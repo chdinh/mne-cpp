@@ -10,11 +10,11 @@
  * @brief    Lossless conversion between AcqStreamInfo and FIFFLIB::FiffInfo.
  *
  * Part of the separate bridge library mne_acq_fiff, the only ACQLIB component that depends on FIFF
- * (and therefore Qt); mne_acq itself stays standard-library only (D9).
+ * (and therefore Qt); mne_acq itself stays standard-library only.
  *
  * Round trip: per-channel fields map to AcqChannelInfo (name, kind, unit, scale = cal * range) and
  * are kept verbatim in AcqChannelInfo::fiff; everything else of FiffInfo is stored serialized in an
- * AcqExtension with schema "fiff.MeasInfo/1". toFiffInfo(fromFiffInfo(x)) equals x field by field (AC-T2.1-2).
+ * AcqExtension with schema "fiff.MeasInfo/1". toFiffInfo(fromFiffInfo(x)) equals x field by field.
  * When a channel was edited in AcqStreamInfo, the edited per-channel fields win.
  */
 

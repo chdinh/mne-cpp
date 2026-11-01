@@ -9,7 +9,7 @@
  * @date     November 2026
  * @brief    AcqError: catalogued error codes of the acquisition API, and AcqExpected, a value-or-error result.
  *
- * Every error the public API can return has a catalogue entry (G12, T2.6): a stable code, a message that
+ * Every error the public API can return has a catalogue entry: a stable code, a message that
  * names the cause, the fix, and a documentation anchor. Catalogue strings are static, so an AcqError on
  * the data path (Timeout, Overrun, Late, ...) never allocates; only control-path errors attach a context
  * string. Neither type throws, so ACQLIB builds with -fno-exceptions and -fno-rtti.

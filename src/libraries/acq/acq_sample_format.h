@@ -7,7 +7,7 @@
  * @author   Christoph Dinh <christoph.dinh@mne-cpp.org>
  * @since    2.5.0
  * @date     November 2026
- * @brief    Native sample formats and memory layouts stored in an acquisition ring (D1, T2.8).
+ * @brief    Native sample formats and memory layouts stored in an acquisition ring.
  *
  * Rings hold the device's own sample format in host byte order; backends that receive another byte
  * order swap while writing. Physical values are produced only on request by the converters in

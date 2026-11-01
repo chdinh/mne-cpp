@@ -9,7 +9,7 @@
  * @date     November 2026
  * @brief    AcqClockModel: relation between the sample index of a stream and host time.
  *
- * The sample index is the time base of every stream, input or output (data-path rule 5). Host time is
+ * The sample index is the time base of every stream, input or output. Host time is
  * derived from it by a linear model anchored at one sample, with an estimated rate correction, the
  * device pipeline delay (ADC group delay, DAC/RF output latency) and a stated uncertainty. Closed-loop
  * code maps an input sample to the output sample that is emitted at the same physical time with

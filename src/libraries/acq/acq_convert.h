@@ -7,7 +7,7 @@
  * @author   Christoph Dinh <christoph.dinh@mne-cpp.org>
  * @since    2.5.0
  * @date     November 2026
- * @brief    decode() native samples into caller-owned matrices and encode() matrices into output rings (T2.8).
+ * @brief    decode() native samples into caller-owned matrices and encode() matrices into output rings.
  *
  * One memory pass: format conversion, layout transposition and per-channel scaling are fused and
  * cache-blocked, written as fixed-width loops the compiler vectorises (no intrinsics, no Eigen, so the

@@ -10,8 +10,8 @@
  * @brief    AcqUri and AcqDeviceRegistry: URI scheme -> backend factory, and discovery (control path).
  *
  * URIs have the form scheme://target?key=value&key=value. Every scheme opens with no parameters
- * where that is meaningful (synthetic://, lsl://<name>, fiff://<file>; G12). Parameters are parsed
- * into a typed configuration by each backend (D3); unknown keys are an InvalidParameter error, never
+ * where that is meaningful (synthetic://, lsl://<name>, fiff://<file>). Parameters are parsed
+ * into a typed configuration by each backend; unknown keys are an InvalidParameter error, never
  * silently ignored. Built-in backends register at static-initialisation time; applications can add
  * their own.
  */
@@ -98,7 +98,7 @@ struct AcqDiscoveredDevice
     std::string label;     /**< Human-readable name. */
     std::string scheme;    /**< Scheme of the uri. */
     std::string detail;    /**< e.g. "8 ch, 250 Hz", or why it is unavailable. */
-    bool available = true; /**< false for backends whose runtime library was not found (still listed, G12). */
+    bool available = true; /**< false for backends whose runtime library was not found (still listed). */
 };
 
 //=============================================================================================================

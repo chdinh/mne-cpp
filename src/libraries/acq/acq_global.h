@@ -9,9 +9,8 @@
  * @date     November 2026
  * @brief    Export macro, build-info accessors and the ACQLIB namespace anchor of the acquisition library.
  *
- * ACQLIB is the headless acquisition library of MNE-CPP. Its public headers use only C++20 standard
- * types and Eigen (decision D9), so the export macro is defined here without Qt: a consumer that only
- * acquires data never needs a Qt header.
+ * ACQLIB is the headless acquisition library of MNE-CPP. It depends only on the C++20 standard
+ * library, so the export macro is defined here without Qt and the library builds for embedded targets.
  */
 
 #ifndef ACQ_GLOBAL_H

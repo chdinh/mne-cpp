@@ -14,8 +14,8 @@
  * transmit pulses). Both are described by the same structure and carried by the same ring.
  *
  * The description can be converted to and from FIFFLIB::FiffInfo without loss (fiff/acq_fiff.h) and
- * also describes what FIFF cannot, such as segmented complex-valued MR data (D12). Nothing is guessed
- * (G12): an unknown unit is AcqUnit::Unknown, an unknown range is NaN, an irregular stream has sfreq 0.
+ * also describes what FIFF cannot, such as segmented complex-valued MR data. Nothing is guessed:
+ * an unknown unit is AcqUnit::Unknown, an unknown range is NaN, an irregular stream has sfreq 0.
  * Metadata changes are versioned at a sample index (@c version, @c validFromSample).
  *
  * MR receive (32 coils, 512-sample readouts, ISMRMRD header per readout) and RF transmit:
@@ -205,7 +205,7 @@ struct AcqChannelInfo
 //=============================================================================================================
 /**
  * Segmentation of a stream: continuous, or segments (triggered readouts, RF pulses, epochs) each with
- * a header delivered alongside the samples (data-path rule 7).
+ * a header delivered alongside the samples.
  */
 struct AcqSegmentation
 {

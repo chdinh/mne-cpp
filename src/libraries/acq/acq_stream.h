@@ -10,9 +10,9 @@
  * @brief    AcqStream (shared handle), AcqWriter (the single producer) and the ring options of a stream.
  *
  * One stream = one rate, one native format, one lock-free single-producer / multi-reader ring
- * (data-path rule 6). The ring is a power of two in samples, page-aligned, optionally mirror-mapped
+ *. The ring is a power of two in samples, page-aligned, optionally mirror-mapped
  * (the ring's pages mapped twice back to back, so every view is one contiguous part), memory-locked
- * and pre-faulted, or an adopted external buffer such as a device DMA region (rule 4).
+ * and pre-faulted, or an adopted external buffer such as a device DMA region.
  *
  * Input stream: the backend owns the writer; commit() is one release store and never waits; samples
  * are overwritten whether or not readers consumed them, and slow readers learn the exact loss.
