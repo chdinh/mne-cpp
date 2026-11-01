@@ -50,6 +50,7 @@ class GenerateExamplesTest(unittest.TestCase):
                 'QCommandLineOption in({"file", "f"}, "The input <in> | {x}.", "in");\n')
             api = root / gen.API / "inv"
             api.mkdir(parents=True)
+            (root / gen.API / "fiff").mkdir()
             (api / "inv-dipole.mdx").write_text("---\nsidebar_label: InvDipole\n---\nsrc/examples/ex_demo/main.cpp\n")
             out = root / "out"
             gen.generate(root, out)
@@ -188,6 +189,44 @@ class GenerateExamplesTest(unittest.TestCase):
             with self.subTest(topic=topic["id"]):
                 self.assertTrue(topic["manual"] and topic["api"] and topic["examples"])
                 self.assertEqual(sum(e["start"] for e in topic["examples"]), 1)
+
+    def test_acquisition_examples_and_links_only_to_existing_api_pages(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            ex = root / gen.EXAMPLES / "ex_acq_demo"
+            ex.mkdir(parents=True)
+            (ex / "main.cpp").write_text('/** @brief Stream data. */\n#include <acq/acq.h>\n#include <fiff/fiff.h>\n')
+            (root / gen.API / "fiff").mkdir(parents=True)
+            out = root / "out"
+            gen.generate(root, out)
+            page = (out / "acq" / "ex_acq_demo.mdx").read_text()
+            category = json.loads((out / "acq" / "_category_.json").read_text())
+        self.assertIn("**Libraries:** Acquisition, [FIFF I/O](../../api/fiff/index.mdx)", page)
+        self.assertEqual(category["label"], "Acquisition")
+
+    def test_example_in_an_unknown_library_fails_and_keeps_the_gallery(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            good = root / gen.EXAMPLES / "ex_good"
+            good.mkdir(parents=True)
+            (good / "main.cpp").write_text("/** @brief Good. */\n#include <fiff/fiff.h>\n")
+            stray = root / gen.EXAMPLES / "ex_stray"
+            stray.mkdir(parents=True)
+            (stray / "main.cpp").write_text("/** @brief Stray. */\n#include <vector>\n")
+            committed = root / gen.OUT / "fiff" / "ex_good.mdx"
+            committed.parent.mkdir(parents=True)
+            committed.write_text("committed\n")
+            with self.assertRaises(ValueError) as caught:
+                gen.generate(root, root / "out")
+            saved = gen.REPO_ROOT
+            gen.REPO_ROOT = root
+            try:
+                status = gen.main([])
+            finally:
+                gen.REPO_ROOT = saved
+            self.assertEqual(status, 1)
+            self.assertEqual(committed.read_text(), "committed\n")
+        self.assertIn("src/examples/ex_stray includes no MNE-CPP library", str(caught.exception))
 
     def test_moved_example_keeps_its_old_url(self) -> None:
         stub = REPO_ROOT / gen.REDIRECTS / "connectivity" / "ex_dsp_rt" / "index.html"

@@ -29,6 +29,7 @@
     }
   },
   "libraries": {
+    "acq": "Acquisition",
     "connectivity": "Connectivity",
     "decoding": "Decoding",
     "ml": "Machine Learning",

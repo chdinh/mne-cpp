@@ -50,6 +50,7 @@ import argparse
 import functools
 import json
 import re
+import shutil
 import struct
 import sys
 import tempfile
@@ -73,7 +74,7 @@ GITHUB_BLOB = "https://github.com/mne-tools/mne-cpp/blob/staging"
 
 # Most specific first: an example is filed under the first library it includes.
 LIBRARIES = {
-    "connectivity": "Connectivity", "decoding": "Decoding", "ml": "Machine Learning",
+    "acq": "Acquisition", "connectivity": "Connectivity", "decoding": "Decoding", "ml": "Machine Learning",
     "sts": "Statistics", "inv": "Inverse", "fwd": "Forward", "disp3D": "3D Visualization",
     "disp": "Visualization", "dsp": "Signal Processing", "ieeg": "iEEG", "bids": "BIDS",
     "lsl": "Lab Streaming Layer", "mna": "MNA Pipelines", "mri": "MRI", "fs": "FreeSurfer",
@@ -226,6 +227,13 @@ def _results(name: str, root: Path) -> list[str]:
     return lines
 
 
+def _library_link(lib: str, root: Path) -> str:
+    """Library name, linked to its API section when that section exists."""
+    if (root / API / api_slug(lib)).is_dir():
+        return f"[{LIBRARIES[lib]}](../../api/{api_slug(lib)}/index.mdx)"
+    return LIBRARIES[lib]
+
+
 def primary_library(src: Path, root: Path = REPO_ROOT) -> str | None:
     """Directory an example's page lives in: the registry override, else its most specific library."""
     override = _registry_examples(root).get(src.name, {}).get("library")
@@ -304,7 +312,7 @@ def render(name: str, src: Path, refs: list[tuple[str, str]], know: kn.Knowledge
     ]
     if meta:
         lines += [f'<ExampleFacts name="{name}" />', ""]
-    lines += ["**Libraries:** " + ", ".join(f"[{LIBRARIES[lib]}](../../api/{api_slug(lib)}/index.mdx)" for lib in libs), ""]
+    lines += ["**Libraries:** " + ", ".join(_library_link(lib, root) for lib in libs), ""]
     if description:
         lines += ["## What it demonstrates", "", mdx_text(description), ""]
     lines += _results(name, root)
@@ -405,6 +413,10 @@ def generate(root: Path, out: Path, data: Path | None = None, redirects: Path | 
     sources = sorted((root / EXAMPLES).glob("ex_*/"))
     know = kn.load(root, [s.name for s in sources]) if (root / kn.REGISTRY).is_file() else None
     refs = quoted_by(root / API)
+    stray = [s.name for s in sources if primary_library(s, root) is None]
+    if stray:
+        raise ValueError("\n".join(f"examples: src/examples/{name} includes no MNE-CPP library "
+                                    f"(one of {', '.join(LIBRARIES)})" for name in stray))
     groups: dict[str, list[tuple[str, str]]] = {}
     briefs = {}
     for src in sources:
@@ -458,10 +470,18 @@ def main(argv: list[str] | None = None) -> int:
     args = parser.parse_args(argv)
     try:
         if not args.check:
-            _clear(REPO_ROOT / OUT)
-            _clear(REPO_ROOT / REDIRECTS)
-            (REPO_ROOT / OUT).mkdir(parents=True, exist_ok=True)
-            generate(REPO_ROOT, REPO_ROOT / OUT, REPO_ROOT / DATA, REPO_ROOT / REDIRECTS)
+            # Generate aside first: a failure must not leave the committed gallery half deleted.
+            with tempfile.TemporaryDirectory() as tmp:
+                out, data, redirects = Path(tmp) / "out", Path(tmp) / "data" / DATA.name, Path(tmp) / "redirects"
+                out.mkdir()
+                generate(REPO_ROOT, out, data, redirects)
+                for fresh, target in ((out, REPO_ROOT / OUT), (redirects, REPO_ROOT / REDIRECTS)):
+                    _clear(target)
+                    if fresh.exists():
+                        shutil.copytree(fresh, target, dirs_exist_ok=True)
+                if data.is_file():
+                    (REPO_ROOT / DATA).parent.mkdir(parents=True, exist_ok=True)
+                    shutil.copyfile(data, REPO_ROOT / DATA)
             print(f"wrote {OUT}, {DATA} and {REDIRECTS}")
             return 0
         with tempfile.TemporaryDirectory() as tmp:
