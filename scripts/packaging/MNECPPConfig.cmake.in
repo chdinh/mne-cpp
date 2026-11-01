@@ -28,6 +28,9 @@
 
 include(CMakeFindDependencyMacro)
 
+# mne_acq uses std::thread primitives (semaphores) and links Threads::Threads.
+find_dependency(Threads)
+
 # MNE-CPP requires Qt (Core at minimum; GUI libs need more components)
 find_dependency(Qt6 COMPONENTS Core Concurrent Gui Network Widgets Svg Xml OpenGL OpenGLWidgets)
 

@@ -42,8 +42,10 @@
 namespace ACQLIB
 {
 
-class AcqReader;
-class AcqWriter;
+namespace detail
+{
+struct ViewAccess;
+}
 
 //=============================================================================================================
 /**
@@ -215,6 +217,8 @@ public:
     }
 
 protected:
+    friend struct detail::ViewAccess;
+
     std::array<AcqPart<Byte>, 2> m_parts{};
     std::size_t m_partCount = 0;
     std::uint64_t m_firstSample = 0;
@@ -278,7 +282,7 @@ public:
     }
 
 private:
-    friend class AcqReader;
+    friend struct detail::ViewAccess;
 
     std::uint64_t m_lost = 0;
     std::uint64_t m_skipped = 0;
@@ -306,7 +310,7 @@ public:
     }
 
 private:
-    friend class AcqWriter;
+    friend struct detail::ViewAccess;
 
     std::uint64_t m_underrun = 0;
 };

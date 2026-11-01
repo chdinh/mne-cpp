@@ -71,7 +71,7 @@ class AcqWriter;
 //=============================================================================================================
 /**
  * An externally owned buffer adopted as the ring (zero-copy DMA). Its capacity in samples must be a
- * power of two and its start page-aligned; @c release is called once the ring no longer uses it.
+ * power of two and its start aligned to 4096 bytes; @c release is called once the ring no longer uses it.
  */
 struct AcqExternalBuffer
 {
@@ -87,7 +87,7 @@ struct AcqExternalBuffer
  */
 struct AcqStreamOptions
 {
-    std::size_t capacitySamples = 0;  /**< Rounded up to a power of two; 0 = max(65536, 2 s of data). */
+    std::size_t capacitySamples = 0;  /**< Rounded up to a power of two; 0 = max(65536, 2 s of data), halved while above 256 MiB. */
     std::size_t maxReaders = 8;       /**< Reader slots, allocated at creation. */
     std::size_t eventCapacity = 4096; /**< Event ring entries (power of two). */
     std::size_t segmentCapacity = 0;  /**< Segment header entries; 0 = derived from capacity for segmented streams. */
@@ -165,7 +165,8 @@ public:
      * @param[in] mode      Consumption mode.
      * @param[in] options   Wake-up strategy, start position, gating.
      *
-     * @return The reader, or TooManyReaders, WrongDirection (gating on an input stream).
+     * @return The reader, or TooManyReaders, WrongDirection (gating on an input stream), InvalidState (a
+     *         gating reader already exists).
      */
     [[nodiscard]] AcqExpected<AcqReader> reader(AcqReader::ReadMode mode, const AcqReaderOptions& options = {}) const;
 
@@ -205,7 +206,7 @@ public:
      *
      * @return The writer, or InvalidParameter, InvalidBuffer, OutOfMemory, PlatformUnsupported.
      */
-    [[nodiscard]] static AcqExpected<AcqWriter> create(AcqStreamInfo info, AcqStreamOptions options = {});
+    [[nodiscard]] static AcqExpected<AcqWriter> create(AcqStreamInfo info, const AcqStreamOptions& options = {});
 
     AcqWriter() noexcept;
     ~AcqWriter(); /**< Equals finish(). */
@@ -242,7 +243,8 @@ public:
      * @param[in] samples   Samples per channel. @pre samples <= capacity
      * @param[in] timeout   Output streams: maximum wait for space.
      *
-     * @return The writable view, or Timeout, EndOfStream (the device side finished).
+     * @return The writable view, or Timeout, InvalidParameter (more than the capacity), EndOfStream (the
+     *         gating reader was destroyed).
      */
     [[nodiscard]] AcqExpected<AcqWriteView> beginWrite(std::size_t samples,
                                                        std::chrono::nanoseconds timeout = {}) noexcept;
@@ -273,7 +275,8 @@ public:
      * immediately (output; scheduled events may lie ahead of writePosition()). Old events are overwritten
      * like samples; lagging readers count them in AcqReaderStats::eventsLost.
      *
-     * @return Late for an output event at or before devicePosition(); otherwise success.
+     * @return Late for an output event before devicePosition(), InvalidParameter for a sample index below the
+     *         previous event's; otherwise success.
      */
     AcqError pushEvent(const AcqEvent& event) noexcept;
 
@@ -281,7 +284,8 @@ public:
      * Starts a segment at header.firstSample with its device-specific @p payload (truncated or zero-padded
      * to AcqSegmentation::headerBytes); published like events.
      *
-     * @return Late for an output segment at or before devicePosition(); otherwise success.
+     * @return Late for an output segment before devicePosition(), InvalidParameter for a decreasing
+     *         firstSample; otherwise success.
      */
     AcqError pushSegment(const AcqSegmentHeader& header, std::span<const std::byte> payload) noexcept;
 

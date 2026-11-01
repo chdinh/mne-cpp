@@ -19,9 +19,13 @@ set(SOURCES
   acq_global.cpp
   acq_error.cpp
   acq_timebase.cpp
+  acq_stream.cpp
+  acq_reader.cpp
 )
 
 set(PRIVATE_HEADERS
+  detail/acq_diagnostics.h
+  detail/acq_stream_core.h
 )
 
 set(HEADERS
@@ -50,6 +54,8 @@ set_source_files_properties(${FILE_TO_UPDATE} PROPERTIES OBJECT_DEPENDS "${SOURC
 
 add_library(${PROJECT_NAME} ${SOURCES} ${HEADERS} ${PRIVATE_HEADERS})
 
+find_package(Threads REQUIRED)
+target_link_libraries(${PROJECT_NAME} PUBLIC Threads::Threads)
 
 target_include_directories(${PROJECT_NAME} PUBLIC $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/..> $<INSTALL_INTERFACE:include>)
 

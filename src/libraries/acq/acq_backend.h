@@ -89,7 +89,7 @@ protected:
      *
      * @return The writer, owned by the backend base and valid until the backend is destroyed.
      */
-    AcqExpected<AcqWriter*> addInputStream(AcqStreamInfo info, AcqStreamOptions options = {});
+    AcqExpected<AcqWriter*> addInputStream(AcqStreamInfo info, const AcqStreamOptions& options = {});
 
     //=========================================================================================================
     /**
@@ -101,7 +101,7 @@ protected:
      *
      * @return The gating device reader, owned by the backend base and valid until the backend is destroyed.
      */
-    AcqExpected<AcqReader*> addOutputStream(AcqStreamInfo info, AcqStreamOptions options = {},
+    AcqExpected<AcqReader*> addOutputStream(AcqStreamInfo info, const AcqStreamOptions& options = {},
                                             AcqWait wait = AcqWait::Spin);
 
     /** Reports a fatal error from any thread; the source moves to state Failed. Allocation-free. */
