@@ -72,6 +72,12 @@ void* countedAlloc(std::size_t size, std::size_t alignment)
         p = std::aligned_alloc(alignment, (size + alignment - 1) / alignment * alignment);
     }
 #endif
+    return p;
+}
+
+void* countedAllocOrThrow(std::size_t size, std::size_t alignment)
+{
+    void* p = countedAlloc(size, alignment);
     if (p == nullptr) {
         throw std::bad_alloc();
     }
@@ -90,17 +96,33 @@ void countedFree(void* p) noexcept
 
 void* operator new(std::size_t size)
 {
-    return countedAlloc(size, alignof(std::max_align_t));
+    return countedAllocOrThrow(size, alignof(std::max_align_t));
 }
 void* operator new[](std::size_t size)
 {
-    return countedAlloc(size, alignof(std::max_align_t));
+    return countedAllocOrThrow(size, alignof(std::max_align_t));
 }
 void* operator new(std::size_t size, std::align_val_t al)
 {
-    return countedAlloc(size, static_cast<std::size_t>(al));
+    return countedAllocOrThrow(size, static_cast<std::size_t>(al));
 }
 void* operator new[](std::size_t size, std::align_val_t al)
+{
+    return countedAllocOrThrow(size, static_cast<std::size_t>(al));
+}
+void* operator new(std::size_t size, const std::nothrow_t&) noexcept
+{
+    return countedAlloc(size, alignof(std::max_align_t));
+}
+void* operator new[](std::size_t size, const std::nothrow_t&) noexcept
+{
+    return countedAlloc(size, alignof(std::max_align_t));
+}
+void* operator new(std::size_t size, std::align_val_t al, const std::nothrow_t&) noexcept
+{
+    return countedAlloc(size, static_cast<std::size_t>(al));
+}
+void* operator new[](std::size_t size, std::align_val_t al, const std::nothrow_t&) noexcept
 {
     return countedAlloc(size, static_cast<std::size_t>(al));
 }
@@ -133,6 +155,22 @@ void operator delete(void* p, std::size_t, std::align_val_t) noexcept
     countedFree(p);
 }
 void operator delete[](void* p, std::size_t, std::align_val_t) noexcept
+{
+    countedFree(p);
+}
+void operator delete(void* p, const std::nothrow_t&) noexcept
+{
+    countedFree(p);
+}
+void operator delete[](void* p, const std::nothrow_t&) noexcept
+{
+    countedFree(p);
+}
+void operator delete(void* p, std::align_val_t, const std::nothrow_t&) noexcept
+{
+    countedFree(p);
+}
+void operator delete[](void* p, std::align_val_t, const std::nothrow_t&) noexcept
 {
     countedFree(p);
 }
