@@ -18,6 +18,8 @@
  * targets the same in double (use double for int32 data beyond 2^24). encode() computes
  * (value - offset) / scale in double, saturates to the channel range and to the native type, and
  * rounds to nearest, ties to even; NaN encodes as 0. Both count what they could not represent.
+ * Channels with AcqChannelInfo::digitalBits = d use raw = signExtend(low W-d bits) << d on decode (W = word width)
+ * and keep the top d bits untouched on encode (value quantised to W-d bits).
  *
  * A channel range lets several threads convert disjoint channel blocks of the same view in parallel.
  */

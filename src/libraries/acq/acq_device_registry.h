@@ -3,11 +3,11 @@
  * SPDX-License-Identifier: BSD-3-Clause
  * Copyright (c) 2026 MNE-CPP Authors
  *
- * @file     acq_source_registry.h
+ * @file     acq_device_registry.h
  * @author   Christoph Dinh <christoph.dinh@mne-cpp.org>
  * @since    2.5.0
  * @date     November 2026
- * @brief    AcqUri and AcqSourceRegistry: URI scheme -> backend factory, and discovery (control path).
+ * @brief    AcqUri and AcqDeviceRegistry: URI scheme -> backend factory, and discovery (control path).
  *
  * URIs have the form scheme://target?key=value&key=value. Every scheme opens with no parameters
  * where that is meaningful (synthetic://, lsl://<name>, fiff://<file>; G12). Parameters are parsed
@@ -16,8 +16,8 @@
  * their own.
  */
 
-#ifndef ACQ_SOURCE_REGISTRY_H
-#define ACQ_SOURCE_REGISTRY_H
+#ifndef ACQ_DEVICE_REGISTRY_H
+#define ACQ_DEVICE_REGISTRY_H
 
 //=============================================================================================================
 // INCLUDES
@@ -26,7 +26,7 @@
 #include "acq_global.h"
 #include "acq_backend.h"
 #include "acq_error.h"
-#include "acq_source.h"
+#include "acq_device.h"
 
 #include <chrono>
 #include <functional>
@@ -92,7 +92,7 @@ struct AcqSchemeInfo
 /**
  * A source found by discovery, with a URI that opens it.
  */
-struct AcqDiscoveredSource
+struct AcqDiscoveredDevice
 {
     std::string uri;       /**< Ready-to-use URI. */
     std::string label;     /**< Human-readable name. */
@@ -105,17 +105,17 @@ struct AcqDiscoveredSource
 /**
  * Process-wide registry of source schemes.
  */
-class ACQSHARED_EXPORT AcqSourceRegistry
+class ACQSHARED_EXPORT AcqDeviceRegistry
 {
 public:
     /** Opens a backend for a parsed URI. */
     using Factory = std::function<AcqExpected<std::unique_ptr<AcqBackend>>(const AcqUri&)>;
 
     /** Lists reachable sources of one scheme within a timeout. */
-    using Discoverer = std::function<std::vector<AcqDiscoveredSource>(std::chrono::milliseconds)>;
+    using Discoverer = std::function<std::vector<AcqDiscoveredDevice>(std::chrono::milliseconds)>;
 
     /** @return The process-wide registry, with every compiled-in backend registered. */
-    [[nodiscard]] static AcqSourceRegistry& instance();
+    [[nodiscard]] static AcqDeviceRegistry& instance();
 
     //=========================================================================================================
     /**
@@ -129,21 +129,21 @@ public:
      */
     AcqError registerScheme(AcqSchemeInfo info, Factory factory, Discoverer discoverer = {});
 
-    /** @return The opened source for @p uri; see AcqSource::open(). */
-    [[nodiscard]] AcqExpected<AcqSource> open(std::string_view uri) const;
+    /** @return The opened source for @p uri; see AcqDevice::open(). */
+    [[nodiscard]] AcqExpected<AcqDevice> open(std::string_view uri) const;
 
     /** @return All registered schemes, sorted by name. */
     [[nodiscard]] std::vector<AcqSchemeInfo> schemes() const;
 
     /** @return Reachable sources of every scheme, discovered in parallel within @p timeout. */
-    [[nodiscard]] std::vector<AcqDiscoveredSource> discover(std::chrono::milliseconds timeout) const;
+    [[nodiscard]] std::vector<AcqDiscoveredDevice> discover(std::chrono::milliseconds timeout) const;
 
-    AcqSourceRegistry(const AcqSourceRegistry&) = delete;
-    AcqSourceRegistry& operator=(const AcqSourceRegistry&) = delete;
+    AcqDeviceRegistry(const AcqDeviceRegistry&) = delete;
+    AcqDeviceRegistry& operator=(const AcqDeviceRegistry&) = delete;
 
 private:
-    AcqSourceRegistry();
-    ~AcqSourceRegistry();
+    AcqDeviceRegistry();
+    ~AcqDeviceRegistry();
 
     struct Impl;
     std::unique_ptr<Impl> m_pImpl;
@@ -151,4 +151,4 @@ private:
 
 } // namespace ACQLIB
 
-#endif // ACQ_SOURCE_REGISTRY_H
+#endif // ACQ_DEVICE_REGISTRY_H

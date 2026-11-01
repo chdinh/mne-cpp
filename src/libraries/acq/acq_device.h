@@ -3,11 +3,11 @@
  * SPDX-License-Identifier: BSD-3-Clause
  * Copyright (c) 2026 MNE-CPP Authors
  *
- * @file     acq_source.h
+ * @file     acq_device.h
  * @author   Christoph Dinh <christoph.dinh@mne-cpp.org>
  * @since    2.5.0
  * @date     November 2026
- * @brief    AcqSource: an opened device, file or network endpoint with its input and output streams (control path).
+ * @brief    AcqDevice: an opened device, file or network endpoint with its input and output streams (control path).
  *
  * Lifecycle: open() -> Opened -> start() -> Running -> stop() -> Stopped -> (start() again) ...
  * -> close() -> Closed. stop() joins the backend threads (output streams emit their underrun fill
@@ -15,8 +15,8 @@
  * Streams and readers obtained from a source stay valid after close() and report EndOfStream.
  */
 
-#ifndef ACQ_SOURCE_H
-#define ACQ_SOURCE_H
+#ifndef ACQ_DEVICE_H
+#define ACQ_DEVICE_H
 
 //=============================================================================================================
 // INCLUDES
@@ -45,7 +45,7 @@ namespace ACQLIB
 /**
  * State of a source.
  */
-enum class AcqSourceState : std::uint8_t
+enum class AcqDeviceState : std::uint8_t
 {
     Opened = 0,  /**< Device connected and described; streams exist; no data flows. */
     Running = 1, /**< Acquiring. */
@@ -58,9 +58,9 @@ enum class AcqSourceState : std::uint8_t
 /**
  * Snapshot of a source and its streams (control path, allocates).
  */
-struct AcqSourceStats
+struct AcqDeviceStats
 {
-    AcqSourceState state = AcqSourceState::Closed; /**< State at the time of the snapshot. */
+    AcqDeviceState state = AcqDeviceState::Closed; /**< State at the time of the snapshot. */
     std::vector<AcqStreamStats> streams;           /**< One entry per stream. */
 };
 
@@ -68,28 +68,28 @@ struct AcqSourceStats
 /**
  * An opened source. Move-only handle that owns its backend.
  */
-class ACQSHARED_EXPORT AcqSource
+class ACQSHARED_EXPORT AcqDevice
 {
 public:
     //=========================================================================================================
     /**
-     * Opens a source through AcqSourceRegistry, e.g. "synthetic://", "fiff:///data/raw.fif?realtime=1".
+     * Opens a source through AcqDeviceRegistry, e.g. "synthetic://", "fiff:///data/raw.fif?realtime=1".
      *
      * @param[in] uri   Source URI.
      *
      * @return The opened source, or InvalidUri, UnknownScheme, InvalidParameter, BackendUnavailable, ...
      */
-    [[nodiscard]] static AcqExpected<AcqSource> open(std::string_view uri);
+    [[nodiscard]] static AcqExpected<AcqDevice> open(std::string_view uri);
 
     /** Wraps an already opened backend. @pre backend != nullptr */
-    explicit AcqSource(std::unique_ptr<AcqBackend> backend);
+    explicit AcqDevice(std::unique_ptr<AcqBackend> backend);
 
-    AcqSource() noexcept;
-    ~AcqSource(); /**< Equals close(). */
-    AcqSource(AcqSource&& other) noexcept;
-    AcqSource& operator=(AcqSource&& other) noexcept;
-    AcqSource(const AcqSource&) = delete;
-    AcqSource& operator=(const AcqSource&) = delete;
+    AcqDevice() noexcept;
+    ~AcqDevice(); /**< Equals close(). */
+    AcqDevice(AcqDevice&& other) noexcept;
+    AcqDevice& operator=(AcqDevice&& other) noexcept;
+    AcqDevice(const AcqDevice&) = delete;
+    AcqDevice& operator=(const AcqDevice&) = delete;
 
     /** Starts acquisition and output. @return InvalidState unless Opened or Stopped, or the backend's error. */
     AcqError start();
@@ -101,7 +101,7 @@ public:
     void close();
 
     /** @return The current state. */
-    [[nodiscard]] AcqSourceState state() const noexcept;
+    [[nodiscard]] AcqDeviceState state() const noexcept;
 
     /** @return All streams of the source. */
     [[nodiscard]] std::span<const AcqStream> streams() const noexcept;
@@ -113,10 +113,10 @@ public:
     [[nodiscard]] AcqStream findStream(std::string_view name) const;
 
     /** @return Description of the source. */
-    [[nodiscard]] AcqSourceDescription description() const;
+    [[nodiscard]] AcqDeviceDescription description() const;
 
     /** @return State and per-stream counters. */
-    [[nodiscard]] AcqSourceStats stats() const;
+    [[nodiscard]] AcqDeviceStats stats() const;
 
     /** @return The last error reported by the backend or a failed transition; success if none. */
     [[nodiscard]] AcqError lastError() const;
@@ -128,4 +128,4 @@ private:
 
 } // namespace ACQLIB
 
-#endif // ACQ_SOURCE_H
+#endif // ACQ_DEVICE_H

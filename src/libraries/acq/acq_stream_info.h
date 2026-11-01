@@ -38,13 +38,13 @@
  * rx.segmentation.samplesPerSegment = 512;
  * rx.segmentation.headerBytes = 340;                        // sizeof(ISMRMRD_AcquisitionHeader)
  * rx.segmentation.headerSchema = "ismrmrd.AcquisitionHeader/1";
- * rx.clockDomain = "scanner";                               // cards on one star-hub / 10 MHz reference
+ * rx.clockDomain = "spectrum:12345";                        // set by the backend: the clock-master card
  *
  * ACQLIB::AcqStreamInfo tx = rx;                              // same card, transmit path
  * tx.name = "tx";
  * tx.direction = ACQLIB::AcqDirection::Output;
  * tx.format = ACQLIB::AcqSampleFormat::ComplexInt16;
- * tx.analogBits = 15;                                       // bit 15 of the I word drives the T/R switch
+ * tx.channels[0].digitalBits = 1;                           // bit 15 of the I word drives the T/R switch
  * tx.bitFields.push_back({"tr_switch", 0, 15, 1, ACQLIB::AcqChannelKind::RfSwitch});
  * tx.channels.resize(1);
  * tx.channels[0].name = "rf0";
@@ -137,7 +137,7 @@ enum class AcqChannelKind : std::uint8_t
     MrTransmit,   /**< RF transmit channel. */
     MrGradient,   /**< Gradient waveform channel. */
     RfSwitch,     /**< T/R switch, RF blanking or ADC gate line. */
-    ClockSync,    /**< Recorded sync / reference marker used to calibrate a clock domain (alignTo). */
+    ClockSync,    /**< Recorded sync / reference marker used to verify a clock domain (verify()). */
     Misc
 };
 
@@ -199,6 +199,7 @@ struct AcqChannelInfo
     double rangeMin = std::numeric_limits<double>::quiet_NaN(); /**< Physical range, NaN if unknown. */
     double rangeMax = std::numeric_limits<double>::quiet_NaN(); /**< Physical range, NaN if unknown. */
     std::optional<AcqFiffChannel> fiff;                         /**< Present for FIFF-described channels. */
+    std::uint8_t digitalBits = 0;                               /**< Integer formats: top bits of the word used by AcqBitFields; the analog value is the remaining low bits. */
 };
 
 //=============================================================================================================
@@ -224,8 +225,14 @@ struct AcqSegmentation
 //=============================================================================================================
 /**
  * A digital line carried inside the sample word of an integer stream, sample-synchronous with the analog
- * value (marker outputs of AWG cards, T/R switch and blanking lines, recorded sync markers). decode()
- * and encode() touch only AcqStreamInfo::analogBits; decodeBits() and encodeBits() touch only the fields.
+ * value (marker outputs of AWG cards, T/R switch and blanking lines, recorded sync markers).
+ *
+ * Packing follows the hardware (Spectrum SPCM_XMODE_DIGOUTSRC_BIT15..BIT12 for output, SPC_DIGMODE for
+ * input): the lines occupy the top AcqChannelInfo::digitalBits bits of the channel's word, allocated
+ * from bit 15 downwards; the analog value is the remaining low bits in two's complement, i.e. the
+ * full-scale value shifted right by digitalBits. decode()/encode() undo/apply that shift, so
+ * AcqChannelInfo::scale stays the full-word scale; decodeBits()/encodeBits() touch only the fields.
+ * For complex int16 the field lives in the I component.
  */
 struct AcqBitField
 {
@@ -262,9 +269,8 @@ struct AcqStreamInfo
     std::vector<AcqChannelInfo> channels;                        /**< One entry per channel, in ring order; may be empty for event-only streams. */
     AcqSegmentation segmentation;                                /**< Continuous unless stated otherwise. */
     AcqUnderrunFill underrunFill = AcqUnderrunFill::Zero;        /**< Output streams: what the device emits on underrun. */
-    std::uint8_t analogBits = 0;                                 /**< Integer formats: low bits holding the signed analog value; 0 = all. */
-    std::vector<AcqBitField> bitFields;                          /**< Digital lines packed into the sample word above analogBits. */
-    std::string clockDomain;                                     /**< Name of the clock domain (acqClockDomainId), empty if free-running. */
+    std::vector<AcqBitField> bitFields;                          /**< Digital lines packed into the top bits of channel words. */
+    std::string clockDomain;                                     /**< Clock domain name, e.g. "spectrum:12345"; empty if free-running. */
     std::vector<std::string> eventLabels;                        /**< Optional names of AcqEvent::code values, index = code. */
     std::vector<std::pair<std::string, std::string>> properties; /**< Free-form device properties (firmware, ...). */
     std::vector<AcqExtension> extensions;                        /**< Bridge payloads for lossless round trips. */

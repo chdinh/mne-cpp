@@ -19,7 +19,7 @@
  *
  * int main()
  * {
- *     auto source = AcqSource::open("synthetic://");
+ *     auto source = AcqDevice::open("synthetic://");
  *     if (!source) {
  *         std::fprintf(stderr, "%s\n", source.error().text().c_str());
  *         return 1;
@@ -34,11 +34,11 @@
  *                     static_cast<unsigned long long>(block->firstSample),
  *                     static_cast<unsigned long long>(block->lost), data.row(0).mean());
  *     }
- *     return 0;                                            // ~AcqSource stops and closes
+ *     return 0;                                            // ~AcqDevice stops and closes
  * }
  * @endcode
  *
- * Layers: AcqSource and AcqSourceRegistry form the control path; AcqStream, AcqReader, AcqWriter and
+ * Layers: AcqDevice and AcqDeviceRegistry form the control path; AcqStream, AcqReader, AcqWriter and
  * the views form the data path, which after start() performs no heap allocation and takes no lock, in
  * both directions. Backend authors implement AcqBackend. The library builds without Qt, Eigen or
  * exceptions for embedded targets; FIFF users include fiff/acq_fiff.h and link mne_acq_fiff.
@@ -55,8 +55,8 @@
 #include "acq_error.h"
 #include "acq_reader.h"
 #include "acq_sample_format.h"
-#include "acq_source.h"
-#include "acq_source_registry.h"
+#include "acq_device.h"
+#include "acq_device_registry.h"
 #include "acq_stream.h"
 #include "acq_stream_info.h"
 #include "acq_timebase.h"

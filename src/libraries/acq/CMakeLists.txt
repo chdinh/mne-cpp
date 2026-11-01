@@ -32,8 +32,8 @@ set(HEADERS
   acq_reader.h
   acq_stream.h
   acq_backend.h
-  acq_source.h
-  acq_source_registry.h
+  acq_device.h
+  acq_device_registry.h
   acq_eigen.h
 )
 

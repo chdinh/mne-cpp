@@ -7,12 +7,12 @@
  * @author   Christoph Dinh <christoph.dinh@mne-cpp.org>
  * @since    2.5.0
  * @date     November 2026
- * @brief    AcqBackend: the interface a device, file or network backend implements behind an AcqSource.
+ * @brief    AcqBackend: the interface a device, file or network backend implements behind an AcqDevice.
  *
- * Users hold an AcqSource; backend authors derive from AcqBackend. While opening, a backend creates
+ * Users hold an AcqDevice; backend authors derive from AcqBackend. While opening, a backend creates
  * its input streams (it gets their writers) and output streams (it gets their gating readers). Between
  * start() and stop() it runs its own acquisition/output thread, interrupt handler or DMA callback.
- * AcqSource owns the backend and enforces the state machine, so a backend only implements transitions.
+ * AcqDevice owns the backend and enforces the state machine, so a backend only implements transitions.
  */
 
 #ifndef ACQ_BACKEND_H
@@ -43,7 +43,7 @@ namespace ACQLIB
 /**
  * What a source is, for display and provenance.
  */
-struct AcqSourceDescription
+struct AcqDeviceDescription
 {
     std::string backend;        /**< Backend name, e.g. "synthetic", "brainflow". */
     std::string backendVersion; /**< Version of the runtime-loaded library, empty if none. */
@@ -63,7 +63,7 @@ public:
     AcqBackend& operator=(const AcqBackend&) = delete;
 
     /** @return Description of the opened device. */
-    [[nodiscard]] virtual AcqSourceDescription description() const = 0;
+    [[nodiscard]] virtual AcqDeviceDescription description() const = 0;
 
     /** Starts acquisition and output. Called in state Opened or Stopped. */
     virtual AcqError start() = 0;
@@ -108,7 +108,7 @@ protected:
     void reportError(AcqError error) noexcept;
 
 private:
-    friend class AcqSource;
+    friend class AcqDevice;
     struct Impl;
     std::unique_ptr<Impl> m_pImpl;
 };

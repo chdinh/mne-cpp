@@ -150,7 +150,7 @@ public:
     [[nodiscard]] AcqTimebase timebase() const noexcept;
 
     /**
-     * Publishes a new timebase, e.g. the result of alignTo() or a reference loss reported by the backend.
+     * Publishes a new timebase, e.g. the result of verify() or a reference loss reported by the backend.
      * Control path; serialised internally, readers see it through a sequence counter without a lock.
      */
     void setTimebase(const AcqTimebase& timebase) noexcept;
@@ -259,7 +259,8 @@ public:
      * @param[in] timeout       Maximum wait for space.
      *
      * @return The view at @p firstSample, or Late (firstSample < earliestWritableSample()), Timeout,
-     *         InvalidParameter (before writePosition()), WrongDirection (input stream).
+     *         InvalidParameter (before writePosition()), NotOnGrid (not a multiple of
+     *         timebase().sampleAlignment), WrongDirection (input stream).
      */
     [[nodiscard]] AcqExpected<AcqWriteView> beginWriteAt(std::uint64_t firstSample, std::size_t samples,
                                                          std::chrono::nanoseconds timeout = {}) noexcept;

@@ -162,7 +162,7 @@ public:
      * @param[in] timeout      Maximum wait.
      * @param[in] maxSamples   Upper bound of the view, 0 for everything available.
      *
-     * @return The view, or Timeout, EndOfStream, SourceStopped, InvalidState (a view is already held).
+     * @return The view, or Timeout, EndOfStream, DeviceStopped, InvalidState (a view is already held).
      */
     [[nodiscard]] AcqExpected<AcqBlockView> acquire(std::size_t minSamples, std::chrono::nanoseconds timeout,
                                                     std::size_t maxSamples = 0) noexcept;

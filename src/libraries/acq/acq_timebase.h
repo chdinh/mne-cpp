@@ -9,32 +9,44 @@
  * @date     November 2026
  * @brief    AcqTimebase: sample-exact relation between streams that share a hardware clock (clock domain).
  *
- * AcqClockModel relates a stream to host time with microsecond-class uncertainty; that is enough for
- * EEG markers but not for MR, where RF transmit, T/R switch, gradients and receive must line up to the
- * sample. Streams whose sample clocks derive from one oscillator (channels of one card, cards on a
- * star-hub, cards locked to a common 10 MHz reference) form a clock domain. Within a domain every
- * stream has an integer number of domain ticks per sample and an origin tick, so the mapping between
- * any two of its streams is exact integer arithmetic, without host time and without drift.
+ * AcqClockModel relates a stream to host time with microsecond-class uncertainty; enough for markers
+ * across devices, not for MR (RF transmit, T/R switch, gradients, receive) or closed-loop stimulation,
+ * which must line up to the sample. Streams whose sample clocks derive from one oscillator form a clock
+ * domain: every stream has an integer number of domain ticks per sample and an origin tick, so mapping
+ * between them is integer arithmetic without host time and without drift.
  *
- * The domain tick rate is chosen so that every stream of the domain has an integer tick count per
- * sample (least common multiple of the sample rates; e.g. 10 GHz for a 1.25 GS/s DAC and an 80 MS/s
- * ADC; 2^63 ticks at 10 GHz are 29 years). The origin tick is the domain tick at which sample 0 crosses
- * the connector, so known converter latencies (ADC pipeline, DAC output delay, trigger delay) are part
- * of it and the mapping refers to physical instants.
+ * Domains follow the hardware, as on Spectrum cards, where every timing quantity is an integer number
+ * of clock cycles in a fixed step (sample rates from a PLL or clock divider of one reference; trigger
+ * delay, gate length, pre/post trigger and pulse generator periods in steps of N samples):
+ * - The domain tick is the common clock all sample clocks are integer divisions of (e.g. the 10 MHz
+ *   reference multiplied by the PLL; for an 80 MS/s ADC and a 1.25 GS/s DAC, 10 GHz: 125 and 8 ticks).
+ * - The origin tick is the domain tick at which sample 0 crosses the connector, so known converter and
+ *   trigger latencies are part of it.
+ * - sampleAlignment is the step in which a stream can place things (Spectrum SPC_GATE_LEN_ALIGNMENT,
+ *   SPC_TRIG_AVAILDELAY_STEP, ...). Exact mapping only succeeds on that grid; an off-grid instant is a
+ *   configuration error reported as NotOnGrid, not hidden by interpolation.
  *
- * Lock states: a shared reference makes frequencies equal (FrequencyLocked) but leaves the start offset
- * of separately triggered cards unknown; a common start trigger (star-hub) or a calibration with a sync
- * marker (alignTo) makes the mapping sample-exact (PhaseLocked). A reference loss is published as Free,
- * and mapSampleExact() then returns NotSynchronized instead of a wrong sample.
+ * Domain membership (who shares a clock):
+ * - One device: all its streams are one domain, named by the backend "<scheme>:<serial>"; FrequencyLocked
+ *   from opening, PhaseLocked once the backend knows the per-stream latencies.
+ * - Devices synchronised by hardware the backend can query (Spectrum star-hub): the hub's domain,
+ *   PhaseLocked by the common start.
+ * - Devices wired by hand (clock output of one card into the external clock input of another, a shared
+ *   10 MHz reference, an amplifier clocked from the stimulator): the user declares it with the URI
+ *   parameter clock_from=<device id of the clock master>, or clock_domain=<name> for an external reference
+ *   that is not itself a device. The declaration only yields Declared; verify() promotes it to PhaseLocked
+ *   after loop-back sync markers have shown zero drift, so a wiring mistake can never produce a wrong
+ *   sample.
+ * - Everything else: domain 0 (Free); only AcqClockModel relations apply. No configuration for EEG users.
  *
  * Sample-exact playout of an RF pulse 2 ms after an event detected in a receive stream:
  * @code
  * const ACQLIB::AcqTimebase& rxTb = view.timebase();                // from the input view
  * const ACQLIB::AcqTimebase txTb = tx.timebase();                    // output stream of the same domain
- * const auto twoMs = static_cast<std::int64_t>(rxTb.tickRate * 2e-3);
- * auto at = ACQLIB::mapSampleExact(rxTb, txTb, eventSample, twoMs);
- * if (at && at->fraction == 0.0 && at->sample >= writer.earliestWritableSample()) {
- *     auto out = writer.beginWriteAt(at->sample, pulseSamples, std::chrono::microseconds(200));
+ * const auto twoMs = static_cast<std::int64_t>(rxTb.ticksPerSecond / 500);
+ * auto at = ACQLIB::mapSampleExact(rxTb, txTb, eventSample, twoMs, ACQLIB::AcqRounding::Exact);
+ * if (at && *at >= writer.earliestWritableSample()) {
+ *     auto out = writer.beginWriteAt(*at, pulseSamples, std::chrono::microseconds(200));
  *     // encode the pulse and the T/R switch bit into *out, then writer.commit(pulseSamples)
  * }
  * @endcode
@@ -51,6 +63,7 @@
 #include "acq_error.h"
 
 #include <cstdint>
+#include <span>
 #include <string_view>
 
 //=============================================================================================================
@@ -66,23 +79,25 @@ namespace ACQLIB
  */
 enum class AcqLockState : std::uint8_t
 {
-    Free = 0,            /**< No common oscillator, or the reference was lost; no exact mapping. */
-    FrequencyLocked = 1, /**< Same oscillator, origin offset unknown (separately started cards). */
-    PhaseLocked = 2      /**< Same oscillator and known origin; mapping is sample-exact. */
+    Free = 0,            /**< No common clock, or the reference was lost; no exact mapping. */
+    Declared = 1,        /**< Common clock asserted by the user (manual wiring), not yet verified. */
+    FrequencyLocked = 2, /**< Common clock known to the backend; origin offset not yet known. */
+    PhaseLocked = 3      /**< Common clock and known origin; mapping is sample-exact. */
 };
 
 //=============================================================================================================
 /**
  * Position of a stream's samples on its domain's tick axis. Trivially copyable; published by the
- * backend or a calibration through AcqStream::setTimebase() and copied into every view.
+ * backend or by verify() through AcqStream::setTimebase() and copied into every view.
  */
 struct AcqTimebase
 {
-    std::uint64_t domain = 0;                 /**< acqClockDomainId(name); 0 = own free-running oscillator. */
-    double tickRate = 0.0;                    /**< Domain ticks per second (informational). */
-    std::uint64_t ticksPerSample = 1;         /**< Integer by construction of the domain tick rate. */
+    std::uint64_t domain = 0;                 /**< acqClockDomainId(name); 0 = free-running. */
+    std::uint64_t ticksPerSecond = 0;         /**< Domain tick rate in Hz (integer, as hardware clocks are). */
+    std::uint64_t ticksPerSample = 1;         /**< Integer by construction of the domain tick. */
+    std::uint32_t sampleAlignment = 1;        /**< Step in samples on which this stream can schedule. */
     std::int64_t originTick = 0;              /**< Domain tick at which sample 0 crosses the connector. */
-    std::uint64_t originUncertaintyTicks = 0; /**< 0 for a common start trigger; calibration residual otherwise. */
+    std::uint64_t originUncertaintyTicks = 0; /**< 0 for a hardware start; marker residual otherwise. */
     AcqLockState lock = AcqLockState::Free;   /**< See AcqLockState. */
 
     /** @return Domain tick of sample @p sample. */
@@ -94,9 +109,7 @@ struct AcqTimebase
 
 //=============================================================================================================
 /**
- * @return The stable domain id of @p name (FNV-1a 64, never 0), e.g. from the URI parameter
- *         clock_domain=scanner, so independently opened devices that the user wired to the same
- *         reference end up in the same domain.
+ * @return The stable domain id of @p name (FNV-1a 64, never 0), e.g. "spectrum:12345" or "scanner-10MHz".
  */
 [[nodiscard]] constexpr std::uint64_t acqClockDomainId(std::string_view name) noexcept
 {
@@ -109,75 +122,87 @@ struct AcqTimebase
 
 //=============================================================================================================
 /**
- * A sample position: integer index and the sub-sample fraction of the exact instant, for fractional-delay
- * filters or to decide whether an instant is representable.
+ * What mapSampleExact() does with an instant that is not on the target's schedulable grid.
  */
-struct AcqSamplePosition
+enum class AcqRounding : std::uint8_t
 {
-    std::uint64_t sample = 0; /**< Last sample at or before the instant. */
-    double fraction = 0.0;    /**< (instant - sample) in samples, in [0, 1); exactly 0 when on a sample. */
+    Exact = 0, /**< Return NotOnGrid. Default for scheduling. */
+    Floor = 1, /**< Last grid point at or before the instant. */
+    Ceil = 2   /**< First grid point at or after the instant. */
 };
 
 //=============================================================================================================
 /**
  * Maps @p sample of stream @p from, shifted by @p offsetTicks, to the stream @p to of the same domain.
- * Pure integer arithmetic, allocation-free; usable on the data path.
+ * Integer arithmetic only, allocation-free; usable on the data path.
  *
  * @param[in] from          Timebase of the source stream.
  * @param[in] to            Timebase of the target stream.
  * @param[in] sample        Sample index in @p from.
  * @param[in] offsetTicks   Delay added to the instant of @p sample, in domain ticks (may be negative).
+ * @param[in] rounding      Handling of instants off the grid of to.ticksPerSample * to.sampleAlignment.
  *
- * @return The position in @p to; NotSynchronized when the domains differ or either side is not
- *         PhaseLocked; BeforeStart when the instant precedes sample 0 of @p to.
+ * @return The sample index in @p to; NotSynchronized unless both are PhaseLocked in the same domain;
+ *         BeforeStart before sample 0 of @p to; NotOnGrid for an off-grid instant with Exact.
  */
-[[nodiscard]] inline AcqExpected<AcqSamplePosition> mapSampleExact(const AcqTimebase& from, const AcqTimebase& to,
-                                                                   std::uint64_t sample,
-                                                                   std::int64_t offsetTicks = 0) noexcept
+[[nodiscard]] inline AcqExpected<std::uint64_t> mapSampleExact(const AcqTimebase& from, const AcqTimebase& to,
+                                                               std::uint64_t sample, std::int64_t offsetTicks = 0,
+                                                               AcqRounding rounding = AcqRounding::Exact) noexcept
 {
     if (from.domain == 0 || from.domain != to.domain || from.lock != AcqLockState::PhaseLocked ||
-        to.lock != AcqLockState::PhaseLocked || to.ticksPerSample == 0) {
+        to.lock != AcqLockState::PhaseLocked || to.ticksPerSample == 0 || to.sampleAlignment == 0) {
         return AcqErrorCode::NotSynchronized;
     }
     const std::int64_t delta = from.tickOf(sample) + offsetTicks - to.originTick;
     if (delta < 0) {
         return AcqErrorCode::BeforeStart;
     }
-    const auto d = static_cast<std::uint64_t>(delta);
-    return AcqSamplePosition{d / to.ticksPerSample,
-                             static_cast<double>(d % to.ticksPerSample) / static_cast<double>(to.ticksPerSample)};
+    const std::uint64_t grid = to.ticksPerSample * to.sampleAlignment;
+    const auto ticks = static_cast<std::uint64_t>(delta);
+    std::uint64_t steps = ticks / grid;
+    if (ticks % grid != 0) {
+        if (rounding == AcqRounding::Exact) {
+            return AcqErrorCode::NotOnGrid;
+        }
+        steps += rounding == AcqRounding::Ceil ? 1U : 0U;
+    }
+    return steps * to.sampleAlignment;
 }
 
 //=============================================================================================================
 /**
- * Calibrates @p target against @p reference from one sync marker: the marker that @p target emitted
- * (output) or recorded (input) at @p targetSample is the same physical edge that @p reference recorded at
- * @p referenceSample (e.g. a loop-back of the trigger or clock-sync line into a receive channel).
- *
- * @param[in] target            Timebase to calibrate; must share the domain of @p reference.
- * @param[in] targetSample      Sample of the marker in the target stream.
- * @param[in] reference         PhaseLocked timebase that defines the domain origin.
- * @param[in] referenceSample   Sample at which the reference observed the marker.
- * @param[in] subTicks          Sub-sample correction from edge interpolation, in domain ticks.
- * @param[in] residualTicks     Uncertainty of the edge detection, stored in originUncertaintyTicks.
- *
- * @return The PhaseLocked target timebase, or NotSynchronized when the domains differ or the reference is
- *         not PhaseLocked.
+ * One loop-back observation: the target stream emitted (output) or recorded (input) a sync edge at
+ * @c targetSample, and the reference stream recorded the same edge at @c referenceSample.
  */
-[[nodiscard]] inline AcqExpected<AcqTimebase> alignTo(AcqTimebase target, std::uint64_t targetSample,
-                                                      const AcqTimebase& reference, std::uint64_t referenceSample,
-                                                      std::int64_t subTicks = 0,
-                                                      std::uint64_t residualTicks = 0) noexcept
+struct AcqSyncMarker
 {
-    if (reference.domain == 0 || target.domain != reference.domain || reference.lock != AcqLockState::PhaseLocked) {
-        return AcqErrorCode::NotSynchronized;
-    }
-    target.originTick =
-        reference.tickOf(referenceSample) + subTicks - static_cast<std::int64_t>(targetSample * target.ticksPerSample);
-    target.originUncertaintyTicks = residualTicks;
-    target.lock = AcqLockState::PhaseLocked;
-    return target;
-}
+    std::uint64_t targetSample = 0;    /**< Sample of the edge in the target stream. */
+    std::uint64_t referenceSample = 0; /**< Sample of the edge in the reference stream. */
+    std::int64_t subTicks = 0;         /**< Edge position inside the reference sample, in domain ticks. */
+};
+
+//=============================================================================================================
+/**
+ * Determines the origin of @p target from loop-back markers against @p reference and verifies the
+ * declared clock relation: every marker must imply the same origin within @p toleranceTicks, so drift
+ * (a missing or wrong clock connection) is detected instead of producing wrong samples.
+ *
+ * @param[in] target           Timebase to verify; same domain as @p reference, Declared or FrequencyLocked.
+ * @param[in] markers          Observations; at least 1 for FrequencyLocked, at least 2 spanning
+ *                             minSpanSamples for Declared.
+ * @param[in] reference        PhaseLocked timebase of the domain.
+ * @param[in] toleranceTicks   Allowed spread of the implied origins (edge detection jitter).
+ * @param[in] minSpanSamples   Minimum distance in target samples between first and last marker for Declared.
+ *
+ * @return The PhaseLocked target timebase (originUncertaintyTicks = observed spread), or NotSynchronized
+ *         when the domains differ, the reference is not PhaseLocked, too few markers were given, or the
+ *         implied origins drift by more than @p toleranceTicks.
+ */
+[[nodiscard]] ACQSHARED_EXPORT AcqExpected<AcqTimebase> verify(const AcqTimebase& target,
+                                                               std::span<const AcqSyncMarker> markers,
+                                                               const AcqTimebase& reference,
+                                                               std::uint64_t toleranceTicks,
+                                                               std::uint64_t minSpanSamples = 1'000'000) noexcept;
 
 } // namespace ACQLIB
 
