@@ -107,7 +107,8 @@
     "onnxruntime::onnxruntime",
     "ZLIB::ZLIB",
     "zlibstatic",
-    "z"
+    "z",
+    "Threads::Threads"
   ],
   "ignored_variables": [
     "FFTW_LIBS",
