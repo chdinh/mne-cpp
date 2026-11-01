@@ -29,7 +29,7 @@
 #endif
 #if __has_include(<sys/mman.h>)
 #include <sys/mman.h>
-#define ACQ_HAVE_MLOCK 1
+#define ACQ_HAVE_MLOCK
 #endif
 
 //=============================================================================================================
@@ -198,11 +198,12 @@ AcqExpected<std::shared_ptr<AcqStreamCore>> AcqStreamCore::create(AcqStreamInfo 
             core->bufferBytes = static_cast<std::size_t>(capacity * core->frameBytes);
         }
         if (core->bufferBytes > 0) {
-            core->base = static_cast<std::byte*>(
-                ::operator new(core->bufferBytes, std::align_val_t(kBufferAlignment), std::nothrow));
-            if (core->base == nullptr) {
+            const std::size_t pages = (core->bufferBytes + kBufferAlignment - 1) / kBufferAlignment;
+            core->ownedPages = std::unique_ptr<RingPage[]>(new (std::nothrow) RingPage[pages]);
+            if (!core->ownedPages) {
                 return AcqErrorCode::OutOfMemory;
             }
+            core->base = core->ownedPages[0].bytes;
             core->ownsBuffer = true;
             if (options.prefault) {
                 std::memset(core->base, 0, core->bufferBytes);
@@ -249,7 +250,6 @@ AcqStreamCore::~AcqStreamCore()
             ::munlock(base, bufferBytes);
         }
 #endif
-        ::operator delete(base, std::align_val_t(kBufferAlignment));
     } else if (releaseExternal) {
         releaseExternal();
     }

@@ -56,6 +56,12 @@ namespace ACQLIB::detail
 
 inline constexpr std::size_t kCacheLine = 64;
 inline constexpr std::size_t kBufferAlignment = 4096;
+
+/** One page of ring memory; arrays of it are allocated with the page alignment. */
+struct alignas(kBufferAlignment) RingPage
+{
+    std::byte bytes[kBufferAlignment];
+};
 inline constexpr std::size_t kMaxInfoVersions = 1024;
 
 //=============================================================================================================
@@ -230,6 +236,7 @@ public:
     std::uint64_t mask = 0;
     std::ptrdiff_t rowStride = 0;
     std::byte* base = nullptr;
+    std::unique_ptr<RingPage[]> ownedPages;
     bool ownsBuffer = false;
     bool memoryLocked = false;
     std::size_t bufferBytes = 0;
