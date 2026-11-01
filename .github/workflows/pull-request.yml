@@ -7,8 +7,8 @@
 # ═══════════════════════════════════════════════════════════════════════════
 #
 # Triggered on pull requests targeting `staging` or `main`, on pushes to
-# `feature/**` branches (so a fork runs it without opening a pull request), and
-# manually on any branch.
+# `feature/**` branches of forks (so a fork runs it without opening a pull
+# request), and manually on any branch.
 #
 # This is the FEATURE BRANCH pipeline:
 #   • Runs the full test suite on all platforms with the maximum supported Qt
@@ -47,6 +47,7 @@ jobs:
 
   # ── Tests (no coverage collection) ──────────────────────────────────────
   Tests:
+    if: ${{ github.event_name != 'push' || github.repository != 'mne-tools/mne-cpp' }}
     uses: ./.github/workflows/_reusable-tests.yml
     with:
       with_code_coverage: false
@@ -54,6 +55,7 @@ jobs:
 
   # Min-Qt on Linux; release PRs into main test it on all three OSes.
   TestsMinQt:
+    if: ${{ github.event_name != 'push' || github.repository != 'mne-tools/mne-cpp' }}
     uses: ./.github/workflows/_reusable-tests.yml
     with:
       qt_version: min
@@ -61,10 +63,12 @@ jobs:
 
   # ── mne_acq under ThreadSanitizer and Address/UB sanitizers (Linux) ─────
   Sanitizers:
+    if: ${{ github.event_name != 'push' || github.repository != 'mne-tools/mne-cpp' }}
     uses: ./.github/workflows/_reusable-sanitizers.yml
 
   # ── Quality gates (static, no build) ────────────────────────────────────
   Quality:
+    if: ${{ github.event_name != 'push' || github.repository != 'mne-tools/mne-cpp' }}
     runs-on: ubuntu-24.04
 
     steps:
@@ -141,6 +145,7 @@ jobs:
 
   # ── Documentation gate (T4.4): API docs, screenshots, site build ────────
   Docs:
+    if: ${{ github.event_name != 'push' || github.repository != 'mne-tools/mne-cpp' }}
     uses: ./.github/workflows/_reusable-docs.yml
     with:
       channel: stable
@@ -148,6 +153,7 @@ jobs:
 
   # ── WebAssembly build (Linux only, no deployment) ───────────────────────
   WasmBuild:
+    if: ${{ github.event_name != 'push' || github.repository != 'mne-tools/mne-cpp' }}
     uses: ./.github/workflows/_reusable-wasm.yml
     secrets: inherit
 

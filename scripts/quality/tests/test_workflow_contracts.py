@@ -76,6 +76,12 @@ class WorkflowContracts(unittest.TestCase):
         text = (WORKFLOWS / "pull-request.yml").read_text(encoding="utf-8")
         self.assertRegex(text, r"\n  push:\n    branches:\n      - 'feature/\*\*'\n")
         self.assertIn("\n  workflow_dispatch:\n", text)
+        # Pushes run only in forks: upstream branches get their checks from the pull request.
+        jobs = re.findall(r"\n  ([A-Za-z]+):\n((?:    .*\n|\n)*)", text.split("\njobs:\n", 1)[1])
+        self.assertTrue(jobs)
+        for name, body in jobs:
+            with self.subTest(job=name):
+                self.assertIn("if: ${{ github.event_name != 'push' || github.repository != 'mne-tools/mne-cpp' }}", body)
         # A push and the pull request of the same branch share one group, so they never both run.
         self.assertIn("group: pr-${{ github.event.pull_request.head.repo.full_name || github.repository }}"
                       "-${{ github.head_ref || github.ref_name }}", text)
