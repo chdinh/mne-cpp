@@ -65,7 +65,11 @@ public:
     /** @return Description of the opened device. */
     [[nodiscard]] virtual AcqDeviceDescription description() const = 0;
 
-    /** Starts acquisition and output. Called in state Opened or Stopped. */
+    /**
+     * Starts acquisition and output. Called in state Opened or Stopped.
+     *
+     * @return Success, or the error that prevented the start.
+     */
     virtual AcqError start() = 0;
 
     /** Stops and joins every backend thread before returning. Called in state Running. */
@@ -104,7 +108,11 @@ protected:
     AcqExpected<AcqReader*> addOutputStream(AcqStreamInfo info, const AcqStreamOptions& options = {},
                                             AcqWait wait = AcqWait::Spin);
 
-    /** Reports a fatal error from any thread; the source moves to state Failed. Allocation-free. */
+    /**
+     * Reports a fatal error from any thread; the device moves to state Failed. Allocation-free.
+     *
+     * @param[in] error   The error.
+     */
     void reportError(AcqError error) noexcept;
 
 private:

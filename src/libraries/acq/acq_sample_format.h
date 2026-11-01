@@ -97,7 +97,9 @@ static_assert(sizeof(AcqComplexInt16) == 4, "AcqComplexInt16 must be packed");
 
 //=============================================================================================================
 /**
- * @return Bytes per sample of one channel in @p format (an I/Q pair counts as one sample).
+ * @param[in] format   Sample format.
+ *
+ * @return Bytes per sample of one channel (an I/Q pair counts as one sample); 0 for an invalid value.
  */
 [[nodiscard]] constexpr std::size_t bytesPerSample(AcqSampleFormat format) noexcept
 {
@@ -120,13 +122,21 @@ static_assert(sizeof(AcqComplexInt16) == 4, "AcqComplexInt16 must be packed");
     return 0;
 }
 
-/** @return true for the complex formats. */
+/**
+ * @param[in] format   Sample format.
+ *
+ * @return true for the complex formats.
+ */
 [[nodiscard]] constexpr bool isComplex(AcqSampleFormat format) noexcept
 {
     return format == AcqSampleFormat::ComplexInt16 || format == AcqSampleFormat::ComplexFloat32;
 }
 
-/** @return The stable lowercase name of @p format, e.g. "float32", "cint16"; "unknown" for invalid values. */
+/**
+ * @param[in] format   Sample format.
+ *
+ * @return The stable lowercase name, e.g. "float32", "cint16"; "unknown" for invalid values.
+ */
 [[nodiscard]] ACQSHARED_EXPORT std::string_view sampleFormatName(AcqSampleFormat format) noexcept;
 
 //=============================================================================================================

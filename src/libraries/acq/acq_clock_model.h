@@ -70,7 +70,11 @@ struct AcqClockModel
     AcqClockSource source = AcqClockSource::Nominal;                /**< Origin of the anchor. */
     bool output = false;                                            /**< true for output streams (sign of pipelineDelayNs). */
 
-    /** @return steady_clock time in ns at which sample @p sample was taken (input) or emitted (output). @pre sfreq > 0 */
+    /**
+     * @param[in] sample   Sample index. @pre sfreq > 0
+     *
+     * @return steady_clock time in ns at which the sample was taken (input) or emitted (output).
+     */
     [[nodiscard]] std::int64_t physicalNs(std::uint64_t sample) const noexcept
     {
         const double ds = static_cast<double>(sample) - static_cast<double>(anchorSample);
@@ -78,7 +82,11 @@ struct AcqClockModel
         return output ? t + pipelineDelayNs : t - pipelineDelayNs;
     }
 
-    /** @return The sample index taken or emitted closest to steady_clock time @p ns, clamped at 0. @pre sfreq > 0 */
+    /**
+     * @param[in] ns   steady_clock time in ns. @pre sfreq > 0
+     *
+     * @return The sample taken or emitted closest to that time, clamped at 0.
+     */
     [[nodiscard]] std::uint64_t sampleAt(std::int64_t ns) const noexcept
     {
         const std::int64_t boundaryNs = output ? ns - pipelineDelayNs : ns + pipelineDelayNs;

@@ -27,13 +27,13 @@
  *   configuration error reported as NotOnGrid, not hidden by interpolation.
  *
  * Domain membership (who shares a clock):
- * - One device: all its streams are one domain, named by the backend "<scheme>:<serial>"; FrequencyLocked
+ * - One device: all its streams are one domain, named by the backend "scheme:serial"; FrequencyLocked
  *   from opening, PhaseLocked once the backend knows the per-stream latencies.
  * - Devices synchronised by hardware the backend can query (Spectrum star-hub): the hub's domain,
  *   PhaseLocked by the common start.
  * - Devices wired by hand (clock output of one card into the external clock input of another, a shared
  *   10 MHz reference, an amplifier clocked from the stimulator): the user declares it with the URI
- *   parameter clock_from=<device id of the clock master>, or clock_domain=<name> for an external reference
+ *   parameter clock_from=ID (the device id of the clock master), or clock_domain=NAME for an external reference
  *   that is not itself a device. The declaration only yields Declared; verify() promotes it to PhaseLocked
  *   after loop-back sync markers have shown zero drift, so a wiring mistake can never produce a wrong
  *   sample.
@@ -100,7 +100,11 @@ struct AcqTimebase
     std::uint64_t originUncertaintyTicks = 0; /**< 0 for a hardware start; marker residual otherwise. */
     AcqLockState lock = AcqLockState::Free;   /**< See AcqLockState. */
 
-    /** @return Domain tick of sample @p sample. */
+    /**
+     * @param[in] sample   Sample index of this stream.
+     *
+     * @return Domain tick of that sample.
+     */
     [[nodiscard]] constexpr std::int64_t tickOf(std::uint64_t sample) const noexcept
     {
         return originTick + static_cast<std::int64_t>(sample * ticksPerSample);
@@ -109,7 +113,9 @@ struct AcqTimebase
 
 //=============================================================================================================
 /**
- * @return The stable domain id of @p name (FNV-1a 64, never 0), e.g. "spectrum:12345" or "scanner-10MHz".
+ * @param[in] name   Domain name, e.g. "spectrum:12345" or "scanner-10MHz".
+ *
+ * @return The stable domain id (FNV-1a 64, never 0).
  */
 [[nodiscard]] constexpr std::uint64_t acqClockDomainId(std::string_view name) noexcept
 {

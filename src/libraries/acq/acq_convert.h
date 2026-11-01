@@ -76,13 +76,25 @@ struct AcqMatrixRef
     std::ptrdiff_t rowStride = 1; /**< Elements between consecutive channels. */
     std::ptrdiff_t colStride = 0; /**< Elements between consecutive samples. */
 
-    /** @return A view of column-major storage (Eigen default, Fortran order). */
+    /**
+     * @param[in] data   Element (0, 0).
+     * @param[in] rows   Channels.
+     * @param[in] cols   Samples.
+     *
+     * @return A view of column-major storage (Eigen default, Fortran order).
+     */
     [[nodiscard]] static constexpr AcqMatrixRef columnMajor(T* data, std::size_t rows, std::size_t cols) noexcept
     {
         return {data, rows, cols, 1, static_cast<std::ptrdiff_t>(rows)};
     }
 
-    /** @return A view of row-major storage (C order, one contiguous row per channel). */
+    /**
+     * @param[in] data   Element (0, 0).
+     * @param[in] rows   Channels.
+     * @param[in] cols   Samples.
+     *
+     * @return A view of row-major storage (C order, one contiguous row per channel).
+     */
     [[nodiscard]] static constexpr AcqMatrixRef rowMajor(T* data, std::size_t rows, std::size_t cols) noexcept
     {
         return {data, rows, cols, static_cast<std::ptrdiff_t>(cols), 1};
@@ -127,7 +139,7 @@ ACQSHARED_EXPORT AcqError decode(const AcqBlockView& view, const AcqMatrixRef<fl
 ACQSHARED_EXPORT AcqError decode(const AcqBlockView& view, const AcqMatrixRef<double>& out,
                                  const AcqConvertOptions& options = {}) noexcept;
 
-/** Complex overload; real formats yield a zero imaginary part. */
+/** @copydoc decode(const AcqBlockView&, const AcqMatrixRef<float>&, const AcqConvertOptions&) Real formats yield a zero imaginary part. */
 ACQSHARED_EXPORT AcqError decode(const AcqBlockView& view, const AcqMatrixRef<std::complex<float>>& out,
                                  const AcqConvertOptions& options = {}) noexcept;
 
@@ -158,7 +170,7 @@ ACQSHARED_EXPORT AcqExpected<AcqEncodeResult> encode(const AcqMatrixRef<const fl
 ACQSHARED_EXPORT AcqExpected<AcqEncodeResult> encode(const AcqMatrixRef<const double>& in, const AcqWriteView& view,
                                                      const AcqConvertOptions& options = {}) noexcept;
 
-/** Complex overload; for real formats the imaginary part must be 0 or the element counts as clipped. */
+/** @copydoc encode(const AcqMatrixRef<const float>&, const AcqWriteView&, const AcqConvertOptions&) For real formats the imaginary part must be 0, otherwise the element counts as clipped. */
 ACQSHARED_EXPORT AcqExpected<AcqEncodeResult> encode(const AcqMatrixRef<const std::complex<float>>& in,
                                                      const AcqWriteView& view,
                                                      const AcqConvertOptions& options = {}) noexcept;

@@ -81,7 +81,11 @@ public:
      */
     [[nodiscard]] static AcqExpected<AcqDevice> open(std::string_view uri);
 
-    /** Wraps an already opened backend. @pre backend != nullptr */
+    /**
+     * Wraps an already opened backend.
+     *
+     * @param[in] backend   The backend. @pre backend != nullptr
+     */
     explicit AcqDevice(std::unique_ptr<AcqBackend> backend);
 
     AcqDevice() noexcept;
@@ -94,7 +98,11 @@ public:
     /** Starts acquisition and output. @return InvalidState unless Opened or Stopped, or the backend's error. */
     AcqError start();
 
-    /** Stops acquisition and output and joins the backend threads. No-op unless Running. */
+    /**
+     * Stops acquisition and output and joins the backend threads. No-op unless Running.
+     *
+     * @return The backend's error, or success.
+     */
     AcqError stop();
 
     /** Stops if needed and releases the device. Idempotent. */
@@ -106,10 +114,18 @@ public:
     /** @return All streams of the source. */
     [[nodiscard]] std::span<const AcqStream> streams() const noexcept;
 
-    /** @return Stream @p index, an invalid stream if out of range. Index 0 is the primary stream. */
+    /**
+     * @param[in] index   Stream index; 0 is the primary stream.
+     *
+     * @return The stream, or an invalid stream if out of range.
+     */
     [[nodiscard]] AcqStream stream(std::size_t index = 0) const;
 
-    /** @return The stream named @p name, an invalid stream if there is none. */
+    /**
+     * @param[in] name   Stream name.
+     *
+     * @return The stream, or an invalid stream if there is none.
+     */
     [[nodiscard]] AcqStream findStream(std::string_view name) const;
 
     /** @return Description of the source. */

@@ -10,7 +10,7 @@
  * @brief    AcqUri and AcqDeviceRegistry: URI scheme -> backend factory, and discovery (control path).
  *
  * URIs have the form scheme://target?key=value&key=value. Every scheme opens with no parameters
- * where that is meaningful (synthetic://, lsl://<name>, fiff://<file>). Parameters are parsed
+ * where that is meaningful (`synthetic://`, `lsl://NAME`, `fiff://FILE`). Parameters are parsed
  * into a typed configuration by each backend; unknown keys are an InvalidParameter error, never
  * silently ignored. Built-in backends register at static-initialisation time; applications can add
  * their own.
@@ -54,10 +54,18 @@ struct AcqUri
     std::string target;                                      /**< Everything between "://" and "?". */
     std::vector<std::pair<std::string, std::string>> params; /**< Query parameters. */
 
-    /** @return The parsed URI, or InvalidUri naming the offending position. */
+    /**
+     * @param[in] uri   Device URI.
+     *
+     * @return The parsed URI, or InvalidUri naming the offending position.
+     */
     [[nodiscard]] static AcqExpected<AcqUri> parse(std::string_view uri);
 
-    /** @return The value of @p key, if present. */
+    /**
+     * @param[in] key   Query key.
+     *
+     * @return The value of the key, if present.
+     */
     [[nodiscard]] std::optional<std::string_view> param(std::string_view key) const noexcept;
 
     /** @return The canonical, percent-encoded string form. */
@@ -129,13 +137,21 @@ public:
      */
     AcqError registerScheme(AcqSchemeInfo info, Factory factory, Discoverer discoverer = {});
 
-    /** @return The opened source for @p uri; see AcqDevice::open(). */
+    /**
+     * @param[in] uri   Device URI.
+     *
+     * @return The opened device; see AcqDevice::open().
+     */
     [[nodiscard]] AcqExpected<AcqDevice> open(std::string_view uri) const;
 
     /** @return All registered schemes, sorted by name. */
     [[nodiscard]] std::vector<AcqSchemeInfo> schemes() const;
 
-    /** @return Reachable sources of every scheme, discovered in parallel within @p timeout. */
+    /**
+     * @param[in] timeout   Time budget for all schemes together.
+     *
+     * @return Reachable devices of every scheme, discovered in parallel.
+     */
     [[nodiscard]] std::vector<AcqDiscoveredDevice> discover(std::chrono::milliseconds timeout) const;
 
     AcqDeviceRegistry(const AcqDeviceRegistry&) = delete;

@@ -106,13 +106,22 @@ class ACQSHARED_EXPORT AcqError
 public:
     AcqError() noexcept = default;
 
-    /** Creates an error without context; allocation-free, usable on the data path. */
+    /**
+     * Creates an error without context; allocation-free, usable on the data path.
+     *
+     * @param[in] code   The error code.
+     */
     constexpr AcqError(AcqErrorCode code) noexcept
     : m_code(code)
     {
     }
 
-    /** Creates an error with context, e.g. the URI or file path (control path, allocates). */
+    /**
+     * Creates an error with context (control path, allocates).
+     *
+     * @param[in] code      The error code.
+     * @param[in] context   What the error refers to, e.g. the URI or file path.
+     */
     AcqError(AcqErrorCode code, std::string context);
 
     /** @return true when this value represents success. */
@@ -160,14 +169,22 @@ template<typename T>
 class AcqExpected
 {
 public:
-    /** Holds @p value. */
+    /**
+     * Holds a value.
+     *
+     * @param[in] value   The value.
+     */
     AcqExpected(T value) noexcept(std::is_nothrow_move_constructible_v<T>)
     : m_hasValue(true)
     {
         ::new (static_cast<void*>(&m_value)) T(std::move(value));
     }
 
-    /** Holds @p error. @pre !error.ok() */
+    /**
+     * Holds an error.
+     *
+     * @param[in] error   The error. @pre !error.ok()
+     */
     AcqExpected(AcqError error) noexcept
     : m_hasValue(false)
     {
@@ -175,7 +192,11 @@ public:
         ::new (static_cast<void*>(&m_error)) AcqError(std::move(error));
     }
 
-    /** Holds the error @p code. @pre code != AcqErrorCode::None */
+    /**
+     * Holds an error without context.
+     *
+     * @param[in] code   The error code. @pre code != AcqErrorCode::None
+     */
     AcqExpected(AcqErrorCode code) noexcept
     : AcqExpected(AcqError(code))
     {

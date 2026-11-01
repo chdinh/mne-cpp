@@ -48,6 +48,8 @@ using AcqEigenMap = Eigen::Map<const Eigen::Matrix<T, Eigen::Dynamic, Eigen::Dyn
  *
  * @tparam T   std::int16_t, std::int32_t, float, double or std::complex<float>; must match view.format().
  *             Packed int24 and complex int16 have no Eigen scalar type; use decode().
+ * @param[in] view   An acquired view.
+ * @param[in] i      Part index. @pre i < view.partCount()
  *
  * @return Strided map into the ring, valid until the view is released.
  */
@@ -64,14 +66,22 @@ template<typename T>
                           Eigen::Stride<Eigen::Dynamic, Eigen::Dynamic>(p.sampleStride / size, p.channelStride / size));
 }
 
-/** @return An AcqMatrixRef over the storage of @p m. */
+/**
+ * @param[in] m   An Eigen matrix.
+ *
+ * @return An AcqMatrixRef over its storage.
+ */
 template<typename T>
 [[nodiscard]] AcqMatrixRef<T> ref(Eigen::Matrix<T, Eigen::Dynamic, Eigen::Dynamic>& m) noexcept
 {
     return AcqMatrixRef<T>::columnMajor(m.data(), static_cast<std::size_t>(m.rows()), static_cast<std::size_t>(m.cols()));
 }
 
-/** @return A read-only AcqMatrixRef over the storage of @p m. */
+/**
+ * @param[in] m   An Eigen matrix.
+ *
+ * @return A read-only AcqMatrixRef over its storage.
+ */
 template<typename T>
 [[nodiscard]] AcqMatrixRef<const T> ref(const Eigen::Matrix<T, Eigen::Dynamic, Eigen::Dynamic>& m) noexcept
 {
@@ -81,8 +91,16 @@ template<typename T>
 
 //=============================================================================================================
 /**
- * Reads @p samples samples into @p out, resizing it only when its shape differs (so a reused matrix
- * does not allocate).
+ * Reads samples into an Eigen matrix, resizing it only when its shape differs (so a reused matrix does
+ * not allocate).
+ *
+ * @param[in] reader    The reader.
+ * @param[in] samples   Samples per channel.
+ * @param[out] out      Destination, channels x samples.
+ * @param[in] timeout   Maximum wait.
+ * @param[in] scaling   Raw or physical values.
+ *
+ * @return Position and loss of the block, or the reader's error.
  */
 template<typename T>
 [[nodiscard]] AcqExpected<AcqReadResult> read(AcqReader& reader, std::size_t samples,
@@ -100,7 +118,14 @@ template<typename T>
 
 //=============================================================================================================
 /**
- * Writes all columns of @p in to an output stream: reserves, encodes, commits.
+ * Writes all columns of an Eigen matrix to an output stream: reserves, encodes, commits.
+ *
+ * @param[in] writer    The writer of the output stream.
+ * @param[in] in        Source, channels x samples.
+ * @param[in] timeout   Maximum wait for space.
+ * @param[in] scaling   Raw or physical values.
+ *
+ * @return Clipping count, or the writer's or encoder's error.
  */
 template<typename T>
 [[nodiscard]] AcqExpected<AcqEncodeResult> write(AcqWriter& writer,

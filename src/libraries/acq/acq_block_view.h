@@ -98,7 +98,11 @@ struct AcqSpanPair
         return size() == 0;
     }
 
-    /** @return Element @p i of the logical sequence. @pre i < size() */
+    /**
+     * @param[in] i   Index into the logical sequence. @pre i < size()
+     *
+     * @return The element.
+     */
     constexpr T& operator[](std::size_t i) const noexcept
     {
         return i < first.size() ? first[i] : second[i - first.size()];
@@ -119,7 +123,12 @@ struct AcqPart
     std::ptrdiff_t sampleStride = 0;  /**< Bytes between consecutive samples of one channel. */
     std::ptrdiff_t channelStride = 0; /**< Bytes between consecutive channels of one sample. */
 
-    /** @return Pointer to element (channel @p c, sample @p s). */
+    /**
+     * @param[in] c   Channel.
+     * @param[in] s   Sample within the run.
+     *
+     * @return Pointer to the element.
+     */
     [[nodiscard]] Byte* at(std::size_t c, std::size_t s) const noexcept
     {
         return data + static_cast<std::ptrdiff_t>(c) * channelStride + static_cast<std::ptrdiff_t>(s) * sampleStride;
@@ -173,7 +182,11 @@ public:
         return m_partCount;
     }
 
-    /** @return Part @p i. @pre i < partCount() */
+    /**
+     * @param[in] i   Part index. @pre i < partCount()
+     *
+     * @return The part.
+     */
     [[nodiscard]] const AcqPart<Byte>& part(std::size_t i) const noexcept
     {
         assert(i < m_partCount);
@@ -272,7 +285,11 @@ public:
         return m_segments;
     }
 
-    /** @return Device-specific payload of segment @p i. @pre i < segments().size() */
+    /**
+     * @param[in] i   Segment index. @pre i < segments().size()
+     *
+     * @return The device-specific header payload of the segment.
+     */
     [[nodiscard]] std::span<const std::byte> segmentPayload(std::size_t i) const noexcept
     {
         const std::size_t offset = i * m_segmentPayloadBytes;

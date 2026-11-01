@@ -140,7 +140,11 @@ public:
     /** @return The current metadata version (control path). */
     [[nodiscard]] std::shared_ptr<const AcqStreamInfo> info() const;
 
-    /** @return The metadata version valid at @p sample, or the oldest retained one. */
+    /**
+     * @param[in] sample   Sample index.
+     *
+     * @return The metadata version valid at that sample, or the oldest retained one.
+     */
     [[nodiscard]] std::shared_ptr<const AcqStreamInfo> infoAt(std::uint64_t sample) const;
 
     /** @return The current clock model. */
@@ -152,6 +156,8 @@ public:
     /**
      * Publishes a new timebase, e.g. the result of verify() or a reference loss reported by the backend.
      * Control path; serialised internally, readers see it through a sequence counter without a lock.
+     *
+     * @param[in] timebase   The new timebase.
      */
     void setTimebase(const AcqTimebase& timebase) noexcept;
 
@@ -267,13 +273,19 @@ public:
     [[nodiscard]] AcqExpected<AcqWriteView> beginWriteAt(std::uint64_t firstSample, std::size_t samples,
                                                          std::chrono::nanoseconds timeout = {}) noexcept;
 
-    /** Publishes the first @p samples samples of the last view (one release store). @pre samples <= reserved */
+    /**
+     * Publishes the first samples of the last view (one release store).
+     *
+     * @param[in] samples   Samples per channel. @pre samples <= reserved
+     */
     void commit(std::size_t samples) noexcept;
 
     /**
      * Attaches @p event (absolute sample index, not decreasing), published with the next commit (input) or
      * immediately (output; scheduled events may lie ahead of writePosition()). Old events are overwritten
      * like samples; lagging readers count them in AcqReaderStats::eventsLost.
+     *
+     * @param[in] event   The event.
      *
      * @return Late for an output event before devicePosition(), InvalidParameter for a sample index below the
      *         previous event's; otherwise success.
@@ -284,15 +296,29 @@ public:
      * Starts a segment at header.firstSample with its device-specific @p payload (truncated or zero-padded
      * to AcqSegmentation::headerBytes); published like events.
      *
+     * @param[in] header    Generic segment header.
+     * @param[in] payload   Device-specific header payload.
+     *
      * @return Late for an output segment before devicePosition(), InvalidParameter for a decreasing
      *         firstSample; otherwise success.
      */
     AcqError pushSegment(const AcqSegmentHeader& header, std::span<const std::byte> payload) noexcept;
 
-    /** Publishes a new clock model (sequence counter, no lock). */
+    /**
+     * Publishes a new clock model (sequence counter, no lock).
+     *
+     * @param[in] clock   The clock model.
+     */
     void setClock(const AcqClockModel& clock) noexcept;
 
-    /** Publishes metadata version info.version = current + 1 valid from @p fromSample (allocates; rare changes only). */
+    /**
+     * Publishes a new metadata version, current + 1 (allocates; rare changes only).
+     *
+     * @param[in] info         New description; channel count, format, layout and direction must not change.
+     * @param[in] fromSample   First sample it describes. @pre fromSample >= writePosition()
+     *
+     * @return InvalidParameter for a geometry change or a past sample, InvalidState after too many versions.
+     */
     AcqError updateInfo(AcqStreamInfo info, std::uint64_t fromSample);
 
     /** Marks the end of the stream; readers drain and then receive EndOfStream. Idempotent. */
