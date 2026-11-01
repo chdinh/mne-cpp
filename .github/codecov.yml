@@ -61,6 +61,10 @@ component_management:
         - type: project
           target: auto
           threshold: 0.1%
+    - component_id: libraries_acq
+      name: libraries/acq
+      paths:
+        - src/libraries/acq/**
     - component_id: libraries_bids
       name: libraries/bids
       paths:
