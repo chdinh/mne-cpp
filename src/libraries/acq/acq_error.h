@@ -48,11 +48,13 @@ enum class AcqErrorCode : std::uint16_t
 {
     None = 0, /**< Success. */
     // Data path (allocation-free)
-    Timeout = 1,       /**< No data (reader) or no space (output writer) within the timeout. */
-    EndOfStream = 2,   /**< The producer finished and every committed sample has been read. */
-    Overrun = 3,       /**< The producer overwrote samples while a view was held; discard the view's data. */
-    SourceStopped = 4, /**< The source was stopped while waiting. */
-    Late = 5,          /**< An output sample, event or segment targets a sample the device has already played. */
+    Timeout = 1,         /**< No data (reader) or no space (output writer) within the timeout. */
+    EndOfStream = 2,     /**< The producer finished and every committed sample has been read. */
+    Overrun = 3,         /**< The producer overwrote samples while a view was held; discard the view's data. */
+    SourceStopped = 4,   /**< The source was stopped while waiting. */
+    Late = 5,            /**< An output sample, event or segment targets a sample the device has already played. */
+    NotSynchronized = 6, /**< The streams are not phase-locked in one clock domain, or the reference was lost. */
+    BeforeStart = 7,     /**< The mapped instant precedes sample 0 of the target stream. */
     // Control path
     InvalidUri = 100,          /**< The URI does not have the form scheme://target?key=value. */
     UnknownScheme = 101,       /**< No backend is registered for the URI scheme. */

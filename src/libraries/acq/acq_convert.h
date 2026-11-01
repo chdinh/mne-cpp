@@ -33,6 +33,7 @@
 #include "acq_block_view.h"
 #include "acq_error.h"
 #include "acq_sample_format.h"
+#include "acq_stream_info.h"
 
 #include <complex>
 #include <cstddef>
@@ -159,6 +160,37 @@ ACQSHARED_EXPORT AcqExpected<AcqEncodeResult> encode(const AcqMatrixRef<const do
 ACQSHARED_EXPORT AcqExpected<AcqEncodeResult> encode(const AcqMatrixRef<const std::complex<float>>& in,
                                                      const AcqWriteView& view,
                                                      const AcqConvertOptions& options = {}) noexcept;
+
+//=============================================================================================================
+/**
+ * Extracts the AcqStreamInfo::bitFields of @p view; row f of @p out holds field f for every sample.
+ *
+ * @param[in] view          Source view of an integer stream.
+ * @param[in] fields        Bit fields of the stream's info version.
+ * @param[out] out          fields.size() x at least firstColumn + view.sampleCount().
+ * @param[in] firstColumn   Matrix column of the view's first sample.
+ *
+ * @return ShapeMismatch, UnsupportedFormat (non-integer format), or success.
+ */
+ACQSHARED_EXPORT AcqError decodeBits(const AcqBlockView& view, std::span<const AcqBitField> fields,
+                                     const AcqMatrixRef<std::uint32_t>& out, std::size_t firstColumn = 0) noexcept;
+
+//=============================================================================================================
+/**
+ * Writes bit fields into the reserved samples of @p view, leaving the analog bits untouched; call before
+ * or after encode() of the same view. Values wider than a field are truncated and counted as clipped.
+ *
+ * @param[in] in            fields.size() x at least firstColumn + view.sampleCount().
+ * @param[in] fields        Bit fields of the stream's info version.
+ * @param[in] view          Destination view.
+ * @param[in] firstColumn   Matrix column of the view's first sample.
+ *
+ * @return Clipping count, or ShapeMismatch / UnsupportedFormat.
+ */
+ACQSHARED_EXPORT AcqExpected<AcqEncodeResult> encodeBits(const AcqMatrixRef<const std::uint32_t>& in,
+                                                         std::span<const AcqBitField> fields,
+                                                         const AcqWriteView& view,
+                                                         std::size_t firstColumn = 0) noexcept;
 
 //=============================================================================================================
 /**

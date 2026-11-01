@@ -27,6 +27,7 @@
 #include "acq_global.h"
 #include "acq_clock_model.h"
 #include "acq_sample_format.h"
+#include "acq_timebase.h"
 
 #include <array>
 #include <cassert>
@@ -207,6 +208,12 @@ public:
         return m_clock;
     }
 
+    /** @return Hardware timebase valid for this view (sample-exact mapping within a clock domain). */
+    [[nodiscard]] const AcqTimebase& timebase() const noexcept
+    {
+        return m_timebase;
+    }
+
 protected:
     std::array<AcqPart<Byte>, 2> m_parts{};
     std::size_t m_partCount = 0;
@@ -220,6 +227,7 @@ protected:
     std::span<const double> m_rangeMin;
     std::span<const double> m_rangeMax;
     AcqClockModel m_clock;
+    AcqTimebase m_timebase;
     std::uint64_t m_ticket = 0; /**< Owner-private validation token. */
 };
 

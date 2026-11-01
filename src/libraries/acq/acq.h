@@ -59,5 +59,6 @@
 #include "acq_source_registry.h"
 #include "acq_stream.h"
 #include "acq_stream_info.h"
+#include "acq_timebase.h"
 
 #endif // ACQ_H

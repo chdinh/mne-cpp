@@ -90,8 +90,9 @@ struct AcqClockModel
 
 //=============================================================================================================
 /**
- * Maps a sample of one stream to the sample of another stream at the same physical time, e.g. the
- * output sample that coincides with a detected input event.
+ * Maps a sample of one stream to the sample of another stream at the same physical time through host
+ * time, so the result carries both clocks' uncertainty. Use it across clock domains (EEG -> TMS on a
+ * different device); within one domain use the sample-exact mapSampleExact() of acq_timebase.h.
  *
  * @param[in] from     Clock model of the stream @p sample belongs to.
  * @param[in] to       Clock model of the target stream.

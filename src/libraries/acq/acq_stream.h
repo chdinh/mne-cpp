@@ -45,6 +45,7 @@
 #include "acq_error.h"
 #include "acq_reader.h"
 #include "acq_stream_info.h"
+#include "acq_timebase.h"
 
 #include <chrono>
 #include <cstddef>
@@ -145,6 +146,15 @@ public:
     /** @return The current clock model. */
     [[nodiscard]] AcqClockModel clock() const noexcept;
 
+    /** @return The current hardware timebase (domain, ticks per sample, origin, lock state). */
+    [[nodiscard]] AcqTimebase timebase() const noexcept;
+
+    /**
+     * Publishes a new timebase, e.g. the result of alignTo() or a reference loss reported by the backend.
+     * Control path; serialised internally, readers see it through a sequence counter without a lock.
+     */
+    void setTimebase(const AcqTimebase& timebase) noexcept;
+
     /** @return Producer-side counters. */
     [[nodiscard]] AcqStreamStats stats() const noexcept;
 
@@ -216,6 +226,13 @@ public:
     /** @return Samples that can be reserved without waiting (input streams: the capacity). */
     [[nodiscard]] std::size_t space() const noexcept;
 
+    /**
+     * @return Output streams: the first sample that can still be written in time, i.e. devicePosition()
+     *         plus the samples the device has already taken into its FIFO/DMA queue. A schedule earlier
+     *         than this returns Late. Input streams: writePosition().
+     */
+    [[nodiscard]] std::uint64_t earliestWritableSample() const noexcept;
+
     //=========================================================================================================
     /**
      * Reserves the next @p samples samples. Input streams never wait. Output streams wait up to @p timeout
@@ -229,6 +246,23 @@ public:
      */
     [[nodiscard]] AcqExpected<AcqWriteView> beginWrite(std::size_t samples,
                                                        std::chrono::nanoseconds timeout = {}) noexcept;
+
+    //=========================================================================================================
+    /**
+     * Output streams: reserves @p samples samples starting exactly at @p firstSample, for sample-precise
+     * playout (an RF pulse at the sample mapped from a receive event). Samples between writePosition()
+     * and @p firstSample are filled with the stream's AcqUnderrunFill on commit; they are scheduled
+     * silence, not underrun.
+     *
+     * @param[in] firstSample   Absolute sample index. @pre firstSample >= writePosition()
+     * @param[in] samples       Samples per channel. @pre firstSample + samples - writePosition() <= capacity
+     * @param[in] timeout       Maximum wait for space.
+     *
+     * @return The view at @p firstSample, or Late (firstSample < earliestWritableSample()), Timeout,
+     *         InvalidParameter (before writePosition()), WrongDirection (input stream).
+     */
+    [[nodiscard]] AcqExpected<AcqWriteView> beginWriteAt(std::uint64_t firstSample, std::size_t samples,
+                                                         std::chrono::nanoseconds timeout = {}) noexcept;
 
     /** Publishes the first @p samples samples of the last view (one release store). @pre samples <= reserved */
     void commit(std::size_t samples) noexcept;

@@ -25,6 +25,7 @@ set(HEADERS
   acq_error.h
   acq_sample_format.h
   acq_clock_model.h
+  acq_timebase.h
   acq_stream_info.h
   acq_block_view.h
   acq_convert.h

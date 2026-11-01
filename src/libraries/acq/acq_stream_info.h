@@ -38,11 +38,14 @@
  * rx.segmentation.samplesPerSegment = 512;
  * rx.segmentation.headerBytes = 340;                        // sizeof(ISMRMRD_AcquisitionHeader)
  * rx.segmentation.headerSchema = "ismrmrd.AcquisitionHeader/1";
+ * rx.clockDomain = "scanner";                               // cards on one star-hub / 10 MHz reference
  *
  * ACQLIB::AcqStreamInfo tx = rx;                              // same card, transmit path
  * tx.name = "tx";
  * tx.direction = ACQLIB::AcqDirection::Output;
- * tx.format = ACQLIB::AcqSampleFormat::ComplexFloat32;
+ * tx.format = ACQLIB::AcqSampleFormat::ComplexInt16;
+ * tx.analogBits = 15;                                       // bit 15 of the I word drives the T/R switch
+ * tx.bitFields.push_back({"tr_switch", 0, 15, 1, ACQLIB::AcqChannelKind::RfSwitch});
  * tx.channels.resize(1);
  * tx.channels[0].name = "rf0";
  * tx.channels[0].kind = ACQLIB::AcqChannelKind::MrTransmit;
@@ -133,6 +136,8 @@ enum class AcqChannelKind : std::uint8_t
     TriggerOut,   /**< Digital output line(s). */
     MrTransmit,   /**< RF transmit channel. */
     MrGradient,   /**< Gradient waveform channel. */
+    RfSwitch,     /**< T/R switch, RF blanking or ADC gate line. */
+    ClockSync,    /**< Recorded sync / reference marker used to calibrate a clock domain (alignTo). */
     Misc
 };
 
@@ -218,6 +223,21 @@ struct AcqSegmentation
 
 //=============================================================================================================
 /**
+ * A digital line carried inside the sample word of an integer stream, sample-synchronous with the analog
+ * value (marker outputs of AWG cards, T/R switch and blanking lines, recorded sync markers). decode()
+ * and encode() touch only AcqStreamInfo::analogBits; decodeBits() and encodeBits() touch only the fields.
+ */
+struct AcqBitField
+{
+    std::string name;                                 /**< e.g. "tr_switch", "sync". */
+    std::uint32_t channel = 0;                        /**< Channel whose sample word carries the field. */
+    std::uint8_t firstBit = 0;                        /**< Least significant bit of the field. */
+    std::uint8_t width = 1;                           /**< Bits in the field. */
+    AcqChannelKind kind = AcqChannelKind::TriggerOut; /**< RfSwitch, ClockSync, Stim, TriggerOut, ... */
+};
+
+//=============================================================================================================
+/**
  * Opaque, schema-tagged metadata block that a bridge needs for a lossless round trip
  * (e.g. "fiff.MeasInfo/1" written by fiff/acq_fiff.h, "ismrmrd.Header/1").
  */
@@ -242,6 +262,9 @@ struct AcqStreamInfo
     std::vector<AcqChannelInfo> channels;                        /**< One entry per channel, in ring order; may be empty for event-only streams. */
     AcqSegmentation segmentation;                                /**< Continuous unless stated otherwise. */
     AcqUnderrunFill underrunFill = AcqUnderrunFill::Zero;        /**< Output streams: what the device emits on underrun. */
+    std::uint8_t analogBits = 0;                                 /**< Integer formats: low bits holding the signed analog value; 0 = all. */
+    std::vector<AcqBitField> bitFields;                          /**< Digital lines packed into the sample word above analogBits. */
+    std::string clockDomain;                                     /**< Name of the clock domain (acqClockDomainId), empty if free-running. */
     std::vector<std::string> eventLabels;                        /**< Optional names of AcqEvent::code values, index = code. */
     std::vector<std::pair<std::string, std::string>> properties; /**< Free-form device properties (firmware, ...). */
     std::vector<AcqExtension> extensions;                        /**< Bridge payloads for lossless round trips. */
