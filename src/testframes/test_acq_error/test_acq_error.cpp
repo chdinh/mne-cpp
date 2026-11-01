@@ -97,9 +97,11 @@ void TestAcqError::testContextAndText()
     QVERIFY(text.find(std::string(withContext.info().message)) != std::string::npos);
     QVERIFY(text.find(std::string(withContext.info().fix)) != std::string::npos);
 
-    const AcqError copy = withContext;
+    AcqError copy = withContext;
     QVERIFY(copy.context() == withContext.context());
-    QVERIFY(AcqError().ok());
+    copy = AcqError();
+    QVERIFY(copy.ok());
+    QVERIFY(withContext.context() == "foo://bar");
 }
 
 //=============================================================================================================

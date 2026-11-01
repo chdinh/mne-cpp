@@ -604,6 +604,7 @@ void TestAcqStream::testManyConcurrentReaders()
 
     std::atomic<int> failures{0};
     std::vector<std::thread> threads;
+    threads.reserve(readers.size());
     for (auto& reader : readers) {
         threads.emplace_back([&reader, &failures] {
             std::uint64_t next = 0;
