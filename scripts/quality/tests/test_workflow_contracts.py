@@ -72,6 +72,14 @@ class WorkflowContracts(unittest.TestCase):
                 self.assertIn("uses: ./.github/workflows/_reusable-sanitizers.yml",
                               (WORKFLOWS / name).read_text(encoding="utf-8"))
 
+    def test_feature_branches_run_the_pull_request_checks_on_push(self) -> None:
+        text = (WORKFLOWS / "pull-request.yml").read_text(encoding="utf-8")
+        self.assertRegex(text, r"\n  push:\n    branches:\n      - 'feature/\*\*'\n")
+        self.assertIn("\n  workflow_dispatch:\n", text)
+        # A push and the pull request of the same branch share one group, so they never both run.
+        self.assertIn("group: pr-${{ github.event.pull_request.head.repo.full_name || github.repository }}"
+                      "-${{ github.head_ref || github.ref_name }}", text)
+
     def test_release_requires_the_release_candidate(self) -> None:
         candidate = (WORKFLOWS / "release-candidate.yml").read_text(encoding="utf-8")
         for step in ("staging.yml --commit", "preflight.py", "--gates", "evidence_bundle.py verify"):

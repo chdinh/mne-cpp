@@ -6,7 +6,9 @@
 # Pull Request Pipeline
 # ═══════════════════════════════════════════════════════════════════════════
 #
-# Triggered on pull requests targeting `staging` or `main`.
+# Triggered on pull requests targeting `staging` or `main`, on pushes to
+# `feature/**` branches (so a fork runs it without opening a pull request), and
+# manually on any branch.
 #
 # This is the FEATURE BRANCH pipeline:
 #   • Runs the full test suite on all platforms with the maximum supported Qt
@@ -23,10 +25,14 @@ on:
     branches:
       - staging
       - main
+  push:
+    branches:
+      - 'feature/**'
+  workflow_dispatch:
 
-# Cancel superseded runs for the same PR
+# Cancel superseded runs of the same branch; a push and its pull request share the group.
 concurrency:
-  group: pr-${{ github.event.pull_request.number }}
+  group: pr-${{ github.event.pull_request.head.repo.full_name || github.repository }}-${{ github.head_ref || github.ref_name }}
   cancel-in-progress: true
 
 env:
