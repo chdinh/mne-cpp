@@ -307,8 +307,9 @@ constexpr std::uint64_t kSpikeOffset = 1000;
 constexpr std::uint64_t kSpikeWidth = 15;
 constexpr std::int16_t kSpikeAmplitude = 9000;
 constexpr std::int16_t kSpikeThreshold = 6000;
-constexpr std::uint64_t kStimDelay = 90; // 3 ms after the spike, on the same clock
-constexpr std::size_t kStimWidth = 30;   // 0.5 ms cathodic + 0.5 ms anodic
+constexpr std::uint64_t kStimDelay = 90;                                // 3 ms after the spike, on the same clock
+constexpr auto kStimDelayTicks = static_cast<std::int64_t>(kStimDelay); // the same delay in card-clock ticks (one per sample)
+constexpr std::size_t kStimWidth = 30;                                  // 0.5 ms cathodic + 0.5 ms anodic
 constexpr std::int16_t kStimAmplitude = 20000;
 constexpr std::size_t kCommitSlots = 4096;
 
@@ -376,6 +377,7 @@ void runCard(AcqWriter& input, AcqReader& dac, const SignalGenerator& gen, Close
     for (std::uint64_t k = 0; k < blocks; ++k) {
         std::this_thread::sleep_until(start + period * static_cast<std::int64_t>(k + 1));
 
+        //! [acq_writer_commit]
         auto view = input.beginWrite(kBlock);
         std::uint64_t s = view->firstSample();
         for (std::size_t p = 0; p < view->partCount(); ++p) {
@@ -397,6 +399,7 @@ void runCard(AcqWriter& input, AcqReader& dac, const SignalGenerator& gen, Close
         }
         st.commitNs[k % kCommitSlots].store(nowNs(), std::memory_order_relaxed);
         input.commit(kBlock);
+        //! [acq_writer_commit]
 
         // Same card, same clock: the DAC plays the samples of this millisecond.
         std::size_t got = 0;
@@ -430,6 +433,7 @@ void runCard(AcqWriter& input, AcqReader& dac, const SignalGenerator& gen, Close
 void runRecorder(AcqReader& reader, const SignalGenerator& gen, ClosedLoopState& st)
 {
     while (true) {
+        //! [acq_reader_acquire]
         auto view = reader.acquire(kBlock, 100ms);
         if (!view) {
             if (view.error() == AcqErrorCode::EndOfStream) {
@@ -437,6 +441,8 @@ void runRecorder(AcqReader& reader, const SignalGenerator& gen, ClosedLoopState&
             }
             continue;
         }
+        //! [acq_reader_acquire]
+        //! [acq_reader_block]
         std::uint64_t s = view->firstSample();
         std::uint64_t mismatches = 0;
         for (std::size_t p = 0; p < view->partCount(); ++p) {
@@ -453,6 +459,7 @@ void runRecorder(AcqReader& reader, const SignalGenerator& gen, ClosedLoopState&
             const bool ok = SignalGenerator::isSpikeStart(marker.sample) && marker.duration == kSpikeWidth;
             (ok ? st.markersVerified : st.markerMismatches).fetch_add(1, std::memory_order_relaxed);
         }
+        //! [acq_reader_block]
         const std::size_t n = view->sampleCount();
         if (reader.release(*view).ok()) {
             st.sampleMismatches.fetch_add(mismatches, std::memory_order_relaxed);
@@ -465,6 +472,8 @@ void runRecorder(AcqReader& reader, const SignalGenerator& gen, ClosedLoopState&
 /** Closed-loop controller: spike on channel 0 -> biphasic stimulus exactly kStimDelay samples later. */
 void runController(AcqReader& reader, AcqWriter& stimulator, ClosedLoopState& st)
 {
+    const AcqTimebase inClock = reader.stream().timebase();
+    const AcqTimebase outClock = stimulator.stream().timebase();
     bool above = false;
     while (true) {
         auto view = reader.acquire(1, 100ms);
@@ -486,20 +495,24 @@ void runController(AcqReader& reader, AcqWriter& stimulator, ClosedLoopState& st
                 const bool now = v > kSpikeThreshold;
                 if (now && !above) {
                     st.spikesDetected.fetch_add(1, std::memory_order_relaxed);
-                    auto pulse = stimulator.beginWriteAt(s + kStimDelay, kStimWidth, 0ns);
-                    if (pulse) {
-                        for (std::size_t q = 0; q < pulse->partCount(); ++q) {
-                            for (std::size_t j = 0; j < pulse->part(q).samples; ++j) {
-                                const std::size_t phase = (pulse->firstSample() + j - s - kStimDelay);
-                                const std::int16_t a = phase < kStimWidth / 2 ? -kStimAmplitude : kStimAmplitude;
-                                std::memcpy(pulse->part(q).at(0, j), &a, sizeof(a));
+                    //! [acq_writer_schedule]
+                    // The output sample whose instant is kStimDelay clock ticks after input sample s.
+                    bool scheduled = false;
+                    if (auto at = mapSampleExact(inClock, outClock, s, kStimDelayTicks)) {
+                        if (auto pulse = stimulator.beginWriteAt(*at, kStimWidth, 0ns)) {
+                            for (std::size_t q = 0; q < pulse->partCount(); ++q) {
+                                for (std::size_t j = 0; j < pulse->part(q).samples; ++j) {
+                                    const std::uint64_t phase = pulse->firstSample() + j - *at;
+                                    const std::int16_t a = phase < kStimWidth / 2 ? -kStimAmplitude : kStimAmplitude;
+                                    std::memcpy(pulse->part(q).at(0, j), &a, sizeof(a));
+                                }
                             }
+                            stimulator.commit(kStimWidth);
+                            scheduled = true;
                         }
-                        stimulator.commit(kStimWidth);
-                        st.stimuliScheduled.fetch_add(1, std::memory_order_relaxed);
-                    } else {
-                        st.stimuliLate.fetch_add(1, std::memory_order_relaxed);
                     }
+                    (scheduled ? st.stimuliScheduled : st.stimuliLate).fetch_add(1, std::memory_order_relaxed);
+                    //! [acq_writer_schedule]
                 }
                 above = now;
             }
@@ -600,6 +613,7 @@ bool runClosedLoop(double seconds)
     std::printf("\nPart 1 - closed-loop recording and stimulation on one card (one clock): a spike on channel 0\n"
                 "         triggers a biphasic pulse 3 ms later; three readers share the input ring\n\n");
 
+    //! [acq_stream_info]
     AcqStreamInfo inInfo;
     inInfo.name = "neural";
     inInfo.format = AcqSampleFormat::Int16;
@@ -611,6 +625,7 @@ bool runClosedLoop(double seconds)
         inInfo.channels[c].unit = AcqUnit::Volt;
         inInfo.channels[c].scale = 0.195e-6;
     }
+    //! [acq_stream_info]
     AcqStreamInfo outInfo;
     outInfo.name = "stim";
     outInfo.direction = AcqDirection::Output;
@@ -623,6 +638,7 @@ bool runClosedLoop(double seconds)
     outInfo.channels[0].scale = 1e-6 / 400.0;
     outInfo.underrunFill = AcqUnderrunFill::Zero;
 
+    //! [acq_stream_setup]
     auto input = AcqWriter::create(inInfo);
     auto stimulator = AcqWriter::create(outInfo);
     if (!input || !stimulator) {
@@ -635,6 +651,18 @@ bool runClosedLoop(double seconds)
     auto recorder = input->stream().reader(AcqReader::ReadMode::Lossless);
     auto display = input->stream().reader(AcqReader::ReadMode::Latest);
     auto controller = input->stream().reader(AcqReader::ReadMode::LowLatency);
+    //! [acq_stream_setup]
+
+    //! [acq_timebase_setup]
+    // One card, one clock: both streams start on the same hardware trigger, so their samples are
+    // phase-locked and the controller can schedule a delay sample-exact from input to output.
+    AcqTimebase cardClock;
+    cardClock.domain = acqClockDomainId("demo-card:0");
+    cardClock.ticksPerSecond = static_cast<std::uint64_t>(kSfreq);
+    cardClock.lock = AcqLockState::PhaseLocked;
+    input->stream().setTimebase(cardClock);
+    stimulator->stream().setTimebase(cardClock);
+    //! [acq_timebase_setup]
 
     const SignalGenerator gen;
     ClosedLoopState st;
@@ -671,7 +699,12 @@ bool runClosedLoop(double seconds)
     g_countAllocations = false;
     printDashboard(st, frame, *recorder, std::chrono::duration<double>(Clock::now() - start).count(), printed);
 
-    const bool ok = st.sampleMismatches == 0 && recorder->stats().lost == 0 && st.markerMismatches == 0 &&
+    //! [acq_stream_stats]
+    const AcqStreamStats produced = input->stream().stats();
+    const AcqReaderStats recorded = recorder->stats();
+    const bool lossless = recorded.lost == 0 && recorded.eventsLost == 0 && recorded.delivered == produced.committed;
+    //! [acq_stream_stats]
+    const bool ok = lossless && st.sampleMismatches == 0 && st.markerMismatches == 0 &&
         st.markersVerified == st.spikesInjected && st.stimuliMisplaced == 0 &&
         st.stimuliExact == st.stimuliScheduled && g_allocations == 0 &&
         st.recordedSamples == static_cast<std::uint64_t>(seconds * kSfreq / kBlock) * kBlock;
