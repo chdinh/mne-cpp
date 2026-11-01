@@ -80,6 +80,11 @@ jobs:
     with:
       qt_version: min
 
+  # ── mne_acq under ThreadSanitizer and Address/UB sanitizers (Linux) ─────
+  Sanitizers:
+    if: ${{ !startsWith(github.ref, 'refs/tags/') }}
+    uses: ./.github/workflows/_reusable-sanitizers.yml
+
   # ── Doxygen API documentation (production) ───────────────────────────────
   Doxygen:
     if: ${{ !startsWith(github.ref, 'refs/tags/') }}

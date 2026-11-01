@@ -1,0 +1,68 @@
+# SPDX-License-Identifier: BSD-3-Clause
+# Copyright (c) 2026 MNE-CPP Authors
+#   Christoph Dinh <christoph.dinh@mne-cpp.org>
+
+# ---------------------------------------------------------------------------
+# Reusable workflow: mne_acq under sanitizers
+# Called by pull-request.yml, staging.yml and main.yml.
+# Builds mne_acq and its tests with ThreadSanitizer, and with Address- plus
+# UndefinedBehaviorSanitizer (they cannot be combined), and runs each test
+# several times. Any finding fails the job.
+# ---------------------------------------------------------------------------
+name: Reusable Sanitizers
+
+on:
+  workflow_call:
+
+env:
+  FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: 'true'
+
+jobs:
+  Sanitizers:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 45
+
+    strategy:
+      fail-fast: false
+      matrix:
+        sanitize: ["thread", "address,undefined"]
+
+    steps:
+    - name: Clone repository
+      uses: actions/checkout@v5
+
+    # Ubuntu 24.04 kernels randomise 32 bits of mmap addresses, which TSan and ASan cannot map around.
+    - name: Allow sanitizer shadow memory
+      run: sudo sysctl vm.mmap_rnd_bits=28
+
+    - name: Load external dependency versions
+      shell: bash
+      run: ./scripts/ci/load_external_deps.sh max
+
+    - name: Download Qt toolchain
+      env:
+        GH_TOKEN: ${{ github.token }}
+      run: |
+        ./scripts/ci/download_toolchain.sh \
+          --kind qt \
+          --version "$QT_BUILD_VERSION" \
+          --linkage dynamic \
+          --output-dir "$RUNNER_TEMP/qt"
+
+    - name: Build
+      run: |
+        cmake -S scripts/ci/sanitizers -B build-sanitize \
+          -DCMAKE_BUILD_TYPE=RelWithDebInfo \
+          -DCMAKE_PREFIX_PATH="$RUNNER_TEMP/qt" \
+          -DMNE_SANITIZE="${{ matrix.sanitize }}"
+        cmake --build build-sanitize -j "$(nproc)"
+
+    - name: Run tests (5 repetitions)
+      env:
+        TSAN_OPTIONS: halt_on_error=1:second_deadlock_stack=1
+        ASAN_OPTIONS: halt_on_error=1:detect_leaks=1:strict_init_order=1
+        UBSAN_OPTIONS: halt_on_error=1:print_stacktrace=1
+        QT_QPA_PLATFORM: offscreen
+      run: |
+        export LD_LIBRARY_PATH="$RUNNER_TEMP/qt/lib${LD_LIBRARY_PATH:+:$LD_LIBRARY_PATH}"
+        ctest --test-dir build-sanitize --output-on-failure --repeat until-fail:5 --timeout 600

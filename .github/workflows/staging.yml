@@ -271,6 +271,13 @@ jobs:
       qt_version: min
       save_ccache: true
 
+  # ── mne_acq under ThreadSanitizer and Address/UB sanitizers (Linux) ─────
+  Sanitizers:
+    if: ${{ !inputs.release_only }}
+    uses: ./.github/workflows/_reusable-sanitizers.yml
+    permissions:
+      contents: read
+
   # ── Doxygen API documentation (dev) ──────────────────────────────────────
   Doxygen:
     runs-on: ubuntu-24.04
@@ -539,7 +546,7 @@ jobs:
   # it when a later nightly passes.
   NightlyStatus:
     runs-on: ubuntu-24.04
-    needs: [Changes, Quality, Tests, TestsMinQt, Compiled, WasmBuild, CreateDevRelease, Linux, MacOS, Windows, Installer, Doxygen, Docs, Website, WebAssembly, ReleaseEvidence]
+    needs: [Changes, Quality, Tests, TestsMinQt, Sanitizers, Compiled, WasmBuild, CreateDevRelease, Linux, MacOS, Windows, Installer, Doxygen, Docs, Website, WebAssembly, ReleaseEvidence]
     if: always() && github.event_name == 'schedule' && needs.Changes.outputs.release == 'true'
     permissions:
       issues: write

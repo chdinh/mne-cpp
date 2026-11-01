@@ -61,6 +61,17 @@ class WorkflowContracts(unittest.TestCase):
             with self.subTest(workflow=name):
                 self.assertEqual([c for c in GATE_COMMANDS if c not in text], [])
 
+    def test_sanitizers_run_on_pull_requests_staging_and_main(self) -> None:
+        sanitizers = (WORKFLOWS / "_reusable-sanitizers.yml").read_text(encoding="utf-8")
+        for flag in ("thread", "address,undefined"):
+            self.assertIn(flag, sanitizers)
+        self.assertIn("scripts/ci/sanitizers", sanitizers)
+        self.assertNotIn("continue-on-error", sanitizers)
+        for name in ("pull-request.yml", "staging.yml", "main.yml"):
+            with self.subTest(workflow=name):
+                self.assertIn("uses: ./.github/workflows/_reusable-sanitizers.yml",
+                              (WORKFLOWS / name).read_text(encoding="utf-8"))
+
     def test_release_requires_the_release_candidate(self) -> None:
         candidate = (WORKFLOWS / "release-candidate.yml").read_text(encoding="utf-8")
         for step in ("staging.yml --commit", "preflight.py", "--gates", "evidence_bundle.py verify"):

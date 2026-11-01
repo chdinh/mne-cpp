@@ -53,6 +53,10 @@ jobs:
       qt_version: min
       os_json: ${{ github.base_ref == 'main' && '["ubuntu-24.04", "macos-26", "windows-2025-vs2026"]' || '["ubuntu-24.04"]' }}
 
+  # ── mne_acq under ThreadSanitizer and Address/UB sanitizers (Linux) ─────
+  Sanitizers:
+    uses: ./.github/workflows/_reusable-sanitizers.yml
+
   # ── Quality gates (static, no build) ────────────────────────────────────
   Quality:
     runs-on: ubuntu-24.04
