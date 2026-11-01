@@ -519,6 +519,8 @@ void updateDisplay(AcqReader& display, DisplayFrame& frame)
 {
     constexpr std::size_t kWindow = 7500;
     constexpr std::size_t kColumns = 60;
+    constexpr std::size_t kSamplesPerColumn = kWindow / kColumns;
+    static_assert(kSamplesPerColumn * kColumns == kWindow);
     auto view = display.acquire(kWindow, 50ms, kWindow);
     if (!view) {
         return;
@@ -544,7 +546,7 @@ void updateDisplay(AcqReader& display, DisplayFrame& frame)
     static constexpr std::array<std::string_view, 8> kLevels{"▁", "▂", "▃", "▄", "▅", "▆", "▇", "█"};
     std::size_t pos = 0;
     for (std::size_t col = 0; col < kColumns; ++col) {
-        const double m = mean[col] / static_cast<double>(kWindow / kColumns);
+        const double m = mean[col] / static_cast<double>(kSamplesPerColumn);
         const int level = spike[col] ? 7 : std::clamp(static_cast<int>((m + 1600.0) * 7.0 / 3200.0), 0, 6);
         const std::string_view glyph = kLevels[static_cast<std::size_t>(level)];
         std::memcpy(frame.trace.data() + pos, glyph.data(), glyph.size());
@@ -883,16 +885,31 @@ bool runThroughput(double seconds)
 // MAIN
 //=============================================================================================================
 
+namespace
+{
+/** Parses a duration of at least 0.1 s; @return false for anything else. */
+bool parseSeconds(const char* text, double& seconds)
+{
+    char* end = nullptr;
+    const double value = std::strtod(text, &end);
+    if (end == text || *end != '\0' || !(value >= 0.1) || !std::isfinite(value)) {
+        return false;
+    }
+    seconds = value;
+    return true;
+}
+} // namespace
+
 int main(int argc, char* argv[])
 {
     double closedLoopSeconds = 10.0;
     double rowSeconds = 2.0;
     for (int i = 1; i < argc; ++i) {
         const std::string_view arg(argv[i]);
-        if (arg == "--seconds" && i + 1 < argc) {
-            closedLoopSeconds = std::max(0.1, std::atof(argv[++i]));
-        } else if (arg == "--row-seconds" && i + 1 < argc) {
-            rowSeconds = std::max(0.1, std::atof(argv[++i]));
+        if (arg == "--seconds" && i + 1 < argc && parseSeconds(argv[i + 1], closedLoopSeconds)) {
+            ++i;
+        } else if (arg == "--row-seconds" && i + 1 < argc && parseSeconds(argv[i + 1], rowSeconds)) {
+            ++i;
         } else {
             std::printf("usage: %s [--seconds <closed-loop duration, default 10>] [--row-seconds <per throughput row, "
                         "default 2>]\n",
