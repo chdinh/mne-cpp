@@ -22,7 +22,7 @@ Component.prototype.createOperations = function()
     component.createOperations();
     var target = installer.value("TargetDir");
 
-    if (systemInfo.productType === "osx") {
+    if (systemInfo.kernelType === "darwin") {
         // /Applications when the user may write there, ~/Applications otherwise; links only, the bundles stay in bin
         var links = "", unlinks = "";
         for (var i = 0; i < applications.length; ++i) {

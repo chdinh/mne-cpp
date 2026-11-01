@@ -156,7 +156,8 @@ function prepareFinishWidget()
 function launch(app)
 {
     var dir = binDir();
-    if (systemInfo.productType === "osx") {
+    // productType is "macos" on Qt 6 and "osx" on Qt 5; kernelType is "darwin" on both
+    if (systemInfo.kernelType === "darwin") {
         installer.executeDetached("/usr/bin/open", [dir + app + ".app"]);
     } else if (systemInfo.kernelType === "winnt") {
         installer.executeDetached(installer.toNativeSeparators(dir + app + ".exe"), [],
