@@ -97,6 +97,7 @@ struct AcqErrorInfo
  */
 ACQSHARED_EXPORT const AcqErrorInfo& acqErrorInfo(AcqErrorCode code) noexcept;
 
+ACQ_STD_MEMBERS_BEGIN
 //=============================================================================================================
 /**
  * An error value: a catalogue code plus an optional context string.
@@ -159,6 +160,7 @@ private:
     AcqErrorCode m_code = AcqErrorCode::None;
     std::shared_ptr<const std::string> m_context;
 };
+ACQ_STD_MEMBERS_END
 
 //=============================================================================================================
 /**

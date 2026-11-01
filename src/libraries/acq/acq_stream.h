@@ -123,6 +123,7 @@ struct AcqStreamStats
     bool adoptedBuffer = false;      /**< Whether the ring is an adopted external buffer. */
 };
 
+ACQ_STD_MEMBERS_BEGIN
 //=============================================================================================================
 /**
  * Shared handle of a stream. Cheap to copy; keeps the ring alive, so readers stay valid after the
@@ -197,7 +198,9 @@ private:
 
     std::shared_ptr<detail::AcqStreamCore> m_core;
 };
+ACQ_STD_MEMBERS_END
 
+ACQ_STD_MEMBERS_BEGIN
 //=============================================================================================================
 /**
  * The single producer of a ring: the backend for an input stream, the application for an output
@@ -338,6 +341,7 @@ private:
 
     std::shared_ptr<detail::AcqStreamCore> m_core;
 };
+ACQ_STD_MEMBERS_END
 
 } // namespace ACQLIB
 

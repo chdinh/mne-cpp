@@ -64,6 +64,7 @@ struct AcqDeviceStats
     std::vector<AcqStreamStats> streams;           /**< One entry per stream. */
 };
 
+ACQ_STD_MEMBERS_BEGIN
 //=============================================================================================================
 /**
  * An opened source. Move-only handle that owns its backend.
@@ -141,6 +142,7 @@ private:
     struct Impl;
     std::unique_ptr<Impl> m_pImpl;
 };
+ACQ_STD_MEMBERS_END
 
 } // namespace ACQLIB
 

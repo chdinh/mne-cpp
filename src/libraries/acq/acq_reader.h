@@ -120,6 +120,7 @@ struct AcqReadResult
     std::uint32_t infoVersion = 0; /**< AcqStreamInfo::version of the samples. */
 };
 
+ACQ_STD_MEMBERS_BEGIN
 //=============================================================================================================
 /**
  * A consumer of one AcqStream. Move-only; destroying it frees its reader slot.
@@ -231,6 +232,7 @@ private:
     std::shared_ptr<detail::AcqStreamCore> m_core;
     std::uint32_t m_slot = 0;
 };
+ACQ_STD_MEMBERS_END
 
 } // namespace ACQLIB
 

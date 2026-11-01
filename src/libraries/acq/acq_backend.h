@@ -51,6 +51,7 @@ struct AcqDeviceDescription
     std::string uri;            /**< Canonical URI that reopens this source. */
 };
 
+ACQ_STD_MEMBERS_BEGIN
 //=============================================================================================================
 /**
  * Base class of all backends.
@@ -120,6 +121,7 @@ private:
     struct Impl;
     std::unique_ptr<Impl> m_pImpl;
 };
+ACQ_STD_MEMBERS_END
 
 } // namespace ACQLIB
 

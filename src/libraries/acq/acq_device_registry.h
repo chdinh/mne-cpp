@@ -109,6 +109,7 @@ struct AcqDiscoveredDevice
     bool available = true; /**< false for backends whose runtime library was not found (still listed). */
 };
 
+ACQ_STD_MEMBERS_BEGIN
 //=============================================================================================================
 /**
  * Process-wide registry of source schemes.
@@ -164,6 +165,7 @@ private:
     struct Impl;
     std::unique_ptr<Impl> m_pImpl;
 };
+ACQ_STD_MEMBERS_END
 
 } // namespace ACQLIB
 

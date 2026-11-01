@@ -94,6 +94,9 @@ PREDEFINED             = "Q_OBJECT=" \
                          "Q_SLOTS=" \
                          "QT_BEGIN_NAMESPACE=" \
                          "QT_END_NAMESPACE=" \
+                         "ACQSHARED_EXPORT=" \
+                         "ACQ_STD_MEMBERS_BEGIN=" \
+                         "ACQ_STD_MEMBERS_END=" \
                          "FIFFSHARED_EXPORT=" \
                          "MNESHARED_EXPORT=" \
                          "FSSHARED_EXPORT=" \
