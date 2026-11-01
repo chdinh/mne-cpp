@@ -9,12 +9,12 @@
  * @date     November 2026
  * @brief    Lossless conversion between AcqStreamInfo and FIFFLIB::FiffInfo.
  *
- * This is the only ACQLIB header that exposes FIFF (and therefore Qt) types (D9). Include it only in
- * code that already uses mne_fiff, and link mne_fiff yourself.
+ * Part of the separate bridge library mne_acq_fiff, the only ACQLIB component that depends on FIFF
+ * (and therefore Qt); mne_acq itself stays standard-library only (D9).
  *
  * Round trip: per-channel fields map to AcqChannelInfo (name, kind, unit, scale = cal * range) and
- * are kept verbatim in AcqChannelInfo::fiff; everything else of FiffInfo is stored serialized in
- * AcqStreamInfo::fiffMeasInfo. toFiffInfo(fromFiffInfo(x)) equals x field by field (AC-T2.1-2).
+ * are kept verbatim in AcqChannelInfo::fiff; everything else of FiffInfo is stored serialized in an
+ * AcqExtension with schema "fiff.MeasInfo/1". toFiffInfo(fromFiffInfo(x)) equals x field by field (AC-T2.1-2).
  * When a channel was edited in AcqStreamInfo, the edited per-channel fields win.
  */
 
@@ -25,12 +25,27 @@
 // INCLUDES
 //=============================================================================================================
 
-#include "acq_global.h"
-#include "acq_error.h"
-#include "acq_sample_format.h"
-#include "acq_stream_info.h"
+#include "../acq_error.h"
+#include "../acq_sample_format.h"
+#include "../acq_stream_info.h"
 
 #include <fiff/fiff_info.h>
+
+//=============================================================================================================
+// DEFINES
+//=============================================================================================================
+
+#if defined(STATICBUILD)
+#define ACQFIFFSHARED_EXPORT
+#elif defined(_WIN32)
+#if defined(MNE_ACQ_FIFF_LIBRARY)
+#define ACQFIFFSHARED_EXPORT __declspec(dllexport) /**< Exported when building mne_acq_fiff. */
+#else
+#define ACQFIFFSHARED_EXPORT __declspec(dllimport) /**< Imported by clients of mne_acq_fiff. */
+#endif
+#else
+#define ACQFIFFSHARED_EXPORT __attribute__((visibility("default"))) /**< Default visibility on ELF/Mach-O. */
+#endif
 
 //=============================================================================================================
 // DEFINE NAMESPACE ACQLIB
@@ -48,8 +63,8 @@ namespace ACQLIB
  *
  * @return The stream description, version 0.
  */
-ACQSHARED_EXPORT AcqStreamInfo fromFiffInfo(const FIFFLIB::FiffInfo& info,
-                                            AcqSampleFormat format = AcqSampleFormat::Float32);
+ACQFIFFSHARED_EXPORT AcqStreamInfo fromFiffInfo(const FIFFLIB::FiffInfo& info,
+                                                AcqSampleFormat format = AcqSampleFormat::Float32);
 
 //=============================================================================================================
 /**
@@ -61,7 +76,7 @@ ACQSHARED_EXPORT AcqStreamInfo fromFiffInfo(const FIFFLIB::FiffInfo& info,
  *
  * @return The FIFF info, or UnsupportedFormat for complex or segmented streams (no FIFF representation).
  */
-ACQSHARED_EXPORT AcqExpected<FIFFLIB::FiffInfo> toFiffInfo(const AcqStreamInfo& info);
+ACQFIFFSHARED_EXPORT AcqExpected<FIFFLIB::FiffInfo> toFiffInfo(const AcqStreamInfo& info);
 
 } // namespace ACQLIB
 

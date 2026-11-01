@@ -6,7 +6,8 @@
       "description": "Numerics and transport primitives with no MNE-CPP dependencies of their own.",
       "libraries": [
         "mne_math",
-        "mne_lsl"
+        "mne_lsl",
+        "mne_acq"
       ]
     },
     {

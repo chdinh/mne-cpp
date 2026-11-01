@@ -7,36 +7,48 @@
  * @author   Christoph Dinh <christoph.dinh@mne-cpp.org>
  * @since    2.5.0
  * @date     November 2026
- * @brief    AcqStreamInfo: format, layout, rate and per-channel description of one acquisition stream.
+ * @brief    AcqStreamInfo: direction, format, layout, rate and per-channel description of one stream.
  *
- * The description is complete enough to convert to and from FIFFLIB::FiffInfo without loss
- * (@ref acq_fiff.h) and generic enough to describe streams that FIFF cannot, such as segmented
- * complex-valued MR receiver data (D12). Nothing is guessed (G12): an unknown unit is
- * AcqUnit::Unknown, an unknown range is NaN, an irregular stream has sfreq 0.
+ * A stream is either an input (device -> host: EEG, MEG, MR receive coils) or an output (host ->
+ * device: electrical or magnetic stimulation waveforms, audio/visual stimuli, trigger lines, RF
+ * transmit pulses). Both are described by the same structure and carried by the same ring.
  *
- * Metadata changes are versioned at a sample index: a producer publishes a new AcqStreamInfo with
- * @c version + 1 and @c validFromSample, and every AcqBlockView names the version it belongs to.
+ * The description can be converted to and from FIFFLIB::FiffInfo without loss (fiff/acq_fiff.h) and
+ * also describes what FIFF cannot, such as segmented complex-valued MR data (D12). Nothing is guessed
+ * (G12): an unknown unit is AcqUnit::Unknown, an unknown range is NaN, an irregular stream has sfreq 0.
+ * Metadata changes are versioned at a sample index (@c version, @c validFromSample).
  *
- * Describing an MR-style segmented complex-int16 stream (32 receive coils, 512 samples per readout,
- * ISMRMRD acquisition header per readout):
+ * MR receive (32 coils, 512-sample readouts, ISMRMRD header per readout) and RF transmit:
  * @code
- * ACQLIB::AcqStreamInfo info;
- * info.name = "rx";
- * info.format = ACQLIB::AcqSampleFormat::ComplexInt16;
- * info.layout = ACQLIB::AcqLayout::Planar;               // one DMA buffer per coil
- * info.sfreq = 1.0e6;                                     // 1 us dwell time inside a readout
- * for (int coil = 0; coil < 32; ++coil) {
- *     ACQLIB::AcqChannelInfo ch;
- *     ch.name = "coil" + std::to_string(coil);
- *     ch.kind = ACQLIB::AcqChannelKind::MrReceive;
- *     ch.unit = ACQLIB::AcqUnit::Volt;
- *     ch.scale = 1.0 / 32768.0;                           // ADC full scale -> 1 V
- *     info.channels.push_back(ch);
+ * ACQLIB::AcqStreamInfo rx;
+ * rx.name = "rx";
+ * rx.direction = ACQLIB::AcqDirection::Input;
+ * rx.format = ACQLIB::AcqSampleFormat::ComplexInt16;
+ * rx.layout = ACQLIB::AcqLayout::Planar;                    // one DMA buffer per coil
+ * rx.sfreq = 1.0e6;                                         // 1 us dwell time
+ * ACQLIB::AcqChannelInfo coil;
+ * coil.kind = ACQLIB::AcqChannelKind::MrReceive;
+ * coil.unit = ACQLIB::AcqUnit::Volt;
+ * coil.scale = 1.0 / 32768.0;                               // ADC full scale -> 1 V
+ * for (int c = 0; c < 32; ++c) {
+ *     coil.name = "coil" + std::to_string(c);
+ *     rx.channels.push_back(coil);
  * }
- * info.segmentation.mode = ACQLIB::AcqSegmentation::Mode::Triggered;
- * info.segmentation.samplesPerSegment = 512;              // 0 would mean variable length
- * info.segmentation.headerBytes = 340;                    // sizeof(ISMRMRD_AcquisitionHeader)
- * info.segmentation.headerSchema = "ismrmrd.AcquisitionHeader/1";
+ * rx.segmentation.mode = ACQLIB::AcqSegmentation::Mode::Triggered;
+ * rx.segmentation.samplesPerSegment = 512;
+ * rx.segmentation.headerBytes = 340;                        // sizeof(ISMRMRD_AcquisitionHeader)
+ * rx.segmentation.headerSchema = "ismrmrd.AcquisitionHeader/1";
+ *
+ * ACQLIB::AcqStreamInfo tx = rx;                              // same card, transmit path
+ * tx.name = "tx";
+ * tx.direction = ACQLIB::AcqDirection::Output;
+ * tx.format = ACQLIB::AcqSampleFormat::ComplexFloat32;
+ * tx.channels.resize(1);
+ * tx.channels[0].name = "rf0";
+ * tx.channels[0].kind = ACQLIB::AcqChannelKind::MrTransmit;
+ * tx.channels[0].scale = 1.0;
+ * tx.segmentation.samplesPerSegment = 0;                    // pulses of variable length
+ * tx.underrunFill = ACQLIB::AcqUnderrunFill::Zero;          // never hold an RF amplitude
  * @endcode
  */
 
@@ -68,7 +80,27 @@ namespace ACQLIB
 
 //=============================================================================================================
 /**
- * Signal kind of a channel. Mapped to and from FIFF channel kinds by @ref acq_fiff.h.
+ * Direction of a stream as seen from the host.
+ */
+enum class AcqDirection : std::uint8_t
+{
+    Input = 0, /**< Device produces, host readers consume. The producer never waits. */
+    Output = 1 /**< Host writer produces, the device consumes. The writer waits for space, never overwrites unplayed samples. */
+};
+
+//=============================================================================================================
+/**
+ * What an output device emits when the writer has not committed the sample it has to play.
+ */
+enum class AcqUnderrunFill : std::uint8_t
+{
+    Zero = 0,    /**< Emit the zero raw value (safe default for stimulation and RF). */
+    HoldLast = 1 /**< Repeat the last committed sample per channel (DC levels, trigger lines). */
+};
+
+//=============================================================================================================
+/**
+ * Signal kind of a channel. Mapped to and from FIFF channel kinds by fiff/acq_fiff.h.
  */
 enum class AcqChannelKind : std::uint8_t
 {
@@ -91,7 +123,16 @@ enum class AcqChannelKind : std::uint8_t
     Temperature,
     Timestamp, /**< Device timestamp row (e.g. BrainFlow timestamp channel). */
     Marker,    /**< Device marker row; also delivered as AcqEvent. */
-    MrReceive, /**< MR receive-coil channel (complex, segmented). */
+    MrReceive, /**< MR receive-coil channel. */
+    // Output kinds
+    StimCurrent,  /**< Electrical stimulation current (tACS/tDCS, DBS, intracortical). */
+    StimVoltage,  /**< Electrical stimulation voltage. */
+    MagneticStim, /**< TMS coil drive or amplitude command. */
+    Audio,        /**< Acoustic stimulus. */
+    Light,        /**< Optical / optogenetic stimulus intensity. */
+    TriggerOut,   /**< Digital output line(s). */
+    MrTransmit,   /**< RF transmit channel. */
+    MrGradient,   /**< Gradient waveform channel. */
     Misc
 };
 
@@ -104,6 +145,7 @@ enum class AcqUnit : std::uint8_t
     Unknown = 0, /**< Not stated by the source; never guessed. */
     None,        /**< Dimensionless (counts, trigger codes). */
     Volt,
+    Ampere,
     Tesla,
     TeslaPerMeter,
     AmpereMeter,
@@ -112,13 +154,15 @@ enum class AcqUnit : std::uint8_t
     DegreeCelsius,
     Second,
     Ohm,
-    Molar /**< fNIRS concentrations. */
+    Watt,
+    Pascal, /**< Sound pressure. */
+    Molar   /**< fNIRS concentrations. */
 };
 
 //=============================================================================================================
 /**
  * FIFF-specific channel fields, kept so that FiffChInfo round-trips without loss. Plain integers and
- * floats with FIFF semantics (FIFFV_* constants), so no FIFF header is needed here.
+ * floats with FIFF semantics (FIFFV_* constants), so no FIFF header is needed.
  */
 struct AcqFiffChannel
 {
@@ -136,7 +180,8 @@ struct AcqFiffChannel
 
 //=============================================================================================================
 /**
- * Description of one channel.
+ * Description of one channel. For output channels, rangeMin/rangeMax are the safety limits the encoder
+ * saturates to.
  */
 struct AcqChannelInfo
 {
@@ -146,15 +191,15 @@ struct AcqChannelInfo
     int unitExponent = 0;                                       /**< Power of ten of the unit (e.g. -6 for uV). */
     double scale = 1.0;                                         /**< Physical = raw * scale + offset. */
     double offset = 0.0;                                        /**< See scale. */
-    double rangeMin = std::numeric_limits<double>::quiet_NaN(); /**< Physical input range, NaN if unknown. */
-    double rangeMax = std::numeric_limits<double>::quiet_NaN(); /**< Physical input range, NaN if unknown. */
+    double rangeMin = std::numeric_limits<double>::quiet_NaN(); /**< Physical range, NaN if unknown. */
+    double rangeMax = std::numeric_limits<double>::quiet_NaN(); /**< Physical range, NaN if unknown. */
     std::optional<AcqFiffChannel> fiff;                         /**< Present for FIFF-described channels. */
 };
 
 //=============================================================================================================
 /**
- * Segmentation of a stream: continuous data, or segments (triggered readouts, epochs) each preceded
- * by a header that AcqBlockView::segments() delivers alongside the samples (data-path rule 7).
+ * Segmentation of a stream: continuous, or segments (triggered readouts, RF pulses, epochs) each with
+ * a header delivered alongside the samples (data-path rule 7).
  */
 struct AcqSegmentation
 {
@@ -168,7 +213,18 @@ struct AcqSegmentation
     Mode mode = Mode::Continuous;        /**< Continuous or segmented. */
     std::uint32_t samplesPerSegment = 0; /**< Fixed segment length, 0 for variable length. */
     std::uint32_t headerBytes = 0;       /**< Size of the device-specific header payload per segment. */
-    std::string headerSchema;            /**< Identifier of the payload format, e.g. "ismrmrd.AcquisitionHeader/1". */
+    std::string headerSchema;            /**< Payload format, e.g. "ismrmrd.AcquisitionHeader/1". */
+};
+
+//=============================================================================================================
+/**
+ * Opaque, schema-tagged metadata block that a bridge needs for a lossless round trip
+ * (e.g. "fiff.MeasInfo/1" written by fiff/acq_fiff.h, "ismrmrd.Header/1").
+ */
+struct AcqExtension
+{
+    std::string schema;          /**< Identifier and version of the payload format. */
+    std::vector<std::byte> data; /**< Serialized payload. */
 };
 
 //=============================================================================================================
@@ -177,25 +233,21 @@ struct AcqSegmentation
  */
 struct AcqStreamInfo
 {
-    std::string name;                                            /**< Stream name, unique within its source (e.g. "eeg"). */
+    std::string name;                                            /**< Unique within its source (e.g. "eeg", "stim"). */
     std::string sourceId;                                        /**< Device serial, file path or LSL source id. */
+    AcqDirection direction = AcqDirection::Input;                /**< Input or output. */
     AcqSampleFormat format = AcqSampleFormat::Float32;           /**< Native sample format stored in the ring. */
     AcqLayout layout = AcqLayout::Interleaved;                   /**< Ring layout. */
     double sfreq = 0.0;                                          /**< Nominal rate in Hz; 0 for irregular streams. */
-    std::vector<AcqChannelInfo> channels;                        /**< One entry per channel, in ring order. */
+    std::vector<AcqChannelInfo> channels;                        /**< One entry per channel, in ring order; may be empty for event-only streams. */
     AcqSegmentation segmentation;                                /**< Continuous unless stated otherwise. */
+    AcqUnderrunFill underrunFill = AcqUnderrunFill::Zero;        /**< Output streams: what the device emits on underrun. */
     std::vector<std::string> eventLabels;                        /**< Optional names of AcqEvent::code values, index = code. */
     std::vector<std::pair<std::string, std::string>> properties; /**< Free-form device properties (firmware, ...). */
+    std::vector<AcqExtension> extensions;                        /**< Bridge payloads for lossless round trips. */
 
     std::uint32_t version = 0;         /**< Metadata version; incremented on every change. */
     std::uint64_t validFromSample = 0; /**< First sample index this version describes. */
-
-    /**
-     * Opaque serialized FIFF measurement-info block (everything of FiffInfo that is not per-channel:
-     * digitizer points, projectors, compensators, transforms, measurement date). Written and read only
-     * by @ref acq_fiff.h; makes the FiffInfo round trip lossless without exposing FIFF types here.
-     */
-    std::vector<std::byte> fiffMeasInfo;
 
     /** @return Number of channels. */
     [[nodiscard]] std::size_t channelCount() const noexcept

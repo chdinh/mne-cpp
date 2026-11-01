@@ -7,24 +7,28 @@
  * @author   Christoph Dinh <christoph.dinh@mne-cpp.org>
  * @since    2.5.0
  * @date     November 2026
- * @brief    AcqStream (consumer handle) and AcqStreamWriter (producer handle) of one lock-free stream ring.
+ * @brief    AcqStream (shared handle), AcqWriter (the single producer) and the ring options of a stream.
  *
- * A stream has one sample rate and one native format; a source with EEG at 1 kHz and an accelerometer
- * at 50 Hz exposes two streams (data-path rule 6). The ring is single-producer / multi-reader,
- * page-aligned, a power of two in samples and memory-locked where the OS allows it. It either owns its
- * memory or adopts an external buffer such as a device DMA region (data-path rule 4).
+ * One stream = one rate, one native format, one lock-free single-producer / multi-reader ring
+ * (data-path rule 6). The ring is a power of two in samples, page-aligned, optionally mirror-mapped
+ * (the ring's pages mapped twice back to back, so every view is one contiguous part), memory-locked
+ * and pre-faulted, or an adopted external buffer such as a device DMA region (rule 4).
  *
- * The producer side never waits: AcqStreamWriter::commit() is one release store (plus a notify only
- * when a reader is blocked), and old samples are overwritten whether or not a reader has consumed
- * them; slow readers learn the exact number of samples they lost.
+ * Input stream: the backend owns the writer; commit() is one release store and never waits; samples
+ * are overwritten whether or not readers consumed them, and slow readers learn the exact loss.
+ * Output stream: the application takes the writer with AcqStream::writer(); beginWrite() waits for
+ * space freed by the device's gating reader, so unplayed samples are never overwritten; samples
+ * committed too late are reported as underrun, never silently shifted in time.
  *
- * Producing without a backend, e.g. for the in-memory DMA emulation or a test:
+ * Closed-loop output, e.g. a TMS trigger 20 ms after a detected input event and a stimulus waveform:
  * @code
- * auto writer = ACQLIB::AcqStreamWriter::create(info);   // info: an AcqStreamInfo
- * auto reader = writer->stream().reader(ACQLIB::AcqReader::ReadMode::Lossless);
- * ACQLIB::AcqWritableBlock block = writer->beginWrite(256);
- * fill(block);                                           // write native samples, at most two parts
- * writer->commit(256);                                   // publish
+ * auto stim = source->findStream("stim");                          // output stream
+ * auto writer = stim.writer();                                      // exclusive
+ * const auto at = ACQLIB::mapSample(eeg.clock(), stim.clock(), peakSample) + 20 * stimRate / 1000;
+ * writer->pushEvent({.sample = at, .duration = 0, .code = 1});      // device fires at exactly 'at'
+ * auto view = writer->beginWrite(pulse.cols, std::chrono::milliseconds(1));
+ * ACQLIB::encode(pulse, *view);                                     // physical -> DAC counts, saturating
+ * writer->commit(view->sampleCount());
  * @endcode
  */
 
@@ -42,7 +46,7 @@
 #include "acq_reader.h"
 #include "acq_stream_info.h"
 
-#include <array>
+#include <chrono>
 #include <cstddef>
 #include <cstdint>
 #include <functional>
@@ -61,30 +65,37 @@ namespace detail
 class AcqStreamCore;
 }
 
+class AcqWriter;
+
 //=============================================================================================================
 /**
- * An externally owned sample buffer adopted as the ring (zero-copy DMA). Its size in samples must be a
- * power of two and its start page-aligned; the ring calls @c release when the last handle is gone.
+ * An externally owned buffer adopted as the ring (zero-copy DMA). Its capacity in samples must be a
+ * power of two and its start page-aligned; @c release is called once the ring no longer uses it.
  */
 struct AcqExternalBuffer
 {
-    std::byte* data = nullptr;     /**< Start of the buffer. */
-    std::size_t bytes = 0;         /**< Size in bytes = capacity samples * frame bytes (interleaved) or per layout. */
-    std::function<void()> release; /**< Called once after the ring no longer uses the buffer; may be empty. */
+    std::byte* data = nullptr;        /**< Start of the buffer. */
+    std::size_t bytes = 0;            /**< Size in bytes. */
+    std::ptrdiff_t channelStride = 0; /**< Planar buffers: bytes between channel rows; 0 = capacity * bytesPerSample. */
+    std::function<void()> release;    /**< Called once after the ring no longer uses the buffer; may be empty. */
 };
 
 //=============================================================================================================
 /**
- * Ring and real-time options of a stream. Fixed at creation (control path).
+ * Ring and real-time options of a stream; fixed at creation (control path).
  */
 struct AcqStreamOptions
 {
     std::size_t capacitySamples = 0;  /**< Rounded up to a power of two; 0 = max(65536, 2 s of data). */
     std::size_t maxReaders = 8;       /**< Reader slots, allocated at creation. */
     std::size_t eventCapacity = 4096; /**< Event ring entries (power of two). */
-    std::size_t segmentCapacity = 0;  /**< Segment header ring entries; 0 = derived from capacity for segmented streams. */
-    bool lockMemory = true;           /**< mlock/VirtualLock the ring; best effort, reported in stats. */
+    std::size_t segmentCapacity = 0;  /**< Segment header entries; 0 = derived from capacity for segmented streams. */
+    std::size_t rowAlignment = 64;    /**< Planar rings: byte alignment of every channel row (SIMD). */
+    bool mirror = true;               /**< Mirror-map the ring where the OS allows it; views are then always one part. */
+    bool lockMemory = true;           /**< mlock / VirtualLock; best effort, reported in stats. */
+    bool prefault = true;             /**< Touch every page at creation, so start() never page-faults. */
     bool hugePages = false;           /**< Back the ring with huge pages where available. */
+    int numaNode = -1;                /**< Allocate on this NUMA node, -1 = local to the creating thread. */
     AcqExternalBuffer external;       /**< Adopt this buffer instead of allocating one. */
 };
 
@@ -96,18 +107,23 @@ struct AcqStreamStats
 {
     std::uint64_t committed = 0;     /**< Samples committed since creation (= next write position). */
     std::uint64_t commits = 0;       /**< commit() calls. */
-    std::uint64_t events = 0;        /**< Events pushed since creation. */
-    std::uint64_t segments = 0;      /**< Segment headers pushed since creation. */
+    std::uint64_t events = 0;        /**< Events pushed. */
+    std::uint64_t segments = 0;      /**< Segment headers pushed. */
+    std::uint64_t underrun = 0;      /**< Output: samples emitted as underrun fill. */
+    std::uint64_t underruns = 0;     /**< Output: underrun episodes. */
+    std::uint64_t writerWaits = 0;   /**< Output: beginWrite() calls that had to wait for space. */
+    std::uint64_t lateEvents = 0;    /**< Output: events or segments rejected as Late. */
     std::size_t capacitySamples = 0; /**< Effective ring capacity. */
     std::size_t activeReaders = 0;   /**< Readers attached right now. */
     bool memoryLocked = false;       /**< Whether lockMemory succeeded. */
+    bool mirrored = false;           /**< Whether the ring is mirror-mapped. */
     bool adoptedBuffer = false;      /**< Whether the ring is an adopted external buffer. */
 };
 
 //=============================================================================================================
 /**
- * Consumer handle of a stream. Cheap to copy (shared ownership of the ring), so readers stay valid
- * after the source that produced the stream is closed; they then return EndOfStream.
+ * Shared handle of a stream. Cheap to copy; keeps the ring alive, so readers stay valid after the
+ * source is closed (they then return EndOfStream).
  */
 class ACQSHARED_EXPORT AcqStream
 {
@@ -117,7 +133,10 @@ public:
     /** @return true when attached to a ring. */
     [[nodiscard]] bool isValid() const noexcept;
 
-    /** @return The current metadata version (control path; copies under a lock-free snapshot). */
+    /** @return Input or output. */
+    [[nodiscard]] AcqDirection direction() const noexcept;
+
+    /** @return The current metadata version (control path). */
     [[nodiscard]] std::shared_ptr<const AcqStreamInfo> info() const;
 
     /** @return The metadata version valid at @p sample, or the oldest retained one. */
@@ -131,19 +150,28 @@ public:
 
     //=========================================================================================================
     /**
-     * Attaches a new reader (control path: may be called before or after start()).
+     * Attaches a reader (control path; before or after start()).
      *
      * @param[in] mode      Consumption mode.
-     * @param[in] options   Wake-up strategy and start position.
+     * @param[in] options   Wake-up strategy, start position, gating.
      *
-     * @return The reader, or TooManyReaders.
+     * @return The reader, or TooManyReaders, WrongDirection (gating on an input stream).
      */
-    [[nodiscard]] AcqExpected<AcqReader> reader(AcqReader::ReadMode mode,
-                                                const AcqReaderOptions& options = {}) const;
+    [[nodiscard]] AcqExpected<AcqReader> reader(AcqReader::ReadMode mode, const AcqReaderOptions& options = {}) const;
+
+    //=========================================================================================================
+    /**
+     * Takes the writer of an output stream (control path).
+     *
+     * @param[in] wait   How beginWrite() waits for space.
+     *
+     * @return The writer, or WrongDirection (input stream), WriterInUse.
+     */
+    [[nodiscard]] AcqExpected<AcqWriter> writer(AcqWait wait = AcqWait::Block) const;
 
 private:
     friend class AcqReader;
-    friend class AcqStreamWriter;
+    friend class AcqWriter;
     explicit AcqStream(std::shared_ptr<detail::AcqStreamCore> core) noexcept;
 
     std::shared_ptr<detail::AcqStreamCore> m_core;
@@ -151,96 +179,89 @@ private:
 
 //=============================================================================================================
 /**
- * Writable region returned by AcqStreamWriter::beginWrite(): one or two parts (wrap-around), with the
- * same strides as AcqBlockPart.
+ * The single producer of a ring: the backend for an input stream, the application for an output
+ * stream. Move-only. All members except create() and updateInfo() are allocation-free and lock-free;
+ * on input streams they are also wait-free.
  */
-struct AcqWritableBlock
-{
-    /** One contiguous writable run. */
-    struct Part
-    {
-        std::byte* data = nullptr;        /**< Channel 0, sample 0 of the run. */
-        std::size_t samples = 0;          /**< Samples per channel. */
-        std::ptrdiff_t sampleStride = 0;  /**< Bytes between samples of one channel. */
-        std::ptrdiff_t channelStride = 0; /**< Bytes between channels of one sample. */
-    };
-
-    std::array<Part, 2> parts{};   /**< parts[1].samples == 0 without wrap. */
-    std::uint64_t firstSample = 0; /**< Sample index of parts[0], sample 0. */
-};
-
-//=============================================================================================================
-/**
- * Producer handle of a stream. Move-only; exactly one per ring. All members except create() and
- * updateInfo() are wait-free and allocation-free.
- */
-class ACQSHARED_EXPORT AcqStreamWriter
+class ACQSHARED_EXPORT AcqWriter
 {
 public:
     //=========================================================================================================
     /**
-     * Creates a ring for @p info.
+     * Creates a standalone ring with its writer (backends, DMA emulation, application-internal pipelines).
      *
-     * @param[in] info      Stream description (version 0).
+     * @param[in] info      Stream description (version 0), including the direction.
      * @param[in] options   Ring and real-time options.
      *
-     * @return The writer, or InvalidParameter, InvalidBuffer, OutOfMemory.
+     * @return The writer, or InvalidParameter, InvalidBuffer, OutOfMemory, PlatformUnsupported.
      */
-    [[nodiscard]] static AcqExpected<AcqStreamWriter> create(AcqStreamInfo info, AcqStreamOptions options = {});
+    [[nodiscard]] static AcqExpected<AcqWriter> create(AcqStreamInfo info, AcqStreamOptions options = {});
 
-    AcqStreamWriter() noexcept;
-    ~AcqStreamWriter(); /**< Equals finish(). */
-    AcqStreamWriter(AcqStreamWriter&& other) noexcept;
-    AcqStreamWriter& operator=(AcqStreamWriter&& other) noexcept;
-    AcqStreamWriter(const AcqStreamWriter&) = delete;
-    AcqStreamWriter& operator=(const AcqStreamWriter&) = delete;
+    AcqWriter() noexcept;
+    ~AcqWriter(); /**< Equals finish(). */
+    AcqWriter(AcqWriter&& other) noexcept;
+    AcqWriter& operator=(AcqWriter&& other) noexcept;
+    AcqWriter(const AcqWriter&) = delete;
+    AcqWriter& operator=(const AcqWriter&) = delete;
 
-    /** @return The consumer handle of this ring. */
+    /** @return The shared handle of this ring. */
     [[nodiscard]] AcqStream stream() const noexcept;
 
     /** @return Next sample index to be written. */
     [[nodiscard]] std::uint64_t writePosition() const noexcept;
 
+    /** @return Output streams: the sample index the device consumes next; input streams: writePosition(). */
+    [[nodiscard]] std::uint64_t devicePosition() const noexcept;
+
+    /** @return Samples that can be reserved without waiting (input streams: the capacity). */
+    [[nodiscard]] std::size_t space() const noexcept;
+
     //=========================================================================================================
     /**
-     * Returns the region for the next @p samples samples. Never waits; the region may still be visible
-     * to readers that lag by more than the capacity, which they detect as loss.
+     * Reserves the next @p samples samples. Input streams never wait. Output streams wait up to @p timeout
+     * for the gating reader to free space; if the device has already passed writePosition(), the view
+     * starts at the device position and reports the gap in AcqWriteView::underrun().
      *
      * @param[in] samples   Samples per channel. @pre samples <= capacity
+     * @param[in] timeout   Output streams: maximum wait for space.
      *
-     * @return The writable region (already in place for an adopted buffer).
+     * @return The writable view, or Timeout, EndOfStream (the device side finished).
      */
-    [[nodiscard]] AcqWritableBlock beginWrite(std::size_t samples) noexcept;
+    [[nodiscard]] AcqExpected<AcqWriteView> beginWrite(std::size_t samples,
+                                                       std::chrono::nanoseconds timeout = {}) noexcept;
 
-    /** Publishes @p samples samples written since the last commit (one release store). */
+    /** Publishes the first @p samples samples of the last view (one release store). @pre samples <= reserved */
     void commit(std::size_t samples) noexcept;
 
     /**
-     * Attaches @p event (absolute sample index, not decreasing). Published with the next commit(). Like
-     * samples, old events are overwritten; a lagging reader counts them in AcqReaderStats::eventsLost.
+     * Attaches @p event (absolute sample index, not decreasing), published with the next commit (input) or
+     * immediately (output; scheduled events may lie ahead of writePosition()). Old events are overwritten
+     * like samples; lagging readers count them in AcqReaderStats::eventsLost.
+     *
+     * @return Late for an output event at or before devicePosition(); otherwise success.
      */
-    void pushEvent(const AcqEvent& event) noexcept;
+    AcqError pushEvent(const AcqEvent& event) noexcept;
 
     /**
      * Starts a segment at header.firstSample with its device-specific @p payload (truncated or zero-padded
-     * to AcqSegmentation::headerBytes). Published with the next commit(); overwritten like events.
+     * to AcqSegmentation::headerBytes); published like events.
+     *
+     * @return Late for an output segment at or before devicePosition(); otherwise success.
      */
-    void pushSegment(const AcqSegmentHeader& header, std::span<const std::byte> payload) noexcept;
+    AcqError pushSegment(const AcqSegmentHeader& header, std::span<const std::byte> payload) noexcept;
 
     /** Publishes a new clock model (sequence counter, no lock). */
     void setClock(const AcqClockModel& clock) noexcept;
 
-    /**
-     * Publishes metadata version info.version = current + 1 valid from @p fromSample. Allocates; meant
-     * for rare changes (channel renamed, gain switched), not per block.
-     */
+    /** Publishes metadata version info.version = current + 1 valid from @p fromSample (allocates; rare changes only). */
     AcqError updateInfo(AcqStreamInfo info, std::uint64_t fromSample);
 
     /** Marks the end of the stream; readers drain and then receive EndOfStream. Idempotent. */
     void finish() noexcept;
 
 private:
-    explicit AcqStreamWriter(std::shared_ptr<detail::AcqStreamCore> core) noexcept;
+    friend class AcqStream;
+    explicit AcqWriter(std::shared_ptr<detail::AcqStreamCore> core) noexcept;
 
     std::shared_ptr<detail::AcqStreamCore> m_core;
 };

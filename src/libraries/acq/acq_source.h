@@ -7,11 +7,11 @@
  * @author   Christoph Dinh <christoph.dinh@mne-cpp.org>
  * @since    2.5.0
  * @date     November 2026
- * @brief    AcqSource: an opened acquisition device, file or network stream (control path).
+ * @brief    AcqSource: an opened device, file or network endpoint with its input and output streams (control path).
  *
  * Lifecycle: open() -> Opened -> start() -> Running -> stop() -> Stopped -> (start() again) ...
- * -> close() -> Closed. stop() joins the acquisition thread, close() releases the device, the
- * destructor equals close(). A backend error moves the source to Failed; lastError() names it.
+ * -> close() -> Closed. stop() joins the backend threads (output streams emit their underrun fill
+ * from then on), close() releases the device, the destructor equals close(). A backend error moves the source to Failed; lastError() names it.
  * Streams and readers obtained from a source stay valid after close() and report EndOfStream.
  */
 
@@ -91,10 +91,10 @@ public:
     AcqSource(const AcqSource&) = delete;
     AcqSource& operator=(const AcqSource&) = delete;
 
-    /** Starts acquisition. @return InvalidState unless Opened or Stopped, or the backend's error. */
+    /** Starts acquisition and output. @return InvalidState unless Opened or Stopped, or the backend's error. */
     AcqError start();
 
-    /** Stops acquisition and joins the acquisition thread. No-op unless Running. */
+    /** Stops acquisition and output and joins the backend threads. No-op unless Running. */
     AcqError stop();
 
     /** Stops if needed and releases the device. Idempotent. */

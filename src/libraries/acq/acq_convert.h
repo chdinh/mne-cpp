@@ -7,12 +7,19 @@
  * @author   Christoph Dinh <christoph.dinh@mne-cpp.org>
  * @since    2.5.0
  * @date     November 2026
- * @brief    Vectorised conversion of native samples into caller-owned Eigen matrices (T2.8).
+ * @brief    decode() native samples into caller-owned matrices and encode() matrices into output rings (T2.8).
  *
- * The converters read any native format and layout and write a channels x samples matrix that the
- * caller owns and sizes; they never allocate. With AcqScaling::Physical each channel is mapped to
- * raw * scale + offset of its stream info; with AcqScaling::Raw the numeric sample value is written
- * unchanged. Results are bit-exact against the scalar reference converter used in the tests.
+ * One memory pass: format conversion, layout transposition and per-channel scaling are fused and
+ * cache-blocked, written as fixed-width loops the compiler vectorises (no intrinsics, no Eigen, so the
+ * same code builds for embedded targets). Converters never allocate.
+ *
+ * Arithmetic is defined, so results are bit-exact against the scalar reference used in the tests:
+ * float targets compute float(raw) * float(scale) + float(offset) without FMA contraction, double
+ * targets the same in double (use double for int32 data beyond 2^24). encode() computes
+ * (value - offset) / scale in double, saturates to the channel range and to the native type, and
+ * rounds to nearest, ties to even; NaN encodes as 0. Both count what they could not represent.
+ *
+ * A channel range lets several threads convert disjoint channel blocks of the same view in parallel.
  */
 
 #ifndef ACQ_CONVERT_H
@@ -27,9 +34,10 @@
 #include "acq_error.h"
 #include "acq_sample_format.h"
 
-#include <Eigen/Core>
-
+#include <complex>
 #include <cstddef>
+#include <cstdint>
+#include <limits>
 #include <span>
 
 //=============================================================================================================
@@ -51,43 +59,123 @@ enum class AcqScaling : std::uint8_t
 
 //=============================================================================================================
 /**
- * Converts all samples of @p view into columns [firstColumn, firstColumn + view.sampleCount()) of @p out.
+ * Non-owning channels x samples matrix with element strides; describes Eigen (column-major), NumPy,
+ * std::vector or device memory alike.
  *
- * @param[in] view          Source view. Real formats only for the real overloads.
- * @param[out] out          Destination, channels x at least firstColumn + view.sampleCount() columns.
- * @param[in] scaling       Raw or physical values.
- * @param[in] firstColumn   First destination column.
- *
- * @return ShapeMismatch if @p out is too small, UnsupportedFormat for a complex view; otherwise success.
+ * @tparam T   float, double or std::complex<float>, optionally const.
  */
-ACQSHARED_EXPORT AcqError convert(const AcqBlockView& view, Eigen::Ref<Eigen::MatrixXf> out,
-                                  AcqScaling scaling = AcqScaling::Physical, Eigen::Index firstColumn = 0) noexcept;
+template<typename T>
+struct AcqMatrixRef
+{
+    T* data = nullptr;            /**< Element (0, 0). */
+    std::size_t rows = 0;         /**< Channels. */
+    std::size_t cols = 0;         /**< Samples. */
+    std::ptrdiff_t rowStride = 1; /**< Elements between consecutive channels. */
+    std::ptrdiff_t colStride = 0; /**< Elements between consecutive samples. */
 
-/** @copydoc convert(const AcqBlockView&, Eigen::Ref<Eigen::MatrixXf>, AcqScaling, Eigen::Index) */
-ACQSHARED_EXPORT AcqError convert(const AcqBlockView& view, Eigen::Ref<Eigen::MatrixXd> out,
-                                  AcqScaling scaling = AcqScaling::Physical, Eigen::Index firstColumn = 0) noexcept;
+    /** @return A view of column-major storage (Eigen default, Fortran order). */
+    [[nodiscard]] static constexpr AcqMatrixRef columnMajor(T* data, std::size_t rows, std::size_t cols) noexcept
+    {
+        return {data, rows, cols, 1, static_cast<std::ptrdiff_t>(rows)};
+    }
 
-/** Complex overload; accepts every format (real formats yield a zero imaginary part). */
-ACQSHARED_EXPORT AcqError convert(const AcqBlockView& view, Eigen::Ref<Eigen::MatrixXcf> out,
-                                  AcqScaling scaling = AcqScaling::Physical, Eigen::Index firstColumn = 0) noexcept;
+    /** @return A view of row-major storage (C order, one contiguous row per channel). */
+    [[nodiscard]] static constexpr AcqMatrixRef rowMajor(T* data, std::size_t rows, std::size_t cols) noexcept
+    {
+        return {data, rows, cols, static_cast<std::ptrdiff_t>(cols), 1};
+    }
+};
 
 //=============================================================================================================
 /**
- * Converts one contiguous part described by raw pointers and strides; the building block of the view
- * overloads, exposed for adopted (DMA) buffers that are not read through an AcqReader.
- *
- * @param[in] part       Source run.
- * @param[in] format     Native format of the run.
- * @param[in] scales     Per-channel scale, size = out.rows(); ignored for AcqScaling::Raw.
- * @param[in] offsets    Per-channel offset, size = out.rows(); ignored for AcqScaling::Raw.
- * @param[out] out       Destination block, channels x part.samples.
- * @param[in] scaling    Raw or physical values.
- *
- * @return ShapeMismatch or UnsupportedFormat on invalid arguments; otherwise success.
+ * Contiguous channel subset [first, first + count) of a view; the matrix rows map to these channels.
  */
-ACQSHARED_EXPORT AcqError convertPart(const AcqBlockPart& part, AcqSampleFormat format,
-                                      std::span<const double> scales, std::span<const double> offsets,
-                                      Eigen::Ref<Eigen::MatrixXf> out, AcqScaling scaling) noexcept;
+struct AcqChannelRange
+{
+    std::size_t first = 0;                                       /**< First channel. */
+    std::size_t count = std::numeric_limits<std::size_t>::max(); /**< Number of channels; max = to the end. */
+};
+
+//=============================================================================================================
+/**
+ * Placement of a conversion inside the matrix.
+ */
+struct AcqConvertOptions
+{
+    AcqScaling scaling = AcqScaling::Physical; /**< Raw or physical values. */
+    AcqChannelRange channels;                  /**< Channels of the view mapped to rows 0..count-1. */
+    std::size_t firstColumn = 0;               /**< Matrix column of the view's first sample. */
+};
+
+//=============================================================================================================
+/**
+ * Decodes all samples of @p view into @p out.
+ *
+ * @param[in] view      Source view.
+ * @param[out] out      Destination; rows >= channel count, cols >= firstColumn + view.sampleCount().
+ * @param[in] options   Scaling, channel subset, first column.
+ *
+ * @return ShapeMismatch, UnsupportedFormat (complex view into a real matrix), or success.
+ */
+ACQSHARED_EXPORT AcqError decode(const AcqBlockView& view, const AcqMatrixRef<float>& out,
+                                 const AcqConvertOptions& options = {}) noexcept;
+
+/** @copydoc decode(const AcqBlockView&, const AcqMatrixRef<float>&, const AcqConvertOptions&) */
+ACQSHARED_EXPORT AcqError decode(const AcqBlockView& view, const AcqMatrixRef<double>& out,
+                                 const AcqConvertOptions& options = {}) noexcept;
+
+/** Complex overload; real formats yield a zero imaginary part. */
+ACQSHARED_EXPORT AcqError decode(const AcqBlockView& view, const AcqMatrixRef<std::complex<float>>& out,
+                                 const AcqConvertOptions& options = {}) noexcept;
+
+//=============================================================================================================
+/**
+ * Result of encode().
+ */
+struct AcqEncodeResult
+{
+    std::uint64_t clipped = 0; /**< Elements saturated to the channel range or native type, or NaN. */
+};
+
+//=============================================================================================================
+/**
+ * Encodes @p in into the reserved space of @p view (an output stream, or an input ring written by a
+ * backend that receives physical values).
+ *
+ * @param[in] in        Source; rows = channel count, cols >= firstColumn + view.sampleCount().
+ * @param[in] view      Destination view from AcqWriter::beginWrite().
+ * @param[in] options   Scaling, channel subset, first source column.
+ *
+ * @return Clipping count, or ShapeMismatch / UnsupportedFormat.
+ */
+ACQSHARED_EXPORT AcqExpected<AcqEncodeResult> encode(const AcqMatrixRef<const float>& in, const AcqWriteView& view,
+                                                     const AcqConvertOptions& options = {}) noexcept;
+
+/** @copydoc encode(const AcqMatrixRef<const float>&, const AcqWriteView&, const AcqConvertOptions&) */
+ACQSHARED_EXPORT AcqExpected<AcqEncodeResult> encode(const AcqMatrixRef<const double>& in, const AcqWriteView& view,
+                                                     const AcqConvertOptions& options = {}) noexcept;
+
+/** Complex overload; for real formats the imaginary part must be 0 or the element counts as clipped. */
+ACQSHARED_EXPORT AcqExpected<AcqEncodeResult> encode(const AcqMatrixRef<const std::complex<float>>& in,
+                                                     const AcqWriteView& view,
+                                                     const AcqConvertOptions& options = {}) noexcept;
+
+//=============================================================================================================
+/**
+ * Decodes one raw run, for adopted device buffers that are not read through an AcqReader.
+ *
+ * @param[in] part      Source run.
+ * @param[in] format    Native format of the run.
+ * @param[in] scales    Per-channel scale (size = out.rows); ignored for AcqScaling::Raw.
+ * @param[in] offsets   Per-channel offset (size = out.rows); ignored for AcqScaling::Raw.
+ * @param[out] out      Destination, out.rows channels x part.samples.
+ * @param[in] scaling   Raw or physical values.
+ *
+ * @return ShapeMismatch, UnsupportedFormat, or success.
+ */
+ACQSHARED_EXPORT AcqError decodePart(const AcqBlockPart& part, AcqSampleFormat format, std::span<const double> scales,
+                                     std::span<const double> offsets, const AcqMatrixRef<float>& out,
+                                     AcqScaling scaling) noexcept;
 
 } // namespace ACQLIB
 

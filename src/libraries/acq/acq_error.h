@@ -10,9 +10,9 @@
  * @brief    AcqError: catalogued error codes of the acquisition API, and AcqExpected, a value-or-error result.
  *
  * Every error the public API can return has a catalogue entry (G12, T2.6): a stable code, a message that
- * names the cause, the fix, and a documentation anchor. The catalogue strings are static, so creating an
- * AcqError on the data path (Timeout, EndOfStream, Overrun) never allocates. Only control-path errors
- * attach a context string (a URI, a file path, a library search path).
+ * names the cause, the fix, and a documentation anchor. Catalogue strings are static, so an AcqError on
+ * the data path (Timeout, Overrun, Late, ...) never allocates; only control-path errors attach a context
+ * string. Neither type throws, so ACQLIB builds with -fno-exceptions and -fno-rtti.
  */
 
 #ifndef ACQ_ERROR_H
@@ -24,13 +24,14 @@
 
 #include "acq_global.h"
 
+#include <cassert>
 #include <cstdint>
 #include <memory>
+#include <new>
 #include <string>
 #include <string_view>
 #include <type_traits>
 #include <utility>
-#include <variant>
 
 //=============================================================================================================
 // DEFINE NAMESPACE ACQLIB
@@ -46,11 +47,12 @@ namespace ACQLIB
 enum class AcqErrorCode : std::uint16_t
 {
     None = 0, /**< Success. */
-    // Data path
-    Timeout = 1,       /**< No data within the requested timeout; not a failure of the source. */
+    // Data path (allocation-free)
+    Timeout = 1,       /**< No data (reader) or no space (output writer) within the timeout. */
     EndOfStream = 2,   /**< The producer finished and every committed sample has been read. */
-    Overrun = 3,       /**< The producer overwrote samples while a view was held; the view's data is invalid. */
-    SourceStopped = 4, /**< The source was stopped while waiting for data. */
+    Overrun = 3,       /**< The producer overwrote samples while a view was held; discard the view's data. */
+    SourceStopped = 4, /**< The source was stopped while waiting. */
+    Late = 5,          /**< An output sample, event or segment targets a sample the device has already played. */
     // Control path
     InvalidUri = 100,          /**< The URI does not have the form scheme://target?key=value. */
     UnknownScheme = 101,       /**< No backend is registered for the URI scheme. */
@@ -58,14 +60,16 @@ enum class AcqErrorCode : std::uint16_t
     BackendUnavailable = 103,  /**< A runtime-loaded library (BrainFlow, liblsl, vendor SDK) was not found. */
     UnsupportedVersion = 104,  /**< A runtime-loaded library has a version outside the supported range. */
     DeviceNotFound = 105,      /**< The device, file or network endpoint does not exist or does not answer. */
-    DeviceIo = 106,            /**< The device or file failed during acquisition. */
-    InvalidState = 107,        /**< The call is not allowed in the current source state. */
+    DeviceIo = 106,            /**< The device or file failed during acquisition or output. */
+    InvalidState = 107,        /**< The call is not allowed in the current state. */
     UnsupportedFormat = 108,   /**< The sample format or layout cannot be used for this operation. */
     ShapeMismatch = 109,       /**< A caller-owned buffer has the wrong shape. */
     TooManyReaders = 110,      /**< All reader slots of the stream are in use. */
-    InvalidBuffer = 111,       /**< An adopted external buffer is not page-aligned or not a power of two in samples. */
+    InvalidBuffer = 111,       /**< An adopted external buffer is misaligned or not a power of two in samples. */
     OutOfMemory = 112,         /**< The ring or its memory lock could not be allocated. */
-    PlatformUnsupported = 113, /**< The backend is not available on this operating system. */
+    PlatformUnsupported = 113, /**< The backend or option is not available on this platform. */
+    WrongDirection = 114,      /**< A writer was requested for an input stream, or a gating reader for an input stream. */
+    WriterInUse = 115,         /**< The output stream already has its writer. */
     Internal = 199             /**< Invariant violation inside ACQLIB; please report it. */
 };
 
@@ -84,42 +88,28 @@ struct AcqErrorInfo
 
 //=============================================================================================================
 /**
- * Returns the catalogue entry for @p code. Never fails: an unknown value maps to the Internal entry.
- *
  * @param[in] code   The error code.
  *
- * @return Reference to a static catalogue entry.
+ * @return The static catalogue entry of @p code; an unknown value maps to the Internal entry.
  */
 ACQSHARED_EXPORT const AcqErrorInfo& acqErrorInfo(AcqErrorCode code) noexcept;
 
 //=============================================================================================================
 /**
- * An error value: a catalogue code plus an optional context string. Cheap to copy; a code without
- * context does not allocate.
+ * An error value: a catalogue code plus an optional context string.
  */
 class ACQSHARED_EXPORT AcqError
 {
 public:
     AcqError() noexcept = default;
 
-    //=========================================================================================================
-    /**
-     * Creates an error without context (allocation-free, usable on the data path).
-     *
-     * @param[in] code   The error code.
-     */
+    /** Creates an error without context; allocation-free, usable on the data path. */
     constexpr AcqError(AcqErrorCode code) noexcept
     : m_code(code)
     {
     } // NOLINT(google-explicit-constructor)
 
-    //=========================================================================================================
-    /**
-     * Creates an error with context (control path only, allocates).
-     *
-     * @param[in] code      The error code.
-     * @param[in] context   What the error refers to, e.g. the URI or file path.
-     */
+    /** Creates an error with context, e.g. the URI or file path (control path, allocates). */
     AcqError(AcqErrorCode code, std::string context);
 
     /** @return true when this value represents success. */
@@ -158,8 +148,8 @@ private:
 
 //=============================================================================================================
 /**
- * Value-or-error result (the subset of C++23 std::expected that ACQLIB needs). Holds either a @c T or
- * an AcqError whose code is not None. Neither state allocates by itself.
+ * Value-or-error result, the subset of C++23 std::expected that ACQLIB needs, without exceptions:
+ * accessing the wrong alternative is a precondition violation (assert), never a throw.
  *
  * @tparam T   The value type; may be move-only.
  */
@@ -167,73 +157,131 @@ template<typename T>
 class AcqExpected
 {
 public:
-    /** Creates a result holding @p value. */
-    AcqExpected(T value)
-    : m_state(std::in_place_index<0>, std::move(value))
+    /** Holds @p value. */
+    AcqExpected(T value) noexcept(std::is_nothrow_move_constructible_v<T>) // NOLINT(google-explicit-constructor)
+    : m_hasValue(true)
+    {
+        ::new (static_cast<void*>(&m_value)) T(std::move(value));
+    }
+
+    /** Holds @p error. @pre !error.ok() */
+    AcqExpected(AcqError error) noexcept
+    : m_hasValue(false) // NOLINT(google-explicit-constructor)
+    {
+        assert(!error.ok());
+        ::new (static_cast<void*>(&m_error)) AcqError(std::move(error));
+    }
+
+    /** Holds the error @p code. @pre code != AcqErrorCode::None */
+    AcqExpected(AcqErrorCode code) noexcept
+    : AcqExpected(AcqError(code))
     {
     } // NOLINT(google-explicit-constructor)
 
-    /** Creates a result holding @p error. @pre !error.ok() */
-    AcqExpected(AcqError error)
-    : m_state(std::in_place_index<1>, std::move(error))
+    AcqExpected(const AcqExpected& other)
+        requires std::is_copy_constructible_v<T>
+    : m_hasValue(other.m_hasValue)
     {
-    } // NOLINT(google-explicit-constructor)
+        if (m_hasValue) {
+            ::new (static_cast<void*>(&m_value)) T(other.m_value);
+        } else {
+            ::new (static_cast<void*>(&m_error)) AcqError(other.m_error);
+        }
+    }
 
-    /** Creates a result holding the error @p code. @pre code != AcqErrorCode::None */
-    AcqExpected(AcqErrorCode code)
-    : m_state(std::in_place_index<1>, AcqError(code))
+    AcqExpected(AcqExpected&& other) noexcept(std::is_nothrow_move_constructible_v<T>)
+    : m_hasValue(other.m_hasValue)
     {
-    } // NOLINT(google-explicit-constructor)
+        if (m_hasValue) {
+            ::new (static_cast<void*>(&m_value)) T(std::move(other.m_value));
+        } else {
+            ::new (static_cast<void*>(&m_error)) AcqError(std::move(other.m_error));
+        }
+    }
+
+    AcqExpected& operator=(AcqExpected other) noexcept(std::is_nothrow_move_constructible_v<T>)
+    {
+        destroy();
+        m_hasValue = other.m_hasValue;
+        if (m_hasValue) {
+            ::new (static_cast<void*>(&m_value)) T(std::move(other.m_value));
+        } else {
+            ::new (static_cast<void*>(&m_error)) AcqError(std::move(other.m_error));
+        }
+        return *this;
+    }
+
+    ~AcqExpected()
+    {
+        destroy();
+    }
 
     /** @return true when a value is held. */
     [[nodiscard]] bool hasValue() const noexcept
     {
-        return m_state.index() == 0;
+        return m_hasValue;
     }
     explicit operator bool() const noexcept
     {
-        return hasValue();
+        return m_hasValue;
     }
 
     /** @return The held value. @pre hasValue() */
-    [[nodiscard]] T& value() &
+    [[nodiscard]] T& value() & noexcept
     {
-        return std::get<0>(m_state);
+        assert(m_hasValue);
+        return m_value;
     }
-    [[nodiscard]] const T& value() const&
+    [[nodiscard]] const T& value() const& noexcept
     {
-        return std::get<0>(m_state);
+        assert(m_hasValue);
+        return m_value;
     }
-    [[nodiscard]] T&& value() &&
+    [[nodiscard]] T&& value() && noexcept
     {
-        return std::get<0>(std::move(m_state));
+        assert(m_hasValue);
+        return std::move(m_value);
     }
 
-    T& operator*() &
+    T& operator*() & noexcept
     {
         return value();
     }
-    const T& operator*() const&
+    const T& operator*() const& noexcept
     {
         return value();
     }
-    T* operator->()
+    T* operator->() noexcept
     {
         return &value();
     }
-    const T* operator->() const
+    const T* operator->() const noexcept
     {
         return &value();
     }
 
-    /** @return The held error, or a success value when a value is held. */
-    [[nodiscard]] AcqError error() const
+    /** @return The held error, or success when a value is held. */
+    [[nodiscard]] AcqError error() const noexcept
     {
-        return hasValue() ? AcqError() : std::get<1>(m_state);
+        return m_hasValue ? AcqError() : m_error;
     }
 
 private:
-    std::variant<T, AcqError> m_state;
+    void destroy() noexcept
+    {
+        if (m_hasValue) {
+            m_value.~T();
+        } else {
+            m_error.~AcqError();
+        }
+    }
+
+    union
+    {
+        T m_value;
+        AcqError m_error;
+    };
+    bool m_hasValue;
 };
 
 } // namespace ACQLIB

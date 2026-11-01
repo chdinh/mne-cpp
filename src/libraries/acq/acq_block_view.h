@@ -7,13 +7,14 @@
  * @author   Christoph Dinh <christoph.dinh@mne-cpp.org>
  * @since    2.5.0
  * @date     November 2026
- * @brief    AcqBlockView: zero-copy view of committed samples, events and segment headers of a stream.
+ * @brief    Zero-copy views into a stream ring: AcqBlockView (read) and AcqWriteView (write).
  *
- * AcqReader::acquire() returns a view into the stream ring: one contiguous part, or two when the
- * block wraps around the end of the ring. The view owns nothing and does not allocate; it is valid
- * until it is passed to AcqReader::release(). The producer never waits for readers, so a view held
- * longer than the ring's headroom can be overwritten; release() detects this and returns
- * AcqErrorCode::Overrun, in which case the data read from the view must be discarded.
+ * A view addresses committed (read) or reserved (write) samples in place: one contiguous part, or two
+ * when the block wraps around the end of a ring that is not mirror-mapped. Views own nothing, do not
+ * allocate and are valid until released (AcqReader::release) or committed (AcqWriter::commit).
+ *
+ * Element (channel c, sample s) of a part is at data + c * channelStride + s * sampleStride, so
+ * interleaved and planar rings, and any channel subset, are handled by the same code.
  */
 
 #ifndef ACQ_BLOCK_VIEW_H
@@ -27,15 +28,11 @@
 #include "acq_clock_model.h"
 #include "acq_sample_format.h"
 
-#include <Eigen/Core>
-
 #include <array>
 #include <cassert>
-#include <complex>
 #include <cstddef>
 #include <cstdint>
 #include <span>
-#include <type_traits>
 
 //=============================================================================================================
 // DEFINE NAMESPACE ACQLIB
@@ -45,23 +42,25 @@ namespace ACQLIB
 {
 
 class AcqReader;
+class AcqWriter;
 
 //=============================================================================================================
 /**
- * An event at a sample index (trigger, marker, annotation onset). Fixed size, stored in a ring next
- * to the samples. Text labels are resolved through AcqStreamInfo::eventLabels.
+ * An event at a sample index: input trigger or marker, or a scheduled output trigger (TMS pulse,
+ * stimulus onset, RF gate). Fixed size, stored in a ring next to the samples; text labels are
+ * resolved through AcqStreamInfo::eventLabels.
  */
 struct AcqEvent
 {
     std::uint64_t sample = 0;   /**< Sample index of the onset. */
     std::uint32_t duration = 0; /**< Duration in samples, 0 for an instantaneous event. */
-    std::int32_t code = 0;      /**< Event code (trigger value, marker id). */
+    std::int32_t code = 0;      /**< Event code (trigger value, marker id, output line mask). */
 };
 
 //=============================================================================================================
 /**
- * Generic header of one segment of a segmented stream. The device-specific payload of
- * AcqSegmentation::headerBytes is delivered by AcqBlockView::segmentPayload().
+ * Generic header of one segment of a segmented stream (MR readout, RF pulse, triggered epoch). The
+ * device-specific payload of AcqSegmentation::headerBytes travels next to it.
  */
 struct AcqSegmentHeader
 {
@@ -74,8 +73,7 @@ struct AcqSegmentHeader
 
 //=============================================================================================================
 /**
- * Up to two contiguous spans that together form one logical sequence (the second is empty unless the
- * sequence wraps around the end of a ring).
+ * Up to two contiguous spans forming one logical sequence (the second is empty without wrap-around).
  *
  * @tparam T   Element type.
  */
@@ -97,7 +95,7 @@ struct AcqSpanPair
         return size() == 0;
     }
 
-    /** @return Element @p i of the logical sequence. */
+    /** @return Element @p i of the logical sequence. @pre i < size() */
     constexpr T& operator[](std::size_t i) const noexcept
     {
         return i < first.size() ? first[i] : second[i - first.size()];
@@ -106,61 +104,46 @@ struct AcqSpanPair
 
 //=============================================================================================================
 /**
- * One contiguous run of samples inside the ring. Element (channel c, sample s) of the run starts at
- * data + c * channelStride + s * sampleStride (strides in bytes; interleaved and planar rings differ
- * only in their strides).
+ * One contiguous run of samples in a ring.
+ *
+ * @tparam Byte   std::byte for writable runs, const std::byte for read-only runs.
  */
-struct AcqBlockPart
+template<typename Byte>
+struct AcqPart
 {
-    const std::byte* data = nullptr;  /**< First byte of channel 0, sample 0 of the run. */
+    Byte* data = nullptr;             /**< Channel 0, sample 0 of the run. */
     std::size_t samples = 0;          /**< Samples per channel in the run. */
     std::ptrdiff_t sampleStride = 0;  /**< Bytes between consecutive samples of one channel. */
     std::ptrdiff_t channelStride = 0; /**< Bytes between consecutive channels of one sample. */
+
+    /** @return Pointer to element (channel @p c, sample @p s). */
+    [[nodiscard]] Byte* at(std::size_t c, std::size_t s) const noexcept
+    {
+        return data + static_cast<std::ptrdiff_t>(c) * channelStride + static_cast<std::ptrdiff_t>(s) * sampleStride;
+    }
 };
+
+using AcqBlockPart = AcqPart<const std::byte>; /**< Read-only run. */
+using AcqWritePart = AcqPart<std::byte>;       /**< Writable run. */
 
 //=============================================================================================================
 /**
- * Zero-copy view of a block acquired from an AcqReader.
+ * Fields shared by read and write views.
  */
-class AcqBlockView
+template<typename Byte>
+class AcqViewBase
 {
 public:
-    /** Strided channels x samples matrix view of one part, without copy. */
-    template<typename T>
-    using Map = Eigen::Map<const Eigen::Matrix<T, Eigen::Dynamic, Eigen::Dynamic>, Eigen::Unaligned,
-                           Eigen::Stride<Eigen::Dynamic, Eigen::Dynamic>>;
-
-    /** Creates an empty view. */
-    AcqBlockView() noexcept = default;
-
-    /** @return true when the view holds no samples, events or segments. */
-    [[nodiscard]] bool empty() const noexcept
-    {
-        return m_sampleCount == 0 && m_events.empty() && m_segments.empty();
-    }
-
     /** @return Sample index of the first sample in the view. */
     [[nodiscard]] std::uint64_t firstSample() const noexcept
     {
         return m_firstSample;
     }
 
-    /** @return Samples per channel in the view (sum over the parts). */
+    /** @return Samples per channel (sum over the parts). */
     [[nodiscard]] std::size_t sampleCount() const noexcept
     {
         return m_sampleCount;
-    }
-
-    /** @return Samples lost to overrun between the previous view of this reader and this one. */
-    [[nodiscard]] std::uint64_t lost() const noexcept
-    {
-        return m_lost;
-    }
-
-    /** @return Samples deliberately skipped by a Latest reader before this view (not a loss). */
-    [[nodiscard]] std::uint64_t skipped() const noexcept
-    {
-        return m_skipped;
     }
 
     /** @return Number of channels. */
@@ -175,75 +158,47 @@ public:
         return m_format;
     }
 
-    /** @return Ring layout. */
-    [[nodiscard]] AcqLayout layout() const noexcept
-    {
-        return m_layout;
-    }
-
-    /** @return AcqStreamInfo::version that describes the samples of this view. */
+    /** @return AcqStreamInfo::version that describes the samples. */
     [[nodiscard]] std::uint32_t infoVersion() const noexcept
     {
         return m_infoVersion;
     }
 
-    /** @return 1, or 2 when the view wraps around the end of the ring; 0 for a view without samples. */
+    /** @return 0 (no samples), 1, or 2 when the view wraps around the end of the ring. */
     [[nodiscard]] std::size_t partCount() const noexcept
     {
         return m_partCount;
     }
 
     /** @return Part @p i. @pre i < partCount() */
-    [[nodiscard]] const AcqBlockPart& part(std::size_t i) const noexcept
+    [[nodiscard]] const AcqPart<Byte>& part(std::size_t i) const noexcept
     {
         assert(i < m_partCount);
         return m_parts[i];
     }
 
-    /**
-     * Maps part @p i as a channels x samples Eigen matrix of the native element type, without copy.
-     *
-     * @tparam T   int16_t, int32_t, float, double or std::complex<float>; must match format().
-     * @param[in] i   Part index. @pre i < partCount()
-     *
-     * @return Strided read-only map into the ring.
-     */
-    template<typename T>
-    [[nodiscard]] Map<T> map(std::size_t i) const noexcept
+    /** @return Per-channel scale of infoVersion(); valid as long as the view. */
+    [[nodiscard]] std::span<const double> scales() const noexcept
     {
-        static_assert(std::is_arithmetic_v<T> || std::is_same_v<T, std::complex<float>>,
-                      "map<T>() needs an Eigen scalar type; use the converters for int24 and complex int16");
-        assert(AcqSampleTraits<T>::format == m_format);
-        const AcqBlockPart& p = part(i);
-        return Map<T>(reinterpret_cast<const T*>(p.data), static_cast<Eigen::Index>(m_channelCount),
-                      static_cast<Eigen::Index>(p.samples),
-                      Eigen::Stride<Eigen::Dynamic, Eigen::Dynamic>(p.sampleStride / static_cast<std::ptrdiff_t>(sizeof(T)),
-                                                                    p.channelStride / static_cast<std::ptrdiff_t>(sizeof(T))));
+        return m_scales;
     }
 
-    /** @return Events whose sample index lies in [firstSample(), firstSample() + sampleCount()). */
-    [[nodiscard]] const AcqSpanPair<const AcqEvent>& events() const noexcept
+    /** @return Per-channel offset of infoVersion(); valid as long as the view. */
+    [[nodiscard]] std::span<const double> offsets() const noexcept
     {
-        return m_events;
+        return m_offsets;
     }
 
-    /** @return Headers of the segments that start inside this view (segmented streams only). */
-    [[nodiscard]] const AcqSpanPair<const AcqSegmentHeader>& segments() const noexcept
+    /** @return Per-channel physical lower limit (NaN if unknown); the encoder saturates to it. */
+    [[nodiscard]] std::span<const double> rangeMin() const noexcept
     {
-        return m_segments;
+        return m_rangeMin;
     }
 
-    /**
-     * @param[in] i   Segment index. @pre i < segments().size()
-     *
-     * @return The device-specific header payload of segment @p i (AcqSegmentation::headerBytes bytes).
-     */
-    [[nodiscard]] std::span<const std::byte> segmentPayload(std::size_t i) const noexcept
+    /** @return Per-channel physical upper limit (NaN if unknown). */
+    [[nodiscard]] std::span<const double> rangeMax() const noexcept
     {
-        const std::size_t offset = i * m_segmentPayloadBytes;
-        return offset < m_segmentPayloads.first.size()
-            ? m_segmentPayloads.first.subspan(offset, m_segmentPayloadBytes)
-            : m_segmentPayloads.second.subspan(offset - m_segmentPayloads.first.size(), m_segmentPayloadBytes);
+        return m_rangeMax;
     }
 
     /** @return Clock model valid for this view. */
@@ -252,39 +207,100 @@ public:
         return m_clock;
     }
 
-    /** @return Per-channel scale of infoVersion(); valid until release(). */
-    [[nodiscard]] std::span<const double> scales() const noexcept
+protected:
+    std::array<AcqPart<Byte>, 2> m_parts{};
+    std::size_t m_partCount = 0;
+    std::uint64_t m_firstSample = 0;
+    std::size_t m_sampleCount = 0;
+    std::size_t m_channelCount = 0;
+    AcqSampleFormat m_format = AcqSampleFormat::Float32;
+    std::uint32_t m_infoVersion = 0;
+    std::span<const double> m_scales;
+    std::span<const double> m_offsets;
+    std::span<const double> m_rangeMin;
+    std::span<const double> m_rangeMax;
+    AcqClockModel m_clock;
+    std::uint64_t m_ticket = 0; /**< Owner-private validation token. */
+};
+
+//=============================================================================================================
+/**
+ * Read view returned by AcqReader::acquire().
+ */
+class AcqBlockView : public AcqViewBase<const std::byte>
+{
+public:
+    /** @return true when the view holds no samples, events or segments. */
+    [[nodiscard]] bool empty() const noexcept
     {
-        return m_scales;
+        return m_sampleCount == 0 && m_events.empty() && m_segments.empty();
     }
 
-    /** @return Per-channel offset of infoVersion(); valid until release(). */
-    [[nodiscard]] std::span<const double> offsets() const noexcept
+    /** @return Samples lost to overrun between the previous view of this reader and this one. */
+    [[nodiscard]] std::uint64_t lost() const noexcept
     {
-        return m_offsets;
+        return m_lost;
+    }
+
+    /** @return Samples skipped on purpose by a Latest reader before this view (not a loss). */
+    [[nodiscard]] std::uint64_t skipped() const noexcept
+    {
+        return m_skipped;
+    }
+
+    /** @return Events with sample index in [firstSample(), firstSample() + sampleCount()). */
+    [[nodiscard]] const AcqSpanPair<const AcqEvent>& events() const noexcept
+    {
+        return m_events;
+    }
+
+    /** @return Headers of the segments that start inside this view. */
+    [[nodiscard]] const AcqSpanPair<const AcqSegmentHeader>& segments() const noexcept
+    {
+        return m_segments;
+    }
+
+    /** @return Device-specific payload of segment @p i. @pre i < segments().size() */
+    [[nodiscard]] std::span<const std::byte> segmentPayload(std::size_t i) const noexcept
+    {
+        const std::size_t offset = i * m_segmentPayloadBytes;
+        return offset < m_segmentPayloads.first.size()
+            ? m_segmentPayloads.first.subspan(offset, m_segmentPayloadBytes)
+            : m_segmentPayloads.second.subspan(offset - m_segmentPayloads.first.size(), m_segmentPayloadBytes);
     }
 
 private:
     friend class AcqReader;
 
-    std::array<AcqBlockPart, 2> m_parts{};
-    std::size_t m_partCount = 0;
-    std::uint64_t m_firstSample = 0;
-    std::size_t m_sampleCount = 0;
     std::uint64_t m_lost = 0;
     std::uint64_t m_skipped = 0;
-    std::size_t m_channelCount = 0;
-    AcqSampleFormat m_format = AcqSampleFormat::Float32;
-    AcqLayout m_layout = AcqLayout::Interleaved;
-    std::uint32_t m_infoVersion = 0;
     AcqSpanPair<const AcqEvent> m_events;
     AcqSpanPair<const AcqSegmentHeader> m_segments;
     AcqSpanPair<const std::byte> m_segmentPayloads;
     std::size_t m_segmentPayloadBytes = 0;
-    AcqClockModel m_clock;
-    std::span<const double> m_scales;
-    std::span<const double> m_offsets;
-    std::uint64_t m_ticket = 0; /**< Reader-private validation token checked by release(). */
+};
+
+//=============================================================================================================
+/**
+ * Write view returned by AcqWriter::beginWrite(): reserved ring space for the next samples.
+ */
+class AcqWriteView : public AcqViewBase<std::byte>
+{
+public:
+    /**
+     * @return Output streams: samples the device emitted as AcqUnderrunFill since the previous
+     *         beginWrite() because they were not committed in time. firstSample() already accounts for
+     *         them. Always 0 for input streams.
+     */
+    [[nodiscard]] std::uint64_t underrun() const noexcept
+    {
+        return m_underrun;
+    }
+
+private:
+    friend class AcqWriter;
+
+    std::uint64_t m_underrun = 0;
 };
 
 } // namespace ACQLIB

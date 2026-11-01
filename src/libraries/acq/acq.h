@@ -7,11 +7,11 @@
  * @author   Christoph Dinh <christoph.dinh@mne-cpp.org>
  * @since    2.5.0
  * @date     November 2026
- * @brief    Umbrella header of ACQLIB, the headless acquisition library (C++20 and Eigen only).
+ * @brief    Umbrella header of ACQLIB, the headless acquisition and stimulation library (C++20 standard library only).
  *
- * Quick start (the complete program):
+ * Quick start (the complete program; Eigen via the optional acq_eigen.h):
  * @code
- * #include <acq/acq.h>
+ * #include <acq/acq_eigen.h>
  * #include <cstdio>
  *
  * using namespace ACQLIB;
@@ -28,7 +28,7 @@
  *     source->start();
  *     Eigen::MatrixXf data;                                // channels x samples, physical units
  *     for (int i = 0; i < 10; ++i) {
- *         auto block = reader->read(250, data, 1s);
+ *         auto block = read(*reader, 250, data, 1s);
  *         if (!block) { std::fprintf(stderr, "%s\n", block.error().text().c_str()); return 1; }
  *         std::printf("first sample %llu, lost %llu, ch0 mean %g\n",
  *                     static_cast<unsigned long long>(block->firstSample),
@@ -38,10 +38,10 @@
  * }
  * @endcode
  *
- * Layers: AcqSource / AcqSourceRegistry form the control path; AcqStream, AcqReader and AcqBlockView
- * the data path, which after start() performs no heap allocation, takes no lock and emits no Qt
- * signal. Backend authors implement AcqBackend and write through AcqStreamWriter. FIFF users include
- * @ref acq_fiff.h separately.
+ * Layers: AcqSource and AcqSourceRegistry form the control path; AcqStream, AcqReader, AcqWriter and
+ * the views form the data path, which after start() performs no heap allocation and takes no lock, in
+ * both directions. Backend authors implement AcqBackend. The library builds without Qt, Eigen or
+ * exceptions for embedded targets; FIFF users include fiff/acq_fiff.h and link mne_acq_fiff.
  */
 
 #ifndef ACQ_H

@@ -2,15 +2,18 @@
 # Copyright (c) 2026 MNE-CPP Authors
 #   Christoph Dinh <christoph.dinh@mne-cpp.org>
 
-cmake_minimum_required(VERSION 3.14)
+# mne_acq depends on the C++20 standard library only (no Qt, no Eigen), so this file also works as a
+# top-level project for embedded and cross builds: cmake -S src/libraries/acq -B build-acq
+cmake_minimum_required(VERSION 3.21)
 project(mne_acq
   LANGUAGES CXX
 )
 
-# Qt Core and FIFF are private implementation dependencies (D9); public headers are C++20 + Eigen.
-set(QT_REQUIRED_COMPONENTS Core)
-find_package(QT NAMES Qt6 Qt5 REQUIRED COMPONENTS ${QT_REQUIRED_COMPONENTS})
-find_package(Qt${QT_VERSION_MAJOR} REQUIRED COMPONENTS ${QT_REQUIRED_COMPONENTS})
+if(PROJECT_IS_TOP_LEVEL)
+    set(CMAKE_CXX_STANDARD 20)
+    set(CMAKE_CXX_STANDARD_REQUIRED ON)
+    set(CMAKE_CXX_EXTENSIONS OFF)
+endif()
 
 set(SOURCES
   acq_global.cpp
@@ -30,7 +33,7 @@ set(HEADERS
   acq_backend.h
   acq_source.h
   acq_source_registry.h
-  acq_fiff.h
+  acq_eigen.h
 )
 
 set(FILE_TO_UPDATE acq_global.cpp)
@@ -43,20 +46,15 @@ add_library(${PROJECT_NAME} ${SOURCES} ${HEADERS})
 
 target_include_directories(${PROJECT_NAME} PUBLIC $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/..> $<INSTALL_INTERFACE:include>)
 
-set(QT_REQUIRED_COMPONENT_LIBS ${QT_REQUIRED_COMPONENTS})
-list(TRANSFORM QT_REQUIRED_COMPONENT_LIBS PREPEND "Qt${QT_VERSION_MAJOR}::")
+target_compile_features(${PROJECT_NAME} PUBLIC cxx_std_20)
 
-set(MNE_LIBS_REQUIRED mne_fiff mne_utils)
-
-target_link_libraries(${PROJECT_NAME} PRIVATE
-    ${QT_REQUIRED_COMPONENT_LIBS}
-    ${MNE_LIBS_REQUIRED}
-    Eigen3::Eigen)
-
-target_compile_definitions(${PROJECT_NAME} PRIVATE MNE_ACQ_LIBRARY MNE_GIT_HASH_SHORT="${MNE_GIT_HASH_SHORT}" MNE_GIT_HASH_LONG="${MNE_GIT_HASH_LONG}")
+target_compile_definitions(${PROJECT_NAME} PRIVATE MNE_ACQ_LIBRARY)
+if(DEFINED MNE_GIT_HASH_SHORT)
+    target_compile_definitions(${PROJECT_NAME} PRIVATE MNE_GIT_HASH_SHORT="${MNE_GIT_HASH_SHORT}" MNE_GIT_HASH_LONG="${MNE_GIT_HASH_LONG}")
+endif()
 
 if(NOT BUILD_SHARED_LIBS)
-    target_compile_definitions(${PROJECT_NAME} PRIVATE STATICBUILD)
+    target_compile_definitions(${PROJECT_NAME} PUBLIC STATICBUILD)
 endif()
 
 install(TARGETS ${PROJECT_NAME} ${MNE_CPP_EXPORT_SET}

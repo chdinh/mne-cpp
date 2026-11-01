@@ -1,5 +1,6 @@
 {
   "clean_modules": [
+    "src/libraries/acq/",
     "src/libraries/connectivity/",
     "src/libraries/decoding/"
   ],

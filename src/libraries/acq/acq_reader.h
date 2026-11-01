@@ -9,10 +9,16 @@
  * @date     November 2026
  * @brief    AcqReader: one consumer of a stream with its own position, mode and exact loss count.
  *
- * Any number of readers (up to AcqStreamOptions::maxReaders) consume the same ring independently:
- * a recorder, a display and a closed-loop controller each read at their own pace. The producer never
- * waits for them (D2, data-path rule 3). After start(), acquire() and release() perform no heap
- * allocation, take no lock and emit no Qt signal.
+ * Input streams: any number of readers (recorder, display, closed-loop controller) consume the ring
+ * independently; the producer never waits for them. Output streams: the device backend consumes
+ * through one gating reader, which the writer waits for; further non-gating readers monitor what was
+ * sent (e.g. to record the delivered stimulus).
+ *
+ * Cost model (throughput does not degrade with the number of readers): each reader's position lives
+ * on its own cache line and is written only by that reader; the producer publishes one position per
+ * commit and touches no per-reader state; a reader computes its loss from positions on acquire();
+ * a blocked reader is woken by std::atomic::notify only when it announced that it waits.
+ * After start(), acquire() and release() perform no heap allocation and take no lock.
  *
  * Zero-copy loop:
  * @code
@@ -20,9 +26,8 @@
  * while (running) {
  *     auto view = reader->acquire(256, std::chrono::milliseconds(100));
  *     if (!view) { if (view.error() == ACQLIB::AcqErrorCode::Timeout) continue; break; }
- *     for (std::size_t p = 0; p < view->partCount(); ++p)
- *         process(view->map<float>(p));                   // channels x samples, in the ring
- *     if (!reader->release(*view).ok()) discardLastResult();  // producer overtook the view
+ *     process(*view);                                  // parts point into the ring
+ *     if (!reader->release(*view).ok()) discardLastResult(); // the producer overtook the view
  * }
  * @endcode
  */
@@ -39,9 +44,8 @@
 #include "acq_convert.h"
 #include "acq_error.h"
 
-#include <Eigen/Core>
-
 #include <chrono>
+#include <complex>
 #include <cstddef>
 #include <cstdint>
 #include <memory>
@@ -62,13 +66,13 @@ class AcqStream;
 
 //=============================================================================================================
 /**
- * How a waiting reader is woken.
+ * How a waiting reader or writer is woken.
  */
 enum class AcqWait : std::uint8_t
 {
-    Block = 0,        /**< std::atomic::wait; no CPU while idle. Default for Lossless and Latest. */
-    Spin = 1,         /**< Busy-poll; lowest latency, one core. Default for LowLatency. */
-    SpinThenBlock = 2 /**< Busy-poll for AcqReaderOptions::spinFor, then block. */
+    Block = 0,        /**< std::atomic::wait; no CPU while idle. */
+    Spin = 1,         /**< Busy-poll; lowest latency, occupies a core. */
+    SpinThenBlock = 2 /**< Busy-poll for spinFor, then block. */
 };
 
 //=============================================================================================================
@@ -77,14 +81,15 @@ enum class AcqWait : std::uint8_t
  */
 struct AcqReaderOptions
 {
-    AcqWait wait = AcqWait::Block;                                    /**< Wake-up strategy; LowLatency forces Spin unless set. */
+    AcqWait wait = AcqWait::Block;                                    /**< Ignored for LowLatency, which spins. */
     std::chrono::nanoseconds spinFor = std::chrono::microseconds(50); /**< Spin window of SpinThenBlock. */
     bool startAtOldest = false;                                       /**< Start at the oldest retained sample instead of the newest. */
+    bool gating = false;                                              /**< Output streams only: the writer never overwrites what this reader has not consumed (device side). */
 };
 
 //=============================================================================================================
 /**
- * Counters of one reader. Exact, maintained without locks.
+ * Counters of one reader; exact.
  */
 struct AcqReaderStats
 {
@@ -92,15 +97,16 @@ struct AcqReaderStats
     std::uint64_t delivered = 0;    /**< Samples delivered in views. */
     std::uint64_t lost = 0;         /**< Samples overwritten before this reader could acquire them. */
     std::uint64_t skipped = 0;      /**< Samples skipped on purpose by a Latest reader. */
+    std::uint64_t idle = 0;         /**< Gating reader: samples played as underrun fill (consumeIdle). */
     std::uint64_t overruns = 0;     /**< Views invalidated while held (release() returned Overrun). */
+    std::uint64_t views = 0;        /**< Views acquired. */
     std::uint64_t eventsLost = 0;   /**< Events overwritten before this reader could acquire them. */
     std::uint64_t segmentsLost = 0; /**< Segment headers overwritten likewise. */
-    std::uint64_t views = 0;        /**< Views acquired. */
 };
 
 //=============================================================================================================
 /**
- * Result of the copying read() convenience calls.
+ * Result of the copying read() calls.
  */
 struct AcqReadResult
 {
@@ -118,12 +124,12 @@ class ACQSHARED_EXPORT AcqReader
 {
 public:
     /**
-     * Consumption mode of a reader.
+     * Consumption mode.
      */
     enum class ReadMode : std::uint8_t
     {
         Lossless = 0,  /**< Every sample in order; an overrun is reported with its exact count and the reader resumes at the oldest retained sample. */
-        Latest = 1,    /**< Always the newest samples; older ones are skipped (counted, not lost). For displays. */
+        Latest = 1,    /**< The newest samples; older ones are skipped (counted, not lost). For displays. */
         LowLatency = 2 /**< Like Lossless, woken by busy-poll for the shortest commit-to-wake latency. */
     };
 
@@ -140,15 +146,19 @@ public:
     /** @return The consumption mode. */
     [[nodiscard]] ReadMode mode() const noexcept;
 
+    /** @return Channels of the stream. */
+    [[nodiscard]] std::size_t channelCount() const noexcept;
+
     /** @return The stream this reader consumes. */
-    [[nodiscard]] AcqStream stream() const;
+    [[nodiscard]] AcqStream stream() const noexcept;
 
     //=========================================================================================================
     /**
      * Waits until at least @p minSamples are available (Latest: the newest @p minSamples), then returns a
-     * view of up to @p maxSamples. Only one view per reader may be held at a time.
+     * view of up to @p maxSamples. Larger blocks amortise the per-view cost; pass maxSamples = 0 to take
+     * everything available. One view per reader at a time.
      *
-     * @param[in] minSamples   Samples per channel required before returning; 0 returns immediately.
+     * @param[in] minSamples   Samples per channel required; 0 returns immediately (device polling).
      * @param[in] timeout      Maximum wait.
      * @param[in] maxSamples   Upper bound of the view, 0 for everything available.
      *
@@ -159,7 +169,7 @@ public:
 
     //=========================================================================================================
     /**
-     * Returns @p view to the ring and advances the reader. Clears @p view.
+     * Returns @p view to the ring and advances the reader; clears @p view.
      *
      * @param[in, out] view   A view returned by this reader's acquire().
      *
@@ -170,29 +180,37 @@ public:
 
     //=========================================================================================================
     /**
-     * Copying convenience: waits for @p samples samples, converts them into @p out (resized to
-     * channels x samples only if its shape differs) and releases the view.
+     * Gating reader of an output stream: the device has emitted @p samples samples of underrun fill
+     * because the writer had not committed them. Advances this reader; the writer learns the gap from
+     * AcqWriteView::underrun().
      *
-     * @param[in] samples   Samples per channel.
-     * @param[out] out      Caller-owned destination.
+     * @param[in] samples   Samples played as fill.
+     *
+     * @return WrongDirection unless this is the gating reader of an output stream.
+     */
+    AcqError consumeIdle(std::size_t samples) noexcept;
+
+    //=========================================================================================================
+    /**
+     * Copying convenience: waits for @p out.cols samples, decodes them into @p out and releases.
+     *
+     * @param[out] out      Caller-owned destination, rows = channelCount().
      * @param[in] timeout   Maximum wait.
      * @param[in] scaling   Raw or physical values.
      *
-     * @return Position and loss of the block, or the error of acquire()/release().
+     * @return Position and loss of the block, or the error of acquire()/decode()/release().
      */
-    [[nodiscard]] AcqExpected<AcqReadResult> read(std::size_t samples, Eigen::MatrixXf& out,
-                                                  std::chrono::nanoseconds timeout,
-                                                  AcqScaling scaling = AcqScaling::Physical);
+    [[nodiscard]] AcqExpected<AcqReadResult> read(const AcqMatrixRef<float>& out, std::chrono::nanoseconds timeout,
+                                                  AcqScaling scaling = AcqScaling::Physical) noexcept;
 
-    /** @copydoc read(std::size_t, Eigen::MatrixXf&, std::chrono::nanoseconds, AcqScaling) */
-    [[nodiscard]] AcqExpected<AcqReadResult> read(std::size_t samples, Eigen::MatrixXd& out,
-                                                  std::chrono::nanoseconds timeout,
-                                                  AcqScaling scaling = AcqScaling::Physical);
+    /** @copydoc read(const AcqMatrixRef<float>&, std::chrono::nanoseconds, AcqScaling) */
+    [[nodiscard]] AcqExpected<AcqReadResult> read(const AcqMatrixRef<double>& out, std::chrono::nanoseconds timeout,
+                                                  AcqScaling scaling = AcqScaling::Physical) noexcept;
 
-    /** @copydoc read(std::size_t, Eigen::MatrixXf&, std::chrono::nanoseconds, AcqScaling) */
-    [[nodiscard]] AcqExpected<AcqReadResult> read(std::size_t samples, Eigen::MatrixXcf& out,
+    /** @copydoc read(const AcqMatrixRef<float>&, std::chrono::nanoseconds, AcqScaling) */
+    [[nodiscard]] AcqExpected<AcqReadResult> read(const AcqMatrixRef<std::complex<float>>& out,
                                                   std::chrono::nanoseconds timeout,
-                                                  AcqScaling scaling = AcqScaling::Physical);
+                                                  AcqScaling scaling = AcqScaling::Physical) noexcept;
 
     /** @return Samples committed and not yet acquired by this reader (capped at the ring capacity). */
     [[nodiscard]] std::size_t available() const noexcept;

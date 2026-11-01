@@ -16,7 +16,13 @@
 
 #include "acq_global.h"
 
-#include <utils/buildinfo.h>
+// Standalone (embedded) builds do not pass the git hashes of the MNE-CPP super-build.
+#ifndef MNE_GIT_HASH_SHORT
+#define MNE_GIT_HASH_SHORT "unknown"
+#endif
+#ifndef MNE_GIT_HASH_LONG
+#define MNE_GIT_HASH_LONG "unknown"
+#endif
 
 //=============================================================================================================
 // DEFINE METHODS
@@ -24,19 +30,19 @@
 
 const char* ACQLIB::buildDateTime()
 {
-    return UTILSLIB::dateTimeNow();
+    return __DATE__ " " __TIME__;
 }
 
 //=============================================================================================================
 
 const char* ACQLIB::buildHash()
 {
-    return UTILSLIB::gitHash();
+    return MNE_GIT_HASH_SHORT;
 }
 
 //=============================================================================================================
 
 const char* ACQLIB::buildHashLong()
 {
-    return UTILSLIB::gitHashLong();
+    return MNE_GIT_HASH_LONG;
 }

@@ -9,10 +9,11 @@
  * @date     November 2026
  * @brief    AcqClockModel: relation between the sample index of a stream and host time.
  *
- * The sample index is the time base of every stream (data-path rule 5). Host time is derived from it
- * by a linear model anchored at one sample, with an estimated rate correction and a stated
- * uncertainty, so that clock drift of a device never silently shifts events. The producer publishes
- * the model; every AcqBlockView carries the snapshot that was valid when it was acquired.
+ * The sample index is the time base of every stream, input or output (data-path rule 5). Host time is
+ * derived from it by a linear model anchored at one sample, with an estimated rate correction, the
+ * device pipeline delay (ADC group delay, DAC/RF output latency) and a stated uncertainty. Closed-loop
+ * code maps an input sample to the output sample that is emitted at the same physical time with
+ * mapSample().
  */
 
 #ifndef ACQ_CLOCK_MODEL_H
@@ -50,38 +51,59 @@ enum class AcqClockSource : std::uint8_t
 
 //=============================================================================================================
 /**
- * Linear sample-index <-> host-time model. Trivially copyable; published by the producer without a
- * lock (sequence counter) and copied into every block view.
+ * Linear sample-index <-> host-time model. Trivially copyable; published by the producer through a
+ * sequence counter (no lock) and copied into every view.
  *
- * hostNs(s) = anchorHostNs + (s - anchorSample) * 1e9 / (sfreq * rateCorrection)
- *
- * Host time is nanoseconds of std::chrono::steady_clock; @c utcOffsetNs converts it to UTC.
+ * physicalNs(s) = anchorHostNs + (s - anchorSample) * 1e9 / (sfreq * rateCorrection) - pipelineDelayNs
+ * for input streams (the sample was taken earlier than it arrived) and + pipelineDelayNs for output
+ * streams (the sample is emitted later than it is handed over). Times are std::chrono::steady_clock ns.
  */
 struct AcqClockModel
 {
     double sfreq = 0.0;                                             /**< Nominal sampling frequency in Hz. */
     double rateCorrection = 1.0;                                    /**< Estimated actual / nominal rate. */
-    double uncertaintyNs = std::numeric_limits<double>::infinity(); /**< One-sigma uncertainty of hostNs(). */
+    double uncertaintyNs = std::numeric_limits<double>::infinity(); /**< One-sigma uncertainty of physicalNs(). */
     std::uint64_t anchorSample = 0;                                 /**< Sample index of the anchor. */
-    std::int64_t anchorHostNs = 0;                                  /**< steady_clock time of the anchor sample. */
+    std::int64_t anchorHostNs = 0;                                  /**< Host time at which the anchor sample crossed the host boundary. */
+    std::int64_t pipelineDelayNs = 0;                               /**< Fixed device delay between the physical event and the host boundary. */
     std::int64_t utcOffsetNs = 0;                                   /**< UTC minus steady_clock at the anchor. */
     AcqClockSource source = AcqClockSource::Nominal;                /**< Origin of the anchor. */
+    bool output = false;                                            /**< true for output streams (sign of pipelineDelayNs). */
 
-    /** @return Host steady_clock time of sample @p sample in nanoseconds. @pre sfreq > 0 */
-    [[nodiscard]] std::int64_t hostNs(std::uint64_t sample) const noexcept
+    /** @return steady_clock time in ns at which sample @p sample was taken (input) or emitted (output). @pre sfreq > 0 */
+    [[nodiscard]] std::int64_t physicalNs(std::uint64_t sample) const noexcept
     {
         const double ds = static_cast<double>(sample) - static_cast<double>(anchorSample);
-        return anchorHostNs + static_cast<std::int64_t>(std::llround(ds * 1e9 / (sfreq * rateCorrection)));
+        const auto t = anchorHostNs + static_cast<std::int64_t>(std::llround(ds * 1e9 / (sfreq * rateCorrection)));
+        return output ? t + pipelineDelayNs : t - pipelineDelayNs;
     }
 
-    /** @return The sample index closest to host time @p hostTimeNs, clamped at 0. @pre sfreq > 0 */
-    [[nodiscard]] std::uint64_t sampleAt(std::int64_t hostTimeNs) const noexcept
+    /** @return The sample index taken or emitted closest to steady_clock time @p ns, clamped at 0. @pre sfreq > 0 */
+    [[nodiscard]] std::uint64_t sampleAt(std::int64_t ns) const noexcept
     {
-        const double ds = static_cast<double>(hostTimeNs - anchorHostNs) * sfreq * rateCorrection / 1e9;
-        const double s = static_cast<double>(anchorSample) + ds;
+        const std::int64_t boundaryNs = output ? ns - pipelineDelayNs : ns + pipelineDelayNs;
+        const double s = static_cast<double>(anchorSample) +
+            static_cast<double>(boundaryNs - anchorHostNs) * sfreq * rateCorrection / 1e9;
         return s <= 0.0 ? 0U : static_cast<std::uint64_t>(std::llround(s));
     }
 };
+
+//=============================================================================================================
+/**
+ * Maps a sample of one stream to the sample of another stream at the same physical time, e.g. the
+ * output sample that coincides with a detected input event.
+ *
+ * @param[in] from     Clock model of the stream @p sample belongs to.
+ * @param[in] to       Clock model of the target stream.
+ * @param[in] sample   Sample index in @p from.
+ *
+ * @return Sample index in @p to.
+ */
+[[nodiscard]] inline std::uint64_t mapSample(const AcqClockModel& from, const AcqClockModel& to,
+                                             std::uint64_t sample) noexcept
+{
+    return to.sampleAt(from.physicalNs(sample));
+}
 
 } // namespace ACQLIB
 

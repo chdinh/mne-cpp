@@ -9,10 +9,10 @@
  * @date     November 2026
  * @brief    AcqBackend: the interface a device, file or network backend implements behind an AcqSource.
  *
- * Users hold an AcqSource; backend authors derive from AcqBackend. A backend creates its streams while
- * it is being opened (addStream), runs its own acquisition thread between start() and stop(), and
- * writes into the streams through their AcqStreamWriter. AcqSource owns the backend and enforces the
- * state machine, so a backend only implements the transitions.
+ * Users hold an AcqSource; backend authors derive from AcqBackend. While opening, a backend creates
+ * its input streams (it gets their writers) and output streams (it gets their gating readers). Between
+ * start() and stop() it runs its own acquisition/output thread, interrupt handler or DMA callback.
+ * AcqSource owns the backend and enforces the state machine, so a backend only implements transitions.
  */
 
 #ifndef ACQ_BACKEND_H
@@ -24,6 +24,7 @@
 
 #include "acq_global.h"
 #include "acq_error.h"
+#include "acq_reader.h"
 #include "acq_stream.h"
 #include "acq_stream_info.h"
 
@@ -64,16 +65,16 @@ public:
     /** @return Description of the opened device. */
     [[nodiscard]] virtual AcqSourceDescription description() const = 0;
 
-    /** Starts acquisition (typically starts the acquisition thread). Called in state Opened or Stopped. */
+    /** Starts acquisition and output. Called in state Opened or Stopped. */
     virtual AcqError start() = 0;
 
-    /** Stops acquisition and joins the acquisition thread before returning. Called in state Running. */
+    /** Stops and joins every backend thread before returning. Called in state Running. */
     virtual void stop() = 0;
 
     /** Releases the device. Called once, after stop(). The default does nothing. */
     virtual void close();
 
-    /** @return The streams created by addStream(), in creation order. */
+    /** @return The streams created while opening, in creation order. */
     [[nodiscard]] std::span<const AcqStream> streams() const noexcept;
 
 protected:
@@ -81,16 +82,29 @@ protected:
 
     //=========================================================================================================
     /**
-     * Creates a stream. Only while opening, before the first start().
+     * Creates an input stream. Only while opening.
      *
-     * @param[in] info      Stream description.
+     * @param[in] info      Stream description; direction must be Input.
      * @param[in] options   Ring options, e.g. an adopted DMA buffer.
      *
-     * @return The producer handle, owned by the backend base; valid until the backend is destroyed.
+     * @return The writer, owned by the backend base and valid until the backend is destroyed.
      */
-    AcqExpected<AcqStreamWriter*> addStream(AcqStreamInfo info, AcqStreamOptions options = {});
+    AcqExpected<AcqWriter*> addInputStream(AcqStreamInfo info, AcqStreamOptions options = {});
 
-    /** Reports a fatal acquisition error from any thread; the source moves to state Failed. */
+    //=========================================================================================================
+    /**
+     * Creates an output stream. Only while opening.
+     *
+     * @param[in] info      Stream description; direction must be Output.
+     * @param[in] options   Ring options, e.g. the device's DMA transmit buffer.
+     * @param[in] wait      How the device reader waits; device loops usually poll with acquire(0, 0).
+     *
+     * @return The gating device reader, owned by the backend base and valid until the backend is destroyed.
+     */
+    AcqExpected<AcqReader*> addOutputStream(AcqStreamInfo info, AcqStreamOptions options = {},
+                                            AcqWait wait = AcqWait::Spin);
+
+    /** Reports a fatal error from any thread; the source moves to state Failed. Allocation-free. */
     void reportError(AcqError error) noexcept;
 
 private:
