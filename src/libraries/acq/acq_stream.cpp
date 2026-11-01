@@ -651,9 +651,6 @@ AcqExpected<AcqWriteView> AcqWriter::beginWriteAt(std::uint64_t firstSample, std
     if (c.direction != AcqDirection::Output) {
         return AcqErrorCode::WrongDirection;
     }
-    if (firstSample < c.writePos || firstSample + samples - c.writePos > c.capacity) {
-        return AcqErrorCode::InvalidParameter;
-    }
     const std::uint32_t alignment = c.timebase.load().sampleAlignment;
     if (alignment > 1 && firstSample % alignment != 0) {
         return AcqErrorCode::NotOnGrid;
@@ -661,7 +658,11 @@ AcqExpected<AcqWriteView> AcqWriter::beginWriteAt(std::uint64_t firstSample, std
     if (firstSample < c.gatePosition.load(std::memory_order_acquire)) {
         return AcqErrorCode::Late;
     }
+    // The device may have played fill far past writePos; the range check refers to the caught-up position.
     const std::uint64_t underrun = catchUpWithDevice(c);
+    if (firstSample < c.writePos || firstSample + samples - c.writePos > c.capacity) {
+        return AcqErrorCode::InvalidParameter;
+    }
     if (AcqError e = waitForSpace(c, firstSample + samples, timeout); !e.ok()) {
         return e;
     }

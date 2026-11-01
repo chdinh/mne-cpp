@@ -251,6 +251,7 @@ private slots:
     void testOutputWriterWaitsForDevice();
     void testOutputUnderrun();
     void testOutputScheduledWrite();
+    void testScheduledWriteAfterLongIdle();
     void testOutputMonitorAndEvents();
     void testWriterHandles();
     void testInvalidHandles();
@@ -1010,6 +1011,7 @@ void TestAcqStream::testOutputScheduledWrite()
     fill(*scheduled);
     writer->commit(8);
     QCOMPARE(writer->writePosition(), std::uint64_t(72));
+    QVERIFY(writer->beginWriteAt(10, 4, 0ns).error() == AcqErrorCode::InvalidParameter); // written, not yet played
 
     auto view = device->acquire(72, 0ns);
     QVERIFY(view);
@@ -1021,7 +1023,7 @@ void TestAcqStream::testOutputScheduledWrite()
     QCOMPARE(pulse, value(64, 1));
     QVERIFY(device->release(*view).ok());
 
-    QVERIFY(writer->beginWriteAt(10, 4, 0ns).error() == AcqErrorCode::InvalidParameter);
+    QVERIFY(writer->beginWriteAt(10, 4, 0ns).error() == AcqErrorCode::Late); // already played
     QVERIFY(device->consumeIdle(50).ok());
     QVERIFY(writer->beginWriteAt(100, 4, 0ns).error() == AcqErrorCode::Late);
     AcqTimebase tb;
@@ -1029,6 +1031,34 @@ void TestAcqStream::testOutputScheduledWrite()
     writer->stream().setTimebase(tb);
     QVERIFY(writer->beginWriteAt(130, 4, 0ns).error() == AcqErrorCode::NotOnGrid);
     QVERIFY(writer->beginWriteAt(128, 4, 0ns));
+}
+
+//=============================================================================================================
+
+void TestAcqStream::testScheduledWriteAfterLongIdle()
+{
+    // Sparse stimulation: the device plays fill far beyond the ring capacity between two pulses.
+    auto writer = AcqWriter::create(makeInfo(1, AcqLayout::Interleaved, AcqDirection::Output), options(64));
+    AcqReaderOptions gating;
+    gating.gating = true;
+    auto device = writer->stream().reader(AcqReader::ReadMode::Lossless, gating);
+    QVERIFY(device->consumeIdle(1000).ok());
+    auto pulse = writer->beginWriteAt(1010, 8, 0ns);
+    QVERIFY2(pulse.hasValue(), pulse.error().text().c_str());
+    QCOMPARE(pulse->firstSample(), std::uint64_t(1010));
+    fill(*pulse);
+    writer->commit(8);
+    QVERIFY(device->consumeIdle(0).ok());
+    auto played = device->acquire(18, 0ns);
+    QVERIFY(played);
+    QCOMPARE(played->firstSample(), std::uint64_t(1000));
+    std::int32_t v = -1;
+    std::memcpy(&v, played->part(0).at(0, 9), sizeof(v));
+    QCOMPARE(v, 0);
+    std::memcpy(&v, played->part(0).at(0, 10), sizeof(v));
+    QCOMPARE(v, value(1010, 0));
+    QVERIFY(device->release(*played).ok());
+    QVERIFY(writer->beginWriteAt(500, 4, 0ns).error() == AcqErrorCode::Late);
 }
 
 //=============================================================================================================

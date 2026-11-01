@@ -260,7 +260,7 @@ public:
      * @param[in] samples       Samples per channel. @pre firstSample + samples - writePosition() <= capacity
      * @param[in] timeout       Maximum wait for space.
      *
-     * @return The view at @p firstSample, or Late (firstSample < earliestWritableSample()), Timeout,
+     * @return The view at @p firstSample, or Late (already played; takes precedence), Timeout,
      *         InvalidParameter (before writePosition()), NotOnGrid (not a multiple of
      *         timebase().sampleAlignment), WrongDirection (input stream).
      */
