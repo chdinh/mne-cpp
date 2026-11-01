@@ -15179,6 +15179,16 @@
       }
     },
     "entries": {
+      "ex_acq_performance": {
+        "title": "Closed-loop acquisition and stimulation at full rate",
+        "tasks": [
+          "real-time"
+        ],
+        "modalities": [
+          "ieeg"
+        ],
+        "level": "advanced"
+      },
       "ex_averaging": {
         "title": "Average epochs into an evoked response",
         "tasks": [

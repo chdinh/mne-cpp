@@ -52,6 +52,25 @@
   },
   "examples": [
     {
+      "name": "ex_acq_performance",
+      "title": "Closed-loop acquisition and stimulation at full rate",
+      "brief": "Closed-loop acquisition and stimulation with ACQLIB, and its sustained throughput per device class",
+      "thumbnail": "",
+      "url": "/docs/examples/acq/ex_acq_performance/",
+      "library": "acq",
+      "libraries": [
+        "acq"
+      ],
+      "tasks": [
+        "real-time"
+      ],
+      "modalities": [
+        "ieeg"
+      ],
+      "level": "advanced",
+      "topics": []
+    },
+    {
       "name": "ex_averaging",
       "title": "Average epochs into an evoked response",
       "brief": "Average stimulus-locked epochs of a raw FIFF recording into an evoked response, with event selection and EOG rejection",
