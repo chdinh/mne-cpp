@@ -183,7 +183,7 @@ jobs:
       env:
         GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       run: |
-        gh release download qt_binaries -p "qt6_${QT_VERSION_TOKEN}_static_binaries_linux.tar.gz" -D /tmp
+        gh release download qt_binaries -R mne-tools/mne-cpp -p "qt6_${QT_VERSION_TOKEN}_static_binaries_linux.tar.gz" -D /tmp
         mkdir -p Qt6_static
         tar xfz "/tmp/qt6_${QT_VERSION_TOKEN}_static_binaries_linux.tar.gz" -C Qt6_static
     - name: Build static Qt from source

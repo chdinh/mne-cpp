@@ -75,7 +75,8 @@ LINKAGE=""
 OUTPUT_DIR=""
 RELEASE_TAG=""
 PLATFORM_OVERRIDE=""
-REPOSITORY="${GITHUB_REPOSITORY:-mne-tools/mne-cpp}"
+# Toolchains are published only on the canonical repository, so forks download from there too.
+REPOSITORY="mne-tools/mne-cpp"
 
 while [[ $# -gt 0 ]]; do
     case "$1" in

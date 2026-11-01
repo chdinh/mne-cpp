@@ -10,11 +10,8 @@ set "VERSION="
 set "LINKAGE="
 set "OUTPUT_DIR="
 set "RELEASE_TAG="
-if defined GITHUB_REPOSITORY (
-    set "REPOSITORY=%GITHUB_REPOSITORY%"
-) else (
-    set "REPOSITORY=mne-tools/mne-cpp"
-)
+rem Toolchains are published only on the canonical repository, so forks download from there too.
+set "REPOSITORY=mne-tools/mne-cpp"
 
 :parse_args
 if "%~1"=="" goto after_parse

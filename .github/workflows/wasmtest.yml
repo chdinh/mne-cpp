@@ -43,7 +43,7 @@ jobs:
       env:
         GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       run: |
-        gh release download qt_binaries -p "qt6_${QT_VERSION_TOKEN}_static_binaries_wasm.tar.gz" -D /tmp
+        gh release download qt_binaries -R mne-tools/mne-cpp -p "qt6_${QT_VERSION_TOKEN}_static_binaries_wasm.tar.gz" -D /tmp
     - name: Trigger BuildQtBinaries and wait
       if: steps.download-qt-wasm.outcome != 'success'
       env:
@@ -59,7 +59,7 @@ jobs:
         gh run watch "$RUN_ID" --interval 30
         # Retry download
         echo "Retrying download..."
-        gh release download qt_binaries -p "qt6_${QT_VERSION_TOKEN}_static_binaries_wasm.tar.gz" -D /tmp
+        gh release download qt_binaries -R mne-tools/mne-cpp -p "qt6_${QT_VERSION_TOKEN}_static_binaries_wasm.tar.gz" -D /tmp
     - name: Extract WASM Qt binaries
       env:
         GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
@@ -71,7 +71,7 @@ jobs:
       env:
         GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       run: |
-        gh release download qt_binaries -p "qt6_${QT_VERSION_TOKEN}_static_binaries_linux.tar.gz" -D /tmp
+        gh release download qt_binaries -R mne-tools/mne-cpp -p "qt6_${QT_VERSION_TOKEN}_static_binaries_linux.tar.gz" -D /tmp
         mkdir -p "${RUNNER_TOOL_CACHE}/Qt/${QT_VERSION}/gcc_64"
         tar xf "/tmp/qt6_${QT_VERSION_TOKEN}_static_binaries_linux.tar.gz" -C "${RUNNER_TOOL_CACHE}/Qt/${QT_VERSION}/gcc_64"
     - name: Download Eigen package

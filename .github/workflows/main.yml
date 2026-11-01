@@ -420,7 +420,7 @@ jobs:
       env:
         GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       run: |
-        gh release download qt_binaries -p "qt6_${QT_VERSION_TOKEN}_static_binaries_wasm.tar.gz" -D /tmp
+        gh release download qt_binaries -R mne-tools/mne-cpp -p "qt6_${QT_VERSION_TOKEN}_static_binaries_wasm.tar.gz" -D /tmp
         mkdir -p "${RUNNER_TOOL_CACHE}/Qt/${QT_VERSION}/wasm_multithread"
         tar xf "/tmp/qt6_${QT_VERSION_TOKEN}_static_binaries_wasm.tar.gz" -C "${RUNNER_TOOL_CACHE}/Qt/${QT_VERSION}/wasm_multithread"
         echo "Qt6_DIR=${RUNNER_TOOL_CACHE}/Qt/${QT_VERSION}" >> "$GITHUB_ENV"
@@ -429,7 +429,7 @@ jobs:
       env:
         GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       run: |
-        gh release download qt_binaries -p "qt6_${QT_VERSION_TOKEN}_static_binaries_linux.tar.gz" -D /tmp
+        gh release download qt_binaries -R mne-tools/mne-cpp -p "qt6_${QT_VERSION_TOKEN}_static_binaries_linux.tar.gz" -D /tmp
         mkdir -p "${RUNNER_TOOL_CACHE}/Qt/${QT_VERSION}/gcc_64"
         tar xf "/tmp/qt6_${QT_VERSION_TOKEN}_static_binaries_linux.tar.gz" -C "${RUNNER_TOOL_CACHE}/Qt/${QT_VERSION}/gcc_64"
 

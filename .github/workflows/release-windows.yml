@@ -197,7 +197,7 @@ jobs:
         GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       run: |
         $qtArchive = "qt6_$($env:QT_VERSION_TOKEN)_static_binaries_win.zip"
-        gh release download qt_binaries -p $qtArchive -D $env:TEMP
+        gh release download qt_binaries -R mne-tools/mne-cpp -p $qtArchive -D $env:TEMP
         mkdir Qt6_static -Force
         7z x (Join-Path $env:TEMP $qtArchive) -o"Qt6_static" -y
     - name: Build static Qt from source
