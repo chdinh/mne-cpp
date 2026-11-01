@@ -1,0 +1,47 @@
+---
+id: acq-stream-options
+title: "ACQLIB::AcqStreamOptions"
+sidebar_label: AcqStreamOptions
+sidebar_position: 15
+---
+
+# AcqStreamOptions
+
+**Namespace:** `ACQLIB` &nbsp;·&nbsp; **Library:** Acquisition Library &nbsp;·&nbsp; **Source:** [`acq/acq_stream.h`](https://github.com/mne-tools/mne-cpp/blob/staging/src/libraries/acq/acq_stream.h)
+
+`#include <acq/acq_stream.h>`
+
+```cpp
+struct ACQLIB::AcqStreamOptions
+```
+
+Ring and real-time options of a stream; fixed at creation (control path).
+
+---
+
+## Example
+
+No example of its own: Ring creation options of AcqWriter::create(); the defaults fit, so callers usually pass none.
+
+It is exercised by:
+
+````cpp title="src/examples/ex_acq_performance/main.cpp"
+auto input = AcqWriter::create(inInfo);
+auto stimulator = AcqWriter::create(outInfo);
+if (!input || !stimulator) {
+    std::fprintf(stderr, "%s\n", (!input ? input.error() : stimulator.error()).text().c_str());
+    return false;
+}
+AcqReaderOptions gating;
+gating.gating = true;
+auto dac = stimulator->stream().reader(AcqReader::ReadMode::Lossless, gating);
+auto recorder = input->stream().reader(AcqReader::ReadMode::Lossless);
+auto display = input->stream().reader(AcqReader::ReadMode::Latest);
+auto controller = input->stream().reader(AcqReader::ReadMode::LowLatency);
+````
+
+From [ex_acq_performance](../../examples/acq/ex_acq_performance.mdx).
+
+## Authors of this file
+
+- Christoph Dinh &lt;christoph.dinh@mne-cpp.org&gt;

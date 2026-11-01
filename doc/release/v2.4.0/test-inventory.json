@@ -6,9 +6,9 @@
     "commit": "0800c9a1bf606c2df8c44e35fbb42ea13029b549"
   },
   "summary": {
-    "directories": 265,
+    "directories": 268,
     "registration": {
-      "unconditional": 256,
+      "unconditional": 259,
       "conditional": 6,
       "unregistered": 3
     },
@@ -31,7 +31,11 @@
         "executed": 295,
         "failures": 0,
         "skipped": 0,
-        "registered_not_executed": [],
+        "registered_not_executed": [
+          "test_acq_error",
+          "test_acq_stream",
+          "test_acq_timebase"
+        ],
         "executed_not_in_inventory": [
           "ex_bids",
           "ex_cancel_noise",
@@ -72,7 +76,11 @@
         "executed": 295,
         "failures": 0,
         "skipped": 0,
-        "registered_not_executed": [],
+        "registered_not_executed": [
+          "test_acq_error",
+          "test_acq_stream",
+          "test_acq_timebase"
+        ],
         "executed_not_in_inventory": [
           "ex_bids",
           "ex_cancel_noise",
@@ -113,7 +121,11 @@
         "executed": 295,
         "failures": 0,
         "skipped": 0,
-        "registered_not_executed": [],
+        "registered_not_executed": [
+          "test_acq_error",
+          "test_acq_stream",
+          "test_acq_timebase"
+        ],
         "executed_not_in_inventory": [
           "ex_bids",
           "ex_cancel_noise",
@@ -154,7 +166,11 @@
         "executed": 295,
         "failures": 0,
         "skipped": 0,
-        "registered_not_executed": [],
+        "registered_not_executed": [
+          "test_acq_error",
+          "test_acq_stream",
+          "test_acq_timebase"
+        ],
         "executed_not_in_inventory": [
           "ex_bids",
           "ex_cancel_noise",
@@ -195,7 +211,11 @@
         "executed": 295,
         "failures": 0,
         "skipped": 2,
-        "registered_not_executed": [],
+        "registered_not_executed": [
+          "test_acq_error",
+          "test_acq_stream",
+          "test_acq_timebase"
+        ],
         "executed_not_in_inventory": [
           "ex_bids",
           "ex_cancel_noise",
@@ -236,7 +256,11 @@
         "executed": 295,
         "failures": 0,
         "skipped": 2,
-        "registered_not_executed": [],
+        "registered_not_executed": [
+          "test_acq_error",
+          "test_acq_stream",
+          "test_acq_timebase"
+        ],
         "executed_not_in_inventory": [
           "ex_bids",
           "ex_cancel_noise",
@@ -276,6 +300,131 @@
     }
   },
   "tests": [
+    {
+      "name": "test_acq_error",
+      "cmake": "src/testframes/test_acq_error/CMakeLists.txt",
+      "registration": {
+        "state": "unconditional",
+        "via": "src/testframes/CMakeLists.txt",
+        "conditions": [],
+        "early_return_guard": null,
+        "unregistered_reason": null
+      },
+      "add_test_names": [
+        "test_acq_error"
+      ],
+      "labels": [
+        "unit"
+      ],
+      "timeout": 120,
+      "requirements": [],
+      "gui": false,
+      "qskip_sites": 0,
+      "spawns_processes": false,
+      "ci_excluded_on": [],
+      "ci": {
+        "macos-26": "absent",
+        "macos-26-qt-min": "absent",
+        "ubuntu-24.04": "absent",
+        "ubuntu-24.04-qt-min": "absent",
+        "windows-2025-vs2026": "absent",
+        "windows-2025-vs2026-qt-min": "absent"
+      },
+      "registry_classes": [
+        "AcqError",
+        "AcqErrorInfo",
+        "AcqExpected",
+        "AcqInt24"
+      ]
+    },
+    {
+      "name": "test_acq_stream",
+      "cmake": "src/testframes/test_acq_stream/CMakeLists.txt",
+      "registration": {
+        "state": "unconditional",
+        "via": "src/testframes/CMakeLists.txt",
+        "conditions": [],
+        "early_return_guard": null,
+        "unregistered_reason": null
+      },
+      "add_test_names": [
+        "test_acq_stream"
+      ],
+      "labels": [
+        "unit"
+      ],
+      "timeout": 120,
+      "requirements": [],
+      "gui": false,
+      "qskip_sites": 0,
+      "spawns_processes": false,
+      "ci_excluded_on": [],
+      "ci": {
+        "macos-26": "absent",
+        "macos-26-qt-min": "absent",
+        "ubuntu-24.04": "absent",
+        "ubuntu-24.04-qt-min": "absent",
+        "windows-2025-vs2026": "absent",
+        "windows-2025-vs2026-qt-min": "absent"
+      },
+      "registry_classes": [
+        "AcqBlockView",
+        "AcqChannelInfo",
+        "AcqComplexInt16",
+        "AcqEvent",
+        "AcqExternalBuffer",
+        "AcqPart",
+        "AcqReader",
+        "AcqReaderOptions",
+        "AcqReaderStats",
+        "AcqSegmentHeader",
+        "AcqSegmentation",
+        "AcqSpanPair",
+        "AcqStream",
+        "AcqStreamInfo",
+        "AcqStreamOptions",
+        "AcqStreamStats",
+        "AcqViewBase",
+        "AcqWriteView",
+        "AcqWriter"
+      ]
+    },
+    {
+      "name": "test_acq_timebase",
+      "cmake": "src/testframes/test_acq_timebase/CMakeLists.txt",
+      "registration": {
+        "state": "unconditional",
+        "via": "src/testframes/CMakeLists.txt",
+        "conditions": [],
+        "early_return_guard": null,
+        "unregistered_reason": null
+      },
+      "add_test_names": [
+        "test_acq_timebase"
+      ],
+      "labels": [
+        "unit"
+      ],
+      "timeout": 120,
+      "requirements": [],
+      "gui": false,
+      "qskip_sites": 0,
+      "spawns_processes": false,
+      "ci_excluded_on": [],
+      "ci": {
+        "macos-26": "absent",
+        "macos-26-qt-min": "absent",
+        "ubuntu-24.04": "absent",
+        "ubuntu-24.04-qt-min": "absent",
+        "windows-2025-vs2026": "absent",
+        "windows-2025-vs2026-qt-min": "absent"
+      },
+      "registry_classes": [
+        "AcqClockModel",
+        "AcqSyncMarker",
+        "AcqTimebase"
+      ]
+    },
     {
       "name": "test_analyze_averaging",
       "cmake": "src/testframes/test_analyze_averaging/CMakeLists.txt",

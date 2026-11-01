@@ -717,6 +717,41 @@ const apiSidebar: SidebarsConfig['apiSidebar'] = [
         'api/ieeg/ieeg-bipolar-pair',
         'api/ieeg/ieeg-surface-map'
       ],
+    },
+    {
+      type: 'category',
+      label: "Acquisition Library",
+      collapsible: true,
+      collapsed: true,
+      link: {type: 'doc', id: 'api/acq/index'},
+      items: [
+        'api/acq/acq-stream',
+        'api/acq/acq-writer',
+        'api/acq/acq-reader',
+        'api/acq/acq-error',
+        'api/acq/acq-block-view',
+        'api/acq/acq-write-view',
+        'api/acq/acq-view-base',
+        'api/acq/acq-part',
+        'api/acq/acq-span-pair',
+        'api/acq/acq-event',
+        'api/acq/acq-segment-header',
+        'api/acq/acq-stream-info',
+        'api/acq/acq-channel-info',
+        'api/acq/acq-segmentation',
+        'api/acq/acq-stream-options',
+        'api/acq/acq-stream-stats',
+        'api/acq/acq-external-buffer',
+        'api/acq/acq-reader-options',
+        'api/acq/acq-reader-stats',
+        'api/acq/acq-expected',
+        'api/acq/acq-error-info',
+        'api/acq/acq-clock-model',
+        'api/acq/acq-timebase',
+        'api/acq/acq-sync-marker',
+        'api/acq/acq-int24',
+        'api/acq/acq-complex-int16'
+      ],
     }
 ];
 

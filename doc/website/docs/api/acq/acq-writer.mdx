@@ -1,0 +1,309 @@
+---
+id: acq-writer
+title: "ACQLIB::AcqWriter"
+sidebar_label: AcqWriter
+sidebar_position: 2
+---
+
+# AcqWriter
+
+**Namespace:** `ACQLIB` &nbsp;·&nbsp; **Library:** Acquisition Library &nbsp;·&nbsp; **Source:** [`acq/acq_stream.h`](https://github.com/mne-tools/mne-cpp/blob/staging/src/libraries/acq/acq_stream.h)
+
+`#include <acq/acq_stream.h>`
+
+```cpp
+class ACQLIB::AcqWriter
+```
+
+The single producer of a ring: the backend for an input stream, the application for an output stream.
+
+Move-only. All members except `create()` and `updateInfo()` are allocation-free and lock-free; on input streams they are also wait-free.
+
+Producing an input block, and scheduling an output pulse at an exact sample: 
+```cpp title="src/examples/ex_acq_performance/main.cpp"
+auto view = input.beginWrite(kBlock);
+std::uint64_t s = view->firstSample();
+for (std::size_t p = 0; p < view->partCount(); ++p) {
+    const AcqWritePart& part = view->part(p);
+    for (std::size_t i = 0; i < part.samples; ++i, ++s) {
+        auto* frame = reinterpret_cast<std::int16_t*>(part.at(0, i));
+        for (std::size_t c = 0; c < kChannels; ++c) {
+            frame[c] = gen.value(s, c);
+        }
+        if (SignalGenerator::isSpikeStart(s)) {
+            AcqEvent marker;
+            marker.sample = s;
+            marker.duration = kSpikeWidth;
+            marker.code = 1;
+            input.pushEvent(marker);
+            st.spikesInjected.fetch_add(1, std::memory_order_relaxed);
+        }
+    }
+}
+st.commitNs[k % kCommitSlots].store(nowNs(), std::memory_order_relaxed);
+input.commit(kBlock);
+```
+
+ 
+```cpp title="src/examples/ex_acq_performance/main.cpp"
+// The output sample whose instant is kStimDelay clock ticks after input sample s.
+bool scheduled = false;
+if (auto at = mapSampleExact(inClock, outClock, s, kStimDelayTicks)) {
+    if (auto pulse = stimulator.beginWriteAt(*at, kStimWidth, 0ns)) {
+        for (std::size_t q = 0; q < pulse->partCount(); ++q) {
+            for (std::size_t j = 0; j < pulse->part(q).samples; ++j) {
+                const std::uint64_t phase = pulse->firstSample() + j - *at;
+                const std::int16_t a = phase < kStimWidth / 2 ? -kStimAmplitude : kStimAmplitude;
+                std::memcpy(pulse->part(q).at(0, j), &a, sizeof(a));
+            }
+        }
+        stimulator.commit(kStimWidth);
+        scheduled = true;
+    }
+}
+(scheduled ? st.stimuliScheduled : st.stimuliLate).fetch_add(1, std::memory_order_relaxed);
+```
+
+---
+
+## Public Methods
+
+### AcqWriter()
+
+---
+
+### ~AcqWriter()
+
+Equals `finish()`.
+
+---
+
+### AcqWriter(other)
+
+---
+
+### operator=(other)
+
+---
+
+### AcqWriter()
+
+---
+
+### operator=()
+
+---
+
+### stream()
+
+**Returns:**
+
+- *[AcqStream](/docs/api/acq/acq-stream)* — The shared handle of this ring.
+
+---
+
+### writePosition()
+
+**Returns:**
+
+- *std::uint64_t* — Next sample index to be written.
+
+---
+
+### devicePosition()
+
+**Returns:**
+
+- *std::uint64_t* — Output streams: the sample index the device consumes next; input streams: `writePosition()`.
+
+---
+
+### space()
+
+**Returns:**
+
+- *std::size_t* — Samples that can be reserved without waiting (input streams: the capacity).
+
+---
+
+### earliestWritableSample()
+
+**Returns:**
+
+- *std::uint64_t* — Output streams: the first sample that can still be written in time, i.e. `devicePosition()` plus the samples the device has already taken into its FIFO/DMA queue. A schedule earlier than this returns Late. Input streams: `writePosition()`.
+
+---
+
+### beginWrite(samples, timeout)
+
+Reserves the next `samples` samples.
+
+Input streams never wait. Output streams wait up to `timeout` for the gating reader to free space; if the device has already passed `writePosition()`, the view starts at the device position and reports the gap in `AcqWriteView::underrun()`.
+
+**Parameters:**
+
+- **samples** : *std::size_t*
+  Samples per channel.
+
+- **timeout** : *std::chrono::nanoseconds*
+  Output streams: maximum wait for space.
+
+**Returns:**
+
+- *[AcqExpected](/docs/api/acq/acq-expected)&lt; [AcqWriteView](/docs/api/acq/acq-write-view) &gt;* — The writable view, or Timeout, InvalidParameter (more than the capacity), EndOfStream (the gating reader was destroyed).
+
+---
+
+### beginWriteAt(firstSample, samples, timeout)
+
+Output streams: reserves `samples` samples starting exactly at `firstSample`, for sample-precise playout (an RF pulse at the sample mapped from a receive event).
+
+Samples between `writePosition()` and `firstSample` are filled with the stream's `AcqUnderrunFill` on commit; they are scheduled silence, not underrun.
+
+**Parameters:**
+
+- **firstSample** : *std::uint64_t*
+  Absolute sample index.
+
+- **samples** : *std::size_t*
+  Samples per channel.
+
+- **timeout** : *std::chrono::nanoseconds*
+  Maximum wait for space.
+
+**Returns:**
+
+- *[AcqExpected](/docs/api/acq/acq-expected)&lt; [AcqWriteView](/docs/api/acq/acq-write-view) &gt;* — The view at `firstSample`, or Late (already played; takes precedence), Timeout, InvalidParameter (before `writePosition()`), NotOnGrid (not a multiple of timebase().sampleAlignment), WrongDirection (input stream).
+
+---
+
+### commit(samples)
+
+Publishes the first samples of the last view (one release store).
+
+**Parameters:**
+
+- **samples** : *std::size_t*
+  Samples per channel.
+
+---
+
+### pushEvent(event)
+
+Attaches `event` (absolute sample index, not decreasing), published with the next commit (input) or immediately (output; scheduled events may lie ahead of `writePosition()`).
+
+Old events are overwritten like samples; lagging readers count them in `AcqReaderStats::eventsLost`.
+
+**Parameters:**
+
+- **event** : *const [AcqEvent](/docs/api/acq/acq-event) &*
+  The event.
+
+**Returns:**
+
+- *[AcqError](/docs/api/acq/acq-error)* — Late for an output event before `devicePosition()`, InvalidParameter for a sample index below the previous event's; otherwise success.
+
+---
+
+### pushSegment(header, payload)
+
+Starts a segment at header.firstSample with its device-specific `payload` (truncated or zero-padded to `AcqSegmentation::headerBytes`); published like events.
+
+**Parameters:**
+
+- **header** : *const [AcqSegmentHeader](/docs/api/acq/acq-segment-header) &*
+  Generic segment header.
+
+- **payload** : *std::span&lt; const std::byte &gt;*
+  Device-specific header payload.
+
+**Returns:**
+
+- *[AcqError](/docs/api/acq/acq-error)* — Late for an output segment before `devicePosition()`, InvalidParameter for a decreasing firstSample; otherwise success.
+
+---
+
+### setClock(clock)
+
+Publishes a new clock model (sequence counter, no lock).
+
+**Parameters:**
+
+- **clock** : *const [AcqClockModel](/docs/api/acq/acq-clock-model) &*
+  The clock model.
+
+---
+
+### updateInfo(info, fromSample)
+
+Publishes a new metadata version, current + 1 (allocates; rare changes only).
+
+**Parameters:**
+
+- **info** : *[AcqStreamInfo](/docs/api/acq/acq-stream-info)*
+  New description; channel count, format, layout and direction must not change.
+
+- **fromSample** : *std::uint64_t*
+  First sample it describes.
+
+**Returns:**
+
+- *[AcqError](/docs/api/acq/acq-error)* — InvalidParameter for a geometry change or a past sample, InvalidState after too many versions.
+
+---
+
+### finish()
+
+Marks the end of the stream; readers drain and then receive EndOfStream.
+
+Idempotent.
+
+---
+
+## Static Methods
+
+### create(info, options)
+
+Creates a standalone ring with its writer (backends, DMA emulation, application-internal pipelines).
+
+**Parameters:**
+
+- **info** : *[AcqStreamInfo](/docs/api/acq/acq-stream-info)*
+  Stream description (version 0), including the direction.
+
+- **options** : *const [AcqStreamOptions](/docs/api/acq/acq-stream-options) &*
+  Ring and real-time options.
+
+**Returns:**
+
+- *[AcqExpected](/docs/api/acq/acq-expected)&lt; AcqWriter &gt;* — The writer, or InvalidParameter, InvalidBuffer, OutOfMemory, PlatformUnsupported.
+
+---
+
+## Example
+
+- Start here: [ex_acq_performance](../../examples/acq/ex_acq_performance.mdx) — Closed-loop acquisition and stimulation with ACQLIB, and its sustained throughput per device class.
+- Full source: [`src/examples/ex_acq_performance/main.cpp`](https://github.com/mne-tools/mne-cpp/tree/staging/src/examples/ex_acq_performance/main.cpp)
+- Build target: `ex_acq_performance` (runs under CTest)
+
+## Used in examples
+
+### [ex_acq_performance](../../examples/acq/ex_acq_performance.mdx)
+
+Closed-loop acquisition and stimulation with ACQLIB, and its sustained throughput per device class.
+
+````cpp title="src/examples/ex_acq_performance/main.cpp, line 370"
+/** The card: writes the input ring in 1 ms blocks at the real-time rate and plays the output ring. */
+void runCard(AcqWriter& input, AcqReader& dac, const SignalGenerator& gen, ClosedLoopState& st, double seconds)
+{
+    const auto blocks = static_cast<std::uint64_t>(seconds * kSfreq / static_cast<double>(kBlock));
+    const auto period = std::chrono::nanoseconds(static_cast<std::int64_t>(1e9 * kBlock / kSfreq));
+    const auto start = Clock::now();
+    bool previousNonZero = false;
+    for (std::uint64_t k = 0; k < blocks; ++k) {
+        std::this_thread::sleep_until(start + period * static_cast<std::int64_t>(k + 1));
+````
+
+## Authors of this file
+
+- Christoph Dinh &lt;christoph.dinh@mne-cpp.org&gt;

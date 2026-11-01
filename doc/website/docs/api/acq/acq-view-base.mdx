@@ -1,0 +1,161 @@
+---
+id: acq-view-base
+title: "ACQLIB::AcqViewBase"
+sidebar_label: AcqViewBase
+sidebar_position: 7
+---
+
+# AcqViewBase
+
+**Namespace:** `ACQLIB` &nbsp;·&nbsp; **Library:** Acquisition Library &nbsp;·&nbsp; **Source:** [`acq/acq_block_view.h`](https://github.com/mne-tools/mne-cpp/blob/staging/src/libraries/acq/acq_block_view.h)
+
+`#include <acq/acq_block_view.h>`
+
+```cpp
+template <typename Byte>
+class ACQLIB::AcqViewBase
+```
+
+Fields shared by read and write views.
+
+```cpp title="src/examples/ex_acq_performance/main.cpp"
+std::uint64_t s = view->firstSample();
+std::uint64_t mismatches = 0;
+for (std::size_t p = 0; p < view->partCount(); ++p) {
+    const AcqBlockPart& part = view->part(p);
+    for (std::size_t i = 0; i < part.samples; ++i, ++s) {
+        const auto* frame = reinterpret_cast<const std::int16_t*>(part.at(0, i));
+        for (std::size_t c = 0; c < kChannels; ++c) {
+            mismatches += frame[c] != gen.value(s, c) ? 1U : 0U;
+        }
+    }
+}
+for (std::size_t e = 0; e < view->events().size(); ++e) {
+    const AcqEvent& marker = view->events()[e];
+    const bool ok = SignalGenerator::isSpikeStart(marker.sample) && marker.duration == kSpikeWidth;
+    (ok ? st.markersVerified : st.markerMismatches).fetch_add(1, std::memory_order_relaxed);
+}
+```
+
+---
+
+## Public Methods
+
+### firstSample()
+
+**Returns:**
+
+- *std::uint64_t* — Sample index of the first sample in the view.
+
+---
+
+### sampleCount()
+
+**Returns:**
+
+- *std::size_t* — Samples per channel (sum over the parts).
+
+---
+
+### channelCount()
+
+**Returns:**
+
+- *std::size_t* — Number of channels.
+
+---
+
+### format()
+
+**Returns:**
+
+- *AcqSampleFormat* — Native sample format.
+
+---
+
+### infoVersion()
+
+**Returns:**
+
+- *std::uint32_t* — `AcqStreamInfo::version` that describes the samples.
+
+---
+
+### partCount()
+
+**Returns:**
+
+- *std::size_t* — 0 (no samples), 1, or 2 when the view wraps around the end of the ring.
+
+---
+
+### part(i)
+
+**Parameters:**
+
+- **i** : *std::size_t*
+  Part index.
+
+**Returns:**
+
+- *const [AcqPart](/docs/api/acq/acq-part)&lt; Byte &gt; &* — The part.
+
+---
+
+### scales()
+
+**Returns:**
+
+- *std::span&lt; const double &gt;* — Per-channel scale of `infoVersion()`; valid as long as the view.
+
+---
+
+### offsets()
+
+**Returns:**
+
+- *std::span&lt; const double &gt;* — Per-channel offset of `infoVersion()`; valid as long as the view.
+
+---
+
+### rangeMin()
+
+**Returns:**
+
+- *std::span&lt; const double &gt;* — Per-channel physical lower limit (NaN if unknown); the encoder saturates to it.
+
+---
+
+### rangeMax()
+
+**Returns:**
+
+- *std::span&lt; const double &gt;* — Per-channel physical upper limit (NaN if unknown).
+
+---
+
+### clock()
+
+**Returns:**
+
+- *const [AcqClockModel](/docs/api/acq/acq-clock-model) &* — Clock model valid for this view.
+
+---
+
+### timebase()
+
+**Returns:**
+
+- *const [AcqTimebase](/docs/api/acq/acq-timebase) &* — Hardware timebase valid for this view (sample-exact mapping within a clock domain).
+
+---
+
+## Example
+
+- Start here: [ex_acq_performance](../../examples/acq/ex_acq_performance.mdx) — Closed-loop acquisition and stimulation with ACQLIB, and its sustained throughput per device class.
+- Full source: [`src/examples/ex_acq_performance/main.cpp`](https://github.com/mne-tools/mne-cpp/tree/staging/src/examples/ex_acq_performance/main.cpp)
+- Build target: `ex_acq_performance` (runs under CTest)
+
+## Authors of this file
+
+- Christoph Dinh &lt;christoph.dinh@mne-cpp.org&gt;

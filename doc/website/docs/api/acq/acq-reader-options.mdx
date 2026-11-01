@@ -1,0 +1,60 @@
+---
+id: acq-reader-options
+title: "ACQLIB::AcqReaderOptions"
+sidebar_label: AcqReaderOptions
+sidebar_position: 18
+---
+
+# AcqReaderOptions
+
+**Namespace:** `ACQLIB` &nbsp;·&nbsp; **Library:** Acquisition Library &nbsp;·&nbsp; **Source:** [`acq/acq_reader.h`](https://github.com/mne-tools/mne-cpp/blob/staging/src/libraries/acq/acq_reader.h)
+
+`#include <acq/acq_reader.h>`
+
+```cpp
+struct ACQLIB::AcqReaderOptions
+```
+
+Per-reader options.
+
+```cpp title="src/examples/ex_acq_performance/main.cpp"
+auto input = AcqWriter::create(inInfo);
+auto stimulator = AcqWriter::create(outInfo);
+if (!input || !stimulator) {
+    std::fprintf(stderr, "%s\n", (!input ? input.error() : stimulator.error()).text().c_str());
+    return false;
+}
+AcqReaderOptions gating;
+gating.gating = true;
+auto dac = stimulator->stream().reader(AcqReader::ReadMode::Lossless, gating);
+auto recorder = input->stream().reader(AcqReader::ReadMode::Lossless);
+auto display = input->stream().reader(AcqReader::ReadMode::Latest);
+auto controller = input->stream().reader(AcqReader::ReadMode::LowLatency);
+```
+
+---
+
+## Example
+
+- Start here: [ex_acq_performance](../../examples/acq/ex_acq_performance.mdx) — Closed-loop acquisition and stimulation with ACQLIB, and its sustained throughput per device class.
+- Full source: [`src/examples/ex_acq_performance/main.cpp`](https://github.com/mne-tools/mne-cpp/tree/staging/src/examples/ex_acq_performance/main.cpp)
+- Build target: `ex_acq_performance` (runs under CTest)
+
+## Used in examples
+
+### [ex_acq_performance](../../examples/acq/ex_acq_performance.mdx)
+
+Closed-loop acquisition and stimulation with ACQLIB, and its sustained throughput per device class.
+
+````cpp title="src/examples/ex_acq_performance/main.cpp, line 648"
+AcqReaderOptions gating;
+gating.gating = true;
+auto dac = stimulator->stream().reader(AcqReader::ReadMode::Lossless, gating);
+auto recorder = input->stream().reader(AcqReader::ReadMode::Lossless);
+auto display = input->stream().reader(AcqReader::ReadMode::Latest);
+auto controller = input->stream().reader(AcqReader::ReadMode::LowLatency);
+````
+
+## Authors of this file
+
+- Christoph Dinh &lt;christoph.dinh@mne-cpp.org&gt;

@@ -1,0 +1,49 @@
+---
+id: acq-error-info
+title: "ACQLIB::AcqErrorInfo"
+sidebar_label: AcqErrorInfo
+sidebar_position: 21
+---
+
+# AcqErrorInfo
+
+**Namespace:** `ACQLIB` &nbsp;·&nbsp; **Library:** Acquisition Library &nbsp;·&nbsp; **Source:** [`acq/acq_error.h`](https://github.com/mne-tools/mne-cpp/blob/staging/src/libraries/acq/acq_error.h)
+
+`#include <acq/acq_error.h>`
+
+```cpp
+struct ACQLIB::AcqErrorInfo
+```
+
+Catalogue entry of one error code.
+
+All strings have static storage duration.
+
+---
+
+## Example
+
+No example of its own: Catalogue entry behind AcqError::text(); callers reach it through AcqError.
+
+It is exercised by:
+
+````cpp title="src/examples/ex_acq_performance/main.cpp"
+auto input = AcqWriter::create(inInfo);
+auto stimulator = AcqWriter::create(outInfo);
+if (!input || !stimulator) {
+    std::fprintf(stderr, "%s\n", (!input ? input.error() : stimulator.error()).text().c_str());
+    return false;
+}
+AcqReaderOptions gating;
+gating.gating = true;
+auto dac = stimulator->stream().reader(AcqReader::ReadMode::Lossless, gating);
+auto recorder = input->stream().reader(AcqReader::ReadMode::Lossless);
+auto display = input->stream().reader(AcqReader::ReadMode::Latest);
+auto controller = input->stream().reader(AcqReader::ReadMode::LowLatency);
+````
+
+From [ex_acq_performance](../../examples/acq/ex_acq_performance.mdx).
+
+## Authors of this file
+
+- Christoph Dinh &lt;christoph.dinh@mne-cpp.org&gt;

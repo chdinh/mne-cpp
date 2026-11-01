@@ -1,0 +1,60 @@
+---
+id: acq-clock-model
+title: "ACQLIB::AcqClockModel"
+sidebar_label: AcqClockModel
+sidebar_position: 22
+---
+
+# AcqClockModel
+
+**Namespace:** `ACQLIB` &nbsp;·&nbsp; **Library:** Acquisition Library &nbsp;·&nbsp; **Source:** [`acq/acq_clock_model.h`](https://github.com/mne-tools/mne-cpp/blob/staging/src/libraries/acq/acq_clock_model.h)
+
+`#include <acq/acq_clock_model.h>`
+
+```cpp
+struct ACQLIB::AcqClockModel
+```
+
+Linear sample-index &lt;-&gt; host-time model.
+
+Trivially copyable; published by the producer through a sequence counter (no lock) and copied into every view.
+
+physicalNs(s) = anchorHostNs + (s - anchorSample) * 1e9 / (sfreq * rateCorrection) - pipelineDelayNs for input streams (the sample was taken earlier than it arrived) and + pipelineDelayNs for output streams (the sample is emitted later than it is handed over). Times are std::chrono::steady_clock ns.
+
+---
+
+## Public Methods
+
+### physicalNs(sample)
+
+**Parameters:**
+
+- **sample** : *std::uint64_t*
+  Sample index.
+
+**Returns:**
+
+- *std::int64_t* — steady_clock time in ns at which the sample was taken (input) or emitted (output).
+
+---
+
+### sampleAt(ns)
+
+**Parameters:**
+
+- **ns** : *std::int64_t*
+  steady_clock time in ns.
+
+**Returns:**
+
+- *std::uint64_t* — The sample taken or emitted closest to that time, clamped at 0.
+
+---
+
+## Example
+
+No example of its own: Host-time model a device backend publishes with AcqWriter::setClock(); callers read it through AcqStream::clock().
+
+## Authors of this file
+
+- Christoph Dinh &lt;christoph.dinh@mne-cpp.org&gt;

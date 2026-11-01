@@ -1,0 +1,252 @@
+---
+id: acq-reader
+title: "ACQLIB::AcqReader"
+sidebar_label: AcqReader
+sidebar_position: 3
+---
+
+# AcqReader
+
+**Namespace:** `ACQLIB` &nbsp;·&nbsp; **Library:** Acquisition Library &nbsp;·&nbsp; **Source:** [`acq/acq_reader.h`](https://github.com/mne-tools/mne-cpp/blob/staging/src/libraries/acq/acq_reader.h)
+
+`#include <acq/acq_reader.h>`
+
+```cpp
+class ACQLIB::AcqReader
+```
+
+A consumer of one [`AcqStream`](/docs/api/acq/acq-stream).
+
+Move-only; destroying it frees its reader slot.
+
+```cpp title="src/examples/ex_acq_performance/main.cpp"
+auto view = reader.acquire(kBlock, 100ms);
+if (!view) {
+    if (view.error() == AcqErrorCode::EndOfStream) {
+        break;
+    }
+    continue;
+}
+```
+
+---
+
+## Public Methods
+
+### AcqReader()
+
+---
+
+### ~AcqReader()
+
+---
+
+### AcqReader(other)
+
+---
+
+### operator=(other)
+
+---
+
+### AcqReader()
+
+---
+
+### operator=()
+
+---
+
+### isValid()
+
+**Returns:**
+
+- *bool* — true when attached to a stream.
+
+---
+
+### mode()
+
+**Returns:**
+
+- *ReadMode* — The consumption mode.
+
+---
+
+### channelCount()
+
+**Returns:**
+
+- *std::size_t* — Channels of the stream.
+
+---
+
+### stream()
+
+**Returns:**
+
+- *[AcqStream](/docs/api/acq/acq-stream)* — The stream this reader consumes.
+
+---
+
+### acquire(minSamples, timeout, maxSamples)
+
+Waits until at least `minSamples` are available (Latest: the newest `minSamples`), then returns a view of up to `maxSamples`.
+
+Larger blocks amortise the per-view cost; pass maxSamples = 0 to take everything available. One view per reader at a time.
+
+**Parameters:**
+
+- **minSamples** : *std::size_t*
+  Samples per channel required; 0 returns immediately (device polling).
+
+- **timeout** : *std::chrono::nanoseconds*
+  Maximum wait.
+
+- **maxSamples** : *std::size_t*
+  Upper bound of the view, 0 for everything available.
+
+**Returns:**
+
+- *[AcqExpected](/docs/api/acq/acq-expected)&lt; [AcqBlockView](/docs/api/acq/acq-block-view) &gt;* — The view, or Timeout, EndOfStream, DeviceStopped, InvalidState (a view is already held).
+
+---
+
+### release(view)
+
+Returns `view` to the ring and advances the reader; clears `view`.
+
+**Parameters:**
+
+- **view** : *[AcqBlockView](/docs/api/acq/acq-block-view) &*
+  A view returned by this reader's `acquire()`.
+
+**Returns:**
+
+- *[AcqError](/docs/api/acq/acq-error)* — Success, or Overrun when the producer overwrote part of the view while it was held; its samples count as lost and anything computed from them must be discarded.
+
+---
+
+### consumeIdle(samples)
+
+Gating reader of an output stream: the device has emitted `samples` samples of underrun fill because the writer had not committed them.
+
+Advances this reader; the writer learns the gap from `AcqWriteView::underrun()`.
+
+**Parameters:**
+
+- **samples** : *std::size_t*
+  Samples played as fill.
+
+**Returns:**
+
+- *[AcqError](/docs/api/acq/acq-error)* — WrongDirection unless this is the gating reader of an output stream.
+
+---
+
+### read(out, timeout, scaling)
+
+Copying convenience: waits for `out.cols` samples, decodes them into `out` and releases.
+
+**Parameters:**
+
+- **out** : *const AcqMatrixRef&lt; float &gt; &*
+  Caller-owned destination, rows = `channelCount()`.
+
+- **timeout** : *std::chrono::nanoseconds*
+  Maximum wait.
+
+- **scaling** : *AcqScaling*
+  Raw or physical values.
+
+**Returns:**
+
+- *[AcqExpected](/docs/api/acq/acq-expected)&lt; AcqReadResult &gt;* — Position and loss of the block, or the error of `acquire()`/decode()/release().
+
+---
+
+### read(out, timeout, scaling)
+
+Copying convenience: waits for `out.cols` samples, decodes them into `out` and releases.
+
+**Parameters:**
+
+- **out** : *const AcqMatrixRef&lt; double &gt; &*
+  Caller-owned destination, rows = `channelCount()`.
+
+- **timeout** : *std::chrono::nanoseconds*
+  Maximum wait.
+
+- **scaling** : *AcqScaling*
+  Raw or physical values.
+
+**Returns:**
+
+- *[AcqExpected](/docs/api/acq/acq-expected)&lt; AcqReadResult &gt;* — Position and loss of the block, or the error of `acquire()`/decode()/release().
+
+---
+
+### read(out, timeout, scaling)
+
+Copying convenience: waits for `out.cols` samples, decodes them into `out` and releases.
+
+**Parameters:**
+
+- **out** : *const AcqMatrixRef&lt; std::complex&lt; float &gt; &gt; &*
+  Caller-owned destination, rows = `channelCount()`.
+
+- **timeout** : *std::chrono::nanoseconds*
+  Maximum wait.
+
+- **scaling** : *AcqScaling*
+  Raw or physical values.
+
+**Returns:**
+
+- *[AcqExpected](/docs/api/acq/acq-expected)&lt; AcqReadResult &gt;* — Position and loss of the block, or the error of `acquire()`/decode()/release().
+
+---
+
+### available()
+
+**Returns:**
+
+- *std::size_t* — Samples committed and not yet acquired by this reader (capped at the ring capacity).
+
+---
+
+### stats()
+
+**Returns:**
+
+- *[AcqReaderStats](/docs/api/acq/acq-reader-stats)* — This reader's counters.
+
+---
+
+## Example
+
+- Start here: [ex_acq_performance](../../examples/acq/ex_acq_performance.mdx) — Closed-loop acquisition and stimulation with ACQLIB, and its sustained throughput per device class.
+- Full source: [`src/examples/ex_acq_performance/main.cpp`](https://github.com/mne-tools/mne-cpp/tree/staging/src/examples/ex_acq_performance/main.cpp)
+- Build target: `ex_acq_performance` (runs under CTest)
+
+## Used in examples
+
+### [ex_acq_performance](../../examples/acq/ex_acq_performance.mdx)
+
+Closed-loop acquisition and stimulation with ACQLIB, and its sustained throughput per device class.
+
+````cpp title="src/examples/ex_acq_performance/main.cpp, line 370"
+/** The card: writes the input ring in 1 ms blocks at the real-time rate and plays the output ring. */
+void runCard(AcqWriter& input, AcqReader& dac, const SignalGenerator& gen, ClosedLoopState& st, double seconds)
+{
+    const auto blocks = static_cast<std::uint64_t>(seconds * kSfreq / static_cast<double>(kBlock));
+    const auto period = std::chrono::nanoseconds(static_cast<std::int64_t>(1e9 * kBlock / kSfreq));
+    const auto start = Clock::now();
+    bool previousNonZero = false;
+    for (std::uint64_t k = 0; k < blocks; ++k) {
+        std::this_thread::sleep_until(start + period * static_cast<std::int64_t>(k + 1));
+````
+
+## Authors of this file
+
+- Christoph Dinh &lt;christoph.dinh@mne-cpp.org&gt;

@@ -1,0 +1,144 @@
+---
+id: acq-expected
+title: "ACQLIB::AcqExpected"
+sidebar_label: AcqExpected
+sidebar_position: 20
+---
+
+# AcqExpected
+
+**Namespace:** `ACQLIB` &nbsp;·&nbsp; **Library:** Acquisition Library &nbsp;·&nbsp; **Source:** [`acq/acq_error.h`](https://github.com/mne-tools/mne-cpp/blob/staging/src/libraries/acq/acq_error.h)
+
+`#include <acq/acq_error.h>`
+
+```cpp
+template <typename T>
+class ACQLIB::AcqExpected
+```
+
+Value-or-error result, the subset of C++23 std::expected that `ACQLIB` needs, without exceptions: accessing the wrong alternative is a precondition violation (assert), never a throw.
+
+```cpp title="src/examples/ex_acq_performance/main.cpp"
+auto view = reader.acquire(kBlock, 100ms);
+if (!view) {
+    if (view.error() == AcqErrorCode::EndOfStream) {
+        break;
+    }
+    continue;
+}
+```
+
+---
+
+## Public Methods
+
+### AcqExpected(value)
+
+Holds a value.
+
+**Parameters:**
+
+- **value** : *T*
+  The value.
+
+---
+
+### AcqExpected(error)
+
+Holds an error.
+
+**Parameters:**
+
+- **error** : *[AcqError](/docs/api/acq/acq-error)*
+  The error.
+
+---
+
+### AcqExpected(code)
+
+Holds an error without context.
+
+**Parameters:**
+
+- **code** : *AcqErrorCode*
+  The error code.
+
+---
+
+### AcqExpected(other)
+
+---
+
+### AcqExpected(other)
+
+---
+
+### operator=(other)
+
+---
+
+### ~AcqExpected()
+
+---
+
+### hasValue()
+
+**Returns:**
+
+- *bool* — true when a value is held.
+
+---
+
+### operator bool()
+
+---
+
+### value()
+
+**Returns:**
+
+- *T &* — The held value.
+
+---
+
+### value()
+
+---
+
+### value()
+
+---
+
+### operator*()
+
+---
+
+### operator*()
+
+---
+
+### operator-&gt;()
+
+---
+
+### operator-&gt;()
+
+---
+
+### error()
+
+**Returns:**
+
+- *[AcqError](/docs/api/acq/acq-error)* — The held error, or success when a value is held.
+
+---
+
+## Example
+
+- Start here: [ex_acq_performance](../../examples/acq/ex_acq_performance.mdx) — Closed-loop acquisition and stimulation with ACQLIB, and its sustained throughput per device class.
+- Full source: [`src/examples/ex_acq_performance/main.cpp`](https://github.com/mne-tools/mne-cpp/tree/staging/src/examples/ex_acq_performance/main.cpp)
+- Build target: `ex_acq_performance` (runs under CTest)
+
+## Authors of this file
+
+- Christoph Dinh &lt;christoph.dinh@mne-cpp.org&gt;

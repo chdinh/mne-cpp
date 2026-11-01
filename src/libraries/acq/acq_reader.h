@@ -78,6 +78,8 @@ enum class AcqWait : std::uint8_t
 //=============================================================================================================
 /**
  * Per-reader options.
+ *
+ * @snippet ex_acq_performance/main.cpp acq_stream_setup
  */
 struct AcqReaderOptions
 {
@@ -90,6 +92,8 @@ struct AcqReaderOptions
 //=============================================================================================================
 /**
  * Counters of one reader; exact.
+ *
+ * @snippet ex_acq_performance/main.cpp acq_stream_stats
  */
 struct AcqReaderStats
 {
@@ -119,6 +123,8 @@ struct AcqReadResult
 //=============================================================================================================
 /**
  * A consumer of one AcqStream. Move-only; destroying it frees its reader slot.
+ *
+ * @snippet ex_acq_performance/main.cpp acq_reader_acquire
  */
 class ACQSHARED_EXPORT AcqReader
 {

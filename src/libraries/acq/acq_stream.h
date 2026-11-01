@@ -103,6 +103,8 @@ struct AcqStreamOptions
 //=============================================================================================================
 /**
  * Producer-side counters of a stream.
+ *
+ * @snippet ex_acq_performance/main.cpp acq_stream_stats
  */
 struct AcqStreamStats
 {
@@ -124,7 +126,9 @@ struct AcqStreamStats
 //=============================================================================================================
 /**
  * Shared handle of a stream. Cheap to copy; keeps the ring alive, so readers stay valid after the
- * source is closed (they then return EndOfStream).
+ * device is closed (they then return EndOfStream).
+ *
+ * @snippet ex_acq_performance/main.cpp acq_stream_setup
  */
 class ACQSHARED_EXPORT AcqStream
 {
@@ -199,6 +203,10 @@ private:
  * The single producer of a ring: the backend for an input stream, the application for an output
  * stream. Move-only. All members except create() and updateInfo() are allocation-free and lock-free;
  * on input streams they are also wait-free.
+ *
+ * Producing an input block, and scheduling an output pulse at an exact sample:
+ * @snippet ex_acq_performance/main.cpp acq_writer_commit
+ * @snippet ex_acq_performance/main.cpp acq_writer_schedule
  */
 class ACQSHARED_EXPORT AcqWriter
 {

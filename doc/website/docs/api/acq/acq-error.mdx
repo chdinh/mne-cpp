@@ -1,0 +1,111 @@
+---
+id: acq-error
+title: "ACQLIB::AcqError"
+sidebar_label: AcqError
+sidebar_position: 4
+---
+
+# AcqError
+
+**Namespace:** `ACQLIB` &nbsp;·&nbsp; **Library:** Acquisition Library &nbsp;·&nbsp; **Source:** [`acq/acq_error.h`](https://github.com/mne-tools/mne-cpp/blob/staging/src/libraries/acq/acq_error.h)
+
+`#include <acq/acq_error.h>`
+
+```cpp
+class ACQLIB::AcqError
+```
+
+An error value: a catalogue code plus an optional context string.
+
+```cpp title="src/examples/ex_acq_performance/main.cpp"
+auto view = reader.acquire(kBlock, 100ms);
+if (!view) {
+    if (view.error() == AcqErrorCode::EndOfStream) {
+        break;
+    }
+    continue;
+}
+```
+
+---
+
+## Public Methods
+
+### AcqError()
+
+---
+
+### AcqError(code)
+
+Creates an error without context; allocation-free, usable on the data path.
+
+**Parameters:**
+
+- **code** : *AcqErrorCode*
+  The error code.
+
+---
+
+### AcqError(code, context)
+
+Creates an error with context (control path, allocates).
+
+**Parameters:**
+
+- **code** : *AcqErrorCode*
+  The error code.
+
+- **context** : *std::string*
+  What the error refers to, e.g. the URI or file path.
+
+---
+
+### ok()
+
+**Returns:**
+
+- *bool* — true when this value represents success.
+
+---
+
+### code()
+
+**Returns:**
+
+- *AcqErrorCode* — The error code.
+
+---
+
+### context()
+
+**Returns:**
+
+- *std::string_view* — The context string, empty if none was attached.
+
+---
+
+### info()
+
+**Returns:**
+
+- *const [AcqErrorInfo](/docs/api/acq/acq-error-info) &* — The catalogue entry of the code.
+
+---
+
+### text()
+
+**Returns:**
+
+- *std::string* — "message (context). fix" ready for printing (allocates).
+
+---
+
+## Example
+
+- Start here: [ex_acq_performance](../../examples/acq/ex_acq_performance.mdx) — Closed-loop acquisition and stimulation with ACQLIB, and its sustained throughput per device class.
+- Full source: [`src/examples/ex_acq_performance/main.cpp`](https://github.com/mne-tools/mne-cpp/tree/staging/src/examples/ex_acq_performance/main.cpp)
+- Build target: `ex_acq_performance` (runs under CTest)
+
+## Authors of this file
+
+- Christoph Dinh &lt;christoph.dinh@mne-cpp.org&gt;

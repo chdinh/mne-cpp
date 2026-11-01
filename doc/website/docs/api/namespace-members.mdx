@@ -7,9 +7,27 @@ sidebar_position: 6
 
 # Namespace Members
 
-Index of 368 namespace-level symbols (functions, typedefs, enums, variables) across all public namespaces.
+Index of 411 namespace-level symbols (functions, typedefs, enums, variables) across all public namespaces.
 
 - **Accuracy** `[enum]` in [INVLIB](/docs/api/inv/)
+- **AcqBlockPart** `[type]` in [ACQLIB](/docs/api/acq/) — Read-only run.
+- **AcqChannelKind** `[enum]` in [ACQLIB](/docs/api/acq/) — Signal kind of a channel.
+- **acqClockDomainId** `[fn]` in [ACQLIB](/docs/api/acq/)
+- **AcqClockSource** `[enum]` in [ACQLIB](/docs/api/acq/) — What the anchor of the clock model is derived from.
+- **AcqDeviceState** `[enum]` in [ACQLIB](/docs/api/acq/) — State of a source.
+- **AcqDirection** `[enum]` in [ACQLIB](/docs/api/acq/) — Direction of a stream as seen from the host.
+- **AcqEigenMap** `[type]` in [ACQLIB](/docs/api/acq/) — Strided read-only channels x samples map of one part of a view.
+- **AcqErrorCode** `[enum]` in [ACQLIB](/docs/api/acq/) — Stable error codes.
+- **acqErrorInfo** `[fn]` in [ACQLIB](/docs/api/acq/)
+- **AcqLayout** `[enum]` in [ACQLIB](/docs/api/acq/) — Memory layout of a ring.
+- **AcqLockState** `[enum]` in [ACQLIB](/docs/api/acq/) — How far a stream's timebase is known relative to its domain.
+- **AcqRounding** `[enum]` in [ACQLIB](/docs/api/acq/) — What `mapSampleExact()` does with an instant that is not on the target's schedulable grid.
+- **AcqSampleFormat** `[enum]` in [ACQLIB](/docs/api/acq/) — Native sample format of a stream.
+- **AcqScaling** `[enum]` in [ACQLIB](/docs/api/acq/) — Whether converters apply the per-channel scale and offset.
+- **AcqUnderrunFill** `[enum]` in [ACQLIB](/docs/api/acq/) — What an output device emits when the writer has not committed the sample it has to play.
+- **AcqUnit** `[enum]` in [ACQLIB](/docs/api/acq/) — SI unit of the physical value of a channel (value = raw * scale + offset, times 10^unitExponent).
+- **AcqWait** `[enum]` in [ACQLIB](/docs/api/acq/) — How a waiting reader or writer is woken.
+- **AcqWritePart** `[type]` in [ACQLIB](/docs/api/acq/) — Writable run.
 - **addReferenceChannels** `[fn]` in [UTILSLIB](/docs/api/utils/) — Add reference channel(s) back as zero-filled rows.
 - **allowedDatatypes** `[fn]` in [BIDSLIB](/docs/api/bids/) — All allowed BIDS datatypes.
 - **allowedElectrophysiologyDatatypes** `[fn]` in [BIDSLIB](/docs/api/bids/) — All allowed BIDS electrophysiology datatypes.
@@ -37,6 +55,7 @@ Index of 368 namespace-level symbols (functions, typedefs, enums, variables) acr
 - **BidsTsvRow** `[type]` in [BIDSLIB](/docs/api/bids/) — Represents a single row of a BIDS TSV file as a column-name → value map.
 - **bidsTypeToFiffKind** `[fn]` in [BIDSLIB](/docs/api/bids/) — Maps BIDS channel type strings back to FIFF channel kind constants.
 - **BIG_TIME** `[var]` in [INVLIB](/docs/api/inv/)
+- **buildDateTime** `[fn]` in [ACQLIB](/docs/api/acq/) — Returns build date and time.
 - **buildDateTime** `[fn]` in [BIDSLIB](/docs/api/bids/) — Returns build date and time.
 - **buildDateTime** `[fn]` in [COMLIB](/docs/api/com/) — Compile-time date/time stamp baked into the ``COMLIB`` binary.
 - **buildDateTime** `[fn]` in [CONNECTIVITYLIB](/docs/api/connectivity/) — Returns build date and time.
@@ -57,6 +76,7 @@ Index of 368 namespace-level symbols (functions, typedefs, enums, variables) acr
 - **buildDateTime** `[fn]` in [MRILIB](/docs/api/mri/) — Returns the build date and time.
 - **buildDateTime** `[fn]` in [STSLIB](/docs/api/sts/) — Returns build date and time.
 - **buildDateTime** `[fn]` in [UTILSLIB](/docs/api/utils/) — Returns build date and time.
+- **buildHash** `[fn]` in [ACQLIB](/docs/api/acq/) — Returns abbreviated build git hash.
 - **buildHash** `[fn]` in [BIDSLIB](/docs/api/bids/) — Returns abbreviated build git hash.
 - **buildHash** `[fn]` in [COMLIB](/docs/api/com/) — Abbreviated git commit hash (typically 7 hex chars) of the source tree this library was built from.
 - **buildHash** `[fn]` in [CONNECTIVITYLIB](/docs/api/connectivity/) — Returns abbreviated build git hash.
@@ -77,6 +97,7 @@ Index of 368 namespace-level symbols (functions, typedefs, enums, variables) acr
 - **buildHash** `[fn]` in [MRILIB](/docs/api/mri/) — Returns the short git hash.
 - **buildHash** `[fn]` in [STSLIB](/docs/api/sts/) — Returns abbreviated build git hash.
 - **buildHash** `[fn]` in [UTILSLIB](/docs/api/utils/) — Returns abbreviated build git hash.
+- **buildHashLong** `[fn]` in [ACQLIB](/docs/api/acq/) — Returns full build git hash.
 - **buildHashLong** `[fn]` in [BIDSLIB](/docs/api/bids/) — Returns full build git hash.
 - **buildHashLong** `[fn]` in [COMLIB](/docs/api/com/) — Full-length git commit hash (40 hex chars) of the source tree this library was built from.
 - **buildHashLong** `[fn]` in [CONNECTIVITYLIB](/docs/api/connectivity/) — Returns full build git hash.
@@ -99,6 +120,7 @@ Index of 368 namespace-level symbols (functions, typedefs, enums, variables) acr
 - **buildHashLong** `[fn]` in [UTILSLIB](/docs/api/utils/) — Returns full build git hash.
 - **BVBinaryFormat** `[enum]` in [BIDSLIB](/docs/api/bids/) — Binary format enumeration for BrainVision data files.
 - **BVOrientation** `[enum]` in [BIDSLIB](/docs/api/bids/) — Data orientation enumeration.
+- **bytesPerSample** `[fn]` in [ACQLIB](/docs/api/acq/)
 - **ChannelFormat** `[enum]` in [LSLLIB](/docs/api/lsl/) — Data format of a channel (mirroring the values used in the original LSL protocol).
 - **CircularBuffer_char** `[type]` in [UTILSLIB](/docs/api/utils/) — Defines [`CircularBuffer`](/docs/api/utils/circular-buffer) of char type.
 - **CircularBuffer_double** `[type]` in [UTILSLIB](/docs/api/utils/) — Defines [`CircularBuffer`](/docs/api/utils/circular-buffer) of double type.
@@ -124,6 +146,11 @@ Index of 368 namespace-level symbols (functions, typedefs, enums, variables) acr
 - **DATA_TYPE** `[var]` in [FIFFLIB](/docs/api/fiff/) — DATA_TYPE encoding 0000ffff.
 - **dateTimeNow** `[fn]` in [UTILSLIB](/docs/api/utils/) — Returns build date and time (time preprocessor was run).
 - **dateToday** `[fn]` in [UTILSLIB](/docs/api/utils/) — Returns build date (time preprocessor was run).
+- **decode** `[fn]` in [ACQLIB](/docs/api/acq/) — Decodes all samples of `view` into `out`.
+- **decode** `[fn]` in [ACQLIB](/docs/api/acq/) — Decodes all samples of `view` into `out`.
+- **decode** `[fn]` in [ACQLIB](/docs/api/acq/) — Decodes all samples of `view` into `out`.    Real formats yield a zero imaginary part.
+- **decodeBits** `[fn]` in [ACQLIB](/docs/api/acq/) — Extracts the `AcqStreamInfo::bitFields` of `view`; row f of `out` holds field f for every sample.
+- **decodePart** `[fn]` in [ACQLIB](/docs/api/acq/) — Decodes one raw run, for adopted device buffers that are not read through an [`AcqReader`](/docs/api/acq/acq-reader).
 - **defaultConstMatrixXd** `[fn]` in [FIFFLIB](/docs/api/fiff/)
 - **defaultCov** `[var]` in [MNELIB](/docs/api/mne/)
 - **defaultD** `[var]` in [MNELIB](/docs/api/mne/)
@@ -144,6 +171,10 @@ Index of 368 namespace-level symbols (functions, typedefs, enums, variables) acr
 - **dipoleFitFuncs** `[type]` in [INVLIB](/docs/api/inv/) — Pointer alias for [`dipoleFitFuncsRec`](/docs/api/inv/dipole-fit-funcs-rec), used throughout the dipole fitting module.
 - **discard3DPointOutliers** `[fn]` in [MNELIB](/docs/api/mne/) — Discard outliers compared to a given 3D surface.
 - **eegAllowedExtensions** `[fn]` in [BIDSLIB](/docs/api/bids/) — Supported raw data file extensions for EEG in BIDS.
+- **encode** `[fn]` in [ACQLIB](/docs/api/acq/) — Encodes `in` into the reserved space of `view` (an output stream, or an input ring written by a backend that receives physical values).
+- **encode** `[fn]` in [ACQLIB](/docs/api/acq/) — Encodes `in` into the reserved space of `view` (an output stream, or an input ring written by a backend that receives physical values).
+- **encode** `[fn]` in [ACQLIB](/docs/api/acq/) — Encodes `in` into the reserved space of `view` (an output stream, or an input ring written by a backend that receives physical values).    For real formats the imaginary part must be 0, otherwise the element counts as clipped.
+- **encodeBits** `[fn]` in [ACQLIB](/docs/api/acq/) — Writes bit fields into the reserved samples of `view`, leaving the analog bits untouched; call before or after `encode()` of the same view.
 - **estimateSnr** `[fn]` in [INVLIB](/docs/api/inv/) — Estimate the SNR of evoked data as a function of time.
 - **eventsFromAnnotations** `[fn]` in [FIFFLIB](/docs/api/fiff/) — Convert [`FiffAnnotations`](/docs/api/fiff/fiff-annotations) to a FIFF event matrix.
 - **FiducialId** `[enum]` in [UTILSLIB](/docs/api/utils/) — Identifier for the three cardinal fiducials.
@@ -187,6 +218,7 @@ Index of 368 namespace-level symbols (functions, typedefs, enums, variables) acr
 - **fitMatchedPoints** `[fn]` in [MNELIB](/docs/api/mne/) — Corresponding point set registration using quaternions.
 - **fitUser** `[type]` in [FWDLIB](/docs/api/fwd/)
 - **fixStimArtifact** `[fn]` in [UTILSLIB](/docs/api/utils/) — Repair stimulus artifacts by interpolating or zeroing data around events.
+- **fromFiffInfo** `[fn]` in [ACQLIB](/docs/api/acq/) — Describes a FIFF measurement as a stream.
 - **fromTokens** `[fn]` in [INVLIB](/docs/api/inv/) — Reconstruct an [`InvSourceEstimate`](/docs/api/inv/inv-source-estimate) from a token sequence.
 - **FWD_BEM_CONSTANT_COLL** `[var]` in [FWDLIB](/docs/api/fwd/)
 - **FWD_BEM_IP_APPROACH_LIMIT** `[var]` in [FWDLIB](/docs/api/fwd/)
@@ -221,6 +253,7 @@ Index of 368 namespace-level symbols (functions, typedefs, enums, variables) acr
 - **InvTokenId** `[enum]` in [INVLIB](/docs/api/inv/) — Token vocabulary for the [`InvSourceEstimate`](/docs/api/inv/inv-source-estimate) tokenization format.
 - **IS_MATRIX** `[var]` in [FIFFLIB](/docs/api/fiff/) — Is Matrix encoding.
 - **IS_TRANSPOSED** `[var]` in [INVLIB](/docs/api/inv/) — Defines IS_TRANSPOSED.
+- **isComplex** `[fn]` in [ACQLIB](/docs/api/acq/)
 - **isHit** `[fn]` in [DISP3DLIB](/docs/api/disp3-d/)
 - **isTrue** `[fn]` in [DISP3DLIB](/docs/api/disp3-d/) — Read a boolean from QSettings with a default fallback.
 - **kBemHead** `[var]` in `SURFACEKEYS`
@@ -249,6 +282,9 @@ Index of 368 namespace-level symbols (functions, typedefs, enums, variables) acr
 - **kSrcSpPrefix** `[var]` in `SURFACEKEYS`
 - **m_matViridrisData** `[var]` in [DISPLIB](/docs/api/disp/)
 - **makeSpharaProjector** `[fn]` in [UTILSLIB](/docs/api/utils/) — Constructs a SPHARA operator.
+- **map** `[fn]` in [ACQLIB](/docs/api/acq/) — Maps part `i` of `view` as a channels x samples matrix of the native type, without copy.
+- **mapSample** `[fn]` in [ACQLIB](/docs/api/acq/) — Maps a sample of one stream to the sample of another stream at the same physical time through host time, so the result carries both clocks' uncertainty.
+- **mapSampleExact** `[fn]` in [ACQLIB](/docs/api/acq/) — Maps `sample` of stream `from`, shifted by `offsetTicks`, to the stream `to` of the same domain.
 - **MATRIX_CODING_CCS** `[var]` in [FIFFLIB](/docs/api/fiff/) — MATRIX_CODING_CCS encoding.
 - **MATRIX_CODING_DENSE** `[var]` in [FIFFLIB](/docs/api/fiff/) — MATRIX_CODING_DENSE encoding.
 - **MATRIX_CODING_RCS** `[var]` in [FIFFLIB](/docs/api/fiff/) — MATRIX_CODING_RCS encoding.
@@ -338,9 +374,13 @@ Index of 368 namespace-level symbols (functions, typedefs, enums, variables) acr
 - **PointKind** `[enum]` in [UTILSLIB](/docs/api/utils/) — Logical category of a captured point.
 - **PythonLineCallback** `[type]` in [UTILSLIB](/docs/api/utils/) — Line-level callback signature.
 - **PythonProgressCallback** `[type]` in [UTILSLIB](/docs/api/utils/) — Progress callback signature.
+- **read** `[fn]` in [ACQLIB](/docs/api/acq/) — Reads samples into an Eigen matrix, resizing it only when its shape differs (so a reused matrix does not allocate).
+- **ref** `[fn]` in [ACQLIB](/docs/api/acq/)
+- **ref** `[fn]` in [ACQLIB](/docs/api/acq/)
 - **resolve_stream** `[fn]` in [LSLLIB](/docs/api/lsl/) — Resolve streams by a specific property value.
 - **resolve_streams** `[fn]` in [LSLLIB](/docs/api/lsl/) — Resolve all streams currently available on the network.
 - **RowVectorPair** `[type]` in [DISPLIB](/docs/api/disp/)
+- **sampleFormatName** `[fn]` in [ACQLIB](/docs/api/acq/)
 - **SceneLayerKind** `[enum]` in [DISP3DLIB](/docs/api/disp3-d/) — Modality of a layer in the multimodal scene.
 - **sensorParentToKeyPrefix** `[fn]` in `SURFACEKEYS` — Map a parent-item display text (e.g.
 - **sensorTypeToObjectKey** `[fn]` in `SURFACEKEYS` — Map from user-facing sensor type name (e.g.
@@ -369,11 +409,14 @@ Index of 368 namespace-level symbols (functions, typedefs, enums, variables) acr
 - **swap_short** `[fn]` in [FIFFLIB](/docs/api/fiff/) — Swap a 16-bit short.
 - **timeNowNow** `[fn]` in [UTILSLIB](/docs/api/utils/) — Returns build time (time preprocessor was run).
 - **toEventMatrix** `[fn]` in [RTPROCESSINGLIB](/docs/api/dsp/) — Transforms QMap with stored information about events per stim channel to a list of event matrices.
+- **toFiffInfo** `[fn]` in [ACQLIB](/docs/api/acq/) — Builds FIFF measurement info for a stream, e.g.
 - **tokenIds** `[fn]` in [INVLIB](/docs/api/inv/) — Extract just the integer token IDs from a token sequence (discarding continuous values).
 - **tokenize** `[fn]` in [INVLIB](/docs/api/inv/) — Serialise an [`InvSourceEstimate`](/docs/api/inv/inv-source-estimate) into a flat token sequence.
 - **tokenValues** `[fn]` in [INVLIB](/docs/api/inv/) — Extract just the continuous values from a token sequence (discarding IDs).
 - **toQMatrix4x4** `[fn]` in `SURFACEKEYS` — Convert an Eigen 4x4 matrix to a QMatrix4x4.
 - **vecDefaultWeights** `[var]` in [MNELIB](/docs/api/mne/)
+- **verify** `[fn]` in [ACQLIB](/docs/api/acq/) — Determines the origin of `target` from loop-back markers against `reference` and verifies the declared clock relation: every marker must imply the same origin within `toleranceTicks`, so drift (a missing or wrong clock connection) is detected instead of producing wrong samples.
 - **VisualizationMode** `[enum]` in [DISP3DLIB](/docs/api/disp3-d/) — Overlay visualisation modes for brain surfaces.
 - **visualizationModeFromName** `[fn]` in [DISP3DLIB](/docs/api/disp3-d/) — Convert a visualization mode name to enum.
 - **visualizationModeName** `[fn]` in [DISP3DLIB](/docs/api/disp3-d/) — Convert a `VisualizationMode` enum to display string.
+- **write** `[fn]` in [ACQLIB](/docs/api/acq/) — Writes all columns of an Eigen matrix to an output stream: reserves, encodes, commits.

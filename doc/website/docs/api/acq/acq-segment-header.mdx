@@ -1,0 +1,30 @@
+---
+id: acq-segment-header
+title: "ACQLIB::AcqSegmentHeader"
+sidebar_label: AcqSegmentHeader
+sidebar_position: 11
+---
+
+# AcqSegmentHeader
+
+**Namespace:** `ACQLIB` &nbsp;·&nbsp; **Library:** Acquisition Library &nbsp;·&nbsp; **Source:** [`acq/acq_block_view.h`](https://github.com/mne-tools/mne-cpp/blob/staging/src/libraries/acq/acq_block_view.h)
+
+`#include <acq/acq_block_view.h>`
+
+```cpp
+struct ACQLIB::AcqSegmentHeader
+```
+
+Generic header of one segment of a segmented stream (MR readout, RF pulse, triggered epoch).
+
+The device-specific payload of `AcqSegmentation::headerBytes` travels next to it.
+
+---
+
+## Example
+
+No example of its own: Per-segment header of triggered and MR readout streams; written by the device backend through AcqWriter::pushSegment() and read through AcqBlockView::segments(), exercised by test_acq_stream.
+
+## Authors of this file
+
+- Christoph Dinh &lt;christoph.dinh@mne-cpp.org&gt;

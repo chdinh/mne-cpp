@@ -1,0 +1,71 @@
+---
+id: acq-event
+title: "ACQLIB::AcqEvent"
+sidebar_label: AcqEvent
+sidebar_position: 10
+---
+
+# AcqEvent
+
+**Namespace:** `ACQLIB` &nbsp;·&nbsp; **Library:** Acquisition Library &nbsp;·&nbsp; **Source:** [`acq/acq_block_view.h`](https://github.com/mne-tools/mne-cpp/blob/staging/src/libraries/acq/acq_block_view.h)
+
+`#include <acq/acq_block_view.h>`
+
+```cpp
+struct ACQLIB::AcqEvent
+```
+
+An event at a sample index: input trigger or marker, or a scheduled output trigger (TMS pulse, stimulus onset, RF gate).
+
+Fixed size, stored in a ring next to the samples; text labels are resolved through `AcqStreamInfo::eventLabels`.
+
+```cpp title="src/examples/ex_acq_performance/main.cpp"
+std::uint64_t s = view->firstSample();
+std::uint64_t mismatches = 0;
+for (std::size_t p = 0; p < view->partCount(); ++p) {
+    const AcqBlockPart& part = view->part(p);
+    for (std::size_t i = 0; i < part.samples; ++i, ++s) {
+        const auto* frame = reinterpret_cast<const std::int16_t*>(part.at(0, i));
+        for (std::size_t c = 0; c < kChannels; ++c) {
+            mismatches += frame[c] != gen.value(s, c) ? 1U : 0U;
+        }
+    }
+}
+for (std::size_t e = 0; e < view->events().size(); ++e) {
+    const AcqEvent& marker = view->events()[e];
+    const bool ok = SignalGenerator::isSpikeStart(marker.sample) && marker.duration == kSpikeWidth;
+    (ok ? st.markersVerified : st.markerMismatches).fetch_add(1, std::memory_order_relaxed);
+}
+```
+
+---
+
+## Example
+
+- Start here: [ex_acq_performance](../../examples/acq/ex_acq_performance.mdx) — Closed-loop acquisition and stimulation with ACQLIB, and its sustained throughput per device class.
+- Full source: [`src/examples/ex_acq_performance/main.cpp`](https://github.com/mne-tools/mne-cpp/tree/staging/src/examples/ex_acq_performance/main.cpp)
+- Build target: `ex_acq_performance` (runs under CTest)
+
+## Used in examples
+
+### [ex_acq_performance](../../examples/acq/ex_acq_performance.mdx)
+
+Closed-loop acquisition and stimulation with ACQLIB, and its sustained throughput per device class.
+
+````cpp title="src/examples/ex_acq_performance/main.cpp, line 391"
+            AcqEvent marker;
+            marker.sample = s;
+            marker.duration = kSpikeWidth;
+            marker.code = 1;
+            input.pushEvent(marker);
+            st.spikesInjected.fetch_add(1, std::memory_order_relaxed);
+        }
+    }
+}
+st.commitNs[k % kCommitSlots].store(nowNs(), std::memory_order_relaxed);
+input.commit(kBlock);
+````
+
+## Authors of this file
+
+- Christoph Dinh &lt;christoph.dinh@mne-cpp.org&gt;

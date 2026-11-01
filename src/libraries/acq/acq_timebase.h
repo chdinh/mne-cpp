@@ -89,6 +89,9 @@ enum class AcqLockState : std::uint8_t
 /**
  * Position of a stream's samples on its domain's tick axis. Trivially copyable; published by the
  * backend or by verify() through AcqStream::setTimebase() and copied into every view.
+ *
+ * @snippet ex_acq_performance/main.cpp acq_timebase_setup
+ * @snippet ex_acq_performance/main.cpp acq_writer_schedule
  */
 struct AcqTimebase
 {

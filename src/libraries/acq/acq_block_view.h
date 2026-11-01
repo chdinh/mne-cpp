@@ -52,6 +52,8 @@ struct ViewAccess;
  * An event at a sample index: input trigger or marker, or a scheduled output trigger (TMS pulse,
  * stimulus onset, RF gate). Fixed size, stored in a ring next to the samples; text labels are
  * resolved through AcqStreamInfo::eventLabels.
+ *
+ * @snippet ex_acq_performance/main.cpp acq_reader_block
  */
 struct AcqEvent
 {
@@ -79,6 +81,8 @@ struct AcqSegmentHeader
  * Up to two contiguous spans forming one logical sequence (the second is empty without wrap-around).
  *
  * @tparam T   Element type.
+ *
+ * @snippet ex_acq_performance/main.cpp acq_reader_block
  */
 template<typename T>
 struct AcqSpanPair
@@ -114,6 +118,8 @@ struct AcqSpanPair
  * One contiguous run of samples in a ring.
  *
  * @tparam Byte   std::byte for writable runs, const std::byte for read-only runs.
+ *
+ * @snippet ex_acq_performance/main.cpp acq_reader_block
  */
 template<typename Byte>
 struct AcqPart
@@ -141,6 +147,8 @@ using AcqWritePart = AcqPart<std::byte>;       /**< Writable run. */
 //=============================================================================================================
 /**
  * Fields shared by read and write views.
+ *
+ * @snippet ex_acq_performance/main.cpp acq_reader_block
  */
 template<typename Byte>
 class AcqViewBase
@@ -251,6 +259,8 @@ protected:
 //=============================================================================================================
 /**
  * Read view returned by AcqReader::acquire().
+ *
+ * @snippet ex_acq_performance/main.cpp acq_reader_block
  */
 class AcqBlockView : public AcqViewBase<const std::byte>
 {
@@ -312,6 +322,8 @@ private:
 //=============================================================================================================
 /**
  * Write view returned by AcqWriter::beginWrite(): reserved ring space for the next samples.
+ *
+ * @snippet ex_acq_performance/main.cpp acq_writer_commit
  */
 class AcqWriteView : public AcqViewBase<std::byte>
 {

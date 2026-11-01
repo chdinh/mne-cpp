@@ -187,6 +187,8 @@ struct AcqFiffChannel
 /**
  * Description of one channel. For output channels, rangeMin/rangeMax are the safety limits the encoder
  * saturates to.
+ *
+ * @snippet ex_acq_performance/main.cpp acq_stream_info
  */
 struct AcqChannelInfo
 {
@@ -257,6 +259,8 @@ struct AcqExtension
 //=============================================================================================================
 /**
  * Complete description of one stream at one metadata version.
+ *
+ * @snippet ex_acq_performance/main.cpp acq_stream_info
  */
 struct AcqStreamInfo
 {

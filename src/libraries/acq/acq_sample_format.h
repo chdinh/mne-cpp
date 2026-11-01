@@ -140,9 +140,8 @@ static_assert(sizeof(AcqComplexInt16) == 4, "AcqComplexInt16 must be packed");
 [[nodiscard]] ACQSHARED_EXPORT std::string_view sampleFormatName(AcqSampleFormat format) noexcept;
 
 //=============================================================================================================
-/**
- * Maps a C++ element type to its sample format; used by AcqBlockView::map<T>().
- */
+/// @cond INTERNAL
+// Maps a C++ element type to its sample format, for map<T>() in acq_eigen.h.
 template<typename T>
 struct AcqSampleTraits; // undefined for unsupported types
 
@@ -181,6 +180,7 @@ struct AcqSampleTraits<std::complex<float>>
 {
     static constexpr AcqSampleFormat format = AcqSampleFormat::ComplexFloat32;
 };
+/// @endcond
 
 } // namespace ACQLIB
 

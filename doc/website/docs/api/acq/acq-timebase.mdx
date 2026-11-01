@@ -1,0 +1,100 @@
+---
+id: acq-timebase
+title: "ACQLIB::AcqTimebase"
+sidebar_label: AcqTimebase
+sidebar_position: 23
+---
+
+# AcqTimebase
+
+**Namespace:** `ACQLIB` &nbsp;·&nbsp; **Library:** Acquisition Library &nbsp;·&nbsp; **Source:** [`acq/acq_timebase.h`](https://github.com/mne-tools/mne-cpp/blob/staging/src/libraries/acq/acq_timebase.h)
+
+`#include <acq/acq_timebase.h>`
+
+```cpp
+struct ACQLIB::AcqTimebase
+```
+
+Position of a stream's samples on its domain's tick axis.
+
+Trivially copyable; published by the backend or by `verify()` through `AcqStream::setTimebase()` and copied into every view.
+
+```cpp title="src/examples/ex_acq_performance/main.cpp"
+// One card, one clock: both streams start on the same hardware trigger, so their samples are
+// phase-locked and the controller can schedule a delay sample-exact from input to output.
+AcqTimebase cardClock;
+cardClock.domain = acqClockDomainId("demo-card:0");
+cardClock.ticksPerSecond = static_cast<std::uint64_t>(kSfreq);
+cardClock.lock = AcqLockState::PhaseLocked;
+input->stream().setTimebase(cardClock);
+stimulator->stream().setTimebase(cardClock);
+```
+
+ 
+```cpp title="src/examples/ex_acq_performance/main.cpp"
+// The output sample whose instant is kStimDelay clock ticks after input sample s.
+bool scheduled = false;
+if (auto at = mapSampleExact(inClock, outClock, s, kStimDelayTicks)) {
+    if (auto pulse = stimulator.beginWriteAt(*at, kStimWidth, 0ns)) {
+        for (std::size_t q = 0; q < pulse->partCount(); ++q) {
+            for (std::size_t j = 0; j < pulse->part(q).samples; ++j) {
+                const std::uint64_t phase = pulse->firstSample() + j - *at;
+                const std::int16_t a = phase < kStimWidth / 2 ? -kStimAmplitude : kStimAmplitude;
+                std::memcpy(pulse->part(q).at(0, j), &a, sizeof(a));
+            }
+        }
+        stimulator.commit(kStimWidth);
+        scheduled = true;
+    }
+}
+(scheduled ? st.stimuliScheduled : st.stimuliLate).fetch_add(1, std::memory_order_relaxed);
+```
+
+---
+
+## Public Methods
+
+### tickOf(sample)
+
+**Parameters:**
+
+- **sample** : *std::uint64_t*
+  Sample index of this stream.
+
+**Returns:**
+
+- *std::int64_t* — Domain tick of that sample.
+
+---
+
+## Example
+
+- Start here: [ex_acq_performance](../../examples/acq/ex_acq_performance.mdx) — Closed-loop acquisition and stimulation with ACQLIB, and its sustained throughput per device class.
+- Full source: [`src/examples/ex_acq_performance/main.cpp`](https://github.com/mne-tools/mne-cpp/tree/staging/src/examples/ex_acq_performance/main.cpp)
+- Build target: `ex_acq_performance` (runs under CTest)
+
+## Used in examples
+
+### [ex_acq_performance](../../examples/acq/ex_acq_performance.mdx)
+
+Closed-loop acquisition and stimulation with ACQLIB, and its sustained throughput per device class.
+
+````cpp title="src/examples/ex_acq_performance/main.cpp, line 475"
+const AcqTimebase inClock = reader.stream().timebase();
+const AcqTimebase outClock = stimulator.stream().timebase();
+bool above = false;
+while (true) {
+    auto view = reader.acquire(1, 100ms);
+    if (!view) {
+        if (view.error() == AcqErrorCode::EndOfStream) {
+            break;
+        }
+        continue;
+    }
+    const std::uint64_t lastBlock = (view->firstSample() + view->sampleCount() - 1) / kBlock;
+    st.wakeLatency.add(nowNs() - st.commitNs[lastBlock % kCommitSlots].load(std::memory_order_relaxed));
+````
+
+## Authors of this file
+
+- Christoph Dinh &lt;christoph.dinh@mne-cpp.org&gt;

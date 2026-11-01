@@ -100,6 +100,8 @@ ACQSHARED_EXPORT const AcqErrorInfo& acqErrorInfo(AcqErrorCode code) noexcept;
 //=============================================================================================================
 /**
  * An error value: a catalogue code plus an optional context string.
+ *
+ * @snippet ex_acq_performance/main.cpp acq_reader_acquire
  */
 class ACQSHARED_EXPORT AcqError
 {
@@ -164,6 +166,8 @@ private:
  * accessing the wrong alternative is a precondition violation (assert), never a throw.
  *
  * @tparam T   The value type; may be move-only.
+ *
+ * @snippet ex_acq_performance/main.cpp acq_reader_acquire
  */
 template<typename T>
 class AcqExpected

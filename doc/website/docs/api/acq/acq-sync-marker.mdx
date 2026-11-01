@@ -1,0 +1,28 @@
+---
+id: acq-sync-marker
+title: "ACQLIB::AcqSyncMarker"
+sidebar_label: AcqSyncMarker
+sidebar_position: 24
+---
+
+# AcqSyncMarker
+
+**Namespace:** `ACQLIB` &nbsp;·&nbsp; **Library:** Acquisition Library &nbsp;·&nbsp; **Source:** [`acq/acq_timebase.h`](https://github.com/mne-tools/mne-cpp/blob/staging/src/libraries/acq/acq_timebase.h)
+
+`#include <acq/acq_timebase.h>`
+
+```cpp
+struct ACQLIB::AcqSyncMarker
+```
+
+One loop-back observation: the target stream emitted (output) or recorded (input) a sync edge at `targetSample`, and the reference stream recorded the same edge at `referenceSample`.
+
+---
+
+## Example
+
+No example of its own: Loop-back edge observation that a device backend passes to verify() when it measures a sync marker.
+
+## Authors of this file
+
+- Christoph Dinh &lt;christoph.dinh@mne-cpp.org&gt;

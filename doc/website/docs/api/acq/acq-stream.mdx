@@ -1,0 +1,160 @@
+---
+id: acq-stream
+title: "ACQLIB::AcqStream"
+sidebar_label: AcqStream
+sidebar_position: 1
+---
+
+# AcqStream
+
+**Namespace:** `ACQLIB` &nbsp;·&nbsp; **Library:** Acquisition Library &nbsp;·&nbsp; **Source:** [`acq/acq_stream.h`](https://github.com/mne-tools/mne-cpp/blob/staging/src/libraries/acq/acq_stream.h)
+
+`#include <acq/acq_stream.h>`
+
+```cpp
+class ACQLIB::AcqStream
+```
+
+Shared handle of a stream.
+
+Cheap to copy; keeps the ring alive, so readers stay valid after the device is closed (they then return EndOfStream).
+
+```cpp title="src/examples/ex_acq_performance/main.cpp"
+auto input = AcqWriter::create(inInfo);
+auto stimulator = AcqWriter::create(outInfo);
+if (!input || !stimulator) {
+    std::fprintf(stderr, "%s\n", (!input ? input.error() : stimulator.error()).text().c_str());
+    return false;
+}
+AcqReaderOptions gating;
+gating.gating = true;
+auto dac = stimulator->stream().reader(AcqReader::ReadMode::Lossless, gating);
+auto recorder = input->stream().reader(AcqReader::ReadMode::Lossless);
+auto display = input->stream().reader(AcqReader::ReadMode::Latest);
+auto controller = input->stream().reader(AcqReader::ReadMode::LowLatency);
+```
+
+---
+
+## Public Methods
+
+### AcqStream()
+
+---
+
+### isValid()
+
+**Returns:**
+
+- *bool* — true when attached to a ring.
+
+---
+
+### direction()
+
+**Returns:**
+
+- *AcqDirection* — Input or output.
+
+---
+
+### info()
+
+**Returns:**
+
+- *std::shared_ptr&lt; const [AcqStreamInfo](/docs/api/acq/acq-stream-info) &gt;* — The current metadata version (control path).
+
+---
+
+### infoAt(sample)
+
+**Parameters:**
+
+- **sample** : *std::uint64_t*
+  Sample index.
+
+**Returns:**
+
+- *std::shared_ptr&lt; const [AcqStreamInfo](/docs/api/acq/acq-stream-info) &gt;* — The metadata version valid at that sample, or the oldest retained one.
+
+---
+
+### clock()
+
+**Returns:**
+
+- *[AcqClockModel](/docs/api/acq/acq-clock-model)* — The current clock model.
+
+---
+
+### timebase()
+
+**Returns:**
+
+- *[AcqTimebase](/docs/api/acq/acq-timebase)* — The current hardware timebase (domain, ticks per sample, origin, lock state).
+
+---
+
+### setTimebase(timebase)
+
+Publishes a new timebase, e.g.
+
+the result of `verify()` or a reference loss reported by the backend. Control path; serialised internally, readers see it through a sequence counter without a lock.
+
+**Parameters:**
+
+- **timebase** : *const [AcqTimebase](/docs/api/acq/acq-timebase) &*
+  The new timebase.
+
+---
+
+### stats()
+
+**Returns:**
+
+- *[AcqStreamStats](/docs/api/acq/acq-stream-stats)* — Producer-side counters.
+
+---
+
+### reader(mode, options)
+
+Attaches a reader (control path; before or after start()).
+
+**Parameters:**
+
+- **mode** : *[AcqReader](/docs/api/acq/acq-reader)::ReadMode*
+  Consumption mode.
+
+- **options** : *const [AcqReaderOptions](/docs/api/acq/acq-reader-options) &*
+  Wake-up strategy, start position, gating.
+
+**Returns:**
+
+- *[AcqExpected](/docs/api/acq/acq-expected)&lt; [AcqReader](/docs/api/acq/acq-reader) &gt;* — The reader, or TooManyReaders, WrongDirection (gating on an input stream), InvalidState (a gating reader already exists).
+
+---
+
+### writer(wait)
+
+Takes the writer of an output stream (control path).
+
+**Parameters:**
+
+- **wait** : *AcqWait*
+  How beginWrite() waits for space.
+
+**Returns:**
+
+- *[AcqExpected](/docs/api/acq/acq-expected)&lt; [AcqWriter](/docs/api/acq/acq-writer) &gt;* — The writer, or WrongDirection (input stream), WriterInUse.
+
+---
+
+## Example
+
+- Start here: [ex_acq_performance](../../examples/acq/ex_acq_performance.mdx) — Closed-loop acquisition and stimulation with ACQLIB, and its sustained throughput per device class.
+- Full source: [`src/examples/ex_acq_performance/main.cpp`](https://github.com/mne-tools/mne-cpp/tree/staging/src/examples/ex_acq_performance/main.cpp)
+- Build target: `ex_acq_performance` (runs under CTest)
+
+## Authors of this file
+
+- Christoph Dinh &lt;christoph.dinh@mne-cpp.org&gt;

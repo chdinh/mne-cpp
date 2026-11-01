@@ -1,0 +1,46 @@
+---
+id: acq-segmentation
+title: "ACQLIB::AcqSegmentation"
+sidebar_label: AcqSegmentation
+sidebar_position: 14
+---
+
+# AcqSegmentation
+
+**Namespace:** `ACQLIB` &nbsp;·&nbsp; **Library:** Acquisition Library &nbsp;·&nbsp; **Source:** [`acq/acq_stream_info.h`](https://github.com/mne-tools/mne-cpp/blob/staging/src/libraries/acq/acq_stream_info.h)
+
+`#include <acq/acq_stream_info.h>`
+
+```cpp
+struct ACQLIB::AcqSegmentation
+```
+
+Segmentation of a stream: continuous, or segments (triggered readouts, RF pulses, epochs) each with a header delivered alongside the samples.
+
+---
+
+## Example
+
+No example of its own: Segmentation settings of AcqStreamInfo for triggered and MR readout streams; set by the device backend, the continuous default needs no code.
+
+It is exercised by:
+
+````cpp title="src/examples/ex_acq_performance/main.cpp"
+AcqStreamInfo inInfo;
+inInfo.name = "neural";
+inInfo.format = AcqSampleFormat::Int16;
+inInfo.sfreq = kSfreq;
+inInfo.channels.resize(kChannels);
+for (std::size_t c = 0; c < kChannels; ++c) {
+    inInfo.channels[c].name = "e" + std::to_string(c);
+    inInfo.channels[c].kind = AcqChannelKind::Seeg;
+    inInfo.channels[c].unit = AcqUnit::Volt;
+    inInfo.channels[c].scale = 0.195e-6;
+}
+````
+
+From [ex_acq_performance](../../examples/acq/ex_acq_performance.mdx).
+
+## Authors of this file
+
+- Christoph Dinh &lt;christoph.dinh@mne-cpp.org&gt;

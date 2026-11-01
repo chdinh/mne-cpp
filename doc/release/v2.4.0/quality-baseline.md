@@ -5,7 +5,7 @@ Coverage from `0800c9a1b` (https://github.com/mne-tools/mne-cpp/actions/runs/394
 
 | Gate | Criterion | Current | Status |
 |---|---|---|---|
-| G1 | Every registered test runs in CI | 262 registered; CI ran 295 on macos-26, 295 on macos-26-qt-min, 295 on ubuntu-24.04, 295 on ubuntu-24.04-qt-min, 295 on windows-2025-vs2026 (2 declared skips), 295 on windows-2025-vs2026-qt-min (2 declared skips) | met |
+| G1 | Every registered test runs in CI | 265 registered; CI ran 295 on macos-26, 295 on macos-26-qt-min, 295 on ubuntu-24.04, 295 on ubuntu-24.04-qt-min, 295 on windows-2025-vs2026 (2 declared skips), 295 on windows-2025-vs2026-qt-min (2 declared skips); not run on macos-26: test_acq_error, test_acq_stream, test_acq_timebase; not run on macos-26-qt-min: test_acq_error, test_acq_stream, test_acq_timebase; not run on ubuntu-24.04: test_acq_error, test_acq_stream, test_acq_timebase; not run on ubuntu-24.04-qt-min: test_acq_error, test_acq_stream, test_acq_timebase; not run on windows-2025-vs2026: test_acq_error, test_acq_stream, test_acq_timebase; not run on windows-2025-vs2026-qt-min: test_acq_error, test_acq_stream, test_acq_timebase | **open** |
 | G1 | Tests carry labels and timeouts | 0 unlabelled, 0 untimed | met |
 | G1 | No retry-to-pass path | 0 retry lines in local scripts | met |
 | G2 | Combined line coverage >= 60.0% | 74.26% (0 lines short) | met |
@@ -13,8 +13,8 @@ Coverage from `0800c9a1b` (https://github.com/mne-tools/mne-cpp/actions/runs/394
 | G2 | Applications >= 50.0% line | 55.85% | met |
 | G2 | Tools >= 50.0% line | 61.66% | met |
 | G2 | Libraries >= 65.0% branch | 65.14% | met |
-| G3 | Eligible APIs have an executable example | 100.0% of 375; 397 snippets | met |
-| G3 | Exported API is registered | 0 exported classes unregistered | met |
+| G3 | Eligible APIs have an executable example | 99.24% of 395; 420 snippets | **open** |
+| G3 | Exported API is registered | 3 exported classes unregistered | **open** |
 | G4 | Documentation images generated in CI | 19 referenced, 0 without producer, placeholders in 0 workflows | met |
 | G4 | Visual regression compares to goldens | 19 golden comparisons | met |
 | G5 | Zero compiler warnings | enforced by -Werror on every matrix entry | met |

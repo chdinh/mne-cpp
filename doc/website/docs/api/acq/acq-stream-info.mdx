@@ -1,0 +1,84 @@
+---
+id: acq-stream-info
+title: "ACQLIB::AcqStreamInfo"
+sidebar_label: AcqStreamInfo
+sidebar_position: 12
+---
+
+# AcqStreamInfo
+
+**Namespace:** `ACQLIB` &nbsp;·&nbsp; **Library:** Acquisition Library &nbsp;·&nbsp; **Source:** [`acq/acq_stream_info.h`](https://github.com/mne-tools/mne-cpp/blob/staging/src/libraries/acq/acq_stream_info.h)
+
+`#include <acq/acq_stream_info.h>`
+
+```cpp
+struct ACQLIB::AcqStreamInfo
+```
+
+Complete description of one stream at one metadata version.
+
+```cpp title="src/examples/ex_acq_performance/main.cpp"
+AcqStreamInfo inInfo;
+inInfo.name = "neural";
+inInfo.format = AcqSampleFormat::Int16;
+inInfo.sfreq = kSfreq;
+inInfo.channels.resize(kChannels);
+for (std::size_t c = 0; c < kChannels; ++c) {
+    inInfo.channels[c].name = "e" + std::to_string(c);
+    inInfo.channels[c].kind = AcqChannelKind::Seeg;
+    inInfo.channels[c].unit = AcqUnit::Volt;
+    inInfo.channels[c].scale = 0.195e-6;
+}
+```
+
+---
+
+## Public Methods
+
+### channelCount()
+
+**Returns:**
+
+- *std::size_t* — Number of channels.
+
+---
+
+### frameBytes()
+
+**Returns:**
+
+- *std::size_t* — Bytes of one frame (all channels of one sample index).
+
+---
+
+## Example
+
+- Start here: [ex_acq_performance](../../examples/acq/ex_acq_performance.mdx) — Closed-loop acquisition and stimulation with ACQLIB, and its sustained throughput per device class.
+- Full source: [`src/examples/ex_acq_performance/main.cpp`](https://github.com/mne-tools/mne-cpp/tree/staging/src/examples/ex_acq_performance/main.cpp)
+- Build target: `ex_acq_performance` (runs under CTest)
+
+## Used in examples
+
+### [ex_acq_performance](../../examples/acq/ex_acq_performance.mdx)
+
+Closed-loop acquisition and stimulation with ACQLIB, and its sustained throughput per device class.
+
+````cpp title="src/examples/ex_acq_performance/main.cpp, line 617"
+AcqStreamInfo inInfo;
+inInfo.name = "neural";
+inInfo.format = AcqSampleFormat::Int16;
+inInfo.sfreq = kSfreq;
+inInfo.channels.resize(kChannels);
+for (std::size_t c = 0; c < kChannels; ++c) {
+    inInfo.channels[c].name = "e" + std::to_string(c);
+    inInfo.channels[c].kind = AcqChannelKind::Seeg;
+    inInfo.channels[c].unit = AcqUnit::Volt;
+    inInfo.channels[c].scale = 0.195e-6;
+}
+AcqStreamInfo outInfo;
+outInfo.name = "stim";
+````
+
+## Authors of this file
+
+- Christoph Dinh &lt;christoph.dinh@mne-cpp.org&gt;

@@ -7,7 +7,7 @@ sidebar_position: 5
 
 # Class Members
 
-Index of 6347 public class members (functions, variables, typedefs, enums) across all documented classes.
+Index of 6656 public class members (functions, variables, typedefs, enums) across all documented classes.
 
 **Jump to:** [A](#a) · [B](#b) · [C](#c) · [D](#d) · [E](#e) · [F](#f) · [G](#g) · [H](#h) · [I](#i) · [J](#j) · [K](#k) · [L](#l) · [M](#m) · [N](#n) · [O](#o) · [P](#p) · [Q](#q) · [R](#r) · [S](#s) · [T](#t) · [U](#u) · [V](#v) · [W](#w) · [X](#x) · [Y](#y) · [Z](#z)
 
@@ -25,9 +25,31 @@ Index of 6347 public class members (functions, variables, typedefs, enums) acros
 - **accurate** `[var]` in [InvDipoleFitSettings](/docs/api/inv/inv-dipole-fit-settings) — Use accurate coil definitions?
 - **acq_pars** `[var]` in [FiffInfo](/docs/api/fiff/fiff-info) — Acquisition parameters.
 - **acq_stim** `[var]` in [FiffInfo](/docs/api/fiff/fiff-info) — Acquisition stimulus information.
+- **AcqBackend** `[fn]` in `AcqBackend`
+- **AcqDevice** `[fn]` in `AcqDevice` — Wraps an already opened backend.
+- **AcqDevice** `[fn]` in `AcqDevice`
+- **AcqDevice** `[fn]` in `AcqDevice`
+- **AcqDevice** `[fn]` in `AcqDevice`
+- **AcqDeviceRegistry** `[fn]` in `AcqDeviceRegistry`
+- **AcqError** `[fn]` in [AcqError](/docs/api/acq/acq-error)
+- **AcqError** `[fn]` in [AcqError](/docs/api/acq/acq-error) — Creates an error without context; allocation-free, usable on the data path.
+- **AcqError** `[fn]` in [AcqError](/docs/api/acq/acq-error) — Creates an error with context (control path, allocates).
+- **AcqExpected** `[fn]` in [AcqExpected](/docs/api/acq/acq-expected) — Holds a value.
+- **AcqExpected** `[fn]` in [AcqExpected](/docs/api/acq/acq-expected) — Holds an error.
+- **AcqExpected** `[fn]` in [AcqExpected](/docs/api/acq/acq-expected) — Holds an error without context.
+- **AcqExpected** `[fn]` in [AcqExpected](/docs/api/acq/acq-expected)
+- **AcqExpected** `[fn]` in [AcqExpected](/docs/api/acq/acq-expected)
+- **AcqReader** `[fn]` in [AcqReader](/docs/api/acq/acq-reader)
+- **AcqReader** `[fn]` in [AcqReader](/docs/api/acq/acq-reader)
+- **AcqReader** `[fn]` in [AcqReader](/docs/api/acq/acq-reader)
+- **AcqStream** `[fn]` in [AcqStream](/docs/api/acq/acq-stream)
+- **acquire** `[fn]` in [AcqReader](/docs/api/acq/acq-reader) — Waits until at least `minSamples` are available (Latest: the newest `minSamples`), then returns a view of up to `maxSamples`.
 - **AcquiredPoints** `[fn]` in [AcquiredPoints](/docs/api/utils/acquired-points)
 - **acquiredPoints** `[fn]` in [PolhemusCoregistration](/docs/api/utils/polhemus-coregistration)
 - **acquisition** `[fn]` in [BIDSPath](/docs/api/bids/bids-path) — Acquisition label.
+- **AcqWriter** `[fn]` in [AcqWriter](/docs/api/acq/acq-writer)
+- **AcqWriter** `[fn]` in [AcqWriter](/docs/api/acq/acq-writer)
+- **AcqWriter** `[fn]` in [AcqWriter](/docs/api/acq/acq-writer)
 - **act** `[var]` in [MNEProjData](/docs/api/mne/mne-proj-data) — Per-triangle boolean flag: 1 if this triangle is active.
 - **activate_neighbors** `[fn]` in [MNESurface](/docs/api/mne/mne-surface) — Recursively mark neighboring triangles as active.
 - **activate_projs** `[fn]` in [FiffProj](/docs/api/fiff/fiff-proj) — Set all projections to active.
@@ -36,6 +58,7 @@ Index of 6347 public class members (functions, variables, typedefs, enums) acros
 - **active** `[var]` in [MNEMshDisplaySurfaceSet](/docs/api/mne/mne-msh-display-surface-set) — Boolean array indicating which surfaces are currently active.
 - **active** `[var]` in [MNEProjItem](/docs/api/mne/mne-proj-item) — Whether this item is currently active.
 - **active_file** `[var]` in [MNEProjItem](/docs/api/mne/mne-proj-item) — Whether this item was active when loaded from file.
+- **activeReaders** `[var]` in [AcqStreamStats](/docs/api/acq/acq-stream-stats) — Readers attached right now.
 - **activeSurfaceForTarget** `[slot]` in [BrainView](/docs/api/disp3-d/brain-view) — Get configured surface type for a target view.
 - **activeVertices** `[var]` in [InvGammaMapResult](/docs/api/inv/inv-gamma-map-result)
 - **activeVertices** `[var]` in [InvMxneResult](/docs/api/inv/inv-mxne-result)
@@ -110,6 +133,7 @@ Index of 6347 public class members (functions, variables, typedefs, enums) acros
 - **addWidgets** `[fn]` in [QuickControlView](/docs/api/disp/quick-control-view) — This convenience function adds control widgets to the [`QuickControlView`](/docs/api/disp/quick-control-view) based on their set objects names.
 - **addWidgetTop** `[fn]` in [MultiView](/docs/api/disp/multi-view) — Adds a QWidget to the top docking area.
 - **adjust_baselines** `[fn]` in [MNEMeasData](/docs/api/mne/mne-meas-data) — Adjust baseline offset of the current data set.
+- **adoptedBuffer** `[var]` in [AcqStreamStats](/docs/api/acq/acq-stream-stats) — Whether the ring is an adopted external buffer.
 - **affect** `[fn]` in [MNEProjItem](/docs/api/mne/mne-proj-item) — Test whether this projection item affects any of the listed channels.
 - **affect** `[fn]` in [MNEProjOp](/docs/api/mne/mne-proj-op) — Count how many active projection vectors affect a given list of channel names.
 - **affect_chs** `[fn]` in [MNEProjOp](/docs/api/mne/mne-proj-op) — Count how many active projection vectors affect the given channels.
@@ -126,6 +150,8 @@ Index of 6347 public class members (functions, variables, typedefs, enums) acros
 - **amplitudeMax** `[var]` in `ButterflyTypeGroup`
 - **amplitudeMax** `[var]` in [ChannelDisplayInfo](/docs/api/disp/channel-display-info) — Amplitude value (physical units) that maps to full row height.
 - **Anatomical** `[var]` in [BrainRenderer](/docs/api/disp3-d/brain-renderer)
+- **anchorHostNs** `[var]` in [AcqClockModel](/docs/api/acq/acq-clock-model) — Host time at which the anchor sample crossed the host boundary.
+- **anchorSample** `[var]` in [AcqClockModel](/docs/api/acq/acq-clock-model) — Sample index of the anchor.
 - **angleTo** `[fn]` in [FiffCoordTrans](/docs/api/fiff/fiff-coord-trans) — Calculate rotation as angle between two rotation matrices.
 - **annotationBoundaryMoved** `[signal]` in [ChannelDataView](/docs/api/disp/channel-data-view) — Emitted when the user drags an annotation boundary to a new position.
 - **annotationBoundaryMoved** `[signal]` in [ChannelRhiView](/docs/api/disp/channel-rhi-view) — Emitted when the user finishes dragging an annotation boundary.
@@ -213,6 +239,7 @@ Index of 6347 public class members (functions, variables, typedefs, enums) acros
 - **assign_channels** `[fn]` in [MNEProjOp](/docs/api/mne/mne-proj-op) — Assign a channel name list to this projection operator, invalidating any previously compiled projector.
 - **assignedOperatorsChanged** `[fn]` in [ChannelInfoModel](/docs/api/disp/channel-info-model) — Updates the fiff info.
 - **associatedImagePath** `[var]` in [BidsCoordinateSystem](/docs/api/bids/bids-coordinate-system) — Relative path to associated T1w image (OPTIONAL).
+- **at** `[fn]` in [AcqPart](/docs/api/acq/acq-part)
 - **at** `[fn]` in [ConnectivitySettings](/docs/api/connectivity/connectivity-settings)
 - **at** `[fn]` in [MNESourceSpaces](/docs/api/mne/mne-source-spaces) — Access the underlying shared_ptr at the given index.
 - **at** `[fn]` in [MNESourceSpaces](/docs/api/mne/mne-source-spaces) — Access the underlying shared_ptr at the given index (const).
@@ -225,6 +252,8 @@ Index of 6347 public class members (functions, variables, typedefs, enums) acros
 - **autoDetectPortName** `[fn]` in [PolhemusConnection](/docs/api/utils/polhemus-connection) — Best-effort auto-detection of an attached Fastrak/FastSCAN.
 - **automatedRotation** `[slot]` in [BrainView](/docs/api/disp3-d/brain-view) — Whether automated rotation is currently active.
 - **autoSelect** `[fn]` in [StsCovEstimators](/docs/api/sts/sts-cov-estimators) — Auto-select the best covariance estimator via cross-validation.
+- **available** `[var]` in `AcqDiscoveredDevice` — false for backends whose runtime library was not found (still listed).
+- **available** `[fn]` in [AcqReader](/docs/api/acq/acq-reader)
 - **availablePorts** `[fn]` in [PolhemusConnection](/docs/api/utils/polhemus-connection) — Enumerate every serial port currently visible to the OS.
 - **ave_nn** `[var]` in [MNEPatchInfo](/docs/api/mne/mne-patch-info) — Average outward surface normal of the patch.
 - **aveFiles** `[var]` in [ProcessingSettings](/docs/api/mne/processing-settings) — Averaging description file(s).
@@ -255,7 +284,9 @@ Index of 6347 public class members (functions, variables, typedefs, enums) acros
 - **b1** `[var]` in [IirBiquad](/docs/api/dsp/iir-biquad) — Numerator coefficient z^-1.
 - **B2** `[var]` in [FitDipUserRec](/docs/api/inv/fit-dip-user-rec)
 - **b2** `[var]` in [IirBiquad](/docs/api/dsp/iir-biquad) — Numerator coefficient z^-2.
+- **backend** `[var]` in `AcqDeviceDescription` — Backend name, e.g.
 - **backendName** `[fn]` in [PolhemusConnection](/docs/api/utils/polhemus-connection)
+- **backendVersion** `[var]` in `AcqDeviceDescription` — Version of the runtime-loaded library, empty if none.
 - **backgroundColor** `[fn]` in [ChannelDataView](/docs/api/disp/channel-data-view)
 - **backgroundColor** `[fn]` in [ChannelRhiView](/docs/api/disp/channel-rhi-view)
 - **backgroundColorChanged** `[signal]` in [FiffRawViewSettings](/docs/api/disp/fiff-raw-view-settings) — Emit this signal whenever the user changed the background color.
@@ -287,6 +318,8 @@ Index of 6347 public class members (functions, variables, typedefs, enums) acros
 - **bEegOnly** `[var]` in [LofBadChannelParams](/docs/api/dsp/lof-bad-channel-params) — If true, only check EEG channels.
 - **beginFrame** `[fn]` in [BrainRenderer](/docs/api/disp3-d/brain-renderer) — Begin the first render pass of a frame.
 - **beginPreservingPass** `[fn]` in [BrainRenderer](/docs/api/disp3-d/brain-renderer) — Begin an additional render pass that preserves previous output.
+- **beginWrite** `[fn]` in [AcqWriter](/docs/api/acq/acq-writer) — Reserves the next `samples` samples.
+- **beginWriteAt** `[fn]` in [AcqWriter](/docs/api/acq/acq-writer) — Output streams: reserves `samples` samples starting exactly at `firstSample`, for sample-precise playout (an RF pulse at the sample mapped from a receive event).
 - **bem_funcs** `[var]` in [InvDipoleFitData](/docs/api/inv/inv-dipole-fit-data) — These are the BEM forward functions.
 - **bem_method** `[var]` in [FwdBemModel](/docs/api/fwd/fwd-bem-model) — Approximation method (FWD_BEM_CONSTANT_COLL or FWD_BEM_LINEAR_COLL).
 - **bem_model** `[var]` in [InvDipoleFitData](/docs/api/inv/inv-dipole-fit-data) — BEM model definition.
@@ -318,6 +351,7 @@ Index of 6347 public class members (functions, variables, typedefs, enums) acros
 - **bipolarMatrix** `[fn]` in [IeegReference](/docs/api/ieeg/ieeg-reference) — Montage matrix of the derivations: bipolar data = M * contact data.
 - **bipolarPairs** `[fn]` in [IeegReference](/docs/api/ieeg/ieeg-reference) — Pair each contact with its next neighbour on the same lead: along a depth lead or strip, and along the rows and then the columns of a grid with a known shape.
 - **bIsLargeHeadMovement** `[var]` in [HpiFitResult](/docs/api/inv/hpi-fit-result)
+- **bitFields** `[var]` in [AcqStreamInfo](/docs/api/acq/acq-stream-info) — Digital lines packed into the top bits of channel words.
 - **block** `[fn]` in [FiffExplain](/docs/api/fiff/fiff-explain) — Name of a block kind (FIFFB_*), e.g.
 - **bmax** `[var]` in [AverageCategory](/docs/api/fiff/average-category) — Baseline max (s).
 - **bmax** `[var]` in [CovDefinition](/docs/api/mne/cov-definition) — Baseline max (s).
@@ -364,6 +398,8 @@ Index of 6347 public class members (functions, variables, typedefs, enums) acros
 - **butterflyToggled** `[signal]` in [ChannelDataView](/docs/api/disp/channel-data-view)
 - **ButterflyView** `[fn]` in [ButterflyView](/docs/api/disp/butterfly-view) — The constructor.
 - **bValid** `[var]` in [XdawnResult](/docs/api/dsp/xdawn-result) — True if fit() produced a usable decomposition.
+- **bytes** `[var]` in [AcqExternalBuffer](/docs/api/acq/acq-external-buffer) — Size in bytes.
+- **bytes** `[var]` in [AcqInt24](/docs/api/acq/acq-int24) — Least significant byte first.
 - **bytes** `[var]` in [GpuStream](/docs/api/disp3-d/gpu-stream) — Size in bytes.
 
 ## C {#c}
@@ -374,6 +410,7 @@ Index of 6347 public class members (functions, variables, typedefs, enums) acros
 - **cachedMeshCount** `[fn]` in [BrainRenderer](/docs/api/disp3-d/brain-renderer)
 - **cachedResultHash** `[var]` in [MnaPort](/docs/api/mna/mna-port) — SHA-256 for invalidation.
 - **cachedResultPath** `[var]` in [MnaPort](/docs/api/mna/mna-port) — Relative path to cached result.
+- **cal** `[var]` in `AcqFiffChannel` — FIFF cal.
 - **cal** `[var]` in [FiffChInfo](/docs/api/fiff/fiff-ch-info) — Calibration from volts to units used.
 - **calc_beta** `[fn]` in [FwdBemModel](/docs/api/fwd/fwd-bem-model) — Compute the beta angle used in the linear collocation integration.
 - **calc_f** `[fn]` in [FwdBemModel](/docs/api/fwd/fwd-bem-model) — Compute the f0, fx, fy integration helper values from corner coordinates.
@@ -429,6 +466,8 @@ Index of 6347 public class members (functions, variables, typedefs, enums) acros
 - **cameraPos** `[var]` in `SceneData`
 - **cancelLoading** `[fn]` in [SourceEstimateManager](/docs/api/disp3-d/source-estimate-manager) — Cancel any in-progress STC loading / interpolation and wait for the thread to finish.
 - **cancelPivotCalibration** `[fn]` in [PolhemusCoregistration](/docs/api/utils/polhemus-coregistration)
+- **capacitySamples** `[var]` in [AcqStreamOptions](/docs/api/acq/acq-stream-options) — Rounded up to a power of two; 0 = max(65536, 2 s of data), halved while above 256 MiB.
+- **capacitySamples** `[var]` in [AcqStreamStats](/docs/api/acq/acq-stream-stats) — Effective ring capacity.
 - **captureCurrentPenPositionAsFiducial** `[fn]` in [PolhemusCoregistration](/docs/api/utils/polhemus-coregistration)
 - **captureCurrentPenPositionAsHeadShape** `[fn]` in [PolhemusCoregistration](/docs/api/utils/polhemus-coregistration)
 - **captureCurrentPenPositionAsVertex** `[fn]` in [PolhemusCoregistration](/docs/api/utils/polhemus-coregistration)
@@ -466,10 +505,14 @@ Index of 6347 public class members (functions, variables, typedefs, enums) acros
 - **changePreStim** `[signal]` in [AveragingSettingsView](/docs/api/disp/averaging-settings-view)
 - **changeSelectedBem** `[signal]` in [CoregSettingsView](/docs/api/disp/coreg-settings-view) — Emit this signal whenever the selected Bem changed.
 - **changeStimChannel** `[signal]` in [AveragingSettingsView](/docs/api/disp/averaging-settings-view)
+- **channel** `[var]` in `AcqBitField` — Channel whose sample word carries the field.
 - **channel** `[var]` in [BrainVisionMarker](/docs/api/bids/brain-vision-marker) — Channel number (0 = all channels).
 - **channel_indices_by_type** `[fn]` in [FiffInfoBase](/docs/api/fiff/fiff-info-base) — Channel indices of each channel type, like mne.channel_indices_by_type.
 - **channel_type** `[fn]` in [FiffInfoBase](/docs/api/fiff/fiff-info-base) — Get channel type.
 - **channelBadToggled** `[signal]` in [ChannelLabelPanel](/docs/api/disp/channel-label-panel)
+- **channelCount** `[fn]` in [AcqReader](/docs/api/acq/acq-reader)
+- **channelCount** `[fn]` in [AcqStreamInfo](/docs/api/acq/acq-stream-info)
+- **channelCount** `[fn]` in [AcqViewBase](/docs/api/acq/acq-view-base)
 - **channelCount** `[fn]` in [ChannelDataModel](/docs/api/disp/channel-data-model)
 - **ChannelDataModel** `[fn]` in [ChannelDataModel](/docs/api/disp/channel-data-model)
 - **ChannelDataView** `[fn]` in [ChannelDataView](/docs/api/disp/channel-data-view) — Constructs a [`ChannelDataView`](/docs/api/disp/channel-data-view).
@@ -487,11 +530,15 @@ Index of 6347 public class members (functions, variables, typedefs, enums) acros
 - **channelPositions** `[fn]` in [MNELayout](/docs/api/mne/mne-layout) — Returns the lower-left corner of every channel's viewport, keyed by the name in the file.
 - **ChannelRhiView** `[fn]` in [ChannelRhiView](/docs/api/disp/channel-rhi-view)
 - **channelRms** `[fn]` in [ChannelDataModel](/docs/api/disp/channel-data-model) — Compute the RMS amplitude of a channel over a sample window.
+- **channels** `[var]` in `AcqConvertOptions` — Channels of the view mapped to rows 0..count-1.
+- **channels** `[var]` in [AcqStreamInfo](/docs/api/acq/acq-stream-info) — One entry per channel, in ring order; may be empty for event-only streams.
 - **channelScrollRequested** `[signal]` in [ChannelLabelPanel](/docs/api/disp/channel-label-panel) — Emitted while the user drags vertically on the panel.
 - **channelSelectionChanged** `[fn]` in [AverageLayoutView](/docs/api/disp/average-layout-view) — Sets the currently viewable channels using the corrent name and location parameters.
 - **channelSelectionManagerChanged** `[fn]` in [AverageLayoutView](/docs/api/disp/average-layout-view) — call this whenever the external channel selection manager changes
 - **ChannelSelectionView** `[fn]` in [ChannelSelectionView](/docs/api/disp/channel-selection-view) — Constructs a [`ChannelSelectionView`](/docs/api/disp/channel-selection-view) which is a child of parent.
 - **channelsMappedToLayout** `[signal]` in [ChannelInfoModel](/docs/api/disp/channel-info-model) — Emit this signal whenever channels where mapped to a layout.
+- **channelStride** `[var]` in [AcqExternalBuffer](/docs/api/acq/acq-external-buffer) — Planar buffers: bytes between channel rows; 0 = capacity * bytesPerSample.
+- **channelStride** `[var]` in [AcqPart](/docs/api/acq/acq-part) — Bytes between consecutive channels of one sample.
 - **channelsTsvPath** `[fn]` in [BIDSPath](/docs/api/bids/bids-path) — Returns the path for the channels.tsv sidecar.
 - **chClass** `[var]` in [FiffCov](/docs/api/fiff/fiff-cov) — Channel classification vector.
 - **chdef** `[var]` in [MNEChSelection](/docs/api/mne/mne-ch-selection) — Channel definitions (may contain regular expressions).
@@ -625,15 +672,21 @@ Index of 6347 public class members (functions, variables, typedefs, enums) acros
 - **client** `[var]` in [FwdCompData](/docs/api/fwd/fwd-comp-data) — Client data to pass to the above functions.
 - **client** `[var]` in [FwdThreadArg](/docs/api/fwd/fwd-thread-arg) — Client data for the field computation function.
 - **client_free** `[var]` in [FwdThreadArg](/docs/api/fwd/fwd-thread-arg) — Releases owned client sub-objects.
+- **clipped** `[var]` in `AcqEncodeResult` — Elements saturated to the channel range or native type, or NaN.
 - **clippingToggled** `[signal]` in [ChannelDataView](/docs/api/disp/channel-data-view)
 - **clippingVisible** `[fn]` in [ChannelDataView](/docs/api/disp/channel-data-view)
 - **clippingVisible** `[fn]` in [ChannelRhiView](/docs/api/disp/channel-rhi-view)
 - **cliTemplate** `[var]` in [MnaOpSchema](/docs/api/mna/mna-op-schema) — For CLI ops: command template with \{\{placeholder\}\} tokens.
+- **clock** `[fn]` in [AcqStream](/docs/api/acq/acq-stream)
+- **clock** `[fn]` in [AcqViewBase](/docs/api/acq/acq-view-base)
+- **clockDomain** `[var]` in [AcqStreamInfo](/docs/api/acq/acq-stream-info) — Clock domain name, e.g.
 - **clockTimeFormat** `[fn]` in [ChannelDataView](/docs/api/disp/channel-data-view)
 - **clockTimeFormat** `[fn]` in [ChannelRhiView](/docs/api/disp/channel-rhi-view)
 - **clockTimeFormat** `[fn]` in [TimeRulerWidget](/docs/api/disp/time-ruler-widget)
 - **clone** `[fn]` in [MNEHemisphere](/docs/api/mne/mne-hemisphere) — Creates a deep copy of this hemisphere, preserving the [`MNEHemisphere`](/docs/api/mne/mne-hemisphere) type.
 - **clone** `[fn]` in [MNESourceSpace](/docs/api/mne/mne-source-space) — Creates a deep copy of this source space, preserving the actual derived type.
+- **close** `[fn]` in `AcqBackend` — Releases the device.
+- **close** `[fn]` in `AcqDevice` — Stops if needed and releases the device.
 - **close** `[fn]` in [FiffStream](/docs/api/fiff/fiff-stream) — Close stream.
 - **close** `[fn]` in [PolhemusConnection](/docs/api/utils/polhemus-connection) — Close the active connection.
 - **close_stream** `[fn]` in [stream_inlet](/docs/api/lsl/stream_inlet) — Close the TCP connection to the outlet.
@@ -656,6 +709,9 @@ Index of 6347 public class members (functions, variables, typedefs, enums) acros
 - **clusterThreshold** `[var]` in [StatsClusterResult](/docs/api/sts/stats-cluster-result) — t-threshold used for clustering.
 - **clusterVertnos** `[var]` in [MNEClusterInfo](/docs/api/mne/mne-cluster-info) — Vertnos which belong to corresponding cluster.
 - **cm** `[var]` in [MNESurfaceOrVolume](/docs/api/mne/mne-surface-or-volume) — Center of mass of the vertex cloud.
+- **code** `[fn]` in [AcqError](/docs/api/acq/acq-error)
+- **code** `[var]` in [AcqErrorInfo](/docs/api/acq/acq-error-info) — The code this entry describes.
+- **code** `[var]` in [AcqEvent](/docs/api/acq/acq-event) — Event code (trigger value, marker id, output line mask).
 - **code** `[var]` in [MnaScript](/docs/api/mna/mna-script) — The inline source code (resolved at save-time if sourceUri is set).
 - **codeSha256** `[var]` in [MnaScript](/docs/api/mna/mna-script) — SHA-256 of ``code`` for integrity verification.
 - **coding** `[var]` in [FiffSparseMatrix](/docs/api/fiff/fiff-sparse-matrix) — FIFF coding type (FIFFTS_MC_RCS or FIFFTS_MC_CCS).
@@ -670,6 +726,7 @@ Index of 6347 public class members (functions, variables, typedefs, enums) acros
 - **CoilParam** `[fn]` in [CoilParam](/docs/api/inv/coil-param)
 - **coils** `[var]` in [FwdCoilSet](/docs/api/fwd/fwd-coil-set) — The coil or electrode positions.
 - **coils_els** `[var]` in [FwdThreadArg](/docs/api/fwd/fwd-thread-arg) — The coil definitions.
+- **coilType** `[var]` in `AcqFiffChannel` — FIFFV_COIL_*.
 - **col_names** `[var]` in [FiffNamedMatrix](/docs/api/fiff/fiff-named-matrix) — Column names.
 - **colcals** `[var]` in [FiffCtfComp](/docs/api/fiff/fiff-ctf-comp) — Column calibrations.
 - **colEdges** `[var]` in [VisualizationInfo](/docs/api/connectivity/visualization-info) — The edge color.
@@ -697,14 +754,17 @@ Index of 6347 public class members (functions, variables, typedefs, enums) acros
 - **colorsAvailable** `[signal]` in [RtSensorStreamManager](/docs/api/disp3-d/rt-sensor-stream-manager) — Emitted when the streaming pipeline produces a new set of per-vertex colours for a sensor surface.
 - **colorsRef** `[fn]` in [BrainSurface](/docs/api/disp3-d/brain-surface)
 - **colorStream** `[fn]` in [BrainSurface](/docs/api/disp3-d/brain-surface)
+- **cols** `[var]` in `AcqMatrixRef` — Samples.
 - **cols** `[fn]` in [FiffSparseMatrix](/docs/api/fiff/fiff-sparse-matrix) — Number of columns.
 - **cols** `[var]` in [IeegLead](/docs/api/ieeg/ieeg-lead) — Grid shape when known, else 0.
 - **cols** `[fn]` in [MlTensor](/docs/api/ml/ml-tensor) — 2-D convenience — equivalent to shape(1).
+- **colStride** `[var]` in `AcqMatrixRef` — Elements between consecutive samples.
 - **column_norm** `[var]` in [InvDipoleFitData](/docs/api/inv/inv-dipole-fit-data) — What kind of column normalization to apply to the forward solution.
 - **columnCount** `[fn]` in [ChannelInfoModel](/docs/api/disp/channel-info-model)
 - **columnCount** `[fn]` in [EvokedSetModel](/docs/api/disp/evoked-set-model) — Returns the number of columns for the children of the given parent.
 - **columnCount** `[fn]` in [FrequencySpectrumModel](/docs/api/disp/frequency-spectrum-model) — Returns the number of columns for the children of the given parent.
 - **columnCount** `[fn]` in [RtFiffRawViewModel](/docs/api/disp/rt-fiff-raw-view-model) — Returns the number of columns for the children of the given parent.
+- **columnMajor** `[fn]` in `AcqMatrixRef`
 - **combine** `[fn]` in [FiffCoordTrans](/docs/api/fiff/fiff-coord-trans) — Combines two coordinate transformations to yield a transform from `from` to `to`.
 - **combine** `[fn]` in [FiffEvoked](/docs/api/fiff/fiff-evoked) — Merges evoked data by weighted addition or subtraction (mne.combine_evoked).
 - **combine** `[fn]` in [FiffEvoked](/docs/api/fiff/fiff-evoked) — Merges evoked data with a predefined weighting strategy (weights="nave" or "equal").
@@ -735,6 +795,9 @@ Index of 6347 public class members (functions, variables, typedefs, enums) acros
 - **comment** `[var]` in [FsLabel](/docs/api/fs/fs-label) — Comment from the first line of the label file.
 - **comment** `[var]` in [MNEEvent](/docs/api/mne/mne-event) — Free-text event comment.
 - **comment** `[var]` in [MNEMeasDataSet](/docs/api/mne/mne-meas-data-set) — Comment / description associated with this data set.
+- **commit** `[fn]` in [AcqWriter](/docs/api/acq/acq-writer) — Publishes the first samples of the last view (one release store).
+- **commits** `[var]` in [AcqStreamStats](/docs/api/acq/acq-stream-stats) — commit() calls.
+- **committed** `[var]` in [AcqStreamStats](/docs/api/acq/acq-stream-stats) — Samples committed since creation (= next write position).
 - **comp** `[var]` in [FiffRawData](/docs/api/fiff/fiff-raw-data) — Compensator.
 - **comp** `[var]` in [FwdThreadArg](/docs/api/fwd/fwd-thread-arg) — Which component to compute for free orientations.
 - **comp** `[var]` in [MNEMeasData](/docs/api/mne/mne-meas-data) — Software gradient compensation data.
@@ -1066,6 +1129,7 @@ Index of 6347 public class members (functions, variables, typedefs, enums) acros
 - **ConstUPtr** `[type]` in [FiffSparseMatrix](/docs/api/fiff/fiff-sparse-matrix) — Const unique pointer type for [`FiffSparseMatrix`](/docs/api/fiff/fiff-sparse-matrix).
 - **ConstUPtr** `[type]` in [FiffStream](/docs/api/fiff/fiff-stream) — Const unique pointer type for [`FiffStream`](/docs/api/fiff/fiff-stream).
 - **ConstUPtr** `[type]` in [FiffTag](/docs/api/fiff/fiff-tag) — Const unique pointer type for [`FiffTag`](/docs/api/fiff/fiff-tag).
+- **consumeIdle** `[fn]` in [AcqReader](/docs/api/acq/acq-reader) — Gating reader of an output stream: the device has emitted `samples` samples of underrun fill because the writer had not committed them.
 - **contactAt** `[fn]` in [ElectrodeObject](/docs/api/disp3-d/electrode-object)
 - **contactLabel** `[fn]` in [ElectrodeObject](/docs/api/disp3-d/electrode-object)
 - **contactRenderKey** `[fn]` in [ElectrodeObject](/docs/api/disp3-d/electrode-object)
@@ -1073,6 +1137,7 @@ Index of 6347 public class members (functions, variables, typedefs, enums) acros
 - **contacts** `[var]` in [IeegLead](/docs/api/ieeg/ieeg-lead) — Contact indices in order along the lead, contact 1 first.
 - **contactStreams** `[fn]` in [ElectrodeObject](/docs/api/disp3-d/electrode-object)
 - **contains** `[fn]` in [MNELayoutPort](/docs/api/mne/mne-layout-port) — Returns whether `channel` (any spelling) is one of the port's channels.
+- **context** `[fn]` in [AcqError](/docs/api/acq/acq-error)
 - **contHpiStatusChanged** `[signal]` in [HpiSettingsView](/docs/api/disp/hpi-settings-view) — Emit this signal whenever continous HPI checkbox changed.
 - **continuousHPIChecked** `[fn]` in [HpiSettingsView](/docs/api/disp/hpi-settings-view) — Returns whether continuous fitting is checked.
 - **contourStep** `[fn]` in [SensorFieldMapper](/docs/api/disp3-d/sensor-field-mapper) — Compute a "nice" iso-contour step given a value range and target number of ticks.
@@ -1096,6 +1161,7 @@ Index of 6347 public class members (functions, variables, typedefs, enums) acros
 - **coord_frame** `[var]` in [MNERawInfo](/docs/api/mne/mne-raw-info) — Which coordinate frame are the positions defined in?
 - **coord_frame** `[var]` in [MNESssData](/docs/api/mne/mne-sss-data) — Coordinate frame.
 - **coord_frame** `[var]` in [MNESurfaceOrVolume](/docs/api/mne/mne-surface-or-volume) — Which coordinate system the data are in now.
+- **coordFrame** `[var]` in `AcqFiffChannel` — FIFFV_COORD_*.
 - **coordinateSystem** `[var]` in [BidsRawData](/docs/api/bids/bids-raw-data) — Coordinate system from *_coordsystem.json.
 - **coordinateSystem** `[fn]` in [IeegImplantation](/docs/api/ieeg/ieeg-implantation)
 - **coordsystemJsonPath** `[fn]` in [BIDSPath](/docs/api/bids/bids-path) — Returns the path for the coordsystem.json sidecar.
@@ -1114,10 +1180,12 @@ Index of 6347 public class members (functions, variables, typedefs, enums) acros
 - **cosmag** `[var]` in [FwdCoil](/docs/api/fwd/fwd-coil) — The corresponding direction cosines (np x 3).
 - **cosmag** `[fn]` in [InvSensorSet](/docs/api/inv/inv-sensor-set)
 - **cosmag** `[fn]` in [InvSensorSet](/docs/api/inv/inv-sensor-set)
+- **count** `[var]` in `AcqChannelRange` — Number of channels; max = to the end.
 - **count** `[fn]` in [Command](/docs/api/com/command) — Returns the number of parameters.
 - **count** `[fn]` in [FiffEvents](/docs/api/fiff/fiff-events) — Count the events per code (column 2), like mne.count_events.
 - **count** `[fn]` in [MNEDerivSet](/docs/api/mne/mne-deriv-set) — Returns the number of derived channels over all derivations (MNE-C `mne_count_deriv`).
 - **count** `[fn]` in [RawCommand](/docs/api/com/raw-command) — Returns the number of parameters.
+- **counter** `[var]` in [AcqSegmentHeader](/docs/api/acq/acq-segment-header) — Device segment counter; gaps reveal dropped segments.
 - **countOf** `[fn]` in [AcquiredPoints](/docs/api/utils/acquired-points)
 - **couplings** `[var]` in [InvSourceEstimate](/docs/api/inv/inv-source-estimate) — Correlated source groups overlaid on the grid.
 - **cov** `[var]` in [MNECovMatrix](/docs/api/mne/mne-cov-matrix) — Packed lower-triangle covariance data (ncov*(ncov+1)/2 elements).
@@ -1125,6 +1193,7 @@ Index of 6347 public class members (functions, variables, typedefs, enums) acros
 - **cov_sparse** `[var]` in [MNECovMatrix](/docs/api/mne/mne-cov-matrix) — Sparse covariance matrix (note: data are floats).
 - **CovarianceSettingsView** `[fn]` in [CovarianceSettingsView](/docs/api/disp/covariance-settings-view)
 - **covFiles** `[var]` in [ProcessingSettings](/docs/api/mne/processing-settings) — Covariance description file(s).
+- **create** `[fn]` in [AcqWriter](/docs/api/acq/acq-writer) — Creates a standalone ring with its writer (backends, DMA emulation, application-internal pipelines).
 - **create** `[fn]` in [MNECovMatrix](/docs/api/mne/mne-cov-matrix) — Create a covariance matrix from either dense or diagonal data.
 - **create_average_eeg_ref** `[fn]` in [MNEProjOp](/docs/api/mne/mne-proj-op) — Create an average EEG reference projector.
 - **create_dense** `[fn]` in [MNECovMatrix](/docs/api/mne/mne-cov-matrix) — Create a dense (full lower-triangle packed) covariance matrix.
@@ -1183,6 +1252,10 @@ Index of 6347 public class members (functions, variables, typedefs, enums) acros
 - **D** `[var]` in [RegionMTOut](/docs/api/mne/region-mt-out) — Distance matrix (nSources x nClusters).
 - **dAlphaSpace** `[var]` in [InvTfMxneParams](/docs/api/inv/inv-tf-mxne-params) — Spatial regularization (L21 penalty on source groups).
 - **dAlphaTime** `[var]` in [InvTfMxneParams](/docs/api/inv/inv-tf-mxne-params) — Temporal regularization (L1 penalty on TF coefficients).
+- **data** `[var]` in `AcqExtension` — Serialized payload.
+- **data** `[var]` in [AcqExternalBuffer](/docs/api/acq/acq-external-buffer) — Start of the buffer.
+- **data** `[var]` in `AcqMatrixRef` — Element (0, 0).
+- **data** `[var]` in [AcqPart](/docs/api/acq/acq-part) — Channel 0, sample 0 of the run.
 - **data** `[var]` in [ArtifactRejectionData](/docs/api/mne/artifact-rejection-data) — One channel of the epoch.
 - **data** `[fn]` in [ChannelInfoModel](/docs/api/disp/channel-info-model)
 - **data** `[fn]` in [EvokedSetModel](/docs/api/disp/evoked-set-model) — Data for the row and column and given display role.
@@ -1240,6 +1313,7 @@ Index of 6347 public class members (functions, variables, typedefs, enums) acros
 - **decompress** `[fn]` in [MriNiftiIO](/docs/api/mri/mri-nifti-io) — Decompresses a .nii.gz file into `rawData`.
 - **dEegReject** `[var]` in [ArtifactDetectProjParams](/docs/api/utils/artifact-detect-proj-params) — Peak-to-peak rejection in V; 0 = off.
 - **defaultForIndex** `[fn]` in [SubView](/docs/api/disp3-d/sub-view) — Return default [`SubView`](/docs/api/disp3-d/sub-view) configuration for viewport `index`.
+- **defaultValue** `[var]` in `AcqParameterInfo` — Value used when the key is absent; empty if required.
 - **defaultValue** `[var]` in [MnaOpSchemaAttr](/docs/api/mna/mna-op-schema-attr) — Default when not set.
 - **Definition** `[type]` in [MNEDerivSet](/docs/api/mne/mne-deriv-set) — Derived channel name and the weight of every input channel.
 - **definitions** `[fn]` in [MNEDerivSet](/docs/api/mne/mne-deriv-set) — Returns every derivation of the set as definitions, in file order.
@@ -1248,6 +1322,7 @@ Index of 6347 public class members (functions, variables, typedefs, enums) acros
 - **delay** `[var]` in [AverageCategory](/docs/api/fiff/average-category) — Stimulus delay (s).
 - **delay** `[var]` in [CovDefinition](/docs/api/mne/cov-definition) — Apply this delay to the stimulus time point.
 - **dElectricalDistanceThreshold** `[var]` in [BridgedElectrodeParams](/docs/api/dsp/bridged-electrode-params) — Max electrical distance to flag as bridged.
+- **delivered** `[var]` in [AcqReaderStats](/docs/api/acq/acq-reader-stats) — Samples delivered in views.
 - **denoise** `[fn]` in [Xdawn](/docs/api/dsp/xdawn) — Reconstruct one epoch from the first `nComponents` xDAWN components.
 - **denoiseEpochs** `[fn]` in [Xdawn](/docs/api/dsp/xdawn) — Apply `denoise()` to all epochs in the vector, preserving metadata.
 - **dEogReject** `[var]` in [ArtifactDetectProjParams](/docs/api/utils/artifact-detect-proj-params) — Peak-to-peak rejection in V; 0 = off.
@@ -1266,6 +1341,10 @@ Index of 6347 public class members (functions, variables, typedefs, enums) acros
 - **desc** `[var]` in [FiffProj](/docs/api/fiff/fiff-proj) — Projector description.
 - **desc** `[var]` in [FwdCoil](/docs/api/fwd/fwd-coil) — Description for this type of a coil.
 - **desc** `[var]` in [MNEProjItem](/docs/api/mne/mne-proj-item) — Human-readable description (e.g.
+- **description** `[fn]` in `AcqBackend`
+- **description** `[fn]` in `AcqDevice`
+- **description** `[var]` in `AcqParameterInfo` — One sentence.
+- **description** `[var]` in `AcqSchemeInfo` — One sentence.
 - **description** `[var]` in [BidsChannel](/docs/api/bids/bids-channel) — Free-text description (OPTIONAL).
 - **description** `[var]` in [BidsCoordinateSystem](/docs/api/bids/bids-coordinate-system) — Description of the coordinate system (RECOMMENDED).
 - **description** `[fn]` in [BIDSPath](/docs/api/bids/bids-path) — Description label.
@@ -1283,6 +1362,7 @@ Index of 6347 public class members (functions, variables, typedefs, enums) acros
 - **DesignMethod** `[enum]` in [FirFilter](/docs/api/dsp/fir-filter) — FIR design method — wraps [`FilterKernel`](/docs/api/dsp/filter-kernel)'s iDesignMethod integer codes.
 - **designMne** `[fn]` in [FirFilter](/docs/api/dsp/fir-filter) — Designs the zero-phase FIR filter of `mne.filter.create_filter` with its defaults: firwin design with a Hamming window, "auto" transition bands (min(max(0.25 f, 2 Hz), f) below, min(max(0.25 f, 2 Hz), Nyquist - f) above) and "auto" length 3.3 / narrowest band.
 - **detach** `[fn]` in [Subject](/docs/api/utils/subject) — Detaches an observer of the subject.
+- **detail** `[var]` in `AcqDiscoveredDevice` — e.g.
 - **detect** `[fn]` in [BadChannelDetect](/docs/api/utils/bad-channel-detect) — Run all three detectors and return the union of bad channel row indices.
 - **detect_from_raw** `[fn]` in [FiffEvents](/docs/api/fiff/fiff-events) — Detect trigger events from raw data using a stimulus channel.
 - **detectEcg** `[fn]` in [ArtifactDetect](/docs/api/utils/artifact-detect) — Detect ECG R-peak events as mne.preprocessing.find_ecg_events does.
@@ -1298,7 +1378,10 @@ Index of 6347 public class members (functions, variables, typedefs, enums) acros
 - **dev_nn** `[var]` in [MNEPatchInfo](/docs/api/mne/mne-patch-info) — Average angular deviation of member normals from ave_nn (radians).
 - **devHeadTrans** `[var]` in [HpiFitResult](/docs/api/inv/hpi-fit-result)
 - **devHeadTrans** `[var]` in `SensorLoadResult` — Device→Head transform (identity if absent).
+- **device** `[var]` in `AcqDeviceDescription` — Device model and serial, file path or stream name.
 - **devicePoseChanged** `[signal]` in [PolhemusCoregistration](/docs/api/utils/polhemus-coregistration)
+- **devicePosition** `[fn]` in [AcqWriter](/docs/api/acq/acq-writer)
+- **deviceTime** `[var]` in [AcqSegmentHeader](/docs/api/acq/acq-segment-header) — Device time stamp of the trigger, device units.
 - **deviceToWorld** `[fn]` in [PolhemusCoregistration](/docs/api/utils/polhemus-coregistration)
 - **dfBetween** `[var]` in [StatsFtestResult](/docs/api/sts/stats-ftest-result) — Between-groups degrees of freedom.
 - **dFilterHigh** `[var]` in [AnnotateMusclParams](/docs/api/dsp/annotate-muscl-params) — Upper edge of the muscle band (Hz).
@@ -1329,6 +1412,7 @@ Index of 6347 public class members (functions, variables, typedefs, enums) acros
 - **digExtra** `[var]` in [ViewVisibilityProfile](/docs/api/disp3-d/view-visibility-profile)
 - **digFileChanged** `[signal]` in [CoregSettingsView](/docs/api/disp/coreg-settings-view) — Emit this signal whenever new digitizers were loaded.
 - **digHpi** `[var]` in [ViewVisibilityProfile](/docs/api/disp3-d/view-visibility-profile)
+- **digitalBits** `[var]` in [AcqChannelInfo](/docs/api/acq/acq-channel-info) — Integer formats: top bits of the word used by AcqBitFields; the analog value is the remaining low bits.
 - **digitalMax** `[var]` in [EDFChannelInfo](/docs/api/bids/edf-channel-info)
 - **digitalMin** `[var]` in [EDFChannelInfo](/docs/api/bids/edf-channel-info)
 - **digitizerPoints** `[var]` in `SensorLoadResult`
@@ -1364,6 +1448,8 @@ Index of 6347 public class members (functions, variables, typedefs, enums) acros
 - **dir_tree_find** `[fn]` in [FiffDirNode](/docs/api/fiff/fiff-dir-node) — Find nodes of the given kind from a directory tree structure.
 - **directed** `[var]` in [InvConnectivity](/docs/api/inv/inv-connectivity) — True for directed measures (Granger, PDC, DTF); false for undirected (COH, PLV, PLI).
 - **DirectedTransferFunction** `[fn]` in [DirectedTransferFunction](/docs/api/connectivity/directed-transfer-function) — Constructs a [`DirectedTransferFunction`](/docs/api/connectivity/directed-transfer-function) object.
+- **direction** `[fn]` in [AcqStream](/docs/api/acq/acq-stream)
+- **direction** `[var]` in [AcqStreamInfo](/docs/api/acq/acq-stream-info) — Input or output.
 - **direction** `[var]` in [MnaPort](/docs/api/mna/mna-port) — Input or Output.
 - **directory** `[fn]` in [BIDSPath](/docs/api/bids/bids-path) — Constructs the directory path for this entity combination.
 - **directory** `[fn]` in [FigureExporter](/docs/api/disp/figure-exporter) — Returns the directory figures are written to.
@@ -1373,6 +1459,8 @@ Index of 6347 public class members (functions, variables, typedefs, enums) acros
 - **discard** `[var]` in [FiffDigitizerData](/docs/api/fiff/fiff-digitizer-data) — Which points should be discarded.
 - **discard_outlier_digitizer_points** `[fn]` in [MNEMshDisplaySurface](/docs/api/mne/mne-msh-display-surface) — Mark digitizer points whose distance to the head surface exceeds maxdist.
 - **disconnectFromHost** `[fn]` in [RtDataClient](/docs/api/com/rt-data-client) — Attempts to close the socket.
+- **discover** `[fn]` in `AcqDeviceRegistry`
+- **Discoverer** `[type]` in `AcqDeviceRegistry` — Lists reachable sources of one scheme within a timeout.
 - **displayLabel** `[fn]` in [RayHit](/docs/api/disp3-d/ray-hit) — Build a human-readable display label for the hit object.
 - **displayName** `[var]` in [SceneLayer](/docs/api/disp3-d/scene-layer) — Human-readable label for the scene tree dock.
 - **dist** `[var]` in [FiffDigitizerData](/docs/api/fiff/fiff-digitizer-data) — Distance of each point from the head surface.
@@ -1395,12 +1483,14 @@ Index of 6347 public class members (functions, variables, typedefs, enums) acros
 - **doAbs** `[var]` in [AverageCategory](/docs/api/fiff/average-category) — Compute absolute values?
 - **doBaseline** `[var]` in [AverageCategory](/docs/api/fiff/average-category) — Should we baseline?
 - **doBaseline** `[var]` in [CovDefinition](/docs/api/mne/cov-definition) — Should we baseline first?
+- **docAnchor** `[var]` in [AcqErrorInfo](/docs/api/acq/acq-error-info) — Anchor on the acquisition error documentation page.
 - **dockLocationChanged** `[signal]` in [MultiView](/docs/api/disp/multi-view)
 - **doDipfitConcurrent** `[fn]` in [InvHpiFitData](/docs/api/inv/inv-hpi-fit-data) — dipfit function is adapted from Fieldtrip Software.
 - **dof** `[var]` in [MriVolData](/docs/api/mri/mri-vol-data) — Degrees of freedom.
 - **doForwardComputation** `[signal]` in [FwdSettingsView](/docs/api/disp/fwd-settings-view) — Emit this signal whenever a forward computation is supposed to be triggered.
 - **doFreqOrder** `[signal]` in [HpiSettingsView](/docs/api/disp/hpi-settings-view) — Emit this signal whenever the frequency ordering is supposed to be triggered.
 - **doInverseSetup** `[fn]` in [InvMinimumNorm](/docs/api/inv/inv-minimum-norm) — Perform the inverse setup: Prepares this inverse operator and assembles the kernel.
+- **domain** `[var]` in [AcqTimebase](/docs/api/acq/acq-timebase) — acqClockDomainId(name); 0 = free-running.
 - **doSingleHpiFit** `[signal]` in [HpiSettingsView](/docs/api/disp/hpi-settings-view) — Emit this signal whenever a single HPI fit is supposed to be triggered.
 - **doStdErr** `[var]` in [AverageCategory](/docs/api/fiff/average-category) — Compute std error of mean?
 - **downstreamNodes** `[fn]` in [MnaGraph](/docs/api/mna/mna-graph)
@@ -1438,6 +1528,7 @@ Index of 6347 public class members (functions, variables, typedefs, enums) acros
 - **dup** `[fn]` in [MNEProjOp](/docs/api/mne/mne-proj-op) — Create a deep copy of this projection operator.
 - **dup_coil_set** `[fn]` in [FwdCoilSet](/docs/api/fwd/fwd-coil-set) — Make a coil set duplicate.
 - **dup_light_set** `[fn]` in [MNEMshDisplaySurfaceSet](/docs/api/mne/mne-msh-display-surface-set) — Deep-copy a light set including all individual light entries.
+- **duration** `[var]` in [AcqEvent](/docs/api/acq/acq-event) — Duration in samples, 0 for an instantaneous event.
 - **duration** `[var]` in [BidsEvent](/docs/api/bids/bids-event) — Duration of the event in seconds.
 - **duration** `[var]` in [BrainVisionMarker](/docs/api/bids/brain-vision-marker) — Duration in samples (0 = point marker).
 - **duration** `[var]` in [FiffAnnotation](/docs/api/fiff/fiff-annotation) — Duration in seconds (0 for point events).
@@ -1447,6 +1538,7 @@ Index of 6347 public class members (functions, variables, typedefs, enums) acros
 
 ## E {#e}
 
+- **earliestWritableSample** `[fn]` in [AcqWriter](/docs/api/acq/acq-writer)
 - **ecdSet** `[fn]` in [DipoleTreeItem](/docs/api/disp3-d/dipole-tree-item)
 - **ecg** `[fn]` in [ArtifactDetectProjParams](/docs/api/utils/artifact-detect-proj-params)
 - **ecgFlat** `[var]` in [RejectionParams](/docs/api/fiff/rejection-params) — ECG flatness (V).
@@ -1494,6 +1586,8 @@ Index of 6347 public class members (functions, variables, typedefs, enums) acros
 - **electrodesTsvPath** `[fn]` in [BIDSPath](/docs/api/bids/bids-path) — Returns the path for the electrodes.tsv sidecar.
 - **embedded** `[var]` in [MnaFileRef](/docs/api/mna/mna-file-ref) — Whether data is embedded in the container.
 - **emitChanged** `[fn]` in [AcquiredPoints](/docs/api/utils/acquired-points)
+- **empty** `[fn]` in [AcqBlockView](/docs/api/acq/acq-block-view)
+- **empty** `[fn]` in [AcqSpanPair](/docs/api/acq/acq-span-pair)
 - **empty** `[fn]` in [MlTensor](/docs/api/ml/ml-tensor)
 - **enable_all_sources** `[fn]` in [MNESourceSpace](/docs/api/mne/mne-source-space) — Enable all source points (set inuse to TRUE, nuse = np).
 - **enabled** `[var]` in [SubView](/docs/api/disp3-d/sub-view)
@@ -1527,6 +1621,7 @@ Index of 6347 public class members (functions, variables, typedefs, enums) acros
 - **epochMarkersToggled** `[signal]` in [ChannelDataView](/docs/api/disp/channel-data-view)
 - **epochMarkersVisible** `[fn]` in [ChannelDataView](/docs/api/disp/channel-data-view)
 - **epochMarkersVisible** `[fn]` in [ChannelRhiView](/docs/api/disp/channel-rhi-view)
+- **error** `[fn]` in [AcqExpected](/docs/api/acq/acq-expected)
 - **error** `[var]` in [DipFitError](/docs/api/inv/dip-fit-error)
 - **error** `[signal]` in [StcLoadingWorker](/docs/api/disp3-d/stc-loading-worker) — Emitted when an error occurs.
 - **errorDistances** `[var]` in [HpiFitResult](/docs/api/inv/hpi-fit-result)
@@ -1544,18 +1639,23 @@ Index of 6347 public class members (functions, variables, typedefs, enums) acros
 - **even_vertex_color** `[var]` in [MNEMshDisplaySurface](/docs/api/mne/mne-msh-display-surface) — Uniform RGBA color for non-data-driven coloring.
 - **event** `[var]` in [MNEEpochData](/docs/api/mne/mne-epoch-data) — The event code.
 - **event_list** `[var]` in [MNERawData](/docs/api/mne/mne-raw-data) — Trigger event list.
+- **eventCapacity** `[var]` in [AcqStreamOptions](/docs/api/acq/acq-stream-options) — Event ring entries (power of two).
 - **eventFile** `[var]` in [AverageDescription](/docs/api/fiff/average-description) — Read events from here.
 - **eventFile** `[var]` in [CovDescription](/docs/api/mne/cov-description) — Read events from here.
 - **eventFiles** `[var]` in [ProcessingSettings](/docs/api/mne/processing-settings) — Event file(s) to read.
 - **eventFilter** `[fn]` in [RtFiffRawView](/docs/api/disp/rt-fiff-raw-view) — Is called when mouse wheel is used.
 - **eventFilter** `[fn]` in [SpectrumView](/docs/api/disp/spectrum-view) — The event filter.
 - **eventIdMap** `[var]` in [BidsRawData](/docs/api/bids/bids-raw-data) — trial_type string → numeric value mapping.
+- **eventLabels** `[var]` in [AcqStreamInfo](/docs/api/acq/acq-stream-info) — Optional names of `AcqEvent::code` values, index = code.
+- **events** `[fn]` in [AcqBlockView](/docs/api/acq/acq-block-view)
+- **events** `[var]` in [AcqStreamStats](/docs/api/acq/acq-stream-stats) — Events pushed.
 - **events** `[var]` in [AverageCategory](/docs/api/fiff/average-category) — The interesting events.
 - **events** `[var]` in [BidsRawData](/docs/api/bids/bids-raw-data) — Events from *_events.tsv.
 - **events** `[var]` in [CovDefinition](/docs/api/mne/cov-definition) — The interesting events.
 - **events** `[var]` in [FiffEvents](/docs/api/fiff/fiff-events) — Event matrix (nEvents x 3): [sample, before, after].
 - **events** `[var]` in [MNEEventList](/docs/api/mne/mne-event-list) — The events.
 - **eventSample** `[var]` in [MNEEpochData](/docs/api/mne/mne-epoch-data) — The sample index of the triggering event.
+- **eventsLost** `[var]` in [AcqReaderStats](/docs/api/acq/acq-reader-stats) — Events overwritten before this reader could acquire them.
 - **eventsOutFiles** `[var]` in [ProcessingSettings](/docs/api/mne/processing-settings) — Save events to these files.
 - **eventsTsvPath** `[fn]` in [BIDSPath](/docs/api/bids/bids-path) — Returns the path for the events.tsv sidecar.
 - **eventsVisible** `[fn]` in [ChannelDataView](/docs/api/disp/channel-data-view)
@@ -1568,6 +1668,7 @@ Index of 6347 public class members (functions, variables, typedefs, enums) acros
 - **ex** `[var]` in [FiffChPos](/docs/api/fiff/fiff-ch-pos) — Coil coordinate system x-axis unit vector.
 - **ex** `[var]` in [FwdCoil](/docs/api/fwd/fwd-coil) — Coil coordinate system x unit vector.
 - **ex** `[var]` in [MNETriangle](/docs/api/mne/mne-triangle) — In-plane unit vector (ey x nn; used by BEM).
+- **exampleUri** `[var]` in `AcqSchemeInfo` — A URI that works out of the box, if any.
 - **excludeComponents** `[fn]` in [ICA](/docs/api/dsp/ica) — Reconstruct sensor-space data after suppressing selected components.
 - **execMode** `[var]` in [MnaNode](/docs/api/mna/mna-node) — Execution mode.
 - **executable** `[var]` in [MnaOpSchema](/docs/api/mna/mna-op-schema) — For CLI ops: executable name (e.g. "recon-all").
@@ -1590,7 +1691,9 @@ Index of 6347 public class members (functions, variables, typedefs, enums) acros
 - **expression** `[var]` in [MnaParamBinding](/docs/api/mna/mna-param-binding) — Formula string, e.g. "clamp(ref('noise_est_01/snr') * 0.1, 0.01, 1.0)".
 - **expression** `[var]` in [MnaVerificationCheck](/docs/api/mna/mna-verification-check) — [`MnaParamTree`](/docs/api/mna/mna-param-tree) expression over attributes, inputs and (post) outputs: "rank &gt; 0".
 - **extension** `[fn]` in [BIDSPath](/docs/api/bids/bids-path) — File extension.
+- **extensions** `[var]` in [AcqStreamInfo](/docs/api/acq/acq-stream-info) — Bridge payloads for lossless round trips.
 - **extent** `[fn]` in [MNELayout](/docs/api/mne/mne-layout) — Returns the drawing area given on the first line of the file.
+- **external** `[var]` in [AcqStreamOptions](/docs/api/acq/acq-stream-options) — Adopt this buffer instead of allocating one.
 - **externalToolVersion** `[var]` in [MnaProvenance](/docs/api/mna/mna-provenance) — e.g. "FreeSurfer 7.4.1", "Python 3.11.5"
 - **extract** `[fn]` in [EpochExtractor](/docs/api/utils/epoch-extractor) — Extract epochs from a continuous raw data matrix.
 - **extract** `[fn]` in [InvLabelTimeCourse](/docs/api/inv/inv-label-time-course) — Extract label time courses from a source estimate.
@@ -1621,6 +1724,7 @@ Index of 6347 public class members (functions, variables, typedefs, enums) acros
 ## F {#f}
 
 - **factorAnalysis** `[fn]` in [StsCovEstimators](/docs/api/sts/sts-cov-estimators) — Factor Analysis covariance estimator via EM algorithm.
+- **Factory** `[type]` in `AcqDeviceRegistry` — Opens a backend for a parsed URI.
 - **FastrakParser** `[fn]` in [FastrakParser](/docs/api/utils/fastrak-parser)
 - **fCdf** `[fn]` in [StatsFtest](/docs/api/sts/stats-ftest) — Compute the CDF of the F-distribution using the regularized incomplete beta function.
 - **fdr** `[fn]` in [StatsMcCorrection](/docs/api/sts/stats-mc-correction) — False Discovery Rate correction as mne.stats.fdr_correction.
@@ -1637,6 +1741,7 @@ Index of 6347 public class members (functions, variables, typedefs, enums) acros
 - **field_mult** `[var]` in [FwdBemModel](/docs/api/fwd/fwd-bem-model) — Magnetic-field multipliers (length nsurf).
 - **field_pot** `[var]` in [FwdThreadArg](/docs/api/fwd/fwd-thread-arg) — Computes the field or potential for one dipole orientation.
 - **field_pot_grad** `[var]` in [FwdThreadArg](/docs/api/fwd/fwd-thread-arg) — Computes the gradient of field or potential for one dipole orientation.
+- **fiff** `[var]` in [AcqChannelInfo](/docs/api/acq/acq-channel-info) — Present for FIFF-described channels.
 - **fiff_get_float_sparse_matrix** `[fn]` in [FiffSparseMatrix](/docs/api/fiff/fiff-sparse-matrix) — Conversion of tag data into the standard sparse representation.
 - **fiff_get_matrix_sparse_dims** `[fn]` in [FiffSparseMatrix](/docs/api/fiff/fiff-sparse-matrix) — Interpret dimensions and nz from matrix data.
 - **fiff_type_base** `[fn]` in [FiffTag](/docs/api/fiff/fiff-tag) — These return information about fiff type base.
@@ -1794,14 +1899,18 @@ Index of 6347 public class members (functions, variables, typedefs, enums) acros
 - **findHelmetSurfaceKey** `[fn]` in [SensorFieldMapper](/docs/api/disp3-d/sensor-field-mapper) — Find the MEG helmet surface key ("sens_surface_meg") if present.
 - **findLayer** `[fn]` in [MultimodalScene](/docs/api/disp3-d/multimodal-scene)
 - **findPeakIndex** `[fn]` in [StatsSourceMetrics](/docs/api/sts/stats-source-metrics) — Find the index of the source with maximum absolute amplitude.
+- **findStream** `[fn]` in `AcqDevice`
 - **findTabWidgetLayout** `[fn]` in [QuickControlView](/docs/api/disp/quick-control-view)
 - **FineCalibration** `[fn]` in [FineCalibration](/docs/api/dsp/fine-calibration)
+- **finish** `[fn]` in [AcqWriter](/docs/api/acq/acq-writer) — Marks the end of the stream; readers drain and then receive EndOfStream.
 - **finish_writing_raw** `[fn]` in [Fiff](/docs/api/fiff/fiff-class) — fiff_finish_writing_raw
 - **finish_writing_raw** `[fn]` in [FiffStream](/docs/api/fiff/fiff-stream) — Finishes a raw file by writing all necessary end tags.
 - **finished** `[signal]` in [PythonRunner](/docs/api/utils/python-runner) — Emitted when the script finishes.
 - **finished** `[signal]` in [StcLoadingWorker](/docs/api/disp3-d/stc-loading-worker) — Emitted when loading is complete.
 - **finishedAt** `[var]` in [MnaProvenance](/docs/api/mna/mna-provenance)
 - **FirCoeff** `[var]` in [ParksMcClellan](/docs/api/utils/parks-mc-clellan) — containt the generated filter coefficients.
+- **first** `[var]` in `AcqChannelRange` — First channel.
+- **first** `[var]` in [AcqSpanPair](/docs/api/acq/acq-span-pair) — Elements up to the end of the ring.
 - **first** `[var]` in [FiffEvoked](/docs/api/fiff/fiff-evoked) — First time sample.
 - **first** `[var]` in [FiffRawDir](/docs/api/fiff/fiff-raw-dir) — first sample.
 - **first** `[var]` in [MNEMeasDataSet](/docs/api/mne/mne-meas-data-set) — First sample index (for raw-data processing).
@@ -1809,7 +1918,12 @@ Index of 6347 public class members (functions, variables, typedefs, enums) acros
 - **first_samp** `[var]` in [MNERawData](/docs/api/mne/mne-raw-data) — First sample index in the file.
 - **first_samp_old** `[var]` in [MNERawData](/docs/api/mne/mne-raw-data) — First sample index (old-version compatible value).
 - **first_sample_val** `[var]` in [MNERawData](/docs/api/mne/mne-raw-data) — Values at the first sample (for DC offset correction before filtering).
+- **firstBit** `[var]` in `AcqBitField` — Least significant bit of the field.
+- **firstColumn** `[var]` in `AcqConvertOptions` — Matrix column of the view's first sample.
 - **firsts** `[var]` in [MNERawBufDef](/docs/api/mne/mne-raw-buf-def) — First sample index.
+- **firstSample** `[var]` in `AcqReadResult` — Sample index of column 0.
+- **firstSample** `[var]` in [AcqSegmentHeader](/docs/api/acq/acq-segment-header) — Sample index of the first sample of the segment.
+- **firstSample** `[fn]` in [AcqViewBase](/docs/api/acq/acq-view-base)
 - **firstSample** `[fn]` in [ChannelDataModel](/docs/api/disp/channel-data-model)
 - **firstVisibleChannel** `[fn]` in [ChannelRhiView](/docs/api/disp/channel-rhi-view)
 - **firstVisibleSample** `[fn]` in [ChannelDataView](/docs/api/disp/channel-data-view) — Returns the first currently visible sample.
@@ -1844,11 +1958,13 @@ Index of 6347 public class members (functions, variables, typedefs, enums) acros
 - **fitTransform** `[fn]` in [DecodingCsp](/docs/api/decoding/decoding-csp) — Fit and transform in one step.
 - **fitTransform** `[fn]` in [DecodingSpoc](/docs/api/decoding/decoding-spoc) — Fit and transform in one step.
 - **fitTransform** `[fn]` in [DecodingSsd](/docs/api/decoding/decoding-ssd) — Fit and transform in one step.
+- **fix** `[var]` in [AcqErrorInfo](/docs/api/acq/acq-error-info) — What the user can do about it.
 - **fixed_noise** `[var]` in [InvDipoleFitData](/docs/api/inv/inv-dipole-fit-data) — Were fixed noise values used rather than a noise-covariance matrix read from a file.
 - **fixed_ori** `[var]` in [ComputeFwdSettings](/docs/api/fwd/compute-fwd-settings) — Fixed-orientation dipoles?
 - **fixed_ori** `[var]` in [FwdThreadArg](/docs/api/fwd/fwd-thread-arg) — Compute fixed orientation solution?
 - **fixSkew** `[var]` in [AverageDescription](/docs/api/fiff/average-description) — Fix skew on trigger lines.
 - **fixSkew** `[var]` in [CovDescription](/docs/api/mne/cov-description) — Fix skew on trigger lines.
+- **flags** `[var]` in [AcqSegmentHeader](/docs/api/acq/acq-segment-header) — Device-defined flags (e.g.
 - **flags** `[fn]` in [ChannelInfoModel](/docs/api/disp/channel-info-model)
 - **flat** `[var]` in [AnnotateAmplitudeParams](/docs/api/dsp/annotate-amplitude-params) — Annotate where consecutive samples differ by at most this much (mne's flat); unset = off.
 - **flat** `[var]` in [MNESurfacePatch](/docs/api/mne/mne-surface-patch) — Non-zero if the patch has been flattened.
@@ -1862,6 +1978,8 @@ Index of 6347 public class members (functions, variables, typedefs, enums) acros
 - **focalDipoles** `[var]` in [InvSourceEstimate](/docs/api/inv/inv-source-estimate) — Off-grid focal dipoles (ECD results).
 - **focusPoint** `[var]` in `OpticalCalibSample` — Stylus focus point in world frame (metres).
 - **focusPosition** `[fn]` in [VideoOverlay](/docs/api/disp3-d/video-overlay)
+- **format** `[var]` in [AcqStreamInfo](/docs/api/acq/acq-stream-info) — Native sample format stored in the ring.
+- **format** `[fn]` in [AcqViewBase](/docs/api/acq/acq-view-base)
 - **format** `[var]` in [MnaFileRef](/docs/api/mna/mna-file-ref) — File format: "fiff", "mgh", "stc", etc.
 - **formatName** `[fn]` in [AbstractFormatReader](/docs/api/bids/abstract-format-reader) — Return a descriptive name for the format (e.g.
 - **formatName** `[fn]` in [BrainVisionReader](/docs/api/bids/brain-vision-reader) — Return a descriptive name for the format (e.g.
@@ -1873,6 +1991,7 @@ Index of 6347 public class members (functions, variables, typedefs, enums) acros
 - **fov_scale** `[var]` in [MNEMshDisplaySurfaceSet](/docs/api/mne/mne-msh-display-surface-set) — Scale factor for extra space around FOV.
 - **frame** `[fn]` in [VideoOverlay](/docs/api/disp3-d/video-overlay)
 - **frame_name** `[fn]` in [FiffCoordTrans](/docs/api/fiff/fiff-coord-trans) — Map coordinate frame integers to human-readable names.
+- **frameBytes** `[fn]` in [AcqStreamInfo](/docs/api/acq/acq-stream-info)
 - **frameGeneration** `[fn]` in [VideoOverlay](/docs/api/disp3-d/video-overlay) — Monotonic counter, incremented on every `setFrame()` call.
 - **fread3** `[fn]` in [FsSurface](/docs/api/fs/fs-surface) — Reads a 3-byte integer out of a QDataStream (FreeSurfer format).
 - **fread3** `[fn]` in [FsSurface](/docs/api/fs/fs-surface) — Reads a 3-byte integer out of a std::iostream (FreeSurfer format).
@@ -2048,6 +2167,7 @@ Index of 6347 public class members (functions, variables, typedefs, enums) acros
 - **gainVector** `[fn]` in [FineCalibration](/docs/api/dsp/fine-calibration) — Magnetometer calibration factors.
 - **gamma** `[var]` in [FwdBemModel](/docs/api/fwd/fwd-bem-model) — Conductivity-ratio coupling matrix (nsurf x nsurf).
 - **gantry_angle** `[var]` in [FiffInfo](/docs/api/fiff/fiff-info) — Tilt angle of the dewar in degrees.
+- **gating** `[var]` in [AcqReaderOptions](/docs/api/acq/acq-reader-options) — Output streams only: the writer never overwrites what this reader has not consumed (device side).
 - **gaussian** `[fn]` in [Interpolation](/docs/api/disp3-d/interpolation) — gaussian Gaussian interpolation function (sigma=1).
 - **gaussianLogLikelihood** `[fn]` in [StsCovEstimators](/docs/api/sts/sts-cov-estimators) — Gaussian log-likelihood of held-out data given a covariance model.
 - **gcd** `[fn]` in [Numerics](/docs/api/utils/numerics) — Finds the Greatest Common Divisor (GCD) of two integer values.
@@ -2426,6 +2546,7 @@ Index of 6347 public class members (functions, variables, typedefs, enums) acros
 - **hasRh** `[fn]` in [StcLoadingWorker](/docs/api/disp3-d/stc-loading-worker) — Check if right hemisphere data was loaded.
 - **hasShape** `[fn]` in [InvVolumeSourceEstimate](/docs/api/inv/inv-volume-source-estimate) — Check whether the grid shape has been set.
 - **hasTwinFiducial** `[fn]` in [AcquiredPoints](/docs/api/utils/acquired-points)
+- **hasValue** `[fn]` in [AcqExpected](/docs/api/acq/acq-expected)
 - **have_consumers** `[fn]` in [stream_outlet](/docs/api/lsl/stream_outlet) — Check whether any consumers are currently connected.
 - **haveLivePenPosition** `[fn]` in [PolhemusCoregistration](/docs/api/utils/polhemus-coregistration)
 - **haveLiveProbePosition** `[fn]` in [PolhemusCoregistration](/docs/api/utils/polhemus-coregistration)
@@ -2433,10 +2554,12 @@ Index of 6347 public class members (functions, variables, typedefs, enums) acros
 - **head_mri_t** `[var]` in [FwdBemModel](/docs/api/fwd/fwd-bem-model) — Head-to-MRI coordinate transform.
 - **head_mri_t_adj** `[var]` in [FiffDigitizerData](/docs/api/fiff/fiff-digitizer-data) — Adjusted head to MRI transformation.
 - **head_surf_RAS_t** `[var]` in [FiffCoordTransSet](/docs/api/fiff/fiff-coord-trans-set) — Transform from MEG head coordinates to surface RAS.
+- **headerBytes** `[var]` in [AcqSegmentation](/docs/api/acq/acq-segmentation) — Size of the device-specific header payload per segment.
 - **headerData** `[fn]` in [ChannelInfoModel](/docs/api/disp/channel-info-model)
 - **headerData** `[fn]` in [EvokedSetModel](/docs/api/disp/evoked-set-model) — Returns the data for the given role and section in the header with the specified orientation.
 - **headerData** `[fn]` in [FrequencySpectrumModel](/docs/api/disp/frequency-spectrum-model) — Returns the data for the given role and section in the header with the specified orientation.
 - **headerData** `[fn]` in [RtFiffRawViewModel](/docs/api/disp/rt-fiff-raw-view-model) — Returns the data for the given role and section in the header with the specified orientation.
+- **headerSchema** `[var]` in [AcqSegmentation](/docs/api/acq/acq-segmentation) — Payload format, e.g.
 - **headToDevice** `[fn]` in [PolhemusCoregistration](/docs/api/utils/polhemus-coregistration)
 - **headToMni** `[fn]` in [FiffCoordTransSet](/docs/api/fiff/fiff-coord-trans-set) — Maps MEG head coordinates to MNI Talairach coordinates, as `mne.head_to_mni` does.
 - **headToWorld** `[fn]` in [PolhemusCoregistration](/docs/api/utils/polhemus-coregistration)
@@ -2487,6 +2610,7 @@ Index of 6347 public class members (functions, variables, typedefs, enums) acros
 - **hpiFreqs** `[var]` in [HpiFitResult](/docs/api/inv/hpi-fit-result)
 - **HpiSettingsView** `[fn]` in [HpiSettingsView](/docs/api/disp/hpi-settings-view) — Constructs a [`HpiSettingsView`](/docs/api/disp/hpi-settings-view) object.
 - **htmlContent** `[var]` in [ReportSection](/docs/api/utils/report-section)
+- **hugePages** `[var]` in [AcqStreamOptions](/docs/api/acq/acq-stream-options) — Back the ring with huge pages where available.
 
 ## I {#i}
 
@@ -2510,6 +2634,7 @@ Index of 6347 public class members (functions, variables, typedefs, enums) acros
 - **ident** `[var]` in [FiffDigPoint](/docs/api/fiff/fiff-dig-point) — Number identifying this point.
 - **identity** `[fn]` in [FiffCoordTrans](/docs/api/fiff/fiff-coord-trans) — Creates an identity transformation between two coordinate systems.
 - **identNumber** `[var]` in [DigitizedPoint](/docs/api/utils/digitized-point) — 1-based id used by FIFF on export.
+- **idle** `[var]` in [AcqReaderStats](/docs/api/acq/acq-reader-stats) — Gating reader: samples played as underrun fill (consumeIdle).
 - **idx** `[var]` in [HPISortStruct](/docs/api/inv/hpi-sort-struct)
 - **IdxIntValue** `[type]` in [Linalg](/docs/api/math/linalg) — Typedef of a pair of ints.
 - **IeegImplantation** `[fn]` in [IeegImplantation](/docs/api/ieeg/ieeg-implantation)
@@ -2523,6 +2648,7 @@ Index of 6347 public class members (functions, variables, typedefs, enums) acros
 - **iLabelIdxOut** `[var]` in [RegionDataOut](/docs/api/mne/region-data-out) — FsLabel ID.
 - **iLabelIdxOut** `[var]` in [RegionMTOut](/docs/api/mne/region-mt-out) — Label index carried through from the input.
 - **iLineFreq** `[fn]` in [InvHpiModelParameters](/docs/api/inv/inv-hpi-model-parameters)
+- **im** `[var]` in [AcqComplexInt16](/docs/api/acq/acq-complex-int16) — Quadrature component.
 - **ImagCoherence** `[fn]` in [ImagCoherence](/docs/api/connectivity/imag-coherence) — Constructs a [`ImagCoherence`](/docs/api/connectivity/imag-coherence) object.
 - **image** `[fn]` in [SliceObject](/docs/api/disp3-d/slice-object)
 - **ImageSc** `[fn]` in [ImageSc](/docs/api/disp/image-sc) — Creates the scaled image view.
@@ -2557,6 +2683,8 @@ Index of 6347 public class members (functions, variables, typedefs, enums) acros
 - **indices** `[var]` in [InstancedStreams](/docs/api/disp3-d/instanced-streams) — Shape triangle indices (uint32).
 - **iNeighbours** `[var]` in [BadChannelDetectParams](/docs/api/utils/bad-channel-detect-params) — Number of channels on each side to use as neighbours.
 - **iNfft** `[var]` in [TaperedSpectraInputData](/docs/api/utils/tapered-spectra-input-data)
+- **info** `[fn]` in [AcqError](/docs/api/acq/acq-error)
+- **info** `[fn]` in [AcqStream](/docs/api/acq/acq-stream)
 - **info** `[var]` in [FiffEvoked](/docs/api/fiff/fiff-evoked) — Measurement info.
 - **info** `[var]` in [FiffEvokedSet](/docs/api/fiff/fiff-evoked-set) — FIFF measurement information.
 - **info** `[var]` in [FiffRawData](/docs/api/fiff/fiff-raw-data) — [`Fiff`](/docs/api/fiff/fiff-class) measurement information.
@@ -2565,6 +2693,9 @@ Index of 6347 public class members (functions, variables, typedefs, enums) acros
 - **info** `[var]` in [MNERawData](/docs/api/mne/mne-raw-data) — Raw data information loaded using [`MNE`](/docs/api/mne/mne-class) routines.
 - **info** `[var]` in `SensorLoadResult` — Channel / dig info.
 - **info** `[fn]` in [stream_outlet](/docs/api/lsl/stream_outlet) — Get the [`stream_info`](/docs/api/lsl/stream_info) associated with this outlet (including the assigned data port).
+- **infoAt** `[fn]` in [AcqStream](/docs/api/acq/acq-stream)
+- **infoVersion** `[var]` in `AcqReadResult` — `AcqStreamInfo::version` of the samples.
+- **infoVersion** `[fn]` in [AcqViewBase](/docs/api/acq/acq-view-base)
 - **iNFreqs** `[var]` in [InvTfMxneParams](/docs/api/inv/inv-tf-mxne-params) — Number of frequency bins for Gabor dictionary.
 - **iNHpiCoils** `[fn]` in [InvHpiModelParameters](/docs/api/inv/inv-hpi-model-parameters)
 - **iNin** `[var]` in `Basis` — N_in = iOrderIn*(iOrderIn+2).
@@ -2596,6 +2727,7 @@ Index of 6347 public class members (functions, variables, typedefs, enums) acros
 - **insert** `[fn]` in [FsSurfaceSet](/docs/api/fs/fs-surface-set) — Insert a surface.
 - **insertRows** `[fn]` in [ChannelInfoModel](/docs/api/disp/channel-info-model)
 - **insetForSeparator** `[fn]` in [MultiViewLayout](/docs/api/disp3-d/multi-view-layout) — Apply a separator-pixel inset to a pane rect so adjacent panes don't overlap the separator bar.
+- **instance** `[fn]` in `AcqDeviceRegistry`
 - **instance** `[fn]` in [MnaOpRegistry](/docs/api/mna/mna-op-registry) — Access the singleton instance.
 - **instanceCount** `[fn]` in [DipoleObject](/docs/api/disp3-d/dipole-object)
 - **instanceCount** `[var]` in [InstancedStreams](/docs/api/disp3-d/instanced-streams) — Number of instances.
@@ -2795,6 +2927,8 @@ Index of 6347 public class members (functions, variables, typedefs, enums) acros
 - **issueSliceDraw** `[fn]` in [BrainRenderer](/docs/api/disp3-d/brain-renderer) — Draw an MRI slice prepared with `prepareSliceDraw()`.
 - **issueSurfaceDraw** `[fn]` in [BrainRenderer](/docs/api/disp3-d/brain-renderer) — Draw a surface with the uniforms from `prepareSurfaceDraw()`.
 - **issueVideoOverlayDraw** `[fn]` in [BrainRenderer](/docs/api/disp3-d/brain-renderer) — Draw a video overlay prepared with `prepareVideoOverlayDraw()`.
+- **isValid** `[fn]` in [AcqReader](/docs/api/acq/acq-reader)
+- **isValid** `[fn]` in [AcqStream](/docs/api/acq/acq-stream)
 - **isValid** `[fn]` in [BidsRawData](/docs/api/bids/bids-raw-data) — Returns true if the data was loaded successfully.
 - **isValid** `[fn]` in [InvBeamformer](/docs/api/inv/inv-beamformer) — Returns true if this beamformer contains valid filter weights.
 - **isValid** `[fn]` in [MriVolData](/docs/api/mri/mri-vol-data) — Returns whether this volume contains valid data.
@@ -2832,6 +2966,9 @@ Index of 6347 public class members (functions, variables, typedefs, enums) acros
 - **keepTempFile** `[var]` in [MnaScript](/docs/api/mna/mna-script) — true → preserve temp script file after execution (debug aid)
 - **khi2** `[var]` in [InvEcd](/docs/api/inv/inv-ecd) — khi^2 value.
 - **khi2** `[var]` in [InvFocalDipole](/docs/api/inv/inv-focal-dipole) — Chi-squared value of the fit.
+- **kind** `[var]` in `AcqBitField` — RfSwitch, ClockSync, Stim, TriggerOut, ...
+- **kind** `[var]` in [AcqChannelInfo](/docs/api/acq/acq-channel-info) — Signal kind.
+- **kind** `[var]` in `AcqFiffChannel` — FIFFV_*_CH.
 - **kind** `[var]` in [DigitizedPoint](/docs/api/utils/digitized-point)
 - **kind** `[var]` in [FiffChInfo](/docs/api/fiff/fiff-ch-info) — Kind of channel.
 - **kind** `[var]` in [FiffCov](/docs/api/fiff/fiff-cov) — Covariance kind -&gt; `fiff_constants.h`.
@@ -2864,6 +3001,7 @@ Index of 6347 public class members (functions, variables, typedefs, enums) acros
 
 ## L {#l}
 
+- **label** `[var]` in `AcqDiscoveredDevice` — Human-readable name.
 - **label** `[var]` in `AnnotationSpan` — Annotation label shown near the top edge.
 - **label** `[var]` in [DigitizedPoint](/docs/api/utils/digitized-point) — Human label ("NAS", "Cz", "HSP-42", …).
 - **label** `[var]` in [EDFChannelInfo](/docs/api/bids/edf-channel-info)
@@ -2891,12 +3029,15 @@ Index of 6347 public class members (functions, variables, typedefs, enums) acros
 - **last** `[var]` in [FiffEvoked](/docs/api/fiff/fiff-evoked) — Last time sample.
 - **last** `[var]` in [FiffRawDir](/docs/api/fiff/fiff-raw-dir) — last sample.
 - **last_samp** `[var]` in [FiffRawData](/docs/api/fiff/fiff-raw-data) — Last sample number.
+- **lastError** `[fn]` in `AcqDevice`
 - **lastFileSample** `[fn]` in [ChannelRhiView](/docs/api/disp/channel-rhi-view)
 - **lastPick** `[fn]` in [MultimodalScene](/docs/api/disp3-d/multimodal-scene)
 - **lasts** `[var]` in [MNERawBufDef](/docs/api/mne/mne-raw-buf-def) — Last sample index.
+- **lateEvents** `[var]` in [AcqStreamStats](/docs/api/acq/acq-stream-stats) — Output: events or segments rejected as Late.
 - **layers** `[var]` in [FwdEegSphereModel](/docs/api/fwd/fwd-eeg-sphere-model) — An array of layers.
 - **layers** `[fn]` in [MultimodalScene](/docs/api/disp3-d/multimodal-scene)
 - **layersChanged** `[signal]` in [MultimodalScene](/docs/api/disp3-d/multimodal-scene) — Emitted whenever the layer set or any layer flag (visibility, opacity, drawOrder) changes.
+- **layout** `[var]` in [AcqStreamInfo](/docs/api/acq/acq-stream-info) — Ring layout.
 - **layoutChanged** `[fn]` in [ChannelInfoModel](/docs/api/disp/channel-info-model) — Updates the layout map.
 - **LayoutScene** `[fn]` in [LayoutScene](/docs/api/disp/layout-scene) — Constructs a [`LayoutScene`](/docs/api/disp/layout-scene).
 - **lead** `[var]` in [IeegContact](/docs/api/ieeg/ieeg-contact) — Lead name; empty when building derives it from the contact name.
@@ -3000,14 +3141,21 @@ Index of 6347 public class members (functions, variables, typedefs, enums) acros
 - **loadStc** `[fn]` in [SourceEstimateOverlay](/docs/api/disp3-d/source-estimate-overlay) — Load a source estimate file (.stc) for a hemisphere.
 - **loadTrans** `[signal]` in [CoregSettingsView](/docs/api/disp/coreg-settings-view) — Emit this signal whenever the transformation should be loaded.
 - **loadTransformation** `[slot]` in [BrainView](/docs/api/disp3-d/brain-view) — Load a coordinate transformation from a FIF file.
+- **loc** `[var]` in `AcqFiffChannel` — Position r0 and orientation ex, ey, ez.
+- **lock** `[var]` in [AcqTimebase](/docs/api/acq/acq-timebase) — See `AcqLockState`.
+- **lockMemory** `[var]` in [AcqStreamOptions](/docs/api/acq/acq-stream-options) — mlock / VirtualLock; best effort, reported in stats.
 - **log2** `[fn]` in [Numerics](/docs/api/utils/numerics) — Compute log base 2 of a given number.
 - **logFile** `[var]` in [AverageDescription](/docs/api/fiff/average-description) — Save log here.
 - **logFile** `[var]` in [CovDescription](/docs/api/mne/cov-description) — Save log here.
 - **logFile** `[fn]` in [MNELogger](/docs/api/utils/mne-logger) — Returns the path of the current log file, empty if file logging is off.
+- **logicalNo** `[var]` in `AcqFiffChannel` — logno.
 - **logNo** `[var]` in [FiffChInfo](/docs/api/fiff/fiff-ch-info) — Logical channel #.
 - **lookAt** `[var]` in [CameraResult](/docs/api/disp3-d/camera-result)
 - **lookBack** `[var]` in [InvCMNESettings](/docs/api/inv/inv-cmne-settings) — k: number of past time steps.
 - **looseOriConstraint** `[var]` in [InvCMNESettings](/docs/api/inv/inv-cmne-settings) — Orientation constraint.
+- **lost** `[fn]` in [AcqBlockView](/docs/api/acq/acq-block-view)
+- **lost** `[var]` in [AcqReaderStats](/docs/api/acq/acq-reader-stats) — Samples overwritten before this reader could acquire them.
+- **lost** `[var]` in `AcqReadResult` — Samples lost before column 0.
 - **lowCutoff** `[var]` in [BidsChannel](/docs/api/bids/bids-channel) — High-pass cutoff frequency in Hz (OPTIONAL).
 - **lowpass** `[var]` in [FiffInfo](/docs/api/fiff/fiff-info) — Lowpass frequency.
 - **lowpass** `[var]` in [FilterSettings](/docs/api/mne/filter-settings) — Lowpass corner (Hz).
@@ -3035,6 +3183,7 @@ Index of 6347 public class members (functions, variables, typedefs, enums) acros
 - **m_Dipole2** `[var]` in [InvDipolePair](/docs/api/inv/inv-dipole-pair) — [`InvDipole`](/docs/api/inv/inv-dipole) two.
 - **m_dMaxAxisX** `[var]` in [Spline](/docs/api/disp/spline) — Largest class limit.
 - **m_dMinAxisX** `[var]` in [Spline](/docs/api/disp/spline) — Smallest class limit.
+- **m_error** `[var]` in [AcqExpected](/docs/api/acq/acq-expected)
 - **m_errorInfo** `[var]` in [InvHpiFitData](/docs/api/inv/inv-hpi-fit-data)
 - **m_fAbortError** `[var]` in [InvHpiFitData](/docs/api/inv/inv-hpi-fit-data)
 - **m_filterTypes** `[var]` in [FilterKernel](/docs/api/dsp/filter-kernel) — Vector of possible filter design types.
@@ -3085,6 +3234,7 @@ Index of 6347 public class members (functions, variables, typedefs, enums) acros
 - **m_sensors** `[var]` in [InvHpiFitData](/docs/api/inv/inv-hpi-fit-data)
 - **m_sName** `[var]` in [MNEOperator](/docs/api/disp/mne-operator)
 - **m_sViewsToApply** `[var]` in [SelectionItem](/docs/api/disp/selection-item)
+- **m_value** `[var]` in [AcqExpected](/docs/api/acq/acq-expected)
 - **m_vCorrelation** `[var]` in [InvDipolePair](/docs/api/inv/inv-dipole-pair) — Correlation of the dipole pair.
 - **m_vecCoeff** `[var]` in [CosineFilter](/docs/api/utils/cosine-filter) — the time filter coefficient set
 - **m_vecFftCoeff** `[var]` in [CosineFilter](/docs/api/utils/cosine-filter) — the FFT-transformed forward filter coefficient set, required for frequency-domain filtering, zero-padded to m_iFftLength.
@@ -3196,6 +3346,7 @@ Index of 6347 public class members (functions, variables, typedefs, enums) acros
 - **maxAbsCorrelation** `[fn]` in [MlIcaLabel](/docs/api/decoding/ml-ica-label) — Compute the maximum absolute Pearson correlation between a source and reference channels.
 - **maxOnset** `[fn]` in [MNEEventList](/docs/api/mne/mne-event-list) — Returns the largest trigger value that starts from 0.
 - **maxPowerOri** `[var]` in [InvBeamformer](/docs/api/inv/inv-beamformer) — Optimal orientation per source (n_sources, 3).
+- **maxReaders** `[var]` in [AcqStreamOptions](/docs/api/acq/acq-stream-options) — Reader slots, allocated at creation.
 - **maxshield_data** `[var]` in [MNERawInfo](/docs/api/mne/mne-raw-info) — Are these unprocessed MaxShield data.
 - **maxSources** `[var]` in [InvTokenizeOptions](/docs/api/inv/inv-tokenize-options) — Sub-sample grid sources (-1 = all).
 - **maxTimePoints** `[var]` in [InvTokenizeOptions](/docs/api/inv/inv-tokenize-options) — Sub-sample time points (-1 = all).
@@ -3235,8 +3386,10 @@ Index of 6347 public class members (functions, variables, typedefs, enums) acros
 - **megPick** `[fn]` in [SensorFieldMapper](/docs/api/disp3-d/sensor-field-mapper)
 - **megSurfaceKey** `[fn]` in [SensorFieldMapper](/docs/api/disp3-d/sensor-field-mapper)
 - **memb_vert** `[var]` in [MNEPatchInfo](/docs/api/mne/mne-patch-info) — Vertex indices that constitute the patch.
+- **memoryLocked** `[var]` in [AcqStreamStats](/docs/api/acq/acq-stream-stats) — Whether lockMemory succeeded.
 - **merge** `[fn]` in [FiffEvents](/docs/api/fiff/fiff-events) — Replace codes in both code columns by a new one, like mne.merge_events.
 - **MeshFactory** `[fn]` in [MeshFactory](/docs/api/disp3-d/mesh-factory)
+- **message** `[var]` in [AcqErrorInfo](/docs/api/acq/acq-error-info) — What went wrong, naming the cause.
 - **message** `[var]` in [MnaVerificationResult](/docs/api/mna/mna-verification-result) — Formatted message: "PASS: ..." or "FAIL [error]: ...".
 - **metaChanged** `[signal]` in [ChannelDataModel](/docs/api/disp/channel-data-model) — Emitted when channel metadata (scale, colour, bad-flag) changes.
 - **metadata** `[fn]` in [MlOnnxModel](/docs/api/ml/ml-onnx-model)
@@ -3255,6 +3408,8 @@ Index of 6347 public class members (functions, variables, typedefs, enums) acros
 - **minPanePx** `[fn]` in [MultiViewLayout](/docs/api/disp3-d/multi-view-layout)
 - **minv** `[var]` in [MNEMshDisplaySurface](/docs/api/mne/mne-msh-display-surface) — Minimum values along the three coordinate axes.
 - **minX** `[fn]` in [BrainSurface](/docs/api/disp3-d/brain-surface) — Get minimum X coordinate.
+- **mirror** `[var]` in [AcqStreamOptions](/docs/api/acq/acq-stream-options) — Mirror-map the ring where the OS allows it; views are then always one part.
+- **mirrored** `[var]` in [AcqStreamStats](/docs/api/acq/acq-stream-stats) — Whether the ring is mirror-mapped.
 - **mirrorX** `[fn]` in [PolhemusCoregistration](/docs/api/utils/polhemus-coregistration)
 - **mirrorY** `[fn]` in [PolhemusCoregistration](/docs/api/utils/polhemus-coregistration)
 - **missingOps** `[fn]` in [MnaOpRegistry](/docs/api/mna/mna-op-registry) — Return op types referenced in a project that have no registered schema.
@@ -3369,6 +3524,9 @@ Index of 6347 public class members (functions, variables, typedefs, enums) acros
 - **modality** `[fn]` in [RtSensorStreamManager](/docs/api/disp3-d/rt-sensor-stream-manager)
 - **modalityChanged** `[signal]` in [DipoleFitView](/docs/api/disp/dipole-fit-view) — Send new modality selection.
 - **ModalitySelectionView** `[fn]` in [ModalitySelectionView](/docs/api/disp/modality-selection-view) — Constructs a [`ModalitySelectionView`](/docs/api/disp/modality-selection-view) which is a child of parent.
+- **mode** `[fn]` in [AcqReader](/docs/api/acq/acq-reader)
+- **mode** `[var]` in [AcqSegmentation](/docs/api/acq/acq-segmentation) — Continuous or segmented.
+- **Mode** `[enum]` in [AcqSegmentation](/docs/api/acq/acq-segmentation) — Continuous or segmented.
 - **ModeAnnotation** `[var]` in [BrainSurface](/docs/api/disp3-d/brain-surface)
 - **model** `[var]` in [CameraResult](/docs/api/disp3-d/camera-result)
 - **model** `[fn]` in [ChannelDataView](/docs/api/disp/channel-data-view) — Returns the underlying data model (non-owning pointer).
@@ -3430,6 +3588,11 @@ Index of 6347 public class members (functions, variables, typedefs, enums) acros
 ## N {#n}
 
 - **nactive** `[var]` in [MNEProjData](/docs/api/mne/mne-proj-data) — Number of currently active triangles.
+- **name** `[var]` in `AcqBitField` — e.g.
+- **name** `[var]` in [AcqChannelInfo](/docs/api/acq/acq-channel-info) — Unique within the stream.
+- **name** `[var]` in [AcqErrorInfo](/docs/api/acq/acq-error-info) — Stable identifier, e.g.
+- **name** `[var]` in `AcqParameterInfo` — Query key.
+- **name** `[var]` in [AcqStreamInfo](/docs/api/acq/acq-stream-info) — Unique within its source (e.g.
 - **name** `[var]` in [BidsChannel](/docs/api/bids/bids-channel) — Channel name (REQUIRED).
 - **name** `[var]` in [BidsDatasetDescription](/docs/api/bids/bids-dataset-description) — Human-readable dataset name (REQUIRED).
 - **name** `[var]` in [BidsElectrode](/docs/api/bids/bids-electrode) — Electrode name (REQUIRED).
@@ -3633,6 +3796,7 @@ Index of 6347 public class members (functions, variables, typedefs, enums) acros
 - **ntri** `[var]` in [FwdBemModel](/docs/api/fwd/fwd-bem-model) — Triangle count per surface (length nsurf).
 - **ntri** `[var]` in [MNESurfaceOrVolume](/docs/api/mne/mne-surface-or-volume) — Number of triangles in the surface.
 - **num_events** `[fn]` in [FiffEvents](/docs/api/fiff/fiff-events) — Returns the number of events.
+- **numaNode** `[var]` in [AcqStreamOptions](/docs/api/acq/acq-stream-options) — Allocate on this NUMA node, -1 = local to the creating thread.
 - **numberTrialRowChanged** `[signal]` in [TfSettingsView](/docs/api/disp/tf-settings-view) — Emit signal whenever trial number changed.
 - **numberTrialsChanged** `[signal]` in [ConnectivitySettingsView](/docs/api/disp/connectivity-settings-view) — Emit signal whenever the number of trials changed.
 - **numClust** `[fn]` in [MNEClusterInfo](/docs/api/mne/mne-cluster-info) — Returns the number of clusters.
@@ -3674,10 +3838,13 @@ Index of 6347 public class members (functions, variables, typedefs, enums) acros
 - **observerNumDebug** `[fn]` in [Subject](/docs/api/utils/subject) — Returns attached observers.
 - **observers** `[fn]` in [Subject](/docs/api/utils/subject) — Returns attached observers.
 - **off** `[var]` in [FwdThreadArg](/docs/api/fwd/fwd-thread-arg) — Offset within the result to the first source space vertex solution.
+- **offset** `[var]` in [AcqChannelInfo](/docs/api/acq/acq-channel-info) — See scale.
 - **offset** `[var]` in [FiffDataRef](/docs/api/fiff/fiff-data-ref) — Offset to the data in the external file.
 - **offset** `[fn]` in [FsSurface](/docs/api/fs/fs-surface) — Vector offset.
 - **offset** `[fn]` in [FsSurface](/docs/api/fs/fs-surface) — Vector offset.
+- **offsets** `[fn]` in [AcqViewBase](/docs/api/acq/acq-view-base)
 - **offsets** `[var]` in [MNERawData](/docs/api/mne/mne-raw-data) — DC offset corrections for display.
+- **ok** `[fn]` in [AcqError](/docs/api/acq/acq-error)
 - **omit_data_proj** `[var]` in [InvDipoleFitSettings](/docs/api/inv/inv-dipole-fit-settings) — Omit the projection in the data file.
 - **omit_samp** `[var]` in [MNERawData](/docs/api/mne/mne-raw-data) — Number of skip samples omitted from the beginning.
 - **omit_samp_old** `[var]` in [MNERawData](/docs/api/mne/mne-raw-data) — Omitted samples (old-version compatible value).
@@ -3707,6 +3874,8 @@ Index of 6347 public class members (functions, variables, typedefs, enums) acros
 - **opacity** `[fn]` in [SliceObject](/docs/api/disp3-d/slice-object)
 - **opacity** `[fn]` in [VideoOverlay](/docs/api/disp3-d/video-overlay)
 - **open** `[fn]` in [AbstractFormatReader](/docs/api/bids/abstract-format-reader) — Open and parse the file header.
+- **open** `[fn]` in `AcqDevice` — Opens a source through `AcqDeviceRegistry`, e.g.
+- **open** `[fn]` in `AcqDeviceRegistry`
 - **open** `[fn]` in [BrainVisionReader](/docs/api/bids/brain-vision-reader) — Open and parse the file header.
 - **open** `[fn]` in [EDFReader](/docs/api/bids/edf-reader) — Open and parse the file header.
 - **open** `[fn]` in [Fiff](/docs/api/fiff/fiff-class) — fiff_open
@@ -3721,15 +3890,29 @@ Index of 6347 public class members (functions, variables, typedefs, enums) acros
 - **operate** `[signal]` in [RtHpi](/docs/api/dsp/rt-hpi)
 - **operate** `[signal]` in [RtInvOp](/docs/api/dsp/rt-inv-op) — Emit this signal whenver the worker should create a new inverse operator estimation.
 - **operate** `[signal]` in [RtNoise](/docs/api/dsp/rt-noise) — Internal signal to forward data to the worker thread.
+- **operator bool** `[fn]` in [AcqExpected](/docs/api/acq/acq-expected)
 - **operator const Eigen::SparseMatrix&lt; float &gt; &** `[fn]` in [FiffSparseMatrix](/docs/api/fiff/fiff-sparse-matrix) — Implicit conversion to const Eigen::SparseMatrix&lt;float&gt;&.
 - **operator!=** `[fn]` in [InvHpiModelParameters](/docs/api/inv/inv-hpi-model-parameters)
 - **operator!=** `[fn]` in [InvSensorSet](/docs/api/inv/inv-sensor-set)
+- **operator*** `[fn]` in [AcqExpected](/docs/api/acq/acq-expected)
+- **operator*** `[fn]` in [AcqExpected](/docs/api/acq/acq-expected)
 - **operator+=** `[fn]` in [FiffEvoked](/docs/api/fiff/fiff-evoked) — Inputs a new data set and recalculates the average.
+- **operator-&gt;** `[fn]` in [AcqExpected](/docs/api/acq/acq-expected)
+- **operator-&gt;** `[fn]` in [AcqExpected](/docs/api/acq/acq-expected)
 - **operator&lt;&lt;** `[fn]` in [FiffDigPointSet](/docs/api/fiff/fiff-dig-point-set) — Subscript operator &lt;&lt; to add a new [`FiffDigPoint`](/docs/api/fiff/fiff-dig-point).
 - **operator&lt;&lt;** `[fn]` in [FiffDigPointSet](/docs/api/fiff/fiff-dig-point-set) — Subscript operator &lt;&lt; to add a new [`FiffDigPoint`](/docs/api/fiff/fiff-dig-point).
 - **operator&lt;&lt;** `[fn]` in [InvEcdSet](/docs/api/inv/inv-ecd-set) — Subscript operator &lt;&lt; to add a new [`InvEcd`](/docs/api/inv/inv-ecd).
 - **operator&lt;&lt;** `[fn]` in [MNEBem](/docs/api/mne/mne-bem) — Subscript operator &lt;&lt; to add a new bem_surface.
 - **operator&lt;&lt;** `[fn]` in [MNEBem](/docs/api/mne/mne-bem) — Subscript operator &lt;&lt; to add a new bem_surface.
+- **operator=** `[fn]` in `AcqBackend`
+- **operator=** `[fn]` in `AcqDevice`
+- **operator=** `[fn]` in `AcqDevice`
+- **operator=** `[fn]` in `AcqDeviceRegistry`
+- **operator=** `[fn]` in [AcqExpected](/docs/api/acq/acq-expected)
+- **operator=** `[fn]` in [AcqReader](/docs/api/acq/acq-reader)
+- **operator=** `[fn]` in [AcqReader](/docs/api/acq/acq-reader)
+- **operator=** `[fn]` in [AcqWriter](/docs/api/acq/acq-writer)
+- **operator=** `[fn]` in [AcqWriter](/docs/api/acq/acq-writer)
 - **operator=** `[fn]` in [BIDSPath](/docs/api/bids/bids-path)
 - **operator=** `[fn]` in [BidsRawData](/docs/api/bids/bids-raw-data)
 - **operator=** `[fn]` in [BidsRawData](/docs/api/bids/bids-raw-data)
@@ -3784,6 +3967,7 @@ Index of 6347 public class members (functions, variables, typedefs, enums) acros
 - **operator=** `[fn]` in [stream_info](/docs/api/lsl/stream_info) — Copy assignment operator.
 - **operator==** `[fn]` in [InvHpiModelParameters](/docs/api/inv/inv-hpi-model-parameters)
 - **operator==** `[fn]` in [InvSensorSet](/docs/api/inv/inv-sensor-set)
+- **operator[]** `[fn]` in [AcqSpanPair](/docs/api/acq/acq-span-pair)
 - **operator[]** `[fn]` in [Command](/docs/api/com/command) — Subscript operator [] to access parameter values by name.
 - **operator[]** `[fn]` in [Command](/docs/api/com/command) — Subscript operator [] to access parameter values by index.
 - **operator[]** `[fn]` in [Command](/docs/api/com/command) — Subscript operator [].
@@ -3842,9 +4026,12 @@ Index of 6347 public class members (functions, variables, typedefs, enums) acros
 - **origin** `[var]` in [MaxwellMoveCompParams](/docs/api/dsp/maxwell-move-comp-params) — [`SSS`](/docs/api/dsp/sss) expansion origin (metres).
 - **origin** `[var]` in [MNESssData](/docs/api/mne/mne-sss-data) — The expansion origin.
 - **origin** `[var]` in [SSSParams](/docs/api/dsp/sss-params) — Expansion origin in metres, head-coordinate frame (default: 4 cm superior to head origin).
+- **originTick** `[var]` in [AcqTimebase](/docs/api/acq/acq-timebase) — Domain tick at which sample 0 crosses the connector.
+- **originUncertaintyTicks** `[var]` in [AcqTimebase](/docs/api/acq/acq-timebase) — 0 for a hardware start; marker residual otherwise.
 - **osInfo** `[var]` in [MnaProvenance](/docs/api/mna/mna-provenance) — e.g. "macOS 15.4 arm64"
 - **out_nuse** `[var]` in [MNESssData](/docs/api/mne/mne-sss-data) — How many components included in the outside expansion.
 - **out_order** `[var]` in [MNESssData](/docs/api/mne/mne-sss-data) — Order of the outside expansion.
+- **output** `[var]` in [AcqClockModel](/docs/api/acq/acq-clock-model) — true for output streams (sign of pipelineDelayNs).
 - **outputName** `[var]` in [DerivationRule](/docs/api/utils/derivation-rule) — Name of the derived output channel.
 - **outputPorts** `[var]` in [MnaOpSchema](/docs/api/mna/mna-op-schema) — Expected output ports.
 - **outputs** `[var]` in [MnaNode](/docs/api/mna/mna-node) — Output ports.
@@ -3859,6 +4046,7 @@ Index of 6347 public class members (functions, variables, typedefs, enums) acros
 - **overlayMode** `[var]` in [SubView](/docs/api/disp3-d/sub-view)
 - **overlayModeForTarget** `[slot]` in [BrainView](/docs/api/disp3-d/brain-view) — Get configured overlay mode name for a target view.
 - **overlayThresholdsChanged** `[signal]` in [MultimodalScene](/docs/api/disp3-d/multimodal-scene) — Emitted when any of the shared overlay thresholds change.
+- **overruns** `[var]` in [AcqReaderStats](/docs/api/acq/acq-reader-stats) — Views invalidated while held (release() returned Overrun).
 - **overviewBarToggled** `[signal]` in [ChannelDataView](/docs/api/disp/channel-data-view)
 - **overviewBarVisible** `[fn]` in [ChannelDataView](/docs/api/disp/channel-data-view)
 - **OverviewBarWidget** `[fn]` in [OverviewBarWidget](/docs/api/disp/overview-bar-widget)
@@ -3873,19 +4061,25 @@ Index of 6347 public class members (functions, variables, typedefs, enums) acros
 - **paint** `[fn]` in [SelectionSceneItem](/docs/api/disp/selection-scene-item) — Reimplemented paint function.
 - **paired** `[fn]` in [StatsTtest](/docs/api/sts/stats-ttest) — Paired t-test.
 - **pan** `[var]` in [SubView](/docs/api/disp3-d/sub-view)
+- **param** `[fn]` in `AcqUri`
 - **param** `[fn]` in [MnaParamTree](/docs/api/mna/mna-param-tree)
+- **parameters** `[var]` in `AcqSchemeInfo` — Accepted query parameters.
 - **Params** `[type]` in [BadChannelDetect](/docs/api/utils/bad-channel-detect) — Convenience alias so callers can still write `BadChannelDetect::Params`.
 - **Params** `[type]` in [EpochExtractor](/docs/api/utils/epoch-extractor) — Convenience alias so callers can still write `EpochExtractor::Params`.
 - **Params** `[type]` in [SSS](/docs/api/dsp/sss) — Convenience alias so callers can still write `SSS::Params`.
+- **params** `[var]` in `AcqUri` — Query parameters.
 - **paramTree** `[var]` in [MnaGraph](/docs/api/mna/mna-graph) — Hierarchical parameter store with formula-driven bindings.
 - **parent** `[var]` in [FiffDirNode](/docs/api/fiff/fiff-dir-node) — Parent node.
 - **parent_id** `[var]` in [FiffDirNode](/docs/api/fiff/fiff-dir-node) — Newly added to stay consistent with MATLAB implementation.
 - **ParksMcClellan** `[fn]` in [ParksMcClellan](/docs/api/utils/parks-mc-clellan)
 - **ParksMcClellan** `[fn]` in [ParksMcClellan](/docs/api/utils/parks-mc-clellan) — NumTaps must be odd for high pass and notch filters.
+- **parse** `[fn]` in `AcqUri`
 - **parse** `[fn]` in [CommandParser](/docs/api/com/command-parser) — Parses a CLI command or JSON command (list) and notifies all attached observers (command managers).
 - **parseAverageFile** `[fn]` in [MNEDescriptionParser](/docs/api/mne/mne-description-parser) — Parse an averaging description file.
 - **parseCovarianceFile** `[fn]` in [MNEDescriptionParser](/docs/api/mne/mne-description-parser) — Parse a covariance description file.
 - **parseRecord** `[fn]` in [FastrakParser](/docs/api/utils/fastrak-parser) — Parse one record line (without trailing CR/LF) — exposed for unit tests and for callers that pre-frame their data.
+- **part** `[fn]` in [AcqViewBase](/docs/api/acq/acq-view-base)
+- **partCount** `[fn]` in [AcqViewBase](/docs/api/acq/acq-view-base)
 - **PartialDirectedCoherence** `[fn]` in [PartialDirectedCoherence](/docs/api/connectivity/partial-directed-coherence) — Constructs a [`PartialDirectedCoherence`](/docs/api/connectivity/partial-directed-coherence) object.
 - **passed** `[var]` in [MnaVerificationResult](/docs/api/mna/mna-verification-result) — true if the expression evaluated to true
 - **patch** `[var]` in [MNENearest](/docs/api/mne/mne-nearest) — Non-owning pointer to the patch this vertex belongs to.
@@ -3936,6 +4130,7 @@ Index of 6347 public class members (functions, variables, typedefs, enums) acros
 - **physicalDimension** `[var]` in [EDFChannelInfo](/docs/api/bids/edf-channel-info)
 - **physicalMax** `[var]` in [EDFChannelInfo](/docs/api/bids/edf-channel-info)
 - **physicalMin** `[var]` in [EDFChannelInfo](/docs/api/bids/edf-channel-info)
+- **physicalNs** `[fn]` in [AcqClockModel](/docs/api/acq/acq-clock-model)
 - **pick** `[fn]` in [FiffEvents](/docs/api/fiff/fiff-events) — Select events by code, like mne.pick_events.
 - **pick** `[var]` in [InvDipoleFitData](/docs/api/inv/inv-dipole-fit-data) — Matrix to pick data from the full data set which may contain channels we are not interested in (currently unused).
 - **pick** `[var]` in [MNEChSelection](/docs/api/mne/mne-ch-selection) — Corresponding channels in raw data (&lt; 0 indicates missing).
@@ -3977,6 +4172,7 @@ Index of 6347 public class members (functions, variables, typedefs, enums) acros
 - **pinfo** `[var]` in [MNEHemisphere](/docs/api/mne/mne-hemisphere) — Patch information (using option -cps during mne_setup_source_space).
 - **pinv** `[fn]` in [Linalg](/docs/api/math/linalg) — Creates the pseudo inverse of a matrix.
 - **pipeline** `[var]` in [MnaProject](/docs/api/mna/mna-project) — Processing pipeline nodes.
+- **pipelineDelayNs** `[var]` in [AcqClockModel](/docs/api/acq/acq-clock-model) — Fixed device delay between the physical event and the host boundary.
 - **pivotCalibrationDone** `[signal]` in [PolhemusCoregistration](/docs/api/utils/polhemus-coregistration)
 - **pivotResidualMm** `[fn]` in [PolhemusCoregistration](/docs/api/utils/polhemus-coregistration)
 - **pivotSampleCollected** `[signal]` in [PolhemusCoregistration](/docs/api/utils/polhemus-coregistration)
@@ -4018,6 +4214,7 @@ Index of 6347 public class members (functions, variables, typedefs, enums) acros
 - **pos** `[fn]` in [FwdCoil](/docs/api/fwd/fwd-coil) — Return a read-only map to the j-th integration point position (3 contiguous floats).
 - **pos** `[var]` in [MNEMshLight](/docs/api/mne/mne-msh-light)
 - **pos** `[var]` in [VertexData](/docs/api/disp3-d/vertex-data)
+- **position** `[var]` in [AcqReaderStats](/docs/api/acq/acq-reader-stats) — Next sample index this reader will deliver.
 - **position** `[var]` in [BrainVisionMarker](/docs/api/bids/brain-vision-marker) — 0-based sample position.
 - **position** `[var]` in [DigitizedPoint](/docs/api/utils/digitized-point) — Position in metres, sensor frame.
 - **position** `[var]` in [FastrakSample](/docs/api/utils/fastrak-sample) — Position in metres (always normalised to SI).
@@ -4041,6 +4238,7 @@ Index of 6347 public class members (functions, variables, typedefs, enums) acros
 - **predict** `[fn]` in [MlModel](/docs/api/ml/ml-model) — Run inference on the given input tensor.
 - **predict** `[fn]` in [MlOnnxModel](/docs/api/ml/ml-onnx-model) — Run inference on the given input tensor.
 - **predicted** `[var]` in [MNEMneData](/docs/api/mne/mne-mne-data) — The predicted data, channels x times.
+- **prefault** `[var]` in [AcqStreamOptions](/docs/api/acq/acq-stream-options) — Touch every page at creation, so start() never page-faults.
 - **prefiltering** `[var]` in [EDFChannelInfo](/docs/api/bids/edf-channel-info)
 - **prepare_forward** `[fn]` in [MNEForwardSolution](/docs/api/mne/mne-forward-solution) — Prepare forward for assembling the inverse operator.
 - **prepare_inverse_operator** `[fn]` in [MNEInverseOperator](/docs/api/mne/mne-inverse-operator) — Prepare the inverse operator for source estimation.
@@ -4124,6 +4322,7 @@ Index of 6347 public class members (functions, variables, typedefs, enums) acros
 - **projSelectionChanged** `[signal]` in [ProjectorsView](/docs/api/disp/projectors-view) — Emit this signal whenever the user changes the projections.
 - **projTmax** `[var]` in [ProcessingSettings](/docs/api/mne/processing-settings) — End time for projection calculation.
 - **projTmin** `[var]` in [ProcessingSettings](/docs/api/mne/processing-settings) — Start time for projection calculation.
+- **properties** `[var]` in [AcqStreamInfo](/docs/api/acq/acq-stream-info) — Free-form device properties (firmware, ...).
 - **provenance** `[var]` in [MnaVerification](/docs/api/mna/mna-verification) — Complete provenance snapshot (populated by executor).
 - **psdFromTaperedSpectra** `[fn]` in [Spectral](/docs/api/utils/spectral) — Calculates the power spectral density of given tapered spectrum.
 - **pull_chunk** `[fn]` in [stream_inlet](/docs/api/lsl/stream_inlet) — Pull a chunk of multichannel data from the inlet.
@@ -4134,8 +4333,10 @@ Index of 6347 public class members (functions, variables, typedefs, enums) acros
 - **push_sample** `[fn]` in [stream_outlet](/docs/api/lsl/stream_outlet) — Push a single multichannel sample into the outlet.
 - **pushData** `[fn]` in [RtSensorStreamManager](/docs/api/disp3-d/rt-sensor-stream-manager) — Push a single measurement vector into the streaming queue.
 - **pushData** `[fn]` in [SourceEstimateManager](/docs/api/disp3-d/source-estimate-manager) — Push a single column of source data into the streaming queue.
+- **pushEvent** `[fn]` in [AcqWriter](/docs/api/acq/acq-writer) — Attaches `event` (absolute sample index, not decreasing), published with the next commit (input) or immediately (output; scheduled events may lie ahead of `writePosition()`).
 - **pushRealtimeSensorData** `[slot]` in [BrainView](/docs/api/disp3-d/brain-view) — Push a single sensor measurement vector into the real-time sensor pipeline.
 - **pushRealtimeSourceData** `[slot]` in [BrainView](/docs/api/disp3-d/brain-view) — Push a single source-data vector into the real-time pipeline.
+- **pushSegment** `[fn]` in [AcqWriter](/docs/api/acq/acq-writer) — Starts a segment at header.firstSample with its device-specific `payload` (truncated or zero-padded to `AcqSegmentation::headerBytes`); published like events.
 - **pushVideoDepthFrame** `[slot]` in [BrainView](/docs/api/disp3-d/brain-view) — Push a monocular depth map corresponding to the current video frame.
 - **pushVideoOverlayFrame** `[slot]` in [BrainView](/docs/api/disp3-d/brain-view) — Push a new video frame to the overlay (e.g.
 - **pValues** `[fn]` in [Command](/docs/api/com/command) — Returns parameter values.
@@ -4172,13 +4373,19 @@ Index of 6347 public class members (functions, variables, typedefs, enums) acros
 - **radius** `[var]` in [LiveMarker](/docs/api/disp3-d/live-marker)
 - **radius** `[fn]` in [Sphere](/docs/api/math/sphere) — The radius of the sphere.
 - **randomSeed** `[var]` in [MnaProvenance](/docs/api/mna/mna-provenance) — -1 if not applicable
+- **range** `[var]` in `AcqFiffChannel` — FIFF range.
 - **range** `[var]` in [FiffChInfo](/docs/api/fiff/fiff-ch-info) — Voltmeter range (-1 = auto ranging).
+- **rangeMax** `[var]` in [AcqChannelInfo](/docs/api/acq/acq-channel-info) — Physical range, NaN if unknown.
+- **rangeMax** `[fn]` in [AcqViewBase](/docs/api/acq/acq-view-base)
+- **rangeMin** `[var]` in [AcqChannelInfo](/docs/api/acq/acq-channel-info) — Physical range, NaN if unknown.
+- **rangeMin** `[fn]` in [AcqViewBase](/docs/api/acq/acq-view-base)
 - **rank** `[var]` in [InvBeamformer](/docs/api/inv/inv-beamformer) — Data covariance rank used.
 - **rank** `[fn]` in [Linalg](/docs/api/math/linalg) — Returns the rank of a matrix A.
 - **RAS_MNI_tal_t** `[var]` in [FiffCoordTransSet](/docs/api/fiff/fiff-coord-trans-set) — Transform from RAS (nonzero origin) to MNI Talairach coordinates.
 - **rasGood** `[var]` in [MriVolData](/docs/api/mri/mri-vol-data) — Whether the direction cosines in the header are valid.
 - **rasToVoxel** `[fn]` in [MriSlicer](/docs/api/mri/mri-slicer) — Convert RAS coordinate to voxel index.
 - **rasToVoxel** `[fn]` in [MriSlicer](/docs/api/mri/mri-slicer) — Convert RAS coordinate to voxel index using a volume's transform.
+- **rateCorrection** `[var]` in [AcqClockModel](/docs/api/acq/acq-clock-model) — Estimated actual / nominal rate.
 - **raw** `[var]` in [BidsRawData](/docs/api/bids/bids-raw-data) — Raw data with fully populated FiffInfo.
 - **raw** `[var]` in [MNEMeasData](/docs/api/mne/mne-meas-data) — Raw-data handle when data originates from a raw file.
 - **rawBufferReceived** `[signal]` in [RtClient](/docs/api/com/rt-client) — Emits a received raw buffer - ToDo change the emits to fiff raw data.
@@ -4191,6 +4398,10 @@ Index of 6347 public class members (functions, variables, typedefs, enums) acros
 - **rcvMouseLoc** `[fn]` in [FrequencySpectrumDelegate](/docs/api/disp/frequency-spectrum-delegate) — Receive Mouse location.
 - **rd** `[var]` in [InvDipoleForward](/docs/api/inv/inv-dipole-forward) — Dipole locations (ndip x 3).
 - **rd** `[var]` in [InvEcd](/docs/api/inv/inv-ecd) — Dipole location.
+- **re** `[var]` in [AcqComplexInt16](/docs/api/acq/acq-complex-int16) — In-phase component.
+- **read** `[fn]` in [AcqReader](/docs/api/acq/acq-reader) — Copying convenience: waits for `out.cols` samples, decodes them into `out` and releases.
+- **read** `[fn]` in [AcqReader](/docs/api/acq/acq-reader) — Copying convenience: waits for `out.cols` samples, decodes them into `out` and releases.
+- **read** `[fn]` in [AcqReader](/docs/api/acq/acq-reader) — Copying convenience: waits for `out.cols` samples, decodes them into `out` and releases.
 - **read** `[fn]` in [BidsDatasetDescription](/docs/api/bids/bids-dataset-description) — Read a dataset_description.json file.
 - **read** `[fn]` in [BidsRawData](/docs/api/bids/bids-raw-data) — Read a BIDS dataset from disk.
 - **read** `[fn]` in [FiffAnnotations](/docs/api/fiff/fiff-annotations) — Auto-detects format and reads annotations.
@@ -4295,6 +4506,7 @@ Index of 6347 public class members (functions, variables, typedefs, enums) acros
 - **readDefinitionFile** `[fn]` in [ChannelDerivation](/docs/api/utils/channel-derivation) — Read derivation rules from an MNE-C derivation text file (`MNELIB::MNEDerivSet::readText`).
 - **readEgi** `[fn]` in [FiffDigPointSet](/docs/api/fiff/fiff-dig-point-set) — Reads the coordinates.xml of an EGI MFF recording, as mne.channels.read_dig_egi does.
 - **readEpochs** `[fn]` in [MNEEpochDataList](/docs/api/mne/mne-epoch-data-list) — Read the epochs from a raw file based on provided events.
+- **reader** `[fn]` in [AcqStream](/docs/api/acq/acq-stream) — Attaches a reader (control path; before or after start()).
 - **reader** `[var]` in [BidsRawData](/docs/api/bids/bids-raw-data) — The underlying format reader (keeps file open).
 - **readFif** `[fn]` in [MNEEventList](/docs/api/mne/mne-event-list) — Reads the event block of a FIFF file (MNE-C `mne_load_events_fiff`).
 - **readFilter** `[fn]` in [FilterIO](/docs/api/utils/filter-io) — Reads a given txt file and scans it for filter coefficients.
@@ -4315,6 +4527,7 @@ Index of 6347 public class members (functions, variables, typedefs, enums) acros
 - **readMNESelFile** `[fn]` in [SelectionIO](/docs/api/utils/selection-io) — Reads the specified MNE sel file.
 - **readMNESelFile** `[fn]` in [SelectionIO](/docs/api/utils/selection-io) — Reads the specified MNE sel file.
 - **readMniTransform** `[fn]` in [FiffCoordTransSet](/docs/api/fiff/fiff-coord-trans-set) — Reads the scanner RAS -&gt; MNI Talairach transform of a FreeSurfer/MNI .xfm file (MNE-C read_mni_coord_transform_file).
+- **ReadMode** `[enum]` in [AcqReader](/docs/api/acq/acq-reader) — Consumption mode.
 - **readMriTransform** `[fn]` in [FiffCoordTrans](/docs/api/fiff/fiff-coord-trans) — Reads the MRI → head coordinate transform from a FIFF file.
 - **readNeuroscanDat** `[fn]` in [FiffDigPointSet](/docs/api/fiff/fiff-dig-point-set) — Reads a Neuroscan .dat electrode file ("name number x y z" per line), as mne.channels.read_dig_dat does: point numbers 78, 76 and 82 are the nasion, LPA and RPA, 67 (the centroid) is skipped, and the coordinates are kept as they are.
 - **readPolhemusFastscan** `[fn]` in [FiffDigPointSet](/docs/api/fiff/fiff-dig-point-set) — Reads the points of a Polhemus FastSCAN .txt file in metres, as mne.channels.read_polhemus_fastscan does.
@@ -4352,6 +4565,7 @@ Index of 6347 public class members (functions, variables, typedefs, enums) acros
 - **referenceMarkerAddRequested** `[signal]` in [ChannelDataView](/docs/api/disp/channel-data-view) — Emitted when the ruler context menu requests a new sample marker.
 - **referenceMarkerRemoveRequested** `[signal]` in [ChannelDataView](/docs/api/disp/channel-data-view) — Emitted when the ruler context menu requests removal of a nearby sample marker.
 - **referenceMarkersClearRequested** `[signal]` in [ChannelDataView](/docs/api/disp/channel-data-view) — Emitted when the ruler context menu requests clearing all sample markers.
+- **referenceSample** `[var]` in [AcqSyncMarker](/docs/api/acq/acq-sync-marker) — Sample of the edge in the reference stream.
 - **reg** `[var]` in [InvBeamformer](/docs/api/inv/inv-beamformer) — Regularization parameter used.
 - **regChanged** `[signal]` in [DipoleFitView](/docs/api/disp/dipole-fit-view) — Set new regularization parameters.
 - **reginv** `[var]` in [MNEInverseOperator](/docs/api/mne/mne-inverse-operator) — Diagonal regularised inverse of the singular values.
@@ -4361,6 +4575,7 @@ Index of 6347 public class members (functions, variables, typedefs, enums) acros
 - **registeredOps** `[fn]` in [MnaOpRegistry](/docs/api/mna/mna-op-registry) — List all registered operation types.
 - **registerOp** `[fn]` in [MnaOpRegistry](/docs/api/mna/mna-op-registry) — Register an operation schema.
 - **registerOpFunc** `[fn]` in [MnaOpRegistry](/docs/api/mna/mna-op-registry) — Register an implementation function for an operation type.
+- **registerScheme** `[fn]` in `AcqDeviceRegistry` — Registers a scheme.
 - **registrationChanged** `[signal]` in [PolhemusCoregistration](/docs/api/utils/polhemus-coregistration)
 - **registrationValid** `[fn]` in [PolhemusCoregistration](/docs/api/utils/polhemus-coregistration)
 - **regularize** `[fn]` in [FiffCov](/docs/api/fiff/fiff-cov) — Regularize noise covariance matrix.
@@ -4372,6 +4587,8 @@ Index of 6347 public class members (functions, variables, typedefs, enums) acros
 - **RejectMask** `[type]` in [StatsMcCorrection](/docs/api/sts/stats-mc-correction) — Hypotheses rejected by a correction, same shape as the p-values.
 - **rel_rad** `[var]` in [FwdEegSphereLayer](/docs/api/fwd/fwd-eeg-sphere-layer) — Relative rads.
 - **relative** `[var]` in [MNEMshColorScaleDef](/docs/api/mne/mne-msh-color-scale-def)
+- **release** `[var]` in [AcqExternalBuffer](/docs/api/acq/acq-external-buffer) — Called once after the ring no longer uses the buffer; may be empty.
+- **release** `[fn]` in [AcqReader](/docs/api/acq/acq-reader) — Returns `view` to the ring and advances the reader; clears `view`.
 - **Remez2** `[fn]` in [ParksMcClellan](/docs/api/utils/parks-mc-clellan)
 - **remove** `[fn]` in [FiffAnnotations](/docs/api/fiff/fiff-annotations) — Removes the annotation at the given index.
 - **removeBinding** `[fn]` in [MnaParamTree](/docs/api/mna/mna-param-tree)
@@ -4481,6 +4698,7 @@ Index of 6347 public class members (functions, variables, typedefs, enums) acros
 - **rotation** `[var]` in [HeadPosEntry](/docs/api/dsp/head-pos-entry) — Rotation quaternion (device → head).
 - **rotationChanged** `[signal]` in [Control3DView](/docs/api/disp/control3-d-view) — Use this signal whenever the user wants to rotate the 3D model.
 - **row_names** `[var]` in [FiffNamedMatrix](/docs/api/fiff/fiff-named-matrix) — Row names.
+- **rowAlignment** `[var]` in [AcqStreamOptions](/docs/api/acq/acq-stream-options) — Planar rings: byte alignment of every channel row (SIMD).
 - **rowcals** `[var]` in [FiffCtfComp](/docs/api/fiff/fiff-ctf-comp) — Row calibrations.
 - **rowCount** `[fn]` in [ChannelInfoModel](/docs/api/disp/channel-info-model) — Reimplemented virtual functions.
 - **rowCount** `[fn]` in [EvokedSetModel](/docs/api/disp/evoked-set-model) — Returns the number of rows under the given parent.
@@ -4488,11 +4706,14 @@ Index of 6347 public class members (functions, variables, typedefs, enums) acros
 - **rowCount** `[fn]` in [RtFiffRawViewModel](/docs/api/disp/rt-fiff-raw-view-model) — Returns the number of rows under the given parent.
 - **rowlist** `[var]` in [MNENamedMatrix](/docs/api/mne/mne-named-matrix) — Name list for the rows (may be empty if unnamed).
 - **rowlist** `[var]` in [MNESparseNamedMatrix](/docs/api/mne/mne-sparse-named-matrix) — Name list for the rows.
+- **rowMajor** `[fn]` in `AcqMatrixRef`
 - **RowMajorMatrixMap** `[type]` in [MlTensor](/docs/api/ml/ml-tensor)
 - **RowMajorMatrixXf** `[type]` in [MlTensor](/docs/api/ml/ml-tensor)
+- **rows** `[var]` in `AcqMatrixRef` — Channels.
 - **rows** `[fn]` in [FiffSparseMatrix](/docs/api/fiff/fiff-sparse-matrix) — Number of rows.
 - **rows** `[var]` in [IeegLead](/docs/api/ieeg/ieeg-lead) — Grid shape when known (rows x cols == contact count), else 0.
 - **rows** `[fn]` in [MlTensor](/docs/api/ml/ml-tensor) — 2-D convenience — equivalent to shape(0).
+- **rowStride** `[var]` in `AcqMatrixRef` — Elements between consecutive channels.
 - **rr** `[var]` in [FitUser](/docs/api/math/fit-user)
 - **rr** `[fn]` in [FsSurface](/docs/api/fs/fs-surface) — Coordinates of vertices (rr).
 - **rr** `[var]` in [InvGuessData](/docs/api/inv/inv-guess-data) — Guess dipole locations (nguess x 3, row-major).
@@ -4537,22 +4758,31 @@ Index of 6347 public class members (functions, variables, typedefs, enums) acros
 - **s** `[var]` in [FilterThreadArg](/docs/api/mne/filter-thread-arg) — The source space to process.
 - **s** `[var]` in [FwdThreadArg](/docs/api/fwd/fwd-thread-arg) — The source space to process.
 - **s** `[var]` in [MNESurfacePatch](/docs/api/mne/mne-surface-patch) — Patch represented as a source space surface.
+- **sample** `[var]` in [AcqEvent](/docs/api/acq/acq-event) — Sample index of the onset.
 - **sample** `[var]` in [BidsEvent](/docs/api/bids/bids-event) — Sample index (0-based) corresponding to onset.
 - **sample** `[var]` in `EventMarker` — Absolute sample index of the event onset.
 - **sample** `[var]` in [MNEEvent](/docs/api/mne/mne-event) — Sample number.
 - **sample** `[var]` in [TimeRulerEventMark](/docs/api/disp/time-ruler-event-mark) — Absolute sample index.
 - **sample** `[var]` in [TimeRulerReferenceMark](/docs/api/disp/time-ruler-reference-mark) — Absolute sample index.
+- **sampleAlignment** `[var]` in [AcqTimebase](/docs/api/acq/acq-timebase) — Step in samples on which this stream can schedule.
+- **sampleAt** `[fn]` in [AcqClockModel](/docs/api/acq/acq-clock-model)
 - **sampleClicked** `[signal]` in [ChannelDataView](/docs/api/disp/channel-data-view) — Emitted when the user clicks on a sample position.
 - **sampleClicked** `[signal]` in [ChannelRhiView](/docs/api/disp/channel-rhi-view) — Emitted whenever the user clicks; provides the sample index under the cursor.
+- **sampleCount** `[var]` in [AcqSegmentHeader](/docs/api/acq/acq-segment-header) — Samples per channel in the segment.
+- **sampleCount** `[fn]` in [AcqViewBase](/docs/api/acq/acq-view-base)
 - **sampleCount** `[var]` in [EDFChannelInfo](/docs/api/bids/edf-channel-info)
 - **sampleRangeSelected** `[signal]` in [ChannelDataView](/docs/api/disp/channel-data-view) — Emitted when the user selected a sample range for annotation creation.
 - **sampleRangeSelected** `[signal]` in [ChannelRhiView](/docs/api/disp/channel-rhi-view) — Emitted when the user selects a time span with Shift+drag in annotation mode.
+- **samples** `[var]` in [AcqPart](/docs/api/acq/acq-part) — Samples per channel in the run.
+- **samples** `[var]` in `AcqReadResult` — Columns written.
 - **samples** `[fn]` in [InvSourceEstimate](/docs/api/inv/inv-source-estimate) — Returns the number of samples.
 - **samples_available** `[fn]` in [stream_inlet](/docs/api/lsl/stream_inlet) — Check whether new samples are available in the internal buffer.
 - **samplesChanged** `[signal]` in [CovarianceSettingsView](/docs/api/disp/covariance-settings-view)
 - **samplesPerPixel** `[fn]` in [ChannelRhiView](/docs/api/disp/channel-rhi-view)
 - **samplesPerPixelChanged** `[signal]` in [ChannelRhiView](/docs/api/disp/channel-rhi-view)
 - **samplesPerRecord** `[var]` in [EDFChannelInfo](/docs/api/bids/edf-channel-info)
+- **samplesPerSegment** `[var]` in [AcqSegmentation](/docs/api/acq/acq-segmentation) — Fixed segment length, 0 for variable length.
+- **sampleStride** `[var]` in [AcqPart](/docs/api/acq/acq-part) — Bytes between consecutive samples of one channel.
 - **sampleToViewportX** `[fn]` in [ChannelDataView](/docs/api/disp/channel-data-view) — Maps an absolute sample index to an x coordinate inside the signal viewport.
 - **sampleValueAt** `[fn]` in [ChannelDataModel](/docs/api/disp/channel-data-model) — Return the raw sample value at a specific absolute sample index for the given channel.
 - **samplingFreq** `[var]` in [BidsChannel](/docs/api/bids/bids-channel) — Sampling frequency in Hz (OPTIONAL).
@@ -4617,6 +4847,7 @@ Index of 6347 public class members (functions, variables, typedefs, enums) acros
 - **saveSettings** `[fn]` in [TfSettingsView](/docs/api/disp/tf-settings-view) — Saves all important settings of this view via QSettings.
 - **saveSettings** `[fn]` in [TriggerDetectionView](/docs/api/disp/trigger-detection-view) — Saves all important settings of this view via QSettings.
 - **saveSnapshot** `[slot]` in [BrainView](/docs/api/disp3-d/brain-view) — Save the current view as .
+- **scale** `[var]` in [AcqChannelInfo](/docs/api/acq/acq-channel-info) — Physical = raw * scale + offset.
 - **scale** `[fn]` in [DigitizerTreeItem](/docs/api/disp3-d/digitizer-tree-item) — Returns the rendering scale (sphere radius).
 - **scale** `[fn]` in [MNEMshDisplaySurface](/docs/api/mne/mne-msh-display-surface) — Scale a display surface's bounding box and all vertex positions.
 - **scale** `[var]` in [MriSlice](/docs/api/mri/mri-slice) — Scaling factor for pixel data.
@@ -4633,11 +4864,14 @@ Index of 6347 public class members (functions, variables, typedefs, enums) acros
 - **ScaleControl** `[fn]` in [ScaleControl](/docs/api/disp/scale-control) — Constructs a [`ScaleControl`](/docs/api/disp/scale-control) object who's Qlabel element will be set.
 - **ScaleControl** `[fn]` in [ScaleControl](/docs/api/disp/scale-control) — Constructs a [`ScaleControl`](/docs/api/disp/scale-control) object who's Qlabel element will be set, and sets the parent of the underlying QWidget.
 - **ScaleControl** `[fn]` in [ScaleControl](/docs/api/disp/scale-control) — Constructs a [`ScaleControl`](/docs/api/disp/scale-control) object who's Qlabel element will be set, and sets the parent of the underlying QWidget.
+- **scales** `[fn]` in [AcqViewBase](/docs/api/acq/acq-view-base)
 - **scales** `[var]` in [InvDipoleForward](/docs/api/inv/inv-dipole-forward) — Column normalization scales applied to fwd (3*ndip).
+- **scaling** `[var]` in `AcqConvertOptions` — Raw or physical values.
 - **scalingChanged** `[signal]` in [ScalingView](/docs/api/disp/scaling-view) — Emit this signal whenever the scaling sliders or spin boxes changed.
 - **scalingMap** `[fn]` in [ChannelDataView](/docs/api/disp/channel-data-view)
 - **ScalingView** `[fn]` in [ScalingView](/docs/api/disp/scaling-view) — Constructs a [`ScalingView`](/docs/api/disp/scaling-view) which is a child of parent.
 - **scanCorrelations** `[fn]` in [InvTrapMusic](/docs/api/inv/inv-trap-music) — Compute the MUSIC-type subspace correlation for all source locations.
+- **scannerNo** `[var]` in `AcqFiffChannel` — scanno.
 - **scanNo** `[var]` in [FiffChInfo](/docs/api/fiff/fiff-ch-info) — Scanning order number.
 - **scdc** `[fn]` in [GeometryInfo](/docs/api/disp3-d/geometry-info) — scdc Calculates surface constrained distances on a mesh.
 - **scdcInterpolationMat** `[fn]` in [GeometryInfo](/docs/api/disp3-d/geometry-info) — scdcInterpolationMat Computes geodesic distances (SCDC) and builds the sparse interpolation matrix in a single pass, without allocating a dense nVertices x nSources distance table.
@@ -4645,7 +4879,12 @@ Index of 6347 public class members (functions, variables, typedefs, enums) acros
 - **sceneColorChanged** `[signal]` in [Control3DView](/docs/api/disp/control3-d-view) — Use this signal whenever the scene color was changed by the user.
 - **sceneSize** `[fn]` in [CameraController](/docs/api/disp3-d/camera-controller)
 - **sceneUpdateRequested** `[signal]` in [AverageSceneItem](/docs/api/disp/average-scene-item) — Signal to request a scene update.
+- **schema** `[var]` in `AcqExtension` — Identifier and version of the payload format.
 - **schema** `[fn]` in [MnaOpRegistry](/docs/api/mna/mna-op-registry) — Get the schema for an operation type.
+- **scheme** `[var]` in `AcqDiscoveredDevice` — Scheme of the uri.
+- **scheme** `[var]` in `AcqSchemeInfo` — e.g.
+- **scheme** `[var]` in `AcqUri` — Lower-case scheme without "://".
+- **schemes** `[fn]` in `AcqDeviceRegistry`
 - **sChName** `[var]` in [ArtifactRejectionData](/docs/api/mne/artifact-rejection-data) — Channel name.
 - **sColormap** `[var]` in [VisualizationInfo](/docs/api/connectivity/visualization-info) — The colormap.
 - **script** `[var]` in [MnaNode](/docs/api/mna/mna-node) — Inline source code, interpreter, language.
@@ -4664,9 +4903,16 @@ Index of 6347 public class members (functions, variables, typedefs, enums) acros
 - **sDistMeasure** `[var]` in [RegionMT](/docs/api/mne/region-mt) — Distance metric: "cityblock" or "sqeuclidean".
 - **SDPtr** `[type]` in [FiffCov](/docs/api/fiff/fiff-cov) — Shared data pointer type for [`FiffCov`](/docs/api/fiff/fiff-cov).
 - **SDPtr** `[type]` in [FiffNamedMatrix](/docs/api/fiff/fiff-named-matrix) — Shared data pointer type for [`FiffNamedMatrix`](/docs/api/fiff/fiff-named-matrix).
+- **second** `[var]` in [AcqSpanPair](/docs/api/acq/acq-span-pair) — Elements from the start of the ring; empty without wrap.
 - **secs** `[var]` in [FiffTime](/docs/api/fiff/fiff-time) — GMT time in seconds since epoch.
 - **sectionCount** `[fn]` in [Report](/docs/api/utils/report) — Get the number of sections.
 - **seed** `[var]` in [SimulateStcParams](/docs/api/dsp/simulate-stc-params) — Random seed for reproducibility.
+- **segmentation** `[var]` in [AcqStreamInfo](/docs/api/acq/acq-stream-info) — Continuous unless stated otherwise.
+- **segmentCapacity** `[var]` in [AcqStreamOptions](/docs/api/acq/acq-stream-options) — Segment header entries; 0 = derived from capacity for segmented streams.
+- **segmentPayload** `[fn]` in [AcqBlockView](/docs/api/acq/acq-block-view)
+- **segments** `[fn]` in [AcqBlockView](/docs/api/acq/acq-block-view)
+- **segments** `[var]` in [AcqStreamStats](/docs/api/acq/acq-stream-stats) — Segment headers pushed.
+- **segmentsLost** `[var]` in [AcqReaderStats](/docs/api/acq/acq-reader-stats) — Segment headers overwritten likewise.
 - **select** `[fn]` in [FiffAnnotations](/docs/api/fiff/fiff-annotations) — Selects annotations whose description starts with the filter string.
 - **select_dipole_fit_noise_cov** `[fn]` in [InvDipoleFitData](/docs/api/inv/inv-dipole-fit-data) — Select and weight the noise-covariance for the active channel set.
 - **selectAll** `[fn]` in [ApplyToView](/docs/api/disp/apply-to-view) — Selects all View Select checkboxes.
@@ -4796,6 +5042,7 @@ Index of 6347 public class members (functions, variables, typedefs, enums) acros
 - **setClientAlias** `[fn]` in [RtDataClient](/docs/api/com/rt-data-client) — Sets the alias of the data client.
 - **setClippingVisible** `[fn]` in [ChannelDataView](/docs/api/disp/channel-data-view)
 - **setClippingVisible** `[fn]` in [ChannelRhiView](/docs/api/disp/channel-rhi-view)
+- **setClock** `[fn]` in [AcqWriter](/docs/api/acq/acq-writer) — Publishes a new clock model (sequence counter, no lock).
 - **setClockTimeFormat** `[fn]` in [ChannelDataView](/docs/api/disp/channel-data-view) — Set clock time format on the ruler.
 - **setClockTimeFormat** `[fn]` in [ChannelRhiView](/docs/api/disp/channel-rhi-view) — Set whether the crosshair label uses clock time (mm:ss.ms) or seconds.
 - **setClockTimeFormat** `[fn]` in [TimeRulerWidget](/docs/api/disp/time-ruler-widget) — Set whether to use clock time (HH:MM:SS) or float seconds for labels.
@@ -5156,6 +5403,7 @@ Index of 6347 public class members (functions, variables, typedefs, enums) acros
 - **setThresholds** `[fn]` in [RtSourceDataWorker](/docs/api/disp3-d/rt-source-data-worker) — Set the threshold values for normalization.
 - **setThresholds** `[fn]` in [SourceEstimateManager](/docs/api/disp3-d/source-estimate-manager) — Set source estimate thresholds.
 - **setThresholds** `[fn]` in [SourceEstimateOverlay](/docs/api/disp3-d/source-estimate-overlay) — Set threshold values for normalization.
+- **setTimebase** `[fn]` in [AcqStream](/docs/api/acq/acq-stream) — Publishes a new timebase, e.g.
 - **setTimeCursor** `[fn]` in [MultimodalScene](/docs/api/disp3-d/multimodal-scene) — Set the shared time cursor in seconds.
 - **setTimeInterval** `[fn]` in [RtSensorDataController](/docs/api/disp3-d/rt-sensor-data-controller) — Set the streaming interval (time between frames).
 - **setTimeInterval** `[fn]` in [RtSourceDataController](/docs/api/disp3-d/rt-source-data-controller) — Set the streaming interval (time between frames).
@@ -5252,6 +5500,8 @@ Index of 6347 public class members (functions, variables, typedefs, enums) acros
 - **severity** `[var]` in [MnaVerificationCheck](/docs/api/mna/mna-verification-check) — "error" (abort), "warning" (log + continue), "info" (always continue)
 - **severity** `[var]` in [MnaVerificationResult](/docs/api/mna/mna-verification-result) — Echoed from the check definition.
 - **sFilePathDigitzers** `[var]` in [HpiFitResult](/docs/api/inv/hpi-fit-result)
+- **sfreq** `[var]` in [AcqClockModel](/docs/api/acq/acq-clock-model) — Nominal sampling frequency in Hz.
+- **sfreq** `[var]` in [AcqStreamInfo](/docs/api/acq/acq-stream-info) — Nominal rate in Hz; 0 for irregular streams.
 - **sfreq** `[fn]` in [ChannelDataModel](/docs/api/disp/channel-data-model)
 - **sfreq** `[var]` in [FiffInfo](/docs/api/fiff/fiff-info) — Sample frequency.
 - **sfreq** `[var]` in [MNEMeasData](/docs/api/mne/mne-meas-data) — Sampling frequency (Hz).
@@ -5296,6 +5546,7 @@ Index of 6347 public class members (functions, variables, typedefs, enums) acros
 - **sing** `[var]` in [fitUserRec](/docs/api/fwd/fit-user-rec)
 - **sing** `[var]` in [InvDipoleForward](/docs/api/inv/inv-dipole-forward) — Singular values of the forward matrix (3*ndip).
 - **sing** `[var]` in [MNEInverseOperator](/docs/api/mne/mne-inverse-operator) — Singular values of the whitened lead field.
+- **size** `[fn]` in [AcqSpanPair](/docs/api/acq/acq-span-pair)
 - **size** `[var]` in [BidsElectrode](/docs/api/bids/bids-electrode) — Electrode size in mm or "n/a" (RECOMMENDED for iEEG).
 - **size** `[fn]` in [ConnectivitySettings](/docs/api/connectivity/connectivity-settings)
 - **size** `[fn]` in [FiffAnnotations](/docs/api/fiff/fiff-annotations) — Returns the number of annotations.
@@ -5319,6 +5570,8 @@ Index of 6347 public class members (functions, variables, typedefs, enums) acros
 - **sizeHint** `[fn]` in [TimeRulerWidget](/docs/api/disp/time-ruler-widget)
 - **sizeMeters** `[fn]` in [VideoOverlay](/docs/api/disp3-d/video-overlay)
 - **sketch** `[var]` in [MNEMshDisplaySurface](/docs/api/mne/mne-msh-display-surface) — Non-zero to use sketch mode with decimated triangulation.
+- **skipped** `[fn]` in [AcqBlockView](/docs/api/acq/acq-block-view)
+- **skipped** `[var]` in [AcqReaderStats](/docs/api/acq/acq-reader-stats) — Samples skipped on purpose by a Latest reader.
 - **sliceIndex** `[var]` in [MriSliceImage](/docs/api/mri/mri-slice-image) — Voxel index along the anatomical orientation's slicing axis.
 - **sliceIndex** `[fn]` in [SliceObject](/docs/api/disp3-d/slice-object)
 - **sliceIndexForOrientation** `[fn]` in [MriSlicer](/docs/api/mri/mri-slicer) — Return the slice index for an anatomical orientation from a voxel coordinate.
@@ -5345,6 +5598,7 @@ Index of 6347 public class members (functions, variables, typedefs, enums) acros
 - **sort** `[fn]` in [MNEEventList](/docs/api/mne/mne-event-list) — Sorts the events by sample; events at the same sample keep their order.
 - **sortChannelsByType** `[fn]` in [ChannelDataView](/docs/api/disp/channel-data-view)
 - **sortrows** `[fn]` in [Linalg](/docs/api/math/linalg) — Sort rows in ascending order.
+- **source** `[var]` in [AcqClockModel](/docs/api/acq/acq-clock-model) — Origin of the anchor.
 - **source_cov** `[var]` in [MNEInverseOperator](/docs/api/mne/mne-inverse-operator) — Source covariance matrix (depth + orientation weighting).
 - **source_mult** `[var]` in [FwdBemModel](/docs/api/fwd/fwd-bem-model) — Infinite-medium potential multipliers (length nsurf).
 - **source_nn** `[var]` in [MNEForwardSolution](/docs/api/mne/mne-forward-solution) — Source normals (number depends on fixed or free orientation).
@@ -5356,6 +5610,7 @@ Index of 6347 public class members (functions, variables, typedefs, enums) acros
 - **sourceEstimateLoaded** `[signal]` in [BrainView](/docs/api/disp3-d/brain-view) — Emitted when a source estimate is loaded.
 - **SourceEstimateManager** `[fn]` in [SourceEstimateManager](/docs/api/disp3-d/source-estimate-manager) — Constructor.
 - **SourceEstimateOverlay** `[fn]` in [SourceEstimateOverlay](/docs/api/disp3-d/source-estimate-overlay) — Constructor.
+- **sourceId** `[var]` in [AcqStreamInfo](/docs/api/acq/acq-stream-info) — Device serial, file path or LSL source id.
 - **sourceId** `[var]` in [PickResult](/docs/api/disp3-d/pick-result) — Source renderable identifier — opaque string assigned by the [`MultimodalScene`](/docs/api/disp3-d/multimodal-scene) when the renderable was added.
 - **sourceIdx** `[var]` in [TrapMusicDipole](/docs/api/inv/trap-music-dipole) — Index in the lead field grid.
 - **SourceMorph** `[fn]` in [SourceMorph](/docs/api/inv/source-morph)
@@ -5367,6 +5622,7 @@ Index of 6347 public class members (functions, variables, typedefs, enums) acros
 - **sourceSpaceType** `[var]` in [InvSourceEstimate](/docs/api/inv/inv-source-estimate) — Source space type (surface, volume, mixed, discrete).
 - **sourceThresholdsUpdated** `[signal]` in [BrainView](/docs/api/disp3-d/brain-view) — Emitted when auto-thresholds are set from loaded source estimate data.
 - **sourceUri** `[var]` in [MnaScript](/docs/api/mna/mna-script) — Optional authoring-time reference (e.g.
+- **space** `[fn]` in [AcqWriter](/docs/api/acq/acq-writer)
 - **space** `[fn]` in [BIDSPath](/docs/api/bids/bids-path) — Space label.
 - **sparse** `[var]` in [MNEMshPicked](/docs/api/mne/mne-msh-picked)
 - **spatialDispersion** `[fn]` in [StatsSourceMetrics](/docs/api/sts/stats-source-metrics) — Spatial dispersion (amplitude-weighted mean distance from peak).
@@ -5383,6 +5639,7 @@ Index of 6347 public class members (functions, variables, typedefs, enums) acros
 - **sphere_funcs** `[var]` in [InvDipoleFitData](/docs/api/inv/inv-dipole-fit-data) — These are the sphere model forward functions.
 - **sphereChanged** `[signal]` in [DipoleFitView](/docs/api/disp/dipole-fit-view) — Set new spherer model parameters.
 - **sphereVertexCount** `[fn]` in [MeshFactory](/docs/api/disp3-d/mesh-factory) — Number of vertices in a subdivided icosahedron (for picking calculations).
+- **spinFor** `[var]` in [AcqReaderOptions](/docs/api/acq/acq-reader-options) — Spin window of SpinThenBlock.
 - **Spline** `[fn]` in [Spline](/docs/api/disp/spline) — The constructor for [`Spline`](/docs/api/disp/spline).
 - **split** `[fn]` in [BIDSPath](/docs/api/bids/bids-path) — Split index.
 - **split_name_list** `[fn]` in [Fiff](/docs/api/fiff/fiff-class) — fiff_split_name_list
@@ -5590,6 +5847,8 @@ Index of 6347 public class members (functions, variables, typedefs, enums) acros
 - **sss** `[var]` in [MNECovMatrix](/docs/api/mne/mne-cov-matrix) — SSS data from the associated raw data file.
 - **sss** `[var]` in [MNERawData](/docs/api/mne/mne-raw-data) — SSS data found in this file.
 - **Standard** `[var]` in [BrainRenderer](/docs/api/disp3-d/brain-renderer)
+- **start** `[fn]` in `AcqBackend` — Starts acquisition and output.
+- **start** `[fn]` in `AcqDevice` — Starts acquisition and output.
 - **start** `[fn]` in [RtNoise](/docs/api/dsp/rt-noise) — Starts the worker thread.
 - **start_block** `[fn]` in [Fiff](/docs/api/fiff/fiff-class) — fiff_start_block
 - **start_block** `[fn]` in [FiffStream](/docs/api/fiff/fiff-stream) — Writes a FIFF_BLOCK_START tag.
@@ -5598,6 +5857,7 @@ Index of 6347 public class members (functions, variables, typedefs, enums) acros
 - **start_time** `[var]` in [MNERawInfo](/docs/api/mne/mne-raw-info) — Acquisition start time (from meas date or block id).
 - **start_writing_raw** `[fn]` in [Fiff](/docs/api/fiff/fiff-class) — fiff_start_writing_raw
 - **start_writing_raw** `[fn]` in [FiffStream](/docs/api/fiff/fiff-stream) — fiff_start_writing_raw
+- **startAtOldest** `[var]` in [AcqReaderOptions](/docs/api/acq/acq-reader-options) — Start at the oldest retained sample instead of the newest.
 - **startedAt** `[var]` in [MnaProvenance](/docs/api/mna/mna-provenance)
 - **startPivotCalibration** `[fn]` in [PolhemusCoregistration](/docs/api/utils/polhemus-coregistration)
 - **startRealtimeSensorStreaming** `[slot]` in [BrainView](/docs/api/disp3-d/brain-view) — Start real-time sensor data streaming for the specified modality.
@@ -5608,8 +5868,13 @@ Index of 6347 public class members (functions, variables, typedefs, enums) acros
 - **startStreaming** `[fn]` in [SourceEstimateManager](/docs/api/disp3-d/source-estimate-manager) — Start real-time playback.
 - **stat** `[var]` in [FilterThreadArg](/docs/api/mne/filter-thread-arg) — Status code indicating whether filtering succeeded.
 - **stat** `[var]` in [FwdThreadArg](/docs/api/fwd/fwd-thread-arg) — Result status (OK or FAIL).
+- **state** `[fn]` in `AcqDevice`
+- **state** `[var]` in `AcqDeviceStats` — State at the time of the snapshot.
 - **state** `[var]` in [MNEMshLight](/docs/api/mne/mne-msh-light)
 - **station** `[var]` in [FastrakSample](/docs/api/utils/fastrak-sample) — 1-based station id reported by the device.
+- **stats** `[fn]` in `AcqDevice`
+- **stats** `[fn]` in [AcqReader](/docs/api/acq/acq-reader)
+- **stats** `[fn]` in [AcqStream](/docs/api/acq/acq-stream)
 - **status** `[var]` in [BidsChannel](/docs/api/bids/bids-channel) — "good" or "bad" (OPTIONAL).
 - **stc** `[var]` in [InvGammaMapResult](/docs/api/inv/inv-gamma-map-result)
 - **stc** `[var]` in [InvMxneResult](/docs/api/inv/inv-mxne-result)
@@ -5633,6 +5898,8 @@ Index of 6347 public class members (functions, variables, typedefs, enums) acros
 - **stdOut** `[var]` in [PythonRunnerResult](/docs/api/utils/python-runner-result) — Complete captured standard output.
 - **stim14** `[var]` in [MNEMeasDataSet](/docs/api/mne/mne-meas-data-set) — Samples from the digital stimulus / trigger channel.
 - **stimIgnore** `[var]` in [RejectionParams](/docs/api/fiff/rejection-params) — Ignore this many seconds around the stimulus.
+- **stop** `[fn]` in `AcqBackend` — Stops and joins every backend thread before returning.
+- **stop** `[fn]` in `AcqDevice` — Stops acquisition and output and joins the backend threads.
 - **stop** `[fn]` in [RtAveraging](/docs/api/dsp/rt-averaging) — Stops the thread by interrupting its computation queue, quitting and waiting.
 - **stop** `[fn]` in [RtClient](/docs/api/com/rt-client) — Stops the [`RtClient`](/docs/api/com/rt-client) by stopping the producer's thread.
 - **stop** `[fn]` in [RtConnectivity](/docs/api/dsp/rt-connectivity) — Stops the thread by interrupting its computation queue, quitting and waiting.
@@ -5656,6 +5923,9 @@ Index of 6347 public class members (functions, variables, typedefs, enums) acros
 - **storageSize** `[fn]` in [FiffTime](/docs/api/fiff/fiff-time) — Size of the old struct (fiffTimeRec) 2*int = 2*4 = 8.
 - **storeHeadPosition** `[fn]` in [InvHpiFit](/docs/api/inv/inv-hpi-fit) — Store results from dev_Head_t as quaternions in position matrix.
 - **storeTrans** `[signal]` in [CoregSettingsView](/docs/api/disp/coreg-settings-view) — Emit this signal whenever the transformation should be stored.
+- **stream** `[fn]` in `AcqDevice`
+- **stream** `[fn]` in [AcqReader](/docs/api/acq/acq-reader)
+- **stream** `[fn]` in [AcqWriter](/docs/api/acq/acq-writer)
 - **stream** `[var]` in [MNERawData](/docs/api/mne/mne-raw-data) — Open FIFF stream for reading.
 - **stream_info** `[fn]` in [stream_info](/docs/api/lsl/stream_info) — Default constructor.
 - **stream_info** `[fn]` in [stream_info](/docs/api/lsl/stream_info) — Construct a new [`stream_info`](/docs/api/lsl/stream_info) object.
@@ -5669,6 +5939,9 @@ Index of 6347 public class members (functions, variables, typedefs, enums) acros
 - **streamEndpoint** `[var]` in [MnaPort](/docs/api/mna/mna-port) — Protocol-specific address (e.g. "localhost:4218" for fiff-rt).
 - **streamName** `[fn]` in [FiffStream](/docs/api/fiff/fiff-stream) — Get the stream name.
 - **streamProtocol** `[var]` in [MnaPort](/docs/api/mna/mna-port) — "fiff-rt", "lsl", "ftbuffer", "shm", "" = internal signal/slot
+- **streams** `[fn]` in `AcqBackend`
+- **streams** `[fn]` in `AcqDevice`
+- **streams** `[var]` in `AcqDeviceStats` — One entry per stream.
 - **streams** `[fn]` in [DipoleObject](/docs/api/disp3-d/dipole-object)
 - **streams** `[fn]` in [PolylineObject](/docs/api/disp3-d/polyline-object)
 - **struct_names** `[var]` in [FsColortable](/docs/api/fs/fs-colortable) — Anatomical ROI description.
@@ -5680,6 +5953,7 @@ Index of 6347 public class members (functions, variables, typedefs, enums) acros
 - **subject** `[var]` in [InvBeamformer](/docs/api/inv/inv-beamformer) — Subject identifier.
 - **subject** `[var]` in [MNESurfaceOrVolume](/docs/api/mne/mne-surface-or-volume) — Name (id) of the subject.
 - **subjects** `[var]` in [MnaProject](/docs/api/mna/mna-project) — Subjects in the project.
+- **subTicks** `[var]` in [AcqSyncMarker](/docs/api/acq/acq-sync-marker) — Edge position inside the reference sample, in domain ticks.
 - **subtractBaseline** `[fn]` in [FiffEvokedSet](/docs/api/fiff/fiff-evoked-set) — Subtract baseline from each channel of an epoch.
 - **success** `[var]` in [PythonRunnerResult](/docs/api/utils/python-runner-result) — True when process exited with code 0.
 - **suffix** `[fn]` in [BIDSPath](/docs/api/bids/bids-path) — Filename suffix.
@@ -5729,7 +6003,9 @@ Index of 6347 public class members (functions, variables, typedefs, enums) acros
 - **talairachXfmPath** `[var]` in [MriVolData](/docs/api/mri/mri-vol-data) — Path to the Talairach .xfm file (from MGH footer tags).
 - **taper_size** `[var]` in [MNEFilterDef](/docs/api/mne/mne-filter-def) — How long a taper in the beginning and end.
 - **taperSize** `[var]` in [FilterSettings](/docs/api/mne/filter-settings) — Taper size.
+- **target** `[var]` in `AcqUri` — Everything between "://" and "?".
 - **targetPath** `[var]` in [MnaParamBinding](/docs/api/mna/mna-param-binding) — Parameter to control: "nodeId/attrKey".
+- **targetSample** `[var]` in [AcqSyncMarker](/docs/api/acq/acq-sync-marker) — Sample of the edge in the target stream.
 - **task** `[fn]` in [BIDSPath](/docs/api/bids/bids-path) — Task label.
 - **taskDescription** `[var]` in [BidsRawData](/docs/api/bids/bids-raw-data) — Task description (OPTIONAL).
 - **taskType** `[fn]` in [MlModel](/docs/api/ml/ml-model)
@@ -5738,6 +6014,7 @@ Index of 6347 public class members (functions, variables, typedefs, enums) acros
 - **tCdf** `[fn]` in [StatsTtest](/docs/api/sts/stats-ttest) — Compute the CDF of the t-distribution using the regularized incomplete beta function.
 - **TE** `[var]` in [MriVolData](/docs/api/mri/mri-vol-data) — Echo time (ms).
 - **testDataPath** `[fn]` in [PythonTestHelper](/docs/api/utils/python-test-helper) — Get the standard path to mne-cpp-test-data from the test binary location.
+- **text** `[fn]` in [AcqError](/docs/api/acq/acq-error)
 - **text_color** `[var]` in [MNEMshDisplaySurfaceSet](/docs/api/mne/mne-msh-display-surface-set) — Text color (RGB).
 - **tfce** `[fn]` in [StatsCluster](/docs/api/sts/stats-cluster) — Threshold-Free Cluster Enhancement (TFCE).
 - **tfCoefficients** `[var]` in [InvTfMxneResult](/docs/api/inv/inv-tf-mxne-result) — Time-frequency coefficients of active sources (n_active*n_freqs × n_times).
@@ -5750,10 +6027,15 @@ Index of 6347 public class members (functions, variables, typedefs, enums) acros
 - **thresholdMin** `[fn]` in [SourceEstimateOverlay](/docs/api/disp3-d/source-estimate-overlay) — Get the current threshold values.
 - **thresholdsUpdated** `[signal]` in [SourceEstimateManager](/docs/api/disp3-d/source-estimate-manager) — Emitted when thresholds are auto-computed from data.
 - **TI** `[var]` in [MriVolData](/docs/api/mri/mri-vol-data) — Inversion time (ms).
+- **tickOf** `[fn]` in [AcqTimebase](/docs/api/acq/acq-timebase)
+- **ticksPerSample** `[var]` in [AcqTimebase](/docs/api/acq/acq-timebase) — Integer by construction of the domain tick.
+- **ticksPerSecond** `[var]` in [AcqTimebase](/docs/api/acq/acq-timebase) — Domain tick rate in Hz (integer, as hardware clocks are).
 - **time** `[var]` in [FiffId](/docs/api/fiff/fiff-id) — Time of the ID creation.
 - **time** `[var]` in [InvEcd](/docs/api/inv/inv-ecd) — Time point.
 - **time_loaded** `[var]` in [MNEMshDisplaySurface](/docs/api/mne/mne-msh-display-surface) — Timestamp when the surface was loaded.
 - **timeAtIndex** `[fn]` in [SourceEstimateOverlay](/docs/api/disp3-d/source-estimate-overlay) — Get the time value at a given index.
+- **timebase** `[fn]` in [AcqStream](/docs/api/acq/acq-stream)
+- **timebase** `[fn]` in [AcqViewBase](/docs/api/acq/acq-view-base)
 - **timeChanged** `[signal]` in [DipoleFitView](/docs/api/disp/dipole-fit-view) — Send new time values.
 - **timeCursor** `[fn]` in [MultimodalScene](/docs/api/disp3-d/multimodal-scene)
 - **timeCursorChanged** `[signal]` in [MultimodalScene](/docs/api/disp3-d/multimodal-scene) — Emitted when the shared time cursor (seconds) changes.
@@ -5873,6 +6155,7 @@ Index of 6347 public class members (functions, variables, typedefs, enums) acros
 - **toShort** `[fn]` in [FiffTag](/docs/api/fiff/fiff-tag) — to Short Fast access; Data are deleted if tag gets deleted, and vice versa
 - **toSi** `[fn]` in [EDFChannelInfo](/docs/api/bids/edf-channel-info)
 - **toSparseFloatMatrix** `[fn]` in [FiffTag](/docs/api/fiff/fiff-tag) — to sparse fiff FIFFT FLOAT MATRIX
+- **toString** `[fn]` in `AcqUri`
 - **toString** `[fn]` in [FiffId](/docs/api/fiff/fiff-id) — Returns a human-readable string representation of this ID.
 - **toString** `[fn]` in [FiffTag](/docs/api/fiff/fiff-tag) — to String
 - **toStringList** `[fn]` in [Command](/docs/api/com/command) — Creates a StringList with three items.
@@ -5961,6 +6244,7 @@ Index of 6347 public class members (functions, variables, typedefs, enums) acros
 - **tstep** `[fn]` in [SourceEstimateOverlay](/docs/api/disp3-d/source-estimate-overlay) — Get the time step between samples.
 - **twinFiducial** `[fn]` in [AcquiredPoints](/docs/api/utils/acquired-points)
 - **type** `[fn]` in [AbstractTreeItem](/docs/api/disp3-d/abstract-tree-item)
+- **type** `[var]` in `AcqParameterInfo` — "int", "double", "bool", "string", "enum:a\|b\|c".
 - **type** `[var]` in [BidsChannel](/docs/api/bids/bids-channel) — BIDS channel type: EEG, ECOG, SEEG, DBS, TRIG, etc.
 - **type** `[var]` in [BidsElectrode](/docs/api/bids/bids-electrode) — Electrode type: "depth", "strip", "grid" (OPTIONAL).
 - **type** `[var]` in [BrainVisionMarker](/docs/api/bids/brain-vision-marker) — Marker type (e.g., "New Segment", "Stimulus", "Response").
@@ -5982,12 +6266,21 @@ Index of 6347 public class members (functions, variables, typedefs, enums) acros
 
 - **UnbiasedSquaredPhaseLagIndex** `[fn]` in [UnbiasedSquaredPhaseLagIndex](/docs/api/connectivity/unbiased-squared-phase-lag-index) — Constructs a [`UnbiasedSquaredPhaseLagIndex`](/docs/api/connectivity/unbiased-squared-phase-lag-index) object.
 - **unbuffered** `[var]` in [PythonRunnerConfig](/docs/api/utils/python-runner-config) — Pass -u to Python for unbuffered I/O.
+- **uncertaintyNs** `[var]` in [AcqClockModel](/docs/api/acq/acq-clock-model) — One-sigma uncertainty of `physicalNs()`.
+- **underrun** `[var]` in [AcqStreamStats](/docs/api/acq/acq-stream-stats) — Output: samples emitted as underrun fill.
+- **underrun** `[fn]` in [AcqWriteView](/docs/api/acq/acq-write-view)
+- **underrunFill** `[var]` in [AcqStreamInfo](/docs/api/acq/acq-stream-info) — Output streams: what the device emits on underrun.
+- **underruns** `[var]` in [AcqStreamStats](/docs/api/acq/acq-stream-stats) — Output: underrun episodes.
 - **undo** `[var]` in [MNECTFCompDataSet](/docs/api/mne/mnectf-comp-data-set) — Compensation data to undo the current state.
 - **undoLast** `[fn]` in [AcquiredPoints](/docs/api/utils/acquired-points) — Remove the most recently captured point matching `kind`, if any.
+- **unit** `[var]` in [AcqChannelInfo](/docs/api/acq/acq-channel-info) — SI unit of the physical value.
+- **unit** `[var]` in `AcqFiffChannel` — FIFF_UNIT_*.
 - **unit** `[var]` in [BrainVisionChannelInfo](/docs/api/bids/brain-vision-channel-info) — Physical unit string (e.g.
 - **unit** `[var]` in [FiffChInfo](/docs/api/fiff/fiff-ch-info) — Unit of measurement.
 - **unit** `[fn]` in [FiffExplain](/docs/api/fiff/fiff-explain) — SI symbol of a unit (FIFF_UNIT_*), e.g.
 - **unit_mul** `[var]` in [FiffChInfo](/docs/api/fiff/fiff-ch-info) — Unit multiplier exponent.
+- **unitExponent** `[var]` in [AcqChannelInfo](/docs/api/acq/acq-channel-info) — Power of ten of the unit (e.g.
+- **unitMul** `[var]` in `AcqFiffChannel` — FIFF_UNITM_*.
 - **unitMultiplier** `[fn]` in [FiffExplain](/docs/api/fiff/fiff-explain) — SI prefix of a unit multiplier (FIFF_UNITM_*), e.g.
 - **units** `[var]` in [BidsChannel](/docs/api/bids/bids-channel) — Unit of measurement: V, uV, mV (REQUIRED).
 - **units** `[var]` in [BidsCoordinateSystem](/docs/api/bids/bids-coordinate-system) — "m", "mm", or "cm" (REQUIRED for iEEG).
@@ -6027,6 +6320,7 @@ Index of 6347 public class members (functions, variables, typedefs, enums) acros
 - **updateGuiMode** `[fn]` in [CoregSettingsView](/docs/api/disp/coreg-settings-view) — Update the views GUI based on the set GuiMode (Clinical=0, Research=1).
 - **updateGuiMode** `[fn]` in [ProgressView](/docs/api/disp/progress-view) — Update the views GUI based on the set GuiMode (Clinical=0, Research=1).
 - **updateHeadPos** `[fn]` in [ComputeFwd](/docs/api/fwd/compute-fwd) — Update the head position with a new device-to-head transform and recompute the MEG portion of the forward solution.
+- **updateInfo** `[fn]` in [AcqWriter](/docs/api/acq/acq-writer) — Publishes a new metadata version, current + 1 (allocates; rare changes only).
 - **updatePlot** `[fn]` in [Bar](/docs/api/disp/bar) — Updates the bar plot with the new data.
 - **updatePlot** `[fn]` in [Spline](/docs/api/disp/spline) — Updates the spline with new data.
 - **updateProcessingMode** `[fn]` in [AbstractView](/docs/api/disp/abstract-view) — Update the views GUI based on the set ProcessingMode (RealTime=0, Offline=1).
@@ -6091,6 +6385,8 @@ Index of 6347 public class members (functions, variables, typedefs, enums) acros
 - **UPtr** `[type]` in [MNESourceSpace](/docs/api/mne/mne-source-space) — Unique pointer type for [`MNESourceSpace`](/docs/api/mne/mne-source-space).
 - **UPtr** `[type]` in [MNESurface](/docs/api/mne/mne-surface) — Unique pointer type for [`MNESurface`](/docs/api/mne/mne-surface).
 - **upVector** `[var]` in [CameraResult](/docs/api/disp3-d/camera-result)
+- **uri** `[var]` in `AcqDeviceDescription` — Canonical URI that reopens this source.
+- **uri** `[var]` in `AcqDiscoveredDevice` — Ready-to-use URI.
 - **use_equiv_eeg** `[var]` in [ComputeFwdSettings](/docs/api/fwd/compute-fwd-settings) — Use the equivalent source approach for the EEG sphere model.
 - **use_ip_approach** `[var]` in [FwdBemModel](/docs/api/fwd/fwd-bem-model) — Whether the isolated-problem approach is active.
 - **use_itris** `[var]` in [MNESurfaceOrVolume](/docs/api/mne/mne-surface-or-volume) — Vertex indices for the in-use triangulation (row-major).
@@ -6106,6 +6402,7 @@ Index of 6347 public class members (functions, variables, typedefs, enums) acros
 - **user_data** `[var]` in [MNEMshDisplaySurface](/docs/api/mne/mne-msh-display-surface) — Arbitrary user-defined data pointer.
 - **user_data_free** `[var]` in [MNEMshDisplaySurface](/docs/api/mne/mne-msh-display-surface) — Function to free user_data.
 - **utc_offset** `[var]` in [FiffInfo](/docs/api/fiff/fiff-info) — UTC offset of related meas_date (sHH:MM).
+- **utcOffsetNs** `[var]` in [AcqClockModel](/docs/api/acq/acq-clock-model) — UTC minus steady_clock at the anchor.
 - **uu** `[var]` in [fitUserRec](/docs/api/fwd/fit-user-rec)
 - **uu** `[var]` in [InvDipoleForward](/docs/api/inv/inv-dipole-forward) — Right singular vectors V^T of fwd (udim x nch, row-major).
 
@@ -6121,7 +6418,12 @@ Index of 6347 public class members (functions, variables, typedefs, enums) acros
 - **validate** `[fn]` in [MnaGraph](/docs/api/mna/mna-graph) — Validate the graph: acyclicity, port connections, data-kind compatibility, op schema compliance, required attributes.
 - **validate** `[fn]` in [MnaOpSchema](/docs/api/mna/mna-op-schema) — Validate that a node conforms to this schema.
 - **validate** `[fn]` in [MNEDeriv](/docs/api/mne/mne-deriv) — Checks every derived channel against channel info (MNE-C `mne_validate_deriv`).
+- **validFromSample** `[var]` in [AcqStreamInfo](/docs/api/acq/acq-stream-info) — First sample index this version describes.
 - **vals** `[var]` in [MNERawBufDef](/docs/api/mne/mne-raw-buf-def) — Sample values matrix [nchan x ns], row-major (empty if not loaded).
+- **value** `[fn]` in [AcqExpected](/docs/api/acq/acq-expected)
+- **value** `[fn]` in [AcqExpected](/docs/api/acq/acq-expected)
+- **value** `[fn]` in [AcqExpected](/docs/api/acq/acq-expected)
+- **value** `[fn]` in [AcqInt24](/docs/api/acq/acq-int24)
 - **value** `[var]` in [BidsEvent](/docs/api/bids/bids-event) — Numeric event value / trigger code.
 - **value** `[var]` in [InvToken](/docs/api/inv/inv-token) — Continuous value (0 for structural tokens).
 - **value** `[var]` in [PickResult](/docs/api/disp3-d/pick-result) — Optional scalar overlay value at the picked element (uV, dSPM, MRI intensity).
@@ -6176,6 +6478,7 @@ Index of 6347 public class members (functions, variables, typedefs, enums) acros
 - **venvPythonPath** `[fn]` in [PythonRunner](/docs/api/utils/python-runner) — Get the Python interpreter path inside the configured venv.
 - **verbose** `[var]` in [InvDipoleFitSettings](/docs/api/inv/inv-dipole-fit-settings) — Verbose output.
 - **verification** `[var]` in [MnaNode](/docs/api/mna/mna-node) — Explanation, checks, results, and provenance snapshot.
+- **version** `[var]` in [AcqStreamInfo](/docs/api/acq/acq-stream-info) — Metadata version; incremented on every change.
 - **version** `[var]` in [FiffId](/docs/api/fiff/fiff-id) — File version.
 - **version** `[var]` in [MnaOpSchema](/docs/api/mna/mna-op-schema) — Version of the operation (e.g. "2.2.0").
 - **version** `[var]` in [MriVolData](/docs/api/mri/mri-vol-data) — MGH format version (should be 1).
@@ -6210,6 +6513,7 @@ Index of 6347 public class members (functions, variables, typedefs, enums) acros
 - **viewportIndexAt** `[fn]` in [MultiViewLayout](/docs/api/disp3-d/multi-view-layout) — Given a cursor position and output size, determine which viewport index the cursor is in.
 - **viewportXToSample** `[fn]` in [ChannelDataView](/docs/api/disp/channel-data-view) — Maps a ChannelDataView-local x coordinate inside the signal viewport to an absolute sample index.
 - **viewResized** `[signal]` in [ChannelRhiView](/docs/api/disp/channel-rhi-view)
+- **views** `[var]` in [AcqReaderStats](/docs/api/acq/acq-reader-stats) — Views acquired.
 - **visibility** `[var]` in [SubView](/docs/api/disp3-d/sub-view)
 - **visible** `[var]` in [SceneLayer](/docs/api/disp3-d/scene-layer)
 - **visibleArea** `[fn]` in [MNELayout](/docs/api/mne/mne-layout) — Returns the area currently shown (the extent unless `confine()` zoomed in).
@@ -6241,6 +6545,7 @@ Index of 6347 public class members (functions, variables, typedefs, enums) acros
 - **w** `[var]` in [FwdCoil](/docs/api/fwd/fwd-coil) — The weighting coefficients.
 - **w** `[fn]` in [InvSensorSet](/docs/api/inv/inv-sensor-set)
 - **w** `[fn]` in [InvSensorSet](/docs/api/inv/inv-sensor-set)
+- **wait** `[var]` in [AcqReaderOptions](/docs/api/acq/acq-reader-options) — Ignored for LowLatency, which spins.
 - **wait** `[fn]` in [RtNoise](/docs/api/dsp/rt-noise) — Blocks until the worker thread has finished, or until the timeout (ms) expires.
 - **waitForDataAvailable** `[fn]` in [RtCmdClient](/docs/api/com/rt-cmd-client) — Wait for ready read until data are available.
 - **wallTimeMs** `[var]` in [MnaProvenance](/docs/api/mna/mna-provenance) — Wall-clock duration in milliseconds.
@@ -6253,6 +6558,7 @@ Index of 6347 public class members (functions, variables, typedefs, enums) acros
 - **whiten_vector** `[fn]` in [MNECovMatrix](/docs/api/mne/mne-cov-matrix) — Apply whitening to a data vector using the inverse square-root eigenvalues stored in this covariance matrix.
 - **whitener** `[var]` in [InvBeamformer](/docs/api/inv/inv-beamformer) — Whitening matrix (n_channels, n_channels).
 - **whitener** `[var]` in [MNEInverseOperator](/docs/api/mne/mne-inverse-operator) — Whitening matrix (derived from noise covariance).
+- **width** `[var]` in `AcqBitField` — Bits in the field.
 - **width** `[var]` in [MNEVolGeom](/docs/api/mne/mne-vol-geom)
 - **width** `[var]` in [MriSlice](/docs/api/mri/mri-slice) — Width of the image in pixels.
 - **width** `[var]` in [MriSliceImage](/docs/api/mri/mri-slice-image) — Width of the slice image in pixels.
@@ -6361,6 +6667,9 @@ Index of 6347 public class members (functions, variables, typedefs, enums) acros
 - **writeMatrix** `[fn]` in [PythonTestHelper](/docs/api/utils/python-test-helper) — Write an Eigen matrix to a text file with full double precision.
 - **writeMNESelFile** `[fn]` in [SelectionIO](/docs/api/utils/selection-io) — Writes the specified selection groups to a single MNE .sel file.
 - **writeMNESelFile** `[fn]` in [SelectionIO](/docs/api/utils/selection-io) — Writes the specified selection groups to a single MNE .sel file.
+- **writePosition** `[fn]` in [AcqWriter](/docs/api/acq/acq-writer)
+- **writer** `[fn]` in [AcqStream](/docs/api/acq/acq-stream) — Takes the writer of an output stream (control path).
+- **writerWaits** `[var]` in [AcqStreamStats](/docs/api/acq/acq-stream-stats) — Output: beginWrite() calls that had to wait for space.
 - **writeToStream** `[fn]` in [FiffCoordTrans](/docs/api/fiff/fiff-coord-trans) — Writes the transformation to a FIFF stream.
 - **writeToStream** `[fn]` in [FiffDigPointSet](/docs/api/fiff/fiff-dig-point-set) — Writes the [`FiffDigPointSet`](/docs/api/fiff/fiff-dig-point-set) to a FIFF stream.
 - **writeToStream** `[fn]` in [FiffInfo](/docs/api/fiff/fiff-info) — Writes the fiff information to a FIF stream.

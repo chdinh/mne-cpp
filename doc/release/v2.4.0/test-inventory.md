@@ -6,8 +6,8 @@ CI evidence: https://github.com/mne-tools/mne-cpp/actions/runs/39457390522 (comm
 
 ## Registration
 
-- Test directories: 265
-- Registered unconditionally: 256
+- Test directories: 268
+- Registered unconditionally: 259
 - Registered behind a CMake condition or early `return()`: 6
 - Not registered: 3
 - Registered without `LABELS`: 0
@@ -18,12 +18,12 @@ CI evidence: https://github.com/mne-tools/mne-cpp/actions/runs/39457390522 (comm
 
 | Platform | Executed | Failures | Skipped | Registered but not executed |
 |---|---:|---:|---:|---|
-| macos-26 | 295 | 0 | 0 | - |
-| macos-26-qt-min | 295 | 0 | 0 | - |
-| ubuntu-24.04 | 295 | 0 | 0 | - |
-| ubuntu-24.04-qt-min | 295 | 0 | 0 | - |
-| windows-2025-vs2026 | 295 | 0 | 2 | - |
-| windows-2025-vs2026-qt-min | 295 | 0 | 2 | - |
+| macos-26 | 295 | 0 | 0 | `test_acq_error`, `test_acq_stream`, `test_acq_timebase` |
+| macos-26-qt-min | 295 | 0 | 0 | `test_acq_error`, `test_acq_stream`, `test_acq_timebase` |
+| ubuntu-24.04 | 295 | 0 | 0 | `test_acq_error`, `test_acq_stream`, `test_acq_timebase` |
+| ubuntu-24.04-qt-min | 295 | 0 | 0 | `test_acq_error`, `test_acq_stream`, `test_acq_timebase` |
+| windows-2025-vs2026 | 295 | 0 | 2 | `test_acq_error`, `test_acq_stream`, `test_acq_timebase` |
+| windows-2025-vs2026-qt-min | 295 | 0 | 2 | `test_acq_error`, `test_acq_stream`, `test_acq_timebase` |
 
 ## Run-time requirements (lexical signals)
 
