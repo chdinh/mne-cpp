@@ -21,11 +21,19 @@ set(SOURCES
   acq_timebase.cpp
   acq_stream.cpp
   acq_reader.cpp
+  acq_uri.cpp
+  acq_backend.cpp
+  acq_device.cpp
+  acq_device_registry.cpp
+  backends/acq_synthetic_backend.cpp
 )
 
 set(PRIVATE_HEADERS
   detail/acq_diagnostics.h
   detail/acq_stream_core.h
+  detail/acq_backend_impl.h
+  detail/acq_uri_params.h
+  detail/acq_synthetic_backend.h
 )
 
 set(HEADERS

@@ -192,6 +192,7 @@ public:
     [[nodiscard]] AcqExpected<AcqWriter> writer(AcqWait wait = AcqWait::Block) const;
 
 private:
+    friend class AcqBackend;
     friend class AcqReader;
     friend class AcqWriter;
     explicit AcqStream(std::shared_ptr<detail::AcqStreamCore> core) noexcept;

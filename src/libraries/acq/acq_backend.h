@@ -39,6 +39,11 @@
 namespace ACQLIB
 {
 
+namespace detail
+{
+struct BackendAccess;
+}
+
 //=============================================================================================================
 /**
  * What a source is, for display and provenance.
@@ -117,7 +122,7 @@ protected:
     void reportError(AcqError error) noexcept;
 
 private:
-    friend class AcqDevice;
+    friend struct detail::BackendAccess;
     struct Impl;
     std::unique_ptr<Impl> m_pImpl;
 };
