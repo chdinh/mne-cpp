@@ -110,7 +110,7 @@ public:
     constexpr AcqError(AcqErrorCode code) noexcept
     : m_code(code)
     {
-    } // NOLINT(google-explicit-constructor)
+    }
 
     /** Creates an error with context, e.g. the URI or file path (control path, allocates). */
     AcqError(AcqErrorCode code, std::string context);
@@ -161,7 +161,7 @@ class AcqExpected
 {
 public:
     /** Holds @p value. */
-    AcqExpected(T value) noexcept(std::is_nothrow_move_constructible_v<T>) // NOLINT(google-explicit-constructor)
+    AcqExpected(T value) noexcept(std::is_nothrow_move_constructible_v<T>)
     : m_hasValue(true)
     {
         ::new (static_cast<void*>(&m_value)) T(std::move(value));
@@ -169,7 +169,7 @@ public:
 
     /** Holds @p error. @pre !error.ok() */
     AcqExpected(AcqError error) noexcept
-    : m_hasValue(false) // NOLINT(google-explicit-constructor)
+    : m_hasValue(false)
     {
         assert(!error.ok());
         ::new (static_cast<void*>(&m_error)) AcqError(std::move(error));
@@ -179,7 +179,7 @@ public:
     AcqExpected(AcqErrorCode code) noexcept
     : AcqExpected(AcqError(code))
     {
-    } // NOLINT(google-explicit-constructor)
+    }
 
     AcqExpected(const AcqExpected& other)
         requires std::is_copy_constructible_v<T>

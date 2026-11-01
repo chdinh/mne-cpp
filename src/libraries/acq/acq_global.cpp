@@ -15,6 +15,7 @@
 //=============================================================================================================
 
 #include "acq_global.h"
+#include "acq_sample_format.h"
 
 // Standalone (embedded) builds do not pass the git hashes of the MNE-CPP super-build.
 #ifndef MNE_GIT_HASH_SHORT
@@ -45,4 +46,27 @@ const char* ACQLIB::buildHash()
 const char* ACQLIB::buildHashLong()
 {
     return MNE_GIT_HASH_LONG;
+}
+
+//=============================================================================================================
+
+std::string_view ACQLIB::sampleFormatName(AcqSampleFormat format) noexcept
+{
+    switch (format) {
+        case AcqSampleFormat::Int16:
+            return "int16";
+        case AcqSampleFormat::Int24Packed:
+            return "int24";
+        case AcqSampleFormat::Int32:
+            return "int32";
+        case AcqSampleFormat::Float32:
+            return "float32";
+        case AcqSampleFormat::Float64:
+            return "float64";
+        case AcqSampleFormat::ComplexInt16:
+            return "cint16";
+        case AcqSampleFormat::ComplexFloat32:
+            return "cfloat32";
+    }
+    return "unknown";
 }

@@ -126,8 +126,8 @@ static_assert(sizeof(AcqComplexInt16) == 4, "AcqComplexInt16 must be packed");
     return format == AcqSampleFormat::ComplexInt16 || format == AcqSampleFormat::ComplexFloat32;
 }
 
-/** @return The stable lowercase name of @p format, e.g. "float32", "cint16". */
-[[nodiscard]] ACQSHARED_EXPORT std::string_view toString(AcqSampleFormat format) noexcept;
+/** @return The stable lowercase name of @p format, e.g. "float32", "cint16"; "unknown" for invalid values. */
+[[nodiscard]] ACQSHARED_EXPORT std::string_view sampleFormatName(AcqSampleFormat format) noexcept;
 
 //=============================================================================================================
 /**
