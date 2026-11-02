@@ -54,6 +54,7 @@
 //=============================================================================================================
 
 #include <QApplication>
+#include <QImage>
 #include <QLabel>
 #include <QPainter>
 #include <QPolygonF>
@@ -338,9 +339,11 @@ void acquire(AcqReader& input, std::vector<AcqReader>& others, AcqWriter& stimul
 
 //=============================================================================================================
 /**
- * Sweep display: each channel is drawn left to right and overwritten at the cursor, every stream at its own rate
- * across the same 5 s. Streams with more samples than pixels are drawn as one min/max pair per pixel, slower ones
- * as lines through their samples.
+ * Sweep display, drawn like an oscilloscope: each channel runs left to right and is overwritten at the cursor,
+ * every stream at its own rate across the same 5 s. Each stream keeps an image of its rows; a frame folds the new
+ * samples into per-column minima and maxima and repaints only the columns the cursor passed, so a frame costs the
+ * same however many samples the window holds. The image is redrawn whole when a sweep starts (new sensitivity),
+ * after a resize, and for streams with fewer samples than columns, which are drawn through their samples.
  */
 class ScopeView : public QWidget
 {
@@ -351,51 +354,50 @@ public:
         setMinimumSize(900, 600);
         setAutoFillBackground(true);
         QPalette p = palette();
-        p.setColor(QPalette::Window, QColor(16, 18, 22));
+        p.setColor(QPalette::Window, kBackground);
         setPalette(p);
     }
 
 protected:
     void paintEvent(QPaintEvent* /*event*/) override
     {
-        QPainter painter(this);
-        painter.setRenderHint(QPainter::Antialiasing, false);
         const int plotWidth = std::max(1, width() - kLabelWidth - 8);
+        {
+            // Hold the lock only while folding the new samples into the column envelopes.
+            std::lock_guard<std::mutex> lock(m_shared.mutex);
+            if (m_lanes.size() != m_shared.traces.size()) {
+                m_lanes.assign(m_shared.traces.size(), Lane());
+            }
+            for (std::size_t t = 0; t < m_shared.traces.size(); ++t) {
+                fold(m_lanes[t], m_shared.traces[t], plotWidth);
+            }
+            m_triggers.assign(m_shared.triggers.begin(), m_shared.triggers.end());
+            m_pulses.assign(m_shared.pulses.begin(), m_shared.pulses.end());
+        }
 
-        std::lock_guard<std::mutex> lock(m_shared.mutex);
-        const Trace& base = m_shared.traces[0];
+        QPainter painter(this);
+        const Lane& base = m_lanes[0];
         if (base.newest == 0) {
             painter.setPen(Qt::gray);
             painter.drawText(rect(), Qt::AlignCenter, "waiting for samples ...");
             return;
         }
         std::size_t rows = 0;
-        for (const Trace& trace : m_shared.traces) {
-            rows += trace.rows;
+        for (const Lane& lane : m_lanes) {
+            rows += lane.rows;
         }
         const double rowHeight = static_cast<double>(height() - 20) / static_cast<double>(rows);
-        if (m_ranges.size() != m_shared.traces.size()) {
-            m_ranges.resize(m_shared.traces.size());
-            m_rangeSweeps.assign(m_shared.traces.size(), 0);
-        }
 
-        std::size_t row = 0;
+        double top = 10.0;
         double outTop = 0.0;
-        for (std::size_t t = 0; t < m_shared.traces.size(); ++t) {
-            const Trace& trace = m_shared.traces[t];
-            const double top = 10.0 + static_cast<double>(row) * rowHeight;
-            if (t > 0) {
-                painter.setPen(QColor(60, 64, 72));
-                painter.drawLine(QPointF(4, top), QPointF(width() - 4, top));
-            }
-            painter.setPen(QColor(120, 160, 220));
-            painter.drawText(QRectF(kLabelWidth, top, plotWidth, 14), Qt::AlignRight | Qt::AlignTop,
-                             QString::fromStdString(trace.title));
+        for (std::size_t t = 0; t < m_lanes.size(); ++t) {
+            Lane& lane = m_lanes[t];
+            render(lane, t == 0, rowHeight);
+            painter.drawImage(QPointF(0, top), lane.image);
             if (t == 0) {
-                outTop = top + static_cast<double>(trace.rows - 1) * rowHeight;
+                outTop = top + static_cast<double>(lane.rows - 1) * rowHeight;
             }
-            drawTrace(painter, trace, t, top, rowHeight, plotWidth);
-            row += trace.rows;
+            top += static_cast<double>(lane.rows) * rowHeight;
         }
 
         // Triggers across all streams, pulses on the output trace; the cursor marks the newest sample.
@@ -404,7 +406,7 @@ protected:
         auto xOf = [&](std::uint64_t phase) {
             return kLabelWidth + static_cast<double>(phase) * plotWidth / static_cast<double>(window);
         };
-        for (const Marker& m : m_shared.triggers) {
+        for (const Marker& m : m_triggers) {
             if (m.sample + window < newest) {
                 continue;
             }
@@ -414,7 +416,7 @@ protected:
             painter.drawText(QPointF(x + 3, 22), m.code == kTarget ? "T" : "S");
         }
         painter.setPen(QColor(255, 200, 120));
-        for (const Marker& m : m_shared.pulses) {
+        for (const Marker& m : m_pulses) {
             if (m.wrapped && m.sample + window >= newest && m.sample < newest) {
                 painter.drawText(QPointF(xOf(m.sample % window) + 2, outTop + 12), "wrap");
             }
@@ -431,117 +433,229 @@ protected:
 
 private:
     static constexpr int kLabelWidth = 110;
+    static constexpr std::uint64_t kEmpty = std::numeric_limits<std::uint64_t>::max();
+    static inline const QColor kBackground{16, 18, 22};
 
-    /** Draws the rows of stream @p t from @p top on, holding each row's sensitivity for a whole sweep. */
-    void drawTrace(QPainter& painter, const Trace& trace, std::size_t t, double top, double rowHeight, int plotWidth)
+    /** Minimum and maximum of one column of one row, with the sweep phase of each, and the sweep they belong to. */
+    struct Column
     {
-        const std::uint64_t newest = trace.newest;
-        const std::uint64_t window = trace.window;
-        const std::uint64_t sweepStart = newest - newest % window;
-        const std::uint64_t cursorPhase = newest % window;
-        // Sample shown at sweep phase p: this sweep left of the cursor, the previous one right of it.
-        auto sampleAt = [&](std::uint64_t phase) {
-            return sweepStart + phase < newest ? sweepStart + phase : sweepStart + phase - window;
-        };
-        auto shown = [&](std::uint64_t s) {
-            return newest > 0 && s >= trace.oldest && s < newest && s + window >= newest;
-        };
-        auto value = [&](std::uint64_t s, std::size_t r) {
-            return trace.history[(s & (trace.length - 1)) * trace.rows + r];
-        };
-        const bool dense = window >= static_cast<std::uint64_t>(plotWidth);
-        std::vector<float>& ranges = m_ranges[t];
-        ranges.resize(trace.rows, 0.0F);
-        const std::uint64_t sweep = window > 0 ? newest / window : 0;
+        float low = 0.0F;
+        float high = 0.0F;
+        std::uint64_t lowPhase = 0;
+        std::uint64_t highPhase = 0;
+        std::uint64_t sweep = kEmpty;
+    };
 
-        std::vector<QPointF> points;
-        for (std::size_t r = 0; r < trace.rows; ++r) {
-            const bool output = t == 0 && r + 1 == trace.rows;
-            const double centre = top + (static_cast<double>(r) + 0.5) * rowHeight;
-            float rangeMax = 0.0F;
-            // Points in the units of the row: x in pixels, y as the raw value, scaled once the range is known.
-            std::vector<std::vector<QPointF>> runs(1);
-            auto breakRun = [&] {
-                if (!runs.back().empty()) {
-                    runs.emplace_back();
-                }
-            };
-            if (dense) {
-                for (int x = 0; x < plotWidth; ++x) {
-                    const auto from = static_cast<std::uint64_t>(x) * window / static_cast<std::uint64_t>(plotWidth);
-                    const auto to = std::max(from + 1, static_cast<std::uint64_t>(x + 1) * window / static_cast<std::uint64_t>(plotWidth));
-                    float a = std::numeric_limits<float>::max();
-                    float b = std::numeric_limits<float>::lowest();
-                    std::uint64_t at = 0;
-                    std::uint64_t bt = 0;
-                    bool any = false;
-                    for (std::uint64_t phase = from; phase < to; ++phase) {
-                        const std::uint64_t s = sampleAt(phase);
-                        if (!shown(s)) {
-                            continue;
-                        }
-                        const float v = value(s, r);
-                        if (v < a) {
-                            a = v;
-                            at = phase;
-                        }
-                        if (v > b) {
-                            b = v;
-                            bt = phase;
-                        }
-                        any = true;
+    /** A stream as drawn: column envelopes (dense) or the samples of the window (sparse), and its image. */
+    struct Lane
+    {
+        std::string title;
+        double sfreq = 0.0;
+        std::uint64_t window = 0;
+        std::size_t rows = 0;
+        std::vector<std::string> names;
+        std::vector<DisplayUnit> units;
+        int width = 0;
+        bool dense = false;
+        std::uint64_t newest = 0;          // samples folded in so far
+        std::vector<Column> columns;       // dense: rows x width
+        std::vector<float> samples;        // sparse: rows x window, by sweep phase
+        std::vector<std::uint64_t> sweeps; // sparse: sweep of each phase
+        std::vector<float> ranges;         // per row, held for a sweep
+        QImage image;                      // labels and traces of the rows
+        double rowHeight = 0.0;
+        std::uint64_t painted = 0; // newest sample in the image
+        std::uint64_t paintedSweep = kEmpty;
+    };
+
+    static std::size_t columnOf(std::uint64_t phase, std::uint64_t window, int width)
+    {
+        return static_cast<std::size_t>(phase * static_cast<std::uint64_t>(width) / window);
+    }
+
+    /** Folds the samples of @p trace that are new since the last frame into @p lane. Called under the lock. */
+    static void fold(Lane& lane, const Trace& trace, int width)
+    {
+        if (lane.width != width || lane.window != trace.window || lane.rows != trace.rows) {
+            lane = Lane();
+            lane.title = trace.title;
+            lane.sfreq = trace.sfreq;
+            lane.window = trace.window;
+            lane.rows = trace.rows;
+            lane.names = trace.names;
+            lane.units = trace.units;
+            lane.width = width;
+            lane.dense = trace.window >= static_cast<std::uint64_t>(width);
+            if (lane.dense) {
+                lane.columns.assign(lane.rows * static_cast<std::size_t>(width), Column());
+            } else {
+                lane.samples.assign(lane.rows * trace.window, 0.0F);
+                lane.sweeps.assign(trace.window, kEmpty);
+            }
+            lane.ranges.assign(lane.rows, 0.0F);
+        }
+        if (trace.newest > lane.newest + trace.window || trace.oldest > lane.newest) {
+            lane.paintedSweep = kEmpty; // samples were skipped: repaint from the envelopes
+        }
+        // Only what the history still holds and the window still shows.
+        const std::uint64_t floor = trace.newest > trace.window ? trace.newest - trace.window : 0;
+        const std::uint64_t from = std::max({lane.newest, trace.oldest, floor});
+        for (std::uint64_t s = from; s < trace.newest; ++s) {
+            const std::uint64_t phase = s % trace.window;
+            const std::uint64_t sweep = s / trace.window;
+            const float* frame = &trace.history[(s & (trace.length - 1)) * trace.rows];
+            if (lane.dense) {
+                const std::size_t x = columnOf(phase, trace.window, width);
+                for (std::size_t r = 0; r < lane.rows; ++r) {
+                    Column& c = lane.columns[r * static_cast<std::size_t>(width) + x];
+                    const float v = frame[r];
+                    if (c.sweep != sweep) {
+                        c = {v, v, phase, phase, sweep};
+                    } else if (v < c.low) {
+                        c.low = v;
+                        c.lowPhase = phase;
+                    } else if (v > c.high) {
+                        c.high = v;
+                        c.highPhase = phase;
                     }
-                    if (!any) {
-                        breakRun();
-                        continue;
-                    }
-                    // The extremes in time order, so an edge is one stroke instead of a down-up-down zig-zag.
-                    runs.back().emplace_back(kLabelWidth + x, at <= bt ? a : b);
-                    runs.back().emplace_back(kLabelWidth + x, at <= bt ? b : a);
-                    rangeMax = std::max({rangeMax, std::abs(a), std::abs(b)});
                 }
             } else {
-                for (std::uint64_t phase = 0; phase < window; ++phase) {
-                    const std::uint64_t s = sampleAt(phase);
-                    if (phase == cursorPhase || !shown(s)) {
-                        breakRun(); // never join the new sweep to the old one across the cursor
-                    }
-                    if (!shown(s)) {
-                        continue;
-                    }
-                    const float v = value(s, r);
-                    runs.back().emplace_back(kLabelWidth + static_cast<double>(phase) * plotWidth / static_cast<double>(window), v);
-                    rangeMax = std::max(rangeMax, std::abs(v));
+                for (std::size_t r = 0; r < lane.rows; ++r) {
+                    lane.samples[r * trace.window + phase] = frame[r];
                 }
+                lane.sweeps[phase] = sweep;
             }
-            if ((sweep != m_rangeSweeps[t] || ranges[r] == 0.0F) && rangeMax > 0.0F) {
-                ranges[r] = niceRange(rangeMax);
-            }
-            const float range = output ? static_cast<float>(1.2e-3) : (ranges[r] > 0.0F ? ranges[r] : 1.0F);
-            const double gain = 0.45 * rowHeight / static_cast<double>(range);
+        }
+        lane.newest = trace.newest;
+    }
 
-            const DisplayUnit unit = output ? displayUnit(AcqUnit::Ampere) : trace.units[r];
-            painter.setPen(output ? QColor(255, 160, 60) : (unit.factor == 1.0 ? QColor(230, 200, 80) : QColor(150, 220, 170)));
-            for (const std::vector<QPointF>& run : runs) {
-                if (run.size() < 2) {
+    /** Whether data of @p sweep at @p phase is on screen: this sweep left of the cursor, the last one right of it. */
+    static bool visible(const Lane& lane, std::uint64_t sweep, std::uint64_t phase)
+    {
+        const std::uint64_t current = lane.newest / lane.window;
+        const std::uint64_t cursor = lane.newest % lane.window;
+        return sweep == current ? phase < cursor : sweep + 1 == current && phase >= cursor;
+    }
+
+    /**
+     * Appends the points of row @p r over columns [x0, x1] to m_points in time order and in raw units, starting
+     * a new polyline wherever the trace is not continuous. @return The largest magnitude among them.
+     */
+    float collect(const Lane& lane, std::size_t r, std::size_t x0, std::size_t x1)
+    {
+        float rangeMax = 0.0F;
+        std::uint64_t previous = kEmpty;
+        auto add = [&](double x, float v, std::uint64_t sweep) {
+            if (sweep != previous) {
+                m_breaks.push_back(m_points.size()); // never join the new sweep to the old one across the cursor
+                previous = sweep;
+            }
+            m_points.emplace_back(x, static_cast<double>(v));
+            rangeMax = std::max(rangeMax, std::abs(v));
+        };
+        if (lane.dense) {
+            const auto width = static_cast<std::size_t>(lane.width);
+            for (std::size_t x = x0; x <= x1; ++x) {
+                const Column& c = lane.columns[r * width + x];
+                if (c.sweep == kEmpty || !visible(lane, c.sweep, c.lowPhase)) {
+                    previous = kEmpty;
                     continue;
                 }
-                points.clear();
-                for (const QPointF& p : run) {
-                    points.emplace_back(p.x(), centre - gain * p.y());
-                }
-                painter.drawPolyline(points.data(), static_cast<int>(points.size()));
+                // The extremes in time order, so an edge is one stroke instead of a down-up-down zig-zag.
+                const bool lowFirst = c.lowPhase <= c.highPhase;
+                add(kLabelWidth + static_cast<double>(x), lowFirst ? c.low : c.high, c.sweep);
+                add(kLabelWidth + static_cast<double>(x), lowFirst ? c.high : c.low, c.sweep);
             }
-
-            painter.setPen(QColor(170, 170, 180));
-            const QString name = QString::fromStdString(output ? std::string("STIM OUT") : trace.names[r]);
-            const QString scale = unit.label[0] != '\0'
-                ? QString("%1 %2").arg(static_cast<double>(range) * unit.factor, 0, 'g', 3).arg(unit.label)
-                : QString("%1").arg(static_cast<double>(range), 0, 'g', 3);
-            painter.drawText(QRectF(4, centre - rowHeight / 2, kLabelWidth - 8, rowHeight), Qt::AlignVCenter | Qt::AlignLeft,
-                             rowHeight >= 22 ? QString("%1\n+-%2").arg(name, scale) : name);
+        } else {
+            for (std::uint64_t phase = 0; phase < lane.window; ++phase) {
+                if (!visible(lane, lane.sweeps[phase], phase)) {
+                    previous = kEmpty;
+                    continue;
+                }
+                add(kLabelWidth + static_cast<double>(phase) * lane.width / static_cast<double>(lane.window),
+                    lane.samples[r * lane.window + phase], lane.sweeps[phase]);
+            }
         }
-        m_rangeSweeps[t] = sweep;
+        return rangeMax;
+    }
+
+    /** Brings the image of @p lane up to date: whole at a sweep start, otherwise only the new columns. */
+    void render(Lane& lane, bool withOutput, double rowHeight)
+    {
+        const std::uint64_t sweep = lane.newest / lane.window;
+        const qreal dpr = devicePixelRatioF();
+        const QSize size(width(), static_cast<int>(std::ceil(static_cast<double>(lane.rows) * rowHeight)));
+        const QSize pixels(static_cast<int>(std::ceil(size.width() * dpr)), static_cast<int>(std::ceil(size.height() * dpr)));
+        const bool geometry = lane.paintedSweep != sweep || lane.rowHeight != rowHeight || lane.image.size() != pixels;
+        if (!geometry && lane.painted == lane.newest) {
+            return;
+        }
+        const bool full = geometry || !lane.dense;
+        std::size_t x0 = 0;
+        std::size_t x1 = static_cast<std::size_t>(lane.width) - 1;
+        if (full) {
+            if (lane.image.size() != pixels) {
+                lane.image = QImage(pixels, QImage::Format_RGB32); // opaque: the cheapest image to blit
+                lane.image.setDevicePixelRatio(dpr);
+            }
+            lane.image.fill(kBackground);
+            lane.rowHeight = rowHeight;
+        } else {
+            // From the column of the last painted sample (it may have gained samples) to the newest one.
+            x0 = columnOf((lane.painted == 0 ? 0 : lane.painted - 1) % lane.window, lane.window, lane.width);
+            x1 = columnOf((lane.newest - 1) % lane.window, lane.window, lane.width);
+        }
+
+        QPainter painter(&lane.image);
+        painter.setRenderHint(QPainter::Antialiasing, false);
+        if (!full) {
+            painter.fillRect(QRectF(kLabelWidth + static_cast<double>(x0), 0, static_cast<double>(x1 - x0 + 1), size.height()),
+                             kBackground);
+        }
+        for (std::size_t r = 0; r < lane.rows; ++r) {
+            const bool output = withOutput && r + 1 == lane.rows;
+            m_points.clear();
+            m_breaks.clear();
+            // One column of overlap joins the new piece to the trace already in the image.
+            const float rangeMax = collect(lane, r, x0 > 0 ? x0 - 1 : 0, x1);
+            if (full && rangeMax > 0.0F && (lane.paintedSweep != sweep || lane.ranges[r] == 0.0F)) {
+                lane.ranges[r] = niceRange(rangeMax); // sensitivity changes only when a sweep starts
+            }
+            const float range = output ? static_cast<float>(1.2e-3) : (lane.ranges[r] > 0.0F ? lane.ranges[r] : 1.0F);
+            const double centre = (static_cast<double>(r) + 0.5) * rowHeight;
+            const double gain = 0.45 * rowHeight / static_cast<double>(range);
+            for (QPointF& p : m_points) {
+                p.setY(centre - gain * p.y());
+            }
+            const DisplayUnit unit = output ? displayUnit(AcqUnit::Ampere) : lane.units[r];
+            painter.setPen(output ? QColor(255, 160, 60) : (unit.factor == 1.0 ? QColor(230, 200, 80) : QColor(150, 220, 170)));
+            m_breaks.push_back(m_points.size());
+            for (std::size_t b = 0; b + 1 < m_breaks.size(); ++b) {
+                const std::size_t n = m_breaks[b + 1] - m_breaks[b];
+                if (n > 1) {
+                    painter.drawPolyline(m_points.data() + m_breaks[b], static_cast<int>(n));
+                }
+            }
+            if (full) {
+                painter.setPen(QColor(170, 170, 180));
+                const QString name = QString::fromStdString(output ? std::string("STIM OUT") : lane.names[r]);
+                const QString scale = unit.label[0] != '\0'
+                    ? QString("%1 %2").arg(static_cast<double>(range) * unit.factor, 0, 'g', 3).arg(unit.label)
+                    : QString("%1").arg(static_cast<double>(range), 0, 'g', 3);
+                painter.drawText(QRectF(4, centre - rowHeight / 2, kLabelWidth - 8, rowHeight),
+                                 Qt::AlignVCenter | Qt::AlignLeft,
+                                 rowHeight >= 22 ? QString("%1\n+-%2").arg(name, scale) : name);
+            }
+        }
+        if (full) {
+            painter.setPen(QColor(60, 64, 72));
+            painter.drawLine(QPointF(4, 0), QPointF(width() - 4, 0));
+            painter.setPen(QColor(120, 160, 220));
+            painter.drawText(QRectF(kLabelWidth, 0, lane.width, 14), Qt::AlignRight | Qt::AlignTop,
+                             QString::fromStdString(lane.title));
+        }
+        lane.painted = lane.newest;
+        lane.paintedSweep = sweep;
     }
 
     /** Smallest 1-2-5 step at or above @p value. */
@@ -557,8 +671,11 @@ private:
     }
 
     Shared& m_shared;
-    std::vector<std::vector<float>> m_ranges; // per stream and row, held for a sweep
-    std::vector<std::uint64_t> m_rangeSweeps;
+    std::vector<Lane> m_lanes;
+    std::vector<Marker> m_triggers;
+    std::vector<Marker> m_pulses;
+    std::vector<QPointF> m_points;
+    std::vector<std::size_t> m_breaks;
 };
 
 QString statusText(const Shared& s)
