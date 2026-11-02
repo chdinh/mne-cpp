@@ -29,6 +29,7 @@
 
 #include "../acq_reader.h"
 #include "../acq_stream.h"
+#include "acq_ring_memory.h"
 
 #include <array>
 #include <atomic>
@@ -55,13 +56,6 @@ namespace ACQLIB::detail
 {
 
 inline constexpr std::size_t kCacheLine = 64;
-inline constexpr std::size_t kBufferAlignment = 4096;
-
-/** One page of ring memory; arrays of it are allocated with the page alignment. */
-struct alignas(kBufferAlignment) RingPage
-{
-    std::byte bytes[kBufferAlignment];
-};
 inline constexpr std::size_t kMaxInfoVersions = 1024;
 
 //=============================================================================================================
@@ -252,9 +246,8 @@ public:
     std::uint64_t mask = 0;
     std::ptrdiff_t rowStride = 0;
     std::byte* base = nullptr;
-    std::unique_ptr<RingPage[]> ownedPages;
-    bool ownsBuffer = false;
-    bool memoryLocked = false;
+    AcqMemoryLocation memory;
+    RingMemory ownedMemory; // empty for an adopted buffer
     std::size_t bufferBytes = 0;
     std::function<void()> releaseExternal;
 
@@ -266,6 +259,7 @@ public:
     std::uint64_t writePos = 0;     /**< Producer-local next sample index. */
     std::uint64_t pendingFirst = 0; /**< Producer-local start of the reserved view. */
     std::uint64_t pendingCount = 0; /**< Producer-local size of the reserved view. */
+    std::uint64_t grantedEnd = 0;   /**< Producer-local end of the space granted to a DMA engine. */
     std::uint64_t idleSeen = 0;     /**< Producer-local snapshot of idleTotal. */
     std::uint64_t lastEventSample = 0;
     std::uint64_t lastSegmentSample = 0;
@@ -370,6 +364,7 @@ struct ViewAccess
         view.m_rangeMax = version.rangeMax;
         view.m_clock = core.clock.load();
         view.m_timebase = core.timebase.load();
+        view.m_memory = core.memory;
     }
 
     static void setUnderrun(AcqWriteView& view, std::uint64_t underrun) noexcept

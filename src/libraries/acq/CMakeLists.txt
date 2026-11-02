@@ -21,6 +21,7 @@ set(SOURCES
   acq_timebase.cpp
   acq_stream.cpp
   acq_reader.cpp
+  detail/acq_ring_memory.cpp
   acq_uri.cpp
   acq_backend.cpp
   acq_device.cpp
@@ -31,6 +32,7 @@ set(SOURCES
 set(PRIVATE_HEADERS
   detail/acq_diagnostics.h
   detail/acq_stream_core.h
+  detail/acq_ring_memory.h
   detail/acq_backend_impl.h
   detail/acq_uri_params.h
   detail/acq_synthetic_backend.h
@@ -40,6 +42,7 @@ set(HEADERS
   acq.h
   acq_global.h
   acq_error.h
+  acq_memory.h
   acq_sample_format.h
   acq_clock_model.h
   acq_timebase.h

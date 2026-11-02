@@ -53,6 +53,7 @@
 #include "acq_clock_model.h"
 #include "acq_convert.h"
 #include "acq_error.h"
+#include "acq_memory.h"
 #include "acq_reader.h"
 #include "acq_sample_format.h"
 #include "acq_device.h"

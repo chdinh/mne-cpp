@@ -27,10 +27,6 @@
 #if defined(__x86_64__) || defined(_M_X64) || defined(__i386__) || defined(_M_IX86)
 #include <immintrin.h>
 #endif
-#if __has_include(<sys/mman.h>)
-#include <sys/mman.h>
-#define ACQ_HAVE_MLOCK
-#endif
 
 //=============================================================================================================
 // USED NAMESPACES
@@ -136,7 +132,8 @@ AcqExpected<std::shared_ptr<AcqStreamCore>> AcqStreamCore::create(AcqStreamInfo 
         return AcqErrorCode::UnsupportedFormat;
     }
     if (!(info.sfreq >= 0.0) || !std::isfinite(info.sfreq) || options.maxReaders == 0 || options.maxReaders > 4096 ||
-        options.rowAlignment == 0 || !std::has_single_bit(options.rowAlignment)) {
+        options.rowAlignment == 0 || !std::has_single_bit(options.rowAlignment) || options.alignment < 64 ||
+        !std::has_single_bit(options.alignment)) {
         return AcqErrorCode::InvalidParameter;
     }
 
@@ -151,7 +148,8 @@ AcqExpected<std::shared_ptr<AcqStreamCore>> AcqStreamCore::create(AcqStreamInfo 
 
     if (options.external.data != nullptr) {
         const AcqExternalBuffer& ext = options.external;
-        if (reinterpret_cast<std::uintptr_t>(ext.data) % kBufferAlignment != 0 || core->channels == 0) {
+        if (reinterpret_cast<std::uintptr_t>(ext.data) % options.alignment != 0 || core->channels == 0 ||
+            (ext.memory.kind != AcqMemoryKind::Host && ext.memory.device < 0)) {
             return AcqErrorCode::InvalidBuffer;
         }
         std::uint64_t capacity = 0;
@@ -178,6 +176,7 @@ AcqExpected<std::shared_ptr<AcqStreamCore>> AcqStreamCore::create(AcqStreamInfo 
         }
         core->capacity = capacity;
         core->base = ext.data;
+        core->memory = ext.memory;
         core->bufferBytes = ext.bytes;
         core->releaseExternal = ext.release;
     } else {
@@ -200,21 +199,18 @@ AcqExpected<std::shared_ptr<AcqStreamCore>> AcqStreamCore::create(AcqStreamInfo 
             core->bufferBytes = static_cast<std::size_t>(capacity * core->frameBytes);
         }
         if (core->bufferBytes > 0) {
-            const std::size_t pages = (core->bufferBytes + kBufferAlignment - 1) / kBufferAlignment;
-            core->ownedPages = std::unique_ptr<RingPage[]>(new (std::nothrow) RingPage[pages]);
-            if (!core->ownedPages) {
+            core->ownedMemory =
+                allocateRingMemory(core->bufferBytes, options.alignment, options.hugePages, options.numaNode);
+            if (core->ownedMemory.data == nullptr) {
                 return AcqErrorCode::OutOfMemory;
             }
-            core->base = core->ownedPages[0].bytes;
-            core->ownsBuffer = true;
+            core->base = core->ownedMemory.data;
             if (options.prefault) {
-                std::memset(core->base, 0, core->bufferBytes);
+                std::memset(core->base, 0, core->ownedMemory.bytes);
             }
-#if defined(ACQ_HAVE_MLOCK)
             if (options.lockMemory) {
-                core->memoryLocked = ::mlock(core->base, core->bufferBytes) == 0;
+                lockRingMemory(core->ownedMemory);
             }
-#endif
         }
     }
     core->mask = core->capacity - 1;
@@ -249,12 +245,8 @@ AcqExpected<std::shared_ptr<AcqStreamCore>> AcqStreamCore::create(AcqStreamInfo 
 
 AcqStreamCore::~AcqStreamCore()
 {
-    if (ownsBuffer) {
-#if defined(ACQ_HAVE_MLOCK)
-        if (memoryLocked) {
-            ::munlock(base, bufferBytes);
-        }
-#endif
+    if (ownedMemory.data != nullptr) {
+        releaseRingMemory(ownedMemory);
     } else if (releaseExternal) {
         releaseExternal();
     }
@@ -304,6 +296,9 @@ void AcqStreamCore::fillRange(std::uint64_t from, std::uint64_t to) noexcept
         from = to - capacity;
     }
     reserveUpTo(to);
+    if (!memory.hostAccessible()) {
+        return; // the device emits its fill itself
+    }
     std::array<AcqWritePart, 2> parts;
     const std::size_t n = buildParts(from, to - from, parts);
     const bool hold = underrunFill == AcqUnderrunFill::HoldLast && from > 0;
@@ -390,6 +385,13 @@ AcqClockModel AcqStream::clock() const noexcept
     return m_core ? m_core->clock.load() : AcqClockModel();
 }
 
+AcqMemoryLocation AcqStream::memory() const noexcept
+{
+    return m_core ? m_core->memory : AcqMemoryLocation{};
+}
+
+//=============================================================================================================
+
 AcqTimebase AcqStream::timebase() const noexcept
 {
     return m_core ? m_core->timebase.load() : AcqTimebase();
@@ -423,9 +425,11 @@ AcqStreamStats AcqStream::stats() const noexcept
     for (std::size_t i = 0; i < c.maxReaders; ++i) {
         s.activeReaders += c.slots[i].inUse.load(std::memory_order_acquire) ? 1U : 0U;
     }
-    s.memoryLocked = c.memoryLocked;
+    s.memoryLocked = c.ownedMemory.locked;
     s.mirrored = false;
-    s.adoptedBuffer = !c.ownsBuffer && c.base != nullptr;
+    s.adoptedBuffer = c.ownedMemory.data == nullptr && c.base != nullptr;
+    s.hugePages = c.ownedMemory.hugePages;
+    s.numaNode = c.ownedMemory.numaNode;
     return s;
 }
 
@@ -681,12 +685,34 @@ AcqExpected<AcqWriteView> AcqWriter::beginWriteAt(std::uint64_t firstSample, std
     return makeWriteView(c, firstSample, samples, underrun);
 }
 
+AcqError AcqWriter::grant(std::size_t samples) noexcept
+{
+    if (!m_core) {
+        return AcqErrorCode::InvalidState;
+    }
+    AcqStreamCore& c = *m_core;
+    if (c.direction != AcqDirection::Input) {
+        return AcqErrorCode::WrongDirection;
+    }
+    const std::uint64_t end = std::max(c.grantedEnd, c.writePos) + samples;
+    if (end - c.writePos > c.capacity) {
+        return AcqErrorCode::InvalidParameter;
+    }
+    c.grantedEnd = end;
+    c.reserveUpTo(end);
+    return {};
+}
+
 void AcqWriter::commit(std::size_t samples) noexcept
 {
     if (!m_core) {
         return;
     }
     AcqStreamCore& c = *m_core;
+    if (c.pendingCount == 0 && c.grantedEnd > c.writePos) {
+        c.pendingFirst = c.writePos;
+        c.pendingCount = c.grantedEnd - c.writePos;
+    }
     const std::uint64_t n = std::min<std::uint64_t>(samples, c.pendingCount);
     const std::uint64_t end = c.pendingFirst + n;
     c.pendingCount = 0;

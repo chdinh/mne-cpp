@@ -26,6 +26,7 @@
 
 #include "acq_global.h"
 #include "acq_clock_model.h"
+#include "acq_memory.h"
 #include "acq_sample_format.h"
 #include "acq_timebase.h"
 
@@ -237,6 +238,12 @@ public:
         return m_timebase;
     }
 
+    /** @return Where the samples live; parts of Device memory must not be dereferenced on the CPU. */
+    [[nodiscard]] AcqMemoryLocation memory() const noexcept
+    {
+        return m_memory;
+    }
+
 protected:
     friend struct detail::ViewAccess;
 
@@ -253,6 +260,7 @@ protected:
     std::span<const double> m_rangeMax;
     AcqClockModel m_clock;
     AcqTimebase m_timebase;
+    AcqMemoryLocation m_memory;
     std::uint64_t m_ticket = 0; /**< Owner-private validation token. */
 };
 

@@ -20,8 +20,10 @@
 #include <acq/acq_stream.h>
 #include <acq/detail/acq_diagnostics.h>
 
+#include <array>
 #include <atomic>
 #include <chrono>
+#include <cstdio>
 #include <cstdlib>
 #include <cstring>
 #include <new>
@@ -31,7 +33,15 @@
 #include <vector>
 
 #if defined(_WIN32)
+#define NOMINMAX
 #include <malloc.h>
+#include <windows.h>
+#else
+#include <sys/mman.h>
+#if defined(__linux__)
+#include <sys/syscall.h>
+#include <unistd.h>
+#endif
 #endif
 
 //=============================================================================================================
@@ -246,6 +256,124 @@ bool matches(const AcqBlockView& view)
     return true;
 }
 
+/** An address range any CPU access to faults, standing in for GPU memory the library must never touch. */
+class NoAccessRegion
+{
+public:
+    explicit NoAccessRegion(std::size_t bytes)
+    : m_bytes(bytes)
+    {
+#if defined(_WIN32)
+        m_data = static_cast<std::byte*>(VirtualAlloc(nullptr, bytes, MEM_RESERVE | MEM_COMMIT, PAGE_NOACCESS));
+#else
+        void* p = mmap(nullptr, bytes, PROT_NONE, MAP_PRIVATE | MAP_ANONYMOUS, -1, 0);
+        m_data = p == MAP_FAILED ? nullptr : static_cast<std::byte*>(p);
+#endif
+    }
+
+    ~NoAccessRegion()
+    {
+#if defined(_WIN32)
+        VirtualFree(m_data, 0, MEM_RELEASE);
+#else
+        munmap(m_data, m_bytes);
+#endif
+    }
+
+    NoAccessRegion(const NoAccessRegion&) = delete;
+    NoAccessRegion& operator=(const NoAccessRegion&) = delete;
+
+    [[nodiscard]] std::byte* data() const noexcept
+    {
+        return m_data;
+    }
+
+private:
+    std::byte* m_data = nullptr;
+    std::size_t m_bytes = 0;
+};
+
+/** Page-aligned host memory for adopted buffers, released by the ring. */
+AcqExternalBuffer hostBuffer(std::size_t bytes, std::size_t alignment = 4096)
+{
+    AcqExternalBuffer buffer;
+    buffer.data = static_cast<std::byte*>(::operator new(bytes, std::align_val_t(alignment)));
+    buffer.bytes = bytes;
+    buffer.release = [data = buffer.data, alignment] {
+        ::operator delete(data, std::align_val_t(alignment));
+    };
+    return buffer;
+}
+
+/**
+ * A PCIe card's DMA engine: writes every granted sample into the adopted ring on its own thread and reports
+ * its progress, like a card's "bytes available" register. The host never touches the samples.
+ */
+class DmaEngineSimulator
+{
+public:
+    DmaEngineSimulator(std::byte* ring, std::size_t capacity, std::size_t channels, std::size_t block)
+    : m_ring(ring)
+    , m_capacity(capacity)
+    , m_channels(channels)
+    , m_block(block)
+    {
+        m_thread = std::thread([this] { run(); });
+    }
+
+    ~DmaEngineSimulator()
+    {
+        m_stop.store(true, std::memory_order_release);
+        m_thread.join();
+    }
+
+    DmaEngineSimulator(const DmaEngineSimulator&) = delete;
+    DmaEngineSimulator& operator=(const DmaEngineSimulator&) = delete;
+
+    /** Host side: the card may write up to @p end. */
+    void setGrantedEnd(std::uint64_t end) noexcept
+    {
+        m_granted.store(end, std::memory_order_release);
+    }
+
+    /** @return Samples the card has written so far. */
+    [[nodiscard]] std::uint64_t written() const noexcept
+    {
+        return m_written.load(std::memory_order_acquire);
+    }
+
+private:
+    void run()
+    {
+        std::uint64_t s = 0;
+        while (!m_stop.load(std::memory_order_acquire)) {
+            const std::uint64_t granted = m_granted.load(std::memory_order_acquire);
+            if (s == granted) {
+                std::this_thread::yield();
+                continue;
+            }
+            const std::uint64_t end = std::min<std::uint64_t>(granted, s + m_block);
+            for (; s < end; ++s) {
+                std::byte* frame = m_ring + (s % m_capacity) * m_channels * sizeof(std::int32_t);
+                for (std::size_t c = 0; c < m_channels; ++c) {
+                    const std::int32_t v = value(s, c);
+                    std::memcpy(frame + c * sizeof(v), &v, sizeof(v));
+                }
+            }
+            m_written.store(s, std::memory_order_release);
+        }
+    }
+
+    std::byte* m_ring;
+    std::size_t m_capacity;
+    std::size_t m_channels;
+    std::size_t m_block;
+    std::atomic<std::uint64_t> m_granted{0};
+    std::atomic<std::uint64_t> m_written{0};
+    std::atomic<bool> m_stop{false};
+    std::thread m_thread;
+};
+
 bool produce(AcqWriter& writer, std::size_t samples)
 {
     auto view = writer.beginWrite(samples);
@@ -301,6 +429,10 @@ private slots:
     void testRecordOrdering();
     void testInfoVersionLimit();
     void testViewHelpers();
+    void testDeviceMemoryNeverTouched();
+    void testGrantDeviceOwnedWrites();
+    void testDmaEngineSimulation();
+    void testRingPlacement();
 };
 
 //=============================================================================================================
@@ -1437,6 +1569,295 @@ void TestAcqStream::testViewHelpers()
         QCOMPARE(r->format(), f);
         QVERIFY(reader->release(*r).ok());
     }
+}
+
+//=============================================================================================================
+
+void TestAcqStream::testDeviceMemoryNeverTouched()
+{
+    // GPU memory written by GPUDirect RDMA: every CPU access to this region faults.
+    constexpr std::size_t kCapacity = 1024;
+    NoAccessRegion gpuIn(kCapacity * 4 * sizeof(std::int32_t));
+    QVERIFY(gpuIn.data() != nullptr);
+    AcqStreamOptions o = options(0);
+    o.lockMemory = true;
+    o.external.data = gpuIn.data();
+    o.external.bytes = kCapacity * 4 * sizeof(std::int32_t);
+    o.external.memory = {AcqMemoryKind::Device, 0};
+    auto in = AcqWriter::create(makeInfo(4), o);
+    QVERIFY(in);
+    QCOMPARE(in->stream().memory(), (AcqMemoryLocation{AcqMemoryKind::Device, 0}));
+    QVERIFY(!in->stream().memory().hostAccessible());
+    auto reader = in->stream().reader(AcqReader::ReadMode::Lossless);
+    auto display = in->stream().reader(AcqReader::ReadMode::Latest);
+    QVERIFY(in->grant(512).ok());
+    QVERIFY(in->pushEvent({100, 0, 7}).ok());
+    in->commit(300);
+    auto block = reader->acquire(300, 0ns);
+    QVERIFY(block);
+    QCOMPARE(block->memory().kind, AcqMemoryKind::Device);
+    QCOMPARE(block->part(0).data, static_cast<const std::byte*>(gpuIn.data()));
+    QCOMPARE(block->events().size(), std::size_t(1));
+    QVERIFY(reader->release(*block).ok());
+    auto latest = display->acquire(10, 0ns, 10);
+    QVERIFY(latest);
+    QCOMPARE(latest->firstSample(), std::uint64_t(290));
+    QVERIFY(display->release(*latest).ok());
+
+    // Output to the GPU: scheduled gaps, underrun catch-up and hold-last fill are the device's job.
+    AcqStreamInfo outInfo = makeInfo(2, AcqLayout::Interleaved, AcqDirection::Output);
+    outInfo.underrunFill = AcqUnderrunFill::HoldLast;
+    NoAccessRegion gpuOut(kCapacity * 2 * sizeof(std::int32_t));
+    QVERIFY(gpuOut.data() != nullptr);
+    AcqStreamOptions oo = options(0);
+    oo.external.data = gpuOut.data();
+    oo.external.bytes = kCapacity * 2 * sizeof(std::int32_t);
+    oo.external.memory = {AcqMemoryKind::Device, 1};
+    auto out = AcqWriter::create(outInfo, oo);
+    QVERIFY(out);
+    AcqReaderOptions gating;
+    gating.gating = true;
+    auto device = out->stream().reader(AcqReader::ReadMode::Lossless, gating);
+    auto pulse = out->beginWriteAt(40, 8, 0ns);
+    QVERIFY(pulse);
+    QCOMPARE(pulse->memory(), (AcqMemoryLocation{AcqMemoryKind::Device, 1}));
+    out->commit(8);
+    auto played = device->acquire(48, 0ns);
+    QVERIFY(played);
+    QVERIFY(device->release(*played).ok());
+    QVERIFY(device->consumeIdle(52).ok());
+    auto later = out->beginWrite(16, 0ns);
+    QVERIFY(later);
+    QCOMPARE(later->firstSample(), std::uint64_t(100));
+    QCOMPARE(later->underrun(), std::uint64_t(52));
+    out->commit(16);
+    auto tail = device->acquire(16, 0ns);
+    QVERIFY(tail);
+    QCOMPARE(tail->firstSample(), std::uint64_t(100));
+    QVERIFY(device->release(*tail).ok());
+
+    AcqStreamOptions noOrdinal = o;
+    noOrdinal.external.release = {};
+    noOrdinal.external.memory = {AcqMemoryKind::Device, -1};
+    QVERIFY(AcqWriter::create(makeInfo(4), noOrdinal).error() == AcqErrorCode::InvalidBuffer);
+
+    AcqStreamOptions pinned = options(0);
+    pinned.external = hostBuffer(kCapacity * 4 * sizeof(std::int32_t));
+    pinned.external.memory = {AcqMemoryKind::HostPinned, 0};
+    auto host = AcqWriter::create(makeInfo(4), pinned);
+    QVERIFY(host);
+    QVERIFY(host->stream().memory().hostAccessible());
+    QCOMPARE(AcqWriter::create(makeInfo(4), options(64))->stream().memory(), AcqMemoryLocation{});
+}
+
+//=============================================================================================================
+
+void TestAcqStream::testGrantDeviceOwnedWrites()
+{
+    // The card writes granted samples straight into the ring; the host only grants and commits.
+    constexpr std::size_t kCapacity = 64;
+    AcqStreamOptions o = options(0);
+    o.external = hostBuffer(kCapacity * sizeof(std::int32_t));
+    std::byte* ring = o.external.data;
+    auto writer = AcqWriter::create(makeInfo(1), o);
+    QVERIFY(writer);
+    auto reader = writer->stream().reader(AcqReader::ReadMode::Lossless);
+    auto lagging = writer->stream().reader(AcqReader::ReadMode::Lossless);
+    auto card = [ring](std::uint64_t from, std::uint64_t to) {
+        for (std::uint64_t s = from; s < to; ++s) {
+            const std::int32_t v = value(s, 0);
+            std::memcpy(ring + (s % kCapacity) * sizeof(v), &v, sizeof(v));
+        }
+    };
+
+    QCOMPARE(writer->grant(kCapacity + 1).code(), AcqErrorCode::InvalidParameter);
+    QVERIFY(writer->grant(40).ok());
+    QVERIFY(writer->grant(24).ok());
+    QCOMPARE(writer->grant(1).code(), AcqErrorCode::InvalidParameter);
+    QVERIFY(writer->grant(0).ok());
+    QCOMPARE(writer->writePosition(), std::uint64_t(0));
+
+    card(0, 40);
+    writer->commit(40);
+    QCOMPARE(writer->writePosition(), std::uint64_t(40));
+    auto first = reader->acquire(40, 0ns);
+    QVERIFY(first);
+    QVERIFY(matches(*first));
+    QVERIFY(reader->release(*first).ok());
+
+    // A commit never passes the granted end.
+    card(40, 64);
+    writer->commit(100);
+    QCOMPARE(writer->writePosition(), std::uint64_t(64));
+    auto second = reader->acquire(24, 0ns);
+    QVERIFY(second);
+    QVERIFY(matches(*second));
+
+    // Granting more lets the card overwrite the oldest samples at once: a reader still holding them gets
+    // Overrun, and a lagging reader's loss is exact before any new sample is committed.
+    QVERIFY(writer->grant(48).ok());
+    QCOMPARE(reader->release(*second).code(), AcqErrorCode::Overrun);
+    auto lag = lagging->acquire(1, 0ns);
+    QVERIFY(lag);
+    QCOMPARE(lag->firstSample(), std::uint64_t(48));
+    QCOMPARE(lagging->stats().lost, std::uint64_t(48));
+    QVERIFY(lagging->release(*lag).ok());
+
+    auto output = AcqWriter::create(makeInfo(1, AcqLayout::Interleaved, AcqDirection::Output), options(64));
+    QCOMPARE(output->grant(8).code(), AcqErrorCode::WrongDirection);
+    QCOMPARE(AcqWriter().grant(8).code(), AcqErrorCode::InvalidState);
+}
+
+//=============================================================================================================
+
+void TestAcqStream::testDmaEngineSimulation()
+{
+    // Eight blocks in flight, like a card's notify size. As on a Spectrum card, the driver grants only space the
+    // recorder has freed, so the card stalls rather than overwrites; every sample is checked.
+    constexpr std::size_t kChannels = 8;
+    constexpr std::size_t kCapacity = 8192;
+    constexpr std::size_t kBlock = 256;
+    constexpr std::size_t kInFlight = 8;
+    constexpr std::uint64_t kTotal = 1U << 20;
+    AcqStreamOptions o = options(0);
+    o.external = hostBuffer(kCapacity * kChannels * sizeof(std::int32_t));
+    auto writer = AcqWriter::create(makeInfo(kChannels), o);
+    QVERIFY(writer);
+    auto reader = writer->stream().reader(AcqReader::ReadMode::Lossless);
+    std::atomic<std::uint64_t> wrong{0};
+    std::thread recorder([&] {
+        while (true) {
+            auto view = reader->acquire(kBlock, 1s);
+            if (!view) {
+                if (view.error() == AcqErrorCode::EndOfStream) {
+                    return;
+                }
+                continue;
+            }
+            const bool ok = matches(*view);
+            if (reader->release(*view).ok() && !ok) {
+                wrong.fetch_add(1, std::memory_order_relaxed);
+            }
+        }
+    });
+
+    DmaEngineSimulator card(o.external.data, kCapacity, kChannels, kBlock);
+    g_allocations = 0;
+    g_countAllocations = true;
+    std::uint64_t granted = 0;
+    std::uint64_t committed = 0;
+    while (committed < kTotal) {
+        const std::uint64_t freed = reader->stats().position + kCapacity;
+        while (granted < kTotal && granted - committed < kInFlight * kBlock && granted + kBlock <= freed) {
+            if (!writer->grant(kBlock).ok()) {
+                break;
+            }
+            granted += kBlock;
+            card.setGrantedEnd(granted);
+        }
+        const std::uint64_t done = card.written();
+        if (done > committed) {
+            writer->commit(static_cast<std::size_t>(done - committed));
+            committed = done;
+        } else {
+            std::this_thread::yield();
+        }
+    }
+    g_countAllocations = false;
+    writer->finish();
+    recorder.join();
+
+    QCOMPARE(writer->writePosition(), kTotal);
+    QCOMPARE(g_allocations.load(), std::size_t(0));
+    QCOMPARE(wrong.load(), std::uint64_t(0));
+    const AcqReaderStats stats = reader->stats();
+    QCOMPARE(stats.lost, std::uint64_t(0));
+    QCOMPARE(stats.delivered, kTotal);
+}
+
+//=============================================================================================================
+
+void TestAcqStream::testRingPlacement()
+{
+    auto addressOf = [](AcqWriter& writer) {
+        auto view = writer.beginWrite(1);
+        return view ? reinterpret_cast<std::uintptr_t>(view->part(0).data) : std::uintptr_t(1);
+    };
+
+    AcqStreamOptions gpuPages = options(1024);
+    gpuPages.alignment = 65536;
+    auto aligned = AcqWriter::create(makeInfo(4), gpuPages);
+    QVERIFY(aligned);
+    QCOMPARE(addressOf(*aligned) % 65536, std::uintptr_t(0));
+    for (const std::size_t bad : {std::size_t(0), std::size_t(3), std::size_t(32)}) {
+        AcqStreamOptions invalid = options(64);
+        invalid.alignment = bad;
+        QVERIFY(AcqWriter::create(makeInfo(4), invalid).error() == AcqErrorCode::InvalidParameter);
+    }
+    AcqStreamOptions misaligned = options(0);
+    misaligned.alignment = 65536;
+    AcqExternalBuffer buffer = hostBuffer(65536 * 2, 65536);
+    misaligned.external.data = buffer.data + 4096;
+    misaligned.external.bytes = 4096;
+    QVERIFY(AcqWriter::create(makeInfo(4), misaligned).error() == AcqErrorCode::InvalidBuffer);
+    buffer.release();
+
+    AcqStreamOptions huge = options(1U << 18);
+    huge.hugePages = true;
+    auto large = AcqWriter::create(makeInfo(4), huge);
+    QVERIFY(large);
+    QCOMPARE(addressOf(*large) % (std::uintptr_t(2) << 20), std::uintptr_t(0));
+#if defined(__linux__)
+    // Transparent huge pages can be disabled ("never"); then madvise fails and the ring says so.
+    std::FILE* thp = std::fopen("/sys/kernel/mm/transparent_hugepage/enabled", "r");
+    std::array<char, 128> mode{};
+    const bool thpOff = thp != nullptr && std::fgets(mode.data(), mode.size(), thp) != nullptr &&
+        std::strstr(mode.data(), "[never]") != nullptr;
+    if (thp != nullptr) {
+        std::fclose(thp);
+    }
+    QCOMPARE(large->stream().stats().hugePages, !thpOff);
+#else
+    QVERIFY(!large->stream().stats().hugePages);
+#endif
+
+    AcqStreamOptions local = options(1024);
+    local.numaNode = 0;
+    auto bound = AcqWriter::create(makeInfo(4), local);
+    QVERIFY(bound);
+#if defined(__linux__) || defined(_WIN32)
+    QCOMPARE(bound->stream().stats().numaNode, 0);
+#else
+    QCOMPARE(bound->stream().stats().numaNode, -1);
+#endif
+#if defined(__linux__)
+    int node = -1;
+    const auto address = reinterpret_cast<void*>(addressOf(*bound));
+    QCOMPARE(syscall(SYS_get_mempolicy, &node, nullptr, 0UL, address, 3UL), 0L); // MPOL_F_NODE | MPOL_F_ADDR
+    QCOMPARE(node, 0);
+#endif
+    AcqStreamOptions missing = options(1024);
+    missing.numaNode = 4000;
+    auto unbound = AcqWriter::create(makeInfo(4), missing);
+    QVERIFY(unbound);
+    QCOMPARE(unbound->stream().stats().numaNode, -1);
+    QVERIFY(produce(*unbound, 8));
+
+    AcqStreamOptions locked = options(64);
+    locked.lockMemory = true;
+    auto pinned = AcqWriter::create(makeInfo(2), locked);
+    QVERIFY(pinned);
+#if !defined(_WIN32)
+    // One page fits every default RLIMIT_MEMLOCK; the ring reports what the kernel granted.
+    void* probe = mmap(nullptr, 4096, PROT_READ | PROT_WRITE, MAP_PRIVATE | MAP_ANONYMOUS, -1, 0);
+    const bool lockable = probe != MAP_FAILED && mlock(probe, 4096) == 0;
+    if (probe != MAP_FAILED) {
+        munmap(probe, 4096);
+    }
+    QCOMPARE(pinned->stream().stats().memoryLocked, lockable);
+#else
+    QVERIFY(pinned->stream().stats().memoryLocked);
+#endif
 }
 
 //=============================================================================================================

@@ -44,6 +44,7 @@
 #include "acq_block_view.h"
 #include "acq_clock_model.h"
 #include "acq_error.h"
+#include "acq_memory.h"
 #include "acq_reader.h"
 #include "acq_stream_info.h"
 #include "acq_timebase.h"
@@ -71,14 +72,16 @@ class AcqWriter;
 
 //=============================================================================================================
 /**
- * An externally owned buffer adopted as the ring (zero-copy DMA). Its capacity in samples must be a
- * power of two and its start aligned to 4096 bytes; @c release is called once the ring no longer uses it.
+ * An externally owned buffer adopted as the ring (zero-copy DMA), e.g. a card's DMA buffer or GPU memory
+ * written by GPUDirect RDMA. Its capacity in samples must be a power of two and its start aligned to
+ * AcqStreamOptions::alignment; @c release is called once the ring no longer uses it.
  */
 struct AcqExternalBuffer
 {
     std::byte* data = nullptr;        /**< Start of the buffer. */
     std::size_t bytes = 0;            /**< Size in bytes. */
     std::ptrdiff_t channelStride = 0; /**< Planar buffers: bytes between channel rows; 0 = capacity * bytesPerSample. */
+    AcqMemoryLocation memory;         /**< Where the buffer lives; Device memory is never dereferenced by the library. */
     std::function<void()> release;    /**< Called once after the ring no longer uses the buffer; may be empty. */
 };
 
@@ -93,11 +96,12 @@ struct AcqStreamOptions
     std::size_t eventCapacity = 4096; /**< Event ring entries (power of two). */
     std::size_t segmentCapacity = 0;  /**< Segment header entries; 0 = derived from capacity for segmented streams. */
     std::size_t rowAlignment = 64;    /**< Planar rings: byte alignment of every channel row (SIMD). */
+    std::size_t alignment = 4096;     /**< Ring start alignment, power of two >= 64 (e.g. 65536 for GPU pages). */
     bool mirror = true;               /**< Mirror-map the ring where the OS allows it; views are then always one part. */
     bool lockMemory = true;           /**< mlock / VirtualLock; best effort, reported in stats. */
     bool prefault = true;             /**< Touch every page at creation, so start() never page-faults. */
-    bool hugePages = false;           /**< Back the ring with huge pages where available. */
-    int numaNode = -1;                /**< Allocate on this NUMA node, -1 = local to the creating thread. */
+    bool hugePages = false;           /**< 2 MiB pages (Linux transparent huge pages); best effort, reported in stats. */
+    int numaNode = -1;                /**< NUMA node of the ring, e.g. the card's; -1 = local; best effort, in stats. */
     AcqExternalBuffer external;       /**< Adopt this buffer instead of allocating one. */
 };
 
@@ -123,6 +127,8 @@ struct AcqStreamStats
     bool memoryLocked = false;       /**< Whether lockMemory succeeded. */
     bool mirrored = false;           /**< Whether the ring is mirror-mapped. */
     bool adoptedBuffer = false;      /**< Whether the ring is an adopted external buffer. */
+    bool hugePages = false;          /**< Whether the ring is backed by huge pages. */
+    int numaNode = -1;               /**< NUMA node the ring is bound to, -1 if not bound. */
 };
 
 ACQ_STD_MEMBERS_BEGIN
@@ -156,6 +162,9 @@ public:
 
     /** @return The current clock model. */
     [[nodiscard]] AcqClockModel clock() const noexcept;
+
+    /** @return Where the samples live; views of Device memory must not be dereferenced on the CPU. */
+    [[nodiscard]] AcqMemoryLocation memory() const noexcept;
 
     /** @return The current hardware timebase (domain, ticks per sample, origin, lock state). */
     [[nodiscard]] AcqTimebase timebase() const noexcept;
@@ -210,9 +219,11 @@ ACQ_STD_MEMBERS_BEGIN
  * stream. Move-only. All members except create() and updateInfo() are allocation-free and lock-free;
  * on input streams they are also wait-free.
  *
- * Producing an input block, and scheduling an output pulse at an exact sample:
+ * Producing an input block, scheduling an output pulse at an exact sample, and driving a card that writes
+ * into the ring by DMA:
  * @snippet ex_acq_performance/main.cpp acq_writer_commit
  * @snippet ex_acq_performance/main.cpp acq_writer_schedule
+ * @snippet ex_acq_performance/main.cpp acq_dma_grant
  */
 class ACQSHARED_EXPORT AcqWriter
 {
@@ -288,9 +299,24 @@ public:
                                                          std::chrono::nanoseconds timeout = {}) noexcept;
 
     /**
-     * Publishes the first samples of the last view (one release store).
+     * Input streams written by a device (DMA): allows the device to write the next @p samples samples
+     * after those already granted, directly into the ring. From now on the device may overwrite
+     * anything older than the granted end minus the capacity, so readers count those samples as lost;
+     * commit() publishes granted samples as the device reports them written. Keep several blocks granted
+     * so the device never stalls; do not also beginWrite() the granted samples.
      *
-     * @param[in] samples   Samples per channel. @pre samples <= reserved
+     * @param[in] samples   Samples per channel.
+     *
+     * @return InvalidParameter if more than the capacity would be granted beyond writePosition(),
+     *         WrongDirection for output streams (there the device is the gating reader).
+     */
+    AcqError grant(std::size_t samples) noexcept;
+
+    /**
+     * Publishes the first samples of the last view (one release store); without a view, the next granted
+     * samples.
+     *
+     * @param[in] samples   Samples per channel. @pre samples <= reserved or granted
      */
     void commit(std::size_t samples) noexcept;
 
