@@ -3,10 +3,12 @@
 #   Christoph Dinh <christoph.dinh@mne-cpp.org>
 """Windows-only failure modes of mne_acq, checked statically.
 
-Only the macOS and Linux builds run locally, so two MSVC failures are caught here:
-exported classes outside ACQ_STD_MEMBERS_BEGIN/END (C4251 under /WX), and
-identifiers that <windows.h> defines as macros (small, far, near, ...) in acq
-sources and tests that include it.
+Only the macOS and Linux builds run locally, so three MSVC failures are caught here:
+exported classes outside ACQ_STD_MEMBERS_BEGIN/END (C4251 under /WX), identifiers
+that <windows.h> defines as macros (small, far, near, ...) in acq sources and
+tests that include it, and replaced global allocators whose plain operator delete
+calls _aligned_free (a replacement only applies to the executable, so blocks the
+DLLs allocated with malloc reach it: heap corruption 0xc0000374).
 """
 
 import re
@@ -31,6 +33,20 @@ def unbracketed(text: str) -> list[str]:
         elif depth != 1:
             missing.append(match.group(2))
     return missing + (["<unbalanced>"] if depth else [])
+
+
+PLAIN_DELETE = re.compile(r"void operator delete(?:\[\])?\(void\* p(?:, std::size_t)?(?:, const std::nothrow_t&)?\) noexcept")
+
+
+def aligned_free_in_plain_delete(text: str) -> bool:
+    """Whether a plain (not align_val_t) operator delete of *text* can reach _aligned_free."""
+    functions = {m.group(1): m.group(2) for m in re.finditer(r"\b(\w+)\(void\* p\) noexcept\n\{(.*?)\n\}", text, re.DOTALL)}
+    for match in PLAIN_DELETE.finditer(text):
+        body = text[match.end() : text.index("}", match.end())]
+        callee = re.search(r"(\w+)\(p\)", body)
+        if "_aligned_free" in body or (callee and "_aligned_free" in functions.get(callee.group(1), "")):
+            return True
+    return False
 
 
 def windows_macro_names(text: str) -> list[str]:
@@ -65,6 +81,19 @@ class TestAcqExportContract(unittest.TestCase):
         for path in files:
             with self.subTest(file=path.name):
                 self.assertEqual(windows_macro_names(path.read_text(encoding="utf-8")), [])
+
+    def test_detects_aligned_free_in_plain_delete(self):
+        bad = "void release(void* p) noexcept\n{\n    _aligned_free(p);\n}\nvoid operator delete(void* p) noexcept\n{\n    release(p);\n}\n"
+        good = bad.replace("operator delete(void* p)", "operator delete(void* p, std::align_val_t)")
+        self.assertTrue(aligned_free_in_plain_delete(bad))
+        self.assertFalse(aligned_free_in_plain_delete(good))
+
+    def test_replaced_allocators_free_plain_blocks_with_free(self):
+        files = sorted((ROOT / "src" / "testframes").glob("test_acq_*/*.cpp"))
+        files += sorted((ROOT / "src" / "examples").glob("ex_acq_*/*.cpp"))
+        for path in files:
+            with self.subTest(file=path.name):
+                self.assertFalse(aligned_free_in_plain_delete(path.read_text(encoding="utf-8")))
 
 
 if __name__ == "__main__":

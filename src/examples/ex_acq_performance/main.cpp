@@ -74,7 +74,8 @@ void* countedAlloc(std::size_t size, std::size_t alignment)
     }
     size = size == 0 ? 1 : size;
 #if defined(_WIN32)
-    void* p = _aligned_malloc(size, alignment);
+    // Default-aligned blocks must come from malloc: the DLLs free what they did not allocate with free().
+    void* p = alignment <= alignof(std::max_align_t) ? std::malloc(size) : _aligned_malloc(size, alignment);
 #else
     void* p = alignment <= alignof(std::max_align_t) ? std::malloc(size)
                                                      : std::aligned_alloc(alignment, (size + alignment - 1) / alignment * alignment);
@@ -92,6 +93,11 @@ void* countedAllocOrThrow(std::size_t size, std::size_t alignment)
 }
 
 void countedFree(void* p) noexcept
+{
+    std::free(p);
+}
+
+void countedAlignedFree(void* p) noexcept
 {
 #if defined(_WIN32)
     _aligned_free(p);
@@ -151,19 +157,19 @@ void operator delete[](void* p, std::size_t) noexcept
 }
 void operator delete(void* p, std::align_val_t) noexcept
 {
-    countedFree(p);
+    countedAlignedFree(p);
 }
 void operator delete[](void* p, std::align_val_t) noexcept
 {
-    countedFree(p);
+    countedAlignedFree(p);
 }
 void operator delete(void* p, std::size_t, std::align_val_t) noexcept
 {
-    countedFree(p);
+    countedAlignedFree(p);
 }
 void operator delete[](void* p, std::size_t, std::align_val_t) noexcept
 {
-    countedFree(p);
+    countedAlignedFree(p);
 }
 void operator delete(void* p, const std::nothrow_t&) noexcept
 {
@@ -175,11 +181,11 @@ void operator delete[](void* p, const std::nothrow_t&) noexcept
 }
 void operator delete(void* p, std::align_val_t, const std::nothrow_t&) noexcept
 {
-    countedFree(p);
+    countedAlignedFree(p);
 }
 void operator delete[](void* p, std::align_val_t, const std::nothrow_t&) noexcept
 {
-    countedFree(p);
+    countedAlignedFree(p);
 }
 
 //=============================================================================================================
