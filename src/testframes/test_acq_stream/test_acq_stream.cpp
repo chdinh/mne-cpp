@@ -434,6 +434,7 @@ private slots:
     void testGrantDeviceOwnedWrites();
     void testDmaEngineSimulation();
     void testRingPlacement();
+    void testMirroredRingSinglePart();
 };
 
 //=============================================================================================================
@@ -1863,6 +1864,61 @@ void TestAcqStream::testRingPlacement()
 #else
     QVERIFY(pinned->stream().stats().memoryLocked);
 #endif
+}
+
+//=============================================================================================================
+
+void TestAcqStream::testMirroredRingSinglePart()
+{
+    // 4096 frames of 16 bytes = 64 KiB, a multiple of every page size and of the Windows mapping granularity.
+    constexpr std::size_t kCapacity = 4096;
+    auto writer = AcqWriter::create(makeInfo(4), options(kCapacity));
+    QVERIFY(writer);
+#if defined(__linux__) || defined(__APPLE__) || defined(_WIN32)
+    QVERIFY(writer->stream().stats().mirrored);
+#endif
+    if (!writer->stream().stats().mirrored) {
+        QSKIP("no mirror mapping on this platform");
+    }
+    auto reader = writer->stream().reader(AcqReader::ReadMode::Lossless);
+    auto start = writer->beginWrite(kCapacity - 100);
+    QVERIFY(start);
+    std::byte* const ringStart = start->part(0).data;
+    fill(*start);
+    writer->commit(kCapacity - 100);
+    auto head = reader->acquire(kCapacity - 100, 0ns);
+    QVERIFY(head);
+    QVERIFY(reader->release(*head).ok());
+
+    // A block across the end of the ring is one contiguous part, written and read through the mirror.
+    auto across = writer->beginWrite(300);
+    QVERIFY(across);
+    QCOMPARE(across->partCount(), std::size_t(1));
+    QCOMPARE(across->part(0).samples, std::size_t(300));
+    fill(*across);
+    writer->commit(300);
+    auto view = reader->acquire(300, 0ns);
+    QVERIFY(view);
+    QCOMPARE(view->partCount(), std::size_t(1));
+    QVERIFY(matches(*view));
+    QVERIFY(reader->release(*view).ok());
+
+    // The mirror is the same memory: sample kCapacity, written past the end, sits at the start of the ring.
+    std::int32_t wrapped = 0;
+    std::memcpy(&wrapped, ringStart + 2 * sizeof(std::int32_t), sizeof(wrapped));
+    QCOMPARE(wrapped, value(kCapacity, 2));
+
+    AcqStreamOptions unmirrored = options(kCapacity);
+    unmirrored.mirror = false;
+    auto plain = AcqWriter::create(makeInfo(4), unmirrored);
+    QVERIFY(!plain->stream().stats().mirrored);
+    AcqStreamOptions planar = options(kCapacity);
+    auto rows = AcqWriter::create(makeInfo(4, AcqLayout::Planar), planar);
+    QVERIFY(!rows->stream().stats().mirrored);
+    AcqStreamOptions huge = options(kCapacity);
+    huge.hugePages = true;
+    QVERIFY(!AcqWriter::create(makeInfo(4), huge)->stream().stats().mirrored);
+    QVERIFY(!AcqWriter::create(makeInfo(4), options(64))->stream().stats().mirrored);
 }
 
 //=============================================================================================================

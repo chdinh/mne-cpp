@@ -97,7 +97,8 @@ struct AcqStreamOptions
     std::size_t segmentCapacity = 0;  /**< Segment header entries; 0 = derived from capacity for segmented streams. */
     std::size_t rowAlignment = 64;    /**< Planar rings: byte alignment of every channel row (SIMD). */
     std::size_t alignment = 4096;     /**< Ring start alignment, power of two >= 64 (e.g. 65536 for GPU pages). */
-    bool mirror = true;               /**< Mirror-map the ring where the OS allows it; views are then always one part. */
+    bool mirror = true;               /**< Map an owned interleaved ring twice back to back so every view is one part;
+                                           needs a size in whole pages (64 KiB on Windows), not with huge pages; in stats. */
     bool lockMemory = true;           /**< mlock / VirtualLock; best effort, reported in stats. */
     bool prefault = true;             /**< Touch every page at creation, so start() never page-faults. */
     bool hugePages = false;           /**< 2 MiB pages (Linux transparent huge pages); best effort, reported in stats. */

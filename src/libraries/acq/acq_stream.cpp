@@ -199,14 +199,17 @@ AcqExpected<std::shared_ptr<AcqStreamCore>> AcqStreamCore::create(AcqStreamInfo 
             core->bufferBytes = static_cast<std::size_t>(capacity * core->frameBytes);
         }
         if (core->bufferBytes > 0) {
-            core->ownedMemory =
-                allocateRingMemory(core->bufferBytes, options.alignment, options.hugePages, options.numaNode);
+            // Only interleaved rings mirror: a planar ring would need every channel row mirrored on its own.
+            core->ownedMemory = allocateRingMemory(core->bufferBytes, options.alignment, options.hugePages,
+                                                   options.numaNode,
+                                                   options.mirror && info.layout == AcqLayout::Interleaved);
             if (core->ownedMemory.data == nullptr) {
                 return AcqErrorCode::OutOfMemory;
             }
             core->base = core->ownedMemory.data;
             if (options.prefault) {
-                std::memset(core->base, 0, core->ownedMemory.bytes);
+                // Touch the mirror too, so its page-table entries exist before start().
+                std::memset(core->base, 0, core->ownedMemory.bytes * (core->ownedMemory.mirrored ? 2 : 1));
             }
             if (options.lockMemory) {
                 lockRingMemory(core->ownedMemory);
@@ -426,7 +429,7 @@ AcqStreamStats AcqStream::stats() const noexcept
         s.activeReaders += c.slots[i].inUse.load(std::memory_order_acquire) ? 1U : 0U;
     }
     s.memoryLocked = c.ownedMemory.locked;
-    s.mirrored = false;
+    s.mirrored = c.ownedMemory.mirrored;
     s.adoptedBuffer = c.ownedMemory.data == nullptr && c.base != nullptr;
     s.hugePages = c.ownedMemory.hugePages;
     s.numaNode = c.ownedMemory.numaNode;

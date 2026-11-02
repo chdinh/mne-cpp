@@ -324,7 +324,7 @@ public:
             return 0;
         }
         const std::uint64_t index = first & mask;
-        const std::uint64_t head = std::min<std::uint64_t>(count, capacity - index);
+        const std::uint64_t head = ownedMemory.mirrored ? count : std::min<std::uint64_t>(count, capacity - index);
         const std::ptrdiff_t sampleStride = layout == AcqLayout::Interleaved
             ? static_cast<std::ptrdiff_t>(frameBytes)
             : static_cast<std::ptrdiff_t>(bytesPerSample);
