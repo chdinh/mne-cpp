@@ -443,9 +443,6 @@ AcqExpected<AcqReader> AcqStream::reader(AcqReader::ReadMode mode, const AcqRead
         return AcqErrorCode::InvalidState;
     }
     AcqStreamCore& c = *m_core;
-    if (options.gating && c.direction != AcqDirection::Output) {
-        return AcqErrorCode::WrongDirection;
-    }
     std::lock_guard<ControlMutex> lock(c.controlMutex);
     if (options.gating && c.gatingSlot.load(std::memory_order_acquire) >= 0) {
         return AcqErrorCode::InvalidState;
@@ -464,7 +461,7 @@ AcqExpected<AcqReader> AcqStream::reader(AcqReader::ReadMode mode, const AcqRead
         slot.timebaseSeq = SeqlockValue<AcqTimebase>::kSeqNone;
         slot.waiting.store(false, std::memory_order_relaxed);
         std::uint64_t start = c.committed.load(std::memory_order_acquire);
-        if (options.gating) {
+        if (options.gating && c.direction == AcqDirection::Output) {
             start = c.gatePosition.load(std::memory_order_acquire);
         } else if (options.startAtOldest) {
             const std::uint64_t r = c.reserved.load(std::memory_order_acquire);
@@ -481,8 +478,9 @@ AcqExpected<AcqReader> AcqStream::reader(AcqReader::ReadMode mode, const AcqRead
             slot.commitCursor = c.outputCommits.published.load(std::memory_order_acquire);
             slot.dropEnd = 0;
             c.commitsValidated.store(slot.commitCursor, std::memory_order_seq_cst);
-            c.gatingSlot.store(static_cast<int>(i), std::memory_order_release);
-            c.deviceGone.store(false, std::memory_order_release);
+            c.gatePosition.store(start, std::memory_order_seq_cst);
+            c.deviceGone.store(false, std::memory_order_seq_cst);
+            c.gatingSlot.store(static_cast<int>(i), std::memory_order_seq_cst);
         }
         slot.inUse.store(true, std::memory_order_release);
         return AcqReader(m_core, static_cast<std::uint32_t>(i));
@@ -567,7 +565,7 @@ std::size_t AcqWriter::space() const noexcept
         return 0;
     }
     const AcqStreamCore& c = *m_core;
-    if (c.direction == AcqDirection::Input) {
+    if (!c.gated()) {
         return static_cast<std::size_t>(c.capacity);
     }
     const std::uint64_t gate = c.gatePosition.load(std::memory_order_acquire);
@@ -605,7 +603,7 @@ std::uint64_t catchUpWithDevice(AcqStreamCore& c) noexcept
     return underrun;
 }
 
-AcqError waitForSpace(AcqStreamCore& c, std::uint64_t end, std::chrono::nanoseconds timeout) noexcept
+AcqError waitForGate(AcqStreamCore& c, std::uint64_t end, std::chrono::nanoseconds timeout) noexcept
 {
     auto fits = [&c, end] {
         const std::uint64_t gate = c.gatePosition.load(std::memory_order_seq_cst);
@@ -629,6 +627,16 @@ AcqError waitForSpace(AcqStreamCore& c, std::uint64_t end, std::chrono::nanoseco
         return AcqErrorCode::Timeout;
     }
     return fits() ? AcqError() : AcqError(AcqErrorCode::EndOfStream);
+}
+
+// Input: waits while a gating reader has not consumed what reserving up to @p end would overwrite.
+AcqError waitForInputSpace(AcqStreamCore& c, std::uint64_t end, std::chrono::nanoseconds timeout) noexcept
+{
+    if (!c.gated()) {
+        return {};
+    }
+    const AcqError e = waitForGate(c, end, timeout);
+    return e.code() == AcqErrorCode::EndOfStream ? AcqError() : e; // the gating reader left: nothing to wait for
 }
 
 AcqWriteView makeWriteView(AcqStreamCore& c, std::uint64_t first, std::uint64_t count, std::uint64_t underrun) noexcept
@@ -655,11 +663,29 @@ AcqExpected<AcqWriteView> AcqWriter::beginWrite(std::size_t samples, std::chrono
     std::uint64_t underrun = 0;
     if (c.direction == AcqDirection::Output) {
         underrun = catchUpWithDevice(c);
-        if (AcqError e = waitForSpace(c, c.writePos + samples, timeout); !e.ok()) {
+        if (AcqError e = waitForGate(c, c.writePos + samples, timeout); !e.ok()) {
             return e;
         }
+    } else if (AcqError e = waitForInputSpace(c, c.writePos + samples, timeout); !e.ok()) {
+        return e;
     }
     return makeWriteView(c, c.writePos, samples, underrun);
+}
+
+AcqError AcqWriter::waitForSpace(std::size_t samples, std::chrono::nanoseconds timeout) noexcept
+{
+    if (!m_core) {
+        return AcqErrorCode::InvalidState;
+    }
+    AcqStreamCore& c = *m_core;
+    if (samples > c.capacity) {
+        return AcqErrorCode::InvalidParameter;
+    }
+    if (c.direction == AcqDirection::Output) {
+        return waitForGate(c, std::max(c.writePos, c.gatePosition.load(std::memory_order_acquire)) + samples,
+                           timeout);
+    }
+    return waitForInputSpace(c, c.writePos + samples, timeout);
 }
 
 AcqExpected<AcqWriteView> AcqWriter::beginWriteAt(std::uint64_t firstSample, std::size_t samples,
@@ -684,7 +710,7 @@ AcqExpected<AcqWriteView> AcqWriter::beginWriteAt(std::uint64_t firstSample, std
     if (firstSample < c.writePos || firstSample + samples - c.writePos > c.capacity) {
         return AcqErrorCode::InvalidParameter;
     }
-    if (AcqError e = waitForSpace(c, firstSample + samples, timeout); !e.ok()) {
+    if (AcqError e = waitForGate(c, firstSample + samples, timeout); !e.ok()) {
         return e;
     }
     c.fillRange(c.writePos, firstSample);
@@ -703,6 +729,9 @@ AcqError AcqWriter::grant(std::size_t samples) noexcept
     const std::uint64_t end = std::max(c.grantedEnd, c.writePos) + samples;
     if (end - c.writePos > c.capacity) {
         return AcqErrorCode::InvalidParameter;
+    }
+    if (AcqError e = waitForInputSpace(c, end, std::chrono::nanoseconds(0)); !e.ok()) {
+        return e;
     }
     c.grantedEnd = end;
     c.reserveUpTo(end);

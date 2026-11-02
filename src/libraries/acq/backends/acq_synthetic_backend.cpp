@@ -816,17 +816,48 @@ private:
         }
     }
 
-    /** Writes the samples of @p stream up to the instant of EEG/MEG sample @p end (exclusive); commit() follows. */
-    bool generate(ModalityStream& stream, std::uint64_t end)
+    /** Sets the samples of @p stream up to the instant of EEG/MEG sample @p end (exclusive) as pending. */
+    static void plan(ModalityStream& stream, std::uint64_t end)
     {
         std::uint64_t until = stream.model.sampleAtOrAfter(end);
         if (stream.total > 0) {
             until = std::min(until, stream.total);
         }
         stream.pending = until > stream.next ? static_cast<std::size_t>(until - stream.next) : 0;
+    }
+
+    /**
+     * Waits until every stream can take its next block, so a gating reader (backpressure) on one stream
+     * never blocks while another stream's block is reserved; returns false on stop() or an error.
+     */
+    bool waitForSpace(std::size_t n)
+    {
+        constexpr std::chrono::milliseconds kPoll(20);
+        while (!m_stop.load(std::memory_order_acquire)) {
+            AcqError e = m_writer->waitForSpace(n, kPoll);
+            for (ModalityStream& stream : m_streams) {
+                if (e.ok()) {
+                    e = stream.writer->waitForSpace(stream.pending, kPoll);
+                }
+            }
+            if (e.ok()) {
+                return true;
+            }
+            if (e.code() != AcqErrorCode::Timeout) {
+                reportError(e);
+                return false;
+            }
+        }
+        return false;
+    }
+
+    /** Writes the pending samples of @p stream; commit() follows. */
+    bool generate(ModalityStream& stream)
+    {
         if (stream.pending == 0) {
             return true;
         }
+        const std::uint64_t until = stream.next + stream.pending;
         auto view = stream.writer->beginWrite(stream.pending);
         if (!view) {
             reportError(view.error());
@@ -887,6 +918,12 @@ private:
                 }
                 n = static_cast<std::size_t>(std::min<std::uint64_t>(n, m_config.totalSamples - m_next));
             }
+            for (ModalityStream& stream : m_streams) {
+                plan(stream, m_next + n);
+            }
+            if (!waitForSpace(n)) {
+                return; // stopped; nothing reserved
+            }
             auto view = m_writer->beginWrite(n);
             if (!view) {
                 reportError(view.error());
@@ -902,7 +939,7 @@ private:
                 }
             }
             for (ModalityStream& stream : m_streams) {
-                if (!generate(stream, m_next + n)) {
+                if (!generate(stream)) {
                     return;
                 }
             }
@@ -967,7 +1004,7 @@ AcqSchemeInfo schemeInfo()
         {"block", "int", "auto", "Samples per block; auto = 10 ms."},
         {"realtime", "bool", "1",
          "Pace blocks by the clock. 0 generates as fast as possible, so readers lose samples once they fall a "
-         "whole ring behind."},
+         "whole ring behind, except a gating reader, which the session waits for (lossless replay)."},
         {"speed", "double", "1", "Pacing factor of realtime, e.g. 100 replays a session 100 times faster."},
         {"duration", "double", "0", "Session length in seconds, then end of stream; 0 runs until stopped."},
         {"seed", "int", "0", "Seed; equal seeds give bit-identical data."},

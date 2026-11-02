@@ -188,8 +188,7 @@ public:
      * @param[in] mode      Consumption mode.
      * @param[in] options   Wake-up strategy, start position, gating.
      *
-     * @return The reader, or TooManyReaders, WrongDirection (gating on an input stream), InvalidState (a
-     *         gating reader already exists).
+     * @return The reader, or TooManyReaders, InvalidState (a gating reader already exists).
      */
     [[nodiscard]] AcqExpected<AcqReader> reader(AcqReader::ReadMode mode, const AcqReaderOptions& options = {}) const;
 
@@ -218,7 +217,7 @@ ACQ_STD_MEMBERS_BEGIN
 /**
  * The single producer of a ring: the backend for an input stream, the application for an output
  * stream. Move-only. All members except create() and updateInfo() are allocation-free and lock-free;
- * on input streams they are also wait-free.
+ * on input streams without a gating reader they are also wait-free.
  *
  * Producing an input block, scheduling an output pulse at an exact sample, and driving a card that writes
  * into the ring by DMA:
@@ -256,7 +255,7 @@ public:
     /** @return Output streams: the sample index the device consumes next; input streams: writePosition(). */
     [[nodiscard]] std::uint64_t devicePosition() const noexcept;
 
-    /** @return Samples that can be reserved without waiting (input streams: the capacity). */
+    /** @return Samples that can be reserved without waiting (input streams without a gating reader: the capacity). */
     [[nodiscard]] std::size_t space() const noexcept;
 
     /**
@@ -268,18 +267,31 @@ public:
 
     //=========================================================================================================
     /**
-     * Reserves the next @p samples samples. Input streams never wait. Output streams wait up to @p timeout
-     * for the gating reader to free space; if the device has already passed writePosition(), the view
-     * starts at the device position and reports the gap in AcqWriteView::underrun().
+     * Reserves the next @p samples samples, waiting up to @p timeout for the gating reader to free space
+     * (input streams without one never wait). Output streams: if the device has already passed
+     * writePosition(), the view starts at the device position and reports the gap in
+     * AcqWriteView::underrun().
      *
      * @param[in] samples   Samples per channel. @pre samples <= capacity
-     * @param[in] timeout   Output streams: maximum wait for space.
+     * @param[in] timeout   Maximum wait for space.
      *
      * @return The writable view, or Timeout, InvalidParameter (more than the capacity), EndOfStream (the
-     *         gating reader was destroyed).
+     *         gating reader of an output stream was destroyed).
      */
     [[nodiscard]] AcqExpected<AcqWriteView> beginWrite(std::size_t samples,
                                                        std::chrono::nanoseconds timeout = {}) noexcept;
+
+    //=========================================================================================================
+    /**
+     * Waits until beginWrite(@p samples) would not wait. A producer of several streams calls this for each
+     * before reserving any, so a gated stream never holds back the others' reservations.
+     *
+     * @param[in] samples   Samples per channel. @pre samples <= capacity
+     * @param[in] timeout   Maximum wait.
+     *
+     * @return Success, Timeout, InvalidParameter, or EndOfStream as beginWrite().
+     */
+    AcqError waitForSpace(std::size_t samples, std::chrono::nanoseconds timeout) noexcept;
 
     //=========================================================================================================
     /**
@@ -308,8 +320,9 @@ public:
      *
      * @param[in] samples   Samples per channel.
      *
-     * @return InvalidParameter if more than the capacity would be granted beyond writePosition(),
-     *         WrongDirection for output streams (there the device is the gating reader).
+     * @return InvalidParameter if more than the capacity would be granted beyond writePosition(), Timeout
+     *         if a gating reader has not yet consumed the space, WrongDirection for output streams (there
+     *         the device is the gating reader).
      */
     AcqError grant(std::size_t samples) noexcept;
 

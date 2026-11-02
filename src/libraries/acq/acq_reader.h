@@ -87,7 +87,7 @@ struct AcqReaderOptions
     AcqWait wait = AcqWait::Block;                                    /**< Ignored for LowLatency, which spins. */
     std::chrono::nanoseconds spinFor = std::chrono::microseconds(50); /**< Spin window of SpinThenBlock. */
     bool startAtOldest = false;                                       /**< Start at the oldest retained sample instead of the newest. */
-    bool gating = false;                                              /**< Output streams only: the writer never overwrites what this reader has not consumed (device side). */
+    bool gating = false;                                              /**< The writer never overwrites what this reader has not consumed: the device side of an output stream, or backpressure on an input stream (replay, conversion; a live device cannot wait). One per stream. */
 };
 
 //=============================================================================================================

@@ -7,7 +7,7 @@ sidebar_position: 5
 
 # Class Members
 
-Index of 6680 public class members (functions, variables, typedefs, enums) across all documented classes.
+Index of 6681 public class members (functions, variables, typedefs, enums) across all documented classes.
 
 **Jump to:** [A](#a) · [B](#b) · [C](#c) · [D](#d) · [E](#e) · [F](#f) · [G](#g) · [H](#h) · [I](#i) · [J](#j) · [K](#k) · [L](#l) · [M](#m) · [N](#n) · [O](#o) · [P](#p) · [Q](#q) · [R](#r) · [S](#s) · [T](#t) · [U](#u) · [V](#v) · [W](#w) · [X](#x) · [Y](#y) · [Z](#z)
 
@@ -323,7 +323,7 @@ Index of 6680 public class members (functions, variables, typedefs, enums) acros
 - **bEegOnly** `[var]` in [LofBadChannelParams](/docs/api/dsp/lof-bad-channel-params) — If true, only check EEG channels.
 - **beginFrame** `[fn]` in [BrainRenderer](/docs/api/disp3-d/brain-renderer) — Begin the first render pass of a frame.
 - **beginPreservingPass** `[fn]` in [BrainRenderer](/docs/api/disp3-d/brain-renderer) — Begin an additional render pass that preserves previous output.
-- **beginWrite** `[fn]` in [AcqWriter](/docs/api/acq/acq-writer) — Reserves the next `samples` samples.
+- **beginWrite** `[fn]` in [AcqWriter](/docs/api/acq/acq-writer) — Reserves the next `samples` samples, waiting up to `timeout` for the gating reader to free space (input streams without one never wait).
 - **beginWriteAt** `[fn]` in [AcqWriter](/docs/api/acq/acq-writer) — Output streams: reserves `samples` samples starting exactly at `firstSample`, for sample-precise playout (an RF pulse at the sample mapped from a receive event).
 - **bem_funcs** `[var]` in [InvDipoleFitData](/docs/api/inv/inv-dipole-fit-data) — These are the BEM forward functions.
 - **bem_method** `[var]` in [FwdBemModel](/docs/api/fwd/fwd-bem-model) — Approximation method (FWD_BEM_CONSTANT_COLL or FWD_BEM_LINEAR_COLL).
@@ -2174,7 +2174,7 @@ Index of 6680 public class members (functions, variables, typedefs, enums) acros
 - **gainVector** `[fn]` in [FineCalibration](/docs/api/dsp/fine-calibration) — Magnetometer calibration factors.
 - **gamma** `[var]` in [FwdBemModel](/docs/api/fwd/fwd-bem-model) — Conductivity-ratio coupling matrix (nsurf x nsurf).
 - **gantry_angle** `[var]` in [FiffInfo](/docs/api/fiff/fiff-info) — Tilt angle of the dewar in degrees.
-- **gating** `[var]` in [AcqReaderOptions](/docs/api/acq/acq-reader-options) — Output streams only: the writer never overwrites what this reader has not consumed (device side).
+- **gating** `[var]` in [AcqReaderOptions](/docs/api/acq/acq-reader-options) — The writer never overwrites what this reader has not consumed: the device side of an output stream, or backpressure on an input stream (replay, conversion; a live device cannot wait).
 - **gaussian** `[fn]` in [Interpolation](/docs/api/disp3-d/interpolation) — gaussian Gaussian interpolation function (sigma=1).
 - **gaussianLogLikelihood** `[fn]` in [StsCovEstimators](/docs/api/sts/sts-cov-estimators) — Gaussian log-likelihood of held-out data given a covariance model.
 - **gcd** `[fn]` in [Numerics](/docs/api/utils/numerics) — Finds the Greatest Common Divisor (GCD) of two integer values.
@@ -6572,6 +6572,7 @@ Index of 6680 public class members (functions, variables, typedefs, enums) acros
 - **wait** `[var]` in [AcqReaderOptions](/docs/api/acq/acq-reader-options) — Ignored for LowLatency, which spins.
 - **wait** `[fn]` in [RtNoise](/docs/api/dsp/rt-noise) — Blocks until the worker thread has finished, or until the timeout (ms) expires.
 - **waitForDataAvailable** `[fn]` in [RtCmdClient](/docs/api/com/rt-cmd-client) — Wait for ready read until data are available.
+- **waitForSpace** `[fn]` in [AcqWriter](/docs/api/acq/acq-writer) — Waits until beginWrite(`samples`) would not wait.
 - **wallTimeMs** `[var]` in [MnaProvenance](/docs/api/mna/mna-provenance) — Wall-clock duration in milliseconds.
 - **warp** `[fn]` in [MNEBem](/docs/api/mne/mne-bem) — Warp the Bem.
 - **WeightedPhaseLagIndex** `[fn]` in [WeightedPhaseLagIndex](/docs/api/connectivity/weighted-phase-lag-index) — Constructs a [`WeightedPhaseLagIndex`](/docs/api/connectivity/weighted-phase-lag-index) object.

@@ -136,13 +136,14 @@ struct Drained
     std::vector<float> samples;
     std::vector<AcqEvent> events;
     std::uint64_t lost = 0;
+    std::uint64_t writerWaits = 0; /**< Times the producer waited for this reader's stream. */
 };
 
-Drained drain(AcqReader& reader)
+Drained drain(AcqReader& reader, std::size_t maxView = 0)
 {
     Drained out;
     while (true) {
-        auto view = reader.acquire(1, 5s);
+        auto view = reader.acquire(1, 5s, maxView);
         if (!view) {
             if (view.error() != AcqErrorCode::EndOfStream) {
                 qWarning("acquire failed: %s", view.error().text().c_str());
@@ -165,11 +166,11 @@ Drained drain(AcqReader& reader)
         static_cast<void>(reader.release(*view));
     }
     out.lost = reader.stats().lost;
+    out.writerWaits = reader.stream().stats().writerWaits;
     return out;
 }
 
-/** Opens uri, runs it to its end with a Lossless reader on stream 0 and returns what was read. */
-/** Records every stream of @p uri until end of stream, one reader thread per stream. */
+/** Records every stream of @p uri until end of stream, one gating reader thread per stream (no loss). */
 std::vector<Drained> recordAll(const std::string& uri)
 {
     auto device = AcqDevice::open(uri);
@@ -177,9 +178,11 @@ std::vector<Drained> recordAll(const std::string& uri)
         qWarning("open(%s): %s", uri.c_str(), device.error().text().c_str());
         return {};
     }
+    AcqReaderOptions gating;
+    gating.gating = true;
     std::vector<AcqReader> readers;
     for (const AcqStream& stream : device->streams()) {
-        auto reader = stream.reader(AcqReader::ReadMode::Lossless);
+        auto reader = stream.reader(AcqReader::ReadMode::Lossless, gating);
         if (!reader) {
             return {};
         }
@@ -189,7 +192,7 @@ std::vector<Drained> recordAll(const std::string& uri)
     std::vector<std::thread> threads;
     threads.reserve(readers.size());
     for (std::size_t i = 0; i < readers.size(); ++i) {
-        threads.emplace_back([&out, &readers, i] { out[i] = drain(readers[i]); });
+        threads.emplace_back([&out, &readers, i] { out[i] = drain(readers[i], 512); });
     }
     if (!device->start().ok()) {
         device->close();
@@ -276,6 +279,7 @@ private slots:
     void testSyntheticMultiRateStreams();
     void testSyntheticMultiRateResponses();
     void testRealtimeRecordingIsComplete();
+    void testBackpressureReplayIsLossless();
 };
 
 //=============================================================================================================
@@ -1110,6 +1114,78 @@ void TestAcqDevice::testSyntheticInvalidParameters()
     QCOMPARE(device.error().code(), AcqErrorCode::InvalidParameter);
     QVERIFY2(device.error().context().find(key.toStdString()) != std::string_view::npos,
              std::string(device.error().context()).c_str());
+}
+
+//=============================================================================================================
+
+
+//=============================================================================================================
+
+void TestAcqDevice::testBackpressureReplayIsLossless()
+{
+    // Generated far faster than the slow readers consume; only the producer waiting keeps every sample.
+    const std::string uri = "synthetic://?eeg=4&fnirs=2&ecog=6&erg=2&realtime=0&duration=150&seed=5&interval=0.5";
+    auto device = AcqDevice::open(uri);
+    QVERIFY(device);
+    auto lossy = device->stream(0).reader(AcqReader::ReadMode::Lossless);
+    QVERIFY(lossy && device->start().ok());
+    QTRY_COMPARE_WITH_TIMEOUT(lossy->stream().stats().committed, std::uint64_t(150000), 30000);
+    const std::uint64_t capacity = lossy->stream().stats().capacitySamples;
+    QCOMPARE(drain(*lossy).lost, std::uint64_t(150000) - capacity);
+    device->close();
+
+    // Readers that start only once the producer is held up by a full ring.
+    auto device2 = AcqDevice::open(uri);
+    QVERIFY(device2);
+    AcqReaderOptions gating;
+    gating.gating = true;
+    std::vector<AcqReader> readers;
+    for (const AcqStream& stream : device2->streams()) {
+        auto reader = stream.reader(AcqReader::ReadMode::Lossless, gating);
+        QVERIFY(reader);
+        readers.push_back(std::move(*reader));
+    }
+    QVERIFY(device2->start().ok());
+    auto waits = [&readers] {
+        std::uint64_t n = 0;
+        for (const AcqReader& r : readers) {
+            n += r.stream().stats().writerWaits;
+        }
+        return n;
+    };
+    QTRY_VERIFY_WITH_TIMEOUT(waits() > 0, 10000);
+    std::vector<Drained> slow(readers.size());
+    std::vector<std::thread> threads;
+    for (std::size_t i = 0; i < readers.size(); ++i) {
+        threads.emplace_back([&slow, &readers, i] { slow[i] = drain(readers[i], 512); });
+    }
+    for (auto& thread : threads) {
+        thread.join();
+    }
+    const std::vector<Drained> fast = recordAll(uri);
+    QCOMPARE(slow.size(), std::size_t(4));
+    QCOMPARE(fast.size(), std::size_t(4));
+    QCOMPARE(slow[0].samples.size(), std::size_t(150000 * 5)); // 4 EEG + STI 014
+    for (std::size_t i = 0; i < slow.size(); ++i) {
+        QCOMPARE(slow[i].lost, std::uint64_t(0));
+        QCOMPARE(fast[i].lost, std::uint64_t(0));
+        QVERIFY(!slow[i].samples.empty() && !slow[i].events.empty());
+        QVERIFY(slow[i].samples == fast[i].samples);
+        QCOMPARE(slow[i].events.size(), fast[i].events.size());
+    }
+
+    // A gating reader that never reads holds the session, and stop() still ends the wait.
+    auto held = AcqDevice::open(uri);
+    QVERIFY(held);
+    auto idle = held->stream(0).reader(AcqReader::ReadMode::Lossless, gating);
+    QVERIFY(idle && held->start().ok());
+    const std::size_t filled = idle->stream().stats().capacitySamples / 10 * 10; // whole 10-sample blocks
+    QTRY_COMPARE_WITH_TIMEOUT(idle->available(), filled, 10000);
+    std::this_thread::sleep_for(50ms);
+    QCOMPARE(idle->available(), filled);
+    QVERIFY(held->stop().ok());
+    QCOMPARE(idle->available(), filled);
+    QCOMPARE(idle->stats().lost, std::uint64_t(0));
 }
 
 //=============================================================================================================

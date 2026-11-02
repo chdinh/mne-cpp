@@ -245,7 +245,7 @@ AcqExpected<AcqBlockView> AcqReader::acquire(std::size_t minSamples, std::chrono
             written = c.committed.load(std::memory_order_acquire);
             available = written > pos ? written - pos : 0;
         }
-        if (slot.gating) {
+        if (slot.gating && c.direction == AcqDirection::Output) {
             validateCommits(c, slot, pos, written);
             if (pos < slot.dropEnd) {
                 // Nothing playable until the device has played fill past the dropped commit.
@@ -432,7 +432,7 @@ AcqError AcqReader::consumeIdle(std::size_t samples) noexcept
     }
     AcqStreamCore& c = *m_core;
     ReaderSlot& slot = c.slots[m_slot];
-    if (!slot.gating) {
+    if (!slot.gating || c.direction != AcqDirection::Output) {
         return AcqErrorCode::WrongDirection;
     }
     if (slot.holding) {

@@ -17,7 +17,7 @@ class ACQLIB::AcqWriter
 
 The single producer of a ring: the backend for an input stream, the application for an output stream.
 
-Move-only. All members except `create()` and `updateInfo()` are allocation-free and lock-free; on input streams they are also wait-free.
+Move-only. All members except `create()` and `updateInfo()` are allocation-free and lock-free; on input streams without a gating reader they are also wait-free.
 
 Producing an input block, scheduling an output pulse at an exact sample, and driving a card that writes into the ring by DMA: 
 ```cpp title="src/examples/ex_acq_performance/main.cpp"
@@ -139,7 +139,7 @@ Equals `finish()`.
 
 **Returns:**
 
-- *std::size_t* — Samples that can be reserved without waiting (input streams: the capacity).
+- *std::size_t* — Samples that can be reserved without waiting (input streams without a gating reader: the capacity).
 
 ---
 
@@ -153,9 +153,9 @@ Equals `finish()`.
 
 ### beginWrite(samples, timeout)
 
-Reserves the next `samples` samples.
+Reserves the next `samples` samples, waiting up to `timeout` for the gating reader to free space (input streams without one never wait).
 
-Input streams never wait. Output streams wait up to `timeout` for the gating reader to free space; if the device has already passed `writePosition()`, the view starts at the device position and reports the gap in `AcqWriteView::underrun()`.
+Output streams: if the device has already passed `writePosition()`, the view starts at the device position and reports the gap in `AcqWriteView::underrun()`.
 
 **Parameters:**
 
@@ -163,11 +163,31 @@ Input streams never wait. Output streams wait up to `timeout` for the gating rea
   Samples per channel.
 
 - **timeout** : *std::chrono::nanoseconds*
-  Output streams: maximum wait for space.
+  Maximum wait for space.
 
 **Returns:**
 
-- *[AcqExpected](/docs/api/acq/acq-expected)&lt; [AcqWriteView](/docs/api/acq/acq-write-view) &gt;* — The writable view, or Timeout, InvalidParameter (more than the capacity), EndOfStream (the gating reader was destroyed).
+- *[AcqExpected](/docs/api/acq/acq-expected)&lt; [AcqWriteView](/docs/api/acq/acq-write-view) &gt;* — The writable view, or Timeout, InvalidParameter (more than the capacity), EndOfStream (the gating reader of an output stream was destroyed).
+
+---
+
+### waitForSpace(samples, timeout)
+
+Waits until beginWrite(`samples`) would not wait.
+
+A producer of several streams calls this for each before reserving any, so a gated stream never holds back the others' reservations.
+
+**Parameters:**
+
+- **samples** : *std::size_t*
+  Samples per channel.
+
+- **timeout** : *std::chrono::nanoseconds*
+  Maximum wait.
+
+**Returns:**
+
+- *[AcqError](/docs/api/acq/acq-error)* — Success, Timeout, InvalidParameter, or EndOfStream as `beginWrite()`.
 
 ---
 
@@ -207,7 +227,7 @@ From now on the device may overwrite anything older than the granted end minus t
 
 **Returns:**
 
-- *[AcqError](/docs/api/acq/acq-error)* — InvalidParameter if more than the capacity would be granted beyond `writePosition()`, WrongDirection for output streams (there the device is the gating reader).
+- *[AcqError](/docs/api/acq/acq-error)* — InvalidParameter if more than the capacity would be granted beyond `writePosition()`, Timeout if a gating reader has not yet consumed the space, WrongDirection for output streams (there the device is the gating reader).
 
 ---
 

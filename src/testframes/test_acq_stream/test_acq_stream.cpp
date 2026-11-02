@@ -459,6 +459,7 @@ private slots:
     void testWrapAroundTwoParts();
     void testExactLossUnderStall();
     void testOverrunWhileHeld();
+    void testInputBackpressure();
     void testLatestSkips();
     void testStartPositions();
     void testTimeoutAndEndOfStream();
@@ -692,6 +693,100 @@ void TestAcqStream::testOverrunWhileHeld()
 
 //=============================================================================================================
 
+void TestAcqStream::testInputBackpressure()
+{
+    auto writer = AcqWriter::create(makeInfo(3), options(64));
+    AcqReaderOptions gating;
+    gating.gating = true;
+    auto gate = writer->stream().reader(AcqReader::ReadMode::Lossless, gating);
+    QVERIFY(gate);
+    QVERIFY(writer->stream().reader(AcqReader::ReadMode::Lossless, gating).error() == AcqErrorCode::InvalidState);
+    QVERIFY(gate->consumeIdle(1).code() == AcqErrorCode::WrongDirection);
+    auto monitor = writer->stream().reader(AcqReader::ReadMode::Lossless);
+
+    // The producer may fill the ring once, then waits for the gating reader instead of overwriting.
+    QVERIFY(produce(*writer, 60));
+    QCOMPARE(writer->space(), std::size_t(4));
+    QVERIFY(writer->beginWrite(5, 0ns).error() == AcqErrorCode::Timeout);
+    QVERIFY(writer->waitForSpace(5, 1ms).code() == AcqErrorCode::Timeout);
+    QVERIFY(writer->grant(5).code() == AcqErrorCode::Timeout);
+    QVERIFY(writer->waitForSpace(4, 0ns).ok());
+    QVERIFY(produce(*writer, 4));
+    auto view = gate->acquire(10, 0ns, 10);
+    QVERIFY(view && view->firstSample() == 0);
+    QVERIFY(writer->beginWrite(1, 0ns).error() == AcqErrorCode::Timeout); // held, not yet consumed
+    QVERIFY(gate->release(*view).ok());
+    QCOMPARE(writer->space(), std::size_t(10));
+    QVERIFY(produce(*writer, 10));
+    QCOMPARE(monitor->available(), std::size_t(64)); // a non-gating reader does not hold the producer back
+
+    // Every sample arrives, in order and intact, however the producer and the consumer block.
+    constexpr std::uint64_t kTotal = 200000;
+    std::thread producer([&writer] {
+        Lcg rng{7};
+        while (writer->writePosition() < kTotal) {
+            const auto n = std::min<std::size_t>(1 + rng.below(40), static_cast<std::size_t>(kTotal - writer->writePosition()));
+            auto block = writer->beginWrite(n, 10s);
+            if (!block) {
+                return;
+            }
+            fill(*block);
+            writer->commit(n);
+        }
+        writer->finish();
+    });
+    std::uint64_t next = 10;
+    std::uint64_t corrupt = 0;
+    Lcg rng{11};
+    while (true) {
+        auto lease = gate->lease(1, 10s, 1 + rng.below(50));
+        if (!lease) {
+            QVERIFY(lease.error() == AcqErrorCode::EndOfStream);
+            break;
+        }
+        corrupt += (*lease)->firstSample() != next || (*lease)->lost() != 0 ? 1U : 0U;
+        corrupt += matches(**lease) ? 0U : 1U;
+        next = (*lease)->firstSample() + (*lease)->sampleCount();
+        QVERIFY(lease->release().ok());
+    }
+    producer.join();
+    QCOMPARE(corrupt, std::uint64_t(0));
+    QCOMPARE(next, kTotal);
+    QCOMPARE(gate->stats().lost, std::uint64_t(0));
+    QCOMPARE(gate->stats().delivered, kTotal);
+    auto late = monitor->acquire(1, 0ns); // the monitor never read, so it lost all but the last ring
+    QVERIFY(late && late->lost() == kTotal - 64);
+    QVERIFY(monitor->release(*late).ok());
+
+    // A DMA grant respects the gating reader as well.
+    auto dma = AcqWriter::create(makeInfo(1), options(64));
+    auto dmaGate = dma->stream().reader(AcqReader::ReadMode::Lossless, gating);
+    QVERIFY(dma->grant(64).ok());
+    dma->commit(64);
+    QVERIFY(dma->grant(1).code() == AcqErrorCode::Timeout);
+    auto first = dmaGate->acquire(1, 0ns, 1);
+    QVERIFY(first && dmaGate->release(*first).ok());
+    QVERIFY(dma->grant(1).ok());
+    QVERIFY(dma->grant(1).code() == AcqErrorCode::Timeout);
+
+    // Without its gating reader the producer no longer waits.
+    auto free = AcqWriter::create(makeInfo(1), options(64));
+    {
+        auto onlyGate = free->stream().reader(AcqReader::ReadMode::Lossless, gating);
+        QVERIFY(produce(*free, 64));
+        std::thread release([&onlyGate] {
+            std::this_thread::sleep_for(20ms);
+            onlyGate = AcqReader();
+        });
+        QVERIFY(free->beginWrite(8, 10s));
+        release.join();
+    }
+    free->commit(8);
+    QVERIFY(produce(*free, 64));
+}
+
+//=============================================================================================================
+
 void TestAcqStream::testLatestSkips()
 {
     auto writer = AcqWriter::create(makeInfo(2), options(64));
@@ -829,9 +924,6 @@ void TestAcqStream::testReaderSlotsAndMisuse()
     QCOMPARE(c->channelCount(), std::size_t(2));
     QVERIFY(c->stream().isValid());
 
-    AcqReaderOptions gating;
-    gating.gating = true;
-    QVERIFY(writer->stream().reader(AcqReader::ReadMode::Lossless, gating).error() == AcqErrorCode::WrongDirection);
     QVERIFY(c->consumeIdle(1).code() == AcqErrorCode::WrongDirection);
 
     QVERIFY(produce(*writer, 4));

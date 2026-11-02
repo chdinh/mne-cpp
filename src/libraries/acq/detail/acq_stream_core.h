@@ -355,6 +355,12 @@ public:
     std::unique_ptr<ReaderSlot[]> slots;
     std::size_t maxReaders = 0;
 
+    /** @return Whether the writer must wait for a gating reader (always on output streams). */
+    [[nodiscard]] bool gated() const noexcept
+    {
+        return direction == AcqDirection::Output || gatingSlot.load(std::memory_order_seq_cst) >= 0;
+    }
+
     /** @return Index of the info version valid at @p sample. */
     [[nodiscard]] std::size_t versionAt(std::uint64_t sample) const noexcept;
 
