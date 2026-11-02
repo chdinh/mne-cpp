@@ -123,6 +123,8 @@ class SeqlockValue
     static constexpr std::size_t kWords = (sizeof(T) + 7) / 8;
 
 public:
+    static constexpr std::uint64_t kSeqNone = ~std::uint64_t{0}; /**< Never reached by the sequence. */
+
     explicit SeqlockValue(const T& value = T()) noexcept
     {
         store(value);
@@ -132,7 +134,7 @@ public:
     {
         std::array<std::uint64_t, kWords> words{};
         std::memcpy(words.data(), &value, sizeof(T));
-        const std::uint32_t seq = m_seq.load(std::memory_order_relaxed);
+        const std::uint64_t seq = m_seq.load(std::memory_order_relaxed);
         m_seq.store(seq + 1, std::memory_order_relaxed);
         std::atomic_thread_fence(std::memory_order_release);
         for (std::size_t i = 0; i < kWords; ++i) {
@@ -143,9 +145,24 @@ public:
 
     [[nodiscard]] T load() const noexcept
     {
+        T value;
+        std::uint64_t seen = kSeqNone;
+        refresh(value, seen);
+        return value;
+    }
+
+    /**
+     * Updates @p cache if the value changed since sequence @p seen (start with kSeqNone).
+     * The 64-bit sequence cannot wrap, so an unchanged sequence proves an unchanged value.
+     */
+    void refresh(T& cache, std::uint64_t& seen) const noexcept
+    {
+        if (m_seq.load(std::memory_order_acquire) == seen) {
+            return;
+        }
         std::array<std::uint64_t, kWords> words{};
-        std::uint32_t before = 0;
-        std::uint32_t after = 0;
+        std::uint64_t before = 0;
+        std::uint64_t after = 0;
         do {
             before = m_seq.load(std::memory_order_acquire);
             for (std::size_t i = 0; i < kWords; ++i) {
@@ -154,13 +171,12 @@ public:
             std::atomic_thread_fence(std::memory_order_acquire);
             after = m_seq.load(std::memory_order_relaxed);
         } while (before != after || (before & 1U) != 0);
-        T value;
-        std::memcpy(static_cast<void*>(&value), words.data(), sizeof(T)); // T is trivially copyable (asserted)
-        return value;
+        std::memcpy(static_cast<void*>(&cache), words.data(), sizeof(T)); // T is trivially copyable (asserted)
+        seen = before;
     }
 
 private:
-    std::atomic<std::uint32_t> m_seq{0};
+    std::atomic<std::uint64_t> m_seq{0};
     std::array<std::atomic<std::uint64_t>, kWords> m_words{};
 };
 
@@ -248,6 +264,10 @@ struct alignas(kCacheLine) ReaderSlot
     std::uint64_t dropEnd = 0;      /**< Gating reader: end of the last commit dropped as late. */
     std::uint64_t segmentFirst = 0;
     std::uint64_t segmentEnd = 0;
+    AcqClockModel clock;  /**< Last clock seen; refreshed when clockSeq changes. */
+    AcqTimebase timebase; /**< Last timebase seen; refreshed when timebaseSeq changes. */
+    std::uint64_t clockSeq = SeqlockValue<AcqClockModel>::kSeqNone;
+    std::uint64_t timebaseSeq = SeqlockValue<AcqTimebase>::kSeqNone;
 
     std::atomic<std::uint64_t> delivered{0};
     std::atomic<std::uint64_t> lost{0};
@@ -388,7 +408,8 @@ struct ViewAccess
 {
     template<typename Byte>
     static void setSamples(AcqViewBase<Byte>& view, const AcqStreamCore& core, std::uint64_t first,
-                           std::uint64_t count, const InfoVersion& version) noexcept
+                           std::uint64_t count, const InfoVersion& version, const AcqClockModel& clock,
+                           const AcqTimebase& timebase) noexcept
     {
         view.m_partCount = core.buildParts(first, count, view.m_parts);
         view.m_firstSample = first;
@@ -401,8 +422,8 @@ struct ViewAccess
         view.m_rangeMin = version.rangeMin;
         view.m_rangeMax = version.rangeMax;
         view.m_digitalBits = version.digitalBits;
-        view.m_clock = core.clock.load();
-        view.m_timebase = core.timebase.load();
+        view.m_clock = clock;
+        view.m_timebase = timebase;
         view.m_memory = core.memory;
     }
 

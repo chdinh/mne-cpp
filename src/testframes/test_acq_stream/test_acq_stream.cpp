@@ -1273,6 +1273,22 @@ void TestAcqStream::testClockAndTimebasePublished()
     QCOMPARE(view->timebase().domain, tb.domain);
     QCOMPARE(view->timebase().lock, AcqLockState::PhaseLocked);
     QVERIFY(reader->release(*view).ok());
+
+    // Every later view carries the values current at its acquire, unchanged or updated.
+    for (std::uint64_t round = 0; round < 3; ++round) {
+        if (round == 2) {
+            clock.anchorSample = 99;
+            writer->setClock(clock);
+            tb.originTick = -5;
+            writer->stream().setTimebase(tb);
+        }
+        QVERIFY(produce(*writer, 4));
+        view = reader->acquire(4, 0ns);
+        QVERIFY(view);
+        QCOMPARE(view->clock().anchorSample, round == 2 ? std::uint64_t(99) : std::uint64_t(7));
+        QCOMPARE(view->timebase().originTick, round == 2 ? std::int64_t(-5) : std::int64_t(0));
+        QVERIFY(reader->release(*view).ok());
+    }
 }
 
 //=============================================================================================================

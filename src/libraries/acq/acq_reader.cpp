@@ -304,8 +304,10 @@ AcqExpected<AcqBlockView> AcqReader::acquire(std::size_t minSamples, std::chrono
                                                 slot.segmentsLost, !latest,
                                                 [](const AcqSegmentHeader& h) { return loadRecordKey(h); });
 
+    c.clock.refresh(slot.clock, slot.clockSeq);
+    c.timebase.refresh(slot.timebase, slot.timebaseSeq);
     AcqBlockView view;
-    ViewAccess::setSamples(view, c, start, count, *c.versions[versionIndex]);
+    ViewAccess::setSamples(view, c, start, count, *c.versions[versionIndex], slot.clock, slot.timebase);
     ViewAccess::setRead(view, slot.pendingLost, skipped, recordSpans(c.events.records, c.events.mask, events),
                         recordSpans(c.segments.records, c.segments.mask, segments), payloadSpans(c.segments, segments),
                         c.segments.payloadBytes);

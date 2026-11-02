@@ -460,6 +460,8 @@ AcqExpected<AcqReader> AcqStream::reader(AcqReader::ReadMode mode, const AcqRead
         slot.gating = options.gating;
         slot.holding = false;
         slot.pendingLost = 0;
+        slot.clockSeq = SeqlockValue<AcqClockModel>::kSeqNone;
+        slot.timebaseSeq = SeqlockValue<AcqTimebase>::kSeqNone;
         slot.waiting.store(false, std::memory_order_relaxed);
         std::uint64_t start = c.committed.load(std::memory_order_acquire);
         if (options.gating) {
@@ -635,7 +637,7 @@ AcqWriteView makeWriteView(AcqStreamCore& c, std::uint64_t first, std::uint64_t 
     c.pendingFirst = first;
     c.pendingCount = count;
     AcqWriteView view;
-    ViewAccess::setSamples(view, c, first, count, *c.versions[c.versionAt(first)]);
+    ViewAccess::setSamples(view, c, first, count, *c.versions[c.versionAt(first)], c.clock.load(), c.timebase.load());
     ViewAccess::setUnderrun(view, underrun);
     return view;
 }
