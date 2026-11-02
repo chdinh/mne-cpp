@@ -290,6 +290,7 @@ private slots:
     void testOutputUnderrun();
     void testOutputScheduledWrite();
     void testScheduledWriteAfterLongIdle();
+    void testCommitOverPlayedFillIsDropped();
     void testOutputMonitorAndEvents();
     void testWriterHandles();
     void testInvalidHandles();
@@ -1097,6 +1098,51 @@ void TestAcqStream::testScheduledWriteAfterLongIdle()
     QCOMPARE(v, value(1010, 0));
     QVERIFY(device->release(*played).ok());
     QVERIFY(writer->beginWriteAt(500, 4, 0ns).error() == AcqErrorCode::Late);
+}
+
+//=============================================================================================================
+
+void TestAcqStream::testCommitOverPlayedFillIsDropped()
+{
+    // The writer reserves a pulse in time, but the device plays fill over its start before the commit lands.
+    auto writer = AcqWriter::create(makeInfo(1, AcqLayout::Interleaved, AcqDirection::Output), options(64));
+    AcqReaderOptions gating;
+    gating.gating = true;
+    auto device = writer->stream().reader(AcqReader::ReadMode::Lossless, gating);
+    auto pulse = writer->beginWriteAt(10, 8, 0ns);
+    QVERIFY(pulse);
+    fill(*pulse);
+    auto nothing = device->acquire(0, 0ns);
+    QVERIFY(nothing);
+    QCOMPARE(nothing->sampleCount(), std::size_t(0));
+    QVERIFY(device->release(*nothing).ok());
+    QVERIFY(device->consumeIdle(12).ok());
+    writer->commit(8);
+
+    // Its tail would play 2 samples late and truncated; it is dropped whole and counted instead.
+    auto tail = device->acquire(0, 0ns);
+    QVERIFY(tail);
+    QCOMPARE(tail->sampleCount(), std::size_t(0));
+    QVERIFY(device->release(*tail).ok());
+    QCOMPARE(device->acquire(1, 0ns).error().code(), AcqErrorCode::Timeout);
+    QCOMPARE(writer->stream().stats().lateCommits, std::uint64_t(1));
+    QVERIFY(device->consumeIdle(6).ok());
+
+    // The next pulse, committed before the device reaches it, plays on its exact sample.
+    auto next = writer->beginWriteAt(20, 4, 0ns);
+    QVERIFY(next);
+    fill(*next);
+    writer->commit(4);
+    auto played = device->acquire(6, 0ns);
+    QVERIFY(played);
+    QCOMPARE(played->firstSample(), std::uint64_t(18));
+    std::int32_t v = -1;
+    std::memcpy(&v, played->part(0).at(0, 1), sizeof(v));
+    QCOMPARE(v, 0);
+    std::memcpy(&v, played->part(0).at(0, 2), sizeof(v));
+    QCOMPARE(v, value(20, 0));
+    QVERIFY(device->release(*played).ok());
+    QCOMPARE(writer->stream().stats().lateCommits, std::uint64_t(1));
 }
 
 //=============================================================================================================

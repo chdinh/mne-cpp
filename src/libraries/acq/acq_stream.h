@@ -17,8 +17,9 @@
  * Input stream: the backend owns the writer; commit() is one release store and never waits; samples
  * are overwritten whether or not readers consumed them, and slow readers learn the exact loss.
  * Output stream: the application takes the writer with AcqStream::writer(); beginWrite() waits for
- * space freed by the device's gating reader, so unplayed samples are never overwritten; samples
- * committed too late are reported as underrun, never silently shifted in time.
+ * space freed by the device's gating reader, so unplayed samples are never overwritten. A block whose
+ * scheduled start the device has already played as fill is dropped whole and counted in
+ * AcqStreamStats::lateCommits; output is never played truncated or shifted in time.
  *
  * Closed-loop output, e.g. a TMS trigger 20 ms after a detected input event and a stimulus waveform:
  * @code
@@ -116,6 +117,7 @@ struct AcqStreamStats
     std::uint64_t underruns = 0;     /**< Output: underrun episodes. */
     std::uint64_t writerWaits = 0;   /**< Output: beginWrite() calls that had to wait for space. */
     std::uint64_t lateEvents = 0;    /**< Output: events or segments rejected as Late. */
+    std::uint64_t lateCommits = 0;   /**< Output: committed blocks the device had already passed; not played. */
     std::size_t capacitySamples = 0; /**< Effective ring capacity. */
     std::size_t activeReaders = 0;   /**< Readers attached right now. */
     bool memoryLocked = false;       /**< Whether lockMemory succeeded. */

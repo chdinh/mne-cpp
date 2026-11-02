@@ -220,6 +220,9 @@ AcqExpected<std::shared_ptr<AcqStreamCore>> AcqStreamCore::create(AcqStreamInfo 
     core->mask = core->capacity - 1;
 
     initRecords(core->events, options.eventCapacity, 0);
+    if (core->direction == AcqDirection::Output) {
+        initRecords(core->outputCommits, kOutputCommitLog, 0);
+    }
     if (info.segmentation.mode == AcqSegmentation::Mode::Triggered) {
         const std::uint64_t perSegment = std::max<std::uint64_t>(info.segmentation.samplesPerSegment, 1);
         const std::size_t count = options.segmentCapacity != 0
@@ -415,6 +418,7 @@ AcqStreamStats AcqStream::stats() const noexcept
     s.underruns = c.underruns.load(std::memory_order_relaxed);
     s.writerWaits = c.writerWaits.load(std::memory_order_relaxed);
     s.lateEvents = c.lateEvents.load(std::memory_order_relaxed);
+    s.lateCommits = c.lateCommits.load(std::memory_order_relaxed);
     s.capacitySamples = static_cast<std::size_t>(c.capacity);
     for (std::size_t i = 0; i < c.maxReaders; ++i) {
         s.activeReaders += c.slots[i].inUse.load(std::memory_order_acquire) ? 1U : 0U;
@@ -464,6 +468,9 @@ AcqExpected<AcqReader> AcqStream::reader(AcqReader::ReadMode mode, const AcqRead
             counter->store(0, std::memory_order_relaxed);
         }
         if (options.gating) {
+            slot.commitCursor = c.outputCommits.published.load(std::memory_order_acquire);
+            slot.dropEnd = 0;
+            c.commitsValidated.store(slot.commitCursor, std::memory_order_seq_cst);
             c.gatingSlot.store(static_cast<int>(i), std::memory_order_release);
             c.deviceGone.store(false, std::memory_order_release);
         }
@@ -592,7 +599,9 @@ AcqError waitForSpace(AcqStreamCore& c, std::uint64_t end, std::chrono::nanoseco
 {
     auto fits = [&c, end] {
         const std::uint64_t gate = c.gatePosition.load(std::memory_order_seq_cst);
-        return gate >= end || end - gate <= c.capacity;
+        const bool logSpace = c.outputCommits.pushed - c.commitsValidated.load(std::memory_order_seq_cst) <
+            c.outputCommits.capacity();
+        return logSpace && (gate >= end || end - gate <= c.capacity);
     };
     if (fits()) {
         return {};
@@ -685,6 +694,10 @@ void AcqWriter::commit(std::size_t samples) noexcept
         return;
     }
     c.writePos = std::max(c.writePos, end);
+    if (c.direction == AcqDirection::Output && n > 0) {
+        // Published before the samples, so the device sees the scheduled start of every block it can play.
+        pushRecord(c.outputCommits, OutputCommit{c.pendingFirst, end}, {}, true);
+    }
     if (c.direction == AcqDirection::Input) {
         c.events.published.store(c.events.pushed, std::memory_order_release);
         c.segments.published.store(c.segments.pushed, std::memory_order_release);

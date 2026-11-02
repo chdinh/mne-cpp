@@ -97,6 +97,31 @@ bool recordsOverwritten(const RecordRing<T>& ring, RecordWindow window) noexcept
     return r > ring.capacity() && r - ring.capacity() > window.first;
 }
 
+/**
+ * Gating reader: decides for every output commit visible up to @p written whether it is played. A commit
+ * whose scheduled start the device has already passed (played as fill) is dropped whole and counted late.
+ */
+void validateCommits(AcqStreamCore& c, ReaderSlot& slot, std::uint64_t pos, std::uint64_t written) noexcept
+{
+    const std::uint64_t published = c.outputCommits.published.load(std::memory_order_acquire);
+    std::uint64_t i = slot.commitCursor;
+    for (; i < published; ++i) {
+        const OutputCommit& commit = c.outputCommits.records[i & c.outputCommits.mask];
+        if (commit.end > written) {
+            break;
+        }
+        if (commit.start < pos) {
+            slot.dropEnd = std::max(slot.dropEnd, commit.end);
+            c.lateCommits.fetch_add(1, std::memory_order_relaxed);
+        }
+    }
+    if (i != slot.commitCursor) {
+        slot.commitCursor = i;
+        c.commitsValidated.store(i, std::memory_order_seq_cst);
+        c.notifyWriter();
+    }
+}
+
 void detach(AcqStreamCore& core, std::uint32_t index) noexcept
 {
     ReaderSlot& slot = core.slots[index];
@@ -206,6 +231,17 @@ AcqExpected<AcqBlockView> AcqReader::acquire(std::size_t minSamples, std::chrono
         if (finished) {
             written = c.committed.load(std::memory_order_acquire);
             available = written > pos ? written - pos : 0;
+        }
+        if (slot.gating) {
+            validateCommits(c, slot, pos, written);
+            if (pos < slot.dropEnd) {
+                // Nothing playable until the device has played fill past the dropped commit.
+                if (minSamples != 0) {
+                    return AcqErrorCode::Timeout;
+                }
+                written = pos;
+                break;
+            }
         }
         if (minSamples == 0 || available >= minSamples || (finished && available > 0)) {
             break;

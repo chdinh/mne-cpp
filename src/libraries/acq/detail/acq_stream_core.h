@@ -162,6 +162,20 @@ struct RecordRing
 
 //=============================================================================================================
 /**
+ * One output commit. The device plays it only if it had not passed @c start when it first saw the commit;
+ * otherwise the whole commit is dropped, so a late block is never played truncated and shifted.
+ */
+struct OutputCommit
+{
+    std::uint64_t start = 0;
+    std::uint64_t end = 0;
+};
+
+/** Output commits the writer may have ahead of the device's validation before beginWrite() waits. */
+constexpr std::size_t kOutputCommitLog = 1024;
+
+//=============================================================================================================
+/**
  * One metadata version with the per-channel arrays views point into.
  */
 struct InfoVersion
@@ -198,6 +212,8 @@ struct alignas(kCacheLine) ReaderSlot
     std::uint64_t eventFirst = 0;
     std::uint64_t eventEnd = 0;
     std::uint64_t segmentCursor = 0;
+    std::uint64_t commitCursor = 0; /**< Gating reader: next output commit to validate. */
+    std::uint64_t dropEnd = 0;      /**< Gating reader: end of the last commit dropped as late. */
     std::uint64_t segmentFirst = 0;
     std::uint64_t segmentEnd = 0;
 
@@ -268,8 +284,11 @@ public:
     std::atomic<std::uint64_t> underruns{0};
     std::atomic<std::uint64_t> writerWaits{0};
     std::atomic<std::uint64_t> lateEvents{0};
+    std::atomic<std::uint64_t> lateCommits{0};
+    std::atomic<std::uint64_t> commitsValidated{0}; /**< Output commits the gating reader has validated. */
 
     // Records
+    RecordRing<OutputCommit> outputCommits; /**< Output: scheduled start and end of every commit. */
     RecordRing<AcqEvent> events;
     RecordRing<AcqSegmentHeader> segments;
 

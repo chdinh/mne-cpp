@@ -367,6 +367,7 @@ struct ClosedLoopState
     std::atomic<std::uint64_t> spikesDetected{0};
     std::atomic<std::uint64_t> stimuliScheduled{0};
     std::atomic<std::uint64_t> stimuliLate{0};
+    std::atomic<std::uint64_t> stimuliDropped{0}; // committed, but the card had already passed their start
     std::atomic<std::uint64_t> stimuliExact{0};
     std::atomic<std::uint64_t> stimuliMisplaced{0};
 };
@@ -575,7 +576,7 @@ void updateDisplay(AcqReader& display, DisplayFrame& frame)
     }
 }
 
-constexpr int kDashboardLines = 10;
+constexpr int kDashboardLines = 11;
 
 void printDashboard(const ClosedLoopState& st, const DisplayFrame& frame, const AcqReader& recorder,
                     double elapsed, bool redraw)
@@ -604,8 +605,9 @@ void printDashboard(const ClosedLoopState& st, const DisplayFrame& frame, const 
                 p99.data(), p999.data(), max.data());
     std::printf("                          spikes %llu injected, %llu detected -> %llu stimuli scheduled, %llu refused late\n",
                 u(st.spikesInjected), u(st.spikesDetected), u(st.stimuliScheduled), u(st.stimuliLate));
-    std::printf("  Stimulator  output      %llu pulses on the exact sample (spike + 3.000 ms), %llu misplaced\n",
-                u(st.stimuliExact), u(st.stimuliMisplaced));
+    std::printf("  Stimulator  output      %llu pulses on the exact sample (spike + 3.000 ms), %llu misplaced,\n"
+                "                          %llu dropped by the card as late\n",
+                u(st.stimuliExact), u(st.stimuliMisplaced), u(st.stimuliDropped));
     std::printf("  Data path   heap allocations after start: %llu\n",
                 static_cast<unsigned long long>(g_allocations.load()));
     std::printf("\n");
@@ -690,6 +692,7 @@ bool runClosedLoop(double seconds)
     bool printed = false;
     while (st.running.load(std::memory_order_acquire)) {
         updateDisplay(*display, frame);
+        st.stimuliDropped = stimulator->stream().stats().lateCommits;
         if (live && Clock::now() >= nextPrint) {
             printDashboard(st, frame, *recorder, std::chrono::duration<double>(Clock::now() - start).count(), printed);
             printed = true;
@@ -701,6 +704,7 @@ bool runClosedLoop(double seconds)
     rec.join();
     loop.join();
     g_countAllocations = false;
+    st.stimuliDropped = stimulator->stream().stats().lateCommits;
     printDashboard(st, frame, *recorder, std::chrono::duration<double>(Clock::now() - start).count(), printed);
 
     //! [acq_stream_stats]
@@ -710,10 +714,10 @@ bool runClosedLoop(double seconds)
     //! [acq_stream_stats]
     const bool ok = lossless && st.sampleMismatches == 0 && st.markerMismatches == 0 &&
         st.markersVerified == st.spikesInjected && st.stimuliMisplaced == 0 &&
-        st.stimuliExact == st.stimuliScheduled && g_allocations == 0 &&
+        st.stimuliExact + st.stimuliDropped == st.stimuliScheduled && g_allocations == 0 &&
         st.recordedSamples == static_cast<std::uint64_t>(seconds * kSfreq / kBlock) * kBlock;
     std::printf("  %s\n", ok ? "PASS: every sample bit-exact and none lost, every stimulus on its exact sample or\n"
-                               "        explicitly refused as late, no heap allocation on the data path"
+                               "        refused or dropped as late, never truncated or shifted; no heap allocation on the data path"
                              : "FAIL: see the counters above");
     return ok;
 }
