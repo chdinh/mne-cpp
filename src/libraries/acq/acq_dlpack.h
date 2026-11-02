@@ -26,6 +26,7 @@
 
 #include <cstddef>
 #include <cstdint>
+#include <memory>
 #include <new>
 
 static_assert(DLPACK_MAJOR_VERSION >= 1, "acq_dlpack.h needs DLPack 1.0 or newer (DLManagedTensorVersioned)");
@@ -124,7 +125,7 @@ namespace ACQLIB
     m.version = {DLPACK_MAJOR_VERSION, DLPACK_MINOR_VERSION};
     m.manager_ctx = holder;
     m.deleter = [](DLManagedTensorVersioned* self) {
-        delete static_cast<Holder*>(self->manager_ctx);
+        std::unique_ptr<Holder>(static_cast<Holder*>(self->manager_ctx)).reset();
     };
     m.flags = DLPACK_FLAG_BITMASK_READ_ONLY;
     m.dl_tensor.data = const_cast<std::byte*>(run.data); // read-only by the flag above

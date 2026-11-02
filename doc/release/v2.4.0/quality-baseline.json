@@ -123,7 +123,7 @@
       "typedef_struct": 0,
       "c_style_cast": 0,
       "raw_new": 0,
-      "raw_delete": 51,
+      "raw_delete": 50,
       "console_io": 0,
       "numeric_define": 0,
       "qt_new_unparented": 907
