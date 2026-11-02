@@ -34,6 +34,7 @@
 
 #if defined(_WIN32)
 #define NOMINMAX
+#define WIN32_LEAN_AND_MEAN
 #include <malloc.h>
 #include <windows.h>
 #else
@@ -1444,9 +1445,9 @@ void TestAcqStream::testDefaultCapacityLimitAndMemoryLock()
 
     AcqStreamOptions locked = options(64);
     locked.lockMemory = true;
-    auto small = AcqWriter::create(makeInfo(2), locked);
-    QVERIFY(small);
-    QVERIFY(produce(*small, 8));
+    auto lockedRing = AcqWriter::create(makeInfo(2), locked);
+    QVERIFY(lockedRing);
+    QVERIFY(produce(*lockedRing, 8));
 }
 
 //=============================================================================================================
@@ -1478,10 +1479,10 @@ void TestAcqStream::testHoldLastUnderrunFill()
     QVERIFY(monitor->release(*held).ok());
 
     QVERIFY(device->consumeIdle(100).ok());
-    auto far = writer->beginWrite(2);
-    QVERIFY(far);
-    QCOMPARE(far->firstSample(), std::uint64_t(107));
-    QCOMPARE(far->underrun(), std::uint64_t(100));
+    auto ahead = writer->beginWrite(2);
+    QVERIFY(ahead);
+    QCOMPARE(ahead->firstSample(), std::uint64_t(107));
+    QCOMPARE(ahead->underrun(), std::uint64_t(100));
 }
 
 //=============================================================================================================
@@ -1779,9 +1780,13 @@ void TestAcqStream::testDmaEngineSimulation()
 
 void TestAcqStream::testRingPlacement()
 {
-    auto addressOf = [](AcqWriter& writer) {
+    auto ringStart = [](AcqWriter& writer) -> std::byte* {
         auto view = writer.beginWrite(1);
-        return view ? reinterpret_cast<std::uintptr_t>(view->part(0).data) : std::uintptr_t(1);
+        return view ? view->part(0).data : nullptr;
+    };
+    auto addressOf = [&ringStart](AcqWriter& writer) {
+        std::byte* start = ringStart(writer);
+        return start != nullptr ? reinterpret_cast<std::uintptr_t>(start) : std::uintptr_t(1);
     };
 
     AcqStreamOptions gpuPages = options(1024);
@@ -1832,7 +1837,7 @@ void TestAcqStream::testRingPlacement()
 #endif
 #if defined(__linux__)
     int node = -1;
-    const auto address = reinterpret_cast<void*>(addressOf(*bound));
+    void* address = ringStart(*bound);
     QCOMPARE(syscall(SYS_get_mempolicy, &node, nullptr, 0UL, address, 3UL), 0L); // MPOL_F_NODE | MPOL_F_ADDR
     QCOMPARE(node, 0);
 #endif

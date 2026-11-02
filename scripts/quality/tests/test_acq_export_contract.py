@@ -1,18 +1,23 @@
 # SPDX-License-Identifier: BSD-3-Clause
 # Copyright (c) 2026 MNE-CPP Authors
 #   Christoph Dinh <christoph.dinh@mne-cpp.org>
-"""Exported acq classes must sit inside ACQ_STD_MEMBERS_BEGIN/END.
+"""Windows-only failure modes of mne_acq, checked statically.
 
-MSVC reports C4251 for standard-library members of exported classes, and the
-Windows build treats it as an error. Only the macOS and Linux builds run
-locally, so this checks the bracketing statically.
+Only the macOS and Linux builds run locally, so two MSVC failures are caught here:
+exported classes outside ACQ_STD_MEMBERS_BEGIN/END (C4251 under /WX), and
+identifiers that <windows.h> defines as macros (small, far, near, ...) in acq
+sources and tests that include it.
 """
 
 import re
 import unittest
 from pathlib import Path
 
-ACQ = Path(__file__).resolve().parents[3] / "src" / "libraries" / "acq"
+ROOT = Path(__file__).resolve().parents[3]
+ACQ = ROOT / "src" / "libraries" / "acq"
+# Object-like macros from <windows.h> (minwindef.h, rpcndr.h) that silently replace an identifier.
+WINDOWS_MACROS = ("small", "hyper", "far", "near", "pascal", "cdecl", "interface")
+CODE_WORD = re.compile(r"\b(" + "|".join(WINDOWS_MACROS) + r")\b")
 TOKENS = re.compile(r"^(ACQ_STD_MEMBERS_BEGIN|ACQ_STD_MEMBERS_END)$|^(?:class|struct) ACQSHARED_EXPORT (\w+)", re.MULTILINE)
 
 
@@ -28,6 +33,14 @@ def unbracketed(text: str) -> list[str]:
     return missing + (["<unbalanced>"] if depth else [])
 
 
+def windows_macro_names(text: str) -> list[str]:
+    """Identifiers of *text* that <windows.h> turns into macros; comments and strings are ignored."""
+    if "<windows.h>" not in text:
+        return []
+    code = re.sub(r"//[^\n]*|/\*.*?\*/|\"(?:\\.|[^\"\\])*\"", " ", text, flags=re.DOTALL)
+    return sorted(set(CODE_WORD.findall(code)))
+
+
 class TestAcqExportContract(unittest.TestCase):
     def test_detects_missing_bracket(self):
         self.assertEqual(unbracketed("class ACQSHARED_EXPORT A\n{\n};\n"), ["A"])
@@ -40,6 +53,18 @@ class TestAcqExportContract(unittest.TestCase):
         for header in headers:
             with self.subTest(header=header.name):
                 self.assertEqual(unbracketed(header.read_text(encoding="utf-8")), [])
+
+    def test_detects_windows_macro_names(self):
+        source = '#include <windows.h>\n// far away\nauto small = 1; auto far = "near";\n'
+        self.assertEqual(windows_macro_names(source), ["far", "small"])
+        self.assertEqual(windows_macro_names("auto small = 1;\n"), [])
+
+    def test_no_windows_macro_names_in_acq_code(self):
+        files = sorted(ACQ.rglob("*.[ch]*")) + sorted((ROOT / "src" / "testframes").glob("test_acq_*/*.cpp"))
+        files += sorted((ROOT / "src" / "examples").glob("ex_acq_*/*.cpp"))
+        for path in files:
+            with self.subTest(file=path.name):
+                self.assertEqual(windows_macro_names(path.read_text(encoding="utf-8")), [])
 
 
 if __name__ == "__main__":
