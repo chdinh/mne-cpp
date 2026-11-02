@@ -23,6 +23,7 @@
 #include <acq/acq_stream.h>
 
 #include <array>
+#include <bit>
 #include <cfenv>
 #include <chrono>
 #include <cmath>
@@ -320,7 +321,8 @@ const std::byte* elementOf(const AcqBlockView& view, std::size_t c, std::size_t 
 template<typename T>
 bool sameBits(const T& a, const T& b)
 {
-    return std::memcmp(&a, &b, sizeof(T)) == 0;
+    using Bytes = std::array<std::byte, sizeof(T)>;
+    return std::bit_cast<Bytes>(a) == std::bit_cast<Bytes>(b);
 }
 
 /**

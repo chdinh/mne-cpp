@@ -38,6 +38,7 @@
 #include <bit>
 #include <cmath>
 #include <cstdio>
+#include <cstdlib>
 #include <cstring>
 #include <deque>
 #include <limits>
@@ -461,7 +462,12 @@ int main(int argc, char* argv[])
     for (int i = 1; i < argc; ++i) {
         const std::string arg = argv[i];
         if (arg == "--seconds" && i + 1 < argc) {
-            seconds = std::atof(argv[++i]);
+            char* end = nullptr;
+            seconds = std::strtod(argv[++i], &end);
+            if (*end != '\0' || !(seconds > 0.0)) {
+                std::fprintf(stderr, "--seconds needs a positive number, got %s\n", argv[i]);
+                return 1;
+            }
         } else {
             uri = arg;
         }
