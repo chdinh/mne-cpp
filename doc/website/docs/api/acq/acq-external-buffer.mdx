@@ -15,9 +15,9 @@ sidebar_position: 17
 struct ACQLIB::AcqExternalBuffer
 ```
 
-An externally owned buffer adopted as the ring (zero-copy DMA).
+An externally owned buffer adopted as the ring (zero-copy DMA), e.g.
 
-Its capacity in samples must be a power of two and its start aligned to 4096 bytes; `release` is called once the ring no longer uses it.
+a card's DMA buffer or GPU memory written by GPUDirect RDMA. Its capacity in samples must be a power of two and its start aligned to `AcqStreamOptions::alignment`; `release` is called once the ring no longer uses it.
 
 ---
 

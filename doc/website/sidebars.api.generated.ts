@@ -759,7 +759,8 @@ const apiSidebar: SidebarsConfig['apiSidebar'] = [
         'api/acq/acq-discovered-device',
         'api/acq/acq-uri',
         'api/acq/acq-backend',
-        'api/acq/acq-device-stats'
+        'api/acq/acq-device-stats',
+        'api/acq/acq-memory-location'
       ],
     }
 ];

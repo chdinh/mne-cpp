@@ -19,7 +19,7 @@ The single producer of a ring: the backend for an input stream, the application 
 
 Move-only. All members except `create()` and `updateInfo()` are allocation-free and lock-free; on input streams they are also wait-free.
 
-Producing an input block, and scheduling an output pulse at an exact sample: 
+Producing an input block, scheduling an output pulse at an exact sample, and driving a card that writes into the ring by DMA: 
 ```cpp title="src/examples/ex_acq_performance/main.cpp"
 auto view = input.beginWrite(kBlock);
 std::uint64_t s = view->firstSample();
@@ -62,6 +62,25 @@ if (auto at = mapSampleExact(inClock, outClock, s, kStimDelayTicks)) {
     }
 }
 (scheduled ? st.stimuliScheduled : st.stimuliLate).fetch_add(1, std::memory_order_relaxed);
+```
+
+ 
+```cpp title="src/examples/ex_acq_performance/main.cpp"
+// Driver: keep the card's queue full, so it never waits for the host.
+while (granted < std::min(k + kInFlight, blocks)) {
+    writer->grant(block);
+    ++granted;
+}
+// Card: its DMA engine writes block k straight into the ring (here a copy stands in for the bus).
+std::this_thread::sleep_until(start + period * static_cast<std::int64_t>(k + 1));
+const std::byte* src = patterns.data() + (k % kPatterns) * blockBytes;
+const std::size_t offset = ((k * block) % capacity) * info.frameBytes();
+const std::size_t head = std::min(blockBytes, ringBytes - offset);
+std::memcpy(cardBuffer + offset, src, head);
+std::memcpy(cardBuffer, src + head, blockBytes - head);
+// Driver: the card reports the block written; publish it to every reader.
+commitNs[k % kCommitSlots].store(nowNs(), std::memory_order_relaxed);
+writer->commit(block);
 ```
 
 ---
@@ -177,9 +196,26 @@ Samples between `writePosition()` and `firstSample` are filled with the stream's
 
 ---
 
+### grant(samples)
+
+Input streams written by a device (DMA): allows the device to write the next `samples` samples after those already granted, directly into the ring.
+
+From now on the device may overwrite anything older than the granted end minus the capacity, so readers count those samples as lost; `commit()` publishes granted samples as the device reports them written. Keep several blocks granted so the device never stalls; do not also `beginWrite()` the granted samples.
+
+**Parameters:**
+
+- **samples** : *std::size_t*
+  Samples per channel.
+
+**Returns:**
+
+- *[AcqError](/docs/api/acq/acq-error)* — InvalidParameter if more than the capacity would be granted beyond `writePosition()`, WrongDirection for output streams (there the device is the gating reader).
+
+---
+
 ### commit(samples)
 
-Publishes the first samples of the last view (one release store).
+Publishes the first samples of the last view (one release store); without a view, the next granted samples.
 
 **Parameters:**
 
@@ -292,7 +328,7 @@ Creates a standalone ring with its writer (backends, DMA emulation, application-
 
 Closed-loop acquisition and stimulation with ACQLIB, and its sustained throughput per device class.
 
-````cpp title="src/examples/ex_acq_performance/main.cpp, line 375"
+````cpp title="src/examples/ex_acq_performance/main.cpp, line 378"
 /** The card: writes the input ring in 1 ms blocks at the real-time rate and plays the output ring. */
 void runCard(AcqWriter& input, AcqReader& dac, const SignalGenerator& gen, ClosedLoopState& st, double seconds)
 {

@@ -421,6 +421,7 @@
         "AcqComplexInt16",
         "AcqEvent",
         "AcqExternalBuffer",
+        "AcqMemoryLocation",
         "AcqPart",
         "AcqReader",
         "AcqReaderOptions",

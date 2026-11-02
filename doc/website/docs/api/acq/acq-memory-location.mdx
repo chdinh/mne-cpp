@@ -1,0 +1,60 @@
+---
+id: acq-memory-location
+title: "ACQLIB::AcqMemoryLocation"
+sidebar_label: AcqMemoryLocation
+sidebar_position: 36
+---
+
+# AcqMemoryLocation
+
+**Namespace:** `ACQLIB` &nbsp;·&nbsp; **Library:** Acquisition Library &nbsp;·&nbsp; **Source:** [`acq/acq_memory.h`](https://github.com/mne-tools/mne-cpp/blob/staging/src/libraries/acq/acq_memory.h)
+
+`#include <acq/acq_memory.h>`
+
+```cpp
+struct ACQLIB::AcqMemoryLocation
+```
+
+Location of ring memory: its kind and the device it belongs to.
+
+---
+
+## Public Methods
+
+### hostAccessible()
+
+**Returns:**
+
+- *bool* — true when the CPU may read and write the samples directly.
+
+---
+
+## Example
+
+No example of its own: Location of an adopted DMA buffer, set by the device backend that owns the memory; readers query it from the view.
+
+It is exercised by:
+
+````cpp title="src/examples/ex_acq_performance/main.cpp"
+// Driver: keep the card's queue full, so it never waits for the host.
+while (granted < std::min(k + kInFlight, blocks)) {
+    writer->grant(block);
+    ++granted;
+}
+// Card: its DMA engine writes block k straight into the ring (here a copy stands in for the bus).
+std::this_thread::sleep_until(start + period * static_cast<std::int64_t>(k + 1));
+const std::byte* src = patterns.data() + (k % kPatterns) * blockBytes;
+const std::size_t offset = ((k * block) % capacity) * info.frameBytes();
+const std::size_t head = std::min(blockBytes, ringBytes - offset);
+std::memcpy(cardBuffer + offset, src, head);
+std::memcpy(cardBuffer, src + head, blockBytes - head);
+// Driver: the card reports the block written; publish it to every reader.
+commitNs[k % kCommitSlots].store(nowNs(), std::memory_order_relaxed);
+writer->commit(block);
+````
+
+From [ex_acq_performance](../../examples/acq/ex_acq_performance.mdx).
+
+## Authors of this file
+
+- Christoph Dinh &lt;christoph.dinh@mne-cpp.org&gt;

@@ -19,7 +19,9 @@
  * exact sample. Commit-to-wake latency of the controller and heap allocations during acquisition are measured.
  *
  * Part 2 offers the data rate of real device classes (64-channel EEG up to a 2 GB/s digitizer card) from an
- * emulated DMA engine, with a recorder that checksums every byte, a display and a low-latency reader.
+ * emulated DMA engine that writes into the ring itself: the ring is the card's buffer, the driver grants
+ * the card space ahead and commits what it wrote, so the host never copies a sample. A recorder checksums
+ * every byte, next to a display and a low-latency reader.
  *
  * Every number printed is measured; the program exits non-zero if any sample is wrong, a stimulus lands on a
  * wrong sample, or the data path allocates.
@@ -34,6 +36,7 @@
 #include <algorithm>
 #include <array>
 #include <atomic>
+#include <bit>
 #include <chrono>
 #include <cmath>
 #include <cstdint>
@@ -779,7 +782,21 @@ ThroughputResult measure(const DeviceClass& dev, double seconds)
         patternSum[p] = sumWords(patterns.data() + p * blockBytes, blockBytes);
     }
 
-    auto writer = AcqWriter::create(info);
+    // The card's DMA buffer is the ring (2 s of data, at most 256 MiB, power of two as a ring needs).
+    std::size_t capacity = std::bit_ceil(std::max<std::size_t>(65536, static_cast<std::size_t>(2.0 * dev.sfreq)));
+    while (capacity * info.frameBytes() > (std::size_t(256) << 20)) {
+        capacity /= 2;
+    }
+    const std::size_t ringBytes = capacity * info.frameBytes();
+    AcqStreamOptions dma;
+    dma.external.data = static_cast<std::byte*>(::operator new(ringBytes, std::align_val_t(4096)));
+    dma.external.bytes = ringBytes;
+    dma.external.memory = {AcqMemoryKind::HostPinned, 0};
+    dma.external.release = [data = dma.external.data] {
+        ::operator delete(data, std::align_val_t(4096));
+    };
+    std::byte* const cardBuffer = dma.external.data;
+    auto writer = AcqWriter::create(info, dma);
     auto recorder = writer->stream().reader(AcqReader::ReadMode::Lossless);
     auto display = writer->stream().reader(AcqReader::ReadMode::Latest);
     auto lowLatency = writer->stream().reader(AcqReader::ReadMode::LowLatency);
@@ -847,18 +864,27 @@ ThroughputResult measure(const DeviceClass& dev, double seconds)
     g_countAllocations = true;
     go = true;
     const auto start = Clock::now();
+    constexpr std::uint64_t kInFlight = 8; // blocks granted to the card ahead of the data, like its notify queue
+    std::uint64_t granted = 0;
     for (std::uint64_t k = 0; k < blocks; ++k) {
-        std::this_thread::sleep_until(start + period * static_cast<std::int64_t>(k + 1));
-        auto view = writer->beginWrite(block);
-        const std::byte* src = patterns.data() + (k % kPatterns) * blockBytes;
-        for (std::size_t p = 0; p < view->partCount(); ++p) {
-            const std::size_t n = view->part(p).samples * info.frameBytes();
-            std::memcpy(view->part(p).data, src, n);
-            src += n;
+        //! [acq_dma_grant]
+        // Driver: keep the card's queue full, so it never waits for the host.
+        while (granted < std::min(k + kInFlight, blocks)) {
+            writer->grant(block);
+            ++granted;
         }
-        producerSum += patternSum[k % kPatterns];
+        // Card: its DMA engine writes block k straight into the ring (here a copy stands in for the bus).
+        std::this_thread::sleep_until(start + period * static_cast<std::int64_t>(k + 1));
+        const std::byte* src = patterns.data() + (k % kPatterns) * blockBytes;
+        const std::size_t offset = ((k * block) % capacity) * info.frameBytes();
+        const std::size_t head = std::min(blockBytes, ringBytes - offset);
+        std::memcpy(cardBuffer + offset, src, head);
+        std::memcpy(cardBuffer, src + head, blockBytes - head);
+        // Driver: the card reports the block written; publish it to every reader.
         commitNs[k % kCommitSlots].store(nowNs(), std::memory_order_relaxed);
         writer->commit(block);
+        //! [acq_dma_grant]
+        producerSum += patternSum[k % kPatterns];
     }
     const double elapsed = std::chrono::duration<double>(Clock::now() - start).count();
     writer->finish();
@@ -889,8 +915,9 @@ bool runThroughput(double seconds)
         {"32-coil MR receiver, 10 MS/s cint16", 32, 10.0e6, AcqSampleFormat::ComplexInt16},
         {"4-ch digitizer card, 250 MS/s int16", 4, 250.0e6, AcqSampleFormat::Int16},
     }};
-    std::printf("\nPart 2 - sustained throughput, emulated DMA in 1 ms blocks; per stream: a Lossless recorder that\n"
-                "         checksums every byte, a Latest display and a LowLatency reader (%.1f s per row)\n\n",
+    std::printf("\nPart 2 - sustained throughput, the card writes 1 ms blocks into the ring by DMA (no host copy);\n"
+                "         per stream: a Lossless recorder that checksums every byte, a Latest display and a\n"
+                "         LowLatency reader (%.1f s per row)\n\n",
                 seconds);
     std::printf("  %-38s %10s %10s %6s %9s %18s %7s\n", "device class", "offered", "recorded", "lost", "checksum",
                 "wake p50/p99/p99.9", "allocs");

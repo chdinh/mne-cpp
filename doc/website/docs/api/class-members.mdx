@@ -7,7 +7,7 @@ sidebar_position: 5
 
 # Class Members
 
-Index of 6657 public class members (functions, variables, typedefs, enums) across all documented classes.
+Index of 6667 public class members (functions, variables, typedefs, enums) across all documented classes.
 
 **Jump to:** [A](#a) · [B](#b) · [C](#c) · [D](#d) · [E](#e) · [F](#f) · [G](#g) · [H](#h) · [I](#i) · [J](#j) · [K](#k) · [L](#l) · [M](#m) · [N](#n) · [O](#o) · [P](#p) · [Q](#q) · [R](#r) · [S](#s) · [T](#t) · [U](#u) · [V](#v) · [W](#w) · [X](#x) · [Y](#y) · [Z](#z)
 
@@ -138,6 +138,7 @@ Index of 6657 public class members (functions, variables, typedefs, enums) acros
 - **affect** `[fn]` in [MNEProjOp](/docs/api/mne/mne-proj-op) — Count how many active projection vectors affect a given list of channel names.
 - **affect_chs** `[fn]` in [MNEProjOp](/docs/api/mne/mne-proj-op) — Count how many active projection vectors affect the given channels.
 - **align_fiducials** `[fn]` in [MNEMshDisplaySurface](/docs/api/mne/mne-msh-display-surface) — Align MEG and MRI coordinate systems using fiducial points and ICP.
+- **alignment** `[var]` in [AcqStreamOptions](/docs/api/acq/acq-stream-options) — Ring start alignment, power of two &gt;= 64 (e.g.
 - **all_coord_trans** `[var]` in [FiffInfoBase](/docs/api/fiff/fiff-info-base) — All coordinate transformations stored in the file, in file order.
 - **allowedMeanErrorDistChanged** `[signal]` in [HpiSettingsView](/docs/api/disp/hpi-settings-view) — Emit this signal whenever the allowed error changed.
 - **allowedMovementChanged** `[signal]` in [HpiSettingsView](/docs/api/disp/hpi-settings-view) — Emit this signal whenever the allowed head movement threshold changed.
@@ -795,7 +796,7 @@ Index of 6657 public class members (functions, variables, typedefs, enums) acros
 - **comment** `[var]` in [FsLabel](/docs/api/fs/fs-label) — Comment from the first line of the label file.
 - **comment** `[var]` in [MNEEvent](/docs/api/mne/mne-event) — Free-text event comment.
 - **comment** `[var]` in [MNEMeasDataSet](/docs/api/mne/mne-meas-data-set) — Comment / description associated with this data set.
-- **commit** `[fn]` in [AcqWriter](/docs/api/acq/acq-writer) — Publishes the first samples of the last view (one release store).
+- **commit** `[fn]` in [AcqWriter](/docs/api/acq/acq-writer) — Publishes the first samples of the last view (one release store); without a view, the next granted samples.
 - **commits** `[var]` in [AcqStreamStats](/docs/api/acq/acq-stream-stats) — commit() calls.
 - **committed** `[var]` in [AcqStreamStats](/docs/api/acq/acq-stream-stats) — Samples committed since creation (= next write position).
 - **comp** `[var]` in [FiffRawData](/docs/api/fiff/fiff-raw-data) — Compensator.
@@ -1379,6 +1380,7 @@ Index of 6657 public class members (functions, variables, typedefs, enums) acros
 - **devHeadTrans** `[var]` in [HpiFitResult](/docs/api/inv/hpi-fit-result)
 - **devHeadTrans** `[var]` in `SensorLoadResult` — Device→Head transform (identity if absent).
 - **device** `[var]` in [AcqDeviceDescription](/docs/api/acq/acq-device-description) — Device model and serial, file path or stream name.
+- **device** `[var]` in [AcqMemoryLocation](/docs/api/acq/acq-memory-location) — GPU or accelerator ordinal; -1 for Host.
 - **devicePoseChanged** `[signal]` in [PolhemusCoregistration](/docs/api/utils/polhemus-coregistration)
 - **devicePosition** `[fn]` in [AcqWriter](/docs/api/acq/acq-writer)
 - **deviceTime** `[var]` in [AcqSegmentHeader](/docs/api/acq/acq-segment-header) — Device time stamp of the trigger, device units.
@@ -2482,6 +2484,7 @@ Index of 6657 public class members (functions, variables, typedefs, enums) acros
 - **grandAveFile** `[var]` in [ProcessingSettings](/docs/api/mne/processing-settings) — Grand average output file.
 - **grandCovFile** `[var]` in [ProcessingSettings](/docs/api/mne/processing-settings) — Grand covariance output file.
 - **GrangerCausality** `[fn]` in [GrangerCausality](/docs/api/connectivity/granger-causality) — Constructs a [`GrangerCausality`](/docs/api/connectivity/granger-causality) object.
+- **grant** `[fn]` in [AcqWriter](/docs/api/acq/acq-writer) — Input streams written by a device (DMA): allows the device to write the next `samples` samples after those already granted, directly into the ring.
 - **Graph** `[fn]` in [Graph](/docs/api/disp/graph) — The constructor.
 - **graph** `[var]` in `StreamContext` — The pipeline graph (owned externally).
 - **graphInputs** `[var]` in `Context` — Graph-level inputs (populated before execution).
@@ -2603,6 +2606,7 @@ Index of 6657 public class members (functions, variables, typedefs, enums) acros
 - **hitTolerancePx** `[fn]` in [MultiViewLayout](/docs/api/disp3-d/multi-view-layout)
 - **holmBonferroni** `[fn]` in [StatsMcCorrection](/docs/api/sts/stats-mc-correction) — Holm-Bonferroni step-down correction.
 - **Holographic** `[var]` in [BrainRenderer](/docs/api/disp3-d/brain-renderer)
+- **hostAccessible** `[fn]` in [AcqMemoryLocation](/docs/api/acq/acq-memory-location)
 - **hostName** `[var]` in [MnaProvenance](/docs/api/mna/mna-provenance) — Machine name (for cluster provenance).
 - **hoveredContact** `[fn]` in [ElectrodeObject](/docs/api/disp3-d/electrode-object)
 - **hoveredRegionChanged** `[signal]` in [BrainView](/docs/api/disp3-d/brain-view) — Emitted when the hovered brain region changes.
@@ -2610,7 +2614,8 @@ Index of 6657 public class members (functions, variables, typedefs, enums) acros
 - **hpiFreqs** `[var]` in [HpiFitResult](/docs/api/inv/hpi-fit-result)
 - **HpiSettingsView** `[fn]` in [HpiSettingsView](/docs/api/disp/hpi-settings-view) — Constructs a [`HpiSettingsView`](/docs/api/disp/hpi-settings-view) object.
 - **htmlContent** `[var]` in [ReportSection](/docs/api/utils/report-section)
-- **hugePages** `[var]` in [AcqStreamOptions](/docs/api/acq/acq-stream-options) — Back the ring with huge pages where available.
+- **hugePages** `[var]` in [AcqStreamOptions](/docs/api/acq/acq-stream-options) — 2 MiB pages (Linux transparent huge pages); best effort, reported in stats.
+- **hugePages** `[var]` in [AcqStreamStats](/docs/api/acq/acq-stream-stats) — Whether the ring is backed by huge pages.
 
 ## I {#i}
 
@@ -2969,6 +2974,7 @@ Index of 6657 public class members (functions, variables, typedefs, enums) acros
 - **kind** `[var]` in `AcqBitField` — RfSwitch, ClockSync, Stim, TriggerOut, ...
 - **kind** `[var]` in [AcqChannelInfo](/docs/api/acq/acq-channel-info) — Signal kind.
 - **kind** `[var]` in `AcqFiffChannel` — FIFFV_*_CH.
+- **kind** `[var]` in [AcqMemoryLocation](/docs/api/acq/acq-memory-location) — Kind of memory.
 - **kind** `[var]` in [DigitizedPoint](/docs/api/utils/digitized-point)
 - **kind** `[var]` in [FiffChInfo](/docs/api/fiff/fiff-ch-info) — Kind of channel.
 - **kind** `[var]` in [FiffCov](/docs/api/fiff/fiff-cov) — Covariance kind -&gt; `fiff_constants.h`.
@@ -3387,6 +3393,9 @@ Index of 6657 public class members (functions, variables, typedefs, enums) acros
 - **megPick** `[fn]` in [SensorFieldMapper](/docs/api/disp3-d/sensor-field-mapper)
 - **megSurfaceKey** `[fn]` in [SensorFieldMapper](/docs/api/disp3-d/sensor-field-mapper)
 - **memb_vert** `[var]` in [MNEPatchInfo](/docs/api/mne/mne-patch-info) — Vertex indices that constitute the patch.
+- **memory** `[var]` in [AcqExternalBuffer](/docs/api/acq/acq-external-buffer) — Where the buffer lives; Device memory is never dereferenced by the library.
+- **memory** `[fn]` in [AcqStream](/docs/api/acq/acq-stream)
+- **memory** `[fn]` in [AcqViewBase](/docs/api/acq/acq-view-base)
 - **memoryLocked** `[var]` in [AcqStreamStats](/docs/api/acq/acq-stream-stats) — Whether lockMemory succeeded.
 - **merge** `[fn]` in [FiffEvents](/docs/api/fiff/fiff-events) — Replace codes in both code columns by a new one, like mne.merge_events.
 - **MeshFactory** `[fn]` in [MeshFactory](/docs/api/disp3-d/mesh-factory)
@@ -3797,7 +3806,8 @@ Index of 6657 public class members (functions, variables, typedefs, enums) acros
 - **ntri** `[var]` in [FwdBemModel](/docs/api/fwd/fwd-bem-model) — Triangle count per surface (length nsurf).
 - **ntri** `[var]` in [MNESurfaceOrVolume](/docs/api/mne/mne-surface-or-volume) — Number of triangles in the surface.
 - **num_events** `[fn]` in [FiffEvents](/docs/api/fiff/fiff-events) — Returns the number of events.
-- **numaNode** `[var]` in [AcqStreamOptions](/docs/api/acq/acq-stream-options) — Allocate on this NUMA node, -1 = local to the creating thread.
+- **numaNode** `[var]` in [AcqStreamOptions](/docs/api/acq/acq-stream-options) — NUMA node of the ring, e.g.
+- **numaNode** `[var]` in [AcqStreamStats](/docs/api/acq/acq-stream-stats) — NUMA node the ring is bound to, -1 if not bound.
 - **numberTrialRowChanged** `[signal]` in [TfSettingsView](/docs/api/disp/tf-settings-view) — Emit signal whenever trial number changed.
 - **numberTrialsChanged** `[signal]` in [ConnectivitySettingsView](/docs/api/disp/connectivity-settings-view) — Emit signal whenever the number of trials changed.
 - **numClust** `[fn]` in [MNEClusterInfo](/docs/api/mne/mne-cluster-info) — Returns the number of clusters.

@@ -5,21 +5,21 @@
   "summary": {
     "exported_classes": 477,
     "exported_free_functions": 135,
-    "registered_classes": 554,
+    "registered_classes": 555,
     "exported_not_registered": 0,
     "registered_function_modules": 13,
-    "registered_header_only": 64,
+    "registered_header_only": 65,
     "registered_stale": 0,
-    "registered_with_test": 198,
+    "registered_with_test": 199,
     "registered_test_unresolved": 0,
     "registered_with_example": 399,
     "registered_example_not_built": 0,
     "registered_with_python_equiv": 93,
     "registered_without_api_page": 0,
     "with_snippet": 429,
-    "public_api_units": 554,
+    "public_api_units": 555,
     "example_eligible": 398,
-    "example_exempt": 156,
+    "example_exempt": 157,
     "eligible_backed_by_registry_example": 398,
     "eligible_used_by_some_example": 353,
     "examples_on_disk": 72,
@@ -27,9 +27,9 @@
   },
   "by_library": {
     "acq": {
-      "public": 35,
-      "registered": 35,
-      "with_test": 35,
+      "public": 36,
+      "registered": 36,
+      "with_test": 36,
       "eligible": 23,
       "eligible_with_registry_example": 23,
       "eligible_used_by_example": 0,
@@ -1366,6 +1366,25 @@
       "exempt_reason": null
     },
     {
+      "name": "AcqMemoryLocation",
+      "header": "acq/acq_memory.h",
+      "library": "acq",
+      "kind": "header-only",
+      "exported": false,
+      "registered": true,
+      "registry_status": "documented",
+      "test": "test_acq_stream",
+      "test_resolves": true,
+      "example": null,
+      "example_state": "none",
+      "including_examples": [],
+      "snippets": [],
+      "api_page": "doc/website/docs/api/acq/acq-memory-location.mdx",
+      "python_equiv": null,
+      "example_eligible": false,
+      "exempt_reason": "registry: Location of an adopted DMA buffer, set by the device backend that owns the memory; readers query it from the view."
+    },
+    {
       "name": "AcqReader",
       "header": "acq/acq_reader.h",
       "library": "acq",
@@ -1489,7 +1508,8 @@
         "ex_acq_performance/main.cpp#acq_stream_stats",
         "ex_acq_performance/main.cpp#acq_stream_setup",
         "ex_acq_performance/main.cpp#acq_writer_commit",
-        "ex_acq_performance/main.cpp#acq_writer_schedule"
+        "ex_acq_performance/main.cpp#acq_writer_schedule",
+        "ex_acq_performance/main.cpp#acq_dma_grant"
       ],
       "api_page": "doc/website/docs/api/acq/acq-external-buffer.mdx",
       "python_equiv": null,
@@ -1513,7 +1533,8 @@
         "ex_acq_performance/main.cpp#acq_stream_stats",
         "ex_acq_performance/main.cpp#acq_stream_setup",
         "ex_acq_performance/main.cpp#acq_writer_commit",
-        "ex_acq_performance/main.cpp#acq_writer_schedule"
+        "ex_acq_performance/main.cpp#acq_writer_schedule",
+        "ex_acq_performance/main.cpp#acq_dma_grant"
       ],
       "api_page": "doc/website/docs/api/acq/acq-stream.mdx",
       "python_equiv": null,
@@ -1537,7 +1558,8 @@
         "ex_acq_performance/main.cpp#acq_stream_stats",
         "ex_acq_performance/main.cpp#acq_stream_setup",
         "ex_acq_performance/main.cpp#acq_writer_commit",
-        "ex_acq_performance/main.cpp#acq_writer_schedule"
+        "ex_acq_performance/main.cpp#acq_writer_schedule",
+        "ex_acq_performance/main.cpp#acq_dma_grant"
       ],
       "api_page": "doc/website/docs/api/acq/acq-stream-options.mdx",
       "python_equiv": null,
@@ -1561,7 +1583,8 @@
         "ex_acq_performance/main.cpp#acq_stream_stats",
         "ex_acq_performance/main.cpp#acq_stream_setup",
         "ex_acq_performance/main.cpp#acq_writer_commit",
-        "ex_acq_performance/main.cpp#acq_writer_schedule"
+        "ex_acq_performance/main.cpp#acq_writer_schedule",
+        "ex_acq_performance/main.cpp#acq_dma_grant"
       ],
       "api_page": "doc/website/docs/api/acq/acq-stream-stats.mdx",
       "python_equiv": null,
@@ -1585,7 +1608,8 @@
         "ex_acq_performance/main.cpp#acq_stream_stats",
         "ex_acq_performance/main.cpp#acq_stream_setup",
         "ex_acq_performance/main.cpp#acq_writer_commit",
-        "ex_acq_performance/main.cpp#acq_writer_schedule"
+        "ex_acq_performance/main.cpp#acq_writer_schedule",
+        "ex_acq_performance/main.cpp#acq_dma_grant"
       ],
       "api_page": "doc/website/docs/api/acq/acq-writer.mdx",
       "python_equiv": null,

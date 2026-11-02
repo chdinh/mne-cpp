@@ -46,7 +46,7 @@ auto controller = input->stream().reader(AcqReader::ReadMode::LowLatency);
 
 Closed-loop acquisition and stimulation with ACQLIB, and its sustained throughput per device class.
 
-````cpp title="src/examples/ex_acq_performance/main.cpp, line 654"
+````cpp title="src/examples/ex_acq_performance/main.cpp, line 657"
 AcqReaderOptions gating;
 gating.gating = true;
 auto dac = stimulator->stream().reader(AcqReader::ReadMode::Lossless, gating);

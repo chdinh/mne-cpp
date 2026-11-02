@@ -233,7 +233,8 @@
       "example": "ex_acq_performance",
       "example_snippet": [
         "ex_acq_performance/main.cpp#acq_writer_commit",
-        "ex_acq_performance/main.cpp#acq_writer_schedule"
+        "ex_acq_performance/main.cpp#acq_writer_schedule",
+        "ex_acq_performance/main.cpp#acq_dma_grant"
       ],
       "example_mode": "run",
       "status": "documented",
@@ -949,6 +950,28 @@
       "python_url": null,
       "example_exempt": true,
       "example_exempt_reason": "State plus one AcqStreamStats per stream; the counters themselves are shown with AcqStreamStats."
+    },
+    {
+      "name": "AcqMemoryLocation",
+      "module": "acq",
+      "header": "acq/acq_memory.h",
+      "origin": "custom",
+      "mne_c_tool": null,
+      "mne_python": null,
+      "sklearn": null,
+      "test": "test_acq_stream",
+      "status": "documented",
+      "skigen_candidate": false,
+      "documented": true,
+      "sidebar_position": 36,
+      "guide": null,
+      "python_equiv": null,
+      "python_url": null,
+      "example_exempt": true,
+      "example_exempt_reason": "Location of an adopted DMA buffer, set by the device backend that owns the memory; readers query it from the view.",
+      "example_used_in": [
+        "ex_acq_performance/main.cpp#acq_dma_grant"
+      ]
     },
     {
       "name": "FiffStream",

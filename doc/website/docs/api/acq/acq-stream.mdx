@@ -87,6 +87,14 @@ auto controller = input->stream().reader(AcqReader::ReadMode::LowLatency);
 
 ---
 
+### memory()
+
+**Returns:**
+
+- *[AcqMemoryLocation](/docs/api/acq/acq-memory-location)* — Where the samples live; views of Device memory must not be dereferenced on the CPU.
+
+---
+
 ### timebase()
 
 **Returns:**
