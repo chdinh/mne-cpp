@@ -56,6 +56,7 @@ set(HEADERS
   acq_device.h
   acq_device_registry.h
   acq_eigen.h
+  acq_dlpack.h
 )
 
 set(FILE_TO_UPDATE acq_global.cpp)

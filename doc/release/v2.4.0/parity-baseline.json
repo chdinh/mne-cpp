@@ -113,6 +113,7 @@
         "test_utils_spectral"
       ],
       "cross-validated-live": [
+        "test_acq_dlpack",
         "test_crossval_covariance",
         "test_ml_trainer",
         "test_mne_compute_raw_inverse",

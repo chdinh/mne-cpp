@@ -5,7 +5,7 @@ Coverage from `0800c9a1b` (https://github.com/mne-tools/mne-cpp/actions/runs/394
 
 | Gate | Criterion | Current | Status |
 |---|---|---|---|
-| G1 | Every registered test runs in CI | 267 registered; CI ran 295 on macos-26, 295 on macos-26-qt-min, 295 on ubuntu-24.04, 295 on ubuntu-24.04-qt-min, 295 on windows-2025-vs2026 (2 declared skips), 295 on windows-2025-vs2026-qt-min (2 declared skips); not run on macos-26: test_acq_convert, test_acq_device, test_acq_error, test_acq_stream, test_acq_timebase; not run on macos-26-qt-min: test_acq_convert, test_acq_device, test_acq_error, test_acq_stream, test_acq_timebase; not run on ubuntu-24.04: test_acq_convert, test_acq_device, test_acq_error, test_acq_stream, test_acq_timebase; not run on ubuntu-24.04-qt-min: test_acq_convert, test_acq_device, test_acq_error, test_acq_stream, test_acq_timebase; not run on windows-2025-vs2026: test_acq_convert, test_acq_device, test_acq_error, test_acq_stream, test_acq_timebase; not run on windows-2025-vs2026-qt-min: test_acq_convert, test_acq_device, test_acq_error, test_acq_stream, test_acq_timebase | **open** |
+| G1 | Every registered test runs in CI | 268 registered; CI ran 295 on macos-26, 295 on macos-26-qt-min, 295 on ubuntu-24.04, 295 on ubuntu-24.04-qt-min, 295 on windows-2025-vs2026 (2 declared skips), 295 on windows-2025-vs2026-qt-min (2 declared skips); not run on macos-26: test_acq_convert, test_acq_device, test_acq_dlpack, test_acq_error, test_acq_stream, test_acq_timebase; not run on macos-26-qt-min: test_acq_convert, test_acq_device, test_acq_dlpack, test_acq_error, test_acq_stream, test_acq_timebase; not run on ubuntu-24.04: test_acq_convert, test_acq_device, test_acq_dlpack, test_acq_error, test_acq_stream, test_acq_timebase; not run on ubuntu-24.04-qt-min: test_acq_convert, test_acq_device, test_acq_dlpack, test_acq_error, test_acq_stream, test_acq_timebase; not run on windows-2025-vs2026: test_acq_convert, test_acq_device, test_acq_dlpack, test_acq_error, test_acq_stream, test_acq_timebase; not run on windows-2025-vs2026-qt-min: test_acq_convert, test_acq_device, test_acq_dlpack, test_acq_error, test_acq_stream, test_acq_timebase | **open** |
 | G1 | Tests carry labels and timeouts | 0 unlabelled, 0 untimed | met |
 | G1 | No retry-to-pass path | 0 retry lines in local scripts | met |
 | G2 | Combined line coverage >= 60.0% | 74.26% (0 lines short) | met |
@@ -18,7 +18,7 @@ Coverage from `0800c9a1b` (https://github.com/mne-tools/mne-cpp/actions/runs/394
 | G4 | Documentation images generated in CI | 19 referenced, 0 without producer, placeholders in 0 workflows | met |
 | G4 | Visual regression compares to goldens | 19 golden comparisons | met |
 | G5 | Zero compiler warnings | enforced by -Werror on every matrix entry | met |
-| G5 | Debt metrics ratcheted | null_macro 0, typedef_struct 0, c_style_cast 0, raw_new 0, raw_delete 50, console_io 0, numeric_define 0, qt_new_unparented 907 | baseline recorded |
+| G5 | Debt metrics ratcheted | null_macro 0, typedef_struct 0, c_style_cast 0, raw_new 0, raw_delete 51, console_io 0, numeric_define 0, qt_new_unparented 907 | baseline recorded |
 | G6 | Pinned reference environment | MNE-Python 1.11.0; lock `scripts/parity/reference_lock.json`; CI installs exactly the lock | met |
 | G6 | Equivalent/exceeds claims are cross-validated | equivalent 139, exceeds 0, implemented 123, partial 95; 0 without embedded MNE-Python values | met |
 | G6 | Every claim has evidence, none compares live | cross-validated-static 174, cross-validated-live 0, tested 183, unverified 0 | met |

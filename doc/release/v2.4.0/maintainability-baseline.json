@@ -2,8 +2,8 @@
   "schema_version": 1,
   "generated_by": "scripts/quality/audit_maintainability.py",
   "policy": "scripts/quality/maintainability_policy.json",
-  "scanned_files": 1541,
-  "scanned_lines": 403352,
+  "scanned_files": 1542,
+  "scanned_lines": 403495,
   "metrics": {
     "null_macro": {
       "total": 0,
@@ -38,11 +38,11 @@
       "all_files": {}
     },
     "raw_delete": {
-      "total": 50,
-      "files": 23,
+      "total": 51,
+      "files": 24,
       "by_scope": {
         "applications": 38,
-        "libraries": 11,
+        "libraries": 12,
         "tools": 1
       },
       "suppressed": [],
@@ -79,6 +79,7 @@
         "src/applications/mne_scan/mne_scan/plugingui.cpp": 11,
         "src/applications/mne_scan/mne_scan/pluginitem.cpp": 1,
         "src/applications/mne_scan/mne_scan/pluginscene.cpp": 1,
+        "src/libraries/acq/acq_dlpack.h": 1,
         "src/libraries/disp/viewers/artifactsettingsview.cpp": 1,
         "src/libraries/disp/viewers/averageselectionview.cpp": 2,
         "src/libraries/disp/viewers/averagingsettingsview.cpp": 2,

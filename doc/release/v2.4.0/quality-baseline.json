@@ -11,7 +11,7 @@
   },
   "gates": {
     "G1_test_integrity": {
-      "registered": 267,
+      "registered": 268,
       "conditional": 6,
       "unregistered": 3,
       "without_labels": 0,
@@ -36,6 +36,7 @@
         "macos-26": [
           "test_acq_convert",
           "test_acq_device",
+          "test_acq_dlpack",
           "test_acq_error",
           "test_acq_stream",
           "test_acq_timebase"
@@ -43,6 +44,7 @@
         "macos-26-qt-min": [
           "test_acq_convert",
           "test_acq_device",
+          "test_acq_dlpack",
           "test_acq_error",
           "test_acq_stream",
           "test_acq_timebase"
@@ -50,6 +52,7 @@
         "ubuntu-24.04": [
           "test_acq_convert",
           "test_acq_device",
+          "test_acq_dlpack",
           "test_acq_error",
           "test_acq_stream",
           "test_acq_timebase"
@@ -57,6 +60,7 @@
         "ubuntu-24.04-qt-min": [
           "test_acq_convert",
           "test_acq_device",
+          "test_acq_dlpack",
           "test_acq_error",
           "test_acq_stream",
           "test_acq_timebase"
@@ -64,6 +68,7 @@
         "windows-2025-vs2026": [
           "test_acq_convert",
           "test_acq_device",
+          "test_acq_dlpack",
           "test_acq_error",
           "test_acq_stream",
           "test_acq_timebase"
@@ -71,6 +76,7 @@
         "windows-2025-vs2026-qt-min": [
           "test_acq_convert",
           "test_acq_device",
+          "test_acq_dlpack",
           "test_acq_error",
           "test_acq_stream",
           "test_acq_timebase"
@@ -117,7 +123,7 @@
       "typedef_struct": 0,
       "c_style_cast": 0,
       "raw_new": 0,
-      "raw_delete": 50,
+      "raw_delete": 51,
       "console_io": 0,
       "numeric_define": 0,
       "qt_new_unparented": 907
