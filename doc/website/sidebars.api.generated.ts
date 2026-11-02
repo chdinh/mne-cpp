@@ -750,7 +750,16 @@ const apiSidebar: SidebarsConfig['apiSidebar'] = [
         'api/acq/acq-timebase',
         'api/acq/acq-sync-marker',
         'api/acq/acq-int24',
-        'api/acq/acq-complex-int16'
+        'api/acq/acq-complex-int16',
+        'api/acq/acq-device',
+        'api/acq/acq-device-registry',
+        'api/acq/acq-device-description',
+        'api/acq/acq-scheme-info',
+        'api/acq/acq-parameter-info',
+        'api/acq/acq-discovered-device',
+        'api/acq/acq-uri',
+        'api/acq/acq-backend',
+        'api/acq/acq-device-stats'
       ],
     }
 ];

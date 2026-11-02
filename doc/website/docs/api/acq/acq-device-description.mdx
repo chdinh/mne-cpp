@@ -1,0 +1,45 @@
+---
+id: acq-device-description
+title: "ACQLIB::AcqDeviceDescription"
+sidebar_label: AcqDeviceDescription
+sidebar_position: 29
+---
+
+# AcqDeviceDescription
+
+**Namespace:** `ACQLIB` &nbsp;·&nbsp; **Library:** Acquisition Library &nbsp;·&nbsp; **Source:** [`acq/acq_backend.h`](https://github.com/mne-tools/mne-cpp/blob/staging/src/libraries/acq/acq_backend.h)
+
+`#include <acq/acq_backend.h>`
+
+```cpp
+struct ACQLIB::AcqDeviceDescription
+```
+
+What a source is, for display and provenance.
+
+```cpp title="src/examples/ex_acq_oddball/main.cpp"
+auto device = AcqDevice::open(uri);
+if (!device) {
+    std::fprintf(stderr, "Cannot open %s: %s\n", uri.c_str(), device.error().text().c_str());
+    return 1;
+}
+const AcqStream stream = device->stream();
+const auto info = stream.info();
+auto reader = stream.reader(AcqReader::ReadMode::Lossless);
+if (!reader || !device->start().ok()) {
+    std::fprintf(stderr, "Cannot start %s: %s\n", uri.c_str(), device->lastError().text().c_str());
+    return 1;
+}
+```
+
+---
+
+## Example
+
+- Start here: [ex_acq_oddball](../../examples/acq/ex_acq_oddball.mdx) — Recover the P300 from a streaming oddball session by trigger-locked averaging.
+- Full source: [`src/examples/ex_acq_oddball/main.cpp`](https://github.com/mne-tools/mne-cpp/tree/staging/src/examples/ex_acq_oddball/main.cpp)
+- Build target: `ex_acq_oddball` (runs under CTest)
+
+## Authors of this file
+
+- Christoph Dinh &lt;christoph.dinh@mne-cpp.org&gt;

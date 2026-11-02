@@ -1,0 +1,222 @@
+---
+id: acq-device
+title: "ACQLIB::AcqDevice"
+sidebar_label: AcqDevice
+sidebar_position: 27
+---
+
+# AcqDevice
+
+**Namespace:** `ACQLIB` &nbsp;·&nbsp; **Library:** Acquisition Library &nbsp;·&nbsp; **Source:** [`acq/acq_device.h`](https://github.com/mne-tools/mne-cpp/blob/staging/src/libraries/acq/acq_device.h)
+
+`#include <acq/acq_device.h>`
+
+```cpp
+class ACQLIB::AcqDevice
+```
+
+An opened source.
+
+Move-only handle that owns its backend.
+
+```cpp title="src/examples/ex_acq_oddball/main.cpp"
+auto device = AcqDevice::open(uri);
+if (!device) {
+    std::fprintf(stderr, "Cannot open %s: %s\n", uri.c_str(), device.error().text().c_str());
+    return 1;
+}
+const AcqStream stream = device->stream();
+const auto info = stream.info();
+auto reader = stream.reader(AcqReader::ReadMode::Lossless);
+if (!reader || !device->start().ok()) {
+    std::fprintf(stderr, "Cannot start %s: %s\n", uri.c_str(), device->lastError().text().c_str());
+    return 1;
+}
+```
+
+---
+
+## Public Methods
+
+### AcqDevice(backend)
+
+Wraps an already opened backend.
+
+**Parameters:**
+
+- **backend** : *std::unique_ptr&lt; [AcqBackend](/docs/api/acq/acq-backend) &gt;*
+  The backend.
+
+---
+
+### AcqDevice()
+
+---
+
+### ~AcqDevice()
+
+Equals `close()`.
+
+---
+
+### AcqDevice(other)
+
+---
+
+### operator=(other)
+
+---
+
+### AcqDevice()
+
+---
+
+### operator=()
+
+---
+
+### start()
+
+Starts acquisition and output.
+
+**Returns:**
+
+- *[AcqError](/docs/api/acq/acq-error)* — InvalidState unless Opened or Stopped, or the backend's error.
+
+---
+
+### stop()
+
+Stops acquisition and output and joins the backend threads.
+
+No-op unless Running.
+
+**Returns:**
+
+- *[AcqError](/docs/api/acq/acq-error)* — The backend's error, or success.
+
+---
+
+### close()
+
+Stops if needed and releases the device.
+
+Idempotent.
+
+---
+
+### state()
+
+**Returns:**
+
+- *AcqDeviceState* — The current state.
+
+---
+
+### streams()
+
+**Returns:**
+
+- *std::span&lt; const [AcqStream](/docs/api/acq/acq-stream) &gt;* — All streams of the source.
+
+---
+
+### stream(index)
+
+**Parameters:**
+
+- **index** : *std::size_t*
+  Stream index; 0 is the primary stream.
+
+**Returns:**
+
+- *[AcqStream](/docs/api/acq/acq-stream)* — The stream, or an invalid stream if out of range.
+
+---
+
+### findStream(name)
+
+**Parameters:**
+
+- **name** : *std::string_view*
+  Stream name.
+
+**Returns:**
+
+- *[AcqStream](/docs/api/acq/acq-stream)* — The stream, or an invalid stream if there is none.
+
+---
+
+### description()
+
+**Returns:**
+
+- *[AcqDeviceDescription](/docs/api/acq/acq-device-description)* — Description of the source.
+
+---
+
+### stats()
+
+**Returns:**
+
+- *[AcqDeviceStats](/docs/api/acq/acq-device-stats)* — State and per-stream counters.
+
+---
+
+### lastError()
+
+**Returns:**
+
+- *[AcqError](/docs/api/acq/acq-error)* — The last error reported by the backend or a failed transition; success if none.
+
+---
+
+## Static Methods
+
+### open(uri)
+
+Opens a source through [`AcqDeviceRegistry`](/docs/api/acq/acq-device-registry), e.g.
+
+"synthetic://", "fiff:///data/raw.fif?realtime=1".
+
+**Parameters:**
+
+- **uri** : *std::string_view*
+  Source URI.
+
+**Returns:**
+
+- *[AcqExpected](/docs/api/acq/acq-expected)&lt; [AcqDevice](/docs/api/acq/acq-device) &gt;* — The opened source, or InvalidUri, UnknownScheme, InvalidParameter, BackendUnavailable, ...
+
+---
+
+## Example
+
+- Start here: [ex_acq_oddball](../../examples/acq/ex_acq_oddball.mdx) — Recover the P300 from a streaming oddball session by trigger-locked averaging.
+- Full source: [`src/examples/ex_acq_oddball/main.cpp`](https://github.com/mne-tools/mne-cpp/tree/staging/src/examples/ex_acq_oddball/main.cpp)
+- Build target: `ex_acq_oddball` (runs under CTest)
+
+## Used in examples
+
+### [ex_acq_oddball](../../examples/acq/ex_acq_oddball.mdx)
+
+Recover the P300 from a streaming oddball session by trigger-locked averaging.
+
+````cpp title="src/examples/ex_acq_oddball/main.cpp, line 197"
+auto device = AcqDevice::open(uri);
+if (!device) {
+    std::fprintf(stderr, "Cannot open %s: %s\n", uri.c_str(), device.error().text().c_str());
+    return 1;
+}
+const AcqStream stream = device->stream();
+const auto info = stream.info();
+auto reader = stream.reader(AcqReader::ReadMode::Lossless);
+if (!reader || !device->start().ok()) {
+    std::fprintf(stderr, "Cannot start %s: %s\n", uri.c_str(), device->lastError().text().c_str());
+    return 1;
+}
+````
+
+## Authors of this file
+
+- Christoph Dinh &lt;christoph.dinh@mne-cpp.org&gt;

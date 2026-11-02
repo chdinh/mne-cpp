@@ -155,6 +155,22 @@ Takes the writer of an output stream (control path).
 - Full source: [`src/examples/ex_acq_performance/main.cpp`](https://github.com/mne-tools/mne-cpp/tree/staging/src/examples/ex_acq_performance/main.cpp)
 - Build target: `ex_acq_performance` (runs under CTest)
 
+## Used in examples
+
+### [ex_acq_oddball](../../examples/acq/ex_acq_oddball.mdx)
+
+Recover the P300 from a streaming oddball session by trigger-locked averaging.
+
+````cpp title="src/examples/ex_acq_oddball/main.cpp, line 202"
+const AcqStream stream = device->stream();
+const auto info = stream.info();
+auto reader = stream.reader(AcqReader::ReadMode::Lossless);
+if (!reader || !device->start().ok()) {
+    std::fprintf(stderr, "Cannot start %s: %s\n", uri.c_str(), device->lastError().text().c_str());
+    return 1;
+}
+````
+
 ## Authors of this file
 
 - Christoph Dinh &lt;christoph.dinh@mne-cpp.org&gt;

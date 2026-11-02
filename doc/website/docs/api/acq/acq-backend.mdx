@@ -1,0 +1,105 @@
+---
+id: acq-backend
+title: "ACQLIB::AcqBackend"
+sidebar_label: AcqBackend
+sidebar_position: 34
+---
+
+# AcqBackend
+
+**Namespace:** `ACQLIB` &nbsp;·&nbsp; **Library:** Acquisition Library &nbsp;·&nbsp; **Source:** [`acq/acq_backend.h`](https://github.com/mne-tools/mne-cpp/blob/staging/src/libraries/acq/acq_backend.h)
+
+`#include <acq/acq_backend.h>`
+
+```cpp
+class ACQLIB::AcqBackend
+```
+
+Base class of all backends.
+
+---
+
+## Public Methods
+
+### ~AcqBackend()
+
+---
+
+### AcqBackend()
+
+---
+
+### operator=()
+
+---
+
+### description()
+
+**Returns:**
+
+- *[AcqDeviceDescription](/docs/api/acq/acq-device-description)* — Description of the opened device.
+
+---
+
+### start()
+
+Starts acquisition and output.
+
+Called in state Opened or Stopped.
+
+**Returns:**
+
+- *[AcqError](/docs/api/acq/acq-error)* — Success, or the error that prevented the start.
+
+---
+
+### stop()
+
+Stops and joins every backend thread before returning.
+
+Called in state Running.
+
+---
+
+### close()
+
+Releases the device.
+
+Called once, after `stop()`. The default does nothing.
+
+---
+
+### streams()
+
+**Returns:**
+
+- *std::span&lt; const [AcqStream](/docs/api/acq/acq-stream) &gt;* — The streams created while opening, in creation order.
+
+---
+
+## Example
+
+No example of its own: Base class of device drivers; applications reach a backend only through AcqDevice::open().
+
+It is exercised by:
+
+````cpp title="src/examples/ex_acq_oddball/main.cpp"
+auto device = AcqDevice::open(uri);
+if (!device) {
+    std::fprintf(stderr, "Cannot open %s: %s\n", uri.c_str(), device.error().text().c_str());
+    return 1;
+}
+const AcqStream stream = device->stream();
+const auto info = stream.info();
+auto reader = stream.reader(AcqReader::ReadMode::Lossless);
+if (!reader || !device->start().ok()) {
+    std::fprintf(stderr, "Cannot start %s: %s\n", uri.c_str(), device->lastError().text().c_str());
+    return 1;
+}
+````
+
+From [ex_acq_oddball](../../examples/acq/ex_acq_oddball.mdx).
+
+## Authors of this file
+
+- Christoph Dinh &lt;christoph.dinh@mne-cpp.org&gt;

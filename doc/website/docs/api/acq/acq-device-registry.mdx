@@ -1,0 +1,146 @@
+---
+id: acq-device-registry
+title: "ACQLIB::AcqDeviceRegistry"
+sidebar_label: AcqDeviceRegistry
+sidebar_position: 28
+---
+
+# AcqDeviceRegistry
+
+**Namespace:** `ACQLIB` &nbsp;·&nbsp; **Library:** Acquisition Library &nbsp;·&nbsp; **Source:** [`acq/acq_device_registry.h`](https://github.com/mne-tools/mne-cpp/blob/staging/src/libraries/acq/acq_device_registry.h)
+
+`#include <acq/acq_device_registry.h>`
+
+```cpp
+class ACQLIB::AcqDeviceRegistry
+```
+
+Process-wide registry of source schemes.
+
+```cpp title="src/examples/ex_acq_oddball/main.cpp"
+if (uri == "--list") {
+    const AcqDeviceRegistry& registry = AcqDeviceRegistry::instance();
+    for (const AcqSchemeInfo& scheme : registry.schemes()) {
+        std::printf("%s://  %s\n", scheme.scheme.c_str(), scheme.description.c_str());
+        for (const AcqParameterInfo& parameter : scheme.parameters) {
+            std::printf("    %-9s %-7s %-6s %s\n", parameter.name.c_str(), parameter.type.c_str(),
+                        parameter.defaultValue.c_str(), parameter.description.c_str());
+        }
+    }
+    for (const AcqDiscoveredDevice& found : registry.discover(1s)) {
+        std::printf("found %s  %s (%s)\n", found.uri.c_str(), found.label.c_str(), found.detail.c_str());
+    }
+    return 0;
+}
+```
+
+---
+
+## Public Methods
+
+### registerScheme(info, factory, discoverer)
+
+Registers a scheme.
+
+Thread-safe.
+
+**Parameters:**
+
+- **info** : *[AcqSchemeInfo](/docs/api/acq/acq-scheme-info)*
+  Scheme description.
+
+- **factory** : *Factory*
+  Opens a backend.
+
+- **discoverer** : *Discoverer*
+  Optional discovery function.
+
+**Returns:**
+
+- *[AcqError](/docs/api/acq/acq-error)* — InvalidParameter if the scheme is already registered or malformed.
+
+---
+
+### open(uri)
+
+**Parameters:**
+
+- **uri** : *std::string_view*
+  Device URI.
+
+**Returns:**
+
+- *[AcqExpected](/docs/api/acq/acq-expected)&lt; [AcqDevice](/docs/api/acq/acq-device) &gt;* — The opened device; see `AcqDevice::open()`.
+
+---
+
+### schemes()
+
+**Returns:**
+
+- *std::vector&lt; [AcqSchemeInfo](/docs/api/acq/acq-scheme-info) &gt;* — All registered schemes, sorted by name.
+
+---
+
+### discover(timeout)
+
+**Parameters:**
+
+- **timeout** : *std::chrono::milliseconds*
+  Time budget for all schemes together.
+
+**Returns:**
+
+- *std::vector&lt; [AcqDiscoveredDevice](/docs/api/acq/acq-discovered-device) &gt;* — Reachable devices of every scheme, discovered in parallel.
+
+---
+
+### AcqDeviceRegistry()
+
+---
+
+### operator=()
+
+---
+
+## Static Methods
+
+### instance()
+
+**Returns:**
+
+- *AcqDeviceRegistry &* — The process-wide registry, with every compiled-in backend registered.
+
+---
+
+## Example
+
+- Start here: [ex_acq_oddball](../../examples/acq/ex_acq_oddball.mdx) — Recover the P300 from a streaming oddball session by trigger-locked averaging.
+- Full source: [`src/examples/ex_acq_oddball/main.cpp`](https://github.com/mne-tools/mne-cpp/tree/staging/src/examples/ex_acq_oddball/main.cpp)
+- Build target: `ex_acq_oddball` (runs under CTest)
+
+## Used in examples
+
+### [ex_acq_oddball](../../examples/acq/ex_acq_oddball.mdx)
+
+Recover the P300 from a streaming oddball session by trigger-locked averaging.
+
+````cpp title="src/examples/ex_acq_oddball/main.cpp, line 181"
+    const AcqDeviceRegistry& registry = AcqDeviceRegistry::instance();
+    for (const AcqSchemeInfo& scheme : registry.schemes()) {
+        std::printf("%s://  %s\n", scheme.scheme.c_str(), scheme.description.c_str());
+        for (const AcqParameterInfo& parameter : scheme.parameters) {
+            std::printf("    %-9s %-7s %-6s %s\n", parameter.name.c_str(), parameter.type.c_str(),
+                        parameter.defaultValue.c_str(), parameter.description.c_str());
+        }
+    }
+    for (const AcqDiscoveredDevice& found : registry.discover(1s)) {
+        std::printf("found %s  %s (%s)\n", found.uri.c_str(), found.label.c_str(), found.detail.c_str());
+    }
+    return 0;
+}
+````
+
+## Authors of this file
+
+- Christoph Dinh &lt;christoph.dinh@mne-cpp.org&gt;

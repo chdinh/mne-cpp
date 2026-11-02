@@ -43,6 +43,7 @@ add_subdirectory(ex_warp)
 
 ## Examples that link mne_disp3D but don't use 3D visualization directly
 if(NOT WASM)
+  add_subdirectory(ex_acq_oddball)
   add_subdirectory(ex_acq_performance)
   add_subdirectory(ex_connectivity_performance)
   add_subdirectory(ex_disp)

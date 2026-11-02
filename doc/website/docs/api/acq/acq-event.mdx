@@ -48,11 +48,28 @@ for (std::size_t e = 0; e < view->events().size(); ++e) {
 
 ## Used in examples
 
+### [ex_acq_oddball](../../examples/acq/ex_acq_oddball.mdx)
+
+Recover the P300 from a streaming oddball session by trigger-locked averaging.
+
+````cpp title="src/examples/ex_acq_oddball/main.cpp, line 234"
+const std::size_t maxView = capacity - length;
+std::vector<float> history(capacity * frame);
+std::vector<AcqEvent> pending;
+std::array<Average, 3> average; // indexed by event code
+average[kStandard].reset(eeg.size(), length);
+average[kTarget].reset(eeg.size(), length);
+std::vector<double> epoch(eeg.size() * length);
+std::vector<NoiseStep> noise;
+std::size_t nextStep = 4;
+std::uint64_t received = 0;
+````
+
 ### [ex_acq_performance](../../examples/acq/ex_acq_performance.mdx)
 
 Closed-loop acquisition and stimulation with ACQLIB, and its sustained throughput per device class.
 
-````cpp title="src/examples/ex_acq_performance/main.cpp, line 391"
+````cpp title="src/examples/ex_acq_performance/main.cpp, line 396"
             AcqEvent marker;
             marker.sample = s;
             marker.duration = kSpikeWidth;

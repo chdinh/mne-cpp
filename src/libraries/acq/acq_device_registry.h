@@ -75,6 +75,8 @@ struct AcqUri
 //=============================================================================================================
 /**
  * One parameter a scheme accepts, for help texts, the CLI and generated settings widgets.
+ *
+ * @snippet ex_acq_oddball/main.cpp acq_registry_list
  */
 struct AcqParameterInfo
 {
@@ -87,6 +89,8 @@ struct AcqParameterInfo
 //=============================================================================================================
 /**
  * Registration record of a scheme.
+ *
+ * @snippet ex_acq_oddball/main.cpp acq_registry_list
  */
 struct AcqSchemeInfo
 {
@@ -99,6 +103,8 @@ struct AcqSchemeInfo
 //=============================================================================================================
 /**
  * A source found by discovery, with a URI that opens it.
+ *
+ * @snippet ex_acq_oddball/main.cpp acq_registry_list
  */
 struct AcqDiscoveredDevice
 {
@@ -113,6 +119,8 @@ ACQ_STD_MEMBERS_BEGIN
 //=============================================================================================================
 /**
  * Process-wide registry of source schemes.
+ *
+ * @snippet ex_acq_oddball/main.cpp acq_registry_list
  */
 class ACQSHARED_EXPORT AcqDeviceRegistry
 {

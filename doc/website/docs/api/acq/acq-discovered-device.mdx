@@ -1,0 +1,61 @@
+---
+id: acq-discovered-device
+title: "ACQLIB::AcqDiscoveredDevice"
+sidebar_label: AcqDiscoveredDevice
+sidebar_position: 32
+---
+
+# AcqDiscoveredDevice
+
+**Namespace:** `ACQLIB` &nbsp;·&nbsp; **Library:** Acquisition Library &nbsp;·&nbsp; **Source:** [`acq/acq_device_registry.h`](https://github.com/mne-tools/mne-cpp/blob/staging/src/libraries/acq/acq_device_registry.h)
+
+`#include <acq/acq_device_registry.h>`
+
+```cpp
+struct ACQLIB::AcqDiscoveredDevice
+```
+
+A source found by discovery, with a URI that opens it.
+
+```cpp title="src/examples/ex_acq_oddball/main.cpp"
+if (uri == "--list") {
+    const AcqDeviceRegistry& registry = AcqDeviceRegistry::instance();
+    for (const AcqSchemeInfo& scheme : registry.schemes()) {
+        std::printf("%s://  %s\n", scheme.scheme.c_str(), scheme.description.c_str());
+        for (const AcqParameterInfo& parameter : scheme.parameters) {
+            std::printf("    %-9s %-7s %-6s %s\n", parameter.name.c_str(), parameter.type.c_str(),
+                        parameter.defaultValue.c_str(), parameter.description.c_str());
+        }
+    }
+    for (const AcqDiscoveredDevice& found : registry.discover(1s)) {
+        std::printf("found %s  %s (%s)\n", found.uri.c_str(), found.label.c_str(), found.detail.c_str());
+    }
+    return 0;
+}
+```
+
+---
+
+## Example
+
+- Start here: [ex_acq_oddball](../../examples/acq/ex_acq_oddball.mdx) — Recover the P300 from a streaming oddball session by trigger-locked averaging.
+- Full source: [`src/examples/ex_acq_oddball/main.cpp`](https://github.com/mne-tools/mne-cpp/tree/staging/src/examples/ex_acq_oddball/main.cpp)
+- Build target: `ex_acq_oddball` (runs under CTest)
+
+## Used in examples
+
+### [ex_acq_oddball](../../examples/acq/ex_acq_oddball.mdx)
+
+Recover the P300 from a streaming oddball session by trigger-locked averaging.
+
+````cpp title="src/examples/ex_acq_oddball/main.cpp, line 189"
+    for (const AcqDiscoveredDevice& found : registry.discover(1s)) {
+        std::printf("found %s  %s (%s)\n", found.uri.c_str(), found.label.c_str(), found.detail.c_str());
+    }
+    return 0;
+}
+````
+
+## Authors of this file
+
+- Christoph Dinh &lt;christoph.dinh@mne-cpp.org&gt;

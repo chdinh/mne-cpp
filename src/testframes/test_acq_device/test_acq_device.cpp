@@ -670,7 +670,7 @@ void TestAcqDevice::testSyntheticNoiseAndRhythm()
     QVERIFY(std::abs(rms - 10e-6) < 0.3e-6);
     QVERIFY(std::abs(cross / static_cast<double>(frames)) < 0.03 * 1e-10);
 
-    // Rhythm only: an 8 uV sine at the requested frequency (20 zero crossings per second at 10 Hz).
+    // Rhythm only: 8 uV at about the requested frequency; its phase drifts, so 10 Hz stays within the alpha band.
     const Drained r = record("synthetic://?realtime=0&duration=2&noise=0&interval=0&stim=0&eeg=1&alpha=10");
     const auto peak = std::max_element(r.samples.begin(), r.samples.end(),
                                        [](float a, float b) { return std::abs(a) < std::abs(b); });
@@ -679,18 +679,33 @@ void TestAcqDevice::testSyntheticNoiseAndRhythm()
     for (std::size_t s = 1; s < r.samples.size(); ++s) {
         crossings += (r.samples[s - 1] < 0.0F) != (r.samples[s] < 0.0F) ? 1 : 0;
     }
-    QVERIFY(crossings >= 39 && crossings <= 41);
+    QVERIFY2(crossings >= 32 && crossings <= 48, qPrintable(QString::number(crossings)));
+
+    // The drift decorrelates the rhythm from the stimuli: averaging over trials removes it, even with an
+    // interval of exactly six cycles.
+    const Drained locked = record("synthetic://?realtime=0&duration=200&sfreq=100&noise=0&evoked=0&eeg=1&stim=0"
+                                  "&interval=0.6&targets=0");
+    double residual = 0.0;
+    int lags = 0;
+    for (int lag = 0; lag < 60; ++lag) {
+        const double m = windowMean(locked, 1, 0, 100.0, 1, lag / 100.0, (lag + 1) / 100.0);
+        residual += m * m;
+        ++lags;
+    }
+    residual = std::sqrt(residual / lags);
+    QVERIFY2(residual < 1.5e-6, qPrintable(QString::number(residual)));
 }
 
 //=============================================================================================================
 
 void TestAcqDevice::testSyntheticOddballResponses()
 {
-    // 400 non-overlapping trials. Standards: N100 (-5 uV) and P200 (+4 uV); targets add a P300 (+8 uV at
+    // 400 non-overlapping trials, sampled at 100 Hz so the session fits the ring and no sample is lost. Standards: N100 (-5 uV) and P200 (+4 uV); targets add a P300 (+8 uV at
     // 350 ms). Channel weights follow cos(pi c / n): +1 on the first channel, mirrored on the last.
-    const double sfreq = 250.0;
-    const Drained d = record("synthetic://?realtime=0&duration=401&sfreq=250&interval=1&seed=3");
+    const double sfreq = 100.0;
+    const Drained d = record("synthetic://?realtime=0&duration=401&sfreq=100&interval=1&seed=3");
     const std::size_t channels = 9;
+    QCOMPARE(d.lost, std::uint64_t(0));
     std::size_t targets = 0;
     for (const AcqEvent& e : d.events) {
         targets += e.code == 2 ? 1U : 0U;
@@ -749,6 +764,19 @@ void TestAcqDevice::testSyntheticRealtimePacing()
     QVERIFY2(committed <= static_cast<std::uint64_t>(elapsedMs + 10), qPrintable(QString::number(committed)));
     QVERIFY2(committed >= 100, qPrintable(QString::number(committed)));
     QCOMPARE(committed % 10, std::uint64_t(0));
+
+    // speed=20 replays twenty times faster than real time.
+    auto fast = AcqDevice::open("synthetic://?sfreq=1000&speed=20");
+    QVERIFY(fast);
+    const auto fastStart = std::chrono::steady_clock::now();
+    QVERIFY(fast->start().ok());
+    std::this_thread::sleep_for(200ms);
+    const std::uint64_t fastCommitted = fast->stats().streams[0].committed;
+    const auto fastMs =
+        std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::steady_clock::now() - fastStart).count();
+    QVERIFY(fast->stop().ok());
+    QVERIFY2(fastCommitted <= static_cast<std::uint64_t>(20 * fastMs + 10), qPrintable(QString::number(fastCommitted)));
+    QVERIFY2(fastCommitted >= 1000, qPrintable(QString::number(fastCommitted)));
 }
 
 //=============================================================================================================
@@ -769,9 +797,10 @@ void TestAcqDevice::testSyntheticStopRestart()
     // The restarted device continues the same signal: identical to an uninterrupted run.
     const Drained resumed = drain(*reader);
     QCOMPARE(resumed.lost, std::uint64_t(0));
-    QVERIFY(resumed.samples.size() / 9 > first);
-    const Drained reference =
-        record("synthetic://?sfreq=2000&seed=9&realtime=0&duration=" + std::to_string((resumed.samples.size() / 9) / 2000.0));
+    const std::size_t frames = resumed.samples.size() / 9;
+    QVERIFY(frames > first);
+    const Drained reference = record("synthetic://?sfreq=2000&seed=9&realtime=0&duration=" +
+                                     std::to_string(static_cast<double>(frames) / 2000.0));
     QVERIFY(reference.samples.size() >= resumed.samples.size());
     QVERIFY(std::equal(resumed.samples.begin(), resumed.samples.end(), reference.samples.begin()));
 }
@@ -788,6 +817,7 @@ void TestAcqDevice::testSyntheticInvalidParameters_data()
     QTest::newRow("zero rate") << "synthetic://?sfreq=0" << "sfreq";
     QTest::newRow("trailing text") << "synthetic://?sfreq=1000Hz" << "sfreq";
     QTest::newRow("bool") << "synthetic://?realtime=maybe" << "realtime";
+    QTest::newRow("speed") << "synthetic://?speed=0" << "speed";
     QTest::newRow("negative interval") << "synthetic://?interval=-1" << "interval";
     QTest::newRow("block zero") << "synthetic://?block=0" << "block";
     QTest::newRow("target share") << "synthetic://?targets=1.5" << "targets";

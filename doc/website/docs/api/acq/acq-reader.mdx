@@ -235,7 +235,7 @@ Copying convenience: waits for `out.cols` samples, decodes them into `out` and r
 
 Closed-loop acquisition and stimulation with ACQLIB, and its sustained throughput per device class.
 
-````cpp title="src/examples/ex_acq_performance/main.cpp, line 370"
+````cpp title="src/examples/ex_acq_performance/main.cpp, line 375"
 /** The card: writes the input ring in 1 ms blocks at the real-time rate and plays the output ring. */
 void runCard(AcqWriter& input, AcqReader& dac, const SignalGenerator& gen, ClosedLoopState& st, double seconds)
 {
@@ -245,6 +245,20 @@ void runCard(AcqWriter& input, AcqReader& dac, const SignalGenerator& gen, Close
     bool previousNonZero = false;
     for (std::uint64_t k = 0; k < blocks; ++k) {
         std::this_thread::sleep_until(start + period * static_cast<std::int64_t>(k + 1));
+````
+
+### [ex_acq_oddball](../../examples/acq/ex_acq_oddball.mdx)
+
+Recover the P300 from a streaming oddball session by trigger-locked averaging.
+
+````cpp title="src/examples/ex_acq_oddball/main.cpp, line 202"
+const AcqStream stream = device->stream();
+const auto info = stream.info();
+auto reader = stream.reader(AcqReader::ReadMode::Lossless);
+if (!reader || !device->start().ok()) {
+    std::fprintf(stderr, "Cannot start %s: %s\n", uri.c_str(), device->lastError().text().c_str());
+    return 1;
+}
 ````
 
 ## Authors of this file

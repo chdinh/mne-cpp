@@ -47,6 +47,8 @@ struct BackendAccess;
 //=============================================================================================================
 /**
  * What a source is, for display and provenance.
+ *
+ * @snippet ex_acq_oddball/main.cpp acq_device_open
  */
 struct AcqDeviceDescription
 {

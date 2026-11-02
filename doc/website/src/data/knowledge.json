@@ -52,6 +52,27 @@
   },
   "examples": [
     {
+      "name": "ex_acq_oddball",
+      "title": "Recover the P300 from a streaming oddball session",
+      "brief": "Recover the P300 from a streaming oddball session by trigger-locked averaging",
+      "thumbnail": "",
+      "url": "/docs/examples/acq/ex_acq_oddball/",
+      "library": "acq",
+      "libraries": [
+        "acq",
+        "disp",
+        "dsp"
+      ],
+      "tasks": [
+        "real-time"
+      ],
+      "modalities": [
+        "eeg"
+      ],
+      "level": "start",
+      "topics": []
+    },
+    {
       "name": "ex_acq_performance",
       "title": "Closed-loop acquisition and stimulation at full rate",
       "brief": "Closed-loop acquisition and stimulation with ACQLIB, and its sustained throughput per device class",

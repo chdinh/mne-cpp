@@ -6,9 +6,9 @@
     "commit": "0800c9a1bf606c2df8c44e35fbb42ea13029b549"
   },
   "summary": {
-    "directories": 268,
+    "directories": 269,
     "registration": {
-      "unconditional": 259,
+      "unconditional": 260,
       "conditional": 6,
       "unregistered": 3
     },
@@ -32,6 +32,7 @@
         "failures": 0,
         "skipped": 0,
         "registered_not_executed": [
+          "test_acq_device",
           "test_acq_error",
           "test_acq_stream",
           "test_acq_timebase"
@@ -77,6 +78,7 @@
         "failures": 0,
         "skipped": 0,
         "registered_not_executed": [
+          "test_acq_device",
           "test_acq_error",
           "test_acq_stream",
           "test_acq_timebase"
@@ -122,6 +124,7 @@
         "failures": 0,
         "skipped": 0,
         "registered_not_executed": [
+          "test_acq_device",
           "test_acq_error",
           "test_acq_stream",
           "test_acq_timebase"
@@ -167,6 +170,7 @@
         "failures": 0,
         "skipped": 0,
         "registered_not_executed": [
+          "test_acq_device",
           "test_acq_error",
           "test_acq_stream",
           "test_acq_timebase"
@@ -212,6 +216,7 @@
         "failures": 0,
         "skipped": 2,
         "registered_not_executed": [
+          "test_acq_device",
           "test_acq_error",
           "test_acq_stream",
           "test_acq_timebase"
@@ -257,6 +262,7 @@
         "failures": 0,
         "skipped": 2,
         "registered_not_executed": [
+          "test_acq_device",
           "test_acq_error",
           "test_acq_stream",
           "test_acq_timebase"
@@ -300,6 +306,48 @@
     }
   },
   "tests": [
+    {
+      "name": "test_acq_device",
+      "cmake": "src/testframes/test_acq_device/CMakeLists.txt",
+      "registration": {
+        "state": "unconditional",
+        "via": "src/testframes/CMakeLists.txt",
+        "conditions": [],
+        "early_return_guard": null,
+        "unregistered_reason": null
+      },
+      "add_test_names": [
+        "test_acq_device"
+      ],
+      "labels": [
+        "unit"
+      ],
+      "timeout": 120,
+      "requirements": [],
+      "gui": false,
+      "qskip_sites": 0,
+      "spawns_processes": false,
+      "ci_excluded_on": [],
+      "ci": {
+        "macos-26": "absent",
+        "macos-26-qt-min": "absent",
+        "ubuntu-24.04": "absent",
+        "ubuntu-24.04-qt-min": "absent",
+        "windows-2025-vs2026": "absent",
+        "windows-2025-vs2026-qt-min": "absent"
+      },
+      "registry_classes": [
+        "AcqBackend",
+        "AcqDevice",
+        "AcqDeviceDescription",
+        "AcqDeviceRegistry",
+        "AcqDeviceStats",
+        "AcqDiscoveredDevice",
+        "AcqParameterInfo",
+        "AcqSchemeInfo",
+        "AcqUri"
+      ]
+    },
     {
       "name": "test_acq_error",
       "cmake": "src/testframes/test_acq_error/CMakeLists.txt",

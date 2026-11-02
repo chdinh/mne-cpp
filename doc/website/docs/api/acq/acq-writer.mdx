@@ -292,7 +292,7 @@ Creates a standalone ring with its writer (backends, DMA emulation, application-
 
 Closed-loop acquisition and stimulation with ACQLIB, and its sustained throughput per device class.
 
-````cpp title="src/examples/ex_acq_performance/main.cpp, line 370"
+````cpp title="src/examples/ex_acq_performance/main.cpp, line 375"
 /** The card: writes the input ring in 1 ms blocks at the real-time rate and plays the output ring. */
 void runCard(AcqWriter& input, AcqReader& dac, const SignalGenerator& gen, ClosedLoopState& st, double seconds)
 {

@@ -1,0 +1,87 @@
+---
+id: acq-uri
+title: "ACQLIB::AcqUri"
+sidebar_label: AcqUri
+sidebar_position: 33
+---
+
+# AcqUri
+
+**Namespace:** `ACQLIB` &nbsp;·&nbsp; **Library:** Acquisition Library &nbsp;·&nbsp; **Source:** [`acq/acq_device_registry.h`](https://github.com/mne-tools/mne-cpp/blob/staging/src/libraries/acq/acq_device_registry.h)
+
+`#include <acq/acq_device_registry.h>`
+
+```cpp
+struct ACQLIB::AcqUri
+```
+
+A parsed source URI.
+
+Percent-decoded; parameter order is preserved.
+
+---
+
+## Public Methods
+
+### param(key)
+
+**Parameters:**
+
+- **key** : *std::string_view*
+  Query key.
+
+**Returns:**
+
+- *std::optional&lt; std::string_view &gt;* — The value of the key, if present.
+
+---
+
+### toString()
+
+**Returns:**
+
+- *std::string* — The canonical, percent-encoded string form.
+
+---
+
+## Static Methods
+
+### parse(uri)
+
+**Parameters:**
+
+- **uri** : *std::string_view*
+  Device URI.
+
+**Returns:**
+
+- *[AcqExpected](/docs/api/acq/acq-expected)&lt; [AcqUri](/docs/api/acq/acq-uri) &gt;* — The parsed URI, or InvalidUri naming the offending position.
+
+---
+
+## Example
+
+No example of its own: Parsed form of a device URI; AcqDevice::open() parses it, backends read their parameters from it.
+
+It is exercised by:
+
+````cpp title="src/examples/ex_acq_oddball/main.cpp"
+auto device = AcqDevice::open(uri);
+if (!device) {
+    std::fprintf(stderr, "Cannot open %s: %s\n", uri.c_str(), device.error().text().c_str());
+    return 1;
+}
+const AcqStream stream = device->stream();
+const auto info = stream.info();
+auto reader = stream.reader(AcqReader::ReadMode::Lossless);
+if (!reader || !device->start().ok()) {
+    std::fprintf(stderr, "Cannot start %s: %s\n", uri.c_str(), device->lastError().text().c_str());
+    return 1;
+}
+````
+
+From [ex_acq_oddball](../../examples/acq/ex_acq_oddball.mdx).
+
+## Authors of this file
+
+- Christoph Dinh &lt;christoph.dinh@mne-cpp.org&gt;

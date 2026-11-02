@@ -1,0 +1,382 @@
+//=============================================================================================================
+/**
+ * SPDX-License-Identifier: BSD-3-Clause
+ * Copyright (c) 2026 MNE-CPP Authors
+ *
+ * @file     main.cpp
+ * @author   Christoph Dinh <christoph.dinh@mne-cpp.org>
+ * @since    2.5.0
+ * @date     November 2026
+ * @brief    Recover the P300 from a streaming oddball session by trigger-locked averaging.
+ *
+ * Opens an acquisition source by URI (default: the seeded auditory-oddball simulator, 8 EEG channels and a
+ * trigger channel), reads it with a Lossless reader and cuts an epoch from -200 to 800 ms around every
+ * trigger as soon as its post-stimulus part has arrived. Each epoch is low-pass filtered at 30 Hz,
+ * baseline-corrected and added to running sums per condition, so memory stays constant however long the session runs.
+ *
+ * At the end it reports the N100 of the standard response, the P300 of the target-minus-standard difference
+ * wave with its standard error, and how the residual noise of the target average, measured with the
+ * plus-minus average, falls with the number of trials next to the sigma/sqrt(N) law that averaging promises. A figure shows both averages and the difference
+ * wave. Any source whose events code standards as 1 and targets as 2 can be passed instead, e.g. a live
+ * amplifier with the same paradigm.
+ *
+ * Run it without arguments for the simulated session, with a URI to analyse another source, or with --list to
+ * print the registered schemes with their parameters and the sources discovery finds.
+ */
+
+//=============================================================================================================
+// INCLUDES
+//=============================================================================================================
+
+#include <acq/acq.h>
+
+#include <disp/plots/helpers/figureexporter.h>
+#include <disp/plots/lineplot.h>
+#include <dsp/firfilter.h>
+
+#include <Eigen/Core>
+
+#include <algorithm>
+#include <array>
+#include <cmath>
+#include <cstdio>
+#include <cstring>
+#include <limits>
+#include <string>
+#include <vector>
+
+//=============================================================================================================
+// QT INCLUDES
+//=============================================================================================================
+
+#include <QApplication>
+
+//=============================================================================================================
+// USED NAMESPACES
+//=============================================================================================================
+
+using namespace ACQLIB;
+using namespace DISPLIB;
+using namespace UTILSLIB;
+using namespace std::chrono_literals;
+
+namespace
+{
+
+constexpr double kPreSeconds = 0.2;
+constexpr double kPostSeconds = 0.8;
+constexpr double kLowPassHz = 30.0;
+constexpr std::int32_t kStandard = 1;
+constexpr std::int32_t kTarget = 2;
+constexpr std::size_t kEnoughTargets = 100;
+
+/** Running sums of baseline-corrected epochs of one condition: mean and standard error per channel and lag. */
+struct Average
+{
+    std::size_t channels = 0;
+    std::size_t length = 0;
+    std::size_t count = 0;
+    std::vector<double> sum;
+    std::vector<double> sumSquares;
+    std::vector<double> plusMinus;
+
+    void reset(std::size_t c, std::size_t n)
+    {
+        channels = c;
+        length = n;
+        sum.assign(c * n, 0.0);
+        sumSquares.assign(c * n, 0.0);
+        plusMinus.assign(c * n, 0.0);
+    }
+
+    void add(const std::vector<double>& epoch)
+    {
+        const double sign = count % 2 == 0 ? 1.0 : -1.0;
+        for (std::size_t i = 0; i < epoch.size(); ++i) {
+            sum[i] += epoch[i];
+            sumSquares[i] += epoch[i] * epoch[i];
+            plusMinus[i] += sign * epoch[i];
+        }
+        ++count;
+    }
+
+    /** @return RMS of the plus-minus average: alternate signs cancel the response and keep the noise. */
+    [[nodiscard]] double plusMinusRms() const
+    {
+        double squares = 0.0;
+        for (const double v : plusMinus) {
+            squares += v * v;
+        }
+        return std::sqrt(squares / static_cast<double>(plusMinus.size())) / static_cast<double>(count);
+    }
+
+    /** @return RMS over channels and lags of the single-trial noise, the spread of the epochs around their mean. */
+    [[nodiscard]] double noiseRms() const
+    {
+        double variance = 0.0;
+        for (std::size_t i = 0; i < sum.size(); ++i) {
+            const double n = static_cast<double>(count);
+            const double m = sum[i] / n;
+            variance += (sumSquares[i] / n - m * m) * n / (n - 1.0);
+        }
+        return std::sqrt(variance / static_cast<double>(sum.size()));
+    }
+
+    [[nodiscard]] double mean(std::size_t ch, std::size_t t) const
+    {
+        return count == 0 ? 0.0 : sum[ch * length + t] / static_cast<double>(count);
+    }
+
+    [[nodiscard]] double standardError(std::size_t ch, std::size_t t) const
+    {
+        if (count < 2) {
+            return 0.0;
+        }
+        const double n = static_cast<double>(count);
+        const double m = mean(ch, t);
+        return std::sqrt(std::max(0.0, (sumSquares[ch * length + t] / n - m * m) / (n - 1.0)));
+    }
+};
+
+/** Residual noise of the target average after N trials, next to the 1/sqrt(N) prediction. */
+struct NoiseStep
+{
+    std::size_t trials;
+    double measured;
+    double predicted;
+};
+
+/** A peak of a waveform inside a latency window. */
+struct Peak
+{
+    std::size_t index = 0;
+    double value = 0.0;
+};
+
+Peak findPeak(const std::vector<double>& wave, std::size_t from, std::size_t to, bool positive)
+{
+    Peak p{from, wave[from]};
+    for (std::size_t t = from; t < to && t < wave.size(); ++t) {
+        if (positive ? wave[t] > p.value : wave[t] < p.value) {
+            p = {t, wave[t]};
+        }
+    }
+    return p;
+}
+
+} // namespace
+
+//=============================================================================================================
+// MAIN
+//=============================================================================================================
+
+int main(int argc, char* argv[])
+{
+    QApplication app(argc, argv);
+    // A session of 400 trials, replayed a hundred times faster than real time.
+    const std::string uri = argc > 1 ? argv[1] : "synthetic://?seed=7&interval=1&duration=400&speed=100";
+
+    //! [acq_registry_list]
+    if (uri == "--list") {
+        const AcqDeviceRegistry& registry = AcqDeviceRegistry::instance();
+        for (const AcqSchemeInfo& scheme : registry.schemes()) {
+            std::printf("%s://  %s\n", scheme.scheme.c_str(), scheme.description.c_str());
+            for (const AcqParameterInfo& parameter : scheme.parameters) {
+                std::printf("    %-9s %-7s %-6s %s\n", parameter.name.c_str(), parameter.type.c_str(),
+                            parameter.defaultValue.c_str(), parameter.description.c_str());
+            }
+        }
+        for (const AcqDiscoveredDevice& found : registry.discover(1s)) {
+            std::printf("found %s  %s (%s)\n", found.uri.c_str(), found.label.c_str(), found.detail.c_str());
+        }
+        return 0;
+    }
+    //! [acq_registry_list]
+
+    //! [acq_device_open]
+    auto device = AcqDevice::open(uri);
+    if (!device) {
+        std::fprintf(stderr, "Cannot open %s: %s\n", uri.c_str(), device.error().text().c_str());
+        return 1;
+    }
+    const AcqStream stream = device->stream();
+    const auto info = stream.info();
+    auto reader = stream.reader(AcqReader::ReadMode::Lossless);
+    if (!reader || !device->start().ok()) {
+        std::fprintf(stderr, "Cannot start %s: %s\n", uri.c_str(), device->lastError().text().c_str());
+        return 1;
+    }
+    //! [acq_device_open]
+
+    std::vector<std::size_t> eeg;
+    for (std::size_t c = 0; c < info->channelCount(); ++c) {
+        if (info->channels[c].kind == AcqChannelKind::Eeg) {
+            eeg.push_back(c);
+        }
+    }
+    if (eeg.empty() || info->format != AcqSampleFormat::Float32 || info->sfreq <= 0.0) {
+        std::fprintf(stderr, "%s needs a regularly sampled float32 stream with EEG channels\n", uri.c_str());
+        return 1;
+    }
+    std::printf("%s\n  %s: %zu channels (%zu EEG) at %.0f Hz\n\n", device->description().device.c_str(),
+                info->name.c_str(), info->channelCount(), eeg.size(), info->sfreq);
+
+    const auto pre = static_cast<std::uint64_t>(std::llround(kPreSeconds * info->sfreq));
+    const auto post = static_cast<std::uint64_t>(std::llround(kPostSeconds * info->sfreq));
+    const std::size_t length = pre + post;
+    const std::size_t frame = info->channelCount();
+
+    // Rolling history of the newest samples, long enough to hold an epoch plus the block that completes it.
+    std::size_t capacity = 1;
+    while (capacity < length + static_cast<std::size_t>(2.0 * info->sfreq)) {
+        capacity *= 2;
+    }
+    const std::size_t maxView = capacity - length;
+    std::vector<float> history(capacity * frame);
+    std::vector<AcqEvent> pending;
+    std::array<Average, 3> average; // indexed by event code
+    average[kStandard].reset(eeg.size(), length);
+    average[kTarget].reset(eeg.size(), length);
+    std::vector<double> epoch(eeg.size() * length);
+    std::vector<NoiseStep> noise;
+    std::size_t nextStep = 4;
+    std::uint64_t received = 0;
+
+    Eigen::MatrixXd raw(static_cast<Eigen::Index>(eeg.size()), static_cast<Eigen::Index>(length));
+    auto cutEpoch = [&](const AcqEvent& event) {
+        for (std::size_t e = 0; e < eeg.size(); ++e) {
+            const AcqChannelInfo& channel = info->channels[eeg[e]];
+            for (std::size_t t = 0; t < length; ++t) {
+                const std::uint64_t s = event.sample - pre + t;
+                raw(static_cast<Eigen::Index>(e), static_cast<Eigen::Index>(t)) =
+                    history[(s & (capacity - 1)) * frame + eeg[e]] * channel.scale + channel.offset;
+            }
+        }
+        // ERPs live below 30 Hz: low-pass like mne.filter.filter_data, then correct the baseline.
+        const Eigen::MatrixXd filtered = FirFilter::filterData(raw, info->sfreq, -1.0, kLowPassHz);
+        for (std::size_t e = 0; e < eeg.size(); ++e) {
+            const auto row = static_cast<Eigen::Index>(e);
+            const double baseline = filtered.row(row).head(static_cast<Eigen::Index>(pre)).mean();
+            for (std::size_t t = 0; t < length; ++t) {
+                epoch[e * length + t] = filtered(row, static_cast<Eigen::Index>(t)) - baseline;
+            }
+        }
+        average[event.code].add(epoch);
+        if (event.code != kTarget) {
+            return;
+        }
+        const Average& targets = average[kTarget];
+        if (targets.count == nextStep) {
+            noise.push_back({targets.count, targets.plusMinusRms(), targets.noiseRms() / std::sqrt(static_cast<double>(targets.count))});
+            nextStep *= 2;
+        }
+    };
+
+    //! [acq_epoch_stream]
+    while (average[kTarget].count < kEnoughTargets) {
+        auto view = reader->acquire(1, 2s, maxView);
+        if (!view) {
+            if (view.error() == AcqErrorCode::EndOfStream) {
+                break;
+            }
+            continue;
+        }
+        std::uint64_t s = view->firstSample();
+        for (std::size_t p = 0; p < view->partCount(); ++p) {
+            const AcqBlockPart& part = view->part(p);
+            for (std::size_t i = 0; i < part.samples; ++i, ++s) {
+                std::memcpy(&history[(s & (capacity - 1)) * frame], part.at(0, i), frame * sizeof(float));
+            }
+        }
+        for (std::size_t e = 0; e < view->events().size(); ++e) {
+            const AcqEvent& event = view->events()[e];
+            if ((event.code == kStandard || event.code == kTarget) && event.sample >= pre) {
+                pending.push_back(event);
+            }
+        }
+        received = s;
+        if (!reader->release(*view).ok()) {
+            std::fprintf(stderr, "The reader fell behind; epochs over the lost samples are skipped\n");
+        }
+        // An epoch is complete once its last post-stimulus sample has arrived.
+        auto complete = [&](const AcqEvent& event) {
+            return event.sample + post <= received;
+        };
+        for (const AcqEvent& event : pending) {
+            if (complete(event)) {
+                cutEpoch(event);
+            }
+        }
+        pending.erase(std::remove_if(pending.begin(), pending.end(), complete), pending.end());
+    }
+    //! [acq_epoch_stream]
+    device->close();
+
+    const Average& standards = average[kStandard];
+    const Average& targets = average[kTarget];
+    if (targets.count < 10 || standards.count < 10) {
+        std::fprintf(stderr, "Only %zu standards and %zu targets; the session was too short\n", standards.count,
+                     targets.count);
+        return 1;
+    }
+
+    // The P300 is positive: the channel where targets exceed standards most in its window carries it.
+    const auto lag = [&](double seconds) {
+        return static_cast<std::size_t>(std::llround((seconds + kPreSeconds) * info->sfreq));
+    };
+    std::size_t best = 0;
+    double bestEffect = -std::numeric_limits<double>::infinity();
+    for (std::size_t e = 0; e < eeg.size(); ++e) {
+        double effect = 0.0;
+        for (std::size_t t = lag(0.25); t < lag(0.5); ++t) {
+            effect += targets.mean(e, t) - standards.mean(e, t);
+        }
+        if (effect > bestEffect) {
+            bestEffect = effect;
+            best = e;
+        }
+    }
+    QVector<double> ms(static_cast<int>(length)), standardUv(ms.size()), targetUv(ms.size()), differenceUv(ms.size());
+    std::vector<double> difference(length), standardWave(length);
+    for (std::size_t t = 0; t < length; ++t) {
+        const auto i = static_cast<int>(t);
+        ms[i] = (static_cast<double>(t) / info->sfreq - kPreSeconds) * 1e3;
+        standardWave[t] = standards.mean(best, t);
+        difference[t] = targets.mean(best, t) - standards.mean(best, t);
+        standardUv[i] = standardWave[t] * 1e6;
+        targetUv[i] = targets.mean(best, t) * 1e6;
+        differenceUv[i] = difference[t] * 1e6;
+    }
+    const Peak n100 = findPeak(standardWave, lag(0.07), lag(0.15), false);
+    const Peak p300 = findPeak(difference, lag(0.25), lag(0.5), true);
+    const double p300Error = std::hypot(targets.standardError(best, p300.index), standards.standardError(best, p300.index));
+    const double tValue = p300.value / p300Error;
+    const std::string& name = info->channels[eeg[best]].name;
+
+    std::printf("  %zu standards, %zu targets; strongest effect at %s\n", standards.count, targets.count, name.c_str());
+    std::printf("  N100 of the standards    %6.1f uV at %3.0f ms\n", n100.value * 1e6, ms[static_cast<int>(n100.index)]);
+    std::printf("  P300, target - standard  %6.1f uV at %3.0f ms, standard error %.2f uV, t = %.1f\n\n",
+                p300.value * 1e6, ms[static_cast<int>(p300.index)], p300Error * 1e6, tValue);
+    std::printf("  residual noise of the target average (plus-minus average, RMS over all EEG channels and lags)\n");
+    std::printf("  %8s %12s %16s\n", "trials", "measured", "sigma/sqrt(N)");
+    for (const NoiseStep& step : noise) {
+        std::printf("  %8zu %9.2f uV %13.2f uV\n", step.trials, step.measured * 1e6, step.predicted * 1e6);
+    }
+
+    LinePlot plot;
+    plot.setTitle(QString("Oddball ERPs at %1").arg(QString::fromStdString(name)));
+    plot.setXLabel("Time after stimulus [ms]");
+    plot.setYLabel("Amplitude [uV]");
+    plot.addSeries(ms, standardUv, QString("standards (N = %1)").arg(standards.count));
+    plot.addSeries(ms, targetUv, QString("targets (N = %1)").arg(targets.count));
+    plot.addSeries(ms, differenceUv, "target - standard", QColor(), Qt::DashLine);
+    FigureExporter::save(plot, "oddball_erp",
+                         QString("Averages of a streamed oddball session at %1, baseline-corrected over -200 to 0 ms and "
+                                 "low-pass filtered at 30 Hz. The difference wave peaks at %2 ms with %3 uV (t = %4): the P300.")
+                             .arg(QString::fromStdString(name))
+                             .arg(ms[static_cast<int>(p300.index)], 0, 'f', 0)
+                             .arg(p300.value * 1e6, 0, 'f', 1)
+                             .arg(tValue, 0, 'f', 1));
+
+    return tValue > 5.0 ? 0 : 1;
+}

@@ -756,6 +756,201 @@
       "example_exempt_reason": "Element type for typed access to ComplexInt16 I/Q samples; a plain value with no behaviour to demonstrate."
     },
     {
+      "name": "AcqDevice",
+      "module": "acq",
+      "header": "acq/acq_device.h",
+      "origin": "custom",
+      "mne_c_tool": null,
+      "mne_python": null,
+      "sklearn": null,
+      "test": "test_acq_device",
+      "status": "documented",
+      "skigen_candidate": false,
+      "documented": true,
+      "sidebar_position": 27,
+      "guide": null,
+      "python_equiv": null,
+      "python_url": null,
+      "example": "ex_acq_oddball",
+      "example_snippet": [
+        "ex_acq_oddball/main.cpp#acq_device_open"
+      ],
+      "example_mode": "run"
+    },
+    {
+      "name": "AcqDeviceRegistry",
+      "module": "acq",
+      "header": "acq/acq_device_registry.h",
+      "origin": "custom",
+      "mne_c_tool": null,
+      "mne_python": null,
+      "sklearn": null,
+      "test": "test_acq_device",
+      "status": "documented",
+      "skigen_candidate": false,
+      "documented": true,
+      "sidebar_position": 28,
+      "guide": null,
+      "python_equiv": null,
+      "python_url": null,
+      "example": "ex_acq_oddball",
+      "example_snippet": [
+        "ex_acq_oddball/main.cpp#acq_registry_list"
+      ],
+      "example_mode": "run"
+    },
+    {
+      "name": "AcqDeviceDescription",
+      "module": "acq",
+      "header": "acq/acq_backend.h",
+      "origin": "custom",
+      "mne_c_tool": null,
+      "mne_python": null,
+      "sklearn": null,
+      "test": "test_acq_device",
+      "status": "documented",
+      "skigen_candidate": false,
+      "documented": true,
+      "sidebar_position": 29,
+      "guide": null,
+      "python_equiv": null,
+      "python_url": null,
+      "example": "ex_acq_oddball",
+      "example_snippet": [
+        "ex_acq_oddball/main.cpp#acq_device_open"
+      ],
+      "example_mode": "run"
+    },
+    {
+      "name": "AcqSchemeInfo",
+      "module": "acq",
+      "header": "acq/acq_device_registry.h",
+      "origin": "custom",
+      "mne_c_tool": null,
+      "mne_python": null,
+      "sklearn": null,
+      "test": "test_acq_device",
+      "status": "documented",
+      "skigen_candidate": false,
+      "documented": true,
+      "sidebar_position": 30,
+      "guide": null,
+      "python_equiv": null,
+      "python_url": null,
+      "example": "ex_acq_oddball",
+      "example_snippet": [
+        "ex_acq_oddball/main.cpp#acq_registry_list"
+      ],
+      "example_mode": "run"
+    },
+    {
+      "name": "AcqParameterInfo",
+      "module": "acq",
+      "header": "acq/acq_device_registry.h",
+      "origin": "custom",
+      "mne_c_tool": null,
+      "mne_python": null,
+      "sklearn": null,
+      "test": "test_acq_device",
+      "status": "documented",
+      "skigen_candidate": false,
+      "documented": true,
+      "sidebar_position": 31,
+      "guide": null,
+      "python_equiv": null,
+      "python_url": null,
+      "example": "ex_acq_oddball",
+      "example_snippet": [
+        "ex_acq_oddball/main.cpp#acq_registry_list"
+      ],
+      "example_mode": "run"
+    },
+    {
+      "name": "AcqDiscoveredDevice",
+      "module": "acq",
+      "header": "acq/acq_device_registry.h",
+      "origin": "custom",
+      "mne_c_tool": null,
+      "mne_python": null,
+      "sklearn": null,
+      "test": "test_acq_device",
+      "status": "documented",
+      "skigen_candidate": false,
+      "documented": true,
+      "sidebar_position": 32,
+      "guide": null,
+      "python_equiv": null,
+      "python_url": null,
+      "example": "ex_acq_oddball",
+      "example_snippet": [
+        "ex_acq_oddball/main.cpp#acq_registry_list"
+      ],
+      "example_mode": "run"
+    },
+    {
+      "name": "AcqUri",
+      "module": "acq",
+      "header": "acq/acq_device_registry.h",
+      "origin": "custom",
+      "mne_c_tool": null,
+      "mne_python": null,
+      "sklearn": null,
+      "test": "test_acq_device",
+      "status": "documented",
+      "skigen_candidate": false,
+      "documented": true,
+      "sidebar_position": 33,
+      "guide": null,
+      "python_equiv": null,
+      "python_url": null,
+      "example_exempt": true,
+      "example_exempt_reason": "Parsed form of a device URI; AcqDevice::open() parses it, backends read their parameters from it.",
+      "example_used_in": [
+        "ex_acq_oddball/main.cpp#acq_device_open"
+      ]
+    },
+    {
+      "name": "AcqBackend",
+      "module": "acq",
+      "header": "acq/acq_backend.h",
+      "origin": "custom",
+      "mne_c_tool": null,
+      "mne_python": null,
+      "sklearn": null,
+      "test": "test_acq_device",
+      "status": "documented",
+      "skigen_candidate": false,
+      "documented": true,
+      "sidebar_position": 34,
+      "guide": null,
+      "python_equiv": null,
+      "python_url": null,
+      "example_exempt": true,
+      "example_exempt_reason": "Base class of device drivers; applications reach a backend only through AcqDevice::open().",
+      "example_used_in": [
+        "ex_acq_oddball/main.cpp#acq_device_open"
+      ]
+    },
+    {
+      "name": "AcqDeviceStats",
+      "module": "acq",
+      "header": "acq/acq_device.h",
+      "origin": "custom",
+      "mne_c_tool": null,
+      "mne_python": null,
+      "sklearn": null,
+      "test": "test_acq_device",
+      "status": "documented",
+      "skigen_candidate": false,
+      "documented": true,
+      "sidebar_position": 35,
+      "guide": null,
+      "python_equiv": null,
+      "python_url": null,
+      "example_exempt": true,
+      "example_exempt_reason": "State plus one AcqStreamStats per stream; the counters themselves are shown with AcqStreamStats."
+    },
+    {
       "name": "FiffStream",
       "module": "fiff",
       "header": "fiff/fiff_stream.h",
@@ -15744,6 +15939,17 @@
       }
     },
     "entries": {
+      "ex_acq_oddball": {
+        "title": "Recover the P300 from a streaming oddball session",
+        "tasks": [
+          "real-time"
+        ],
+        "modalities": [
+          "eeg"
+        ],
+        "level": "start",
+        "library": "acq"
+      },
       "ex_acq_performance": {
         "title": "Closed-loop acquisition and stimulation at full rate",
         "tasks": [

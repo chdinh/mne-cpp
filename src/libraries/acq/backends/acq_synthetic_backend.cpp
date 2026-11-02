@@ -12,9 +12,10 @@
  * Every sample is a pure function of the seed, the sample index and the channel, so a recording does not
  * depend on block size, pacing or restarts. Signal per channel c (1 model unit = 1 uV on EEG, 20 fT on MEG):
  *
- *     x_c(s) = noise * 10 * N(0, 1) + 8 * sin(2 pi alpha s / sfreq + phi_c) + evoked * w_c * sum_k erp_k(s)
+ *     x_c(s) = noise * 10 * N(0, 1) + 8 * sin(2 pi alpha t + d(t) + phi_c) + evoked * w_c * sum_k erp_k(s)
  *
- * with w_c = cos(pi c / n) (a dipolar topography over the n channels of one kind). Trial k starts at
+ * with t = s / sfreq and d(t) a smooth phase drift (cosine-interpolated random values every 0.5 s, within
+ * +-1.5 pi), so the rhythm is not phase-locked to the stimuli, as in real recordings. w_c = cos(pi c / n) (a dipolar topography over the n channels of one kind). Trial k starts at
  * (k + 1 + 0.1 u_k) * interval seconds; it is a target with probability targets, a standard otherwise.
  * Standards evoke an N100 (-5 at 100 ms, sigma 25 ms) and a P200 (+4 at 200 ms, sigma 40 ms); targets add
  * a P300 (+8 at 350 ms, sigma 80 ms). The stim channel holds the trial code (1 standard, 2 target) for 5 ms.
@@ -54,6 +55,8 @@ constexpr double kEegUnit = 1e-6;   // V per model unit
 constexpr double kMegUnit = 20e-15; // T per model unit
 constexpr double kNoiseRms = 10.0;
 constexpr double kAlphaAmplitude = 8.0;
+constexpr double kDriftKnotSeconds = 0.5;
+constexpr double kDriftRange = 1.5 * 3.14159265358979323846;
 constexpr double kWindowSeconds = 0.8; // evoked responses have decayed below 1e-4 of their peak by then
 constexpr double kJitter = 0.1;
 constexpr double kPulseSeconds = 0.005;
@@ -82,7 +85,8 @@ enum Stream : std::uint64_t
     NoiseStream = 1,
     PhaseStream = 2,
     TrialStream = 3,
-    JitterStream = 4
+    JitterStream = 4,
+    DriftStream = 5
 };
 
 constexpr std::uint64_t mix(std::uint64_t x) noexcept
@@ -113,6 +117,7 @@ struct Config
     double sfreq = 1000.0;
     std::size_t block = 0;
     bool realtime = true;
+    double speed = 1.0;
     std::uint64_t totalSamples = 0;
     std::uint64_t seed = 0;
     double noise = 1.0;
@@ -140,6 +145,7 @@ AcqExpected<Config> parseConfig(const AcqUri& uri)
     const auto sfreq = paramDouble(uri, "sfreq", 1000.0, 0.001, 1e6);
     const auto block = paramInt(uri, "block", 0, 1, 1 << 20);
     const auto realtime = paramBool(uri, "realtime", true);
+    const auto speed = paramDouble(uri, "speed", 1.0, 0.01, 1e4);
     const auto duration = paramDouble(uri, "duration", 0.0, 0.0, 1e7);
     const auto seed = paramInt(uri, "seed", 0, 0, INT64_MAX);
     const auto noise = paramDouble(uri, "noise", 1.0, 0.0, 1e3);
@@ -148,7 +154,7 @@ AcqExpected<Config> parseConfig(const AcqUri& uri)
     const auto targets = paramDouble(uri, "targets", 0.2, 0.0, 1.0);
     const auto evoked = paramDouble(uri, "evoked", 1.0, 0.0, 1e3);
     for (const AcqError& error : {eeg.error(), meg.error(), stim.error(), sfreq.error(), block.error(),
-                                  realtime.error(), duration.error(), seed.error(), noise.error(), alpha.error(),
+                                  realtime.error(), speed.error(), duration.error(), seed.error(), noise.error(), alpha.error(),
                                   interval.error(), targets.error(), evoked.error()}) {
         if (!error.ok()) {
             return error;
@@ -160,6 +166,7 @@ AcqExpected<Config> parseConfig(const AcqUri& uri)
     c.sfreq = *sfreq;
     c.block = *block > 0 ? static_cast<std::size_t>(*block) : static_cast<std::size_t>(std::max(1.0, std::round(c.sfreq / 100.0)));
     c.realtime = *realtime;
+    c.speed = *speed;
     c.totalSamples = static_cast<std::uint64_t>(std::llround(*duration * c.sfreq));
     c.seed = static_cast<std::uint64_t>(*seed);
     c.noise = *noise;
@@ -251,6 +258,18 @@ public:
         }
     }
 
+    /** @return The phase drift of the rhythm at t seconds. */
+    [[nodiscard]] double drift(double t) const noexcept
+    {
+        const double knot = t / kDriftKnotSeconds;
+        const double k = std::floor(knot);
+        const double w = 0.5 - 0.5 * std::cos(kPi * (knot - k));
+        const auto index = static_cast<std::uint64_t>(k);
+        const double a = 2.0 * uniform(hash(m_c.seed, DriftStream, index)) - 1.0;
+        const double b = 2.0 * uniform(hash(m_c.seed, DriftStream, index + 1)) - 1.0;
+        return kDriftRange * (a + (b - a) * w);
+    }
+
     /** Writes the frame of sample s (all channels, physical units) to out. */
     void frame(std::uint64_t s, const std::vector<Trial>& trials, float* out) const noexcept
     {
@@ -269,7 +288,7 @@ public:
         erp *= m_c.evoked;
 
         const double cycles = m_c.alpha * static_cast<double>(s) / m_c.sfreq;
-        const double alphaPhase = 2.0 * kPi * (cycles - std::floor(cycles));
+        const double alphaPhase = 2.0 * kPi * (cycles - std::floor(cycles)) + drift(static_cast<double>(s) / m_c.sfreq);
         for (std::size_t c = 0; c < m_analog; c += 2) {
             double z[2] = {0.0, 0.0};
             if (m_c.noise > 0.0) {
@@ -437,7 +456,8 @@ private:
             }
 
             if (m_config.realtime) {
-                const std::chrono::duration<double> due(static_cast<double>(m_next + n - startSample) / m_config.sfreq);
+                const std::chrono::duration<double> due(static_cast<double>(m_next + n - startSample) /
+                                                        (m_config.sfreq * m_config.speed));
                 const auto deadline = start + std::chrono::duration_cast<Clock::duration>(due);
                 std::unique_lock<std::mutex> lock(m_mutex);
                 m_wake.wait_until(lock, deadline, [this] { return m_stop.load(std::memory_order_acquire); });
@@ -486,7 +506,10 @@ AcqSchemeInfo schemeInfo()
         {"stim", "bool", "1", "Add the trigger channel STI 014."},
         {"sfreq", "double", "1000", "Sampling rate in Hz."},
         {"block", "int", "auto", "Samples per block; auto = 10 ms."},
-        {"realtime", "bool", "1", "Pace blocks by the clock; 0 generates as fast as possible."},
+        {"realtime", "bool", "1",
+         "Pace blocks by the clock. 0 generates as fast as possible, so readers lose samples once they fall a "
+         "whole ring behind."},
+        {"speed", "double", "1", "Pacing factor of realtime, e.g. 100 replays a session 100 times faster."},
         {"duration", "double", "0", "Session length in seconds, then end of stream; 0 runs until stopped."},
         {"seed", "int", "0", "Seed; equal seeds give bit-identical data."},
         {"noise", "double", "1", "Gain of the background noise (1 = 10 uV / 200 fT rms)."},

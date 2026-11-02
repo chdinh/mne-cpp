@@ -254,6 +254,27 @@ ok &= expect(smooth.size() == tones.size() && std::fabs(kept - 1.0) < 0.02 && re
              QString("FirFilter 20 Hz low-pass keeps 10 Hz (%1) and removes 40 Hz (%2)").arg(kept, 0, 'f', 4).arg(removed, 0, 'f', 4));
 ````
 
+### [ex_acq_oddball](../../examples/acq/ex_acq_oddball.mdx)
+
+Recover the P300 from a streaming oddball session by trigger-locked averaging.
+
+````cpp title="src/examples/ex_acq_oddball/main.cpp, line 255"
+// ERPs live below 30 Hz: low-pass like mne.filter.filter_data, then correct the baseline.
+const Eigen::MatrixXd filtered = FirFilter::filterData(raw, info->sfreq, -1.0, kLowPassHz);
+for (std::size_t e = 0; e < eeg.size(); ++e) {
+    const auto row = static_cast<Eigen::Index>(e);
+    const double baseline = filtered.row(row).head(static_cast<Eigen::Index>(pre)).mean();
+    for (std::size_t t = 0; t < length; ++t) {
+        epoch[e * length + t] = filtered(row, static_cast<Eigen::Index>(t)) - baseline;
+    }
+}
+average[event.code].add(epoch);
+if (event.code != kTarget) {
+    return;
+}
+const Average& targets = average[kTarget];
+````
+
 ## Authors of this file
 
 - Christoph Dinh &lt;christoph.dinh@mne-cpp.org&gt;

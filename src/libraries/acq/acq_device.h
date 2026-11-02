@@ -68,6 +68,8 @@ ACQ_STD_MEMBERS_BEGIN
 //=============================================================================================================
 /**
  * An opened source. Move-only handle that owns its backend.
+ *
+ * @snippet ex_acq_oddball/main.cpp acq_device_open
  */
 class ACQSHARED_EXPORT AcqDevice
 {

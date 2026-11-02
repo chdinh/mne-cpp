@@ -11,7 +11,7 @@
   },
   "gates": {
     "G1_test_integrity": {
-      "registered": 265,
+      "registered": 266,
       "conditional": 6,
       "unregistered": 3,
       "without_labels": 0,
@@ -34,31 +34,37 @@
       },
       "ci_not_executed": {
         "macos-26": [
+          "test_acq_device",
           "test_acq_error",
           "test_acq_stream",
           "test_acq_timebase"
         ],
         "macos-26-qt-min": [
+          "test_acq_device",
           "test_acq_error",
           "test_acq_stream",
           "test_acq_timebase"
         ],
         "ubuntu-24.04": [
+          "test_acq_device",
           "test_acq_error",
           "test_acq_stream",
           "test_acq_timebase"
         ],
         "ubuntu-24.04-qt-min": [
+          "test_acq_device",
           "test_acq_error",
           "test_acq_stream",
           "test_acq_timebase"
         ],
         "windows-2025-vs2026": [
+          "test_acq_device",
           "test_acq_error",
           "test_acq_stream",
           "test_acq_timebase"
         ],
         "windows-2025-vs2026-qt-min": [
+          "test_acq_device",
           "test_acq_error",
           "test_acq_stream",
           "test_acq_timebase"
@@ -85,12 +91,12 @@
       }
     },
     "G3_api_documentation": {
-      "public_api_units": 548,
-      "exported_not_registered": 3,
-      "example_eligible": 395,
-      "eligible_backed_percent": 99.24,
-      "snippets": 420,
-      "registered_test_percent": 34.68
+      "public_api_units": 554,
+      "exported_not_registered": 0,
+      "example_eligible": 398,
+      "eligible_backed_percent": 100.0,
+      "snippets": 429,
+      "registered_test_percent": 35.74
     },
     "G4_screenshots": {
       "referenced_images": 19,

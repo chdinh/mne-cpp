@@ -6,15 +6,6 @@
     "SURFACEKEYS": "String-key constants for disp3D surface lookups, not types."
   },
   "classes": {
-    "ACQLIB::AcqDevice": "Declared ahead of its implementation; registered with the synthetic device that implements and exercises it.",
-    "ACQLIB::AcqDeviceRegistry": "Declared ahead of its implementation; registered with the synthetic device that implements and exercises it.",
-    "ACQLIB::AcqBackend": "Declared ahead of its implementation; registered with the synthetic device that implements and exercises it.",
-    "ACQLIB::AcqDeviceDescription": "Declared ahead of its implementation; registered with the synthetic device that implements and exercises it.",
-    "ACQLIB::AcqDeviceStats": "Declared ahead of its implementation; registered with the synthetic device that implements and exercises it.",
-    "ACQLIB::AcqDiscoveredDevice": "Declared ahead of its implementation; registered with the synthetic device that implements and exercises it.",
-    "ACQLIB::AcqUri": "Declared ahead of its implementation; registered with the synthetic device that implements and exercises it.",
-    "ACQLIB::AcqSchemeInfo": "Declared ahead of its implementation; registered with the synthetic device that implements and exercises it.",
-    "ACQLIB::AcqParameterInfo": "Declared ahead of its implementation; registered with the synthetic device that implements and exercises it.",
     "ACQLIB::AcqReadResult": "Declared ahead of its implementation; registered with the format converters that implement and exercise it.",
     "ACQLIB::AcqMatrixRef": "Declared ahead of its implementation; registered with the format converters that implement and exercise it.",
     "ACQLIB::AcqConvertOptions": "Declared ahead of its implementation; registered with the format converters that implement and exercise it.",
