@@ -37,9 +37,9 @@ The documented classes this example uses most:
 |---|---|
 | [`AcqReader`](../../api/acq/acq-reader.mdx) | Acquisition |
 | [`AcqMatrixRef`](../../api/acq/acq-matrix-ref.mdx) | Acquisition |
+| [`AcqChannelInfo`](../../api/acq/acq-channel-info.mdx) | Acquisition |
 | [`AcqStreamInfo`](../../api/acq/acq-stream-info.mdx) | Acquisition |
 | [`AcqWriter`](../../api/acq/acq-writer.mdx) | Acquisition |
-| [`AcqChannelInfo`](../../api/acq/acq-channel-info.mdx) | Acquisition |
 | [`AcqDevice`](../../api/acq/acq-device.mdx) | Acquisition |
 | [`AcqError`](../../api/acq/acq-error.mdx) | Acquisition |
 | [`AcqEvent`](../../api/acq/acq-event.mdx) | Acquisition |
@@ -102,6 +102,7 @@ The documented classes this example uses most:
 #include <disp/plots/helpers/figureexporter.h>
 
 #include <algorithm>
+#include <array>
 #include <atomic>
 #include <bit>
 #include <cmath>
@@ -120,6 +121,7 @@ The documented classes this example uses most:
 //=============================================================================================================
 
 #include <QApplication>
+#include <QFont>
 #include <QImage>
 #include <QLabel>
 #include <QPainter>
@@ -154,27 +156,79 @@ struct Marker
     bool wrapped = false; // pulse markers: written in two parts across the end of the ring
 };
 
-/** Display unit of a channel: factor from SI and its label. */
-struct DisplayUnit
+// Colour scheme (Tokyo Night): dark background, one muted hue per modality, red/blue for HbO/HbR as in fNIRS.
+const QColor kBackground(0x1a, 0x1b, 0x26);
+const QColor kSeparator(0x29, 0x2e, 0x42);
+const QColor kLabel(0xc0, 0xca, 0xf5);
+const QColor kScale(0x73, 0x7a, 0xa2);
+const QColor kTitle(0x7a, 0xa2, 0xf7);
+const QColor kStimulus(0xff, 0x9e, 0x64);
+const QColor kStandardMarker(0x7a, 0xa2, 0xf7, 110);
+const QColor kTargetMarker(0xf7, 0x76, 0x8e, 150);
+const QColor kCursor(0xc0, 0xca, 0xf5, 200);
+
+/** How a channel is drawn: trace colour and SI unit symbol. */
+struct ChannelStyle
 {
-    double factor = 1.0;
-    const char* label = "";
+    QColor colour;
+    QString unit;
 };
 
-DisplayUnit displayUnit(AcqUnit unit)
+ChannelStyle channelStyle(const AcqChannelInfo& channel)
 {
-    switch (unit) {
+    QString unit;
+    switch (channel.unit) {
         case AcqUnit::Volt:
-            return {1e6, "uV"};
+            unit = "V";
+            break;
         case AcqUnit::Tesla:
-            return {1e15, "fT"};
+            unit = "T";
+            break;
         case AcqUnit::Ampere:
-            return {1e3, "mA"};
+            unit = "A";
+            break;
         case AcqUnit::Molar:
-            return {1e6, "uM"};
+            unit = "M";
+            break;
         default:
-            return {};
+            break;
     }
+    switch (channel.kind) {
+        case AcqChannelKind::Eeg:
+            return {QColor(0x7a, 0xa2, 0xf7), unit};
+        case AcqChannelKind::Meg:
+        case AcqChannelKind::Opm:
+            return {QColor(0xbb, 0x9a, 0xf7), unit};
+        case AcqChannelKind::Ecog:
+        case AcqChannelKind::Seeg:
+            return {QColor(0x9e, 0xce, 0x6a), unit};
+        case AcqChannelKind::Erg:
+            return {QColor(0xe0, 0xaf, 0x68), unit};
+        case AcqChannelKind::Fnirs:
+            return {channel.name.ends_with("hbr") ? QColor(0x7d, 0xcf, 0xff) : QColor(0xf7, 0x76, 0x8e), unit};
+        case AcqChannelKind::StimCurrent:
+        case AcqChannelKind::StimVoltage:
+            return {kStimulus, unit};
+        default:
+            return {QColor(0xa9, 0xb1, 0xd6), unit};
+    }
+}
+
+/** A sensitivity as "±50 µV": the SI prefix that puts the number between 1 and 1000. */
+QString formatRange(double value, const QString& unit)
+{
+    if (unit.isEmpty()) {
+        return QString("±%1").arg(value, 0, 'g', 3);
+    }
+    static const std::array<std::pair<double, const char*>, 6> kPrefixes = {
+        {{1e-15, "f"}, {1e-12, "p"}, {1e-9, "n"}, {1e-6, "µ"}, {1e-3, "m"}, {1.0, ""}}};
+    auto prefix = kPrefixes.back();
+    for (const auto& candidate : kPrefixes) {
+        if (value >= candidate.first * 0.9995) {
+            prefix = candidate;
+        }
+    }
+    return QString("±%1 %2%3").arg(value / prefix.first, 0, 'g', 3).arg(QString::fromUtf8(prefix.second), unit);
 }
 
 /** Rolling history of one stream in physical units. */
@@ -189,7 +243,7 @@ struct Trace
     std::uint64_t newest = 0;   // one past the newest sample in the history
     std::uint64_t oldest = 0;   // first valid sample in the history
     std::vector<std::string> names;
-    std::vector<DisplayUnit> units;
+    std::vector<ChannelStyle> styles;
 
     Trace(const AcqStreamInfo& info, std::size_t extraRows)
     : title(QString("%1  %2 Hz").arg(QString::fromStdString(info.name)).arg(info.sfreq).toStdString())
@@ -201,7 +255,7 @@ struct Trace
     {
         for (const AcqChannelInfo& channel : info.channels) {
             names.push_back(channel.name);
-            units.push_back(displayUnit(channel.unit));
+            styles.push_back(channelStyle(channel));
         }
     }
 
@@ -417,6 +471,10 @@ public:
     explicit ScopeView(Shared& shared)
     : m_shared(shared)
     {
+        m_labelFont = font();
+        m_labelFont.setPointSizeF(m_labelFont.pointSizeF() * 0.95);
+        m_scaleFont = font();
+        m_scaleFont.setPointSizeF(m_scaleFont.pointSizeF() * 0.85);
         setMinimumSize(900, 600);
         setAutoFillBackground(true);
         QPalette p = palette();
@@ -477,20 +535,20 @@ protected:
                 continue;
             }
             const double x = xOf(m.sample % window);
-            painter.setPen(QPen(m.code == kTarget ? QColor(240, 80, 80, 170) : QColor(90, 140, 255, 170), 1, Qt::DashLine));
+            painter.setPen(QPen(m.code == kTarget ? kTargetMarker : kStandardMarker, 1, Qt::DashLine));
             painter.drawLine(QPointF(x, 10), QPointF(x, height() - 10));
             painter.drawText(QPointF(x + 3, 22), m.code == kTarget ? "T" : "S");
         }
-        painter.setPen(QColor(255, 200, 120));
+        painter.setPen(kStimulus);
         for (const Marker& m : m_pulses) {
             if (m.wrapped && m.sample + window >= newest && m.sample < newest) {
                 painter.drawText(QPointF(xOf(m.sample % window) + 2, outTop + 12), "wrap");
             }
         }
-        painter.setPen(QPen(QColor(255, 255, 255, 200), 2));
+        painter.setPen(QPen(kCursor, 2));
         const double cursor = xOf(newest % window);
         painter.drawLine(QPointF(cursor, 4), QPointF(cursor, height() - 4));
-        painter.setPen(QColor(120, 120, 130));
+        painter.setPen(kScale);
         painter.drawText(QRectF(kLabelWidth, height() - 18, plotWidth, 16), Qt::AlignRight,
                          QString("t = %1 s, %2 s per sweep")
                              .arg(static_cast<double>(newest) / base.sfreq, 0, 'f', 1)
@@ -498,9 +556,8 @@ protected:
     }
 
 private:
-    static constexpr int kLabelWidth = 110;
+    static constexpr int kLabelWidth = 150;
     static constexpr std::uint64_t kEmpty = std::numeric_limits<std::uint64_t>::max();
-    static inline const QColor kBackground{16, 18, 22};
 
     /** Minimum and maximum of one column of one row, with the sweep phase of each, and the sweep they belong to. */
     struct Column
@@ -520,7 +577,7 @@ private:
         std::uint64_t window = 0;
         std::size_t rows = 0;
         std::vector<std::string> names;
-        std::vector<DisplayUnit> units;
+        std::vector<ChannelStyle> styles;
         int width = 0;
         bool dense = false;
         std::uint64_t newest = 0;          // samples folded in so far
@@ -549,7 +606,7 @@ private:
             lane.window = trace.window;
             lane.rows = trace.rows;
             lane.names = trace.names;
-            lane.units = trace.units;
+            lane.styles = trace.styles;
             lane.width = width;
             lane.dense = trace.window >= static_cast<std::uint64_t>(width);
             if (lane.dense) {
@@ -693,8 +750,10 @@ private:
             for (QPointF& p : m_points) {
                 p.setY(centre - gain * p.y());
             }
-            const DisplayUnit unit = output ? displayUnit(AcqUnit::Ampere) : lane.units[r];
-            painter.setPen(output ? QColor(255, 160, 60) : (unit.factor == 1.0 ? QColor(230, 200, 80) : QColor(150, 220, 170)));
+            const ChannelStyle style = output ? ChannelStyle{kStimulus, "A"} : lane.styles[r];
+            painter.setPen(style.colour);
+            // A value beyond the sensitivity held for this sweep stays in its own row.
+            painter.setClipRect(QRectF(kLabelWidth, centre - rowHeight / 2, lane.width, rowHeight));
             m_breaks.push_back(m_points.size());
             for (std::size_t b = 0; b + 1 < m_breaks.size(); ++b) {
                 const std::size_t n = m_breaks[b + 1] - m_breaks[b];
@@ -702,21 +761,24 @@ private:
                     painter.drawPolyline(m_points.data() + m_breaks[b], static_cast<int>(n));
                 }
             }
+            painter.setClipping(false);
             if (full) {
-                painter.setPen(QColor(170, 170, 180));
-                const QString name = QString::fromStdString(output ? std::string("STIM OUT") : lane.names[r]);
-                const QString scale = unit.label[0] != '\0'
-                    ? QString("%1 %2").arg(static_cast<double>(range) * unit.factor, 0, 'g', 3).arg(unit.label)
-                    : QString("%1").arg(static_cast<double>(range), 0, 'g', 3);
-                painter.drawText(QRectF(4, centre - rowHeight / 2, kLabelWidth - 8, rowHeight),
-                                 Qt::AlignVCenter | Qt::AlignLeft,
-                                 rowHeight >= 22 ? QString("%1\n+-%2").arg(name, scale) : name);
+                // Name on the left, sensitivity right-aligned before the trace, one line per channel.
+                const QRectF label(8, centre - rowHeight / 2, kLabelWidth - 16, rowHeight);
+                painter.setFont(m_labelFont);
+                painter.setPen(kLabel);
+                painter.drawText(label, Qt::AlignVCenter | Qt::AlignLeft,
+                                 QString::fromStdString(output ? std::string("STIM OUT") : lane.names[r]));
+                painter.setFont(m_scaleFont);
+                painter.setPen(kScale);
+                painter.drawText(label, Qt::AlignVCenter | Qt::AlignRight, formatRange(static_cast<double>(range), style.unit));
             }
         }
         if (full) {
-            painter.setPen(QColor(60, 64, 72));
+            painter.setPen(kSeparator);
             painter.drawLine(QPointF(4, 0), QPointF(width() - 4, 0));
-            painter.setPen(QColor(120, 160, 220));
+            painter.setFont(m_scaleFont);
+            painter.setPen(kTitle);
             painter.drawText(QRectF(kLabelWidth, 0, lane.width, 14), Qt::AlignRight | Qt::AlignTop,
                              QString::fromStdString(lane.title));
         }
@@ -737,6 +799,8 @@ private:
     }
 
     Shared& m_shared;
+    QFont m_labelFont;
+    QFont m_scaleFont;
     std::vector<Lane> m_lanes;
     std::vector<Marker> m_triggers;
     std::vector<Marker> m_pulses;
@@ -851,10 +915,13 @@ int main(int argc, char* argv[])
         title += QString("  |  %1").arg(QString::fromStdString(trace.title));
     }
     window.setWindowTitle(title);
+    window.setStyleSheet(QString("background-color: %1;").arg(kBackground.name()));
     auto* layout = new QVBoxLayout(&window);
+    layout->setContentsMargins(8, 8, 8, 6);
     auto* scope = new ScopeView(shared);
     auto* status = new QLabel;
     status->setWordWrap(true);
+    status->setStyleSheet(QString("color: %1;").arg(kScale.name()));
     layout->addWidget(scope, 1);
     layout->addWidget(status);
     window.resize(1400, 900);
