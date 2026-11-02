@@ -104,8 +104,10 @@ struct AcqReaderStats
     std::uint64_t idle = 0;         /**< Gating reader: samples played as underrun fill (consumeIdle). */
     std::uint64_t overruns = 0;     /**< Views invalidated while held (release() returned Overrun). */
     std::uint64_t views = 0;        /**< Views acquired. */
-    std::uint64_t eventsLost = 0;   /**< Events overwritten before this reader could acquire them. */
-    std::uint64_t segmentsLost = 0; /**< Segment headers overwritten likewise. */
+    std::uint64_t eventsLost = 0;   /**< Events this reader did not receive: overwritten, attached to lost or overrun
+                                         samples, or pushed after it had acquired their sample. Lossless readers:
+                                         events received + eventsLost = events published. */
+    std::uint64_t segmentsLost = 0; /**< Segment headers not received, likewise. */
 };
 
 //=============================================================================================================

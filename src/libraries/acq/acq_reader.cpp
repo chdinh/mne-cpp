@@ -41,25 +41,34 @@ struct RecordWindow
     std::uint64_t end = 0;
 };
 
-// Records of @p ring with a sample index in [from, to), starting at @p cursor; counts overwritten records.
+// Records of @p ring with a sample index in [from, to), starting at @p cursor. Counts as lost the records
+// overwritten before the scan and, if @p countSkipped, those skipped because their sample lies before @p from.
 template<typename T, typename SampleOf>
 RecordWindow selectRecords(const RecordRing<T>& ring, std::uint64_t cursor, std::uint64_t from, std::uint64_t to,
-                           std::atomic<std::uint64_t>& lostCounter, SampleOf sampleOf) noexcept
+                           std::atomic<std::uint64_t>& lostCounter, bool countSkipped, SampleOf sampleOf) noexcept
 {
-    const std::uint64_t oldest = ring.oldest();
-    if (cursor < oldest) {
-        lostCounter.fetch_add(oldest - cursor, std::memory_order_relaxed);
-        cursor = oldest;
+    while (true) {
+        const std::uint64_t start = std::max(cursor, ring.oldest());
+        const std::uint64_t published = ring.published.load(std::memory_order_acquire);
+        RecordWindow window{start, start};
+        while (window.first < published && sampleOf(ring.records[window.first & ring.mask]) < from) {
+            ++window.first;
+        }
+        window.end = window.first;
+        while (window.end < published && sampleOf(ring.records[window.end & ring.mask]) < to) {
+            ++window.end;
+        }
+        // A slot the scan read may have been overwritten meanwhile, which can hide records; scan again.
+        std::atomic_thread_fence(std::memory_order_acquire);
+        if (ring.oldest() > start) {
+            continue;
+        }
+        const std::uint64_t lost = (start - cursor) + (countSkipped ? window.first - start : 0);
+        if (lost > 0) {
+            lostCounter.fetch_add(lost, std::memory_order_relaxed);
+        }
+        return window;
     }
-    const std::uint64_t published = ring.published.load(std::memory_order_acquire);
-    while (cursor < published && sampleOf(ring.records[cursor & ring.mask]) < from) {
-        ++cursor;
-    }
-    RecordWindow window{cursor, cursor};
-    while (window.end < published && sampleOf(ring.records[window.end & ring.mask]) < to) {
-        ++window.end;
-    }
-    return window;
 }
 
 template<typename T>
@@ -283,9 +292,9 @@ AcqExpected<AcqBlockView> AcqReader::acquire(std::size_t minSamples, std::chrono
     }
 
     const RecordWindow events = selectRecords(c.events, slot.eventCursor, start, start + count, slot.eventsLost,
-                                              [](const AcqEvent& e) { return e.sample; });
+                                              !latest, [](const AcqEvent& e) { return e.sample; });
     const RecordWindow segments = selectRecords(c.segments, slot.segmentCursor, start, start + count,
-                                                slot.segmentsLost,
+                                                slot.segmentsLost, !latest,
                                                 [](const AcqSegmentHeader& h) { return h.firstSample; });
 
     AcqBlockView view;
@@ -327,6 +336,8 @@ AcqError AcqReader::release(AcqBlockView& view) noexcept
         recordsOverwritten(c.segments, {slot.segmentFirst, slot.segmentEnd});
     if (overwritten) {
         slot.lost.fetch_add(slot.viewCount, std::memory_order_relaxed);
+        slot.eventsLost.fetch_add(slot.eventEnd - slot.eventFirst, std::memory_order_relaxed);
+        slot.segmentsLost.fetch_add(slot.segmentEnd - slot.segmentFirst, std::memory_order_relaxed);
         slot.overruns.fetch_add(1, std::memory_order_relaxed);
     } else {
         slot.delivered.fetch_add(slot.viewCount, std::memory_order_relaxed);

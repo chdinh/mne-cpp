@@ -231,6 +231,13 @@ AcqStreamOptions options(std::size_t capacity, std::size_t maxReaders = 8)
     return o;
 }
 
+// Relaxed atomic element access: readers may check a view the producer is overwriting (release() then reports
+// Overrun), and that check must not itself be a data race.
+std::atomic_ref<std::int32_t> element(const std::byte* p)
+{
+    return std::atomic_ref<std::int32_t>(*reinterpret_cast<std::int32_t*>(const_cast<std::byte*>(p)));
+}
+
 void fill(const AcqWriteView& view)
 {
     std::uint64_t sample = view.firstSample();
@@ -238,8 +245,7 @@ void fill(const AcqWriteView& view)
         const AcqWritePart& part = view.part(p);
         for (std::size_t s = 0; s < part.samples; ++s, ++sample) {
             for (std::size_t c = 0; c < view.channelCount(); ++c) {
-                const std::int32_t v = value(sample, c);
-                std::memcpy(part.at(c, s), &v, sizeof(v));
+                element(part.at(c, s)).store(value(sample, c), std::memory_order_relaxed);
             }
         }
     }
@@ -252,8 +258,7 @@ bool matches(const AcqBlockView& view)
         const AcqBlockPart& part = view.part(p);
         for (std::size_t s = 0; s < part.samples; ++s, ++sample) {
             for (std::size_t c = 0; c < view.channelCount(); ++c) {
-                std::int32_t v = 0;
-                std::memcpy(&v, part.at(c, s), sizeof(v));
+                const std::int32_t v = element(part.at(c, s)).load(std::memory_order_relaxed);
                 if (v != value(sample, c)) {
                     return false;
                 }
@@ -381,6 +386,46 @@ private:
     std::thread m_thread;
 };
 
+/** Deterministic generator for randomised schedules (block sizes, pacing). */
+struct Lcg
+{
+    std::uint64_t state;
+
+    std::uint64_t next() noexcept
+    {
+        state = state * 6364136223846793005ULL + 1442695040888963407ULL;
+        return state >> 33U;
+    }
+
+    std::size_t below(std::size_t n) noexcept
+    {
+        return static_cast<std::size_t>(next() % n);
+    }
+};
+
+constexpr std::uint64_t kEventEvery = 37;
+
+std::int32_t eventCode(std::uint64_t sample)
+{
+    return static_cast<std::int32_t>((sample / kEventEvery) % 1000 + 1);
+}
+
+/** Whether every event of @p view is a pushed one of its sample range, in order and without duplicates. */
+bool eventsValid(const AcqBlockView& view)
+{
+    const std::uint64_t end = view.firstSample() + view.sampleCount();
+    std::uint64_t previous = 0;
+    for (std::size_t i = 0; i < view.events().size(); ++i) {
+        const AcqEvent& event = view.events()[i];
+        if (event.sample < view.firstSample() || event.sample >= end || event.sample % kEventEvery != 0 ||
+            event.code != eventCode(event.sample) || (i > 0 && event.sample <= previous)) {
+            return false;
+        }
+        previous = event.sample;
+    }
+    return true;
+}
+
 bool produce(AcqWriter& writer, std::size_t samples)
 {
     auto view = writer.beginWrite(samples);
@@ -415,6 +460,8 @@ private slots:
     void testReaderSlotsAndMisuse();
     void testManyConcurrentReaders();
     void testSlowReaderLossAccounting();
+    void testNoSilentLossOrCorruption_data();
+    void testNoSilentLossOrCorruption();
     void testNoAllocationsOrLocksPerBlock();
     void testAdoptExternalBuffer();
     void testEvents();
@@ -862,6 +909,154 @@ void TestAcqStream::testSlowReaderLossAccounting()
     QCOMPARE(stats.delivered + stats.lost, std::uint64_t(kTotal));
     QVERIFY(stats.lost >= lostInViews);
     QVERIFY(stats.lost > 0);
+}
+
+//=============================================================================================================
+
+void TestAcqStream::testNoSilentLossOrCorruption_data()
+{
+    QTest::addColumn<int>("layout");
+    QTest::addColumn<bool>("mirror");
+    QTest::addColumn<int>("capacity");
+    for (const AcqLayout layout : {AcqLayout::Interleaved, AcqLayout::Planar}) {
+        for (const bool mirror : {false, true}) {
+            for (const int capacity : {64, 1024}) {
+                const std::string name = std::string(layout == AcqLayout::Interleaved ? "interleaved" : "planar") +
+                    (mirror ? " mirrored" : "") + " capacity " + std::to_string(capacity);
+                QTest::newRow(name.c_str()) << static_cast<int>(layout) << mirror << capacity;
+            }
+        }
+    }
+}
+
+/**
+ * The contract every reader relies on, under a producer that laps slow readers on a small ring: a sample either
+ * reaches the reader intact, in order and exactly once, or is counted as lost; never silently dropped, duplicated
+ * or delivered after being overwritten. Readers hold views for random times, so overwrites hit held views.
+ */
+void TestAcqStream::testNoSilentLossOrCorruption()
+{
+    QFETCH(int, layout);
+    QFETCH(bool, mirror);
+    QFETCH(int, capacity);
+    constexpr std::size_t kChannels = 4;
+    constexpr std::uint64_t kTotal = 1U << 17;
+    constexpr int kReaders = 3;
+    AcqStreamOptions o = options(static_cast<std::size_t>(capacity), kReaders);
+    o.mirror = mirror;
+    o.eventCapacity = 16; // spans 592 samples: shorter than the 1024-sample ring, so delivered samples lose events
+    auto writer = AcqWriter::create(makeInfo(kChannels, static_cast<AcqLayout>(layout)), o);
+    QVERIFY(writer);
+
+    struct Tally
+    {
+        std::uint64_t delivered = 0;
+        std::uint64_t lostInViews = 0;
+        std::uint64_t overrunSamples = 0;
+        std::uint64_t overruns = 0;
+        std::uint64_t events = 0;
+        std::uint64_t end = 0;
+        std::string failure;
+    };
+    std::vector<AcqReader> readers;
+    for (int i = 0; i < kReaders; ++i) {
+        auto r = writer->stream().reader(i == 0 ? AcqReader::ReadMode::LowLatency : AcqReader::ReadMode::Lossless);
+        QVERIFY(r);
+        readers.push_back(std::move(*r));
+    }
+    std::vector<Tally> tallies(kReaders);
+    std::vector<std::thread> threads;
+    threads.reserve(kReaders);
+    for (int i = 0; i < kReaders; ++i) {
+        threads.emplace_back([&, i] {
+            AcqReader& reader = readers[static_cast<std::size_t>(i)];
+            Tally& t = tallies[static_cast<std::size_t>(i)];
+            Lcg rng{static_cast<std::uint64_t>(capacity * 7 + i)};
+            auto fail = [&t](std::string what) {
+                if (t.failure.empty()) {
+                    t.failure = std::move(what);
+                }
+            };
+            while (true) {
+                auto view = reader.acquire(1, 10s, 1 + rng.below(static_cast<std::size_t>(capacity)));
+                if (!view) {
+                    if (view.error() != AcqErrorCode::EndOfStream) {
+                        fail("acquire: " + view.error().text());
+                    }
+                    break;
+                }
+                const std::uint64_t first = view->firstSample();
+                const std::size_t n = view->sampleCount();
+                if (n == 0 || first != t.end + view->lost()) {
+                    fail("gap not reported before sample " + std::to_string(first));
+                }
+                if (i == 1 && rng.below(4) == 0) {
+                    std::this_thread::sleep_for(std::chrono::microseconds(rng.below(50)));
+                } else if (i == 2) {
+                    std::this_thread::sleep_for(std::chrono::microseconds(100 + rng.below(200)));
+                }
+                const bool intact = matches(*view);
+                const bool eventsIntact = eventsValid(*view);
+                const std::uint64_t lost = view->lost();
+                const std::size_t events = view->events().size();
+                const AcqError released = reader.release(*view);
+                if (released.ok()) {
+                    if (!intact) {
+                        fail("overwritten samples released as valid at " + std::to_string(first));
+                    }
+                    if (!eventsIntact) {
+                        fail("wrong events delivered with " + std::to_string(first));
+                    }
+                    t.delivered += n;
+                    t.events += events;
+                } else if (released == AcqErrorCode::Overrun) {
+                    t.overrunSamples += n;
+                    ++t.overruns;
+                } else {
+                    fail("release: " + released.text());
+                }
+                t.lostInViews += lost;
+                t.end = first + n;
+            }
+        });
+    }
+
+    Lcg rng{static_cast<std::uint64_t>(layout * 131 + (mirror ? 17 : 0) + capacity)};
+    for (std::uint64_t written = 0; written < kTotal;) {
+        const auto n = std::min<std::uint64_t>(1 + rng.below(static_cast<std::size_t>(capacity) / 2), kTotal - written);
+        auto view = writer->beginWrite(static_cast<std::size_t>(n));
+        QVERIFY(view);
+        fill(*view);
+        for (std::uint64_t s = (written + kEventEvery - 1) / kEventEvery * kEventEvery; s < written + n; s += kEventEvery) {
+            QVERIFY(writer->pushEvent({s, 1, eventCode(s)}).ok());
+        }
+        writer->commit(static_cast<std::size_t>(n));
+        written += n;
+        if (rng.below(8) == 0) {
+            std::this_thread::sleep_for(20us);
+        }
+    }
+    writer->finish();
+    for (auto& thread : threads) {
+        thread.join();
+    }
+
+    QCOMPARE(writer->stream().stats().committed, kTotal);
+    for (int i = 0; i < kReaders; ++i) {
+        const Tally& t = tallies[static_cast<std::size_t>(i)];
+        const AcqReaderStats stats = readers[static_cast<std::size_t>(i)].stats();
+        QVERIFY2(t.failure.empty(), qPrintable(QString("reader %1: %2").arg(i).arg(t.failure.c_str())));
+        QCOMPARE(t.end, kTotal);
+        QCOMPARE(stats.position, kTotal);
+        QCOMPARE(stats.delivered, t.delivered);
+        QCOMPARE(stats.lost, t.lostInViews + t.overrunSamples);
+        QCOMPARE(stats.overruns, t.overruns);
+        QCOMPARE(stats.delivered + stats.lost, kTotal);                        // every sample accounted for exactly once
+        QCOMPARE(t.events + stats.eventsLost, (kTotal - 1) / kEventEvery + 1); // and every event, none twice
+    }
+    // The slow reader must have met every case the contract covers.
+    QVERIFY(tallies[2].lostInViews > 0);
+    QVERIFY(capacity < 1024 || readers[2].stats().eventsLost > 0);
 }
 
 //=============================================================================================================
