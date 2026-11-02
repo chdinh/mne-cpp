@@ -77,6 +77,16 @@ private:
 
 //=============================================================================================================
 /**
+ * Adds @p n to a counter that only the calling thread writes (others only read it): a plain load and store
+ * instead of an atomic read-modify-write, which costs several times as much on the data path.
+ */
+inline void addOwned(std::atomic<std::uint64_t>& counter, std::uint64_t n) noexcept
+{
+    counter.store(counter.load(std::memory_order_relaxed) + n, std::memory_order_relaxed);
+}
+
+//=============================================================================================================
+/**
  * Lock-free single-writer value with a sequence counter, stored in atomic words so readers never race.
  */
 template<typename T>
@@ -367,6 +377,17 @@ struct ViewAccess
         view.m_clock = core.clock.load();
         view.m_timebase = core.timebase.load();
         view.m_memory = core.memory;
+    }
+
+    /** Empties a released view: no samples, events or segments, and no longer accepted by release(). */
+    static void clear(AcqBlockView& view) noexcept
+    {
+        view.m_partCount = 0;
+        view.m_sampleCount = 0;
+        view.m_events = {};
+        view.m_segments = {};
+        view.m_segmentPayloads = {};
+        view.m_ticket = 0;
     }
 
     static void setUnderrun(AcqWriteView& view, std::uint64_t underrun) noexcept

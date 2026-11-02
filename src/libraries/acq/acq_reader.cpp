@@ -21,6 +21,7 @@
 #include "detail/acq_stream_core.h"
 
 #include <algorithm>
+#include <optional>
 
 //=============================================================================================================
 // USED NAMESPACES
@@ -65,7 +66,7 @@ RecordWindow selectRecords(const RecordRing<T>& ring, std::uint64_t cursor, std:
         }
         const std::uint64_t lost = (start - cursor) + (countSkipped ? window.first - start : 0);
         if (lost > 0) {
-            lostCounter.fetch_add(lost, std::memory_order_relaxed);
+            addOwned(lostCounter, lost);
         }
         return window;
     }
@@ -219,7 +220,8 @@ AcqExpected<AcqBlockView> AcqReader::acquire(std::size_t minSamples, std::chrono
     const std::uint64_t maxCount = maxSamples == 0 ? c.capacity : std::min<std::uint64_t>(maxSamples, c.capacity);
     const bool latest = slot.mode == ReadMode::Latest;
     const AcqWait wait = slot.mode == ReadMode::LowLatency ? AcqWait::Spin : slot.options.wait;
-    const auto deadline = Clock::now() + std::clamp(timeout, std::chrono::nanoseconds(0), kMaxTimeout);
+    // The clock is read only if the samples are not there yet; reading it costs as much as the rest of acquire().
+    std::optional<Clock::time_point> deadline;
 
     std::uint64_t pos = 0;
     std::uint64_t written = 0;
@@ -232,7 +234,7 @@ AcqExpected<AcqBlockView> AcqReader::acquire(std::size_t minSamples, std::chrono
         if (!latest && pos < oldest) {
             const std::uint64_t lostNow = oldest - pos;
             slot.pendingLost += lostNow;
-            slot.lost.fetch_add(lostNow, std::memory_order_relaxed);
+            addOwned(slot.lost, lostNow);
             pos = oldest;
             slot.position.store(pos, std::memory_order_release);
         }
@@ -259,7 +261,12 @@ AcqExpected<AcqBlockView> AcqReader::acquire(std::size_t minSamples, std::chrono
         if (finished) {
             return AcqErrorCode::EndOfStream;
         }
-        if (Clock::now() >= deadline) {
+        if (!deadline) {
+            if (timeout <= std::chrono::nanoseconds(0)) {
+                return AcqErrorCode::Timeout;
+            }
+            deadline = Clock::now() + std::min(timeout, kMaxTimeout);
+        } else if (Clock::now() >= *deadline) {
             return AcqErrorCode::Timeout;
         }
         const std::uint64_t from = pos;
@@ -267,7 +274,7 @@ AcqExpected<AcqBlockView> AcqReader::acquire(std::size_t minSamples, std::chrono
             const std::uint64_t w = c.committed.load(std::memory_order_seq_cst);
             return (w > from && w - from >= minSamples) || c.finished.load(std::memory_order_seq_cst);
         };
-        waitFor(ready, wait, slot.options.spinFor, deadline, slot.waiting, slot.wake, &c.waiters);
+        waitFor(ready, wait, slot.options.spinFor, *deadline, slot.waiting, slot.wake, &c.waiters);
     }
 
     const std::uint64_t available = written > pos ? written - pos : 0;
@@ -312,9 +319,9 @@ AcqExpected<AcqBlockView> AcqReader::acquire(std::size_t minSamples, std::chrono
     slot.segmentFirst = segments.first;
     slot.segmentEnd = segments.end;
     slot.pendingLost = 0;
-    slot.views.fetch_add(1, std::memory_order_relaxed);
+    addOwned(slot.views, 1);
     if (skipped > 0) {
-        slot.skipped.fetch_add(skipped, std::memory_order_relaxed);
+        addOwned(slot.skipped, skipped);
     }
     return view;
 }
@@ -335,18 +342,18 @@ AcqError AcqReader::release(AcqBlockView& view) noexcept
         recordsOverwritten(c.events, {slot.eventFirst, slot.eventEnd}) ||
         recordsOverwritten(c.segments, {slot.segmentFirst, slot.segmentEnd});
     if (overwritten) {
-        slot.lost.fetch_add(slot.viewCount, std::memory_order_relaxed);
-        slot.eventsLost.fetch_add(slot.eventEnd - slot.eventFirst, std::memory_order_relaxed);
-        slot.segmentsLost.fetch_add(slot.segmentEnd - slot.segmentFirst, std::memory_order_relaxed);
-        slot.overruns.fetch_add(1, std::memory_order_relaxed);
+        addOwned(slot.lost, slot.viewCount);
+        addOwned(slot.eventsLost, slot.eventEnd - slot.eventFirst);
+        addOwned(slot.segmentsLost, slot.segmentEnd - slot.segmentFirst);
+        addOwned(slot.overruns, 1);
     } else {
-        slot.delivered.fetch_add(slot.viewCount, std::memory_order_relaxed);
+        addOwned(slot.delivered, slot.viewCount);
     }
     slot.eventCursor = slot.eventEnd;
     slot.segmentCursor = slot.segmentEnd;
     const std::uint64_t end = slot.viewFirst + slot.viewCount;
     slot.holding = false;
-    view = AcqBlockView();
+    ViewAccess::clear(view);
     if (slot.gating) {
         slot.position.store(end, std::memory_order_release);
         c.gatePosition.store(end, std::memory_order_seq_cst);

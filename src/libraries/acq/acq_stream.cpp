@@ -733,7 +733,7 @@ void AcqWriter::commit(std::size_t samples) noexcept
         c.segments.published.store(c.segments.pushed, std::memory_order_release);
     }
     c.committed.store(c.writePos, std::memory_order_seq_cst);
-    c.commits.fetch_add(1, std::memory_order_relaxed);
+    addOwned(c.commits, 1);
     c.notifyReaders();
 }
 
