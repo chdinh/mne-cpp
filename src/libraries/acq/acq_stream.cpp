@@ -87,7 +87,9 @@ void pushRecord(RecordRing<T>& ring, const T& record, std::span<const std::byte>
     if (ring.payloadBytes > 0) {
         std::byte* dst = ring.payloads.data() + slot * ring.payloadBytes;
         const std::size_t n = std::min(payload.size(), ring.payloadBytes);
-        std::memcpy(dst, payload.data(), n);
+        if (n > 0) { // an empty span's data() may be null, which memcpy must never receive
+            std::memcpy(dst, payload.data(), n);
+        }
         std::memset(dst + n, 0, ring.payloadBytes - n);
     }
     ring.pushed = index + 1;

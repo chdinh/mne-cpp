@@ -46,8 +46,10 @@
 #include <vector>
 
 #if defined(_WIN32)
+#define NOMINMAX
 #include <io.h>
 #include <malloc.h>
+#include <windows.h>
 #else
 #include <sys/ioctl.h>
 #include <unistd.h>
@@ -221,8 +223,10 @@ bool isTerminal()
 int terminalColumns()
 {
 #if defined(_WIN32)
-    const char* env = std::getenv("COLUMNS");
-    return env != nullptr ? std::atoi(env) : 120;
+    CONSOLE_SCREEN_BUFFER_INFO console{};
+    return GetConsoleScreenBufferInfo(GetStdHandle(STD_OUTPUT_HANDLE), &console) != 0
+        ? console.srWindow.Right - console.srWindow.Left + 1
+        : 0;
 #else
     winsize ws{};
     return ioctl(STDOUT_FILENO, TIOCGWINSZ, &ws) == 0 ? ws.ws_col : 0;
@@ -579,7 +583,7 @@ void printDashboard(const ClosedLoopState& st, const DisplayFrame& frame, const 
     if (redraw) {
         std::printf("\x1b[%dA\x1b[J", kDashboardLines);
     }
-    std::array<char, 16> p50{}, p99{}, p999{}, max{};
+    std::array<char, 32> p50{}, p99{}, p999{}, max{};
     formatLatency(p50.data(), p50.size(), st.wakeLatency.quantileUs(0.50));
     formatLatency(p99.data(), p99.size(), st.wakeLatency.quantileUs(0.99));
     formatLatency(p999.data(), p999.size(), st.wakeLatency.quantileUs(0.999));
