@@ -651,6 +651,43 @@ void TestAcqStream::testOverrunWhileHeld()
     QCOMPARE(next->firstSample(), std::uint64_t(64));
     QCOMPARE(next->lost(), std::uint64_t(0));
     QVERIFY(reader->release(*next).ok());
+
+    // The same through leases: explicit release reports the overrun, scope exit releases, moves transfer.
+    auto lease = reader->lease(0, 0ns);
+    QVERIFY(lease && lease->isHeld() && (*lease)->sampleCount() == 0);
+    QVERIFY(lease->release().ok());
+    QVERIFY(!lease->isHeld() && lease->release() == AcqErrorCode::InvalidState);
+    QVERIFY(produce(*writer, 64));
+    auto overrun = reader->lease(64, 0ns);
+    QVERIFY(overrun && (*overrun)->firstSample() == 74);
+    QVERIFY(reader->lease(0, 0ns).error() == AcqErrorCode::InvalidState); // one view at a time
+    QVERIFY(produce(*writer, 1));
+    QVERIFY(overrun->release() == AcqErrorCode::Overrun);
+    QCOMPARE(reader->stats().overruns, std::uint64_t(2));
+    QCOMPARE(reader->stats().lost, std::uint64_t(128));
+    {
+        auto scoped = reader->lease(1, 0ns);
+        QVERIFY(scoped && (*scoped)->sampleCount() == 1);
+        AcqViewLease moved(std::move(*scoped));
+        QVERIFY(!scoped->isHeld() && moved.isHeld());
+        AcqReader movedReader = std::move(*reader);
+        *reader = std::move(movedReader); // moving the reader keeps the lease valid
+    }
+    QCOMPARE(reader->stats().delivered, std::uint64_t(11));
+    {
+        QVERIFY(produce(*writer, 64));
+        auto overrunOnExit = reader->lease(1, 0ns, 1);
+        QVERIFY(overrunOnExit && (*overrunOnExit)->firstSample() == 139);
+        AcqViewLease target;
+        target = std::move(*overrunOnExit);
+        QVERIFY(produce(*writer, 1));
+    }
+    QCOMPARE(reader->stats().delivered, std::uint64_t(11));
+    QCOMPARE(reader->stats().overruns, std::uint64_t(3));
+    QCOMPARE(reader->stats().lost, std::uint64_t(129));
+    auto after = reader->acquire(0, 0ns);
+    QVERIFY(after && after->firstSample() == 140);
+    QVERIFY(reader->release(*after).ok());
 }
 
 //=============================================================================================================

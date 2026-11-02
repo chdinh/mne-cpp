@@ -7,7 +7,7 @@ sidebar_position: 5
 
 # Class Members
 
-Index of 6670 public class members (functions, variables, typedefs, enums) across all documented classes.
+Index of 6680 public class members (functions, variables, typedefs, enums) across all documented classes.
 
 **Jump to:** [A](#a) · [B](#b) · [C](#c) · [D](#d) · [E](#e) · [F](#f) · [G](#g) · [H](#h) · [I](#i) · [J](#j) · [K](#k) · [L](#l) · [M](#m) · [N](#n) · [O](#o) · [P](#p) · [Q](#q) · [R](#r) · [S](#s) · [T](#t) · [U](#u) · [V](#v) · [W](#w) · [X](#x) · [Y](#y) · [Z](#z)
 
@@ -48,6 +48,9 @@ Index of 6670 public class members (functions, variables, typedefs, enums) acros
 - **AcquiredPoints** `[fn]` in [AcquiredPoints](/docs/api/utils/acquired-points)
 - **acquiredPoints** `[fn]` in [PolhemusCoregistration](/docs/api/utils/polhemus-coregistration)
 - **acquisition** `[fn]` in [BIDSPath](/docs/api/bids/bids-path) — Acquisition label.
+- **AcqViewLease** `[fn]` in [AcqViewLease](/docs/api/acq/acq-view-lease)
+- **AcqViewLease** `[fn]` in [AcqViewLease](/docs/api/acq/acq-view-lease)
+- **AcqViewLease** `[fn]` in [AcqViewLease](/docs/api/acq/acq-view-lease)
 - **AcqWriter** `[fn]` in [AcqWriter](/docs/api/acq/acq-writer)
 - **AcqWriter** `[fn]` in [AcqWriter](/docs/api/acq/acq-writer)
 - **AcqWriter** `[fn]` in [AcqWriter](/docs/api/acq/acq-writer)
@@ -2893,6 +2896,7 @@ Index of 6670 public class members (functions, variables, typedefs, enums) acros
 - **isFreezed** `[fn]` in [RtFiffRawViewModel](/docs/api/disp/rt-fiff-raw-view-model) — Returns current freezing status.
 - **isFreOri** `[var]` in [InvBeamformer](/docs/api/inv/inv-beamformer) — True if free orientation (n_orient = 3).
 - **isFrozen** `[fn]` in [ChannelRhiView](/docs/api/disp/channel-rhi-view)
+- **isHeld** `[fn]` in [AcqViewLease](/docs/api/acq/acq-view-lease)
 - **isInfoPanelVisible** `[slot]` in [BrainView](/docs/api/disp3-d/brain-view) — Whether the info panel is currently visible.
 - **isInit** `[fn]` in [EvokedSetModel](/docs/api/disp/evoked-set-model) — Returns whether this class is initalized.
 - **isJson** `[fn]` in [Command](/docs/api/com/command) — If received command was Json fomratted or triggered command should be Json formatted.
@@ -3052,6 +3056,7 @@ Index of 6670 public class members (functions, variables, typedefs, enums) acros
 - **lead** `[var]` in [IeegContact](/docs/api/ieeg/ieeg-contact) — Lead name; empty when building derives it from the contact name.
 - **leadColor** `[fn]` in [ElectrodeObject](/docs/api/disp3-d/electrode-object)
 - **leads** `[fn]` in [IeegImplantation](/docs/api/ieeg/ieeg-implantation)
+- **lease** `[fn]` in [AcqReader](/docs/api/acq/acq-reader) — `acquire()` whose view is released when the returned lease goes out of scope, so no exit path can leave the reader blocked.
 - **ledoitWolf** `[fn]` in [StsCovEstimators](/docs/api/sts/sts-cov-estimators) — Ledoit-Wolf optimal shrinkage covariance estimator.
 - **left** `[var]` in [MNEMshEyes](/docs/api/mne/mne-msh-eyes) — Left hemisphere viewpoint (x, y, z).
 - **left_up** `[var]` in [MNEMshEyes](/docs/api/mne/mne-msh-eyes) — Left hemisphere up-vector.
@@ -3910,9 +3915,11 @@ Index of 6670 public class members (functions, variables, typedefs, enums) acros
 - **operator*** `[fn]` in [AcqExpected](/docs/api/acq/acq-expected)
 - **operator*** `[fn]` in [AcqExpected](/docs/api/acq/acq-expected)
 - **operator*** `[fn]` in [AcqExpected](/docs/api/acq/acq-expected)
+- **operator*** `[fn]` in [AcqViewLease](/docs/api/acq/acq-view-lease)
 - **operator+=** `[fn]` in [FiffEvoked](/docs/api/fiff/fiff-evoked) — Inputs a new data set and recalculates the average.
 - **operator-&gt;** `[fn]` in [AcqExpected](/docs/api/acq/acq-expected)
 - **operator-&gt;** `[fn]` in [AcqExpected](/docs/api/acq/acq-expected)
+- **operator-&gt;** `[fn]` in [AcqViewLease](/docs/api/acq/acq-view-lease)
 - **operator&lt;&lt;** `[fn]` in [FiffDigPointSet](/docs/api/fiff/fiff-dig-point-set) — Subscript operator &lt;&lt; to add a new [`FiffDigPoint`](/docs/api/fiff/fiff-dig-point).
 - **operator&lt;&lt;** `[fn]` in [FiffDigPointSet](/docs/api/fiff/fiff-dig-point-set) — Subscript operator &lt;&lt; to add a new [`FiffDigPoint`](/docs/api/fiff/fiff-dig-point).
 - **operator&lt;&lt;** `[fn]` in [InvEcdSet](/docs/api/inv/inv-ecd-set) — Subscript operator &lt;&lt; to add a new [`InvEcd`](/docs/api/inv/inv-ecd).
@@ -3925,6 +3932,8 @@ Index of 6670 public class members (functions, variables, typedefs, enums) acros
 - **operator=** `[fn]` in [AcqExpected](/docs/api/acq/acq-expected)
 - **operator=** `[fn]` in [AcqReader](/docs/api/acq/acq-reader)
 - **operator=** `[fn]` in [AcqReader](/docs/api/acq/acq-reader)
+- **operator=** `[fn]` in [AcqViewLease](/docs/api/acq/acq-view-lease)
+- **operator=** `[fn]` in [AcqViewLease](/docs/api/acq/acq-view-lease)
 - **operator=** `[fn]` in [AcqWriter](/docs/api/acq/acq-writer)
 - **operator=** `[fn]` in [AcqWriter](/docs/api/acq/acq-writer)
 - **operator=** `[fn]` in [BIDSPath](/docs/api/bids/bids-path)
@@ -4603,6 +4612,7 @@ Index of 6670 public class members (functions, variables, typedefs, enums) acros
 - **relative** `[var]` in [MNEMshColorScaleDef](/docs/api/mne/mne-msh-color-scale-def)
 - **release** `[var]` in [AcqExternalBuffer](/docs/api/acq/acq-external-buffer) — Called once after the ring no longer uses the buffer; may be empty.
 - **release** `[fn]` in [AcqReader](/docs/api/acq/acq-reader) — Returns `view` to the ring and advances the reader; clears `view`.
+- **release** `[fn]` in [AcqViewLease](/docs/api/acq/acq-view-lease) — Returns the view now.
 - **Remez2** `[fn]` in [ParksMcClellan](/docs/api/utils/parks-mc-clellan)
 - **remove** `[fn]` in [FiffAnnotations](/docs/api/fiff/fiff-annotations) — Removes the annotation at the given index.
 - **removeBinding** `[fn]` in [MnaParamTree](/docs/api/mna/mna-param-tree)

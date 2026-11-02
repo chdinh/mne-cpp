@@ -127,6 +127,29 @@ Returns `view` to the ring and advances the reader; clears `view`.
 
 ---
 
+### lease(minSamples, timeout, maxSamples)
+
+`acquire()` whose view is released when the returned lease goes out of scope, so no exit path can leave the reader blocked.
+
+Call `AcqViewLease::release()` to learn whether the view was overrun.
+
+**Parameters:**
+
+- **minSamples** : *std::size_t*
+  As for `acquire()`.
+
+- **timeout** : *std::chrono::nanoseconds*
+  As for `acquire()`.
+
+- **maxSamples** : *std::size_t*
+  As for `acquire()`.
+
+**Returns:**
+
+- *[AcqExpected](/docs/api/acq/acq-expected)&lt; [AcqViewLease](/docs/api/acq/acq-view-lease) &gt;* — The lease, or the error of `acquire()`.
+
+---
+
 ### consumeIdle(samples)
 
 Gating reader of an output stream: the device has emitted `samples` samples of underrun fill because the writer had not committed them.

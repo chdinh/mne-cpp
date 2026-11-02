@@ -766,7 +766,8 @@ const apiSidebar: SidebarsConfig['apiSidebar'] = [
         'api/acq/acq-convert-options',
         'api/acq/acq-channel-range',
         'api/acq/acq-read-result',
-        'api/acq/acq-bit-field'
+        'api/acq/acq-bit-field',
+        'api/acq/acq-view-lease'
       ],
     }
 ];

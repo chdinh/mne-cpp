@@ -3,37 +3,37 @@
   "generated_by": "scripts/quality/audit_api_evidence.py",
   "policy": "scripts/quality/api_evidence_policy.json",
   "summary": {
-    "exported_classes": 477,
+    "exported_classes": 478,
     "exported_free_functions": 135,
-    "registered_classes": 561,
+    "registered_classes": 562,
     "exported_not_registered": 0,
     "registered_function_modules": 13,
     "registered_header_only": 71,
     "registered_stale": 0,
-    "registered_with_test": 205,
+    "registered_with_test": 206,
     "registered_test_unresolved": 0,
-    "registered_with_example": 401,
+    "registered_with_example": 402,
     "registered_example_not_built": 0,
     "registered_with_python_equiv": 93,
     "registered_without_api_page": 0,
-    "with_snippet": 435,
-    "public_api_units": 561,
-    "example_eligible": 400,
+    "with_snippet": 436,
+    "public_api_units": 562,
+    "example_eligible": 401,
     "example_exempt": 161,
-    "eligible_backed_by_registry_example": 400,
+    "eligible_backed_by_registry_example": 401,
     "eligible_used_by_some_example": 353,
     "examples_on_disk": 73,
     "examples_built": 73
   },
   "by_library": {
     "acq": {
-      "public": 42,
-      "registered": 42,
-      "with_test": 42,
-      "eligible": 25,
-      "eligible_with_registry_example": 25,
+      "public": 43,
+      "registered": 43,
+      "with_test": 43,
+      "eligible": 26,
+      "eligible_with_registry_example": 26,
       "eligible_used_by_example": 0,
-      "with_snippet": 38
+      "with_snippet": 39
     },
     "bids": {
       "public": 14,
@@ -1488,7 +1488,8 @@
       "snippets": [
         "ex_acq_performance/main.cpp#acq_stream_setup",
         "ex_acq_performance/main.cpp#acq_stream_stats",
-        "ex_acq_performance/main.cpp#acq_reader_acquire"
+        "ex_acq_performance/main.cpp#acq_reader_acquire",
+        "ex_acq_oddball/main.cpp#acq_epoch_stream"
       ],
       "api_page": "doc/website/docs/api/acq/acq-read-result.mdx",
       "python_equiv": null,
@@ -1511,7 +1512,8 @@
       "snippets": [
         "ex_acq_performance/main.cpp#acq_stream_setup",
         "ex_acq_performance/main.cpp#acq_stream_stats",
-        "ex_acq_performance/main.cpp#acq_reader_acquire"
+        "ex_acq_performance/main.cpp#acq_reader_acquire",
+        "ex_acq_oddball/main.cpp#acq_epoch_stream"
       ],
       "api_page": "doc/website/docs/api/acq/acq-reader.mdx",
       "python_equiv": null,
@@ -1534,7 +1536,8 @@
       "snippets": [
         "ex_acq_performance/main.cpp#acq_stream_setup",
         "ex_acq_performance/main.cpp#acq_stream_stats",
-        "ex_acq_performance/main.cpp#acq_reader_acquire"
+        "ex_acq_performance/main.cpp#acq_reader_acquire",
+        "ex_acq_oddball/main.cpp#acq_epoch_stream"
       ],
       "api_page": "doc/website/docs/api/acq/acq-reader-options.mdx",
       "python_equiv": null,
@@ -1557,9 +1560,34 @@
       "snippets": [
         "ex_acq_performance/main.cpp#acq_stream_setup",
         "ex_acq_performance/main.cpp#acq_stream_stats",
-        "ex_acq_performance/main.cpp#acq_reader_acquire"
+        "ex_acq_performance/main.cpp#acq_reader_acquire",
+        "ex_acq_oddball/main.cpp#acq_epoch_stream"
       ],
       "api_page": "doc/website/docs/api/acq/acq-reader-stats.mdx",
+      "python_equiv": null,
+      "example_eligible": true,
+      "exempt_reason": null
+    },
+    {
+      "name": "AcqViewLease",
+      "header": "acq/acq_reader.h",
+      "library": "acq",
+      "kind": "exported-class",
+      "exported": true,
+      "registered": true,
+      "registry_status": "documented",
+      "test": "test_acq_stream",
+      "test_resolves": true,
+      "example": "ex_acq_oddball",
+      "example_state": "built",
+      "including_examples": [],
+      "snippets": [
+        "ex_acq_performance/main.cpp#acq_stream_setup",
+        "ex_acq_performance/main.cpp#acq_stream_stats",
+        "ex_acq_performance/main.cpp#acq_reader_acquire",
+        "ex_acq_oddball/main.cpp#acq_epoch_stream"
+      ],
+      "api_page": "doc/website/docs/api/acq/acq-view-lease.mdx",
       "python_equiv": null,
       "example_eligible": true,
       "exempt_reason": null

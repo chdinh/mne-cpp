@@ -24,10 +24,10 @@
  * @code
  * auto reader = stream.reader(ACQLIB::AcqReader::ReadMode::Lossless);
  * while (running) {
- *     auto view = reader->acquire(256, std::chrono::milliseconds(100));
+ *     auto view = reader->lease(256, std::chrono::milliseconds(100));
  *     if (!view) { if (view.error() == ACQLIB::AcqErrorCode::Timeout) continue; break; }
- *     process(*view);                                  // parts point into the ring
- *     if (!reader->release(*view).ok()) discardLastResult(); // the producer overtook the view
+ *     process(**view);                                  // parts point into the ring
+ *     if (!view->release().ok()) discardLastResult(); // the producer overtook the view
  * }
  * @endcode
  */
@@ -63,6 +63,7 @@ class AcqStreamCore;
 }
 
 class AcqStream;
+class AcqViewLease;
 
 //=============================================================================================================
 /**
@@ -189,6 +190,20 @@ public:
 
     //=========================================================================================================
     /**
+     * acquire() whose view is released when the returned lease goes out of scope, so no exit path can
+     * leave the reader blocked. Call AcqViewLease::release() to learn whether the view was overrun.
+     *
+     * @param[in] minSamples   As for acquire().
+     * @param[in] timeout      As for acquire().
+     * @param[in] maxSamples   As for acquire().
+     *
+     * @return The lease, or the error of acquire().
+     */
+    [[nodiscard]] AcqExpected<AcqViewLease> lease(std::size_t minSamples, std::chrono::nanoseconds timeout,
+                                                  std::size_t maxSamples = 0) noexcept;
+
+    //=========================================================================================================
+    /**
      * Gating reader of an output stream: the device has emitted @p samples samples of underrun fill
      * because the writer had not committed them. Advances this reader; the writer learns the gap from
      * AcqWriteView::underrun().
@@ -235,6 +250,58 @@ private:
 
     std::shared_ptr<detail::AcqStreamCore> m_core;
     std::uint32_t m_slot = 0;
+};
+
+//=============================================================================================================
+/**
+ * A view held from AcqReader::lease(); returns it to the ring when destroyed. Move-only. The reader that
+ * issued it must outlive it (moving the reader is fine).
+ *
+ * @snippet ex_acq_oddball/main.cpp acq_epoch_stream
+ */
+class ACQSHARED_EXPORT AcqViewLease
+{
+public:
+    AcqViewLease() noexcept = default;
+    ~AcqViewLease();
+    AcqViewLease(AcqViewLease&& other) noexcept;
+    AcqViewLease& operator=(AcqViewLease&& other) noexcept;
+    AcqViewLease(const AcqViewLease&) = delete;
+    AcqViewLease& operator=(const AcqViewLease&) = delete;
+
+    /** @return true until released. */
+    [[nodiscard]] bool isHeld() const noexcept
+    {
+        return m_core != nullptr;
+    }
+
+    /** @return The held view; empty after release(). */
+    [[nodiscard]] const AcqBlockView& operator*() const noexcept
+    {
+        return m_view;
+    }
+
+    /** @return The held view; empty after release(). */
+    [[nodiscard]] const AcqBlockView* operator->() const noexcept
+    {
+        return &m_view;
+    }
+
+    //=========================================================================================================
+    /**
+     * Returns the view now. The destructor does the same and leaves an overrun only in AcqReaderStats.
+     *
+     * @return As AcqReader::release(); InvalidState if not held.
+     */
+    AcqError release() noexcept;
+
+private:
+    friend class AcqReader;
+    AcqViewLease(detail::AcqStreamCore* core, std::uint32_t slot, AcqBlockView&& view) noexcept;
+
+    detail::AcqStreamCore* m_core = nullptr;
+    std::uint32_t m_slot = 0;
+    AcqBlockView m_view;
 };
 ACQ_STD_MEMBERS_END
 

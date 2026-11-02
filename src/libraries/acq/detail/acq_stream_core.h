@@ -472,6 +472,9 @@ struct ViewAccess
  */
 void cpuRelax() noexcept;
 
+/** AcqReader::release() for reader slot @p slot of @p core; shared with AcqViewLease. */
+AcqError releaseView(AcqStreamCore& core, std::uint32_t slot, AcqBlockView& view) noexcept;
+
 //=============================================================================================================
 /**
  * Waits on @p semaphore according to @p wait until @p ready() or @p deadline; Dekker handshake with the

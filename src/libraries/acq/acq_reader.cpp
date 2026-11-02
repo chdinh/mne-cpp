@@ -22,6 +22,7 @@
 
 #include <algorithm>
 #include <optional>
+#include <utility>
 
 //=============================================================================================================
 // USED NAMESPACES
@@ -333,8 +334,22 @@ AcqError AcqReader::release(AcqBlockView& view) noexcept
     if (!m_core) {
         return AcqErrorCode::InvalidState;
     }
-    AcqStreamCore& c = *m_core;
-    ReaderSlot& slot = c.slots[m_slot];
+    return releaseView(*m_core, m_slot, view);
+}
+
+AcqExpected<AcqViewLease> AcqReader::lease(std::size_t minSamples, std::chrono::nanoseconds timeout,
+                                           std::size_t maxSamples) noexcept
+{
+    auto view = acquire(minSamples, timeout, maxSamples);
+    if (!view) {
+        return view.error();
+    }
+    return AcqViewLease(m_core.get(), m_slot, *std::move(view));
+}
+
+AcqError ACQLIB::detail::releaseView(AcqStreamCore& c, std::uint32_t index, AcqBlockView& view) noexcept
+{
+    ReaderSlot& slot = c.slots[index];
     if (!slot.holding || ViewAccess::ticket(view) != slot.ticket) {
         return AcqErrorCode::InvalidState;
     }
@@ -365,6 +380,50 @@ AcqError AcqReader::release(AcqBlockView& view) noexcept
     }
     return overwritten ? AcqError(AcqErrorCode::Overrun) : AcqError();
 }
+
+//=============================================================================================================
+// DEFINE MEMBER METHODS AcqViewLease
+//=============================================================================================================
+
+AcqViewLease::AcqViewLease(AcqStreamCore* core, std::uint32_t slot, AcqBlockView&& view) noexcept
+: m_core(core)
+, m_slot(slot)
+, m_view(std::move(view))
+{
+}
+
+AcqViewLease::~AcqViewLease()
+{
+    static_cast<void>(release()); // an overrun stays counted in AcqReaderStats
+}
+
+AcqViewLease::AcqViewLease(AcqViewLease&& other) noexcept
+: m_core(std::exchange(other.m_core, nullptr))
+, m_slot(other.m_slot)
+, m_view(std::move(other.m_view))
+{
+}
+
+AcqViewLease& AcqViewLease::operator=(AcqViewLease&& other) noexcept
+{
+    if (this != &other) {
+        static_cast<void>(release());
+        m_core = std::exchange(other.m_core, nullptr);
+        m_slot = other.m_slot;
+        m_view = std::move(other.m_view);
+    }
+    return *this;
+}
+
+AcqError AcqViewLease::release() noexcept
+{
+    if (m_core == nullptr) {
+        return AcqErrorCode::InvalidState;
+    }
+    return releaseView(*std::exchange(m_core, nullptr), m_slot, m_view);
+}
+
+//=============================================================================================================
 
 AcqError AcqReader::consumeIdle(std::size_t samples) noexcept
 {
