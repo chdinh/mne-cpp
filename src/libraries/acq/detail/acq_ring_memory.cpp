@@ -321,13 +321,11 @@ void ACQLIB::detail::lockRingMemory(RingMemory& memory) noexcept
     if (memory.data == nullptr || memory.locked) {
         return;
     }
-    const std::size_t span = memory.mirrored ? 2 * memory.bytes : memory.bytes;
 #if defined(ACQ_RING_WINDOWS)
-    memory.locked = memory.mirrored
-        ? VirtualLock(memory.data, memory.bytes) != 0 && VirtualLock(memory.data + memory.bytes, memory.bytes) != 0
-        : VirtualLock(memory.data, span) != 0;
+    memory.locked = VirtualLock(memory.data, memory.bytes) != 0 &&
+        (!memory.mirrored || VirtualLock(memory.data + memory.bytes, memory.bytes) != 0);
 #elif defined(ACQ_RING_MMAP)
-    memory.locked = mlock(memory.data, span) == 0;
+    memory.locked = mlock(memory.data, memory.mirrored ? 2 * memory.bytes : memory.bytes) == 0;
 #endif
 }
 
