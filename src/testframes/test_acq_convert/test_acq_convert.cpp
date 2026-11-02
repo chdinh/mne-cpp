@@ -940,9 +940,9 @@ void TestAcqConvert::testFloatSaturationAndWideBitFields()
     auto dr = encode(AcqMatrixRef<const double>::rowMajor(infinite.data(), 1, 2), *dv, raw);
     QVERIFY(dr);
     QCOMPARE(dr->clipped, std::uint64_t(2));
-    double top = 0.0;
-    std::memcpy(&top, dv->part(0).at(0, 0), sizeof(top));
-    QCOMPARE(top, std::numeric_limits<double>::max());
+    double largest = 0.0;
+    std::memcpy(&largest, dv->part(0).at(0, 0), sizeof(largest));
+    QCOMPARE(largest, std::numeric_limits<double>::max());
     doubles.writer.commit(2);
 
     // Bit fields sit at the top of 24- and 32-bit words as well.
