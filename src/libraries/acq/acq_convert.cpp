@@ -24,7 +24,6 @@
 
 #include <algorithm>
 #include <array>
-#include <tuple>
 #include <utility>
 #include <cmath>
 #include <cstring>
@@ -572,8 +571,14 @@ void encodeFastRun(const AcqMatrixRef<const T>& in, std::size_t firstColumn, con
 {
     constexpr auto kBytes = static_cast<std::ptrdiff_t>(realBytes<F>());
     constexpr double kInf = std::numeric_limits<double>::infinity();
+    struct Limits
+    {
+        double lo;
+        double hi;
+    };
+    // A plain struct, not std::pair, whose by-value passing GCC flags as changed in its ABI (-Wpsabi note).
     const auto limits = [&](std::size_t c) {
-        return std::pair{std::isnan(rangeMin[c]) ? -kInf : rangeMin[c], std::isnan(rangeMax[c]) ? kInf : rangeMax[c]};
+        return Limits{std::isnan(rangeMin[c]) ? -kInf : rangeMin[c], std::isnan(rangeMax[c]) ? kInf : rangeMax[c]};
     };
     std::uint64_t clip = 0;
     if (part.sampleStride == kBytes && in.colStride == 1) {
@@ -598,7 +603,9 @@ void encodeFastRun(const AcqMatrixRef<const T>& in, std::size_t firstColumn, con
         for (std::size_t c0 = 0; c0 < in.rows; c0 += kChannelChunk) {
             const std::size_t n = std::min(kChannelChunk, in.rows - c0);
             for (std::size_t i = 0; i < n; ++i) {
-                std::tie(lo[i], hi[i]) = limits(firstChannel + c0 + i);
+                const Limits l = limits(firstChannel + c0 + i);
+                lo[i] = l.lo;
+                hi[i] = l.hi;
                 scale[i] = scales[firstChannel + c0 + i];
                 offset[i] = offsets[firstChannel + c0 + i];
             }
