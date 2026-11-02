@@ -68,6 +68,8 @@ target_link_libraries(${PROJECT_NAME} PUBLIC Threads::Threads)
 target_include_directories(${PROJECT_NAME} PUBLIC $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/..> $<INSTALL_INTERFACE:include>)
 
 target_compile_features(${PROJECT_NAME} PUBLIC cxx_std_20)
+# Export only ACQSHARED_EXPORT symbols everywhere, as Windows DLLs do, so a missing export fails on every OS.
+set_target_properties(${PROJECT_NAME} PROPERTIES CXX_VISIBILITY_PRESET hidden VISIBILITY_INLINES_HIDDEN ON)
 
 target_compile_definitions(${PROJECT_NAME} PRIVATE MNE_ACQ_LIBRARY)
 if(DEFINED MNE_GIT_HASH_SHORT)

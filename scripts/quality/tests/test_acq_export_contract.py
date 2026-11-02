@@ -13,7 +13,7 @@ import unittest
 from pathlib import Path
 
 ACQ = Path(__file__).resolve().parents[3] / "src" / "libraries" / "acq"
-TOKENS = re.compile(r"^(ACQ_STD_MEMBERS_BEGIN|ACQ_STD_MEMBERS_END)$|^class ACQSHARED_EXPORT (\w+)", re.MULTILINE)
+TOKENS = re.compile(r"^(ACQ_STD_MEMBERS_BEGIN|ACQ_STD_MEMBERS_END)$|^(?:class|struct) ACQSHARED_EXPORT (\w+)", re.MULTILINE)
 
 
 def unbracketed(text: str) -> list[str]:
@@ -31,6 +31,7 @@ def unbracketed(text: str) -> list[str]:
 class TestAcqExportContract(unittest.TestCase):
     def test_detects_missing_bracket(self):
         self.assertEqual(unbracketed("class ACQSHARED_EXPORT A\n{\n};\n"), ["A"])
+        self.assertEqual(unbracketed("struct ACQSHARED_EXPORT B\n{\n};\n"), ["B"])
         self.assertEqual(unbracketed("ACQ_STD_MEMBERS_BEGIN\nclass ACQSHARED_EXPORT A\n"), ["<unbalanced>"])
 
     def test_every_exported_class_is_bracketed(self):

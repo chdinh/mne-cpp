@@ -44,11 +44,12 @@
 namespace ACQLIB
 {
 
+ACQ_STD_MEMBERS_BEGIN
 //=============================================================================================================
 /**
  * A parsed source URI. Percent-decoded; parameter order is preserved.
  */
-struct AcqUri
+struct ACQSHARED_EXPORT AcqUri
 {
     std::string scheme;                                      /**< Lower-case scheme without "://". */
     std::string target;                                      /**< Everything between "://" and "?". */
@@ -71,6 +72,7 @@ struct AcqUri
     /** @return The canonical, percent-encoded string form. */
     [[nodiscard]] std::string toString() const;
 };
+ACQ_STD_MEMBERS_END
 
 //=============================================================================================================
 /**
