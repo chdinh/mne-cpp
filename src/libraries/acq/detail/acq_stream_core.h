@@ -87,6 +87,33 @@ inline void addOwned(std::atomic<std::uint64_t>& counter, std::uint64_t n) noexc
 
 //=============================================================================================================
 /**
+ * Copies @p src into the record slot @p dst as relaxed 8-byte atomic stores. A lagging reader may scan a slot
+ * the producer is overwriting (the reader detects that afterwards and scans again); the accesses must still not
+ * be a data race.
+ */
+template<typename T>
+void storeRecord(T& dst, const T& src) noexcept
+{
+    static_assert(std::is_trivially_copyable_v<T> && sizeof(T) % 8 == 0 && alignof(T) >= 8);
+    std::array<std::uint64_t, sizeof(T) / 8> words{};
+    std::memcpy(words.data(), &src, sizeof(T));
+    auto* raw = reinterpret_cast<std::uint64_t*>(&dst);
+    for (std::size_t k = 0; k < words.size(); ++k) {
+        std::atomic_ref<std::uint64_t>(raw[k]).store(words[k], std::memory_order_relaxed);
+    }
+}
+
+/** @return The sample index of a record (its first 8 bytes), read as a relaxed atomic. */
+template<typename T>
+[[nodiscard]] std::uint64_t loadRecordKey(const T& record) noexcept
+{
+    static_assert(alignof(T) >= 8 && (offsetof(AcqEvent, sample) == 0) && (offsetof(AcqSegmentHeader, firstSample) == 0));
+    auto* raw = reinterpret_cast<std::uint64_t*>(const_cast<T*>(&record));
+    return std::atomic_ref<std::uint64_t>(*raw).load(std::memory_order_relaxed);
+}
+
+//=============================================================================================================
+/**
  * Lock-free single-writer value with a sequence counter, stored in atomic words so readers never race.
  */
 template<typename T>

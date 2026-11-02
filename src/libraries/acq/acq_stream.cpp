@@ -80,7 +80,7 @@ void pushRecord(RecordRing<T>& ring, const T& record, std::span<const std::byte>
     ring.reserved.store(index + 1, std::memory_order_relaxed);
     std::atomic_thread_fence(std::memory_order_seq_cst);
     const std::uint64_t slot = index & ring.mask;
-    ring.records[slot] = record;
+    storeRecord(ring.records[slot], record);
     if (ring.payloadBytes > 0) {
         std::byte* dst = ring.payloads.data() + slot * ring.payloadBytes;
         const std::size_t n = std::min(payload.size(), ring.payloadBytes);

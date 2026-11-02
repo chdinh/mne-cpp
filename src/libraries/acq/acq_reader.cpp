@@ -299,10 +299,10 @@ AcqExpected<AcqBlockView> AcqReader::acquire(std::size_t minSamples, std::chrono
     }
 
     const RecordWindow events = selectRecords(c.events, slot.eventCursor, start, start + count, slot.eventsLost,
-                                              !latest, [](const AcqEvent& e) { return e.sample; });
+                                              !latest, [](const AcqEvent& e) { return loadRecordKey(e); });
     const RecordWindow segments = selectRecords(c.segments, slot.segmentCursor, start, start + count,
                                                 slot.segmentsLost, !latest,
-                                                [](const AcqSegmentHeader& h) { return h.firstSample; });
+                                                [](const AcqSegmentHeader& h) { return loadRecordKey(h); });
 
     AcqBlockView view;
     ViewAccess::setSamples(view, c, start, count, *c.versions[versionIndex]);

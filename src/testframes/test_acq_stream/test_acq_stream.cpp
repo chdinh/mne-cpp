@@ -416,7 +416,14 @@ bool eventsValid(const AcqBlockView& view)
     const std::uint64_t end = view.firstSample() + view.sampleCount();
     std::uint64_t previous = 0;
     for (std::size_t i = 0; i < view.events().size(); ++i) {
-        const AcqEvent& event = view.events()[i];
+        // The producer may be overwriting the event while the view is held; it stores records as 8-byte atomics.
+        std::array<std::uint64_t, 2> words{};
+        auto* raw = reinterpret_cast<std::uint64_t*>(const_cast<AcqEvent*>(&view.events()[i]));
+        for (std::size_t k = 0; k < words.size(); ++k) {
+            words[k] = std::atomic_ref<std::uint64_t>(raw[k]).load(std::memory_order_relaxed);
+        }
+        AcqEvent event;
+        std::memcpy(&event, words.data(), sizeof(event));
         if (event.sample < view.firstSample() || event.sample >= end || event.sample % kEventEvery != 0 ||
             event.code != eventCode(event.sample) || (i > 0 && event.sample <= previous)) {
             return false;
