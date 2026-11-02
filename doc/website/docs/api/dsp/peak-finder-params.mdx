@@ -57,7 +57,7 @@ ok &= expect(indices(peaks) == QList<int>({9, 51, 92, 128, 170}) && indices(peak
 
 Spectral and filtering tools of the dsp library on signals with known content.
 
-````cpp title="src/examples/ex_dsp_spectral/main.cpp, line 212"
+````cpp title="src/examples/ex_dsp_spectral/main.cpp, line 222"
 VectorXd trace(10);
 trace << 0, 1, 0, 3, 0, 2, 0, 5, 1, 0;
 const QList<QPair<int, double>> allPeaks = peakFinder(trace);

@@ -58,19 +58,20 @@ The documented classes this example uses most:
 
 | Class | Library |
 |---|---|
+| [`IirFilter`](../../api/dsp/iir-filter.mdx) | Signal Processing |
 | [`FigureExporter`](../../api/disp/figure-exporter.mdx) | Visualization |
 | [`IirBiquad`](../../api/dsp/iir-biquad.mdx) | Signal Processing |
-| [`IirFilter`](../../api/dsp/iir-filter.mdx) | Signal Processing |
 | [`MorletTfr`](../../api/dsp/morlet-tfr.mdx) | Signal Processing |
 | [`LinePlot`](../../api/disp/line-plot.mdx) | Visualization |
 | [`MorletTfrResult`](../../api/dsp/morlet-tfr-result.mdx) | Signal Processing |
 | [`MultitaperPsd`](../../api/dsp/multitaper-psd.mdx) | Signal Processing |
-| [`ImageSc`](../../api/disp/image-sc.mdx) | Visualization |
+| [`IirStreamFilter`](../../api/dsp/iir-stream-filter.mdx) | Signal Processing |
 
 ## Used in the API reference
 
 - [IirBiquad](../../api/dsp/iir-biquad.mdx)
 - [IirFilter](../../api/dsp/iir-filter.mdx)
+- [IirStreamFilter](../../api/dsp/iir-stream-filter.mdx)
 - [MorletTfrResult](../../api/dsp/morlet-tfr-result.mdx)
 - [MorletTfr](../../api/dsp/morlet-tfr.mdx)
 - [MultitaperPsdResult](../../api/dsp/multitaper-psd-result.mdx)
@@ -301,6 +302,16 @@ int main(int argc, char* argv[])
     const double lowPassErr = (lowPassed - only20).segment(50, n - 100).cwiseAbs().maxCoeff();
     ok &= expect(std::fabs(lowPassErr - 0.02592545936305224) < 1e-3,
                  QString("zero-phase low-pass: 55 Hz removed, 20 Hz in phase (deviation %1, scipy 0.02593)").arg(lowPassErr));
+
+    //! [iir_stream_usage]
+    // Online: the same low-pass, causal, applied to blocks as they arrive (e.g. from an acquisition stream).
+    IirStreamFilter online(sos, 1);
+    MatrixXd stream = signal;
+    for (Index at = 0; at < stream.cols(); at += 37) {
+        online.process(stream.middleCols(at, std::min<Index>(37, stream.cols() - at)));
+    }
+    //! [iir_stream_usage]
+    ok &= expect(stream.row(0) == IirFilter::applySos(signal, sos), "block-wise streaming filter = one pass, bit for bit");
 
     VectorXd trace(10);
     trace << 0, 1, 0, 3, 0, 2, 0, 5, 1, 0;

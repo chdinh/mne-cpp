@@ -2538,7 +2538,8 @@
         "windows-2025-vs2026-qt-min": "run"
       },
       "registry_classes": [
-        "IirFilter"
+        "IirFilter",
+        "IirStreamFilter"
       ]
     },
     {

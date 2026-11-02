@@ -299,7 +299,8 @@ const apiSidebar: SidebarsConfig['apiSidebar'] = [
         'api/dsp/simulate-stc-params',
         'api/dsp/surface-laplacian-result',
         'api/dsp/welch-psd-result',
-        'api/dsp/xdawn-result'
+        'api/dsp/xdawn-result',
+        'api/dsp/iir-stream-filter'
       ],
     },
     {

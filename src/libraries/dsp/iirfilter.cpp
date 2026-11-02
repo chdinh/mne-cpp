@@ -371,26 +371,68 @@ RowVectorXd IirFilter::applySos(const RowVectorXd& vecData, const QVector<IirBiq
     }
 
     RowVectorXd y = vecData;
-
-    // Cascade all biquad sections using Direct-Form II transposed structure:
-    // w[n] = x[n] - a1*w[n-1] - a2*w[n-2]
-    // y[n] = b0*w[n] + b1*w[n-1] + b2*w[n-2]
-    // Equivalent transposed: uses two state variables (s1, s2)
-
     for (const IirBiquad& bq : sos) {
-        RowVectorXd x = y;
-        double s1 = 0.0, s2 = 0.0;
+        double s1 = 0.0;
+        double s2 = 0.0;
+        runSection(bq, y.data(), y.size(), 1, s1, s2);
+    }
+    return y;
+}
 
-        for (int i = 0; i < static_cast<int>(x.size()); ++i) {
-            double xi = x(i);
-            double yi = bq.b0 * xi + s1;
-            s1 = bq.b1 * xi - bq.a1 * yi + s2;
-            s2 = bq.b2 * xi - bq.a2 * yi;
-            y(i) = yi;
+//=============================================================================================================
+
+void IirFilter::runSection(const IirBiquad& bq, double* data, Index samples, Index stride, double& s1, double& s2)
+{
+    // Direct-form II transposed: y = b0 x + s1; s1 = b1 x - a1 y + s2; s2 = b2 x - a2 y.
+    double z1 = s1;
+    double z2 = s2;
+    for (Index i = 0; i < samples; ++i) {
+        double& v = data[i * stride];
+        const double xi = v;
+        const double yi = bq.b0 * xi + z1;
+        z1 = bq.b1 * xi - bq.a1 * yi + z2;
+        z2 = bq.b2 * xi - bq.a2 * yi;
+        v = yi;
+    }
+    s1 = z1;
+    s2 = z2;
+}
+
+//=============================================================================================================
+// DEFINE MEMBER METHODS IirStreamFilter
+//=============================================================================================================
+
+IirStreamFilter::IirStreamFilter(const QVector<IirBiquad>& sos, int channels)
+: m_sos(sos)
+, m_state(MatrixXd::Zero(std::max(channels, 0), 2 * sos.size()))
+{
+}
+
+bool IirStreamFilter::process(Ref<MatrixXd> block)
+{
+    if (block.rows() != m_state.rows()) {
+        return false;
+    }
+    if (block.cols() == 0) {
+        return true;
+    }
+    for (Index c = 0; c < block.rows(); ++c) {
+        for (Index k = 0; k < m_sos.size(); ++k) {
+            IirFilter::runSection(m_sos[static_cast<int>(k)], &block(c, 0), block.cols(), block.outerStride(),
+                                  m_state(c, 2 * k), m_state(c, 2 * k + 1));
         }
     }
+    return true;
+}
 
-    return y;
+void IirStreamFilter::reset()
+{
+    m_state.setZero();
+}
+
+int IirStreamFilter::channels() const
+{
+    return static_cast<int>(m_state.rows());
 }
 
 //=============================================================================================================

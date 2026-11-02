@@ -3,25 +3,25 @@
   "generated_by": "scripts/quality/audit_api_evidence.py",
   "policy": "scripts/quality/api_evidence_policy.json",
   "summary": {
-    "exported_classes": 478,
+    "exported_classes": 479,
     "exported_free_functions": 135,
-    "registered_classes": 564,
+    "registered_classes": 565,
     "exported_not_registered": 0,
     "registered_function_modules": 13,
     "registered_header_only": 73,
     "registered_stale": 0,
-    "registered_with_test": 208,
+    "registered_with_test": 209,
     "registered_test_unresolved": 0,
-    "registered_with_example": 403,
+    "registered_with_example": 404,
     "registered_example_not_built": 0,
-    "registered_with_python_equiv": 93,
+    "registered_with_python_equiv": 94,
     "registered_without_api_page": 0,
-    "with_snippet": 438,
-    "public_api_units": 564,
-    "example_eligible": 402,
+    "with_snippet": 439,
+    "public_api_units": 565,
+    "example_eligible": 403,
     "example_exempt": 162,
-    "eligible_backed_by_registry_example": 402,
-    "eligible_used_by_some_example": 353,
+    "eligible_backed_by_registry_example": 403,
+    "eligible_used_by_some_example": 354,
     "examples_on_disk": 73,
     "examples_built": 73
   },
@@ -90,13 +90,13 @@
       "with_snippet": 18
     },
     "dsp": {
-      "public": 85,
-      "registered": 85,
-      "with_test": 29,
-      "eligible": 81,
-      "eligible_with_registry_example": 81,
-      "eligible_used_by_example": 81,
-      "with_snippet": 85
+      "public": 86,
+      "registered": 86,
+      "with_test": 30,
+      "eligible": 82,
+      "eligible_with_registry_example": 82,
+      "eligible_used_by_example": 82,
+      "with_snippet": 86
     },
     "fiff": {
       "public": 38,
@@ -6514,7 +6514,8 @@
       ],
       "snippets": [
         "ex_dsp_spectral/main.cpp#iir_filter_usage",
-        "ex_dsp_spectral/main.cpp#iir_filter_usage"
+        "ex_dsp_spectral/main.cpp#iir_filter_usage",
+        "ex_dsp_spectral/main.cpp#iir_stream_usage"
       ],
       "api_page": "doc/website/docs/api/dsp/iir-biquad.mdx",
       "python_equiv": null,
@@ -6538,10 +6539,36 @@
       ],
       "snippets": [
         "ex_dsp_spectral/main.cpp#iir_filter_usage",
-        "ex_dsp_spectral/main.cpp#iir_filter_usage"
+        "ex_dsp_spectral/main.cpp#iir_filter_usage",
+        "ex_dsp_spectral/main.cpp#iir_stream_usage"
       ],
       "api_page": "doc/website/docs/api/dsp/iir-filter.mdx",
       "python_equiv": "mne.filter.filter_data (method='iir')",
+      "example_eligible": true,
+      "exempt_reason": null
+    },
+    {
+      "name": "IirStreamFilter",
+      "header": "dsp/iirfilter.h",
+      "library": "dsp",
+      "kind": "exported-class",
+      "exported": true,
+      "registered": true,
+      "registry_status": "done",
+      "test": "test_dsp_iirfilter",
+      "test_resolves": true,
+      "example": "ex_dsp_spectral",
+      "example_state": "built",
+      "including_examples": [
+        "ex_dsp_spectral"
+      ],
+      "snippets": [
+        "ex_dsp_spectral/main.cpp#iir_filter_usage",
+        "ex_dsp_spectral/main.cpp#iir_filter_usage",
+        "ex_dsp_spectral/main.cpp#iir_stream_usage"
+      ],
+      "api_page": "doc/website/docs/api/dsp/iir-stream-filter.mdx",
+      "python_equiv": "scipy.signal.sosfilt with zi",
       "example_eligible": true,
       "exempt_reason": null
     },

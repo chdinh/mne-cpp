@@ -158,6 +158,21 @@ public:
     static Eigen::MatrixXd applyZeroPhaseMatrix(const Eigen::MatrixXd& matData,
                                                 const QVector<IirBiquad>& sos);
 
+    //=========================================================================================================
+    /**
+     * Runs one section in place, continuing from its transposed direct-form II state. The kernel of
+     * applySos() and IirStreamFilter, so both give identical results.
+     *
+     * @param[in] bq            The section.
+     * @param[in, out] data     First value; filtered in place.
+     * @param[in] samples       Number of values.
+     * @param[in] stride        Distance between consecutive values, in doubles.
+     * @param[in, out] s1       First state variable.
+     * @param[in, out] s2       Second state variable.
+     */
+    static void runSection(const IirBiquad& bq, double* data, Eigen::Index samples, Eigen::Index stride, double& s1,
+                           double& s2);
+
 private:
     //=========================================================================================================
     /**
@@ -197,6 +212,45 @@ private:
     static IirBiquad realPoleToDigitalSection(double dPoleReal,
                                               double dC,
                                               double dGain);
+};
+
+//=============================================================================================================
+/**
+ * @brief Causal second-order-section filter that keeps its state between blocks.
+ *
+ * For filtering acquired data block by block (e.g. decoded from an ACQLIB view): the output over any split
+ * into blocks is bit-identical to IirFilter::applySos() over the whole recording, so online and offline
+ * results agree exactly. One state per channel and section, allocated once.
+ *
+ * @snippet ex_dsp_spectral/main.cpp iir_stream_usage
+ */
+class DSPSHARED_EXPORT IirStreamFilter
+{
+public:
+    /**
+     * @param[in] sos        Second-order sections, e.g. from IirFilter::designButterworth(); empty passes data through.
+     * @param[in] channels   Rows of every block.
+     */
+    IirStreamFilter(const QVector<IirBiquad>& sos, int channels);
+
+    /**
+     * Filters @p block (channels x samples) in place, continuing from the previous block.
+     *
+     * @param[in, out] block   The next samples of every channel.
+     *
+     * @return false, with block and state unchanged, if block.rows() != channels().
+     */
+    bool process(Eigen::Ref<Eigen::MatrixXd> block);
+
+    /** Returns every channel to rest (zero state), as before the first block. */
+    void reset();
+
+    /** @return Rows expected by process(). */
+    int channels() const;
+
+private:
+    QVector<IirBiquad> m_sos;
+    Eigen::MatrixXd m_state; /**< channels x (2 * sections): s1, s2 of each section. */
 };
 
 } // namespace UTILSLIB

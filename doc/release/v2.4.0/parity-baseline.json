@@ -21,17 +21,17 @@
     "lock_mismatch": []
   },
   "summary": {
-    "claims": 356,
+    "claims": 357,
     "by_evidence": {
       "cross-validated-static": 174,
       "cross-validated-live": 0,
-      "tested": 182,
+      "tested": 183,
       "unverified": 0
     },
     "by_claim": {
       "equivalent": 139,
       "exceeds": 0,
-      "implemented": 122,
+      "implemented": 123,
       "partial": 95
     },
     "equivalence_without_static_evidence": [],
@@ -39,7 +39,7 @@
       "classes": {
         "cross-validated-static": 32,
         "cross-validated-live": 0,
-        "tested": 61,
+        "tested": 62,
         "unverified": 0
       },
       "parity": {
@@ -1001,6 +1001,15 @@
       "test": "test_dsp_artifact_detect",
       "evidence": "cross-validated-static",
       "tolerance": "1e-05"
+    },
+    {
+      "source": "classes",
+      "mne_cpp": "IirStreamFilter",
+      "python": "scipy.signal.sosfilt with zi",
+      "claimed": "implemented",
+      "equivalence": null,
+      "test": "test_dsp_iirfilter",
+      "evidence": "tested"
     },
     {
       "source": "parity",

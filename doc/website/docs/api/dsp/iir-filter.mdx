@@ -115,6 +115,34 @@ Apply zero-phase filtering to every row of a matrix (each row = one channel).
 
 ---
 
+### runSection(bq, data, samples, stride, s1, s2)
+
+Runs one section in place, continuing from its transposed direct-form II state.
+
+The kernel of `applySos()` and [`IirStreamFilter`](/docs/api/dsp/iir-stream-filter), so both give identical results.
+
+**Parameters:**
+
+- **bq** : *const [IirBiquad](/docs/api/dsp/iir-biquad) &*
+  The section.
+
+- **data** : *double **
+  First value; filtered in place.
+
+- **samples** : *Eigen::Index*
+  Number of values.
+
+- **stride** : *Eigen::Index*
+  Distance between consecutive values, in doubles.
+
+- **s1** : *double &*
+  First state variable.
+
+- **s2** : *double &*
+  Second state variable.
+
+---
+
 ## Example
 
 - Start here: [ex_dsp_spectral](../../examples/dsp/ex_dsp_spectral.mdx) — Spectral and filtering tools of the dsp library on signals with known content.

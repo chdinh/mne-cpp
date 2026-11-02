@@ -215,6 +215,45 @@ private slots:
         auto sos = IirFilter::designButterworth(0, IirFilter::LowPass, 40.0, 0.0, 1000.0);
         QVERIFY(sos.isEmpty());
     }
+
+    //=========================================================================
+    // Streaming: block by block equals one pass, bit for bit
+    //=========================================================================
+    void streaming_bitIdenticalToOnePass()
+    {
+        const auto sos = IirFilter::designButterworth(4, IirFilter::BandPass, 1.0, 40.0, 1000.0);
+        const MatrixXd data = MatrixXd::Random(3, 5000);
+        MatrixXd whole(data.rows(), data.cols());
+        for (int c = 0; c < data.rows(); ++c) {
+            whole.row(c) = IirFilter::applySos(data.row(c), sos);
+        }
+        IirStreamFilter filter(sos, 3);
+        QCOMPARE(filter.channels(), 3);
+        MatrixXd streamed = data;
+        std::uint64_t rng = 1;
+        for (Index at = 0; at < data.cols();) {
+            rng = rng * 6364136223846793005ULL + 1442695040888963407ULL;
+            const Index n = std::min<Index>(static_cast<Index>(rng >> 60U), data.cols() - at); // 0..15, empty blocks too
+            Eigen::Ref<MatrixXd> block = streamed.middleCols(at, n);
+            QVERIFY(filter.process(block));
+            at += n;
+        }
+        QVERIFY(std::memcmp(streamed.data(), whole.data(), sizeof(double) * static_cast<std::size_t>(whole.size())) == 0);
+
+        // reset() starts from rest again; a block of the wrong height is refused and leaves the state alone.
+        filter.reset();
+        MatrixXd again = data;
+        QVERIFY(filter.process(again));
+        QVERIFY(std::memcmp(again.data(), whole.data(), sizeof(double) * static_cast<std::size_t>(whole.size())) == 0);
+        MatrixXd wrong = MatrixXd::Ones(2, 4);
+        QVERIFY(!filter.process(wrong));
+        QCOMPARE(wrong, MatrixXd::Ones(2, 4));
+        IirStreamFilter passThrough({}, 1);
+        MatrixXd row = MatrixXd::Random(1, 16);
+        const MatrixXd copy = row;
+        QVERIFY(passThrough.process(row));
+        QCOMPARE(row, copy);
+    }
 };
 
 QTEST_MAIN(TestDspIirFilter)

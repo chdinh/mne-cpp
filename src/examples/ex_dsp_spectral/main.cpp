@@ -209,6 +209,16 @@ int main(int argc, char* argv[])
     ok &= expect(std::fabs(lowPassErr - 0.02592545936305224) < 1e-3,
                  QString("zero-phase low-pass: 55 Hz removed, 20 Hz in phase (deviation %1, scipy 0.02593)").arg(lowPassErr));
 
+    //! [iir_stream_usage]
+    // Online: the same low-pass, causal, applied to blocks as they arrive (e.g. from an acquisition stream).
+    IirStreamFilter online(sos, 1);
+    MatrixXd stream = signal;
+    for (Index at = 0; at < stream.cols(); at += 37) {
+        online.process(stream.middleCols(at, std::min<Index>(37, stream.cols() - at)));
+    }
+    //! [iir_stream_usage]
+    ok &= expect(stream.row(0) == IirFilter::applySos(signal, sos), "block-wise streaming filter = one pass, bit for bit");
+
     VectorXd trace(10);
     trace << 0, 1, 0, 3, 0, 2, 0, 5, 1, 0;
     const QList<QPair<int, double>> allPeaks = peakFinder(trace);
