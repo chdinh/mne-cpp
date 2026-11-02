@@ -319,6 +319,13 @@ constexpr auto kStimDelayTicks = static_cast<std::int64_t>(kStimDelay); // the s
 constexpr std::size_t kStimWidth = 30;                                  // 0.5 ms cathodic + 0.5 ms anodic
 constexpr std::int16_t kStimAmplitude = 20000;
 constexpr std::size_t kCommitSlots = 4096;
+constexpr auto kBiphasic = [] {
+    std::array<double, kStimWidth> pulse{};
+    for (std::size_t j = 0; j < kStimWidth; ++j) {
+        pulse[j] = j < kStimWidth / 2 ? -kStimAmplitude : kStimAmplitude;
+    }
+    return pulse;
+}();
 
 /** Neural-like test signal: per-channel oscillation, noise and, on channel 0, a periodic spike. */
 class SignalGenerator
@@ -373,6 +380,7 @@ struct ClosedLoopState
     std::atomic<std::uint64_t> stimuliDropped{0}; // committed, but the card had already passed their start
     std::atomic<std::uint64_t> stimuliExact{0};
     std::atomic<std::uint64_t> stimuliMisplaced{0};
+    std::atomic<std::uint64_t> pulseSampleErrors{0}; // played samples off the biphasic shape
 };
 
 /** The card: writes the input ring in 1 ms blocks at the real-time rate and plays the output ring. */
@@ -382,6 +390,7 @@ void runCard(AcqWriter& input, AcqReader& dac, const SignalGenerator& gen, Close
     const auto period = std::chrono::nanoseconds(static_cast<std::int64_t>(1e9 * kBlock / kSfreq));
     const auto start = Clock::now();
     bool previousNonZero = false;
+    std::uint64_t pulseStart = 0;
     for (std::uint64_t k = 0; k < blocks; ++k) {
         std::this_thread::sleep_until(start + period * static_cast<std::int64_t>(k + 1));
 
@@ -422,6 +431,12 @@ void runCard(AcqWriter& input, AcqReader& dac, const SignalGenerator& gen, Close
                     if (nonZero && !previousNonZero) {
                         const bool exact = t >= kStimDelay && SignalGenerator::isSpikeStart(t - kStimDelay);
                         (exact ? st.stimuliExact : st.stimuliMisplaced).fetch_add(1, std::memory_order_relaxed);
+                        pulseStart = t;
+                    }
+                    if (nonZero) {
+                        const std::int16_t expected =
+                            t - pulseStart < kStimWidth / 2 ? -kStimAmplitude : kStimAmplitude;
+                        st.pulseSampleErrors.fetch_add(v != expected ? 1U : 0U, std::memory_order_relaxed);
                     }
                     previousNonZero = nonZero;
                 }
@@ -508,13 +523,11 @@ void runController(AcqReader& reader, AcqWriter& stimulator, ClosedLoopState& st
                     bool scheduled = false;
                     if (auto at = mapSampleExact(inClock, outClock, s, kStimDelayTicks)) {
                         if (auto pulse = stimulator.beginWriteAt(*at, kStimWidth, 0ns)) {
-                            for (std::size_t q = 0; q < pulse->partCount(); ++q) {
-                                for (std::size_t j = 0; j < pulse->part(q).samples; ++j) {
-                                    const std::uint64_t phase = pulse->firstSample() + j - *at;
-                                    const std::int16_t a = phase < kStimWidth / 2 ? -kStimAmplitude : kStimAmplitude;
-                                    std::memcpy(pulse->part(q).at(0, j), &a, sizeof(a));
-                                }
-                            }
+                            // encode() handles a pulse that crosses the end of the ring (two parts).
+                            AcqConvertOptions raw;
+                            raw.scaling = AcqScaling::Raw;
+                            (void)encode(AcqMatrixRef<const double>::rowMajor(kBiphasic.data(), 1, kStimWidth), *pulse,
+                                         raw);
                             stimulator.commit(kStimWidth);
                             scheduled = true;
                         }
@@ -609,8 +622,8 @@ void printDashboard(const ClosedLoopState& st, const DisplayFrame& frame, const 
     std::printf("                          spikes %llu injected, %llu detected -> %llu stimuli scheduled, %llu refused late\n",
                 u(st.spikesInjected), u(st.spikesDetected), u(st.stimuliScheduled), u(st.stimuliLate));
     std::printf("  Stimulator  output      %llu pulses on the exact sample (spike + 3.000 ms), %llu misplaced,\n"
-                "                          %llu dropped by the card as late\n",
-                u(st.stimuliExact), u(st.stimuliMisplaced), u(st.stimuliDropped));
+                "                          %llu samples off the biphasic shape, %llu dropped by the card as late\n",
+                u(st.stimuliExact), u(st.stimuliMisplaced), u(st.pulseSampleErrors), u(st.stimuliDropped));
     std::printf("  Data path   heap allocations after start: %llu\n",
                 static_cast<unsigned long long>(g_allocations.load()));
     std::printf("\n");
@@ -716,7 +729,7 @@ bool runClosedLoop(double seconds)
     const bool lossless = recorded.lost == 0 && recorded.eventsLost == 0 && recorded.delivered == produced.committed;
     //! [acq_stream_stats]
     const bool ok = lossless && st.sampleMismatches == 0 && st.markerMismatches == 0 &&
-        st.markersVerified == st.spikesInjected && st.stimuliMisplaced == 0 &&
+        st.markersVerified == st.spikesInjected && st.stimuliMisplaced == 0 && st.pulseSampleErrors == 0 &&
         st.stimuliExact + st.stimuliDropped == st.stimuliScheduled && g_allocations == 0 &&
         st.recordedSamples == static_cast<std::uint64_t>(seconds * kSfreq / kBlock) * kBlock;
     std::printf("  %s\n", ok ? "PASS: every sample bit-exact and none lost, every stimulus on its exact sample or\n"
