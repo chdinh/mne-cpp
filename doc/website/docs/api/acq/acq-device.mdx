@@ -217,6 +217,25 @@ if (!reader || !device->start().ok()) {
 }
 ````
 
+### [ex_acq_scope](../../examples/acq/ex_acq_scope.mdx)
+
+Live multi-channel scope of a streaming source with a closed-loop stimulator played back on the same clock.
+
+````cpp title="src/examples/ex_acq_scope/main.cpp, line 470"
+auto device = AcqDevice::open(uri);
+if (!device) {
+    std::fprintf(stderr, "Cannot open %s: %s\n", uri.c_str(), device.error().text().c_str());
+    return 1;
+}
+const auto info = device->stream().info();
+if (isComplex(info->format) || info->sfreq <= 0.0) {
+    std::fprintf(stderr, "%s needs a regularly sampled real-valued stream\n", uri.c_str());
+    return 1;
+}
+const std::size_t channels = info->channelCount();
+const double sfreq = info->sfreq;
+````
+
 ## Authors of this file
 
 - Christoph Dinh &lt;christoph.dinh@mne-cpp.org&gt;

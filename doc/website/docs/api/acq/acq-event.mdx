@@ -52,9 +52,10 @@ for (std::size_t e = 0; e < view->events().size(); ++e) {
 
 Recover the P300 from a streaming oddball session by trigger-locked averaging.
 
-````cpp title="src/examples/ex_acq_oddball/main.cpp, line 234"
+````cpp title="src/examples/ex_acq_oddball/main.cpp, line 235"
 const std::size_t maxView = capacity - length;
 std::vector<float> history(capacity * frame);
+std::vector<float> block(maxView * frame);
 std::vector<AcqEvent> pending;
 std::array<Average, 3> average; // indexed by event code
 average[kStandard].reset(eeg.size(), length);
@@ -69,7 +70,7 @@ std::uint64_t received = 0;
 
 Closed-loop acquisition and stimulation with ACQLIB, and its sustained throughput per device class.
 
-````cpp title="src/examples/ex_acq_performance/main.cpp, line 399"
+````cpp title="src/examples/ex_acq_performance/main.cpp, line 408"
             AcqEvent marker;
             marker.sample = s;
             marker.duration = kSpikeWidth;
@@ -81,6 +82,18 @@ Closed-loop acquisition and stimulation with ACQLIB, and its sustained throughpu
 }
 st.commitNs[k % kCommitSlots].store(nowNs(), std::memory_order_relaxed);
 input.commit(kBlock);
+````
+
+### [ex_acq_scope](../../examples/acq/ex_acq_scope.mdx)
+
+Live multi-channel scope of a streaming source with a closed-loop stimulator played back on the same clock.
+
+````cpp title="src/examples/ex_acq_scope/main.cpp, line 184"
+const AcqEvent& event = view->events()[e];
+if (event.code != kStandard && event.code != kTarget) {
+    continue;
+}
+newTriggers.push_back({event.sample, event.code, false});
 ````
 
 ## Authors of this file

@@ -226,6 +226,12 @@ public:
         return m_rangeMax;
     }
 
+    /** @return Per-channel AcqChannelInfo::digitalBits of infoVersion(). */
+    [[nodiscard]] std::span<const std::uint8_t> digitalBits() const noexcept
+    {
+        return m_digitalBits;
+    }
+
     /** @return Clock model valid for this view. */
     [[nodiscard]] const AcqClockModel& clock() const noexcept
     {
@@ -258,6 +264,7 @@ protected:
     std::span<const double> m_offsets;
     std::span<const double> m_rangeMin;
     std::span<const double> m_rangeMax;
+    std::span<const std::uint8_t> m_digitalBits;
     AcqClockModel m_clock;
     AcqTimebase m_timebase;
     AcqMemoryLocation m_memory;

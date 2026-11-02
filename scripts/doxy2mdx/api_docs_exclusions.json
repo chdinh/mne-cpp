@@ -6,12 +6,6 @@
     "SURFACEKEYS": "String-key constants for disp3D surface lookups, not types."
   },
   "classes": {
-    "ACQLIB::AcqReadResult": "Declared ahead of its implementation; registered with the format converters that implement and exercise it.",
-    "ACQLIB::AcqMatrixRef": "Declared ahead of its implementation; registered with the format converters that implement and exercise it.",
-    "ACQLIB::AcqConvertOptions": "Declared ahead of its implementation; registered with the format converters that implement and exercise it.",
-    "ACQLIB::AcqChannelRange": "Declared ahead of its implementation; registered with the format converters that implement and exercise it.",
-    "ACQLIB::AcqEncodeResult": "Declared ahead of its implementation; registered with the format converters that implement and exercise it.",
-    "ACQLIB::AcqBitField": "Declared ahead of its implementation; registered with the format converters that implement and exercise it.",
     "ACQLIB::AcqFiffChannel": "Declared ahead of its implementation; registered with the FIFF bridge that implements and exercises it.",
     "ACQLIB::AcqExtension": "Declared ahead of its implementation; registered with the FIFF bridge that implements and exercises it."
   }

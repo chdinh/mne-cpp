@@ -150,7 +150,7 @@ Copying convenience: waits for `out.cols` samples, decodes them into `out` and r
 
 **Parameters:**
 
-- **out** : *const AcqMatrixRef&lt; float &gt; &*
+- **out** : *const [AcqMatrixRef](/docs/api/acq/acq-matrix-ref)&lt; float &gt; &*
   Caller-owned destination, rows = `channelCount()`.
 
 - **timeout** : *std::chrono::nanoseconds*
@@ -161,7 +161,7 @@ Copying convenience: waits for `out.cols` samples, decodes them into `out` and r
 
 **Returns:**
 
-- *[AcqExpected](/docs/api/acq/acq-expected)&lt; AcqReadResult &gt;* — Position and loss of the block, or the error of `acquire()`/decode()/release().
+- *[AcqExpected](/docs/api/acq/acq-expected)&lt; [AcqReadResult](/docs/api/acq/acq-read-result) &gt;* — Position and loss of the block, ShapeMismatch (rows != `channelCount()`), DeviceMemory (the ring is in GPU memory; returned at once, nothing is consumed), or the error of `acquire()`/decode()/release().
 
 ---
 
@@ -171,7 +171,7 @@ Copying convenience: waits for `out.cols` samples, decodes them into `out` and r
 
 **Parameters:**
 
-- **out** : *const AcqMatrixRef&lt; double &gt; &*
+- **out** : *const [AcqMatrixRef](/docs/api/acq/acq-matrix-ref)&lt; double &gt; &*
   Caller-owned destination, rows = `channelCount()`.
 
 - **timeout** : *std::chrono::nanoseconds*
@@ -182,7 +182,7 @@ Copying convenience: waits for `out.cols` samples, decodes them into `out` and r
 
 **Returns:**
 
-- *[AcqExpected](/docs/api/acq/acq-expected)&lt; AcqReadResult &gt;* — Position and loss of the block, or the error of `acquire()`/decode()/release().
+- *[AcqExpected](/docs/api/acq/acq-expected)&lt; [AcqReadResult](/docs/api/acq/acq-read-result) &gt;* — Position and loss of the block, ShapeMismatch (rows != `channelCount()`), DeviceMemory (the ring is in GPU memory; returned at once, nothing is consumed), or the error of `acquire()`/decode()/release().
 
 ---
 
@@ -192,7 +192,7 @@ Copying convenience: waits for `out.cols` samples, decodes them into `out` and r
 
 **Parameters:**
 
-- **out** : *const AcqMatrixRef&lt; std::complex&lt; float &gt; &gt; &*
+- **out** : *const [AcqMatrixRef](/docs/api/acq/acq-matrix-ref)&lt; std::complex&lt; float &gt; &gt; &*
   Caller-owned destination, rows = `channelCount()`.
 
 - **timeout** : *std::chrono::nanoseconds*
@@ -203,7 +203,7 @@ Copying convenience: waits for `out.cols` samples, decodes them into `out` and r
 
 **Returns:**
 
-- *[AcqExpected](/docs/api/acq/acq-expected)&lt; AcqReadResult &gt;* — Position and loss of the block, or the error of `acquire()`/decode()/release().
+- *[AcqExpected](/docs/api/acq/acq-expected)&lt; [AcqReadResult](/docs/api/acq/acq-read-result) &gt;* — Position and loss of the block, ShapeMismatch (rows != `channelCount()`), DeviceMemory (the ring is in GPU memory; returned at once, nothing is consumed), or the error of `acquire()`/decode()/release().
 
 ---
 
@@ -235,7 +235,7 @@ Copying convenience: waits for `out.cols` samples, decodes them into `out` and r
 
 Closed-loop acquisition and stimulation with ACQLIB, and its sustained throughput per device class.
 
-````cpp title="src/examples/ex_acq_performance/main.cpp, line 378"
+````cpp title="src/examples/ex_acq_performance/main.cpp, line 386"
 /** The card: writes the input ring in 1 ms blocks at the real-time rate and plays the output ring. */
 void runCard(AcqWriter& input, AcqReader& dac, const SignalGenerator& gen, ClosedLoopState& st, double seconds)
 {
@@ -243,8 +243,24 @@ void runCard(AcqWriter& input, AcqReader& dac, const SignalGenerator& gen, Close
     const auto period = std::chrono::nanoseconds(static_cast<std::int64_t>(1e9 * kBlock / kSfreq));
     const auto start = Clock::now();
     bool previousNonZero = false;
+    std::uint64_t pulseStart = 0;
     for (std::uint64_t k = 0; k < blocks; ++k) {
         std::this_thread::sleep_until(start + period * static_cast<std::int64_t>(k + 1));
+````
+
+### [ex_acq_scope](../../examples/acq/ex_acq_scope.mdx)
+
+Live multi-channel scope of a streaming source with a closed-loop stimulator played back on the same clock.
+
+````cpp title="src/examples/ex_acq_scope/main.cpp, line 142"
+/** Acquisition thread: reads the source, schedules pulses, plays the output ring, fills the history. */
+void acquire(AcqReader& input, AcqWriter& stimulator, AcqReader& dac, std::size_t channels, double sfreq, Shared& shared)
+{
+    const auto delay = static_cast<std::uint64_t>(std::llround(kDelaySeconds * sfreq));
+    const auto phaseSamples = static_cast<std::size_t>(std::llround(kPhaseSeconds * sfreq));
+    const std::size_t pulseSamples = 2 * phaseSamples;
+    const auto maxView = static_cast<std::size_t>(std::llround(kMaxViewSeconds * sfreq));
+    const double lsb = kFullScale / 32767.0;
 ````
 
 ### [ex_acq_oddball](../../examples/acq/ex_acq_oddball.mdx)

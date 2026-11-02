@@ -46,13 +46,28 @@ auto controller = input->stream().reader(AcqReader::ReadMode::LowLatency);
 
 Closed-loop acquisition and stimulation with ACQLIB, and its sustained throughput per device class.
 
-````cpp title="src/examples/ex_acq_performance/main.cpp, line 657"
+````cpp title="src/examples/ex_acq_performance/main.cpp, line 670"
 AcqReaderOptions gating;
 gating.gating = true;
 auto dac = stimulator->stream().reader(AcqReader::ReadMode::Lossless, gating);
 auto recorder = input->stream().reader(AcqReader::ReadMode::Lossless);
 auto display = input->stream().reader(AcqReader::ReadMode::Latest);
 auto controller = input->stream().reader(AcqReader::ReadMode::LowLatency);
+````
+
+### [ex_acq_scope](../../examples/acq/ex_acq_scope.mdx)
+
+Live multi-channel scope of a streaming source with a closed-loop stimulator played back on the same clock.
+
+````cpp title="src/examples/ex_acq_scope/main.cpp, line 506"
+AcqReaderOptions gating;
+gating.gating = true; // the emulated DAC: it consumes what was written or plays fill
+auto dac = stimulator->stream().reader(AcqReader::ReadMode::Lossless, gating);
+auto input = device->stream().reader(AcqReader::ReadMode::Lossless);
+if (!dac || !input || !device->start().ok()) {
+    std::fprintf(stderr, "Cannot start %s\n", uri.c_str());
+    return 1;
+}
 ````
 
 ## Authors of this file

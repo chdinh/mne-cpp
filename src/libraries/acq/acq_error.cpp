@@ -28,7 +28,7 @@ namespace
 {
 using C = AcqErrorCode;
 
-constexpr std::array<AcqErrorInfo, 26> kCatalogue{{
+constexpr std::array<AcqErrorInfo, 27> kCatalogue{{
     {C::None, "None", "Success", "", "acq-errors#none"},
     {C::Timeout, "Timeout", "No data or space became available within the timeout",
      "Retry, use a longer timeout, or check that the device is running", "acq-errors#timeout"},
@@ -80,6 +80,9 @@ constexpr std::array<AcqErrorInfo, 26> kCatalogue{{
      "acq-errors#wrong-direction"},
     {C::WriterInUse, "WriterInUse", "The output stream already has its writer",
      "Keep and share the existing AcqWriter", "acq-errors#writer-in-use"},
+    {C::DeviceMemory, "DeviceMemory", "The samples live in GPU memory, which the CPU must not access",
+     "Process the view on the GPU (e.g. through DLPack) or copy it to host memory there",
+     "acq-errors#device-memory"},
     {C::Internal, "Internal", "An internal invariant of ACQLIB was violated",
      "Please report this with the steps that led to it", "acq-errors#internal"},
 }};

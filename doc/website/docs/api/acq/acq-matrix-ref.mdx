@@ -1,0 +1,171 @@
+---
+id: acq-matrix-ref
+title: "ACQLIB::AcqMatrixRef"
+sidebar_label: AcqMatrixRef
+sidebar_position: 37
+---
+
+# AcqMatrixRef
+
+**Namespace:** `ACQLIB` &nbsp;·&nbsp; **Library:** Acquisition Library &nbsp;·&nbsp; **Source:** [`acq/acq_convert.h`](https://github.com/mne-tools/mne-cpp/blob/staging/src/libraries/acq/acq_convert.h)
+
+`#include <acq/acq_convert.h>`
+
+```cpp
+template <typename T>
+struct ACQLIB::AcqMatrixRef
+```
+
+Non-owning channels x samples matrix with element strides; describes Eigen (column-major), NumPy, std::vector or device memory alike.
+
+```cpp title="src/examples/ex_acq_oddball/main.cpp"
+while (average[kTarget].count < kEnoughTargets) {
+    auto view = reader->acquire(1, 2s, maxView);
+    if (!view) {
+        if (view.error() == AcqErrorCode::EndOfStream) {
+            break;
+        }
+        continue;
+    }
+    // Native samples to volts in one pass, whatever the device's format and layout.
+    const std::size_t n = view->sampleCount();
+    if (const AcqError error = decode(*view, AcqMatrixRef<float>::columnMajor(block.data(), frame, n));
+        !error.ok()) {
+        std::fprintf(stderr, "Cannot decode %s: %s\n", uri.c_str(), error.text().c_str());
+        reader->release(*view);
+        break;
+    }
+    std::uint64_t s = view->firstSample();
+    for (std::size_t i = 0; i < n; ++i, ++s) {
+        std::memcpy(&history[(s & (capacity - 1)) * frame], &block[i * frame], frame * sizeof(float));
+    }
+    for (std::size_t e = 0; e < view->events().size(); ++e) {
+        const AcqEvent& event = view->events()[e];
+        if ((event.code == kStandard || event.code == kTarget) && event.sample >= pre) {
+            pending.push_back(event);
+        }
+    }
+    received = s;
+    if (!reader->release(*view).ok()) {
+        std::fprintf(stderr, "The reader fell behind; epochs over the lost samples are skipped\n");
+    }
+    // An epoch is complete once its last post-stimulus sample has arrived.
+    auto complete = [&](const AcqEvent& event) {
+        return event.sample + post <= received;
+    };
+    for (const AcqEvent& event : pending) {
+        if (complete(event)) {
+            cutEpoch(event);
+        }
+    }
+    pending.erase(std::remove_if(pending.begin(), pending.end(), complete), pending.end());
+}
+```
+
+---
+
+## Static Methods
+
+### columnMajor(data, rows, cols)
+
+**Parameters:**
+
+- **data** : *T **
+  Element (0, 0).
+
+- **rows** : *std::size_t*
+  Channels.
+
+- **cols** : *std::size_t*
+  Samples.
+
+**Returns:**
+
+- *[AcqMatrixRef](/docs/api/acq/acq-matrix-ref)* — A view of column-major storage (Eigen default, Fortran order).
+
+---
+
+### rowMajor(data, rows, cols)
+
+**Parameters:**
+
+- **data** : *T **
+  Element (0, 0).
+
+- **rows** : *std::size_t*
+  Channels.
+
+- **cols** : *std::size_t*
+  Samples.
+
+**Returns:**
+
+- *[AcqMatrixRef](/docs/api/acq/acq-matrix-ref)* — A view of row-major storage (C order, one contiguous row per channel).
+
+---
+
+## Example
+
+- Start here: [ex_acq_oddball](../../examples/acq/ex_acq_oddball.mdx) — Recover the P300 from a streaming oddball session by trigger-locked averaging.
+- Full source: [`src/examples/ex_acq_oddball/main.cpp`](https://github.com/mne-tools/mne-cpp/tree/staging/src/examples/ex_acq_oddball/main.cpp)
+- Build target: `ex_acq_oddball` (runs under CTest)
+
+## Used in examples
+
+### [ex_acq_scope](../../examples/acq/ex_acq_scope.mdx)
+
+Live multi-channel scope of a streaming source with a closed-loop stimulator played back on the same clock.
+
+````cpp title="src/examples/ex_acq_scope/main.cpp, line 175"
+if (const AcqError error = decode(*view, AcqMatrixRef<float>::columnMajor(block.data(), channels, n));
+    !error.ok()) {
+    std::fprintf(stderr, "Cannot decode: %s\n", error.text().c_str());
+    (void)input.release(*view);
+    break;
+}
+````
+
+### [ex_acq_oddball](../../examples/acq/ex_acq_oddball.mdx)
+
+Recover the P300 from a streaming oddball session by trigger-locked averaging.
+
+````cpp title="src/examples/ex_acq_oddball/main.cpp, line 285"
+// Native samples to volts in one pass, whatever the device's format and layout.
+const std::size_t n = view->sampleCount();
+if (const AcqError error = decode(*view, AcqMatrixRef<float>::columnMajor(block.data(), frame, n));
+    !error.ok()) {
+    std::fprintf(stderr, "Cannot decode %s: %s\n", uri.c_str(), error.text().c_str());
+    reader->release(*view);
+    break;
+}
+std::uint64_t s = view->firstSample();
+for (std::size_t i = 0; i < n; ++i, ++s) {
+    std::memcpy(&history[(s & (capacity - 1)) * frame], &block[i * frame], frame * sizeof(float));
+}
+for (std::size_t e = 0; e < view->events().size(); ++e) {
+    const AcqEvent& event = view->events()[e];
+````
+
+### [ex_acq_performance](../../examples/acq/ex_acq_performance.mdx)
+
+Closed-loop acquisition and stimulation with ACQLIB, and its sustained throughput per device class.
+
+````cpp title="src/examples/ex_acq_performance/main.cpp, line 526"
+                // encode() handles a pulse that crosses the end of the ring (two parts).
+                AcqConvertOptions raw;
+                raw.scaling = AcqScaling::Raw;
+                (void)encode(AcqMatrixRef<const double>::rowMajor(kBiphasic.data(), 1, kStimWidth), *pulse,
+                             raw);
+                stimulator.commit(kStimWidth);
+                scheduled = true;
+            }
+        }
+        (scheduled ? st.stimuliScheduled : st.stimuliLate).fetch_add(1, std::memory_order_relaxed);
+    }
+    above = now;
+}
+````
+
+## Authors of this file
+
+- Christoph Dinh &lt;christoph.dinh@mne-cpp.org&gt;

@@ -42,6 +42,29 @@ auto controller = input->stream().reader(AcqReader::ReadMode::LowLatency);
 
 From [ex_acq_performance](../../examples/acq/ex_acq_performance.mdx).
 
+## Used in examples
+
+### [ex_acq_scope](../../examples/acq/ex_acq_scope.mdx)
+
+Live multi-channel scope of a streaming source with a closed-loop stimulator played back on the same clock.
+
+````cpp title="src/examples/ex_acq_scope/main.cpp, line 495"
+outInfo.channels[0].rangeMin = -kFullScale;
+outInfo.channels[0].rangeMax = kFullScale;
+outInfo.underrunFill = AcqUnderrunFill::Zero;
+AcqStreamOptions outOptions;
+outOptions.capacitySamples = std::bit_ceil(static_cast<std::size_t>(
+    std::llround((kMaxViewSeconds + kDelaySeconds + 2.0 * kPhaseSeconds) * sfreq) + 1));
+auto stimulator = AcqWriter::create(outInfo, outOptions);
+if (!stimulator) {
+    std::fprintf(stderr, "Cannot create the stimulator: %s\n", stimulator.error().text().c_str());
+    return 1;
+}
+AcqReaderOptions gating;
+gating.gating = true; // the emulated DAC: it consumes what was written or plays fill
+auto dac = stimulator->stream().reader(AcqReader::ReadMode::Lossless, gating);
+````
+
 ## Authors of this file
 
 - Christoph Dinh &lt;christoph.dinh@mne-cpp.org&gt;

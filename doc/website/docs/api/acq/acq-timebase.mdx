@@ -36,13 +36,11 @@ stimulator->stream().setTimebase(cardClock);
 bool scheduled = false;
 if (auto at = mapSampleExact(inClock, outClock, s, kStimDelayTicks)) {
     if (auto pulse = stimulator.beginWriteAt(*at, kStimWidth, 0ns)) {
-        for (std::size_t q = 0; q < pulse->partCount(); ++q) {
-            for (std::size_t j = 0; j < pulse->part(q).samples; ++j) {
-                const std::uint64_t phase = pulse->firstSample() + j - *at;
-                const std::int16_t a = phase < kStimWidth / 2 ? -kStimAmplitude : kStimAmplitude;
-                std::memcpy(pulse->part(q).at(0, j), &a, sizeof(a));
-            }
-        }
+        // encode() handles a pulse that crosses the end of the ring (two parts).
+        AcqConvertOptions raw;
+        raw.scaling = AcqScaling::Raw;
+        (void)encode(AcqMatrixRef<const double>::rowMajor(kBiphasic.data(), 1, kStimWidth), *pulse,
+                     raw);
         stimulator.commit(kStimWidth);
         scheduled = true;
     }
@@ -79,7 +77,7 @@ if (auto at = mapSampleExact(inClock, outClock, s, kStimDelayTicks)) {
 
 Closed-loop acquisition and stimulation with ACQLIB, and its sustained throughput per device class.
 
-````cpp title="src/examples/ex_acq_performance/main.cpp, line 483"
+````cpp title="src/examples/ex_acq_performance/main.cpp, line 498"
 const AcqTimebase inClock = reader.stream().timebase();
 const AcqTimebase outClock = stimulator.stream().timebase();
 bool above = false;

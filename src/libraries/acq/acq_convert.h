@@ -66,6 +66,8 @@ enum class AcqScaling : std::uint8_t
  * std::vector or device memory alike.
  *
  * @tparam T   float, double or std::complex<float>, optionally const.
+ *
+ * @snippet ex_acq_oddball/main.cpp acq_epoch_stream
  */
 template<typename T>
 struct AcqMatrixRef
@@ -130,7 +132,7 @@ struct AcqConvertOptions
  * @param[out] out      Destination; rows >= channel count, cols >= firstColumn + view.sampleCount().
  * @param[in] options   Scaling, channel subset, first column.
  *
- * @return ShapeMismatch, UnsupportedFormat (complex view into a real matrix), or success.
+ * @return ShapeMismatch, UnsupportedFormat (complex view into a real matrix), DeviceMemory, or success.
  */
 ACQSHARED_EXPORT AcqError decode(const AcqBlockView& view, const AcqMatrixRef<float>& out,
                                  const AcqConvertOptions& options = {}) noexcept;
@@ -146,6 +148,8 @@ ACQSHARED_EXPORT AcqError decode(const AcqBlockView& view, const AcqMatrixRef<st
 //=============================================================================================================
 /**
  * Result of encode().
+ *
+ * @snippet ex_acq_scope/main.cpp acq_scope_stimulate
  */
 struct AcqEncodeResult
 {
@@ -161,7 +165,7 @@ struct AcqEncodeResult
  * @param[in] view      Destination view from AcqWriter::beginWrite().
  * @param[in] options   Scaling, channel subset, first source column.
  *
- * @return Clipping count, or ShapeMismatch / UnsupportedFormat.
+ * @return Clipping count, or ShapeMismatch / UnsupportedFormat / DeviceMemory.
  */
 ACQSHARED_EXPORT AcqExpected<AcqEncodeResult> encode(const AcqMatrixRef<const float>& in, const AcqWriteView& view,
                                                      const AcqConvertOptions& options = {}) noexcept;
@@ -184,7 +188,8 @@ ACQSHARED_EXPORT AcqExpected<AcqEncodeResult> encode(const AcqMatrixRef<const st
  * @param[out] out          fields.size() x at least firstColumn + view.sampleCount().
  * @param[in] firstColumn   Matrix column of the view's first sample.
  *
- * @return ShapeMismatch, UnsupportedFormat (non-integer format), or success.
+ * @return ShapeMismatch, UnsupportedFormat (non-integer format), InvalidParameter (a field outside its
+ *         channel's digitalBits), DeviceMemory, or success.
  */
 ACQSHARED_EXPORT AcqError decodeBits(const AcqBlockView& view, std::span<const AcqBitField> fields,
                                      const AcqMatrixRef<std::uint32_t>& out, std::size_t firstColumn = 0) noexcept;
@@ -199,7 +204,7 @@ ACQSHARED_EXPORT AcqError decodeBits(const AcqBlockView& view, std::span<const A
  * @param[in] view          Destination view.
  * @param[in] firstColumn   Matrix column of the view's first sample.
  *
- * @return Clipping count, or ShapeMismatch / UnsupportedFormat.
+ * @return Clipping count, or ShapeMismatch / UnsupportedFormat / InvalidParameter / DeviceMemory.
  */
 ACQSHARED_EXPORT AcqExpected<AcqEncodeResult> encodeBits(const AcqMatrixRef<const std::uint32_t>& in,
                                                          std::span<const AcqBitField> fields,

@@ -1,0 +1,30 @@
+---
+id: acq-bit-field
+title: "ACQLIB::AcqBitField"
+sidebar_label: AcqBitField
+sidebar_position: 42
+---
+
+# AcqBitField
+
+**Namespace:** `ACQLIB` &nbsp;·&nbsp; **Library:** Acquisition Library &nbsp;·&nbsp; **Source:** [`acq/acq_stream_info.h`](https://github.com/mne-tools/mne-cpp/blob/staging/src/libraries/acq/acq_stream_info.h)
+
+`#include <acq/acq_stream_info.h>`
+
+```cpp
+struct ACQLIB::AcqBitField
+```
+
+A digital line carried inside the sample word of an integer stream, sample-synchronous with the analog value (marker outputs of AWG cards, T/R switch and blanking lines, recorded sync markers).
+
+Packing follows the hardware (Spectrum SPCM_XMODE_DIGOUTSRC_BIT15..BIT12 for output, SPC_DIGMODE for input): the lines occupy the top `AcqChannelInfo::digitalBits` bits of the channel's word, allocated from bit 15 downwards; the analog value is the remaining low bits in two's complement, i.e. the full-scale value shifted right by digitalBits. `decode()`/encode() undo/apply that shift, so `AcqChannelInfo::scale` stays the full-word scale; `decodeBits()`/encodeBits() touch only the fields. For complex int16 the field lives in the I component.
+
+---
+
+## Example
+
+No example of its own: Bit-field descriptor of AcqStreamInfo, consumed by decodeBits() and encodeBits().
+
+## Authors of this file
+
+- Christoph Dinh &lt;christoph.dinh@mne-cpp.org&gt;

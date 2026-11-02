@@ -179,6 +179,7 @@ struct InfoVersion
     std::vector<double> offsets;
     std::vector<double> rangeMin;
     std::vector<double> rangeMax;
+    std::vector<std::uint8_t> digitalBits;
     std::uint64_t validFrom = 0;
 };
 
@@ -362,6 +363,7 @@ struct ViewAccess
         view.m_offsets = version.offsets;
         view.m_rangeMin = version.rangeMin;
         view.m_rangeMax = version.rangeMax;
+        view.m_digitalBits = version.digitalBits;
         view.m_clock = core.clock.load();
         view.m_timebase = core.timebase.load();
         view.m_memory = core.memory;

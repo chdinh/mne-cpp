@@ -21,6 +21,7 @@ set(SOURCES
   acq_timebase.cpp
   acq_stream.cpp
   acq_reader.cpp
+  acq_convert.cpp
   detail/acq_ring_memory.cpp
   acq_uri.cpp
   acq_backend.cpp
@@ -75,6 +76,12 @@ target_compile_features(${PROJECT_NAME} PUBLIC cxx_std_20)
 set_target_properties(${PROJECT_NAME} PROPERTIES CXX_VISIBILITY_PRESET hidden VISIBILITY_INLINES_HIDDEN ON)
 
 target_compile_definitions(${PROJECT_NAME} PRIVATE MNE_ACQ_LIBRARY)
+# The converters define their arithmetic (multiply, then add): no FMA contraction on any target.
+if(MSVC)
+    set_source_files_properties(acq_convert.cpp PROPERTIES COMPILE_OPTIONS "/fp:precise;/fp:contract-")
+else()
+    set_source_files_properties(acq_convert.cpp PROPERTIES COMPILE_OPTIONS "-ffp-contract=off")
+endif()
 if(DEFINED MNE_GIT_HASH_SHORT)
     target_compile_definitions(${PROJECT_NAME} PRIVATE MNE_GIT_HASH_SHORT="${MNE_GIT_HASH_SHORT}" MNE_GIT_HASH_LONG="${MNE_GIT_HASH_LONG}")
 endif()

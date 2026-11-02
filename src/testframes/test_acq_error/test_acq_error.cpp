@@ -69,8 +69,8 @@ void TestAcqError::testCatalogueIsComplete()
         QVERIFY2(!info.docAnchor.empty(), info.name.data());
         QVERIFY2(names.insert(info.name).second, info.name.data());
     }
-    // None, 8 data-path codes and 17 control-path codes; update when codes are added.
-    QCOMPARE(entries, std::size_t(26));
+    // None, 8 data-path codes and 18 control-path codes; update when codes are added.
+    QCOMPARE(entries, std::size_t(27));
 }
 
 //=============================================================================================================

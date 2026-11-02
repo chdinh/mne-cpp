@@ -37,12 +37,12 @@ const bool lossless = recorded.lost == 0 && recorded.eventsLost == 0 && recorded
 
 Closed-loop acquisition and stimulation with ACQLIB, and its sustained throughput per device class.
 
-````cpp title="src/examples/ex_acq_performance/main.cpp, line 714"
+````cpp title="src/examples/ex_acq_performance/main.cpp, line 727"
     const AcqStreamStats produced = input->stream().stats();
     const AcqReaderStats recorded = recorder->stats();
     const bool lossless = recorded.lost == 0 && recorded.eventsLost == 0 && recorded.delivered == produced.committed;
     const bool ok = lossless && st.sampleMismatches == 0 && st.markerMismatches == 0 &&
-        st.markersVerified == st.spikesInjected && st.stimuliMisplaced == 0 &&
+        st.markersVerified == st.spikesInjected && st.stimuliMisplaced == 0 && st.pulseSampleErrors == 0 &&
         st.stimuliExact + st.stimuliDropped == st.stimuliScheduled && g_allocations == 0 &&
         st.recordedSamples == static_cast<std::uint64_t>(seconds * kSfreq / kBlock) * kBlock;
     std::printf("  %s\n", ok ? "PASS: every sample bit-exact and none lost, every stimulus on its exact sample or\n"

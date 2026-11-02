@@ -56,6 +56,7 @@ std::unique_ptr<InfoVersion> makeVersion(AcqStreamInfo info, std::uint32_t versi
         v->offsets.push_back(ch.offset);
         v->rangeMin.push_back(ch.rangeMin);
         v->rangeMax.push_back(ch.rangeMax);
+        v->digitalBits.push_back(ch.digitalBits);
     }
     v->validFrom = validFrom;
     v->info = std::make_shared<const AcqStreamInfo>(std::move(info));

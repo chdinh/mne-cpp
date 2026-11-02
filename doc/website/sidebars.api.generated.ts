@@ -760,7 +760,13 @@ const apiSidebar: SidebarsConfig['apiSidebar'] = [
         'api/acq/acq-uri',
         'api/acq/acq-backend',
         'api/acq/acq-device-stats',
-        'api/acq/acq-memory-location'
+        'api/acq/acq-memory-location',
+        'api/acq/acq-matrix-ref',
+        'api/acq/acq-encode-result',
+        'api/acq/acq-convert-options',
+        'api/acq/acq-channel-range',
+        'api/acq/acq-read-result',
+        'api/acq/acq-bit-field'
       ],
     }
 ];

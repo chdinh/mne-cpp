@@ -92,6 +92,26 @@
       "topics": []
     },
     {
+      "name": "ex_acq_scope",
+      "title": "Watch a multi-channel stream live with a closed-loop stimulator",
+      "brief": "Live multi-channel scope of a streaming source with a closed-loop stimulator played back on the same clock",
+      "thumbnail": "",
+      "url": "/docs/examples/acq/ex_acq_scope/",
+      "library": "acq",
+      "libraries": [
+        "acq",
+        "disp"
+      ],
+      "tasks": [
+        "real-time"
+      ],
+      "modalities": [
+        "eeg"
+      ],
+      "level": "start",
+      "topics": []
+    },
+    {
       "name": "ex_averaging",
       "title": "Average epochs into an evoked response",
       "brief": "Average stimulus-locked epochs of a raw FIFF recording into an evoked response, with event selection and EOG rejection",

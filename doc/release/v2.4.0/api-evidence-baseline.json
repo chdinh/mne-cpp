@@ -5,35 +5,35 @@
   "summary": {
     "exported_classes": 477,
     "exported_free_functions": 135,
-    "registered_classes": 555,
+    "registered_classes": 561,
     "exported_not_registered": 0,
     "registered_function_modules": 13,
-    "registered_header_only": 65,
+    "registered_header_only": 71,
     "registered_stale": 0,
-    "registered_with_test": 199,
+    "registered_with_test": 205,
     "registered_test_unresolved": 0,
-    "registered_with_example": 399,
+    "registered_with_example": 401,
     "registered_example_not_built": 0,
     "registered_with_python_equiv": 93,
     "registered_without_api_page": 0,
-    "with_snippet": 429,
-    "public_api_units": 555,
-    "example_eligible": 398,
-    "example_exempt": 157,
-    "eligible_backed_by_registry_example": 398,
+    "with_snippet": 435,
+    "public_api_units": 561,
+    "example_eligible": 400,
+    "example_exempt": 161,
+    "eligible_backed_by_registry_example": 400,
     "eligible_used_by_some_example": 353,
-    "examples_on_disk": 72,
-    "examples_built": 72
+    "examples_on_disk": 73,
+    "examples_built": 73
   },
   "by_library": {
     "acq": {
-      "public": 36,
-      "registered": 36,
-      "with_test": 36,
-      "eligible": 23,
-      "eligible_with_registry_example": 23,
+      "public": 42,
+      "registered": 42,
+      "with_test": 42,
+      "eligible": 25,
+      "eligible_with_registry_example": 25,
       "eligible_used_by_example": 0,
-      "with_snippet": 32
+      "with_snippet": 38
     },
     "bids": {
       "public": 14,
@@ -1138,6 +1138,94 @@
       "exempt_reason": "registry: Host-time model a device backend publishes with AcqWriter::setClock(); callers read it through AcqStream::clock()."
     },
     {
+      "name": "AcqChannelRange",
+      "header": "acq/acq_convert.h",
+      "library": "acq",
+      "kind": "header-only",
+      "exported": false,
+      "registered": true,
+      "registry_status": "documented",
+      "test": "test_acq_convert",
+      "test_resolves": true,
+      "example": null,
+      "example_state": "none",
+      "including_examples": [],
+      "snippets": [
+        "ex_acq_oddball/main.cpp#acq_epoch_stream",
+        "ex_acq_scope/main.cpp#acq_scope_stimulate"
+      ],
+      "api_page": "doc/website/docs/api/acq/acq-channel-range.mdx",
+      "python_equiv": null,
+      "example_eligible": false,
+      "exempt_reason": "registry: Field of AcqConvertOptions that lets threads convert disjoint channel blocks of one view."
+    },
+    {
+      "name": "AcqConvertOptions",
+      "header": "acq/acq_convert.h",
+      "library": "acq",
+      "kind": "header-only",
+      "exported": false,
+      "registered": true,
+      "registry_status": "documented",
+      "test": "test_acq_convert",
+      "test_resolves": true,
+      "example": null,
+      "example_state": "none",
+      "including_examples": [],
+      "snippets": [
+        "ex_acq_oddball/main.cpp#acq_epoch_stream",
+        "ex_acq_scope/main.cpp#acq_scope_stimulate"
+      ],
+      "api_page": "doc/website/docs/api/acq/acq-convert-options.mdx",
+      "python_equiv": null,
+      "example_eligible": false,
+      "exempt_reason": "registry: Optional argument of decode() and encode(); the defaults convert every channel in physical units."
+    },
+    {
+      "name": "AcqEncodeResult",
+      "header": "acq/acq_convert.h",
+      "library": "acq",
+      "kind": "header-only",
+      "exported": false,
+      "registered": true,
+      "registry_status": "documented",
+      "test": "test_acq_convert",
+      "test_resolves": true,
+      "example": "ex_acq_scope",
+      "example_state": "built",
+      "including_examples": [],
+      "snippets": [
+        "ex_acq_oddball/main.cpp#acq_epoch_stream",
+        "ex_acq_scope/main.cpp#acq_scope_stimulate"
+      ],
+      "api_page": "doc/website/docs/api/acq/acq-encode-result.mdx",
+      "python_equiv": null,
+      "example_eligible": true,
+      "exempt_reason": null
+    },
+    {
+      "name": "AcqMatrixRef",
+      "header": "acq/acq_convert.h",
+      "library": "acq",
+      "kind": "header-only",
+      "exported": false,
+      "registered": true,
+      "registry_status": "documented",
+      "test": "test_acq_convert",
+      "test_resolves": true,
+      "example": "ex_acq_oddball",
+      "example_state": "built",
+      "including_examples": [],
+      "snippets": [
+        "ex_acq_oddball/main.cpp#acq_epoch_stream",
+        "ex_acq_scope/main.cpp#acq_scope_stimulate"
+      ],
+      "api_page": "doc/website/docs/api/acq/acq-matrix-ref.mdx",
+      "python_equiv": null,
+      "example_eligible": true,
+      "exempt_reason": null
+    },
+    {
       "name": "AcqDevice",
       "header": "acq/acq_device.h",
       "library": "acq",
@@ -1385,6 +1473,29 @@
       "exempt_reason": "registry: Location of an adopted DMA buffer, set by the device backend that owns the memory; readers query it from the view."
     },
     {
+      "name": "AcqReadResult",
+      "header": "acq/acq_reader.h",
+      "library": "acq",
+      "kind": "header-only",
+      "exported": false,
+      "registered": true,
+      "registry_status": "documented",
+      "test": "test_acq_convert",
+      "test_resolves": true,
+      "example": null,
+      "example_state": "none",
+      "including_examples": [],
+      "snippets": [
+        "ex_acq_performance/main.cpp#acq_stream_setup",
+        "ex_acq_performance/main.cpp#acq_stream_stats",
+        "ex_acq_performance/main.cpp#acq_reader_acquire"
+      ],
+      "api_page": "doc/website/docs/api/acq/acq-read-result.mdx",
+      "python_equiv": null,
+      "example_eligible": false,
+      "exempt_reason": "registry: Return value of AcqReader::read(), the copying convenience over acquire(), decode() and release()."
+    },
+    {
       "name": "AcqReader",
       "header": "acq/acq_reader.h",
       "library": "acq",
@@ -1615,6 +1726,28 @@
       "python_equiv": null,
       "example_eligible": true,
       "exempt_reason": null
+    },
+    {
+      "name": "AcqBitField",
+      "header": "acq/acq_stream_info.h",
+      "library": "acq",
+      "kind": "header-only",
+      "exported": false,
+      "registered": true,
+      "registry_status": "documented",
+      "test": "test_acq_convert",
+      "test_resolves": true,
+      "example": null,
+      "example_state": "none",
+      "including_examples": [],
+      "snippets": [
+        "ex_acq_performance/main.cpp#acq_stream_info",
+        "ex_acq_performance/main.cpp#acq_stream_info"
+      ],
+      "api_page": "doc/website/docs/api/acq/acq-bit-field.mdx",
+      "python_equiv": null,
+      "example_eligible": false,
+      "exempt_reason": "registry: Bit-field descriptor of AcqStreamInfo, consumed by decodeBits() and encodeBits()."
     },
     {
       "name": "AcqChannelInfo",
@@ -2923,6 +3056,7 @@
       "example_state": "built",
       "including_examples": [
         "ex_acq_oddball",
+        "ex_acq_scope",
         "ex_averaging",
         "ex_connectivity_metrics",
         "ex_disp",

@@ -73,6 +73,7 @@ enum class AcqErrorCode : std::uint16_t
     PlatformUnsupported = 113, /**< The backend or option is not available on this platform. */
     WrongDirection = 114,      /**< A writer was requested for an input stream, or a gating reader for an input stream. */
     WriterInUse = 115,         /**< The output stream already has its writer. */
+    DeviceMemory = 116,        /**< The samples live in GPU memory, which the CPU must not read or write. */
     Internal = 199             /**< Invariant violation inside ACQLIB; please report it. */
 };
 

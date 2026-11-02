@@ -205,7 +205,9 @@ public:
      * @param[in] timeout   Maximum wait.
      * @param[in] scaling   Raw or physical values.
      *
-     * @return Position and loss of the block, or the error of acquire()/decode()/release().
+     * @return Position and loss of the block, ShapeMismatch (rows != channelCount()), DeviceMemory (the
+     *         ring is in GPU memory; returned at once, nothing is consumed), or the error of
+     *         acquire()/decode()/release().
      */
     [[nodiscard]] AcqExpected<AcqReadResult> read(const AcqMatrixRef<float>& out, std::chrono::nanoseconds timeout,
                                                   AcqScaling scaling = AcqScaling::Physical) noexcept;

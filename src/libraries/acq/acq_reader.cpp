@@ -16,6 +16,7 @@
 
 #include "acq_reader.h"
 
+#include "acq_convert.h"
 #include "acq_stream.h"
 #include "detail/acq_stream_core.h"
 
@@ -365,6 +366,61 @@ AcqError AcqReader::consumeIdle(std::size_t samples) noexcept
     c.gatePosition.store(end, std::memory_order_seq_cst);
     c.notifyWriter();
     return {};
+}
+
+namespace
+{
+
+// Shared body of the read() overloads.
+template<typename T>
+AcqExpected<AcqReadResult> readInto(AcqReader& reader, const AcqStreamCore* core, const AcqMatrixRef<T>& out,
+                                    std::chrono::nanoseconds timeout, AcqScaling scaling) noexcept
+{
+    if (core == nullptr) {
+        return AcqErrorCode::InvalidState;
+    }
+    if (out.rows != core->channels) {
+        return AcqErrorCode::ShapeMismatch;
+    }
+    if (!core->memory.hostAccessible()) {
+        return AcqErrorCode::DeviceMemory;
+    }
+    auto view = reader.acquire(out.cols, timeout, out.cols);
+    if (!view) {
+        return view.error();
+    }
+    AcqConvertOptions options;
+    options.scaling = scaling;
+    const AcqError decoded = decode(*view, out, options);
+    const AcqReadResult result{view->firstSample(), view->sampleCount(), view->lost(), view->infoVersion()};
+    const AcqError released = reader.release(*view);
+    if (!decoded.ok()) {
+        return decoded;
+    }
+    if (!released.ok()) {
+        return released;
+    }
+    return result;
+}
+
+} // namespace
+
+AcqExpected<AcqReadResult> AcqReader::read(const AcqMatrixRef<float>& out, std::chrono::nanoseconds timeout,
+                                           AcqScaling scaling) noexcept
+{
+    return readInto(*this, m_core.get(), out, timeout, scaling);
+}
+
+AcqExpected<AcqReadResult> AcqReader::read(const AcqMatrixRef<double>& out, std::chrono::nanoseconds timeout,
+                                           AcqScaling scaling) noexcept
+{
+    return readInto(*this, m_core.get(), out, timeout, scaling);
+}
+
+AcqExpected<AcqReadResult> AcqReader::read(const AcqMatrixRef<std::complex<float>>& out,
+                                           std::chrono::nanoseconds timeout, AcqScaling scaling) noexcept
+{
+    return readInto(*this, m_core.get(), out, timeout, scaling);
 }
 
 std::size_t AcqReader::available() const noexcept

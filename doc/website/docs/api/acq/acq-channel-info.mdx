@@ -43,25 +43,19 @@ for (std::size_t c = 0; c < kChannels; ++c) {
 
 ## Used in examples
 
-### [ex_acq_oddball](../../examples/acq/ex_acq_oddball.mdx)
+### [ex_acq_scope](../../examples/acq/ex_acq_scope.mdx)
 
-Recover the P300 from a streaming oddball session by trigger-locked averaging.
+Live multi-channel scope of a streaming source with a closed-loop stimulator played back on the same clock.
 
-````cpp title="src/examples/ex_acq_oddball/main.cpp, line 248"
-    const AcqChannelInfo& channel = info->channels[eeg[e]];
-    for (std::size_t t = 0; t < length; ++t) {
-        const std::uint64_t s = event.sample - pre + t;
-        raw(static_cast<Eigen::Index>(e), static_cast<Eigen::Index>(t)) =
-            history[(s & (capacity - 1)) * frame + eeg[e]] * channel.scale + channel.offset;
-    }
+````cpp title="src/examples/ex_acq_scope/main.cpp, line 521"
+std::vector<std::string> names;
+std::vector<DisplayUnit> units;
+for (const AcqChannelInfo& channel : info->channels) {
+    names.push_back(channel.name);
+    units.push_back(displayUnit(channel.unit));
 }
-// ERPs live below 30 Hz: low-pass like mne.filter.filter_data, then correct the baseline.
-const Eigen::MatrixXd filtered = FirFilter::filterData(raw, info->sfreq, -1.0, kLowPassHz);
-for (std::size_t e = 0; e < eeg.size(); ++e) {
-    const auto row = static_cast<Eigen::Index>(e);
-    const double baseline = filtered.row(row).head(static_cast<Eigen::Index>(pre)).mean();
-    for (std::size_t t = 0; t < length; ++t) {
-        epoch[e * length + t] = filtered(row, static_cast<Eigen::Index>(t)) - baseline;
+names.push_back(outInfo.channels[0].name);
+units.push_back(displayUnit(AcqUnit::Ampere));
 ````
 
 ## Authors of this file

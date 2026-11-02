@@ -50,13 +50,11 @@ input.commit(kBlock);
 bool scheduled = false;
 if (auto at = mapSampleExact(inClock, outClock, s, kStimDelayTicks)) {
     if (auto pulse = stimulator.beginWriteAt(*at, kStimWidth, 0ns)) {
-        for (std::size_t q = 0; q < pulse->partCount(); ++q) {
-            for (std::size_t j = 0; j < pulse->part(q).samples; ++j) {
-                const std::uint64_t phase = pulse->firstSample() + j - *at;
-                const std::int16_t a = phase < kStimWidth / 2 ? -kStimAmplitude : kStimAmplitude;
-                std::memcpy(pulse->part(q).at(0, j), &a, sizeof(a));
-            }
-        }
+        // encode() handles a pulse that crosses the end of the ring (two parts).
+        AcqConvertOptions raw;
+        raw.scaling = AcqScaling::Raw;
+        (void)encode(AcqMatrixRef<const double>::rowMajor(kBiphasic.data(), 1, kStimWidth), *pulse,
+                     raw);
         stimulator.commit(kStimWidth);
         scheduled = true;
     }
@@ -328,7 +326,7 @@ Creates a standalone ring with its writer (backends, DMA emulation, application-
 
 Closed-loop acquisition and stimulation with ACQLIB, and its sustained throughput per device class.
 
-````cpp title="src/examples/ex_acq_performance/main.cpp, line 378"
+````cpp title="src/examples/ex_acq_performance/main.cpp, line 386"
 /** The card: writes the input ring in 1 ms blocks at the real-time rate and plays the output ring. */
 void runCard(AcqWriter& input, AcqReader& dac, const SignalGenerator& gen, ClosedLoopState& st, double seconds)
 {
@@ -336,8 +334,24 @@ void runCard(AcqWriter& input, AcqReader& dac, const SignalGenerator& gen, Close
     const auto period = std::chrono::nanoseconds(static_cast<std::int64_t>(1e9 * kBlock / kSfreq));
     const auto start = Clock::now();
     bool previousNonZero = false;
+    std::uint64_t pulseStart = 0;
     for (std::uint64_t k = 0; k < blocks; ++k) {
         std::this_thread::sleep_until(start + period * static_cast<std::int64_t>(k + 1));
+````
+
+### [ex_acq_scope](../../examples/acq/ex_acq_scope.mdx)
+
+Live multi-channel scope of a streaming source with a closed-loop stimulator played back on the same clock.
+
+````cpp title="src/examples/ex_acq_scope/main.cpp, line 142"
+/** Acquisition thread: reads the source, schedules pulses, plays the output ring, fills the history. */
+void acquire(AcqReader& input, AcqWriter& stimulator, AcqReader& dac, std::size_t channels, double sfreq, Shared& shared)
+{
+    const auto delay = static_cast<std::uint64_t>(std::llround(kDelaySeconds * sfreq));
+    const auto phaseSamples = static_cast<std::size_t>(std::llround(kPhaseSeconds * sfreq));
+    const std::size_t pulseSamples = 2 * phaseSamples;
+    const auto maxView = static_cast<std::size_t>(std::llround(kMaxViewSeconds * sfreq));
+    const double lsb = kFullScale / 32767.0;
 ````
 
 ## Authors of this file
