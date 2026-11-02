@@ -27,6 +27,17 @@ if (!device) {
 }
 const AcqStream stream = device->stream();
 const auto info = stream.info();
+// Electrode check before recording; amplifiers without an impedance mode return NotSupported.
+if (auto impedances = device->measureImpedances()) {
+    for (const AcqImpedance& z : *impedances) {
+        if (z.ohms > kMaxImpedanceOhms) {
+            std::printf("  check electrode %s: %.0f kOhm\n",
+                        device->stream(z.stream).info()->channels[z.channel].name.c_str(), z.ohms * 1e-3);
+        }
+    }
+} else if (impedances.error() != AcqErrorCode::NotSupported) {
+    std::fprintf(stderr, "Impedance check failed: %s\n", impedances.error().text().c_str());
+}
 auto reader = stream.reader(AcqReader::ReadMode::Lossless);
 if (!reader || !device->start().ok()) {
     std::fprintf(stderr, "Cannot start %s: %s\n", uri.c_str(), device->lastError().text().c_str());
@@ -163,6 +174,23 @@ Idempotent.
 
 ---
 
+### measureImpedances(timeout)
+
+Measures the electrode impedances (control path, allocates).
+
+Not while Running: amplifiers inject a test current for it.
+
+**Parameters:**
+
+- **timeout** : *std::chrono::milliseconds*
+  Maximum duration of the measurement.
+
+**Returns:**
+
+- *[AcqExpected](/docs/api/acq/acq-expected)&lt; std::vector&lt; [AcqImpedance](/docs/api/acq/acq-impedance) &gt; &gt;* — One entry per electrode channel, or InvalidState (Running, Failed, Closed), NotSupported (the device cannot measure impedances), or the backend's error.
+
+---
+
 ### lastError()
 
 **Returns:**
@@ -202,7 +230,7 @@ Opens a source through [`AcqDeviceRegistry`](/docs/api/acq/acq-device-registry),
 
 Recover the P300 from a streaming oddball session by trigger-locked averaging.
 
-````cpp title="src/examples/ex_acq_oddball/main.cpp, line 197"
+````cpp title="src/examples/ex_acq_oddball/main.cpp, line 198"
 auto device = AcqDevice::open(uri);
 if (!device) {
     std::fprintf(stderr, "Cannot open %s: %s\n", uri.c_str(), device.error().text().c_str());
@@ -210,11 +238,13 @@ if (!device) {
 }
 const AcqStream stream = device->stream();
 const auto info = stream.info();
-auto reader = stream.reader(AcqReader::ReadMode::Lossless);
-if (!reader || !device->start().ok()) {
-    std::fprintf(stderr, "Cannot start %s: %s\n", uri.c_str(), device->lastError().text().c_str());
-    return 1;
-}
+// Electrode check before recording; amplifiers without an impedance mode return NotSupported.
+if (auto impedances = device->measureImpedances()) {
+    for (const AcqImpedance& z : *impedances) {
+        if (z.ohms > kMaxImpedanceOhms) {
+            std::printf("  check electrode %s: %.0f kOhm\n",
+                        device->stream(z.stream).info()->channels[z.channel].name.c_str(), z.ohms * 1e-3);
+        }
 ````
 
 ### [ex_acq_scope](../../examples/acq/ex_acq_scope.mdx)

@@ -1,0 +1,79 @@
+---
+id: acq-impedance
+title: "ACQLIB::AcqImpedance"
+sidebar_label: AcqImpedance
+sidebar_position: 44
+---
+
+# AcqImpedance
+
+**Namespace:** `ACQLIB` &nbsp;·&nbsp; **Library:** Acquisition Library &nbsp;·&nbsp; **Source:** [`acq/acq_backend.h`](https://github.com/mne-tools/mne-cpp/blob/staging/src/libraries/acq/acq_backend.h)
+
+`#include <acq/acq_backend.h>`
+
+```cpp
+struct ACQLIB::AcqImpedance
+```
+
+Electrode impedance of one channel.
+
+```cpp title="src/examples/ex_acq_oddball/main.cpp"
+auto device = AcqDevice::open(uri);
+if (!device) {
+    std::fprintf(stderr, "Cannot open %s: %s\n", uri.c_str(), device.error().text().c_str());
+    return 1;
+}
+const AcqStream stream = device->stream();
+const auto info = stream.info();
+// Electrode check before recording; amplifiers without an impedance mode return NotSupported.
+if (auto impedances = device->measureImpedances()) {
+    for (const AcqImpedance& z : *impedances) {
+        if (z.ohms > kMaxImpedanceOhms) {
+            std::printf("  check electrode %s: %.0f kOhm\n",
+                        device->stream(z.stream).info()->channels[z.channel].name.c_str(), z.ohms * 1e-3);
+        }
+    }
+} else if (impedances.error() != AcqErrorCode::NotSupported) {
+    std::fprintf(stderr, "Impedance check failed: %s\n", impedances.error().text().c_str());
+}
+auto reader = stream.reader(AcqReader::ReadMode::Lossless);
+if (!reader || !device->start().ok()) {
+    std::fprintf(stderr, "Cannot start %s: %s\n", uri.c_str(), device->lastError().text().c_str());
+    return 1;
+}
+```
+
+---
+
+## Example
+
+- Start here: [ex_acq_oddball](../../examples/acq/ex_acq_oddball.mdx) — Recover the P300 from a streaming oddball session by trigger-locked averaging.
+- Full source: [`src/examples/ex_acq_oddball/main.cpp`](https://github.com/mne-tools/mne-cpp/tree/staging/src/examples/ex_acq_oddball/main.cpp)
+- Build target: `ex_acq_oddball` (runs under CTest)
+
+## Used in examples
+
+### [ex_acq_oddball](../../examples/acq/ex_acq_oddball.mdx)
+
+Recover the P300 from a streaming oddball session by trigger-locked averaging.
+
+````cpp title="src/examples/ex_acq_oddball/main.cpp, line 207"
+    for (const AcqImpedance& z : *impedances) {
+        if (z.ohms > kMaxImpedanceOhms) {
+            std::printf("  check electrode %s: %.0f kOhm\n",
+                        device->stream(z.stream).info()->channels[z.channel].name.c_str(), z.ohms * 1e-3);
+        }
+    }
+} else if (impedances.error() != AcqErrorCode::NotSupported) {
+    std::fprintf(stderr, "Impedance check failed: %s\n", impedances.error().text().c_str());
+}
+auto reader = stream.reader(AcqReader::ReadMode::Lossless);
+if (!reader || !device->start().ok()) {
+    std::fprintf(stderr, "Cannot start %s: %s\n", uri.c_str(), device->lastError().text().c_str());
+    return 1;
+}
+````
+
+## Authors of this file
+
+- Christoph Dinh &lt;christoph.dinh@mne-cpp.org&gt;

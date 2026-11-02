@@ -69,6 +69,7 @@ constexpr double kLowPassHz = 30.0;
 constexpr std::int32_t kStandard = 1;
 constexpr std::int32_t kTarget = 2;
 constexpr std::size_t kEnoughTargets = 100;
+constexpr double kMaxImpedanceOhms = 10e3; // a common limit for wet EEG electrodes
 
 /** Running sums of baseline-corrected epochs of one condition: mean and standard error per channel and lag. */
 struct Average
@@ -201,6 +202,17 @@ int main(int argc, char* argv[])
     }
     const AcqStream stream = device->stream();
     const auto info = stream.info();
+    // Electrode check before recording; amplifiers without an impedance mode return NotSupported.
+    if (auto impedances = device->measureImpedances()) {
+        for (const AcqImpedance& z : *impedances) {
+            if (z.ohms > kMaxImpedanceOhms) {
+                std::printf("  check electrode %s: %.0f kOhm\n",
+                            device->stream(z.stream).info()->channels[z.channel].name.c_str(), z.ohms * 1e-3);
+            }
+        }
+    } else if (impedances.error() != AcqErrorCode::NotSupported) {
+        std::fprintf(stderr, "Impedance check failed: %s\n", impedances.error().text().c_str());
+    }
     auto reader = stream.reader(AcqReader::ReadMode::Lossless);
     if (!reader || !device->start().ok()) {
         std::fprintf(stderr, "Cannot start %s: %s\n", uri.c_str(), device->lastError().text().c_str());

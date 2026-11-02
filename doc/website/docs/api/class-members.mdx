@@ -7,7 +7,7 @@ sidebar_position: 5
 
 # Class Members
 
-Index of 6681 public class members (functions, variables, typedefs, enums) across all documented classes.
+Index of 6686 public class members (functions, variables, typedefs, enums) across all documented classes.
 
 **Jump to:** [A](#a) · [B](#b) · [C](#c) · [D](#d) · [E](#e) · [F](#f) · [G](#g) · [H](#h) · [I](#i) · [J](#j) · [K](#k) · [L](#l) · [M](#m) · [N](#n) · [O](#o) · [P](#p) · [Q](#q) · [R](#r) · [S](#s) · [T](#t) · [U](#u) · [V](#v) · [W](#w) · [X](#x) · [Y](#y) · [Z](#z)
 
@@ -511,6 +511,7 @@ Index of 6681 public class members (functions, variables, typedefs, enums) acros
 - **changeSelectedBem** `[signal]` in [CoregSettingsView](/docs/api/disp/coreg-settings-view) — Emit this signal whenever the selected Bem changed.
 - **changeStimChannel** `[signal]` in [AveragingSettingsView](/docs/api/disp/averaging-settings-view)
 - **channel** `[var]` in [AcqBitField](/docs/api/acq/acq-bit-field) — Channel whose sample word carries the field.
+- **channel** `[var]` in [AcqImpedance](/docs/api/acq/acq-impedance) — Channel index within the stream.
 - **channel** `[var]` in [BrainVisionMarker](/docs/api/bids/brain-vision-marker) — Channel number (0 = all channels).
 - **channel_indices_by_type** `[fn]` in [FiffInfoBase](/docs/api/fiff/fiff-info-base) — Channel indices of each channel type, like mne.channel_indices_by_type.
 - **channel_type** `[fn]` in [FiffInfoBase](/docs/api/fiff/fiff-info-base) — Get channel type.
@@ -3375,6 +3376,8 @@ Index of 6681 public class members (functions, variables, typedefs, enums) acros
 - **measname** `[var]` in [ComputeFwdSettings](/docs/api/fwd/compute-fwd-settings) — Measurement file.
 - **measname** `[var]` in [InvDipoleFitSettings](/docs/api/inv/inv-dipole-fit-settings) — Data file.
 - **measure** `[var]` in [InvConnectivity](/docs/api/inv/inv-connectivity) — Metric name, e.g.
+- **measureImpedances** `[fn]` in [AcqBackend](/docs/api/acq/acq-backend) — Measures electrode impedances.
+- **measureImpedances** `[fn]` in [AcqDevice](/docs/api/acq/acq-device) — Measures the electrode impedances (control path, allocates).
 - **meg_client** `[var]` in [dipoleFitFuncsRec](/docs/api/inv/dipole-fit-funcs-rec) — Client data for MEG field computations.
 - **meg_coils** `[var]` in [InvDipoleFitData](/docs/api/inv/inv-dipole-fit-data) — MEG coil definitions.
 - **meg_comp** `[var]` in [dipoleFitFuncsRec](/docs/api/inv/dipole-fit-funcs-rec) — Owns `meg_client` when it is a compensation wrapper.
@@ -3862,6 +3865,7 @@ Index of 6681 public class members (functions, variables, typedefs, enums) acros
 - **offset** `[fn]` in [FsSurface](/docs/api/fs/fs-surface) — Vector offset.
 - **offsets** `[fn]` in [AcqViewBase](/docs/api/acq/acq-view-base)
 - **offsets** `[var]` in [MNERawData](/docs/api/mne/mne-raw-data) — DC offset corrections for display.
+- **ohms** `[var]` in [AcqImpedance](/docs/api/acq/acq-impedance) — Electrode-skin (or -tissue) impedance magnitude in ohm.
 - **ok** `[fn]` in [AcqError](/docs/api/acq/acq-error)
 - **omit_data_proj** `[var]` in [InvDipoleFitSettings](/docs/api/inv/inv-dipole-fit-settings) — Omit the projection in the data file.
 - **omit_samp** `[var]` in [MNERawData](/docs/api/mne/mne-raw-data) — Number of skip samples omitted from the beginning.
@@ -5948,6 +5952,7 @@ Index of 6681 public class members (functions, variables, typedefs, enums) acros
 - **storeHeadPosition** `[fn]` in [InvHpiFit](/docs/api/inv/inv-hpi-fit) — Store results from dev_Head_t as quaternions in position matrix.
 - **storeTrans** `[signal]` in [CoregSettingsView](/docs/api/disp/coreg-settings-view) — Emit this signal whenever the transformation should be stored.
 - **stream** `[fn]` in [AcqDevice](/docs/api/acq/acq-device)
+- **stream** `[var]` in [AcqImpedance](/docs/api/acq/acq-impedance) — Stream index.
 - **stream** `[fn]` in [AcqReader](/docs/api/acq/acq-reader)
 - **stream** `[fn]` in [AcqWriter](/docs/api/acq/acq-writer)
 - **stream** `[var]` in [MNERawData](/docs/api/mne/mne-raw-data) — Open FIFF stream for reading.

@@ -296,9 +296,7 @@ void drainInto(AcqReader& reader, std::size_t index, std::vector<float>& block, 
 
 Recover the P300 from a streaming oddball session by trigger-locked averaging.
 
-````cpp title="src/examples/ex_acq_oddball/main.cpp, line 202"
-const AcqStream stream = device->stream();
-const auto info = stream.info();
+````cpp title="src/examples/ex_acq_oddball/main.cpp, line 216"
 auto reader = stream.reader(AcqReader::ReadMode::Lossless);
 if (!reader || !device->start().ok()) {
     std::fprintf(stderr, "Cannot start %s: %s\n", uri.c_str(), device->lastError().text().c_str());

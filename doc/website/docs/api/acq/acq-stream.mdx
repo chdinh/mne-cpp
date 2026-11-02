@@ -169,14 +169,21 @@ Takes the writer of an output stream (control path).
 
 Recover the P300 from a streaming oddball session by trigger-locked averaging.
 
-````cpp title="src/examples/ex_acq_oddball/main.cpp, line 202"
+````cpp title="src/examples/ex_acq_oddball/main.cpp, line 203"
 const AcqStream stream = device->stream();
 const auto info = stream.info();
-auto reader = stream.reader(AcqReader::ReadMode::Lossless);
-if (!reader || !device->start().ok()) {
-    std::fprintf(stderr, "Cannot start %s: %s\n", uri.c_str(), device->lastError().text().c_str());
-    return 1;
+// Electrode check before recording; amplifiers without an impedance mode return NotSupported.
+if (auto impedances = device->measureImpedances()) {
+    for (const AcqImpedance& z : *impedances) {
+        if (z.ohms > kMaxImpedanceOhms) {
+            std::printf("  check electrode %s: %.0f kOhm\n",
+                        device->stream(z.stream).info()->channels[z.channel].name.c_str(), z.ohms * 1e-3);
+        }
+    }
+} else if (impedances.error() != AcqErrorCode::NotSupported) {
+    std::fprintf(stderr, "Impedance check failed: %s\n", impedances.error().text().c_str());
 }
+auto reader = stream.reader(AcqReader::ReadMode::Lossless);
 ````
 
 ### [ex_acq_scope](../../examples/acq/ex_acq_scope.mdx)

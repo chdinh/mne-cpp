@@ -280,6 +280,7 @@ private slots:
     void testSyntheticMultiRateResponses();
     void testRealtimeRecordingIsComplete();
     void testBackpressureReplayIsLossless();
+    void testImpedances();
 };
 
 //=============================================================================================================
@@ -591,6 +592,7 @@ void TestAcqDevice::testDeviceStreamsLookup()
     QVERIFY(!device.stream(2).isValid());
     QVERIFY(device.findStream("in").isValid());
     QVERIFY(!device.findStream("none").isValid());
+    QVERIFY(device.measureImpedances().error() == AcqErrorCode::NotSupported); // the AcqBackend default
 
     AcqDevice empty;
     QCOMPARE(empty.state(), AcqDeviceState::Closed);
@@ -1186,6 +1188,48 @@ void TestAcqDevice::testBackpressureReplayIsLossless()
     QVERIFY(held->stop().ok());
     QCOMPARE(idle->available(), filled);
     QCOMPARE(idle->stats().lost, std::uint64_t(0));
+}
+
+//=============================================================================================================
+
+void TestAcqDevice::testImpedances()
+{
+    const std::string uri = "synthetic://?eeg=6&meg=2&ecog=3&erg=2&fnirs=1&seed=4";
+    auto device = AcqDevice::open(uri);
+    QVERIFY(device);
+    auto z = device->measureImpedances(1s);
+    QVERIFY(z);
+    // Electrodes only (6 EEG, 3 ECoG, 2 ERG), in stream and channel order, each in the range of its kind.
+    QCOMPARE(z->size(), std::size_t(11));
+    std::size_t previous = 0;
+    for (std::size_t i = 0; i < z->size(); ++i) {
+        const AcqImpedance& e = (*z)[i];
+        const AcqChannelKind kind = device->stream(e.stream).info()->channels[e.channel].kind;
+        const auto [lo, hi] = kind == AcqChannelKind::Eeg ? std::pair{2e3, 20e3}
+            : kind == AcqChannelKind::Ecog                ? std::pair{1e3, 5e3}
+                                                          : std::pair{5e3, 15e3};
+        QVERIFY(kind == AcqChannelKind::Eeg || kind == AcqChannelKind::Ecog || kind == AcqChannelKind::Erg);
+        QVERIFY(e.ohms >= lo && e.ohms < hi);
+        const std::size_t key = e.stream * 1000 + e.channel;
+        QVERIFY(i == 0 || key > previous);
+        previous = key;
+    }
+    // Seeded: the same electrodes give the same values, another seed others.
+    auto same = AcqDevice::open(uri)->measureImpedances();
+    auto other = AcqDevice::open("synthetic://?eeg=6&meg=2&ecog=3&erg=2&fnirs=1&seed=5")->measureImpedances();
+    QVERIFY(same && other);
+    QCOMPARE((*same)[0].ohms, (*z)[0].ohms);
+    QVERIFY((*other)[0].ohms != (*z)[0].ohms);
+
+    // Not while running; again once stopped; never after close.
+    auto reader = device->stream().reader(AcqReader::ReadMode::Latest);
+    QVERIFY(device->start().ok());
+    QVERIFY(device->measureImpedances().error() == AcqErrorCode::InvalidState);
+    QVERIFY(device->stop().ok());
+    QVERIFY(device->measureImpedances());
+    device->close();
+    QVERIFY(device->measureImpedances().error() == AcqErrorCode::InvalidState);
+    QVERIFY(AcqDevice().measureImpedances().error() == AcqErrorCode::InvalidState);
 }
 
 //=============================================================================================================

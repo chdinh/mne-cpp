@@ -40,6 +40,11 @@ void AcqBackend::close()
 {
 }
 
+AcqExpected<std::vector<AcqImpedance>> AcqBackend::measureImpedances(std::chrono::milliseconds /*timeout*/)
+{
+    return AcqErrorCode::NotSupported;
+}
+
 //=============================================================================================================
 
 std::span<const AcqStream> AcqBackend::streams() const noexcept

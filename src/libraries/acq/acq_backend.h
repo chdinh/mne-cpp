@@ -28,9 +28,12 @@
 #include "acq_stream.h"
 #include "acq_stream_info.h"
 
+#include <chrono>
+#include <cstddef>
 #include <memory>
 #include <span>
 #include <string>
+#include <vector>
 
 //=============================================================================================================
 // DEFINE NAMESPACE ACQLIB
@@ -56,6 +59,19 @@ struct AcqDeviceDescription
     std::string backendVersion; /**< Version of the runtime-loaded library, empty if none. */
     std::string device;         /**< Device model and serial, file path or stream name. */
     std::string uri;            /**< Canonical URI that reopens this source. */
+};
+
+//=============================================================================================================
+/**
+ * Electrode impedance of one channel.
+ *
+ * @snippet ex_acq_oddball/main.cpp acq_device_open
+ */
+struct AcqImpedance
+{
+    std::size_t stream = 0;  /**< Stream index. */
+    std::size_t channel = 0; /**< Channel index within the stream. */
+    double ohms = 0.0;       /**< Electrode-skin (or -tissue) impedance magnitude in ohm. */
 };
 
 ACQ_STD_MEMBERS_BEGIN
@@ -85,6 +101,15 @@ public:
 
     /** Releases the device. Called once, after stop(). The default does nothing. */
     virtual void close();
+
+    /**
+     * Measures electrode impedances. Called in state Opened or Stopped; the default returns NotSupported.
+     *
+     * @param[in] timeout   Maximum duration of the measurement.
+     *
+     * @return One entry per measured electrode, or the error.
+     */
+    [[nodiscard]] virtual AcqExpected<std::vector<AcqImpedance>> measureImpedances(std::chrono::milliseconds timeout);
 
     /** @return The streams created while opening, in creation order. */
     [[nodiscard]] std::span<const AcqStream> streams() const noexcept;

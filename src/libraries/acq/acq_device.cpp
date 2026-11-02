@@ -123,6 +123,21 @@ AcqError AcqDevice::start()
 
 //=============================================================================================================
 
+AcqExpected<std::vector<AcqImpedance>> AcqDevice::measureImpedances(std::chrono::milliseconds timeout)
+{
+    if (!m_pImpl) {
+        return AcqErrorCode::InvalidState;
+    }
+    std::lock_guard<std::mutex> lock(m_pImpl->mutex);
+    const AcqDeviceState state = m_pImpl->effectiveState();
+    if (state != AcqDeviceState::Opened && state != AcqDeviceState::Stopped) {
+        return AcqErrorCode::InvalidState;
+    }
+    return m_pImpl->backend->measureImpedances(timeout);
+}
+
+//=============================================================================================================
+
 AcqError AcqDevice::stop()
 {
     if (!m_pImpl) {

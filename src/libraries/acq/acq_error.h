@@ -74,6 +74,7 @@ enum class AcqErrorCode : std::uint16_t
     WrongDirection = 114,      /**< A writer was requested for an input stream, or a gating reader for an input stream. */
     WriterInUse = 115,         /**< The output stream already has its writer. */
     DeviceMemory = 116,        /**< The samples live in GPU memory, which the CPU must not read or write. */
+    NotSupported = 117,        /**< The device does not offer this function (e.g. impedance measurement). */
     Internal = 199             /**< Invariant violation inside ACQLIB; please report it. */
 };
 

@@ -27,6 +27,7 @@
 #include "acq_error.h"
 #include "acq_stream.h"
 
+#include <chrono>
 #include <cstddef>
 #include <cstdint>
 #include <memory>
@@ -136,6 +137,19 @@ public:
 
     /** @return State and per-stream counters. */
     [[nodiscard]] AcqDeviceStats stats() const;
+
+    //=========================================================================================================
+    /**
+     * Measures the electrode impedances (control path, allocates). Not while Running: amplifiers inject a
+     * test current for it.
+     *
+     * @param[in] timeout   Maximum duration of the measurement.
+     *
+     * @return One entry per electrode channel, or InvalidState (Running, Failed, Closed), NotSupported
+     *         (the device cannot measure impedances), or the backend's error.
+     */
+    [[nodiscard]] AcqExpected<std::vector<AcqImpedance>> measureImpedances(
+        std::chrono::milliseconds timeout = std::chrono::seconds(10));
 
     /** @return The last error reported by the backend or a failed transition; success if none. */
     [[nodiscard]] AcqError lastError() const;

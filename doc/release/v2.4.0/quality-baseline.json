@@ -97,12 +97,12 @@
       }
     },
     "G3_api_documentation": {
-      "public_api_units": 562,
+      "public_api_units": 563,
       "exported_not_registered": 0,
-      "example_eligible": 401,
+      "example_eligible": 402,
       "eligible_backed_percent": 100.0,
-      "snippets": 436,
-      "registered_test_percent": 36.65
+      "snippets": 437,
+      "registered_test_percent": 36.77
     },
     "G4_screenshots": {
       "referenced_images": 19,

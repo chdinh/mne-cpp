@@ -102,7 +102,8 @@ enum Stream : std::uint64_t
     FnirsNoiseStream = 6,
     EcogNoiseStream = 7,
     ErgNoiseStream = 8,
-    ModalityPhaseStream = 9
+    ModalityPhaseStream = 9,
+    ImpedanceStream = 10
 };
 
 constexpr double kFnirsUnit = 1e-6; // M per model unit (1 uM)
@@ -775,6 +776,28 @@ public:
         }
         m_thread = std::thread([this] { run(); });
         return {};
+    }
+
+    /** Electrodes get seeded impedances in a typical range of their kind: wet EEG 2-20 kOhm, ECoG 1-5 kOhm, ERG 5-15 kOhm. */
+    AcqExpected<std::vector<AcqImpedance>> measureImpedances(std::chrono::milliseconds /*timeout*/) override
+    {
+        std::vector<AcqImpedance> out;
+        const std::span<const AcqStream> all = streams();
+        for (std::size_t s = 0; s < all.size(); ++s) {
+            const auto info = all[s].info();
+            for (std::size_t c = 0; c < info->channels.size(); ++c) {
+                const AcqChannelKind kind = info->channels[c].kind;
+                const double u = uniform(hash(m_config.seed, ImpedanceStream, s, c));
+                if (kind == AcqChannelKind::Eeg) {
+                    out.push_back({s, c, 2e3 + 18e3 * u});
+                } else if (kind == AcqChannelKind::Ecog) {
+                    out.push_back({s, c, 1e3 + 4e3 * u});
+                } else if (kind == AcqChannelKind::Erg) {
+                    out.push_back({s, c, 5e3 + 10e3 * u});
+                }
+            }
+        }
+        return out;
     }
 
     void stop() override

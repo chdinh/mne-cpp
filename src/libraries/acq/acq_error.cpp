@@ -28,7 +28,7 @@ namespace
 {
 using C = AcqErrorCode;
 
-constexpr std::array<AcqErrorInfo, 27> kCatalogue{{
+constexpr std::array<AcqErrorInfo, 28> kCatalogue{{
     {C::None, "None", "Success", "", "acq-errors#none"},
     {C::Timeout, "Timeout", "No data or space became available within the timeout",
      "Retry, use a longer timeout, or check that the device is running", "acq-errors#timeout"},
@@ -76,13 +76,16 @@ constexpr std::array<AcqErrorInfo, 27> kCatalogue{{
     {C::PlatformUnsupported, "PlatformUnsupported", "The backend or option is not available on this platform",
      "Use a supported platform or disable the option", "acq-errors#platform-unsupported"},
     {C::WrongDirection, "WrongDirection", "The call does not match the direction of the stream",
-     "Use writer() only on output streams and gating readers only on output streams",
+     "Use writer() and consumeIdle() only on output streams, grant() only on input streams",
      "acq-errors#wrong-direction"},
     {C::WriterInUse, "WriterInUse", "The output stream already has its writer",
      "Keep and share the existing AcqWriter", "acq-errors#writer-in-use"},
     {C::DeviceMemory, "DeviceMemory", "The samples live in GPU memory, which the CPU must not access",
      "Process the view on the GPU (e.g. through DLPack) or copy it to host memory there",
      "acq-errors#device-memory"},
+    {C::NotSupported, "NotSupported", "The device does not offer this function",
+     "Check the device documentation; for impedances, use an amplifier with an impedance mode",
+     "acq-errors#not-supported"},
     {C::Internal, "Internal", "An internal invariant of ACQLIB was violated",
      "Please report this with the steps that led to it", "acq-errors#internal"},
 }};
