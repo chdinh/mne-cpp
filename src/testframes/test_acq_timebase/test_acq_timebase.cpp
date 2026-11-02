@@ -92,6 +92,7 @@ private slots:
     void testMapRequiresPhaseLock();
     void testMapOnGridAndRounding();
     void testMapBeforeStart();
+    void testMapRange();
     void testVerifyPromotesDeclared();
     void testVerifyDetectsDrift();
     void testVerifyRejectsInsufficientMarkers();
@@ -145,6 +146,60 @@ void TestAcqTimebase::testMapOnGridAndRounding()
     auto far = mapSampleExact(rx, tx, 8 + 80'000'000ULL);
     QVERIFY(far);
     QCOMPARE(*far, std::uint64_t(1'250'000'000ULL));
+}
+
+//=============================================================================================================
+
+void TestAcqTimebase::testMapRange()
+{
+    // Every window of one stream against every sample of the other: a sample belongs to the mapped range
+    // exactly when its instant lies in the window's half-open time span. Rates 3:7 share no factor; origins
+    // differ in both directions.
+    const auto dom = acqClockDomainId("multi");
+    for (const std::int64_t origin : {std::int64_t(-10), std::int64_t(0), std::int64_t(5)}) {
+        AcqTimebase a = receive(dom);
+        a.ticksPerSample = 3;
+        AcqTimebase b = receive(dom);
+        b.ticksPerSample = 7;
+        b.sampleAlignment = 4; // the scheduling grid does not restrict which samples are read
+        b.originTick = origin;
+        for (std::uint64_t first = 0; first < 40; ++first) {
+            for (std::uint64_t end = first; end < first + 12; ++end) {
+                auto range = mapRangeExact(a, b, first, end);
+                QVERIFY(range);
+                std::uint64_t lo = 0;
+                std::uint64_t hi = 0;
+                bool any = false;
+                for (std::uint64_t k = 0; k < 40; ++k) {
+                    const std::int64_t t = b.tickOf(k);
+                    if (t >= a.tickOf(first) && t < a.tickOf(end)) {
+                        lo = any ? lo : k;
+                        hi = k + 1;
+                        any = true;
+                    }
+                }
+                QCOMPARE(range->end - range->first, hi - lo);
+                if (any) {
+                    QCOMPARE(range->first, lo);
+                }
+            }
+        }
+    }
+
+    // Exact over long runs, and the result does not depend on how a recording is cut into windows.
+    AcqTimebase eeg = receive(dom);
+    eeg.ticksPerSample = 2; // 1 kHz on a 2 kHz tick
+    AcqTimebase fnirs = receive(dom);
+    fnirs.ticksPerSample = 200; // 10 Hz
+    auto day = mapRangeExact(eeg, fnirs, 0, 86'400'000ULL);
+    QVERIFY(day);
+    QCOMPARE(day->end, std::uint64_t(864'000));
+    auto left = mapRangeExact(eeg, fnirs, 0, 12'345);
+    auto right = mapRangeExact(eeg, fnirs, 12'345, 86'400'000ULL);
+    QVERIFY(left && right && left->end == right->first && right->end == day->end);
+
+    QVERIFY(mapRangeExact(eeg, fnirs, 5, 4).error() == AcqErrorCode::InvalidParameter);
+    QVERIFY(mapRangeExact(eeg, transmit(dom, AcqLockState::Declared), 0, 1).error() == AcqErrorCode::NotSynchronized);
 }
 
 //=============================================================================================================

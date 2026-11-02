@@ -180,6 +180,53 @@ enum class AcqRounding : std::uint8_t
 
 //=============================================================================================================
 /**
+ * Half-open range of sample indices [first, end).
+ */
+struct AcqSampleRange
+{
+    std::uint64_t first = 0; /**< First sample. */
+    std::uint64_t end = 0;   /**< One past the last sample; equals first for an empty range. */
+};
+
+//=============================================================================================================
+/**
+ * The samples of @p to whose instants lie in the time span of samples [@p first, @p end) of @p from, e.g.
+ * the ECoG or fNIRS samples of an EEG epoch. Integer arithmetic only; adjacent windows map to adjacent
+ * ranges, so a recording cut into windows loses and repeats no sample. Every sample of @p to counts,
+ * whatever its sampleAlignment; samples before sample 0 of @p to do not exist and are left out.
+ *
+ * @param[in] from    Timebase of the stream the window is given in.
+ * @param[in] to      Timebase of the stream to read.
+ * @param[in] first   First sample of the window in @p from.
+ * @param[in] end     One past the last sample of the window in @p from.
+ *
+ * @return The range in @p to, NotSynchronized unless both are PhaseLocked in the same domain,
+ *         InvalidParameter if @p end < @p first.
+ */
+[[nodiscard]] inline AcqExpected<AcqSampleRange> mapRangeExact(const AcqTimebase& from, const AcqTimebase& to,
+                                                               std::uint64_t first, std::uint64_t end) noexcept
+{
+    if (from.domain == 0 || from.domain != to.domain || from.lock != AcqLockState::PhaseLocked ||
+        to.lock != AcqLockState::PhaseLocked || to.ticksPerSample == 0) {
+        return AcqErrorCode::NotSynchronized;
+    }
+    if (end < first) {
+        return AcqErrorCode::InvalidParameter;
+    }
+    // First sample of to at or after the instant of sample s of from.
+    const auto atOrAfter = [&](std::uint64_t s) -> std::uint64_t {
+        const std::int64_t delta = from.tickOf(s) - to.originTick;
+        if (delta <= 0) {
+            return 0;
+        }
+        const auto ticks = static_cast<std::uint64_t>(delta);
+        return ticks / to.ticksPerSample + (ticks % to.ticksPerSample != 0 ? 1U : 0U);
+    };
+    return AcqSampleRange{atOrAfter(first), atOrAfter(end)};
+}
+
+//=============================================================================================================
+/**
  * One loop-back observation: the target stream emitted (output) or recorded (input) a sync edge at
  * @c targetSample, and the reference stream recorded the same edge at @c referenceSample.
  */

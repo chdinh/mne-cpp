@@ -12747,6 +12747,25 @@
         "ex_acq_oddball/main.cpp#acq_device_open"
       ],
       "example_mode": "run"
+    },
+    {
+      "name": "AcqSampleRange",
+      "module": "acq",
+      "header": "acq/acq_timebase.h",
+      "origin": "custom",
+      "mne_c_tool": null,
+      "mne_python": null,
+      "sklearn": null,
+      "test": "test_acq_timebase",
+      "status": "documented",
+      "skigen_candidate": false,
+      "documented": true,
+      "sidebar_position": 45,
+      "guide": null,
+      "python_equiv": null,
+      "python_url": null,
+      "example_exempt": true,
+      "example_exempt_reason": "Plain result type of mapRangeExact(), which maps an epoch of one stream to the samples of another stream."
     }
   ],
   "parity": {

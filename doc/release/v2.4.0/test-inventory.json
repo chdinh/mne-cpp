@@ -517,6 +517,7 @@
       },
       "registry_classes": [
         "AcqClockModel",
+        "AcqSampleRange",
         "AcqSyncMarker",
         "AcqTimebase"
       ]

@@ -913,6 +913,9 @@ void TestAcqDevice::testSyntheticMultiRateStreams()
             auto mapped = mapSampleExact(from, to, eeg.sample, 0, AcqRounding::Ceil);
             QVERIFY(mapped);
             QCOMPARE(other.sample, *mapped);
+            const auto window = mapRangeExact(from, to, eeg.sample, eeg.sample + 1000); // a 1 s epoch
+            QVERIFY(window && window->first == other.sample);
+            QCOMPARE(window->end - window->first, static_cast<std::uint64_t>(expected[i].sfreq));
         }
     }
 

@@ -768,7 +768,8 @@ const apiSidebar: SidebarsConfig['apiSidebar'] = [
         'api/acq/acq-read-result',
         'api/acq/acq-bit-field',
         'api/acq/acq-view-lease',
-        'api/acq/acq-impedance'
+        'api/acq/acq-impedance',
+        'api/acq/acq-sample-range'
       ],
     }
 ];
