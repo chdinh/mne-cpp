@@ -22,6 +22,7 @@
 
 #include <array>
 #include <atomic>
+#include <bit>
 #include <chrono>
 #include <cstdio>
 #include <cstdlib>
@@ -422,8 +423,7 @@ bool eventsValid(const AcqBlockView& view)
         for (std::size_t k = 0; k < words.size(); ++k) {
             words[k] = std::atomic_ref<std::uint64_t>(raw[k]).load(std::memory_order_relaxed);
         }
-        AcqEvent event;
-        std::memcpy(&event, words.data(), sizeof(event));
+        const auto event = std::bit_cast<AcqEvent>(words);
         if (event.sample < view.firstSample() || event.sample >= end || event.sample % kEventEvery != 0 ||
             event.code != eventCode(event.sample) || (i > 0 && event.sample <= previous)) {
             return false;
