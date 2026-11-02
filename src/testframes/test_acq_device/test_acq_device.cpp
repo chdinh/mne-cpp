@@ -71,8 +71,8 @@ struct Calls
 class FakeBackend : public AcqBackend
 {
 public:
-    explicit FakeBackend(Calls& calls)
-    : calls(calls)
+    explicit FakeBackend(Calls& record)
+    : calls(record)
     {
         input = addInputStream(channelsInfo("in", AcqDirection::Input, 2)).value();
         deviceSide = addOutputStream(channelsInfo("out", AcqDirection::Output, 1), {}, AcqWait::Block).value();
