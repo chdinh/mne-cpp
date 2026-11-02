@@ -47,12 +47,21 @@ for (std::size_t c = 0; c < kChannels; ++c) {
 
 Live multi-channel, multi-rate scope of a streaming source with a closed-loop stimulator on the same clock.
 
-````cpp title="src/examples/ex_acq_scope/main.cpp, line 135"
-    for (const AcqChannelInfo& channel : info.channels) {
-        names.push_back(channel.name);
-        units.push_back(displayUnit(channel.unit));
-    }
-}
+````cpp title="src/examples/ex_acq_scope/main.cpp, line 111"
+ChannelStyle channelStyle(const AcqChannelInfo& channel)
+{
+    QString unit;
+    switch (channel.unit) {
+        case AcqUnit::Volt:
+            unit = "V";
+            break;
+        case AcqUnit::Tesla:
+            unit = "T";
+            break;
+        case AcqUnit::Ampere:
+            unit = "A";
+            break;
+        case AcqUnit::Molar:
 ````
 
 ## Authors of this file

@@ -221,7 +221,7 @@ if (!reader || !device->start().ok()) {
 
 Live multi-channel, multi-rate scope of a streaming source with a closed-loop stimulator on the same clock.
 
-````cpp title="src/examples/ex_acq_scope/main.cpp, line 602"
+````cpp title="src/examples/ex_acq_scope/main.cpp, line 783"
 auto device = AcqDevice::open(uri);
 if (!device) {
     std::fprintf(stderr, "Cannot open %s: %s\n", uri.c_str(), device.error().text().c_str());

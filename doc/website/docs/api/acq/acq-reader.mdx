@@ -252,7 +252,7 @@ void runCard(AcqWriter& input, AcqReader& dac, const SignalGenerator& gen, Close
 
 Live multi-channel, multi-rate scope of a streaming source with a closed-loop stimulator on the same clock.
 
-````cpp title="src/examples/ex_acq_scope/main.cpp, line 189"
+````cpp title="src/examples/ex_acq_scope/main.cpp, line 244"
 /** Reads everything @p reader has now into trace @p index; used for the device's further streams. */
 void drainInto(AcqReader& reader, std::size_t index, std::vector<float>& block, Shared& shared)
 {

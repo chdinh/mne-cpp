@@ -38,7 +38,18 @@ Holds a value.
 
 **Parameters:**
 
-- **value** : *T*
+- **value** : *T &&*
+  The value.
+
+---
+
+### AcqExpected(value)
+
+Holds a value.
+
+**Parameters:**
+
+- **value** : *const T &*
   The value.
 
 ---
@@ -114,6 +125,14 @@ Holds an error without context.
 ---
 
 ### operator*()
+
+---
+
+### operator*()
+
+**Returns:**
+
+- *T &&* — The value, moved out of a temporary result, e.g. *stream.reader(mode).
 
 ---
 

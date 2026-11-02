@@ -116,7 +116,7 @@ while (average[kTarget].count < kEnoughTargets) {
 
 Live multi-channel, multi-rate scope of a streaming source with a closed-loop stimulator on the same clock.
 
-````cpp title="src/examples/ex_acq_scope/main.cpp, line 199"
+````cpp title="src/examples/ex_acq_scope/main.cpp, line 254"
         const std::size_t n = view->sampleCount();
         const std::uint64_t first = view->firstSample();
         shared.lost.fetch_add(view->lost(), std::memory_order_relaxed);

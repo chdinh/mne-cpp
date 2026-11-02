@@ -183,7 +183,7 @@ if (!reader || !device->start().ok()) {
 
 Live multi-channel, multi-rate scope of a streaming source with a closed-loop stimulator on the same clock.
 
-````cpp title="src/examples/ex_acq_scope/main.cpp, line 647"
+````cpp title="src/examples/ex_acq_scope/main.cpp, line 828"
     const AcqStream stream = device->stream(i);
     const auto streamInfo = stream.info();
     if (streamInfo->direction != AcqDirection::Input || isComplex(streamInfo->format) || streamInfo->sfreq <= 0.0) {

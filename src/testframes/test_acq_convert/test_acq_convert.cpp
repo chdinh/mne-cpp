@@ -399,6 +399,7 @@ private slots:
     void testReaderRead();
     void testDeviceMemoryRefused();
     void testFloatSaturationAndWideBitFields();
+    void testWideStreams();
 };
 
 //=============================================================================================================
@@ -408,12 +409,17 @@ void TestAcqConvert::testDecodeAllFormats_data()
     QTest::addColumn<int>("format");
     QTest::addColumn<int>("layout");
     QTest::addColumn<bool>("mirror");
+    QTest::addColumn<int>("digitalBits");
     for (const AcqSampleFormat f : kFormats) {
         for (const AcqLayout layout : {AcqLayout::Interleaved, AcqLayout::Planar}) {
             for (const bool mirror : {false, true}) {
-                const std::string name = std::string(sampleFormatName(f)) +
-                    (layout == AcqLayout::Interleaved ? " interleaved" : " planar") + (mirror ? " mirrored" : "");
-                QTest::newRow(name.c_str()) << static_cast<int>(f) << static_cast<int>(layout) << mirror;
+                // Channels with digital bits take the general converter, channels without them the fast one.
+                for (const int digitalBits : {0, 3}) {
+                    const std::string name = std::string(sampleFormatName(f)) +
+                        (layout == AcqLayout::Interleaved ? " interleaved" : " planar") + (mirror ? " mirrored" : "") +
+                        (digitalBits > 0 ? " digital" : "");
+                    QTest::newRow(name.c_str()) << static_cast<int>(f) << static_cast<int>(layout) << mirror << digitalBits;
+                }
             }
         }
     }
@@ -424,7 +430,9 @@ void TestAcqConvert::testDecodeAllFormats()
     QFETCH(int, format);
     QFETCH(int, layout);
     QFETCH(bool, mirror);
-    const AcqStreamInfo info = makeInfo(static_cast<AcqSampleFormat>(format), static_cast<AcqLayout>(layout), 7, 3);
+    QFETCH(int, digitalBits);
+    const AcqStreamInfo info =
+        makeInfo(static_cast<AcqSampleFormat>(format), static_cast<AcqLayout>(layout), 7, digitalBits);
     // A ring of 4096 samples mirrors where the size allows; without the mirror the second block wraps in two parts.
     Ring ring = makeRing(info, mirror ? 4096 : 64, mirror);
     Lcg rng{static_cast<std::uint64_t>(format * 31 + layout)};
@@ -534,96 +542,109 @@ void TestAcqConvert::testEncodeAllFormatsBitExact()
 {
     for (const AcqSampleFormat f : kFormats) {
         for (const AcqLayout layout : {AcqLayout::Interleaved, AcqLayout::Planar}) {
-            AcqStreamInfo info = makeInfo(f, layout, 5, 2);
-            info.channels[2].rangeMin = -200.0;
-            info.channels[2].rangeMax = 300.0;
-            Ring ring = makeRing(info, 64, false);
-            Lcg rng{static_cast<std::uint64_t>(f) * 7 + static_cast<std::uint64_t>(layout)};
-            produceRandom(ring.writer, 50, rng); // wrap the next block, and leave digital bits in the ring
-            auto skip = ring.reader.acquire(50, 0ns);
-            QVERIFY(ring.reader.release(*skip).ok());
+            for (const int digitalBits : {0, 2}) {
+                for (const bool columnMajor : {false, true}) {
+                    AcqStreamInfo info = makeInfo(f, layout, 5, digitalBits);
+                    info.channels[2].rangeMin = -200.0;
+                    info.channels[2].rangeMax = 300.0;
+                    Ring ring = makeRing(info, 64, false);
+                    Lcg rng{static_cast<std::uint64_t>(f) * 7 + static_cast<std::uint64_t>(layout)};
+                    produceRandom(ring.writer, 50, rng); // wrap the next block, and leave digital bits in the ring
+                    auto skip = ring.reader.acquire(50, 0ns);
+                    QVERIFY(ring.reader.release(*skip).ok());
 
-            constexpr std::size_t kSamples = 30;
-            const double amplitude = isInteger(f) ? std::ldexp(1.0, wordBits(f) - 1) * 1.3 : 1e6;
-            std::vector<double> in(5 * kSamples);
-            for (double& v : in) {
-                v = rng.uniform(-amplitude, amplitude);
-            }
-            in[7] = std::numeric_limits<double>::quiet_NaN();
-            in[11] = 0.5;
-            in[12] = -1.5;
-
-            auto view = ring.writer.beginWrite(kSamples);
-            QVERIFY(view);
-            QCOMPARE(view->partCount(), std::size_t(2));
-            // Expected native bytes: start from what the ring holds (digital bits are kept), apply the reference.
-            std::vector<std::vector<std::byte>> expected(5 * kSamples);
-            std::uint64_t expectedClipped = 0;
-            for (std::size_t c = 0; c < 5; ++c) {
-                for (std::size_t s = 0; s < kSamples; ++s) {
-                    std::vector<std::byte>& e = expected[c * kSamples + s];
-                    std::size_t index = s;
-                    std::size_t part = 0;
-                    while (index >= view->part(part).samples) {
-                        index -= view->part(part).samples;
-                        ++part;
+                    constexpr std::size_t kSamples = 30;
+                    const double amplitude = isInteger(f) ? std::ldexp(1.0, wordBits(f) - 1) * 1.3 : 1e6;
+                    std::vector<double> in(5 * kSamples);
+                    for (double& v : in) {
+                        v = rng.uniform(-amplitude, amplitude);
                     }
-                    const std::byte* ringElement = view->part(part).at(c, index);
-                    e.assign(ringElement, ringElement + componentBytes(f) * (isComplex(f) ? 2 : 1));
-                    const AcqChannelInfo& ch = info.channels[c];
-                    expectedClipped += refEncodeComponent(in[c * kSamples + s], f, 0, ch.digitalBits, true, ch.scale,
-                                                          ch.offset, ch.rangeMin, ch.rangeMax, e.data())
-                        ? 1
-                        : 0;
-                    if (isComplex(f)) {
-                        refEncodeComponent(0.0, f, 1, 0, true, ch.scale, ch.offset, ch.rangeMin, ch.rangeMax, e.data());
-                    }
-                }
-            }
-            auto result = encode(AcqMatrixRef<const double>::rowMajor(in.data(), 5, kSamples), *view);
-            QVERIFY2(result, sampleFormatName(f).data());
-            QCOMPARE(result->clipped, expectedClipped);
-            ring.writer.commit(kSamples);
-            auto back = ring.reader.acquire(kSamples, 0ns);
-            QVERIFY(back);
-            for (std::size_t c = 0; c < 5; ++c) {
-                for (std::size_t s = 0; s < kSamples; ++s) {
-                    const std::vector<std::byte>& e = expected[c * kSamples + s];
-                    QVERIFY2(std::memcmp(elementOf(*back, c, s), e.data(), e.size()) == 0,
-                             qPrintable(QString("%1 layout %2 channel %3 sample %4")
-                                            .arg(sampleFormatName(f).data())
-                                            .arg(static_cast<int>(layout))
-                                            .arg(c)
-                                            .arg(s)));
-                }
-            }
-            QVERIFY(ring.reader.release(*back).ok());
+                    in[7] = std::numeric_limits<double>::quiet_NaN();
+                    in[11] = 0.5;
+                    in[12] = -1.5;
 
-            // Decoding what was encoded returns the input quantised to the channel's analog resolution.
-            if (!isComplex(f)) {
-                auto again = ring.writer.beginWrite(kSamples);
-                const std::array<double, 5> one = {1.0, 2.0, 3.0, 4.0, 5.0};
-                std::vector<double> column(5 * kSamples);
-                for (std::size_t s = 0; s < kSamples; ++s) {
+                    auto view = ring.writer.beginWrite(kSamples);
+                    QVERIFY(view);
+                    QCOMPARE(view->partCount(), std::size_t(2));
+                    // Expected native bytes: start from what the ring holds (digital bits are kept), apply the reference.
+                    std::vector<std::vector<std::byte>> expected(5 * kSamples);
+                    std::uint64_t expectedClipped = 0;
                     for (std::size_t c = 0; c < 5; ++c) {
-                        column[s * 5 + c] = one[c] * info.channels[c].scale * (isInteger(f) ? 64.0 : 1.0) +
-                            info.channels[c].offset;
+                        for (std::size_t s = 0; s < kSamples; ++s) {
+                            std::vector<std::byte>& e = expected[c * kSamples + s];
+                            std::size_t index = s;
+                            std::size_t part = 0;
+                            while (index >= view->part(part).samples) {
+                                index -= view->part(part).samples;
+                                ++part;
+                            }
+                            const std::byte* ringElement = view->part(part).at(c, index);
+                            e.assign(ringElement, ringElement + componentBytes(f) * (isComplex(f) ? 2 : 1));
+                            const AcqChannelInfo& ch = info.channels[c];
+                            expectedClipped += refEncodeComponent(in[c * kSamples + s], f, 0, ch.digitalBits, true, ch.scale,
+                                                                  ch.offset, ch.rangeMin, ch.rangeMax, e.data())
+                                ? 1
+                                : 0;
+                            if (isComplex(f)) {
+                                refEncodeComponent(0.0, f, 1, 0, true, ch.scale, ch.offset, ch.rangeMin, ch.rangeMax, e.data());
+                            }
+                        }
+                    }
+                    // The same values from a row-major and from a column-major matrix.
+                    std::vector<double> transposed(in.size());
+                    for (std::size_t c = 0; c < 5; ++c) {
+                        for (std::size_t s = 0; s < kSamples; ++s) {
+                            transposed[s * 5 + c] = in[c * kSamples + s];
+                        }
+                    }
+                    auto result = encode(columnMajor ? AcqMatrixRef<const double>::columnMajor(transposed.data(), 5, kSamples)
+                                                     : AcqMatrixRef<const double>::rowMajor(in.data(), 5, kSamples),
+                                         *view);
+                    QVERIFY2(result, sampleFormatName(f).data());
+                    QCOMPARE(result->clipped, expectedClipped);
+                    ring.writer.commit(kSamples);
+                    auto back = ring.reader.acquire(kSamples, 0ns);
+                    QVERIFY(back);
+                    for (std::size_t c = 0; c < 5; ++c) {
+                        for (std::size_t s = 0; s < kSamples; ++s) {
+                            const std::vector<std::byte>& e = expected[c * kSamples + s];
+                            QVERIFY2(std::memcmp(elementOf(*back, c, s), e.data(), e.size()) == 0,
+                                     qPrintable(QString("%1 layout %2 channel %3 sample %4")
+                                                    .arg(sampleFormatName(f).data())
+                                                    .arg(static_cast<int>(layout))
+                                                    .arg(c)
+                                                    .arg(s)));
+                        }
+                    }
+                    QVERIFY(ring.reader.release(*back).ok());
+
+                    // Decoding what was encoded returns the input quantised to the channel's analog resolution.
+                    if (!isComplex(f)) {
+                        auto again = ring.writer.beginWrite(kSamples);
+                        const std::array<double, 5> one = {1.0, 2.0, 3.0, 4.0, 5.0};
+                        std::vector<double> column(5 * kSamples);
+                        for (std::size_t s = 0; s < kSamples; ++s) {
+                            for (std::size_t c = 0; c < 5; ++c) {
+                                column[s * 5 + c] = one[c] * info.channels[c].scale * (isInteger(f) ? 64.0 : 1.0) +
+                                    info.channels[c].offset;
+                            }
+                        }
+                        QVERIFY(encode(AcqMatrixRef<const double>::columnMajor(column.data(), 5, kSamples), *again));
+                        ring.writer.commit(kSamples);
+                        auto decoded = ring.reader.acquire(kSamples, 0ns);
+                        std::vector<double> roundTrip(5 * kSamples);
+                        QVERIFY(decode(*decoded, AcqMatrixRef<double>::columnMajor(roundTrip.data(), 5, kSamples)).ok());
+                        for (std::size_t i = 0; i < column.size(); ++i) {
+                            QVERIFY2(std::abs(roundTrip[i] - column[i]) <= 1e-9 * std::abs(column[i]) + 1e-9,
+                                     qPrintable(QString("%1 element %2: %3 != %4")
+                                                    .arg(sampleFormatName(f).data())
+                                                    .arg(i)
+                                                    .arg(roundTrip[i])
+                                                    .arg(column[i])));
+                        }
+                        QVERIFY(ring.reader.release(*decoded).ok());
                     }
                 }
-                QVERIFY(encode(AcqMatrixRef<const double>::columnMajor(column.data(), 5, kSamples), *again));
-                ring.writer.commit(kSamples);
-                auto decoded = ring.reader.acquire(kSamples, 0ns);
-                std::vector<double> roundTrip(5 * kSamples);
-                QVERIFY(decode(*decoded, AcqMatrixRef<double>::columnMajor(roundTrip.data(), 5, kSamples)).ok());
-                for (std::size_t i = 0; i < column.size(); ++i) {
-                    QVERIFY2(std::abs(roundTrip[i] - column[i]) <= 1e-9 * std::abs(column[i]) + 1e-9,
-                             qPrintable(QString("%1 element %2: %3 != %4")
-                                            .arg(sampleFormatName(f).data())
-                                            .arg(i)
-                                            .arg(roundTrip[i])
-                                            .arg(column[i])));
-                }
-                QVERIFY(ring.reader.release(*decoded).ok());
             }
         }
     }
@@ -942,6 +963,55 @@ void TestAcqConvert::testFloatSaturationAndWideBitFields()
         QVERIFY(decodeBits(*back, info.bitFields, AcqMatrixRef<std::uint32_t>::rowMajor(decoded.data(), 1, 4)).ok());
         QVERIFY(decoded == lines);
         QVERIFY(ring.reader.release(*back).ok());
+    }
+}
+
+//=============================================================================================================
+
+void TestAcqConvert::testWideStreams()
+{
+    // 300 channels span several channel chunks (256) and transpose tiles (32) of the converters.
+    constexpr std::size_t kChannels = 300;
+    for (const AcqSampleFormat f : {AcqSampleFormat::Int16, AcqSampleFormat::Float32, AcqSampleFormat::ComplexInt16}) {
+        for (const AcqLayout layout : {AcqLayout::Interleaved, AcqLayout::Planar}) {
+            const AcqStreamInfo info = makeInfo(f, layout, kChannels, 0);
+            Ring ring = makeRing(info, 128, false);
+            Lcg rng{static_cast<std::uint64_t>(f) * 13 + static_cast<std::uint64_t>(layout)};
+            produceRandom(ring.writer, 70, rng);
+            auto view = ring.reader.acquire(70, 0ns);
+            QVERIFY(view);
+            std::string failure = checkDecode<std::complex<float>>(*view, info);
+            QVERIFY2(failure.empty(), failure.c_str());
+            if (!isComplex(f)) {
+                failure = checkDecode<float>(*view, info);
+                QVERIFY2(failure.empty(), failure.c_str());
+            }
+            QVERIFY(ring.reader.release(*view).ok());
+
+            if (isComplex(f)) {
+                continue;
+            }
+            // Exactly representable values come back unchanged through encode() and decode().
+            constexpr std::size_t kSamples = 40;
+            std::vector<double> in(kChannels * kSamples);
+            for (std::size_t i = 0; i < in.size(); ++i) {
+                const std::size_t c = i % kChannels;
+                in[i] = static_cast<double>(static_cast<int>(i % 2001) - 1000) * info.channels[c].scale + info.channels[c].offset;
+            }
+            auto write = ring.writer.beginWrite(kSamples);
+            auto encoded = encode(AcqMatrixRef<const double>::columnMajor(in.data(), kChannels, kSamples), *write);
+            QVERIFY(encoded);
+            QCOMPARE(encoded->clipped, std::uint64_t(0));
+            ring.writer.commit(kSamples);
+            auto back = ring.reader.acquire(kSamples, 0ns);
+            std::vector<double> out(in.size());
+            QVERIFY(decode(*back, AcqMatrixRef<double>::columnMajor(out.data(), kChannels, kSamples)).ok());
+            for (std::size_t i = 0; i < in.size(); ++i) {
+                QVERIFY2(std::abs(out[i] - in[i]) <= 1e-9 * std::abs(in[i]) + 1e-12,
+                         qPrintable(QString("%1 element %2").arg(sampleFormatName(f).data()).arg(i)));
+            }
+            QVERIFY(ring.reader.release(*back).ok());
+        }
     }
 }
 

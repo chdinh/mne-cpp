@@ -83,7 +83,7 @@ outInfo.name = "stim";
 
 Live multi-channel, multi-rate scope of a streaming source with a closed-loop stimulator on the same clock.
 
-````cpp title="src/examples/ex_acq_scope/main.cpp, line 127"
+````cpp title="src/examples/ex_acq_scope/main.cpp, line 182"
 Trace(const AcqStreamInfo& info, std::size_t extraRows)
 : title(QString("%1  %2 Hz").arg(QString::fromStdString(info.name)).arg(info.sfreq).toStdString())
 , sfreq(info.sfreq)
@@ -94,7 +94,7 @@ Trace(const AcqStreamInfo& info, std::size_t extraRows)
 {
     for (const AcqChannelInfo& channel : info.channels) {
         names.push_back(channel.name);
-        units.push_back(displayUnit(channel.unit));
+        styles.push_back(channelStyle(channel));
     }
 }
 ````

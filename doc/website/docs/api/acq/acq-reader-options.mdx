@@ -59,7 +59,7 @@ auto controller = input->stream().reader(AcqReader::ReadMode::LowLatency);
 
 Live multi-channel, multi-rate scope of a streaming source with a closed-loop stimulator on the same clock.
 
-````cpp title="src/examples/ex_acq_scope/main.cpp, line 637"
+````cpp title="src/examples/ex_acq_scope/main.cpp, line 818"
 AcqReaderOptions gating;
 gating.gating = true; // the emulated DAC: it consumes what was written or plays fill
 auto dac = stimulator->stream().reader(AcqReader::ReadMode::Lossless, gating);
