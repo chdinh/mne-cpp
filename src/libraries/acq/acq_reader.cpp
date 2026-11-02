@@ -344,7 +344,7 @@ AcqExpected<AcqViewLease> AcqReader::lease(std::size_t minSamples, std::chrono::
     if (!view) {
         return view.error();
     }
-    return AcqViewLease(m_core.get(), m_slot, *std::move(view));
+    return AcqViewLease(m_core.get(), m_slot, *view);
 }
 
 AcqError ACQLIB::detail::releaseView(AcqStreamCore& c, std::uint32_t index, AcqBlockView& view) noexcept
@@ -385,10 +385,10 @@ AcqError ACQLIB::detail::releaseView(AcqStreamCore& c, std::uint32_t index, AcqB
 // DEFINE MEMBER METHODS AcqViewLease
 //=============================================================================================================
 
-AcqViewLease::AcqViewLease(AcqStreamCore* core, std::uint32_t slot, AcqBlockView&& view) noexcept
+AcqViewLease::AcqViewLease(AcqStreamCore* core, std::uint32_t slot, const AcqBlockView& view) noexcept
 : m_core(core)
 , m_slot(slot)
-, m_view(std::move(view))
+, m_view(view)
 {
 }
 
@@ -400,7 +400,7 @@ AcqViewLease::~AcqViewLease()
 AcqViewLease::AcqViewLease(AcqViewLease&& other) noexcept
 : m_core(std::exchange(other.m_core, nullptr))
 , m_slot(other.m_slot)
-, m_view(std::move(other.m_view))
+, m_view(other.m_view)
 {
 }
 
@@ -410,7 +410,7 @@ AcqViewLease& AcqViewLease::operator=(AcqViewLease&& other) noexcept
         static_cast<void>(release());
         m_core = std::exchange(other.m_core, nullptr);
         m_slot = other.m_slot;
-        m_view = std::move(other.m_view);
+        m_view = other.m_view;
     }
     return *this;
 }

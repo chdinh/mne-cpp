@@ -297,7 +297,7 @@ public:
 
 private:
     friend class AcqReader;
-    AcqViewLease(detail::AcqStreamCore* core, std::uint32_t slot, AcqBlockView&& view) noexcept;
+    AcqViewLease(detail::AcqStreamCore* core, std::uint32_t slot, const AcqBlockView& view) noexcept;
 
     detail::AcqStreamCore* m_core = nullptr;
     std::uint32_t m_slot = 0;

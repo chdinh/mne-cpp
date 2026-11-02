@@ -1161,6 +1161,7 @@ void TestAcqDevice::testBackpressureReplayIsLossless()
     QTRY_VERIFY_WITH_TIMEOUT(waits() > 0, 10000);
     std::vector<Drained> slow(readers.size());
     std::vector<std::thread> threads;
+    threads.reserve(readers.size());
     for (std::size_t i = 0; i < readers.size(); ++i) {
         threads.emplace_back([&slow, &readers, i] { slow[i] = drain(readers[i], 512); });
     }
