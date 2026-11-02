@@ -791,7 +791,11 @@ void TestAcqDevice::testSyntheticStopRestart()
     QVERIFY(device->stop().ok());
     const std::uint64_t first = device->stats().streams[0].committed;
     QVERIFY(device->start().ok());
-    std::this_thread::sleep_for(50ms);
+    // Wait for samples after the restart rather than a fixed time: a loaded CI runner may not schedule the backend.
+    const auto deadline = std::chrono::steady_clock::now() + 10s;
+    while (device->stats().streams[0].committed < first + 100 && std::chrono::steady_clock::now() < deadline) {
+        std::this_thread::sleep_for(5ms);
+    }
     device->close();
 
     // The restarted device continues the same signal: identical to an uninterrupted run.
