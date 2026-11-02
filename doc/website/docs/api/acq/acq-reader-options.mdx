@@ -46,7 +46,7 @@ auto controller = input->stream().reader(AcqReader::ReadMode::LowLatency);
 
 Closed-loop acquisition and stimulation with ACQLIB, and its sustained throughput per device class.
 
-````cpp title="src/examples/ex_acq_performance/main.cpp, line 670"
+````cpp title="src/examples/ex_acq_performance/main.cpp, line 676"
 AcqReaderOptions gating;
 gating.gating = true;
 auto dac = stimulator->stream().reader(AcqReader::ReadMode::Lossless, gating);
@@ -57,17 +57,22 @@ auto controller = input->stream().reader(AcqReader::ReadMode::LowLatency);
 
 ### [ex_acq_scope](../../examples/acq/ex_acq_scope.mdx)
 
-Live multi-channel scope of a streaming source with a closed-loop stimulator played back on the same clock.
+Live multi-channel, multi-rate scope of a streaming source with a closed-loop stimulator on the same clock.
 
-````cpp title="src/examples/ex_acq_scope/main.cpp, line 506"
+````cpp title="src/examples/ex_acq_scope/main.cpp, line 637"
 AcqReaderOptions gating;
 gating.gating = true; // the emulated DAC: it consumes what was written or plays fill
 auto dac = stimulator->stream().reader(AcqReader::ReadMode::Lossless, gating);
 auto input = device->stream().reader(AcqReader::ReadMode::Lossless);
-if (!dac || !input || !device->start().ok()) {
-    std::fprintf(stderr, "Cannot start %s\n", uri.c_str());
-    return 1;
-}
+Shared shared;
+shared.traces.emplace_back(*info, 1);
+// Every further real-valued stream at its own rate: fNIRS, ECoG, ERG, ...
+std::vector<AcqReader> others;
+for (std::size_t i = 1; i < device->streams().size(); ++i) {
+    const AcqStream stream = device->stream(i);
+    const auto streamInfo = stream.info();
+    if (streamInfo->direction != AcqDirection::Input || isComplex(streamInfo->format) || streamInfo->sfreq <= 0.0) {
+        continue;
 ````
 
 ## Authors of this file

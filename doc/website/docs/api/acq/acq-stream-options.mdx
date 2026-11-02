@@ -46,9 +46,9 @@ From [ex_acq_performance](../../examples/acq/ex_acq_performance.mdx).
 
 ### [ex_acq_scope](../../examples/acq/ex_acq_scope.mdx)
 
-Live multi-channel scope of a streaming source with a closed-loop stimulator played back on the same clock.
+Live multi-channel, multi-rate scope of a streaming source with a closed-loop stimulator on the same clock.
 
-````cpp title="src/examples/ex_acq_scope/main.cpp, line 495"
+````cpp title="src/examples/ex_acq_scope/main.cpp, line 626"
 outInfo.channels[0].rangeMin = -kFullScale;
 outInfo.channels[0].rangeMax = kFullScale;
 outInfo.underrunFill = AcqUnderrunFill::Zero;

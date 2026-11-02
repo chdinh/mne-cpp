@@ -18,6 +18,7 @@
 #include <acq/acq_device_registry.h>
 
 #include <algorithm>
+#include <array>
 #include <atomic>
 #include <chrono>
 #include <cmath>
@@ -168,6 +169,37 @@ Drained drain(AcqReader& reader)
 }
 
 /** Opens uri, runs it to its end with a Lossless reader on stream 0 and returns what was read. */
+/** Records every stream of @p uri until end of stream, one reader thread per stream. */
+std::vector<Drained> recordAll(const std::string& uri)
+{
+    auto device = AcqDevice::open(uri);
+    if (!device) {
+        qWarning("open(%s): %s", uri.c_str(), device.error().text().c_str());
+        return {};
+    }
+    std::vector<AcqReader> readers;
+    for (const AcqStream& stream : device->streams()) {
+        auto reader = stream.reader(AcqReader::ReadMode::Lossless);
+        if (!reader) {
+            return {};
+        }
+        readers.push_back(std::move(*reader));
+    }
+    std::vector<Drained> out(readers.size());
+    std::vector<std::thread> threads;
+    threads.reserve(readers.size());
+    for (std::size_t i = 0; i < readers.size(); ++i) {
+        threads.emplace_back([&out, &readers, i] { out[i] = drain(readers[i]); });
+    }
+    if (!device->start().ok()) {
+        device->close();
+    }
+    for (auto& thread : threads) {
+        thread.join();
+    }
+    return out;
+}
+
 Drained record(const std::string& uri)
 {
     auto device = AcqDevice::open(uri);
@@ -241,6 +273,9 @@ private slots:
     void testSyntheticStopRestart();
     void testSyntheticInvalidParameters_data();
     void testSyntheticInvalidParameters();
+    void testSyntheticMultiRateStreams();
+    void testSyntheticMultiRateResponses();
+    void testRealtimeRecordingIsComplete();
 };
 
 //=============================================================================================================
@@ -811,6 +846,236 @@ void TestAcqDevice::testSyntheticStopRestart()
 
 //=============================================================================================================
 
+void TestAcqDevice::testSyntheticMultiRateStreams()
+{
+    // EEG at 1 kHz, fNIRS at 10 Hz, ECoG and ERG at 2 kHz: four streams on one clock domain.
+    const std::string uri = "synthetic://?eeg=4&fnirs=3&ecog=6&erg=2&realtime=0&duration=4&seed=5&interval=0.7";
+    auto device = AcqDevice::open(uri);
+    QVERIFY(device);
+    QCOMPARE(device->streams().size(), std::size_t(4));
+    struct Expected
+    {
+        const char* name;
+        double sfreq;
+        std::size_t channels;
+        AcqChannelKind kind;
+        AcqUnit unit;
+        std::uint64_t ticksPerSample;
+        std::size_t samples;
+    };
+    const std::array<Expected, 4> expected = {{{"synthetic", 1000.0, 5, AcqChannelKind::Eeg, AcqUnit::Volt, 2, 4000},
+                                               {"fnirs", 10.0, 6, AcqChannelKind::Fnirs, AcqUnit::Molar, 200, 40},
+                                               {"ecog", 2000.0, 6, AcqChannelKind::Ecog, AcqUnit::Volt, 1, 8000},
+                                               {"erg", 2000.0, 2, AcqChannelKind::Erg, AcqUnit::Volt, 1, 8000}}};
+    const AcqTimebase eegClock = device->stream(0).timebase();
+    QVERIFY(eegClock.domain != 0);
+    for (std::size_t i = 0; i < expected.size(); ++i) {
+        const auto info = device->stream(i).info();
+        QCOMPARE(info->name, std::string(expected[i].name));
+        QCOMPARE(info->sfreq, expected[i].sfreq);
+        QCOMPARE(info->channelCount(), expected[i].channels);
+        QCOMPARE(info->channels[0].kind, expected[i].kind);
+        QCOMPARE(info->channels[0].unit, expected[i].unit);
+        const AcqTimebase clock = device->stream(i).timebase();
+        QCOMPARE(clock.domain, eegClock.domain);
+        QCOMPARE(clock.ticksPerSecond, std::uint64_t(2000));
+        QCOMPARE(clock.ticksPerSample, expected[i].ticksPerSample);
+        QCOMPARE(clock.lock, AcqLockState::PhaseLocked);
+    }
+    QCOMPARE(device->stream(1).info()->channels[0].name, std::string("S1_D1 hbo"));
+    QCOMPARE(device->stream(1).info()->channels[5].name, std::string("S3_D3 hbr"));
+    device->close();
+
+    const std::vector<Drained> streams = recordAll(uri);
+    QCOMPARE(streams.size(), expected.size());
+    for (std::size_t i = 0; i < expected.size(); ++i) {
+        QCOMPARE(streams[i].lost, std::uint64_t(0));
+        QCOMPARE(streams[i].samples.size(), expected[i].samples * expected[i].channels);
+        QCOMPARE(streams[i].events.size(), streams[0].events.size());
+    }
+    QVERIFY(streams[0].events.size() >= 4);
+
+    // A trigger lands in every stream on the first sample at or after its instant on the shared clock.
+    AcqTimebase from = eegClock;
+    for (std::size_t i = 1; i < expected.size(); ++i) {
+        AcqTimebase to = from;
+        to.ticksPerSample = expected[i].ticksPerSample;
+        for (std::size_t e = 0; e < streams[0].events.size(); ++e) {
+            const AcqEvent& eeg = streams[0].events[e];
+            const AcqEvent& other = streams[i].events[e];
+            QCOMPARE(other.code, eeg.code);
+            auto mapped = mapSampleExact(from, to, eeg.sample, 0, AcqRounding::Ceil);
+            QVERIFY(mapped);
+            QCOMPARE(other.sample, *mapped);
+        }
+    }
+
+    // The extra streams leave the EEG stream untouched.
+    const Drained eegOnly = record("synthetic://?eeg=4&realtime=0&duration=4&seed=5&interval=0.7");
+    QVERIFY(eegOnly.samples == streams[0].samples);
+}
+
+//=============================================================================================================
+
+void TestAcqDevice::testSyntheticMultiRateResponses()
+{
+    // Noise-free, one stimulus every 15 s, so each response stands alone and the values are exact.
+    const std::vector<Drained> d = recordAll(
+        "synthetic://?eeg=1&fnirs=2&ecog=10&erg=2&noise=0&alpha=0&realtime=0&duration=75&seed=3&interval=15&targets=0");
+    QCOMPARE(d.size(), std::size_t(4));
+    QCOMPARE(d[1].events.size(), std::size_t(4));
+    for (const Drained& stream : d) {
+        QCOMPARE(stream.lost, std::uint64_t(0));
+    }
+
+    // fNIRS, 10 Hz: HbO of pair 1 peaks about 5 s after each stimulus, the first at 0.4 uM (later ones sit on the
+    // undershoot of the previous response); HbR is -0.3 x HbO.
+    const auto at = [](const Drained& s, std::size_t channels, std::uint64_t sample, std::size_t ch) {
+        return static_cast<double>(s.samples.at(sample * channels + ch));
+    };
+    for (const AcqEvent& e : d[1].events) {
+        std::uint64_t peak = e.sample;
+        for (std::uint64_t s = e.sample; s < e.sample + 120; ++s) {
+            peak = at(d[1], 4, s, 0) > at(d[1], 4, peak, 0) ? s : peak;
+        }
+        QVERIFY2(peak - e.sample >= 45 && peak - e.sample <= 55, qPrintable(QString::number(peak - e.sample)));
+        QVERIFY(&e != &d[1].events.front() || std::abs(at(d[1], 4, peak, 0) - 0.4e-6) < 0.01e-6);
+        QVERIFY(at(d[1], 4, peak, 0) > 0.3e-6 && at(d[1], 4, peak, 0) < 0.41e-6);
+        QVERIFY(std::abs(at(d[1], 4, peak, 1) + 0.3 * at(d[1], 4, peak, 0)) < 1e-12);
+        QVERIFY(at(d[1], 4, peak, 2) < at(d[1], 4, peak, 0)); // the second pair lies off the activation
+    }
+
+    // ERG, 2 kHz: a-wave around 15 ms, b-wave around 40 ms after the flash.
+    for (const AcqEvent& e : d[3].events) {
+        std::uint64_t trough = e.sample;
+        std::uint64_t peak = e.sample;
+        for (std::uint64_t s = e.sample; s < e.sample + 200; ++s) {
+            trough = at(d[3], 2, s, 0) < at(d[3], 2, trough, 0) ? s : trough;
+            peak = at(d[3], 2, s, 0) > at(d[3], 2, peak, 0) ? s : peak;
+        }
+        QVERIFY2(trough - e.sample >= 26 && trough - e.sample <= 34, qPrintable(QString::number(trough - e.sample)));
+        QVERIFY2(peak - e.sample >= 72 && peak - e.sample <= 90, qPrintable(QString::number(peak - e.sample)));
+        QVERIFY(at(d[3], 2, trough, 0) < -50e-6);
+        QVERIFY(at(d[3], 2, peak, 0) > 100e-6);
+    }
+
+    // ECoG, 2 kHz: high gamma around 150 ms on the focal contacts only; second differences remove the ERP.
+    const auto highGamma = [&](std::size_t ch, std::int64_t from, std::int64_t to) {
+        double energy = 0.0;
+        for (const AcqEvent& e : d[2].events) {
+            for (std::int64_t s = static_cast<std::int64_t>(e.sample) + from; s < static_cast<std::int64_t>(e.sample) + to; ++s) {
+                const auto u = static_cast<std::uint64_t>(s);
+                const double second = at(d[2], 10, u + 1, ch) - 2.0 * at(d[2], 10, u, ch) + at(d[2], 10, u - 1, ch);
+                energy += second * second;
+            }
+        }
+        return energy;
+    };
+    QVERIFY(highGamma(3, 200, 400) > 100.0 * highGamma(3, -400, -200));
+    QVERIFY(highGamma(3, 200, 400) > 100.0 * highGamma(9, 200, 400));
+}
+
+//=============================================================================================================
+
+/**
+ * A live multi-rate session read at the real-time pace, with a stop and restart in the middle: every committed
+ * sample of every stream reaches its lossless reader exactly once, and the recording is bit-identical to the same
+ * session generated offline.
+ */
+void TestAcqDevice::testRealtimeRecordingIsComplete()
+{
+    const std::string params = "eeg=16&fnirs=4&ecog=32&erg=2&seed=21&interval=0.5";
+    auto device = AcqDevice::open("synthetic://?" + params + "&speed=20");
+    QVERIFY(device);
+    const std::size_t streamCount = device->streams().size();
+    QCOMPARE(streamCount, std::size_t(4));
+
+    struct Recorder
+    {
+        AcqReader reader;
+        Drained data;
+        std::uint64_t gaps = 0;
+        std::uint64_t overruns = 0;
+    };
+    std::vector<Recorder> recorders;
+    for (const AcqStream& stream : device->streams()) {
+        auto reader = stream.reader(AcqReader::ReadMode::Lossless);
+        QVERIFY(reader);
+        recorders.push_back({std::move(*reader), {}, 0, 0});
+    }
+    std::vector<std::thread> threads;
+    threads.reserve(recorders.size());
+    for (std::size_t i = 0; i < recorders.size(); ++i) {
+        threads.emplace_back([&recorder = recorders[i], i] {
+            std::uint64_t next = 0;
+            std::uint64_t pick = i + 1;
+            while (true) {
+                pick = pick * 6364136223846793005ULL + 1442695040888963407ULL;
+                auto view = recorder.reader.acquire(1, 5s, 1 + static_cast<std::size_t>((pick >> 33U) % 64));
+                if (!view) {
+                    break;
+                }
+                recorder.gaps += view->firstSample() != next || view->lost() != 0 ? 1U : 0U;
+                for (std::size_t p = 0; p < view->partCount(); ++p) {
+                    const AcqBlockPart& part = view->part(p);
+                    for (std::size_t s = 0; s < part.samples; ++s) {
+                        for (std::size_t c = 0; c < view->channelCount(); ++c) {
+                            float v = 0.0F;
+                            std::memcpy(&v, part.at(c, s), sizeof(v));
+                            recorder.data.samples.push_back(v);
+                        }
+                    }
+                }
+                for (std::size_t e = 0; e < view->events().size(); ++e) {
+                    recorder.data.events.push_back(view->events()[e]);
+                }
+                next = view->firstSample() + view->sampleCount();
+                recorder.overruns += recorder.reader.release(*view).ok() ? 0U : 1U;
+            }
+        });
+    }
+
+    QVERIFY(device->start().ok());
+    std::this_thread::sleep_for(300ms);
+    QVERIFY(device->stop().ok());
+    std::this_thread::sleep_for(50ms);
+    QVERIFY(device->start().ok());
+    std::this_thread::sleep_for(500ms);
+    const AcqDeviceStats stats = device->stats();
+    device->close();
+    for (auto& thread : threads) {
+        thread.join();
+    }
+
+    // Streams outlive the closed device through their readers.
+    const std::uint64_t eegSamples = recorders[0].reader.stream().stats().committed;
+    QVERIFY2(eegSamples >= 10000, qPrintable(QString::number(eegSamples))); // about 16 s of session at speed 20
+    const std::vector<Drained> offline =
+        recordAll("synthetic://?" + params + "&realtime=0&duration=" + std::to_string(static_cast<double>(eegSamples) / 1000.0));
+    QCOMPARE(offline.size(), streamCount);
+    for (std::size_t i = 0; i < streamCount; ++i) {
+        const Recorder& r = recorders[i];
+        const AcqReaderStats readerStats = r.reader.stats();
+        const AcqStream stream = r.reader.stream();
+        const std::uint64_t committed = stream.stats().committed;
+        QCOMPARE(r.gaps, std::uint64_t(0));
+        QCOMPARE(r.overruns, std::uint64_t(0));
+        QCOMPARE(readerStats.lost, std::uint64_t(0));
+        QCOMPARE(readerStats.eventsLost, std::uint64_t(0));
+        QCOMPARE(readerStats.delivered, committed);
+        QVERIFY(stats.streams[i].committed <= committed);
+        QCOMPARE(r.data.samples.size(), committed * stream.info()->channelCount());
+        QVERIFY2(r.data.samples == offline[i].samples, stream.info()->name.c_str());
+        QCOMPARE(r.data.events.size(), offline[i].events.size());
+        for (std::size_t e = 0; e < r.data.events.size(); ++e) {
+            QCOMPARE(r.data.events[e].sample, offline[i].events[e].sample);
+            QCOMPARE(r.data.events[e].code, offline[i].events[e].code);
+        }
+    }
+}
+
+//=============================================================================================================
+
 void TestAcqDevice::testSyntheticInvalidParameters_data()
 {
     QTest::addColumn<QString>("uri");
@@ -828,6 +1093,12 @@ void TestAcqDevice::testSyntheticInvalidParameters_data()
     QTest::newRow("target") << "synthetic://host" << "host";
     QTest::newRow("alpha above Nyquist") << "synthetic://?sfreq=100&alpha=50" << "alpha";
     QTest::newRow("interval below two pulses") << "synthetic://?interval=0.005" << "interval";
+    QTest::newRow("fNIRS below cardiac Nyquist") << "synthetic://?fnirs=2&fnirs_sfreq=2" << "fnirs_sfreq";
+    QTest::newRow("fractional fNIRS rate") << "synthetic://?fnirs=2&fnirs_sfreq=7.8125" << "fnirs_sfreq";
+    QTest::newRow("fractional EEG rate with ECoG") << "synthetic://?sfreq=512.5&ecog=4" << "sfreq";
+    QTest::newRow("ECoG below high gamma") << "synthetic://?ecog=4&ecog_sfreq=200" << "ecog_sfreq";
+    QTest::newRow("ERG below oscillatory potentials") << "synthetic://?erg=2&erg_sfreq=250" << "erg_sfreq";
+    QTest::newRow("negative ERG count") << "synthetic://?erg=-2" << "erg";
 }
 
 void TestAcqDevice::testSyntheticInvalidParameters()

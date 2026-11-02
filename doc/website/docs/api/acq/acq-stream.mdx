@@ -179,6 +179,27 @@ if (!reader || !device->start().ok()) {
 }
 ````
 
+### [ex_acq_scope](../../examples/acq/ex_acq_scope.mdx)
+
+Live multi-channel, multi-rate scope of a streaming source with a closed-loop stimulator on the same clock.
+
+````cpp title="src/examples/ex_acq_scope/main.cpp, line 647"
+    const AcqStream stream = device->stream(i);
+    const auto streamInfo = stream.info();
+    if (streamInfo->direction != AcqDirection::Input || isComplex(streamInfo->format) || streamInfo->sfreq <= 0.0) {
+        continue;
+    }
+    if (auto reader = stream.reader(AcqReader::ReadMode::Lossless)) {
+        others.push_back(std::move(*reader));
+        shared.traces.emplace_back(*streamInfo, 0);
+    }
+}
+if (!dac || !input || !device->start().ok()) {
+    std::fprintf(stderr, "Cannot start %s\n", uri.c_str());
+    return 1;
+}
+````
+
 ## Authors of this file
 
 - Christoph Dinh &lt;christoph.dinh@mne-cpp.org&gt;

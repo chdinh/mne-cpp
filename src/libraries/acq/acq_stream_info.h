@@ -113,6 +113,7 @@ enum class AcqChannelKind : std::uint8_t
     Opm, /**< Optically pumped magnetometer. */
     Ecg,
     Eog,
+    Erg, /**< Electroretinogram. */
     Emg,
     Seeg,
     Ecog,

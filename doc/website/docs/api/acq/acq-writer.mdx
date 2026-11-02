@@ -326,7 +326,7 @@ Creates a standalone ring with its writer (backends, DMA emulation, application-
 
 Closed-loop acquisition and stimulation with ACQLIB, and its sustained throughput per device class.
 
-````cpp title="src/examples/ex_acq_performance/main.cpp, line 386"
+````cpp title="src/examples/ex_acq_performance/main.cpp, line 392"
 /** The card: writes the input ring in 1 ms blocks at the real-time rate and plays the output ring. */
 void runCard(AcqWriter& input, AcqReader& dac, const SignalGenerator& gen, ClosedLoopState& st, double seconds)
 {
@@ -341,12 +341,14 @@ void runCard(AcqWriter& input, AcqReader& dac, const SignalGenerator& gen, Close
 
 ### [ex_acq_scope](../../examples/acq/ex_acq_scope.mdx)
 
-Live multi-channel scope of a streaming source with a closed-loop stimulator played back on the same clock.
+Live multi-channel, multi-rate scope of a streaming source with a closed-loop stimulator on the same clock.
 
-````cpp title="src/examples/ex_acq_scope/main.cpp, line 142"
-/** Acquisition thread: reads the source, schedules pulses, plays the output ring, fills the history. */
-void acquire(AcqReader& input, AcqWriter& stimulator, AcqReader& dac, std::size_t channels, double sfreq, Shared& shared)
+````cpp title="src/examples/ex_acq_scope/main.cpp, line 212"
+/** Acquisition thread: reads the source, schedules pulses, plays the output ring, fills the histories. */
+void acquire(AcqReader& input, std::vector<AcqReader>& others, AcqWriter& stimulator, AcqReader& dac, Shared& shared)
 {
+    const std::size_t channels = input.channelCount();
+    const double sfreq = shared.traces[0].sfreq;
     const auto delay = static_cast<std::uint64_t>(std::llround(kDelaySeconds * sfreq));
     const auto phaseSamples = static_cast<std::size_t>(std::llround(kPhaseSeconds * sfreq));
     const std::size_t pulseSamples = 2 * phaseSamples;

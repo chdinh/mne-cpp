@@ -70,7 +70,7 @@ std::uint64_t received = 0;
 
 Closed-loop acquisition and stimulation with ACQLIB, and its sustained throughput per device class.
 
-````cpp title="src/examples/ex_acq_performance/main.cpp, line 408"
+````cpp title="src/examples/ex_acq_performance/main.cpp, line 414"
             AcqEvent marker;
             marker.sample = s;
             marker.duration = kSpikeWidth;
@@ -86,9 +86,9 @@ input.commit(kBlock);
 
 ### [ex_acq_scope](../../examples/acq/ex_acq_scope.mdx)
 
-Live multi-channel scope of a streaming source with a closed-loop stimulator played back on the same clock.
+Live multi-channel, multi-rate scope of a streaming source with a closed-loop stimulator on the same clock.
 
-````cpp title="src/examples/ex_acq_scope/main.cpp, line 184"
+````cpp title="src/examples/ex_acq_scope/main.cpp, line 261"
 const AcqEvent& event = view->events()[e];
 if (event.code != kStandard && event.code != kTarget) {
     continue;

@@ -94,7 +94,7 @@
     {
       "name": "ex_acq_scope",
       "title": "Watch a multi-channel stream live with a closed-loop stimulator",
-      "brief": "Live multi-channel scope of a streaming source with a closed-loop stimulator played back on the same clock",
+      "brief": "Live multi-channel, multi-rate scope of a streaming source with a closed-loop stimulator on the same clock",
       "thumbnail": "",
       "url": "/docs/examples/acq/ex_acq_scope/",
       "library": "acq",

@@ -1658,7 +1658,7 @@ Index of 6668 public class members (functions, variables, typedefs, enums) acros
 - **events** `[var]` in [FiffEvents](/docs/api/fiff/fiff-events) — Event matrix (nEvents x 3): [sample, before, after].
 - **events** `[var]` in [MNEEventList](/docs/api/mne/mne-event-list) — The events.
 - **eventSample** `[var]` in [MNEEpochData](/docs/api/mne/mne-epoch-data) — The sample index of the triggering event.
-- **eventsLost** `[var]` in [AcqReaderStats](/docs/api/acq/acq-reader-stats) — Events overwritten before this reader could acquire them.
+- **eventsLost** `[var]` in [AcqReaderStats](/docs/api/acq/acq-reader-stats) — Events this reader did not receive: overwritten, attached to lost or overrun samples, or pushed after it had acquired their sample.
 - **eventsOutFiles** `[var]` in [ProcessingSettings](/docs/api/mne/processing-settings) — Save events to these files.
 - **eventsTsvPath** `[fn]` in [BIDSPath](/docs/api/bids/bids-path) — Returns the path for the events.tsv sidecar.
 - **eventsVisible** `[fn]` in [ChannelDataView](/docs/api/disp/channel-data-view)
@@ -4924,7 +4924,7 @@ Index of 6668 public class members (functions, variables, typedefs, enums) acros
 - **segmentPayload** `[fn]` in [AcqBlockView](/docs/api/acq/acq-block-view)
 - **segments** `[fn]` in [AcqBlockView](/docs/api/acq/acq-block-view)
 - **segments** `[var]` in [AcqStreamStats](/docs/api/acq/acq-stream-stats) — Segment headers pushed.
-- **segmentsLost** `[var]` in [AcqReaderStats](/docs/api/acq/acq-reader-stats) — Segment headers overwritten likewise.
+- **segmentsLost** `[var]` in [AcqReaderStats](/docs/api/acq/acq-reader-stats) — Segment headers not received, likewise.
 - **select** `[fn]` in [FiffAnnotations](/docs/api/fiff/fiff-annotations) — Selects annotations whose description starts with the filter string.
 - **select_dipole_fit_noise_cov** `[fn]` in [InvDipoleFitData](/docs/api/inv/inv-dipole-fit-data) — Select and weight the noise-covariance for the active channel set.
 - **selectAll** `[fn]` in [ApplyToView](/docs/api/disp/apply-to-view) — Selects all View Select checkboxes.

@@ -235,7 +235,7 @@ Copying convenience: waits for `out.cols` samples, decodes them into `out` and r
 
 Closed-loop acquisition and stimulation with ACQLIB, and its sustained throughput per device class.
 
-````cpp title="src/examples/ex_acq_performance/main.cpp, line 386"
+````cpp title="src/examples/ex_acq_performance/main.cpp, line 392"
 /** The card: writes the input ring in 1 ms blocks at the real-time rate and plays the output ring. */
 void runCard(AcqWriter& input, AcqReader& dac, const SignalGenerator& gen, ClosedLoopState& st, double seconds)
 {
@@ -250,17 +250,23 @@ void runCard(AcqWriter& input, AcqReader& dac, const SignalGenerator& gen, Close
 
 ### [ex_acq_scope](../../examples/acq/ex_acq_scope.mdx)
 
-Live multi-channel scope of a streaming source with a closed-loop stimulator played back on the same clock.
+Live multi-channel, multi-rate scope of a streaming source with a closed-loop stimulator on the same clock.
 
-````cpp title="src/examples/ex_acq_scope/main.cpp, line 142"
-/** Acquisition thread: reads the source, schedules pulses, plays the output ring, fills the history. */
-void acquire(AcqReader& input, AcqWriter& stimulator, AcqReader& dac, std::size_t channels, double sfreq, Shared& shared)
+````cpp title="src/examples/ex_acq_scope/main.cpp, line 189"
+/** Reads everything @p reader has now into trace @p index; used for the device's further streams. */
+void drainInto(AcqReader& reader, std::size_t index, std::vector<float>& block, Shared& shared)
 {
-    const auto delay = static_cast<std::uint64_t>(std::llround(kDelaySeconds * sfreq));
-    const auto phaseSamples = static_cast<std::size_t>(std::llround(kPhaseSeconds * sfreq));
-    const std::size_t pulseSamples = 2 * phaseSamples;
-    const auto maxView = static_cast<std::size_t>(std::llround(kMaxViewSeconds * sfreq));
-    const double lsb = kFullScale / 32767.0;
+    const std::size_t channels = reader.channelCount();
+    const std::size_t maxView = block.size() / channels;
+    while (true) {
+        auto view = reader.acquire(0, 0ns, maxView);
+        if (!view) {
+            return;
+        }
+        const std::size_t n = view->sampleCount();
+        const std::uint64_t first = view->firstSample();
+        shared.lost.fetch_add(view->lost(), std::memory_order_relaxed);
+        const bool decoded = n > 0 && decode(*view, AcqMatrixRef<float>::columnMajor(block.data(), channels, n)).ok();
 ````
 
 ### [ex_acq_oddball](../../examples/acq/ex_acq_oddball.mdx)

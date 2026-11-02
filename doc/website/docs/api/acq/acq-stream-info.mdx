@@ -63,7 +63,7 @@ for (std::size_t c = 0; c < kChannels; ++c) {
 
 Closed-loop acquisition and stimulation with ACQLIB, and its sustained throughput per device class.
 
-````cpp title="src/examples/ex_acq_performance/main.cpp, line 639"
+````cpp title="src/examples/ex_acq_performance/main.cpp, line 645"
 AcqStreamInfo inInfo;
 inInfo.name = "neural";
 inInfo.format = AcqSampleFormat::Int16;
@@ -81,23 +81,22 @@ outInfo.name = "stim";
 
 ### [ex_acq_scope](../../examples/acq/ex_acq_scope.mdx)
 
-Live multi-channel scope of a streaming source with a closed-loop stimulator played back on the same clock.
+Live multi-channel, multi-rate scope of a streaming source with a closed-loop stimulator on the same clock.
 
-````cpp title="src/examples/ex_acq_scope/main.cpp, line 484"
-// Stimulator output on the input's clock; a small ring makes pulses cross its end often.
-AcqStreamInfo outInfo;
-outInfo.name = "stim";
-outInfo.direction = AcqDirection::Output;
-outInfo.format = AcqSampleFormat::Int16;
-outInfo.sfreq = sfreq;
-outInfo.channels.resize(1);
-outInfo.channels[0].name = "STIM OUT";
-outInfo.channels[0].kind = AcqChannelKind::StimCurrent;
-outInfo.channels[0].unit = AcqUnit::Ampere;
-outInfo.channels[0].scale = kFullScale / 32767.0;
-outInfo.channels[0].rangeMin = -kFullScale;
-outInfo.channels[0].rangeMax = kFullScale;
-outInfo.underrunFill = AcqUnderrunFill::Zero;
+````cpp title="src/examples/ex_acq_scope/main.cpp, line 127"
+Trace(const AcqStreamInfo& info, std::size_t extraRows)
+: title(QString("%1  %2 Hz").arg(QString::fromStdString(info.name)).arg(info.sfreq).toStdString())
+, sfreq(info.sfreq)
+, window(static_cast<std::uint64_t>(std::llround(kWindowSeconds * info.sfreq)))
+, rows(info.channelCount() + extraRows)
+, length(std::bit_ceil(static_cast<std::size_t>(window) + 1))
+, history(length * rows, 0.0F)
+{
+    for (const AcqChannelInfo& channel : info.channels) {
+        names.push_back(channel.name);
+        units.push_back(displayUnit(channel.unit));
+    }
+}
 ````
 
 ## Authors of this file

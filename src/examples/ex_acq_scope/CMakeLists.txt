@@ -28,5 +28,5 @@ if(NOT BUILD_SHARED_LIBS)
 endif()
 
 if(BUILD_TESTS)
-    mne_add_test(${PROJECT_NAME} LABELS example integration TIMEOUT 120 COMMAND ${PROJECT_NAME} "synthetic://?eeg=32&seed=3&interval=0.7&speed=5" --seconds 8 ENVIRONMENT QT_QPA_PLATFORM=offscreen)
+    mne_add_test(${PROJECT_NAME} LABELS example integration TIMEOUT 120 COMMAND ${PROJECT_NAME} "synthetic://?eeg=8&fnirs=2&ecog=8&erg=2&seed=3&interval=0.7&speed=5" --seconds 8 ENVIRONMENT QT_QPA_PLATFORM=offscreen)
 endif()

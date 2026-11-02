@@ -45,17 +45,14 @@ for (std::size_t c = 0; c < kChannels; ++c) {
 
 ### [ex_acq_scope](../../examples/acq/ex_acq_scope.mdx)
 
-Live multi-channel scope of a streaming source with a closed-loop stimulator played back on the same clock.
+Live multi-channel, multi-rate scope of a streaming source with a closed-loop stimulator on the same clock.
 
-````cpp title="src/examples/ex_acq_scope/main.cpp, line 521"
-std::vector<std::string> names;
-std::vector<DisplayUnit> units;
-for (const AcqChannelInfo& channel : info->channels) {
-    names.push_back(channel.name);
-    units.push_back(displayUnit(channel.unit));
+````cpp title="src/examples/ex_acq_scope/main.cpp, line 135"
+    for (const AcqChannelInfo& channel : info.channels) {
+        names.push_back(channel.name);
+        units.push_back(displayUnit(channel.unit));
+    }
 }
-names.push_back(outInfo.channels[0].name);
-units.push_back(displayUnit(AcqUnit::Ampere));
 ````
 
 ## Authors of this file
