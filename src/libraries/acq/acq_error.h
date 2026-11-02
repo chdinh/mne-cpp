@@ -181,10 +181,18 @@ public:
      *
      * @param[in] value   The value.
      */
-    AcqExpected(T value) noexcept(std::is_nothrow_move_constructible_v<T>)
+    AcqExpected(T&& value) noexcept(std::is_nothrow_move_constructible_v<T>)
     : m_hasValue(true)
     {
         ::new (static_cast<void*>(&m_value)) T(std::move(value));
+    }
+
+    /** @copydoc AcqExpected(T&&) */
+    AcqExpected(const T& value)
+        requires std::is_copy_constructible_v<T>
+    : m_hasValue(true)
+    {
+        ::new (static_cast<void*>(&m_value)) T(value);
     }
 
     /**
@@ -281,6 +289,12 @@ public:
     const T& operator*() const& noexcept
     {
         return value();
+    }
+
+    /** @return The value, moved out of a temporary result, e.g. *stream.reader(mode). @pre hasValue() */
+    T&& operator*() && noexcept
+    {
+        return std::move(*this).value();
     }
     T* operator->() noexcept
     {

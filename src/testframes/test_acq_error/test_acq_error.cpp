@@ -137,6 +137,18 @@ void TestAcqError::testExpectedMoveOnly()
     QCOMPARE(**moved, 7);
     std::unique_ptr<int> out = std::move(moved).value();
     QCOMPARE(*out, 7);
+
+    // A move-only value is taken straight out of a temporary result, as in *stream.reader(mode).
+    auto make = [] {
+        return AcqExpected<std::unique_ptr<int>>(std::make_unique<int>(9));
+    };
+    std::unique_ptr<int> direct = *make();
+    QCOMPARE(*direct, 9);
+
+    // A named value is copied in once, not twice.
+    const std::string name = "abc";
+    AcqExpected<std::string> copied(name);
+    QCOMPARE(*copied, name);
 }
 
 //=============================================================================================================
