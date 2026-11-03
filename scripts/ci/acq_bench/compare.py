@@ -13,8 +13,8 @@
 
 Absolute numbers on shared CI machines drift by tens of percent between runs, so the two builds are run
 interleaved on the same machine and each metric keeps its best value. Throughput, per-call cost and converter
-rates are gated: head may be at most ``--tolerance`` worse than base. Wake-up latencies depend on the scheduler
-of the machine and are reported only.
+rates are gated: head may be at most ``--tolerance`` worse than base. Wake-up latencies and CPU time depend on the
+scheduler of the machine and are reported only.
 
     python3 scripts/ci/acq_bench/compare.py --base build-base/mne_acq_bench --head build-head/mne_acq_bench
 """
@@ -28,7 +28,7 @@ import sys
 import tempfile
 from pathlib import Path
 
-REPORT_ONLY_PREFIXES = ("wake_",)
+REPORT_ONLY_PREFIXES = ("wake_", "cpu_")
 
 
 def run_bench(binary: str, quick: bool) -> list[dict]:

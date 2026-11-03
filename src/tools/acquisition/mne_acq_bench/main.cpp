@@ -30,10 +30,13 @@
 
 #include <algorithm>
 #include <array>
+#include <atomic>
+#include <bit>
 #include <chrono>
 #include <complex>
 #include <cstdint>
 #include <cstring>
+#include <ctime>
 #include <string>
 #include <thread>
 #include <vector>
@@ -59,12 +62,14 @@ struct Metric
     double value = 0.0;
     const char* unit = "";
     bool higherIsBetter = false;
+    double target = 0.0; /**< Performance target, 0 if none; a minimum if higherIsBetter, else a maximum. */
 };
 
 struct Settings
 {
     bool quick = false;
     int repeats = 3;
+    double pacedSeconds = 0.0; /**< Duration of the paced run; 0 = 2 s with --quick, else 10 s. */
 };
 
 double secondsSince(Clock::time_point start)
@@ -154,13 +159,17 @@ double opCost(int readers, int ops)
 }
 
 /**
- * Commit-to-wake latency of a reader in @p mode: the producer commits one sample carrying its commit time every
- * 50 us; the reader subtracts it from the time it returned from acquire(). @return p50, p99, p99.9 in ns.
+ * Commit-to-consume latency: the producer commits one sample carrying its commit time every 50 us; the consumer
+ * subtracts it from the time it returned from acquire(). Input: a reader in @p mode; output: the device's gating
+ * reader. @return p50, p99, p99.9 in ns.
  */
-std::array<double, 3> wakeLatency(AcqReader::ReadMode mode, int commits)
+std::array<double, 3> wakeLatency(AcqReader::ReadMode mode, int commits, AcqDirection direction = AcqDirection::Input)
 {
-    auto writer = AcqWriter::create(streamInfo(2, AcqSampleFormat::Int32), ringOptions(65536));
-    auto reader = writer->stream().reader(mode);
+    auto writer = AcqWriter::create(streamInfo(2, AcqSampleFormat::Int32, AcqLayout::Interleaved, direction),
+                                    ringOptions(65536));
+    AcqReaderOptions options;
+    options.gating = direction == AcqDirection::Output;
+    auto reader = writer->stream().reader(mode, options);
     std::vector<std::int64_t> latencies;
     latencies.reserve(static_cast<std::size_t>(commits));
     std::thread consumer([&] {
@@ -183,7 +192,10 @@ std::array<double, 3> wakeLatency(AcqReader::ReadMode mode, int commits)
         const auto due = Clock::now() + 50us;
         while (Clock::now() < due) {
         }
-        auto view = writer->beginWrite(1);
+        auto view = writer->beginWrite(1, 5s);
+        if (!view) {
+            break;
+        }
         const std::int64_t stamp = nowNs();
         const auto hi = static_cast<std::int32_t>(stamp >> 32);
         const auto lo = static_cast<std::int32_t>(static_cast<std::uint32_t>(stamp & 0xFFFFFFFF));
@@ -191,6 +203,7 @@ std::array<double, 3> wakeLatency(AcqReader::ReadMode mode, int commits)
         std::memcpy(view->part(0).at(1, 0), &lo, sizeof(lo));
         writer->commit(1);
     }
+    writer->finish();
     consumer.join();
     std::sort(latencies.begin(), latencies.end());
     const auto at = [&](double q) {
@@ -199,21 +212,72 @@ std::array<double, 3> wakeLatency(AcqReader::ReadMode mode, int commits)
     return {at(0.5), at(0.99), at(0.999)};
 }
 
-/**
- * Sustained throughput of an unpaced producer into a reader that reads every byte; the reader gates the
- * producer, so nothing is lost and the number is the end-to-end rate. @return GB/s, or -1 if a sample was lost.
- */
-double ringThroughput(std::size_t channels, std::uint64_t bytes)
+/** How a stream run fills the ring. */
+enum class Feed : std::uint8_t
 {
-    const std::size_t frame = channels * sizeof(std::int16_t);
-    const std::size_t block = std::max<std::size_t>(1, 65536 / frame);
-    auto writer = AcqWriter::create(streamInfo(channels, AcqSampleFormat::Int16),
-                                    ringOptions(std::max<std::size_t>(65536, 16 * block)));
-    AcqReaderOptions gating;
-    gating.gating = true;
-    auto reader = writer->stream().reader(AcqReader::ReadMode::Lossless, gating);
-    const std::uint64_t total = std::max<std::uint64_t>(bytes / frame / block, 1) * block;
-    // Every byte of sample s is fillByte(s), so the reader can check what it reads without a reference copy.
+    Copy,  /**< The producer writes through beginWrite()/commit(), like a USB or network backend. */
+    Dma,   /**< A card thread writes granted space of an adopted buffer; the driver commits what it reports. */
+    Output /**< The application writes an output stream; the device's gating reader consumes it. */
+};
+
+struct StreamCase
+{
+    std::size_t channels = 1;
+    AcqSampleFormat format = AcqSampleFormat::Int16;
+    Feed feed = Feed::Copy;
+    bool display = false;     /**< Also attach a Latest reader polling the newest second, as a display does. */
+    double rate = 0.0;        /**< Samples per second and channel; 0 = as fast as the consumer takes them. */
+    std::uint64_t bytes = 0;  /**< Data to move. */
+    AcqStreamOptions options; /**< Ring knobs; capacitySamples 0 = max(65536, 16 blocks). */
+};
+
+/** One page of an adopted DMA buffer; a vector of them is page-aligned and contiguous. */
+struct alignas(4096) Page
+{
+    std::array<std::byte, 4096> bytes;
+};
+
+struct StreamResult
+{
+    double gigabytesPerSecond = -1.0; /**< -1 if a sample was lost, corrupted or not delivered. */
+    double cpuSecondsPerGigabyte = 0.0;
+};
+
+/**
+ * Moves @p c.bytes through one ring into a consumer that checks every byte. Unpaced runs gate the producer on the
+ * consumer, so nothing may be lost and the number is the end-to-end rate; paced runs do not, as a live device
+ * cannot wait, so the rate shows whether the consumer keeps up.
+ */
+StreamResult streamThroughput(const StreamCase& c)
+{
+    const std::size_t frame = c.channels * bytesPerSample(c.format);
+    const std::size_t block =
+        c.rate > 0.0 ? std::bit_floor(std::max<std::size_t>(1, static_cast<std::size_t>(c.rate / 1000.0)))
+                     : std::bit_floor(std::max<std::size_t>(1, 65536 / frame));
+    AcqStreamOptions options = c.options;
+    if (options.capacitySamples == 0) {
+        options.capacitySamples = std::max<std::size_t>(65536, 16 * block);
+    }
+    const std::size_t capacity = std::bit_ceil(options.capacitySamples);
+    std::vector<Page> dmaPages;
+    std::byte* dmaBuffer = nullptr;
+    if (c.feed == Feed::Dma) {
+        dmaPages.resize((capacity * frame + sizeof(Page) - 1) / sizeof(Page));
+        dmaBuffer = dmaPages.front().bytes.data();
+        options.external.data = dmaBuffer;
+        options.external.bytes = capacity * frame;
+    }
+    const AcqDirection direction = c.feed == Feed::Output ? AcqDirection::Output : AcqDirection::Input;
+    auto writer = AcqWriter::create(streamInfo(c.channels, c.format, AcqLayout::Interleaved, direction), options);
+    if (!writer) {
+        return {};
+    }
+    AcqReaderOptions consumerOptions;
+    consumerOptions.gating = c.rate <= 0.0 || c.feed == Feed::Output;
+    auto reader = writer->stream().reader(AcqReader::ReadMode::Lossless, consumerOptions);
+    auto display = writer->stream().reader(AcqReader::ReadMode::Latest);
+    const std::uint64_t total = std::max<std::uint64_t>(c.bytes / frame / block, 1) * block;
+    // Every byte of sample s is fillByte(s), so the consumer can check what it reads without a reference copy.
     const auto fillByte = [block](std::uint64_t s) {
         return static_cast<std::uint8_t>((s / block) % 251 + 1);
     };
@@ -243,26 +307,91 @@ double ringThroughput(std::size_t channels, std::uint64_t bytes)
             static_cast<void>(reader->release(*view));
         }
     });
+    std::atomic<bool> producing{true};
+    std::thread viewer;
+    if (c.display) {
+        viewer = std::thread([&] {
+            const auto window = static_cast<std::size_t>(c.rate > 0.0 ? c.rate : 1000.0);
+            while (producing.load(std::memory_order_acquire)) {
+                if (auto view = display->acquire(1, 20ms, window)) {
+                    static_cast<void>(display->release(*view));
+                }
+                std::this_thread::sleep_for(16ms);
+            }
+        });
+    }
+
     std::uint64_t expectedSum = 0;
     const auto start = Clock::now();
-    for (std::uint64_t written = 0; written < total; written += block) {
-        auto view = writer->beginWrite(block, 10s);
-        if (!view) {
-            break;
+    const std::clock_t cpuStart = std::clock();
+    if (c.feed == Feed::Dma) {
+        constexpr std::uint64_t kInFlight = 8; // blocks the card may have granted at once, like its notify queue
+        std::atomic<std::uint64_t> granted{0};
+        std::atomic<std::uint64_t> written{0};
+        std::thread card([&] {
+            std::uint64_t w = 0;
+            while (w < total) {
+                const std::uint64_t g = granted.load(std::memory_order_acquire);
+                if (g == w) {
+                    std::this_thread::yield();
+                    continue;
+                }
+                for (; w < g; w += block) {
+                    std::memset(dmaBuffer + (w & (capacity - 1)) * frame, fillByte(w), block * frame);
+                }
+                written.store(w, std::memory_order_release);
+            }
+        });
+        std::uint64_t g = 0;
+        std::uint64_t committed = 0;
+        while (committed < total) {
+            while (g < total && g - committed < kInFlight * block && writer->grant(block).ok()) {
+                g += block;
+                granted.store(g, std::memory_order_release);
+            }
+            const std::uint64_t done = written.load(std::memory_order_acquire);
+            if (done > committed) {
+                writer->commit(static_cast<std::size_t>(done - committed));
+                committed = done;
+            } else {
+                std::this_thread::yield();
+            }
         }
-        for (std::size_t p = 0; p < view->partCount(); ++p) {
-            std::memset(view->part(p).data, fillByte(written), view->part(p).samples * frame);
+        card.join();
+        for (std::uint64_t s = 0; s < total; s += block) {
+            expectedSum += static_cast<std::uint64_t>(fillByte(s)) * block * frame;
         }
-        writer->commit(block);
-        expectedSum += static_cast<std::uint64_t>(fillByte(written)) * block * frame;
+    } else {
+        for (std::uint64_t written = 0; written < total; written += block) {
+            if (c.rate > 0.0) {
+                std::this_thread::sleep_until(start + std::chrono::duration_cast<Clock::duration>(std::chrono::duration<double>(static_cast<double>(written) / c.rate)));
+            }
+            auto view = writer->beginWrite(block, 10s);
+            if (!view) {
+                break;
+            }
+            for (std::size_t p = 0; p < view->partCount(); ++p) {
+                std::memset(view->part(p).data, fillByte(written), view->part(p).samples * frame);
+            }
+            writer->commit(block);
+            expectedSum += static_cast<std::uint64_t>(fillByte(written)) * block * frame;
+        }
     }
     writer->finish();
     consumer.join();
     const double s = secondsSince(start);
-    if (received != total || reader->stats().lost != 0 || wrong != 0 || byteSum != expectedSum) {
-        return -1.0;
+    const double cpu = static_cast<double>(std::clock() - cpuStart) / CLOCKS_PER_SEC;
+    producing.store(false, std::memory_order_release);
+    if (viewer.joinable()) {
+        viewer.join();
     }
-    return static_cast<double>(total * frame) / s / 1e9;
+    const AcqStreamStats producer = writer->stream().stats();
+    if (received != total || reader->stats().lost != 0 || wrong != 0 || byteSum != expectedSum ||
+        producer.underrun != 0) {
+        return {};
+    }
+    const double gigabytes = static_cast<double>(total * frame) / 1e9;
+    return {gigabytes / s, cpu / gigabytes};
 }
 
 /** decode() of a 64 x 4096 interleaved block into a column-major T matrix. @return G output elements/s. */
@@ -325,17 +454,69 @@ std::vector<Metric> run(const Settings& s)
         }
         const std::string prefix = std::string("wake_") + m.name + "_";
         metrics.push_back({prefix + "p50", bestLatency[0], "ns", false});
-        metrics.push_back({prefix + "p99", bestLatency[1], "ns", false});
+        metrics.push_back({prefix + "p99", bestLatency[1], "ns", false, m.mode == AcqReader::ReadMode::LowLatency ? 50000.0 : 0.0});
         metrics.push_back({prefix + "p999", bestLatency[2], "ns", false});
     }
-    const std::uint64_t bytes = s.quick ? (std::uint64_t(256) << 20) : (std::uint64_t(4) << 30);
-    for (const std::size_t channels : {1U, 64U, 1024U, 4096U}) {
-        // Best of several shorter streams: a stream is two threads, and one slow placement must not set the value.
-        Settings streams = s;
-        streams.repeats = 8 * s.repeats;
-        metrics.push_back({"ring_int16_" + std::to_string(channels) + "_ch",
-                           best(streams, true, [&] { return ringThroughput(channels, bytes / 8); }), "GB/s", true});
+    std::array<double, 3> output{1e18, 1e18, 1e18};
+    for (int r = 0; r < s.repeats; ++r) {
+        const auto l = wakeLatency(AcqReader::ReadMode::LowLatency, commits, AcqDirection::Output);
+        for (std::size_t i = 0; i < 3; ++i) {
+            output[i] = std::min(output[i], l[i]);
+        }
     }
+    metrics.push_back({"wake_output_p50", output[0], "ns", false});
+    metrics.push_back({"wake_output_p99", output[1], "ns", false});
+    metrics.push_back({"wake_output_p999", output[2], "ns", false});
+    const std::uint64_t bytes = s.quick ? (std::uint64_t(256) << 20) : (std::uint64_t(4) << 30);
+    // Best of several shorter streams: a stream is two threads, and one slow placement must not set the value.
+    Settings streams = s;
+    streams.repeats = 8 * s.repeats;
+    const auto gbps = [&](const StreamCase& c) {
+        return best(streams, true, [&] { return streamThroughput(c).gigabytesPerSecond; });
+    };
+    for (const std::size_t channels : {1U, 64U, 1024U, 4096U}) {
+        metrics.push_back({"ring_int16_" + std::to_string(channels) + "_ch",
+                           gbps({channels, AcqSampleFormat::Int16, Feed::Copy, false, 0.0, bytes / 8, {}}), "GB/s", true});
+    }
+
+    // Ring knobs on the 1,024-channel stream.
+    AcqStreamOptions knob;
+    knob.lockMemory = true;
+    metrics.push_back({"ring_int16_1024_ch_locked", gbps({1024, AcqSampleFormat::Int16, Feed::Copy, false, 0.0, bytes / 8, knob}),
+                       "GB/s", true});
+    knob = {};
+    knob.mirror = false;
+    metrics.push_back({"ring_int16_1024_ch_unmirrored",
+                       gbps({1024, AcqSampleFormat::Int16, Feed::Copy, false, 0.0, bytes / 8, knob}), "GB/s", true});
+    knob.hugePages = true;
+    metrics.push_back({"ring_int16_1024_ch_hugepages",
+                       gbps({1024, AcqSampleFormat::Int16, Feed::Copy, false, 0.0, bytes / 8, knob}), "GB/s", true});
+
+    // A digitizer card writing by DMA (4 channels, any rate up to its limit) and an output stream to a device.
+    metrics.push_back({"dma_int16_4_ch", gbps({4, AcqSampleFormat::Int16, Feed::Dma, false, 0.0, bytes / 8, {}}), "GB/s", true});
+    metrics.push_back({"output_float32_64_ch", gbps({64, AcqSampleFormat::Float32, Feed::Output, false, 0.0, bytes / 8, {}}),
+                       "GB/s", true});
+
+    // 1,000 float32 channels: sustained with a recorder plus a display, and paced at 20 kHz without loss.
+    AcqStreamOptions wide;
+    wide.capacitySamples = 16384;
+    StreamCase sustained{1000, AcqSampleFormat::Float32, Feed::Copy, true, 0.0, bytes / 8, wide};
+    StreamResult bestSustained = streamThroughput(sustained);
+    for (int r = 1; r < streams.repeats && bestSustained.gigabytesPerSecond >= 0.0; ++r) {
+        const StreamResult run = streamThroughput(sustained);
+        if (run.gigabytesPerSecond < 0.0 || run.gigabytesPerSecond > bestSustained.gigabytesPerSecond) {
+            bestSustained = run; // a loss is never hidden by a later good run
+        }
+    }
+    metrics.push_back({"sustained_float32_1000_ch_2_readers", bestSustained.gigabytesPerSecond, "GB/s", true, 2.0});
+    metrics.push_back({"cpu_sustained_float32_1000_ch", bestSustained.cpuSecondsPerGigabyte, "s/GB", false});
+    const double pacedSeconds = s.pacedSeconds > 0.0 ? s.pacedSeconds : (s.quick ? 2.0 : 10.0);
+    const StreamCase paced{1000, AcqSampleFormat::Float32, Feed::Copy, true, 20000.0,
+                           static_cast<std::uint64_t>(pacedSeconds * 20000.0 * 1000.0 * 4.0), wide};
+    const double pacedRate = streamThroughput(paced).gigabytesPerSecond;
+    metrics.push_back({"paced_float32_1000_ch_20_khz", pacedRate < 0.0 ? -1.0 : pacedRate * 1e9 / 4.0 / 1000.0 / 1e3,
+                       "kS/s per ch", true, 20.0 * 0.99});
+
     const int trials = s.quick ? 50 : 200;
     for (const AcqSampleFormat f : {AcqSampleFormat::Int16, AcqSampleFormat::Int24Packed, AcqSampleFormat::Int32,
                                     AcqSampleFormat::Float32}) {
@@ -359,13 +540,15 @@ bool writeJson(const QString& path, const std::vector<Metric>& metrics, const Se
         list.append(QJsonObject{{"name", QString::fromStdString(m.name)},
                                 {"value", m.value},
                                 {"unit", QString::fromLatin1(m.unit)},
-                                {"better", m.higherIsBetter ? "higher" : "lower"}});
+                                {"better", m.higherIsBetter ? "higher" : "lower"},
+                                {"target", m.target}});
     }
     const QJsonObject report{{"tool", "mne_acq_bench"},
                              {"version", MNE_CPP_VERSION},
                              {"build", buildHash()},
                              {"quick", s.quick},
                              {"repeats", s.repeats},
+                             {"paced_seconds", s.pacedSeconds},
                              {"threads", static_cast<int>(std::thread::hardware_concurrency())},
                              {"metrics", list}};
     QFile file(path);
@@ -387,14 +570,19 @@ int main(int argc, char* argv[])
     QCommandLineParser parser;
     parser.setApplicationDescription(
         "Performance suite of the MNE-CPP acquisition library: per-call cost of the stream protocol, commit-to-wake "
-        "latency (spinning and blocking readers), sustained ring throughput over a channel sweep, and the "
-        "decode/encode converters. Every value is the best of --repeats runs.");
+        "latency (spinning, blocking and output readers), verified throughput over a channel sweep, with ring knobs, "
+        "a DMA card, an output stream and 1,000 channels with a recorder and a display, a paced 1,000-channel 20 kHz "
+        "run that must not lose a sample, and the decode/encode converters. Every value is the best of --repeats runs.");
     parser.addHelpOption();
     parser.addVersionOption();
     const QCommandLineOption quickOpt("quick", "Short runs (about 10 s), for CI regression checks.");
     const QCommandLineOption repeatsOpt("repeats", "Runs per measurement (default 3).", "n", "3");
     const QCommandLineOption jsonOpt("json", "Also write the results as JSON.", "file");
-    parser.addOptions({quickOpt, repeatsOpt, jsonOpt});
+    const QCommandLineOption pacedOpt("paced-seconds",
+                                      "Duration of the paced 1,000-channel 20 kHz run, e.g. 600 for a soak test "
+                                      "(default 10, or 2 with --quick).",
+                                      "s");
+    parser.addOptions({quickOpt, repeatsOpt, jsonOpt, pacedOpt});
     parser.process(app);
 
     Settings settings;
@@ -405,6 +593,13 @@ int main(int argc, char* argv[])
         qCritical("--repeats needs a positive integer, got '%s'", qPrintable(parser.value(repeatsOpt)));
         return 1;
     }
+    if (parser.isSet(pacedOpt)) {
+        settings.pacedSeconds = parser.value(pacedOpt).toDouble(&ok);
+        if (!ok || settings.pacedSeconds <= 0.0) {
+            qCritical("--paced-seconds needs a positive number, got '%s'", qPrintable(parser.value(pacedOpt)));
+            return 1;
+        }
+    }
 
     QTextStream out(stdout);
     out << "mne_acq_bench " << MNE_CPP_VERSION << " (ACQLIB " << buildHash() << "), "
@@ -413,8 +608,13 @@ int main(int argc, char* argv[])
     const std::vector<Metric> metrics = run(settings);
     bool lost = false;
     for (const Metric& m : metrics) {
-        out << "  " << QString::fromStdString(m.name).leftJustified(34) << QString::number(m.value, 'g', 4).rightJustified(12)
-            << ' ' << m.unit << '\n';
+        out << "  " << QString::fromStdString(m.name).leftJustified(38) << QString::number(m.value, 'g', 4).rightJustified(12)
+            << ' ' << QString::fromLatin1(m.unit).leftJustified(12);
+        if (m.target > 0.0) {
+            const bool met = m.value >= 0.0 && (m.higherIsBetter ? m.value >= m.target : m.value <= m.target);
+            out << (m.higherIsBetter ? " target >= " : " target <= ") << m.target << (met ? "  met" : "  MISSED");
+        }
+        out << '\n';
         lost |= m.value < 0.0;
     }
     out.flush();
@@ -423,7 +623,7 @@ int main(int argc, char* argv[])
         return 1;
     }
     if (lost) {
-        qCritical("A ring throughput run lost or corrupted samples");
+        qCritical("A stream run lost, corrupted or did not deliver samples");
         return 1;
     }
     return 0;
