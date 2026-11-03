@@ -431,9 +431,9 @@ bool BIDSPath::isValidEntityValue(const QString& sValue)
 {
     if (sValue.isEmpty())
         return true;
-    // Entity values must not contain -, _, or /
-    static const QRegularExpression forbidden(QStringLiteral("[\\-_/]"));
-    return !sValue.contains(forbidden);
+    // BIDS labels are alphanumeric ASCII
+    static const QRegularExpression label(QStringLiteral("^[A-Za-z0-9]+$"));
+    return label.match(sValue).hasMatch();
 }
 
 //=============================================================================================================

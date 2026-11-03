@@ -352,7 +352,7 @@ public:
     //=========================================================================================================
 
     /**
-     * Validates entity values (no forbidden characters: -, _, /).
+     * Validates entity values: BIDS labels are alphanumeric ASCII.
      * @param[in] sValue Entity value to validate.
      * @return true if the value is valid.
      */

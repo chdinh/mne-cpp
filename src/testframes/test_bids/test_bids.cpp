@@ -1155,6 +1155,11 @@ void TestBids::testPathValidation()
     QVERIFY(!BIDSPath::isValidEntityValue("abc-def"));
     QVERIFY(!BIDSPath::isValidEntityValue("abc_def"));
     QVERIFY(!BIDSPath::isValidEntityValue("abc/def"));
+    // BIDS labels are alphanumeric: anything else breaks the file name or the validator.
+    QVERIFY(!BIDSPath::isValidEntityValue("a b"));
+    QVERIFY(!BIDSPath::isValidEntityValue("a.b"));
+    QVERIFY(!BIDSPath::isValidEntityValue("a+b"));
+    QVERIFY(!BIDSPath::isValidEntityValue(QStringLiteral("\u00e4")));
 }
 
 //=============================================================================================================
