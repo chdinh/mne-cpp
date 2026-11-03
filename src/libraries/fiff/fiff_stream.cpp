@@ -340,7 +340,6 @@ FiffDirNode::SPtr FiffStream::make_subtree(QList<FiffDirEntry::SPtr>& dentry)
 
     node->dir_tree = dentry;
     node->nent_tree = 1;
-    node->parent = FiffDirNode::SPtr();
     node->type = FIFFB_ROOT;
 
     if (dentry[current]->kind == FIFF_BLOCK_START) {

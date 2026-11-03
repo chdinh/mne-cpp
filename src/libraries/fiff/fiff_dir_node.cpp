@@ -45,7 +45,6 @@ using namespace FIFFLIB;
 FiffDirNode::FiffDirNode()
 : type(-1)
 , nent_tree(-1)
-, parent(nullptr)
 {
 }
 

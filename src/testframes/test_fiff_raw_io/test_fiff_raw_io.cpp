@@ -122,6 +122,15 @@ private slots:
         QVERIFY(rawBlocks.size() > 0 || true); // might be FIFFB_PROCESSED_DATA
 
         stream->close();
+
+        // The tree is released with its last owner, although children point back to their parents.
+        const QWeakPointer<FiffDirNode> root = stream->dirtree();
+        QVERIFY(!meas.first()->parent.isNull());
+        meas.clear();
+        measInfo.clear();
+        rawBlocks.clear();
+        stream.reset();
+        QVERIFY(root.isNull());
     }
 
     void fiffStream_readTags()

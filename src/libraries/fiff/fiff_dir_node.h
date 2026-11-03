@@ -228,7 +228,7 @@ public:
     QList<FiffDirEntry::SPtr> dir_tree; /**< Directory of tags within this node subtrees
                                                  as well as FIFF_BLOCK_START and FIFF_BLOCK_END */
     fiff_int_t nent_tree;               /**< Number of entries in the directory tree node. */
-    FiffDirNode::SPtr parent;           /**< Parent node. */
+    QWeakPointer<FiffDirNode> parent;   /**< Parent node; weak, since the parent owns its children. */
     FiffId parent_id;                   /**< Newly added to stay consistent with MATLAB implementation. */
     QList<FiffDirNode::SPtr> children;  /**< Child nodes. */
     //    fiff_int_t                  nchild;     /**< Number of child nodes. */ -> use nchild() instead
