@@ -9,7 +9,7 @@
 #
 #
 # @brief    Reconcile documentation screenshots: producers, consumers, placeholders, and goldens.
-"""Audit documentation screenshots for gate G4 (package T0.4).
+"""Audit documentation screenshots for gate G4.
 
 For every image referenced as ``/img/manual/auto/<id>.png`` from the website
 docs, and every entry of ``doc/website/screenshots/manifest.json``, report

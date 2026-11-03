@@ -9,7 +9,7 @@
 #
 #
 # @brief    Map every MNE-Python parity claim to the evidence behind it.
-"""Parity evidence baseline for gate G6 (package T0.6).
+"""Parity evidence baseline for gate G6.
 
 ``scripts/parity/gap_analysis.py`` answers *what* MNE-CPP claims relative to
 MNE-Python.  This audit answers *how well each claim is supported*:

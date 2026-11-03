@@ -8,7 +8,7 @@
 # @date     October, 2026
 #
 #
-# @brief    Fixtures for website strictness, the quality page and version routing (T4.3).
+# @brief    Fixtures for website strictness, the quality page and version routing.
 """Fixtures for the Docusaurus configuration, ``render_quality_pages.py`` and ``check_website_build.py``."""
 
 from __future__ import annotations
@@ -58,7 +58,7 @@ class TestStrictConfig(unittest.TestCase):
         self.config = (_WEBSITE / "docusaurus.config.ts").read_text(encoding="utf-8")
 
     def test_broken_links_and_anchors_fail(self) -> None:
-        """AC-T4.3-1: broken internal links, anchors and Markdown links stop the build."""
+        """Broken internal links, anchors and Markdown links stop the build."""
         for option in ("onBrokenLinks", "onBrokenAnchors", "onBrokenMarkdownLinks"):
             with self.subTest(option=option):
                 self.assertRegex(self.config, rf"{option}:\s*'throw'")
@@ -78,7 +78,7 @@ class TestStrictConfig(unittest.TestCase):
                     self.fail("link to the .md/.mdx file instead of the URL slug")
 
     def test_missing_images_fail(self) -> None:
-        """AC-T4.3-1, AC-T5.3-3: a missing image fails; only a local opt-in skips generated screenshots."""
+        """A missing image fails; only a local opt-in skips generated screenshots."""
         hook = self.config[self.config.index("onBrokenMarkdownImages"):]
         hook = hook[:hook.index("},\n        },")]
         self.assertIn("process.env.MNECPP_ALLOW_MISSING_SCREENSHOTS === '1'", hook)
@@ -88,7 +88,7 @@ class TestStrictConfig(unittest.TestCase):
                 self.assertNotIn("MNECPP_ALLOW_MISSING_SCREENSHOTS", workflow.read_text(encoding="utf-8"))
 
     def test_site_builds_wait_for_generated_screenshots(self) -> None:
-        """AC-T5.3-2, AC-T4.4-1: the docs gate builds the site from the screenshots of the DocShots job."""
+        """The docs gate builds the site from the screenshots of the DocShots job."""
         docs = (_WORKFLOWS / "_reusable-docs.yml").read_text(encoding="utf-8")
         self.assertIn("uses: ./.github/workflows/_reusable-doc-shots.yml", docs)
         body = docs[docs.index("\n  Docs:\n"):]
@@ -104,7 +104,7 @@ class TestStrictConfig(unittest.TestCase):
 
     @unittest.skipUnless(shutil.which("doxygen") and shutil.which("bash"), "needs Doxygen and bash")
     def test_gate_script_fails_on_a_broken_screenshot(self) -> None:
-        """AC-T4.4-2: a missing or blank screenshot injected into the generated set fails doc/check-docs.sh."""
+        """A missing or blank screenshot injected into the generated set fails doc/check-docs.sh."""
         import subprocess
 
         manifest = json.loads((_WEBSITE / "screenshots" / "manifest.json").read_text(encoding="utf-8"))
@@ -121,7 +121,7 @@ class TestStrictConfig(unittest.TestCase):
         self.assertIn("FAIL", run.stdout)
 
     def test_deployment_waits_for_the_docs_gate(self) -> None:
-        """AC-T5.3-3: a failing documentation gate blocks deployment; the deployed site is the checked build."""
+        """A failing documentation gate blocks deployment; the deployed site is the checked build."""
         for workflow, channel in (("staging.yml", "dev"), ("main.yml", "stable")):
             with self.subTest(workflow=workflow):
                 text = (_WORKFLOWS / workflow).read_text(encoding="utf-8")
@@ -155,7 +155,7 @@ class TestStrictConfig(unittest.TestCase):
 
 class TestQualityPage(unittest.TestCase):
     def test_numbers_match_the_source_json(self) -> None:
-        """AC-T4.3-2: every gate and library figure on the page equals the quality JSON."""
+        """Every gate and library figure on the page equals the quality JSON."""
         page = pages.build()
         release = _REPO_ROOT / "doc" / "release" / "v2.4.0"
         dashboard = json.loads((release / "quality-baseline.json").read_text(encoding="utf-8"))
@@ -208,7 +208,7 @@ class TestVersionRouting(unittest.TestCase):
         return root
 
     def test_each_channel_needs_its_base_url_and_label(self) -> None:
-        """AC-T4.3-3: stable is served from / as vX.Y.Z, dev from /dev/ as 'dev (latest)'."""
+        """Stable is served from / as vX.Y.Z, dev from /dev/ as 'dev (latest)'."""
         self.assertEqual([], build_check.check(self.build("/", f"v{self.VERSION}"), "stable", self.VERSION))
         self.assertEqual([], build_check.check(self.build("/dev/", "dev (latest)"), "dev", self.VERSION))
         wrong = build_check.check(self.build("/", f"v{self.VERSION}"), "dev", self.VERSION)

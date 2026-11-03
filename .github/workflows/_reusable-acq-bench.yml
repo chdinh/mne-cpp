@@ -3,7 +3,7 @@
 #   Christoph Dinh <christoph.dinh@mne-cpp.org>
 
 # ---------------------------------------------------------------------------
-# Reusable workflow: mne_acq performance regression gate (T2.9)
+# Reusable workflow: mne_acq performance regression gate
 # Called by pull-request.yml.
 # Builds mne_acq_bench of the commit under test and of its base (the pull
 # request base, or the previous head of the pushed branch) and runs both

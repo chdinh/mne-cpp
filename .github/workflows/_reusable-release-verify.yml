@@ -4,7 +4,7 @@
 
 name: Release Verification
 
-# Download a published release on clean runners and check it (v2.4.0 T10.4):
+# Download a published release on clean runners and check it:
 # every required asset present and matching SHA256SUMS, signing status as
 # required, and the platform's dynamic build unpacks and starts.
 

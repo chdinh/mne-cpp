@@ -8,7 +8,7 @@
 # @date     October, 2026
 #
 #
-# @brief    Verify a built Docusaurus site has the base URL and version label of its channel (T4.3).
+# @brief    Verify a built Docusaurus site has the base URL and version label of its channel.
 """Check that a built site routes and labels the version it is deployed as.
 
 The stable site is served from ``/`` and labelled ``vX.Y.Z`` (the project

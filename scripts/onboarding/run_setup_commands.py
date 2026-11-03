@@ -2,7 +2,7 @@
 # SPDX-License-Identifier: BSD-3-Clause
 # Copyright (c) 2026 MNE-CPP Authors
 #   Christoph Dinh <christoph.dinh@mne-cpp.org>
-"""Run the documented onboarding commands on this machine (v2.4.0 T10.8b).
+"""Run the documented onboarding commands on this machine.
 
 The commands come from ``setup_commands.json`` (extracted from the build guide
 by ``extract_setup_commands.py``). Each step runs in one shell session, so

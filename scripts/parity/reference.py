@@ -7,7 +7,7 @@
 # @date     October, 2026
 #
 #
-# @brief    Pinned MNE-Python reference environment for parity fixtures (T7.1).
+# @brief    Pinned MNE-Python reference environment for parity fixtures.
 """Pinned MNE-Python reference environment for parity fixtures.
 
 ``reference_lock.json`` names the versions that CI installs and that every

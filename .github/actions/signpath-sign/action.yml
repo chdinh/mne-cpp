@@ -8,7 +8,7 @@ description: >
   .signpath/artifact-configurations restricts, submit one file (installer .exe
   or deployment .zip) to SignPath with the release version as parameter,
   replace it with the signed result and verify every signed executable with
-  signtool (v2.4.0 T10.7a). Windows runners only.
+  signtool. Windows runners only.
 
 inputs:
   file:

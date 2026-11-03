@@ -1,7 +1,7 @@
 # SPDX-License-Identifier: BSD-3-Clause
 # Copyright (c) 2026 MNE-CPP Authors
 #   Christoph Dinh <christoph.dinh@mne-cpp.org>
-"""Tests for scripts/release/evidence_bundle.py (v2.4.0 T10.2, T10.8d)."""
+"""Tests for scripts/release/evidence_bundle.py."""
 
 import json
 import sys

@@ -8,7 +8,7 @@
 # @date     September, 2026
 #
 #
-# @brief    Tests for the documentation screenshot audit (T0.4).
+# @brief    Tests for the documentation screenshot audit.
 """Tests for ``scripts/quality/audit_visual_assets.py``."""
 
 from __future__ import annotations

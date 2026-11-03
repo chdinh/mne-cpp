@@ -8,7 +8,7 @@
 # @date     September, 2026
 #
 #
-# @brief    Tests for the API evidence audit (T0.3).
+# @brief    Tests for the API evidence audit.
 """Tests for ``scripts/quality/audit_api_evidence.py``."""
 
 from __future__ import annotations

@@ -8,7 +8,7 @@
 # @date     October, 2026
 #
 #
-# @brief    clang-tidy ratchet: findings per file and check may only shrink (T6.3).
+# @brief    clang-tidy ratchet: findings per file and check may only shrink.
 """Run the pinned clang-tidy and fail when any file gains findings of a check.
 
 The checks are configured in ``.clang-tidy``.  ``scripts/quality/tidy_baseline.json``

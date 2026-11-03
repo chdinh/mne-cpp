@@ -8,7 +8,7 @@
 # @date     September, 2026
 #
 #
-# @brief    Ratchet Doxygen warnings against a shrink-only allowlist (T4.1).
+# @brief    Ratchet Doxygen warnings against a shrink-only allowlist.
 """Fail on any Doxygen warning that is not in the allowlist.
 
 Doxygen writes its warnings to ``doc/xml_out/doxygen-warnings.log``
@@ -82,8 +82,8 @@ def load_allowlist(path: Path) -> Counter:
 
 def write_allowlist(path: Path, keys: Counter) -> None:
     data = {
-        "$comment": "Doxygen warnings tolerated by scripts/quality/check_doxygen_warnings.py (release gate G3, "
-                    "v2.4.0 T4.1). Keys are '<file>: <message>' without line numbers; values are how often the "
+        "$comment": "Doxygen warnings tolerated by scripts/quality/check_doxygen_warnings.py (release gate G3). "
+                    "Keys are '<file>: <message>' without line numbers; values are how often the "
                     "key may occur. The list may only shrink: fix a warning, then run the checker with --update.",
         "total": sum(keys.values()),
         "warnings": dict(sorted(keys.items())),

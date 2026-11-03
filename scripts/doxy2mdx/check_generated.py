@@ -8,7 +8,7 @@
 # @date     October, 2026
 #
 #
-# @brief    Fail when the committed API pages or sidebar differ from a fresh doxy2mdx run (T4.2).
+# @brief    Fail when the committed API pages or sidebar differ from a fresh doxy2mdx run.
 """Fail when the committed API pages or sidebar differ from what doxy2mdx generates.
 
 doxy2mdx runs in strict mode into a temporary directory, so the working tree is

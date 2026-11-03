@@ -8,7 +8,7 @@
 # @date     October, 2026
 #
 #
-# @brief    Validate the documentation screenshot manifest and the PNGs generated from it (T5.2).
+# @brief    Validate the documentation screenshot manifest and the PNGs generated from it.
 """Validate ``doc/website/screenshots/manifest.json`` and the screenshots it produces.
 
 Manifest checks

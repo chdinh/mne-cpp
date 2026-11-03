@@ -2,7 +2,7 @@
 # SPDX-License-Identifier: BSD-3-Clause
 # Copyright (c) 2026 MNE-CPP Authors
 #   Christoph Dinh <christoph.dinh@mne-cpp.org>
-"""Release invariants checked before anything is tagged or published (v2.4.0 T10.3).
+"""Release invariants checked before anything is tagged or published.
 
 Every file that carries the release version must agree with ``src/CMakeLists.txt``,
 ``CHANGELOG.md`` must have a section for it, the tag must not exist yet, and the

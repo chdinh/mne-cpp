@@ -2,7 +2,7 @@
 # SPDX-License-Identifier: BSD-3-Clause
 # Copyright (c) 2026 MNE-CPP Authors
 #   Christoph Dinh <christoph.dinh@mne-cpp.org>
-"""Release evidence bundle (v2.4.0 T10.2, T10.8d).
+"""Release evidence bundle.
 
 ``build`` collects the generated release reports (``doc/release/v2.4.0``), the
 onboarding reports of the documented setup path and, once a release exists, its

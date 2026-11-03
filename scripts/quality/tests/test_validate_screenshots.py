@@ -8,7 +8,7 @@
 # @date     October, 2026
 #
 #
-# @brief    Fixtures for the documentation screenshot validator (T5.2).
+# @brief    Fixtures for the documentation screenshot validator.
 """Fixtures for ``scripts/quality/validate_screenshots.py``."""
 
 from __future__ import annotations

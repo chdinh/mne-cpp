@@ -115,7 +115,7 @@ class ValidatorTestCase(unittest.TestCase):
 
 
 # --------------------------------------------------------------------------------------------------------
-# AC-T1.4-1: deleting add_test() or using an unknown label fails validation
+# Deleting add_test() or using an unknown label fails validation
 # --------------------------------------------------------------------------------------------------------
 
 
@@ -219,7 +219,7 @@ class TestLabels(ValidatorTestCase):
 
 
 # --------------------------------------------------------------------------------------------------------
-# AC-T1.4-2: registry references resolve to a registered test
+# Registry references resolve to a registered test
 # --------------------------------------------------------------------------------------------------------
 
 
@@ -267,7 +267,7 @@ class TestRegistryReferences(ValidatorTestCase):
 
 
 # --------------------------------------------------------------------------------------------------------
-# AC-T1.4-3: quarantine requires issue/owner/expiry
+# Quarantine requires issue/owner/expiry
 # --------------------------------------------------------------------------------------------------------
 
 

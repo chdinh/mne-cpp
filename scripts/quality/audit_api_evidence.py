@@ -9,7 +9,7 @@
 #
 #
 # @brief    Classify every exported library class by the evidence that backs it.
-"""Audit API evidence for gate G3 (package T0.3).
+"""Audit API evidence for gate G3.
 
 For every class exported from ``src/libraries`` (``class|struct <LIB>SHARED_EXPORT``)
 and every ``doc/api_registry.json`` record, report:

@@ -8,7 +8,7 @@
 # @date     October, 2026
 #
 #
-# @brief    Fixtures for the clang-format gate (T6.2).
+# @brief    Fixtures for the clang-format gate.
 """Fixtures for ``check_format.py``, ``.clang-format`` and the CI wiring of the format gate."""
 
 from __future__ import annotations

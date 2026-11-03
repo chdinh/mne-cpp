@@ -9,21 +9,21 @@
 #
 #
 # @brief    Regenerate every v2.4.0 baseline report and the combined quality dashboard.
-"""One command for the v2.4.0 quality baseline (package T0.7).
+"""One command for the v2.4.0 quality baseline.
 
 Regenerates, from the working tree plus the pinned CI evidence in
 ``doc/release/v2.4.0``:
 
-* ``test-inventory.{json,md}``          T0.1  (``audit_tests.py``)
-* ``api-evidence-baseline.{json,md}``   T0.3  (``audit_api_evidence.py``)
-* ``visual-baseline.{json,md}``         T0.4  (``audit_visual_assets.py``)
-* ``maintainability-baseline.{json,md}``T0.5  (``audit_maintainability.py``)
-* ``parity-baseline.{json,md}``         T0.6  (``audit_parity_baseline.py``)
-* ``quality-baseline.{json,md}``        T0.7  gate-by-gate dashboard
+* ``test-inventory.{json,md}``          (``audit_tests.py``)
+* ``api-evidence-baseline.{json,md}``   (``audit_api_evidence.py``)
+* ``visual-baseline.{json,md}``         (``audit_visual_assets.py``)
+* ``maintainability-baseline.{json,md}`` (``audit_maintainability.py``)
+* ``parity-baseline.{json,md}``         (``audit_parity_baseline.py``)
+* ``quality-baseline.{json,md}``        gate-by-gate dashboard
 
-``coverage-baseline.json`` (T0.2) and ``ci-test-results.json`` are inputs, not
+``coverage-baseline.json`` and ``ci-test-results.json`` are inputs, not
 outputs: both are imported from a named CI run because neither can be measured
-from a checkout without building.  ``mne-python-gap.json`` (T7.0) is likewise
+from a checkout without building.  ``mne-python-gap.json`` is likewise
 an input produced by ``scripts/parity/gap_analysis.py`` against the pinned
 MNE-Python install.
 

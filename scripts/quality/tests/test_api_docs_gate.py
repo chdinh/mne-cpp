@@ -8,7 +8,7 @@
 # @date     October, 2026
 #
 #
-# @brief    Fixtures for the registry/XML audit and the generated-pages check (T4.2).
+# @brief    Fixtures for the registry/XML audit and the generated-pages check.
 """Fixtures for ``scripts/doxy2mdx/audit_registry.py`` and ``scripts/doxy2mdx/check_generated.py``."""
 
 from __future__ import annotations
@@ -80,13 +80,13 @@ class TestRegistryAudit(AuditTestCase):
         self.assertEqual([], self.problems())
 
     def test_unregistered_xml_class_fails(self) -> None:
-        """AC-T4.2-1: a public class in the XML that is neither registered nor excluded."""
+        """A public class in the XML that is neither registered nor excluded."""
         self.add("FIFFLIB::FiffNew", "fiff/fiff_new.h")
         self.assertEqual(["class 'FIFFLIB::FiffNew' (fiff/fiff_new.h) is in the Doxygen XML but not in the registry"],
                          self.problems())
 
     def test_documented_class_missing_from_xml_fails(self) -> None:
-        """AC-T4.2-1: a documented registry class that Doxygen did not extract."""
+        """A documented registry class that Doxygen did not extract."""
         del self.compounds["FIFFLIB::FiffInfo"]
         self.assertIn("registry class 'FiffInfo' is documented but not in the Doxygen XML", self.problems())
 
@@ -117,7 +117,7 @@ class TestRegistryAudit(AuditTestCase):
 
 class TestExclusions(AuditTestCase):
     def test_each_exclusion_kind_applies(self) -> None:
-        """AC-T4.2-3: namespace, class and unnamespaced-header exclusions each hide one class."""
+        """Namespace, class and unnamespaced-header exclusions each hide one class."""
         for key, fragment in (("namespaces", "std::vector"), ("classes", "FIFFLIB::FiffTool"),
                               ("unnamespaced", "BrainView")):
             with self.subTest(kind=key):
@@ -156,7 +156,7 @@ class TestGeneratedDiff(unittest.TestCase):
         self.assertEqual({"stale": [], "missing": [], "orphaned": []}, generated.compare(self.gen, self.com))
 
     def test_stale_missing_and_orphaned_pages_fail(self) -> None:
-        """AC-T4.2-2: a changed page, an uncommitted page and a page nobody generates are reported."""
+        """A changed page, an uncommitted page and a page nobody generates are reported."""
         (self.com / "fiff" / "fiff-info.mdx").write_text("edited\n", encoding="utf-8")
         (self.gen / "fiff" / "fiff-new.mdx").write_text("new\n", encoding="utf-8")
         (self.com / "fiff" / "fiff-gone.mdx").write_text("old\n", encoding="utf-8")

@@ -8,7 +8,7 @@
 # @date     September, 2026
 #
 #
-# @brief    Fixtures for the Doxygen warning ratchet and its entry point (T4.1).
+# @brief    Fixtures for the Doxygen warning ratchet and its entry point.
 """Fixtures for ``scripts/quality/check_doxygen_warnings.py`` and ``doc/build-api-docs.sh``."""
 
 from __future__ import annotations
@@ -86,7 +86,7 @@ class TestRatchet(RatchetTestCase):
         self.assertIn("PASS", text)
 
     def test_new_warning_fails(self) -> None:
-        """AC-T4.1-1: a warning outside the allowlist fails the check."""
+        """A warning outside the allowlist fails the check."""
         self.seed()
         extra = f"{ROOT}/src/libraries/fiff/c.h:3: warning: Found unknown command '@bogus'\n"
         code, text = self.run_checker(LOG + extra)
@@ -98,7 +98,7 @@ class TestRatchet(RatchetTestCase):
         self.assertEqual(1, self.run_checker(LOG + LOG.splitlines()[0] + "\n")[0])
 
     def test_update_cannot_grow_the_allowlist(self) -> None:
-        """AC-T4.1-2: --update refuses a new key or a higher count and leaves the file untouched."""
+        """--update refuses a new key or a higher count and leaves the file untouched."""
         self.seed()
         before = self.allowlist.read_text(encoding="utf-8")
         extra = f"{ROOT}/src/libraries/fiff/c.h:3: warning: Found unknown command '@bogus'\n"
@@ -136,7 +136,7 @@ class TestRepositoryConfiguration(unittest.TestCase):
         self.assertFalse(any(re.search(r"/(Users|home)/", key) for key in data["warnings"]))
 
     def test_entry_point_is_clean_and_pinned(self) -> None:
-        """AC-T4.1-3: the documented command starts from an empty xml_out with a pinned Doxygen."""
+        """The documented command starts from an empty xml_out with a pinned Doxygen."""
         script = (_REPO_ROOT / "doc" / "build-api-docs.sh").read_text(encoding="utf-8")
         self.assertIn('DOXYGEN_VERSION="1.16.1"', script)
         commands = [line.strip() for line in script.splitlines() if line.strip() and not line.lstrip().startswith("#")]

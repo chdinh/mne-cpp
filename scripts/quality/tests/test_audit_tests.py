@@ -8,7 +8,7 @@
 # @date     September, 2026
 #
 #
-# @brief    Tests for the test inventory audit (T0.1).
+# @brief    Tests for the test inventory audit.
 """Tests for ``scripts/quality/audit_tests.py``."""
 
 from __future__ import annotations
@@ -118,7 +118,7 @@ class RepositoryTests(unittest.TestCase):
         self.assertEqual(sum(report["summary"]["registration"].values()), len(directories))
 
     def test_timeouts_leave_five_times_the_slowest_ci_run(self) -> None:
-        """T1.2 rule: a timeout gives at least 5x the slowest pinned CI duration, so parallel local runs pass."""
+        """A timeout gives at least 5x the slowest pinned CI duration, so parallel local runs pass."""
         evidence = audit.load_ci_evidence(audit.CI_EVIDENCE)
         slowest: dict[str, float] = {}
         for platform in evidence["platforms"].values():

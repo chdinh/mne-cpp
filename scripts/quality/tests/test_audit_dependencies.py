@@ -110,7 +110,7 @@ class AuditTestCase(unittest.TestCase):
 
 
 # --------------------------------------------------------------------------------------------------------
-# AC-T6.7-1: the graph is reproducible
+# The graph is reproducible
 # --------------------------------------------------------------------------------------------------------
 
 
@@ -170,7 +170,7 @@ class TestGraphExtraction(AuditTestCase):
 
 
 # --------------------------------------------------------------------------------------------------------
-# AC-T6.7-2: a synthetic forbidden edge or cycle fails
+# A synthetic forbidden edge or cycle fails
 # --------------------------------------------------------------------------------------------------------
 
 
@@ -296,7 +296,7 @@ class TestExternalDependencies(AuditTestCase):
 
 
 # --------------------------------------------------------------------------------------------------------
-# AC-T6.7-3: exceptions carry owner, rationale and expiry
+# Exceptions carry owner, rationale and expiry
 # --------------------------------------------------------------------------------------------------------
 
 

@@ -8,7 +8,7 @@
 # @date     September, 2026
 #
 #
-# @brief    Fixture for the Doxygen @snippet contract between library headers and src/examples (T3.1).
+# @brief    Fixture for the Doxygen @snippet contract between library headers and src/examples.
 """Fixture for ``@snippet`` references from library headers into ``src/examples``.
 
 The static tests run anywhere. The Doxygen tests need ``doxygen`` on PATH; they
@@ -76,7 +76,7 @@ class TestSnippetReferences(unittest.TestCase):
         self.assertRegex(text, r"(?m)^CASE_SENSE_NAMES\s*=\s*NO\s*$")
 
     def test_references_are_qualified_and_resolve(self) -> None:
-        """AC-T3.1-3: every example is main.cpp, so a reference must name its directory."""
+        """Every example is main.cpp, so a reference must name its directory."""
         refs = snippet_references()
         self.assertGreaterEqual(len(refs), len(REFERENCE_REGIONS))
         for header, number, path, name in refs:
@@ -120,7 +120,7 @@ class TestDoxygenXml(unittest.TestCase):
         self.fail("FiffRawData is not documented inside FIFFLIB")
 
     def test_xml_contains_exactly_the_named_regions(self) -> None:
-        """AC-T3.1-1 and AC-T3.1-2: each listing is its region, line for line, and nothing else."""
+        """Each listing is its region, line for line, and nothing else."""
         result, xml_dir = self.run_doxygen(REFERENCE_HEADER.read_text(encoding="utf-8"))
         self.assertNotIn("snippet", result.stderr)
         listings = self.listings(xml_dir)
@@ -133,7 +133,7 @@ class TestDoxygenXml(unittest.TestCase):
                 self.assertFalse(any("QCommandLineParser" in line or "make_compensator" in line for line in got))
 
     def test_bare_basename_is_rejected(self) -> None:
-        """AC-T3.1-3: an unqualified main.cpp is ambiguous and yields an empty listing."""
+        """An unqualified main.cpp is ambiguous and yields an empty listing."""
         header = REFERENCE_HEADER.read_text(encoding="utf-8").replace(
             "@snippet ex_read_raw/main.cpp fiff_raw_data_open", "@snippet main.cpp fiff_raw_data_open")
         result, xml_dir = self.run_doxygen(header)

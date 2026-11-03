@@ -8,7 +8,7 @@
 # @date     August, 2026
 #
 #
-# @brief    Tests for the LCOV coverage model and its policy (T0.2, T2.2).
+# @brief    Tests for the LCOV coverage model and its policy.
 """Tests for ``scripts/quality/summarize_coverage.py`` and the coverage configuration."""
 
 from __future__ import annotations
@@ -108,7 +108,7 @@ class TestLcovParsing(CoverageTestCase):
 
 class TestExclusions(CoverageTestCase):
     def test_missing_reason_is_rejected(self) -> None:
-        """AC-T2.2-3: an exclusion without a reason is a policy error."""
+        """An exclusion without a reason is a policy error."""
         for entry in ({"pattern": "src/tools/*"}, {"pattern": "src/tools/*", "reason": "  "},
                       {"pattern": "", "reason": "x"}, {"pattern": "a", "reason": "b", "owner": "c"}):
             with self.subTest(entry=entry):
@@ -155,7 +155,7 @@ class TestCompleteness(unittest.TestCase):
         return coverage.check_completeness(reported, sorted(self.SOURCES), exclusions or [], self.SOURCES.__getitem__)
 
     def test_every_translation_unit_is_accounted_for(self) -> None:
-        """AC-T2.2-1: a compiled-nowhere unit with code is reported as missing."""
+        """A compiled-nowhere unit with code is reported as missing."""
         result = self.check({"src/libraries/a/reported.cpp"},
                             [{"pattern": "src/tools/t/template/*", "reason": "template"}])
         self.assertEqual(["src/libraries/a/unbuilt.cpp"], result["missing"])

@@ -5,7 +5,7 @@
 #
 # @author  Christoph Dinh <christoph.dinh@mne-cpp.org>
 
-"""MNE-CPP vs MNE-Python gap analysis renderer + drift check (v2.4.0 TASK T7.0).
+"""MNE-CPP vs MNE-Python gap analysis renderer + drift check.
 
 MNE-CPP and MNE-Python have fundamentally different architectures (C++
 real-time, class/CLI-tool oriented vs. scriptable, function-heavy), so the
@@ -522,8 +522,7 @@ def render_markdown(report: Dict[str, Any]) -> str:
     impl = [r for r in report["apis"] if r["status"] == STATUS_IMPLEMENTED]
     a(f"{len(impl)} MNE-Python APIs already have an MNE-CPP equivalent. See "
       "`mne-python-gap.json` (`status == \"implemented\"`) for the full "
-      "mapping. TASK 8 candidates must not target any API listed there "
-      "(AC-T8.0-3).")
+      "mapping. New parity work must not target any API listed there.")
     a("")
     return "\n".join(lines) + "\n"
 

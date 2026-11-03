@@ -1,7 +1,7 @@
 # SPDX-License-Identifier: BSD-3-Clause
 # Copyright (c) 2026 MNE-CPP Authors
 #   Christoph Dinh <christoph.dinh@mne-cpp.org>
-"""CI source-of-truth contracts (v2.4.0 T10.1).
+"""CI source-of-truth contracts.
 
 Tool versions, thresholds and gate commands are declared once and every
 workflow must agree with that declaration.

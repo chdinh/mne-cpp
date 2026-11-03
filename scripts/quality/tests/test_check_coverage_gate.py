@@ -8,7 +8,7 @@
 # @date     September, 2026
 #
 #
-# @brief    Fixtures for the coverage gate and its CI wiring (T2.1).
+# @brief    Fixtures for the coverage gate and its CI wiring.
 """Fixtures for ``scripts/quality/check_coverage_gate.py`` and the workflows that call it."""
 
 from __future__ import annotations
@@ -59,7 +59,7 @@ class GateTestCase(unittest.TestCase):
 
 class TestGate(GateTestCase):
     def test_log_reports_the_enforced_numbers(self) -> None:
-        """AC-T2.1-1: the log states the floor and tolerance the policy configures."""
+        """The log states the floor and tolerance the policy configures."""
         code, text = self.run_gate(60, 40)
         self.assertEqual(0, code)
         self.assertIn("Line coverage        : 60.00% (60 / 100 lines)", text)
@@ -72,7 +72,7 @@ class TestGate(GateTestCase):
         self.assertIn("below the floor of 50.00%", text)
 
     def test_second_run_compares_against_the_first(self) -> None:
-        """AC-T2.1-2: a passing run leaves a baseline that the next run is held to."""
+        """A passing run leaves a baseline that the next run is held to."""
         self.assertEqual(0, self.run_gate(60, 40)[0])
         self.assertEqual("60.00", self.baseline.read_text(encoding="utf-8").strip())
         code, text = self.run_gate(598, 402)
@@ -132,7 +132,7 @@ def _value(block: str, key: str) -> str | None:
 
 class TestWorkflowWiring(unittest.TestCase):
     def test_release_branches_cannot_disable_coverage(self) -> None:
-        """AC-T2.1-3: staging and main pass literal true, with no commit-message override."""
+        """Staging and main pass literal true, with no commit-message override."""
         for name in ("staging.yml", "main.yml"):
             with self.subTest(workflow=name):
                 text = (_WORKFLOWS / name).read_text(encoding="utf-8")
@@ -142,7 +142,7 @@ class TestWorkflowWiring(unittest.TestCase):
                 self.assertNotIn("skip-coverage", text)
 
     def test_restore_prefix_matches_saved_keys(self) -> None:
-        """AC-T2.1-2: the saved key starts with the restore prefix, so the next run finds it."""
+        """The saved key starts with the restore prefix, so the next run finds it."""
         save_key = _value(_step("Save coverage baseline"), "key")
         restore = _step("Restore previous coverage baseline")
         prefixes = [line.strip() for line in _block(restore, "restore-keys: |").splitlines() if line.strip()]

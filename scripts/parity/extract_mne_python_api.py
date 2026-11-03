@@ -2,7 +2,7 @@
 # SPDX-License-Identifier: BSD-3-Clause
 # Copyright (c) 2026 MNE-CPP Authors
 #   Christoph Dinh <christoph.dinh@mne-cpp.org>
-"""Deterministic inventory of the public MNE-Python API (v2.4.0 TASK T7.2).
+"""Deterministic inventory of the public MNE-Python API.
 
 Walks the documented public namespaces of the installed, pinned ``mne``
 package and writes one record per public class or function: qualified name,

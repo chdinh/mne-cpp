@@ -9,7 +9,7 @@ MNE-CPP's public API reference.
 Ported from src/external/skigen/doc/doxygen2mdx.py and adapted to:
   * MNE-CPP's FIFFLIB::, MNELIB::, ... namespaced compound names.
   * Qt-specific Q_SIGNALS: / Q_SLOTS: sections.
-  * SPDX-style author headers (TASK 17).
+  * SPDX-style author headers.
   * Math passthrough for KaTeX (remark-math) in the Docusaurus site.
   * Registry-driven coverage with optional user-guide and Python
     cross-reference admonitions.
@@ -68,7 +68,7 @@ _XREF_RE: Optional[re.Pattern] = None
 # Doxygen refid → short class name, populated from XML.
 _REFID_MAP: Dict[str, str] = {}
 
-# @snippet support (v2.4.0 T3.3).  Set by main(); listings whose ``filename``
+# @snippet support.  Set by main(); listings whose ``filename``
 # attribute names a file under src/examples are named regions.
 _EXAMPLES_DIR: Optional[Path] = None
 _RENDERED_SNIPPETS: List[str] = []   # '<file>#<region>' rendered for the current page
@@ -258,7 +258,7 @@ def page_slug(qualified: str, dir_slug: str) -> str:
 
 
 # ---------------------------------------------------------------------------
-# SPDX author scraping (TASK 17 source files)
+# SPDX author scraping
 # ---------------------------------------------------------------------------
 
 _SPDX_AUTHOR_RE = re.compile(

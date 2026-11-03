@@ -9,7 +9,7 @@
 #
 #
 # @brief    Count maintainability debt per file so it can be ratcheted and assigned.
-"""Maintainability baseline for gate G5 (package T0.5).
+"""Maintainability baseline for gate G5.
 
 Counts lexical debt candidates in maintained C++ under ``src/libraries``,
 ``src/applications`` and ``src/tools``:
@@ -21,14 +21,14 @@ Counts lexical debt candidates in maintained C++ under ``src/libraries``,
 * ``qt_new_unparented`` ``new QXxx`` -- or of a project class deriving from a Qt class -- with no parent on the
                         same line (usually handed to a layout, scene, model or dock afterwards)
 * ``raw_delete``        explicit ``delete`` / ``delete[]``
-* ``console_io``        ``printf``/``fprintf``/``std::cout``/``std::cerr`` (T6.6 decides keep-or-convert)
+* ``console_io``        ``printf``/``fprintf``/``std::cout``/``std::cerr``
 * ``numeric_define``    ``#define NAME <number>`` constants that could be ``constexpr``
 
 Comments and string literals are stripped before matching, so a ``NULL`` in a
 doc comment or a ``"printf"`` in a message is not counted.  Every metric lists
-the files that contribute to it, which is what T6.4-T6.8 need to cut
-path-disjoint tranches.  Compiler warnings are not counted here: the build is
-already ``-Werror`` (T6.1), so the warning count is zero by construction.
+the files that contribute to it, so the debt can be cut in path-disjoint
+tranches.  Compiler warnings are not counted here: the build is
+already ``-Werror``, so the warning count is zero by construction.
 
 Usage
 -----
@@ -228,7 +228,7 @@ def render_markdown(report: dict[str, Any]) -> str:
         "Counts are lexical candidates with comments and string literals removed; they rank work, they do not prove defects.",
         "",
         f"Scanned {report['scanned_files']:,} files / {report['scanned_lines']:,} lines in "
-        "`src/libraries`, `src/applications`, `src/tools`. Compiler warnings: 0 (the build is `-Werror`, T6.1).",
+        "`src/libraries`, `src/applications`, `src/tools`. Compiler warnings: 0 (the build is `-Werror`).",
         "",
         "| Metric | Total | Files | libraries | applications | tools |",
         "|---|---:|---:|---:|---:|---:|",

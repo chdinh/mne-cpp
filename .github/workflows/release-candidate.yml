@@ -4,7 +4,7 @@
 
 name: Release Candidate
 
-# GO/NO-GO for releasing the current staging commit (v2.4.0 T10.6). Every gate
+# GO/NO-GO for releasing the current staging commit. Every gate
 # must pass, there is no skip input: G1-G6 from the green Staging run of this
 # commit and the committed reports, G7 from the configured signing credentials,
 # G8 from the pinned onboarding results. The evidence bundle of a GO is kept as

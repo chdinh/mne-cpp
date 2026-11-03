@@ -7,7 +7,7 @@
  * @author   Christoph Dinh <christoph.dinh@mne-cpp.org>
  * @since    2.5.0
  * @date     November 2026
- * @brief    mne_acq_bench: performance suite of the acquisition library (T2.9).
+ * @brief    mne_acq_bench: performance suite of the acquisition library.
  *
  * Measures the per-call cost of the stream protocol, commit-to-wake latency, sustained ring throughput over a
  * channel sweep and the converters, and writes a table and optionally a JSON report. The measured code is

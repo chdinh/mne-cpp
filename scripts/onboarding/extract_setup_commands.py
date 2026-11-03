@@ -2,7 +2,7 @@
 # SPDX-License-Identifier: BSD-3-Clause
 # Copyright (c) 2026 MNE-CPP Authors
 #   Christoph Dinh <christoph.dinh@mne-cpp.org>
-"""Extract the documented developer-onboarding commands (v2.4.0 T10.8a).
+"""Extract the documented developer-onboarding commands.
 
 The build guide marks each code block of the supported setup path with an MDX
 comment on the line before its fence::

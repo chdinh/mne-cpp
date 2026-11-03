@@ -8,7 +8,7 @@
 # @date     October, 2026
 #
 #
-# @brief    Render the website quality page from the committed v2.4.0 quality JSON (T4.3).
+# @brief    Render the website quality page from the committed v2.4.0 quality JSON.
 """Render ``doc/website/docs/development/quality.mdx`` from the quality JSON.
 
 Every number on the page is read from ``doc/release/v2.4.0/*.json`` (the files

@@ -8,7 +8,7 @@
 # @date     September, 2026
 #
 #
-# @brief    Tests for the maintainability baseline audit (T0.5).
+# @brief    Tests for the maintainability baseline audit.
 """Tests for ``scripts/quality/audit_maintainability.py``."""
 
 from __future__ import annotations

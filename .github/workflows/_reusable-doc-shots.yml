@@ -3,7 +3,7 @@
 #   Christoph Dinh <christoph.dinh@mne-cpp.org>
 
 # ---------------------------------------------------------------------------
-# Reusable workflow: generate the documentation screenshots (T5.3).
+# Reusable workflow: generate the documentation screenshots.
 # Builds mne_doc_shots, renders every entry of doc/website/screenshots/manifest.json
 # from the real applications, validates the PNGs and uploads them as the
 # `doc-screenshots` artifact for the website jobs. Called by main.yml,

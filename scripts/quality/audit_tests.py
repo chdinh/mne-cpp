@@ -9,7 +9,7 @@
 #
 #
 # @brief    Inventory every test: registration, metadata, requirements, and CI execution.
-"""Produce the v2.4.0 test inventory (package T0.1).
+"""Produce the v2.4.0 test inventory.
 
 ``validate_test_inventory.py`` answers "is anything wrong?".  This tool answers
 "what is there?": one record per ``src/testframes/test_*`` directory with how it

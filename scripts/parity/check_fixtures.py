@@ -7,7 +7,7 @@
 # @date     October, 2026
 #
 #
-# @brief    Checksum manifest for committed parity fixtures (T7.4).
+# @brief    Checksum manifest for committed parity fixtures.
 """Checksum manifest for the committed test fixtures under ``src/testframes/*/data``.
 
 ``fixtures.json`` lists, per test directory, the scripts that generate its

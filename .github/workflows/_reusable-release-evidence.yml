@@ -4,8 +4,8 @@
 
 name: Release Evidence
 
-# Publish SHA256SUMS and the per-asset signing evidence of a release (v2.4.0
-# T10.7c) once every asset is uploaded. Signatures were checked by the jobs
+# Publish SHA256SUMS and the per-asset signing evidence of a release once
+# every asset is uploaded. Signatures were checked by the jobs
 # that built the dmg/exe files (signing-evidence-* artifacts of this run).
 
 on:

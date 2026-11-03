@@ -8,7 +8,7 @@
 # @date     September, 2026
 #
 #
-# @brief    Tests for the parity evidence baseline (T0.6).
+# @brief    Tests for the parity evidence baseline.
 """Tests for ``scripts/quality/audit_parity_baseline.py``."""
 
 from __future__ import annotations
@@ -113,7 +113,7 @@ class RepositoryTests(unittest.TestCase):
         self.assertEqual(report["reference_environment"]["registry_mne_python_ref"], "1.11.0")
 
     def test_parity_label_is_exactly_the_static_cross_validation(self) -> None:
-        """AC-T7.5-3: ``ctest -L parity`` runs the offline MNE-Python comparisons and nothing else."""
+        """``ctest -L parity`` runs the offline MNE-Python comparisons and nothing else."""
         frames = audit.TESTFRAMES_DIR
         registered = audit.registered_tests(frames)
         static = {name for name, level in audit.test_evidence(frames).items()

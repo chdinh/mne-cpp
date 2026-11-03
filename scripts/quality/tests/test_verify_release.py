@@ -1,7 +1,7 @@
 # SPDX-License-Identifier: BSD-3-Clause
 # Copyright (c) 2026 MNE-CPP Authors
 #   Christoph Dinh <christoph.dinh@mne-cpp.org>
-"""Tests for scripts/release/verify_release.py (v2.4.0 T10.4)."""
+"""Tests for scripts/release/verify_release.py."""
 
 import hashlib
 import io

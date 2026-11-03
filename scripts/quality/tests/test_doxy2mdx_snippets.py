@@ -8,7 +8,7 @@
 # @date     September, 2026
 #
 #
-# @brief    Fixtures for @snippet rendering in scripts/doxy2mdx/doxy2mdx.py (T3.3).
+# @brief    Fixtures for @snippet rendering in scripts/doxy2mdx/doxy2mdx.py.
 """Fixtures for how ``doxy2mdx`` renders ``@snippet`` program listings into MDX."""
 
 from __future__ import annotations
@@ -113,7 +113,7 @@ class SnippetRenderingTestCase(unittest.TestCase):
 
 class TestSnippetRendering(SnippetRenderingTestCase):
     def test_region_renders_byte_for_byte_after_dedent(self) -> None:
-        """AC-T3.3-1: the fenced block equals the source region, dedented, with no escaping."""
+        """The fenced block equals the source region, dedented, with no escaping."""
         code, page = self.run_generator(_listing(REGION))
         self.assertEqual(0, code)
         expected = textwrap.dedent("\n".join(REGION))
@@ -126,7 +126,7 @@ class TestSnippetRendering(SnippetRenderingTestCase):
         self.assertIn("```cpp\nint x = 1;\n```", page)
 
     def test_example_metadata_links_source_instead_of_copying_it(self) -> None:
-        """AC-T3.3-3: the example section links the source and never inlines the file."""
+        """The example section links the source and never inlines the file."""
         code, page = self.run_generator(_listing(REGION))
         self.assertEqual(0, code)
         example = page[page.index("## Example"):page.index("## Authors")]
@@ -173,11 +173,11 @@ class TestStrictErrors(SnippetRenderingTestCase):
         self.assertIn(fragment, code)
 
     def test_empty_listing_fails(self) -> None:
-        """AC-T3.3-2: Doxygen emits an empty listing for a missing region or ambiguous file."""
+        """Doxygen emits an empty listing for a missing region or ambiguous file."""
         self.assert_fails(_listing([]), "empty listing")
 
     def test_listing_that_is_not_a_region_fails(self) -> None:
-        """AC-T3.3-2: a listing that no longer matches the source region (stale XML) fails."""
+        """A listing that no longer matches the source region (stale XML) fails."""
         self.assert_fails(_listing(REGION[:-1]), "matches 0 regions")
 
     def test_unknown_example_file_fails(self) -> None:
@@ -188,7 +188,7 @@ class TestStrictErrors(SnippetRenderingTestCase):
         self.assert_fails("", "is not rendered from the Doxygen XML")
 
     def test_malformed_xml_fails(self) -> None:
-        """AC-T3.3-2: unparseable compound XML is an error, not a skipped page."""
+        """Unparseable compound XML is an error, not a skipped page."""
         (self.xml / "class_d_e_m_o_1_1_widget.xml").write_text("<doxygen><compounddef", encoding="utf-8")
         (self.xml / "index.xml").write_text(
             '<doxygenindex><compound refid="class_d_e_m_o_1_1_widget" kind="class">'

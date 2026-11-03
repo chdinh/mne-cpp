@@ -2,7 +2,7 @@
 # SPDX-License-Identifier: BSD-3-Clause
 # Copyright (c) 2026 MNE-CPP Authors
 #   Christoph Dinh <christoph.dinh@mne-cpp.org>
-"""Release checksums and signing evidence (v2.4.0 T10.7c).
+"""Release checksums and signing evidence.
 
 Signatures can only be checked on the platform that produced them, so each
 installer job records its own artifact::

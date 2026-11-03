@@ -1,11 +1,11 @@
 # `doxy2mdx` — Doxygen XML → Docusaurus MDX
 
-Converts the XML emitted by `doc/Doxyfile` (TASK 18.1) into one MDX page
+Converts the XML emitted by `doc/Doxyfile` into one MDX page
 per registered public class plus a sidebar fragment consumed by
 `doc/website/sidebars.ts`.  Port of `src/external/skigen/doc/doxygen2mdx.py`,
 adapted for MNE-CPP's `FIFFLIB::` / `MNELIB::` namespaces, Qt
-`Q_SIGNALS:` / `Q_SLOTS:` sections, SPDX author headers (TASK 17), and
-the existing `doc/api_registry.json` (TASK 16.7 + 18.3).
+`Q_SIGNALS:` / `Q_SLOTS:` sections, SPDX author headers, and
+the existing `doc/api_registry.json`.
 
 ## Usage
 
@@ -51,7 +51,7 @@ coverage:
 ## Running locally
 
 ```bash
-doxygen doc/Doxyfile                       # TASK 18.1 (emits doc/xml_out/xml/)
+doxygen doc/Doxyfile                       # emits doc/xml_out/xml/
 python scripts/doxy2mdx/doxy2mdx.py \
     --xml-dir doc/xml_out/xml \
     --out-dir doc/website/docs/api \
@@ -62,10 +62,10 @@ python scripts/doxy2mdx/doxy2mdx.py \
 
 ## Running in CI
 
-`.github/workflows/api-docs.yml` (TASK 18.5) chains the same three
+`.github/workflows/api-docs.yml` chains the same three
 commands and additionally runs `python scripts/validate_api_registry.py`
 to enforce the registry invariants — including the new
-`validate_documented_flag` check added in TASK 18.3.  Failure of any
+`validate_documented_flag` check.  Failure of any
 step blocks merge.
 
 ## Implementation notes
@@ -77,8 +77,7 @@ step blocks merge.
 * `read_spdx_authors(path)` regex-scrapes the first 30 lines of the
   source file for `Name <email>` lines after an
   `SPDX-License-Identifier` marker.  Falls back to Doxygen `@author`
-  blocks when no SPDX header is present (legacy files prior to
-  TASK 17).
+  blocks when no SPDX header is present (legacy files).
 * `beautify_type` collapses `Eigen::Matrix<double,-1,-1,…>` →
   `Eigen::MatrixXd`, strips `class`/`struct`, drops `*_EXPORT` macro
   prefixes, and normalises `QSharedPointer< X >` spacing.
@@ -90,7 +89,7 @@ step blocks merge.
   * `python_equiv` / `python_url` — emits a `:::info[Python equivalent]`
     admonition cross-referencing MNE-Python.
 
-## Example evidence fields (v2.4.0 T3.2)
+## Example evidence fields
 
 `scripts/validate_api_registry.py` enforces these per-class fields:
 

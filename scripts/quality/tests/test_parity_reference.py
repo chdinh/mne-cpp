@@ -7,7 +7,7 @@
 # @date     October, 2026
 #
 #
-# @brief    Tests for the parity reference lock (T7.1) and fixture manifest (T7.4).
+# @brief    Tests for the parity reference lock and fixture manifest.
 """Tests for ``scripts/parity/reference.py`` and ``scripts/parity/check_fixtures.py``."""
 
 from __future__ import annotations
@@ -56,7 +56,7 @@ class ReferenceLockTests(unittest.TestCase):
         return reference.check_reference(self.LOCK, installed, python)
 
     def test_minor_mismatch_is_refused_and_patch_is_noted(self) -> None:
-        """AC-T7.1-1: a generator refuses a wrong major/minor version."""
+        """A generator refuses a wrong major/minor version."""
         self.assertEqual(self.check({"mne": "1.11.0", "numpy": "2.2.6"}), ([], []))
         errors, notes = self.check({"mne": "1.11.1", "numpy": "2.4.0"}, python="3.13")
         self.assertEqual(errors, ["numpy 2.4.0 (reference 2.2.6)"])
@@ -64,7 +64,7 @@ class ReferenceLockTests(unittest.TestCase):
         self.assertEqual(self.check({"numpy": "2.2.6"})[0], ["mne is not installed (reference 1.11.0)"])
 
     def test_ci_installs_exactly_the_lock(self) -> None:
-        """AC-T7.1-2: CI and fixture generation use one environment."""
+        """CI and fixture generation use one environment."""
         lock = reference.load_lock()
         workflow = (_REPO_ROOT / ".github" / "workflows" / "_reusable-tests.yml").read_text(encoding="utf-8")
         pins = dict(re.findall(r"\b([A-Za-z][\w.-]*)==([\w.]+)", workflow))
@@ -97,14 +97,14 @@ class FixtureManifestTests(unittest.TestCase):
         return check_fixtures.compare(self.manifest, check_fixtures.build_manifest(self.root, files or self.files))
 
     def test_manifest_records_generator_and_checksum(self) -> None:
-        """AC-T7.4-1."""
+        """The manifest records each fixture's generator and checksum."""
         entry = self.manifest["tests"]["test_demo"]
         self.assertEqual(entry["generators"], ["src/testframes/test_demo/make_a.py"])
         self.assertEqual(len(entry["fixtures"]["src/testframes/test_demo/data/a.fif"]), 64)
         self.assertEqual(self.problems(), [])
 
     def test_corrupted_orphaned_and_missing_fixtures_fail(self) -> None:
-        """AC-T7.4-3: a corrupted or stale fixture fails and names its generator."""
+        """A corrupted or stale fixture fails and names its generator."""
         (self.root / self.files[0]).write_bytes(b"\x00\x02")
         self.assertIn("regenerate with src/testframes/test_demo/make_a.py", self.problems()[0])
         (self.root / self.files[0]).write_bytes(b"\x00\x01")

@@ -3,7 +3,7 @@
 #   Christoph Dinh <christoph.dinh@mne-cpp.org>
 
 # ---------------------------------------------------------------------------
-# Reusable workflow: the documentation gate (T4.4).
+# Reusable workflow: the documentation gate.
 # Generates the screenshots (_reusable-doc-shots.yml), then runs
 # doc/check-docs.sh - the same script developers run locally - and uploads the
 # built site, the Doxygen warning log and the screenshots for diagnosis.

@@ -1,5 +1,5 @@
 {
-  "$comment": "Policy for scripts/quality/audit_maintainability.py (v2.4.0 T0.5). Lexical debt metrics for gate G5. Counts are candidates, not verdicts: every metric names the files it found so T6.4-T6.8 can assign path-disjoint tranches. Paths are relative to the repository root.",
+  "$comment": "Policy for scripts/quality/audit_maintainability.py. Lexical debt metrics for gate G5. Counts are candidates, not verdicts: every metric names the files it found so the debt can be cut in path-disjoint tranches. Paths are relative to the repository root.",
   "scan_roots": [
     "src/libraries",
     "src/applications",

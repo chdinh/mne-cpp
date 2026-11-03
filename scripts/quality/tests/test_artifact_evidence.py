@@ -1,7 +1,7 @@
 # SPDX-License-Identifier: BSD-3-Clause
 # Copyright (c) 2026 MNE-CPP Authors
 #   Christoph Dinh <christoph.dinh@mne-cpp.org>
-"""Tests for scripts/release/artifact_evidence.py (v2.4.0 T10.7c)."""
+"""Tests for scripts/release/artifact_evidence.py."""
 
 import hashlib
 import json

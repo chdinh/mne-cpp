@@ -8,7 +8,7 @@
 # @date     September, 2026
 #
 #
-# @brief    Tests for the combined quality baseline (T0.7).
+# @brief    Tests for the combined quality baseline.
 """Tests for ``scripts/quality/generate_quality_report.py``."""
 
 from __future__ import annotations

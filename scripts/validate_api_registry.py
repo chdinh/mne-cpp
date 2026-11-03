@@ -11,7 +11,7 @@ Enforces the following invariants:
 2. Every 'header' path exists under 'src/libraries/' (relative).
 3. Every 'test' (when not null) corresponds to a directory under 'src/testframes/'.
 4. No entry with skigen_candidate: true AND status: "done" lacks a skigen_target.
-5. Example evidence (v2.4.0 T3.2): example targets, snippets, modes, data,
+5. Example evidence: example targets, snippets, modes, data,
    screenshots and exemptions; eligible entries without an example are errors
    unless listed in the shrink-only example_debt of api_evidence_policy.json.
 6. Cross-reference with src/external/skigen/doc/api_registry.json if present.
@@ -103,13 +103,13 @@ def validate_skigen_targets(registry: Dict[str, Any]) -> Tuple[bool, List[str]]:
 
 
 def validate_documented_flag(registry: Dict[str, Any]) -> Tuple[bool, List[str]]:
-    """Enforce the TASK 18.3 ``documented`` flag invariants.
+    """Enforce the ``documented`` flag invariants.
 
     * ``documented`` (when present) must be a boolean.
     * For every ``documented: true`` entry, ``name`` and ``module``
       must be non-empty strings.
     * The referenced module must exist in ``modules`` and have
-      ``dir_slug`` set (added in TASK 18.3 alongside the flag).
+      ``dir_slug`` set (added alongside the flag).
     * Within a module, ``(module, sidebar_position)`` tuples must be
       unique across ``documented: true`` entries.
     """
@@ -164,7 +164,7 @@ PARITY_STATUS_VALUES = {"implemented", "partial", "missing", "not-applicable"}
 
 
 def validate_parity_block(registry: Dict[str, Any], repo_root: Path) -> Tuple[bool, List[str]]:
-    """Enforce invariants on the ``parity`` block (v2.4.0 TASK T7.0/T7.3).
+    """Enforce invariants on the ``parity`` block.
 
     * ``parity`` (when present) must be an object with a ``records`` list.
     * ``mne_python_pinned`` must be a non-empty string.
@@ -325,7 +325,7 @@ def policy_exemption(name: str, header: str, policy: Dict[str, Any]) -> Optional
 
 def validate_examples(repo_root: Path, registry: Dict[str, Any],
                       policy: Dict[str, Any], manifest: Dict[str, Any]) -> Tuple[bool, List[str], Dict[str, int]]:
-    """Enforce the example-evidence fields of v2.4.0 T3.2.
+    """Enforce the example-evidence fields.
 
     Optional per-class fields: ``example`` (directory under src/examples),
     ``example_snippet`` (list of ``<example>/<file>#<region>``), ``example_mode``
@@ -523,7 +523,7 @@ def main() -> int:
     else:
         print("  OK")
 
-    print("[5/8] documented flag + sidebar invariants (TASK 18.3)...")
+    print("[5/8] documented flag + sidebar invariants...")
     ok, issues = validate_documented_flag(registry)
     if not ok:
         all_passed = False
@@ -534,7 +534,7 @@ def main() -> int:
                         if c.get("documented", False))
         print(f"  OK ({doc_count} documented entries)")
 
-    print("[6/8] Parity block invariants (TASK T7.0/T7.3)...")
+    print("[6/8] Parity block invariants...")
     ok, issues = validate_parity_block(registry, repo_root)
     if not ok:
         all_passed = False
@@ -544,7 +544,7 @@ def main() -> int:
         parity_count = len(registry.get("parity", {}).get("records", []))
         print(f"  OK ({parity_count} parity records)")
 
-    print("[7/8] Example evidence (TASK T3.2)...")
+    print("[7/8] Example evidence...")
     policy = load_json(repo_root / EVIDENCE_POLICY) or {}
     manifest = load_json(repo_root / SCREENSHOT_MANIFEST) or {}
     ok, issues, stats = validate_examples(repo_root, registry, policy, manifest)

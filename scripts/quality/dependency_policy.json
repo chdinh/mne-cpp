@@ -1,5 +1,5 @@
 {
-  "$comment": "Dependency architecture policy for scripts/quality/audit_dependencies.py. See doc/dev-notes/v2.4.0-requirements.md TASK 6 (gate G5). The rule is simple and deliberately strict: a library may depend only on libraries in a strictly lower layer. Same-layer edges are refused too, because they are how cycles start.",
+  "$comment": "Dependency architecture policy for scripts/quality/audit_dependencies.py. Gate G5. The rule is simple and deliberately strict: a library may depend only on libraries in a strictly lower layer. Same-layer edges are refused too, because they are how cycles start.",
   "layers": [
     {
       "name": "core",

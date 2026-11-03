@@ -481,21 +481,21 @@ Dependabot.
 
 ### New Features
 
-- **Covariance estimation parity** (TASK 12): Auto/shrunk/OAS/FA/PCA/regularize/whitener methods; `apply_inverse_epochs/raw/cov`, beamformer epochs, source PSD/power convenience API
-- **Preprocessing & artifact detection parity** (TASK 13): Maxwell bad-channel detection, EOG regression, EEG re-referencing, cHPI filter, stim artifact removal, muscle/amplitude annotation, bridged electrode detection, LOF bad-channel detection, fine calibration, annotation↔event conversion
-- **Source estimate types** (TASK 14): `VectorSourceEstimate`, `VolSourceEstimate`, `MixedSourceEstimate`; label operations (`extract_label_time_course` with 5 modes, stc↔label, grow/split labels)
-- **Decoding** (TASK 15): CSP/SPoC/SSD/SlidingEstimator/GeneralizingEstimator/ReceptiveField; I/O export (EDF/BrainVision), AEC/PEC connectivity, HTML Report, linear regression, RM-ANOVA, bootstrap CI, fixed-length epochs
-- **Standard montages** (TASK 6): 10-20/10-10/10-05 electrode montage support
-- **Maxwell movement compensation** (TASK 6): Full Maxwell filter movement compensation
-- **Multitaper TFR** (TASK 7): Multitaper time-frequency representation
-- **Picard ICA** (TASK 7): Picard-based ICA decomposition algorithm
-- **Surface Laplacian** (TASK 7): Current source density via surface Laplacian
-- **Auto ICA classification** (TASK 7): Automated ICA component labeling
-- **Depth priors & resolution metrics** (TASK 8): PSF/CTF resolution metrics for source estimation
-- **Full SourceMorph** (TASK 8): Complete cross-subject cortical morphing
-- **TRAP-MUSIC** (TASK 8): TRAP-MUSIC source localization algorithm
-- **TF-MxNE** (TASK 6): Time-frequency mixed-norm estimates
-- **Simulation API** (TASK 9): `simulate_raw`/`_stc`/`_evoked`, `addNoise`/`Ecg`/`Eog`/`Chpi` in new `sim` library
+- **Covariance estimation parity**: Auto/shrunk/OAS/FA/PCA/regularize/whitener methods; `apply_inverse_epochs/raw/cov`, beamformer epochs, source PSD/power convenience API
+- **Preprocessing & artifact detection parity**: Maxwell bad-channel detection, EOG regression, EEG re-referencing, cHPI filter, stim artifact removal, muscle/amplitude annotation, bridged electrode detection, LOF bad-channel detection, fine calibration, annotation↔event conversion
+- **Source estimate types**: `VectorSourceEstimate`, `VolSourceEstimate`, `MixedSourceEstimate`; label operations (`extract_label_time_course` with 5 modes, stc↔label, grow/split labels)
+- **Decoding**: CSP/SPoC/SSD/SlidingEstimator/GeneralizingEstimator/ReceptiveField; I/O export (EDF/BrainVision), AEC/PEC connectivity, HTML Report, linear regression, RM-ANOVA, bootstrap CI, fixed-length epochs
+- **Standard montages**: 10-20/10-10/10-05 electrode montage support
+- **Maxwell movement compensation**: Full Maxwell filter movement compensation
+- **Multitaper TFR**: Multitaper time-frequency representation
+- **Picard ICA**: Picard-based ICA decomposition algorithm
+- **Surface Laplacian**: Current source density via surface Laplacian
+- **Auto ICA classification**: Automated ICA component labeling
+- **Depth priors & resolution metrics**: PSF/CTF resolution metrics for source estimation
+- **Full SourceMorph**: Complete cross-subject cortical morphing
+- **TRAP-MUSIC**: TRAP-MUSIC source localization algorithm
+- **TF-MxNE**: Time-frequency mixed-norm estimates
+- **Simulation API**: `simulate_raw`/`_stc`/`_evoked`, `addNoise`/`Ecg`/`Eog`/`Chpi` in new `sim` library
 - **MNE Inspect plugins**: Electrode visualization plugin (`inspect_electrodes`), MRI slices plugin (`inspect_mri_slices`)
 - **MNE Analyze Studio skills**: MNA-aware agent skills extension (`mna_skills`)
 - **MNE Analyze cortical surface plugin**: STC load with fThresh/fMid/fMax colormap, time slider, play/pause

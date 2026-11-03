@@ -3,7 +3,7 @@
 #   Christoph Dinh <christoph.dinh@mne-cpp.org>
 
 # ---------------------------------------------------------------------------
-# Blank-machine onboarding (v2.4.0 T10.8b): a fresh clone on a clean runner
+# Blank-machine onboarding: a fresh clone on a clean runner
 # follows exactly the setup commands the build guide documents
 # (scripts/onboarding/setup_commands.json), builds and runs an example. No
 # caches, no token for the dependency downloads, no MNE-CPP tooling beyond

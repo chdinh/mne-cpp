@@ -8,7 +8,7 @@
 # @date     October, 2026
 #
 #
-# @brief    Fixtures for the clang-tidy ratchet (T6.3).
+# @brief    Fixtures for the clang-tidy ratchet.
 """Fixtures for ``check_tidy.py``, ``.clang-tidy`` and ``tidy_baseline.json``."""
 
 from __future__ import annotations
@@ -32,7 +32,7 @@ _spec.loader.exec_module(tidy)
 
 
 class RatchetTests(unittest.TestCase):
-    """AC-T6.3-1: a new violation fails; accepted debt does not."""
+    """A new violation fails; accepted debt does not."""
 
     def test_header_findings_count_once(self) -> None:
         findings = [("src/a.h", 3, 1, "bugprone-x"), ("src/a.h", 3, 1, "bugprone-x"), ("src/a.cpp", 9, 2, "bugprone-x")]
@@ -62,7 +62,7 @@ class RatchetTests(unittest.TestCase):
 
 
 class SuppressionTests(unittest.TestCase):
-    """AC-T6.3-2: a suppression needs a check name and a reason."""
+    """A suppression needs a check name and a reason."""
 
     def setUp(self) -> None:
         self.tmp = Path(tempfile.mkdtemp(dir=_REPO_ROOT / "scripts" / "quality" / "tests"))
@@ -106,7 +106,7 @@ class ConfigTests(unittest.TestCase):
 
 
 class CacheTests(unittest.TestCase):
-    """AC-T6.3-3: the cache key changes with every input and nothing else."""
+    """The cache key changes with every input and nothing else."""
 
     def test_key_depends_on_inputs(self) -> None:
         with tempfile.TemporaryDirectory() as temp:

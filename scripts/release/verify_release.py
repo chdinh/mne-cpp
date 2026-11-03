@@ -2,7 +2,7 @@
 # SPDX-License-Identifier: BSD-3-Clause
 # Copyright (c) 2026 MNE-CPP Authors
 #   Christoph Dinh <christoph.dinh@mne-cpp.org>
-"""Verify the published assets of a release on a clean machine (v2.4.0 T10.4).
+"""Verify the published assets of a release on a clean machine.
 
 Download the assets first (``gh release download TAG -D assets``), then::
 

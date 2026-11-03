@@ -8,7 +8,7 @@
 # @date     September, 2026
 #
 #
-# @brief    Fixtures for the example-evidence checks in scripts/validate_api_registry.py (T3.2).
+# @brief    Fixtures for the example-evidence checks in scripts/validate_api_registry.py.
 """Fixtures for ``validate_examples`` in ``scripts/validate_api_registry.py``."""
 
 from __future__ import annotations
@@ -82,11 +82,11 @@ class TestSnippets(ExampleEvidenceTestCase):
         self.assertEqual([], self.check(GOOD))
 
     def test_missing_region_fails(self) -> None:
-        """AC-T3.2-1: a snippet naming a region the example does not contain."""
+        """A snippet naming a region the example does not contain."""
         self.assert_issue("no balanced region", self.check(self.with_(example_snippet=["ex_widget/main.cpp#nothing"])))
 
     def test_unbalanced_marker_fails(self) -> None:
-        """AC-T3.2-1: a marker must appear exactly twice."""
+        """A marker must appear exactly twice."""
         source = self.root / "src" / "examples" / "ex_widget" / "main.cpp"
         source.write_text(EXAMPLE.replace("    //! [widget_use]\n", "", 1), encoding="utf-8")
         issues = self.check(GOOD)
@@ -94,7 +94,7 @@ class TestSnippets(ExampleEvidenceTestCase):
         self.assert_issue("no balanced region", issues)
 
     def test_wrong_snippet_path_fails(self) -> None:
-        """AC-T3.2-1: the path must belong to the record's own example."""
+        """The path must belong to the record's own example."""
         for ref in ("main.cpp#widget_use", "ex_other/main.cpp#widget_use", "ex_widget/main.cpp"):
             with self.subTest(ref=ref):
                 self.assert_issue("must be 'ex_widget/<file>#<region>'", self.check(self.with_(example_snippet=[ref])))
@@ -109,7 +109,7 @@ class TestSnippets(ExampleEvidenceTestCase):
 
 class TestEligibility(ExampleEvidenceTestCase):
     def test_eligible_without_example_fails(self) -> None:
-        """AC-T3.2-2: an eligible class needs a built example with a snippet."""
+        """An eligible class needs a built example with a snippet."""
         bare = {"name": "Widget", "module": "demo", "header": "demo/widget.h", "example": None}
         issues = self.check(bare)
         self.assert_issue("example-eligible but has no built example", issues)
@@ -142,7 +142,7 @@ class TestExemptions(ExampleEvidenceTestCase):
         (self.root / "src" / "libraries" / "demo" / "widget.h").write_text("class Widget {};\n", encoding="utf-8")
 
     def test_exemption_needs_a_reason(self) -> None:
-        """AC-T3.2-3: example_exempt without a non-empty reason fails."""
+        """``example_exempt`` without a non-empty reason fails."""
         for reason in (None, "", "  "):
             record = {"name": "Widget", "module": "demo", "header": "demo/widget.h", "example_exempt": True}
             if reason is not None:
@@ -173,7 +173,7 @@ class TestExemptions(ExampleEvidenceTestCase):
 
 class TestTargetsAndMetadata(ExampleEvidenceTestCase):
     def test_example_must_be_a_cmake_target(self) -> None:
-        """AC-T3.2-4: the referenced example must be added by src/examples/CMakeLists.txt."""
+        """The referenced example must be added by src/examples/CMakeLists.txt."""
         (self.root / "src" / "examples" / "CMakeLists.txt").write_text("", encoding="utf-8")
         self.assert_issue("is not a CMake target", self.check(GOOD))
 
@@ -204,7 +204,7 @@ class ParityTestFieldTestCase(unittest.TestCase):
 
 
 class EquivalenceTestCase(unittest.TestCase):
-    """AC-T7.3-1/2: an equivalence claim needs a test that embeds MNE-Python reference values for that API."""
+    """An equivalence claim needs a test that embeds MNE-Python reference values for that API."""
 
     def issues(self, **record) -> list[str]:
         record = {"python": "mne.channel_indices_by_type", "status": "implemented", "mne_cpp": "F",

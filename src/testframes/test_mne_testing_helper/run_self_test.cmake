@@ -133,7 +133,7 @@ function(_expect_property case test name expected)
 endfunction()
 
 # --------------------------------------------------------------------------------------------------------
-# Refusals: every one of these must stop the configure step (AC-T1.1-2).
+# Refusals: every one of these must stop the configure step.
 # --------------------------------------------------------------------------------------------------------
 
 _expect_refusal(missing_labels
@@ -177,7 +177,7 @@ _expect_refusal(target_not_executable
     "is a INTERFACE_LIBRARY, not an executable")
 
 # --------------------------------------------------------------------------------------------------------
-# Accepted registrations and the metadata they publish (AC-T1.1-1, AC-T1.1-3).
+# Accepted registrations and the metadata they publish.
 # --------------------------------------------------------------------------------------------------------
 
 if(CMAKE_HOST_SYSTEM_NAME STREQUAL "Windows")
@@ -242,7 +242,7 @@ else()
         if(NOT helper OR NOT plain OR NOT skip_target OR NOT skip_platform)
             _fail(accepted "CTest does not list every fixture test:\n${ctest_json}")
         else()
-            # AC-T1.1-1: the helper runs the same binary a bare add_test() would.
+            # The helper runs the same binary a bare add_test() would.
             string(JSON helper_command ERROR_VARIABLE helper_error GET "${helper}" command 0)
             string(JSON plain_command ERROR_VARIABLE plain_error GET "${plain}" command 0)
             get_filename_component(helper_dir "${helper_command}" DIRECTORY)
@@ -260,7 +260,7 @@ else()
                 _pass(output_path)
             endif()
 
-            # AC-T1.1-3: the declared metadata is visible to CTest.
+            # The declared metadata is visible to CTest.
             _expect_property(metadata "${helper}" LABELS "requires-data;unit")
             _expect_property(metadata "${helper}" TIMEOUT 120)
             _expect_property(metadata "${helper}" ENVIRONMENT "QT_QPA_PLATFORM=offscreen;MNE_FIXTURE=1")

@@ -2,7 +2,7 @@
 # SPDX-License-Identifier: BSD-3-Clause
 # Copyright (c) 2026 MNE-CPP Authors
 #   Christoph Dinh <christoph.dinh@mne-cpp.org>
-"""Checks for ``scripts/onboarding/extract_setup_commands.py`` (T10.8a)."""
+"""Checks for ``scripts/onboarding/extract_setup_commands.py``."""
 
 from __future__ import annotations
 

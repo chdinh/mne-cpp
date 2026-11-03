@@ -220,7 +220,7 @@ jobs:
         cmake -B build -S . -DCMAKE_BUILD_TYPE=Release -DBUILD_TESTS=ON -DMNE_WARNINGS_AS_ERRORS=ON ${COV_FLAG}
         cmake --build build -j "$(nproc)"
 
-    # Gate T6.3: findings per file and check may only shrink (scripts/quality/tidy_baseline.json).
+    # Findings per file and check may only shrink (scripts/quality/tidy_baseline.json).
     # Units are cached by tool version, config, compile command and included file contents.
     - name: Restore clang-tidy cache
       if: matrix.os == 'ubuntu-24.04' && inputs.qt_version == 'max'

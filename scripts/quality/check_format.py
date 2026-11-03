@@ -8,7 +8,7 @@
 # @date     October, 2026
 #
 #
-# @brief    Fail when in-scope C/C++ files are not formatted with the pinned clang-format (T6.2).
+# @brief    Fail when in-scope C/C++ files are not formatted with the pinned clang-format.
 """Check (or fix) the formatting of the C/C++ sources against ``.clang-format``.
 
 The whole tree was reformatted once with the pinned clang-format, so every

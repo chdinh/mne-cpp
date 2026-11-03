@@ -11,7 +11,7 @@
 # @brief    Normalise, filter and summarise an LCOV report under the coverage policy.
 """Normalise, filter and summarise an LCOV report under ``coverage_policy.json``.
 
-Every number published for gate G2 passes through this one script (T0.2, T2.2):
+Every number published for gate G2 passes through this one script:
 
 * source paths become repository-relative, so the summary, the gate and Codecov
   name the same files;

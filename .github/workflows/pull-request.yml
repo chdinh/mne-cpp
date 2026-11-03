@@ -90,7 +90,7 @@ jobs:
     - name: Validate API registry
       run: python3 scripts/validate_api_registry.py --repo-root "$GITHUB_WORKSPACE"
 
-    # Gate T6.2: the tree was reformatted once with the pinned clang-format, so
+    # The tree was reformatted once with the pinned clang-format, so
     # every C/C++ file under src/ (minus src/external) must stay formatted.
     - name: Check C/C++ formatting
       run: |
@@ -104,7 +104,7 @@ jobs:
         python3 -m unittest discover -s scripts/quality/tests
         python3 scripts/quality/validate_test_inventory.py
 
-    # T10.8a: onboarding CI runs the commands the build guide shows, so both must change together.
+    # Onboarding CI runs the commands the build guide shows, so both must change together.
     - name: Check documented onboarding commands
       run: python3 scripts/onboarding/extract_setup_commands.py --check
 
@@ -150,7 +150,7 @@ jobs:
         path: ${{ runner.temp }}/quality
         retention-days: 30
 
-  # ── Documentation gate (T4.4): API docs, screenshots, site build ────────
+  # ── Documentation gate: API docs, screenshots, site build ────────
   Docs:
     if: ${{ github.event_name != 'push' || github.repository != 'mne-tools/mne-cpp' }}
     uses: ./.github/workflows/_reusable-docs.yml

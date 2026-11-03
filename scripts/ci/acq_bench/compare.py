@@ -8,7 +8,7 @@
 # @date     November, 2026
 #
 #
-# @brief    A/B regression gate of the acquisition performance suite (T2.9).
+# @brief    A/B regression gate of the acquisition performance suite.
 """Runs mne_acq_bench of a base and a head build alternately and fails on a regression.
 
 Absolute numbers on shared CI machines drift by tens of percent between runs, so the two builds are run
