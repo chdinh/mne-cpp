@@ -67,7 +67,7 @@ jobs:
 
     # The recorder test reads its recordings back with mne-python, mne-bids and the BIDS validator.
     - name: Install MNE-Python, MNE-BIDS and the BIDS validator
-      run: python3 -m pip install --quiet mne==1.11.0 numpy==2.2.6 scipy==1.15.3 mne-bids==0.20.0 bids-validator-deno==3.0.2
+      run: python3 -m pip install --quiet mne==1.11.0 numpy==2.2.6 scipy==1.15.3 mne-bids==0.17.0 bids-validator-deno==3.0.2
 
     - name: Build
       run: |

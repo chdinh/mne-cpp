@@ -160,7 +160,7 @@ jobs:
     - name: Install MNE-Python
       run: |
         pip install --upgrade pip==26.2.1
-        pip install mne==1.11.0 numpy==2.2.6 scipy==1.15.3 scikit-learn==1.7.2 mne-bids==0.20.0 bids-validator-deno==3.0.2
+        pip install mne==1.11.0 numpy==2.2.6 scipy==1.15.3 scikit-learn==1.7.2 mne-bids==0.17.0 bids-validator-deno==3.0.2
 
     - name: Cache MNE sample data
       id: cache-mne-data

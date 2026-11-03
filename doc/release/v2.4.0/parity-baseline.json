@@ -11,7 +11,7 @@
       "bids-validator-deno==3.0.2",
       "clang-tidy==22.1.8",
       "fastcov==1.17",
-      "mne-bids==0.20.0",
+      "mne-bids==0.17.0",
       "mne==1.11.0",
       "numpy==2.2.6",
       "pip==26.2.1",
