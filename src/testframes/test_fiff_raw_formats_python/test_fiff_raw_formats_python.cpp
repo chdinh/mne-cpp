@@ -20,7 +20,9 @@
 // INCLUDES
 //=============================================================================================================
 
+#include <fiff/fiff_annotations.h>
 #include <fiff/fiff_raw_data.h>
+#include <fiff/fiff_stream.h>
 #include <mne/mne.h>
 #include <mne/mne_filter_def.h>
 #include <mne/mne_meas_data.h>
@@ -220,6 +222,26 @@ void TestFiffRawFormatsPython::readsAcquisitionSkip()
     QCOMPARE(part.row(1), data.block(1, 65, 1, 30));
     QVERIFY(std::abs(part(0, 0) - 7e-6) < 1e-12);
     QCOMPARE(part(0, 10), 0.0);
+
+    // The bad_acq_skip annotation as mne.annotations._read_annotations_fif returns it (no orig_time).
+    QFile again(fixture("skip"));
+    FiffStream stream(&again);
+    QVERIFY(stream.open());
+    FiffAnnotations annotations;
+    fiff_int_t origTime[2] = {0, 0};
+    QVERIFY(stream.read_annotations(stream.dirtree(), annotations, origTime));
+    QCOMPARE(origTime[0], -1);
+    QCOMPARE(annotations.size(), 1);
+    QCOMPARE(annotations[0].onset, 1.2000000476837158);
+    QCOMPARE(annotations[0].duration, 0.19999992847442627);
+    QCOMPARE(annotations[0].description, QStringLiteral("bad_acq_skip"));
+    QVERIFY(annotations[0].channelNames.isEmpty());
+
+    QFile none(fixture("single"));
+    FiffStream noAnnotations(&none);
+    QVERIFY(noAnnotations.open());
+    QVERIFY(!noAnnotations.read_annotations(noAnnotations.dirtree(), annotations, origTime));
+    QVERIFY(annotations.isEmpty());
 }
 
 //=============================================================================================================

@@ -26,6 +26,7 @@
 //=============================================================================================================
 
 #include <fiff/fiff_stream.h>
+#include <fiff/fiff_annotations.h>
 #include <fiff/fiff_raw_data.h>
 #include <fiff/fiff_cov.h>
 #include <fiff/fiff_digitizer_data.h>
@@ -103,6 +104,7 @@ private slots:
     void readsTagTypes();
     void printsDirectoryTree();
     void refusesUnwritablePath();
+    void writesAnnotations();
 
 private:
     FiffDirNode::SPtr findBlock(int kind) const;
@@ -673,6 +675,68 @@ void TestFiffStreamPython::refusesUnwritablePath()
     QCOMPARE(raw1.info.acq_pars, info.acq_pars);
     QCOMPARE(raw1.info.acq_stim, info.acq_stim);
     QCOMPARE(raw1.info.ctf_head_t.trans, ctf);
+}
+
+//=============================================================================================================
+
+void TestFiffStreamPython::writesAnnotations()
+{
+    // mne.io.read_raw_fif reads this file with annotations onset [1.5, 2.25, 3.0], duration [0.0, 0.5, 0.25], description
+    // ['Stimulus 1', 'a:b', ''], ch_names [(), ('EEG 001',), ()], meas_date 2026-11-03 10:00:00.250000 UTC.
+    QTemporaryDir dir;
+    QVERIFY(dir.isValid());
+    FiffInfo info;
+    FiffChInfo ch;
+    ch.ch_name = QStringLiteral("EEG 001");
+    ch.kind = FIFFV_EEG_CH;
+    ch.unit = FIFF_UNIT_V;
+    ch.cal = 1.0f;
+    ch.range = 1.0f;
+    info.chs << ch;
+    info.ch_names << ch.ch_name;
+    info.nchan = 1;
+    info.sfreq = 100.0f;
+    info.linefreq = 50.0f;
+    info.meas_date[0] = 1793700000;
+    info.meas_date[1] = 250000;
+
+    FiffAnnotations annotations;
+    annotations.append(1.5, 0.0, QStringLiteral("Stimulus 1"));
+    annotations.append(2.25, 0.5, QStringLiteral("a:b"), {QStringLiteral("EEG 001")});
+    annotations.append(3.0, 0.25, QString());
+
+    const QString path = dir.filePath(QStringLiteral("annotated_raw.fif"));
+    QFile file(path);
+    RowVectorXd cals;
+    FiffStream::SPtr stream = FiffStream::start_writing_raw(file, info, cals);
+    QVERIFY(stream);
+    stream->write_raw_buffer(MatrixXd::Constant(1, 400, 1e-6), cals);
+    stream->end_block(FIFFB_RAW_DATA);
+    stream->write_annotations(annotations, info.meas_date);
+    stream->end_block(FIFFB_MEAS);
+    stream->end_file();
+    stream->close();
+
+    QFile readBack(path);
+    FiffRawData raw(readBack);
+    QCOMPARE(raw.info.meas_date[1], 250000);
+
+    QFile again(path);
+    FiffStream reader(&again);
+    QVERIFY(reader.open());
+    FiffAnnotations back;
+    fiff_int_t origTime[2] = {0, 0};
+    QVERIFY(reader.read_annotations(reader.dirtree(), back, origTime));
+    QCOMPARE(origTime[0], info.meas_date[0]);
+    QCOMPARE(origTime[1], info.meas_date[1]);
+    QCOMPARE(back.size(), 3);
+    QCOMPARE(back[0].description, QStringLiteral("Stimulus 1"));
+    QCOMPARE(back[1].description, QStringLiteral("a:b"));
+    QVERIFY(back[2].description.isEmpty());
+    QCOMPARE(back[1].onset, 2.25);
+    QCOMPARE(back[1].duration, 0.5);
+    QVERIFY(back[0].channelNames.isEmpty());
+    QCOMPARE(back[1].channelNames, QStringList{QStringLiteral("EEG 001")});
 }
 
 //=============================================================================================================

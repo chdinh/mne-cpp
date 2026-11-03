@@ -28,6 +28,7 @@
 //=============================================================================================================
 
 #include "fiff_stream.h"
+#include "fiff_annotations.h"
 #include "fiff_tag.h"
 #include "fiff_dir_node.h"
 #include "fiff_ctf_comp.h"
@@ -48,8 +49,11 @@
 #include <math/numerics.h>
 #include <utils/ioutils.h>
 
+#include <algorithm>
+#include <cmath>
 #include <functional>
 #include <time.h>
+#include <utility>
 
 //=============================================================================================================
 // EIGEN INCLUDES
@@ -63,6 +67,9 @@
 //=============================================================================================================
 
 #include <QFile>
+#include <QJsonArray>
+#include <QJsonDocument>
+#include <QJsonObject>
 #include <QTcpSocket>
 #include <QDebug>
 
@@ -408,6 +415,118 @@ void FiffStream::write_bad_channels(const QStringList& bads)
     start_block(FIFFB_MNE_BAD_CHANNELS);
     write_name_list(FIFF_MNE_CH_NAME_LIST, bads);
     end_block(FIFFB_MNE_BAD_CHANNELS);
+}
+
+//=============================================================================================================
+
+bool FiffStream::read_annotations(const FiffDirNode::SPtr& p_Node, FiffAnnotations& annotations, fiff_int_t origTime[2])
+{
+    annotations.clear();
+    origTime[0] = -1;
+    origTime[1] = 0;
+    const QList<FiffDirNode::SPtr> blocks = p_Node->dir_tree_find(FIFFB_MNE_ANNOTATIONS);
+    if (blocks.isEmpty()) {
+        return false;
+    }
+    QVector<float> onsets;
+    QVector<float> ends;
+    QStringList descriptions;
+    QJsonArray channelNames;
+    QJsonArray extras;
+    FiffTag::UPtr tag;
+    for (const FiffDirEntry::SPtr& entry : blocks.first()->dir) {
+        if (!this->read_tag(tag, entry->pos)) {
+            continue;
+        }
+        switch (entry->kind) {
+            case FIFF_MNE_BASELINE_MIN:
+                onsets = QVector<float>(tag->toFloat(), tag->toFloat() + tag->size() / 4);
+                break;
+            case FIFF_MNE_BASELINE_MAX:
+                ends = QVector<float>(tag->toFloat(), tag->toFloat() + tag->size() / 4);
+                break;
+            case FIFF_COMMENT:
+                // Unlike channel name lists, descriptions keep spaces; colons inside them are stored as {COLON}.
+                if (!tag->toString().isEmpty()) {
+                    for (const QString& name : tag->toString().split(QLatin1Char(':'))) {
+                        descriptions << QString(name).replace(QStringLiteral("{COLON}"), QStringLiteral(":"));
+                    }
+                }
+                break;
+            case FIFF_MEAS_DATE:
+                if (tag->getType() == FIFFT_DOUBLE && tag->size() >= 16) {
+                    origTime[0] = static_cast<fiff_int_t>(tag->toDouble()[0]);
+                    origTime[1] = static_cast<fiff_int_t>(tag->toDouble()[1]);
+                } else if (tag->getType() == FIFFT_DOUBLE && tag->size() == 8) {
+                    const double stamp = tag->toDouble()[0];
+                    origTime[0] = static_cast<fiff_int_t>(std::floor(stamp));
+                    origTime[1] = static_cast<fiff_int_t>(std::lround((stamp - std::floor(stamp)) * 1e6));
+                }
+                break;
+            case FIFF_MNE_EPOCHS_DROP_LOG:
+                channelNames = QJsonDocument::fromJson(tag->toString().toUtf8()).array();
+                break;
+            case FIFF_FREE_LIST:
+                extras = QJsonDocument::fromJson(tag->toString().toUtf8()).array();
+                break;
+            default:
+                break;
+        }
+    }
+    const int count = std::min({static_cast<int>(onsets.size()), static_cast<int>(ends.size()),
+                                static_cast<int>(descriptions.size())});
+    for (int i = 0; i < count; ++i) {
+        FiffAnnotation annotation;
+        annotation.onset = static_cast<double>(onsets[i]);
+        annotation.duration = static_cast<double>(ends[i] - onsets[i]); // float32, as MNE-Python
+        annotation.description = descriptions[i];
+        for (const QJsonValue& name : channelNames.at(i).toArray()) {
+            annotation.channelNames << name.toString();
+        }
+        annotation.extras = extras.at(i).toObject().toVariantMap();
+        annotations.append(annotation);
+    }
+    return true;
+}
+
+//=============================================================================================================
+
+fiff_long_t FiffStream::write_annotations(const FiffAnnotations& annotations, const fiff_int_t* origTime)
+{
+    const fiff_long_t pos = start_block(FIFFB_MNE_ANNOTATIONS);
+    const int count = annotations.size();
+    QVector<float> onsets(count);
+    QVector<float> ends(count);
+    QStringList descriptions;
+    QJsonArray channelNames;
+    QJsonArray extras;
+    bool anyChannels = false;
+    bool anyExtras = false;
+    for (int i = 0; i < count; ++i) {
+        const FiffAnnotation& annotation = annotations[i];
+        onsets[i] = static_cast<float>(annotation.onset);
+        ends[i] = static_cast<float>(annotation.onset + annotation.duration);
+        descriptions << QString(annotation.description).replace(QLatin1Char(':'), QStringLiteral("{COLON}"));
+        channelNames.append(QJsonArray::fromStringList(annotation.channelNames));
+        extras.append(QJsonObject::fromVariantMap(annotation.extras));
+        anyChannels = anyChannels || !annotation.channelNames.isEmpty();
+        anyExtras = anyExtras || !annotation.extras.isEmpty();
+    }
+    write_float(FIFF_MNE_BASELINE_MIN, onsets.constData(), count);
+    write_float(FIFF_MNE_BASELINE_MAX, ends.constData(), count);
+    write_string(FIFF_COMMENT, descriptions.join(QLatin1Char(':')));
+    if (origTime != nullptr) {
+        const double stamp[2] = {static_cast<double>(origTime[0]), static_cast<double>(origTime[1])};
+        write_double(FIFF_MEAS_DATE, stamp, 2);
+    }
+    if (anyChannels) {
+        write_string(FIFF_MNE_EPOCHS_DROP_LOG, QString::fromUtf8(QJsonDocument(channelNames).toJson(QJsonDocument::Compact)));
+    }
+    if (anyExtras) {
+        write_string(FIFF_FREE_LIST, QString::fromUtf8(QJsonDocument(extras).toJson(QJsonDocument::Compact)));
+    }
+    end_block(FIFFB_MNE_ANNOTATIONS);
+    return pos;
 }
 
 //=============================================================================================================

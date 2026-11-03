@@ -7,9 +7,9 @@
  * @author   Christoph Dinh <christoph.dinh@mne-cpp.org>
  * @since    2.2.0
  * @date     April 2026
- * @brief    Implementation of @ref FiffAnnotation / @ref FiffAnnotations, including the FIFF, JSON and CSV serializers.
+ * @brief    Implementation of @ref FiffAnnotation / @ref FiffAnnotations, including the JSON and CSV serializers.
  *
- * FIFF I/O reads and writes under @c FIFFB_MNE_ANNOTATIONS. The JSON and
+ * FiffStream reads and writes them under @c FIFFB_MNE_ANNOTATIONS. The JSON and
  * CSV paths exist so the same annotations can be exchanged with BIDS
  * sidecars and external scoring tools that do not parse FIFF.
  */

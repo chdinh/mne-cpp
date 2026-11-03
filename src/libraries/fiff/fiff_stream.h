@@ -93,6 +93,7 @@ class FiffChInfo;
 class FiffChPos;
 class FiffCoordTrans;
 class FiffDigitizerData;
+class FiffAnnotations;
 
 //=============================================================================================================
 /**
@@ -280,6 +281,30 @@ public:
      * @param[in] bads The list of bad channel names.
      */
     void write_bad_channels(const QStringList& bads);
+
+    //=========================================================================================================
+    /**
+     * Reads the first MNE-Python annotations block (FIFFB_MNE_ANNOTATIONS) below @p p_Node.
+     *
+     * @param[in] p_Node         The node to search, e.g. dirtree().
+     * @param[out] annotations   Onsets in seconds since @p origTime, or since the first sample without it.
+     * @param[out] origTime      orig_time as seconds and microseconds; origTime[0] is -1 when the block has none.
+     *
+     * @return false if there is no annotations block.
+     */
+    bool read_annotations(const FiffDirNode::SPtr& p_Node, FiffAnnotations& annotations, fiff_int_t origTime[2]);
+
+    //=========================================================================================================
+    /**
+     * Writes @p annotations as an MNE-Python annotations block (FIFFB_MNE_ANNOTATIONS): onsets and ends as
+     * float, descriptions as a colon-separated list, channel names and extras as JSON.
+     *
+     * @param[in] annotations   Onsets in seconds since @p origTime, or since the first sample without it.
+     * @param[in] origTime      orig_time as seconds and microseconds (e.g. FiffInfo::meas_date), or nullptr.
+     *
+     * @return The position of the block start.
+     */
+    fiff_long_t write_annotations(const FiffAnnotations& annotations, const fiff_int_t* origTime = nullptr);
 
     //=========================================================================================================
     /**

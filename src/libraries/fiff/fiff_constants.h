@@ -437,6 +437,8 @@ inline constexpr auto FIFF_MNE_EVENT_LIST = 3561;         /**< An event list (fo
 inline constexpr auto FIFF_MNE_EVENT_TRIGGER_MASK = 3565; /**< Mask applied to the trigger channel values*/
 inline constexpr auto FIFF_MNE_EVENT_COMMENTS = 3566;     /**< Event comments, one NUL-terminated string per event*/
 inline constexpr auto FIFF_MNE_HEMI = 3562;               /**< Hemisphere association for general purposes*/
+inline constexpr auto FIFF_MNE_BASELINE_MIN = 3568;       /**< Baseline start; annotation onsets in FIFFB_MNE_ANNOTATIONS*/
+inline constexpr auto FIFF_MNE_BASELINE_MAX = 3569;       /**< Baseline end; annotation onset + duration in FIFFB_MNE_ANNOTATIONS*/
 
 /*
  * 3570... Morphing maps
@@ -463,6 +465,12 @@ inline constexpr auto FIFF_MNE_RT_CLIENT_ID = 3701; /**< Fiff Real-Time mne_t_se
  * 3710... Real-Time Blocks
  */
 inline constexpr auto FIFFB_MNE_RT_MEAS_INFO = 3710; /**< Fiff Real-Time Measurement Info. */
+
+/*
+ * 3800... MNE-Python epochs and annotations
+ */
+inline constexpr auto FIFF_MNE_EPOCHS_DROP_LOG = 3801; /**< Drop log; per-annotation channel names (JSON) in FIFFB_MNE_ANNOTATIONS*/
+inline constexpr auto FIFFB_MNE_ANNOTATIONS = 3810;    /**< MNE-Python annotations block*/
 
 /*
  * Fiff values associated with MNE computations

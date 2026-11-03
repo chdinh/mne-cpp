@@ -72,8 +72,9 @@ struct FIFFSHARED_EXPORT FiffAnnotation
 /**
  * @brief Container for @ref FiffAnnotation entries with FIFF, JSON and CSV serializers.
  *
- * Read and written under @c FIFFB_MNE_ANNOTATIONS so the annotation list
- * travels with the FIFF file. The JSON and CSV exporters let the same
+ * Read and written under @c FIFFB_MNE_ANNOTATIONS by FiffStream::read_annotations()
+ * and FiffStream::write_annotations(), so the annotation list travels with the
+ * FIFF file. The JSON and CSV exporters let the same
  * annotations be consumed by BIDS sidecars and by external scoring
  * tools that do not understand FIFF directly.
  *
