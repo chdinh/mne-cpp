@@ -17,6 +17,12 @@ target_include_directories(acq_dlpack_probe PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/.
 target_link_libraries(acq_dlpack_probe PUBLIC mne_acq)
 # Next to mne_acq, where the tests' rpath (../lib) finds it; Windows DLLs already land next to the test.
 set_target_properties(acq_dlpack_probe PROPERTIES LIBRARY_OUTPUT_DIRECTORY "$<TARGET_FILE_DIR:mne_acq>")
+# Python loads the probe, so the tests' executable-relative rpath does not apply; mne_acq sits next to it.
+if(APPLE)
+    set_target_properties(acq_dlpack_probe PROPERTIES INSTALL_RPATH "@loader_path")
+elseif(UNIX)
+    set_target_properties(acq_dlpack_probe PROPERTIES INSTALL_RPATH "\$ORIGIN")
+endif()
 
 if(${QT_VERSION_MAJOR} GREATER_EQUAL 6)
     qt_add_executable(${PROJECT_NAME} MANUAL_FINALIZATION test_acq_dlpack.cpp)
