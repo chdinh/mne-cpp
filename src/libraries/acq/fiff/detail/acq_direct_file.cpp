@@ -177,7 +177,7 @@ bool AcqDirectFile::isOpen() const noexcept
     return m_fd >= 0;
 }
 
-AcqError AcqDirectFile::open(const std::string& path, bool direct, bool create)
+AcqError AcqDirectFile::open(const std::string& path, [[maybe_unused]] bool direct, bool create)
 {
     close();
     m_path = path;
