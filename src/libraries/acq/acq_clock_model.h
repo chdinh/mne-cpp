@@ -66,7 +66,7 @@ struct AcqClockModel
     std::uint64_t anchorSample = 0;                                 /**< Sample index of the anchor. */
     std::int64_t anchorHostNs = 0;                                  /**< Host time at which the anchor sample crossed the host boundary. */
     std::int64_t pipelineDelayNs = 0;                               /**< Fixed device delay between the physical event and the host boundary. */
-    std::int64_t utcOffsetNs = 0;                                   /**< UTC minus steady_clock at the anchor. */
+    std::int64_t utcOffsetNs = 0;                                   /**< UTC minus steady_clock at the anchor; 0 if not known. */
     AcqClockSource source = AcqClockSource::Nominal;                /**< Origin of the anchor. */
     bool output = false;                                            /**< true for output streams (sign of pipelineDelayNs). */
 

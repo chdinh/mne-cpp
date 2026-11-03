@@ -770,6 +770,10 @@ public:
         clock.sfreq = m_config.sfreq;
         clock.anchorSample = m_next;
         clock.anchorHostNs = now;
+        clock.utcOffsetNs =
+            std::chrono::duration_cast<std::chrono::nanoseconds>(std::chrono::system_clock::now().time_since_epoch())
+                .count() -
+            now;
         clock.source = AcqClockSource::Nominal;
         m_writer->setClock(clock);
         for (ModalityStream& stream : m_streams) {

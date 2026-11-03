@@ -806,6 +806,14 @@ void TestAcqDevice::testSyntheticRealtimePacing()
     QVERIFY2(committed >= 100, qPrintable(QString::number(committed)));
     QCOMPARE(committed % 10, std::uint64_t(0));
 
+    // The clock model places sample 0 on the UTC axis, so a recording gets its measurement date.
+    const AcqClockModel clock = device->stream().clock();
+    const auto utcNow = std::chrono::duration_cast<std::chrono::nanoseconds>(
+                            std::chrono::system_clock::now().time_since_epoch())
+                            .count();
+    const std::int64_t sample0Utc = clock.physicalNs(0) + clock.utcOffsetNs;
+    QVERIFY2(std::llabs(utcNow - sample0Utc) < 60'000'000'000LL, qPrintable(QString::number(sample0Utc)));
+
     // speed=20 replays twenty times faster than real time.
     auto fast = AcqDevice::open("synthetic://?sfreq=1000&speed=20");
     QVERIFY(fast);
