@@ -92,6 +92,28 @@
       "topics": []
     },
     {
+      "name": "ex_acq_record",
+      "title": "Record a running source to FIFF and BIDS",
+      "brief": "Record an acquisition source to FIFF and to a BIDS dataset while it runs, and read the file back",
+      "thumbnail": "",
+      "url": "/docs/examples/acq/ex_acq_record/",
+      "library": "acq",
+      "libraries": [
+        "acq",
+        "disp",
+        "fiff"
+      ],
+      "tasks": [
+        "real-time"
+      ],
+      "modalities": [
+        "eeg",
+        "meg"
+      ],
+      "level": "start",
+      "topics": []
+    },
+    {
       "name": "ex_acq_scope",
       "title": "Watch a multi-channel stream live with a closed-loop stimulator",
       "brief": "Live multi-channel, multi-rate scope of a streaming source with a closed-loop stimulator on the same clock",
@@ -1790,7 +1812,7 @@
           "methods": [
             {
               "name": "start_writing_raw",
-              "url": "/docs/api/fiff/fiff-stream/#start_writing_rawp_iodevice-info-cals-sel-bresetrange"
+              "url": "/docs/api/fiff/fiff-stream/#start_writing_rawp_iodevice-info-cals-sel-bresetrange-datatype"
             }
           ]
         },

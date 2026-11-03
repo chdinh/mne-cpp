@@ -1,0 +1,216 @@
+---
+id: acq-recorder
+title: "ACQLIB::AcqRecorder"
+sidebar_label: AcqRecorder
+sidebar_position: 47
+---
+
+# AcqRecorder
+
+**Namespace:** `ACQLIB` &nbsp;·&nbsp; **Library:** Acquisition Library &nbsp;·&nbsp; **Source:** [`acq/fiff/acq_recorder.h`](https://github.com/mne-tools/mne-cpp/blob/staging/src/libraries/acq/fiff/acq_recorder.h)
+
+`#include <acq/acq_recorder.h>`
+
+```cpp
+class ACQLIB::AcqRecorder
+```
+
+Records one stream to FIFF on its own threads (reader and writer, double-buffered).
+
+Move-only; the destructor equals `stop()`.
+
+```cpp title="src/examples/ex_acq_record/main.cpp"
+auto device = AcqDevice::open(uri);
+if (!device) {
+    std::fprintf(stderr, "%s\n", device.error().text().c_str());
+    return 1;
+}
+AcqRecorderOptions options;
+options.device = device->description(); // device and URI go into the file's measurement info
+const std::string path = QDir(directory).filePath("oddball_raw.fif").toStdString();
+auto recorder = AcqRecorder::start(device->stream(), path, options); // attaches its own Lossless reader
+if (!recorder || !device->start().ok()) {
+    std::fprintf(stderr, "%s\n", recorder ? "cannot start the source" : recorder.error().text().c_str());
+    return 1;
+}
+while (recorder->isRecording()) { // a session of fixed duration ends the stream, which ends the recording
+    std::this_thread::sleep_for(std::chrono::milliseconds(20));
+}
+device->close();
+if (const AcqError error = recorder->stop(); !error.ok()) {
+    std::fprintf(stderr, "%s\n", error.text().c_str());
+    return 1;
+}
+const AcqRecorderStats stats = recorder->stats();
+std::printf("recorded %llu samples (%llu lost) and %llu events in %llu buffers, %.1f MB, direct I/O %s\n",
+            static_cast<unsigned long long>(stats.samples), static_cast<unsigned long long>(stats.lost),
+            static_cast<unsigned long long>(stats.events), static_cast<unsigned long long>(stats.buffers),
+            static_cast<double>(stats.bytes) / 1e6, stats.directIo ? "on" : "off");
+```
+
+ 
+```cpp title="src/examples/ex_acq_record/main.cpp"
+auto session = AcqDevice::open(uri);
+if (!session) {
+    return 1;
+}
+AcqBidsPath bids;
+bids.root = QDir(directory).filePath("bids").toStdString();
+bids.subject = "01";
+bids.session = "1";
+bids.task = "oddball";
+bids.datasetName = "Simulated oddball";
+auto bidsRecorder = AcqRecorder::start(session->stream(), bids, options);
+if (!bidsRecorder || !session->start().ok()) {
+    return 1;
+}
+while (bidsRecorder->isRecording()) {
+    std::this_thread::sleep_for(std::chrono::milliseconds(20));
+}
+session->close();
+if (!bidsRecorder->stop().ok()) { // writes channels.tsv, events.tsv, meg.json and dataset_description.json
+    return 1;
+}
+std::printf("BIDS: %s\n", bidsRecorder->files().front().c_str());
+```
+
+---
+
+## Public Methods
+
+### AcqRecorder()
+
+---
+
+### ~AcqRecorder()
+
+---
+
+### AcqRecorder(other)
+
+---
+
+### operator=(other)
+
+---
+
+### AcqRecorder()
+
+---
+
+### operator=()
+
+---
+
+### isRecording()
+
+**Returns:**
+
+- *bool* — true from `start()` until `stop()`, or until the stream ended and everything is on disk.
+
+---
+
+### stop()
+
+Records every sample committed until now, writes the annotations and closes the files (and writes the BIDS sidecars).
+
+Idempotent.
+
+**Returns:**
+
+- *[AcqError](/docs/api/acq/acq-error)* — The first error of the recording (DeviceIo), or success.
+
+---
+
+### stats()
+
+**Returns:**
+
+- *[AcqRecorderStats](/docs/api/acq/acq-recorder-stats)* — Progress counters.
+
+---
+
+### files()
+
+**Returns:**
+
+- *std::vector&lt; std::string &gt;* — The files written so far, in split order.
+
+---
+
+## Static Methods
+
+### start(stream, path, options)
+
+Starts recording `stream` to `path` from its next sample; the measurement info is on disk on return.
+
+**Parameters:**
+
+- **stream** : *const [AcqStream](/docs/api/acq/acq-stream) &*
+  An input or output stream of real, continuous samples in host memory.
+
+- **path** : *const std::string &*
+  FIFF file to create; further split parts are created next to it.
+
+- **options** : *const [AcqRecorderOptions](/docs/api/acq/acq-recorder-options) &*
+  Buffering, splitting, I/O mode, device description, thread policy.
+
+**Returns:**
+
+- *[AcqExpected](/docs/api/acq/acq-expected)&lt; AcqRecorder &gt;* — The recorder, or UnsupportedFormat (complex or segmented stream), DeviceMemory (the ring is in GPU memory), InvalidParameter (splitBytes out of range), TooManyReaders, or DeviceIo.
+
+---
+
+### start(stream, bids, options)
+
+Starts recording `stream` into a BIDS dataset; `stop()` writes the sidecars (channels.tsv, events.tsv, meg.json, dataset_description.json) as mne-bids does.
+
+**Parameters:**
+
+- **stream** : *const [AcqStream](/docs/api/acq/acq-stream) &*
+  As `start(const AcqStream&, const std::string&, const AcqRecorderOptions&)`.
+
+- **bids** : *const [AcqBidsPath](/docs/api/acq/acq-bids-path) &*
+  Dataset root and entities.
+
+- **options** : *const [AcqRecorderOptions](/docs/api/acq/acq-recorder-options) &*
+  As `start(const AcqStream&, const std::string&, const AcqRecorderOptions&)`.
+
+**Returns:**
+
+- *[AcqExpected](/docs/api/acq/acq-expected)&lt; AcqRecorder &gt;* — As `start(const AcqStream&, const std::string&, const AcqRecorderOptions&)`, or InvalidParameter for a missing root, subject or task, or a label that is not alphanumeric.
+
+---
+
+## Example
+
+- Start here: [ex_acq_record](../../examples/acq/ex_acq_record.mdx) — Record an acquisition source to FIFF and to a BIDS dataset while it runs, and read the file back.
+- Full source: [`src/examples/ex_acq_record/main.cpp`](https://github.com/mne-tools/mne-cpp/tree/staging/src/examples/ex_acq_record/main.cpp)
+- Build target: `ex_acq_record` (runs under CTest)
+
+## Used in examples
+
+### [ex_acq_record](../../examples/acq/ex_acq_record.mdx)
+
+Record an acquisition source to FIFF and to a BIDS dataset while it runs, and read the file back.
+
+````cpp title="src/examples/ex_acq_record/main.cpp, line 75"
+AcqRecorderOptions options;
+options.device = device->description(); // device and URI go into the file's measurement info
+const std::string path = QDir(directory).filePath("oddball_raw.fif").toStdString();
+auto recorder = AcqRecorder::start(device->stream(), path, options); // attaches its own Lossless reader
+if (!recorder || !device->start().ok()) {
+    std::fprintf(stderr, "%s\n", recorder ? "cannot start the source" : recorder.error().text().c_str());
+    return 1;
+}
+while (recorder->isRecording()) { // a session of fixed duration ends the stream, which ends the recording
+    std::this_thread::sleep_for(std::chrono::milliseconds(20));
+}
+device->close();
+if (const AcqError error = recorder->stop(); !error.ok()) {
+    std::fprintf(stderr, "%s\n", error.text().c_str());
+````
+
+## Authors of this file
+
+- Christoph Dinh &lt;christoph.dinh@mne-cpp.org&gt;

@@ -7,7 +7,7 @@ sidebar_position: 5
 
 # Class Members
 
-Index of 6695 public class members (functions, variables, typedefs, enums) across all documented classes.
+Index of 6734 public class members (functions, variables, typedefs, enums) across all documented classes.
 
 **Jump to:** [A](#a) · [B](#b) · [C](#c) · [D](#d) · [E](#e) · [F](#f) · [G](#g) · [H](#h) · [I](#i) · [J](#j) · [K](#k) · [L](#l) · [M](#m) · [N](#n) · [O](#o) · [P](#p) · [Q](#q) · [R](#r) · [S](#s) · [T](#t) · [U](#u) · [V](#v) · [W](#w) · [X](#x) · [Y](#y) · [Z](#z)
 
@@ -43,6 +43,9 @@ Index of 6695 public class members (functions, variables, typedefs, enums) acros
 - **AcqReader** `[fn]` in [AcqReader](/docs/api/acq/acq-reader)
 - **AcqReader** `[fn]` in [AcqReader](/docs/api/acq/acq-reader)
 - **AcqReader** `[fn]` in [AcqReader](/docs/api/acq/acq-reader)
+- **AcqRecorder** `[fn]` in [AcqRecorder](/docs/api/acq/acq-recorder)
+- **AcqRecorder** `[fn]` in [AcqRecorder](/docs/api/acq/acq-recorder)
+- **AcqRecorder** `[fn]` in [AcqRecorder](/docs/api/acq/acq-recorder)
 - **AcqStream** `[fn]` in [AcqStream](/docs/api/acq/acq-stream)
 - **acquire** `[fn]` in [AcqReader](/docs/api/acq/acq-reader) — Waits until at least `minSamples` are available (Latest: the newest `minSamples`), then returns a view of up to `maxSamples`.
 - **AcquiredPoints** `[fn]` in [AcquiredPoints](/docs/api/utils/acquired-points)
@@ -387,6 +390,8 @@ Index of 6695 public class members (functions, variables, typedefs, enums) acros
 - **bReject** `[var]` in [MNEEpochData](/docs/api/mne/mne-epoch-data) — Whether this epoch is to be rejected.
 - **bRejected** `[var]` in [ArtifactRejectionData](/docs/api/mne/artifact-rejection-data) — Set when the channel's peak-to-peak range exceeds dThreshold.
 - **buf_size** `[var]` in [MNERawInfo](/docs/api/mne/mne-raw-info) — Buffer size in samples.
+- **buffers** `[var]` in [AcqRecorderStats](/docs/api/acq/acq-recorder-stats) — FIFF data buffers flushed to disk.
+- **bufferSamples** `[var]` in [AcqRecorderOptions](/docs/api/acq/acq-recorder-options) — Samples per FIFF data buffer, the unit flushed to disk; 0 = 1 s.
 - **bufs** `[var]` in [MNERawData](/docs/api/mne/mne-raw-data) — Raw data buffer definitions.
 - **build** `[fn]` in [MNENamedMatrix](/docs/api/mne/mne-named-matrix) — Factory: build a named matrix from its constituent parts.
 - **buildAdjacency** `[fn]` in [FsLabelUtils](/docs/api/fs/fs-label-utils) — Build adjacency list from surface triangle mesh.
@@ -405,6 +410,7 @@ Index of 6695 public class members (functions, variables, typedefs, enums) acros
 - **bValid** `[var]` in [XdawnResult](/docs/api/dsp/xdawn-result) — True if fit() produced a usable decomposition.
 - **bytes** `[var]` in [AcqExternalBuffer](/docs/api/acq/acq-external-buffer) — Size in bytes.
 - **bytes** `[var]` in [AcqInt24](/docs/api/acq/acq-int24) — Least significant byte first.
+- **bytes** `[var]` in [AcqRecorderStats](/docs/api/acq/acq-recorder-stats) — Bytes written to all files.
 - **bytes** `[var]` in [GpuStream](/docs/api/disp3-d/gpu-stream) — Size in bytes.
 
 ## C {#c}
@@ -1298,6 +1304,7 @@ Index of 6695 public class members (functions, variables, typedefs, enums) acros
 - **DataLoader** `[fn]` in [DataLoader](/docs/api/disp3-d/data-loader)
 - **dataname** `[var]` in [InvEcdSet](/docs/api/inv/inv-ecd-set) — The associated data file.
 - **datap** `[var]` in [MNEMneData](/docs/api/mne/mne-mne-data) — Projection of the whitened data onto the eigenfields, components x times.
+- **datasetName** `[var]` in [AcqBidsPath](/docs/api/acq/acq-bids-path) — Name in a newly created dataset_description.json.
 - **datasetName** `[var]` in `WriteOptions` — Name for dataset_description.json (defaults to "[Unspecified]").
 - **datasetType** `[var]` in [BidsDatasetDescription](/docs/api/bids/bids-dataset-description) — "raw" or "derivative" (RECOMMENDED).
 - **datatype** `[fn]` in [BIDSPath](/docs/api/bids/bids-path) — BIDS datatype string.
@@ -1388,6 +1395,8 @@ Index of 6695 public class members (functions, variables, typedefs, enums) acros
 - **devHeadTrans** `[var]` in `SensorLoadResult` — Device→Head transform (identity if absent).
 - **device** `[var]` in [AcqDeviceDescription](/docs/api/acq/acq-device-description) — Device model and serial, file path or stream name.
 - **device** `[var]` in [AcqMemoryLocation](/docs/api/acq/acq-memory-location) — GPU or accelerator ordinal; -1 for Host.
+- **device** `[var]` in [AcqRecorderOptions](/docs/api/acq/acq-recorder-options) — Source, for the device info of the file, e.g.
+- **device_info** `[var]` in [FiffInfo](/docs/api/fiff/fiff-info) — Acquisition device; empty if unknown.
 - **devicePoseChanged** `[signal]` in [PolhemusCoregistration](/docs/api/utils/polhemus-coregistration)
 - **devicePosition** `[fn]` in [AcqWriter](/docs/api/acq/acq-writer)
 - **deviceTime** `[var]` in [AcqSegmentHeader](/docs/api/acq/acq-segment-header) — Device time stamp of the trigger, device units.
@@ -1458,6 +1467,8 @@ Index of 6695 public class members (functions, variables, typedefs, enums) acros
 - **dir_tree_find** `[fn]` in [FiffDirNode](/docs/api/fiff/fiff-dir-node) — Find nodes of the given kind from a directory tree structure.
 - **directed** `[var]` in [InvConnectivity](/docs/api/inv/inv-connectivity) — True for directed measures (Granger, PDC, DTF); false for undirected (COH, PLV, PLI).
 - **DirectedTransferFunction** `[fn]` in [DirectedTransferFunction](/docs/api/connectivity/directed-transfer-function) — Constructs a [`DirectedTransferFunction`](/docs/api/connectivity/directed-transfer-function) object.
+- **directIo** `[var]` in [AcqRecorderOptions](/docs/api/acq/acq-recorder-options) — Bypass the page cache where the file system allows it.
+- **directIo** `[var]` in [AcqRecorderStats](/docs/api/acq/acq-recorder-stats) — Whether the page cache is bypassed.
 - **direction** `[fn]` in [AcqStream](/docs/api/acq/acq-stream)
 - **direction** `[var]` in [AcqStreamInfo](/docs/api/acq/acq-stream-info) — Input or output.
 - **direction** `[var]` in [MnaPort](/docs/api/mna/mna-port) — Input or Output.
@@ -1659,6 +1670,7 @@ Index of 6695 public class members (functions, variables, typedefs, enums) acros
 - **eventIdMap** `[var]` in [BidsRawData](/docs/api/bids/bids-raw-data) — trial_type string → numeric value mapping.
 - **eventLabels** `[var]` in [AcqStreamInfo](/docs/api/acq/acq-stream-info) — Optional names of `AcqEvent::code` values, index = code.
 - **events** `[fn]` in [AcqBlockView](/docs/api/acq/acq-block-view)
+- **events** `[var]` in [AcqRecorderStats](/docs/api/acq/acq-recorder-stats) — Events recorded.
 - **events** `[var]` in [AcqStreamStats](/docs/api/acq/acq-stream-stats) — Events pushed.
 - **events** `[var]` in [AverageCategory](/docs/api/fiff/average-category) — The interesting events.
 - **events** `[var]` in [BidsRawData](/docs/api/bids/bids-raw-data) — Events from *_events.tsv.
@@ -1852,6 +1864,8 @@ Index of 6695 public class members (functions, variables, typedefs, enums) acros
 - **filePath** `[fn]` in [BIDSPath](/docs/api/bids/bids-path) — Constructs the full file path: `directory()` + `basename()`.
 - **filePath** `[fn]` in [FsAnnotation](/docs/api/fs/fs-annotation) — annotation file path
 - **filePath** `[fn]` in [FsSurface](/docs/api/fs/fs-surface) — path to surf directuryt
+- **files** `[fn]` in [AcqRecorder](/docs/api/acq/acq-recorder)
+- **files** `[var]` in [AcqRecorderStats](/docs/api/acq/acq-recorder-stats) — Files started (split parts).
 - **files** `[var]` in [MnaRecording](/docs/api/mna/mna-recording) — Files belonging to this recording.
 - **filt_bufs** `[var]` in [MNERawData](/docs/api/mne/mne-raw-data) — Filtered data buffer definitions.
 - **filt_ring** `[var]` in [MNERawData](/docs/api/mne/mne-raw-data) — Ring buffer for filtered data.
@@ -1934,6 +1948,7 @@ Index of 6695 public class members (functions, variables, typedefs, enums) acros
 - **firstColumn** `[var]` in [AcqConvertOptions](/docs/api/acq/acq-convert-options) — Matrix column of the view's first sample.
 - **firsts** `[var]` in [MNERawBufDef](/docs/api/mne/mne-raw-buf-def) — First sample index.
 - **firstSample** `[var]` in [AcqReadResult](/docs/api/acq/acq-read-result) — Sample index of column 0.
+- **firstSample** `[var]` in [AcqRecorderStats](/docs/api/acq/acq-recorder-stats) — Stream sample index of the first recorded sample (FIFF first_samp).
 - **firstSample** `[var]` in [AcqSegmentHeader](/docs/api/acq/acq-segment-header) — Sample index of the first sample of the segment.
 - **firstSample** `[fn]` in [AcqViewBase](/docs/api/acq/acq-view-base)
 - **firstSample** `[fn]` in [ChannelDataModel](/docs/api/disp/channel-data-model)
@@ -2870,6 +2885,7 @@ Index of 6695 public class members (functions, variables, typedefs, enums) acros
 - **isEmpty** `[fn]` in [FiffAnnotations](/docs/api/fiff/fiff-annotations) — Returns true if no annotations are stored.
 - **isEmpty** `[fn]` in [FiffCoordTrans](/docs/api/fiff/fiff-coord-trans) — Returns true if coordinate transform contains no data.
 - **isEmpty** `[fn]` in [FiffCov](/docs/api/fiff/fiff-cov) — True if FIFF covariance is empty.
+- **isEmpty** `[fn]` in [FiffDeviceInfo](/docs/api/fiff/fiff-device-info)
 - **isEmpty** `[fn]` in [FiffDigPointSet](/docs/api/fiff/fiff-dig-point-set) — True if [`FiffDigPointSet`](/docs/api/fiff/fiff-dig-point-set) is empty.
 - **isEmpty** `[fn]` in [FiffDirNode](/docs/api/fiff/fiff-dir-node) — Returns true if directory tree structure contains no data.
 - **isEmpty** `[fn]` in [FiffEvoked](/docs/api/fiff/fiff-evoked) — Returns whether [`FiffEvoked`](/docs/api/fiff/fiff-evoked) is empty.
@@ -2923,6 +2939,7 @@ Index of 6695 public class members (functions, variables, typedefs, enums) acros
 - **isPythonRequired** `[fn]` in [PythonTestHelper](/docs/api/utils/python-test-helper) — Check whether the environment demands Python availability.
 - **isRealtimeSensorStreaming** `[slot]` in [BrainView](/docs/api/disp3-d/brain-view) — Check whether real-time sensor streaming is active.
 - **isRealtimeStreaming** `[slot]` in [BrainView](/docs/api/disp3-d/brain-view) — Check whether real-time streaming is active.
+- **isRecording** `[fn]` in [AcqRecorder](/docs/api/acq/acq-recorder)
 - **isRejected** `[fn]` in [MNEEpochData](/docs/api/mne/mne-epoch-data) — Returns whether this epoch should be excluded from averaging.
 - **isRunning** `[fn]` in [RtNoise](/docs/api/dsp/rt-noise) — Returns whether the worker thread is running.
 - **isScannerRas** `[fn]` in [IeegImplantation](/docs/api/ieeg/ieeg-implantation)
@@ -2950,7 +2967,7 @@ Index of 6695 public class members (functions, variables, typedefs, enums) acros
 - **isValid** `[fn]` in [InvBeamformer](/docs/api/inv/inv-beamformer) — Returns true if this beamformer contains valid filter weights.
 - **isValid** `[fn]` in [MriVolData](/docs/api/mri/mri-vol-data) — Returns whether this volume contains valid data.
 - **isValidEeg** `[fn]` in [FiffChInfo](/docs/api/fiff/fiff-ch-info) — Check whether this channel has a valid EEG electrode position.
-- **isValidEntityValue** `[fn]` in [BIDSPath](/docs/api/bids/bids-path) — Validates entity values (no forbidden characters: -, _, /).
+- **isValidEntityValue** `[fn]` in [BIDSPath](/docs/api/bids/bids-path) — Validates entity values: BIDS labels are alphanumeric ASCII.
 - **isVideoOverlayEnabled** `[slot]` in [BrainView](/docs/api/disp3-d/brain-view)
 - **isView** `[fn]` in [MlTensor](/docs/api/ml/ml-tensor)
 - **isViewportEnabled** `[slot]` in [BrainView](/docs/api/disp3-d/brain-view) — Check if a multi-view viewport is enabled.
@@ -3176,6 +3193,7 @@ Index of 6695 public class members (functions, variables, typedefs, enums) acros
 - **lost** `[fn]` in [AcqBlockView](/docs/api/acq/acq-block-view)
 - **lost** `[var]` in [AcqReaderStats](/docs/api/acq/acq-reader-stats) — Samples overwritten before this reader could acquire them.
 - **lost** `[var]` in [AcqReadResult](/docs/api/acq/acq-read-result) — Samples lost before column 0.
+- **lost** `[var]` in [AcqRecorderStats](/docs/api/acq/acq-recorder-stats) — Samples the reader lost or saw overwritten, stored as zeros under BAD_ACQ_SKIP.
 - **lowCutoff** `[var]` in [BidsChannel](/docs/api/bids/bids-channel) — High-pass cutoff frequency in Hz (OPTIONAL).
 - **lowpass** `[var]` in [FiffInfo](/docs/api/fiff/fiff-info) — Lowpass frequency.
 - **lowpass** `[var]` in [FilterSettings](/docs/api/mne/filter-settings) — Lowpass corner (Hz).
@@ -3555,6 +3573,7 @@ Index of 6695 public class members (functions, variables, typedefs, enums) acros
 - **ModeAnnotation** `[var]` in [BrainSurface](/docs/api/disp3-d/brain-surface)
 - **model** `[var]` in [CameraResult](/docs/api/disp3-d/camera-result)
 - **model** `[fn]` in [ChannelDataView](/docs/api/disp/channel-data-view) — Returns the underlying data model (non-owning pointer).
+- **model** `[var]` in [FiffDeviceInfo](/docs/api/fiff/fiff-device-info) — Device model.
 - **model** `[var]` in `InstanceData`
 - **model** `[var]` in `InstanceData`
 - **model** `[var]` in `InstanceData`
@@ -3941,6 +3960,8 @@ Index of 6695 public class members (functions, variables, typedefs, enums) acros
 - **operator=** `[fn]` in [AcqExpected](/docs/api/acq/acq-expected)
 - **operator=** `[fn]` in [AcqReader](/docs/api/acq/acq-reader)
 - **operator=** `[fn]` in [AcqReader](/docs/api/acq/acq-reader)
+- **operator=** `[fn]` in [AcqRecorder](/docs/api/acq/acq-recorder)
+- **operator=** `[fn]` in [AcqRecorder](/docs/api/acq/acq-recorder)
 - **operator=** `[fn]` in [AcqViewLease](/docs/api/acq/acq-view-lease)
 - **operator=** `[fn]` in [AcqViewLease](/docs/api/acq/acq-view-lease)
 - **operator=** `[fn]` in [AcqWriter](/docs/api/acq/acq-writer)
@@ -4474,6 +4495,7 @@ Index of 6695 public class members (functions, variables, typedefs, enums) acros
 - **read** `[fn]` in [MriMghIO](/docs/api/mri/mri-mgh-io) — Reads a FreeSurfer MGH or MGZ file.
 - **read** `[fn]` in [MriNiftiIO](/docs/api/mri/mri-nifti-io) — Reads a NIfTI-1 single-file volume.
 - **read** `[fn]` in [MriVolData](/docs/api/mri/mri-vol-data) — Convenience loader: reads an MGH/MGZ file and populates this volume.
+- **read_annotations** `[fn]` in [FiffStream](/docs/api/fiff/fiff-stream) — Reads the first MNE-Python annotations block (FIFFB_MNE_ANNOTATIONS) below `p_Node`.
 - **read_bad_channels** `[fn]` in [Fiff](/docs/api/fiff/fiff-class) — fiff_read_bad_channels
 - **read_bad_channels** `[fn]` in [FiffStream](/docs/api/fiff/fiff-stream) — fiff_read_bad_channels
 - **read_bem_surface** `[fn]` in [MNESurface](/docs/api/mne/mne-surface) — Read a BEM surface from a FIFF file (excess-neighbor checking enabled).
@@ -4727,6 +4749,7 @@ Index of 6695 public class members (functions, variables, typedefs, enums) acros
 - **roiIdx** `[var]` in [RegionDataOut](/docs/api/mne/region-data-out) — Region cluster indices.
 - **roiIdx** `[var]` in [RegionMTOut](/docs/api/mne/region-mt-out) — Per-source cluster assignment indices.
 - **role** `[var]` in [MnaFileRef](/docs/api/mna/mna-file-ref) — Role of the file.
+- **root** `[var]` in [AcqBidsPath](/docs/api/acq/acq-bids-path) — Dataset root; created if missing.
 - **root** `[fn]` in [BIDSPath](/docs/api/bids/bids-path) — BIDS dataset root path.
 - **rot** `[var]` in [MNEMshDisplaySurface](/docs/api/mne/mne-msh-display-surface) — Rotation angles of the MRI (in radians).
 - **rot** `[var]` in [MNEMshDisplaySurfaceSet](/docs/api/mne/mne-msh-display-surface-set) — Rotation angles of the MRI (in radians).
@@ -4778,6 +4801,7 @@ Index of 6695 public class members (functions, variables, typedefs, enums) acros
 - **RtSourceDataController** `[fn]` in [RtSourceDataController](/docs/api/disp3-d/rt-source-data-controller) — Constructor.
 - **RtSourceDataWorker** `[fn]` in [RtSourceDataWorker](/docs/api/disp3-d/rt-source-data-worker) — Constructor.
 - **RtSourceInterpolationMatWorker** `[fn]` in [RtSourceInterpolationMatWorker](/docs/api/disp3-d/rt-source-interpolation-mat-worker) — Constructor.
+- **run** `[var]` in [AcqBidsPath](/docs/api/acq/acq-bids-path) — Run label without "run-"; empty for none.
 - **run** `[fn]` in [BIDSPath](/docs/api/bids/bids-path) — Run index.
 - **run** `[fn]` in [ICA](/docs/api/dsp/ica) — Fit FastICA on the given data matrix.
 - **run** `[fn]` in [MLTrainer](/docs/api/ml/ml-trainer) — Run a training script.
@@ -4812,6 +4836,7 @@ Index of 6695 public class members (functions, variables, typedefs, enums) acros
 - **sampleRangeSelected** `[signal]` in [ChannelRhiView](/docs/api/disp/channel-rhi-view) — Emitted when the user selects a time span with Shift+drag in annotation mode.
 - **samples** `[var]` in [AcqPart](/docs/api/acq/acq-part) — Samples per channel in the run.
 - **samples** `[var]` in [AcqReadResult](/docs/api/acq/acq-read-result) — Columns written.
+- **samples** `[var]` in [AcqRecorderStats](/docs/api/acq/acq-recorder-stats) — Samples per channel flushed to disk, including zero-filled lost ones.
 - **samples** `[fn]` in [InvSourceEstimate](/docs/api/inv/inv-source-estimate) — Returns the number of samples.
 - **samples_available** `[fn]` in [stream_inlet](/docs/api/lsl/stream_inlet) — Check whether new samples are available in the internal buffer.
 - **samplesChanged** `[signal]` in [CovarianceSettingsView](/docs/api/disp/covariance-settings-view)
@@ -4996,7 +5021,9 @@ Index of 6695 public class members (functions, variables, typedefs, enums) acros
 - **SensorTreeItem** `[fn]` in [SensorTreeItem](/docs/api/disp3-d/sensor-tree-item)
 - **separatorGeometries** `[fn]` in [MultiViewLayout](/docs/api/disp3-d/multi-view-layout) — Compute the separator widget geometries.
 - **separatorLinePx** `[fn]` in [MultiViewLayout](/docs/api/disp3-d/multi-view-layout)
+- **serial** `[var]` in [FiffDeviceInfo](/docs/api/fiff/fiff-device-info) — Serial number.
 - **seriesCount** `[fn]` in [LinePlot](/docs/api/disp/line-plot) — Returns the number of series in the plot.
+- **session** `[var]` in [AcqBidsPath](/docs/api/acq/acq-bids-path) — Session label without "ses-"; empty for none.
 - **session** `[fn]` in [BIDSPath](/docs/api/bids/bids-path) — Session label (without "ses-").
 - **sessions** `[var]` in [MnaSubject](/docs/api/mna/mna-subject) — Sessions for this subject.
 - **set** `[var]` in [FwdCompData](/docs/api/fwd/fwd-comp-data) — The compensation data set.
@@ -5583,6 +5610,7 @@ Index of 6695 public class members (functions, variables, typedefs, enums) acros
 - **sing** `[var]` in [fitUserRec](/docs/api/fwd/fit-user-rec)
 - **sing** `[var]` in [InvDipoleForward](/docs/api/inv/inv-dipole-forward) — Singular values of the forward matrix (3*ndip).
 - **sing** `[var]` in [MNEInverseOperator](/docs/api/mne/mne-inverse-operator) — Singular values of the whitened lead field.
+- **site** `[var]` in [FiffDeviceInfo](/docs/api/fiff/fiff-device-info) — Site of the device.
 - **size** `[fn]` in [AcqSpanPair](/docs/api/acq/acq-span-pair)
 - **size** `[var]` in [BidsElectrode](/docs/api/bids/bids-electrode) — Electrode size in mm or "n/a" (RECOMMENDED for iEEG).
 - **size** `[fn]` in [ConnectivitySettings](/docs/api/connectivity/connectivity-settings)
@@ -5681,6 +5709,7 @@ Index of 6695 public class members (functions, variables, typedefs, enums) acros
 - **split** `[fn]` in [BIDSPath](/docs/api/bids/bids-path) — Split index.
 - **split_name_list** `[fn]` in [Fiff](/docs/api/fiff/fiff-class) — fiff_split_name_list
 - **split_name_list** `[fn]` in [FiffStream](/docs/api/fiff/fiff-stream) — fiff_split_name_list
+- **splitBytes** `[var]` in [AcqRecorderOptions](/docs/api/acq/acq-recorder-options) — Size at which the file is split, at most 2 GiB (FIFF positions are int32).
 - **splitLabel** `[fn]` in [FsLabelUtils](/docs/api/fs/fs-label-utils) — Split a label into connected components.
 - **splitSize** `[var]` in [ProcessingSettings](/docs/api/mne/processing-settings) — Split output into chunks of this many bytes (-1=no split).
 - **splitX** `[fn]` in [MultiViewLayout](/docs/api/disp3-d/multi-view-layout)
@@ -5886,6 +5915,8 @@ Index of 6695 public class members (functions, variables, typedefs, enums) acros
 - **Standard** `[var]` in [BrainRenderer](/docs/api/disp3-d/brain-renderer)
 - **start** `[fn]` in [AcqBackend](/docs/api/acq/acq-backend) — Starts acquisition and output.
 - **start** `[fn]` in [AcqDevice](/docs/api/acq/acq-device) — Starts acquisition and output.
+- **start** `[fn]` in [AcqRecorder](/docs/api/acq/acq-recorder) — Starts recording `stream` to `path` from its next sample; the measurement info is on disk on return.
+- **start** `[fn]` in [AcqRecorder](/docs/api/acq/acq-recorder) — Starts recording `stream` into a BIDS dataset; `stop()` writes the sidecars (channels.tsv, events.tsv, meg.json, dataset_description.json) as mne-bids does.
 - **start** `[fn]` in [RtNoise](/docs/api/dsp/rt-noise) — Starts the worker thread.
 - **start_block** `[fn]` in [Fiff](/docs/api/fiff/fiff-class) — fiff_start_block
 - **start_block** `[fn]` in [FiffStream](/docs/api/fiff/fiff-stream) — Writes a FIFF_BLOCK_START tag.
@@ -5911,6 +5942,7 @@ Index of 6695 public class members (functions, variables, typedefs, enums) acros
 - **station** `[var]` in [FastrakSample](/docs/api/utils/fastrak-sample) — 1-based station id reported by the device.
 - **stats** `[fn]` in [AcqDevice](/docs/api/acq/acq-device)
 - **stats** `[fn]` in [AcqReader](/docs/api/acq/acq-reader)
+- **stats** `[fn]` in [AcqRecorder](/docs/api/acq/acq-recorder)
 - **stats** `[fn]` in [AcqStream](/docs/api/acq/acq-stream)
 - **status** `[var]` in [BidsChannel](/docs/api/bids/bids-channel) — "good" or "bad" (OPTIONAL).
 - **stc** `[var]` in [InvGammaMapResult](/docs/api/inv/inv-gamma-map-result)
@@ -5937,6 +5969,7 @@ Index of 6695 public class members (functions, variables, typedefs, enums) acros
 - **stimIgnore** `[var]` in [RejectionParams](/docs/api/fiff/rejection-params) — Ignore this many seconds around the stimulus.
 - **stop** `[fn]` in [AcqBackend](/docs/api/acq/acq-backend) — Stops and joins every backend thread before returning.
 - **stop** `[fn]` in [AcqDevice](/docs/api/acq/acq-device) — Stops acquisition and output and joins the backend threads.
+- **stop** `[fn]` in [AcqRecorder](/docs/api/acq/acq-recorder) — Records every sample committed until now, writes the annotations and closes the files (and writes the BIDS sidecars).
 - **stop** `[fn]` in [RtAveraging](/docs/api/dsp/rt-averaging) — Stops the thread by interrupting its computation queue, quitting and waiting.
 - **stop** `[fn]` in [RtClient](/docs/api/com/rt-client) — Stops the [`RtClient`](/docs/api/com/rt-client) by stopping the producer's thread.
 - **stop** `[fn]` in [RtConnectivity](/docs/api/dsp/rt-connectivity) — Stops the thread by interrupting its computation queue, quitting and waiting.
@@ -5987,6 +6020,7 @@ Index of 6695 public class members (functions, variables, typedefs, enums) acros
 - **StyleMode** `[enum]` in [AbstractView](/docs/api/disp/abstract-view)
 - **subj** `[var]` in [MNEMshDisplaySurface](/docs/api/mne/mne-msh-display-surface) — Subject name in SUBJECTS_DIR.
 - **subj** `[var]` in [MNEMshDisplaySurfaceSet](/docs/api/mne/mne-msh-display-surface-set) — The name of the subject.
+- **subject** `[var]` in [AcqBidsPath](/docs/api/acq/acq-bids-path) — Subject label without "sub-".
 - **subject** `[fn]` in [BIDSPath](/docs/api/bids/bids-path) — Subject label (without "sub-").
 - **subject** `[var]` in [InvBeamformer](/docs/api/inv/inv-beamformer) — Subject identifier.
 - **subject** `[var]` in [MNESurfaceOrVolume](/docs/api/mne/mne-surface-or-volume) — Name (id) of the subject.
@@ -6044,6 +6078,7 @@ Index of 6695 public class members (functions, variables, typedefs, enums) acros
 - **target** `[var]` in [AcqUri](/docs/api/acq/acq-uri) — Everything between "://" and "?".
 - **targetPath** `[var]` in [MnaParamBinding](/docs/api/mna/mna-param-binding) — Parameter to control: "nodeId/attrKey".
 - **targetSample** `[var]` in [AcqSyncMarker](/docs/api/acq/acq-sync-marker) — Sample of the edge in the target stream.
+- **task** `[var]` in [AcqBidsPath](/docs/api/acq/acq-bids-path) — Task label without "task-".
 - **task** `[fn]` in [BIDSPath](/docs/api/bids/bids-path) — Task label.
 - **taskDescription** `[var]` in [BidsRawData](/docs/api/bids/bids-raw-data) — Task description (OPTIONAL).
 - **taskType** `[fn]` in [MlModel](/docs/api/ml/ml-model)
@@ -6060,6 +6095,7 @@ Index of 6695 public class members (functions, variables, typedefs, enums) acros
 - **TFplot** `[fn]` in [TFplot](/docs/api/disp/t-fplot) — Plots all frequency bins.
 - **tfrData** `[var]` in [MultitaperTfrResult](/docs/api/dsp/multitaper-tfr-result) — One matrix per channel, each: n_freqs × n_times.
 - **TfSettingsView** `[fn]` in [TfSettingsView](/docs/api/disp/tf-settings-view) — Constructs a [`TfSettingsView`](/docs/api/disp/tf-settings-view) which is a child of parent.
+- **thread** `[var]` in [AcqRecorderOptions](/docs/api/acq/acq-recorder-options) — Placement and priority of the recorder's reader thread.
 - **thresholdMax** `[fn]` in [SourceEstimateOverlay](/docs/api/disp3-d/source-estimate-overlay)
 - **thresholdMid** `[fn]` in [SourceEstimateOverlay](/docs/api/disp3-d/source-estimate-overlay)
 - **thresholdMin** `[fn]` in [SourceEstimateOverlay](/docs/api/disp3-d/source-estimate-overlay) — Get the current threshold values.
@@ -6288,6 +6324,7 @@ Index of 6695 public class members (functions, variables, typedefs, enums) acros
 - **type** `[var]` in [BrainVisionMarker](/docs/api/bids/brain-vision-marker) — Marker type (e.g., "New Segment", "Stimulus", "Response").
 - **type** `[var]` in `EventMarker` — Numeric event type (stimulus code).
 - **type** `[var]` in [FiffDataRef](/docs/api/fiff/fiff-data-ref) — Type of the data.
+- **type** `[var]` in [FiffDeviceInfo](/docs/api/fiff/fiff-device-info) — Device type, e.g.
 - **type** `[var]` in [FiffDirEntry](/docs/api/fiff/fiff-dir-entry) — Data type.
 - **type** `[var]` in [FiffDirNode](/docs/api/fiff/fiff-dir-node) — Block type for this directory.
 - **type** `[var]` in [FiffTag](/docs/api/fiff/fiff-tag) — Data type.
@@ -6440,7 +6477,7 @@ Index of 6695 public class members (functions, variables, typedefs, enums) acros
 - **user_data** `[var]` in [MNEMshDisplaySurface](/docs/api/mne/mne-msh-display-surface) — Arbitrary user-defined data pointer.
 - **user_data_free** `[var]` in [MNEMshDisplaySurface](/docs/api/mne/mne-msh-display-surface) — Function to free user_data.
 - **utc_offset** `[var]` in [FiffInfo](/docs/api/fiff/fiff-info) — UTC offset of related meas_date (sHH:MM).
-- **utcOffsetNs** `[var]` in [AcqClockModel](/docs/api/acq/acq-clock-model) — UTC minus steady_clock at the anchor.
+- **utcOffsetNs** `[var]` in [AcqClockModel](/docs/api/acq/acq-clock-model) — UTC minus steady_clock at the anchor; 0 if not known.
 - **uu** `[var]` in [fitUserRec](/docs/api/fwd/fit-user-rec)
 - **uu** `[var]` in [InvDipoleForward](/docs/api/inv/inv-dipole-forward) — Right singular vectors V^T of fwd (udim x nch, row-major).
 
@@ -6638,6 +6675,7 @@ Index of 6695 public class members (functions, variables, typedefs, enums) acros
 - **write** `[fn]` in [MNEMorphMap](/docs/api/mne/mne-morph-map) — Writes maps as `FIFFB_MNE_MORPH_MAP` blocks (MNE-C `mne_save_morph_map_matrices`).
 - **write** `[fn]` in [MNESparseNamedMatrix](/docs/api/mne/mne-sparse-named-matrix) — Writes the matrix as a `FIFFB_MNE_NAMED_MATRIX` block (MNE-C `mne_write_sparse_named_matrix`).
 - **write** `[fn]` in [MriCorFifIO](/docs/api/mri/mri-cor-fif-io) — Writes COR.fif file from slice data.
+- **write_annotations** `[fn]` in [FiffStream](/docs/api/fiff/fiff-stream) — Writes `annotations` as an MNE-Python annotations block (FIFFB_MNE_ANNOTATIONS): onsets and ends as float, descriptions as a colon-separated list, channel names and extras as JSON.
 - **write_bad_channels** `[fn]` in [FiffStream](/docs/api/fiff/fiff-stream) — Write a bad channel list as a FIFFB_MNE_BAD_CHANNELS block.
 - **write_ch_info** `[fn]` in [Fiff](/docs/api/fiff/fiff-class) — fiff_write_ch_info
 - **write_ch_info** `[fn]` in [FiffStream](/docs/api/fiff/fiff-stream) — Writes a channel information record to a fif file The type, cal, unit, and pos members are explained in Table 9.5 of the MNE manual.
@@ -6647,6 +6685,7 @@ Index of 6695 public class members (functions, variables, typedefs, enums) acros
 - **write_cov** `[fn]` in [FiffStream](/docs/api/fiff/fiff-stream) — Write a noise covariance matrix.
 - **write_ctf_comp** `[fn]` in [Fiff](/docs/api/fiff/fiff-class) — fiff_write_ctf_comp
 - **write_ctf_comp** `[fn]` in [FiffStream](/docs/api/fiff/fiff-stream) — fiff_write_ctf_comp
+- **write_device_info** `[fn]` in [FiffStream](/docs/api/fiff/fiff-stream) — Writes a FIFFB_DEVICE block; nothing for an empty `device`.
 - **write_dig_point** `[fn]` in [Fiff](/docs/api/fiff/fiff-class) — fiff_write_dig_point
 - **write_dig_point** `[fn]` in [FiffStream](/docs/api/fiff/fiff-stream) — fiff_write_dig_point
 - **write_dir_entries** `[fn]` in [FiffStream](/docs/api/fiff/fiff-stream) — Writes a list of dir entries to a fif file, as a FIFFT_DIR_ENTRY_STRUCT Returns the postion where the structure was written to.

@@ -226,6 +226,27 @@ Opens a source through [`AcqDeviceRegistry`](/docs/api/acq/acq-device-registry),
 
 ## Used in examples
 
+### [ex_acq_record](../../examples/acq/ex_acq_record.mdx)
+
+Record an acquisition source to FIFF and to a BIDS dataset while it runs, and read the file back.
+
+````cpp title="src/examples/ex_acq_record/main.cpp, line 70"
+auto device = AcqDevice::open(uri);
+if (!device) {
+    std::fprintf(stderr, "%s\n", device.error().text().c_str());
+    return 1;
+}
+AcqRecorderOptions options;
+options.device = device->description(); // device and URI go into the file's measurement info
+const std::string path = QDir(directory).filePath("oddball_raw.fif").toStdString();
+auto recorder = AcqRecorder::start(device->stream(), path, options); // attaches its own Lossless reader
+if (!recorder || !device->start().ok()) {
+    std::fprintf(stderr, "%s\n", recorder ? "cannot start the source" : recorder.error().text().c_str());
+    return 1;
+}
+while (recorder->isRecording()) { // a session of fixed duration ends the stream, which ends the recording
+````
+
 ### [ex_acq_oddball](../../examples/acq/ex_acq_oddball.mdx)
 
 Recover the P300 from a streaming oddball session by trigger-locked averaging.

@@ -63,7 +63,8 @@ const apiSidebar: SidebarsConfig['apiSidebar'] = [
         'api/fiff/fiff-annotation',
         'api/fiff/fiff-epoch-data',
         'api/fiff/fiff-explain',
-        'api/fiff/rejection-params'
+        'api/fiff/rejection-params',
+        'api/fiff/fiff-device-info'
       ],
     },
     {
@@ -771,7 +772,11 @@ const apiSidebar: SidebarsConfig['apiSidebar'] = [
         'api/acq/acq-view-lease',
         'api/acq/acq-impedance',
         'api/acq/acq-sample-range',
-        'api/acq/acq-thread-policy'
+        'api/acq/acq-thread-policy',
+        'api/acq/acq-recorder',
+        'api/acq/acq-recorder-options',
+        'api/acq/acq-recorder-stats',
+        'api/acq/acq-bids-path'
       ],
     }
 ];

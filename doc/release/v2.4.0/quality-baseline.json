@@ -11,7 +11,7 @@
   },
   "gates": {
     "G1_test_integrity": {
-      "registered": 269,
+      "registered": 270,
       "conditional": 6,
       "unregistered": 3,
       "without_labels": 0,
@@ -38,6 +38,7 @@
           "test_acq_device",
           "test_acq_dlpack",
           "test_acq_error",
+          "test_acq_recorder",
           "test_acq_stream",
           "test_acq_thread",
           "test_acq_timebase"
@@ -47,6 +48,7 @@
           "test_acq_device",
           "test_acq_dlpack",
           "test_acq_error",
+          "test_acq_recorder",
           "test_acq_stream",
           "test_acq_thread",
           "test_acq_timebase"
@@ -56,6 +58,7 @@
           "test_acq_device",
           "test_acq_dlpack",
           "test_acq_error",
+          "test_acq_recorder",
           "test_acq_stream",
           "test_acq_thread",
           "test_acq_timebase"
@@ -65,6 +68,7 @@
           "test_acq_device",
           "test_acq_dlpack",
           "test_acq_error",
+          "test_acq_recorder",
           "test_acq_stream",
           "test_acq_thread",
           "test_acq_timebase"
@@ -74,6 +78,7 @@
           "test_acq_device",
           "test_acq_dlpack",
           "test_acq_error",
+          "test_acq_recorder",
           "test_acq_stream",
           "test_acq_thread",
           "test_acq_timebase"
@@ -83,6 +88,7 @@
           "test_acq_device",
           "test_acq_dlpack",
           "test_acq_error",
+          "test_acq_recorder",
           "test_acq_stream",
           "test_acq_thread",
           "test_acq_timebase"
@@ -109,12 +115,12 @@
       }
     },
     "G3_api_documentation": {
-      "public_api_units": 566,
+      "public_api_units": 571,
       "exported_not_registered": 0,
-      "example_eligible": 404,
+      "example_eligible": 409,
       "eligible_backed_percent": 100.0,
-      "snippets": 440,
-      "registered_test_percent": 37.1
+      "snippets": 445,
+      "registered_test_percent": 37.65
     },
     "G4_screenshots": {
       "referenced_images": 19,
@@ -146,17 +152,17 @@
         "missing": 145,
         "not-applicable": 8
       },
-      "claims": 357,
+      "claims": 358,
       "claims_by_evidence": {
         "cross-validated-static": 174,
         "cross-validated-live": 0,
-        "tested": 183,
+        "tested": 184,
         "unverified": 0
       },
       "claims_by_status": {
         "equivalent": 139,
         "exceeds": 0,
-        "implemented": 123,
+        "implemented": 124,
         "partial": 95
       },
       "equivalence_without_static_evidence": []

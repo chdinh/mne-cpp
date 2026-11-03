@@ -3,37 +3,37 @@
   "generated_by": "scripts/quality/audit_api_evidence.py",
   "policy": "scripts/quality/api_evidence_policy.json",
   "summary": {
-    "exported_classes": 479,
+    "exported_classes": 480,
     "exported_free_functions": 135,
-    "registered_classes": 566,
+    "registered_classes": 571,
     "exported_not_registered": 0,
     "registered_function_modules": 13,
-    "registered_header_only": 74,
+    "registered_header_only": 78,
     "registered_stale": 0,
-    "registered_with_test": 210,
+    "registered_with_test": 215,
     "registered_test_unresolved": 0,
-    "registered_with_example": 405,
+    "registered_with_example": 410,
     "registered_example_not_built": 0,
-    "registered_with_python_equiv": 94,
+    "registered_with_python_equiv": 95,
     "registered_without_api_page": 0,
-    "with_snippet": 440,
-    "public_api_units": 566,
-    "example_eligible": 404,
+    "with_snippet": 445,
+    "public_api_units": 571,
+    "example_eligible": 409,
     "example_exempt": 162,
-    "eligible_backed_by_registry_example": 404,
-    "eligible_used_by_some_example": 354,
-    "examples_on_disk": 73,
-    "examples_built": 73
+    "eligible_backed_by_registry_example": 409,
+    "eligible_used_by_some_example": 359,
+    "examples_on_disk": 74,
+    "examples_built": 74
   },
   "by_library": {
     "acq": {
-      "public": 46,
-      "registered": 46,
-      "with_test": 46,
-      "eligible": 28,
-      "eligible_with_registry_example": 28,
-      "eligible_used_by_example": 0,
-      "with_snippet": 42
+      "public": 50,
+      "registered": 50,
+      "with_test": 50,
+      "eligible": 32,
+      "eligible_with_registry_example": 32,
+      "eligible_used_by_example": 4,
+      "with_snippet": 46
     },
     "bids": {
       "public": 14,
@@ -99,13 +99,13 @@
       "with_snippet": 86
     },
     "fiff": {
-      "public": 38,
-      "registered": 38,
-      "with_test": 11,
-      "eligible": 38,
-      "eligible_with_registry_example": 38,
-      "eligible_used_by_example": 36,
-      "with_snippet": 38
+      "public": 39,
+      "registered": 39,
+      "with_test": 12,
+      "eligible": 39,
+      "eligible_with_registry_example": 39,
+      "eligible_used_by_example": 37,
+      "with_snippet": 39
     },
     "fs": {
       "public": 8,
@@ -1955,6 +1955,114 @@
       "exempt_reason": null
     },
     {
+      "name": "AcqBidsPath",
+      "header": "acq/fiff/acq_recorder.h",
+      "library": "acq",
+      "kind": "header-only",
+      "exported": false,
+      "registered": true,
+      "registry_status": "documented",
+      "test": "test_acq_recorder",
+      "test_resolves": true,
+      "example": "ex_acq_record",
+      "example_state": "built",
+      "including_examples": [
+        "ex_acq_record"
+      ],
+      "snippets": [
+        "ex_acq_record/main.cpp#acq_record_bids",
+        "ex_acq_record/main.cpp#acq_record_fiff",
+        "ex_acq_record/main.cpp#acq_record_fiff",
+        "ex_acq_record/main.cpp#acq_record_fiff",
+        "ex_acq_record/main.cpp#acq_record_bids"
+      ],
+      "api_page": "doc/website/docs/api/acq/acq-bids-path.mdx",
+      "python_equiv": null,
+      "example_eligible": true,
+      "exempt_reason": null
+    },
+    {
+      "name": "AcqRecorder",
+      "header": "acq/fiff/acq_recorder.h",
+      "library": "acq",
+      "kind": "exported-class",
+      "exported": true,
+      "registered": true,
+      "registry_status": "documented",
+      "test": "test_acq_recorder",
+      "test_resolves": true,
+      "example": "ex_acq_record",
+      "example_state": "built",
+      "including_examples": [
+        "ex_acq_record"
+      ],
+      "snippets": [
+        "ex_acq_record/main.cpp#acq_record_bids",
+        "ex_acq_record/main.cpp#acq_record_fiff",
+        "ex_acq_record/main.cpp#acq_record_fiff",
+        "ex_acq_record/main.cpp#acq_record_fiff",
+        "ex_acq_record/main.cpp#acq_record_bids"
+      ],
+      "api_page": "doc/website/docs/api/acq/acq-recorder.mdx",
+      "python_equiv": null,
+      "example_eligible": true,
+      "exempt_reason": null
+    },
+    {
+      "name": "AcqRecorderOptions",
+      "header": "acq/fiff/acq_recorder.h",
+      "library": "acq",
+      "kind": "header-only",
+      "exported": false,
+      "registered": true,
+      "registry_status": "documented",
+      "test": "test_acq_recorder",
+      "test_resolves": true,
+      "example": "ex_acq_record",
+      "example_state": "built",
+      "including_examples": [
+        "ex_acq_record"
+      ],
+      "snippets": [
+        "ex_acq_record/main.cpp#acq_record_bids",
+        "ex_acq_record/main.cpp#acq_record_fiff",
+        "ex_acq_record/main.cpp#acq_record_fiff",
+        "ex_acq_record/main.cpp#acq_record_fiff",
+        "ex_acq_record/main.cpp#acq_record_bids"
+      ],
+      "api_page": "doc/website/docs/api/acq/acq-recorder-options.mdx",
+      "python_equiv": null,
+      "example_eligible": true,
+      "exempt_reason": null
+    },
+    {
+      "name": "AcqRecorderStats",
+      "header": "acq/fiff/acq_recorder.h",
+      "library": "acq",
+      "kind": "header-only",
+      "exported": false,
+      "registered": true,
+      "registry_status": "documented",
+      "test": "test_acq_recorder",
+      "test_resolves": true,
+      "example": "ex_acq_record",
+      "example_state": "built",
+      "including_examples": [
+        "ex_acq_record"
+      ],
+      "snippets": [
+        "ex_acq_record/main.cpp#acq_record_bids",
+        "ex_acq_record/main.cpp#acq_record_fiff",
+        "ex_acq_record/main.cpp#acq_record_fiff",
+        "ex_acq_record/main.cpp#acq_record_fiff",
+        "ex_acq_record/main.cpp#acq_record_bids"
+      ],
+      "api_page": "doc/website/docs/api/acq/acq-recorder-stats.mdx",
+      "python_equiv": null,
+      "example_eligible": true,
+      "exempt_reason": null
+    },
+    {
       "name": "BidsChannel",
       "header": "bids/bids_channel.h",
       "library": "bids",
@@ -3151,6 +3259,7 @@
       "example_state": "built",
       "including_examples": [
         "ex_acq_oddball",
+        "ex_acq_record",
         "ex_acq_scope",
         "ex_averaging",
         "ex_connectivity_metrics",
@@ -3217,6 +3326,7 @@
       "example_state": "built",
       "including_examples": [
         "ex_acq_oddball",
+        "ex_acq_record",
         "ex_averaging",
         "ex_connectivity_metrics",
         "ex_disp_plots",
@@ -8345,6 +8455,34 @@
       "exempt_reason": null
     },
     {
+      "name": "FiffDeviceInfo",
+      "header": "fiff/fiff_info.h",
+      "library": "fiff",
+      "kind": "header-only",
+      "exported": false,
+      "registered": true,
+      "registry_status": "done",
+      "test": "test_fiff_stream_python",
+      "test_resolves": true,
+      "example": "ex_acq_record",
+      "example_state": "built",
+      "including_examples": [
+        "ex_compute_forward",
+        "ex_dsp_artifacts",
+        "ex_fiff_api",
+        "ex_hpiFit",
+        "ex_inv_hpi"
+      ],
+      "snippets": [
+        "ex_acq_record/main.cpp#acq_record_read",
+        "ex_fiff_api/main.cpp#fiff_info_usage"
+      ],
+      "api_page": "doc/website/docs/api/fiff/fiff-device-info.mdx",
+      "python_equiv": "mne.Info[\"device_info\"]",
+      "example_eligible": true,
+      "exempt_reason": null
+    },
+    {
       "name": "FiffInfo",
       "header": "fiff/fiff_info.h",
       "library": "fiff",
@@ -8364,6 +8502,7 @@
         "ex_inv_hpi"
       ],
       "snippets": [
+        "ex_acq_record/main.cpp#acq_record_read",
         "ex_fiff_api/main.cpp#fiff_info_usage"
       ],
       "api_page": "doc/website/docs/api/fiff/fiff-info.mdx",
@@ -8477,6 +8616,7 @@
       "example": "ex_read_raw",
       "example_state": "built",
       "including_examples": [
+        "ex_acq_record",
         "ex_connectivity",
         "ex_connectivity_comparison",
         "ex_connectivity_performance",

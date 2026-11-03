@@ -19,6 +19,11 @@
 //=============================================================================================================
 
 #include <acq/acq.h>
+#if defined(MNE_ACQ_BENCH_RECORDING) // the standalone A/B build has no FIFF bridge
+#include <acq/fiff/acq_recorder.h>
+
+#include <QTemporaryDir>
+#endif
 
 #include <QCommandLineParser>
 #include <QCoreApplication>
@@ -440,6 +445,72 @@ StreamResult streamThroughput(const StreamCase& c)
     return {gigabytes / s, cpu / gigabytes};
 }
 
+#if defined(MNE_ACQ_BENCH_RECORDING)
+struct RecordResult
+{
+    double ratePerChannel = -1.0; /**< Producer rate in kS/s per channel; -1 if the recorder lost a sample. */
+    double producerGigabytesPerSecond = 0.0;
+    double diskMegabytesPerSecond = 0.0; /**< Bytes the recorder wrote per second until everything was on disk. */
+};
+
+/**
+ * Records a stream to a temporary FIFF file while a producer fills it. Paced runs (@p rate > 0) must record every
+ * sample at the full rate; unpaced runs push @p bytes as fast as the ring allows, so they show that the recorder's
+ * reader never slows the producer and how fast the recorder writes.
+ */
+RecordResult recordRun(std::size_t channels, AcqSampleFormat format, double rate, std::uint64_t bytes)
+{
+    QTemporaryDir dir;
+    AcqStreamInfo info = streamInfo(channels, format);
+    for (AcqChannelInfo& ch : info.channels) {
+        ch.offset = 0.0; // native samples, no physical conversion
+    }
+    info.sfreq = rate > 0.0 ? rate : 1000.0;
+    const std::size_t frame = channels * bytesPerSample(format);
+    const std::size_t block = rate > 0.0 ? std::bit_floor(std::max<std::size_t>(1, static_cast<std::size_t>(rate / 1000.0)))
+                                         : std::bit_floor(std::max<std::size_t>(1, 65536 / frame));
+    auto writer = AcqWriter::create(info, ringOptions(std::max<std::size_t>(65536, 2 * static_cast<std::size_t>(rate))));
+    if (!writer || !dir.isValid()) {
+        return {};
+    }
+    AcqRecorderOptions options;
+    options.bufferSamples = rate > 0.0 ? static_cast<std::size_t>(rate / 4.0) : 16 * block;
+    auto recorder = AcqRecorder::start(writer->stream(), dir.filePath("bench_raw.fif").toStdString(), options);
+    if (!recorder) {
+        return {};
+    }
+    const std::uint64_t total = std::max<std::uint64_t>(bytes / frame / block, 1) * block;
+    const auto start = Clock::now();
+    for (std::uint64_t written = 0; written < total; written += block) {
+        if (rate > 0.0) {
+            std::this_thread::sleep_until(start + std::chrono::duration_cast<Clock::duration>(std::chrono::duration<double>(static_cast<double>(written) / rate)));
+        }
+        auto view = writer->beginWrite(block);
+        if (!view) {
+            return {};
+        }
+        for (std::size_t p = 0; p < view->partCount(); ++p) {
+            std::memset(view->part(p).data, static_cast<int>(written % 251), view->part(p).samples * frame);
+        }
+        writer->commit(block);
+    }
+    const double produced = secondsSince(start);
+    writer->finish();
+    if (!recorder->stop().ok()) {
+        return {};
+    }
+    const double recorded = secondsSince(start);
+    const AcqRecorderStats stats = recorder->stats();
+    RecordResult result;
+    result.producerGigabytesPerSecond = static_cast<double>(total * frame) / 1e9 / produced;
+    result.diskMegabytesPerSecond = static_cast<double>(stats.bytes) / 1e6 / recorded;
+    if (stats.samples == total && (rate <= 0.0 || stats.lost == 0)) {
+        result.ratePerChannel = static_cast<double>(total) / produced / 1e3;
+    }
+    return result;
+}
+#endif
+
 /** decode() of a 64 x 4096 interleaved block into a column-major T matrix. @return G output elements/s. */
 template<typename T>
 double decodeRate(AcqSampleFormat format, int trials)
@@ -599,6 +670,17 @@ std::vector<Metric> run(const Settings& s)
     paced("paced_float32_1000_ch_20_khz", 1000, AcqSampleFormat::Float32, 20000.0, true, wide);
     paced("paced_int16_4_ch_62500_khz", 4, AcqSampleFormat::Int16, 62.5e6, false, {});
 
+#if defined(MNE_ACQ_BENCH_RECORDING)
+    // Recording to FIFF: 256 channels at 20 kHz must reach the disk without a lost sample; flat out, the
+    // recorder's reader must not slow the producer below the ring rate (compare ring_int16_64_ch).
+    const RecordResult paced256 = recordRun(256, AcqSampleFormat::Float32, 20000.0,
+                                            static_cast<std::uint64_t>(pacedSeconds * 20000.0 * 256 * 4));
+    metrics.push_back({"record_float32_256_ch_20_khz", paced256.ratePerChannel, "kS/s per ch", true, 20.0 * 0.99});
+    const RecordResult flatOut = recordRun(64, AcqSampleFormat::Int16, 0.0, bytes / 8);
+    metrics.push_back({"record_producer_int16_64_ch", flatOut.producerGigabytesPerSecond, "GB/s", true});
+    metrics.push_back({"record_disk_int16_64_ch", flatOut.diskMegabytesPerSecond, "MB/s", true});
+#endif
+
     const int trials = s.quick ? 50 : 200;
     for (const AcqSampleFormat f : {AcqSampleFormat::Int16, AcqSampleFormat::Int24Packed, AcqSampleFormat::Int32,
                                     AcqSampleFormat::Float32}) {
@@ -654,7 +736,8 @@ int main(int argc, char* argv[])
         "Performance suite of the MNE-CPP acquisition library: per-call cost of the stream protocol, commit-to-wake "
         "latency (spinning, blocking and output readers), verified throughput over a channel sweep, with ring knobs, "
         "a DMA card, an output stream and 1,000 channels with a recorder and a display, paced runs from 1 kHz to "
-        "62.5 MHz that must not lose a sample, and the decode/encode converters. Where threads can be pinned, the "
+        "62.5 MHz that must not lose a sample, recording to FIFF (paced without loss, and flat out), and the "
+        "decode/encode converters. Where threads can be pinned, the "
         "spinning wake-up and the 1,000-channel stream are repeated with producer and consumer pinned to two CPUs of "
         "the ring's NUMA node. Every value is the best of --repeats runs.");
     parser.addHelpOption();

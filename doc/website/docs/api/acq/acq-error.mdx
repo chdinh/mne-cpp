@@ -129,6 +129,23 @@ for (std::size_t e = 0; e < samples.events().size(); ++e) {
     const AcqEvent& event = samples.events()[e];
 ````
 
+### [ex_acq_record](../../examples/acq/ex_acq_record.mdx)
+
+Record an acquisition source to FIFF and to a BIDS dataset while it runs, and read the file back.
+
+````cpp title="src/examples/ex_acq_record/main.cpp, line 86"
+device->close();
+if (const AcqError error = recorder->stop(); !error.ok()) {
+    std::fprintf(stderr, "%s\n", error.text().c_str());
+    return 1;
+}
+const AcqRecorderStats stats = recorder->stats();
+std::printf("recorded %llu samples (%llu lost) and %llu events in %llu buffers, %.1f MB, direct I/O %s\n",
+            static_cast<unsigned long long>(stats.samples), static_cast<unsigned long long>(stats.lost),
+            static_cast<unsigned long long>(stats.events), static_cast<unsigned long long>(stats.buffers),
+            static_cast<double>(stats.bytes) / 1e6, stats.directIo ? "on" : "off");
+````
+
 ### [ex_acq_scope](../../examples/acq/ex_acq_scope.mdx)
 
 Live multi-channel, multi-rate scope of a streaming source with a closed-loop stimulator on the same clock.

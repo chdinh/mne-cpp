@@ -40,6 +40,13 @@
       ]
     },
     {
+      "name": "acquisition",
+      "description": "FIFF and BIDS bridge of the standard-C++ acquisition core: measurement-info conversion and recording.",
+      "libraries": [
+        "mne_acq_fiff"
+      ]
+    },
+    {
       "name": "forward",
       "description": "Forward modelling.",
       "libraries": [

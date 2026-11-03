@@ -261,6 +261,60 @@ Write a bad channel list as a FIFFB_MNE_BAD_CHANNELS block.
 
 ---
 
+### read_annotations(p_Node, annotations, origTime)
+
+Reads the first MNE-Python annotations block (FIFFB_MNE_ANNOTATIONS) below `p_Node`.
+
+**Parameters:**
+
+- **p_Node** : *const [FiffDirNode](/docs/api/fiff/fiff-dir-node)::SPtr &*
+  The node to search, e.g. `dirtree()`.
+
+- **annotations** : *[FiffAnnotations](/docs/api/fiff/fiff-annotations) &*
+  Onsets in seconds since `origTime`, or since the first sample without it.
+
+- **origTime** : *fiff_int_t*
+  orig_time as seconds and microseconds; origTime[0] is -1 when the block has none.
+
+**Returns:**
+
+- *bool* — false if there is no annotations block.
+
+---
+
+### write_annotations(annotations, origTime)
+
+Writes `annotations` as an MNE-Python annotations block (FIFFB_MNE_ANNOTATIONS): onsets and ends as float, descriptions as a colon-separated list, channel names and extras as JSON.
+
+**Parameters:**
+
+- **annotations** : *const [FiffAnnotations](/docs/api/fiff/fiff-annotations) &*
+  Onsets in seconds since `origTime`, or since the first sample without it.
+
+- **origTime** : *const fiff_int_t **
+  orig_time as seconds and microseconds (e.g. `FiffInfo::meas_date`), or nullptr.
+
+**Returns:**
+
+- *fiff_long_t* — The position of the block start.
+
+---
+
+### write_device_info(device)
+
+Writes a FIFFB_DEVICE block; nothing for an empty `device`.
+
+**Parameters:**
+
+- **device** : *const [FiffDeviceInfo](/docs/api/fiff/fiff-device-info) &*
+  The acquisition device.
+
+**Returns:**
+
+- *fiff_long_t* — The position of the block start, or -1 if nothing was written.
+
+---
+
 ### attach_env(workingDir, command)
 
 Attach environment metadata (working directory, command line) to this stream.
@@ -1087,7 +1141,7 @@ Open fiff file for update.
 
 ---
 
-### start_writing_raw(p_IODevice, info, cals, sel, bResetRange)
+### start_writing_raw(p_IODevice, info, cals, sel, bResetRange, dataType)
 
 fiff_start_writing_raw
 
@@ -1109,6 +1163,9 @@ function [fid,cals] = fiff_start_writing_raw(name,info,sel)
 
 - **bResetRange** : *bool*
   Flag whether to reset the channel range to 1.0. Default is true.
+
+- **dataType** : *fiff_int_t*
+  FIFF_DATA_PACK of the buffers that follow: FIFFT_FLOAT (write_raw_buffer), or FIFFT_DAU_PACK16, FIFFT_INT, FIFFT_DOUBLE for writers of native samples.
 
 **Returns:**
 

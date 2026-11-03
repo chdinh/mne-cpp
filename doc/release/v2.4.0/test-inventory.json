@@ -6,9 +6,9 @@
     "commit": "0800c9a1bf606c2df8c44e35fbb42ea13029b549"
   },
   "summary": {
-    "directories": 272,
+    "directories": 273,
     "registration": {
-      "unconditional": 263,
+      "unconditional": 264,
       "conditional": 6,
       "unregistered": 3
     },
@@ -18,12 +18,12 @@
     "without_timeout": 0,
     "requirements": {
       "freesurfer": 2,
-      "python": 9,
+      "python": 10,
       "sample-data": 20,
       "test-data": 120
     },
     "gui": 46,
-    "with_qskip": 90,
+    "with_qskip": 91,
     "ci_excluded": {},
     "retry_paths": [],
     "ci": {
@@ -36,6 +36,7 @@
           "test_acq_device",
           "test_acq_dlpack",
           "test_acq_error",
+          "test_acq_recorder",
           "test_acq_stream",
           "test_acq_thread",
           "test_acq_timebase"
@@ -85,6 +86,7 @@
           "test_acq_device",
           "test_acq_dlpack",
           "test_acq_error",
+          "test_acq_recorder",
           "test_acq_stream",
           "test_acq_thread",
           "test_acq_timebase"
@@ -134,6 +136,7 @@
           "test_acq_device",
           "test_acq_dlpack",
           "test_acq_error",
+          "test_acq_recorder",
           "test_acq_stream",
           "test_acq_thread",
           "test_acq_timebase"
@@ -183,6 +186,7 @@
           "test_acq_device",
           "test_acq_dlpack",
           "test_acq_error",
+          "test_acq_recorder",
           "test_acq_stream",
           "test_acq_thread",
           "test_acq_timebase"
@@ -232,6 +236,7 @@
           "test_acq_device",
           "test_acq_dlpack",
           "test_acq_error",
+          "test_acq_recorder",
           "test_acq_stream",
           "test_acq_thread",
           "test_acq_timebase"
@@ -281,6 +286,7 @@
           "test_acq_device",
           "test_acq_dlpack",
           "test_acq_error",
+          "test_acq_recorder",
           "test_acq_stream",
           "test_acq_thread",
           "test_acq_timebase"
@@ -475,6 +481,45 @@
         "AcqErrorInfo",
         "AcqExpected",
         "AcqInt24"
+      ]
+    },
+    {
+      "name": "test_acq_recorder",
+      "cmake": "src/testframes/test_acq_recorder/CMakeLists.txt",
+      "registration": {
+        "state": "unconditional",
+        "via": "src/testframes/CMakeLists.txt",
+        "conditions": [],
+        "early_return_guard": null,
+        "unregistered_reason": null
+      },
+      "add_test_names": [
+        "test_acq_recorder"
+      ],
+      "labels": [
+        "unit"
+      ],
+      "timeout": 600,
+      "requirements": [
+        "python"
+      ],
+      "gui": false,
+      "qskip_sites": 1,
+      "spawns_processes": true,
+      "ci_excluded_on": [],
+      "ci": {
+        "macos-26": "absent",
+        "macos-26-qt-min": "absent",
+        "ubuntu-24.04": "absent",
+        "ubuntu-24.04-qt-min": "absent",
+        "windows-2025-vs2026": "absent",
+        "windows-2025-vs2026-qt-min": "absent"
+      },
+      "registry_classes": [
+        "AcqBidsPath",
+        "AcqRecorder",
+        "AcqRecorderOptions",
+        "AcqRecorderStats"
       ]
     },
     {
@@ -4121,6 +4166,7 @@
         "windows-2025-vs2026-qt-min": "run"
       },
       "registry_classes": [
+        "FiffDeviceInfo",
         "FiffExplain"
       ]
     },

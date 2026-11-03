@@ -25,27 +25,12 @@
 // INCLUDES
 //=============================================================================================================
 
+#include "acq_fiff_global.h"
 #include "../acq_error.h"
 #include "../acq_sample_format.h"
 #include "../acq_stream_info.h"
 
 #include <fiff/fiff_info.h>
-
-//=============================================================================================================
-// DEFINES
-//=============================================================================================================
-
-#if defined(STATICBUILD)
-#define ACQFIFFSHARED_EXPORT
-#elif defined(_WIN32)
-#if defined(MNE_ACQ_FIFF_LIBRARY)
-#define ACQFIFFSHARED_EXPORT __declspec(dllexport) /**< Exported when building mne_acq_fiff. */
-#else
-#define ACQFIFFSHARED_EXPORT __declspec(dllimport) /**< Imported by clients of mne_acq_fiff. */
-#endif
-#else
-#define ACQFIFFSHARED_EXPORT __attribute__((visibility("default"))) /**< Default visibility on ELF/Mach-O. */
-#endif
 
 //=============================================================================================================
 // DEFINE NAMESPACE ACQLIB

@@ -66,7 +66,7 @@ Read a BIDS *_coordsystem.json file.
 
 ---
 
-### writeJson(sFilePath, cs)
+### writeJson(sFilePath, cs, sModality)
 
 Write a BIDS *_coordsystem.json file.
 
@@ -77,6 +77,9 @@ Write a BIDS *_coordsystem.json file.
 
 - **cs** : *const [BidsCoordinateSystem](/docs/api/bids/bids-coordinate-system) &*
   Coordinate system metadata.
+
+- **sModality** : *const QString &*
+  Key prefix of the datatype: "iEEG", "EEG" or "MEG".
 
 **Returns:**
 

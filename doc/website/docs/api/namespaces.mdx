@@ -11,7 +11,7 @@ All public namespaces in the MNE-CPP library tree.
 
 | Namespace | Classes | Description |
 |-----------|---------|-------------|
-| [`ACQLIB`](/docs/api/acq/) | 48 | Headless acquisition: sources, streams, zero-copy readers and native sample formats. |
+| [`ACQLIB`](/docs/api/acq/) | 52 | Headless acquisition: sources, streams, zero-copy readers and native sample formats. |
 | [`BIDSLIB`](/docs/api/bids/) | 14 | BIDS dataset reading, writing, path construction, and sidecar metadata handling for iEEG/EEG/MEG. |
 | [`COMLIB`](/docs/api/com/) | 8 | Real-time client/server communication primitives for talking to `mne_rt_server`. |
 | [`CONNECTIVITYLIB`](/docs/api/connectivity/) | 21 | Functional connectivity metrics (coherence, PLV, cross-correlation, etc.). |
@@ -19,7 +19,7 @@ All public namespaces in the MNE-CPP library tree.
 | [`DISP3DLIB`](/docs/api/disp3-d/) | 49 | 3-D brain visualisation using the Qt RHI rendering backend. |
 | [`DISPLIB`](/docs/api/disp/) | 70 | 2-D display widgets and visualisation helpers (charts, topography, colour maps). |
 | `DSPLIB` | 0 | Digital signal processing (filtering, spectrograms, real-time averaging, HPI, noise reduction). |
-| [`FIFFLIB`](/docs/api/fiff/) | 37 | FIFF file I/O, in-memory data structures and high-level readers/writers. |
+| [`FIFFLIB`](/docs/api/fiff/) | 38 | FIFF file I/O, in-memory data structures and high-level readers/writers. |
 | [`FSLIB`](/docs/api/fs/) | 8 | FreeSurfer surface, annotation and parcellation I/O for mne-cpp. |
 | [`FWDLIB`](/docs/api/fwd/) | 14 | Forward modelling — BEM solver, spherical models, sensor/coil definitions and the lead-field assembly that links current dipoles to MEG/EEG sensor readings. |
 | [`IEEGLIB`](/docs/api/ieeg/) | 6 | Intracranial EEG (sEEG, ECoG): implantation, bipolar referencing, cortical mapping. |
@@ -41,6 +41,7 @@ All public namespaces in the MNE-CPP library tree.
 ### ACQLIB
 
 - [AcqBackend](/docs/api/acq/acq-backend)
+- [AcqBidsPath](/docs/api/acq/acq-bids-path)
 - [AcqBitField](/docs/api/acq/acq-bit-field)
 - [AcqBlockView](/docs/api/acq/acq-block-view)
 - [AcqChannelInfo](/docs/api/acq/acq-channel-info)
@@ -71,6 +72,9 @@ All public namespaces in the MNE-CPP library tree.
 - [AcqReader](/docs/api/acq/acq-reader)
 - [AcqReaderOptions](/docs/api/acq/acq-reader-options)
 - [AcqReaderStats](/docs/api/acq/acq-reader-stats)
+- [AcqRecorder](/docs/api/acq/acq-recorder)
+- [AcqRecorderOptions](/docs/api/acq/acq-recorder-options)
+- [AcqRecorderStats](/docs/api/acq/acq-recorder-stats)
 - [AcqSampleRange](/docs/api/acq/acq-sample-range)
 - [AcqSchemeInfo](/docs/api/acq/acq-scheme-info)
 - [AcqSegmentHeader](/docs/api/acq/acq-segment-header)
@@ -288,6 +292,7 @@ All public namespaces in the MNE-CPP library tree.
 - [FiffCov](/docs/api/fiff/fiff-cov)
 - [FiffCtfComp](/docs/api/fiff/fiff-ctf-comp)
 - [FiffDataRef](/docs/api/fiff/fiff-data-ref)
+- [FiffDeviceInfo](/docs/api/fiff/fiff-device-info)
 - [FiffDigPoint](/docs/api/fiff/fiff-dig-point)
 - [FiffDigPointSet](/docs/api/fiff/fiff-dig-point-set)
 - [FiffDigitizerData](/docs/api/fiff/fiff-digitizer-data)

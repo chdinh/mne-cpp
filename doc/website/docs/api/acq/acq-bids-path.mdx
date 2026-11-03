@@ -1,0 +1,80 @@
+---
+id: acq-bids-path
+title: "ACQLIB::AcqBidsPath"
+sidebar_label: AcqBidsPath
+sidebar_position: 50
+---
+
+# AcqBidsPath
+
+**Namespace:** `ACQLIB` &nbsp;·&nbsp; **Library:** Acquisition Library &nbsp;·&nbsp; **Source:** [`acq/fiff/acq_recorder.h`](https://github.com/mne-tools/mne-cpp/blob/staging/src/libraries/acq/fiff/acq_recorder.h)
+
+`#include <acq/acq_recorder.h>`
+
+```cpp
+struct ACQLIB::AcqBidsPath
+```
+
+Where a BIDS recording goes: root/sub-&lt;subject&gt;[/ses-&lt;session&gt;]/meg/..._meg.fif with its sidecars.
+
+BIDS stores FIFF under the meg datatype, whatever the channel types.
+
+```cpp title="src/examples/ex_acq_record/main.cpp"
+auto session = AcqDevice::open(uri);
+if (!session) {
+    return 1;
+}
+AcqBidsPath bids;
+bids.root = QDir(directory).filePath("bids").toStdString();
+bids.subject = "01";
+bids.session = "1";
+bids.task = "oddball";
+bids.datasetName = "Simulated oddball";
+auto bidsRecorder = AcqRecorder::start(session->stream(), bids, options);
+if (!bidsRecorder || !session->start().ok()) {
+    return 1;
+}
+while (bidsRecorder->isRecording()) {
+    std::this_thread::sleep_for(std::chrono::milliseconds(20));
+}
+session->close();
+if (!bidsRecorder->stop().ok()) { // writes channels.tsv, events.tsv, meg.json and dataset_description.json
+    return 1;
+}
+std::printf("BIDS: %s\n", bidsRecorder->files().front().c_str());
+```
+
+---
+
+## Example
+
+- Start here: [ex_acq_record](../../examples/acq/ex_acq_record.mdx) — Record an acquisition source to FIFF and to a BIDS dataset while it runs, and read the file back.
+- Full source: [`src/examples/ex_acq_record/main.cpp`](https://github.com/mne-tools/mne-cpp/tree/staging/src/examples/ex_acq_record/main.cpp)
+- Build target: `ex_acq_record` (runs under CTest)
+
+## Used in examples
+
+### [ex_acq_record](../../examples/acq/ex_acq_record.mdx)
+
+Record an acquisition source to FIFF and to a BIDS dataset while it runs, and read the file back.
+
+````cpp title="src/examples/ex_acq_record/main.cpp, line 112"
+AcqBidsPath bids;
+bids.root = QDir(directory).filePath("bids").toStdString();
+bids.subject = "01";
+bids.session = "1";
+bids.task = "oddball";
+bids.datasetName = "Simulated oddball";
+auto bidsRecorder = AcqRecorder::start(session->stream(), bids, options);
+if (!bidsRecorder || !session->start().ok()) {
+    return 1;
+}
+while (bidsRecorder->isRecording()) {
+    std::this_thread::sleep_for(std::chrono::milliseconds(20));
+}
+session->close();
+````
+
+## Authors of this file
+
+- Christoph Dinh &lt;christoph.dinh@mne-cpp.org&gt;

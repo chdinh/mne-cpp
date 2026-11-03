@@ -8,8 +8,10 @@
       "3.10"
     ],
     "ci_pip_packages": [
+      "bids-validator-deno==3.0.2",
       "clang-tidy==22.1.8",
       "fastcov==1.17",
+      "mne-bids==0.20.0",
       "mne==1.11.0",
       "numpy==2.2.6",
       "pip==26.2.1",
@@ -21,17 +23,17 @@
     "lock_mismatch": []
   },
   "summary": {
-    "claims": 357,
+    "claims": 358,
     "by_evidence": {
       "cross-validated-static": 174,
       "cross-validated-live": 0,
-      "tested": 183,
+      "tested": 184,
       "unverified": 0
     },
     "by_claim": {
       "equivalent": 139,
       "exceeds": 0,
-      "implemented": 123,
+      "implemented": 124,
       "partial": 95
     },
     "equivalence_without_static_evidence": [],
@@ -39,7 +41,7 @@
       "classes": {
         "cross-validated-static": 32,
         "cross-validated-live": 0,
-        "tested": 62,
+        "tested": 63,
         "unverified": 0
       },
       "parity": {
@@ -114,6 +116,7 @@
       ],
       "cross-validated-live": [
         "test_acq_dlpack",
+        "test_acq_recorder",
         "test_crossval_covariance",
         "test_ml_trainer",
         "test_mne_compute_raw_inverse",
@@ -161,6 +164,15 @@
       "claimed": "implemented",
       "equivalence": null,
       "test": "test_fiff_info",
+      "evidence": "tested"
+    },
+    {
+      "source": "classes",
+      "mne_cpp": "FiffDeviceInfo",
+      "python": "mne.Info[\"device_info\"]",
+      "claimed": "implemented",
+      "equivalence": null,
+      "test": "test_fiff_stream_python",
       "evidence": "tested"
     },
     {

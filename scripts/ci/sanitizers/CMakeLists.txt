@@ -2,8 +2,9 @@
 # Copyright (c) 2026 MNE-CPP Authors
 #   Christoph Dinh <christoph.dinh@mne-cpp.org>
 
-# Builds mne_acq and every src/testframes/test_acq_* test with one sanitizer set, without the rest of
-# MNE-CPP. Usage: cmake -S scripts/ci/sanitizers -B build-tsan -DMNE_SANITIZE=thread
+# Builds mne_acq, its FIFF bridge mne_acq_fiff (with the FIFF and BIDS libraries it needs) and every
+# src/testframes/test_acq_* test with one sanitizer set, without the rest of MNE-CPP. Eigen is taken from
+# src/external/eigen. Usage: cmake -S scripts/ci/sanitizers -B build-tsan -DMNE_SANITIZE=thread
 cmake_minimum_required(VERSION 3.21)
 project(mne_acq_sanitizers LANGUAGES CXX)
 
@@ -20,14 +21,24 @@ add_link_options(-fsanitize=${MNE_SANITIZE})
 find_package(Qt6 REQUIRED COMPONENTS Core Test)
 
 get_filename_component(MNE_ROOT "${CMAKE_CURRENT_SOURCE_DIR}/../../.." ABSOLUTE)
+find_package(Eigen3 REQUIRED NO_MODULE PATHS "${MNE_ROOT}/src/external/eigen")
 add_subdirectory("${MNE_ROOT}/src/libraries/acq" acq)
+foreach(_lib math utils fiff bids acq/fiff)
+    add_subdirectory("${MNE_ROOT}/src/libraries/${_lib}" "lib_${_lib}")
+endforeach()
 
 enable_testing()
 file(GLOB _acq_tests LIST_DIRECTORIES true "${MNE_ROOT}/src/testframes/test_acq_*")
 foreach(_dir ${_acq_tests})
     get_filename_component(_name "${_dir}" NAME)
     add_executable(${_name} "${_dir}/${_name}.cpp")
-    target_link_libraries(${_name} PRIVATE Qt6::Core Qt6::Test mne_acq)
+    if(_name STREQUAL "test_acq_recorder")
+        # mne_acq_fiff brings mne_acq and mne_fiff; listing them again duplicates the static archives.
+        target_link_libraries(${_name} PRIVATE Qt6::Core Qt6::Test mne_acq_fiff Eigen3::Eigen)
+        target_compile_definitions(${_name} PRIVATE ACQ_RECORDER_CHECK_SCRIPT="${_dir}/check_recording.py")
+    else()
+        target_link_libraries(${_name} PRIVATE Qt6::Core Qt6::Test mne_acq)
+    endif()
     if(_name STREQUAL "test_acq_dlpack")
         # An instrumented probe cannot be loaded into an uninstrumented Python, so the NumPy round trip is skipped.
         target_sources(${_name} PRIVATE "${_dir}/acq_dlpack_probe.cpp")

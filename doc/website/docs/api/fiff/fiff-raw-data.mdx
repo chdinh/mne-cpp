@@ -318,17 +318,20 @@ for (FiffProj& proj : projInfo.projs) {
 projInfo.make_projector(projectors);
 ````
 
-### [ex_averaging](../../examples/mne/ex_averaging.mdx)
+### [ex_acq_record](../../examples/acq/ex_acq_record.mdx)
 
-Average stimulus-locked epochs of a raw FIFF recording into an evoked response, with event selection and EOG rejection.
+Record an acquisition source to FIFF and to a BIDS dataset while it runs, and read the file back.
 
-````cpp title="src/examples/ex_averaging/main.cpp, line 119"
-// Setup for reading the raw data
-FiffRawData raw(t_fileRaw);
-MNE::setup_compensators(raw, dest_comp, keep_comp);
+````cpp title="src/examples/ex_acq_record/main.cpp, line 99"
+QFile file(QString::fromStdString(path));
+FiffRawData raw(file);
+const FiffDeviceInfo& recorded = raw.info.device_info; // backend, device and source id of the recording
+std::printf("%s: %d channels, samples %d to %d, device %s '%s' (%s)\n", path.c_str(), raw.info.nchan,
+            raw.first_samp, raw.last_samp, qPrintable(recorded.type), qPrintable(recorded.model),
+            qPrintable(recorded.serial));
 ````
 
-Also used in [ex_clustered_inverse_mne_raw](../../examples/inv/ex_clustered_inverse_mne_raw.mdx), [ex_clustered_inverse_pwl_rap_music_raw](../../examples/inv/ex_clustered_inverse_pwl_rap_music_raw.mdx), [ex_clustered_inverse_rap_music_raw](../../examples/inv/ex_clustered_inverse_rap_music_raw.mdx), [ex_compute_forward](../../examples/fwd/ex_compute_forward.mdx), [ex_connectivity](../../examples/connectivity/ex_connectivity.mdx), [ex_connectivity_comparison](../../examples/connectivity/ex_connectivity_comparison.mdx), [ex_connectivity_performance](../../examples/connectivity/ex_connectivity_performance.mdx), [ex_disp](../../examples/disp/ex_disp.mdx), [ex_dsp_maxwell](../../examples/dsp/ex_dsp_maxwell.mdx), [ex_fiff_api](../../examples/fiff/ex_fiff_api.mdx), [ex_filtering](../../examples/dsp/ex_filtering.mdx), [ex_fwd_api](../../examples/fwd/ex_fwd_api.mdx), [ex_hpiFit](../../examples/inv/ex_hpiFit.mdx), [ex_inv_hpi](../../examples/inv/ex_inv_hpi.mdx), [ex_inverse_mne_raw](../../examples/inv/ex_inverse_mne_raw.mdx), [ex_make_layout](../../examples/fiff/ex_make_layout.mdx), [ex_mne_api](../../examples/fs/ex_mne_api.mdx), [ex_read_epochs](../../examples/mne/ex_read_epochs.mdx), [ex_read_raw](../../examples/mne/ex_read_raw.mdx), [ex_read_write_raw](../../examples/fiff/ex_read_write_raw.mdx), [ex_roi_clustered_inverse_pwl_rap_music](../../examples/inv/ex_roi_clustered_inverse_pwl_rap_music.mdx), [ex_st_clustered_inverse_pwl_rap_music](../../examples/inv/ex_st_clustered_inverse_pwl_rap_music.mdx).
+Also used in [ex_averaging](../../examples/mne/ex_averaging.mdx), [ex_clustered_inverse_mne_raw](../../examples/inv/ex_clustered_inverse_mne_raw.mdx), [ex_clustered_inverse_pwl_rap_music_raw](../../examples/inv/ex_clustered_inverse_pwl_rap_music_raw.mdx), [ex_clustered_inverse_rap_music_raw](../../examples/inv/ex_clustered_inverse_rap_music_raw.mdx), [ex_compute_forward](../../examples/fwd/ex_compute_forward.mdx), [ex_connectivity](../../examples/connectivity/ex_connectivity.mdx), [ex_connectivity_comparison](../../examples/connectivity/ex_connectivity_comparison.mdx), [ex_connectivity_performance](../../examples/connectivity/ex_connectivity_performance.mdx), [ex_disp](../../examples/disp/ex_disp.mdx), [ex_dsp_maxwell](../../examples/dsp/ex_dsp_maxwell.mdx), [ex_fiff_api](../../examples/fiff/ex_fiff_api.mdx), [ex_filtering](../../examples/dsp/ex_filtering.mdx), [ex_fwd_api](../../examples/fwd/ex_fwd_api.mdx), [ex_hpiFit](../../examples/inv/ex_hpiFit.mdx), [ex_inv_hpi](../../examples/inv/ex_inv_hpi.mdx), [ex_inverse_mne_raw](../../examples/inv/ex_inverse_mne_raw.mdx), [ex_make_layout](../../examples/fiff/ex_make_layout.mdx), [ex_mne_api](../../examples/fs/ex_mne_api.mdx), [ex_read_epochs](../../examples/mne/ex_read_epochs.mdx), [ex_read_raw](../../examples/mne/ex_read_raw.mdx), [ex_read_write_raw](../../examples/fiff/ex_read_write_raw.mdx), [ex_roi_clustered_inverse_pwl_rap_music](../../examples/inv/ex_roi_clustered_inverse_pwl_rap_music.mdx), [ex_st_clustered_inverse_pwl_rap_music](../../examples/inv/ex_st_clustered_inverse_pwl_rap_music.mdx).
 
 ## Authors of this file
 

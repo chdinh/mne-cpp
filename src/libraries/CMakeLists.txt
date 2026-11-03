@@ -75,6 +75,7 @@ add_subdirectory(com)
 add_subdirectory(connectivity)
 add_subdirectory(dsp)
 add_subdirectory(acq)
+add_subdirectory(acq/fiff)
 
 add_subdirectory(mna)
 add_subdirectory(ml)

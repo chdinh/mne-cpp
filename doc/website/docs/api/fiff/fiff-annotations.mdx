@@ -21,7 +21,7 @@ class FIFFLIB::FiffAnnotations
 
 Container for [`FiffAnnotation`](/docs/api/fiff/fiff-annotation) entries with FIFF, JSON and CSV serializers.
 
-Read and written under `FIFFB_MNE_ANNOTATIONS` so the annotation list travels with the FIFF file. The JSON and CSV exporters let the same annotations be consumed by BIDS sidecars and by external scoring tools that do not understand FIFF directly.
+Read and written under `FIFFB_MNE_ANNOTATIONS` by `FiffStream::read_annotations()` and `FiffStream::write_annotations()`, so the annotation list travels with the FIFF file. The JSON and CSV exporters let the same annotations be consumed by BIDS sidecars and by external scoring tools that do not understand FIFF directly.
 
 ```cpp title="src/examples/ex_fiff_api/main.cpp"
 MatrixXi firstThree = events.events.topRows(3);

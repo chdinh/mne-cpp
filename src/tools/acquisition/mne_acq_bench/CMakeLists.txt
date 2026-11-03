@@ -16,6 +16,10 @@ else()
 endif()
 
 target_link_libraries(${PROJECT_NAME} PRIVATE Qt${QT_VERSION_MAJOR}::Core mne_acq)
+if(TARGET mne_acq_fiff)
+    target_link_libraries(${PROJECT_NAME} PRIVATE mne_acq_fiff)
+    target_compile_definitions(${PROJECT_NAME} PRIVATE MNE_ACQ_BENCH_RECORDING)
+endif()
 
 set_target_properties(${PROJECT_NAME} PROPERTIES
     MACOSX_BUNDLE FALSE
