@@ -136,6 +136,9 @@ option(BUILD_MNE_SIMU "Build MNE Simu" ON)
 # Visualization / testing
 option(BUILD_MNE_SCREENSHOT_REGRESSION "Build MNE Screenshot Regression" ON)
 
+# Acquisition
+option(BUILD_MNE_ACQ_BENCH "Build MNE acquisition performance suite" ON)
+
 ##==============================================================================
 ## Preset: build only realtime tools
 
@@ -409,6 +412,11 @@ if(NOT WASM)
   # Simulation
   if(BUILD_MNE_SIMU)
     add_subdirectory(simulation/mne_simu)
+  endif()
+
+  # Acquisition
+  if(BUILD_MNE_ACQ_BENCH)
+    add_subdirectory(acquisition/mne_acq_bench)
   endif()
 
   # Visualization / testing

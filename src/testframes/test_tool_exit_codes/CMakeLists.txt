@@ -118,6 +118,7 @@ set(CLI_TOOL_TARGETS
     mne_rt_server
     mne_simu
     mne_screenshot_regression
+    mne_acq_bench
 )
 
 foreach(CLI_TOOL_TARGET IN LISTS CLI_TOOL_TARGETS)

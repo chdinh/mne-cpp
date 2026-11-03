@@ -1,0 +1,91 @@
+# SPDX-License-Identifier: BSD-3-Clause
+# Copyright (c) 2026 MNE-CPP Authors
+#   Christoph Dinh <christoph.dinh@mne-cpp.org>
+
+# ---------------------------------------------------------------------------
+# Reusable workflow: mne_acq performance regression gate (T2.9)
+# Called by pull-request.yml.
+# Builds mne_acq_bench of the commit under test and of its base (the pull
+# request base, or the previous head of the pushed branch) and runs both
+# alternately on the same runner; a gated metric more than 20 % worse than
+# the base fails the job. Without a base that has the suite, the commit is
+# compared with itself, which records the noise floor of the runner.
+# ---------------------------------------------------------------------------
+name: Reusable AcqBench
+
+on:
+  workflow_call:
+    inputs:
+      base_sha:
+        description: Commit to compare against; empty or all zeros means none.
+        type: string
+        default: ''
+
+env:
+  FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: 'true'
+
+jobs:
+  AcqBench:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 45
+
+    steps:
+    - name: Clone repository
+      uses: actions/checkout@v5
+      with:
+        fetch-depth: 0
+
+    - name: Load external dependency versions
+      shell: bash
+      run: ./scripts/ci/load_external_deps.sh max
+
+    - name: Download Qt toolchain
+      env:
+        GH_TOKEN: ${{ github.token }}
+      run: |
+        ./scripts/ci/download_toolchain.sh \
+          --kind qt \
+          --version "$QT_BUILD_VERSION" \
+          --linkage dynamic \
+          --output-dir "$RUNNER_TEMP/qt"
+
+    - name: Check out the base
+      id: base
+      env:
+        BASE_SHA: ${{ inputs.base_sha }}
+      run: |
+        root="$GITHUB_WORKSPACE"
+        if [[ -n "$BASE_SHA" && "$BASE_SHA" != 0000000000000000000000000000000000000000 ]] \
+           && git cat-file -e "$BASE_SHA^{commit}" 2>/dev/null \
+           && git cat-file -e "$BASE_SHA:src/tools/acquisition/mne_acq_bench/main.cpp" 2>/dev/null; then
+          git worktree add "$RUNNER_TEMP/base" "$BASE_SHA"
+          root="$RUNNER_TEMP/base"
+        else
+          echo "::notice::No base with mne_acq_bench; comparing the commit with itself (noise floor)."
+        fi
+        echo "root=$root" >> "$GITHUB_OUTPUT"
+
+    - name: Build
+      env:
+        BASE_ROOT: ${{ steps.base.outputs.root }}
+      run: |
+        for side in head base; do
+          root="$GITHUB_WORKSPACE"; [[ $side == base ]] && root="$BASE_ROOT"
+          cmake -S scripts/ci/acq_bench -B "build-$side" -DCMAKE_BUILD_TYPE=Release \
+            -DCMAKE_PREFIX_PATH="$RUNNER_TEMP/qt" -DACQ_ROOT="$root"
+          cmake --build "build-$side" -j "$(nproc)"
+        done
+
+    - name: Compare
+      run: |
+        export LD_LIBRARY_PATH="$RUNNER_TEMP/qt/lib${LD_LIBRARY_PATH:+:$LD_LIBRARY_PATH}"
+        python3 scripts/ci/acq_bench/compare.py --base build-base/mne_acq_bench \
+          --head build-head/mne_acq_bench --runs 5 --json acq-bench.json
+
+    - name: Upload comparison
+      if: always()
+      uses: actions/upload-artifact@v7
+      with:
+        name: acq-bench
+        path: acq-bench.json
+        if-no-files-found: ignore

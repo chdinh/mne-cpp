@@ -173,6 +173,10 @@ component_management:
       name: applications/mne_scan
       paths:
         - src/applications/mne_scan/**
+    - component_id: tools_acquisition
+      name: tools/acquisition
+      paths:
+        - src/tools/acquisition/**
     - component_id: tools_conversion
       name: tools/conversion
       paths:

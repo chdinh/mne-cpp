@@ -366,7 +366,10 @@ void TestToolExitCodes::helpSucceeds_data()
         // Surface, simulation, server, and visualization
         "mne_add_patch_info", "mne_annot2labels", "mne_make_eeg_layout",
         "mne_make_morph_maps", "mne_morph_labels", "mne_volume_source_space",
-        "mne_rt_server", "mne_simu", "mne_screenshot_regression"};
+        "mne_rt_server", "mne_simu", "mne_screenshot_regression",
+
+        // Acquisition
+        "mne_acq_bench"};
 
     for (const QString& tool : tools) {
         QTest::newRow(tool.toUtf8().constData()) << tool;

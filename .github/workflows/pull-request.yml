@@ -66,6 +66,13 @@ jobs:
     if: ${{ github.event_name != 'push' || github.repository != 'mne-tools/mne-cpp' }}
     uses: ./.github/workflows/_reusable-sanitizers.yml
 
+  # ── mne_acq performance against the base commit (Linux) ──────────────────
+  AcqBench:
+    if: ${{ github.event_name != 'push' || github.repository != 'mne-tools/mne-cpp' }}
+    uses: ./.github/workflows/_reusable-acq-bench.yml
+    with:
+      base_sha: ${{ github.event.pull_request.base.sha || github.event.before }}
+
   # ── Quality gates (static, no build) ────────────────────────────────────
   Quality:
     if: ${{ github.event_name != 'push' || github.repository != 'mne-tools/mne-cpp' }}
