@@ -446,7 +446,7 @@ void decodeComplexFastRun(const AcqBlockPart& part, std::size_t firstChannel, st
 {
     using Component = std::conditional_t<F == AcqSampleFormat::ComplexInt16, std::int16_t, float>;
     constexpr auto kBytes = static_cast<std::ptrdiff_t>(2 * sizeof(Component));
-    const auto element = [](const std::byte* p, float scale, float offset) {
+    const auto element = [](const std::byte* p, [[maybe_unused]] float scale, [[maybe_unused]] float offset) {
         std::array<Component, 2> iq{};
         std::memcpy(iq.data(), p, sizeof(iq));
         auto re = static_cast<float>(iq[0]);
