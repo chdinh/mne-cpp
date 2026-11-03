@@ -9,7 +9,7 @@
 #
 #
 # @brief    Tests for scripts/ci/acq_bench/compare.py, the A/B regression gate of the acquisition suite.
-"""The gate fails a gated metric that got more than the tolerance worse, and nothing else."""
+"""The gate fails a gated metric that got more than the tolerance worse or a metric that misses its target."""
 
 from __future__ import annotations
 
@@ -59,6 +59,15 @@ class TestAcqBenchCompare(unittest.TestCase):
         head = compare.best_of([run({"ring_1": -1.0, "op_new": 5})])
         rows = {r["name"]: r["status"] for r in compare.compare(base, head, tolerance=0.2)}
         self.assertEqual(rows, {"ring_1": "LOST", "op_new": "new"})
+
+    def test_missed_target_fails_even_when_reported_only(self) -> None:
+        base = compare.best_of([run({"wake_spin_p99": 100, "ring_1": 2.0, "ring_2": 2.0})])
+        head = run({"wake_spin_p99": 60000, "ring_1": 1.9, "ring_2": 2.1})
+        targets = {"wake_spin_p99": 50000, "ring_1": 2.0, "ring_2": 2.0}
+        for m in head:
+            m["target"] = targets[m["name"]]
+        rows = {r["name"]: r["status"] for r in compare.compare(base, compare.best_of([head]), tolerance=0.2)}
+        self.assertEqual(rows, {"wake_spin_p99": "TARGET", "ring_1": "TARGET", "ring_2": "ok"})
 
 
 if __name__ == "__main__":

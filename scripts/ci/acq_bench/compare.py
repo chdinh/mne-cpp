@@ -14,7 +14,8 @@
 Absolute numbers on shared CI machines drift by tens of percent between runs, so the two builds are run
 interleaved on the same machine and each metric keeps its best value. Throughput, per-call cost and converter
 rates are gated: head may be at most ``--tolerance`` worse than base. Wake-up latencies and CPU time depend on the
-scheduler of the machine and are reported only.
+scheduler of the machine and are compared only for the report. Any metric that has a target (e.g. a p99 wake-up
+latency, a paced rate) must also meet it, whatever the base did.
 
     python3 scripts/ci/acq_bench/compare.py --base build-base/mne_acq_bench --head build-head/mne_acq_bench
 """
@@ -58,7 +59,7 @@ def best_of(runs: list[list[dict]]) -> dict[str, dict]:
 
 
 def compare(base: dict[str, dict], head: dict[str, dict], tolerance: float) -> list[dict]:
-    """One row per head metric with its status: ok, REGRESSION, LOST, report or new."""
+    """One row per head metric with its status: ok, REGRESSION, LOST, TARGET (missed), report or new."""
     rows = []
     for name, h in head.items():
         b = base.get(name)
@@ -76,6 +77,11 @@ def compare(base: dict[str, dict], head: dict[str, dict], tolerance: float) -> l
                 row["status"] = "report"
             else:
                 row["status"] = "REGRESSION" if worse > tolerance else "ok"
+        target = h.get("target", 0)
+        if row["status"] != "LOST" and target > 0:
+            missed = h["value"] < target if h["better"] == "higher" else h["value"] > target
+            if missed:
+                row["status"] = "TARGET"
         rows.append(row)
     return rows
 
@@ -105,12 +111,12 @@ def main(argv: list[str] | None = None) -> int:
         print(f"{r['name']:36} {base:>12} {r['head']:>12.4g} {change:>8}  {r['status']} [{r['unit']}]")
     if args.json:
         Path(args.json).write_text(json.dumps(rows, indent=2) + "\n", encoding="utf-8")
-    failed = [r["name"] for r in rows if r["status"] in ("REGRESSION", "LOST")]
+    failed = [r["name"] for r in rows if r["status"] in ("REGRESSION", "LOST", "TARGET")]
     if failed:
-        print(f"FAIL: {len(failed)} metric(s) regressed by more than {100 * args.tolerance:.0f}% "
-              f"or lost samples: {', '.join(failed)}")
+        print(f"FAIL: {len(failed)} metric(s) regressed by more than {100 * args.tolerance:.0f}%, "
+              f"lost samples or missed their target: {', '.join(failed)}")
         return 1
-    print(f"PASS: no gated metric more than {100 * args.tolerance:.0f}% worse than the base")
+    print(f"PASS: no gated metric more than {100 * args.tolerance:.0f}% worse than the base, every target met")
     return 0
 
 

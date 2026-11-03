@@ -37,6 +37,7 @@
 #include <cstdint>
 #include <cstring>
 #include <ctime>
+#include <optional>
 #include <string>
 #include <thread>
 #include <vector>
@@ -69,7 +70,7 @@ struct Settings
 {
     bool quick = false;
     int repeats = 3;
-    double pacedSeconds = 0.0; /**< Duration of the paced run; 0 = 2 s with --quick, else 10 s. */
+    double pacedSeconds = 0.0; /**< Duration of each paced run; 0 = 2 s with --quick, else 10 s. */
 };
 
 double secondsSince(Clock::time_point start)
@@ -158,13 +159,54 @@ double opCost(int readers, int ops)
            });
 }
 
+/** CPUs of a producer and its consumer thread; -1 = wherever the scheduler puts them. */
+using CpuPair = std::array<int, 2>;
+constexpr CpuPair kUnpinned{-1, -1};
+
+/** Pins the calling thread to @p cpu, unless it is -1. */
+void pinTo(int cpu)
+{
+    if (cpu >= 0) {
+        const auto c = static_cast<unsigned>(cpu);
+        static_cast<void>(acqPinThisThread(std::span<const unsigned>(&c, 1)));
+    }
+}
+
+/** @return Two CPUs of NUMA node 0, the ring's node, or nothing where threads cannot be pinned (macOS). */
+std::optional<CpuPair> pinnablePair()
+{
+    const auto cpus = acqNumaNodeCpus(0);
+    if (!cpus || cpus->size() < 2) {
+        return std::nullopt;
+    }
+    // The last two: CPU 0 takes most interrupts.
+    const CpuPair pair{static_cast<int>((*cpus)[cpus->size() - 1]), static_cast<int>((*cpus)[cpus->size() - 2])};
+    bool pinned = false;
+    std::thread([&] {
+        const auto c = static_cast<unsigned>(pair[0]);
+        pinned = acqPinThisThread(std::span<const unsigned>(&c, 1)).ok();
+    }).join();
+    return pinned ? std::optional<CpuPair>(pair) : std::nullopt;
+}
+
+/** Runs @p body on a fresh thread, so pinning it leaves the calling thread alone. */
+template<typename Body>
+auto onOwnThread(Body body)
+{
+    decltype(body()) result{};
+    std::thread([&] { result = body(); }).join();
+    return result;
+}
+
 /**
  * Commit-to-consume latency: the producer commits one sample carrying its commit time every 50 us; the consumer
  * subtracts it from the time it returned from acquire(). Input: a reader in @p mode; output: the device's gating
- * reader. @return p50, p99, p99.9 in ns.
+ * reader. The calling thread produces. @return p50, p99, p99.9 in ns.
  */
-std::array<double, 3> wakeLatency(AcqReader::ReadMode mode, int commits, AcqDirection direction = AcqDirection::Input)
+std::array<double, 3> wakeLatency(AcqReader::ReadMode mode, int commits, AcqDirection direction = AcqDirection::Input,
+                                  CpuPair cpus = kUnpinned)
 {
+    pinTo(cpus[0]);
     auto writer = AcqWriter::create(streamInfo(2, AcqSampleFormat::Int32, AcqLayout::Interleaved, direction),
                                     ringOptions(65536));
     AcqReaderOptions options;
@@ -173,6 +215,7 @@ std::array<double, 3> wakeLatency(AcqReader::ReadMode mode, int commits, AcqDire
     std::vector<std::int64_t> latencies;
     latencies.reserve(static_cast<std::size_t>(commits));
     std::thread consumer([&] {
+        pinTo(cpus[1]);
         for (int i = 0; i < commits; ++i) {
             auto view = reader->acquire(1, 5s, 1);
             const std::int64_t woke = nowNs();
@@ -229,6 +272,7 @@ struct StreamCase
     double rate = 0.0;        /**< Samples per second and channel; 0 = as fast as the consumer takes them. */
     std::uint64_t bytes = 0;  /**< Data to move. */
     AcqStreamOptions options; /**< Ring knobs; capacitySamples 0 = max(65536, 16 blocks). */
+    CpuPair cpus = kUnpinned; /**< Producer (the calling thread) and consumer CPUs. */
 };
 
 /** One page of an adopted DMA buffer; a vector of them is page-aligned and contiguous. */
@@ -284,7 +328,9 @@ StreamResult streamThroughput(const StreamCase& c)
     std::uint64_t byteSum = 0;
     std::uint64_t wrong = 0;
     std::uint64_t received = 0;
+    pinTo(c.cpus[0]);
     std::thread consumer([&] {
+        pinTo(c.cpus[1]);
         while (true) {
             auto view = reader->acquire(1, 5s);
             if (!view) {
@@ -467,6 +513,22 @@ std::vector<Metric> run(const Settings& s)
     metrics.push_back({"wake_output_p50", output[0], "ns", false});
     metrics.push_back({"wake_output_p99", output[1], "ns", false});
     metrics.push_back({"wake_output_p999", output[2], "ns", false});
+    // Pinned producer and consumer on the ring's NUMA node: no migration, so no cold caches after a move.
+    const std::optional<CpuPair> pair = pinnablePair();
+    if (pair) {
+        std::array<double, 3> pinned{1e18, 1e18, 1e18};
+        for (int r = 0; r < s.repeats; ++r) {
+            const auto l = onOwnThread([&] {
+                return wakeLatency(AcqReader::ReadMode::LowLatency, commits, AcqDirection::Input, *pair);
+            });
+            for (std::size_t i = 0; i < 3; ++i) {
+                pinned[i] = std::min(pinned[i], l[i]);
+            }
+        }
+        metrics.push_back({"wake_spin_pinned_p50", pinned[0], "ns", false});
+        metrics.push_back({"wake_spin_pinned_p99", pinned[1], "ns", false, 50000.0});
+        metrics.push_back({"wake_spin_pinned_p999", pinned[2], "ns", false});
+    }
     const std::uint64_t bytes = s.quick ? (std::uint64_t(256) << 20) : (std::uint64_t(4) << 30);
     // Best of several shorter streams: a stream is two threads, and one slow placement must not set the value.
     Settings streams = s;
@@ -500,22 +562,42 @@ std::vector<Metric> run(const Settings& s)
     // 1,000 float32 channels: sustained with a recorder plus a display, and paced at 20 kHz without loss.
     AcqStreamOptions wide;
     wide.capacitySamples = 16384;
-    StreamCase sustained{1000, AcqSampleFormat::Float32, Feed::Copy, true, 0.0, bytes / 8, wide};
-    StreamResult bestSustained = streamThroughput(sustained);
-    for (int r = 1; r < streams.repeats && bestSustained.gigabytesPerSecond >= 0.0; ++r) {
-        const StreamResult run = streamThroughput(sustained);
-        if (run.gigabytesPerSecond < 0.0 || run.gigabytesPerSecond > bestSustained.gigabytesPerSecond) {
-            bestSustained = run; // a loss is never hidden by a later good run
+    const auto sustainedRun = [&](CpuPair cpus) {
+        const StreamCase sustained{1000, AcqSampleFormat::Float32, Feed::Copy, true, 0.0, bytes / 8, wide, cpus};
+        StreamResult bestRun{};
+        for (int r = 0; r < streams.repeats; ++r) {
+            const StreamResult run = onOwnThread([&] { return streamThroughput(sustained); });
+            if (r == 0 || run.gigabytesPerSecond < 0.0 || run.gigabytesPerSecond > bestRun.gigabytesPerSecond) {
+                bestRun = run;
+            }
+            if (bestRun.gigabytesPerSecond < 0.0) {
+                break; // a loss is never hidden by a later good run
+            }
         }
-    }
+        return bestRun;
+    };
+    const StreamResult bestSustained = sustainedRun(kUnpinned);
     metrics.push_back({"sustained_float32_1000_ch_2_readers", bestSustained.gigabytesPerSecond, "GB/s", true, 2.0});
     metrics.push_back({"cpu_sustained_float32_1000_ch", bestSustained.cpuSecondsPerGigabyte, "s/GB", false});
+    if (pair) {
+        metrics.push_back({"sustained_float32_1000_ch_pinned", sustainedRun(*pair).gigabytesPerSecond, "GB/s", true, 2.0});
+    }
+
+    // Paced rate sweep, all without loss: a 64-channel EEG at 1 kHz, 1,000 channels at 20 kHz, and a 4-channel
+    // digitizer at 62.5 MHz (250 MS/s aggregate).
     const double pacedSeconds = s.pacedSeconds > 0.0 ? s.pacedSeconds : (s.quick ? 2.0 : 10.0);
-    const StreamCase paced{1000, AcqSampleFormat::Float32, Feed::Copy, true, 20000.0,
-                           static_cast<std::uint64_t>(pacedSeconds * 20000.0 * 1000.0 * 4.0), wide};
-    const double pacedRate = streamThroughput(paced).gigabytesPerSecond;
-    metrics.push_back({"paced_float32_1000_ch_20_khz", pacedRate < 0.0 ? -1.0 : pacedRate * 1e9 / 4.0 / 1000.0 / 1e3,
-                       "kS/s per ch", true, 20.0 * 0.99});
+    const auto paced = [&](const char* name, std::size_t channels, AcqSampleFormat format, double rate, bool display,
+                           const AcqStreamOptions& options) {
+        const double bytesPerSecond = rate * static_cast<double>(channels * bytesPerSample(format));
+        const StreamCase c{channels, format, Feed::Copy, display, rate,
+                           static_cast<std::uint64_t>(pacedSeconds * bytesPerSecond), options};
+        const double gbps = streamThroughput(c).gigabytesPerSecond;
+        metrics.push_back({name, gbps < 0.0 ? -1.0 : gbps * 1e9 / bytesPerSecond * rate / 1e3, "kS/s per ch", true,
+                           rate / 1e3 * 0.99});
+    };
+    paced("paced_float32_64_ch_1_khz", 64, AcqSampleFormat::Float32, 1000.0, true, {});
+    paced("paced_float32_1000_ch_20_khz", 1000, AcqSampleFormat::Float32, 20000.0, true, wide);
+    paced("paced_int16_4_ch_62500_khz", 4, AcqSampleFormat::Int16, 62.5e6, false, {});
 
     const int trials = s.quick ? 50 : 200;
     for (const AcqSampleFormat f : {AcqSampleFormat::Int16, AcqSampleFormat::Int24Packed, AcqSampleFormat::Int32,
@@ -571,15 +653,17 @@ int main(int argc, char* argv[])
     parser.setApplicationDescription(
         "Performance suite of the MNE-CPP acquisition library: per-call cost of the stream protocol, commit-to-wake "
         "latency (spinning, blocking and output readers), verified throughput over a channel sweep, with ring knobs, "
-        "a DMA card, an output stream and 1,000 channels with a recorder and a display, a paced 1,000-channel 20 kHz "
-        "run that must not lose a sample, and the decode/encode converters. Every value is the best of --repeats runs.");
+        "a DMA card, an output stream and 1,000 channels with a recorder and a display, paced runs from 1 kHz to "
+        "62.5 MHz that must not lose a sample, and the decode/encode converters. Where threads can be pinned, the "
+        "spinning wake-up and the 1,000-channel stream are repeated with producer and consumer pinned to two CPUs of "
+        "the ring's NUMA node. Every value is the best of --repeats runs.");
     parser.addHelpOption();
     parser.addVersionOption();
     const QCommandLineOption quickOpt("quick", "Short runs (about 10 s), for CI regression checks.");
     const QCommandLineOption repeatsOpt("repeats", "Runs per measurement (default 3).", "n", "3");
     const QCommandLineOption jsonOpt("json", "Also write the results as JSON.", "file");
     const QCommandLineOption pacedOpt("paced-seconds",
-                                      "Duration of the paced 1,000-channel 20 kHz run, e.g. 600 for a soak test "
+                                      "Duration of each paced run, e.g. 600 for a soak test "
                                       "(default 10, or 2 with --quick).",
                                       "s");
     parser.addOptions({quickOpt, repeatsOpt, jsonOpt, pacedOpt});
