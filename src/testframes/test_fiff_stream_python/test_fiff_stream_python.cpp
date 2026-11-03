@@ -676,6 +676,19 @@ void TestFiffStreamPython::refusesUnwritablePath()
     QCOMPARE(raw1.info.acq_pars, info.acq_pars);
     QCOMPARE(raw1.info.acq_stim, info.acq_stim);
     QCOMPARE(raw1.info.ctf_head_t.trans, ctf);
+
+    // A source file that has gone away only loses the blocks copied from it, not the measurement info.
+    info.filename = dir.filePath(QStringLiteral("deleted_raw.fif"));
+    QFile orphan(dir.filePath(QStringLiteral("orphan_raw.fif")));
+    FiffStream::SPtr orphanStream = FiffStream::start_writing_raw(orphan, info, cals);
+    QVERIFY(orphanStream);
+    orphanStream->write_raw_buffer(MatrixXd::Constant(1, 10, 2e-6), cals);
+    orphanStream->finish_writing_raw();
+    QFile orphanBack(orphan.fileName());
+    FiffRawData raw2(orphanBack);
+    QCOMPARE(raw2.info.nchan, 1);
+    QCOMPARE(raw2.last_samp, 9);
+    QCOMPARE(raw2.info.dig.size(), 3);
 }
 
 //=============================================================================================================

@@ -2171,8 +2171,8 @@ FiffStream::SPtr FiffStream::start_writing_raw(QIODevice& p_IODevice,
         FiffStream::SPtr t_pStream2(new FiffStream(&t_qFile));
 
         if (!t_pStream2->open()) {
-            qDebug() << "Failed to open file. Returning early";
-            return t_pStream;
+            qWarning() << "Cannot copy the measurement blocks of" << info.filename << "; writing the info without them";
+            blocks.clear();
         }
 
         for (qint32 k = 0; k < blocks.size(); ++k) {
