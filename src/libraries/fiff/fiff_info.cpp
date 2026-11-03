@@ -81,6 +81,7 @@ FiffInfo::FiffInfo(const FiffInfo& p_FiffInfo)
 , acq_pars(p_FiffInfo.acq_pars)
 , acq_stim(p_FiffInfo.acq_stim)
 , hpi_coil_freqs(p_FiffInfo.hpi_coil_freqs)
+, device_info(p_FiffInfo.device_info)
 {
     meas_date[0] = p_FiffInfo.meas_date[0];
     meas_date[1] = p_FiffInfo.meas_date[1];
@@ -118,6 +119,7 @@ void FiffInfo::clear()
     acq_pars = "";
     acq_stim = "";
     hpi_coil_freqs.clear();
+    device_info = FiffDeviceInfo();
 }
 
 //=============================================================================================================
@@ -412,6 +414,7 @@ void FiffInfo::writeToStream(FiffStream* p_pStream) const
 
         p_pStream->end_block(FIFFB_DACQ_PARS);
     }
+    p_pStream->write_device_info(this->device_info);
     //
     //    Coordinate transformations if the HPI result block was not there
     //

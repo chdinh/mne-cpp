@@ -74,6 +74,24 @@ class FiffStream;
 
 //=============================================================================================================
 /**
+ * @brief The acquisition device of a measurement (FIFFB_DEVICE), the counterpart of info["device_info"] in MNE-Python.
+ */
+struct FiffDeviceInfo
+{
+    QString type;   /**< Device type, e.g. the acquisition backend. */
+    QString model;  /**< Device model. */
+    QString serial; /**< Serial number. */
+    QString site;   /**< Site of the device. */
+
+    /** @return true when no field is set; then no FIFFB_DEVICE block is written. */
+    bool isEmpty() const
+    {
+        return type.isEmpty() && model.isEmpty() && serial.isEmpty() && site.isEmpty();
+    }
+};
+
+//=============================================================================================================
+/**
  * @brief Full FIFF measurement info: per-channel descriptors, sampling and filter setup, projectors, compensators, transforms and dig points.
  *
  * Materializes the union of the tags found in @c FIFFB_MEAS /
@@ -294,6 +312,7 @@ public:                          //Public because it's a mne struct
     QString acq_pars;            /**< Acquisition parameters. */
     QString acq_stim;            /**< Acquisition stimulus information. */
     QList<float> hpi_coil_freqs; /**< Excitation frequencies of the HPI coils in Hz, in coil order. Empty when the file contains no HPI measurement block. */
+    FiffDeviceInfo device_info;  /**< Acquisition device; empty if unknown. */
 };
 
 //=============================================================================================================

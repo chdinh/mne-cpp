@@ -373,6 +373,7 @@ inline constexpr auto FIFFB_REF = 118; /**< Fiff referencing mechanism. */
 inline constexpr auto FIFFB_SMSH_RAW_DATA = 119; /**< SmartShield raw data. */
 inline constexpr auto FIFFB_SMSH_ASPECT = 120;   /**< SmartShield averaged data. */
 inline constexpr auto FIFFB_HPI_SUBSYSTEM = 121; /**< HPI subsystem. */
+inline constexpr auto FIFFB_DEVICE = 124;        /**< Acquisition device: type, model, serial, site. */
 
 /*
  * MRI
@@ -439,7 +440,11 @@ inline constexpr auto FIFFV_ASPECT_DIPOLE_WAVE = 200;   /**< Dipole amplitude cu
  * Tags used in data files
  */
 
-inline constexpr auto FIFF_UTC_OFFSET = 159; /**< UTC offset of related meas_date (sHH:MM). */
+inline constexpr auto FIFF_DEVICE_TYPE = 152;   /**< Device type in FIFFB_DEVICE. */
+inline constexpr auto FIFF_DEVICE_MODEL = 153;  /**< Device model in FIFFB_DEVICE. */
+inline constexpr auto FIFF_DEVICE_SERIAL = 154; /**< Device serial number in FIFFB_DEVICE. */
+inline constexpr auto FIFF_DEVICE_SITE = 155;   /**< Device site in FIFFB_DEVICE. */
+inline constexpr auto FIFF_UTC_OFFSET = 159;    /**< UTC offset of related meas_date (sHH:MM). */
 
 inline constexpr auto FIFF_NCHAN = 200;          /**< Number of channels. */
 inline constexpr auto FIFF_SFREQ = 201;          /**< Sampling frequency (Hz). */

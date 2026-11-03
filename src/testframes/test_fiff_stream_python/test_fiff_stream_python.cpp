@@ -49,6 +49,7 @@
 //=============================================================================================================
 
 #include <QtTest>
+#include <QBuffer>
 #include <QFile>
 #include <QTemporaryDir>
 
@@ -104,7 +105,7 @@ private slots:
     void readsTagTypes();
     void printsDirectoryTree();
     void refusesUnwritablePath();
-    void writesAnnotations();
+    void writesAnnotationsAndDevice();
 
 private:
     FiffDirNode::SPtr findBlock(int kind) const;
@@ -679,9 +680,10 @@ void TestFiffStreamPython::refusesUnwritablePath()
 
 //=============================================================================================================
 
-void TestFiffStreamPython::writesAnnotations()
+void TestFiffStreamPython::writesAnnotationsAndDevice()
 {
-    // mne.io.read_raw_fif reads this file with annotations onset [1.5, 2.25, 3.0], duration [0.0, 0.5, 0.25], description
+    // mne.io.read_raw_fif reads this file with device_info {type: synthetic, model: Oddball 8, serial: seed=3} and
+    // annotations onset [1.5, 2.25, 3.0], duration [0.0, 0.5, 0.25], description
     // ['Stimulus 1', 'a:b', ''], ch_names [(), ('EEG 001',), ()], meas_date 2026-11-03 10:00:00.250000 UTC.
     QTemporaryDir dir;
     QVERIFY(dir.isValid());
@@ -699,6 +701,9 @@ void TestFiffStreamPython::writesAnnotations()
     info.linefreq = 50.0f;
     info.meas_date[0] = 1793700000;
     info.meas_date[1] = 250000;
+    info.device_info.type = QStringLiteral("synthetic");
+    info.device_info.model = QStringLiteral("Oddball 8");
+    info.device_info.serial = QStringLiteral("seed=3");
 
     FiffAnnotations annotations;
     annotations.append(1.5, 0.0, QStringLiteral("Stimulus 1"));
@@ -719,6 +724,10 @@ void TestFiffStreamPython::writesAnnotations()
 
     QFile readBack(path);
     FiffRawData raw(readBack);
+    QCOMPARE(raw.info.device_info.type, info.device_info.type);
+    QCOMPARE(raw.info.device_info.model, info.device_info.model);
+    QCOMPARE(raw.info.device_info.serial, info.device_info.serial);
+    QVERIFY(raw.info.device_info.site.isEmpty());
     QCOMPARE(raw.info.meas_date[1], 250000);
 
     QFile again(path);
@@ -737,6 +746,27 @@ void TestFiffStreamPython::writesAnnotations()
     QCOMPARE(back[1].duration, 0.5);
     QVERIFY(back[0].channelNames.isEmpty());
     QCOMPARE(back[1].channelNames, QStringList{QStringLiteral("EEG 001")});
+
+    // Without devices and orig_time nothing of either is written.
+    info.device_info = FiffDeviceInfo();
+    QBuffer buffer;
+    QVERIFY(buffer.open(QIODevice::WriteOnly));
+    FiffStream plain(&buffer);
+    QCOMPARE(plain.write_device_info(info.device_info), fiff_long_t(-1));
+    QCOMPARE(buffer.size(), qint64(0));
+
+    // Writers of native samples declare their packing.
+    QFile packedFile(dir.filePath(QStringLiteral("packed_raw.fif")));
+    FiffStream::SPtr packed = FiffStream::start_writing_raw(packedFile, info, cals, defaultMatrixXi, false,
+                                                            FIFFT_DAU_PACK16);
+    QVERIFY(packed);
+    packed->finish_writing_raw();
+    QFile packedBack(packedFile.fileName());
+    FiffStream packedReader(&packedBack);
+    QVERIFY(packedReader.open());
+    FiffTag::UPtr pack;
+    QVERIFY(packedReader.dirtree()->dir_tree_find(FIFFB_MEAS_INFO).first()->find_tag(&packedReader, FIFF_DATA_PACK, pack));
+    QCOMPARE(*pack->toInt(), FIFFT_DAU_PACK16);
 }
 
 //=============================================================================================================

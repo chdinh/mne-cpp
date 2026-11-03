@@ -41,6 +41,7 @@
 //=============================================================================================================
 
 #include "fiff_global.h"
+#include "fiff_file.h"
 #include "fiff_types.h"
 #include "fiff_id.h"
 
@@ -94,6 +95,7 @@ class FiffChPos;
 class FiffCoordTrans;
 class FiffDigitizerData;
 class FiffAnnotations;
+struct FiffDeviceInfo;
 
 //=============================================================================================================
 /**
@@ -305,6 +307,16 @@ public:
      * @return The position of the block start.
      */
     fiff_long_t write_annotations(const FiffAnnotations& annotations, const fiff_int_t* origTime = nullptr);
+
+    //=========================================================================================================
+    /**
+     * Writes a FIFFB_DEVICE block; nothing for an empty @p device.
+     *
+     * @param[in] device   The acquisition device.
+     *
+     * @return The position of the block start, or -1 if nothing was written.
+     */
+    fiff_long_t write_device_info(const FiffDeviceInfo& device);
 
     //=========================================================================================================
     /**
@@ -534,6 +546,8 @@ public:
      * @param[out] cals          A copy of the calibration values.
      * @param[in] sel            Which channels will be included in the output file (optional).
      * @param[in] bResetRange    Flag whether to reset the channel range to 1.0. Default is true.
+     * @param[in] dataType       FIFF_DATA_PACK of the buffers that follow: FIFFT_FLOAT (write_raw_buffer), or
+     *                           FIFFT_DAU_PACK16, FIFFT_INT, FIFFT_DOUBLE for writers of native samples.
      *
      * @return the started fiff file, or null if the device cannot be opened for writing.
      */
@@ -541,7 +555,8 @@ public:
                                               const FiffInfo& info,
                                               Eigen::RowVectorXd& cals,
                                               Eigen::MatrixXi sel = defaultMatrixXi,
-                                              bool bResetRange = true);
+                                              bool bResetRange = true,
+                                              fiff_int_t dataType = FIFFT_FLOAT);
 
     //=========================================================================================================
     /**

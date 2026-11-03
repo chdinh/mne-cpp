@@ -531,6 +531,27 @@ fiff_long_t FiffStream::write_annotations(const FiffAnnotations& annotations, co
 
 //=============================================================================================================
 
+fiff_long_t FiffStream::write_device_info(const FiffDeviceInfo& device)
+{
+    if (device.isEmpty()) {
+        return -1;
+    }
+    const fiff_long_t pos = start_block(FIFFB_DEVICE);
+    const std::pair<fiff_int_t, const QString*> fields[] = {{FIFF_DEVICE_TYPE, &device.type},
+                                                            {FIFF_DEVICE_MODEL, &device.model},
+                                                            {FIFF_DEVICE_SERIAL, &device.serial},
+                                                            {FIFF_DEVICE_SITE, &device.site}};
+    for (const auto& [kind, value] : fields) {
+        if (!value->isEmpty()) {
+            write_string(kind, *value);
+        }
+    }
+    end_block(FIFFB_DEVICE);
+    return pos;
+}
+
+//=============================================================================================================
+
 bool FiffStream::attach_env(const QString& workingDir, const QString& command)
 {
     int insert_blocks[] = {FIFFB_MNE, FIFFB_MEAS, FIFFB_MRI, FIFFB_BEM, -1};
@@ -1277,6 +1298,21 @@ bool FiffStream::read_meas_info(const FiffDirNode::SPtr& p_Node, FiffInfo& info,
             }
         }
     }
+    QList<FiffDirNode::SPtr> device = meas_info[0]->dir_tree_find(FIFFB_DEVICE);
+    FiffDeviceInfo device_info;
+    if (device.size() == 1) {
+        for (k = 0; k < device[0]->nent(); ++k) {
+            kind = device[0]->dir[k]->kind;
+            QString* field = kind == FIFF_DEVICE_TYPE ? &device_info.type
+                : kind == FIFF_DEVICE_MODEL           ? &device_info.model
+                : kind == FIFF_DEVICE_SERIAL          ? &device_info.serial
+                : kind == FIFF_DEVICE_SITE            ? &device_info.site
+                                                      : nullptr;
+            if (field != nullptr && this->read_tag(t_pTag, device[0]->dir[k]->pos)) {
+                *field = t_pTag->toString();
+            }
+        }
+    }
     //
     //   Load the SSP data
     //
@@ -1376,6 +1412,7 @@ bool FiffStream::read_meas_info(const FiffDirNode::SPtr& p_Node, FiffInfo& info,
     info.comps = comps;
     info.acq_pars = acq_pars;
     info.acq_stim = acq_stim;
+    info.device_info = device_info;
 
     //
     //   Locate the HPI coil excitation frequencies
@@ -2084,12 +2121,10 @@ FiffStream::SPtr FiffStream::start_writing_raw(QIODevice& p_IODevice,
                                                const FiffInfo& info,
                                                RowVectorXd& cals,
                                                MatrixXi sel,
-                                               bool bResetRange)
+                                               bool bResetRange,
+                                               fiff_int_t dataType)
 {
-    //
-    //   We will always write floats
-    //
-    fiff_int_t data_type = 4;
+    fiff_int_t data_type = dataType;
 
     // The channel list is authoritative: nchan is -1 until a reader sets it
     if (sel.cols() == 0) {
@@ -2167,6 +2202,7 @@ FiffStream::SPtr FiffStream::start_writing_raw(QIODevice& p_IODevice,
 
         t_pStream->end_block(FIFFB_DACQ_PARS);
     }
+    t_pStream->write_device_info(info.device_info);
 
 #ifndef WASMBUILD
     //
