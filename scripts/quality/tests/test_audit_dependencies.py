@@ -123,6 +123,22 @@ class TestGraphExtraction(AuditTestCase):
         self.assertEqual(["mne_math", "mne_utils"], graph["mne_fiff"].depends_on)
         self.assertEqual([], graph["mne_math"].depends_on)
 
+    def test_nested_library_is_part_of_the_graph(self) -> None:
+        """A library in a subdirectory of another (acq/fiff) is audited like any other."""
+        self.add_library("fiff")
+        self.add_library("acq")
+        nested = self.libraries / "acq" / "bridge"
+        nested.mkdir()
+        (nested / "CMakeLists.txt").write_text(
+            LIBRARY_TEMPLATE.format(name="mne_acq_bridge", deps="    mne_acq\n    mne_fiff", external=""),
+            encoding="utf-8",
+        )
+        graph = self.graph()
+        self.assertEqual(["mne_acq", "mne_fiff"], graph["mne_acq_bridge"].depends_on)
+        self.assertEqual("src/libraries/acq/bridge/CMakeLists.txt", graph["mne_acq_bridge"].cmake_path)
+        policy = self.policy([("core", ["mne_acq", "mne_fiff"])])
+        self.assertIn("DEP001", self.evaluate(policy))
+
     def test_commented_out_dependency_is_ignored(self) -> None:
         self.add_library("math")
         path = self.libraries / "math" / "CMakeLists.txt"

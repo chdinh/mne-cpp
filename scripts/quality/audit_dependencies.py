@@ -202,7 +202,7 @@ class Library:
         return f"src/libraries/{self.directory}/CMakeLists.txt"
 
 
-def read_library(directory: Path, prefixes: dict[str, str] | None = None) -> Library | None:
+def read_library(directory: Path, prefixes: dict[str, str] | None = None, root: Path | None = None) -> Library | None:
     cmake = directory / "CMakeLists.txt"
     if not cmake.is_file():
         return None
@@ -239,7 +239,7 @@ def read_library(directory: Path, prefixes: dict[str, str] | None = None) -> Lib
 
     return Library(
         name=name,
-        directory=directory.name,
+        directory=directory.relative_to(root).as_posix() if root is not None else directory.name,
         depends_on=sorted(internal),
         external=sorted(external),
         unresolved=sorted(unresolved),
@@ -248,10 +248,11 @@ def read_library(directory: Path, prefixes: dict[str, str] | None = None) -> Lib
 
 def build_graph(libraries_dir: Path, prefixes: dict[str, str] | None = None) -> dict[str, Library]:
     graph: dict[str, Library] = {}
-    for child in sorted(libraries_dir.iterdir()):
-        if not child.is_dir():
+    # Libraries may nest (acq/fiff is a library inside acq's directory).
+    for cmake in sorted(libraries_dir.rglob("CMakeLists.txt")):
+        if cmake.parent == libraries_dir:
             continue
-        library = read_library(child, prefixes)
+        library = read_library(cmake.parent, prefixes, libraries_dir)
         if library is not None:
             graph[library.name] = library
     return graph
