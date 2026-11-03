@@ -15,9 +15,8 @@ find_package(Qt${QT_VERSION_MAJOR} REQUIRED COMPONENTS ${QT_REQUIRED_COMPONENTS}
 add_library(acq_dlpack_probe SHARED acq_dlpack_probe.cpp)
 target_include_directories(acq_dlpack_probe PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/../../external/dlpack/include)
 target_link_libraries(acq_dlpack_probe PUBLIC mne_acq)
-# Next to mne_acq, so the test, the probe and Python's ctypes find both the same way.
-set_target_properties(acq_dlpack_probe PROPERTIES LIBRARY_OUTPUT_DIRECTORY "$<TARGET_FILE_DIR:mne_acq>"
-                                                  RUNTIME_OUTPUT_DIRECTORY "$<TARGET_FILE_DIR:mne_acq>")
+# Next to mne_acq, where the tests' rpath (../lib) finds it; Windows DLLs already land next to the test.
+set_target_properties(acq_dlpack_probe PROPERTIES LIBRARY_OUTPUT_DIRECTORY "$<TARGET_FILE_DIR:mne_acq>")
 
 if(${QT_VERSION_MAJOR} GREATER_EQUAL 6)
     qt_add_executable(${PROJECT_NAME} MANUAL_FINALIZATION test_acq_dlpack.cpp)
