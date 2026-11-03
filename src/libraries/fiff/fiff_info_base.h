@@ -118,7 +118,7 @@ public:
     /**
      * Initializes light FIFF measurement information.
      */
-    void clear();
+    virtual void clear();
 
     //=========================================================================================================
     /**

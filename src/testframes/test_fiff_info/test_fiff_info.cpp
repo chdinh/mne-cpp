@@ -95,6 +95,20 @@ private slots:
         QVERIFY(info.isEmpty());
     }
 
+    void info_clearThroughBase()
+    {
+        // A FiffInfo cleared through its base clears its own fields too.
+        FiffInfo info;
+        info.sfreq = 1000.0f;
+        info.device_info.type = QStringLiteral("synthetic");
+        info.acq_pars = QStringLiteral("ACQch001 110113");
+        FiffInfoBase& base = info;
+        base.clear();
+        QCOMPARE(info.sfreq, -1.0f);
+        QVERIFY(info.device_info.isEmpty());
+        QVERIFY(info.acq_pars.isEmpty());
+    }
+
     void infoBase_channelType()
     {
         FiffInfoBase info = makeSyntheticInfoBase(2);

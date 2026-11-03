@@ -75,6 +75,8 @@ class FiffStream;
 //=============================================================================================================
 /**
  * @brief The acquisition device of a measurement (FIFFB_DEVICE), the counterpart of info["device_info"] in MNE-Python.
+ *
+ * @snippet ex_acq_record/main.cpp acq_record_read
  */
 struct FiffDeviceInfo
 {
@@ -143,13 +145,13 @@ public:
     /**
      * Destroys the fiff measurement file information.
      */
-    ~FiffInfo();
+    ~FiffInfo() override;
 
     //=========================================================================================================
     /**
      * Initializes FIFF measurement information.
      */
-    void clear();
+    void clear() override;
 
     //=========================================================================================================
     /**
