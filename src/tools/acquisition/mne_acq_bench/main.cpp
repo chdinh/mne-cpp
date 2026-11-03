@@ -591,8 +591,8 @@ std::vector<Metric> run(const Settings& s)
         const double bytesPerSecond = rate * static_cast<double>(channels * bytesPerSample(format));
         const StreamCase c{channels, format, Feed::Copy, display, rate,
                            static_cast<std::uint64_t>(pacedSeconds * bytesPerSecond), options};
-        const double gbps = streamThroughput(c).gigabytesPerSecond;
-        metrics.push_back({name, gbps < 0.0 ? -1.0 : gbps * 1e9 / bytesPerSecond * rate / 1e3, "kS/s per ch", true,
+        const double measured = streamThroughput(c).gigabytesPerSecond;
+        metrics.push_back({name, measured < 0.0 ? -1.0 : measured * 1e9 / bytesPerSecond * rate / 1e3, "kS/s per ch", true,
                            rate / 1e3 * 0.99});
     };
     paced("paced_float32_64_ch_1_khz", 64, AcqSampleFormat::Float32, 1000.0, true, {});
