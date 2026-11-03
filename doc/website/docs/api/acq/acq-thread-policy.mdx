@@ -1,0 +1,66 @@
+---
+id: acq-thread-policy
+title: "ACQLIB::AcqThreadPolicy"
+sidebar_label: AcqThreadPolicy
+sidebar_position: 46
+---
+
+# AcqThreadPolicy
+
+**Namespace:** `ACQLIB` &nbsp;·&nbsp; **Library:** Acquisition Library &nbsp;·&nbsp; **Source:** [`acq/acq_thread.h`](https://github.com/mne-tools/mne-cpp/blob/staging/src/libraries/acq/acq_thread.h)
+
+`#include <acq/acq_thread.h>`
+
+```cpp
+struct ACQLIB::AcqThreadPolicy
+```
+
+Where and how an acquisition thread runs, e.g.
+
+a backend's producer thread (URI parameters cpus and priority).
+
+```cpp title="src/examples/ex_acq_performance/main.cpp"
+// The closed-loop controller spins on the newest samples: pin it to a core of the ring's NUMA node, so it never
+// wakes up on a cold cache after the scheduler moved it, and raise it above other work.
+AcqThreadPolicy controllerPolicy;
+controllerPolicy.priority = AcqThreadPriority::High;
+if (const auto cpus = acqNumaNodeCpus(std::max(0, input->stream().stats().numaNode)); cpus && cpus->size() > 1) {
+    controllerPolicy.cpus = {cpus->back()};
+}
+std::thread loop = startGated(go, [&] { runController(*controller, *stimulator, st); }, controllerPolicy);
+```
+
+---
+
+## Example
+
+- Start here: [ex_acq_performance](../../examples/acq/ex_acq_performance.mdx) — Closed-loop acquisition and stimulation with ACQLIB, and its sustained throughput per device class.
+- Full source: [`src/examples/ex_acq_performance/main.cpp`](https://github.com/mne-tools/mne-cpp/tree/staging/src/examples/ex_acq_performance/main.cpp)
+- Build target: `ex_acq_performance` (runs under CTest)
+
+## Used in examples
+
+### [ex_acq_performance](../../examples/acq/ex_acq_performance.mdx)
+
+Closed-loop acquisition and stimulation with ACQLIB, and its sustained throughput per device class.
+
+````cpp title="src/examples/ex_acq_performance/main.cpp, line 214"
+ * (macOS) or the right to raise the priority (Linux without CAP_SYS_NICE) the thread still runs.
+ */
+template<typename Body>
+std::thread startGated(std::atomic<bool>& go, Body body, const AcqThreadPolicy& policy = {})
+{
+    std::atomic<bool> placed{false};
+    std::thread thread([&go, &placed, body, policy] {
+        if (!policy.cpus.empty()) {
+            static_cast<void>(acqPinThisThread(policy.cpus));
+        }
+        static_cast<void>(acqSetThisThreadPriority(policy.priority));
+        placed.store(true, std::memory_order_release); // the thread's last access to placed
+        while (!go.load(std::memory_order_acquire)) {
+            std::this_thread::yield();
+````
+
+## Authors of this file
+
+- Christoph Dinh &lt;christoph.dinh@mne-cpp.org&gt;

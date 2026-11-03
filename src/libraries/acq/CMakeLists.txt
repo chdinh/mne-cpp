@@ -18,6 +18,7 @@ endif()
 set(SOURCES
   acq_global.cpp
   acq_error.cpp
+  acq_thread.cpp
   acq_timebase.cpp
   acq_stream.cpp
   acq_reader.cpp
@@ -46,6 +47,7 @@ set(HEADERS
   acq_memory.h
   acq_sample_format.h
   acq_clock_model.h
+  acq_thread.h
   acq_timebase.h
   acq_stream_info.h
   acq_block_view.h
@@ -69,6 +71,9 @@ add_library(${PROJECT_NAME} ${SOURCES} ${HEADERS} ${PRIVATE_HEADERS})
 
 find_package(Threads REQUIRED)
 target_link_libraries(${PROJECT_NAME} PUBLIC Threads::Threads)
+if(WIN32)
+    target_link_libraries(${PROJECT_NAME} PRIVATE avrt) # MMCSS for realtime threads
+endif()
 
 target_include_directories(${PROJECT_NAME} PUBLIC $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/..> $<INSTALL_INTERFACE:include>)
 

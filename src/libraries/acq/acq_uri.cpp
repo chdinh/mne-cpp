@@ -258,3 +258,36 @@ AcqExpected<bool> ACQLIB::detail::paramBool(const AcqUri& uri, std::string_view 
     }
     return badValue(uri, key, *text, "1/0, true/false, yes/no or on/off");
 }
+
+//=============================================================================================================
+
+AcqExpected<AcqThreadPolicy> ACQLIB::detail::paramThreadPolicy(const AcqUri& uri)
+{
+    AcqThreadPolicy policy;
+    if (const auto cpus = uri.param("cpus")) {
+        const char* p = cpus->data();
+        const char* const end = p + cpus->size();
+        while (true) {
+            unsigned cpu = 0;
+            const auto [next, ec] = std::from_chars(p, end, cpu);
+            if (ec != std::errc() || (next != end && *next != ',')) {
+                return badValue(uri, "cpus", *cpus, "comma-separated CPU numbers, e.g. 2,3");
+            }
+            policy.cpus.push_back(cpu);
+            if (next == end) {
+                break;
+            }
+            p = next + 1;
+        }
+    }
+    if (const auto priority = uri.param("priority")) {
+        if (*priority == "high") {
+            policy.priority = AcqThreadPriority::High;
+        } else if (*priority == "realtime") {
+            policy.priority = AcqThreadPriority::Realtime;
+        } else if (*priority != "normal") {
+            return badValue(uri, "priority", *priority, "normal, high or realtime");
+        }
+    }
+    return policy;
+}

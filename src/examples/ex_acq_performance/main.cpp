@@ -208,16 +208,30 @@ std::int64_t nowNs()
     return std::chrono::duration_cast<std::chrono::nanoseconds>(Clock::now().time_since_epoch()).count();
 }
 
-/** Wraps @p body so that the thread waits for @p go; threads exist before allocations are counted. */
+/**
+ * Starts a thread that takes its place per @p policy and then waits for @p go to run @p body; returns once the
+ * thread is placed, so threads exist before allocations are counted. Placement is best effort: without pinning
+ * (macOS) or the right to raise the priority (Linux without CAP_SYS_NICE) the thread still runs.
+ */
 template<typename Body>
-auto startGated(std::atomic<bool>& go, Body body)
+std::thread startGated(std::atomic<bool>& go, Body body, const AcqThreadPolicy& policy = {})
 {
-    return std::thread([&go, body] {
+    std::atomic<bool> placed{false};
+    std::thread thread([&go, &placed, body, policy] {
+        if (!policy.cpus.empty()) {
+            static_cast<void>(acqPinThisThread(policy.cpus));
+        }
+        static_cast<void>(acqSetThisThreadPriority(policy.priority));
+        placed.store(true, std::memory_order_release); // the thread's last access to placed
         while (!go.load(std::memory_order_acquire)) {
             std::this_thread::yield();
         }
         body();
     });
+    while (!placed.load(std::memory_order_acquire)) {
+        std::this_thread::yield();
+    }
+    return thread;
 }
 
 bool isTerminal()
@@ -700,7 +714,16 @@ bool runClosedLoop(double seconds)
     std::atomic<bool> go{false};
     std::thread card = startGated(go, [&] { runCard(*input, *dac, gen, st, seconds); });
     std::thread rec = startGated(go, [&] { runRecorder(*recorder, gen, st); });
-    std::thread loop = startGated(go, [&] { runController(*controller, *stimulator, st); });
+    //! [acq_thread_policy]
+    // The closed-loop controller spins on the newest samples: pin it to a core of the ring's NUMA node, so it never
+    // wakes up on a cold cache after the scheduler moved it, and raise it above other work.
+    AcqThreadPolicy controllerPolicy;
+    controllerPolicy.priority = AcqThreadPriority::High;
+    if (const auto cpus = acqNumaNodeCpus(std::max(0, input->stream().stats().numaNode)); cpus && cpus->size() > 1) {
+        controllerPolicy.cpus = {cpus->back()};
+    }
+    std::thread loop = startGated(go, [&] { runController(*controller, *stimulator, st); }, controllerPolicy);
+    //! [acq_thread_policy]
 
     if (!live) {
         std::printf("  running for %.1f s ...\n\n", seconds);

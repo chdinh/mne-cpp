@@ -108,7 +108,8 @@
     "ZLIB::ZLIB",
     "zlibstatic",
     "z",
-    "Threads::Threads"
+    "Threads::Threads",
+    "avrt"
   ],
   "ignored_variables": [
     "FFTW_LIBS",

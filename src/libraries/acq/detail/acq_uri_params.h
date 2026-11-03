@@ -18,6 +18,7 @@
 //=============================================================================================================
 
 #include "../acq_device_registry.h"
+#include "../acq_thread.h"
 
 #include <cstdint>
 #include <string_view>
@@ -38,6 +39,13 @@ AcqExpected<double> paramDouble(const AcqUri& uri, std::string_view key, double 
 
 /** @return The value of key (1/0, true/false, yes/no, on/off), fallback if absent, or InvalidParameter. */
 AcqExpected<bool> paramBool(const AcqUri& uri, std::string_view key, bool fallback);
+
+/**
+ * @return The policy of a backend's acquisition thread from cpus (comma-separated CPU numbers) and priority
+ *         (normal, high, realtime); both optional. InvalidParameter for malformed values; whether the CPUs
+ *         exist is checked when the thread applies the policy.
+ */
+AcqExpected<AcqThreadPolicy> paramThreadPolicy(const AcqUri& uri);
 
 } // namespace ACQLIB::detail
 

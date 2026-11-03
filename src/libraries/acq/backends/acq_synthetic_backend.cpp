@@ -204,6 +204,7 @@ struct Config
     double ecogSfreq = 2000.0;
     double ergSfreq = 2000.0;
     std::uint64_t ticksPerSecond = 0; // shared clock domain; 0 = the EEG/MEG rate is not a whole number of Hz
+    AcqThreadPolicy thread;           // placement and priority of the producer thread
 };
 
 bool wholeHz(double rate) noexcept
@@ -242,15 +243,17 @@ AcqExpected<Config> parseConfig(const AcqUri& uri)
     const auto fnirsSfreq = paramDouble(uri, "fnirs_sfreq", 10.0, 3.0, 1e3);
     const auto ecogSfreq = paramDouble(uri, "ecog_sfreq", 2000.0, 300.0, 1e6);
     const auto ergSfreq = paramDouble(uri, "erg_sfreq", 2000.0, 300.0, 1e6);
+    auto thread = paramThreadPolicy(uri);
     for (const AcqError& error :
          {eeg.error(), meg.error(), stim.error(), sfreq.error(), block.error(), realtime.error(), speed.error(),
           duration.error(), seed.error(), noise.error(), alpha.error(), interval.error(), targets.error(),
           evoked.error(), fnirs.error(), ecog.error(), erg.error(), fnirsSfreq.error(), ecogSfreq.error(),
-          ergSfreq.error()}) {
+          ergSfreq.error(), thread.error()}) {
         if (!error.ok()) {
             return error;
         }
     }
+    c.thread = std::move(*thread);
     c.fnirs = static_cast<std::size_t>(*fnirs);
     c.ecog = static_cast<std::size_t>(*ecog);
     c.erg = static_cast<std::size_t>(*erg);
@@ -774,7 +777,23 @@ public:
             clock.anchorSample = stream.next;
             stream.writer->setClock(clock);
         }
-        m_thread = std::thread([this] { run(); });
+        // The thread applies its policy before producing anything; a refused policy fails start(). The flag is a
+        // member: the thread may still be inside notify_one() when start() returns.
+        m_applied.store(-1, std::memory_order_relaxed);
+        m_thread = std::thread([this] {
+            m_refused = acqApplyThreadPolicy(m_config.thread);
+            const bool ok = m_refused.ok();
+            m_applied.store(ok ? 1 : 0, std::memory_order_release);
+            m_applied.notify_one();
+            if (ok) {
+                run();
+            }
+        });
+        m_applied.wait(-1, std::memory_order_acquire);
+        if (m_applied.load(std::memory_order_acquire) == 0) {
+            m_thread.join();
+            return m_refused;
+        }
         return {};
     }
 
@@ -1007,6 +1026,8 @@ private:
     std::mutex m_mutex;
     std::condition_variable m_wake;
     std::atomic<bool> m_stop{false};
+    std::atomic<int> m_applied{-1}; // start(): -1 pending, 1 the thread policy applied, 0 refused (m_refused)
+    AcqError m_refused;
 };
 
 //=============================================================================================================
@@ -1031,6 +1052,8 @@ AcqSchemeInfo schemeInfo()
         {"speed", "double", "1", "Pacing factor of realtime, e.g. 100 replays a session 100 times faster."},
         {"duration", "double", "0", "Session length in seconds, then end of stream; 0 runs until stopped."},
         {"seed", "int", "0", "Seed; equal seeds give bit-identical data."},
+        {"cpus", "string", "", "Comma-separated CPUs for the producer thread, e.g. those of the ring's NUMA node."},
+        {"priority", "string", "normal", "Producer thread priority: normal, high or realtime."},
         {"noise", "double", "1",
          "Gain of the background noise (1 = 10 uV / 200 fT rms EEG/MEG, 25 uV ECoG, 5 uV ERG; fNIRS: physiology and "
          "measurement noise)."},

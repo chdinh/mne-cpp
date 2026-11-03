@@ -7,13 +7,15 @@ sidebar_position: 6
 
 # Namespace Members
 
-Index of 414 namespace-level symbols (functions, typedefs, enums, variables) across all public namespaces.
+Index of 420 namespace-level symbols (functions, typedefs, enums, variables) across all public namespaces.
 
 - **Accuracy** `[enum]` in [INVLIB](/docs/api/inv/)
+- **acqApplyThreadPolicy** `[fn]` in [ACQLIB](/docs/api/acq/) — Applies `policy` to the calling thread: CPUs first, then priority.
 - **AcqBlockPart** `[type]` in [ACQLIB](/docs/api/acq/) — Read-only run.
 - **AcqChannelKind** `[enum]` in [ACQLIB](/docs/api/acq/) — Signal kind of a channel.
 - **acqClockDomainId** `[fn]` in [ACQLIB](/docs/api/acq/)
 - **AcqClockSource** `[enum]` in [ACQLIB](/docs/api/acq/) — What the anchor of the clock model is derived from.
+- **acqCurrentCpu** `[fn]` in [ACQLIB](/docs/api/acq/)
 - **AcqDeviceState** `[enum]` in [ACQLIB](/docs/api/acq/) — State of a source.
 - **AcqDirection** `[enum]` in [ACQLIB](/docs/api/acq/) — Direction of a stream as seen from the host.
 - **AcqEigenMap** `[type]` in [ACQLIB](/docs/api/acq/) — Strided read-only channels x samples map of one part of a view.
@@ -22,9 +24,13 @@ Index of 414 namespace-level symbols (functions, typedefs, enums, variables) acr
 - **AcqLayout** `[enum]` in [ACQLIB](/docs/api/acq/) — Memory layout of a ring.
 - **AcqLockState** `[enum]` in [ACQLIB](/docs/api/acq/) — How far a stream's timebase is known relative to its domain.
 - **AcqMemoryKind** `[enum]` in [ACQLIB](/docs/api/acq/) — Kind of memory that holds the samples of a ring.
+- **acqNumaNodeCpus** `[fn]` in [ACQLIB](/docs/api/acq/)
+- **acqPinThisThread** `[fn]` in [ACQLIB](/docs/api/acq/) — Restricts the calling thread to `cpus`.
 - **AcqRounding** `[enum]` in [ACQLIB](/docs/api/acq/) — What `mapSampleExact()` does with an instant that is not on the target's schedulable grid.
 - **AcqSampleFormat** `[enum]` in [ACQLIB](/docs/api/acq/) — Native sample format of a stream.
 - **AcqScaling** `[enum]` in [ACQLIB](/docs/api/acq/) — Whether converters apply the per-channel scale and offset.
+- **acqSetThisThreadPriority** `[fn]` in [ACQLIB](/docs/api/acq/) — Sets the scheduling class of the calling thread.
+- **AcqThreadPriority** `[enum]` in [ACQLIB](/docs/api/acq/) — Scheduling class of an acquisition thread.
 - **AcqUnderrunFill** `[enum]` in [ACQLIB](/docs/api/acq/) — What an output device emits when the writer has not committed the sample it has to play.
 - **AcqUnit** `[enum]` in [ACQLIB](/docs/api/acq/) — SI unit of the physical value of a channel (value = raw * scale + offset, times 10^unitExponent).
 - **AcqWait** `[enum]` in [ACQLIB](/docs/api/acq/) — How a waiting reader or writer is woken.

@@ -75,6 +75,7 @@ enum class AcqErrorCode : std::uint16_t
     WriterInUse = 115,         /**< The output stream already has its writer. */
     DeviceMemory = 116,        /**< The samples live in GPU memory, which the CPU must not read or write. */
     NotSupported = 117,        /**< The device does not offer this function (e.g. impedance measurement). */
+    PermissionDenied = 118,    /**< The operating system refused the request (e.g. a realtime priority without the right). */
     Internal = 199             /**< Invariant violation inside ACQLIB; please report it. */
 };
 
