@@ -6,9 +6,9 @@
     "commit": "0800c9a1bf606c2df8c44e35fbb42ea13029b549"
   },
   "summary": {
-    "directories": 271,
+    "directories": 272,
     "registration": {
-      "unconditional": 262,
+      "unconditional": 263,
       "conditional": 6,
       "unregistered": 3
     },
@@ -37,6 +37,7 @@
           "test_acq_dlpack",
           "test_acq_error",
           "test_acq_stream",
+          "test_acq_thread",
           "test_acq_timebase"
         ],
         "executed_not_in_inventory": [
@@ -85,6 +86,7 @@
           "test_acq_dlpack",
           "test_acq_error",
           "test_acq_stream",
+          "test_acq_thread",
           "test_acq_timebase"
         ],
         "executed_not_in_inventory": [
@@ -133,6 +135,7 @@
           "test_acq_dlpack",
           "test_acq_error",
           "test_acq_stream",
+          "test_acq_thread",
           "test_acq_timebase"
         ],
         "executed_not_in_inventory": [
@@ -181,6 +184,7 @@
           "test_acq_dlpack",
           "test_acq_error",
           "test_acq_stream",
+          "test_acq_thread",
           "test_acq_timebase"
         ],
         "executed_not_in_inventory": [
@@ -229,6 +233,7 @@
           "test_acq_dlpack",
           "test_acq_error",
           "test_acq_stream",
+          "test_acq_thread",
           "test_acq_timebase"
         ],
         "executed_not_in_inventory": [
@@ -277,6 +282,7 @@
           "test_acq_dlpack",
           "test_acq_error",
           "test_acq_stream",
+          "test_acq_thread",
           "test_acq_timebase"
         ],
         "executed_not_in_inventory": [
@@ -523,6 +529,40 @@
         "AcqViewLease",
         "AcqWriteView",
         "AcqWriter"
+      ]
+    },
+    {
+      "name": "test_acq_thread",
+      "cmake": "src/testframes/test_acq_thread/CMakeLists.txt",
+      "registration": {
+        "state": "unconditional",
+        "via": "src/testframes/CMakeLists.txt",
+        "conditions": [],
+        "early_return_guard": null,
+        "unregistered_reason": null
+      },
+      "add_test_names": [
+        "test_acq_thread"
+      ],
+      "labels": [
+        "unit"
+      ],
+      "timeout": 120,
+      "requirements": [],
+      "gui": false,
+      "qskip_sites": 0,
+      "spawns_processes": false,
+      "ci_excluded_on": [],
+      "ci": {
+        "macos-26": "absent",
+        "macos-26-qt-min": "absent",
+        "ubuntu-24.04": "absent",
+        "ubuntu-24.04-qt-min": "absent",
+        "windows-2025-vs2026": "absent",
+        "windows-2025-vs2026-qt-min": "absent"
+      },
+      "registry_classes": [
+        "AcqThreadPolicy"
       ]
     },
     {
