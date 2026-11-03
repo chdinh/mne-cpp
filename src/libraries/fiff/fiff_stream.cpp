@@ -480,7 +480,7 @@ bool FiffStream::read_annotations(const FiffDirNode::SPtr& p_Node, FiffAnnotatio
         annotation.onset = static_cast<double>(onsets[i]);
         annotation.duration = static_cast<double>(ends[i] - onsets[i]); // float32, as MNE-Python
         annotation.description = descriptions[i];
-        for (const QJsonValue& name : channelNames.at(i).toArray()) {
+        for (const auto& name : channelNames.at(i).toArray()) {
             annotation.channelNames << name.toString();
         }
         annotation.extras = extras.at(i).toObject().toVariantMap();
