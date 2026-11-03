@@ -35,6 +35,7 @@
 #include <QTemporaryDir>
 
 #include <algorithm>
+#include <tuple>
 
 //=============================================================================================================
 // USED NAMESPACES
@@ -103,6 +104,7 @@ private slots:
     void testBrainVisionReaderMatchesPython();
     void testBrainVisionReaderVariants();
     void testWriteFromInfoAndReadRejects();
+    void testWriteSidecarsPerDatatype();
 
     // BIDSPath setter/getter coverage
     void testPathSettersGetters();
@@ -880,6 +882,78 @@ void TestBids::testBrainVisionReaderVariants()
     }
     BrainVisionReader missing;
     QVERIFY(!missing.open(dir.filePath("none.vhdr")));
+}
+
+//=============================================================================================================
+
+void TestBids::testWriteSidecarsPerDatatype()
+{
+    // MEG, EEG and iEEG sidecars carry their own REQUIRED keys (BIDS 1.9; mne-bids writes the same for MEG).
+    BidsRawData data;
+    FIFFLIB::FiffInfo& info = data.raw.info;
+    info.sfreq = 1000.0f;
+    info.linefreq = -1.0f; // unknown
+    for (const auto& [name, kind, unit] : {std::tuple{"MEG 001", FIFFV_MEG_CH, FIFF_UNIT_T},
+                                           std::tuple{"EEG 001", FIFFV_EEG_CH, FIFF_UNIT_V},
+                                           std::tuple{"STI 101", FIFFV_STIM_CH, FIFF_UNIT_NONE}}) {
+        FIFFLIB::FiffChInfo ch;
+        ch.ch_name = QString::fromLatin1(name);
+        ch.kind = kind;
+        ch.unit = unit;
+        info.chs << ch;
+        info.ch_names << ch.ch_name;
+    }
+    info.nchan = info.chs.size();
+    data.raw.first_samp = 0;
+    data.raw.last_samp = 2999;
+    QTemporaryDir dir;
+    QVERIFY(dir.isValid());
+    BidsRawData::WriteOptions opts;
+    opts.copyData = false;
+    const auto sidecar = [](const BIDSPath& path) {
+        QFile file(path.filePath());
+        return file.open(QIODevice::ReadOnly) ? QJsonDocument::fromJson(file.readAll()).object() : QJsonObject();
+    };
+
+    const BIDSPath meg(dir.path(), "01", QString(), "rest", "meg", "meg", ".fif");
+    QVERIFY(data.write(meg, QString(), opts) == meg);
+    const QJsonObject megJson = sidecar(meg.sidecarJsonPath());
+    for (const char* key : {"TaskName", "SamplingFrequency", "PowerLineFrequency", "DewarPosition", "SoftwareFilters",
+                            "DigitizedLandmarks", "DigitizedHeadPoints"}) {
+        QVERIFY2(megJson.contains(QLatin1String(key)), key);
+    }
+    QCOMPARE(megJson.value(QStringLiteral("PowerLineFrequency")).toString(), QStringLiteral("n/a"));
+    QCOMPARE(megJson.value(QStringLiteral("MEGChannelCount")).toInt(), 1);
+    QCOMPARE(megJson.value(QStringLiteral("EEGChannelCount")).toInt(), 1);
+    QCOMPARE(megJson.value(QStringLiteral("TriggerChannelCount")).toInt(), 1);
+    QVERIFY(!megJson.contains(QStringLiteral("iEEGReference")));
+    QVERIFY(!megJson.contains(QStringLiteral("ECOGChannelCount")));
+    // An EEG channel without a position gives no electrodes.tsv; MEG always has its coordinate system.
+    QVERIFY(!QFileInfo::exists(meg.electrodesTsvPath().filePath()));
+    const QJsonObject megCoords = sidecar(meg.coordsystemJsonPath());
+    QCOMPARE(megCoords.value(QStringLiteral("MEGCoordinateSystem")).toString(), QStringLiteral("Other"));
+    QCOMPARE(megCoords.value(QStringLiteral("MEGCoordinateUnits")).toString(), QStringLiteral("m"));
+    QVERIFY(megCoords.contains(QStringLiteral("MEGCoordinateSystemDescription")));
+
+    const BIDSPath eeg(dir.path(), "02", QString(), "rest", "eeg", "eeg", ".edf");
+    info.chs[1].chpos.r0 = Eigen::Vector3f(0.01f, 0.02f, 0.03f);
+    QVERIFY(data.write(eeg, QString(), opts) == eeg);
+    const QJsonObject eegJson = sidecar(eeg.sidecarJsonPath());
+    for (const char* key : {"TaskName", "SamplingFrequency", "PowerLineFrequency", "SoftwareFilters", "EEGReference"}) {
+        QVERIFY2(eegJson.contains(QLatin1String(key)), key);
+    }
+    QVERIFY(!eegJson.contains(QStringLiteral("iEEGReference")));
+    QVERIFY(!eegJson.contains(QStringLiteral("DewarPosition")));
+    QVERIFY(QFileInfo::exists(eeg.electrodesTsvPath().filePath()));
+    QVERIFY(sidecar(eeg.coordsystemJsonPath()).contains(QStringLiteral("EEGCoordinateSystem")));
+
+    const BIDSPath ieeg(dir.path(), "03", QString(), "rest", "ieeg", "ieeg", ".edf");
+    QVERIFY(data.write(ieeg, QString(), opts) == ieeg);
+    const QJsonObject ieegJson = sidecar(ieeg.sidecarJsonPath());
+    for (const char* key : {"TaskName", "SamplingFrequency", "PowerLineFrequency", "SoftwareFilters", "iEEGReference"}) {
+        QVERIFY2(ieegJson.contains(QLatin1String(key)), key);
+    }
+    QVERIFY(sidecar(ieeg.coordsystemJsonPath()).contains(QStringLiteral("iEEGCoordinateSystem")));
 }
 
 //=============================================================================================================

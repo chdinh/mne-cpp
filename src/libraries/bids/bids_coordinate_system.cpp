@@ -59,18 +59,18 @@ BidsCoordinateSystem BidsCoordinateSystem::readJson(const QString& sFilePath)
 
     QJsonObject json = doc.object();
 
-    // Try iEEG fields first, fall back to EEG fields
-    cs.system = json.value(QStringLiteral("iEEGCoordinateSystem")).toString();
-    if (cs.system.isEmpty())
-        cs.system = json.value(QStringLiteral("EEGCoordinateSystem")).toString();
-
-    cs.units = json.value(QStringLiteral("iEEGCoordinateUnits")).toString();
-    if (cs.units.isEmpty())
-        cs.units = json.value(QStringLiteral("EEGCoordinateUnits")).toString();
-
-    cs.description = json.value(QStringLiteral("iEEGCoordinateSystemDescription")).toString();
-    if (cs.description.isEmpty())
-        cs.description = json.value(QStringLiteral("EEGCoordinateSystemDescription")).toString();
+    // iEEG fields first, then EEG, then MEG
+    const auto field = [&json](const QString& name) {
+        for (const char* prefix : {"iEEG", "EEG", "MEG"}) {
+            const QString value = json.value(QLatin1String(prefix) + name).toString();
+            if (!value.isEmpty())
+                return value;
+        }
+        return QString();
+    };
+    cs.system = field(QStringLiteral("CoordinateSystem"));
+    cs.units = field(QStringLiteral("CoordinateUnits"));
+    cs.description = field(QStringLiteral("CoordinateSystemDescription"));
 
     cs.processingDescription = json.value(QStringLiteral("iEEGCoordinateProcessingDescription")).toString();
     if (cs.processingDescription.isEmpty())
@@ -104,22 +104,23 @@ BidsCoordinateSystem BidsCoordinateSystem::readJson(const QString& sFilePath)
 //=============================================================================================================
 
 bool BidsCoordinateSystem::writeJson(const QString& sFilePath,
-                                     const BidsCoordinateSystem& cs)
+                                     const BidsCoordinateSystem& cs,
+                                     const QString& sModality)
 {
     QJsonObject json;
 
-    json[QStringLiteral("iEEGCoordinateSystem")] = cs.system;
-    json[QStringLiteral("iEEGCoordinateUnits")] = cs.units;
+    json[sModality + QStringLiteral("CoordinateSystem")] = cs.system;
+    json[sModality + QStringLiteral("CoordinateUnits")] = cs.units;
 
     if (!cs.description.isEmpty())
-        json[QStringLiteral("iEEGCoordinateSystemDescription")] = cs.description;
-    if (!cs.processingDescription.isEmpty())
+        json[sModality + QStringLiteral("CoordinateSystemDescription")] = cs.description;
+    if (!cs.processingDescription.isEmpty() && sModality == QLatin1String("iEEG"))
         json[QStringLiteral("iEEGCoordinateProcessingDescription")] = cs.processingDescription;
     if (!cs.associatedImagePath.isEmpty())
         json[QStringLiteral("IntendedFor")] = cs.associatedImagePath;
 
     // Serialize the 4x4 transform matrix
-    if (!cs.transform.isIdentity(1e-15)) {
+    if (!cs.transform.isIdentity(1e-15) && sModality == QLatin1String("iEEG")) {
         QJsonArray rows;
         for (int r = 0; r < 4; ++r) {
             QJsonArray cols;

@@ -87,10 +87,12 @@ struct BIDSSHARED_EXPORT BidsCoordinateSystem
      * @brief Write a BIDS *_coordsystem.json file.
      * @param[in] sFilePath  Output path.
      * @param[in] cs         Coordinate system metadata.
+     * @param[in] sModality  Key prefix of the datatype: "iEEG", "EEG" or "MEG".
      * @return true on success.
      */
     static bool writeJson(const QString& sFilePath,
-                          const BidsCoordinateSystem& cs);
+                          const BidsCoordinateSystem& cs,
+                          const QString& sModality = QStringLiteral("iEEG"));
 
     /**
      * @brief Convert parsed transform to a FiffCoordTrans.

@@ -33,6 +33,7 @@
 #include <QFile>
 #include <QJsonDocument>
 #include <QJsonObject>
+#include <algorithm>
 #include <cmath>
 
 //=============================================================================================================
@@ -362,27 +363,44 @@ QList<BidsElectrode> buildElectrodeRecords(const FiffInfo& info)
 }
 
 //=========================================================================================================
-QJsonObject buildIeegSidecarJson(const BidsRawData& data,
-                                 const BIDSPath& bidsPath)
+QJsonObject buildSidecarJson(const BidsRawData& data,
+                             const BIDSPath& bidsPath)
 {
     QJsonObject json;
     const FiffInfo& info = data.raw.info;
+    const QString datatype = bidsPath.datatype();
 
-    // Required
+    // Required for every electrophysiology datatype
     json[QStringLiteral("TaskName")] = bidsPath.task();
     json[QStringLiteral("SamplingFrequency")] = static_cast<double>(info.sfreq);
-    json[QStringLiteral("PowerLineFrequency")] = static_cast<double>(info.linefreq);
-
-    // Reference
-    if (!data.ieegReference.isEmpty())
-        json[QStringLiteral("iEEGReference")] = data.ieegReference;
+    if (info.linefreq > 0.0f)
+        json[QStringLiteral("PowerLineFrequency")] = static_cast<double>(info.linefreq);
     else
-        json[QStringLiteral("iEEGReference")] = QStringLiteral("n/a");
+        json[QStringLiteral("PowerLineFrequency")] = QStringLiteral("n/a");
+    json[QStringLiteral("SoftwareFilters")] = QStringLiteral("n/a");
+
+    // Required per datatype
+    const QString reference = data.ieegReference.isEmpty() ? QStringLiteral("n/a") : data.ieegReference;
+    if (datatype == QLatin1String("meg")) {
+        json[QStringLiteral("DewarPosition")] = QStringLiteral("n/a");
+        json[QStringLiteral("DigitizedLandmarks")] = false;
+        json[QStringLiteral("DigitizedHeadPoints")] = !info.dig.isEmpty();
+    } else if (datatype == QLatin1String("eeg")) {
+        json[QStringLiteral("EEGReference")] = reference;
+    } else {
+        json[QStringLiteral("iEEGReference")] = reference;
+    }
 
     // Channel counts — computed from FiffInfo
-    int ecog = 0, seeg = 0, dbs = 0, eeg = 0, eog = 0, ecg = 0, emg = 0, misc = 0, trig = 0;
+    int meg = 0, megRef = 0, ecog = 0, seeg = 0, dbs = 0, eeg = 0, eog = 0, ecg = 0, emg = 0, misc = 0, trig = 0;
     for (const auto& ch : info.chs) {
         switch (ch.kind) {
+            case FIFFV_MEG_CH:
+                ++meg;
+                break;
+            case FIFFV_REF_MEG_CH:
+                ++megRef;
+                break;
             case FIFFV_ECOG_CH:
                 ++ecog;
                 break;
@@ -414,11 +432,17 @@ QJsonObject buildIeegSidecarJson(const BidsRawData& data,
                 break;
         }
     }
-    json[QStringLiteral("ECOGChannelCount")] = ecog;
-    json[QStringLiteral("SEEGChannelCount")] = seeg;
-    if (dbs > 0)
-        json[QStringLiteral("DBSChannelCount")] = dbs;
-    if (eeg > 0)
+    if (datatype == QLatin1String("meg")) {
+        json[QStringLiteral("MEGChannelCount")] = meg;
+        json[QStringLiteral("MEGREFChannelCount")] = megRef;
+    }
+    if (datatype == QLatin1String("ieeg")) {
+        json[QStringLiteral("ECOGChannelCount")] = ecog;
+        json[QStringLiteral("SEEGChannelCount")] = seeg;
+        if (dbs > 0)
+            json[QStringLiteral("DBSChannelCount")] = dbs;
+    }
+    if (eeg > 0 || datatype == QLatin1String("eeg"))
         json[QStringLiteral("EEGChannelCount")] = eeg;
     if (eog > 0)
         json[QStringLiteral("EOGChannelCount")] = eog;
@@ -863,6 +887,11 @@ BIDSPath BidsRawData::write(const BIDSPath& bidsPath,
     //=========================================================================================================
     {
         QList<BidsElectrode> electrodeRecords = buildElectrodeRecords(raw.info);
+        // Electrodes without any position say nothing a channels.tsv does not.
+        const bool anyPosition = std::any_of(electrodeRecords.cbegin(), electrodeRecords.cend(),
+                                             [](const BidsElectrode& e) { return e.x != QLatin1String("n/a"); });
+        if (!anyPosition)
+            electrodeRecords.clear();
 
         if (!electrodeRecords.isEmpty()) {
             BIDSPath electrodesPath = bidsPath.electrodesTsvPath();
@@ -870,30 +899,40 @@ BIDSPath BidsRawData::write(const BIDSPath& bidsPath,
                 if (!BidsElectrode::writeTsv(electrodesPath.filePath(), electrodeRecords))
                     qWarning() << "[BidsRawData::write] Failed to write electrodes.tsv";
             }
+        }
 
-            BIDSPath coordsysPath = bidsPath.coordsystemJsonPath();
-            if (options.overwrite || !QFileInfo::exists(coordsysPath.filePath())) {
-                // Build coordinate system, deriving defaults from FiffInfo if needed
-                BidsCoordinateSystem cs = coordinateSystem;
-                if (cs.system.isEmpty()) {
-                    if (raw.info.dig.isEmpty()) {
-                        cs.system = QStringLiteral("Other");
-                        cs.units = QStringLiteral("n/a");
-                    } else {
-                        int coordFrame = raw.info.dig.first().coord_frame;
-                        QMap<int, QString> frameMap = fiffFrameToBidsCoord();
-                        cs.system = frameMap.contains(coordFrame)
-                            ? frameMap[coordFrame]
-                            : QStringLiteral("Other");
-                        cs.units = QStringLiteral("m");
-                    }
+        // MEG always states its coordinate system (sensor positions live in the data file).
+        const QString datatype = bidsPath.datatype();
+        const bool isMeg = datatype == QLatin1String("meg");
+        BIDSPath coordsysPath = bidsPath.coordsystemJsonPath();
+        if ((isMeg || !electrodeRecords.isEmpty()) && (options.overwrite || !QFileInfo::exists(coordsysPath.filePath()))) {
+            // Build coordinate system, deriving defaults from FiffInfo if needed
+            BidsCoordinateSystem cs = coordinateSystem;
+            if (cs.system.isEmpty()) {
+                if (raw.info.dig.isEmpty()) {
+                    cs.system = QStringLiteral("Other");
+                    cs.units = isMeg ? QStringLiteral("m") : QStringLiteral("n/a");
+                } else {
+                    int coordFrame = raw.info.dig.first().coord_frame;
+                    QMap<int, QString> frameMap = fiffFrameToBidsCoord();
+                    cs.system = frameMap.contains(coordFrame)
+                        ? frameMap[coordFrame]
+                        : QStringLiteral("Other");
+                    cs.units = QStringLiteral("m");
                 }
-                if (cs.description.isEmpty() && !raw.info.dig.isEmpty())
-                    cs.description = QStringLiteral("Coordinate system derived from recording data");
-
-                if (!BidsCoordinateSystem::writeJson(coordsysPath.filePath(), cs))
-                    qWarning() << "[BidsRawData::write] Failed to write coordsystem.json";
             }
+            if (cs.description.isEmpty() && !raw.info.dig.isEmpty())
+                cs.description = QStringLiteral("Coordinate system derived from recording data");
+            // REQUIRED by BIDS for "Other".
+            if (cs.description.isEmpty() && cs.system == QLatin1String("Other"))
+                cs.description = isMeg ? QStringLiteral("Device coordinates of the acquisition system")
+                                       : QStringLiteral("Coordinate system of the electrode positions");
+
+            const QString modality = isMeg         ? QStringLiteral("MEG")
+                : datatype == QLatin1String("eeg") ? QStringLiteral("EEG")
+                                                   : QStringLiteral("iEEG");
+            if (!BidsCoordinateSystem::writeJson(coordsysPath.filePath(), cs, modality))
+                qWarning() << "[BidsRawData::write] Failed to write coordsystem.json";
         }
     }
 
@@ -932,7 +971,7 @@ BIDSPath BidsRawData::write(const BIDSPath& bidsPath,
             return result;
         }
 
-        QJsonObject sidecarJson = buildIeegSidecarJson(*this, bidsPath);
+        QJsonObject sidecarJson = buildSidecarJson(*this, bidsPath);
         if (!writeJsonFile(sidecarPath.filePath(), sidecarJson)) {
             qWarning() << "[BidsRawData::write] Failed to write sidecar JSON";
             return result;
