@@ -455,7 +455,8 @@ void FiffInfo::writeToStream(FiffStream* p_pStream) const
     //    General
     //
     p_pStream->write_float(FIFF_SFREQ, &this->sfreq);
-    p_pStream->write_float(FIFF_LINE_FREQ, &this->linefreq);
+    if (this->linefreq >= 0.0f)
+        p_pStream->write_float(FIFF_LINE_FREQ, &this->linefreq);
     p_pStream->write_float(FIFF_HIGHPASS, &this->highpass);
     p_pStream->write_float(FIFF_LOWPASS, &this->lowpass);
     p_pStream->write_string(FIFF_EXPERIMENTER, this->experimenter);

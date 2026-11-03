@@ -2249,7 +2249,8 @@ FiffStream::SPtr FiffStream::start_writing_raw(QIODevice& p_IODevice,
     t_pStream->write_float(FIFF_SFREQ, &info.sfreq);
     t_pStream->write_float(FIFF_HIGHPASS, &info.highpass);
     t_pStream->write_float(FIFF_LOWPASS, &info.lowpass);
-    t_pStream->write_float(FIFF_LINE_FREQ, &info.linefreq);
+    if (info.linefreq >= 0.0f)
+        t_pStream->write_float(FIFF_LINE_FREQ, &info.linefreq);
     t_pStream->write_int(FIFF_GANTRY_ANGLE, &info.gantry_angle);
     t_pStream->write_int(FIFF_NCHAN, &nchan);
     t_pStream->write_int(FIFF_DATA_PACK, &data_type);

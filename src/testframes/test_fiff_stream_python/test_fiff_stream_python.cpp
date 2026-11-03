@@ -768,7 +768,9 @@ void TestFiffStreamPython::writesAnnotationsAndDevice()
     QCOMPARE(plain.write_device_info(info.device_info), fiff_long_t(-1));
     QCOMPARE(buffer.size(), qint64(0));
 
-    // Writers of native samples declare their packing.
+    // Writers of native samples declare their packing. An unknown line frequency is not written (mne-python's
+    // info["line_freq"] stays None instead of reading -1).
+    info.linefreq = -1.0f;
     QFile packedFile(dir.filePath(QStringLiteral("packed_raw.fif")));
     FiffStream::SPtr packed = FiffStream::start_writing_raw(packedFile, info, cals, defaultMatrixXi, false,
                                                             FIFFT_DAU_PACK16);
@@ -780,6 +782,8 @@ void TestFiffStreamPython::writesAnnotationsAndDevice()
     FiffTag::UPtr pack;
     QVERIFY(packedReader.dirtree()->dir_tree_find(FIFFB_MEAS_INFO).first()->find_tag(&packedReader, FIFF_DATA_PACK, pack));
     QCOMPARE(*pack->toInt(), FIFFT_DAU_PACK16);
+    FiffTag::UPtr lineFreq;
+    QVERIFY(!packedReader.dirtree()->dir_tree_find(FIFFB_MEAS_INFO).first()->find_tag(&packedReader, FIFF_LINE_FREQ, lineFreq));
 }
 
 //=============================================================================================================
