@@ -31,7 +31,7 @@ mne_acq view <uri> [--window s] [--duration s] [--screenshot file.png]
 | `info <uri>` | Opens the source and prints its backend, device and, per stream, the sample format, sampling rate, clock and every channel with its kind and unit |
 | `record <uri> <file.fif>` | Records the first stream of the source to a raw FIFF file (split into parts like MNE-Python above 2 GB), with trigger events in the stim channel and as annotations |
 | `stream <uri> --lsl` | Publishes the first stream of the source as a Lab Streaming Layer outlet (float32, the stream's name unless `--name` is given) |
-| `view <uri>` | Shows the first stream as live traces in the raw-data browser's channel view, with trigger events marked, until the window is closed, `--duration` has passed or the source ends |
+| `view <uri>` | Shows the first stream as live traces in a sweep display: a fixed `--window` that the newest samples overwrite from left to right at the "now" marker, so the traces stand still; trigger events are marked until they are overwritten. Runs until the window is closed, `--duration` has passed or the source ends |
 | `stream <uri> --brainflow-multicast` | Publishes the first stream in BrainFlow's multicast format, so BrainFlow's `STREAMING_BOARD` in Python, C#, Julia or Java receives it (see below) |
 
 ## Options

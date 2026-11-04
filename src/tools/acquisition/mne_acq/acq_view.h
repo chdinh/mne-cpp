@@ -7,7 +7,7 @@
  * @author   Christoph Dinh <christoph.dinh@mne-cpp.org>
  * @since    2.5.0
  * @date     November 2026
- * @brief    mne_acq view: live traces of a source in a ChannelDataView.
+ * @brief    mne_acq view: live traces of a source in a sweep display (ChannelDataView).
  */
 
 #ifndef MNE_ACQ_VIEW_H

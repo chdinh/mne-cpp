@@ -7,7 +7,7 @@
  * @author   Christoph Dinh <christoph.dinh@mne-cpp.org>
  * @since    2.5.0
  * @date     November 2026
- * @brief    mne_acq view: live traces of a source in a ChannelDataView.
+ * @brief    mne_acq view: live traces of a source in a sweep display (ChannelDataView).
  */
 
 //=============================================================================================================
@@ -20,10 +20,11 @@
 #include <acq/fiff/acq_fiff.h>
 
 #include <disp/viewers/channeldataview.h>
-#include <disp/viewers/helpers/channeldatamodel.h>
 
 #include <algorithm>
 #include <chrono>
+#include <cmath>
+#include <vector>
 
 //=============================================================================================================
 // QT INCLUDES
@@ -61,15 +62,19 @@ int runAcqView(AcqDevice& device, double window, double duration, const QString&
         return 2;
     }
     const auto channels = static_cast<Eigen::Index>(streamInfo->channels.size());
-    const double sfreq = streamInfo->sfreq;
-    const auto windowSamples = static_cast<int>(window * sfreq);
+    // Sweep display: a fixed window that the newest samples overwrite from left to right, so traces stand still.
+    const auto width = std::max<Eigen::Index>(2, static_cast<Eigen::Index>(std::lround(window * streamInfo->sfreq)));
 
     ChannelDataView view(QStringLiteral("MNEACQ/view"));
     view.setWindowTitle(QStringLiteral("mne_acq view %1").arg(QString::fromStdString(device.description().uri)));
     view.resize(1200, 700);
     view.init(QSharedPointer<FIFFLIB::FiffInfo>::create(*fiffInfo));
-    view.model()->setMaxStoredSamples(4 * windowSamples);
+    view.setOverviewBarVisible(false);
     view.setWindowSize(static_cast<float>(window));
+    Eigen::MatrixXd sweep = Eigen::MatrixXd::Zero(channels, width);
+    view.setFileBounds(0, static_cast<int>(width) - 1);
+    view.setData(sweep, 0);
+    view.scrollToSample(0, false);
     view.show();
 
     if (const AcqError started = device.start(); !started.ok()) {
@@ -77,7 +82,7 @@ int runAcqView(AcqDevice& device, double window, double duration, const QString&
         return 2;
     }
 
-    QVector<ChannelRhiView::EventMarker> events;
+    std::vector<AcqEvent> events;
     Eigen::MatrixXd block;
     std::uint64_t next = 0;
     bool ended = false;
@@ -102,24 +107,30 @@ int runAcqView(AcqDevice& device, double window, double duration, const QString&
             block.resize(channels, static_cast<Eigen::Index>(acquiredView.sampleCount()));
             const AcqError decoded = decode(acquiredView, ref(block));
             for (const auto* part : {&acquiredView.events().first, &acquiredView.events().second}) {
-                for (const AcqEvent& event : *part) {
-                    events.append({static_cast<int>(event.sample), event.code, QColor(), QString::number(event.code)});
-                }
+                events.insert(events.end(), part->begin(), part->end());
             }
-            next = acquiredView.firstSample() + acquiredView.sampleCount();
+            const std::uint64_t first = acquiredView.firstSample();
             if (reader->release(acquiredView).ok() && decoded.ok()) {
-                view.addData(block);
+                for (Eigen::Index i = 0; i < block.cols(); ++i) {
+                    sweep.col(static_cast<Eigen::Index>((first + static_cast<std::uint64_t>(i)) % static_cast<std::uint64_t>(width))) = block.col(i);
+                }
+                next = first + static_cast<std::uint64_t>(block.cols());
                 added = true;
             }
         }
         if (added) {
-            const int first = view.model()->firstSample();
-            events.erase(std::remove_if(events.begin(), events.end(),
-                                        [first](const ChannelRhiView::EventMarker& e) { return e.sample < first; }),
-                         events.end());
-            view.setFileBounds(first, static_cast<int>(next) - 1);
-            view.setEvents(events);
-            view.scrollToSample(qMax(0, static_cast<int>(next) - windowSamples), false);
+            const auto bar = static_cast<int>(next % static_cast<std::uint64_t>(width));
+            // Events older than one sweep have been overwritten.
+            std::erase_if(events, [&](const AcqEvent& e) { return e.sample + static_cast<std::uint64_t>(width) < next; });
+            QVector<ChannelRhiView::EventMarker> markers;
+            for (const AcqEvent& e : events) {
+                markers.append({static_cast<int>(e.sample % static_cast<std::uint64_t>(width)), e.code, QColor(), QString::number(e.code)});
+            }
+            markers.append({bar, 0, QColor(0, 110, 230), QStringLiteral("now")});
+            // The time ruler lays out the chips from left to right.
+            std::sort(markers.begin(), markers.end(), [](const auto& a, const auto& b) { return a.sample < b.sample; });
+            view.setData(sweep, 0);
+            view.setEvents(markers);
         }
         const bool timeUp = duration > 0.0 && elapsed.elapsed() >= static_cast<qint64>(duration * 1000.0);
         if (ended || timeUp || !view.isVisible()) {

@@ -14,7 +14,7 @@
  *   mne_acq record <uri> <file.fif> [--duration s]     record the first stream to FIFF
  *   mne_acq stream <uri> --lsl [--name n] [--duration s]   publish the first stream as an LSL outlet
  *   mne_acq stream <uri> --brainflow-multicast a:p [--master-board id]   publish it for BrainFlow's STREAMING_BOARD
- *   mne_acq view <uri> [--window s] [--duration s] [--screenshot file.png]   live traces in a ChannelDataView
+ *   mne_acq view <uri> [--window s] [--duration s] [--screenshot file.png]   live traces in a sweep display
  *
  * record and stream run until the duration has passed, the source ends (e.g. a file replay without loop) or
  * Ctrl+C. Exit codes: 0 success, 1 usage error, 2 the source or the output failed.
