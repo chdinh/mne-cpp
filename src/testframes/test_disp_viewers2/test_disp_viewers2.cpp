@@ -69,6 +69,7 @@
 // QT INCLUDES
 //=============================================================================================================
 
+#include <QRhiWidget>
 #include <QtTest>
 #include <QApplication>
 #include <QFile>
@@ -2301,6 +2302,12 @@ void TestDispViewers2::averageLayoutView_drawsEachChannelsAverage()
     auto* scene = view.findChild<QGraphicsScene*>();
     QVERIFY(scene != nullptr);
     QCOMPARE(scene->items().size(), 2);
+    // The scene items paint with QPainter, which a QRhiWidget viewport cannot take
+    auto* graphicsView = view.findChild<QGraphicsView*>();
+    QVERIFY(graphicsView != nullptr);
+    QVERIFY(graphicsView && !qobject_cast<QRhiWidget*>(graphicsView->viewport()));
+    view.updateViewport();
+    QVERIFY(graphicsView && !qobject_cast<QRhiWidget*>(graphicsView->viewport()));
     // Recolouring keeps the channel items (name, number and layout position) intact
     QStringList names;
     for (QGraphicsItem* item : scene->items()) {
@@ -3630,6 +3637,8 @@ void TestDispViewers2::rtFiffRawView_paintsHidesRowsAndAddsEvents()
     QCOMPARE(view.getSamplingFreq(), 1000.0f);
     auto* table = view.findChild<QTableView*>();
     QVERIFY(table != nullptr);
+    // The delegate paints with QPainter, which a QRhiWidget viewport cannot take
+    QVERIFY(table && !qobject_cast<QRhiWidget*>(table->viewport()));
     auto* model = qobject_cast<RtFiffRawViewModel*>(table->model());
     QVERIFY(model != nullptr);
 

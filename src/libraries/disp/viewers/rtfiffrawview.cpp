@@ -38,7 +38,6 @@
 #include <QSettings>
 #include <QScrollBar>
 #include <QMouseEvent>
-#include <QRhiWidget>
 
 
 //=============================================================================================================
@@ -92,21 +91,12 @@ RtFiffRawView::~RtFiffRawView()
 void RtFiffRawView::updateViewport()
 {
     if (m_pTableView) {
-        auto* rhiViewport = new QRhiWidget;
-#if defined(WASMBUILD) || defined(__EMSCRIPTEN__)
-        rhiViewport->setApi(QRhiWidget::Api::OpenGL);
-#elif defined(Q_OS_MACOS) || defined(Q_OS_IOS)
-        rhiViewport->setApi(QRhiWidget::Api::Metal);
-#elif defined(Q_OS_WIN)
-        rhiViewport->setApi(QRhiWidget::Api::Direct3D11);
-#else
-        rhiViewport->setApi(QRhiWidget::Api::OpenGL);
-#endif
-        m_pTableView->setViewport(rhiViewport);
-
+        // The delegate paints with QPainter, so the viewport stays Qt's raster widget
+        QWidget* viewport = m_pTableView->viewport();
         // Mouse moves drive the crosshair
-        rhiViewport->installEventFilter(this);
-        rhiViewport->setMouseTracking(true);
+        viewport->installEventFilter(this);
+        viewport->setMouseTracking(true);
+        viewport->update();
     }
 }
 

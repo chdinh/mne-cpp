@@ -22,9 +22,9 @@
 #include <anShared/Model/eventmodel.h>
 #include <anShared/Model/fiffrawviewmodel.h>
 
+#include <QRhiWidget>
 #include <QtTest>
 #include <QHeaderView>
-#include <QRhiWidget>
 #include <QScrollBar>
 #include <QTableView>
 
@@ -81,10 +81,10 @@ void TestAnalyzeRawDataViewer::jumpsToTheSelectedEvent()
 
     auto raw = data->loadModel<FiffRawViewModel>(rawPath);
     plugin.handleEvent(QSharedPointer<Event>::create(SELECTED_MODEL_CHANGED, nullptr, QVariant::fromValue(raw.staticCast<AbstractModel>())));
-    for (QRhiWidget* rhi : view->findChildren<QRhiWidget*>())
-        rhi->setApi(QRhiWidget::Api::Null);
     auto* table = view->findChild<QTableView*>(QStringLiteral("m_pTableView"));
     QVERIFY(table);
+    // The delegate paints with QPainter, which a QRhiWidget viewport cannot take
+    QVERIFY(table && !qobject_cast<QRhiWidget*>(table->viewport()));
     QCoreApplication::processEvents();
 
     // Jumping without a selected event leaves the view where it is

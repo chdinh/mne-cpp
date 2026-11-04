@@ -38,7 +38,6 @@
 #include <QDebug>
 #include <QGraphicsItem>
 #include <QSettings>
-#include <QRhiWidget>
 
 
 //=============================================================================================================
@@ -64,17 +63,6 @@ AverageLayoutView::AverageLayoutView(const QString& sSettingsPath,
 
     m_pAverageLayoutView = new QGraphicsView();
 
-    auto* rhiViewport = new QRhiWidget;
-#if defined(WASMBUILD) || defined(__EMSCRIPTEN__)
-    rhiViewport->setApi(QRhiWidget::Api::OpenGL);
-#elif defined(Q_OS_MACOS) || defined(Q_OS_IOS)
-    rhiViewport->setApi(QRhiWidget::Api::Metal);
-#elif defined(Q_OS_WIN)
-    rhiViewport->setApi(QRhiWidget::Api::Direct3D11);
-#else
-    rhiViewport->setApi(QRhiWidget::Api::OpenGL);
-#endif
-    m_pAverageLayoutView->setViewport(rhiViewport);
 
     m_pAverageLayoutView->setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
     m_pAverageLayoutView->setVerticalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
@@ -103,18 +91,9 @@ AverageLayoutView::~AverageLayoutView()
 
 void AverageLayoutView::updateViewport()
 {
+    // The scene items paint with QPainter, so the viewport stays Qt's raster widget
     if (m_pAverageLayoutView) {
-        auto* rhiViewport = new QRhiWidget;
-#if defined(WASMBUILD) || defined(__EMSCRIPTEN__)
-        rhiViewport->setApi(QRhiWidget::Api::OpenGL);
-#elif defined(Q_OS_MACOS) || defined(Q_OS_IOS)
-        rhiViewport->setApi(QRhiWidget::Api::Metal);
-#elif defined(Q_OS_WIN)
-        rhiViewport->setApi(QRhiWidget::Api::Direct3D11);
-#else
-        rhiViewport->setApi(QRhiWidget::Api::OpenGL);
-#endif
-        m_pAverageLayoutView->setViewport(rhiViewport);
+        m_pAverageLayoutView->viewport()->update();
     }
 }
 
