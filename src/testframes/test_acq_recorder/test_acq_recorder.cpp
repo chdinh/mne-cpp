@@ -256,15 +256,21 @@ QString checkWithMne(const QTemporaryDir& dir, const QJsonObject& spec)
     out.write(QJsonDocument(spec).toJson());
     out.close();
     QProcess process;
+    // Import timings on stderr stand in for notices such as Matplotlib building its font cache.
+    QProcessEnvironment env = QProcessEnvironment::systemEnvironment();
+    env.insert(QStringLiteral("PYTHONPROFILEIMPORTTIME"), QStringLiteral("1"));
+    process.setProcessEnvironment(env);
     process.start(exe, {QStringLiteral(ACQ_RECORDER_CHECK_SCRIPT), specPath});
     if (!process.waitForFinished(300000)) {
         return QStringLiteral("FAIL check_recording.py did not finish");
     }
-    const QString text = QString::fromUtf8(process.readAllStandardOutput() + process.readAllStandardError()).trimmed();
+    // Python packages may print notices to stderr (Matplotlib's font cache on a first run).
+    const QString output = QString::fromUtf8(process.readAllStandardOutput()).trimmed();
+    const QString text = (output + QLatin1Char('\n') + QString::fromUtf8(process.readAllStandardError())).trimmed();
     if (process.exitCode() == 2) {
         return QStringLiteral("SKIP ") + text;
     }
-    return text.endsWith(QStringLiteral("OK")) ? QStringLiteral("OK") : text;
+    return process.exitCode() == 0 && output.endsWith(QStringLiteral("OK")) ? QStringLiteral("OK") : text;
 }
 
 bool writeDoubles(const QString& path, const std::vector<double>& values)
