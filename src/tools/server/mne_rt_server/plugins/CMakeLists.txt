@@ -21,4 +21,12 @@ endif()
 set(CMAKE_SHARED_LIBRARY_PREFIX "")
 set(CMAKE_STATIC_LIBRARY_PREFIX "")
 
+# Plugins live one level below the executables, so libraries that mne_rt_server itself does not link (e.g.
+# libmne_acq_fiff) must be found relative to the plugin.
+if(APPLE)
+  list(APPEND CMAKE_INSTALL_RPATH "@loader_path/../../lib")
+elseif(UNIX)
+  list(APPEND CMAKE_INSTALL_RPATH "\${ORIGIN}/../../lib")
+endif()
+
 add_subdirectory(fiffsimulator)
