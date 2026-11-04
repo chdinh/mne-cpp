@@ -37,11 +37,13 @@
 #include <QDateTime>
 #include <QFile>
 #include <QImage>
+#include <QNetworkInterface>
 #include <QRegularExpression>
 #include <QProcess>
 #include <QStandardPaths>
 #include <QTemporaryDir>
 #include <QThread>
+#include <QUdpSocket>
 #include <QtTest>
 
 //=============================================================================================================
@@ -119,6 +121,36 @@ Source readSource(const std::string& uri)
     }
     device->close();
     return source;
+}
+
+/** Whether this host delivers a multicast datagram it sends on the interface BrainFlow joins groups on. */
+bool multicastLoopsBack(const QHostAddress& group, quint16 port)
+{
+    // STREAMING_BOARD joins on the interface that routes to 8.8.8.8, as mne_acq sends on it.
+    QNetworkInterface iface;
+    QUdpSocket probe;
+    probe.connectToHost(QHostAddress(QStringLiteral("8.8.8.8")), 53);
+    if (probe.waitForConnected(1000)) {
+        for (const QNetworkInterface& candidate : QNetworkInterface::allInterfaces()) {
+            for (const QNetworkAddressEntry& entry : candidate.addressEntries()) {
+                if (entry.ip() == probe.localAddress()) {
+                    iface = candidate;
+                }
+            }
+        }
+    }
+    QUdpSocket receiver;
+    if (!receiver.bind(QHostAddress(QHostAddress::AnyIPv4), port, QAbstractSocket::ShareAddress | QAbstractSocket::ReuseAddressHint) || !(iface.isValid() ? receiver.joinMulticastGroup(group, iface) : receiver.joinMulticastGroup(group))) {
+        return false;
+    }
+    QUdpSocket sender;
+    sender.bind(QHostAddress(QHostAddress::AnyIPv4), 0);
+    sender.setSocketOption(QAbstractSocket::MulticastLoopbackOption, 1);
+    if (iface.isValid()) {
+        sender.setMulticastInterface(iface);
+    }
+    sender.writeDatagram("probe", group, port);
+    return receiver.waitForReadyRead(1000) && receiver.hasPendingDatagrams();
 }
 
 QString python()
@@ -343,6 +375,9 @@ void TestMneAcqTool::streamPublishesBrainFlow()
     const QString received = dir.filePath(QStringLiteral("brainflow.bin"));
     // A port of its own per run, so parallel runs on one host do not mix.
     const QString port = QString::number(20000 + QCoreApplication::applicationPid() % 20000);
+    if (!multicastLoopsBack(QHostAddress(QStringLiteral("225.1.1.1")), port.toUShort())) {
+        QSKIP("This host does not loop multicast back (BrainFlow's STREAMING_BOARD receives multicast only)");
+    }
     QProcess consumer;
     consumer.start(exe, {QStringLiteral(MNE_ACQ_BRAINFLOW_RECEIVE), QStringLiteral("225.1.1.1"), port, QStringLiteral("-1"), QStringLiteral("4"), received});
     QVERIFY(consumer.waitForStarted());
