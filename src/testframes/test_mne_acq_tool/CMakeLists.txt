@@ -7,7 +7,7 @@ project(test_mne_acq_tool LANGUAGES CXX)
 
 set(CMAKE_AUTOMOC ON)
 
-set(QT_REQUIRED_COMPONENTS Core Test)
+set(QT_REQUIRED_COMPONENTS Core Gui Test)
 find_package(QT NAMES Qt6 Qt5 REQUIRED COMPONENTS ${QT_REQUIRED_COMPONENTS})
 find_package(Qt${QT_VERSION_MAJOR} REQUIRED COMPONENTS ${QT_REQUIRED_COMPONENTS})
 
@@ -19,6 +19,7 @@ endif()
 
 target_link_libraries(${PROJECT_NAME} PRIVATE
     Qt${QT_VERSION_MAJOR}::Core
+    Qt${QT_VERSION_MAJOR}::Gui
     Qt${QT_VERSION_MAJOR}::Test
     mne_acq
     mne_fiff

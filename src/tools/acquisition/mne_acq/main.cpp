@@ -14,6 +14,7 @@
  *   mne_acq record <uri> <file.fif> [--duration s]     record the first stream to FIFF
  *   mne_acq stream <uri> --lsl [--name n] [--duration s]   publish the first stream as an LSL outlet
  *   mne_acq stream <uri> --brainflow-multicast a:p [--master-board id]   publish it for BrainFlow's STREAMING_BOARD
+ *   mne_acq view <uri> [--window s] [--duration s] [--screenshot file.png]   live traces in a ChannelDataView
  *
  * record and stream run until the duration has passed, the source ends (e.g. a file replay without loop) or
  * Ctrl+C. Exit codes: 0 success, 1 usage error, 2 the source or the output failed.
@@ -28,6 +29,11 @@
 #include <acq/fiff/acq_fiff_replay.h>
 #include <acq/fiff/acq_recorder.h>
 #include <acq/lsl/acq_lsl.h>
+#if defined(MNE_ACQ_VIEW)
+#include "acq_view.h"
+
+#include <QApplication>
+#endif
 
 #include <lsl/lsl_stream_info.h>
 #include <lsl/lsl_stream_outlet.h>
@@ -35,6 +41,8 @@
 #include <atomic>
 #include <chrono>
 #include <csignal>
+#include <memory>
+#include <string_view>
 #include <optional>
 #include <string>
 #include <thread>
@@ -457,7 +465,17 @@ int streamBrainFlow(AcqDevice& device, AcqReader& reader, const QString& target,
 
 int main(int argc, char* argv[])
 {
-    QCoreApplication app(argc, argv);
+#if defined(MNE_ACQ_VIEW)
+    // Only view needs a GUI; the other commands also run without a display.
+    bool gui = false;
+    for (int i = 1; i < argc && !gui; ++i) {
+        gui = std::string_view(argv[i]) == "view";
+    }
+    std::unique_ptr<QCoreApplication> app = gui ? std::make_unique<QApplication>(argc, argv)
+                                                : std::make_unique<QCoreApplication>(argc, argv);
+#else
+    auto app = std::make_unique<QCoreApplication>(argc, argv);
+#endif
     QCoreApplication::setApplicationName("mne_acq");
     QCoreApplication::setApplicationVersion(MNE_CPP_VERSION);
 
@@ -468,11 +486,12 @@ int main(int argc, char* argv[])
         "  mne_acq info <uri>\n"
         "  mne_acq record <uri> <file.fif> [--duration s]\n"
         "  mne_acq stream <uri> --lsl [--name n] [--duration s]\n"
-        "  mne_acq stream <uri> --brainflow-multicast 225.1.1.1:6677 [--master-board id] [--duration s]\n\n"
+        "  mne_acq stream <uri> --brainflow-multicast 225.1.1.1:6677 [--master-board id] [--duration s]\n"
+        "  mne_acq view <uri> [--window s] [--duration s] [--screenshot file.png]\n\n"
         "URIs: synthetic://?eeg=32&sfreq=1000, fiff:///data/raw.fif?loop=1, lsl://NAME, ... (see mne_acq list).");
     parser.addHelpOption();
     parser.addVersionOption();
-    parser.addPositionalArgument("command", "list, info, record or stream.");
+    parser.addPositionalArgument("command", "list, info, record, stream or view.");
     parser.addPositionalArgument("uri", "Source URI.", "[uri]");
     parser.addPositionalArgument("file", "Output file of record.", "[file]");
     const QCommandLineOption timeoutOpt("timeout", "Seconds to search for sources (list, default 1).", "s", "1");
@@ -486,8 +505,10 @@ int main(int argc, char* argv[])
                                       "BrainFlow board whose row layout is sent; consumers pass it as master_board "
                                       "(default -1, the synthetic board).",
                                       "id", "-1");
-    parser.addOptions({timeoutOpt, durationOpt, lslOpt, nameOpt, brainFlowOpt, boardOpt});
-    parser.process(app);
+    const QCommandLineOption windowOpt("window", "Visible time window of view in seconds (default 10).", "s", "10");
+    const QCommandLineOption screenshotOpt("screenshot", "PNG of the view window when it closes (view).", "file");
+    parser.addOptions({timeoutOpt, durationOpt, lslOpt, nameOpt, brainFlowOpt, boardOpt, windowOpt, screenshotOpt});
+    parser.process(*app);
 
     const QStringList args = parser.positionalArguments();
     const QString command = args.value(0);
@@ -534,6 +555,25 @@ int main(int argc, char* argv[])
         return parser.isSet(lslOpt)
             ? streamLsl(*device, *reader, parser.value(nameOpt), duration)
             : streamBrainFlow(*device, *reader, parser.value(brainFlowOpt), board, duration);
+    }
+    if (command == QLatin1String("view") && args.size() == 2) {
+        bool windowOk = false;
+        const double window = parser.value(windowOpt).toDouble(&windowOk);
+        if (!windowOk || window <= 0.0) {
+            err() << QString::asprintf("mne_acq: --window needs positive seconds\n");
+            return kUsageError;
+        }
+#if defined(MNE_ACQ_VIEW)
+        auto device = openSource(args[1]);
+        if (!device) {
+            return kRunError;
+        }
+        err().flush();
+        return runAcqView(*device, window, duration, parser.value(screenshotOpt));
+#else
+        err() << QString::asprintf("mne_acq: view needs a build with the display library (mne_disp)\n");
+        return kRunError;
+#endif
     }
     err() << QString::asprintf("%s\n", qPrintable(parser.helpText()));
     return kUsageError;

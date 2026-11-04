@@ -36,6 +36,8 @@
 #include <QCoreApplication>
 #include <QDateTime>
 #include <QFile>
+#include <QImage>
+#include <QRegularExpression>
 #include <QProcess>
 #include <QStandardPaths>
 #include <QTemporaryDir>
@@ -145,6 +147,7 @@ private slots:
     void recordFailsOnUnwritablePath();
     void streamPublishesLsl();
     void streamPublishesBrainFlow();
+    void viewShowsLiveTraces();
 };
 
 //=============================================================================================================
@@ -409,6 +412,41 @@ void TestMneAcqTool::streamPublishesBrainFlow()
         }
     }
     QVERIFY2(markers > 0, "no trigger reached the stim row");
+}
+
+//=============================================================================================================
+
+void TestMneAcqTool::viewShowsLiveTraces()
+{
+    QCOMPARE(runTool({QStringLiteral("view"), QStringLiteral("synthetic://"), QStringLiteral("--window"), QStringLiteral("0")}).exitCode, 1);
+    QTemporaryDir dir;
+    QVERIFY(dir.isValid());
+    const QString shot = dir.filePath(QStringLiteral("view.png"));
+    QProcess tool;
+    QProcessEnvironment env = QProcessEnvironment::systemEnvironment();
+    env.insert(QStringLiteral("QT_QPA_PLATFORM"), QStringLiteral("offscreen"));
+    tool.setProcessEnvironment(env);
+    tool.start(toolPath(), {QStringLiteral("view"), QStringLiteral("synthetic://?eeg=4&sfreq=500&seed=2"), QStringLiteral("--window"), QStringLiteral("2"), QStringLiteral("--duration"), QStringLiteral("2"), QStringLiteral("--screenshot"), shot});
+    QVERIFY(tool.waitForFinished(60000));
+    const QString out = QString::fromUtf8(tool.readAllStandardOutput());
+    const QString err = QString::fromUtf8(tool.readAllStandardError());
+    if (tool.exitCode() == 2 && err.contains(QStringLiteral("display library"))) {
+        QSKIP("mne_acq was built without mne_disp");
+    }
+    QVERIFY2(tool.exitCode() == 0, qPrintable(out + err));
+    const QRegularExpressionMatch shown = QRegularExpression(QStringLiteral("Showed (\\d+) samples")).match(out);
+    QVERIFY2(shown.hasMatch(), qPrintable(out));
+    // Paced at 500 Hz for 2 s.
+    QVERIFY2(shown.captured(1).toInt() >= 500, qPrintable(out));
+    QImage image(shot);
+    QVERIFY(!image.isNull());
+    QCOMPARE(image.size(), QSize(1200, 700));
+
+    QProcess bad;
+    bad.setProcessEnvironment(env);
+    bad.start(toolPath(), {QStringLiteral("view"), QStringLiteral("nope://x")});
+    QVERIFY(bad.waitForFinished(60000));
+    QVERIFY(bad.exitCode() == 2 || QString::fromUtf8(bad.readAllStandardError()).contains(QStringLiteral("display library")));
 }
 
 //=============================================================================================================
