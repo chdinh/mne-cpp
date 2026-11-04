@@ -22,10 +22,12 @@ Coverage from `0800c9a1b` (https://github.com/mne-tools/mne-cpp/actions/runs/394
 | G6 | Pinned reference environment | MNE-Python 1.11.0; lock `scripts/parity/reference_lock.json`; CI installs exactly the lock | met |
 | G6 | Equivalent/exceeds claims are cross-validated | equivalent 139, exceeds 0, implemented 124, partial 95; 0 without embedded MNE-Python values | met |
 | G6 | Every claim has evidence, none compares live | cross-validated-static 174, cross-validated-live 0, tested 184, unverified 0 | met |
+| G13 | No Qt Gui outside disp and disp3D | `acq/polhemus` | **open** |
+| G13 | Qt usage per library ratcheted | 21,419 Qt tokens in 24 libraries; Qt-free: `acq` | baseline recorded |
 | G8 | Documented setup works on linux | passed in 31 min, checkout 0.8 GiB; setup minutes over pinned runs: 22 -> 20 -> 18 -> 16 -> 31 | met |
 | G8 | Documented setup works on macos | passed in 26 min, checkout 1.0 GiB; setup minutes over pinned runs: 27 -> 31 -> 23 -> 29 -> 26 | met |
 | G8 | Documented setup works on windows | passed in 64 min, checkout 1.5 GiB; setup minutes over pinned runs: 1 -> 1 -> 2 -> 1 -> 64 | met |
 
-Detailed reports: [test inventory](test-inventory.md), [coverage](coverage-baseline.md), [API evidence](api-evidence-baseline.md), [visual](visual-baseline.md), [maintainability](maintainability-baseline.md), [parity evidence](parity-baseline.md), [MNE-Python gap](mne-python-gap.md).
+Detailed reports: [test inventory](test-inventory.md), [coverage](coverage-baseline.md), [API evidence](api-evidence-baseline.md), [visual](visual-baseline.md), [maintainability](maintainability-baseline.md), [parity evidence](parity-baseline.md), [Qt usage](qt-usage-baseline.md), [MNE-Python gap](mne-python-gap.md).
 
 G7 (signed artifacts) is verified on the tagged release; see `release-evidence.json` on the release page.

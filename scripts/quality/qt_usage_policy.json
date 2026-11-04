@@ -1,0 +1,228 @@
+{
+  "$comment": "Policy for scripts/quality/audit_qt_usage.py (gate G13). Ceilings may only fall: lower them in the commit that removes Qt (audit_qt_usage.py --print-ceilings).",
+  "scan_root": "src/libraries",
+  "exclude_path_fragments": {
+    "/FormFiles/": "Qt Designer generated forms (uic input); not hand-maintained C++.",
+    "_autogen/": "moc/uic/rcc output; generated at build time."
+  },
+  "qt_by_design": [
+    "disp",
+    "disp3D"
+  ],
+  "kept": {
+    "$comment": "Library -> { use: reason } for Qt kept by decision D16.",
+    "bids": {
+      "JSON": "Sidecars are JSON; QJsonDocument instead of a new dependency."
+    },
+    "com": {
+      "Sockets": "The FIFF real-time protocol runs over QTcpSocket."
+    },
+    "fiff": {
+      "Sockets": "FiffStream also streams over a QTcpSocket for the real-time protocol."
+    },
+    "lsl": {
+      "Sockets": "The LSL wire protocol runs over QUdpSocket and QTcpSocket."
+    },
+    "mna": {
+      "JSON/CBOR": "Project files are JSON and CBOR."
+    }
+  },
+  "ceilings": {
+    "acq": {
+      "tokens": 0,
+      "public_header_includes": 0,
+      "modules": []
+    },
+    "acq/fiff": {
+      "tokens": 72,
+      "public_header_includes": 0,
+      "modules": [
+        "Core"
+      ]
+    },
+    "acq/lsl": {
+      "tokens": 0,
+      "public_header_includes": 0,
+      "modules": [
+        "Core"
+      ]
+    },
+    "acq/polhemus": {
+      "tokens": 416,
+      "public_header_includes": 21,
+      "modules": [
+        "Core",
+        "Gui",
+        "SerialPort"
+      ]
+    },
+    "bids": {
+      "tokens": 1090,
+      "public_header_includes": 33,
+      "modules": [
+        "Core"
+      ]
+    },
+    "com": {
+      "tokens": 401,
+      "public_header_includes": 30,
+      "modules": [
+        "Concurrent",
+        "Core",
+        "Network"
+      ]
+    },
+    "connectivity": {
+      "tokens": 447,
+      "public_header_includes": 33,
+      "modules": [
+        "Concurrent",
+        "Core",
+        "Network"
+      ]
+    },
+    "decoding": {
+      "tokens": 18,
+      "public_header_includes": 4,
+      "modules": [
+        "Core"
+      ]
+    },
+    "disp": {
+      "tokens": 6290,
+      "public_header_includes": 124,
+      "modules": [
+        "Concurrent",
+        "Core",
+        "GuiPrivate",
+        "Svg",
+        "Widgets"
+      ]
+    },
+    "disp3D": {
+      "tokens": 2932,
+      "public_header_includes": 142,
+      "modules": [
+        "Concurrent",
+        "Core",
+        "Gui",
+        "GuiPrivate",
+        "Multimedia",
+        "ShaderTools",
+        "Widgets"
+      ]
+    },
+    "dsp": {
+      "tokens": 869,
+      "public_header_includes": 59,
+      "modules": [
+        "Concurrent",
+        "Core",
+        "Network"
+      ]
+    },
+    "fiff": {
+      "tokens": 2017,
+      "public_header_includes": 98,
+      "modules": [
+        "Core",
+        "Network"
+      ]
+    },
+    "fs": {
+      "tokens": 639,
+      "public_header_includes": 22,
+      "modules": [
+        "Concurrent",
+        "Core",
+        "Network"
+      ]
+    },
+    "fwd": {
+      "tokens": 349,
+      "public_header_includes": 14,
+      "modules": [
+        "Concurrent",
+        "Core"
+      ]
+    },
+    "ieeg": {
+      "tokens": 89,
+      "public_header_includes": 5,
+      "modules": [
+        "Core"
+      ]
+    },
+    "inv": {
+      "tokens": 956,
+      "public_header_includes": 50,
+      "modules": [
+        "Concurrent",
+        "Core"
+      ]
+    },
+    "lsl": {
+      "tokens": 172,
+      "public_header_includes": 4,
+      "modules": [
+        "Core",
+        "Network"
+      ]
+    },
+    "math": {
+      "tokens": 208,
+      "public_header_includes": 9,
+      "modules": [
+        "Concurrent",
+        "Core"
+      ]
+    },
+    "ml": {
+      "tokens": 46,
+      "public_header_includes": 6,
+      "modules": [
+        "Core"
+      ]
+    },
+    "mna": {
+      "tokens": 1661,
+      "public_header_includes": 85,
+      "modules": [
+        "Core"
+      ]
+    },
+    "mne": {
+      "tokens": 1918,
+      "public_header_includes": 99,
+      "modules": [
+        "Concurrent",
+        "Core",
+        "Network"
+      ]
+    },
+    "mri": {
+      "tokens": 205,
+      "public_header_includes": 11,
+      "modules": [
+        "Core",
+        "Network",
+        "ZlibPrivate"
+      ]
+    },
+    "sts": {
+      "tokens": 91,
+      "public_header_includes": 5,
+      "modules": [
+        "Concurrent",
+        "Core"
+      ]
+    },
+    "utils": {
+      "tokens": 533,
+      "public_header_includes": 41,
+      "modules": [
+        "Core"
+      ]
+    }
+  }
+}

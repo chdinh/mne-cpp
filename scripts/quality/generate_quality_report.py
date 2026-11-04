@@ -45,6 +45,7 @@ sys.path.insert(0, str(Path(__file__).resolve().parent))
 import audit_api_evidence  # noqa: E402
 import audit_maintainability  # noqa: E402
 import audit_parity_baseline  # noqa: E402
+import audit_qt_usage  # noqa: E402
 import audit_tests  # noqa: E402
 import audit_visual_assets  # noqa: E402
 import render_quality_pages  # noqa: E402
@@ -85,6 +86,7 @@ def section_reports() -> dict[str, tuple[dict[str, Any], Callable[[dict[str, Any
         "visual-baseline": (audit_visual_assets.build_report(), audit_visual_assets.render_markdown),
         "maintainability-baseline": (audit_maintainability.build_report(), audit_maintainability.render_markdown),
         "parity-baseline": (audit_parity_baseline.build_report(), audit_parity_baseline.render_markdown),
+        "qt-usage-baseline": (audit_qt_usage.build_report(), audit_qt_usage.render_markdown),
     }
 
 
@@ -96,6 +98,7 @@ def build_dashboard(sections: dict[str, dict[str, Any]]) -> dict[str, Any]:
     visual = sections["visual-baseline"]["summary"]
     maintain = sections["maintainability-baseline"]["metrics"]
     parity = sections["parity-baseline"]
+    qt = sections["qt-usage-baseline"]["summary"]
     scopes = coverage["scopes"]
 
     gates: dict[str, dict[str, Any]] = {
@@ -161,6 +164,12 @@ def build_dashboard(sections: dict[str, dict[str, Any]]) -> dict[str, Any]:
             "claims_by_evidence": parity["summary"]["by_evidence"],
             "claims_by_status": parity["summary"]["by_claim"],
             "equivalence_without_static_evidence": parity["summary"]["equivalence_without_static_evidence"],
+        },
+        "G13_qt": {
+            "tokens": qt["tokens"],
+            "libraries": qt["libraries"],
+            "qt_free": qt["qt_free"],
+            "gui_outside_design": qt["gui_outside_design"],
         },
     }
     onboarding = RELEASE_DIR / "onboarding-results.json"
@@ -235,6 +244,16 @@ def dashboard_rows(report: dict[str, Any]) -> list[tuple[str, str, str, str]]:
          ", ".join(f"{k} {v}" for k, v in g6["claims_by_evidence"].items()),
          status(g6["claims_by_evidence"]["unverified"] == 0 and g6["claims_by_evidence"]["cross-validated-live"] == 0)),
     ]
+    g13 = g.get("G13_qt")
+    if g13:
+        rows += [
+            ("G13", "No Qt Gui outside disp and disp3D",
+             ", ".join(f"`{name}`" for name in g13["gui_outside_design"]) or "none",
+             status(not g13["gui_outside_design"])),
+            ("G13", "Qt usage per library ratcheted",
+             f"{g13['tokens']:,} Qt tokens in {g13['libraries']} libraries; Qt-free: "
+             + (", ".join(f"`{name}`" for name in g13["qt_free"]) or "none"), "baseline recorded"),
+        ]
     for os_name, run in g.get("G8_onboarding", {}).get("results", {}).items():
         trend = " -> ".join(f"{m}" for m in g["G8_onboarding"]["trend"].get(os_name, []))
         rows.append(("G8", f"Documented setup works on {os_name}",
@@ -261,6 +280,7 @@ def render_dashboard(report: dict[str, Any]) -> str:
         "Detailed reports: [test inventory](test-inventory.md), [coverage](coverage-baseline.md), "
         "[API evidence](api-evidence-baseline.md), [visual](visual-baseline.md), "
         "[maintainability](maintainability-baseline.md), [parity evidence](parity-baseline.md), "
+        "[Qt usage](qt-usage-baseline.md), "
         "[MNE-Python gap](mne-python-gap.md).",
         "",
         "G7 (signed artifacts) is verified on the tagged release; see `release-evidence.json` on the release page.",

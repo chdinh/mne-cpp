@@ -123,6 +123,10 @@ jobs:
     - name: Check maintainability ceilings
       run: python3 scripts/quality/audit_maintainability.py --ceilings
 
+    # Gate G13: no library may use more Qt than its ceiling; Qt-free libraries stay Qt-free.
+    - name: Check Qt usage ceilings
+      run: python3 scripts/quality/audit_qt_usage.py --ceilings
+
     - name: Lint GitHub workflows
       run: |
         tarball="$RUNNER_TEMP/actionlint.tar.gz"

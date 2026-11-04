@@ -1,0 +1,516 @@
+{
+  "schema_version": 1,
+  "generated_by": "scripts/quality/audit_qt_usage.py",
+  "policy": "scripts/quality/qt_usage_policy.json",
+  "qt_by_design": [
+    "disp",
+    "disp3D"
+  ],
+  "kept": {
+    "bids": {
+      "JSON": "Sidecars are JSON; QJsonDocument instead of a new dependency."
+    },
+    "com": {
+      "Sockets": "The FIFF real-time protocol runs over QTcpSocket."
+    },
+    "fiff": {
+      "Sockets": "FiffStream also streams over a QTcpSocket for the real-time protocol."
+    },
+    "lsl": {
+      "Sockets": "The LSL wire protocol runs over QUdpSocket and QTcpSocket."
+    },
+    "mna": {
+      "JSON/CBOR": "Project files are JSON and CBOR."
+    }
+  },
+  "summary": {
+    "libraries": 24,
+    "qt_free": [
+      "acq"
+    ],
+    "tokens": 21419,
+    "gui_outside_design": [
+      "acq/polhemus"
+    ]
+  },
+  "libraries": {
+    "acq": {
+      "tokens": 0,
+      "by_category": {},
+      "public_header_includes": 0,
+      "q_object": 0,
+      "files": 39,
+      "modules": []
+    },
+    "acq/fiff": {
+      "tokens": 72,
+      "by_category": {
+        "files": 7,
+        "global": 4,
+        "strings": 61
+      },
+      "public_header_includes": 0,
+      "q_object": 0,
+      "files": 9,
+      "modules": [
+        "Core"
+      ]
+    },
+    "acq/lsl": {
+      "tokens": 0,
+      "by_category": {},
+      "public_header_includes": 0,
+      "q_object": 0,
+      "files": 3,
+      "modules": [
+        "Core"
+      ]
+    },
+    "acq/polhemus": {
+      "tokens": 416,
+      "by_category": {
+        "containers": 5,
+        "files": 11,
+        "global": 13,
+        "gui": 212,
+        "logging": 32,
+        "objects_signals": 57,
+        "other": 15,
+        "strings": 67,
+        "time": 4
+      },
+      "public_header_includes": 21,
+      "q_object": 3,
+      "files": 8,
+      "modules": [
+        "Core",
+        "Gui",
+        "SerialPort"
+      ]
+    },
+    "bids": {
+      "tokens": 1090,
+      "by_category": {
+        "containers": 85,
+        "files": 102,
+        "global": 34,
+        "json": 32,
+        "logging": 52,
+        "regex": 3,
+        "smart_pointers": 5,
+        "strings": 770,
+        "time": 7
+      },
+      "public_header_includes": 33,
+      "q_object": 0,
+      "files": 24,
+      "modules": [
+        "Core"
+      ]
+    },
+    "com": {
+      "tokens": 401,
+      "by_category": {
+        "containers": 20,
+        "files": 5,
+        "global": 51,
+        "json": 45,
+        "logging": 21,
+        "network": 8,
+        "objects_signals": 90,
+        "smart_pointers": 8,
+        "strings": 146,
+        "threads": 5,
+        "time": 2
+      },
+      "public_header_includes": 30,
+      "q_object": 7,
+      "files": 16,
+      "modules": [
+        "Concurrent",
+        "Core",
+        "Network"
+      ]
+    },
+    "connectivity": {
+      "tokens": 447,
+      "by_category": {
+        "containers": 211,
+        "global": 36,
+        "logging": 34,
+        "objects_signals": 5,
+        "smart_pointers": 92,
+        "strings": 20,
+        "threads": 48,
+        "time": 1
+      },
+      "public_header_includes": 33,
+      "q_object": 0,
+      "files": 42,
+      "modules": [
+        "Concurrent",
+        "Core",
+        "Network"
+      ]
+    },
+    "decoding": {
+      "tokens": 18,
+      "by_category": {
+        "containers": 8,
+        "global": 2,
+        "strings": 8
+      },
+      "public_header_includes": 4,
+      "q_object": 0,
+      "files": 10,
+      "modules": [
+        "Core"
+      ]
+    },
+    "disp": {
+      "tokens": 6290,
+      "by_category": {
+        "containers": 522,
+        "files": 110,
+        "global": 1256,
+        "gui": 924,
+        "json": 5,
+        "logging": 49,
+        "objects_signals": 553,
+        "other": 1504,
+        "regex": 4,
+        "smart_pointers": 219,
+        "strings": 1110,
+        "threads": 23,
+        "time": 11
+      },
+      "public_header_includes": 124,
+      "q_object": 60,
+      "files": 135,
+      "modules": [
+        "Concurrent",
+        "Core",
+        "GuiPrivate",
+        "Svg",
+        "Widgets"
+      ]
+    },
+    "disp3D": {
+      "tokens": 2932,
+      "by_category": {
+        "containers": 292,
+        "files": 51,
+        "global": 304,
+        "gui": 962,
+        "logging": 111,
+        "objects_signals": 144,
+        "other": 228,
+        "random": 3,
+        "smart_pointers": 73,
+        "strings": 673,
+        "threads": 74,
+        "time": 17
+      },
+      "public_header_includes": 142,
+      "q_object": 12,
+      "files": 83,
+      "modules": [
+        "Concurrent",
+        "Core",
+        "Gui",
+        "GuiPrivate",
+        "Multimedia",
+        "ShaderTools",
+        "Widgets"
+      ]
+    },
+    "dsp": {
+      "tokens": 869,
+      "by_category": {
+        "containers": 280,
+        "files": 32,
+        "global": 150,
+        "logging": 89,
+        "objects_signals": 84,
+        "other": 3,
+        "regex": 3,
+        "smart_pointers": 31,
+        "strings": 175,
+        "threads": 21,
+        "time": 1
+      },
+      "public_header_includes": 59,
+      "q_object": 12,
+      "files": 94,
+      "modules": [
+        "Concurrent",
+        "Core",
+        "Network"
+      ]
+    },
+    "fiff": {
+      "tokens": 2017,
+      "by_category": {
+        "containers": 315,
+        "files": 186,
+        "global": 477,
+        "json": 27,
+        "logging": 297,
+        "network": 7,
+        "objects_signals": 21,
+        "other": 3,
+        "regex": 16,
+        "smart_pointers": 73,
+        "strings": 594,
+        "time": 1
+      },
+      "public_header_includes": 98,
+      "q_object": 1,
+      "files": 70,
+      "modules": [
+        "Core",
+        "Network"
+      ]
+    },
+    "fs": {
+      "tokens": 639,
+      "by_category": {
+        "containers": 71,
+        "files": 24,
+        "global": 174,
+        "logging": 56,
+        "objects_signals": 1,
+        "regex": 3,
+        "smart_pointers": 12,
+        "strings": 298
+      },
+      "public_header_includes": 22,
+      "q_object": 0,
+      "files": 18,
+      "modules": [
+        "Concurrent",
+        "Core",
+        "Network"
+      ]
+    },
+    "fwd": {
+      "tokens": 349,
+      "by_category": {
+        "containers": 14,
+        "files": 26,
+        "global": 5,
+        "logging": 185,
+        "objects_signals": 6,
+        "other": 1,
+        "regex": 3,
+        "smart_pointers": 9,
+        "strings": 96,
+        "threads": 4
+      },
+      "public_header_includes": 14,
+      "q_object": 0,
+      "files": 28,
+      "modules": [
+        "Concurrent",
+        "Core"
+      ]
+    },
+    "ieeg": {
+      "tokens": 89,
+      "by_category": {
+        "containers": 25,
+        "files": 2,
+        "global": 7,
+        "regex": 5,
+        "strings": 50
+      },
+      "public_header_includes": 5,
+      "q_object": 0,
+      "files": 8,
+      "modules": [
+        "Core"
+      ]
+    },
+    "inv": {
+      "tokens": 956,
+      "by_category": {
+        "containers": 110,
+        "files": 68,
+        "global": 81,
+        "json": 2,
+        "logging": 424,
+        "objects_signals": 7,
+        "regex": 1,
+        "smart_pointers": 50,
+        "strings": 211,
+        "threads": 2
+      },
+      "public_header_includes": 50,
+      "q_object": 0,
+      "files": 81,
+      "modules": [
+        "Concurrent",
+        "Core"
+      ]
+    },
+    "lsl": {
+      "tokens": 172,
+      "by_category": {
+        "containers": 8,
+        "global": 33,
+        "logging": 1,
+        "network": 49,
+        "other": 4,
+        "random": 1,
+        "strings": 72,
+        "time": 4
+      },
+      "public_header_includes": 4,
+      "q_object": 0,
+      "files": 13,
+      "modules": [
+        "Core",
+        "Network"
+      ]
+    },
+    "math": {
+      "tokens": 208,
+      "by_category": {
+        "containers": 14,
+        "files": 4,
+        "global": 139,
+        "logging": 21,
+        "regex": 1,
+        "smart_pointers": 4,
+        "strings": 22,
+        "threads": 3
+      },
+      "public_header_includes": 9,
+      "q_object": 0,
+      "files": 15,
+      "modules": [
+        "Concurrent",
+        "Core"
+      ]
+    },
+    "ml": {
+      "tokens": 46,
+      "by_category": {
+        "files": 1,
+        "global": 5,
+        "logging": 8,
+        "smart_pointers": 1,
+        "strings": 31
+      },
+      "public_header_includes": 6,
+      "q_object": 0,
+      "files": 10,
+      "modules": [
+        "Core"
+      ]
+    },
+    "mna": {
+      "tokens": 1661,
+      "by_category": {
+        "containers": 65,
+        "files": 28,
+        "global": 33,
+        "json": 335,
+        "logging": 20,
+        "objects_signals": 80,
+        "other": 5,
+        "regex": 19,
+        "smart_pointers": 2,
+        "strings": 1052,
+        "time": 22
+      },
+      "public_header_includes": 85,
+      "q_object": 0,
+      "files": 37,
+      "modules": [
+        "Core"
+      ]
+    },
+    "mne": {
+      "tokens": 1918,
+      "by_category": {
+        "containers": 173,
+        "files": 118,
+        "global": 405,
+        "logging": 629,
+        "objects_signals": 4,
+        "other": 23,
+        "regex": 4,
+        "smart_pointers": 97,
+        "strings": 455,
+        "threads": 10
+      },
+      "public_header_includes": 99,
+      "q_object": 0,
+      "files": 114,
+      "modules": [
+        "Concurrent",
+        "Core",
+        "Network"
+      ]
+    },
+    "mri": {
+      "tokens": 205,
+      "by_category": {
+        "containers": 35,
+        "files": 25,
+        "global": 64,
+        "logging": 34,
+        "strings": 47
+      },
+      "public_header_includes": 11,
+      "q_object": 0,
+      "files": 15,
+      "modules": [
+        "Core",
+        "Network",
+        "ZlibPrivate"
+      ]
+    },
+    "sts": {
+      "tokens": 91,
+      "by_category": {
+        "containers": 63,
+        "global": 12,
+        "logging": 1,
+        "random": 6,
+        "strings": 3,
+        "threads": 6
+      },
+      "public_header_includes": 5,
+      "q_object": 0,
+      "files": 17,
+      "modules": [
+        "Concurrent",
+        "Core"
+      ]
+    },
+    "utils": {
+      "tokens": 533,
+      "by_category": {
+        "containers": 55,
+        "files": 80,
+        "global": 23,
+        "logging": 58,
+        "objects_signals": 15,
+        "other": 2,
+        "regex": 10,
+        "smart_pointers": 12,
+        "strings": 266,
+        "threads": 9,
+        "time": 3
+      },
+      "public_header_includes": 41,
+      "q_object": 1,
+      "files": 25,
+      "modules": [
+        "Core"
+      ]
+    }
+  }
+}
