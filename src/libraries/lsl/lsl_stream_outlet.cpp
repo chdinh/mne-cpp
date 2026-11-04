@@ -7,25 +7,16 @@
  * @author   Christoph Dinh <christoph.dinh@mne-cpp.org>
  * @since    2.0.0
  * @date     March 2026
- * @brief    Implements the TCP-server / UDP-announcer worker that publishes pushed samples to every connected LSL inlet.
+ * @brief    Implements the outlet worker: liblsl's UDP query and time-correction responders and its TCP data server.
  *
- * The PIMPL class @c StreamOutletPrivate spawns a dedicated
- * @c std::thread that owns a @c QTcpServer for accepting inlet
- * connections, a @c QUdpSocket that emits the stream's serialised
- * @ref LSLLIB::stream_info to the LSL discovery multicast group
- * @c 239.255.172.215:16571 every @c BROADCAST_INTERVAL_MS
- * milliseconds, and a mutex-protected queue that buffers samples
- * pushed from the producing thread.
+ * The PIMPL class @c StreamOutletPrivate runs a dedicated @c std::thread that owns every socket, so no Qt
+ * object crosses threads. It answers discovery queries on the LSL discovery port 16571 (multicast groups,
+ * broadcast and localhost) and on its own UDP service port, which also answers time-correction requests. Its
+ * TCP server answers shortinfo and fullinfo requests and serves stream feeds of data protocol 1.10.
  *
- * On every loop iteration the worker drains the queue, packs each
- * sample as a contiguous @c channel_count * @c sizeof(float) byte
- * block, and writes the result to every currently connected inlet
- * socket; the multicast advertisement keeps firing on its own cadence
- * so that newly started @ref LSLLIB::resolve_streams calls discover
- * the outlet within at most one broadcast interval. The destructor
- * signals the worker to stop, joins it, closes all sockets and tears
- * down the server, guaranteeing that no Qt object outlives its
- * owning thread.
+ * Pushed samples are encoded once, on the producing thread, into blocks whose first sample carries its
+ * timestamp; the worker appends each block to every inlet that is streaming, so an inlet always starts at a
+ * sample with an explicit timestamp.
  */
 
 //=============================================================================================================
@@ -33,65 +24,71 @@
 //=============================================================================================================
 
 #include "lsl_stream_outlet.h"
+#include "lsl_protocol.h"
 
 //=============================================================================================================
 // QT INCLUDES
 //=============================================================================================================
 
+#include <QHostAddress>
+#include <QNetworkDatagram>
 #include <QTcpServer>
 #include <QTcpSocket>
 #include <QUdpSocket>
-#include <QHostAddress>
-#include <QDebug>
 
 //=============================================================================================================
 // STL INCLUDES
 //=============================================================================================================
 
-#include <thread>
-#include <mutex>
 #include <atomic>
-#include <cstring>
-#include <queue>
-#include <future>
 #include <chrono>
+#include <future>
+#include <mutex>
+#include <sstream>
+#include <thread>
+#include <vector>
 
 //=============================================================================================================
 // USED NAMESPACES
 //=============================================================================================================
 
 using namespace LSLLIB;
-
-//=============================================================================================================
-// CONSTANTS
-//=============================================================================================================
+using namespace LSLLIB::detail;
 
 namespace
 {
-const QHostAddress DISCOVERY_MULTICAST_GROUP("239.255.172.215");
-const quint16 DISCOVERY_PORT = 16571;
-const int BROADCAST_INTERVAL_MS = 500;
+
+constexpr qsizetype kMaxRequestBytes = 65536;
+
+/** One accepted TCP connection: reading its request, or receiving the stream. */
+struct Client
+{
+    std::unique_ptr<QTcpSocket> socket;
+    QByteArray request;
+    bool streaming = false;
+    bool closing = false;
+};
+
+std::string number(double value)
+{
+    std::ostringstream text;
+    text.imbue(std::locale::classic());
+    text.precision(17);
+    text << value;
+    return text.str();
 }
 
+} // namespace
+
 //=============================================================================================================
-// PRIVATE IMPLEMENTATION
+// DEFINE MEMBER METHODS
 //=============================================================================================================
 
-/**
- * @internal
- * @brief Private implementation for stream_outlet (PIMPL).
- *
- * Runs a background thread that:
- *   1. Manages a QTcpServer for data connections from inlets.
- *   2. Periodically sends UDP multicast discovery broadcasts.
- *   3. Drains the sample queue and writes data to all connected inlets.
- */
 class LSLLIB::StreamOutletPrivate
 {
 public:
-    StreamOutletPrivate(const stream_info& info)
+    explicit StreamOutletPrivate(const stream_info& info)
     : m_info(info)
-    , m_bRunning(false)
     {
     }
 
@@ -100,22 +97,17 @@ public:
         stop();
     }
 
-    //=========================================================================================================
-    /**
-     * Start the background thread (TCP server + UDP broadcast).
-     */
+    StreamOutletPrivate(const StreamOutletPrivate&) = delete;
+    StreamOutletPrivate& operator=(const StreamOutletPrivate&) = delete;
+
     void start()
     {
         m_bRunning = true;
         std::future<void> listening = m_listening.get_future();
         m_bgThread = std::thread(&StreamOutletPrivate::run, this);
-        listening.wait(); // m_info (with its data port) is not modified after this point
+        listening.wait(); // m_info (with its ports) is not modified after this point
     }
 
-    //=========================================================================================================
-    /**
-     * Stop the background thread and clean up all network resources.
-     */
     void stop()
     {
         m_bRunning = false;
@@ -124,173 +116,202 @@ public:
         }
     }
 
-    //=========================================================================================================
-    /**
-     * Enqueue a single sample for transmission to connected inlets.
-     */
-    void enqueueSample(const std::vector<float>& sample)
+    /** Encodes @p samples as one block; the first sample carries the timestamp of the first, the others are deduced. */
+    void enqueue(const std::vector<std::vector<float>>& samples)
     {
-        std::lock_guard<std::mutex> lock(m_queueMutex);
-        m_sampleQueue.push(sample);
-    }
-
-    //=========================================================================================================
-    /**
-     * Enqueue a chunk of samples for transmission.
-     */
-    void enqueueChunk(const std::vector<std::vector<float>>& chunk)
-    {
-        std::lock_guard<std::mutex> lock(m_queueMutex);
-        for (const auto& sample : chunk) {
-            m_sampleQueue.push(sample);
+        if (samples.empty()) {
+            return;
         }
+        const double rate = m_info.nominal_srate();
+        const double now = local_clock();
+        const double first = rate > 0.0 ? now - static_cast<double>(samples.size() - 1) / rate : now;
+        QByteArray block;
+        std::vector<double> values(static_cast<std::size_t>(m_info.channel_count()));
+        for (std::size_t s = 0; s < samples.size(); ++s) {
+            for (std::size_t c = 0; c < values.size(); ++c) {
+                values[c] = c < samples[s].size() ? static_cast<double>(samples[s][c]) : 0.0;
+            }
+            appendSample(block, m_info.channel_format(), values, first, s > 0 && rate > 0.0);
+        }
+        std::lock_guard<std::mutex> lock(m_queueMutex);
+        m_blocks.push_back(std::move(block));
     }
 
-    //=========================================================================================================
-    /**
-     * Get the stream_info with updated data port.
-     */
     stream_info info() const
     {
         return m_info;
     }
 
-    //=========================================================================================================
-    /**
-     * Check if any inlets are connected.
-     */
     bool haveConsumers() const
     {
         return m_nClients.load() > 0;
     }
 
 private:
-    //=========================================================================================================
-    /**
-     * Background thread main function.
-     *
-     * Creates a QTcpServer and QUdpSocket, then loops:
-     *   - Accepting new connections
-     *   - Sending UDP discovery broadcasts
-     *   - Draining sample queue and writing to connected clients
-     */
     void run()
     {
-        // --- Set up TCP server ---
-        QTcpServer tcpServer;
-        if (!tcpServer.listen(QHostAddress::Any, 0)) {
-            qDebug() << "[lsl::stream_outlet] Failed to start TCP server:" << tcpServer.errorString();
+        QTcpServer server;
+        if (!server.listen(QHostAddress::AnyIPv4, 0)) {
             m_listening.set_value();
             return;
         }
-
-        // Record the assigned port into stream_info
-        m_info.set_data_port(tcpServer.serverPort());
+        // The service port has the data port's number where it is free, as in liblsl.
+        QUdpSocket service;
+        if (!service.bind(QHostAddress::AnyIPv4, server.serverPort())) {
+            service.bind(QHostAddress::AnyIPv4, 0);
+        }
+        QUdpSocket discovery;
+        if (discovery.bind(QHostAddress::AnyIPv4, kDiscoveryPort, QAbstractSocket::ShareAddress | QAbstractSocket::ReuseAddressHint)) {
+#ifndef Q_OS_WASM
+            for (const QHostAddress& group : discoveryGroups()) {
+                discovery.joinMulticastGroup(group);
+            }
+#endif
+        }
+        m_info.set_data_port(server.serverPort());
+        m_info.set_service_port(service.localPort());
+        m_shortinfo = QByteArray::fromStdString(m_info.to_string());
         m_listening.set_value();
 
-        // --- Set up UDP socket for multicast discovery ---
-        QUdpSocket udpSocket;
-#ifndef Q_OS_WASM
-        udpSocket.setSocketOption(QAbstractSocket::MulticastTtlOption, 1);
-#endif
-
-        // --- Prepare the handshake header ---
-        // "LSL1" (4 bytes) + channel_count (4 bytes, little-endian int)
-        QByteArray handshake("LSL1", 4);
-        int ch = m_info.channel_count();
-        handshake.append(reinterpret_cast<const char*>(&ch), sizeof(int));
-
-        // Prepare discovery datagram (re-created each loop to include up-to-date port)
-        std::string discoveryPayload = m_info.to_string();
-
-        // Connected client sockets; owned here rather than left to the server's child list
-        std::vector<std::unique_ptr<QTcpSocket>> clients;
-
-        auto lastBroadcast = std::chrono::steady_clock::now() - std::chrono::seconds(10); // send immediately
-
-        // --- Main loop ---
+        std::vector<Client> clients;
         while (m_bRunning) {
-            // 1. Accept new connections
-            while (tcpServer.waitForNewConnection(0)) {
-                std::unique_ptr<QTcpSocket> client(tcpServer.nextPendingConnection());
-                if (client) {
-                    // Send handshake to the new client
-                    client->write(handshake);
-                    client->flush();
+            while (server.waitForNewConnection(0)) {
+                Client client;
+                client.socket.reset(server.nextPendingConnection());
+                if (client.socket) {
                     clients.push_back(std::move(client));
-                    m_nClients.store(static_cast<int>(clients.size()));
                 }
             }
-
-            // 2. Send UDP discovery broadcast (every BROADCAST_INTERVAL_MS)
-            auto now = std::chrono::steady_clock::now();
-            auto elapsed = std::chrono::duration_cast<std::chrono::milliseconds>(now - lastBroadcast).count();
-            if (elapsed >= BROADCAST_INTERVAL_MS) {
-                QByteArray datagram(discoveryPayload.c_str(), static_cast<int>(discoveryPayload.size()));
-                udpSocket.writeDatagram(datagram, DISCOVERY_MULTICAST_GROUP, DISCOVERY_PORT);
-                // Same-host listeners still find the stream when multicast is unrouted (VPNs, CI VMs).
-                udpSocket.writeDatagram(datagram, QHostAddress(QHostAddress::LocalHost), DISCOVERY_PORT);
-                lastBroadcast = now;
+            answerQueries(discovery, false);
+            answerQueries(service, true);
+            for (Client& client : clients) {
+                if (!client.streaming && !client.closing) {
+                    client.socket->waitForReadyRead(0);
+                    client.request += client.socket->readAll();
+                    handleRequest(client);
+                }
             }
-
-            // 3. Drain sample queue and write to all clients
+            std::vector<QByteArray> blocks;
             {
                 std::lock_guard<std::mutex> lock(m_queueMutex);
-                while (!m_sampleQueue.empty()) {
-                    const std::vector<float>& sample = m_sampleQueue.front();
-                    QByteArray sampleData(reinterpret_cast<const char*>(sample.data()),
-                                          static_cast<int>(sample.size() * sizeof(float)));
-
-                    // Write to all clients, remove disconnected ones
-                    auto it = clients.begin();
-                    while (it != clients.end()) {
-                        QTcpSocket* client = it->get();
-                        if (client->state() != QAbstractSocket::ConnectedState) {
-                            it = clients.erase(it);
-                            continue;
-                        }
-                        client->write(sampleData);
-                        ++it;
+                blocks.swap(m_blocks);
+            }
+            for (Client& client : clients) {
+                if (client.streaming) {
+                    for (const QByteArray& block : blocks) {
+                        client.socket->write(block);
                     }
-
-                    m_sampleQueue.pop();
+                    client.socket->flush();
                 }
             }
-
-            // Flush all clients
-            for (const auto& client : clients) {
-                client->flush();
-            }
-
-            m_nClients.store(static_cast<int>(clients.size()));
-
-            // Sleep briefly to avoid busy-waiting
+            std::erase_if(clients, [](Client& client) {
+                if (client.closing) {
+                    client.socket->flush();
+                    client.socket->waitForBytesWritten(100);
+                    client.socket->disconnectFromHost();
+                    return true;
+                }
+                return client.socket->state() != QAbstractSocket::ConnectedState;
+            });
+            m_nClients.store(static_cast<int>(std::count_if(clients.begin(), clients.end(),
+                                                            [](const Client& c) { return c.streaming; })));
             std::this_thread::sleep_for(std::chrono::milliseconds(1));
         }
-
-        // --- Cleanup ---
-        for (const auto& client : clients) {
-            client->disconnectFromHost();
+        for (Client& client : clients) {
+            client.socket->disconnectFromHost();
         }
-        clients.clear();
         m_nClients.store(0);
-
-        tcpServer.close();
-        udpSocket.close();
     }
 
-    stream_info m_info;             /**< Stream description. */
-    std::atomic<bool> m_bRunning;   /**< Background thread running flag. */
-    std::thread m_bgThread;         /**< Background thread. */
-    std::promise<void> m_listening; /**< Fulfilled once the TCP port is recorded in m_info. */
+    /** Answers shortinfo queries and, on the service port, time-correction requests. */
+    void answerQueries(QUdpSocket& socket, bool timedata)
+    {
+        while (socket.hasPendingDatagrams()) {
+            const QNetworkDatagram datagram = socket.receiveDatagram();
+            const QList<QByteArray> lines = datagram.data().split('\n');
+            if (lines.size() < 2) {
+                continue;
+            }
+            const QByteArray kind = lines[0].trimmed();
+            const QList<QByteArray> words = lines.size() > 2 ? lines[2].trimmed().split(' ') : QList<QByteArray>();
+            if (kind == "LSL:shortinfo" && words.size() == 2) {
+                if (matchesQuery(m_info, lines[1].trimmed().toStdString())) {
+                    const quint16 port = words[0].toUShort();
+                    socket.writeDatagram(words[1] + "\r\n" + m_shortinfo, datagram.senderAddress(), port);
+                }
+            } else if (timedata && kind == "LSL:timedata") {
+                const double received = local_clock();
+                const QList<QByteArray> request = lines[1].trimmed().split(' ');
+                if (request.size() == 2) {
+                    const QByteArray reply = " " + request[0] + " " + request[1] + " " +
+                        QByteArray::fromStdString(number(received)) + " " +
+                        QByteArray::fromStdString(number(local_clock()));
+                    socket.writeDatagram(reply, datagram.senderAddress(), datagram.senderPort());
+                }
+            }
+        }
+    }
 
-    std::mutex m_queueMutex;                      /**< Protects the sample queue. */
-    std::queue<std::vector<float>> m_sampleQueue; /**< Queue of samples for transmission. */
-    std::atomic<int> m_nClients{0};               /**< Number of connected clients. */
+    /** Answers a complete TCP request: stream feed, shortinfo or fullinfo; anything else closes the connection. */
+    void handleRequest(Client& client)
+    {
+        const QByteArray& r = client.request;
+        if (r.startsWith("LSL:streamfeed/")) {
+            if (!r.contains("\r\n\r\n")) {
+                client.closing = r.size() > kMaxRequestBytes;
+                return;
+            }
+            const QList<QByteArray> head = r.left(r.indexOf("\r\n")).split(' ');
+            const bool ours = head.size() < 2 || head[1].isEmpty() || head[1] == QByteArray::fromStdString(m_info.uid());
+            if (!ours) {
+                client.socket->write("LSL/110 404 Not found\r\n\r\n");
+                client.closing = true;
+                return;
+            }
+            QByteArray reply = "LSL/110 200 OK\r\nUID: " + QByteArray::fromStdString(m_info.uid()) +
+                "\r\nByte-Order: " + byteOrderName() + "\r\nSuppress-Subnormals: 0\r\nData-Protocol-Version: " +
+                QByteArray::number(kProtocolVersion) + "\r\n\r\n";
+            std::vector<double> pattern(static_cast<std::size_t>(m_info.channel_count()));
+            for (const int offset : {4, 2}) {
+                for (std::size_t k = 0; k < pattern.size(); ++k) {
+                    pattern[k] = testPatternValue(m_info.channel_format(), static_cast<int>(k), offset);
+                }
+                appendSample(reply, m_info.channel_format(), pattern, kTestPatternTime, false);
+            }
+            client.socket->write(reply);
+            client.socket->flush();
+            client.streaming = true;
+            client.request.clear();
+        } else if (r.startsWith("LSL:shortinfo\r\n")) {
+            const qsizetype end = r.indexOf("\r\n", 15);
+            if (end < 0) {
+                client.closing = r.size() > kMaxRequestBytes;
+                return;
+            }
+            if (matchesQuery(m_info, r.mid(15, end - 15).trimmed().toStdString())) {
+                client.socket->write(m_shortinfo);
+            }
+            client.closing = true;
+        } else if (r.startsWith("LSL:fullinfo")) {
+            if (r.contains("\n")) {
+                client.socket->write(m_shortinfo);
+                client.closing = true;
+            }
+        } else if (r.contains("\n") || r.size() > kMaxRequestBytes) {
+            client.closing = true; // e.g. a protocol 1.00 stream feed, which is not served
+        }
+    }
+
+    stream_info m_info;                  /**< Stream description, ports set once listening. */
+    QByteArray m_shortinfo;              /**< m_info as XML, written by the worker before m_listening. */
+    std::atomic<bool> m_bRunning{false}; /**< Worker running flag. */
+    std::thread m_bgThread;              /**< Worker thread owning all sockets. */
+    std::promise<void> m_listening;      /**< Fulfilled once the ports are recorded in m_info. */
+    std::mutex m_queueMutex;             /**< Protects m_blocks. */
+    std::vector<QByteArray> m_blocks;    /**< Encoded sample blocks not yet sent. */
+    std::atomic<int> m_nClients{0};      /**< Number of streaming inlets. */
 };
 
-//=============================================================================================================
-// DEFINE MEMBER METHODS
 //=============================================================================================================
 
 stream_outlet::stream_outlet(const stream_info& info)
@@ -301,23 +322,20 @@ stream_outlet::stream_outlet(const stream_info& info)
 
 //=============================================================================================================
 
-stream_outlet::~stream_outlet()
-{
-    // unique_ptr destructor handles cleanup via StreamOutletPrivate destructor
-}
+stream_outlet::~stream_outlet() = default;
 
 //=============================================================================================================
 
 void stream_outlet::push_sample(const std::vector<float>& sample)
 {
-    m_pImpl->enqueueSample(sample);
+    m_pImpl->enqueue({sample});
 }
 
 //=============================================================================================================
 
 void stream_outlet::push_chunk(const std::vector<std::vector<float>>& chunk)
 {
-    m_pImpl->enqueueChunk(chunk);
+    m_pImpl->enqueue(chunk);
 }
 
 //=============================================================================================================

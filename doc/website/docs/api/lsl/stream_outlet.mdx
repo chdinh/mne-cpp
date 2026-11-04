@@ -15,7 +15,7 @@ sidebar_position: 3
 class LSLLIB::stream_outlet
 ```
 
-Server-side LSL endpoint: binds a TCP data server, advertises the stream on the LSL discovery multicast group, and fans samples out to every connected inlet.
+Server-side LSL endpoint: binds a TCP data server, answers LSL discovery queries, and fans samples out to every connected inlet.
 
 ```cpp title="src/examples/ex_lsl/main.cpp"
 stream_info info("ex_lsl_eeg", "EEG", 3, 250.0, ChannelFormat::Float32, "ex_lsl"); // name, type, channels, Hz
@@ -30,7 +30,7 @@ stream_outlet outlet(info);                                                     
 
 Construct a [`stream_outlet`](/docs/api/lsl/stream_outlet) for the given [`stream_info`](/docs/api/lsl/stream_info).
 
-This immediately starts the TCP data server and begins UDP discovery broadcasts.
+This immediately starts the TCP data server and the UDP query responders.
 
 **Parameters:**
 
@@ -43,7 +43,7 @@ This immediately starts the TCP data server and begins UDP discovery broadcasts.
 
 Destructor.
 
-Stops broadcasting and closes all connections.
+Stops answering queries and closes all connections.
 
 ---
 

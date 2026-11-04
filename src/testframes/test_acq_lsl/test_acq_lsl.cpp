@@ -7,7 +7,7 @@
  * @author   Christoph Dinh <christoph.dinh@mne-cpp.org>
  * @since    2.5.0
  * @date     November 2026
- * @brief    Tests for the lsl:// source on both paths: liblsl (outlets from C++ and from pylsl) and the in-tree LSL.
+ * @brief    Tests for the lsl:// source on both paths, against outlets of liblsl, pylsl and the in-tree LSL.
  *
  * The liblsl cases need a liblsl: MNE_CPP_LIBLSL, or pylsl installed for the python3 on the PATH; they skip
  * otherwise. Every outlet gets a unique name, so concurrent runs and other LSL streams on the network do not
@@ -191,7 +191,8 @@ private slots:
     void readsLiblslOutlets();
     void readsPylslOutlet();
     void readsInTreeOutlet();
-    void inTreeDoesNotSeeLiblslOutlets();
+    void readsInTreeOutlet_data();
+    void pylslReadsInTreeOutlet();
     void rejectsBadUris();
 
 private:
@@ -213,10 +214,17 @@ void TestAcqLsl::readsLiblslOutlets_data()
 {
     QTest::addColumn<int>("lslFormat");
     QTest::addColumn<int>("format");
-    QTest::newRow("float32") << 1 << int(AcqSampleFormat::Float32);
-    QTest::newRow("double64") << 2 << int(AcqSampleFormat::Float64);
-    QTest::newRow("int32") << 4 << int(AcqSampleFormat::Int32);
-    QTest::newRow("int16") << 5 << int(AcqSampleFormat::Int16);
+    QTest::addColumn<QString>("library");
+    for (const char* library : {"liblsl", "intree"}) {
+        const bool intree = std::string(library) == "intree";
+        const auto row = [&](const char* name) -> QTestData& {
+            return QTest::addRow("%s %s", library, name);
+        };
+        row("float32") << 1 << int(AcqSampleFormat::Float32) << QString(library);
+        row("double64") << 2 << int(intree ? AcqSampleFormat::Float32 : AcqSampleFormat::Float64) << QString(library);
+        row("int32") << 4 << int(intree ? AcqSampleFormat::Float32 : AcqSampleFormat::Int32) << QString(library);
+        row("int16") << 5 << int(intree ? AcqSampleFormat::Float32 : AcqSampleFormat::Int16) << QString(library);
+    }
 }
 
 void TestAcqLsl::readsLiblslOutlets()
@@ -226,6 +234,8 @@ void TestAcqLsl::readsLiblslOutlets()
     }
     QFETCH(int, lslFormat);
     QFETCH(int, format);
+    QFETCH(QString, library);
+    const bool intree = library == QStringLiteral("intree");
     const std::string name = uniqueName("acqlsl");
     void* info = m_lsl->createInfo(name.c_str(), "EEG", kChannels, kSfreq, lslFormat, name.c_str());
     void* channels = m_lsl->appendChild(m_lsl->desc(info), "channels");
@@ -238,17 +248,19 @@ void TestAcqLsl::readsLiblslOutlets()
     void* outlet = m_lsl->createOutlet(info, 0, 360);
     m_lsl->destroyInfo(info);
 
-    auto device = AcqDevice::open("lsl://" + name + "?timeout=10&library=liblsl");
+    auto device = AcqDevice::open("lsl://" + name + "?timeout=10&library=" + library.toStdString());
     QVERIFY2(device, device ? "" : device.error().text().c_str());
-    QCOMPARE(device->description().backendVersion.rfind("liblsl", 0), std::size_t(0));
+    QCOMPARE(device->description().backendVersion.rfind(intree ? "in-tree" : "liblsl", 0), std::size_t(0));
     const auto streamInfo = device->stream().info();
     QCOMPARE(int(streamInfo->format), format);
     QCOMPARE(streamInfo->sfreq, kSfreq);
     QCOMPARE(streamInfo->channels.size(), std::size_t(kChannels));
-    QCOMPARE(streamInfo->channels[1].name, std::string("Cz"));
     QCOMPARE(streamInfo->channels[1].kind, AcqChannelKind::Eeg);
-    QCOMPARE(streamInfo->channels[1].unit, AcqUnit::Volt);
-    QCOMPARE(streamInfo->channels[1].unitExponent, -6);
+    if (!intree) {
+        QCOMPARE(streamInfo->channels[1].name, std::string("Cz"));
+        QCOMPARE(streamInfo->channels[1].unit, AcqUnit::Volt);
+        QCOMPARE(streamInfo->channels[1].unitExponent, -6);
+    }
 
     AcqReaderOptions gating;
     gating.gating = true;
@@ -347,52 +359,114 @@ void TestAcqLsl::readsPylslOutlet()
 
 //=============================================================================================================
 
+void TestAcqLsl::readsInTreeOutlet_data()
+{
+    QTest::addColumn<int>("lslFormat");
+    QTest::addColumn<QString>("library");
+    for (const char* library : {"intree", "liblsl"}) {
+        for (const auto& [format, label] : {std::pair{1, "float32"}, std::pair{2, "double64"}, std::pair{4, "int32"},
+                                            std::pair{5, "int16"}, std::pair{6, "int8"}, std::pair{7, "int64"}}) {
+            QTest::addRow("%s %s", library, label) << format << QString(library);
+        }
+    }
+}
+
 void TestAcqLsl::readsInTreeOutlet()
 {
+    QFETCH(int, lslFormat);
+    QFETCH(QString, library);
+    if (library == QStringLiteral("liblsl") && !m_lsl) {
+        QSKIP("liblsl not found");
+    }
     const std::string name = uniqueName("intree");
-    LSLLIB::stream_outlet outlet(LSLLIB::stream_info(name, "EEG", kChannels, kSfreq, LSLLIB::ChannelFormat::Float32, name));
-    auto device = AcqDevice::open("lsl://" + name + "?timeout=5&library=intree");
+    LSLLIB::stream_outlet outlet(
+        LSLLIB::stream_info(name, "EEG", kChannels, kSfreq, static_cast<LSLLIB::ChannelFormat>(lslFormat), name));
+    auto device = AcqDevice::open("lsl://" + name + "?timeout=5&library=" + library.toStdString());
     QVERIFY2(device, device ? "" : device.error().text().c_str());
-    QCOMPARE(device->description().backendVersion, std::string("in-tree"));
     AcqReaderOptions gating;
     gating.gating = true;
     auto reader = device->stream().reader(AcqReader::ReadMode::Lossless, gating);
     QVERIFY(reader);
     QVERIFY(device->start().ok());
     QTRY_VERIFY_WITH_TIMEOUT(outlet.have_consumers(), 5000);
+    // Values within +-1500 are exact in every format, int8 excepted: the outlet wraps them to its range.
+    const auto expected = [lslFormat](std::size_t s, std::size_t c) {
+        const double v = value(s, c);
+        return lslFormat == 6 ? static_cast<double>(static_cast<std::int8_t>(static_cast<int>(v))) : v;
+    };
     std::vector<std::vector<float>> chunk(500, std::vector<float>(kChannels));
     for (std::size_t s = 0; s < chunk.size(); ++s) {
         for (std::size_t c = 0; c < kChannels; ++c) {
             chunk[s][c] = static_cast<float>(value(s, c));
         }
     }
+    const double pushed = LSLLIB::local_clock();
     outlet.push_chunk(chunk);
     const std::vector<double> got = drain(*reader, chunk.size());
     QCOMPARE(got.size(), chunk.size() * kChannels);
     for (std::size_t i = 0; i < got.size(); ++i) {
-        QCOMPARE(got[i], value(i / kChannels, i % kChannels));
+        QCOMPARE(got[i], expected(i / kChannels, i % kChannels));
     }
-    QCOMPARE(reader->stream().clock().source, AcqClockSource::Host);
+    // The outlet stamps the last sample of a chunk with the push time and the others back by 1 / rate.
+    const AcqClockModel clock = reader->stream().clock();
+    QCOMPARE(clock.source, AcqClockSource::Lsl);
+    const double stamp = pushed - static_cast<double>(chunk.size() - 1 - clock.anchorSample) / kSfreq;
+    const auto steady = std::chrono::duration_cast<std::chrono::nanoseconds>(
+                            std::chrono::steady_clock::now().time_since_epoch())
+                            .count();
+    const double want = static_cast<double>(steady) + (stamp - LSLLIB::local_clock()) * 1e9;
+    QVERIFY2(std::abs(static_cast<double>(clock.anchorHostNs) - want) < 5e6,
+             qPrintable(QString("clock off by %1 ms").arg((static_cast<double>(clock.anchorHostNs) - want) / 1e6)));
     device->close();
 }
 
 //=============================================================================================================
 
-void TestAcqLsl::inTreeDoesNotSeeLiblslOutlets()
+void TestAcqLsl::pylslReadsInTreeOutlet()
 {
-    // Documented incompatibility: the in-tree LSL only finds MNE-CPP outlets, which announce themselves by
-    // multicast; liblsl outlets answer queries instead, so library=intree cannot resolve them.
-    if (!m_lsl) {
-        QSKIP("liblsl not found");
+    QString python = QStandardPaths::findExecutable(QStringLiteral("python3"));
+    if (python.isEmpty()) {
+        python = QStandardPaths::findExecutable(QStringLiteral("python"));
     }
-    const std::string name = uniqueName("unseen");
-    void* info = m_lsl->createInfo(name.c_str(), "EEG", kChannels, kSfreq, 1, name.c_str());
-    void* outlet = m_lsl->createOutlet(info, 0, 360);
-    m_lsl->destroyInfo(info);
-    auto device = AcqDevice::open("lsl://" + name + "?timeout=1&library=intree");
-    QVERIFY(!device);
-    QCOMPARE(device.error().code(), AcqErrorCode::DeviceNotFound);
-    m_lsl->destroyOutlet(outlet);
+    if (python.isEmpty() || !m_lsl) {
+        QSKIP("pylsl with its liblsl not installed for the Python on the PATH");
+    }
+    const std::string name = uniqueName("topylsl");
+    LSLLIB::stream_outlet outlet(LSLLIB::stream_info(name, "EEG", kChannels, kSfreq, LSLLIB::ChannelFormat::Int16, name));
+    // pylsl resolves the outlet by name, checks its description, reads 300 samples and prints them.
+    const QString script = QStringLiteral(
+                               "import pylsl,sys\n"
+                               "s=pylsl.resolve_byprop('name','%1',1,10)\n"
+                               "assert s and s[0].channel_format()==pylsl.cf_int16 and s[0].nominal_srate()==500.0\n"
+                               "i=pylsl.StreamInlet(s[0])\n"
+                               "i.open_stream(10)\n"
+                               "assert abs(i.time_correction(5))<0.01\n"
+                               "out=[]\n"
+                               "while len(out)<300:\n"
+                               "    d,t=i.pull_chunk(timeout=5)\n"
+                               "    assert d, 'timeout'\n"
+                               "    out+=d\n"
+                               "print(' '.join(str(v) for row in out[:300] for v in row))\n")
+                               .arg(QString::fromStdString(name));
+    QProcess inlet;
+    inlet.start(python, {QStringLiteral("-c"), script});
+    QVERIFY(inlet.waitForStarted(10000));
+    QTRY_VERIFY_WITH_TIMEOUT(outlet.have_consumers(), 20000);
+    std::vector<std::vector<float>> chunk(300, std::vector<float>(kChannels));
+    for (std::size_t s = 0; s < chunk.size(); ++s) {
+        for (std::size_t c = 0; c < kChannels; ++c) {
+            chunk[s][c] = static_cast<float>(value(s, c));
+        }
+    }
+    outlet.push_chunk(chunk);
+    QVERIFY(inlet.waitForFinished(30000));
+    const QByteArray error = inlet.readAllStandardError();
+    QVERIFY2(inlet.exitCode() == 0, error.constData());
+    const QList<QByteArray> values = inlet.readAllStandardOutput().trimmed().split(' ');
+    QCOMPARE(values.size(), qsizetype(chunk.size() * kChannels));
+    for (qsizetype i = 0; i < values.size(); ++i) {
+        QCOMPARE(values[i].toDouble(), value(static_cast<std::size_t>(i) / kChannels, static_cast<std::size_t>(i) % kChannels));
+    }
 }
 
 //=============================================================================================================

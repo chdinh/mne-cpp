@@ -4,7 +4,7 @@
   "policy": "scripts/quality/api_evidence_policy.json",
   "summary": {
     "exported_classes": 481,
-    "exported_free_functions": 144,
+    "exported_free_functions": 145,
     "registered_classes": 571,
     "exported_not_registered": 1,
     "registered_function_modules": 13,
@@ -815,6 +815,11 @@
     {
       "name": "resolve_stream",
       "header": "lsl/lsl_stream_discovery.h",
+      "library": "lsl"
+    },
+    {
+      "name": "local_clock",
+      "header": "lsl/lsl_stream_info.h",
       "library": "lsl"
     },
     {

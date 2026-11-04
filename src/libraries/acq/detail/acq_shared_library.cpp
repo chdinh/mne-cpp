@@ -53,6 +53,8 @@ std::wstring widen(const std::string& text)
     return out;
 }
 
+//=============================================================================================================
+
 void* open(const std::string& path, std::string& error)
 {
     void* handle = reinterpret_cast<void*>(LoadLibraryW(widen(path).c_str()));
@@ -145,11 +147,15 @@ AcqSharedLibrary::~AcqSharedLibrary()
     }
 }
 
+//=============================================================================================================
+
 AcqSharedLibrary::AcqSharedLibrary(AcqSharedLibrary&& other) noexcept
 : m_handle(std::exchange(other.m_handle, nullptr))
 , m_path(std::move(other.m_path))
 {
 }
+
+//=============================================================================================================
 
 AcqSharedLibrary& AcqSharedLibrary::operator=(AcqSharedLibrary&& other) noexcept
 {
@@ -162,6 +168,8 @@ AcqSharedLibrary& AcqSharedLibrary::operator=(AcqSharedLibrary&& other) noexcept
     }
     return *this;
 }
+
+//=============================================================================================================
 
 AcqExpected<AcqSharedLibrary> AcqSharedLibrary::load(const std::vector<std::string>& candidates)
 {
@@ -184,10 +192,14 @@ AcqExpected<AcqSharedLibrary> AcqSharedLibrary::load(const std::vector<std::stri
                     "not found (tried " + (tried.empty() ? std::string("nothing") : tried) + "): " + error);
 }
 
+//=============================================================================================================
+
 void* AcqSharedLibrary::symbol(const char* name) const noexcept
 {
     return m_handle != nullptr ? lookup(m_handle, name) : nullptr;
 }
+
+//=============================================================================================================
 
 const std::string& AcqSharedLibrary::path() const noexcept
 {
@@ -221,6 +233,8 @@ std::string ACQLIB::detail::acqPythonPackageDir(const std::string& package, cons
     }
     return {};
 }
+
+//=============================================================================================================
 
 std::string ACQLIB::detail::acqSharedLibraryName(const std::string& base)
 {

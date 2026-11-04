@@ -21,9 +21,9 @@
  * layer) needed to actually open a connection.
  *
  * This header also defines the @ref LSLLIB::ChannelFormat enum,
- * whose integer values intentionally match the @c cf_* constants of
- * the upstream liblsl C API so that wire payloads serialised by
- * @c to_string remain interoperable with third-party LSL clients.
+ * whose integer values match the @c cf_* constants of the upstream
+ * liblsl C API. @c to_string produces liblsl's shortinfo XML, so
+ * outlets and inlets of this library interoperate with liblsl.
  * The class is intentionally a plain value type (cheap to copy,
  * default-constructible into an "invalid" state) so it can be passed
  * around freely between the discovery, outlet and inlet components
@@ -220,6 +220,27 @@ public:
      */
     void set_data_host(const std::string& host);
 
+    /**
+     * @brief UDP port on which the outlet answers time-correction and direct queries.
+     *
+     * @return The UDP port number, or 0 if not assigned.
+     */
+    [[nodiscard]] int service_port() const noexcept;
+
+    /**
+     * @brief Set the UDP service port (used internally during discovery / outlet creation).
+     *
+     * @param[in] port              UDP port number.
+     */
+    void set_service_port(int port);
+
+    /**
+     * @brief Time the stream was created, in local_clock() seconds of the originating host.
+     *
+     * @return The creation time, 0.0 for a default-constructed object.
+     */
+    [[nodiscard]] double created_at() const noexcept;
+
     /** @} */
 
     //=========================================================================================================
@@ -254,9 +275,19 @@ private:
     std::string m_uid;              /**< Unique per-instance identifier. */
     std::string m_hostname;         /**< Hostname of the originating machine. */
 
-    int m_data_port;         /**< TCP data port (set during discovery). */
-    std::string m_data_host; /**< Data host address (set during discovery). */
+    int m_data_port;           /**< TCP data port (set during discovery). */
+    std::string m_data_host;   /**< Data host address (set during discovery). */
+    int m_service_port = 0;    /**< UDP service port. */
+    double m_created_at = 0.0; /**< Creation time in local_clock() seconds. */
 };
+
+//=============================================================================================================
+/**
+ * @brief Seconds of the monotonic clock LSL timestamps refer to, as liblsl's lsl_local_clock().
+ *
+ * @return The current local LSL time.
+ */
+LSLSHARED_EXPORT double local_clock();
 
 } // namespace LSLLIB
 

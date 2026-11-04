@@ -12,11 +12,10 @@
  * A @ref LSLLIB::stream_inlet is constructed from a resolved
  * @ref LSLLIB::stream_info (typically obtained via
  * @ref LSLLIB::resolve_streams) and represents a one-way TCP
- * connection to the corresponding @ref LSLLIB::stream_outlet. The
- * class wraps the @c QTcpSocket plumbing, the framing of
- * channel-count-sized sample blocks, and an internal ring buffer
- * behind a PIMPL so that the public header pulls in no Qt network
- * symbols.
+ * connection to the corresponding outlet, of this library or of
+ * liblsl, speaking liblsl's data protocol 1.10. The class wraps the
+ * @c QTcpSocket plumbing and the sample decoding behind a PIMPL so
+ * that the public header pulls in no Qt network symbols.
  *
  * The data path is intentionally chunked rather than
  * sample-at-a-time: @ref LSLLIB::stream_inlet::samples_available "samples_available" drains pending bytes off
@@ -26,8 +25,9 @@
  * plug-ins under @c applications/mne_scan_plugins) consume most
  * efficiently. The templated @ref LSLLIB::stream_inlet::pull_chunk "pull_chunk" is provided purely for
  * source-level compatibility with liblsl; in this implementation
- * only the @c float specialisation is wired up, since every mne-cpp
- * acquisition path operates on 32-bit floating-point samples.
+ * only the @c float specialisation is wired up: samples of every
+ * numeric channel format are converted to float (int32, int64 and
+ * double64 values beyond float precision are rounded).
  */
 
 #ifndef LSL_STREAM_INLET_H
@@ -93,7 +93,8 @@ public:
     /**
      * Open the TCP connection to the outlet and begin receiving data.
      *
-     * @throws std::runtime_error if the connection cannot be established.
+     * @throws std::runtime_error if the connection cannot be established, the outlet refuses the stream or
+     *         its test-pattern samples do not match the protocol.
      */
     void open_stream();
 
@@ -138,6 +139,28 @@ public:
      * @return A vector of samples, where each sample is a vector of float channel values.
      */
     [[nodiscard]] std::vector<std::vector<float>> pull_chunk_float();
+
+    //=========================================================================================================
+    /**
+     * Pull a chunk of float data with the timestamp of every sample.
+     *
+     * @param[out] timestamps   One timestamp per returned sample, in the outlet host's local_clock() seconds.
+     *
+     * @return A vector of samples, where each sample is a vector of float channel values.
+     */
+    [[nodiscard]] std::vector<std::vector<float>> pull_chunk_float(std::vector<double>& timestamps);
+
+    //=========================================================================================================
+    /**
+     * Estimates the offset between the outlet host's clock and local_clock() from round trips to the outlet's
+     * service port, keeping the one with the shortest round-trip time.
+     *
+     * @param[in] timeout   Maximum wait in seconds.
+     *
+     * @return Seconds to add to the outlet's timestamps to express them in local_clock(), or NaN if the outlet
+     *         did not answer within @p timeout.
+     */
+    [[nodiscard]] double time_correction(double timeout = 2.0);
 
 private:
     /** Opaque implementation pointer (PIMPL). */

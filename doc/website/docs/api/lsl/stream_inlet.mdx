@@ -114,6 +114,36 @@ Pull a chunk of float data (non-template version).
 
 ---
 
+### pull_chunk_float(timestamps)
+
+Pull a chunk of float data with the timestamp of every sample.
+
+**Parameters:**
+
+- **timestamps** : *std::vector&lt; double &gt; &*
+  One timestamp per returned sample, in the outlet host's `local_clock()` seconds.
+
+**Returns:**
+
+- *std::vector&lt; std::vector&lt; float &gt; &gt;* — A vector of samples, where each sample is a vector of float channel values.
+
+---
+
+### time_correction(timeout)
+
+Estimates the offset between the outlet host's clock and `local_clock()` from round trips to the outlet's service port, keeping the one with the shortest round-trip time.
+
+**Parameters:**
+
+- **timeout** : *double*
+  Maximum wait in seconds.
+
+**Returns:**
+
+- *double* — Seconds to add to the outlet's timestamps to express them in `local_clock()`, or NaN if the outlet did not answer within `timeout`.
+
+---
+
 ## Example
 
 - Start here: [ex_lsl](../../examples/lsl/ex_lsl.mdx) — LSL library: publish a stream, discover it and receive its samples over loopback.

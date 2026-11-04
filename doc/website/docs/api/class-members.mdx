@@ -7,7 +7,7 @@ sidebar_position: 5
 
 # Class Members
 
-Index of 6734 public class members (functions, variables, typedefs, enums) across all documented classes.
+Index of 6739 public class members (functions, variables, typedefs, enums) across all documented classes.
 
 **Jump to:** [A](#a) · [B](#b) · [C](#c) · [D](#d) · [E](#e) · [F](#f) · [G](#g) · [H](#h) · [I](#i) · [J](#j) · [K](#k) · [L](#l) · [M](#m) · [N](#n) · [O](#o) · [P](#p) · [Q](#q) · [R](#r) · [S](#s) · [T](#t) · [U](#u) · [V](#v) · [W](#w) · [X](#x) · [Y](#y) · [Z](#z)
 
@@ -4382,6 +4382,7 @@ Index of 6734 public class members (functions, variables, typedefs, enums) acros
 - **psdFromTaperedSpectra** `[fn]` in [Spectral](/docs/api/utils/spectral) — Calculates the power spectral density of given tapered spectrum.
 - **pull_chunk** `[fn]` in [stream_inlet](/docs/api/lsl/stream_inlet) — Pull a chunk of multichannel data from the inlet.
 - **pull_chunk_float** `[fn]` in [stream_inlet](/docs/api/lsl/stream_inlet) — Pull a chunk of float data (non-template version).
+- **pull_chunk_float** `[fn]` in [stream_inlet](/docs/api/lsl/stream_inlet) — Pull a chunk of float data with the timestamp of every sample.
 - **push** `[fn]` in [CircularBuffer](/docs/api/utils/circular-buffer) — Adds a whole array at the end buffer.
 - **push** `[fn]` in [CircularBuffer](/docs/api/utils/circular-buffer) — Adds an element at the end of the buffer.
 - **push_chunk** `[fn]` in [stream_outlet](/docs/api/lsl/stream_outlet) — Push a chunk of multichannel samples into the outlet.
@@ -4495,6 +4496,7 @@ Index of 6734 public class members (functions, variables, typedefs, enums) acros
 - **read** `[fn]` in [MriMghIO](/docs/api/mri/mri-mgh-io) — Reads a FreeSurfer MGH or MGZ file.
 - **read** `[fn]` in [MriNiftiIO](/docs/api/mri/mri-nifti-io) — Reads a NIfTI-1 single-file volume.
 - **read** `[fn]` in [MriVolData](/docs/api/mri/mri-vol-data) — Convenience loader: reads an MGH/MGZ file and populates this volume.
+- **read** `[fn]` in `SampleReader` — Decodes the sample starting at `pos` in `data`.
 - **read_annotations** `[fn]` in [FiffStream](/docs/api/fiff/fiff-stream) — Reads the first MNE-Python annotations block (FIFFB_MNE_ANNOTATIONS) below `p_Node`.
 - **read_bad_channels** `[fn]` in [Fiff](/docs/api/fiff/fiff-class) — fiff_read_bad_channels
 - **read_bad_channels** `[fn]` in [FiffStream](/docs/api/fiff/fiff-stream) — fiff_read_bad_channels
@@ -4834,6 +4836,8 @@ Index of 6734 public class members (functions, variables, typedefs, enums) acros
 - **sampleCount** `[var]` in [EDFChannelInfo](/docs/api/bids/edf-channel-info)
 - **sampleRangeSelected** `[signal]` in [ChannelDataView](/docs/api/disp/channel-data-view) — Emitted when the user selected a sample range for annotation creation.
 - **sampleRangeSelected** `[signal]` in [ChannelRhiView](/docs/api/disp/channel-rhi-view) — Emitted when the user selects a time span with Shift+drag in annotation mode.
+- **SampleReader** `[fn]` in `SampleReader`
+- **SampleReader** `[fn]` in `SampleReader`
 - **samples** `[var]` in [AcqPart](/docs/api/acq/acq-part) — Samples per channel in the run.
 - **samples** `[var]` in [AcqReadResult](/docs/api/acq/acq-read-result) — Columns written.
 - **samples** `[var]` in [AcqRecorderStats](/docs/api/acq/acq-recorder-stats) — Samples per channel flushed to disk, including zero-filled lost ones.
@@ -6106,6 +6110,7 @@ Index of 6734 public class members (functions, variables, typedefs, enums) acros
 - **ticksPerSecond** `[var]` in [AcqTimebase](/docs/api/acq/acq-timebase) — Domain tick rate in Hz (integer, as hardware clocks are).
 - **time** `[var]` in [FiffId](/docs/api/fiff/fiff-id) — Time of the ID creation.
 - **time** `[var]` in [InvEcd](/docs/api/inv/inv-ecd) — Time point.
+- **time_correction** `[fn]` in [stream_inlet](/docs/api/lsl/stream_inlet) — Estimates the offset between the outlet host's clock and `local_clock()` from round trips to the outlet's service port, keeping the one with the shortest round-trip time.
 - **time_loaded** `[var]` in [MNEMshDisplaySurface](/docs/api/mne/mne-msh-display-surface) — Timestamp when the surface was loaded.
 - **timeAtIndex** `[fn]` in [SourceEstimateOverlay](/docs/api/disp3-d/source-estimate-overlay) — Get the time value at a given index.
 - **timebase** `[fn]` in [AcqStream](/docs/api/acq/acq-stream)

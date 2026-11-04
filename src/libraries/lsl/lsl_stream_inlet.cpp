@@ -7,22 +7,11 @@
  * @author   Christoph Dinh <christoph.dinh@mne-cpp.org>
  * @since    2.0.0
  * @date     March 2026
- * @brief    Implements the QTcpSocket-backed receive path that turns a remote LSL outlet into a stream of multichannel float chunks.
+ * @brief    Implements the receive path of liblsl's data protocol 1.10 and its time-correction exchange.
  *
- * The PIMPL class @c StreamInletPrivate owns the @c QTcpSocket and
- * is responsible for opening the connection to the host/port pair
- * stored in the @ref LSLLIB::stream_info, draining pending bytes on
- * every @c samples_available probe, and reassembling them into
- * fixed-width multichannel samples sized by @c channel_count *
- * @c sizeof(float). Partial samples observed at the end of a
- * @c readAll buffer are kept in a residual byte buffer and prepended
- * to the next read so that no sample is ever split across calls.
- *
- * The public @ref LSLLIB::stream_inlet methods are thin forwarding
- * shims that delegate to the PIMPL, which lets the public header
- * stay free of Qt network symbols and keeps the @c std::unique_ptr
- * destructor pinned to this translation unit where the complete
- * type is visible.
+ * open_stream() sends the stream-feed request, checks the response headers and the two test-pattern samples,
+ * and keeps the bytes that follow. Pulls decode every complete sample in the buffer; a sample whose timestamp
+ * was not transmitted gets the previous one plus 1 / nominal rate, as liblsl does.
  */
 
 //=============================================================================================================
@@ -30,20 +19,25 @@
 //=============================================================================================================
 
 #include "lsl_stream_inlet.h"
+#include "lsl_protocol.h"
 
 //=============================================================================================================
 // QT INCLUDES
 //=============================================================================================================
 
-#include <QTcpSocket>
 #include <QByteArray>
-#include <QDebug>
+#include <QElapsedTimer>
+#include <QHostInfo>
+#include <QNetworkDatagram>
+#include <QTcpSocket>
+#include <QUdpSocket>
 
 //=============================================================================================================
 // STL INCLUDES
 //=============================================================================================================
 
-#include <cstring>
+#include <cmath>
+#include <limits>
 #include <stdexcept>
 
 //=============================================================================================================
@@ -51,23 +45,27 @@
 //=============================================================================================================
 
 using namespace LSLLIB;
+using namespace LSLLIB::detail;
+
+namespace
+{
+
+constexpr int kConnectMs = 5000;
+
+std::runtime_error failure(const std::string& what)
+{
+    return std::runtime_error("[lsl::stream_inlet] " + what);
+}
+
+} // namespace
 
 //=============================================================================================================
-// PRIVATE IMPLEMENTATION
-//=============================================================================================================
 
-/**
- * @internal
- * @brief Private implementation for stream_inlet (PIMPL).
- */
 class LSLLIB::StreamInletPrivate
 {
 public:
-    StreamInletPrivate(const stream_info& info)
+    explicit StreamInletPrivate(const stream_info& info)
     : m_info(info)
-    , m_bIsOpen(false)
-    , m_iChannelCount(info.channel_count())
-    , m_iBytesPerSample(static_cast<int>(info.channel_count() * sizeof(float)))
     {
     }
 
@@ -76,73 +74,50 @@ public:
         closeStream();
     }
 
-    //=========================================================================================================
-    /**
-     * Open a TCP connection to the stream outlet.
-     */
+    StreamInletPrivate(const StreamInletPrivate&) = delete;
+    StreamInletPrivate& operator=(const StreamInletPrivate&) = delete;
+
     void openStream()
     {
-        if (m_bIsOpen) {
+        if (m_pSocket) {
             return;
         }
-
-        // Create socket (no parent, we manage lifetime ourselves)
-        m_pSocket = std::make_unique<QTcpSocket>();
-
-        QString host = QString::fromStdString(m_info.data_host());
-        quint16 port = static_cast<quint16>(m_info.data_port());
-
+        const QString host = QString::fromStdString(m_info.data_host());
+        const auto port = static_cast<quint16>(m_info.data_port());
         if (host.isEmpty() || port == 0) {
-            m_pSocket.reset();
-            throw std::runtime_error("[lsl::stream_inlet] Invalid data host or port in stream_info");
+            throw failure("Invalid data host or port in stream_info");
         }
-
+        if (m_info.channel_format() == ChannelFormat::Undefined || m_info.channel_count() <= 0) {
+            throw failure("stream_info has no channel format or channels");
+        }
+        m_pSocket = std::make_unique<QTcpSocket>();
         m_pSocket->connectToHost(host, port);
-
-        if (!m_pSocket->waitForConnected(5000)) {
-            QString err = m_pSocket->errorString();
+        if (!m_pSocket->waitForConnected(kConnectMs)) {
+            const std::string error = m_pSocket->errorString().toStdString();
             m_pSocket.reset();
-            throw std::runtime_error(std::string("[lsl::stream_inlet] Failed to connect to outlet: ") + err.toStdString());
+            throw failure("Failed to connect to outlet: " + error);
         }
-
-        // Read the handshake header: "LSL1" (4 bytes) + channel_count (4 bytes, little-endian)
-        if (!m_pSocket->waitForReadyRead(5000)) {
-            m_pSocket.reset();
-            throw std::runtime_error("[lsl::stream_inlet] Timeout waiting for handshake from outlet");
+        // The outlet buffers this many samples for us (liblsl: 360 s, or 36000 samples for irregular streams).
+        const auto bufferSamples = static_cast<qlonglong>(m_info.nominal_srate() > 0.0 ? 360.0 * m_info.nominal_srate() : 36000.0);
+        const QByteArray request = "LSL:streamfeed/110 " + QByteArray::fromStdString(m_info.uid()) +
+            "\r\nNative-Byte-Order: " + byteOrderName() +
+            "\r\nEndian-Performance: 0\r\nHas-IEEE754-Floats: 1\r\nSupports-Subnormals: 1\r\nValue-Size: " +
+            QByteArray::number(static_cast<qulonglong>(valueSize(m_info.channel_format()))) +
+            "\r\nData-Protocol-Version: 110\r\nMax-Buffer-Length: " + QByteArray::number(bufferSamples) +
+            "\r\nMax-Chunk-Length: 0\r\nHostname: " +
+            QHostInfo::localHostName().toUtf8() + "\r\nSource-Id: " + QByteArray::fromStdString(m_info.source_id()) +
+            "\r\nSession-Id: default\r\n\r\n";
+        m_pSocket->write(request);
+        m_pSocket->flush();
+        try {
+            readHeaders();
+            checkTestPatterns();
+        } catch (...) {
+            closeStream();
+            throw;
         }
-
-        QByteArray header;
-        while (header.size() < 8) {
-            if (m_pSocket->bytesAvailable() == 0) {
-                if (!m_pSocket->waitForReadyRead(5000)) {
-                    break;
-                }
-            }
-            header.append(m_pSocket->read(8 - header.size()));
-        }
-
-        if (header.size() < 8 || header.left(4) != QByteArray("LSL1", 4)) {
-            m_pSocket.reset();
-            throw std::runtime_error("[lsl::stream_inlet] Invalid handshake from outlet");
-        }
-
-        // Read channel count from header (little-endian int32)
-        int headerChannels = 0;
-        std::memcpy(&headerChannels, header.constData() + 4, sizeof(int));
-        if (headerChannels != m_iChannelCount) {
-            qDebug() << "[lsl::stream_inlet] Warning: outlet reports" << headerChannels
-                     << "channels, expected" << m_iChannelCount << "- using outlet value";
-            m_iChannelCount = headerChannels;
-            m_iBytesPerSample = m_iChannelCount * static_cast<int>(sizeof(float));
-        }
-
-        m_bIsOpen = true;
     }
 
-    //=========================================================================================================
-    /**
-     * Close the TCP connection.
-     */
     void closeStream()
     {
         if (m_pSocket) {
@@ -154,81 +129,184 @@ public:
             }
             m_pSocket.reset();
         }
-        m_bIsOpen = false;
-        m_rawBuffer.clear();
+        m_buffer.clear();
+        m_pos = 0;
     }
 
-    //=========================================================================================================
-    /**
-     * Try to read pending data from the TCP socket into the raw byte buffer (non-blocking).
-     *
-     * @return True if at least one complete sample is available in the buffer.
-     */
     bool readPending()
     {
-        if (!m_bIsOpen || !m_pSocket) {
+        if (!m_pSocket) {
             return false;
         }
-
-        // Non-blocking check for available data
         if (m_pSocket->bytesAvailable() > 0 || m_pSocket->waitForReadyRead(0)) {
-            QByteArray data = m_pSocket->readAll();
-            m_rawBuffer.append(data);
+            m_buffer.append(m_pSocket->readAll());
         }
-
-        // A complete sample requires m_iBytesPerSample bytes
-        return (m_iBytesPerSample > 0) && (m_rawBuffer.size() >= m_iBytesPerSample);
+        qsizetype pos = m_pos;
+        std::uint8_t tag = 0;
+        double timestamp = 0.0;
+        return m_reader.read(m_buffer, pos, tag, timestamp, m_values) == 1;
     }
 
-    //=========================================================================================================
-    /**
-     * Extract all complete samples from the byte buffer as a chunk.
-     *
-     * @return Vector of samples, each sample is a vector of float channel values.
-     */
-    std::vector<std::vector<float>> pullChunkFloat()
+    std::vector<std::vector<float>> pullChunk(std::vector<double>* timestamps)
     {
         std::vector<std::vector<float>> chunk;
-
-        if (!m_bIsOpen || !m_pSocket) {
+        if (timestamps != nullptr) {
+            timestamps->clear();
+        }
+        if (!m_pSocket) {
             return chunk;
         }
-
-        // Read any pending data
         readPending();
-
-        if (m_iBytesPerSample <= 0) {
+        std::uint8_t tag = 0;
+        double timestamp = 0.0;
+        int result = 0;
+        while ((result = m_reader.read(m_buffer, m_pos, tag, timestamp, m_values)) == 1) {
+            m_lastTimestamp = stamp(tag, timestamp);
+            chunk.emplace_back(m_values.begin(), m_values.end());
+            if (timestamps != nullptr) {
+                timestamps->push_back(m_lastTimestamp);
+            }
+        }
+        if (result < 0) {
+            qWarning("[lsl::stream_inlet] Malformed sample from the outlet; closing the stream");
+            closeStream();
             return chunk;
         }
-
-        // Extract complete samples from the buffer
-        int nCompleteSamples = m_rawBuffer.size() / m_iBytesPerSample;
-        if (nCompleteSamples == 0) {
-            return chunk;
+        if (m_pos > (1 << 20)) {
+            m_buffer.remove(0, m_pos);
+            m_pos = 0;
         }
-
-        chunk.reserve(nCompleteSamples);
-        const char* ptr = m_rawBuffer.constData();
-
-        for (int s = 0; s < nCompleteSamples; ++s) {
-            std::vector<float> sample(m_iChannelCount);
-            std::memcpy(sample.data(), ptr + s * m_iBytesPerSample, m_iBytesPerSample);
-            chunk.push_back(std::move(sample));
-        }
-
-        // Remove consumed bytes from the buffer
-        int consumedBytes = nCompleteSamples * m_iBytesPerSample;
-        m_rawBuffer.remove(0, consumedBytes);
-
         return chunk;
     }
 
+    double timeCorrection(double timeout)
+    {
+        const auto port = static_cast<quint16>(m_info.service_port());
+        if (port == 0 || m_info.data_host().empty()) {
+            return std::numeric_limits<double>::quiet_NaN();
+        }
+        QUdpSocket socket;
+        if (!socket.bind(QHostAddress::AnyIPv4, 0)) {
+            return std::numeric_limits<double>::quiet_NaN();
+        }
+        const QHostAddress host(QString::fromStdString(m_info.data_host()));
+        constexpr int kProbes = 8;
+        double bestRtt = std::numeric_limits<double>::infinity();
+        double best = std::numeric_limits<double>::quiet_NaN();
+        QElapsedTimer timer;
+        timer.start();
+        const auto budget = static_cast<qint64>(timeout * 1000.0);
+        for (int wave = 0; wave < kProbes && timer.elapsed() < budget; ++wave) {
+            const double t0 = local_clock();
+            socket.writeDatagram("LSL:timedata\r\n" + QByteArray::number(wave) + " " + QByteArray::number(t0, 'g', 17) + "\r\n",
+                                 host, port);
+            const qint64 waitUntil = std::min(budget, timer.elapsed() + 100);
+            bool answered = false;
+            while (!answered && timer.elapsed() < waitUntil) {
+                if (!socket.hasPendingDatagrams() && !socket.waitForReadyRead(static_cast<int>(waitUntil - timer.elapsed()))) {
+                    break;
+                }
+                while (socket.hasPendingDatagrams()) {
+                    const double t3 = local_clock();
+                    const QList<QByteArray> reply = socket.receiveDatagram().data().trimmed().split(' ');
+                    if (reply.size() != 4 || reply[0].toInt() != wave) {
+                        continue;
+                    }
+                    const double t1 = reply[2].toDouble();
+                    const double t2 = reply[3].toDouble();
+                    const double rtt = (t3 - t0) - (t2 - t1);
+                    if (rtt < bestRtt) {
+                        bestRtt = rtt;
+                        best = -((t1 - t0) + (t2 - t3)) / 2.0; // remote clock minus local clock, negated
+                    }
+                    answered = true;
+                }
+            }
+        }
+        return best;
+    }
+
+private:
+    /** Reads the response headers; the bytes after them start the sample stream. */
+    void readHeaders()
+    {
+        QByteArray data;
+        QElapsedTimer timer;
+        timer.start();
+        qsizetype end = -1;
+        while ((end = data.indexOf("\r\n\r\n")) < 0) {
+            if (timer.elapsed() > kConnectMs || data.size() > 65536 ||
+                (m_pSocket->bytesAvailable() == 0 && !m_pSocket->waitForReadyRead(static_cast<int>(kConnectMs - timer.elapsed())))) {
+                throw failure("Timeout waiting for the outlet's response");
+            }
+            data.append(m_pSocket->readAll());
+        }
+        const QList<QByteArray> lines = data.left(end).split('\n');
+        const QList<QByteArray> status = lines.value(0).trimmed().split(' ');
+        if (status.size() < 2 || !status[0].startsWith("LSL/") || status[1] != "200") {
+            throw failure("Outlet refused the stream: " + lines.value(0).trimmed().toStdString());
+        }
+        bool reverse = false;
+        for (const QByteArray& line : lines) {
+            const qsizetype colon = line.indexOf(':');
+            if (colon < 0) {
+                continue;
+            }
+            const QByteArray key = line.left(colon).trimmed();
+            const QByteArray value = line.mid(colon + 1).trimmed();
+            if (key == "Byte-Order") {
+                reverse = value != byteOrderName();
+            } else if (key == "Data-Protocol-Version" && value.toInt() != kProtocolVersion) {
+                throw failure("Outlet speaks data protocol " + value.toStdString() + "; 110 is supported");
+            }
+        }
+        m_reader = SampleReader(m_info.channel_format(), m_info.channel_count(), reverse);
+        m_buffer = data.mid(end + 4);
+        m_pos = 0;
+    }
+
+    /** Reads the two test-pattern samples and checks them against the protocol's values. */
+    void checkTestPatterns()
+    {
+        QElapsedTimer timer;
+        timer.start();
+        for (const int offset : {4, 2}) {
+            std::uint8_t tag = 0;
+            double timestamp = 0.0;
+            int result = 0;
+            while ((result = m_reader.read(m_buffer, m_pos, tag, timestamp, m_values)) == 0) {
+                if (timer.elapsed() > kConnectMs || !m_pSocket->waitForReadyRead(static_cast<int>(kConnectMs - timer.elapsed()))) {
+                    throw failure("Timeout waiting for the test-pattern samples");
+                }
+                m_buffer.append(m_pSocket->readAll());
+            }
+            bool match = result == 1 && tag == kTagTransmitted && timestamp == kTestPatternTime;
+            for (std::size_t k = 0; match && k < m_values.size(); ++k) {
+                const double expected = testPatternValue(m_info.channel_format(), static_cast<int>(k), offset);
+                match = m_info.channel_format() == ChannelFormat::Float32 ? static_cast<float>(m_values[k]) == static_cast<float>(expected)
+                                                                          : m_values[k] == expected;
+            }
+            if (!match) {
+                throw failure("The outlet's test-pattern samples do not match; the protocol formats are incompatible");
+            }
+        }
+    }
+
+    double stamp(std::uint8_t tag, double timestamp) const noexcept
+    {
+        if (tag == kTagTransmitted) {
+            return timestamp;
+        }
+        return m_info.nominal_srate() > 0.0 ? m_lastTimestamp + 1.0 / m_info.nominal_srate() : m_lastTimestamp;
+    }
+
     stream_info m_info;                    /**< The stream info for this inlet. */
-    std::unique_ptr<QTcpSocket> m_pSocket; /**< TCP socket for data reception. */
-    bool m_bIsOpen;                        /**< Whether the stream is currently open. */
-    int m_iChannelCount;                   /**< Number of channels. */
-    int m_iBytesPerSample;                 /**< Bytes per sample (channels * sizeof(float)). */
-    QByteArray m_rawBuffer;                /**< Raw byte buffer for incoming TCP data. */
+    std::unique_ptr<QTcpSocket> m_pSocket; /**< TCP socket of the stream feed; null while closed. */
+    SampleReader m_reader;                 /**< Decoder for the negotiated format and byte order. */
+    QByteArray m_buffer;                   /**< Received bytes not yet decoded, from m_pos on. */
+    qsizetype m_pos = 0;                   /**< Read position in m_buffer. */
+    std::vector<double> m_values;          /**< Scratch for one decoded sample. */
+    double m_lastTimestamp = 0.0;          /**< Timestamp of the last decoded sample. */
 };
 
 //=============================================================================================================
@@ -242,10 +320,7 @@ stream_inlet::stream_inlet(const stream_info& info)
 
 //=============================================================================================================
 
-stream_inlet::~stream_inlet()
-{
-    // unique_ptr destructor handles cleanup via StreamInletPrivate destructor
-}
+stream_inlet::~stream_inlet() = default;
 
 //=============================================================================================================
 
@@ -272,5 +347,19 @@ bool stream_inlet::samples_available()
 
 std::vector<std::vector<float>> stream_inlet::pull_chunk_float()
 {
-    return m_pImpl->pullChunkFloat();
+    return m_pImpl->pullChunk(nullptr);
+}
+
+//=============================================================================================================
+
+std::vector<std::vector<float>> stream_inlet::pull_chunk_float(std::vector<double>& timestamps)
+{
+    return m_pImpl->pullChunk(&timestamps);
+}
+
+//=============================================================================================================
+
+double stream_inlet::time_correction(double timeout)
+{
+    return m_pImpl->timeCorrection(timeout);
 }

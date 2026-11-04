@@ -324,31 +324,36 @@ void TestLsl::testStreamInfoRoundTripAllFormats()
 void TestLsl::testStreamInfoSerializationFormat()
 {
     stream_info info("MyStream", "EEG", 32, 512.0, ChannelFormat::Float32, "src1");
-    std::string s = info.to_string();
+    info.set_data_port(16572);
+    info.set_service_port(16573);
+    const QString s = QString::fromStdString(info.to_string());
 
-    // Should start with MNELSL1 header
-    QVERIFY(s.substr(0, 7) == "MNELSL1");
-
-    // Should be pipe-delimited with 10 fields
-    int pipeCount = static_cast<int>(std::count(s.begin(), s.end(), '|'));
-    QCOMPARE(pipeCount, 9); // 10 fields = 9 pipes
+    // liblsl's shortinfo XML, element names and channel format as liblsl spells them
+    QVERIFY(s.startsWith(QStringLiteral("<?xml version=\"1.0\"?>\n<info>")));
+    QVERIFY(s.contains(QStringLiteral("<channel_format>float32</channel_format>")));
+    QVERIFY(s.contains(QStringLiteral("<session_id>default</session_id>")));
+    QVERIFY(s.contains(QStringLiteral("<v4data_port>16572</v4data_port>")));
+    QVERIFY(s.contains(QStringLiteral("<v4service_port>16573</v4service_port>")));
+    QVERIFY(s.contains(QStringLiteral("<uid>") + QString::fromStdString(info.uid()) + QStringLiteral("</uid>")));
 }
 
 //=============================================================================================================
 
 void TestLsl::testStreamInfoDeserializationInvalidHeader()
 {
-    stream_info result = stream_info::from_string("INVALID|a|b|1|100|uid|host|src|0|1");
+    stream_info result = stream_info::from_string("<?xml version=\"1.0\"?><other><name>a</name></other>");
     QVERIFY(result.name().empty());
     QVERIFY(result.uid().empty());
+    QVERIFY(stream_info::from_string("MNELSL1|a|b|1|100|uid|host|src|0|1").name().empty());
 }
 
 //=============================================================================================================
 
 void TestLsl::testStreamInfoDeserializationTooFewFields()
 {
-    stream_info result = stream_info::from_string("MNELSL1|a|b|1");
-    QVERIFY(result.name().empty());
+    // Truncated XML and an info block without a name are both invalid.
+    QVERIFY(stream_info::from_string("<?xml version=\"1.0\"?>\n<info>\n\t<name>a</na").name().empty());
+    QVERIFY(stream_info::from_string("<info><type>EEG</type></info>").name().empty());
 }
 
 //=============================================================================================================
@@ -365,14 +370,14 @@ void TestLsl::testStreamInfoDeserializationEmptyString()
 
 void TestLsl::testStreamInfoSpecialCharacters()
 {
-    // Ensure names with spaces work (but pipes would break protocol - we don't test that)
-    stream_info info("My Stream Name", "EEG Data", 1, 100.0, ChannelFormat::Float32, "source 1");
+    // Spaces and XML metacharacters survive the round trip.
+    stream_info info("My Stream Name", "EEG Data", 1, 100.0, ChannelFormat::Float32, "source <1> & 'x'");
     std::string s = info.to_string();
     stream_info restored = stream_info::from_string(s);
 
     QCOMPARE(restored.name(), std::string("My Stream Name"));
     QCOMPARE(restored.type(), std::string("EEG Data"));
-    QCOMPARE(restored.source_id(), std::string("source 1"));
+    QCOMPARE(restored.source_id(), std::string("source <1> & 'x'"));
 }
 
 //=============================================================================================================

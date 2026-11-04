@@ -407,7 +407,17 @@ public:
     : m_inlet(info)
     , m_channels(channels)
     {
-        m_inlet.open_stream();
+    }
+
+    /** @return Success, or DeviceIo naming why the outlet refused the stream. */
+    AcqError open()
+    {
+        try {
+            m_inlet.open_stream();
+        } catch (const std::exception& e) {
+            return {AcqErrorCode::DeviceIo, e.what()};
+        }
+        return {};
     }
 
     ~InTreeLink() override
@@ -422,7 +432,7 @@ public:
     {
         if (m_pending.empty()) {
             if (m_inlet.samples_available()) {
-                m_pending = m_inlet.pull_chunk_float();
+                m_pending = m_inlet.pull_chunk_float(m_stamps);
                 m_next = 0;
             }
             if (m_pending.empty()) {
@@ -438,28 +448,34 @@ public:
                 std::memcpy(out + (n * m_channels + c) * sizeof(float), &v, sizeof(float));
             }
         }
+        lastTimestamp = m_stamps[m_next - 1];
         if (m_next == m_pending.size()) {
             m_pending.clear();
         }
-        lastTimestamp = std::numeric_limits<double>::quiet_NaN();
         return n;
     }
 
     double timeCorrection() override
     {
-        return 0.0;
+        const double correction = m_inlet.time_correction(2.0);
+        if (correction == correction) {
+            m_correction = correction;
+        }
+        return m_correction;
     }
 
     double localClock() const override
     {
-        return std::numeric_limits<double>::quiet_NaN();
+        return LSLLIB::local_clock();
     }
 
 private:
     LSLLIB::stream_inlet m_inlet;
     std::size_t m_channels;
     std::vector<std::vector<float>> m_pending;
+    std::vector<double> m_stamps;
     std::size_t m_next = 0;
+    double m_correction = 0.0;
 };
 
 //=============================================================================================================
@@ -624,13 +640,16 @@ private:
     AcqError connectInTree()
     {
         const auto [property, value] = selector(m_config);
-        const std::vector<LSLLIB::stream_info> found = LSLLIB::resolve_stream(property, value, m_config.timeout);
+        const std::vector<LSLLIB::stream_info> found = LSLLIB::resolve_stream(property, value, m_config.timeout, 1);
         if (found.empty()) {
             return {AcqErrorCode::DeviceNotFound, "no LSL stream with " + property + "=" + value + " within " + std::to_string(m_config.timeout) + " s (in-tree LSL)"};
         }
         const LSLLIB::stream_info& info = found.front();
-        if (info.channel_format() != LSLLIB::ChannelFormat::Float32 || info.nominal_srate() <= 0.0) {
-            return {AcqErrorCode::UnsupportedFormat, "the in-tree LSL reads only regular float32 streams"};
+        if (info.channel_format() == LSLLIB::ChannelFormat::String) {
+            return {AcqErrorCode::UnsupportedFormat, "string (marker) LSL streams are not supported yet"};
+        }
+        if (info.nominal_srate() <= 0.0) {
+            return {AcqErrorCode::UnsupportedFormat, "irregular-rate LSL streams are not supported yet"};
         }
         AcqStreamInfo stream;
         stream.name = info.name();
@@ -645,7 +664,11 @@ private:
             stream.channels.push_back(std::move(ch));
         }
         m_device = info.name() + " (" + info.type() + ") on " + info.hostname();
-        m_link = std::make_unique<InTreeLink>(info, stream.channels.size());
+        auto link = std::make_unique<InTreeLink>(info, stream.channels.size());
+        if (AcqError opened = link->open(); !opened.ok()) {
+            return opened;
+        }
+        m_link = std::move(link);
         m_runtime = "in-tree";
         return addStream(std::move(stream));
     }
@@ -705,11 +728,12 @@ private:
             if (n == 0) {
                 continue;
             }
-            const AcqError space = m_writer->waitForSpace(n, std::chrono::milliseconds(200));
+            // A gating reader may hold the ring; the samples already pulled wait, later ones stay in LSL's buffer.
+            AcqError space = m_writer->waitForSpace(n, std::chrono::milliseconds(200));
+            while (space.code() == AcqErrorCode::Timeout && !m_stop.load(std::memory_order_acquire)) {
+                space = m_writer->waitForSpace(n, std::chrono::milliseconds(200));
+            }
             if (!space.ok()) {
-                if (space.code() == AcqErrorCode::Timeout && !m_stop.load(std::memory_order_acquire)) {
-                    continue; // a gating reader holds the ring; LSL buffers meanwhile
-                }
                 return;
             }
             auto view = m_writer->beginWrite(n);
@@ -814,6 +838,8 @@ AcqError ACQLIB::registerLslScheme()
     static const AcqError result = AcqDeviceRegistry::instance().registerScheme(schemeInfo(), &LslBackend::open, &discover);
     return result;
 }
+
+//=============================================================================================================
 
 std::string ACQLIB::lslRuntime()
 {

@@ -22,6 +22,7 @@ set(SOURCES
   lsl_stream_inlet.cpp
   lsl_stream_outlet.cpp
   lsl_stream_discovery.cpp
+  lsl_protocol.cpp
 )
 
 set(HEADERS
@@ -39,7 +40,7 @@ set(SOURCE_PATHS ${SOURCES})
 list(TRANSFORM SOURCE_PATHS PREPEND "${CMAKE_CURRENT_SOURCE_DIR}/")
 set_source_files_properties(${FILE_TO_UPDATE} PROPERTIES OBJECT_DEPENDS "${SOURCE_PATHS}")
 
-add_library(${PROJECT_NAME} ${SOURCES} ${HEADERS})
+add_library(${PROJECT_NAME} ${SOURCES} ${HEADERS} lsl_protocol.h)
 
 target_include_directories(${PROJECT_NAME} PUBLIC $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/..> $<INSTALL_INTERFACE:include>)
 

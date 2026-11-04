@@ -7,23 +7,23 @@
  * @author   Christoph Dinh <christoph.dinh@mne-cpp.org>
  * @since    2.0.0
  * @date     March 2026
- * @brief    Declares stream_outlet, the server side of an LSL stream that publishes samples over TCP and advertises itself via UDP multicast.
+ * @brief    Declares stream_outlet, the server side of an LSL stream that publishes samples over TCP and answers discovery queries by UDP.
  *
  * A @ref LSLLIB::stream_outlet is the producer counterpart of
  * @ref LSLLIB::stream_inlet "stream_inlet": instantiating it immediately binds a
  * @c QTcpServer on an OS-assigned port (which is written back into
  * the contained @ref LSLLIB::stream_info so callers can read it via
- * @ref LSLLIB::stream_outlet::info "info"), starts a background worker that periodically multicasts
- * the stream's serialised metadata on the LSL discovery channel, and
- * accepts incoming inlet connections so they can be fed from the
- * outlet's internal sample queue.
+ * @ref LSLLIB::stream_outlet::info "info"), starts a background worker that answers
+ * liblsl discovery and time-correction queries by UDP, and serves
+ * inlets (of this library or of liblsl) over TCP with liblsl's data
+ * protocol 1.10 from the outlet's internal sample queue.
  *
  * The public API is the standard LSL @c push_sample / @c push_chunk
  * pair plus @c have_consumers for back-pressure decisions in
  * acquisition loops. As with the inlet, all Qt network and threading
  * machinery is hidden behind a PIMPL so this header stays
  * lightweight and the implementation is free to evolve (for example,
- * to swap the broadcast scheme or add a peer-discovery cache)
+ * to add IPv6 or a peer-discovery cache)
  * without rippling through every translation unit that produces LSL
  * data in mne-cpp.
  */
@@ -57,13 +57,13 @@ namespace LSLLIB
 //=============================================================================================================
 
 /**
- * @brief PIMPL backend of stream_outlet that owns the QTcpServer, the UDP multicast announcer and the producer-side sample queue.
+ * @brief PIMPL backend of stream_outlet that owns the QTcpServer, the UDP query responders and the producer-side sample queue.
  */
 class StreamOutletPrivate;
 
 //=============================================================================================================
 /**
- * @brief Server-side LSL endpoint: binds a TCP data server, advertises the stream on the LSL discovery multicast group, and fans samples out to every connected inlet.
+ * @brief Server-side LSL endpoint: binds a TCP data server, answers LSL discovery queries, and fans samples out to every connected inlet.
  *
  * @snippet ex_lsl/main.cpp lsl_stream_outlet_usage
  */
@@ -74,7 +74,7 @@ public:
     /**
      * Construct a stream_outlet for the given stream_info.
      *
-     * This immediately starts the TCP data server and begins UDP discovery broadcasts.
+     * This immediately starts the TCP data server and the UDP query responders.
      *
      * @param[in] info  The stream_info describing this outlet's stream.
      */
@@ -82,7 +82,7 @@ public:
 
     //=========================================================================================================
     /**
-     * Destructor. Stops broadcasting and closes all connections.
+     * Destructor. Stops answering queries and closes all connections.
      */
     ~stream_outlet();
 

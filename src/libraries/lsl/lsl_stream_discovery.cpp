@@ -7,27 +7,11 @@
  * @author   Christoph Dinh <christoph.dinh@mne-cpp.org>
  * @since    2.0.0
  * @date     March 2026
- * @brief    Implements the UDP multicast listener that turns LSL outlet announcements on 239.255.172.215:16571 into stream_info results.
+ * @brief    Implements the liblsl discovery query: UDP "LSL:shortinfo" requests and the outlets' XML answers.
  *
- * @ref LSLLIB::resolve_streams binds a @c QUdpSocket on the LSL
- * discovery port @c 16571 with @c ShareAddress + @c ReuseAddressHint
- * so multiple LSLLIB consumers can coexist on the same host, joins
- * the well-known LSL multicast group @c 239.255.172.215 (skipped on
- * WebAssembly, where the runtime cannot join multicast groups but
- * may still receive broadcast traffic), and then enters a
- * timeout-bounded loop that pulls every pending datagram, parses it
- * via @ref LSLLIB::stream_info::from_string and accumulates the
- * results.
- *
- * Each accepted descriptor is deduplicated on its per-instance UUID
- * and has its @c data_host overwritten with the datagram's actual
- * sender address, which is more reliable than the hostname the
- * outlet self-reports (it copes with hosts that have multiple
- * interfaces or that resolve their own name to a loopback address).
- * @ref LSLLIB::resolve_stream is implemented as a thin client-side
- * filter on top: it calls @ref LSLLIB::resolve_streams once and
- * then matches the requested property locally, which keeps the
- * network-facing surface to a single well-tested code path.
+ * @ref LSLLIB::resolve_stream puts the property into the query's predicate, so outlets that do not match stay
+ * silent; it also filters locally. Each result's @c data_host is the sender of the answer, which copes with
+ * hosts that have several interfaces or resolve their own name to a loopback address.
  */
 
 //=============================================================================================================
@@ -35,147 +19,121 @@
 //=============================================================================================================
 
 #include "lsl_stream_discovery.h"
+#include "lsl_protocol.h"
 
 //=============================================================================================================
 // QT INCLUDES
 //=============================================================================================================
 
-#include <QUdpSocket>
+#include <QElapsedTimer>
 #include <QHostAddress>
 #include <QNetworkDatagram>
-#include <QElapsedTimer>
-#include <QDebug>
+#include <QRandomGenerator>
+#include <QUdpSocket>
+#include <QVariant>
 
 //=============================================================================================================
 // STL INCLUDES
 //=============================================================================================================
 
+#include <algorithm>
 #include <set>
 
 //=============================================================================================================
-// CONSTANTS
+// USED NAMESPACES
+//=============================================================================================================
+
+using namespace LSLLIB;
+using namespace LSLLIB::detail;
+
+//=============================================================================================================
+// DEFINE LOCAL METHODS
 //=============================================================================================================
 
 namespace
 {
-const QHostAddress DISCOVERY_MULTICAST_GROUP("239.255.172.215");
-const quint16 DISCOVERY_PORT = 16571;
+
+constexpr int kResendMs = 500;
+
+std::vector<stream_info> resolve(const std::string& predicate, double timeout, std::size_t minimum = 0)
+{
+    std::vector<stream_info> results;
+    QUdpSocket socket;
+    if (!socket.bind(QHostAddress::AnyIPv4, 0)) {
+        return results;
+    }
+#ifndef Q_OS_WASM
+    socket.setSocketOption(QAbstractSocket::MulticastTtlOption, 1);
+    socket.setSocketOption(QAbstractSocket::MulticastLoopbackOption, 1);
+#endif
+    const QByteArray id = QByteArray::number(QRandomGenerator::global()->generate64());
+    const QByteArray query = "LSL:shortinfo\r\n" + QByteArray::fromStdString(predicate) + "\r\n" +
+        QByteArray::number(socket.localPort()) + " " + id + "\r\n";
+    const QByteArray prefix = id + "\r\n";
+
+    std::set<std::string> seen;
+    const auto timeoutMs = static_cast<qint64>(timeout * 1000.0);
+    QElapsedTimer timer;
+    timer.start();
+    qint64 nextSend = 0;
+    while (timer.elapsed() < timeoutMs && (minimum == 0 || results.size() < minimum)) {
+        if (timer.elapsed() >= nextSend) {
+            for (const QHostAddress& target : discoveryTargets()) {
+                socket.writeDatagram(query, target, kDiscoveryPort);
+            }
+            nextSend = timer.elapsed() + kResendMs;
+        }
+        const auto wait = static_cast<int>(std::min(timeoutMs, nextSend) - timer.elapsed());
+        if (wait > 0 && !socket.hasPendingDatagrams()) {
+            socket.waitForReadyRead(wait);
+        }
+        while (socket.hasPendingDatagrams()) {
+            const QNetworkDatagram datagram = socket.receiveDatagram();
+            const QByteArray data = datagram.data();
+            if (!data.startsWith(prefix)) {
+                continue;
+            }
+            stream_info info = stream_info::from_string(data.mid(prefix.size()).toStdString());
+            if (info.uid().empty() || !seen.insert(info.uid()).second) {
+                continue;
+            }
+            if (info.data_host().empty()) {
+                info.set_data_host(hostText(datagram.senderAddress()));
+            }
+            results.push_back(std::move(info));
+        }
+    }
+    return results;
 }
 
+} // namespace
+
 //=============================================================================================================
-// DEFINE FUNCTIONS
+// DEFINE GLOBAL METHODS
 //=============================================================================================================
 
 std::vector<LSLLIB::stream_info> LSLLIB::resolve_streams(double timeout)
 {
-    std::vector<stream_info> results;
-    std::set<std::string> seenUIDs; // track unique streams by UID
-
-    // Create a UDP socket and join the multicast group
-    QUdpSocket udpSocket;
-
-    // Bind to the discovery port, allow address reuse for multiple listeners
-    if (!udpSocket.bind(QHostAddress::AnyIPv4, DISCOVERY_PORT,
-                        QAbstractSocket::ShareAddress | QAbstractSocket::ReuseAddressHint)) {
-        qDebug() << "[lsl::resolve_streams] Failed to bind UDP socket:" << udpSocket.errorString();
-        return results;
-    }
-
-#ifndef Q_OS_WASM
-    // Join the multicast group (not available on WebAssembly)
-    if (!udpSocket.joinMulticastGroup(DISCOVERY_MULTICAST_GROUP)) {
-        qDebug() << "[lsl::resolve_streams] Failed to join multicast group:" << udpSocket.errorString();
-        // Continue anyway — broadcast messages may still be received on some platforms
-    }
-#endif
-
-    // Listen for the specified timeout
-    int timeoutMs = static_cast<int>(timeout * 1000.0);
-    QElapsedTimer timer;
-    timer.start();
-
-    while (timer.elapsed() < timeoutMs) {
-        // Wait for datagrams with remaining time budget
-        int remainingMs = timeoutMs - static_cast<int>(timer.elapsed());
-        if (remainingMs <= 0) {
-            break;
-        }
-
-        if (!udpSocket.waitForReadyRead(remainingMs)) {
-            continue;
-        }
-
-        // Process all pending datagrams
-        while (udpSocket.hasPendingDatagrams()) {
-            QNetworkDatagram datagram = udpSocket.receiveDatagram();
-            if (!datagram.isValid()) {
-                continue;
-            }
-
-            QByteArray data = datagram.data();
-            std::string payload(data.constData(), data.size());
-
-            // Try to parse as stream_info
-            stream_info info = stream_info::from_string(payload);
-
-            // Validate the parsed info
-            if (info.uid().empty() || info.name().empty()) {
-                continue;
-            }
-
-            // Skip duplicates (same UID)
-            if (seenUIDs.count(info.uid()) > 0) {
-                continue;
-            }
-
-            // Set the data host from the UDP sender address (more reliable than self-reported hostname)
-            info.set_data_host(datagram.senderAddress().toString().toStdString());
-
-            seenUIDs.insert(info.uid());
-            results.push_back(info);
-        }
-    }
-
-#ifndef Q_OS_WASM
-    // Leave multicast group and close
-    udpSocket.leaveMulticastGroup(DISCOVERY_MULTICAST_GROUP);
-#endif
-    udpSocket.close();
-
-    return results;
+    return resolve("session_id='default'", timeout);
 }
 
 //=============================================================================================================
 
 std::vector<LSLLIB::stream_info> LSLLIB::resolve_stream(const std::string& prop,
                                                         const std::string& value,
-                                                        double timeout)
+                                                        double timeout,
+                                                        int minimum)
 {
-    // First get all streams
-    std::vector<stream_info> all = resolve_streams(timeout);
-
-    // Filter by the requested property
     std::vector<stream_info> filtered;
-    for (const auto& info : all) {
-        std::string actual;
-        if (prop == "name") {
-            actual = info.name();
-        } else if (prop == "type") {
-            actual = info.type();
-        } else if (prop == "source_id") {
-            actual = info.source_id();
-        } else if (prop == "uid") {
-            actual = info.uid();
-        } else if (prop == "hostname") {
-            actual = info.hostname();
-        } else {
-            continue; // unknown property
-        }
-
-        if (actual == value) {
-            filtered.push_back(info);
+    if (value.find('\'') != std::string::npos) {
+        return filtered; // a quote cannot appear in an LSL predicate value
+    }
+    std::string test = prop;
+    test.append("='").append(value).append("'");
+    for (stream_info& info : resolve("session_id='default' and " + test, timeout, static_cast<std::size_t>(std::max(minimum, 0)))) {
+        if (matchesQuery(info, test)) {
+            filtered.push_back(std::move(info));
         }
     }
-
     return filtered;
 }

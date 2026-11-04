@@ -7,25 +7,11 @@
  * @author   Christoph Dinh <christoph.dinh@mne-cpp.org>
  * @since    2.0.0
  * @date     March 2026
- * @brief    Implements stream_info construction, accessors and the wire serialisation used by LSL discovery datagrams.
+ * @brief    Implements stream_info construction, accessors and its shortinfo XML, as liblsl exchanges it.
  *
- * The constructors populate the two transport-identity fields that
- * cannot be supplied by the caller: a per-instance @c uid generated
- * via @c QUuid::createUuid (the same UUID format used by liblsl) and
- * the originating @c hostname obtained from @c QHostInfo. The data
- * port and data host stay zero/empty until either the outlet binds a
- * TCP server (and writes the bound port back in) or the discovery
- * code observes the stream on the wire (and writes the sender
- * address back in).
- *
- * The @c to_string / @c from_string pair defines the on-wire
- * representation broadcast over UDP multicast and stored by
- * applications that want to remember a stream across runs. The
- * format is a deliberately minimal, line-oriented key=value
- * encoding rather than the XML used by upstream liblsl: it is
- * trivial to parse without an external dependency, fits comfortably
- * in a single UDP datagram, and round-trips every field exposed by
- * the public accessors.
+ * The constructors populate the transport-identity fields the caller cannot supply: a per-instance @c uid
+ * (a UUID, as in liblsl), the originating @c hostname and the creation time. The data and service ports and
+ * the data host stay empty until an outlet binds its sockets or discovery observes the stream on the wire.
  */
 
 //=============================================================================================================
@@ -33,6 +19,7 @@
 //=============================================================================================================
 
 #include "lsl_stream_info.h"
+#include "lsl_protocol.h"
 
 //=============================================================================================================
 // QT INCLUDES
@@ -40,11 +27,13 @@
 
 #include <QHostInfo>
 #include <QUuid>
+#include <QXmlStreamReader>
 
 //=============================================================================================================
 // STL INCLUDES
 //=============================================================================================================
 
+#include <chrono>
 #include <sstream>
 
 //=============================================================================================================
@@ -52,22 +41,66 @@
 //=============================================================================================================
 
 using namespace LSLLIB;
+using namespace LSLLIB::detail;
+
+//=============================================================================================================
+// DEFINE LOCAL METHODS
+//=============================================================================================================
+
+namespace
+{
+
+std::string escaped(const std::string& text)
+{
+    std::string out;
+    out.reserve(text.size());
+    for (const char c : text) {
+        switch (c) {
+            case '&':
+                out += "&amp;";
+                break;
+            case '<':
+                out += "&lt;";
+                break;
+            case '>':
+                out += "&gt;";
+                break;
+            case '"':
+                out += "&quot;";
+                break;
+            case '\'':
+                out += "&apos;";
+                break;
+            default:
+                out += c;
+                break;
+        }
+    }
+    return out;
+}
+
+//=============================================================================================================
+
+std::string number(double value)
+{
+    std::ostringstream text;
+    text.imbue(std::locale::classic());
+    text.precision(17);
+    text << value;
+    return text.str();
+}
+
+} // namespace
 
 //=============================================================================================================
 // DEFINE MEMBER METHODS
 //=============================================================================================================
 
 stream_info::stream_info()
-: m_name()
-, m_type()
-, m_channel_count(0)
+: m_channel_count(0)
 , m_nominal_srate(0.0)
 , m_channel_format(ChannelFormat::Undefined)
-, m_source_id()
-, m_uid()
-, m_hostname()
 , m_data_port(0)
-, m_data_host()
 {
 }
 
@@ -88,7 +121,7 @@ stream_info::stream_info(const std::string& name,
 , m_uid(QUuid::createUuid().toString(QUuid::WithoutBraces).toStdString())
 , m_hostname(QHostInfo::localHostName().toStdString())
 , m_data_port(0)
-, m_data_host()
+, m_created_at(local_clock())
 {
 }
 
@@ -178,52 +211,106 @@ void stream_info::set_data_host(const std::string& host)
 
 //=============================================================================================================
 
+int stream_info::service_port() const noexcept
+{
+    return m_service_port;
+}
+
+//=============================================================================================================
+
+void stream_info::set_service_port(int port)
+{
+    m_service_port = port;
+}
+
+//=============================================================================================================
+
+double stream_info::created_at() const noexcept
+{
+    return m_created_at;
+}
+
+//=============================================================================================================
+
 std::string stream_info::to_string() const
 {
-    // Pipe-delimited format:
-    // MNELSL1|name|type|channel_count|nominal_srate|uid|hostname|source_id|data_port|channel_format
-    std::ostringstream oss;
-    oss << "MNELSL1"
-        << "|" << m_name
-        << "|" << m_type
-        << "|" << m_channel_count
-        << "|" << m_nominal_srate
-        << "|" << m_uid
-        << "|" << m_hostname
-        << "|" << m_source_id
-        << "|" << m_data_port
-        << "|" << static_cast<int>(m_channel_format);
-    return oss.str();
+    std::ostringstream xml;
+    xml << "<?xml version=\"1.0\"?>\n<info>\n"
+        << "\t<name>" << escaped(m_name) << "</name>\n"
+        << "\t<type>" << escaped(m_type) << "</type>\n"
+        << "\t<channel_count>" << m_channel_count << "</channel_count>\n"
+        << "\t<channel_format>" << formatName(m_channel_format) << "</channel_format>\n"
+        << "\t<source_id>" << escaped(m_source_id) << "</source_id>\n"
+        << "\t<nominal_srate>" << number(m_nominal_srate) << "</nominal_srate>\n"
+        << "\t<version>1.1</version>\n"
+        << "\t<created_at>" << number(m_created_at) << "</created_at>\n"
+        << "\t<uid>" << escaped(m_uid) << "</uid>\n"
+        << "\t<session_id>default</session_id>\n"
+        << "\t<hostname>" << escaped(m_hostname) << "</hostname>\n"
+        << "\t<v4address></v4address>\n"
+        << "\t<v4data_port>" << m_data_port << "</v4data_port>\n"
+        << "\t<v4service_port>" << m_service_port << "</v4service_port>\n"
+        << "\t<v6address></v6address>\n"
+        << "\t<v6data_port>0</v6data_port>\n"
+        << "\t<v6service_port>0</v6service_port>\n"
+        << "\t<desc />\n</info>\n";
+    return xml.str();
 }
 
 //=============================================================================================================
 
 stream_info stream_info::from_string(const std::string& data)
 {
-    // Parse pipe-delimited format
-    std::istringstream iss(data);
-    std::string token;
-    std::vector<std::string> tokens;
-
-    while (std::getline(iss, token, '|')) {
-        tokens.push_back(token);
-    }
-
-    // Validate: need at least 10 fields (header + 9 data fields)
-    if (tokens.size() < 10 || tokens[0] != "MNELSL1") {
-        return stream_info(); // return invalid/empty
-    }
-
     stream_info info;
-    info.m_name = tokens[1];
-    info.m_type = tokens[2];
-    info.m_channel_count = std::stoi(tokens[3]);
-    info.m_nominal_srate = std::stod(tokens[4]);
-    info.m_uid = tokens[5];
-    info.m_hostname = tokens[6];
-    info.m_source_id = tokens[7];
-    info.m_data_port = std::stoi(tokens[8]);
-    info.m_channel_format = static_cast<ChannelFormat>(std::stoi(tokens[9]));
-
+    QXmlStreamReader xml(QByteArray::fromStdString(data));
+    if (!xml.readNextStartElement() || xml.name() != QLatin1String("info")) {
+        return {};
+    }
+    while (xml.readNextStartElement()) {
+        const QString key = xml.name().toString();
+        if (key == QLatin1String("desc")) {
+            xml.skipCurrentElement();
+            continue;
+        }
+        const QString text = xml.readElementText(QXmlStreamReader::SkipChildElements);
+        const std::string value = text.toStdString();
+        if (key == QLatin1String("name")) {
+            info.m_name = value;
+        } else if (key == QLatin1String("type")) {
+            info.m_type = value;
+        } else if (key == QLatin1String("channel_count")) {
+            info.m_channel_count = text.toInt();
+        } else if (key == QLatin1String("channel_format")) {
+            info.m_channel_format = formatFromName(value);
+        } else if (key == QLatin1String("source_id")) {
+            info.m_source_id = value;
+        } else if (key == QLatin1String("nominal_srate")) {
+            info.m_nominal_srate = text.toDouble();
+        } else if (key == QLatin1String("created_at")) {
+            info.m_created_at = text.toDouble();
+        } else if (key == QLatin1String("uid")) {
+            info.m_uid = value;
+        } else if (key == QLatin1String("hostname")) {
+            info.m_hostname = value;
+        } else if (key == QLatin1String("v4data_port")) {
+            info.m_data_port = text.toInt();
+        } else if (key == QLatin1String("v4service_port")) {
+            info.m_service_port = text.toInt();
+        } else if (key == QLatin1String("v4address") && !value.empty()) {
+            info.m_data_host = value;
+        }
+    }
+    if (xml.hasError() || info.m_name.empty()) {
+        return {};
+    }
     return info;
+}
+
+//=============================================================================================================
+// DEFINE GLOBAL METHODS
+//=============================================================================================================
+
+double LSLLIB::local_clock()
+{
+    return std::chrono::duration<double>(std::chrono::steady_clock::now().time_since_epoch()).count();
 }
