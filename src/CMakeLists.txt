@@ -476,6 +476,40 @@ if(DEFINED MNE_CPP_EIGEN_PACKAGE_ROOT)
     endif()
 endif()
 
+# Per library: the MNE-CPP libraries, Qt modules and Eigen it links, so that MNE-CPPConfig.cmake finds only
+# what the requested COMPONENTS need.
+set(MNECPP_LIBRARIES "")
+set(MNECPP_COMPONENT_MAP "")
+get_property(_mnecpp_dirs DIRECTORY libraries PROPERTY SUBDIRECTORIES)
+foreach(_dir IN LISTS _mnecpp_dirs)
+    get_property(_targets DIRECTORY "${_dir}" PROPERTY BUILDSYSTEM_TARGETS)
+    foreach(_t IN LISTS _targets)
+        get_target_property(_type ${_t} TYPE)
+        if(NOT _t MATCHES "^mne_" OR NOT _type MATCHES "_LIBRARY$")
+            continue()
+        endif()
+        get_target_property(_links ${_t} LINK_LIBRARIES)
+        set(_mne "")
+        set(_qt "")
+        set(_eigen OFF)
+        foreach(_l IN LISTS _links)
+            if(_l MATCHES "^mne_")
+                list(APPEND _mne ${_l})
+            elseif(_l MATCHES "^Qt[0-9]*::(.+)$")
+                list(APPEND _qt ${CMAKE_MATCH_1})
+            elseif(_l STREQUAL "Eigen3::Eigen")
+                set(_eigen ON)
+            endif()
+        endforeach()
+        list(REMOVE_DUPLICATES _mne)
+        list(REMOVE_DUPLICATES _qt)
+        list(APPEND MNECPP_LIBRARIES ${_t})
+        string(APPEND MNECPP_COMPONENT_MAP
+            "set(_mnecpp_libs_${_t} ${_mne})\nset(_mnecpp_qt_${_t} ${_qt})\nset(_mnecpp_eigen_${_t} ${_eigen})\n")
+    endforeach()
+endforeach()
+unset(_mnecpp_dirs)
+
 # Generate MNE-CPPConfig.cmake from template
 configure_package_config_file(
     "${CMAKE_CURRENT_SOURCE_DIR}/../scripts/packaging/MNECPPConfig.cmake.in"

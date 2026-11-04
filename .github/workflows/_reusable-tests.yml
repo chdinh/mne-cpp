@@ -288,6 +288,41 @@ jobs:
     # by name.  --no-tests=error makes an empty suite a failure rather than a
     # silent success.  Passed-test output is kept (CTest trims it to 1 KB by
     # default) so QSKIP reasons reach the JUnit file and the run summary.
+    # Install the SDK and build a separate project against it with find_package. Only the SDK prefix and
+    # Qt are on the prefix path, so files the SDK fails to install are not found in the source tree.
+    - name: Build and run an SDK consumer (Linux|MacOS)
+      if: runner.os != 'Windows'
+      run: |
+        for component in runtime sdk; do
+          cmake --install build --prefix "$RUNNER_TEMP/mne-cpp-sdk" --component "$component"
+        done
+        env -u CMAKE_PREFIX_PATH cmake -S scripts/ci/sdk_consumer -B "$RUNNER_TEMP/sdk-consumer" \
+          -DCMAKE_BUILD_TYPE=Release -DCMAKE_PREFIX_PATH="$RUNNER_TEMP/mne-cpp-sdk;$QT_ROOT_DIR"
+        cmake --build "$RUNNER_TEMP/sdk-consumer"
+        ctest --test-dir "$RUNNER_TEMP/sdk-consumer" --output-on-failure --no-tests=error
+
+    - name: Build and run an SDK consumer (Windows)
+      if: runner.os == 'Windows'
+      shell: pwsh
+      run: |
+        $vsInstallPath = & "${env:ProgramFiles(x86)}\Microsoft Visual Studio\Installer\vswhere.exe" -latest -products * -requires Microsoft.VisualStudio.Component.VC.Tools.x86.x64 -property installationPath
+        $vcvarsPath = Join-Path $vsInstallPath 'VC\Auxiliary\Build\vcvars64.bat'
+        cmd.exe /c "call `"$vcvarsPath`" && set > %temp%\vcvars.txt"
+        Get-Content "$env:temp\vcvars.txt" | Foreach-Object { if ($_ -match "^(.*?)=(.*)$") { Set-Content "env:\$($matches[1])" $matches[2] } }
+        $sdk = Join-Path $env:RUNNER_TEMP 'mne-cpp-sdk'
+        $consumer = Join-Path $env:RUNNER_TEMP 'sdk-consumer'
+        foreach ($component in 'runtime', 'sdk') {
+          cmake --install build --config Release --prefix $sdk --component $component
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+        }
+        $env:CMAKE_PREFIX_PATH = $null
+        cmake -S scripts/ci/sdk_consumer -B $consumer "-DCMAKE_PREFIX_PATH=$sdk;$env:QT_ROOT_DIR"
+        if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+        cmake --build $consumer --config Release
+        if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+        ctest --test-dir $consumer -C Release --output-on-failure --no-tests=error
+        exit $LASTEXITCODE
+
     - name: Cross-check CTest inventory
       shell: bash
       run: |

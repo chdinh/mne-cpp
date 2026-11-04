@@ -54,7 +54,10 @@ cmake --install build/developer-dynamic --prefix "$HOME/mne-cpp-sdk"
 
 The prefix now contains `include/<library>/…`, the shared libraries, and
 `lib/cmake/MNE-CPP/MNE-CPPConfig.cmake`, which defines one imported target per library —
-`MNE-CPP::mne_fiff`, `MNE-CPP::mne_dsp`, `MNE-CPP::mne_inv` and so on.
+`MNE-CPP::mne_fiff`, `MNE-CPP::mne_dsp`, `MNE-CPP::mne_inv` and so on. Every library is also a component:
+`find_package(MNE-CPP REQUIRED COMPONENTS fiff dsp acq)` looks up only the Qt modules those libraries need
+(here Core, Concurrent and Network, no Qt Gui or Widgets), so headless programs build on machines without Qt's GUI
+modules. Without `COMPONENTS`, every library is available.
 
 ## 3. Write a program that uses MNE-CPP
 
@@ -70,7 +73,7 @@ project(raw_summary LANGUAGES CXX)
 set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
-find_package(MNE-CPP 2.4 REQUIRED)
+find_package(MNE-CPP 2.4 REQUIRED COMPONENTS fiff)
 
 add_executable(raw_summary main.cpp)
 target_link_libraries(raw_summary PRIVATE MNE-CPP::mne_fiff)
