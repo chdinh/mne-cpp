@@ -7,7 +7,7 @@
  * @author   Christoph Dinh <christoph.dinh@mne-cpp.org>
  * @since    2.2.1
  * @date     May 2026
- * @brief    Backend implementation for @ref UTILSLIB::PolhemusConnection — mock sweep generator and live @c QSerialPort driver.
+ * @brief    Backend implementation for @ref ACQLIB::PolhemusConnection — mock sweep generator and live @c QSerialPort driver.
  *
  * The hardware backend opens the serial port with the
  * documented Fastrak defaults (115 200 8N1, no flow control),
@@ -23,7 +23,7 @@
 
 #include <QtMath>
 
-using namespace UTILSLIB;
+using namespace ACQLIB;
 
 namespace
 {

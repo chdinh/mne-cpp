@@ -1,23 +1,23 @@
 ---
 id: digitized-point
-title: "UTILSLIB::DigitizedPoint"
+title: "ACQLIB::DigitizedPoint"
 sidebar_label: DigitizedPoint
 sidebar_position: 55
 ---
 
 # DigitizedPoint
 
-**Namespace:** `UTILSLIB` &nbsp;·&nbsp; **Library:** Utilities Library &nbsp;·&nbsp; **Source:** [`utils/polhemus/acquired_points.h`](https://github.com/mne-tools/mne-cpp/blob/staging/src/libraries/utils/polhemus/acquired_points.h)
+**Namespace:** `ACQLIB` &nbsp;·&nbsp; **Library:** Acquisition Library &nbsp;·&nbsp; **Source:** [`acq/polhemus/acquired_points.h`](https://github.com/mne-tools/mne-cpp/blob/staging/src/libraries/acq/polhemus/acquired_points.h)
 
-`#include <utils/acquired_points.h>`
+`#include <acq/acquired_points.h>`
 
 ```cpp
-struct UTILSLIB::DigitizedPoint
+struct ACQLIB::DigitizedPoint
 ```
 
 A single digitised point captured during the alignment session.
 
-```cpp title="src/examples/ex_utils/main.cpp"
+```cpp title="src/examples/ex_acq_polhemus/main.cpp"
 AcquiredPoints points;
 points.append({PointKind::HeadShape, "HSP-1", 1, QVector3D(0.0f, 0.08f, 0.05f)});
 points.append({PointKind::Eeg, "Cz", 1, QVector3D(0.0f, 0.0f, 0.09f)});
@@ -29,17 +29,17 @@ const DigitizedPoint& kept = points.points().first(); // kind, label, FIFF ident
 
 ## Example
 
-- Start here: [ex_utils](../../examples/utils/ex_utils.mdx) — Utilities library: buffers, observers, logging, file formats, montages, layouts and reports.
-- Full source: [`src/examples/ex_utils/main.cpp`](https://github.com/mne-tools/mne-cpp/tree/staging/src/examples/ex_utils/main.cpp)
-- Build target: `ex_utils` (runs under CTest)
+- Start here: [ex_acq_polhemus](../../examples/acq/ex_acq_polhemus.mdx) — Polhemus digitiser: parse Fastrak records, register captured fiducials and collect digitised points.
+- Full source: [`src/examples/ex_acq_polhemus/main.cpp`](https://github.com/mne-tools/mne-cpp/tree/staging/src/examples/ex_acq_polhemus/main.cpp)
+- Build target: `ex_acq_polhemus` (runs under CTest)
 
 ## Used in examples
 
-### [ex_utils](../../examples/utils/ex_utils.mdx)
+### [ex_acq_polhemus](../../examples/acq/ex_acq_polhemus.mdx)
 
-Utilities library: buffers, observers, logging, file formats, montages, layouts and reports.
+Polhemus digitiser: parse Fastrak records, register captured fiducials and collect digitised points.
 
-````cpp title="src/examples/ex_utils/main.cpp, line 304"
+````cpp title="src/examples/ex_acq_polhemus/main.cpp, line 106"
 points.append({PointKind::HeadShape, "HSP-1", 1, QVector3D(0.0f, 0.08f, 0.05f)});
 points.append({PointKind::Eeg, "Cz", 1, QVector3D(0.0f, 0.0f, 0.09f)});
 points.undoLast(PointKind::HeadShape);

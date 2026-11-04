@@ -7877,22 +7877,22 @@
     },
     {
       "name": "AcquiredPoints",
-      "module": "utils",
-      "header": "utils/polhemus/acquired_points.h",
+      "module": "acq",
+      "header": "acq/polhemus/acquired_points.h",
       "origin": "mne-c + custom",
       "mne_c_tool": null,
       "mne_python": null,
       "sklearn": null,
       "test": null,
-      "example": "ex_utils",
+      "example": "ex_acq_polhemus",
       "example_snippet": [
-        "ex_utils/main.cpp#acquired_points_usage"
+        "ex_acq_polhemus/main.cpp#acquired_points_usage"
       ],
       "example_mode": "run",
       "status": "documented",
       "skigen_candidate": false,
       "documented": true,
-      "sidebar_position": 3,
+      "sidebar_position": 54,
       "guide": null,
       "python_equiv": null,
       "python_url": null
@@ -8075,22 +8075,22 @@
     },
     {
       "name": "FastrakParser",
-      "module": "utils",
-      "header": "utils/polhemus/fastrak_parser.h",
+      "module": "acq",
+      "header": "acq/polhemus/fastrak_parser.h",
       "origin": "mne-c + custom",
       "mne_c_tool": null,
       "mne_python": null,
       "sklearn": null,
       "test": null,
-      "example": "ex_utils",
+      "example": "ex_acq_polhemus",
       "example_snippet": [
-        "ex_utils/main.cpp#fastrak_parser_usage"
+        "ex_acq_polhemus/main.cpp#fastrak_parser_usage"
       ],
       "example_mode": "run",
       "status": "documented",
       "skigen_candidate": false,
       "documented": true,
-      "sidebar_position": 15,
+      "sidebar_position": 56,
       "guide": null,
       "python_equiv": null,
       "python_url": null
@@ -8317,44 +8317,44 @@
     },
     {
       "name": "PolhemusConnection",
-      "module": "utils",
-      "header": "utils/polhemus/polhemus_connection.h",
+      "module": "acq",
+      "header": "acq/polhemus/polhemus_connection.h",
       "origin": "mne-c + custom",
       "mne_c_tool": null,
       "mne_python": null,
       "sklearn": null,
       "test": null,
-      "example": "ex_utils",
+      "example": "ex_acq_polhemus",
       "example_snippet": [
-        "ex_utils/main.cpp#polhemus_coregistration_usage"
+        "ex_acq_polhemus/main.cpp#polhemus_coregistration_usage"
       ],
       "example_mode": "run",
       "status": "documented",
       "skigen_candidate": false,
       "documented": true,
-      "sidebar_position": 38,
+      "sidebar_position": 51,
       "guide": null,
       "python_equiv": null,
       "python_url": null
     },
     {
       "name": "PolhemusCoregistration",
-      "module": "utils",
-      "header": "utils/polhemus/polhemus_coregistration.h",
+      "module": "acq",
+      "header": "acq/polhemus/polhemus_coregistration.h",
       "origin": "mne-c + custom",
       "mne_c_tool": null,
       "mne_python": null,
       "sklearn": null,
       "test": null,
-      "example": "ex_utils",
+      "example": "ex_acq_polhemus",
       "example_snippet": [
-        "ex_utils/main.cpp#polhemus_coregistration_usage"
+        "ex_acq_polhemus/main.cpp#polhemus_coregistration_usage"
       ],
       "example_mode": "run",
       "status": "documented",
       "skigen_candidate": false,
       "documented": true,
-      "sidebar_position": 39,
+      "sidebar_position": 52,
       "guide": null,
       "python_equiv": null,
       "python_url": null
@@ -11113,16 +11113,16 @@
     },
     {
       "name": "DigitizedPoint",
-      "module": "utils",
-      "header": "utils/polhemus/acquired_points.h",
+      "module": "acq",
+      "header": "acq/polhemus/acquired_points.h",
       "origin": "mne-c + custom",
       "mne_c_tool": null,
       "mne_python": null,
       "sklearn": null,
       "test": null,
-      "example": "ex_utils",
+      "example": "ex_acq_polhemus",
       "example_snippet": [
-        "ex_utils/main.cpp#acquired_points_usage"
+        "ex_acq_polhemus/main.cpp#acquired_points_usage"
       ],
       "example_mode": "run",
       "status": "documented",
@@ -11201,22 +11201,22 @@
     },
     {
       "name": "FastrakSample",
-      "module": "utils",
-      "header": "utils/polhemus/fastrak_parser.h",
+      "module": "acq",
+      "header": "acq/polhemus/fastrak_parser.h",
       "origin": "mne-c + custom",
       "mne_c_tool": null,
       "mne_python": null,
       "sklearn": null,
       "test": null,
-      "example": "ex_utils",
+      "example": "ex_acq_polhemus",
       "example_snippet": [
-        "ex_utils/main.cpp#fastrak_parser_usage"
+        "ex_acq_polhemus/main.cpp#fastrak_parser_usage"
       ],
       "example_mode": "run",
       "status": "documented",
       "skigen_candidate": false,
       "documented": true,
-      "sidebar_position": 59,
+      "sidebar_position": 57,
       "guide": null,
       "python_equiv": null,
       "python_url": null
@@ -11522,22 +11522,22 @@
     },
     {
       "name": "PolhemusSerialConfig",
-      "module": "utils",
-      "header": "utils/polhemus/polhemus_connection.h",
+      "module": "acq",
+      "header": "acq/polhemus/polhemus_connection.h",
       "origin": "mne-c + custom",
       "mne_c_tool": null,
       "mne_python": null,
       "sklearn": null,
       "test": null,
-      "example": "ex_utils",
+      "example": "ex_acq_polhemus",
       "example_snippet": [
-        "ex_utils/main.cpp#polhemus_coregistration_usage"
+        "ex_acq_polhemus/main.cpp#polhemus_coregistration_usage"
       ],
       "example_mode": "run",
       "status": "documented",
       "skigen_candidate": false,
       "documented": true,
-      "sidebar_position": 60,
+      "sidebar_position": 53,
       "guide": null,
       "python_equiv": null,
       "python_url": null
@@ -16326,6 +16326,18 @@
           "ieeg"
         ],
         "level": "advanced"
+      },
+      "ex_acq_polhemus": {
+        "title": "Digitise fiducials with a Polhemus Fastrak",
+        "tasks": [
+          "forward-modeling"
+        ],
+        "modalities": [
+          "meg",
+          "eeg"
+        ],
+        "level": "start",
+        "library": "acq"
       },
       "ex_acq_record": {
         "title": "Record a running source to FIFF and BIDS",

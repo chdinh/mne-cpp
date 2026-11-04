@@ -92,6 +92,26 @@
       "topics": []
     },
     {
+      "name": "ex_acq_polhemus",
+      "title": "Digitise fiducials with a Polhemus Fastrak",
+      "brief": "Polhemus digitiser: parse Fastrak records, register captured fiducials and collect digitised points",
+      "thumbnail": "",
+      "url": "/docs/examples/acq/ex_acq_polhemus/",
+      "library": "acq",
+      "libraries": [
+        "acq"
+      ],
+      "tasks": [
+        "forward-modeling"
+      ],
+      "modalities": [
+        "meg",
+        "eeg"
+      ],
+      "level": "start",
+      "topics": []
+    },
+    {
       "name": "ex_acq_record",
       "title": "Record a running source to FIFF and BIDS",
       "brief": "Record an acquisition source to FIFF and to a BIDS dataset while it runs, and read the file back",

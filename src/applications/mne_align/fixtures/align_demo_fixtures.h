@@ -15,7 +15,7 @@
 #ifndef MNEALIGN_ALIGN_DEMO_FIXTURES_H
 #define MNEALIGN_ALIGN_DEMO_FIXTURES_H
 
-#include <utils/polhemus/acquired_points.h>
+#include <acq/polhemus/acquired_points.h>
 
 #include <QString>
 #include <QVector>
@@ -30,7 +30,7 @@ namespace MNEALIGN
  * realistic for an adult head: NAS forward, LPA / RPA symmetric on
  * the ears.
  */
-QVector<UTILSLIB::DigitizedPoint> demoFiducials();
+QVector<ACQLIB::DigitizedPoint> demoFiducials();
 
 //=============================================================================================================
 /**
@@ -41,7 +41,7 @@ QVector<UTILSLIB::DigitizedPoint> demoFiducials();
  *
  * @param[in] count   Number of EEG points to return (clamped to 0..8).
  */
-QVector<UTILSLIB::DigitizedPoint> demoEegCap(int count = 8);
+QVector<ACQLIB::DigitizedPoint> demoEegCap(int count = 8);
 
 //=============================================================================================================
 /**
@@ -50,7 +50,7 @@ QVector<UTILSLIB::DigitizedPoint> demoEegCap(int count = 8);
  *
  * @param[in] count   Number of HSP points to return (>= 0).
  */
-QVector<UTILSLIB::DigitizedPoint> demoHeadShape(int count = 40);
+QVector<ACQLIB::DigitizedPoint> demoHeadShape(int count = 40);
 
 //=============================================================================================================
 /**
@@ -58,15 +58,15 @@ QVector<UTILSLIB::DigitizedPoint> demoHeadShape(int count = 40);
  * EEG cap + 40 HSP points. Convenience helper used by the Verify / Save
  * / Done screenshots where every category should be populated.
  */
-QVector<UTILSLIB::DigitizedPoint> demoFullDigitisation();
+QVector<ACQLIB::DigitizedPoint> demoFullDigitisation();
 
 //=============================================================================================================
 /**
  * Push @p points into @p store, replacing whatever was there before.
  * Only one @c pointsChanged signal is emitted (after the final point).
  */
-void applyTo(UTILSLIB::AcquiredPoints* store,
-             const QVector<UTILSLIB::DigitizedPoint>& points);
+void applyTo(ACQLIB::AcquiredPoints* store,
+             const QVector<ACQLIB::DigitizedPoint>& points);
 
 } // namespace MNEALIGN
 

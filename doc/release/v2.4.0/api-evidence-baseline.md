@@ -25,13 +25,13 @@ Public API units (exported classes, registered function namespaces and header-on
 
 - Eligible with a built registry example: 409 / 410 (99.8%)
 - Eligible whose header is included by any example: 359 / 410 (87.6%)
-- Examples on disk / built: 74 / 74
+- Examples on disk / built: 75 / 75
 
 ## By library
 
 | Library | Public | Registered | Test | Eligible | Registry example | Used by example | Snippet |
 |---|---:|---:|---:|---:|---:|---:|---:|
-| `acq` | 51 | 50 | 50 | 33 | 32 | 4 | 46 |
+| `acq` | 58 | 57 | 50 | 40 | 39 | 11 | 53 |
 | `bids` | 14 | 14 | 5 | 14 | 14 | 14 | 14 |
 | `com` | 8 | 8 | 8 | 0 | 0 | 0 | 0 |
 | `connectivity` | 21 | 21 | 7 | 20 | 20 | 20 | 20 |
@@ -51,7 +51,7 @@ Public API units (exported classes, registered function namespaces and header-on
 | `mne` | 66 | 66 | 6 | 43 | 43 | 39 | 50 |
 | `mri` | 8 | 8 | 0 | 8 | 8 | 8 | 8 |
 | `sts` | 10 | 10 | 6 | 10 | 10 | 10 | 10 |
-| `utils` | 24 | 24 | 2 | 23 | 23 | 23 | 24 |
+| `utils` | 17 | 17 | 2 | 16 | 16 | 16 | 17 |
 
 ## Registry drift
 

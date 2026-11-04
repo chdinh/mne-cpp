@@ -25,14 +25,14 @@
  *           pop completed samples via @ref nextSample.
  */
 
-#ifndef UTILS_FASTRAK_PARSER_H
-#define UTILS_FASTRAK_PARSER_H
+#ifndef ACQ_FASTRAK_PARSER_H
+#define ACQ_FASTRAK_PARSER_H
 
 //=============================================================================================================
 // INCLUDES
 //=============================================================================================================
 
-#include "../utils_global.h"
+#include "acq_polhemus_global.h"
 
 //=============================================================================================================
 // QT INCLUDES
@@ -43,19 +43,19 @@
 #include <QVector3D>
 
 //=============================================================================================================
-// DEFINE NAMESPACE UTILSLIB
+// DEFINE NAMESPACE ACQLIB
 //=============================================================================================================
 
-namespace UTILSLIB
+namespace ACQLIB
 {
 
 //=============================================================================================================
 /**
  * @brief One decoded sample from a Fastrak ASCII stream.
  *
- * @snippet ex_utils/main.cpp fastrak_parser_usage
+ * @snippet ex_acq_polhemus/main.cpp fastrak_parser_usage
  */
-struct UTILSSHARED_EXPORT FastrakSample
+struct ACQPOLHEMUSSHARED_EXPORT FastrakSample
 {
     int station = 0;         ///< 1-based station id reported by the device.
     QVector3D position;      ///< Position in metres (always normalised to SI).
@@ -70,9 +70,9 @@ struct UTILSSHARED_EXPORT FastrakSample
  * Thread-affine: the caller is responsible for serialising calls. No
  * heap allocations on the hot path other than the internal buffer.
  *
- * @snippet ex_utils/main.cpp fastrak_parser_usage
+ * @snippet ex_acq_polhemus/main.cpp fastrak_parser_usage
  */
-class UTILSSHARED_EXPORT FastrakParser
+class ACQPOLHEMUSSHARED_EXPORT FastrakParser
 {
 public:
     /** Linear unit of the positions reported by the device. */
@@ -142,6 +142,6 @@ private:
     Units m_units = Units::Centimetres;
 };
 
-} // namespace UTILSLIB
+} // namespace ACQLIB
 
-#endif // UTILS_FASTRAK_PARSER_H
+#endif // ACQ_FASTRAK_PARSER_H

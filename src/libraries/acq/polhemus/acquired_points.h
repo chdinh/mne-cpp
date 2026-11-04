@@ -15,14 +15,14 @@
  *           Polhemus Fastrak.
  */
 
-#ifndef UTILS_ACQUIRED_POINTS_H
-#define UTILS_ACQUIRED_POINTS_H
+#ifndef ACQ_ACQUIRED_POINTS_H
+#define ACQ_ACQUIRED_POINTS_H
 
 //=============================================================================================================
 // INCLUDES
 //=============================================================================================================
 
-#include "../utils_global.h"
+#include "acq_polhemus_global.h"
 
 //=============================================================================================================
 // QT INCLUDES
@@ -35,10 +35,10 @@
 #include <QVector3D>
 
 //=============================================================================================================
-// DEFINE NAMESPACE UTILSLIB
+// DEFINE NAMESPACE ACQLIB
 //=============================================================================================================
 
-namespace UTILSLIB
+namespace ACQLIB
 {
 
 //=============================================================================================================
@@ -73,9 +73,9 @@ enum class FiducialId
 /**
  * @brief A single digitised point captured during the alignment session.
  *
- * @snippet ex_utils/main.cpp acquired_points_usage
+ * @snippet ex_acq_polhemus/main.cpp acquired_points_usage
  */
-struct UTILSSHARED_EXPORT DigitizedPoint
+struct ACQPOLHEMUSSHARED_EXPORT DigitizedPoint
 {
     PointKind kind = PointKind::HeadShape;
     QString label;       ///< Human label ("NAS", "Cz", "HSP-42", …).
@@ -90,9 +90,9 @@ struct UTILSSHARED_EXPORT DigitizedPoint
  * The wizard hands one of these to the 3-D view (for visualisation) and
  * later to the export step (for FIFF write). Single-threaded, no locking.
  *
- * @snippet ex_utils/main.cpp acquired_points_usage
+ * @snippet ex_acq_polhemus/main.cpp acquired_points_usage
  */
-class UTILSSHARED_EXPORT AcquiredPoints : public QObject
+class ACQPOLHEMUSSHARED_EXPORT AcquiredPoints : public QObject
 {
     Q_OBJECT
 public:
@@ -107,7 +107,7 @@ public:
     }
 
     /**
-     * Append a new point and emit @c UTILSLIB::AcquiredPoints::pointsChanged "pointsChanged".
+     * Append a new point and emit @c ACQLIB::AcquiredPoints::pointsChanged "pointsChanged".
      *
      * @param[in] p Captured point to append.
      */
@@ -124,7 +124,7 @@ public:
      */
     void undoLast(PointKind kind)
     {
-        for (int i = m_points.size() - 1; i >= 0; --i) {
+        for (qsizetype i = m_points.size() - 1; i >= 0; --i) {
             if (m_points[i].kind == kind) {
                 m_points.removeAt(i);
                 emit pointsChanged();
@@ -183,7 +183,7 @@ public:
      */
     void removeFiducial(FiducialId id)
     {
-        for (int i = m_points.size() - 1; i >= 0; --i) {
+        for (qsizetype i = m_points.size() - 1; i >= 0; --i) {
             if (m_points[i].kind == PointKind::Fiducial && m_points[i].identNumber == static_cast<int>(id)) {
                 m_points.removeAt(i);
             }
@@ -258,6 +258,6 @@ private:
     QMap<int, QVector3D> m_twinFiducials; ///< BEM-space fiducials keyed by FiducialId
 };
 
-} // namespace UTILSLIB
+} // namespace ACQLIB
 
-#endif // UTILS_ACQUIRED_POINTS_H
+#endif // ACQ_ACQUIRED_POINTS_H

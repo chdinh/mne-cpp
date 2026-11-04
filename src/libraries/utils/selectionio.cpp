@@ -39,7 +39,6 @@
 #include <QTextStream>
 #include <QFile>
 #include <QDebug>
-#include <QScreen>
 
 //=============================================================================================================
 // USED NAMESPACES

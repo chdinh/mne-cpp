@@ -1,25 +1,25 @@
 ---
 id: fastrak-parser
-title: "UTILSLIB::FastrakParser"
+title: "ACQLIB::FastrakParser"
 sidebar_label: FastrakParser
-sidebar_position: 15
+sidebar_position: 56
 ---
 
 # FastrakParser
 
-**Namespace:** `UTILSLIB` &nbsp;·&nbsp; **Library:** Utilities Library &nbsp;·&nbsp; **Source:** [`utils/polhemus/fastrak_parser.h`](https://github.com/mne-tools/mne-cpp/blob/staging/src/libraries/utils/polhemus/fastrak_parser.h)
+**Namespace:** `ACQLIB` &nbsp;·&nbsp; **Library:** Acquisition Library &nbsp;·&nbsp; **Source:** [`acq/polhemus/fastrak_parser.h`](https://github.com/mne-tools/mne-cpp/blob/staging/src/libraries/acq/polhemus/fastrak_parser.h)
 
-`#include <utils/fastrak_parser.h>`
+`#include <acq/fastrak_parser.h>`
 
 ```cpp
-class UTILSLIB::FastrakParser
+class ACQLIB::FastrakParser
 ```
 
 Streaming parser for Fastrak / FastSCAN ASCII records.
 
 Thread-affine: the caller is responsible for serialising calls. No heap allocations on the hot path other than the internal buffer.
 
-```cpp title="src/examples/ex_utils/main.cpp"
+```cpp title="src/examples/ex_acq_polhemus/main.cpp"
 FastrakParser parser;
 parser.setUnits(FastrakParser::Units::Centimetres);
 parser.append("01   12.50  -3.25   8.00\r\n02  1.0"); // the second record is still incomplete
@@ -68,7 +68,7 @@ Pop the next fully-decoded sample, if any.
 
 **Parameters:**
 
-- **out** : *[FastrakSample](/docs/api/utils/fastrak-sample) &*
+- **out** : *[FastrakSample](/docs/api/acq/fastrak-sample) &*
   Receives the decoded sample; malformed lines are skipped.
 
 **Returns:**
@@ -97,7 +97,7 @@ Parse one record line (without trailing CR/LF) — exposed for unit tests and fo
 - **units** : *Units*
   Unit of the positions in `record`.
 
-- **out** : *[FastrakSample](/docs/api/utils/fastrak-sample) &*
+- **out** : *[FastrakSample](/docs/api/acq/fastrak-sample) &*
   Receives the decoded sample with the position in metres.
 
 **Returns:**
@@ -108,17 +108,17 @@ Parse one record line (without trailing CR/LF) — exposed for unit tests and fo
 
 ## Example
 
-- Start here: [ex_utils](../../examples/utils/ex_utils.mdx) — Utilities library: buffers, observers, logging, file formats, montages, layouts and reports.
-- Full source: [`src/examples/ex_utils/main.cpp`](https://github.com/mne-tools/mne-cpp/tree/staging/src/examples/ex_utils/main.cpp)
-- Build target: `ex_utils` (runs under CTest)
+- Start here: [ex_acq_polhemus](../../examples/acq/ex_acq_polhemus.mdx) — Polhemus digitiser: parse Fastrak records, register captured fiducials and collect digitised points.
+- Full source: [`src/examples/ex_acq_polhemus/main.cpp`](https://github.com/mne-tools/mne-cpp/tree/staging/src/examples/ex_acq_polhemus/main.cpp)
+- Build target: `ex_acq_polhemus` (runs under CTest)
 
 ## Used in examples
 
-### [ex_utils](../../examples/utils/ex_utils.mdx)
+### [ex_acq_polhemus](../../examples/acq/ex_acq_polhemus.mdx)
 
-Utilities library: buffers, observers, logging, file formats, montages, layouts and reports.
+Polhemus digitiser: parse Fastrak records, register captured fiducials and collect digitised points.
 
-````cpp title="src/examples/ex_utils/main.cpp, line 254"
+````cpp title="src/examples/ex_acq_polhemus/main.cpp, line 66"
 FastrakParser parser;
 parser.setUnits(FastrakParser::Units::Centimetres);
 parser.append("01   12.50  -3.25   8.00\r\n02  1.0"); // the second record is still incomplete

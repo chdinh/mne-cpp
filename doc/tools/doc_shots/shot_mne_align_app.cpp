@@ -45,7 +45,7 @@
 #include "fixtures/align_demo_fixtures.h"
 #include "mne_align.h"
 
-#include <utils/polhemus/acquired_points.h>
+#include <acq/polhemus/acquired_points.h>
 
 #include <QApplication>
 #include <QJsonArray>
@@ -56,23 +56,26 @@
 
 using MNEALIGN::AlignStep;
 using MNEALIGN::MneAlign;
-using UTILSLIB::DigitizedPoint;
+using ACQLIB::DigitizedPoint;
 
 namespace DOCSHOTS
 {
 
-namespace {
+namespace
+{
 
 void appendCapture(QVector<DigitizedPoint>& target, const QJsonObject& spec)
 {
     const QString kind = spec.value(QStringLiteral("kind")).toString().toLower();
-    const int count    = spec.value(QStringLiteral("count")).toInt(0);
-    if (count <= 0) return;
+    const int count = spec.value(QStringLiteral("count")).toInt(0);
+    if (count <= 0)
+        return;
 
     if (kind == QLatin1String("fiducial")) {
         const QVector<DigitizedPoint> fids = MNEALIGN::demoFiducials();
         const int n = qMin(count, fids.size());
-        for (int i = 0; i < n; ++i) target.append(fids.at(i));
+        for (int i = 0; i < n; ++i)
+            target.append(fids.at(i));
     } else if (kind == QLatin1String("eeg")) {
         target += MNEALIGN::demoEegCap(count);
     } else if (kind == QLatin1String("hsp")) {
@@ -80,7 +83,7 @@ void appendCapture(QVector<DigitizedPoint>& target, const QJsonObject& spec)
     }
 }
 
-}  // namespace
+} // namespace
 
 bool renderMneAlignApp(const ShotSpec& spec,
                        const QString& outPath,
@@ -107,8 +110,7 @@ bool renderMneAlignApp(const ShotSpec& spec,
     // we hand it to the live AcquiredPoints store.
     QVector<DigitizedPoint> session;
 
-    if (setup.value(QStringLiteral("load_demo_digitisation")).toString()
-        == QLatin1String("demo")) {
+    if (setup.value(QStringLiteral("load_demo_digitisation")).toString() == QLatin1String("demo")) {
         session = MNEALIGN::demoFullDigitisation();
     }
 
@@ -150,4 +152,4 @@ bool renderMneAlignApp(const ShotSpec& spec,
     return showAtSize(mw, spec.size, err) && captureWindow(mw, spec.size, outPath, err);
 }
 
-}  // namespace DOCSHOTS
+} // namespace DOCSHOTS

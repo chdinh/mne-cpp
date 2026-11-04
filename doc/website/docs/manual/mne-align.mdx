@@ -6,7 +6,7 @@ sidebar_label: MNE Align
 
 `mne_align` is the standalone coregistration helper that ships with mne-cpp (since v2.3.0). It walks an operator through a seven-step wizard that takes a subject's head BEM, the corresponding live or recorded digitisation, and produces a `-trans.fif` head→MRI transform suitable for downstream forward / inverse modelling.
 
-The app is built on the same `MultimodalScene` foundation as `mne_inspect`, and integrates direct serial capture from a Polhemus FASTRAK digitiser via the shared `UTILSLIB::PolhemusConnection` driver. It also accepts a previously recorded digitisation FIFF file when no hardware is available.
+The app is built on the same `MultimodalScene` foundation as `mne_inspect`, and integrates direct serial capture from a Polhemus FASTRAK digitiser via the shared `ACQLIB::PolhemusConnection` driver. It also accepts a previously recorded digitisation FIFF file when no hardware is available.
 
 ![mne_align overview](/img/manual/auto/mne-align/overview.png)
 
@@ -81,7 +81,7 @@ A summary lists the BEM, cap, captured counts, ICP source / RMSE, and the path o
 
 ## Hardware: Polhemus FASTRAK
 
-`mne_align` talks to the FASTRAK over a serial port via the shared `UTILSLIB::PolhemusConnection` driver (`src/libraries/utils/polhemus/`). Use **Digitizer → Connect…** to attach:
+`mne_align` talks to the FASTRAK over a serial port via the shared `ACQLIB::PolhemusConnection` driver (`src/libraries/acq/polhemus/`). Use **Digitizer → Connect…** to attach:
 
 - The wizard first scans known FASTRAK / FastSCAN USB vendor ids; if a device is detected its port name is pre-selected.
 - If auto-detection fails, a dialog lists every visible serial port plus a *Mock backend* option that emits scripted samples for offline testing.
@@ -130,8 +130,8 @@ The digitisation `.fif` written in parallel can be merged back into a raw record
 - `src/applications/mne_align/mne_align.{h,cpp}` — `QMainWindow` shell.
 - `src/applications/mne_align/align_wizard.{h,cpp}` — seven-step wizard.
 - `src/applications/mne_align/align_3d_view.{h,cpp}` — 3D scene + camera presets.
-- `src/applications/mne_align/polhemus_connection.h` — re-export of `UTILSLIB::PolhemusConnection`.
-- `src/libraries/utils/polhemus/` — shared FASTRAK parser, connection driver, `AcquiredPoints` store.
+- `src/applications/mne_align/polhemus_connection.h` — re-export of `ACQLIB::PolhemusConnection`.
+- `src/libraries/acq/polhemus/` — shared FASTRAK parser, connection driver, `AcquiredPoints` store.
 - `src/libraries/mne/mne_icp.{h,cpp}` — ICP refinement entry point (`MNELIB::performIcp`).
 
 ## Related manual pages

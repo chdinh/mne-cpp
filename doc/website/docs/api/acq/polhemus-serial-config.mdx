@@ -1,23 +1,23 @@
 ---
 id: polhemus-serial-config
-title: "UTILSLIB::PolhemusSerialConfig"
+title: "ACQLIB::PolhemusSerialConfig"
 sidebar_label: PolhemusSerialConfig
-sidebar_position: 60
+sidebar_position: 53
 ---
 
 # PolhemusSerialConfig
 
-**Namespace:** `UTILSLIB` &nbsp;·&nbsp; **Library:** Utilities Library &nbsp;·&nbsp; **Source:** [`utils/polhemus/polhemus_connection.h`](https://github.com/mne-tools/mne-cpp/blob/staging/src/libraries/utils/polhemus/polhemus_connection.h)
+**Namespace:** `ACQLIB` &nbsp;·&nbsp; **Library:** Acquisition Library &nbsp;·&nbsp; **Source:** [`acq/polhemus/polhemus_connection.h`](https://github.com/mne-tools/mne-cpp/blob/staging/src/libraries/acq/polhemus/polhemus_connection.h)
 
-`#include <utils/polhemus_connection.h>`
+`#include <acq/polhemus_connection.h>`
 
 ```cpp
-struct UTILSLIB::PolhemusSerialConfig
+struct ACQLIB::PolhemusSerialConfig
 ```
 
 Settings used to open a real Polhemus serial connection.
 
-```cpp title="src/examples/ex_utils/main.cpp"
+```cpp title="src/examples/ex_acq_polhemus/main.cpp"
 PolhemusConnection connection;
 PolhemusSerialConfig serial;        // 115200 baud, inches; the hemisphere and stream command a Fastrak needs
 connection.open(QString(), serial); // empty port name = mock backend sweeping a 10 cm sphere; e.g. "/dev/tty.usbserial" for a Fastrak
@@ -46,17 +46,17 @@ connection.close();
 
 ## Example
 
-- Start here: [ex_utils](../../examples/utils/ex_utils.mdx) — Utilities library: buffers, observers, logging, file formats, montages, layouts and reports.
-- Full source: [`src/examples/ex_utils/main.cpp`](https://github.com/mne-tools/mne-cpp/tree/staging/src/examples/ex_utils/main.cpp)
-- Build target: `ex_utils` (runs under CTest)
+- Start here: [ex_acq_polhemus](../../examples/acq/ex_acq_polhemus.mdx) — Polhemus digitiser: parse Fastrak records, register captured fiducials and collect digitised points.
+- Full source: [`src/examples/ex_acq_polhemus/main.cpp`](https://github.com/mne-tools/mne-cpp/tree/staging/src/examples/ex_acq_polhemus/main.cpp)
+- Build target: `ex_acq_polhemus` (runs under CTest)
 
 ## Used in examples
 
-### [ex_utils](../../examples/utils/ex_utils.mdx)
+### [ex_acq_polhemus](../../examples/acq/ex_acq_polhemus.mdx)
 
-Utilities library: buffers, observers, logging, file formats, montages, layouts and reports.
+Polhemus digitiser: parse Fastrak records, register captured fiducials and collect digitised points.
 
-````cpp title="src/examples/ex_utils/main.cpp, line 275"
+````cpp title="src/examples/ex_acq_polhemus/main.cpp, line 77"
 PolhemusConnection connection;
 PolhemusSerialConfig serial;        // 115200 baud, inches; the hemisphere and stream command a Fastrak needs
 connection.open(QString(), serial); // empty port name = mock backend sweeping a 10 cm sphere; e.g. "/dev/tty.usbserial" for a Fastrak

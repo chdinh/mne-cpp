@@ -38,14 +38,14 @@
  *           stored in the application settings.
  */
 
-#ifndef UTILS_POLHEMUS_COREGISTRATION_H
-#define UTILS_POLHEMUS_COREGISTRATION_H
+#ifndef ACQ_POLHEMUS_COREGISTRATION_H
+#define ACQ_POLHEMUS_COREGISTRATION_H
 
 //=============================================================================================================
 // INCLUDES
 //=============================================================================================================
 
-#include "../utils_global.h"
+#include "acq_polhemus_global.h"
 #include "acquired_points.h"
 #include "polhemus_connection.h"
 
@@ -62,10 +62,10 @@
 #include <vector>
 
 //=============================================================================================================
-// DEFINE NAMESPACE UTILSLIB
+// DEFINE NAMESPACE ACQLIB
 //=============================================================================================================
 
-namespace UTILSLIB
+namespace ACQLIB
 {
 
 //=============================================================================================================
@@ -79,9 +79,9 @@ namespace UTILSLIB
  *     automatically on pen-button press.
  *   - The computed head–device transform after @ref computeRegistration.
  *
- * @snippet ex_utils/main.cpp polhemus_coregistration_usage
+ * @snippet ex_acq_polhemus/main.cpp polhemus_coregistration_usage
  */
-class UTILSSHARED_EXPORT PolhemusCoregistration : public QObject
+class ACQPOLHEMUSSHARED_EXPORT PolhemusCoregistration : public QObject
 {
     Q_OBJECT
 
@@ -640,6 +640,6 @@ private:
     bool solvePivotCalibration();
 };
 
-} // namespace UTILSLIB
+} // namespace ACQLIB
 
-#endif // UTILS_POLHEMUS_COREGISTRATION_H
+#endif // ACQ_POLHEMUS_COREGISTRATION_H

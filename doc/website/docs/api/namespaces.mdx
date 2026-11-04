@@ -11,7 +11,7 @@ All public namespaces in the MNE-CPP library tree.
 
 | Namespace | Classes | Description |
 |-----------|---------|-------------|
-| [`ACQLIB`](/docs/api/acq/) | 52 | Headless acquisition: sources, streams, zero-copy readers and native sample formats. |
+| [`ACQLIB`](/docs/api/acq/) | 59 | Headless acquisition: sources, streams, zero-copy readers and native sample formats. |
 | [`BIDSLIB`](/docs/api/bids/) | 14 | BIDS dataset reading, writing, path construction, and sidecar metadata handling for iEEG/EEG/MEG. |
 | [`COMLIB`](/docs/api/com/) | 8 | Real-time client/server communication primitives for talking to `mne_rt_server`. |
 | [`CONNECTIVITYLIB`](/docs/api/connectivity/) | 21 | Functional connectivity metrics (coherence, PLV, cross-correlation, etc.). |
@@ -33,7 +33,7 @@ All public namespaces in the MNE-CPP library tree.
 | [`RTPROCESSINGLIB`](/docs/api/dsp/) | 15 |  |
 | [`STSLIB`](/docs/api/sts/) | 10 | Statistical testing (t-tests, F-tests, cluster permutation, multiple comparison correction). |
 | `SURFACEKEYS` | 0 | Centralised string constants for surface map keys. |
-| [`UTILSLIB`](/docs/api/utils/) | 94 | Shared utilities (I/O helpers, spectral analysis, layout management, warp algorithms). |
+| [`UTILSLIB`](/docs/api/utils/) | 87 | Shared utilities (I/O helpers, spectral analysis, layout management, warp algorithms). |
 | `Ui` | 0 |  |
 
 ## Class inventory by namespace
@@ -92,6 +92,13 @@ All public namespaces in the MNE-CPP library tree.
 - [AcqViewLease](/docs/api/acq/acq-view-lease)
 - [AcqWriteView](/docs/api/acq/acq-write-view)
 - [AcqWriter](/docs/api/acq/acq-writer)
+- [AcquiredPoints](/docs/api/acq/acquired-points)
+- [DigitizedPoint](/docs/api/acq/digitized-point)
+- [FastrakParser](/docs/api/acq/fastrak-parser)
+- [FastrakSample](/docs/api/acq/fastrak-sample)
+- [PolhemusConnection](/docs/api/acq/polhemus-connection)
+- [PolhemusCoregistration](/docs/api/acq/polhemus-coregistration)
+- [PolhemusSerialConfig](/docs/api/acq/polhemus-serial-config)
 
 ### BIDSLIB
 
@@ -563,7 +570,6 @@ All public namespaces in the MNE-CPP library tree.
 
 ### UTILSLIB
 
-- [AcquiredPoints](/docs/api/utils/acquired-points)
 - [AnnotateAmplitudeParams](/docs/api/dsp/annotate-amplitude-params)
 - [AnnotateMusclParams](/docs/api/dsp/annotate-muscl-params)
 - [ArtifactDetect](/docs/api/utils/artifact-detect)
@@ -582,7 +588,6 @@ All public namespaces in the MNE-CPP library tree.
 - [Csd](/docs/api/utils/csd)
 - [CsdResult](/docs/api/utils/csd-result)
 - [DerivationRule](/docs/api/utils/derivation-rule)
-- [DigitizedPoint](/docs/api/utils/digitized-point)
 - [Dpss](/docs/api/utils/dpss)
 - [DpssResult](/docs/api/utils/dpss-result)
 - [ElectrodePosition](/docs/api/utils/electrode-position)
@@ -590,8 +595,6 @@ All public namespaces in the MNE-CPP library tree.
 - [EpochExtractor](/docs/api/utils/epoch-extractor)
 - [EpochExtractorParams](/docs/api/utils/epoch-extractor-params)
 - [ExtendedInfomax](/docs/api/dsp/extended-infomax)
-- [FastrakParser](/docs/api/utils/fastrak-parser)
-- [FastrakSample](/docs/api/utils/fastrak-sample)
 - [FilterChpiParams](/docs/api/dsp/filter-chpi-params)
 - [FilterIO](/docs/api/utils/filter-io)
 - [FilterKernel](/docs/api/dsp/filter-kernel)
@@ -628,9 +631,6 @@ All public namespaces in the MNE-CPP library tree.
 - [ParksMcClellan](/docs/api/utils/parks-mc-clellan)
 - [PeakFinderParams](/docs/api/dsp/peak-finder-params)
 - [PicardIca](/docs/api/dsp/picard-ica)
-- [PolhemusConnection](/docs/api/utils/polhemus-connection)
-- [PolhemusCoregistration](/docs/api/utils/polhemus-coregistration)
-- [PolhemusSerialConfig](/docs/api/utils/polhemus-serial-config)
 - [PythonRunner](/docs/api/utils/python-runner)
 - [PythonRunnerConfig](/docs/api/utils/python-runner-config)
 - [PythonRunnerResult](/docs/api/utils/python-runner-result)

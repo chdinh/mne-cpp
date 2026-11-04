@@ -7,7 +7,7 @@
  * @author   Christoph Dinh <christoph.dinh@mne-cpp.org>
  * @since    2.2.1
  * @date     May 2026
- * @brief    Streaming ASCII record decoder that converts Polhemus Fastrak / FastSCAN bytes into @ref UTILSLIB::FastrakSample values.
+ * @brief    Streaming ASCII record decoder that converts Polhemus Fastrak / FastSCAN bytes into @ref ACQLIB::FastrakSample values.
  *
  * Bytes are accumulated in an internal buffer; complete
  * CR/LF terminated records are tokenised on demand by
@@ -22,7 +22,7 @@
 
 #include "fastrak_parser.h"
 
-using namespace UTILSLIB;
+using namespace ACQLIB;
 
 namespace
 {
@@ -47,7 +47,7 @@ bool FastrakParser::parseRecord(const QByteArray& record, Units units, FastrakSa
     // separating space, e.g. "0.8829-0.3055".  Insert a space before
     // every '-' that is preceded by a digit so tokenisation works.
     QByteArray fixed = record.simplified();
-    for (int i = fixed.size() - 1; i > 0; --i) {
+    for (qsizetype i = fixed.size() - 1; i > 0; --i) {
         const char c = fixed.at(i);
         const char pc = fixed.at(i - 1);
         if (c == '-' && pc >= '0' && pc <= '9') {
@@ -121,7 +121,7 @@ bool FastrakParser::parseRecord(const QByteArray& record, Units units, FastrakSa
 bool FastrakParser::nextSample(FastrakSample& out)
 {
     while (true) {
-        const int eol = m_buffer.indexOf('\n');
+        const qsizetype eol = m_buffer.indexOf('\n');
         if (eol < 0) {
             return false;
         }

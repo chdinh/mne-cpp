@@ -7,7 +7,7 @@
  * @author   Christoph Dinh <christoph.dinh@mne-cpp.org>
  * @since    2.2.1
  * @date     May 2026
- * @brief    Implementation of @ref UTILSLIB::PolhemusCoregistration — fiducial-based head→device rigid alignment.
+ * @brief    Implementation of @ref ACQLIB::PolhemusCoregistration — fiducial-based head→device rigid alignment.
  *
  * The three cardinal fiducials (LPA, NAS, RPA) define an
  * orthonormal head frame whose construction matches the
@@ -26,7 +26,7 @@
 #include <QSettings>
 #include <cmath>
 
-using namespace UTILSLIB;
+using namespace ACQLIB;
 
 //=============================================================================================================
 

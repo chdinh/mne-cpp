@@ -20,9 +20,9 @@
 // INCLUDES
 //=============================================================================================================
 
-#include <utils/polhemus/polhemus_coregistration.h>
-#include <utils/polhemus/acquired_points.h>
-#include <utils/polhemus/fastrak_parser.h>
+#include <acq/polhemus/polhemus_coregistration.h>
+#include <acq/polhemus/acquired_points.h>
+#include <acq/polhemus/fastrak_parser.h>
 
 //=============================================================================================================
 // QT INCLUDES
@@ -42,7 +42,7 @@
 // USED NAMESPACES
 //=============================================================================================================
 
-using namespace UTILSLIB;
+using namespace ACQLIB;
 
 //=============================================================================================================
 /**

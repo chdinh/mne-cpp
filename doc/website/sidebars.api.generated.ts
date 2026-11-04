@@ -461,7 +461,6 @@ const apiSidebar: SidebarsConfig['apiSidebar'] = [
       items: [
         'api/utils/standard-montage',
         'api/utils/report',
-        'api/utils/acquired-points',
         'api/utils/artifact-detect',
         'api/utils/bad-channel-detect',
         'api/utils/channel-derivation',
@@ -470,7 +469,6 @@ const apiSidebar: SidebarsConfig['apiSidebar'] = [
         'api/utils/csd',
         'api/utils/dpss',
         'api/utils/epoch-extractor',
-        'api/utils/fastrak-parser',
         'api/utils/filter-io',
         'api/utils/filter-parameter',
         'api/utils/i-command',
@@ -481,8 +479,6 @@ const apiSidebar: SidebarsConfig['apiSidebar'] = [
         'api/utils/mne-logger',
         'api/utils/numerics',
         'api/utils/parks-mc-clellan',
-        'api/utils/polhemus-connection',
-        'api/utils/polhemus-coregistration',
         'api/utils/python-runner',
         'api/utils/python-test-helper',
         'api/utils/selection-io',
@@ -494,12 +490,9 @@ const apiSidebar: SidebarsConfig['apiSidebar'] = [
         'api/utils/bad-channel-detect-params',
         'api/utils/csd-result',
         'api/utils/derivation-rule',
-        'api/utils/digitized-point',
         'api/utils/dpss-result',
         'api/utils/electrode-position',
         'api/utils/epoch-extractor-params',
-        'api/utils/fastrak-sample',
-        'api/utils/polhemus-serial-config',
         'api/utils/python-runner-config',
         'api/utils/python-runner-result',
         'api/utils/report-section',
@@ -776,7 +769,14 @@ const apiSidebar: SidebarsConfig['apiSidebar'] = [
         'api/acq/acq-recorder',
         'api/acq/acq-recorder-options',
         'api/acq/acq-recorder-stats',
-        'api/acq/acq-bids-path'
+        'api/acq/acq-bids-path',
+        'api/acq/polhemus-connection',
+        'api/acq/polhemus-coregistration',
+        'api/acq/polhemus-serial-config',
+        'api/acq/acquired-points',
+        'api/acq/digitized-point',
+        'api/acq/fastrak-parser',
+        'api/acq/fastrak-sample'
       ],
     }
 ];

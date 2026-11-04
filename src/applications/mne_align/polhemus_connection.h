@@ -6,12 +6,12 @@
 #ifndef MNE_ALIGN_POLHEMUS_CONNECTION_H
 #define MNE_ALIGN_POLHEMUS_CONNECTION_H
 
-#include <utils/polhemus/polhemus_connection.h>
+#include <acq/polhemus/polhemus_connection.h>
 
 namespace MNEALIGN
 {
-using UTILSLIB::PolhemusSerialConfig;
-using UTILSLIB::PolhemusConnection;
+using ACQLIB::PolhemusSerialConfig;
+using ACQLIB::PolhemusConnection;
 } // namespace MNEALIGN
 
 #endif // MNE_ALIGN_POLHEMUS_CONNECTION_H

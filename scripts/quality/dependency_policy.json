@@ -41,10 +41,11 @@
     },
     {
       "name": "acquisition",
-      "description": "Bridges of the standard-C++ acquisition core to FIFF, BIDS and LSL: measurement-info conversion, recording and the lsl:// source.",
+      "description": "Bridges of the standard-C++ acquisition core to FIFF, BIDS and LSL (measurement-info conversion, recording, the lsl:// source) and the Polhemus digitiser.",
       "libraries": [
         "mne_acq_fiff",
-        "mne_acq_lsl"
+        "mne_acq_lsl",
+        "mne_acq_polhemus"
       ]
     },
     {

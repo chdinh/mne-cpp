@@ -19,6 +19,7 @@ set(QT_REQUIRED_COMPONENT_LIBS ${QT_REQUIRED_COMPONENTS})
 list(TRANSFORM QT_REQUIRED_COMPONENT_LIBS PREPEND "Qt${QT_VERSION_MAJOR}::")
 
 set(MNE_LIBS_REQUIRED
+    mne_acq_polhemus
     mne_utils
     mne_math
     mne_fiff
@@ -89,7 +90,7 @@ target_include_directories(mne_align_demo_fixtures PUBLIC
 target_link_libraries(mne_align_demo_fixtures PUBLIC
     Qt${QT_VERSION_MAJOR}::Core
     Qt${QT_VERSION_MAJOR}::Gui
-    mne_utils
+    mne_acq_polhemus
     mne_fiff
     Eigen3::Eigen
 )

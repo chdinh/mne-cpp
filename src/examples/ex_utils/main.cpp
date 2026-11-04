@@ -9,8 +9,8 @@
  * @date     October 2026
  * @brief    Utilities library: buffers, observers, logging, file formats, montages, layouts and reports.
  *
- * Every step checks its result (round trips, known electrode positions, a
- * hand-written digitiser record) and the example exits non-zero on a mismatch.
+ * Every step checks its result (round trips, known electrode positions) and the
+ * example exits non-zero on a mismatch.
  * All files are written to a temporary directory.
  */
 
@@ -26,10 +26,6 @@
 #include <utils/layoutloader.h>
 #include <utils/layoutmaker.h>
 #include <utils/montage/standard_montage.h>
-#include <utils/polhemus/acquired_points.h>
-#include <utils/polhemus/fastrak_parser.h>
-#include <utils/polhemus/polhemus_connection.h>
-#include <utils/polhemus/polhemus_coregistration.h>
 #include <utils/python_runner.h>
 #include <utils/python_test_helper.h>
 #include <utils/report.h>
@@ -41,10 +37,8 @@
 
 #include <QCoreApplication>
 #include <QDebug>
-#include <QEventLoop>
 #include <QFile>
 #include <QTemporaryDir>
-#include <QTimer>
 
 //=============================================================================================================
 // STL INCLUDES
@@ -250,17 +244,6 @@ int main(int argc, char* argv[])
     ok &= expect(capNames == QStringList({"Fp1", "Cz"}) && capUnit == "mm" && cap3D.size() == 2 && cap3D[1] == QVector<float>({0.0f, 0.0f, 87.0f}),
                  "LayoutLoader reads the electrode names, positions and unit of an .elc file");
 
-    //! [fastrak_parser_usage]
-    FastrakParser parser;
-    parser.setUnits(FastrakParser::Units::Centimetres);
-    parser.append("01   12.50  -3.25   8.00\r\n02  1.0"); // the second record is still incomplete
-    FastrakSample sample;
-    const bool complete = parser.nextSample(sample);
-    const bool pending = parser.nextSample(sample);
-    //! [fastrak_parser_usage]
-    ok &= expect(complete && !pending && sample.station == 1 && std::fabs(sample.position.x() - 0.125f) < 1e-6f && std::fabs(sample.position.y() + 0.0325f) < 1e-6f,
-                 "FastrakParser converts centimetres to metres and waits for the partial record");
-
     //! [report_usage]
     Report report("Example report");
     report.addText("Summary", "All utilities were exercised.");
@@ -270,43 +253,6 @@ int main(int argc, char* argv[])
     //! [report_usage]
     ok &= expect(report.sectionCount() == 2 && html.contains("<table") && html.contains("Fp1") && QFile::exists(dir.filePath("report.html")),
                  "Report renders text and table sections to HTML");
-
-    //! [polhemus_coregistration_usage]
-    PolhemusConnection connection;
-    PolhemusSerialConfig serial;        // 115200 baud, inches; the hemisphere and stream command a Fastrak needs
-    connection.open(QString(), serial); // empty port name = mock backend sweeping a 10 cm sphere; e.g. "/dev/tty.usbserial" for a Fastrak
-    PolhemusCoregistration coreg;
-    coreg.setConnection(&connection); // station 1 = pen, station 2 = head tracker
-
-    // Model fiducials are the pen fiducials turned 90 deg about z and moved 5 cm in x; the registration must find that transform
-    QMatrix4x4 truth;
-    truth.translate(0.05f, 0.0f, 0.0f);
-    truth.rotate(90.0f, 0.0f, 0.0f, 1.0f);
-    const QList<FiducialId> fiducials = {FiducialId::NAS, FiducialId::LPA, FiducialId::RPA};
-    QList<QVector3D> penAt;
-    for (const FiducialId id : fiducials) {
-        QEventLoop wait; // let the next mock pen sample arrive, as the user would move the pen
-        QTimer::singleShot(350, &wait, &QEventLoop::quit);
-        wait.exec();
-        coreg.captureCurrentPenPositionAsFiducial(id);
-        penAt.append(coreg.penPosition());
-        coreg.setModelFiducial(id, truth.map(coreg.penPosition()));
-    }
-    const bool registered = coreg.computeRegistration();
-    connection.close();
-    //! [polhemus_coregistration_usage]
-    const QVector3D mapped = coreg.worldToModel().map(penAt[1]);
-    ok &= expect(registered && coreg.acquiredPoints()->hasAllFiducials() && coreg.acquiredPoints()->countOf(PointKind::Fiducial) == 3 && (mapped - truth.map(penAt[1])).length() < 1e-5f,
-                 "PolhemusCoregistration maps the captured LPA onto its model position from the mock digitiser");
-
-    //! [acquired_points_usage]
-    AcquiredPoints points;
-    points.append({PointKind::HeadShape, "HSP-1", 1, QVector3D(0.0f, 0.08f, 0.05f)});
-    points.append({PointKind::Eeg, "Cz", 1, QVector3D(0.0f, 0.0f, 0.09f)});
-    points.undoLast(PointKind::HeadShape);
-    const DigitizedPoint& kept = points.points().first(); // kind, label, FIFF ident, position (m)
-    //! [acquired_points_usage]
-    ok &= expect(points.points().size() == 1 && kept.label == "Cz" && kept.position.z() == 0.09f && points.countOf(PointKind::Eeg) == 1 && !points.hasAllFiducials(), "AcquiredPoints keeps Cz after undoing the head-shape point");
 
     //! [python_runner_usage]
     PythonRunner python; // "python3" from PATH; a venv is configured via PythonRunnerConfig

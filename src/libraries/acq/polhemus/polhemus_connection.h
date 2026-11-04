@@ -27,14 +27,14 @@
  *           type a device path.
  */
 
-#ifndef UTILS_POLHEMUS_CONNECTION_H
-#define UTILS_POLHEMUS_CONNECTION_H
+#ifndef ACQ_POLHEMUS_CONNECTION_H
+#define ACQ_POLHEMUS_CONNECTION_H
 
 //=============================================================================================================
 // INCLUDES
 //=============================================================================================================
 
-#include "../utils_global.h"
+#include "acq_polhemus_global.h"
 #include "fastrak_parser.h"
 
 //=============================================================================================================
@@ -51,19 +51,19 @@
 #include <QVector3D>
 
 //=============================================================================================================
-// DEFINE NAMESPACE UTILSLIB
+// DEFINE NAMESPACE ACQLIB
 //=============================================================================================================
 
-namespace UTILSLIB
+namespace ACQLIB
 {
 
 //=============================================================================================================
 /**
  * @brief Settings used to open a real Polhemus serial connection.
  *
- * @snippet ex_utils/main.cpp polhemus_coregistration_usage
+ * @snippet ex_acq_polhemus/main.cpp polhemus_coregistration_usage
  */
-struct UTILSSHARED_EXPORT PolhemusSerialConfig
+struct ACQPOLHEMUSSHARED_EXPORT PolhemusSerialConfig
 {
     int baudRate = 115200;
     FastrakParser::Units units = FastrakParser::Units::Inches;
@@ -83,9 +83,9 @@ struct UTILSSHARED_EXPORT PolhemusSerialConfig
 /**
  * @brief Polhemus digitizer connection (mock + serial-port backends).
  *
- * @snippet ex_utils/main.cpp polhemus_coregistration_usage
+ * @snippet ex_acq_polhemus/main.cpp polhemus_coregistration_usage
  */
-class UTILSSHARED_EXPORT PolhemusConnection : public QObject
+class ACQPOLHEMUSSHARED_EXPORT PolhemusConnection : public QObject
 {
     Q_OBJECT
 
@@ -146,7 +146,7 @@ signals:
      */
     void pointReceived(int station, const QVector3D& position, const QQuaternion& orientation);
 
-    /** Emitted whenever @c UTILSLIB::PolhemusConnection::isConnected "isConnected" changes. */
+    /** Emitted whenever @c ACQLIB::PolhemusConnection::isConnected "isConnected" changes. */
     void connectedChanged(bool isConnected);
 
     /** Non-fatal protocol/IO error (already logged by the backend). */
@@ -197,6 +197,6 @@ private:
     QMap<int, StationSample> m_lastSamples;
 };
 
-} // namespace UTILSLIB
+} // namespace ACQLIB
 
-#endif // UTILS_POLHEMUS_CONNECTION_H
+#endif // ACQ_POLHEMUS_CONNECTION_H
