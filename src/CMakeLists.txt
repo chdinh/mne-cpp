@@ -453,7 +453,7 @@ if(NOT WASM)
 
 include(CMakePackageConfigHelpers)
 
-if(MNE_CPP_EIGEN_MODE STREQUAL "prebuilt" AND DEFINED MNE_CPP_EIGEN_PACKAGE_ROOT)
+if(DEFINED MNE_CPP_EIGEN_PACKAGE_ROOT)
     if(EXISTS "${MNE_CPP_EIGEN_PACKAGE_ROOT}/include/eigen3")
         install(DIRECTORY "${MNE_CPP_EIGEN_PACKAGE_ROOT}/include/eigen3"
             DESTINATION include
