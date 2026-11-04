@@ -24,6 +24,7 @@ set(SOURCES
   acq_reader.cpp
   acq_convert.cpp
   detail/acq_ring_memory.cpp
+  detail/acq_shared_library.cpp
   acq_uri.cpp
   acq_backend.cpp
   acq_device.cpp
@@ -38,6 +39,7 @@ set(PRIVATE_HEADERS
   detail/acq_backend_impl.h
   detail/acq_uri_params.h
   detail/acq_synthetic_backend.h
+  detail/acq_shared_library.h
 )
 
 set(HEADERS
@@ -71,6 +73,7 @@ add_library(${PROJECT_NAME} ${SOURCES} ${HEADERS} ${PRIVATE_HEADERS})
 
 find_package(Threads REQUIRED)
 target_link_libraries(${PROJECT_NAME} PUBLIC Threads::Threads)
+target_link_libraries(${PROJECT_NAME} PRIVATE ${CMAKE_DL_LIBS}) # runtime-loaded device libraries
 if(WIN32)
     target_link_libraries(${PROJECT_NAME} PRIVATE avrt) # MMCSS for realtime threads
 endif()

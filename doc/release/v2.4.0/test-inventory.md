@@ -6,8 +6,8 @@ CI evidence: https://github.com/mne-tools/mne-cpp/actions/runs/39457390522 (comm
 
 ## Registration
 
-- Test directories: 275
-- Registered unconditionally: 266
+- Test directories: 276
+- Registered unconditionally: 267
 - Registered behind a CMake condition or early `return()`: 6
 - Not registered: 3
 - Registered without `LABELS`: 0
@@ -18,23 +18,23 @@ CI evidence: https://github.com/mne-tools/mne-cpp/actions/runs/39457390522 (comm
 
 | Platform | Executed | Failures | Skipped | Registered but not executed |
 |---|---:|---:|---:|---|
-| macos-26 | 295 | 0 | 0 | `test_acq_convert`, `test_acq_device`, `test_acq_dlpack`, `test_acq_error`, `test_acq_fiff_replay`, `test_acq_recorder`, `test_acq_stream`, `test_acq_thread`, `test_acq_timebase`, `test_rt_server_fiff_replay` |
-| macos-26-qt-min | 295 | 0 | 0 | `test_acq_convert`, `test_acq_device`, `test_acq_dlpack`, `test_acq_error`, `test_acq_fiff_replay`, `test_acq_recorder`, `test_acq_stream`, `test_acq_thread`, `test_acq_timebase`, `test_rt_server_fiff_replay` |
-| ubuntu-24.04 | 295 | 0 | 0 | `test_acq_convert`, `test_acq_device`, `test_acq_dlpack`, `test_acq_error`, `test_acq_fiff_replay`, `test_acq_recorder`, `test_acq_stream`, `test_acq_thread`, `test_acq_timebase`, `test_rt_server_fiff_replay` |
-| ubuntu-24.04-qt-min | 295 | 0 | 0 | `test_acq_convert`, `test_acq_device`, `test_acq_dlpack`, `test_acq_error`, `test_acq_fiff_replay`, `test_acq_recorder`, `test_acq_stream`, `test_acq_thread`, `test_acq_timebase`, `test_rt_server_fiff_replay` |
-| windows-2025-vs2026 | 295 | 0 | 2 | `test_acq_convert`, `test_acq_device`, `test_acq_dlpack`, `test_acq_error`, `test_acq_fiff_replay`, `test_acq_recorder`, `test_acq_stream`, `test_acq_thread`, `test_acq_timebase`, `test_rt_server_fiff_replay` |
-| windows-2025-vs2026-qt-min | 295 | 0 | 2 | `test_acq_convert`, `test_acq_device`, `test_acq_dlpack`, `test_acq_error`, `test_acq_fiff_replay`, `test_acq_recorder`, `test_acq_stream`, `test_acq_thread`, `test_acq_timebase`, `test_rt_server_fiff_replay` |
+| macos-26 | 295 | 0 | 0 | `test_acq_convert`, `test_acq_device`, `test_acq_dlpack`, `test_acq_error`, `test_acq_fiff_replay`, `test_acq_lsl`, `test_acq_recorder`, `test_acq_stream`, `test_acq_thread`, `test_acq_timebase`, `test_rt_server_fiff_replay` |
+| macos-26-qt-min | 295 | 0 | 0 | `test_acq_convert`, `test_acq_device`, `test_acq_dlpack`, `test_acq_error`, `test_acq_fiff_replay`, `test_acq_lsl`, `test_acq_recorder`, `test_acq_stream`, `test_acq_thread`, `test_acq_timebase`, `test_rt_server_fiff_replay` |
+| ubuntu-24.04 | 295 | 0 | 0 | `test_acq_convert`, `test_acq_device`, `test_acq_dlpack`, `test_acq_error`, `test_acq_fiff_replay`, `test_acq_lsl`, `test_acq_recorder`, `test_acq_stream`, `test_acq_thread`, `test_acq_timebase`, `test_rt_server_fiff_replay` |
+| ubuntu-24.04-qt-min | 295 | 0 | 0 | `test_acq_convert`, `test_acq_device`, `test_acq_dlpack`, `test_acq_error`, `test_acq_fiff_replay`, `test_acq_lsl`, `test_acq_recorder`, `test_acq_stream`, `test_acq_thread`, `test_acq_timebase`, `test_rt_server_fiff_replay` |
+| windows-2025-vs2026 | 295 | 0 | 2 | `test_acq_convert`, `test_acq_device`, `test_acq_dlpack`, `test_acq_error`, `test_acq_fiff_replay`, `test_acq_lsl`, `test_acq_recorder`, `test_acq_stream`, `test_acq_thread`, `test_acq_timebase`, `test_rt_server_fiff_replay` |
+| windows-2025-vs2026-qt-min | 295 | 0 | 2 | `test_acq_convert`, `test_acq_device`, `test_acq_dlpack`, `test_acq_error`, `test_acq_fiff_replay`, `test_acq_lsl`, `test_acq_recorder`, `test_acq_stream`, `test_acq_thread`, `test_acq_timebase`, `test_rt_server_fiff_replay` |
 
 ## Run-time requirements (lexical signals)
 
 | Requirement | Tests |
 |---|---:|
 | freesurfer | 2 |
-| python | 10 |
+| python | 11 |
 | sample-data | 20 |
 | test-data | 122 |
 | GUI (`QTEST_MAIN`) | 46 |
-| Contains `QSKIP` | 93 |
+| Contains `QSKIP` | 94 |
 
 ## Conditional and unregistered tests
 
