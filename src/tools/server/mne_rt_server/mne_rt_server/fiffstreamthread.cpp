@@ -80,7 +80,7 @@ void FiffStreamThread::startMeas(qint32 ID)
 
         m_qMutex.lock();
         // ToDo send start meas
-        FiffStream t_FiffStreamOut(&m_qSendBlock, QIODevice::WriteOnly);
+        FiffStream t_FiffStreamOut(&m_qSendBlock, QIODevice::WriteOnly | QIODevice::Append);
         t_FiffStreamOut.start_block(FIFFB_RAW_DATA);
         m_bIsSendingRawBuffer = true;
         m_qMutex.unlock();
@@ -96,7 +96,7 @@ void FiffStreamThread::stopMeas(qint32 ID)
         qDebug() << "stop raw buffer sending.";
 
         m_qMutex.lock();
-        FiffStream t_FiffStreamOut(&m_qSendBlock, QIODevice::WriteOnly);
+        FiffStream t_FiffStreamOut(&m_qSendBlock, QIODevice::WriteOnly | QIODevice::Append);
         t_FiffStreamOut.end_block(FIFFB_RAW_DATA);
         m_bIsSendingRawBuffer = false;
         m_qMutex.unlock();
@@ -141,7 +141,7 @@ void FiffStreamThread::sendRawBuffer(QSharedPointer<Eigen::MatrixXf> m_pMatRawDa
 
         m_qMutex.lock();
 
-        FiffStream t_FiffStreamOut(&m_qSendBlock, QIODevice::WriteOnly);
+        FiffStream t_FiffStreamOut(&m_qSendBlock, QIODevice::WriteOnly | QIODevice::Append);
         t_FiffStreamOut.write_float(FIFF_DATA_BUFFER, m_pMatRawData->data(), m_pMatRawData->rows() * m_pMatRawData->cols());
 
         m_qMutex.unlock();
@@ -178,7 +178,7 @@ void FiffStreamThread::sendMeasurementInfo(qint32 ID, const FiffInfo& p_fiffInfo
     if (ID == m_iDataClientId) {
         m_qMutex.lock();
 
-        FiffStream t_FiffStreamOut(&m_qSendBlock, QIODevice::WriteOnly);
+        FiffStream t_FiffStreamOut(&m_qSendBlock, QIODevice::WriteOnly | QIODevice::Append);
 
         //        qint32 init_info[2];
         //        init_info[0] = FIFF_MNE_RT_CLIENT_ID;
@@ -199,7 +199,7 @@ void FiffStreamThread::sendMeasurementInfo(qint32 ID, const FiffInfo& p_fiffInfo
 
 void FiffStreamThread::writeClientId()
 {
-    FiffStream t_FiffStreamOut(&m_qSendBlock, QIODevice::WriteOnly);
+    FiffStream t_FiffStreamOut(&m_qSendBlock, QIODevice::WriteOnly | QIODevice::Append);
 
     t_FiffStreamOut.write_int(FIFF_MNE_RT_CLIENT_ID, &m_iDataClientId);
 }
