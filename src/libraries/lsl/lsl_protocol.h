@@ -25,6 +25,7 @@
 // INCLUDES
 //=============================================================================================================
 
+#include "lsl_global.h"
 #include "lsl_stream_info.h"
 
 #include <cstddef>
@@ -38,6 +39,7 @@
 
 #include <QByteArray>
 #include <QHostAddress>
+#include <QUdpSocket>
 
 //=============================================================================================================
 // DEFINE NAMESPACE LSLLIB::detail
@@ -146,6 +148,28 @@ bool matchesQuery(const stream_info& info, const std::string& predicate);
  * @return @p address as text, plain IPv4 where it is an IPv4-mapped IPv6 address.
  */
 std::string hostText(const QHostAddress& address);
+
+/**
+ * Binds @p socket for sending queries and receiving their replies (multicast TTL 1, loopback on).
+ *
+ * @param[in, out] socket   The socket.
+ * @param[in]      port     Local port, 0 for any.
+ *
+ * @return Whether the socket is bound.
+ */
+LSLSHARED_EXPORT bool bindQuerySocket(QUdpSocket& socket, quint16 port);
+
+/**
+ * Waits up to @p ms for a datagram on @p socket. QAbstractSocket::waitForReadyRead closes the socket on any error
+ * but a timeout; the socket is bound to @p port again then, so replies to queries already sent still arrive.
+ *
+ * @param[in, out] socket   A socket bound with bindQuerySocket().
+ * @param[in]      port     Its local port.
+ * @param[in]      ms       Maximum wait in milliseconds.
+ *
+ * @return Whether a datagram is pending.
+ */
+LSLSHARED_EXPORT bool waitForDatagrams(QUdpSocket& socket, quint16 port, int ms);
 
 } // namespace LSLLIB::detail
 

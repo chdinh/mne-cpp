@@ -186,9 +186,10 @@ public:
             return std::numeric_limits<double>::quiet_NaN();
         }
         QUdpSocket socket;
-        if (!socket.bind(QHostAddress::AnyIPv4, 0)) {
+        if (!detail::bindQuerySocket(socket, 0)) {
             return std::numeric_limits<double>::quiet_NaN();
         }
+        const quint16 localPort = socket.localPort();
         const QHostAddress host(QString::fromStdString(m_info.data_host()));
         constexpr int kProbes = 8;
         double bestRtt = std::numeric_limits<double>::infinity();
@@ -203,8 +204,8 @@ public:
             const qint64 waitUntil = std::min(budget, timer.elapsed() + 100);
             bool answered = false;
             while (!answered && timer.elapsed() < waitUntil) {
-                if (!socket.hasPendingDatagrams() && !socket.waitForReadyRead(static_cast<int>(waitUntil - timer.elapsed()))) {
-                    break;
+                if (!detail::waitForDatagrams(socket, localPort, static_cast<int>(waitUntil - timer.elapsed()))) {
+                    continue;
                 }
                 while (socket.hasPendingDatagrams()) {
                     const double t3 = local_clock();

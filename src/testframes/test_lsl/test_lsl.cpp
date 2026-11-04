@@ -15,6 +15,7 @@
 //=============================================================================================================
 
 #include <lsl/lsl.h>
+#include <lsl/lsl_protocol.h>
 
 //=============================================================================================================
 // QT INCLUDES
@@ -22,6 +23,8 @@
 
 #include <QtTest/QtTest>
 #include <QThread>
+#include <QNetworkDatagram>
+#include <QUdpSocket>
 
 //=============================================================================================================
 // STL INCLUDES
@@ -123,6 +126,7 @@ private slots:
     void testResolveStreamsTimeout();
     void testResolveStreamNoMatch();
     void testResolveStreamsMultipleOutlets();
+    void testWaitForDatagramsKeepsSocketBound();
 
     //=========================================================================================================
     // Build info tests
@@ -842,6 +846,30 @@ void TestLsl::testResolveStreamsMultipleOutlets()
     }
     QVERIFY(found1);
     QVERIFY(found2);
+}
+
+//=============================================================================================================
+
+void TestLsl::testWaitForDatagramsKeepsSocketBound()
+{
+    QUdpSocket socket;
+    QVERIFY(detail::bindQuerySocket(socket, 0));
+    const quint16 port = socket.localPort();
+    QUdpSocket sender;
+    QVERIFY(!detail::waitForDatagrams(socket, port, 50));
+
+    sender.writeDatagram("one", QHostAddress::LocalHost, port);
+    QVERIFY(detail::waitForDatagrams(socket, port, 2000));
+    QCOMPARE(socket.receiveDatagram().data(), QByteArray("one"));
+
+    // QAbstractSocket::waitForReadyRead closes the socket on any error but a timeout; replies must still arrive.
+    socket.close();
+    QVERIFY(!detail::waitForDatagrams(socket, port, 50));
+    QCOMPARE(socket.state(), QAbstractSocket::BoundState);
+    QCOMPARE(socket.localPort(), port);
+    sender.writeDatagram("two", QHostAddress::LocalHost, port);
+    QVERIFY(detail::waitForDatagrams(socket, port, 2000));
+    QCOMPARE(socket.receiveDatagram().data(), QByteArray("two"));
 }
 
 //=============================================================================================================

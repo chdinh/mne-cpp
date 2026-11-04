@@ -4,7 +4,7 @@
   "policy": "scripts/quality/api_evidence_policy.json",
   "summary": {
     "exported_classes": 481,
-    "exported_free_functions": 146,
+    "exported_free_functions": 148,
     "registered_classes": 571,
     "exported_not_registered": 1,
     "registered_function_modules": 13,
@@ -810,6 +810,16 @@
     {
       "name": "buildHashLong",
       "header": "lsl/lsl_global.h",
+      "library": "lsl"
+    },
+    {
+      "name": "bindQuerySocket",
+      "header": "lsl/lsl_protocol.h",
+      "library": "lsl"
+    },
+    {
+      "name": "waitForDatagrams",
+      "header": "lsl/lsl_protocol.h",
       "library": "lsl"
     },
     {

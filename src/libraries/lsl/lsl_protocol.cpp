@@ -22,6 +22,8 @@
 #include <cstring>
 #include <sstream>
 
+#include <QVariant>
+
 //=============================================================================================================
 // USED NAMESPACES
 //=============================================================================================================
@@ -401,4 +403,38 @@ std::string LSLLIB::detail::hostText(const QHostAddress& address)
     bool mapped = false;
     const quint32 v4 = address.toIPv4Address(&mapped);
     return (mapped ? QHostAddress(v4) : address).toString().toStdString();
+}
+
+//=============================================================================================================
+
+bool LSLLIB::detail::bindQuerySocket(QUdpSocket& socket, quint16 port)
+{
+    if (!socket.bind(QHostAddress::AnyIPv4, port)) {
+        return false;
+    }
+#ifndef Q_OS_WASM
+    socket.setSocketOption(QAbstractSocket::MulticastTtlOption, 1);
+    socket.setSocketOption(QAbstractSocket::MulticastLoopbackOption, 1);
+#endif
+    return true;
+}
+
+//=============================================================================================================
+
+bool LSLLIB::detail::waitForDatagrams(QUdpSocket& socket, quint16 port, int ms)
+{
+    if (socket.state() != QAbstractSocket::BoundState && !bindQuerySocket(socket, port)) {
+        return false;
+    }
+    if (socket.hasPendingDatagrams()) {
+        return true;
+    }
+    if (ms > 0) {
+        socket.waitForReadyRead(ms);
+    }
+    if (socket.state() != QAbstractSocket::BoundState) {
+        bindQuerySocket(socket, port);
+        return false;
+    }
+    return socket.hasPendingDatagrams();
 }

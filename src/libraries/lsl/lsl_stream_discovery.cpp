@@ -59,16 +59,13 @@ std::vector<stream_info> resolve(const std::string& predicate, double timeout, s
 {
     std::vector<stream_info> results;
     QUdpSocket socket;
-    if (!socket.bind(QHostAddress::AnyIPv4, 0)) {
+    if (!detail::bindQuerySocket(socket, 0)) {
         return results;
     }
-#ifndef Q_OS_WASM
-    socket.setSocketOption(QAbstractSocket::MulticastTtlOption, 1);
-    socket.setSocketOption(QAbstractSocket::MulticastLoopbackOption, 1);
-#endif
+    const quint16 port = socket.localPort();
     const QByteArray id = QByteArray::number(QRandomGenerator::global()->generate64());
     const QByteArray query = "LSL:shortinfo\r\n" + QByteArray::fromStdString(predicate) + "\r\n" +
-        QByteArray::number(socket.localPort()) + " " + id + "\r\n";
+        QByteArray::number(port) + " " + id + "\r\n";
     const QByteArray prefix = id + "\r\n";
 
     std::set<std::string> seen;
@@ -84,9 +81,7 @@ std::vector<stream_info> resolve(const std::string& predicate, double timeout, s
             nextSend = timer.elapsed() + kResendMs;
         }
         const auto wait = static_cast<int>(std::min(timeoutMs, nextSend) - timer.elapsed());
-        if (wait > 0 && !socket.hasPendingDatagrams()) {
-            socket.waitForReadyRead(wait);
-        }
+        detail::waitForDatagrams(socket, port, wait);
         while (socket.hasPendingDatagrams()) {
             const QNetworkDatagram datagram = socket.receiveDatagram();
             const QByteArray data = datagram.data();
