@@ -75,6 +75,9 @@ ACQSHARED_EXPORT std::string acqPythonPackageDir(const std::string& package, con
 /** @return The platform file name of library @p base: liblsl.dylib, liblsl.so, lsl.dll for "lsl". */
 ACQSHARED_EXPORT std::string acqSharedLibraryName(const std::string& base);
 
+/** @return The value of environment variable @p name, empty if it is not set. */
+ACQSHARED_EXPORT std::string acqEnvironment(const char* name);
+
 } // namespace ACQLIB::detail
 
 #endif // ACQ_SHARED_LIBRARY_H

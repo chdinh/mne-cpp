@@ -19,6 +19,7 @@
 #include <algorithm>
 #include <cctype>
 #include <cstdio>
+#include <cstdlib>
 #include <utility>
 
 #if defined(_WIN32)
@@ -244,5 +245,24 @@ std::string ACQLIB::detail::acqSharedLibraryName(const std::string& base)
     return "lib" + base + ".dylib";
 #else
     return "lib" + base + ".so";
+#endif
+}
+
+//=============================================================================================================
+
+std::string ACQLIB::detail::acqEnvironment(const char* name)
+{
+#if defined(_WIN32)
+    char* value = nullptr;
+    std::size_t size = 0;
+    std::string out;
+    if (_dupenv_s(&value, &size, name) == 0 && value != nullptr) {
+        out = value;
+    }
+    std::free(value);
+    return out;
+#else
+    const char* value = std::getenv(name); // NOLINT(concurrency-mt-unsafe): read once while loading a backend
+    return value != nullptr ? value : "";
 #endif
 }

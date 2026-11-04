@@ -32,7 +32,6 @@
 #include <chrono>
 #include <cmath>
 #include <cstdint>
-#include <cstdlib>
 #include <cstring>
 #include <limits>
 #include <memory>
@@ -118,9 +117,7 @@ private:
     static AcqExpected<std::unique_ptr<Liblsl>> load()
     {
         std::vector<std::string> candidates;
-        if (const char* path = std::getenv("MNE_CPP_LIBLSL")) {
-            candidates.emplace_back(path);
-        }
+        candidates.push_back(acqEnvironment("MNE_CPP_LIBLSL"));
         const std::string pylsl = acqPythonPackageDir("pylsl", "lib");
         if (!pylsl.empty()) {
             candidates.push_back(pylsl + "/" + acqSharedLibraryName("lsl"));

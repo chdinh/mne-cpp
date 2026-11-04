@@ -851,8 +851,7 @@ void TestLsl::testResolveStreamsMultipleOutlets()
 void TestLsl::testBuildInfo()
 {
     const char* dt = LSLLIB::buildDateTime();
-    QVERIFY(dt != nullptr);
-    QVERIFY(std::strlen(dt) > 0);
+    QVERIFY(dt != nullptr && std::strlen(dt) > 0);
 
     const char* hash = LSLLIB::buildHash();
     QVERIFY(hash != nullptr);
