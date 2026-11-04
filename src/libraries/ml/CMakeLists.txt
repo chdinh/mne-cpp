@@ -54,8 +54,8 @@ if(TARGET onnxruntime::onnxruntime)
     target_compile_definitions(${PROJECT_NAME} PUBLIC MNE_USE_ONNXRUNTIME)
     message(STATUS "[mne_ml] ONNX Runtime enabled")
 
-    # Copy the ONNX Runtime shared library next to mne_ml so the runtime linker
-    # can find it (via RPATH on macOS/Linux, or same-directory on Windows).
+    # Copy the ONNX Runtime shared library next to mne_ml, in the build and in the installed SDK, so the runtime
+    # linker can find it (via RPATH on macOS/Linux, or same-directory on Windows).
     get_target_property(_ort_loc onnxruntime::onnxruntime IMPORTED_LOCATION)
     if(NOT _ort_loc)
         get_target_property(_ort_loc onnxruntime::onnxruntime IMPORTED_LOCATION_RELEASE)
@@ -69,6 +69,7 @@ if(TARGET onnxruntime::onnxruntime)
                     COMMAND ${CMAKE_COMMAND} -E copy_if_different "${_dll}" "$<TARGET_FILE_DIR:${PROJECT_NAME}>"
                     COMMENT "Copying ORT DLL: ${_dll}")
             endforeach()
+            install(FILES ${_ort_dlls} DESTINATION bin COMPONENT runtime)
         elseif(APPLE)
             file(GLOB _ort_dylibs "${_ort_dir}/libonnxruntime*.dylib")
             foreach(_dylib ${_ort_dylibs})
@@ -76,6 +77,7 @@ if(TARGET onnxruntime::onnxruntime)
                     COMMAND ${CMAKE_COMMAND} -E copy_if_different "${_dylib}" "$<TARGET_FILE_DIR:${PROJECT_NAME}>"
                     COMMENT "Copying ORT dylib: ${_dylib}")
             endforeach()
+            install(FILES ${_ort_dylibs} DESTINATION lib COMPONENT runtime)
         else()
             file(GLOB _ort_sos "${_ort_dir}/libonnxruntime*.so*")
             foreach(_so ${_ort_sos})
@@ -83,6 +85,7 @@ if(TARGET onnxruntime::onnxruntime)
                     COMMAND ${CMAKE_COMMAND} -E copy_if_different "${_so}" "$<TARGET_FILE_DIR:${PROJECT_NAME}>"
                     COMMENT "Copying ORT so: ${_so}")
             endforeach()
+            install(FILES ${_ort_sos} DESTINATION lib COMPONENT runtime)
         endif()
     endif()
 endif()
