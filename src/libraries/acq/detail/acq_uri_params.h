@@ -31,21 +31,22 @@ namespace ACQLIB::detail
 {
 
 /** @return The integer value of key in [min, max], fallback if absent, or InvalidParameter naming the key. */
-AcqExpected<std::int64_t> paramInt(const AcqUri& uri, std::string_view key, std::int64_t fallback, std::int64_t min,
-                                   std::int64_t max);
+ACQSHARED_EXPORT AcqExpected<std::int64_t> paramInt(const AcqUri& uri, std::string_view key, std::int64_t fallback,
+                                                    std::int64_t min, std::int64_t max);
 
 /** @return The decimal value of key in [min, max], fallback if absent, or InvalidParameter naming the key. */
-AcqExpected<double> paramDouble(const AcqUri& uri, std::string_view key, double fallback, double min, double max);
+ACQSHARED_EXPORT AcqExpected<double> paramDouble(const AcqUri& uri, std::string_view key, double fallback, double min,
+                                                 double max);
 
 /** @return The value of key (1/0, true/false, yes/no, on/off), fallback if absent, or InvalidParameter. */
-AcqExpected<bool> paramBool(const AcqUri& uri, std::string_view key, bool fallback);
+ACQSHARED_EXPORT AcqExpected<bool> paramBool(const AcqUri& uri, std::string_view key, bool fallback);
 
 /**
  * @return The policy of a backend's acquisition thread from cpus (comma-separated CPU numbers) and priority
  *         (normal, high, realtime); both optional. InvalidParameter for malformed values; whether the CPUs
  *         exist is checked when the thread applies the policy.
  */
-AcqExpected<AcqThreadPolicy> paramThreadPolicy(const AcqUri& uri);
+ACQSHARED_EXPORT AcqExpected<AcqThreadPolicy> paramThreadPolicy(const AcqUri& uri);
 
 } // namespace ACQLIB::detail
 

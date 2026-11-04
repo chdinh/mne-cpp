@@ -17,6 +17,7 @@ find_package(Qt${QT_VERSION_MAJOR} REQUIRED COMPONENTS ${QT_REQUIRED_COMPONENTS}
 
 set(SOURCES
   acq_fiff.cpp
+  acq_fiff_replay.cpp
   acq_recorder.cpp
   detail/acq_direct_file.cpp
 )
@@ -28,6 +29,7 @@ set(PRIVATE_HEADERS
 set(HEADERS
   acq_fiff_global.h
   acq_fiff.h
+  acq_fiff_replay.h
   acq_recorder.h
 )
 

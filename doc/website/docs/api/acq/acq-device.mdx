@@ -230,7 +230,7 @@ Opens a source through [`AcqDeviceRegistry`](/docs/api/acq/acq-device-registry),
 
 Record an acquisition source to FIFF and to a BIDS dataset while it runs, and read the file back.
 
-````cpp title="src/examples/ex_acq_record/main.cpp, line 70"
+````cpp title="src/examples/ex_acq_record/main.cpp, line 71"
 auto device = AcqDevice::open(uri);
 if (!device) {
     std::fprintf(stderr, "%s\n", device.error().text().c_str());

@@ -60,7 +60,7 @@ std::printf("recorded %llu samples (%llu lost) and %llu events in %llu buffers, 
 
 Record an acquisition source to FIFF and to a BIDS dataset while it runs, and read the file back.
 
-````cpp title="src/examples/ex_acq_record/main.cpp, line 91"
+````cpp title="src/examples/ex_acq_record/main.cpp, line 92"
 const AcqRecorderStats stats = recorder->stats();
 std::printf("recorded %llu samples (%llu lost) and %llu events in %llu buffers, %.1f MB, direct I/O %s\n",
             static_cast<unsigned long long>(stats.samples), static_cast<unsigned long long>(stats.lost),

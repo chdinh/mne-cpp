@@ -32,7 +32,7 @@ file(GLOB _acq_tests LIST_DIRECTORIES true "${MNE_ROOT}/src/testframes/test_acq_
 foreach(_dir ${_acq_tests})
     get_filename_component(_name "${_dir}" NAME)
     add_executable(${_name} "${_dir}/${_name}.cpp")
-    if(_name STREQUAL "test_acq_recorder")
+    if(_name STREQUAL "test_acq_recorder" OR _name STREQUAL "test_acq_fiff_replay")
         # mne_acq_fiff brings mne_acq and mne_fiff; listing them again duplicates the static archives.
         target_link_libraries(${_name} PRIVATE Qt6::Core Qt6::Test mne_acq_fiff Eigen3::Eigen)
         target_compile_definitions(${_name} PRIVATE ACQ_RECORDER_CHECK_SCRIPT="${_dir}/check_recording.py")

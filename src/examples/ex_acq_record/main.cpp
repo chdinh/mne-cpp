@@ -24,6 +24,7 @@
 //=============================================================================================================
 
 #include <acq/acq.h>
+#include <acq/fiff/acq_fiff_replay.h>
 #include <acq/fiff/acq_recorder.h>
 
 #include <disp/plots/helpers/figureexporter.h>
@@ -103,6 +104,28 @@ int main(int argc, char* argv[])
                 raw.first_samp, raw.last_samp, qPrintable(recorded.type), qPrintable(recorded.model),
                 qPrintable(recorded.serial));
     //! [acq_record_read]
+
+    //! [acq_replay_fiff]
+    // fiff:// replays a raw file as a source in its native format, with the trigger channel's changes as events.
+    registerFiffScheme();                                                                // keeps a static link from dropping the backend
+    auto replay = AcqDevice::open(AcqUri{"fiff", path, {{"realtime", "0"}}}.toString()); // as fast as possible
+    AcqReaderOptions gating;
+    gating.gating = true; // the replay waits for this reader, so it reads the whole file
+    auto reader = replay ? replay->stream().reader(AcqReader::ReadMode::Lossless, gating) : replay.error();
+    if (!reader || !replay->start().ok()) {
+        return 1;
+    }
+    std::uint64_t replayed = 0;
+    std::uint64_t triggers = 0;
+    while (auto view = reader->acquire(1, std::chrono::seconds(5))) {
+        replayed += view->sampleCount();
+        triggers += view->events().size();
+        static_cast<void>(reader->release(*view));
+    }
+    replay->close();
+    std::printf("replayed %llu samples and %llu trigger events from %s\n", static_cast<unsigned long long>(replayed),
+                static_cast<unsigned long long>(triggers), path.c_str());
+    //! [acq_replay_fiff]
 
     //! [acq_record_bids]
     auto session = AcqDevice::open(uri);

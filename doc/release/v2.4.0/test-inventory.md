@@ -6,8 +6,8 @@ CI evidence: https://github.com/mne-tools/mne-cpp/actions/runs/39457390522 (comm
 
 ## Registration
 
-- Test directories: 273
-- Registered unconditionally: 264
+- Test directories: 274
+- Registered unconditionally: 265
 - Registered behind a CMake condition or early `return()`: 6
 - Not registered: 3
 - Registered without `LABELS`: 0
@@ -18,12 +18,12 @@ CI evidence: https://github.com/mne-tools/mne-cpp/actions/runs/39457390522 (comm
 
 | Platform | Executed | Failures | Skipped | Registered but not executed |
 |---|---:|---:|---:|---|
-| macos-26 | 295 | 0 | 0 | `test_acq_convert`, `test_acq_device`, `test_acq_dlpack`, `test_acq_error`, `test_acq_recorder`, `test_acq_stream`, `test_acq_thread`, `test_acq_timebase` |
-| macos-26-qt-min | 295 | 0 | 0 | `test_acq_convert`, `test_acq_device`, `test_acq_dlpack`, `test_acq_error`, `test_acq_recorder`, `test_acq_stream`, `test_acq_thread`, `test_acq_timebase` |
-| ubuntu-24.04 | 295 | 0 | 0 | `test_acq_convert`, `test_acq_device`, `test_acq_dlpack`, `test_acq_error`, `test_acq_recorder`, `test_acq_stream`, `test_acq_thread`, `test_acq_timebase` |
-| ubuntu-24.04-qt-min | 295 | 0 | 0 | `test_acq_convert`, `test_acq_device`, `test_acq_dlpack`, `test_acq_error`, `test_acq_recorder`, `test_acq_stream`, `test_acq_thread`, `test_acq_timebase` |
-| windows-2025-vs2026 | 295 | 0 | 2 | `test_acq_convert`, `test_acq_device`, `test_acq_dlpack`, `test_acq_error`, `test_acq_recorder`, `test_acq_stream`, `test_acq_thread`, `test_acq_timebase` |
-| windows-2025-vs2026-qt-min | 295 | 0 | 2 | `test_acq_convert`, `test_acq_device`, `test_acq_dlpack`, `test_acq_error`, `test_acq_recorder`, `test_acq_stream`, `test_acq_thread`, `test_acq_timebase` |
+| macos-26 | 295 | 0 | 0 | `test_acq_convert`, `test_acq_device`, `test_acq_dlpack`, `test_acq_error`, `test_acq_fiff_replay`, `test_acq_recorder`, `test_acq_stream`, `test_acq_thread`, `test_acq_timebase` |
+| macos-26-qt-min | 295 | 0 | 0 | `test_acq_convert`, `test_acq_device`, `test_acq_dlpack`, `test_acq_error`, `test_acq_fiff_replay`, `test_acq_recorder`, `test_acq_stream`, `test_acq_thread`, `test_acq_timebase` |
+| ubuntu-24.04 | 295 | 0 | 0 | `test_acq_convert`, `test_acq_device`, `test_acq_dlpack`, `test_acq_error`, `test_acq_fiff_replay`, `test_acq_recorder`, `test_acq_stream`, `test_acq_thread`, `test_acq_timebase` |
+| ubuntu-24.04-qt-min | 295 | 0 | 0 | `test_acq_convert`, `test_acq_device`, `test_acq_dlpack`, `test_acq_error`, `test_acq_fiff_replay`, `test_acq_recorder`, `test_acq_stream`, `test_acq_thread`, `test_acq_timebase` |
+| windows-2025-vs2026 | 295 | 0 | 2 | `test_acq_convert`, `test_acq_device`, `test_acq_dlpack`, `test_acq_error`, `test_acq_fiff_replay`, `test_acq_recorder`, `test_acq_stream`, `test_acq_thread`, `test_acq_timebase` |
+| windows-2025-vs2026-qt-min | 295 | 0 | 2 | `test_acq_convert`, `test_acq_device`, `test_acq_dlpack`, `test_acq_error`, `test_acq_fiff_replay`, `test_acq_recorder`, `test_acq_stream`, `test_acq_thread`, `test_acq_timebase` |
 
 ## Run-time requirements (lexical signals)
 
@@ -32,9 +32,9 @@ CI evidence: https://github.com/mne-tools/mne-cpp/actions/runs/39457390522 (comm
 | freesurfer | 2 |
 | python | 10 |
 | sample-data | 20 |
-| test-data | 120 |
+| test-data | 121 |
 | GUI (`QTEST_MAIN`) | 46 |
-| Contains `QSKIP` | 91 |
+| Contains `QSKIP` | 92 |
 
 ## Conditional and unregistered tests
 

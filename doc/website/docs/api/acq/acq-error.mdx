@@ -133,7 +133,7 @@ for (std::size_t e = 0; e < samples.events().size(); ++e) {
 
 Record an acquisition source to FIFF and to a BIDS dataset while it runs, and read the file back.
 
-````cpp title="src/examples/ex_acq_record/main.cpp, line 86"
+````cpp title="src/examples/ex_acq_record/main.cpp, line 87"
 device->close();
 if (const AcqError error = recorder->stop(); !error.ok()) {
     std::fprintf(stderr, "%s\n", error.text().c_str());
