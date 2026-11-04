@@ -77,13 +77,16 @@ void TestRtServerFiffReplay::streamsTheFile()
     while (!output.contains("fiff data port") && m_server.waitForReadyRead(30000)) {
         output += m_server.readAll();
     }
-    QVERIFY2(output.contains("fiff data port"), "mne_rt_server did not start listening");
+    QVERIFY2(output.contains("fiff data port"), output.constData());
+    QVERIFY2(output.contains("Fiff File Simulator"), output.constData());
 
     RtCmdClient command;
     command.connectToHost(QStringLiteral("127.0.0.1"), 4217);
     QVERIFY(command.waitForConnected(5000));
     command.requestCommands();
-    QVERIFY(command.hasCommand(QStringLiteral("simfile")));
+    QVERIFY2(command.hasCommand(QStringLiteral("simfile")),
+             qPrintable(QStringLiteral("help reply: ") + command.readAvailableData().left(400) + "\nserver: " +
+                        QString::fromUtf8(output + m_server.readAll())));
     command[QStringLiteral("simfile")].pValues()[0].setValue(file);
     command[QStringLiteral("simfile")].send();
     QVERIFY(command.waitForDataAvailable(10000));
