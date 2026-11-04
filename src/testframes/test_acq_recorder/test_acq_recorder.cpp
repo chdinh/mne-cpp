@@ -799,7 +799,8 @@ void TestAcqRecorder::splitsFiles()
 {
     // 2 MiB parts of 16 float64 channels: the first keeps 1 MiB free for its annotations, as MNE-Python.
     AcqStreamInfo info = makeInfo(AcqSampleFormat::Float64, AcqLayout::Interleaved, 16, true);
-    const QString path = m_dir.filePath(QStringLiteral("split_raw.fif"));
+    // The doubled separator checks that later parts keep the directory exactly as given.
+    const QString path = m_dir.path() + QStringLiteral("//split_raw.fif");
     AcqRecorderOptions options;
     options.bufferSamples = 500;
     options.splitBytes = 2 * 1048576;
@@ -809,7 +810,7 @@ void TestAcqRecorder::splitsFiles()
     QVERIFY(r.files.size() >= 3);
     QCOMPARE(r.stats.files, r.files.size());
     QCOMPARE(QString::fromStdString(r.files[0]), path);
-    QCOMPARE(QString::fromStdString(r.files[1]), m_dir.filePath(QStringLiteral("split_raw-1.fif")));
+    QCOMPARE(QString::fromStdString(r.files[1]), m_dir.path() + QStringLiteral("//split_raw-1.fif"));
     std::uint64_t next = 0;
     for (const std::string& part : r.files) {
         QVERIFY(QFileInfo(QString::fromStdString(part)).size() <= static_cast<qint64>(options.splitBytes));

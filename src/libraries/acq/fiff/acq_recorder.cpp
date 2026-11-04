@@ -492,8 +492,14 @@ struct AcqRecorder::Impl
         if (bids) {
             return splitPath(index);
         }
-        return (first.parent_path() / (first.stem().string() + "-" + std::to_string(index) + first.extension().string()))
-            .string();
+        return sibling(first.stem().string() + "-" + std::to_string(index) + first.extension().string());
+    }
+
+    /** @p name in the directory of the first part, spelled as the caller gave it (no separator rewrite on Windows). */
+    std::string sibling(const std::string& name) const
+    {
+        const std::string first = std::filesystem::path(firstPath).filename().string();
+        return firstPath.substr(0, firstPath.size() - first.size()) + name;
     }
 
     /** BIDS name of part @p index of a split recording: sub-01_task-x_meg.fif -> sub-01_task-x_split-02_meg.fif. */
@@ -504,7 +510,7 @@ struct AcqRecorder::Impl
         const std::size_t suffix = name.rfind("_meg.fif");
         char split[16];
         std::snprintf(split, sizeof(split), "_split-%02zu", index + 1);
-        return (first.parent_path() / (name.substr(0, suffix) + split + name.substr(suffix))).string();
+        return sibling(name.substr(0, suffix) + split + name.substr(suffix));
     }
 
     /** Name of part @p index once the recording is complete, as the links between parts give it. */
