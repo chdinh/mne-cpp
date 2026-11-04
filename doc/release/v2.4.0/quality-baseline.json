@@ -11,7 +11,7 @@
   },
   "gates": {
     "G1_test_integrity": {
-      "registered": 273,
+      "registered": 274,
       "conditional": 6,
       "unregistered": 3,
       "without_labels": 0,
@@ -44,6 +44,7 @@
           "test_acq_stream",
           "test_acq_thread",
           "test_acq_timebase",
+          "test_mne_acq_tool",
           "test_rt_server_fiff_replay"
         ],
         "macos-26-qt-min": [
@@ -57,6 +58,7 @@
           "test_acq_stream",
           "test_acq_thread",
           "test_acq_timebase",
+          "test_mne_acq_tool",
           "test_rt_server_fiff_replay"
         ],
         "ubuntu-24.04": [
@@ -70,6 +72,7 @@
           "test_acq_stream",
           "test_acq_thread",
           "test_acq_timebase",
+          "test_mne_acq_tool",
           "test_rt_server_fiff_replay"
         ],
         "ubuntu-24.04-qt-min": [
@@ -83,6 +86,7 @@
           "test_acq_stream",
           "test_acq_thread",
           "test_acq_timebase",
+          "test_mne_acq_tool",
           "test_rt_server_fiff_replay"
         ],
         "windows-2025-vs2026": [
@@ -96,6 +100,7 @@
           "test_acq_stream",
           "test_acq_thread",
           "test_acq_timebase",
+          "test_mne_acq_tool",
           "test_rt_server_fiff_replay"
         ],
         "windows-2025-vs2026-qt-min": [
@@ -109,6 +114,7 @@
           "test_acq_stream",
           "test_acq_thread",
           "test_acq_timebase",
+          "test_mne_acq_tool",
           "test_rt_server_fiff_replay"
         ]
       },

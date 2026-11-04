@@ -1,0 +1,81 @@
+---
+title: mne_acq
+sidebar_label: mne_acq
+sidebar_position: 11
+---
+
+# mne_acq
+
+## Overview
+
+`mne_acq` lists, inspects, records and re-publishes acquisition sources from the command line. A source is
+named by the same URI that the acquisition library (`ACQLIB::AcqDevice::open`) takes, so anything that works
+in code works here.
+
+## Usage
+
+```bash
+mne_acq list [--timeout s]
+mne_acq info <uri>
+mne_acq record <uri> <file.fif> [--duration s]
+mne_acq stream <uri> --lsl [--name n] [--duration s]
+```
+
+## Commands
+
+| Command | Description |
+|---|---|
+| `list` | Prints the registered URI schemes and the sources that answer within `--timeout` seconds (default 1), each with a URI ready for the other commands |
+| `info <uri>` | Opens the source and prints its backend, device and, per stream, the sample format, sampling rate, clock and every channel with its kind and unit |
+| `record <uri> <file.fif>` | Records the first stream of the source to a raw FIFF file (split into parts like MNE-Python above 2 GB), with trigger events in the stim channel and as annotations |
+| `stream <uri> --lsl` | Publishes the first stream of the source as a Lab Streaming Layer outlet (float32, the stream's name unless `--name` is given) |
+
+## Options
+
+| Option | Description |
+|---|---|
+| `--timeout <s>` | Seconds to search for sources (`list`) |
+| `--duration <s>` | Seconds to run (`record`, `stream`); 0, the default, runs until the source ends or Ctrl+C |
+| `--lsl` | Publish as an LSL outlet (`stream`) |
+| `--name <n>` | Name of the published LSL stream (`stream`) |
+| `-h, --help` | Displays help |
+| `-v, --version` | Displays the version |
+
+## Sources
+
+| URI | Source |
+|---|---|
+| `synthetic://?eeg=32&sfreq=1000` | Seeded synthetic oddball session |
+| `fiff:///data/sample_raw.fif?loop=1&speed=2` | Replay of a raw FIFF file, paced in real time |
+| `lsl://NAME` | A Lab Streaming Layer stream by name |
+
+## Exit Codes
+
+| Code | Meaning |
+|---|---|
+| 0 | Success |
+| 1 | Usage error (unknown command, missing argument, invalid number) |
+| 2 | The source could not be opened or read, or the output could not be written |
+
+## Examples
+
+Record 60 s of a synthetic session and check the result in MNE-Python:
+
+```bash
+mne_acq record "synthetic://?eeg=32&sfreq=1000" session_raw.fif --duration 60
+python -c "import mne; print(mne.io.read_raw_fif('session_raw.fif'))"
+```
+
+Re-publish a recorded file to LSL, e.g. for an LSL-based pipeline or LabRecorder:
+
+```bash
+mne_acq stream "fiff:///data/sample_audvis_raw.fif?loop=1" --lsl --name SampleMEG
+```
+
+Inspect an LSL stream, then record it:
+
+```bash
+mne_acq list
+mne_acq info lsl://SampleMEG
+mne_acq record lsl://SampleMEG sample_copy_raw.fif --duration 30
+```

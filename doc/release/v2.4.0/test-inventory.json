@@ -6,9 +6,9 @@
     "commit": "0800c9a1bf606c2df8c44e35fbb42ea13029b549"
   },
   "summary": {
-    "directories": 276,
+    "directories": 277,
     "registration": {
-      "unconditional": 267,
+      "unconditional": 268,
       "conditional": 6,
       "unregistered": 3
     },
@@ -23,7 +23,7 @@
       "test-data": 122
     },
     "gui": 46,
-    "with_qskip": 94,
+    "with_qskip": 95,
     "ci_excluded": {},
     "retry_paths": [],
     "ci": {
@@ -42,6 +42,7 @@
           "test_acq_stream",
           "test_acq_thread",
           "test_acq_timebase",
+          "test_mne_acq_tool",
           "test_rt_server_fiff_replay"
         ],
         "executed_not_in_inventory": [
@@ -95,6 +96,7 @@
           "test_acq_stream",
           "test_acq_thread",
           "test_acq_timebase",
+          "test_mne_acq_tool",
           "test_rt_server_fiff_replay"
         ],
         "executed_not_in_inventory": [
@@ -148,6 +150,7 @@
           "test_acq_stream",
           "test_acq_thread",
           "test_acq_timebase",
+          "test_mne_acq_tool",
           "test_rt_server_fiff_replay"
         ],
         "executed_not_in_inventory": [
@@ -201,6 +204,7 @@
           "test_acq_stream",
           "test_acq_thread",
           "test_acq_timebase",
+          "test_mne_acq_tool",
           "test_rt_server_fiff_replay"
         ],
         "executed_not_in_inventory": [
@@ -254,6 +258,7 @@
           "test_acq_stream",
           "test_acq_thread",
           "test_acq_timebase",
+          "test_mne_acq_tool",
           "test_rt_server_fiff_replay"
         ],
         "executed_not_in_inventory": [
@@ -307,6 +312,7 @@
           "test_acq_stream",
           "test_acq_thread",
           "test_acq_timebase",
+          "test_mne_acq_tool",
           "test_rt_server_fiff_replay"
         ],
         "executed_not_in_inventory": [
@@ -6202,6 +6208,38 @@
         "ubuntu-24.04-qt-min": "run",
         "windows-2025-vs2026": "run",
         "windows-2025-vs2026-qt-min": "run"
+      },
+      "registry_classes": []
+    },
+    {
+      "name": "test_mne_acq_tool",
+      "cmake": "src/testframes/test_mne_acq_tool/CMakeLists.txt",
+      "registration": {
+        "state": "unconditional",
+        "via": "src/testframes/CMakeLists.txt",
+        "conditions": [],
+        "early_return_guard": null,
+        "unregistered_reason": null
+      },
+      "add_test_names": [
+        "test_mne_acq_tool"
+      ],
+      "labels": [
+        "integration"
+      ],
+      "timeout": 180,
+      "requirements": [],
+      "gui": false,
+      "qskip_sites": 1,
+      "spawns_processes": true,
+      "ci_excluded_on": [],
+      "ci": {
+        "macos-26": "absent",
+        "macos-26-qt-min": "absent",
+        "ubuntu-24.04": "absent",
+        "ubuntu-24.04-qt-min": "absent",
+        "windows-2025-vs2026": "absent",
+        "windows-2025-vs2026-qt-min": "absent"
       },
       "registry_classes": []
     },

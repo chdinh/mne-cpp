@@ -4,7 +4,7 @@
   "policy": "scripts/quality/api_evidence_policy.json",
   "summary": {
     "exported_classes": 481,
-    "exported_free_functions": 145,
+    "exported_free_functions": 146,
     "registered_classes": 571,
     "exported_not_registered": 1,
     "registered_function_modules": 13,
@@ -294,6 +294,11 @@
     },
     {
       "name": "acqSharedLibraryName",
+      "header": "acq/detail/acq_shared_library.h",
+      "library": "acq"
+    },
+    {
+      "name": "acqEnvironment",
       "header": "acq/detail/acq_shared_library.h",
       "library": "acq"
     },

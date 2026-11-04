@@ -218,6 +218,7 @@ const sidebars: SidebarsConfig = {
                                 'manual/tools-show-mna',
                             ],
                         },
+                        'manual/tools-acq',
                         'manual/tools-rt-server',
                         'manual/tools-simu',
                     ],

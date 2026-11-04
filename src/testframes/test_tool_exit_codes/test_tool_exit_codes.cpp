@@ -209,6 +209,7 @@ void TestToolExitCodes::missingRequiredArguments_data()
     QTest::newRow("mne_change_nave") << "mne_change_nave";
     QTest::newRow("mne_mark_bad_channels") << "mne_mark_bad_channels";
     QTest::newRow("mne_cov2proj") << "mne_cov2proj";
+    QTest::newRow("mne_acq") << "mne_acq";
     QTest::newRow("mne_compare_fif_files") << "mne_compare_fif_files";
     QTest::newRow("mne_collect_transforms") << "mne_collect_transforms";
     QTest::newRow("mne_add_patch_info") << "mne_add_patch_info";
@@ -369,7 +370,7 @@ void TestToolExitCodes::helpSucceeds_data()
         "mne_rt_server", "mne_simu", "mne_screenshot_regression",
 
         // Acquisition
-        "mne_acq_bench"};
+        "mne_acq", "mne_acq_bench"};
 
     for (const QString& tool : tools) {
         QTest::newRow(tool.toUtf8().constData()) << tool;

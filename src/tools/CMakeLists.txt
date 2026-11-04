@@ -137,6 +137,7 @@ option(BUILD_MNE_SIMU "Build MNE Simu" ON)
 option(BUILD_MNE_SCREENSHOT_REGRESSION "Build MNE Screenshot Regression" ON)
 
 # Acquisition
+option(BUILD_MNE_ACQ_TOOL "Build the mne_acq command-line tool" ON)
 option(BUILD_MNE_ACQ_BENCH "Build MNE acquisition performance suite" ON)
 
 ##==============================================================================
@@ -415,6 +416,9 @@ if(NOT WASM)
   endif()
 
   # Acquisition
+  if(BUILD_MNE_ACQ_TOOL AND TARGET mne_acq_fiff AND TARGET mne_acq_lsl)
+    add_subdirectory(acquisition/mne_acq)
+  endif()
   if(BUILD_MNE_ACQ_BENCH)
     add_subdirectory(acquisition/mne_acq_bench)
   endif()
