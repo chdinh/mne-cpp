@@ -5,7 +5,7 @@
 cmake_minimum_required(VERSION 3.14)
 project(mne_acq_tool LANGUAGES CXX)
 
-set(QT_REQUIRED_COMPONENTS Core)
+set(QT_REQUIRED_COMPONENTS Core Network)
 find_package(QT NAMES Qt6 Qt5 REQUIRED COMPONENTS ${QT_REQUIRED_COMPONENTS})
 find_package(Qt${QT_VERSION_MAJOR} REQUIRED COMPONENTS ${QT_REQUIRED_COMPONENTS})
 
@@ -16,7 +16,7 @@ else()
     add_executable(${PROJECT_NAME} main.cpp)
 endif()
 
-target_link_libraries(${PROJECT_NAME} PRIVATE Qt${QT_VERSION_MAJOR}::Core mne_acq mne_acq_fiff mne_acq_lsl mne_lsl)
+target_link_libraries(${PROJECT_NAME} PRIVATE Qt${QT_VERSION_MAJOR}::Core Qt${QT_VERSION_MAJOR}::Network mne_acq mne_acq_fiff mne_acq_lsl mne_lsl)
 
 set_target_properties(${PROJECT_NAME} PROPERTIES
     OUTPUT_NAME mne_acq

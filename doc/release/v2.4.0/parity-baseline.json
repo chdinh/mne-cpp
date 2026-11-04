@@ -9,6 +9,7 @@
     ],
     "ci_pip_packages": [
       "bids-validator-deno==3.0.2",
+      "brainflow==5.23.0",
       "clang-tidy==22.1.8",
       "fastcov==1.17",
       "mne-bids==0.17.0",
@@ -121,6 +122,7 @@
         "test_acq_recorder",
         "test_crossval_covariance",
         "test_ml_trainer",
+        "test_mne_acq_tool",
         "test_mne_compute_raw_inverse",
         "test_python_runner"
       ]

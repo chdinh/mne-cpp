@@ -19,6 +19,7 @@ mne_acq list [--timeout s]
 mne_acq info <uri>
 mne_acq record <uri> <file.fif> [--duration s]
 mne_acq stream <uri> --lsl [--name n] [--duration s]
+mne_acq stream <uri> --brainflow-multicast <address:port> [--master-board id] [--duration s]
 ```
 
 ## Commands
@@ -29,6 +30,7 @@ mne_acq stream <uri> --lsl [--name n] [--duration s]
 | `info <uri>` | Opens the source and prints its backend, device and, per stream, the sample format, sampling rate, clock and every channel with its kind and unit |
 | `record <uri> <file.fif>` | Records the first stream of the source to a raw FIFF file (split into parts like MNE-Python above 2 GB), with trigger events in the stim channel and as annotations |
 | `stream <uri> --lsl` | Publishes the first stream of the source as a Lab Streaming Layer outlet (float32, the stream's name unless `--name` is given) |
+| `stream <uri> --brainflow-multicast` | Publishes the first stream in BrainFlow's multicast format, so BrainFlow's `STREAMING_BOARD` in Python, C#, Julia or Java receives it (see below) |
 
 ## Options
 
@@ -38,6 +40,8 @@ mne_acq stream <uri> --lsl [--name n] [--duration s]
 | `--duration <s>` | Seconds to run (`record`, `stream`); 0, the default, runs until the source ends or Ctrl+C |
 | `--lsl` | Publish as an LSL outlet (`stream`) |
 | `--name <n>` | Name of the published LSL stream (`stream`) |
+| `--brainflow-multicast <address:port>` | Publish in BrainFlow's multicast format to this group, e.g. `225.1.1.1:6677` (`stream`) |
+| `--master-board <id>` | BrainFlow board whose row layout is sent (`stream`; default -1, the synthetic board) |
 | `-h, --help` | Displays help |
 | `-v, --version` | Displays the version |
 
@@ -48,6 +52,27 @@ mne_acq stream <uri> --lsl [--name n] [--duration s]
 | `synthetic://?eeg=32&sfreq=1000` | Seeded synthetic oddball session |
 | `fiff:///data/sample_raw.fif?loop=1&speed=2` | Replay of a raw FIFF file, paced in real time |
 | `lsl://NAME` | A Lab Streaming Layer stream by name |
+
+## BrainFlow Output
+
+BrainFlow's `STREAMING_BOARD` interprets every packet with the row layout of a *master board*, so the publisher
+sends that layout: the source's channels fill the board's EEG rows in order (volts as microvolts, as BrainFlow
+reports EEG), the package row counts samples modulo 256 and the timestamp row holds Unix time. Channels beyond the
+board's EEG rows are not sent. The layout comes from BrainFlow when it is installed (`pip install brainflow`, or
+`MNE_CPP_BRAINFLOW` pointing to its `BoardController` library); without it, only the synthetic board (-1, 16 EEG
+rows) is known. Triggers are sent in the stim channel's row: `STREAMING_BOARD` fills the marker row from its own
+`insert_marker()`. Both sides must use the same `BRAINFLOW_BATCH_SIZE` (default 3).
+
+```python
+from brainflow.board_shim import BoardIds, BoardShim, BrainFlowInputParams
+
+params = BrainFlowInputParams()
+params.ip_address, params.ip_port = "225.1.1.1", 6677
+params.master_board = BoardIds.SYNTHETIC_BOARD
+board = BoardShim(BoardIds.STREAMING_BOARD, params)
+board.prepare_session()
+board.start_stream()
+```
 
 ## Exit Codes
 

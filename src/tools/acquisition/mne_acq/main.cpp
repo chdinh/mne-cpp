@@ -13,6 +13,7 @@
  *   mne_acq info <uri>                                 device, streams and channels of a source
  *   mne_acq record <uri> <file.fif> [--duration s]     record the first stream to FIFF
  *   mne_acq stream <uri> --lsl [--name n] [--duration s]   publish the first stream as an LSL outlet
+ *   mne_acq stream <uri> --brainflow-multicast a:p [--master-board id]   publish it for BrainFlow's STREAMING_BOARD
  *
  * record and stream run until the duration has passed, the source ends (e.g. a file replay without loop) or
  * Ctrl+C. Exit codes: 0 success, 1 usage error, 2 the source or the output failed.
@@ -23,6 +24,7 @@
 //=============================================================================================================
 
 #include <acq/acq.h>
+#include <acq/detail/acq_shared_library.h>
 #include <acq/fiff/acq_fiff_replay.h>
 #include <acq/fiff/acq_recorder.h>
 #include <acq/lsl/acq_lsl.h>
@@ -33,6 +35,7 @@
 #include <atomic>
 #include <chrono>
 #include <csignal>
+#include <optional>
 #include <string>
 #include <thread>
 #include <vector>
@@ -43,6 +46,12 @@
 
 #include <QCommandLineParser>
 #include <QCoreApplication>
+#include <QHostAddress>
+#include <QJsonArray>
+#include <QJsonDocument>
+#include <QJsonObject>
+#include <QNetworkInterface>
+#include <QUdpSocket>
 #include <QTextStream>
 
 //=============================================================================================================
@@ -229,60 +238,215 @@ int record(const QString& uri, const QString& path, double duration)
 
 //=============================================================================================================
 
-int streamLsl(const QString& uri, const QString& name, double duration)
+/** One decoded block: physical units, column-major channels x samples. */
+struct Block
 {
-    auto device = openSource(uri);
-    if (!device) {
-        return kRunError;
-    }
-    auto reader = device->stream().reader(AcqReader::ReadMode::Lossless);
-    if (!reader) {
-        err() << QString::asprintf("mne_acq: %s\n", reader.error().text().c_str());
-        return kRunError;
-    }
-    const auto streamInfo = reader->stream().info();
-    const std::size_t channels = streamInfo->channels.size();
-    const std::string type = channels > 0 ? kindName(streamInfo->channels.front().kind) : "unknown";
-    LSLLIB::stream_outlet outlet(LSLLIB::stream_info(name.isEmpty() ? streamInfo->name : name.toStdString(), type,
-                                                     static_cast<int>(channels), streamInfo->sfreq,
-                                                     LSLLIB::ChannelFormat::Float32, device->description().uri));
-    if (const AcqError started = device->start(); !started.ok()) {
+    std::vector<double> values;
+    std::size_t samples = 0;
+    std::uint64_t first = 0;
+};
+
+/** Hands every block of @p reader to @p sink until the duration (0: none), the end of the source or Ctrl+C. */
+template<typename Sink>
+int pump(AcqDevice& device, AcqReader& reader, double duration, Sink sink)
+{
+    if (const AcqError started = device.start(); !started.ok()) {
         err() << QString::asprintf("mne_acq: %s\n", started.text().c_str());
         return kRunError;
     }
-    out() << QString::asprintf("Publishing %s as LSL stream \"%s\" (%zu channels, %g Hz, float32)\n", qPrintable(uri),
-                               outlet.info().name().c_str(), channels, streamInfo->sfreq);
-    out().flush();
+    const std::size_t channels = reader.channelCount();
     const auto deadline = std::chrono::steady_clock::now() + std::chrono::duration<double>(duration);
-    std::vector<float> values;
-    std::vector<std::vector<float>> chunk;
+    Block block;
     std::uint64_t published = 0;
     bool ended = false;
     while (!ended && !g_interrupted.load() && (duration <= 0.0 || std::chrono::steady_clock::now() < deadline)) {
-        auto view = reader->acquire(1, 100ms);
+        auto view = reader.acquire(1, 100ms);
         if (!view) {
             ended = view.error().code() != AcqErrorCode::Timeout;
             continue;
         }
-        const std::size_t samples = view->sampleCount();
-        values.resize(samples * channels);
-        // channels x samples, column-major: sample by sample, as LSL sends it
-        const AcqError decoded = decode(*view, AcqMatrixRef<float>::columnMajor(values.data(), channels, samples));
-        static_cast<void>(reader->release(*view)); // clears the view
+        block.samples = view->sampleCount();
+        block.first = view->firstSample();
+        block.values.resize(block.samples * channels);
+        const AcqError decoded = decode(*view, AcqMatrixRef<double>::columnMajor(block.values.data(), channels, block.samples));
+        static_cast<void>(reader.release(*view));
         if (!decoded.ok()) {
             err() << QString::asprintf("mne_acq: %s\n", decoded.text().c_str());
             return kRunError;
         }
-        chunk.assign(samples, std::vector<float>(channels));
-        for (std::size_t s = 0; s < chunk.size(); ++s) {
-            std::copy_n(values.data() + s * channels, channels, chunk[s].begin());
-        }
-        outlet.push_chunk(chunk);
-        published += chunk.size();
+        sink(block);
+        published += block.samples;
     }
-    device->close();
+    device.close();
     out() << QString::asprintf("Published %llu samples\n", static_cast<unsigned long long>(published));
     return 0;
+}
+
+//=============================================================================================================
+
+int streamLsl(AcqDevice& device, AcqReader& reader, const QString& name, double duration)
+{
+    const auto streamInfo = reader.stream().info();
+    const std::size_t channels = streamInfo->channels.size();
+    const std::string type = channels > 0 ? kindName(streamInfo->channels.front().kind) : "unknown";
+    LSLLIB::stream_outlet outlet(LSLLIB::stream_info(name.isEmpty() ? streamInfo->name : name.toStdString(), type,
+                                                     static_cast<int>(channels), streamInfo->sfreq,
+                                                     LSLLIB::ChannelFormat::Float32, device.description().uri));
+    out() << QString::asprintf("Publishing %s as LSL stream \"%s\" (%zu channels, %g Hz, float32)\n",
+                               device.description().uri.c_str(), outlet.info().name().c_str(), channels,
+                               streamInfo->sfreq);
+    out().flush();
+    std::vector<std::vector<float>> chunk;
+    return pump(device, reader, duration, [&](const Block& block) {
+        chunk.assign(block.samples, std::vector<float>(channels));
+        for (std::size_t s = 0; s < block.samples; ++s) {
+            for (std::size_t c = 0; c < channels; ++c) {
+                chunk[s][c] = static_cast<float>(block.values[s * channels + c]);
+            }
+        }
+        outlet.push_chunk(chunk);
+    });
+}
+
+//=============================================================================================================
+
+/** Row layout of a BrainFlow board's default preset, as BrainFlow's STREAMING_BOARD expects it. */
+struct BrainFlowLayout
+{
+    QString name;
+    int rows = 0;
+    int packageRow = -1;
+    int timestampRow = -1;
+    std::vector<int> dataRows;
+};
+
+/** Layout of @p board from BrainFlow's BoardController when it is installed; the synthetic board's otherwise. */
+std::optional<BrainFlowLayout> brainFlowLayout(int board)
+{
+    QJsonObject descr;
+    std::vector<std::string> candidates;
+    if (const std::string path = detail::acqEnvironment("MNE_CPP_BRAINFLOW"); !path.empty()) {
+        candidates.push_back(path);
+    }
+    if (const std::string dir = detail::acqPythonPackageDir("brainflow", "lib"); !dir.empty()) {
+        candidates.push_back(dir + "/" + detail::acqSharedLibraryName("BoardController"));
+    }
+    candidates.push_back(detail::acqSharedLibraryName("BoardController"));
+    if (auto library = detail::AcqSharedLibrary::load(candidates)) {
+        using GetBoardDescr = int (*)(int, int, char*, int*, int);
+        if (auto* get = reinterpret_cast<GetBoardDescr>(library->symbol("get_board_descr"))) {
+            std::vector<char> json(65536);
+            int length = 0;
+            if (get(board, 0, json.data(), &length, static_cast<int>(json.size())) == 0) {
+                descr = QJsonDocument::fromJson(QByteArray(json.data(), length)).object();
+            }
+        }
+    }
+    if (descr.isEmpty() && board == -1) {
+        // BrainFlow's synthetic board, default preset (brainflow_boards.cpp, MIT license)
+        descr = QJsonObject{{"name", "Synthetic"},
+                            {"num_rows", 32},
+                            {"package_num_channel", 0},
+                            {"timestamp_channel", 30},
+                            {"eeg_channels", QJsonArray{1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16}}};
+    }
+    if (descr.isEmpty()) {
+        return std::nullopt;
+    }
+    BrainFlowLayout layout;
+    layout.name = descr.value("name").toString();
+    layout.rows = descr.value("num_rows").toInt();
+    layout.packageRow = descr.value("package_num_channel").toInt(-1);
+    layout.timestampRow = descr.value("timestamp_channel").toInt(-1);
+    for (const QJsonValue row : descr.value("eeg_channels").toArray()) {
+        layout.dataRows.push_back(row.toInt());
+    }
+    return layout;
+}
+
+int streamBrainFlow(AcqDevice& device, AcqReader& reader, const QString& target, int board, double duration)
+{
+    const QHostAddress address(target.section(QLatin1Char(':'), 0, 0));
+    bool portOk = false;
+    const auto port = target.section(QLatin1Char(':'), 1).toUShort(&portOk);
+    if (!address.isMulticast() || !portOk || port == 0) {
+        err() << QString::asprintf("mne_acq: --brainflow-multicast needs a multicast address:port, e.g. 225.1.1.1:6677\n");
+        return kUsageError;
+    }
+    const auto layout = brainFlowLayout(board);
+    if (!layout || layout->rows <= 0) {
+        err() << QString::asprintf("mne_acq: the layout of BrainFlow board %d needs BrainFlow (pip install brainflow or "
+                                   "MNE_CPP_BRAINFLOW); without it only the synthetic board (-1) is known\n",
+                                   board);
+        return kRunError;
+    }
+    QUdpSocket socket;
+    if (!socket.bind(QHostAddress(QHostAddress::AnyIPv4), 0)) {
+        err() << QString::asprintf("mne_acq: %s\n", qPrintable(socket.errorString()));
+        return kRunError;
+    }
+    socket.setSocketOption(QAbstractSocket::MulticastLoopbackOption, 1);
+    // STREAMING_BOARD joins the group on the interface that routes to 8.8.8.8; send there, so a VPN is no obstacle.
+    QUdpSocket probe;
+    probe.connectToHost(QHostAddress(QStringLiteral("8.8.8.8")), 53);
+    if (probe.waitForConnected(1000)) {
+        for (const QNetworkInterface& candidate : QNetworkInterface::allInterfaces()) {
+            for (const QNetworkAddressEntry& entry : candidate.addressEntries()) {
+                if (entry.ip() == probe.localAddress()) {
+                    socket.setMulticastInterface(candidate);
+                }
+            }
+        }
+    }
+
+    const auto streamInfo = reader.stream().info();
+    const std::size_t channels = streamInfo->channels.size();
+    const std::size_t mapped = std::min(channels, layout->dataRows.size());
+    // STREAMING_BOARD reads packets of BRAINFLOW_BATCH_SIZE rows (default 3), so both sides must agree.
+    const int batchEnv = qEnvironmentVariableIntValue("BRAINFLOW_BATCH_SIZE");
+    const std::size_t batch = batchEnv > 1 && batchEnv < 100 ? static_cast<std::size_t>(batchEnv) : 3;
+    out() << QString::asprintf("Publishing %s in BrainFlow's format to %s as board %d (%s): channels 1-%zu of %zu on "
+                               "its EEG rows, volts as microvolts, triggers in the stim channel's row, %zu samples per packet\n",
+                               device.description().uri.c_str(), qPrintable(target), board, qPrintable(layout->name),
+                               mapped, channels, batch);
+    out().flush();
+
+    std::vector<double> scale(channels, 1.0);
+    for (std::size_t c = 0; c < channels; ++c) {
+        if (streamInfo->channels[c].unit == AcqUnit::Volt) {
+            scale[c] = 1e6;
+        }
+    }
+    const auto rows = static_cast<std::size_t>(layout->rows);
+    std::vector<double> packet;
+    packet.reserve(batch * rows);
+    double t0 = -1.0;
+    return pump(device, reader, duration, [&](const Block& block) {
+        if (t0 < 0.0) {
+            t0 = std::chrono::duration<double>(std::chrono::system_clock::now().time_since_epoch()).count() -
+                static_cast<double>(block.first) / streamInfo->sfreq;
+        }
+        for (std::size_t s = 0; s < block.samples; ++s) {
+            const std::uint64_t sample = block.first + s;
+            const std::size_t at = packet.size();
+            packet.resize(at + rows, 0.0);
+            double* row = packet.data() + at;
+            for (std::size_t c = 0; c < mapped; ++c) {
+                row[layout->dataRows[c]] = block.values[s * channels + c] * scale[c];
+            }
+            if (layout->packageRow >= 0) {
+                row[layout->packageRow] = static_cast<double>(sample % 256);
+            }
+            if (layout->timestampRow >= 0) {
+                row[layout->timestampRow] = t0 + static_cast<double>(sample) / streamInfo->sfreq;
+            }
+            if (packet.size() == batch * rows) {
+                socket.writeDatagram(reinterpret_cast<const char*>(packet.data()),
+                                     static_cast<qint64>(packet.size()) * static_cast<qint64>(sizeof(double)), address, port);
+                packet.clear();
+            }
+        }
+    });
 }
 
 } // namespace
@@ -303,7 +467,8 @@ int main(int argc, char* argv[])
         "  mne_acq list [--timeout s]\n"
         "  mne_acq info <uri>\n"
         "  mne_acq record <uri> <file.fif> [--duration s]\n"
-        "  mne_acq stream <uri> --lsl [--name n] [--duration s]\n\n"
+        "  mne_acq stream <uri> --lsl [--name n] [--duration s]\n"
+        "  mne_acq stream <uri> --brainflow-multicast 225.1.1.1:6677 [--master-board id] [--duration s]\n\n"
         "URIs: synthetic://?eeg=32&sfreq=1000, fiff:///data/raw.fif?loop=1, lsl://NAME, ... (see mne_acq list).");
     parser.addHelpOption();
     parser.addVersionOption();
@@ -314,7 +479,14 @@ int main(int argc, char* argv[])
     const QCommandLineOption durationOpt("duration", "Seconds to run (record, stream); 0 until the source ends or Ctrl+C.", "s", "0");
     const QCommandLineOption lslOpt("lsl", "Publish as a Lab Streaming Layer outlet (stream).");
     const QCommandLineOption nameOpt("name", "Name of the published stream (stream; default: the stream's name).", "n");
-    parser.addOptions({timeoutOpt, durationOpt, lslOpt, nameOpt});
+    const QCommandLineOption brainFlowOpt("brainflow-multicast",
+                                          "Publish in BrainFlow's multicast format for its STREAMING_BOARD (stream).",
+                                          "address:port");
+    const QCommandLineOption boardOpt("master-board",
+                                      "BrainFlow board whose row layout is sent; consumers pass it as master_board "
+                                      "(default -1, the synthetic board).",
+                                      "id", "-1");
+    parser.addOptions({timeoutOpt, durationOpt, lslOpt, nameOpt, brainFlowOpt, boardOpt});
     parser.process(app);
 
     const QStringList args = parser.positionalArguments();
@@ -340,11 +512,28 @@ int main(int argc, char* argv[])
         return record(args[1], args[2], duration);
     }
     if (command == QLatin1String("stream") && args.size() == 2) {
-        if (!parser.isSet(lslOpt)) {
-            err() << QString::asprintf("mne_acq: stream needs an output, e.g. --lsl\n");
+        if (parser.isSet(lslOpt) == parser.isSet(brainFlowOpt)) {
+            err() << QString::asprintf("mne_acq: stream needs one output, --lsl or --brainflow-multicast\n");
             return kUsageError;
         }
-        return streamLsl(args[1], parser.value(nameOpt), duration);
+        bool boardOk = false;
+        const int board = parser.value(boardOpt).toInt(&boardOk);
+        if (!boardOk) {
+            err() << QString::asprintf("mne_acq: --master-board needs a BrainFlow board id\n");
+            return kUsageError;
+        }
+        auto device = openSource(args[1]);
+        if (!device) {
+            return kRunError;
+        }
+        auto reader = device->stream().reader(AcqReader::ReadMode::Lossless);
+        if (!reader) {
+            err() << QString::asprintf("mne_acq: %s\n", reader.error().text().c_str());
+            return kRunError;
+        }
+        return parser.isSet(lslOpt)
+            ? streamLsl(*device, *reader, parser.value(nameOpt), duration)
+            : streamBrainFlow(*device, *reader, parser.value(brainFlowOpt), board, duration);
     }
     err() << QString::asprintf("%s\n", qPrintable(parser.helpText()));
     return kUsageError;

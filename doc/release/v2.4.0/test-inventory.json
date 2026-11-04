@@ -18,7 +18,7 @@
     "without_timeout": 0,
     "requirements": {
       "freesurfer": 2,
-      "python": 11,
+      "python": 12,
       "sample-data": 20,
       "test-data": 122
     },
@@ -6228,9 +6228,11 @@
         "integration"
       ],
       "timeout": 180,
-      "requirements": [],
+      "requirements": [
+        "python"
+      ],
       "gui": false,
-      "qskip_sites": 1,
+      "qskip_sites": 3,
       "spawns_processes": true,
       "ci_excluded_on": [],
       "ci": {

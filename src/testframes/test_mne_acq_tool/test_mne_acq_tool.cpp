@@ -24,6 +24,7 @@
 #include <algorithm>
 #include <chrono>
 #include <cmath>
+#include <cstring>
 #include <string>
 #include <thread>
 #include <vector>
@@ -36,7 +37,9 @@
 #include <QDateTime>
 #include <QFile>
 #include <QProcess>
+#include <QStandardPaths>
 #include <QTemporaryDir>
+#include <QThread>
 #include <QtTest>
 
 //=============================================================================================================
@@ -79,36 +82,47 @@ ToolResult runTool(const QStringList& arguments, int timeoutMs = 60000)
     return result;
 }
 
-/** All samples of @p uri in physical units as float, column-major channels x samples, with the channel names. */
-std::vector<float> readSource(const std::string& uri, std::vector<std::string>& names)
+/** A source read to its end: channel names and physical values, column-major channels x samples. */
+struct Source
 {
+    std::vector<std::string> names;
+    std::vector<double> values;
+};
+
+Source readSource(const std::string& uri)
+{
+    Source source;
     auto device = AcqDevice::open(uri);
     if (!device) {
-        return {};
+        return source;
     }
     auto reader = device->stream().reader(AcqReader::ReadMode::Lossless);
     if (!reader || !device->start().ok()) {
-        return {};
+        return source;
     }
-    names.clear();
     for (const AcqChannelInfo& channel : reader->stream().info()->channels) {
-        names.push_back(channel.name);
+        source.names.push_back(channel.name);
     }
-    std::vector<float> values;
     for (;;) {
         auto lease = reader->lease(1, 1s);
         if (!lease) {
             break;
         }
         const AcqBlockView& view = **lease;
-        std::vector<float> block(view.channelCount() * view.sampleCount());
-        if (!decode(view, AcqMatrixRef<float>::columnMajor(block.data(), view.channelCount(), view.sampleCount())).ok()) {
+        std::vector<double> block(view.channelCount() * view.sampleCount());
+        if (!decode(view, AcqMatrixRef<double>::columnMajor(block.data(), view.channelCount(), view.sampleCount())).ok()) {
             return {};
         }
-        values.insert(values.end(), block.begin(), block.end());
+        source.values.insert(source.values.end(), block.begin(), block.end());
     }
     device->close();
-    return values;
+    return source;
+}
+
+QString python()
+{
+    const QString exe = QStandardPaths::findExecutable(QStringLiteral("python3"));
+    return exe.isEmpty() ? QStandardPaths::findExecutable(QStringLiteral("python")) : exe;
 }
 
 } // namespace
@@ -130,6 +144,7 @@ private slots:
     void recordWritesTheSource();
     void recordFailsOnUnwritablePath();
     void streamPublishesLsl();
+    void streamPublishesBrainFlow();
 };
 
 //=============================================================================================================
@@ -157,6 +172,13 @@ void TestMneAcqTool::usageErrors()
     const ToolResult noOutput = runTool({QStringLiteral("stream"), QStringLiteral("synthetic://")});
     QCOMPARE(noOutput.exitCode, 1);
     QVERIFY(noOutput.err.contains(QStringLiteral("--lsl")));
+    const QString synthetic = QStringLiteral("synthetic://?duration=1&realtime=0");
+    const QString bf = QStringLiteral("--brainflow-multicast");
+    QCOMPARE(runTool({QStringLiteral("stream"), synthetic, QStringLiteral("--lsl"), bf, QStringLiteral("225.1.1.1:6677")}).exitCode, 1);
+    QCOMPARE(runTool({QStringLiteral("stream"), synthetic, bf, QStringLiteral("10.0.0.1:6677")}).exitCode, 1);
+    QCOMPARE(runTool({QStringLiteral("stream"), synthetic, bf, QStringLiteral("225.1.1.1")}).exitCode, 1);
+    QCOMPARE(runTool({QStringLiteral("stream"), synthetic, bf, QStringLiteral("225.1.1.1:6677"), QStringLiteral("--master-board"), QStringLiteral("x")}).exitCode, 1);
+    QCOMPARE(runTool({QStringLiteral("stream"), synthetic, bf, QStringLiteral("225.1.1.1:6677"), QStringLiteral("--master-board"), QStringLiteral("99999")}).exitCode, 2);
 
     const ToolResult help = runTool({QStringLiteral("--help")});
     QCOMPARE(help.exitCode, 0);
@@ -215,8 +237,9 @@ void TestMneAcqTool::recordWritesTheSource()
     QVERIFY2(record.exitCode == 0, qPrintable(record.out + record.err));
     QVERIFY2(record.out.contains(QStringLiteral("Recorded 2000 samples (0 lost)")), qPrintable(record.out));
 
-    std::vector<std::string> names;
-    const std::vector<float> expected = readSource(uri, names);
+    const Source source = readSource(uri);
+    const std::vector<std::string>& names = source.names;
+    const std::vector<double>& expected = source.values;
     QCOMPARE(expected.size(), names.size() * 2000);
 
     QFile file(path);
@@ -285,9 +308,9 @@ void TestMneAcqTool::streamPublishesLsl()
     QVERIFY(QString::fromUtf8(tool.readAllStandardOutput()).contains(QStringLiteral("Published")));
 
     // The inlet joins mid-stream: find its first sample in the seeded source, then compare all received samples.
-    std::vector<std::string> names;
-    const std::vector<float> expected = readSource(uri + "&realtime=0&duration=10", names);
-    const std::size_t channels = names.size();
+    const Source source = readSource(uri + "&realtime=0&duration=10");
+    std::vector<float> expected(source.values.begin(), source.values.end());
+    const std::size_t channels = source.names.size();
     QCOMPARE(channels, std::size_t(5));
     const std::size_t total = expected.size() / channels;
     std::size_t offset = total;
@@ -302,6 +325,90 @@ void TestMneAcqTool::streamPublishesLsl()
         QVERIFY(std::equal(received[s].begin(), received[s].end(),
                            expected.begin() + static_cast<std::ptrdiff_t>((offset + s) * channels)));
     }
+}
+
+//=============================================================================================================
+
+void TestMneAcqTool::streamPublishesBrainFlow()
+{
+    const QString exe = python();
+    if (exe.isEmpty()) {
+        QSKIP("no python");
+    }
+    QTemporaryDir dir;
+    QVERIFY(dir.isValid());
+    const QString received = dir.filePath(QStringLiteral("brainflow.bin"));
+    // A port of its own per run, so parallel runs on one host do not mix.
+    const QString port = QString::number(20000 + QCoreApplication::applicationPid() % 20000);
+    QProcess consumer;
+    consumer.start(exe, {QStringLiteral(MNE_ACQ_BRAINFLOW_RECEIVE), QStringLiteral("225.1.1.1"), port, QStringLiteral("-1"), QStringLiteral("4"), received});
+    QVERIFY(consumer.waitForStarted());
+    QThread::msleep(1000); // the consumer joins the group before the first packet
+
+    const std::string uri = "synthetic://?eeg=4&sfreq=250&seed=9";
+    const ToolResult tool = runTool({QStringLiteral("stream"), QString::fromStdString(uri),
+                                     QStringLiteral("--brainflow-multicast"), QStringLiteral("225.1.1.1:") + port,
+                                     QStringLiteral("--duration"), QStringLiteral("4")});
+    QVERIFY(consumer.waitForFinished(60000));
+    const QString consumerOut = QString::fromUtf8(consumer.readAllStandardOutput());
+    if (consumer.exitCode() == 2) {
+        QSKIP(qPrintable(consumerOut.trimmed()));
+    }
+    QVERIFY2(tool.exitCode == 0, qPrintable(tool.out + tool.err));
+    QVERIFY2(tool.out.contains(QStringLiteral("as board -1 (Synthetic)")), qPrintable(tool.out));
+    QVERIFY2(consumer.exitCode() == 0, qPrintable(consumerOut + QString::fromUtf8(consumer.readAllStandardError())));
+
+    QFile file(received);
+    QVERIFY(file.open(QIODevice::ReadOnly));
+    const QByteArray bytes = file.readAll();
+    QVERIFY(bytes.size() >= 16);
+    qint64 shape[2] = {0, 0};
+    std::memcpy(shape, bytes.constData(), sizeof(shape));
+    const auto rows = static_cast<std::size_t>(shape[0]);
+    const auto count = static_cast<std::size_t>(shape[1]);
+    QCOMPARE(rows, std::size_t(32));
+    QVERIFY2(count >= 250, qPrintable(QString::number(count)));
+    QCOMPARE(static_cast<std::size_t>(bytes.size()), 16 + rows * count * sizeof(double));
+    std::vector<double> data(rows * count);
+    std::memcpy(data.data(), bytes.constData() + 16, data.size() * sizeof(double));
+    const auto at = [&](std::size_t row, std::size_t sample) {
+        return data[row * count + sample];
+    };
+
+    // STREAMING_BOARD joins mid-stream: locate its first sample by the EEG rows (microvolts), then compare all.
+    const Source source = readSource(uri + "&realtime=0&duration=30");
+    const std::size_t channels = source.names.size();
+    QCOMPARE(channels, std::size_t(5));
+    const std::size_t total = source.values.size() / channels;
+    const auto expectedRow = [&](std::size_t sample, std::size_t c) {
+        const double value = source.values[sample * channels + c];
+        return c < 4 ? value * 1e6 : value; // EEG in volts, the stim channel without unit
+    };
+    std::size_t offset = total;
+    for (std::size_t s = 0; s + count <= total && offset == total; ++s) {
+        bool same = true;
+        for (std::size_t c = 0; c < channels && same; ++c) {
+            same = at(c + 1, 0) == expectedRow(s, c);
+        }
+        offset = same ? s : total;
+    }
+    QVERIFY2(offset < total, "the first received sample is not in the source");
+    int markers = 0;
+    for (std::size_t i = 0; i < count; ++i) {
+        const std::size_t sample = offset + i;
+        for (std::size_t c = 0; c < channels; ++c) {
+            if (at(c + 1, i) != expectedRow(sample, c)) {
+                QFAIL(qPrintable(QStringLiteral("sample %1 channel %2: %3 != %4").arg(sample).arg(c).arg(at(c + 1, i)).arg(expectedRow(sample, c))));
+            }
+        }
+        QCOMPARE(at(0, i), static_cast<double>(sample % 256));
+        // STREAMING_BOARD fills the marker row from its own insert_marker(); triggers travel in the stim row.
+        markers += at(5, i) != 0.0 ? 1 : 0;
+        if (i > 0) {
+            QVERIFY(std::abs(at(30, i) - at(30, i - 1) - 1.0 / 250.0) < 1e-6);
+        }
+    }
+    QVERIFY2(markers > 0, "no trigger reached the stim row");
 }
 
 //=============================================================================================================

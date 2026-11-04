@@ -25,6 +25,8 @@ target_link_libraries(${PROJECT_NAME} PRIVATE
     mne_lsl
     Eigen3::Eigen)
 
+target_compile_definitions(${PROJECT_NAME} PRIVATE
+    MNE_ACQ_BRAINFLOW_RECEIVE="${CMAKE_CURRENT_SOURCE_DIR}/brainflow_receive.py")
 if(NOT BUILD_SHARED_LIBS)
     target_compile_definitions(${PROJECT_NAME} PRIVATE STATICBUILD)
 endif()
