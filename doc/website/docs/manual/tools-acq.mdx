@@ -79,3 +79,8 @@ mne_acq list
 mne_acq info lsl://SampleMEG
 mne_acq record lsl://SampleMEG sample_copy_raw.fif --duration 30
 ```
+
+## See Also
+
+[mne_rt_server](tools-rt-server.mdx) serves a source to MNE Scan and other MNE-CPP clients over the FIFF real-time
+protocol; its FiffSimulator replays files through the same `fiff://` source.

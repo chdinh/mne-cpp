@@ -30,7 +30,8 @@ mne_rt_server [options]
 
 The server uses a plugin-based connector architecture:
 
-- **FiffSimulator** — Streams pre-recorded FIFF files as if they were being acquired in real-time
+- **FiffSimulator** — Streams pre-recorded FIFF files as if they were being acquired in real-time (through the
+  acquisition library's `fiff://` source, as [mne_acq](tools-acq.mdx) does)
 - Additional connectors can be loaded for different data sources
 
 ### Use Cases

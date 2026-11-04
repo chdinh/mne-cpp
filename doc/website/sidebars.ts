@@ -218,8 +218,14 @@ const sidebars: SidebarsConfig = {
                                 'manual/tools-show-mna',
                             ],
                         },
-                        'manual/tools-acq',
-                        'manual/tools-rt-server',
+                        {
+                            type: 'category',
+                            label: 'Acquisition',
+                            items: [
+                                'manual/tools-acq',
+                                'manual/tools-rt-server',
+                            ],
+                        },
                         'manual/tools-simu',
                     ],
                 },
