@@ -15,8 +15,7 @@ find_package(QT NAMES Qt6 Qt5 REQUIRED COMPONENTS ${QT_REQUIRED_COMPONENTS})
 find_package(Qt${QT_VERSION_MAJOR} REQUIRED COMPONENTS ${QT_REQUIRED_COMPONENTS})
 
 set(SOURCES
-    fiffsimulator.cpp 
-    fiffproducer.cpp
+    fiffsimulator.cpp
 )
 
 
@@ -24,14 +23,12 @@ set(SOURCES
 if(NOT BUILD_SHARED_LIBS)
     set(HEADERS
         fiffsimulator.h
-        fiffsimulator_global.h 
-        fiffproducer.h 
+        fiffsimulator_global.h
     )
 else()
     set(HEADERS
         fiffsimulator.h
-        fiffsimulator_global.h 
-        fiffproducer.h 
+        fiffsimulator_global.h
         ../../mne_rt_server/IConnector.h
     )
 endif()
@@ -70,6 +67,7 @@ set(MNE_LIBS_REQUIRED
     mne_math
     mne_fiff
     mne_com
+    mne_acq_fiff
 )
 
 target_link_libraries(${PROJECT_NAME} PRIVATE

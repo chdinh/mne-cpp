@@ -1808,9 +1808,6 @@
     "src/tools/server/mne_rt_server/mne_rt_server/mne_rt_server.h": {
       "modernize-use-override": 1
     },
-    "src/tools/server/mne_rt_server/plugins/fiffsimulator/fiffproducer.h": {
-      "modernize-use-override": 2
-    },
     "src/tools/server/mne_rt_server/plugins/fiffsimulator/fiffsimulator.cpp": {
       "bugprone-throwing-static-initialization": 5
     },

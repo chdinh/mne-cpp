@@ -17,8 +17,10 @@
 //=============================================================================================================
 
 #include "fiffsimulator.h"
-#include "fiffproducer.h"
 
+#include <acq/acq_device_registry.h>
+#include <acq/acq_eigen.h>
+#include <acq/fiff/acq_fiff_replay.h>
 #include <fiff/fiff.h>
 #include <fiff/fiff_types.h>
 
@@ -37,13 +39,17 @@
 // STL INCLUDES
 //=============================================================================================================
 
+#include <chrono>
+#include <cstring>
 #include <iostream>
+#include <string>
 
 //=============================================================================================================
 // USED NAMESPACES
 //=============================================================================================================
 
 using namespace FIFFSIMULATORRTSERVERPLUGIN;
+using namespace ACQLIB;
 using namespace FIFFLIB;
 using namespace RTSERVER;
 using namespace UTILSLIB;
@@ -64,8 +70,7 @@ const QString FiffSimulator::Commands::SIMFILE = "simfile";
 //=============================================================================================================
 
 FiffSimulator::FiffSimulator()
-: m_pFiffProducer(std::make_unique<FiffProducer>(this))
-, m_sResourceDataPath(QString("%1/../resources/data/MNE-sample-data/MEG/sample/sample_audvis_raw.fif").arg(QCoreApplication::applicationDirPath()))
+: m_sResourceDataPath(QString("%1/../resources/data/MNE-sample-data/MEG/sample/sample_audvis_raw.fif").arg(QCoreApplication::applicationDirPath()))
 , m_uiBufferSampleSize(200) //(4)
 , m_AccelerationFactor(1.0)
 , m_TrueSamplingRate(0.0)
@@ -78,12 +83,7 @@ FiffSimulator::FiffSimulator()
 
 FiffSimulator::~FiffSimulator()
 {
-    m_bIsRunning = false;
-    QThread::wait();
-
-    // The producer thread pushes into the buffer, so it has to go first.
-    m_pFiffProducer.reset();
-    m_pRawMatrixBuffer.reset();
+    stop();
 }
 
 //=============================================================================================================
@@ -99,7 +99,6 @@ void FiffSimulator::comBufsize(Command p_command)
         bool t_bWasRunning = m_bIsRunning;
 
         if (m_bIsRunning) {
-            m_pFiffProducer->stop();
             this->stop();
         }
 
@@ -148,7 +147,6 @@ void FiffSimulator::comAccel(Command p_command)
         bool t_bWasRunning = m_bIsRunning;
 
         if (m_bIsRunning) {
-            m_pFiffProducer->stop();
             this->stop();
         }
 
@@ -201,7 +199,6 @@ void FiffSimulator::comSimfile(Command p_command)
         m_RawInfo = FiffRawData();
 
         if (this->readRawInfo()) {
-            m_pFiffProducer->stop();
             this->stop();
 
             m_commandManager[Commands::SIMFILE].reply("New simulation file set succefully.\r\n");
@@ -276,11 +273,6 @@ void FiffSimulator::init()
         }
         t_qFile.close();
     }
-
-    m_pRawMatrixBuffer.reset();
-
-    if (!m_RawInfo.isEmpty())
-        m_pRawMatrixBuffer = std::make_unique<CircularBuffer_Matrix_float>(RAW_BUFFFER_SIZE);
 }
 
 //=============================================================================================================
@@ -288,12 +280,30 @@ void FiffSimulator::init()
 bool FiffSimulator::start()
 {
     this->init();
-
-    // Start threads
-    m_pFiffProducer->start();
-
+    if (m_RawInfo.isEmpty() && !readRawInfo()) {
+        return false;
+    }
+    registerFiffScheme();
+    const AcqUri uri{"fiff",
+                     m_RawInfo.info.filename.toStdString(), // the file whose info clients got
+                     {{"loop", "1"},
+                      {"speed", std::to_string(m_AccelerationFactor)},
+                      {"block", std::to_string(m_uiBufferSampleSize)},
+                      {"events", "0"}}};
+    auto device = AcqDevice::open(uri.toString());
+    if (!device) {
+        qWarning("[FiffSimulator::start] %s", device.error().text().c_str());
+        return false;
+    }
+    auto reader = device->stream().reader(AcqReader::ReadMode::Lossless);
+    if (!reader || !device->start().ok()) {
+        qWarning("[FiffSimulator::start] Cannot start the replay of %s", qPrintable(m_RawInfo.info.filename));
+        return false;
+    }
+    m_device = std::move(*device);
+    m_reader = std::move(*reader);
+    m_bIsRunning = true;
     QThread::start();
-
     return true;
 }
 
@@ -301,10 +311,10 @@ bool FiffSimulator::start()
 
 bool FiffSimulator::stop()
 {
-    this->m_pFiffProducer->stop();
     m_bIsRunning = false;
     QThread::wait();
-
+    m_reader.reset();
+    m_device.reset(); // closes the replay
     return true;
 }
 
@@ -418,11 +428,6 @@ bool FiffSimulator::readRawInfo()
         //            }
         //        }
 
-        //
-        // Create circular buffer to transfer data form producer to simulator
-        //
-        m_pRawMatrixBuffer = std::make_unique<CircularBuffer_Matrix_float>(10);
-
         mutex.unlock();
     }
 
@@ -433,24 +438,17 @@ bool FiffSimulator::readRawInfo()
 
 void FiffSimulator::run()
 {
-    m_bIsRunning = true;
-
-    float t_fSamplingFrequency = m_RawInfo.info.sfreq;
-    float t_fBuffSampleSize = static_cast<float>(m_uiBufferSampleSize);
-
-    quint32 uiSamplePeriod = static_cast<unsigned int>((t_fBuffSampleSize / t_fSamplingFrequency) * 1000000.0f);
-
-    //    quint32 count = 0;
-    Eigen::MatrixXf matData;
-
+    // The replay paces itself at sfreq * acceleration; buffers go out calibrated, as read_raw_segment returns them.
+    Eigen::MatrixXd data;
     while (m_bIsRunning) {
-        if (m_pRawMatrixBuffer->pop(matData)) {
-            QSharedPointer<Eigen::MatrixXf> t_pRawBuffer(new Eigen::MatrixXf(matData));
-            //        ++count;
-            //        qInfo("%d raw buffer (%d x %d) generated\r", count, t_pRawBuffer->rows(), t_pRawBuffer->cols());
-
-            emit remitRawBuffer(t_pRawBuffer);
-            usleep(uiSamplePeriod);
+        const auto block = ACQLIB::read(*m_reader, m_uiBufferSampleSize, data, std::chrono::milliseconds(100));
+        if (!block) {
+            if (block.error().code() != AcqErrorCode::Timeout) {
+                qWarning("[FiffSimulator::run] %s", block.error().text().c_str());
+                return;
+            }
+            continue;
         }
+        emit remitRawBuffer(QSharedPointer<Eigen::MatrixXf>::create(data.cast<float>()));
     }
 }

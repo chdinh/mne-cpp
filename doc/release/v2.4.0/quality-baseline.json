@@ -11,7 +11,7 @@
   },
   "gates": {
     "G1_test_integrity": {
-      "registered": 271,
+      "registered": 272,
       "conditional": 6,
       "unregistered": 3,
       "without_labels": 0,
@@ -42,7 +42,8 @@
           "test_acq_recorder",
           "test_acq_stream",
           "test_acq_thread",
-          "test_acq_timebase"
+          "test_acq_timebase",
+          "test_rt_server_fiff_replay"
         ],
         "macos-26-qt-min": [
           "test_acq_convert",
@@ -53,7 +54,8 @@
           "test_acq_recorder",
           "test_acq_stream",
           "test_acq_thread",
-          "test_acq_timebase"
+          "test_acq_timebase",
+          "test_rt_server_fiff_replay"
         ],
         "ubuntu-24.04": [
           "test_acq_convert",
@@ -64,7 +66,8 @@
           "test_acq_recorder",
           "test_acq_stream",
           "test_acq_thread",
-          "test_acq_timebase"
+          "test_acq_timebase",
+          "test_rt_server_fiff_replay"
         ],
         "ubuntu-24.04-qt-min": [
           "test_acq_convert",
@@ -75,7 +78,8 @@
           "test_acq_recorder",
           "test_acq_stream",
           "test_acq_thread",
-          "test_acq_timebase"
+          "test_acq_timebase",
+          "test_rt_server_fiff_replay"
         ],
         "windows-2025-vs2026": [
           "test_acq_convert",
@@ -86,7 +90,8 @@
           "test_acq_recorder",
           "test_acq_stream",
           "test_acq_thread",
-          "test_acq_timebase"
+          "test_acq_timebase",
+          "test_rt_server_fiff_replay"
         ],
         "windows-2025-vs2026-qt-min": [
           "test_acq_convert",
@@ -97,7 +102,8 @@
           "test_acq_recorder",
           "test_acq_stream",
           "test_acq_thread",
-          "test_acq_timebase"
+          "test_acq_timebase",
+          "test_rt_server_fiff_replay"
         ]
       },
       "ci_failures": 0,
