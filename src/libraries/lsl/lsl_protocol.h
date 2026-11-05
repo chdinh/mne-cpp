@@ -60,10 +60,19 @@ std::vector<QHostAddress> discoveryTargets();
 /** @return The multicast groups an outlet joins to hear queries. */
 std::vector<QHostAddress> discoveryGroups();
 
-/** Joins the discovery groups on the default and the loopback interface; outlets on one host share the port. */
+/**
+ * Joins the discovery groups on the default and the loopback interface; outlets on one host share the port.
+ *
+ * @param[in, out] socket   The bound discovery socket.
+ */
 void joinDiscoveryGroups(QUdpSocket& socket);
 
-/** Sends @p query to every discovery target and, over loopback, to a group, which reaches every local outlet. */
+/**
+ * Sends @p query to every discovery target and, over loopback, to a group, which reaches every local outlet.
+ *
+ * @param[in, out] socket   A socket bound with bindQuerySocket().
+ * @param[in]      query    The query datagram.
+ */
 void sendQuery(QUdpSocket& socket, const QByteArray& query);
 
 /**
