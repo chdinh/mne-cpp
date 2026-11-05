@@ -125,7 +125,7 @@ QString ElectrodesPlugin::highlightNearest(const QVector3D& worldPosition)
         const float d = (c.position - target).squaredNorm();
         if (d < bestDistSq) {
             bestDistSq = d;
-            bestName = c.name;
+            bestName = QString::fromStdString(c.name);
         }
     }
     if (bestName.isEmpty()) {
@@ -186,15 +186,15 @@ bool ElectrodesPlugin::loadFiff(const QString& path)
 
     // All points form one lead named after the file
     const QString lead = QFileInfo(path).baseName();
-    QVector<IEEGLIB::IeegContact> contacts;
-    contacts.reserve(picked.size());
+    std::vector<IEEGLIB::IeegContact> contacts;
+    contacts.reserve(std::size_t(picked.size()));
     for (qint32 i = 0; i < picked.size(); ++i) {
         const FiffDigPoint& dp = picked[i];
         IEEGLIB::IeegContact contact;
-        contact.name = QStringLiteral("%1_%2").arg(lead).arg(dp.ident);
+        contact.name = QStringLiteral("%1_%2").arg(lead).arg(dp.ident).toStdString();
         contact.position = Eigen::Vector3f(dp.r[0], dp.r[1], dp.r[2]);
-        contact.lead = lead;
-        contacts.append(contact);
+        contact.lead = lead.toStdString();
+        contacts.push_back(contact);
     }
 
     rebuild(IEEGLIB::IeegImplantation(contacts));
@@ -216,7 +216,7 @@ bool ElectrodesPlugin::loadCsv(const QString& path)
     QTextStream in(&file);
     const QString fallbackLabel = QFileInfo(path).baseName();
 
-    QVector<IEEGLIB::IeegContact> contacts;
+    std::vector<IEEGLIB::IeegContact> contacts;
     QHash<QString, IEEGLIB::IeegLeadType> declared;
     QHash<QString, int> leadSize;
 
@@ -258,21 +258,21 @@ bool ElectrodesPlugin::loadCsv(const QString& path)
         }
 
         IEEGLIB::IeegContact contact;
-        contact.name = name.isEmpty() ? QStringLiteral("%1_%2").arg(lead).arg(leadSize.value(lead)) : name;
+        contact.name = (name.isEmpty() ? QStringLiteral("%1_%2").arg(lead).arg(leadSize.value(lead)) : name).toStdString();
         contact.position = Eigen::Vector3f(x, y, z);
-        contact.lead = lead;
-        contacts.append(contact);
+        contact.lead = lead.toStdString();
+        contacts.push_back(contact);
         leadSize[lead] += 1;
     }
 
-    if (contacts.isEmpty()) {
+    if (contacts.empty()) {
         qWarning() << "ElectrodesPlugin::loadCsv: no contact rows parsed from" << path;
         return false;
     }
 
     IEEGLIB::IeegImplantation implantation(contacts);
     for (auto it = declared.cbegin(); it != declared.cend(); ++it)
-        implantation.setLeadType(it.key(), it.value());
+        implantation.setLeadType(it.key().toStdString(), it.value());
     rebuild(implantation);
     m_source = ElectrodeSource::Csv;
     m_sourcePath = path;
@@ -283,8 +283,9 @@ bool ElectrodesPlugin::loadCsv(const QString& path)
 
 bool ElectrodesPlugin::loadBids(const QString& path, const QString& t1Path)
 {
-    m_lastError.clear();
-    IEEGLIB::IeegImplantation implantation = IEEGLIB::IeegImplantation::readBids(path, &m_lastError);
+    std::string error;
+    IEEGLIB::IeegImplantation implantation = IEEGLIB::IeegImplantation::readBids(path.toStdString(), &error);
+    m_lastError = QString::fromStdString(error);
     if (implantation.isEmpty()) {
         qWarning() << "ElectrodesPlugin::loadBids:" << m_lastError;
         return false;
@@ -295,11 +296,11 @@ bool ElectrodesPlugin::loadBids(const QString& path, const QString& t1Path)
         MRILIB::MriVolData t1;
         if (t1Path.isEmpty() || !t1.read(t1Path)) {
             m_lastError = QStringLiteral("%1 positions are scanner RAS of the subject's T1; T1.mgz is needed to place them on the surfaces")
-                              .arg(implantation.coordinateSystem());
+                              .arg(QString::fromStdString(implantation.coordinateSystem()));
             qWarning() << "ElectrodesPlugin::loadBids:" << m_lastError;
             return false;
         }
-        implantation = implantation.transformed(t1.computeVox2RasTkr() * t1.computeVox2Ras().inverse(), QStringLiteral("surface RAS"));
+        implantation = implantation.transformed(t1.computeVox2RasTkr() * t1.computeVox2Ras().inverse(), "surface RAS");
     }
 
     rebuild(implantation);
@@ -387,9 +388,9 @@ bool ElectrodesPlugin::loadValues(const QString& path)
 
     QMap<QString, float> matched;
     for (const IEEGLIB::IeegContact& contact : m_object->implantation().contacts()) {
-        const auto it = values.constFind(contact.name);
+        const auto it = values.constFind(QString::fromStdString(contact.name));
         if (it != values.cend())
-            matched.insert(contact.name, it.value());
+            matched.insert(QString::fromStdString(contact.name), it.value());
     }
     if (matched.isEmpty()) {
         m_lastError = values.isEmpty() ? QStringLiteral("No values in %1").arg(path)
@@ -406,9 +407,9 @@ void ElectrodesPlugin::setValues(const QMap<QString, float>& values)
 {
     m_values.clear();
     for (const IEEGLIB::IeegContact& contact : m_object->implantation().contacts()) {
-        const auto it = values.constFind(contact.name);
+        const auto it = values.constFind(QString::fromStdString(contact.name));
         if (it != values.cend())
-            m_values.insert(contact.name, it.value());
+            m_values.insert(QString::fromStdString(contact.name), it.value());
     }
     emit valuesChanged();
 }

@@ -44,9 +44,9 @@ namespace
 {
 IeegImplantation oneLead(int nContacts)
 {
-    QVector<IeegContact> contacts(nContacts);
+    std::vector<IeegContact> contacts(nContacts);
     for (int i = 0; i < nContacts; ++i) {
-        contacts[i].name = QStringLiteral("LA%1").arg(i);
+        contacts[i].name = "LA" + std::to_string(i);
         contacts[i].position = Eigen::Vector3f(0.0f, 0.0f, float(i) * 0.005f);
     }
     return IeegImplantation(contacts);
@@ -147,11 +147,11 @@ void TestElectrodesPlugin::csvLoadGroupsByArrayLabel()
     QCOMPARE(plugin.source(), ElectrodeSource::Csv);
     QCOMPARE(plugin.sourcePath(), file.fileName());
 
-    const QVector<IeegLead>& leads = plugin.electrodeObject()->implantation().leads();
+    const std::vector<IeegLead>& leads = plugin.electrodeObject()->implantation().leads();
     QCOMPARE(leads.size(), 2);
-    QCOMPARE(leads[0].name, QStringLiteral("LA"));
+    QCOMPARE(leads[0].name, std::string("LA"));
     QCOMPARE(leads[0].type, IeegLeadType::Depth);
-    QCOMPARE(leads[1].name, QStringLiteral("GRID"));
+    QCOMPARE(leads[1].name, std::string("GRID"));
     QCOMPARE(leads[1].type, IeegLeadType::Grid);
     QCOMPARE(leads[1].contacts.size(), 3);
 }
@@ -234,17 +234,17 @@ void TestElectrodesPlugin::bidsLoadGroupsLeadsByName()
     QCOMPARE(plugin.contactCount(), 7);
 
     const IeegImplantation& implantation = plugin.electrodeObject()->implantation();
-    const QVector<IeegLead>& leads = implantation.leads();
+    const std::vector<IeegLead>& leads = implantation.leads();
     QCOMPARE(leads.size(), 4);
-    QCOMPARE(leads[0].name, QStringLiteral("LA"));
-    QCOMPARE(implantation.contacts()[leads[0].contacts[1]].name, QStringLiteral("LA2"));
+    QCOMPARE(leads[0].name, std::string("LA"));
+    QCOMPARE(implantation.contacts()[leads[0].contacts[1]].name, std::string("LA2"));
     const IeegContact& la10 = implantation.contacts()[leads[0].contacts[2]];
-    QCOMPARE(la10.name, QStringLiteral("LA10"));
+    QCOMPARE(la10.name, std::string("LA10"));
     QVERIFY(la10.position.isApprox(Eigen::Vector3f(0.0f, 0.0f, 0.0315f)));
     QCOMPARE(leads[0].type, IeegLeadType::Depth); // contacts 3.5 mm apart
-    QCOMPARE(leads[1].name, QStringLiteral("A'"));
+    QCOMPARE(leads[1].name, std::string("A'"));
     QCOMPARE(leads[1].type, IeegLeadType::Strip); // 10 mm apart
-    QCOMPARE(leads[2].name, QStringLiteral("A"));
+    QCOMPARE(leads[2].name, std::string("A"));
     QCOMPARE(leads[3].type, IeegLeadType::Grid);
 }
 
@@ -276,7 +276,7 @@ void TestElectrodesPlugin::bidsLoadConvertsScannerRas()
     QVERIFY(plugin.loadBids(tsv, t1));
     QVERIFY(plugin.lastError().isEmpty());
     const IeegImplantation& implantation = plugin.electrodeObject()->implantation();
-    QCOMPARE(implantation.coordinateSystem(), QStringLiteral("surface RAS"));
+    QCOMPARE(implantation.coordinateSystem(), std::string("surface RAS"));
     QVERIFY(implantation.contacts()[0].position.isZero(1e-6f));
     QVERIFY(implantation.contacts()[1].position.isApprox(Eigen::Vector3f(0.0f, 0.0f, 0.0035f)));
 }

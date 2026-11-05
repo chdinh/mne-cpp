@@ -38,7 +38,7 @@ namespace
 IeegContact makeContact(const QString& name, const Eigen::Vector3f& position)
 {
     IeegContact contact;
-    contact.name = name;
+    contact.name = name.toStdString();
     contact.position = position;
     return contact;
 }
@@ -46,10 +46,10 @@ IeegContact makeContact(const QString& name, const Eigen::Vector3f& position)
 // nLeads depth leads "S<l>_C<c>" with 3.5 mm spacing, 2 cm apart
 IeegImplantation createTestImplantation(int nLeads, int contactsPerLead)
 {
-    QVector<IeegContact> contacts;
+    std::vector<IeegContact> contacts;
     for (int l = 0; l < nLeads; ++l) {
         for (int c = 0; c < contactsPerLead; ++c)
-            contacts.append(makeContact(QString("S%1_C%2").arg(l).arg(c), Eigen::Vector3f(l * 0.02f, 0.0f, c * 0.0035f)));
+            contacts.push_back(makeContact(QString("S%1_C%2").arg(l).arg(c), Eigen::Vector3f(l * 0.02f, 0.0f, c * 0.0035f)));
     }
     return IeegImplantation(contacts);
 }
@@ -200,13 +200,16 @@ void TestElectrodeObject::testSingleContact()
 void TestElectrodeObject::testGeometryGeneration()
 {
     // A depth lead, a strip and a 2 x 2 grid, in metres
-    QVector<IeegContact> contacts;
+    std::vector<IeegContact> contacts;
+    contacts.reserve(12);
     for (int i = 0; i < 4; ++i)
-        contacts.append(makeContact(QString("LA%1").arg(i + 1), Eigen::Vector3f(0.0f, 0.0f, 0.0035f * float(i))));
+        contacts.push_back(makeContact(QString("LA%1").arg(i + 1), Eigen::Vector3f(0.0f, 0.0f, 0.0035f * float(i))));
     for (int i = 0; i < 4; ++i)
-        contacts.append(makeContact(QString("ST%1").arg(i + 1), Eigen::Vector3f(0.05f + 0.01f * float(i), 0.0f, 0.0f)));
-    for (int i = 0; i < 4; ++i)
-        contacts.append(makeContact(QString("GR%1").arg(i + 1), Eigen::Vector3f(0.01f * float(i % 2), 0.05f + 0.01f * float(i / 2), 0.0f)));
+        contacts.push_back(makeContact(QString("ST%1").arg(i + 1), Eigen::Vector3f(0.05f + 0.01f * float(i), 0.0f, 0.0f)));
+    for (int row = 0; row < 2; ++row) {
+        for (int col = 0; col < 2; ++col)
+            contacts.push_back(makeContact(QString("GR%1").arg(row * 2 + col + 1), Eigen::Vector3f(0.01f * float(col), 0.05f + 0.01f * float(row), 0.0f)));
+    }
     // A gap too wide for one array is not tied
     contacts[7].position.x() = 0.2f;
     IeegImplantation implantation(contacts);

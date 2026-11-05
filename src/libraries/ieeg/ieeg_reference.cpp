@@ -21,6 +21,7 @@
 // STL INCLUDES
 //=============================================================================================================
 
+#include <cstdint>
 #include <vector>
 
 //=============================================================================================================
@@ -33,31 +34,32 @@ using namespace IEEGLIB;
 // DEFINE MEMBER METHODS
 //=============================================================================================================
 
-QVector<IeegBipolarPair> IeegReference::bipolarPairs(const IeegImplantation& implantation)
+std::vector<IeegBipolarPair> IeegReference::bipolarPairs(const IeegImplantation& implantation)
 {
-    const QVector<IeegContact>& contacts = implantation.contacts();
-    QVector<IeegBipolarPair> pairs;
+    const std::vector<IeegContact>& contacts = implantation.contacts();
+    std::vector<IeegBipolarPair> pairs;
     auto add = [&](int anode, int cathode) {
-        const Eigen::Vector3f& a = contacts[anode].position;
-        const Eigen::Vector3f& c = contacts[cathode].position;
+        const Eigen::Vector3f& a = contacts[std::size_t(anode)].position;
+        const Eigen::Vector3f& c = contacts[std::size_t(cathode)].position;
         if ((a - c).norm() > kMaxNeighbourDistance)
             return;
-        pairs.append({anode, cathode, contacts[anode].name + QLatin1Char('-') + contacts[cathode].name, (a + c) * 0.5f});
+        pairs.push_back({anode, cathode, contacts[std::size_t(anode)].name + '-' + contacts[std::size_t(cathode)].name, (a + c) * 0.5f});
     };
 
     for (const IeegLead& lead : implantation.leads()) {
-        const QVector<int>& order = lead.contacts;
-        const bool grid = lead.type == IeegLeadType::Grid && qint64(lead.rows) * lead.cols == order.size() && lead.cols > 0;
-        const int cols = grid ? lead.cols : int(order.size());
+        const std::vector<int>& order = lead.contacts;
+        const int count = static_cast<int>(order.size());
+        const bool grid = lead.type == IeegLeadType::Grid && std::int64_t{lead.rows} * lead.cols == count && lead.cols > 0;
+        const int cols = grid ? lead.cols : count;
         // Along each row (the whole lead for depth leads and strips)
-        for (int k = 0; k + 1 < order.size(); ++k) {
+        for (int k = 0; k + 1 < count; ++k) {
             if ((k + 1) % cols != 0)
-                add(order[k], order[k + 1]);
+                add(order[std::size_t(k)], order[std::size_t(k) + 1]);
         }
         // Down each column of a grid
         if (grid) {
-            for (int k = 0; k + cols < order.size(); ++k)
-                add(order[k], order[k + cols]);
+            for (int k = 0; k + cols < count; ++k)
+                add(order[std::size_t(k)], order[std::size_t(k) + std::size_t(cols)]);
         }
     }
     return pairs;
@@ -65,15 +67,15 @@ QVector<IeegBipolarPair> IeegReference::bipolarPairs(const IeegImplantation& imp
 
 //=============================================================================================================
 
-Eigen::SparseMatrix<double> IeegReference::bipolarMatrix(const QVector<IeegBipolarPair>& pairs, int contactCount)
+Eigen::SparseMatrix<double> IeegReference::bipolarMatrix(const std::vector<IeegBipolarPair>& pairs, int contactCount)
 {
     std::vector<Eigen::Triplet<double>> entries;
-    entries.reserve(size_t(pairs.size()) * 2);
-    for (int p = 0; p < pairs.size(); ++p) {
-        entries.emplace_back(p, pairs[p].anode, 1.0);
-        entries.emplace_back(p, pairs[p].cathode, -1.0);
+    entries.reserve(pairs.size() * 2);
+    for (std::size_t p = 0; p < pairs.size(); ++p) {
+        entries.emplace_back(int(p), pairs[p].anode, 1.0);
+        entries.emplace_back(int(p), pairs[p].cathode, -1.0);
     }
-    Eigen::SparseMatrix<double> montage(pairs.size(), contactCount);
+    Eigen::SparseMatrix<double> montage(Eigen::Index(pairs.size()), contactCount);
     montage.setFromTriplets(entries.begin(), entries.end());
     return montage;
 }

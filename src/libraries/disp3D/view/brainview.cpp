@@ -2167,7 +2167,7 @@ void BrainView::mouseReleaseEvent(QMouseEvent* event)
     if (event->button() == Qt::LeftButton && !m_draggedSincePress) {
         castRay(event->pos());
         if (const IEEGLIB::IeegContact* contact = m_electrodes ? m_electrodes->contactAt(m_electrodes->hoveredContact()) : nullptr) {
-            emit electrodeContactClicked(contact->name, QVector3D(contact->position.x(), contact->position.y(), contact->position.z()));
+            emit electrodeContactClicked(QString::fromStdString(contact->name), QVector3D(contact->position.x(), contact->position.y(), contact->position.z()));
         } else if (m_hasIntersection) {
             emit surfacePointClicked(m_lastIntersectionPoint);
         }

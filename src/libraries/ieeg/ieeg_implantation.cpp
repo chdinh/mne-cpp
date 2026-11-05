@@ -18,22 +18,27 @@
 
 #include <bids/bids_coordinate_system.h>
 #include <bids/bids_electrode.h>
+#include <utils/string_utils.h>
 
 //=============================================================================================================
 // QT INCLUDES
 //=============================================================================================================
 
-#include <QDir>
-#include <QFileInfo>
-#include <QHash>
-#include <QRegularExpression>
+#include <QString>
 
 //=============================================================================================================
 // STL INCLUDES
 //=============================================================================================================
 
 #include <algorithm>
+#include <cctype>
+#include <cmath>
+#include <cstdint>
+#include <filesystem>
 #include <limits>
+#include <optional>
+#include <unordered_map>
+#include <utility>
 
 //=============================================================================================================
 // USED NAMESPACES
@@ -41,20 +46,95 @@
 
 using namespace IEEGLIB;
 
+//=============================================================================================================
+// DEFINE LOCAL FUNCTIONS
+//=============================================================================================================
+
 namespace
 {
 
-// "LA10" -> ("LA", 10); "A'2" -> ("A'", 2); a name without a trailing number has no number
-QRegularExpressionMatch splitName(const QString& name)
+struct NameParts
 {
-    static const QRegularExpression trailingNumber(QStringLiteral("^(.*?)[\\s_-]*(\\d+)$"));
-    return trailingNumber.match(name);
+    bool numbered = false;
+    std::string prefix;
+    int number = 0;
+};
+
+bool isDigit(char c)
+{
+    return std::isdigit(static_cast<unsigned char>(c)) != 0;
 }
 
-void setError(QString* error, const QString& message)
+bool isSpace(char c)
+{
+    return std::isspace(static_cast<unsigned char>(c)) != 0;
+}
+
+// "LA 12" -> ("LA", 12): the trailing number and the name before it without separators
+NameParts splitName(const std::string& name)
+{
+    std::size_t digits = name.size();
+    while (digits > 0 && isDigit(name[digits - 1]))
+        --digits;
+    if (digits == name.size())
+        return {};
+    std::size_t prefixEnd = digits;
+    while (prefixEnd > 0 && (isSpace(name[prefixEnd - 1]) || name[prefixEnd - 1] == '_' || name[prefixEnd - 1] == '-'))
+        --prefixEnd;
+    return {true, name.substr(0, prefixEnd), UTILSLIB::toInt(std::string_view(name).substr(digits)).value_or(0)};
+}
+
+// "[4x8]", "4 x 8" -> (4, 8)
+std::optional<std::pair<int, int>> parseDimension(std::string_view text)
+{
+    std::size_t i = 0;
+    auto skipSpace = [&] {
+        while (i < text.size() && isSpace(text[i]))
+            ++i;
+    };
+    auto number = [&]() -> std::optional<int> {
+        const std::size_t start = i;
+        while (i < text.size() && isDigit(text[i]))
+            ++i;
+        if (i == start)
+            return std::nullopt;
+        return UTILSLIB::toInt(text.substr(start, i - start)).value_or(0);
+    };
+    if (i < text.size() && text[i] == '[')
+        ++i;
+    skipSpace();
+    const std::optional<int> rows = number();
+    skipSpace();
+    if (!rows || i >= text.size() || text[i] != 'x')
+        return std::nullopt;
+    ++i;
+    skipSpace();
+    const std::optional<int> cols = number();
+    skipSpace();
+    if (cols && i < text.size() && text[i] == ']')
+        ++i;
+    if (!cols || i != text.size())
+        return std::nullopt;
+    return std::make_pair(*rows, *cols);
+}
+
+std::optional<float> toCoordinate(const QString& text)
+{
+    const std::optional<double> value = UTILSLIB::toDouble(UTILSLIB::trimmed(text.toStdString()));
+    if (!value || !std::isfinite(static_cast<float>(*value)))
+        return std::nullopt;
+    return static_cast<float>(*value);
+}
+
+bool endsWithIgnoreCase(const std::string& text, std::string_view suffix)
+{
+    return text.size() >= suffix.size() && UTILSLIB::equalsIgnoreCase(std::string_view(text).substr(text.size() - suffix.size()), suffix);
+}
+
+void setError(std::string* error, std::string message)
 {
     if (error)
-        *error = message;
+        *error = std::move(message);
 }
 
 } // namespace
@@ -63,35 +143,36 @@ void setError(QString* error, const QString& message)
 // DEFINE MEMBER METHODS
 //=============================================================================================================
 
-IeegImplantation::IeegImplantation(const QVector<IeegContact>& contacts, const QString& coordinateSystem)
+IeegImplantation::IeegImplantation(const std::vector<IeegContact>& contacts, const std::string& coordinateSystem)
 : m_contacts(contacts)
 , m_coordinateSystem(coordinateSystem)
 {
-    QHash<QString, int> leadIndex;
-    QVector<QVector<QPair<int, int>>> members; // per lead: (number along the lead, contact index)
-    for (int i = 0; i < m_contacts.size(); ++i) {
+    std::unordered_map<std::string, std::size_t> leadIndex;
+    std::vector<std::vector<std::pair<int, int>>> members; // per lead: (number along the lead, contact index)
+    for (std::size_t i = 0; i < m_contacts.size(); ++i) {
         IeegContact& contact = m_contacts[i];
-        const QRegularExpressionMatch m = splitName(contact.name);
-        if (contact.lead.isEmpty())
-            contact.lead = (m.hasMatch() && !m.captured(1).isEmpty()) ? m.captured(1) : contact.name;
-        if (!leadIndex.contains(contact.lead)) {
-            leadIndex.insert(contact.lead, int(m_leads.size()));
+        const NameParts parts = splitName(contact.name);
+        if (contact.lead.empty())
+            contact.lead = (parts.numbered && !parts.prefix.empty()) ? parts.prefix : contact.name;
+        auto [it, inserted] = leadIndex.try_emplace(contact.lead, m_leads.size());
+        if (inserted) {
             IeegLead lead;
             lead.name = contact.lead;
-            m_leads.append(lead);
-            members.append(QVector<QPair<int, int>>());
+            m_leads.push_back(lead);
+            members.emplace_back();
         }
-        members[leadIndex.value(contact.lead)].append({m.hasMatch() ? m.captured(2).toInt() : 0, i});
+        members[it->second].emplace_back(parts.number, static_cast<int>(i));
     }
 
-    for (int l = 0; l < m_leads.size(); ++l) {
-        QVector<QPair<int, int>>& lead = members[l];
+    for (std::size_t l = 0; l < m_leads.size(); ++l) {
+        std::vector<std::pair<int, int>>& lead = members[l];
         std::stable_sort(lead.begin(), lead.end(), [](const auto& a, const auto& b) { return a.first < b.first; });
         float spacing = std::numeric_limits<float>::max();
-        for (int k = 0; k < lead.size(); ++k) {
-            m_leads[l].contacts.append(lead[k].second);
+        m_leads[l].contacts.reserve(lead.size());
+        for (std::size_t k = 0; k < lead.size(); ++k) {
+            m_leads[l].contacts.push_back(lead[k].second);
             if (k > 0)
-                spacing = std::min(spacing, (m_contacts[lead[k].second].position - m_contacts[lead[k - 1].second].position).norm());
+                spacing = std::min(spacing, (m_contacts[std::size_t(lead[k].second)].position - m_contacts[std::size_t(lead[k - 1].second)].position).norm());
         }
         m_leads[l].type = spacing < kMaxDepthSpacing ? IeegLeadType::Depth : IeegLeadType::Strip;
     }
@@ -99,84 +180,96 @@ IeegImplantation::IeegImplantation(const QVector<IeegContact>& contacts, const Q
 
 //=============================================================================================================
 
-IeegImplantation IeegImplantation::readBids(const QString& electrodesTsv, QString* error)
+IeegImplantation IeegImplantation::readBids(const std::string& electrodesTsv, std::string* error)
 {
-    const QFileInfo info(electrodesTsv);
+    const std::filesystem::path tsvPath = UTILSLIB::pathFromUtf8(electrodesTsv);
+    const std::string tsvName = UTILSLIB::utf8FromPath(tsvPath.filename());
     // The coordsystem sidecar sharing the longest name prefix, so sessions are never mixed
-    QString coordPath;
-    int bestPrefix = -1;
-    const QStringList candidates = info.dir().entryList({QStringLiteral("*_coordsystem.json")}, QDir::Files);
-    for (const QString& candidate : candidates) {
-        int prefix = 0;
-        while (prefix < candidate.size() && prefix < info.fileName().size() && candidate[prefix] == info.fileName()[prefix])
-            ++prefix;
+    std::vector<std::pair<std::string, std::string>> candidates; // (lower-case name, name), sorted like QDir
+    std::error_code ec;
+    for (const auto& entry : std::filesystem::directory_iterator(tsvPath.parent_path().empty() ? "." : tsvPath.parent_path(), ec)) {
+        std::error_code typeError;
+        const std::string name = UTILSLIB::utf8FromPath(entry.path().filename());
+        if (entry.is_regular_file(typeError) && endsWithIgnoreCase(name, "_coordsystem.json"))
+            candidates.emplace_back(UTILSLIB::toLower(name), name);
+    }
+    std::sort(candidates.begin(), candidates.end());
+    std::string coordPath;
+    std::ptrdiff_t bestPrefix = -1;
+    for (const auto& [lower, candidate] : candidates) {
+        const auto prefix = std::mismatch(candidate.begin(), candidate.end(), tsvName.begin(), tsvName.end()).first - candidate.begin();
         if (prefix > bestPrefix) {
             bestPrefix = prefix;
-            coordPath = info.dir().filePath(candidate);
+            coordPath = UTILSLIB::utf8FromPath(tsvPath.parent_path() / UTILSLIB::pathFromUtf8(candidate));
         }
     }
-    if (coordPath.isEmpty()) {
-        setError(error, QStringLiteral("no *_coordsystem.json next to %1, so the units are unknown").arg(electrodesTsv));
+    if (coordPath.empty()) {
+        setError(error, "no *_coordsystem.json next to " + electrodesTsv + ", so the units are unknown");
         return {};
     }
-    const BIDSLIB::BidsCoordinateSystem coordSystem = BIDSLIB::BidsCoordinateSystem::readJson(coordPath);
-    const float scale = coordSystem.units == QLatin1String("m") ? 1.0f
-        : coordSystem.units == QLatin1String("cm")              ? 0.01f
-        : coordSystem.units == QLatin1String("mm")              ? 0.001f
-                                                                : 0.0f;
+    const BIDSLIB::BidsCoordinateSystem coordSystem = BIDSLIB::BidsCoordinateSystem::readJson(QString::fromStdString(coordPath));
+    const std::string units = coordSystem.units.toStdString();
+    const float scale = units == "m" ? 1.0f
+        : units == "cm"              ? 0.01f
+        : units == "mm"              ? 0.001f
+                                     : 0.0f;
     if (scale == 0.0f) {
-        setError(error, QStringLiteral("unsupported iEEGCoordinateUnits \"%1\" in %2").arg(coordSystem.units, coordPath));
+        setError(error, "unsupported iEEGCoordinateUnits \"" + units + "\" in " + coordPath);
         return {};
     }
 
-    QVector<IeegContact> contacts;
-    QHash<QString, QString> declaredTypes;
-    QHash<QString, QString> declaredDimensions;
-    for (const BIDSLIB::BidsElectrode& e : BIDSLIB::BidsElectrode::readTsv(electrodesTsv)) {
-        bool okX = false, okY = false, okZ = false;
-        const Eigen::Vector3f position(e.x.toFloat(&okX), e.y.toFloat(&okY), e.z.toFloat(&okZ));
-        if (!okX || !okY || !okZ)
+    std::vector<IeegContact> contacts;
+    std::unordered_map<std::string, std::string> declaredTypes;
+    std::unordered_map<std::string, std::string> declaredDimensions;
+    for (const BIDSLIB::BidsElectrode& e : BIDSLIB::BidsElectrode::readTsv(QString::fromStdString(electrodesTsv))) {
+        const std::optional<float> x = toCoordinate(e.x);
+        const std::optional<float> y = toCoordinate(e.y);
+        const std::optional<float> z = toCoordinate(e.z);
+        if (!x || !y || !z)
             continue;
         IeegContact contact;
-        contact.name = e.name;
-        contact.position = position * scale;
-        contact.lead = e.group;
-        contacts.append(contact);
+        contact.name = e.name.toStdString();
+        contact.position = Eigen::Vector3f(*x, *y, *z) * scale;
+        contact.lead = e.group.toStdString();
         // Declarations are per lead; contacts without a group take their lead from the name later
-        const QString key = e.group.isEmpty() ? e.name : e.group;
+        const std::string key = contact.lead.empty() ? contact.name : contact.lead;
         if (!e.type.isEmpty())
-            declaredTypes.insert(key, e.type.toLower());
+            declaredTypes.insert_or_assign(key, UTILSLIB::toLower(e.type.toStdString()));
         if (!e.dimension.isEmpty())
-            declaredDimensions.insert(key, e.dimension);
+            declaredDimensions.insert_or_assign(key, e.dimension.toStdString());
+        contacts.push_back(std::move(contact));
     }
-    if (contacts.isEmpty()) {
-        setError(error, QStringLiteral("no contacts with coordinates in %1").arg(electrodesTsv));
+    if (contacts.empty()) {
+        setError(error, "no contacts with coordinates in " + electrodesTsv);
         return {};
     }
 
-    IeegImplantation implantation(contacts, coordSystem.system);
-    static const QRegularExpression dimension(QStringLiteral("^\\[?\\s*(\\d+)\\s*x\\s*(\\d+)\\s*\\]?$"));
-    for (int l = 0; l < implantation.m_leads.size(); ++l) {
+    auto lookup = [](const std::unordered_map<std::string, std::string>& map, const std::string& key) {
+        const auto it = map.find(key);
+        return it == map.end() ? std::string() : it->second;
+    };
+    IeegImplantation implantation(contacts, coordSystem.system.toStdString());
+    for (std::size_t l = 0; l < implantation.m_leads.size(); ++l) {
         const IeegLead lead = implantation.m_leads[l];
         // A declaration on any contact of the lead applies to the lead
-        QString type = declaredTypes.value(lead.name);
-        QString shape = declaredDimensions.value(lead.name);
-        for (const int c : std::as_const(lead.contacts)) {
-            const QString& name = implantation.m_contacts[c].name;
-            if (type.isEmpty())
-                type = declaredTypes.value(name);
-            if (shape.isEmpty())
-                shape = declaredDimensions.value(name);
+        std::string type = lookup(declaredTypes, lead.name);
+        std::string shape = lookup(declaredDimensions, lead.name);
+        for (const int c : lead.contacts) {
+            const std::string& name = implantation.m_contacts[std::size_t(c)].name;
+            if (type.empty())
+                type = lookup(declaredTypes, name);
+            if (shape.empty())
+                shape = lookup(declaredDimensions, name);
         }
-        const QRegularExpressionMatch m = dimension.match(shape);
-        const int rows = m.hasMatch() ? m.captured(1).toInt() : 0;
-        const int cols = m.hasMatch() ? m.captured(2).toInt() : 0;
-        IeegLeadType leadType = (rows > 1 && cols > 1 && qint64(rows) * cols == lead.contacts.size()) ? IeegLeadType::Grid : lead.type;
-        if (type.contains(QLatin1String("depth")) || type.contains(QLatin1String("seeg")))
+        const std::optional<std::pair<int, int>> dimension = parseDimension(shape);
+        const int rows = dimension ? dimension->first : 0;
+        const int cols = dimension ? dimension->second : 0;
+        IeegLeadType leadType = (rows > 1 && cols > 1 && std::int64_t{rows} * cols == std::int64_t(lead.contacts.size())) ? IeegLeadType::Grid : lead.type;
+        if (type.find("depth") != std::string::npos || type.find("seeg") != std::string::npos)
             leadType = IeegLeadType::Depth;
-        else if (type.contains(QLatin1String("strip")))
+        else if (type.find("strip") != std::string::npos)
             leadType = IeegLeadType::Strip;
-        else if (type.contains(QLatin1String("grid")))
+        else if (type.find("grid") != std::string::npos)
             leadType = IeegLeadType::Grid;
         implantation.setLeadType(lead.name, leadType, rows, cols);
     }
@@ -185,13 +278,13 @@ IeegImplantation IeegImplantation::readBids(const QString& electrodesTsv, QStrin
 
 //=============================================================================================================
 
-bool IeegImplantation::setLeadType(const QString& lead, IeegLeadType type, int rows, int cols)
+bool IeegImplantation::setLeadType(const std::string& lead, IeegLeadType type, int rows, int cols)
 {
     for (IeegLead& l : m_leads) {
         if (l.name != lead)
             continue;
         l.type = type;
-        const bool shapeFits = rows > 0 && cols > 0 && qint64(rows) * cols == l.contacts.size();
+        const bool shapeFits = rows > 0 && cols > 0 && std::int64_t{rows} * cols == std::int64_t(l.contacts.size());
         l.rows = shapeFits ? rows : 0;
         l.cols = shapeFits ? cols : 0;
         return true;
@@ -201,25 +294,22 @@ bool IeegImplantation::setLeadType(const QString& lead, IeegLeadType type, int r
 
 //=============================================================================================================
 
-int IeegImplantation::indexOf(const QString& name) const
+int IeegImplantation::indexOf(const std::string& name) const
 {
-    for (int i = 0; i < m_contacts.size(); ++i) {
-        if (m_contacts[i].name == name)
-            return i;
-    }
-    return -1;
+    const auto it = std::find_if(m_contacts.begin(), m_contacts.end(), [&](const IeegContact& c) { return c.name == name; });
+    return it == m_contacts.end() ? -1 : static_cast<int>(it - m_contacts.begin());
 }
 
 //=============================================================================================================
 
 bool IeegImplantation::isScannerRas() const
 {
-    return m_coordinateSystem.compare(QLatin1String("ACPC"), Qt::CaseInsensitive) == 0 || m_coordinateSystem.compare(QLatin1String("ScanRAS"), Qt::CaseInsensitive) == 0;
+    return UTILSLIB::equalsIgnoreCase(m_coordinateSystem, "ACPC") || UTILSLIB::equalsIgnoreCase(m_coordinateSystem, "ScanRAS");
 }
 
 //=============================================================================================================
 
-IeegImplantation IeegImplantation::transformed(const Eigen::Matrix4f& trans, const QString& frame) const
+IeegImplantation IeegImplantation::transformed(const Eigen::Matrix4f& trans, const std::string& frame) const
 {
     IeegImplantation result = *this;
     for (IeegContact& contact : result.m_contacts)
@@ -232,8 +322,8 @@ IeegImplantation IeegImplantation::transformed(const Eigen::Matrix4f& trans, con
 
 Eigen::MatrixX3f IeegImplantation::positions() const
 {
-    Eigen::MatrixX3f rr(m_contacts.size(), 3);
-    for (int i = 0; i < m_contacts.size(); ++i)
-        rr.row(i) = m_contacts[i].position.transpose();
+    Eigen::MatrixX3f rr(Eigen::Index(m_contacts.size()), 3);
+    for (std::size_t i = 0; i < m_contacts.size(); ++i)
+        rr.row(Eigen::Index(i)) = m_contacts[i].position.transpose();
     return rr;
 }

@@ -62,24 +62,24 @@ int main(int argc, char* argv[])
 
     //! [ieeg_implantation_usage]
     // Contacts of one depth lead, 3.5 mm apart, in metres; the lead comes from the names
-    QVector<IeegContact> contacts;
+    std::vector<IeegContact> contacts;
     for (int k : {3, 1, 2}) {
         IeegContact contact;
-        contact.name = QStringLiteral("LA%1").arg(k);
+        contact.name = "LA" + std::to_string(k);
         contact.position = Eigen::Vector3f(-0.03f, 0.0f, 0.0035f * float(k - 1));
-        contacts.append(contact);
+        contacts.push_back(contact);
     }
-    const IeegImplantation implantation(contacts, QStringLiteral("ACPC"));
-    const IeegLead& lead = implantation.leads().first(); // contacts ordered LA1, LA2, LA3
+    const IeegImplantation implantation(contacts, "ACPC");
+    const IeegLead& lead = implantation.leads().front(); // contacts ordered LA1, LA2, LA3
     // IeegImplantation::readBids("sub-01_electrodes.tsv") reads the same from BIDS iEEG
     //! [ieeg_implantation_usage]
-    ok &= expect(implantation.leads().size() == 1 && lead.name == "LA" && lead.type == IeegLeadType::Depth && lead.contacts == QVector<int>({1, 2, 0}),
+    ok &= expect(implantation.leads().size() == 1 && lead.name == "LA" && lead.type == IeegLeadType::Depth && lead.contacts == std::vector<int>({1, 2, 0}),
                  "IeegImplantation: one depth lead LA, ordered by contact number");
 
     //! [ieeg_reference_usage]
-    const QVector<IeegBipolarPair> pairs = IeegReference::bipolarPairs(implantation); // LA1-LA2, LA2-LA3
-    Eigen::MatrixXd data(3, 1);                                                       // contacts x samples, file order
-    data << 30.0, 10.0, 15.0;                                                         // LA3, LA1, LA2
+    const std::vector<IeegBipolarPair> pairs = IeegReference::bipolarPairs(implantation); // LA1-LA2, LA2-LA3
+    Eigen::MatrixXd data(3, 1);                                                           // contacts x samples, file order
+    data << 30.0, 10.0, 15.0;                                                             // LA3, LA1, LA2
     const Eigen::MatrixXd bipolar = IeegReference::bipolarMatrix(pairs, int(contacts.size())) * data;
     //! [ieeg_reference_usage]
     ok &= expect(pairs.size() == 2 && pairs[0].name == "LA1-LA2" && bipolar(0, 0) == -5.0 && bipolar(1, 0) == -15.0,

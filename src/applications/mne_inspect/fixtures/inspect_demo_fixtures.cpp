@@ -36,44 +36,44 @@ namespace
 IeegContact makeContact(const QString& name, const QString& lead, const Eigen::Vector3f& position)
 {
     IeegContact c;
-    c.name = name;
-    c.lead = lead;
+    c.name = name.toStdString();
+    c.lead = lead.toStdString();
     c.position = position;
     return c;
 }
 
-void addLine(QVector<IeegContact>& contacts, const QString& lead, const Eigen::Vector3f& origin,
+void addLine(std::vector<IeegContact>& contacts, const QString& lead, const Eigen::Vector3f& origin,
              const Eigen::Vector3f& step, int nContacts, int firstNumber)
 {
     for (int i = 0; i < nContacts; ++i)
-        contacts.append(makeContact(QStringLiteral("%1%2").arg(lead).arg(i + firstNumber), lead, origin + float(i) * step));
+        contacts.push_back(makeContact(QStringLiteral("%1%2").arg(lead).arg(i + firstNumber), lead, origin + float(i) * step));
 }
 
 } // namespace
 
 IeegImplantation demoOneDepthStrip()
 {
-    QVector<IeegContact> contacts;
+    std::vector<IeegContact> contacts;
     addLine(contacts, QStringLiteral("LA"), Eigen::Vector3f::Zero(), Eigen::Vector3f(0.0f, 0.0f, 0.01f), 4, 0);
     IeegImplantation implantation(contacts);
-    implantation.setLeadType(QStringLiteral("LA"), IeegLeadType::Depth);
+    implantation.setLeadType("LA", IeegLeadType::Depth);
     return implantation;
 }
 
 IeegImplantation demoFourArrayMontage()
 {
-    QVector<IeegContact> contacts;
+    std::vector<IeegContact> contacts;
     addLine(contacts, QStringLiteral("LA"), Eigen::Vector3f(-0.035f, 0.010f, 0.0f), Eigen::Vector3f(0.0f, 0.0f, 0.005f), 6, 0);
     addLine(contacts, QStringLiteral("RA"), Eigen::Vector3f(0.035f, 0.010f, 0.0f), Eigen::Vector3f(0.0f, 0.0f, 0.005f), 6, 0);
     addLine(contacts, QStringLiteral("LG"), Eigen::Vector3f(-0.020f, -0.020f, 0.030f), Eigen::Vector3f(0.008f, 0.0f, 0.0f), 6, 1);
     for (int r = 0; r < 4; ++r) {
         for (int c = 0; c < 4; ++c)
-            contacts.append(makeContact(QStringLiteral("RG%1").arg(r * 4 + c + 1), QStringLiteral("RG"),
-                                        Eigen::Vector3f(0.010f + 0.006f * float(c), -0.020f + 0.006f * float(r), 0.030f)));
+            contacts.push_back(makeContact(QStringLiteral("RG%1").arg(r * 4 + c + 1), QStringLiteral("RG"),
+                                           Eigen::Vector3f(0.010f + 0.006f * float(c), -0.020f + 0.006f * float(r), 0.030f)));
     }
     IeegImplantation implantation(contacts);
-    implantation.setLeadType(QStringLiteral("LG"), IeegLeadType::Strip);
-    implantation.setLeadType(QStringLiteral("RG"), IeegLeadType::Grid, 4, 4);
+    implantation.setLeadType("LG", IeegLeadType::Strip);
+    implantation.setLeadType("RG", IeegLeadType::Grid, 4, 4);
     return implantation;
 }
 

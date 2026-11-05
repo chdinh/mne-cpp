@@ -31,11 +31,11 @@
 #include <Eigen/Core>
 
 //=============================================================================================================
-// QT INCLUDES
+// STL INCLUDES
 //=============================================================================================================
 
-#include <QString>
-#include <QVector>
+#include <string>
+#include <vector>
 
 //=============================================================================================================
 // DEFINE NAMESPACE IEEGLIB
@@ -63,9 +63,9 @@ enum class IeegLeadType
  */
 struct IEEGSHARED_EXPORT IeegContact
 {
-    QString name;                                       /**< Contact (channel) name, e.g. "LA3". */
+    std::string name;                                   /**< Contact (channel) name, e.g. "LA3". */
     Eigen::Vector3f position = Eigen::Vector3f::Zero(); /**< Position in metres, in the frame of the implantation. */
-    QString lead;                                       /**< Lead name; empty when building derives it from the contact name. */
+    std::string lead;                                   /**< Lead name; empty when building derives it from the contact name. */
 };
 
 //=============================================================================================================
@@ -76,9 +76,9 @@ struct IEEGSHARED_EXPORT IeegContact
  */
 struct IEEGSHARED_EXPORT IeegLead
 {
-    QString name;                            /**< Lead name, e.g. "LA" or "GridA". */
+    std::string name;                        /**< Lead name, e.g. "LA" or "GridA". */
     IeegLeadType type = IeegLeadType::Depth; /**< Lead type. */
-    QVector<int> contacts;                   /**< Contact indices in order along the lead, contact 1 first. */
+    std::vector<int> contacts;               /**< Contact indices in order along the lead, contact 1 first. */
     int rows = 0;                            /**< Grid shape when known (rows x cols == contact count), else 0. */
     int cols = 0;                            /**< Grid shape when known, else 0. */
 };
@@ -110,7 +110,7 @@ public:
      * @param[in] contacts          Contacts, positions in metres.
      * @param[in] coordinateSystem  Name of the frame of the positions, e.g. "ACPC".
      */
-    explicit IeegImplantation(const QVector<IeegContact>& contacts, const QString& coordinateSystem = QString());
+    explicit IeegImplantation(const std::vector<IeegContact>& contacts, const std::string& coordinateSystem = {});
 
     //=========================================================================================================
     /**
@@ -126,22 +126,22 @@ public:
      * @param[out] error          Optional: why the file was refused.
      * @return The implantation; empty when the file was refused or has no placed contacts.
      */
-    static IeegImplantation readBids(const QString& electrodesTsv, QString* error = nullptr);
+    static IeegImplantation readBids(const std::string& electrodesTsv, std::string* error = nullptr);
 
     /** @return All contacts. */
-    const QVector<IeegContact>& contacts() const
+    const std::vector<IeegContact>& contacts() const
     {
         return m_contacts;
     }
 
     /** @return All leads, in order of their first contact. */
-    const QVector<IeegLead>& leads() const
+    const std::vector<IeegLead>& leads() const
     {
         return m_leads;
     }
 
     /** @return Name of the frame of the positions, e.g. "ACPC"; empty when unknown. */
-    QString coordinateSystem() const
+    const std::string& coordinateSystem() const
     {
         return m_coordinateSystem;
     }
@@ -149,7 +149,7 @@ public:
     /** @return True without contacts. */
     bool isEmpty() const
     {
-        return m_contacts.isEmpty();
+        return m_contacts.empty();
     }
 
     /**
@@ -161,13 +161,13 @@ public:
      * @param[in] cols  Grid columns, or 0 when unknown.
      * @return False when there is no such lead. A shape that does not match the contact count is dropped.
      */
-    bool setLeadType(const QString& lead, IeegLeadType type, int rows = 0, int cols = 0);
+    bool setLeadType(const std::string& lead, IeegLeadType type, int rows = 0, int cols = 0);
 
     /**
      * @param[in] name  Contact name.
      * @return Index of the contact, or -1.
      */
-    int indexOf(const QString& name) const;
+    int indexOf(const std::string& name) const;
 
     /** @return Contact positions, one row per contact, in metres. */
     Eigen::MatrixX3f positions() const;
@@ -184,12 +184,12 @@ public:
      * @param[in] frame  Name of the new frame.
      * @return A copy with every position transformed; leads are unchanged.
      */
-    IeegImplantation transformed(const Eigen::Matrix4f& trans, const QString& frame) const;
+    IeegImplantation transformed(const Eigen::Matrix4f& trans, const std::string& frame) const;
 
 private:
-    QVector<IeegContact> m_contacts;
-    QVector<IeegLead> m_leads;
-    QString m_coordinateSystem;
+    std::vector<IeegContact> m_contacts;
+    std::vector<IeegLead> m_leads;
+    std::string m_coordinateSystem;
 };
 
 } // namespace IEEGLIB

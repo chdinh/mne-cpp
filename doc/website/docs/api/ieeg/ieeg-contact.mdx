@@ -19,15 +19,15 @@ One recording contact.
 
 ```cpp title="src/examples/ex_ieeg/main.cpp"
 // Contacts of one depth lead, 3.5 mm apart, in metres; the lead comes from the names
-QVector<IeegContact> contacts;
+std::vector<IeegContact> contacts;
 for (int k : {3, 1, 2}) {
     IeegContact contact;
-    contact.name = QStringLiteral("LA%1").arg(k);
+    contact.name = "LA" + std::to_string(k);
     contact.position = Eigen::Vector3f(-0.03f, 0.0f, 0.0035f * float(k - 1));
-    contacts.append(contact);
+    contacts.push_back(contact);
 }
-const IeegImplantation implantation(contacts, QStringLiteral("ACPC"));
-const IeegLead& lead = implantation.leads().first(); // contacts ordered LA1, LA2, LA3
+const IeegImplantation implantation(contacts, "ACPC");
+const IeegLead& lead = implantation.leads().front(); // contacts ordered LA1, LA2, LA3
 // IeegImplantation::readBids("sub-01_electrodes.tsv") reads the same from BIDS iEEG
 ```
 
@@ -46,9 +46,9 @@ const IeegLead& lead = implantation.leads().first(); // contacts ordered LA1, LA
 Disp3D scene data: sensor-to-surface interpolation, electrodes, MRI slices, video overlay and layers.
 
 ````cpp title="src/examples/ex_disp3d_scene/main.cpp, line 134"
-QVector<IeegContact> shaft(4); // LH1..LH4, 3.5 mm apart: grouped into the sEEG depth lead "LH"
+std::vector<IeegContact> shaft(4); // LH1..LH4, 3.5 mm apart: grouped into the sEEG depth lead "LH"
 for (int k = 0; k < 4; ++k) {
-    shaft[k].name = QString("LH%1").arg(k + 1);
+    shaft[k].name = "LH" + std::to_string(k + 1);
     shaft[k].position = Eigen::Vector3f(0.010f + 0.0035f * float(k), -0.020f, 0.005f); // surface RAS, metres
 }
 ElectrodeObject electrodes; // a view of the implantation, drawn by BrainView::setElectrodes()
@@ -66,17 +66,17 @@ IEEG library: group sEEG contacts into a lead, derive a bipolar montage and pain
 
 ````cpp title="src/examples/ex_ieeg/main.cpp, line 64"
 // Contacts of one depth lead, 3.5 mm apart, in metres; the lead comes from the names
-QVector<IeegContact> contacts;
+std::vector<IeegContact> contacts;
 for (int k : {3, 1, 2}) {
     IeegContact contact;
-    contact.name = QStringLiteral("LA%1").arg(k);
+    contact.name = "LA" + std::to_string(k);
     contact.position = Eigen::Vector3f(-0.03f, 0.0f, 0.0035f * float(k - 1));
-    contacts.append(contact);
+    contacts.push_back(contact);
 }
-const IeegImplantation implantation(contacts, QStringLiteral("ACPC"));
-const IeegLead& lead = implantation.leads().first(); // contacts ordered LA1, LA2, LA3
+const IeegImplantation implantation(contacts, "ACPC");
+const IeegLead& lead = implantation.leads().front(); // contacts ordered LA1, LA2, LA3
 // IeegImplantation::readBids("sub-01_electrodes.tsv") reads the same from BIDS iEEG
-ok &= expect(implantation.leads().size() == 1 && lead.name == "LA" && lead.type == IeegLeadType::Depth && lead.contacts == QVector<int>({1, 2, 0}),
+ok &= expect(implantation.leads().size() == 1 && lead.name == "LA" && lead.type == IeegLeadType::Depth && lead.contacts == std::vector<int>({1, 2, 0}),
              "IeegImplantation: one depth lead LA, ordered by contact number");
 ````
 

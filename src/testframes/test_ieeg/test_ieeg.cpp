@@ -44,9 +44,9 @@ namespace
 IeegContact contact(const QString& name, float xMm, float yMm, float zMm, const QString& lead = QString())
 {
     IeegContact c;
-    c.name = name;
+    c.name = name.toStdString();
     c.position = Eigen::Vector3f(xMm, yMm, zMm) * 0.001f;
-    c.lead = lead;
+    c.lead = lead.toStdString();
     return c;
 }
 
@@ -97,29 +97,29 @@ void TestIeeg::readsBidsUnitsAndDeclarations()
               R"({"iEEGCoordinateSystem": "Other", "iEEGCoordinateUnits": "mm"})");
     writeFile(dir.filePath(QStringLiteral("sub-01_ses-02_coordsystem.json")),
               R"({"iEEGCoordinateSystem": "Other", "iEEGCoordinateUnits": "cm"})");
-    QString error;
-    IeegImplantation implantation = IeegImplantation::readBids(tsv, &error);
-    QVERIFY2(error.isEmpty(), qPrintable(error));
+    std::string error;
+    IeegImplantation implantation = IeegImplantation::readBids(tsv.toStdString(), &error);
+    QVERIFY2(error.empty(), error.c_str());
     QVERIFY(!implantation.isScannerRas());
     QVERIFY(implantation.contacts()[1].position.isApprox(Eigen::Vector3f(0.0f, 0.0f, 0.01f))); // cm -> m
-    const QVector<IeegLead>& leads = implantation.leads();
+    const std::vector<IeegLead>& leads = implantation.leads();
     QCOMPARE(leads.size(), 3);
     QCOMPARE(leads[0].type, IeegLeadType::Depth); // seeg, although 10 mm apart
     QCOMPARE(leads[1].type, IeegLeadType::Grid);  // declared by type; 3x1 does not fit two contacts
     QCOMPARE(leads[1].rows, 0);
-    QCOMPARE(leads[2].name, QStringLiteral("D"));
+    QCOMPARE(leads[2].name, std::string("D"));
     QCOMPARE(leads[2].type, IeegLeadType::Depth);
 
     writeFile(dir.filePath(QStringLiteral("sub-01_ses-02_coordsystem.json")),
               R"({"iEEGCoordinateSystem": "ScanRAS", "iEEGCoordinateUnits": "m"})");
-    implantation = IeegImplantation::readBids(tsv);
+    implantation = IeegImplantation::readBids(tsv.toStdString());
     QVERIFY(implantation.isScannerRas());
     QVERIFY(implantation.contacts()[1].position.isApprox(Eigen::Vector3f(0.0f, 0.0f, 1.0f)));
 
     // Only contacts without coordinates: nothing to place
     writeFile(tsv, "name\tx\ty\tz\nA1\tn/a\tn/a\tn/a\nA2\t1\tn/a\t0\n");
-    QVERIFY(IeegImplantation::readBids(tsv, &error).isEmpty());
-    QVERIFY2(error.contains(QLatin1String("no contacts")), qPrintable(error));
+    QVERIFY(IeegImplantation::readBids(tsv.toStdString(), &error).isEmpty());
+    QVERIFY2(error.find("no contacts") != std::string::npos, error.c_str());
 }
 
 //=============================================================================================================
@@ -127,14 +127,14 @@ void TestIeeg::readsBidsUnitsAndDeclarations()
 void TestIeeg::handlesDegenerateInput()
 {
     IeegImplantation implantation({contact("A1", 0, 0, 0), contact("A2", 0, 0, 3), contact("A3", 0, 0, 6), contact("A4", 0, 0, 9)});
-    QVERIFY(!implantation.setLeadType(QStringLiteral("nope"), IeegLeadType::Grid));
-    QVERIFY(implantation.setLeadType(QStringLiteral("A"), IeegLeadType::Grid, 2, 2));
+    QVERIFY(!implantation.setLeadType("nope", IeegLeadType::Grid));
+    QVERIFY(implantation.setLeadType("A", IeegLeadType::Grid, 2, 2));
     QCOMPARE(implantation.leads()[0].rows, 2);
     // A shape that does not fit the contacts is dropped, so the lead is paired as a single row
-    QVERIFY(implantation.setLeadType(QStringLiteral("A"), IeegLeadType::Grid, 3, 2));
+    QVERIFY(implantation.setLeadType("A", IeegLeadType::Grid, 3, 2));
     QCOMPARE(implantation.leads()[0].cols, 0);
     // 4 x 1073741825 wraps to 4 in 32-bit int arithmetic; it must not pass as a 4-contact grid
-    QVERIFY(implantation.setLeadType(QStringLiteral("A"), IeegLeadType::Grid, 4, 1073741825));
+    QVERIFY(implantation.setLeadType("A", IeegLeadType::Grid, 4, 1073741825));
     QCOMPARE(implantation.leads()[0].cols, 0);
     QCOMPARE(IeegReference::bipolarPairs(implantation).size(), 3);
     QCOMPARE(IeegReference::bipolarPairs(IeegImplantation()).size(), 0);
@@ -164,21 +164,28 @@ void TestIeeg::groupsContactsIntoLeads()
                                          contact("A'2", -30, 0, 10),
                                          contact("A1", 30, 0, 0),
                                          contact("REF", 0, 50, 0)},
-                                        QStringLiteral("ACPC"));
-    QCOMPARE(implantation.coordinateSystem(), QStringLiteral("ACPC"));
-    const QVector<IeegLead>& leads = implantation.leads();
+                                        "ACPC");
+    QCOMPARE(implantation.coordinateSystem(), std::string("ACPC"));
+    const std::vector<IeegLead>& leads = implantation.leads();
     QCOMPARE(leads.size(), 4);
-    QCOMPARE(leads[0].name, QStringLiteral("LA"));
-    QCOMPARE(leads[0].contacts, QVector<int>({1, 3, 0}));
+    QCOMPARE(leads[0].name, std::string("LA"));
+    QCOMPARE(leads[0].contacts, std::vector<int>({1, 3, 0}));
     QCOMPARE(leads[0].type, IeegLeadType::Depth); // 3.5 mm apart
-    QCOMPARE(leads[1].name, QStringLiteral("A'"));
+    QCOMPARE(leads[1].name, std::string("A'"));
     QCOMPARE(leads[1].type, IeegLeadType::Strip); // 10 mm apart
-    QCOMPARE(leads[2].name, QStringLiteral("A"));
-    QCOMPARE(leads[3].name, QStringLiteral("REF")); // no number: the name is the lead
-    QCOMPARE(implantation.contacts()[0].lead, QStringLiteral("LA"));
-    QCOMPARE(implantation.indexOf(QStringLiteral("A1")), 5);
-    QCOMPARE(implantation.indexOf(QStringLiteral("nope")), -1);
+    QCOMPARE(leads[2].name, std::string("A"));
+    QCOMPARE(leads[3].name, std::string("REF")); // no number: the name is the lead
+    QCOMPARE(implantation.contacts()[0].lead, std::string("LA"));
+    QCOMPARE(implantation.indexOf("A1"), 5);
+    QCOMPARE(implantation.indexOf("nope"), -1);
     QCOMPARE(implantation.positions().row(0), Eigen::RowVector3f(0.0f, 0.0f, 0.0315f));
+
+    // Separators between the lead name and the number are not part of the lead
+    const IeegImplantation separated({contact("LB_1", 0, 0, 0), contact("LB-2", 0, 0, 3), contact("LB 3", 0, 0, 6), contact("7", 9, 0, 0)});
+    QCOMPARE(separated.leads().size(), std::size_t{2});
+    QCOMPARE(separated.leads()[0].name, std::string("LB"));
+    QCOMPARE(separated.leads()[0].contacts, std::vector<int>({0, 1, 2}));
+    QCOMPARE(separated.leads()[1].name, std::string("7"));
 }
 
 //=============================================================================================================
@@ -202,44 +209,44 @@ void TestIeeg::readsBidsElectrodes()
               "NOPOS\tn/a\tn/a\tn/a\tn/a\tn/a\tn/a\tn/a\n");
 
     // Units are unknown without a coordsystem sidecar, so the file is refused
-    QString error;
-    QVERIFY(IeegImplantation::readBids(tsv, &error).isEmpty());
-    QVERIFY2(error.contains(QLatin1String("_coordsystem.json")), qPrintable(error));
+    std::string error;
+    QVERIFY(IeegImplantation::readBids(tsv.toStdString(), &error).isEmpty());
+    QVERIFY2(error.find("_coordsystem.json") != std::string::npos, error.c_str());
 
     writeFile(dir.filePath(QStringLiteral("sub-01_ses-01_coordsystem.json")),
               R"({"iEEGCoordinateSystem": "ACPC", "iEEGCoordinateUnits": "furlong"})");
-    QVERIFY(IeegImplantation::readBids(tsv, &error).isEmpty());
-    QVERIFY2(error.contains(QLatin1String("furlong")), qPrintable(error));
+    QVERIFY(IeegImplantation::readBids(tsv.toStdString(), &error).isEmpty());
+    QVERIFY2(error.find("furlong") != std::string::npos, error.c_str());
 
     writeFile(dir.filePath(QStringLiteral("sub-01_ses-01_coordsystem.json")),
               R"({"iEEGCoordinateSystem": "ACPC", "iEEGCoordinateUnits": "mm"})");
-    const IeegImplantation implantation = IeegImplantation::readBids(tsv, &error);
+    const IeegImplantation implantation = IeegImplantation::readBids(tsv.toStdString(), &error);
     QCOMPARE(implantation.contacts().size(), 8);
-    QCOMPARE(implantation.coordinateSystem(), QStringLiteral("ACPC"));
+    QCOMPARE(implantation.coordinateSystem(), std::string("ACPC"));
     QVERIFY(implantation.contacts()[1].position.isApprox(Eigen::Vector3f(0.01f, 0.0f, 0.0f))); // mm -> m
 
     // ACPC is scanner RAS of the T1 (as MNE-BIDS reads it): moving it into surface RAS keeps the leads
     QVERIFY(implantation.isScannerRas());
     Eigen::Matrix4f scannerToSurface = Eigen::Matrix4f::Identity();
     scannerToSurface.block<3, 1>(0, 3) = Eigen::Vector3f(-0.005f, 0.02f, 0.0f);
-    const IeegImplantation surfaceRas = implantation.transformed(scannerToSurface, QStringLiteral("surface RAS"));
+    const IeegImplantation surfaceRas = implantation.transformed(scannerToSurface, "surface RAS");
     QVERIFY(!surfaceRas.isScannerRas());
     QVERIFY(surfaceRas.contacts()[1].position.isApprox(Eigen::Vector3f(0.005f, 0.02f, 0.0f)));
     QCOMPARE(surfaceRas.leads().size(), implantation.leads().size());
-    const QVector<IeegLead>& leads = implantation.leads();
+    const std::vector<IeegLead>& leads = implantation.leads();
     QCOMPARE(leads.size(), 3);
-    QCOMPARE(leads[0].name, QStringLiteral("GridA"));
+    QCOMPARE(leads[0].name, std::string("GridA"));
     QCOMPARE(leads[0].type, IeegLeadType::Grid);
     QCOMPARE(leads[0].rows, 2);
     QCOMPARE(leads[0].cols, 2);
     QCOMPARE(leads[1].type, IeegLeadType::Strip); // declared, although 3 mm apart
-    QCOMPARE(leads[2].name, QStringLiteral("LA"));
+    QCOMPARE(leads[2].name, std::string("LA"));
     QCOMPARE(leads[2].type, IeegLeadType::Depth);
 
     // A grid of known shape is paired along its rows, then down its columns
     QStringList names;
     for (const IeegBipolarPair& p : IeegReference::bipolarPairs(implantation))
-        names << p.name;
+        names << QString::fromStdString(p.name);
     QCOMPARE(names, QStringList({"G1-G2", "G3-G4", "G1-G3", "G2-G4", "S1-S2", "LA1-LA2"}));
 }
 
@@ -248,20 +255,20 @@ void TestIeeg::readsBidsElectrodes()
 void TestIeeg::bipolarPairsFollowLeads()
 {
     // A depth lead whose last contact is too far for a neighbour, and six grid contacts of unknown shape
-    QVector<IeegContact> contacts = {contact("LA1", 0, 0, 0), contact("LA2", 0, 0, 3.5), contact("LA3", 0, 0, 7),
-                                     contact("LA4", 0, 0, 40)};
+    std::vector<IeegContact> contacts = {contact("LA1", 0, 0, 0), contact("LA2", 0, 0, 3.5), contact("LA3", 0, 0, 7),
+                                         contact("LA4", 0, 0, 40)};
     for (int r = 0; r < 2; ++r) {
         for (int c = 0; c < 3; ++c)
-            contacts.append(contact(QStringLiteral("G%1").arg(r * 3 + c + 1), 50.0f + 10.0f * float(c), 10.0f * float(r), 0, QStringLiteral("G")));
+            contacts.push_back(contact(QStringLiteral("G%1").arg(r * 3 + c + 1), 50.0f + 10.0f * float(c), 10.0f * float(r), 0, QStringLiteral("G")));
     }
     IeegImplantation implantation(contacts);
     QCOMPARE(implantation.leads()[1].type, IeegLeadType::Strip); // no declared shape: one row
 
     // Without a known shape the grid is paired as one row: G3-G4 spans 22 mm and is dropped
-    QVector<IeegBipolarPair> pairs = IeegReference::bipolarPairs(implantation);
+    std::vector<IeegBipolarPair> pairs = IeegReference::bipolarPairs(implantation);
     QStringList names;
     for (const IeegBipolarPair& p : pairs)
-        names << p.name;
+        names << QString::fromStdString(p.name);
     QCOMPARE(names, QStringList({"LA1-LA2", "LA2-LA3", "G1-G2", "G2-G3", "G4-G5", "G5-G6"}));
     QCOMPARE(pairs[0].position, Eigen::Vector3f(0.0f, 0.0f, 0.00175f));
 
@@ -281,15 +288,15 @@ void TestIeeg::bipolarPairsFollowLeads()
     QStringList anodes, cathodes;
     for (const IeegContact& c : contacts) {
         FiffChInfo ch;
-        ch.ch_name = c.name;
+        ch.ch_name = QString::fromStdString(c.name);
         ch.kind = FIFFV_SEEG_CH;
         info.chs.append(ch);
-        info.ch_names.append(c.name);
+        info.ch_names.append(QString::fromStdString(c.name));
     }
     info.nchan = int(contacts.size());
     for (const IeegBipolarPair& p : pairs) {
-        anodes << contacts[p.anode].name;
-        cathodes << contacts[p.cathode].name;
+        anodes << QString::fromStdString(contacts[p.anode].name);
+        cathodes << QString::fromStdString(contacts[p.cathode].name);
     }
     Eigen::MatrixXd derived = Eigen::MatrixXd::Random(contacts.size(), 5);
     const Eigen::MatrixXd expected = IeegReference::bipolarMatrix(pairs, int(contacts.size())) * derived;

@@ -367,7 +367,7 @@ void TestMultimodalScene::testStripLayoutSkipsCylinderGeometry()
     ElectrodeObject obj;
     obj.setImplantation(IEEGLIB::IeegImplantation({c0, c1}));
 
-    QCOMPARE(obj.implantation().leads().first().type, IEEGLIB::IeegLeadType::Strip);
+    QCOMPARE(obj.implantation().leads().front().type, IEEGLIB::IeegLeadType::Strip);
     QCOMPARE(obj.bodyStreams().instanceCount, 1);
     QCOMPARE(obj.contactStreams().instanceCount, 2);
 }

@@ -30,7 +30,7 @@
       "decoding",
       "math"
     ],
-    "tokens": 20843,
+    "tokens": 20753,
     "gui_outside_design": []
   },
   "libraries": {
@@ -188,9 +188,9 @@
       ]
     },
     "disp3D": {
-      "tokens": 2932,
+      "tokens": 2928,
       "by_category": {
-        "containers": 292,
+        "containers": 282,
         "files": 51,
         "global": 304,
         "gui": 962,
@@ -199,7 +199,7 @@
         "other": 228,
         "random": 3,
         "smart_pointers": 73,
-        "strings": 673,
+        "strings": 679,
         "threads": 74,
         "time": 17
       },
@@ -308,15 +308,11 @@
       ]
     },
     "ieeg": {
-      "tokens": 89,
+      "tokens": 3,
       "by_category": {
-        "containers": 25,
-        "files": 2,
-        "global": 7,
-        "regex": 5,
-        "strings": 50
+        "strings": 3
       },
-      "public_header_includes": 5,
+      "public_header_includes": 0,
       "q_object": 0,
       "files": 8,
       "modules": [

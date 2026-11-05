@@ -32,11 +32,11 @@
 #include <Eigen/SparseCore>
 
 //=============================================================================================================
-// QT INCLUDES
+// STL INCLUDES
 //=============================================================================================================
 
-#include <QString>
-#include <QVector>
+#include <string>
+#include <vector>
 
 //=============================================================================================================
 // DEFINE NAMESPACE IEEGLIB
@@ -57,7 +57,7 @@ struct IEEGSHARED_EXPORT IeegBipolarPair
 {
     int anode = -1;                                     /**< Contact index of the anode. */
     int cathode = -1;                                   /**< Contact index of the cathode. */
-    QString name;                                       /**< Derivation name, "anode-cathode" as in MNE-Python. */
+    std::string name;                                   /**< Derivation name, "anode-cathode" as in MNE-Python. */
     Eigen::Vector3f position = Eigen::Vector3f::Zero(); /**< Midpoint of the two contacts. */
 };
 
@@ -82,7 +82,7 @@ public:
      * @param[in] implantation  Contacts and leads.
      * @return The derivations, lead by lead.
      */
-    static QVector<IeegBipolarPair> bipolarPairs(const IeegImplantation& implantation);
+    static std::vector<IeegBipolarPair> bipolarPairs(const IeegImplantation& implantation);
 
     //=========================================================================================================
     /**
@@ -92,7 +92,7 @@ public:
      * @param[in] contactCount  Number of contacts, the columns of M.
      * @return Sparse pairs x contacts matrix, +1 at the anode and -1 at the cathode of each row.
      */
-    static Eigen::SparseMatrix<double> bipolarMatrix(const QVector<IeegBipolarPair>& pairs, int contactCount);
+    static Eigen::SparseMatrix<double> bipolarMatrix(const std::vector<IeegBipolarPair>& pairs, int contactCount);
 };
 
 } // namespace IEEGLIB

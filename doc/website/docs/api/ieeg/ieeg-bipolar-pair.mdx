@@ -18,9 +18,9 @@ struct IEEGLIB::IeegBipolarPair
 One bipolar derivation: anode minus cathode.
 
 ```cpp title="src/examples/ex_ieeg/main.cpp"
-const QVector<IeegBipolarPair> pairs = IeegReference::bipolarPairs(implantation); // LA1-LA2, LA2-LA3
-Eigen::MatrixXd data(3, 1);                                                       // contacts x samples, file order
-data << 30.0, 10.0, 15.0;                                                         // LA3, LA1, LA2
+const std::vector<IeegBipolarPair> pairs = IeegReference::bipolarPairs(implantation); // LA1-LA2, LA2-LA3
+Eigen::MatrixXd data(3, 1);                                                           // contacts x samples, file order
+data << 30.0, 10.0, 15.0;                                                             // LA3, LA1, LA2
 const Eigen::MatrixXd bipolar = IeegReference::bipolarMatrix(pairs, int(contacts.size())) * data;
 ```
 
@@ -39,9 +39,9 @@ const Eigen::MatrixXd bipolar = IeegReference::bipolarMatrix(pairs, int(contacts
 IEEG library: group sEEG contacts into a lead, derive a bipolar montage and paint contact values onto a surface.
 
 ````cpp title="src/examples/ex_ieeg/main.cpp, line 80"
-const QVector<IeegBipolarPair> pairs = IeegReference::bipolarPairs(implantation); // LA1-LA2, LA2-LA3
-Eigen::MatrixXd data(3, 1);                                                       // contacts x samples, file order
-data << 30.0, 10.0, 15.0;                                                         // LA3, LA1, LA2
+const std::vector<IeegBipolarPair> pairs = IeegReference::bipolarPairs(implantation); // LA1-LA2, LA2-LA3
+Eigen::MatrixXd data(3, 1);                                                           // contacts x samples, file order
+data << 30.0, 10.0, 15.0;                                                             // LA3, LA1, LA2
 const Eigen::MatrixXd bipolar = IeegReference::bipolarMatrix(pairs, int(contacts.size())) * data;
 ok &= expect(pairs.size() == 2 && pairs[0].name == "LA1-LA2" && bipolar(0, 0) == -5.0 && bipolar(1, 0) == -15.0,
              "IeegReference: LA1-LA2 = -5, LA2-LA3 = -15");

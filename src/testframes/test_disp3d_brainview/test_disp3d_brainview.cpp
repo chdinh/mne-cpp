@@ -1507,9 +1507,9 @@ void TestDisp3dBrainView::brainRenderer_nullRhi()
     NetworkObject networkObject;
     networkObject.load(network, QStringLiteral("Jet"));
     networkObject.setThreshold(0.0);
-    QVector<IEEGLIB::IeegContact> lead(3);
+    std::vector<IEEGLIB::IeegContact> lead(3);
     for (int i = 0; i < 3; ++i) {
-        lead[i].name = QStringLiteral("LA%1").arg(i + 1);
+        lead[i].name = "LA" + std::to_string(i + 1);
         lead[i].position = Eigen::Vector3f(0.0f, 0.0f, 0.0035f * float(i));
     }
     ElectrodeObject electrodes;
@@ -2756,8 +2756,8 @@ void TestDisp3dBrainView::brainView_clickVersusDrag()
     QCOMPARE(doubleClicked.size(), 1);
 
     // Contact values paint the white surface of their hemisphere; an empty map clears them
-    QVector<IEEGLIB::IeegContact> grid(1);
-    grid[0].name = QStringLiteral("G1");
+    std::vector<IEEGLIB::IeegContact> grid(1);
+    grid[0].name = "G1";
     grid[0].position = lh.rr().row(0).transpose();
     ElectrodeObject electrodes;
     electrodes.setImplantation(IEEGLIB::IeegImplantation(grid));

@@ -131,9 +131,9 @@ int main(int argc, char* argv[])
                  QString("Interpolation: sensors kept, vertex 5 = %1, vertex 3 = %2").arg(atVertices(5)).arg(atVertices(3)));
 
     //! [electrode_object_usage]
-    QVector<IeegContact> shaft(4); // LH1..LH4, 3.5 mm apart: grouped into the sEEG depth lead "LH"
+    std::vector<IeegContact> shaft(4); // LH1..LH4, 3.5 mm apart: grouped into the sEEG depth lead "LH"
     for (int k = 0; k < 4; ++k) {
-        shaft[k].name = QString("LH%1").arg(k + 1);
+        shaft[k].name = "LH" + std::to_string(k + 1);
         shaft[k].position = Eigen::Vector3f(0.010f + 0.0035f * float(k), -0.020f, 0.005f); // surface RAS, metres
     }
     ElectrodeObject electrodes; // a view of the implantation, drawn by BrainView::setElectrodes()
@@ -207,9 +207,9 @@ int main(int argc, char* argv[])
     PickResult contactPick;
     contactPick.kind = PickKind::ElectrodeContact;
     contactPick.sourceId = "seeg_LH";
-    const IeegContact& first = electrodes.implantation().contacts().first();
+    const IeegContact& first = electrodes.implantation().contacts().front();
     contactPick.world = QVector3D(first.position.x(), first.position.y(), first.position.z());
-    contactPick.label = first.name;
+    contactPick.label = QString::fromStdString(first.name);
     contactPick.value = 3.5f;
     contactPick.timeSample = 120;
     scene.reportPick(contactPick);
