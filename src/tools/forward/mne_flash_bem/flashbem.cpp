@@ -779,10 +779,10 @@ bool FlashBem::convertTriToSurf(const QString& bemDir, const QString& paramDir)
             // Read the MGH volume to get vox-to-RAS transform
             //
             MriVolData volData;
-            QVector<FiffCoordTrans> additionalTrans;
+            std::vector<FiffCoordTrans> additionalTrans;
             QString subjectMriDir = m_settings.subjectsDir() + "/" + m_settings.subject() + "/mri";
 
-            if (!MriMghIO::read(flash5RegFile, volData, additionalTrans, subjectMriDir, false)) {
+            if (!MriMghIO::read(flash5RegFile.toStdString(), volData, additionalTrans, subjectMriDir.toStdString(), false)) {
                 qCritical() << "Could not read MGH file" << flash5RegFile;
                 return false;
             }

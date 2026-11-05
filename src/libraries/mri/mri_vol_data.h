@@ -52,11 +52,12 @@
 #include <fiff/fiff_coord_trans.h>
 
 //=============================================================================================================
-// QT INCLUDES
+// STL INCLUDES
 //=============================================================================================================
 
-#include <QString>
-#include <QVector>
+#include <array>
+#include <string>
+#include <vector>
 
 //=============================================================================================================
 // EIGEN INCLUDES
@@ -90,17 +91,17 @@ namespace MRILIB
  */
 struct MRISHARED_EXPORT MriSlice
 {
-    QString fileName;                   /**< Source file name. */
-    QVector<unsigned char> pixels;      /**< Pixel data (unsigned char), for FIFFV_MRI_PIXEL_BYTE. */
-    QVector<unsigned short> pixelsWord; /**< Pixel data (unsigned short), for FIFFV_MRI_PIXEL_WORD. */
-    QVector<float> pixelsFloat;         /**< Pixel data (float), for FIFFV_MRI_PIXEL_FLOAT. */
-    int pixelFormat;                    /**< Pixel format: FIFFV_MRI_PIXEL_BYTE(1), WORD(2), FLOAT(4). */
-    int width;                          /**< Width of the image in pixels. */
-    int height;                         /**< Height of the image in pixels. */
-    float dimx;                         /**< Pixel size in x direction (meters). */
-    float dimy;                         /**< Pixel size in y direction (meters). */
-    float scale;                        /**< Scaling factor for pixel data. */
-    FIFFLIB::FiffCoordTrans trans;      /**< Coordinate transform: slice -> MRI (surface RAS). */
+    std::string fileName;                   /**< Source file name. */
+    std::vector<unsigned char> pixels;      /**< Pixel data (unsigned char), for FIFFV_MRI_PIXEL_BYTE. */
+    std::vector<unsigned short> pixelsWord; /**< Pixel data (unsigned short), for FIFFV_MRI_PIXEL_WORD. */
+    std::vector<float> pixelsFloat;         /**< Pixel data (float), for FIFFV_MRI_PIXEL_FLOAT. */
+    int pixelFormat;                        /**< Pixel format: FIFFV_MRI_PIXEL_BYTE(1), WORD(2), FLOAT(4). */
+    int width;                              /**< Width of the image in pixels. */
+    int height;                             /**< Height of the image in pixels. */
+    float dimx;                             /**< Pixel size in x direction (meters). */
+    float dimy;                             /**< Pixel size in y direction (meters). */
+    float scale;                            /**< Scaling factor for pixel data. */
+    FIFFLIB::FiffCoordTrans trans;          /**< Coordinate transform: slice -> MRI (surface RAS). */
 
     //=========================================================================================================
     /**
@@ -165,7 +166,7 @@ public:
      *
      * @return True on success, false on error.
      */
-    bool read(const QString& path);
+    bool read(const std::string& path);
 
     //=========================================================================================================
     /**
@@ -206,7 +207,7 @@ public:
     /**
      * @return Volume dimensions as {dimX, dimY, dimZ}.
      */
-    QVector<int> dims() const
+    std::array<int, 3> dims() const
     {
         return {width, height, depth};
     }
@@ -221,7 +222,7 @@ public:
      *
      * @return Flat voxel data; empty vector if the volume has no slices.
      */
-    QVector<float> voxelDataAsFloat() const;
+    std::vector<float> voxelDataAsFloat() const;
 
     //=========================================================================================================
     /**
@@ -252,7 +253,7 @@ public:
     // MGH Header Fields
     //=========================================================================================================
 
-    QString fileName;      /**< Name of the source file. */
+    std::string fileName;  /**< Name of the source file. */
     int version;           /**< MGH format version (should be 1). */
     int width;             /**< First dimension of the image buffer (fastest). */
     int height;            /**< Second dimension. */
@@ -289,13 +290,13 @@ public:
     // Talairach Transform
     //=========================================================================================================
 
-    QString talairachXfmPath; /**< Path to the Talairach .xfm file (from MGH footer tags). */
+    std::string talairachXfmPath; /**< Path to the Talairach .xfm file (from MGH footer tags). */
 
     //=========================================================================================================
     // Slice Data
     //=========================================================================================================
 
-    QVector<MriSlice> slices; /**< Per-slice data (for COR-equivalent representation). */
+    std::vector<MriSlice> slices; /**< Per-slice data (for COR-equivalent representation). */
 };
 
 } // namespace MRILIB

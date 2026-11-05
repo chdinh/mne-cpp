@@ -114,9 +114,9 @@ int main(int argc, char* argv[])
     FiffCoordTransSet chain;
     if (!mghName.isEmpty()) {
         MriVolData volume;
-        QVector<FiffCoordTrans> volumeTrans;
+        std::vector<FiffCoordTrans> volumeTrans;
         const QString mriDir = QFileInfo(mghName).absolutePath();
-        if (!MriMghIO::read(mghName, volume, volumeTrans, mriDir)) {
+        if (!MriMghIO::read(mghName.toStdString(), volume, volumeTrans, mriDir.toStdString())) {
             qCritical("Cannot read %s", qPrintable(mghName));
             return 1;
         }

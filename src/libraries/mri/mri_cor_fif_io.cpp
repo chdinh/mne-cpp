@@ -35,12 +35,13 @@
 #include <fiff/fiff_file.h>
 #include <fiff/fiff_constants.h>
 
+#include <utils/generics/log.h>
+
 //=============================================================================================================
 // QT INCLUDES
 //=============================================================================================================
 
 #include <QFile>
-#include <QDebug>
 
 //=============================================================================================================
 // EIGEN INCLUDES
@@ -60,9 +61,9 @@ using namespace Eigen;
 // DEFINE MEMBER METHODS
 //=============================================================================================================
 
-bool MriCorFifIO::write(const QString& fileName,
-                        const QVector<MriSlice>& slices,
-                        const QVector<FiffCoordTrans>& additionalTrans)
+bool MriCorFifIO::write(const std::string& fileName,
+                        const std::vector<MriSlice>& slices,
+                        const std::vector<FiffCoordTrans>& additionalTrans)
 {
     //
     // File structure (ported from save_slices() / write_slice() in write_mri_set.c):
@@ -86,11 +87,11 @@ bool MriCorFifIO::write(const QString& fileName,
     //   /FIFFB_MRI
     //
 
-    QFile file(fileName);
+    QFile file(QString::fromStdString(fileName));
     FiffStream::SPtr stream = FiffStream::start_file(file);
 
     if (!stream) {
-        qCritical() << "MriCorFifIO::write - Could not open file for writing:" << fileName;
+        UTILSLIB::Log::critical("MriCorFifIO::write - Could not open file for writing: " + fileName);
         return false;
     }
 
@@ -115,9 +116,7 @@ bool MriCorFifIO::write(const QString& fileName,
     }
 
     // Write each slice
-    for (int k = 0; k < slices.size(); ++k) {
-        const MriSlice& slice = slices[k];
-
+    for (const MriSlice& slice : slices) {
         stream->start_block(FIFFB_MRI_SLICE);
 
         // Width and height in pixels
@@ -149,19 +148,19 @@ bool MriCorFifIO::write(const QString& fileName,
             case FIFFV_MRI_PIXEL_BYTE: {
                 pixelTag->type = FIFFT_BYTE;
                 pixelTag->resize(nPixels);
-                memcpy(pixelTag->data(), slice.pixels.constData(), nPixels);
+                memcpy(pixelTag->data(), slice.pixels.data(), nPixels);
                 break;
             }
             case FIFFV_MRI_PIXEL_WORD: {
                 pixelTag->type = FIFFT_USHORT;
                 pixelTag->resize(nPixels * 2);
-                memcpy(pixelTag->data(), slice.pixelsWord.constData(), nPixels * 2);
+                memcpy(pixelTag->data(), slice.pixelsWord.data(), nPixels * 2);
                 break;
             }
             case FIFFV_MRI_PIXEL_FLOAT: {
                 pixelTag->type = FIFFT_FLOAT;
                 pixelTag->resize(nPixels * 4);
-                memcpy(pixelTag->data(), slice.pixelsFloat.constData(), nPixels * 4);
+                memcpy(pixelTag->data(), slice.pixelsFloat.data(), nPixels * 4);
                 break;
             }
         }

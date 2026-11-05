@@ -44,11 +44,11 @@
 #include "mri_vol_data.h"
 
 //=============================================================================================================
-// QT INCLUDES
+// STL INCLUDES
 //=============================================================================================================
 
-#include <QString>
-#include <QVector>
+#include <string>
+#include <vector>
 
 //=============================================================================================================
 // DEFINE NAMESPACE MRILIB
@@ -89,8 +89,8 @@ public:
      *
      * @return True on success, false on error.
      */
-    static bool read(const QString& dir,
-                     QVector<MriSlice>& slices,
+    static bool read(const std::string& dir,
+                     std::vector<MriSlice>& slices,
                      bool verbose = false);
 };
 

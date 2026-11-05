@@ -134,12 +134,12 @@ private:
     /** Write a QByteArray to a file. */
     bool writeToFile(const QString& path, const QByteArray& data);
 
-    bool m_bDataAvailable;             /**< Whether sample data is found. */
-    QString m_sSubjectsDir;            /**< Path to subjects dir. */
-    QString m_sMriDir;                 /**< Path to sample/mri/. */
-    MriVolData m_volT1;                /**< Loaded T1 volume (populated in initTestCase). */
-    QVector<FiffCoordTrans> m_transT1; /**< Additional transforms from T1. */
-    QTemporaryDir m_tempDir;           /**< Temporary directory for output files. */
+    bool m_bDataAvailable;                 /**< Whether sample data is found. */
+    QString m_sSubjectsDir;                /**< Path to subjects dir. */
+    QString m_sMriDir;                     /**< Path to sample/mri/. */
+    MriVolData m_volT1;                    /**< Loaded T1 volume (populated in initTestCase). */
+    std::vector<FiffCoordTrans> m_transT1; /**< Additional transforms from T1. */
+    QTemporaryDir m_tempDir;               /**< Temporary directory for output files. */
 };
 
 //=============================================================================================================
@@ -264,7 +264,7 @@ void TestMriIO::initTestCase()
         // Pre-load T1 volume for multiple tests
         QString t1Path = m_sMriDir + "/T1.mgz";
         if (QFile::exists(t1Path)) {
-            bool ok = MriMghIO::read(t1Path, m_volT1, m_transT1, m_sMriDir, false);
+            bool ok = MriMghIO::read(t1Path.toStdString(), m_volT1, m_transT1, m_sMriDir.toStdString(), false);
             QVERIFY2(ok, "Failed to pre-load T1.mgz in initTestCase");
         }
     } else {
@@ -332,8 +332,8 @@ void TestMriIO::testVolDataDefaultConstruction()
     QVERIFY(qFuzzyCompare(1.0f + vol.c_ras[2], 1.0f));
 
     // Should have no slices
-    QVERIFY(vol.slices.isEmpty());
-    QVERIFY(vol.talairachXfmPath.isEmpty());
+    QVERIFY(vol.slices.empty());
+    QVERIFY(vol.talairachXfmPath.empty());
 }
 
 //=============================================================================================================
@@ -467,8 +467,8 @@ void TestMriIO::testMghReadBrain()
     }
 
     MriVolData vol;
-    QVector<FiffCoordTrans> trans;
-    bool ok = MriMghIO::read(brainPath, vol, trans, m_sMriDir, false);
+    std::vector<FiffCoordTrans> trans;
+    bool ok = MriMghIO::read(brainPath.toStdString(), vol, trans, m_sMriDir.toStdString(), false);
     QVERIFY(ok);
     QVERIFY(vol.isValid());
     QCOMPARE(vol.width, 256);
@@ -513,7 +513,7 @@ void TestMriIO::testMghSliceTransforms()
     QCOMPARE(m_volT1.slices.size(), 256);
 
     // Each slice should have valid dimensions and pixel data
-    for (int k = 0; k < m_volT1.slices.size(); ++k) {
+    for (int k = 0; k < int(m_volT1.slices.size()); ++k) {
         const MriSlice& slice = m_volT1.slices[k];
         QCOMPARE(slice.width, 256);
         QCOMPARE(slice.height, 256);
@@ -548,7 +548,7 @@ void TestMriIO::testMghSliceTransforms()
 void TestMriIO::testMghInvalidFile()
 {
     MriVolData vol;
-    QVector<FiffCoordTrans> trans;
+    std::vector<FiffCoordTrans> trans;
 
     // Non-existent file
     bool ok = MriMghIO::read("/nonexistent/file.mgz", vol, trans);
@@ -562,7 +562,7 @@ void TestMriIO::testMghInvalidFile()
         f.write("TOO_SMALL");
         f.close();
     }
-    ok = MriMghIO::read(tinyFile, vol, trans);
+    ok = MriMghIO::read(tinyFile.toStdString(), vol, trans);
     QVERIFY(!ok);
 
     // Create a file with wrong version
@@ -579,7 +579,7 @@ void TestMriIO::testMghInvalidFile()
         f.write(padding);
         f.close();
     }
-    ok = MriMghIO::read(badVersion, vol, trans);
+    ok = MriMghIO::read(badVersion.toStdString(), vol, trans);
     QVERIFY(!ok);
 }
 
@@ -594,7 +594,7 @@ void TestMriIO::testCorFifWriteRead()
     // Write COR.fif from T1 data, then read it back and verify structure
     QString corFifPath = m_tempDir.path() + "/COR_test.fif";
 
-    bool ok = MriCorFifIO::write(corFifPath, m_volT1.slices, m_transT1);
+    bool ok = MriCorFifIO::write(corFifPath.toStdString(), m_volT1.slices, m_transT1);
     QVERIFY2(ok, "MriCorFifIO::write failed");
     QVERIFY(QFile::exists(corFifPath));
 
@@ -652,8 +652,8 @@ void TestMriIO::testMghReadSyntheticUchar()
     QVERIFY(writeToFile(path, mghData));
 
     MriVolData vol;
-    QVector<FiffCoordTrans> trans;
-    bool ok = MriMghIO::read(path, vol, trans);
+    std::vector<FiffCoordTrans> trans;
+    bool ok = MriMghIO::read(path.toStdString(), vol, trans);
     QVERIFY(ok);
     QVERIFY(vol.isValid());
     QCOMPARE(vol.width, 4);
@@ -679,8 +679,8 @@ void TestMriIO::testMghReadSyntheticShort()
     QVERIFY(writeToFile(path, mghData));
 
     MriVolData vol;
-    QVector<FiffCoordTrans> trans;
-    bool ok = MriMghIO::read(path, vol, trans);
+    std::vector<FiffCoordTrans> trans;
+    bool ok = MriMghIO::read(path.toStdString(), vol, trans);
     QVERIFY(ok);
     QVERIFY(vol.isValid());
     QCOMPARE(vol.type, MRI_SHORT);
@@ -702,8 +702,8 @@ void TestMriIO::testMghReadSyntheticInt()
     QVERIFY(writeToFile(path, mghData));
 
     MriVolData vol;
-    QVector<FiffCoordTrans> trans;
-    bool ok = MriMghIO::read(path, vol, trans);
+    std::vector<FiffCoordTrans> trans;
+    bool ok = MriMghIO::read(path.toStdString(), vol, trans);
     QVERIFY(ok);
     QVERIFY(vol.isValid());
     QCOMPARE(vol.type, MRI_INT);
@@ -727,8 +727,8 @@ void TestMriIO::testMghReadSyntheticFloat()
     QVERIFY(writeToFile(path, mghData));
 
     MriVolData vol;
-    QVector<FiffCoordTrans> trans;
-    bool ok = MriMghIO::read(path, vol, trans);
+    std::vector<FiffCoordTrans> trans;
+    bool ok = MriMghIO::read(path.toStdString(), vol, trans);
     QVERIFY(ok);
     QVERIFY(vol.isValid());
     QCOMPARE(vol.type, MRI_FLOAT);
@@ -753,8 +753,8 @@ void TestMriIO::testMghDefaultDirectionCosines()
     QVERIFY(writeToFile(path, mghData));
 
     MriVolData vol;
-    QVector<FiffCoordTrans> trans;
-    bool ok = MriMghIO::read(path, vol, trans);
+    std::vector<FiffCoordTrans> trans;
+    bool ok = MriMghIO::read(path.toStdString(), vol, trans);
     QVERIFY(ok);
     QVERIFY(vol.isValid());
     QVERIFY(!vol.rasGood);
@@ -794,8 +794,8 @@ void TestMriIO::testMghFooterScanParams()
     QVERIFY(writeToFile(path, mghData));
 
     MriVolData vol;
-    QVector<FiffCoordTrans> trans;
-    bool ok = MriMghIO::read(path, vol, trans);
+    std::vector<FiffCoordTrans> trans;
+    bool ok = MriMghIO::read(path.toStdString(), vol, trans);
     QVERIFY(ok);
     QVERIFY(vol.isValid());
 
@@ -845,11 +845,11 @@ void TestMriIO::testMghFooterTalairachTag()
     }
 
     MriVolData vol;
-    QVector<FiffCoordTrans> trans;
-    bool ok = MriMghIO::read(path, vol, trans, m_tempDir.path());
+    std::vector<FiffCoordTrans> trans;
+    bool ok = MriMghIO::read(path.toStdString(), vol, trans, m_tempDir.path().toStdString());
     QVERIFY(ok);
-    QVERIFY(!vol.talairachXfmPath.isEmpty());
-    QCOMPARE(vol.talairachXfmPath, QString("talairach.xfm"));
+    QVERIFY(!vol.talairachXfmPath.empty());
+    QCOMPARE(vol.talairachXfmPath, std::string("talairach.xfm"));
 
     // Surface RAS -> RAS, then the Talairach chain (MNE-C mne_mri_add_talairach_transforms)
     QCOMPARE(trans.size(), 4);
@@ -885,8 +885,8 @@ void TestMriIO::testMghUnsupportedDataType()
     QVERIFY(writeToFile(path, data));
 
     MriVolData vol;
-    QVector<FiffCoordTrans> trans;
-    bool ok = MriMghIO::read(path, vol, trans);
+    std::vector<FiffCoordTrans> trans;
+    bool ok = MriMghIO::read(path.toStdString(), vol, trans);
     QVERIFY(!ok); // Should fail for unsupported type
 }
 
@@ -905,8 +905,8 @@ void TestMriIO::testMghCorruptedMgz()
     }
 
     MriVolData vol;
-    QVector<FiffCoordTrans> trans;
-    bool ok = MriMghIO::read(path, vol, trans);
+    std::vector<FiffCoordTrans> trans;
+    bool ok = MriMghIO::read(path.toStdString(), vol, trans);
     QVERIFY(!ok);
 }
 
@@ -923,8 +923,8 @@ void TestMriIO::testMghEmptyFile()
     }
 
     MriVolData vol;
-    QVector<FiffCoordTrans> trans;
-    bool ok = MriMghIO::read(path, vol, trans);
+    std::vector<FiffCoordTrans> trans;
+    bool ok = MriMghIO::read(path.toStdString(), vol, trans);
     QVERIFY(!ok);
 
     // Empty .mgz file
@@ -934,7 +934,7 @@ void TestMriIO::testMghEmptyFile()
         QVERIFY(f.open(QIODevice::WriteOnly));
         f.close();
     }
-    ok = MriMghIO::read(pathMgz, vol, trans);
+    ok = MriMghIO::read(pathMgz.toStdString(), vol, trans);
     QVERIFY(!ok);
 }
 
@@ -949,14 +949,14 @@ void TestMriIO::testCorFifWriteReadSynthetic()
     QVERIFY(writeToFile(mghPath, mghData));
 
     MriVolData vol;
-    QVector<FiffCoordTrans> trans;
-    bool ok = MriMghIO::read(mghPath, vol, trans);
+    std::vector<FiffCoordTrans> trans;
+    bool ok = MriMghIO::read(mghPath.toStdString(), vol, trans);
     QVERIFY(ok);
     QCOMPARE(vol.slices.size(), 3);
 
     // Write to COR.fif
     QString corPath = m_tempDir.path() + "/COR_synth.fif";
-    ok = MriCorFifIO::write(corPath, vol.slices, trans);
+    ok = MriCorFifIO::write(corPath.toStdString(), vol.slices, trans);
     QVERIFY(ok);
     QVERIFY(QFile::exists(corPath));
 

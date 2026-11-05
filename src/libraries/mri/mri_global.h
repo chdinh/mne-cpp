@@ -11,8 +11,8 @@
  *
  * Provides the @c MRISHARED_EXPORT decorator used by every public
  * symbol in the MRI library so that the same headers can be
- * consumed by a shared-library build (Q_DECL_EXPORT when compiling
- * MNE_MRI_LIBRARY, Q_DECL_IMPORT when linking against it) and a
+ * consumed by a shared-library build (export when compiling
+ * MNE_MRI_LIBRARY, import when linking against it) and a
  * static build (empty decorator). Also exposes @c buildDateTime()
  * and @c buildHash() for runtime provenance reporting --- e.g.
  * when @c mne_analyze prints the linked-library version table
@@ -28,7 +28,6 @@
 // INCLUDES
 //=============================================================================================================
 
-#include <QtCore/qglobal.h>
 #include <utils/buildinfo.h>
 
 //=============================================================================================================
@@ -37,10 +36,14 @@
 
 #if defined(STATICBUILD)
 #define MRISHARED_EXPORT
-#elif defined(MNE_MRI_LIBRARY)
-#define MRISHARED_EXPORT Q_DECL_EXPORT /**< Shared library export. */
+#elif defined(_WIN32)
+#if defined(MNE_MRI_LIBRARY)
+#define MRISHARED_EXPORT __declspec(dllexport) /**< Exported when building the shared library. */
 #else
-#define MRISHARED_EXPORT Q_DECL_IMPORT /**< Shared library import. */
+#define MRISHARED_EXPORT __declspec(dllimport) /**< Imported by clients of the shared library. */
+#endif
+#else
+#define MRISHARED_EXPORT __attribute__((visibility("default"))) /**< Default visibility on ELF/Mach-O. */
 #endif
 
 //=============================================================================================================

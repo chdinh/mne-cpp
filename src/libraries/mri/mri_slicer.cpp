@@ -138,9 +138,9 @@ PlaneSpec planeSpecForOrientation(const Matrix4f& vox2ras,
     return {columnAxis, rowAxis, fixedAxis};
 }
 
-int axisDimension(const QVector<int>& dims, int axis)
+int axisDimension(const std::array<int, 3>& dims, int axis)
 {
-    return dims[axis];
+    return dims[static_cast<std::size_t>(axis)];
 }
 
 int flatIndex(int x, int y, int z, int dimX, int dimY)
@@ -155,8 +155,8 @@ int flatIndex(int x, int y, int z, int dimX, int dimY)
 //=============================================================================================================
 
 MriSliceImage MriSlicer::extractSlice(
-    const QVector<float>& volData,
-    const QVector<int>& dims,
+    const std::vector<float>& volData,
+    const std::array<int, 3>& dims,
     const Matrix4f& vox2ras,
     SliceOrientation orientation,
     int sliceIndex)
@@ -183,7 +183,7 @@ MriSliceImage MriSlicer::extractSlice(
             voxel[spec.columnAxis] = col;
             voxel[spec.rowAxis] = row;
             voxel[spec.fixedAxis] = sliceIndex;
-            result.pixels(col, row) = volData[flatIndex(voxel[0], voxel[1], voxel[2], dimX, dimY)];
+            result.pixels(col, row) = volData[static_cast<std::size_t>(flatIndex(voxel[0], voxel[1], voxel[2], dimX, dimY))];
         }
     }
 
@@ -218,7 +218,7 @@ int MriSlicer::voxelAxisForOrientation(const Matrix4f& vox2ras,
 
 //=============================================================================================================
 
-int MriSlicer::dimensionForOrientation(const QVector<int>& dims,
+int MriSlicer::dimensionForOrientation(const std::array<int, 3>& dims,
                                        const Matrix4f& vox2ras,
                                        SliceOrientation orientation)
 {
@@ -236,22 +236,22 @@ int MriSlicer::sliceIndexForOrientation(const Matrix4f& vox2ras,
 
 //=============================================================================================================
 
-QVector<MriSliceImage> MriSlicer::extractOrthogonal(
-    const QVector<float>& volData,
-    const QVector<int>& dims,
+std::vector<MriSliceImage> MriSlicer::extractOrthogonal(
+    const std::vector<float>& volData,
+    const std::array<int, 3>& dims,
     const Matrix4f& vox2ras,
     const Vector3f& rasPoint)
 {
     Vector3i voxel = rasToVoxel(vox2ras, rasPoint);
 
-    QVector<MriSliceImage> slices;
+    std::vector<MriSliceImage> slices;
     slices.reserve(3);
-    slices.append(extractSlice(volData, dims, vox2ras, SliceOrientation::Axial,
-                               sliceIndexForOrientation(vox2ras, SliceOrientation::Axial, voxel)));
-    slices.append(extractSlice(volData, dims, vox2ras, SliceOrientation::Coronal,
-                               sliceIndexForOrientation(vox2ras, SliceOrientation::Coronal, voxel)));
-    slices.append(extractSlice(volData, dims, vox2ras, SliceOrientation::Sagittal,
-                               sliceIndexForOrientation(vox2ras, SliceOrientation::Sagittal, voxel)));
+    slices.push_back(extractSlice(volData, dims, vox2ras, SliceOrientation::Axial,
+                                  sliceIndexForOrientation(vox2ras, SliceOrientation::Axial, voxel)));
+    slices.push_back(extractSlice(volData, dims, vox2ras, SliceOrientation::Coronal,
+                                  sliceIndexForOrientation(vox2ras, SliceOrientation::Coronal, voxel)));
+    slices.push_back(extractSlice(volData, dims, vox2ras, SliceOrientation::Sagittal,
+                                  sliceIndexForOrientation(vox2ras, SliceOrientation::Sagittal, voxel)));
 
     return slices;
 }
@@ -326,8 +326,8 @@ int MriSlicer::sliceIndexForOrientation(const MriVolData& vol,
 
 //=============================================================================================================
 
-QVector<MriSliceImage> MriSlicer::extractOrthogonal(const MriVolData& vol,
-                                                    const Vector3f& rasPoint)
+std::vector<MriSliceImage> MriSlicer::extractOrthogonal(const MriVolData& vol,
+                                                        const Vector3f& rasPoint)
 {
     return extractOrthogonal(vol.voxelDataAsFloat(), vol.dims(),
                              vol.computeVox2RasTkr(), rasPoint);

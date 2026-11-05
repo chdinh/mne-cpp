@@ -47,10 +47,12 @@
 #include "mri_vol_data.h"
 
 //=============================================================================================================
-// QT INCLUDES
+// STL INCLUDES
 //=============================================================================================================
 
-#include <QString>
+#include <cstddef>
+#include <string>
+#include <vector>
 
 //=============================================================================================================
 // DEFINE NAMESPACE MRILIB
@@ -88,7 +90,7 @@ public:
      *
      * @return True on success, false on parse / I/O error.
      */
-    static bool read(const QString& niiFile, MriVolData& volData, bool verbose = false);
+    static bool read(const std::string& niiFile, MriVolData& volData, bool verbose = false);
 
     //=========================================================================================================
     /**
@@ -102,7 +104,7 @@ public:
      *
      * @return True on success.
      */
-    static bool decompress(const QString& gzFile, QByteArray& rawData);
+    static bool decompress(const std::string& gzFile, std::vector<std::byte>& rawData);
 };
 
 } // namespace MRILIB

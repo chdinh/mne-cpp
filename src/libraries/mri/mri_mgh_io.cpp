@@ -29,22 +29,22 @@
 
 #include "mri_mgh_io.h"
 
+#include "detail/mri_file_bytes.h"
+
 #include <fiff/fiff_coord_trans.h>
 #include <fiff/fiff_coord_trans_set.h>
 #include <fiff/fiff_constants.h>
 #include <fiff/fiff_file.h>
 
+#include <utils/byte_stream.h>
+#include <utils/generics/log.h>
+#include <utils/string_utils.h>
+
 //=============================================================================================================
 // QT INCLUDES
 //=============================================================================================================
 
-#include <QFile>
-#include <QFileInfo>
-#include <QDataStream>
-#include <QDebug>
-#include <QDebug>
-
-#include <zlib.h>
+#include <QString>
 
 //=============================================================================================================
 // EIGEN INCLUDES
@@ -53,52 +53,79 @@
 #include <Eigen/Core>
 
 //=============================================================================================================
+// STL INCLUDES
+//=============================================================================================================
+
+#include <cstdint>
+#include <cstdio>
+#include <filesystem>
+
+//=============================================================================================================
 // USED NAMESPACES
 //=============================================================================================================
 
 using namespace MRILIB;
 using namespace FIFFLIB;
 using namespace Eigen;
+using UTILSLIB::Log;
+
+//=============================================================================================================
+// DEFINE LOCAL FUNCTIONS
+//=============================================================================================================
+
+namespace
+{
+
+template<typename... Args>
+std::string format(const char* pattern, Args... args)
+{
+    char buffer[512];
+    std::snprintf(buffer, sizeof(buffer), pattern, args...);
+    return buffer;
+}
+
+// Reads @p count big-endian values of type T and converts each one with @p convert into @p out
+template<typename T, typename Out, typename Convert>
+bool readBigEndianInto(UTILSLIB::ByteStream& stream, std::vector<Out>& out, std::size_t count, Convert convert)
+{
+    std::vector<T> values(count);
+    if (!stream.readBigEndian(values.data(), count))
+        return false;
+    out.resize(count);
+    std::transform(values.begin(), values.end(), out.begin(), convert);
+    return true;
+}
+
+} // namespace
 
 //=============================================================================================================
 // DEFINE MEMBER METHODS
 //=============================================================================================================
 
-bool MriMghIO::read(const QString& mgzFile,
+bool MriMghIO::read(const std::string& mgzFile,
                     MriVolData& volData,
-                    QVector<FiffCoordTrans>& additionalTrans,
-                    const QString& subjectMriDir,
+                    std::vector<FiffCoordTrans>& additionalTrans,
+                    const std::string& subjectMriDir,
                     bool verbose)
 {
     volData.fileName = mgzFile;
 
     // Step 1: Get raw (decompressed) bytes
-    bool isCompressed = mgzFile.endsWith(".mgz", Qt::CaseInsensitive);
-    QByteArray fileData;
-
-    if (isCompressed) {
-        if (!decompress(mgzFile, fileData)) {
-            return false;
-        }
-    } else {
-        QFile file(mgzFile);
-        if (!file.open(QIODevice::ReadOnly)) {
-            qCritical() << "MriMghIO::read - Could not open" << mgzFile;
-            return false;
-        }
-        fileData = file.readAll();
-        file.close();
+    const bool isCompressed = UTILSLIB::toLower(mgzFile).ends_with(".mgz");
+    std::string error;
+    const std::optional<std::vector<std::byte>> fileData = detail::readFileBytes(mgzFile, isCompressed, error);
+    if (!fileData) {
+        Log::critical("MriMghIO::read - " + error);
+        return false;
     }
 
-    if (fileData.size() < MRI_MGH_DATA_OFFSET) {
-        qCritical() << "MriMghIO::read - File" << mgzFile
-                    << "is too small to be a valid MGH file ("
-                    << fileData.size() << "bytes)";
+    if (fileData->size() < MRI_MGH_DATA_OFFSET) {
+        Log::critical("MriMghIO::read - File " + mgzFile + " is too small to be a valid MGH file (" + std::to_string(fileData->size()) + " bytes)");
         return false;
     }
 
     // Step 2: Parse header
-    if (!parseHeader(fileData, volData, verbose)) {
+    if (!parseHeader(*fileData, volData, verbose)) {
         return false;
     }
 
@@ -108,28 +135,27 @@ bool MriMghIO::read(const QString& mgzFile,
         FIFFV_COORD_MRI_SLICE, FIFFV_COORD_MRI, vox2ras, true);
 
     if (verbose) {
-        qInfo("Voxel -> FsSurface RAS transform:\n");
+        Log::info("Voxel -> FsSurface RAS transform:");
         for (int r = 0; r < 4; ++r) {
-            qInfo("  %10.6f %10.6f %10.6f %10.6f\n",
-                  vox2ras(r, 0), vox2ras(r, 1), vox2ras(r, 2), vox2ras(r, 3));
+            Log::info(format("  %10.6f %10.6f %10.6f %10.6f",
+                             double(vox2ras(r, 0)), double(vox2ras(r, 1)), double(vox2ras(r, 2)), double(vox2ras(r, 3))));
         }
     }
 
     // Surface RAS -> scanner RAS: a shift by the volume centre (MNE-C mne_mri_add_transforms).
-    additionalTrans.append(FiffCoordTrans(FIFFV_COORD_MRI, FIFFV_MNE_COORD_RAS, Matrix3f::Identity(), Vector3f(volData.c_ras / 1000.0f)));
+    additionalTrans.push_back(FiffCoordTrans(FIFFV_COORD_MRI, FIFFV_MNE_COORD_RAS, Matrix3f::Identity(), Vector3f(volData.c_ras / 1000.0f)));
 
     // Step 4: Read voxel data
-    if (!readVoxelData(fileData, volData)) {
+    if (!readVoxelData(*fileData, volData)) {
         return false;
     }
 
     // Step 5: Parse footer (optional)
-    parseFooter(fileData, volData, additionalTrans, subjectMriDir, verbose);
+    parseFooter(*fileData, volData, additionalTrans, subjectMriDir, verbose);
 
     if (verbose) {
-        qInfo("Read %d slices from %s (%dx%d pixels)\n",
-              static_cast<int>(volData.slices.size()), qPrintable(mgzFile),
-              volData.width, volData.height);
+        Log::info(format("Read %d slices from %s (%dx%d pixels)",
+                         static_cast<int>(volData.slices.size()), mgzFile.c_str(), volData.width, volData.height));
     }
 
     return true;
@@ -137,61 +163,7 @@ bool MriMghIO::read(const QString& mgzFile,
 
 //=============================================================================================================
 
-bool MriMghIO::decompress(const QString& mgzFile, QByteArray& rawData)
-{
-    QFile file(mgzFile);
-    if (!file.open(QIODevice::ReadOnly)) {
-        qCritical() << "MriMghIO::decompress - Could not open" << mgzFile;
-        return false;
-    }
-    QByteArray compressedData = file.readAll();
-    file.close();
-
-    if (compressedData.isEmpty()) {
-        qCritical() << "MriMghIO::decompress - File is empty:" << mgzFile;
-        return false;
-    }
-
-    // Use zlib to decompress gzip data in memory
-    z_stream strm = {};
-
-    // MAX_WBITS + 16 tells zlib to detect and handle gzip headers
-    int ret = inflateInit2(&strm, MAX_WBITS + 16);
-    if (ret != Z_OK) {
-        qCritical() << "MriMghIO::decompress - inflateInit2 failed";
-        return false;
-    }
-
-    strm.next_in = reinterpret_cast<Bytef*>(compressedData.data());
-    strm.avail_in = static_cast<uInt>(compressedData.size());
-
-    const int chunkSize = 256 * 1024; // 256 KB chunks
-    rawData.clear();
-
-    do {
-        rawData.resize(rawData.size() + chunkSize);
-        strm.next_out = reinterpret_cast<Bytef*>(rawData.data() + rawData.size() - chunkSize);
-        strm.avail_out = chunkSize;
-
-        ret = inflate(&strm, Z_NO_FLUSH);
-        if (ret == Z_STREAM_ERROR || ret == Z_DATA_ERROR || ret == Z_MEM_ERROR) {
-            qCritical() << "MriMghIO::decompress - inflate failed for" << mgzFile
-                        << "- zlib error:" << ret;
-            inflateEnd(&strm);
-            return false;
-        }
-    } while (ret != Z_STREAM_END);
-
-    // Trim to actual decompressed size
-    rawData.resize(rawData.size() - static_cast<int>(strm.avail_out));
-    inflateEnd(&strm);
-
-    return true;
-}
-
-//=============================================================================================================
-
-bool MriMghIO::parseHeader(const QByteArray& data, MriVolData& volData, bool verbose)
+bool MriMghIO::parseHeader(const std::vector<std::byte>& data, MriVolData& volData, bool verbose)
 {
     //
     // MGH header layout (all big-endian):
@@ -209,15 +181,14 @@ bool MriMghIO::parseHeader(const QByteArray& data, MriVolData& volData, bool ver
     //   Bytes 90-283: unused (padding)
     //
 
-    QDataStream stream(data);
-    stream.setByteOrder(QDataStream::BigEndian);
-    stream.setFloatingPointPrecision(QDataStream::SinglePrecision);
+    UTILSLIB::MemoryByteStream stream({data.begin(), data.begin() + MRI_MGH_DATA_OFFSET});
 
-    qint32 version, width, height, depth, nframes, type, dof;
-    stream >> version >> width >> height >> depth >> nframes >> type >> dof;
+    std::int32_t header[7] = {};
+    stream.readBigEndian(header, 7);
+    const auto [version, width, height, depth, nframes, type, dof] = header;
 
     if (version != MRI_MGH_VERSION) {
-        qCritical() << "MriMghIO::parseHeader - Unknown MGH version:" << version;
+        Log::critical("MriMghIO::parseHeader - Unknown MGH version: " + std::to_string(version));
         return false;
     }
 
@@ -230,38 +201,31 @@ bool MriMghIO::parseHeader(const QByteArray& data, MriVolData& volData, bool ver
     volData.dof = dof;
 
     if (verbose) {
-        qInfo("MGH file: %dx%dx%d, %d frame(s), type=%d\n",
-              width, height, depth, nframes, type);
+        Log::info(format("MGH file: %dx%dx%d, %d frame(s), type=%d", width, height, depth, nframes, type));
     }
 
-    // goodRASflag (2 bytes short)
-    qint16 goodRASflag;
-    stream >> goodRASflag;
+    std::int16_t goodRASflag = 0;
+    stream.readBigEndian(goodRASflag);
     volData.rasGood = (goodRASflag > 0);
 
     if (goodRASflag > 0) {
-        // Voxel sizes
-        stream >> volData.xsize >> volData.ysize >> volData.zsize;
-
-        // Direction cosines (Mdc matrix):
-        //   xr, xa, xs  (x-direction cosines)
-        //   yr, ya, ys  (y-direction cosines)
-        //   zr, za, zs  (z-direction cosines)
-        stream >> volData.x_ras[0] >> volData.x_ras[1] >> volData.x_ras[2];
-        stream >> volData.y_ras[0] >> volData.y_ras[1] >> volData.y_ras[2];
-        stream >> volData.z_ras[0] >> volData.z_ras[1] >> volData.z_ras[2];
-
-        // Center RAS
-        stream >> volData.c_ras[0] >> volData.c_ras[1] >> volData.c_ras[2];
+        // Voxel sizes, then the direction cosines (x, y, z columns) and the centre RAS
+        float geometry[15] = {};
+        stream.readBigEndian(geometry, 15);
+        volData.xsize = geometry[0];
+        volData.ysize = geometry[1];
+        volData.zsize = geometry[2];
+        volData.x_ras = Vector3f(geometry[3], geometry[4], geometry[5]);
+        volData.y_ras = Vector3f(geometry[6], geometry[7], geometry[8]);
+        volData.z_ras = Vector3f(geometry[9], geometry[10], geometry[11]);
+        volData.c_ras = Vector3f(geometry[12], geometry[13], geometry[14]);
     }
     // Else: default values from MriVolData constructor are used
 
     if (verbose) {
-        qInfo("Voxel sizes: %.4f x %.4f x %.4f mm\n",
-              volData.xsize, volData.ysize, volData.zsize);
-        qInfo("goodRAS: %d\n", goodRASflag);
-        qInfo("c_ras: %.4f %.4f %.4f\n",
-              volData.c_ras[0], volData.c_ras[1], volData.c_ras[2]);
+        Log::info(format("Voxel sizes: %.4f x %.4f x %.4f mm", double(volData.xsize), double(volData.ysize), double(volData.zsize)));
+        Log::info(format("goodRAS: %d", int(goodRASflag)));
+        Log::info(format("c_ras: %.4f %.4f %.4f", double(volData.c_ras[0]), double(volData.c_ras[1]), double(volData.c_ras[2])));
     }
 
     return true;
@@ -269,7 +233,7 @@ bool MriMghIO::parseHeader(const QByteArray& data, MriVolData& volData, bool ver
 
 //=============================================================================================================
 
-bool MriMghIO::readVoxelData(const QByteArray& data, MriVolData& volData)
+bool MriMghIO::readVoxelData(const std::vector<std::byte>& data, MriVolData& volData)
 {
     //
     // Read voxel data starting at byte 284 (MRI_MGH_DATA_OFFSET).
@@ -277,84 +241,52 @@ bool MriMghIO::readVoxelData(const QByteArray& data, MriVolData& volData)
     // Only the first frame is read.
     //
 
-    int bpv = bytesPerVoxel(volData.type);
+    const int bpv = bytesPerVoxel(volData.type);
     if (bpv == 0) {
-        qCritical() << "MriMghIO::readVoxelData - Unsupported MGH data type:" << volData.type;
+        Log::critical("MriMghIO::readVoxelData - Unsupported MGH data type: " + std::to_string(volData.type));
         return false;
     }
 
-    qint64 frameSize = static_cast<qint64>(volData.width) * volData.height * volData.depth * bpv;
+    const std::size_t nPixels = static_cast<std::size_t>(volData.width) * static_cast<std::size_t>(volData.height);
+    const std::size_t nslice = static_cast<std::size_t>(volData.depth);
+    const std::size_t frameSize = nPixels * nslice * static_cast<std::size_t>(bpv);
     if (data.size() < MRI_MGH_DATA_OFFSET + frameSize) {
-        qCritical() << "MriMghIO::readVoxelData - File too small for expected data size";
+        Log::critical("MriMghIO::readVoxelData - File too small for expected data size");
         return false;
     }
 
-    QDataStream stream(data);
-    stream.setByteOrder(QDataStream::BigEndian);
-    stream.setFloatingPointPrecision(QDataStream::SinglePrecision);
-    stream.device()->seek(MRI_MGH_DATA_OFFSET);
-
-    int nslice = volData.depth;
-    int nPixels = volData.width * volData.height;
+    UTILSLIB::MemoryByteStream stream({data.begin() + MRI_MGH_DATA_OFFSET, data.begin() + std::ptrdiff_t(MRI_MGH_DATA_OFFSET + frameSize)});
     volData.slices.resize(nslice);
 
     // Build the vox2ras transform for per-slice transforms
     Matrix4f vox2ras = volData.computeVox2Ras();
 
-    for (int k = 0; k < nslice; ++k) {
+    for (std::size_t k = 0; k < nslice; ++k) {
         MriSlice& slice = volData.slices[k];
         slice.width = volData.width;
         slice.height = volData.height;
         slice.dimx = volData.xsize / 1000.0f; // mm -> meters
         slice.dimy = volData.ysize / 1000.0f;
+        slice.scale = 1.0f;
 
-        // Read pixel data for this slice
         switch (volData.type) {
-            case MRI_UCHAR: {
+            case MRI_UCHAR:
                 slice.pixelFormat = FIFFV_MRI_PIXEL_BYTE;
-                slice.pixels.resize(nPixels);
-                for (int p = 0; p < nPixels; ++p) {
-                    quint8 val;
-                    stream >> val;
-                    slice.pixels[p] = val;
-                }
-                slice.scale = 1.0f;
+                readBigEndianInto<std::uint8_t>(stream, slice.pixels, nPixels, [](std::uint8_t v) { return v; });
                 break;
-            }
-            case MRI_SHORT: {
+            case MRI_SHORT:
                 slice.pixelFormat = FIFFV_MRI_PIXEL_WORD;
-                slice.pixelsWord.resize(nPixels);
-                for (int p = 0; p < nPixels; ++p) {
-                    qint16 val;
-                    stream >> val;
-                    slice.pixelsWord[p] = static_cast<unsigned short>(val < 0 ? 0 : val);
-                }
-                slice.scale = 1.0f;
+                readBigEndianInto<std::int16_t>(stream, slice.pixelsWord, nPixels, [](std::int16_t v) { return static_cast<unsigned short>(v < 0 ? 0 : v); });
                 break;
-            }
-            case MRI_INT: {
+            case MRI_INT:
                 // Convert INT to FLOAT
                 slice.pixelFormat = FIFFV_MRI_PIXEL_FLOAT;
-                slice.pixelsFloat.resize(nPixels);
-                for (int p = 0; p < nPixels; ++p) {
-                    qint32 val;
-                    stream >> val;
-                    slice.pixelsFloat[p] = static_cast<float>(val);
-                }
-                slice.scale = 1.0f;
+                readBigEndianInto<std::int32_t>(stream, slice.pixelsFloat, nPixels, [](std::int32_t v) { return static_cast<float>(v); });
                 break;
-            }
-            case MRI_FLOAT: {
+            case MRI_FLOAT:
                 slice.pixelFormat = FIFFV_MRI_PIXEL_FLOAT;
-                slice.pixelsFloat.resize(nPixels);
-                for (int p = 0; p < nPixels; ++p) {
-                    float val;
-                    stream >> val;
-                    slice.pixelsFloat[p] = val;
-                }
-                slice.scale = 1.0f;
+                readBigEndianInto<float>(stream, slice.pixelsFloat, nPixels, [](float v) { return v; });
                 break;
-            }
         }
 
         //
@@ -363,20 +295,18 @@ bool MriMghIO::readVoxelData(const QByteArray& data, MriVolData& volData)
         //   sliceOrigin = vox2ras * [0, 0, k, 1]^T
         //   sliceRot    = vox2ras rotation columns (x, y, z pixel axes)
         //
+        const float kf = static_cast<float>(k);
         Vector3f sliceOrigin;
-        sliceOrigin(0) = vox2ras(0, 2) * k + vox2ras(0, 3);
-        sliceOrigin(1) = vox2ras(1, 2) * k + vox2ras(1, 3);
-        sliceOrigin(2) = vox2ras(2, 2) * k + vox2ras(2, 3);
+        sliceOrigin(0) = vox2ras(0, 2) * kf + vox2ras(0, 3);
+        sliceOrigin(1) = vox2ras(1, 2) * kf + vox2ras(1, 3);
+        sliceOrigin(2) = vox2ras(2, 2) * kf + vox2ras(2, 3);
 
         Matrix3f sliceRot;
         sliceRot.col(0) = vox2ras.block<3, 1>(0, 0); // x-pixel direction
         sliceRot.col(1) = vox2ras.block<3, 1>(0, 1); // y-pixel direction
         sliceRot.col(2) = vox2ras.block<3, 1>(0, 2); // z (normal) direction
 
-        Vector3f sliceMove;
-        sliceMove << sliceOrigin(0), sliceOrigin(1), sliceOrigin(2);
-
-        slice.trans = FiffCoordTrans(FIFFV_COORD_MRI_SLICE, FIFFV_COORD_MRI, sliceRot, sliceMove);
+        slice.trans = FiffCoordTrans(FIFFV_COORD_MRI_SLICE, FIFFV_COORD_MRI, sliceRot, sliceOrigin);
     }
 
     return true;
@@ -384,10 +314,10 @@ bool MriMghIO::readVoxelData(const QByteArray& data, MriVolData& volData)
 
 //=============================================================================================================
 
-bool MriMghIO::parseFooter(const QByteArray& data,
+bool MriMghIO::parseFooter(const std::vector<std::byte>& data,
                            MriVolData& volData,
-                           QVector<FiffCoordTrans>& additionalTrans,
-                           const QString& subjectMriDir,
+                           std::vector<FiffCoordTrans>& additionalTrans,
+                           const std::string& subjectMriDir,
                            bool verbose)
 {
     //
@@ -402,79 +332,72 @@ bool MriMghIO::parseFooter(const QByteArray& data,
         bpv = 1; // Fallback for footer calculation
     }
 
-    qint64 frameSize = static_cast<qint64>(volData.width) * volData.height * volData.depth * bpv;
-    qint64 footerPos = MRI_MGH_DATA_OFFSET + frameSize;
+    const std::size_t frameSize = static_cast<std::size_t>(volData.width) * static_cast<std::size_t>(volData.height) * static_cast<std::size_t>(volData.depth) * static_cast<std::size_t>(bpv);
+    const std::size_t footerPos = MRI_MGH_DATA_OFFSET + frameSize;
 
-    if (data.size() <= footerPos) {
-        // No footer — that's fine
+    // Scan parameters take 5 x float32; without them there is no footer
+    constexpr std::size_t kScanParamBytes = 5 * sizeof(float);
+    if (data.size() < footerPos + kScanParamBytes) {
         return true;
     }
 
-    QDataStream stream(data);
-    stream.setByteOrder(QDataStream::BigEndian);
-    stream.setFloatingPointPrecision(QDataStream::SinglePrecision);
-    stream.device()->seek(footerPos);
-
-    // Read scan parameters (5 × float32 = 20 bytes)
-    constexpr int kScanParamBytes = 5 * sizeof(float);
-    qint64 remainingBytes = data.size() - footerPos;
-    if (remainingBytes >= kScanParamBytes) {
-        stream >> volData.TR >> volData.flipAngle >> volData.TE >> volData.TI >> volData.FoV;
-    } else {
-        return true;
-    }
+    UTILSLIB::MemoryByteStream stream({data.begin() + std::ptrdiff_t(footerPos), data.end()});
+    float scan[5] = {};
+    stream.readBigEndian(scan, 5);
+    volData.TR = scan[0];
+    volData.flipAngle = scan[1];
+    volData.TE = scan[2];
+    volData.TI = scan[3];
+    volData.FoV = scan[4];
 
     // Parse tags
     while (!stream.atEnd()) {
-        qint32 tagType;
-        stream >> tagType;
-        if (stream.atEnd())
+        std::int32_t tagType = 0;
+        if (!stream.readBigEndian(tagType))
             break;
 
-        qint64 tagLen;
-        // For TAG_OLD_SURF_GEOM (20) and TAG_OLD_MGH_XFORM (30), length is 4 bytes
-        // For newer tags, length is 8 bytes
+        std::int64_t tagLen = 0;
+        // TAG_OLD_SURF_GEOM (20) and TAG_OLD_MGH_XFORM (30) have a 4-byte length, newer tags an 8-byte one
         if (tagType == MGH_TAG_OLD_SURF_GEOM || tagType == MGH_TAG_OLD_MGH_XFORM) {
-            qint32 len32;
-            stream >> len32;
+            std::int32_t len32 = 0;
+            if (!stream.readBigEndian(len32))
+                break;
             tagLen = len32;
-        } else {
-            qint64 len64;
-            stream >> len64;
-            tagLen = len64;
+        } else if (!stream.readBigEndian(tagLen)) {
+            break;
         }
 
-        if (tagLen <= 0 || tagLen > data.size())
+        if (tagLen <= 0 || static_cast<std::uint64_t>(tagLen) > data.size())
             break;
 
-        QByteArray tagData(tagLen, '\0');
-        if (stream.readRawData(tagData.data(), tagLen) != tagLen)
+        std::string tagData(static_cast<std::size_t>(tagLen), '\0');
+        if (stream.read(tagData.data(), tagData.size()) != tagData.size())
             break;
 
         if (tagType == MGH_TAG_MGH_XFORM) {
             // TAG_MGH_XFORM: contains path to talairach.xfm
-            QString xfmPath = QString::fromLatin1(tagData).trimmed();
+            std::string xfmPath(UTILSLIB::trimmed(tagData));
             volData.talairachXfmPath = xfmPath;
 
             if (verbose) {
-                qInfo("Found Talairach transform reference: %s\n", qPrintable(xfmPath));
+                Log::info("Found Talairach transform reference: " + xfmPath);
             }
 
             // Resolve relative paths using subject MRI directory
-            if (!QFileInfo(xfmPath).isAbsolute() && !subjectMriDir.isEmpty()) {
-                xfmPath = subjectMriDir + "/transforms/" + xfmPath;
+            if (!UTILSLIB::pathFromUtf8(xfmPath).is_absolute() && !subjectMriDir.empty()) {
+                xfmPath = UTILSLIB::utf8FromPath(UTILSLIB::pathFromUtf8(subjectMriDir) / "transforms" / UTILSLIB::pathFromUtf8(xfmPath));
             }
 
             FiffCoordTransSet talairach;
-            if (talairach.addTalairach(xfmPath)) {
-                additionalTrans.append(talairach.RAS_MNI_tal_t);
-                additionalTrans.append(talairach.MNI_tal_tal_gtz_t);
-                additionalTrans.append(talairach.MNI_tal_tal_ltz_t);
+            if (talairach.addTalairach(QString::fromStdString(xfmPath))) {
+                additionalTrans.push_back(talairach.RAS_MNI_tal_t);
+                additionalTrans.push_back(talairach.MNI_tal_tal_gtz_t);
+                additionalTrans.push_back(talairach.MNI_tal_tal_ltz_t);
                 if (verbose) {
-                    qInfo("Read Talairach transform from %s\n", qPrintable(xfmPath));
+                    Log::info("Read Talairach transform from " + xfmPath);
                 }
             } else if (verbose) {
-                qWarning("Talairach transform not readable: %s\n", qPrintable(xfmPath));
+                Log::warning("Talairach transform not readable: " + xfmPath);
             }
         }
     }

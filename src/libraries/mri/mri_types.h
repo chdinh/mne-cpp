@@ -15,7 +15,7 @@
  *
  * - @b voxel-type codes (MRI_UCHAR, MRI_INT, MRI_FLOAT, MRI_SHORT)
  * used to decode the @c type field of the MGH header and to
- * dispatch the corresponding QVector storage on the consumer side;
+ * dispatch the corresponding std::vector storage on the consumer side;
  * - @b frame-selection sentinels (MRI_ALL_FRAMES, MRI_NO_FRAMES)
  * used by the MGH reader API to distinguish "read everything"
  * from "header-only" without overloading the parameter type;

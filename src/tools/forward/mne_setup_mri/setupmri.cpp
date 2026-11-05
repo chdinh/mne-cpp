@@ -170,8 +170,8 @@ bool SetupMri::processMriSet(const QString& mriName)
     }
 
     // Read MRI data and create COR.fif
-    QVector<MriSlice> slices;
-    QVector<FiffCoordTrans> additionalTrans;
+    std::vector<MriSlice> slices;
+    std::vector<FiffCoordTrans> additionalTrans;
 
     if (mgzInfo.exists()) {
         // MGZ/MGH path — use MRILIB::MriMghIO
@@ -180,7 +180,7 @@ bool SetupMri::processMriSet(const QString& mriName)
         MriVolData volData;
         QString subjectMriDir = m_settings.subjectsDir() + "/" + m_settings.subject() + "/mri";
 
-        if (!MriMghIO::read(thisMgz, volData, additionalTrans, subjectMriDir, m_settings.verbose())) {
+        if (!MriMghIO::read(thisMgz.toStdString(), volData, additionalTrans, subjectMriDir.toStdString(), m_settings.verbose())) {
             qCritical() << "Failed to read MGZ/MGH file" << thisMgz;
             return false;
         }
@@ -201,7 +201,7 @@ bool SetupMri::processMriSet(const QString& mriName)
             }
         }
 
-        if (!MriCorIO::read(thisDir, slices, m_settings.verbose())) {
+        if (!MriCorIO::read(thisDir.toStdString(), slices, m_settings.verbose())) {
             qCritical() << "Failed to read COR slices from" << thisDir;
             return false;
         }
@@ -212,7 +212,7 @@ bool SetupMri::processMriSet(const QString& mriName)
     QFile::remove(corFifPath);
 
     qInfo("Creating %s...", qPrintable(corFifPath));
-    if (!MriCorFifIO::write(corFifPath, slices, additionalTrans)) {
+    if (!MriCorFifIO::write(corFifPath.toStdString(), slices, additionalTrans)) {
         qCritical() << "Failed to write" << corFifPath;
         return false;
     }

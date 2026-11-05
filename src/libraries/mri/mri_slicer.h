@@ -45,10 +45,11 @@
 #include "mri_global.h"
 
 //=============================================================================================================
-// QT INCLUDES
+// STL INCLUDES
 //=============================================================================================================
 
-#include <QVector>
+#include <array>
+#include <vector>
 
 //=============================================================================================================
 // EIGEN INCLUDES
@@ -130,8 +131,8 @@ public:
      * @return The extracted slice image.
      */
     static MriSliceImage extractSlice(
-        const QVector<float>& volData,
-        const QVector<int>& dims,
+        const std::vector<float>& volData,
+        const std::array<int, 3>& dims,
         const Eigen::Matrix4f& vox2ras,
         SliceOrientation orientation,
         int sliceIndex);
@@ -162,7 +163,7 @@ public:
      *
      * @return Number of slices along the orientation's fixed voxel axis.
      */
-    static int dimensionForOrientation(const QVector<int>& dims,
+    static int dimensionForOrientation(const std::array<int, 3>& dims,
                                        const Eigen::Matrix4f& vox2ras,
                                        SliceOrientation orientation);
 
@@ -191,9 +192,9 @@ public:
      *
      * @return Vector of three MriSliceImage (axial, coronal, sagittal).
      */
-    static QVector<MriSliceImage> extractOrthogonal(
-        const QVector<float>& volData,
-        const QVector<int>& dims,
+    static std::vector<MriSliceImage> extractOrthogonal(
+        const std::vector<float>& volData,
+        const std::array<int, 3>& dims,
         const Eigen::Matrix4f& vox2ras,
         const Eigen::Vector3f& rasPoint);
 
@@ -278,8 +279,8 @@ public:
      *
      * @return Vector of three MriSliceImage (axial, coronal, sagittal).
      */
-    static QVector<MriSliceImage> extractOrthogonal(const MriVolData& vol,
-                                                    const Eigen::Vector3f& rasPoint);
+    static std::vector<MriSliceImage> extractOrthogonal(const MriVolData& vol,
+                                                        const Eigen::Vector3f& rasPoint);
 
     /**
      * Convert RAS coordinate to voxel index using a volume's transform.

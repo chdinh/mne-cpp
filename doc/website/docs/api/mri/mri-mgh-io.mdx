@@ -25,10 +25,10 @@ Ported from `make_mgh_cor_set()` in [MNE](/docs/api/mne/mne-class) C `mne_make_c
 
 ```cpp title="src/examples/ex_mri/main.cpp"
 MriVolData mgh;
-QVector<FiffCoordTrans> extraTransforms; // e.g. Talairach, if the footer names one
-MriMghIO::read(dataDir + "/gradient.mgz", mgh, extraTransforms);
-const Matrix4f vox2ras = mgh.computeVox2Ras();        // scanner RAS, metres
-const QVector<float> voxels = mgh.voxelDataAsFloat(); // x fastest
+std::vector<FiffCoordTrans> extraTransforms; // e.g. Talairach, if the footer names one
+MriMghIO::read((dataDir + "/gradient.mgz").toStdString(), mgh, extraTransforms);
+const Matrix4f vox2ras = mgh.computeVox2Ras();            // scanner RAS, metres
+const std::vector<float> voxels = mgh.voxelDataAsFloat(); // x fastest
 ```
 
 ---
@@ -45,16 +45,16 @@ For .mgz files, automatic gzip decompression is performed via zlib.
 
 **Parameters:**
 
-- **mgzFile** : *const QString &*
+- **mgzFile** : *const std::string &*
   Path to the .mgz or .mgh file.
 
 - **volData** : *[MriVolData](/docs/api/mri/mri-vol-data) &*
   [`MriVolData`](/docs/api/mri/mri-vol-data) structure to populate.
 
-- **additionalTrans** : *QVector&lt; [FiffCoordTrans](/docs/api/fiff/fiff-coord-trans) &gt; &*
+- **additionalTrans** : *std::vector&lt; [FiffCoordTrans](/docs/api/fiff/fiff-coord-trans) &gt; &*
   Surface RAS -&gt; RAS and, if the footer names a talairach.xfm, the Talairach chain of [`FiffCoordTransSet`](/docs/api/fiff/fiff-coord-trans-set).
 
-- **subjectMriDir** : *const QString &*
+- **subjectMriDir** : *const std::string &*
   Path to subject's mri/ directory (for resolving relative .xfm paths).
 
 - **verbose** : *bool*
@@ -80,13 +80,13 @@ MRI library: MGH/MGZ and NIfTI volumes, voxel/RAS transforms, slicing and COR se
 
 ````cpp title="src/examples/ex_mri/main.cpp, line 92"
 MriVolData mgh;
-QVector<FiffCoordTrans> extraTransforms; // e.g. Talairach, if the footer names one
-MriMghIO::read(dataDir + "/gradient.mgz", mgh, extraTransforms);
-const Matrix4f vox2ras = mgh.computeVox2Ras();        // scanner RAS, metres
-const QVector<float> voxels = mgh.voxelDataAsFloat(); // x fastest
+std::vector<FiffCoordTrans> extraTransforms; // e.g. Talairach, if the footer names one
+MriMghIO::read((dataDir + "/gradient.mgz").toStdString(), mgh, extraTransforms);
+const Matrix4f vox2ras = mgh.computeVox2Ras();            // scanner RAS, metres
+const std::vector<float> voxels = mgh.voxelDataAsFloat(); // x fastest
 Matrix4f vox2rasMm = vox2ras;
 vox2rasMm.block<3, 4>(0, 0) *= 1000.0f;
-ok &= expect(mgh.dims() == QVector<int>({6, 5, 4}) && (vox2rasMm - nibabelAffine).cwiseAbs().maxCoeff() < 1e-4f && voxels.size() == 120 && voxels[2 + 6 * (3 + 5 * 1)] == 82.0f,
+ok &= expect(mgh.dims() == std::array<int, 3>{6, 5, 4} && (vox2rasMm - nibabelAffine).cwiseAbs().maxCoeff() < 1e-4f && voxels.size() == 120 && voxels[2 + 6 * (3 + 5 * 1)] == 82.0f,
              "MGZ: 6x5x4 voxels, vox2ras and voxel (2,3,1) = 82 match nibabel");
 ````
 

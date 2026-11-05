@@ -30,7 +30,7 @@
       "decoding",
       "math"
     ],
-    "tokens": 20753,
+    "tokens": 20551,
     "gui_outside_design": []
   },
   "libraries": {
@@ -427,20 +427,16 @@
       ]
     },
     "mri": {
-      "tokens": 205,
+      "tokens": 3,
       "by_category": {
-        "containers": 35,
-        "files": 25,
-        "global": 64,
-        "logging": 34,
-        "strings": 47
+        "files": 1,
+        "strings": 2
       },
-      "public_header_includes": 11,
+      "public_header_includes": 0,
       "q_object": 0,
-      "files": 15,
+      "files": 17,
       "modules": [
         "Core",
-        "Network",
         "ZlibPrivate"
       ]
     },

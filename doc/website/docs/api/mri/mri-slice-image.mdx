@@ -22,7 +22,7 @@ Carries one orthogonal-plane sample of a 3D [`MriVolData`](/docs/api/mri/mri-vol
 ```cpp title="src/examples/ex_mri/main.cpp"
 const Vector3f ras(0.001f, -0.0005f, -0.002f); // metres; voxel (2,3,1)
 const Vector3i voxel = MriSlicer::rasToVoxel(vox2ras, ras);
-const QVector<MriSliceImage> planes = MriSlicer::extractOrthogonal(voxels, mgh.dims(), vox2ras, ras); // axial, coronal, sagittal
+const std::vector<MriSliceImage> planes = MriSlicer::extractOrthogonal(voxels, mgh.dims(), vox2ras, ras); // axial, coronal, sagittal
 ```
 
 ---
@@ -42,7 +42,7 @@ MRI library: MGH/MGZ and NIfTI volumes, voxel/RAS transforms, slicing and COR se
 ````cpp title="src/examples/ex_mri/main.cpp, line 119"
 const Vector3f ras(0.001f, -0.0005f, -0.002f); // metres; voxel (2,3,1)
 const Vector3i voxel = MriSlicer::rasToVoxel(vox2ras, ras);
-const QVector<MriSliceImage> planes = MriSlicer::extractOrthogonal(voxels, mgh.dims(), vox2ras, ras); // axial, coronal, sagittal
+const std::vector<MriSliceImage> planes = MriSlicer::extractOrthogonal(voxels, mgh.dims(), vox2ras, ras); // axial, coronal, sagittal
 ok &= expect(voxel == Vector3i(2, 3, 1) && (MriSlicer::voxelToRas(vox2ras, voxel) - ras).norm() < 1e-7f && planes.size() == 3,
              QString("RAS (1, -0.5, -2) mm -> voxel (%1, %2, %3); three orthogonal planes").arg(voxel(0)).arg(voxel(1)).arg(voxel(2)));
 ````

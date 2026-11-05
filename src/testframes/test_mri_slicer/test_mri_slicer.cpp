@@ -71,8 +71,8 @@ private slots:
 
 private:
     // Flat-array path
-    QVector<float> m_volData;
-    QVector<int> m_dims;
+    std::vector<float> m_volData;
+    std::array<int, 3> m_dims;
     Matrix4f m_vox2ras;
 
     // MriVolData path — populated with same synthetic data
@@ -86,13 +86,13 @@ void TestMriSlicer::initTestCase()
     // Create a small synthetic 16×16×16 volume with identity vox2ras
     m_dims = {16, 16, 16};
     int nVoxels = m_dims[0] * m_dims[1] * m_dims[2];
-    m_volData.resize(nVoxels);
+    m_volData.resize(static_cast<std::size_t>(nVoxels));
 
     // Fill with a gradient so slices are non-uniform
     for (int z = 0; z < m_dims[2]; ++z)
         for (int y = 0; y < m_dims[1]; ++y)
             for (int x = 0; x < m_dims[0]; ++x)
-                m_volData[x + y * m_dims[0] + z * m_dims[0] * m_dims[1]] =
+                m_volData[static_cast<std::size_t>(x) + static_cast<std::size_t>(y * m_dims[0]) + static_cast<std::size_t>(z * m_dims[0] * m_dims[1])] =
                     static_cast<float>(x + y + z);
 
     // Identity vox2ras (1mm voxels, origin at corner)
@@ -115,7 +115,7 @@ void TestMriSlicer::initTestCase()
     m_vol.c_ras = Vector3f(m_dims[0] / 2.0f, m_dims[1] / 2.0f, m_dims[2] / 2.0f);
 
     // Build per-slice data (z slices, each width x height, float pixel format)
-    m_vol.slices.resize(m_dims[2]);
+    m_vol.slices.resize(static_cast<std::size_t>(m_dims[2]));
     for (int z = 0; z < m_dims[2]; ++z) {
         MriSlice& s = m_vol.slices[z];
         s.pixelFormat = FIFFV_MRI_PIXEL_FLOAT;
@@ -190,8 +190,8 @@ void TestMriSlicer::testOrthogonalExtraction()
 {
     // Extract three orthogonal slices at a point
     Vector3f centerRas(8.0f, 8.0f, 8.0f);
-    QVector<MriSliceImage> slices = MriSlicer::extractOrthogonal(m_volData, m_dims,
-                                                                 m_vox2ras, centerRas);
+    std::vector<MriSliceImage> slices = MriSlicer::extractOrthogonal(m_volData, m_dims,
+                                                                     m_vox2ras, centerRas);
 
     QCOMPARE(slices.size(), 3);
 
@@ -214,12 +214,12 @@ void TestMriSlicer::testOrthogonalExtraction()
 
 void TestMriSlicer::testFreeSurferTkRasAnatomicalAxes()
 {
-    const QVector<int> dims = {3, 5, 7};
-    QVector<float> volData(dims[0] * dims[1] * dims[2]);
+    const std::array<int, 3> dims = {3, 5, 7};
+    std::vector<float> volData(static_cast<std::size_t>(dims[0] * dims[1] * dims[2]));
     for (int z = 0; z < dims[2]; ++z) {
         for (int y = 0; y < dims[1]; ++y) {
             for (int x = 0; x < dims[0]; ++x) {
-                volData[x + dims[0] * (y + dims[1] * z)] = static_cast<float>(x + 10 * y + 100 * z);
+                volData[static_cast<std::size_t>(x) + static_cast<std::size_t>(dims[0] * (y + dims[1] * z))] = static_cast<float>(x + 10 * y + 100 * z);
             }
         }
     }
@@ -240,7 +240,7 @@ void TestMriSlicer::testFreeSurferTkRasAnatomicalAxes()
 
     const Vector3i voxel(1, 2, 3);
     const Vector3f ras = MriSlicer::voxelToRas(fsTkr, voxel);
-    const QVector<MriSliceImage> slices = MriSlicer::extractOrthogonal(volData, dims, fsTkr, ras);
+    const std::vector<MriSliceImage> slices = MriSlicer::extractOrthogonal(volData, dims, fsTkr, ras);
 
     QCOMPARE(slices.size(), 3);
     QCOMPARE(slices[0].orientation, SliceOrientation::Axial);
@@ -292,7 +292,7 @@ void TestMriSlicer::testVolDataDimAccessors()
     QCOMPARE(m_vol.dimY(), m_dims[1]);
     QCOMPARE(m_vol.dimZ(), m_dims[2]);
 
-    QVector<int> dims = m_vol.dims();
+    std::array<int, 3> dims = m_vol.dims();
     QCOMPARE(dims.size(), 3);
     QCOMPARE(dims[0], m_dims[0]);
     QCOMPARE(dims[1], m_dims[1]);
@@ -303,11 +303,11 @@ void TestMriSlicer::testVolDataDimAccessors()
 
 void TestMriSlicer::testVolDataVoxelDataAsFloat()
 {
-    QVector<float> flat = m_vol.voxelDataAsFloat();
+    std::vector<float> flat = m_vol.voxelDataAsFloat();
     QCOMPARE(flat.size(), m_volData.size());
 
     // Verify content matches the flat-array data
-    for (int i = 0; i < flat.size(); ++i) {
+    for (std::size_t i = 0; i < flat.size(); ++i) {
         QCOMPARE(flat[i], m_volData[i]);
     }
 }
@@ -321,8 +321,8 @@ void TestMriSlicer::testVolDataSliceOverload()
     // Extract via flat-array API using the same tkRAS transform as the
     // MriVolData convenience overloads.
     Matrix4f volVox2ras = m_vol.computeVox2RasTkr();
-    QVector<float> flat = m_vol.voxelDataAsFloat();
-    QVector<int> dims = m_vol.dims();
+    std::vector<float> flat = m_vol.voxelDataAsFloat();
+    std::array<int, 3> dims = m_vol.dims();
 
     MriSliceImage refSlice = MriSlicer::extractSlice(flat, dims, volVox2ras,
                                                      SliceOrientation::Axial, midAxial);
@@ -347,16 +347,16 @@ void TestMriSlicer::testVolDataOrthogonalOverload()
     // Use a RAS point in meters (computeVox2RasTkr returns meters), matching
     // the MriVolData convenience overloads.
     Matrix4f volVox2ras = m_vol.computeVox2RasTkr();
-    QVector<float> flat = m_vol.voxelDataAsFloat();
-    QVector<int> dims = m_vol.dims();
+    std::vector<float> flat = m_vol.voxelDataAsFloat();
+    std::array<int, 3> dims = m_vol.dims();
 
     // Centre voxel in RAS (meters)
     Vector3i centerVox(m_dims[0] / 2, m_dims[1] / 2, m_dims[2] / 2);
     Vector3f centerRas = MriSlicer::voxelToRas(volVox2ras, centerVox);
 
-    QVector<MriSliceImage> refSlices = MriSlicer::extractOrthogonal(flat, dims,
-                                                                    volVox2ras, centerRas);
-    QVector<MriSliceImage> volSlices = MriSlicer::extractOrthogonal(m_vol, centerRas);
+    std::vector<MriSliceImage> refSlices = MriSlicer::extractOrthogonal(flat, dims,
+                                                                        volVox2ras, centerRas);
+    std::vector<MriSliceImage> volSlices = MriSlicer::extractOrthogonal(m_vol, centerRas);
 
     QCOMPARE(volSlices.size(), 3);
     QCOMPARE(volSlices.size(), refSlices.size());

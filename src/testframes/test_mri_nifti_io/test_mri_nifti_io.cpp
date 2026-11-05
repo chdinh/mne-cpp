@@ -189,7 +189,7 @@ void TestMriNiftiIo::roundTripNii()
     tmp.close();
 
     MriVolData vol;
-    QVERIFY(vol.read(path));
+    QVERIFY(vol.read(path.toStdString()));
     QVERIFY(vol.isValid());
     QCOMPARE(vol.width, nx);
     QCOMPARE(vol.height, ny);
@@ -222,11 +222,11 @@ void TestMriNiftiIo::roundTripNiiGz()
     QVERIFY2(writeGz(path, buf), "failed to gzip synthetic NIfTI");
 
     MriVolData vol;
-    QVERIFY(vol.read(path));
+    QVERIFY(vol.read(path.toStdString()));
     QCOMPARE(vol.width, nx);
     QCOMPARE(vol.depth, nz);
-    QVERIFY(!vol.slices.isEmpty());
-    QCOMPARE(vol.slices.last().pixelsFloat.size(), nx * ny);
+    QVERIFY(!vol.slices.empty());
+    QCOMPARE(vol.slices.back().pixelsFloat.size(), nx * ny);
 }
 
 namespace
@@ -322,7 +322,7 @@ void TestMriNiftiIo::readsEveryDatatypeAndForm()
     QFETCH(float, inter);
     QTemporaryDir dir;
     MriVolData vol;
-    QVERIFY(vol.read(writeTemp(dir, "v.nii", variant(static_cast<qint16>(datatype), bytes, bigEndian, qform, slope, inter))));
+    QVERIFY(vol.read(writeTemp(dir, "v.nii", variant(static_cast<qint16>(datatype), bytes, bigEndian, qform, slope, inter)).toStdString()));
     QCOMPARE(vol.width, 4);
     QCOMPARE(vol.depth, 6);
 
@@ -365,7 +365,7 @@ void TestMriNiftiIo::rejectsBrokenFiles()
     QTemporaryDir dir;
     const QByteArray good = variant(16, 4, false, false, 1.0f, 0.0f);
     MriVolData vol;
-    QVERIFY(vol.read(writeTemp(dir, "good.nii", good)));
+    QVERIFY(vol.read(writeTemp(dir, "good.nii", good).toStdString()));
     const auto withI16 = [&good](int off, qint16 v) {
         QByteArray b = good;
         qToLittleEndian(v, b.data() + off);
@@ -383,9 +383,9 @@ void TestMriNiftiIo::rejectsBrokenFiles()
         {"garbage.nii.gz", QByteArray("not gzip at all")},
     };
     for (const auto& [name, bytes] : broken) {
-        QVERIFY2(!MriNiftiIO::read(writeTemp(dir, name, bytes), vol), qPrintable(name));
+        QVERIFY2(!MriNiftiIO::read(writeTemp(dir, name, bytes).toStdString(), vol), qPrintable(name));
     }
-    QVERIFY(!MriNiftiIO::read(dir.filePath("missing.nii"), vol));
+    QVERIFY(!MriNiftiIO::read(dir.filePath("missing.nii").toStdString(), vol));
 
     // A gzip stream cut short ends in an error, not an endless wait for more input
     const QString gz = dir.filePath("cut.nii.gz");
@@ -394,7 +394,7 @@ void TestMriNiftiIo::rejectsBrokenFiles()
     QVERIFY(cut.open(QIODevice::ReadWrite));
     QVERIFY(cut.resize(cut.size() / 2));
     cut.close();
-    QVERIFY(!MriNiftiIO::read(gz, vol));
+    QVERIFY(!MriNiftiIO::read(gz.toStdString(), vol));
 }
 
 QTEST_APPLESS_MAIN(TestMriNiftiIo)

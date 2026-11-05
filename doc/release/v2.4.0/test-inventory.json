@@ -7702,7 +7702,7 @@
         "sample-data"
       ],
       "gui": false,
-      "qskip_sites": 7,
+      "qskip_sites": 8,
       "spawns_processes": false,
       "ci_excluded_on": [],
       "ci": {

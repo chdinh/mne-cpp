@@ -294,7 +294,7 @@ bool ElectrodesPlugin::loadBids(const QString& path, const QString& t1Path)
     // Scanner RAS of the T1 -> surface (tkr) RAS of the FreeSurfer surfaces, as MNE's convert_montage_to_mri
     if (implantation.isScannerRas()) {
         MRILIB::MriVolData t1;
-        if (t1Path.isEmpty() || !t1.read(t1Path)) {
+        if (t1Path.isEmpty() || !t1.read(t1Path.toStdString())) {
             m_lastError = QStringLiteral("%1 positions are scanner RAS of the subject's T1; T1.mgz is needed to place them on the surfaces")
                               .arg(QString::fromStdString(implantation.coordinateSystem()));
             qWarning() << "ElectrodesPlugin::loadBids:" << m_lastError;

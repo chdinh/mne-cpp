@@ -21,7 +21,7 @@ Parses the 348-byte fixed-size header, expands any voxel-type / endianness combi
 
 ```cpp title="src/examples/ex_mri/main.cpp"
 MriVolData direct;
-MriNiftiIO::read(dataDir + "/gradient.nii.gz", direct);
+MriNiftiIO::read((dataDir + "/gradient.nii.gz").toStdString(), direct);
 ```
 
 ---
@@ -36,7 +36,7 @@ For .nii.gz inputs the file is decompressed in memory via zlib (re-using the sam
 
 **Parameters:**
 
-- **niiFile** : *const QString &*
+- **niiFile** : *const std::string &*
   Path to the .nii or .nii.gz file.
 
 - **volData** : *[MriVolData](/docs/api/mri/mri-vol-data) &*
@@ -59,10 +59,10 @@ Exposed for direct use by tests; `read` calls it transparently when the input pa
 
 **Parameters:**
 
-- **gzFile** : *const QString &*
+- **gzFile** : *const std::string &*
   Path to the gzip-compressed input.
 
-- **rawData** : *QByteArray &*
+- **rawData** : *std::vector&lt; std::byte &gt; &*
   Output buffer.
 
 **Returns:**
@@ -85,7 +85,7 @@ MRI library: MGH/MGZ and NIfTI volumes, voxel/RAS transforms, slicing and COR se
 
 ````cpp title="src/examples/ex_mri/main.cpp, line 113"
 MriVolData direct;
-MriNiftiIO::read(dataDir + "/gradient.nii.gz", direct);
+MriNiftiIO::read((dataDir + "/gradient.nii.gz").toStdString(), direct);
 ok &= expect(direct.voxelDataAsFloat() == voxels, "MriNiftiIO::read equals MriVolData::read");
 ````
 

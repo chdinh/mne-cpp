@@ -90,19 +90,19 @@ int main(int argc, char* argv[])
 
     //! [mri_mgh_io_read]
     MriVolData mgh;
-    QVector<FiffCoordTrans> extraTransforms; // e.g. Talairach, if the footer names one
-    MriMghIO::read(dataDir + "/gradient.mgz", mgh, extraTransforms);
-    const Matrix4f vox2ras = mgh.computeVox2Ras();        // scanner RAS, metres
-    const QVector<float> voxels = mgh.voxelDataAsFloat(); // x fastest
+    std::vector<FiffCoordTrans> extraTransforms; // e.g. Talairach, if the footer names one
+    MriMghIO::read((dataDir + "/gradient.mgz").toStdString(), mgh, extraTransforms);
+    const Matrix4f vox2ras = mgh.computeVox2Ras();            // scanner RAS, metres
+    const std::vector<float> voxels = mgh.voxelDataAsFloat(); // x fastest
     //! [mri_mgh_io_read]
     Matrix4f vox2rasMm = vox2ras;
     vox2rasMm.block<3, 4>(0, 0) *= 1000.0f;
-    ok &= expect(mgh.dims() == QVector<int>({6, 5, 4}) && (vox2rasMm - nibabelAffine).cwiseAbs().maxCoeff() < 1e-4f && voxels.size() == 120 && voxels[2 + 6 * (3 + 5 * 1)] == 82.0f,
+    ok &= expect(mgh.dims() == std::array<int, 3>{6, 5, 4} && (vox2rasMm - nibabelAffine).cwiseAbs().maxCoeff() < 1e-4f && voxels.size() == 120 && voxels[2 + 6 * (3 + 5 * 1)] == 82.0f,
                  "MGZ: 6x5x4 voxels, vox2ras and voxel (2,3,1) = 82 match nibabel");
 
     //! [mri_vol_data_read]
     MriVolData nifti;
-    nifti.read(dataDir + "/gradient.nii.gz"); // the suffix selects the NIfTI reader
+    nifti.read((dataDir + "/gradient.nii.gz").toStdString()); // the suffix selects the NIfTI reader
     //! [mri_vol_data_read]
     Matrix4f niftiMm = nifti.computeVox2Ras();
     niftiMm.block<3, 4>(0, 0) *= 1000.0f;
@@ -111,14 +111,14 @@ int main(int argc, char* argv[])
 
     //! [mri_nifti_io_read]
     MriVolData direct;
-    MriNiftiIO::read(dataDir + "/gradient.nii.gz", direct);
+    MriNiftiIO::read((dataDir + "/gradient.nii.gz").toStdString(), direct);
     //! [mri_nifti_io_read]
     ok &= expect(direct.voxelDataAsFloat() == voxels, "MriNiftiIO::read equals MriVolData::read");
 
     //! [mri_slicer_usage]
     const Vector3f ras(0.001f, -0.0005f, -0.002f); // metres; voxel (2,3,1)
     const Vector3i voxel = MriSlicer::rasToVoxel(vox2ras, ras);
-    const QVector<MriSliceImage> planes = MriSlicer::extractOrthogonal(voxels, mgh.dims(), vox2ras, ras); // axial, coronal, sagittal
+    const std::vector<MriSliceImage> planes = MriSlicer::extractOrthogonal(voxels, mgh.dims(), vox2ras, ras); // axial, coronal, sagittal
     //! [mri_slicer_usage]
     ok &= expect(voxel == Vector3i(2, 3, 1) && (MriSlicer::voxelToRas(vox2ras, voxel) - ras).norm() < 1e-7f && planes.size() == 3,
                  QString("RAS (1, -0.5, -2) mm -> voxel (%1, %2, %3); three orthogonal planes").arg(voxel(0)).arg(voxel(1)).arg(voxel(2)));
@@ -136,15 +136,15 @@ int main(int argc, char* argv[])
     }
 
     //! [mri_cor_io_read]
-    QVector<MriSlice> corSlices;
-    MriCorIO::read(corDir, corSlices);
+    std::vector<MriSlice> corSlices;
+    MriCorIO::read(corDir.toStdString(), corSlices);
     //! [mri_cor_io_read]
     ok &= expect(corSlices.size() == 256 && corSlices[7].pixels.size() == 256 * 256 && corSlices[7].pixels[0] == 7,
                  QString("COR set: %1 slices of 256x256, slice 7 holds 7").arg(corSlices.size()));
 
     //! [mri_cor_fif_io_write]
     const QString corFif = dir.filePath("COR.fif");
-    MriCorFifIO::write(corFif, corSlices, extraTransforms);
+    MriCorFifIO::write(corFif.toStdString(), corSlices, extraTransforms);
     //! [mri_cor_fif_io_write]
     ok &= expect(QFile(corFif).size() > 256 * 256 * 256, QString("COR.fif written (%1 bytes)").arg(QFile(corFif).size()));
 

@@ -22,7 +22,7 @@ Pure `static` methods  no instance state is owned. For a given orientation and s
 ```cpp title="src/examples/ex_mri/main.cpp"
 const Vector3f ras(0.001f, -0.0005f, -0.002f); // metres; voxel (2,3,1)
 const Vector3i voxel = MriSlicer::rasToVoxel(vox2ras, ras);
-const QVector<MriSliceImage> planes = MriSlicer::extractOrthogonal(voxels, mgh.dims(), vox2ras, ras); // axial, coronal, sagittal
+const std::vector<MriSliceImage> planes = MriSlicer::extractOrthogonal(voxels, mgh.dims(), vox2ras, ras); // axial, coronal, sagittal
 ```
 
 ---
@@ -35,10 +35,10 @@ Extract a 2D slice from a 3D volume stored as a flat array.
 
 **Parameters:**
 
-- **volData** : *const QVector&lt; float &gt; &*
+- **volData** : *const std::vector&lt; float &gt; &*
   Flat array of voxel intensities (dimX x dimY x dimZ, x-fastest).
 
-- **dims** : *const QVector&lt; int &gt; &*
+- **dims** : *const std::array&lt; int, 3 &gt; &*
   Volume dimensions \{dimX, dimY, dimZ\}.
 
 - **vox2ras** : *const Eigen::Matrix4f &*
@@ -82,7 +82,7 @@ Return the volume dimension used by an anatomical slice orientation.
 
 **Parameters:**
 
-- **dims** : *const QVector&lt; int &gt; &*
+- **dims** : *const std::array&lt; int, 3 &gt; &*
   Volume dimensions \{dimX, dimY, dimZ\}.
 
 - **vox2ras** : *const Eigen::Matrix4f &*
@@ -124,10 +124,10 @@ Extract all three orthogonal slices at a given RAS point.
 
 **Parameters:**
 
-- **volData** : *const QVector&lt; float &gt; &*
+- **volData** : *const std::vector&lt; float &gt; &*
   Flat array of voxel intensities.
 
-- **dims** : *const QVector&lt; int &gt; &*
+- **dims** : *const std::array&lt; int, 3 &gt; &*
   Volume dimensions \{dimX, dimY, dimZ\}.
 
 - **vox2ras** : *const Eigen::Matrix4f &*
@@ -138,7 +138,7 @@ Extract all three orthogonal slices at a given RAS point.
 
 **Returns:**
 
-- *QVector&lt; [MriSliceImage](/docs/api/mri/mri-slice-image) &gt;* — Vector of three [`MriSliceImage`](/docs/api/mri/mri-slice-image) (axial, coronal, sagittal).
+- *std::vector&lt; [MriSliceImage](/docs/api/mri/mri-slice-image) &gt;* — Vector of three [`MriSliceImage`](/docs/api/mri/mri-slice-image) (axial, coronal, sagittal).
 
 ---
 
@@ -270,7 +270,7 @@ Extract all three orthogonal slices at a given RAS point.
 
 **Returns:**
 
-- *QVector&lt; [MriSliceImage](/docs/api/mri/mri-slice-image) &gt;* — Vector of three [`MriSliceImage`](/docs/api/mri/mri-slice-image) (axial, coronal, sagittal).
+- *std::vector&lt; [MriSliceImage](/docs/api/mri/mri-slice-image) &gt;* — Vector of three [`MriSliceImage`](/docs/api/mri/mri-slice-image) (axial, coronal, sagittal).
 
 ---
 
@@ -325,7 +325,7 @@ MRI library: MGH/MGZ and NIfTI volumes, voxel/RAS transforms, slicing and COR se
 ````cpp title="src/examples/ex_mri/main.cpp, line 119"
 const Vector3f ras(0.001f, -0.0005f, -0.002f); // metres; voxel (2,3,1)
 const Vector3i voxel = MriSlicer::rasToVoxel(vox2ras, ras);
-const QVector<MriSliceImage> planes = MriSlicer::extractOrthogonal(voxels, mgh.dims(), vox2ras, ras); // axial, coronal, sagittal
+const std::vector<MriSliceImage> planes = MriSlicer::extractOrthogonal(voxels, mgh.dims(), vox2ras, ras); // axial, coronal, sagittal
 ok &= expect(voxel == Vector3i(2, 3, 1) && (MriSlicer::voxelToRas(vox2ras, voxel) - ras).norm() < 1e-7f && planes.size() == 3,
              QString("RAS (1, -0.5, -2) mm -> voxel (%1, %2, %3); three orthogonal planes").arg(voxel(0)).arg(voxel(1)).arg(voxel(2)));
 ````

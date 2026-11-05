@@ -31,13 +31,16 @@
 #include <fiff/fiff_constants.h>
 #include <fiff/fiff_file.h>
 
+#include "detail/mri_file_bytes.h"
+
+#include <utils/generics/log.h>
+
 //=============================================================================================================
-// QT INCLUDES
+// STL INCLUDES
 //=============================================================================================================
 
-#include <QDir>
-#include <QFile>
-#include <QDebug>
+#include <cstdio>
+#include <cstring>
 
 //=============================================================================================================
 // EIGEN INCLUDES
@@ -57,8 +60,8 @@ using namespace Eigen;
 // DEFINE MEMBER METHODS
 //=============================================================================================================
 
-bool MriCorIO::read(const QString& dir,
-                    QVector<MriSlice>& slices,
+bool MriCorIO::read(const std::string& dir,
+                    std::vector<MriSlice>& slices,
                     bool verbose)
 {
     //
@@ -73,29 +76,26 @@ bool MriCorIO::read(const QString& dir,
     // Ported from make_cor_set() in mne_make_cor_set/make_cor_set.c
     //
 
-    int nPixels = COR_WIDTH * COR_HEIGHT;
-
+    const std::size_t nPixels = static_cast<std::size_t>(COR_WIDTH) * static_cast<std::size_t>(COR_HEIGHT);
     slices.resize(COR_NSLICE);
 
     for (int k = 0; k < COR_NSLICE; ++k) {
-        QString fileName = QString("%1/COR-%2").arg(dir).arg(k + 1, 3, 10, QChar('0'));
-        QFile file(fileName);
-
-        if (!file.open(QIODevice::ReadOnly)) {
-            qCritical() << "MriCorIO::read - Could not open COR file" << fileName;
+        char name[16];
+        std::snprintf(name, sizeof(name), "/COR-%03d", k + 1);
+        const std::string fileName = dir + name;
+        std::string error;
+        const std::optional<std::vector<std::byte>> data = detail::readFileBytes(fileName, false, error);
+        if (!data) {
+            UTILSLIB::Log::critical("MriCorIO::read - Could not open COR file " + fileName);
             return false;
         }
 
-        QByteArray data = file.readAll();
-        file.close();
-
-        if (data.size() < nPixels) {
-            qCritical() << "MriCorIO::read - COR file" << fileName << "is too small:"
-                        << data.size() << "bytes (expected" << nPixels << ")";
+        if (data->size() < nPixels) {
+            UTILSLIB::Log::critical("MriCorIO::read - COR file " + fileName + " is too small: " + std::to_string(data->size()) + " bytes (expected " + std::to_string(nPixels) + ")");
             return false;
         }
 
-        MriSlice& slice = slices[k];
+        MriSlice& slice = slices[static_cast<std::size_t>(k)];
         slice.fileName = fileName;
         slice.width = COR_WIDTH;
         slice.height = COR_HEIGHT;
@@ -106,7 +106,7 @@ bool MriCorIO::read(const QString& dir,
 
         // Copy pixel data
         slice.pixels.resize(nPixels);
-        memcpy(slice.pixels.data(), data.constData(), nPixels);
+        std::memcpy(slice.pixels.data(), data->data(), nPixels);
 
         // Build the coordinate transformation: slice -> MRI (surface RAS)
         // Ported from the original C code in make_cor_set.c:
@@ -124,7 +124,7 @@ bool MriCorIO::read(const QString& dir,
     }
 
     if (verbose) {
-        qInfo("Read %d COR slices from %s", COR_NSLICE, qPrintable(dir));
+        UTILSLIB::Log::info("Read " + std::to_string(COR_NSLICE) + " COR slices from " + dir);
     }
 
     return true;

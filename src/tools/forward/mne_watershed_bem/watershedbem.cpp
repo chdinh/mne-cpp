@@ -301,10 +301,10 @@ bool WatershedBem::convertSurfaces(const QString& wsDir, const QString& mgzFile)
 
     // Read the MGH volume to get coordinate transform
     MriVolData volData;
-    QVector<FiffCoordTrans> additionalTrans;
+    std::vector<FiffCoordTrans> additionalTrans;
     QString subjectMriDir = m_settings.subjectsDir() + "/" + m_settings.subject() + "/mri";
 
-    if (!MriMghIO::read(mgzFile, volData, additionalTrans, subjectMriDir, m_settings.verbose())) {
+    if (!MriMghIO::read(mgzFile.toStdString(), volData, additionalTrans, subjectMriDir.toStdString(), m_settings.verbose())) {
         qCritical() << "Failed to read MGH/MGZ file" << mgzFile;
         return false;
     }

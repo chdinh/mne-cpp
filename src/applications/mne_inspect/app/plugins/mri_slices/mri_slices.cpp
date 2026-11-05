@@ -119,7 +119,7 @@ bool MriSlicesPlugin::loadVolume(const QString& path)
     }
 
     auto vol = std::make_unique<MriVolData>();
-    if (!vol->read(path) || !vol->isValid()) {
+    if (!vol->read(path.toStdString()) || !vol->isValid()) {
         qWarning() << "MriSlicesPlugin::loadVolume: failed to read" << path;
         return false;
     }
@@ -208,9 +208,9 @@ float MriSlicesPlugin::intensityAt(const QVector3D& worldPosition) const
     if (ix < 0 || iy < 0 || iz < 0 || ix >= nx || iy >= ny || iz >= nz) {
         return std::numeric_limits<float>::quiet_NaN();
     }
-    const QVector<float> data = m_volume->voxelDataAsFloat();
-    const qsizetype idx = static_cast<qsizetype>(iz) * ny * nx + static_cast<qsizetype>(iy) * nx + ix;
-    if (idx < 0 || idx >= data.size()) {
+    const std::vector<float> data = m_volume->voxelDataAsFloat();
+    const std::size_t idx = (static_cast<std::size_t>(iz) * static_cast<std::size_t>(ny) + static_cast<std::size_t>(iy)) * static_cast<std::size_t>(nx) + static_cast<std::size_t>(ix);
+    if (idx >= data.size()) {
         return std::numeric_limits<float>::quiet_NaN();
     }
     return data[idx];
@@ -280,7 +280,7 @@ void MriSlicesPlugin::rebuildSlices()
         return;
     }
 
-    const QVector<MriSliceImage> ortho =
+    const std::vector<MriSliceImage> ortho =
         MriSlicer::extractOrthogonal(*m_volume, m_crosshair);
 
     // extractOrthogonal documents the result order as {axial, coronal, sagittal}.

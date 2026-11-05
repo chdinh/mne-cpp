@@ -66,7 +66,7 @@ private slots:
         slice.width = 256;
         slice.height = 256;
         slice.pixels.resize(256 * 256);
-        slice.pixels.fill(128);
+        std::fill(slice.pixels.begin(), slice.pixels.end(), 128);
 
         QCOMPARE(slice.pixels.size(), 256 * 256);
         QCOMPARE(slice.pixels[0], static_cast<unsigned char>(128));

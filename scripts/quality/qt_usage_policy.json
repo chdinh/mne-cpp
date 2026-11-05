@@ -195,11 +195,10 @@
       ]
     },
     "mri": {
-      "tokens": 205,
-      "public_header_includes": 11,
+      "tokens": 3,
+      "public_header_includes": 0,
       "modules": [
         "Core",
-        "Network",
         "ZlibPrivate"
       ]
     },

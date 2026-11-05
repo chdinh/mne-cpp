@@ -36,15 +36,11 @@
 
 #include <fiff/fiff_file.h>
 
-//=============================================================================================================
-// QT INCLUDES
-//=============================================================================================================
+#include "detail/mri_file_bytes.h"
 
-#include <QByteArray>
-#include <QDataStream>
-#include <QDebug>
-#include <QFile>
-#include <QtEndian>
+#include <utils/endian.h>
+#include <utils/generics/log.h>
+#include <utils/string_utils.h>
 
 //=============================================================================================================
 // EIGEN INCLUDES
@@ -53,12 +49,13 @@
 #include <Eigen/Core>
 
 //=============================================================================================================
-// SYSTEM INCLUDES
+// STL INCLUDES
 //=============================================================================================================
 
-#include <zlib.h>
-
+#include <bit>
 #include <cmath>
+#include <cstdint>
+#include <cstdio>
 #include <cstring>
 
 //=============================================================================================================
@@ -68,160 +65,108 @@
 using namespace MRILIB;
 using namespace FIFFLIB;
 using namespace Eigen;
+using UTILSLIB::Log;
 
 namespace
 {
 
 // NIfTI-1 datatype codes (subset that we map onto MRI_* types).
-constexpr qint16 DT_UINT8 = 2;
-constexpr qint16 DT_INT16 = 4;
-constexpr qint16 DT_INT32 = 8;
-constexpr qint16 DT_FLOAT32 = 16;
-constexpr qint16 DT_INT8 = 256;
-constexpr qint16 DT_UINT16 = 512;
+constexpr std::int16_t DT_UINT8 = 2;
+constexpr std::int16_t DT_INT16 = 4;
+constexpr std::int16_t DT_INT32 = 8;
+constexpr std::int16_t DT_FLOAT32 = 16;
+constexpr std::int16_t DT_INT8 = 256;
+constexpr std::int16_t DT_UINT16 = 512;
 
-constexpr int NIFTI_HDR_SIZE = 348;
+constexpr std::size_t NIFTI_HDR_SIZE = 348;
 
-template<typename T>
-T readLE(const char* p)
+// Value of type T at @p p, stored with the file's byte order
+template<UTILSLIB::Swappable T>
+T readValue(const std::byte* p, bool bigEndian)
 {
     T v;
     std::memcpy(&v, p, sizeof(T));
-    return qFromLittleEndian(v);
+    return bigEndian != (std::endian::native == std::endian::big) ? UTILSLIB::byteSwap(v) : v;
 }
 
-template<typename T>
-T readBE(const char* p)
+// Decodes @p count values of type T from @p p and converts each one with @p convert into @p out
+template<UTILSLIB::Swappable T, typename Out, typename Convert>
+void readValues(const std::byte*& p, bool bigEndian, std::vector<Out>& out, std::size_t count, Convert convert)
 {
-    T v;
-    std::memcpy(&v, p, sizeof(T));
-    return qFromBigEndian(v);
+    out.resize(count);
+    for (std::size_t i = 0; i < count; ++i, p += sizeof(T))
+        out[i] = convert(readValue<T>(p, bigEndian));
 }
 
 } // namespace
 
 //=============================================================================================================
 
-bool MriNiftiIO::decompress(const QString& gzFile, QByteArray& rawData)
+bool MriNiftiIO::decompress(const std::string& gzFile, std::vector<std::byte>& rawData)
 {
-    QFile file(gzFile);
-    if (!file.open(QIODevice::ReadOnly)) {
-        qCritical() << "MriNiftiIO::decompress - Could not open" << gzFile;
+    std::string error;
+    std::optional<std::vector<std::byte>> bytes = detail::readFileBytes(gzFile, true, error);
+    if (!bytes) {
+        Log::critical("MriNiftiIO::decompress - " + error);
         return false;
     }
-    const QByteArray compressed = file.readAll();
-    file.close();
-
-    if (compressed.isEmpty()) {
-        qCritical() << "MriNiftiIO::decompress - File is empty:" << gzFile;
-        return false;
-    }
-
-    z_stream strm = {};
-    if (inflateInit2(&strm, MAX_WBITS + 16) != Z_OK) {
-        qCritical() << "MriNiftiIO::decompress - inflateInit2 failed";
-        return false;
-    }
-
-    strm.next_in = reinterpret_cast<Bytef*>(const_cast<char*>(compressed.data()));
-    strm.avail_in = static_cast<uInt>(compressed.size());
-
-    const int chunkSize = 256 * 1024;
-    rawData.clear();
-
-    int ret = Z_OK;
-    do {
-        rawData.resize(rawData.size() + chunkSize);
-        strm.next_out = reinterpret_cast<Bytef*>(rawData.data() + rawData.size() - chunkSize);
-        strm.avail_out = chunkSize;
-
-        ret = inflate(&strm, Z_NO_FLUSH);
-        // With all input consumed and output room left, a stream that has not ended is cut short
-        const bool truncated = ret != Z_STREAM_END && strm.avail_in == 0 && strm.avail_out > 0;
-        if (ret == Z_STREAM_ERROR || ret == Z_DATA_ERROR || ret == Z_MEM_ERROR || truncated) {
-            qCritical() << "MriNiftiIO::decompress - inflate failed for" << gzFile
-                        << "- zlib error:" << (truncated ? Z_BUF_ERROR : ret);
-            inflateEnd(&strm);
-            return false;
-        }
-    } while (ret != Z_STREAM_END);
-
-    rawData.resize(rawData.size() - static_cast<int>(strm.avail_out));
-    inflateEnd(&strm);
+    rawData = std::move(*bytes);
     return true;
 }
 
 //=============================================================================================================
 
-bool MriNiftiIO::read(const QString& niiFile, MriVolData& volData, bool verbose)
+bool MriNiftiIO::read(const std::string& niiFile, MriVolData& volData, bool verbose)
 {
     volData.fileName = niiFile;
 
-    QByteArray bytes;
-    const bool compressed = niiFile.endsWith(QStringLiteral(".gz"), Qt::CaseInsensitive);
-    if (compressed) {
-        if (!decompress(niiFile, bytes)) {
-            return false;
-        }
-    } else {
-        QFile f(niiFile);
-        if (!f.open(QIODevice::ReadOnly)) {
-            qCritical() << "MriNiftiIO::read - Could not open" << niiFile;
-            return false;
-        }
-        bytes = f.readAll();
+    const bool compressed = UTILSLIB::toLower(niiFile).ends_with(".gz");
+    std::string error;
+    const std::optional<std::vector<std::byte>> content = detail::readFileBytes(niiFile, compressed, error);
+    if (!content) {
+        Log::critical("MriNiftiIO::read - " + error);
+        return false;
     }
+    const std::vector<std::byte>& bytes = *content;
 
     if (bytes.size() < NIFTI_HDR_SIZE) {
-        qCritical() << "MriNiftiIO::read - file too small (" << bytes.size() << "bytes) :" << niiFile;
+        Log::critical("MriNiftiIO::read - file too small (" + std::to_string(bytes.size()) + " bytes) : " + niiFile);
         return false;
     }
 
-    const char* hdr = bytes.constData();
+    const std::byte* hdr = bytes.data();
 
     // Endianness detection via sizeof_hdr (must be 348).
-    qint32 sizeofHdr = readLE<qint32>(hdr);
     bool bigEndian = false;
-    if (sizeofHdr != NIFTI_HDR_SIZE) {
-        sizeofHdr = readBE<qint32>(hdr);
-        if (sizeofHdr != NIFTI_HDR_SIZE) {
-            qCritical() << "MriNiftiIO::read - not a NIfTI-1 file (sizeof_hdr ="
-                        << sizeofHdr << "):" << niiFile;
+    std::int32_t sizeofHdr = readValue<std::int32_t>(hdr, bigEndian);
+    if (sizeofHdr != std::int32_t(NIFTI_HDR_SIZE)) {
+        bigEndian = true;
+        sizeofHdr = readValue<std::int32_t>(hdr, bigEndian);
+        if (sizeofHdr != std::int32_t(NIFTI_HDR_SIZE)) {
+            Log::critical("MriNiftiIO::read - not a NIfTI-1 file (sizeof_hdr = " + std::to_string(sizeofHdr) + "): " + niiFile);
             return false;
         }
-        bigEndian = true;
     }
 
-    auto i16 = [&](int off) {
-        return bigEndian ? readBE<qint16>(hdr + off) : readLE<qint16>(hdr + off);
+    auto i16 = [&](std::size_t off) {
+        return readValue<std::int16_t>(hdr + off, bigEndian);
     };
-    auto f32 = [&](int off) {
-        if (bigEndian) {
-            quint32 raw = readBE<quint32>(hdr + off);
-            float v;
-            std::memcpy(&v, &raw, sizeof(float));
-            return v;
-        }
-        quint32 raw = readLE<quint32>(hdr + off);
-        float v;
-        std::memcpy(&v, &raw, sizeof(float));
-        return v;
+    auto f32 = [&](std::size_t off) {
+        return readValue<float>(hdr + off, bigEndian);
     };
 
     // dim[0..7] starts at offset 40; dim[0] = ndim, dim[1..3] = nx,ny,nz, dim[4] = nt.
-    qint16 ndim = i16(40);
-    qint16 nx = i16(42);
-    qint16 ny = i16(44);
-    qint16 nz = i16(46);
-    qint16 nt = i16(48);
+    const std::int16_t ndim = i16(40);
+    const std::int16_t nx = i16(42);
+    const std::int16_t ny = i16(44);
+    const std::int16_t nz = i16(46);
+    const std::int16_t nt = i16(48);
     if (ndim < 3 || nx <= 0 || ny <= 0 || nz <= 0) {
-        qCritical() << "MriNiftiIO::read - degenerate dims" << ndim << nx << ny << nz;
+        Log::critical("MriNiftiIO::read - degenerate dims " + std::to_string(ndim) + " " + std::to_string(nx) + " " + std::to_string(ny) + " " + std::to_string(nz));
         return false;
     }
 
-    qint16 datatype = i16(70);
-    qint16 bitpix = i16(72);
-    Q_UNUSED(bitpix);
+    const std::int16_t datatype = i16(70);
 
     // pixdim[0..7] starts at offset 76. pixdim[1..3] = spacing in mm; pixdim[0] is the qfac sign.
     float qfac = f32(76);
@@ -236,8 +181,8 @@ bool MriNiftiIO::read(const QString& niiFile, MriVolData& volData, bool verbose)
     const float sclSlope = f32(112);
     const float sclInter = f32(116);
 
-    const qint16 qformCode = i16(252);
-    const qint16 sformCode = i16(254);
+    const std::int16_t qformCode = i16(252);
+    const std::int16_t sformCode = i16(254);
 
     // Map NIfTI datatype to MRI_* + bytes-per-voxel.
     int mriType = MRI_UCHAR;
@@ -268,7 +213,7 @@ bool MriNiftiIO::read(const QString& niiFile, MriVolData& volData, bool verbose)
             bpv = 4;
             break;
         default:
-            qCritical() << "MriNiftiIO::read - unsupported datatype" << datatype;
+            Log::critical("MriNiftiIO::read - unsupported datatype " + std::to_string(datatype));
             return false;
     }
 
@@ -276,9 +221,10 @@ bool MriNiftiIO::read(const QString& niiFile, MriVolData& volData, bool verbose)
     Matrix4f vox2ras = Matrix4f::Identity();
     if (sformCode > 0) {
         for (int c = 0; c < 4; ++c) {
-            vox2ras(0, c) = f32(280 + c * 4);
-            vox2ras(1, c) = f32(296 + c * 4);
-            vox2ras(2, c) = f32(312 + c * 4);
+            const std::size_t col = static_cast<std::size_t>(c) * 4;
+            vox2ras(0, c) = f32(280 + col);
+            vox2ras(1, c) = f32(296 + col);
+            vox2ras(2, c) = f32(312 + col);
         }
     } else if (qformCode > 0) {
         const float b = f32(256);
@@ -349,27 +295,22 @@ bool MriNiftiIO::read(const QString& niiFile, MriVolData& volData, bool verbose)
         FIFFV_COORD_MRI_SLICE, FIFFV_COORD_MRI, volData.computeVox2Ras(), true);
 
     // Read voxel data starting at vox_offset (typically 352 for single-file).
-    const qint64 dataOff = static_cast<qint64>(voxOffset > 0.0f ? voxOffset : NIFTI_HDR_SIZE + 4);
-    const qint64 frameSize = static_cast<qint64>(nx) * ny * nz * bpv;
+    const std::size_t dataOff = static_cast<std::size_t>(voxOffset > 0.0f ? voxOffset : float(NIFTI_HDR_SIZE + 4));
+    const std::size_t nPixels = static_cast<std::size_t>(nx) * static_cast<std::size_t>(ny);
+    const std::size_t nslice = static_cast<std::size_t>(nz);
+    const std::size_t frameSize = nPixels * nslice * static_cast<std::size_t>(bpv);
     if (bytes.size() < dataOff + frameSize) {
-        qCritical() << "MriNiftiIO::read - data section truncated (need"
-                    << (dataOff + frameSize) << "bytes, got" << bytes.size() << ")";
+        Log::critical("MriNiftiIO::read - data section truncated (need " + std::to_string(dataOff + frameSize) + " bytes, got " + std::to_string(bytes.size()) + ")");
         return false;
     }
 
-    QDataStream stream(bytes);
-    stream.setByteOrder(bigEndian ? QDataStream::BigEndian : QDataStream::LittleEndian);
-    stream.setFloatingPointPrecision(QDataStream::SinglePrecision);
-    stream.device()->seek(dataOff);
-
-    const int nslice = nz;
-    const int nPixels = nx * ny;
+    const std::byte* voxels = bytes.data() + dataOff;
     volData.slices.resize(nslice);
 
     const Matrix4f vox2rasFinal = volData.computeVox2Ras();
     const bool useScale = (sclSlope != 0.0f) && !(sclSlope == 1.0f && sclInter == 0.0f);
 
-    for (int k = 0; k < nslice; ++k) {
+    for (std::size_t k = 0; k < nslice; ++k) {
         MriSlice& slice = volData.slices[k];
         slice.width = nx;
         slice.height = ny;
@@ -378,77 +319,46 @@ bool MriNiftiIO::read(const QString& niiFile, MriVolData& volData, bool verbose)
         slice.scale = 1.0f;
 
         switch (mriType) {
-            case MRI_UCHAR: {
+            case MRI_UCHAR:
                 slice.pixelFormat = FIFFV_MRI_PIXEL_BYTE;
-                slice.pixels.resize(nPixels);
                 if (datatype == DT_INT8) {
-                    for (int p = 0; p < nPixels; ++p) {
-                        qint8 v;
-                        stream >> v;
-                        slice.pixels[p] = static_cast<unsigned char>(v < 0 ? 0 : v);
-                    }
+                    readValues<std::int8_t>(voxels, bigEndian, slice.pixels, nPixels, [](std::int8_t v) { return static_cast<unsigned char>(v < 0 ? 0 : v); });
                 } else {
-                    for (int p = 0; p < nPixels; ++p) {
-                        quint8 v;
-                        stream >> v;
-                        slice.pixels[p] = v;
-                    }
+                    readValues<std::uint8_t>(voxels, bigEndian, slice.pixels, nPixels, [](std::uint8_t v) { return v; });
                 }
                 break;
-            }
-            case MRI_SHORT: {
+            case MRI_SHORT:
                 slice.pixelFormat = FIFFV_MRI_PIXEL_WORD;
-                slice.pixelsWord.resize(nPixels);
                 if (datatype == DT_UINT16) {
-                    for (int p = 0; p < nPixels; ++p) {
-                        quint16 v;
-                        stream >> v;
-                        slice.pixelsWord[p] = v;
-                    }
+                    readValues<std::uint16_t>(voxels, bigEndian, slice.pixelsWord, nPixels, [](std::uint16_t v) { return v; });
                 } else {
-                    for (int p = 0; p < nPixels; ++p) {
-                        qint16 v;
-                        stream >> v;
-                        slice.pixelsWord[p] = static_cast<unsigned short>(v < 0 ? 0 : v);
-                    }
+                    readValues<std::int16_t>(voxels, bigEndian, slice.pixelsWord, nPixels, [](std::int16_t v) { return static_cast<unsigned short>(v < 0 ? 0 : v); });
                 }
                 break;
-            }
-            case MRI_INT: {
+            case MRI_INT:
                 slice.pixelFormat = FIFFV_MRI_PIXEL_FLOAT;
-                slice.pixelsFloat.resize(nPixels);
-                for (int p = 0; p < nPixels; ++p) {
-                    qint32 v;
-                    stream >> v;
-                    slice.pixelsFloat[p] = static_cast<float>(v);
-                }
+                readValues<std::int32_t>(voxels, bigEndian, slice.pixelsFloat, nPixels, [](std::int32_t v) { return static_cast<float>(v); });
                 break;
-            }
-            case MRI_FLOAT: {
+            case MRI_FLOAT:
                 slice.pixelFormat = FIFFV_MRI_PIXEL_FLOAT;
-                slice.pixelsFloat.resize(nPixels);
-                for (int p = 0; p < nPixels; ++p) {
-                    float v;
-                    stream >> v;
-                    slice.pixelsFloat[p] = v;
-                }
+                readValues<float>(voxels, bigEndian, slice.pixelsFloat, nPixels, [](float v) { return v; });
                 break;
-            }
         }
 
         // Apply scl_slope / scl_inter for floating-point output (the NIfTI spec
         // states the transform produces the "physical" value; we only honour it
         // for floats — integer outputs stay as-is to preserve label maps).
         if (useScale && slice.pixelFormat == FIFFV_MRI_PIXEL_FLOAT) {
-            for (int p = 0; p < slice.pixelsFloat.size(); ++p) {
-                slice.pixelsFloat[p] = slice.pixelsFloat[p] * sclSlope + sclInter;
+            for (float& v : slice.pixelsFloat) {
+                v = v * sclSlope + sclInter;
             }
         }
 
+        const float kf = static_cast<float>(k);
         Vector3f sliceOrigin;
-        sliceOrigin(0) = vox2rasFinal(0, 2) * k + vox2rasFinal(0, 3);
-        sliceOrigin(1) = vox2rasFinal(1, 2) * k + vox2rasFinal(1, 3);
-        sliceOrigin(2) = vox2rasFinal(2, 2) * k + vox2rasFinal(2, 3);
+        sliceOrigin(0) = vox2rasFinal(0, 2) * kf + vox2rasFinal(0, 3);
+        sliceOrigin(1) = vox2rasFinal(1, 2) * kf + vox2rasFinal(1, 3);
+        sliceOrigin(2) = vox2rasFinal(2, 2) * kf + vox2rasFinal(2, 3);
 
         Matrix3f sliceRot;
         sliceRot.col(0) = vox2rasFinal.block<3, 1>(0, 0);
@@ -459,9 +369,11 @@ bool MriNiftiIO::read(const QString& niiFile, MriVolData& volData, bool verbose)
     }
 
     if (verbose) {
-        qInfo("NIfTI file: %dx%dx%d, datatype=%d, voxel %.3fx%.3fx%.3f mm, c_ras=(%.2f, %.2f, %.2f)",
-              nx, ny, nz, datatype, sx, sy, sz,
-              volData.c_ras[0], volData.c_ras[1], volData.c_ras[2]);
+        char line[256];
+        std::snprintf(line, sizeof(line), "NIfTI file: %dx%dx%d, datatype=%d, voxel %.3fx%.3fx%.3f mm, c_ras=(%.2f, %.2f, %.2f)",
+                      nx, ny, nz, datatype, double(sx), double(sy), double(sz),
+                      double(volData.c_ras[0]), double(volData.c_ras[1]), double(volData.c_ras[2]));
+        Log::info(line);
     }
 
     return true;

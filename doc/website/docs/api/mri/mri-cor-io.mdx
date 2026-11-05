@@ -22,8 +22,8 @@ Walks a `mri/T1` (or `mri/orig`, `mri/brain`, …) directory, loads the 256 `COR
 Ported from `make_cor_set()` in [MNE](/docs/api/mne/mne-class) C `mne_make_cor_set` by Matti Hamalainen.
 
 ```cpp title="src/examples/ex_mri/main.cpp"
-QVector<MriSlice> corSlices;
-MriCorIO::read(corDir, corSlices);
+std::vector<MriSlice> corSlices;
+MriCorIO::read(corDir.toStdString(), corSlices);
 ```
 
 ---
@@ -38,10 +38,10 @@ Expects files named COR-001 through COR-256, each containing 256×256 unsigned c
 
 **Parameters:**
 
-- **dir** : *const QString &*
+- **dir** : *const std::string &*
   Path to the directory containing COR-NNN files.
 
-- **slices** : *QVector&lt; [MriSlice](/docs/api/mri/mri-slice) &gt; &*
+- **slices** : *std::vector&lt; [MriSlice](/docs/api/mri/mri-slice) &gt; &*
   Vector of [`MriSlice`](/docs/api/mri/mri-slice) structures to populate.
 
 - **verbose** : *bool*
@@ -66,8 +66,8 @@ Expects files named COR-001 through COR-256, each containing 256×256 unsigned c
 MRI library: MGH/MGZ and NIfTI volumes, voxel/RAS transforms, slicing and COR sets.
 
 ````cpp title="src/examples/ex_mri/main.cpp, line 139"
-QVector<MriSlice> corSlices;
-MriCorIO::read(corDir, corSlices);
+std::vector<MriSlice> corSlices;
+MriCorIO::read(corDir.toStdString(), corSlices);
 ok &= expect(corSlices.size() == 256 && corSlices[7].pixels.size() == 256 * 256 && corSlices[7].pixels[0] == 7,
              QString("COR set: %1 slices of 256x256, slice 7 holds 7").arg(corSlices.size()));
 ````

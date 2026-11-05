@@ -37,6 +37,9 @@
 #include "mri_nifti_io.h"
 
 #include <fiff/fiff_file.h>
+#include <utils/string_utils.h>
+
+#include <algorithm>
 
 //=============================================================================================================
 // USED NAMESPACES
@@ -82,48 +85,42 @@ bool MriVolData::isValid() const
 
 //=============================================================================================================
 
-bool MriVolData::read(const QString& path)
+bool MriVolData::read(const std::string& path)
 {
-    // Dispatch on filename suffix so callers can use the same one-shot loader
-    // for FreeSurfer MGH/MGZ and NIfTI-1 (.nii / .nii.gz) volumes.
-    const QString lower = path.toLower();
-    if (lower.endsWith(QStringLiteral(".nii")) || lower.endsWith(QStringLiteral(".nii.gz"))) {
+    // One loader for FreeSurfer MGH/MGZ and NIfTI-1 (.nii / .nii.gz), chosen by suffix
+    const std::string lower = UTILSLIB::toLower(path);
+    if (lower.ends_with(".nii") || lower.ends_with(".nii.gz")) {
         return MriNiftiIO::read(path, *this);
     }
-    QVector<FIFFLIB::FiffCoordTrans> additionalTrans;
+    std::vector<FIFFLIB::FiffCoordTrans> additionalTrans;
     return MriMghIO::read(path, *this, additionalTrans);
 }
 
 //=============================================================================================================
 
-QVector<float> MriVolData::voxelDataAsFloat() const
+std::vector<float> MriVolData::voxelDataAsFloat() const
 {
-    if (slices.isEmpty() || width <= 0 || height <= 0 || depth <= 0)
+    if (slices.empty() || width <= 0 || height <= 0 || depth <= 0)
         return {};
 
-    const int nPixels = width * height;
-    QVector<float> result(static_cast<qsizetype>(width) * height * depth, 0.0f);
-
-    for (int k = 0; k < depth && k < slices.size(); ++k) {
+    const std::size_t nPixels = static_cast<std::size_t>(width) * static_cast<std::size_t>(height);
+    std::vector<float> result(nPixels * static_cast<std::size_t>(depth), 0.0f);
+    const std::size_t nSlices = std::min(static_cast<std::size_t>(depth), slices.size());
+    for (std::size_t k = 0; k < nSlices; ++k) {
         const MriSlice& slice = slices[k];
-        int offset = k * nPixels;
-
+        float* out = result.data() + k * nPixels;
         switch (slice.pixelFormat) {
             case FIFFV_MRI_PIXEL_BYTE:
-                for (int p = 0; p < qMin(nPixels, slice.pixels.size()); ++p)
-                    result[offset + p] = static_cast<float>(slice.pixels[p]);
+                std::transform(slice.pixels.begin(), slice.pixels.begin() + std::ptrdiff_t(std::min(nPixels, slice.pixels.size())), out, [](unsigned char v) { return static_cast<float>(v); });
                 break;
             case FIFFV_MRI_PIXEL_WORD:
-                for (int p = 0; p < qMin(nPixels, slice.pixelsWord.size()); ++p)
-                    result[offset + p] = static_cast<float>(slice.pixelsWord[p]);
+                std::transform(slice.pixelsWord.begin(), slice.pixelsWord.begin() + std::ptrdiff_t(std::min(nPixels, slice.pixelsWord.size())), out, [](unsigned short v) { return static_cast<float>(v); });
                 break;
             case FIFFV_MRI_PIXEL_FLOAT:
-                for (int p = 0; p < qMin(nPixels, slice.pixelsFloat.size()); ++p)
-                    result[offset + p] = slice.pixelsFloat[p];
+                std::copy_n(slice.pixelsFloat.begin(), std::min(nPixels, slice.pixelsFloat.size()), out);
                 break;
         }
     }
-
     return result;
 }
 

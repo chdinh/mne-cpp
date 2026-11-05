@@ -68,11 +68,12 @@
 #include "mri_vol_data.h"
 
 //=============================================================================================================
-// QT INCLUDES
+// STL INCLUDES
 //=============================================================================================================
 
-#include <QString>
-#include <QVector>
+#include <cstddef>
+#include <string>
+#include <vector>
 
 //=============================================================================================================
 // DEFINE NAMESPACE MRILIB
@@ -121,24 +122,13 @@ public:
      *
      * @return True on success, false on error.
      */
-    static bool read(const QString& mgzFile,
+    static bool read(const std::string& mgzFile,
                      MriVolData& volData,
-                     QVector<FIFFLIB::FiffCoordTrans>& additionalTrans,
-                     const QString& subjectMriDir = QString(),
+                     std::vector<FIFFLIB::FiffCoordTrans>& additionalTrans,
+                     const std::string& subjectMriDir = {},
                      bool verbose = false);
 
 private:
-    //=========================================================================================================
-    /**
-     * Decompresses a .mgz file to raw MGH bytes.
-     *
-     * @param[in]  mgzFile  Path to the .mgz file.
-     * @param[out] rawData  Decompressed byte array.
-     *
-     * @return True on success.
-     */
-    static bool decompress(const QString& mgzFile, QByteArray& rawData);
-
     //=========================================================================================================
     /**
      * Parses the MGH header from raw bytes.
@@ -149,7 +139,7 @@ private:
      *
      * @return True on success.
      */
-    static bool parseHeader(const QByteArray& data, MriVolData& volData, bool verbose);
+    static bool parseHeader(const std::vector<std::byte>& data, MriVolData& volData, bool verbose);
 
     //=========================================================================================================
     /**
@@ -160,7 +150,7 @@ private:
      *
      * @return True on success.
      */
-    static bool readVoxelData(const QByteArray& data, MriVolData& volData);
+    static bool readVoxelData(const std::vector<std::byte>& data, MriVolData& volData);
 
     //=========================================================================================================
     /**
@@ -174,10 +164,10 @@ private:
      *
      * @return True on success (footer is optional, so missing footer is not an error).
      */
-    static bool parseFooter(const QByteArray& data,
+    static bool parseFooter(const std::vector<std::byte>& data,
                             MriVolData& volData,
-                            QVector<FIFFLIB::FiffCoordTrans>& additionalTrans,
-                            const QString& subjectMriDir,
+                            std::vector<FIFFLIB::FiffCoordTrans>& additionalTrans,
+                            const std::string& subjectMriDir,
                             bool verbose);
 
     //=========================================================================================================

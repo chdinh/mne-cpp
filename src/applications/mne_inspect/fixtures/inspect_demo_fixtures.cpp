@@ -84,7 +84,7 @@ std::unique_ptr<MriVolData> demoMriSlab(int dim)
     }
 
     auto vol = std::make_unique<MriVolData>();
-    vol->fileName = QStringLiteral("<demo:slab>");
+    vol->fileName = "<demo:slab>";
     vol->version = MRILIB::MRI_MGH_VERSION;
     vol->width = dim;
     vol->height = dim;
@@ -141,7 +141,7 @@ std::unique_ptr<MriVolData> demoMriSlab(int dim)
                 slice.pixelsFloat[j * dim + i] = v;
             }
         }
-        vol->slices.append(slice);
+        vol->slices.push_back(slice);
     }
 
     return vol;

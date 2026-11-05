@@ -61,11 +61,11 @@
 #include <fiff/fiff_coord_trans.h>
 
 //=============================================================================================================
-// QT INCLUDES
+// STL INCLUDES
 //=============================================================================================================
 
-#include <QString>
-#include <QVector>
+#include <string>
+#include <vector>
 
 //=============================================================================================================
 // DEFINE NAMESPACE MRILIB
@@ -103,9 +103,9 @@ public:
      *
      * @return True on success, false on error.
      */
-    static bool write(const QString& fileName,
-                      const QVector<MriSlice>& slices,
-                      const QVector<FIFFLIB::FiffCoordTrans>& additionalTrans);
+    static bool write(const std::string& fileName,
+                      const std::vector<MriSlice>& slices,
+                      const std::vector<FIFFLIB::FiffCoordTrans>& additionalTrans);
 };
 
 } // namespace MRILIB

@@ -10,7 +10,7 @@ set(CMAKE_AUTOUIC ON)
 set(CMAKE_AUTOMOC ON)
 set(CMAKE_AUTORCC ON)
 
-set(QT_REQUIRED_COMPONENTS Core Network)
+set(QT_REQUIRED_COMPONENTS Core)
 find_package(QT NAMES Qt6 Qt5 REQUIRED COMPONENTS ${QT_REQUIRED_COMPONENTS})
 find_package(Qt${QT_VERSION_MAJOR} REQUIRED COMPONENTS ${QT_REQUIRED_COMPONENTS})
 
@@ -32,12 +32,17 @@ endif()
 
 set(SOURCES
     mri_global.cpp
+    detail/mri_file_bytes.cpp
     mri_vol_data.cpp
     mri_mgh_io.cpp
     mri_nifti_io.cpp
     mri_cor_io.cpp
     mri_cor_fif_io.cpp
     mri_slicer.cpp
+)
+
+set(PRIVATE_HEADERS
+    detail/mri_file_bytes.h
 )
 
 set(HEADERS
@@ -57,7 +62,7 @@ set(SOURCE_PATHS ${SOURCES})
 list(TRANSFORM SOURCE_PATHS PREPEND "${CMAKE_CURRENT_SOURCE_DIR}/")
 set_source_files_properties(${FILE_TO_UPDATE} PROPERTIES OBJECT_DEPENDS "${SOURCE_PATHS}")
 
-add_library(${PROJECT_NAME} ${SOURCES} ${HEADERS})
+add_library(${PROJECT_NAME} ${SOURCES} ${HEADERS} ${PRIVATE_HEADERS})
 
 set(FFTW_LIBS "")
 

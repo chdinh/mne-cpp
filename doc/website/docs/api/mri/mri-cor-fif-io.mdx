@@ -23,7 +23,7 @@ Ported from `save_slices()` / `write_slice()` in [MNE](/docs/api/mne/mne-class) 
 
 ```cpp title="src/examples/ex_mri/main.cpp"
 const QString corFif = dir.filePath("COR.fif");
-MriCorFifIO::write(corFif, corSlices, extraTransforms);
+MriCorFifIO::write(corFif.toStdString(), corSlices, extraTransforms);
 ```
 
 ---
@@ -36,13 +36,13 @@ Writes COR.fif file from slice data.
 
 **Parameters:**
 
-- **fileName** : *const QString &*
+- **fileName** : *const std::string &*
   Output FIFF file path.
 
-- **slices** : *const QVector&lt; [MriSlice](/docs/api/mri/mri-slice) &gt; &*
+- **slices** : *const std::vector&lt; [MriSlice](/docs/api/mri/mri-slice) &gt; &*
   Vector of [`MriSlice`](/docs/api/mri/mri-slice) structures to write.
 
-- **additionalTrans** : *const QVector&lt; [FiffCoordTrans](/docs/api/fiff/fiff-coord-trans) &gt; &*
+- **additionalTrans** : *const std::vector&lt; [FiffCoordTrans](/docs/api/fiff/fiff-coord-trans) &gt; &*
   Additional coordinate transforms (Talairach etc.).
 
 **Returns:**
@@ -65,7 +65,7 @@ MRI library: MGH/MGZ and NIfTI volumes, voxel/RAS transforms, slicing and COR se
 
 ````cpp title="src/examples/ex_mri/main.cpp, line 146"
 const QString corFif = dir.filePath("COR.fif");
-MriCorFifIO::write(corFif, corSlices, extraTransforms);
+MriCorFifIO::write(corFif.toStdString(), corSlices, extraTransforms);
 ok &= expect(QFile(corFif).size() > 256 * 256 * 256, QString("COR.fif written (%1 bytes)").arg(QFile(corFif).size()));
 ````
 
