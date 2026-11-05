@@ -46,8 +46,8 @@
 // QT INCLUDES
 //=============================================================================================================
 
-#include <QVector>
-#include <QPair>
+#include <utility>
+#include <vector>
 
 //=============================================================================================================
 // EIGEN INCLUDES
@@ -73,11 +73,11 @@ namespace STSLIB
  */
 struct STSSHARED_EXPORT StatsClusterResult
 {
-    Eigen::MatrixXd matTObs;         /**< Observed t-statistic map (nChannels x nTimes). */
-    QVector<double> vecClusterStats; /**< Sum of t-values for each observed cluster. */
-    QVector<double> vecClusterPvals; /**< p-value for each observed cluster. */
-    Eigen::MatrixXi matClusterIds;   /**< Cluster label at each (channel, time) point; 0 = not in cluster. */
-    double clusterThreshold;         /**< t-threshold used for clustering. */
+    Eigen::MatrixXd matTObs;             /**< Observed t-statistic map (nChannels x nTimes). */
+    std::vector<double> vecClusterStats; /**< Sum of t-values for each observed cluster. */
+    std::vector<double> vecClusterPvals; /**< p-value for each observed cluster. */
+    Eigen::MatrixXi matClusterIds;       /**< Cluster label at each (channel, time) point; 0 = not in cluster. */
+    double clusterThreshold;             /**< t-threshold used for clustering. */
 };
 
 //=============================================================================================================
@@ -106,8 +106,8 @@ public:
      * @return StatsClusterResult with observed t-map, cluster statistics, and p-values.
      */
     static StatsClusterResult permutationTest(
-        const QVector<Eigen::MatrixXd>& dataA,
-        const QVector<Eigen::MatrixXd>& dataB,
+        const std::vector<Eigen::MatrixXd>& dataA,
+        const std::vector<Eigen::MatrixXd>& dataB,
         const Eigen::SparseMatrix<int>& adjacency,
         int nPermutations = 1024,
         double clusterAlpha = 0.05,
@@ -132,7 +132,7 @@ public:
      * @since 2.2.0
      */
     static StatsClusterResult oneSamplePermutationTest(
-        const QVector<Eigen::MatrixXd>& data,
+        const std::vector<Eigen::MatrixXd>& data,
         const Eigen::SparseMatrix<int>& adjacency,
         double threshold,
         int nPermutations,
@@ -155,7 +155,7 @@ public:
      * @since 2.2.0
      */
     static StatsClusterResult fTestPermutationTest(
-        const QVector<QVector<Eigen::MatrixXd>>& conditions,
+        const std::vector<std::vector<Eigen::MatrixXd>>& conditions,
         const Eigen::SparseMatrix<int>& adjacency,
         double threshold,
         int nPermutations);
@@ -192,8 +192,8 @@ private:
      * Compute a paired t-statistic map from two groups of per-subject matrices.
      */
     static Eigen::MatrixXd computeTMap(
-        const QVector<Eigen::MatrixXd>& dataA,
-        const QVector<Eigen::MatrixXd>& dataB);
+        const std::vector<Eigen::MatrixXd>& dataA,
+        const std::vector<Eigen::MatrixXd>& dataB);
 
     //=========================================================================================================
     /**
@@ -201,7 +201,7 @@ private:
      *
      * @return Pair of (cluster ID matrix, vector of cluster statistic sums).
      */
-    static QPair<Eigen::MatrixXi, QVector<double>> findClusters(
+    static std::pair<Eigen::MatrixXi, std::vector<double>> findClusters(
         const Eigen::MatrixXd& tMap,
         double threshold,
         const Eigen::SparseMatrix<int>& adjacency,
@@ -212,7 +212,7 @@ private:
      * Perform one permutation: shuffle labels, compute t-map, return max cluster statistic.
      */
     static double permuteOnce(
-        const QVector<Eigen::MatrixXd>& allData,
+        const std::vector<Eigen::MatrixXd>& allData,
         int nA,
         const Eigen::SparseMatrix<int>& adjacency,
         double threshold,
@@ -229,14 +229,14 @@ private:
      * Compute a one-sample t-statistic map: t = mean / (std / sqrt(n)).
      */
     static Eigen::MatrixXd computeOneSampleTMap(
-        const QVector<Eigen::MatrixXd>& data);
+        const std::vector<Eigen::MatrixXd>& data);
 
     //=========================================================================================================
     /**
      * Compute a one-way ANOVA F-statistic map across conditions.
      */
     static Eigen::MatrixXd computeFMap(
-        const QVector<QVector<Eigen::MatrixXd>>& conditions);
+        const std::vector<std::vector<Eigen::MatrixXd>>& conditions);
 
     //=========================================================================================================
     /**
@@ -244,7 +244,7 @@ private:
      *
      * @return Pair of (cluster ID matrix, vector of cluster statistic sums).
      */
-    static QPair<Eigen::MatrixXi, QVector<double>> findClustersFlat(
+    static std::pair<Eigen::MatrixXi, std::vector<double>> findClustersFlat(
         const Eigen::MatrixXd& statMap,
         double threshold,
         const Eigen::SparseMatrix<int>& adjacency,
@@ -255,7 +255,7 @@ private:
      * Perform one sign-flip permutation for one-sample test.
      */
     static double permuteOnceOneSample(
-        const QVector<Eigen::MatrixXd>& data,
+        const std::vector<Eigen::MatrixXd>& data,
         const Eigen::SparseMatrix<int>& adjacency,
         double threshold,
         StatsTailType tail);
@@ -265,8 +265,8 @@ private:
      * Perform one label-shuffle permutation for F-test.
      */
     static double permuteOnceFTest(
-        const QVector<Eigen::MatrixXd>& allData,
-        const QVector<int>& groupSizes,
+        const std::vector<Eigen::MatrixXd>& allData,
+        const std::vector<int>& groupSizes,
         const Eigen::SparseMatrix<int>& adjacency,
         double threshold);
 };

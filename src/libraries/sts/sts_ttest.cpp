@@ -28,11 +28,14 @@
 
 #include "sts_ttest.h"
 
+#include <utils/generics/log.h>
+
 #include <cmath>
 #include <algorithm>
-#include <QtGlobal>
 #include <random>
+#include <cstdint>
 #include <set>
+#include <string>
 #include <vector>
 
 //=============================================================================================================
@@ -100,20 +103,20 @@ StatsTtestResult StatsTtest::permutation(const MatrixXd& data, int nPermutations
     // Sign flips as n-bit numbers, sample 0 in the most significant bit; a two-sided test never flips sample 0
     const int bits = n - (tail == StatsTailType::Both ? 1 : 0);
     if (n < 2 || bits > 63) {
-        qWarning("StatsTtest::permutation: needs 2 to 63 samples, got %d.", n);
+        UTILSLIB::Log::warning("StatsTtest::permutation: needs 2 to 63 samples, got " + std::to_string(n) + ".");
         return StatsTtestResult();
     }
-    const quint64 maxPerms = (quint64(1) << bits) - 1;
-    std::vector<quint64> orders;
-    if (static_cast<quint64>(std::max(nPermutations, 0)) > maxPerms) {
-        for (quint64 s = 1; s <= maxPerms; ++s)
+    const std::uint64_t maxPerms = (std::uint64_t(1) << bits) - 1;
+    std::vector<std::uint64_t> orders;
+    if (static_cast<std::uint64_t>(std::max(nPermutations, 0)) > maxPerms) {
+        for (std::uint64_t s = 1; s <= maxPerms; ++s)
             orders.push_back(s);
     } else {
         std::mt19937_64 gen(seed);
-        std::uniform_int_distribution<quint64> pick(1, maxPerms);
-        std::set<quint64> seen;
+        std::uniform_int_distribution<std::uint64_t> pick(1, maxPerms);
+        std::set<std::uint64_t> seen;
         while (static_cast<int>(orders.size()) < nPermutations - 1) {
-            const quint64 s = pick(gen);
+            const std::uint64_t s = pick(gen);
             if (seen.insert(s).second)
                 orders.push_back(s);
         }
@@ -121,7 +124,7 @@ StatsTtestResult StatsTtest::permutation(const MatrixXd& data, int nPermutations
 
     std::vector<double> h0;
     h0.reserve(orders.size() + 1);
-    for (quint64 s : orders) {
+    for (std::uint64_t s : orders) {
         VectorXd signs(n);
         for (int i = 0; i < n; ++i)
             signs(i) = ((s >> (n - 1 - i)) & 1) ? -1.0 : 1.0;

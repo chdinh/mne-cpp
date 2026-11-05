@@ -98,17 +98,17 @@ SparseMatrix<int> StatsAdjacency::combine(const QList<SparseMatrix<int>>& dims)
 // DEFINE METHODS
 //=============================================================================================================
 
-SparseMatrix<int> StatsAdjacency::fromChannelPositions(const FiffInfo& info, const QStringList& picks)
+SparseMatrix<int> StatsAdjacency::fromChannelPositions(const FiffInfo& info, const std::vector<std::string>& picks)
 {
     // Gather channel indices and 3D positions
     std::vector<int> chIdx;
-    if (picks.isEmpty()) {
+    if (picks.empty()) {
         for (int i = 0; i < info.chs.size(); ++i) {
             chIdx.push_back(i);
         }
     } else {
         for (int i = 0; i < info.chs.size(); ++i) {
-            if (picks.contains(info.chs[i].ch_name)) {
+            if (std::find(picks.begin(), picks.end(), info.chs[i].ch_name.toStdString()) != picks.end()) {
                 chIdx.push_back(i);
             }
         }

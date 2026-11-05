@@ -19,11 +19,11 @@
  * of its t- or F-values.
  *
  * The null distribution of the maximum absolute cluster-mass is then
- * built by @c QtConcurrent::blockingMapped over @c nPermutations
+ * built by @c UTILSLIB::ThreadPool::parallelMap over @c nPermutations
  * randomisations - exchangeable label shuffles for the two-sample test,
  * Rademacher sign flips for the one-sample test, and group-label
  * reassignments for the ANOVA test - with thread-local
- * @c QRandomGenerator instances for reproducibility. Observed cluster
+ * @c std::mt19937 instances for reproducibility. Observed cluster
  * p-values count the observed statistic as one draw from that null, as
  * MNE-Python does: p = (1 + #exceedances) / (1 + nPermutations).
  *
@@ -43,12 +43,12 @@
 #include "sts_ttest.h"
 #include "sts_ftest.h"
 
-#include <QtConcurrent>
-#include <QRandomGenerator>
+#include <utils/thread_pool.h>
 
 #include <cmath>
 #include <algorithm>
 #include <queue>
+#include <random>
 #include <vector>
 
 //=============================================================================================================
@@ -63,17 +63,17 @@ using namespace Eigen;
 //=============================================================================================================
 
 StatsClusterResult StatsCluster::permutationTest(
-    const QVector<MatrixXd>& dataA,
-    const QVector<MatrixXd>& dataB,
+    const std::vector<MatrixXd>& dataA,
+    const std::vector<MatrixXd>& dataB,
     const SparseMatrix<int>& adjacency,
     int nPermutations,
     double clusterAlpha,
     double pThreshold,
     StatsTailType tail)
 {
-    Q_UNUSED(pThreshold);
+    static_cast<void>(pThreshold);
 
-    const int nA = dataA.size();
+    const int nA = static_cast<int>(dataA.size());
 
     // Step 1: Compute the observed t-map
     MatrixXd tObs = computeTMap(dataA, dataB);
@@ -87,37 +87,30 @@ StatsClusterResult StatsCluster::permutationTest(
     auto [clusterIds, clusterStats] = findClusters(tObs, threshold, adjacency, tail);
 
     // Step 4: Combine all data for permutation
-    QVector<MatrixXd> allData;
+    std::vector<MatrixXd> allData;
     allData.reserve(nA + dataB.size());
     for (const auto& m : dataA)
-        allData.append(m);
+        allData.push_back(m);
     for (const auto& m : dataB)
-        allData.append(m);
+        allData.push_back(m);
 
-    // Step 5: Build null distribution via permutations (using QtConcurrent)
-    QVector<double> nullDist(nPermutations);
-
+    // Step 5: Build null distribution via permutations on the thread pool
     // Perform permutations in parallel
-    QVector<int> permIndices(nPermutations);
+    std::vector<int> permIndices(nPermutations);
     std::iota(permIndices.begin(), permIndices.end(), 0);
 
     std::function<double(int)> permuteFunc = [&](int) -> double {
         return permuteOnce(allData, nA, adjacency, threshold, tail);
     };
 
-    QFuture<double> future = QtConcurrent::mapped(permIndices, permuteFunc);
-    future.waitForFinished();
-
-    for (int i = 0; i < nPermutations; ++i) {
-        nullDist[i] = future.resultAt(i);
-    }
+    std::vector<double> nullDist = UTILSLIB::ThreadPool::global().parallelMap(permIndices, permuteFunc);
 
     // Sort null distribution for percentile computation
     std::sort(nullDist.begin(), nullDist.end());
 
     // Step 6: Compute cluster p-values
-    QVector<double> clusterPvals(clusterStats.size());
-    for (int c = 0; c < clusterStats.size(); ++c) {
+    std::vector<double> clusterPvals(clusterStats.size());
+    for (int c = 0; c < static_cast<int>(clusterStats.size()); ++c) {
         double obsStat = std::fabs(clusterStats[c]);
         int count = 0;
         for (int p = 0; p < nPermutations; ++p) {
@@ -139,9 +132,9 @@ StatsClusterResult StatsCluster::permutationTest(
 
 //=============================================================================================================
 
-MatrixXd StatsCluster::computeTMap(const QVector<MatrixXd>& dataA, const QVector<MatrixXd>& dataB)
+MatrixXd StatsCluster::computeTMap(const std::vector<MatrixXd>& dataA, const std::vector<MatrixXd>& dataB)
 {
-    const int nSubjects = dataA.size();
+    const int nSubjects = static_cast<int>(dataA.size());
     const int nChannels = static_cast<int>(dataA[0].rows());
     const int nTimes = static_cast<int>(dataA[0].cols());
 
@@ -169,7 +162,7 @@ MatrixXd StatsCluster::computeTMap(const QVector<MatrixXd>& dataA, const QVector
 
 //=============================================================================================================
 
-QPair<MatrixXi, QVector<double>> StatsCluster::findClusters(
+std::pair<MatrixXi, std::vector<double>> StatsCluster::findClusters(
     const MatrixXd& tMap,
     double threshold,
     const SparseMatrix<int>& adjacency,
@@ -179,7 +172,7 @@ QPair<MatrixXi, QVector<double>> StatsCluster::findClusters(
     const int nTimes = static_cast<int>(tMap.cols());
 
     MatrixXi clusterIds = MatrixXi::Zero(nChannels, nTimes);
-    QVector<double> clusterStats;
+    std::vector<double> clusterStats;
     int currentClusterId = 0;
 
     // Helper lambda: BFS on combined spatial+temporal adjacency for one polarity
@@ -234,7 +227,7 @@ QPair<MatrixXi, QVector<double>> StatsCluster::findClusters(
                     }
                 }
 
-                clusterStats.append(clusterSum);
+                clusterStats.push_back(clusterSum);
             }
         }
     };
@@ -252,34 +245,34 @@ QPair<MatrixXi, QVector<double>> StatsCluster::findClusters(
 //=============================================================================================================
 
 double StatsCluster::permuteOnce(
-    const QVector<MatrixXd>& allData,
+    const std::vector<MatrixXd>& allData,
     int nA,
     const SparseMatrix<int>& adjacency,
     double threshold,
     StatsTailType tail)
 {
-    const int nTotal = allData.size();
+    const int nTotal = static_cast<int>(allData.size());
 
     // Generate a random permutation of indices
     std::vector<int> indices(nTotal);
     std::iota(indices.begin(), indices.end(), 0);
 
     // Use thread-safe random generator
-    QRandomGenerator rng(QRandomGenerator::global()->generate());
+    std::mt19937 rng(std::random_device{}());
     for (int i = nTotal - 1; i > 0; --i) {
-        int j = static_cast<int>(rng.bounded(i + 1));
+        int j = std::uniform_int_distribution<int>(0, i)(rng);
         std::swap(indices[i], indices[j]);
     }
 
     // Split into permuted groups
-    QVector<MatrixXd> permA, permB;
+    std::vector<MatrixXd> permA, permB;
     permA.reserve(nA);
     permB.reserve(nTotal - nA);
     for (int i = 0; i < nTotal; ++i) {
         if (i < nA) {
-            permA.append(allData[indices[i]]);
+            permA.push_back(allData[indices[i]]);
         } else {
-            permB.append(allData[indices[i]]);
+            permB.push_back(allData[indices[i]]);
         }
     }
 
@@ -327,9 +320,9 @@ double StatsCluster::inverseTCdf(double p, int df)
 
 //=============================================================================================================
 
-MatrixXd StatsCluster::computeOneSampleTMap(const QVector<MatrixXd>& data)
+MatrixXd StatsCluster::computeOneSampleTMap(const std::vector<MatrixXd>& data)
 {
-    const int nSubjects = data.size();
+    const int nSubjects = static_cast<int>(data.size());
     const int nVertices = static_cast<int>(data[0].rows());
     const int nTimes = static_cast<int>(data[0].cols());
 
@@ -352,9 +345,9 @@ MatrixXd StatsCluster::computeOneSampleTMap(const QVector<MatrixXd>& data)
 
 //=============================================================================================================
 
-MatrixXd StatsCluster::computeFMap(const QVector<QVector<MatrixXd>>& conditions)
+MatrixXd StatsCluster::computeFMap(const std::vector<std::vector<MatrixXd>>& conditions)
 {
-    const int nConditions = conditions.size();
+    const int nConditions = static_cast<int>(conditions.size());
     const int nVertices = static_cast<int>(conditions[0][0].rows());
     const int nTimes = static_cast<int>(conditions[0][0].cols());
 
@@ -367,7 +360,7 @@ MatrixXd StatsCluster::computeFMap(const QVector<QVector<MatrixXd>>& conditions)
     // Grand mean
     MatrixXd grandSum = MatrixXd::Zero(nVertices, nTimes);
     for (int c = 0; c < nConditions; ++c) {
-        for (int s = 0; s < conditions[c].size(); ++s) {
+        for (int s = 0; s < static_cast<int>(conditions[c].size()); ++s) {
             grandSum += conditions[c][s];
         }
     }
@@ -407,7 +400,7 @@ MatrixXd StatsCluster::computeFMap(const QVector<QVector<MatrixXd>>& conditions)
 
 //=============================================================================================================
 
-QPair<MatrixXi, QVector<double>> StatsCluster::findClustersFlat(
+std::pair<MatrixXi, std::vector<double>> StatsCluster::findClustersFlat(
     const MatrixXd& statMap,
     double threshold,
     const SparseMatrix<int>& adjacency,
@@ -418,7 +411,7 @@ QPair<MatrixXi, QVector<double>> StatsCluster::findClustersFlat(
     const int nTotal = nVertices * nTimes;
 
     MatrixXi clusterIds = MatrixXi::Zero(nVertices, nTimes);
-    QVector<double> clusterStats;
+    std::vector<double> clusterStats;
     int currentClusterId = 0;
 
     // BFS on the flat spatio-temporal adjacency
@@ -465,7 +458,7 @@ QPair<MatrixXi, QVector<double>> StatsCluster::findClustersFlat(
             }
         }
 
-        clusterStats.append(clusterSum);
+        clusterStats.push_back(clusterSum);
     }
 
     return {clusterIds, clusterStats};
@@ -474,22 +467,22 @@ QPair<MatrixXi, QVector<double>> StatsCluster::findClustersFlat(
 //=============================================================================================================
 
 double StatsCluster::permuteOnceOneSample(
-    const QVector<MatrixXd>& data,
+    const std::vector<MatrixXd>& data,
     const SparseMatrix<int>& adjacency,
     double threshold,
     StatsTailType tail)
 {
-    const int nSubjects = data.size();
+    const int nSubjects = static_cast<int>(data.size());
 
     // Generate random sign flips
-    QRandomGenerator rng(QRandomGenerator::global()->generate());
-    QVector<int> signs(nSubjects);
+    std::mt19937 rng(std::random_device{}());
+    std::vector<int> signs(nSubjects);
     for (int s = 0; s < nSubjects; ++s) {
-        signs[s] = rng.bounded(2) == 0 ? 1 : -1;
+        signs[s] = std::uniform_int_distribution<int>(0, 1)(rng) == 0 ? 1 : -1;
     }
 
     // Apply sign flips
-    QVector<MatrixXd> flipped(nSubjects);
+    std::vector<MatrixXd> flipped(nSubjects);
     for (int s = 0; s < nSubjects; ++s) {
         flipped[s] = data[s] * static_cast<double>(signs[s]);
     }
@@ -520,33 +513,33 @@ double StatsCluster::permuteOnceOneSample(
 //=============================================================================================================
 
 double StatsCluster::permuteOnceFTest(
-    const QVector<MatrixXd>& allData,
-    const QVector<int>& groupSizes,
+    const std::vector<MatrixXd>& allData,
+    const std::vector<int>& groupSizes,
     const SparseMatrix<int>& adjacency,
     double threshold)
 {
-    const int nTotal = allData.size();
+    const int nTotal = static_cast<int>(allData.size());
 
     // Random permutation of indices
     std::vector<int> indices(nTotal);
     std::iota(indices.begin(), indices.end(), 0);
 
-    QRandomGenerator rng(QRandomGenerator::global()->generate());
+    std::mt19937 rng(std::random_device{}());
     for (int i = nTotal - 1; i > 0; --i) {
-        int j = static_cast<int>(rng.bounded(i + 1));
+        int j = std::uniform_int_distribution<int>(0, i)(rng);
         std::swap(indices[i], indices[j]);
     }
 
     // Rebuild condition groups
-    QVector<QVector<MatrixXd>> permConditions;
+    std::vector<std::vector<MatrixXd>> permConditions;
     int offset = 0;
-    for (int c = 0; c < groupSizes.size(); ++c) {
-        QVector<MatrixXd> group;
+    for (int c = 0; c < static_cast<int>(groupSizes.size()); ++c) {
+        std::vector<MatrixXd> group;
         group.reserve(groupSizes[c]);
         for (int s = 0; s < groupSizes[c]; ++s) {
-            group.append(allData[indices[offset + s]]);
+            group.push_back(allData[indices[offset + s]]);
         }
-        permConditions.append(group);
+        permConditions.push_back(group);
         offset += groupSizes[c];
     }
 
@@ -565,7 +558,7 @@ double StatsCluster::permuteOnceFTest(
 //=============================================================================================================
 
 StatsClusterResult StatsCluster::oneSamplePermutationTest(
-    const QVector<MatrixXd>& data,
+    const std::vector<MatrixXd>& data,
     const SparseMatrix<int>& adjacency,
     double threshold,
     int nPermutations,
@@ -576,17 +569,17 @@ StatsClusterResult StatsCluster::oneSamplePermutationTest(
 
     // Step 2: Find observed clusters
     MatrixXi clusterIdsPos, clusterIdsNeg;
-    QVector<double> clusterStats;
+    std::vector<double> clusterStats;
 
     if (tail == StatsTailType::Both || tail == StatsTailType::Right) {
         auto [ids, stats] = findClustersFlat(tObs, threshold, adjacency, true);
         clusterIdsPos = ids;
-        clusterStats.append(stats);
+        clusterStats.insert(clusterStats.end(), stats.begin(), stats.end());
     }
     if (tail == StatsTailType::Both || tail == StatsTailType::Left) {
         auto [ids, stats] = findClustersFlat(tObs, threshold, adjacency, false);
         clusterIdsNeg = ids;
-        clusterStats.append(stats);
+        clusterStats.insert(clusterStats.end(), stats.begin(), stats.end());
     }
 
     // Merge cluster ID maps
@@ -597,25 +590,20 @@ StatsClusterResult StatsCluster::oneSamplePermutationTest(
         clusterIds += clusterIdsNeg;
 
     // Step 3: Build null distribution via sign-flip permutations
-    QVector<int> permIndices(nPermutations);
+    std::vector<int> permIndices(nPermutations);
     std::iota(permIndices.begin(), permIndices.end(), 0);
 
     std::function<double(int)> permuteFunc = [&](int) -> double {
         return permuteOnceOneSample(data, adjacency, threshold, tail);
     };
 
-    QFuture<double> future = QtConcurrent::mapped(permIndices, permuteFunc);
-    future.waitForFinished();
+    std::vector<double> nullDist = UTILSLIB::ThreadPool::global().parallelMap(permIndices, permuteFunc);
 
-    QVector<double> nullDist(nPermutations);
-    for (int i = 0; i < nPermutations; ++i) {
-        nullDist[i] = future.resultAt(i);
-    }
     std::sort(nullDist.begin(), nullDist.end());
 
     // Step 4: Compute cluster p-values
-    QVector<double> clusterPvals(clusterStats.size());
-    for (int c = 0; c < clusterStats.size(); ++c) {
+    std::vector<double> clusterPvals(clusterStats.size());
+    for (int c = 0; c < static_cast<int>(clusterStats.size()); ++c) {
         double obsStat = std::fabs(clusterStats[c]);
         int count = 0;
         for (int p = 0; p < nPermutations; ++p) {
@@ -638,7 +626,7 @@ StatsClusterResult StatsCluster::oneSamplePermutationTest(
 //=============================================================================================================
 
 StatsClusterResult StatsCluster::fTestPermutationTest(
-    const QVector<QVector<MatrixXd>>& conditions,
+    const std::vector<std::vector<MatrixXd>>& conditions,
     const SparseMatrix<int>& adjacency,
     double threshold,
     int nPermutations)
@@ -650,35 +638,30 @@ StatsClusterResult StatsCluster::fTestPermutationTest(
     auto [clusterIds, clusterStats] = findClustersFlat(fObs, threshold, adjacency, true);
 
     // Step 3: Flatten all data and record group sizes
-    QVector<MatrixXd> allData;
-    QVector<int> groupSizes;
-    for (int c = 0; c < conditions.size(); ++c) {
-        groupSizes.append(conditions[c].size());
-        for (int s = 0; s < conditions[c].size(); ++s) {
-            allData.append(conditions[c][s]);
+    std::vector<MatrixXd> allData;
+    std::vector<int> groupSizes;
+    for (int c = 0; c < static_cast<int>(conditions.size()); ++c) {
+        groupSizes.push_back(static_cast<int>(conditions[c].size()));
+        for (int s = 0; s < static_cast<int>(conditions[c].size()); ++s) {
+            allData.push_back(conditions[c][s]);
         }
     }
 
     // Step 4: Build null distribution via label-shuffle permutations
-    QVector<int> permIndices(nPermutations);
+    std::vector<int> permIndices(nPermutations);
     std::iota(permIndices.begin(), permIndices.end(), 0);
 
     std::function<double(int)> permuteFunc = [&](int) -> double {
         return permuteOnceFTest(allData, groupSizes, adjacency, threshold);
     };
 
-    QFuture<double> future = QtConcurrent::mapped(permIndices, permuteFunc);
-    future.waitForFinished();
+    std::vector<double> nullDist = UTILSLIB::ThreadPool::global().parallelMap(permIndices, permuteFunc);
 
-    QVector<double> nullDist(nPermutations);
-    for (int i = 0; i < nPermutations; ++i) {
-        nullDist[i] = future.resultAt(i);
-    }
     std::sort(nullDist.begin(), nullDist.end());
 
     // Step 5: Compute cluster p-values
-    QVector<double> clusterPvals(clusterStats.size());
-    for (int c = 0; c < clusterStats.size(); ++c) {
+    std::vector<double> clusterPvals(clusterStats.size());
+    for (int c = 0; c < static_cast<int>(clusterStats.size()); ++c) {
         double obsStat = clusterStats[c];
         int count = 0;
         for (int p = 0; p < nPermutations; ++p) {

@@ -163,15 +163,15 @@ int main(int argc, char* argv[])
         chain.insert(i, i + 1) = 1;
         chain.insert(i + 1, i) = 1;
     }
-    QVector<MatrixXd> condA, condB;
+    std::vector<MatrixXd> condA, condB;
     for (int s = 0; s < 12; ++s) {
         MatrixXd noiseA(8, 1), noiseB(8, 1);
         for (int ch = 0; ch < 8; ++ch) {
             noiseA(ch, 0) = std::sin(1.3 * s + 0.7 * ch);
             noiseB(ch, 0) = std::cos(0.9 * s + 1.1 * ch) + ((ch >= 2 && ch <= 4) ? 3.0 : 0.0);
         }
-        condA.append(noiseA);
-        condB.append(noiseB);
+        condA.push_back(noiseA);
+        condB.push_back(noiseB);
     }
     const StatsClusterResult clusters = StatsCluster::permutationTest(condA, condB, chain, 500);
     // Cluster ids are negative where A < B; |id| - 1 indexes vecClusterStats and vecClusterPvals

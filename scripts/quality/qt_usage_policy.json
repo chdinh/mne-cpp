@@ -207,16 +207,15 @@
       ]
     },
     "sts": {
-      "tokens": 91,
-      "public_header_includes": 5,
+      "tokens": 2,
+      "public_header_includes": 0,
       "modules": [
-        "Concurrent",
         "Core"
       ]
     },
     "utils": {
-      "tokens": 533,
-      "public_header_includes": 41,
+      "tokens": 531,
+      "public_header_includes": 40,
       "modules": [
         "Core"
       ]

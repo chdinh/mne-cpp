@@ -48,7 +48,8 @@
 // QT INCLUDES
 //=============================================================================================================
 
-#include <QStringList>
+#include <string>
+#include <vector>
 
 //=============================================================================================================
 // EIGEN INCLUDES
@@ -87,7 +88,7 @@ public:
      */
     static Eigen::SparseMatrix<int> fromChannelPositions(
         const FIFFLIB::FiffInfo& info,
-        const QStringList& picks = QStringList());
+        const std::vector<std::string>& picks = {});
 
     //=========================================================================================================
     /**

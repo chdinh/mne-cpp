@@ -209,10 +209,10 @@ void TestStsCluster::testTtestDegreesOfFreedom()
 void TestStsCluster::testFtestOneWay()
 {
     // Three groups with distinct means
-    QVector<MatrixXd> groups;
-    groups.append(MatrixXd::Random(20, 3));
-    groups.append(MatrixXd::Random(20, 3) + MatrixXd::Constant(20, 3, 3.0));
-    groups.append(MatrixXd::Random(20, 3) + MatrixXd::Constant(20, 3, 6.0));
+    std::vector<MatrixXd> groups;
+    groups.push_back(MatrixXd::Random(20, 3));
+    groups.push_back(MatrixXd::Random(20, 3) + MatrixXd::Constant(20, 3, 3.0));
+    groups.push_back(MatrixXd::Random(20, 3) + MatrixXd::Constant(20, 3, 6.0));
 
     StatsFtestResult result = StatsFtest::oneWay(groups);
 
@@ -231,10 +231,10 @@ void TestStsCluster::testFtestOneWay()
 void TestStsCluster::testFtestEqualGroups()
 {
     // Three groups from same distribution — should not reject H0
-    QVector<MatrixXd> groups;
-    groups.append(MatrixXd::Random(30, 2));
-    groups.append(MatrixXd::Random(30, 2));
-    groups.append(MatrixXd::Random(30, 2));
+    std::vector<MatrixXd> groups;
+    groups.push_back(MatrixXd::Random(30, 2));
+    groups.push_back(MatrixXd::Random(30, 2));
+    groups.push_back(MatrixXd::Random(30, 2));
 
     StatsFtestResult result = StatsFtest::oneWay(groups);
 
@@ -248,10 +248,10 @@ void TestStsCluster::testFtestEqualGroups()
 
 void TestStsCluster::testFtestDegreesOfFreedom()
 {
-    QVector<MatrixXd> groups;
-    groups.append(MatrixXd::Random(10, 2));
-    groups.append(MatrixXd::Random(10, 2));
-    groups.append(MatrixXd::Random(10, 2));
+    std::vector<MatrixXd> groups;
+    groups.push_back(MatrixXd::Random(10, 2));
+    groups.push_back(MatrixXd::Random(10, 2));
+    groups.push_back(MatrixXd::Random(10, 2));
 
     StatsFtestResult result = StatsFtest::oneWay(groups);
 
@@ -339,10 +339,10 @@ void TestStsCluster::testClusterPermutationBasic()
     int nObs = 10;
     int nSpace = 8;
 
-    QVector<MatrixXd> dataA, dataB;
+    std::vector<MatrixXd> dataA, dataB;
     for (int i = 0; i < nObs; ++i) {
-        dataA.append(MatrixXd::Random(nSpace, 1));
-        dataB.append(MatrixXd::Random(nSpace, 1) + MatrixXd::Constant(nSpace, 1, 3.0));
+        dataA.push_back(MatrixXd::Random(nSpace, 1));
+        dataB.push_back(MatrixXd::Random(nSpace, 1) + MatrixXd::Constant(nSpace, 1, 3.0));
     }
 
     SparseMatrix<int> adj = createChainAdjacency(nSpace);
@@ -355,7 +355,7 @@ void TestStsCluster::testClusterPermutationBasic()
     // Cluster threshold should be set
     QVERIFY(result.clusterThreshold > 0);
     // The shift of 3 is never exceeded by a permutation; p is still >= 1/(100+1) as in mne-python
-    QVERIFY(!result.vecClusterPvals.isEmpty());
+    QVERIFY(!result.vecClusterPvals.empty());
     for (double p : result.vecClusterPvals) {
         QVERIFY2(p >= 1.0 / 101.0 && p <= 1.0, qPrintable(QString::number(p)));
     }
@@ -369,10 +369,10 @@ void TestStsCluster::testClusterPermutationNullDistribution()
     int nObs = 15;
     int nSpace = 6;
 
-    QVector<MatrixXd> dataA, dataB;
+    std::vector<MatrixXd> dataA, dataB;
     for (int i = 0; i < nObs; ++i) {
-        dataA.append(MatrixXd::Random(nSpace, 1));
-        dataB.append(MatrixXd::Random(nSpace, 1));
+        dataA.push_back(MatrixXd::Random(nSpace, 1));
+        dataB.push_back(MatrixXd::Random(nSpace, 1));
     }
 
     SparseMatrix<int> adj = createChainAdjacency(nSpace);
@@ -398,7 +398,7 @@ void TestStsCluster::testClusterPermutationStrongEffect()
     int nObs = 20;
     int nSpace = 8;
 
-    QVector<MatrixXd> dataA, dataB;
+    std::vector<MatrixXd> dataA, dataB;
     for (int i = 0; i < nObs; ++i) {
         MatrixXd a = MatrixXd::Random(nSpace, 1) * 0.1;
         MatrixXd b = MatrixXd::Random(nSpace, 1) * 0.1;
@@ -406,8 +406,8 @@ void TestStsCluster::testClusterPermutationStrongEffect()
         for (int j = 2; j <= 5; ++j) {
             b(j, 0) += 10.0;
         }
-        dataA.append(a);
-        dataB.append(b);
+        dataA.push_back(a);
+        dataB.push_back(b);
     }
 
     SparseMatrix<int> adj = createChainAdjacency(nSpace);
@@ -432,21 +432,21 @@ void TestStsCluster::testClusterPvalueFloorOneSampleAndFtest()
 {
     // An effect no permutation reaches: p must be exactly 1/(nPerm+1), as in mne-python
     const int nSpace = 6;
-    QVector<MatrixXd> shifted, zero;
+    std::vector<MatrixXd> shifted, zero;
     for (int s = 0; s < 10; ++s) {
         MatrixXd x(nSpace, 1);
         for (int j = 0; j < nSpace; ++j) {
             x(j, 0) = 0.1 * std::sin(1.7 * s + j) + (j >= 2 && j <= 3 ? 5.0 : 0.0);
         }
-        shifted.append(x);
-        zero.append(MatrixXd::Constant(nSpace, 1, 0.1 * std::cos(0.9 * s)));
+        shifted.push_back(x);
+        zero.push_back(MatrixXd::Constant(nSpace, 1, 0.1 * std::cos(0.9 * s)));
     }
     const SparseMatrix<int> adj = createChainAdjacency(nSpace);
 
     const StatsClusterResult oneSample = StatsCluster::oneSamplePermutationTest(shifted, adj, 3.0, 99, StatsTailType::Both);
     const StatsClusterResult fTest = StatsCluster::fTestPermutationTest({shifted, zero}, adj, 10.0, 99);
     for (const StatsClusterResult* result : {&oneSample, &fTest}) {
-        QVERIFY(!result->vecClusterPvals.isEmpty());
+        QVERIFY(!result->vecClusterPvals.empty());
         const double pMin = *std::min_element(result->vecClusterPvals.begin(), result->vecClusterPvals.end());
         // A random permutation can reproduce the observed labelling (sign flips all +1), so allow a few hits
         QVERIFY2(pMin >= 1.0 / 100.0 && pMin <= 5.0 / 100.0, qPrintable(QString::number(pMin)));
@@ -755,10 +755,10 @@ void TestStsCluster::testClusterThresholdMatchesMne()
 {
     // mne's automatic threshold for a paired/one-sample test with 9 subjects at p = 0.05:
     // -scipy.stats.t.ppf(0.05 / (1 + (tail == 0)), 8), i.e. the one-tailed quantile for a one-tailed test
-    QVector<MatrixXd> a, b;
+    std::vector<MatrixXd> a, b;
     for (int s = 0; s < 9; ++s) {
-        a.append(oracleSubject(s, -1));
-        b.append(MatrixXd::Constant(6, 4, 0.1 * std::cos(s)));
+        a.push_back(oracleSubject(s, -1));
+        b.push_back(MatrixXd::Constant(6, 4, 0.1 * std::cos(s)));
     }
     MatrixX3i tris(4, 3);
     tris << 0, 1, 2, 1, 3, 2, 2, 3, 4, 3, 5, 4;
@@ -780,9 +780,10 @@ void TestStsCluster::testClusterSumsMatchMne()
     tris << 0, 1, 2, 1, 3, 2, 2, 3, 4, 3, 5, 4;
     const SparseMatrix<int> adj = StatsAdjacency::fromSourceSpaceTemporal(tris, 6, 4);
 
-    QVector<MatrixXd> x;
+    std::vector<MatrixXd> x;
+    x.reserve(10);
     for (int s = 0; s < 10; ++s) {
-        x.append(oracleSubject(s, -1));
+        x.push_back(oracleSubject(s, -1));
     }
     // With this spatio-temporal adjacency these are spatio_temporal_cluster_1samp_test and
     // spatio_temporal_cluster_test. mne.stats.permutation_cluster_1samp_test(X, threshold=+-2, adjacency, tail):
@@ -800,15 +801,15 @@ void TestStsCluster::testClusterSumsMatchMne()
         const StatsClusterResult r = StatsCluster::oneSamplePermutationTest(x, adj, 2.0, 16, tail);
         MatrixXd t = r.matTObs.transpose();
         compareValues(t, tObs, 1e-9);
-        QVector<double> got = r.vecClusterStats;
+        std::vector<double> got = r.vecClusterStats;
         std::sort(got.begin(), got.end());
-        compareValues(Map<const VectorXd>(got.constData(), got.size()), sums, 1e-9);
+        compareValues(Map<const VectorXd>(got.data(), static_cast<Eigen::Index>(got.size())), sums, 1e-9);
     }
 
-    QVector<QVector<MatrixXd>> groups(3);
+    std::vector<std::vector<MatrixXd>> groups(3);
     for (int g = 0; g < 3; ++g) {
         for (int s = 0; s < 6 + g; ++s) {
-            groups[g].append(oracleSubject(s, g));
+            groups[g].push_back(oracleSubject(s, g));
         }
     }
     // mne.stats.permutation_cluster_test(G, threshold=3.0, adjacency): F_obs and cluster sums
@@ -820,7 +821,7 @@ void TestStsCluster::testClusterSumsMatchMne()
     const StatsClusterResult f = StatsCluster::fTestPermutationTest(groups, adj, 3.0, 16);
     MatrixXd ft = f.matTObs.transpose();
     compareValues(ft, fObs, 1e-9);
-    QCOMPARE(f.vecClusterStats.size(), 1);
+    QCOMPARE(f.vecClusterStats.size(), std::size_t(1));
     QVERIFY(std::fabs(f.vecClusterStats[0] - 141.888892639) < 1e-7);
 }
 

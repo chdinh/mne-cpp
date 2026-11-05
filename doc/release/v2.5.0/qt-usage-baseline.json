@@ -29,7 +29,7 @@
       "acq",
       "decoding"
     ],
-    "tokens": 21150,
+    "tokens": 21059,
     "gui_outside_design": []
   },
   "libraries": {
@@ -460,29 +460,23 @@
       ]
     },
     "sts": {
-      "tokens": 91,
+      "tokens": 2,
       "by_category": {
-        "containers": 63,
-        "global": 12,
-        "logging": 1,
-        "random": 6,
-        "strings": 3,
-        "threads": 6
+        "containers": 2
       },
-      "public_header_includes": 5,
+      "public_header_includes": 0,
       "q_object": 0,
       "files": 17,
       "modules": [
-        "Concurrent",
         "Core"
       ]
     },
     "utils": {
-      "tokens": 533,
+      "tokens": 531,
       "by_category": {
         "containers": 55,
         "files": 80,
-        "global": 18,
+        "global": 16,
         "logging": 62,
         "objects_signals": 15,
         "other": 2,
@@ -492,7 +486,7 @@
         "threads": 9,
         "time": 3
       },
-      "public_header_includes": 41,
+      "public_header_includes": 40,
       "q_object": 1,
       "files": 34,
       "modules": [

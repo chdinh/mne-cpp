@@ -41,7 +41,7 @@
 // QT INCLUDES
 //=============================================================================================================
 
-#include <QVector>
+#include <vector>
 
 //=============================================================================================================
 // EIGEN INCLUDES
@@ -91,7 +91,7 @@ public:
      *
      * @return StatsFtestResult with F-statistics, p-values, and degrees of freedom.
      */
-    static StatsFtestResult oneWay(const QVector<Eigen::MatrixXd>& groups);
+    static StatsFtestResult oneWay(const std::vector<Eigen::MatrixXd>& groups);
 
     //=========================================================================================================
     /**

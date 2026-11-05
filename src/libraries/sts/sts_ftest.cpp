@@ -41,7 +41,7 @@ using namespace Eigen;
 // DEFINE METHODS
 //=============================================================================================================
 
-StatsFtestResult StatsFtest::oneWay(const QVector<MatrixXd>& groups)
+StatsFtestResult StatsFtest::oneWay(const std::vector<MatrixXd>& groups)
 {
     const int k = groups.size();
     const int nVars = static_cast<int>(groups[0].cols());
