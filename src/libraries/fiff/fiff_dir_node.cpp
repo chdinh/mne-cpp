@@ -105,42 +105,14 @@ bool FiffDirNode::copy_tree(FiffStream::SPtr& p_pStreamIn, const FiffId& in_id, 
                 return false;
             }
 
-            //ToDo this is the same like read_tag
-            auto tag = std::make_unique<FiffTag>();
-            //QDataStream in(fidin);
-            FiffStream::SPtr in = p_pStreamIn;
-            in->setByteOrder(QDataStream::BigEndian);
-
-            //
-            // Read fiff tag header from stream
-            //
-            *in >> tag->kind;
-            *in >> tag->type;
-            qint32 size;
-            *in >> size;
-            tag->resize(size);
-            *in >> tag->next;
-
-            //
-            // Read data when available
-            //
-            if (tag->size() > 0) {
-                in->readRawData(tag->data(), tag->size());
-                // Don't do this conversion because it breaks the writing on
-                // little endian systems (i.e., OSX, Linux, Windows...)
-                // FiffTag::convert_tag_data(tag.get(),FIFFV_BIG_ENDIAN,FIFFV_NATIVE_ENDIAN);
-            }
-
-            //QDataStream out(p_pStreamOut);
-            FiffStream::SPtr out = p_pStreamOut;
-            out->setByteOrder(QDataStream::BigEndian);
-
-            *out << static_cast<qint32>(tag->kind);
-            *out << static_cast<qint32>(tag->type);
-            *out << static_cast<qint32>(tag->size());
-            *out << static_cast<qint32>(FIFFV_NEXT_SEQ);
-
-            out->writeRawData(tag->data(), tag->size());
+            // Copy the tag verbatim; read_tag and write_tag reproduce its bytes
+            p_pStreamIn->setLittleEndian(false);
+            FiffTag::UPtr tag;
+            if (!p_pStreamIn->read_tag(tag, p_Nodes[k]->dir[p]->pos))
+                return false;
+            tag->next = FIFFV_NEXT_SEQ;
+            p_pStreamOut->setLittleEndian(false);
+            p_pStreamOut->write_tag(tag);
         }
         for (p = 0; p < p_Nodes[k]->nchild(); ++p) {
             QList<FiffDirNode::SPtr> childList;

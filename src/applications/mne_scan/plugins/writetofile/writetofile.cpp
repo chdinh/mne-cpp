@@ -508,7 +508,7 @@ void WriteToFile::clipRecording(bool bChecked)
         return;
     }
 
-    m_pOutfid->skipRawData(m_qFileOut.bytesAvailable());
+    m_qFileOut.seek(m_qFileOut.size());
 }
 
 //=============================================================================================================

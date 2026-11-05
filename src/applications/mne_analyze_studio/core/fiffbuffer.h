@@ -39,7 +39,6 @@ public:
     bool isOpen() const override;
     QJsonObject getMetadata() const override;
     QIODevice* device() const override;
-    QDataStream* getBinaryStream() override;
 
     const FIFFLIB::FiffRawData& rawData() const;
 

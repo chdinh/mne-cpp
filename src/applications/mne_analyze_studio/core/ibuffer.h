@@ -51,7 +51,6 @@ public:
     virtual bool isOpen() const = 0;
     virtual QJsonObject getMetadata() const = 0;
     virtual QIODevice* device() const = 0;
-    virtual QDataStream* getBinaryStream() = 0;
 
 signals:
     void metadataChanged(const QJsonObject& metadata);

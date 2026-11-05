@@ -72,8 +72,8 @@ void FiffFileSharer::copyRealtimeFile(const QString& sSourcePath)
 
     QFile newFile(sPartPath);
     if (newFile.open(QIODevice::ReadWrite)) {
+        newFile.seek(newFile.size());
         FIFFLIB::FiffStream stream(&newFile);
-        stream.skipRawData(newFile.bytesAvailable());
         stream.finish_writing_raw();
         newFile.close();
     }

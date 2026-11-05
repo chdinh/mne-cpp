@@ -21,6 +21,7 @@
 #include <fiff/fiff.h>
 #include <fiff/fiff_dig_point_set.h>
 #include <mne/mne_forward_solution.h>
+#include <utils/byte_stream.h>
 
 #include <iostream>
 
@@ -99,6 +100,7 @@ private slots:
     void compareInfo();
     void tagsRewriteByteIdentical_data();
     void tagsRewriteByteIdentical();
+    void readsWithoutQtDevice();
     void writersStable_data();
     void writersStable();
     void cleanupTestCase();
@@ -362,6 +364,42 @@ void TestFiffRWR::tagsRewriteByteIdentical()
             QFAIL(qPrintable(QString("tag kind %1 type %2 at %3 differs").arg(entry->kind).arg(entry->type).arg(entry->pos)));
     }
     stream.close();
+}
+
+//=============================================================================================================
+
+void TestFiffRWR::readsWithoutQtDevice()
+{
+    // A stream on a plain file byte stream sees the same directory and tags as one on a QFile
+    const QString path = testDataDir() + "/MEG/sample/sample_audvis-cov.fif";
+    QFile qtFile(path);
+    FiffStream qtStream(&qtFile);
+    QVERIFY(qtStream.open());
+
+    auto bytes = UTILSLIB::FileByteStream::open(path.toStdString(), UTILSLIB::FileByteStream::Mode::Read);
+    QVERIFY(bytes);
+    FiffStream stream(std::move(bytes));
+    QVERIFY(stream.device() == nullptr);
+    QVERIFY(stream.open());
+    QCOMPARE(stream.nent(), qtStream.nent());
+    QCOMPARE(stream.id().machid[0], qtStream.id().machid[0]);
+
+    for (int i = 0; i < stream.nent(); ++i) {
+        const FiffDirEntry::SPtr& entry = stream.dir()[i];
+        if (entry->pos < 0)
+            continue;
+        FiffTag::UPtr tag;
+        FiffTag::UPtr qtTag;
+        QVERIFY(stream.read_tag(tag, entry->pos));
+        QVERIFY(qtStream.read_tag(qtTag, entry->pos));
+        QCOMPARE(tag->kind, qtTag->kind);
+        QCOMPARE(QByteArray(tag->data(), tag->size()), QByteArray(qtTag->data(), qtTag->size()));
+    }
+
+    FiffCov cov;
+    QVERIFY(stream.read_cov(stream.dirtree(), FIFFV_MNE_NOISE_COV, cov));
+    QCOMPARE(cov.dim, 366);
+    qtStream.close();
 }
 
 //=============================================================================================================

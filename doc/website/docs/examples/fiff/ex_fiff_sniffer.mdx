@@ -249,11 +249,7 @@ int main(int argc, char* argv[])
         buffer.reset();
 
         FIFFLIB::FiffStream stream(&buffer);
-        if (littleEndian) {
-            stream.setByteOrder(QDataStream::LittleEndian);
-        } else {
-            stream.setByteOrder(QDataStream::BigEndian);
-        }
+        stream.setLittleEndian(littleEndian);
 
         if (stream.open()) {
             FIFFLIB::FiffInfo FifInfo;

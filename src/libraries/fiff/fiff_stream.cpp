@@ -66,6 +66,7 @@
 // QT INCLUDES
 //=============================================================================================================
 
+#include <QBuffer>
 #include <QFile>
 #include <QJsonArray>
 #include <QJsonDocument>
@@ -82,26 +83,154 @@ using namespace UTILSLIB;
 using namespace Eigen;
 
 //=============================================================================================================
+// DEFINE LOCAL CLASSES
+//=============================================================================================================
+
+namespace
+{
+
+// Byte stream over a Qt device, so sockets and Qt files keep working
+class QIODeviceByteStream : public UTILSLIB::ByteStream
+{
+public:
+    explicit QIODeviceByteStream(QIODevice* device)
+    : m_device(device)
+    {
+    }
+
+    std::size_t read(void* data, std::size_t bytes) override
+    {
+        const qint64 n = m_device->read(static_cast<char*>(data), static_cast<qint64>(bytes));
+        return n > 0 ? static_cast<std::size_t>(n) : 0;
+    }
+
+    std::size_t write(const void* data, std::size_t bytes) override
+    {
+        const qint64 n = m_device->write(static_cast<const char*>(data), static_cast<qint64>(bytes));
+        return n > 0 ? static_cast<std::size_t>(n) : 0;
+    }
+
+    bool seek(std::uint64_t position) override
+    {
+        return m_device->seek(static_cast<qint64>(position));
+    }
+
+    std::uint64_t pos() const override
+    {
+        return static_cast<std::uint64_t>(m_device->pos());
+    }
+
+    std::uint64_t size() const override
+    {
+        return static_cast<std::uint64_t>(m_device->size());
+    }
+
+private:
+    QIODevice* m_device;
+};
+
+} // namespace
+
+//=============================================================================================================
 // DEFINE MEMBER METHODS
 //=============================================================================================================
 
 FiffStream::FiffStream(QIODevice* p_pIODevice)
-: QDataStream(p_pIODevice)
+: m_device(p_pIODevice)
+, m_bytes(std::make_unique<QIODeviceByteStream>(p_pIODevice))
 {
-    this->setFloatingPointPrecision(QDataStream::SinglePrecision);
-    this->setByteOrder(QDataStream::BigEndian);
-    this->setVersion(QDataStream::Qt_5_0);
 }
 
 //=============================================================================================================
 
 FiffStream::FiffStream(QByteArray* a,
                        QIODevice::OpenMode mode)
-: QDataStream(a, mode)
+: m_ownedDevice(std::make_unique<QBuffer>(a))
+, m_device(m_ownedDevice.get())
+, m_bytes(std::make_unique<QIODeviceByteStream>(m_device))
 {
-    this->setFloatingPointPrecision(QDataStream::SinglePrecision);
-    this->setByteOrder(QDataStream::BigEndian);
-    this->setVersion(QDataStream::Qt_5_0);
+    m_device->open(mode);
+}
+
+//=============================================================================================================
+
+FiffStream::FiffStream(std::unique_ptr<UTILSLIB::ByteStream> bytes)
+: m_bytes(std::move(bytes))
+{
+}
+
+//=============================================================================================================
+
+FiffStream::~FiffStream() = default;
+
+//=============================================================================================================
+
+QIODevice* FiffStream::device() const
+{
+    return m_device;
+}
+
+//=============================================================================================================
+
+void FiffStream::setLittleEndian(bool littleEndian)
+{
+    m_littleEndian = littleEndian;
+}
+
+//=============================================================================================================
+
+bool FiffStream::isLittleEndian() const
+{
+    return m_littleEndian;
+}
+
+//=============================================================================================================
+
+fiff_long_t FiffStream::tell() const
+{
+    return static_cast<fiff_long_t>(m_bytes->pos());
+}
+
+//=============================================================================================================
+
+bool FiffStream::seekTo(fiff_long_t pos)
+{
+    return pos >= 0 && m_bytes->seek(static_cast<std::uint64_t>(pos));
+}
+
+//=============================================================================================================
+
+void FiffStream::seekToEnd()
+{
+    // Appending tags without a position goes to the end of files; other Qt devices write where they are
+    if (!m_device || qobject_cast<QFile*>(m_device))
+        m_bytes->seek(m_bytes->size());
+}
+
+//=============================================================================================================
+
+void FiffStream::readRaw(void* data, fiff_long_t bytes)
+{
+    if (bytes > 0 && m_bytes->read(data, static_cast<std::size_t>(bytes)) != static_cast<std::size_t>(bytes))
+        m_readFailed = true;
+}
+
+//=============================================================================================================
+
+void FiffStream::writeRaw(const void* data, fiff_long_t bytes)
+{
+    if (bytes > 0)
+        m_bytes->write(data, static_cast<std::size_t>(bytes));
+}
+
+//=============================================================================================================
+
+void FiffStream::skipRaw(fiff_long_t bytes)
+{
+    if (m_device && m_device->isSequential())
+        m_device->skip(bytes);
+    else
+        seekTo(tell() + bytes);
 }
 
 //=============================================================================================================
@@ -166,10 +295,10 @@ void FiffStream::end_file()
 {
     fiff_int_t datasize = 0;
 
-    *this << static_cast<qint32>(FIFF_NOP);
-    *this << static_cast<qint32>(FIFFT_VOID);
-    *this << static_cast<qint32>(datasize);
-    *this << static_cast<qint32>(FIFFV_NEXT_NONE);
+    write(static_cast<qint32>(FIFF_NOP));
+    write(static_cast<qint32>(FIFFT_VOID));
+    write(static_cast<qint32>(datasize));
+    write(static_cast<qint32>(FIFFV_NEXT_NONE));
 }
 
 //=============================================================================================================
@@ -242,7 +371,7 @@ bool FiffStream::open(QIODevice::OpenModeFlag mode)
     /*
      * Try to open...
      */
-    if (!this->device()->open(mode)) {
+    if (m_device && !m_device->open(mode)) {
         qCritical("Cannot open %s\n", t_sFileName.toUtf8().constData()); //consider throw
         return false;
     }
@@ -255,7 +384,7 @@ bool FiffStream::open(QIODevice::OpenModeFlag mode)
      */
     if (t_pTag->kind != FIFF_FILE_ID) {
         qCritical("FIFF file should start with FIFF_FILE_ID!"); //consider throw
-        this->device()->close();
+        close();
         return false;
     }
     m_id = t_pTag->toFiffID();
@@ -263,7 +392,7 @@ bool FiffStream::open(QIODevice::OpenModeFlag mode)
     this->read_tag(t_pTag);
     if (t_pTag->kind != FIFF_DIR_POINTER) {
         qWarning("Fiff::open: file does have a directory pointer"); //consider throw
-        this->device()->close();
+        close();
         return false;
     }
 
@@ -313,7 +442,7 @@ bool FiffStream::open(QIODevice::OpenModeFlag mode)
     //
     //   Back to the beginning
     //
-    this->device()->seek(SEEK_SET); //fseek(fid,0,'bof');
+    seekTo(SEEK_SET); //fseek(fid,0,'bof');
     return true;
 }
 
@@ -321,8 +450,8 @@ bool FiffStream::open(QIODevice::OpenModeFlag mode)
 
 bool FiffStream::close()
 {
-    if (this->device()->isOpen())
-        this->device()->close();
+    if (m_device && m_device->isOpen())
+        m_device->close();
 
     return true;
 }
@@ -1655,7 +1784,7 @@ QList<FiffProj> FiffStream::read_proj(const FiffDirNode::SPtr& p_Node)
 bool FiffStream::read_tag_data(FiffTag::UPtr& p_pTag, fiff_long_t pos)
 {
     if (pos >= 0) {
-        this->device()->seek(pos);
+        seekTo(pos);
     }
 
     if (!p_pTag)
@@ -1665,12 +1794,12 @@ bool FiffStream::read_tag_data(FiffTag::UPtr& p_pTag, fiff_long_t pos)
     // Read data when available
     //
     if (p_pTag->size() > 0) {
-        this->readRawData(p_pTag->data(), p_pTag->size());
+        readRaw(p_pTag->data(), p_pTag->size());
         FiffTag::convert_tag_data(p_pTag, FIFFV_BIG_ENDIAN, FIFFV_NATIVE_ENDIAN);
     }
 
     if (p_pTag->next != FIFFV_NEXT_SEQ)
-        this->device()->seek(p_pTag->next); //fseek(fid,tag.next,'bof');
+        seekTo(p_pTag->next); //fseek(fid,tag.next,'bof');
 
     return true;
 }
@@ -1679,7 +1808,7 @@ bool FiffStream::read_tag_data(FiffTag::UPtr& p_pTag, fiff_long_t pos)
 
 fiff_long_t FiffStream::read_tag_info(FiffTag::UPtr& p_pTag, bool p_bDoSkip)
 {
-    fiff_long_t pos = this->device()->pos();
+    fiff_long_t pos = tell();
 
     p_pTag = std::make_unique<FiffTag>();
 
@@ -1691,27 +1820,27 @@ fiff_long_t FiffStream::read_tag_info(FiffTag::UPtr& p_pTag, bool p_bDoSkip)
     //    p_pTag->next = Fiff::swap_int(p_pTag->next);
 
     //Option 2
-    *this >> p_pTag->kind;
-    *this >> p_pTag->type;
+    read(p_pTag->kind);
+    read(p_pTag->type);
     qint32 size;
-    *this >> size;
+    read(size);
     p_pTag->resize(size);
-    *this >> p_pTag->next;
+    read(p_pTag->next);
 
     //    qDebug() << "read_tag_info" << "  Kind:" << p_pTag->kind << "  Type:" << p_pTag->type << "  Size:" << p_pTag->size() << "  Next:" << p_pTag->next;
 
     if (p_bDoSkip) {
         QTcpSocket* t_qTcpSocket = qobject_cast<QTcpSocket*>(this->device());
         if (t_qTcpSocket) {
-            this->skipRawData(p_pTag->size());
+            skipRaw(p_pTag->size());
         } else {
             if (p_pTag->next > 0) {
-                if (!this->device()->seek(p_pTag->next)) {
+                if (!seekTo(p_pTag->next)) {
                     qCritical("fseek"); //fseek(fid,tag.next,'bof');
                     pos = -1;
                 }
             } else if (p_pTag->size() > 0 && p_pTag->next == FIFFV_NEXT_SEQ) {
-                if (!this->device()->seek(this->device()->pos() + p_pTag->size())) {
+                if (!seekTo(tell() + p_pTag->size())) {
                     qCritical("fseek"); //fseek(fid,tag.size,'cof');
                     pos = -1;
                 }
@@ -1747,7 +1876,7 @@ bool FiffStream::read_tag(FiffTag::UPtr& p_pTag,
                           fiff_long_t pos)
 {
     if (pos >= 0) {
-        this->device()->seek(pos);
+        seekTo(pos);
     }
 
     p_pTag = std::make_unique<FiffTag>();
@@ -1755,12 +1884,12 @@ bool FiffStream::read_tag(FiffTag::UPtr& p_pTag,
     //
     // Read fiff tag header from stream
     //
-    *this >> p_pTag->kind;
-    *this >> p_pTag->type;
+    read(p_pTag->kind);
+    read(p_pTag->type);
     qint32 size;
-    *this >> size;
+    read(size);
     p_pTag->resize(size);
-    *this >> p_pTag->next;
+    read(p_pTag->next);
 
     //    qDebug() << "read_tag" << "  Kind:" << p_pTag->kind << "  Type:" << p_pTag->type << "  Size:" << p_pTag->size() << "  Next:" << p_pTag->next;
 
@@ -1768,7 +1897,7 @@ bool FiffStream::read_tag(FiffTag::UPtr& p_pTag,
     // Read data when available
     //
     int endian;
-    if (this->byteOrder() == QDataStream::LittleEndian) {
+    if (m_littleEndian) {
         endian = FIFFV_LITTLE_ENDIAN;
         //qInfo("Endian: Little");
     } else {
@@ -1777,14 +1906,14 @@ bool FiffStream::read_tag(FiffTag::UPtr& p_pTag,
     }
 
     if (p_pTag->size() > 0) {
-        this->readRawData(p_pTag->data(), p_pTag->size());
+        readRaw(p_pTag->data(), p_pTag->size());
 
         //FiffTag::convert_tag_data(p_pTag,FIFFV_BIG_ENDIAN,FIFFV_NATIVE_ENDIAN);
         FiffTag::convert_tag_data(p_pTag, endian, FIFFV_NATIVE_ENDIAN);
     }
 
     if (p_pTag->next != FIFFV_NEXT_SEQ)
-        this->device()->seek(p_pTag->next); //fseek(fid,tag.next,'bof');
+        seekTo(p_pTag->next); //fseek(fid,tag.next,'bof');
 
     return true;
 }
@@ -1804,7 +1933,7 @@ bool FiffStream::setup_read_raw(QIODevice& p_IODevice,
 
     if (is_littleEndian) {
         //qInfo("Setting stream to little Endian");
-        t_pStream->setByteOrder(QDataStream::LittleEndian);
+        t_pStream->setLittleEndian(true);
     }
 
     qInfo("Opening raw data %s...\n", t_sFileName.toUtf8().constData());
@@ -2294,20 +2423,18 @@ fiff_long_t FiffStream::write_tag(const FiffTag::UPtr& p_pTag, fiff_long_t pos)
      * Write tag to specified position
      */
     if (pos >= 0) {
-        this->device()->seek(pos);
+        seekTo(pos);
     } else { //SEEK_END
-        QFile* file = qobject_cast<QFile*>(this->device());
-        if (file)
-            this->device()->seek(file->size());
+        seekToEnd();
     }
-    pos = this->device()->pos();
+    pos = tell();
 
     fiff_int_t datasize = p_pTag->size();
 
-    *this << static_cast<qint32>(p_pTag->kind);
-    *this << static_cast<qint32>(p_pTag->type);
-    *this << static_cast<qint32>(datasize);
-    *this << static_cast<qint32>(p_pTag->next);
+    write(static_cast<qint32>(p_pTag->kind));
+    write(static_cast<qint32>(p_pTag->type));
+    write(static_cast<qint32>(datasize));
+    write(static_cast<qint32>(p_pTag->next));
 
     /*
      * Do we have data?
@@ -2316,7 +2443,7 @@ fiff_long_t FiffStream::write_tag(const FiffTag::UPtr& p_pTag, fiff_long_t pos)
         // read_tag hands out host byte order; FIFF files are big-endian.
         auto fileTag = std::make_unique<FiffTag>(*p_pTag);
         FiffTag::convert_tag_data(fileTag, FIFFV_NATIVE_ENDIAN, FIFFV_BIG_ENDIAN);
-        this->writeRawData(fileTag->data(), datasize);
+        writeRaw(fileTag->data(), datasize);
     }
 
     return pos;
@@ -2326,7 +2453,7 @@ fiff_long_t FiffStream::write_tag(const FiffTag::UPtr& p_pTag, fiff_long_t pos)
 
 fiff_long_t FiffStream::write_ch_info(const FiffChInfo& ch)
 {
-    fiff_long_t pos = this->device()->pos();
+    fiff_long_t pos = tell();
 
     //typedef struct _fiffChPosRec {
     //  fiff_int_t   coil_type;          /*!< What kind of coil. */
@@ -2349,20 +2476,20 @@ fiff_long_t FiffStream::write_ch_info(const FiffChInfo& ch)
     //} fiffChInfoRec,*fiffChInfo;   /*!< Description of one channel */
     fiff_int_t datasize = 4 * 13 + 4 * 7 + 16;
 
-    *this << static_cast<qint32>(FIFF_CH_INFO);
-    *this << static_cast<qint32>(FIFFT_CH_INFO_STRUCT);
-    *this << static_cast<qint32>(datasize);
-    *this << static_cast<qint32>(FIFFV_NEXT_SEQ);
+    write(static_cast<qint32>(FIFF_CH_INFO));
+    write(static_cast<qint32>(FIFFT_CH_INFO_STRUCT));
+    write(static_cast<qint32>(datasize));
+    write(static_cast<qint32>(FIFFV_NEXT_SEQ));
 
     //
     //   Start writing fiffChInfoRec
     //
-    *this << static_cast<qint32>(ch.scanNo);
-    *this << static_cast<qint32>(ch.logNo);
-    *this << static_cast<qint32>(ch.kind);
+    write(static_cast<qint32>(ch.scanNo));
+    write(static_cast<qint32>(ch.logNo));
+    write(static_cast<qint32>(ch.kind));
 
-    *this << ch.range;
-    *this << ch.cal;
+    write(ch.range);
+    write(ch.cal);
 
     //
     //   FiffChPos follows
@@ -2372,8 +2499,8 @@ fiff_long_t FiffStream::write_ch_info(const FiffChInfo& ch)
     //
     //   unit and unit multiplier
     //
-    *this << static_cast<qint32>(ch.unit);
-    *this << static_cast<qint32>(ch.unit_mul);
+    write(static_cast<qint32>(ch.unit));
+    write(static_cast<qint32>(ch.unit_mul));
 
     //
     //   Finally channel name
@@ -2387,12 +2514,12 @@ fiff_long_t FiffStream::write_ch_info(const FiffChInfo& ch)
 
     len = ch_name.size();
 
-    this->writeRawData(ch_name.toUtf8().constData(), len);
+    writeRaw(ch_name.toUtf8().constData(), len);
 
     if (len < 16) {
         const char* chNull = "";
         for (qint32 i = 0; i < 16 - len; ++i)
-            this->writeRawData(chNull, 1);
+            writeRaw(chNull, 1);
     }
 
     return pos;
@@ -2402,26 +2529,26 @@ fiff_long_t FiffStream::write_ch_info(const FiffChInfo& ch)
 
 fiff_long_t FiffStream::write_ch_pos(const FiffChPos& chpos)
 {
-    fiff_long_t pos = this->device()->pos();
+    fiff_long_t pos = tell();
 
     //
     //   FiffChPos
     //
-    *this << static_cast<qint32>(chpos.coil_type);
+    write(static_cast<qint32>(chpos.coil_type));
 
     qint32 i;
     // r0
     for (i = 0; i < 3; ++i)
-        *this << chpos.r0[i];
+        write(chpos.r0[i]);
     // ex
     for (i = 0; i < 3; ++i)
-        *this << chpos.ex[i];
+        write(chpos.ex[i]);
     // ey
     for (i = 0; i < 3; ++i)
-        *this << chpos.ey[i];
+        write(chpos.ey[i]);
     // ez
     for (i = 0; i < 3; ++i)
-        *this << chpos.ez[i];
+        write(chpos.ez[i]);
 
     return pos;
 }
@@ -2430,7 +2557,7 @@ fiff_long_t FiffStream::write_ch_pos(const FiffChPos& chpos)
 
 fiff_long_t FiffStream::write_coord_trans(const FiffCoordTrans& trans)
 {
-    fiff_long_t pos = this->device()->pos();
+    fiff_long_t pos = tell();
 
     //?typedef struct _fiffCoordTransRec {
     //  fiff_int_t   from;                   /*!< Source coordinate system. */
@@ -2442,16 +2569,16 @@ fiff_long_t FiffStream::write_coord_trans(const FiffCoordTrans& trans)
     //} *fiffCoordTrans, fiffCoordTransRec;  /*!< Coordinate transformation descriptor */
     fiff_int_t datasize = 4 * 2 * 12 + 4 * 2;
 
-    *this << static_cast<qint32>(FIFF_COORD_TRANS);
-    *this << static_cast<qint32>(FIFFT_COORD_TRANS_STRUCT);
-    *this << static_cast<qint32>(datasize);
-    *this << static_cast<qint32>(FIFFV_NEXT_SEQ);
+    write(static_cast<qint32>(FIFF_COORD_TRANS));
+    write(static_cast<qint32>(FIFFT_COORD_TRANS_STRUCT));
+    write(static_cast<qint32>(datasize));
+    write(static_cast<qint32>(FIFFV_NEXT_SEQ));
 
     //
     //   Start writing fiffCoordTransRec
     //
-    *this << static_cast<qint32>(trans.from);
-    *this << static_cast<qint32>(trans.to);
+    write(static_cast<qint32>(trans.from));
+    write(static_cast<qint32>(trans.to));
 
     //
     //   The transform...
@@ -2459,18 +2586,18 @@ fiff_long_t FiffStream::write_coord_trans(const FiffCoordTrans& trans)
     qint32 r, c;
     for (r = 0; r < 3; ++r)
         for (c = 0; c < 3; ++c)
-            *this << static_cast<float>(trans.trans(r, c));
+            write(static_cast<float>(trans.trans(r, c)));
     for (r = 0; r < 3; ++r)
-        *this << static_cast<float>(trans.trans(r, 3));
+        write(static_cast<float>(trans.trans(r, 3)));
 
     //
     //   ...and its inverse
     //
     for (r = 0; r < 3; ++r)
         for (c = 0; c < 3; ++c)
-            *this << static_cast<float>(trans.invtrans(r, c));
+            write(static_cast<float>(trans.invtrans(r, c)));
     for (r = 0; r < 3; ++r)
-        *this << static_cast<float>(trans.invtrans(r, 3));
+        write(static_cast<float>(trans.invtrans(r, 3)));
 
     return pos;
 }
@@ -2479,7 +2606,7 @@ fiff_long_t FiffStream::write_coord_trans(const FiffCoordTrans& trans)
 
 fiff_long_t FiffStream::write_cov(const FiffCov& p_FiffCov)
 {
-    fiff_long_t pos = this->device()->pos();
+    fiff_long_t pos = tell();
 
     this->start_block(FIFFB_MNE_COV);
 
@@ -2552,7 +2679,7 @@ fiff_long_t FiffStream::write_cov(const FiffCov& p_FiffCov)
 
 fiff_long_t FiffStream::write_ctf_comp(const QList<FiffCtfComp>& comps)
 {
-    fiff_long_t pos = this->device()->pos();
+    fiff_long_t pos = tell();
 
     if (comps.size() <= 0)
         return -1;
@@ -2593,7 +2720,7 @@ fiff_long_t FiffStream::write_ctf_comp(const QList<FiffCtfComp>& comps)
 
 fiff_long_t FiffStream::write_dig_point(const FiffDigPoint& dig)
 {
-    fiff_long_t pos = this->device()->pos();
+    fiff_long_t pos = tell();
 
     //?typedef struct _fiffDigPointRec {
     //  fiff_int_t kind;               /*!< FIFF_POINT_CARDINAL,
@@ -2604,18 +2731,18 @@ fiff_long_t FiffStream::write_dig_point(const FiffDigPoint& dig)
     //} *fiffDigPoint,fiffDigPointRec; /*!< Digitization point description */
     fiff_int_t datasize = 5 * 4;
 
-    *this << static_cast<qint32>(FIFF_DIG_POINT);
-    *this << static_cast<qint32>(FIFFT_DIG_POINT_STRUCT);
-    *this << static_cast<qint32>(datasize);
-    *this << static_cast<qint32>(FIFFV_NEXT_SEQ);
+    write(static_cast<qint32>(FIFF_DIG_POINT));
+    write(static_cast<qint32>(FIFFT_DIG_POINT_STRUCT));
+    write(static_cast<qint32>(datasize));
+    write(static_cast<qint32>(FIFFV_NEXT_SEQ));
 
     //
     //   Start writing fiffDigPointRec
     //
-    *this << static_cast<qint32>(dig.kind);
-    *this << static_cast<qint32>(dig.ident);
+    write(static_cast<qint32>(dig.kind));
+    write(static_cast<qint32>(dig.ident));
     for (qint32 i = 0; i < 3; ++i)
-        *this << dig.r[i];
+        write(dig.r[i]);
 
     return pos;
 }
@@ -2628,22 +2755,20 @@ fiff_long_t FiffStream::write_dir_pointer(fiff_int_t dirpos, fiff_long_t pos, fi
      * Write entires to specified position
      */
     if (pos >= 0) {
-        this->device()->seek(pos);
+        seekTo(pos);
     } else { //SEEK_END
-        QFile* file = qobject_cast<QFile*>(this->device());
-        if (file)
-            this->device()->seek(file->size());
+        seekToEnd();
     }
-    pos = this->device()->pos();
+    pos = tell();
 
     fiff_int_t datasize = 1 * 4;
 
-    *this << static_cast<qint32>(FIFF_DIR_POINTER);
-    *this << static_cast<qint32>(FIFFT_INT);
-    *this << static_cast<qint32>(datasize);
-    *this << static_cast<qint32>(next);
+    write(static_cast<qint32>(FIFF_DIR_POINTER));
+    write(static_cast<qint32>(FIFFT_INT));
+    write(static_cast<qint32>(datasize));
+    write(static_cast<qint32>(next));
 
-    *this << dirpos;
+    write(dirpos);
 
     return pos;
 }
@@ -2666,31 +2791,29 @@ fiff_long_t FiffStream::write_dir_entries(const QList<FiffDirEntry::SPtr>& dir, 
      * Write entires to specified position
      */
     if (pos >= 0) {
-        this->device()->seek(pos);
+        seekTo(pos);
     } else { //SEEK_END
-        QFile* file = qobject_cast<QFile*>(this->device());
-        if (file)
-            this->device()->seek(file->size());
+        seekToEnd();
     }
 
-    pos = this->device()->pos();
+    pos = tell();
 
     fiff_int_t nent = dir.size();
     fiff_int_t datasize = nent * static_cast<fiff_int_t>(sizeof(FiffDirEntry));
 
-    *this << static_cast<qint32>(FIFF_DIR);
-    *this << static_cast<qint32>(FIFFT_DIR_ENTRY_STRUCT);
-    *this << static_cast<qint32>(datasize);
-    *this << static_cast<qint32>(FIFFV_NEXT_NONE);
+    write(static_cast<qint32>(FIFF_DIR));
+    write(static_cast<qint32>(FIFFT_DIR_ENTRY_STRUCT));
+    write(static_cast<qint32>(datasize));
+    write(static_cast<qint32>(FIFFV_NEXT_NONE));
 
     //
     //   Start writing FiffDirEntries
     //
     for (qint32 i = 0; i < nent; ++i) {
-        *this << static_cast<qint32>(dir[i]->kind);
-        *this << static_cast<qint32>(dir[i]->type);
-        *this << static_cast<qint32>(dir[i]->size);
-        *this << static_cast<qint32>(dir[i]->pos);
+        write(static_cast<qint32>(dir[i]->kind));
+        write(static_cast<qint32>(dir[i]->type));
+        write(static_cast<qint32>(dir[i]->size));
+        write(static_cast<qint32>(dir[i]->pos));
     }
 
     return pos;
@@ -2700,26 +2823,17 @@ fiff_long_t FiffStream::write_dir_entries(const QList<FiffDirEntry::SPtr>& dir, 
 
 fiff_long_t FiffStream::write_double(fiff_int_t kind, const double* data, fiff_int_t nel)
 {
-    fiff_long_t pos = this->device()->pos();
+    fiff_long_t pos = tell();
 
     qint32 datasize = nel * 8;
 
-    *this << static_cast<qint32>(kind);
-    *this << static_cast<qint32>(FIFFT_DOUBLE);
-    *this << datasize;
-    *this << static_cast<qint32>(FIFFV_NEXT_SEQ);
+    write(static_cast<qint32>(kind));
+    write(static_cast<qint32>(FIFFT_DOUBLE));
+    write(datasize);
+    write(static_cast<qint32>(FIFFV_NEXT_SEQ));
 
-    //
-    // Write doubles as raw 8-byte big-endian values.
-    // FiffStream sets QDataStream::SinglePrecision, which causes
-    // operator<<(double) to write only 4 bytes. We must bypass that
-    // to emit the full 8-byte IEEE 754 representation.
-    //
-    for (qint32 i = 0; i < nel; ++i) {
-        qint64 bits;
-        memcpy(&bits, &data[i], sizeof(double));
-        *this << bits;
-    }
+    for (qint32 i = 0; i < nel; ++i)
+        write(data[i]);
 
     return pos;
 }
@@ -2728,17 +2842,17 @@ fiff_long_t FiffStream::write_double(fiff_int_t kind, const double* data, fiff_i
 
 fiff_long_t FiffStream::write_float(fiff_int_t kind, const float* data, fiff_int_t nel)
 {
-    fiff_long_t pos = this->device()->pos();
+    fiff_long_t pos = tell();
 
     qint32 datasize = nel * 4;
 
-    *this << static_cast<qint32>(kind);
-    *this << static_cast<qint32>(FIFFT_FLOAT);
-    *this << datasize;
-    *this << static_cast<qint32>(FIFFV_NEXT_SEQ);
+    write(static_cast<qint32>(kind));
+    write(static_cast<qint32>(FIFFT_FLOAT));
+    write(datasize);
+    write(static_cast<qint32>(FIFFV_NEXT_SEQ));
 
     for (qint32 i = 0; i < nel; ++i)
-        *this << data[i];
+        write(data[i]);
 
     return pos;
 }
@@ -2747,22 +2861,22 @@ fiff_long_t FiffStream::write_float(fiff_int_t kind, const float* data, fiff_int
 
 fiff_long_t FiffStream::write_float_matrix(fiff_int_t kind, const MatrixXf& mat)
 {
-    fiff_long_t pos = this->device()->pos();
+    fiff_long_t pos = tell();
 
     qint32 numel = mat.rows() * mat.cols();
 
     fiff_int_t datasize = 4 * numel + 4 * 3;
 
-    *this << static_cast<qint32>(kind);
-    *this << static_cast<qint32> FIFFT_MATRIX_FLOAT;
-    *this << static_cast<qint32>(datasize);
-    *this << static_cast<qint32>(FIFFV_NEXT_SEQ);
+    write(static_cast<qint32>(kind));
+    write(static_cast<qint32> FIFFT_MATRIX_FLOAT);
+    write(static_cast<qint32>(datasize));
+    write(static_cast<qint32>(FIFFV_NEXT_SEQ));
 
     qint32 i, j;
     // Storage order: row-major
     for (i = 0; i < mat.rows(); ++i)
         for (j = 0; j < mat.cols(); ++j)
-            *this << mat(i, j);
+            write(mat(i, j));
 
     qint32 dims[3];
     dims[0] = mat.cols();
@@ -2770,7 +2884,7 @@ fiff_long_t FiffStream::write_float_matrix(fiff_int_t kind, const MatrixXf& mat)
     dims[2] = 2;
 
     for (i = 0; i < 3; ++i)
-        *this << dims[i];
+        write(dims[i]);
 
     return pos;
 }
@@ -2779,7 +2893,7 @@ fiff_long_t FiffStream::write_float_matrix(fiff_int_t kind, const MatrixXf& mat)
 
 fiff_long_t FiffStream::write_float_sparse_ccs(fiff_int_t kind, const SparseMatrix<float>& mat)
 {
-    fiff_long_t pos = this->device()->pos();
+    fiff_long_t pos = tell();
 
     //
     //   nnz values
@@ -2816,22 +2930,22 @@ fiff_long_t FiffStream::write_float_sparse_ccs(fiff_int_t kind, const SparseMatr
         }
     }
 
-    *this << static_cast<qint32>(kind);
-    *this << static_cast<qint32> FIFFT_CCS_MATRIX_FLOAT;
-    *this << static_cast<qint32>(datasize);
-    *this << static_cast<qint32>(FIFFV_NEXT_SEQ);
+    write(static_cast<qint32>(kind));
+    write(static_cast<qint32> FIFFT_CCS_MATRIX_FLOAT);
+    write(static_cast<qint32>(datasize));
+    write(static_cast<qint32>(FIFFV_NEXT_SEQ));
 
     //
     //  The data values
     //
     for (i = 0; i < s.size(); ++i)
-        *this << s[i].value();
+        write(s[i].value());
 
     //
     //  Row indices
     //
     for (i = 0; i < s.size(); ++i)
-        *this << s[i].row();
+        write(s[i].row());
 
     //
     //  Pointers
@@ -2850,7 +2964,7 @@ fiff_long_t FiffStream::write_float_sparse_ccs(fiff_int_t kind, const SparseMatr
             ptrs[k - 1] = ptrs[k];
     //
     for (i = 0; i < static_cast<quint32>(ptrs.size()); ++i)
-        *this << ptrs[i];
+        write(ptrs[i]);
     //
     //   Dimensions
     //
@@ -2861,7 +2975,7 @@ fiff_long_t FiffStream::write_float_sparse_ccs(fiff_int_t kind, const SparseMatr
     dims[3] = 2;
 
     for (i = 0; i < 4; ++i)
-        *this << dims[i];
+        write(dims[i]);
 
     return pos;
 }
@@ -2870,7 +2984,7 @@ fiff_long_t FiffStream::write_float_sparse_ccs(fiff_int_t kind, const SparseMatr
 
 fiff_long_t FiffStream::write_float_sparse_rcs(fiff_int_t kind, const SparseMatrix<float>& mat)
 {
-    fiff_long_t pos = this->device()->pos();
+    fiff_long_t pos = tell();
 
     //
     //   nnz values
@@ -2910,22 +3024,22 @@ fiff_long_t FiffStream::write_float_sparse_rcs(fiff_int_t kind, const SparseMatr
     //
     // Write tag info header
     //
-    *this << static_cast<qint32>(kind);
-    *this << static_cast<qint32> FIFFT_RCS_MATRIX_FLOAT;
-    *this << static_cast<qint32>(datasize);
-    *this << static_cast<qint32>(FIFFV_NEXT_SEQ);
+    write(static_cast<qint32>(kind));
+    write(static_cast<qint32> FIFFT_RCS_MATRIX_FLOAT);
+    write(static_cast<qint32>(datasize));
+    write(static_cast<qint32>(FIFFV_NEXT_SEQ));
 
     //
     //  The data values
     //
     for (i = 0; i < s.size(); ++i)
-        *this << s[i].value();
+        write(s[i].value());
 
     //
     //  Column indices
     //
     for (i = 0; i < s.size(); ++i)
-        *this << s[i].col();
+        write(s[i].col());
 
     //
     //  Pointers
@@ -2946,7 +3060,7 @@ fiff_long_t FiffStream::write_float_sparse_rcs(fiff_int_t kind, const SparseMatr
 
     //
     for (i = 0; i < static_cast<quint32>(ptrs.size()); ++i)
-        *this << ptrs[i];
+        write(ptrs[i]);
 
     //
     //  Dimensions
@@ -2958,7 +3072,7 @@ fiff_long_t FiffStream::write_float_sparse_rcs(fiff_int_t kind, const SparseMatr
     dims[3] = 2;
 
     for (i = 0; i < 4; ++i)
-        *this << dims[i];
+        write(dims[i]);
 
     return pos;
 }
@@ -2967,7 +3081,7 @@ fiff_long_t FiffStream::write_float_sparse_rcs(fiff_int_t kind, const SparseMatr
 
 fiff_long_t FiffStream::write_id(fiff_int_t kind, const FiffId& id)
 {
-    fiff_long_t pos = this->device()->pos();
+    fiff_long_t pos = tell();
 
     FiffId t_id = id;
 
@@ -2982,10 +3096,10 @@ fiff_long_t FiffStream::write_id(fiff_int_t kind, const FiffId& id)
     //
     fiff_int_t datasize = 5 * 4; //   The id comprises five integers
 
-    *this << static_cast<qint32>(kind);
-    *this << static_cast<qint32>(FIFFT_ID_STRUCT);
-    *this << static_cast<qint32>(datasize);
-    *this << static_cast<qint32>(FIFFV_NEXT_SEQ);
+    write(static_cast<qint32>(kind));
+    write(static_cast<qint32>(FIFFT_ID_STRUCT));
+    write(static_cast<qint32>(datasize));
+    write(static_cast<qint32>(FIFFV_NEXT_SEQ));
     //
     // Collect the bits together for one write
     //
@@ -2997,7 +3111,7 @@ fiff_long_t FiffStream::write_id(fiff_int_t kind, const FiffId& id)
     data[4] = t_id.time.usecs;
 
     for (qint32 i = 0; i < 5; ++i)
-        *this << data[i];
+        write(data[i]);
 
     return pos;
 }
@@ -3006,7 +3120,7 @@ fiff_long_t FiffStream::write_id(fiff_int_t kind, const FiffId& id)
 
 fiff_long_t FiffStream::write_info_base(const FiffInfoBase& p_FiffInfoBase)
 {
-    fiff_long_t pos = this->device()->pos();
+    fiff_long_t pos = tell();
 
     //
     // Information from the MEG file
@@ -3070,17 +3184,17 @@ fiff_long_t FiffStream::write_info_base(const FiffInfoBase& p_FiffInfoBase)
 
 fiff_long_t FiffStream::write_int(fiff_int_t kind, const fiff_int_t* data, fiff_int_t nel, fiff_int_t next)
 {
-    fiff_long_t pos = this->device()->pos();
+    fiff_long_t pos = tell();
 
     fiff_int_t datasize = nel * 4;
 
-    *this << static_cast<qint32>(kind);
-    *this << static_cast<qint32>(FIFFT_INT);
-    *this << static_cast<qint32>(datasize);
-    *this << static_cast<qint32>(next);
+    write(static_cast<qint32>(kind));
+    write(static_cast<qint32>(FIFFT_INT));
+    write(static_cast<qint32>(datasize));
+    write(static_cast<qint32>(next));
 
     for (qint32 i = 0; i < nel; ++i)
-        *this << data[i];
+        write(data[i]);
 
     return pos;
 }
@@ -3089,7 +3203,7 @@ fiff_long_t FiffStream::write_int(fiff_int_t kind, const fiff_int_t* data, fiff_
 
 fiff_long_t FiffStream::write_int_matrix(fiff_int_t kind, const MatrixXi& mat)
 {
-    fiff_long_t pos = this->device()->pos();
+    fiff_long_t pos = tell();
 
     //    qint32 FIFFT_MATRIX = 1 << 30;
     //    qint32 FIFFT_MATRIX_INT = FIFFT_INT | FIFFT_MATRIX;
@@ -3098,16 +3212,16 @@ fiff_long_t FiffStream::write_int_matrix(fiff_int_t kind, const MatrixXi& mat)
 
     fiff_int_t datasize = 4 * numel + 4 * 3;
 
-    *this << static_cast<qint32>(kind);
-    *this << static_cast<qint32> FIFFT_MATRIX_INT;
-    *this << static_cast<qint32>(datasize);
-    *this << static_cast<qint32>(FIFFV_NEXT_SEQ);
+    write(static_cast<qint32>(kind));
+    write(static_cast<qint32> FIFFT_MATRIX_INT);
+    write(static_cast<qint32>(datasize));
+    write(static_cast<qint32>(FIFFV_NEXT_SEQ));
 
     qint32 i, j;
     // Storage order: row-major
     for (i = 0; i < mat.rows(); ++i)
         for (j = 0; j < mat.cols(); ++j)
-            *this << mat(i, j);
+            write(mat(i, j));
 
     qint32 dims[3];
     dims[0] = mat.cols();
@@ -3115,7 +3229,7 @@ fiff_long_t FiffStream::write_int_matrix(fiff_int_t kind, const MatrixXi& mat)
     dims[2] = 2;
 
     for (i = 0; i < 3; ++i)
-        *this << dims[i];
+        write(dims[i]);
 
     return pos;
 }
@@ -3132,7 +3246,7 @@ fiff_long_t FiffStream::write_name_list(fiff_int_t kind, const QStringList& data
 
 fiff_long_t FiffStream::write_named_matrix(fiff_int_t kind, const FiffNamedMatrix& mat)
 {
-    fiff_long_t pos = this->device()->pos();
+    fiff_long_t pos = tell();
 
     this->start_block(FIFFB_MNE_NAMED_MATRIX);
     this->write_int(FIFF_MNE_NROW, &mat.nrow);
@@ -3151,7 +3265,7 @@ fiff_long_t FiffStream::write_named_matrix(fiff_int_t kind, const FiffNamedMatri
 
 fiff_long_t FiffStream::write_proj(const QList<FiffProj>& projs)
 {
-    fiff_long_t pos = this->device()->pos();
+    fiff_long_t pos = tell();
 
     if (projs.size() <= 0)
         return -1;
@@ -3184,7 +3298,7 @@ fiff_long_t FiffStream::write_proj(const QList<FiffProj>& projs)
 
 fiff_long_t FiffStream::write_evoked_set(const FiffEvokedSet& p_FiffEvokedSet)
 {
-    fiff_long_t pos = this->device()->pos();
+    fiff_long_t pos = tell();
 
     if (p_FiffEvokedSet.evoked.isEmpty())
         return -1;
@@ -3321,16 +3435,16 @@ bool FiffStream::write_raw_buffer(const MatrixXd& buf)
 fiff_long_t FiffStream::write_string(fiff_int_t kind,
                                      const QString& data)
 {
-    fiff_long_t pos = this->device()->pos();
+    fiff_long_t pos = tell();
 
     const QByteArray bytes = data.toUtf8();
     const fiff_int_t datasize = static_cast<fiff_int_t>(bytes.size());
-    *this << static_cast<qint32>(kind);
-    *this << static_cast<qint32>(FIFFT_STRING);
-    *this << static_cast<qint32>(datasize);
-    *this << static_cast<qint32>(FIFFV_NEXT_SEQ);
+    write(static_cast<qint32>(kind));
+    write(static_cast<qint32>(FIFFT_STRING));
+    write(static_cast<qint32>(datasize));
+    write(static_cast<qint32>(FIFFV_NEXT_SEQ));
 
-    this->writeRawData(bytes.constData(), datasize);
+    writeRaw(bytes.constData(), datasize);
 
     return pos;
 }
@@ -3341,13 +3455,13 @@ void FiffStream::write_rt_command(fiff_int_t command, const QString& data)
 {
     const QByteArray bytes = data.toUtf8();
     const fiff_int_t datasize = static_cast<fiff_int_t>(bytes.size());
-    *this << static_cast<qint32>(FIFF_MNE_RT_COMMAND);
-    *this << static_cast<qint32>(FIFFT_VOID);
-    *this << 4 + static_cast<qint32>(datasize);
-    *this << static_cast<qint32>(FIFFV_NEXT_SEQ);
-    *this << command;
+    write(static_cast<qint32>(FIFF_MNE_RT_COMMAND));
+    write(static_cast<qint32>(FIFFT_VOID));
+    write(4 + static_cast<qint32>(datasize));
+    write(static_cast<qint32>(FIFFV_NEXT_SEQ));
+    write(command);
 
-    this->writeRawData(bytes.constData(), datasize);
+    writeRaw(bytes.constData(), datasize);
 }
 
 //=============================================================================================================
@@ -3363,17 +3477,12 @@ QList<FiffDirEntry::SPtr> FiffStream::make_dir(bool* ok)
     /*
      * Start from the very beginning...
      */
-    if (!this->device()->seek(SEEK_SET))
+    if (!seekTo(SEEK_SET))
         return dir;
     while ((pos = this->read_tag_info(t_pTag)) != -1) {
-        /*
-        * Guard against reading past EOF.  When QDataStream reaches the
-        * end of the device every subsequent read silently returns zero,
-        * so read_tag_info never returns -1.  Detect this by checking
-        * whether the stream is still healthy after the header read.
-        */
-        if (this->status() != QDataStream::Ok) {
-            this->resetStatus();
+        // A header read past the end of the data ends the scan; read_tag_info itself does not fail there
+        if (m_readFailed) {
+            m_readFailed = false;
             break;
         }
         /*

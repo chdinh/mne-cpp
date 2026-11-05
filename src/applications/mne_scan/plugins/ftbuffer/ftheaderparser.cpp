@@ -57,7 +57,7 @@ void FTBUFFERPLUGIN::parseNeuromagHeader(MetaData& data, QBuffer& neuromagBuffer
     neuromagBuffer.reset();
 
     FIFFLIB::FiffStream::SPtr pStream(new FIFFLIB::FiffStream(&neuromagBuffer));
-    pStream->setByteOrder(QDataStream::LittleEndian);
+    pStream->setLittleEndian(true);
 
     if (pStream->open()) {
         FIFFLIB::FiffInfo FifInfo;

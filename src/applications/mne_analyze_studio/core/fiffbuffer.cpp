@@ -91,11 +91,6 @@ QIODevice* FiffBuffer::device() const
     return const_cast<QFile*>(&m_file);
 }
 
-QDataStream* FiffBuffer::getBinaryStream()
-{
-    return m_stream.data();
-}
-
 const FIFFLIB::FiffRawData& FiffBuffer::rawData() const
 {
     return m_rawData;

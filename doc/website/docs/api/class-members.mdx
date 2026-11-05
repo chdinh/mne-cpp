@@ -7,7 +7,7 @@ sidebar_position: 5
 
 # Class Members
 
-Index of 6786 public class members (functions, variables, typedefs, enums) across all documented classes.
+Index of 6792 public class members (functions, variables, typedefs, enums) across all documented classes.
 
 **Jump to:** [A](#a) · [B](#b) · [C](#c) · [D](#d) · [E](#e) · [F](#f) · [G](#g) · [H](#h) · [I](#i) · [J](#j) · [K](#k) · [L](#l) · [M](#m) · [N](#n) · [O](#o) · [P](#p) · [Q](#q) · [R](#r) · [S](#s) · [T](#t) · [U](#u) · [V](#v) · [W](#w) · [X](#x) · [Y](#y) · [Z](#z)
 
@@ -1402,6 +1402,7 @@ Index of 6786 public class members (functions, variables, typedefs, enums) acros
 - **device** `[var]` in [AcqDeviceDescription](/docs/api/acq/acq-device-description) — Device model and serial, file path or stream name.
 - **device** `[var]` in [AcqMemoryLocation](/docs/api/acq/acq-memory-location) — GPU or accelerator ordinal; -1 for Host.
 - **device** `[var]` in [AcqRecorderOptions](/docs/api/acq/acq-recorder-options) — Source, for the device info of the file, e.g.
+- **device** `[fn]` in [FiffStream](/docs/api/fiff/fiff-stream)
 - **device_info** `[var]` in [FiffInfo](/docs/api/fiff/fiff-info) — Acquisition device; empty if unknown.
 - **devicePoseChanged** `[signal]` in [PolhemusCoregistration](/docs/api/acq/polhemus-coregistration)
 - **devicePosition** `[fn]` in [AcqWriter](/docs/api/acq/acq-writer)
@@ -1844,6 +1845,8 @@ Index of 6786 public class members (functions, variables, typedefs, enums) acros
 - **FiffSparseMatrix** `[fn]` in [FiffSparseMatrix](/docs/api/fiff/fiff-sparse-matrix) — Default move constructor.
 - **FiffStream** `[fn]` in [FiffStream](/docs/api/fiff/fiff-stream) — Constructs a fiff stream that uses the I/O device p_pIODevice.
 - **FiffStream** `[fn]` in [FiffStream](/docs/api/fiff/fiff-stream) — Constructs a fiff stream that operates on a byte array, a.
+- **FiffStream** `[fn]` in [FiffStream](/docs/api/fiff/fiff-stream) — Constructs a fiff stream on a byte stream, e.g.
+- **FiffStream** `[fn]` in [FiffStream](/docs/api/fiff/fiff-stream)
 - **FiffTag** `[fn]` in [FiffTag](/docs/api/fiff/fiff-tag) — Constructs a default [`FiffTag`](/docs/api/fiff/fiff-tag).
 - **FiffTag** `[fn]` in [FiffTag](/docs/api/fiff/fiff-tag) — Copy constructor.
 - **FiffTag** `[fn]` in [FiffTag](/docs/api/fiff/fiff-tag) — Move constructor.
@@ -2932,6 +2935,7 @@ Index of 6786 public class members (functions, variables, typedefs, enums) acros
 - **isInit** `[fn]` in [EvokedSetModel](/docs/api/disp/evoked-set-model) — Returns whether this class is initalized.
 - **isJson** `[fn]` in [Command](/docs/api/com/command) — If received command was Json fomratted or triggered command should be Json formatted.
 - **isJson** `[fn]` in [RawCommand](/docs/api/com/raw-command) — Returns whether the received command was in Json format.
+- **isLittleEndian** `[fn]` in [FiffStream](/docs/api/fiff/fiff-stream)
 - **isLoaded** `[fn]` in [FsAtlasLookup](/docs/api/fs/fs-atlas-lookup) — Check whether a parcellation volume has been loaded.
 - **isLoaded** `[fn]` in [MlOnnxModel](/docs/api/ml/ml-onnx-model)
 - **isLoaded** `[fn]` in [SensorFieldMapper](/docs/api/disp3-d/sensor-field-mapper)
@@ -4005,6 +4009,7 @@ Index of 6786 public class members (functions, variables, typedefs, enums) acros
 - **operator=** `[fn]` in [FiffRawDir](/docs/api/fiff/fiff-raw-dir) — Copy assignment.
 - **operator=** `[fn]` in [FiffSparseMatrix](/docs/api/fiff/fiff-sparse-matrix) — Default copy-assignment operator.
 - **operator=** `[fn]` in [FiffSparseMatrix](/docs/api/fiff/fiff-sparse-matrix) — Default move-assignment operator.
+- **operator=** `[fn]` in [FiffStream](/docs/api/fiff/fiff-stream)
 - **operator=** `[fn]` in [FiffTag](/docs/api/fiff/fiff-tag) — Copy assignment operator.
 - **operator=** `[fn]` in [FiffTag](/docs/api/fiff/fiff-tag) — Move assignment operator.
 - **operator=** `[fn]` in [FileByteStream](/docs/api/utils/file-byte-stream)
@@ -5297,6 +5302,7 @@ Index of 6786 public class members (functions, variables, typedefs, enums) acros
 - **setLeadType** `[fn]` in [IeegImplantation](/docs/api/ieeg/ieeg-implantation) — Set a lead's type when it is declared rather than inferred.
 - **setLightingEnabled** `[slot]` in [BrainView](/docs/api/disp3-d/brain-view) — Enable or disable lighting for the scene.
 - **setLineCallback** `[fn]` in [PythonRunner](/docs/api/utils/python-runner) — Set a callback invoked for every stdout/stderr line.
+- **setLittleEndian** `[fn]` in [FiffStream](/docs/api/fiff/fiff-stream) — Sets the byte order of the stream; FIFF files are big-endian, some raw data files little-endian.
 - **setLiveMarkers** `[slot]` in [BrainView](/docs/api/disp3-d/brain-view) — Replace the set of live overlay markers.
 - **setLiveRay** `[slot]` in [BrainView](/docs/api/disp3-d/brain-view) — Set a semi-transparent ray cylinder between two world-space points.
 - **setLoadingBarVisible** `[slot]` in [ProgressView](/docs/api/disp/progress-view) — Sets whether loading bar is visible.

@@ -103,7 +103,7 @@ int main(int argc, char* argv[])
             stream->device()->seek(dataPos);
             fiff_int_t beVal = newSkipCount;
             // Write as big-endian int32
-            stream->writeRawData(reinterpret_cast<const char*>(&beVal), sizeof(fiff_int_t));
+            stream->device()->write(reinterpret_cast<const char*>(&beVal), sizeof(fiff_int_t));
 
             qInfo("  Tag at pos %lld: skip count %d -> %d",
                   static_cast<long long>(dirEntries[i]->pos), skipCount, newSkipCount);

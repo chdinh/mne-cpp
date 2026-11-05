@@ -28,9 +28,9 @@
  * @ref FIFFLIB::FiffStream::write_coord_trans "write_coord_trans", ...) emit a fully spec-compliant FIFF file
  * that round-trips through MNE-Python and MNE-C unchanged.
  *
- * Inheriting from @c QDataStream gives the class transparent access to
- * the Qt I/O byte ordering / device abstraction while keeping the rest
- * of FIFFLIB Qt-agnostic at the API boundary.
+ * All bytes go through a @ref UTILSLIB::ByteStream "byte stream", either one
+ * wrapping the given @c QIODevice, which keeps sockets and Qt files working,
+ * or one the caller passes in, such as a @ref UTILSLIB::FileByteStream.
  */
 
 #ifndef FIFF_STREAM_H
@@ -48,6 +48,8 @@
 #include "fiff_dir_node.h"
 #include "fiff_dir_entry.h"
 
+#include <utils/byte_stream.h>
+
 //=============================================================================================================
 // EIGEN INCLUDES
 //=============================================================================================================
@@ -60,7 +62,6 @@
 //=============================================================================================================
 
 #include <QByteArray>
-#include <QDataStream>
 #include <QIODevice>
 #include <QList>
 #include <QSharedPointer>
@@ -112,7 +113,7 @@ struct FiffDeviceInfo;
  * @snippet ex_fiff_api/main.cpp fiff_stream_usage
  */
 
-class FIFFSHARED_EXPORT FiffStream : public QDataStream
+class FIFFSHARED_EXPORT FiffStream
 {
 public:
     using SPtr = QSharedPointer<FiffStream>;             /**< Shared pointer type for FiffStream. */
@@ -136,6 +137,39 @@ public:
      * @param[in] mode   The open mode.
      */
     explicit FiffStream(QByteArray* a, QIODevice::OpenMode mode);
+
+    //=========================================================================================================
+    /**
+     * Constructs a fiff stream on a byte stream, e.g. a file opened without Qt.
+     *
+     * @param[in] bytes  The byte stream, already open; the fiff stream owns it.
+     */
+    explicit FiffStream(std::unique_ptr<UTILSLIB::ByteStream> bytes);
+
+    ~FiffStream();
+
+    FiffStream(const FiffStream&) = delete;
+    FiffStream& operator=(const FiffStream&) = delete;
+
+    //=========================================================================================================
+    /**
+     * @return The Qt device the stream reads and writes, or nullptr for a stream on a byte stream.
+     */
+    QIODevice* device() const;
+
+    //=========================================================================================================
+    /**
+     * Sets the byte order of the stream; FIFF files are big-endian, some raw data files little-endian.
+     *
+     * @param[in] littleEndian  True to read and write little-endian.
+     */
+    void setLittleEndian(bool littleEndian);
+
+    //=========================================================================================================
+    /**
+     * @return True when the stream reads and writes little-endian.
+     */
+    bool isLittleEndian() const;
 
     //=========================================================================================================
     /**
@@ -918,7 +952,40 @@ private:
      */
     QList<FiffDirEntry::SPtr> make_dir(bool* ok = nullptr);
 
+    fiff_long_t tell() const;
+    bool seekTo(fiff_long_t pos);
+    void seekToEnd();
+    void readRaw(void* data, fiff_long_t bytes);
+    void writeRaw(const void* data, fiff_long_t bytes);
+    void skipRaw(fiff_long_t bytes);
+
+    // Reads one value in the stream's byte order; a short read yields 0 and marks the stream failed
+    template<UTILSLIB::Swappable T>
+    void read(T& value)
+    {
+        if (m_bytes->read(&value, sizeof(T)) != sizeof(T)) {
+            value = T{};
+            m_readFailed = true;
+            return;
+        }
+        if (m_littleEndian != (std::endian::native == std::endian::little))
+            value = UTILSLIB::byteSwap(value);
+    }
+
+    template<UTILSLIB::Swappable T>
+    void write(T value)
+    {
+        if (m_littleEndian != (std::endian::native == std::endian::little))
+            value = UTILSLIB::byteSwap(value);
+        m_bytes->write(&value, sizeof(T));
+    }
+
 private:
+    std::unique_ptr<QIODevice> m_ownedDevice; /**< Buffer created for the byte-array constructor. */
+    QIODevice* m_device = nullptr;            /**< Qt device, or nullptr for a stream on a byte stream. */
+    std::unique_ptr<UTILSLIB::ByteStream> m_bytes;
+    bool m_littleEndian = false;
+    bool m_readFailed = false;
     //    char         *file_name;    /**< Name of the file. */ -> Use streamName() instead
     //    FILE         *fd;           /**< The normal file descriptor. */ -> file descitpion is part of the stream: stream->device()
     FiffId m_id;                     /**< The file identifier. */

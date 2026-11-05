@@ -37,13 +37,6 @@ const FiffId fileId = stream->id();
 stream->close();
 ```
 
-### Inheritance
-
-```mermaid
-classDiagram
-    QDataStream <|-- FiffStream
-```
-
 ---
 
 ## Public Methods
@@ -72,6 +65,58 @@ The mode describes how the device is to be used.
 
 - **mode** : *QIODevice::OpenMode*
   The open mode.
+
+---
+
+### FiffStream(bytes)
+
+Constructs a fiff stream on a byte stream, e.g.
+
+a file opened without Qt.
+
+**Parameters:**
+
+- **bytes** : *std::unique_ptr&lt; [ByteStream](/docs/api/utils/byte-stream) &gt;*
+  The byte stream, already open; the fiff stream owns it.
+
+---
+
+### ~FiffStream()
+
+---
+
+### FiffStream()
+
+---
+
+### operator=()
+
+---
+
+### device()
+
+**Returns:**
+
+- *QIODevice ** — The Qt device the stream reads and writes, or nullptr for a stream on a byte stream.
+
+---
+
+### setLittleEndian(littleEndian)
+
+Sets the byte order of the stream; FIFF files are big-endian, some raw data files little-endian.
+
+**Parameters:**
+
+- **littleEndian** : *bool*
+  True to read and write little-endian.
+
+---
+
+### isLittleEndian()
+
+**Returns:**
+
+- *bool* — True when the stream reads and writes little-endian.
 
 ---
 
@@ -1226,11 +1271,7 @@ Read a FIFF file from a memory buffer with a chosen byte order and summarise its
 
 ````cpp title="src/examples/ex_fiff_sniffer/main.cpp, line 125"
 FIFFLIB::FiffStream stream(&buffer);
-if (littleEndian) {
-    stream.setByteOrder(QDataStream::LittleEndian);
-} else {
-    stream.setByteOrder(QDataStream::BigEndian);
-}
+stream.setLittleEndian(littleEndian);
 ````
 
 ### [ex_fiff_structure](../../examples/fiff/ex_fiff_structure.mdx)
