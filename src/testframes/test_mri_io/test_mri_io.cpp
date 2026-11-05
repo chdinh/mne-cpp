@@ -110,6 +110,7 @@ private slots:
     void testMghReadSyntheticFloat();
     void testMghDefaultDirectionCosines();
     void testMghFooterScanParams();
+    void testMghFooterTalairachTag_data();
     void testMghFooterTalairachTag();
     void testMghUnsupportedDataType();
     void testMghCorruptedMgz();
@@ -811,13 +812,23 @@ void TestMriIO::testMghFooterScanParams()
 
 //=============================================================================================================
 
+void TestMriIO::testMghFooterTalairachTag_data()
+{
+    QTest::addColumn<QByteArray>("tagData");
+    QTest::newRow("exact length") << QByteArray("talairach.xfm");
+    // FreeSurfer's mriio writes strlen + 1 bytes, so the tag ends with the terminating NUL
+    QTest::newRow("NUL terminated") << QByteArray("talairach.xfm", 14);
+}
+
 void TestMriIO::testMghFooterTalairachTag()
 {
+    QFETCH(QByteArray, tagData);
+
     // Create an MGH with a TAG_MGH_XFORM in the footer pointing to a dummy xfm
     QByteArray mghData = createSyntheticMgh(2, 2, 2, MRI_UCHAR, true, true, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f);
 
     // Append TAG_MGH_XFORM tag
-    QByteArray xfmPath = "talairach.xfm";
+    const QByteArray& xfmPath = tagData;
     QDataStream tagStream(&mghData, QIODevice::Append);
     tagStream.setByteOrder(QDataStream::BigEndian);
     tagStream << qint32(MGH_TAG_MGH_XFORM); // tag type

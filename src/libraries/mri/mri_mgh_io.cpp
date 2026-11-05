@@ -375,8 +375,8 @@ bool MriMghIO::parseFooter(const std::vector<std::byte>& data,
             break;
 
         if (tagType == MGH_TAG_MGH_XFORM) {
-            // TAG_MGH_XFORM: contains path to talairach.xfm
-            std::string xfmPath(UTILSLIB::trimmed(tagData));
+            // TAG_MGH_XFORM: path to talairach.xfm; FreeSurfer includes the terminating NUL in the length
+            std::string xfmPath(UTILSLIB::trimmed(std::string_view(tagData).substr(0, tagData.find('\0'))));
             volData.talairachXfmPath = xfmPath;
 
             if (verbose) {
