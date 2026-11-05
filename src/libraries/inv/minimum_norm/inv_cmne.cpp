@@ -201,11 +201,11 @@ bool InvCMNE::applyCmne(const MatrixXd& matDspmData,
                         MatrixXd& cmne)
 {
     MLLIB::MlOnnxModel model;
-    if (!model.load(onnxModelPath)) {
+    if (!model.load(onnxModelPath.toStdString())) {
         qWarning() << "[InvCMNE] Cannot load CMNE model" << onnxModelPath;
         return false;
     }
-    const QJsonObject config = QJsonDocument::fromJson(model.metadata(QStringLiteral("cmne_config")).toUtf8()).object();
+    const QJsonObject config = QJsonDocument::fromJson(QByteArray::fromStdString(model.metadata("cmne_config"))).object();
     const int k = config.value(QStringLiteral("look_back")).toInt();
     const int nSources = config.value(QStringLiteral("n_sources")).toInt();
     if (k <= 0 || nSources != matDspmData.rows()) {

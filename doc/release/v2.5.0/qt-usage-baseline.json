@@ -29,7 +29,7 @@
       "acq",
       "decoding"
     ],
-    "tokens": 21181,
+    "tokens": 21150,
     "gui_outside_design": []
   },
   "libraries": {
@@ -384,15 +384,12 @@
       ]
     },
     "ml": {
-      "tokens": 46,
+      "tokens": 15,
       "by_category": {
-        "files": 1,
-        "global": 5,
-        "logging": 8,
-        "smart_pointers": 1,
-        "strings": 31
+        "logging": 3,
+        "strings": 12
       },
-      "public_header_includes": 6,
+      "public_header_includes": 2,
       "q_object": 0,
       "files": 10,
       "modules": [

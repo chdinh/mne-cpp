@@ -87,13 +87,13 @@ int main(int argc, char* argv[])
     std::unique_ptr<MlModel> model = std::make_unique<MlOnnxModel>();
     const bool loaded = model->load(MNE_EX_ML_DATA_DIR "/affine_softmax.onnx");
     const MlTensor probabilities = model->predict(batch); // shape {2, 2}, one row per sample
-    const QString classes = static_cast<MlOnnxModel&>(*model).metadata("classes");
+    const std::string classes = static_cast<MlOnnxModel&>(*model).metadata("classes");
     //! [ml_onnx_model_usage]
     // NumPy: softmax(x @ W + b) = [[0.6681878, 0.33181223], [0.00235232, 0.9976477]]
     Matrix2f expected;
     expected << 0.6681878f, 0.33181223f, 0.00235232f, 0.9976477f;
     ok &= expect(loaded && model->modelType() == "onnx" && probabilities.shape() == std::vector<int64_t>({2, 2}) && (probabilities.toMatrixXf() - expected).cwiseAbs().maxCoeff() < 1e-6f && classes == "rest,task",
-                 QString("MlOnnxModel: p(task) = %1, %2 match NumPy; classes '%3'").arg(probabilities.matrix()(0, 1)).arg(probabilities.matrix()(1, 1)).arg(classes));
+                 QString("MlOnnxModel: p(task) = %1, %2 match NumPy; classes '%3'").arg(probabilities.matrix()(0, 1)).arg(probabilities.matrix()(1, 1)).arg(QString::fromStdString(classes)));
 #else
     qInfo().noquote() << "  skip  MlOnnxModel (built without ONNX Runtime)";
 #endif

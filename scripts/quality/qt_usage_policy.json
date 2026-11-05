@@ -175,8 +175,8 @@
       ]
     },
     "ml": {
-      "tokens": 46,
-      "public_header_includes": 6,
+      "tokens": 15,
+      "public_header_includes": 2,
       "modules": [
         "Core"
       ]

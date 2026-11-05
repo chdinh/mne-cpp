@@ -39,12 +39,6 @@
 #include "ml_model.h"
 
 //=============================================================================================================
-// QT INCLUDES
-//=============================================================================================================
-
-#include <QString>
-
-//=============================================================================================================
 // STL INCLUDES
 //=============================================================================================================
 
@@ -102,9 +96,9 @@ public:
 
     //=========================================================================================================
     MlTensor predict(const MlTensor& input) const override;
-    bool save(const QString& path) const override;
-    bool load(const QString& path) override;
-    QString modelType() const override;
+    bool save(const std::string& path) const override;
+    bool load(const std::string& path) override;
+    std::string modelType() const override;
     MlTaskType taskType() const override;
 
     //=========================================================================================================
@@ -118,14 +112,14 @@ public:
      * @param[in] key  Custom metadata key stored in the model file.
      * @return The value stored under @p key, or an empty string if the model has none or is not loaded.
      */
-    QString metadata(const QString& key) const;
+    std::string metadata(const std::string& key) const;
 
 private:
 #ifdef MNE_USE_ONNXRUNTIME
     static Ort::Env& ortEnv();
 #endif
 
-    QString m_modelPath;                                /**< Path to ONNX model file. */
+    std::string m_modelPath;                            /**< Path to ONNX model file. */
     MlTaskType m_taskType = MlTaskType::Classification; /**< Task type.               */
 
 #ifdef MNE_USE_ONNXRUNTIME

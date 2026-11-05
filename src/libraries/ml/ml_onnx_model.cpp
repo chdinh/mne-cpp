@@ -40,11 +40,13 @@
 #endif
 
 //=============================================================================================================
-// QT INCLUDES
+// INCLUDES
 //=============================================================================================================
 
-#include <QDebug>
-#include <QFileInfo>
+#include <utils/generics/log.h>
+#include <utils/string_utils.h>
+
+#include <filesystem>
 
 //=============================================================================================================
 // STL INCLUDES
@@ -132,29 +134,30 @@ MlTensor MlOnnxModel::predict(const MlTensor& input) const
 
     return MlTensor(outputData, std::move(outputShape));
 #else
-    Q_UNUSED(input);
+    static_cast<void>(input);
     throw std::runtime_error("ONNX Runtime not available. Build with -DUSE_ONNXRUNTIME=ON");
 #endif
 }
 
 //=============================================================================================================
 
-bool MlOnnxModel::save(const QString& path) const
+bool MlOnnxModel::save(const std::string& /*path*/) const
 {
-    Q_UNUSED(path);
-    qWarning() << "MlOnnxModel::save – ONNX models cannot be saved from this interface.";
+    UTILSLIB::Log::warning("MlOnnxModel::save – ONNX models cannot be saved from this interface.");
     return false;
 }
 
 //=============================================================================================================
 
-bool MlOnnxModel::load(const QString& path)
+bool MlOnnxModel::load(const std::string& path)
 {
 #ifdef MNE_USE_ONNXRUNTIME
     m_modelPath = path;
 
-    if (!QFileInfo::exists(path)) {
-        qWarning() << "MlOnnxModel::load – File does not exist:" << path;
+    const std::filesystem::path file = UTILSLIB::pathFromUtf8(path);
+    std::error_code ec;
+    if (!std::filesystem::exists(file, ec)) {
+        UTILSLIB::Log::warning("MlOnnxModel::load – File does not exist: " + path);
         return false;
     }
 
@@ -166,8 +169,8 @@ bool MlOnnxModel::load(const QString& path)
         sessionOpts.DisableMemPattern(); // reduces peak memory for small models
 
         // Create session from the ONNX file
-        std::string modelPathStd = path.toStdString();
-        m_session = std::make_unique<Ort::Session>(ortEnv(), modelPathStd.c_str(), sessionOpts);
+        // The native path type matches ORTCHAR_T, which is wchar_t on Windows.
+        m_session = std::make_unique<Ort::Session>(ortEnv(), file.c_str(), sessionOpts);
 
         // CPU memory info (reused for every predict call)
         m_memoryInfo = std::make_unique<Ort::MemoryInfo>(
@@ -200,18 +203,17 @@ bool MlOnnxModel::load(const QString& path)
             m_outputNames.emplace_back(namePtr.get());
         }
 
-        qDebug() << "MlOnnxModel::load – Session created for" << path
-                 << "(" << numInputs << "inputs," << numOutputs << "outputs)";
+        UTILSLIB::Log::debug("MlOnnxModel::load – Session created for " + path + " (" + std::to_string(numInputs) + " inputs, " + std::to_string(numOutputs) + " outputs)");
         return true;
 
     } catch (const Ort::Exception& e) {
-        qWarning() << "MlOnnxModel::load – ORT error:" << e.what();
+        UTILSLIB::Log::warning(std::string("MlOnnxModel::load – ORT error: ") + e.what());
         m_session.reset();
         return false;
     }
 #else
     m_modelPath = path;
-    qWarning() << "MlOnnxModel::load – Path stored but no ONNX Runtime session created (build with -DUSE_ONNXRUNTIME=ON).";
+    UTILSLIB::Log::warning("MlOnnxModel::load – Path stored but no ONNX Runtime session created (build with -DUSE_ONNXRUNTIME=ON).");
     return false;
 #endif
 }
@@ -229,25 +231,25 @@ bool MlOnnxModel::isLoaded() const
 
 //=============================================================================================================
 
-QString MlOnnxModel::metadata(const QString& key) const
+std::string MlOnnxModel::metadata(const std::string& key) const
 {
 #ifdef MNE_USE_ONNXRUNTIME
     if (!m_session)
-        return QString();
+        return {};
     Ort::AllocatorWithDefaultOptions allocator;
-    auto value = m_session->GetModelMetadata().LookupCustomMetadataMapAllocated(key.toStdString().c_str(), allocator);
-    return value ? QString::fromStdString(value.get()) : QString();
+    auto value = m_session->GetModelMetadata().LookupCustomMetadataMapAllocated(key.c_str(), allocator);
+    return value ? std::string(value.get()) : std::string();
 #else
-    Q_UNUSED(key);
-    return QString();
+    static_cast<void>(key);
+    return {};
 #endif
 }
 
 //=============================================================================================================
 
-QString MlOnnxModel::modelType() const
+std::string MlOnnxModel::modelType() const
 {
-    return QStringLiteral("onnx");
+    return "onnx";
 }
 
 //=============================================================================================================

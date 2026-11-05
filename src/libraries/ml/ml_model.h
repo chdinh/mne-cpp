@@ -38,11 +38,11 @@
 #include "ml_tensor.h"
 
 //=============================================================================================================
-// QT INCLUDES
+// STL INCLUDES
 //=============================================================================================================
 
-#include <QSharedPointer>
-#include <QString>
+#include <memory>
+#include <string>
 
 //=============================================================================================================
 // DEFINE NAMESPACE MLLIB
@@ -60,7 +60,7 @@ namespace MLLIB
 class MLSHARED_EXPORT MlModel
 {
 public:
-    typedef QSharedPointer<MlModel> SPtr; /**< Shared pointer type for MlModel. */
+    using SPtr = std::shared_ptr<MlModel>; /**< Shared pointer type for MlModel. */
 
     //=========================================================================================================
     /**
@@ -84,7 +84,7 @@ public:
      * @param[in] path   File path.
      * @return True if successful.
      */
-    virtual bool save(const QString& path) const = 0;
+    virtual bool save(const std::string& path) const = 0;
 
     //=========================================================================================================
     /**
@@ -93,13 +93,13 @@ public:
      * @param[in] path   File path.
      * @return True if successful.
      */
-    virtual bool load(const QString& path) = 0;
+    virtual bool load(const std::string& path) = 0;
 
     //=========================================================================================================
     /**
      * @return Human-readable model type name.
      */
-    virtual QString modelType() const = 0;
+    virtual std::string modelType() const = 0;
 
     //=========================================================================================================
     /**
