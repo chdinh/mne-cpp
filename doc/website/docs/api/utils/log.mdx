@@ -1,0 +1,97 @@
+---
+id: log
+title: "UTILSLIB::Log"
+sidebar_label: Log
+sidebar_position: 67
+---
+
+# Log
+
+**Namespace:** `UTILSLIB` &nbsp;·&nbsp; **Library:** Utilities Library &nbsp;·&nbsp; **Source:** [`utils/generics/log.h`](https://github.com/mne-tools/mne-cpp/blob/staging/src/libraries/utils/generics/log.h)
+
+`#include <utils/log.h>`
+
+```cpp
+class UTILSLIB::Log
+```
+
+Writes library messages to the current sink; thread-safe.
+
+```cpp title="src/examples/ex_utils/main.cpp"
+Log::warning("channel MEG 0113 is flat"); // reaches Qt's handler, here MNELogger
+```
+
+---
+
+## Public Methods
+
+### Log()
+
+---
+
+## Static Methods
+
+### write(level, message)
+
+Hands `message` to the current sink.
+
+**Parameters:**
+
+- **level** : *Level*
+  Severity.
+
+- **message** : *std::string_view*
+  UTF-8 text.
+
+---
+
+### debug(message)
+
+---
+
+### info(message)
+
+---
+
+### warning(message)
+
+---
+
+### critical(message)
+
+---
+
+### setSink(sink)
+
+Replaces the sink.
+
+**Parameters:**
+
+- **sink** : *Sink*
+  The new sink; an empty one restores forwarding to Qt's message handler.
+
+**Returns:**
+
+- *Sink* — The sink that was installed before, empty if messages were forwarded to Qt.
+
+---
+
+## Example
+
+- Start here: [ex_utils](../../examples/utils/ex_utils.mdx) — Utilities library: buffers, observers, logging, file formats, montages, layouts and reports.
+- Full source: [`src/examples/ex_utils/main.cpp`](https://github.com/mne-tools/mne-cpp/tree/staging/src/examples/ex_utils/main.cpp)
+- Build target: `ex_utils` (runs under CTest)
+
+## Used in examples
+
+### [ex_utils](../../examples/utils/ex_utils.mdx)
+
+Utilities library: buffers, observers, logging, file formats, montages, layouts and reports.
+
+````cpp title="src/examples/ex_utils/main.cpp, line 152"
+Log::warning("channel MEG 0113 is flat"); // reaches Qt's handler, here MNELogger
+````
+
+## Authors of this file
+
+- Christoph Dinh &lt;christoph.dinh@mne-cpp.org&gt;

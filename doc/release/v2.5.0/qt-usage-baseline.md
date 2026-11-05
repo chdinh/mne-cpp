@@ -30,7 +30,7 @@ Qt identifiers in code with comments, string literals and `#include` lines remov
 | `mne` | Concurrent Core Network | 1,918 | 99 | 0 | 173 | 118 | 405 | 0 | 0 | 629 | 0 | 4 | 23 | 0 | 4 | 97 | 455 | 10 | 0 |
 | `mri` | Core Network ZlibPrivate | 205 | 11 | 0 | 35 | 25 | 64 | 0 | 0 | 34 | 0 | 0 | 0 | 0 | 0 | 0 | 47 | 0 | 0 |
 | `sts` | Concurrent Core | 91 | 5 | 0 | 63 | 0 | 12 | 0 | 0 | 1 | 0 | 0 | 0 | 6 | 0 | 0 | 3 | 6 | 0 |
-| `utils` | Core | 533 | 41 | 1 | 55 | 80 | 23 | 0 | 0 | 58 | 0 | 15 | 2 | 0 | 10 | 12 | 266 | 9 | 3 |
+| `utils` | Core | 533 | 41 | 1 | 55 | 80 | 18 | 0 | 0 | 62 | 0 | 15 | 2 | 0 | 10 | 12 | 267 | 9 | 3 |
 
 ## Kept Qt uses (D16)
 

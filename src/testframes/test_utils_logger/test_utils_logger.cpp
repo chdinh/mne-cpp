@@ -7,13 +7,14 @@
  * @author   Christoph Dinh <christoph.dinh@mne-cpp.org>
  * @since    0.1.0
  * @date     July, 2026
- * @brief    Tests the file logging of MNELogger.
+ * @brief    Tests the file logging of MNELogger and the Log facade with its capture sink.
  */
 
 //=============================================================================================================
 // INCLUDES
 //=============================================================================================================
 
+#include <utils/generics/log.h>
 #include <utils/generics/mne_logger.h>
 
 //=============================================================================================================
@@ -31,12 +32,30 @@
 
 #include <iostream>
 #include <sstream>
+#include <string>
+#include <thread>
+#include <utility>
+#include <vector>
 
 //=============================================================================================================
 // USED NAMESPACES
 //=============================================================================================================
 
 using namespace UTILSLIB;
+
+//=============================================================================================================
+
+namespace
+{
+
+std::vector<std::pair<QtMsgType, QString>> g_qtMessages;
+
+void recordQtMessage(QtMsgType type, const QMessageLogContext&, const QString& message)
+{
+    g_qtMessages.emplace_back(type, message);
+}
+
+} // namespace
 
 //=============================================================================================================
 /**
@@ -57,6 +76,11 @@ private slots:
     void testWritesMessagesToFile();
     void testDisablingStopsFileOutput();
     void testRoutesDiagnosticsToStderr();
+    void testLogForwardsEveryLevelToQt();
+    void testLogCaptureSwallowsAndRecords();
+    void testLogCaptureNestsAndRestores();
+    void testLogCustomSink();
+    void testLogCaptureFromManyThreads();
     void cleanupTestCase();
 
 private:
@@ -149,6 +173,126 @@ void TestUtilsLogger::testRoutesDiagnosticsToStderr()
     QVERIFY(err.str().find("test-logger-warn-stream") != std::string::npos);
     QVERIFY(err.str().find("test-logger-crit-stream") != std::string::npos);
     QVERIFY(err.str().find("test-logger-info") == std::string::npos);
+}
+
+//=============================================================================================================
+
+void TestUtilsLogger::testLogForwardsEveryLevelToQt()
+{
+    g_qtMessages.clear();
+    const QtMessageHandler previous = qInstallMessageHandler(recordQtMessage);
+    Log::debug("log-debug");
+    Log::info("log-info");
+    Log::warning("log-warning \xc3\xa4");
+    Log::critical("log-critical");
+    qInstallMessageHandler(previous);
+
+    const std::vector<std::pair<QtMsgType, QString>> expected = {
+        {QtDebugMsg, QStringLiteral("log-debug")},
+        {QtInfoMsg, QStringLiteral("log-info")},
+        {QtWarningMsg, QStringLiteral("log-warning \u00e4")},
+        {QtCriticalMsg, QStringLiteral("log-critical")}};
+    QCOMPARE(g_qtMessages.size(), expected.size());
+    for (std::size_t i = 0; i < expected.size(); ++i) {
+        QCOMPARE(g_qtMessages[i].first, expected[i].first);
+        QCOMPARE(g_qtMessages[i].second, expected[i].second);
+    }
+}
+
+//=============================================================================================================
+
+void TestUtilsLogger::testLogCaptureSwallowsAndRecords()
+{
+    g_qtMessages.clear();
+    const QtMessageHandler previous = qInstallMessageHandler(recordQtMessage);
+    {
+        LogCapture capture;
+        Log::warning("disk almost full");
+        Log::warning("disk full");
+        Log::info("disk checked");
+
+        QCOMPARE(capture.entries().size(), std::size_t(3));
+        QCOMPARE(capture.entries()[1].level, Log::Level::Warning);
+        QCOMPARE(capture.entries()[1].message, std::string("disk full"));
+        QCOMPARE(capture.count(Log::Level::Warning), 2);
+        QCOMPARE(capture.count(Log::Level::Warning, "almost"), 1);
+        QCOMPARE(capture.count(Log::Level::Critical), 0);
+
+        capture.clear();
+        QVERIFY(capture.entries().empty());
+    }
+    Log::warning("after capture");
+    qInstallMessageHandler(previous);
+
+    // Captured messages never reach Qt; once the capture is gone, forwarding resumes.
+    QCOMPARE(g_qtMessages.size(), std::size_t(1));
+    QCOMPARE(g_qtMessages[0].second, QStringLiteral("after capture"));
+}
+
+//=============================================================================================================
+
+void TestUtilsLogger::testLogCaptureNestsAndRestores()
+{
+    LogCapture outer;
+    Log::info("to outer");
+    {
+        LogCapture inner;
+        Log::info("to inner");
+        QCOMPARE(inner.count(Log::Level::Info), 1);
+    }
+    Log::info("to outer again");
+    QCOMPARE(outer.count(Log::Level::Info), 2);
+    QCOMPARE(outer.count(Log::Level::Info, "inner"), 0);
+}
+
+//=============================================================================================================
+
+void TestUtilsLogger::testLogCustomSink()
+{
+    std::vector<std::string> seen;
+    Log::Sink previous = Log::setSink([&seen](Log::Level level, std::string_view message) {
+        seen.emplace_back(std::to_string(static_cast<int>(level)) + ":" + std::string(message));
+    });
+    Log::critical("boom");
+    Log::write(Log::Level::Debug, "trace");
+    Log::Sink mine = Log::setSink(std::move(previous));
+
+    QVERIFY(mine);
+    QCOMPARE(seen.size(), std::size_t(2));
+    QCOMPARE(seen[0], std::string("3:boom"));
+    QCOMPARE(seen[1], std::string("0:trace"));
+
+    // An empty sink restores forwarding to Qt.
+    g_qtMessages.clear();
+    const QtMessageHandler handler = qInstallMessageHandler(recordQtMessage);
+    Log::setSink([](Log::Level, std::string_view) {});
+    Log::setSink({});
+    Log::info("forwarded");
+    qInstallMessageHandler(handler);
+    QCOMPARE(g_qtMessages.size(), std::size_t(1));
+}
+
+//=============================================================================================================
+
+void TestUtilsLogger::testLogCaptureFromManyThreads()
+{
+    constexpr int kThreads = 8;
+    constexpr int kMessages = 500;
+    LogCapture capture;
+    std::vector<std::thread> threads;
+    threads.reserve(kThreads);
+    for (int t = 0; t < kThreads; ++t) {
+        threads.emplace_back([t] {
+            for (int i = 0; i < kMessages; ++i) {
+                Log::warning("thread " + std::to_string(t));
+            }
+        });
+    }
+    for (std::thread& thread : threads) {
+        thread.join();
+    }
+    QCOMPARE(capture.count(Log::Level::Warning), kThreads * kMessages);
+    QCOMPARE(capture.count(Log::Level::Warning, "thread 3"), kMessages);
 }
 
 //=============================================================================================================

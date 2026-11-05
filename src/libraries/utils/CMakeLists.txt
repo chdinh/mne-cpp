@@ -25,6 +25,7 @@ set(SOURCES
   montage/standard_montage.cpp
   report.cpp
   generics/observerpattern.cpp
+  generics/log.cpp
   generics/mne_logger.cpp
   utils_global.cpp
 )
@@ -41,6 +42,7 @@ set(HEADERS
   generics/circularbuffer.h
   generics/commandpattern.h
   generics/observerpattern.h
+  generics/log.h
   generics/mne_logger.h
 )
 

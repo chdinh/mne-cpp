@@ -126,7 +126,7 @@ bool LayoutLoader::readAsaElcFile(const QString& path,
         }
     }
 
-    Q_UNUSED(numberElectrodes);
+    static_cast<void>(numberElectrodes);
 
     file.close();
 
@@ -221,7 +221,7 @@ bool LayoutLoader::readAsaElcFile(const std::string& path,
         }
     }
 
-    Q_UNUSED(numberElectrodes);
+    static_cast<void>(numberElectrodes);
 
     return true;
 }

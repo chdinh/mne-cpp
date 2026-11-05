@@ -20,6 +20,7 @@
 
 #include <utils/generics/circularbuffer.h>
 #include <utils/generics/commandpattern.h>
+#include <utils/generics/log.h>
 #include <utils/generics/mne_logger.h>
 #include <utils/generics/observerpattern.h>
 #include <utils/ioutils.h>
@@ -146,6 +147,17 @@ int main(int argc, char* argv[])
     MNELogger::setLogFile(QString());
     QFile log(dir.filePath("example.log"));
     ok &= expect(log.open(QIODevice::ReadOnly) && log.readAll().contains("logging to"), "MNELogger wrote the message to the log file");
+
+    //! [log_usage]
+    Log::warning("channel MEG 0113 is flat"); // reaches Qt's handler, here MNELogger
+    //! [log_usage]
+
+    //! [log_capture_usage]
+    LogCapture capture; // in a test: record instead of printing
+    Log::warning("channel MEG 0113 is flat");
+    const int flat = capture.count(Log::Level::Warning, "flat");
+    //! [log_capture_usage]
+    ok &= expect(flat == 1 && capture.entries().size() == 1, "LogCapture recorded the warning");
 
     //! [circular_buffer_usage]
     CircularBuffer<double> buffer(4); // single producer, single consumer

@@ -490,19 +490,19 @@
       "by_category": {
         "containers": 55,
         "files": 80,
-        "global": 23,
-        "logging": 58,
+        "global": 18,
+        "logging": 62,
         "objects_signals": 15,
         "other": 2,
         "regex": 10,
         "smart_pointers": 12,
-        "strings": 266,
+        "strings": 267,
         "threads": 9,
         "time": 3
       },
       "public_header_includes": 41,
       "q_object": 1,
-      "files": 25,
+      "files": 27,
       "modules": [
         "Core"
       ]

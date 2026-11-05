@@ -68,9 +68,8 @@ bool PythonTestHelper::hasPackage(const QString& packageName) const
 
 //=============================================================================================================
 
-PythonRunnerResult PythonTestHelper::eval(const QString& code, int timeoutMs) const
+PythonRunnerResult PythonTestHelper::eval(const QString& code, int /*timeoutMs*/) const
 {
-    Q_UNUSED(timeoutMs);
     return m_runner.runCode(code);
 }
 
@@ -208,9 +207,8 @@ MatrixXd PythonTestHelper::evalMatrix(const QString& code, bool* ok, int timeout
 
 PythonRunnerResult PythonTestHelper::runScript(const QString& scriptPath,
                                                const QStringList& args,
-                                               int timeoutMs) const
+                                               int /*timeoutMs*/) const
 {
-    Q_UNUSED(timeoutMs);
     return m_runner.run(scriptPath, args);
 }
 

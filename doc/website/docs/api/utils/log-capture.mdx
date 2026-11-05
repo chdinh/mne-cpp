@@ -1,0 +1,99 @@
+---
+id: log-capture
+title: "UTILSLIB::LogCapture"
+sidebar_label: LogCapture
+sidebar_position: 68
+---
+
+# LogCapture
+
+**Namespace:** `UTILSLIB` &nbsp;·&nbsp; **Library:** Utilities Library &nbsp;·&nbsp; **Source:** [`utils/generics/log.h`](https://github.com/mne-tools/mne-cpp/blob/staging/src/libraries/utils/generics/log.h)
+
+`#include <utils/log.h>`
+
+```cpp
+class UTILSLIB::LogCapture
+```
+
+Records every message instead of passing it on, while it exists; replaces `QTest::ignoreMessage`.
+
+The sink installed before is restored on destruction, so captures nest when destroyed in reverse order.
+
+```cpp title="src/examples/ex_utils/main.cpp"
+LogCapture capture; // in a test: record instead of printing
+Log::warning("channel MEG 0113 is flat");
+const int flat = capture.count(Log::Level::Warning, "flat");
+```
+
+---
+
+## Public Methods
+
+### LogCapture()
+
+---
+
+### ~LogCapture()
+
+---
+
+### LogCapture()
+
+---
+
+### operator=()
+
+---
+
+### entries()
+
+**Returns:**
+
+- *std::vector&lt; Entry &gt;* — The messages recorded so far, oldest first.
+
+---
+
+### count(level, contains)
+
+**Parameters:**
+
+- **level** : *[Log](/docs/api/utils/log)::Level*
+  Severity to count.
+
+- **contains** : *std::string_view*
+  Only messages containing this text; empty counts all.
+
+**Returns:**
+
+- *int* — The number of recorded messages of `level` that contain `contains`.
+
+---
+
+### clear()
+
+Forgets the messages recorded so far.
+
+---
+
+## Example
+
+- Start here: [ex_utils](../../examples/utils/ex_utils.mdx) — Utilities library: buffers, observers, logging, file formats, montages, layouts and reports.
+- Full source: [`src/examples/ex_utils/main.cpp`](https://github.com/mne-tools/mne-cpp/tree/staging/src/examples/ex_utils/main.cpp)
+- Build target: `ex_utils` (runs under CTest)
+
+## Used in examples
+
+### [ex_utils](../../examples/utils/ex_utils.mdx)
+
+Utilities library: buffers, observers, logging, file formats, montages, layouts and reports.
+
+````cpp title="src/examples/ex_utils/main.cpp, line 156"
+LogCapture capture; // in a test: record instead of printing
+Log::warning("channel MEG 0113 is flat");
+const int flat = capture.count(Log::Level::Warning, "flat");
+ok &= expect(flat == 1 && capture.entries().size() == 1, "LogCapture recorded the warning");
+````
+
+## Authors of this file
+
+- Christoph Dinh &lt;christoph.dinh@mne-cpp.org&gt;

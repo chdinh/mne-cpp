@@ -103,11 +103,9 @@ QString MNELogger::logFile()
 }
 
 void MNELogger::customLogWriter(QtMsgType type,
-                                const QMessageLogContext& context,
+                                const QMessageLogContext& /*context*/,
                                 const QString& msg)
 {
-    Q_UNUSED(context)
-
     // Map Qt message type to numeric level (must match CMake MNE_LOG_LEVEL values)
     // 0=DEBUG, 1=INFO, 2=WARN, 3=CRIT, 4=FATAL
     int msgLevel = 0;
