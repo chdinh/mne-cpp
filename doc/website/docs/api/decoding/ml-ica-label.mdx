@@ -26,10 +26,10 @@ Static utility that labels [ICA](/docs/api/dsp/ica) components against EOG/ECG r
 The two scoring primitives — `maxAbsCorrelation` and `muscleScore` — are exposed publicly so an interactive viewer can display the per-component evidence behind each decision and let the user override the label without having to recompute the [ICA](/docs/api/dsp/ica) itself. The class has no state, deleted constructor, and no virtual methods; it is purely a namespaced collection of pure functions.
 
 ```cpp title="src/examples/ex_decoding/main.cpp"
-const QList<IcaLabelResult> labels = MlIcaLabel::classify(icaSources, eog, ecg, kSFreq);
-const QVector<int> reject = MlIcaLabel::findArtifactComponents(labels); // indices to drop before back-projection
+const std::vector<IcaLabelResult> labels = MlIcaLabel::classify(icaSources, eog, ecg, kSFreq);
+const std::vector<int> reject = MlIcaLabel::findArtifactComponents(labels); // indices to drop before back-projection
 for (const IcaLabelResult& label : labels) {
-    qInfo().noquote() << "component" << label.componentIndex << IcaLabelResult::labelToString(label.label)
+    qInfo().noquote() << "component" << label.componentIndex << IcaLabelResult::labelToString(label.label).c_str()
                       << "confidence" << label.confidence;
 }
 ```
@@ -64,7 +64,7 @@ Classify each [ICA](/docs/api/dsp/ica) component using reference signals and spe
 
 **Returns:**
 
-- *QList&lt; [IcaLabelResult](/docs/api/decoding/ica-label-result) &gt;* — Label results for each component.
+- *std::vector&lt; [IcaLabelResult](/docs/api/decoding/ica-label-result) &gt;* — Label results for each component.
 
 ---
 
@@ -74,12 +74,12 @@ Extract indices of artifact components (EOG, ECG, muscle).
 
 **Parameters:**
 
-- **labels** : *const QList&lt; [IcaLabelResult](/docs/api/decoding/ica-label-result) &gt; &*
+- **labels** : *const std::vector&lt; [IcaLabelResult](/docs/api/decoding/ica-label-result) &gt; &*
   Label results from `classify()`.
 
 **Returns:**
 
-- *QVector&lt; int &gt;* — 0-based indices of artifact components.
+- *std::vector&lt; int &gt;* — 0-based indices of artifact components.
 
 ---
 
@@ -134,15 +134,15 @@ Muscle artifacts typically have high power above 30 Hz.
 Spatial decoders and ICA labelling on synthetic mixtures with a known ground truth.
 
 ````cpp title="src/examples/ex_decoding/main.cpp, line 190"
-const QList<IcaLabelResult> labels = MlIcaLabel::classify(icaSources, eog, ecg, kSFreq);
-const QVector<int> reject = MlIcaLabel::findArtifactComponents(labels); // indices to drop before back-projection
+const std::vector<IcaLabelResult> labels = MlIcaLabel::classify(icaSources, eog, ecg, kSFreq);
+const std::vector<int> reject = MlIcaLabel::findArtifactComponents(labels); // indices to drop before back-projection
 for (const IcaLabelResult& label : labels) {
-    qInfo().noquote() << "component" << label.componentIndex << IcaLabelResult::labelToString(label.label)
+    qInfo().noquote() << "component" << label.componentIndex << IcaLabelResult::labelToString(label.label).c_str()
                       << "confidence" << label.confidence;
 }
 ok &= expect(labels.size() == 4 && labels[0].label == IcaComponentLabel::Eog && labels[1].label == IcaComponentLabel::Ecg && labels[2].label == IcaComponentLabel::Muscle && labels[3].label == IcaComponentLabel::Brain,
              "ICA labels: EOG, ECG, muscle, brain");
-ok &= expect(reject == QVector<int>({0, 1, 2}), "components 0-2 are rejected");
+ok &= expect(reject == std::vector<int>({0, 1, 2}), "components 0-2 are rejected");
 ````
 
 ## Authors of this file

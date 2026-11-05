@@ -26,9 +26,10 @@
   "summary": {
     "libraries": 24,
     "qt_free": [
-      "acq"
+      "acq",
+      "decoding"
     ],
-    "tokens": 21199,
+    "tokens": 21181,
     "gui_outside_design": []
   },
   "libraries": {
@@ -150,18 +151,12 @@
       ]
     },
     "decoding": {
-      "tokens": 18,
-      "by_category": {
-        "containers": 8,
-        "global": 2,
-        "strings": 8
-      },
-      "public_header_includes": 4,
+      "tokens": 0,
+      "by_category": {},
+      "public_header_includes": 0,
       "q_object": 0,
       "files": 10,
-      "modules": [
-        "Core"
-      ]
+      "modules": []
     },
     "disp": {
       "tokens": 6290,

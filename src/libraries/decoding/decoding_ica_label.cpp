@@ -35,12 +35,6 @@
 #include <Eigen/Core>
 
 //=============================================================================================================
-// QT INCLUDES
-//=============================================================================================================
-
-#include <QDebug>
-
-//=============================================================================================================
 // STD INCLUDES
 //=============================================================================================================
 
@@ -57,33 +51,33 @@ using namespace Eigen;
 // DEFINE MEMBER METHODS
 //=============================================================================================================
 
-QString IcaLabelResult::labelToString(IcaComponentLabel label)
+std::string IcaLabelResult::labelToString(IcaComponentLabel label)
 {
     switch (label) {
         case IcaComponentLabel::Brain:
-            return QStringLiteral("brain");
+            return "brain";
         case IcaComponentLabel::Eog:
-            return QStringLiteral("eog");
+            return "eog";
         case IcaComponentLabel::Ecg:
-            return QStringLiteral("ecg");
+            return "ecg";
         case IcaComponentLabel::Muscle:
-            return QStringLiteral("muscle");
+            return "muscle";
         case IcaComponentLabel::Other:
-            return QStringLiteral("other");
+            return "other";
     }
-    return QStringLiteral("unknown");
+    return "unknown";
 }
 
 //=============================================================================================================
 
-QList<IcaLabelResult> MlIcaLabel::classify(const MatrixXd& matSources,
-                                           const MatrixXd& matEog,
-                                           const MatrixXd& matEcg,
-                                           double dSFreq,
-                                           double dEogThresh,
-                                           double dEcgThresh)
+std::vector<IcaLabelResult> MlIcaLabel::classify(const MatrixXd& matSources,
+                                                 const MatrixXd& matEog,
+                                                 const MatrixXd& matEcg,
+                                                 double dSFreq,
+                                                 double dEogThresh,
+                                                 double dEcgThresh)
 {
-    QList<IcaLabelResult> results;
+    std::vector<IcaLabelResult> results;
 
     const int nComp = static_cast<int>(matSources.rows());
     if (nComp == 0)
@@ -128,7 +122,7 @@ QList<IcaLabelResult> MlIcaLabel::classify(const MatrixXd& matSources,
             res.confidence = 1.0 - std::max({eogCorr, ecgCorr, muscle});
         }
 
-        results.append(res);
+        results.push_back(res);
     }
 
     return results;
@@ -136,14 +130,14 @@ QList<IcaLabelResult> MlIcaLabel::classify(const MatrixXd& matSources,
 
 //=============================================================================================================
 
-QVector<int> MlIcaLabel::findArtifactComponents(const QList<IcaLabelResult>& labels)
+std::vector<int> MlIcaLabel::findArtifactComponents(const std::vector<IcaLabelResult>& labels)
 {
-    QVector<int> artifacts;
+    std::vector<int> artifacts;
     for (const auto& res : labels) {
         if (res.label == IcaComponentLabel::Eog ||
             res.label == IcaComponentLabel::Ecg ||
             res.label == IcaComponentLabel::Muscle) {
-            artifacts.append(res.componentIndex);
+            artifacts.push_back(res.componentIndex);
         }
     }
     return artifacts;

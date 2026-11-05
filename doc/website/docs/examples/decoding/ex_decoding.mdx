@@ -254,16 +254,16 @@ int main(int argc, char* argv[])
     }
 
     //! [ml_ica_label_classify]
-    const QList<IcaLabelResult> labels = MlIcaLabel::classify(icaSources, eog, ecg, kSFreq);
-    const QVector<int> reject = MlIcaLabel::findArtifactComponents(labels); // indices to drop before back-projection
+    const std::vector<IcaLabelResult> labels = MlIcaLabel::classify(icaSources, eog, ecg, kSFreq);
+    const std::vector<int> reject = MlIcaLabel::findArtifactComponents(labels); // indices to drop before back-projection
     for (const IcaLabelResult& label : labels) {
-        qInfo().noquote() << "component" << label.componentIndex << IcaLabelResult::labelToString(label.label)
+        qInfo().noquote() << "component" << label.componentIndex << IcaLabelResult::labelToString(label.label).c_str()
                           << "confidence" << label.confidence;
     }
     //! [ml_ica_label_classify]
     ok &= expect(labels.size() == 4 && labels[0].label == IcaComponentLabel::Eog && labels[1].label == IcaComponentLabel::Ecg && labels[2].label == IcaComponentLabel::Muscle && labels[3].label == IcaComponentLabel::Brain,
                  "ICA labels: EOG, ECG, muscle, brain");
-    ok &= expect(reject == QVector<int>({0, 1, 2}), "components 0-2 are rejected");
+    ok &= expect(reject == std::vector<int>({0, 1, 2}), "components 0-2 are rejected");
 
     qInfo() << (ok ? "All decoding checks passed." : "Decoding checks FAILED.");
     return ok ? EXIT_SUCCESS : EXIT_FAILURE;

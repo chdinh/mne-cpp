@@ -49,12 +49,12 @@
 #include <Eigen/Core>
 
 //=============================================================================================================
-// QT INCLUDES
+// STL INCLUDES
 //=============================================================================================================
 
-#include <QList>
-#include <QString>
-#include <QPair>
+#include <string>
+#include <vector>
+
 
 //=============================================================================================================
 // DEFINE NAMESPACE DECODINGLIB
@@ -103,7 +103,7 @@ struct DECODINGSHARED_EXPORT IcaLabelResult
     IcaComponentLabel label; /**< Assigned label. */
     double confidence;       /**< Confidence score in [0, 1]. */
 
-    static QString labelToString(IcaComponentLabel label);
+    static std::string labelToString(IcaComponentLabel label);
 };
 
 //=============================================================================================================
@@ -146,12 +146,12 @@ public:
      *
      * @return Label results for each component.
      */
-    static QList<IcaLabelResult> classify(const Eigen::MatrixXd& matSources,
-                                          const Eigen::MatrixXd& matEog,
-                                          const Eigen::MatrixXd& matEcg,
-                                          double dSFreq,
-                                          double dEogThresh = 0.3,
-                                          double dEcgThresh = 0.3);
+    static std::vector<IcaLabelResult> classify(const Eigen::MatrixXd& matSources,
+                                                const Eigen::MatrixXd& matEog,
+                                                const Eigen::MatrixXd& matEcg,
+                                                double dSFreq,
+                                                double dEogThresh = 0.3,
+                                                double dEcgThresh = 0.3);
 
     //=========================================================================================================
     /**
@@ -161,7 +161,7 @@ public:
      *
      * @return 0-based indices of artifact components.
      */
-    static QVector<int> findArtifactComponents(const QList<IcaLabelResult>& labels);
+    static std::vector<int> findArtifactComponents(const std::vector<IcaLabelResult>& labels);
 
     //=========================================================================================================
     /**

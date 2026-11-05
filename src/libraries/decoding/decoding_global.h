@@ -19,7 +19,7 @@
  * matrices — which is why they live in one compilation unit and not in
  * @c rtprocessing or @c dsp.
  *
- * The header only declares the Qt @c Q_DECL_EXPORT / @c Q_DECL_IMPORT
+ * The header only declares the export / import
  * macro plus the build-stamp accessors used by the version probe in the
  * applications layer; the actual algorithms are declared in
  * @ref decoding_csp.h, @ref decoding_spoc.h, @ref decoding_ssd.h and
@@ -38,21 +38,19 @@
 #include <utils/buildinfo.h>
 
 //=============================================================================================================
-// QT INCLUDES
-//=============================================================================================================
-
-#include <QtCore/qglobal.h>
-
-//=============================================================================================================
 // DEFINES
 //=============================================================================================================
 
 #if defined(STATICBUILD)
 #define DECODINGSHARED_EXPORT
-#elif defined(MNE_DECODING_LIBRARY)
-#define DECODINGSHARED_EXPORT Q_DECL_EXPORT /**< Q_DECL_EXPORT must be added to the declarations of symbols used when compiling a shared library. */
+#elif defined(_WIN32)
+#if defined(MNE_DECODING_LIBRARY)
+#define DECODINGSHARED_EXPORT __declspec(dllexport) /**< Exported when building the shared library. */
 #else
-#define DECODINGSHARED_EXPORT Q_DECL_IMPORT /**< Q_DECL_IMPORT must be added to the declarations of symbols used when compiling a client that uses the shared library. */
+#define DECODINGSHARED_EXPORT __declspec(dllimport) /**< Imported by clients of the shared library. */
+#endif
+#else
+#define DECODINGSHARED_EXPORT __attribute__((visibility("default"))) /**< Default visibility on ELF/Mach-O. */
 #endif
 
 //=============================================================================================================

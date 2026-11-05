@@ -20,10 +20,10 @@ Outcome of labelling a single [ICA](/docs/api/dsp/ica) component.
 Pairs a component index with its winning `IcaComponentLabel` and a confidence score in $[0, 1]$ derived from the underlying correlation or spectral statistic (for EOG/ECG: the maximum absolute Pearson correlation with the reference traces; for muscle: the fraction of power above 30 Hz). Downstream consumers typically threshold the score or render it next to the component topography so the user can override the automatic decision.
 
 ```cpp title="src/examples/ex_decoding/main.cpp"
-const QList<IcaLabelResult> labels = MlIcaLabel::classify(icaSources, eog, ecg, kSFreq);
-const QVector<int> reject = MlIcaLabel::findArtifactComponents(labels); // indices to drop before back-projection
+const std::vector<IcaLabelResult> labels = MlIcaLabel::classify(icaSources, eog, ecg, kSFreq);
+const std::vector<int> reject = MlIcaLabel::findArtifactComponents(labels); // indices to drop before back-projection
 for (const IcaLabelResult& label : labels) {
-    qInfo().noquote() << "component" << label.componentIndex << IcaLabelResult::labelToString(label.label)
+    qInfo().noquote() << "component" << label.componentIndex << IcaLabelResult::labelToString(label.label).c_str()
                       << "confidence" << label.confidence;
 }
 ```
@@ -49,15 +49,15 @@ for (const IcaLabelResult& label : labels) {
 Spatial decoders and ICA labelling on synthetic mixtures with a known ground truth.
 
 ````cpp title="src/examples/ex_decoding/main.cpp, line 190"
-const QList<IcaLabelResult> labels = MlIcaLabel::classify(icaSources, eog, ecg, kSFreq);
-const QVector<int> reject = MlIcaLabel::findArtifactComponents(labels); // indices to drop before back-projection
+const std::vector<IcaLabelResult> labels = MlIcaLabel::classify(icaSources, eog, ecg, kSFreq);
+const std::vector<int> reject = MlIcaLabel::findArtifactComponents(labels); // indices to drop before back-projection
 for (const IcaLabelResult& label : labels) {
-    qInfo().noquote() << "component" << label.componentIndex << IcaLabelResult::labelToString(label.label)
+    qInfo().noquote() << "component" << label.componentIndex << IcaLabelResult::labelToString(label.label).c_str()
                       << "confidence" << label.confidence;
 }
 ok &= expect(labels.size() == 4 && labels[0].label == IcaComponentLabel::Eog && labels[1].label == IcaComponentLabel::Ecg && labels[2].label == IcaComponentLabel::Muscle && labels[3].label == IcaComponentLabel::Brain,
              "ICA labels: EOG, ECG, muscle, brain");
-ok &= expect(reject == QVector<int>({0, 1, 2}), "components 0-2 are rejected");
+ok &= expect(reject == std::vector<int>({0, 1, 2}), "components 0-2 are rejected");
 ````
 
 ## Authors of this file

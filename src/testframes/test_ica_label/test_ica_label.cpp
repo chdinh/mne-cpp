@@ -110,16 +110,16 @@ void TestIcaLabel::initTestCase()
 void TestIcaLabel::testEmptyInput()
 {
     MatrixXd empty;
-    QList<IcaLabelResult> labels = MlIcaLabel::classify(empty, m_eogRef, m_ecgRef, m_sFreq);
-    QVERIFY(labels.isEmpty());
+    std::vector<IcaLabelResult> labels = MlIcaLabel::classify(empty, m_eogRef, m_ecgRef, m_sFreq);
+    QVERIFY(labels.empty());
 }
 
 //=============================================================================================================
 
 void TestIcaLabel::testEogDetection()
 {
-    QList<IcaLabelResult> labels = MlIcaLabel::classify(m_sources, m_eogRef, m_ecgRef, m_sFreq);
-    QCOMPARE(labels.size(), 3);
+    std::vector<IcaLabelResult> labels = MlIcaLabel::classify(m_sources, m_eogRef, m_ecgRef, m_sFreq);
+    QCOMPARE(labels.size(), std::size_t(3));
 
     // Component 1 should be classified as EOG
     QCOMPARE(labels[1].label, IcaComponentLabel::Eog);
@@ -130,7 +130,7 @@ void TestIcaLabel::testEogDetection()
 
 void TestIcaLabel::testEcgDetection()
 {
-    QList<IcaLabelResult> labels = MlIcaLabel::classify(m_sources, m_eogRef, m_ecgRef, m_sFreq);
+    std::vector<IcaLabelResult> labels = MlIcaLabel::classify(m_sources, m_eogRef, m_ecgRef, m_sFreq);
 
     // Component 2 should be classified as ECG
     QCOMPARE(labels[2].label, IcaComponentLabel::Ecg);
@@ -141,7 +141,7 @@ void TestIcaLabel::testEcgDetection()
 
 void TestIcaLabel::testBrainDefault()
 {
-    QList<IcaLabelResult> labels = MlIcaLabel::classify(m_sources, m_eogRef, m_ecgRef, m_sFreq);
+    std::vector<IcaLabelResult> labels = MlIcaLabel::classify(m_sources, m_eogRef, m_ecgRef, m_sFreq);
 
     // Component 0 (10 Hz alpha) should be brain
     QCOMPARE(labels[0].label, IcaComponentLabel::Brain);
@@ -151,13 +151,11 @@ void TestIcaLabel::testBrainDefault()
 
 void TestIcaLabel::testFindArtifacts()
 {
-    QList<IcaLabelResult> labels = MlIcaLabel::classify(m_sources, m_eogRef, m_ecgRef, m_sFreq);
-    QVector<int> artifacts = MlIcaLabel::findArtifactComponents(labels);
+    std::vector<IcaLabelResult> labels = MlIcaLabel::classify(m_sources, m_eogRef, m_ecgRef, m_sFreq);
+    std::vector<int> artifacts = MlIcaLabel::findArtifactComponents(labels);
 
     // Should find components 1 (EOG) and 2 (ECG) as artifacts
-    QVERIFY(artifacts.contains(1));
-    QVERIFY(artifacts.contains(2));
-    QVERIFY(!artifacts.contains(0));
+    QCOMPARE(artifacts, std::vector<int>({1, 2}));
 }
 
 //=============================================================================================================
@@ -194,11 +192,11 @@ void TestIcaLabel::testMuscleScore()
 
 void TestIcaLabel::testLabelToString()
 {
-    QCOMPARE(IcaLabelResult::labelToString(IcaComponentLabel::Brain), QStringLiteral("brain"));
-    QCOMPARE(IcaLabelResult::labelToString(IcaComponentLabel::Eog), QStringLiteral("eog"));
-    QCOMPARE(IcaLabelResult::labelToString(IcaComponentLabel::Ecg), QStringLiteral("ecg"));
-    QCOMPARE(IcaLabelResult::labelToString(IcaComponentLabel::Muscle), QStringLiteral("muscle"));
-    QCOMPARE(IcaLabelResult::labelToString(IcaComponentLabel::Other), QStringLiteral("other"));
+    QCOMPARE(IcaLabelResult::labelToString(IcaComponentLabel::Brain), std::string("brain"));
+    QCOMPARE(IcaLabelResult::labelToString(IcaComponentLabel::Eog), std::string("eog"));
+    QCOMPARE(IcaLabelResult::labelToString(IcaComponentLabel::Ecg), std::string("ecg"));
+    QCOMPARE(IcaLabelResult::labelToString(IcaComponentLabel::Muscle), std::string("muscle"));
+    QCOMPARE(IcaLabelResult::labelToString(IcaComponentLabel::Other), std::string("other"));
 }
 
 //=============================================================================================================
@@ -206,7 +204,7 @@ void TestIcaLabel::testLabelToString()
 void TestIcaLabel::testNoReferences()
 {
     MatrixXd emptyRef;
-    QList<IcaLabelResult> labels = MlIcaLabel::classify(m_sources, emptyRef, emptyRef, m_sFreq);
+    std::vector<IcaLabelResult> labels = MlIcaLabel::classify(m_sources, emptyRef, emptyRef, m_sFreq);
 
     // Without references, all should be brain or other (no EOG/ECG detection possible)
     for (const auto& l : labels) {
@@ -229,9 +227,9 @@ void TestIcaLabel::testMultipleArtifacts()
         sources(3, t) = m_ecgRef(0, t) * 2.0;               // ECG
     }
 
-    QList<IcaLabelResult> labels = MlIcaLabel::classify(sources, m_eogRef, m_ecgRef, m_sFreq);
-    QVector<int> artifacts = MlIcaLabel::findArtifactComponents(labels);
-    QVERIFY(artifacts.size() >= 2);
+    std::vector<IcaLabelResult> labels = MlIcaLabel::classify(sources, m_eogRef, m_ecgRef, m_sFreq);
+    std::vector<int> artifacts = MlIcaLabel::findArtifactComponents(labels);
+    QVERIFY(artifacts.size() >= 2u);
 }
 
 //=============================================================================================================
