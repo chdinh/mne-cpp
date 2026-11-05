@@ -22,6 +22,7 @@
 #include <cstring>
 #include <sstream>
 
+#include <QNetworkInterface>
 #include <QVariant>
 
 //=============================================================================================================
@@ -99,6 +100,16 @@ bool field(const stream_info& info, const std::string& key, std::string& value)
     return true;
 }
 
+QNetworkInterface loopbackInterface()
+{
+    for (const auto& iface : QNetworkInterface::allInterfaces()) {
+        if (iface.type() == QNetworkInterface::Loopback) {
+            return iface;
+        }
+    }
+    return {};
+}
+
 } // namespace
 
 //=============================================================================================================
@@ -116,6 +127,33 @@ std::vector<QHostAddress> LSLLIB::detail::discoveryTargets()
 std::vector<QHostAddress> LSLLIB::detail::discoveryGroups()
 {
     return {QHostAddress(QStringLiteral("239.255.172.215")), QHostAddress(QStringLiteral("224.0.0.183"))};
+}
+
+//=============================================================================================================
+
+void LSLLIB::detail::joinDiscoveryGroups(QUdpSocket& socket)
+{
+    const auto loopback = loopbackInterface();
+    for (const auto& group : discoveryGroups()) {
+        socket.joinMulticastGroup(group);
+        if (loopback.isValid()) {
+            socket.joinMulticastGroup(group, loopback);
+        }
+    }
+}
+
+//=============================================================================================================
+
+void LSLLIB::detail::sendQuery(QUdpSocket& socket, const QByteArray& query)
+{
+    for (const auto& target : discoveryTargets()) {
+        socket.writeDatagram(query, target, kDiscoveryPort);
+    }
+    if (const auto loopback = loopbackInterface(); loopback.isValid()) {
+        socket.setMulticastInterface(loopback);
+        socket.writeDatagram(query, discoveryGroups().front(), kDiscoveryPort);
+        socket.setMulticastInterface({});
+    }
 }
 
 //=============================================================================================================

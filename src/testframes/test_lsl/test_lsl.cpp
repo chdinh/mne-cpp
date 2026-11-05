@@ -24,6 +24,7 @@
 #include <QtTest/QtTest>
 #include <QThread>
 #include <QNetworkDatagram>
+#include <QNetworkInterface>
 #include <QUdpSocket>
 
 //=============================================================================================================
@@ -126,6 +127,7 @@ private slots:
     void testResolveStreamsTimeout();
     void testResolveStreamNoMatch();
     void testResolveStreamsMultipleOutlets();
+    void testOutletAnswersGroupQueryOnLoopback();
     void testWaitForDatagramsKeepsSocketBound();
 
     //=========================================================================================================
@@ -846,6 +848,38 @@ void TestLsl::testResolveStreamsMultipleOutlets()
     }
     QVERIFY(found1);
     QVERIFY(found2);
+}
+
+//=============================================================================================================
+
+void TestLsl::testOutletAnswersGroupQueryOnLoopback()
+{
+    // Outlets share the discovery port, so only a group query reaches all of them; loopback works on every host.
+    QNetworkInterface loopback;
+    for (const QNetworkInterface& iface : QNetworkInterface::allInterfaces()) {
+        if (iface.flags().testFlag(QNetworkInterface::IsLoopBack) && iface.flags().testFlag(QNetworkInterface::IsUp)) {
+            loopback = iface;
+        }
+    }
+    if (!loopback.isValid()) {
+        QSKIP("No loopback interface");
+    }
+    stream_info info("LoopGroup", "EEG", 1, 100.0, ChannelFormat::Float32, "loopgroup");
+    stream_outlet outlet(info);
+
+    QUdpSocket socket;
+    QVERIFY(detail::bindQuerySocket(socket, 0));
+    const quint16 port = socket.localPort();
+    socket.setMulticastInterface(loopback);
+    const QByteArray query = "LSL:shortinfo\r\nsource_id='loopgroup'\r\n" + QByteArray::number(port) + " 42\r\n";
+    bool answered = false;
+    for (int attempt = 0; attempt < 10 && !answered; ++attempt) {
+        socket.writeDatagram(query, detail::discoveryGroups().front(), detail::kDiscoveryPort);
+        if (detail::waitForDatagrams(socket, port, 300)) {
+            answered = socket.receiveDatagram().data().startsWith("42\r\n");
+        }
+    }
+    QVERIFY(answered);
 }
 
 //=============================================================================================================

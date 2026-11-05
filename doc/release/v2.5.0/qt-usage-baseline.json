@@ -353,13 +353,12 @@
       "tokens": 172,
       "by_category": {
         "containers": 8,
-        "global": 33,
+        "global": 30,
         "logging": 1,
-        "network": 49,
+        "network": 53,
         "other": 4,
-        "random": 1,
-        "strings": 72,
-        "time": 4
+        "strings": 73,
+        "time": 3
       },
       "public_header_includes": 4,
       "q_object": 0,

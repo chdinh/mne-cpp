@@ -5827,7 +5827,7 @@
       "timeout": 120,
       "requirements": [],
       "gui": false,
-      "qskip_sites": 5,
+      "qskip_sites": 6,
       "spawns_processes": false,
       "ci_excluded_on": [],
       "ci": {

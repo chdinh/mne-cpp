@@ -163,9 +163,7 @@ private:
         QUdpSocket discovery;
         if (discovery.bind(QHostAddress::AnyIPv4, kDiscoveryPort, QAbstractSocket::ShareAddress | QAbstractSocket::ReuseAddressHint)) {
 #ifndef Q_OS_WASM
-            for (const QHostAddress& group : discoveryGroups()) {
-                discovery.joinMulticastGroup(group);
-            }
+            joinDiscoveryGroups(discovery);
 #endif
         }
         m_info.set_data_port(server.serverPort());

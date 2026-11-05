@@ -25,10 +25,8 @@
 // QT INCLUDES
 //=============================================================================================================
 
-#include <QElapsedTimer>
 #include <QHostAddress>
 #include <QNetworkDatagram>
-#include <QRandomGenerator>
 #include <QUdpSocket>
 #include <QVariant>
 
@@ -37,7 +35,10 @@
 //=============================================================================================================
 
 #include <algorithm>
+#include <chrono>
+#include <random>
 #include <set>
+#include <string>
 
 //=============================================================================================================
 // USED NAMESPACES
@@ -53,7 +54,7 @@ using namespace LSLLIB::detail;
 namespace
 {
 
-constexpr int kResendMs = 500;
+constexpr std::chrono::milliseconds kResend{500};
 
 std::vector<stream_info> resolve(const std::string& predicate, double timeout, std::size_t minimum = 0)
 {
@@ -62,29 +63,27 @@ std::vector<stream_info> resolve(const std::string& predicate, double timeout, s
     if (!detail::bindQuerySocket(socket, 0)) {
         return results;
     }
-    const quint16 port = socket.localPort();
-    const QByteArray id = QByteArray::number(QRandomGenerator::global()->generate64());
+    const auto port = socket.localPort();
+    const QByteArray id = QByteArray::fromStdString(std::to_string(std::random_device{}()));
     const QByteArray query = "LSL:shortinfo\r\n" + QByteArray::fromStdString(predicate) + "\r\n" +
         QByteArray::number(port) + " " + id + "\r\n";
     const QByteArray prefix = id + "\r\n";
 
     std::set<std::string> seen;
-    const auto timeoutMs = static_cast<qint64>(timeout * 1000.0);
-    QElapsedTimer timer;
-    timer.start();
-    qint64 nextSend = 0;
-    while (timer.elapsed() < timeoutMs && (minimum == 0 || results.size() < minimum)) {
-        if (timer.elapsed() >= nextSend) {
-            for (const QHostAddress& target : discoveryTargets()) {
-                socket.writeDatagram(query, target, kDiscoveryPort);
-            }
-            nextSend = timer.elapsed() + kResendMs;
+    using Clock = std::chrono::steady_clock;
+    const Clock::time_point deadline =
+        Clock::now() + std::chrono::duration_cast<Clock::duration>(std::chrono::duration<double>(timeout));
+    Clock::time_point nextSend = Clock::now();
+    while (Clock::now() < deadline && (minimum == 0 || results.size() < minimum)) {
+        if (Clock::now() >= nextSend) {
+            sendQuery(socket, query);
+            nextSend = Clock::now() + kResend;
         }
-        const auto wait = static_cast<int>(std::min(timeoutMs, nextSend) - timer.elapsed());
-        detail::waitForDatagrams(socket, port, wait);
+        const auto wait = std::chrono::ceil<std::chrono::milliseconds>(std::min(deadline, nextSend) - Clock::now());
+        detail::waitForDatagrams(socket, port, static_cast<int>(std::max<std::chrono::milliseconds::rep>(wait.count(), 0)));
         while (socket.hasPendingDatagrams()) {
-            const QNetworkDatagram datagram = socket.receiveDatagram();
-            const QByteArray data = datagram.data();
+            const auto datagram = socket.receiveDatagram();
+            const auto data = datagram.data();
             if (!data.startsWith(prefix)) {
                 continue;
             }
