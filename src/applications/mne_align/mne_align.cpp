@@ -587,8 +587,8 @@ void MneAlign::onIcpFit()
     auto residualFor = [&](FiducialId id, const QString& label) {
         if (!m_pPoints->hasFiducial(id) || !m_pPoints->hasTwinFiducial(id))
             return;
-        const QVector3D cap = m_pPoints->fiducial(id);        // device space
-        const QVector3D mriRef = m_pPoints->twinFiducial(id); // MRI space
+        const QVector3D cap = toQt(m_pPoints->fiducial(id));        // device space
+        const QVector3D mriRef = toQt(m_pPoints->twinFiducial(id)); // MRI space
         const QVector3D mriPred = (refinedHeadToMri * deviceToHead).map(cap);
         residuals.append({label, (mriPred - mriRef).length()});
     };

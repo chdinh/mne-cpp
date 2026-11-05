@@ -34,13 +34,14 @@
 
 #include "acq_polhemus_global.h"
 
+#include <Eigen/Core>
+#include <Eigen/Geometry>
+
 //=============================================================================================================
 // QT INCLUDES
 //=============================================================================================================
 
 #include <QByteArray>
-#include <QQuaternion>
-#include <QVector3D>
 
 //=============================================================================================================
 // DEFINE NAMESPACE ACQLIB
@@ -57,9 +58,9 @@ namespace ACQLIB
  */
 struct ACQPOLHEMUSSHARED_EXPORT FastrakSample
 {
-    int station = 0;         ///< 1-based station id reported by the device.
-    QVector3D position;      ///< Position in metres (always normalised to SI).
-    QQuaternion orientation; ///< Sensor orientation; identity if not provided.
+    int station = 0;                                                 ///< 1-based station id reported by the device.
+    Eigen::Vector3f position = Eigen::Vector3f::Zero();              ///< Position in metres (always normalised to SI).
+    Eigen::Quaternionf orientation = Eigen::Quaternionf::Identity(); ///< Sensor orientation; identity if not provided.
     bool hasOrientation = false;
 };
 

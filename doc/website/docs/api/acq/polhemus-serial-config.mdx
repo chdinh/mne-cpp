@@ -25,18 +25,16 @@ PolhemusCoregistration coreg;
 coreg.setConnection(&connection); // station 1 = pen, station 2 = head tracker
 
 // Model fiducials are the pen fiducials turned 90 deg about z and moved 5 cm in x; the registration must find that transform
-QMatrix4x4 truth;
-truth.translate(0.05f, 0.0f, 0.0f);
-truth.rotate(90.0f, 0.0f, 0.0f, 1.0f);
+const Eigen::Affine3f truth = Eigen::Translation3f(0.05f, 0.0f, 0.0f) * Eigen::AngleAxisf(0.5f * static_cast<float>(EIGEN_PI), Eigen::Vector3f::UnitZ());
 const QList<FiducialId> fiducials = {FiducialId::NAS, FiducialId::LPA, FiducialId::RPA};
-QList<QVector3D> penAt;
+QList<Eigen::Vector3f> penAt;
 for (const FiducialId id : fiducials) {
     QEventLoop wait; // let the next mock pen sample arrive, as the user would move the pen
     QTimer::singleShot(350, &wait, &QEventLoop::quit);
     wait.exec();
     coreg.captureCurrentPenPositionAsFiducial(id);
     penAt.append(coreg.penPosition());
-    coreg.setModelFiducial(id, truth.map(coreg.penPosition()));
+    coreg.setModelFiducial(id, truth * coreg.penPosition());
 }
 const bool registered = coreg.computeRegistration();
 connection.close();
@@ -56,7 +54,7 @@ connection.close();
 
 Polhemus digitiser: parse Fastrak records, register captured fiducials and collect digitised points.
 
-````cpp title="src/examples/ex_acq_polhemus/main.cpp, line 77"
+````cpp title="src/examples/ex_acq_polhemus/main.cpp, line 79"
 PolhemusConnection connection;
 PolhemusSerialConfig serial;        // 115200 baud, inches; the hemisphere and stream command a Fastrak needs
 connection.open(QString(), serial); // empty port name = mock backend sweeping a 10 cm sphere; e.g. "/dev/tty.usbserial" for a Fastrak

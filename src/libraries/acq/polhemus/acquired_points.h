@@ -32,7 +32,8 @@
 #include <QObject>
 #include <QString>
 #include <QVector>
-#include <QVector3D>
+
+#include <Eigen/Core>
 
 //=============================================================================================================
 // DEFINE NAMESPACE ACQLIB
@@ -78,9 +79,9 @@ enum class FiducialId
 struct ACQPOLHEMUSSHARED_EXPORT DigitizedPoint
 {
     PointKind kind = PointKind::HeadShape;
-    QString label;       ///< Human label ("NAS", "Cz", "HSP-42", …).
-    int identNumber = 0; ///< 1-based id used by FIFF on export.
-    QVector3D position;  ///< Position in metres, sensor frame.
+    QString label;                                      ///< Human label ("NAS", "Cz", "HSP-42", …).
+    int identNumber = 0;                                ///< 1-based id used by FIFF on export.
+    Eigen::Vector3f position = Eigen::Vector3f::Zero(); ///< Position in metres, sensor frame.
 };
 
 //=============================================================================================================
@@ -143,20 +144,20 @@ public:
     }
 
     /** Convenience accessor: returns the captured fiducial position for
-     *  @p id, or a default-constructed @c QVector3D if not yet captured.
+     *  @p id, or a zero vector if not yet captured.
      *
      * @param[in] id Fiducial to look up.
      *
      * @return Captured fiducial position, or a zero vector if not yet captured.
      */
-    QVector3D fiducial(FiducialId id) const
+    Eigen::Vector3f fiducial(FiducialId id) const
     {
         for (const auto& p : m_points) {
             if (p.kind == PointKind::Fiducial && p.identNumber == static_cast<int>(id)) {
                 return p.position;
             }
         }
-        return {};
+        return Eigen::Vector3f::Zero();
     }
 
     /**
@@ -210,7 +211,7 @@ public:
         return n;
     }
 
-    void setPosition(int index, const QVector3D& pos)
+    void setPosition(int index, const Eigen::Vector3f& pos)
     {
         if (index >= 0 && index < m_points.size())
             m_points[index].position = pos;
@@ -223,7 +224,7 @@ public:
 
     // ── Twin (BEM-space) fiducials — clicked on digital twin surface ──
 
-    void setTwinFiducial(FiducialId id, const QVector3D& pos)
+    void setTwinFiducial(FiducialId id, const Eigen::Vector3f& pos)
     {
         m_twinFiducials[static_cast<int>(id)] = pos;
         emit pointsChanged();
@@ -240,9 +241,9 @@ public:
         return m_twinFiducials.contains(static_cast<int>(id));
     }
 
-    QVector3D twinFiducial(FiducialId id) const
+    Eigen::Vector3f twinFiducial(FiducialId id) const
     {
-        return m_twinFiducials.value(static_cast<int>(id));
+        return m_twinFiducials.value(static_cast<int>(id), Eigen::Vector3f::Zero());
     }
 
     bool hasAllTwinFiducials() const
@@ -255,7 +256,7 @@ signals:
 
 private:
     QVector<DigitizedPoint> m_points;
-    QMap<int, QVector3D> m_twinFiducials; ///< BEM-space fiducials keyed by FiducialId
+    QMap<int, Eigen::Vector3f> m_twinFiducials; ///< BEM-space fiducials keyed by FiducialId
 };
 
 } // namespace ACQLIB

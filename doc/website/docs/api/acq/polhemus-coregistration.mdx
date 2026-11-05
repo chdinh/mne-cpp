@@ -31,18 +31,16 @@ PolhemusCoregistration coreg;
 coreg.setConnection(&connection); // station 1 = pen, station 2 = head tracker
 
 // Model fiducials are the pen fiducials turned 90 deg about z and moved 5 cm in x; the registration must find that transform
-QMatrix4x4 truth;
-truth.translate(0.05f, 0.0f, 0.0f);
-truth.rotate(90.0f, 0.0f, 0.0f, 1.0f);
+const Eigen::Affine3f truth = Eigen::Translation3f(0.05f, 0.0f, 0.0f) * Eigen::AngleAxisf(0.5f * static_cast<float>(EIGEN_PI), Eigen::Vector3f::UnitZ());
 const QList<FiducialId> fiducials = {FiducialId::NAS, FiducialId::LPA, FiducialId::RPA};
-QList<QVector3D> penAt;
+QList<Eigen::Vector3f> penAt;
 for (const FiducialId id : fiducials) {
     QEventLoop wait; // let the next mock pen sample arrive, as the user would move the pen
     QTimer::singleShot(350, &wait, &QEventLoop::quit);
     wait.exec();
     coreg.captureCurrentPenPositionAsFiducial(id);
     penAt.append(coreg.penPosition());
-    coreg.setModelFiducial(id, truth.map(coreg.penPosition()));
+    coreg.setModelFiducial(id, truth * coreg.penPosition());
 }
 const bool registered = coreg.computeRegistration();
 connection.close();
@@ -157,10 +155,10 @@ Set the rigid offset from the tracker sensor body frame to the device frame.
 
 **Parameters:**
 
-- **translation** : *const QVector3D &*
+- **translation** : *const Eigen::Vector3f &*
   Translation in metres, expressed in the tracker body frame.
 
-- **rotation** : *const QQuaternion &*
+- **rotation** : *const Eigen::Quaternionf &*
   Rotation from tracker body frame to device frame.
 
 ---
@@ -229,7 +227,7 @@ Captured objective center in tracker body frame (metres).
 
 **Returns:**
 
-- *QVector3D* — Objective center in the tracker body frame in metres; only meaningful if `hasObjectiveCenter()` is true.
+- *Eigen::Vector3f* — Objective center in the tracker body frame in metres; only meaningful if `hasObjectiveCenter()` is true.
 
 ---
 
@@ -276,7 +274,7 @@ Direction of the optical axis in the tracker body frame (unit vector).
 
 **Returns:**
 
-- *QVector3D* — Unit optical-axis direction in the tracker body frame; only meaningful if `opticalCalibrationValid()` is true.
+- *Eigen::Vector3f* — Unit optical-axis direction in the tracker body frame; only meaningful if `opticalCalibrationValid()` is true.
 
 ---
 
@@ -286,7 +284,7 @@ Position of the optical center in the tracker body frame (metres).
 
 **Returns:**
 
-- *QVector3D* — Optical center in the tracker body frame in metres.
+- *Eigen::Vector3f* — Optical center in the tracker body frame in metres.
 
 ---
 
@@ -320,7 +318,7 @@ The correction rotates `m_opticalAxisLocal` in the tracker body frame so that a 
 
 **Parameters:**
 
-- **targetWorldPos** : *const QVector3D &*
+- **targetWorldPos** : *const Eigen::Vector3f &*
   Desired focus point in Polhemus world frame.
 
 - **correctionDeg** : *float &*
@@ -360,10 +358,10 @@ Compute the current optical axis ray in Polhemus world frame.
 
 **Parameters:**
 
-- **origin** : *QVector3D &*
+- **origin** : *Eigen::Vector3f &*
   Ray origin (optical center in world frame).
 
-- **direction** : *QVector3D &*
+- **direction** : *Eigen::Vector3f &*
   Ray direction (optical axis in world frame, unit vector).
 
 **Returns:**
@@ -380,7 +378,7 @@ This is the tracker's local Y axis rotated into the world frame, orthogonalised 
 
 **Parameters:**
 
-- **up** : *QVector3D &*
+- **up** : *Eigen::Vector3f &*
   Unit vector pointing "up" in the microscope view.
 
 **Returns:**
@@ -535,7 +533,7 @@ Call this when the user clears all fiducials.
 
 Polhemus digitiser: parse Fastrak records, register captured fiducials and collect digitised points.
 
-````cpp title="src/examples/ex_acq_polhemus/main.cpp, line 77"
+````cpp title="src/examples/ex_acq_polhemus/main.cpp, line 79"
 PolhemusConnection connection;
 PolhemusSerialConfig serial;        // 115200 baud, inches; the hemisphere and stream command a Fastrak needs
 connection.open(QString(), serial); // empty port name = mock backend sweeping a 10 cm sphere; e.g. "/dev/tty.usbserial" for a Fastrak

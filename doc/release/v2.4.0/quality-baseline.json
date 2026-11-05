@@ -191,16 +191,6 @@
       },
       "equivalence_without_static_evidence": []
     },
-    "G13_qt": {
-      "tokens": 21419,
-      "libraries": 24,
-      "qt_free": [
-        "acq"
-      ],
-      "gui_outside_design": [
-        "acq/polhemus"
-      ]
-    },
     "G8_onboarding": {
       "run": "https://github.com/mne-tools/mne-cpp/actions/runs/39457174548",
       "results": {

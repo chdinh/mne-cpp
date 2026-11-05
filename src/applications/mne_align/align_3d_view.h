@@ -196,7 +196,7 @@ public:
      * @param[in] position     Position in metres, sensor frame.
      * @param[in] orientation  Sensor orientation quaternion.
      */
-    void setLiveDigitizerPose(int station, const QVector3D& position, const QQuaternion& orientation);
+    void setLiveDigitizerPose(int station, const Eigen::Vector3f& position, const Eigen::Quaternionf& orientation);
 
     /**
      * @brief Override the head→MRI transform with an externally refined fit

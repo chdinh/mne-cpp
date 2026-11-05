@@ -52,6 +52,8 @@ import render_quality_pages  # noqa: E402
 
 REPO_ROOT = Path(__file__).resolve().parents[2]
 RELEASE_DIR = REPO_ROOT / "doc" / "release" / "v2.4.0"
+# The Qt usage report tracks a v2.5.0 gate (G13), so it lives with that release.
+QT_RELEASE_DIR = REPO_ROOT / "doc" / "release" / "v2.5.0"
 
 # Gate thresholds as recorded in doc/dev-notes/v2.4.0-requirements.md (G2, G3).
 THRESHOLDS = {
@@ -86,7 +88,6 @@ def section_reports() -> dict[str, tuple[dict[str, Any], Callable[[dict[str, Any
         "visual-baseline": (audit_visual_assets.build_report(), audit_visual_assets.render_markdown),
         "maintainability-baseline": (audit_maintainability.build_report(), audit_maintainability.render_markdown),
         "parity-baseline": (audit_parity_baseline.build_report(), audit_parity_baseline.render_markdown),
-        "qt-usage-baseline": (audit_qt_usage.build_report(), audit_qt_usage.render_markdown),
     }
 
 
@@ -98,7 +99,6 @@ def build_dashboard(sections: dict[str, dict[str, Any]]) -> dict[str, Any]:
     visual = sections["visual-baseline"]["summary"]
     maintain = sections["maintainability-baseline"]["metrics"]
     parity = sections["parity-baseline"]
-    qt = sections["qt-usage-baseline"]["summary"]
     scopes = coverage["scopes"]
 
     gates: dict[str, dict[str, Any]] = {
@@ -164,12 +164,6 @@ def build_dashboard(sections: dict[str, dict[str, Any]]) -> dict[str, Any]:
             "claims_by_evidence": parity["summary"]["by_evidence"],
             "claims_by_status": parity["summary"]["by_claim"],
             "equivalence_without_static_evidence": parity["summary"]["equivalence_without_static_evidence"],
-        },
-        "G13_qt": {
-            "tokens": qt["tokens"],
-            "libraries": qt["libraries"],
-            "qt_free": qt["qt_free"],
-            "gui_outside_design": qt["gui_outside_design"],
         },
     }
     onboarding = RELEASE_DIR / "onboarding-results.json"
@@ -244,16 +238,6 @@ def dashboard_rows(report: dict[str, Any]) -> list[tuple[str, str, str, str]]:
          ", ".join(f"{k} {v}" for k, v in g6["claims_by_evidence"].items()),
          status(g6["claims_by_evidence"]["unverified"] == 0 and g6["claims_by_evidence"]["cross-validated-live"] == 0)),
     ]
-    g13 = g.get("G13_qt")
-    if g13:
-        rows += [
-            ("G13", "No Qt Gui outside disp and disp3D",
-             ", ".join(f"`{name}`" for name in g13["gui_outside_design"]) or "none",
-             status(not g13["gui_outside_design"])),
-            ("G13", "Qt usage per library ratcheted",
-             f"{g13['tokens']:,} Qt tokens in {g13['libraries']} libraries; Qt-free: "
-             + (", ".join(f"`{name}`" for name in g13["qt_free"]) or "none"), "baseline recorded"),
-        ]
     for os_name, run in g.get("G8_onboarding", {}).get("results", {}).items():
         trend = " -> ".join(f"{m}" for m in g["G8_onboarding"]["trend"].get(os_name, []))
         rows.append(("G8", f"Documented setup works on {os_name}",
@@ -280,7 +264,6 @@ def render_dashboard(report: dict[str, Any]) -> str:
         "Detailed reports: [test inventory](test-inventory.md), [coverage](coverage-baseline.md), "
         "[API evidence](api-evidence-baseline.md), [visual](visual-baseline.md), "
         "[maintainability](maintainability-baseline.md), [parity evidence](parity-baseline.md), "
-        "[Qt usage](qt-usage-baseline.md), "
         "[MNE-Python gap](mne-python-gap.md).",
         "",
         "G7 (signed artifacts) is verified on the tagged release; see `release-evidence.json` on the release page.",
@@ -288,8 +271,12 @@ def render_dashboard(report: dict[str, Any]) -> str:
     return "\n".join(lines) + "\n"
 
 
-def expected_outputs(out_dir: Path = RELEASE_DIR) -> dict[Path, str]:
-    outputs: dict[Path, str] = {}
+def expected_outputs(out_dir: Path = RELEASE_DIR, qt_dir: Path = QT_RELEASE_DIR) -> dict[Path, str]:
+    qt_report = audit_qt_usage.build_report()
+    outputs: dict[Path, str] = {
+        qt_dir / "qt-usage-baseline.json": _json(qt_report),
+        qt_dir / "qt-usage-baseline.md": audit_qt_usage.render_markdown(qt_report),
+    }
     data: dict[str, dict[str, Any]] = {}
     for name, (report, render) in section_reports().items():
         data[name] = report
@@ -318,7 +305,7 @@ def main(argv: list[str] | None = None) -> int:
         return 1 if open_rows else 0
 
     out_dir = args.out_dir.resolve()
-    outputs = expected_outputs(out_dir)
+    outputs = expected_outputs(out_dir, QT_RELEASE_DIR if out_dir == RELEASE_DIR else out_dir)
     if args.check:
         stale = [p for p, text in outputs.items() if not p.is_file() or p.read_text(encoding="utf-8") != text]
         for path in stale:
@@ -329,7 +316,8 @@ def main(argv: list[str] | None = None) -> int:
         print(f"OK: {len(outputs)} reports are current.")
         return 0
 
-    out_dir.mkdir(parents=True, exist_ok=True)
+    for directory in {path.parent for path in outputs}:
+        directory.mkdir(parents=True, exist_ok=True)
     if out_dir != RELEASE_DIR:
         # Inputs travel with the artifact so its report links resolve.
         for name in ("coverage-baseline.md", "mne-python-gap.md"):

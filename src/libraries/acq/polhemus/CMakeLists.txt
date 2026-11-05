@@ -9,8 +9,8 @@ project(mne_acq_polhemus
 
 set(CMAKE_AUTOMOC ON)
 
-# Qt Gui for the vector, quaternion and matrix types of the digitiser API; Qt SerialPort for the device.
-set(QT_REQUIRED_COMPONENTS Core Gui SerialPort)
+# Qt SerialPort for the device; poses and positions are Eigen types.
+set(QT_REQUIRED_COMPONENTS Core SerialPort)
 find_package(QT NAMES Qt6 Qt5 REQUIRED COMPONENTS ${QT_REQUIRED_COMPONENTS})
 find_package(Qt${QT_VERSION_MAJOR} REQUIRED COMPONENTS ${QT_REQUIRED_COMPONENTS})
 
@@ -35,7 +35,6 @@ target_include_directories(${PROJECT_NAME} PUBLIC $<BUILD_INTERFACE:${CMAKE_CURR
 target_link_libraries(${PROJECT_NAME}
   PUBLIC
     Qt${QT_VERSION_MAJOR}::Core
-    Qt${QT_VERSION_MAJOR}::Gui
     Qt${QT_VERSION_MAJOR}::SerialPort
   PRIVATE
     Eigen3::Eigen)

@@ -53,11 +53,11 @@
 // QT INCLUDES
 //=============================================================================================================
 
-#include <QMatrix4x4>
 #include <QObject>
-#include <QQuaternion>
 #include <QSettings>
-#include <QVector3D>
+
+#include <Eigen/Core>
+#include <Eigen/Geometry>
 
 #include <vector>
 
@@ -114,11 +114,11 @@ public:
     // Pen tip offset (sensor body frame → tip)
     //=========================================================================================================
 
-    void setPenTipOffset(const QVector3D& offset)
+    void setPenTipOffset(const Eigen::Vector3f& offset)
     {
         m_penTipOffset = offset;
     }
-    QVector3D penTipOffset() const
+    Eigen::Vector3f penTipOffset() const
     {
         return m_penTipOffset;
     }
@@ -199,14 +199,14 @@ public:
      * @param translation  Translation in metres, expressed in the tracker body frame.
      * @param rotation     Rotation from tracker body frame to device frame.
      */
-    void setTrackerToDeviceOffset(const QVector3D& translation,
-                                  const QQuaternion& rotation);
+    void setTrackerToDeviceOffset(const Eigen::Vector3f& translation,
+                                  const Eigen::Quaternionf& rotation);
 
-    QVector3D trackerToDeviceTranslation() const
+    Eigen::Vector3f trackerToDeviceTranslation() const
     {
         return m_offsetTranslation;
     }
-    QQuaternion trackerToDeviceRotation() const
+    Eigen::Quaternionf trackerToDeviceRotation() const
     {
         return m_offsetRotation;
     }
@@ -226,9 +226,9 @@ public:
 
     struct OpticalCalibSample
     {
-        QVector3D trackerPos;   ///< Tracker position in world frame (metres).
-        QQuaternion trackerOri; ///< Tracker orientation in world frame.
-        QVector3D focusPoint;   ///< Stylus focus point in world frame (metres).
+        Eigen::Vector3f trackerPos = Eigen::Vector3f::Zero();           ///< Tracker position in world frame (metres).
+        Eigen::Quaternionf trackerOri = Eigen::Quaternionf::Identity(); ///< Tracker orientation in world frame.
+        Eigen::Vector3f focusPoint = Eigen::Vector3f::Zero();           ///< Stylus focus point in world frame (metres).
     };
 
     /**
@@ -272,7 +272,7 @@ public:
      *
      * @return Objective center in the tracker body frame in metres; only meaningful if hasObjectiveCenter() is true.
      */
-    QVector3D objectiveCenterLocal() const
+    Eigen::Vector3f objectiveCenterLocal() const
     {
         return m_objectiveCenterLocal;
     }
@@ -317,7 +317,7 @@ public:
      *
      * @return Unit optical-axis direction in the tracker body frame; only meaningful if opticalCalibrationValid() is true.
      */
-    QVector3D opticalAxisLocal() const
+    Eigen::Vector3f opticalAxisLocal() const
     {
         return m_opticalAxisLocal;
     }
@@ -327,7 +327,7 @@ public:
      *
      * @return Optical center in the tracker body frame in metres.
      */
-    QVector3D opticalCenterLocal() const
+    Eigen::Vector3f opticalCenterLocal() const
     {
         return m_opticalCenterLocal;
     }
@@ -365,7 +365,7 @@ public:
      * @return @c true on success; @c false if calibration or tracker data
      *         is unavailable, or the correction would exceed 10°.
      */
-    bool applyOpticalAxisFineAdjust(const QVector3D& targetWorldPos,
+    bool applyOpticalAxisFineAdjust(const Eigen::Vector3f& targetWorldPos,
                                     float& correctionDeg);
 
     /** @return Whether a fine adjustment has been applied. */
@@ -390,7 +390,7 @@ public:
      * @param[out] direction  Ray direction (optical axis in world frame, unit vector).
      * @return @c true if tracker data and calibration are available.
      */
-    bool opticalRayInWorld(QVector3D& origin, QVector3D& direction) const;
+    bool opticalRayInWorld(Eigen::Vector3f& origin, Eigen::Vector3f& direction) const;
 
     /**
      * Returns the "up" direction of the optical path in world coordinates.
@@ -401,7 +401,7 @@ public:
      * @param[out] up  Unit vector pointing "up" in the microscope view.
      * @return @c true if tracker data and calibration are available.
      */
-    bool opticalUpInWorld(QVector3D& up) const;
+    bool opticalUpInWorld(Eigen::Vector3f& up) const;
 
     //=========================================================================================================
     // Digitizer connection
@@ -433,10 +433,10 @@ public:
     // Model (BEM / FIFF) fiducials — target landmarks for SVD coregistration
     //=========================================================================================================
 
-    void setModelFiducial(FiducialId id, const QVector3D& posInModel);
+    void setModelFiducial(FiducialId id, const Eigen::Vector3f& posInModel);
     bool hasModelFiducial(FiducialId id) const;
     bool hasAllModelFiducials() const;
-    QVector3D modelFiducial(FiducialId id) const;
+    Eigen::Vector3f modelFiducial(FiducialId id) const;
 
     bool hasAllPenFiducials() const;
 
@@ -444,7 +444,7 @@ public:
     // Vertex (CZ / top of head) — 4th reference point for orientation validation
     //=========================================================================================================
 
-    void setModelVertex(const QVector3D& pos)
+    void setModelVertex(const Eigen::Vector3f& pos)
     {
         m_modelVertex = pos;
         m_hasModelVertex = true;
@@ -453,7 +453,7 @@ public:
     {
         return m_hasModelVertex;
     }
-    QVector3D modelVertex() const
+    Eigen::Vector3f modelVertex() const
     {
         return m_modelVertex;
     }
@@ -463,7 +463,7 @@ public:
     {
         return m_hasPenVertex;
     }
-    QVector3D penVertex() const
+    Eigen::Vector3f penVertex() const
     {
         return m_penVertex;
     }
@@ -503,27 +503,27 @@ public:
     // Current state accessors
     //=========================================================================================================
 
-    QMatrix4x4 deviceToWorld() const
+    Eigen::Matrix4f deviceToWorld() const
     {
         return m_deviceToWorld;
     }
-    QMatrix4x4 headToWorld() const
+    Eigen::Matrix4f headToWorld() const
     {
         return m_headToWorld;
     }
-    QMatrix4x4 headToDevice() const
+    Eigen::Matrix4f headToDevice() const
     {
         return m_headToDevice;
     }
-    QMatrix4x4 worldToModel() const
+    Eigen::Matrix4f worldToModel() const
     {
         return m_worldToModel;
     }
-    QVector3D penPosition() const
+    Eigen::Vector3f penPosition() const
     {
         return m_penPosition;
     }
-    QQuaternion penOrientation() const
+    Eigen::Quaternionf penOrientation() const
     {
         return m_penOrientation;
     }
@@ -532,11 +532,11 @@ public:
         return m_havePenPos;
     }
 
-    QVector3D probePosition() const
+    Eigen::Vector3f probePosition() const
     {
         return m_probePosition;
     }
-    QQuaternion probeOrientation() const
+    Eigen::Quaternionf probeOrientation() const
     {
         return m_probeOrientation;
     }
@@ -546,32 +546,32 @@ public:
     }
 
 signals:
-    void devicePoseChanged(const QMatrix4x4& deviceToWorld);
-    void penPoseChanged(const QVector3D& position, const QQuaternion& orientation);
-    void probePoseChanged(const QVector3D& position, const QQuaternion& orientation);
-    void penButtonPressed(const QVector3D& position, const QQuaternion& orientation);
+    void devicePoseChanged(const Eigen::Matrix4f& deviceToWorld);
+    void penPoseChanged(const Eigen::Vector3f& position, const Eigen::Quaternionf& orientation);
+    void probePoseChanged(const Eigen::Vector3f& position, const Eigen::Quaternionf& orientation);
+    void penButtonPressed(const Eigen::Vector3f& position, const Eigen::Quaternionf& orientation);
     void registrationChanged();
     void pivotStateChanged(PolhemusCoregistration::PivotState state);
-    void pivotCalibrationDone(const QVector3D& offset, float residualMm);
+    void pivotCalibrationDone(const Eigen::Vector3f& offset, float residualMm);
     void pivotSampleCollected(int sampleCount, float angularSpanDeg);
     void opticalCalibrationChanged();
 
 private slots:
-    void onPointReceived(int station, const QVector3D& position, const QQuaternion& orientation);
-    void onPenButtonPressedFromConn(int station, const QVector3D& position, const QQuaternion& orientation);
+    void onPointReceived(int station, const Eigen::Vector3f& position, const Eigen::Quaternionf& orientation);
+    void onPenButtonPressedFromConn(int station, const Eigen::Vector3f& position, const Eigen::Quaternionf& orientation);
 
 private:
-    QMatrix4x4 buildDevicePose(const QVector3D& trackerPos,
-                               const QQuaternion& trackerOri) const;
-    QMatrix4x4 buildHeadFrame() const;
+    Eigen::Matrix4f buildDevicePose(const Eigen::Vector3f& trackerPos,
+                                    const Eigen::Quaternionf& trackerOri) const;
+    Eigen::Matrix4f buildHeadFrame() const;
 
     int m_trackerStation = 2;
     int m_penStation = 1;
     int m_probeStation = 3;
 
-    QVector3D m_offsetTranslation;
-    QQuaternion m_offsetRotation;
-    QVector3D m_penTipOffset; // tip offset in sensor body frame (metres)
+    Eigen::Vector3f m_offsetTranslation = Eigen::Vector3f::Zero();
+    Eigen::Quaternionf m_offsetRotation = Eigen::Quaternionf::Identity();
+    Eigen::Vector3f m_penTipOffset = Eigen::Vector3f::Zero(); // tip offset in sensor body frame (metres)
     bool m_tipOffsetEnabled = false;
     bool m_mirrorX = false; // negate X of incoming Polhemus positions
     bool m_mirrorY = false; // negate Y of incoming Polhemus positions
@@ -579,57 +579,57 @@ private:
     PolhemusConnection* m_pConn = nullptr;
     AcquiredPoints* m_pPoints = nullptr;
 
-    QVector3D m_penPosition;
-    QQuaternion m_penOrientation;
+    Eigen::Vector3f m_penPosition = Eigen::Vector3f::Zero();
+    Eigen::Quaternionf m_penOrientation = Eigen::Quaternionf::Identity();
     bool m_havePenPos = false;
 
-    QVector3D m_probePosition;
-    QQuaternion m_probeOrientation;
+    Eigen::Vector3f m_probePosition = Eigen::Vector3f::Zero();
+    Eigen::Quaternionf m_probeOrientation = Eigen::Quaternionf::Identity();
     bool m_haveProbePos = false;
 
-    QMatrix4x4 m_deviceToWorld;
-    QMatrix4x4 m_headToWorld;
-    QMatrix4x4 m_headToDevice;
-    QMatrix4x4 m_worldToModel;
+    Eigen::Matrix4f m_deviceToWorld = Eigen::Matrix4f::Identity();
+    Eigen::Matrix4f m_headToWorld = Eigen::Matrix4f::Identity();
+    Eigen::Matrix4f m_headToDevice = Eigen::Matrix4f::Identity();
+    Eigen::Matrix4f m_worldToModel = Eigen::Matrix4f::Identity();
     bool m_registrationValid = false;
 
     // Pen fiducials (captured from stylus in Polhemus world frame)
-    QVector3D m_penFid[4]; // indexed by FiducialId (1..3)
+    Eigen::Vector3f m_penFid[4] = {Eigen::Vector3f::Zero(), Eigen::Vector3f::Zero(), Eigen::Vector3f::Zero(), Eigen::Vector3f::Zero()}; // indexed by FiducialId (1..3)
     bool m_hasPenFid[4] = {};
 
     // Model fiducials (from FIFF / BEM, in MRI/surface-RAS frame)
-    QVector3D m_modelFid[4]; // indexed by FiducialId (1..3)
+    Eigen::Vector3f m_modelFid[4] = {Eigen::Vector3f::Zero(), Eigen::Vector3f::Zero(), Eigen::Vector3f::Zero(), Eigen::Vector3f::Zero()}; // indexed by FiducialId (1..3)
     bool m_hasModelFid[4] = {};
 
     // Vertex / CZ (top of head) for orientation validation
-    QVector3D m_modelVertex;
+    Eigen::Vector3f m_modelVertex = Eigen::Vector3f::Zero();
     bool m_hasModelVertex = false;
-    QVector3D m_penVertex;
+    Eigen::Vector3f m_penVertex = Eigen::Vector3f::Zero();
     bool m_hasPenVertex = false;
 
     // Pivot calibration state
     PivotState m_pivotState = PivotState::Idle;
-    std::vector<QVector3D> m_pivotPositions;
-    std::vector<QQuaternion> m_pivotOrientations;
+    std::vector<Eigen::Vector3f> m_pivotPositions;
+    std::vector<Eigen::Quaternionf> m_pivotOrientations;
     float m_pivotResidualMm = 0.0f;
 
     // Optical path calibration state
     std::vector<OpticalCalibSample> m_opticalCalibSamples;
-    QVector3D m_opticalAxisLocal;   // optical axis direction in tracker body frame
-    QVector3D m_opticalCenterLocal; // optical center position in tracker body frame
+    Eigen::Vector3f m_opticalAxisLocal = Eigen::Vector3f::Zero();   // optical axis direction in tracker body frame
+    Eigen::Vector3f m_opticalCenterLocal = Eigen::Vector3f::Zero(); // optical center position in tracker body frame
     float m_opticalCalibResidualMm = 0.0f;
     float m_opticalCalibDepthSpreadMm = 0.0f;
     bool m_opticalCalibValid = false;
 
     // Directly captured objective center (in tracker-local frame, metres).
     // When available, the solver uses this instead of the distance constraint.
-    QVector3D m_objectiveCenterLocal; // objective center in tracker body frame
+    Eigen::Vector3f m_objectiveCenterLocal = Eigen::Vector3f::Zero(); // objective center in tracker body frame
     bool m_hasObjectiveCenter = false;
 
     // Fine adjustment — small correction rotation applied on top of the
     // solved optical axis to compensate for residual misalignment between
     // the tracked probe position and its appearance in the video.
-    QVector3D m_opticalAxisPreFineAdjust; // axis before fine-adjust (for undo)
+    Eigen::Vector3f m_opticalAxisPreFineAdjust = Eigen::Vector3f::Zero(); // axis before fine-adjust (for undo)
     float m_opticalFineAdjustDeg = 0.0f;
     bool m_opticalFineAdjustApplied = false;
 

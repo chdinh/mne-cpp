@@ -22,6 +22,8 @@
 
 #include "fastrak_parser.h"
 
+#include <QList>
+
 using namespace ACQLIB;
 
 namespace
@@ -83,9 +85,9 @@ bool FastrakParser::parseRecord(const QByteArray& record, Units units, FastrakSa
 
     const float scale = linearScale(units);
     out.station = station;
-    out.position = QVector3D(x * scale, y * scale, z * scale);
+    out.position = Eigen::Vector3f(x * scale, y * scale, z * scale);
     out.hasOrientation = false;
-    out.orientation = QQuaternion();
+    out.orientation = Eigen::Quaternionf::Identity();
 
     if (tokens.size() >= 8) {
         // Quaternion output (O-item 11): q0 q1 q2 q3 (scalar-first).
@@ -95,7 +97,7 @@ bool FastrakParser::parseRecord(const QByteArray& record, Units units, FastrakSa
         const float q2 = parseFloat(tokens[6]);
         const float q3 = parseFloat(tokens[7]);
         if (ok) {
-            out.orientation = QQuaternion(q0, q1, q2, q3).normalized();
+            out.orientation = Eigen::Quaternionf(q0, q1, q2, q3).normalized();
             out.hasOrientation = true;
         }
     } else if (tokens.size() >= 7) {
@@ -105,10 +107,8 @@ bool FastrakParser::parseRecord(const QByteArray& record, Units units, FastrakSa
         const float el = parseFloat(tokens[5]);
         const float ro = parseFloat(tokens[6]);
         if (ok) {
-            const QQuaternion qZ = QQuaternion::fromAxisAndAngle(0.0f, 0.0f, 1.0f, az);
-            const QQuaternion qY = QQuaternion::fromAxisAndAngle(0.0f, 1.0f, 0.0f, el);
-            const QQuaternion qX = QQuaternion::fromAxisAndAngle(1.0f, 0.0f, 0.0f, ro);
-            out.orientation = qZ * qY * qX;
+            constexpr float kDegToRad = 3.14159265358979f / 180.0f;
+            out.orientation = Eigen::AngleAxisf(az * kDegToRad, Eigen::Vector3f::UnitZ()) * Eigen::AngleAxisf(el * kDegToRad, Eigen::Vector3f::UnitY()) * Eigen::AngleAxisf(ro * kDegToRad, Eigen::Vector3f::UnitX());
             out.hasOrientation = true;
         }
     }

@@ -41,14 +41,13 @@
 // QT INCLUDES
 //=============================================================================================================
 
+#include <QMap>
 #include <QObject>
-#include <QQuaternion>
 #include <QSerialPort>
 #include <QSerialPortInfo>
 #include <QString>
 #include <QStringList>
 #include <QTimer>
-#include <QVector3D>
 
 //=============================================================================================================
 // DEFINE NAMESPACE ACQLIB
@@ -72,7 +71,7 @@ struct ACQPOLHEMUSSHARED_EXPORT PolhemusSerialConfig
      *  Example: (0,0,1) = +Z (superior), (0,0,-1) = -Z (inferior).
      *  Set to a non-zero vector to send Fastrak "H<n>,x,y,z\r" for
      *  stations 1-4 at connect time. Default (0,0,0) = don't change. */
-    QVector3D hemisphere = QVector3D(0, 0, 0);
+    Eigen::Vector3f hemisphere = Eigen::Vector3f::Zero();
     /** Stream control command sent right after opening the port. The
      *  factory default for Fastrak is `"C\r"` (continuous ASCII output);
      *  use `"P\r"` if the application drives polled mode itself. */
@@ -144,7 +143,7 @@ signals:
      * @param position    Sample point in metres, sensor-frame.
      * @param orientation Sensor orientation; identity if N/A.
      */
-    void pointReceived(int station, const QVector3D& position, const QQuaternion& orientation);
+    void pointReceived(int station, const Eigen::Vector3f& position, const Eigen::Quaternionf& orientation);
 
     /** Emitted whenever @c ACQLIB::PolhemusConnection::isConnected "isConnected" changes. */
     void connectedChanged(bool isConnected);
@@ -160,7 +159,7 @@ signals:
      * After emitting, the connection automatically restarts the
      * continuous stream so the live feed resumes on button release.
      */
-    void penButtonPressed(int station, const QVector3D& position, const QQuaternion& orientation);
+    void penButtonPressed(int station, const Eigen::Vector3f& position, const Eigen::Quaternionf& orientation);
 
 private slots:
     void onMockTick();
@@ -191,8 +190,8 @@ private:
     QTimer m_streamPauseTimer;
     struct StationSample
     {
-        QVector3D position;
-        QQuaternion orientation;
+        Eigen::Vector3f position = Eigen::Vector3f::Zero();
+        Eigen::Quaternionf orientation = Eigen::Quaternionf::Identity();
     };
     QMap<int, StationSample> m_lastSamples;
 };

@@ -164,11 +164,11 @@ void Align3DView::setDigitizerConnected(bool connected)
 }
 
 void Align3DView::setLiveDigitizerPose(int station,
-                                       const QVector3D& position,
-                                       const QQuaternion& orientation)
+                                       const Eigen::Vector3f& position,
+                                       const Eigen::Quaternionf& orientation)
 {
     m_digitizerConnected = true;
-    m_stationPoses[station] = {position, orientation};
+    m_stationPoses[station] = {toQt(position), toQt(orientation)};
     m_liveTrackerDirty = true;
 
     if (!m_liveUpdateTimer.isActive()) {
@@ -364,7 +364,7 @@ void Align3DView::rebuildDigitizerLayer()
     for (const auto& pt : m_pPoints->points()) {
         FIFFLIB::FiffDigPoint dig;
         dig.coord_frame = FIFFV_COORD_HEAD;
-        const QVector3D pos = devToMri.map(pt.position);
+        const QVector3D pos = devToMri.map(toQt(pt.position));
         dig.r[0] = pos.x();
         dig.r[1] = pos.y();
         dig.r[2] = pos.z();
@@ -408,7 +408,7 @@ void Align3DView::rebuildStaticMarkers()
     };
     for (int i = 0; i < 3; ++i) {
         if (m_pPoints->hasTwinFiducial(kFiducialOrder[i])) {
-            markers.append({m_pPoints->twinFiducial(kFiducialOrder[i]),
+            markers.append({toQt(m_pPoints->twinFiducial(kFiducialOrder[i])),
                             kTwinColors[i], kFidRadius});
         }
     }
@@ -424,7 +424,7 @@ void Align3DView::rebuildStaticMarkers()
     // Acquired points (sensor-frame → transformed to MRI space for display)
     const QMatrix4x4 devToMri = trackerToMri();
     for (const auto& pt : m_pPoints->points()) {
-        const QVector3D pos = devToMri.map(pt.position);
+        const QVector3D pos = devToMri.map(toQt(pt.position));
         switch (pt.kind) {
             case PointKind::Fiducial: {
                 // Color per identity so captured NAS/LPA/RPA are visually distinct
@@ -468,9 +468,9 @@ void Align3DView::recomputeAlignment()
 
     if (hasCapNas && hasCapLpa && hasCapRpa) {
         // All 3 captured → proper Neuromag HEAD frame definition
-        const QVector3D cN = m_pPoints->fiducial(FiducialId::NAS);
-        const QVector3D cL = m_pPoints->fiducial(FiducialId::LPA);
-        const QVector3D cR = m_pPoints->fiducial(FiducialId::RPA);
+        const QVector3D cN = toQt(m_pPoints->fiducial(FiducialId::NAS));
+        const QVector3D cL = toQt(m_pPoints->fiducial(FiducialId::LPA));
+        const QVector3D cR = toQt(m_pPoints->fiducial(FiducialId::RPA));
         const float rL[3] = {cL.x(), cL.y(), cL.z()};
         const float rN[3] = {cN.x(), cN.y(), cN.z()};
         const float rR[3] = {cR.x(), cR.y(), cR.z()};
@@ -500,10 +500,10 @@ void Align3DView::recomputeAlignment()
         const bool hasTwin = m_pPoints->hasTwinFiducial(id);
         if (hasCap && hasTwin) {
             // Transform captured fiducial into HEAD space
-            const QVector3D capDev = m_pPoints->fiducial(id);
+            const QVector3D capDev = toQt(m_pPoints->fiducial(id));
             const QVector3D capHead = m_deviceToHead.map(capDev);
             headPts.append(capHead);
-            mriPts.append(m_pPoints->twinFiducial(id));
+            mriPts.append(toQt(m_pPoints->twinFiducial(id)));
         }
     }
 

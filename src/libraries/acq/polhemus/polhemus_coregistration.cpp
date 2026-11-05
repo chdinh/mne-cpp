@@ -14,9 +14,8 @@
  * MEG/EEG convention used throughout mne-cpp. The head→device
  * transform is obtained by composing that frame with the pre-
  * calibrated tracker-to-device offset and with the live tracker
- * pose streamed from the Polhemus connection, all wrapped in
- * @c QMatrix4x4 so callers can hand the result straight to the
- * OpenGL viewer in DISP3DLIB or to the navigation export.
+ * pose streamed from the Polhemus connection, all as Eigen
+ * 4x4 matrices for the viewer and the navigation export.
  */
 
 #include "polhemus_coregistration.h"
@@ -25,8 +24,41 @@
 #include <Eigen/Dense>
 #include <QSettings>
 #include <cmath>
+#include <cstring>
 
 using namespace ACQLIB;
+
+//=============================================================================================================
+
+namespace
+{
+
+Eigen::Matrix4f poseMatrix(const Eigen::Vector3f& translation, const Eigen::Quaternionf& rotation)
+{
+    Eigen::Matrix4f pose = Eigen::Matrix4f::Identity();
+    pose.topLeftCorner<3, 3>() = rotation.toRotationMatrix();
+    pose.topRightCorner<3, 1>() = translation;
+    return pose;
+}
+
+// Raw tracker pose: deviceToWorld with the tracker-to-device offset removed.
+void trackerPose(const Eigen::Matrix4f& deviceToWorld,
+                 const Eigen::Vector3f& offsetTranslation,
+                 const Eigen::Quaternionf& offsetRotation,
+                 Eigen::Vector3f& position,
+                 Eigen::Quaternionf& orientation)
+{
+    const Eigen::Matrix4f trackerToWorld = deviceToWorld * poseMatrix(offsetTranslation, offsetRotation).inverse();
+    position = trackerToWorld.topRightCorner<3, 1>();
+    orientation = Eigen::Quaternionf(Eigen::Matrix3f(trackerToWorld.topLeftCorner<3, 3>()));
+}
+
+bool isIdentity(const Eigen::Matrix4f& m)
+{
+    return m == Eigen::Matrix4f::Identity();
+}
+
+} // anonymous namespace
 
 //=============================================================================================================
 
@@ -34,9 +66,6 @@ PolhemusCoregistration::PolhemusCoregistration(QObject* parent)
 : QObject(parent)
 , m_pPoints(new AcquiredPoints(this))
 {
-    m_deviceToWorld.setToIdentity();
-    m_headToWorld.setToIdentity();
-    m_headToDevice.setToIdentity();
 }
 
 //=============================================================================================================
@@ -58,8 +87,8 @@ void PolhemusCoregistration::setProbeStation(int station)
 
 //=============================================================================================================
 
-void PolhemusCoregistration::setTrackerToDeviceOffset(const QVector3D& translation,
-                                                      const QQuaternion& rotation)
+void PolhemusCoregistration::setTrackerToDeviceOffset(const Eigen::Vector3f& translation,
+                                                      const Eigen::Quaternionf& rotation)
 {
     m_offsetTranslation = translation;
     m_offsetRotation = rotation;
@@ -104,7 +133,7 @@ bool PolhemusCoregistration::captureCurrentPenPositionAsFiducial(FiducialId id)
     // Log distances to previously captured fiducials
     for (int j = 1; j <= 3; ++j) {
         if (j != ident && m_hasPenFid[j]) {
-            float dist = (m_penFid[ident] - m_penFid[j]).length() * 1000.0f;
+            float dist = (m_penFid[ident] - m_penFid[j]).norm() * 1000.0f;
             qInfo().nospace() << "  " << labels[ident] << " ↔ " << labels[j]
                               << ": " << dist << " mm"
                               << (dist > 200.0f ? "  *** WARNING: > 200 mm!" : "");
@@ -144,9 +173,9 @@ bool PolhemusCoregistration::captureCurrentPenPositionAsHeadShape()
 void PolhemusCoregistration::resetRegistration()
 {
     m_registrationValid = false;
-    m_headToWorld.setToIdentity();
-    m_headToDevice.setToIdentity();
-    m_worldToModel.setToIdentity();
+    m_headToWorld.setIdentity();
+    m_headToDevice.setIdentity();
+    m_worldToModel.setIdentity();
     m_hasPenVertex = false;
     for (int i = 0; i < 4; ++i)
         m_hasPenFid[i] = false;
@@ -155,7 +184,7 @@ void PolhemusCoregistration::resetRegistration()
 
 //=============================================================================================================
 
-void PolhemusCoregistration::setModelFiducial(FiducialId id, const QVector3D& posInModel)
+void PolhemusCoregistration::setModelFiducial(FiducialId id, const Eigen::Vector3f& posInModel)
 {
     const int i = static_cast<int>(id);
     m_modelFid[i] = posInModel;
@@ -172,7 +201,7 @@ bool PolhemusCoregistration::hasAllModelFiducials() const
     return m_hasModelFid[1] && m_hasModelFid[2] && m_hasModelFid[3];
 }
 
-QVector3D PolhemusCoregistration::modelFiducial(FiducialId id) const
+Eigen::Vector3f PolhemusCoregistration::modelFiducial(FiducialId id) const
 {
     return m_modelFid[static_cast<int>(id)];
 }
@@ -190,7 +219,8 @@ bool PolhemusCoregistration::captureCurrentPenPositionAsVertex()
         return false;
     m_penVertex = m_penPosition;
     m_hasPenVertex = true;
-    qInfo() << "Captured pen vertex (CZ) at" << m_penVertex * 1000.0f << "mm";
+    qInfo() << "Captured pen vertex (CZ) at" << m_penVertex.x() * 1000.0f << m_penVertex.y() * 1000.0f
+            << m_penVertex.z() * 1000.0f << "mm";
     // Notify observers so auto-registration can trigger
     if (m_pPoints)
         emit m_pPoints->pointsChanged();
@@ -206,14 +236,14 @@ bool PolhemusCoregistration::computeRegistration()
     }
 
     // Pen fiducial positions in Polhemus world frame (metres)
-    const QVector3D pNas = m_penFid[static_cast<int>(FiducialId::NAS)];
-    const QVector3D pLpa = m_penFid[static_cast<int>(FiducialId::LPA)];
-    const QVector3D pRpa = m_penFid[static_cast<int>(FiducialId::RPA)];
+    const Eigen::Vector3f pNas = m_penFid[static_cast<int>(FiducialId::NAS)];
+    const Eigen::Vector3f pLpa = m_penFid[static_cast<int>(FiducialId::LPA)];
+    const Eigen::Vector3f pRpa = m_penFid[static_cast<int>(FiducialId::RPA)];
 
     // Spread check: reject degenerate input
-    const float dNL = (pNas - pLpa).length() * 1000.0f;
-    const float dNR = (pNas - pRpa).length() * 1000.0f;
-    const float dLR = (pLpa - pRpa).length() * 1000.0f;
+    const float dNL = (pNas - pLpa).norm() * 1000.0f;
+    const float dNR = (pNas - pRpa).norm() * 1000.0f;
+    const float dLR = (pLpa - pRpa).norm() * 1000.0f;
     const float minSpread = std::min({dNL, dNR, dLR});
     if (minSpread < 20.0f) {
         qWarning() << "Registration failed: pen fiducials too close"
@@ -235,14 +265,14 @@ bool PolhemusCoregistration::computeRegistration()
     // vertex correction could flip ey or ez in one frame but not the
     // other.
     if (hasAllModelFiducials()) {
-        const QVector3D mNas = m_modelFid[static_cast<int>(FiducialId::NAS)];
-        const QVector3D mLpa = m_modelFid[static_cast<int>(FiducialId::LPA)];
-        const QVector3D mRpa = m_modelFid[static_cast<int>(FiducialId::RPA)];
+        const Eigen::Vector3f mNas = m_modelFid[static_cast<int>(FiducialId::NAS)];
+        const Eigen::Vector3f mLpa = m_modelFid[static_cast<int>(FiducialId::LPA)];
+        const Eigen::Vector3f mRpa = m_modelFid[static_cast<int>(FiducialId::RPA)];
 
         // Compare pen vs model fiducial distances — should be similar for the same head
-        const float mNL = (mNas - mLpa).length() * 1000.0f;
-        const float mNR = (mNas - mRpa).length() * 1000.0f;
-        const float mLR = (mLpa - mRpa).length() * 1000.0f;
+        const float mNL = (mNas - mLpa).norm() * 1000.0f;
+        const float mNR = (mNas - mRpa).norm() * 1000.0f;
+        const float mLR = (mLpa - mRpa).norm() * 1000.0f;
 
         const float maxRatio = std::max({dNL / mNL, dNR / mNR, dLR / mLR});
         const float minRatio = std::min({dNL / mNL, dNR / mNR, dLR / mLR});
@@ -255,24 +285,18 @@ bool PolhemusCoregistration::computeRegistration()
         // --- Kabsch algorithm (SVD least-squares rigid alignment) ---
 
         // 1. Centroids
-        const Eigen::Vector3d penC(
-            (pNas.x() + pLpa.x() + pRpa.x()) / 3.0,
-            (pNas.y() + pLpa.y() + pRpa.y()) / 3.0,
-            (pNas.z() + pLpa.z() + pRpa.z()) / 3.0);
-        const Eigen::Vector3d modC(
-            (mNas.x() + mLpa.x() + mRpa.x()) / 3.0,
-            (mNas.y() + mLpa.y() + mRpa.y()) / 3.0,
-            (mNas.z() + mLpa.z() + mRpa.z()) / 3.0);
+        const Eigen::Vector3d penC = (pNas + pLpa + pRpa).cast<double>() / 3.0;
+        const Eigen::Vector3d modC = (mNas + mLpa + mRpa).cast<double>() / 3.0;
 
         // 2. Centered point matrices (3×3, each column = one centered point)
         Eigen::Matrix3d P, Q;
-        P.col(0) = Eigen::Vector3d(pNas.x(), pNas.y(), pNas.z()) - penC;
-        P.col(1) = Eigen::Vector3d(pLpa.x(), pLpa.y(), pLpa.z()) - penC;
-        P.col(2) = Eigen::Vector3d(pRpa.x(), pRpa.y(), pRpa.z()) - penC;
+        P.col(0) = pNas.cast<double>() - penC;
+        P.col(1) = pLpa.cast<double>() - penC;
+        P.col(2) = pRpa.cast<double>() - penC;
 
-        Q.col(0) = Eigen::Vector3d(mNas.x(), mNas.y(), mNas.z()) - modC;
-        Q.col(1) = Eigen::Vector3d(mLpa.x(), mLpa.y(), mLpa.z()) - modC;
-        Q.col(2) = Eigen::Vector3d(mRpa.x(), mRpa.y(), mRpa.z()) - modC;
+        Q.col(0) = mNas.cast<double>() - modC;
+        Q.col(1) = mLpa.cast<double>() - modC;
+        Q.col(2) = mRpa.cast<double>() - modC;
 
         // 3. Cross-covariance matrix H = P * Qᵀ
         const Eigen::Matrix3d H = P * Q.transpose();
@@ -302,8 +326,8 @@ bool PolhemusCoregistration::computeRegistration()
         // test both candidate rotations (D₃₃ = +1 and D₃₃ = -1) and
         // keep whichever maps pen CZ closer to model CZ.
         if (m_hasPenVertex && m_hasModelVertex) {
-            const Eigen::Vector3d penCZ(m_penVertex.x(), m_penVertex.y(), m_penVertex.z());
-            const Eigen::Vector3d modCZ(m_modelVertex.x(), m_modelVertex.y(), m_modelVertex.z());
+            const Eigen::Vector3d penCZ = m_penVertex.cast<double>();
+            const Eigen::Vector3d modCZ = m_modelVertex.cast<double>();
 
             const Eigen::Vector3d mappedCZ = R * penCZ + t;
             const double errCurrent = (mappedCZ - modCZ).norm();
@@ -323,17 +347,13 @@ bool PolhemusCoregistration::computeRegistration()
             }
         }
 
-        // 7. Build QMatrix4x4 worldToModel = [R | t]
-        m_worldToModel.setToIdentity();
-        for (int r = 0; r < 3; ++r) {
-            for (int c = 0; c < 3; ++c) {
-                m_worldToModel(r, c) = static_cast<float>(R(r, c));
-            }
-            m_worldToModel(r, 3) = static_cast<float>(t(r));
-        }
+        // 7. worldToModel = [R | t]
+        m_worldToModel.setIdentity();
+        m_worldToModel.topLeftCorner<3, 3>() = R.cast<float>();
+        m_worldToModel.topRightCorner<3, 1>() = t.cast<float>();
 
-        m_headToWorld.setToIdentity();
-        m_headToDevice = m_deviceToWorld.inverted() * m_headToWorld;
+        m_headToWorld.setIdentity();
+        m_headToDevice = m_deviceToWorld.inverse() * m_headToWorld;
         m_registrationValid = true;
         qInfo() << "Registration succeeded (analytical paired).";
         emit registrationChanged();
@@ -341,15 +361,14 @@ bool PolhemusCoregistration::computeRegistration()
     }
 
     // --- Fallback: head-frame-only registration ---
-    const QMatrix4x4 headFrame = buildHeadFrame();
-    const QVector3D ez(headFrame(0, 2), headFrame(1, 2), headFrame(2, 2));
-    if (ez.length() < 1e-6f) {
+    const Eigen::Matrix4f headFrame = buildHeadFrame();
+    if (headFrame.block<3, 1>(0, 2).norm() < 1e-6f) {
         return false;
     }
 
     m_headToWorld = headFrame;
-    m_headToDevice = m_deviceToWorld.inverted() * m_headToWorld;
-    m_worldToModel.setToIdentity();
+    m_headToDevice = m_deviceToWorld.inverse() * m_headToWorld;
+    m_worldToModel.setIdentity();
     m_registrationValid = true;
     qInfo() << "Registration succeeded (head-frame fallback).";
     emit registrationChanged();
@@ -359,13 +378,13 @@ bool PolhemusCoregistration::computeRegistration()
 //=============================================================================================================
 
 void PolhemusCoregistration::onPointReceived(int station,
-                                             const QVector3D& position,
-                                             const QQuaternion& orientation)
+                                             const Eigen::Vector3f& position,
+                                             const Eigen::Quaternionf& orientation)
 {
     // Apply axis mirroring to compensate for transmitter placement
-    const QVector3D pos(m_mirrorX ? -position.x() : position.x(),
-                        m_mirrorY ? -position.y() : position.y(),
-                        position.z());
+    const Eigen::Vector3f pos(m_mirrorX ? -position.x() : position.x(),
+                              m_mirrorY ? -position.y() : position.y(),
+                              position.z());
 
     if (station == m_trackerStation) {
         m_deviceToWorld = buildDevicePose(pos, orientation);
@@ -374,14 +393,14 @@ void PolhemusCoregistration::onPointReceived(int station,
         // Gimbal-lock guard: for ZYX Euler, sin(el) = 2*(w*y - x*z).
         // When |el| > 80° the Euler→quaternion conversion is unreliable,
         // so freeze the pen pose at its last good value.
-        const float sinEl = 2.0f * (orientation.scalar() * orientation.y() - orientation.x() * orientation.z());
+        const float sinEl = 2.0f * (orientation.w() * orientation.y() - orientation.x() * orientation.z());
         constexpr float kGimbalSinEl = 0.9848f; // sin(80°)
         const bool gimbalLock = (std::abs(sinEl) > kGimbalSinEl);
 
         if (!gimbalLock) {
-            const QVector3D tipAdj = m_tipOffsetEnabled
-                ? orientation.rotatedVector(m_penTipOffset)
-                : QVector3D();
+            const Eigen::Vector3f tipAdj = m_tipOffsetEnabled
+                ? Eigen::Vector3f(orientation * m_penTipOffset)
+                : Eigen::Vector3f::Zero();
             m_penPosition = pos + tipAdj;
             m_penOrientation = orientation;
             m_havePenPos = true;
@@ -397,16 +416,16 @@ void PolhemusCoregistration::onPointReceived(int station,
             constexpr float kGimbalSinEl2 = 0.9848f; // sin(80°) — reject |el|>80°
 
             // Gimbal-lock check: for ZYX Euler, sin(el) = 2*(w*y - x*z)
-            const float sinEl2 = 2.0f * (orientation.scalar() * orientation.y() - orientation.x() * orientation.z());
+            const float sinEl2 = 2.0f * (orientation.w() * orientation.y() - orientation.x() * orientation.z());
             if (std::abs(sinEl2) > kGimbalSinEl2) {
                 // Near gimbal lock — skip this sample silently
             } else {
                 bool accept = m_pivotOrientations.empty();
                 if (!accept) {
-                    const QQuaternion& prev = m_pivotOrientations.back();
-                    float dot = std::abs(QQuaternion::dotProduct(prev, orientation));
+                    const Eigen::Quaternionf& prev = m_pivotOrientations.back();
+                    float dot = std::abs(prev.dot(orientation));
                     float angleDeg = 2.0f * std::acos(std::min(dot, 1.0f)) * (180.0f / 3.14159265f);
-                    float posDelta = (pos - m_pivotPositions.back()).length();
+                    float posDelta = (pos - m_pivotPositions.back()).norm();
                     accept = (angleDeg >= kMinAngleDeg) && (posDelta < kMaxPosJumpM);
                 }
                 if (accept) {
@@ -419,7 +438,7 @@ void PolhemusCoregistration::onPointReceived(int station,
                         float minDot = 1.0f;
                         const auto& first = m_pivotOrientations.front();
                         for (size_t k = 1; k < m_pivotOrientations.size(); ++k) {
-                            float d = std::abs(QQuaternion::dotProduct(first, m_pivotOrientations[k]));
+                            float d = std::abs(first.dot(m_pivotOrientations[k]));
                             if (d < minDot)
                                 minDot = d;
                         }
@@ -440,18 +459,18 @@ void PolhemusCoregistration::onPointReceived(int station,
 }
 
 void PolhemusCoregistration::onPenButtonPressedFromConn(int station,
-                                                        const QVector3D& position,
-                                                        const QQuaternion& orientation)
+                                                        const Eigen::Vector3f& position,
+                                                        const Eigen::Quaternionf& orientation)
 {
     if (station == m_penStation) {
         // Apply axis mirroring to compensate for transmitter placement
-        const QVector3D pos(m_mirrorX ? -position.x() : position.x(),
-                            m_mirrorY ? -position.y() : position.y(),
-                            position.z());
+        const Eigen::Vector3f pos(m_mirrorX ? -position.x() : position.x(),
+                                  m_mirrorY ? -position.y() : position.y(),
+                                  position.z());
 
-        const QVector3D tipAdj = m_tipOffsetEnabled
-            ? orientation.rotatedVector(m_penTipOffset)
-            : QVector3D();
+        const Eigen::Vector3f tipAdj = m_tipOffsetEnabled
+            ? Eigen::Vector3f(orientation * m_penTipOffset)
+            : Eigen::Vector3f::Zero();
         m_penPosition = pos + tipAdj;
         m_penOrientation = orientation;
         m_havePenPos = true;
@@ -476,53 +495,30 @@ void PolhemusCoregistration::onPenButtonPressedFromConn(int station,
 
 //=============================================================================================================
 
-QMatrix4x4 PolhemusCoregistration::buildDevicePose(const QVector3D& trackerPos,
-                                                   const QQuaternion& trackerOri) const
+Eigen::Matrix4f PolhemusCoregistration::buildDevicePose(const Eigen::Vector3f& trackerPos,
+                                                        const Eigen::Quaternionf& trackerOri) const
 {
-    QMatrix4x4 trackerToWorld;
-    trackerToWorld.setToIdentity();
-    trackerToWorld.translate(trackerPos);
-    trackerToWorld.rotate(trackerOri);
-
-    QMatrix4x4 offset;
-    offset.setToIdentity();
-    offset.translate(m_offsetTranslation);
-    offset.rotate(m_offsetRotation);
-
-    return trackerToWorld * offset;
+    return poseMatrix(trackerPos, trackerOri) * poseMatrix(m_offsetTranslation, m_offsetRotation);
 }
 
-QMatrix4x4 PolhemusCoregistration::buildHeadFrame() const
+Eigen::Matrix4f PolhemusCoregistration::buildHeadFrame() const
 {
-    const QVector3D nas = m_pPoints->fiducial(FiducialId::NAS);
-    const QVector3D lpa = m_pPoints->fiducial(FiducialId::LPA);
-    const QVector3D rpa = m_pPoints->fiducial(FiducialId::RPA);
+    const Eigen::Vector3f nas = m_pPoints->fiducial(FiducialId::NAS);
+    const Eigen::Vector3f lpa = m_pPoints->fiducial(FiducialId::LPA);
+    const Eigen::Vector3f rpa = m_pPoints->fiducial(FiducialId::RPA);
 
-    const QVector3D origin = (lpa + rpa) * 0.5f;
-    const QVector3D ex = (nas - origin).normalized();
-    const QVector3D eyApprox = (lpa - origin).normalized();
+    const Eigen::Vector3f origin = (lpa + rpa) * 0.5f;
+    const Eigen::Vector3f ex = (nas - origin).normalized();
+    const Eigen::Vector3f eyApprox = (lpa - origin).normalized();
     // Gram-Schmidt: orthogonalize ey against ex, preserving LPA direction
-    const QVector3D ey = (eyApprox - QVector3D::dotProduct(eyApprox, ex) * ex).normalized();
-    const QVector3D ez = QVector3D::crossProduct(ex, ey).normalized();
+    const Eigen::Vector3f ey = (eyApprox - eyApprox.dot(ex) * ex).normalized();
+    const Eigen::Vector3f ez = ex.cross(ey).normalized();
 
-    QMatrix4x4 frame;
-    frame.setToIdentity();
-    frame(0, 0) = ex.x();
-    frame(0, 1) = ey.x();
-    frame(0, 2) = ez.x();
-    frame(0, 3) = origin.x();
-    frame(1, 0) = ex.y();
-    frame(1, 1) = ey.y();
-    frame(1, 2) = ez.y();
-    frame(1, 3) = origin.y();
-    frame(2, 0) = ex.z();
-    frame(2, 1) = ey.z();
-    frame(2, 2) = ez.z();
-    frame(2, 3) = origin.z();
-    frame(3, 0) = 0.0f;
-    frame(3, 1) = 0.0f;
-    frame(3, 2) = 0.0f;
-    frame(3, 3) = 1.0f;
+    Eigen::Matrix4f frame = Eigen::Matrix4f::Identity();
+    frame.block<3, 1>(0, 0) = ex;
+    frame.block<3, 1>(0, 1) = ey;
+    frame.block<3, 1>(0, 2) = ez;
+    frame.block<3, 1>(0, 3) = origin;
     return frame;
 }
 
@@ -565,11 +561,10 @@ bool PolhemusCoregistration::solvePivotCalibration()
     Eigen::VectorXd b(3 * N);
 
     for (int i = 0; i < N; ++i) {
-        const QVector3D& p = m_pivotPositions[static_cast<size_t>(i)];
-        const QQuaternion& q = m_pivotOrientations[static_cast<size_t>(i)];
+        const Eigen::Vector3f& p = m_pivotPositions[static_cast<size_t>(i)];
+        const Eigen::Quaternionf& q = m_pivotOrientations[static_cast<size_t>(i)];
 
-        // Extract 3x3 rotation matrix directly from quaternion
-        const QMatrix3x3 rm = q.toRotationMatrix();
+        const Eigen::Matrix3f rm = q.toRotationMatrix();
 
         const int row = 3 * i;
         for (int r = 0; r < 3; ++r) {
@@ -599,20 +594,16 @@ bool PolhemusCoregistration::solvePivotCalibration()
 
     Eigen::VectorXd x = svd.solve(b);
 
-    QVector3D offset(static_cast<float>(x(0)),
-                     static_cast<float>(x(1)),
-                     static_cast<float>(x(2)));
-    QVector3D tipPos(static_cast<float>(x(3)),
-                     static_cast<float>(x(4)),
-                     static_cast<float>(x(5)));
+    const Eigen::Vector3f offset = x.head<3>().cast<float>();
+    const Eigen::Vector3f tipPos = x.tail<3>().cast<float>();
 
     // Compute RMS residual
     double sumSq = 0.0;
     for (int i = 0; i < N; ++i) {
-        const QVector3D& p = m_pivotPositions[static_cast<size_t>(i)];
-        const QQuaternion& q = m_pivotOrientations[static_cast<size_t>(i)];
-        QVector3D computed = p + q.rotatedVector(offset);
-        float err = (computed - tipPos).length();
+        const Eigen::Vector3f& p = m_pivotPositions[static_cast<size_t>(i)];
+        const Eigen::Quaternionf& q = m_pivotOrientations[static_cast<size_t>(i)];
+        const Eigen::Vector3f computed = p + q * offset;
+        float err = (computed - tipPos).norm();
         sumSq += static_cast<double>(err) * static_cast<double>(err);
     }
     float rms = static_cast<float>(std::sqrt(sumSq / static_cast<double>(N))) * 1000.0f;
@@ -640,8 +631,8 @@ bool PolhemusCoregistration::captureOpticalCalibSample()
         return false;
     }
 
-    const QMatrix4x4& dev = m_deviceToWorld;
-    if (dev.isIdentity()) {
+    const Eigen::Matrix4f& dev = m_deviceToWorld;
+    if (isIdentity(dev)) {
         qWarning() << "Optical calibration: no tracker data available";
         return false;
     }
@@ -650,15 +641,9 @@ bool PolhemusCoregistration::captureOpticalCalibSample()
     // deviceToWorld = trackerToWorld * offset, but we want the raw tracker
     // pose (before offset). Reconstruct from the current raw tracker data
     // by removing the offset: trackerToWorld = deviceToWorld * offset^-1
-    QMatrix4x4 offsetInv;
-    offsetInv.setToIdentity();
-    offsetInv.translate(m_offsetTranslation);
-    offsetInv.rotate(m_offsetRotation);
-    offsetInv = offsetInv.inverted();
-
-    const QMatrix4x4 trackerToWorld = dev * offsetInv;
-    const QVector3D trackerPos(trackerToWorld(0, 3), trackerToWorld(1, 3), trackerToWorld(2, 3));
-    const QQuaternion trackerOri = QQuaternion::fromRotationMatrix(trackerToWorld.toGenericMatrix<3, 3>());
+    Eigen::Vector3f trackerPos;
+    Eigen::Quaternionf trackerOri;
+    trackerPose(dev, m_offsetTranslation, m_offsetRotation, trackerPos, trackerOri);
 
     OpticalCalibSample sample;
     sample.trackerPos = trackerPos;
@@ -667,8 +652,8 @@ bool PolhemusCoregistration::captureOpticalCalibSample()
     m_opticalCalibSamples.push_back(sample);
 
     const int n = static_cast<int>(m_opticalCalibSamples.size());
-    const QVector3D localFocus = trackerOri.inverted().rotatedVector(m_penPosition - trackerPos);
-    const float distToTracker = localFocus.length() * 1000.0f;
+    const Eigen::Vector3f localFocus = trackerOri.inverse() * (m_penPosition - trackerPos);
+    const float distToTracker = localFocus.norm() * 1000.0f;
 
     qInfo().nospace()
         << "Optical calibration sample " << n << ":"
@@ -682,12 +667,12 @@ bool PolhemusCoregistration::captureOpticalCalibSample()
     // at close range the angle is large because the ~20 cm tracker offset dominates.
     if (n >= 2) {
         const auto& prev = m_opticalCalibSamples[static_cast<size_t>(n - 2)];
-        const QVector3D prevLocal = prev.trackerOri.inverted().rotatedVector(prev.focusPoint - prev.trackerPos);
-        const QVector3D curDir = localFocus.normalized();
-        const QVector3D prevDir = prevLocal.normalized();
-        const float dot = std::clamp(QVector3D::dotProduct(curDir, prevDir), -1.0f, 1.0f);
+        const Eigen::Vector3f prevLocal = prev.trackerOri.inverse() * (prev.focusPoint - prev.trackerPos);
+        const Eigen::Vector3f curDir = localFocus.normalized();
+        const Eigen::Vector3f prevDir = prevLocal.normalized();
+        const float dot = std::clamp(curDir.dot(prevDir), -1.0f, 1.0f);
         const float angleDeg = std::acos(dot) * (180.0f / 3.14159265f);
-        const float prevDist = prevLocal.length() * 1000.0f;
+        const float prevDist = prevLocal.norm() * 1000.0f;
         qInfo().nospace()
             << "    convergence angle (sample " << n - 1 << "\u2194" << n << "): " << angleDeg << "\u00b0"
             << "  (distances: " << prevDist << " / " << distToTracker << " mm)";
@@ -714,28 +699,22 @@ bool PolhemusCoregistration::captureObjectiveCenter()
         return false;
     }
 
-    const QMatrix4x4& dev = m_deviceToWorld;
-    if (dev.isIdentity()) {
+    const Eigen::Matrix4f& dev = m_deviceToWorld;
+    if (isIdentity(dev)) {
         qWarning() << "Objective center capture: no tracker data available";
         return false;
     }
 
     // Recover raw tracker pose (remove device offset)
-    QMatrix4x4 offsetInv;
-    offsetInv.setToIdentity();
-    offsetInv.translate(m_offsetTranslation);
-    offsetInv.rotate(m_offsetRotation);
-    offsetInv = offsetInv.inverted();
-
-    const QMatrix4x4 trackerToWorld = dev * offsetInv;
-    const QVector3D trackerPos(trackerToWorld(0, 3), trackerToWorld(1, 3), trackerToWorld(2, 3));
-    const QQuaternion trackerOri = QQuaternion::fromRotationMatrix(trackerToWorld.toGenericMatrix<3, 3>());
+    Eigen::Vector3f trackerPos;
+    Eigen::Quaternionf trackerOri;
+    trackerPose(dev, m_offsetTranslation, m_offsetRotation, trackerPos, trackerOri);
 
     // Transform pen position into tracker-local frame
-    m_objectiveCenterLocal = trackerOri.inverted().rotatedVector(m_penPosition - trackerPos);
+    m_objectiveCenterLocal = trackerOri.inverse() * (m_penPosition - trackerPos);
     m_hasObjectiveCenter = true;
 
-    const float distMm = m_objectiveCenterLocal.length() * 1000.0f;
+    const float distMm = m_objectiveCenterLocal.norm() * 1000.0f;
     qInfo().nospace()
         << "Objective center captured (tracker-local): ("
         << m_objectiveCenterLocal.x() * 1000.f << ", "
@@ -748,7 +727,7 @@ bool PolhemusCoregistration::captureObjectiveCenter()
 
 void PolhemusCoregistration::clearObjectiveCenter()
 {
-    m_objectiveCenterLocal = QVector3D();
+    m_objectiveCenterLocal = Eigen::Vector3f::Zero();
     m_hasObjectiveCenter = false;
 }
 
@@ -764,8 +743,8 @@ bool PolhemusCoregistration::solveOpticalCalibration()
     std::vector<Eigen::Vector3d> localPoints(static_cast<size_t>(N));
     for (int i = 0; i < N; ++i) {
         const auto& s = m_opticalCalibSamples[static_cast<size_t>(i)];
-        const QVector3D local = s.trackerOri.inverted().rotatedVector(s.focusPoint - s.trackerPos);
-        localPoints[static_cast<size_t>(i)] = Eigen::Vector3d(local.x(), local.y(), local.z());
+        const Eigen::Vector3f local = s.trackerOri.inverse() * (s.focusPoint - s.trackerPos);
+        localPoints[static_cast<size_t>(i)] = local.cast<double>();
     }
 
     // Step 2: PCA initial estimate — centroid + SVD for starting axis & center
@@ -800,9 +779,7 @@ bool PolhemusCoregistration::solveOpticalCalibration()
     const double knownDist = static_cast<double>(m_knownTrackerToObjectiveDist);
     if (m_hasObjectiveCenter) {
         // Direct objective center — use it as-is, recompute axis from it
-        opticalCenter = Eigen::Vector3d(m_objectiveCenterLocal.x(),
-                                        m_objectiveCenterLocal.y(),
-                                        m_objectiveCenterLocal.z());
+        opticalCenter = m_objectiveCenterLocal.cast<double>();
 
         Eigen::MatrixXd rays(3, N);
         for (int i = 0; i < N; ++i)
@@ -933,17 +910,13 @@ bool PolhemusCoregistration::solveOpticalCalibration()
     }
     const double depthSpreadMm = (maxDepth - minDepth) * 1000.0;
 
-    m_opticalAxisLocal = QVector3D(static_cast<float>(axisDir.x()),
-                                   static_cast<float>(axisDir.y()),
-                                   static_cast<float>(axisDir.z()));
-    m_opticalCenterLocal = QVector3D(static_cast<float>(opticalCenter.x()),
-                                     static_cast<float>(opticalCenter.y()),
-                                     static_cast<float>(opticalCenter.z()));
+    m_opticalAxisLocal = axisDir.cast<float>();
+    m_opticalCenterLocal = opticalCenter.cast<float>();
     m_opticalCalibResidualMm = static_cast<float>(rms);
     m_opticalCalibDepthSpreadMm = static_cast<float>(depthSpreadMm);
     m_opticalCalibValid = true;
 
-    const float distMm = m_opticalCenterLocal.length() * 1000.0f;
+    const float distMm = m_opticalCenterLocal.norm() * 1000.0f;
 
     qInfo().nospace()
         << "Optical calibration solved (" << N << " samples"
@@ -1001,60 +974,51 @@ bool PolhemusCoregistration::solveOpticalCalibration()
     return true;
 }
 
-bool PolhemusCoregistration::opticalRayInWorld(QVector3D& origin, QVector3D& direction) const
+bool PolhemusCoregistration::opticalRayInWorld(Eigen::Vector3f& origin, Eigen::Vector3f& direction) const
 {
     if (!m_opticalCalibValid)
         return false;
 
-    const QMatrix4x4& dev = m_deviceToWorld;
-    if (dev.isIdentity())
+    const Eigen::Matrix4f& dev = m_deviceToWorld;
+    if (isIdentity(dev))
         return false;
 
     // Recover raw tracker pose (before device offset)
-    QMatrix4x4 offsetMat;
-    offsetMat.setToIdentity();
-    offsetMat.translate(m_offsetTranslation);
-    offsetMat.rotate(m_offsetRotation);
+    Eigen::Vector3f trackerPos;
+    Eigen::Quaternionf trackerOri;
+    trackerPose(dev, m_offsetTranslation, m_offsetRotation, trackerPos, trackerOri);
 
-    const QMatrix4x4 trackerToWorld = dev * offsetMat.inverted();
-    const QVector3D trackerPos(trackerToWorld(0, 3), trackerToWorld(1, 3), trackerToWorld(2, 3));
-    const QQuaternion trackerOri = QQuaternion::fromRotationMatrix(trackerToWorld.toGenericMatrix<3, 3>());
-
-    origin = trackerPos + trackerOri.rotatedVector(m_opticalCenterLocal);
-    direction = trackerOri.rotatedVector(m_opticalAxisLocal).normalized();
+    origin = trackerPos + trackerOri * m_opticalCenterLocal;
+    direction = (trackerOri * m_opticalAxisLocal).normalized();
     return true;
 }
 
 //=============================================================================================================
 
-bool PolhemusCoregistration::opticalUpInWorld(QVector3D& up) const
+bool PolhemusCoregistration::opticalUpInWorld(Eigen::Vector3f& up) const
 {
     if (!m_opticalCalibValid)
         return false;
 
-    const QMatrix4x4& dev = m_deviceToWorld;
-    if (dev.isIdentity())
+    const Eigen::Matrix4f& dev = m_deviceToWorld;
+    if (isIdentity(dev))
         return false;
 
-    QMatrix4x4 offsetMat;
-    offsetMat.setToIdentity();
-    offsetMat.translate(m_offsetTranslation);
-    offsetMat.rotate(m_offsetRotation);
-
-    const QMatrix4x4 trackerToWorld = dev * offsetMat.inverted();
-    const QQuaternion trackerOri = QQuaternion::fromRotationMatrix(trackerToWorld.toGenericMatrix<3, 3>());
+    Eigen::Vector3f trackerPos;
+    Eigen::Quaternionf trackerOri;
+    trackerPose(dev, m_offsetTranslation, m_offsetRotation, trackerPos, trackerOri);
 
     // Tracker local Z axis = "up" in the microscope view.
     // Orthogonalise against the optical axis to remove any tilt component.
-    const QVector3D rawUp = trackerOri.rotatedVector(QVector3D(0.0f, 0.0f, 1.0f));
-    const QVector3D axis = trackerOri.rotatedVector(m_opticalAxisLocal).normalized();
-    up = (rawUp - QVector3D::dotProduct(rawUp, axis) * axis).normalized();
-    return up.lengthSquared() > 0.5f; // degenerate if Y ≈ optical axis
+    const Eigen::Vector3f rawUp = trackerOri * Eigen::Vector3f::UnitZ();
+    const Eigen::Vector3f axis = (trackerOri * m_opticalAxisLocal).normalized();
+    up = (rawUp - rawUp.dot(axis) * axis).normalized();
+    return up.squaredNorm() > 0.5f; // degenerate if Y ≈ optical axis
 }
 
 //=============================================================================================================
 
-bool PolhemusCoregistration::applyOpticalAxisFineAdjust(const QVector3D& targetWorldPos,
+bool PolhemusCoregistration::applyOpticalAxisFineAdjust(const Eigen::Vector3f& targetWorldPos,
                                                         float& correctionDeg)
 {
     correctionDeg = 0.0f;
@@ -1062,34 +1026,29 @@ bool PolhemusCoregistration::applyOpticalAxisFineAdjust(const QVector3D& targetW
         return false;
 
     // Get tracker-to-world transform (same as opticalRayInWorld)
-    const QMatrix4x4& dev = m_deviceToWorld;
-    if (dev.isIdentity())
+    const Eigen::Matrix4f& dev = m_deviceToWorld;
+    if (isIdentity(dev))
         return false;
 
-    QMatrix4x4 offsetMat;
-    offsetMat.setToIdentity();
-    offsetMat.translate(m_offsetTranslation);
-    offsetMat.rotate(m_offsetRotation);
-
-    const QMatrix4x4 trackerToWorld = dev * offsetMat.inverted();
-    const QVector3D trackerPos(trackerToWorld(0, 3), trackerToWorld(1, 3), trackerToWorld(2, 3));
-    const QQuaternion trackerOri = QQuaternion::fromRotationMatrix(trackerToWorld.toGenericMatrix<3, 3>());
+    Eigen::Vector3f trackerPos;
+    Eigen::Quaternionf trackerOri;
+    trackerPose(dev, m_offsetTranslation, m_offsetRotation, trackerPos, trackerOri);
 
     // Current optical center in world frame
-    const QVector3D optCenterWorld = trackerPos + trackerOri.rotatedVector(m_opticalCenterLocal);
+    const Eigen::Vector3f optCenterWorld = trackerPos + trackerOri * m_opticalCenterLocal;
 
     // Desired axis direction: from optical center to the target point
-    const QVector3D toTarget = (targetWorldPos - optCenterWorld);
-    if (toTarget.length() < 0.001f)
+    const Eigen::Vector3f toTarget = (targetWorldPos - optCenterWorld);
+    if (toTarget.norm() < 0.001f)
         return false; // target too close to optical center
 
-    const QVector3D desiredDirWorld = toTarget.normalized();
+    const Eigen::Vector3f desiredDirWorld = toTarget.normalized();
 
     // Current axis direction in world frame
-    const QVector3D currentDirWorld = trackerOri.rotatedVector(m_opticalAxisLocal).normalized();
+    const Eigen::Vector3f currentDirWorld = (trackerOri * m_opticalAxisLocal).normalized();
 
     // Compute correction angle
-    const float cosAngle = std::clamp(QVector3D::dotProduct(currentDirWorld, desiredDirWorld), -1.0f, 1.0f);
+    const float cosAngle = std::clamp(currentDirWorld.dot(desiredDirWorld), -1.0f, 1.0f);
     correctionDeg = std::acos(cosAngle) * (180.0f / 3.14159265358979f);
 
     // Sanity: reject corrections > 10° — likely a user error
@@ -1104,15 +1063,15 @@ bool PolhemusCoregistration::applyOpticalAxisFineAdjust(const QVector3D& targetW
         m_opticalAxisPreFineAdjust = m_opticalAxisLocal;
 
     // Compute the rotation from current to desired direction, in world frame
-    const QQuaternion worldCorrection = QQuaternion::rotationTo(currentDirWorld, desiredDirWorld);
+    const Eigen::Quaternionf worldCorrection = Eigen::Quaternionf::FromTwoVectors(currentDirWorld, desiredDirWorld);
 
     // Transform the correction into tracker-local frame:
     // localCorrection = trackerOri⁻¹ * worldCorrection * trackerOri
-    const QQuaternion trackerOriInv = trackerOri.inverted();
-    const QQuaternion localCorrection = trackerOriInv * worldCorrection * trackerOri;
+    const Eigen::Quaternionf trackerOriInv = trackerOri.inverse();
+    const Eigen::Quaternionf localCorrection = trackerOriInv * worldCorrection * trackerOri;
 
     // Apply to the local axis
-    m_opticalAxisLocal = localCorrection.rotatedVector(m_opticalAxisLocal).normalized();
+    m_opticalAxisLocal = (localCorrection * m_opticalAxisLocal).normalized();
     m_opticalFineAdjustDeg = correctionDeg;
     m_opticalFineAdjustApplied = true;
 
@@ -1147,47 +1106,48 @@ void PolhemusCoregistration::clearOpticalFineAdjust()
 namespace
 {
 
-void saveVec3(QSettings& s, const QString& key, const QVector3D& v)
+void saveVec3(QSettings& s, const QString& key, const Eigen::Vector3f& v)
 {
     s.setValue(key + "/x", static_cast<double>(v.x()));
     s.setValue(key + "/y", static_cast<double>(v.y()));
     s.setValue(key + "/z", static_cast<double>(v.z()));
 }
 
-QVector3D loadVec3(const QSettings& s, const QString& key)
+Eigen::Vector3f loadVec3(const QSettings& s, const QString& key)
 {
-    return QVector3D(
+    return Eigen::Vector3f(
         static_cast<float>(s.value(key + "/x", 0.0).toDouble()),
         static_cast<float>(s.value(key + "/y", 0.0).toDouble()),
         static_cast<float>(s.value(key + "/z", 0.0).toDouble()));
 }
 
-void saveMat4(QSettings& s, const QString& key, const QMatrix4x4& m)
+// Column-major floats, the layout earlier sessions stored.
+void saveMat4(QSettings& s, const QString& key, const Eigen::Matrix4f& m)
 {
-    QByteArray data(reinterpret_cast<const char*>(m.constData()), 16 * sizeof(float));
+    QByteArray data(reinterpret_cast<const char*>(m.data()), 16 * sizeof(float));
     s.setValue(key, data);
 }
 
-QMatrix4x4 loadMat4(const QSettings& s, const QString& key)
+Eigen::Matrix4f loadMat4(const QSettings& s, const QString& key)
 {
     QByteArray data = s.value(key).toByteArray();
-    QMatrix4x4 m;
+    Eigen::Matrix4f m = Eigen::Matrix4f::Identity();
     if (data.size() == 16 * static_cast<int>(sizeof(float)))
-        memcpy(m.data(), data.constData(), 16 * sizeof(float));
+        std::memcpy(m.data(), data.constData(), 16 * sizeof(float));
     return m;
 }
 
-void saveQuat(QSettings& s, const QString& key, const QQuaternion& q)
+void saveQuat(QSettings& s, const QString& key, const Eigen::Quaternionf& q)
 {
-    s.setValue(key + "/w", static_cast<double>(q.scalar()));
+    s.setValue(key + "/w", static_cast<double>(q.w()));
     s.setValue(key + "/x", static_cast<double>(q.x()));
     s.setValue(key + "/y", static_cast<double>(q.y()));
     s.setValue(key + "/z", static_cast<double>(q.z()));
 }
 
-QQuaternion loadQuat(const QSettings& s, const QString& key)
+Eigen::Quaternionf loadQuat(const QSettings& s, const QString& key)
 {
-    return QQuaternion(
+    return Eigen::Quaternionf(
         static_cast<float>(s.value(key + "/w", 1.0).toDouble()),
         static_cast<float>(s.value(key + "/x", 0.0).toDouble()),
         static_cast<float>(s.value(key + "/y", 0.0).toDouble()),

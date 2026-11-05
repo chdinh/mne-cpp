@@ -28,10 +28,8 @@
     "qt_free": [
       "acq"
     ],
-    "tokens": 21419,
-    "gui_outside_design": [
-      "acq/polhemus"
-    ]
+    "tokens": 21201,
+    "gui_outside_design": []
   },
   "libraries": {
     "acq": {
@@ -67,24 +65,22 @@
       ]
     },
     "acq/polhemus": {
-      "tokens": 416,
+      "tokens": 198,
       "by_category": {
         "containers": 5,
         "files": 11,
-        "global": 13,
-        "gui": 212,
+        "global": 7,
         "logging": 32,
         "objects_signals": 57,
         "other": 15,
         "strings": 67,
         "time": 4
       },
-      "public_header_includes": 21,
+      "public_header_includes": 14,
       "q_object": 3,
       "files": 8,
       "modules": [
         "Core",
-        "Gui",
         "SerialPort"
       ]
     },

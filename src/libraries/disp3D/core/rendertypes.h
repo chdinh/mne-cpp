@@ -133,7 +133,7 @@ public:
     : RenderKey()
     {
     }
-    RenderKey& operator=(const RenderKey&)
+    RenderKey& operator=(const RenderKey&) // NOLINT(bugprone-unhandled-self-assignment): keeps its own key, copies nothing
     {
         return *this;
     }

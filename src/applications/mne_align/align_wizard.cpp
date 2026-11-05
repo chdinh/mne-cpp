@@ -183,13 +183,13 @@ void AlignWizard::setPenStation(int station)
 // Live cursor
 //=============================================================================================================
 
-void AlignWizard::onLivePoint(int station, const QVector3D& pos, const QQuaternion& /*ori*/)
+void AlignWizard::onLivePoint(int station, const Eigen::Vector3f& pos, const Eigen::Quaternionf& /*ori*/)
 {
     // Only track the pen station for capture
     if (station != m_penStation)
         return;
 
-    m_lastLivePos = pos;
+    m_lastLivePos = toQt(pos);
     const bool wasLive = m_haveLive;
     m_haveLive = true;
 
@@ -200,7 +200,7 @@ void AlignWizard::onLivePoint(int station, const QVector3D& pos, const QQuaterni
         refreshHeadShapeUi();
     }
 
-    const QVector3D mapped = m_trackerToMri.map(pos);
+    const QVector3D mapped = m_trackerToMri.map(m_lastLivePos);
     const auto liveStr = QStringLiteral("live: (%1, %2, %3) m")
                              .arg(mapped.x(), 0, 'f', 4)
                              .arg(mapped.y(), 0, 'f', 4)
@@ -213,13 +213,13 @@ void AlignWizard::onLivePoint(int station, const QVector3D& pos, const QQuaterni
         m_pHspLiveLabel->setText(liveStr);
 }
 
-void AlignWizard::onPenButtonPressed(int station, const QVector3D& pos, const QQuaternion& /*ori*/)
+void AlignWizard::onPenButtonPressed(int station, const Eigen::Vector3f& pos, const Eigen::Quaternionf& /*ori*/)
 {
     if (station != m_penStation)
         return;
 
     // Use the frozen position as the capture point
-    m_lastLivePos = pos;
+    m_lastLivePos = toQt(pos);
     m_haveLive = true;
 
     switch (currentStep()) {
@@ -354,7 +354,7 @@ void AlignWizard::onSurfaceDoubleClicked(const QVector3D& worldPos)
         return;
 
     // Place the currently selected twin fiducial
-    m_pPoints->setTwinFiducial(m_selectedTwinFid, worldPos);
+    m_pPoints->setTwinFiducial(m_selectedTwinFid, toEigen(worldPos));
     refreshSetupTwinUi();
 
     // Auto-advance to next unset fiducial
@@ -384,7 +384,7 @@ void AlignWizard::refreshSetupTwinUi()
         const QString mark = have ? QStringLiteral("✔") : QStringLiteral("○");
         QString posStr;
         if (have) {
-            const QVector3D p = m_pPoints->twinFiducial(id);
+            const QVector3D p = toQt(m_pPoints->twinFiducial(id));
             posStr = QStringLiteral(" (%1, %2, %3)")
                          .arg(p.x(), 0, 'f', 4)
                          .arg(p.y(), 0, 'f', 4)
@@ -526,7 +526,7 @@ void AlignWizard::onCaptureFiducial()
     p.kind = PointKind::Fiducial;
     p.label = fiducialName(target);
     p.identNumber = static_cast<int>(target);
-    p.position = m_lastLivePos;
+    p.position = toEigen(m_lastLivePos);
     m_pPoints->append(p);
 
     // Auto-advance to next uncaptured fiducial
@@ -652,7 +652,7 @@ void AlignWizard::onCaptureEeg()
     p.kind = PointKind::Eeg;
     p.label = name;
     p.identNumber = ident;
-    p.position = m_lastLivePos;
+    p.position = toEigen(m_lastLivePos);
     m_pPoints->append(p);
 }
 
@@ -718,7 +718,7 @@ void AlignWizard::onCaptureHsp()
     p.kind = PointKind::HeadShape;
     p.label = QStringLiteral("HSP-%1").arg(n + 1);
     p.identNumber = n + 1;
-    p.position = m_lastLivePos;
+    p.position = toEigen(m_lastLivePos);
     m_pPoints->append(p);
 }
 
@@ -985,7 +985,7 @@ void AlignWizard::onLoadDigiFiff()
     for (qint32 i = 0; i < set.size(); ++i) {
         const FIFFLIB::FiffDigPoint& dp = set[i];
         DigitizedPoint p;
-        p.position = QVector3D(dp.r[0], dp.r[1], dp.r[2]);
+        p.position = Eigen::Vector3f(dp.r[0], dp.r[1], dp.r[2]);
         switch (dp.kind) {
             case FIFFV_POINT_CARDINAL: {
                 p.kind = PointKind::Fiducial;

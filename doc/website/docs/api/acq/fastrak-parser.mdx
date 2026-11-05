@@ -118,7 +118,7 @@ Parse one record line (without trailing CR/LF) — exposed for unit tests and fo
 
 Polhemus digitiser: parse Fastrak records, register captured fiducials and collect digitised points.
 
-````cpp title="src/examples/ex_acq_polhemus/main.cpp, line 66"
+````cpp title="src/examples/ex_acq_polhemus/main.cpp, line 68"
 FastrakParser parser;
 parser.setUnits(FastrakParser::Units::Centimetres);
 parser.append("01   12.50  -3.25   8.00\r\n02  1.0"); // the second record is still incomplete

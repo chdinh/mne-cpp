@@ -209,8 +209,8 @@ public slots:
     void setLastSavedTrans(const QString& outPath);
 
 private slots:
-    void onLivePoint(int station, const QVector3D& pos, const QQuaternion& ori);
-    void onPenButtonPressed(int station, const QVector3D& pos, const QQuaternion& ori);
+    void onLivePoint(int station, const Eigen::Vector3f& pos, const Eigen::Quaternionf& ori);
+    void onPenButtonPressed(int station, const Eigen::Vector3f& pos, const Eigen::Quaternionf& ori);
     void onPickBemFile();
     void onCapComboChanged(int index);
     void onAcquiredChanged();

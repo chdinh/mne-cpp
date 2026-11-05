@@ -21,6 +21,7 @@
 
 #include "polhemus_connection.h"
 
+#include <QDebug>
 #include <QtMath>
 
 using namespace ACQLIB;
@@ -166,23 +167,22 @@ void PolhemusConnection::onMockTick()
 {
     const double phase = (2.0 * M_PI * (m_mockSampleIdx % kMockPointsPerLap)) / static_cast<double>(kMockPointsPerLap);
     const double elevation = 0.3 * std::sin(phase * 3.0);
-    const QVector3D pos(
+    const Eigen::Vector3f pos(
         kMockSphereRadiusM * static_cast<float>(std::cos(phase)),
         kMockSphereRadiusM * static_cast<float>(std::sin(phase)),
         kMockSphereRadiusM * static_cast<float>(elevation));
     ++m_mockSampleIdx;
 
     // Station 1 = pen (stylus — matches default penStation=1)
-    const QVector3D penPos(
+    const Eigen::Vector3f penPos(
         kMockSphereRadiusM * static_cast<float>(std::cos(phase + 0.3)),
         kMockSphereRadiusM * static_cast<float>(std::sin(phase + 0.3)),
         kMockSphereRadiusM * static_cast<float>(elevation) + 0.02f);
-    const QQuaternion penOri = QQuaternion::fromAxisAndAngle(
-        QVector3D(0, 0, 1), static_cast<float>(phase * 180.0 / M_PI));
+    const Eigen::Quaternionf penOri(Eigen::AngleAxisf(static_cast<float>(phase), Eigen::Vector3f::UnitZ()));
     emit pointReceived(/*station*/ 1, penPos, penOri);
 
     // Station 2 = tracker (device pose — matches default trackerStation=2)
-    emit pointReceived(/*station*/ 2, pos, QQuaternion());
+    emit pointReceived(/*station*/ 2, pos, Eigen::Quaternionf::Identity());
 }
 
 //=============================================================================================================
@@ -227,8 +227,8 @@ bool PolhemusConnection::openSerial(const QString& portName, const PolhemusSeria
     // Set tracking hemisphere per station if configured (non-zero vector).
     // Fastrak command: "H<station>,x,y,z\r" — prevents position jumps
     // when a sensor crosses the default hemisphere boundary.
-    if (!cfg.hemisphere.isNull()) {
-        const QVector3D& h = cfg.hemisphere;
+    if (!cfg.hemisphere.isZero(0.0f)) {
+        const Eigen::Vector3f& h = cfg.hemisphere;
         for (int st = 1; st <= 4; ++st) {
             const QByteArray cmd = QStringLiteral("H%1,%2,%3,%4\r")
                                        .arg(st)
@@ -239,7 +239,7 @@ bool PolhemusConnection::openSerial(const QString& portName, const PolhemusSeria
             m_pSerial->write(cmd);
         }
         m_pSerial->flush();
-        qInfo() << "Fastrak: hemisphere set to" << cfg.hemisphere;
+        qInfo() << "Fastrak: hemisphere set to" << h.x() << h.y() << h.z();
     }
 
     if (!cfg.streamCommand.isEmpty()) {

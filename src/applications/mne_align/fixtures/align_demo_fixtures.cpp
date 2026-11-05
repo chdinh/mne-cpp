@@ -33,21 +33,21 @@ QVector<DigitizedPoint> demoFiducials()
     nas.kind = PointKind::Fiducial;
     nas.label = QStringLiteral("NAS");
     nas.identNumber = static_cast<int>(FiducialId::NAS);
-    nas.position = QVector3D(0.000f, 0.095f, 0.005f);
+    nas.position = Eigen::Vector3f(0.000f, 0.095f, 0.005f);
     out.append(nas);
 
     DigitizedPoint lpa;
     lpa.kind = PointKind::Fiducial;
     lpa.label = QStringLiteral("LPA");
     lpa.identNumber = static_cast<int>(FiducialId::LPA);
-    lpa.position = QVector3D(-0.080f, 0.000f, 0.000f);
+    lpa.position = Eigen::Vector3f(-0.080f, 0.000f, 0.000f);
     out.append(lpa);
 
     DigitizedPoint rpa;
     rpa.kind = PointKind::Fiducial;
     rpa.label = QStringLiteral("RPA");
     rpa.identNumber = static_cast<int>(FiducialId::RPA);
-    rpa.position = QVector3D(0.080f, 0.000f, 0.000f);
+    rpa.position = Eigen::Vector3f(0.080f, 0.000f, 0.000f);
     out.append(rpa);
 
     return out;
@@ -61,17 +61,17 @@ QVector<DigitizedPoint> demoEegCap(int count)
     struct Entry
     {
         const char* label;
-        QVector3D pos;
+        Eigen::Vector3f pos;
     };
     static const Entry kEntries[] = {
-        {"Fz", QVector3D(0.000f, 0.070f, 0.060f)},
-        {"Cz", QVector3D(0.000f, 0.000f, 0.095f)},
-        {"Pz", QVector3D(0.000f, -0.070f, 0.060f)},
-        {"Oz", QVector3D(0.000f, -0.095f, 0.005f)},
-        {"T7", QVector3D(-0.075f, 0.000f, 0.040f)},
-        {"T8", QVector3D(0.075f, 0.000f, 0.040f)},
-        {"O1", QVector3D(-0.035f, -0.085f, 0.025f)},
-        {"O2", QVector3D(0.035f, -0.085f, 0.025f)},
+        {"Fz", Eigen::Vector3f(0.000f, 0.070f, 0.060f)},
+        {"Cz", Eigen::Vector3f(0.000f, 0.000f, 0.095f)},
+        {"Pz", Eigen::Vector3f(0.000f, -0.070f, 0.060f)},
+        {"Oz", Eigen::Vector3f(0.000f, -0.095f, 0.005f)},
+        {"T7", Eigen::Vector3f(-0.075f, 0.000f, 0.040f)},
+        {"T8", Eigen::Vector3f(0.075f, 0.000f, 0.040f)},
+        {"O1", Eigen::Vector3f(-0.035f, -0.085f, 0.025f)},
+        {"O2", Eigen::Vector3f(0.035f, -0.085f, 0.025f)},
     };
 
     const int n = qBound(0, count, static_cast<int>(sizeof(kEntries) / sizeof(kEntries[0])));
@@ -106,7 +106,7 @@ QVector<DigitizedPoint> demoHeadShape(int count)
         p.kind = PointKind::HeadShape;
         p.label = QStringLiteral("HSP-%1").arg(i + 1);
         p.identNumber = i + 1;
-        p.position = QVector3D(
+        p.position = Eigen::Vector3f(
             kRadius * std::sin(phi) * std::cos(th),
             kRadius * std::sin(phi) * std::sin(th),
             kRadius * std::cos(phi));
