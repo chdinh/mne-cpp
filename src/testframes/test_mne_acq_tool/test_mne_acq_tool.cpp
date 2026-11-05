@@ -306,8 +306,14 @@ void TestMneAcqTool::recordWritesTheSource()
 
 void TestMneAcqTool::recordFailsOnUnwritablePath()
 {
+    // The recorder creates missing directories, so the parent is a regular file instead.
+    QTemporaryDir dir;
+    QVERIFY(dir.isValid());
+    QFile blocker(dir.filePath(QStringLiteral("not_a_dir")));
+    QVERIFY(blocker.open(QIODevice::WriteOnly));
+    blocker.close();
     const ToolResult record = runTool({QStringLiteral("record"), QStringLiteral("synthetic://?duration=1&realtime=0"),
-                                       QStringLiteral("/does/not/exist/cli_raw.fif")});
+                                       blocker.fileName() + QStringLiteral("/cli_raw.fif")});
     QCOMPARE(record.exitCode, 2);
     QVERIFY(!record.err.isEmpty());
 }
