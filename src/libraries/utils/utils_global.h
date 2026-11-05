@@ -17,7 +17,7 @@
  * parsers, command and observer patterns, thread-safe circular
  * buffers, the Polhemus digitizer stack, the Python runner used
  * by tests, and the standard EEG montages. This header carries
- * the @c Q_DECL_EXPORT / @c Q_DECL_IMPORT switch so symbols
+ * the export / import switch so symbols
  * resolve correctly whether UTILSLIB is built as a shared
  * library, a static archive (@c STATICBUILD) or imported by a
  * downstream consumer.
@@ -36,21 +36,19 @@
 #include "buildinfo.h"
 
 //=============================================================================================================
-// QT INCLUDES
-//=============================================================================================================
-
-#include <QtCore/qglobal.h>
-
-//=============================================================================================================
 // DEFINES
 //=============================================================================================================
 
 #if defined(STATICBUILD)
 #define UTILSSHARED_EXPORT
-#elif defined(MNE_UTILS_LIBRARY)
-#define UTILSSHARED_EXPORT Q_DECL_EXPORT /**< Q_DECL_EXPORT must be added to the declarations of symbols used when compiling a shared library. */
+#elif defined(_WIN32)
+#if defined(MNE_UTILS_LIBRARY)
+#define UTILSSHARED_EXPORT __declspec(dllexport) /**< Exported when building the shared library. */
 #else
-#define UTILSSHARED_EXPORT Q_DECL_IMPORT /**< Q_DECL_IMPORT must be added to the declarations of symbols used when compiling a client that uses the shared library. */
+#define UTILSSHARED_EXPORT __declspec(dllimport) /**< Imported by clients of the shared library. */
+#endif
+#else
+#define UTILSSHARED_EXPORT __attribute__((visibility("default"))) /**< Default visibility on ELF/Mach-O. */
 #endif
 
 //=============================================================================================================
