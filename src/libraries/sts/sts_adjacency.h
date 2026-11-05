@@ -145,7 +145,7 @@ public:
      *
      * @return Sparse adjacency matrix over the product of the dimensions.
      */
-    static Eigen::SparseMatrix<int> combine(const QList<Eigen::SparseMatrix<int>>& dims);
+    static Eigen::SparseMatrix<int> combine(const std::vector<Eigen::SparseMatrix<int>>& dims);
 };
 
 } // namespace STSLIB

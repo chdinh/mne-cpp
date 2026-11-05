@@ -59,7 +59,7 @@ SparseMatrix<int> StatsAdjacency::chain(int n)
 
 //=============================================================================================================
 
-SparseMatrix<int> StatsAdjacency::combine(const QList<SparseMatrix<int>>& dims)
+SparseMatrix<int> StatsAdjacency::combine(const std::vector<SparseMatrix<int>>& dims)
 {
     // Adapted from mne.stats.combine_adjacency (MNE-Python, BSD-3-Clause).
     Index total = 1;
