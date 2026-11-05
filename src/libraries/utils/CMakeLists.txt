@@ -23,6 +23,7 @@ set(SOURCES
   layoutloader.cpp
   layoutmaker.cpp
   selectionio.cpp
+  string_utils.cpp
   thread_pool.cpp
   montage/standard_montage.cpp
   report.cpp
@@ -41,6 +42,7 @@ set(HEADERS
   layoutloader.h
   layoutmaker.h
   selectionio.h
+  string_utils.h
   thread_pool.h
   montage/standard_montage.h
   report.h

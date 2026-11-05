@@ -129,7 +129,7 @@ Writes `bytes` bytes at the current position, overwriting or extending the strea
 
 Utilities library: buffers, observers, logging, file formats, montages, layouts and reports.
 
-````cpp title="src/examples/ex_utils/main.cpp, line 182"
+````cpp title="src/examples/ex_utils/main.cpp, line 185"
 MemoryByteStream memory;
 memory.writeBigEndian(std::int16_t{0x0102});
 const bool bigEndian = memory.data()[0] == std::byte{0x01}; // most significant byte first

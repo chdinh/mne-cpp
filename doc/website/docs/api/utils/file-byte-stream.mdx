@@ -158,7 +158,7 @@ Writes `bytes` bytes at the current position, overwriting or extending the strea
 
 Utilities library: buffers, observers, logging, file formats, montages, layouts and reports.
 
-````cpp title="src/examples/ex_utils/main.cpp, line 169"
+````cpp title="src/examples/ex_utils/main.cpp, line 172"
     auto out = FileByteStream::open(dir.filePath("data.bin").toStdString(), FileByteStream::Mode::Write);
     out->writeBigEndian(std::int32_t(samples.size())); // FIFF byte order
     out->writeBigEndian(samples.data(), samples.size());

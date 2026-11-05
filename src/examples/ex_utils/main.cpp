@@ -32,6 +32,7 @@
 #include <utils/python_test_helper.h>
 #include <utils/report.h>
 #include <utils/selectionio.h>
+#include <utils/string_utils.h>
 #include <utils/thread_pool.h>
 
 //=============================================================================================================
@@ -50,6 +51,8 @@
 #include <cmath>
 #include <cstdint>
 #include <cstdlib>
+#include <optional>
+#include <string>
 #include <vector>
 
 //=============================================================================================================
@@ -191,6 +194,11 @@ int main(int argc, char* argv[])
     auto background = ThreadPool::global().submit([] { return 42; });
     //! [thread_pool_usage]
     ok &= expect(power == std::vector<double>({0.0, 0.5, 1.0, 1.5}) && background.get() == 42, "ThreadPool mapped the channels in order");
+
+    const std::vector<std::string> fields = split(trimmed(" MEG 0113, 1.5e-13 \n"), ','); // a line of a text file
+    const std::optional<double> scale = toDouble(fields[1]);                              // locale independent
+    const bool isGz = equalsIgnoreCase(utf8FromPath(pathFromUtf8("T1.NII.GZ").extension()), ".gz");
+    ok &= expect(fields[0] == "MEG 0113" && scale == 1.5e-13 && isGz, "string helpers parsed the line");
 
     //! [circular_buffer_usage]
     CircularBuffer<double> buffer(4); // single producer, single consumer

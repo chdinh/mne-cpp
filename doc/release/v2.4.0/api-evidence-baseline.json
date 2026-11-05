@@ -4,7 +4,7 @@
   "policy": "scripts/quality/api_evidence_policy.json",
   "summary": {
     "exported_classes": 487,
-    "exported_free_functions": 148,
+    "exported_free_functions": 156,
     "registered_classes": 577,
     "exported_not_registered": 1,
     "registered_function_modules": 13,
@@ -941,6 +941,46 @@
       "name": "buildHashLong",
       "header": "sts/sts_global.h",
       "library": "sts"
+    },
+    {
+      "name": "trimmed",
+      "header": "utils/string_utils.h",
+      "library": "utils"
+    },
+    {
+      "name": "split",
+      "header": "utils/string_utils.h",
+      "library": "utils"
+    },
+    {
+      "name": "toLower",
+      "header": "utils/string_utils.h",
+      "library": "utils"
+    },
+    {
+      "name": "equalsIgnoreCase",
+      "header": "utils/string_utils.h",
+      "library": "utils"
+    },
+    {
+      "name": "toDouble",
+      "header": "utils/string_utils.h",
+      "library": "utils"
+    },
+    {
+      "name": "toInt",
+      "header": "utils/string_utils.h",
+      "library": "utils"
+    },
+    {
+      "name": "pathFromUtf8",
+      "header": "utils/string_utils.h",
+      "library": "utils"
+    },
+    {
+      "name": "utf8FromPath",
+      "header": "utils/string_utils.h",
+      "library": "utils"
     },
     {
       "name": "buildDateTime",

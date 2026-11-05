@@ -132,7 +132,7 @@ Calls `body(i)` for every i in [`begin`, `end`) and returns when all calls have 
 
 Utilities library: buffers, observers, logging, file formats, montages, layouts and reports.
 
-````cpp title="src/examples/ex_utils/main.cpp, line 189"
+````cpp title="src/examples/ex_utils/main.cpp, line 192"
 const std::vector<int> channels = {0, 1, 2, 3};
 const std::vector<double> power = ThreadPool::global().parallelMap(channels, [](int ch) { return 0.5 * ch; }); // in order
 auto background = ThreadPool::global().submit([] { return 42; });

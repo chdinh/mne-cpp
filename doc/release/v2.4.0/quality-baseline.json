@@ -11,7 +11,7 @@
   },
   "gates": {
     "G1_test_integrity": {
-      "registered": 276,
+      "registered": 277,
       "conditional": 6,
       "unregistered": 3,
       "without_labels": 0,
@@ -47,6 +47,7 @@
           "test_mne_acq_tool",
           "test_rt_server_fiff_replay",
           "test_utils_byte_stream",
+          "test_utils_string_utils",
           "test_utils_thread_pool"
         ],
         "macos-26-qt-min": [
@@ -63,6 +64,7 @@
           "test_mne_acq_tool",
           "test_rt_server_fiff_replay",
           "test_utils_byte_stream",
+          "test_utils_string_utils",
           "test_utils_thread_pool"
         ],
         "ubuntu-24.04": [
@@ -79,6 +81,7 @@
           "test_mne_acq_tool",
           "test_rt_server_fiff_replay",
           "test_utils_byte_stream",
+          "test_utils_string_utils",
           "test_utils_thread_pool"
         ],
         "ubuntu-24.04-qt-min": [
@@ -95,6 +98,7 @@
           "test_mne_acq_tool",
           "test_rt_server_fiff_replay",
           "test_utils_byte_stream",
+          "test_utils_string_utils",
           "test_utils_thread_pool"
         ],
         "windows-2025-vs2026": [
@@ -111,6 +115,7 @@
           "test_mne_acq_tool",
           "test_rt_server_fiff_replay",
           "test_utils_byte_stream",
+          "test_utils_string_utils",
           "test_utils_thread_pool"
         ],
         "windows-2025-vs2026-qt-min": [
@@ -127,6 +132,7 @@
           "test_mne_acq_tool",
           "test_rt_server_fiff_replay",
           "test_utils_byte_stream",
+          "test_utils_string_utils",
           "test_utils_thread_pool"
         ]
       },

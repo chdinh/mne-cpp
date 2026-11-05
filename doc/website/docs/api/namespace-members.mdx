@@ -7,7 +7,7 @@ sidebar_position: 6
 
 # Namespace Members
 
-Index of 428 namespace-level symbols (functions, typedefs, enums, variables) across all public namespaces.
+Index of 436 namespace-level symbols (functions, typedefs, enums, variables) across all public namespaces.
 
 - **Accuracy** `[enum]` in [INVLIB](/docs/api/inv/)
 - **acqApplyThreadPolicy** `[fn]` in [ACQLIB](/docs/api/acq/) — Applies `policy` to the calling thread: CPUs first, then priority.
@@ -184,6 +184,7 @@ Index of 428 namespace-level symbols (functions, typedefs, enums, variables) acr
 - **encode** `[fn]` in [ACQLIB](/docs/api/acq/) — Encodes `in` into the reserved space of `view` (an output stream, or an input ring written by a backend that receives physical values).
 - **encode** `[fn]` in [ACQLIB](/docs/api/acq/) — Encodes `in` into the reserved space of `view` (an output stream, or an input ring written by a backend that receives physical values).    For real formats the imaginary part must be 0, otherwise the element counts as clipped.
 - **encodeBits** `[fn]` in [ACQLIB](/docs/api/acq/) — Writes bit fields into the reserved samples of `view`, leaving the analog bits untouched; call before or after `encode()` of the same view.
+- **equalsIgnoreCase** `[fn]` in [UTILSLIB](/docs/api/utils/)
 - **estimateSnr** `[fn]` in [INVLIB](/docs/api/inv/) — Estimate the SNR of evoked data as a function of time.
 - **eventsFromAnnotations** `[fn]` in [FIFFLIB](/docs/api/fiff/) — Convert [`FiffAnnotations`](/docs/api/fiff/fiff-annotations) to a FIFF event matrix.
 - **FiducialId** `[enum]` in [ACQLIB](/docs/api/acq/) — Identifier for the three cardinal fiducials.
@@ -378,6 +379,7 @@ Index of 428 namespace-level symbols (functions, typedefs, enums, variables) acr
 - **operator==** `[fn]` in [MNELIB](/docs/api/mne/)
 - **operator==** `[fn]` in [MNELIB](/docs/api/mne/)
 - **packABGR** `[fn]` in [DISP3DLIB](/docs/api/disp3-d/) — Pack RGBA colour components into a single ABGR uint32_t suitable for GPU vertex attributes declared as UNormByte4.
+- **pathFromUtf8** `[fn]` in [UTILSLIB](/docs/api/utils/)
 - **peakFinder** `[fn]` in [UTILSLIB](/docs/api/utils/) — Find peaks in a 1D signal.
 - **peakFinderMne** `[fn]` in [UTILSLIB](/docs/api/utils/) — Noise-tolerant extrema search of `mne.preprocessing.peak_finder`.
 - **peakProminences** `[fn]` in [UTILSLIB](/docs/api/utils/) — Compute prominence of each peak.
@@ -410,6 +412,7 @@ Index of 428 namespace-level symbols (functions, typedefs, enums, variables) acr
 - **simulateStcFromWaveforms** `[fn]` in [UTILSLIB](/docs/api/utils/) — Create a synthetic source time course from custom waveforms.
 - **SliceOrientation** `[enum]` in [DISP3DLIB](/docs/api/disp3-d/) — Orientation for an orthogonal MRI slice.
 - **SliceOrientation** `[enum]` in [MRILIB](/docs/api/mri/) — Slice orientation for orthogonal MRI volume slicing.
+- **split** `[fn]` in [UTILSLIB](/docs/api/utils/)
 - **SplitterHit** `[enum]` in [DISP3DLIB](/docs/api/disp3-d/) — Identifies which splitter(s) are hit by a cursor position.
 - **StatsCorrection** `[enum]` in [STSLIB](/docs/api/sts/) — Multiple comparison correction method.
 - **StatsTailType** `[enum]` in [STSLIB](/docs/api/sts/) — Tail type for statistical tests.
@@ -425,12 +428,17 @@ Index of 428 namespace-level symbols (functions, typedefs, enums, variables) acr
 - **timeNowNow** `[fn]` in [UTILSLIB](/docs/api/utils/) — Returns build time (time preprocessor was run).
 - **toBigEndian** `[fn]` in [UTILSLIB](/docs/api/utils/)
 - **toDLPack** `[fn]` in [ACQLIB](/docs/api/acq/) — Exports one part of `view` as a read-only DLPack tensor of shape channels x samples, without a copy.
+- **toDouble** `[fn]` in [UTILSLIB](/docs/api/utils/)
 - **toEventMatrix** `[fn]` in [RTPROCESSINGLIB](/docs/api/dsp/) — Transforms QMap with stored information about events per stim channel to a list of event matrices.
 - **toFiffInfo** `[fn]` in [ACQLIB](/docs/api/acq/) — Builds FIFF measurement info for a stream, e.g.
+- **toInt** `[fn]` in [UTILSLIB](/docs/api/utils/)
 - **tokenIds** `[fn]` in [INVLIB](/docs/api/inv/) — Extract just the integer token IDs from a token sequence (discarding continuous values).
 - **tokenize** `[fn]` in [INVLIB](/docs/api/inv/) — Serialise an [`InvSourceEstimate`](/docs/api/inv/inv-source-estimate) into a flat token sequence.
 - **tokenValues** `[fn]` in [INVLIB](/docs/api/inv/) — Extract just the continuous values from a token sequence (discarding IDs).
+- **toLower** `[fn]` in [UTILSLIB](/docs/api/utils/)
 - **toQMatrix4x4** `[fn]` in `SURFACEKEYS` — Convert an Eigen 4x4 matrix to a QMatrix4x4.
+- **trimmed** `[fn]` in [UTILSLIB](/docs/api/utils/)
+- **utf8FromPath** `[fn]` in [UTILSLIB](/docs/api/utils/)
 - **vecDefaultWeights** `[var]` in [MNELIB](/docs/api/mne/)
 - **verify** `[fn]` in [ACQLIB](/docs/api/acq/) — Determines the origin of `target` from loop-back markers against `reference` and verifies the declared clock relation: every marker must imply the same origin within `toleranceTicks`, so drift (a missing or wrong clock connection) is detected instead of producing wrong samples.
 - **VisualizationMode** `[enum]` in [DISP3DLIB](/docs/api/disp3-d/) — Overlay visualisation modes for brain surfaces.
