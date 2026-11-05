@@ -55,6 +55,13 @@
 #include <Eigen/Core>
 
 //=============================================================================================================
+// STL INCLUDES
+//=============================================================================================================
+
+#include <cstdint>
+#include <cstring>
+
+//=============================================================================================================
 // USED NAMESPACES
 //=============================================================================================================
 
@@ -93,6 +100,7 @@ private slots:
     void testMghReadBrain();
     void testMghHeaderGeometry();
     void testMghSliceTransforms();
+    void testMghT1VoxelChecksum();
     void testMghInvalidFile();
 
     // MriMghIO synthetic unit tests (no sample data needed)
@@ -972,6 +980,26 @@ void TestMriIO::testCorFifWriteReadSynthetic()
     }
     QCOMPARE(sliceCount, 3);
     stream->close();
+}
+
+//=============================================================================================================
+
+void TestMriIO::testMghT1VoxelChecksum()
+{
+    if (!m_bDataAvailable || !m_volT1.isValid())
+        QSKIP("Sample data not available");
+
+    // FNV-1a over the float voxels pins the decoded intensities, not only the geometry
+    std::uint64_t hash = 1469598103934665603ULL;
+    double sum = 0.0;
+    for (const float v : m_volT1.voxelDataAsFloat()) {
+        std::uint32_t bits = 0;
+        std::memcpy(&bits, &v, sizeof(bits));
+        hash = (hash ^ bits) * 1099511628211ULL;
+        sum += v;
+    }
+    QCOMPARE(hash, std::uint64_t{0x739b754670d00383ULL});
+    QCOMPARE(sum, 375391345.0);
 }
 
 //=============================================================================================================
