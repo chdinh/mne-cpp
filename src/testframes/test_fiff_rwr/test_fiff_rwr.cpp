@@ -19,6 +19,8 @@
 #include <utils/generics/mne_logger.h>
 
 #include <fiff/fiff.h>
+#include <fiff/fiff_dig_point_set.h>
+#include <mne/mne_forward_solution.h>
 
 #include <iostream>
 
@@ -27,6 +29,8 @@
 //=============================================================================================================
 
 #include <QtTest>
+#include <QBuffer>
+#include <QDirIterator>
 #include <QTemporaryDir>
 
 //=============================================================================================================
@@ -35,6 +39,44 @@
 
 using namespace FIFFLIB;
 using namespace Eigen;
+
+//=============================================================================================================
+// DEFINE LOCAL FUNCTIONS
+//=============================================================================================================
+
+namespace
+{
+
+QString testDataDir()
+{
+    return QCoreApplication::applicationDirPath() + "/../resources/data/mne-cpp-test-data";
+}
+
+std::uint64_t fnv1a(const QByteArray& bytes)
+{
+    std::uint64_t hash = 1469598103934665603ULL;
+    for (const char c : bytes)
+        hash = (hash ^ static_cast<unsigned char>(c)) * 1099511628211ULL;
+    return hash;
+}
+
+// File bytes with the file and block IDs zeroed, since they carry the time of writing
+QByteArray stableBytes(QByteArray bytes)
+{
+    QBuffer buffer(&bytes);
+    FiffStream stream(&buffer);
+    if (!stream.open())
+        return {};
+    const QList<FiffDirEntry::SPtr> dir = stream.dir();
+    stream.close();
+    for (const FiffDirEntry::SPtr& entry : dir) {
+        if (entry->pos >= 0 && (entry->kind == FIFF_FILE_ID || entry->kind == FIFF_BLOCK_ID || entry->kind == FIFF_PARENT_FILE_ID || entry->kind == FIFF_PARENT_BLOCK_ID))
+            bytes.replace(entry->pos + 16, entry->size, QByteArray(entry->size, '\0'));
+    }
+    return bytes;
+}
+
+} // namespace
 
 //=============================================================================================================
 /**
@@ -55,6 +97,10 @@ private slots:
     void compareData();
     void compareTimes();
     void compareInfo();
+    void tagsRewriteByteIdentical_data();
+    void tagsRewriteByteIdentical();
+    void writersStable_data();
+    void writersStable();
     void cleanupTestCase();
 
 private:
@@ -266,6 +312,120 @@ void TestFiffRWR::compareInfo()
         MatrixXd mTmp = rawFirstInRaw.info.comps[i].data->data - rawSecondInRaw.info.comps[i].data->data;
         QVERIFY(mTmp.sum() < dEpsilon);
     }
+}
+
+//=============================================================================================================
+
+void TestFiffRWR::tagsRewriteByteIdentical_data()
+{
+    QTest::addColumn<QString>("path");
+    QDirIterator it(testDataDir(), {"*.fif"}, QDir::Files, QDirIterator::Subdirectories);
+    QStringList paths;
+    while (it.hasNext())
+        paths << it.next();
+    paths.sort();
+    for (const QString& path : std::as_const(paths))
+        QTest::newRow(qPrintable(QDir(testDataDir()).relativeFilePath(path))) << path;
+}
+
+//=============================================================================================================
+
+void TestFiffRWR::tagsRewriteByteIdentical()
+{
+    QFETCH(QString, path);
+
+    QFile file(path);
+    QVERIFY(file.open(QIODevice::ReadOnly));
+    const QByteArray original = file.readAll();
+    file.close();
+
+    FiffStream stream(&file);
+    QVERIFY(stream.open());
+    QVERIFY(!stream.dir().isEmpty());
+
+    // Every tag read and written again must reproduce the bytes in the file, header and payload
+    QByteArray rewritten;
+    QBuffer buffer(&rewritten);
+    QVERIFY(buffer.open(QIODevice::WriteOnly));
+    FiffStream out(&buffer);
+    for (const FiffDirEntry::SPtr& entry : stream.dir()) {
+        // The stored directory ends with a sentinel entry
+        if (entry->pos < 0)
+            continue;
+        FiffTag::UPtr tag;
+        QVERIFY(stream.read_tag(tag, entry->pos));
+        rewritten.clear();
+        buffer.seek(0);
+        out.write_tag(tag, 0);
+        const QByteArray expected = original.mid(entry->pos, 16 + entry->size);
+        if (rewritten != expected)
+            QFAIL(qPrintable(QString("tag kind %1 type %2 at %3 differs").arg(entry->kind).arg(entry->type).arg(entry->pos)));
+    }
+    stream.close();
+}
+
+//=============================================================================================================
+
+void TestFiffRWR::writersStable_data()
+{
+    QTest::addColumn<QString>("writer");
+    QTest::addColumn<qulonglong>("hash");
+    QTest::addColumn<qlonglong>("size");
+    QTest::newRow("raw") << "raw" << qulonglong(0x7315ac1531102ed1ULL) << qlonglong(12036488);
+    QTest::newRow("evoked") << "evoked" << qulonglong(0xe11625041cc9e4bfULL) << qlonglong(2581535);
+    QTest::newRow("covariance") << "cov" << qulonglong(0xc41f39abd7c6cd27ULL) << qlonglong(545712);
+    QTest::newRow("transform") << "trans" << qulonglong(0x9199331869f76d3eULL) << qlonglong(212);
+    QTest::newRow("digitizer") << "dig" << qulonglong(0xc59bdb7c1024cdc8ULL) << qlonglong(5468);
+    QTest::newRow("forward") << "fwd" << qulonglong(0xbb1db2f3f8001eb2ULL) << qlonglong(55417952);
+}
+
+//=============================================================================================================
+
+void TestFiffRWR::writersStable()
+{
+    QFETCH(QString, writer);
+    QFETCH(qulonglong, hash);
+    QFETCH(qlonglong, size);
+
+    // Pins the bytes each writer produces for a fixture, so moving the stream layer cannot change the files
+    QByteArray bytes;
+    QBuffer out(&bytes);
+    const QString meg = testDataDir() + "/MEG/sample/";
+    if (writer == "raw") {
+        QFile in(meg + "sample_audvis_trunc_raw.fif");
+        const FiffRawData raw(in);
+        QVERIFY(raw.save(out));
+    } else if (writer == "evoked") {
+        QFile in(meg + "sample_audvis-ave.fif");
+        const FiffEvokedSet evoked(in);
+        QVERIFY(evoked.save(out));
+    } else if (writer == "cov") {
+        QFile in(meg + "sample_audvis-cov.fif");
+        const FiffCov cov(in);
+        const QString path = m_tempDir.filePath("stable-cov.fif");
+        QVERIFY(cov.save(path));
+        QFile written(path);
+        QVERIFY(written.open(QIODevice::ReadOnly));
+        bytes = written.readAll();
+    } else if (writer == "trans") {
+        QFile in(meg + "all-trans.fif");
+        FiffCoordTrans trans(in);
+        QVERIFY(trans.write(out));
+    } else if (writer == "dig") {
+        QFile in(meg + "sample_audvis_trunc_raw.fif");
+        FiffDigPointSet dig(in);
+        QVERIFY(dig.size() > 0);
+        QVERIFY(dig.write(out));
+    } else if (writer == "fwd") {
+        QFile in(testDataDir() + "/Result/ref-sample_audvis-meg-eeg-oct-6-fwd.fif");
+        const MNELIB::MNEForwardSolution fwd(in);
+        QVERIFY(fwd.write(out));
+    }
+
+    const QByteArray stable = stableBytes(bytes);
+    QVERIFY(!stable.isEmpty());
+    QCOMPARE(qlonglong(stable.size()), size);
+    QCOMPARE(qulonglong(fnv1a(stable)), hash);
 }
 
 //=============================================================================================================
