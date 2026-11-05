@@ -29,9 +29,9 @@
 //=============================================================================================================
 
 #include "sphere.h"
-#include "simplex_algorithm.h"
 
-#include <QDebug>
+#include <string>
+#include "simplex_algorithm.h"
 
 //=============================================================================================================
 // EIGEN INCLUDES
@@ -148,7 +148,6 @@ bool Sphere::fit_sphere_to_points(const MatrixXf& rr, float simplex_size, Vector
      * Find the optimal sphere origin
      */
     if (rr.rows() == 0) {
-        qWarning("Sphere::fit_sphere_to_points - No points were passed.");
         return false;
     }
 
@@ -204,15 +203,8 @@ bool Sphere::fit_sphere_to_points(const MatrixXf& rr, float simplex_size, Vector
 
 //=============================================================================================================
 
-bool Sphere::report_func(int loop, const VectorXf& fitpar, double fval_lo, double /*fval_hi*/, double /*par_diff*/)
+bool Sphere::report_func(int /*loop*/, const VectorXf& /*fitpar*/, double /*fval_lo*/, double /*fval_hi*/, double /*par_diff*/)
 {
-    /*
-     * Report periodically
-     */
-    const VectorXf& r0 = fitpar;
-
-    qDebug().noquote().nospace() << "loop: " << loop << "; r0: " << 1000 * r0[0] << ", r1: " << 1000 * r0[1] << ", r2: " << 1000 * r0[2] << "; fval: " << fval_lo;
-
     return true;
 }
 
@@ -266,8 +258,6 @@ float Sphere::fit_eval(const VectorXf& fitpar, const void* user_data)
 
     F = sum2 - sum * sum / user->rr.rows();
 
-    if (user->report)
-        qDebug().noquote().nospace() << "r0: " << 1000 * r0[0] << ", r1: " << 1000 * r0[1] << ", r2: " << 1000 * r0[2] << "; R: " << 1000 * sum / user->rr.rows() << "; fval: " << F;
 
     return F;
 }

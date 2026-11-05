@@ -69,23 +69,8 @@ Calculates the TPS [`Warp`](/docs/api/math/warp) of a given setup for a List of 
 - **dLm** : *const Eigen::MatrixXf &*
   3D Landmarks of the destination geometry.
 
-- **vertList** : *QList&lt; Eigen::MatrixXf &gt; &*
+- **vertList** : *std::vector&lt; Eigen::MatrixXf &gt; &*
   List of Vertices of the source geometry that are warped to the destination.
-
----
-
-### readsLm(electrodeFileName)
-
-Read electrode positions from MRI Database.
-
-**Parameters:**
-
-- **electrodeFileName** : *const QString &*
-  .txt file of electrodes.
-
-**Returns:**
-
-- *Eigen::MatrixXf* — electrodes Matrix with electrode positions.
 
 ---
 

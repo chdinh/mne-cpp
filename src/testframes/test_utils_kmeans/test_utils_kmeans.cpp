@@ -269,7 +269,7 @@ private slots:
         X.bottomRows(6).setConstant(10.0);
         MatrixXd start(3, 2);
         start << 0.0, 0.0, 0.0, 0.0, 10.0, 10.0;
-        KMeans kmeans("sqeuclidean", "sample", 1, emptyact, online, 50);
+        KMeans kmeans("sqeuclidean", "sample", 1, emptyact.toStdString(), online, 50);
         VectorXi idx;
         MatrixXd C, D;
         VectorXd sumD;
@@ -279,7 +279,7 @@ private slots:
         VectorXi idxRandom;
         MatrixXd CRandom, DRandom;
         VectorXd sumDRandom;
-        KMeans replicated("sqeuclidean", "sample", 3, emptyact, online, 50);
+        KMeans replicated("sqeuclidean", "sample", 3, emptyact.toStdString(), online, 50);
         const bool okRandom = replicated.calculate(X, 3, idxRandom, CRandom, sumDRandom, DRandom);
 
         if (emptyact == QStringLiteral("error")) {
@@ -391,7 +391,7 @@ private slots:
         QFETCH(double, expectedSumD);
         const MatrixXd X = Map<const VectorXd>(points.constData(), points.size());
         const MatrixXd startC = Map<const VectorXd>(start.constData(), start.size());
-        KMeans kmeans("sqeuclidean", "sample", 1, emptyact, false, 100);
+        KMeans kmeans("sqeuclidean", "sample", 1, emptyact.toStdString(), false, 100);
         VectorXi idx;
         MatrixXd C, D;
         VectorXd sumD;
@@ -539,7 +539,7 @@ private slots:
                 X(i, j) = hamming ? std::round(value * 0.8) : value;
             }
         }
-        KMeans kmeans(distance, start, 3, "singleton", true, 100);
+        KMeans kmeans(distance.toStdString(), start.toStdString(), 3, "singleton", true, 100);
         VectorXi idx;
         MatrixXd C, D;
         VectorXd sumD;

@@ -39,22 +39,22 @@ Constructs a [`KMeans`](/docs/api/math/k-means) algorithm object.
 
 **Parameters:**
 
-- **distance** : *QString*
+- **distance** : *const std::string &*
   (optional) K-Means distance measure: "sqeuclidean" (default), "cityblock" , "cosine", "correlation", "hamming".
 
-- **start** : *QString*
+- **start** : *const std::string &*
   (optional) Cluster initialization: "sample" (default), "uniform", "cluster".
 
-- **replicates** : *qint32*
+- **replicates** : *std::int32_t*
   (optional) Number of K-Means replicates, which are generated. Best is returned.
 
-- **emptyact** : *QString*
+- **emptyact** : *const std::string &*
   (optional) What happens if a cluster goes empty: "error", "drop", "singleton" (default).
 
 - **online** : *bool*
   (optional) If centroids should be updated during iterations: true (default), false.
 
-- **maxit** : *qint32*
+- **maxit** : *std::int32_t*
   (optional) Maximal number of iterations per replicate; 100 by default.
 
 ---
@@ -71,7 +71,7 @@ Constructs a [`KMeans`](/docs/api/math/k-means) algorithm object using enum para
 - **start** : *KMeansStart*
   Cluster initialization strategy.
 
-- **replicates** : *qint32*
+- **replicates** : *std::int32_t*
   Number of K-Means replicates. Best is returned.
 
 - **emptyact** : *KMeansEmptyAction*
@@ -80,7 +80,7 @@ Constructs a [`KMeans`](/docs/api/math/k-means) algorithm object using enum para
 - **online** : *bool*
   If centroids should be updated during iterations.
 
-- **maxit** : *qint32*
+- **maxit** : *std::int32_t*
   Maximal number of iterations per replicate.
 
 ---
@@ -94,7 +94,7 @@ Clusters input data X.
 - **X** : *const Eigen::MatrixXd &*
   Input data (rows = points; cols = p dimensional space).
 
-- **kClusters** : *qint32*
+- **kClusters** : *std::int32_t*
   Number of k clusters.
 
 - **idx** : *Eigen::VectorXi &*

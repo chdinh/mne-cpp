@@ -109,29 +109,6 @@ Returns the whitener of a given matrix.
 - **pca** : *bool*
   Perform a PCA.
 
-- **ch_type** : *QString*
-  Channel type string.
-
-- **eig** : *Eigen::VectorXd &*
-  Eigenvalues.
-
-- **eigvec** : *Eigen::MatrixXd &*
-  Eigenvectors (transposed).
-
----
-
-### get_whitener(A, pca, ch_type, eig, eigvec)
-
-Returns the whitener of a given matrix.
-
-**Parameters:**
-
-- **A** : *Eigen::MatrixXd &*
-  Matrix to compute the whitener from.
-
-- **pca** : *bool*
-  Perform a PCA.
-
 - **ch_type** : *const std::string &*
   Channel type string.
 
@@ -175,7 +152,7 @@ Returns a sparse block diagonal, diagonalized from the elements in "A". "A" is m
 - **A** : *const Eigen::MatrixXd &*
   Matrix which should be diagonalized.
 
-- **n** : *qint32*
+- **n** : *std::int32_t*
   Columns of the submatrices.
 
 **Returns:**
@@ -213,7 +190,7 @@ Returns the rank of a matrix A.
 
 **Returns:**
 
-- *qint32* — rank of matrix A.
+- *std::int32_t* — rank of matrix A.
 
 ---
 
@@ -267,7 +244,7 @@ Sort rows in ascending order.
 - **A** : *const std::vector&lt; Eigen::Triplet&lt; T &gt; &gt; &*
   Triplet vector to sort.
 
-- **column** : *qint32*
+- **column** : *std::int32_t*
   Sorts the triplet vector based on the column specified.
 
 **Returns:**

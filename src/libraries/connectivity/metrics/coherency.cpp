@@ -79,7 +79,7 @@ void Coherency::calculateAbs(Network& finalNetwork,
     int iNfft = connectivitySettings.getFFTSize();
 
     // Generate tapers
-    QPair<MatrixXd, VectorXd> tapers = Spectral::generateTapers(iSignalLength, connectivitySettings.getWindowType());
+    QPair<MatrixXd, VectorXd> tapers = Spectral::generateTapers(iSignalLength, connectivitySettings.getWindowType().toStdString());
 
     // Initialize vecPsdAvg and vecCsdAvg
     int iNRows = connectivitySettings.at(0).matData.rows();
@@ -150,7 +150,7 @@ void Coherency::calculateImag(Network& finalNetwork,
     int iNfft = connectivitySettings.getFFTSize();
 
     // Generate tapers
-    QPair<MatrixXd, VectorXd> tapers = Spectral::generateTapers(iSignalLength, connectivitySettings.getWindowType());
+    QPair<MatrixXd, VectorXd> tapers = Spectral::generateTapers(iSignalLength, connectivitySettings.getWindowType().toStdString());
 
     // Initialize vecPsdAvg and vecCsdAvg
     int iNRows = connectivitySettings.at(0).matData.rows();

@@ -77,7 +77,7 @@ void MNEEpochData::applyBaselineCorrection(const QPair<float, float>& baseline)
     RowVectorXf times(n);
     for (Eigen::Index i = 0; i < n; ++i)
         times(i) = static_cast<float>((first + static_cast<double>(i)) * step);
-    this->epoch = Numerics::rescale(this->epoch, times, baseline, QString("mean"));
+    this->epoch = Numerics::rescale(this->epoch, times, baseline, "mean");
 }
 
 //=============================================================================================================

@@ -50,10 +50,12 @@
 #include <string>
 
 //=============================================================================================================
-// QT INCLUDES
+// STL INCLUDES
 //=============================================================================================================
 
-#include <QSharedPointer>
+#include <cstdint>
+#include <memory>
+#include <string>
 
 //=============================================================================================================
 // EIGEN INCLUDES
@@ -111,8 +113,8 @@ enum class KMeansEmptyAction
 class MATHSHARED_EXPORT KMeans
 {
 public:
-    typedef QSharedPointer<KMeans> SPtr;            /**< Shared pointer type for KMeans. */
-    typedef QSharedPointer<const KMeans> ConstSPtr; /**< Const shared pointer type for KMeans. */
+    using SPtr = std::shared_ptr<KMeans>;            /**< Shared pointer type for KMeans. */
+    using ConstSPtr = std::shared_ptr<const KMeans>; /**< Const shared pointer type for KMeans. */
 
     //=========================================================================================================
     /**
@@ -125,12 +127,12 @@ public:
      * @param[in] online     (optional) If centroids should be updated during iterations: true (default), false.
      * @param[in] maxit      (optional) Maximal number of iterations per replicate; 100 by default.
      */
-    explicit KMeans(QString distance = QString("sqeuclidean"),
-                    QString start = QString("sample"),
-                    qint32 replicates = 1,
-                    QString emptyact = QString("singleton"),
+    explicit KMeans(const std::string& distance = "sqeuclidean",
+                    const std::string& start = "sample",
+                    std::int32_t replicates = 1,
+                    const std::string& emptyact = "singleton",
                     bool online = true,
-                    qint32 maxit = 100);
+                    std::int32_t maxit = 100);
 
     //=========================================================================================================
     /**
@@ -145,10 +147,10 @@ public:
      */
     explicit KMeans(KMeansDistance distance,
                     KMeansStart start = KMeansStart::Sample,
-                    qint32 replicates = 1,
+                    std::int32_t replicates = 1,
                     KMeansEmptyAction emptyact = KMeansEmptyAction::Singleton,
                     bool online = true,
-                    qint32 maxit = 100);
+                    std::int32_t maxit = 100);
 
     //=========================================================================================================
     /**
@@ -164,7 +166,7 @@ public:
      * @return true if clustering succeeded, false otherwise.
      */
     bool calculate(const Eigen::MatrixXd& X,
-                   qint32 kClusters,
+                   std::int32_t kClusters,
                    Eigen::VectorXi& idx,
                    Eigen::MatrixXd& C,
                    Eigen::VectorXd& sumD,
@@ -219,7 +221,7 @@ private:
                       Eigen::VectorXi& idx,
                       Eigen::VectorXd& sumD,
                       Eigen::MatrixXd& D,
-                      qint32 rep);
+                      std::int32_t rep);
 
     //=========================================================================================================
     /**
@@ -309,17 +311,17 @@ private:
     KMeansDistance m_distance;    /**< Distance metric to use. */
     KMeansStart m_start;          /**< Initialization strategy. */
     KMeansEmptyAction m_emptyact; /**< Empty-cluster action. */
-    qint32 m_iReps;               /**< Number of replicates. */
-    qint32 m_iMaxit;              /**< Max iterations per replicate. */
+    std::int32_t m_iReps;         /**< Number of replicates. */
+    std::int32_t m_iMaxit;        /**< Max iterations per replicate. */
     bool m_bOnline;               /**< Whether to perform online updates. */
 
     std::mt19937 m_rng; /**< Mersenne Twister random number generator. */
 
-    qint32 emptyErrCnt; /**< Empty-cluster error count. */
-    qint32 iter;        /**< Current iteration. */
-    qint32 k;           /**< Number of clusters. */
-    qint32 n;           /**< Number of data points. */
-    qint32 p;           /**< Dimensionality of the data space. */
+    std::int32_t emptyErrCnt; /**< Empty-cluster error count. */
+    std::int32_t iter;        /**< Current iteration. */
+    std::int32_t k;           /**< Number of clusters. */
+    std::int32_t n;           /**< Number of data points. */
+    std::int32_t p;           /**< Dimensionality of the data space. */
 
     Eigen::MatrixXd Del; /**< Reassignment cost matrix (n x k). */
     Eigen::VectorXd d;   /**< Minimal distance of each point to its centroid. */

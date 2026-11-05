@@ -254,7 +254,6 @@ bool SimplexAlgorithm::simplex_minimize(Eigen::Matrix<T, Eigen::Dynamic, Eigen::
         if (count == report) {
             if (!report_func(loop, static_cast<Eigen::Matrix<T, Eigen::Dynamic, 1>>(p.row(ilo)),
                              y[ilo], y[ihi], std::sqrt(dsum))) {
-                qWarning("Iteration interrupted.");
                 result = false;
                 break;
             }
@@ -263,7 +262,6 @@ bool SimplexAlgorithm::simplex_minimize(Eigen::Matrix<T, Eigen::Dynamic, Eigen::
         if (rtol < ftol)
             break;
         if (neval >= max_eval) {
-            qWarning("Maximum number of evaluations exceeded.");
             result = false;
             break;
         }

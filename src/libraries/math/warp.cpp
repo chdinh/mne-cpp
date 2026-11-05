@@ -30,7 +30,6 @@
 
 #include "warp.h"
 
-#include <iostream>
 #include <fstream>
 
 //=============================================================================================================
@@ -40,13 +39,10 @@
 #include <Eigen/LU>
 
 //=============================================================================================================
-// QT INCLUDES
+// INCLUDES
 //=============================================================================================================
 
-#include <QDebug>
-#include <QFile>
-#include <QList>
-#include <QRegularExpression>
+#include <string>
 
 //=============================================================================================================
 // USED NAMESPACES
@@ -69,15 +65,14 @@ MatrixXf Warp::calculate(const MatrixXf& sLm, const MatrixXf& dLm, const MatrixX
 
 //=============================================================================================================
 
-void Warp::calculate(const MatrixXf& sLm, const MatrixXf& dLm, QList<MatrixXf>& vertList)
+void Warp::calculate(const MatrixXf& sLm, const MatrixXf& dLm, std::vector<MatrixXf>& vertList)
 {
     MatrixXf warpWeight, polWeight;
     calcWeighting(sLm, dLm, warpWeight, polWeight);
 
-    for (int i = 0; i < vertList.size(); i++) {
-        vertList.replace(i, warpVertices(vertList.at(i), sLm, warpWeight, polWeight));
+    for (MatrixXf& vert : vertList) {
+        vert = warpVertices(vert, sLm, warpWeight, polWeight);
     }
-    return;
 }
 
 //=============================================================================================================
@@ -140,54 +135,12 @@ MatrixXf Warp::warpVertices(const MatrixXf& sVert, const MatrixXf& sLm, const Ma
 
 //=============================================================================================================
 
-MatrixXf Warp::readsLm(const QString& electrodeFileName)
-{
-    MatrixXf electrodes;
-    QFile file(electrodeFileName);
-
-    if (!file.open(QIODevice::ReadOnly | QIODevice::Text)) {
-        qDebug() << "Error opening file";
-        //        return false;
-    }
-
-    //Start reading from file
-    double numberElectrodes;
-    QTextStream in(&file);
-    int i = 0;
-
-    while (!in.atEnd()) {
-        QString line = in.readLine();
-        QStringList fields = line.split(QRegularExpression("\\s+"));
-
-        //Delete last element if it is a blank character
-        if (fields.at(fields.size() - 1) == "")
-            fields.removeLast();
-
-        //Read number of electrodes
-        if (i == 0) {
-            numberElectrodes = fields.at(fields.size() - 1).toDouble();
-            electrodes = MatrixXf::Zero(numberElectrodes, 3);
-        }
-        //Read actual electrode positions
-        else {
-            Vector3f x;
-            x << fields.at(fields.size() - 3).toFloat(), fields.at(fields.size() - 2).toFloat(), fields.at(fields.size() - 1).toFloat();
-            electrodes.row(i - 1) = x.transpose();
-        }
-        i++;
-    }
-    return electrodes;
-}
-
-//=============================================================================================================
-
 MatrixXf Warp::readsLm(const std::string& electrodeFileName)
 {
     MatrixXf electrodes;
     std::ifstream inFile(electrodeFileName);
 
     if (!inFile.is_open()) {
-        qDebug() << "Error opening file";
         //Why are we not returning?
         //        return false;
     }

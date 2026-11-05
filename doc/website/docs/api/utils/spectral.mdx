@@ -17,7 +17,7 @@ class UTILSLIB::Spectral
 
 Static multi-taper spectral estimator producing tapered spectra, PSDs and cross-spectral density matrices over `Eigen` row inputs.
 
-Designed for fan-out across channels via `QtConcurrent` and feeding `CONNECTIVITYLIB`'s coherence / phase estimators.
+Designed for fan-out across channels on std::async tasks and feeding `CONNECTIVITYLIB`'s coherence / phase estimators.
 
 Static multi-taper spectra, PSD and CSD estimator for MEG/EEG time series.
 
@@ -89,7 +89,7 @@ This function calculates each row in parallel.
 
 **Returns:**
 
-- *QVector&lt; Eigen::MatrixXcd &gt;* — tapered spectra of the input data.
+- *std::vector&lt; Eigen::MatrixXcd &gt;* — tapered spectra of the input data.
 
 ---
 
@@ -107,22 +107,6 @@ This function gets called in parallel.
 **Returns:**
 
 - *Eigen::MatrixXcd* — The tapered spectra for one data row.
-
----
-
-### reduce(finalData, resultData)
-
-Reduces the taperedSpectra results to a final result.
-
-This function gets called in parallel.
-
-**Parameters:**
-
-- **finalData** : *QVector&lt; Eigen::MatrixXcd &gt; &*
-  The final data data.
-
-- **resultData** : *const Eigen::MatrixXcd &*
-  The resulting data from the computation step.
 
 ---
 
@@ -207,24 +191,6 @@ Calculates a hanning window of given length.
 - **iSignalLength** : *int*
   length of the hanning window.
 
-- **sWindowType** : *const QString &*
-  type of the window function used to compute tapered spectra.
-
-**Returns:**
-
-- *QPair&lt; Eigen::MatrixXd, Eigen::VectorXd &gt;* — Qpair of tapers and taper weights.
-
----
-
-### generateTapers(iSignalLength, sWindowType)
-
-Calculates a hanning window of given length.
-
-**Parameters:**
-
-- **iSignalLength** : *int*
-  length of the hanning window.
-
 - **sWindowType** : *const std::string &*
   type of the window function used to compute tapered spectra.
 
@@ -248,7 +214,7 @@ Multitaper spectra, power spectral density and cross-spectral density of random 
 
 ````cpp title="src/examples/ex_spectral/main.cpp, line 80"
 //Generate hanning window
-QPair<MatrixXd, VectorXd> tapers = Spectral::generateTapers(iNSamples, QString("hanning"));
+QPair<MatrixXd, VectorXd> tapers = Spectral::generateTapers(iNSamples, "hanning");
 MatrixXd matTaps = tapers.first;
 VectorXd vecTapWeights = tapers.second;
 int iNfft = iNSamples;

@@ -378,15 +378,16 @@ MNEBem& MNEBem::operator<<(const MNEBemSurface* surf)
 void MNEBem::warp(const MatrixXf& sLm, const MatrixXf& dLm)
 {
     Warp help;
-    QList<MatrixXf> vertList;
+    std::vector<MatrixXf> vertList;
+    vertList.reserve(static_cast<std::size_t>(this->m_qListBemSurface.size()));
     for (int i = 0; i < this->m_qListBemSurface.size(); i++) {
-        vertList.append(this->m_qListBemSurface[i].rr);
+        vertList.push_back(this->m_qListBemSurface[i].rr);
     }
 
     help.calculate(sLm, dLm, vertList);
 
     for (int i = 0; i < this->m_qListBemSurface.size(); i++) {
-        this->m_qListBemSurface[i].rr = vertList.at(i);
+        this->m_qListBemSurface[i].rr = vertList[static_cast<std::size_t>(i)];
     }
     return;
 }

@@ -104,7 +104,7 @@ Network WeightedPhaseLagIndex::calculate(ConnectivitySettings& connectivitySetti
     int iNfft = connectivitySettings.getFFTSize();
 
     // Generate tapers
-    QPair<MatrixXd, VectorXd> tapers = Spectral::generateTapers(iSignalLength, connectivitySettings.getWindowType());
+    QPair<MatrixXd, VectorXd> tapers = Spectral::generateTapers(iSignalLength, connectivitySettings.getWindowType().toStdString());
 
     // Initialize
     int iNRows = connectivitySettings.at(0).matData.rows();

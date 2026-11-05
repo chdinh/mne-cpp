@@ -17,7 +17,7 @@ class TestUtilsSpectral : public QObject
 private slots:
     void testGenerateTapersHanningProperties()
     {
-        QPair<MatrixXd, VectorXd> tapResult = Spectral::generateTapers(64, QString("hanning"));
+        QPair<MatrixXd, VectorXd> tapResult = Spectral::generateTapers(64, "hanning");
         MatrixXd hann = tapResult.first;
         QCOMPARE(hann.rows(), 1);
         QCOMPARE(hann.cols(), 64);
@@ -35,13 +35,13 @@ private slots:
 
     void testGenerateTapersHanningSmall()
     {
-        QPair<MatrixXd, VectorXd> tapResult = Spectral::generateTapers(8, QString("hanning"));
+        QPair<MatrixXd, VectorXd> tapResult = Spectral::generateTapers(8, "hanning");
         QCOMPARE(tapResult.first.cols(), 8);
     }
 
     void testGenerateTapersQString()
     {
-        QPair<MatrixXd, VectorXd> result = Spectral::generateTapers(64, QString("hanning"));
+        QPair<MatrixXd, VectorXd> result = Spectral::generateTapers(64, "hanning");
         QCOMPARE(result.first.cols(), 64);
         QVERIFY(result.first.rows() >= 1);
         QCOMPARE(result.second.size(), result.first.rows());
@@ -56,7 +56,7 @@ private slots:
 
     void testGenerateTapersOnes()
     {
-        QPair<MatrixXd, VectorXd> result = Spectral::generateTapers(32, QString("ones"));
+        QPair<MatrixXd, VectorXd> result = Spectral::generateTapers(32, "ones");
         QCOMPARE(result.first.cols(), 32);
         // "ones" taper should have all ones (or near constant)
     }
@@ -93,7 +93,7 @@ private slots:
     {
         int N = 64;
         RowVectorXd data = RowVectorXd::Random(N);
-        QPair<MatrixXd, VectorXd> tapResult = Spectral::generateTapers(N, QString("hanning"));
+        QPair<MatrixXd, VectorXd> tapResult = Spectral::generateTapers(N, "hanning");
         MatrixXd tapers = tapResult.first;
         int iNfft = N;
 
@@ -108,7 +108,7 @@ private slots:
         // Test with varying lengths (no zero-padding to avoid Eigen FFT row-vector bug)
         int N = 128;
         RowVectorXd data = RowVectorXd::Random(N);
-        QPair<MatrixXd, VectorXd> tapResult = Spectral::generateTapers(N, QString("hanning"));
+        QPair<MatrixXd, VectorXd> tapResult = Spectral::generateTapers(N, "hanning");
         MatrixXd tapers = tapResult.first;
 
         MatrixXcd result = Spectral::computeTaperedSpectraRow(data, tapers, N);
@@ -121,13 +121,13 @@ private slots:
         int nChannels = 4;
         int N = 128;
         MatrixXd data = MatrixXd::Random(nChannels, N);
-        QPair<MatrixXd, VectorXd> tapResult = Spectral::generateTapers(N, QString("hanning"));
+        QPair<MatrixXd, VectorXd> tapResult = Spectral::generateTapers(N, "hanning");
         MatrixXd tapers = tapResult.first;
         int iNfft = N;
 
-        QVector<MatrixXcd> result = Spectral::computeTaperedSpectraMatrix(
+        std::vector<MatrixXcd> result = Spectral::computeTaperedSpectraMatrix(
             data, tapers, iNfft, false /* sequential */);
-        QCOMPARE(result.size(), nChannels);
+        QCOMPARE(result.size(), static_cast<std::size_t>(nChannels));
         for (int ch = 0; ch < nChannels; ++ch) {
             QCOMPARE(result[ch].cols(), int(floor(iNfft / 2.0)) + 1); // half spectrum
         }
@@ -138,20 +138,20 @@ private slots:
         int nChannels = 4;
         int N = 128;
         MatrixXd data = MatrixXd::Random(nChannels, N);
-        QPair<MatrixXd, VectorXd> tapResult = Spectral::generateTapers(N, QString("hanning"));
+        QPair<MatrixXd, VectorXd> tapResult = Spectral::generateTapers(N, "hanning");
         MatrixXd tapers = tapResult.first;
         int iNfft = N;
 
-        QVector<MatrixXcd> result = Spectral::computeTaperedSpectraMatrix(
+        std::vector<MatrixXcd> result = Spectral::computeTaperedSpectraMatrix(
             data, tapers, iNfft, true /* parallel */);
-        QCOMPARE(result.size(), nChannels);
+        QCOMPARE(result.size(), static_cast<std::size_t>(nChannels));
     }
 
     void testPsdFromTaperedSpectra()
     {
         int N = 64;
         RowVectorXd data = RowVectorXd::Random(N);
-        QPair<MatrixXd, VectorXd> tapResult = Spectral::generateTapers(N, QString("hanning"));
+        QPair<MatrixXd, VectorXd> tapResult = Spectral::generateTapers(N, "hanning");
         MatrixXcd tapSpectra = Spectral::computeTaperedSpectraRow(data, tapResult.first, N);
 
         RowVectorXd psd = Spectral::psdFromTaperedSpectra(
@@ -169,7 +169,7 @@ private slots:
         int N = 64;
         RowVectorXd data1 = RowVectorXd::Random(N);
         RowVectorXd data2 = RowVectorXd::Random(N);
-        QPair<MatrixXd, VectorXd> tapResult = Spectral::generateTapers(N, QString("hanning"));
+        QPair<MatrixXd, VectorXd> tapResult = Spectral::generateTapers(N, "hanning");
 
         MatrixXcd tapSpectra1 = Spectral::computeTaperedSpectraRow(data1, tapResult.first, N);
         MatrixXcd tapSpectra2 = Spectral::computeTaperedSpectraRow(data2, tapResult.first, N);
@@ -193,7 +193,7 @@ private slots:
             data(i) = std::sin(2.0 * M_PI * fSine * i / sFreq);
         }
 
-        QPair<MatrixXd, VectorXd> tapResult = Spectral::generateTapers(N, QString("hanning"));
+        QPair<MatrixXd, VectorXd> tapResult = Spectral::generateTapers(N, "hanning");
         MatrixXcd tapSpectra = Spectral::computeTaperedSpectraRow(data, tapResult.first, N);
         RowVectorXd psd = Spectral::psdFromTaperedSpectra(tapSpectra, tapResult.second, N, sFreq);
 
@@ -217,7 +217,7 @@ private slots:
         // Verify CSD function can be called with same spectrum as seed and target
         int N = 64;
         RowVectorXd data = RowVectorXd::Random(N);
-        QPair<MatrixXd, VectorXd> tapResult = Spectral::generateTapers(N, QString("hanning"));
+        QPair<MatrixXd, VectorXd> tapResult = Spectral::generateTapers(N, "hanning");
         MatrixXcd tapSpectra = Spectral::computeTaperedSpectraRow(data, tapResult.first, N);
 
         RowVectorXcd csd = Spectral::csdFromTaperedSpectra(

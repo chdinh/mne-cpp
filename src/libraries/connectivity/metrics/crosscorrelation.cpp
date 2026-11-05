@@ -101,7 +101,7 @@ Network CrossCorrelation::calculate(ConnectivitySettings& connectivitySettings)
     int iSignalLength = connectivitySettings.at(0).matData.cols();
     int iNfft = connectivitySettings.getFFTSize();
 
-    QPair<MatrixXd, VectorXd> tapers = Spectral::generateTapers(iSignalLength, connectivitySettings.getWindowType());
+    QPair<MatrixXd, VectorXd> tapers = Spectral::generateTapers(iSignalLength, connectivitySettings.getWindowType().toStdString());
 
     // Compute the cross correlation in parallel
     QMutex mutex;

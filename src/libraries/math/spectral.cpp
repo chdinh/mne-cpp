@@ -14,7 +14,7 @@
  * @c O(N log N); the @c K taper streams are then averaged into a PSD
  * with the one-sided scaling convention or combined into a complex
  * cross-spectral-density matrix per frequency bin. The matrix entry
- * point uses @c QtConcurrent::mapped to spread channels across worker
+ * point uses @c std::async to spread channels across worker
  * threads while keeping a deterministic ordering in the output vector.
  *
  * Numerical conventions match MNE-Python's @c psd_array_multitaper and
@@ -37,12 +37,14 @@
 #include <unsupported/Eigen/FFT>
 
 //=============================================================================================================
-// QT INCLUDES
+// INCLUDES
 //=============================================================================================================
 
-#include <QtMath>
-#include <QtConcurrent>
-#include <QVector>
+#include <algorithm>
+#include <cmath>
+#include <future>
+#include <thread>
+#include <vector>
 
 //=============================================================================================================
 // USED NAMESPACES
@@ -59,7 +61,6 @@ MatrixXcd Spectral::computeTaperedSpectraRow(const RowVectorXd& vecData,
                                              const MatrixXd& matTaper,
                                              int iNfft)
 {
-    //qDebug() << "Spectral::computeTaperedSpectra Matrixwise";
     FFT<double> fft;
     fft.SetFlag(fft.HalfSpectrum);
 
@@ -83,23 +84,19 @@ MatrixXcd Spectral::computeTaperedSpectraRow(const RowVectorXd& vecData,
 
 //=============================================================================================================
 
-QVector<MatrixXcd> Spectral::computeTaperedSpectraMatrix(const MatrixXd& matData,
-                                                         const MatrixXd& matTaper,
-                                                         int iNfft,
-                                                         bool bUseThreads)
+std::vector<MatrixXcd> Spectral::computeTaperedSpectraMatrix(const MatrixXd& matData,
+                                                             const MatrixXd& matTaper,
+                                                             int iNfft,
+                                                             bool bUseThreads)
 {
 #ifdef EIGEN_FFTW_DEFAULT
     fftw_make_planner_thread_safe();
 #endif
 
-    QVector<MatrixXcd> finalResult;
+    std::vector<MatrixXcd> finalResult;
 
     if (!bUseThreads) {
         // Sequential
-        //        QElapsedTimer timer;
-        //        int iTime = 0;
-        //        int iTimeAll = 0;
-        //        timer.start();
 
         FFT<double> fft;
         fft.SetFlag(fft.HalfSpectrum);
@@ -119,34 +116,30 @@ QVector<MatrixXcd> Spectral::computeTaperedSpectraMatrix(const MatrixXd& matData
                 matTapSpectrum.row(j) = vecTmpFreq;
             }
 
-            finalResult.append(matTapSpectrum);
-
-            //            iTime = timer.elapsed();
-            //            qDebug() << QThread::currentThreadId() << "Spectral::computeTaperedSpectraMatrix - Row-wise computation:" << iTime;
-            //            iTimeAll += iTime;
-            //            timer.restart();
+            finalResult.push_back(matTapSpectrum);
         }
 
-        //        qDebug() << QThread::currentThreadId() << "Spectral::computeTaperedSpectraMatrix - Complete computation:" << iTimeAll;
     } else {
-        // Parallel
-        QList<TaperedSpectraInputData> lData;
-        TaperedSpectraInputData dataTemp;
-        dataTemp.matTaper = matTaper;
-        dataTemp.iNfft = iNfft;
-
-        for (int i = 0; i < matData.rows(); ++i) {
-            dataTemp.vecData = matData.row(i);
-
-            lData.append(dataTemp);
+        // Parallel; each worker fills an interleaved set of rows, so the order is kept
+        const std::size_t rows = static_cast<std::size_t>(matData.rows());
+        finalResult.resize(rows);
+        const std::size_t workers = std::max<std::size_t>(1, std::min<std::size_t>(std::thread::hardware_concurrency(), rows));
+        std::vector<std::future<void>> tasks;
+        tasks.reserve(workers);
+        for (std::size_t w = 0; w < workers; ++w) {
+            tasks.push_back(std::async(std::launch::async, [&, w] {
+                for (std::size_t i = w; i < rows; i += workers) {
+                    TaperedSpectraInputData input;
+                    input.vecData = matData.row(static_cast<Eigen::Index>(i));
+                    input.matTaper = matTaper;
+                    input.iNfft = iNfft;
+                    finalResult[i] = compute(input);
+                }
+            }));
         }
-
-        QFuture<QVector<MatrixXcd>> result = QtConcurrent::mappedReduced(lData,
-                                                                         compute,
-                                                                         reduce,
-                                                                         QtConcurrent::OrderedReduce);
-        result.waitForFinished();
-        finalResult = result.result();
+        for (auto& task : tasks) {
+            task.get();
+        }
     }
 
     return finalResult;
@@ -156,19 +149,9 @@ QVector<MatrixXcd> Spectral::computeTaperedSpectraMatrix(const MatrixXd& matData
 
 MatrixXcd Spectral::compute(const TaperedSpectraInputData& inputData)
 {
-    //qDebug() << "Spectral::compute";
     return computeTaperedSpectraRow(inputData.vecData,
                                     inputData.matTaper,
                                     inputData.iNfft);
-}
-
-//=============================================================================================================
-
-void Spectral::reduce(QVector<MatrixXcd>& finalData,
-                      const MatrixXcd& resultData)
-{
-    //qDebug() << "Spectral::reduce";
-    finalData.append(resultData);
 }
 
 //=============================================================================================================
@@ -206,10 +189,6 @@ Eigen::RowVectorXcd Spectral::csdFromTaperedSpectra(const Eigen::MatrixXcd& vecT
                                                     int iNfft,
                                                     double dSampFreq)
 {
-    //    QElapsedTimer timer;
-    //    int iTime = 0;
-    //    timer.start();
-
     //Check inputs
     if (vecTapSpectrumSeed.rows() != vecTapSpectrumTarget.rows()) {
         return Eigen::MatrixXcd();
@@ -224,9 +203,6 @@ Eigen::RowVectorXcd Spectral::csdFromTaperedSpectra(const Eigen::MatrixXcd& vecT
         return Eigen::MatrixXcd();
     }
 
-    //    iTime = timer.elapsed();
-    //    qDebug() << QThread::currentThreadId() << "Spectral::csdFromTaperedSpectra timer - Prepare:" << iTime;
-    //    timer.restart();
 
     // Compute PSD (average over tapers if necessary)
     // Multiply by 2 due to half spectrum
@@ -234,9 +210,6 @@ Eigen::RowVectorXcd Spectral::csdFromTaperedSpectra(const Eigen::MatrixXcd& vecT
     double denom = sqrt(vecTapWeightsSeed.cwiseAbs2().sum()) * sqrt(vecTapWeightsTarget.cwiseAbs2().sum()) * dSampFreq;
     Eigen::RowVectorXcd vecCsd = 2.0 * (vecTapWeightsSeed.asDiagonal() * vecTapSpectrumSeed).cwiseProduct((vecTapWeightsTarget.asDiagonal() * vecTapSpectrumTarget).conjugate()).colwise().sum() / denom;
 
-    //    iTime = timer.elapsed();
-    //    qDebug() << QThread::currentThreadId() << "Spectral::csdFromTaperedSpectra timer - compute PSD:" << iTime;
-    //    timer.restart();
 
     //multiply first and last element by 2 due to half spectrum
     vecCsd(0) /= 2.0;
@@ -244,9 +217,6 @@ Eigen::RowVectorXcd Spectral::csdFromTaperedSpectra(const Eigen::MatrixXcd& vecT
         vecCsd.tail(1) /= 2.0;
     }
 
-    //    iTime = timer.elapsed();
-    //    qDebug() << QThread::currentThreadId() << "Spectral::csdFromTaperedSpectra timer - half spectrum:" << iTime;
-    //    timer.restart();
 
     return vecCsd;
 }
@@ -263,24 +233,6 @@ VectorXd Spectral::calculateFFTFreqs(int iNfft, double dSampFreq)
         vecFFTFreqs = (dSampFreq / iNfft) * RowVectorXd::LinSpaced((iNfft - 1) / 2.0 + 1, 0.0, (iNfft - 1) / 2.0);
     }
     return vecFFTFreqs;
-}
-
-//=============================================================================================================
-
-QPair<MatrixXd, VectorXd> Spectral::generateTapers(int iSignalLength, const QString& sWindowType)
-{
-    QPair<MatrixXd, VectorXd> pairOut;
-    if (sWindowType == "hanning") {
-        pairOut.first = hanningWindow(iSignalLength);
-        pairOut.second = VectorXd::Ones(1);
-    } else if (sWindowType == "ones") {
-        pairOut.first = MatrixXd::Ones(1, iSignalLength) / double(iSignalLength);
-        pairOut.second = VectorXd::Ones(1);
-    } else {
-        pairOut.first = hanningWindow(iSignalLength);
-        pairOut.second = VectorXd::Ones(1);
-    }
-    return pairOut;
 }
 
 //=============================================================================================================

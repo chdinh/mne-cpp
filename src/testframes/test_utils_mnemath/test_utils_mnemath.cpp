@@ -215,7 +215,7 @@ void TestMNEMath::testGetWhitener()
 
     // Test without PCA
     MatrixXd covCopy = cov;
-    Linalg::get_whitener(covCopy, false, QString("test"), eig, eigvec);
+    Linalg::get_whitener(covCopy, false, "test", eig, eigvec);
     QCOMPARE(eig.size(), (Eigen::Index)3);
     QCOMPARE(eigvec.rows(), (Eigen::Index)3);
     QCOMPARE(eigvec.cols(), (Eigen::Index)3);
@@ -234,7 +234,7 @@ void TestMNEMath::testGetWhitener()
     for (const bool useQString : {true, false}) {
         MatrixXd rank2Copy = rank2;
         if (useQString) {
-            Linalg::get_whitener(rank2Copy, true, QString("test"), eig, eigvec);
+            Linalg::get_whitener(rank2Copy, true, "test", eig, eigvec);
         } else {
             Linalg::get_whitener(rank2Copy, true, std::string("test"), eig, eigvec);
         }
@@ -375,7 +375,7 @@ void TestMNEMath::testRescaleMean()
 
     QPair<float, float> baseline(-0.3f, 0.0f);
 
-    MatrixXd result = Numerics::rescale(data, times, baseline, QString("mean"));
+    MatrixXd result = Numerics::rescale(data, times, baseline, "mean");
 
     // Mean baseline subtraction: data - mean(baseline) should give zeros for constant data
     for (int i = 0; i < result.cols(); ++i) {
@@ -421,7 +421,7 @@ void TestMNEMath::testRescaleZscore()
 
     QPair<float, float> baseline(-0.3f, 0.0f);
 
-    MatrixXd result = Numerics::rescale(data, times, baseline, QString("zscore"));
+    MatrixXd result = Numerics::rescale(data, times, baseline, "zscore");
 
     // Result should be z-scored; verify it's finite
     for (int i = 0; i < result.cols(); ++i) {
@@ -436,12 +436,12 @@ void TestMNEMath::testRescaleZscore()
     MatrixXd expected(2, 5);
     expected << -1.224744871391589, 0.0, 1.224744871391589, 2.449489742783178, 3.6742346141747673,
         -1.4142135623730951, 0.7071067811865474, 0.7071067811865474, 4.949747468305832, 7.071067811865475;
-    QVERIFY((Numerics::rescale(d, t, QPair<float, float>(-0.2f, 0.0f), QString("zscore")) - expected).cwiseAbs().maxCoeff() < 1e-9);
+    QVERIFY((Numerics::rescale(d, t, QPair<float, float>(-0.2f, 0.0f), "zscore") - expected).cwiseAbs().maxCoeff() < 1e-9);
     expected << -0.47712125471966244, -0.17609125905568127, 0.0, 0.12493873660829993, 0.2218487496163564,
         -0.42596873227228116, -0.12493873660829995, -0.12493873660829995, 0.17609125905568124, 0.27300127206373764;
     QVERIFY((Numerics::rescale(d, t, std::pair<float, float>(-0.1f, 0.1f), std::string("logratio")) - expected).cwiseAbs().maxCoeff() < 1e-9);
     expected << 1.0 / 3, 2.0 / 3, 1.0, 4.0 / 3, 5.0 / 3, 0.375, 0.75, 0.75, 1.5, 1.875;
-    QVERIFY((Numerics::rescale(d, t, QPair<float, float>(-0.1f, 0.1f), QString("ratio")) - expected).cwiseAbs().maxCoeff() < 1e-9);
+    QVERIFY((Numerics::rescale(d, t, QPair<float, float>(-0.1f, 0.1f), "ratio") - expected).cwiseAbs().maxCoeff() < 1e-9);
 }
 
 //=============================================================================================================
@@ -460,7 +460,7 @@ void TestMNEMath::testRescalePercent()
 
     QPair<float, float> baseline(-0.3f, 0.0f);
 
-    MatrixXd result = Numerics::rescale(data, times, baseline, QString("percent"));
+    MatrixXd result = Numerics::rescale(data, times, baseline, "percent");
 
     // For column 5: (8-4)/4 = 1.0
     QVERIFY(std::abs(result(0, 5) - 1.0) < m_dEpsilon);
@@ -481,7 +481,7 @@ void TestMNEMath::testRescaleInvalidMode()
     QPair<float, float> baseline(0.0f, 2.0f);
 
     // Invalid mode should return input data unchanged
-    MatrixXd result = Numerics::rescale(data, times, baseline, QString("invalid_mode"));
+    MatrixXd result = Numerics::rescale(data, times, baseline, "invalid_mode");
     QVERIFY(result.isApprox(data));
 }
 

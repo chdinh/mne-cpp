@@ -20,7 +20,7 @@
  * higher-level library (FIFFLIB, FWDLIB, INVERSELIB, CONNECTIVITYLIB).
  *
  * This header defines the @c MATHSHARED_EXPORT visibility macro that
- * toggles between @c Q_DECL_EXPORT and @c Q_DECL_IMPORT depending on
+ * toggles between symbol export and import depending on
  * whether the library itself or a consumer is being compiled, plus the
  * @c STATICBUILD short-circuit used on WebAssembly and other static
  * deployments. It also exposes @c buildDateTime(), @c buildHash() and
@@ -38,21 +38,19 @@
 #include <utils/buildinfo.h>
 
 //=============================================================================================================
-// QT INCLUDES
-//=============================================================================================================
-
-#include <QtCore/qglobal.h>
-
-//=============================================================================================================
 // DEFINES
 //=============================================================================================================
 
 #if defined(STATICBUILD)
 #define MATHSHARED_EXPORT
-#elif defined(MNE_MATH_LIBRARY)
-#define MATHSHARED_EXPORT Q_DECL_EXPORT /**< Q_DECL_EXPORT must be added to the declarations of symbols used when compiling a shared library. */
+#elif defined(_WIN32)
+#if defined(MNE_MATH_LIBRARY)
+#define MATHSHARED_EXPORT __declspec(dllexport) /**< Exported when building the shared library. */
 #else
-#define MATHSHARED_EXPORT Q_DECL_IMPORT /**< Q_DECL_IMPORT must be added to the declarations of symbols used when compiling a client that uses the shared library. */
+#define MATHSHARED_EXPORT __declspec(dllimport) /**< Imported by clients of the shared library. */
+#endif
+#else
+#define MATHSHARED_EXPORT __attribute__((visibility("default"))) /**< Default visibility on ELF/Mach-O. */
 #endif
 
 //=============================================================================================================

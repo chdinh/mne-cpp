@@ -47,10 +47,11 @@
 #include <Eigen/SVD>
 
 //=============================================================================================================
-// QT INCLUDES
+// STL INCLUDES
 //=============================================================================================================
 
-#include <QString>
+#include <cstdint>
+#include <string>
 
 //=============================================================================================================
 // DEFINE NAMESPACE UTILSLIB
@@ -126,22 +127,6 @@ public:
      */
     static void get_whitener(Eigen::MatrixXd& A,
                              bool pca,
-                             QString ch_type,
-                             Eigen::VectorXd& eig,
-                             Eigen::MatrixXd& eigvec);
-
-    //=========================================================================================================
-    /**
-     * Returns the whitener of a given matrix.
-     *
-     * @param[in] A         Matrix to compute the whitener from.
-     * @param[in] pca       Perform a PCA.
-     * @param[in] ch_type   Channel type string.
-     * @param[out] eig      Eigenvalues.
-     * @param[out] eigvec   Eigenvectors (transposed).
-     */
-    static void get_whitener(Eigen::MatrixXd& A,
-                             bool pca,
                              const std::string& ch_type,
                              Eigen::VectorXd& eig,
                              Eigen::MatrixXd& eigvec);
@@ -174,7 +159,7 @@ public:
      * @return A sparse block diagonal, diagonalized from the elements in "A".
      */
     static Eigen::SparseMatrix<double> make_block_diag(const Eigen::MatrixXd& A,
-                                                       qint32 n);
+                                                       std::int32_t n);
 
     //=========================================================================================================
     /**
@@ -196,8 +181,8 @@ public:
      *
      * @return rank of matrix A.
      */
-    static qint32 rank(const Eigen::MatrixXd& A,
-                       double tol = 1e-8);
+    static std::int32_t rank(const Eigen::MatrixXd& A,
+                             double tol = 1e-8);
 
     //=========================================================================================================
     /**
@@ -239,7 +224,7 @@ public:
      */
     template<typename T>
     static std::vector<Eigen::Triplet<T>> sortrows(const std::vector<Eigen::Triplet<T>>& A,
-                                                   qint32 column = 0);
+                                                   std::int32_t column = 0);
 
     //=========================================================================================================
     /**
@@ -302,7 +287,7 @@ Eigen::VectorXi Linalg::sort(Eigen::Matrix<T, Eigen::Dynamic, 1>& v,
     Eigen::VectorXi idx(v.size());
 
     if (v.size() > 0) {
-        for (qint32 i = 0; i < v.size(); ++i)
+        for (std::int32_t i = 0; i < v.size(); ++i)
             t_vecIdxValue.push_back(std::pair<int, T>(i, v[i]));
 
         if (desc)
@@ -310,7 +295,7 @@ Eigen::VectorXi Linalg::sort(Eigen::Matrix<T, Eigen::Dynamic, 1>& v,
         else
             std::sort(t_vecIdxValue.begin(), t_vecIdxValue.end(), Linalg::compareIdxValuePairSmallerThan<T>);
 
-        for (qint32 i = 0; i < v.size(); ++i) {
+        for (std::int32_t i = 0; i < v.size(); ++i) {
             idx[i] = t_vecIdxValue[i].first;
             v[i] = t_vecIdxValue[i].second;
         }
@@ -330,7 +315,7 @@ Eigen::VectorXi Linalg::sort(Eigen::Matrix<T, Eigen::Dynamic, 1>& v_prime,
 
     if (v_prime.size() > 0) {
         Eigen::Matrix<T, Eigen::Dynamic, Eigen::Dynamic> newMat(mat.rows(), mat.cols());
-        for (qint32 i = 0; i < idx.size(); ++i)
+        for (std::int32_t i = 0; i < idx.size(); ++i)
             newMat.col(i) = mat.col(idx[i]);
         mat = newMat;
     }
@@ -342,11 +327,11 @@ Eigen::VectorXi Linalg::sort(Eigen::Matrix<T, Eigen::Dynamic, 1>& v_prime,
 
 template<typename T>
 std::vector<Eigen::Triplet<T>> Linalg::sortrows(const std::vector<Eigen::Triplet<T>>& A,
-                                                qint32 column)
+                                                std::int32_t column)
 {
     std::vector<Eigen::Triplet<T>> p_ASorted;
 
-    for (quint32 i = 0; i < A.size(); ++i)
+    for (std::uint32_t i = 0; i < A.size(); ++i)
         p_ASorted.push_back(A[i]);
 
     if (column == 0)

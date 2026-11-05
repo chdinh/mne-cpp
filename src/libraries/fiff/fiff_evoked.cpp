@@ -581,6 +581,6 @@ void FiffEvoked::applyBaselineCorrection(QPair<float, float>& p_baseline)
 
     // Run baseline correction
     qInfo("Applying baseline correction ... (mode: mean)\n");
-    this->data = Numerics::rescale(this->data, this->times, p_baseline, QString("mean"));
+    this->data = Numerics::rescale(this->data, this->times, p_baseline, "mean");
     this->baseline = p_baseline;
 }

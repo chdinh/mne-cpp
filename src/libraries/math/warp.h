@@ -46,11 +46,12 @@
 #include <Eigen/Core>
 
 //=============================================================================================================
-// QT INCLUDES
+// STL INCLUDES
 //=============================================================================================================
 
-#include <QSharedPointer>
-#include <QStringList>
+#include <memory>
+#include <string>
+#include <vector>
 
 //=============================================================================================================
 // DEFINE NAMESPACE UTILSLIB
@@ -77,8 +78,8 @@ namespace UTILSLIB
 class MATHSHARED_EXPORT Warp
 {
 public:
-    typedef QSharedPointer<Warp> SPtr;            /**< Shared pointer type for Warp. */
-    typedef QSharedPointer<const Warp> ConstSPtr; /**< Const shared pointer type for Warp. */
+    using SPtr = std::shared_ptr<Warp>;            /**< Shared pointer type for Warp. */
+    using ConstSPtr = std::shared_ptr<const Warp>; /**< Const shared pointer type for Warp. */
 
     //=========================================================================================================
     /**
@@ -104,17 +105,7 @@ public:
      */
     void calculate(const Eigen::MatrixXf& sLm,
                    const Eigen::MatrixXf& dLm,
-                   QList<Eigen::MatrixXf>& vertList);
-
-    //=========================================================================================================
-    /**
-     * Read electrode positions from MRI Database
-     *
-     * @param[in] electrodeFileName    .txt file of electrodes.
-     *
-     * @return electrodes   Matrix with electrode positions.
-     */
-    Eigen::MatrixXf readsLm(const QString& electrodeFileName);
+                   std::vector<Eigen::MatrixXf>& vertList);
 
     //=========================================================================================================
     /**

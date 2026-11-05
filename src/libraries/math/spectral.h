@@ -19,7 +19,7 @@
  * @c (K+1)/(NW) of spectral resolution.
  *
  * The class is static and operates row-wise on @c Eigen matrices so it
- * can fan out across channels via @c QtConcurrent without touching any
+ * can fan out across channels via std::async without touching any
  * shared state. PSD scaling follows the one-sided convention
  * (factor 2 on bins 1…Nyquist-1, no doubling at DC or Nyquist) so
  * results are directly comparable to MNE-Python's @c psd_array_multitaper,
@@ -50,12 +50,11 @@
 #include <Eigen/Core>
 
 //=============================================================================================================
-// QT INCLUDES
+// STL INCLUDES
 //=============================================================================================================
 
-#include <QString>
-#include <QPair>
-#include <QSharedPointer>
+#include <utility>
+#include <vector>
 
 //=============================================================================================================
 // DEFINE NAMESPACE UTILSLIB
@@ -78,7 +77,7 @@ struct TaperedSpectraInputData
 /**
  * Static multi-taper spectral estimator producing tapered spectra, PSDs
  * and cross-spectral density matrices over @c Eigen row inputs. Designed
- * for fan-out across channels via @c QtConcurrent and feeding
+ * for fan-out across channels on std::async tasks and feeding
  * CONNECTIVITYLIB's coherence / phase estimators.
  *
  * @brief Static multi-taper spectra, PSD and CSD estimator for MEG/EEG time series.
@@ -119,10 +118,10 @@ public:
      *
      * @return tapered spectra of the input data.
      */
-    static QVector<Eigen::MatrixXcd> computeTaperedSpectraMatrix(const Eigen::MatrixXd& matData,
-                                                                 const Eigen::MatrixXd& matTaper,
-                                                                 int iNfft,
-                                                                 bool bUseThreads = true);
+    static std::vector<Eigen::MatrixXcd> computeTaperedSpectraMatrix(const Eigen::MatrixXd& matData,
+                                                                     const Eigen::MatrixXd& matTaper,
+                                                                     int iNfft,
+                                                                     bool bUseThreads = true);
 
     //=========================================================================================================
     /**
@@ -133,16 +132,6 @@ public:
      * @return                 The tapered spectra for one data row.
      */
     static Eigen::MatrixXcd compute(const TaperedSpectraInputData& inputData);
-
-    //=========================================================================================================
-    /**
-     * Reduces the taperedSpectra results to a final result. This function gets called in parallel.
-     *
-     * @param[out] finalData    The final data data.
-     * @param[in] resultData   The resulting data from the computation step.
-     */
-    static void reduce(QVector<Eigen::MatrixXcd>& finalData,
-                       const Eigen::MatrixXcd& resultData);
 
     //=========================================================================================================
     /**
@@ -190,18 +179,6 @@ public:
      * @return FFT frequencies.
      */
     static Eigen::VectorXd calculateFFTFreqs(int iNfft, double dSampFreq);
-
-    //=========================================================================================================
-    /**
-     * Calculates a hanning window of given length
-     *
-     * @param[in] iSignalLength    length of the hanning window.
-     * @param[in] sWindowType      type of the window function used to compute tapered spectra.
-     *
-     * @return Qpair of tapers and taper weights.
-     */
-    static QPair<Eigen::MatrixXd, Eigen::VectorXd> generateTapers(int iSignalLength,
-                                                                  const QString& sWindowType = "hanning");
 
     //=========================================================================================================
     /**

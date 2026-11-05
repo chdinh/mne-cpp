@@ -27,9 +27,10 @@
     "libraries": 24,
     "qt_free": [
       "acq",
-      "decoding"
+      "decoding",
+      "math"
     ],
-    "tokens": 21059,
+    "tokens": 20843,
     "gui_outside_design": []
   },
   "libraries": {
@@ -216,7 +217,7 @@
       ]
     },
     "dsp": {
-      "tokens": 869,
+      "tokens": 868,
       "by_category": {
         "containers": 280,
         "files": 32,
@@ -226,7 +227,7 @@
         "other": 3,
         "regex": 3,
         "smart_pointers": 31,
-        "strings": 175,
+        "strings": 174,
         "threads": 21,
         "time": 1
       },
@@ -240,7 +241,7 @@
       ]
     },
     "fiff": {
-      "tokens": 2017,
+      "tokens": 2014,
       "by_category": {
         "containers": 315,
         "files": 186,
@@ -252,7 +253,7 @@
         "other": 3,
         "regex": 16,
         "smart_pointers": 73,
-        "strings": 594,
+        "strings": 591,
         "time": 1
       },
       "public_header_includes": 98,
@@ -364,24 +365,12 @@
       ]
     },
     "math": {
-      "tokens": 208,
-      "by_category": {
-        "containers": 14,
-        "files": 4,
-        "global": 139,
-        "logging": 21,
-        "regex": 1,
-        "smart_pointers": 4,
-        "strings": 22,
-        "threads": 3
-      },
-      "public_header_includes": 9,
+      "tokens": 0,
+      "by_category": {},
+      "public_header_includes": 0,
       "q_object": 0,
       "files": 15,
-      "modules": [
-        "Concurrent",
-        "Core"
-      ]
+      "modules": []
     },
     "ml": {
       "tokens": 15,
@@ -419,9 +408,9 @@
       ]
     },
     "mne": {
-      "tokens": 1918,
+      "tokens": 1914,
       "by_category": {
-        "containers": 173,
+        "containers": 172,
         "files": 118,
         "global": 405,
         "logging": 629,
@@ -429,7 +418,7 @@
         "other": 23,
         "regex": 4,
         "smart_pointers": 97,
-        "strings": 455,
+        "strings": 452,
         "threads": 10
       },
       "public_header_includes": 99,

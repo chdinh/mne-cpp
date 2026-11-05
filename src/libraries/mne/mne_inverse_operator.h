@@ -107,7 +107,7 @@ struct RegionMT
             : sDistMeasure;
 
         RegionMTOut out;
-        UTILSLIB::KMeans kMeans(distMeasure, QStringLiteral("sample"), 5);
+        UTILSLIB::KMeans kMeans(distMeasure.toStdString(), "sample", 5);
         kMeans.calculate(matRoiMT, nClusters,
                          out.roiIdx, out.ctrs, out.sumd, out.D);
         out.iLabelIdxOut = iLabelIdxIn;

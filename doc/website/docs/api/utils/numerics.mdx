@@ -117,30 +117,6 @@ Rescale (baseline correct) data.
 - **times** : *const Eigen::RowVectorXf &*
   Time instants in seconds.
 
-- **baseline** : *const QPair&lt; float, float &gt; &*
-  If baseline is (a, b) the interval is between "a (s)" and "b (s)". If a and b are equal, use interval between the beginning of the data and time 0.
-
-- **mode** : *QString*
-  Baseline correction mode: "logratio" | "ratio" | "zscore" | "mean" | "percent".
-
-**Returns:**
-
-- *Eigen::MatrixXd* — Rescaled data matrix.
-
----
-
-### rescale(data, times, baseline, mode)
-
-Rescale (baseline correct) data.
-
-**Parameters:**
-
-- **data** : *const Eigen::MatrixXd &*
-  Data Matrix (m x n_time).
-
-- **times** : *const Eigen::RowVectorXf &*
-  Time instants in seconds.
-
 - **baseline** : *const std::pair&lt; float, float &gt; &*
   If baseline is (a, b) the interval is between "a (s)" and "b (s)". If a and b are equal, use interval between the beginning of the data and time 0.
 

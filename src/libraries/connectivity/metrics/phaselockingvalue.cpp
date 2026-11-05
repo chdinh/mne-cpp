@@ -103,7 +103,7 @@ Network PhaseLockingValue::calculate(ConnectivitySettings& connectivitySettings)
     int iNfft = connectivitySettings.getFFTSize();
 
     // Generate tapers
-    QPair<MatrixXd, VectorXd> tapers = Spectral::generateTapers(iSignalLength, connectivitySettings.getWindowType());
+    QPair<MatrixXd, VectorXd> tapers = Spectral::generateTapers(iSignalLength, connectivitySettings.getWindowType().toStdString());
 
     // Initialize
     int iNFreqs = int(floor(iNfft / 2.0)) + 1;

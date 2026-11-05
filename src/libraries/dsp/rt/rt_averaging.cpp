@@ -407,7 +407,7 @@ void RtAveragingWorker::generateEvoked(double dTriggerType)
     }
 
     if (m_bDoBaselineCorrection) {
-        finalAverage = Numerics::rescale(finalAverage, evoked.times, m_pairBaselineSec, QString("mean"));
+        finalAverage = Numerics::rescale(finalAverage, evoked.times, m_pairBaselineSec, "mean");
     }
 
     evoked.data = finalAverage;

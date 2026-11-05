@@ -110,7 +110,7 @@
       ]
     },
     "dsp": {
-      "tokens": 869,
+      "tokens": 868,
       "public_header_includes": 59,
       "modules": [
         "Concurrent",
@@ -119,7 +119,7 @@
       ]
     },
     "fiff": {
-      "tokens": 2017,
+      "tokens": 2014,
       "public_header_includes": 98,
       "modules": [
         "Core",
@@ -167,12 +167,9 @@
       ]
     },
     "math": {
-      "tokens": 208,
-      "public_header_includes": 9,
-      "modules": [
-        "Concurrent",
-        "Core"
-      ]
+      "tokens": 0,
+      "public_header_includes": 0,
+      "modules": []
     },
     "ml": {
       "tokens": 15,
@@ -189,7 +186,7 @@
       ]
     },
     "mne": {
-      "tokens": 1918,
+      "tokens": 1914,
       "public_header_includes": 99,
       "modules": [
         "Concurrent",

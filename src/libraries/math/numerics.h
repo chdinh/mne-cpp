@@ -48,10 +48,12 @@
 #include <Eigen/Core>
 
 //=============================================================================================================
-// QT INCLUDES
+// STL INCLUDES
 //=============================================================================================================
 
-#include <QVariant>
+#include <cstdint>
+#include <string>
+#include <utility>
 
 //=============================================================================================================
 // DEFINE NAMESPACE UTILSLIB
@@ -121,24 +123,6 @@ public:
      * @return The quantile.
      */
     static double chi2Isf(double p, int dof);
-
-    //=========================================================================================================
-    /**
-     * Rescale (baseline correct) data.
-     *
-     * @param[in] data           Data Matrix (m x n_time).
-     * @param[in] times          Time instants in seconds.
-     * @param[in] baseline       If baseline is (a, b) the interval is between "a (s)" and "b (s)".
-     *                           If a and b are equal, use interval between the beginning of the data and time 0.
-     * @param[in] mode           Baseline correction mode:
-     *                           "logratio" | "ratio" | "zscore" | "mean" | "percent".
-     *
-     * @return Rescaled data matrix.
-     */
-    static Eigen::MatrixXd rescale(const Eigen::MatrixXd& data,
-                                   const Eigen::RowVectorXf& times,
-                                   const QPair<float, float>& baseline,
-                                   QString mode);
 
     //=========================================================================================================
     /**

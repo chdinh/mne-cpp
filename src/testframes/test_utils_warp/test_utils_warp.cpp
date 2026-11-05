@@ -66,10 +66,10 @@ private slots:
         sLm << 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 1;
         MatrixXf dLm = sLm; // identity warp
 
-        QList<MatrixXf> vertList;
+        std::vector<MatrixXf> vertList;
         MatrixXf v1(3, 3);
         v1 << 0.1f, 0.2f, 0.3f, 0.4f, 0.5f, 0.6f, 0.7f, 0.8f, 0.9f;
-        vertList.append(v1);
+        vertList.push_back(v1);
 
         Warp warp;
         warp.calculate(sLm, dLm, vertList);
@@ -90,10 +90,10 @@ private slots:
         MatrixXf dLm(4, 3);
         dLm << 1, 0, 0, 2, 0, 0, 1, 1, 0, 1, 0, 1; // shifted +1 in x
 
-        QList<MatrixXf> vertList;
+        std::vector<MatrixXf> vertList;
         MatrixXf v1(1, 3);
         v1 << 0.5f, 0.5f, 0.5f;
-        vertList.append(v1);
+        vertList.push_back(v1);
 
         Warp warp;
         warp.calculate(sLm, dLm, vertList);
@@ -107,17 +107,17 @@ private slots:
         sLm << 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 1;
         MatrixXf dLm = sLm;
 
-        QList<MatrixXf> vertList;
+        std::vector<MatrixXf> vertList;
         MatrixXf v1(3, 3);
         v1 << 0.1f, 0.2f, 0.3f, 0.4f, 0.5f, 0.6f, 0.7f, 0.8f, 0.9f;
         MatrixXf v2(2, 3);
         v2 << 0.5f, 0.5f, 0.5f, 0.2f, 0.2f, 0.2f;
-        vertList.append(v1);
-        vertList.append(v2);
+        vertList.push_back(v1);
+        vertList.push_back(v2);
 
         Warp warp;
         warp.calculate(sLm, dLm, vertList);
-        QCOMPARE(vertList.size(), 2);
+        QCOMPARE(vertList.size(), std::size_t{2});
         QCOMPARE(vertList[0].rows(), 3);
         QCOMPARE(vertList[1].rows(), 2);
     }
@@ -136,7 +136,7 @@ private slots:
         tmpFile.close();
 
         Warp warp;
-        MatrixXf electrodes = warp.readsLm(tmpFile.fileName());
+        MatrixXf electrodes = warp.readsLm(tmpFile.fileName().toStdString());
         QCOMPARE(electrodes.rows(), 3);
         QCOMPARE(electrodes.cols(), 3);
         QVERIFY(std::abs(electrodes(0, 0) - (-0.0309f)) < 0.001f);
