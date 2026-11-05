@@ -8,6 +8,9 @@ project(mne_cpp_root LANGUAGES NONE)
 
 enable_testing()
 
+# The doc tools and their tests live outside src but include the same C++20 headers
+set(CMAKE_CXX_STANDARD 20)
+
 # Root entry point for IDEs; keep the real project definition in src
 # so existing paths that rely on PROJECT_SOURCE_DIR remain unchanged.
 add_subdirectory(src)
