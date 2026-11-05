@@ -500,7 +500,10 @@ const apiSidebar: SidebarsConfig['apiSidebar'] = [
         'api/utils/tapered-spectra-input-data',
         'api/utils/artifact-detect-proj-params',
         'api/utils/log',
-        'api/utils/log-capture'
+        'api/utils/log-capture',
+        'api/utils/byte-stream',
+        'api/utils/memory-byte-stream',
+        'api/utils/file-byte-stream'
       ],
     },
     {

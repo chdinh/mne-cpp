@@ -7,7 +7,7 @@ sidebar_position: 6
 
 # Namespace Members
 
-Index of 424 namespace-level symbols (functions, typedefs, enums, variables) across all public namespaces.
+Index of 428 namespace-level symbols (functions, typedefs, enums, variables) across all public namespaces.
 
 - **Accuracy** `[enum]` in [INVLIB](/docs/api/inv/)
 - **acqApplyThreadPolicy** `[fn]` in [ACQLIB](/docs/api/acq/) — Applies `policy` to the calling thread: CPUs first, then priority.
@@ -128,6 +128,8 @@ Index of 424 namespace-level symbols (functions, typedefs, enums, variables) acr
 - **BVBinaryFormat** `[enum]` in [BIDSLIB](/docs/api/bids/) — Binary format enumeration for BrainVision data files.
 - **BVOrientation** `[enum]` in [BIDSLIB](/docs/api/bids/) — Data orientation enumeration.
 - **bytesPerSample** `[fn]` in [ACQLIB](/docs/api/acq/)
+- **byteSwap** `[fn]` in [UTILSLIB](/docs/api/utils/)
+- **byteSwapInPlace** `[fn]` in [UTILSLIB](/docs/api/utils/) — Reverses the bytes of every element of `data`.
 - **ChannelFormat** `[enum]` in [LSLLIB](/docs/api/lsl/) — Data format of a channel (mirroring the values used in the original LSL protocol).
 - **CircularBuffer_char** `[type]` in [UTILSLIB](/docs/api/utils/) — Defines [`CircularBuffer`](/docs/api/utils/circular-buffer) of char type.
 - **CircularBuffer_double** `[type]` in [UTILSLIB](/docs/api/utils/) — Defines [`CircularBuffer`](/docs/api/utils/circular-buffer) of double type.
@@ -225,6 +227,7 @@ Index of 424 namespace-level symbols (functions, typedefs, enums, variables) acr
 - **fitMatchedPoints** `[fn]` in [MNELIB](/docs/api/mne/) — Corresponding point set registration using quaternions.
 - **fitUser** `[type]` in [FWDLIB](/docs/api/fwd/)
 - **fixStimArtifact** `[fn]` in [UTILSLIB](/docs/api/utils/) — Repair stimulus artifacts by interpolating or zeroing data around events.
+- **fromBigEndian** `[fn]` in [UTILSLIB](/docs/api/utils/)
 - **fromFiffInfo** `[fn]` in [ACQLIB](/docs/api/acq/) — Describes a FIFF measurement as a stream.
 - **fromTokens** `[fn]` in [INVLIB](/docs/api/inv/) — Reconstruct an [`InvSourceEstimate`](/docs/api/inv/inv-source-estimate) from a token sequence.
 - **FWD_BEM_CONSTANT_COLL** `[var]` in [FWDLIB](/docs/api/fwd/)
@@ -420,6 +423,7 @@ Index of 424 namespace-level symbols (functions, typedefs, enums, variables) acr
 - **swap_longp** `[fn]` in [FIFFLIB](/docs/api/fiff/) — Swap a 64-bit long in place.
 - **swap_short** `[fn]` in [FIFFLIB](/docs/api/fiff/) — Swap a 16-bit short.
 - **timeNowNow** `[fn]` in [UTILSLIB](/docs/api/utils/) — Returns build time (time preprocessor was run).
+- **toBigEndian** `[fn]` in [UTILSLIB](/docs/api/utils/)
 - **toDLPack** `[fn]` in [ACQLIB](/docs/api/acq/) — Exports one part of `view` as a read-only DLPack tensor of shape channels x samples, without a copy.
 - **toEventMatrix** `[fn]` in [RTPROCESSINGLIB](/docs/api/dsp/) — Transforms QMap with stored information about events per stim channel to a list of event matrices.
 - **toFiffInfo** `[fn]` in [ACQLIB](/docs/api/acq/) — Builds FIFF measurement info for a stream, e.g.

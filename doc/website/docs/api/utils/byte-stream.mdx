@@ -1,0 +1,195 @@
+---
+id: byte-stream
+title: "UTILSLIB::ByteStream"
+sidebar_label: ByteStream
+sidebar_position: 69
+---
+
+# ByteStream
+
+**Namespace:** `UTILSLIB` &nbsp;·&nbsp; **Library:** Utilities Library &nbsp;·&nbsp; **Source:** [`utils/byte_stream.h`](https://github.com/mne-tools/mne-cpp/blob/staging/src/libraries/utils/byte_stream.h)
+
+`#include <utils/byte_stream.h>`
+
+```cpp
+class UTILSLIB::ByteStream
+```
+
+A seekable sequence of bytes; positions are absolute byte offsets.
+
+```cpp title="src/examples/ex_utils/main.cpp"
+const std::vector<float> samples = {1.5f, -0.25f};
+{
+    auto out = FileByteStream::open(dir.filePath("data.bin").toStdString(), FileByteStream::Mode::Write);
+    out->writeBigEndian(std::int32_t(samples.size())); // FIFF byte order
+    out->writeBigEndian(samples.data(), samples.size());
+}
+auto in = FileByteStream::open(dir.filePath("data.bin").toStdString(), FileByteStream::Mode::Read);
+std::int32_t count = 0;
+in->readBigEndian(count);
+std::vector<float> back(static_cast<std::size_t>(count));
+in->readBigEndian(back.data(), back.size());
+```
+
+### Inheritance
+
+```mermaid
+classDiagram
+    ByteStream <|-- FileByteStream
+    click FileByteStream href "../../utils/file-byte-stream/"
+    ByteStream <|-- MemoryByteStream
+    click MemoryByteStream href "../../utils/memory-byte-stream/"
+```
+
+---
+
+## Public Methods
+
+### ~ByteStream()
+
+---
+
+### read(data, bytes)
+
+Reads up to `bytes` bytes at the current position and advances past them.
+
+**Parameters:**
+
+- **data** : *void **
+  Destination of at least `bytes` bytes.
+
+- **bytes** : *std::size_t*
+  Number of bytes wanted.
+
+**Returns:**
+
+- *std::size_t* — The number of bytes read; fewer than `bytes` at the end of the stream.
+
+---
+
+### write(data, bytes)
+
+Writes `bytes` bytes at the current position, overwriting or extending the stream.
+
+**Parameters:**
+
+- **data** : *const void **
+  Source of `bytes` bytes.
+
+- **bytes** : *std::size_t*
+  Number of bytes.
+
+**Returns:**
+
+- *std::size_t* — The number of bytes written; fewer than `bytes` if the stream cannot be written.
+
+---
+
+### seek(position)
+
+**Parameters:**
+
+- **position** : *std::uint64_t*
+  New position, at most `size()`.
+
+**Returns:**
+
+- *bool* — Whether the position changed; it stays put on failure.
+
+---
+
+### pos()
+
+**Returns:**
+
+- *std::uint64_t* — The current position.
+
+---
+
+### size()
+
+**Returns:**
+
+- *std::uint64_t* — The number of bytes in the stream.
+
+---
+
+### atEnd()
+
+**Returns:**
+
+- *bool* — Whether the position is at or past the end.
+
+---
+
+### readBigEndian(values, count)
+
+Reads `count` big-endian values and converts them to host byte order.
+
+**Parameters:**
+
+- **values** : *T **
+  Destination of `count` values.
+
+- **count** : *std::size_t*
+  Number of values.
+
+**Returns:**
+
+- *bool* — Whether all values were read.
+
+---
+
+### readBigEndian(value)
+
+**Parameters:**
+
+- **value** : *T &*
+  Receives one value converted from big-endian byte order.
+
+**Returns:**
+
+- *bool* — Whether the value was read.
+
+---
+
+### writeBigEndian(values, count)
+
+Writes `count` values in big-endian byte order.
+
+**Parameters:**
+
+- **values** : *const T **
+  Source of `count` values in host byte order.
+
+- **count** : *std::size_t*
+  Number of values.
+
+**Returns:**
+
+- *bool* — Whether all values were written.
+
+---
+
+### writeBigEndian(value)
+
+**Parameters:**
+
+- **value** : *T*
+  One value in host byte order, written in big-endian byte order.
+
+**Returns:**
+
+- *bool* — Whether the value was written.
+
+---
+
+## Example
+
+- Start here: [ex_utils](../../examples/utils/ex_utils.mdx) — Utilities library: buffers, observers, logging, file formats, montages, layouts and reports.
+- Full source: [`src/examples/ex_utils/main.cpp`](https://github.com/mne-tools/mne-cpp/tree/staging/src/examples/ex_utils/main.cpp)
+- Build target: `ex_utils` (runs under CTest)
+
+## Authors of this file
+
+- Christoph Dinh &lt;christoph.dinh@mne-cpp.org&gt;

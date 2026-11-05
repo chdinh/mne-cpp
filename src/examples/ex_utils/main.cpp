@@ -18,6 +18,7 @@
 // INCLUDES
 //=============================================================================================================
 
+#include <utils/byte_stream.h>
 #include <utils/generics/circularbuffer.h>
 #include <utils/generics/commandpattern.h>
 #include <utils/generics/log.h>
@@ -46,7 +47,9 @@
 //=============================================================================================================
 
 #include <cmath>
+#include <cstdint>
 #include <cstdlib>
+#include <vector>
 
 //=============================================================================================================
 // USED NAMESPACES
@@ -158,6 +161,28 @@ int main(int argc, char* argv[])
     const int flat = capture.count(Log::Level::Warning, "flat");
     //! [log_capture_usage]
     ok &= expect(flat == 1 && capture.entries().size() == 1, "LogCapture recorded the warning");
+
+    //! [byte_stream_usage]
+    const std::vector<float> samples = {1.5f, -0.25f};
+    {
+        auto out = FileByteStream::open(dir.filePath("data.bin").toStdString(), FileByteStream::Mode::Write);
+        out->writeBigEndian(std::int32_t(samples.size())); // FIFF byte order
+        out->writeBigEndian(samples.data(), samples.size());
+    }
+    auto in = FileByteStream::open(dir.filePath("data.bin").toStdString(), FileByteStream::Mode::Read);
+    std::int32_t count = 0;
+    in->readBigEndian(count);
+    std::vector<float> back(static_cast<std::size_t>(count));
+    in->readBigEndian(back.data(), back.size());
+    //! [byte_stream_usage]
+    ok &= expect(back == samples && in->atEnd(), "FileByteStream read back the big-endian samples");
+
+    //! [memory_byte_stream_usage]
+    MemoryByteStream memory;
+    memory.writeBigEndian(std::int16_t{0x0102});
+    const bool bigEndian = memory.data()[0] == std::byte{0x01}; // most significant byte first
+    //! [memory_byte_stream_usage]
+    ok &= expect(bigEndian && memory.size() == 2, "MemoryByteStream stores values most significant byte first");
 
     //! [circular_buffer_usage]
     CircularBuffer<double> buffer(4); // single producer, single consumer

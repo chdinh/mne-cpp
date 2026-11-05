@@ -3,25 +3,25 @@
   "generated_by": "scripts/quality/audit_api_evidence.py",
   "policy": "scripts/quality/api_evidence_policy.json",
   "summary": {
-    "exported_classes": 483,
+    "exported_classes": 486,
     "exported_free_functions": 148,
-    "registered_classes": 573,
+    "registered_classes": 576,
     "exported_not_registered": 1,
     "registered_function_modules": 13,
     "registered_header_only": 78,
     "registered_stale": 0,
-    "registered_with_test": 217,
+    "registered_with_test": 220,
     "registered_test_unresolved": 0,
-    "registered_with_example": 412,
+    "registered_with_example": 415,
     "registered_example_not_built": 0,
     "registered_with_python_equiv": 95,
     "registered_without_api_page": 0,
-    "with_snippet": 447,
-    "public_api_units": 574,
-    "example_eligible": 412,
+    "with_snippet": 450,
+    "public_api_units": 577,
+    "example_eligible": 415,
     "example_exempt": 162,
-    "eligible_backed_by_registry_example": 411,
-    "eligible_used_by_some_example": 361,
+    "eligible_backed_by_registry_example": 414,
+    "eligible_used_by_some_example": 364,
     "examples_on_disk": 75,
     "examples_built": 75
   },
@@ -207,13 +207,13 @@
       "with_snippet": 10
     },
     "utils": {
-      "public": 19,
-      "registered": 19,
-      "with_test": 4,
-      "eligible": 18,
-      "eligible_with_registry_example": 18,
-      "eligible_used_by_example": 18,
-      "with_snippet": 19
+      "public": 22,
+      "registered": 22,
+      "with_test": 7,
+      "eligible": 21,
+      "eligible_with_registry_example": 21,
+      "eligible_used_by_example": 21,
+      "with_snippet": 22
     }
   },
   "exported_free_functions": [
@@ -13866,6 +13866,81 @@
         "ex_sts_statistics/main.cpp#stats_ttest_usage"
       ],
       "api_page": "doc/website/docs/api/sts/stats-ttest-result.mdx",
+      "python_equiv": null,
+      "example_eligible": true,
+      "exempt_reason": null
+    },
+    {
+      "name": "ByteStream",
+      "header": "utils/byte_stream.h",
+      "library": "utils",
+      "kind": "exported-class",
+      "exported": true,
+      "registered": true,
+      "registry_status": "documented",
+      "test": "test_utils_byte_stream",
+      "test_resolves": true,
+      "example": "ex_utils",
+      "example_state": "built",
+      "including_examples": [
+        "ex_utils"
+      ],
+      "snippets": [
+        "ex_utils/main.cpp#byte_stream_usage",
+        "ex_utils/main.cpp#memory_byte_stream_usage",
+        "ex_utils/main.cpp#byte_stream_usage"
+      ],
+      "api_page": "doc/website/docs/api/utils/byte-stream.mdx",
+      "python_equiv": null,
+      "example_eligible": true,
+      "exempt_reason": null
+    },
+    {
+      "name": "FileByteStream",
+      "header": "utils/byte_stream.h",
+      "library": "utils",
+      "kind": "exported-class",
+      "exported": true,
+      "registered": true,
+      "registry_status": "documented",
+      "test": "test_utils_byte_stream",
+      "test_resolves": true,
+      "example": "ex_utils",
+      "example_state": "built",
+      "including_examples": [
+        "ex_utils"
+      ],
+      "snippets": [
+        "ex_utils/main.cpp#byte_stream_usage",
+        "ex_utils/main.cpp#memory_byte_stream_usage",
+        "ex_utils/main.cpp#byte_stream_usage"
+      ],
+      "api_page": "doc/website/docs/api/utils/file-byte-stream.mdx",
+      "python_equiv": null,
+      "example_eligible": true,
+      "exempt_reason": null
+    },
+    {
+      "name": "MemoryByteStream",
+      "header": "utils/byte_stream.h",
+      "library": "utils",
+      "kind": "exported-class",
+      "exported": true,
+      "registered": true,
+      "registry_status": "documented",
+      "test": "test_utils_byte_stream",
+      "test_resolves": true,
+      "example": "ex_utils",
+      "example_state": "built",
+      "including_examples": [
+        "ex_utils"
+      ],
+      "snippets": [
+        "ex_utils/main.cpp#byte_stream_usage",
+        "ex_utils/main.cpp#memory_byte_stream_usage",
+        "ex_utils/main.cpp#byte_stream_usage"
+      ],
+      "api_page": "doc/website/docs/api/utils/memory-byte-stream.mdx",
       "python_equiv": null,
       "example_eligible": true,
       "exempt_reason": null

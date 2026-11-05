@@ -18,6 +18,7 @@ find_package(QT NAMES Qt6 Qt5 REQUIRED COMPONENTS ${QT_REQUIRED_COMPONENTS})
 find_package(Qt${QT_VERSION_MAJOR} REQUIRED COMPONENTS ${QT_REQUIRED_COMPONENTS})
 
 set(SOURCES
+  byte_stream.cpp
   ioutils.cpp
   layoutloader.cpp
   layoutmaker.cpp
@@ -33,6 +34,8 @@ set(SOURCES
 set(HEADERS
   buildinfo.h
   utils_global.h
+  byte_stream.h
+  endian.h
   ioutils.h
   layoutloader.h
   layoutmaker.h

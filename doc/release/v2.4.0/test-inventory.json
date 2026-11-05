@@ -6,9 +6,9 @@
     "commit": "0800c9a1bf606c2df8c44e35fbb42ea13029b549"
   },
   "summary": {
-    "directories": 277,
+    "directories": 278,
     "registration": {
-      "unconditional": 268,
+      "unconditional": 269,
       "conditional": 6,
       "unregistered": 3
     },
@@ -43,7 +43,8 @@
           "test_acq_thread",
           "test_acq_timebase",
           "test_mne_acq_tool",
-          "test_rt_server_fiff_replay"
+          "test_rt_server_fiff_replay",
+          "test_utils_byte_stream"
         ],
         "executed_not_in_inventory": [
           "ex_bids",
@@ -97,7 +98,8 @@
           "test_acq_thread",
           "test_acq_timebase",
           "test_mne_acq_tool",
-          "test_rt_server_fiff_replay"
+          "test_rt_server_fiff_replay",
+          "test_utils_byte_stream"
         ],
         "executed_not_in_inventory": [
           "ex_bids",
@@ -151,7 +153,8 @@
           "test_acq_thread",
           "test_acq_timebase",
           "test_mne_acq_tool",
-          "test_rt_server_fiff_replay"
+          "test_rt_server_fiff_replay",
+          "test_utils_byte_stream"
         ],
         "executed_not_in_inventory": [
           "ex_bids",
@@ -205,7 +208,8 @@
           "test_acq_thread",
           "test_acq_timebase",
           "test_mne_acq_tool",
-          "test_rt_server_fiff_replay"
+          "test_rt_server_fiff_replay",
+          "test_utils_byte_stream"
         ],
         "executed_not_in_inventory": [
           "ex_bids",
@@ -259,7 +263,8 @@
           "test_acq_thread",
           "test_acq_timebase",
           "test_mne_acq_tool",
-          "test_rt_server_fiff_replay"
+          "test_rt_server_fiff_replay",
+          "test_utils_byte_stream"
         ],
         "executed_not_in_inventory": [
           "ex_bids",
@@ -313,7 +318,8 @@
           "test_acq_thread",
           "test_acq_timebase",
           "test_mne_acq_tool",
-          "test_rt_server_fiff_replay"
+          "test_rt_server_fiff_replay",
+          "test_utils_byte_stream"
         ],
         "executed_not_in_inventory": [
           "ex_bids",
@@ -9618,6 +9624,42 @@
       },
       "registry_classes": [
         "InvTrapMusic"
+      ]
+    },
+    {
+      "name": "test_utils_byte_stream",
+      "cmake": "src/testframes/test_utils_byte_stream/CMakeLists.txt",
+      "registration": {
+        "state": "unconditional",
+        "via": "src/testframes/CMakeLists.txt",
+        "conditions": [],
+        "early_return_guard": null,
+        "unregistered_reason": null
+      },
+      "add_test_names": [
+        "test_utils_byte_stream"
+      ],
+      "labels": [
+        "unit"
+      ],
+      "timeout": 60,
+      "requirements": [],
+      "gui": false,
+      "qskip_sites": 0,
+      "spawns_processes": false,
+      "ci_excluded_on": [],
+      "ci": {
+        "macos-26": "absent",
+        "macos-26-qt-min": "absent",
+        "ubuntu-24.04": "absent",
+        "ubuntu-24.04-qt-min": "absent",
+        "windows-2025-vs2026": "absent",
+        "windows-2025-vs2026-qt-min": "absent"
+      },
+      "registry_classes": [
+        "ByteStream",
+        "FileByteStream",
+        "MemoryByteStream"
       ]
     },
     {

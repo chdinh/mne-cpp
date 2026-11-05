@@ -256,7 +256,7 @@ Get the Python interpreter path inside the configured venv.
 
 Utilities library: buffers, observers, logging, file formats, montages, layouts and reports.
 
-````cpp title="src/examples/ex_utils/main.cpp, line 270"
+````cpp title="src/examples/ex_utils/main.cpp, line 295"
 PythonRunner python; // "python3" from PATH; a venv is configured via PythonRunnerConfig
 QStringList progress;
 python.setProgressCallback([&](float pct, const QString& msg) { progress << QString("%1 %2").arg(pct).arg(msg); });

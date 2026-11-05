@@ -8316,6 +8316,72 @@
       "python_url": null
     },
     {
+      "name": "ByteStream",
+      "module": "utils",
+      "header": "utils/byte_stream.h",
+      "origin": "mne-c + custom",
+      "mne_c_tool": null,
+      "mne_python": null,
+      "sklearn": null,
+      "test": "test_utils_byte_stream",
+      "example": "ex_utils",
+      "example_snippet": [
+        "ex_utils/main.cpp#byte_stream_usage"
+      ],
+      "example_mode": "run",
+      "status": "documented",
+      "skigen_candidate": false,
+      "documented": true,
+      "sidebar_position": 69,
+      "guide": null,
+      "python_equiv": null,
+      "python_url": null
+    },
+    {
+      "name": "MemoryByteStream",
+      "module": "utils",
+      "header": "utils/byte_stream.h",
+      "origin": "mne-c + custom",
+      "mne_c_tool": null,
+      "mne_python": null,
+      "sklearn": null,
+      "test": "test_utils_byte_stream",
+      "example": "ex_utils",
+      "example_snippet": [
+        "ex_utils/main.cpp#memory_byte_stream_usage"
+      ],
+      "example_mode": "run",
+      "status": "documented",
+      "skigen_candidate": false,
+      "documented": true,
+      "sidebar_position": 70,
+      "guide": null,
+      "python_equiv": null,
+      "python_url": null
+    },
+    {
+      "name": "FileByteStream",
+      "module": "utils",
+      "header": "utils/byte_stream.h",
+      "origin": "mne-c + custom",
+      "mne_c_tool": null,
+      "mne_python": null,
+      "sklearn": null,
+      "test": "test_utils_byte_stream",
+      "example": "ex_utils",
+      "example_snippet": [
+        "ex_utils/main.cpp#byte_stream_usage"
+      ],
+      "example_mode": "run",
+      "status": "documented",
+      "skigen_candidate": false,
+      "documented": true,
+      "sidebar_position": 71,
+      "guide": null,
+      "python_equiv": null,
+      "python_url": null
+    },
+    {
       "name": "Numerics",
       "module": "utils",
       "header": "math/numerics.h",

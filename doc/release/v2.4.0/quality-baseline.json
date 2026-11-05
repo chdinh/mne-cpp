@@ -11,7 +11,7 @@
   },
   "gates": {
     "G1_test_integrity": {
-      "registered": 274,
+      "registered": 275,
       "conditional": 6,
       "unregistered": 3,
       "without_labels": 0,
@@ -45,7 +45,8 @@
           "test_acq_thread",
           "test_acq_timebase",
           "test_mne_acq_tool",
-          "test_rt_server_fiff_replay"
+          "test_rt_server_fiff_replay",
+          "test_utils_byte_stream"
         ],
         "macos-26-qt-min": [
           "test_acq_convert",
@@ -59,7 +60,8 @@
           "test_acq_thread",
           "test_acq_timebase",
           "test_mne_acq_tool",
-          "test_rt_server_fiff_replay"
+          "test_rt_server_fiff_replay",
+          "test_utils_byte_stream"
         ],
         "ubuntu-24.04": [
           "test_acq_convert",
@@ -73,7 +75,8 @@
           "test_acq_thread",
           "test_acq_timebase",
           "test_mne_acq_tool",
-          "test_rt_server_fiff_replay"
+          "test_rt_server_fiff_replay",
+          "test_utils_byte_stream"
         ],
         "ubuntu-24.04-qt-min": [
           "test_acq_convert",
@@ -87,7 +90,8 @@
           "test_acq_thread",
           "test_acq_timebase",
           "test_mne_acq_tool",
-          "test_rt_server_fiff_replay"
+          "test_rt_server_fiff_replay",
+          "test_utils_byte_stream"
         ],
         "windows-2025-vs2026": [
           "test_acq_convert",
@@ -101,7 +105,8 @@
           "test_acq_thread",
           "test_acq_timebase",
           "test_mne_acq_tool",
-          "test_rt_server_fiff_replay"
+          "test_rt_server_fiff_replay",
+          "test_utils_byte_stream"
         ],
         "windows-2025-vs2026-qt-min": [
           "test_acq_convert",
@@ -115,7 +120,8 @@
           "test_acq_thread",
           "test_acq_timebase",
           "test_mne_acq_tool",
-          "test_rt_server_fiff_replay"
+          "test_rt_server_fiff_replay",
+          "test_utils_byte_stream"
         ]
       },
       "ci_failures": 0,
@@ -139,12 +145,12 @@
       }
     },
     "G3_api_documentation": {
-      "public_api_units": 574,
+      "public_api_units": 577,
       "exported_not_registered": 1,
-      "example_eligible": 412,
+      "example_eligible": 415,
       "eligible_backed_percent": 99.76,
-      "snippets": 447,
-      "registered_test_percent": 37.87
+      "snippets": 450,
+      "registered_test_percent": 38.19
     },
     "G4_screenshots": {
       "referenced_images": 19,

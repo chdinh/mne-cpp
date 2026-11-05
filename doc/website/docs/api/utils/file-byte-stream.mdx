@@ -1,0 +1,176 @@
+---
+id: file-byte-stream
+title: "UTILSLIB::FileByteStream"
+sidebar_label: FileByteStream
+sidebar_position: 71
+---
+
+# FileByteStream
+
+**Namespace:** `UTILSLIB` &nbsp;·&nbsp; **Library:** Utilities Library &nbsp;·&nbsp; **Source:** [`utils/byte_stream.h`](https://github.com/mne-tools/mne-cpp/blob/staging/src/libraries/utils/byte_stream.h)
+
+`#include <utils/byte_stream.h>`
+
+```cpp
+class UTILSLIB::FileByteStream
+```
+
+A buffered byte stream over a file, with 64-bit positions.
+
+```cpp title="src/examples/ex_utils/main.cpp"
+const std::vector<float> samples = {1.5f, -0.25f};
+{
+    auto out = FileByteStream::open(dir.filePath("data.bin").toStdString(), FileByteStream::Mode::Write);
+    out->writeBigEndian(std::int32_t(samples.size())); // FIFF byte order
+    out->writeBigEndian(samples.data(), samples.size());
+}
+auto in = FileByteStream::open(dir.filePath("data.bin").toStdString(), FileByteStream::Mode::Read);
+std::int32_t count = 0;
+in->readBigEndian(count);
+std::vector<float> back(static_cast<std::size_t>(count));
+in->readBigEndian(back.data(), back.size());
+```
+
+### Inheritance
+
+```mermaid
+classDiagram
+    ByteStream <|-- FileByteStream
+    click ByteStream href "../../utils/byte-stream/"
+```
+
+---
+
+## Public Methods
+
+### ~FileByteStream()
+
+---
+
+### FileByteStream()
+
+---
+
+### operator=()
+
+---
+
+### read(data, bytes)
+
+Reads up to `bytes` bytes at the current position and advances past them.
+
+**Parameters:**
+
+- **data** : *void **
+  Destination of at least `bytes` bytes.
+
+- **bytes** : *std::size_t*
+  Number of bytes wanted.
+
+**Returns:**
+
+- *std::size_t* — The number of bytes read; fewer than `bytes` at the end of the stream.
+
+---
+
+### write(data, bytes)
+
+Writes `bytes` bytes at the current position, overwriting or extending the stream.
+
+**Parameters:**
+
+- **data** : *const void **
+  Source of `bytes` bytes.
+
+- **bytes** : *std::size_t*
+  Number of bytes.
+
+**Returns:**
+
+- *std::size_t* — The number of bytes written; fewer than `bytes` if the stream cannot be written.
+
+---
+
+### seek(position)
+
+**Parameters:**
+
+- **position** : *std::uint64_t*
+  New position, at most `size()`.
+
+**Returns:**
+
+- *bool* — Whether the position changed; it stays put on failure.
+
+---
+
+### pos()
+
+**Returns:**
+
+- *std::uint64_t* — The current position.
+
+---
+
+### size()
+
+**Returns:**
+
+- *std::uint64_t* — The number of bytes in the stream.
+
+---
+
+### flush()
+
+**Returns:**
+
+- *bool* — Whether everything written has reached the operating system.
+
+---
+
+## Static Methods
+
+### open(path, mode)
+
+**Parameters:**
+
+- **path** : *const std::filesystem::path &*
+  The file.
+
+- **mode** : *Mode*
+  How to open it.
+
+**Returns:**
+
+- *std::unique_ptr&lt; FileByteStream &gt;* — The stream, positioned at 0, or nullptr if the file cannot be opened.
+
+---
+
+## Example
+
+- Start here: [ex_utils](../../examples/utils/ex_utils.mdx) — Utilities library: buffers, observers, logging, file formats, montages, layouts and reports.
+- Full source: [`src/examples/ex_utils/main.cpp`](https://github.com/mne-tools/mne-cpp/tree/staging/src/examples/ex_utils/main.cpp)
+- Build target: `ex_utils` (runs under CTest)
+
+## Used in examples
+
+### [ex_utils](../../examples/utils/ex_utils.mdx)
+
+Utilities library: buffers, observers, logging, file formats, montages, layouts and reports.
+
+````cpp title="src/examples/ex_utils/main.cpp, line 168"
+    auto out = FileByteStream::open(dir.filePath("data.bin").toStdString(), FileByteStream::Mode::Write);
+    out->writeBigEndian(std::int32_t(samples.size())); // FIFF byte order
+    out->writeBigEndian(samples.data(), samples.size());
+}
+auto in = FileByteStream::open(dir.filePath("data.bin").toStdString(), FileByteStream::Mode::Read);
+std::int32_t count = 0;
+in->readBigEndian(count);
+std::vector<float> back(static_cast<std::size_t>(count));
+in->readBigEndian(back.data(), back.size());
+ok &= expect(back == samples && in->atEnd(), "FileByteStream read back the big-endian samples");
+````
+
+## Authors of this file
+
+- Christoph Dinh &lt;christoph.dinh@mne-cpp.org&gt;
