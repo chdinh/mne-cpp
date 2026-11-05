@@ -502,7 +502,7 @@
       },
       "public_header_includes": 41,
       "q_object": 1,
-      "files": 30,
+      "files": 32,
       "modules": [
         "Core"
       ]

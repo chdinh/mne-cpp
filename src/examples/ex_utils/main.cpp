@@ -32,6 +32,7 @@
 #include <utils/python_test_helper.h>
 #include <utils/report.h>
 #include <utils/selectionio.h>
+#include <utils/thread_pool.h>
 
 //=============================================================================================================
 // QT INCLUDES
@@ -183,6 +184,13 @@ int main(int argc, char* argv[])
     const bool bigEndian = memory.data()[0] == std::byte{0x01}; // most significant byte first
     //! [memory_byte_stream_usage]
     ok &= expect(bigEndian && memory.size() == 2, "MemoryByteStream stores values most significant byte first");
+
+    //! [thread_pool_usage]
+    const std::vector<int> channels = {0, 1, 2, 3};
+    const std::vector<double> power = ThreadPool::global().parallelMap(channels, [](int ch) { return 0.5 * ch; }); // in order
+    auto background = ThreadPool::global().submit([] { return 42; });
+    //! [thread_pool_usage]
+    ok &= expect(power == std::vector<double>({0.0, 0.5, 1.0, 1.5}) && background.get() == 42, "ThreadPool mapped the channels in order");
 
     //! [circular_buffer_usage]
     CircularBuffer<double> buffer(4); // single producer, single consumer

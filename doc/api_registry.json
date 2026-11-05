@@ -8382,6 +8382,28 @@
       "python_url": null
     },
     {
+      "name": "ThreadPool",
+      "module": "utils",
+      "header": "utils/thread_pool.h",
+      "origin": "mne-c + custom",
+      "mne_c_tool": null,
+      "mne_python": null,
+      "sklearn": null,
+      "test": "test_utils_thread_pool",
+      "example": "ex_utils",
+      "example_snippet": [
+        "ex_utils/main.cpp#thread_pool_usage"
+      ],
+      "example_mode": "run",
+      "status": "documented",
+      "skigen_candidate": false,
+      "documented": true,
+      "sidebar_position": 72,
+      "guide": null,
+      "python_equiv": null,
+      "python_url": null
+    },
+    {
       "name": "Numerics",
       "module": "utils",
       "header": "math/numerics.h",

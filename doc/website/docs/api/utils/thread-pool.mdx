@@ -1,0 +1,144 @@
+---
+id: thread-pool
+title: "UTILSLIB::ThreadPool"
+sidebar_label: ThreadPool
+sidebar_position: 72
+---
+
+# ThreadPool
+
+**Namespace:** `UTILSLIB` &nbsp;·&nbsp; **Library:** Utilities Library &nbsp;·&nbsp; **Source:** [`utils/thread_pool.h`](https://github.com/mne-tools/mne-cpp/blob/staging/src/libraries/utils/thread_pool.h)
+
+`#include <utils/thread_pool.h>`
+
+```cpp
+class UTILSLIB::ThreadPool
+```
+
+Runs tasks on a fixed set of worker threads.
+
+`parallelFor()` and `parallelMap()` block until done, and the calling thread works through the range too, so they may be nested or called from a task of the same pool without deadlocking.
+
+```cpp title="src/examples/ex_utils/main.cpp"
+const std::vector<int> channels = {0, 1, 2, 3};
+const std::vector<double> power = ThreadPool::global().parallelMap(channels, [](int ch) { return 0.5 * ch; }); // in order
+auto background = ThreadPool::global().submit([] { return 42; });
+```
+
+---
+
+## Public Methods
+
+### ThreadPool(threads)
+
+Starts the workers.
+
+**Parameters:**
+
+- **threads** : *std::size_t*
+  Number of workers; 0 for one per hardware thread.
+
+---
+
+### ~ThreadPool()
+
+Runs the tasks still queued, then joins the workers.
+
+---
+
+### ThreadPool()
+
+---
+
+### operator=()
+
+---
+
+### threadCount()
+
+**Returns:**
+
+- *std::size_t* — The number of workers.
+
+---
+
+### submit(task)
+
+Queues `task`.
+
+**Parameters:**
+
+- **task** : *F*
+  Callable without arguments.
+
+**Returns:**
+
+- *std::future&lt; std::invoke_result_t&lt; F &gt; &gt;* — Its result, or the exception it threw.
+
+---
+
+### parallelFor(begin, end, body)
+
+Calls `body(i)` for every i in [`begin`, `end`) and returns when all calls have finished.
+
+**Parameters:**
+
+- **begin** : *std::size_t*
+  First index.
+
+- **end** : *std::size_t*
+  One past the last index; an empty range does nothing.
+
+- **body** : *const std::function&lt; void(std::size_t)&gt; &*
+  Called once per index, from any thread.
+
+---
+
+### parallelMap(input, f)
+
+**Parameters:**
+
+- **input** : *const std::vector&lt; T &gt; &*
+  The values.
+
+- **f** : *F*
+  Called once per value, from any thread.
+
+**Returns:**
+
+- *std::vector&lt; std::invoke_result_t&lt; F, const T & &gt; &gt;* — f applied to every value of `input`, in the order of `input`.
+
+---
+
+## Static Methods
+
+### global()
+
+**Returns:**
+
+- *[ThreadPool](/docs/api/utils/thread-pool) &* — The pool shared by the libraries, with one worker per hardware thread.
+
+---
+
+## Example
+
+- Start here: [ex_utils](../../examples/utils/ex_utils.mdx) — Utilities library: buffers, observers, logging, file formats, montages, layouts and reports.
+- Full source: [`src/examples/ex_utils/main.cpp`](https://github.com/mne-tools/mne-cpp/tree/staging/src/examples/ex_utils/main.cpp)
+- Build target: `ex_utils` (runs under CTest)
+
+## Used in examples
+
+### [ex_utils](../../examples/utils/ex_utils.mdx)
+
+Utilities library: buffers, observers, logging, file formats, montages, layouts and reports.
+
+````cpp title="src/examples/ex_utils/main.cpp, line 189"
+const std::vector<int> channels = {0, 1, 2, 3};
+const std::vector<double> power = ThreadPool::global().parallelMap(channels, [](int ch) { return 0.5 * ch; }); // in order
+auto background = ThreadPool::global().submit([] { return 42; });
+ok &= expect(power == std::vector<double>({0.0, 0.5, 1.0, 1.5}) && background.get() == 42, "ThreadPool mapped the channels in order");
+````
+
+## Authors of this file
+
+- Christoph Dinh &lt;christoph.dinh@mne-cpp.org&gt;
