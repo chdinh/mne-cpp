@@ -162,9 +162,7 @@ private:
         }
         QUdpSocket discovery;
         if (discovery.bind(QHostAddress::AnyIPv4, kDiscoveryPort, QAbstractSocket::ShareAddress | QAbstractSocket::ReuseAddressHint)) {
-#ifndef Q_OS_WASM
             joinDiscoveryGroups(discovery);
-#endif
         }
         m_info.set_data_port(server.serverPort());
         m_info.set_service_port(service.localPort());
@@ -226,7 +224,7 @@ private:
     {
         while (socket.hasPendingDatagrams()) {
             const QNetworkDatagram datagram = socket.receiveDatagram();
-            const QList<QByteArray> lines = datagram.data().split('\n');
+            const auto lines = datagram.data().split('\n');
             if (lines.size() < 2) {
                 continue;
             }
@@ -239,7 +237,7 @@ private:
                 }
             } else if (timedata && kind == "LSL:timedata") {
                 const double received = local_clock();
-                const QList<QByteArray> request = lines[1].trimmed().split(' ');
+                const auto request = lines[1].trimmed().split(' ');
                 if (request.size() == 2) {
                     const QByteArray reply = " " + request[0] + " " + request[1] + " " +
                         QByteArray::fromStdString(number(received)) + " " +

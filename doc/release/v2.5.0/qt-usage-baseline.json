@@ -28,7 +28,7 @@
     "qt_free": [
       "acq"
     ],
-    "tokens": 21201,
+    "tokens": 21199,
     "gui_outside_design": []
   },
   "libraries": {
@@ -350,14 +350,14 @@
       ]
     },
     "lsl": {
-      "tokens": 172,
+      "tokens": 170,
       "by_category": {
-        "containers": 8,
-        "global": 30,
+        "containers": 6,
+        "global": 32,
         "logging": 1,
         "network": 53,
         "other": 4,
-        "strings": 73,
+        "strings": 71,
         "time": 3
       },
       "public_header_includes": 4,

@@ -161,7 +161,7 @@
       ]
     },
     "lsl": {
-      "tokens": 172,
+      "tokens": 170,
       "public_header_includes": 4,
       "modules": [
         "Core",

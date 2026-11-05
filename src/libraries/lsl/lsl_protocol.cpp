@@ -100,6 +100,7 @@ bool field(const stream_info& info, const std::string& key, std::string& value)
     return true;
 }
 
+#ifndef QT_NO_NETWORKINTERFACE
 QNetworkInterface loopbackInterface()
 {
     for (const auto& iface : QNetworkInterface::allInterfaces()) {
@@ -109,6 +110,7 @@ QNetworkInterface loopbackInterface()
     }
     return {};
 }
+#endif
 
 } // namespace
 
@@ -131,8 +133,9 @@ std::vector<QHostAddress> LSLLIB::detail::discoveryGroups()
 
 //=============================================================================================================
 
-void LSLLIB::detail::joinDiscoveryGroups(QUdpSocket& socket)
+void LSLLIB::detail::joinDiscoveryGroups([[maybe_unused]] QUdpSocket& socket)
 {
+#ifndef QT_NO_NETWORKINTERFACE // WebAssembly has no multicast
     const auto loopback = loopbackInterface();
     for (const auto& group : discoveryGroups()) {
         socket.joinMulticastGroup(group);
@@ -140,6 +143,7 @@ void LSLLIB::detail::joinDiscoveryGroups(QUdpSocket& socket)
             socket.joinMulticastGroup(group, loopback);
         }
     }
+#endif
 }
 
 //=============================================================================================================
@@ -149,11 +153,13 @@ void LSLLIB::detail::sendQuery(QUdpSocket& socket, const QByteArray& query)
     for (const auto& target : discoveryTargets()) {
         socket.writeDatagram(query, target, kDiscoveryPort);
     }
+#ifndef QT_NO_NETWORKINTERFACE
     if (const auto loopback = loopbackInterface(); loopback.isValid()) {
         socket.setMulticastInterface(loopback);
         socket.writeDatagram(query, discoveryGroups().front(), kDiscoveryPort);
         socket.setMulticastInterface({});
     }
+#endif
 }
 
 //=============================================================================================================
