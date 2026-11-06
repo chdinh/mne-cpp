@@ -7,7 +7,7 @@ sidebar_position: 5
 
 # Class Members
 
-Index of 6798 public class members (functions, variables, typedefs, enums) across all documented classes.
+Index of 6800 public class members (functions, variables, typedefs, enums) across all documented classes.
 
 **Jump to:** [A](#a) · [B](#b) · [C](#c) · [D](#d) · [E](#e) · [F](#f) · [G](#g) · [H](#h) · [I](#i) · [J](#j) · [K](#k) · [L](#l) · [M](#m) · [N](#n) · [O](#o) · [P](#p) · [Q](#q) · [R](#r) · [S](#s) · [T](#t) · [U](#u) · [V](#v) · [W](#w) · [X](#x) · [Y](#y) · [Z](#z)
 
@@ -1804,7 +1804,7 @@ Index of 6798 public class members (functions, variables, typedefs, enums) acros
 - **FiffDigPointSet** `[fn]` in [FiffDigPointSet](/docs/api/fiff/fiff-dig-point-set) — Constructs a [`FiffDigPointSet`](/docs/api/fiff/fiff-dig-point-set) object.
 - **FiffDigPointSet** `[fn]` in [FiffDigPointSet](/docs/api/fiff/fiff-dig-point-set) — Copy constructor.
 - **FiffDigPointSet** `[fn]` in [FiffDigPointSet](/docs/api/fiff/fiff-dig-point-set) — Construct [`FiffDigPointSet`](/docs/api/fiff/fiff-dig-point-set) based on input pointList.
-- **FiffDigPointSet** `[fn]` in [FiffDigPointSet](/docs/api/fiff/fiff-dig-point-set) — Constructs a [`FiffDigPointSet`](/docs/api/fiff/fiff-dig-point-set) by reading from a IO device.
+- **FiffDigPointSet** `[fn]` in [FiffDigPointSet](/docs/api/fiff/fiff-dig-point-set) — Constructs a [`FiffDigPointSet`](/docs/api/fiff/fiff-dig-point-set) by reading a FIFF file.
 - **FiffDirEntry** `[fn]` in [FiffDirEntry](/docs/api/fiff/fiff-dir-entry) — Constructs the dir entry.
 - **FiffDirEntry** `[fn]` in [FiffDirEntry](/docs/api/fiff/fiff-dir-entry) — Copy constructor.
 - **FiffDirNode** `[fn]` in [FiffDirNode](/docs/api/fiff/fiff-dir-node) — Constructors the directory tree structure.
@@ -2949,6 +2949,9 @@ Index of 6798 public class members (functions, variables, typedefs, enums) acros
 - **isMatrix** `[fn]` in [FiffTag](/docs/api/fiff/fiff-tag) — Provides information if tag contains a matrix.
 - **isMeasurement** `[var]` in [EDFChannelInfo](/docs/api/bids/edf-channel-info)
 - **isObjectVisible** `[fn]` in [ViewVisibilityProfile](/docs/api/disp3-d/view-visibility-profile) — Query visibility of a named object.
+- **isOpen** `[fn]` in [ByteStream](/docs/api/utils/byte-stream)
+- **isOpen** `[fn]` in [FiffStream](/docs/api/fiff/fiff-stream)
+- **isOpen** `[fn]` in [FileByteStream](/docs/api/utils/file-byte-stream)
 - **isPackageAvailable** `[fn]` in [PythonRunner](/docs/api/utils/python-runner) — Check whether a Python package is importable.
 - **isPlaying** `[var]` in [SubView](/docs/api/disp3-d/sub-view)
 - **isPythonAvailable** `[fn]` in [PythonRunner](/docs/api/utils/python-runner) — Check that the configured Python interpreter is reachable.
@@ -6718,8 +6721,7 @@ Index of 6798 public class members (functions, variables, typedefs, enums) acros
 - **write** `[fn]` in [FiffAnnotations](/docs/api/fiff/fiff-annotations) — Auto-detects format and writes annotations.
 - **write** `[fn]` in [FiffCoordTrans](/docs/api/fiff/fiff-coord-trans) — Writes the transformation to file.
 - **write** `[fn]` in [FiffCoordTransSet](/docs/api/fiff/fiff-coord-trans-set) — Writes every non-empty transform, head -&gt; MRI first.
-- **write** `[fn]` in [FiffDigPointSet](/docs/api/fiff/fiff-dig-point-set) — Writes the [`FiffDigPointSet`](/docs/api/fiff/fiff-dig-point-set) to a FIFF file.
-- **write** `[fn]` in [FiffDigPointSet](/docs/api/fiff/fiff-dig-point-set) — Convenience overload: write the digitizer point set to a path on disk.
+- **write** `[fn]` in [FiffDigPointSet](/docs/api/fiff/fiff-dig-point-set) — Writes the digitizer point set to a FIFF file, replacing any existing file.
 - **write** `[fn]` in [FiffIO](/docs/api/fiff/fiff-io) — Write data to a single pIODevice.
 - **write** `[fn]` in [FiffIO](/docs/api/fiff/fiff-io) — Write whole data of a type to a fiff file.
 - **write** `[fn]` in [FileByteStream](/docs/api/utils/file-byte-stream) — Writes `bytes` bytes at the current position, overwriting or extending the stream.

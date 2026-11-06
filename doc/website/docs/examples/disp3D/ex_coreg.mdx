@@ -157,7 +157,6 @@ int main(int argc, char* argv[])
     parser.process(a);
 
     // get cli parameters
-    QFile t_fileDig(parser.value(digOption));
     QFile t_fileBem(parser.value(bemOption));
     QFile t_fileTrans(parser.value(transOption));
 
@@ -183,10 +182,10 @@ int main(int argc, char* argv[])
     // read digitizer data
     QList<int> lPickFiducials({FIFFV_POINT_CARDINAL});
     QList<int> lPickHSP({FIFFV_POINT_CARDINAL, FIFFV_POINT_HPI, FIFFV_POINT_EXTRA, FIFFV_POINT_EEG});
-    FiffDigPointSet digSetSrc = FiffDigPointSet(t_fileDig).pickTypes(lPickFiducials); // Fiducials Head-Space
-    FiffDigPointSet digSetDst = FiffDigPointSet(t_fileDig).pickTypes(lPickFiducials);
+    FiffDigPointSet digSetSrc = FiffDigPointSet(parser.value(digOption).toStdString()).pickTypes(lPickFiducials); // Fiducials Head-Space
+    FiffDigPointSet digSetDst = FiffDigPointSet(parser.value(digOption).toStdString()).pickTypes(lPickFiducials);
     digSetDst.applyTransform(transHeadMriRef, false);
-    FiffDigPointSet digSetHsp = FiffDigPointSet(t_fileDig).pickTypes(lPickHSP); // Head shape points Head-Space
+    FiffDigPointSet digSetHsp = FiffDigPointSet(parser.value(digOption).toStdString()).pickTypes(lPickHSP); // Head shape points Head-Space
 
     // Initial Fiducial Alignment
     // Declare variables

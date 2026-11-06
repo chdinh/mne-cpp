@@ -73,14 +73,14 @@ Construct [`FiffDigPointSet`](/docs/api/fiff/fiff-dig-point-set) based on input 
 
 ---
 
-### FiffDigPointSet(p_IODevice)
+### FiffDigPointSet(path)
 
-Constructs a [`FiffDigPointSet`](/docs/api/fiff/fiff-dig-point-set) by reading from a IO device.
+Constructs a [`FiffDigPointSet`](/docs/api/fiff/fiff-dig-point-set) by reading a FIFF file.
 
 **Parameters:**
 
-- **p_IODevice** : *QIODevice &*
-  IO device to read the digitizer point set from.
+- **path** : *const std::filesystem::path &*
+  FIFF file to read the digitizer point set from.
 
 ---
 
@@ -116,33 +116,16 @@ Returns the number of stored FiffDigPoints.
 
 ---
 
-### write(p_IODevice)
+### write(path, errorMessage)
 
-Writes the [`FiffDigPointSet`](/docs/api/fiff/fiff-dig-point-set) to a FIFF file.
-
-**Parameters:**
-
-- **p_IODevice** : *QIODevice &*
-  IO device to write the digitizer point set to.
-
-**Returns:**
-
-- *bool* — false if the device cannot be opened for writing.
-
----
-
-### write(filePath, errorMessage)
-
-Convenience overload: write the digitizer point set to a path on disk.
-
-Verifies that the destination directory exists and that the file was actually produced. The file is opened in WriteOnly|Truncate mode.
+Writes the digitizer point set to a FIFF file, replacing any existing file.
 
 **Parameters:**
 
-- **filePath** : *const QString &*
+- **path** : *const std::filesystem::path &*
   Destination .fif file path.
 
-- **errorMessage** : *QString **
+- **errorMessage** : *std::string **
   Optional, populated on failure.
 
 **Returns:**
@@ -465,8 +448,7 @@ Compute a clustered MNE, dSPM or sLORETA estimate of the sample evoked response 
 
 ````cpp title="src/examples/ex_disp_3D/main.cpp, line 263"
 // Read and show digitizer points
-QFile t_fileDig(QCoreApplication::applicationDirPath() + "/../resources/data/MNE-sample-data/MEG/sample/sample_audvis-ave.fif");
-FiffDigPointSet t_Dig(t_fileDig);
+FiffDigPointSet t_Dig((QCoreApplication::applicationDirPath() + "/../resources/data/MNE-sample-data/MEG/sample/sample_audvis-ave.fif").toStdString());
 ````
 
 ### [ex_hpiFit](../../examples/inv/ex_hpiFit.mdx)
