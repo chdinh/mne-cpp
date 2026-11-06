@@ -35,7 +35,7 @@ Pick elements from this named vector by name matching, writing them into a resul
 
 **Parameters:**
 
-- **names** : *const QStringList &*
+- **names** : *const StringList &*
   List of names to pick.
 
 - **nnames** : *int*
@@ -77,7 +77,7 @@ sel.nchan = sel.ndef = static_cast<int>(sel.chspick.size());
 sel.pick_deriv = VectorXi::Constant(sel.nchan, -1);
 sel.pick.resize(sel.nchan);
 for (int c = 0; c < sel.nchan; ++c) {
-    sel.pick[c] = static_cast<int>(mneRaw->ch_names.indexOf(sel.chspick[c]));
+    sel.pick[c] = static_cast<int>(UTILSLIB::indexOf(mneRaw->ch_names, sel.chspick[c]));
 }
 
 const int ns = 25;

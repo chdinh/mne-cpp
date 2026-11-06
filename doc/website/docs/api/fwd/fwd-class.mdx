@@ -54,10 +54,10 @@ mne_read_forward_solution
 - **surf_ori** : *bool*
   Use surface based source coordinate system? (optional).
 
-- **include** : *const QStringList &*
+- **include** : *const StringList &*
   Include these channels (optional).
 
-- **exclude** : *const QStringList &*
+- **exclude** : *const StringList &*
   Exclude these channels (optional).
 
 **Returns:**
@@ -79,7 +79,7 @@ mne_read_forward_solution
 
 Forward library: coil definitions, BEM and sphere models, field maps and forward solutions.
 
-````cpp title="src/examples/ex_fwd_api/main.cpp, line 196"
+````cpp title="src/examples/ex_fwd_api/main.cpp, line 197"
 MNEForwardSolution back;
 Fwd::read_forward_solution(solFile, back); // all 366 rows, like mne.read_forward_solution
 MNEForwardSolution good;

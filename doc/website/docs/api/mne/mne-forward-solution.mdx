@@ -66,10 +66,10 @@ Constructs a forward operator, by reading from a IO device.
 - **surf_ori** : *bool*
   Use surface based source coordinate system? (optional).
 
-- **include** : *const QStringList &*
+- **include** : *const StringList &*
   Include these channels (optional).
 
-- **exclude** : *const QStringList &*
+- **exclude** : *const StringList &*
   Exclude these channels (optional).
 
 - **bExcludeBads** : *bool*
@@ -228,10 +228,10 @@ Pick channels from forward operator
 
 **Parameters:**
 
-- **include** : *const QStringList &*
+- **include** : *const StringList &*
   List of channels to include. (if None, include all available).
 
-- **exclude** : *const QStringList &*
+- **exclude** : *const StringList &*
   Channels to exclude (if None, do not exclude any).
 
 **Returns:**
@@ -269,10 +269,10 @@ Pick by channel type and names from a forward operator
 - **eeg** : *bool*
   Include EEG channels.
 
-- **include** : *const QStringList &*
+- **include** : *const StringList &*
   Additional channels to include (if empty, do not add any).
 
-- **exclude** : *const QStringList &*
+- **exclude** : *const StringList &*
   Channels to exclude (if empty, do not exclude any).
 
 **Returns:**
@@ -439,10 +439,10 @@ ToDo move this to [FiffCov](/docs/api/fiff/fiff-cov)
 - **surf_ori** : *bool*
   Use surface based source coordinate system? (optional).
 
-- **include** : *const QStringList &*
+- **include** : *const StringList &*
   Include these channels (optional).
 
-- **exclude** : *const QStringList &*
+- **exclude** : *const StringList &*
   Exclude these channels (optional).
 
 - **bExcludeBads** : *bool*
@@ -505,7 +505,7 @@ MNEForwardSolution t_Fwd;
 
 Compare connectivity metrics side by side on the same averaged sensor- or source-level data.
 
-````cpp title="src/examples/ex_connectivity_comparison/main.cpp, line 183"
+````cpp title="src/examples/ex_connectivity_comparison/main.cpp, line 184"
 MNEForwardSolution t_clusteredFwd;
 MNEForwardSolution t_Fwd;
 ````

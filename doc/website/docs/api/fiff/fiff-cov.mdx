@@ -28,7 +28,7 @@ Round-trips with `*-cov.fif` files and with `mne.Covariance` in MNE-Python. Carr
 ```cpp title="src/examples/ex_fiff_api/main.cpp"
 QFile covFile(dir + "/sample_audvis-cov.fif");
 FiffCov cov(covFile);
-const FiffCov megCov = cov.pick_channels(info.ch_names.mid(0, 306), cov.bads); // good MEG channels only
+const FiffCov megCov = cov.pick_channels(StringList(info.ch_names.begin() + 0, info.ch_names.begin() + 0 + 306), cov.bads); // good MEG channels only
 ```
 
 ### Inheritance
@@ -100,10 +100,10 @@ Pick channels from covariance matrix
 
 **Parameters:**
 
-- **p_include** : *const QStringList &*
+- **p_include** : *const StringList &*
   List of channels to include (if empty, include all available). (optional).
 
-- **p_exclude** : *const QStringList &*
+- **p_exclude** : *const StringList &*
   Channels to exclude (if empty, do not exclude any). (optional).
 
 **Returns:**
@@ -123,7 +123,7 @@ Before creating inverse operator.
 - **p_info** : *const [FiffInfo](/docs/api/fiff/fiff-info) &*
   measurement info.
 
-- **p_chNames** : *const QStringList &*
+- **p_chNames** : *const StringList &*
   Channels which should be taken into account.
 
 **Returns:**
@@ -155,7 +155,7 @@ This method works by adding a constant to the diagonal for each channel type sep
 - **p_bProj** : *bool*
   Apply or not projections to keep rank of data.
 
-- **p_exclude** : *QStringList*
+- **p_exclude** : *StringList*
   List of channels to mark as bad. If None, bads channels are extracted from both info['bads'] and cov['bads'].
 
 **Returns:**
@@ -318,7 +318,7 @@ FIFF library: measurement info, channels, digitizer, transforms, projectors, cov
 ````cpp title="src/examples/ex_fiff_api/main.cpp, line 165"
 QFile covFile(dir + "/sample_audvis-cov.fif");
 FiffCov cov(covFile);
-const FiffCov megCov = cov.pick_channels(info.ch_names.mid(0, 306), cov.bads); // good MEG channels only
+const FiffCov megCov = cov.pick_channels(StringList(info.ch_names.begin() + 0, info.ch_names.begin() + 0 + 306), cov.bads); // good MEG channels only
 // mne.read_cov: dim 366, nfree 15972, 2 bads, 4 projectors, C[0, 0] = 2.272355891906954e-23
 ok &= expect(cov.dim == 366 && cov.nfree == 15972 && cov.bads.size() == 2 && cov.projs.size() == 4 && near(cov.data(0, 0), 2.272355891906954e-23) && megCov.dim == 305,
              "FiffCov: 366 channels, 15972 degrees of freedom, C[0,0] matches mne.read_cov");
@@ -328,14 +328,14 @@ ok &= expect(cov.dim == 366 && cov.nfree == 15972 && cov.bads.size() == 2 && cov
 
 DSP real-time workers: averaging, covariance, noise spectrum, connectivity, HPI fitting and inverse operators.
 
-````cpp title="src/examples/ex_dsp_rt/main.cpp, line 196"
+````cpp title="src/examples/ex_dsp_rt/main.cpp, line 197"
 RtCov rtCov(info);
 FiffCov cov;
 for (int start = 0; start < covData.cols(); start += 1000) {
     cov = rtCov.estimateCovariance(covData.middleCols(start, 1000), 4000); // empty until 4000 samples arrived
 }
 // regularize() adds 0.1 x mean MEG variance to the diagonal; the off-diagonal term is untouched
-ok &= expect(cov.dim == 2 && cov.names == QStringList({"MEG0111", "MEG0121"}) && cov.nfree == 4000 && std::fabs(cov.data(0, 1) - numpyCov(0, 1)) < 1e-6 * std::fabs(numpyCov(0, 1)),
+ok &= expect(cov.dim == 2 && cov.names == StringList{"MEG0111", "MEG0121"} && cov.nfree == 4000 && std::fabs(cov.data(0, 1) - numpyCov(0, 1)) < 1e-6 * std::fabs(numpyCov(0, 1)),
              QString("RtCov: covariance of 4000 samples matches numpy.cov off the diagonal (%1)").arg(cov.data(0, 1), 0, 'g', 6));
 ````
 

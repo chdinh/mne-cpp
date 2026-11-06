@@ -36,8 +36,7 @@ FiffRawData raw(t_fileRaw);
 //
 //   Set up pick list: MEG + STI 014 - bad channels
 //
-QStringList include;
-include << "STI 014";
+StringList include{"STI 014"};
 bool want_meg = true;
 bool want_eeg = false;
 bool want_stim = false;
@@ -301,7 +300,7 @@ ok &= expect(epochs.size() == 13 && epochs[0].data.cols() == 601 && std::lround(
 
 DSP real-time workers: averaging, covariance, noise spectrum, connectivity, HPI fitting and inverse operators.
 
-````cpp title="src/examples/ex_dsp_rt/main.cpp, line 274"
+````cpp title="src/examples/ex_dsp_rt/main.cpp, line 275"
 // ---------------------------------------------------------------------------------------------------------
 // HPI: fit the four coils of the test recording on the worker and directly
 QFile hpiFile(dataDir + "/MEG/sample/test_hpiFit_raw.fif");
@@ -327,8 +326,8 @@ QFile file(QString::fromStdString(path));
 FiffRawData raw(file);
 const FiffDeviceInfo& recorded = raw.info.device_info; // backend, device and source id of the recording
 std::printf("%s: %d channels, samples %d to %d, device %s '%s' (%s)\n", path.c_str(), raw.info.nchan,
-            raw.first_samp, raw.last_samp, qPrintable(recorded.type), qPrintable(recorded.model),
-            qPrintable(recorded.serial));
+            raw.first_samp, raw.last_samp, recorded.type.c_str(), recorded.model.c_str(),
+            recorded.serial.c_str());
 ````
 
 Also used in [ex_averaging](../../examples/mne/ex_averaging.mdx), [ex_clustered_inverse_mne_raw](../../examples/inv/ex_clustered_inverse_mne_raw.mdx), [ex_clustered_inverse_pwl_rap_music_raw](../../examples/inv/ex_clustered_inverse_pwl_rap_music_raw.mdx), [ex_clustered_inverse_rap_music_raw](../../examples/inv/ex_clustered_inverse_rap_music_raw.mdx), [ex_compute_forward](../../examples/fwd/ex_compute_forward.mdx), [ex_connectivity](../../examples/connectivity/ex_connectivity.mdx), [ex_connectivity_comparison](../../examples/connectivity/ex_connectivity_comparison.mdx), [ex_connectivity_performance](../../examples/connectivity/ex_connectivity_performance.mdx), [ex_disp](../../examples/disp/ex_disp.mdx), [ex_dsp_maxwell](../../examples/dsp/ex_dsp_maxwell.mdx), [ex_fiff_api](../../examples/fiff/ex_fiff_api.mdx), [ex_filtering](../../examples/dsp/ex_filtering.mdx), [ex_fwd_api](../../examples/fwd/ex_fwd_api.mdx), [ex_hpiFit](../../examples/inv/ex_hpiFit.mdx), [ex_inv_hpi](../../examples/inv/ex_inv_hpi.mdx), [ex_inverse_mne_raw](../../examples/inv/ex_inverse_mne_raw.mdx), [ex_make_layout](../../examples/fiff/ex_make_layout.mdx), [ex_mne_api](../../examples/fs/ex_mne_api.mdx), [ex_read_epochs](../../examples/mne/ex_read_epochs.mdx), [ex_read_raw](../../examples/mne/ex_read_raw.mdx), [ex_read_write_raw](../../examples/fiff/ex_read_write_raw.mdx), [ex_roi_clustered_inverse_pwl_rap_music](../../examples/inv/ex_roi_clustered_inverse_pwl_rap_music.mdx), [ex_st_clustered_inverse_pwl_rap_music](../../examples/inv/ex_st_clustered_inverse_pwl_rap_music.mdx).

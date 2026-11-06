@@ -104,7 +104,7 @@ Returns the number of frequency bins (1 for LCMV, &gt;= 1 for DICS).
 
 Inverse library: LCMV and DICS beamformers and the RAP-MUSIC family of dipole scanners.
 
-````cpp title="src/examples/ex_inv_beamformer/main.cpp, line 126"
+````cpp title="src/examples/ex_inv_beamformer/main.cpp, line 127"
 FiffCov dataCov = noiseCov; // noise plus the two sources
 dataCov.data += g1 * g1.transpose() + g2 * g2.transpose();
 const InvBeamformer lcmv = InvLCMV::makeLCMV(info, fwd, dataCov, 0.05, noiseCov,

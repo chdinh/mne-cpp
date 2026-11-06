@@ -203,8 +203,7 @@ int main(int argc, char* argv[])
     //
     //   Set up pick list: MEG + STI 014 - bad channels
     //
-    QStringList include;
-    include << "STI 014";
+    StringList include{"STI 014"};
     bool want_meg = true;
     bool want_eeg = false;
     bool want_stim = false;
@@ -306,7 +305,7 @@ int main(int argc, char* argv[])
         for (int s = 0; s < data.cols(); ++s) {
             values[s] = 1e13 * data(c, s) - mean - 6.0 * spread * i;
         }
-        traces.addSeries(seconds, values, raw.info.ch_names[picks(c)]);
+        traces.addSeries(seconds, values, QString::fromStdString(raw.info.ch_names[picks(c)]));
     }
     FigureExporter::save(traces, "raw", "The first six gradiometers of the segment with the SSP projectors applied.", QSize(800, 520));
 

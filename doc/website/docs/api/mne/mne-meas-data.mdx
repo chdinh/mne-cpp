@@ -91,7 +91,7 @@ Refactored from `mne_read_meas_data_add` (mne_read_data.c).
 - **fwd** : *[MNENamedMatrix](/docs/api/mne/mne-named-matrix) **
   Forward operator for consistency checks (may be `nullptr`).
 
-- **namesp** : *const QStringList &*
+- **namesp** : *const StringList &*
   Explicit channel name list (fallback if `op` and `fwd` are `nullptr`).
 
 - **nnamesp** : *int*
@@ -124,7 +124,7 @@ Read an evoked-response data set into a new container.
 - **fwd** : *[MNENamedMatrix](/docs/api/mne/mne-named-matrix) **
   Forward operator for consistency checks (may be `nullptr`).
 
-- **namesp** : *const QStringList &*
+- **namesp** : *const StringList &*
   Explicit channel name list.
 
 - **nnamesp** : *int*
@@ -149,7 +149,7 @@ Read an evoked-response data set into a new container.
 
 MNE library: BEM surfaces, surface projection, ICP, source spaces and epochs.
 
-````cpp title="src/examples/ex_mne_api/main.cpp, line 423"
+````cpp title="src/examples/ex_mne_api/main.cpp, line 424"
 // MNE-C measurement container: data set 1 of the evoked file, MEG and EEG channels, time-major
 std::unique_ptr<MNEMeasData> meas(MNEMeasData::mne_read_meas_data(aveFile.fileName(), 1, nullptr, nullptr, {}, 0));
 const MNEMeasDataSet& left = *meas->current;

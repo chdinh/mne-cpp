@@ -146,7 +146,7 @@ QMap<QString, Vector4i> mColor;
 
 DSP real-time workers: averaging, covariance, noise spectrum, connectivity, HPI fitting and inverse operators.
 
-````cpp title="src/examples/ex_dsp_rt/main.cpp, line 239"
+````cpp title="src/examples/ex_dsp_rt/main.cpp, line 240"
 // ---------------------------------------------------------------------------------------------------------
 // Connectivity: the same network as Connectivity::calculate, computed on a worker thread
 ConnectivitySettings settings;
@@ -167,7 +167,7 @@ settings.setFFTSize(256);
 
 Compare connectivity metrics side by side on the same averaged sensor- or source-level data.
 
-````cpp title="src/examples/ex_connectivity_comparison/main.cpp, line 195"
+````cpp title="src/examples/ex_connectivity_comparison/main.cpp, line 196"
 ConnectivitySettings conSettings;
 ````
 

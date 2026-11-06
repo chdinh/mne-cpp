@@ -32,7 +32,7 @@ MNEChSelection bipolar;
 bipolar.chspick = bipolar.chspick_nospace = {"EEG001-EEG002", "EEG001", "EEG002"};
 bipolar.nchan = bipolar.ndef = 3;
 bipolar.nderiv = 1;
-bipolar.pick = (VectorXi(3) << -1, mneRaw->ch_names.indexOf("EEG001"), mneRaw->ch_names.indexOf("EEG002")).finished();
+bipolar.pick = (VectorXi(3) << -1, UTILSLIB::indexOf(mneRaw->ch_names, "EEG001"), UTILSLIB::indexOf(mneRaw->ch_names, "EEG002")).finished();
 bipolar.pick_deriv = (VectorXi(3) << 0, -1, -1).finished();
 mneRaw->proj.reset();
 mneRaw->pick_data(&bipolar, mneRaw->first_samp + 2990, ns, rows.data());
@@ -126,7 +126,7 @@ Keeps the derivations whose inputs are all among `chNames` and merges them into 
 
 **Parameters:**
 
-- **chNames** : *const QStringList &*
+- **chNames** : *const StringList &*
   Channel names of a recording, in data order.
 
 **Returns:**
@@ -210,7 +210,7 @@ Builds one derivation from definitions such as those of dsp::[ChannelDerivation]
 
 MNE library: BEM surfaces, surface projection, ICP, source spaces and epochs.
 
-````cpp title="src/examples/ex_mne_api/main.cpp, line 501"
+````cpp title="src/examples/ex_mne_api/main.cpp, line 502"
 ok &= montageFile.open(QIODevice::WriteOnly | QIODevice::Text);
 montageFile.write("\"EEG001-EEG002\" = \"EEG001\" - \"EEG002\"\n\"FRONT\" = 0.5 * \"EEG001\" + 0.5 * \"EEG002\" - \"EEG999\"\n");
 montageFile.close();
@@ -222,7 +222,7 @@ MNEChSelection bipolar;
 bipolar.chspick = bipolar.chspick_nospace = {"EEG001-EEG002", "EEG001", "EEG002"};
 bipolar.nchan = bipolar.ndef = 3;
 bipolar.nderiv = 1;
-bipolar.pick = (VectorXi(3) << -1, mneRaw->ch_names.indexOf("EEG001"), mneRaw->ch_names.indexOf("EEG002")).finished();
+bipolar.pick = (VectorXi(3) << -1, UTILSLIB::indexOf(mneRaw->ch_names, "EEG001"), UTILSLIB::indexOf(mneRaw->ch_names, "EEG002")).finished();
 bipolar.pick_deriv = (VectorXi(3) << 0, -1, -1).finished();
 mneRaw->proj.reset();
 ````

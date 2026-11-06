@@ -121,13 +121,13 @@ Make an SSP operator
 - **projs** : *const QList&lt; [FiffProj](/docs/api/fiff/fiff-proj) &gt; &*
   A set of projection vectors.
 
-- **ch_names** : *const QStringList &*
+- **ch_names** : *const StringList &*
   A cell array of channel names.
 
 - **proj** : *Eigen::MatrixXd &*
   The projection operator to apply to the data.
 
-- **bads** : *const QStringList &*
+- **bads** : *const StringList &*
   Bad channels to exclude.
 
 - **U** : *Eigen::MatrixXd &*
@@ -231,7 +231,7 @@ ok &= expect(pca.desc == "PCA-v1" && !pca.active && pca.data->nrow == 1 && pca.d
 
 MNE library: BEM surfaces, surface projection, ICP, source spaces and epochs.
 
-````cpp title="src/examples/ex_mne_api/main.cpp, line 451"
+````cpp title="src/examples/ex_mne_api/main.cpp, line 452"
 MatrixXi eventsBack;
 MNE::read_events(eveName, rawFile.fileName(), eventsBack);
 QList<FiffProj> projs = raw.info.projs; // stored inactive in the raw file
@@ -247,7 +247,7 @@ ok &= expect(eventsBack.rows() == 25 && eventsBack(0, 0) == 13988 && eventsBack(
 
 DSP real-time workers: averaging, covariance, noise spectrum, connectivity, HPI fitting and inverse operators.
 
-````cpp title="src/examples/ex_dsp_rt/main.cpp, line 281"
+````cpp title="src/examples/ex_dsp_rt/main.cpp, line 282"
 ok &= hpiRaw.read_raw_segment(hpiData, hpiTimes, hpiRaw.first_samp, hpiRaw.first_samp + 399);
 MatrixXd projectors = MatrixXd::Identity(hpiInfo->nchan, hpiInfo->nchan);
 FiffInfo projInfo = *hpiInfo;

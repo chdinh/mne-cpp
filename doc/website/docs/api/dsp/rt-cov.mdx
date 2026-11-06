@@ -73,14 +73,14 @@ Perform actual covariance estimation.
 
 DSP real-time workers: averaging, covariance, noise spectrum, connectivity, HPI fitting and inverse operators.
 
-````cpp title="src/examples/ex_dsp_rt/main.cpp, line 196"
+````cpp title="src/examples/ex_dsp_rt/main.cpp, line 197"
 RtCov rtCov(info);
 FiffCov cov;
 for (int start = 0; start < covData.cols(); start += 1000) {
     cov = rtCov.estimateCovariance(covData.middleCols(start, 1000), 4000); // empty until 4000 samples arrived
 }
 // regularize() adds 0.1 x mean MEG variance to the diagonal; the off-diagonal term is untouched
-ok &= expect(cov.dim == 2 && cov.names == QStringList({"MEG0111", "MEG0121"}) && cov.nfree == 4000 && std::fabs(cov.data(0, 1) - numpyCov(0, 1)) < 1e-6 * std::fabs(numpyCov(0, 1)),
+ok &= expect(cov.dim == 2 && cov.names == StringList{"MEG0111", "MEG0121"} && cov.nfree == 4000 && std::fabs(cov.data(0, 1) - numpyCov(0, 1)) < 1e-6 * std::fabs(numpyCov(0, 1)),
              QString("RtCov: covariance of 4000 samples matches numpy.cov off the diagonal (%1)").arg(cov.data(0, 1), 0, 'g', 6));
 ````
 

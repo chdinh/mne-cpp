@@ -665,16 +665,18 @@ int main(int argc, char* argv[])
     InvSourceEstimate sourceEstimateEvoked;
     VectorXi vDataIndices;
 
-    QStringList exclude;
-    exclude << raw.info.bads << raw.info.ch_names.filter("EOG");
+    StringList exclude = raw.info.bads;
+    for (const std::string& name : raw.info.ch_names)
+        if (name.find("EOG") != std::string::npos)
+            exclude.push_back(name);
 
     if (!bDoSourceLoc) {
         // Pick relevant channels
         if (sChType.contains("EEG", Qt::CaseInsensitive)) {
-            picks = raw.info.pick_types(false, true, false, QStringList(), exclude);
+            picks = raw.info.pick_types(false, true, false, {}, exclude);
         } else if (sCoilType.contains("grad", Qt::CaseInsensitive)) {
             // Only pick every second gradiometer which are not marked as bad.
-            RowVectorXi picksTmp = raw.info.pick_types(QString("grad"), false, false, QStringList(), exclude);
+            RowVectorXi picksTmp = raw.info.pick_types("grad", false, false, {}, exclude);
             picks.resize(0);
 
             for (int i = 0; i < picksTmp.cols() - 1; i += 2) {
@@ -682,7 +684,7 @@ int main(int argc, char* argv[])
                 picks(picks.cols() - 1) = picksTmp(i);
             }
         } else if (sCoilType.contains("mag", Qt::CaseInsensitive)) {
-            picks = raw.info.pick_types(QString("mag"), false, false, QStringList(), exclude);
+            picks = raw.info.pick_types("mag", false, false, {}, exclude);
         }
 
         // Transform to a more generic data matrix list, pick only channels of interest and remove EOG channel
@@ -739,7 +741,7 @@ int main(int argc, char* argv[])
         InvMinimumNorm minimumNorm(inverse_operator, lambda2, method);
         minimumNorm.doInverseSetup(1, true);
 
-        picks = raw.info.pick_types(QString("all"), true, false, QStringList(), exclude);
+        picks = raw.info.pick_types("all", true, false, {}, exclude);
         data.pick_channels(picks);
         for (int i = 0; i < data.size(); i++) {
             sourceEstimate = minimumNorm.calculateInverse(data.at(i)->epoch,
@@ -763,20 +765,7 @@ int main(int argc, char* argv[])
         //Generate network nodes and define ROIs
         /*QList<FsLabel> lLabels;
         QList<RowVector4i> qListLabelRGBAs;
-        QStringList lWantedLabels;
-
-        lWantedLabels << "G_frontal_inf-Opercular_part-lh"
-                        << "G_postcentral-lh"
-                        << "G_precentral-lh"
-                        << "G_subcentral-lh"
-                        << "S_central-lh"
-                        << "G_frontal_inf-Opercular_part-rh"
-                        << "G_postcentral-rh"
-                        << "G_precentral-rh"
-                        << "G_subcentral-rh"
-                        << "S_central-rh"
-                        << "G_occipital_middle-lh"
-                        << "G_occipital_middle-rh";
+        StringList lWantedLabels{"G_frontal_inf-Opercular_part-lh", "G_postcentral-lh", "G_precentral-lh", "G_subcentral-lh", "S_central-lh", "G_frontal_inf-Opercular_part-rh", "G_postcentral-rh", "G_precentral-rh", "G_subcentral-rh", "S_central-rh", "G_occipital_middle-lh", "G_occipital_middle-rh"};
 
         tAnnotSet.toLabels(tSurfSetInflated, lLabels, qListLabelRGBAs, lWantedLabels);
 

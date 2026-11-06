@@ -142,6 +142,23 @@ SSP projectors for blink artifacts as mne.preprocessing.compute_proj_eog does (s
 - Full source: [`src/examples/ex_dsp_artifacts/main.cpp`](https://github.com/mne-tools/mne-cpp/tree/staging/src/examples/ex_dsp_artifacts/main.cpp)
 - Build target: `ex_dsp_artifacts` (runs under CTest)
 
+## Used in examples
+
+### [ex_dsp_artifacts](../../examples/dsp/ex_dsp_artifacts.mdx)
+
+Artifact detection and repair with the dsp library on a recording with planted defects.
+
+````cpp title="src/examples/ex_dsp_artifacts/main.cpp, line 138"
+ArtifactDetect::EcgParams ecg;                                                  // mne find_ecg_events defaults: 5-35 Hz, automatic QRS threshold
+ArtifactDetect::EogParams eog;                                                  // mne find_eog_events defaults: 1-10 Hz, automatic peak threshold
+const QVector<int> beats = ArtifactDetect::detectEcg(data, info, kSFreq, ecg);  // R-peak samples on the ECG channel
+const QVector<int> blinks = ArtifactDetect::detectEog(data, info, kSFreq, eog); // blink peaks on the EOG channel
+ok &= expect(beats.size() == 12 && std::abs(beats[0] - 100) <= 2 && std::abs(beats[1] - beats[0] - 200) <= 2,
+             QString("ECG: %1 beats, first at sample %2 (12 beats every 200 samples from 100)").arg(beats.size()).arg(beats.value(0)));
+ok &= expect(blinks.size() == 3 && std::abs(blinks[1] - (1100 + 25)) <= 15,
+             QString("EOG: %1 blinks, second at sample %2 (3 blinks around 325, 1125, 1925)").arg(blinks.size()).arg(blinks.value(1)));
+````
+
 ## Authors of this file
 
 - Christoph Dinh &lt;christoph.dinh@mne-cpp.org&gt;

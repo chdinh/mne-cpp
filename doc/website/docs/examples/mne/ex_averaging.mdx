@@ -109,6 +109,7 @@ The documented classes this example uses most:
 //=============================================================================================================
 
 #include <iostream>
+#include <utils/string_utils.h>
 #include <vector>
 #include <math.h>
 
@@ -221,8 +222,7 @@ int main(int argc, char* argv[])
             picks(k) = k;
         }
     } else {
-        QStringList include;
-        include << "STI 014";
+        StringList include{"STI 014"};
         bool want_meg = true;
         bool want_eeg = false;
         bool want_stim = false;
@@ -272,7 +272,7 @@ int main(int argc, char* argv[])
     butterfly.setXLabel("Time [ms]");
     butterfly.setYLabel("Gradiometers [fT/cm]");
     for (int c = 0; c < evoked.data.rows(); ++c) {
-        if (evoked.info.chs[c].unit == FIFF_UNIT_T_M && !evoked.info.bads.contains(evoked.info.ch_names[c])) {
+        if (evoked.info.chs[c].unit == FIFF_UNIT_T_M && !UTILSLIB::contains(evoked.info.bads, evoked.info.ch_names[c])) {
             QVector<double> values(times.size());
             for (int s = 0; s < times.size(); ++s) {
                 values[s] = 1e13 * evoked.data(c, s);

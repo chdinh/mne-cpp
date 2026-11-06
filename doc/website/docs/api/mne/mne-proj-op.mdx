@@ -37,7 +37,7 @@ sel.nchan = sel.ndef = static_cast<int>(sel.chspick.size());
 sel.pick_deriv = VectorXi::Constant(sel.nchan, -1);
 sel.pick.resize(sel.nchan);
 for (int c = 0; c < sel.nchan; ++c) {
-    sel.pick[c] = static_cast<int>(mneRaw->ch_names.indexOf(sel.chspick[c]));
+    sel.pick[c] = static_cast<int>(UTILSLIB::indexOf(mneRaw->ch_names, sel.chspick[c]));
 }
 
 const int ns = 25;
@@ -161,7 +161,7 @@ Count how many active projection vectors affect a given list of channel names.
 
 **Parameters:**
 
-- **list** : *const QStringList &*
+- **list** : *const StringList &*
   List of channel names to test.
 
 - **nlist** : *int*
@@ -228,7 +228,7 @@ Write a formatted summary of all projection items to a text stream, optionally i
 - **list_data** : *bool*
   If true, print full vector data.
 
-- **exclude** : *const QStringList &*
+- **exclude** : *const StringList &*
   Channel names to exclude from the display.
 
 ---
@@ -255,7 +255,7 @@ Assign a channel name list to this projection operator, invalidating any previou
 
 **Parameters:**
 
-- **list** : *const QStringList &*
+- **list** : *const StringList &*
   Channel name list.
 
 - **nlist** : *int*
@@ -275,7 +275,7 @@ Active projection items are picked, expanded to the assigned channel list, bad c
 
 **Parameters:**
 
-- **bad** : *const QStringList &*
+- **bad** : *const StringList &*
   List of bad channel names.
 
 **Returns:**
@@ -427,7 +427,7 @@ Refactored: make_projection (dipole_fit_setup.c)
 
 MNE library: BEM surfaces, surface projection, ICP, source spaces and epochs.
 
-````cpp title="src/examples/ex_mne_api/main.cpp, line 293"
+````cpp title="src/examples/ex_mne_api/main.cpp, line 294"
 // The file stores its 4 SSP projectors as inactive; makeProjection switches them on
 std::unique_ptr<MNEProjOp> proj;
 MNEProjOp::makeProjection({rawFile.fileName()}, rawInfo.chInfo, rawInfo.nchan, proj);

@@ -175,7 +175,7 @@ ok &= expect(readBack.rows() == 2 && readBack.cols() == 3 && (readBack - matrix)
 
 Fit continuous HPI coils on raw data with SSP and write the head positions for comparison with MaxFilter.
 
-````cpp title="src/examples/ex_hpiFit/main.cpp, line 261"
+````cpp title="src/examples/ex_hpiFit/main.cpp, line 262"
         IOUtils::write_eigen_matrix(matPosition, QString(QCoreApplication::applicationDirPath() + "/MNE-sample-data/" + sNameOut));
     }
 }

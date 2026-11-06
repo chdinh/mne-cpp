@@ -24,7 +24,7 @@ QFile facadeFile(dir + "/sample_audvis_trunc_raw.fif");
 FiffStream::SPtr facadeStream;
 const bool facadeOpened = Fiff::open(facadeFile, facadeStream); // static wrappers around FiffStream
 FiffDirNode::SPtr facadeRoot = facadeStream->dirtree();
-const QStringList facadeBads = Fiff::read_bad_channels(facadeStream, facadeRoot);
+const StringList facadeBads = Fiff::read_bad_channels(facadeStream, facadeRoot);
 facadeStream->close();
 ```
 
@@ -189,13 +189,13 @@ Make a selector to pick desired channels from data
 
 **Parameters:**
 
-- **ch_names** : *QStringList &*
+- **ch_names** : *const StringList &*
   - The channel name list to consult.
 
-- **include** : *const QStringList &*
+- **include** : *const StringList &*
   - Channels to include (if empty, include all available).
 
-- **exclude** : *const QStringList &*
+- **exclude** : *const StringList &*
   - Channels to exclude (if empty, do not exclude any).
 
 **Returns:**
@@ -217,10 +217,10 @@ Pick desired channels from evoked-response data
 - **orig** : *[FiffEvokedSet](/docs/api/fiff/fiff-evoked-set) &*
   The original data.
 
-- **include** : *const QStringList &*
+- **include** : *const StringList &*
   - Channels to include (if empty, include all available).
 
-- **exclude** : *const QStringList &*
+- **exclude** : *const StringList &*
   - Channels to exclude (if empty, do not exclude any).
 
 **Returns:**
@@ -292,10 +292,10 @@ Create a selector to pick desired channel types from data
 - **stim** : *bool*
   Include stimulus channels.
 
-- **include** : *const QStringList &*
+- **include** : *const StringList &*
   Additional channels to include (if empty, do not add any).
 
-- **exclude** : *const QStringList &*
+- **exclude** : *const StringList &*
   Channels to exclude (if empty, do not exclude any).
 
 **Returns:**
@@ -322,7 +322,7 @@ Reads the bad channel list from a node if it exists
 
 **Returns:**
 
-- *QStringList* — the bad channel list.
+- *StringList* — the bad channel list.
 
 ---
 
@@ -634,12 +634,12 @@ Splits a string by looking for seperator ":"
 
 **Parameters:**
 
-- **p_sNameList** : *QString*
+- **p_sNameList** : *std::string_view*
   string to split.
 
 **Returns:**
 
-- *QStringList* — the splitted string list.
+- *StringList* — the splitted string list.
 
 ---
 
@@ -886,7 +886,7 @@ Writes a colon-separated list of names
 - **kind** : *fiff_int_t*
   The tag kind.
 
-- **data** : *QStringList &*
+- **data** : *const StringList &*
   An array of names to create the list from.
 
 ---
@@ -994,7 +994,7 @@ QFile facadeFile(dir + "/sample_audvis_trunc_raw.fif");
 FiffStream::SPtr facadeStream;
 const bool facadeOpened = Fiff::open(facadeFile, facadeStream); // static wrappers around FiffStream
 FiffDirNode::SPtr facadeRoot = facadeStream->dirtree();
-const QStringList facadeBads = Fiff::read_bad_channels(facadeStream, facadeRoot);
+const StringList facadeBads = Fiff::read_bad_channels(facadeStream, facadeRoot);
 facadeStream->close();
 ok &= expect(facadeOpened && facadeBads == info.bads, "Fiff::open and Fiff::read_bad_channels find the same 2 bads as FiffInfo");
 ````

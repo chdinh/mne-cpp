@@ -36,7 +36,7 @@ const QList<QPair<int, int>> bridged = computeBridgedElectrodes(data, info, brid
 
 Artifact detection and repair with the dsp library on a recording with planted defects.
 
-````cpp title="src/examples/ex_dsp_artifacts/main.cpp, line 173"
+````cpp title="src/examples/ex_dsp_artifacts/main.cpp, line 174"
 BridgedElectrodeParams bridging; // electrical distance below 0.3 flags a pair
 const QList<QPair<int, int>> bridged = computeBridgedElectrodes(data, info, bridging);
 ok &= expect(bridged.size() == 1 && bridged[0] == qMakePair(6, 7),

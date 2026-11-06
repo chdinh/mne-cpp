@@ -23,10 +23,10 @@ Stores a noise or source covariance matrix in dense (packed lower-triangle), dia
 // Whiten one time point of the evoked response with the projected noise covariance
 QFile aveFile(data + "/MEG/sample/sample_audvis-ave.fif");
 FiffEvoked ave(aveFile, 0, QPair<float, float>(-1.0f, -1.0f), false);
-QStringList megNames; // the 305 good MEG channels
-for (const QString& name : ave.info.ch_names) {
-    if (name.startsWith("MEG") && !ave.info.bads.contains(name)) {
-        megNames << name;
+StringList megNames; // the 305 good MEG channels
+for (const std::string& name : ave.info.ch_names) {
+    if (name.starts_with("MEG") && !UTILSLIB::contains(ave.info.bads, name)) {
+        megNames.push_back(name);
     }
 }
 ave = ave.pick_channels(megNames);
@@ -64,7 +64,7 @@ Construct a covariance matrix.
 - **p_ncov** : *int*
   Dimension (number of channels).
 
-- **p_names** : *const QStringList &*
+- **p_names** : *const StringList &*
   Channel names.
 
 - **p_cov** : *const Eigen::VectorXd &*
@@ -222,7 +222,7 @@ Pick designated channels from this covariance matrix, optionally omitting MEG-EE
 
 **Parameters:**
 
-- **new_names** : *const QStringList &*
+- **new_names** : *const StringList &*
   Names of channels to pick.
 
 - **new_ncov** : *int*
@@ -254,7 +254,7 @@ Create a dense (full lower-triangle packed) covariance matrix.
 - **ncov** : *int*
   Dimension (number of channels).
 
-- **names** : *const QStringList &*
+- **names** : *const StringList &*
   Channel names.
 
 - **cov** : *const Eigen::VectorXd &*
@@ -278,7 +278,7 @@ Create a diagonal covariance matrix.
 - **ncov** : *int*
   Dimension (number of channels).
 
-- **names** : *const QStringList &*
+- **names** : *const StringList &*
   Channel names.
 
 - **cov_diag** : *const Eigen::VectorXd &*
@@ -302,7 +302,7 @@ Create a sparse covariance matrix.
 - **ncov** : *int*
   Dimension (number of channels).
 
-- **names** : *const QStringList &*
+- **names** : *const StringList &*
   Channel names.
 
 - **cov_sparse** : *[FiffSparseMatrix](/docs/api/fiff/fiff-sparse-matrix) **
@@ -326,7 +326,7 @@ Create a covariance matrix from either dense or diagonal data.
 - **ncov** : *int*
   Dimension (number of channels).
 
-- **names** : *const QStringList &*
+- **names** : *const StringList &*
   Channel names.
 
 - **cov** : *const Eigen::VectorXd &*
@@ -390,7 +390,7 @@ Compute the linear index into a symmetric lower-triangular packed storage array 
 
 MNE library: BEM surfaces, surface projection, ICP, source spaces and epochs.
 
-````cpp title="src/examples/ex_mne_api/main.cpp, line 331"
+````cpp title="src/examples/ex_mne_api/main.cpp, line 332"
 auto noise = MNECovMatrix::read(data + "/MEG/sample/sample_audvis-cov.fif", FIFFV_MNE_NOISE_COV);
 const int ncovFile = noise->ncov;
 auto noiseMeg = noise->pick_chs_omit(megNames, nMeg, false, ave.info.chs);

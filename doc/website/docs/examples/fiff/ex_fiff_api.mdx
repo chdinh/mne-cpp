@@ -264,10 +264,10 @@ int main(int argc, char* argv[])
     FiffRawData raw(rawFile);        // reads the measurement info, raw data is read on demand
     const FiffInfo& info = raw.info; // channels, sampling rate, bads, projectors, digitizer, transforms
     const FiffChInfo& first = info.chs[0];
-    const RowVectorXi megPicks = info.pick_types(true, false, false, QStringList(), info.bads); // good MEG channels
+    const RowVectorXi megPicks = info.pick_types(true, false, false, {}, info.bads); // good MEG channels
     //! [fiff_info_usage]
     // mne.io.read_raw_fif: 376 channels at 300.307 Hz, bads MEG 2443 + EEG 053, 4 projectors
-    ok &= expect(info.nchan == 376 && near(info.sfreq, 300.3074951171875) && info.bads == QStringList({"MEG2443", "EEG053"}) && info.projs.size() == 4 && megPicks.size() == 305 && raw.first_samp == 12900 && raw.last_samp == 18906,
+    ok &= expect(info.nchan == 376 && near(info.sfreq, 300.3074951171875) && info.bads == StringList{"MEG2443", "EEG053"} && info.projs.size() == 4 && megPicks.size() == 305 && raw.first_samp == 12900 && raw.last_samp == 18906,
                  "FiffInfo: 376 channels at 300.307 Hz, 2 bads, 4 projectors, 305 good MEG channels");
     // ch 0: MEG 0113, planar gradiometer 3012 at (-0.1066, 0.0464, -0.0604) m, cal 3.16e-9
     ok &= expect(first.ch_name == "MEG0113" && first.kind == FIFFV_MEG_CH && first.chpos.coil_type == FIFFV_COIL_VV_PLANAR_T1 && (first.chpos.r0 - Vector3f(-0.1066f, 0.0464f, -0.0604f)).norm() < 1e-6f && near(first.cal, 3.1600000394149674e-09),
@@ -318,7 +318,7 @@ int main(int argc, char* argv[])
     //! [fiff_cov_usage]
     QFile covFile(dir + "/sample_audvis-cov.fif");
     FiffCov cov(covFile);
-    const FiffCov megCov = cov.pick_channels(info.ch_names.mid(0, 306), cov.bads); // good MEG channels only
+    const FiffCov megCov = cov.pick_channels(StringList(info.ch_names.begin() + 0, info.ch_names.begin() + 0 + 306), cov.bads); // good MEG channels only
     //! [fiff_cov_usage]
     // mne.read_cov: dim 366, nfree 15972, 2 bads, 4 projectors, C[0, 0] = 2.272355891906954e-23
     ok &= expect(cov.dim == 366 && cov.nfree == 15972 && cov.bads.size() == 2 && cov.projs.size() == 4 && near(cov.data(0, 0), 2.272355891906954e-23) && megCov.dim == 305,
@@ -416,7 +416,7 @@ int main(int argc, char* argv[])
     FiffStream::SPtr facadeStream;
     const bool facadeOpened = Fiff::open(facadeFile, facadeStream); // static wrappers around FiffStream
     FiffDirNode::SPtr facadeRoot = facadeStream->dirtree();
-    const QStringList facadeBads = Fiff::read_bad_channels(facadeStream, facadeRoot);
+    const StringList facadeBads = Fiff::read_bad_channels(facadeStream, facadeRoot);
     facadeStream->close();
     //! [fiff_facade_usage]
     ok &= expect(facadeOpened && facadeBads == info.bads, "Fiff::open and Fiff::read_bad_channels find the same 2 bads as FiffInfo");

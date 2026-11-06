@@ -154,7 +154,7 @@ Sets the source estimate attributes.
 
 Inverse library: LCMV and DICS beamformers and the RAP-MUSIC family of dipole scanners.
 
-````cpp title="src/examples/ex_inv_beamformer/main.cpp, line 154"
+````cpp title="src/examples/ex_inv_beamformer/main.cpp, line 155"
 for (int t = 0; t < nSamples; ++t)
     measured.col(t) = g1 * std::sin(0.21 * t) + g2 * std::sin(0.53 * t + 0.4);
 QList<InvDipolePair<double>> pairs;
@@ -187,7 +187,7 @@ QCommandLineOption surfOption("surfType", "FsSurface type <type>.", "type", "ori
 
 Average a raw recording and localize dipole pairs with RAP-MUSIC on a parcellation-clustered forward solution.
 
-````cpp title="src/examples/ex_clustered_inverse_rap_music_raw/main.cpp, line 428"
+````cpp title="src/examples/ex_clustered_inverse_rap_music_raw/main.cpp, line 427"
 //
 // Compute inverse solution
 //

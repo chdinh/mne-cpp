@@ -21,7 +21,7 @@ Parameters for LOF bad channel detection.
 LofBadChannelParams lofParams;
 lofParams.iNNeighbors = 4;
 lofParams.bEegOnly = true;
-const QStringList lofBad = findBadChannelsLof(data, info, lofParams); // features: std, kurtosis, max |x|
+const StringList lofBad = findBadChannelsLof(data, info, lofParams); // features: std, kurtosis, max |x|
 
 MatrixXd features(6, 2); // the generic LOF score on a 2-D point cloud: one far point
 features << 0.0, 0.0, 0.1, 0.0, 0.0, 0.1, 0.1, 0.1, 0.05, 0.05, 3.0, 3.0;
@@ -42,11 +42,11 @@ const VectorXd lofScores = computeLofScores(features, 3);
 
 Artifact detection and repair with the dsp library on a recording with planted defects.
 
-````cpp title="src/examples/ex_dsp_artifacts/main.cpp, line 157"
+````cpp title="src/examples/ex_dsp_artifacts/main.cpp, line 158"
 LofBadChannelParams lofParams;
 lofParams.iNNeighbors = 4;
 lofParams.bEegOnly = true;
-const QStringList lofBad = findBadChannelsLof(data, info, lofParams); // features: std, kurtosis, max |x|
+const StringList lofBad = findBadChannelsLof(data, info, lofParams); // features: std, kurtosis, max |x|
 ````
 
 ## Authors of this file

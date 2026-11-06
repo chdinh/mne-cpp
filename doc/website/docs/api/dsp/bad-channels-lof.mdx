@@ -31,7 +31,7 @@ The detector follows MNE-Python's `mne.preprocessing.find_bad_channels_lof` so M
 LofBadChannelParams lofParams;
 lofParams.iNNeighbors = 4;
 lofParams.bEegOnly = true;
-const QStringList lofBad = findBadChannelsLof(data, info, lofParams); // features: std, kurtosis, max |x|
+const StringList lofBad = findBadChannelsLof(data, info, lofParams); // features: std, kurtosis, max |x|
 
 MatrixXd features(6, 2); // the generic LOF score on a 2-D point cloud: one far point
 features << 0.0, 0.0, 0.1, 0.0, 0.0, 0.1, 0.1, 0.1, 0.05, 0.05, 3.0, 3.0;
@@ -45,7 +45,7 @@ const VectorXd lofScores = computeLofScores(features, 3);
 ### findBadChannelsLof(data, info, params)
 
 ```cpp
-QStringList findBadChannelsLof(const Eigen::MatrixXd & data, const [FiffInfo](/docs/api/fiff/fiff-info) & info, const [LofBadChannelParams](/docs/api/dsp/lof-bad-channel-params) & params);
+StringList findBadChannelsLof(const Eigen::MatrixXd & data, const [FiffInfo](/docs/api/fiff/fiff-info) & info, const [LofBadChannelParams](/docs/api/dsp/lof-bad-channel-params) & params);
 ```
 
 Detect bad channels using Local Outlier Factor (LOF).
@@ -65,7 +65,7 @@ Computes features for each channel (standard deviation, kurtosis, max absolute a
 
 **Returns:**
 
-- *QStringList* — List of bad channel names.
+- *StringList* — List of bad channel names.
 
 ---
 

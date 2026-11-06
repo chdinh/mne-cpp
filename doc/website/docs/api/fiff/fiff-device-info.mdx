@@ -22,8 +22,8 @@ QFile file(QString::fromStdString(path));
 FiffRawData raw(file);
 const FiffDeviceInfo& recorded = raw.info.device_info; // backend, device and source id of the recording
 std::printf("%s: %d channels, samples %d to %d, device %s '%s' (%s)\n", path.c_str(), raw.info.nchan,
-            raw.first_samp, raw.last_samp, qPrintable(recorded.type), qPrintable(recorded.model),
-            qPrintable(recorded.serial));
+            raw.first_samp, raw.last_samp, recorded.type.c_str(), recorded.model.c_str(),
+            recorded.serial.c_str());
 ```
 
 ---
@@ -56,8 +56,8 @@ QFile file(QString::fromStdString(path));
 FiffRawData raw(file);
 const FiffDeviceInfo& recorded = raw.info.device_info; // backend, device and source id of the recording
 std::printf("%s: %d channels, samples %d to %d, device %s '%s' (%s)\n", path.c_str(), raw.info.nchan,
-            raw.first_samp, raw.last_samp, qPrintable(recorded.type), qPrintable(recorded.model),
-            qPrintable(recorded.serial));
+            raw.first_samp, raw.last_samp, recorded.type.c_str(), recorded.model.c_str(),
+            recorded.serial.c_str());
 ````
 
 ## Authors of this file

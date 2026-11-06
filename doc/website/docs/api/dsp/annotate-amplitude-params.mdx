@@ -20,7 +20,7 @@ Parameters for amplitude-based annotation.
 ```cpp title="src/examples/ex_dsp_artifacts/main.cpp"
 AnnotateAmplitudeParams amplitude;
 amplitude.flat = 1e-12; // consecutive samples within 1 pV of each other
-QStringList flatChannels;
+StringList flatChannels;
 const FiffAnnotations flatSpans = annotateAmplitude(loose, info, kSFreq, amplitude, &flatChannels);
 ```
 
@@ -38,15 +38,15 @@ const FiffAnnotations flatSpans = annotateAmplitude(loose, info, kSFreq, amplitu
 
 Artifact detection and repair with the dsp library on a recording with planted defects.
 
-````cpp title="src/examples/ex_dsp_artifacts/main.cpp, line 219"
+````cpp title="src/examples/ex_dsp_artifacts/main.cpp, line 220"
 MatrixXd loose = data;
 loose.row(3).segment(250, 50).setConstant(loose(3, 250));
 AnnotateAmplitudeParams amplitude;
 amplitude.flat = 1e-12; // consecutive samples within 1 pV of each other
-QStringList flatChannels;
+StringList flatChannels;
 const FiffAnnotations flatSpans = annotateAmplitude(loose, info, kSFreq, amplitude, &flatChannels);
-ok &= expect(flatSpans.size() == 1 && flatSpans[0].description == "BAD_flat" && std::abs(flatSpans[0].onset - 1.0) < 1e-12 && flatChannels == QStringList({"EEG2"}),
-             QString("annotateAmplitude: %1 flat span(s), bad %2").arg(flatSpans.size()).arg(flatChannels.join(", ")));
+ok &= expect(flatSpans.size() == 1 && flatSpans[0].description == "BAD_flat" && std::abs(flatSpans[0].onset - 1.0) < 1e-12 && flatChannels == StringList{"EEG2"},
+             QString("annotateAmplitude: %1 flat span(s), bad %2").arg(flatSpans.size()).arg(QString::fromStdString(UTILSLIB::join(flatChannels, ", "))));
 ````
 
 ## Authors of this file

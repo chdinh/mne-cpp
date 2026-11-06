@@ -329,7 +329,7 @@ Vertices of a subject's surfaces nearest to an icosahedron of the given grade (m
 
 MNE library: BEM surfaces, surface projection, ICP, source spaces and epochs.
 
-````cpp title="src/examples/ex_mne_api/main.cpp, line 211"
+````cpp title="src/examples/ex_mne_api/main.cpp, line 212"
 // A FreeSurfer surface with its curvature and the volume geometry from the file footer
 const auto white = MNESourceSpace::load_surface(data + "/subjects/sample/surf/lh.white", data + "/subjects/sample/surf/lh.curv");
 const MNEVolGeom& geometry = *white->vol_geom; // sizes and centre converted to metres

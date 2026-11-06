@@ -44,7 +44,7 @@ hpi.fit(updater.getProjectedData(), updater.getProjectors(), model, updater.getH
 
 DSP real-time workers: averaging, covariance, noise spectrum, connectivity, HPI fitting and inverse operators.
 
-````cpp title="src/examples/ex_dsp_rt/main.cpp, line 294"
+````cpp title="src/examples/ex_dsp_rt/main.cpp, line 295"
 RtHpiWorker hpiWorker(updater.getSensors());
 HpiFitResult workerFit;
 QObject::connect(&hpiWorker, &RtHpiWorker::resultReady, [&](const HpiFitResult& fit) { workerFit = fit; });
@@ -59,7 +59,7 @@ ok &= expect(workerFit.GoF.size() == 4 && workerFit.GoF.minCoeff() > 0.98 && wor
 
 Fit continuous HPI coils on raw data with SSP and write the head positions for comparison with MaxFilter.
 
-````cpp title="src/examples/ex_hpiFit/main.cpp, line 207"
+````cpp title="src/examples/ex_hpiFit/main.cpp, line 208"
 HpiFitResult hpiFitResult;
 HPI.fit(matProjectedData, matPreparedProjectors, hpiModelParameters, matCoilsHead, true, hpiFitResult);
 hpiModelParameters = InvHpiModelParameters(hpiFitResult.hpiFreqs,

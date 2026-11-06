@@ -163,8 +163,8 @@ int main(int argc, char* argv[])
     FiffRawData raw(file);
     const FiffDeviceInfo& recorded = raw.info.device_info; // backend, device and source id of the recording
     std::printf("%s: %d channels, samples %d to %d, device %s '%s' (%s)\n", path.c_str(), raw.info.nchan,
-                raw.first_samp, raw.last_samp, qPrintable(recorded.type), qPrintable(recorded.model),
-                qPrintable(recorded.serial));
+                raw.first_samp, raw.last_samp, recorded.type.c_str(), recorded.model.c_str(),
+                recorded.serial.c_str());
     //! [acq_record_read]
 
     //! [acq_replay_fiff]
@@ -231,13 +231,13 @@ int main(int argc, char* argv[])
         for (int s = 0; s < y.size(); ++s) {
             y[s] = data(c, s) * 1e6 - 40.0 * c;
         }
-        plot.addSeries(t, y, raw.info.ch_names[c]);
+        plot.addSeries(t, y, QString::fromStdString(raw.info.ch_names[static_cast<std::size_t>(c)]));
     }
     QVector<double> trigger(t.size());
     for (int s = 0; s < trigger.size(); ++s) {
         trigger[s] = data(raw.info.nchan - 1, s) * 10.0 - 200.0;
     }
-    plot.addSeries(t, trigger, QString("%1 x 10").arg(raw.info.ch_names.last()), QColor(), Qt::DashLine);
+    plot.addSeries(t, trigger, QString("%1 x 10").arg(raw.info.ch_names.back()), QColor(), Qt::DashLine);
     FigureExporter::save(plot, "acq_record",
                          QString("The first EEG channels and the trigger channel of a 10 s simulated oddball session, as "
                                  "AcqRecorder stored them while the source ran (%1 samples, %2 events, none lost).")

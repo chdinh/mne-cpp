@@ -291,7 +291,7 @@ Reads the bad channel list from a node if it exists Note: In difference to mne-m
 
 **Returns:**
 
-- *QStringList* — the bad channel list.
+- *StringList* — the bad channel list.
 
 ---
 
@@ -301,7 +301,7 @@ Write a bad channel list as a FIFFB_MNE_BAD_CHANNELS block.
 
 **Parameters:**
 
-- **bads** : *const QStringList &*
+- **bads** : *const StringList &*
   The list of bad channel names.
 
 ---
@@ -959,7 +959,7 @@ Writes a colon-separated list of names
 - **kind** : *fiff_int_t*
   The tag kind.
 
-- **data** : *const QStringList &*
+- **data** : *const StringList &*
   An array of names to create the list from.
 
 **Returns:**
@@ -1088,7 +1088,7 @@ Writes a string tag.
 - **kind** : *fiff_int_t*
   The tag kind.
 
-- **data** : *const QString &*
+- **data** : *std::string_view*
   The string data to write.
 
 **Returns:**
@@ -1147,12 +1147,12 @@ Splits a string by looking for seperator ":"
 
 **Parameters:**
 
-- **p_sNameList** : *QString*
+- **p_sNameList** : *std::string_view*
   string to split.
 
 **Returns:**
 
-- *QStringList* — the splitted string list.
+- *StringList* — the splitted string list.
 
 ---
 

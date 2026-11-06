@@ -24,7 +24,7 @@ QFile rawFile(dir + "/sample_audvis_trunc_raw.fif");
 FiffRawData raw(rawFile);        // reads the measurement info, raw data is read on demand
 const FiffInfo& info = raw.info; // channels, sampling rate, bads, projectors, digitizer, transforms
 const FiffChInfo& first = info.chs[0];
-const RowVectorXi megPicks = info.pick_types(true, false, false, QStringList(), info.bads); // good MEG channels
+const RowVectorXi megPicks = info.pick_types(true, false, false, {}, info.bads); // good MEG channels
 ```
 
 ### Inheritance
@@ -96,7 +96,33 @@ Get channel type.
 
 **Returns:**
 
-- *QString* — Type of channel as in mne.channel_type ('grad', 'mag', 'eeg', 'seeg', 'ecog', 'hbo', 'eyegaze', ...).
+- *std::string* — Type of channel as in mne.channel_type ('grad', 'mag', 'eeg', 'seeg', 'ecog', 'hbo', 'eyegaze', ...).
+
+---
+
+### channelIndex(name)
+
+**Parameters:**
+
+- **name** : *std::string_view*
+  Channel name.
+
+**Returns:**
+
+- *int* — Index of the channel in ch_names, or -1 when there is none.
+
+---
+
+### isBad(name)
+
+**Parameters:**
+
+- **name** : *std::string_view*
+  Channel name.
+
+**Returns:**
+
+- *bool* — True when the channel is marked bad.
 
 ---
 
@@ -121,7 +147,7 @@ The data channels (MEG including reference MEG, EEG, CSD, sEEG, ECoG, DBS, fNIRS
 
 **Parameters:**
 
-- **exclude** : *const QStringList &*
+- **exclude** : *const StringList &*
   Channel names to leave out, e.g. the bads.
 
 **Returns:**
@@ -165,7 +191,7 @@ Create a selector to pick desired channel types from data
 
 **Parameters:**
 
-- **meg** : *const QString*
+- **meg** : *const std::string &*
   It can be "all", to select all or it can be "mag" or "grad" to select only gradiometers or magnetometers.
 
 - **eeg** : *bool*
@@ -174,15 +200,19 @@ Create a selector to pick desired channel types from data
 - **stim** : *bool*
   Include stimulus channels.
 
-- **include** : *const QStringList &*
+- **include** : *const StringList &*
   Additional channels to include (if empty, do not add any).
 
-- **exclude** : *const QStringList &*
+- **exclude** : *const StringList &*
   Channels to exclude (if empty, do not exclude any).
 
 **Returns:**
 
 - *Eigen::RowVectorXi* — the selector matrix (row vector).
+
+---
+
+### pick_types(meg, eeg, stim, include, exclude)
 
 ---
 
@@ -203,10 +233,10 @@ Create a selector to pick desired channel types from data Use overloaded pick_ty
 - **stim** : *bool*
   Include stimulus channels.
 
-- **include** : *const QStringList &*
+- **include** : *const StringList &*
   Additional channels to include (if empty, do not add any).
 
-- **exclude** : *const QStringList &*
+- **exclude** : *const StringList &*
   Channels to exclude (if empty, do not exclude any).
 
 **Returns:**
@@ -255,7 +285,7 @@ Parses the channel info information and returns a string list of channel types.
 
 **Returns:**
 
-- *QStringList* — The distinct channel types in channel order, as `channel_type()` names them (unknown kinds skipped).
+- *StringList* — The distinct channel types in channel order, as `channel_type()` names them (unknown kinds skipped).
 
 ---
 
@@ -267,7 +297,7 @@ Indices of the channel names that match a regular expression from their start, l
 
 **Parameters:**
 
-- **ch_names** : *const QStringList &*
+- **ch_names** : *const StringList &*
   The channel names.
 
 - **regexp** : *const QString &*
@@ -287,13 +317,13 @@ Make a selector to pick desired channels from data
 
 **Parameters:**
 
-- **ch_names** : *const QStringList &*
+- **ch_names** : *const StringList &*
   - The channel name list to consult.
 
-- **include** : *const QStringList &*
+- **include** : *const StringList &*
   - Channels to include (if empty, include all available).
 
-- **exclude** : *const QStringList &*
+- **exclude** : *const StringList &*
   - Channels to exclude (if empty, do not exclude any).
 
 **Returns:**
@@ -308,10 +338,10 @@ Read bad channel names from a plain text file (one name per line, '#' comments s
 
 **Parameters:**
 
-- **name** : *const QString &*
+- **name** : *const std::string &*
   Path to the bad channel file (empty string is a no-op).
 
-- **listOut** : *QStringList &*
+- **listOut** : *StringList &*
   The bad channel names read from the file.
 
 **Returns:**

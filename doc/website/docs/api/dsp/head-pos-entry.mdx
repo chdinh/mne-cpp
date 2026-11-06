@@ -44,7 +44,7 @@ const QList<HeadPosEntry> posBack = MaxwellMovementComp::readHeadPos(posPath);
 
 DSP Maxwell filtering: SSS, bad-channel detection, movement compensation, fine calibration and cHPI removal.
 
-````cpp title="src/examples/ex_dsp_maxwell/main.cpp, line 156"
+````cpp title="src/examples/ex_dsp_maxwell/main.cpp, line 157"
 QList<HeadPosEntry> headPos(1); // one position from t = 0: identity rotation, no translation
 MaxwellMoveCompParams moveParams;
 moveParams.origin = params.origin;

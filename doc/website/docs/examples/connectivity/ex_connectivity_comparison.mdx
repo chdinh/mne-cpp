@@ -101,6 +101,7 @@ The documented classes this example uses most:
 //=============================================================================================================
 
 #include <disp3D/view/brainview.h>
+#include <utils/string_utils.h>
 #include <disp3D/model/braintreemodel.h>
 #include <disp3D/model/items/networktreeitem.h>
 
@@ -314,26 +315,28 @@ int main(int argc, char* argv[])
                                      fTMax);
     InvSourceEstimate sourceEstimateEvoked;
 
-    QStringList exclude;
-    exclude << raw.info.bads << raw.info.ch_names.filter("EOG");
+    StringList exclude = raw.info.bads;
+    for (const std::string& name : raw.info.ch_names)
+        if (name.find("EOG") != std::string::npos)
+            exclude.push_back(name);
 
     if (!bDoSourceLoc) {
         // Pick relevant channels
         if (sChType.contains("EEG", Qt::CaseInsensitive)) {
-            picks = raw.info.pick_types(false, true, false, QStringList(), exclude);
+            picks = raw.info.pick_types(false, true, false, {}, exclude);
         } else if (sCoilType.contains("grad", Qt::CaseInsensitive)) {
             // Only pick every second gradiometer which are not marked as bad.
-            RowVectorXi picksTmp = raw.info.pick_types(QString("grad"), false, false);
+            RowVectorXi picksTmp = raw.info.pick_types("grad", false, false);
             picks.resize(0);
 
             for (int i = 0; i < picksTmp.cols() - 1; i += 2) {
-                if (!raw.info.bads.contains(raw.info.ch_names.at(picksTmp(i)))) {
+                if (!UTILSLIB::contains(raw.info.bads, raw.info.ch_names.at(picksTmp(i)))) {
                     picks.conservativeResize(picks.cols() + 1);
                     picks(picks.cols() - 1) = picksTmp(i);
                 }
             }
         } else if (sCoilType.contains("mag", Qt::CaseInsensitive)) {
-            picks = raw.info.pick_types(QString("mag"), false, false, QStringList(), exclude);
+            picks = raw.info.pick_types("mag", false, false, {}, exclude);
         }
 
         // Generate network nodes
@@ -386,7 +389,7 @@ int main(int argc, char* argv[])
         InvMinimumNorm minimumNorm(inverse_operator, lambda2, method);
         minimumNorm.doInverseSetup(1, true);
 
-        picks = raw.info.pick_types(QString("all"), true, false, QStringList(), exclude);
+        picks = raw.info.pick_types("all", true, false, {}, exclude);
         data.pick_channels(picks);
         for (int i = 0; i < data.size(); i++) {
             sourceEstimate = minimumNorm.calculateInverse(data.at(i)->epoch,

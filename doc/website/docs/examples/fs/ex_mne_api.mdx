@@ -12,7 +12,7 @@ MNE library: BEM surfaces, surface projection, ICP, source spaces and epochs.
 
 <ExampleFacts name="ex_mne_api" />
 
-**Libraries:** [FreeSurfer](../../api/fs/index.mdx), [MNE Core](../../api/mne/index.mdx), [FIFF I/O](../../api/fiff/index.mdx)
+**Libraries:** [FreeSurfer](../../api/fs/index.mdx), [MNE Core](../../api/mne/index.mdx), [FIFF I/O](../../api/fiff/index.mdx), [Utilities](../../api/utils/index.mdx)
 
 ## What it demonstrates
 
@@ -208,6 +208,7 @@ The documented classes this example uses most:
 //=============================================================================================================
 
 #include <fiff/fiff_constants.h>
+#include <utils/string_utils.h>
 #include <fiff/fiff_coord_trans.h>
 #include <fiff/fiff_cov.h>
 #include <fiff/fiff_events.h>
@@ -467,7 +468,7 @@ int main(int argc, char* argv[])
     sel.pick_deriv = VectorXi::Constant(sel.nchan, -1);
     sel.pick.resize(sel.nchan);
     for (int c = 0; c < sel.nchan; ++c) {
-        sel.pick[c] = static_cast<int>(mneRaw->ch_names.indexOf(sel.chspick[c]));
+        sel.pick[c] = static_cast<int>(UTILSLIB::indexOf(mneRaw->ch_names, sel.chspick[c]));
     }
 
     const int ns = 25;
@@ -501,10 +502,10 @@ int main(int argc, char* argv[])
     // Whiten one time point of the evoked response with the projected noise covariance
     QFile aveFile(data + "/MEG/sample/sample_audvis-ave.fif");
     FiffEvoked ave(aveFile, 0, QPair<float, float>(-1.0f, -1.0f), false);
-    QStringList megNames; // the 305 good MEG channels
-    for (const QString& name : ave.info.ch_names) {
-        if (name.startsWith("MEG") && !ave.info.bads.contains(name)) {
-            megNames << name;
+    StringList megNames; // the 305 good MEG channels
+    for (const std::string& name : ave.info.ch_names) {
+        if (name.starts_with("MEG") && !UTILSLIB::contains(ave.info.bads, name)) {
+            megNames.push_back(name);
         }
     }
     ave = ave.pick_channels(megNames);
@@ -603,7 +604,7 @@ int main(int argc, char* argv[])
     //! [mne_cov_description_usage]
     // mne.compute_covariance(mne.Epochs(event_id=[1, 2], tmin=-0.2, tmax=0, baseline=None, reject=dict(eeg=14.23e-9)),
     // keep_sample_mean=False, rank="full"): 6 of 12 epochs kept, nfree 365, C[EEG001, EEG001] = 8.784207369943824e-18
-    const int eeg001 = noiseCov.names.indexOf("EEG001");
+    const int eeg001 = UTILSLIB::indexOf(noiseCov.names, "EEG001");
     ok &= expect(preStim.events == QVector<unsigned int>({1, 2}) && noiseCov.nfree == 365 && near(noiseCov.data(eeg001, eeg001), 8.784207369943824e-18, 1e-6),
                  QString("MNEDescriptionParser: a .cov description with EEG rejection gives nfree %1 like mne.compute_covariance").arg(noiseCov.nfree));
 
@@ -697,7 +698,7 @@ int main(int argc, char* argv[])
     bipolar.chspick = bipolar.chspick_nospace = {"EEG001-EEG002", "EEG001", "EEG002"};
     bipolar.nchan = bipolar.ndef = 3;
     bipolar.nderiv = 1;
-    bipolar.pick = (VectorXi(3) << -1, mneRaw->ch_names.indexOf("EEG001"), mneRaw->ch_names.indexOf("EEG002")).finished();
+    bipolar.pick = (VectorXi(3) << -1, UTILSLIB::indexOf(mneRaw->ch_names, "EEG001"), UTILSLIB::indexOf(mneRaw->ch_names, "EEG002")).finished();
     bipolar.pick_deriv = (VectorXi(3) << 0, -1, -1).finished();
     mneRaw->proj.reset();
     mneRaw->pick_data(&bipolar, mneRaw->first_samp + 2990, ns, rows.data());

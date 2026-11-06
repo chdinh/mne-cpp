@@ -35,7 +35,7 @@ sel.nchan = sel.ndef = static_cast<int>(sel.chspick.size());
 sel.pick_deriv = VectorXi::Constant(sel.nchan, -1);
 sel.pick.resize(sel.nchan);
 for (int c = 0; c < sel.nchan; ++c) {
-    sel.pick[c] = static_cast<int>(mneRaw->ch_names.indexOf(sel.chspick[c]));
+    sel.pick[c] = static_cast<int>(UTILSLIB::indexOf(mneRaw->ch_names, sel.chspick[c]));
 }
 
 const int ns = 25;
@@ -262,7 +262,7 @@ Opens the specified FIFF file, locates the raw data block (or MaxShield data blo
 
 MNE library: BEM surfaces, surface projection, ICP, source spaces and epochs.
 
-````cpp title="src/examples/ex_mne_api/main.cpp, line 270"
+````cpp title="src/examples/ex_mne_api/main.cpp, line 271"
 filter.lowpass = filter.eog_lowpass = 40.0f;
 filter.lowpass_width = filter.eog_lowpass_width = 5.0f;
 std::unique_ptr<MNERawData> mneRaw(MNERawData::open_file(rawFile.fileName(), false, false, filter));

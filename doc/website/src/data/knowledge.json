@@ -625,7 +625,8 @@
       "library": "dsp",
       "libraries": [
         "dsp",
-        "fiff"
+        "fiff",
+        "utils"
       ],
       "tasks": [
         "preprocessing"
@@ -668,7 +669,8 @@
       "library": "dsp",
       "libraries": [
         "dsp",
-        "fiff"
+        "fiff",
+        "utils"
       ],
       "tasks": [
         "preprocessing"
@@ -712,7 +714,8 @@
         "inv",
         "dsp",
         "mne",
-        "fiff"
+        "fiff",
+        "utils"
       ],
       "tasks": [
         "real-time"
@@ -959,7 +962,8 @@
       "libraries": [
         "fwd",
         "mne",
-        "fiff"
+        "fiff",
+        "utils"
       ],
       "tasks": [
         "forward-modeling"
@@ -1103,7 +1107,8 @@
         "inv",
         "fs",
         "mne",
-        "fiff"
+        "fiff",
+        "utils"
       ],
       "tasks": [
         "source-localization"
@@ -1430,7 +1435,8 @@
       "libraries": [
         "fs",
         "mne",
-        "fiff"
+        "fiff",
+        "utils"
       ],
       "tasks": [
         "anatomy",

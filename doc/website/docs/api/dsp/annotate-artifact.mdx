@@ -30,7 +30,7 @@ Both routines reproduce their MNE-Python counterparts `mne.preprocessing.annotat
 ```cpp title="src/examples/ex_dsp_artifacts/main.cpp"
 AnnotateAmplitudeParams amplitude;
 amplitude.flat = 1e-12; // consecutive samples within 1 pV of each other
-QStringList flatChannels;
+StringList flatChannels;
 const FiffAnnotations flatSpans = annotateAmplitude(loose, info, kSFreq, amplitude, &flatChannels);
 ```
 
@@ -95,7 +95,7 @@ Mark samples above the threshold; good stretches shorter than dMinLengthGood bec
 ### annotateAmplitude(data, info, sfreq, params, bads)
 
 ```cpp
-[FiffAnnotations](/docs/api/fiff/fiff-annotations) annotateAmplitude(const Eigen::MatrixXd & data, const [FiffInfo](/docs/api/fiff/fiff-info) & info, double sfreq, const [AnnotateAmplitudeParams](/docs/api/dsp/annotate-amplitude-params) & params, QStringList * bads);
+[FiffAnnotations](/docs/api/fiff/fiff-annotations) annotateAmplitude(const Eigen::MatrixXd & data, const [FiffInfo](/docs/api/fiff/fiff-info) & info, double sfreq, const [AnnotateAmplitudeParams](/docs/api/dsp/annotate-amplitude-params) & params, StringList * bads);
 ```
 
 Annotate spans where consecutive samples jump or stay flat, as mne.preprocessing.annotate_amplitude.
@@ -116,7 +116,7 @@ For every data channel that is not bad, the absolute differences between consecu
 - **params** : *const [AnnotateAmplitudeParams](/docs/api/dsp/annotate-amplitude-params) &*
   Thresholds; at least one of peak and flat must be set.
 
-- **bads** : *QStringList **
+- **bads** : *StringList **
   If not null, receives the channels annotated for too long, in channel order.
 
 **Returns:**

@@ -41,15 +41,15 @@ const BadChannelsMaxwellResult bads = findBadChannelsMaxwell(broken, info, badPa
 
 DSP Maxwell filtering: SSS, bad-channel detection, movement compensation, fine calibration and cHPI removal.
 
-````cpp title="src/examples/ex_dsp_maxwell/main.cpp, line 145"
+````cpp title="src/examples/ex_dsp_maxwell/main.cpp, line 146"
 BadChannelsMaxwellParams badParams;
 badParams.origin = params.origin;
 badParams.dZThreshold = 50.0; // robust z-score of the reconstruction residual
 const BadChannelsMaxwellResult bads = findBadChannelsMaxwell(broken, info, badParams);
 int worst = 0;
 bads.zScores.maxCoeff(&worst);
-ok &= expect(worst == 40 && bads.badIndices.contains(meg[40]) && bads.badChannels.contains(info.ch_names[meg[40]]),
-             QString("findBadChannelsMaxwell ranks %1 worst (z = %2), flagged: %3").arg(info.ch_names[meg[worst]]).arg(bads.zScores(worst), 0, 'f', 0).arg(bads.badChannels.join(", ")));
+ok &= expect(worst == 40 && bads.badIndices.contains(meg[40]) && UTILSLIB::contains(bads.badChannels, info.ch_names[meg[40]]),
+             QString("findBadChannelsMaxwell ranks %1 worst (z = %2), flagged: %3").arg(info.ch_names[meg[worst]]).arg(bads.zScores(worst), 0, 'f', 0).arg(QString::fromStdString(UTILSLIB::join(bads.badChannels, ", "))));
 ````
 
 ## Authors of this file
