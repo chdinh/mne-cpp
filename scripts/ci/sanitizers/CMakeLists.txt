@@ -10,7 +10,7 @@ project(mne_acq_sanitizers LANGUAGES CXX)
 
 set(MNE_SANITIZE "address,undefined" CACHE STRING "Value passed to -fsanitize=")
 
-set(CMAKE_CXX_STANDARD 20)
+set(CMAKE_CXX_STANDARD 23)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_AUTOMOC ON)
 set(BUILD_SHARED_LIBS OFF)

@@ -10,7 +10,7 @@ project(mne_acq_bench_ab LANGUAGES CXX)
 
 set(ACQ_ROOT "${CMAKE_CURRENT_SOURCE_DIR}/../../.." CACHE PATH "MNE-CPP checkout to build mne_acq_bench from")
 
-set(CMAKE_CXX_STANDARD 20)
+set(CMAKE_CXX_STANDARD 23)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(BUILD_SHARED_LIBS OFF)
 

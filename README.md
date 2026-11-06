@@ -78,7 +78,7 @@ cmake --build build\developer-dynamic --parallel
 
 ### Requirements
 
-[CMake](https://cmake.org/download/) ≥ 3.21 and a C++20 compiler:
+[CMake](https://cmake.org/download/) ≥ 3.21 and a C++23 compiler:
 
 | Platform | Compiler |
 |----------|----------|

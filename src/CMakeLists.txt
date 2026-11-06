@@ -21,7 +21,7 @@ add_compile_definitions(MNE_CPP_VERSION="${MNE_CPP_VERSION}")
 ##==============================================================================
 ## Global build options
 
-set(CMAKE_CXX_STANDARD 20)
+set(CMAKE_CXX_STANDARD 23)
 
 option(BUILD_SHARED_LIBS "Build using shared libraries" ON)
 if(APPLE)
@@ -167,7 +167,7 @@ else()
   # Qt's QSKIP/QVERIFY-family macros are declared variadic (kind, ...) but are
   # invariably called with no trailing argument, which -Wpedantic reports as a
   # C++20 extension. The non-conformance lives in Qt's headers, not our code,
-  # and the project already targets C++20, so silence only that one diagnostic
+  # and the project targets C++23, so silence only that one diagnostic
   # while keeping every other pedantic ISO check active.
   include(CheckCXXCompilerFlag)
   check_cxx_compiler_flag("-Wno-variadic-macro-arguments-omitted" HAVE_WNO_VARIADIC_MACRO_OMITTED)
