@@ -138,10 +138,9 @@ int main(int argc, char* argv[])
     parser.process(a);
 
     // Init data loading and writing
-    QFile t_fileIn(parser.value(inputOption));
     QFile t_fileOut(parser.value(outputOption));
 
-    FiffRawData raw(t_fileIn);
+    FiffRawData raw(parser.value(inputOption).toStdString());
 
     // Set up pick list: MEG + STI 014 - bad channels
     bool want_meg = true;
@@ -160,7 +159,7 @@ int main(int argc, char* argv[])
     }
 
     RowVectorXd cals;
-    FiffStream::SPtr outfid = FiffStream::start_writing_raw(t_fileOut, raw.info, cals /*, picks*/);
+    FiffStream::SPtr outfid = FiffStream::start_writing_raw(parser.value(outputOption).toStdString(), raw.info, cals /*, picks*/);
     if (!outfid) {
         printf("Cannot write %s\n", t_fileOut.fileName().toUtf8().constData());
         return -1;

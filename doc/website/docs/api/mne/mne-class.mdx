@@ -358,7 +358,7 @@ compute_proj
 
 ---
 
-### save_raw(raw, p_IODevice, picks, decim, from, to)
+### save_raw(raw, path, picks, decim, from, to)
 
 save_raw
 
@@ -367,8 +367,8 @@ save_raw
 - **raw** : *const [FiffRawData](/docs/api/fiff/fiff-raw-data) &*
   The raw data to save.
 
-- **p_IODevice** : *QIODevice &*
-  Output device to write to.
+- **path** : *const std::filesystem::path &*
+  The file to write.
 
 - **picks** : *const Eigen::RowVectorXi &*
   Channel indices to include (empty = all channels).

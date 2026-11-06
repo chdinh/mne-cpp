@@ -426,8 +426,7 @@ int main(int argc, char* argv[])
 
     // ---------------------------------------------------------------------------------------------------------
     // HPI: fit the four coils of the test recording on the worker and directly
-    QFile hpiFile(dataDir + "/MEG/sample/test_hpiFit_raw.fif");
-    FiffRawData hpiRaw(hpiFile);
+    FiffRawData hpiRaw((dataDir + "/MEG/sample/test_hpiFit_raw.fif").toStdString());
     const FiffInfo::SPtr hpiInfo = FiffInfo::SPtr::create(hpiRaw.info);
     MatrixXd hpiData;
     MatrixXd hpiTimes;
@@ -457,8 +456,7 @@ int main(int argc, char* argv[])
     // ---------------------------------------------------------------------------------------------------------
     // Inverse operator from the sample forward solution and the covariance of the sample raw data
     QFile fwdFile(dataDir + "/Result/ref-sample_audvis-meg-eeg-oct-6-fwd.fif");
-    QFile rawFile(dataDir + "/MEG/sample/sample_audvis_trunc_raw.fif");
-    FiffRawData raw(rawFile);
+    FiffRawData raw((dataDir + "/MEG/sample/sample_audvis_trunc_raw.fif").toStdString());
     FiffInfo::SPtr rawInfo = FiffInfo::SPtr::create(raw.info);
     QSharedPointer<MNEForwardSolution> fwd = QSharedPointer<MNEForwardSolution>::create(fwdFile);
     MatrixXd rawData;

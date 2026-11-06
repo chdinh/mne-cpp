@@ -21,8 +21,7 @@ A list of [`FiffCtfComp`](/docs/api/fiff/fiff-ctf-comp) lives inside [`FiffInfo`
 
 ```cpp title="src/examples/ex_fiff_structure/main.cpp"
 // CTF third-order gradient compensation: info.comps holds one FiffCtfComp per grade.
-QFile ctfFile(parser.value(ctfOption));
-const FiffRawData ctf(ctfFile);
+const FiffRawData ctf(parser.value(ctfOption).toStdString());
 FiffCtfComp toGrade1;
 ok &= ctf.info.make_compensator(0, 1, toGrade1); // uncompensated -> grade 1
 ```
@@ -107,10 +106,9 @@ The factors are kept in rowcals and colcals so that write_ctf_comp can undo them
 
 FIFF library: fixed-length epochs, CTF compensation, the file directory and raw buffers, and handing recordings to another application.
 
-````cpp title="src/examples/ex_fiff_structure/main.cpp, line 140"
+````cpp title="src/examples/ex_fiff_structure/main.cpp, line 139"
 // CTF third-order gradient compensation: info.comps holds one FiffCtfComp per grade.
-QFile ctfFile(parser.value(ctfOption));
-const FiffRawData ctf(ctfFile);
+const FiffRawData ctf(parser.value(ctfOption).toStdString());
 FiffCtfComp toGrade1;
 ok &= ctf.info.make_compensator(0, 1, toGrade1); // uncompensated -> grade 1
 // mne._fiff.compensator.make_compensator(info, 0, 1) on ctf_grade0_raw.fif: 36 x 36, ||C - I||_F = 0.1947596520139745

@@ -26,9 +26,8 @@ Full FIFF measurement info: per-channel descriptors, sampling and filter setup, 
 Materializes the union of the tags found in `FIFFB_MEAS` / `FIFFB_MEAS_INFO:` `sfreq`, `lowpass` / `highpass` / `line_freq`, `meas_date`, `experimenter`, `projs` ([`FiffProj`](/docs/api/fiff/fiff-proj)), `comps` ([`FiffCtfComp`](/docs/api/fiff/fiff-ctf-comp)), `dig` ([`FiffDigPoint`](/docs/api/fiff/fiff-dig-point)), `hpi_results` / `hpi_meas`, `dev_head_t` / `ctf_head_t`, plus the [`FiffInfoBase`](/docs/api/fiff/fiff-info-base) channel / bads / sfreq subset. Drop-in counterpart of `mne.Info` in MNE-Python.
 
 ```cpp title="src/examples/ex_fiff_api/main.cpp"
-QFile rawFile(dir + "/sample_audvis_trunc_raw.fif");
-FiffRawData raw(rawFile);        // reads the measurement info, raw data is read on demand
-const FiffInfo& info = raw.info; // channels, sampling rate, bads, projectors, digitizer, transforms
+FiffRawData raw((dir + "/sample_audvis_trunc_raw.fif").toStdString()); // reads the measurement info, raw data is read on demand
+const FiffInfo& info = raw.info;                                       // channels, sampling rate, bads, projectors, digitizer, transforms
 const FiffChInfo& first = info.chs[0];
 const RowVectorXi megPicks = info.pick_types(true, false, false, {}, info.bads); // good MEG channels
 ```
@@ -326,9 +325,8 @@ FiffInfo makeInfo()
 FIFF library: measurement info, channels, digitizer, transforms, projectors, covariance, events, annotations, evoked sets and the low-level file structure.
 
 ````cpp title="src/examples/ex_fiff_api/main.cpp, line 109"
-QFile rawFile(dir + "/sample_audvis_trunc_raw.fif");
-FiffRawData raw(rawFile);        // reads the measurement info, raw data is read on demand
-const FiffInfo& info = raw.info; // channels, sampling rate, bads, projectors, digitizer, transforms
+FiffRawData raw((dir + "/sample_audvis_trunc_raw.fif").toStdString()); // reads the measurement info, raw data is read on demand
+const FiffInfo& info = raw.info;                                       // channels, sampling rate, bads, projectors, digitizer, transforms
 const FiffChInfo& first = info.chs[0];
 const RowVectorXi megPicks = info.pick_types(true, false, false, {}, info.bads); // good MEG channels
 // mne.io.read_raw_fif: 376 channels at 300.307 Hz, bads MEG 2443 + EEG 053, 4 projectors

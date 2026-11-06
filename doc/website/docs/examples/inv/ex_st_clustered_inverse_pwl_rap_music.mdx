@@ -173,7 +173,6 @@ int main(int argc, char* argv[])
     parser.process(a);
 
     //Load data
-    QFile t_fileRaw(parser.value(inputOption));
     QFile t_fileFwd(parser.value(fwdOption));
 
     FsSurfaceSet t_surfSet(parser.value(subjectOption), parser.value(hemiOption).toInt(), parser.value(surfOption), parser.value(subjectPathOption));
@@ -213,7 +212,7 @@ int main(int argc, char* argv[])
     //
     //   Setup for reading the raw data
     //
-    FiffRawData raw(t_fileRaw);
+    FiffRawData raw(parser.value(inputOption).toStdString());
 
     float from = raw.first_samp + startSample;
     float to = from + numSample - 1;

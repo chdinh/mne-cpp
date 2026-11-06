@@ -1838,7 +1838,7 @@
           "methods": [
             {
               "name": "start_writing_raw",
-              "url": "/docs/api/fiff/fiff-stream/#start_writing_rawp_iodevice-info-cals-sel-bresetrange-datatype"
+              "url": "/docs/api/fiff/fiff-stream/#start_writing_rawpath-info-cals-sel-bresetrange-datatype"
             }
           ]
         },

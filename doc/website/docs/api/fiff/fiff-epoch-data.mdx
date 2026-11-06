@@ -20,8 +20,7 @@ Fixed-length epoching result: the (nepoch × nchan × nsamples) data stack plus 
 Returned by the static epoch-cutting helpers of [`FiffEpochs`](/docs/api/fiff/fiff-epochs). Mirrors the `mne.EpochsArray` construction return value in MNE-Python.
 
 ```cpp title="src/examples/ex_fiff_structure/main.cpp"
-QFile rawFile(rawPath);
-FiffRawData raw(rawFile);
+FiffRawData raw(rawPath.toStdString());
 MatrixXd data;
 MatrixXd times;
 ok &= raw.read_raw_segment(data, times); // all 6007 samples
@@ -45,7 +44,7 @@ const FiffEvoked average = FiffEpochs::averageEpochs(epochs, sfreq);
 
 FIFF library: fixed-length epochs, CTF compensation, the file directory and raw buffers, and handing recordings to another application.
 
-````cpp title="src/examples/ex_fiff_structure/main.cpp, line 98"
+````cpp title="src/examples/ex_fiff_structure/main.cpp, line 97"
 MatrixXd times;
 ok &= raw.read_raw_segment(data, times); // all 6007 samples
 const double sfreq = raw.info.sfreq;

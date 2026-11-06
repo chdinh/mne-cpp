@@ -160,7 +160,7 @@ Compares two 4x4 transformation matrices by evaluating their rotation and transl
 
 Fit continuous HPI coils on raw data with SSP and write the head positions for comparison with MaxFilter.
 
-````cpp title="src/examples/ex_hpiFit/main.cpp, line 183"
+````cpp title="src/examples/ex_hpiFit/main.cpp, line 182"
 InvHpiDataUpdater hpiDataUpdater = InvHpiDataUpdater(pFiffInfo);
 InvHpiFit HPI = InvHpiFit(hpiDataUpdater.getSensors());
 ````
@@ -169,7 +169,7 @@ InvHpiFit HPI = InvHpiFit(hpiDataUpdater.getSensors());
 
 DSP real-time workers: averaging, covariance, noise spectrum, connectivity, HPI fitting and inverse operators.
 
-````cpp title="src/examples/ex_dsp_rt/main.cpp, line 298"
+````cpp title="src/examples/ex_dsp_rt/main.cpp, line 297"
 hpiWorker.doWork(updater.getProjectedData(), updater.getProjectors(), model, updater.getHpiDigitizer());
 HpiFitResult direct;
 InvHpiFit(updater.getSensors()).fit(updater.getProjectedData(), updater.getProjectors(), model, updater.getHpiDigitizer(), direct);
@@ -181,7 +181,7 @@ ok &= expect(workerFit.GoF.size() == 4 && workerFit.GoF.minCoeff() > 0.98 && wor
 
 Inverse library: continuous head position (HPI) fitting.
 
-````cpp title="src/examples/ex_inv_hpi/main.cpp, line 107"
+````cpp title="src/examples/ex_inv_hpi/main.cpp, line 106"
 updater.prepareDataAndProjectors(segment, MatrixXd::Identity(info->nchan, info->nchan));
 // The coil frequencies are known but not their order; the first fit with bOrderFrequencies finds it.
 const InvHpiModelParameters model(QVector<int>({154, 158, 161, 166}), info->sfreq, info->linefreq, true);

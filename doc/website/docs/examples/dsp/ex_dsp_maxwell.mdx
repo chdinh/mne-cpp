@@ -197,8 +197,7 @@ int main(int argc, char* argv[])
                                  QCoreApplication::applicationDirPath() + "/../resources/data/mne-cpp-test-data/MEG/sample/sample_audvis_trunc_raw.fif");
     parser.addOption(rawOption);
     parser.process(app);
-    QFile rawFile(parser.value(rawOption));
-    const FiffRawData raw(rawFile);
+    const FiffRawData raw(parser.value(rawOption).toStdString());
     FiffInfo info = raw.info;
     bool ok = info.nchan > 0;
 

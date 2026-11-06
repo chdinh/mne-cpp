@@ -24,8 +24,7 @@ Static helpers that cut continuous data into fixed-length epochs, concatenate an
 Stateless; operates on data matrices. Counterpart of `mne.make_fixed_length_epochs` and `mne.concatenate_epochs` in MNE-Python.
 
 ```cpp title="src/examples/ex_fiff_structure/main.cpp"
-QFile rawFile(rawPath);
-FiffRawData raw(rawFile);
+FiffRawData raw(rawPath.toStdString());
 MatrixXd data;
 MatrixXd times;
 ok &= raw.read_raw_segment(data, times); // all 6007 samples
@@ -135,7 +134,7 @@ Convenience method to get a list of data matrices from epoch structures, suitabl
 
 FIFF library: fixed-length epochs, CTF compensation, the file directory and raw buffers, and handing recordings to another application.
 
-````cpp title="src/examples/ex_fiff_structure/main.cpp, line 98"
+````cpp title="src/examples/ex_fiff_structure/main.cpp, line 97"
 MatrixXd times;
 ok &= raw.read_raw_segment(data, times); // all 6007 samples
 const double sfreq = raw.info.sfreq;

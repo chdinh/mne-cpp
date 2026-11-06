@@ -617,8 +617,7 @@ int main(int argc, char* argv[])
     fiff_int_t dest_comp = 0;
 
     // Create sensor level data
-    QFile t_fileRaw(sRaw);
-    FiffRawData raw(t_fileRaw);
+    FiffRawData raw(sRaw.toStdString());
 
     int samplesToCutOut = (abs(fTMin) + 0.0) * raw.info.sfreq;
     QSharedPointer<ConnectivitySettingsManager> pConnectivitySettingsManager = QSharedPointer<ConnectivitySettingsManager>::create();

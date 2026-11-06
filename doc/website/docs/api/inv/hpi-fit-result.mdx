@@ -44,7 +44,7 @@ hpi.fit(updater.getProjectedData(), updater.getProjectors(), model, updater.getH
 
 DSP real-time workers: averaging, covariance, noise spectrum, connectivity, HPI fitting and inverse operators.
 
-````cpp title="src/examples/ex_dsp_rt/main.cpp, line 295"
+````cpp title="src/examples/ex_dsp_rt/main.cpp, line 294"
 RtHpiWorker hpiWorker(updater.getSensors());
 HpiFitResult workerFit;
 QObject::connect(&hpiWorker, &RtHpiWorker::resultReady, [&](const HpiFitResult& fit) { workerFit = fit; });
@@ -59,7 +59,7 @@ ok &= expect(workerFit.GoF.size() == 4 && workerFit.GoF.minCoeff() > 0.98 && wor
 
 Fit continuous HPI coils on raw data with SSP and write the head positions for comparison with MaxFilter.
 
-````cpp title="src/examples/ex_hpiFit/main.cpp, line 208"
+````cpp title="src/examples/ex_hpiFit/main.cpp, line 207"
 HpiFitResult hpiFitResult;
 HPI.fit(matProjectedData, matPreparedProjectors, hpiModelParameters, matCoilsHead, true, hpiFitResult);
 hpiModelParameters = InvHpiModelParameters(hpiFitResult.hpiFreqs,
@@ -72,7 +72,7 @@ hpiModelParameters = InvHpiModelParameters(hpiFitResult.hpiFreqs,
 
 Inverse library: continuous head position (HPI) fitting.
 
-````cpp title="src/examples/ex_inv_hpi/main.cpp, line 108"
+````cpp title="src/examples/ex_inv_hpi/main.cpp, line 107"
 // The coil frequencies are known but not their order; the first fit with bOrderFrequencies finds it.
 const InvHpiModelParameters model(QVector<int>({154, 158, 161, 166}), info->sfreq, info->linefreq, true);
 InvHpiFit hpi(updater.getSensors());

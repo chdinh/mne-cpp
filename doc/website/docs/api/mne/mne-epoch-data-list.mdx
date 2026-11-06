@@ -23,7 +23,7 @@ Ordered list of [`MNEEpochData`](/docs/api/mne/mne-epoch-data) objects sharing a
 
 ```cpp title="src/examples/ex_mne_api/main.cpp"
 QFile rawFile(data + "/MEG/sample/sample_audvis_trunc_raw.fif");
-const FiffRawData raw(rawFile);
+const FiffRawData raw((data + "/MEG/sample/sample_audvis_trunc_raw.fif").toStdString());
 FiffEvents events;
 FiffEvents::detect_from_raw(raw, events); // rising edges on STI 014
 // Epochs of event 1 from -100 to 300 ms, no rejection
@@ -316,7 +316,7 @@ MNELIB::MNEEpochDataList epochs;
 
 Average stimulus-locked epochs of a raw FIFF recording into an evoked response, with event selection and EOG rejection.
 
-````cpp title="src/examples/ex_averaging/main.cpp, line 155"
+````cpp title="src/examples/ex_averaging/main.cpp, line 154"
 FiffEvoked evoked = MNEEpochDataList::computeAverage(raw,
                                                      events,
                                                      fTMin,

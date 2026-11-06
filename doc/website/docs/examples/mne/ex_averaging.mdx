@@ -186,7 +186,6 @@ int main(int argc, char* argv[])
 
     //Load data
     QString t_fileRawName = parser.value(inputOption);
-    QFile t_fileRaw(t_fileRawName);
 
     qint32 event = parser.value(evokedIdxOption).toInt();
     QString t_sEventName = parser.value(eventsFileOption);
@@ -210,7 +209,7 @@ int main(int argc, char* argv[])
     }
 
     // Setup for reading the raw data
-    FiffRawData raw(t_fileRaw);
+    FiffRawData raw(t_fileRawName.toStdString());
     MNE::setup_compensators(raw, dest_comp, keep_comp);
 
     RowVectorXi picks;

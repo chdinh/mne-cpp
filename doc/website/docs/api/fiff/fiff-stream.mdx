@@ -112,6 +112,16 @@ a file opened without Qt.
 
 ---
 
+### reopen()
+
+Opens a closed stream again without truncating it; the directory read before stays valid.
+
+**Returns:**
+
+- *bool* — Whether the stream is open.
+
+---
+
 ### setLittleEndian(littleEndian)
 
 Sets the byte order of the stream; FIFF files are big-endian, some raw data files little-endian.
@@ -1139,7 +1149,7 @@ Opens a FIFF file for reading and reads its tag directory.
 
 ---
 
-### setup_read_raw(p_IODevice, data, allow_maxshield, is_littleEndian)
+### setup_read_raw(path, data, allow_maxshield, is_littleEndian)
 
 fiff_setup_read_raw
 
@@ -1147,8 +1157,8 @@ Read information about raw data file
 
 **Parameters:**
 
-- **p_IODevice** : *QIODevice &*
-  An fiff IO device like a fiff QFile or QTCPSocket.
+- **path** : *const std::filesystem::path &*
+  The raw data file.
 
 - **data** : *[FiffRawData](/docs/api/fiff/fiff-raw-data) &*
   The raw data information - contains the opened fiff file.
@@ -1162,6 +1172,50 @@ Read information about raw data file
 **Returns:**
 
 - *bool* — true if succeeded, false otherwise.
+
+---
+
+### setup_read_raw(bytes, data, allow_maxshield, is_littleEndian)
+
+Read information about raw data held in bytes that are not a file, e.g.
+
+in memory.
+
+**Parameters:**
+
+- **bytes** : *std::unique_ptr&lt; [ByteStream](/docs/api/utils/byte-stream) &gt;*
+  The raw data; data keeps them for reading segments.
+
+- **data** : *[FiffRawData](/docs/api/fiff/fiff-raw-data) &*
+  The raw data information.
+
+- **allow_maxshield** : *bool*
+  Accept unprocessed MaxShield data.
+
+- **is_littleEndian** : *bool*
+  The bytes are in little-endian byte order.
+
+**Returns:**
+
+- *bool* — true if succeeded, false otherwise.
+
+---
+
+### byteStream(device, mode)
+
+Byte stream over a Qt device, for callers that hold a QIODevice such as a socket or a QBuffer.
+
+**Parameters:**
+
+- **device** : *QIODevice &*
+  The device; it must outlive the byte stream. It is opened in `mode` unless already open.
+
+- **mode** : *QIODevice::OpenMode*
+  How to open the device.
+
+**Returns:**
+
+- *std::unique_ptr&lt; [ByteStream](/docs/api/utils/byte-stream) &gt;* — The byte stream, or nullptr if the device cannot be opened.
 
 ---
 
@@ -1227,7 +1281,7 @@ Open fiff file for update.
 
 ---
 
-### start_writing_raw(p_IODevice, info, cals, sel, bResetRange, dataType)
+### start_writing_raw(path, info, cals, sel, bResetRange, dataType)
 
 fiff_start_writing_raw
 
@@ -1235,8 +1289,8 @@ function [fid,cals] = fiff_start_writing_raw(name,info,sel)
 
 **Parameters:**
 
-- **p_IODevice** : *QIODevice &*
-  A fiff IO device like a fiff QFile or QTCPSocket.
+- **path** : *const std::filesystem::path &*
+  The file to create.
 
 - **info** : *const [FiffInfo](/docs/api/fiff/fiff-info) &*
   The measurement info block of the source file.
@@ -1255,7 +1309,39 @@ function [fid,cals] = fiff_start_writing_raw(name,info,sel)
 
 **Returns:**
 
-- *FiffStream::SPtr* — the started fiff file, or null if the device cannot be opened for writing.
+- *FiffStream::SPtr* — the started fiff file, or null if the file cannot be created.
+
+---
+
+### start_writing_raw(bytes, info, cals, sel, bResetRange, dataType)
+
+Starts raw data in bytes that are not a file, e.g.
+
+in memory.
+
+**Parameters:**
+
+- **bytes** : *std::unique_ptr&lt; [ByteStream](/docs/api/utils/byte-stream) &gt;*
+  Where to write; the returned stream owns them.
+
+- **info** : *const [FiffInfo](/docs/api/fiff/fiff-info) &*
+  The measurement info block of the source file.
+
+- **cals** : *Eigen::RowVectorXd &*
+  A copy of the calibration values.
+
+- **sel** : *Eigen::MatrixXi*
+  Which channels will be included in the output (optional).
+
+- **bResetRange** : *bool*
+  Flag whether to reset the channel range to 1.0. Default is true.
+
+- **dataType** : *fiff_int_t*
+  FIFF_DATA_PACK of the buffers that follow, as for the path overload.
+
+**Returns:**
+
+- *FiffStream::SPtr* — the started stream, or null if `bytes` is null.
 
 ---
 
@@ -1292,7 +1378,7 @@ Opens the source file, locates the FIFFB_PROCESSING_HISTORY block, reads all tag
 
 FIFF library: measurement info, channels, digitizer, transforms, projectors, covariance, events, annotations, evoked sets and the low-level file structure.
 
-````cpp title="src/examples/ex_fiff_api/main.cpp, line 205"
+````cpp title="src/examples/ex_fiff_api/main.cpp, line 204"
 QFile structureFile(dir + "/sample_audvis-ave.fif");
 FiffStream::SPtr stream(new FiffStream(&structureFile));
 const bool opened = stream->open();
@@ -1319,7 +1405,7 @@ stream.setLittleEndian(littleEndian);
 
 FIFF library: fixed-length epochs, CTF compensation, the file directory and raw buffers, and handing recordings to another application.
 
-````cpp title="src/examples/ex_fiff_structure/main.cpp, line 120"
+````cpp title="src/examples/ex_fiff_structure/main.cpp, line 119"
 QFile structureFile(rawPath);
 FiffStream::SPtr stream(new FiffStream(&structureFile));
 ok &= stream->open();

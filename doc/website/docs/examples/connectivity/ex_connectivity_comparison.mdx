@@ -277,8 +277,7 @@ int main(int argc, char* argv[])
     ConnectivitySettings conSettings;
 
     // Create sensor level data
-    QFile t_fileRaw(sRaw);
-    FiffRawData raw(t_fileRaw);
+    FiffRawData raw(sRaw.toStdString());
 
     // Select bad channels
     //raw.info.bads << "MEG2412" << "MEG2413";

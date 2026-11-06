@@ -31,7 +31,7 @@ Open a recording and pick the MEG channels plus the trigger channel:
 //
 //   Setup for reading the raw data
 //
-FiffRawData raw(t_fileRaw);
+FiffRawData raw(parser.value(inputOption).toStdString());
 
 //
 //   Set up pick list: MEG + STI 014 - bad channels
@@ -103,25 +103,30 @@ Every member has value semantics, so the compiler-generated member-wise assignme
 
 ---
 
-### FiffRawData(p_IODevice)
+### FiffRawData(path, b_littleEndian)
 
-Constructs fiff raw data, by reading from a IO device.
+Constructs fiff raw data by reading a FIFF file.
 
 **Parameters:**
 
-- **p_IODevice** : *QIODevice &*
-  IO device to read the raw data from .
+- **path** : *const std::filesystem::path &*
+  The raw data file.
+
+- **b_littleEndian** : *bool*
+  If true, read data as little-endian.
 
 ---
 
-### FiffRawData(p_IODevice, b_littleEndian)
+### FiffRawData(bytes, b_littleEndian)
 
-Constructs fiff raw data, by reading from a IO device with specified endianness.
+Constructs fiff raw data held in bytes that are not a file, e.g.
+
+in memory.
 
 **Parameters:**
 
-- **p_IODevice** : *QIODevice &*
-  IO device to read the raw data from.
+- **bytes** : *std::unique_ptr&lt; [ByteStream](/docs/api/utils/byte-stream) &gt;*
+  The raw data; kept for reading segments.
 
 - **b_littleEndian** : *bool*
   If true, read data as little-endian.
@@ -240,7 +245,7 @@ Read a specific raw data segment.
 
 ---
 
-### save(p_IODevice, picks, decim, from, to)
+### save(path, picks, decim, from, to)
 
 Save raw data to a FIFF file, optionally with decimation and channel picking.
 
@@ -248,8 +253,8 @@ Ported from save.c (MNE-C).
 
 **Parameters:**
 
-- **p_IODevice** : *QIODevice &*
-  Output device to write to.
+- **path** : *const std::filesystem::path &*
+  The file to write.
 
 - **picks** : *const Eigen::RowVectorXi &*
   Channel indices to include (empty = all channels).
@@ -283,8 +288,7 @@ Ported from save.c (MNE-C).
 FIFF library: fixed-length epochs, CTF compensation, the file directory and raw buffers, and handing recordings to another application.
 
 ````cpp title="src/examples/ex_fiff_structure/main.cpp, line 95"
-QFile rawFile(rawPath);
-FiffRawData raw(rawFile);
+FiffRawData raw(rawPath.toStdString());
 MatrixXd data;
 MatrixXd times;
 ok &= raw.read_raw_segment(data, times); // all 6007 samples
@@ -303,8 +307,7 @@ DSP real-time workers: averaging, covariance, noise spectrum, connectivity, HPI 
 ````cpp title="src/examples/ex_dsp_rt/main.cpp, line 275"
 // ---------------------------------------------------------------------------------------------------------
 // HPI: fit the four coils of the test recording on the worker and directly
-QFile hpiFile(dataDir + "/MEG/sample/test_hpiFit_raw.fif");
-FiffRawData hpiRaw(hpiFile);
+FiffRawData hpiRaw((dataDir + "/MEG/sample/test_hpiFit_raw.fif").toStdString());
 const FiffInfo::SPtr hpiInfo = FiffInfo::SPtr::create(hpiRaw.info);
 MatrixXd hpiData;
 MatrixXd hpiTimes;
@@ -322,8 +325,7 @@ projInfo.make_projector(projectors);
 Record an acquisition source to FIFF and to a BIDS dataset while it runs, and read the file back.
 
 ````cpp title="src/examples/ex_acq_record/main.cpp, line 100"
-QFile file(QString::fromStdString(path));
-FiffRawData raw(file);
+FiffRawData raw(QString::fromStdString(path).toStdString());
 const FiffDeviceInfo& recorded = raw.info.device_info; // backend, device and source id of the recording
 std::printf("%s: %d channels, samples %d to %d, device %s '%s' (%s)\n", path.c_str(), raw.info.nchan,
             raw.first_samp, raw.last_samp, recorded.type.c_str(), recorded.model.c_str(),

@@ -251,7 +251,7 @@ int main(int argc, char* argv[])
     //
     //   Setup for reading the raw data
     //
-    FiffRawData raw(t_fileRaw);
+    FiffRawData raw(parser.value(inputOption).toStdString());
 
     RowVectorXi picks;
     if (pick_all) {

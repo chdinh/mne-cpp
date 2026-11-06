@@ -199,10 +199,9 @@ int main(int argc, char* argv[])
     parser.process(a);
 
     // Init data loading and writing
-    QFile fileIn(parser.value(inputOption));
     QFile fileOut(parser.value(outputOption));
 
-    FiffRawData::SPtr pRaw = FiffRawData::SPtr::create(fileIn);
+    FiffRawData::SPtr pRaw = FiffRawData::SPtr::create(parser.value(inputOption).toStdString());
 
     // Only filter MEG and EEG channels
     RowVectorXi picks = pRaw->info.pick_types(true, false, false);

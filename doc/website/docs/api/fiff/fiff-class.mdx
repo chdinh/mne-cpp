@@ -599,7 +599,7 @@ Read tag information of one tag from a fif file. if pos is not provided, reading
 
 ---
 
-### setup_read_raw(p_IODevice, data, allow_maxshield)
+### setup_read_raw(path, data, allow_maxshield)
 
 fiff_setup_read_raw
 
@@ -609,8 +609,8 @@ Read information about raw data file
 
 **Parameters:**
 
-- **p_IODevice** : *QIODevice &*
-  A fiff IO device like a fiff QFile or QTCPSocket.
+- **path** : *const std::filesystem::path &*
+  The raw data file.
 
 - **data** : *[FiffRawData](/docs/api/fiff/fiff-raw-data) &*
   The raw data information - contains the opened fiff file.
@@ -680,7 +680,7 @@ Opens a fiff file for writing and writes the compulsory header tags
 
 ---
 
-### start_writing_raw(p_IODevice, info, cals, sel)
+### start_writing_raw(path, info, cals, sel)
 
 fiff_start_writing_raw
 
@@ -690,8 +690,8 @@ function [fid,cals] = fiff_start_writing_raw(name,info,sel)
 
 **Parameters:**
 
-- **p_IODevice** : *QIODevice &*
-  A fiff IO device like a fiff QFile or QTCPSocket.
+- **path** : *const std::filesystem::path &*
+  The file to create.
 
 - **info** : *const [FiffInfo](/docs/api/fiff/fiff-info) &*
   The measurement info block of the source file.
@@ -989,7 +989,7 @@ Writes a string tag
 
 FIFF library: measurement info, channels, digitizer, transforms, projectors, covariance, events, annotations, evoked sets and the low-level file structure.
 
-````cpp title="src/examples/ex_fiff_api/main.cpp, line 258"
+````cpp title="src/examples/ex_fiff_api/main.cpp, line 257"
 QFile facadeFile(dir + "/sample_audvis_trunc_raw.fif");
 FiffStream::SPtr facadeStream;
 const bool facadeOpened = Fiff::open(facadeFile, facadeStream); // static wrappers around FiffStream

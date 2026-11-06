@@ -175,8 +175,7 @@ int main(int argc, char* argv[])
     const QString data = parser.value(dataOption);
     bool ok = true;
 
-    QFile rawFile(data + "/MEG/sample/test_hpiFit_raw.fif");
-    FiffRawData raw(rawFile);
+    FiffRawData raw((data + "/MEG/sample/test_hpiFit_raw.fif").toStdString());
     const FiffInfo::SPtr info = FiffInfo::SPtr::create(raw.info);
     MatrixXd segment;
     MatrixXd times;
