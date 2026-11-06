@@ -64,14 +64,14 @@ Copy assignment operator (deep-copies unique_ptr members).
 
 ---
 
-### FiffDigitizerData(p_IODevice)
+### FiffDigitizerData(path)
 
-Constructs a [`FiffDigitizerData`](/docs/api/fiff/fiff-digitizer-data) by reading from an IO device.
+Constructs a [`FiffDigitizerData`](/docs/api/fiff/fiff-digitizer-data) by reading a FIFF file.
 
 **Parameters:**
 
-- **p_IODevice** : *QIODevice &*
-  Input device to read data from.
+- **path** : *const std::filesystem::path &*
+  FIFF file to read the digitizer data from.
 
 ---
 
