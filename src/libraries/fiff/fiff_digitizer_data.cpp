@@ -93,34 +93,19 @@ FiffDigitizerData& FiffDigitizerData::operator=(const FiffDigitizerData& rhs)
 
 //=============================================================================================================
 
-FiffDigitizerData::FiffDigitizerData(QIODevice& p_IODevice)
+FiffDigitizerData::FiffDigitizerData(const std::filesystem::path& path)
 : coord_frame(FIFFV_COORD_UNKNOWN)
 , npoint(0)
 , show(false)
 , show_minimal(false)
 , dist_valid(false)
 {
-    // Open the io device
-    FiffStream::SPtr t_pStream(new FiffStream(&p_IODevice));
-    bool open_here = false;
-
-    //Open if the device and stream have not been openend already
-    if (!t_pStream->isOpen()) {
-        if (!t_pStream->open()) {
-            throw std::runtime_error("Could not open the digitizer data file");
-        }
-
-        open_here = true;
+    FiffStream::SPtr t_pStream = FiffStream::open(path);
+    if (!t_pStream) {
+        throw std::runtime_error("Could not open the digitizer data file");
     }
-
-    // If device is open read the data
     if (!t_pStream->read_digitizer_data(t_pStream->dirtree(), *this)) {
         throw std::runtime_error("Could not read the FiffDigitizerData");
-    }
-
-    // If stream has been opened in this function also close here again
-    if (open_here) {
-        t_pStream->close();
     }
 }
 

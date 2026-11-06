@@ -246,8 +246,7 @@ void RealTime3DWidget::alignFiducials(const QString& sFilePath)
 {
     m_sFilePathDigitizers = sFilePath;
 
-    QFile t_fileDigData(sFilePath);
-    QSharedPointer<FIFFLIB::FiffDigitizerData> t_digData = QSharedPointer<FIFFLIB::FiffDigitizerData>::create(t_fileDigData);
+    QSharedPointer<FIFFLIB::FiffDigitizerData> t_digData = QSharedPointer<FIFFLIB::FiffDigitizerData>::create(UTILSLIB::pathFromUtf8(sFilePath.toStdString()));
 
     alignFiducials(t_digData);
 }
@@ -265,10 +264,9 @@ void RealTime3DWidget::alignFiducials(QSharedPointer<FIFFLIB::FiffDigitizerData>
 
     MNEMshDisplaySurface* surface = pMneMshDisplaySurfaceSet->surfs[0].get();
 
-    QFile t_fileDigDataReference(QCoreApplication::applicationDirPath() + "/../resources/general/hpiAlignment/fsaverage-fiducials.fif");
 
     Eigen::Vector3f scales;
-    QScopedPointer<FiffDigitizerData> t_digDataReference(new FiffDigitizerData(t_fileDigDataReference));
+    QScopedPointer<FiffDigitizerData> t_digDataReference(new FiffDigitizerData(UTILSLIB::pathFromUtf8((QCoreApplication::applicationDirPath() + "/../resources/general/hpiAlignment/fsaverage-fiducials.fif").toStdString())));
     surface->align_fiducials(*pDigData,
                              *t_digDataReference,
                              10,

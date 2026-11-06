@@ -30,7 +30,7 @@
       "decoding",
       "math"
     ],
-    "tokens": 20035,
+    "tokens": 20033,
     "gui_outside_design": []
   },
   "libraries": {
@@ -241,10 +241,10 @@
       ]
     },
     "fiff": {
-      "tokens": 1732,
+      "tokens": 1730,
       "by_category": {
         "containers": 305,
-        "files": 122,
+        "files": 120,
         "global": 453,
         "json": 27,
         "logging": 295,

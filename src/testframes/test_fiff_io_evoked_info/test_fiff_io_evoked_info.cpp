@@ -577,8 +577,7 @@ void TestFiffIoEvokedInfo::digitizerData_assignment()
 
 void TestFiffIoEvokedInfo::digitizerData_readFromFile()
 {
-    QFile file(rawPath());
-    FiffDigitizerData dd(file);
+    FiffDigitizerData dd(rawPath().toStdString());
     // The raw file should have digitizer points
     QVERIFY(dd.points.size() >= 0);
 }

@@ -945,8 +945,7 @@ void TestMneLibrary::displaySurf_alignFiducials()
     QCOMPARE(set.add_bem_surface(dir + "fsaverage-head.fif", FIFFV_BEM_SURF_ID_HEAD, "head", 1, 1), 0);
     MNEMshDisplaySurface* surf = set.surfs[0].get();
     const MatrixX3f mriRr = surf->rr;
-    QFile fidFile(dir + "fsaverage-fiducials.fif");
-    FiffDigitizerData mriDig(fidFile);
+    FiffDigitizerData mriDig((dir + "fsaverage-fiducials.fif").toStdString());
     QCOMPARE(mriDig.npoint, 3);
 
     // mne-python get_ras_to_neuromag_trans(nasion, lpa, rpa) of the fsaverage fiducials.

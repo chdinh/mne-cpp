@@ -42,6 +42,7 @@
 
 #include <QSharedPointer>
 
+#include <filesystem>
 #include <memory>
 
 #include <QDebug>
@@ -104,11 +105,11 @@ public:
 
     //=========================================================================================================
     /**
-     * Constructs a FiffDigitizerData by reading from an IO device.
+     * Constructs a FiffDigitizerData by reading a FIFF file.
      *
-     * @param[in] p_IODevice   Input device to read data from.
+     * @param[in] path   FIFF file to read the digitizer data from.
      */
-    FiffDigitizerData(QIODevice& p_IODevice);
+    explicit FiffDigitizerData(const std::filesystem::path& path);
 
     //=========================================================================================================
     /**
