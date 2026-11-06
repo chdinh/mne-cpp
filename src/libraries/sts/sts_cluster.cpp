@@ -354,7 +354,7 @@ MatrixXd StatsCluster::computeFMap(const std::vector<std::vector<MatrixXd>>& con
     // Count total subjects and build per-condition means
     int nTotal = 0;
     for (int c = 0; c < nConditions; ++c) {
-        nTotal += conditions[c].size();
+        nTotal += static_cast<int>(conditions[c].size());
     }
 
     // Grand mean

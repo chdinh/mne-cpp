@@ -526,7 +526,7 @@ void FiffTag::convert_tag_data(const FiffTag::UPtr& tag, int from_endian, int to
             swap_floatp(fthis + 0);
             swap_floatp(fthis + 1);
             sthis = reinterpret_cast<short*>(fthis + 2);
-            np = (tag->size() - 2 * sizeof(float)) / sizeof(short);
+            np = static_cast<int>((tag->size() - 2 * sizeof(float)) / sizeof(short));
             for (k = 0; k < np; k++, sthis++)
                 *sthis = swap_short(*sthis);
             break;

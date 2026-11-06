@@ -362,7 +362,7 @@ void Hpi::updateProjections()
     if (m_pFiffInfo) {
         m_mutex.lock();
         if (m_iNumberBadChannels != static_cast<int>(m_pFiffInfo->bads.size()) || m_matCompProjectors.rows() == 0 || m_matCompProjectors.cols() == 0) {
-            m_iNumberBadChannels = m_pFiffInfo->bads.size();
+            m_iNumberBadChannels = static_cast<qint16>(m_pFiffInfo->bads.size());
         } else {
             m_mutex.unlock();
             return;
