@@ -168,7 +168,7 @@ void UTILSLIB::addReferenceChannels(MatrixXd& data,
 
     const Eigen::Index nTimes = data.cols();
     const Eigen::Index nOldCh = data.rows();
-    const int nNew = chNames.size();
+    const int nNew = static_cast<int>(chNames.size());
 
     // Expand data matrix with zero rows
     MatrixXd newData(nOldCh + nNew, nTimes);
@@ -230,7 +230,7 @@ void UTILSLIB::setBipolarReference(MatrixXd& data,
         return;
     }
 
-    const int nPairs = anodes.size();
+    const int nPairs = static_cast<int>(anodes.size());
     const Eigen::Index nTimes = data.cols();
 
     // Resolve anode and cathode indices

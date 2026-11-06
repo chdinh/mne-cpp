@@ -301,7 +301,7 @@ void NeuronalConnectivity::updateRTMSA(SCMEASLIB::Measurement::SPtr pMeasurement
 
             //Generate node vertices
             generateNodeVertices();
-            m_iNumberBadChannels = m_pFiffInfo->bads.size();
+            m_iNumberBadChannels = static_cast<int>(m_pFiffInfo->bads.size());
         }
 
         if (!m_bPluginControlWidgetsInit) {
@@ -313,7 +313,7 @@ void NeuronalConnectivity::updateRTMSA(SCMEASLIB::Measurement::SPtr pMeasurement
             if (m_iNumberBadChannels != static_cast<int>(pRTMSA->info()->bads.size())) {
                 m_pFiffInfo = pRTMSA->info();
                 generateNodeVertices();
-                m_iNumberBadChannels = m_pFiffInfo->bads.size();
+                m_iNumberBadChannels = static_cast<int>(m_pFiffInfo->bads.size());
                 m_pRtConnectivity->restart();
             }
 
@@ -384,7 +384,7 @@ void NeuronalConnectivity::updateRTEV(SCMEASLIB::Measurement::SPtr pMeasurement)
 
                     //Generate node vertices
                     generateNodeVertices();
-                    m_iNumberBadChannels = m_pFiffInfo->bads.size();
+                    m_iNumberBadChannels = static_cast<int>(m_pFiffInfo->bads.size());
 
                     break;
                 }

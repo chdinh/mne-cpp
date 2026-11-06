@@ -297,7 +297,7 @@ bool MNEInverseOperator::check_ch_names(const FiffInfo& measInfo) const
         if (!UTILSLIB::contains(data_ch_names, inv_ch_names[i]))
             missing_ch_names.push_back(inv_ch_names[i]);
 
-    qint32 n_missing = missing_ch_names.size();
+    qint32 n_missing = static_cast<int>(missing_ch_names.size());
 
     if (n_missing > 0) {
         qCritical() << n_missing << "channels in inverse operator are not present in the data (" << missing_ch_names << ")";

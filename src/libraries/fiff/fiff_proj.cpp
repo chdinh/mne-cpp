@@ -165,7 +165,7 @@ void FiffProj::activate_projs(QList<FiffProj>& p_qListFiffProj)
 
 fiff_int_t FiffProj::make_projector(const QList<FiffProj>& projs, const StringList& ch_names, MatrixXd& proj, const StringList& bads, MatrixXd& U)
 {
-    fiff_int_t nchan = ch_names.size();
+    fiff_int_t nchan = static_cast<int>(ch_names.size());
     if (nchan == 0) {
         throw std::invalid_argument("No channel names specified");
     }

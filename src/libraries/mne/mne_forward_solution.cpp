@@ -1079,7 +1079,7 @@ void MNEForwardSolution::prepare_forward(const FiffInfo& p_info,
         if (!UTILSLIB::contains(p_info.bads, p_info.chs[i].ch_name) && !UTILSLIB::contains(p_noise_cov.bads, p_info.chs[i].ch_name) && UTILSLIB::contains(p_noise_cov.names, p_info.chs[i].ch_name) && UTILSLIB::contains(fwd_ch_names, p_info.chs[i].ch_name))
             ch_names.push_back(p_info.chs[i].ch_name);
 
-    qint32 n_chan = ch_names.size();
+    qint32 n_chan = static_cast<int>(ch_names.size());
     qInfo("Computing inverse operator with %d channels.", n_chan);
 
     //

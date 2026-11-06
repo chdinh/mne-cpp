@@ -197,7 +197,7 @@ std::unique_ptr<MNECovMatrix> MNECovMatrix::read(const QString& name, int kind)
     }
     if (covnode->find_tag(stream, FIFF_MNE_ROW_NAMES, t_pTag)) {
         names = FiffStream::split_name_list(t_pTag->toString());
-        nnames = names.size();
+        nnames = static_cast<int>(names.size());
         if (nnames != ncov) {
             qCritical("Incorrect number of channel names for a covariance matrix");
             stream->close();
@@ -292,7 +292,7 @@ std::unique_ptr<MNECovMatrix> MNECovMatrix::read(const QString& name, int kind)
          * Read the optional bad channel list
          */
         bads = stream->read_bad_channels(nodes[k]);
-        nbad = bads.size();
+        nbad = static_cast<int>(bads.size());
     }
     if (cov_sparse_owner)
         res = create_sparse(kind, ncov, names, cov_sparse_owner.release());

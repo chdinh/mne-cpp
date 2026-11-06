@@ -2542,14 +2542,14 @@ fiff_long_t FiffStream::write_ch_info(const FiffChInfo& ch)
     //
     //   Finally channel name
     //
-    fiff_int_t len = ch.ch_name.size();
+    fiff_int_t len = static_cast<int>(ch.ch_name.size());
     std::string ch_name;
     if (len > 15)
         ch_name = ch.ch_name.substr(0, 15);
     else
         ch_name = ch.ch_name;
 
-    len = ch_name.size();
+    len = static_cast<int>(ch_name.size());
 
     writeRaw(ch_name.c_str(), len);
 

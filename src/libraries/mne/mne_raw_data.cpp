@@ -466,7 +466,7 @@ int mne_read_bad_channel_list_from_node(FiffStream::SPtr& stream,
         if (t_pTag) {
             names = QString::fromStdString(t_pTag->toString());
             list = FiffStream::split_name_list(t_pTag->toString());
-            nlist = list.size();
+            nlist = static_cast<int>(list.size());
         }
     }
     listp = list;

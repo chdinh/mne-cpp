@@ -599,7 +599,7 @@ void TestMneRawProjComp::projOp_assignChannelsAndMake()
         chNames.push_back(ch.ch_name);
     }
 
-    int assignResult = proj->assign_channels(chNames, chNames.size());
+    int assignResult = proj->assign_channels(chNames, static_cast<int>(chNames.size()));
     QVERIFY(assignResult >= 0);
 
     int makeResult = proj->make_proj();

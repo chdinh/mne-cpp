@@ -102,11 +102,11 @@ private slots:
         item.vecs = MNENamedMatrix::build(1, 3, rowNames, colNames, data);
 
         StringList testList = {"MEG0111", "MEG0112", "MEG0113"};
-        int affected = item.affect(testList, testList.size());
+        int affected = item.affect(testList, static_cast<int>(testList.size()));
         QVERIFY(affected > 0);
 
         StringList noMatch = {"EEG001", "EEG002"};
-        int notAffected = item.affect(noMatch, noMatch.size());
+        int notAffected = item.affect(noMatch, static_cast<int>(noMatch.size()));
         QCOMPARE(notAffected, 0);
     }
 
@@ -234,7 +234,7 @@ private slots:
         op.add_item(&nm, 1, "SSP");
 
         StringList chList = {"MEG0111", "MEG0112", "MEG0113", "MEG0121"};
-        int rc = op.assign_channels(chList, chList.size());
+        int rc = op.assign_channels(chList, static_cast<int>(chList.size()));
         QVERIFY(rc >= 0);
     }
 
@@ -251,7 +251,7 @@ private slots:
         op.add_item(&nm, 1, "SSP");
 
         StringList chList = {"ch1", "ch2", "ch3"};
-        op.assign_channels(chList, chList.size());
+        op.assign_channels(chList, static_cast<int>(chList.size()));
         int rc = op.make_proj();
         QVERIFY(rc >= 0);
     }
@@ -272,7 +272,7 @@ private slots:
         op.add_item(&nm, 1, "SSP");
 
         StringList chList = {"ch1", "ch2", "ch3"};
-        op.assign_channels(chList, chList.size());
+        op.assign_channels(chList, static_cast<int>(chList.size()));
         op.make_proj();
 
         // Project a vector
@@ -301,7 +301,7 @@ private slots:
         op.add_item(&nm, 1, "SSP");
 
         StringList chList = {"ch1", "ch2"};
-        op.assign_channels(chList, chList.size());
+        op.assign_channels(chList, static_cast<int>(chList.size()));
         op.make_proj();
 
         Eigen::VectorXd dvec(2);
@@ -325,11 +325,11 @@ private slots:
         op.add_item(&nm, 1, "SSP");
 
         StringList testChs = {"MEG0111", "MEG0112"};
-        int n = op.affect(testChs, testChs.size());
+        int n = op.affect(testChs, static_cast<int>(testChs.size()));
         QVERIFY(n >= 0);
 
         StringList noMatch = {"EEG001"};
-        int n2 = op.affect(noMatch, noMatch.size());
+        int n2 = op.affect(noMatch, static_cast<int>(noMatch.size()));
         QCOMPARE(n2, 0);
     }
 
@@ -377,7 +377,7 @@ private slots:
         op.add_item(&nm, 1, "SSP");
 
         StringList chList = {"ch1", "ch2", "ch3"};
-        op.assign_channels(chList, chList.size());
+        op.assign_channels(chList, static_cast<int>(chList.size()));
         op.make_proj();
 
         // Create a covariance matrix

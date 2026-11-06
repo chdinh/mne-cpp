@@ -321,7 +321,7 @@ bool MNEMeasData::read_evoked_set(const QString& name,
          */
         {
             target.badlist = evoked.info.bads;
-            target.nbad = target.badlist.size();
+            target.nbad = static_cast<int>(target.badlist.size());
             target.bad = Eigen::VectorXi::Zero(target.nchan);
 
             for (int b = 0; b < target.nbad; b++) {

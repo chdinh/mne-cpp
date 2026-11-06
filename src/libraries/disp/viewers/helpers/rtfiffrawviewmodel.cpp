@@ -487,7 +487,7 @@ void RtFiffRawViewModel::addData(const QList<MatrixXd>& data)
 
     //Update data content
     QModelIndex topLeft = this->index(0, 1);
-    QModelIndex bottomRight = this->index(m_pFiffInfo->ch_names.size() - 1, 1);
+    QModelIndex bottomRight = this->index(static_cast<int>(m_pFiffInfo->ch_names.size()) - 1, 1);
     QVector<int> roles;
     roles << Qt::DisplayRole;
 

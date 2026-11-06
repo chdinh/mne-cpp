@@ -142,7 +142,7 @@ void RealTime3DWidget::update(SCMEASLIB::Measurement::SPtr pMeasurement)
             // Note: Sensor surface visualization from FiffChInfo/MNEBem is not
             // directly supported in disp3D's addSensors API. Use loadSensors()
             // with a .fif file path if sensor visualization is needed.
-            m_iNumberBadChannels = pRTCE->getFiffInfo() ? pRTCE->getFiffInfo()->bads.size() : 0;
+            m_iNumberBadChannels = pRTCE->getFiffInfo() ? static_cast<int>(pRTCE->getFiffInfo()->bads.size()) : 0;
         } else {
             // Update existing connectivity data - replace with new network
             QPair<float, float> freqs = pRTCE->getValue()->getFrequencyRange();
@@ -153,7 +153,7 @@ void RealTime3DWidget::update(SCMEASLIB::Measurement::SPtr pMeasurement)
                 if (m_iNumberBadChannels != static_cast<int>(pRTCE->getFiffInfo()->bads.size())) {
                     // Note: Sensor update from in-memory FiffChInfo/MNEBem not
                     // directly supported in disp3D.
-                    m_iNumberBadChannels = pRTCE->getFiffInfo()->bads.size();
+                    m_iNumberBadChannels = static_cast<int>(pRTCE->getFiffInfo()->bads.size());
                 }
             }
         }

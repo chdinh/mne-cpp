@@ -274,7 +274,7 @@ FiffCov FiffCov::prepare_noise_cov(const FiffInfo& p_Info, const StringList& p_C
         Linalg::get_whitener(C_eeg, false, "EEG", C_eeg_eig, C_eeg_eigvec);
     }
 
-    qint32 n_chan = p_ChNames.size();
+    qint32 n_chan = static_cast<int>(p_ChNames.size());
     p_NoiseCov.eigvec = MatrixXd::Zero(n_chan, n_chan);
     p_NoiseCov.eig = VectorXd::Zero(n_chan);
 
@@ -299,7 +299,7 @@ FiffCov FiffCov::prepare_noise_cov(const FiffInfo& p_Info, const StringList& p_C
     }
 
     p_NoiseCov.data = C;
-    p_NoiseCov.dim = p_ChNames.size();
+    p_NoiseCov.dim = static_cast<int>(p_ChNames.size());
     p_NoiseCov.diag = false;
     p_NoiseCov.names = p_ChNames;
 

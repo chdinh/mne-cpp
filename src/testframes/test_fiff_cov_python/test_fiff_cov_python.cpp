@@ -154,9 +154,9 @@ void TestFiffCovPython::scalars_matchPython()
     else if (field == "diag")
         actual = m_cov.diag ? 1 : 0;
     else if (field == "n_names")
-        actual = m_cov.names.size();
+        actual = static_cast<int>(m_cov.names.size());
     else if (field == "n_bads")
-        actual = m_cov.bads.size();
+        actual = static_cast<int>(m_cov.bads.size());
     else if (field == "n_projs")
         actual = m_cov.projs.size();
     else if (field == "rows")

@@ -482,7 +482,7 @@ void TestMneBrowseData::testRawModelMarkChBad()
     // Mark first channel as bad (must use column 1 — markChBad only processes column 1)
     QModelIndexList indices;
     indices << model.index(0, 1);
-    int badsBefore = model.fiffInfo()->bads.size();
+    int badsBefore = static_cast<int>(model.fiffInfo()->bads.size());
     model.markChBad(indices, true);
 
     // Verify bad channel was added

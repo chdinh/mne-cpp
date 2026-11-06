@@ -304,11 +304,11 @@ inline std::ostream& operator<<(std::ostream& out, const FIFFLIB::FiffCov& p_Fif
     out << "\tnames " << p_FiffCov.names.size() << ":\n\t";
 
     if (t_bIsShort) {
-        qint32 nchan = p_FiffCov.names.size() > 6 ? 6 : p_FiffCov.names.size();
+        const int nchan = std::min(static_cast<int>(p_FiffCov.names.size()), 6);
         for (qint32 i = 0; i < nchan / 2; ++i)
             out << p_FiffCov.names[i].c_str() << " ";
         out << "... ";
-        for (qint32 i = p_FiffCov.names.size() - nchan / 2; i < static_cast<int>(p_FiffCov.names.size()); ++i)
+        for (qint32 i = static_cast<int>(p_FiffCov.names.size()) - nchan / 2; i < static_cast<int>(p_FiffCov.names.size()); ++i)
             out << p_FiffCov.names[i].c_str() << " ";
         out << std::endl;
     }

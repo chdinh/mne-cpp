@@ -729,7 +729,7 @@ void AverageWindow::refreshPlots()
                 averageSceneItemTemp->m_iChannelUnit = fiffInfo->chs.at(channelNumber).unit;
                 ;
                 averageSceneItemTemp->m_iChannelNumber = channelNumber;
-                averageSceneItemTemp->m_iTotalNumberChannels = fiffInfo->ch_names.size();
+                averageSceneItemTemp->m_iTotalNumberChannels = static_cast<int>(fiffInfo->ch_names.size());
                 averageSceneItemTemp->m_lAverageData.append(QPair<QString, RowVectorPair>(index.data(Qt::DisplayRole).toString(),
                                                                                           averageData));
             }

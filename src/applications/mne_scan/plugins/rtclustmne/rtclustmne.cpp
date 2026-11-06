@@ -599,7 +599,7 @@ void RtClustMne::run()
         bEvokedInput = m_bEvokedInput;
         bRawInput = m_bRawInput;
         iDownSample = m_iDownSample;
-        iNumberChannels = m_invOp.noise_cov->names.size();
+        iNumberChannels = static_cast<int>(m_invOp.noise_cov->names.size());
         tstep = 1.0f / m_pFiffInfoInput->sfreq;
         lChNamesFiffInfo = m_pFiffInfoInput->ch_names;
         lChNamesInvOp = m_invOp.noise_cov->names;
