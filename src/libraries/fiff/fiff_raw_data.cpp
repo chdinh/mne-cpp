@@ -217,7 +217,7 @@ bool FiffRawData::read_raw_segment(MatrixXd& data,
     //    mult.makeCompressed();
 
     FiffStream::SPtr fid;
-    if (!this->file->device()->isOpen()) {
+    if (!this->file->isOpen()) {
         if (!this->file->device()->open(QIODevice::ReadOnly)) {
             qWarning("Cannot open file %s", this->info.filename.c_str());
         }
@@ -393,7 +393,7 @@ bool FiffRawData::read_raw_segment(MatrixXd& data,
         }
     }
 
-    if (!this->file->device()->isOpen()) {
+    if (!this->file->isOpen()) {
         this->file->device()->close();
     }
 
@@ -520,7 +520,7 @@ bool FiffRawData::read_raw_segment(MatrixXd& data,
     //
 
     FiffStream::SPtr fid;
-    if (!this->file->device()->isOpen()) {
+    if (!this->file->isOpen()) {
         if (!this->file->device()->open(QIODevice::ReadOnly)) {
             qWarning("Cannot open file %s", this->info.filename.c_str());
         }
@@ -700,7 +700,7 @@ bool FiffRawData::read_raw_segment(MatrixXd& data,
     else
         multSegment = mult;
 
-    if (!this->file->device()->isOpen()) {
+    if (!this->file->isOpen()) {
         this->file->device()->close();
     }
 

@@ -105,7 +105,7 @@ FiffDigitizerData::FiffDigitizerData(QIODevice& p_IODevice)
     bool open_here = false;
 
     //Open if the device and stream have not been openend already
-    if (!t_pStream->device()->isOpen()) {
+    if (!t_pStream->isOpen()) {
         if (!t_pStream->open()) {
             throw std::runtime_error("Could not open the digitizer data file");
         }

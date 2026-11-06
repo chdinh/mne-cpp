@@ -386,7 +386,9 @@ void TestFiffRWR::readsWithoutQtDevice()
     const QString path = testDataDir() + "/MEG/sample/sample_audvis-cov.fif";
     QFile qtFile(path);
     FiffStream qtStream(&qtFile);
+    QVERIFY(!qtStream.isOpen());
     QVERIFY(qtStream.open());
+    QVERIFY(qtStream.isOpen());
 
     auto bytes = UTILSLIB::FileByteStream::open(path.toStdString(), UTILSLIB::FileByteStream::Mode::Read);
     QVERIFY(bytes);
@@ -422,6 +424,7 @@ void TestFiffRWR::opensAndStartsFilesByPath()
     FiffStream::SPtr in = FiffStream::open(path);
     QVERIFY(in);
     QVERIFY(in->device() == nullptr);
+    QVERIFY(in->isOpen());
     QCOMPARE(in->streamName(), QString::fromStdString(path));
     QVERIFY(in->nent() > 0);
     QVERIFY(!FiffStream::open(m_tempDir.filePath("missing.fif").toStdString()));
@@ -437,6 +440,7 @@ void TestFiffRWR::opensAndStartsFilesByPath()
     }
     out->end_file();
     out->close();
+    QVERIFY(!out->isOpen());
     FiffStream::SPtr back = FiffStream::open(outPath);
     QVERIFY(back);
     int transforms = 0;

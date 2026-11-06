@@ -205,6 +205,13 @@ QIODevice* FiffStream::device() const
 
 //=============================================================================================================
 
+bool FiffStream::isOpen() const
+{
+    return m_device ? m_device->isOpen() : m_bytes && m_bytes->isOpen();
+}
+
+//=============================================================================================================
+
 void FiffStream::setLittleEndian(bool littleEndian)
 {
     m_littleEndian = littleEndian;

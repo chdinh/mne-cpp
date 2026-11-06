@@ -90,6 +90,12 @@ public:
     {
     }
 
+    /** @return Whether the stream has not been closed. */
+    virtual bool isOpen() const
+    {
+        return true;
+    }
+
     /** @return Whether the position is at or past the end. */
     bool atEnd() const
     {
@@ -236,6 +242,7 @@ public:
     std::uint64_t pos() const override;
     std::uint64_t size() const override;
     void close() override;
+    bool isOpen() const override;
 
     /** @return Whether everything written has reached the operating system. */
     bool flush();

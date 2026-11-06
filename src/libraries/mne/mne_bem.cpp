@@ -68,7 +68,7 @@ MNEBem::MNEBem(QIODevice& p_IODevice) //const MNEBem &p_MNEBem
         //        return false;
     }
 
-    //    bool testStream =t_pStream->device()->isOpen();
+    //    bool testStream =t_pStream->isOpen();
 }
 
 //=============================================================================================================
@@ -94,7 +94,7 @@ bool MNEBem::readFromStream(FiffStream::SPtr& p_pStream, bool add_geom, MNEBem& 
     bool open_here = false;
     QFile t_file; //ToDo TCPSocket;
 
-    if (!p_pStream->device()->isOpen()) {
+    if (!p_pStream->isOpen()) {
         QString t_sFileName = p_pStream->streamName();
 
         t_file.setFileName(t_sFileName);

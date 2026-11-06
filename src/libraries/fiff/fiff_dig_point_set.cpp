@@ -117,7 +117,7 @@ bool FiffDigPointSet::readFromStream(FiffStream::SPtr& p_pStream, FiffDigPointSe
     //
     bool open_here = false;
 
-    if (!p_pStream->device()->isOpen()) {
+    if (!p_pStream->isOpen()) {
         QString t_sFileName = p_pStream->streamName();
 
         if (!p_pStream->open())

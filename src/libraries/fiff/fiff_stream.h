@@ -172,6 +172,12 @@ public:
 
     //=========================================================================================================
     /**
+     * @return Whether the underlying device or byte stream is open.
+     */
+    bool isOpen() const;
+
+    //=========================================================================================================
+    /**
      * Sets the byte order of the stream; FIFF files are big-endian, some raw data files little-endian.
      *
      * @param[in] littleEndian  True to read and write little-endian.

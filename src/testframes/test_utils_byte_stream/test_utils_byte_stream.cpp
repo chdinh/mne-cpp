@@ -287,8 +287,10 @@ void TestUtilsByteStream::fileStreamCloseWritesAndEnds()
     const std::filesystem::path path = dir.filePath(QStringLiteral("closed.bin")).toStdString();
     auto stream = FileByteStream::open(path, FileByteStream::Mode::Write);
     QVERIFY(stream);
+    QVERIFY(stream->isOpen());
     QVERIFY(stream->writeBigEndian(std::int32_t{7}));
     stream->close();
+    QVERIFY(!stream->isOpen());
     // The bytes are on disk while the stream object still exists, and later calls fail instead of crashing.
     QCOMPARE(std::filesystem::file_size(path), std::uintmax_t(4));
     QCOMPARE(stream->write("x", 1), std::size_t(0));

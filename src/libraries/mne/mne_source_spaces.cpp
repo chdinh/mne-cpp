@@ -261,7 +261,7 @@ bool MNESourceSpaces::readFromStream(FiffStream::SPtr& p_pStream,
     bool open_here = false;
     QFile t_file; //ToDo TCPSocket;
 
-    if (!p_pStream->device()->isOpen()) {
+    if (!p_pStream->isOpen()) {
         QString t_sFileName = p_pStream->streamName();
 
         t_file.setFileName(t_sFileName);

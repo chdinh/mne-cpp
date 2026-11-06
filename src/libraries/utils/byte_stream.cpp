@@ -226,6 +226,13 @@ std::uint64_t FileByteStream::size() const
 
 //=============================================================================================================
 
+bool FileByteStream::isOpen() const
+{
+    return m_file != nullptr;
+}
+
+//=============================================================================================================
+
 bool FileByteStream::flush()
 {
     return m_file && std::fflush(m_file) == 0;
