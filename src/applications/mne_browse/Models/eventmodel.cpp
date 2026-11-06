@@ -17,6 +17,7 @@
 //=============================================================================================================
 
 #include "eventmodel.h"
+#include <utils/string_utils.h>
 #include <QFileInfo>
 
 
@@ -336,9 +337,9 @@ bool EventModel::loadEventData(QFile& qFile)
     QFileInfo fileInfo(qFile);
     bool readSuccess = false;
     if (fileInfo.suffix() == "eve") {
-        readSuccess = MNE::read_events_from_ascii(qFile, events);
+        readSuccess = MNE::read_events_from_ascii(UTILSLIB::pathFromUtf8(qFile.fileName().toStdString()), events);
     } else {
-        readSuccess = MNE::read_events_from_fif(qFile, events);
+        readSuccess = MNE::read_events_from_fif(UTILSLIB::pathFromUtf8(qFile.fileName().toStdString()), events);
     }
 
     if (!readSuccess) {
@@ -372,9 +373,9 @@ bool EventModel::saveEventData(QFile& qFile)
     QFileInfo fileInfo(qFile);
     bool writeSuccess = false;
     if (fileInfo.suffix() == "eve") {
-        writeSuccess = MNE::write_events_to_ascii(qFile, events);
+        writeSuccess = MNE::write_events_to_ascii(UTILSLIB::pathFromUtf8(qFile.fileName().toStdString()), events);
     } else {
-        writeSuccess = MNE::write_events_to_fif(qFile, events);
+        writeSuccess = MNE::write_events_to_fif(UTILSLIB::pathFromUtf8(qFile.fileName().toStdString()), events);
     }
     qFile.close();
 

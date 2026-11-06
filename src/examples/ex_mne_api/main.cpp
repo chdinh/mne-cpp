@@ -444,13 +444,10 @@ int main(int argc, char* argv[])
 
     //! [mne_facade_usage]
     // The MNE facade mirrors the MNE-Matlab/Python toolbox functions
-    const QString eveName = tmp.filePath("audvis-eve.fif");
-    {
-        QFile eveOut(eveName);
-        MNE::write_events_to_fif(eveOut, events.events);
-    }
+    const std::string eveName = tmp.filePath("audvis-eve.fif").toStdString();
+    MNE::write_events_to_fif(eveName, events.events);
     MatrixXi eventsBack;
-    MNE::read_events(eveName, rawFile.fileName(), eventsBack);
+    MNE::read_events(eveName, rawFile.fileName().toStdString(), eventsBack);
     QList<FiffProj> projs = raw.info.projs; // stored inactive in the raw file
     FiffProj::activate_projs(projs);
     MatrixXd ssp; // like mne._fiff.proj.make_projector(info['projs'], ch_names, bads)

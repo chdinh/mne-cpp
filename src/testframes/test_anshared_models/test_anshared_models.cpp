@@ -221,10 +221,10 @@ void TestAnSharedModels::eventModel_emptyStateIsSafe()
     events.events.resize(2, 3);
     events.events << 25800, 0, 1, 26000, 0, 2;
     QFile fif(dir.filePath("triggers-eve.fif"));
-    QVERIFY(events.write_to_fif(fif));
+    QVERIFY(events.write_to_fif(dir.filePath("triggers-eve.fif").toStdString()));
     fif.close();
     QFile text(dir.filePath("triggers.eve"));
-    QVERIFY(events.write_to_ascii(text));
+    QVERIFY(events.write_to_ascii(dir.filePath("triggers.eve").toStdString()));
     for (const QString& path : {fif.fileName(), text.fileName()}) {
         QVERIFY2(EventModel(path).rowCount() == 2, qPrintable(path));
     }

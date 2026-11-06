@@ -5,6 +5,8 @@
 #include <QtTest/QtTest>
 #include <utils/string_utils.h>
 #include <QBuffer>
+#include <QFile>
+#include <QTemporaryDir>
 #include <QTemporaryFile>
 #include <Eigen/Dense>
 
@@ -244,15 +246,12 @@ private slots:
         FiffEvents events;
         events.events = eventData;
 
-        // Write to buffer
-        QBuffer buffer;
-        buffer.open(QIODevice::ReadWrite);
-        events.write_to_ascii(buffer, 1000.0f);
+        QTemporaryDir dir;
+        const std::string path = dir.filePath("events.eve").toStdString();
+        QVERIFY(events.write_to_ascii(path, 1000.0f));
 
-        // Read back
-        buffer.seek(0);
         FiffEvents eventsRead;
-        bool ok = FiffEvents::read_from_ascii(buffer, eventsRead);
+        bool ok = FiffEvents::read_from_ascii(path, eventsRead);
         QVERIFY(ok);
         QCOMPARE(eventsRead.num_events(), 3);
 
@@ -272,13 +271,14 @@ private slots:
     {
         // Files written by other tools may omit the redundant onset column.
         // Those lines carry three integers and must still be understood.
-        QBuffer buffer;
-        buffer.open(QIODevice::ReadWrite);
-        buffer.write("  100   0   1\n  200   0   2\n");
-        buffer.close();
+        QTemporaryDir dir;
+        QFile file(dir.filePath("three.eve"));
+        QVERIFY(file.open(QIODevice::WriteOnly));
+        file.write("  100   0   1\n  200   0   2\n");
+        file.close();
 
         FiffEvents eventsRead;
-        QVERIFY(FiffEvents::read_from_ascii(buffer, eventsRead));
+        QVERIFY(FiffEvents::read_from_ascii(file.fileName().toStdString(), eventsRead));
         QCOMPARE(eventsRead.num_events(), 2);
         QCOMPARE(eventsRead.events(0, 0), 100);
         QCOMPARE(eventsRead.events(0, 2), 1);
@@ -296,13 +296,12 @@ private slots:
         FiffEvents events;
         events.events = eventData;
 
-        QBuffer buffer;
-        buffer.open(QIODevice::ReadWrite);
-        events.write_to_fif(buffer);
+        QTemporaryDir dir;
+        const std::string path = dir.filePath("events-eve.fif").toStdString();
+        QVERIFY(events.write_to_fif(path));
 
-        buffer.seek(0);
         FiffEvents eventsRead;
-        bool ok = FiffEvents::read_from_fif(buffer, eventsRead);
+        bool ok = FiffEvents::read_from_fif(path, eventsRead);
         QVERIFY(ok);
         QCOMPARE(eventsRead.num_events(), 3);
     }

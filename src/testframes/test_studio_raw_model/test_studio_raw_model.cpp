@@ -172,7 +172,7 @@ void TestStudioRawModel::browserWidgetNavigatesTheRecording()
     events.events.resize(2, 3);
     events.events << 15000, 0, 1, 16000, 0, 2;
     QFile eveFile(dir.filePath("run_raw-eve.fif"));
-    QVERIFY(events.write_to_fif(eveFile));
+    QVERIFY(events.write_to_fif(dir.filePath("run_raw-eve.fif").toStdString()));
     eveFile.close();
 
     MNEANALYZESTUDIO::RawDataBrowserWidget widget;

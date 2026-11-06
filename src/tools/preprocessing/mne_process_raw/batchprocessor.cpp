@@ -156,11 +156,9 @@ int BatchProcessor::run(const ProcessingSettings& settings)
         if (!eventInFile.isEmpty()) {
             qInfo() << "Loading events from" << eventInFile;
             if (eventInFile.endsWith(".fif", Qt::CaseInsensitive)) {
-                QFile evtFile(eventInFile);
-                FiffEvents::read_from_fif(evtFile, fiffEvents);
+                FiffEvents::read_from_fif(UTILSLIB::pathFromUtf8(eventInFile.toStdString()), fiffEvents);
             } else {
-                QFile evtFile(eventInFile);
-                FiffEvents::read_from_ascii(evtFile, fiffEvents);
+                FiffEvents::read_from_ascii(UTILSLIB::pathFromUtf8(eventInFile.toStdString()), fiffEvents);
             }
         }
 
@@ -187,11 +185,9 @@ int BatchProcessor::run(const ProcessingSettings& settings)
         if (!eventOutFile.isEmpty()) {
             qInfo() << "\n--- Saving events to" << eventOutFile << "---\n";
             if (eventOutFile.endsWith(".fif", Qt::CaseInsensitive)) {
-                QFile evtOutFile(eventOutFile);
-                fiffEvents.write_to_fif(evtOutFile);
+                fiffEvents.write_to_fif(UTILSLIB::pathFromUtf8(eventOutFile.toStdString()));
             } else {
-                QFile evtOutFile(eventOutFile);
-                fiffEvents.write_to_ascii(evtOutFile, raw.info.sfreq);
+                fiffEvents.write_to_ascii(UTILSLIB::pathFromUtf8(eventOutFile.toStdString()), raw.info.sfreq);
             }
         }
 

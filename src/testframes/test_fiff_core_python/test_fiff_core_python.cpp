@@ -55,6 +55,7 @@
 #include <fiff/fiff_events.h>
 
 #include <array>
+#include <clocale>
 #include <cmath>
 #include <initializer_list>
 #include <memory>
@@ -1048,33 +1049,43 @@ void TestFiffCorePython::events_matchPython()
 
     // FIF and ASCII round trips; read() derives <raw>-eve.fif from the raw file name.
     QTemporaryDir dir;
-    const QString fifPath = dir.filePath("run-eve.fif");
-    {
-        QFile file(fifPath);
-        QVERIFY(found.write_to_fif(file));
-    }
-    QVERIFY(!FiffEvents().write_to_fif(*m_rawFile));
+    const auto path = [&dir](const char* name) {
+        return dir.filePath(name).toStdString();
+    };
+    QVERIFY(found.write_to_fif(path("run-eve.fif")));
+    QVERIFY(!FiffEvents().write_to_fif(path("empty-eve.fif")));
+    QVERIFY(!QFile::exists(dir.filePath("empty-eve.fif")));
     FiffEvents back;
-    QVERIFY(FiffEvents::read(QString(), dir.filePath("run.fif"), back));
+    QVERIFY(FiffEvents::read({}, path("run.fif"), back));
     QVERIFY(back.events == onsets);
     FiffEvents byName;
-    QVERIFY(FiffEvents::read(fifPath, QString(), byName));
+    QVERIFY(FiffEvents::read(path("run-eve.fif"), {}, byName));
     QVERIFY(byName.events == onsets);
-    QVERIFY(!FiffEvents::read(QString(), dir.filePath("run.raw"), byName));
-    QVERIFY(!FiffEvents::read(dir.filePath("missing-eve.fif"), QString(), byName));
-    QVERIFY(!FiffEvents::read(QString(), dir.filePath("missing.fif"), byName));
+    QVERIFY(!FiffEvents::read({}, path("run.raw"), byName));
+    QVERIFY(!FiffEvents::read(path("missing-eve.fif"), {}, byName));
+    QVERIFY(!FiffEvents::read({}, path("missing.fif"), byName));
     FiffEvents noBlock;
-    QFile rawAgain(dataPath("sample_audvis_trunc_raw.fif"));
-    QVERIFY(!FiffEvents::read_from_fif(rawAgain, noBlock));
+    QVERIFY(!FiffEvents::read_from_fif(dataPath("sample_audvis_trunc_raw.fif").toStdString(), noBlock));
 
-    const QString evePath = dir.filePath("run.eve");
-    {
-        QFile file(evePath);
-        QVERIFY(found.write_to_ascii(file, static_cast<float>(m_raw->info.sfreq)));
-    }
-    QFile eveFile(evePath);
-    const FiffEvents ascii(eveFile);
+    // The text file keeps the layout MNE-C writes, also under a locale with a decimal comma.
+    const float sfreq = static_cast<float>(m_raw->info.sfreq);
+    QString expected;
+    for (int k = 0; k < found.events.rows(); ++k)
+        expected += QString("%1 %2 %3 %4\n").arg(found.events(k, 0), 6).arg(static_cast<float>(found.events(k, 0)) / sfreq, -10, 'f', 3).arg(found.events(k, 1), 3).arg(found.events(k, 2), 3);
+    const bool comma = std::setlocale(LC_NUMERIC, "de_DE.UTF-8") != nullptr;
+    QVERIFY(found.write_to_ascii(path("run.eve"), sfreq));
+    std::setlocale(LC_NUMERIC, "C");
+    QFile eveFile(dir.filePath("run.eve"));
+    QVERIFY(eveFile.open(QIODevice::ReadOnly | QIODevice::Text));
+    QCOMPARE(QString::fromUtf8(eveFile.readAll()), expected);
+    qInfo("decimal comma locale %s", comma ? "tested" : "not installed");
+    QVERIFY(!found.write_to_ascii(path("no/dir/run.eve"), sfreq));
+    const FiffEvents ascii(path("run.eve"));
     QVERIFY(ascii.events == onsets);
+    FiffEvents fromText;
+    QVERIFY(FiffEvents::read_from_ascii(path("run.eve"), fromText));
+    QVERIFY(fromText.events == onsets);
+    QVERIFY(!FiffEvents::read_from_ascii(path("missing.eve"), fromText));
 }
 
 //=============================================================================================================

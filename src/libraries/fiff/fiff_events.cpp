@@ -31,14 +31,18 @@
 // QT INCLUDES
 //=============================================================================================================
 
-#include <QFile>
+#include <utils/string_utils.h>
+
 #include <QDebug>
-#include <QRegularExpression>
-#include <QTextStream>
 
 #include <algorithm>
+#include <charconv>
 #include <cmath>
+#include <fstream>
 #include <numeric>
+#include <sstream>
+#include <string>
+#include <string_view>
 #include <vector>
 
 //=============================================================================================================
@@ -47,6 +51,31 @@
 
 using namespace FIFFLIB;
 using namespace Eigen;
+
+namespace
+{
+
+// A whole-token integer, else 0 like QString::toInt.
+int toInt(std::string_view token)
+{
+    if (!token.empty() && token.front() == '+')
+        token.remove_prefix(1);
+    int value = 0;
+    const auto [end, ec] = std::from_chars(token.data(), token.data() + token.size(), value);
+    return ec == std::errc() && end == token.data() + token.size() ? value : 0;
+}
+
+// Pads to |width|, right-aligned for a positive width and left-aligned for a negative one.
+std::string padded(const std::string& text, int width)
+{
+    const std::size_t size = static_cast<std::size_t>(std::abs(width));
+    if (text.size() >= size)
+        return text;
+    const std::string fill(size - text.size(), ' ');
+    return width < 0 ? text + fill : fill + text;
+}
+
+} // namespace
 
 //=============================================================================================================
 // DEFINE MEMBER METHODS
@@ -58,55 +87,47 @@ FiffEvents::FiffEvents()
 
 //=============================================================================================================
 
-FiffEvents::FiffEvents(QIODevice& p_IODevice)
+FiffEvents::FiffEvents(const std::filesystem::path& path)
 {
-    // Try FIFF first, then ASCII
-    if (!read_from_fif(p_IODevice, *this)) {
-        // The FIFF attempt leaves the device open in binary mode.
-        p_IODevice.close();
-        read_from_ascii(p_IODevice, *this);
+    if (!read_from_fif(path, *this)) {
+        read_from_ascii(path, *this);
     }
 }
 
 //=============================================================================================================
 
-bool FiffEvents::read(const QString& t_sEventName,
-                      const QString& t_fileRawName,
+bool FiffEvents::read(const std::filesystem::path& t_sEventName,
+                      const std::filesystem::path& t_fileRawName,
                       FiffEvents& p_Events)
 {
-    QString eventName = t_sEventName;
-    QFile t_EventFile;
-    qint32 p;
+    std::string eventName = UTILSLIB::utf8FromPath(t_sEventName);
 
-    if (eventName.isEmpty()) {
-        eventName = t_fileRawName;
-        p = eventName.indexOf(".fif");
-        if (p > 0) {
-            eventName.replace(p, 4, "-eve.fif");
-        } else {
+    if (eventName.empty()) {
+        eventName = UTILSLIB::utf8FromPath(t_fileRawName);
+        const std::size_t p = eventName.find(".fif");
+        if (p == std::string::npos || p == 0) {
             qWarning("Raw file name does not end properly\n");
             return false;
         }
+        eventName.replace(p, 4, "-eve.fif");
 
-        t_EventFile.setFileName(eventName);
-        if (!read_from_fif(t_EventFile, p_Events)) {
+        if (!read_from_fif(UTILSLIB::pathFromUtf8(eventName), p_Events)) {
             qWarning("Error while read events.\n");
             return false;
         }
-        qInfo("Events read from %s\n", eventName.toUtf8().constData());
+        qInfo("Events read from %s\n", eventName.c_str());
     } else {
         // Binary file
-        if (eventName.contains(".fif")) {
-            t_EventFile.setFileName(eventName);
-            if (!read_from_fif(t_EventFile, p_Events)) {
+        if (eventName.find(".fif") != std::string::npos) {
+            if (!read_from_fif(t_sEventName, p_Events)) {
                 qWarning("Error while read events.\n");
                 return false;
             }
-            qInfo("Binary event file %s read\n", eventName.toUtf8().constData());
-        } else if (eventName.contains(".eve")) {
+            qInfo("Binary event file %s read\n", eventName.c_str());
+        } else if (eventName.find(".eve") != std::string::npos) {
         } else {
             // Text file
-            qWarning("Text file %s is not supported jet.\n", eventName.toUtf8().constData());
+            qWarning("Text file %s is not supported jet.\n", eventName.c_str());
         }
     }
 
@@ -115,15 +136,11 @@ bool FiffEvents::read(const QString& t_sEventName,
 
 //=============================================================================================================
 
-bool FiffEvents::read_from_fif(QIODevice& p_IODevice,
+bool FiffEvents::read_from_fif(const std::filesystem::path& path,
                                FiffEvents& p_Events)
 {
-    //
-    // Open file
-    //
-    FiffStream::SPtr t_pStream(new FiffStream(&p_IODevice));
-
-    if (!t_pStream->open()) {
+    FiffStream::SPtr t_pStream = FiffStream::open(path);
+    if (!t_pStream) {
         return false;
     }
 
@@ -192,23 +209,20 @@ bool FiffEvents::read_from_fif(QIODevice& p_IODevice,
 
 //=============================================================================================================
 
-bool FiffEvents::read_from_ascii(QIODevice& p_IODevice,
+bool FiffEvents::read_from_ascii(const std::filesystem::path& path,
                                  FiffEvents& p_Events)
 {
-    if (!p_IODevice.open(QIODevice::ReadOnly | QIODevice::Text)) {
+    std::ifstream file(path);
+    if (!file) {
         return false;
     }
-    QTextStream textStream(&p_IODevice);
 
-    QList<int> sampleList;
-    QList<int> beforeList;
-    QList<int> afterList;
+    std::vector<int> sampleList;
+    std::vector<int> beforeList;
+    std::vector<int> afterList;
 
-    while (!textStream.atEnd()) {
-        QString line = textStream.readLine().trimmed();
-        if (line.isEmpty())
-            continue;
-
+    std::string line;
+    while (std::getline(file, line)) {
         // A standard .eve line has four fields: sample, onset in seconds,
         // value before and value after the transition. The onset is redundant
         // with the sample and is skipped, which is what write_to_ascii emits.
@@ -216,40 +230,39 @@ bool FiffEvents::read_from_ascii(QIODevice& p_IODevice,
         // one, so the trigger code was lost and the event looked like it had
         // a code of zero. Files carrying only the three integer fields are
         // still accepted.
-        const QStringList fields = line.split(QRegularExpression("\\s+"),
-                                              Qt::SkipEmptyParts);
-        if (fields.isEmpty())
+        std::vector<std::string> fields;
+        std::istringstream words(line);
+        for (std::string word; words >> word;)
+            fields.push_back(word);
+        if (fields.empty())
             continue;
 
-        const int iOffset = (fields.size() >= 4) ? 1 : 0;
+        const std::size_t iOffset = (fields.size() >= 4) ? 1 : 0;
 
-        int iSample = fields.at(0).toInt();
-        int iBefore = (fields.size() > 1 + iOffset) ? fields.at(1 + iOffset).toInt() : 0;
-        int iAfter = (fields.size() > 2 + iOffset) ? fields.at(2 + iOffset).toInt() : 0;
-
-        sampleList.append(iSample);
-        beforeList.append(iBefore);
-        afterList.append(iAfter);
+        sampleList.push_back(toInt(fields[0]));
+        beforeList.push_back(fields.size() > 1 + iOffset ? toInt(fields[1 + iOffset]) : 0);
+        afterList.push_back(fields.size() > 2 + iOffset ? toInt(fields[2 + iOffset]) : 0);
     }
 
-    p_Events.events.resize(sampleList.size(), 3);
+    p_Events.events.resize(static_cast<Eigen::Index>(sampleList.size()), 3);
 
-    for (int i = 0; i < sampleList.size(); i++) {
-        p_Events.events(i, 0) = sampleList[i];
-        p_Events.events(i, 1) = beforeList[i];
-        p_Events.events(i, 2) = afterList[i];
+    for (std::size_t i = 0; i < sampleList.size(); i++) {
+        const auto row = static_cast<Eigen::Index>(i);
+        p_Events.events(row, 0) = sampleList[i];
+        p_Events.events(row, 1) = beforeList[i];
+        p_Events.events(row, 2) = afterList[i];
     }
     return true;
 }
 
 //=============================================================================================================
 
-bool FiffEvents::write_to_fif(QIODevice& p_IODevice) const
+bool FiffEvents::write_to_fif(const std::filesystem::path& path) const
 {
     if (events.rows() == 0 || events.cols() < 3)
         return false;
 
-    FiffStream::SPtr pStream = FiffStream::start_file(p_IODevice);
+    FiffStream::SPtr pStream = FiffStream::start_file(path);
     if (!pStream)
         return false;
 
@@ -259,16 +272,18 @@ bool FiffEvents::write_to_fif(QIODevice& p_IODevice) const
     pStream->write_int(FIFF_MNE_EVENT_LIST, rows.data(), rows.rows() * 3);
     pStream->end_block(FIFFB_MNE_EVENTS);
     pStream->end_file();
+    pStream->close();
 
     return true;
 }
 
 //=============================================================================================================
 
-bool FiffEvents::write_to_ascii(QIODevice& p_IODevice,
+bool FiffEvents::write_to_ascii(const std::filesystem::path& path,
                                 float sfreq) const
 {
-    if (!p_IODevice.open(QIODevice::WriteOnly | QIODevice::Text))
+    std::ofstream out(path);
+    if (!out)
         return false;
 
     for (int k = 0; k < events.rows(); ++k) {
@@ -276,16 +291,15 @@ bool FiffEvents::write_to_ascii(QIODevice& p_IODevice,
         int before = (events.cols() > 1) ? events(k, 1) : 0;
         int after = (events.cols() > 2) ? events(k, 2) : 0;
         float time = (sfreq > 0.0f) ? static_cast<float>(sample) / sfreq : 0.0f;
-        QTextStream out(&p_IODevice);
-        out << QString("%1 %2 %3 %4\n")
-                   .arg(sample, 6)
-                   .arg(time, -10, 'f', 3)
-                   .arg(before, 3)
-                   .arg(after, 3);
+        char digits[64];
+        const auto result = std::to_chars(digits, digits + sizeof(digits), static_cast<double>(time), std::chars_format::fixed, 3);
+        out << padded(std::to_string(sample), 6) << ' '
+            << padded(std::string(digits, result.ptr), -10) << ' '
+            << padded(std::to_string(before), 3) << ' '
+            << padded(std::to_string(after), 3) << '\n';
     }
 
-    p_IODevice.close();
-    return true;
+    return static_cast<bool>(out.flush());
 }
 
 //=============================================================================================================

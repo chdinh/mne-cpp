@@ -42,13 +42,8 @@
 #include <QList>
 #include <QMap>
 
+#include <filesystem>
 #include <optional>
-
-//=============================================================================================================
-// FORWARD DECLARATIONS
-//=============================================================================================================
-
-class QIODevice;
 
 //=============================================================================================================
 // DEFINE NAMESPACE FIFFLIB
@@ -83,13 +78,13 @@ public:
 
     //=========================================================================================================
     /**
-     * Constructs FiffEvents by reading from an I/O device.
+     * Constructs FiffEvents by reading an event file.
      *
      * Attempts to read as FIFF first; if that fails, tries ASCII format.
      *
-     * @param[in] p_IODevice    The I/O device to read from.
+     * @param[in] path    The event file.
      */
-    explicit FiffEvents(QIODevice& p_IODevice);
+    explicit FiffEvents(const std::filesystem::path& path);
 
     //=========================================================================================================
     /**
@@ -104,54 +99,54 @@ public:
      *
      * @return true if succeeded, false otherwise.
      */
-    static bool read(const QString& t_sEventName,
-                     const QString& t_fileRawName,
+    static bool read(const std::filesystem::path& t_sEventName,
+                     const std::filesystem::path& t_fileRawName,
                      FiffEvents& p_Events);
 
     //=========================================================================================================
     /**
      * Read an event list from a FIFF file.
      *
-     * @param[in] p_IODevice    The I/O device to read from.
+     * @param[in] path          The FIFF file.
      * @param[out] p_Events     The loaded events.
      *
      * @return true if succeeded, false otherwise.
      */
-    static bool read_from_fif(QIODevice& p_IODevice,
+    static bool read_from_fif(const std::filesystem::path& path,
                               FiffEvents& p_Events);
 
     //=========================================================================================================
     /**
      * Read a list of events from an ASCII event file.
      *
-     * @param[in] p_IODevice    The I/O device to read from.
+     * @param[in] path          The text file.
      * @param[out] p_Events     The loaded events.
      *
      * @return true if succeeded, false otherwise.
      */
-    static bool read_from_ascii(QIODevice& p_IODevice,
+    static bool read_from_ascii(const std::filesystem::path& path,
                                 FiffEvents& p_Events);
 
     //=========================================================================================================
     /**
      * Write the event list to a FIFF file.
      *
-     * @param[in] p_IODevice    The I/O device to write to.
+     * @param[in] path    The FIFF file to write.
      *
      * @return true if succeeded, false otherwise.
      */
-    bool write_to_fif(QIODevice& p_IODevice) const;
+    bool write_to_fif(const std::filesystem::path& path) const;
 
     //=========================================================================================================
     /**
      * Write the event list to a text file (MNE-C compatible format).
      *
-     * @param[in] p_IODevice    The I/O device to write to.
+     * @param[in] path          The text file to write.
      * @param[in] sfreq         Sampling frequency for time column computation.
      *
      * @return true if succeeded, false otherwise.
      */
-    bool write_to_ascii(QIODevice& p_IODevice,
+    bool write_to_ascii(const std::filesystem::path& path,
                         float sfreq = 0.0f) const;
 
     //=========================================================================================================

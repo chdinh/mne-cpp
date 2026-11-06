@@ -17,6 +17,7 @@
 //=============================================================================================================
 
 #include "eventmodel.h"
+#include <utils/string_utils.h>
 #include <QFileInfo>
 
 
@@ -353,9 +354,9 @@ bool EventModel::loadEventData(QFile& qFile)
     QFileInfo fileInfo(qFile);
     bool readSuccess = false;
     if (fileInfo.suffix() == "eve") {
-        readSuccess = MNE::read_events_from_ascii(qFile, events);
+        readSuccess = MNE::read_events_from_ascii(UTILSLIB::pathFromUtf8(qFile.fileName().toStdString()), events);
     } else {
-        readSuccess = MNE::read_events_from_fif(qFile, events);
+        readSuccess = MNE::read_events_from_fif(UTILSLIB::pathFromUtf8(qFile.fileName().toStdString()), events);
     }
 
     if (!readSuccess) {

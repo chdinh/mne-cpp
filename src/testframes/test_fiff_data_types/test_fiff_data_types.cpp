@@ -3,7 +3,6 @@
 //   Christoph Dinh <christoph.dinh@mne-cpp.org>
 
 #include <QtTest/QtTest>
-#include <QBuffer>
 #include <QFileInfo>
 #include <QTemporaryDir>
 #include <QTemporaryFile>
@@ -38,69 +37,30 @@ private slots:
         QCOMPARE(ev.num_events(), 0);
     }
 
-    void events_asciiRoundTrip()
+    void events_asciiAndFifRoundTrip()
     {
-        QBuffer buf;
-        buf.open(QIODevice::ReadWrite);
-        QTextStream ts(&buf);
-        for (int r = 0; r < 3; ++r) {
-            ts << (r + 1) * 100 << " 0 " << (r + 1) << "\n";
-        }
-        ts.flush();
-        buf.seek(0);
-
-        FiffEvents evRead;
-        bool ok = FiffEvents::read_from_ascii(buf, evRead);
-        QVERIFY(ok);
-        QCOMPARE(evRead.num_events(), 3);
-        QVERIFY(!evRead.is_empty());
-    }
-
-    void events_asciiWriteReadRoundTrip()
-    {
-        QBuffer buf;
-        buf.open(QIODevice::ReadWrite);
-        QTextStream ts(&buf);
-        ts << "100 0 1\n200 0 2\n300 0 3\n";
-        ts.flush();
-        buf.seek(0);
+        QTemporaryDir dir;
+        const auto path = [&dir](const char* name) {
+            return dir.filePath(name).toStdString();
+        };
+        QFile text(dir.filePath("in.eve"));
+        QVERIFY(text.open(QIODevice::WriteOnly));
+        text.write("100 0 1\n200 0 2\n300 0 3\n");
+        text.close();
 
         FiffEvents ev;
-        FiffEvents::read_from_ascii(buf, ev);
+        QVERIFY(FiffEvents::read_from_ascii(path("in.eve"), ev));
         QCOMPARE(ev.num_events(), 3);
 
-        QBuffer buf2;
-        buf2.open(QIODevice::ReadWrite);
-        ev.write_to_ascii(buf2, 1000.0);
-        buf2.seek(0);
+        FiffEvents ascii;
+        QVERIFY(ev.write_to_ascii(path("out.eve"), 1000.0f));
+        QVERIFY(FiffEvents::read_from_ascii(path("out.eve"), ascii));
+        QVERIFY(ascii.events == ev.events);
 
-        FiffEvents ev2;
-        FiffEvents::read_from_ascii(buf2, ev2);
-        QCOMPARE(ev2.num_events(), 3);
-    }
-
-    void events_fifRoundTrip()
-    {
-        QBuffer buf;
-        buf.open(QIODevice::ReadWrite);
-        QTextStream ts(&buf);
-        ts << "100 0 1\n200 0 2\n";
-        ts.flush();
-        buf.seek(0);
-        FiffEvents ev;
-        FiffEvents::read_from_ascii(buf, ev);
-
-        QBuffer fifBuf;
-        fifBuf.open(QIODevice::ReadWrite);
-        bool writeOk = ev.write_to_fif(fifBuf);
-        QVERIFY(writeOk);
-
-        fifBuf.seek(0);
-        FiffEvents ev2;
-        bool readOk = FiffEvents::read_from_fif(fifBuf, ev2);
-        if (readOk) {
-            QCOMPARE(ev2.num_events(), 2);
-        }
+        FiffEvents fif;
+        QVERIFY(ev.write_to_fif(path("out-eve.fif")));
+        QVERIFY(FiffEvents::read_from_fif(path("out-eve.fif"), fif));
+        QVERIFY(fif.events == ev.events);
     }
 
     //=========================================================================

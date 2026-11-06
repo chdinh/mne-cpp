@@ -25,6 +25,7 @@
 #include <iostream>
 
 #include <dsp/rt/rt_detect_trigger.h>
+#include <utils/string_utils.h>
 
 //=============================================================================================================
 // QT INCLUDES
@@ -587,11 +588,9 @@ void EventModel::initFromFile(const QString& sFilePath)
     Eigen::MatrixXi eventList;
 
     if (fileInfo.exists() && (fileInfo.completeSuffix() == "eve")) {
-        QFile file(sFilePath);
-        MNELIB::MNE::read_events_from_ascii(file, eventList);
+        MNELIB::MNE::read_events_from_ascii(UTILSLIB::pathFromUtf8(sFilePath.toStdString()), eventList);
     } else if (fileInfo.exists() && (fileInfo.completeSuffix() == "fif")) {
-        QFile file(sFilePath);
-        MNELIB::MNE::read_events_from_fif(file, eventList);
+        MNELIB::MNE::read_events_from_fif(UTILSLIB::pathFromUtf8(sFilePath.toStdString()), eventList);
     } else {
         return;
     }

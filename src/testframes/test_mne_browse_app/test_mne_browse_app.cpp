@@ -811,9 +811,11 @@ void TestMneBrowseApp::savesAndOpensProjects()
         if (ref.role == MNALIB::MnaFileRole::Event)
             eventData = ref.data;
     }
-    QBuffer eventBuffer(&eventData);
+    QFile eventFile(dir.filePath("embedded-eve.fif"));
+    QVERIFY(eventFile.open(QIODevice::WriteOnly) && eventFile.write(eventData) == eventData.size());
+    eventFile.close();
     FIFFLIB::FiffEvents events;
-    QVERIFY(FIFFLIB::FiffEvents::read_from_fif(eventBuffer, events));
+    QVERIFY(FIFFLIB::FiffEvents::read_from_fif(eventFile.fileName().toStdString(), events));
     QCOMPARE(events.num_events(), 25);
     QCOMPARE(events.events.row(0), Eigen::RowVector3i(13988, 0, 2));
     first->hide();

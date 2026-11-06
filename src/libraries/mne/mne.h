@@ -265,8 +265,8 @@ public:
         return p_Hemisphere.compute_patch_info();
     }
 
-    inline static bool read_events(const QString& t_sEventName,
-                                   const QString& t_fileRawName,
+    inline static bool read_events(const std::filesystem::path& t_sEventName,
+                                   const std::filesystem::path& t_fileRawName,
                                    Eigen::MatrixXi& events)
     {
         FIFFLIB::FiffEvents fiffEvents;
@@ -282,16 +282,16 @@ public:
      *
      * Read an event list from a fif file
      *
-     * @param[in] p_IODevice   The I/O device to read from.
+     * @param[in] path         The FIFF file.
      * @param[in, out] eventlist    The read eventlist m x 3; with m events; colum: 1 - position in samples, 3 - eventcode.
      *
      * @return true if succeeded, false otherwise.
      */
-    inline static bool read_events_from_fif(QIODevice& p_IODevice,
+    inline static bool read_events_from_fif(const std::filesystem::path& path,
                                             Eigen::MatrixXi& eventlist)
     {
         FIFFLIB::FiffEvents fiffEvents;
-        if (!FIFFLIB::FiffEvents::read_from_fif(p_IODevice, fiffEvents))
+        if (!FIFFLIB::FiffEvents::read_from_fif(path, fiffEvents))
             return false;
         eventlist = fiffEvents.events;
         return true;
@@ -303,16 +303,16 @@ public:
      *
      * Read a list of events from an eve file
      *
-     * @param[in] p_IODevice   The I/O device to read from.
+     * @param[in] path         The text file.
      * @param[in, out] eventlist   List of events.
      *
      * @return true if succeeded, false otherwise.
      */
-    inline static bool read_events_from_ascii(QIODevice& p_IODevice,
+    inline static bool read_events_from_ascii(const std::filesystem::path& path,
                                               Eigen::MatrixXi& eventlist)
     {
         FIFFLIB::FiffEvents fiffEvents;
-        if (!FIFFLIB::FiffEvents::read_from_ascii(p_IODevice, fiffEvents))
+        if (!FIFFLIB::FiffEvents::read_from_ascii(path, fiffEvents))
             return false;
         eventlist = fiffEvents.events;
         return true;
@@ -324,17 +324,17 @@ public:
      *
      * Write an event list to a FIFF file.
      *
-     * @param[in] p_IODevice   The I/O device to write to.
+     * @param[in] path         The FIFF file to write.
      * @param[in] eventlist    The event list (nEvents x 3): [sample, before, after].
      *
      * @return true if succeeded, false otherwise.
      */
-    inline static bool write_events_to_fif(QIODevice& p_IODevice,
+    inline static bool write_events_to_fif(const std::filesystem::path& path,
                                            const Eigen::MatrixXi& eventlist)
     {
         FIFFLIB::FiffEvents fiffEvents;
         fiffEvents.events = eventlist;
-        return fiffEvents.write_to_fif(p_IODevice);
+        return fiffEvents.write_to_fif(path);
     }
 
     //=========================================================================================================
@@ -343,19 +343,19 @@ public:
      *
      * Write an event list to a text file (MNE-C compatible format).
      *
-     * @param[in] p_IODevice   The I/O device to write to.
+     * @param[in] path         The text file to write.
      * @param[in] eventlist    The event list (nEvents x 3): [sample, before, after].
      * @param[in] sfreq        Sampling frequency for time column computation.
      *
      * @return true if succeeded, false otherwise.
      */
-    inline static bool write_events_to_ascii(QIODevice& p_IODevice,
+    inline static bool write_events_to_ascii(const std::filesystem::path& path,
                                              const Eigen::MatrixXi& eventlist,
                                              float sfreq = 0.0f)
     {
         FIFFLIB::FiffEvents fiffEvents;
         fiffEvents.events = eventlist;
-        return fiffEvents.write_to_ascii(p_IODevice, sfreq);
+        return fiffEvents.write_to_ascii(path, sfreq);
     }
 
     //=========================================================================================================

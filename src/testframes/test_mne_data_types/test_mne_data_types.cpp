@@ -4,6 +4,7 @@
 
 #include <QtTest/QtTest>
 #include <QBuffer>
+#include <QTemporaryDir>
 #include <QDir>
 #include <Eigen/Dense>
 #include <Eigen/SparseCore>
@@ -1616,25 +1617,12 @@ private slots:
         QVERIFY(!evWrite.is_empty());
         QCOMPARE(evWrite.num_events(), 3);
 
-        // Write to ASCII buffer — write_to_ascii opens the device itself
-        QBuffer buf;
-        bool ok = evWrite.write_to_ascii(buf, 1000.0f);
-        QVERIFY(ok);
-        QVERIFY(buf.size() > 0);
-
-        // Read back — note: write format is "sample time before after" (4 fields)
-        // but read interprets as "sample val2 val3" (3 fields), so columns shift!
-        // We just verify the read succeeds and gets the right number of events
-        QBuffer buf2;
-        buf2.setData(buf.data());
+        QTemporaryDir dir;
+        const std::string path = dir.filePath("events.eve").toStdString();
+        QVERIFY(evWrite.write_to_ascii(path, 1000.0f));
         FiffEvents evRead;
-        ok = FiffEvents::read_from_ascii(buf2, evRead);
-        QVERIFY(ok);
-        QCOMPARE(evRead.num_events(), 3);
-        // First column (sample) should match
-        QCOMPARE(evRead.events(0, 0), 100);
-        QCOMPARE(evRead.events(1, 0), 200);
-        QCOMPARE(evRead.events(2, 0), 300);
+        QVERIFY(FiffEvents::read_from_ascii(path, evRead));
+        QVERIFY(evRead.events == evMat);
     }
 
     void fiffEvents_fifRoundtrip()
@@ -1646,21 +1634,12 @@ private slots:
         FiffEvents evWrite;
         evWrite.events = evMat;
 
-        // write_to_fif opens the device internally via FiffStream::start_file
-        QBuffer buf;
-        bool ok = evWrite.write_to_fif(buf);
-        QVERIFY(ok);
-        QVERIFY(buf.size() > 0);
-
-        QBuffer buf2;
-        buf2.setData(buf.data());
+        QTemporaryDir dir;
+        const std::string path = dir.filePath("events-eve.fif").toStdString();
+        QVERIFY(evWrite.write_to_fif(path));
         FiffEvents evRead;
-        ok = FiffEvents::read_from_fif(buf2, evRead);
-        QVERIFY(ok);
-        // Note: Eigen MatrixXi is column-major, so write_int serializes
-        // columns not rows. The read back re-interprets as row-major triplets.
-        // Just verify the roundtrip executes successfully.
-        QVERIFY(evRead.num_events() > 0);
+        QVERIFY(FiffEvents::read_from_fif(path, evRead));
+        QVERIFY(evRead.events == evMat);
     }
 
     //=========================================================================
