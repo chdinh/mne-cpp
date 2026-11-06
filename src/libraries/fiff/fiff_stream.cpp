@@ -154,9 +154,42 @@ FiffStream::FiffStream(QByteArray* a,
 
 //=============================================================================================================
 
-FiffStream::FiffStream(std::unique_ptr<UTILSLIB::ByteStream> bytes)
+FiffStream::FiffStream(std::unique_ptr<UTILSLIB::ByteStream> bytes, std::string name)
 : m_bytes(std::move(bytes))
+, m_name(std::move(name))
 {
+}
+
+//=============================================================================================================
+
+FiffStream::SPtr FiffStream::open(const std::filesystem::path& path)
+{
+    auto bytes = UTILSLIB::FileByteStream::open(path, UTILSLIB::FileByteStream::Mode::Read);
+    if (!bytes) {
+        qCritical("Cannot open %s", UTILSLIB::utf8FromPath(path).c_str());
+        return {};
+    }
+    FiffStream::SPtr stream(new FiffStream(std::move(bytes), UTILSLIB::utf8FromPath(path)));
+    if (!stream->open())
+        return {};
+    return stream;
+}
+
+//=============================================================================================================
+
+FiffStream::SPtr FiffStream::start_file(const std::filesystem::path& path)
+{
+    auto bytes = UTILSLIB::FileByteStream::open(path, UTILSLIB::FileByteStream::Mode::Write);
+    if (!bytes) {
+        qWarning("Cannot write to %s", UTILSLIB::utf8FromPath(path).c_str());
+        return {};
+    }
+    FiffStream::SPtr stream(new FiffStream(std::move(bytes), UTILSLIB::utf8FromPath(path)));
+    stream->write_id(FIFF_FILE_ID);
+    int null_pointer = FIFFV_NEXT_NONE;
+    stream->write_int(FIFF_DIR_POINTER, &null_pointer);
+    stream->write_int(FIFF_FREE_LIST, &null_pointer);
+    return stream;
 }
 
 //=============================================================================================================
@@ -237,14 +270,9 @@ void FiffStream::skipRaw(fiff_long_t bytes)
 
 QString FiffStream::streamName()
 {
-    QFile* t_pFile = qobject_cast<QFile*>(this->device());
-    QString p_sFileName;
-    if (t_pFile)
-        p_sFileName = t_pFile->fileName();
-    else
-        p_sFileName = QString("TCPSocket");
-
-    return p_sFileName;
+    if (QFile* t_pFile = qobject_cast<QFile*>(this->device()))
+        return t_pFile->fileName();
+    return m_name.empty() ? QString("TCPSocket") : QString::fromStdString(m_name);
 }
 
 //=============================================================================================================
@@ -452,6 +480,8 @@ bool FiffStream::close()
 {
     if (m_device && m_device->isOpen())
         m_device->close();
+    else if (!m_device)
+        m_bytes->close();
 
     return true;
 }

@@ -115,6 +115,7 @@ private slots:
     void tagsRewriteByteIdentical_data();
     void tagsRewriteByteIdentical();
     void readsWithoutQtDevice();
+    void opensAndStartsFilesByPath();
     void writersStable_data();
     void writersStable();
     void cleanupTestCase();
@@ -411,6 +412,38 @@ void TestFiffRWR::readsWithoutQtDevice()
     QVERIFY(stream.read_cov(stream.dirtree(), FIFFV_MNE_NOISE_COV, cov));
     QCOMPARE(cov.dim, 366);
     qtStream.close();
+}
+
+//=============================================================================================================
+
+void TestFiffRWR::opensAndStartsFilesByPath()
+{
+    const std::string path = (testDataDir() + "/MEG/sample/all-trans.fif").toStdString();
+    FiffStream::SPtr in = FiffStream::open(path);
+    QVERIFY(in);
+    QVERIFY(in->device() == nullptr);
+    QCOMPARE(in->streamName(), QString::fromStdString(path));
+    QVERIFY(in->nent() > 0);
+    QVERIFY(!FiffStream::open(m_tempDir.filePath("missing.fif").toStdString()));
+
+    // A file started by path is complete on disk once the stream is closed, before the stream goes away
+    const std::string outPath = m_tempDir.filePath("by-path.fif").toStdString();
+    FiffStream::SPtr out = FiffStream::start_file(outPath);
+    QVERIFY(out);
+    for (const FiffDirEntry::SPtr& entry : in->dir()) {
+        FiffTag::UPtr tag;
+        if (entry->kind == FIFF_COORD_TRANS && in->read_tag(tag, entry->pos))
+            out->write_tag(tag);
+    }
+    out->end_file();
+    out->close();
+    FiffStream::SPtr back = FiffStream::open(outPath);
+    QVERIFY(back);
+    int transforms = 0;
+    for (const FiffDirEntry::SPtr& entry : back->dir())
+        transforms += entry->kind == FIFF_COORD_TRANS ? 1 : 0;
+    QVERIFY(transforms > 0);
+    QVERIFY(!FiffStream::start_file(m_tempDir.filePath("no/dir/out.fif").toStdString()));
 }
 
 //=============================================================================================================

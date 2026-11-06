@@ -67,7 +67,9 @@
 #include <QSharedPointer>
 #include <QString>
 #include <QStringList>
+#include <filesystem>
 #include <memory>
+#include <string>
 
 //=============================================================================================================
 // DEFINE NAMESPACE FIFFLIB
@@ -143,8 +145,19 @@ public:
      * Constructs a fiff stream on a byte stream, e.g. a file opened without Qt.
      *
      * @param[in] bytes  The byte stream, already open; the fiff stream owns it.
+     * @param[in] name   Name reported by streamName(), e.g. the file path.
      */
-    explicit FiffStream(std::unique_ptr<UTILSLIB::ByteStream> bytes);
+    explicit FiffStream(std::unique_ptr<UTILSLIB::ByteStream> bytes, std::string name = {});
+
+    //=========================================================================================================
+    /**
+     * Opens a FIFF file for reading and reads its tag directory.
+     *
+     * @param[in] path   The file.
+     *
+     * @return The open stream, or nullptr if the file cannot be opened or is not a FIFF file.
+     */
+    static FiffStream::SPtr open(const std::filesystem::path& path);
 
     ~FiffStream();
 
@@ -558,6 +571,16 @@ public:
      * @return The opened file.
      */
     static FiffStream::SPtr start_file(QIODevice& p_IODevice);
+
+    //=========================================================================================================
+    /**
+     * Creates or truncates a FIFF file and writes the compulsory header tags.
+     *
+     * @param[in] path   The file.
+     *
+     * @return The stream, or nullptr if the file cannot be created.
+     */
+    static FiffStream::SPtr start_file(const std::filesystem::path& path);
 
     //=========================================================================================================
     /**
@@ -984,6 +1007,7 @@ private:
     std::unique_ptr<QIODevice> m_ownedDevice; /**< Buffer created for the byte-array constructor. */
     QIODevice* m_device = nullptr;            /**< Qt device, or nullptr for a stream on a byte stream. */
     std::unique_ptr<UTILSLIB::ByteStream> m_bytes;
+    std::string m_name; /**< File path of a stream on a byte stream. */
     bool m_littleEndian = false;
     bool m_readFailed = false;
     //    char         *file_name;    /**< Name of the file. */ -> Use streamName() instead

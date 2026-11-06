@@ -68,7 +68,7 @@ The mode describes how the device is to be used.
 
 ---
 
-### FiffStream(bytes)
+### FiffStream(bytes, name)
 
 Constructs a fiff stream on a byte stream, e.g.
 
@@ -78,6 +78,9 @@ a file opened without Qt.
 
 - **bytes** : *std::unique_ptr&lt; [ByteStream](/docs/api/utils/byte-stream) &gt;*
   The byte stream, already open; the fiff stream owns it.
+
+- **name** : *std::string*
+  Name reported by `streamName()`, e.g. the file path.
 
 ---
 
@@ -1113,6 +1116,21 @@ Writes a real-time command.
 
 ## Static Methods
 
+### open(path)
+
+Opens a FIFF file for reading and reads its tag directory.
+
+**Parameters:**
+
+- **path** : *const std::filesystem::path &*
+  The file.
+
+**Returns:**
+
+- *FiffStream::SPtr* — The open stream, or nullptr if the file cannot be opened or is not a FIFF file.
+
+---
+
 ### setup_read_raw(p_IODevice, data, allow_maxshield, is_littleEndian)
 
 fiff_setup_read_raw
@@ -1168,6 +1186,21 @@ Opens a fiff file for writing and writes the compulsory header tags.
 **Returns:**
 
 - *FiffStream::SPtr* — The opened file.
+
+---
+
+### start_file(path)
+
+Creates or truncates a FIFF file and writes the compulsory header tags.
+
+**Parameters:**
+
+- **path** : *const std::filesystem::path &*
+  The file.
+
+**Returns:**
+
+- *FiffStream::SPtr* — The stream, or nullptr if the file cannot be created.
 
 ---
 
