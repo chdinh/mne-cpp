@@ -173,7 +173,7 @@ void RtFiffRawView::addData(const QList<Eigen::MatrixXd>& lMatData)
     if (!lMatData.isEmpty()) {
         m_pModel->addData(lMatData);
 
-        if (m_qListBadChannels.size() != m_pFiffInfo->bads.size()) {
+        if (m_qListBadChannels.size() != static_cast<int>(m_pFiffInfo->bads.size())) {
             m_qListBadChannels.clear();
             for (int i = 0; i < m_pModel->rowCount(); i++) {
                 if (m_pModel->data(m_pModel->index(i, 2)).toBool()) {

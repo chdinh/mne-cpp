@@ -103,7 +103,7 @@ int main(int argc, char* argv[])
         if (ch.kind == FIFFV_EEG_CH) {
             EegEntry e;
             e.index = k;
-            e.name = ch.ch_name;
+            e.name = QString::fromStdString(ch.ch_name);
             e.pos = ch.chpos.r0;
             eegChannels.append(e);
         }

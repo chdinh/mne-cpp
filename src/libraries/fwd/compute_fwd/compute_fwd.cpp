@@ -487,7 +487,7 @@ void ComputeFwd::populateMetadata(MNEForwardSolution& fwd)
     }
 
     // Measurement provenance
-    fwd.info.filename = m_pSettings->measname;
+    fwd.info.filename = m_pSettings->measname.toStdString();
     fwd.info.meas_id = m_meas_id;
     fwd.info.dev_head_t = m_meg_head_t;
     fwd.info.nchan = fwd.nchan;
@@ -496,11 +496,11 @@ void ComputeFwd::populateMetadata(MNEForwardSolution& fwd)
     fwd.info.ch_names.clear();
     for (int i = 0; i < nmeg; ++i) {
         fwd.info.chs.append(m_listMegChs[i]);
-        fwd.info.ch_names.append(m_listMegChs[i].ch_name);
+        fwd.info.ch_names.push_back(m_listMegChs[i].ch_name);
     }
     for (int i = 0; i < neeg; ++i) {
         fwd.info.chs.append(m_listEegChs[i]);
-        fwd.info.ch_names.append(m_listEegChs[i].ch_name);
+        fwd.info.ch_names.push_back(m_listEegChs[i].ch_name);
     }
 
     // Bad channels
@@ -585,7 +585,7 @@ std::unique_ptr<MNEForwardSolution> ComputeFwd::calculateFwd()
         fwdSolution->sol->data.block(0, 0, m_meg_forward->nrow, m_meg_forward->ncol) = m_meg_forward->data;
         fwdSolution->sol->data.block(m_meg_forward->nrow, 0, m_eeg_forward->nrow, m_eeg_forward->ncol) = m_eeg_forward->data;
         fwdSolution->sol->row_names = m_meg_forward->row_names;
-        fwdSolution->sol->row_names.append(m_eeg_forward->row_names);
+        fwdSolution->sol->row_names.insert(fwdSolution->sol->row_names.end(), m_eeg_forward->row_names.begin(), m_eeg_forward->row_names.end());
         fwdSolution->sol->col_names = m_meg_forward->col_names;
     } else if (iNMeg > 0) {
         fwdSolution->sol = m_meg_forward;
@@ -606,7 +606,7 @@ std::unique_ptr<MNEForwardSolution> ComputeFwd::calculateFwd()
             fwdSolution->sol_grad->data.block(0, 0, m_meg_forward_grad->nrow, m_meg_forward_grad->ncol) = m_meg_forward_grad->data;
             fwdSolution->sol_grad->data.block(m_meg_forward_grad->nrow, 0, m_eeg_forward_grad->nrow, m_eeg_forward_grad->ncol) = m_eeg_forward_grad->data;
             fwdSolution->sol_grad->row_names = m_meg_forward_grad->row_names;
-            fwdSolution->sol_grad->row_names.append(m_eeg_forward_grad->row_names);
+            fwdSolution->sol_grad->row_names.insert(fwdSolution->sol_grad->row_names.end(), m_eeg_forward_grad->row_names.begin(), m_eeg_forward_grad->row_names.end());
             fwdSolution->sol_grad->col_names = m_meg_forward_grad->col_names;
         } else if (iNMeg > 0) {
             fwdSolution->sol_grad = m_meg_forward_grad;

@@ -24,11 +24,15 @@
 
 #include <iostream>
 
-#include <QFile>
-#include <QHash>
+#include <utils/generics/log.h>
+#include <utils/string_utils.h>
+
 #include <QRegularExpression>
-#include <QTextStream>
-#include <QDebug>
+
+#include <algorithm>
+#include <fstream>
+#include <unordered_map>
+#include <unordered_set>
 
 #include <stdexcept>
 //=============================================================================================================
@@ -75,19 +79,20 @@ namespace
 {
 
 /** mne-python's channel type name for @p ch, or an empty string for a kind outside the standard. */
-QString channelTypeName(const FiffChInfo& ch)
+std::string channelTypeName(const FiffChInfo& ch)
 {
     // mne-python's _first_rule (by kind) refined by _second_rules (MEG by unit, EEG/fNIRS/eye tracking by coil type)
-    static const QHash<int, QString> byKind{
+    static const std::unordered_map<int, std::string> byKind{
         {FIFFV_REF_MEG_CH, "ref_meg"}, {FIFFV_STIM_CH, "stim"}, {FIFFV_EOG_CH, "eog"}, {FIFFV_EMG_CH, "emg"}, {FIFFV_ECG_CH, "ecg"}, {FIFFV_RESP_CH, "resp"}, {FIFFV_MISC_CH, "misc"}, {FIFFV_EXCI_CH, "exci"}, {FIFFV_IAS_CH, "ias"}, {FIFFV_SYST_CH, "syst"}, {FIFFV_SEEG_CH, "seeg"}, {FIFFV_DBS_CH, "dbs"}, {FIFFV_BIO_CH, "bio"}, {FIFFV_DIPOLE_WAVE_CH, "dipole"}, {FIFFV_GOODNESS_FIT_CH, "gof"}, {FIFFV_ECOG_CH, "ecog"}, {FIFFV_TEMPERATURE_CH, "temperature"}, {FIFFV_GALVANIC_CH, "gsr"}};
-    static const QHash<int, QString> eegByCoil{
+    static const std::unordered_map<int, std::string> eegByCoil{
         {FIFFV_COIL_EEG, "eeg"}, {FIFFV_COIL_EEG_BIPOLAR, "eeg"}, {FIFFV_COIL_NONE, "eeg"}, {FIFFV_COIL_EEG_CSD, "csd"}};
-    static const QHash<int, QString> fnirsByCoil{
+    static const std::unordered_map<int, std::string> fnirsByCoil{
         {FIFFV_COIL_FNIRS_HBO, "hbo"}, {FIFFV_COIL_FNIRS_HBR, "hbr"}, {FIFFV_COIL_FNIRS_CW_AMPLITUDE, "fnirs_cw_amplitude"}, {FIFFV_COIL_FNIRS_FD_AC_AMPLITUDE, "fnirs_fd_ac_amplitude"}, {FIFFV_COIL_FNIRS_FD_PHASE, "fnirs_fd_phase"}, {FIFFV_COIL_FNIRS_OD, "fnirs_od"}, {FIFFV_COIL_FNIRS_TD_GATED_AMPLITUDE, "fnirs_td_gated_amplitude"}, {FIFFV_COIL_FNIRS_TD_MOMENTS_INTENSITY, "fnirs_td_moments_intensity"}, {FIFFV_COIL_FNIRS_TD_MOMENTS_MEAN, "fnirs_td_moments_mean"}, {FIFFV_COIL_FNIRS_TD_MOMENTS_VARIANCE, "fnirs_td_moments_variance"}};
-    static const QHash<int, QString> eyetrackByCoil{{FIFFV_COIL_EYETRACK_POS, "eyegaze"}, {FIFFV_COIL_EYETRACK_PUPIL, "pupil"}};
+    static const std::unordered_map<int, std::string> eyetrackByCoil{{FIFFV_COIL_EYETRACK_POS, "eyegaze"}, {FIFFV_COIL_EYETRACK_PUPIL, "pupil"}};
 
-    const auto refine = [](const QHash<int, QString>& rule, int key) {
-        return rule.value(key);
+    const auto refine = [](const std::unordered_map<int, std::string>& rule, int key) {
+        const auto it = rule.find(key);
+        return it == rule.end() ? std::string() : it->second;
     };
     if (ch.kind == FIFFV_MEG_CH)
         return refine({{FIFF_UNIT_T_M, "grad"}, {FIFF_UNIT_T, "mag"}}, ch.unit);
@@ -106,12 +111,27 @@ QString channelTypeName(const FiffChInfo& ch)
 
 //=============================================================================================================
 
-QString FiffInfoBase::channel_type(qint32 idx) const
+std::string FiffInfoBase::channel_type(qint32 idx) const
 {
-    const QString type = channelTypeName(this->chs[idx]);
-    if (type.isEmpty())
-        throw std::invalid_argument("Unknown channel type for channel " + this->chs[idx].ch_name.toStdString());
+    std::string type = channelTypeName(this->chs[idx]);
+    if (type.empty())
+        throw std::invalid_argument("Unknown channel type for channel " + this->chs[idx].ch_name);
     return type;
+}
+
+//=============================================================================================================
+
+int FiffInfoBase::channelIndex(std::string_view name) const
+{
+    const auto it = std::find(ch_names.begin(), ch_names.end(), name);
+    return it == ch_names.end() ? -1 : static_cast<int>(it - ch_names.begin());
+}
+
+//=============================================================================================================
+
+bool FiffInfoBase::isBad(std::string_view name) const
+{
+    return std::find(bads.begin(), bads.end(), name) != bads.end();
 }
 
 //=============================================================================================================
@@ -129,34 +149,35 @@ QMap<QString, QList<int>> FiffInfoBase::channel_indices_by_type(const QList<int>
     const qsizetype count = picks.isEmpty() ? chs.size() : picks.size();
     for (qsizetype k = 0; k < count; ++k) {
         const int idx = picks.isEmpty() ? static_cast<int>(k) : picks[k];
-        byType[channel_type(idx)].append(idx);
+        byType[QString::fromStdString(channel_type(idx))].append(idx);
     }
     return byType;
 }
 
 //=============================================================================================================
 
-RowVectorXi FiffInfoBase::pick_data_channels(const QStringList& exclude) const
+RowVectorXi FiffInfoBase::pick_data_channels(const StringList& exclude) const
 {
-    static const QStringList dataTypes{"mag", "grad", "ref_meg", "eeg", "csd", "seeg", "ecog", "dbs", "hbo", "hbr"};
-    QList<int> picks;
+    static const std::vector<std::string_view> dataTypes{"mag", "grad", "ref_meg", "eeg", "csd", "seeg", "ecog", "dbs", "hbo", "hbr"};
+    std::vector<int> picks;
     for (int i = 0; i < chs.size(); ++i) {
-        const QString type = channelTypeName(chs[i]);
-        if ((dataTypes.contains(type) || type.startsWith(QLatin1String("fnirs_"))) && !exclude.contains(chs[i].ch_name))
-            picks.append(i);
+        const std::string type = channelTypeName(chs[i]);
+        const bool isData = std::find(dataTypes.begin(), dataTypes.end(), type) != dataTypes.end() || type.starts_with("fnirs_");
+        if (isData && std::find(exclude.begin(), exclude.end(), chs[i].ch_name) == exclude.end())
+            picks.push_back(i);
     }
-    return Map<const RowVectorXi>(picks.data(), picks.size());
+    return Map<const RowVectorXi>(picks.data(), static_cast<Index>(picks.size()));
 }
 
 //=============================================================================================================
 
-RowVectorXi FiffInfoBase::pick_channels_regexp(const QStringList& ch_names, const QString& regexp)
+RowVectorXi FiffInfoBase::pick_channels_regexp(const StringList& ch_names, const QString& regexp)
 {
     const QRegularExpression re(QRegularExpression::anchoredPattern(regexp + QStringLiteral(".*")),
                                 QRegularExpression::DotMatchesEverythingOption);
     QList<int> sel;
-    for (int k = 0; k < ch_names.size(); ++k) {
-        if (re.match(ch_names[k]).hasMatch())
+    for (int k = 0; k < static_cast<int>(ch_names.size()); ++k) {
+        if (re.match(QString::fromStdString(ch_names[static_cast<std::size_t>(k)])).hasMatch())
             sel.append(k);
     }
     return Eigen::Map<const RowVectorXi>(sel.constData(), sel.size());
@@ -179,7 +200,7 @@ void FiffInfoBase::clear()
 
 //=============================================================================================================
 
-RowVectorXi FiffInfoBase::pick_types(const QString meg, bool eeg, bool stim, const QStringList& include, const QStringList& exclude) const
+RowVectorXi FiffInfoBase::pick_types(const std::string& meg, bool eeg, bool stim, const StringList& include, const StringList& exclude) const
 {
     // A default-constructed info has nchan -1; count the channels actually present.
     const qint32 nchPresent = static_cast<qint32>(this->chs.size());
@@ -191,11 +212,11 @@ RowVectorXi FiffInfoBase::pick_types(const QString meg, bool eeg, bool stim, con
         kind = this->chs[k].kind;
 
         if ((kind == FIFFV_MEG_CH || kind == FIFFV_REF_MEG_CH)) {
-            if (meg.compare("all") == 0) {
+            if (meg == "all") {
                 pick(k) = 1;
-            } else if (meg.compare("grad") == 0 && this->chs[k].unit == FIFF_UNIT_T_M) {
+            } else if (meg == "grad" && this->chs[k].unit == FIFF_UNIT_T_M) {
                 pick(k) = 1;
-            } else if (meg.compare("mag") == 0 && this->chs[k].unit == FIFF_UNIT_T) {
+            } else if (meg == "mag" && this->chs[k].unit == FIFF_UNIT_T) {
                 pick(k) = 1;
             }
         } else if (kind == FIFFV_EEG_CH && eeg)
@@ -206,20 +227,15 @@ RowVectorXi FiffInfoBase::pick_types(const QString meg, bool eeg, bool stim, con
 
     // restrict channels to selection if provided
     qint32 p = 0;
-    QStringList myinclude;
+    StringList myinclude;
     for (k = 0; k < nchPresent; ++k) {
         if (pick(0, k)) {
-            myinclude << this->ch_names[k];
+            myinclude.push_back(this->ch_names[static_cast<std::size_t>(k)]);
             ++p;
         }
     }
-
-    if (include.size() > 0) {
-        for (k = 0; k < include.size(); ++k) {
-            myinclude << include[k];
-            ++p;
-        }
-    }
+    myinclude.insert(myinclude.end(), include.begin(), include.end());
+    p += static_cast<qint32>(include.size());
 
     RowVectorXi sel;
     if (p != 0)
@@ -230,31 +246,26 @@ RowVectorXi FiffInfoBase::pick_types(const QString meg, bool eeg, bool stim, con
 
 //=============================================================================================================
 
-RowVectorXi FiffInfoBase::pick_types(bool meg, bool eeg, bool stim, const QStringList& include, const QStringList& exclude) const
+RowVectorXi FiffInfoBase::pick_types(bool meg, bool eeg, bool stim, const StringList& include, const StringList& exclude) const
 {
-    if (meg)
-        return this->pick_types(QString("all"), eeg, stim, include, exclude);
-    else
-        return this->pick_types(QString(""), eeg, stim, include, exclude);
+    return this->pick_types(std::string(meg ? "all" : ""), eeg, stim, include, exclude);
 }
 
 //=============================================================================================================
 
-RowVectorXi FiffInfoBase::pick_channels(const QStringList& ch_names, const QStringList& include, const QStringList& exclude)
+RowVectorXi FiffInfoBase::pick_channels(const StringList& ch_names, const StringList& include, const StringList& exclude)
 {
-    RowVectorXi sel = RowVectorXi::Zero(ch_names.size());
-
-    QStringList t_includedSelection;
-
+    const auto contains = [](const StringList& list, const std::string& name) {
+        return std::find(list.begin(), list.end(), name) != list.end();
+    };
+    RowVectorXi sel = RowVectorXi::Zero(static_cast<Index>(ch_names.size()));
+    std::unordered_set<std::string> selected;
     qint32 count = 0;
-    for (qint32 k = 0; k < ch_names.size(); ++k) {
-        if ((include.size() == 0 || include.contains(ch_names[k])) && !exclude.contains(ch_names[k])) {
-            //make sure channel is unique
-            if (!t_includedSelection.contains(ch_names[k])) {
-                sel[count] = k;
-                ++count;
-                t_includedSelection << ch_names[k];
-            }
+    for (std::size_t k = 0; k < ch_names.size(); ++k) {
+        const std::string& name = ch_names[k];
+        if ((include.empty() || contains(include, name)) && !contains(exclude, name) && selected.insert(name).second) {
+            sel[count] = static_cast<int>(k);
+            ++count;
         }
     }
     sel.conservativeResize(count);
@@ -277,10 +288,10 @@ FiffInfoBase FiffInfoBase::pick_info(const RowVectorXi* sel) const
     for (qint32 i = 0; i < sel->size(); ++i) {
         idx = (*sel)(0, i);
         res.chs.append(this->chs[idx]);
-        res.ch_names.append(this->ch_names[idx]);
+        res.ch_names.push_back(this->ch_names[static_cast<std::size_t>(idx)]);
     }
     res.nchan = sel->size();
-    res.bads.removeIf([&res](const QString& bad) { return !res.ch_names.contains(bad); });
+    std::erase_if(res.bads, [&res](const std::string& bad) { return res.channelIndex(bad) < 0; });
 
     return res;
 }
@@ -313,46 +324,42 @@ void FiffInfoBase::mne_read_meg_comp_eeg_ch_info(QList<FiffChInfo>& megp,
 
 //=============================================================================================================
 
-QStringList FiffInfoBase::get_channel_types()
+StringList FiffInfoBase::get_channel_types()
 {
-    QStringList lChannelTypes;
+    StringList types;
     for (const FiffChInfo& ch : chs) {
-        const QString type = channelTypeName(ch);
-        if (!type.isEmpty() && !lChannelTypes.contains(type))
-            lChannelTypes << type;
+        std::string type = channelTypeName(ch);
+        if (!type.empty() && std::find(types.begin(), types.end(), type) == types.end())
+            types.push_back(std::move(type));
     }
-    return lChannelTypes;
+    return types;
 }
 
 //=============================================================================================================
 
-bool FiffInfoBase::readBadChannelsFromFile(const QString& name, QStringList& listOut)
+bool FiffInfoBase::readBadChannelsFromFile(const std::string& name, StringList& listOut)
 {
-    if (name.isEmpty()) {
+    if (name.empty()) {
         listOut.clear();
         return true;
     }
-
-    QFile file(name);
-    if (!file.open(QIODevice::ReadOnly | QIODevice::Text)) {
-        qCritical() << "Cannot open bad channel file:" << name;
+    std::ifstream file(UTILSLIB::pathFromUtf8(name));
+    if (!file) {
+        UTILSLIB::Log::critical("Cannot open bad channel file: " + name);
         return false;
     }
-
-    QStringList list;
-    QTextStream in(&file);
-    while (!in.atEnd()) {
-        QString line = in.readLine().trimmed();
-        if (line.isEmpty() || line.startsWith('#'))
+    StringList list;
+    std::string line;
+    while (std::getline(file, line)) {
+        const std::string_view trimmed = UTILSLIB::trimmed(line);
+        if (trimmed.empty() || trimmed.front() == '#')
             continue;
-        list.append(line);
+        list.emplace_back(trimmed);
     }
-
-    if (file.error() != QFileDevice::NoError) {
-        qCritical() << "Error reading bad channel file:" << name;
+    if (file.bad()) {
+        UTILSLIB::Log::critical("Error reading bad channel file: " + name);
         return false;
     }
-
-    listOut = list;
+    listOut = std::move(list);
     return true;
 }

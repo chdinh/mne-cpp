@@ -34,7 +34,7 @@ constexpr int OK = 0;
 // DEFINE MEMBER METHODS
 //=============================================================================================================
 
-int MNENamedVector::pick(const QStringList& pick_names, int nnames, bool require_all, Eigen::Ref<Eigen::VectorXf> res) const
+int MNENamedVector::pick(const StringList& pick_names, int nnames, bool require_all, Eigen::Ref<Eigen::VectorXf> res) const
 {
     int found;
     int k, p;
@@ -50,7 +50,7 @@ int MNENamedVector::pick(const QStringList& pick_names, int nnames, bool require
     for (k = 0; k < nnames; k++) {
         found = 0;
         for (p = 0; p < nvec; p++) {
-            if (QString::compare(names[p], pick_names[k]) == 0) {
+            if ((names[p] == pick_names[k])) {
                 res[k] = data[p];
                 found = true;
                 break;

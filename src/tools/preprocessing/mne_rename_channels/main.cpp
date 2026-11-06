@@ -206,7 +206,7 @@ int main(int argc, char* argv[])
                 if (ch.ch_name == a.from) {
                     QString line = QString("%1 -> %2").arg(ch.ch_name, a.to);
                     nMod++;
-                    ch.ch_name = a.to;
+                    ch.ch_name = a.to.toStdString();
                     if (a.toKind > 0) {
                         line += QString(" (%1 -> %2)").arg(explainKind(ch.kind), explainKind(a.toKind));
                         ch.kind = a.toKind;

@@ -19,7 +19,7 @@
  * specification regardless of host platform. It also publishes a handful
  * of Eigen typedefs (@c MatrixDau16, @c MatrixShort) used by the matrix
  * tag readers in @ref FIFFLIB::FiffStream and a small set of empty-default
- * sentinel objects (@c defaultMatrixXd, @c defaultQStringList, ...) that
+ * sentinel objects (@c defaultMatrixXd, ...) that
  * let callers express "no value provided" on optional arguments without
  * relying on @c std::optional, matching the historical MATLAB-style
  * signatures inherited from the MNE matlab toolbox.
@@ -57,6 +57,10 @@
 #include <QPair>
 #include <QVariant>
 
+#include <string>
+#include <string_view>
+#include <vector>
+
 //=============================================================================================================
 // DEFINE NAMESPACE FIFFLIB
 //=============================================================================================================
@@ -64,7 +68,6 @@
 namespace FIFFLIB
 {
 
-const static QStringList defaultQStringList = QStringList();
 static Eigen::MatrixXd defaultMatrixXd = Eigen::MatrixXd::Constant(1, 1, -1);
 const static Eigen::MatrixXd defaultConstMatrixXd(0, 0);
 const static Eigen::MatrixXi defaultMatrixXi(0, 0);

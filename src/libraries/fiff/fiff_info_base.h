@@ -128,7 +128,23 @@ public:
      *
      * @return Type of channel as in mne.channel_type ('grad', 'mag', 'eeg', 'seeg', 'ecog', 'hbo', 'eyegaze', ...).
      */
-    QString channel_type(qint32 idx) const;
+    std::string channel_type(qint32 idx) const;
+
+    //=========================================================================================================
+    /**
+     * @param[in] name   Channel name.
+     *
+     * @return Index of the channel in ch_names, or -1 when there is none.
+     */
+    int channelIndex(std::string_view name) const;
+
+    //=========================================================================================================
+    /**
+     * @param[in] name   Channel name.
+     *
+     * @return True when the channel is marked bad.
+     */
+    bool isBad(std::string_view name) const;
 
     //=========================================================================================================
     /**
@@ -148,7 +164,7 @@ public:
      *
      * @return The channel indices in channel order.
      */
-    Eigen::RowVectorXi pick_data_channels(const QStringList& exclude = defaultQStringList) const;
+    Eigen::RowVectorXi pick_data_channels(const StringList& exclude = {}) const;
 
     //=========================================================================================================
     /**
@@ -159,7 +175,7 @@ public:
      *
      * @return The selector (row vector).
      */
-    static Eigen::RowVectorXi pick_channels_regexp(const QStringList& ch_names, const QString& regexp);
+    static Eigen::RowVectorXi pick_channels_regexp(const StringList& ch_names, const QString& regexp);
 
     //=========================================================================================================
     /**
@@ -181,9 +197,9 @@ public:
      *
      * @return the selector matrix (row Vector).
      */
-    static Eigen::RowVectorXi pick_channels(const QStringList& ch_names,
-                                            const QStringList& include = defaultQStringList,
-                                            const QStringList& exclude = defaultQStringList);
+    static Eigen::RowVectorXi pick_channels(const StringList& ch_names,
+                                            const StringList& include = {},
+                                            const StringList& exclude = {});
 
     //=========================================================================================================
     /**
@@ -211,11 +227,21 @@ public:
      *
      * @return the selector matrix (row vector).
      */
-    Eigen::RowVectorXi pick_types(const QString meg,
+    Eigen::RowVectorXi pick_types(const std::string& meg,
                                   bool eeg = false,
                                   bool stim = false,
-                                  const QStringList& include = defaultQStringList,
-                                  const QStringList& exclude = defaultQStringList) const;
+                                  const StringList& include = {},
+                                  const StringList& exclude = {}) const;
+
+    // Without this, a literal such as "mag" converts to bool and selects the overload below.
+    Eigen::RowVectorXi pick_types(const char* meg,
+                                  bool eeg = false,
+                                  bool stim = false,
+                                  const StringList& include = {},
+                                  const StringList& exclude = {}) const
+    {
+        return pick_types(std::string(meg), eeg, stim, include, exclude);
+    }
 
     //=========================================================================================================
     /**
@@ -235,8 +261,8 @@ public:
     Eigen::RowVectorXi pick_types(bool meg,
                                   bool eeg = false,
                                   bool stim = false,
-                                  const QStringList& include = defaultQStringList,
-                                  const QStringList& exclude = defaultQStringList) const;
+                                  const StringList& include = {},
+                                  const StringList& exclude = {}) const;
 
     /**
      * Overloaded == operator to compare an object to this instance.
@@ -277,7 +303,7 @@ public:
      *
      * @return The distinct channel types in channel order, as channel_type() names them (unknown kinds skipped).
      */
-    QStringList get_channel_types();
+    StringList get_channel_types();
 
     //=========================================================================================================
     /**
@@ -287,15 +313,15 @@ public:
      * @param[out] listOut The bad channel names read from the file.
      * @return true on success, false on error.
      */
-    static bool readBadChannelsFromFile(const QString& name, QStringList& listOut);
+    static bool readBadChannelsFromFile(const std::string& name, StringList& listOut);
 
 public:
-    QString filename;                      /**< Filename when the info is read of a fiff file. */
-    QStringList bads;                      /**< List of bad channels. */
+    std::string filename;                  /**< Filename when the info is read of a fiff file. */
+    StringList bads;                       /**< List of bad channels. */
     FiffId meas_id;                        /**< Measurement ID. */
     fiff_int_t nchan;                      /**< Number of channels. */
     QList<FiffChInfo> chs;                 /**< List of all channel info descriptors. */
-    QStringList ch_names;                  /**< List of all channel names. */
+    StringList ch_names;                   /**< List of all channel names. */
     FiffCoordTrans dev_head_t;             /**< Device to head coordinate transformation. */
     FiffCoordTrans ctf_head_t;             /**< CTF to head coordinate transformation. */
     QList<FiffCoordTrans> all_coord_trans; /**< All coordinate transformations stored in the file, in file order. */

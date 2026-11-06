@@ -264,7 +264,7 @@ int main(int argc, char* argv[])
         ch.chpos.coil_type = 4003; // FIFFV_COIL_MAGNES_REF_MAG
         ch.unit = FIFF_UNIT_T;
         ch.unit_mul = FIFF_UNITM_NONE;
-        ch.ch_name = QString("REF%1").arg(k + 1, 3, 10, QChar('0'));
+        ch.ch_name = QString("REF%1").arg(k + 1, 3, 10, QChar('0')).toStdString();
         refChs.append(ch);
     }
 

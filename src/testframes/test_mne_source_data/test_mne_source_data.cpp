@@ -119,7 +119,7 @@ private slots:
 
         // Left hemisphere
         auto& lh = srcSpace[0];
-        QVERIFY(lh.id == 101 || lh.id == FIFFV_MNE_SURF_LEFT_HEMI);
+        QVERIFY(lh.id == FIFFV_MNE_SURF_LEFT_HEMI);
         QVERIFY(lh.np > 1000); // typical source space has many vertices
         QVERIFY(lh.ntri > 0);
         QVERIFY(lh.itris.rows() > 0);
@@ -127,7 +127,7 @@ private slots:
 
         // Right hemisphere
         auto& rh = srcSpace[1];
-        QVERIFY(rh.id == 102 || rh.id == FIFFV_MNE_SURF_RIGHT_HEMI);
+        QVERIFY(rh.id == FIFFV_MNE_SURF_RIGHT_HEMI);
 
         // Check that isClustered returns consistent result
         QVERIFY(!srcSpace.isEmpty());
@@ -320,9 +320,9 @@ private slots:
             // Pick MEG channels only
             RowVectorXi megPicks = fwd.info.pick_types(true, false, false);
             if (megPicks.size() > 0) {
-                QStringList megNames;
+                StringList megNames;
                 for (int i = 0; i < megPicks.size(); ++i)
-                    megNames << fwd.info.ch_names[megPicks(i)];
+                    megNames.push_back(fwd.info.ch_names[megPicks(i)]);
                 MNEForwardSolution fwdMeg = fwd.pick_channels(megNames);
                 QCOMPARE(fwdMeg.nchan, (int)megPicks.size());
             }

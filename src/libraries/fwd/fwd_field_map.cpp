@@ -446,7 +446,7 @@ std::unique_ptr<MatrixXf> FwdFieldMap::computeMegMapping(
     const MatrixX3f& normals,
     const Vector3f& origin,
     const FIFFLIB::FiffInfo& info,
-    const QStringList& chNames,
+    const StringList& chNames,
     float intrad,
     float miss)
 {
@@ -501,7 +501,7 @@ std::unique_ptr<MatrixXf> FwdFieldMap::computeEegMapping(
     const MatrixX3f& vertices,
     const Vector3f& origin,
     const FIFFLIB::FiffInfo& info,
-    const QStringList& chNames,
+    const StringList& chNames,
     float intrad,
     float miss)
 {

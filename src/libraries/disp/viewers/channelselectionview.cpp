@@ -332,8 +332,7 @@ void ChannelSelectionView::setCurrentLayoutFile(QString currentLayoutFile)
 void ChannelSelectionView::updateBadChannels()
 {
     QStringList badChannelMappedNames;
-    QStringList badChannelList = m_pChannelInfoModel->getBadChannelList();
-
+    const StringList badChannelList = m_pChannelInfoModel->getBadChannelList();
     if (m_pUi->m_checkBox_showBadChannelsAsRed->isChecked()) {
         for (int i = 0; i < m_pChannelInfoModel->rowCount(); i++) {
             QModelIndex digIndex = m_pChannelInfoModel->index(i, 3);
@@ -342,7 +341,7 @@ void ChannelSelectionView::updateBadChannels()
             digIndex = m_pChannelInfoModel->index(i, 1);
             QString origChName = m_pChannelInfoModel->data(digIndex, ChannelInfoModelRoles::GetOrigChName).toString();
 
-            if (badChannelList.contains(origChName)) {
+            if (UTILSLIB::contains(badChannelList, origChName.toStdString())) {
                 badChannelMappedNames << mappedChName;
             }
         }

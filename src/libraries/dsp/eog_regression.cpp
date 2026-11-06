@@ -15,6 +15,7 @@
 //=============================================================================================================
 
 #include "eog_regression.h"
+#include <utils/string_utils.h>
 
 #include <fiff/fiff_info.h>
 #include <fiff/fiff_ch_info.h>
@@ -63,20 +64,20 @@ MatrixXd demeanedRows(const MatrixXd& data, const QVector<int>& rows)
 
 void EogRegression::fit(const MatrixXd& data,
                         const FiffInfo& info,
-                        const QStringList& eogChannels)
+                        const StringList& eogChannels)
 {
     m_vecEogIndices.clear();
     m_vecTargetIndices.clear();
     m_bFitted = false;
 
-    if (eogChannels.isEmpty()) {
+    if (eogChannels.empty()) {
         for (int i = 0; i < info.chs.size(); ++i) {
-            if (info.chs[i].kind == FIFFV_EOG_CH && !info.bads.contains(info.ch_names[i]))
+            if (info.chs[i].kind == FIFFV_EOG_CH && !UTILSLIB::contains(info.bads, info.ch_names[i]))
                 m_vecEogIndices.append(i);
         }
     } else {
-        for (const QString& name : eogChannels) {
-            const int idx = static_cast<int>(info.ch_names.indexOf(name));
+        for (const std::string& name : eogChannels) {
+            const int idx = static_cast<int>(UTILSLIB::indexOf(info.ch_names, name));
             if (idx >= 0)
                 m_vecEogIndices.append(idx);
             else
@@ -119,7 +120,7 @@ void EogRegression::apply(MatrixXd& data,
 
 void EogRegression::fitApply(MatrixXd& data,
                              const FiffInfo& info,
-                             const QStringList& eogChannels)
+                             const StringList& eogChannels)
 {
     EogRegression reg;
     reg.fit(data, info, eogChannels);

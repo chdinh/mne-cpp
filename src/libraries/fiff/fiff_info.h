@@ -80,15 +80,15 @@ class FiffStream;
  */
 struct FiffDeviceInfo
 {
-    QString type;   /**< Device type, e.g. the acquisition backend. */
-    QString model;  /**< Device model. */
-    QString serial; /**< Serial number. */
-    QString site;   /**< Site of the device. */
+    std::string type;   /**< Device type, e.g. the acquisition backend. */
+    std::string model;  /**< Device model. */
+    std::string serial; /**< Serial number. */
+    std::string site;   /**< Site of the device. */
 
     /** @return true when no field is set; then no FIFFB_DEVICE block is written. */
     bool isEmpty() const
     {
-        return type.isEmpty() && model.isEmpty() && serial.isEmpty() && site.isEmpty();
+        return type.empty() && model.empty() && serial.empty() && site.empty();
     }
 };
 
@@ -201,7 +201,7 @@ public:
      *
      * @return nproj - How many items in the projector.
      */
-    inline qint32 make_projector(Eigen::MatrixXd& proj, const QStringList& p_chNames) const;
+    inline qint32 make_projector(Eigen::MatrixXd& proj, const StringList& p_chNames) const;
 
     //=========================================================================================================
     /**
@@ -256,10 +256,10 @@ public:
      * @param[out] neegp   Number of EEG channels in chsp.
      * @return true on success, false on error.
      */
-    static bool readMegEegChannels(const QString& name,
+    static bool readMegEegChannels(const std::string& name,
                                    bool do_meg,
                                    bool do_eeg,
-                                   const QStringList& bads,
+                                   const StringList& bads,
                                    QList<FiffChInfo>& chsp,
                                    int& nmegp,
                                    int& neegp);
@@ -300,19 +300,19 @@ public:                          //Public because it's a mne struct
     float highpass;              /**< Highpass frequency. */
     float lowpass;               /**< Lowpass frequency. */
     int proj_id;                 /**< Project ID. */
-    QString proj_name;           /**< Project name. */
-    QString xplotter_layout;     /**< xplotter layout tag. */
-    QString experimenter;        /**< Experimenter name. */
-    QString description;         /**< (Textual) Description of an object.*/
-    QString utc_offset;          /**< UTC offset of related meas_date (sHH:MM).*/
+    std::string proj_name;       /**< Project name. */
+    std::string xplotter_layout; /**< xplotter layout tag. */
+    std::string experimenter;    /**< Experimenter name. */
+    std::string description;     /**< (Textual) Description of an object.*/
+    std::string utc_offset;      /**< UTC offset of related meas_date (sHH:MM).*/
     fiff_int_t gantry_angle;     /**< Tilt angle of the dewar in degrees.*/
     FiffCoordTrans dev_ctf_t;    /**< Device to CTF coordinate transformation. */
     QList<FiffDigPoint> dig;     /**< List of all digitization point descriptors. */
     FiffCoordTrans dig_trans;    /**< Digitizer coordinate transformation. */
     QList<FiffProj> projs;       /**< List of available SSP projectors. */
     QList<FiffCtfComp> comps;    /**< List of available CTF software compensators. */
-    QString acq_pars;            /**< Acquisition parameters. */
-    QString acq_stim;            /**< Acquisition stimulus information. */
+    std::string acq_pars;        /**< Acquisition parameters. */
+    std::string acq_stim;        /**< Acquisition stimulus information. */
     QList<float> hpi_coil_freqs; /**< Excitation frequencies of the HPI coils in Hz, in coil order. Empty when the file contains no HPI measurement block. */
     FiffDeviceInfo device_info;  /**< Acquisition device; empty if unknown. */
 };
@@ -328,7 +328,7 @@ inline qint32 FiffInfo::make_projector(Eigen::MatrixXd& proj) const
 
 //=============================================================================================================
 
-inline qint32 FiffInfo::make_projector(Eigen::MatrixXd& proj, const QStringList& p_chNames) const
+inline qint32 FiffInfo::make_projector(Eigen::MatrixXd& proj, const StringList& p_chNames) const
 {
     return FiffProj::make_projector(this->projs, p_chNames, proj, this->bads);
 }

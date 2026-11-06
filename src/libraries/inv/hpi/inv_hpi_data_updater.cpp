@@ -23,6 +23,7 @@
 //=============================================================================================================
 
 #include "inv_hpi_data_updater.h"
+#include <utils/string_utils.h>
 #include <fiff/fiff_ch_info.h>
 #include <fiff/fiff_info.h>
 
@@ -86,7 +87,7 @@ void InvHpiDataUpdater::updateChannels(FiffInfo::SPtr pFiffInfo)
             pFiffInfo->chs[i].chpos.coil_type == FIFFV_COIL_VV_PLANAR_T3) {
             // Check if the sensor is bad, if not append to innerind
 
-            if (!(pFiffInfo->bads.contains(pFiffInfo->ch_names.at(i)))) {
+            if (!(UTILSLIB::contains(pFiffInfo->bads, pFiffInfo->ch_names.at(i)))) {
                 m_vecInnerind.append(i);
                 m_lChannels.append(pFiffInfo->chs[i]);
             }
@@ -146,7 +147,7 @@ void InvHpiDataUpdater::checkForUpdate(const FiffInfo::SPtr pFiffInfo)
 
 //=============================================================================================================
 
-bool InvHpiDataUpdater::checkIfChanged(const QList<QString>& lBads, const QList<FIFFLIB::FiffChInfo>& lChannels)
+bool InvHpiDataUpdater::checkIfChanged(const StringList& lBads, const QList<FIFFLIB::FiffChInfo>& lChannels)
 {
     bool bUpdate = false;
     if (!(m_lBads == lBads) || !(m_lChannels == lChannels)) {

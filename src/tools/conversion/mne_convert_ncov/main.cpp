@@ -236,9 +236,9 @@ int main(int argc, char* argv[])
     //=========================================================================
     // Build and write FIFF covariance
     //=========================================================================
-    QStringList chNames;
+    StringList chNames;
     for (int i = 0; i < nSel; ++i) {
-        chNames << info.chs[selectedMeasIdx[i]].ch_name;
+        chNames.push_back(info.chs[selectedMeasIdx[i]].ch_name);
     }
 
     FiffCov cov;

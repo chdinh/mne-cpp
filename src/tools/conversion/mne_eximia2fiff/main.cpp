@@ -80,7 +80,7 @@ FiffInfo eximiaInfo()
     const QStringList names = channelNames();
     for (int c = 0; c < kChannels; ++c) {
         FiffChInfo ch;
-        ch.ch_name = names[c];
+        ch.ch_name = names[c].toStdString();
         ch.scanNo = c + 1;
         ch.logNo = c + 1;
         ch.unit = FIFF_UNIT_V;
@@ -99,7 +99,7 @@ FiffInfo eximiaInfo()
             ch.chpos.coil_type = FIFFV_COIL_EEG;
         }
         info.chs.append(ch);
-        info.ch_names.append(ch.ch_name);
+        info.ch_names.push_back(ch.ch_name);
     }
     return info;
 }

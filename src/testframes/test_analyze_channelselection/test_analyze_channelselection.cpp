@@ -15,6 +15,7 @@
 //=============================================================================================================
 
 #include <applications/mne_analyze/plugins/channelselection/channelselection.h>
+#include <utils/string_utils.h>
 
 #include <anShared/Management/analyzedata.h>
 #include <anShared/Management/communicator.h>
@@ -108,8 +109,8 @@ void TestAnalyzeChannelSelection::publishesTheSelectedChannels()
         QCOMPARE(got, expected);
         QList<int> idx = indices.last();
         std::sort(idx.begin(), idx.end());
-        QList<int> expectedIdx{static_cast<int>(raw->getFiffInfo()->ch_names.indexOf("MEG0112")),
-                               static_cast<int>(raw->getFiffInfo()->ch_names.indexOf("MEG0113"))};
+        QList<int> expectedIdx{static_cast<int>(UTILSLIB::indexOf(raw->getFiffInfo()->ch_names, "MEG0112")),
+                               static_cast<int>(UTILSLIB::indexOf(raw->getFiffInfo()->ch_names, "MEG0113"))};
         std::sort(expectedIdx.begin(), expectedIdx.end());
         QCOMPARE(idx, expectedIdx);
     }

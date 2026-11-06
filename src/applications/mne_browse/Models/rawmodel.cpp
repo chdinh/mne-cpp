@@ -18,6 +18,7 @@
 //=============================================================================================================
 
 #include "rawmodel.h"
+#include <utils/string_utils.h>
 
 #include <math/numerics.h>
 
@@ -173,7 +174,7 @@ QVariant RawModel::data(const QModelIndex& index, int role) const
     if (index.isValid()) {
         //******** first column (chname) ********
         if (index.column() == 0 && role == Qt::DisplayRole)
-            return QVariant(m_chInfolist[index.row()].ch_name);
+            return QVariant(QString::fromStdString(m_chInfolist[index.row()].ch_name));
 
         //******** second column (data plot) ********
         if (index.column() == 1) {
@@ -205,7 +206,7 @@ QVariant RawModel::data(const QModelIndex& index, int role) const
                 }
 
                 case Qt::BackgroundRole: { //plot channel red if marked as red
-                    if (m_pFiffInfo->bads.contains(m_chInfolist[index.row()].ch_name)) {
+                    if (UTILSLIB::contains(m_pFiffInfo->bads, m_chInfolist[index.row()].ch_name)) {
                         QBrush brush;
                         brush.setStyle(Qt::SolidPattern);
                         brush.setColor(Qt::darkRed);
@@ -666,13 +667,13 @@ void RawModel::markChBad(QModelIndexList chlist, bool status)
     for (int i = 0; i < chlist.size(); ++i) {
         if (chlist[i].column() == 1) { //only process indexes corresponding to column 1 (data)
             if (status) {
-                if (!m_pFiffInfo->bads.contains(m_chInfolist[chlist[i].row()].ch_name))
-                    m_pFiffInfo->bads.append(m_chInfolist[chlist[i].row()].ch_name);
+                if (!UTILSLIB::contains(m_pFiffInfo->bads, m_chInfolist[chlist[i].row()].ch_name))
+                    m_pFiffInfo->bads.push_back(m_chInfolist[chlist[i].row()].ch_name);
                 qInfo() << "RawModel:" << m_chInfolist[chlist[i].row()].ch_name << "marked as bad.";
             } else {
-                if (m_pFiffInfo->bads.contains(m_chInfolist[chlist[i].row()].ch_name)) {
-                    int index = m_pFiffInfo->bads.indexOf(m_chInfolist[chlist[i].row()].ch_name);
-                    m_pFiffInfo->bads.removeAt(index);
+                if (UTILSLIB::contains(m_pFiffInfo->bads, m_chInfolist[chlist[i].row()].ch_name)) {
+                    int index = UTILSLIB::indexOf(m_pFiffInfo->bads, m_chInfolist[chlist[i].row()].ch_name);
+                    m_pFiffInfo->bads.erase(m_pFiffInfo->bads.begin() + index);
                     qInfo() << "RawModel:" << m_chInfolist[chlist[i].row()].ch_name << "marked as good.";
                 }
             }
@@ -695,13 +696,13 @@ void RawModel::applyOperator(QModelIndexList chlist, const QSharedPointer<MNEOpe
     //filter only channels which include chType in their names
     if (chType == "All") {
         for (qint32 i = 0; i < m_chInfolist.size(); ++i) {
-            if (!m_chInfolist.at(i).ch_name.contains("STI") && !m_chInfolist.at(i).ch_name.contains("MISC") && !m_chInfolist.at(i).ch_name.contains("TRG"))
+            if (!(m_chInfolist.at(i).ch_name.find("STI") != std::string::npos) && !(m_chInfolist.at(i).ch_name.find("MISC") != std::string::npos) && !(m_chInfolist.at(i).ch_name.find("TRG") != std::string::npos))
                 if (!m_assignedOperators.values(i).contains(operatorPtr))
                     m_assignedOperators.insert(i, operatorPtr);
         }
     } else {
         for (qint32 i = 0; i < m_chInfolist.size(); ++i) {
-            if (!m_chInfolist.at(i).ch_name.contains("STI") && !m_chInfolist.at(i).ch_name.contains("MISC") && !m_chInfolist.at(i).ch_name.contains("TRG") && m_chInfolist.at(i).ch_name.contains(chType))
+            if (!(m_chInfolist.at(i).ch_name.find("STI") != std::string::npos) && !(m_chInfolist.at(i).ch_name.find("MISC") != std::string::npos) && !(m_chInfolist.at(i).ch_name.find("TRG") != std::string::npos) && (m_chInfolist.at(i).ch_name.find(chType.toStdString()) != std::string::npos))
                 if (!m_assignedOperators.values(i).contains(operatorPtr))
                     m_assignedOperators.insert(i, operatorPtr);
         }
@@ -730,7 +731,7 @@ void RawModel::applyOperator(QModelIndexList chlist, const QSharedPointer<MNEOpe
     if (chlist.empty()) {
         for (qint32 i = 0; i < m_chInfolist.size(); ++i) {
             if (chlist.at(i).column() == 1)
-                if (!m_chInfolist.at(i).ch_name.contains("STI") && !m_chInfolist.at(i).ch_name.contains("MISC") && !m_chInfolist.at(i).ch_name.contains("TRG"))
+                if (!(m_chInfolist.at(i).ch_name.find("STI") != std::string::npos) && !(m_chInfolist.at(i).ch_name.find("MISC") != std::string::npos) && !(m_chInfolist.at(i).ch_name.find("TRG") != std::string::npos))
                     if (!m_assignedOperators.values(i).contains(operatorPtr))
                         m_assignedOperators.insert(i, operatorPtr);
         }
@@ -899,7 +900,7 @@ void RawModel::undoFilter(const QString& chType)
     else {
         //filter only channels which include chType in their names
         for (qint32 i = 0; i < m_chInfolist.size(); ++i)
-            if (m_chInfolist.at(i).ch_name.contains(chType))
+            if ((m_chInfolist.at(i).ch_name.find(chType.toStdString()) != std::string::npos))
                 m_assignedOperators.remove(i);
     }
 

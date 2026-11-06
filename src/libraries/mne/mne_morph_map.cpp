@@ -327,8 +327,8 @@ bool MNEMorphMap::write(const QString& path, const QList<const MNEMorphMap*>& ma
             return false;
         }
         stream->start_block(FIFFB_MNE_MORPH_MAP);
-        stream->write_string(FIFF_MNE_MORPH_MAP_FROM, morph->from_subj);
-        stream->write_string(FIFF_MNE_MORPH_MAP_TO, morph->to_subj);
+        stream->write_string(FIFF_MNE_MORPH_MAP_FROM, morph->from_subj.toStdString());
+        stream->write_string(FIFF_MNE_MORPH_MAP_TO, morph->to_subj.toStdString());
         stream->write_int(FIFF_MNE_HEMI, &kHemiKind[morph->hemi]);
         stream->write_float_sparse_rcs(FIFF_MNE_MORPH_MAP, morph->map->eigen());
         stream->end_block(FIFFB_MNE_MORPH_MAP);

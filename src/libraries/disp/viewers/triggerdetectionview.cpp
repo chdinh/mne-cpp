@@ -84,7 +84,7 @@ void TriggerDetectionView::init(const FiffInfo::SPtr pFiffInfo)
 
         for (int i = 0; i < m_pFiffInfo->chs.size(); i++) {
             if (m_pFiffInfo->chs[i].kind == FIFFV_STIM_CH) {
-                m_pUi->m_comboBox_triggerChannels->addItem(m_pFiffInfo->chs[i].ch_name);
+                m_pUi->m_comboBox_triggerChannels->addItem(QString::fromStdString(m_pFiffInfo->chs[i].ch_name));
             }
         }
 

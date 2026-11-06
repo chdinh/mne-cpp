@@ -124,9 +124,9 @@ FiffAnnotations UTILSLIB::annotateMusclZscore(
     if (data.rows() == 0 || nTimes == 0)
         return annot;
 
-    RowVectorXi picks = info.pick_types(QStringLiteral("mag"), false, false);
+    RowVectorXi picks = info.pick_types("mag", false, false);
     if (picks.size() == 0)
-        picks = info.pick_types(QStringLiteral("grad"), false, false);
+        picks = info.pick_types("grad", false, false);
     if (picks.size() == 0)
         picks = info.pick_types(false, true, false);
     if (picks.size() == 0) {
@@ -175,7 +175,7 @@ FiffAnnotations UTILSLIB::annotateAmplitude(
     const FiffInfo& info,
     double sfreq,
     const AnnotateAmplitudeParams& params,
-    QStringList* bads)
+    StringList* bads)
 {
     FiffAnnotations annot;
     if (bads)
@@ -214,7 +214,7 @@ FiffAnnotations UTILSLIB::annotateAmplitude(
             }
         }
         if (bad && bads)
-            bads->append(info.ch_names[ch]);
+            bads->push_back(info.ch_names[ch]);
     }
 
     for (const auto& [any, description] : {std::pair{&anyFlat, "BAD_flat"}, std::pair{&anyPeak, "BAD_peak"}}) {

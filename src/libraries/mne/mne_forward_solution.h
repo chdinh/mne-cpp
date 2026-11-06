@@ -182,8 +182,8 @@ public:
     MNEForwardSolution(QIODevice& p_IODevice,
                        bool force_fixed = false,
                        bool surf_ori = false,
-                       const QStringList& include = FIFFLIB::defaultQStringList,
-                       const QStringList& exclude = FIFFLIB::defaultQStringList,
+                       const StringList& include = {},
+                       const StringList& exclude = {},
                        bool bExcludeBads = false);
 
     //=========================================================================================================
@@ -323,8 +323,8 @@ public:
      *
      * @return Forward solution restricted to selected channel types.
      */
-    MNEForwardSolution pick_channels(const QStringList& include = FIFFLIB::defaultQStringList,
-                                     const QStringList& exclude = FIFFLIB::defaultQStringList) const;
+    MNEForwardSolution pick_channels(const StringList& include = {},
+                                     const StringList& exclude = {}) const;
 
     //=========================================================================================================
     /**
@@ -351,8 +351,8 @@ public:
      */
     MNEForwardSolution pick_types(bool meg,
                                   bool eeg,
-                                  const QStringList& include = FIFFLIB::defaultQStringList,
-                                  const QStringList& exclude = FIFFLIB::defaultQStringList) const;
+                                  const StringList& include = {},
+                                  const StringList& exclude = {}) const;
 
     //=========================================================================================================
     /**
@@ -411,8 +411,8 @@ public:
                      MNEForwardSolution& fwd,
                      bool force_fixed = false,
                      bool surf_ori = false,
-                     const QStringList& include = FIFFLIB::defaultQStringList,
-                     const QStringList& exclude = FIFFLIB::defaultQStringList,
+                     const StringList& include = {},
+                     const StringList& exclude = {},
                      bool bExcludeBads = false);
 
     //=========================================================================================================

@@ -160,7 +160,7 @@ int main(int argc, char* argv[])
     //
     //   Set up pick list: MEG + STI 014 - bad channels
     //
-    QStringList include;
+    StringList include;
     //    include << "STI 014";
     bool want_meg = true;
     bool want_eeg = false;

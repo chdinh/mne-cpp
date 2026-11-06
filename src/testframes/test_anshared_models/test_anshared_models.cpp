@@ -33,6 +33,7 @@
 //=============================================================================================================
 
 #include <anShared/Model/fiffrawviewmodel.h>
+#include <utils/string_utils.h>
 #include <anShared/Model/eventmodel.h>
 #include <anShared/Model/averagingdatamodel.h>
 #include <anShared/Model/bemdatamodel.h>
@@ -169,10 +170,10 @@ void TestAnSharedModels::rawModel_saveToFileRoundTrips()
     QVERIFY(original.read_raw_segment(a, t, 14000, 14999));
     QVERIFY(lowpassed.read_raw_segment(b, t, 14000, 14999));
     for (const char* name : {"STI014", "MEG0113", "EOG061"}) {
-        const int k = static_cast<int>(original.info.ch_names.indexOf(name));
+        const int k = static_cast<int>(UTILSLIB::indexOf(original.info.ch_names, name));
         QVERIFY2(k >= 0 && (a.row(k) - b.row(k)).cwiseAbs().maxCoeff() <= 1e-6 * a.row(k).cwiseAbs().maxCoeff(), name);
     }
-    const int eeg = static_cast<int>(original.info.ch_names.indexOf("EEG001"));
+    const int eeg = static_cast<int>(UTILSLIB::indexOf(original.info.ch_names, "EEG001"));
     QVERIFY((a.row(eeg) - b.row(eeg)).cwiseAbs().maxCoeff() > 1e-3 * a.row(eeg).cwiseAbs().maxCoeff());
 }
 

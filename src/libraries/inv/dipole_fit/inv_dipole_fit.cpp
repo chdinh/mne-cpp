@@ -21,6 +21,7 @@
 //=============================================================================================================
 
 #include "inv_dipole_fit.h"
+#include <utils/string_utils.h>
 #include <mne/mne_meas_data_set.h>
 #include "inv_guess_data.h"
 
@@ -56,7 +57,7 @@ static constexpr float SEG_LEN = 10.0f;
  *
  * @return The new channel selection.
  */
-static std::unique_ptr<MNEChSelection> mne_ch_selection_these(const QString& selname, const QStringList& names, int nch)
+static std::unique_ptr<MNEChSelection> mne_ch_selection_these(const QString& selname, const StringList& names, int nch)
 {
     auto sel = std::make_unique<MNEChSelection>();
     sel->name = selname;
@@ -64,7 +65,7 @@ static std::unique_ptr<MNEChSelection> mne_ch_selection_these(const QString& sel
     sel->kind = MNE_CH_SELECTION_USER;
 
     for (int c = 0; c < nch; c++)
-        sel->chdef.append(names[c]);
+        sel->chdef.push_back(names[c]);
 
     return sel;
 }
@@ -93,7 +94,7 @@ static int mne_ch_selection_assign_chs(mneChSelection sel,
     sel->chspick = sel->chdef;
     sel->chspick_nospace = sel->chdef;
     for (auto& name : sel->chspick_nospace)
-        name = name.trimmed();
+        name = std::string(UTILSLIB::trimmed(name));
     sel->nchan = sel->ndef;
 
     sel->pick.setConstant(sel->nchan, -1);
@@ -102,8 +103,8 @@ static int mne_ch_selection_assign_chs(mneChSelection sel,
 
     for (int c = 0; c < sel->nchan; c++) {
         for (int rc = 0; rc < info->nchan; rc++) {
-            if (QString::compare(sel->chspick[c], info->chInfo[rc].ch_name, Qt::CaseInsensitive) == 0 ||
-                QString::compare(sel->chspick_nospace[c], info->chInfo[rc].ch_name, Qt::CaseInsensitive) == 0) {
+            if (UTILSLIB::equalsIgnoreCase(sel->chspick[c], info->chInfo[rc].ch_name) ||
+                UTILSLIB::equalsIgnoreCase(sel->chspick_nospace[c], info->chInfo[rc].ch_name)) {
                 sel->pick[c] = rc;
                 sel->ch_kind[c] = info->chInfo[rc].kind;
                 break;
@@ -115,13 +116,13 @@ static int mne_ch_selection_assign_chs(mneChSelection sel,
      */
     sel->nderiv = 0;
     if (data->deriv_matched) {
-        QStringList deriv_names = data->deriv_matched->deriv_data->rowlist;
+        const StringList& deriv_names = data->deriv_matched->deriv_data->rowlist;
         int nderiv = data->deriv_matched->deriv_data->nrow;
 
         for (int c = 0; c < sel->nchan; c++) {
             if (sel->pick[c] == -1) {
                 for (int d = 0; d < nderiv; d++) {
-                    if (QString::compare(sel->chspick[c], deriv_names[d], Qt::CaseInsensitive) == 0 &&
+                    if (UTILSLIB::equalsIgnoreCase(sel->chspick[c], deriv_names[d]) &&
                         data->deriv_matched->valid.size() > 0 && data->deriv_matched->valid[d]) {
                         sel->pick_deriv[c] = d;
                         sel->ch_kind[c] = data->deriv_matched->chs[d].kind;
@@ -138,10 +139,11 @@ static int mne_ch_selection_assign_chs(mneChSelection sel,
     for (int c = 0; c < sel->nchan; c++) {
         if (sel->pick[c] == -1 && sel->pick_deriv[c] == -1) {
             for (int rc = 0; rc < info->nchan; rc++) {
-                QString dash = QString(info->chInfo[rc].ch_name).mid(QString(info->chInfo[rc].ch_name).indexOf("-") + 1);
+                const QString chName = QString::fromStdString(info->chInfo[rc].ch_name);
+                QString dash = chName.mid(chName.indexOf("-") + 1);
                 if (!dash.isNull()) {
-                    if (QString::compare(sel->chspick[c], info->chInfo[rc].ch_name, Qt::CaseInsensitive) == 0 ||
-                        QString::compare(sel->chspick_nospace[c], info->chInfo[rc].ch_name, Qt::CaseInsensitive) == 0) {
+                    if (UTILSLIB::equalsIgnoreCase(sel->chspick[c], info->chInfo[rc].ch_name) ||
+                        UTILSLIB::equalsIgnoreCase(sel->chspick_nospace[c], info->chInfo[rc].ch_name)) {
                         sel->pick[c] = rc;
                         sel->ch_kind[c] = info->chInfo[rc].kind;
                         break;

@@ -276,7 +276,7 @@ private slots:
         QList<FiffChInfo> chs;
         for (int i = 0; i < 3; ++i) {
             FiffChInfo ch;
-            ch.ch_name = QString("EEG%1").arg(i + 1, 3, 10, QChar('0'));
+            ch.ch_name = (QString("EEG%1").arg(i + 1, 3, 10, QChar('0'))).toStdString();
             ch.kind = FIFFV_EEG_CH;
             ch.chpos.r0[0] = 0.05f * (i + 1);
             ch.chpos.r0[1] = 0.0f;

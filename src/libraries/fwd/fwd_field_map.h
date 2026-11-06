@@ -44,6 +44,8 @@
 
 #include <Eigen/Core>
 #include <memory>
+#include <string>
+#include <vector>
 #include "fwd_coil_set.h"
 #include <fiff/fiff_info.h>
 
@@ -109,7 +111,7 @@ public:
                                                               const Eigen::MatrixX3f& normals,
                                                               const Eigen::Vector3f& origin,
                                                               const FIFFLIB::FiffInfo& info,
-                                                              const QStringList& chNames,
+                                                              const StringList& chNames,
                                                               float intrad = 0.06f,
                                                               float miss = 1e-4f);
 
@@ -149,7 +151,7 @@ public:
                                                               const Eigen::MatrixX3f& vertices,
                                                               const Eigen::Vector3f& origin,
                                                               const FIFFLIB::FiffInfo& info,
-                                                              const QStringList& chNames,
+                                                              const StringList& chNames,
                                                               float intrad = 0.06f,
                                                               float miss = 1e-3f);
 };

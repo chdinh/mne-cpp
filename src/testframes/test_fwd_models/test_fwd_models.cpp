@@ -172,7 +172,7 @@ private slots:
         QList<FIFFLIB::FiffChInfo> chs;
         for (const Eigen::Vector3f& r : {Eigen::Vector3f(0.0f, 0.0f, 0.09f), Eigen::Vector3f(0.09f, 0.0f, 0.0f), Eigen::Vector3f(0.0f, -0.0636f, 0.0636f)}) {
             FIFFLIB::FiffChInfo ch;
-            ch.ch_name = QStringLiteral("EEG%1").arg(chs.size());
+            ch.ch_name = (QStringLiteral("EEG%1").arg(chs.size())).toStdString();
             ch.kind = FIFFV_EEG_CH;
             ch.chpos.coil_type = FIFFV_COIL_EEG;
             ch.chpos.r0 = r;
@@ -274,14 +274,14 @@ private slots:
         info.nchan = nSensors;
         for (int i = 0; i < nSensors; ++i) {
             FiffChInfo ch;
-            ch.ch_name = QString("MEG%1").arg(i);
+            ch.ch_name = (QString("MEG%1").arg(i)).toStdString();
             ch.kind = FIFFV_MEG_CH;
             ch.unit = FIFF_UNIT_T;
             ch.chpos.coil_type = FIFFV_COIL_VV_MAG_T3;
             ch.range = 1.0;
             ch.cal = 1.0;
             info.chs.append(ch);
-            info.ch_names.append(ch.ch_name);
+            info.ch_names.push_back(ch.ch_name);
         }
         info.bads.clear();
 

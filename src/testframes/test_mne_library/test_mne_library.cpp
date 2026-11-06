@@ -1268,10 +1268,10 @@ void TestMneLibrary::forwardSolution_pickChannels()
     if (fwd.isEmpty())
         QSKIP("Could not read forward solution");
 
-    QStringList include;
+    StringList include;
     if (fwd.sol->row_names.size() >= 10) {
         for (int i = 0; i < 10; i++)
-            include.append(fwd.sol->row_names[i]);
+            include.push_back(fwd.sol->row_names[i]);
     }
     if (include.size() > 0) {
         MNEForwardSolution fwdPicked = fwd.pick_channels(include);
@@ -1344,8 +1344,8 @@ void TestMneLibrary::namedMatrix_lifecycle()
     nm2.nrow = 3;
     nm2.ncol = 4;
     nm2.data = MatrixXf::Random(3, 4).eval();
-    nm2.rowlist = QStringList{"r0", "r1", "r2"};
-    nm2.collist = QStringList{"c0", "c1", "c2", "c3"};
+    nm2.rowlist = {"r0", "r1", "r2"};
+    nm2.collist = {"c0", "c1", "c2", "c3"};
 
     MNENamedMatrix nm3(nm2);
     QCOMPARE(nm3.nrow, 3);
@@ -1373,9 +1373,12 @@ void TestMneLibrary::namedMatrix_methods()
     MNENamedMatrix m;
     QCOMPARE(m.nrow, 0);
 
-    QStringList rows, cols;
-    rows << "r1" << "r2";
-    cols << "c1" << "c2" << "c3";
+    StringList rows, cols;
+    rows.push_back("r1");
+    rows.push_back("r2");
+    cols.push_back("c1");
+    cols.push_back("c2");
+    cols.push_back("c3");
     MatrixXf matData = MatrixXf::Identity(2, 3);
 
     auto m2 = MNENamedMatrix::build(2, 3, rows, cols, matData);
@@ -1430,10 +1433,10 @@ void TestMneLibrary::epochData_average()
     pInfo->nchan = 3;
     for (int i = 0; i < 3; i++) {
         FiffChInfo ch;
-        ch.ch_name = QString("CH%1").arg(i);
+        ch.ch_name = (QString("CH%1").arg(i)).toStdString();
         ch.kind = FIFFV_MEG_CH;
         pInfo->chs.append(ch);
-        pInfo->ch_names.append(ch.ch_name);
+        pInfo->ch_names.push_back(ch.ch_name);
     }
 
     MNEEpochDataList list;

@@ -85,7 +85,7 @@ FiffChInfo BrainVisionChannelInfo::toFiffChInfo() const
     // Calibration: resolution is the scaling factor from raw → physical units
     info.cal = resolution;
     info.range = 1.0f;
-    info.ch_name = name;
+    info.ch_name = name.toStdString();
 
     return info;
 }
@@ -410,7 +410,7 @@ FIFFLIB::FiffInfo BrainVisionReader::getInfo() const
     for (const auto& ch : m_vChannels) {
         FiffChInfo fiffCh = ch.toFiffChInfo();
         info.chs.append(fiffCh);
-        info.ch_names.append(fiffCh.ch_name);
+        info.ch_names.push_back(fiffCh.ch_name);
     }
 
     return info;

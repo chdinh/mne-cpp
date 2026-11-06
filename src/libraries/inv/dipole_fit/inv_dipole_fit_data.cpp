@@ -42,6 +42,7 @@
 
 #include <math/simplex_algorithm.h>
 #include <math/sphere.h>
+#include <utils/string_utils.h>
 
 #include <Eigen/Dense>
 
@@ -253,7 +254,7 @@ std::unique_ptr<MNECovMatrix> InvDipoleFitData::ad_hoc_noise(FwdCoilSet* meg, Fw
 {
     int nchan;
     Eigen::VectorXd stds;
-    QStringList names, ch_names;
+    StringList names, ch_names;
     int k, n;
 
     qInfo("Using standard noise values "
@@ -281,13 +282,13 @@ std::unique_ptr<MNECovMatrix> InvDipoleFitData::ad_hoc_noise(FwdCoilSet* meg, Fw
 #endif
             } else
                 stds[n] = static_cast<double>(grad_std) * grad_std;
-            ch_names.append(meg->coils[k]->chname);
+            ch_names.push_back(meg->coils[k]->chname.toStdString());
         }
     }
     if (eeg) {
         for (k = 0; k < eeg->ncoil(); k++, n++) {
             stds[n] = static_cast<double>(eeg_std) * eeg_std;
-            ch_names.append(eeg->coils[k]->chname);
+            ch_names.push_back(eeg->coils[k]->chname.toStdString());
         }
     }
     names = ch_names;
@@ -424,9 +425,7 @@ int InvDipoleFitData::select_dipole_fit_noise_cov(InvDipoleFitData* f,
             /* Check whether this channel is selected in the measurement */
             bool selected = false;
             for (int c = 0; c < meas->nchan; c++) {
-                if (QString::compare(f->noise_orig->names[k],
-                                     meas->chs[c].ch_name,
-                                     Qt::CaseInsensitive) == 0) {
+                if (UTILSLIB::equalsIgnoreCase(f->noise_orig->names[k], meas->chs[c].ch_name)) {
                     selected = sels[c] != 0;
                     break;
                 }
@@ -497,9 +496,9 @@ InvDipoleFitData* InvDipoleFitData::setup_dipole_fit_data(const QString& mriname
                                                           int include_eeg)
 {
     auto res = std::make_unique<InvDipoleFitData>();
-    QStringList badlist;
+    StringList badlist;
     int nbad = 0;
-    QStringList file_bads;
+    StringList file_bads;
     int file_nbad = 0;
     int coord_frame = FIFFV_COORD_HEAD;
     std::unique_ptr<MNECovMatrix> cov;
@@ -539,9 +538,9 @@ InvDipoleFitData* InvDipoleFitData::setup_dipole_fit_data(const QString& mriname
        * Read the bad channel lists
        */
     if (!badname.isEmpty()) {
-        if (!FiffInfoBase::readBadChannelsFromFile(badname, badlist))
+        if (!FiffInfoBase::readBadChannelsFromFile(badname.toStdString(), badlist))
             return nullptr;
-        nbad = badlist.size();
+        nbad = static_cast<int>(badlist.size());
         qInfo("%d bad channels read from %s.", nbad, badname.toUtf8().data());
     }
     {
@@ -549,15 +548,15 @@ InvDipoleFitData* InvDipoleFitData::setup_dipole_fit_data(const QString& mriname
         FiffStream::SPtr measStream(new FiffStream(&measFile));
         if (measStream->open()) {
             file_bads = measStream->read_bad_channels(measStream->dirtree());
-            file_nbad = file_bads.size();
+            file_nbad = static_cast<int>(file_bads.size());
             measStream->close();
         }
     }
     if (file_nbad > 0) {
-        if (badlist.isEmpty())
+        if (badlist.empty())
             nbad = 0;
         for (int k = 0; k < file_nbad; k++) {
-            badlist.append(file_bads[k]);
+            badlist.push_back(file_bads[k]);
             nbad++;
         }
         file_bads.clear();
@@ -567,7 +566,7 @@ InvDipoleFitData* InvDipoleFitData::setup_dipole_fit_data(const QString& mriname
     /*
        * Read the channel information
        */
-    if (!FiffInfo::readMegEegChannels(measname,
+    if (!FiffInfo::readMegEegChannels(measname.toStdString(),
                                       include_meg,
                                       include_eeg,
                                       badlist,
@@ -584,7 +583,7 @@ InvDipoleFitData* InvDipoleFitData::setup_dipole_fit_data(const QString& mriname
         int nch_total = res->nmeg + res->neeg;
         res->ch_names.clear();
         for (int i = 0; i < nch_total; i++)
-            res->ch_names.append(res->chs[i].ch_name);
+            res->ch_names.push_back(res->chs[i].ch_name);
     }
     /*
        * Make coil definitions
@@ -839,7 +838,7 @@ bool InvDipoleFitData::print_fields(const Eigen::Vector3f& rd,
 
     for (int k = 0; k < nch; ++k) {
         const double scale = k < fit.nmeg ? 1e15 : 1e6;
-        out << fit.ch_names[k] << '\t' << scale * measured[k] << '\t' << scale * predicted[k] << '\n';
+        out << QString::fromStdString(fit.ch_names[k]) << '\t' << scale * measured[k] << '\t' << scale * predicted[k] << '\n';
     }
     return true;
 }

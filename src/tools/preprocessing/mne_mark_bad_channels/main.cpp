@@ -54,9 +54,9 @@ using namespace UTILSLIB;
 
 //=============================================================================================================
 
-static QStringList readBadChannelList(const QString& filename)
+static StringList readBadChannelList(const QString& filename)
 {
-    QStringList bads;
+    StringList bads;
     QFile file(filename);
     if (!file.open(QIODevice::ReadOnly | QIODevice::Text)) {
         qCritical("Cannot open bad channel file: %s", qPrintable(filename));
@@ -66,7 +66,7 @@ static QStringList readBadChannelList(const QString& filename)
     while (!in.atEnd()) {
         QString line = in.readLine().trimmed();
         if (!line.isEmpty() && !line.startsWith('#'))
-            bads.append(line);
+            bads.push_back(line.toStdString());
     }
     return bads;
 }
@@ -110,14 +110,14 @@ int main(int argc, char* argv[])
     }
 
     // Read the bad channel list
-    QStringList bads = readBadChannelList(badName);
-    if (bads.isEmpty()) {
+    StringList bads = readBadChannelList(badName);
+    if (bads.empty()) {
         qWarning("Bad channel list is empty.");
     }
 
     qInfo("Bad channels to mark (%lld):", static_cast<long long>(bads.size()));
-    for (const QString& ch : bads) {
-        qInfo("  %s", qPrintable(ch));
+    for (const std::string& ch : bads) {
+        qInfo("  %s", ch.c_str());
     }
 
     // Open the FIFF file and read raw data

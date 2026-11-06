@@ -191,7 +191,13 @@ int main(int argc, char* argv[])
     stream->write_int(FIFF_MNE_CTF_COMP_CALIBRATED, &cal);
 
     // Write the named matrix
-    FiffNamedMatrix namedMat(nrow, ncol, rowNames, colNames, data);
+    StringList rows;
+    StringList cols;
+    for (const QString& name : rowNames)
+        rows.push_back(name.toStdString());
+    for (const QString& name : colNames)
+        cols.push_back(name.toStdString());
+    FiffNamedMatrix namedMat(nrow, ncol, rows, cols, data);
     stream->write_named_matrix(FIFF_MNE_CTF_COMP_DATA, namedMat);
 
     stream->end_block(FIFFB_MNE_CTF_COMP_DATA);

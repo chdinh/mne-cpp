@@ -571,7 +571,7 @@ FIFFLIB::FiffInfo FtConnector::infoFromSimpleHeader()
     for (int i = 0; i < m_iNumChannels; i++) {
         FIFFLIB::FiffChInfo channel;
 
-        channel.ch_name = "Ch. " + QString::number(i);
+        channel.ch_name = ("Ch. " + QString::number(i)).toStdString();
         channel.kind = FIFFV_MEG_CH;
         channel.unit = FIFF_UNIT_T;
         channel.unit_mul = FIFF_UNITM_NONE;
@@ -579,7 +579,7 @@ FIFFLIB::FiffInfo FtConnector::infoFromSimpleHeader()
 
         defaultInfo.chs.append(channel);
 
-        defaultInfo.ch_names.append("Ch. " + QString::number(i));
+        defaultInfo.ch_names.push_back("Ch. " + std::to_string(i));
     }
 
     return defaultInfo;

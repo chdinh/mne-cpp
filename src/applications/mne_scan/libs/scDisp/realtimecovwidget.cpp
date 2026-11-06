@@ -17,6 +17,7 @@
 //=============================================================================================================
 
 #include "realtimecovwidget.h"
+#include <utils/string_utils.h>
 
 #include <scMeas/realtimecov.h>
 
@@ -153,11 +154,11 @@ void RealTimeCovWidget::initDisplayControllWidgets()
 void RealTimeCovWidget::onNewModalitySelection(const QMap<QString, bool>& modalityMap)
 {
     if (m_pRTC && m_pFiffInfo) {
-        QStringList chNames = m_pRTC->getValue()->names;
+        const StringList& chNames = m_pRTC->getValue()->names;
         m_qListSelChannel.clear();
 
-        for (qint32 i = 0; i < chNames.size(); ++i) {
-            int unit = m_pFiffInfo->chs.at(m_pFiffInfo->ch_names.indexOf(chNames.at(i))).unit;
+        for (qint32 i = 0; i < static_cast<qint32>(chNames.size()); ++i) {
+            int unit = m_pFiffInfo->chs.at(UTILSLIB::indexOf(m_pFiffInfo->ch_names, chNames.at(i))).unit;
 
             if (unit == FIFF_UNIT_T && modalityMap["MAG"]) {
                 m_qListSelChannel.append(i);

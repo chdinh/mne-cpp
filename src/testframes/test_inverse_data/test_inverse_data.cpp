@@ -794,8 +794,8 @@ private slots:
             QSKIP("Failed to read covariance");
 
         // Pick first 50 channels
-        int nPick = qMin(50, cov.names.size());
-        QStringList pickNames = cov.names.mid(0, nPick);
+        int nPick = std::min(50, static_cast<int>(cov.names.size()));
+        StringList pickNames = StringList(cov.names.begin() + 0, cov.names.begin() + 0 + nPick);
 
         FiffCov picked = cov.pick_channels(pickNames);
         QCOMPARE(picked.names.size(), nPick);

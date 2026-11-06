@@ -213,10 +213,10 @@ QJsonObject SourceEstimationSkill::executeSkill(const WorkflowNode& nodeState)
     mnNorm.doInverseSetup(nave, /*pick_normal=*/false);
 
     // ── Pick raw channels that match the inverse operator ────────────────────
-    QStringList invChNames;
+    StringList invChNames;
     invChNames.reserve(invOp.noise_cov->names.size());
-    for (int i = 0; i < invOp.noise_cov->names.size(); ++i) {
-        invChNames << invOp.noise_cov->names[i];
+    for (int i = 0; i < static_cast<int>(invOp.noise_cov->names.size()); ++i) {
+        invChNames.push_back(invOp.noise_cov->names[i]);
     }
     const RowVectorXi picks = raw.info.pick_channels(invChNames);
     if (picks.size() == 0) {

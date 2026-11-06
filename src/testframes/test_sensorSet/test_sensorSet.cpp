@@ -17,6 +17,7 @@
 //=============================================================================================================
 
 #include <utils/generics/mne_logger.h>
+#include <utils/string_utils.h>
 #include <inv/hpi/inv_sensor_set.h>
 #include <fiff/fiff_raw_data.h>
 #include <fwd/fwd_coil_set.h>
@@ -105,7 +106,7 @@ void TestSensorSet::initTestCase()
             pFiffInfo->chs[i].chpos.coil_type == FIFFV_COIL_VV_PLANAR_T2 ||
             pFiffInfo->chs[i].chpos.coil_type == FIFFV_COIL_VV_PLANAR_T3) {
             // Check if the sensor is bad, if not append to innerind
-            if (!(pFiffInfo->bads.contains(pFiffInfo->ch_names.at(i)))) {
+            if (!(UTILSLIB::contains(pFiffInfo->bads, pFiffInfo->ch_names.at(i)))) {
                 m_lChannels.append(pFiffInfo->chs[i]);
             }
         }

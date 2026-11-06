@@ -496,7 +496,7 @@ VectorXi GeometryInfo::filterBadChannels(QSharedPointer<Eigen::MatrixXd> matDist
         }
     }
 
-    for (const QString& b : fiffInfo.bads) {
+    for (const std::string& b : fiffInfo.bads) {
         for (int col = 0; col < vecSensors.size(); ++col) {
             if (vecSensors[col]->ch_name == b) {
                 vecBadColumns.push_back(col);

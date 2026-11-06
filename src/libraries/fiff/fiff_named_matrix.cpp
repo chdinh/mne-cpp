@@ -41,7 +41,7 @@ FiffNamedMatrix::FiffNamedMatrix()
 
 //=============================================================================================================
 
-FiffNamedMatrix::FiffNamedMatrix(fiff_int_t p_nrow, fiff_int_t p_ncol, const QStringList& p_row_names, const QStringList& p_col_names, const MatrixXd& p_data)
+FiffNamedMatrix::FiffNamedMatrix(fiff_int_t p_nrow, fiff_int_t p_ncol, const StringList& p_row_names, const StringList& p_col_names, const MatrixXd& p_data)
 : nrow(p_nrow)
 , ncol(p_ncol)
 , row_names(p_row_names)
@@ -77,7 +77,7 @@ void FiffNamedMatrix::clear()
 
 void FiffNamedMatrix::transpose_named_matrix()
 {
-    QStringList col_names_old = this->col_names;
+    StringList col_names_old = this->col_names;
     this->col_names = this->row_names;
     this->row_names = col_names_old;
 

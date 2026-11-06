@@ -16,6 +16,7 @@
 //=============================================================================================================
 
 #include "channeldatamodel.h"
+#include <utils/string_utils.h>
 #include <fiff/fiff_info.h>
 #include <fiff/fiff_constants.h>
 
@@ -261,14 +262,14 @@ void ChannelDataModel::setChannelBad(int channelIdx, bool bad)
         m_displayInfo[channelIdx].bad = bad;
 
     if (m_pFiffInfo && channelIdx >= 0 && channelIdx < m_pFiffInfo->nchan) {
-        const QString channelName = m_pFiffInfo->ch_names.value(channelIdx);
-        const int badIndex = m_pFiffInfo->bads.indexOf(channelName);
+        const std::string& channelName = m_pFiffInfo->ch_names[channelIdx];
+        const int badIndex = UTILSLIB::indexOf(m_pFiffInfo->bads, channelName);
 
         if (bad) {
             if (badIndex < 0)
-                m_pFiffInfo->bads.append(channelName);
+                m_pFiffInfo->bads.push_back(channelName);
         } else if (badIndex >= 0) {
-            m_pFiffInfo->bads.removeAt(badIndex);
+            m_pFiffInfo->bads.erase(m_pFiffInfo->bads.begin() + badIndex);
         }
     }
 
@@ -502,12 +503,12 @@ void ChannelDataModel::rebuildDisplayInfo()
         m_displayInfo[ch].amplitudeMax = amplitudeMaxForChannel(ch);
         m_displayInfo[ch].color = colorForChannel(ch);
         if (m_pFiffInfo && ch < realChannelCount)
-            m_displayInfo[ch].name = m_pFiffInfo->ch_names[ch];
+            m_displayInfo[ch].name = QString::fromStdString(m_pFiffInfo->ch_names[ch]);
         else
             m_displayInfo[ch].name = QString("CH %1").arg(ch + 1);
         m_displayInfo[ch].typeLabel = typeLabelForChannel(ch);
         m_displayInfo[ch].bad = (m_pFiffInfo && ch < realChannelCount)
-            ? m_pFiffInfo->bads.contains(m_displayInfo[ch].name)
+            ? UTILSLIB::contains(m_pFiffInfo->bads, m_displayInfo[ch].name.toStdString())
             : false;
         m_displayInfo[ch].isVirtualChannel = false;
     }

@@ -301,8 +301,8 @@ bool FiffEvents::detect_from_raw(const FiffRawData& raw,
     // Channel names are read without spaces ("STI014"), so compare without them.
     const QString wanted = QString(stimCh).remove(' ');
     int triggerChIdx = -1;
-    for (int k = 0; k < raw.info.ch_names.size(); ++k) {
-        if (QString(raw.info.ch_names[k]).remove(' ') == wanted) {
+    for (int k = 0; k < static_cast<int>(raw.info.ch_names.size()); ++k) {
+        if (QString::fromStdString(raw.info.ch_names[static_cast<std::size_t>(k)]).remove(' ') == wanted) {
             triggerChIdx = k;
             break;
         }

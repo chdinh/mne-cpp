@@ -32,7 +32,8 @@
 // QT INCLUDES
 //=============================================================================================================
 
-#include <QStringList>
+#include <string>
+#include <vector>
 #include <QVector>
 
 //=============================================================================================================
@@ -82,7 +83,7 @@ public:
      */
     void fit(const Eigen::MatrixXd& data,
              const FIFFLIB::FiffInfo& info,
-             const QStringList& eogChannels = QStringList());
+             const StringList& eogChannels = {});
 
     //=========================================================================================================
     /**
@@ -107,7 +108,7 @@ public:
      */
     static void fitApply(Eigen::MatrixXd& data,
                          const FIFFLIB::FiffInfo& info,
-                         const QStringList& eogChannels = QStringList());
+                         const StringList& eogChannels = {});
 
     //=========================================================================================================
     /**

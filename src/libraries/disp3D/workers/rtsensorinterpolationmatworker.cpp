@@ -15,6 +15,7 @@
 //=============================================================================================================
 
 #include "rtsensorinterpolationmatworker.h"
+#include <utils/string_utils.h>
 #include "../scene/sensorfieldmapper.h"
 #include <fwd/fwd_field_map.h>
 
@@ -199,7 +200,7 @@ void RtSensorInterpolationMatWorker::computeMapping()
 
     for (int k = 0; k < evoked.info.chs.size(); ++k) {
         const auto& ch = evoked.info.chs[k];
-        if (bads.contains(ch.ch_name) || evoked.info.bads.contains(ch.ch_name))
+        if (bads.contains(ch.ch_name) || UTILSLIB::contains(evoked.info.bads, ch.ch_name))
             continue;
 
         QVector3D pos(ch.chpos.r0(0), ch.chpos.r0(1), ch.chpos.r0(2));

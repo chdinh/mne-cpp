@@ -235,9 +235,9 @@ public:
      * @param[in] exclude   - Channels to exclude (if empty, do not exclude any).
      * @return the selector matrix (row Vector).
      */
-    inline static Eigen::RowVectorXi pick_channels(QStringList& ch_names,
-                                                   const QStringList& include = defaultQStringList,
-                                                   const QStringList& exclude = defaultQStringList)
+    inline static Eigen::RowVectorXi pick_channels(const StringList& ch_names,
+                                                   const StringList& include = {},
+                                                   const StringList& exclude = {})
     {
         return FiffInfo::pick_channels(ch_names, include, exclude);
     }
@@ -257,8 +257,8 @@ public:
      * @return the desired fiff evoked data set.
      */
     inline static FiffEvokedSet pick_channels(FiffEvokedSet& orig,
-                                              const QStringList& include = defaultQStringList,
-                                              const QStringList& exclude = defaultQStringList)
+                                              const StringList& include = {},
+                                              const StringList& exclude = {})
     {
         return orig.pick_channels(include, exclude);
     }
@@ -320,8 +320,8 @@ public:
                                                 bool meg,
                                                 bool eeg = false,
                                                 bool stim = false,
-                                                const QStringList& include = defaultQStringList,
-                                                const QStringList& exclude = defaultQStringList)
+                                                const StringList& include = {},
+                                                const StringList& exclude = {})
     {
         return info.pick_types(meg, eeg, stim, include, exclude);
     }
@@ -339,8 +339,8 @@ public:
      *
      * @return the bad channel list.
      */
-    static inline QStringList read_bad_channels(FiffStream::SPtr& p_pStream,
-                                                FiffDirNode::SPtr& p_Node)
+    static inline StringList read_bad_channels(FiffStream::SPtr& p_pStream,
+                                               FiffDirNode::SPtr& p_Node)
     {
         return p_pStream->read_bad_channels(p_Node);
     }
@@ -594,7 +594,7 @@ public:
      *
      * @return the splitted string list.
      */
-    inline static QStringList split_name_list(QString p_sNameList)
+    inline static StringList split_name_list(std::string_view p_sNameList)
     {
         return FiffStream::split_name_list(p_sNameList);
     }
@@ -804,7 +804,7 @@ public:
      * @param[in] kind       The tag kind.
      * @param[in] data       An array of names to create the list from.
      */
-    inline static void write_name_list(FiffStream* p_pStream, fiff_int_t kind, QStringList& data)
+    inline static void write_name_list(FiffStream* p_pStream, fiff_int_t kind, const StringList& data)
     {
         p_pStream->write_name_list(kind, data);
     }
@@ -875,7 +875,7 @@ public:
      */
     inline static void write_string(FiffStream* p_pStream, fiff_int_t kind, QString& data)
     {
-        p_pStream->write_string(kind, data);
+        p_pStream->write_string(kind, data.toStdString());
     }
 };
 

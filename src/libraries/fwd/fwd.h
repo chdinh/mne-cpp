@@ -35,7 +35,8 @@
 //=============================================================================================================
 
 #include <QIODevice>
-#include <QStringList>
+#include <string>
+#include <vector>
 
 //=============================================================================================================
 // DEFINE NAMESPACE FWDLIB
@@ -84,8 +85,8 @@ public:
                                              MNELIB::MNEForwardSolution& fwd,
                                              bool force_fixed = false,
                                              bool surf_ori = false,
-                                             const QStringList& include = FIFFLIB::defaultQStringList,
-                                             const QStringList& exclude = FIFFLIB::defaultQStringList)
+                                             const StringList& include = {},
+                                             const StringList& exclude = {})
     {
         return MNELIB::MNEForwardSolution::read(p_IODevice,
                                                 fwd,

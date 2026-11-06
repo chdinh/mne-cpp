@@ -26,6 +26,8 @@
 
 #include "mne_global.h"
 
+#include <string>
+
 #include <fiff/fiff_dir_node.h>
 #include <fiff/fiff_stream.h>
 #include "mne_raw_info.h"
@@ -254,8 +256,8 @@ public:
     std::unique_ptr<QFile> file;                     /**< Owned QFile backing the FIFF stream. */
     FIFFLIB::FiffStream::SPtr stream;                /**< Open FIFF stream for reading. */
     std::unique_ptr<MNELIB::MNERawInfo> info;        /**< Raw data information loaded using MNE routines. */
-    QStringList ch_names;                            /**< Channel names as a flat list. */
-    QStringList badlist;                             /**< Bad channel names. */
+    StringList ch_names;                             /**< Channel names as a flat list. */
+    StringList badlist;                              /**< Bad channel names. */
     int nbad;                                        /**< Number of bad channels. */
     Eigen::VectorXi bad;                             /**< Boolean array marking bad channels (0 = good, 1 = bad). */
     std::vector<MNELIB::MNERawBufDef> bufs;          /**< Raw data buffer definitions. */

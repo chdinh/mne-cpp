@@ -12,6 +12,7 @@
  */
 
 #include <QtTest/QtTest>
+#include <utils/string_utils.h>
 #include <Eigen/Dense>
 #include <cmath>
 
@@ -239,7 +240,7 @@ private slots:
         for (int i = 0; i < 2; ++i) {
             FiffChInfo ch;
             ch.kind = FIFFV_EOG_CH;
-            ch.ch_name = QString("EOG%1").arg(i + 1);
+            ch.ch_name = (QString("EOG%1").arg(i + 1)).toStdString();
             info.chs.append(ch);
         }
         info.nchan = 2;
@@ -316,9 +317,9 @@ private slots:
             FiffChInfo ch;
             ch.kind = kinds[k];
             ch.unit = k < 3 ? FIFF_UNIT_T : FIFF_UNIT_V;
-            ch.ch_name = names[k];
+            ch.ch_name = names[k].toStdString();
             info.chs.append(ch);
-            info.ch_names.append(names[k]);
+            info.ch_names.push_back(names[k].toStdString());
         }
         info.nchan = 6;
 
@@ -335,7 +336,7 @@ private slots:
             ch.kind = ecg ? FIFFV_ECG_CH : FIFFV_EOG_CH;
             ch.ch_name = "ICA000";
             srcInfo.chs.append(ch);
-            srcInfo.ch_names.append(ch.ch_name);
+            srcInfo.ch_names.push_back(ch.ch_name);
             srcInfo.nchan = 1;
             got = ecg ? ArtifactDetect::detectEcg(source, srcInfo, sf) : ArtifactDetect::detectEog(source, srcInfo, sf);
         } else if (call == "eog") {
@@ -343,7 +344,7 @@ private slots:
         } else {
             ArtifactDetect::EcgParams params;
             if (call == "ecg-mag")
-                info.bads << "ECG";
+                info.bads.push_back("ECG");
             if (call == "ecg-0.6-t1") {
                 params.dQrsThreshold = 0.6;
                 params.dTStart = 1.0;
@@ -476,7 +477,7 @@ private slots:
             const double peak = v.cwiseAbs().maxCoeff(&peakIdx);
             QCOMPARE(p.data->col_names.at(static_cast<int>(peakIdx)), peakNames[i]);
             QVERIFY2(qAbs(peak / peaks[i] - 1.0) < 1e-5, qPrintable(QString("%1 peak %2").arg(p.desc).arg(peak, 0, 'g', 12)));
-            const double first = std::fabs(v(p.data->col_names.indexOf(firstNames[i])));
+            const double first = std::fabs(v(UTILSLIB::indexOf(p.data->col_names, firstNames[i].toStdString())));
             QVERIFY2(qAbs(first / firsts[i] - 1.0) < 1e-4, qPrintable(QString("%1 first %2").arg(p.desc).arg(first, 0, 'g', 12)));
         }
     }

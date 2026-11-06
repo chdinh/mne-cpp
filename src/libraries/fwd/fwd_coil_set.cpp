@@ -154,7 +154,7 @@ FwdCoil::UPtr FwdCoilSet::create_meg_coil(const FiffChInfo& ch, int acc, const F
      */
     auto res = std::make_unique<FwdCoil>(def->np);
 
-    res->chname = ch.ch_name;
+    res->chname = QString::fromStdString(ch.ch_name);
     if (!def->desc.isEmpty())
         res->desc = def->desc;
     res->coil_class = def->coil_class;

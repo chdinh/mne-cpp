@@ -81,14 +81,14 @@ MNEProjItem::~MNEProjItem()
 
 //=============================================================================================================
 
-int MNEProjItem::affect(const QStringList& list, int nlist) const
+int MNEProjItem::affect(const StringList& list, int nlist) const
 {
     if (nvec == 0 || !vecs)
         return false;
 
     for (int k = 0; k < nlist; ++k) {
         for (int p = 0; p < vecs->ncol; ++p) {
-            if (QString::compare(vecs->collist[p], list[k]) == 0) {
+            if ((vecs->collist[p] == list[k])) {
                 for (int q = 0; q < vecs->nrow; ++q) {
                     if (vecs->data(q, p) != 0.0f)
                         return true;

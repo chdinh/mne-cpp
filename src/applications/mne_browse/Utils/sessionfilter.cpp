@@ -15,6 +15,7 @@
 //=============================================================================================================
 
 #include "sessionfilter.h"
+#include <utils/string_utils.h>
 
 #include <dsp/firfilter.h>
 
@@ -63,11 +64,11 @@ bool channelMatchesScope(const FiffInfo& info, int channelIndex, const QString& 
         return true;
     }
 
-    if (channelIndex < 0 || channelIndex >= info.ch_names.size() || channelIndex >= info.chs.size()) {
+    if (channelIndex < 0 || channelIndex >= static_cast<int>(info.ch_names.size()) || channelIndex >= static_cast<int>(info.chs.size())) {
         return false;
     }
 
-    const QString channelName = info.ch_names.at(channelIndex).trimmed().toUpper();
+    const QString channelName = QString::fromStdString(info.ch_names.at(channelIndex)).trimmed().toUpper();
     const int kind = info.chs.at(channelIndex).kind;
 
     if (normalized == QLatin1String("MEG")) {

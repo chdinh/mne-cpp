@@ -50,7 +50,8 @@
 //=============================================================================================================
 
 #include <QString>
-#include <QStringList>
+#include <string>
+#include <vector>
 
 //=============================================================================================================
 // STL INCLUDES
@@ -152,7 +153,7 @@ DSPSHARED_EXPORT FIFFLIB::FiffAnnotations annotateAmplitude(
     const FIFFLIB::FiffInfo& info,
     double sfreq,
     const AnnotateAmplitudeParams& params,
-    QStringList* bads = nullptr);
+    StringList* bads = nullptr);
 
 } // namespace UTILSLIB
 #endif // ANNOTATE_ARTIFACT_DSP_H

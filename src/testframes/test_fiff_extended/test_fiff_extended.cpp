@@ -3,6 +3,7 @@
 //   Christoph Dinh <christoph.dinh@mne-cpp.org>
 
 #include <QtTest/QtTest>
+#include <utils/string_utils.h>
 #include <QBuffer>
 #include <QTemporaryFile>
 #include <Eigen/Dense>
@@ -40,14 +41,14 @@ private:
 
         for (int i = 0; i < nCh; ++i) {
             FiffChInfo ch;
-            ch.ch_name = QString("EEG %1").arg(i + 1, 3, 10, QChar('0'));
+            ch.ch_name = (QString("EEG %1").arg(i + 1, 3, 10, QChar('0'))).toStdString();
             ch.kind = FIFFV_EEG_CH;
             ch.chpos.coil_type = FIFFV_COIL_EEG;
             ch.unit = FIFF_UNIT_V;
             ch.cal = 1.0;
             ch.range = 1.0;
             info.chs.append(ch);
-            info.ch_names.append(ch.ch_name);
+            info.ch_names.push_back(ch.ch_name);
         }
         info.nchan = nCh;
         return info;
@@ -68,7 +69,7 @@ private:
         }
         cov.data = covData;
         for (int i = 0; i < dim; ++i) {
-            cov.names.append(QString("EEG %1").arg(i + 1, 3, 10, QChar('0')));
+            cov.names.push_back(QString("EEG %1").arg(i + 1, 3, 10, QChar('0')).toStdString());
         }
         return cov;
     }
@@ -113,8 +114,9 @@ private slots:
     void testFiffCovPickChannels()
     {
         FiffCov cov = createSyntheticCov(5);
-        QStringList include;
-        include << "EEG 001" << "EEG 003";
+        StringList include;
+        include.push_back("EEG 001");
+        include.push_back("EEG 003");
         FiffCov picked = cov.pick_channels(include);
         QCOMPARE(picked.dim, 2);
         QCOMPARE(picked.names.size(), 2);
@@ -125,9 +127,8 @@ private slots:
     void testFiffCovPickChannelsExclude()
     {
         FiffCov cov = createSyntheticCov(5);
-        QStringList exclude;
-        exclude << "EEG 001";
-        FiffCov picked = cov.pick_channels(QStringList(), exclude);
+        StringList exclude{"EEG 001"};
+        FiffCov picked = cov.pick_channels({}, exclude);
         QCOMPARE(picked.dim, 4);
     }
 
@@ -217,11 +218,11 @@ private slots:
 
         // prepare_noise_cov requires only MEG+EEG channels that exist in both info and cov
         // Must also exclude bad channels since prepare_noise_cov excludes them internally
-        RowVectorXi picks = raw.info.pick_types(true, true, false, QStringList(), raw.info.bads);
-        QStringList chNames;
+        RowVectorXi picks = raw.info.pick_types(true, true, false, {}, raw.info.bads);
+        StringList chNames;
         for (int i = 0; i < picks.size(); ++i) {
-            if (cov.names.contains(raw.info.ch_names[picks(i)]))
-                chNames << raw.info.ch_names[picks(i)];
+            if (UTILSLIB::contains(cov.names, raw.info.ch_names[picks(i)]))
+                chNames.push_back(raw.info.ch_names[picks(i)]);
         }
         FiffCov prepared = cov.prepare_noise_cov(raw.info, chNames);
         QVERIFY(!prepared.isEmpty());
@@ -388,8 +389,10 @@ private slots:
         FiffNamedMatrix::SDPtr projData(new FiffNamedMatrix());
         projData->nrow = 1;
         projData->ncol = 3;
-        projData->row_names << "EEG avg";
-        projData->col_names << "EEG 001" << "EEG 002" << "EEG 003";
+        projData->row_names.push_back("EEG avg");
+        projData->col_names.push_back("EEG 001");
+        projData->col_names.push_back("EEG 002");
+        projData->col_names.push_back("EEG 003");
         projData->data = MatrixXd::Ones(1, 3) / std::sqrt(3.0);
         proj.data = projData;
 
@@ -411,16 +414,20 @@ private slots:
         FiffNamedMatrix::SDPtr projData(new FiffNamedMatrix());
         projData->nrow = 1;
         projData->ncol = 3;
-        projData->row_names << "EEG avg";
-        projData->col_names << "EEG 001" << "EEG 002" << "EEG 003";
+        projData->row_names.push_back("EEG avg");
+        projData->col_names.push_back("EEG 001");
+        projData->col_names.push_back("EEG 002");
+        projData->col_names.push_back("EEG 003");
         projData->data = MatrixXd::Ones(1, 3) / std::sqrt(3.0);
         proj.data = projData;
 
         QList<FiffProj> projList;
         projList << proj;
 
-        QStringList chNames;
-        chNames << "EEG 001" << "EEG 002" << "EEG 003";
+        StringList chNames;
+        chNames.push_back("EEG 001");
+        chNames.push_back("EEG 002");
+        chNames.push_back("EEG 003");
 
         MatrixXd projMat;
         fiff_int_t nProj = FiffProj::make_projector(projList, chNames, projMat);
@@ -451,8 +458,9 @@ private slots:
         QFile file(avePath);
         FiffEvokedSet evokedSet(file);
 
-        QStringList include;
-        include << evokedSet.info.ch_names[0] << evokedSet.info.ch_names[1];
+        StringList include;
+        include.push_back(evokedSet.info.ch_names[0]);
+        include.push_back(evokedSet.info.ch_names[1]);
         FiffEvokedSet picked = evokedSet.pick_channels(include);
         QCOMPARE(picked.info.nchan, 2);
     }

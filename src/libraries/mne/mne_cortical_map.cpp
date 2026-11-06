@@ -18,6 +18,7 @@
 //=============================================================================================================
 
 #include "mne_cortical_map.h"
+#include <utils/string_utils.h>
 #include "mne_forward_solution.h"
 #include "mne_inverse_operator.h"
 
@@ -71,14 +72,14 @@ MatrixXd MNECorticalMap::makeCorticalMap(
     // The kernel's columns are the inverse operator's channels; pick those rows of the gain by name, as
     // mne-python's make_inverse_resolution_matrix does.
     MatrixXd gain = matched.sol->data;
-    const QStringList& invChannels = inv.eigen_fields ? inv.eigen_fields->col_names : QStringList();
-    if (invChannels.size() == kernel.cols() && matched.sol->row_names.size() == gain.rows()) {
+    const StringList& invChannels = inv.eigen_fields ? inv.eigen_fields->col_names : StringList();
+    if (static_cast<int>(invChannels.size()) == kernel.cols() && static_cast<int>(matched.sol->row_names.size()) == gain.rows()) {
         MatrixXd picked(kernel.cols(), gain.cols());
-        for (int c = 0; c < invChannels.size(); ++c) {
-            const int row = static_cast<int>(matched.sol->row_names.indexOf(invChannels[c]));
+        for (int c = 0; c < static_cast<int>(invChannels.size()); ++c) {
+            const int row = static_cast<int>(UTILSLIB::indexOf(matched.sol->row_names, invChannels[c]));
             if (row < 0) {
                 qWarning("MNECorticalMap::makeCorticalMap - Channel %s is not in the forward solution.",
-                         invChannels[c].toUtf8().constData());
+                         invChannels[c].c_str());
                 return MatrixXd();
             }
             picked.row(c) = gain.row(row);

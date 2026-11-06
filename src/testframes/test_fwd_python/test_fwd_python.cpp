@@ -512,7 +512,7 @@ void TestFwdPython::labelForward_variants()
     const int nChan = (meg ? 306 : 0) + (eeg ? 60 : 0);
     const Matrix3d R = mriFrame ? Matrix3d(m_ref.mri_head_t.trans.topLeftCorner<3, 3>().cast<double>()) : Matrix3d::Identity();
     QCOMPARE(static_cast<int>(fwd->sol->data.rows()), nChan);
-    QCOMPARE(fwd->sol->row_names, m_ref.sol->row_names.mid(first, nChan));
+    QCOMPARE(fwd->sol->row_names, StringList(m_ref.sol->row_names.begin() + first, m_ref.sol->row_names.begin() + first + nChan));
     auto check = [&]() {
         for (int i = 0; i < 70; ++i) {
             MatrixXd ref = m_ref.sol->data.block(first, 3 * m_v1Sel(i), nChan, 3) * R;

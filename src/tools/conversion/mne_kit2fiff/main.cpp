@@ -459,7 +459,7 @@ int main(int argc, char* argv[])
         FiffChInfo ch;
         ch.scanNo = c + 1;
         ch.logNo = c + 1;
-        ch.ch_name = info.sensors[c].name;
+        ch.ch_name = info.sensors[c].name.toStdString();
         ch.cal = 1.0;
         ch.range = 1.0;
 
@@ -495,7 +495,7 @@ int main(int argc, char* argv[])
         ch.chpos.ez(2) = static_cast<float>(info.sensors[c].coil.orientation(2));
 
         fiffInfo.chs.append(ch);
-        fiffInfo.ch_names.append(ch.ch_name);
+        fiffInfo.ch_names.push_back(ch.ch_name);
     }
 
     // Write FIFF

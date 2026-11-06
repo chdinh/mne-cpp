@@ -234,7 +234,10 @@ void RealTimeMultiSampleArrayWidget::initDisplayControllWidgets()
         //                m_pChannelDataView.data(), &RtFiffRawView::updateSpharaOptions);
 
         // Quick control scaling
-        ScalingView* pScalingView = new ScalingView(QString("MNESCAN/RTMSAW"), 0, Qt::Widget, m_pFiffInfo->get_channel_types());
+        QStringList channelTypes;
+        for (const std::string& type : m_pFiffInfo->get_channel_types())
+            channelTypes << QString::fromStdString(type);
+        ScalingView* pScalingView = new ScalingView(QString("MNESCAN/RTMSAW"), 0, Qt::Widget, channelTypes);
         pScalingView->setObjectName("group_tab_View_Scaling");
         lControlWidgets.append(pScalingView);
 

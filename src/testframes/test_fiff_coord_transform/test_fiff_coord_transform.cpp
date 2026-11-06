@@ -210,12 +210,15 @@ private slots:
         FiffCov cov;
         cov.kind = 1;
         cov.dim = 3;
-        cov.names << "CH1" << "CH2" << "CH3";
+        cov.names.push_back("CH1");
+        cov.names.push_back("CH2");
+        cov.names.push_back("CH3");
         cov.data = MatrixXd::Identity(3, 3);
         cov.nfree = 100;
 
-        QStringList include;
-        include << "CH1" << "CH3";
+        StringList include;
+        include.push_back("CH1");
+        include.push_back("CH3");
         FiffCov picked = cov.pick_channels(include);
         QCOMPARE(picked.dim, 2);
         QCOMPARE(picked.names.size(), 2);
@@ -227,7 +230,8 @@ private slots:
         c1.kind = 1;
         c1.dim = 2;
         c1.nfree = 50;
-        c1.names << "A" << "B";
+        c1.names.push_back("A");
+        c1.names.push_back("B");
         c1.data = MatrixXd::Identity(2, 2);
 
         c2 = c1;
@@ -250,8 +254,11 @@ private slots:
         FiffNamedMatrix nm;
         nm.nrow = 2;
         nm.ncol = 3;
-        nm.row_names << "R1" << "R2";
-        nm.col_names << "C1" << "C2" << "C3";
+        nm.row_names.push_back("R1");
+        nm.row_names.push_back("R2");
+        nm.col_names.push_back("C1");
+        nm.col_names.push_back("C2");
+        nm.col_names.push_back("C3");
         nm.data = MatrixXd(2, 3);
         nm.data << 1, 2, 3, 4, 5, 6;
 

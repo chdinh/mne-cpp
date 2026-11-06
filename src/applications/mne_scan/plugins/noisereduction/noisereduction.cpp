@@ -17,6 +17,7 @@
 //=============================================================================================================
 
 #include "noisereduction.h"
+#include <utils/string_utils.h>
 
 #include <disp/viewers/scalingview.h>
 #include <disp/viewers/projectorsview.h>
@@ -356,8 +357,8 @@ void NoiseReduction::run()
             //Do SPHARA here
             if (m_bSpharaActive) {
                 //Set bad channels to zero so they do not get smeared into
-                for (int i = 0; i < m_pFiffInfo->bads.size(); ++i) {
-                    matData.row(m_pFiffInfo->ch_names.indexOf(m_pFiffInfo->bads.at(i))).setZero();
+                for (int i = 0; i < static_cast<int>(m_pFiffInfo->bads.size()); ++i) {
+                    matData.row(UTILSLIB::indexOf(m_pFiffInfo->ch_names, m_pFiffInfo->bads.at(i))).setZero();
                 }
 
                 matData = m_matSparseSpharaMult * matData;
@@ -415,9 +416,9 @@ void NoiseReduction::updateProjection(const QList<FIFFLIB::FiffProj>& projs)
         FiffProj::make_projector(projs, m_pFiffInfo->ch_names, matProj, m_pFiffInfo->bads);
 
         //set columns of matrix to zero depending on bad channels indexes
-        for (qint32 j = 0; j < m_pFiffInfo->bads.size(); ++j) {
-            int index = m_pFiffInfo->ch_names.indexOf(m_pFiffInfo->bads.at(j));
-            if (index >= 0 && index < m_pFiffInfo->ch_names.size()) {
+        for (qint32 j = 0; j < static_cast<int>(m_pFiffInfo->bads.size()); ++j) {
+            int index = UTILSLIB::indexOf(m_pFiffInfo->ch_names, m_pFiffInfo->bads.at(j));
+            if (index >= 0 && index < static_cast<int>(m_pFiffInfo->ch_names.size())) {
                 matProj.col(index).setZero();
             }
         }
@@ -524,7 +525,7 @@ void NoiseReduction::setFilterChannelType(QString sType)
             if (m_sFilterChannelType == "All") {
                 m_lFilterChannelList.conservativeResize(m_lFilterChannelList.cols() + 1);
                 m_lFilterChannelList[m_lFilterChannelList.cols() - 1] = i;
-            } else if (m_pFiffInfo->chs.at(i).ch_name.contains(m_sFilterChannelType)) {
+            } else if ((m_pFiffInfo->chs.at(i).ch_name.find(m_sFilterChannelType.toStdString()) != std::string::npos)) {
                 m_lFilterChannelList.conservativeResize(m_lFilterChannelList.cols() + 1);
                 m_lFilterChannelList[m_lFilterChannelList.cols() - 1] = i;
             }

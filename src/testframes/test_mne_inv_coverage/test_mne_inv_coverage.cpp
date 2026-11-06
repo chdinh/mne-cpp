@@ -158,15 +158,18 @@ void TestMneInvCoverage::testCheckChNamesMatch()
     ch2.ch_name = "MEG0121";
     info.chs << ch1 << ch2;
     info.nchan = 2;
-    info.ch_names << "MEG0111" << "MEG0121";
+    info.ch_names.push_back("MEG0111");
+    info.ch_names.push_back("MEG0121");
 
     // Create inverse operator with same channels
     MNEInverseOperator invOp;
     invOp.noise_cov = FiffCov::SDPtr(new FiffCov());
-    invOp.noise_cov->names << "MEG0111" << "MEG0121";
+    invOp.noise_cov->names.push_back("MEG0111");
+    invOp.noise_cov->names.push_back("MEG0121");
     // eigen_fields must have matching col_names for check_ch_names to pass
     invOp.eigen_fields = FiffNamedMatrix::SDPtr(new FiffNamedMatrix());
-    invOp.eigen_fields->col_names << "MEG0111" << "MEG0121";
+    invOp.eigen_fields->col_names.push_back("MEG0111");
+    invOp.eigen_fields->col_names.push_back("MEG0121");
 
     // check_ch_names should succeed (names match)
     bool ok = invOp.check_ch_names(info);
@@ -180,11 +183,11 @@ void TestMneInvCoverage::testCheckChNamesMismatch()
     ch1.ch_name = "MEG0111";
     info.chs << ch1;
     info.nchan = 1;
-    info.ch_names << "MEG0111";
+    info.ch_names.push_back("MEG0111");
 
     MNEInverseOperator invOp;
     invOp.noise_cov = FiffCov::SDPtr(new FiffCov());
-    invOp.noise_cov->names << "DIFFERENT_CHANNEL";
+    invOp.noise_cov->names.push_back("DIFFERENT_CHANNEL");
 
     bool ok = invOp.check_ch_names(info);
     // Mismatch should fail or return false

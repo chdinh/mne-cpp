@@ -24,6 +24,7 @@
 //=============================================================================================================
 
 #include "fiff_info.h"
+#include <utils/string_utils.h>
 #include "fiff_stream.h"
 #include "fiff_file.h"
 
@@ -231,17 +232,17 @@ bool FiffInfo::make_compensator(fiff_int_t kind, MatrixXd& this_comp) const //pr
 
             for (col = 0; col < this_data->ncol; ++col) {
                 channelAvailable = 0;
-                for (c = 0; c < this->ch_names.size(); ++c) {
-                    if (QString::compare(this_data->col_names.at(col), this->ch_names.at(c)) == 0) {
+                for (c = 0; c < static_cast<int>(this->ch_names.size()); ++c) {
+                    if ((this_data->col_names.at(col) == this->ch_names.at(c))) {
                         ++channelAvailable;
                         ch = c;
                     }
                 }
                 if (channelAvailable == 0) {
-                    qWarning("Channel %s is not available in data\n", this_data->col_names.at(col).toUtf8().constData());
+                    qWarning("Channel %s is not available in data\n", this_data->col_names.at(col).c_str());
                     return false;
                 } else if (channelAvailable > 1) {
-                    qWarning("Ambiguous channel %s", this_data->col_names.at(col).toUtf8().constData());
+                    qWarning("Ambiguous channel %s", this_data->col_names.at(col).c_str());
                     return false;
                 }
                 presel(col, ch) = 1.0;
@@ -253,14 +254,14 @@ bool FiffInfo::make_compensator(fiff_int_t kind, MatrixXd& this_comp) const //pr
 
             for (c = 0; c < this->nchan; ++c) {
                 channelAvailable = 0;
-                for (row = 0; row < this_data->row_names.size(); ++row) {
-                    if (QString::compare(this->ch_names.at(c), this_data->row_names.at(row)) == 0) {
+                for (row = 0; row < static_cast<int>(this_data->row_names.size()); ++row) {
+                    if ((this->ch_names.at(c) == this_data->row_names.at(row))) {
                         ++channelAvailable;
                         row_ch = row;
                     }
                 }
                 if (channelAvailable > 1) {
-                    qWarning("Ambiguous channel %s", this->ch_names.at(c).toUtf8().constData());
+                    qWarning("Ambiguous channel %s", this->ch_names.at(c).c_str());
                     return false;
                 } else if (channelAvailable == 1) {
                     postsel(c, row_ch) = 1.0;
@@ -290,10 +291,10 @@ FiffInfo FiffInfo::pick_info(const RowVectorXi& sel) const
     for (qint32 i = 0; i < sel.size(); ++i) {
         idx = sel[i];
         res.chs.append(this->chs[idx]);
-        res.ch_names.append(this->ch_names[idx]);
+        res.ch_names.push_back(this->ch_names[idx]);
     }
     res.nchan = static_cast<int>(sel.size());
-    res.bads.removeIf([&res](const QString& bad) { return !res.ch_names.contains(bad); });
+    std::erase_if(res.bads, [&res](const std::string& bad) { return !UTILSLIB::contains(res.ch_names, bad); });
 
     return res;
 }
@@ -321,15 +322,15 @@ QList<FiffChInfo> FiffInfo::set_current_comp(QList<FiffChInfo>& listFiffChInfo, 
 
 //=============================================================================================================
 
-bool FiffInfo::readMegEegChannels(const QString& name,
+bool FiffInfo::readMegEegChannels(const std::string& name,
                                   bool do_meg,
                                   bool do_eeg,
-                                  const QStringList& bads,
+                                  const StringList& bads,
                                   QList<FiffChInfo>& chsp,
                                   int& nmegp,
                                   int& neegp)
 {
-    QFile file(name);
+    QFile file(QString::fromStdString(name));
     FiffStream::SPtr stream(new FiffStream(&file));
 
     if (!stream->open())
@@ -338,7 +339,7 @@ bool FiffInfo::readMegEegChannels(const QString& name,
     FiffInfo info;
     FiffDirNode::SPtr infoNode;
     if (!stream->read_meas_info(stream->dirtree(), info, infoNode)) {
-        qCritical("%s : could not read measurement info", name.toUtf8().data());
+        qCritical("%s : could not read measurement info", name.c_str());
         stream->close();
         return false;
     }
@@ -348,7 +349,7 @@ bool FiffInfo::readMegEegChannels(const QString& name,
     QList<FiffChInfo> eeg;
 
     for (int k = 0; k < info.chs.size(); k++) {
-        if (bads.contains(info.chs[k].ch_name))
+        if (UTILSLIB::contains(bads, info.chs[k].ch_name))
             continue;
         if (do_meg && info.chs[k].kind == FIFFV_MEG_CH)
             meg.append(info.chs[k]);
@@ -404,12 +405,12 @@ void FiffInfo::writeToStream(FiffStream* p_pStream) const
     //
     //    megacq parameters
     //
-    if (!this->acq_pars.isEmpty() || !this->acq_stim.isEmpty()) {
+    if (!this->acq_pars.empty() || !this->acq_stim.empty()) {
         p_pStream->start_block(FIFFB_DACQ_PARS);
-        if (!this->acq_pars.isEmpty())
+        if (!this->acq_pars.empty())
             p_pStream->write_string(FIFF_DACQ_PARS, this->acq_pars);
 
-        if (!this->acq_stim.isEmpty())
+        if (!this->acq_stim.empty())
             p_pStream->write_string(FIFF_DACQ_STIM, this->acq_stim);
 
         p_pStream->end_block(FIFFB_DACQ_PARS);

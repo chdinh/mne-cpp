@@ -176,7 +176,7 @@ struct Trace
     std::vector<float> history; // frames of `rows` values, sample s at (s & (length - 1))
     std::uint64_t newest = 0;   // one past the newest sample in the history
     std::uint64_t oldest = 0;   // first valid sample in the history
-    std::vector<std::string> names;
+    StringList names;
     std::vector<ChannelStyle> styles;
 
     Trace(const AcqStreamInfo& info, std::size_t extraRows)
@@ -510,7 +510,7 @@ private:
         double sfreq = 0.0;
         std::uint64_t window = 0;
         std::size_t rows = 0;
-        std::vector<std::string> names;
+        StringList names;
         std::vector<ChannelStyle> styles;
         int width = 0;
         bool dense = false;

@@ -537,7 +537,7 @@ struct AcqRecorder::Impl
             tags->start_block(FIFFB_REF);
             const fiff_int_t role = FIFFV_ROLE_PREV_FILE;
             tags->write_int(FIFF_REF_ROLE, &role);
-            tags->write_string(FIFF_REF_FILE_NAME, QString::fromStdString(finalName(index - 1)));
+            tags->write_string(FIFF_REF_FILE_NAME, finalName(index - 1));
             const auto number = static_cast<fiff_int_t>(index - 1);
             tags->write_int(FIFF_REF_FILE_NUM, &number);
             tags->end_block(FIFFB_REF);
@@ -572,7 +572,7 @@ struct AcqRecorder::Impl
                 tags.start_block(FIFFB_REF);
                 const fiff_int_t role = FIFFV_ROLE_NEXT_FILE;
                 tags.write_int(FIFF_REF_ROLE, &role);
-                tags.write_string(FIFF_REF_FILE_NAME, QString::fromStdString(finalName(part + 1)));
+                tags.write_string(FIFF_REF_FILE_NAME, finalName(part + 1));
                 const auto number = static_cast<fiff_int_t>(part + 1);
                 tags.write_int(FIFF_REF_FILE_NUM, &number);
                 tags.end_block(FIFFB_REF);
@@ -1044,7 +1044,7 @@ struct AcqRecorder::Impl
                                [](const AcqChannelInfo& c) { return c.kind == AcqChannelKind::Stim; });
         if (addStim) {
             FiffChInfo stim;
-            stim.ch_name = QString::fromLatin1(kStimName);
+            stim.ch_name = QString::fromLatin1(kStimName).toStdString();
             stim.kind = FIFFV_STIM_CH;
             stim.unit = FIFF_UNIT_NONE;
             stim.unit_mul = FIFF_UNITM_NONE;
@@ -1055,7 +1055,7 @@ struct AcqRecorder::Impl
             stim.chpos.coil_type = FIFFV_COIL_NONE;
             stim.coord_frame = FIFFV_COORD_UNKNOWN;
             fiffInfo.chs.append(stim);
-            fiffInfo.ch_names.append(stim.ch_name);
+            fiffInfo.ch_names.push_back(stim.ch_name);
             fiffInfo.nchan = static_cast<fiff_int_t>(fiffInfo.chs.size());
         }
         outChannels = channels + (addStim ? 1U : 0U);
@@ -1096,9 +1096,9 @@ struct AcqRecorder::Impl
         fiffInfo.meas_date[0] = measDate[0];
         fiffInfo.meas_date[1] = measDate[1];
 
-        fiffInfo.device_info.type = QString::fromStdString(options.device.backend);
-        fiffInfo.device_info.model = QString::fromStdString(options.device.device);
-        fiffInfo.device_info.serial = QString::fromStdString(info->sourceId);
+        fiffInfo.device_info.type = options.device.backend;
+        fiffInfo.device_info.model = options.device.device;
+        fiffInfo.device_info.serial = info->sourceId;
         const AcqTimebase timebase = source.timebase();
         std::ostringstream provenance;
         provenance << "mne_acq stream=" << info->name << " uri=" << options.device.uri
@@ -1109,8 +1109,8 @@ struct AcqRecorder::Impl
                    << " origin_uncertainty_ticks=" << timebase.originUncertaintyTicks
                    << " clock_source=" << clockSourceName(clock.source) << " rate_correction=" << clock.rateCorrection
                    << " clock_uncertainty_ns=" << clock.uncertaintyNs << " pipeline_delay_ns=" << clock.pipelineDelayNs;
-        const QString text = QString::fromStdString(provenance.str());
-        fiffInfo.description = fiffInfo.description.isEmpty() ? text : fiffInfo.description + QStringLiteral("; ") + text;
+        const std::string text = provenance.str();
+        fiffInfo.description = fiffInfo.description.empty() ? text : fiffInfo.description + "; " + text;
 
         firstPath = path;
         std::error_code ec;

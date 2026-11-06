@@ -67,9 +67,9 @@ VectorXd UTILSLIB::computeLofScores(const MatrixXd& features, int k)
 
 //=============================================================================================================
 
-QStringList UTILSLIB::findBadChannelsLof(const MatrixXd& data,
-                                         const FiffInfo& info,
-                                         const LofBadChannelParams& params)
+UTILSLIB::StringList UTILSLIB::findBadChannelsLof(const MatrixXd& data,
+                                                  const FiffInfo& info,
+                                                  const LofBadChannelParams& params)
 {
     // Select channel indices based on type filter
     QList<int> chIdx;
@@ -87,7 +87,7 @@ QStringList UTILSLIB::findBadChannelsLof(const MatrixXd& data,
 
     const int nCh = chIdx.size();
     if (nCh < 3) {
-        return QStringList();
+        return StringList();
     }
 
     // Compute features: [std_dev, kurtosis, max_abs]
@@ -127,10 +127,10 @@ QStringList UTILSLIB::findBadChannelsLof(const MatrixXd& data,
     VectorXd lof = computeLofScores(features, k);
 
     // Flag channels above threshold
-    QStringList badChannels;
+    StringList badChannels;
     for (int i = 0; i < nCh; ++i) {
         if (lof(i) > params.dThreshold) {
-            badChannels.append(info.ch_names[chIdx[i]]);
+            badChannels.push_back(info.ch_names[chIdx[i]]);
         }
     }
 

@@ -112,8 +112,8 @@ int main(int argc, char* argv[])
     qInfo("Read covariance: %d x %d channels", cov.dim, cov.dim);
 
     // Get channel names
-    QStringList chNames = cov.names;
-    if (chNames.isEmpty() && !rawFile.isEmpty()) {
+    StringList chNames = cov.names;
+    if (chNames.empty() && !rawFile.isEmpty()) {
         QFile fRaw(rawFile);
         FiffRawData raw(fRaw);
         chNames = raw.info.ch_names;

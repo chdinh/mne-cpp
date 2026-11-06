@@ -24,6 +24,9 @@
 //=============================================================================================================
 
 #include "mne_global.h"
+
+#include <string>
+#include <vector>
 #include "mne_named_matrix.h"
 #include "mne_proj_item.h"
 
@@ -163,7 +166,7 @@ public:
      * @return Number of projection vectors that affect at least one channel
      *         in the list (0 if none).
      */
-    int affect(const QStringList& list, int nlist);
+    int affect(const StringList& list, int nlist);
 
     /**
      * Count how many active projection vectors affect the given channels.
@@ -247,7 +250,7 @@ public:
      * @param[in]      list_data  If true, print full vector data.
      * @param[in]      exclude    Channel names to exclude from the display.
      */
-    void report_data(QTextStream& out, const QString& tag, bool list_data, const QStringList& exclude);
+    void report_data(QTextStream& out, const QString& tag, bool list_data, const StringList& exclude);
 
     /**
      * Write a one-line-per-item summary of all projection items to a text
@@ -268,7 +271,7 @@ public:
      *
      * @return OK on success.
      */
-    int assign_channels(const QStringList& list, int nlist);
+    int assign_channels(const StringList& list, int nlist);
 
     //=========================================================================================================
     /**
@@ -281,7 +284,7 @@ public:
      *
      * @return OK on success, FAIL on error.
      */
-    int make_proj_bad(const QStringList& bad);
+    int make_proj_bad(const StringList& bad);
 
     //=========================================================================================================
     /**
@@ -317,7 +320,7 @@ public:
 public:
     QList<MNELIB::MNEProjItem> items;                                                /**< The projection items. */
     int nitems;                                                                      /**< Number of items. */
-    QStringList names;                                                               /**< Names of the channels in the final compiled projector. */
+    StringList names;                                                                /**< Names of the channels in the final compiled projector. */
     int nch;                                                                         /**< Number of channels in the final projector. */
     int nvec;                                                                        /**< Number of orthogonalized vectors in the final projector. */
     Eigen::Matrix<float, Eigen::Dynamic, Eigen::Dynamic, Eigen::RowMajor> proj_data; /**< The compiled projector: orthogonalized projection vectors (nvec x nch). */

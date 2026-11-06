@@ -22,6 +22,8 @@
 
 #include "mne_forward_solution.h"
 
+#include <utils/string_utils.h>
+
 #include <fiff/fiff.h>
 #include <fiff/fiff_coord_trans.h>
 
@@ -62,42 +64,44 @@ using namespace FIFFLIB;
 namespace
 {
 
-bool check_matching_chnames_conventions(const QStringList& chNamesA, const QStringList& chNamesB, bool bCheckForNewNamingConvention = false)
+bool check_matching_chnames_conventions(const StringList& chNamesA, const StringList& chNamesB, bool bCheckForNewNamingConvention = false)
 {
     bool bMatching = false;
 
-    if (chNamesA.isEmpty()) {
+    if (chNamesA.empty()) {
         qWarning("Warning in check_matching_chnames_conventions - chNamesA list is empty. Nothing to compare");
     }
-    if (chNamesB.isEmpty()) {
+    if (chNamesB.empty()) {
         qWarning("Warning in check_matching_chnames_conventions - chNamesB list is empty. Nothing to compare");
     }
 
-    QString replaceStringOldConv, replaceStringNewConv;
-
-    for (int i = 0; i < chNamesA.size(); ++i) {
-        if (chNamesB.contains(chNamesA.at(i))) {
+    for (const std::string& name : chNamesA) {
+        if (UTILSLIB::contains(chNamesB, name)) {
             bMatching = true;
         } else if (bCheckForNewNamingConvention) {
-            replaceStringNewConv = chNamesA.at(i);
-            replaceStringNewConv.replace(" ", "");
+            // New convention drops the space ("MEG0113"), the old one has it before the number ("MEG 0113")
+            std::string newConv = name;
+            std::erase(newConv, ' ');
 
-            if (chNamesB.contains(replaceStringNewConv)) {
+            if (UTILSLIB::contains(chNamesB, newConv)) {
                 bMatching = true;
             } else {
-                QRegularExpression xRegExp("[0-9]{1,100}");
-                QRegularExpressionMatch match = xRegExp.match(chNamesA.at(i));
-                QStringList xList = match.capturedTexts();
-
-                for (int k = 0; k < xList.size(); ++k) {
-                    replaceStringOldConv = chNamesA.at(i);
-                    replaceStringOldConv.replace(xList.at(k), QString("%1%2").arg(" ").arg(xList.at(k)));
-
-                    if (chNamesB.contains(replaceStringNewConv) || chNamesB.contains(replaceStringOldConv)) {
-                        bMatching = true;
-                    } else {
-                        bMatching = false;
+                const auto digit = [](char c) {
+                    return c >= '0' && c <= '9';
+                };
+                const auto first = std::find_if(name.begin(), name.end(), digit);
+                if (first != name.end()) {
+                    const std::string number(first, std::find_if_not(first, name.end(), digit));
+                    std::string oldConv;
+                    for (std::size_t pos = 0;;) {
+                        const std::size_t hit = name.find(number, pos);
+                        oldConv.append(name, pos, hit == std::string::npos ? std::string::npos : hit - pos);
+                        if (hit == std::string::npos)
+                            break;
+                        oldConv += " " + number;
+                        pos = hit + number.size();
                     }
+                    bMatching = UTILSLIB::contains(chNamesB, newConv) || UTILSLIB::contains(chNamesB, oldConv);
                 }
             }
         }
@@ -138,7 +142,7 @@ MNEForwardSolution::MNEForwardSolution()
 
 //=============================================================================================================
 
-MNEForwardSolution::MNEForwardSolution(QIODevice& p_IODevice, bool force_fixed, bool surf_ori, const QStringList& include, const QStringList& exclude, bool bExcludeBads)
+MNEForwardSolution::MNEForwardSolution(QIODevice& p_IODevice, bool force_fixed, bool surf_ori, const StringList& include, const StringList& exclude, bool bExcludeBads)
 : source_ori(-1)
 , surf_ori(surf_ori)
 , coord_frame(-1)
@@ -265,7 +269,7 @@ bool MNEForwardSolution::write(QIODevice& p_IODevice) const
         t_pStream->start_block(FIFFB_MNE_PARENT_MRI_FILE);
 
         if (!mri_filename.isEmpty())
-            t_pStream->write_string(FIFF_MNE_FILE_NAME, mri_filename);
+            t_pStream->write_string(FIFF_MNE_FILE_NAME, mri_filename.toStdString());
         if (!mri_id.isEmpty())
             t_pStream->write_id(FIFF_PARENT_FILE_ID, mri_id);
         t_pStream->write_coord_trans(mri_head_t);
@@ -279,7 +283,7 @@ bool MNEForwardSolution::write(QIODevice& p_IODevice) const
     {
         t_pStream->start_block(FIFFB_MNE_PARENT_MEAS_FILE);
 
-        if (!info.filename.isEmpty())
+        if (!info.filename.empty())
             t_pStream->write_string(FIFF_MNE_FILE_NAME, info.filename);
         if (!info.meas_id.isEmpty())
             t_pStream->write_id(FIFF_PARENT_BLOCK_ID, info.meas_id);
@@ -322,10 +326,10 @@ bool MNEForwardSolution::write(QIODevice& p_IODevice) const
         int nRows = static_cast<int>(rowIdx.size());
         int nCols = combined.ncol;
         MatrixXd data(nRows, nCols);
-        QStringList row_names;
+        StringList row_names;
         for (int r = 0; r < nRows; ++r) {
             data.row(r) = combined.data.row(rowIdx[r]);
-            row_names.append(combined.row_names[rowIdx[r]]);
+            row_names.push_back(combined.row_names[rowIdx[r]]);
         }
         FiffNamedMatrix sub;
         sub.nrow = nRows;
@@ -431,7 +435,7 @@ MNEForwardSolution MNEForwardSolution::cluster_forward_solution(const FsAnnotati
     MNEForwardSolution p_fwdOut = MNEForwardSolution(*this);
 
     //Check if cov naming conventions are matching
-    if (!check_matching_chnames_conventions(p_pNoise_cov.names, p_pInfo.ch_names) && !p_pNoise_cov.names.isEmpty() && !p_pInfo.ch_names.isEmpty()) {
+    if (!check_matching_chnames_conventions(p_pNoise_cov.names, p_pInfo.ch_names) && !p_pNoise_cov.names.empty() && !p_pInfo.ch_names.empty()) {
         if (check_matching_chnames_conventions(p_pNoise_cov.names, p_pInfo.ch_names, true)) {
             qWarning("MNEForwardSolution::cluster_forward_solution - Cov names do match with info channel names but have a different naming convention.");
             //return p_fwdOut;
@@ -936,8 +940,8 @@ FiffCov MNEForwardSolution::compute_orient_prior(float loose)
 
 //=============================================================================================================
 
-MNEForwardSolution MNEForwardSolution::pick_channels(const QStringList& include,
-                                                     const QStringList& exclude) const
+MNEForwardSolution MNEForwardSolution::pick_channels(const StringList& include,
+                                                     const StringList& exclude) const
 {
     MNEForwardSolution fwd(*this);
 
@@ -963,9 +967,9 @@ MNEForwardSolution MNEForwardSolution::pick_channels(const QStringList& include,
     fwd.sol->data = newData;
     fwd.sol->nrow = nuse;
 
-    QStringList ch_names;
+    StringList ch_names;
     for (qint32 i = 0; i < sel.cols(); ++i)
-        ch_names << fwd.sol->row_names[sel(i)];
+        ch_names.push_back(fwd.sol->row_names[sel(i)]);
     fwd.nchan = nuse;
     fwd.sol->row_names = ch_names;
 
@@ -975,10 +979,10 @@ MNEForwardSolution MNEForwardSolution::pick_channels(const QStringList& include,
     fwd.info.chs = chs;
     fwd.info.nchan = nuse;
 
-    QStringList bads;
-    for (qint32 i = 0; i < fwd.info.bads.size(); ++i)
-        if (ch_names.contains(fwd.info.bads[i]))
-            bads.append(fwd.info.bads[i]);
+    StringList bads;
+    for (qint32 i = 0; i < static_cast<int>(fwd.info.bads.size()); ++i)
+        if (UTILSLIB::contains(ch_names, fwd.info.bads[i]))
+            bads.push_back(fwd.info.bads[i]);
     fwd.info.bads = bads;
 
     if (!fwd.sol_grad->isEmpty()) {
@@ -987,9 +991,9 @@ MNEForwardSolution MNEForwardSolution::pick_channels(const QStringList& include,
             newData.row(i) = fwd.sol_grad->data.row(sel[i]);
         fwd.sol_grad->data = newData;
         fwd.sol_grad->nrow = nuse;
-        QStringList row_names;
+        StringList row_names;
         for (qint32 i = 0; i < sel.cols(); ++i)
-            row_names << fwd.sol_grad->row_names[sel(i)];
+            row_names.push_back(fwd.sol_grad->row_names[sel(i)]);
         fwd.sol_grad->row_names = row_names;
     }
 
@@ -1044,13 +1048,13 @@ MNEForwardSolution MNEForwardSolution::pick_regions(const QList<FsLabel>& p_qLis
 
 //=============================================================================================================
 
-MNEForwardSolution MNEForwardSolution::pick_types(bool meg, bool eeg, const QStringList& include, const QStringList& exclude) const
+MNEForwardSolution MNEForwardSolution::pick_types(bool meg, bool eeg, const StringList& include, const StringList& exclude) const
 {
     RowVectorXi sel = info.pick_types(meg, eeg, false, include, exclude);
 
-    QStringList include_ch_names;
+    StringList include_ch_names;
     for (qint32 i = 0; i < sel.cols(); ++i)
-        include_ch_names << info.ch_names[sel[i]];
+        include_ch_names.push_back(info.ch_names[sel[i]]);
 
     return this->pick_channels(include_ch_names);
 }
@@ -1066,14 +1070,14 @@ void MNEForwardSolution::prepare_forward(const FiffInfo& p_info,
                                          MatrixXd& p_outWhitener,
                                          qint32& p_outNumNonZero) const
 {
-    QStringList fwd_ch_names, ch_names;
+    StringList fwd_ch_names, ch_names;
     for (qint32 i = 0; i < this->info.chs.size(); ++i)
-        fwd_ch_names << this->info.chs[i].ch_name;
+        fwd_ch_names.push_back(this->info.chs[i].ch_name);
 
     ch_names.clear();
     for (qint32 i = 0; i < p_info.chs.size(); ++i)
-        if (!p_info.bads.contains(p_info.chs[i].ch_name) && !p_noise_cov.bads.contains(p_info.chs[i].ch_name) && p_noise_cov.names.contains(p_info.chs[i].ch_name) && fwd_ch_names.contains(p_info.chs[i].ch_name))
-            ch_names << p_info.chs[i].ch_name;
+        if (!UTILSLIB::contains(p_info.bads, p_info.chs[i].ch_name) && !UTILSLIB::contains(p_noise_cov.bads, p_info.chs[i].ch_name) && UTILSLIB::contains(p_noise_cov.names, p_info.chs[i].ch_name) && UTILSLIB::contains(fwd_ch_names, p_info.chs[i].ch_name))
+            ch_names.push_back(p_info.chs[i].ch_name);
 
     qint32 n_chan = ch_names.size();
     qInfo("Computing inverse operator with %d channels.", n_chan);
@@ -1117,13 +1121,13 @@ void MNEForwardSolution::prepare_forward(const FiffInfo& p_info,
     qint32 idx;
     qint32 count_fwd_idx = 0;
     qint32 count_info_idx = 0;
-    for (qint32 i = 0; i < ch_names.size(); ++i) {
-        idx = fwd_ch_names.indexOf(ch_names[i]);
+    for (qint32 i = 0; i < static_cast<int>(ch_names.size()); ++i) {
+        idx = UTILSLIB::indexOf(fwd_ch_names, ch_names[i]);
         if (idx > -1) {
             fwd_idx[count_fwd_idx] = idx;
             ++count_fwd_idx;
         }
-        idx = p_info.ch_names.indexOf(ch_names[i]);
+        idx = UTILSLIB::indexOf(p_info.ch_names, ch_names[i]);
         if (idx > -1) {
             info_idx[count_info_idx] = idx;
             ++count_info_idx;
@@ -1147,8 +1151,8 @@ bool MNEForwardSolution::read(QIODevice& p_IODevice,
                               MNEForwardSolution& fwd,
                               bool force_fixed,
                               bool surf_ori,
-                              const QStringList& include,
-                              const QStringList& exclude,
+                              const StringList& include,
+                              const StringList& exclude,
                               bool bExcludeBads)
 {
     FiffStream::SPtr t_pStream(new FiffStream(&p_IODevice));
@@ -1190,13 +1194,13 @@ bool MNEForwardSolution::read(QIODevice& p_IODevice,
     //
     //   Bad channel list
     //
-    QStringList bads;
+    StringList bads;
     if (bExcludeBads) {
         bads = t_pStream->read_bad_channels(t_pStream->dirtree());
         if (bads.size() > 0) {
             qInfo("\t%lld bad channels ( ", static_cast<long long>(bads.size()));
-            for (qint32 i = 0; i < bads.size(); ++i)
-                qInfo("\"%s\" ", bads[i].toUtf8().constData());
+            for (qint32 i = 0; i < static_cast<int>(bads.size()); ++i)
+                qInfo("\"%s\" ", bads[i].c_str());
             qInfo(") read");
         }
     }
@@ -1261,7 +1265,7 @@ bool MNEForwardSolution::read(QIODevice& p_IODevice,
         fwd.sol->data.block(0, 0, megfwd.sol->nrow, megfwd.sol->ncol) = megfwd.sol->data;
         fwd.sol->data.block(megfwd.sol->nrow, 0, eegfwd.sol->nrow, eegfwd.sol->ncol) = eegfwd.sol->data;
         fwd.sol->nrow = megfwd.sol->nrow + eegfwd.sol->nrow;
-        fwd.sol->row_names.append(eegfwd.sol->row_names);
+        fwd.sol->row_names.insert(fwd.sol->row_names.end(), eegfwd.sol->row_names.begin(), eegfwd.sol->row_names.end());
 
         if (!fwd.sol_grad->isEmpty()) {
             fwd.sol_grad->data.resize(megfwd.sol_grad->data.rows() + eegfwd.sol_grad->data.rows(), megfwd.sol_grad->data.cols());
@@ -1270,7 +1274,7 @@ bool MNEForwardSolution::read(QIODevice& p_IODevice,
             fwd.sol_grad->data.block(megfwd.sol_grad->data.rows(), 0, eegfwd.sol_grad->data.rows(), eegfwd.sol_grad->data.cols()) = eegfwd.sol_grad->data;
 
             fwd.sol_grad->nrow = megfwd.sol_grad->nrow + eegfwd.sol_grad->nrow;
-            fwd.sol_grad->row_names.append(eegfwd.sol_grad->row_names);
+            fwd.sol_grad->row_names.insert(fwd.sol_grad->row_names.end(), eegfwd.sol_grad->row_names.begin(), eegfwd.sol_grad->row_names.end());
         }
         fwd.nchan = megfwd.nchan + eegfwd.nchan;
         qInfo("\tMEG and EEG forward solutions combined");
@@ -1399,11 +1403,11 @@ bool MNEForwardSolution::read(QIODevice& p_IODevice,
     //
     //   Do the channel selection
     //
-    QStringList exclude_bads = exclude;
+    StringList exclude_bads = exclude;
     if (bads.size() > 0) {
-        for (qint32 k = 0; k < bads.size(); ++k)
-            if (!exclude_bads.contains(bads[k], Qt::CaseInsensitive))
-                exclude_bads << bads[k];
+        for (qint32 k = 0; k < static_cast<int>(bads.size()); ++k)
+            if (std::none_of(exclude_bads.begin(), exclude_bads.end(), [&](const std::string& e) { return UTILSLIB::equalsIgnoreCase(e, bads[k]); }))
+                exclude_bads.push_back(bads[k]);
     }
 
     fwd.surf_ori = surf_ori;
@@ -1504,14 +1508,14 @@ void MNEForwardSolution::restrict_gain_matrix(MatrixXd& G, const FiffInfo& info)
         return;
     }
 
-    RowVectorXi sel = info.pick_types(QString("grad"));
+    RowVectorXi sel = info.pick_types(std::string("grad"));
     if (sel.size() > 0) {
         for (qint32 i = 0; i < sel.size(); ++i)
             G.row(i) = G.row(sel[i]);
         G.conservativeResize(sel.size(), G.cols());
         qInfo("\t%ld planar channels", sel.size());
     } else {
-        sel = info.pick_types(QString("mag"));
+        sel = info.pick_types(std::string("mag"));
         if (sel.size() > 0) {
             for (qint32 i = 0; i < sel.size(); ++i)
                 G.row(i) = G.row(sel[i]);

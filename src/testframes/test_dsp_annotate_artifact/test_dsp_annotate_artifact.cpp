@@ -72,9 +72,9 @@ FiffInfo makeMegInfo(int nCh, double sfreq)
         ch.cal = 1.0f;
         ch.unit = 0;
         ch.unit_mul = 0;
-        ch.ch_name = QString("MEG%1").arg(i + 1, 3, 10, QLatin1Char('0'));
+        ch.ch_name = (QString("MEG%1").arg(i + 1, 3, 10, QLatin1Char('0'))).toStdString();
         info.chs.append(ch);
-        info.ch_names.append(ch.ch_name);
+        info.ch_names.push_back(ch.ch_name);
     }
     Q_UNUSED(sfreq)
     return info;
@@ -268,19 +268,19 @@ void TestDspAnnotateArtifact::testAmplitudeMatchesPython()
     for (int k = 0; k < 6; ++k) {
         FiffChInfo ch;
         ch.kind = k == 4 ? FIFFV_STIM_CH : FIFFV_EEG_CH;
-        ch.ch_name = k == 4 ? QStringLiteral("STI") : QString("EEG%1").arg(k + 1);
+        ch.ch_name = k == 4 ? "STI" : "EEG" + std::to_string(k + 1);
         info.chs.append(ch);
-        info.ch_names.append(ch.ch_name);
+        info.ch_names.push_back(ch.ch_name);
     }
     info.nchan = 6;
-    info.bads = QStringList{"EEG6"};
+    info.bads = {"EEG6"};
 
     AnnotateAmplitudeParams params;
     params.peak = 5e-4;
     params.flat = 1e-9;
-    QStringList bads;
+    StringList bads;
     const FiffAnnotations annot = annotateAmplitude(data, info, sfreq, params, &bads);
-    QCOMPARE(bads, QStringList({"EEG3", "EEG4"}));
+    QCOMPARE(bads, StringList({"EEG3", "EEG4"}));
     QCOMPARE(annot.size(), 2);
     QCOMPARE(annot[0].description, QStringLiteral("BAD_flat"));
     QCOMPARE(annot[0].onset, 0.5);
@@ -292,12 +292,12 @@ void TestDspAnnotateArtifact::testAmplitudeMatchesPython()
     // EEG4's 201 jumps span 202 samples, exactly 10.1 %: with bad_percent=10.1 mne still calls it bad
     params.dBadPercent = 10.1;
     QCOMPARE(annotateAmplitude(data, info, sfreq, params, &bads).size(), 2);
-    QCOMPARE(bads, QStringList({"EEG3", "EEG4"}));
+    QCOMPARE(bads, StringList({"EEG3", "EEG4"}));
 
     // With bad_percent=20 mne annotates EEG4's run instead: BAD_peak onset 0.799 duration 0.201
     params.dBadPercent = 20.0;
     const FiffAnnotations relaxed = annotateAmplitude(data, info, sfreq, params, &bads);
-    QCOMPARE(bads, QStringList({"EEG3"}));
+    QCOMPARE(bads, StringList({"EEG3"}));
     QCOMPARE(relaxed.size(), 3);
     QCOMPARE(relaxed[1].description, QStringLiteral("BAD_peak"));
     QVERIFY(std::abs(relaxed[1].onset - 0.799) < 1e-12);
@@ -314,9 +314,9 @@ void TestDspAnnotateArtifact::testAmplitudeNoArtifact()
 
     AnnotateAmplitudeParams params;
     params.peak = 1000.0;
-    QStringList bads{"stale"};
+    StringList bads{"stale"};
     QCOMPARE(annotateAmplitude(data, info, sfreq, params, &bads).size(), 0);
-    QVERIFY(bads.isEmpty());
+    QVERIFY(bads.empty());
 
     // Without a threshold nothing is checked
     QCOMPARE(annotateAmplitude(data, info, sfreq, AnnotateAmplitudeParams()).size(), 0);

@@ -179,7 +179,7 @@ static int doCompute(const QCommandLineParser& parser)
     // ── Pick channels to match forward solution ────────────────────────
     // The evoked file may contain extra channels (STIM, EOG, ECG, …)
     // that are not in the forward solution.  Subset to forward channels.
-    const QStringList fwdChNames = fwd.sol->row_names;
+    const StringList fwdChNames = fwd.sol->row_names;
     FiffEvoked evokedPicked = evoked.pick_channels(fwdChNames);
     FiffCov noiseCovPicked = noiseCov.pick_channels(fwdChNames);
 

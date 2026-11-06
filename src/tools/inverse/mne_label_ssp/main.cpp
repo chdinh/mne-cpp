@@ -129,7 +129,7 @@ int main(int argc, char* argv[])
     // Get the gain matrix and channel names
     //
     const MatrixXd& G = fwd.sol->data; // nchan x nsource (or nsource*3 for free ori)
-    const QStringList& chNames = fwd.sol->row_names;
+    const StringList& chNames = fwd.sol->row_names;
 
     //
     // Determine source columns per vertex depending on orientation type
@@ -212,10 +212,10 @@ int main(int argc, char* argv[])
             MatrixXd projData(1, fwd.nchan);
             projData.row(0) = U.col(k).transpose();
 
-            QStringList rowNames;
-            rowNames << QString("Label-SSP-%1-comp-%2")
-                            .arg(QFileInfo(labelFile).baseName())
-                            .arg(k + 1);
+            const StringList rowNames{QString("Label-SSP-%1-comp-%2")
+                                          .arg(QFileInfo(labelFile).baseName())
+                                          .arg(k + 1)
+                                          .toStdString()};
 
             FiffNamedMatrix namedMat(1, fwd.nchan, rowNames, chNames, projData);
             FiffProj proj(FIFFV_PROJ_ITEM_FIELD, false,

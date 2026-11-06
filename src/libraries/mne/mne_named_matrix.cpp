@@ -69,8 +69,8 @@ MNENamedMatrix::~MNENamedMatrix()
 
 std::unique_ptr<MNENamedMatrix> MNENamedMatrix::build(int nrow,
                                                       int ncol,
-                                                      const QStringList& rowlist,
-                                                      const QStringList& collist,
+                                                      const StringList& rowlist,
+                                                      const StringList& collist,
                                                       const Eigen::MatrixXf& data)
 {
     auto mat = std::make_unique<MNENamedMatrix>();
@@ -84,19 +84,19 @@ std::unique_ptr<MNENamedMatrix> MNENamedMatrix::build(int nrow,
 
 //=============================================================================================================
 
-std::unique_ptr<MNENamedMatrix> MNENamedMatrix::pick(const QStringList& pickrowlist,
+std::unique_ptr<MNENamedMatrix> MNENamedMatrix::pick(const StringList& pickrowlist,
                                                      int picknrow,
-                                                     const QStringList& pickcollist,
+                                                     const StringList& pickcollist,
                                                      int pickncol) const
 {
     /*
      * Validate: picking by name requires names in the original matrix.
      */
-    if (!pickrowlist.isEmpty() && this->rowlist.isEmpty()) {
+    if (!pickrowlist.empty() && this->rowlist.empty()) {
         qCritical("MNENamedMatrix::pick - Cannot pick rows: no row names in original matrix.");
         return nullptr;
     }
-    if (!pickcollist.isEmpty() && this->collist.isEmpty()) {
+    if (!pickcollist.empty() && this->collist.empty()) {
         qCritical("MNENamedMatrix::pick - Cannot pick columns: no column names in original matrix.");
         return nullptr;
     }
@@ -104,30 +104,30 @@ std::unique_ptr<MNENamedMatrix> MNENamedMatrix::pick(const QStringList& pickrowl
     /*
      * When no pick-list is given, keep all rows / columns.
      */
-    if (pickrowlist.isEmpty())
+    if (pickrowlist.empty())
         picknrow = this->nrow;
-    if (pickcollist.isEmpty())
+    if (pickcollist.empty())
         pickncol = this->ncol;
 
     /*
      * Build row index mapping: for each picked row find its index in the original.
      */
     Eigen::VectorXi pick_row = Eigen::VectorXi::Zero(picknrow);
-    QStringList my_pickrowlist;
+    StringList my_pickrowlist;
 
-    if (!pickrowlist.isEmpty()) {
+    if (!pickrowlist.empty()) {
         for (int j = 0; j < picknrow; ++j) {
-            const QString& name = pickrowlist[j];
+            const std::string& name = pickrowlist[j];
             pick_row[j] = -1;
             for (int k = 0; k < this->nrow; ++k) {
-                if (QString::compare(name, this->rowlist[k]) == 0) {
+                if ((name == this->rowlist[k])) {
                     pick_row[j] = k;
                     break;
                 }
             }
             if (pick_row[j] == -1) {
                 qCritical("MNENamedMatrix::pick - Row '%s' not found in original matrix.",
-                          name.toUtf8().constData());
+                          name.c_str());
                 return nullptr;
             }
         }
@@ -142,21 +142,21 @@ std::unique_ptr<MNENamedMatrix> MNENamedMatrix::pick(const QStringList& pickrowl
      * Build column index mapping analogously.
      */
     Eigen::VectorXi pick_col = Eigen::VectorXi::Zero(pickncol);
-    QStringList my_pickcollist;
+    StringList my_pickcollist;
 
-    if (!pickcollist.isEmpty()) {
+    if (!pickcollist.empty()) {
         for (int j = 0; j < pickncol; ++j) {
-            const QString& name = pickcollist[j];
+            const std::string& name = pickcollist[j];
             pick_col[j] = -1;
             for (int k = 0; k < this->ncol; ++k) {
-                if (QString::compare(name, this->collist[k]) == 0) {
+                if ((name == this->collist[k])) {
                     pick_col[j] = k;
                     break;
                 }
             }
             if (pick_col[j] == -1) {
                 qCritical("MNENamedMatrix::pick - Column '%s' not found in original matrix.",
-                          name.toUtf8().constData());
+                          name.c_str());
                 return nullptr;
             }
         }
@@ -186,8 +186,8 @@ std::unique_ptr<MNENamedMatrix> MNENamedMatrix::read(FiffStream::SPtr& stream,
                                                      const FiffDirNode::SPtr& node,
                                                      int kind)
 {
-    QStringList colnames;
-    QStringList rownames;
+    StringList colnames;
+    StringList rownames;
     int ncol = 0;
     int nrow = 0;
     qint32 ndim;
@@ -265,9 +265,9 @@ std::unique_ptr<MNENamedMatrix> MNENamedMatrix::read(FiffStream::SPtr& stream,
      * Read optional row and column name lists.
      */
     if (tmp_node->find_tag(stream, FIFF_MNE_ROW_NAMES, t_pTag)) {
-        const QString s = t_pTag->toString();
+        const std::string s = t_pTag->toString();
         rownames = FiffStream::split_name_list(s);
-        if (rownames.size() != nrow) {
+        if (static_cast<int>(rownames.size()) != nrow) {
             qCritical("MNENamedMatrix::read - Row name count (%d) does not match nrow (%d).",
                       static_cast<int>(rownames.size()), nrow);
             return nullptr;
@@ -275,9 +275,9 @@ std::unique_ptr<MNENamedMatrix> MNENamedMatrix::read(FiffStream::SPtr& stream,
     }
 
     if (tmp_node->find_tag(stream, FIFF_MNE_COL_NAMES, t_pTag)) {
-        const QString s = t_pTag->toString();
+        const std::string s = t_pTag->toString();
         colnames = FiffStream::split_name_list(s);
-        if (colnames.size() != ncol) {
+        if (static_cast<int>(colnames.size()) != ncol) {
             qCritical("MNENamedMatrix::read - Column name count (%d) does not match ncol (%d).",
                       static_cast<int>(colnames.size()), ncol);
             return nullptr;

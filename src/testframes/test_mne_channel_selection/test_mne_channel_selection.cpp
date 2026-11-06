@@ -40,10 +40,10 @@ private slots:
     {
         MNEChSelection sel;
         QCOMPARE(sel.name, QString());
-        QVERIFY(sel.chdef.isEmpty());
+        QVERIFY(sel.chdef.empty());
         QCOMPARE(sel.ndef, 0);
-        QVERIFY(sel.chspick.isEmpty());
-        QVERIFY(sel.chspick_nospace.isEmpty());
+        QVERIFY(sel.chspick.empty());
+        QVERIFY(sel.chspick_nospace.empty());
         QCOMPARE(sel.pick.size(), 0);
         QCOMPARE(sel.pick_deriv.size(), 0);
         QCOMPARE(sel.nderiv, 0);
@@ -56,11 +56,18 @@ private slots:
     {
         MNEChSelection sel;
         sel.name = "Frontal";
-        sel.chdef << "MEG 01*" << "MEG 02*";
+        sel.chdef.push_back("MEG 01*");
+        sel.chdef.push_back("MEG 02*");
         sel.ndef = 2;
 
-        sel.chspick << "MEG 0111" << "MEG 0112" << "MEG 0211" << "MEG 0212";
-        sel.chspick_nospace << "MEG0111" << "MEG0112" << "MEG0211" << "MEG0212";
+        sel.chspick.push_back("MEG 0111");
+        sel.chspick.push_back("MEG 0112");
+        sel.chspick.push_back("MEG 0211");
+        sel.chspick.push_back("MEG 0212");
+        sel.chspick_nospace.push_back("MEG0111");
+        sel.chspick_nospace.push_back("MEG0112");
+        sel.chspick_nospace.push_back("MEG0211");
+        sel.chspick_nospace.push_back("MEG0212");
         sel.nchan = 4;
 
         sel.pick.resize(4);
@@ -82,7 +89,7 @@ private slots:
     {
         MNEChSelection orig;
         orig.name = "TestSelection";
-        orig.chdef << "EEG*";
+        orig.chdef.push_back("EEG*");
         orig.ndef = 1;
         orig.nchan = 3;
 

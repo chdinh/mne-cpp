@@ -215,9 +215,9 @@ public:
      * @return nproj - How many items in the projector.
      */
     inline static FIFFLIB::fiff_int_t make_projector(const QList<FIFFLIB::FiffProj>& projs,
-                                                     const QStringList& ch_names,
+                                                     const StringList& ch_names,
                                                      Eigen::MatrixXd& proj,
-                                                     const QStringList& bads = FIFFLIB::defaultQStringList,
+                                                     const StringList& bads = {},
                                                      Eigen::MatrixXd& U = FIFFLIB::defaultMatrixXd)
     {
         return FIFFLIB::FiffProj::make_projector(projs,

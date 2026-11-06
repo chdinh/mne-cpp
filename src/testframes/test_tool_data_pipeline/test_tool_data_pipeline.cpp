@@ -492,7 +492,7 @@ private slots:
         int stimIndex = -1;
         for (int index = 0; index < outputRaw.info.chs.size(); ++index) {
             if (outputRaw.info.chs[index].kind == FIFFV_STIM_CH) {
-                if (outputRaw.info.chs[index].ch_name.contains("014") || stimIndex < 0) {
+                if ((outputRaw.info.chs[index].ch_name.find("014") != std::string::npos) || stimIndex < 0) {
                     stimIndex = index;
                 }
             }
@@ -720,9 +720,9 @@ private slots:
         QCOMPARE(raw.info.sfreq, 1450.0);
         QCOMPARE(raw.info.nchan, 64);
         QCOMPARE(raw.last_samp - raw.first_samp + 1, 100);
-        QCOMPARE(raw.info.ch_names.first(), QStringLiteral("GateIn"));
+        QCOMPARE(raw.info.ch_names.front(), QStringLiteral("GateIn"));
         QCOMPARE(raw.info.ch_names[4], QStringLiteral("Fp1"));
-        QCOMPARE(raw.info.ch_names.last(), QStringLiteral("Iz"));
+        QCOMPARE(raw.info.ch_names.back(), QStringLiteral("Iz"));
         QCOMPARE(raw.info.channel_type(0), QStringLiteral("stim"));
         QCOMPARE(raw.info.channel_type(3), QStringLiteral("eog"));
         QCOMPARE(raw.info.channel_type(4), QStringLiteral("eeg"));

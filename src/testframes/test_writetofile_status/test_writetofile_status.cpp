@@ -168,10 +168,10 @@ void TestWriteToFileStatus::recording_refusesUnwritableFile()
     plugin.m_pFiffInfo = QSharedPointer<FIFFLIB::FiffInfo>::create();
     plugin.m_pFiffInfo->sfreq = 1000.0;
     FIFFLIB::FiffChInfo ch;
-    ch.ch_name = QStringLiteral("EEG001");
+    ch.ch_name = "EEG001";
     ch.kind = FIFFV_EEG_CH;
     plugin.m_pFiffInfo->chs << ch;
-    plugin.m_pFiffInfo->ch_names << ch.ch_name;
+    plugin.m_pFiffInfo->ch_names.push_back(ch.ch_name);
     plugin.m_pFiffInfo->nchan = 1;
     plugin.m_pFiffInfo->dev_head_t.trans(0, 3) = 0.01f; // not identity: no "HPI fitting" question
     plugin.m_sRecordFileName = tmpDir.filePath(QStringLiteral("no/such/dir/rec_raw.fif"));

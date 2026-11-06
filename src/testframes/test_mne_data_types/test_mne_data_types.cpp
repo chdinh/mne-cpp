@@ -269,14 +269,14 @@ private slots:
         info.nchan = nSensors;
         for (int i = 0; i < nSensors; ++i) {
             FiffChInfo ch;
-            ch.ch_name = QString("CH%1").arg(i);
+            ch.ch_name = "CH" + std::to_string(i);
             ch.kind = FIFFV_MEG_CH;
             ch.unit = FIFF_UNIT_T;
             ch.chpos.coil_type = FIFFV_COIL_VV_MAG_T3;
             ch.range = 1.0;
             ch.cal = 1.0;
             info.chs.append(ch);
-            info.ch_names.append(ch.ch_name);
+            info.ch_names.push_back(ch.ch_name);
         }
         info.bads.clear();
 
@@ -492,21 +492,21 @@ private slots:
         solData->nrow = nSensors;
         solData->ncol = nSources;
         for (int i = 0; i < nSensors; ++i)
-            solData->row_names << QString("CH%1").arg(i);
+            solData->row_names.push_back(QString("CH%1").arg(i).toStdString());
         fwd.sol = solData;
 
         FiffInfo info;
         info.nchan = nSensors;
         for (int i = 0; i < nSensors; ++i) {
             FiffChInfo ch;
-            ch.ch_name = QString("CH%1").arg(i);
+            ch.ch_name = (QString("CH%1").arg(i)).toStdString();
             ch.kind = FIFFV_MEG_CH;
             ch.unit = FIFF_UNIT_T;
             ch.chpos.coil_type = FIFFV_COIL_VV_MAG_T3;
             ch.range = 1.0;
             ch.cal = 1.0;
             info.chs.append(ch);
-            info.ch_names.append(ch.ch_name);
+            info.ch_names.push_back(ch.ch_name);
         }
 
         // Test restrict_gain_matrix
@@ -715,9 +715,9 @@ private slots:
         nm.ncol = 4;
         nm.data = MatrixXd::Random(3, 4);
         for (int i = 0; i < 3; ++i)
-            nm.row_names << QString("r%1").arg(i);
+            nm.row_names.push_back(QString("r%1").arg(i).toStdString());
         for (int j = 0; j < 4; ++j)
-            nm.col_names << QString("c%1").arg(j);
+            nm.col_names.push_back(QString("c%1").arg(j).toStdString());
 
         QCOMPARE(nm.row_names.size(), 3);
         QCOMPARE(nm.col_names.size(), 4);
@@ -737,8 +737,11 @@ private slots:
         nm.nrow = 2;
         nm.ncol = 3;
         nm.data = MatrixXd::Random(2, 3);
-        nm.row_names << "r0" << "r1";
-        nm.col_names << "c0" << "c1" << "c2";
+        nm.row_names.push_back("r0");
+        nm.row_names.push_back("r1");
+        nm.col_names.push_back("c0");
+        nm.col_names.push_back("c1");
+        nm.col_names.push_back("c2");
 
         nm.transpose_named_matrix();
         QCOMPARE(nm.nrow, 3);
@@ -1072,10 +1075,8 @@ private slots:
         MNEProjOp projOp;
 
         // Create a named matrix for projection vectors
-        QStringList rowlist;
-        rowlist << "vec1";
-        QStringList collist;
-        collist << "MEG 001" << "MEG 002" << "MEG 003";
+        StringList rowlist{"vec1"};
+        StringList collist{"MEG 001", "MEG 002", "MEG 003"};
         MatrixXf data(1, 3);
         data << 0.577f, 0.577f, 0.577f;
         auto vecs = MNENamedMatrix::build(1, 3, rowlist, collist, data);
@@ -1093,10 +1094,8 @@ private slots:
     void projOp_addItemActive()
     {
         MNEProjOp projOp;
-        QStringList rowlist;
-        rowlist << "v1";
-        QStringList collist;
-        collist << "ch1" << "ch2";
+        StringList rowlist{"v1"};
+        StringList collist{"ch1", "ch2"};
         MatrixXf data(1, 2);
         data << 0.707f, 0.707f;
         auto vecs = MNENamedMatrix::build(1, 2, rowlist, collist, data);
@@ -1108,10 +1107,8 @@ private slots:
     void projOp_combine()
     {
         MNEProjOp projOp1;
-        QStringList rowlist;
-        rowlist << "v1";
-        QStringList collist;
-        collist << "ch1" << "ch2";
+        StringList rowlist{"v1"};
+        StringList collist{"ch1", "ch2"};
         MatrixXf data(1, 2);
         data << 1.0f, 0.0f;
         auto vecs = MNENamedMatrix::build(1, 2, rowlist, collist, data);
@@ -1130,18 +1127,15 @@ private slots:
     void projOp_assignAndMakeProj()
     {
         MNEProjOp projOp;
-        QStringList rowlist;
-        rowlist << "v1";
-        QStringList collist;
-        collist << "ch1" << "ch2" << "ch3";
+        StringList rowlist{"v1"};
+        StringList collist{"ch1", "ch2", "ch3"};
         MatrixXf data(1, 3);
         data << 0.577f, 0.577f, 0.577f;
         auto vecs = MNENamedMatrix::build(1, 3, rowlist, collist, data);
         projOp.add_item(vecs.get(), FIFFV_PROJ_ITEM_FIELD, "Test proj");
 
         // assign_channels
-        QStringList chanNames;
-        chanNames << "ch1" << "ch2" << "ch3";
+        StringList chanNames{"ch1", "ch2", "ch3"};
         int ret = projOp.assign_channels(chanNames, 3);
         QCOMPARE(ret, 0);
 
@@ -1153,17 +1147,14 @@ private slots:
     void projOp_affect()
     {
         MNEProjOp projOp;
-        QStringList rowlist;
-        rowlist << "v1";
-        QStringList collist;
-        collist << "ch1" << "ch2";
+        StringList rowlist{"v1"};
+        StringList collist{"ch1", "ch2"};
         MatrixXf data(1, 2);
         data << 1.0f, 0.0f;
         auto vecs = MNENamedMatrix::build(1, 2, rowlist, collist, data);
         projOp.add_item(vecs.get(), FIFFV_PROJ_ITEM_FIELD, "Test");
 
-        QStringList chList;
-        chList << "ch1" << "ch2" << "ch3";
+        StringList chList{"ch1", "ch2", "ch3"};
         int nAffect = projOp.affect(chList, 3);
         QVERIFY(nAffect >= 0);
     }
@@ -1171,10 +1162,8 @@ private slots:
     void projOp_report()
     {
         MNEProjOp projOp;
-        QStringList rowlist;
-        rowlist << "v1";
-        QStringList collist;
-        collist << "ch1" << "ch2";
+        StringList rowlist{"v1"};
+        StringList collist{"ch1", "ch2"};
         MatrixXf data(1, 2);
         data << 1.0f, 0.0f;
         auto vecs = MNENamedMatrix::build(1, 2, rowlist, collist, data);
@@ -1193,10 +1182,8 @@ private slots:
 
     void namedMatrix_build()
     {
-        QStringList rows;
-        rows << "r1" << "r2";
-        QStringList cols;
-        cols << "c1" << "c2" << "c3";
+        StringList rows{"r1", "r2"};
+        StringList cols{"c1", "c2", "c3"};
         MatrixXf data(2, 3);
         data << 1, 2, 3, 4, 5, 6;
         auto mat = MNENamedMatrix::build(2, 3, rows, cols, data);
@@ -1209,19 +1196,15 @@ private slots:
 
     void namedMatrix_pick()
     {
-        QStringList rows;
-        rows << "r1" << "r2" << "r3";
-        QStringList cols;
-        cols << "c1" << "c2" << "c3";
+        StringList rows{"r1", "r2", "r3"};
+        StringList cols{"c1", "c2", "c3"};
         MatrixXf data(3, 3);
         data << 1, 2, 3, 4, 5, 6, 7, 8, 9;
         auto mat = MNENamedMatrix::build(3, 3, rows, cols, data);
 
         // Pick subset of rows and cols
-        QStringList pickRows;
-        pickRows << "r1" << "r3";
-        QStringList pickCols;
-        pickCols << "c2";
+        StringList pickRows{"r1", "r3"};
+        StringList pickCols{"c2"};
         auto sub = mat->pick(pickRows, 2, pickCols, 1);
         QVERIFY(sub != nullptr);
         QCOMPARE(sub->nrow, 2);
@@ -1311,11 +1294,9 @@ private slots:
         QVERIFY(evokedSet.evoked.size() > 0);
 
         // Test pick_channels with include list
-        QStringList include;
+        StringList include;
         if (evokedSet.info.ch_names.size() >= 3) {
-            include << evokedSet.info.ch_names[0]
-                    << evokedSet.info.ch_names[1]
-                    << evokedSet.info.ch_names[2];
+            include.assign(evokedSet.info.ch_names.begin(), evokedSet.info.ch_names.begin() + 3);
         }
         FiffEvokedSet picked = evokedSet.pick_channels(include);
         QCOMPARE(picked.info.ch_names.size(), 3);
@@ -1363,8 +1344,10 @@ private slots:
         FiffNamedMatrix data;
         data.nrow = 1;
         data.ncol = 3;
-        data.row_names << "vec1";
-        data.col_names << "MEG 001" << "MEG 002" << "MEG 003";
+        data.row_names.push_back("vec1");
+        data.col_names.push_back("MEG 001");
+        data.col_names.push_back("MEG 002");
+        data.col_names.push_back("MEG 003");
         data.data = MatrixXd(1, 3);
         data.data << 0.577, 0.577, 0.577;
 
@@ -1379,8 +1362,9 @@ private slots:
         FiffNamedMatrix data;
         data.nrow = 1;
         data.ncol = 2;
-        data.row_names << "v1";
-        data.col_names << "ch1" << "ch2";
+        data.row_names.push_back("v1");
+        data.col_names.push_back("ch1");
+        data.col_names.push_back("ch2");
         data.data = MatrixXd(1, 2);
         data.data << 1.0, 0.0;
 
@@ -1396,8 +1380,9 @@ private slots:
         FiffNamedMatrix data;
         data.nrow = 1;
         data.ncol = 2;
-        data.row_names << "v1";
-        data.col_names << "ch1" << "ch2";
+        data.row_names.push_back("v1");
+        data.col_names.push_back("ch1");
+        data.col_names.push_back("ch2");
         data.data = MatrixXd(1, 2);
         data.data << 1.0, 0.0;
 
@@ -1418,16 +1403,17 @@ private slots:
         FiffNamedMatrix data;
         data.nrow = 1;
         data.ncol = 3;
-        data.row_names << "v1";
-        data.col_names << "ch1" << "ch2" << "ch3";
+        data.row_names.push_back("v1");
+        data.col_names.push_back("ch1");
+        data.col_names.push_back("ch2");
+        data.col_names.push_back("ch3");
         data.data = MatrixXd(1, 3);
         data.data << 1.0, 0.0, 0.0;
 
         QList<FiffProj> projs;
         projs.append(FiffProj(FIFFV_PROJ_ITEM_FIELD, true, "TestProj", data));
 
-        QStringList ch_names;
-        ch_names << "ch1" << "ch2" << "ch3";
+        StringList ch_names{"ch1", "ch2", "ch3"};
         MatrixXd proj;
         fiff_int_t nproj = FiffProj::make_projector(projs, ch_names, proj);
         QVERIFY(nproj >= 0);
@@ -1443,18 +1429,15 @@ private slots:
 
     void namedMatrix_pickRowsOnly()
     {
-        QStringList rows;
-        rows << "r1" << "r2" << "r3";
-        QStringList cols;
-        cols << "c1" << "c2";
+        StringList rows{"r1", "r2", "r3"};
+        StringList cols{"c1", "c2"};
         MatrixXf data(3, 2);
         data << 1, 2, 3, 4, 5, 6;
         auto mat = MNENamedMatrix::build(3, 2, rows, cols, data);
 
         // Pick only rows — empty col list keeps all columns
-        QStringList pickRows;
-        pickRows << "r2";
-        QStringList emptyCols;
+        StringList pickRows{"r2"};
+        StringList emptyCols;
         auto sub = mat->pick(pickRows, 1, emptyCols, 0);
         QVERIFY(sub != nullptr);
         QCOMPARE(sub->nrow, 1);
@@ -1466,18 +1449,15 @@ private slots:
 
     void namedMatrix_pickColsOnly()
     {
-        QStringList rows;
-        rows << "r1" << "r2";
-        QStringList cols;
-        cols << "c1" << "c2" << "c3";
+        StringList rows{"r1", "r2"};
+        StringList cols{"c1", "c2", "c3"};
         MatrixXf data(2, 3);
         data << 1, 2, 3, 4, 5, 6;
         auto mat = MNENamedMatrix::build(2, 3, rows, cols, data);
 
         // Pick only cols — empty row list keeps all rows
-        QStringList emptyRows;
-        QStringList pickCols;
-        pickCols << "c3" << "c1";
+        StringList emptyRows;
+        StringList pickCols{"c3", "c1"};
         auto sub = mat->pick(emptyRows, 0, pickCols, 2);
         QVERIFY(sub != nullptr);
         QCOMPARE(sub->nrow, 2);
@@ -1491,46 +1471,38 @@ private slots:
 
     void namedMatrix_pickMissingRow()
     {
-        QStringList rows;
-        rows << "r1" << "r2";
-        QStringList cols;
-        cols << "c1";
+        StringList rows{"r1", "r2"};
+        StringList cols{"c1"};
         MatrixXf data(2, 1);
         data << 1, 2;
         auto mat = MNENamedMatrix::build(2, 1, rows, cols, data);
 
         // Pick a row that does not exist
-        QStringList pickRows;
-        pickRows << "r_missing";
-        QStringList emptyCols;
+        StringList pickRows{"r_missing"};
+        StringList emptyCols;
         auto sub = mat->pick(pickRows, 1, emptyCols, 0);
         QVERIFY(sub == nullptr);
     }
 
     void namedMatrix_pickMissingCol()
     {
-        QStringList rows;
-        rows << "r1";
-        QStringList cols;
-        cols << "c1" << "c2";
+        StringList rows{"r1"};
+        StringList cols{"c1", "c2"};
         MatrixXf data(1, 2);
         data << 1, 2;
         auto mat = MNENamedMatrix::build(1, 2, rows, cols, data);
 
         // Pick a col that does not exist
-        QStringList emptyRows;
-        QStringList pickCols;
-        pickCols << "c_missing";
+        StringList emptyRows;
+        StringList pickCols{"c_missing"};
         auto sub = mat->pick(emptyRows, 0, pickCols, 1);
         QVERIFY(sub == nullptr);
     }
 
     void namedMatrix_copyCtor()
     {
-        QStringList rows;
-        rows << "r1" << "r2";
-        QStringList cols;
-        cols << "c1";
+        StringList rows{"r1", "r2"};
+        StringList cols{"c1"};
         MatrixXf data(2, 1);
         data << 3, 7;
         auto orig = MNENamedMatrix::build(2, 1, rows, cols, data);

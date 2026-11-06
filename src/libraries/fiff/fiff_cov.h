@@ -151,7 +151,7 @@ public:
      *
      * @return Covariance solution restricted to selected channels.
      */
-    FiffCov pick_channels(const QStringList& p_include = defaultQStringList, const QStringList& p_exclude = defaultQStringList);
+    FiffCov pick_channels(const StringList& p_include = {}, const StringList& p_exclude = {});
 
     //=========================================================================================================
     /**
@@ -162,7 +162,7 @@ public:
      *
      * @return the prepared noise covariance matrix.
      */
-    FiffCov prepare_noise_cov(const FiffInfo& p_info, const QStringList& p_chNames) const;
+    FiffCov prepare_noise_cov(const FiffInfo& p_info, const StringList& p_chNames) const;
 
     //=========================================================================================================
     /**
@@ -180,7 +180,7 @@ public:
      *
      * @return the regularized covariance matrix.
      */
-    FiffCov regularize(const FiffInfo& p_info, double p_fMag = 0.1, double p_fGrad = 0.1, double p_fEeg = 0.1, bool p_bProj = true, QStringList p_exclude = defaultQStringList) const;
+    FiffCov regularize(const FiffInfo& p_info, double p_fMag = 0.1, double p_fGrad = 0.1, double p_fEeg = 0.1, bool p_bProj = true, StringList p_exclude = {}) const;
 
     //=========================================================================================================
     /**
@@ -274,10 +274,10 @@ public:
     Eigen::VectorXi chClass; /**< Channel classification vector. */
     bool diag;               /**< If the covariance is stored in a diagonal order. */
     fiff_int_t dim;          /**< Dimension of the covariance (dim x dim). */
-    QStringList names;       /**< Channel names. */
+    StringList names;        /**< Channel names. */
     Eigen::MatrixXd data;    /**< Covariance data. */
     QList<FiffProj> projs;   /**< List of available ssp projectors. */
-    QStringList bads;        /**< List of bad channels. */
+    StringList bads;         /**< List of bad channels. */
     fiff_int_t nfree;        /**< Number of degrees of freedom. */
     Eigen::VectorXd eig;     /**< Vector of eigenvalues. */
     Eigen::MatrixXd eigvec;  /**< Matrix of eigenvectors (each row represents an eigenvector). */
@@ -306,10 +306,10 @@ inline std::ostream& operator<<(std::ostream& out, const FIFFLIB::FiffCov& p_Fif
     if (t_bIsShort) {
         qint32 nchan = p_FiffCov.names.size() > 6 ? 6 : p_FiffCov.names.size();
         for (qint32 i = 0; i < nchan / 2; ++i)
-            out << p_FiffCov.names[i].toUtf8().constData() << " ";
+            out << p_FiffCov.names[i].c_str() << " ";
         out << "... ";
-        for (qint32 i = p_FiffCov.names.size() - nchan / 2; i < p_FiffCov.names.size(); ++i)
-            out << p_FiffCov.names[i].toUtf8().constData() << " ";
+        for (qint32 i = p_FiffCov.names.size() - nchan / 2; i < static_cast<int>(p_FiffCov.names.size()); ++i)
+            out << p_FiffCov.names[i].c_str() << " ";
         out << std::endl;
     }
 
@@ -343,8 +343,8 @@ inline std::ostream& operator<<(std::ostream& out, const FIFFLIB::FiffCov& p_Fif
 
     //Bads
     out << "\tbads " << p_FiffCov.bads.size() << ":\n\t";
-    for (qint32 i = 0; i < p_FiffCov.bads.size(); ++i)
-        out << p_FiffCov.bads[i].toUtf8().constData() << " ";
+    for (qint32 i = 0; i < static_cast<int>(p_FiffCov.bads.size()); ++i)
+        out << p_FiffCov.bads[i].c_str() << " ";
 
     out << "\n\tfree: " << p_FiffCov.nfree << std::endl;
 

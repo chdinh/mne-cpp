@@ -235,17 +235,17 @@ void TestComRtClient::testRtDataClientReadsWhatTheServerWrites()
     if (withProjector) {
         Eigen::MatrixXd vec(2, 3);
         vec << 0.6, 0.8, 0.0, 0.0, 0.6, -0.8;
-        FiffNamedMatrix vectors(2, 3, QStringList(), info.ch_names.mid(0, 3), vec);
+        FiffNamedMatrix vectors(2, 3, {}, StringList(info.ch_names.begin() + 0, info.ch_names.begin() + 0 + 3), vec);
         info.projs.append(FiffProj(FIFFV_PROJ_ITEM_FIELD, true, QStringLiteral("PCA-v1"), vectors));
     }
-    info.experimenter = QStringLiteral("rt test");
-    info.description = QStringLiteral("wire round trip");
-    info.proj_name = QStringLiteral("rt");
+    info.experimenter = "rt test";
+    info.description = "wire round trip";
+    info.proj_name = "rt";
     info.proj_id = 7;
-    info.utc_offset = QStringLiteral("+02:00");
-    info.acq_pars = QStringLiteral("ACQch001 110113");
-    info.acq_stim = QStringLiteral("STI 014");
-    info.bads = QStringList{info.ch_names.first()};
+    info.utc_offset = "+02:00";
+    info.acq_pars = "ACQch001 110113";
+    info.acq_stim = "STI 014";
+    info.bads = {info.ch_names.front()};
 
     QTcpServer server;
     QVERIFY(server.listen(QHostAddress::LocalHost));

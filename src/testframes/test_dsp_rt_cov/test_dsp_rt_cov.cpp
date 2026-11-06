@@ -31,13 +31,13 @@ QSharedPointer<FiffInfo> makeSyntheticInfo()
         FiffChInfo ch;
         ch.kind = FIFFV_EEG_CH;
         ch.unit = FIFF_UNIT_V;
-        ch.ch_name = QString("EEG%1").arg(i + 1, 3, 10, QChar('0'));
+        ch.ch_name = (QString("EEG%1").arg(i + 1, 3, 10, QChar('0'))).toStdString();
         ch.range = 1.0f;
         ch.cal = 1.0f;
         ch.chpos.coil_type = FIFFV_COIL_EEG;
         ch.chpos.r0 << 0.01f * (i + 1), 0.0f, 0.02f;
         info->chs.append(ch);
-        info->ch_names.append(ch.ch_name);
+        info->ch_names.push_back(ch.ch_name);
     }
 
     info->nchan = info->chs.size();

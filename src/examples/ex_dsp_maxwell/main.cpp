@@ -20,6 +20,7 @@
 //=============================================================================================================
 
 #include <dsp/bad_channels_maxwell.h>
+#include <utils/string_utils.h>
 #include <dsp/filter_chpi.h>
 #include <dsp/fine_calibration.h>
 #include <dsp/maxwell_movement_comp.h>
@@ -149,8 +150,8 @@ int main(int argc, char* argv[])
     //! [bad_channels_maxwell_usage]
     int worst = 0;
     bads.zScores.maxCoeff(&worst);
-    ok &= expect(worst == 40 && bads.badIndices.contains(meg[40]) && bads.badChannels.contains(info.ch_names[meg[40]]),
-                 QString("findBadChannelsMaxwell ranks %1 worst (z = %2), flagged: %3").arg(info.ch_names[meg[worst]]).arg(bads.zScores(worst), 0, 'f', 0).arg(bads.badChannels.join(", ")));
+    ok &= expect(worst == 40 && bads.badIndices.contains(meg[40]) && UTILSLIB::contains(bads.badChannels, info.ch_names[meg[40]]),
+                 QString("findBadChannelsMaxwell ranks %1 worst (z = %2), flagged: %3").arg(info.ch_names[meg[worst]]).arg(bads.zScores(worst), 0, 'f', 0).arg(QString::fromStdString(UTILSLIB::join(bads.badChannels, ", "))));
 
     //! [maxwell_movement_comp_usage]
     QList<HeadPosEntry> headPos(1); // one position from t = 0: identity rotation, no translation

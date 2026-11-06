@@ -227,8 +227,8 @@ public:
      *
      * @return the desired fiff evoked data set.
      */
-    FiffEvokedSet pick_channels(const QStringList& include = defaultQStringList,
-                                const QStringList& exclude = defaultQStringList) const;
+    FiffEvokedSet pick_channels(const StringList& include = {},
+                                const StringList& exclude = {}) const;
 
     //=========================================================================================================
     /**
@@ -339,7 +339,7 @@ public:
      */
     static bool checkArtifacts(const Eigen::MatrixXd& epoch,
                                const FiffInfo& info,
-                               const QStringList& bads,
+                               const StringList& bads,
                                const RejectionParams& rej,
                                QString& reason);
 

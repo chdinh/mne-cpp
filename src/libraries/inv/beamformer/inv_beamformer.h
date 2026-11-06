@@ -143,7 +143,7 @@ public:
     QString subject;           /**< Subject identifier. */
 
     // --- Filter parameters ---
-    QStringList chNames;             /**< Channel names used for filter computation. */
+    StringList chNames;              /**< Channel names used for filter computation. */
     BeamformerWeightNorm weightNorm; /**< Applied weight normalization. */
     BeamformerPickOri pickOri;       /**< Orientation picking mode. */
     BeamformerInversion inversion;   /**< Inversion method used. */

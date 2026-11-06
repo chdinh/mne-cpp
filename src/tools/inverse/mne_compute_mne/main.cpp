@@ -24,6 +24,7 @@
 //=============================================================================================================
 
 #include <fiff/fiff.h>
+#include <utils/string_utils.h>
 #include <fiff/fiff_evoked.h>
 #include <fiff/fiff_evoked_set.h>
 #include <fiff/fiff_info.h>
@@ -185,7 +186,7 @@ static void scaleData(MatrixXd& data, double scaleTo, double scaleBy, bool siCur
  * @return true on success.
  */
 static bool readBaselines(const QString& fileName,
-                          const QStringList& ch_names,
+                          const StringList& ch_names,
                           VectorXd& baselines)
 {
     QFile file(fileName);
@@ -194,7 +195,7 @@ static bool readBaselines(const QString& fileName,
         return false;
     }
 
-    baselines = VectorXd::Zero(ch_names.size());
+    baselines = VectorXd::Zero(static_cast<Eigen::Index>(ch_names.size()));
     QTextStream in(&file);
     int nFound = 0;
     while (!in.atEnd()) {
@@ -203,7 +204,7 @@ static bool readBaselines(const QString& fileName,
             continue;
         QStringList parts = line.split(QRegularExpression("\\s+"));
         if (parts.size() >= 2) {
-            int idx = ch_names.indexOf(parts[0]);
+            const int idx = UTILSLIB::indexOf(ch_names, parts[0].toStdString());
             if (idx >= 0) {
                 baselines(idx) = parts[1].toDouble();
                 nFound++;
@@ -848,11 +849,11 @@ int main(int argc, char* argv[])
         }
 
         MatrixXd pickedData(invOp.nchan, fwd.sol->data.cols());
-        for (int channel = 0; channel < invOp.noise_cov->names.size(); ++channel) {
-            const int fwdChannel = fwd.sol->row_names.indexOf(invOp.noise_cov->names[channel]);
+        for (int channel = 0; channel < static_cast<int>(invOp.noise_cov->names.size()); ++channel) {
+            const int fwdChannel = UTILSLIB::indexOf(fwd.sol->row_names, invOp.noise_cov->names[channel]);
             if (fwdChannel < 0) {
                 qCritical("Error: Forward solution is missing inverse-operator channel %s.",
-                          invOp.noise_cov->names[channel].toUtf8().constData());
+                          invOp.noise_cov->names[channel].c_str());
                 return 1;
             }
             pickedData.row(channel) = fwd.sol->data.row(fwdChannel) * fwdAmp;
@@ -928,9 +929,9 @@ int main(int argc, char* argv[])
 
         // Apply per-channel baselines from file if specified
         if (parser.isSet(baselinesOpt)) {
-            QStringList chNames;
-            for (int c = 0; c < evoked.info.ch_names.size(); ++c)
-                chNames << evoked.info.ch_names[c];
+            StringList chNames;
+            for (int c = 0; c < static_cast<int>(evoked.info.ch_names.size()); ++c)
+                chNames.push_back(evoked.info.ch_names[c]);
 
             VectorXd baselines;
             if (readBaselines(parser.value(baselinesOpt), chNames, baselines)) {

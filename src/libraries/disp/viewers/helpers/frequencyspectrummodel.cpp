@@ -82,7 +82,7 @@ QVariant FrequencySpectrumModel::data(const QModelIndex& index, int role) const
         //******** first column (chname) ********
         if (index.column() == 0 && role == Qt::DisplayRole)
             if (m_pFiffInfo)
-                return QVariant(m_pFiffInfo->chs[r].ch_name);
+                return QString::fromStdString(m_pFiffInfo->chs[r].ch_name);
 
         //******** second column (data plot) ********
         if (index.column() == 1) {

@@ -409,10 +409,8 @@ private slots:
 
     void namedMatrix_build()
     {
-        QStringList rows;
-        rows << "R1" << "R2";
-        QStringList cols;
-        cols << "C1" << "C2" << "C3";
+        StringList rows{"R1", "R2"};
+        StringList cols{"C1", "C2", "C3"};
         MatrixXf data(2, 3);
         data << 1, 2, 3, 4, 5, 6;
 
@@ -426,10 +424,8 @@ private slots:
 
     void namedMatrix_copyCtor()
     {
-        QStringList rows;
-        rows << "A" << "B";
-        QStringList cols;
-        cols << "X" << "Y";
+        StringList rows{"A", "B"};
+        StringList cols{"X", "Y"};
         MatrixXf data(2, 2);
         data << 1, 2, 3, 4;
 
@@ -442,19 +438,15 @@ private slots:
 
     void namedMatrix_pick()
     {
-        QStringList rows;
-        rows << "R1" << "R2" << "R3";
-        QStringList cols;
-        cols << "C1" << "C2" << "C3";
+        StringList rows{"R1", "R2", "R3"};
+        StringList cols{"C1", "C2", "C3"};
         MatrixXf data(3, 3);
         data << 1, 2, 3, 4, 5, 6, 7, 8, 9;
 
         auto nm = MNENamedMatrix::build(3, 3, rows, cols, data);
 
-        QStringList pickRows;
-        pickRows << "R1" << "R3";
-        QStringList pickCols;
-        pickCols << "C2";
+        StringList pickRows{"R1", "R3"};
+        StringList pickCols{"C2"};
         auto picked = nm->pick(pickRows, 2, pickCols, 1);
         QVERIFY(picked != nullptr);
         QCOMPARE(picked->nrow, 2);
@@ -466,8 +458,7 @@ private slots:
     //=========================================================================
     void covMatrix_createDense()
     {
-        QStringList names;
-        names << "CH1" << "CH2" << "CH3";
+        StringList names{"CH1", "CH2", "CH3"};
         // Packed lower triangle for 3x3: elements [0,0], [1,0], [1,1], [2,0], [2,1], [2,2]
         VectorXd cov(6);
         cov << 1, 0, 1, 0, 0, 1; // identity
@@ -480,8 +471,7 @@ private slots:
 
     void covMatrix_createDiag()
     {
-        QStringList names;
-        names << "CH1" << "CH2";
+        StringList names{"CH1", "CH2"};
         VectorXd diag(2);
         diag << 4.0, 9.0;
 
@@ -493,8 +483,7 @@ private slots:
 
     void covMatrix_dup()
     {
-        QStringList names;
-        names << "A" << "B";
+        StringList names{"A", "B"};
         VectorXd diag(2);
         diag << 2.0, 3.0;
 
@@ -517,10 +506,8 @@ private slots:
     void projOp_addItem()
     {
         MNEProjOp op;
-        QStringList rows;
-        rows << "R1";
-        QStringList cols;
-        cols << "CH1" << "CH2" << "CH3";
+        StringList rows{"R1"};
+        StringList cols{"CH1", "CH2", "CH3"};
         MatrixXf data(1, 3);
         data << 1.0f, 0.0f, 0.0f;
 
@@ -532,10 +519,8 @@ private slots:
     void projOp_dup()
     {
         MNEProjOp op;
-        QStringList rows;
-        rows << "R1";
-        QStringList cols;
-        cols << "CH1" << "CH2";
+        StringList rows{"R1"};
+        StringList cols{"CH1", "CH2"};
         MatrixXf data(1, 2);
         data << 1.0f, 0.0f;
 
@@ -642,9 +627,9 @@ private slots:
         FiffStream::SPtr srcStream2(new FiffStream(&file));
         srcStream2->open();
         MNESourceSpaces::readFromStream(srcStream2, false, srcSpace);
-        QVERIFY(srcSpace[0].id == 101 || srcSpace[0].id == FIFFV_MNE_SURF_LEFT_HEMI);
+        QVERIFY(srcSpace[0].id == FIFFV_MNE_SURF_LEFT_HEMI);
         // Right hemisphere
-        QVERIFY(srcSpace[1].id == 102 || srcSpace[1].id == FIFFV_MNE_SURF_RIGHT_HEMI);
+        QVERIFY(srcSpace[1].id == FIFFV_MNE_SURF_RIGHT_HEMI);
 
         // Copy and verify
         MNESourceSpaces copy(srcSpace);
@@ -763,9 +748,9 @@ private slots:
         if (!fwd.isEmpty() && fwd.info.nchan > 0) {
             RowVectorXi megIdx = fwd.info.pick_types(true, false, false);
             if (megIdx.size() > 0) {
-                QStringList megNames;
+                StringList megNames;
                 for (int i = 0; i < megIdx.size(); ++i)
-                    megNames << fwd.info.ch_names[megIdx(i)];
+                    megNames.push_back(fwd.info.ch_names[megIdx(i)]);
                 MNEForwardSolution fwdMeg = fwd.pick_channels(megNames);
                 QCOMPARE(fwdMeg.nchan, (int)megIdx.size());
             }
@@ -917,8 +902,8 @@ private slots:
         if (cov.isEmpty())
             QSKIP("Failed to read cov");
 
-        int nPick = qMin(30, cov.names.size());
-        QStringList pickNames = cov.names.mid(0, nPick);
+        int nPick = std::min(30, static_cast<int>(cov.names.size()));
+        StringList pickNames = StringList(cov.names.begin() + 0, cov.names.begin() + 0 + nPick);
         FiffCov picked = cov.pick_channels(pickNames);
         QCOMPARE(picked.names.size(), nPick);
         QCOMPARE(picked.data.rows(), (Index)nPick);

@@ -44,6 +44,7 @@
 //=============================================================================================================
 
 #include <inv/inv_convenience.h>
+#include <utils/string_utils.h>
 #include <inv/minimum_norm/inv_minimum_norm.h>
 #include <mne/mne_forward_solution.h>
 #include <mne/mne_inverse_operator.h>
@@ -230,7 +231,7 @@ void TestInvEloretaPython::makeInverse_matchesPython()
     const MNEForwardSolution fwd = MNEForwardSolution(fwdFile, fixedFwd, surfOri).pick_regions({m_v1});
     FiffInfo info = m_info;
     if (channels == "mag+eeg")
-        info = m_info.pick_info(m_info.pick_types(QString("mag"), true));
+        info = m_info.pick_info(m_info.pick_types("mag", true));
     else if (channels == "eeg")
         info = m_info.pick_info(m_info.pick_types(false, true));
     const MNEInverseOperator inv = MNEInverseOperator::make_inverse_operator(info, fwd, m_cov, loose, depth, fixed, limitDepthChs);
@@ -306,7 +307,7 @@ void TestInvEloretaPython::estimateSnr_matchesPython()
         const RowVectorXd ramp = RowVectorXd::LinSpaced(evoked.data.cols(), 1.0, static_cast<double>(evoked.data.cols())) * amplitude;
         evoked.data.setZero();
         for (int i = 0; i < g.size(); ++i)
-            evoked.data.row(evoked.info.ch_names.indexOf(m_freeFwd.sol->row_names[i])) = g(i) * ramp;
+            evoked.data.row(UTILSLIB::indexOf(evoked.info.ch_names, m_freeFwd.sol->row_names[i])) = g(i) * ramp;
     } else {
         QTest::ignoreMessage(QtWarningMsg, "[estimateSnr] SNR estimation did not converge.");
     }
@@ -366,7 +367,7 @@ void TestInvEloretaPython::mneData_matchesPython()
         const RowVectorXd ramp = RowVectorXd::LinSpaced(evoked.data.cols(), 1.0, static_cast<double>(evoked.data.cols())) * amplitude;
         evoked.data.setZero();
         for (int i = 0; i < g.size(); ++i)
-            evoked.data.row(evoked.info.ch_names.indexOf(m_freeFwd.sol->row_names[i])) = g(i) * ramp;
+            evoked.data.row(UTILSLIB::indexOf(evoked.info.ch_names, m_freeFwd.sol->row_names[i])) = g(i) * ramp;
     }
 
     InvMinimumNorm mn(m_loose, 1.0f / 9.0f, "MNE");
@@ -398,9 +399,9 @@ void TestInvEloretaPython::mneData_predictedMatchesPython()
     QVERIFY(std::fabs(mne.lambda2(0) - 0.19047619047619055) <= 1e-12);
     QCOMPARE(mne.lambda2.size(), mne.lambda2_est.size());
     QCOMPARE(static_cast<int>(mne.predicted.rows()), 364);
-    const QStringList& names = mn.getPreparedInverseOperator().noise_cov->names;
-    QCOMPARE(names[5], QString("MEG0121"));
-    QCOMPARE(names[300], QString("MEG2632"));
+    const StringList& names = mn.getPreparedInverseOperator().noise_cov->names;
+    QCOMPARE(names[5], std::string("MEG0121"));
+    QCOMPARE(names[300], std::string("MEG2632"));
     const double absSum = mne.predicted.cwiseAbs().sum();
     QVERIFY2(std::fabs(absSum - 0.047335931752795365) <= 1e-6 * 0.047335931752795365, qPrintable(QString("predicted sum %1").arg(absSum, 0, 'g', 17)));
     QVERIFY(std::fabs(mne.predicted(5, 100) - 1.2397408293656668e-13) <= 1e-6 * 1.2397408293656668e-13);

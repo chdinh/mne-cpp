@@ -17,6 +17,7 @@
 //=============================================================================================================
 
 #include <iostream>
+#include <utils/string_utils.h>
 #include <vector>
 #include <math.h>
 
@@ -87,7 +88,7 @@ int main(int argc, char* argv[])
     MatrixXi pairs(p_FiffEvokedSet.info.nchan, 2);
     fiff_double_t base1, base2;
 
-    QStringList ch_sel_names;
+    StringList ch_sel_names;
 
     //settings
     bool do_baseline = false;
@@ -107,8 +108,8 @@ int main(int argc, char* argv[])
         coil1 = p_FiffEvokedSet.info.chs.at(i).chpos.coil_type;
         coil2 = p_FiffEvokedSet.info.chs.at(i + 1).chpos.coil_type;
         if (coil1 == coil2 && (coil1 == 2 || coil1 == 3012 || coil1 == 3013)) {
-            one = p_FiffEvokedSet.info.ch_names[i];
-            two = p_FiffEvokedSet.info.ch_names[i + 1];
+            one = QString::fromStdString(p_FiffEvokedSet.info.ch_names[i]);
+            two = QString::fromStdString(p_FiffEvokedSet.info.ch_names[i + 1]);
             lastone = one.at(one.size() - 1);
             lasttwo = one.at(two.size() - 1);
 
@@ -171,29 +172,29 @@ int main(int argc, char* argv[])
 
     //Compose the selection name list
     for (qint32 i = 0; i < npair; ++i) {
-        ch_sel_names.append(p_FiffEvokedSet.info.ch_names.at(i));
+        ch_sel_names.push_back(p_FiffEvokedSet.info.ch_names.at(i));
     }
 
     //Omit MEG channels but include others
     for (qint32 p = 0; p < p_FiffEvokedSet.info.nchan; ++p) {
         if ((p_FiffEvokedSet.info.channel_type(p) == "grad") || (p_FiffEvokedSet.info.channel_type(p) == "mag")) {
-            ch_sel_names.append(p_FiffEvokedSet.info.ch_names.at(p));
+            ch_sel_names.push_back(p_FiffEvokedSet.info.ch_names.at(p));
         }
     }
 
     //Modify the bad channel list
-    if (!p_FiffEvokedSet.info.bads.isEmpty()) {
+    if (!p_FiffEvokedSet.info.bads.empty()) {
         QString firstOfPair, secondOfPair;
 
         for (qint32 i = 0; i < npair; ++i) {
-            firstOfPair = p_FiffEvokedSet.info.ch_names.at(pairs(i, 0));
-            secondOfPair = p_FiffEvokedSet.info.ch_names.at(pairs(i, 1));
+            firstOfPair = QString::fromStdString(p_FiffEvokedSet.info.ch_names.at(pairs(i, 0)));
+            secondOfPair = QString::fromStdString(p_FiffEvokedSet.info.ch_names.at(pairs(i, 1)));
 
             //If one channel of the planar gradiometer is marked bad, add the other to the bad channel list
-            if (!p_FiffEvokedSet.info.bads.contains(firstOfPair) && p_FiffEvokedSet.info.bads.contains(secondOfPair))
-                p_FiffEvokedSet.info.bads.append(secondOfPair);
-            if (p_FiffEvokedSet.info.bads.contains(firstOfPair) && !p_FiffEvokedSet.info.bads.contains(secondOfPair))
-                p_FiffEvokedSet.info.bads.append(firstOfPair);
+            if (!UTILSLIB::contains(p_FiffEvokedSet.info.bads, firstOfPair.toStdString()) && UTILSLIB::contains(p_FiffEvokedSet.info.bads, secondOfPair.toStdString()))
+                p_FiffEvokedSet.info.bads.push_back(secondOfPair.toStdString());
+            if (UTILSLIB::contains(p_FiffEvokedSet.info.bads, firstOfPair.toStdString()) && !UTILSLIB::contains(p_FiffEvokedSet.info.bads, secondOfPair.toStdString()))
+                p_FiffEvokedSet.info.bads.push_back(firstOfPair.toStdString());
         }
     }
 

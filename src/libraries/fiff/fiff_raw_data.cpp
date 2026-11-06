@@ -219,7 +219,7 @@ bool FiffRawData::read_raw_segment(MatrixXd& data,
     FiffStream::SPtr fid;
     if (!this->file->device()->isOpen()) {
         if (!this->file->device()->open(QIODevice::ReadOnly)) {
-            qWarning("Cannot open file %s", this->info.filename.toUtf8().constData());
+            qWarning("Cannot open file %s", this->info.filename.c_str());
         }
         fid = this->file;
     } else {
@@ -522,7 +522,7 @@ bool FiffRawData::read_raw_segment(MatrixXd& data,
     FiffStream::SPtr fid;
     if (!this->file->device()->isOpen()) {
         if (!this->file->device()->open(QIODevice::ReadOnly)) {
-            qWarning("Cannot open file %s", this->info.filename.toUtf8().constData());
+            qWarning("Cannot open file %s", this->info.filename.c_str());
         }
         fid = this->file;
     } else {

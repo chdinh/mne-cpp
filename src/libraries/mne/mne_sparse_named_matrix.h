@@ -22,6 +22,9 @@
 
 #include "mne_global.h"
 
+#include <string>
+#include <vector>
+
 #include <fiff/fiff_dir_node.h>
 #include <fiff/fiff_sparse_matrix.h>
 #include <fiff/fiff_stream.h>
@@ -73,8 +76,8 @@ public:
 
     int nrow = 0;                                    /**< Number of rows (same as in data). */
     int ncol = 0;                                    /**< Number of columns (same as in data). */
-    QStringList rowlist;                             /**< Name list for the rows. */
-    QStringList collist;                             /**< Name list for the columns. */
+    StringList rowlist;                              /**< Name list for the rows. */
+    StringList collist;                              /**< Name list for the columns. */
     std::unique_ptr<FIFFLIB::FiffSparseMatrix> data; /**< The data itself (sparse). */
 };
 

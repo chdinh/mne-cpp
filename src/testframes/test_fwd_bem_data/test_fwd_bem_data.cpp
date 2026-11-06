@@ -212,9 +212,9 @@ private slots:
         if (megIdx.size() == 0)
             QSKIP("No MEG channels in fwd");
 
-        QStringList megNames;
+        StringList megNames;
         for (int i = 0; i < megIdx.size(); ++i)
-            megNames << fwd.info.ch_names[megIdx(i)];
+            megNames.push_back(fwd.info.ch_names[megIdx(i)]);
         MNEForwardSolution fwdMeg = fwd.pick_channels(megNames);
         QCOMPARE(fwdMeg.nchan, (int)megIdx.size());
         QCOMPARE(fwdMeg.nsource, fwd.nsource); // sources unchanged
@@ -241,9 +241,9 @@ private slots:
         if (eegIdx.size() == 0)
             QSKIP("No EEG channels");
 
-        QStringList eegNames;
+        StringList eegNames;
         for (int i = 0; i < eegIdx.size(); ++i)
-            eegNames << fwd.info.ch_names[eegIdx(i)];
+            eegNames.push_back(fwd.info.ch_names[eegIdx(i)]);
         MNEForwardSolution fwdEeg = fwd.pick_channels(eegNames);
         QCOMPARE(fwdEeg.nchan, (int)eegIdx.size());
     }

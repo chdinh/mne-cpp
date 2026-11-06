@@ -149,9 +149,9 @@ int main(int argc, char* argv[])
     // Find STI channel (prefer STI 014, fallback to first stim channel)
     int stiIdx = -1;
     for (int i = 0; i < raw.info.chs.size(); ++i) {
-        if (raw.info.chs[i].ch_name.contains("STI") ||
+        if ((raw.info.chs[i].ch_name.find("STI") != std::string::npos) ||
             raw.info.chs[i].kind == FIFFV_STIM_CH) {
-            if (raw.info.chs[i].ch_name.contains("014") || stiIdx < 0) {
+            if ((raw.info.chs[i].ch_name.find("014") != std::string::npos) || stiIdx < 0) {
                 stiIdx = i;
             }
         }
@@ -162,7 +162,7 @@ int main(int argc, char* argv[])
         return 1;
     }
     qInfo("Using stimulus channel: %s (index %d)",
-          qPrintable(raw.info.chs[stiIdx].ch_name), stiIdx);
+          raw.info.chs[stiIdx].ch_name.c_str(), stiIdx);
 
     // Read all data
     MatrixXd data;

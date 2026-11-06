@@ -448,7 +448,7 @@ int MNECTFCompDataSet::make_comp(const QList<FiffChInfo>& chList,
     int first_comp;
     MNECTFCompData* this_comp;
     Eigen::VectorXi comp_sel;
-    QStringList names;
+    StringList names;
     QString name;
     int j, k, p;
 
@@ -456,7 +456,7 @@ int MNECTFCompDataSet::make_comp(const QList<FiffChInfo>& chList,
     std::unique_ptr<FiffSparseMatrix> postsel;
     std::unique_ptr<MNENamedMatrix> data;
 
-    QStringList emptyList;
+    StringList emptyList;
 
     if (compchs.isEmpty()) {
         compchs = chList;
@@ -510,9 +510,9 @@ int MNECTFCompDataSet::make_comp(const QList<FiffChInfo>& chList,
     comp_sel.resize(this_comp->data->ncol);
     for (k = 0; k < this_comp->data->ncol; k++) {
         comp_sel[k] = -1;
-        name = this_comp->data->collist[k];
+        name = QString::fromStdString(this_comp->data->collist[k]);
         for (p = 0; p < nCompChan; p++)
-            if (QString::compare(name, compchs[p].ch_name) == 0) {
+            if ((name == compchs[p].ch_name)) {
                 comp_sel[k] = p;
                 break;
             }
@@ -539,7 +539,7 @@ int MNECTFCompDataSet::make_comp(const QList<FiffChInfo>& chList,
      */
     for (k = 0; k < nChan; k++) {
         if (compGrades[k] != MNE_CTFV_COMP_NONE)
-            names.append(chList[k].ch_name);
+            names.push_back(chList[k].ch_name);
     }
 
     {

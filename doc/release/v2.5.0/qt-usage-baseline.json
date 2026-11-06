@@ -30,7 +30,7 @@
       "decoding",
       "math"
     ],
-    "tokens": 20540,
+    "tokens": 20140,
     "gui_outside_design": []
   },
   "libraries": {
@@ -43,11 +43,11 @@
       "modules": []
     },
     "acq/fiff": {
-      "tokens": 72,
+      "tokens": 49,
       "by_category": {
         "files": 7,
         "global": 4,
-        "strings": 61
+        "strings": 38
       },
       "public_header_includes": 0,
       "q_object": 0,
@@ -87,16 +87,16 @@
       ]
     },
     "bids": {
-      "tokens": 1090,
+      "tokens": 1086,
       "by_category": {
-        "containers": 85,
+        "containers": 82,
         "files": 102,
         "global": 34,
         "json": 32,
         "logging": 52,
         "regex": 3,
         "smart_pointers": 5,
-        "strings": 770,
+        "strings": 769,
         "time": 7
       },
       "public_header_includes": 33,
@@ -160,7 +160,7 @@
       "modules": []
     },
     "disp": {
-      "tokens": 6290,
+      "tokens": 6289,
       "by_category": {
         "containers": 522,
         "files": 110,
@@ -168,11 +168,11 @@
         "gui": 924,
         "json": 5,
         "logging": 49,
-        "objects_signals": 553,
+        "objects_signals": 551,
         "other": 1504,
         "regex": 4,
         "smart_pointers": 219,
-        "strings": 1110,
+        "strings": 1111,
         "threads": 23,
         "time": 11
       },
@@ -188,7 +188,7 @@
       ]
     },
     "disp3D": {
-      "tokens": 2928,
+      "tokens": 2927,
       "by_category": {
         "containers": 282,
         "files": 51,
@@ -199,7 +199,7 @@
         "other": 228,
         "random": 3,
         "smart_pointers": 73,
-        "strings": 679,
+        "strings": 678,
         "threads": 74,
         "time": 17
       },
@@ -217,21 +217,21 @@
       ]
     },
     "dsp": {
-      "tokens": 868,
+      "tokens": 829,
       "by_category": {
-        "containers": 280,
+        "containers": 279,
         "files": 32,
-        "global": 150,
+        "global": 146,
         "logging": 89,
         "objects_signals": 84,
         "other": 3,
         "regex": 3,
         "smart_pointers": 31,
-        "strings": 174,
+        "strings": 140,
         "threads": 21,
         "time": 1
       },
-      "public_header_includes": 59,
+      "public_header_includes": 54,
       "q_object": 12,
       "files": 94,
       "modules": [
@@ -241,19 +241,19 @@
       ]
     },
     "fiff": {
-      "tokens": 2005,
+      "tokens": 1830,
       "by_category": {
-        "containers": 315,
-        "files": 178,
-        "global": 476,
+        "containers": 308,
+        "files": 173,
+        "global": 475,
         "json": 27,
-        "logging": 297,
+        "logging": 295,
         "network": 7,
         "objects_signals": 21,
         "other": 3,
         "regex": 16,
         "smart_pointers": 73,
-        "strings": 591,
+        "strings": 431,
         "time": 1
       },
       "public_header_includes": 97,
@@ -286,7 +286,7 @@
       ]
     },
     "fwd": {
-      "tokens": 349,
+      "tokens": 339,
       "by_category": {
         "containers": 14,
         "files": 26,
@@ -296,10 +296,10 @@
         "other": 1,
         "regex": 3,
         "smart_pointers": 9,
-        "strings": 96,
+        "strings": 86,
         "threads": 4
       },
-      "public_header_includes": 14,
+      "public_header_includes": 13,
       "q_object": 0,
       "files": 28,
       "modules": [
@@ -320,17 +320,17 @@
       ]
     },
     "inv": {
-      "tokens": 956,
+      "tokens": 931,
       "by_category": {
-        "containers": 110,
+        "containers": 107,
         "files": 68,
-        "global": 81,
+        "global": 74,
         "json": 2,
         "logging": 424,
         "objects_signals": 7,
         "regex": 1,
         "smart_pointers": 50,
-        "strings": 211,
+        "strings": 196,
         "threads": 2
       },
       "public_header_includes": 50,
@@ -404,20 +404,20 @@
       ]
     },
     "mne": {
-      "tokens": 1914,
+      "tokens": 1792,
       "by_category": {
         "containers": 172,
         "files": 118,
-        "global": 405,
+        "global": 402,
         "logging": 629,
         "objects_signals": 4,
         "other": 23,
-        "regex": 4,
+        "regex": 2,
         "smart_pointers": 97,
-        "strings": 452,
+        "strings": 335,
         "threads": 10
       },
-      "public_header_includes": 99,
+      "public_header_includes": 98,
       "q_object": 0,
       "files": 114,
       "modules": [

@@ -3,6 +3,7 @@
 //   Christoph Dinh <christoph.dinh@mne-cpp.org>
 
 #include <QtTest/QtTest>
+#include <utils/string_utils.h>
 #include <QTemporaryDir>
 #include <Eigen/Dense>
 
@@ -215,7 +216,7 @@ private slots:
         MatrixXd a, b, t;
         QVERIFY(raw->read_raw_segment(a, t, raw->first_samp, raw->last_samp));
         QVERIFY(filtered.read_raw_segment(b, t, raw->first_samp, raw->last_samp));
-        const int stim = static_cast<int>(raw->info.ch_names.indexOf("STI014"));
+        const int stim = static_cast<int>(UTILSLIB::indexOf(raw->info.ch_names, "STI014"));
         QVERIFY(stim >= 0);
         QCOMPARE(b.row(stim), a.row(stim));
         QVERIFY((b.row(3) - a.row(3)).cwiseAbs().maxCoeff() <= 1e-6 * a.row(3).cwiseAbs().maxCoeff());

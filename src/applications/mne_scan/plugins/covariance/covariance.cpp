@@ -250,7 +250,7 @@ void Covariance::run()
             m_mutex.unlock();
 
             fiffCov = rtCov.estimateCovariance(matData, iEstimationSamples);
-            if (!fiffCov.names.isEmpty()) {
+            if (!fiffCov.names.empty()) {
                 m_pCovarianceOutput->measurementData()->setValue(fiffCov);
             }
         }

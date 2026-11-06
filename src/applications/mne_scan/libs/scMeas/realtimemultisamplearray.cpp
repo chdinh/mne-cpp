@@ -86,7 +86,7 @@ void RealTimeMultiSampleArray::initFromFiffInfo(QSharedPointer<FIFFLIB::FiffInfo
 
     for (qint32 i = 0; i < pFiffInfo->nchan; ++i) {
         RealTimeSampleArrayChInfo initChInfo;
-        initChInfo.setChannelName(pFiffInfo->chs[i].ch_name);
+        initChInfo.setChannelName(QString::fromStdString(pFiffInfo->chs[i].ch_name));
 
         // set channel Unit
         initChInfo.setUnit(pFiffInfo->chs[i].unit);

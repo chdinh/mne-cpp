@@ -2604,11 +2604,11 @@ int FwdBemModel::compute_forward_meg(std::vector<std::unique_ptr<MNESourceSpace>
     int nsource;                 /* Total number of sources */
     int nspace = static_cast<int>(spaces.size());
     int k, p, q, off;
-    QStringList names; /* Channel names */
+    StringList names; /* Channel names */
     void* client;
     FwdThreadArg::UPtr one_arg;
     int nproc = QThread::idealThreadCount();
-    QStringList emptyList;
+    StringList emptyList;
 
     auto cleanup_fail = [&]() {
         one_arg.reset();
@@ -2767,9 +2767,9 @@ int FwdBemModel::compute_forward_meg(std::vector<std::unique_ptr<MNESourceSpace>
     }
     qInfo("done.");
     {
-        QStringList orig_names;
+        StringList orig_names;
         for (k = 0; k < nmeg; k++)
-            orig_names.append(coils->coils[k]->chname);
+            orig_names.push_back(coils->coils[k]->chname.toStdString());
         names = orig_names;
     }
     one_arg.reset();
@@ -2826,11 +2826,11 @@ int FwdBemModel::compute_forward_eeg(std::vector<std::unique_ptr<MNESourceSpace>
     int nspace = static_cast<int>(spaces.size());
     int neeg = els->ncoil(); /* Number of channels */
     int k, p, q, off;
-    QStringList names; /* Channel names */
+    StringList names; /* Channel names */
     void* client;
     FwdThreadArg::UPtr one_arg;
     int nproc = QThread::idealThreadCount();
-    QStringList emptyList;
+    StringList emptyList;
     /*
        * Count the sources
        */
@@ -2961,9 +2961,9 @@ int FwdBemModel::compute_forward_eeg(std::vector<std::unique_ptr<MNESourceSpace>
     }
     qInfo("done.");
     {
-        QStringList orig_names;
+        StringList orig_names;
         for (k = 0; k < neeg; k++)
-            orig_names.append(els->coils[k]->chname);
+            orig_names.push_back(els->coils[k]->chname.toStdString());
         names = orig_names;
     }
     one_arg.reset();

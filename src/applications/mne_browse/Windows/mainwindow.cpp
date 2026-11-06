@@ -308,7 +308,7 @@ bool detectFallbackStimEvents(const FIFFLIB::FiffRawData& raw,
             continue;
         }
 
-        const QString stimChannel = raw.info.ch_names.value(channelIndex);
+        const QString stimChannel = QString::fromStdString(raw.info.ch_names[channelIndex]);
         const QString normalizedName = normalizeStimChannelName(stimChannel);
 
         if (normalizedName == QLatin1String("STI014") ||
@@ -2705,7 +2705,7 @@ void MainWindow::openFile()
                 QSignalBlocker blocker(m_pVirtualChannelWindow->getVirtualChannelModel());
                 m_pVirtualChannelWindow->getVirtualChannelModel()->clearModel();
             }
-            m_pVirtualChannelWindow->setAvailableChannelNames(QStringList());
+            m_pVirtualChannelWindow->setAvailableChannelNames({});
             m_pDataWindow->setVirtualChannels({}, false);
 
             s_wasmByteArray = fileContent;
@@ -3347,7 +3347,7 @@ bool MainWindow::loadRawFile(const QString& filename)
         QSignalBlocker blocker(m_pVirtualChannelWindow->getVirtualChannelModel());
         m_pVirtualChannelWindow->getVirtualChannelModel()->clearModel();
     }
-    m_pVirtualChannelWindow->setAvailableChannelNames(QStringList());
+    m_pVirtualChannelWindow->setAvailableChannelNames({});
     m_pDataWindow->setVirtualChannels({}, false);
 
     // ── ChannelDataView path: demand-paged, opens header only (fast) ──

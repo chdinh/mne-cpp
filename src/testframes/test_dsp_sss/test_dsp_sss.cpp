@@ -65,7 +65,7 @@ static FiffInfo makeSyntheticMegInfo(int nSensors, double radius = 0.12)
         ch.chpos.ex = ex;
         ch.chpos.ey = ey;
         ch.chpos.ez = ez;
-        ch.ch_name = QString("MEG%1").arg(i + 1, 4, 10, QChar('0'));
+        ch.ch_name = (QString("MEG%1").arg(i + 1, 4, 10, QChar('0'))).toStdString();
         info.chs[i] = ch;
     }
 

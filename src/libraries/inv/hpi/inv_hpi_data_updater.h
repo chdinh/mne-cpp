@@ -166,7 +166,7 @@ private:
      *
      * @return true if changed
      */
-    bool checkIfChanged(const QList<QString>& lBads, const QList<FIFFLIB::FiffChInfo>& lChannels);
+    bool checkIfChanged(const StringList& lBads, const QList<FIFFLIB::FiffChInfo>& lChannels);
 
     //=========================================================================================================
     /**
@@ -188,7 +188,7 @@ private:
 
     QList<FIFFLIB::FiffChInfo> m_lChannels; /**< Channellist with bads excluded. */
     QVector<int> m_vecInnerind;             /**< index of inner channels . */
-    QList<QString> m_lBads;                 /**< contains bad channels . */
+    StringList m_lBads;                     /**< contains bad channels . */
     Eigen::MatrixXd m_matHpiDigitizer;      /**< The coordinates of the digitized HPI coils in head space*/
     Eigen::MatrixXd m_matProjectors;        /**< The projectors ready to use*/
     Eigen::MatrixXd m_matInnerdata;         /**< The data ready to use*/

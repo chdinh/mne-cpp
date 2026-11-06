@@ -130,8 +130,8 @@ BadChannelsMaxwellResult UTILSLIB::findBadChannelsMaxwell(
         if (result.zScores(i) > params.dZThreshold) {
             int origIdx = basis.megChannelIdx[i];
             result.badIndices.append(origIdx);
-            if (origIdx < info.ch_names.size()) {
-                result.badChannels.append(info.ch_names[origIdx]);
+            if (origIdx < static_cast<int>(info.ch_names.size())) {
+                result.badChannels.push_back(info.ch_names[origIdx]);
             }
         }
     }

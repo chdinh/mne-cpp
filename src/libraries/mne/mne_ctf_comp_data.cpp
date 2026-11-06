@@ -87,10 +87,10 @@ int MNECTFCompData::calibrate(const QList<FIFFLIB::FiffChInfo>& chs, int nch, bo
         return OK;
 
     for (j = 0; j < this->data->nrow; j++) {
-        name = this->data->rowlist[j];
+        name = QString::fromStdString(this->data->rowlist[j]);
         found = false;
         for (p = 0; p < nch; p++)
-            if (QString::compare(name, chs[p].ch_name) == 0) {
+            if ((name == chs[p].ch_name)) {
                 row_cals[j] = chs[p].range * chs[p].cal;
                 found = true;
                 break;
@@ -101,10 +101,10 @@ int MNECTFCompData::calibrate(const QList<FIFFLIB::FiffChInfo>& chs, int nch, bo
         }
     }
     for (k = 0; k < this->data->ncol; k++) {
-        name = this->data->collist[k];
+        name = QString::fromStdString(this->data->collist[k]);
         found = false;
         for (p = 0; p < nch; p++)
-            if (QString::compare(name, chs[p].ch_name) == 0) {
+            if ((name == chs[p].ch_name)) {
                 col_cals[k] = chs[p].range * chs[p].cal;
                 found = true;
                 break;

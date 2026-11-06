@@ -161,12 +161,14 @@ void toHostOrder(std::byte* data, std::size_t elements, std::size_t size) noexce
 }
 
 /** @return The channel called @p name, ignoring spaces as FIFFLIB drops them when reading names; -1 if none. */
-int channelIndex(const FiffInfo& info, QString name)
+int channelIndex(const FiffInfo& info, std::string name)
 {
-    name.remove(QLatin1Char(' '));
-    for (int k = 0; k < info.ch_names.size(); ++k) {
-        if (QString(info.ch_names[k]).remove(QLatin1Char(' ')) == name) {
-            return k;
+    std::erase(name, ' ');
+    for (std::size_t k = 0; k < info.ch_names.size(); ++k) {
+        std::string compact = info.ch_names[k];
+        std::erase(compact, ' ');
+        if (compact == name) {
+            return static_cast<int>(k);
         }
     }
     return -1;
@@ -176,14 +178,14 @@ int channelIndex(const FiffInfo& info, QString name)
 AcqExpected<int> stimChannel(const FiffInfo& info, const std::string& name)
 {
     if (!name.empty()) {
-        const int index = channelIndex(info, QString::fromStdString(name));
+        const int index = channelIndex(info, name);
         if (index < 0) {
             return invalid("stim=" + name + ": the file has no such channel");
         }
         return index;
     }
     for (const char* candidate : {"STI101", "STI014"}) {
-        const int index = channelIndex(info, QString::fromLatin1(candidate));
+        const int index = channelIndex(info, candidate);
         if (index >= 0) {
             return index;
         }

@@ -18,6 +18,7 @@
 //=============================================================================================================
 
 #include "mne_meas_data.h"
+#include <utils/string_utils.h>
 #include "mne_meas_data_set.h"
 #include "mne_inverse_operator.h"
 
@@ -123,7 +124,7 @@ bool MNEMeasData::read_evoked_set(const QString& name,
                                   int set,
                                   MNEInverseOperator* op,
                                   MNENamedMatrix* fwd,
-                                  const QStringList& namesp,
+                                  const StringList& namesp,
                                   int nnamesp,
                                   MNEMeasData& target,
                                   bool fresh)
@@ -163,7 +164,7 @@ bool MNEMeasData::read_evoked_set(const QString& name,
     /*
      * Desired channels
      */
-    QStringList names;
+    StringList names;
     int nchan = 0;
     /*
        * Selected channels
@@ -184,7 +185,7 @@ bool MNEMeasData::read_evoked_set(const QString& name,
 
     if (!fresh) {
         for (int i = 0; i < target.nchan; i++)
-            names.append(target.chs[i].ch_name);
+            names.push_back(target.chs[i].ch_name);
         nchan = target.nchan;
     } else {
         if (op) {
@@ -197,7 +198,7 @@ bool MNEMeasData::read_evoked_set(const QString& name,
             names = namesp;
             nchan = nnamesp;
         }
-        if (names.isEmpty())
+        if (names.empty())
             nchan = 0;
     }
 
@@ -211,12 +212,12 @@ bool MNEMeasData::read_evoked_set(const QString& name,
         sel = Eigen::VectorXi::Constant(nchan, -1);
         for (c = 0; c < nchan_file; c++) {
             for (k = 0; k < nchan; k++) {
-                if (sel[k] == -1 && QString::compare(chs[c].ch_name, names[k]) == 0) {
+                if (sel[k] == -1 && (chs[c].ch_name == names[k])) {
                     sel[k] = c;
                     break;
                 }
             }
-            if (QString(chs[c].ch_name).remove(' ') == stim14_name) {
+            if (QString::fromStdString(chs[c].ch_name).remove(' ') == stim14_name) {
                 stim14 = c;
             }
         }
@@ -224,7 +225,7 @@ bool MNEMeasData::read_evoked_set(const QString& name,
             if (sel[k] == -1) {
                 qCritical("All channels needed were not in the MEG/EEG data file "
                           "(first missing: %s).",
-                          names[k].toUtf8().constData());
+                          names[k].c_str());
                 return false;
             }
     } else { /* Load all channels */
@@ -235,7 +236,7 @@ bool MNEMeasData::read_evoked_set(const QString& name,
                 sel[nchan] = c;
                 nchan++;
             }
-            if (QString(chs[c].ch_name).remove(' ') == stim14_name) {
+            if (QString::fromStdString(chs[c].ch_name).remove(' ') == stim14_name) {
                 stim14 = c;
             }
         }
@@ -325,7 +326,7 @@ bool MNEMeasData::read_evoked_set(const QString& name,
 
             for (int b = 0; b < target.nbad; b++) {
                 for (k = 0; k < target.nchan; k++) {
-                    if (QString::compare(target.chs[k].ch_name, target.badlist[b], Qt::CaseInsensitive) == 0) {
+                    if (UTILSLIB::equalsIgnoreCase(target.chs[k].ch_name, target.badlist[b])) {
                         target.bad[k] = 1;
                         break;
                     }
@@ -335,7 +336,7 @@ bool MNEMeasData::read_evoked_set(const QString& name,
             if (target.nbad > 0) {
                 qInfo("\t\t");
                 for (k = 0; k < target.nbad; k++)
-                    qInfo("%s%c", target.badlist[k].toUtf8().constData(), k < target.nbad - 1 ? ' ' : '\n');
+                    qInfo("%s%c", target.badlist[k].c_str(), k < target.nbad - 1 ? ' ' : '\n');
             }
         }
     }
@@ -385,7 +386,7 @@ std::unique_ptr<MNEMeasData> MNEMeasData::mne_read_meas_data(const QString& name
                                                              int set,
                                                              MNEInverseOperator* op,
                                                              MNENamedMatrix* fwd,
-                                                             const QStringList& namesp,
+                                                             const StringList& namesp,
                                                              int nnamesp)
 {
     auto data = std::make_unique<MNEMeasData>();
@@ -400,7 +401,7 @@ bool MNEMeasData::mne_read_meas_data_add(const QString& name,
                                          int set,
                                          MNEInverseOperator* op,
                                          MNENamedMatrix* fwd,
-                                         const QStringList& namesp,
+                                         const StringList& namesp,
                                          int nnamesp,
                                          MNEMeasData& add_to)
 {

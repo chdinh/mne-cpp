@@ -348,10 +348,10 @@ void TestFiffFsLibrary::fiff_evokedSetPickChannels()
     FiffEvokedSet evokedSet(aveFile);
     QVERIFY(evokedSet.evoked.size() > 0);
 
-    QStringList include;
+    StringList include;
     int nPick = qMin(20, (int)evokedSet.info.ch_names.size());
     for (int i = 0; i < nPick; i++)
-        include.append(evokedSet.info.ch_names[i]);
+        include.push_back(evokedSet.info.ch_names[i]);
 
     FiffEvokedSet picked = evokedSet.pick_channels(include);
     QVERIFY(picked.evoked.size() > 0);
@@ -509,9 +509,9 @@ void TestFiffFsLibrary::fiff_infoPickEeg()
     FiffInfo pickedInfo = raw.info.pick_info(sel);
     QCOMPARE(pickedInfo.nchan, nEeg);
 
-    QStringList include;
+    StringList include;
     for (int i = 0; i < nEeg; i++)
-        include << raw.info.ch_names[eegSel[i]];
+        include.push_back(raw.info.ch_names[eegSel[i]]);
     RowVectorXi sel2 = FiffInfo::pick_channels(raw.info.ch_names, include);
     QCOMPARE((int)sel2.size(), nEeg);
 }
@@ -564,8 +564,11 @@ void TestFiffFsLibrary::fiff_namedMatrixAccessors()
     FiffNamedMatrix m2;
     m2.nrow = 2;
     m2.ncol = 3;
-    m2.row_names << "r1" << "r2";
-    m2.col_names << "c1" << "c2" << "c3";
+    m2.row_names.push_back("r1");
+    m2.row_names.push_back("r2");
+    m2.col_names.push_back("c1");
+    m2.col_names.push_back("c2");
+    m2.col_names.push_back("c3");
     m2.data = MatrixXd::Identity(2, 3);
 
     FiffNamedMatrix m3(m2);
@@ -587,13 +590,13 @@ void TestFiffFsLibrary::fiff_infoBaseAccessors()
     FiffRawData raw(rawFile);
 
     for (int i = 0; i < qMin(5, raw.info.nchan); i++) {
-        QString chType = raw.info.channel_type(i);
+        QString chType = QString::fromStdString(raw.info.channel_type(i));
         QVERIFY(!chType.isEmpty());
     }
 
     FiffInfoBase infoCopy(raw.info);
     QCOMPARE(infoCopy.nchan, raw.info.nchan);
-    QVERIFY(!infoCopy.ch_names.isEmpty());
+    QVERIFY(!infoCopy.ch_names.empty());
 }
 
 //=============================================================================================================
@@ -921,10 +924,10 @@ void TestFiffFsLibrary::fiffCov_pickChannels()
     QFile covFile(covPath());
     FiffCov cov(covFile);
     QVERIFY(!cov.isEmpty());
-    QStringList pickNames;
-    int nPick = qMin(20, cov.names.size());
+    StringList pickNames;
+    int nPick = std::min(20, static_cast<int>(cov.names.size()));
     for (int i = 0; i < nPick; ++i)
-        pickNames.append(cov.names[i]);
+        pickNames.push_back(cov.names[i]);
     FiffCov pickedCov = cov.pick_channels(pickNames);
     QCOMPARE(pickedCov.dim, nPick);
     QCOMPARE(pickedCov.names.size(), nPick);
@@ -939,7 +942,7 @@ void TestFiffFsLibrary::fiffCov_saveAndReload()
     FiffCov cov(covFile);
     QVERIFY(!cov.isEmpty());
     QVERIFY(cov.dim > 0);
-    QVERIFY(cov.names.size() == cov.dim);
+    QVERIFY(static_cast<int>(cov.names.size()) == cov.dim);
 }
 
 void TestFiffFsLibrary::fiffCov_regularize()
@@ -1150,7 +1153,7 @@ void TestFiffFsLibrary::fiffInfo_pickChannels()
     QFile rawFile(rawPath());
     FiffRawData raw(rawFile);
     FiffInfo info = raw.info;
-    int nPick = qMin(15, info.ch_names.size());
+    int nPick = std::min(15, static_cast<int>(info.ch_names.size()));
     RowVectorXi picks(nPick);
     for (int i = 0; i < nPick; ++i)
         picks(i) = i;
@@ -1167,7 +1170,7 @@ void TestFiffFsLibrary::fiffInfo_writeAndRead()
     FiffInfo info = raw.info;
     QVERIFY(info.nchan > 0);
     QVERIFY(info.sfreq > 0);
-    QVERIFY(info.ch_names.size() == info.nchan);
+    QVERIFY(static_cast<int>(info.ch_names.size()) == info.nchan);
     QVERIFY(info.chs.size() == info.nchan);
 }
 
@@ -1224,8 +1227,11 @@ void TestFiffFsLibrary::fiffStream_writeStringAndNameList()
     FiffStream::SPtr stream = FiffStream::start_file(buffer);
     fiff_long_t pos1 = stream->write_string(FIFF_DESCRIPTION, "Test description string");
     QVERIFY(pos1 >= 0);
-    QStringList names;
-    names << "MEG 0113" << "MEG 0112" << "MEG 0122" << "EEG 001";
+    StringList names;
+    names.push_back("MEG 0113");
+    names.push_back("MEG 0112");
+    names.push_back("MEG 0122");
+    names.push_back("EEG 001");
     fiff_long_t pos2 = stream->write_name_list(FIFF_MNE_CH_NAME_LIST, names);
     QVERIFY(pos2 >= 0);
     stream->end_file();
@@ -1307,7 +1313,9 @@ void TestFiffFsLibrary::fiffStream_writeCov()
     FiffCov cov;
     cov.kind = FIFFV_MNE_NOISE_COV;
     cov.dim = 3;
-    cov.names << "CH1" << "CH2" << "CH3";
+    cov.names.push_back("CH1");
+    cov.names.push_back("CH2");
+    cov.names.push_back("CH3");
     cov.data = MatrixXd::Identity(3, 3) * 1e-24;
     cov.nfree = 100;
     fiff_long_t pos = stream->write_cov(cov);
@@ -1328,8 +1336,10 @@ void TestFiffFsLibrary::fiffStream_writeProj()
     FiffNamedMatrix::SDPtr projData(new FiffNamedMatrix());
     projData->nrow = 1;
     projData->ncol = 3;
-    projData->row_names << "Proj1";
-    projData->col_names << "CH1" << "CH2" << "CH3";
+    projData->row_names.push_back("Proj1");
+    projData->col_names.push_back("CH1");
+    projData->col_names.push_back("CH2");
+    projData->col_names.push_back("CH3");
     projData->data = MatrixXd::Ones(1, 3) / std::sqrt(3.0);
     proj.data = projData;
     projs.append(proj);
@@ -1346,8 +1356,11 @@ void TestFiffFsLibrary::fiffStream_writeNamedMatrix()
     FiffNamedMatrix named;
     named.nrow = 2;
     named.ncol = 3;
-    named.row_names << "ROW1" << "ROW2";
-    named.col_names << "COL1" << "COL2" << "COL3";
+    named.row_names.push_back("ROW1");
+    named.row_names.push_back("ROW2");
+    named.col_names.push_back("COL1");
+    named.col_names.push_back("COL2");
+    named.col_names.push_back("COL3");
     named.data = MatrixXd::Random(2, 3);
     fiff_long_t pos = stream->write_named_matrix(FIFF_MNE_FORWARD_SOLUTION, named);
     QVERIFY(pos >= 0);

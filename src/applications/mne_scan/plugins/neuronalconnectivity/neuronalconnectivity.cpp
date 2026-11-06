@@ -17,6 +17,7 @@
 //=============================================================================================================
 
 #include "neuronalconnectivity.h"
+#include <utils/string_utils.h>
 #include "FormFiles/neuronalconnectivitysetupwidget.h"
 
 #include <connectivity/connectivity.h>
@@ -309,7 +310,7 @@ void NeuronalConnectivity::updateRTMSA(SCMEASLIB::Measurement::SPtr pMeasurement
 
         if (m_pFiffInfo) {
             //Generate node vertices because the number of bad channels changed
-            if (m_iNumberBadChannels != pRTMSA->info()->bads.size()) {
+            if (m_iNumberBadChannels != static_cast<int>(pRTMSA->info()->bads.size())) {
                 m_pFiffInfo = pRTMSA->info();
                 generateNodeVertices();
                 m_iNumberBadChannels = m_pFiffInfo->bads.size();
@@ -450,24 +451,26 @@ void NeuronalConnectivity::generateNodeVertices()
     QString sCoilType = "grad";
     QString sChType = "meg";
 
-    QStringList exclude;
-    exclude << m_pFiffInfo->bads << m_pFiffInfo->ch_names.filter("EOG");
+    StringList exclude = m_pFiffInfo->bads;
+    for (const std::string& name : m_pFiffInfo->ch_names)
+        if (name.find("EOG") != std::string::npos)
+            exclude.push_back(name);
 
     if (sChType.contains("EEG", Qt::CaseInsensitive)) {
-        m_vecPicks = m_pFiffInfo->pick_types(false, true, false, QStringList(), exclude);
+        m_vecPicks = m_pFiffInfo->pick_types(false, true, false, {}, exclude);
     } else if (sCoilType.contains("grad", Qt::CaseInsensitive)) {
         // Only pick every second gradiometer which are not marked as bad.
-        RowVectorXi picksTmp = m_pFiffInfo->pick_types(QString("grad"), false, false);
+        RowVectorXi picksTmp = m_pFiffInfo->pick_types("grad", false, false);
         m_vecPicks.resize(0);
 
         for (int i = 0; i < picksTmp.cols() - 1; i += 2) {
-            if (!m_pFiffInfo->bads.contains(m_pFiffInfo->ch_names.at(picksTmp(i)))) {
+            if (!UTILSLIB::contains(m_pFiffInfo->bads, m_pFiffInfo->ch_names.at(picksTmp(i)))) {
                 m_vecPicks.conservativeResize(m_vecPicks.cols() + 1);
                 m_vecPicks(m_vecPicks.cols() - 1) = picksTmp(i);
             }
         }
     } else if (sCoilType.contains("mag", Qt::CaseInsensitive)) {
-        m_vecPicks = m_pFiffInfo->pick_types(QString("mag"), false, false, QStringList(), exclude);
+        m_vecPicks = m_pFiffInfo->pick_types("mag", false, false, {}, exclude);
     }
 
     // Set sampling frequency so that the spectrum resolution is updated

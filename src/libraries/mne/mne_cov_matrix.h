@@ -26,6 +26,9 @@
 
 #include "mne_global.h"
 
+#include <string>
+#include <vector>
+
 //=============================================================================================================
 // EIGEN INCLUDES
 //=============================================================================================================
@@ -104,7 +107,7 @@ public:
      * @param[in] p_cov_diag    Diagonal data (may be empty).
      * @param[in] p_cov_sparse  Sparse covariance data (may be nullptr).
      */
-    MNECovMatrix(int p_kind, int p_ncov, const QStringList& p_names, const Eigen::VectorXd& p_cov, const Eigen::VectorXd& p_cov_diag, FIFFLIB::FiffSparseMatrix* p_cov_sparse);
+    MNECovMatrix(int p_kind, int p_ncov, const StringList& p_names, const Eigen::VectorXd& p_cov, const Eigen::VectorXd& p_cov_diag, FIFFLIB::FiffSparseMatrix* p_cov_sparse);
 
     //=========================================================================================================
     /**
@@ -134,7 +137,7 @@ public:
      */
     static std::unique_ptr<MNECovMatrix> create_dense(int kind,
                                                       int ncov,
-                                                      const QStringList& names,
+                                                      const StringList& names,
                                                       const Eigen::VectorXd& cov)
     {
         return std::unique_ptr<MNECovMatrix>(new MNECovMatrix(kind, ncov, names, cov, Eigen::VectorXd(), nullptr));
@@ -153,7 +156,7 @@ public:
      */
     static std::unique_ptr<MNECovMatrix> create_diag(int kind,
                                                      int ncov,
-                                                     const QStringList& names,
+                                                     const StringList& names,
                                                      const Eigen::VectorXd& cov_diag)
     {
         return std::unique_ptr<MNECovMatrix>(new MNECovMatrix(kind, ncov, names, Eigen::VectorXd(), cov_diag, nullptr));
@@ -172,7 +175,7 @@ public:
      */
     static std::unique_ptr<MNECovMatrix> create_sparse(int kind,
                                                        int ncov,
-                                                       const QStringList& names,
+                                                       const StringList& names,
                                                        FIFFLIB::FiffSparseMatrix* cov_sparse)
     {
         return std::unique_ptr<MNECovMatrix>(new MNECovMatrix(kind, ncov, names, Eigen::VectorXd(), Eigen::VectorXd(), cov_sparse));
@@ -192,7 +195,7 @@ public:
      */
     static std::unique_ptr<MNECovMatrix> create(int kind,
                                                 int ncov,
-                                                const QStringList& names,
+                                                const StringList& names,
                                                 const Eigen::VectorXd& cov,
                                                 const Eigen::VectorXd& cov_diag)
     {
@@ -326,7 +329,7 @@ public:
      *
      * @return A new covariance matrix with only the selected channels, or nullptr on error.
      */
-    std::unique_ptr<MNECovMatrix> pick_chs_omit(const QStringList& new_names,
+    std::unique_ptr<MNECovMatrix> pick_chs_omit(const StringList& new_names,
                                                 int new_ncov,
                                                 int omit_meg_eeg,
                                                 const QList<FIFFLIB::FiffChInfo>& chs) const;
@@ -336,7 +339,7 @@ public:
     int nfree;                                                                   /**< Number of degrees of freedom used in estimation. */
     int nproj;                                                                   /**< Number of dimensions projected out. */
     int nzero;                                                                   /**< Number of zero or small eigenvalues. */
-    QStringList names;                                                           /**< Channel names (optional). */
+    StringList names;                                                            /**< Channel names (optional). */
     Eigen::VectorXd cov;                                                         /**< Packed lower-triangle covariance data (ncov*(ncov+1)/2 elements). */
     Eigen::VectorXd cov_diag;                                                    /**< Diagonal covariance data (ncov elements). */
     std::unique_ptr<FIFFLIB::FiffSparseMatrix> cov_sparse;                       /**< Sparse covariance matrix (note: data are floats). */
@@ -346,7 +349,7 @@ public:
     std::unique_ptr<MNEProjOp> proj;                                             /**< The projection operator active when this matrix was computed. */
     std::unique_ptr<MNESssData> sss;                                             /**< SSS data from the associated raw data file. */
     Eigen::VectorXi ch_class;                                                    /**< Per-channel type classification for regularization (MEG grad, MEG mag, EEG). */
-    QStringList bads;                                                            /**< Channel names designated bad during computation. */
+    StringList bads;                                                             /**< Channel names designated bad during computation. */
     int nbad;                                                                    /**< Number of bad channels. */
 };
 

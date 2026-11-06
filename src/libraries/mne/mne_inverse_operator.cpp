@@ -25,6 +25,7 @@
 //=============================================================================================================
 
 #include "mne_inverse_operator.h"
+#include <utils/string_utils.h>
 #include <fs/fs_label.h>
 #include <math/linalg.h>
 
@@ -270,13 +271,13 @@ bool MNEInverseOperator::assemble_kernel(const FsLabel& label,
 
 bool MNEInverseOperator::check_ch_names(const FiffInfo& measInfo) const
 {
-    QStringList inv_ch_names = this->eigen_fields->col_names;
+    StringList inv_ch_names = this->eigen_fields->col_names;
 
     bool t_bContains = true;
     if (this->eigen_fields->col_names.size() != this->noise_cov->names.size())
         t_bContains = false;
     else {
-        for (qint32 i = 0; i < this->noise_cov->names.size(); ++i) {
+        for (qint32 i = 0; i < static_cast<int>(this->noise_cov->names.size()); ++i) {
             if (inv_ch_names[i] != this->noise_cov->names[i]) {
                 t_bContains = false;
                 break;
@@ -289,12 +290,12 @@ bool MNEInverseOperator::check_ch_names(const FiffInfo& measInfo) const
         return false;
     }
 
-    QStringList data_ch_names = measInfo.ch_names;
+    StringList data_ch_names = measInfo.ch_names;
 
-    QStringList missing_ch_names;
-    for (qint32 i = 0; i < inv_ch_names.size(); ++i)
-        if (!data_ch_names.contains(inv_ch_names[i]))
-            missing_ch_names.append(inv_ch_names[i]);
+    StringList missing_ch_names;
+    for (qint32 i = 0; i < static_cast<int>(inv_ch_names.size()); ++i)
+        if (!UTILSLIB::contains(data_ch_names, inv_ch_names[i]))
+            missing_ch_names.push_back(inv_ch_names[i]);
 
     qint32 n_missing = missing_ch_names.size();
 
@@ -696,7 +697,7 @@ MNEInverseOperator MNEInverseOperator::make_inverse_operator(const FiffInfo& inf
     Linalg::sort<double>(p_sing, t_U);
     FiffNamedMatrix::SDPtr p_eigen_fields = FiffNamedMatrix::SDPtr(new FiffNamedMatrix(svd.matrixU().cols(),
                                                                                        svd.matrixU().rows(),
-                                                                                       defaultQStringList,
+                                                                                       {},
                                                                                        gain_info.ch_names,
                                                                                        t_U.transpose()));
 
@@ -705,8 +706,8 @@ MNEInverseOperator MNEInverseOperator::make_inverse_operator(const FiffInfo& inf
     Linalg::sort<double>(p_sing, t_V);
     FiffNamedMatrix::SDPtr p_eigen_leads = FiffNamedMatrix::SDPtr(new FiffNamedMatrix(svd.matrixV().rows(),
                                                                                       svd.matrixV().cols(),
-                                                                                      defaultQStringList,
-                                                                                      defaultQStringList,
+                                                                                      {},
+                                                                                      {},
                                                                                       t_V));
     qInfo("\tlargest singular value = %f\n", p_sing.maxCoeff());
     qInfo("\tscaling factor to adjust the trace = %f\n", trace_GRGT);
@@ -720,7 +721,7 @@ MNEInverseOperator MNEInverseOperator::make_inverse_operator(const FiffInfo& inf
     RowVectorXd ch_idx(info.chs.size());
     qint32 count = 0;
     for (qint32 i = 0; i < info.chs.size(); ++i) {
-        if (gain_info.ch_names.contains(info.chs[i].ch_name)) {
+        if (UTILSLIB::contains(gain_info.ch_names, info.chs[i].ch_name)) {
             ch_idx[count] = i;
             ++count;
         }
@@ -728,7 +729,7 @@ MNEInverseOperator MNEInverseOperator::make_inverse_operator(const FiffInfo& inf
     ch_idx.conservativeResize(count);
 
     for (qint32 i = 0; i < ch_idx.size(); ++i) {
-        QString ch_type = info.channel_type(ch_idx[i]);
+        const std::string ch_type = info.channel_type(ch_idx[i]);
         if (ch_type == "eeg")
             has_eeg = true;
         if ((ch_type == "mag") || (ch_type == "grad"))

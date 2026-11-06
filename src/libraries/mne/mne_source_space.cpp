@@ -1733,7 +1733,7 @@ int MNESourceSpace::read_source_spaces(const QString& name, std::vector<std::uni
             new_space->id = *t_pTag->toInt();
         }
         if (node->find_tag(stream, FIFF_SUBJ_HIS_ID, t_pTag)) {
-            new_space->subject = t_pTag->toString();
+            new_space->subject = QString::fromStdString(t_pTag->toString());
         }
         if (node->find_tag(stream, FIFF_MNE_SOURCE_SPACE_TYPE, t_pTag)) {
             new_space->type = *t_pTag->toInt();
@@ -1908,14 +1908,14 @@ int MNESourceSpace::read_source_spaces(const QString& name, std::vector<std::uni
                 if (mris.size() == 0) { /* The old way */
                     new_space->MRI_surf_RAS_RAS_t = FiffCoordTrans(FiffCoordTrans::readTransformFromNode(stream, node, FIFFV_MNE_COORD_SURFACE_RAS, FIFFV_MNE_COORD_RAS));
                     if (node->find_tag(stream, FIFF_MNE_SOURCE_SPACE_MRI_FILE, t_pTag)) {
-                        new_space->MRI_volume = t_pTag->toString();
+                        new_space->MRI_volume = QString::fromStdString(t_pTag->toString());
                     }
                     if (node->find_tag(stream, FIFF_MNE_SOURCE_SPACE_INTERPOLATOR, t_pTag)) {
                         new_space->interpolator = std::move(*FiffSparseMatrix::fiff_get_float_sparse_matrix(t_pTag));
                     }
                 } else {
                     if (mris[0]->find_tag(stream, FIFF_MNE_FILE_NAME, t_pTag)) {
-                        new_space->MRI_volume = t_pTag->toString();
+                        new_space->MRI_volume = QString::fromStdString(t_pTag->toString());
                     }
                     new_space->MRI_surf_RAS_RAS_t = FiffCoordTrans(FiffCoordTrans::readTransformFromNode(stream, mris[0], FIFFV_MNE_COORD_SURFACE_RAS, FIFFV_MNE_COORD_RAS));
                     new_space->MRI_voxel_surf_RAS_t = FiffCoordTrans(FiffCoordTrans::readTransformFromNode(stream, mris[0], FIFFV_MNE_COORD_MRI_VOXEL, FIFFV_MNE_COORD_SURFACE_RAS));
@@ -2167,7 +2167,7 @@ int MNESourceSpace::writeVolumeInfo(FiffStream::SPtr& stream, bool selected_only
                 stream->write_coord_trans(*MRI_surf_RAS_RAS_t);
             if (MRI_voxel_surf_RAS_t && !MRI_voxel_surf_RAS_t->isEmpty())
                 stream->write_coord_trans(*MRI_voxel_surf_RAS_t);
-            stream->write_string(FIFF_MNE_FILE_NAME, MRI_volume);
+            stream->write_string(FIFF_MNE_FILE_NAME, MRI_volume.toStdString());
             if (interpolator)
                 stream->write_float_sparse_rcs(FIFF_MNE_SOURCE_SPACE_INTERPOLATOR, interpolator->eigen());
             if (MRI_vol_dims[0] > 0 && MRI_vol_dims[1] > 0 && MRI_vol_dims[2] > 0) {
@@ -2179,7 +2179,7 @@ int MNESourceSpace::writeVolumeInfo(FiffStream::SPtr& stream, bool selected_only
         }
     } else {
         if (interpolator && !MRI_volume.isEmpty()) {
-            stream->write_string(FIFF_MNE_SOURCE_SPACE_MRI_FILE, MRI_volume);
+            stream->write_string(FIFF_MNE_SOURCE_SPACE_MRI_FILE, MRI_volume.toStdString());
             qCritical("Cannot write the interpolator for selection yet");
             return FAIL;
         }
@@ -2206,7 +2206,7 @@ int MNESourceSpace::writeToStream(FiffStream::SPtr& stream, bool selected_only) 
         stream->write_int(FIFF_MNE_SOURCE_SPACE_ID, &id);
     if (!subject.isEmpty() && subject.size() > 0) {
         QString subj(subject);
-        stream->write_string(FIFF_SUBJ_HIS_ID, subj);
+        stream->write_string(FIFF_SUBJ_HIS_ID, subj.toStdString());
     }
 
     stream->write_int(FIFF_MNE_COORD_FRAME, &coord_frame);

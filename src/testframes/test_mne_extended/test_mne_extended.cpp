@@ -49,16 +49,16 @@ private slots:
         MNENamedMatrix m;
         QCOMPARE(m.nrow, 0);
         QCOMPARE(m.ncol, 0);
-        QVERIFY(m.rowlist.isEmpty());
-        QVERIFY(m.collist.isEmpty());
+        QVERIFY(m.rowlist.empty());
+        QVERIFY(m.collist.empty());
         QCOMPARE(m.data.rows(), 0);
         QCOMPARE(m.data.cols(), 0);
     }
 
     void mneNamedMatrix_build()
     {
-        QStringList rows = {"r0", "r1"};
-        QStringList cols = {"c0", "c1", "c2"};
+        StringList rows = {"r0", "r1"};
+        StringList cols = {"c0", "c1", "c2"};
         MatrixXf data(2, 3);
         data << 1, 2, 3, 4, 5, 6;
 
@@ -73,8 +73,8 @@ private slots:
 
     void mneNamedMatrix_copyConstruct()
     {
-        QStringList rows = {"r0", "r1"};
-        QStringList cols = {"c0", "c1"};
+        StringList rows = {"r0", "r1"};
+        StringList cols = {"c0", "c1"};
         MatrixXf data(2, 2);
         data << 1, 2, 3, 4;
 
@@ -90,8 +90,8 @@ private slots:
 
     void mneNamedMatrix_pickRowsAndCols()
     {
-        QStringList rows = {"r0", "r1", "r2"};
-        QStringList cols = {"c0", "c1", "c2", "c3"};
+        StringList rows = {"r0", "r1", "r2"};
+        StringList cols = {"c0", "c1", "c2", "c3"};
         MatrixXf data(3, 4);
         data << 1, 2, 3, 4,
             5, 6, 7, 8,
@@ -100,8 +100,8 @@ private slots:
         auto mat = MNENamedMatrix::build(3, 4, rows, cols, data);
 
         // Pick row "r1" and cols "c1", "c3"
-        QStringList pickRows = {"r1"};
-        QStringList pickCols = {"c1", "c3"};
+        StringList pickRows = {"r1"};
+        StringList pickCols = {"c1", "c3"};
         auto sub = mat->pick(pickRows, 1, pickCols, 2);
         QVERIFY(sub != nullptr);
         QCOMPARE(sub->nrow, 1);
@@ -115,16 +115,16 @@ private slots:
 
     void mneNamedMatrix_pickAllRows()
     {
-        QStringList rows = {"r0", "r1"};
-        QStringList cols = {"c0", "c1"};
+        StringList rows = {"r0", "r1"};
+        StringList cols = {"c0", "c1"};
         MatrixXf data(2, 2);
         data << 1, 2, 3, 4;
 
         auto mat = MNENamedMatrix::build(2, 2, rows, cols, data);
 
         // Empty pick list = keep all
-        QStringList emptyPick;
-        QStringList pickCols = {"c0"};
+        StringList emptyPick;
+        StringList pickCols = {"c0"};
         auto sub = mat->pick(emptyPick, 2, pickCols, 1);
         QVERIFY(sub != nullptr);
         QCOMPARE(sub->nrow, 2);
@@ -133,14 +133,14 @@ private slots:
 
     void mneNamedMatrix_pickInvalidName()
     {
-        QStringList rows = {"r0"};
-        QStringList cols = {"c0"};
+        StringList rows = {"r0"};
+        StringList cols = {"c0"};
         MatrixXf data(1, 1);
         data << 42;
 
         auto mat = MNENamedMatrix::build(1, 1, rows, cols, data);
-        QStringList pickRows = {"nonexistent"};
-        auto sub = mat->pick(pickRows, 1, QStringList(), 1);
+        StringList pickRows = {"nonexistent"};
+        auto sub = mat->pick(pickRows, 1, {}, 1);
         // Should return nullptr when name not found
         QVERIFY(sub == nullptr);
     }
@@ -313,7 +313,7 @@ private slots:
         ch.chpos.coil_type = FIFFV_COIL_VV_MAG_T3;
         ch.unit = FIFF_UNIT_T;
         info.chs.append(ch);
-        info.ch_names.append("MEG0001");
+        info.ch_names.push_back("MEG0001");
         info.nchan = 1;
 
         // Data well within threshold (peak-to-peak = 0 since all values the same)
@@ -346,7 +346,7 @@ private slots:
         ch.chpos.coil_type = FIFFV_COIL_VV_MAG_T3;
         ch.unit = FIFF_UNIT_T;
         info.chs.append(ch);
-        info.ch_names.append("MEG0001");
+        info.ch_names.push_back("MEG0001");
         info.nchan = 1;
         info.sfreq = 100.0;
 

@@ -104,7 +104,7 @@ Vector3f truthMoment(int k)
 /**
  * Writes the five-sample synthetic evoked file and returns false on failure.
  */
-bool writeSyntheticEvoked(const QString& sourceFile, const QString& outFile, const QStringList& chNames, const MatrixXd& data)
+bool writeSyntheticEvoked(const QString& sourceFile, const QString& outFile, const StringList& chNames, const MatrixXd& data)
 {
     QFile file(sourceFile);
     FiffEvokedSet source(file);
@@ -134,7 +134,7 @@ bool writeSyntheticEvoked(const QString& sourceFile, const QString& outFile, con
 /**
  * Writes a raw file whose MEG channels hold @p data (one column per sample).
  */
-bool writeSyntheticRaw(const QString& sourceFile, const QString& outFile, const QStringList& chNames, const MatrixXd& data)
+bool writeSyntheticRaw(const QString& sourceFile, const QString& outFile, const StringList& chNames, const MatrixXd& data)
 {
     QFile file(sourceFile);
     FiffRawData source(file);
@@ -200,7 +200,7 @@ private:
     std::unique_ptr<InvDipoleFitData> m_fitData;
     InvEcdSet m_rawFit;
     QTemporaryDir m_dir;
-    QStringList m_chNames;
+    StringList m_chNames;
     MatrixXf m_fields; /**< 305 x 3 projected fields of the true dipoles. */
     InvEcdSet m_fit;
 };
@@ -223,7 +223,7 @@ void TestInvDipoleFitPython::initTestCase()
     QCOMPARE(fwdData->nmeg, 305);
     QCOMPARE(fwdData->neeg, 0);
     fwdData->funcs = fwdData->sphere_funcs.get();
-    m_chNames = fwdData->ch_names.mid(0, fwdData->nmeg);
+    m_chNames = StringList(fwdData->ch_names.begin() + 0, fwdData->ch_names.begin() + 0 + fwdData->nmeg);
     m_fitData.reset(InvDipoleFitData::setup_dipole_fit_data(
         QString(), m_sampleAve, QString(), &r0, nullptr, false, QString(), QString(),
         5e-13f, 20e-15f, 0.2e-6f, 0.1f, 0.1f, 0.1f, false, projnames, true, false));
@@ -411,7 +411,7 @@ void TestInvDipoleFitPython::compensatedFieldMatches()
     Vector3f r0(0.0f, 0.0f, 0.04f);
     std::unique_ptr<InvDipoleFitData> fitData(InvDipoleFitData::setup_dipole_fit_data(
         QString(), meas, QString(), &r0, nullptr, false, QString(), QString(),
-        5e-13f, 20e-15f, 0.2e-6f, 0.1f, 0.1f, 0.1f, false, QStringList(), true, false));
+        5e-13f, 20e-15f, 0.2e-6f, 0.1f, 0.1f, 0.1f, false, {}, true, false));
     QVERIFY(fitData);
     QCOMPARE(fitData->nmeg, 7);
     MatrixXf g(7, 3);
@@ -923,12 +923,12 @@ void TestInvDipoleFitPython::selectsNoiseCov()
     QFETCH(bool, ok);
 
     constexpr int kN = 25;
-    QStringList names;
+    StringList names;
     MNEMeasData meas;
     for (int k = 0; k < kN; ++k) {
-        names << QStringLiteral("MEG%1").arg(k, 4, 10, QChar('0'));
+        names.push_back(QStringLiteral("MEG%1").arg(k, 4, 10, QChar(u'0')).toStdString());
         FiffChInfo ch;
-        ch.ch_name = names.last();
+        ch.ch_name = names.back();
         meas.chs << ch;
     }
     meas.nchan = kN;

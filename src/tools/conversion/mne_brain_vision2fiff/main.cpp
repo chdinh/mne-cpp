@@ -397,12 +397,12 @@ int main(int argc, char* argv[])
 
     for (int c = 0; c < nChan; ++c) {
         FiffChInfo ch;
-        ch.ch_name = hdr.channels[c].name;
+        ch.ch_name = hdr.channels[c].name.toStdString();
         ch.scanNo = c + 1;
         ch.logNo = c + 1;
 
         // Classify channel type from name
-        QString nameUp = ch.ch_name.toUpper();
+        QString nameUp = QString::fromStdString(ch.ch_name).toUpper();
         if (nameUp.startsWith("EOG") || nameUp.contains("EOG")) {
             ch.kind = FIFFV_EOG_CH;
             ch.unit = FIFF_UNIT_V;
@@ -428,7 +428,7 @@ int main(int argc, char* argv[])
         ch.cal = 1.0;
         ch.range = 1.0;
         info.chs.append(ch);
-        info.ch_names.append(ch.ch_name);
+        info.ch_names.push_back(ch.ch_name);
     }
 
     // Write FIFF

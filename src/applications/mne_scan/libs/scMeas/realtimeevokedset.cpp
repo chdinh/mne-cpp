@@ -66,7 +66,7 @@ void RealTimeEvokedSet::init(FiffInfo::SPtr p_fiffInfo)
         m_qListChColors.append(QColor(rand() % 256, rand() % 256, rand() % 256));
 
         RealTimeSampleArrayChInfo initChInfo;
-        initChInfo.setChannelName(p_fiffInfo->chs[i].ch_name);
+        initChInfo.setChannelName(QString::fromStdString(p_fiffInfo->chs[i].ch_name));
 
         // set channel Unit
         initChInfo.setUnit(p_fiffInfo->chs[i].unit);

@@ -116,7 +116,7 @@ FwdCoil::UPtr FwdCoil::create_eeg_el(const FiffChInfo& ch, const FiffCoordTrans&
     else
         res = std::make_unique<FwdCoil>(2); /* Reference electrode present */
 
-    res->chname = ch.ch_name;
+    res->chname = QString::fromStdString(ch.ch_name);
     res->desc = "EEG electrode";
     res->coil_class = FWD_COILC_EEG;
     res->accuracy = FWD_COIL_ACCURACY_NORMAL;

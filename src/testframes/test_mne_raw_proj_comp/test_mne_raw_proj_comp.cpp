@@ -220,7 +220,7 @@ void TestMneRawProjComp::namedVector_defaultConstruction()
 {
     MNENamedVector nv;
     QCOMPARE(nv.nvec, 0);
-    QVERIFY(nv.names.isEmpty());
+    QVERIFY(nv.names.empty());
     QCOMPARE(nv.data.size(), (Index)0);
 }
 
@@ -228,12 +228,16 @@ void TestMneRawProjComp::namedVector_pickByName()
 {
     MNENamedVector nv;
     nv.nvec = 4;
-    nv.names << "MEG001" << "MEG002" << "EEG001" << "EEG002";
+    nv.names.push_back("MEG001");
+    nv.names.push_back("MEG002");
+    nv.names.push_back("EEG001");
+    nv.names.push_back("EEG002");
     nv.data.resize(4);
     nv.data << 1.0f, 2.0f, 3.0f, 4.0f;
 
-    QStringList pickNames;
-    pickNames << "MEG001" << "EEG002";
+    StringList pickNames;
+    pickNames.push_back("MEG001");
+    pickNames.push_back("EEG002");
     VectorXf result(2);
     int status = nv.pick(pickNames, 2, false, result);
     QCOMPARE(status, 0);
@@ -245,12 +249,14 @@ void TestMneRawProjComp::namedVector_pickSubset()
 {
     MNENamedVector nv;
     nv.nvec = 3;
-    nv.names << "ch1" << "ch2" << "ch3";
+    nv.names.push_back("ch1");
+    nv.names.push_back("ch2");
+    nv.names.push_back("ch3");
     nv.data.resize(3);
     nv.data << 10.0f, 20.0f, 30.0f;
 
-    QStringList pickNames;
-    pickNames << "ch2";
+    StringList pickNames;
+    pickNames.push_back("ch2");
     VectorXf result(1);
     int status = nv.pick(pickNames, 1, false, result);
     QCOMPARE(status, 0);
@@ -261,12 +267,14 @@ void TestMneRawProjComp::namedVector_pickRequireAllFails()
 {
     MNENamedVector nv;
     nv.nvec = 2;
-    nv.names << "ch1" << "ch2";
+    nv.names.push_back("ch1");
+    nv.names.push_back("ch2");
     nv.data.resize(2);
     nv.data << 1.0f, 2.0f;
 
-    QStringList pickNames;
-    pickNames << "ch1" << "MISSING";
+    StringList pickNames;
+    pickNames.push_back("ch1");
+    pickNames.push_back("MISSING");
     VectorXf result(2);
     // require_all=true should fail when a name is missing
     int status = nv.pick(pickNames, 2, true, result);
@@ -464,7 +472,7 @@ void TestMneRawProjComp::derivSet_textFifAndValidation()
     QList<FiffChInfo> chs;
     for (const auto& [name, kind] : QList<QPair<QString, int>>{{"EEG001", FIFFV_EEG_CH}, {"EEG002", FIFFV_EEG_CH}, {"EOG061", FIFFV_EOG_CH}}) {
         FiffChInfo ch;
-        ch.ch_name = name;
+        ch.ch_name = name.toStdString();
         ch.kind = kind;
         ch.unit = FIFF_UNIT_V;
         chs << ch;
@@ -504,8 +512,10 @@ void TestMneRawProjComp::projOp_addItemAndDuplicate()
     auto vecs = std::make_unique<MNENamedMatrix>();
     vecs->nrow = 1;
     vecs->ncol = 3;
-    vecs->rowlist << "proj1";
-    vecs->collist << "ch1" << "ch2" << "ch3";
+    vecs->rowlist.push_back("proj1");
+    vecs->collist.push_back("ch1");
+    vecs->collist.push_back("ch2");
+    vecs->collist.push_back("ch3");
     vecs->data = MatrixXf(1, 3);
     vecs->data << 1.0f / std::sqrt(3.0f), 1.0f / std::sqrt(3.0f), 1.0f / std::sqrt(3.0f);
 
@@ -584,9 +594,9 @@ void TestMneRawProjComp::projOp_assignChannelsAndMake()
     QFile file(rawPath());
     FiffRawData rawData(file);
 
-    QStringList chNames;
+    StringList chNames;
     for (const auto& ch : rawData.info.chs) {
-        chNames << ch.ch_name;
+        chNames.push_back(ch.ch_name);
     }
 
     int assignResult = proj->assign_channels(chNames, chNames.size());
@@ -627,16 +637,20 @@ void TestMneRawProjComp::projOp_projectVector()
     auto vecs = std::make_unique<MNENamedMatrix>();
     vecs->nrow = 1;
     vecs->ncol = 3;
-    vecs->rowlist << "avg";
-    vecs->collist << "ch0" << "ch1" << "ch2";
+    vecs->rowlist.push_back("avg");
+    vecs->collist.push_back("ch0");
+    vecs->collist.push_back("ch1");
+    vecs->collist.push_back("ch2");
     vecs->data = MatrixXf(1, 3);
     float val = 1.0f / std::sqrt(3.0f);
     vecs->data << val, val, val;
 
     proj.add_item(vecs.get(), FIFFV_MNE_PROJ_ITEM_EEG_AVREF, "avg ref");
 
-    QStringList names;
-    names << "ch0" << "ch1" << "ch2";
+    StringList names;
+    names.push_back("ch0");
+    names.push_back("ch1");
+    names.push_back("ch2");
     proj.assign_channels(names, 3);
     proj.make_proj();
 
@@ -669,16 +683,18 @@ void TestMneRawProjComp::projOp_combine()
     auto vecs1 = std::make_unique<MNENamedMatrix>();
     vecs1->nrow = 1;
     vecs1->ncol = 2;
-    vecs1->rowlist << "p1";
-    vecs1->collist << "ch0" << "ch1";
+    vecs1->rowlist.push_back("p1");
+    vecs1->collist.push_back("ch0");
+    vecs1->collist.push_back("ch1");
     vecs1->data = MatrixXf::Ones(1, 2) / std::sqrt(2.0f);
     proj1.add_item(vecs1.get(), 1, "proj1");
 
     auto vecs2 = std::make_unique<MNENamedMatrix>();
     vecs2->nrow = 1;
     vecs2->ncol = 2;
-    vecs2->rowlist << "p2";
-    vecs2->collist << "ch0" << "ch1";
+    vecs2->rowlist.push_back("p2");
+    vecs2->collist.push_back("ch0");
+    vecs2->collist.push_back("ch1");
     vecs2->data = MatrixXf(1, 2);
     vecs2->data << 1.0f / std::sqrt(2.0f), -1.0f / std::sqrt(2.0f);
     proj2.add_item(vecs2.get(), 2, "proj2");
@@ -789,7 +805,7 @@ void TestMneRawProjComp::rawData_openFile()
     QVERIFY(raw->info != nullptr);
     QVERIFY(raw->info->nchan > 0);
     QVERIFY(!raw->bufs.empty());
-    QVERIFY(!raw->ch_names.isEmpty());
+    QVERIFY(!raw->ch_names.empty());
 }
 
 void TestMneRawProjComp::rawData_openFileComp()
@@ -817,7 +833,7 @@ void TestMneRawProjComp::rawData_members()
     QVERIFY(raw->nsamp > 0);
 
     // Channel info should be populated
-    QVERIFY(raw->ch_names.size() == raw->info->nchan);
+    QVERIFY(static_cast<int>(raw->ch_names.size()) == raw->info->nchan);
 
     // SSS and projection may or may not be present
     if (raw->sss) {
@@ -1095,7 +1111,7 @@ void TestMneRawProjComp::measData_readFromFile()
     // Read evoked data from the ave file
     std::unique_ptr<MNEMeasData> md(
         MNEMeasData::mne_read_meas_data(avePath(), 0, nullptr, nullptr,
-                                        QStringList(), 0));
+                                        {}, 0));
     if (md) {
         QVERIFY(md->nchan > 0);
         QVERIFY(md->sfreq > 0);
@@ -1108,7 +1124,7 @@ void TestMneRawProjComp::measData_adjustBaselines()
 {
     std::unique_ptr<MNEMeasData> md(
         MNEMeasData::mne_read_meas_data(avePath(), 0, nullptr, nullptr,
-                                        QStringList(), 0));
+                                        {}, 0));
     if (md && md->current) {
         // Store original data
         MatrixXf origData = md->current->data;

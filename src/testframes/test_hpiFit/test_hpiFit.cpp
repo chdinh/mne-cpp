@@ -18,6 +18,7 @@
 
 
 #include <iostream>
+#include <utils/string_utils.h>
 #include <vector>
 #include <math.h>
 
@@ -141,8 +142,8 @@ void TestHpiFit::initTestCase()
     infoTemp.make_projector(m_matProjectors);
 
     //set columns of matrix to zero depending on bad channels indexes
-    for (qint32 j = 0; j < infoTemp.bads.size(); ++j) {
-        m_matProjectors.col(infoTemp.ch_names.indexOf(infoTemp.bads.at(j))).setZero();
+    for (qint32 j = 0; j < static_cast<int>(infoTemp.bads.size()); ++j) {
+        m_matProjectors.col(UTILSLIB::indexOf(infoTemp.ch_names, infoTemp.bads.at(j))).setZero();
     }
 }
 
@@ -248,7 +249,8 @@ void TestHpiFit::testFit_dimensions_dataAndSensors()
     InvHpiDataUpdater hpiDataUpdater = InvHpiDataUpdater(m_pFiffInfo);
     InvHpiFit HPI = InvHpiFit(hpiDataUpdater.getSensors());
 
-    m_pFiffInfo->bads << "MEG0113" << "MEG0112";
+    m_pFiffInfo->bads.push_back("MEG0113");
+    m_pFiffInfo->bads.push_back("MEG0112");
     hpiDataUpdater.checkForUpdate(m_pFiffInfo);
 
     hpiDataUpdater.prepareDataAndProjectors(m_matData, m_matProjectors);
@@ -429,7 +431,8 @@ void TestHpiFit::testCheckForUpdate()
     InvHpiDataUpdater hpiDataUpdater = InvHpiDataUpdater(m_pFiffInfo);
     InvHpiFit HPI = InvHpiFit(hpiDataUpdater.getSensors());
 
-    m_pFiffInfo->bads << "MEG0113" << "MEG0112";
+    m_pFiffInfo->bads.push_back("MEG0113");
+    m_pFiffInfo->bads.push_back("MEG0112");
     hpiDataUpdater.checkForUpdate(m_pFiffInfo);
 
     HPI.checkForUpdate(hpiDataUpdater.getSensors());

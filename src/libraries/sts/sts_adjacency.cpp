@@ -108,7 +108,7 @@ SparseMatrix<int> StatsAdjacency::fromChannelPositions(const FiffInfo& info, con
         }
     } else {
         for (int i = 0; i < info.chs.size(); ++i) {
-            if (std::find(picks.begin(), picks.end(), info.chs[i].ch_name.toStdString()) != picks.end()) {
+            if (std::find(picks.begin(), picks.end(), info.chs[i].ch_name) != picks.end()) {
                 chIdx.push_back(i);
             }
         }

@@ -392,7 +392,7 @@ void TestFiffRawFormatsPython::mneRawDataNormalisesChannels()
 void TestFiffRawFormatsPython::measDataKeepsTrigger()
 {
     // data/trigger-ave.fif (make_trigger_evoked_fixture.py): STI 014 with cal 2 next to two EEG channels.
-    std::unique_ptr<MNEMeasData> meas(MNEMeasData::mne_read_meas_data(QStringLiteral(MNE_RAW_FORMATS_DATA_DIR "/trigger-ave.fif"), 1, nullptr, nullptr, QStringList(), 0));
+    std::unique_ptr<MNEMeasData> meas(MNEMeasData::mne_read_meas_data(QStringLiteral(MNE_RAW_FORMATS_DATA_DIR "/trigger-ave.fif"), 1, nullptr, nullptr, {}, 0));
     QVERIFY(meas);
     QCOMPARE(meas->nchan, 2);
     QCOMPARE(meas->sets.size(), std::size_t(1));

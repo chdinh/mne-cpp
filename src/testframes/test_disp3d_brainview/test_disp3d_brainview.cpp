@@ -19,6 +19,7 @@
 //=============================================================================================================
 
 #include <disp3D/view/brainview.h>
+#include <utils/string_utils.h>
 #include <disp3D/view/brainrenderer.h>
 #include <rhi/qrhi.h>
 #include <disp3D/renderable/polylineobject.h>
@@ -860,10 +861,10 @@ void TestDisp3dBrainView::rtSensorInterpolationMatWorker_basics()
     QCOMPARE(eegKey, QStringLiteral("bem_head"));
     QVERIFY(mapping && mapping->rows() == scalp.rows() && mapping->cols() == pick.size());
     // The file's own bad channels (EEG 053) are left out, as in SensorFieldMapper and MNE-Python
-    QVERIFY(!evoked.info.bads.isEmpty());
+    QVERIFY(!evoked.info.bads.empty());
     for (int k : pick) {
         QCOMPARE(evoked.info.chs[k].kind, FIFFV_EEG_CH);
-        QVERIFY(!evoked.info.bads.contains(evoked.info.chs[k].ch_name));
+        QVERIFY(!UTILSLIB::contains(evoked.info.bads, evoked.info.chs[k].ch_name));
     }
 
     // Same mapping as FwdFieldMap with the origin fitted to the head shape (MNE-Python's make_field_map origin="auto")
@@ -878,7 +879,7 @@ void TestDisp3dBrainView::rtSensorInterpolationMatWorker_basics()
     const auto nEeg = pick.size();
 
     // Channels passed as bad are left out
-    const QString firstEeg = evoked.info.chs[pick.first()].ch_name;
+    const QString firstEeg = QString::fromStdString(evoked.info.chs[pick.first()].ch_name);
     worker.setBadChannels({firstEeg});
     worker.computeMapping();
     QCOMPARE(eegCount, 2);

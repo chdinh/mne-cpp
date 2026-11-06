@@ -21,6 +21,7 @@
 //=============================================================================================================
 
 #include <inv/beamformer/inv_beamformer.h>
+#include <utils/string_utils.h>
 #include <inv/beamformer/inv_dics.h>
 #include <inv/beamformer/inv_lcmv.h>
 #include <inv/inv_source_estimate.h>
@@ -103,10 +104,10 @@ int main(int argc, char* argv[])
     // The 305 good MEG channels; the forward names them without the space ("MEG0113").
     QFile aveFile(data + "/MEG/sample/sample_audvis-ave.fif");
     const FiffEvoked sample(aveFile, 0);
-    QStringList good;
-    for (const QString& name : sample.info.ch_names) {
-        if (name.startsWith("MEG") && !sample.info.bads.contains(name))
-            good << name;
+    StringList good;
+    for (const std::string& name : sample.info.ch_names) {
+        if (name.starts_with("MEG") && !UTILSLIB::contains(sample.info.bads, name))
+            good.push_back(name);
     }
     FsLabel v1;
     FsLabel::read(data + "/subjects/sample/label/lh.V1.label", v1);

@@ -701,7 +701,7 @@ void TestMneAnonymize::verifyTags(FIFFLIB::FiffStream::SPtr& stream,
             case FIFF_PROJ_COMMENT: {
                 if (testArg == "BruteMode") {
                     QString defaultComment("mne_anonymize");
-                    QString intAnonProjComment(pTag->toString());
+                    QString intAnonProjComment(QString::fromStdString(pTag->toString()));
                     QVERIFY(intAnonProjComment == defaultComment);
                 }
                 break;

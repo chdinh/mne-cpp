@@ -156,13 +156,11 @@ void TestFiffRWR::initTestCase()
     bool bWantMeg = true;
     bool bWantEeg = false;
     bool bWantStim = false;
-    QStringList include;
-    include << "STI 014";
+    StringList include{"STI 014"};
 
     MatrixXi vPicks = rawFirstInRaw.info.pick_types(bWantMeg, bWantEeg, bWantStim, include, rawFirstInRaw.info.bads); // prefer member function
     if (vPicks.cols() == 0) {
-        include.clear();
-        include << "STI101" << "STI201" << "STI301";
+        include = {"STI101", "STI201", "STI301"};
         vPicks = rawFirstInRaw.info.pick_types(bWantMeg, bWantEeg, bWantStim, include, rawFirstInRaw.info.bads); // prefer member function
         if (vPicks.cols() == 0) {
             printf("channel list may need modification\n");
@@ -237,8 +235,7 @@ void TestFiffRWR::initTestCase()
 
     vPicks = rawSecondInRaw.info.pick_types(bWantMeg, bWantEeg, bWantStim, include, rawSecondInRaw.info.bads); // prefer member function
     if (vPicks.cols() == 0) {
-        include.clear();
-        include << "STI101" << "STI201" << "STI301";
+        include = {"STI101", "STI201", "STI301"};
         vPicks = rawSecondInRaw.info.pick_types(bWantMeg, bWantEeg, bWantStim, include, rawSecondInRaw.info.bads); // prefer member function
         if (vPicks.cols() == 0) {
             printf("channel list may need modification\n");

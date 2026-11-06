@@ -80,14 +80,14 @@ private:
             ch.scanNo = i + 1;
             ch.logNo = i + 1;
             ch.kind = kinds[i];
-            ch.ch_name = names[i];
+            ch.ch_name = names[i].toStdString();
             ch.range = 1.0f;
             ch.cal = 1.0f;
             ch.unit = kinds[i] == FIFFV_MEG_CH ? FIFF_UNIT_T : FIFF_UNIT_V;
             ch.unit_mul = 0;
             ch.coord_frame = 0;
             info.chs.append(ch);
-            info.ch_names.append(names[i]);
+            info.ch_names.push_back(names[i].toStdString());
         }
 
         return info;
@@ -172,7 +172,7 @@ private slots:
         data *= 1e-5;
         FiffInfo info;
         const QList<int> kinds{FIFFV_SEEG_CH, FIFFV_SEEG_CH, FIFFV_SEEG_CH, FIFFV_STIM_CH, FIFFV_EOG_CH, FIFFV_EOG_CH};
-        const QStringList names{"EEG1", "EEG2", "EEG3", "STI", "EOG1", "EOG2"};
+        const StringList names{"EEG1", "EEG2", "EEG3", "STI", "EOG1", "EOG2"};
         for (int i = 0; i < 6; ++i) {
             FiffChInfo ch;
             ch.kind = kinds[i];
@@ -181,7 +181,7 @@ private slots:
         }
         info.ch_names = names;
         info.nchan = 6;
-        info.bads = QStringList{"EEG3"};
+        info.bads = {"EEG3"};
 
         const MatrixXd original = data;
         EogRegression reg;
@@ -270,7 +270,7 @@ private slots:
         MatrixXd data = makeTestData();
 
         // Only specify EOG1 — regression should only use EOG1
-        QStringList eogNames = {"EOG1"};
+        StringList eogNames = {"EOG1"};
         EogRegression reg;
         reg.fit(data, info, eogNames);
 
@@ -354,14 +354,14 @@ private slots:
             ch.scanNo = i + 1;
             ch.logNo = i + 1;
             ch.kind = kinds[i];
-            ch.ch_name = names[i];
+            ch.ch_name = names[i].toStdString();
             ch.range = 1.0f;
             ch.cal = 1.0f;
             ch.unit = 107;
             ch.unit_mul = 0;
             ch.coord_frame = 0;
             info.chs.append(ch);
-            info.ch_names.append(names[i]);
+            info.ch_names.push_back(names[i].toStdString());
         }
 
         MatrixXd data = MatrixXd::Random(2, 50);

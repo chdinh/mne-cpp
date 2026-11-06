@@ -138,7 +138,7 @@ int main(int argc, char* argv[])
     if (t_Fwd.isEmpty())
         return 1;
 
-    QStringList ch_sel_names = t_Fwd.info.ch_names;
+    StringList ch_sel_names = t_Fwd.info.ch_names;
     FiffEvoked pickedEvoked = evoked.pick_channels(ch_sel_names);
 
     //

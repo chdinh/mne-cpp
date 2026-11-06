@@ -23,6 +23,9 @@
 //=============================================================================================================
 
 #include "fiff_proj.h"
+
+#include <set>
+#include <utils/string_utils.h>
 #include "fiff_raw_data.h"
 #include "fiff_evoked.h"
 #include "fiff_constants.h"
@@ -60,7 +63,7 @@ std::array<QList<int>, 3> pcaChannelGroups(const FiffInfo& info)
 {
     std::array<QList<int>, 3> groups;
     for (int k = 0; k < info.chs.size(); ++k) {
-        if (info.bads.contains(info.ch_names[k])) {
+        if (UTILSLIB::contains(info.bads, info.ch_names[k])) {
             continue;
         }
         if (info.chs[k].kind == FIFFV_MEG_CH) {
@@ -76,7 +79,7 @@ std::array<QList<int>, 3> pcaChannelGroups(const FiffInfo& info)
  * Unprojected PCA projectors of data (channels x samples) restricted to chIdx: the first nVec left
  * singular vectors, i.e. eigenvectors of the uncentred second moment, padded to all channels.
  */
-QList<FiffProj> pcaProjectors(const MatrixXd& data, const QList<int>& chIdx, const QStringList& chNames,
+QList<FiffProj> pcaProjectors(const MatrixXd& data, const QList<int>& chIdx, const StringList& chNames,
                               int nVec, const QStringList& descs)
 {
     QList<FiffProj> projs;
@@ -160,7 +163,7 @@ void FiffProj::activate_projs(QList<FiffProj>& p_qListFiffProj)
 
 //=============================================================================================================
 
-fiff_int_t FiffProj::make_projector(const QList<FiffProj>& projs, const QStringList& ch_names, MatrixXd& proj, const QStringList& bads, MatrixXd& U)
+fiff_int_t FiffProj::make_projector(const QList<FiffProj>& projs, const StringList& ch_names, MatrixXd& proj, const StringList& bads, MatrixXd& U)
 {
     fiff_int_t nchan = ch_names.size();
     if (nchan == 0) {
@@ -180,7 +183,7 @@ fiff_int_t FiffProj::make_projector(const QList<FiffProj>& projs, const QStringL
         return 0;
 
     fiff_int_t nvec = 0;
-    fiff_int_t k, l;
+    fiff_int_t k;
     for (k = 0; k < projs.size(); ++k) {
         if (projs[k].active) {
             ++nproj;
@@ -215,11 +218,8 @@ fiff_int_t FiffProj::make_projector(const QList<FiffProj>& projs, const QStringL
         if (projs[k].active) {
             FiffProj one = projs[k];
 
-            QMap<QString, int> uniqueMap;
-            for (l = 0; l < one.data->col_names.size(); ++l)
-                uniqueMap[one.data->col_names[l]] = 0;
-
-            if (one.data->col_names.size() != uniqueMap.keys().size()) {
+            const std::set<std::string> unique(one.data->col_names.begin(), one.data->col_names.end());
+            if (one.data->col_names.size() != unique.size()) {
                 qWarning("Channel name list in projection item %d contains duplicate items", k);
                 return 0;
             }
@@ -234,11 +234,11 @@ fiff_int_t FiffProj::make_projector(const QList<FiffProj>& projs, const QStringL
             vecSel.setConstant(-1);
             p = 0;
             for (c = 0; c < nchan; ++c) {
-                for (i = 0; i < one.data->col_names.size(); ++i) {
-                    if (QString::compare(ch_names.at(c), one.data->col_names[i]) == 0) {
+                for (i = 0; i < static_cast<int>(one.data->col_names.size()); ++i) {
+                    if (ch_names[c] == one.data->col_names[i]) {
                         isBad = false;
-                        for (j = 0; j < bads.size(); ++j) {
-                            if (QString::compare(ch_names.at(c), bads.at(j)) == 0) {
+                        for (j = 0; j < static_cast<int>(bads.size()); ++j) {
+                            if (ch_names[c] == bads[j]) {
                                 isBad = true;
                             }
                         }
@@ -355,7 +355,7 @@ QList<FiffProj> FiffProj::compute_from_raw(const FiffRawData& raw,
         // Simple peak-to-peak rejection
         bool ok = true;
         for (int c = 0; c < nchan && ok; ++c) {
-            if (raw.info.bads.contains(raw.info.ch_names[c]))
+            if (UTILSLIB::contains(raw.info.bads, raw.info.ch_names[c]))
                 continue;
             double pp = epochData.row(c).maxCoeff() - epochData.row(c).minCoeff();
             if (raw.info.chs[c].kind == FIFFV_MEG_CH) {

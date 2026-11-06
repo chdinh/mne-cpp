@@ -33,6 +33,7 @@
 //=============================================================================================================
 
 #include <mne/mne_cov_matrix.h>
+#include <utils/string_utils.h>
 #include <mne/mne_proj_op.h>
 
 #include <fiff/fiff_cov.h>
@@ -101,7 +102,7 @@ private:
     QString m_covPath;
     QTemporaryDir m_dir;
     FiffEvoked m_evoked;
-    QStringList m_names;
+    StringList m_names;
     VectorXf m_raw;
     VectorXf m_projected;
     std::unique_ptr<MNEProjOp> m_proj;
@@ -118,9 +119,9 @@ void TestMneCovPython::initTestCase()
     QVERIFY(m_dir.isValid());
 
     FiffEvoked evoked(aveFile, 0, QPair<float, float>(-1.0f, -1.0f), false);
-    for (const QString& name : evoked.info.ch_names) {
-        if (name.startsWith("MEG") && !evoked.info.bads.contains(name))
-            m_names << name;
+    for (const std::string& name : evoked.info.ch_names) {
+        if (name.starts_with("MEG") && !UTILSLIB::contains(evoked.info.bads, name))
+            m_names.push_back(name);
     }
     QCOMPARE(m_names.size(), 305);
     m_evoked = evoked.pick_channels(m_names);
@@ -168,7 +169,7 @@ void TestMneCovPython::readsHeader()
     QCOMPARE(cov->ncov, 366);
     QCOMPARE(cov->nfree, 15972);
     // Name lists are read without spaces (see test_fiff_cov_python).
-    QCOMPARE(cov->bads, QStringList({"MEG2443", "EEG053"}));
+    QCOMPARE(cov->bads, StringList({"MEG2443", "EEG053"}));
     QVERIFY(!cov->is_diag());
     QVERIFY(cov->proj);
     QCOMPARE(cov->proj->nitems, 4);
@@ -286,8 +287,8 @@ void TestMneCovPython::rejectsBadInput()
 {
     auto cov = MNECovMatrix::read(m_covPath, FIFFV_MNE_NOISE_COV);
     QVERIFY(cov);
-    QVERIFY(!cov->pick_chs_omit(QStringList({"NOT A CHANNEL"}), 1, false, {}));
-    QVERIFY(!cov->pick_chs_omit(QStringList(), 0, false, {}));
+    QVERIFY(!cov->pick_chs_omit(StringList{"NOT A CHANNEL"}, 1, false, {}));
+    QVERIFY(!cov->pick_chs_omit({}, 0, false, {}));
 
     VectorXf data = VectorXf::Zero(10);
     VectorXf out(10);

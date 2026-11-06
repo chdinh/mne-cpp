@@ -170,7 +170,7 @@ public:
      *
      * @return The merged derivation with MNEDeriv::in_use set, or nullptr if nothing matched.
      */
-    std::unique_ptr<MNEDeriv> match(const QStringList& chNames) const;
+    std::unique_ptr<MNEDeriv> match(const StringList& chNames) const;
 
     //=========================================================================================================
     /**

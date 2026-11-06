@@ -19,6 +19,7 @@
 
 
 #include "hpi.h"
+#include <utils/string_utils.h>
 
 #include "FormFiles/hpisetupwidget.h"
 
@@ -360,7 +361,7 @@ void Hpi::updateProjections()
 {
     if (m_pFiffInfo) {
         m_mutex.lock();
-        if (m_iNumberBadChannels != m_pFiffInfo->bads.size() || m_matCompProjectors.rows() == 0 || m_matCompProjectors.cols() == 0) {
+        if (m_iNumberBadChannels != static_cast<int>(m_pFiffInfo->bads.size()) || m_matCompProjectors.rows() == 0 || m_matCompProjectors.cols() == 0) {
             m_iNumberBadChannels = m_pFiffInfo->bads.size();
         } else {
             m_mutex.unlock();
@@ -384,8 +385,8 @@ void Hpi::updateProjections()
             //Create the projector for all SSP's on
             infoTemp.make_projector(matProjectors);
             //set columns of matrix to zero depending on bad channels indexes
-            for (qint32 j = 0; j < infoTemp.bads.size(); ++j) {
-                matProjectors.col(infoTemp.ch_names.indexOf(infoTemp.bads.at(j))).setZero();
+            for (qint32 j = 0; j < static_cast<int>(infoTemp.bads.size()); ++j) {
+                matProjectors.col(UTILSLIB::indexOf(infoTemp.ch_names, infoTemp.bads.at(j))).setZero();
             }
         }
 

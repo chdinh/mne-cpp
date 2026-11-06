@@ -251,9 +251,9 @@ int main(int argc, char* argv[])
         ch.unit_mul = FIFF_UNITM_NONE;
 
         if (k < elpNames.size()) {
-            ch.ch_name = elpNames[k];
+            ch.ch_name = elpNames[k].toStdString();
         } else {
-            ch.ch_name = QString("EEG%1").arg(k + 1, 3, 10, QChar('0'));
+            ch.ch_name = QString("EEG%1").arg(k + 1, 3, 10, QChar('0')).toStdString();
         }
 
         if (k < elpPositions.rows()) {

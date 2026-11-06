@@ -18,6 +18,7 @@
 //=============================================================================================================
 
 #include "rtfiffrawviewmodel.h"
+#include <utils/string_utils.h>
 
 #include <fiff/fiff_types.h>
 #include <fiff/fiff_info.h>
@@ -152,7 +153,7 @@ QVariant RtFiffRawViewModel::data(const QModelIndex& index, int role) const
 
         //******** first column (chname) ********
         if (index.column() == 0 && role == Qt::DisplayRole)
-            return QVariant(m_pFiffInfo->ch_names[row]);
+            return QString::fromStdString(m_pFiffInfo->ch_names[row]);
 
         //******** second column (data plot) ********
         if (index.column() == 1) {
@@ -192,7 +193,7 @@ QVariant RtFiffRawViewModel::data(const QModelIndex& index, int role) const
 
         //******** third column (bad channel) ********
         if (index.column() == 2 && role == Qt::DisplayRole) {
-            return QVariant(m_pFiffInfo->bads.contains(m_pFiffInfo->ch_names[row]));
+            return QVariant(UTILSLIB::contains(m_pFiffInfo->bads, m_pFiffInfo->ch_names[row]));
         } // end column check
 
     } // end index.valid() check
@@ -301,7 +302,7 @@ void RtFiffRawViewModel::setFiffInfo(QSharedPointer<FIFFLIB::FiffInfo>& p_pFiffI
 {
     if (p_pFiffInfo) {
         RowVectorXi sel; // = RowVectorXi(0,0);
-        QStringList emptyExclude;
+        StringList emptyExclude;
 
         if (p_pFiffInfo->bads.size() > 0) {
             sel = FiffInfoBase::pick_channels(p_pFiffInfo->ch_names, p_pFiffInfo->bads, emptyExclude);
@@ -785,8 +786,8 @@ void RtFiffRawViewModel::setFilterChannelType(const QString& channelType)
     for (const FiffChInfo& ch : std::as_const(m_pFiffInfo->chs)) {
         if (ch.kind == FIFFV_MEG_CH || ch.kind == FIFFV_EEG_CH || ch.kind == FIFFV_EOG_CH ||
             ch.kind == FIFFV_ECG_CH || ch.kind == FIFFV_EMG_CH) {
-            if (m_sFilterChannelType == "All" || ch.ch_name.contains(m_sFilterChannelType)) {
-                m_filterChannelList << ch.ch_name;
+            if (m_sFilterChannelType == "All" || (ch.ch_name.find(m_sFilterChannelType.toStdString()) != std::string::npos)) {
+                m_filterChannelList << QString::fromStdString(ch.ch_name);
             }
         }
     }
@@ -799,17 +800,17 @@ void RtFiffRawViewModel::markChBad(QModelIndex ch, bool status)
     QList<FiffChInfo> chInfolist = m_pFiffInfo->chs;
 
     if (status) {
-        if (!m_pFiffInfo->bads.contains(chInfolist[ch.row()].ch_name))
-            m_pFiffInfo->bads.append(chInfolist[ch.row()].ch_name);
+        if (!UTILSLIB::contains(m_pFiffInfo->bads, chInfolist[ch.row()].ch_name))
+            m_pFiffInfo->bads.push_back(chInfolist[ch.row()].ch_name);
         qDebug() << "RawModel:" << chInfolist[ch.row()].ch_name << "marked as bad.";
-    } else if (m_pFiffInfo->bads.contains(chInfolist[ch.row()].ch_name)) {
-        int index = m_pFiffInfo->bads.indexOf(chInfolist[ch.row()].ch_name);
-        m_pFiffInfo->bads.removeAt(index);
+    } else if (UTILSLIB::contains(m_pFiffInfo->bads, chInfolist[ch.row()].ch_name)) {
+        int index = UTILSLIB::indexOf(m_pFiffInfo->bads, chInfolist[ch.row()].ch_name);
+        m_pFiffInfo->bads.erase(m_pFiffInfo->bads.begin() + index);
         qDebug() << "RawModel:" << chInfolist[ch.row()].ch_name << "marked as good.";
     }
 
     //Update indeices of bad channels (this vector is needed when creating new ssp operators)
-    QStringList emptyExclude;
+    StringList emptyExclude;
     m_vecBadIdcs = FiffInfoBase::pick_channels(m_pFiffInfo->ch_names, m_pFiffInfo->bads, emptyExclude);
 
     emit dataChanged(ch, ch);
@@ -868,12 +869,12 @@ void RtFiffRawViewModel::markChBad(QModelIndexList chlist, bool status)
 
     for (int i = 0; i < chlist.size(); ++i) {
         if (status) {
-            if (!m_pFiffInfo->bads.contains(chInfolist[chlist[i].row()].ch_name))
-                m_pFiffInfo->bads.append(chInfolist[chlist[i].row()].ch_name);
+            if (!UTILSLIB::contains(m_pFiffInfo->bads, chInfolist[chlist[i].row()].ch_name))
+                m_pFiffInfo->bads.push_back(chInfolist[chlist[i].row()].ch_name);
         } else {
-            if (m_pFiffInfo->bads.contains(chInfolist[chlist[i].row()].ch_name)) {
-                int index = m_pFiffInfo->bads.indexOf(chInfolist[chlist[i].row()].ch_name);
-                m_pFiffInfo->bads.removeAt(index);
+            if (UTILSLIB::contains(m_pFiffInfo->bads, chInfolist[chlist[i].row()].ch_name)) {
+                int index = UTILSLIB::indexOf(m_pFiffInfo->bads, chInfolist[chlist[i].row()].ch_name);
+                m_pFiffInfo->bads.erase(m_pFiffInfo->bads.begin() + index);
             }
         }
 
@@ -881,7 +882,7 @@ void RtFiffRawViewModel::markChBad(QModelIndexList chlist, bool status)
     }
 
     //Update indeices of bad channels (this vector is needed when creating new ssp operators)
-    QStringList emptyExclude;
+    StringList emptyExclude;
     m_vecBadIdcs = FiffInfoBase::pick_channels(m_pFiffInfo->ch_names, m_pFiffInfo->bads, emptyExclude);
 }
 

@@ -177,7 +177,7 @@ public:
      *
      * @return the bad channel list.
      */
-    QStringList getBadChannelList();
+    StringList getBadChannelList();
 
     //=========================================================================================================
     /**

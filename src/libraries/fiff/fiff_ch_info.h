@@ -165,7 +165,7 @@ public:
     FiffChPos chpos;     /**< Channel location. */
     fiff_int_t unit;     /**< Unit of measurement. */
     fiff_int_t unit_mul; /**< Unit multiplier exponent. */
-    QString ch_name;     /**< Descriptive name for the channel. */
+    std::string ch_name; /**< Descriptive name for the channel. */
 
     //Convenience members - MATLAB -
     Eigen::Matrix<float, 4, 4, Eigen::DontAlign> coil_trans; /**< Coil coordinate system transformation. */
@@ -180,7 +180,7 @@ public:
 inline qint32 FiffChInfo::storageSize()
 {
     // On-disk layout: scanNo, logNo, kind, range, cal, chpos, unit, unit_mul, ch_name[16]
-    // (C++ class uses QString but on-disk stores fixed 16-char name)
+    // (in memory a std::string, on disk a fixed 16-char name)
     return 3 * sizeof(fiff_int_t) + 2 * sizeof(fiff_float_t) + FiffChPos::storageSize() + 2 * sizeof(fiff_int_t) + 16;
 }
 

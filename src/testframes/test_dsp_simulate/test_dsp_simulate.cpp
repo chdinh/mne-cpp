@@ -209,9 +209,9 @@ private slots:
         info.nchan = nChan;
         for (int i = 0; i < nChan; ++i) {
             FiffChInfo ch;
-            ch.ch_name = QString("CH%1").arg(i);
+            ch.ch_name = (QString("CH%1").arg(i)).toStdString();
             info.chs.append(ch);
-            info.ch_names.append(ch.ch_name);
+            info.ch_names.push_back(ch.ch_name);
         }
 
         FiffEvoked evoked = simulateEvokedNoiseless(fwd, stc, info);
@@ -245,9 +245,9 @@ private slots:
         info.nchan = nChan;
         for (int i = 0; i < nChan; ++i) {
             FiffChInfo ch;
-            ch.ch_name = QString("CH%1").arg(i);
+            ch.ch_name = (QString("CH%1").arg(i)).toStdString();
             info.chs.append(ch);
-            info.ch_names.append(ch.ch_name);
+            info.ch_names.push_back(ch.ch_name);
         }
 
         FiffEvoked evoked = simulateEvokedNoiseless(fwd, stc, info);
@@ -282,10 +282,10 @@ private slots:
         info.nchan = nChan;
         for (int i = 0; i < nChan; ++i) {
             FiffChInfo ch;
-            ch.ch_name = QString("CH%1").arg(i);
+            ch.ch_name = (QString("CH%1").arg(i)).toStdString();
             ch.kind = FIFFV_EEG_CH;
             info.chs.append(ch);
-            info.ch_names.append(ch.ch_name);
+            info.ch_names.push_back(ch.ch_name);
         }
 
         // Identity noise covariance
@@ -321,14 +321,14 @@ private slots:
 
         FiffInfo info;
         info.sfreq = 1000.0;
-        const QStringList names{"M1", "M2", "M3", "E1", "E2"};
+        const StringList names{"M1", "M2", "M3", "E1", "E2"};
         for (int i = 0; i < nChan; ++i) {
             FiffChInfo ch;
             ch.ch_name = names[i];
             ch.kind = i < 3 ? FIFFV_MEG_CH : FIFFV_EEG_CH;
             ch.unit = i < 3 ? FIFF_UNIT_T : FIFF_UNIT_V;
             info.chs.append(ch);
-            info.ch_names.append(names[i]);
+            info.ch_names.push_back(names[i]);
         }
         info.nchan = nChan;
 

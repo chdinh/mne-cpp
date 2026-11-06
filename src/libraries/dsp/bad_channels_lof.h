@@ -45,7 +45,8 @@
 // QT INCLUDES
 //=============================================================================================================
 
-#include <QStringList>
+#include <string>
+#include <vector>
 
 //=============================================================================================================
 // FORWARD DECLARATIONS
@@ -92,9 +93,9 @@ struct DSPSHARED_EXPORT LofBadChannelParams
  *
  * @return List of bad channel names.
  */
-DSPSHARED_EXPORT QStringList findBadChannelsLof(const Eigen::MatrixXd& data,
-                                                const FIFFLIB::FiffInfo& info,
-                                                const LofBadChannelParams& params = LofBadChannelParams());
+DSPSHARED_EXPORT StringList findBadChannelsLof(const Eigen::MatrixXd& data,
+                                               const FIFFLIB::FiffInfo& info,
+                                               const LofBadChannelParams& params = LofBadChannelParams());
 
 //=============================================================================================================
 /**

@@ -39,7 +39,8 @@
 // QT INCLUDES
 //=============================================================================================================
 
-#include <QStringList>
+#include <string>
+#include <vector>
 
 //=============================================================================================================
 // EIGEN INCLUDES
@@ -82,7 +83,7 @@ namespace UTILSLIB
  */
 DSPSHARED_EXPORT void setEegReference(Eigen::MatrixXd& data,
                                       FIFFLIB::FiffInfo& info,
-                                      const QStringList& refChannels = QStringList(),
+                                      const StringList& refChannels = {},
                                       bool projection = false);
 
 //=============================================================================================================
@@ -99,7 +100,7 @@ DSPSHARED_EXPORT void setEegReference(Eigen::MatrixXd& data,
  */
 DSPSHARED_EXPORT void addReferenceChannels(Eigen::MatrixXd& data,
                                            FIFFLIB::FiffInfo& info,
-                                           const QStringList& chNames);
+                                           const StringList& chNames);
 
 //=============================================================================================================
 /**
@@ -117,8 +118,8 @@ DSPSHARED_EXPORT void addReferenceChannels(Eigen::MatrixXd& data,
  */
 DSPSHARED_EXPORT void setBipolarReference(Eigen::MatrixXd& data,
                                           FIFFLIB::FiffInfo& info,
-                                          const QStringList& anodes,
-                                          const QStringList& cathodes,
+                                          const StringList& anodes,
+                                          const StringList& cathodes,
                                           bool dropOriginals = true);
 
 } // namespace UTILSLIB

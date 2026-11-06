@@ -100,7 +100,7 @@ int mne_decompose_eigen(const VectorXd& mat,
 
 MNECovMatrix::MNECovMatrix(int p_kind,
                            int p_ncov,
-                           const QStringList& p_names,
+                           const StringList& p_names,
                            const VectorXd& p_cov,
                            const VectorXd& p_cov_diag,
                            FiffSparseMatrix* p_cov_sparse)
@@ -136,7 +136,7 @@ std::unique_ptr<MNECovMatrix> MNECovMatrix::read(const QString& name, int kind)
     QList<FiffDirNode::SPtr> nodes;
     FiffDirNode::SPtr covnode;
 
-    QStringList names;
+    StringList names;
     int nnames = 0;
     Eigen::VectorXd cov;
     Eigen::VectorXd cov_diag;
@@ -144,7 +144,7 @@ std::unique_ptr<MNECovMatrix> MNECovMatrix::read(const QString& name, int kind)
     Eigen::VectorXd lambda;
     Eigen::Matrix<float, Eigen::Dynamic, Eigen::Dynamic, Eigen::RowMajor> eigen;
     MatrixXf tmp_eigen;
-    QStringList bads;
+    StringList bads;
     int nbad = 0;
     int ncov = 0;
     int nfree = 1;
@@ -607,7 +607,7 @@ int MNECovMatrix::classify_channels(const QList<FiffChInfo>& chs, int nchan)
     for (k = 0; k < ncov; k++) {
         ch_class[k] = MNE_COV_CH_UNKNOWN;
         for (p = 0; p < nchan; p++) {
-            if (QString::compare(chs[p].ch_name, names[k]) == 0) {
+            if ((chs[p].ch_name == names[k])) {
                 ch = chs[p];
                 if (ch.kind == FIFFV_MEG_CH) {
                     if (ch.unit == FIFF_UNIT_T)
@@ -710,7 +710,7 @@ void MNECovMatrix::revert_to_diag()
 
 //=============================================================================================================
 
-std::unique_ptr<MNECovMatrix> MNECovMatrix::pick_chs_omit(const QStringList& new_names,
+std::unique_ptr<MNECovMatrix> MNECovMatrix::pick_chs_omit(const StringList& new_names,
                                                           int new_ncov,
                                                           int omit_meg_eeg,
                                                           const QList<FiffChInfo>& chs) const
@@ -718,7 +718,7 @@ std::unique_ptr<MNECovMatrix> MNECovMatrix::pick_chs_omit(const QStringList& new
     int j, k;
     Eigen::VectorXd cov_local;
     Eigen::VectorXd cov_diag_local;
-    QStringList picked_names;
+    StringList picked_names;
     int from, to;
     std::unique_ptr<MNECovMatrix> res;
 
@@ -726,20 +726,20 @@ std::unique_ptr<MNECovMatrix> MNECovMatrix::pick_chs_omit(const QStringList& new
         qCritical("No channels specified for picking in pick_chs_omit");
         return nullptr;
     }
-    if (names.isEmpty()) {
+    if (names.empty()) {
         qCritical("No names in covariance matrix. Cannot do picking.");
         return nullptr;
     }
     Eigen::VectorXi pickVec = Eigen::VectorXi::Constant(new_ncov, -1);
     for (j = 0; j < new_ncov; j++)
         for (k = 0; k < ncov; k++)
-            if (QString::compare(names[k], new_names[j]) == 0) {
+            if ((names[k] == new_names[j])) {
                 pickVec[j] = k;
                 break;
             }
     for (j = 0; j < new_ncov; j++) {
         if (pickVec[j] < 0) {
-            qWarning("All desired channels not found in the covariance matrix (at least missing %s).", new_names[j].toUtf8().constData());
+            qWarning("All desired channels not found in the covariance matrix (at least missing %s).", new_names[j].c_str());
             return nullptr;
         }
     }
@@ -754,7 +754,7 @@ std::unique_ptr<MNECovMatrix> MNECovMatrix::pick_chs_omit(const QStringList& new
                     isMegVec[j] = false;
         } else {
             for (j = 0; j < new_ncov; j++)
-                if (new_names[j].startsWith("MEG"))
+                if (new_names[j].starts_with("MEG"))
                     isMegVec[j] = true;
                 else
                     isMegVec[j] = false;
@@ -764,12 +764,12 @@ std::unique_ptr<MNECovMatrix> MNECovMatrix::pick_chs_omit(const QStringList& new
         cov_diag_local.resize(new_ncov);
         for (j = 0; j < new_ncov; j++) {
             cov_diag_local[j] = cov_diag[pickVec[j]];
-            picked_names.append(names[pickVec[j]]);
+            picked_names.push_back(names[pickVec[j]]);
         }
     } else {
         cov_local.resize(new_ncov * (new_ncov + 1) / 2);
         for (j = 0; j < new_ncov; j++) {
-            picked_names.append(names[pickVec[j]]);
+            picked_names.push_back(names[pickVec[j]]);
             for (k = 0; k <= j; k++) {
                 from = lt_packed_index(pickVec[j], pickVec[k]);
                 to = lt_packed_index(j, k);

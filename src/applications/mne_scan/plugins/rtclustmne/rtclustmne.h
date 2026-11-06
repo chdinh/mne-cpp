@@ -274,8 +274,8 @@ protected:
     QString m_sModelCheckpoint; /**< CMNE LSTM model checkpoint path (.onnx). */
     QFile m_fMriHeadTrans;      /**< The Head - Mri transformation. */
 
-    QStringList m_qListCovChNames;   /**< Covariance channel names. */
-    QStringList m_qListPickChannels; /**< Channels to pick. */
+    std::vector<std::string> m_qListCovChNames;   /**< Covariance channel names. */
+    std::vector<std::string> m_qListPickChannels; /**< Channels to pick. */
 
     MNELIB::MNEInverseOperator m_invOp; /**< The inverse operator. */
 

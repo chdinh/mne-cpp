@@ -104,7 +104,7 @@ void Natus::setUpFiffInfo()
     m_pFiffInfo->lowpass = m_iSamplingFreq / 2;
 
     //Set up the channel info
-    QStringList QSLChNames;
+    StringList QSLChNames;
     m_pFiffInfo->chs.clear();
 
     for (int i = 0; i < m_pFiffInfo->nchan; ++i) {
@@ -125,7 +125,7 @@ void Natus::setUpFiffInfo()
             sChType.append("0");
         }
 
-        fChInfo.ch_name = sChType.append(sChType.number(i));
+        fChInfo.ch_name = sChType.append(sChType.number(i)).toStdString();
 
         //Set channel type
         fChInfo.kind = FIFFV_EEG_CH;
@@ -177,7 +177,7 @@ void Natus::setUpFiffInfo()
         //            fChInfo.ch_name = sChType;
         //        }
 
-        QSLChNames << sChType;
+        QSLChNames.push_back(sChType.toStdString());
 
         m_pFiffInfo->chs.append(fChInfo);
     }

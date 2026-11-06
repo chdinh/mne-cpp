@@ -27,6 +27,7 @@
 //=============================================================================================================
 
 #include <fiff/fiff.h>
+#include <utils/string_utils.h>
 #include <fiff/fiff_cov.h>
 #include <fiff/fiff_info.h>
 #include <fiff/fiff_evoked.h>
@@ -132,16 +133,16 @@ static FiffInfo buildInfoFromForward(const MNEForwardSolution& forward,
     if (hasEeg && !hasEegAvRef) {
         qInfo("  Adding average EEG reference projector.");
         // Build EEG average reference projector
-        QStringList eegNames;
+        StringList eegNames;
         for (int i = 0; i < info.nchan; ++i) {
             if (info.chs[i].kind == FIFFV_EEG_CH)
-                eegNames << info.chs[i].ch_name;
+                eegNames.push_back(info.chs[i].ch_name);
         }
         if (eegNames.size() > 0) {
             RowVectorXd vecOnes = RowVectorXd::Ones(eegNames.size());
             MatrixXd data = vecOnes / sqrt(static_cast<double>(eegNames.size()));
-            FiffNamedMatrix projData(1, eegNames.size(),
-                                     QStringList(),
+            FiffNamedMatrix projData(1, static_cast<int>(eegNames.size()),
+                                     {},
                                      eegNames,
                                      data);
             FiffProj eegAvRef;
@@ -485,19 +486,19 @@ int main(int argc, char* argv[])
               badFileName.toUtf8().constData());
         QStringList fileBads = readBadFile(badFileName);
         for (const QString& bad : fileBads) {
-            if (!info.bads.contains(bad))
-                info.bads << bad;
+            if (!UTILSLIB::contains(info.bads, bad.toStdString()))
+                info.bads.push_back(bad.toStdString());
         }
     }
     // Also merge bad channels from the noise covariance
-    for (const QString& bad : noiseCov.bads) {
-        if (!info.bads.contains(bad))
-            info.bads << bad;
+    for (const std::string& bad : noiseCov.bads) {
+        if (!UTILSLIB::contains(info.bads, bad))
+            info.bads.push_back(bad);
     }
-    if (!info.bads.isEmpty()) {
+    if (!info.bads.empty()) {
         qInfo("  Bad channels (%lld): %s",
-              info.bads.size(),
-              info.bads.join(' ').toUtf8().constData());
+              static_cast<long long>(info.bads.size()),
+              QString::fromStdString(UTILSLIB::join(info.bads, " ")).toUtf8().constData());
     }
 
     //=========================================================================================================

@@ -24,6 +24,7 @@ target_link_libraries(${PROJECT_NAME} PRIVATE
     Qt${QT_VERSION_MAJOR}::Test
     mne_acq
     mne_fiff
+    mne_utils
     mne_lsl
     Eigen3::Eigen)
 

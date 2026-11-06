@@ -41,6 +41,7 @@
 //=============================================================================================================
 
 #include <fiff/fiff_raw_data.h>
+#include <utils/string_utils.h>
 #include <fiff/fiff_evoked.h>
 #include <fiff/fiff_evoked_set.h>
 #include <fiff/fiff_proj.h>
@@ -147,7 +148,7 @@ RejectionParams noRejection()
 FiffChInfo makeChannel(const QString& name, int kind, int unit)
 {
     FiffChInfo ch;
-    ch.ch_name = name;
+    ch.ch_name = name.toStdString();
     ch.kind = kind;
     ch.unit = unit;
     return ch;
@@ -158,7 +159,7 @@ FiffInfo makeInfo(const QList<FiffChInfo>& chs)
     FiffInfo info;
     info.chs = chs;
     for (const FiffChInfo& ch : chs) {
-        info.ch_names << ch.ch_name;
+        info.ch_names.push_back(ch.ch_name);
     }
     info.nchan = static_cast<int>(chs.size());
     return info;
@@ -492,7 +493,7 @@ void TestFiffCorePython::checkArtifacts_reason()
     *fields.value(field) = limit;
 
     QString actual;
-    const bool clean = FiffEvokedSet::checkArtifacts(epoch, info, QStringList(), rej, actual);
+    const bool clean = FiffEvokedSet::checkArtifacts(epoch, info, {}, rej, actual);
     QCOMPARE(clean, reason.isEmpty());
     QCOMPARE(actual, reason);
 }
@@ -561,8 +562,8 @@ void TestFiffCorePython::computeFromRaw_matchesPython()
         QVERIFY2(relClose(peak, expected[i].peak, 1e-6), qPrintable(mismatch(p.desc + " peak", peak, expected[i].peak)));
 
         // Bad channels must not take part in the projection.
-        for (const QString& bad : m_raw->info.bads) {
-            QCOMPARE(v(m_raw->info.ch_names.indexOf(bad)), 0.0);
+        for (const std::string& bad : m_raw->info.bads) {
+            QCOMPARE(v(UTILSLIB::indexOf(m_raw->info.ch_names, bad)), 0.0);
         }
     }
 
@@ -636,10 +637,10 @@ void TestFiffCorePython::computeFromEvoked_matchesPython()
         const double peak = v.cwiseAbs().maxCoeff(&peakIdx);
         QCOMPARE(evoked.info.ch_names.at(static_cast<int>(peakIdx)), QString(expected[i].peakName));
         QVERIFY2(relClose(peak, expected[i].peak, 1e-6), qPrintable(mismatch(p.desc + " peak", peak, expected[i].peak)));
-        const double first = std::fabs(v(evoked.info.ch_names.indexOf(expected[i].firstName)));
+        const double first = std::fabs(v(UTILSLIB::indexOf(evoked.info.ch_names, expected[i].firstName)));
         QVERIFY2(relClose(first, expected[i].first, 1e-6), qPrintable(mismatch(p.desc + " first", first, expected[i].first)));
-        for (const QString& bad : evoked.info.bads) {
-            QCOMPARE(v(evoked.info.ch_names.indexOf(bad)), 0.0);
+        for (const std::string& bad : evoked.info.bads) {
+            QCOMPARE(v(UTILSLIB::indexOf(evoked.info.ch_names, bad)), 0.0);
         }
     }
 }
@@ -1150,15 +1151,15 @@ void TestFiffCorePython::channelTypes_matchPython()
 {
     // data/channel-types-raw.fif: one channel of every type mne.create_info knows; reference values produced by
     // mne.channel_type (make_channel_types_fixture.py)
-    const QStringList expected{"grad", "mag", "ref_meg", "eeg", "seeg", "dbs", "ecog", "eog", "emg", "ecg", "resp", "bio",
-                               "misc", "stim", "exci", "syst", "ias", "gof", "dipole", "chpi", "fnirs_cw_amplitude",
-                               "fnirs_fd_ac_amplitude", "fnirs_fd_phase", "fnirs_td_gated_amplitude", "fnirs_td_moments_intensity",
-                               "fnirs_td_moments_mean", "fnirs_td_moments_variance", "fnirs_od", "hbo", "hbr", "csd", "temperature",
-                               "gsr", "eyegaze", "pupil"};
+    const StringList expected{"grad", "mag", "ref_meg", "eeg", "seeg", "dbs", "ecog", "eog", "emg", "ecg", "resp", "bio",
+                              "misc", "stim", "exci", "syst", "ias", "gof", "dipole", "chpi", "fnirs_cw_amplitude",
+                              "fnirs_fd_ac_amplitude", "fnirs_fd_phase", "fnirs_td_gated_amplitude", "fnirs_td_moments_intensity",
+                              "fnirs_td_moments_mean", "fnirs_td_moments_variance", "fnirs_od", "hbo", "hbr", "csd", "temperature",
+                              "gsr", "eyegaze", "pupil"};
     QFile file(QStringLiteral(FIFF_CORE_DATA_DIR "/channel-types-raw.fif"));
     const FiffRawData raw(file);
-    QCOMPARE(raw.info.chs.size(), expected.size());
-    for (int k = 0; k < expected.size(); ++k) {
+    QCOMPARE(raw.info.chs.size(), static_cast<qsizetype>(expected.size()));
+    for (int k = 0; k < static_cast<int>(expected.size()); ++k) {
         QCOMPARE(raw.info.channel_type(k), expected[k]);
     }
     FiffInfo info = raw.info;

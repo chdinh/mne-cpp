@@ -25,6 +25,9 @@
 
 #include "mne_global.h"
 
+#include <string>
+#include <vector>
+
 #include <Eigen/Core>
 
 #include <QStringList>
@@ -57,10 +60,10 @@ public:
      *
      * @return OK on success, FAIL on error.
      */
-    int pick(const QStringList& names, int nnames, bool require_all, Eigen::Ref<Eigen::VectorXf> res) const;
+    int pick(const StringList& names, int nnames, bool require_all, Eigen::Ref<Eigen::VectorXf> res) const;
 
     int nvec = 0;         /**< Number of elements. */
-    QStringList names;    /**< Name list for the elements. */
+    StringList names;     /**< Name list for the elements. */
     Eigen::VectorXf data; /**< The data itself. */
 };
 

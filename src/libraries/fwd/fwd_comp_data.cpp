@@ -111,7 +111,7 @@ int FwdCompData::fwd_make_ctf_comp_coils(MNECTFCompDataSet* set,
     for (k = 0; k < coils->ncoil(); k++) {
         chs.append(FiffChInfo());
         FwdCoil* coil = coils->coils[k].get();
-        chs[k].ch_name = coil->chname;
+        chs[k].ch_name = coil->chname.toStdString();
         chs[k].chpos.coil_type = coil->type;
         chs[k].kind = (coil->coil_class == FWD_COILC_EEG) ? FIFFV_EEG_CH : FIFFV_MEG_CH;
     }
@@ -120,7 +120,7 @@ int FwdCompData::fwd_make_ctf_comp_coils(MNECTFCompDataSet* set,
         for (k = 0; k < comp_coils->ncoil(); k++) {
             compchs.append(FiffChInfo());
             FwdCoil* coil = comp_coils->coils[k].get();
-            compchs[k].ch_name = coil->chname;
+            compchs[k].ch_name = coil->chname.toStdString();
             compchs[k].chpos.coil_type = coil->type;
             compchs[k].kind = (coil->coil_class == FWD_COILC_EEG) ? FIFFV_EEG_CH : FIFFV_MEG_CH;
         }

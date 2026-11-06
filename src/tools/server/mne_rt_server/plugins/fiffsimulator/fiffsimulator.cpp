@@ -285,7 +285,7 @@ bool FiffSimulator::start()
     }
     registerFiffScheme();
     const AcqUri uri{"fiff",
-                     m_RawInfo.info.filename.toStdString(), // the file whose info clients got
+                     m_RawInfo.info.filename, // the file whose info clients got
                      {{"loop", "1"},
                       {"speed", std::to_string(m_AccelerationFactor)},
                       {"block", std::to_string(m_uiBufferSampleSize)},
@@ -297,7 +297,7 @@ bool FiffSimulator::start()
     }
     auto reader = device->stream().reader(AcqReader::ReadMode::Lossless);
     if (!reader || !device->start().ok()) {
-        qWarning("[FiffSimulator::start] Cannot start the replay of %s", qPrintable(m_RawInfo.info.filename));
+        qWarning("[FiffSimulator::start] Cannot start the replay of %s", m_RawInfo.info.filename.c_str());
         return false;
     }
     m_device = std::move(*device);

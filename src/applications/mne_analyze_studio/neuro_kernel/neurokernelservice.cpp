@@ -230,7 +230,7 @@ QJsonObject NeuroKernelService::handleToolCallUnchecked(const QJsonObject& param
         channelStats.reserve(static_cast<int>(data.rows()));
         for (int row = 0; row < data.rows(); ++row) {
             channelStats.push_back(ChannelStat{
-                raw.info.ch_names.value(row),
+                QString::fromStdString(raw.info.ch_names[row]),
                 std::sqrt(data.row(row).array().square().mean())});
         }
 
@@ -310,7 +310,7 @@ QJsonObject NeuroKernelService::handleToolCallUnchecked(const QJsonObject& param
         QVector<ChannelStat> channelStats;
         channelStats.reserve(static_cast<int>(data.rows()));
         for (int row = 0; row < data.rows(); ++row) {
-            const QString channelName = raw.info.ch_names.value(row);
+            const QString channelName = QString::fromStdString(raw.info.ch_names[row]);
             if (!match.isEmpty() && !channelName.contains(match, Qt::CaseInsensitive)) {
                 continue;
             }
@@ -388,7 +388,7 @@ QJsonObject NeuroKernelService::handleToolCallUnchecked(const QJsonObject& param
         int peakRow = -1;
         int peakColumn = -1;
         for (int row = 0; row < data.rows(); ++row) {
-            const QString channelName = raw.info.ch_names.value(row);
+            const QString channelName = QString::fromStdString(raw.info.ch_names[row]);
             if (!match.isEmpty() && !channelName.contains(match, Qt::CaseInsensitive)) {
                 continue;
             }
@@ -409,7 +409,7 @@ QJsonObject NeuroKernelService::handleToolCallUnchecked(const QJsonObject& param
         }
 
         const int peakSample = fromSample + peakColumn;
-        const QString peakChannel = raw.info.ch_names.value(peakRow);
+        const QString peakChannel = QString::fromStdString(raw.info.ch_names[peakRow]);
         return QJsonObject{
             {"status", "ok"},
             {"tool_name", toolName},
@@ -461,7 +461,7 @@ QJsonObject NeuroKernelService::handleToolCallUnchecked(const QJsonObject& param
         int pickCount = 0;
         QStringList matchedChannels;
         for (int row = 0; row < data.rows(); ++row) {
-            const QString channelName = raw.info.ch_names.value(row);
+            const QString channelName = QString::fromStdString(raw.info.ch_names[row]);
             if (!match.isEmpty() && !channelName.contains(match, Qt::CaseInsensitive)) {
                 continue;
             }

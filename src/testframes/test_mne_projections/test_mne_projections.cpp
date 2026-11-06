@@ -75,8 +75,8 @@ private slots:
         item.nvec = 1;
 
         // Construct named matrix
-        QStringList colNames = {"ch1", "ch2", "ch3"};
-        QStringList rowNames = {"vec1"};
+        StringList colNames = {"ch1", "ch2", "ch3"};
+        StringList rowNames = {"vec1"};
         Eigen::MatrixXf data(1, 3);
         data << 1.0f, 2.0f, 3.0f;
         item.vecs = MNENamedMatrix::build(1, 3, rowNames, colNames, data);
@@ -95,17 +95,17 @@ private slots:
         item.active = 1;
         item.nvec = 1;
 
-        QStringList colNames = {"MEG0111", "MEG0112", "MEG0113"};
-        QStringList rowNames = {"vec1"};
+        StringList colNames = {"MEG0111", "MEG0112", "MEG0113"};
+        StringList rowNames = {"vec1"};
         Eigen::MatrixXf data(1, 3);
         data << 1.0f, 1.0f, 1.0f;
         item.vecs = MNENamedMatrix::build(1, 3, rowNames, colNames, data);
 
-        QStringList testList = {"MEG0111", "MEG0112", "MEG0113"};
+        StringList testList = {"MEG0111", "MEG0112", "MEG0113"};
         int affected = item.affect(testList, testList.size());
         QVERIFY(affected > 0);
 
-        QStringList noMatch = {"EEG001", "EEG002"};
+        StringList noMatch = {"EEG001", "EEG002"};
         int notAffected = item.affect(noMatch, noMatch.size());
         QCOMPARE(notAffected, 0);
     }
@@ -124,8 +124,8 @@ private slots:
     {
         MNEProjOp op;
 
-        QStringList colNames = {"MEG0111", "MEG0112", "MEG0113"};
-        QStringList rowNames = {"vec1"};
+        StringList colNames = {"MEG0111", "MEG0112", "MEG0113"};
+        StringList rowNames = {"vec1"};
         Eigen::MatrixXf data(1, 3);
         data << 0.577f, 0.577f, 0.577f;
         auto nm_ptr = MNENamedMatrix::build(1, 3, rowNames, colNames, data);
@@ -142,8 +142,8 @@ private slots:
     {
         MNEProjOp op;
 
-        QStringList colNames = {"ch1", "ch2"};
-        QStringList rowNames = {"v1"};
+        StringList colNames = {"ch1", "ch2"};
+        StringList rowNames = {"v1"};
         Eigen::MatrixXf data(1, 2);
         data << 0.707f, 0.707f;
         auto nm_ptr = MNENamedMatrix::build(1, 2, rowNames, colNames, data);
@@ -162,8 +162,8 @@ private slots:
     void testProjOpDup()
     {
         MNEProjOp op;
-        QStringList colNames = {"ch1", "ch2", "ch3"};
-        QStringList rowNames = {"v1", "v2"};
+        StringList colNames = {"ch1", "ch2", "ch3"};
+        StringList rowNames = {"v1", "v2"};
         Eigen::MatrixXf data(2, 3);
         data << 1, 0, 0,
             0, 1, 0;
@@ -181,8 +181,8 @@ private slots:
     void testProjOpCombine()
     {
         MNEProjOp op1;
-        QStringList colNames = {"ch1", "ch2"};
-        QStringList rowNames = {"v1"};
+        StringList colNames = {"ch1", "ch2"};
+        StringList rowNames = {"v1"};
         Eigen::MatrixXf data(1, 2);
         data << 1, 0;
         auto nm1_ptr = MNENamedMatrix::build(1, 2, rowNames, colNames, data);
@@ -205,8 +205,8 @@ private slots:
     void testProjOpFreeProj()
     {
         MNEProjOp op;
-        QStringList colNames = {"ch1", "ch2"};
-        QStringList rowNames = {"v1"};
+        StringList colNames = {"ch1", "ch2"};
+        StringList rowNames = {"v1"};
         Eigen::MatrixXf data(1, 2);
         data << 1, 0;
         auto nm_ptr = MNENamedMatrix::build(1, 2, rowNames, colNames, data);
@@ -224,8 +224,8 @@ private slots:
     void testProjOpAssignChannels()
     {
         MNEProjOp op;
-        QStringList colNames = {"MEG0111", "MEG0112", "MEG0113"};
-        QStringList rowNames = {"v1"};
+        StringList colNames = {"MEG0111", "MEG0112", "MEG0113"};
+        StringList rowNames = {"v1"};
         Eigen::MatrixXf data(1, 3);
         data << 0.577f, 0.577f, 0.577f;
         auto nm_ptr = MNENamedMatrix::build(1, 3, rowNames, colNames, data);
@@ -233,7 +233,7 @@ private slots:
         MNENamedMatrix nm(*nm_ptr);
         op.add_item(&nm, 1, "SSP");
 
-        QStringList chList = {"MEG0111", "MEG0112", "MEG0113", "MEG0121"};
+        StringList chList = {"MEG0111", "MEG0112", "MEG0113", "MEG0121"};
         int rc = op.assign_channels(chList, chList.size());
         QVERIFY(rc >= 0);
     }
@@ -241,8 +241,8 @@ private slots:
     void testProjOpMakeProj()
     {
         MNEProjOp op;
-        QStringList colNames = {"ch1", "ch2", "ch3"};
-        QStringList rowNames = {"v1"};
+        StringList colNames = {"ch1", "ch2", "ch3"};
+        StringList rowNames = {"v1"};
         Eigen::MatrixXf data(1, 3);
         data << 0.577f, 0.577f, 0.577f;
         auto nm_ptr = MNENamedMatrix::build(1, 3, rowNames, colNames, data);
@@ -250,7 +250,7 @@ private slots:
         MNENamedMatrix nm(*nm_ptr);
         op.add_item(&nm, 1, "SSP");
 
-        QStringList chList = {"ch1", "ch2", "ch3"};
+        StringList chList = {"ch1", "ch2", "ch3"};
         op.assign_channels(chList, chList.size());
         int rc = op.make_proj();
         QVERIFY(rc >= 0);
@@ -261,8 +261,8 @@ private slots:
         MNEProjOp op;
 
         // Create an orthonormal projection vector
-        QStringList colNames = {"ch1", "ch2", "ch3"};
-        QStringList rowNames = {"v1"};
+        StringList colNames = {"ch1", "ch2", "ch3"};
+        StringList rowNames = {"v1"};
         float invSqrt3 = 1.0f / std::sqrt(3.0f);
         Eigen::MatrixXf data(1, 3);
         data << invSqrt3, invSqrt3, invSqrt3;
@@ -271,7 +271,7 @@ private slots:
         MNENamedMatrix nm(*nm_ptr);
         op.add_item(&nm, 1, "SSP");
 
-        QStringList chList = {"ch1", "ch2", "ch3"};
+        StringList chList = {"ch1", "ch2", "ch3"};
         op.assign_channels(chList, chList.size());
         op.make_proj();
 
@@ -290,8 +290,8 @@ private slots:
     {
         MNEProjOp op;
 
-        QStringList colNames = {"ch1", "ch2"};
-        QStringList rowNames = {"v1"};
+        StringList colNames = {"ch1", "ch2"};
+        StringList rowNames = {"v1"};
         float invSqrt2 = 1.0f / std::sqrt(2.0f);
         Eigen::MatrixXf data(1, 2);
         data << invSqrt2, invSqrt2;
@@ -300,7 +300,7 @@ private slots:
         MNENamedMatrix nm(*nm_ptr);
         op.add_item(&nm, 1, "SSP");
 
-        QStringList chList = {"ch1", "ch2"};
+        StringList chList = {"ch1", "ch2"};
         op.assign_channels(chList, chList.size());
         op.make_proj();
 
@@ -315,8 +315,8 @@ private slots:
     void testProjOpAffect()
     {
         MNEProjOp op;
-        QStringList colNames = {"MEG0111", "MEG0112"};
-        QStringList rowNames = {"v1"};
+        StringList colNames = {"MEG0111", "MEG0112"};
+        StringList rowNames = {"v1"};
         Eigen::MatrixXf data(1, 2);
         data << 1, 0;
         auto nm_ptr = MNENamedMatrix::build(1, 2, rowNames, colNames, data);
@@ -324,11 +324,11 @@ private slots:
         MNENamedMatrix nm(*nm_ptr);
         op.add_item(&nm, 1, "SSP");
 
-        QStringList testChs = {"MEG0111", "MEG0112"};
+        StringList testChs = {"MEG0111", "MEG0112"};
         int n = op.affect(testChs, testChs.size());
         QVERIFY(n >= 0);
 
-        QStringList noMatch = {"EEG001"};
+        StringList noMatch = {"EEG001"};
         int n2 = op.affect(noMatch, noMatch.size());
         QCOMPARE(n2, 0);
     }
@@ -339,7 +339,7 @@ private slots:
         QList<FiffChInfo> chs;
         for (int i = 0; i < 5; ++i) {
             FiffChInfo ch;
-            ch.ch_name = QString("EEG%1").arg(i + 1, 3, 10, QChar('0'));
+            ch.ch_name = (QString("EEG%1").arg(i + 1, 3, 10, QChar('0'))).toStdString();
             ch.kind = FIFFV_EEG_CH;
             ch.chpos.coil_type = FIFFV_COIL_EEG;
             chs.append(ch);
@@ -366,8 +366,8 @@ private slots:
     void testProjOpApplyCov()
     {
         MNEProjOp op;
-        QStringList colNames = {"ch1", "ch2", "ch3"};
-        QStringList rowNames = {"v1"};
+        StringList colNames = {"ch1", "ch2", "ch3"};
+        StringList rowNames = {"v1"};
         float invSqrt3 = 1.0f / std::sqrt(3.0f);
         Eigen::MatrixXf data(1, 3);
         data << invSqrt3, invSqrt3, invSqrt3;
@@ -376,12 +376,12 @@ private slots:
         MNENamedMatrix nm(*nm_ptr);
         op.add_item(&nm, 1, "SSP");
 
-        QStringList chList = {"ch1", "ch2", "ch3"};
+        StringList chList = {"ch1", "ch2", "ch3"};
         op.assign_channels(chList, chList.size());
         op.make_proj();
 
         // Create a covariance matrix
-        QStringList covNames = colNames;
+        StringList covNames = colNames;
         Eigen::VectorXd covDiag = Eigen::VectorXd::Ones(3);
         MNECovMatrix cov(FIFFV_MNE_NOISE_COV, 3, covNames, covDiag, covDiag, nullptr);
 
@@ -431,7 +431,7 @@ private slots:
         QList<FiffChInfo> chs;
         for (int i = 0; i < 3; ++i) {
             FiffChInfo ch;
-            ch.ch_name = QString("MEG%1").arg(i + 1, 4, 10, QChar('0'));
+            ch.ch_name = ((QString("MEG%1").arg(i + 1, 4, 10, QChar('0'))).toStdString());
             ch.kind = FIFFV_MEG_CH;
             chs.append(ch);
         }
@@ -445,7 +445,7 @@ private slots:
         QList<FiffChInfo> chs;
         for (int i = 0; i < 3; ++i) {
             FiffChInfo ch;
-            ch.ch_name = QString("MEG%1").arg(i + 1, 4, 10, QChar('0'));
+            ch.ch_name = ((QString("MEG%1").arg(i + 1, 4, 10, QChar('0'))).toStdString());
             ch.kind = FIFFV_MEG_CH;
             chs.append(ch);
         }

@@ -17,6 +17,7 @@
 //=============================================================================================================
 
 #include <utils/generics/mne_logger.h>
+#include <utils/string_utils.h>
 #include <iostream>
 #include <inv/hpi/inv_hpi_data_updater.h>
 #include <inv/hpi/inv_sensor_set.h>
@@ -123,7 +124,7 @@ void TestHpiDataUpdater::initTestCase()
             m_pFiffInfo->chs[i].chpos.coil_type == FIFFV_COIL_VV_PLANAR_T2 ||
             m_pFiffInfo->chs[i].chpos.coil_type == FIFFV_COIL_VV_PLANAR_T3) {
             // Check if the sensor is bad, if not append to innerind
-            if (!(m_pFiffInfo->bads.contains(m_pFiffInfo->ch_names.at(i)))) {
+            if (!(UTILSLIB::contains(m_pFiffInfo->bads, m_pFiffInfo->ch_names.at(i)))) {
                 m_lChannelsWithoutBads.append(m_pFiffInfo->chs[i]);
                 m_vecInnerindWithoutBads.append(i);
             }
@@ -131,14 +132,15 @@ void TestHpiDataUpdater::initTestCase()
     }
 
     // Prepare channel lists with bads
-    m_pFiffInfo->bads << "MEG0113" << "MEG0112";
+    m_pFiffInfo->bads.push_back("MEG0113");
+    m_pFiffInfo->bads.push_back("MEG0112");
     for (int i = 0; i < iNumCh; ++i) {
         if (m_pFiffInfo->chs[i].chpos.coil_type == FIFFV_COIL_BABY_MAG ||
             m_pFiffInfo->chs[i].chpos.coil_type == FIFFV_COIL_VV_PLANAR_T1 ||
             m_pFiffInfo->chs[i].chpos.coil_type == FIFFV_COIL_VV_PLANAR_T2 ||
             m_pFiffInfo->chs[i].chpos.coil_type == FIFFV_COIL_VV_PLANAR_T3) {
             // Check if the sensor is bad, if not append to innerind
-            if (!(m_pFiffInfo->bads.contains(m_pFiffInfo->ch_names.at(i)))) {
+            if (!(UTILSLIB::contains(m_pFiffInfo->bads, m_pFiffInfo->ch_names.at(i)))) {
                 m_lChannelsWithBads.append(m_pFiffInfo->chs[i]);
                 m_vecInnerindWithBads.append(i);
             }
@@ -208,7 +210,8 @@ void TestHpiDataUpdater::testprepareDataAndProjectors()
 void TestHpiDataUpdater::testprepareDataAndProjectors_bads()
 {
     // prepare
-    m_pFiffInfo->bads << "MEG0113" << "MEG0112";
+    m_pFiffInfo->bads.push_back("MEG0113");
+    m_pFiffInfo->bads.push_back("MEG0112");
 
     InvHpiDataUpdater hpiData = InvHpiDataUpdater(m_pFiffInfo);
     MatrixXd matProj = MatrixXd::Identity(m_pFiffInfo->chs.size(), m_pFiffInfo->chs.size());
@@ -260,7 +263,8 @@ void TestHpiDataUpdater::testPrepareData()
 void TestHpiDataUpdater::testPrepareData_bads()
 {
     // extract data for channels to use
-    m_pFiffInfo->bads << "MEG0113" << "MEG0112";
+    m_pFiffInfo->bads.push_back("MEG0113");
+    m_pFiffInfo->bads.push_back("MEG0112");
     MatrixXd matDataExpected = MatrixXd(m_vecInnerindWithBads.size(), m_matData.cols());
 
     for (int j = 0; j < m_vecInnerindWithBads.size(); ++j) {
@@ -304,7 +308,8 @@ void TestHpiDataUpdater::testGetSensors_bads()
     InvSensorSetCreator sensorCreator;
     InvSensorSet sensorsExpected = sensorCreator.updateSensorSet(m_lChannelsWithBads, Accuracy::high);
 
-    m_pFiffInfo->bads << "MEG0113" << "MEG0112";
+    m_pFiffInfo->bads.push_back("MEG0113");
+    m_pFiffInfo->bads.push_back("MEG0112");
     InvHpiDataUpdater hpiData = InvHpiDataUpdater(m_pFiffInfo);
 
     /// act
@@ -319,7 +324,8 @@ void TestHpiDataUpdater::testGetSensors_bads()
 void TestHpiDataUpdater::testCheckForUpdates_sensors()
 {
     InvHpiDataUpdater hpiData = InvHpiDataUpdater(m_pFiffInfo);
-    m_pFiffInfo->bads << "MEG0113" << "MEG0112";
+    m_pFiffInfo->bads.push_back("MEG0113");
+    m_pFiffInfo->bads.push_back("MEG0112");
     InvSensorSetCreator sensorCreator;
     InvSensorSet sensorsExpected = sensorCreator.updateSensorSet(m_lChannelsWithBads, Accuracy::high);
 
@@ -336,7 +342,8 @@ void TestHpiDataUpdater::testCheckForUpdates_sensors()
 void TestHpiDataUpdater::testCheckForUpdates_data()
 {
     InvHpiDataUpdater hpiData = InvHpiDataUpdater(m_pFiffInfo);
-    m_pFiffInfo->bads << "MEG0113" << "MEG0112";
+    m_pFiffInfo->bads.push_back("MEG0113");
+    m_pFiffInfo->bads.push_back("MEG0112");
     MatrixXd matDataExpected = MatrixXd(m_vecInnerindWithBads.size(), m_matData.cols());
 
     for (int j = 0; j < m_vecInnerindWithBads.size(); ++j) {
@@ -357,7 +364,8 @@ void TestHpiDataUpdater::testCheckForUpdates_data()
 void TestHpiDataUpdater::testCheckForUpdates_projectors()
 {
     InvHpiDataUpdater hpiData = InvHpiDataUpdater(m_pFiffInfo);
-    m_pFiffInfo->bads << "MEG0113" << "MEG0112";
+    m_pFiffInfo->bads.push_back("MEG0113");
+    m_pFiffInfo->bads.push_back("MEG0112");
     MatrixXd matProj = MatrixXd::Identity(m_pFiffInfo->chs.size(), m_pFiffInfo->chs.size());
 
     //Create new projector based on the excluded channels, first exclude the rows then the columns

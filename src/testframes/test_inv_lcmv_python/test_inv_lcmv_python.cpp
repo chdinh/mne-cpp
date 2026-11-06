@@ -40,6 +40,7 @@
 //=============================================================================================================
 
 #include <inv/beamformer/inv_lcmv.h>
+#include <utils/string_utils.h>
 #include <inv/beamformer/inv_dics.h>
 #include <inv/beamformer/inv_beamformer.h>
 #include <inv/inv_source_estimate.h>
@@ -125,20 +126,20 @@ void TestInvLcmvPython::initTestCase()
     QVERIFY2(fwdFile.exists() && covFile.exists() && aveFile.exists(), "test data missing");
 
     FiffEvoked sampleEvoked(aveFile, 0, QPair<float, float>(-1.0f, -1.0f), false);
-    QStringList good;
-    for (const QString& name : sampleEvoked.info.ch_names) {
-        if (name.startsWith("MEG") && !sampleEvoked.info.bads.contains(name))
-            good << name;
+    StringList good;
+    for (const std::string& name : sampleEvoked.info.ch_names) {
+        if (name.starts_with("MEG") && !UTILSLIB::contains(sampleEvoked.info.bads, name))
+            good.push_back(name);
     }
     QCOMPARE(good.size(), 305);
 
     // The forward names channels without the space ("MEG0113"); the evoked and
     // covariance files use "MEG 0113". Both list them in the same order.
     MNEForwardSolution fullFwd(fwdFile);
-    QStringList fwdGood;
-    for (const QString& name : fullFwd.sol->row_names) {
-        if (name.startsWith("MEG") && name != "MEG2443")
-            fwdGood << name;
+    StringList fwdGood;
+    for (const std::string& name : fullFwd.sol->row_names) {
+        if (name.starts_with("MEG") && name != "MEG2443")
+            fwdGood.push_back(name);
     }
     m_fwd = fullFwd.pick_channels(fwdGood);
     QCOMPARE(static_cast<int>(m_fwd.sol->data.rows()), 305);

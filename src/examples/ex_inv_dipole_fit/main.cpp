@@ -115,7 +115,7 @@ int main(int argc, char* argv[])
     // Hand the field to the pipeline as an evoked file with two samples.
     QFile aveFile(sampleAve);
     FiffEvokedSet evokedSet(aveFile);
-    FiffEvoked evoked = evokedSet.evoked[0].pick_channels(fitData->ch_names.mid(0, fitData->nmeg));
+    FiffEvoked evoked = evokedSet.evoked[0].pick_channels(StringList(fitData->ch_names.begin() + 0, fitData->ch_names.begin() + 0 + fitData->nmeg));
     evoked.info.bads.clear();
     evoked.data = field.cast<double>().replicate(1, 2);
     evoked.first = 0;

@@ -40,6 +40,14 @@ using namespace UTILSLIB;
 using namespace FIFFLIB;
 using namespace Eigen;
 
+static StringList toStd(const QStringList& names)
+{
+    StringList result;
+    for (const QString& name : names)
+        result.push_back(name.toStdString());
+    return result;
+}
+
 //=============================================================================================================
 /**
  * @brief Test class for EEG re-referencing functions.
@@ -65,7 +73,7 @@ private:
         info.nchan = 5;
         info.sfreq = 1000.0;
 
-        QStringList names = {"EEG1", "EEG2", "EEG3", "MEG1", "MEG2"};
+        StringList names = {"EEG1", "EEG2", "EEG3", "MEG1", "MEG2"};
         QList<int> kinds = {FIFFV_EEG_CH, FIFFV_EEG_CH, FIFFV_EEG_CH,
                             FIFFV_MEG_CH, FIFFV_MEG_CH};
 
@@ -81,7 +89,7 @@ private:
             ch.unit_mul = 0;
             ch.coord_frame = 0;
             info.chs.append(ch);
-            info.ch_names.append(names[i]);
+            info.ch_names.push_back(names[i]);
         }
 
         return info;
@@ -154,7 +162,7 @@ private slots:
         MatrixXd data = makeTestData();
 
         // Re-reference to EEG2 (value 20)
-        setEegReference(data, info, QStringList{"EEG2"});
+        setEegReference(data, info, StringList{"EEG2"});
 
         // EEG1: 10 - 20 = -10
         QVERIFY(data.row(0).isApprox(RowVectorXd::Constant(10, -10.0), 1e-10));
@@ -176,7 +184,7 @@ private slots:
         MatrixXd data = makeTestData();
 
         // Re-reference to mean of EEG1 and EEG3: (10+30)/2 = 20
-        setEegReference(data, info, QStringList{"EEG1", "EEG3"});
+        setEegReference(data, info, StringList{"EEG1", "EEG3"});
 
         // EEG1: 10 - 20 = -10
         QVERIFY(data.row(0).isApprox(RowVectorXd::Constant(10, -10.0), 1e-10));
@@ -195,7 +203,7 @@ private slots:
         FiffInfo info = makeTestInfo();
         MatrixXd data = makeTestData();
 
-        addReferenceChannels(data, info, QStringList{"REF1", "REF2"});
+        addReferenceChannels(data, info, StringList{"REF1", "REF2"});
 
         // Data should have 7 rows now
         QCOMPARE(data.rows(), static_cast<Eigen::Index>(7));
@@ -213,8 +221,8 @@ private slots:
         QCOMPARE(info.nchan, 7);
         QCOMPARE(info.chs.size(), 7);
         QCOMPARE(info.ch_names.size(), 7);
-        QCOMPARE(info.ch_names[5], QString("REF1"));
-        QCOMPARE(info.ch_names[6], QString("REF2"));
+        QCOMPARE(info.ch_names[5], std::string("REF1"));
+        QCOMPARE(info.ch_names[6], std::string("REF2"));
         QCOMPARE(info.chs[5].kind, static_cast<fiff_int_t>(FIFFV_EEG_CH));
         QCOMPARE(info.chs[6].kind, static_cast<fiff_int_t>(FIFFV_EEG_CH));
     }
@@ -230,8 +238,8 @@ private slots:
 
         // EEG1 - EEG2: 10 - 20 = -10
         setBipolarReference(data, info,
-                            QStringList{"EEG1"},
-                            QStringList{"EEG2"},
+                            StringList{"EEG1"},
+                            StringList{"EEG2"},
                             false);
 
         // With dropOriginals=false, original rows are kept plus one bipolar row
@@ -241,7 +249,7 @@ private slots:
         QVERIFY(data.row(5).isApprox(RowVectorXd::Constant(10, -10.0), 1e-10));
 
         // Bipolar channel name
-        QCOMPARE(info.ch_names.last(), QString("EEG1-EEG2"));
+        QCOMPARE(info.ch_names.back(), QString("EEG1-EEG2"));
         QCOMPARE(info.nchan, 6);
     }
 
@@ -256,8 +264,8 @@ private slots:
 
         // EEG1 - EEG2 with drop originals
         setBipolarReference(data, info,
-                            QStringList{"EEG1"},
-                            QStringList{"EEG2"},
+                            StringList{"EEG1"},
+                            StringList{"EEG2"},
                             true);
 
         // 5 original - 2 dropped + 1 bipolar = 4 rows
@@ -265,10 +273,10 @@ private slots:
         QCOMPARE(info.nchan, 4);
 
         // Remaining channels: EEG3, MEG1, MEG2, EEG1-EEG2
-        QCOMPARE(info.ch_names[0], QString("EEG3"));
-        QCOMPARE(info.ch_names[1], QString("MEG1"));
-        QCOMPARE(info.ch_names[2], QString("MEG2"));
-        QCOMPARE(info.ch_names[3], QString("EEG1-EEG2"));
+        QCOMPARE(info.ch_names[0], std::string("EEG3"));
+        QCOMPARE(info.ch_names[1], std::string("MEG1"));
+        QCOMPARE(info.ch_names[2], std::string("MEG2"));
+        QCOMPARE(info.ch_names[3], std::string("EEG1-EEG2"));
 
         // Verify data values
         QVERIFY(data.row(0).isApprox(RowVectorXd::Constant(10, 30.0), 1e-10));  // EEG3
@@ -287,8 +295,8 @@ private slots:
         MatrixXd data = makeTestData();
 
         setBipolarReference(data, info,
-                            QStringList{"EEG2"},
-                            QStringList{"EEG3"},
+                            StringList{"EEG2"},
+                            StringList{"EEG3"},
                             false);
 
         // 5 original + 1 bipolar = 6 rows
@@ -302,7 +310,7 @@ private slots:
 
         // Bipolar row: EEG2 - EEG3 = 20 - 30 = -10
         QVERIFY(data.row(5).isApprox(RowVectorXd::Constant(10, -10.0), 1e-10));
-        QCOMPARE(info.ch_names[5], QString("EEG2-EEG3"));
+        QCOMPARE(info.ch_names[5], std::string("EEG2-EEG3"));
     }
 
     //=========================================================================================================
@@ -315,7 +323,7 @@ private slots:
         MatrixXd data = makeTestData();
 
         // Mark EEG3 as bad
-        info.bads.append("EEG3");
+        info.bads.push_back("EEG3");
 
         // Average ref should use only EEG1 and EEG2: (10 + 20) / 2 = 15
         setEegReference(data, info);
@@ -367,16 +375,16 @@ private slots:
 
         FiffInfo info;
         info.sfreq = 100.0;
-        const QStringList chNames = {"E1", "E2", "E3", "E4", "M1"};
-        for (int i = 0; i < chNames.size(); ++i) {
+        const StringList chNames = {"E1", "E2", "E3", "E4", "M1"};
+        for (int i = 0; i < static_cast<int>(chNames.size()); ++i) {
             FiffChInfo ch;
             ch.scanNo = ch.logNo = i + 1;
             ch.kind = i < 4 ? FIFFV_EEG_CH : FIFFV_MEG_CH;
             ch.ch_name = chNames[i];
             info.chs.append(ch);
-            info.ch_names.append(chNames[i]);
+            info.ch_names.push_back(chNames[i]);
         }
-        info.nchan = chNames.size();
+        info.nchan = static_cast<int>(chNames.size());
         info.bads = {"E3"};
         MatrixXd data(5, 6);
         for (int k = 0; k < 5; ++k)
@@ -390,9 +398,9 @@ private slots:
         else if (op == "bipolarkeep")
             setBipolarReference(data, info, {"E1"}, {"E4"}, false);
         else
-            setEegReference(data, info, op.split(','));
+            setEegReference(data, info, toStd(op.split(',')));
 
-        QCOMPARE(info.ch_names, names);
+        QCOMPARE(info.ch_names, toStd(names));
         QCOMPARE(data.rows(), static_cast<Eigen::Index>(expected.size()));
         for (int i = 0; i < expected.size(); ++i)
             QVERIFY2(std::abs(data(i, 2) - expected[i]) <= 1e-9,
@@ -408,12 +416,12 @@ private slots:
     void testAverageProjector()
     {
         FiffInfo info = makeTestInfo();
-        info.bads.append("EEG3");
+        info.bads.push_back("EEG3");
         MatrixXd data = makeTestData();
         const MatrixXd orig = data;
 
-        setEegReference(data, info, QStringList(), true);
-        setEegReference(data, info, QStringList(), true);
+        setEegReference(data, info, {}, true);
+        setEegReference(data, info, {}, true);
         setEegReference(data, info, {"EEG1"}, true);
 
         QCOMPARE(data, orig);
@@ -422,7 +430,7 @@ private slots:
         QCOMPARE(proj.desc, QString("Average EEG reference"));
         QCOMPARE(proj.kind, static_cast<fiff_int_t>(FIFFV_PROJ_ITEM_EEG_AVREF));
         QVERIFY(!proj.active);
-        QCOMPARE(proj.data->col_names, QStringList({"EEG1", "EEG2"}));
+        QCOMPARE(proj.data->col_names, StringList({"EEG1", "EEG2"}));
         QVERIFY(proj.data->data.isApprox(MatrixXd::Constant(1, 2, 1.0 / std::sqrt(2.0))));
     }
 
@@ -441,10 +449,10 @@ private slots:
         QCOMPARE(data.rows(), static_cast<Eigen::Index>(0));
         QCOMPARE(data.cols(), static_cast<Eigen::Index>(0));
 
-        addReferenceChannels(data, info, QStringList{});
+        addReferenceChannels(data, info, StringList{});
         QCOMPARE(data.rows(), static_cast<Eigen::Index>(0));
 
-        setBipolarReference(data, info, QStringList{}, QStringList{});
+        setBipolarReference(data, info, StringList{}, StringList{});
         QCOMPARE(data.rows(), static_cast<Eigen::Index>(0));
     }
 };

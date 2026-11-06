@@ -20,6 +20,7 @@
 //=============================================================================================================
 
 #include <fwd/compute_fwd/compute_fwd.h>
+#include <utils/string_utils.h>
 #include <fwd/compute_fwd/compute_fwd_settings.h>
 #include <fwd/fwd.h>
 #include <fwd/fwd_bem_model.h>
@@ -105,7 +106,7 @@ int main(int argc, char* argv[])
     for (const FiffChInfo& ch : raw.info.chs) {
         if (ch.kind == FIFFV_MEG_CH) {
             meg << ch;
-            if (!raw.info.bads.contains(ch.ch_name)) {
+            if (!UTILSLIB::contains(raw.info.bads, ch.ch_name)) {
                 goodMeg << ch;
             }
         } else if (ch.kind == FIFFV_EEG_CH) {

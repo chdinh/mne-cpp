@@ -313,7 +313,7 @@ void LSLAdapter::prepareFiffInfo(const LSLLIB::stream_info& stream)
         m_pFiffInfo->sfreq = m_fSamplingFrequency;
 
         // set up the channel info
-        QStringList QSLChNames;
+        StringList QSLChNames;
         m_pFiffInfo->chs.clear();
 
         for (int i = 0; i < m_pFiffInfo->nchan; ++i) {
@@ -331,7 +331,7 @@ void LSLAdapter::prepareFiffInfo(const LSLLIB::stream_info& stream)
                 sChType.append("0");
             }
 
-            fChInfo.ch_name = sChType.append(sChType.number(i));
+            fChInfo.ch_name = sChType.append(sChType.number(i)).toStdString();
 
             // set channel type
             fChInfo.kind = FIFFV_EEG_CH;
@@ -373,7 +373,7 @@ void LSLAdapter::prepareFiffInfo(const LSLLIB::stream_info& stream)
             fChInfo.chpos.ez(1) = 0;
             fChInfo.chpos.ez(2) = 1;
 
-            QSLChNames << sChType;
+            QSLChNames.push_back(sChType.toStdString());
 
             m_pFiffInfo->chs.append(fChInfo);
         }

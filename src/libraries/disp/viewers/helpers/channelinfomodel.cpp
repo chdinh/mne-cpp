@@ -19,6 +19,7 @@
 //=============================================================================================================
 
 #include "channelinfomodel.h"
+#include <utils/string_utils.h>
 #include "mneoperator.h"
 
 #include <fiff/fiff_info.h>
@@ -42,6 +43,13 @@ using namespace DISPLIB;
 using namespace Eigen;
 using namespace FIFFLIB;
 
+static QStringList toQStringList(const StringList& names)
+{
+    QStringList list;
+    for (const std::string& name : names)
+        list << QString::fromStdString(name);
+    return list;
+}
 //=============================================================================================================
 // DEFINE MEMBER METHODS
 //=============================================================================================================
@@ -434,17 +442,14 @@ QVariant ChannelInfoModel::data(const QModelIndex& index, int role) const
         //******** twelve column (channel bad) ********
         if (index.column() == 11) {
             QVariant v;
-            bool isBad = false;
-            QString chName = m_pFiffInfo->chs.at(index.row()).ch_name;
+            const bool isBad = m_pFiffInfo->isBad(m_pFiffInfo->chs.at(index.row()).ch_name);
 
             switch (role) {
                 case Qt::DisplayRole:
-                    isBad = m_pFiffInfo->bads.contains(chName);
                     v.setValue(isBad);
                     return v;
 
                 case ChannelInfoModelRoles::GetIsBad:
-                    isBad = m_pFiffInfo->bads.contains(chName);
                     v.setValue(isBad);
                     return v;
 
@@ -521,8 +526,8 @@ void ChannelInfoModel::setFiffInfo(FiffInfo::SPtr& pFiffInfo)
     beginResetModel();
 
     m_pFiffInfo = pFiffInfo;
-    m_aliasNames = m_pFiffInfo->ch_names;
-    m_mappedLayoutChNames = m_pFiffInfo->ch_names;
+    m_aliasNames = toQStringList(m_pFiffInfo->ch_names);
+    m_mappedLayoutChNames = m_aliasNames;
 
     mapLayoutToChannels();
 
@@ -551,8 +556,8 @@ void ChannelInfoModel::layoutChanged(const QMap<QString, QPointF>& layoutMap)
     beginResetModel();
 
     m_layoutMap = layoutMap;
-    m_aliasNames = m_pFiffInfo->ch_names;
-    m_mappedLayoutChNames = m_pFiffInfo->ch_names;
+    m_aliasNames = toQStringList(m_pFiffInfo->ch_names);
+    m_mappedLayoutChNames = m_aliasNames;
 
     mapLayoutToChannels();
 
@@ -572,7 +577,7 @@ const QStringList& ChannelInfoModel::getMappedChannelsList()
 
 int ChannelInfoModel::getIndexFromOrigChName(QString chName)
 {
-    return m_pFiffInfo->ch_names.indexOf(chName);
+    return UTILSLIB::indexOf(m_pFiffInfo->ch_names, chName.toStdString());
 }
 
 //=============================================================================================================
@@ -584,7 +589,7 @@ int ChannelInfoModel::getIndexFromMappedChName(QString chName)
 
 //=============================================================================================================
 
-QStringList ChannelInfoModel::getBadChannelList()
+StringList ChannelInfoModel::getBadChannelList()
 {
     return m_pFiffInfo->bads;
 }
@@ -598,7 +603,7 @@ void ChannelInfoModel::mapLayoutToChannels()
     for (int i = 0; i < channelList.size(); i++) {
         //Get current channel information
         FiffChInfo chInfo = channelList.at(i);
-        QString chName = chInfo.ch_name;
+        QString chName = QString::fromStdString(chInfo.ch_name);
         QRegularExpression regExpRemove;
 
         switch (chInfo.kind) {

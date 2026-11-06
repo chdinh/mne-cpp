@@ -27,6 +27,7 @@
 //=============================================================================================================
 
 #include <fwd/fwd_field_map.h>
+#include <utils/string_utils.h>
 
 #include <fiff/fiff.h>
 #include <fiff/fiff_evoked.h>
@@ -385,17 +386,17 @@ void TestFieldMap::initTestCase()
 
     // Classify channels (matching Python's pick_types)
     QList<FiffChInfo> megChs, eegChs;
-    QStringList megChNames, eegChNames;
+    StringList megChNames, eegChNames;
     for (int k = 0; k < m_evoked.info.chs.size(); ++k) {
         const auto& ch = m_evoked.info.chs[k];
-        if (m_evoked.info.bads.contains(ch.ch_name))
+        if (UTILSLIB::contains(m_evoked.info.bads, ch.ch_name))
             continue;
         if (ch.kind == FIFFV_MEG_CH) {
             megChs.append(ch);
-            megChNames.append(ch.ch_name);
+            megChNames.push_back(ch.ch_name);
         } else if (ch.kind == FIFFV_EEG_CH) {
             eegChs.append(ch);
-            eegChNames.append(ch.ch_name);
+            eegChNames.push_back(ch.ch_name);
         }
     }
     qDebug() << "Good MEG channels:" << megChs.size()
@@ -559,10 +560,10 @@ void TestFieldMap::testMappingProjectorVariants()
     if (!m_hasMeg || !m_hasEeg)
         QSKIP("Needs MEG and EEG data");
 
-    QStringList eegNames;
+    StringList eegNames;
     for (const FiffChInfo& ch : m_evoked.info.chs) {
-        if (ch.kind == FIFFV_EEG_CH && !m_evoked.info.bads.contains(ch.ch_name))
-            eegNames << ch.ch_name;
+        if (ch.kind == FIFFV_EEG_CH && !UTILSLIB::contains(m_evoked.info.bads, ch.ch_name))
+            eegNames.push_back(ch.ch_name);
     }
 
     // Same thresholds as testMegMapping/testEegMapping: 5% per element, at most 1% outliers.
@@ -729,7 +730,7 @@ void TestFieldMap::testMultiEvokedMegMapping()
             int idx = -1;
             QString pyNorm = chName.trimmed().remove(' ');
             for (int k = 0; k < evoked.info.chs.size(); ++k) {
-                QString cppNorm = evoked.info.chs[k].ch_name.trimmed().remove(' ');
+                QString cppNorm = QString::fromStdString(evoked.info.chs[k].ch_name).trimmed().remove(' ');
                 if (cppNorm == pyNorm) {
                     idx = k;
                     break;
@@ -885,7 +886,7 @@ void TestFieldMap::testMultiEvokedEegMapping()
             int idx = -1;
             QString pyNorm = chName.trimmed().remove(' ');
             for (int k = 0; k < evoked.info.chs.size(); ++k) {
-                QString cppNorm = evoked.info.chs[k].ch_name.trimmed().remove(' ');
+                QString cppNorm = QString::fromStdString(evoked.info.chs[k].ch_name).trimmed().remove(' ');
                 if (cppNorm == pyNorm) {
                     idx = k;
                     break;
@@ -1058,14 +1059,14 @@ void TestFieldMap::testHelmetFieldMap()
     // ── Compute C++ mapping with helmet surface + auto origin ──────────
     // Build MEG channel names matching C++ ordering
     QList<FiffChInfo> megChs;
-    QStringList cppMegChNames;
+    StringList cppMegChNames;
     for (int k = 0; k < m_evoked.info.chs.size(); ++k) {
         const auto& ch = m_evoked.info.chs[k];
-        if (m_evoked.info.bads.contains(ch.ch_name))
+        if (UTILSLIB::contains(m_evoked.info.bads, ch.ch_name))
             continue;
         if (ch.kind == FIFFV_MEG_CH) {
             megChs.append(ch);
-            cppMegChNames.append(ch.ch_name);
+            cppMegChNames.push_back(ch.ch_name);
         }
     }
 
@@ -1150,7 +1151,7 @@ void TestFieldMap::testHelmetFieldMap()
             int idx = -1;
             QString pyNorm = pyName.trimmed().remove(' ');
             for (int k = 0; k < baselinedEvoked.info.chs.size(); ++k) {
-                QString cppNorm = baselinedEvoked.info.chs[k].ch_name.trimmed().remove(' ');
+                QString cppNorm = QString::fromStdString(baselinedEvoked.info.chs[k].ch_name).trimmed().remove(' ');
                 if (cppNorm == pyNorm) {
                     idx = k;
                     break;

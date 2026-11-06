@@ -102,7 +102,7 @@ FiffInfo::SPtr RtDataClient::readInfo()
     FiffInfo::SPtr p_pFiffInfo(new FiffInfo());
     bool t_bReadMeasBlockStart = false;
     bool t_bReadMeasBlockEnd = false;
-    QString col_names, row_names;
+    std::string col_names, row_names;
 
     FiffStream t_fiffStream(this);
     //
@@ -176,7 +176,7 @@ FiffInfo::SPtr RtDataClient::readInfo()
                             case FIFF_NAME: // First proj -> Proj is created
                                 proj = FiffProj();
                                 p_pFiffInfo->projs.append(proj);
-                                p_pFiffInfo->projs[countProj].desc = t_pTag->toString();
+                                p_pFiffInfo->projs[countProj].desc = QString::fromStdString(t_pTag->toString());
                                 break;
                             case FIFF_PROJ_ITEM_KIND:
                                 p_pFiffInfo->projs[countProj].kind = *(t_pTag->toInt());
@@ -249,12 +249,12 @@ FiffInfo::SPtr RtDataClient::readInfo()
                                 break;
                             case FIFF_MNE_ROW_NAMES:
                                 row_names = t_pTag->toString();
-                                if (!row_names.isEmpty())
+                                if (!row_names.empty())
                                     p_pFiffInfo->comps[countComp].data->row_names = FiffStream::split_name_list(row_names);
                                 break;
                             case FIFF_MNE_COL_NAMES:
                                 col_names = t_pTag->toString();
-                                if (!col_names.isEmpty())
+                                if (!col_names.empty())
                                     p_pFiffInfo->comps[countComp].data->col_names = FiffStream::split_name_list(col_names);
                                 break;
                             case FIFF_MNE_CTF_COMP_DATA:
@@ -337,7 +337,7 @@ FiffInfo::SPtr RtDataClient::readInfo()
     //   for convenience
     //
     for (qint32 c = 0; c < p_pFiffInfo->nchan; ++c)
-        p_pFiffInfo->ch_names << p_pFiffInfo->chs[c].ch_name;
+        p_pFiffInfo->ch_names.push_back(p_pFiffInfo->chs[c].ch_name);
     calibrateCompensators(*p_pFiffInfo);
 
     return p_pFiffInfo;
@@ -352,7 +352,7 @@ MetaData RtDataClient::readMetadata()
 
     bool t_bReadMeasBlockStart = false;
     bool t_bReadMeasBlockEnd = false;
-    QString col_names, row_names;
+    std::string col_names, row_names;
 
     FiffStream t_fiffStream(this);
     //
@@ -431,7 +431,7 @@ MetaData RtDataClient::readMetadata()
                             case FIFF_NAME: // First proj -> Proj is created
                                 proj = FiffProj();
                                 p_pFiffInfo->projs.append(proj);
-                                p_pFiffInfo->projs[countProj].desc = t_pTag->toString();
+                                p_pFiffInfo->projs[countProj].desc = QString::fromStdString(t_pTag->toString());
                                 break;
                             case FIFF_PROJ_ITEM_KIND:
                                 p_pFiffInfo->projs[countProj].kind = *(t_pTag->toInt());
@@ -504,12 +504,12 @@ MetaData RtDataClient::readMetadata()
                                 break;
                             case FIFF_MNE_ROW_NAMES:
                                 row_names = t_pTag->toString();
-                                if (!row_names.isEmpty())
+                                if (!row_names.empty())
                                     p_pFiffInfo->comps[countComp].data->row_names = FiffStream::split_name_list(row_names);
                                 break;
                             case FIFF_MNE_COL_NAMES:
                                 col_names = t_pTag->toString();
-                                if (!col_names.isEmpty())
+                                if (!col_names.empty())
                                     p_pFiffInfo->comps[countComp].data->col_names = FiffStream::split_name_list(col_names);
                                 break;
                             case FIFF_MNE_CTF_COMP_DATA:
@@ -592,7 +592,7 @@ MetaData RtDataClient::readMetadata()
     //   for convenience
     //
     for (qint32 c = 0; c < p_pFiffInfo->nchan; ++c)
-        p_pFiffInfo->ch_names << p_pFiffInfo->chs[c].ch_name;
+        p_pFiffInfo->ch_names.push_back(p_pFiffInfo->chs[c].ch_name);
     calibrateCompensators(*p_pFiffInfo);
 
     p_pDigData->npoint = p_pDigData->points.size();

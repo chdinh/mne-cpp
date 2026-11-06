@@ -13,6 +13,7 @@
  */
 
 #include "rawdatabrowserwidget.h"
+#include <utils/string_utils.h>
 
 #include "mnebrowserrawdelegate.h"
 
@@ -437,8 +438,8 @@ bool RawDataBrowserWidget::eventFilter(QObject* watched, QEvent* event)
                     // Click in label column — toggle bad channel
                     const QModelIndex idx = m_tableView->indexAt(mouseEvent->pos());
                     if (idx.isValid() && !m_rawModel->channelInfoList().isEmpty()) {
-                        const QString& chName = m_rawModel->channelInfoList().at(idx.row()).ch_name;
-                        const bool isBad = m_rawModel->fiffInfo()->bads.contains(chName);
+                        const std::string& chName = m_rawModel->channelInfoList().at(idx.row()).ch_name;
+                        const bool isBad = UTILSLIB::contains(m_rawModel->fiffInfo()->bads, chName);
                         QModelIndexList colOneList;
                         colOneList << m_rawModel->index(idx.row(), 1);
                         m_rawModel->markChBad(colOneList, !isBad);

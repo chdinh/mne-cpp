@@ -15,6 +15,7 @@
 //=============================================================================================================
 
 #include "sensorfieldmapper.h"
+#include <utils/string_utils.h>
 #include "renderable/brainsurface.h"
 #include "core/rendertypes.h"
 
@@ -234,10 +235,10 @@ bool SensorFieldMapper::buildMapping(
 
     // ── Classify channels ──────────────────────────────────────────────
     QList<FiffChInfo> megChs, eegChs;
-    QStringList megChNames, eegChNames;
+    std::vector<std::string> megChNames, eegChNames;
 
-    auto isBad = [this](const QString& name) {
-        return m_evoked.info.bads.contains(name);
+    auto isBad = [this](const std::string& name) {
+        return UTILSLIB::contains(m_evoked.info.bads, name);
     };
 
     const int nChs = m_evoked.info.chs.size();
@@ -260,14 +261,14 @@ bool SensorFieldMapper::buildMapping(
             m_megPick(nMeg++) = k;
             m_megPositions.push_back(Eigen::Vector3f(pos.x(), pos.y(), pos.z()));
             megChs.append(ch);
-            megChNames.append(ch.ch_name);
+            megChNames.push_back(ch.ch_name);
         } else if (ch.kind == FIFFV_EEG_CH) {
             if (applySensorTrans && !headToMriTrans.isEmpty())
                 pos = headToMri.map(pos);
             m_eegPick(nEeg++) = k;
             m_eegPositions.push_back(Eigen::Vector3f(pos.x(), pos.y(), pos.z()));
             eegChs.append(ch);
-            eegChNames.append(ch.ch_name);
+            eegChNames.push_back(ch.ch_name);
         }
     }
 

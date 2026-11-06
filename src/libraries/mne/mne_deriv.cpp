@@ -15,6 +15,7 @@
 //=============================================================================================================
 
 #include "mne_deriv.h"
+#include <utils/string_utils.h>
 
 //=============================================================================================================
 // USED NAMESPACES
@@ -67,9 +68,9 @@ int MNEDeriv::validate(const QList<FiffChInfo>& chInfo)
     if (chInfo.isEmpty() || nrow == 0) {
         return 0;
     }
-    QStringList names;
+    StringList names;
     for (const FiffChInfo& ch : chInfo) {
-        names << ch.ch_name;
+        names.push_back(ch.ch_name);
     }
     // Row-major view: the inputs of derived channel j are the non-zeros of row j.
     const Eigen::SparseMatrix<float, Eigen::RowMajor> rows = deriv_data->data->eigen();
@@ -78,7 +79,7 @@ int MNEDeriv::validate(const QList<FiffChInfo>& chInfo)
         const FiffChInfo* first = nullptr;
         bool ok = true;
         for (Eigen::SparseMatrix<float, Eigen::RowMajor>::InnerIterator it(rows, j); it && ok; ++it) {
-            const int pick = static_cast<int>(names.indexOf(deriv_data->collist.value(static_cast<int>(it.col()))));
+            const int pick = static_cast<int>(UTILSLIB::indexOf(names, ((deriv_data->collist[static_cast<int>(it.col())]))));
             if (pick < 0) {
                 ok = false;
             } else if (!first) {

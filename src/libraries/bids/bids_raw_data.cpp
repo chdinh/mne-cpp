@@ -34,6 +34,7 @@
 #include <QJsonDocument>
 #include <QJsonObject>
 #include <algorithm>
+#include <map>
 #include <cmath>
 
 //=============================================================================================================
@@ -98,9 +99,9 @@ void applyChannelsTsv(FiffInfo& info, const QList<BidsChannel>& channels)
 
     QMap<QString, int> bidsToFiff = bidsTypeToFiffKind();
 
-    QMap<QString, const BidsChannel*> channelMap;
+    std::map<std::string, const BidsChannel*> channelMap;
     for (const auto& ch : channels)
-        channelMap[ch.name] = &ch;
+        channelMap[ch.name.toStdString()] = &ch;
 
     info.bads.clear();
 
@@ -109,7 +110,7 @@ void applyChannelsTsv(FiffInfo& info, const QList<BidsChannel>& channels)
         auto it = channelMap.find(fiffCh.ch_name);
         if (it == channelMap.end())
             continue;
-        const BidsChannel* rec = it.value();
+        const BidsChannel* rec = it->second;
 
         QString typeUpper = rec->type.toUpper();
         if (bidsToFiff.contains(typeUpper))
@@ -118,7 +119,7 @@ void applyChannelsTsv(FiffInfo& info, const QList<BidsChannel>& channels)
         bidsUnitToFiff(rec->units, fiffCh.unit, fiffCh.unit_mul);
 
         if (rec->status.toLower() == "bad")
-            info.bads.append(fiffCh.ch_name);
+            info.bads.push_back(fiffCh.ch_name);
     }
 }
 
@@ -144,10 +145,10 @@ void applyElectrodePositions(FiffInfo& info,
         scaleFactor = 0.01f;
 
     // Ident = 1-based ordinal among electrode channels, the order buildElectrodeRecords() reads them back in
-    QMap<QString, int> chOrdinal;
+    std::map<std::string, int> chOrdinal;
     for (const auto& ch : info.chs) {
         if (ch.kind == FIFFV_EEG_CH || ch.kind == FIFFV_ECOG_CH || ch.kind == FIFFV_SEEG_CH || ch.kind == FIFFV_DBS_CH)
-            chOrdinal.insert(ch.ch_name, static_cast<int>(chOrdinal.size()) + 1);
+            chOrdinal.emplace(ch.ch_name, static_cast<int>(chOrdinal.size()) + 1);
     }
 
     info.dig.clear();
@@ -157,8 +158,9 @@ void applyElectrodePositions(FiffInfo& info,
             continue;
 
         FiffDigPoint dp;
-        dp.kind = chOrdinal.contains(elec.name) ? FIFFV_POINT_EEG : FIFFV_POINT_EXTRA;
-        dp.ident = chOrdinal.contains(elec.name) ? chOrdinal.value(elec.name) : extraIdent++;
+        const auto ordinal = chOrdinal.find(elec.name.toStdString());
+        dp.kind = ordinal != chOrdinal.end() ? FIFFV_POINT_EEG : FIFFV_POINT_EXTRA;
+        dp.ident = ordinal != chOrdinal.end() ? ordinal->second : extraIdent++;
         dp.r[0] = elec.x.toFloat() * scaleFactor;
         dp.r[1] = elec.y.toFloat() * scaleFactor;
         dp.r[2] = elec.z.toFloat() * scaleFactor;
@@ -276,13 +278,13 @@ QList<BidsChannel> buildChannelRecords(const FiffInfo& info)
 {
     QList<BidsChannel> records;
     QMap<int, QString> kindMap = fiffKindToBidsType();
-    QSet<QString> badsSet(info.bads.begin(), info.bads.end());
+
 
     for (int i = 0; i < info.chs.size(); ++i) {
         const FiffChInfo& ch = info.chs[i];
 
         BidsChannel rec;
-        rec.name = ch.ch_name;
+        rec.name = QString::fromStdString(ch.ch_name);
         rec.type = kindMap.contains(ch.kind) ? kindMap[ch.kind] : QStringLiteral("MISC");
         rec.units = fiffUnitToBidsString(ch.unit, ch.unit_mul);
         rec.samplingFreq = QString::number(static_cast<double>(info.sfreq), 'g', 10);
@@ -293,7 +295,7 @@ QList<BidsChannel> buildChannelRecords(const FiffInfo& info)
             ? QString::number(static_cast<double>(info.lowpass), 'g', 10)
             : QStringLiteral("n/a");
         rec.notch = QStringLiteral("n/a");
-        rec.status = badsSet.contains(ch.ch_name) ? QStringLiteral("bad") : QStringLiteral("good");
+        rec.status = info.isBad(ch.ch_name) ? QStringLiteral("bad") : QStringLiteral("good");
         rec.description = channelTypeDescription(ch.kind);
 
         records.append(rec);
@@ -324,7 +326,7 @@ QList<BidsElectrode> buildElectrodeRecords(const FiffInfo& info)
             continue;
 
         BidsElectrode rec;
-        rec.name = ch.ch_name;
+        rec.name = QString::fromStdString(ch.ch_name);
 
         ++digIdx;
         bool hasPosition = false;

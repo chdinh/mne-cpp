@@ -17,6 +17,7 @@
 //=============================================================================================================
 
 #include "evokedsetmodel.h"
+#include <utils/string_utils.h>
 
 #include <fiff/fiff_info.h>
 #include <fiff/fiff_evoked_set.h>
@@ -104,7 +105,10 @@ QVariant EvokedSetModel::data(const QModelIndex& index, int role) const
 
         //******** first column (chname) ********
         if (index.column() == 0 && role == Qt::DisplayRole) {
-            return QVariant(m_pEvokedSet->info.ch_names);
+            QStringList names;
+            for (const std::string& name : m_pEvokedSet->info.ch_names)
+                names << QString::fromStdString(name);
+            return QVariant(names);
         }
 
         //******** second column (butterfly data plot) ********
@@ -249,7 +253,7 @@ void EvokedSetModel::init()
 
     //Generate bad channel index list
     RowVectorXi sel; // = RowVectorXi(0,0);
-    QStringList emptyExclude;
+    StringList emptyExclude;
 
     if (m_pEvokedSet->info.bads.size() > 0) {
         sel = FiffInfoBase::pick_channels(m_pEvokedSet->info.ch_names, m_pEvokedSet->info.bads, emptyExclude);
@@ -434,7 +438,7 @@ bool EvokedSetModel::getIsChannelBad(qint32 row) const
 
     if (row < m_qMapIdxRowSelection.size()) {
         qint32 chRow = m_qMapIdxRowSelection[row];
-        bIsBad = m_pEvokedSet->info.bads.contains(m_pEvokedSet->info.chs[chRow].ch_name);
+        bIsBad = UTILSLIB::contains(m_pEvokedSet->info.bads, m_pEvokedSet->info.chs[chRow].ch_name);
     }
 
     return bIsBad;
@@ -647,7 +651,7 @@ void EvokedSetModel::updateProjection(const QList<FiffProj>& projs)
 
         //set columns of matrix to zero depending on bad channels indexes
         RowVectorXi sel; // = RowVectorXi(0,0);
-        QStringList emptyExclude;
+        StringList emptyExclude;
 
         if (m_pEvokedSet->info.bads.size() > 0) {
             sel = FiffInfoBase::pick_channels(m_pEvokedSet->info.ch_names, m_pEvokedSet->info.bads, emptyExclude);

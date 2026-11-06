@@ -107,7 +107,7 @@ void MNEFiffContents::print_ch_info(QTextStream& out, const FiffTag::UPtr& tag)
     const QString text2 = FiffExplain::unitMultiplier(info.unit_mul);
     const QString text3 = FiffExplain::channelKind(info.kind).isEmpty() ? QStringLiteral("N/A") : FiffExplain::channelKind(info.kind);
 
-    out << QString::asprintf("\t%3d \"%s\" (%s %3d) [%s%s]", info.scanNo, info.ch_name.toUtf8().constData(), text3.toUtf8().constData(), info.logNo, text2.toUtf8().constData(), text1.toUtf8().constData());
+    out << QString::asprintf("\t%3d \"%s\" (%s %3d) [%s%s]", info.scanNo, info.ch_name.c_str(), text3.toUtf8().constData(), info.logNo, text2.toUtf8().constData(), text1.toUtf8().constData());
     out << QString::asprintf("\trange %g cal %g", info.range, info.cal);
 }
 
@@ -152,6 +152,8 @@ void MNEFiffContents::print_dig_point(QTextStream& out, const FiffTag::UPtr& tag
             break;
         case FIFFV_POINT_EXTRA:
             out << QString::asprintf("\textra    %3d ", point.ident);
+            break;
+        default:
             break;
     }
     out << QString::asprintf("(%6.1f,%6.1f,%6.1f)", 1000 * point.r[0], 1000 * point.r[1], 1000 * point.r[2]);
@@ -298,9 +300,9 @@ bool MNEFiffContents::show_fiff_contents(QTextStream& out, const QString& name, 
                                 break;
                             case FIFFT_STRING:
                                 if (stream->read_tag(tag, this_ent->pos)) {
-                                    s = tag->toString();
+                                    s = QString::fromStdString(tag->toString());
                                     if (long_strings)
-                                        out << QString::asprintf("\t%s", tag->toString().toUtf8().constData());
+                                        out << QString::asprintf("\t%s", tag->toString().c_str());
                                     else {
                                         if ((s.indexOf("\n")) != -1)
                                             s.replace(s.indexOf("\n"), 2, "\0");
@@ -382,7 +384,6 @@ bool MNEFiffContents::show_fiff_contents(QTextStream& out, const QString& name, 
                         }
                     }
                     out << "\n";
-                    prev_kind = this_ent->kind;
                 } else {
                     if (this_ent->kind != prev_kind) {
                         if (count > 1)

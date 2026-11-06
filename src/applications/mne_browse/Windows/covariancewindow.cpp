@@ -18,6 +18,7 @@
 //=============================================================================================================
 
 #include "covariancewindow.h"
+#include <utils/string_utils.h>
 
 #include <QAction>
 #include <QCheckBox>
@@ -42,19 +43,20 @@ using namespace MNEBROWSE;
 namespace
 {
 
-QString summarizeChannelNames(const QStringList& names, int limit = 8)
+QString summarizeChannelNames(const std::vector<std::string>& names, int limit = 8)
 {
-    if (names.isEmpty()) {
+    if (names.empty()) {
         return QStringLiteral("none");
     }
 
-    if (names.size() <= limit) {
-        return names.join(QStringLiteral(", "));
+    const int count = static_cast<int>(names.size());
+    const std::vector<std::string> shown(names.begin(), names.begin() + std::min(count, limit));
+    QString joined = QString::fromStdString(UTILSLIB::join(shown, ", "));
+    if (count <= limit) {
+        return joined;
     }
 
-    return QStringLiteral("%1, ... (%2 total)")
-        .arg(names.mid(0, limit).join(QStringLiteral(", ")))
-        .arg(names.size());
+    return QStringLiteral("%1, ... (%2 total)").arg(joined).arg(count);
 }
 
 QString covarianceSummary(const FIFFLIB::FiffCov& covariance,
@@ -71,8 +73,8 @@ QString covarianceSummary(const FIFFLIB::FiffCov& covariance,
     int otherCount = 0;
 
     if (fiffInfo) {
-        for (const QString& channelName : covariance.names) {
-            const int channelIndex = fiffInfo->ch_names.indexOf(channelName);
+        for (const std::string& channelName : covariance.names) {
+            const int channelIndex = UTILSLIB::indexOf(fiffInfo->ch_names, channelName);
             if (channelIndex < 0 || channelIndex >= fiffInfo->chs.size()) {
                 ++otherCount;
                 continue;
@@ -335,14 +337,14 @@ void CovarianceWindow::updateHeatmap()
     const QString filter = m_pHeatmapChannelType ? m_pHeatmapChannelType->currentText()
                                                  : QStringLiteral("All");
 
-    for (int i = 0; i < m_covariance.names.size(); ++i) {
+    for (int i = 0; i < static_cast<int>(m_covariance.names.size()); ++i) {
         if (filter == QStringLiteral("All")) {
             indices.append(i);
             continue;
         }
 
         if (m_pFiffInfo) {
-            const int chIdx = m_pFiffInfo->ch_names.indexOf(m_covariance.names[i]);
+            const int chIdx = UTILSLIB::indexOf(m_pFiffInfo->ch_names, m_covariance.names[i]);
             if (chIdx < 0 || chIdx >= m_pFiffInfo->chs.size())
                 continue;
 

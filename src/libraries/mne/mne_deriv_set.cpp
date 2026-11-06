@@ -15,6 +15,7 @@
 //=============================================================================================================
 
 #include "mne_deriv_set.h"
+#include <utils/string_utils.h>
 
 #include <fiff/fiff_constants.h>
 #include <fiff/fiff_dir_node.h>
@@ -91,8 +92,8 @@ QStringList tokenize(QTextStream& in)
 
 std::unique_ptr<MNEDeriv> makeDeriv(const QList<MNEDerivSet::Definition>& definitions, const QString& filename, const QString& shortname)
 {
-    QStringList inputs;
-    QStringList outputs;
+    StringList inputs;
+    StringList outputs;
     std::vector<Eigen::Triplet<float>> triplets;
     for (const MNEDerivSet::Definition& definition : definitions) {
         QList<QPair<int, double>> row;
@@ -100,10 +101,10 @@ std::unique_ptr<MNEDeriv> makeDeriv(const QList<MNEDerivSet::Definition>& defini
             if (std::fabs(it.value()) <= kZero) {
                 continue;
             }
-            if (!inputs.contains(it.key())) {
-                inputs << it.key();
+            if (!UTILSLIB::contains(inputs, it.key().toStdString())) {
+                inputs.push_back(it.key().toStdString());
             }
-            row.append({static_cast<int>(inputs.indexOf(it.key())), it.value()});
+            row.append({static_cast<int>(UTILSLIB::indexOf(inputs, it.key().toStdString())), it.value()});
         }
         if (row.isEmpty()) {
             qInfo("MNEDerivSet - Empty derivation \"%s\" omitted", qPrintable(definition.first));
@@ -112,7 +113,7 @@ std::unique_ptr<MNEDeriv> makeDeriv(const QList<MNEDerivSet::Definition>& defini
         for (const auto& [column, weight] : row) {
             triplets.emplace_back(static_cast<int>(outputs.size()), column, static_cast<float>(weight));
         }
-        outputs << definition.first;
+        outputs.push_back(definition.first.toStdString());
     }
     Eigen::SparseMatrix<float> data(outputs.size(), inputs.size());
     data.setFromTriplets(triplets.begin(), triplets.end());
@@ -269,9 +270,9 @@ QList<MNEDerivSet::Definition> MNEDerivSet::definitions() const
         const MNESparseNamedMatrix& m = *deriv->deriv_data;
         const Eigen::SparseMatrix<float, Eigen::RowMajor> rows = m.data->eigen();
         for (int j = 0; j < m.nrow; ++j) {
-            Definition definition{m.rowlist.value(j), {}};
+            Definition definition{QString::fromStdString(m.rowlist[j]), {}};
             for (Eigen::SparseMatrix<float, Eigen::RowMajor>::InnerIterator it(rows, j); it; ++it) {
-                definition.second.insert(m.collist.value(static_cast<int>(it.col())), it.value());
+                definition.second.insert(QString::fromStdString(m.collist[static_cast<std::size_t>(it.col())]), it.value());
             }
             result.append(definition);
         }
@@ -290,28 +291,28 @@ void MNEDerivSet::append(const MNEDerivSet& other)
 
 //=============================================================================================================
 
-std::unique_ptr<MNEDeriv> MNEDerivSet::match(const QStringList& chNames) const
+std::unique_ptr<MNEDeriv> MNEDerivSet::match(const StringList& chNames) const
 {
     std::vector<Eigen::Triplet<float>> triplets;
-    QStringList outputs;
+    StringList outputs;
     int ntot = 0;
     for (const Definition& definition : definitions()) {
         ++ntot;
         bool available = true;
         for (auto it = definition.second.cbegin(); it != definition.second.cend() && available; ++it) {
-            available = std::fabs(it.value()) <= kZero || chNames.contains(it.key());
+            available = std::fabs(it.value()) <= kZero || UTILSLIB::contains(chNames, it.key().toStdString());
         }
         if (!available) {
             continue;
         }
         for (auto it = definition.second.cbegin(); it != definition.second.cend(); ++it) {
             if (std::fabs(it.value()) > kZero) {
-                triplets.emplace_back(static_cast<int>(outputs.size()), static_cast<int>(chNames.indexOf(it.key())), static_cast<float>(it.value()));
+                triplets.emplace_back(static_cast<int>(outputs.size()), static_cast<int>(UTILSLIB::indexOf(chNames, it.key().toStdString())), static_cast<float>(it.value()));
             }
         }
-        outputs << definition.first;
+        outputs.push_back(definition.first.toStdString());
     }
-    if (outputs.isEmpty()) {
+    if (outputs.empty()) {
         return nullptr;
     }
     qInfo("MNEDerivSet::match - %lld of %d derivations were matched.", static_cast<long long>(outputs.size()), ntot);

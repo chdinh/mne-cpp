@@ -355,7 +355,7 @@ void TestMneBrowseData::testRawModelData()
     model.loadFiffData(&file);
 
     // Column 0 names the channel, column 1 carries its loaded samples
-    QCOMPARE(model.data(model.index(0, 0), Qt::DisplayRole).toString(), model.fiffInfo()->ch_names.first());
+    QCOMPARE(model.data(model.index(0, 0), Qt::DisplayRole).toString(), model.fiffInfo()->ch_names.front());
     QVERIFY(model.data(model.index(0, 1), Qt::DisplayRole).isValid());
 
     // Access invalid index
@@ -486,7 +486,7 @@ void TestMneBrowseData::testRawModelMarkChBad()
     model.markChBad(indices, true);
 
     // Verify bad channel was added
-    QVERIFY(model.fiffInfo()->bads.size() > badsBefore);
+    QVERIFY(static_cast<int>(model.fiffInfo()->bads.size()) > badsBefore);
 
     // Unmark it
     model.markChBad(indices, false);

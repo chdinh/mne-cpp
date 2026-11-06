@@ -15,6 +15,7 @@
 //=============================================================================================================
 
 #include <acq/acq.h>
+#include <utils/string_utils.h>
 
 #include <fiff/fiff_raw_data.h>
 
@@ -89,7 +90,7 @@ ToolResult runTool(const QStringList& arguments, int timeoutMs = 60000)
 /** A source read to its end: channel names and physical values, column-major channels x samples. */
 struct Source
 {
-    std::vector<std::string> names;
+    StringList names;
     std::vector<double> values;
 };
 
@@ -273,7 +274,7 @@ void TestMneAcqTool::recordWritesTheSource()
     QVERIFY2(record.out.contains(QStringLiteral("Recorded 2000 samples (0 lost)")), qPrintable(record.out));
 
     const Source source = readSource(uri);
-    const std::vector<std::string>& names = source.names;
+    const StringList& names = source.names;
     const std::vector<double>& expected = source.values;
     QCOMPARE(expected.size(), names.size() * 2000);
 
@@ -288,7 +289,7 @@ void TestMneAcqTool::recordWritesTheSource()
             continue;
         }
         // FIFFLIB drops the spaces of channel names on read.
-        const auto row = static_cast<Eigen::Index>(raw.info.ch_names.indexOf(QString::fromStdString(names[c]).remove(QLatin1Char(' '))));
+        const auto row = static_cast<Eigen::Index>(UTILSLIB::indexOf(raw.info.ch_names, ((QString::fromStdString(names[c]).remove(QLatin1Char(' '))).toStdString())));
         QVERIFY2(row >= 0, names[c].c_str());
         for (std::size_t s = 0; s < 2000; ++s) {
             const double want = expected[s * names.size() + c];

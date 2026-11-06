@@ -139,7 +139,7 @@ public:
      *
      * @return List of channel names.
      */
-    inline QStringList ch_names();
+    inline const StringList& ch_names() const;
 
     //=========================================================================================================
     /**
@@ -176,8 +176,8 @@ public:
      *
      * @return the desired fiff evoked data.
      */
-    FiffEvoked pick_channels(const QStringList& include = defaultQStringList,
-                             const QStringList& exclude = defaultQStringList) const;
+    FiffEvoked pick_channels(const StringList& include = {},
+                             const StringList& exclude = {}) const;
 
     //=========================================================================================================
     /**
@@ -285,7 +285,7 @@ public:
 // INLINE DEFINITIONS
 //=============================================================================================================
 
-inline QStringList FiffEvoked::ch_names()
+inline const StringList& FiffEvoked::ch_names() const
 {
     return info.ch_names;
 }

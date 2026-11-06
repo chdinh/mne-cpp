@@ -22,6 +22,7 @@
 //=============================================================================================================
 
 #include "mne_epoch_data_list.h"
+#include <utils/string_utils.h>
 
 #include <fiff/fiff_evoked_set.h>
 
@@ -289,13 +290,13 @@ bool MNEEpochDataList::checkForArtifact(const MatrixXd& data,
             key = QStringLiteral("eog");
         }
         // Like mne.Epochs(reject=...): only channel types with a limit are checked
-        if (!mapReject.contains(key) || lExcludeChs.contains(ch.ch_name) || pFiffInfo.bads.contains(ch.ch_name) || ch.chpos.coil_type == FIFFV_COIL_BABY_REF_MAG || ch.chpos.coil_type == FIFFV_COIL_BABY_REF_MAG2) {
+        if (!mapReject.contains(key) || lExcludeChs.contains(ch.ch_name) || UTILSLIB::contains(pFiffInfo.bads, ch.ch_name) || ch.chpos.coil_type == FIFFV_COIL_BABY_REF_MAG || ch.chpos.coil_type == FIFFV_COIL_BABY_REF_MAG2) {
             continue;
         }
         ArtifactRejectionData tempData;
         tempData.data = data.row(i);
         tempData.dThreshold = mapReject.value(key);
-        tempData.sChName = ch.ch_name;
+        tempData.sChName = QString::fromStdString(ch.ch_name);
         lchData.append(tempData);
     }
 

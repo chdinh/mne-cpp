@@ -121,8 +121,7 @@ int main(int argc, char* argv[])
     //   Set up pick list: MEG + STI 014 - bad channels
     //
     //
-    QStringList include;
-    include << "STI 014";
+    StringList include{"STI 014"};
     bool want_meg = true;
     bool want_eeg = false;
     bool want_stim = false;
@@ -222,7 +221,7 @@ int main(int argc, char* argv[])
     VectorXd dataCol = data.row(0).transpose();
     VectorXd dataColFtCm = 1e13 * dataCol;
     Plot plot(dataColFtCm);
-    plot.setTitle(raw.info.ch_names[picks(0)]);
+    plot.setTitle(QString::fromStdString(raw.info.ch_names[picks(0)]));
     plot.setXLabel("Sample");
     plot.setYLabel("Amplitude [fT/cm]");
     plot.setWindowTitle("Corresponding function to MATLABs plot");

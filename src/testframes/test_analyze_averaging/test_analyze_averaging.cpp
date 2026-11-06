@@ -15,6 +15,7 @@
 //=============================================================================================================
 
 #include <applications/mne_analyze/plugins/averaging/averaging.h>
+#include <utils/string_utils.h>
 
 #include <anShared/Management/analyzedata.h>
 #include <anShared/Management/event.h>
@@ -117,8 +118,8 @@ void TestAnalyzeAveraging::averagesEveryEventCodeLikePython()
         QCOMPARE(evoked.comment, QString::number(expected[k].code));
         QCOMPARE(evoked.nave, 6);
         QCOMPARE(evoked.data.cols(), Eigen::Index(121));
-        const int meg = static_cast<int>(evoked.info.ch_names.indexOf("MEG1332"));
-        const int eeg = static_cast<int>(evoked.info.ch_names.indexOf("EEG021"));
+        const int meg = static_cast<int>(UTILSLIB::indexOf(evoked.info.ch_names, "MEG1332"));
+        const int eeg = static_cast<int>(UTILSLIB::indexOf(evoked.info.ch_names, "EEG021"));
         QVERIFY(meg >= 0 && eeg >= 0);
         const auto near = [](double a, double b) {
             return std::abs(a - b) < 1e-5 * std::abs(b);

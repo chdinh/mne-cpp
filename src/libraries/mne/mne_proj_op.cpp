@@ -19,6 +19,7 @@
 //=============================================================================================================
 
 #include <fiff/fiff_constants.h>
+#include <utils/string_utils.h>
 #include <fiff/fiff_tag.h>
 
 #include "mne_proj_op.h"
@@ -113,9 +114,9 @@ void MNEProjOp::add_item_active(const MNENamedMatrix* vecs, int kind, const QStr
         new_item.has_eeg = true;
     } else {
         for (int k = 0; k < vecs->ncol; k++) {
-            if (vecs->collist[k].contains("EEG")) //strstr(vecs->collist[k],"EEG") == vecs->collist[k])
+            if ((vecs->collist[k].find("EEG") != std::string::npos)) //strstr(vecs->collist[k],"EEG") == vecs->collist[k])
                 new_item.has_eeg = true;
-            if (vecs->collist[k].contains("MEG")) //strstr(vecs->collist[k],"MEG") == vecs->collist[k])
+            if ((vecs->collist[k].find("MEG") != std::string::npos)) //strstr(vecs->collist[k],"MEG") == vecs->collist[k])
                 new_item.has_meg = true;
         }
         if (!new_item.has_meg && !new_item.has_eeg) {
@@ -170,7 +171,7 @@ std::unique_ptr<MNEProjOp> MNEProjOp::create_average_eeg_ref(const QList<FiffChI
 {
     int eegcount = 0;
     int k;
-    QStringList names;
+    StringList names;
 
     for (k = 0; k < nch; k++)
         if (chs.at(k).kind == FIFFV_EEG_CH)
@@ -182,11 +183,11 @@ std::unique_ptr<MNEProjOp> MNEProjOp::create_average_eeg_ref(const QList<FiffChI
 
     for (k = 0; k < nch; k++)
         if (chs.at(k).kind == FIFFV_EEG_CH)
-            names.append(chs.at(k).ch_name);
+            names.push_back(chs.at(k).ch_name);
 
     Eigen::MatrixXf vec_data = Eigen::MatrixXf::Constant(1, eegcount, 1.0f / sqrt(static_cast<double>(eegcount)));
 
-    QStringList emptyList;
+    StringList emptyList;
     auto vecs = MNENamedMatrix::build(1, eegcount, emptyList, names, vec_data);
 
     auto op = std::make_unique<MNEProjOp>();
@@ -197,7 +198,7 @@ std::unique_ptr<MNEProjOp> MNEProjOp::create_average_eeg_ref(const QList<FiffChI
 
 //=============================================================================================================
 
-int MNEProjOp::affect(const QStringList& list, int nlist)
+int MNEProjOp::affect(const StringList& list, int nlist)
 {
     int k;
     int naff;
@@ -215,10 +216,10 @@ int MNEProjOp::affect_chs(const QList<FiffChInfo>& chs, int nChan)
 {
     if (nChan == 0)
         return false;
-    QStringList list;
+    StringList list;
     list.reserve(nChan);
     for (int k = 0; k < nChan; k++)
-        list.append(chs.at(k).ch_name);
+        list.push_back(chs.at(k).ch_name);
     return affect(list, nChan);
 }
 
@@ -268,7 +269,7 @@ std::unique_ptr<MNEProjOp> MNEProjOp::read_from_node(FiffStream::SPtr& stream, c
     int k;
     QString item_desc, desc_tag;
     int global_nchan, item_nchan;
-    QStringList item_names;
+    StringList item_names;
     int item_kind;
     int item_nvec;
     int item_active;
@@ -322,7 +323,7 @@ std::unique_ptr<MNEProjOp> MNEProjOp::read_from_node(FiffStream::SPtr& stream, c
             * Take the first line of description if it exists
             */
         if (node->find_tag(stream, FIFF_DESCRIPTION, t_pTag)) {
-            desc_tag = t_pTag->toString();
+            desc_tag = QString::fromStdString(t_pTag->toString());
             int pos;
             if ((pos = desc_tag.indexOf("\n")) >= 0)
                 desc_tag.truncate(pos);
@@ -351,7 +352,7 @@ std::unique_ptr<MNEProjOp> MNEProjOp::read_from_node(FiffStream::SPtr& stream, c
 
         item_names = FiffStream::split_name_list(t_pTag->toString());
 
-        if (item_names.size() != item_nchan) {
+        if (static_cast<int>(item_names.size()) != item_nchan) {
             qCritical("Channel name list incorrectly specified for proj item # %d", k + 1);
             item_names.clear();
             return nullptr;
@@ -389,7 +390,7 @@ std::unique_ptr<MNEProjOp> MNEProjOp::read_from_node(FiffStream::SPtr& stream, c
         /*
         * Ready to add
         */
-        QStringList emptyList;
+        StringList emptyList;
         auto item = MNENamedMatrix::build(item_nvec, item_nchan, emptyList, item_names, item_vectors);
         op->add_item_active(item.get(), item_kind, item_desc, item_active);
         op->items[op->nitems - 1].active_file = item_active;
@@ -418,7 +419,7 @@ std::unique_ptr<MNEProjOp> MNEProjOp::read(const QString& name)
 
 //=============================================================================================================
 
-void MNEProjOp::report_data(QTextStream& out, const QString& tag, bool list_data, const QStringList& exclude)
+void MNEProjOp::report_data(QTextStream& out, const QString& tag, bool list_data, const StringList& exclude)
 /*
      * Output info about the projection operator
      */
@@ -447,12 +448,12 @@ void MNEProjOp::report_data(QTextStream& out, const QString& tag, bool list_data
             vecs = items[k].vecs.get();
 
             for (q = 0; q < vecs->ncol; q++) {
-                out << qSetFieldWidth(10) << Qt::left << vecs->collist[q] << qSetFieldWidth(0);
+                out << qSetFieldWidth(10) << Qt::left << QString::fromStdString(vecs->collist[q]) << qSetFieldWidth(0);
                 out << (q < vecs->ncol - 1 ? " " : "\n");
             }
             for (p = 0; p < vecs->nrow; p++)
                 for (q = 0; q < vecs->ncol; q++) {
-                    found = exclude.contains(vecs->collist[q]);
+                    found = UTILSLIB::contains(exclude, vecs->collist[q]);
                     out << qSetFieldWidth(10) << qSetRealNumberPrecision(5) << Qt::forcepoint
                         << (found ? 0.0 : vecs->data(p, q)) << qSetFieldWidth(0) << " ";
                     out << (q < vecs->ncol - 1 ? " " : "\n");
@@ -468,12 +469,12 @@ void MNEProjOp::report_data(QTextStream& out, const QString& tag, bool list_data
 
 void MNEProjOp::report(QTextStream& out, const QString& tag)
 {
-    report_data(out, tag, false, QStringList());
+    report_data(out, tag, false, StringList());
 }
 
 //=============================================================================================================
 
-int MNEProjOp::assign_channels(const QStringList& list, int nlist)
+int MNEProjOp::assign_channels(const StringList& list, int nlist)
 {
     free_proj(); /* Compiled data is no longer valid */
 
@@ -491,10 +492,10 @@ int MNEProjOp::assign_channels(const QStringList& list, int nlist)
 namespace
 {
 
-void clear_channel_group(Eigen::Ref<Eigen::VectorXf> data, const QStringList& ch_names, int nnames, const QString& prefix)
+void clear_channel_group(Eigen::Ref<Eigen::VectorXf> data, const StringList& ch_names, int nnames, const QString& prefix)
 {
     for (int k = 0; k < nnames; k++)
-        if (ch_names[k].contains(prefix))
+        if (QString::fromStdString(ch_names[static_cast<std::size_t>(k)]).contains(prefix))
             data[k] = 0.0;
 }
 
@@ -503,7 +504,7 @@ constexpr float SMALL_VALUE = 1e-4f;
 
 } // anonymous namespace
 
-int MNEProjOp::make_proj_bad(const QStringList& bad)
+int MNEProjOp::make_proj_bad(const StringList& bad)
 {
     using RowMatrixXf = Eigen::Matrix<float, Eigen::Dynamic, Eigen::Dynamic, Eigen::RowMajor>;
 
@@ -557,7 +558,7 @@ int MNEProjOp::make_proj_bad(const QStringList& bad)
     /*
      * Replace bad channel entries with zeroes
      */
-    for (q = 0; q < bad.size(); q++)
+    for (q = 0; q < static_cast<int>(bad.size()); q++)
         for (r = 0; r < nch; r++)
             if (names[r] == bad[q]) {
                 for (p = 0; p < nvec_meg; p++)
@@ -643,7 +644,7 @@ int MNEProjOp::make_proj_bad(const QStringList& bad)
      * Make sure that the stimulus channels are not modified
      */
     for (k = 0; k < nch; k++)
-        if (names[k].contains("STI")) {
+        if ((names[k].find("STI") != std::string::npos)) {
             for (p = 0; p < nvec; p++)
                 proj_data(p, k) = 0.0;
         }
@@ -655,7 +656,7 @@ int MNEProjOp::make_proj_bad(const QStringList& bad)
 
 int MNEProjOp::make_proj()
 {
-    return make_proj_bad(QStringList());
+    return make_proj_bad(StringList());
 }
 
 //=============================================================================================================

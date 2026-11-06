@@ -758,9 +758,9 @@ int main(int argc, char* argv[])
         FiffRawData raw(rawFile);
 
         // Pick channels that match the inverse operator
-        QStringList invChNames;
-        for (int i = 0; i < inverseOperator.noise_cov->names.size(); ++i) {
-            invChNames << inverseOperator.noise_cov->names[i];
+        StringList invChNames;
+        for (int i = 0; i < static_cast<int>(inverseOperator.noise_cov->names.size()); ++i) {
+            invChNames.push_back(inverseOperator.noise_cov->names[i]);
         }
 
         RowVectorXi picks = raw.info.pick_channels(invChNames);

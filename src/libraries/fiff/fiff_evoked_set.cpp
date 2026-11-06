@@ -24,6 +24,7 @@
 //=============================================================================================================
 
 #include "fiff_evoked_set.h"
+#include <utils/string_utils.h>
 #include "fiff_events.h"
 #include "fiff_raw_data.h"
 #include "fiff_tag.h"
@@ -101,8 +102,8 @@ void FiffEvokedSet::clear()
 
 //=============================================================================================================
 
-FiffEvokedSet FiffEvokedSet::pick_channels(const QStringList& include,
-                                           const QStringList& exclude) const
+FiffEvokedSet FiffEvokedSet::pick_channels(const StringList& include,
+                                           const StringList& exclude) const
 {
     FiffEvokedSet res;
 
@@ -154,10 +155,10 @@ bool FiffEvokedSet::compensate_to(fiff_int_t to)
 bool FiffEvokedSet::find_evoked(const FiffEvokedSet& p_FiffEvokedSet) const
 {
     if (!p_FiffEvokedSet.evoked.size()) {
-        qWarning("No evoked response data sets in %s\n", p_FiffEvokedSet.info.filename.toUtf8().constData());
+        qWarning("No evoked response data sets in %s\n", p_FiffEvokedSet.info.filename.c_str());
         return false;
     } else
-        qInfo("\nFound %lld evoked response data sets in %s :\n", static_cast<long long>(p_FiffEvokedSet.evoked.size()), p_FiffEvokedSet.info.filename.toUtf8().constData());
+        qInfo("\nFound %lld evoked response data sets in %s :\n", static_cast<long long>(p_FiffEvokedSet.evoked.size()), p_FiffEvokedSet.info.filename.c_str());
 
     for (qint32 i = 0; i < p_FiffEvokedSet.evoked.size(); ++i) {
         qInfo("%s (%s)\n", p_FiffEvokedSet.evoked.at(i).comment.toUtf8().constData(), p_FiffEvokedSet.evoked.at(i).aspectKindToString().toUtf8().constBegin());
@@ -190,7 +191,7 @@ bool FiffEvokedSet::read(QIODevice& p_IODevice,
     FiffDirNode::SPtr meas;
     if (!t_pStream->read_meas_info(t_pStream->dirtree(), p_FiffEvokedSet.info, meas))
         return false;
-    p_FiffEvokedSet.info.filename = t_sFileName; //move fname storage to read_meas_info member function
+    p_FiffEvokedSet.info.filename = t_sFileName.toStdString(); //move fname storage to read_meas_info member function
     //
     //   Locate the data of interest
     //
@@ -214,7 +215,7 @@ bool FiffEvokedSet::read(QIODevice& p_IODevice,
     qInfo("\tFound %lld datasets\n", static_cast<long long>(evoked_node.size()));
 
     for (qint32 i = 0; i < comments.size(); ++i) {
-        QFile t_file(p_FiffEvokedSet.info.filename);
+        QFile t_file(QString::fromStdString(p_FiffEvokedSet.info.filename));
         qInfo(">> Processing %s <<\n", comments[i].toUtf8().constData());
         FiffEvoked t_FiffEvoked;
         if (FiffEvoked::read(t_file, t_FiffEvoked, i, baseline, proj))
@@ -277,22 +278,22 @@ FiffEvokedSet FiffEvokedSet::computeGrandAverage(const QList<FiffEvokedSet>& evo
 
     for (int j = 0; j < nCat; ++j) {
         // Drop every channel marked bad in any data set, then keep the common channels.
-        QStringList bads;
+        StringList bads;
         for (const FiffEvokedSet& eset : evokedSets) {
-            for (const QString& bad : eset.evoked[j].info.bads) {
-                if (!bads.contains(bad)) {
-                    bads.append(bad);
+            for (const std::string& bad : eset.evoked[j].info.bads) {
+                if (!UTILSLIB::contains(bads, bad)) {
+                    bads.push_back(bad);
                 }
             }
         }
-        QStringList common;
-        for (const QString& name : evokedSets.first().evoked[j].info.ch_names) {
-            bool inAll = !bads.contains(name);
+        StringList common;
+        for (const std::string& name : evokedSets.first().evoked[j].info.ch_names) {
+            bool inAll = !UTILSLIB::contains(bads, name);
             for (const FiffEvokedSet& eset : evokedSets) {
-                inAll = inAll && eset.evoked[j].info.ch_names.contains(name);
+                inAll = inAll && UTILSLIB::contains(eset.evoked[j].info.ch_names, name);
             }
             if (inAll) {
-                common.append(name);
+                common.push_back(name);
             }
         }
 
@@ -463,13 +464,13 @@ FiffEvokedSet FiffEvokedSet::computeAverages(const FiffRawData& raw,
 
 bool FiffEvokedSet::checkArtifacts(const MatrixXd& epoch,
                                    const FiffInfo& info,
-                                   const QStringList& bads,
+                                   const StringList& bads,
                                    const RejectionParams& rej,
                                    QString& reason)
 {
     for (int c = 0; c < epoch.rows(); ++c) {
         // Skip bad channels
-        if (bads.contains(info.ch_names[c]))
+        if (UTILSLIB::contains(bads, info.ch_names[c]))
             continue;
 
         double minVal = epoch.row(c).minCoeff();

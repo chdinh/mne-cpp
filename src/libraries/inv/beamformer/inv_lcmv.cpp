@@ -22,6 +22,7 @@
 //=============================================================================================================
 
 #include "inv_lcmv.h"
+#include <utils/string_utils.h>
 #include "inv_beamformer_compute.h"
 
 #include <mne/mne_forward_solution.h>
@@ -233,10 +234,10 @@ InvSourceEstimate InvLCMV::applyLCMV(const FiffEvoked& evoked, const InvBeamform
         const int nTimes = static_cast<int>(evoked.data.cols());
         data.resize(nFilterCh, nTimes);
         for (int i = 0; i < nFilterCh; ++i) {
-            int idx = evoked.info.ch_names.indexOf(filters.chNames[i]);
+            int idx = UTILSLIB::indexOf(evoked.info.ch_names, filters.chNames[i]);
             if (idx < 0) {
                 qWarning("InvLCMV::applyLCMV - Channel %s not found in evoked!",
-                         qPrintable(filters.chNames[i]));
+                         filters.chNames[i].c_str());
                 return InvSourceEstimate();
             }
             data.row(i) = evoked.data.row(idx);

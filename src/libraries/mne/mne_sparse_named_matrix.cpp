@@ -68,14 +68,14 @@ std::unique_ptr<MNESparseNamedMatrix> MNESparseNamedMatrix::read(FiffStream::SPt
     }
     if (block->find_tag(stream, FIFF_MNE_ROW_NAMES, tag)) {
         matrix->rowlist = FiffStream::split_name_list(tag->toString());
-        if (matrix->rowlist.size() != matrix->nrow) {
+        if (static_cast<int>(matrix->rowlist.size()) != matrix->nrow) {
             qCritical("MNESparseNamedMatrix::read - Incorrect number of entries in the row name list.");
             return nullptr;
         }
     }
     if (block->find_tag(stream, FIFF_MNE_COL_NAMES, tag)) {
         matrix->collist = FiffStream::split_name_list(tag->toString());
-        if (matrix->collist.size() != matrix->ncol) {
+        if (static_cast<int>(matrix->collist.size()) != matrix->ncol) {
             qCritical("MNESparseNamedMatrix::read - Incorrect number of entries in the column name list.");
             return nullptr;
         }
@@ -91,10 +91,10 @@ void MNESparseNamedMatrix::write(FiffStream& stream, int kind) const
     stream.start_block(FIFFB_MNE_NAMED_MATRIX);
     stream.write_int(FIFF_MNE_NROW, &nrow);
     stream.write_int(FIFF_MNE_NCOL, &ncol);
-    if (!rowlist.isEmpty()) {
+    if (!rowlist.empty()) {
         stream.write_name_list(FIFF_MNE_ROW_NAMES, rowlist);
     }
-    if (!collist.isEmpty()) {
+    if (!collist.empty()) {
         stream.write_name_list(FIFF_MNE_COL_NAMES, collist);
     }
     stream.write_float_sparse_rcs(kind, data->eigen());

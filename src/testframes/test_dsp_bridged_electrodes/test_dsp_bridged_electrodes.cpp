@@ -67,14 +67,14 @@ private:
             ch.scanNo = i + 1;
             ch.logNo = i + 1;
             ch.kind = FIFFV_EEG_CH;
-            ch.ch_name = QString("EEG%1").arg(i + 1);
+            ch.ch_name = (QString("EEG%1").arg(i + 1)).toStdString();
             ch.range = 1.0f;
             ch.cal = 1.0f;
             ch.unit = 107;
             ch.unit_mul = 0;
             ch.coord_frame = 0;
             info.chs.append(ch);
-            info.ch_names.append(ch.ch_name);
+            info.ch_names.push_back(ch.ch_name);
         }
 
         return info;
@@ -204,11 +204,11 @@ private slots:
             ch.scanNo = i + 1;
             ch.logNo = i + 1;
             ch.kind = FIFFV_MEG_CH;
-            ch.ch_name = QString("MEG%1").arg(i + 1);
+            ch.ch_name = (QString("MEG%1").arg(i + 1)).toStdString();
             ch.range = 1.0f;
             ch.cal = 1.0f;
             info.chs.append(ch);
-            info.ch_names.append(ch.ch_name);
+            info.ch_names.push_back(ch.ch_name);
         }
 
         MatrixXd data = MatrixXd::Random(3, 100);

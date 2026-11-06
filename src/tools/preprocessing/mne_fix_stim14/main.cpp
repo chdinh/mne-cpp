@@ -15,6 +15,7 @@
 //=============================================================================================================
 
 #include <fiff/fiff_raw_data.h>
+#include <utils/string_utils.h>
 #include <fiff/fiff_stream.h>
 #include <fiff/fiff_info.h>
 #include <fiff/fiff_ch_info.h>
@@ -56,7 +57,7 @@ using namespace Eigen;
 static int findChannelByName(const FiffInfo& info, const QString& name)
 {
     for (int i = 0; i < info.chs.size(); ++i) {
-        if (info.chs[i].ch_name.trimmed() == name)
+        if (std::string(UTILSLIB::trimmed(info.chs[i].ch_name)) == name)
             return i;
     }
     return -1;

@@ -129,8 +129,7 @@ int main(int argc, char* argv[])
             picks(k) = k;
         }
     } else {
-        QStringList include;
-        include << "STI 014";
+        StringList include{"STI 014"};
         bool want_meg = true;
         bool want_eeg = false;
         bool want_stim = false;

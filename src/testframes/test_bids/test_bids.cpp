@@ -15,6 +15,7 @@
 //=============================================================================================================
 
 #include <bids/bids_path.h>
+#include <utils/string_utils.h>
 #include <bids/bids_channel.h>
 #include <bids/bids_electrode.h>
 #include <bids/bids_event.h>
@@ -426,7 +427,7 @@ void TestBids::testReadBrainVision()
     QVERIFY(std::abs(data.raw.info.sfreq - 1000.0f) < 1.0f);
 
     // Bad channels: P4 marked bad in channels.tsv
-    QVERIFY(data.raw.info.bads.contains(QStringLiteral("P4")));
+    QVERIFY(UTILSLIB::contains(data.raw.info.bads, "P4"));
     QCOMPARE(data.raw.info.bads.size(), 1);
 
     // Reference values produced by mne_bids.read_raw_bids(BIDSPath(...)) (mne-bids 0.17, mne 1.11): 32 channels,
@@ -482,7 +483,7 @@ void TestBids::testReadEdf()
     QVERIFY(std::abs(data.raw.info.sfreq - 128.0f) < 1.0f);
 
     // Bad channels: EEG O1 marked bad in channels.tsv (EDF uses full label)
-    QVERIFY(data.raw.info.bads.contains(QStringLiteral("EEG O1")));
+    QVERIFY(UTILSLIB::contains(data.raw.info.bads, "EEG O1"));
 
     // As mne_bids.read_raw_bids: 25 channels, 128 Hz, bads ['EEG O1'], annotations start, stimulus, response
     QCOMPARE(data.events.size(), 3);
@@ -546,10 +547,10 @@ void TestBids::testReadEdf()
     EDFReader reduced;
     QVERIFY(reduced.open(dataPath() + QStringLiteral("EEG/test_reduced.edf")));
     const FIFFLIB::FiffInfo reducedInfo = reduced.getInfo();
-    const int a4 = reducedInfo.ch_names.indexOf(QStringLiteral("A4"));
-    const int status = reducedInfo.ch_names.indexOf(QStringLiteral("Status"));
+    const int a4 = UTILSLIB::indexOf(reducedInfo.ch_names, "A4");
+    const int status = UTILSLIB::indexOf(reducedInfo.ch_names, "Status");
     QVERIFY(a4 < 0 && status >= 0); // A4 is sampled below the highest rate
-    const int a10 = reducedInfo.ch_names.indexOf(QStringLiteral("A10"));
+    const int a10 = UTILSLIB::indexOf(reducedInfo.ch_names, "A10");
     QCOMPARE(reducedInfo.chs[a10].kind, FIFFV_EEG_CH);
     QCOMPARE(reducedInfo.chs[a10].unit, FIFF_UNIT_V);
     QCOMPARE(reducedInfo.chs[status].kind, FIFFV_STIM_CH);
@@ -666,7 +667,7 @@ void TestBids::testWriteRoundTrip()
     QCOMPARE(edfBack.events.size(), 3);
     QCOMPARE(edfBack.events[1].trialType, QStringLiteral("visual"));
     QCOMPARE(edfBack.events[2].trialType, QStringLiteral("response"));
-    QVERIFY(edfBack.raw.info.bads.contains(QStringLiteral("EEG O1")));
+    QVERIFY(UTILSLIB::contains(edfBack.raw.info.bads, "EEG O1"));
 
     // channels.tsv units other than volts, as mne_bids.read_raw_bids: known ones set the unit, unknown ones keep it
     QFile channelsTsv(edfDst.channelsTsvPath().filePath());
@@ -765,16 +766,16 @@ void TestBids::testBrainVisionReaderMatchesPython()
         QCOMPARE(reader.getSampleCount(), 4L);
         QCOMPARE(reader.toFiffRawData().last_samp, 3);
         const FIFFLIB::FiffInfo info = reader.getInfo();
-        QCOMPARE(info.ch_names.last(), QStringLiteral("A,B"));
+        QCOMPARE(info.ch_names.back(), QStringLiteral("A,B"));
         for (int k = 0; k < 6; ++k) {
-            QVERIFY2(info.chs[k].kind == kinds[k], qPrintable(info.ch_names[k]));
+            QVERIFY2(info.chs[k].kind == kinds[k], info.ch_names[k].c_str());
         }
         const Eigen::MatrixXd data = reader.readRawSegment(0, 4).cast<double>();
         QVERIFY2((data - factor * expected).cwiseAbs().maxCoeff() <= 1e-6 * (factor * expected).cwiseAbs().maxCoeff(),
                  qPrintable(base));
         for (int k = 0; k < 6; ++k) {
             QVERIFY2((data.row(k) - factor * expected.row(k)).cwiseAbs().maxCoeff() <= 1e-6 * (factor * expected.row(k)).cwiseAbs().maxCoeff(),
-                     qPrintable(base + " " + info.ch_names[k]));
+                     qPrintable(base + " " + QString::fromStdString(info.ch_names[k])));
         }
         // Markers: 1-based positions in the file, \1 decodes to a comma
         const QVector<BrainVisionMarker> markers = reader.getMarkers();
@@ -897,11 +898,11 @@ void TestBids::testWriteSidecarsPerDatatype()
                                            std::tuple{"EEG 001", FIFFV_EEG_CH, FIFF_UNIT_V},
                                            std::tuple{"STI 101", FIFFV_STIM_CH, FIFF_UNIT_NONE}}) {
         FIFFLIB::FiffChInfo ch;
-        ch.ch_name = QString::fromLatin1(name);
+        ch.ch_name = QString::fromLatin1(name).toStdString();
         ch.kind = kind;
         ch.unit = unit;
         info.chs << ch;
-        info.ch_names << ch.ch_name;
+        info.ch_names.push_back(ch.ch_name);
     }
     info.nchan = info.chs.size();
     data.raw.first_samp = 0;
@@ -970,11 +971,11 @@ void TestBids::testWriteFromInfoAndReadRejects()
     const QList<std::pair<QString, int>> chans = {{"E1", FIFFV_EEG_CH}, {"G1", FIFFV_ECOG_CH}, {"S1", FIFFV_SEEG_CH}, {"D1", FIFFV_DBS_CH}, {"EOG", FIFFV_EOG_CH}, {"ECG", FIFFV_ECG_CH}, {"EMG", FIFFV_EMG_CH}, {"MISC", FIFFV_MISC_CH}, {"RESP", FIFFV_RESP_CH}, {"TRG", FIFFV_STIM_CH}, {"MEG", FIFFV_MEG_CH}, {"ODD", 9999}};
     for (const auto& [name, kind] : chans) {
         FIFFLIB::FiffChInfo ch;
-        ch.ch_name = name;
+        ch.ch_name = name.toStdString();
         ch.kind = kind;
         ch.unit = FIFF_UNIT_V;
         info.chs << ch;
-        info.ch_names << name;
+        info.ch_names.push_back(name.toStdString());
     }
     info.nchan = info.chs.size();
     info.bads = {"EOG"};

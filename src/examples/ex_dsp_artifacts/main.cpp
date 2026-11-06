@@ -21,6 +21,7 @@
 //=============================================================================================================
 
 #include <dsp/annotate_artifact.h>
+#include <utils/string_utils.h>
 #include <dsp/artifact_detect.h>
 #include <dsp/bad_channel_detect.h>
 #include <dsp/bad_channels_lof.h>
@@ -87,11 +88,11 @@ FiffInfo makeInfo()
         FiffChInfo ch;
         ch.scanNo = ch.logNo = i + 1;
         ch.kind = i < kEeg ? FIFFV_EEG_CH : (i == kEog ? FIFFV_EOG_CH : FIFFV_ECG_CH);
-        ch.ch_name = i < kEeg ? QString("EEG%1").arg(i) : (i == kEog ? QString("EOG") : QString("ECG"));
+        ch.ch_name = i < kEeg ? "EEG" + std::to_string(i) : (i == kEog ? "EOG" : "ECG");
         ch.range = ch.cal = 1.0f;
         ch.unit = FIFF_UNIT_V;
         info.chs.append(ch);
-        info.ch_names.append(ch.ch_name);
+        info.ch_names.push_back(ch.ch_name);
     }
     info.nchan = info.chs.size();
     return info;
@@ -157,7 +158,7 @@ int main(int argc, char* argv[])
     LofBadChannelParams lofParams;
     lofParams.iNNeighbors = 4;
     lofParams.bEegOnly = true;
-    const QStringList lofBad = findBadChannelsLof(data, info, lofParams); // features: std, kurtosis, max |x|
+    const StringList lofBad = findBadChannelsLof(data, info, lofParams); // features: std, kurtosis, max |x|
 
     MatrixXd features(6, 2); // the generic LOF score on a 2-D point cloud: one far point
     features << 0.0, 0.0, 0.1, 0.0, 0.0, 0.1, 0.1, 0.1, 0.05, 0.05, 3.0, 3.0;
@@ -167,7 +168,7 @@ int main(int argc, char* argv[])
     VectorXd sklearnLof(6);
     sklearnLof << 0.96745631, 0.96745631, 0.96745631, 0.96745631, 1.10819419, 44.47792863;
     ok &= expect((lofScores - sklearnLof).cwiseAbs().maxCoeff() < 1e-6,
-                 QString("LOF scores = sklearn (far point %1); %2 EEG channel(s) flagged").arg(lofScores(5)).arg(lofBad.size()));
+                 QString("LOF scores = sklearn (far point %1); %2 EEG channel(s) flagged").arg(lofScores(5)).arg(static_cast<int>(lofBad.size())));
 
     //! [bridged_electrodes_usage]
     BridgedElectrodeParams bridging; // electrical distance below 0.3 flags a pair
@@ -221,11 +222,11 @@ int main(int argc, char* argv[])
     //! [annotate_amplitude_usage]
     AnnotateAmplitudeParams amplitude;
     amplitude.flat = 1e-12; // consecutive samples within 1 pV of each other
-    QStringList flatChannels;
+    StringList flatChannels;
     const FiffAnnotations flatSpans = annotateAmplitude(loose, info, kSFreq, amplitude, &flatChannels);
     //! [annotate_amplitude_usage]
-    ok &= expect(flatSpans.size() == 1 && flatSpans[0].description == "BAD_flat" && std::abs(flatSpans[0].onset - 1.0) < 1e-12 && flatChannels == QStringList({"EEG2"}),
-                 QString("annotateAmplitude: %1 flat span(s), bad %2").arg(flatSpans.size()).arg(flatChannels.join(", ")));
+    ok &= expect(flatSpans.size() == 1 && flatSpans[0].description == "BAD_flat" && std::abs(flatSpans[0].onset - 1.0) < 1e-12 && flatChannels == StringList{"EEG2"},
+                 QString("annotateAmplitude: %1 flat span(s), bad %2").arg(flatSpans.size()).arg(QString::fromStdString(UTILSLIB::join(flatChannels, ", "))));
 
     // 4 s of 8 EEG channels at 1 kHz: alpha, a few tones and a 125 Hz EMG burst from 1.5 to 2.5 s
     const double emgSFreq = 1000.0;

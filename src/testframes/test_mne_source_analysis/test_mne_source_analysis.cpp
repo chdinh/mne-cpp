@@ -14,6 +14,7 @@
  */
 
 #include <QtTest/QtTest>
+#include <utils/string_utils.h>
 
 #include <fiff/fiff.h>
 #include <fiff/fiff_cov.h>
@@ -88,9 +89,11 @@ private slots:
         FiffEvokedSet evokedSet;
         FiffEvokedSet::read(file, evokedSet, QPair<float, float>(-0.2f, 0.0f), true);
 
-        QStringList include;
-        include << "MEG0111" << "MEG0121" << "MEG0131";
-        FiffEvokedSet picked = evokedSet.pick_channels(include, QStringList());
+        StringList include;
+        include.push_back("MEG0111");
+        include.push_back("MEG0121");
+        include.push_back("MEG0131");
+        FiffEvokedSet picked = evokedSet.pick_channels(include, {});
 
         QCOMPARE(picked.info.nchan, 3);
         QCOMPARE(picked.evoked.size(), evokedSet.evoked.size());
@@ -122,9 +125,10 @@ private slots:
         FiffEvokedSet evokedSet;
         FiffEvokedSet::read(file, evokedSet, QPair<float, float>(-0.2f, 0.0f), true);
 
-        QStringList include;
-        include << "MEG0111" << "MEG0121";
-        FiffEvoked picked = evokedSet.evoked[0].pick_channels(include, QStringList());
+        StringList include;
+        include.push_back("MEG0111");
+        include.push_back("MEG0121");
+        FiffEvoked picked = evokedSet.evoked[0].pick_channels(include, {});
         QCOMPARE(picked.ch_names().size(), 2);
     }
 
@@ -178,12 +182,12 @@ private slots:
         FiffRawData raw(file);
         FiffInfo& info = raw.info;
 
-        Eigen::RowVectorXi megSel = info.pick_types(true, false, false, QStringList(), QStringList());
+        Eigen::RowVectorXi megSel = info.pick_types(true, false, false, {}, {});
         QVERIFY(megSel.size() > 0);
 
-        Eigen::RowVectorXi eegSel = info.pick_types(false, true, false, QStringList(), QStringList());
+        Eigen::RowVectorXi eegSel = info.pick_types(false, true, false, {}, {});
 
-        Eigen::RowVectorXi stimSel = info.pick_types(false, false, true, QStringList(), QStringList());
+        Eigen::RowVectorXi stimSel = info.pick_types(false, false, true, {}, {});
         QVERIFY(stimSel.size() > 0);
     }
 
@@ -208,7 +212,7 @@ private slots:
         FiffRawData raw(file);
         FiffInfo& info = raw.info;
 
-        Eigen::RowVectorXi sel = info.pick_types(true, false, false, QStringList(), QStringList());
+        Eigen::RowVectorXi sel = info.pick_types(true, false, false, {}, {});
         FiffInfo picked = info.pick_info(sel);
         QCOMPARE(picked.nchan, sel.size());
     }
@@ -220,7 +224,7 @@ private slots:
         FiffInfo& info = raw.info;
 
         for (int i = 0; i < qMin(5, info.nchan); ++i) {
-            QString chType = info.channel_type(i);
+            QString chType = QString::fromStdString(info.channel_type(i));
             QVERIFY(!chType.isEmpty());
         }
     }
@@ -231,9 +235,10 @@ private slots:
         FiffRawData raw(file);
         FiffInfo& info = raw.info;
 
-        QStringList include;
-        include << "MEG0111" << "MEG0121";
-        Eigen::RowVectorXi sel = FiffInfoBase::pick_channels(info.ch_names, include, QStringList());
+        StringList include;
+        include.push_back("MEG0111");
+        include.push_back("MEG0121");
+        Eigen::RowVectorXi sel = FiffInfoBase::pick_channels(info.ch_names, include, {});
         QCOMPARE(sel.size(), 2);
     }
 
@@ -243,7 +248,7 @@ private slots:
         FiffRawData raw(file);
         FiffInfo& info = raw.info;
 
-        QStringList types = info.get_channel_types();
+        StringList types = info.get_channel_types();
         QVERIFY(types.size() > 0);
     }
 
@@ -253,10 +258,10 @@ private slots:
         FiffRawData raw(file);
         FiffInfo& info = raw.info;
 
-        Eigen::RowVectorXi magSel = info.pick_types(QString("mag"), false, false, QStringList(), QStringList());
+        Eigen::RowVectorXi magSel = info.pick_types("mag", false, false, {}, {});
         QVERIFY(magSel.size() > 0);
 
-        Eigen::RowVectorXi gradSel = info.pick_types(QString("grad"), false, false, QStringList(), QStringList());
+        Eigen::RowVectorXi gradSel = info.pick_types("grad", false, false, {}, {});
         QVERIFY(gradSel.size() > 0);
     }
 
@@ -291,9 +296,11 @@ private slots:
         QFile file(m_sCovFile);
         FiffCov cov(file);
 
-        QStringList include;
-        include << "MEG0111" << "MEG0121" << "MEG0131";
-        FiffCov picked = cov.pick_channels(include, QStringList());
+        StringList include;
+        include.push_back("MEG0111");
+        include.push_back("MEG0121");
+        include.push_back("MEG0131");
+        FiffCov picked = cov.pick_channels(include, {});
         QCOMPARE(picked.names.size(), 3);
         QCOMPARE(picked.dim, 3);
     }
@@ -309,7 +316,7 @@ private slots:
         QFile rawFile(m_sRawFile);
         FiffRawData raw(rawFile);
 
-        FiffCov regCov = cov.regularize(raw.info, 0.1, 0.1, 0.1, true, QStringList());
+        FiffCov regCov = cov.regularize(raw.info, 0.1, 0.1, 0.1, true, {});
         QCOMPARE(regCov.dim, cov.dim);
     }
 
@@ -325,21 +332,21 @@ private slots:
         FiffRawData raw(rawFile);
 
         // Use channel names that exist in both the cov and the raw info
-        QSet<QString> covNames(cov.names.begin(), cov.names.end());
-        Eigen::RowVectorXi sel = raw.info.pick_types(true, false, false, QStringList(), QStringList());
-        QStringList chNames;
+
+        Eigen::RowVectorXi sel = raw.info.pick_types(true, false, false, {}, {});
+        StringList chNames;
         for (int i = 0; i < sel.size(); ++i) {
-            QString name = raw.info.ch_names[sel(i)];
-            if (covNames.contains(name))
-                chNames << name;
+            const std::string& name = raw.info.ch_names[sel(i)];
+            if (UTILSLIB::contains(cov.names, name))
+                chNames.push_back(name);
         }
-        QVERIFY2(!chNames.isEmpty(), "No intersecting channels between cov and info");
+        QVERIFY2(!chNames.empty(), "No intersecting channels between cov and info");
 
         FiffCov prepared = cov.prepare_noise_cov(raw.info, chNames);
         // prepare_noise_cov may fail if channel projector dimensions don't match;
         // the important thing is exercising the code path for coverage
         if (prepared.dim >= 0) {
-            QVERIFY(prepared.dim == chNames.size());
+            QVERIFY(prepared.dim == static_cast<int>(chNames.size()));
         } else {
             qWarning("%s", qPrintable(QString("prepare_noise_cov returned dim=%1 for %2 channels — code path exercised").arg(prepared.dim).arg(chNames.size())));
         }
@@ -557,8 +564,8 @@ private slots:
 
     void testNamedMatrixBuild()
     {
-        QStringList rows = {"r1", "r2", "r3"};
-        QStringList cols = {"c1", "c2"};
+        StringList rows = {"r1", "r2", "r3"};
+        StringList cols = {"c1", "c2"};
         Eigen::MatrixXf data(3, 2);
         data << 1, 2, 3, 4, 5, 6;
 
@@ -570,15 +577,15 @@ private slots:
 
     void testNamedMatrixPick()
     {
-        QStringList rows = {"r1", "r2", "r3"};
-        QStringList cols = {"c1", "c2", "c3"};
+        StringList rows = {"r1", "r2", "r3"};
+        StringList cols = {"c1", "c2", "c3"};
         Eigen::MatrixXf data(3, 3);
         data << 1, 2, 3, 4, 5, 6, 7, 8, 9;
 
         auto nm = MNENamedMatrix::build(3, 3, rows, cols, data);
 
-        QStringList pickRows = {"r1", "r3"};
-        QStringList pickCols = {"c2"};
+        StringList pickRows = {"r1", "r3"};
+        StringList pickCols = {"c2"};
         auto picked = nm->pick(pickRows, 2, pickCols, 1);
         QVERIFY(picked != nullptr);
         QCOMPARE(picked->nrow, 2);
@@ -624,7 +631,7 @@ private slots:
 
     void testCovMatrixAddInv()
     {
-        QStringList names = {"ch1", "ch2", "ch3"};
+        StringList names = {"ch1", "ch2", "ch3"};
         Eigen::VectorXd diag(3);
         diag << 1.0, 2.0, 3.0;
         auto cov = MNECovMatrix::create_diag(FIFFV_MNE_NOISE_COV, 3, names, diag);

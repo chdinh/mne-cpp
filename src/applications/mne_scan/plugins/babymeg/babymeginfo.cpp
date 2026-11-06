@@ -221,9 +221,9 @@ void BabyMEGInfo::MGH_LM_Parse_Para(QByteArray cmdstr)
     m_FiffInfo.sfreq = sfreq;
     m_FiffInfo.highpass = 0;
     m_FiffInfo.lowpass = m_FiffInfo.sfreq / 2;
-    m_FiffInfo.acq_pars = QString("BabyMEG");
-    m_FiffInfo.acq_stim = QString("");
-    m_FiffInfo.filename = QString("");
+    m_FiffInfo.acq_pars = "BabyMEG";
+    m_FiffInfo.acq_stim = "";
+    m_FiffInfo.filename = "";
     m_FiffInfo.meas_id = FiffId::new_file_id();
     m_FiffInfo.nchan = chnNum;                       //464;
     m_FiffInfo.dev_head_t.from = FIFFV_COORD_DEVICE; //1;  //* should be from dev to head 7/18/2016 Limin
@@ -241,7 +241,7 @@ void BabyMEGInfo::MGH_LM_Parse_Para(QByteArray cmdstr)
     for (qint32 i = 0; i < chnNum; i++) {
         FiffChInfo t_ch;
 
-        t_ch.ch_name = lm_ch_names.at(i); //QString("MEG%1").arg(i);
+        t_ch.ch_name = lm_ch_names.at(i).toStdString(); //QString("MEG%1").arg(i);
         //qDebug()<<t_ch.ch_name;
         t_ch.scanNo = i;
         t_ch.logNo = i + 1;
@@ -368,7 +368,7 @@ void BabyMEGInfo::MGH_LM_Parse_Para(QByteArray cmdstr)
         t_ch.coil_trans(3, 3) = 1.0;
 
         m_FiffInfo.chs.append(t_ch);
-        m_FiffInfo.ch_names.append(t_ch.ch_name);
+        m_FiffInfo.ch_names.push_back(t_ch.ch_name);
     }
 
     emit fiffInfoAvailable(m_FiffInfo);

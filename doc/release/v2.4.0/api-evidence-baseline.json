@@ -4,7 +4,7 @@
   "policy": "scripts/quality/api_evidence_policy.json",
   "summary": {
     "exported_classes": 487,
-    "exported_free_functions": 156,
+    "exported_free_functions": 159,
     "registered_classes": 577,
     "exported_not_registered": 1,
     "registered_function_modules": 13,
@@ -949,6 +949,21 @@
     },
     {
       "name": "split",
+      "header": "utils/string_utils.h",
+      "library": "utils"
+    },
+    {
+      "name": "indexOf",
+      "header": "utils/string_utils.h",
+      "library": "utils"
+    },
+    {
+      "name": "contains",
+      "header": "utils/string_utils.h",
+      "library": "utils"
+    },
+    {
+      "name": "join",
       "header": "utils/string_utils.h",
       "library": "utils"
     },

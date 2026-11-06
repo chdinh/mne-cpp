@@ -24,6 +24,9 @@
 
 #include <QDockWidget>
 
+#include <string>
+#include <vector>
+
 class QLabel;
 class QTableView;
 class QToolBar;
@@ -46,7 +49,7 @@ public:
 
     VirtualChannelModel* getVirtualChannelModel() const;
     QTableView* getVirtualChannelTableView() const;
-    void setAvailableChannelNames(const QStringList& channelNames);
+    void setAvailableChannelNames(const std::vector<std::string>& channelNames);
 
 protected:
     bool event(QEvent* event) override;

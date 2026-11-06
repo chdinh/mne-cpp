@@ -20,6 +20,7 @@
 //=============================================================================================================
 
 #include <disp/viewers/abstractview.h>
+#include <utils/string_utils.h>
 #include <disp/viewers/hpisettingsview.h>
 #include <disp/viewers/coregsettingsview.h>
 #include <disp/viewers/artifactsettingsview.h>
@@ -307,10 +308,7 @@ QSharedPointer<FiffInfo> createBrowserTestInfo()
     QSharedPointer<FiffInfo> info(new FiffInfo);
     info->sfreq = 1000.0f;
     info->nchan = 4;
-    info->ch_names = QStringList({QStringLiteral("MEG0111"),
-                                  QStringLiteral("MEG0112"),
-                                  QStringLiteral("MEG0113"),
-                                  QStringLiteral("STI014")});
+    info->ch_names = {"MEG0111", "MEG0112", "MEG0113", "STI014"};
 
     info->chs.clear();
     info->chs.resize(info->nchan);
@@ -330,7 +328,7 @@ QSharedPointer<FiffInfo> createBrowserTestInfo()
         info->chs[i] = channelInfo;
     }
 
-    info->bads = QStringList({QStringLiteral("MEG0112")});
+    info->bads = {"MEG0112"};
     return info;
 }
 
@@ -1325,7 +1323,7 @@ void TestDispViewers2::triggerDetectionView_settingsAndSignals()
 {
     auto info = createBrowserTestInfo();
     info->chs[2].kind = FIFFV_STIM_CH;
-    info->chs[2].ch_name = QStringLiteral("STI101");
+    info->chs[2].ch_name = "STI101";
 
     TriggerDetectionView view(QString{});
     view.show();
@@ -1689,7 +1687,7 @@ void TestDispViewers2::channelSelectionView_lifecycle()
     view.newFiffFileLoaded(info);
     QVERIFY(!view.getLayoutMap().isEmpty());
 
-    view.selectChannels(QStringList{info->ch_names.first()});
+    view.selectChannels(QStringList{QString::fromStdString(info->ch_names.front())});
     view.updateBadChannels();
     view.updateDataView();
     view.saveSettings();
@@ -2007,12 +2005,12 @@ void TestDispViewers2::rtFiffRawViewModel_dataFlow()
     QCOMPARE(model.getIdxSelMap().size(), 4);
 
     model.markChBad(model.index(0, 0), true);
-    QVERIFY(info->bads.contains(QStringLiteral("MEG0111")));
+    QVERIFY(UTILSLIB::contains(info->bads, "MEG0111"));
     model.markChBad(model.index(0, 0), false);
-    QVERIFY(!info->bads.contains(QStringLiteral("MEG0111")));
+    QVERIFY(!UTILSLIB::contains(info->bads, "MEG0111"));
     model.markChBad({model.index(0, 0), model.index(2, 0)}, true);
-    QVERIFY(info->bads.contains(QStringLiteral("MEG0111")));
-    QVERIFY(info->bads.contains(QStringLiteral("MEG0113")));
+    QVERIFY(UTILSLIB::contains(info->bads, "MEG0111"));
+    QVERIFY(UTILSLIB::contains(info->bads, "MEG0113"));
 
     QMap<double, QColor> triggerColors;
     triggerColors.insert(3.0, Qt::red);
@@ -2165,7 +2163,7 @@ void TestDispViewers2::rtFiffRawViewModel_projectionWrapFilterAndRoles()
     // An active projector removing the common mode of the three MEG channels
     Eigen::MatrixXd vec(1, 3);
     vec.setConstant(1.0 / std::sqrt(3.0));
-    FiffNamedMatrix vectors(1, 3, QStringList(), info->ch_names.mid(0, 3), vec);
+    FiffNamedMatrix vectors(1, 3, {}, StringList(info->ch_names.begin() + 0, info->ch_names.begin() + 0 + 3), vec);
     model.updateProjection({FiffProj(FIFFV_PROJ_ITEM_FIELD, true, QStringLiteral("common"), vectors)});
     model.updateCompensator(0);
 
@@ -2419,7 +2417,7 @@ void TestDispViewers2::evokedSetModel_projectionRolesAndAverageMaps()
     QCOMPARE(matrices.at(0).second.first[5 * 4 + 3], 5.0);
     QVERIFY(!model.data(0, 1, Qt::BackgroundRole).isValid());
     QVERIFY(!model.data(0, 1, Qt::ToolTipRole).isValid());
-    QCOMPARE(model.data(0, 0).toStringList(), set->info.ch_names);
+    QCOMPARE(model.data(0, 0).toStringList().join(QLatin1Char(',')).toStdString(), UTILSLIB::join(set->info.ch_names, ","));
     QCOMPARE(model.headerData(1, Qt::Horizontal).toString(), QStringLiteral("data plot"));
     QCOMPARE(model.headerData(1, Qt::Horizontal, Qt::TextAlignmentRole).toInt(), static_cast<int>(Qt::AlignLeft));
     QVERIFY(!model.headerData(0, Qt::Horizontal).isValid());
@@ -2433,7 +2431,7 @@ void TestDispViewers2::evokedSetModel_projectionRolesAndAverageMaps()
     QCOMPARE(model.getKind(5), 0);
     QCOMPARE(model.getUnit(5), FIFF_UNIT_NONE);
     QCOMPARE(model.getCoil(5), FIFFV_COIL_NONE);
-    set->info.bads = {QStringLiteral("MEG0111")};
+    set->info.bads = {"MEG0111"};
     QVERIFY(model.getIsChannelBad(1));
     QVERIFY(!model.getIsChannelBad(0));
     QVERIFY(!model.getIsChannelBad(7));
@@ -2443,7 +2441,7 @@ void TestDispViewers2::evokedSetModel_projectionRolesAndAverageMaps()
     // An active common-mode projector applies to every average once the data is updated
     Eigen::MatrixXd vec(1, 3);
     vec.setConstant(1.0 / std::sqrt(3.0));
-    FiffNamedMatrix vectors(1, 3, QStringList(), set->info.ch_names.mid(0, 3), vec);
+    FiffNamedMatrix vectors(1, 3, {}, StringList(set->info.ch_names.begin() + 0, set->info.ch_names.begin() + 0 + 3), vec);
     model.updateProjection({FiffProj(FIFFV_PROJ_ITEM_FIELD, true, QStringLiteral("common"), vectors)});
     model.updateCompensator(0);
     model.setEvokedSet(set);
@@ -2490,11 +2488,11 @@ void TestDispViewers2::channelInfoModel_columnsRolesAndLayoutMapping()
     info->chs[1].chpos.coil_type = FIFFV_COIL_VV_PLANAR_T1;
     info->chs[0].chpos.r0 = Eigen::Vector3f(0.01f, -0.02f, 0.05f);
     FiffChInfo eeg;
-    eeg.ch_name = QStringLiteral("EEG-007");
+    eeg.ch_name = "EEG-007";
     eeg.kind = FIFFV_EEG_CH;
     eeg.unit = FIFF_UNIT_V;
     info->chs.append(eeg);
-    info->ch_names.append(eeg.ch_name);
+    info->ch_names.push_back(eeg.ch_name);
     info->nchan = 5;
 
     ChannelInfoModel model(info);
@@ -2507,7 +2505,7 @@ void TestDispViewers2::channelInfoModel_columnsRolesAndLayoutMapping()
     QCOMPARE(model.getMappedChannelsList(), mapped);
     QCOMPARE(model.getIndexFromMappedChName(QStringLiteral("EEG 007")), 4);
     QCOMPARE(model.getIndexFromOrigChName(QStringLiteral("MEG0113")), 2);
-    QCOMPARE(model.getBadChannelList(), QStringList{QStringLiteral("MEG0112")});
+    QCOMPARE(model.getBadChannelList(), StringList{"MEG0112"});
 
     model.layoutChanged({{QStringLiteral("MEG 0111"), QPointF(1.5, -2.0)}, {QStringLiteral("EEG 007"), QPointF(3, 4)}});
     QCOMPARE(mappedSpy.size(), 1);
@@ -3481,13 +3479,13 @@ void TestDispViewers2::channelDataModel_bufferDetrendAndDecimation()
     info->nchan = kinds.size();
     for (int i = 0; i < kinds.size(); ++i) {
         FiffChInfo ch;
-        ch.ch_name = QStringLiteral("CH%1").arg(i);
+        ch.ch_name = (QStringLiteral("CH%1").arg(i)).toStdString();
         ch.kind = kinds[i].first;
         ch.unit = kinds[i].second;
         info->chs.append(ch);
-        info->ch_names.append(ch.ch_name);
+        info->ch_names.push_back(ch.ch_name);
     }
-    info->bads = {QStringLiteral("CH2")};
+    info->bads = {"CH2"};
 
     ChannelDataModel model;
     QSignalSpy metaSpy(&model, &ChannelDataModel::metaChanged);
@@ -3517,7 +3515,7 @@ void TestDispViewers2::channelDataModel_bufferDetrendAndDecimation()
     model.setChannelBad(2, false);
     model.setChannelBad(5, true);
     model.setChannelBad(5, true);
-    QCOMPARE(info->bads, QStringList{QStringLiteral("CH5")});
+    QCOMPARE(info->bads, StringList{"CH5"});
     QVERIFY(model.channelInfo(5).bad);
 
     // Virtual channels get defaults for every missing field
@@ -3694,7 +3692,7 @@ void TestDispViewers2::rtFiffRawView_paintsHidesRowsAndAddsEvents()
     QVERIFY(!table->isRowHidden(0));
     QVERIFY(table->isRowHidden(2));
     QVERIFY(!table->isRowHidden(3));
-    view.showSelectedChannelsOnly(info->ch_names);
+    view.showSelectedChannelsOnly({"MEG0111", "MEG0112", "MEG0113", "STI014"});
 
     // The context menu offers the event and bad-marking actions; trigger them as the user would
     auto contextAction = [&view, table](const QPoint& pos, const QString& text) {
@@ -3710,9 +3708,9 @@ void TestDispViewers2::rtFiffRawView_paintsHidesRowsAndAddsEvents()
     QSignalSpy markSpy(&view, &RtFiffRawView::channelMarkingChanged);
     table->selectRow(2);
     contextAction(table->visualRect(model->index(2, 1)).center(), QStringLiteral("Mark as bad"));
-    QVERIFY(info->bads.contains(QStringLiteral("MEG0113")));
+    QVERIFY(UTILSLIB::contains(info->bads, "MEG0113"));
     contextAction(table->visualRect(model->index(2, 1)).center(), QStringLiteral("Mark as good"));
-    QVERIFY(!info->bads.contains(QStringLiteral("MEG0113")));
+    QVERIFY(!UTILSLIB::contains(info->bads, "MEG0113"));
     QCOMPARE(markSpy.size(), 2);
 
     // Only show / hide / reset the selected rows
@@ -4391,7 +4389,7 @@ void TestDispViewers2::rtFiffRawViewDelegate_paintsSignalCursorAndThreshold()
     QVERIFY2(iThreshold > 30, qPrintable(QString::number(iThreshold)));
 
     // A bad channel gets a reddish tint over the whole cell
-    info->bads = {QStringLiteral("MEG0111")};
+    info->bads = {"MEG0111"};
     image = render(0);
     const QRgb background = image.pixel(5, 90);
     QVERIFY2(qRed(background) > qBlue(background) + 10, qPrintable(QColor(background).name()));

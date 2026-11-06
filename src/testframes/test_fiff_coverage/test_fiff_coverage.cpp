@@ -328,8 +328,10 @@ void TestFiffCoverage::testWriteBadChannels()
         FiffStream::SPtr stream = FiffStream::start_file(outFile);
         QVERIFY(stream != nullptr);
 
-        QStringList bads;
-        bads << "MEG0111" << "MEG0113" << "MEG0121";
+        StringList bads;
+        bads.push_back("MEG0111");
+        bads.push_back("MEG0113");
+        bads.push_back("MEG0121");
         stream->write_bad_channels(bads);
         stream->end_file();
         stream->close(); // flush to disk
@@ -428,8 +430,11 @@ void TestFiffCoverage::testCtfCompRoundTrip()
         data->nrow = 2;
         data->ncol = 3;
         data->data = MatrixXd::Ones(2, 3);
-        data->row_names << "MEG0111" << "MEG0121";
-        data->col_names << "REF01" << "REF02" << "REF03";
+        data->row_names.push_back("MEG0111");
+        data->row_names.push_back("MEG0121");
+        data->col_names.push_back("REF01");
+        data->col_names.push_back("REF02");
+        data->col_names.push_back("REF03");
         comp.data = FiffNamedMatrix::SDPtr(data);
         comps.append(comp);
     }
@@ -564,10 +569,8 @@ void TestFiffCoverage::testCoordTransApply()
 
 void TestFiffCoverage::testNamedMatrixConstruction()
 {
-    QStringList rowNames;
-    rowNames << "row1" << "row2";
-    QStringList colNames;
-    colNames << "col1" << "col2" << "col3";
+    StringList rowNames{"row1", "row2"};
+    StringList colNames{"col1", "col2", "col3"};
     MatrixXd data = MatrixXd::Random(2, 3);
 
     FiffNamedMatrix nm(2, 3, rowNames, colNames, data);
@@ -581,10 +584,8 @@ void TestFiffCoverage::testNamedMatrixConstruction()
 
 void TestFiffCoverage::testNamedMatrixTranspose()
 {
-    QStringList rowNames;
-    rowNames << "A" << "B";
-    QStringList colNames;
-    colNames << "X" << "Y" << "Z";
+    StringList rowNames{"A", "B"};
+    StringList colNames{"X", "Y", "Z"};
     MatrixXd data(2, 3);
     data << 1, 2, 3, 4, 5, 6;
 

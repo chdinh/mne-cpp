@@ -89,9 +89,10 @@ void TestFiffSimulatorSsp::sspAndBadsRoundTripThroughFiffWrite()
 
     // Inject a couple of bad channels for the round-trip (sample data may have
     // an empty bads list) — pick the first two valid channel names.
-    QStringList expectedBads = srcInfo.bads;
-    if (expectedBads.isEmpty() && srcInfo.ch_names.size() >= 2) {
-        expectedBads << srcInfo.ch_names.at(0) << srcInfo.ch_names.at(1);
+    StringList expectedBads = srcInfo.bads;
+    if (expectedBads.empty() && srcInfo.ch_names.size() >= 2) {
+        expectedBads.push_back(srcInfo.ch_names.at(0));
+        expectedBads.push_back(srcInfo.ch_names.at(1));
     }
     FiffInfo infoForWrite = srcInfo;
     infoForWrite.bads = expectedBads;

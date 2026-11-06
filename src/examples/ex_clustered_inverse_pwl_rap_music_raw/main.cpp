@@ -190,8 +190,7 @@ int main(int argc, char* argv[])
             picks(k) = k;
         //
     } else {
-        QStringList include;
-        include << "STI 014";
+        StringList include{"STI 014"};
         bool want_meg = true;
         bool want_eeg = false;
         bool want_stim = false;
@@ -199,9 +198,9 @@ int main(int argc, char* argv[])
         picks = raw.info.pick_types(want_meg, want_eeg, want_stim, include, raw.info.bads); //prefer member function
     }
 
-    QStringList ch_names;
+    StringList ch_names;
     for (k = 0; k < picks.cols(); ++k)
-        ch_names << raw.info.ch_names[picks(0, k)];
+        ch_names.push_back(raw.info.ch_names[picks(0, k)]);
 
     //
     //   Set up projection
@@ -419,7 +418,7 @@ int main(int argc, char* argv[])
 
     FiffEvoked evoked = data.average(raw.info, tmin * raw.info.sfreq, floor(tmax * raw.info.sfreq + 0.5), vecSel);
 
-    QStringList ch_sel_names = t_Fwd.info.ch_names;
+    StringList ch_sel_names = t_Fwd.info.ch_names;
     FiffEvoked pickedEvoked = evoked.pick_channels(ch_sel_names);
 
     //########################################################################################

@@ -139,7 +139,7 @@ int main(int argc, char* argv[])
     const MatrixXf edfHead = edf->readRawSegment(0, 201);
     //! [edf_reader_usage]
     // mne.io.read_raw_edf: 25 channels at 128 Hz, 1228 samples, first channel "EEG Fp1"; data[3, 200] = 0.1757724
-    ok &= expect(edfOpen && dynamic_cast<EDFReader*>(edf.get()) != nullptr && edf->formatName() == "EDF" && edfInfo.nchan == 25 && edfInfo.ch_names.first() == "EEG Fp1" && edf->getSampleCount() == 1228 && near(edfHead(0, 0), 0.17594066, 1e-5) && near(edfHead(3, 200), 0.17577240650034331, 1e-5),
+    ok &= expect(edfOpen && dynamic_cast<EDFReader*>(edf.get()) != nullptr && edf->formatName() == "EDF" && edfInfo.nchan == 25 && edfInfo.ch_names.front() == "EEG Fp1" && edf->getSampleCount() == 1228 && near(edfHead(0, 0), 0.17594066, 1e-5) && near(edfHead(3, 200), 0.17577240650034331, 1e-5),
                  QString("EDF: %1 channels, %2 samples, (3,200) = %3 match mne").arg(edfInfo.nchan).arg(edf->getSampleCount()).arg(edfHead(3, 200), 0, 'g', 8));
 
     //! [edf_channel_info]
@@ -152,7 +152,7 @@ int main(int argc, char* argv[])
     //! [bids_raw_data_read]
     BidsRawData data = BidsRawData::read(ieeg); // raw data plus channels, events, electrodes and sidecar metadata
     //! [bids_raw_data_read]
-    ok &= expect(data.isValid() && data.raw.info.nchan == 32 && data.raw.info.bads == QStringList({"P4"}) && data.events.size() == 4 && data.electrodes.size() == 10 && data.ieegReference == "Cz" && data.eventIdMap.value("feedback") == 3,
+    ok &= expect(data.isValid() && data.raw.info.nchan == 32 && data.raw.info.bads == std::vector<std::string>{"P4"} && data.events.size() == 4 && data.electrodes.size() == 10 && data.ieegReference == "Cz" && data.eventIdMap.value("feedback") == 3,
                  "BidsRawData applies channels.tsv (bad P4), events.tsv, electrodes.tsv and the sidecar");
 
     //! [bids_raw_data_write]

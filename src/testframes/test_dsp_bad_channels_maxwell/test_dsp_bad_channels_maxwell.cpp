@@ -64,7 +64,7 @@ static FiffInfo createSyntheticMegInfo(int nChannels = 102)
     // Create channels in a hemisphere arrangement
     for (int i = 0; i < nChannels; ++i) {
         FiffChInfo ch;
-        ch.ch_name = QString("MEG%1").arg(i + 1, 4, 10, QChar('0'));
+        ch.ch_name = (QString("MEG%1").arg(i + 1, 4, 10, QChar('0'))).toStdString();
         ch.kind = FIFFV_MEG_CH;
         ch.unit = FIFF_UNIT_T;
 
@@ -96,7 +96,7 @@ static FiffInfo createSyntheticMegInfo(int nChannels = 102)
         ch.cal = 1.0;
 
         info.chs.append(ch);
-        info.ch_names.append(ch.ch_name);
+        info.ch_names.push_back(ch.ch_name);
     }
 
     return info;

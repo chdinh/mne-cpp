@@ -338,7 +338,7 @@ public:
      *
      * @return converts data to a string.
      */
-    inline QString toString() const;
+    inline std::string toString() const;
 
     //=========================================================================================================
     /**
@@ -636,12 +636,11 @@ inline const double* FiffTag::toDouble() const
 
 //=============================================================================================================
 
-inline QString FiffTag::toString() const
+inline std::string FiffTag::toString() const
 {
     if (this->isMatrix() || this->getType() != FIFFT_STRING)
-        return nullptr;
-    else
-        return *this;
+        return {};
+    return std::string(this->constData(), static_cast<std::size_t>(this->size()));
 }
 
 //=============================================================================================================
@@ -815,7 +814,9 @@ inline FiffChInfo FiffTag::toChInfo() const
         //   Handle the channel name
         //
         const char* orig = static_cast<const char*>(this->data());
-        p_FiffChInfo.ch_name = QString::fromUtf8(orig + 80, static_cast<qsizetype>(qstrnlen(orig + 80, 16))).replace(" ", "");
+        std::string name(orig + 80, qstrnlen(orig + 80, 16));
+        std::erase(name, ' ');
+        p_FiffChInfo.ch_name = std::move(name);
 
         return p_FiffChInfo;
     }

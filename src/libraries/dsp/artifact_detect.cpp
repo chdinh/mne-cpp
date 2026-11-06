@@ -65,7 +65,7 @@ QVector<int> goodChannelsOfKind(const FiffInfo& info, int kind)
 {
     QVector<int> idx;
     for (int i = 0; i < info.nchan; ++i) {
-        if (info.chs[i].kind == kind && !info.bads.contains(info.ch_names.value(i, info.chs[i].ch_name)))
+        if (info.chs[i].kind == kind && !info.isBad(info.chs[i].ch_name))
             idx.append(i);
     }
     return idx;

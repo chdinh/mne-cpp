@@ -3,6 +3,7 @@
 //   Christoph Dinh <christoph.dinh@mne-cpp.org>
 
 #include <QtTest/QtTest>
+#include <utils/string_utils.h>
 #include <Eigen/Dense>
 
 #include <cstring>
@@ -41,7 +42,7 @@ private:
     FiffChInfo makeCh(const QString& name, int kind, int unit, int coilType)
     {
         FiffChInfo ch;
-        ch.ch_name = name;
+        ch.ch_name = name.toStdString();
         ch.kind = kind;
         ch.unit = unit;
         ch.chpos.coil_type = coilType;
@@ -57,7 +58,7 @@ private:
         for (int i = 0; i < nCh; ++i) {
             QString name = QString("MEG %1").arg(i, 4, 10, QChar('0'));
             info.chs.append(makeCh(name, FIFFV_MEG_CH, FIFF_UNIT_T, FIFFV_COIL_VV_MAG_T3));
-            info.ch_names.append(name);
+            info.ch_names.push_back(name.toStdString());
         }
         info.bads.clear();
         return info;
@@ -100,29 +101,33 @@ private slots:
         // A FiffInfo cleared through its base clears its own fields too.
         FiffInfo info;
         info.sfreq = 1000.0f;
-        info.device_info.type = QStringLiteral("synthetic");
-        info.acq_pars = QStringLiteral("ACQch001 110113");
+        info.device_info.type = "synthetic";
+        info.acq_pars = "ACQch001 110113";
         FiffInfoBase& base = info;
         base.clear();
         QCOMPARE(info.sfreq, -1.0f);
         QVERIFY(info.device_info.isEmpty());
-        QVERIFY(info.acq_pars.isEmpty());
+        QVERIFY(info.acq_pars.empty());
     }
 
     void infoBase_channelType()
     {
         FiffInfoBase info = makeSyntheticInfoBase(2);
-        QString type = info.channel_type(0);
+        QString type = QString::fromStdString(info.channel_type(0));
         QVERIFY(!type.isEmpty());
     }
 
     void infoBase_pickChannels()
     {
-        QStringList allNames;
-        allNames << "MEG 0001" << "MEG 0002" << "MEG 0003" << "EEG 001";
-        QStringList include;
-        include << "MEG 0001" << "MEG 0003";
-        QStringList exclude;
+        StringList allNames;
+        allNames.push_back("MEG 0001");
+        allNames.push_back("MEG 0002");
+        allNames.push_back("MEG 0003");
+        allNames.push_back("EEG 001");
+        StringList include;
+        include.push_back("MEG 0001");
+        include.push_back("MEG 0003");
+        StringList exclude;
 
         RowVectorXi picks = FiffInfoBase::pick_channels(allNames, include, exclude);
         QCOMPARE(picks.size(), 2);
@@ -132,11 +137,13 @@ private slots:
 
     void infoBase_pickChannelsExclude()
     {
-        QStringList allNames;
-        allNames << "MEG 0001" << "MEG 0002" << "MEG 0003";
-        QStringList include; // empty = include all
-        QStringList exclude;
-        exclude << "MEG 0002";
+        StringList allNames;
+        allNames.push_back("MEG 0001");
+        allNames.push_back("MEG 0002");
+        allNames.push_back("MEG 0003");
+        StringList include; // empty = include all
+        StringList exclude;
+        exclude.push_back("MEG 0002");
 
         RowVectorXi picks = FiffInfoBase::pick_channels(allNames, include, exclude);
         QCOMPARE(picks.size(), 2);
@@ -155,9 +162,9 @@ private slots:
     void infoBase_getChannelTypes()
     {
         FiffInfoBase info = makeSyntheticInfoBase(3);
-        QStringList types = info.get_channel_types();
+        StringList types = info.get_channel_types();
         QVERIFY(types.size() > 0);
-        QVERIFY(types.contains("mag"));
+        QVERIFY(UTILSLIB::contains(types, "mag"));
     }
 
     void infoBase_equality()
@@ -176,10 +183,10 @@ private slots:
     void infoBase_pickTypes()
     {
         FiffInfoBase info = makeSyntheticInfoBase(4);
-        RowVectorXi megPicks = info.pick_types(QString("mag"), false, false);
+        RowVectorXi megPicks = info.pick_types("mag", false, false);
         QVERIFY(megPicks.size() > 0);
         // A default-constructed info has nchan -1 and no channels; this used to throw bad_alloc.
-        QCOMPARE(FiffInfoBase().pick_types(QString("mag"), true, true).size(), Index(0));
+        QCOMPARE(FiffInfoBase().pick_types("mag", true, true).size(), Index(0));
     }
 
     void info_picksMatchMnePython()
@@ -194,29 +201,29 @@ private slots:
         const FiffRawData raw(file);
         const FiffInfo& info = raw.info;
         QCOMPARE(info.nchan, 376);
-        QCOMPARE(info.bads, QStringList({"MEG2443", "EEG053"}));
+        QCOMPARE(info.bads, StringList({"MEG2443", "EEG053"}));
 
-        const RowVectorXi meg = info.pick_types(true, false, false, QStringList(), info.bads);
+        const RowVectorXi meg = info.pick_types(true, false, false, {}, info.bads);
         QCOMPARE(meg.size(), Index(305));
         QCOMPARE(meg(304), 305);
-        const RowVectorXi eeg = info.pick_types(false, true, false, QStringList(), info.bads);
+        const RowVectorXi eeg = info.pick_types(false, true, false, {}, info.bads);
         QCOMPARE(eeg.size(), Index(59));
         QCOMPARE(eeg(0), 315);
         QCOMPARE(eeg(58), 374);
-        const RowVectorXi stim = info.pick_types(false, false, true, QStringList(), info.bads);
+        const RowVectorXi stim = info.pick_types(false, false, true, {}, info.bads);
         QCOMPARE(stim.size(), Index(9));
         QCOMPARE(stim(0), 306);
         QCOMPARE(stim(8), 314);
         QCOMPARE(info.pick_types(true, true, false).size(), Index(366));
 
         QCOMPARE(FiffInfoBase::pick_channels(info.ch_names, {"EEG001", "MEG0113", "STI014"}), RowVectorXi((RowVectorXi(3) << 0, 312, 315).finished()));
-        QCOMPARE(FiffInfoBase::pick_channels(info.ch_names, QStringList(), info.bads).size(), Index(374));
+        QCOMPARE(FiffInfoBase::pick_channels(info.ch_names, {}, info.bads).size(), Index(374));
 
         const RowVectorXi sel = (RowVectorXi(3) << 3, 10, 316).finished();
         const FiffInfo sub = info.pick_info(sel);
-        QCOMPARE(sub.ch_names, QStringList({"MEG0122", "MEG0142", "EEG002"}));
+        QCOMPARE(sub.ch_names, StringList({"MEG0122", "MEG0142", "EEG002"}));
         QCOMPARE(sub.nchan, 3);
-        QVERIFY(sub.bads.isEmpty());
+        QVERIFY(sub.bads.empty());
     }
 
     //=========================================================================
@@ -235,8 +242,10 @@ private slots:
         data->nrow = 1;
         data->ncol = 3;
         data->data = MatrixXd::Ones(1, 3) / std::sqrt(3.0);
-        data->col_names << "CH1" << "CH2" << "CH3";
-        data->row_names << "Proj1";
+        data->col_names.push_back("CH1");
+        data->col_names.push_back("CH2");
+        data->col_names.push_back("CH3");
+        data->row_names.push_back("Proj1");
 
         FiffProj proj(FIFFV_MNE_PROJ_ITEM_EEG_AVREF, true, "TestProj", *data);
         QCOMPARE(proj.active, true);
@@ -269,15 +278,19 @@ private slots:
         data->nrow = 1;
         data->ncol = 3;
         data->data = MatrixXd::Ones(1, 3) / std::sqrt(3.0);
-        data->col_names << "CH1" << "CH2" << "CH3";
-        data->row_names << "PCA1";
+        data->col_names.push_back("CH1");
+        data->col_names.push_back("CH2");
+        data->col_names.push_back("CH3");
+        data->row_names.push_back("PCA1");
 
         FiffProj proj(FIFFV_MNE_PROJ_ITEM_EEG_AVREF, true, "PCA", *data);
         QList<FiffProj> projs;
         projs << proj;
 
-        QStringList chNames;
-        chNames << "CH1" << "CH2" << "CH3";
+        StringList chNames;
+        chNames.push_back("CH1");
+        chNames.push_back("CH2");
+        chNames.push_back("CH3");
         MatrixXd P;
         int nProj = FiffProj::make_projector(projs, chNames, P);
         QVERIFY(nProj >= 0);
@@ -301,13 +314,13 @@ private slots:
         QVERIFY(raw.info.nchan > 0);
         QVERIFY(raw.info.sfreq > 0);
 
-        RowVectorXi megPicks = raw.info.pick_types(QString("mag"), false, false);
+        RowVectorXi megPicks = raw.info.pick_types("mag", false, false);
         QVERIFY(megPicks.size() > 0);
 
-        RowVectorXi gradPicks = raw.info.pick_types(QString("grad"), false, false);
+        RowVectorXi gradPicks = raw.info.pick_types("grad", false, false);
         QVERIFY(gradPicks.size() > 0);
 
-        RowVectorXi eegPicks = raw.info.pick_types(QString(""), true, false);
+        RowVectorXi eegPicks = raw.info.pick_types("", true, false);
         QVERIFY(eegPicks.size() > 0);
 
         FiffInfoBase pickedInfo = raw.info.pick_info(megPicks);
@@ -323,9 +336,9 @@ private slots:
         QFile file(rawPath);
         FiffRawData raw(file);
 
-        QStringList chTypes = raw.info.get_channel_types();
+        StringList chTypes = raw.info.get_channel_types();
         QVERIFY(chTypes.size() > 0);
-        QVERIFY(chTypes.contains("mag") || chTypes.contains("grad") || chTypes.contains("eeg"));
+        QVERIFY(UTILSLIB::contains(chTypes, "mag") || UTILSLIB::contains(chTypes, "grad") || UTILSLIB::contains(chTypes, "eeg"));
     }
 
     //=========================================================================
@@ -339,19 +352,19 @@ private slots:
         FiffRawData raw(file);
 
         // Pick magnetometers
-        RowVectorXi magPicks = raw.info.pick_types(QString("mag"), false, false);
+        RowVectorXi magPicks = raw.info.pick_types("mag", false, false);
         QVERIFY(magPicks.size() > 0);
 
         // Pick gradiometers
-        RowVectorXi gradPicks = raw.info.pick_types(QString("grad"), false, false);
+        RowVectorXi gradPicks = raw.info.pick_types("grad", false, false);
         QVERIFY(gradPicks.size() > 0);
 
         // Pick EEG
-        RowVectorXi eegPicks = raw.info.pick_types(QString(""), true, false);
+        RowVectorXi eegPicks = raw.info.pick_types("", true, false);
         QVERIFY(eegPicks.size() > 0);
 
         // Pick STI
-        RowVectorXi stiPicks = raw.info.pick_types(QString(""), false, true);
+        RowVectorXi stiPicks = raw.info.pick_types("", false, true);
         QVERIFY(stiPicks.size() > 0);
 
         // All combined should cover more
@@ -434,8 +447,8 @@ private slots:
         QVERIFY(cov.names.size() > 0);
 
         // Pick subset
-        int nPick = qMin(30, cov.names.size());
-        QStringList pickNames = cov.names.mid(0, nPick);
+        int nPick = std::min(30, static_cast<int>(cov.names.size()));
+        StringList pickNames = StringList(cov.names.begin() + 0, cov.names.begin() + 0 + nPick);
         FiffCov picked = cov.pick_channels(pickNames);
         QCOMPARE(picked.names.size(), nPick);
     }
@@ -457,9 +470,9 @@ private slots:
         QVERIFY(evokedSet.info.nchan > 0);
 
         // Exercise pick_channels
-        QStringList picks;
+        StringList picks;
         for (int i = 0; i < qMin(20, evokedSet.info.nchan); ++i)
-            picks << evokedSet.info.ch_names[i];
+            picks.push_back(evokedSet.info.ch_names[i]);
 
         FiffEvokedSet pickedSet = evokedSet.pick_channels(picks);
         QCOMPARE(pickedSet.info.nchan, picks.size());

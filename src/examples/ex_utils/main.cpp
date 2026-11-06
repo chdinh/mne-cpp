@@ -195,8 +195,8 @@ int main(int argc, char* argv[])
     //! [thread_pool_usage]
     ok &= expect(power == std::vector<double>({0.0, 0.5, 1.0, 1.5}) && background.get() == 42, "ThreadPool mapped the channels in order");
 
-    const std::vector<std::string> fields = split(trimmed(" MEG 0113, 1.5e-13 \n"), ','); // a line of a text file
-    const std::optional<double> scale = toDouble(fields[1]);                              // locale independent
+    const StringList fields = split(trimmed(" MEG 0113, 1.5e-13 \n"), ','); // a line of a text file
+    const std::optional<double> scale = toDouble(fields[1]);                // locale independent
     const bool isGz = equalsIgnoreCase(utf8FromPath(pathFromUtf8("T1.NII.GZ").extension()), ".gz");
     ok &= expect(fields[0] == "MEG 0113" && scale == 1.5e-13 && isGz, "string helpers parsed the line");
 

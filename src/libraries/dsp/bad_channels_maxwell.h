@@ -39,7 +39,8 @@
 // QT INCLUDES
 //=============================================================================================================
 
-#include <QStringList>
+#include <string>
+#include <vector>
 
 //=============================================================================================================
 // DEFINE NAMESPACE UTILSLIB
@@ -72,7 +73,7 @@ struct DSPSHARED_EXPORT BadChannelsMaxwellParams
  */
 struct DSPSHARED_EXPORT BadChannelsMaxwellResult
 {
-    QStringList badChannels;   /**< Names of detected bad channels. */
+    StringList badChannels;    /**< Names of detected bad channels. */
     QList<int> badIndices;     /**< Indices in the MEG channel list. */
     Eigen::VectorXd residuals; /**< Per-channel reconstruction residuals. */
     Eigen::VectorXd zScores;   /**< Per-channel z-scores of residuals. */

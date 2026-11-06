@@ -143,8 +143,11 @@ void TestFiffStreamPython::initTestCase()
         FiffNamedMatrix named;
         named.nrow = 2;
         named.ncol = 3;
-        named.row_names << "R1" << "R2";
-        named.col_names << "C1" << "C2" << "C3";
+        named.row_names.push_back("R1");
+        named.row_names.push_back("R2");
+        named.col_names.push_back("C1");
+        named.col_names.push_back("C2");
+        named.col_names.push_back("C3");
         named.data.resize(2, 3);
         named.data << 0.5, -1.0, 2.0, 3.5, 0.0, -4.25;
         w->write_named_matrix(FIFF_MNE_CTF_COMP_DATA, named);
@@ -154,7 +157,9 @@ void TestFiffStreamPython::initTestCase()
             FiffNamedMatrix vec;
             vec.nrow = 1;
             vec.ncol = 3;
-            vec.col_names << "MEG 0113" << "MEG 0112" << "MEG 0111";
+            vec.col_names.push_back("MEG 0113");
+            vec.col_names.push_back("MEG 0112");
+            vec.col_names.push_back("MEG 0111");
             vec.data = RowVector3d(k == 0 ? 0.6 : 0.0, 0.8, k == 0 ? 0.0 : 0.6);
             projs.append(FiffProj(FIFFV_PROJ_ITEM_FIELD, k == 0, QStringLiteral("PCA-%1").arg(k + 1), vec));
         }
@@ -221,8 +226,8 @@ void TestFiffStreamPython::namedMatrix()
     QVERIFY(m_stream->read_named_matrix(m_stream->dirtree(), FIFF_MNE_CTF_COMP_DATA, back));
     QCOMPARE(back.nrow, 2);
     QCOMPARE(back.ncol, 3);
-    QCOMPARE(back.row_names, QStringList({"R1", "R2"}));
-    QCOMPARE(back.col_names, QStringList({"C1", "C2", "C3"}));
+    QCOMPARE(back.row_names, StringList({"R1", "R2"}));
+    QCOMPARE(back.col_names, StringList({"C1", "C2", "C3"}));
     MatrixXd expected(2, 3);
     expected << 0.5, -1.0, 2.0, 3.5, 0.0, -4.25;
     QCOMPARE(back.data, expected);
@@ -240,7 +245,7 @@ void TestFiffStreamPython::projectors()
     QCOMPARE(back[1].active, false);
     QCOMPARE(back[0].kind, static_cast<fiff_int_t>(FIFFV_PROJ_ITEM_FIELD));
     // Channel names are read without spaces (FIFF convention in MNE-CPP).
-    QCOMPARE(back[0].data->col_names, QStringList({"MEG0113", "MEG0112", "MEG0111"}));
+    QCOMPARE(back[0].data->col_names, StringList({"MEG0113", "MEG0112", "MEG0111"}));
     QVERIFY((back[0].data->data - RowVector3d(0.6, 0.8, 0.0)).cwiseAbs().maxCoeff() < 1e-7);
     QVERIFY((back[1].data->data - RowVector3d(0.0, 0.8, 0.6)).cwiseAbs().maxCoeff() < 1e-7);
 }
@@ -394,7 +399,7 @@ void TestFiffStreamPython::readsFloatCovariance()
     QCOMPARE(noise.dim, 3);
     QCOMPARE(noise.nfree, 42);
     QVERIFY(!noise.diag);
-    QCOMPARE(noise.names, QStringList({"A", "B", "C"}));
+    QCOMPARE(noise.names, StringList({"A", "B", "C"}));
     Matrix3d full;
     full << 1.164402008, 0.134921417, 0.535389721,
         0.134921417, 2.983242273, -0.174825236,
@@ -404,12 +409,12 @@ void TestFiffStreamPython::readsFloatCovariance()
     // Rows of eigvec are the eigenvectors, as in mne-python (whitener = diag(1/sqrt(eig)) * eigvec).
     QCOMPARE(noise.eigvec.rows(), 3);
     QVERIFY((noise.eigvec * full - noise.eig.asDiagonal() * noise.eigvec).cwiseAbs().maxCoeff() < 1e-5);
-    QCOMPARE(noise.bads, QStringList({"B"}));
+    QCOMPARE(noise.bads, StringList({"B"}));
     QCOMPARE(noise.projs.size(), 1);
     QCOMPARE(noise.projs[0].desc, QString("ECG-1"));
     QCOMPARE(noise.projs[0].kind, static_cast<fiff_int_t>(FIFFV_PROJ_ITEM_FIELD));
     QVERIFY(!noise.projs[0].active);
-    QCOMPARE(noise.projs[0].data->col_names, QStringList({"A", "B", "C"}));
+    QCOMPARE(noise.projs[0].data->col_names, StringList({"A", "B", "C"}));
     QVERIFY((noise.projs[0].data->data - RowVector3d(0.0, 0.6, 0.8)).cwiseAbs().maxCoeff() < 1e-7);
 
     FiffCov source;
@@ -627,10 +632,10 @@ void TestFiffStreamPython::refusesUnwritablePath()
     const QString path = dir.filePath(QStringLiteral("no/such/dir/out.fif"));
     FiffInfo info;
     FiffChInfo ch;
-    ch.ch_name = QStringLiteral("EEG001");
+    ch.ch_name = "EEG001";
     ch.kind = FIFFV_EEG_CH;
     info.chs << ch;
-    info.ch_names << ch.ch_name;
+    info.ch_names.push_back(ch.ch_name);
     info.nchan = 1;
     info.sfreq = 100.0f;
     QFile raw(path);
@@ -655,8 +660,8 @@ void TestFiffStreamPython::refusesUnwritablePath()
         point.r[1] = point.r[2] = 0.0f;
         info.dig << point;
     }
-    info.acq_pars = QStringLiteral("ACQch001 110113");
-    info.acq_stim = QStringLiteral("STIM 1");
+    info.acq_pars = "ACQch001 110113";
+    info.acq_stim = "STIM 1";
     Matrix4f ctf = Matrix4f::Identity();
     ctf(0, 3) = 0.004f;
     info.ctf_head_t = FiffCoordTrans(FIFFV_MNE_COORD_CTF_HEAD, FIFFV_COORD_HEAD, ctf);
@@ -678,7 +683,7 @@ void TestFiffStreamPython::refusesUnwritablePath()
     QCOMPARE(raw1.info.ctf_head_t.trans, ctf);
 
     // A source file that has gone away only loses the blocks copied from it, not the measurement info.
-    info.filename = dir.filePath(QStringLiteral("deleted_raw.fif"));
+    info.filename = (dir.filePath(QStringLiteral("deleted_raw.fif"))).toStdString();
     QFile orphan(dir.filePath(QStringLiteral("orphan_raw.fif")));
     FiffStream::SPtr orphanStream = FiffStream::start_writing_raw(orphan, info, cals);
     QVERIFY(orphanStream);
@@ -702,21 +707,21 @@ void TestFiffStreamPython::writesAnnotationsAndDevice()
     QVERIFY(dir.isValid());
     FiffInfo info;
     FiffChInfo ch;
-    ch.ch_name = QStringLiteral("EEG 001");
+    ch.ch_name = "EEG 001";
     ch.kind = FIFFV_EEG_CH;
     ch.unit = FIFF_UNIT_V;
     ch.cal = 1.0f;
     ch.range = 1.0f;
     info.chs << ch;
-    info.ch_names << ch.ch_name;
+    info.ch_names.push_back(ch.ch_name);
     info.nchan = 1;
     info.sfreq = 100.0f;
     info.linefreq = 50.0f;
     info.meas_date[0] = 1793700000;
     info.meas_date[1] = 250000;
-    info.device_info.type = QStringLiteral("synthetic");
-    info.device_info.model = QStringLiteral("Oddball 8");
-    info.device_info.serial = QStringLiteral("seed=3");
+    info.device_info.type = "synthetic";
+    info.device_info.model = "Oddball 8";
+    info.device_info.serial = "seed=3";
 
     FiffAnnotations annotations;
     annotations.append(1.5, 0.0, QStringLiteral("Stimulus 1"));
@@ -740,7 +745,7 @@ void TestFiffStreamPython::writesAnnotationsAndDevice()
     QCOMPARE(raw.info.device_info.type, info.device_info.type);
     QCOMPARE(raw.info.device_info.model, info.device_info.model);
     QCOMPARE(raw.info.device_info.serial, info.device_info.serial);
-    QVERIFY(raw.info.device_info.site.isEmpty());
+    QVERIFY(raw.info.device_info.site.empty());
     QCOMPARE(raw.info.meas_date[1], 250000);
 
     QFile again(path);

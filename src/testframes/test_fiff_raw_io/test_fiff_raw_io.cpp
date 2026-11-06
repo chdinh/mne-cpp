@@ -169,7 +169,7 @@ private slots:
         QVERIFY(raw.info.sfreq > 0);
         QVERIFY(raw.first_samp >= 0);
         QVERIFY(raw.last_samp > raw.first_samp);
-        QVERIFY(!raw.info.ch_names.isEmpty());
+        QVERIFY(!raw.info.ch_names.empty());
         QCOMPARE(raw.info.ch_names.size(), raw.info.nchan);
     }
 
@@ -248,12 +248,12 @@ private slots:
         QVERIFY(info.sfreq > 0);
         QVERIFY(info.nchan > 0);
         QVERIFY(info.chs.size() == info.nchan);
-        QVERIFY(info.ch_names.size() == info.nchan);
+        QVERIFY(static_cast<int>(info.ch_names.size()) == info.nchan);
 
         // Check channel info details
         for (int i = 0; i < qMin(info.nchan, 5); ++i) {
             const FiffChInfo& ch = info.chs[i];
-            QVERIFY(!ch.ch_name.isEmpty());
+            QVERIFY(!ch.ch_name.empty());
             QVERIFY(ch.kind > 0);
             QVERIFY(ch.cal != 0.0);
         }
@@ -360,9 +360,9 @@ private slots:
 
         // Pick MEG channels
         RowVectorXi picks = evokedSet.info.pick_types(true, false, false);
-        QStringList pickNames;
+        StringList pickNames;
         for (int i = 0; i < picks.size(); ++i)
-            pickNames << evokedSet.info.ch_names[picks(i)];
+            pickNames.push_back(evokedSet.info.ch_names[picks(i)]);
         FiffEvokedSet picked = evokedSet.pick_channels(pickNames);
         QVERIFY(picked.info.nchan > 0);
         QCOMPARE(picked.info.nchan, (int)picks.size());
@@ -434,13 +434,13 @@ private slots:
         FiffCov cov(covFile);
 
         if (cov.dim > 0) {
-            QVERIFY(cov.names.size() == cov.dim);
+            QVERIFY(static_cast<int>(cov.names.size()) == cov.dim);
             QVERIFY(cov.data.rows() > 0 || cov.eig.size() > 0 || cov.diag);
 
             // Try picking channels
-            QStringList include;
+            StringList include;
             for (int i = 0; i < qMin(5, cov.dim); ++i) {
-                include << cov.names[i];
+                include.push_back(cov.names[i]);
             }
             FiffCov pickedCov = cov.pick_channels(include);
             QVERIFY(pickedCov.dim <= cov.dim);
@@ -738,8 +738,11 @@ private slots:
         FiffNamedMatrix nm;
         nm.nrow = 2;
         nm.ncol = 3;
-        nm.row_names << "R1" << "R2";
-        nm.col_names << "C1" << "C2" << "C3";
+        nm.row_names.push_back("R1");
+        nm.row_names.push_back("R2");
+        nm.col_names.push_back("C1");
+        nm.col_names.push_back("C2");
+        nm.col_names.push_back("C3");
         nm.data = MatrixXd::Random(2, 3);
 
         MatrixXd origData = nm.data;

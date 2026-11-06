@@ -25,6 +25,9 @@
 
 #include "mne_global.h"
 
+#include <string>
+#include <vector>
+
 //=============================================================================================================
 // EIGEN INCLUDES
 //=============================================================================================================
@@ -133,8 +136,8 @@ public:
      */
     static std::unique_ptr<MNENamedMatrix> build(int nrow,
                                                  int ncol,
-                                                 const QStringList& rowlist,
-                                                 const QStringList& collist,
+                                                 const StringList& rowlist,
+                                                 const StringList& collist,
                                                  const Eigen::MatrixXf& data);
 
     //=========================================================================================================
@@ -172,16 +175,16 @@ public:
      * @return A unique pointer to the picked sub-matrix, or @c nullptr if a
      *         requested name was not found.
      */
-    std::unique_ptr<MNENamedMatrix> pick(const QStringList& pickrowlist,
+    std::unique_ptr<MNENamedMatrix> pick(const StringList& pickrowlist,
                                          int picknrow,
-                                         const QStringList& pickcollist,
+                                         const StringList& pickcollist,
                                          int pickncol) const;
 
 public:
     int nrow;             /**< Number of rows in @ref data. */
     int ncol;             /**< Number of columns in @ref data. */
-    QStringList rowlist;  /**< Name list for the rows (may be empty if unnamed). */
-    QStringList collist;  /**< Name list for the columns (may be empty if unnamed). */
+    StringList rowlist;   /**< Name list for the rows (may be empty if unnamed). */
+    StringList collist;   /**< Name list for the columns (may be empty if unnamed). */
     Eigen::MatrixXf data; /**< Dense data matrix of dimension @ref nrow x @ref ncol. */
 };
 

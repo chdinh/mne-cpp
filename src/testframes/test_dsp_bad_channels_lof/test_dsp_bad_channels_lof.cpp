@@ -15,6 +15,7 @@
 //=============================================================================================================
 
 #include <dsp/bad_channels_lof.h>
+#include <utils/string_utils.h>
 #include <fiff/fiff_info.h>
 #include <fiff/fiff_ch_info.h>
 #include <fiff/fiff_constants.h>
@@ -67,14 +68,14 @@ private:
             ch.scanNo = i + 1;
             ch.logNo = i + 1;
             ch.kind = kind;
-            ch.ch_name = QString("%1%2").arg(prefix).arg(i + 1);
+            ch.ch_name = (QString("%1%2").arg(prefix).arg(i + 1)).toStdString();
             ch.range = 1.0f;
             ch.cal = 1.0f;
             ch.unit = 107;
             ch.unit_mul = 0;
             ch.coord_frame = 0;
             info.chs.append(ch);
-            info.ch_names.append(ch.ch_name);
+            info.ch_names.push_back(ch.ch_name);
         }
 
         return info;
@@ -159,9 +160,9 @@ private slots:
         params.iNNeighbors = 5;
         params.dThreshold = 2.0;
 
-        QStringList bads = findBadChannelsLof(data, info, params);
-        QVERIFY2(bads.contains("EEG6"),
-                 qPrintable(QString("Expected EEG6 in bads, got: %1").arg(bads.join(", "))));
+        StringList bads = findBadChannelsLof(data, info, params);
+        QVERIFY2(UTILSLIB::contains(bads, "EEG6"),
+                 qPrintable(QString("Expected EEG6 in bads, got: %1").arg(QString::fromStdString(UTILSLIB::join(bads, ", ")))));
     }
 
     void testCleanDataNoBads()
@@ -183,7 +184,7 @@ private slots:
         params.iNNeighbors = 5;
         params.dThreshold = 3.0; // High threshold
 
-        QStringList bads = findBadChannelsLof(data, info, params);
+        StringList bads = findBadChannelsLof(data, info, params);
         // With uniform data and high threshold, should find few/no bads
         QVERIFY2(bads.size() <= 2,
                  qPrintable(QString("Too many false positives: %1").arg(bads.size())));
@@ -201,22 +202,22 @@ private slots:
             ch.scanNo = i + 1;
             ch.logNo = i + 1;
             ch.kind = FIFFV_MEG_CH;
-            ch.ch_name = QString("MEG%1").arg(i + 1);
+            ch.ch_name = (QString("MEG%1").arg(i + 1)).toStdString();
             ch.range = 1.0f;
             ch.cal = 1.0f;
             info.chs.append(ch);
-            info.ch_names.append(ch.ch_name);
+            info.ch_names.push_back(ch.ch_name);
         }
         for (int i = 0; i < 3; ++i) {
             FiffChInfo ch;
             ch.scanNo = i + 4;
             ch.logNo = i + 4;
             ch.kind = FIFFV_EEG_CH;
-            ch.ch_name = QString("EEG%1").arg(i + 1);
+            ch.ch_name = (QString("EEG%1").arg(i + 1)).toStdString();
             ch.range = 1.0f;
             ch.cal = 1.0f;
             info.chs.append(ch);
-            info.ch_names.append(ch.ch_name);
+            info.ch_names.push_back(ch.ch_name);
         }
 
         MatrixXd data = MatrixXd::Random(6, 500);
@@ -225,9 +226,9 @@ private slots:
         params.bMegOnly = true;
 
         // Should only check MEG channels, but 3 channels is minimum
-        QStringList bads = findBadChannelsLof(data, info, params);
-        for (const QString& name : bads) {
-            QVERIFY2(name.startsWith("MEG"),
+        StringList bads = findBadChannelsLof(data, info, params);
+        for (const std::string& name : bads) {
+            QVERIFY2(name.starts_with("MEG"),
                      qPrintable(QString("MEG-only mode returned non-MEG channel: %1").arg(name)));
         }
     }
@@ -236,8 +237,8 @@ private slots:
     {
         FiffInfo info = makeTestInfo(2);
         MatrixXd data = MatrixXd::Random(2, 100);
-        QStringList bads = findBadChannelsLof(data, info);
-        QVERIFY(bads.isEmpty());
+        StringList bads = findBadChannelsLof(data, info);
+        QVERIFY(bads.empty());
     }
 
     void testFlatChannelDetected()
@@ -262,9 +263,9 @@ private slots:
         params.iNNeighbors = 5;
         params.dThreshold = 2.0;
 
-        QStringList bads = findBadChannelsLof(data, info, params);
-        QVERIFY2(bads.contains("EEG4"),
-                 qPrintable(QString("Expected flat EEG4 in bads, got: %1").arg(bads.join(", "))));
+        StringList bads = findBadChannelsLof(data, info, params);
+        QVERIFY2(UTILSLIB::contains(bads, "EEG4"),
+                 qPrintable(QString("Expected flat EEG4 in bads, got: %1").arg(QString::fromStdString(UTILSLIB::join(bads, ", ")))));
     }
 
     void cleanupTestCase()

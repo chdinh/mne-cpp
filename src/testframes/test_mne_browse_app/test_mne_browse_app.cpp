@@ -15,6 +15,7 @@
 //=============================================================================================================
 
 #include <Windows/averagewindow.h>
+#include <utils/string_utils.h>
 #include <Windows/datawindow.h>
 #include <Windows/eventwindow.h>
 #include <Models/eventmodel.h>
@@ -223,8 +224,8 @@ void TestMneBrowseApp::recomputesEvokedLikePython()
         QCOMPARE(evoked->nave, 6);
         QCOMPARE(evoked->data.cols(), Eigen::Index(121));
         QVERIFY(std::abs(evoked->times(0) + 0.09989760657919393) < 1e-6);
-        const int meg = static_cast<int>(evoked->info.ch_names.indexOf("MEG1332"));
-        const int eeg = static_cast<int>(evoked->info.ch_names.indexOf("EEG021"));
+        const int meg = static_cast<int>(UTILSLIB::indexOf(evoked->info.ch_names, "MEG1332"));
+        const int eeg = static_cast<int>(UTILSLIB::indexOf(evoked->info.ch_names, "EEG021"));
         QVERIFY(meg >= 0 && eeg >= 0);
         QVERIFY2(std::abs(evoked->data.row(meg).sum() - expected[row].megSum) < 1e-5 * std::abs(expected[row].megSum),
                  qPrintable(QString::number(evoked->data.row(meg).sum(), 'g', 17)));
@@ -340,8 +341,8 @@ void TestMneBrowseApp::computesAndSavesCovarianceLikePython()
     const FIFFLIB::FiffCov cov(covFile);
     QVERIFY(!cov.isEmpty());
     QCOMPARE(cov.nfree, 1524);
-    const int meg = static_cast<int>(cov.names.indexOf("MEG1332"));
-    const int eeg = static_cast<int>(cov.names.indexOf("EEG021"));
+    const int meg = static_cast<int>(UTILSLIB::indexOf(cov.names, "MEG1332"));
+    const int eeg = static_cast<int>(UTILSLIB::indexOf(cov.names, "EEG021"));
     QVERIFY(meg >= 0 && eeg >= 0);
     const double expected[3] = {4.770659745331084e-30, 3.182089184120055e-17, 1.7621560460231146e-24};
     const double got[3] = {cov.data(meg, meg), cov.data(eeg, eeg), cov.data(meg, eeg)};
@@ -469,9 +470,9 @@ void TestMneBrowseApp::writesRawCopyButNotOverItsSource()
     FIFFLIB::FiffRawData source(sourceFile);
     Eigen::MatrixXd sourceData, times;
     QVERIFY(source.read_raw_segment(sourceData, times));
-    const int meg = static_cast<int>(source.info.ch_names.indexOf("MEG1332"));
-    const int eeg = static_cast<int>(source.info.ch_names.indexOf("EEG021"));
-    const int eog = static_cast<int>(source.info.ch_names.indexOf("EOG061"));
+    const int meg = static_cast<int>(UTILSLIB::indexOf(source.info.ch_names, "MEG1332"));
+    const int eeg = static_cast<int>(UTILSLIB::indexOf(source.info.ch_names, "EEG021"));
+    const int eog = static_cast<int>(UTILSLIB::indexOf(source.info.ch_names, "EOG061"));
     QVERIFY(meg >= 0 && eeg >= 0 && eog >= 0);
     for (const QString& path : {copyPath, filteredPath}) {
         QFile file(path);

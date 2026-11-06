@@ -20,6 +20,7 @@
 //=============================================================================================================
 
 #include "mne_raw_data.h"
+#include <utils/string_utils.h>
 
 #include <QFile>
 #include <QDebug>
@@ -443,11 +444,11 @@ int mne_read_raw_buffer_t( //fiffFile     in,        /* Input file */
 //============================= mne_process_bads.c =============================
 
 int mne_read_bad_channel_list_from_node(FiffStream::SPtr& stream,
-                                        const FiffDirNode::SPtr& pNode, QStringList& listp, int& nlistp)
+                                        const FiffDirNode::SPtr& pNode, StringList& listp, int& nlistp)
 {
     FiffDirNode::SPtr node, bad;
     QList<FiffDirNode::SPtr> temp;
-    QStringList list;
+    StringList list;
     int nlist = 0;
     FiffTag::UPtr t_pTag;
     QString names;
@@ -463,8 +464,8 @@ int mne_read_bad_channel_list_from_node(FiffStream::SPtr& stream,
 
         bad->find_tag(stream, FIFF_MNE_CH_NAME_LIST, t_pTag);
         if (t_pTag) {
-            names = t_pTag->toString();
-            list = FiffStream::split_name_list(names);
+            names = QString::fromStdString(t_pTag->toString());
+            list = FiffStream::split_name_list(t_pTag->toString());
             nlist = list.size();
         }
     }
@@ -473,7 +474,7 @@ int mne_read_bad_channel_list_from_node(FiffStream::SPtr& stream,
     return OK;
 }
 
-int mne_read_bad_channel_list(const QString& name, QStringList& listp, int& nlistp)
+int mne_read_bad_channel_list(const QString& name, StringList& listp, int& nlistp)
 
 {
     QFile file(name);
@@ -1270,7 +1271,7 @@ MNERawData* MNERawData::open_file_comp(const QString& name,
     for (k = 0; k < info->nchan; k++) {
         FiffChInfo& ch = info->chInfo[k];
         // FiffTag::toChInfo strips the spaces from channel names.
-        if (QString(ch.ch_name).remove(' ') == QString(MNE_DEFAULT_TRIGGER_CH).remove(' ')) {
+        if (QString::fromStdString(ch.ch_name).remove(' ') == QString(MNE_DEFAULT_TRIGGER_CH).remove(' ')) {
             if (std::fabs(1.0 - ch.range) > 1e-5) {
                 ch.range = 1.0;
                 qInfo("%s range set to %f\n", MNE_DEFAULT_TRIGGER_CH, ch.range);
@@ -1281,7 +1282,7 @@ MNERawData* MNERawData::open_file_comp(const QString& name,
          */
         if (ch.unit_mul != 0) {
             ch.cal = pow(10.0, static_cast<double>(ch.unit_mul)) * ch.cal;
-            qInfo("Ch %s unit multiplier %d -> 0\n", ch.ch_name.toLatin1().data(), ch.unit_mul);
+            qInfo("Ch %s unit multiplier %d -> 0\n", ch.ch_name.c_str(), ch.unit_mul);
             ch.unit_mul = 0;
         }
     }
@@ -1300,8 +1301,8 @@ MNERawData* MNERawData::open_file_comp(const QString& name,
        */
     data->ch_names.clear();
     for (int i = 0; i < data->info->nchan; i++)
-        data->ch_names.append(data->info->chInfo[i].ch_name);
-    if (data->ch_names.size() != data->info->nchan) {
+        data->ch_names.push_back(data->info->chInfo[i].ch_name);
+    if (static_cast<int>(data->ch_names.size()) != data->info->nchan) {
         qCritical("Channel names were not translated correctly into a name list");
         return nullptr;
     }
@@ -1458,7 +1459,7 @@ MNERawData* MNERawData::open_file_comp(const QString& name,
         if (mne_read_bad_channel_list(name, data->badlist, data->nbad) == OK) {
             for (b = 0; b < data->nbad; b++) {
                 for (k = 0; k < data->info->nchan; k++) {
-                    if (QString::compare(data->info->chInfo[k].ch_name, data->badlist[b], Qt::CaseInsensitive) == 0) {
+                    if (UTILSLIB::equalsIgnoreCase(data->info->chInfo[k].ch_name, data->badlist[b])) {
                         data->bad[k] = 1;
                         break;
                     }
@@ -1468,7 +1469,7 @@ MNERawData* MNERawData::open_file_comp(const QString& name,
             if (data->nbad > 0) {
                 qInfo("\t");
                 for (k = 0; k < data->nbad; k++)
-                    qInfo("%s%c", data->badlist[k].toUtf8().constData(), k < data->nbad - 1 ? ' ' : '\n');
+                    qInfo("%s%c", data->badlist[k].c_str(), k < data->nbad - 1 ? ' ' : '\n');
             }
         }
     }

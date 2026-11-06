@@ -19,6 +19,7 @@
 //=============================================================================================================
 
 #include "babymeg.h"
+#include <utils/string_utils.h>
 #include "FormFiles/babymegsetupwidget.h"
 #include "FormFiles/babymegsquidcontroldgl.h"
 #include "babymegclient.h"
@@ -260,14 +261,14 @@ void BabyMEG::initConnector()
         m_pRTMSABabyMEG->measurementData()->setMultiArraySize(1);
 
         //Look for trigger channels and initialise detected trigger map
-        m_lTriggerChannelIndices.append(m_pFiffInfo->ch_names.indexOf("TRG001"));
-        m_lTriggerChannelIndices.append(m_pFiffInfo->ch_names.indexOf("TRG002"));
-        m_lTriggerChannelIndices.append(m_pFiffInfo->ch_names.indexOf("TRG003"));
-        m_lTriggerChannelIndices.append(m_pFiffInfo->ch_names.indexOf("TRG004"));
-        m_lTriggerChannelIndices.append(m_pFiffInfo->ch_names.indexOf("TRG005"));
-        m_lTriggerChannelIndices.append(m_pFiffInfo->ch_names.indexOf("TRG006"));
-        m_lTriggerChannelIndices.append(m_pFiffInfo->ch_names.indexOf("TRG007"));
-        m_lTriggerChannelIndices.append(m_pFiffInfo->ch_names.indexOf("TRG008"));
+        m_lTriggerChannelIndices.append(UTILSLIB::indexOf(m_pFiffInfo->ch_names, "TRG001"));
+        m_lTriggerChannelIndices.append(UTILSLIB::indexOf(m_pFiffInfo->ch_names, "TRG002"));
+        m_lTriggerChannelIndices.append(UTILSLIB::indexOf(m_pFiffInfo->ch_names, "TRG003"));
+        m_lTriggerChannelIndices.append(UTILSLIB::indexOf(m_pFiffInfo->ch_names, "TRG004"));
+        m_lTriggerChannelIndices.append(UTILSLIB::indexOf(m_pFiffInfo->ch_names, "TRG005"));
+        m_lTriggerChannelIndices.append(UTILSLIB::indexOf(m_pFiffInfo->ch_names, "TRG006"));
+        m_lTriggerChannelIndices.append(UTILSLIB::indexOf(m_pFiffInfo->ch_names, "TRG007"));
+        m_lTriggerChannelIndices.append(UTILSLIB::indexOf(m_pFiffInfo->ch_names, "TRG008"));
     }
 }
 
@@ -438,7 +439,7 @@ void BabyMEG::createDigTrig(MatrixXf& data)
     //Combine and write results into data block's digital trigger channel
     QMapIterator<int, QList<QPair<int, double>>> i(qMapDetectedTrigger);
     int counter = 0;
-    int idxDigTrig = m_pFiffInfo->ch_names.indexOf("DTRG01");
+    int idxDigTrig = UTILSLIB::indexOf(m_pFiffInfo->ch_names, "DTRG01");
 
     while (i.hasNext()) {
         i.next();
@@ -565,14 +566,14 @@ bool BabyMEG::readBadChannels()
 
     QTextStream in(&t_badChannelsFile);
     qint32 count = 0;
-    QStringList t_sListbads;
+    StringList t_sListbads;
     while (!in.atEnd()) {
         QString channel = in.readLine();
         if (channel.isEmpty())
             continue;
         ++count;
         qInfo("[BabyMEG::readBadChannels] Channel %i: %s", count, channel.toUtf8().constData());
-        t_sListbads << channel;
+        t_sListbads.push_back(channel.toStdString());
     }
 
     m_pFiffInfo->bads = t_sListbads;

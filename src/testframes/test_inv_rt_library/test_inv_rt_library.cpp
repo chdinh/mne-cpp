@@ -398,7 +398,7 @@ void TestInvRtLibrary::rtAveraging_moreWorkerOps()
     pInfo->nchan = 10;
     for (int i = 0; i < 10; i++) {
         FiffChInfo ch;
-        ch.ch_name = QString("Ch%1").arg(i);
+        ch.ch_name = (QString("Ch%1").arg(i)).toStdString();
         if (i == 9) {
             ch.kind = FIFFV_STIM_CH;
             ch.ch_name = "STI014";
@@ -406,7 +406,7 @@ void TestInvRtLibrary::rtAveraging_moreWorkerOps()
             ch.kind = FIFFV_MEG_CH;
         }
         pInfo->chs.append(ch);
-        pInfo->ch_names.append(ch.ch_name);
+        pInfo->ch_names.push_back(ch.ch_name);
     }
 
     RtAveraging rtAvg(10, 100, 200, 0, 50, 9, pInfo);
@@ -441,10 +441,10 @@ void TestInvRtLibrary::rtNoise_hanningWindow()
     pInfo->nchan = 5;
     for (int i = 0; i < 5; i++) {
         FiffChInfo ch;
-        ch.ch_name = QString("MEG%1").arg(i);
+        ch.ch_name = (QString("MEG%1").arg(i)).toStdString();
         ch.kind = FIFFV_MEG_CH;
         pInfo->chs.append(ch);
-        pInfo->ch_names.append(ch.ch_name);
+        pInfo->ch_names.push_back(ch.ch_name);
     }
 
     RtNoise rtNoise(256, pInfo, 5);
@@ -479,10 +479,10 @@ void TestInvRtLibrary::rtNoise_lifecycle()
     pInfo->nchan = 3;
     for (int i = 0; i < 3; i++) {
         FiffChInfo ch;
-        ch.ch_name = QString("CH%1").arg(i);
+        ch.ch_name = (QString("CH%1").arg(i)).toStdString();
         ch.kind = FIFFV_MEG_CH;
         pInfo->chs.append(ch);
-        pInfo->ch_names.append(ch.ch_name);
+        pInfo->ch_names.push_back(ch.ch_name);
     }
 
     {
@@ -777,7 +777,8 @@ void TestInvRtLibrary::rtAveragingWorker_doWork()
     chTrig.cal = 1.0;
     pInfo->chs << chData << chTrig;
     pInfo->nchan = 2;
-    pInfo->ch_names << "MEG0111" << "STI014";
+    pInfo->ch_names.push_back("MEG0111");
+    pInfo->ch_names.push_back("STI014");
     quint32 preStim = 50, postStim = 100;
     RTPROCESSINGLIB::RtAveragingWorker worker(2, preStim, postStim, 0, 0, 1, pInfo);
     QList<FiffEvokedSet> results;

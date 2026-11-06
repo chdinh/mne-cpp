@@ -174,10 +174,12 @@ QByteArray serialize(const FiffInfo& info)
 }
 
 // FiffStream drops the spaces of names read from name lists ("MEG 0113" -> "MEG0113"); restore them from the channels.
-QString channelName(const QStringList& channels, const QString& name)
+std::string channelName(const std::vector<std::string>& channels, const std::string& name)
 {
-    for (const QString& channel : channels) {
-        if (QString(channel).remove(QLatin1Char(' ')) == name) {
+    for (const std::string& channel : channels) {
+        std::string compact = channel;
+        std::erase(compact, ' ');
+        if (compact == name) {
             return channel;
         }
     }
@@ -198,12 +200,12 @@ bool deserialize(const std::vector<std::byte>& data, FiffInfo& info)
 
 void restoreNames(FiffInfo& info)
 {
-    for (QString& bad : info.bads) {
+    for (std::string& bad : info.bads) {
         bad = channelName(info.ch_names, bad);
     }
     for (FiffProj& proj : info.projs) {
         if (proj.data != nullptr) {
-            for (QString& name : proj.data->col_names) {
+            for (std::string& name : proj.data->col_names) {
                 name = channelName(info.ch_names, name);
             }
         }
@@ -220,14 +222,14 @@ AcqStreamInfo ACQLIB::fromFiffInfo(const FiffInfo& info, AcqSampleFormat format)
 {
     AcqStreamInfo stream;
     stream.name = "raw";
-    stream.sourceId = info.filename.toStdString();
+    stream.sourceId = info.filename;
     stream.format = format;
     stream.layout = AcqLayout::Interleaved;
     stream.sfreq = static_cast<double>(info.sfreq);
     stream.channels.reserve(static_cast<std::size_t>(info.chs.size()));
     for (const FiffChInfo& ch : info.chs) {
         AcqChannelInfo channel;
-        channel.name = ch.ch_name.toStdString();
+        channel.name = ch.ch_name;
         channel.kind = acqKind(ch.kind);
         channel.unit = acqUnit(ch.unit);
         channel.unitExponent = ch.unit_mul;
@@ -291,7 +293,7 @@ AcqExpected<FiffInfo> ACQLIB::toFiffInfo(const AcqStreamInfo& info)
     int index = 0;
     for (const AcqChannelInfo& channel : info.channels) {
         FiffChInfo ch;
-        ch.ch_name = QString::fromStdString(channel.name);
+        ch.ch_name = channel.name;
         ch.scanNo = ++index;
         if (channel.fiff) {
             const AcqFiffChannel& f = *channel.fiff;
@@ -324,7 +326,7 @@ AcqExpected<FiffInfo> ACQLIB::toFiffInfo(const AcqStreamInfo& info)
             ch.range = 1.0f;
         }
         fiff.chs.append(ch);
-        fiff.ch_names.append(ch.ch_name);
+        fiff.ch_names.push_back(ch.ch_name);
     }
     fiff.nchan = static_cast<fiff_int_t>(fiff.chs.size());
     restoreNames(fiff);

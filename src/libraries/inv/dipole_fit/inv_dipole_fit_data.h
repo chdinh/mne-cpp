@@ -382,7 +382,7 @@ public:
     QList<FIFFLIB::FiffChInfo> chs;                      /**< Channels. */
     int nmeg;                                            /**< How many MEG. */
     int neeg;                                            /**< How many EEG. */
-    QStringList ch_names;                                /**< List of all channel names. */
+    StringList ch_names;                                 /**< List of all channel names. */
     std::unique_ptr<FIFFLIB::FiffSparseMatrix> pick;     /**< Matrix to pick data from the full data set which may contain channels we are not interested in (currently unused). */
     std::unique_ptr<FWDLIB::FwdCoilSet> meg_coils;       /**< MEG coil definitions. */
     std::unique_ptr<FWDLIB::FwdCoilSet> eeg_els;         /**< EEG electrode definitions. */

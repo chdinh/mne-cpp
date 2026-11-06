@@ -151,7 +151,7 @@ QVariant textToVariant(const QString& text)
         return QString();
     }
 
-    const QString trimmed = text.trimmed();
+    QString trimmed = text.trimmed();
     if (trimmed.compare(QStringLiteral("true"), Qt::CaseInsensitive) == 0) {
         return true;
     }
@@ -523,13 +523,6 @@ int AnnotationModel::addAnnotation(int startSample,
 
     // Convert to time-based FiffAnnotation
     const double sfreq = (m_pFiffInfo && m_pFiffInfo->sfreq > 0.0f) ? m_pFiffInfo->sfreq : 1.0;
-    double onset = static_cast<double>(entry.startSample - m_iFirstSample) / sfreq;
-    double duration = static_cast<double>(entry.endSample - entry.startSample) / sfreq;
-    if (onset < 0.0)
-        onset = 0.0;
-    if (duration < 0.0)
-        duration = 0.0;
-
     // Auto-merge: absorb any existing same-description annotations that overlap or are adjacent
     QVector<int> mergeIndices;
     for (int i = 0; i < m_fiffAnnotations.size(); ++i) {
@@ -548,8 +541,8 @@ int AnnotationModel::addAnnotation(int startSample,
     }
 
     // Recompute onset/duration after merge
-    onset = static_cast<double>(entry.startSample - m_iFirstSample) / sfreq;
-    duration = static_cast<double>(entry.endSample - entry.startSample) / sfreq;
+    const double onset = static_cast<double>(entry.startSample - m_iFirstSample) / sfreq;
+    const double duration = static_cast<double>(entry.endSample - entry.startSample) / sfreq;
 
     beginResetModel();
     // Remove merged entries in reverse order
@@ -820,9 +813,9 @@ bool AnnotationModel::loadAnnotationFif(QFile& qFile)
         } else if (directoryEntry->kind == FIFF_MEAS_DATE) {
             haveOrigTime = true;
         } else if (directoryEntry->kind == FIFF_COMMENT) {
-            descriptions = decodeMneChannelNames(tag->toString());
+            descriptions = decodeMneChannelNames(QString::fromStdString(tag->toString()));
         } else if (directoryEntry->kind == FiffMneEpochsDropLog) {
-            const QJsonDocument document = QJsonDocument::fromJson(tag->toString().toUtf8());
+            const QJsonDocument document = QJsonDocument::fromJson(QByteArray::fromStdString(tag->toString()));
             const QJsonArray rows = document.array();
             channelNames.resize(rows.size());
             for (int row = 0; row < rows.size(); ++row) {
@@ -835,7 +828,7 @@ bool AnnotationModel::loadAnnotationFif(QFile& qFile)
                 }
             }
         } else if (directoryEntry->kind == FIFF_FREE_LIST) {
-            const QJsonDocument document = QJsonDocument::fromJson(tag->toString().toUtf8());
+            const QJsonDocument document = QJsonDocument::fromJson(QByteArray::fromStdString(tag->toString()));
             const QJsonArray rows = document.array();
             extras.resize(rows.size());
             for (int row = 0; row < rows.size(); ++row) {
@@ -1154,8 +1147,8 @@ bool AnnotationModel::saveAnnotationJson(QFile& qFile) const
         rootObject.insert(QStringLiteral("orig_time"), formatTimestampFromUsecs(measurementStartUsecs));
     }
 
-    if (m_pFiffInfo && !m_pFiffInfo->utc_offset.isEmpty()) {
-        rootObject.insert(QStringLiteral("utc_offset"), m_pFiffInfo->utc_offset);
+    if (m_pFiffInfo && !m_pFiffInfo->utc_offset.empty()) {
+        rootObject.insert(QStringLiteral("utc_offset"), QString::fromStdString(m_pFiffInfo->utc_offset));
     }
 
     rootObject.insert(QStringLiteral("annotations"), annotationArray);
@@ -1232,7 +1225,7 @@ bool AnnotationModel::saveAnnotationFif(QFile& qFile) const
         stream->write_float(FiffMneBaselineMax, endSeconds.data(), endSeconds.size());
 
         const QString encodedDescriptions = encodeMneChannelNames(descriptions);
-        stream->write_string(FIFF_COMMENT, encodedDescriptions);
+        stream->write_string(FIFF_COMMENT, encodedDescriptions.toStdString());
     }
 
     if (haveMeasurementStart) {
@@ -1244,12 +1237,12 @@ bool AnnotationModel::saveAnnotationFif(QFile& qFile) const
 
     if (haveChannelNames) {
         const QString json = QString::fromUtf8(QJsonDocument(channelNameRows).toJson(QJsonDocument::Compact));
-        stream->write_string(FiffMneEpochsDropLog, json);
+        stream->write_string(FiffMneEpochsDropLog, json.toStdString());
     }
 
     if (haveExtras) {
         const QString json = QString::fromUtf8(QJsonDocument(extrasRows).toJson(QJsonDocument::Compact));
-        stream->write_string(FIFF_FREE_LIST, json);
+        stream->write_string(FIFF_FREE_LIST, json.toStdString());
     }
 
     stream->end_block(FiffBlockMneAnnotations);

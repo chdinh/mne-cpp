@@ -828,7 +828,7 @@ void EventModel::getEventsFromNewData()
         auto groups = m_EventManager.getAllGroups();
 
         for (auto key : std::as_const(keyList)) {
-            QString name = info->chs[iChannelIndex].ch_name + "_" + QString::number(static_cast<int>(key));
+            QString name = QString::fromStdString(info->chs[iChannelIndex].ch_name) + "_" + QString::number(static_cast<int>(key));
             bool foundMatch = false;
             int groupID = 0;
             for (auto& group : *groups) {

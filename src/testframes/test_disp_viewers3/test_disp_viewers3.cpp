@@ -289,7 +289,7 @@ std::unique_ptr<ChannelDataModel> labelTestModel()
     QSharedPointer<FIFFLIB::FiffInfo> info(new FIFFLIB::FiffInfo);
     info->sfreq = 1000.0f;
     const QVector<std::pair<int, int>> kinds = {{FIFFV_MEG_CH, FIFF_UNIT_T}, {FIFFV_MEG_CH, FIFF_UNIT_T}, {FIFFV_MEG_CH, FIFF_UNIT_T}, {FIFFV_EEG_CH, FIFF_UNIT_V}, {FIFFV_EEG_CH, FIFF_UNIT_V}, {FIFFV_STIM_CH, FIFF_UNIT_NONE}};
-    const QStringList names = {"MEG0", "MEG1", "MEG2", "EEG0", "EEG1", "STI"};
+    const StringList names = {"MEG0", "MEG1", "MEG2", "EEG0", "EEG1", "STI"};
     for (int i = 0; i < kinds.size(); ++i) {
         FIFFLIB::FiffChInfo ch;
         ch.ch_name = names[i];
@@ -298,8 +298,8 @@ std::unique_ptr<ChannelDataModel> labelTestModel()
         info->chs.append(ch);
     }
     info->ch_names = names;
-    info->nchan = names.size();
-    info->bads = {QStringLiteral("MEG1")};
+    info->nchan = static_cast<int>(names.size());
+    info->bads = {"MEG1"};
 
     auto model = std::make_unique<ChannelDataModel>();
     model->init(info);

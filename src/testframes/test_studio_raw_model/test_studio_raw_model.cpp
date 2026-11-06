@@ -11,6 +11,7 @@
  */
 
 #include <browsercore/Models/rawmodel.h>
+#include <utils/string_utils.h>
 #include <rawdatabrowserwidget.h>
 
 #include <fiff/fiff_events.h>
@@ -98,13 +99,13 @@ void TestStudioRawModel::loadAndInspect()
     QVERIFY(!model.headerData(0, Qt::Horizontal, Qt::ToolTipRole).isValid());
 
     QModelIndexList channels{dataIndex};
-    const QString channelName = model.channelInfoList().constFirst().ch_name;
-    const bool initiallyBad = model.fiffInfo()->bads.contains(channelName);
+    const QString channelName = QString::fromStdString(model.channelInfoList().constFirst().ch_name);
+    const bool initiallyBad = UTILSLIB::contains(model.fiffInfo()->bads, channelName.toStdString());
     model.markChBad(channels, !initiallyBad);
-    QCOMPARE(model.fiffInfo()->bads.contains(channelName), !initiallyBad);
+    QCOMPARE(UTILSLIB::contains(model.fiffInfo()->bads, channelName.toStdString()), !initiallyBad);
     QVERIFY(model.data(dataIndex, Qt::BackgroundRole).isValid());
     model.markChBad(channels, initiallyBad);
-    QCOMPARE(model.fiffInfo()->bads.contains(channelName), initiallyBad);
+    QCOMPARE(UTILSLIB::contains(model.fiffInfo()->bads, channelName.toStdString()), initiallyBad);
 
     model.updateProjections();
     model.updateCompensator(0);

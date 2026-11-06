@@ -17,6 +17,7 @@
 
 #include <utils/ioutils.h>
 #include <utils/layoutloader.h>
+#include <utils/string_utils.h>
 #include <utils/layoutmaker.h>
 #include <utils/selectionio.h>
 #include <utils/generics/mne_logger.h>
@@ -145,7 +146,7 @@ void TestUtilsLayoutSelection::testReadAsaElcFileStdString()
         QSKIP("ELC file not available");
     }
 
-    std::vector<std::string> channelNames;
+    StringList channelNames;
     std::vector<std::vector<float>> location3D, location2D;
     std::string unit;
 
@@ -307,7 +308,7 @@ void TestUtilsLayoutSelection::testMakeLayoutStdVectorNoFit()
         {0.0f, -0.1f, 0.0f}};
 
     std::vector<std::vector<float>> outputPoints;
-    std::vector<std::string> names = {"Ch1", "Ch2", "Ch3", "Ch4"};
+    StringList names = {"Ch1", "Ch2", "Ch3", "Ch4"};
 
     std::string outPath = (m_tempDir.path() + "/layout_stdvec_nofit.lout").toStdString();
 
@@ -332,7 +333,7 @@ void TestUtilsLayoutSelection::testMakeLayoutStdVectorWithFit()
         {0.05f, 0.05f, 0.07f}};
 
     std::vector<std::vector<float>> outputPoints;
-    std::vector<std::string> names = {"Ch1", "Ch2", "Ch3", "Ch4", "Ch5"};
+    StringList names = {"Ch1", "Ch2", "Ch3", "Ch4", "Ch5"};
 
     std::string outPath = (m_tempDir.path() + "/layout_stdvec_fit.lout").toStdString();
 
@@ -352,7 +353,7 @@ void TestUtilsLayoutSelection::testMakeLayoutStdVectorMirrorX()
         {-0.1f, 0.0f, 0.0f}};
 
     std::vector<std::vector<float>> outputNormal, outputMirrored;
-    std::vector<std::string> names = {"Ch1", "Ch2", "Ch3"};
+    StringList names = {"Ch1", "Ch2", "Ch3"};
 
     std::string out1 = (m_tempDir.path() + "/layout_stdvec_normal.lout").toStdString();
     std::string out2 = (m_tempDir.path() + "/layout_stdvec_mirrorx.lout").toStdString();
@@ -378,7 +379,7 @@ void TestUtilsLayoutSelection::testMakeLayoutStdVectorWriteFile()
         {-0.1f, 0.0f, 0.0f}};
 
     std::vector<std::vector<float>> outputPoints;
-    std::vector<std::string> names = {"Ch1", "Ch2", "Ch3"};
+    StringList names = {"Ch1", "Ch2", "Ch3"};
 
     std::string outPath = (m_tempDir.path() + "/layout_stdvec_written.lout").toStdString();
 
@@ -420,13 +421,13 @@ void TestUtilsLayoutSelection::testWriteReadMNESelFileStdString()
 {
     std::string path = m_tempDir.path().toStdString() + "/test_write_std.sel";
 
-    std::map<std::string, std::vector<std::string>> selMap;
+    std::map<std::string, StringList> selMap;
     selMap["GroupA"] = {"MEG 0111", "MEG 0121"};
     selMap["GroupB"] = {"MEG 0211"};
 
     QVERIFY(SelectionIO::writeMNESelFile(path, selMap));
 
-    std::multimap<std::string, std::vector<std::string>> readMap;
+    std::multimap<std::string, StringList> readMap;
     QVERIFY(SelectionIO::readMNESelFile(path, readMap));
     QVERIFY(!readMap.empty());
     QVERIFY(readMap.count("GroupA") > 0);
@@ -469,14 +470,14 @@ void TestUtilsLayoutSelection::testWriteReadBrainstormMonStdString()
 {
     std::string basePath = m_tempDir.path().toStdString() + "/brainstorm_std";
 
-    std::map<std::string, std::vector<std::string>> selMap;
+    std::map<std::string, StringList> selMap;
     selMap["StdTestGroup"] = {"Chan1", "Chan2"};
 
     QVERIFY(SelectionIO::writeBrainstormMonFiles(basePath, selMap));
 
     // Read back using std::string overload
     std::string monPath = basePath.substr(0, basePath.find_last_of("/") + 1) + "StdTestGroup.mon";
-    std::multimap<std::string, std::vector<std::string>> readMap;
+    std::multimap<std::string, StringList> readMap;
     QVERIFY(SelectionIO::readBrainstormMonFile(monPath, readMap));
     QVERIFY(!readMap.empty());
 }

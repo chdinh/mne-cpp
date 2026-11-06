@@ -16,6 +16,7 @@
 
 #include <utils/generics/log.h>
 #include <utils/generics/mne_logger.h>
+#include <utils/string_utils.h>
 
 //=============================================================================================================
 // QT INCLUDES
@@ -249,7 +250,7 @@ void TestUtilsLogger::testLogCaptureNestsAndRestores()
 
 void TestUtilsLogger::testLogCustomSink()
 {
-    std::vector<std::string> seen;
+    StringList seen;
     Log::Sink previous = Log::setSink([&seen](Log::Level level, std::string_view message) {
         seen.emplace_back(std::to_string(static_cast<int>(level)) + ":" + std::string(message));
     });

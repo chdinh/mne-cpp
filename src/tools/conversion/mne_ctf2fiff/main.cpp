@@ -306,7 +306,7 @@ static bool readMeg4Data(const CtfDatasetInfo& info, MatrixXd& data)
 
 static void mapCtfToFiff(const CtfSensorInfo& sen, FiffChInfo& ch)
 {
-    ch.ch_name = QString::fromLatin1(sen.name, static_cast<int>(strnlen(sen.name, CTF_SENSOR_NAME_SIZE)));
+    ch.ch_name = (QString::fromLatin1(sen.name, static_cast<int>(strnlen(sen.name, CTF_SENSOR_NAME_SIZE)))).toStdString();
 
     switch (sen.sensorType) {
         case CTF_SEN_TYPE_MEG:
@@ -461,7 +461,7 @@ int main(int argc, char* argv[])
         ch.logNo = c + 1;
         mapCtfToFiff(info.sensors[c], ch);
         fiffInfo.chs.append(ch);
-        fiffInfo.ch_names.append(ch.ch_name);
+        fiffInfo.ch_names.push_back(ch.ch_name);
     }
 
     // Write FIFF output

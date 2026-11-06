@@ -107,9 +107,11 @@ QTableView* VirtualChannelWindow::getVirtualChannelTableView() const
 
 //=============================================================================================================
 
-void VirtualChannelWindow::setAvailableChannelNames(const QStringList& channelNames)
+void VirtualChannelWindow::setAvailableChannelNames(const std::vector<std::string>& channelNames)
 {
-    m_availableChannelNames = channelNames;
+    m_availableChannelNames.clear();
+    for (const std::string& name : channelNames)
+        m_availableChannelNames << QString::fromStdString(name);
 }
 
 //=============================================================================================================

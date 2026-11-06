@@ -89,7 +89,7 @@ DataLoader::SensorLoadResult DataLoader::loadSensors(const QString& fifPath,
                     pos = devHeadQTrans.map(pos);
                 }
 
-                auto* item = new SensorTreeItem(ch.ch_name, pos, QColor(100, 100, 100), 0.01f);
+                auto* item = new SensorTreeItem(QString::fromStdString(ch.ch_name), pos, QColor(100, 100, 100), 0.01f);
 
                 // Store coil orientation
                 QMatrix4x4 orient;
@@ -112,7 +112,7 @@ DataLoader::SensorLoadResult DataLoader::loadSensors(const QString& fifPath,
                 }
             } else if (ch.kind == FIFFV_EEG_CH) {
                 QVector3D pos(ch.chpos.r0(0), ch.chpos.r0(1), ch.chpos.r0(2));
-                result.eegItems.append(new SensorTreeItem(ch.ch_name, pos, QColor(0, 200, 220), 0.002f));
+                result.eegItems.append(new SensorTreeItem(QString::fromStdString(ch.ch_name), pos, QColor(0, 200, 220), 0.002f));
             }
         }
 

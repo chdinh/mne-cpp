@@ -468,11 +468,11 @@ void TestToolPreprocHelpers::testReadBadChannelListBasic()
     out << "MEG0131\n";
     f.close();
 
-    QStringList bads = readBadChannelList(fname);
-    QCOMPARE(bads.size(), 3);
-    QCOMPARE(bads[0], QString("MEG0111"));
-    QCOMPARE(bads[1], QString("MEG0121"));
-    QCOMPARE(bads[2], QString("MEG0131"));
+    std::vector<std::string> bads = readBadChannelList(fname);
+    QCOMPARE(static_cast<int>(bads.size()), 3);
+    QCOMPARE(bads[0], std::string("MEG0111"));
+    QCOMPARE(bads[1], std::string("MEG0121"));
+    QCOMPARE(bads[2], std::string("MEG0131"));
 }
 
 void TestToolPreprocHelpers::testReadBadChannelListComments()
@@ -488,8 +488,8 @@ void TestToolPreprocHelpers::testReadBadChannelListComments()
     out << "MEG0121\n";
     f.close();
 
-    QStringList bads = readBadChannelList(fname);
-    QCOMPARE(bads.size(), 2);
+    std::vector<std::string> bads = readBadChannelList(fname);
+    QCOMPARE(static_cast<int>(bads.size()), 2);
 }
 
 void TestToolPreprocHelpers::testReadBadChannelListEmpty()
@@ -502,8 +502,8 @@ void TestToolPreprocHelpers::testReadBadChannelListEmpty()
     out << "\n";
     f.close();
 
-    QStringList bads = readBadChannelList(fname);
-    QCOMPARE(bads.size(), 0);
+    std::vector<std::string> bads = readBadChannelList(fname);
+    QCOMPARE(static_cast<int>(bads.size()), 0);
 }
 
 //=============================================================================================================

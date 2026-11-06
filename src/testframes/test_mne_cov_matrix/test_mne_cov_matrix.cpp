@@ -85,7 +85,7 @@ private slots:
     void testCreateDense()
     {
         const int n = 3;
-        QStringList names = {"MEG0111", "MEG0121", "MEG0131"};
+        StringList names = {"MEG0111", "MEG0121", "MEG0131"};
         VectorXd cov(n * (n + 1) / 2); // 6 elements for 3x3
         cov << 1.0, 0.1, 0.2, 2.0, 0.3, 3.0;
 
@@ -99,7 +99,7 @@ private slots:
     void testCreateDiag()
     {
         const int n = 4;
-        QStringList names = {"ch1", "ch2", "ch3", "ch4"};
+        StringList names = {"ch1", "ch2", "ch3", "ch4"};
         VectorXd diag(n);
         diag << 1e-20, 2e-20, 3e-20, 4e-20;
 
@@ -116,7 +116,7 @@ private slots:
     void testDup()
     {
         const int n = 3;
-        QStringList names = {"a", "b", "c"};
+        StringList names = {"a", "b", "c"};
         VectorXd cov(6);
         cov << 1, 0, 0, 1, 0, 1;
 
@@ -135,7 +135,7 @@ private slots:
     void testRevertToDiag()
     {
         const int n = 3;
-        QStringList names = {"a", "b", "c"};
+        StringList names = {"a", "b", "c"};
         VectorXd cov(6);
         cov << 4.0, 0.5, 0.5, 9.0, 0.5, 16.0;
 
@@ -161,14 +161,14 @@ private slots:
         auto cm = MNECovMatrix::read(covFile, FIFFV_MNE_NOISE_COV);
         QVERIFY(cm != nullptr);
         QVERIFY(cm->ncov > 0);
-        QVERIFY(cm->names.size() == cm->ncov);
+        QVERIFY(static_cast<int>(cm->names.size()) == cm->ncov);
 
         // Validate: covariance should contain MEG and EEG channel names
         bool hasMEG = false, hasEEG = false;
         for (const auto& name : cm->names) {
-            if (name.startsWith("MEG"))
+            if (name.starts_with("MEG"))
                 hasMEG = true;
-            if (name.startsWith("EEG"))
+            if (name.starts_with("EEG"))
                 hasEEG = true;
         }
         QVERIFY(hasMEG);
@@ -183,7 +183,7 @@ private slots:
     {
         // Create 3x3 identity-like covariance (well-conditioned)
         const int n = 3;
-        QStringList names = {"ch1", "ch2", "ch3"};
+        StringList names = {"ch1", "ch2", "ch3"};
         VectorXd cov(6);
         cov << 1.0, 0.0, 0.0, 1.0, 0.0, 1.0; // pack of identity
 

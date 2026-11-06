@@ -12,6 +12,7 @@
 //=============================================================================================================
 
 #include <QtTest/QtTest>
+#include <utils/string_utils.h>
 #include <QDir>
 #include <QFile>
 #include <QBuffer>
@@ -223,9 +224,9 @@ void TestFiffIoEvokedInfo::evokedSet_pickChannels()
     QVERIFY2(!set.evoked.isEmpty(), "No evoked data loaded");
 
     // Pick first 10 channels by name
-    QStringList include;
+    StringList include;
     for (int i = 0; i < qMin(10, set.info.nchan); i++) {
-        include << set.info.chs[i].ch_name;
+        include.push_back(set.info.chs[i].ch_name);
     }
 
     FiffEvokedSet pickedSet = set.pick_channels(include);
@@ -339,8 +340,8 @@ void TestFiffIoEvokedInfo::evokedSet_grandAverage()
     QCOMPARE(g.comment, QString("Grand average (n = 2)"));
     QCOMPARE(g.info.nchan, 374);
     QCOMPARE(grandAvg.info.nchan, 374);
-    QVERIFY(g.info.bads.isEmpty());
-    QVERIFY(!g.info.ch_names.contains("MEG2443"));
+    QVERIFY(g.info.bads.empty());
+    QVERIFY(!UTILSLIB::contains(g.info.ch_names, "MEG2443"));
     QVERIFY(qAbs(g.data(0, 100) / -9.523296577431598e-12 - 1.0) < 1e-6);
     QVERIFY(qAbs(g.data.norm() / 11.161421411316139 - 1.0) < 1e-6);
 }
@@ -379,8 +380,8 @@ void TestFiffIoEvokedInfo::evoked_combineMatchesMnePython()
         QCOMPARE(c.combined.nave, c.nave);
         QCOMPARE(c.combined.comment, c.comment);
         QCOMPARE(c.combined.info.bads.size(), 2);
-        QVERIFY(c.combined.info.bads.contains("MEG2443"));
-        QVERIFY(c.combined.info.bads.contains("EEG053"));
+        QVERIFY(UTILSLIB::contains(c.combined.info.bads, "MEG2443"));
+        QVERIFY(UTILSLIB::contains(c.combined.info.bads, "EEG053"));
         QVERIFY(qAbs(c.combined.data(0, 100) / c.d0 - 1.0) < 1e-6);
         QVERIFY(qAbs(c.combined.data(315, 200) / c.d1 - 1.0) < 1e-6);
         QVERIFY(qAbs(c.combined.data.norm() / c.norm - 1.0) < 1e-6);
@@ -401,12 +402,12 @@ void TestFiffIoEvokedInfo::evokedSet_checkArtifacts()
     // Create minimal channel info
     for (int i = 0; i < nChan; i++) {
         FiffChInfo ch;
-        ch.ch_name = QString("MEG%1").arg(i + 1, 4, 10, QChar('0'));
+        ch.ch_name = (QString("MEG%1").arg(i + 1, 4, 10, QChar('0'))).toStdString();
         ch.kind = FIFFV_MEG_CH;
         ch.chpos.coil_type = FIFFV_COIL_VV_MAG_W;
         ch.unit = FIFF_UNIT_T;
         info.chs.append(ch);
-        info.ch_names.append(ch.ch_name);
+        info.ch_names.push_back(ch.ch_name);
     }
     info.nchan = nChan;
 
@@ -416,7 +417,7 @@ void TestFiffIoEvokedInfo::evokedSet_checkArtifacts()
     rej.eegReject = 150e-6f;
 
     QString reason;
-    bool epochOk = FiffEvokedSet::checkArtifacts(epoch, info, QStringList(), rej, reason);
+    bool epochOk = FiffEvokedSet::checkArtifacts(epoch, info, {}, rej, reason);
     // Small values should not trigger artifact rejection (returns true = clean)
     QVERIFY(epochOk);
 
@@ -426,7 +427,7 @@ void TestFiffIoEvokedInfo::evokedSet_checkArtifacts()
         badEpoch(c, 0) = -1e-9;
         badEpoch(c, 1) = 1e-9; // pp = 2e-9 T, much larger than 4e-12 T reject
     }
-    bool badEpochOk = FiffEvokedSet::checkArtifacts(badEpoch, info, QStringList(), rej, reason);
+    bool badEpochOk = FiffEvokedSet::checkArtifacts(badEpoch, info, {}, rej, reason);
     // Large peak-to-peak should trigger rejection (returns false = artifact found)
     QVERIFY(!badEpochOk);
 }
@@ -541,7 +542,7 @@ void TestFiffIoEvokedInfo::fiffInfo_readMegEegChannels()
     QList<FiffChInfo> chsp;
     int nmeg = 0, neeg = 0;
 
-    bool ok = FiffInfo::readMegEegChannels(rawPath(), true, true, QStringList(),
+    bool ok = FiffInfo::readMegEegChannels(rawPath().toStdString(), true, true, {},
                                            chsp, nmeg, neeg);
     QVERIFY(ok);
     QVERIFY(nmeg > 0); // Should find MEG channels

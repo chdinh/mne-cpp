@@ -110,10 +110,10 @@ FiffCov RtCov::estimateCovariance(const Eigen::MatrixXd& matData,
         computedCov.dim = computedCov.data.rows();
 
         // Set names to picked channels only
-        QStringList pickedNames;
-        if (!m_picks.isEmpty() && m_picks.size() < m_fiffInfo.ch_names.size()) {
+        StringList pickedNames;
+        if (!m_picks.isEmpty() && m_picks.size() < static_cast<int>(m_fiffInfo.ch_names.size())) {
             for (int i = 0; i < m_picks.size(); i++) {
-                pickedNames << m_fiffInfo.ch_names.at(m_picks[i]);
+                pickedNames.push_back(m_fiffInfo.ch_names.at(m_picks[i]));
             }
         } else {
             pickedNames = m_fiffInfo.ch_names;
@@ -124,7 +124,7 @@ FiffCov RtCov::estimateCovariance(const Eigen::MatrixXd& matData,
         computedCov.nfree = m_iSamples;
 
         // regularize noise covariance
-        computedCov = computedCov.regularize(m_fiffInfo, 0.05, 0.05, 0.1, doProj, QStringList());
+        computedCov = computedCov.regularize(m_fiffInfo, 0.05, 0.05, 0.1, doProj, {});
 
         //            qint32 samples = rawSegment.cols();
         //            VectorXf mu = rawSegment.rowwise().sum().array() / (float)samples;

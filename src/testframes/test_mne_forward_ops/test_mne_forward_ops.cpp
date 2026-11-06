@@ -10,6 +10,7 @@
 //=============================================================================================================
 
 #include <QtTest/QtTest>
+#include <utils/string_utils.h>
 #include <QCoreApplication>
 #include <QDir>
 #include <QFile>
@@ -80,9 +81,9 @@ private slots:
             QSKIP("Forward solution not loaded");
 
         // Pick a subset of channels
-        QStringList include;
-        for (int i = 0; i < qMin(10, m_fwd.info.ch_names.size()); ++i) {
-            include << m_fwd.info.ch_names[i];
+        StringList include;
+        for (int i = 0; i < std::min(10, static_cast<int>(m_fwd.info.ch_names.size())); ++i) {
+            include.push_back(m_fwd.info.ch_names[i]);
         }
 
         MNEForwardSolution picked = m_fwd.pick_channels(include);
@@ -98,12 +99,12 @@ private slots:
             QSKIP("Forward solution not loaded");
 
         // Exclude some channels
-        QStringList exclude;
-        for (int i = 0; i < qMin(5, m_fwd.info.ch_names.size()); ++i) {
-            exclude << m_fwd.info.ch_names[i];
+        StringList exclude;
+        for (int i = 0; i < std::min(5, static_cast<int>(m_fwd.info.ch_names.size())); ++i) {
+            exclude.push_back(m_fwd.info.ch_names[i]);
         }
 
-        QStringList emptyInclude;
+        StringList emptyInclude;
         MNEForwardSolution picked = m_fwd.pick_channels(emptyInclude, exclude);
         QVERIFY(!picked.isEmpty());
         QVERIFY(picked.nchan < m_fwd.nchan);
@@ -232,7 +233,7 @@ private slots:
 
         const FiffEvoked evoked = INVLIB::applyForward(m_fwd, stc, ave.info);
         QCOMPARE(evoked.info.ch_names.size(), 366);
-        QCOMPARE(evoked.info.ch_names.first(), QString("MEG0113"));
+        QCOMPARE(evoked.info.ch_names.front(), QString("MEG0113"));
         QVERIFY(std::abs(evoked.times(0) - 0.1f) < 1e-7f);
         const QList<QPair<QString, QList<double>>> expected = {
             {"MEG0113", {2.29908704899e-13, 5.78211973512e-14, -2.13557499523e-13}},
@@ -240,7 +241,7 @@ private slots:
             {"EEG001", {-3.50052778352e-07, 1.34513634827e-08, 4.92685045566e-07}},
             {"EEG060", {5.92750625114e-09, -2.18851835027e-07, -4.00659174832e-07}}};
         for (const auto& [name, values] : expected) {
-            const int row = static_cast<int>(evoked.info.ch_names.indexOf(name));
+            const int row = static_cast<int>(UTILSLIB::indexOf(evoked.info.ch_names, name.toStdString()));
             QVERIFY2(row >= 0, qPrintable(name));
             for (int k = 0; k < 3; ++k) {
                 const double got = evoked.data(row, 2 * k);
@@ -347,7 +348,7 @@ private slots:
         const FiffRawData raw(rawFile);
         Eigen::RowVectorXi sel(fwd.info.ch_names.size());
         for (int i = 0; i < sel.size(); ++i) {
-            sel(i) = static_cast<int>(raw.info.ch_names.indexOf(fwd.info.ch_names[i]));
+            sel(i) = static_cast<int>(UTILSLIB::indexOf(raw.info.ch_names, fwd.info.ch_names[i]));
             QVERIFY(sel(i) >= 0);
         }
         const FiffInfo info = raw.info.pick_info(sel);

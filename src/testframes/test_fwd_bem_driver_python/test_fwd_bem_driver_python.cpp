@@ -140,7 +140,7 @@ void TestFwdBemDriverPython::initTestCase()
     QList<FiffChInfo> meg, eeg;
     for (int k = 0; k < kNMeg; ++k) {
         FiffChInfo ch;
-        ch.ch_name = QStringLiteral("MEG%1").arg(k);
+        ch.ch_name = (QStringLiteral("MEG%1").arg(k)).toStdString();
         ch.kind = FIFFV_MEG_CH;
         ch.chpos.coil_type = FIFFV_COIL_POINT_MAGNETOMETER;
         ch.chpos.r0 = geo.row(k).cast<float>().transpose();
@@ -153,7 +153,7 @@ void TestFwdBemDriverPython::initTestCase()
     }
     for (int k = 0; k < kNEeg; ++k) {
         FiffChInfo ch;
-        ch.ch_name = QStringLiteral("EEG%1").arg(k);
+        ch.ch_name = (QStringLiteral("EEG%1").arg(k)).toStdString();
         ch.kind = FIFFV_EEG_CH;
         ch.chpos.coil_type = FIFFV_COIL_EEG;
         ch.chpos.r0 = geo.row(2 * kNMeg + k).cast<float>().transpose();

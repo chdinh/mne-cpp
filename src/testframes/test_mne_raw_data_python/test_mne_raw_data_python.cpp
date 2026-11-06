@@ -27,6 +27,7 @@
 //=============================================================================================================
 
 #include <mne/mne_raw_data.h>
+#include <utils/string_utils.h>
 #include <mne/mne_raw_info.h>
 #include <mne/mne_ch_selection.h>
 #include <mne/mne_proj_op.h>
@@ -134,7 +135,7 @@ void TestMneRawDataPython::initTestCase()
 
 MNEChSelection TestMneRawDataPython::makeSelection() const
 {
-    const QStringList picks{"MEG 0113", "MEG 0112", "MEG 0111", "EEG 001", "STI 014", "EOG 061"};
+    const StringList picks{"MEG 0113", "MEG 0112", "MEG 0111", "EEG 001", "STI 014", "EOG 061"};
     MNEChSelection sel;
     sel.name = "picks";
     sel.chspick = picks;
@@ -145,8 +146,8 @@ MNEChSelection TestMneRawDataPython::makeSelection() const
     sel.pick_deriv = VectorXi::Constant(sel.nchan, -1);
     // Channel names are stored without spaces ("MEG0113").
     for (int c = 0; c < sel.nchan; ++c) {
-        sel.chspick_nospace[c] = QString(picks[c]).remove(' ');
-        sel.pick[c] = static_cast<int>(m_raw->ch_names.indexOf(sel.chspick_nospace[c]));
+        std::erase(sel.chspick_nospace[c], ' ');
+        sel.pick[c] = static_cast<int>(UTILSLIB::indexOf(m_raw->ch_names, sel.chspick_nospace[c]));
     }
     return sel;
 }
@@ -322,7 +323,7 @@ void TestMneRawDataPython::projectsSegment()
     QTextStream out(&listing);
     proj->report_data(out, QStringLiteral("#"), true, {eeg[1].ch_name});
     QVERIFY2(listing.startsWith(QStringLiteral("#\n## 1 : Average EEG reference : 1 vecs : %1 chs EEG active\n#\n").arg(eeg.size())), qPrintable(listing));
-    QVERIFY(listing.contains(eeg[0].ch_name));
+    QVERIFY(listing.contains(QString::fromStdString(eeg[0].ch_name)));
     // The excluded channel's weight is listed as zero
     QCOMPARE(listing.count(QStringLiteral(" 0.0000 ")), 1);
     QVERIFY(MNEProjOp::makeProjection({}, meg, static_cast<int>(meg.size()), proj));
@@ -334,7 +335,7 @@ void TestMneRawDataPython::projectsSegment()
 
     // Bad channels are left out of the vectors before orthogonalisation (mne make_projector(projs, ch_names, bads)):
     // the average EEG reference then spans 59 channels, and with every EEG channel bad it disappears
-    const auto projector = [&](const QStringList& bads, int& nvec) {
+    const auto projector = [&](const StringList& bads, int& nvec) {
         std::unique_ptr<MNEProjOp> op;
         MNEProjOp::makeProjection({m_rawPath}, m_raw->info->chInfo, m_raw->info->nchan, op);
         op->assign_channels(m_raw->ch_names, m_raw->info->nchan);
@@ -343,22 +344,22 @@ void TestMneRawDataPython::projectsSegment()
         const Eigen::MatrixXd u = op->proj_data.cast<double>();
         return Eigen::MatrixXd(Eigen::MatrixXd::Identity(u.cols(), u.cols()) - u.transpose() * u);
     };
-    const int eeg1 = m_raw->ch_names.indexOf(QStringLiteral("EEG001"));
-    const int meg2443 = m_raw->ch_names.indexOf(QStringLiteral("MEG2443"));
+    const int eeg1 = UTILSLIB::indexOf(m_raw->ch_names, "EEG001");
+    const int meg2443 = UTILSLIB::indexOf(m_raw->ch_names, "MEG2443");
     QVERIFY(eeg1 >= 0 && meg2443 >= 0);
     int nvec = 0;
     Eigen::MatrixXd p = projector({}, nvec);
     QCOMPARE(nvec, 4);
     QVERIFY(std::fabs(p(eeg1, eeg1) - 0.9833333333333333) < 1e-6);
-    p = projector({QStringLiteral("MEG2443"), QStringLiteral("EEG053")}, nvec);
+    p = projector({"MEG2443", "EEG053"}, nvec);
     QCOMPARE(nvec, 4);
     QVERIFY(std::fabs(p.trace() - 372.0) < 1e-4);
     QVERIFY2(std::fabs(p(eeg1, eeg1) - 0.9830508474576272) < 1e-6, qPrintable(QString::number(p(eeg1, eeg1), 'g', 10)));
     QVERIFY(std::fabs(p(meg2443, meg2443) - 1.0) < 1e-6);
-    QStringList allEeg;
-    for (const QString& name : m_raw->ch_names) {
-        if (name.startsWith(QLatin1String("EEG"))) {
-            allEeg << name;
+    StringList allEeg;
+    for (const std::string& name : m_raw->ch_names) {
+        if (name.starts_with("EEG")) {
+            allEeg.push_back(name);
         }
     }
     p = projector(allEeg, nvec);
@@ -483,14 +484,14 @@ void TestMneRawDataPython::picksDerivedChannel()
     filter.lowpass_width = filter.eog_lowpass_width = 5.0f;
     std::unique_ptr<MNERawData> raw(MNERawData::open_file(m_rawPath, false, false, filter));
     QVERIFY(raw);
-    const int a = static_cast<int>(raw->ch_names.indexOf("MEG0111"));
-    const int b = static_cast<int>(raw->ch_names.indexOf("MEG0121"));
+    const int a = static_cast<int>(UTILSLIB::indexOf(raw->ch_names, "MEG0111"));
+    const int b = static_cast<int>(UTILSLIB::indexOf(raw->ch_names, "MEG0121"));
     // A derivation set with one usable row and one whose input is not recorded.
     const MNEDerivSet set = MNEDerivSet::fromDefinitions({{"BIP", {{"MEG0111", 1.0}, {"MEG0121", -1.0}}}, {"MISSING", {{"MEG0111", 1.0}, {"EEG999", -1.0}}}});
     std::unique_ptr<MNEDeriv> deriv = set.match(raw->ch_names);
     QVERIFY(deriv);
     // Matching keeps the usable row, takes the data's channel order and counts per channel how many rows use it.
-    QCOMPARE(deriv->deriv_data->rowlist, QStringList({"BIP"}));
+    QCOMPARE(deriv->deriv_data->rowlist, StringList({"BIP"}));
     QCOMPARE(deriv->deriv_data->collist, raw->ch_names);
     VectorXi inUse = VectorXi::Zero(raw->info->nchan);
     inUse(a) = inUse(b) = 1;

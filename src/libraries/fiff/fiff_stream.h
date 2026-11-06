@@ -308,7 +308,7 @@ public:
      *
      * @return the bad channel list.
      */
-    QStringList read_bad_channels(const FiffDirNode::SPtr& p_Node);
+    StringList read_bad_channels(const FiffDirNode::SPtr& p_Node);
 
     //=========================================================================================================
     /**
@@ -316,7 +316,7 @@ public:
      *
      * @param[in] bads The list of bad channel names.
      */
-    void write_bad_channels(const QStringList& bads);
+    void write_bad_channels(const StringList& bads);
 
     //=========================================================================================================
     /**
@@ -537,7 +537,7 @@ public:
      *
      * @return the splitted string list.
      */
-    static QStringList split_name_list(QString p_sNameList);
+    static StringList split_name_list(std::string_view p_sNameList);
 
     //=========================================================================================================
     /**
@@ -815,7 +815,7 @@ public:
      *
      * @return the position where the name list struct was written to.
      */
-    fiff_long_t write_name_list(fiff_int_t kind, const QStringList& data);
+    fiff_long_t write_name_list(fiff_int_t kind, const StringList& data);
 
     //=========================================================================================================
     /**
@@ -904,7 +904,7 @@ public:
      *
      * @return the position where the string struct was written to.
      */
-    fiff_long_t write_string(fiff_int_t kind, const QString& data);
+    fiff_long_t write_string(fiff_int_t kind, std::string_view data);
 
     //=========================================================================================================
     /**

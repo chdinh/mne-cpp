@@ -3,6 +3,7 @@
 //   Christoph Dinh <christoph.dinh@mne-cpp.org>
 
 #include <QtTest/QtTest>
+#include <utils/string_utils.h>
 #include <Eigen/Dense>
 #include <algorithm>
 #include <cmath>
@@ -44,14 +45,14 @@ static FiffInfo::SPtr createSyntheticFiffInfo(int nChannels, float sfreq)
 
     for (int i = 0; i < nChannels; ++i) {
         FiffChInfo ch;
-        ch.ch_name = QString("MEG%1").arg(i + 1, 4, 10, QChar('0'));
+        ch.ch_name = (QString("MEG%1").arg(i + 1, 4, 10, QChar('0'))).toStdString();
         ch.kind = FIFFV_MEG_CH;
         ch.unit = FIFF_UNIT_T;
         ch.cal = 1.0;
         ch.range = 1.0;
         ch.chpos.coil_type = FIFFV_COIL_VV_MAG_T3;
         info->chs.append(ch);
-        info->ch_names.append(ch.ch_name);
+        info->ch_names.push_back(ch.ch_name);
     }
     // Add one STI channel as trigger
     FiffChInfo sti;
@@ -61,7 +62,7 @@ static FiffInfo::SPtr createSyntheticFiffInfo(int nChannels, float sfreq)
     sti.cal = 1.0;
     sti.range = 1.0;
     info->chs.append(sti);
-    info->ch_names.append(sti.ch_name);
+    info->ch_names.push_back(sti.ch_name);
 
     info->nchan = info->chs.size();
     return info;
@@ -73,7 +74,7 @@ static MatrixXi deriveStimEvents(const FiffRawData& raw)
     for (int channelIndex = 0; channelIndex < raw.info.nchan; ++channelIndex) {
         if (raw.info.chs[channelIndex].kind == FIFFV_STIM_CH) {
             stimIdx = channelIndex;
-            if (raw.info.ch_names.value(channelIndex).remove(QLatin1Char(' ')) == QLatin1String("STI014")) {
+            if (QString::fromStdString(raw.info.ch_names[channelIndex]).remove(QLatin1Char(' ')) == QLatin1String("STI014")) {
                 break;
             }
         }
@@ -259,7 +260,7 @@ private slots:
         QFile file(m_sDataPath + "/MEG/sample/sample_audvis_trunc_raw.fif");
         FiffRawData raw(file);
         FiffInfo::SPtr info = FiffInfo::SPtr::create(raw.info);
-        const int stiIdx = info->ch_names.indexOf("STI014");
+        const int stiIdx = UTILSLIB::indexOf(info->ch_names, "STI014");
         QVERIFY(stiIdx >= 0);
         MatrixXd data, times;
         QVERIFY(raw.read_raw_segment(data, times));
@@ -296,7 +297,7 @@ private slots:
         const MatrixXd diff = evoked.data - expected;
         for (int ch = 0; ch < data.rows(); ++ch) {
             const double scale = expected.row(ch).cwiseAbs().maxCoeff();
-            QVERIFY2(diff.row(ch).cwiseAbs().maxCoeff() <= 1e-9 * scale + 1e-30, qPrintable(info->ch_names.at(ch)));
+            QVERIFY2(diff.row(ch).cwiseAbs().maxCoeff() <= 1e-9 * scale + 1e-30, info->ch_names.at(ch).c_str());
         }
     }
 
@@ -789,7 +790,7 @@ private slots:
         FiffRawData raw(file);
         MatrixXd data, times;
         QVERIFY(raw.read_raw_segment(data, times));
-        const int stiIdx = raw.info.ch_names.indexOf("STI014");
+        const int stiIdx = UTILSLIB::indexOf(raw.info.ch_names, "STI014");
         QVERIFY(stiIdx >= 0);
 
         // Rising stim onsets with their codes, as read from the stim channel directly
@@ -821,9 +822,9 @@ private slots:
         QVERIFY(evokedSet.evoked.size() > 0);
 
         // Pick first 50 channels
-        QStringList picks;
+        StringList picks;
         for (int i = 0; i < qMin(50, evokedSet.info.nchan); ++i)
-            picks << evokedSet.info.ch_names[i];
+            picks.push_back(evokedSet.info.ch_names[i]);
 
         FiffEvokedSet picked = evokedSet.pick_channels(picks);
         QCOMPARE(picked.info.nchan, picks.size());

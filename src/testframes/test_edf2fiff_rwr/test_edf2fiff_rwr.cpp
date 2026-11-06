@@ -17,6 +17,7 @@
 //=============================================================================================================
 
 #include <bids/readers/bids_edf_reader.h>
+#include <utils/string_utils.h>
 
 #include <fiff/fiff_constants.h>
 #include <fiff/fiff_raw_data.h>
@@ -125,7 +126,7 @@ void TestEDF2FIFFRWR::convertMatchesPython()
         {QStringLiteral("Status"), FIFFV_STIM_CH, {4352.0, 0.0, 0.0, 57624.0}},
     };
     for (const auto& [name, kind, values] : expected) {
-        const int k = raw.info.ch_names.indexOf(name);
+        const int k = UTILSLIB::indexOf(raw.info.ch_names, name.toStdString());
         QVERIFY2(k >= 0, qPrintable(name));
         QCOMPARE(raw.info.chs[k].kind, kind);
         const double tol = 1e-6 * std::abs(values[3]);

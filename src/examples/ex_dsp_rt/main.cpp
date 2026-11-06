@@ -20,6 +20,7 @@
 //=============================================================================================================
 
 #include <dsp/rt/rt_averaging.h>
+#include <utils/string_utils.h>
 #include <dsp/rt/rt_connectivity.h>
 #include <dsp/rt/rt_cov.h>
 #include <dsp/rt/rt_hpis.h>
@@ -107,13 +108,13 @@ FiffInfo::SPtr makeInfo(double sfreq)
     info->sfreq = sfreq;
     for (const QString& name : {QStringLiteral("MEG0111"), QStringLiteral("MEG0121"), QStringLiteral("STI014")}) {
         FiffChInfo ch;
-        ch.ch_name = name;
+        ch.ch_name = name.toStdString();
         ch.kind = name.startsWith("STI") ? FIFFV_STIM_CH : FIFFV_MEG_CH;
         ch.unit = name.startsWith("STI") ? FIFF_UNIT_NONE : FIFF_UNIT_T;
         ch.cal = 1.0f;
         ch.range = 1.0f;
         info->chs.append(ch);
-        info->ch_names.append(name);
+        info->ch_names.push_back(name.toStdString());
     }
     info->nchan = info->chs.size();
     return info;
@@ -200,7 +201,7 @@ int main(int argc, char* argv[])
     }
     //! [rt_cov_usage]
     // regularize() adds 0.1 x mean MEG variance to the diagonal; the off-diagonal term is untouched
-    ok &= expect(cov.dim == 2 && cov.names == QStringList({"MEG0111", "MEG0121"}) && cov.nfree == 4000 && std::fabs(cov.data(0, 1) - numpyCov(0, 1)) < 1e-6 * std::fabs(numpyCov(0, 1)),
+    ok &= expect(cov.dim == 2 && cov.names == StringList{"MEG0111", "MEG0121"} && cov.nfree == 4000 && std::fabs(cov.data(0, 1) - numpyCov(0, 1)) < 1e-6 * std::fabs(numpyCov(0, 1)),
                  QString("RtCov: covariance of 4000 samples matches numpy.cov off the diagonal (%1)").arg(cov.data(0, 1), 0, 'g', 6));
 
     // ---------------------------------------------------------------------------------------------------------
@@ -326,7 +327,7 @@ int main(int argc, char* argv[])
     //! [rt_inv_op_usage]
     const bool inverseArrived = waitFor(inverseDone, 60000);
     // 306 MEG channels in the forward solution, minus the bad MEG2443
-    ok &= expect(inverseArrived && inverse.nsource == fwd->nsource && inverse.nchan == 305 && rawInfo->bads.contains("MEG2443"),
+    ok &= expect(inverseArrived && inverse.nsource == fwd->nsource && inverse.nchan == 305 && UTILSLIB::contains(rawInfo->bads, "MEG2443"),
                  QString("RtInvOp builds a %1-channel operator for %2 sources").arg(inverse.nchan).arg(inverse.nsource));
     rtInvOp.stop();
 

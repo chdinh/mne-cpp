@@ -25,6 +25,8 @@
 //=============================================================================================================
 
 #include "mne_global.h"
+
+#include <string>
 #include <fiff/fiff_types.h>
 
 #include "mne_types.h"
@@ -142,7 +144,7 @@ public:
                                        int set,
                                        MNEInverseOperator* op,
                                        MNENamedMatrix* fwd,
-                                       const QStringList& namesp,
+                                       const StringList& namesp,
                                        int nnamesp,
                                        MNEMeasData& add_to);
 
@@ -162,7 +164,7 @@ public:
                                                            int set,
                                                            MNEInverseOperator* op,
                                                            MNENamedMatrix* fwd,
-                                                           const QStringList& namesp,
+                                                           const StringList& namesp,
                                                            int nnamesp);
 
 private:
@@ -170,7 +172,7 @@ private:
                                 int set,
                                 MNEInverseOperator* op,
                                 MNENamedMatrix* fwd,
-                                const QStringList& namesp,
+                                const StringList& namesp,
                                 int nnamesp,
                                 MNEMeasData& target,
                                 bool fresh);
@@ -191,7 +193,7 @@ public:
     MNEInverseOperator* op;                              /**< Associated inverse operator (not owned). */
     MNENamedMatrix* fwd;                                 /**< Forward operator for dipole fitting (not owned). */
     std::unique_ptr<MNERawData> raw;                     /**< Raw-data handle when data originates from a raw file. */
-    QStringList badlist;                                 /**< List of bad channel names. */
+    StringList badlist;                                  /**< List of bad channel names. */
     int nbad;                                            /**< Number of bad channels. */
     Eigen::VectorXi bad;                                 /**< Per-channel bad flag array (0 = good, 1 = bad). */
 

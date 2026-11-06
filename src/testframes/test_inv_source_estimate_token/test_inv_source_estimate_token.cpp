@@ -218,7 +218,7 @@ void TestInvSourceEstimateToken::roundTripsLabels()
 
 void TestInvSourceEstimateToken::roundTripsMeasures()
 {
-    const std::vector<std::string> measures{"coh", "imcoh", "plv", "pli", "wpli", "granger", "pdc", "dtf", "correlation", "crosscorrelation"};
+    const StringList measures{"coh", "imcoh", "plv", "pli", "wpli", "granger", "pdc", "dtf", "correlation", "crosscorrelation"};
     InvSourceEstimate est;
     for (const std::string& m : measures) {
         InvConnectivity conn;

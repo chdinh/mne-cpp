@@ -136,7 +136,7 @@ void Averaging::update(SCMEASLIB::Measurement::SPtr pMeasurement)
             // Init the stim channels
             for (qint32 i = 0; i < m_pFiffInfo->chs.size(); ++i) {
                 if (m_pFiffInfo->chs[i].kind == FIFFV_STIM_CH) {
-                    m_mapStimChsIndexNames.insert(m_pFiffInfo->chs[i].ch_name, i);
+                    m_mapStimChsIndexNames.insert(QString::fromStdString(m_pFiffInfo->chs[i].ch_name), i);
                 }
             }
         }

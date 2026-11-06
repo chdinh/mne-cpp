@@ -17,6 +17,7 @@
 //=============================================================================================================
 
 #include "datawindow.h"
+#include <utils/string_utils.h>
 #include "../Models/virtualchannelmodel.h"
 #include <disp/viewers/helpers/channeldatamodel.h>
 #include <fiff/fiff_constants.h>
@@ -49,7 +50,7 @@ int resolveStimChannelIndex(const FIFFLIB::FiffInfo& info)
         if (fallbackStim < 0)
             fallbackStim = ch;
 
-        QString normalizedName = info.ch_names[ch].trimmed().toUpper();
+        QString normalizedName = QString::fromStdString(info.ch_names[ch]).trimmed().toUpper();
         normalizedName.remove(QLatin1Char(' '));
         if (normalizedName == QLatin1String("STI014") ||
             normalizedName == QLatin1String("STI101")) {
@@ -223,7 +224,7 @@ void DataWindow::computeAutoScale()
     QMap<qint32, TypeStats> typeStats;
 
     for (int ch = 0; ch < fiffInfo->nchan && ch < block.rows(); ++ch) {
-        if (fiffInfo->bads.contains(fiffInfo->ch_names[ch]))
+        if (UTILSLIB::contains(fiffInfo->bads, fiffInfo->ch_names[ch]))
             continue;
 
         const auto& chInfo = fiffInfo->chs[ch];
@@ -789,14 +790,14 @@ void DataWindow::updateRawWhitener(const FIFFLIB::FiffCov& cov, const WhiteningS
 
         QMap<QString, int> infoNameToIdx;
         for (int i = 0; i < nCh; ++i) {
-            infoNameToIdx[info->ch_names[i]] = i;
+            infoNameToIdx[QString::fromStdString(info->ch_names[i])] = i;
         }
 
         // Build pick list: for each row in preparedCov, find its index in info
         QVector<int> picks;
         picks.reserve(preparedCov.dim);
-        for (int i = 0; i < preparedCov.names.size(); ++i) {
-            auto it = infoNameToIdx.constFind(preparedCov.names[i]);
+        for (int i = 0; i < static_cast<int>(preparedCov.names.size()); ++i) {
+            auto it = infoNameToIdx.constFind(QString::fromStdString(preparedCov.names[i]));
             if (it != infoNameToIdx.constEnd()) {
                 picks.append(it.value());
             }
@@ -1089,8 +1090,8 @@ void DataWindow::rebuildVirtualChannels()
     }
 
     QHash<QString, int> channelIndexByName;
-    for (int channelIndex = 0; channelIndex < fiffInfo->ch_names.size(); ++channelIndex) {
-        channelIndexByName.insert(fiffInfo->ch_names.at(channelIndex).trimmed(), channelIndex);
+    for (int channelIndex = 0; channelIndex < static_cast<int>(fiffInfo->ch_names.size()); ++channelIndex) {
+        channelIndexByName.insert(QString::fromStdString(fiffInfo->ch_names.at(channelIndex)).trimmed(), channelIndex);
     }
 
     QVector<DISPLIB::ChannelDisplayInfo> virtualDisplayInfo;

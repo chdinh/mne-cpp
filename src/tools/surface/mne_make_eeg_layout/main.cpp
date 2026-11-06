@@ -130,7 +130,7 @@ int main(int argc, char* argv[])
     for (int i = 0; i < raw.info.nchan; i++) {
         if (raw.info.chs[i].kind == FIFFV_EEG_CH) {
             EegCh ch;
-            ch.name = raw.info.chs[i].ch_name;
+            ch.name = QString::fromStdString(raw.info.chs[i].ch_name);
             ch.pos = Vector3f(raw.info.chs[i].chpos.r0(0),
                               raw.info.chs[i].chpos.r0(1),
                               raw.info.chs[i].chpos.r0(2));

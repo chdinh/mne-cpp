@@ -18,6 +18,7 @@
 //=============================================================================================================
 
 #include <utils/generics/mne_logger.h>
+#include <utils/string_utils.h>
 
 #include <fiff/fiff_cov.h>
 #include <fiff/fiff_raw_data.h>
@@ -55,7 +56,7 @@ MatrixXi deriveStimEvents(const FiffRawData& raw)
     for (int channelIndex = 0; channelIndex < raw.info.nchan; ++channelIndex) {
         if (raw.info.chs[channelIndex].kind == FIFFV_STIM_CH) {
             stimIdx = channelIndex;
-            if (raw.info.ch_names.value(channelIndex).remove(QLatin1Char(' ')) == QLatin1String("STI014")) {
+            if (QString::fromStdString(raw.info.ch_names[channelIndex]).remove(QLatin1Char(' ')) == QLatin1String("STI014")) {
                 break;
             }
         }
@@ -307,8 +308,8 @@ void TestFiffCov::computeFromEpochs_matchesPython()
     rej.eegReject = static_cast<float>(eegReject);
     const FiffCov cov = FiffCov::compute_from_epochs(raw, events, codes, tmin, tmax, tmin, bmax, baseline, removeMean, 0, delay, eegReject > 0.0 ? &rej : nullptr);
     QCOMPARE(cov.nfree, nfree);
-    const int i = cov.names.indexOf("MEG0113");
-    const int e = cov.names.indexOf("EEG001");
+    const int i = UTILSLIB::indexOf(cov.names, "MEG0113");
+    const int e = UTILSLIB::indexOf(cov.names, "EEG001");
     const Vector3d got(cov.data(i, i), cov.data(e, e), cov.data(i, e));
     for (int k = 0; k < 3; ++k)
         QVERIFY2(std::abs(got[k] - ref[k]) <= 1e-6 * std::abs(ref[k]), qPrintable(QString("entry %1: %2 vs %3").arg(k).arg(got[k], 0, 'g', 17).arg(ref[k], 0, 'g', 17)));

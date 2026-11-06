@@ -266,10 +266,10 @@ void TestIeeg::bipolarPairsFollowLeads()
 
     // Without a known shape the grid is paired as one row: G3-G4 spans 22 mm and is dropped
     std::vector<IeegBipolarPair> pairs = IeegReference::bipolarPairs(implantation);
-    QStringList names;
+    StringList names;
     for (const IeegBipolarPair& p : pairs)
-        names << QString::fromStdString(p.name);
-    QCOMPARE(names, QStringList({"LA1-LA2", "LA2-LA3", "G1-G2", "G2-G3", "G4-G5", "G5-G6"}));
+        names.push_back(p.name);
+    QCOMPARE(names, StringList({"LA1-LA2", "LA2-LA3", "G1-G2", "G2-G3", "G4-G5", "G5-G6"}));
     QCOMPARE(pairs[0].position, Eigen::Vector3f(0.0f, 0.0f, 0.00175f));
 
     // The montage subtracts the cathode from the anode
@@ -285,24 +285,24 @@ void TestIeeg::bipolarPairsFollowLeads()
 
     // It equals the sensor-space derivation on the same pairs, which appends the bipolar rows last
     FiffInfo info;
-    QStringList anodes, cathodes;
+    StringList anodes, cathodes;
     for (const IeegContact& c : contacts) {
         FiffChInfo ch;
-        ch.ch_name = QString::fromStdString(c.name);
+        ch.ch_name = c.name;
         ch.kind = FIFFV_SEEG_CH;
         info.chs.append(ch);
-        info.ch_names.append(QString::fromStdString(c.name));
+        info.ch_names.push_back(c.name);
     }
     info.nchan = int(contacts.size());
     for (const IeegBipolarPair& p : pairs) {
-        anodes << QString::fromStdString(contacts[p.anode].name);
-        cathodes << QString::fromStdString(contacts[p.cathode].name);
+        anodes.push_back(contacts[p.anode].name);
+        cathodes.push_back(contacts[p.cathode].name);
     }
     Eigen::MatrixXd derived = Eigen::MatrixXd::Random(contacts.size(), 5);
     const Eigen::MatrixXd expected = IeegReference::bipolarMatrix(pairs, int(contacts.size())) * derived;
     UTILSLIB::setBipolarReference(derived, info, anodes, cathodes);
     QCOMPARE(derived.bottomRows(pairs.size()), expected);
-    QCOMPARE(info.ch_names.mid(info.nchan - int(pairs.size())), names);
+    QCOMPARE(StringList(info.ch_names.begin() + info.nchan - int(pairs.size()), info.ch_names.end()), names);
 }
 
 //=============================================================================================================

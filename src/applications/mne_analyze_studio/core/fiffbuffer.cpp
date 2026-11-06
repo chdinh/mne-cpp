@@ -101,8 +101,8 @@ void FiffBuffer::loadHeaderMetadata()
     const FIFFLIB::FiffInfo& info = m_rawData.info;
 
     QJsonArray channels;
-    for (const QString& channelName : info.ch_names) {
-        channels.append(channelName);
+    for (const std::string& channelName : info.ch_names) {
+        channels.append(QString::fromStdString(channelName));
     }
 
     QJsonObject bidsInfo;

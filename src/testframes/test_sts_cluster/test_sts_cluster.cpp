@@ -714,7 +714,7 @@ void TestStsCluster::testTrisAdjacencyMatchesMne()
     FIFFLIB::FiffInfo info;
     for (const float x : {0.0f, 1.0f, 2.0f, 3.0f, 10.0f}) {
         FIFFLIB::FiffChInfo ch;
-        ch.ch_name = QStringLiteral("EEG%1").arg(static_cast<int>(x));
+        ch.ch_name = QString("EEG%1").arg(static_cast<int>(x)).toStdString();
         ch.chpos.r0 = Eigen::Vector3f(x, 0.0f, 0.0f);
         info.chs.append(ch);
     }

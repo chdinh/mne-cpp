@@ -75,20 +75,20 @@ void FiffCtfComp::clear()
 namespace
 {
 
-int uniqueChannel(const QList<FiffChInfo>& chs, const QString& name)
+int uniqueChannel(const QList<FiffChInfo>& chs, const std::string& name)
 {
     int found = -1;
     for (int i = 0; i < chs.size(); ++i) {
         if (chs[i].ch_name == name) {
             if (found >= 0) {
-                qWarning("Ambiguous channel %s", name.toUtf8().constData());
+                qWarning("Ambiguous channel %s", name.c_str());
                 return -1;
             }
             found = i;
         }
     }
     if (found < 0)
-        qWarning("Channel %s is not available in data", name.toUtf8().constData());
+        qWarning("Channel %s is not available in data", name.c_str());
     return found;
 }
 
@@ -101,13 +101,13 @@ bool FiffCtfComp::calibrate(const QList<FiffChInfo>& chs)
     if (save_calibrated)
         return true;
     for (Index col = 0; col < data->data.cols(); ++col) {
-        const int p = uniqueChannel(chs, data->col_names.value(col));
+        const int p = uniqueChannel(chs, data->col_names[col]);
         if (p < 0)
             return false;
         colcals(col) = 1.0 / (static_cast<double>(chs[p].range) * chs[p].cal);
     }
     for (Index row = 0; row < data->data.rows(); ++row) {
-        const int p = uniqueChannel(chs, data->row_names.value(row));
+        const int p = uniqueChannel(chs, data->row_names[row]);
         if (p < 0)
             return false;
         rowcals(row) = static_cast<double>(chs[p].range) * chs[p].cal;

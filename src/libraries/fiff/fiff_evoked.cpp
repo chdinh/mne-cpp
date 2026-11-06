@@ -21,6 +21,7 @@
 //=============================================================================================================
 
 #include "fiff_evoked.h"
+#include <utils/string_utils.h>
 #include "fiff_stream.h"
 #include "fiff_tag.h"
 #include "fiff_dir_node.h"
@@ -105,8 +106,8 @@ void FiffEvoked::clear()
 
 //=============================================================================================================
 
-FiffEvoked FiffEvoked::pick_channels(const QStringList& include,
-                                     const QStringList& exclude) const
+FiffEvoked FiffEvoked::pick_channels(const StringList& include,
+                                     const StringList& exclude) const
 {
     if (include.size() == 0 && exclude.size() == 0)
         return FiffEvoked(*this);
@@ -167,7 +168,7 @@ bool FiffEvoked::read(QIODevice& p_IODevice,
     FiffDirNode::SPtr meas;
     if (!t_pStream->read_meas_info(t_pStream->dirtree(), info, meas))
         return false;
-    info.filename = t_sFileName; //move fname storage to read_meas_info member function
+    info.filename = t_sFileName.toStdString(); //move fname storage to read_meas_info member function
     //
     //   Locate the data of interest
     //
@@ -258,7 +259,7 @@ bool FiffEvoked::read(QIODevice& p_IODevice,
         switch (kind) {
             case FIFF_COMMENT:
                 t_pStream->read_tag(t_pTag, pos);
-                comment = t_pTag->toString();
+                comment = QString::fromStdString(t_pTag->toString());
                 break;
             case FIFF_FIRST_SAMPLE:
                 t_pStream->read_tag(t_pTag, pos);
@@ -322,7 +323,7 @@ bool FiffEvoked::read(QIODevice& p_IODevice,
         switch (kind) {
             case FIFF_COMMENT:
                 t_pStream->read_tag(t_pTag, pos);
-                comment = t_pTag->toString();
+                comment = QString::fromStdString(t_pTag->toString());
                 break;
             case FIFF_ASPECT_KIND:
                 t_pStream->read_tag(t_pTag, pos);
@@ -545,9 +546,9 @@ FiffEvoked FiffEvoked::combine(const QList<FiffEvoked>& evokeds, const VectorXd&
         const double w = weights(i);
         res.data += w * e.data;
         invNave += w * w / e.nave;
-        for (const QString& bad : e.info.bads) {
-            if (!res.info.bads.contains(bad)) {
-                res.info.bads.append(bad);
+        for (const std::string& bad : e.info.bads) {
+            if (!UTILSLIB::contains(res.info.bads, bad)) {
+                res.info.bads.push_back(bad);
             }
         }
 

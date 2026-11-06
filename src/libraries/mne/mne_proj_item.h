@@ -135,7 +135,7 @@ public:
      * @return @c true (non-zero) if this item affects at least one channel,
      *         @c false (0) otherwise.
      */
-    int affect(const QStringList& list, int nlist) const;
+    int affect(const StringList& list, int nlist) const;
 
 public:
     std::unique_ptr<MNENamedMatrix> vecs; /**< Projection vectors (nrow = nvec, ncol = nch); may be nullptr when nvec == 0. */

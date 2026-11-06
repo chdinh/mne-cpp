@@ -20,6 +20,7 @@
 //=============================================================================================================
 
 #include "fiffrawviewmodel.h"
+#include <utils/string_utils.h>
 
 #include "../Utils/metatypes.h"
 
@@ -183,7 +184,7 @@ QVariant FiffRawViewModel::data(const QModelIndex& index,
     if (index.isValid()) {
         // channel names
         if (index.column() == 0) {
-            return QVariant(m_ChannelInfoList[index.row()].ch_name);
+            return QVariant(QString::fromStdString(m_ChannelInfoList[index.row()].ch_name));
         }
 
         // whole data
@@ -212,7 +213,7 @@ QVariant FiffRawViewModel::data(const QModelIndex& index,
 
         // whether channel is marked as bad
         else if (index.column() == 2) {
-            return QVariant(m_pFiffInfo->bads.contains(m_pFiffInfo->ch_names[index.row()]));
+            return QVariant(UTILSLIB::contains(m_pFiffInfo->bads, m_pFiffInfo->ch_names[index.row()]));
         } else {
             qWarning() << "[FiffRawViewModel::data] Column " << index.column() << " not implemented !";
             return QVariant();
@@ -513,7 +514,7 @@ void FiffRawViewModel::setFilterChannelType(const QString& channelType)
             if (m_sFilterChannelType == "All") {
                 m_lFilterChannelList.conservativeResize(m_lFilterChannelList.cols() + 1);
                 m_lFilterChannelList[m_lFilterChannelList.cols() - 1] = i;
-            } else if (m_pFiffInfo->chs.at(i).ch_name.contains(m_sFilterChannelType)) {
+            } else if ((m_pFiffInfo->chs.at(i).ch_name.find(m_sFilterChannelType.toStdString()) != std::string::npos)) {
                 m_lFilterChannelList.conservativeResize(m_lFilterChannelList.cols() + 1);
                 m_lFilterChannelList[m_lFilterChannelList.cols() - 1] = i;
             }

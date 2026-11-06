@@ -362,7 +362,7 @@ private:
         std::vector<double> stored; // samples x channels as stored, stim included
         std::vector<AcqEvent> events;
         AcqRecorderStats stats;
-        std::vector<std::string> files;
+        StringList files;
         QStringList chNames;
         AcqSampleFormat format = AcqSampleFormat::Float32;
         bool physical = false;
@@ -502,14 +502,14 @@ void TestAcqRecorder::convertsFiffInfo()
     fiff.linefreq = 50.0f;
     fiff.highpass = 0.1f;
     fiff.lowpass = 172.0f;
-    fiff.experimenter = QStringLiteral("cd");
+    fiff.experimenter = "cd";
     fiff.meas_date[0] = 1793700000;
     fiff.meas_date[1] = 5;
-    fiff.bads << QStringLiteral("MEG 0113");
+    fiff.bads.push_back("MEG 0113");
     const int kinds[] = {FIFFV_MEG_CH, FIFFV_EEG_CH, FIFFV_STIM_CH, FIFFV_RESP_CH, FIFFV_BIO_CH};
     for (int k = 0; k < 5; ++k) {
         FiffChInfo ch;
-        ch.ch_name = k == 0 ? QStringLiteral("MEG 0113") : QStringLiteral("CH %1").arg(k);
+        ch.ch_name = k == 0 ? std::string("MEG 0113") : "CH " + std::to_string(k);
         ch.kind = kinds[k];
         ch.scanNo = k + 1;
         ch.logNo = 100 + k;
@@ -521,7 +521,7 @@ void TestAcqRecorder::convertsFiffInfo()
         ch.chpos.r0 = Eigen::Vector3f(0.01f * static_cast<float>(k), 0.02f, 0.03f);
         ch.coord_frame = FIFFV_COORD_DEVICE;
         fiff.chs << ch;
-        fiff.ch_names << ch.ch_name;
+        fiff.ch_names.push_back(ch.ch_name);
     }
     fiff.nchan = 5;
     const AcqStreamInfo info = fromFiffInfo(fiff, AcqSampleFormat::Int32);
@@ -681,7 +681,7 @@ void TestAcqRecorder::recordsNativeFormats()
     QCOMPARE(raw.info.device_info.type, QStringLiteral("test"));
     QCOMPARE(raw.info.device_info.model, QStringLiteral("Test amplifier"));
     QCOMPARE(raw.info.device_info.serial, QStringLiteral("test:42"));
-    QVERIFY(raw.info.description.contains(QStringLiteral("lock=Free")));
+    QVERIFY((raw.info.description.find("lock=Free") != std::string::npos));
     QVERIFY(raw.info.meas_date[0] > 1700000000);
     Eigen::MatrixXd data, times;
     QVERIFY(raw.read_raw_segment(data, times));

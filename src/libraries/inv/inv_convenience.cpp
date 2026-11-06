@@ -21,6 +21,7 @@
 //=============================================================================================================
 
 #include "inv_convenience.h"
+#include <utils/string_utils.h>
 #include "minimum_norm/inv_minimum_norm.h"
 
 #include <mne/mne_inverse_operator.h>
@@ -232,16 +233,16 @@ FiffEvoked INVLIB::applyForward(const MNEForwardSolution& fwd, const InvSourceEs
     }
 
     // A gain matrix without channel names is taken to have the info's channels in order
-    RowVectorXi sel(fixed.sol->row_names.isEmpty() ? gain.rows() : fixed.sol->row_names.size());
-    if (fixed.sol->row_names.isEmpty()) {
+    RowVectorXi sel(fixed.sol->row_names.empty() ? gain.rows() : fixed.sol->row_names.size());
+    if (fixed.sol->row_names.empty()) {
         if (info.nchan != gain.rows()) {
             qWarning() << "[applyForward] Unnamed forward rows" << gain.rows() << "!= info channels" << info.nchan;
             return FiffEvoked();
         }
         std::iota(sel.begin(), sel.end(), 0);
     }
-    for (int c = 0; c < fixed.sol->row_names.size(); ++c) {
-        sel(c) = static_cast<int>(info.ch_names.indexOf(fixed.sol->row_names[c]));
+    for (int c = 0; c < static_cast<int>(fixed.sol->row_names.size()); ++c) {
+        sel(c) = static_cast<int>(UTILSLIB::indexOf(info.ch_names, fixed.sol->row_names[c]));
         if (sel(c) < 0) {
             qWarning() << "[applyForward] Channel" << fixed.sol->row_names[c] << "of the forward is not in the info.";
             return FiffEvoked();

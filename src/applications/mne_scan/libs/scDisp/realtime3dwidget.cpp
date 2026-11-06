@@ -150,7 +150,7 @@ void RealTime3DWidget::update(SCMEASLIB::Measurement::SPtr pMeasurement)
             m_pRtConnectivityItem->setText(sItemName);
 
             if (pRTCE->getSensorSurface() && pRTCE->getFiffInfo()) {
-                if (m_iNumberBadChannels != pRTCE->getFiffInfo()->bads.size()) {
+                if (m_iNumberBadChannels != static_cast<int>(pRTCE->getFiffInfo()->bads.size())) {
                     // Note: Sensor update from in-memory FiffChInfo/MNEBem not
                     // directly supported in disp3D.
                     m_iNumberBadChannels = pRTCE->getFiffInfo()->bads.size();

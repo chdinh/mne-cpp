@@ -80,13 +80,11 @@ int main(int argc, char* argv[])
     bool want_meg = true;
     bool want_eeg = true;
     bool want_stim = true;
-    QStringList include;
-    include << "STI 014";
+    StringList include{"STI 014"};
 
     RowVectorXi picks = raw.info.pick_types(want_meg, want_eeg, want_stim, include, raw.info.bads);
     if (picks.cols() == 0) {
-        include.clear();
-        include << "STI101" << "STI201" << "STI301";
+        include = {"STI101", "STI201", "STI301"};
         picks = raw.info.pick_types(want_meg, want_eeg, want_stim, include, raw.info.bads);
         if (picks.cols() == 0) {
             printf("channel list may need modification\n");

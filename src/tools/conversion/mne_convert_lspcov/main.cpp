@@ -328,9 +328,9 @@ int main(int argc, char* argv[])
     //=========================================================================
     if (!outFile.isEmpty()) {
         // Build channel name list
-        QStringList chNames;
+        StringList chNames;
         for (int i = 0; i < nChan; ++i) {
-            chNames << info.chs[i].ch_name;
+            chNames.push_back(info.chs[i].ch_name);
         }
 
         // Store as lower triangle (packed)

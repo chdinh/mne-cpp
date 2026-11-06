@@ -302,8 +302,9 @@ private slots:
         if (es.evoked.isEmpty())
             QSKIP("Failed to load evoked set");
 
-        QStringList include;
-        include << es.info.ch_names[0] << es.info.ch_names[1];
+        StringList include;
+        include.push_back(es.info.ch_names[0]);
+        include.push_back(es.info.ch_names[1]);
         FiffEvokedSet picked = es.pick_channels(include);
         QCOMPARE(picked.info.nchan, 2);
 
@@ -313,9 +314,9 @@ private slots:
         const FiffEvoked one = evoked.pick_channels({include[1]});
         QCOMPARE(one.data, evoked.data.row(1));
         QCOMPARE(evoked.pick_channels({}).data.rows(), evoked.data.rows());
-        QCOMPARE(evoked.pick_channels({QStringLiteral("NOPE")}).data.rows(), evoked.data.rows());
+        QCOMPARE(evoked.pick_channels({"NOPE"}).data.rows(), evoked.data.rows());
         evoked.data = evoked.data.topRows(2).eval();
-        const QString third = evoked.info.ch_names[2];
+        const std::string third = evoked.info.ch_names[2];
         QVERIFY(evoked.pick_channels({third}).data.isZero(0.0));
     }
 
@@ -567,8 +568,10 @@ private slots:
         data->nrow = 1;
         data->ncol = 3;
         data->data = MatrixXd::Ones(1, 3);
-        data->row_names << "comp1";
-        data->col_names << "ch1" << "ch2" << "ch3";
+        data->row_names.push_back("comp1");
+        data->col_names.push_back("ch1");
+        data->col_names.push_back("ch2");
+        data->col_names.push_back("ch3");
         proj.data = data;
 
         // Activate

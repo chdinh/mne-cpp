@@ -98,7 +98,7 @@ int main(int argc, char* argv[])
 
         int chKind = parser.value(chKindOption).toInt();
 
-        for (int i = 0; i < fiffInfo.ch_names.size(); i++) {
+        for (int i = 0; i < static_cast<int>(fiffInfo.ch_names.size()); i++) {
             int type = fiffInfo.chs.at(i).chpos.coil_type;
 
             if (type == chKind) {
@@ -114,7 +114,7 @@ int main(int argc, char* argv[])
 
                 qDebug() << x << " " << y << " " << z;
 
-                names << fiffInfo.ch_names.at(i);
+                names << QString::fromStdString(fiffInfo.ch_names.at(i));
             }
         }
     }

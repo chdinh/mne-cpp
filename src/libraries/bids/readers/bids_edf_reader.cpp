@@ -88,7 +88,7 @@ FiffChInfo EDFChannelInfo::toFiffChInfo() const
 
     info.cal = 1.0f;
     info.range = 1.0f;
-    info.ch_name = label;
+    info.ch_name = label.toStdString();
 
     return info;
 }
@@ -252,7 +252,7 @@ FiffInfo EDFReader::getInfo() const
     for (const auto& ch : m_vMeasChannels) {
         FiffChInfo fiffCh = ch.toFiffChInfo();
         info.chs.append(fiffCh);
-        info.ch_names.append(fiffCh.ch_name);
+        info.ch_names.push_back(fiffCh.ch_name);
     }
 
     info.sfreq = getFrequency();

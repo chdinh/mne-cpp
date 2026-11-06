@@ -450,7 +450,7 @@ void WriteToFile::splitRecordingFile()
     m_pOutfid->start_block(FIFFB_REF);
     data = FIFFV_ROLE_NEXT_FILE;
     m_pOutfid->write_int(FIFF_REF_ROLE, &data);
-    m_pOutfid->write_string(FIFF_REF_FILE_NAME, nextFileName);
+    m_pOutfid->write_string(FIFF_REF_FILE_NAME, nextFileName.toStdString());
     m_pOutfid->write_id(FIFF_REF_FILE_ID); //ToDo meas_id
     data = m_iSplitCount - 1;
     m_pOutfid->write_int(FIFF_REF_FILE_NUM, &data);

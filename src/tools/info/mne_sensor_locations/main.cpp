@@ -170,7 +170,7 @@ int main(int argc, char* argv[])
             continue;
         }
 
-        out << qSetFieldWidth(20) << Qt::left << ch.ch_name
+        out << qSetFieldWidth(20) << Qt::left << QString::fromStdString(ch.ch_name)
             << qSetFieldWidth(0) << Qt::right
             << Qt::fixed << qSetRealNumberPrecision(6)
             << ' ' << qSetFieldWidth(12) << x

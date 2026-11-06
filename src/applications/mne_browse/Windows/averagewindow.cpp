@@ -17,6 +17,7 @@
 //=============================================================================================================
 
 #include "averagewindow.h"
+#include <utils/string_utils.h>
 
 #include <disp/viewers/helpers/averagesceneitem.h>
 
@@ -74,18 +75,18 @@ bool matchesButterflySelection(const FIFFLIB::FiffChInfo& channelInfo,
     return channelInfo.unit == FIFF_UNIT_T_M;
 }
 
-QStringList selectedButterflyChannels(const FIFFLIB::FiffInfo& info,
-                                      const QString& selectionText)
+std::vector<std::string> selectedButterflyChannels(const FIFFLIB::FiffInfo& info,
+                                                   const QString& selectionText)
 {
-    QStringList channelNames;
+    std::vector<std::string> channelNames;
 
     for (const auto& channelInfo : info.chs) {
-        if (info.bads.contains(channelInfo.ch_name)) {
+        if (UTILSLIB::contains(info.bads, channelInfo.ch_name)) {
             continue;
         }
 
         if (matchesButterflySelection(channelInfo, selectionText)) {
-            channelNames << channelInfo.ch_name;
+            channelNames.push_back(channelInfo.ch_name);
         }
     }
 
@@ -163,7 +164,7 @@ FIFFLIB::FiffEvoked buildButterflyEvoked(const FIFFLIB::FiffEvoked& sourceEvoked
                                          bool whiten,
                                          bool* whiteningApplied)
 {
-    const QStringList includeChannels = selectedButterflyChannels(sourceEvoked.info, selectionText);
+    const std::vector<std::string> includeChannels = selectedButterflyChannels(sourceEvoked.info, selectionText);
 
     FIFFLIB::FiffEvoked displayEvoked =
         sourceEvoked.pick_channels(includeChannels, sourceEvoked.info.bads);
@@ -719,7 +720,7 @@ void AverageWindow::refreshPlots()
             const int last = displayEvoked.last;
 
             //Get the averageScenItem specific data row
-            int channelNumber = fiffInfo->ch_names.indexOf(averageSceneItemTemp->m_sChannelName);
+            int channelNumber = UTILSLIB::indexOf(fiffInfo->ch_names, averageSceneItemTemp->m_sChannelName.toStdString());
 
             if (channelNumber != -1) {
                 averageSceneItemTemp->m_firstLastSample.first = first;
@@ -744,7 +745,7 @@ void AverageWindow::refreshPlots()
                 continue;
             const auto& info = evoked.info;
             for (int ch = 0; ch < info.chs.size() && ch < evoked.data.rows(); ++ch) {
-                if (info.bads.contains(info.chs[ch].ch_name))
+                if (UTILSLIB::contains(info.bads, info.chs[ch].ch_name))
                     continue;
                 double maxVal = evoked.data.row(ch).cwiseAbs().maxCoeff();
                 if (info.chs[ch].kind == FIFFV_MEG_CH) {
@@ -830,7 +831,7 @@ void AverageWindow::refreshPlots()
         if (!m_bButterflyAutoScaled) {
             const auto& info = displayEvoked.info;
             for (int ch = 0; ch < info.chs.size() && ch < displayEvoked.data.rows(); ++ch) {
-                if (info.bads.contains(info.chs[ch].ch_name))
+                if (UTILSLIB::contains(info.bads, info.chs[ch].ch_name))
                     continue;
                 double maxVal = displayEvoked.data.row(ch).cwiseAbs().maxCoeff();
                 if (info.chs[ch].kind == FIFFV_MEG_CH) {
@@ -947,7 +948,7 @@ bool AverageWindow::populateLayoutFromEvoked(const QModelIndexList& selectedRows
                 continue;
         }
 
-        selItem.m_sChannelName.append(chInfo.ch_name);
+        selItem.m_sChannelName.append(QString::fromStdString(chInfo.ch_name));
         selItem.m_iChannelNumber.append(ch);
         selItem.m_iChannelKind.append(chInfo.kind);
         selItem.m_iChannelUnit.append(chInfo.unit);

@@ -34,7 +34,7 @@
       "modules": []
     },
     "acq/fiff": {
-      "tokens": 72,
+      "tokens": 49,
       "public_header_includes": 0,
       "modules": [
         "Core"
@@ -56,7 +56,7 @@
       ]
     },
     "bids": {
-      "tokens": 1090,
+      "tokens": 1086,
       "public_header_includes": 33,
       "modules": [
         "Core"
@@ -86,7 +86,7 @@
       "modules": []
     },
     "disp": {
-      "tokens": 6290,
+      "tokens": 6289,
       "public_header_includes": 124,
       "modules": [
         "Concurrent",
@@ -97,7 +97,7 @@
       ]
     },
     "disp3D": {
-      "tokens": 2928,
+      "tokens": 2927,
       "public_header_includes": 142,
       "modules": [
         "Concurrent",
@@ -110,8 +110,8 @@
       ]
     },
     "dsp": {
-      "tokens": 868,
-      "public_header_includes": 59,
+      "tokens": 829,
+      "public_header_includes": 54,
       "modules": [
         "Concurrent",
         "Core",
@@ -119,7 +119,7 @@
       ]
     },
     "fiff": {
-      "tokens": 2005,
+      "tokens": 1830,
       "public_header_includes": 97,
       "modules": [
         "Core",
@@ -136,8 +136,8 @@
       ]
     },
     "fwd": {
-      "tokens": 349,
-      "public_header_includes": 14,
+      "tokens": 339,
+      "public_header_includes": 13,
       "modules": [
         "Concurrent",
         "Core"
@@ -151,7 +151,7 @@
       ]
     },
     "inv": {
-      "tokens": 956,
+      "tokens": 931,
       "public_header_includes": 50,
       "modules": [
         "Concurrent",
@@ -186,8 +186,8 @@
       ]
     },
     "mne": {
-      "tokens": 1914,
-      "public_header_includes": 99,
+      "tokens": 1792,
+      "public_header_includes": 98,
       "modules": [
         "Concurrent",
         "Core",

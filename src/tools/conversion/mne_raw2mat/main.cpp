@@ -222,9 +222,9 @@ int main(int argc, char* argv[])
     qInfo("Read %lld channels x %lld samples", rowCount, sampleCount);
 
     // Build channel names
-    QStringList chNames;
+    StringList chNames;
     for (int c = 0; c < nChan; ++c)
-        chNames << raw.info.chs[c].ch_name;
+        chNames.push_back(raw.info.chs[c].ch_name);
 
     // Write MAT file (Level 5 format)
     QFile outF(outFile);

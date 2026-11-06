@@ -17,6 +17,7 @@
 //=============================================================================================================
 
 #include "rtclustmne.h"
+#include <utils/string_utils.h>
 
 #include "FormFiles/rtclustmnesetupwidget.h"
 
@@ -240,7 +241,7 @@ bool RtClustMne::calcFiffInfo()
             for (qint32 x = 0; x < m_pFiffInfoInput->chs.size(); ++x) {
                 if (m_pFiffInfoInput->chs[x].kind == FIFFV_MEG_CH) {
                     m_pFiffInfoForward->chs[counter].ch_name = m_pFiffInfoInput->chs[x].ch_name;
-                    m_pFiffInfoForward->ch_names << m_pFiffInfoInput->chs[x].ch_name;
+                    m_pFiffInfoForward->ch_names.push_back(m_pFiffInfoInput->chs[x].ch_name);
                     counter++;
                 }
             }
@@ -251,7 +252,7 @@ bool RtClustMne::calcFiffInfo()
             for (qint32 x = 0; x < m_pFiffInfoInput->chs.size(); ++x) {
                 if (m_pFiffInfoInput->chs[x].kind == FIFFV_EEG_CH) {
                     m_pFiffInfoForward->chs[counter].ch_name = m_pFiffInfoInput->chs[x].ch_name;
-                    m_pFiffInfoForward->ch_names << m_pFiffInfoInput->chs[x].ch_name;
+                    m_pFiffInfoForward->ch_names.push_back(m_pFiffInfoInput->chs[x].ch_name);
                     counter++;
                 }
             }
@@ -263,23 +264,17 @@ bool RtClustMne::calcFiffInfo()
             for (qint32 x = 0; x < m_pFiffInfoInput->chs.size(); ++x) {
                 if (m_pFiffInfoInput->chs[x].kind == FIFFV_MEG_CH || m_pFiffInfoInput->chs[x].kind == FIFFV_EEG_CH) {
                     m_pFiffInfoForward->chs[counter].ch_name = m_pFiffInfoInput->chs[x].ch_name;
-                    m_pFiffInfoForward->ch_names << m_pFiffInfoInput->chs[x].ch_name;
+                    m_pFiffInfoForward->ch_names.push_back(m_pFiffInfoInput->chs[x].ch_name);
                     counter++;
                 }
             }
         }
 
         //Pick only channels which are present in all data structures (covariance, evoked and forward)
-        QStringList tmp_pick_ch_names;
-        foreach (const QString& ch, m_pFiffInfoForward->ch_names) {
-            if (m_pFiffInfoInput->ch_names.contains(ch))
-                tmp_pick_ch_names << ch;
-        }
         m_qListPickChannels.clear();
-
-        foreach (const QString& ch, tmp_pick_ch_names) {
-            if (m_qListCovChNames.contains(ch))
-                m_qListPickChannels << ch;
+        for (const std::string& ch : m_pFiffInfoForward->ch_names) {
+            if (UTILSLIB::contains(m_pFiffInfoInput->ch_names, ch) && UTILSLIB::contains(m_qListCovChNames, ch))
+                m_qListPickChannels.push_back(ch);
         }
         RowVectorXi sel = m_pFiffInfoInput->pick_channels(m_qListPickChannels);
 
@@ -594,8 +589,8 @@ void RtClustMne::run()
     bool bCmne = false;
     QString sModelCheckpoint;
     QSharedPointer<INVLIB::InvMinimumNorm> pMinimumNorm;
-    QStringList lChNamesFiffInfo;
-    QStringList lChNamesInvOp;
+    StringList lChNamesFiffInfo;
+    StringList lChNamesInvOp;
 
     // Start processing data
     while (!isInterruptionRequested()) {
@@ -639,7 +634,7 @@ void RtClustMne::run()
                     matDataResized.resize(iNumberChannels, matData.cols());
 
                     for (j = 0; j < iNumberChannels; ++j) {
-                        matDataResized.row(j) = matData.row(lChNamesFiffInfo.indexOf(lChNamesInvOp.at(j)));
+                        matDataResized.row(j) = matData.row(UTILSLIB::indexOf(lChNamesFiffInfo, lChNamesInvOp.at(j)));
                     }
 
                     //TODO: Add picking here. See evoked part as input.

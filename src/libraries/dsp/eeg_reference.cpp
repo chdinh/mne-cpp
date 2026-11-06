@@ -15,6 +15,7 @@
 //=============================================================================================================
 
 #include "eeg_reference.h"
+#include <utils/string_utils.h>
 
 #include <fiff/fiff_info.h>
 #include <fiff/fiff_constants.h>
@@ -45,9 +46,8 @@ using namespace Eigen;
 static QVector<int> findGoodEegIndices(const FiffInfo& info)
 {
     QVector<int> indices;
-    const QSet<QString> badSet(info.bads.begin(), info.bads.end());
     for (int i = 0; i < info.nchan; ++i) {
-        if (info.chs[i].kind == FIFFV_EEG_CH && !badSet.contains(info.ch_names[i])) {
+        if (info.chs[i].kind == FIFFV_EEG_CH && !info.isBad(info.ch_names[i])) {
             indices.append(i);
         }
     }
@@ -75,10 +75,10 @@ static QVector<int> findAllEegIndices(const FiffInfo& info)
 
 void UTILSLIB::setEegReference(MatrixXd& data,
                                FiffInfo& info,
-                               const QStringList& refChannels,
+                               const StringList& refChannels,
                                bool projection)
 {
-    const bool useAverage = refChannels.isEmpty() || (refChannels.size() == 1 && refChannels.first().compare(QLatin1String("average"), Qt::CaseInsensitive) == 0);
+    const bool useAverage = refChannels.empty() || (refChannels.size() == 1 && UTILSLIB::equalsIgnoreCase(refChannels.front(), "average"));
 
     if (projection) {
         if (!useAverage) {
@@ -89,14 +89,14 @@ void UTILSLIB::setEegReference(MatrixXd& data,
             if (proj.kind == FIFFV_PROJ_ITEM_EEG_AVREF)
                 return;
         }
-        QStringList names;
+        StringList names;
         for (int idx : findGoodEegIndices(info))
-            names << info.ch_names[idx];
-        if (names.isEmpty()) {
+            names.push_back(info.ch_names[idx]);
+        if (names.empty()) {
             qWarning("setEegReference: no good EEG channels for an average reference projector.");
             return;
         }
-        FiffNamedMatrix vec(1, static_cast<int>(names.size()), QStringList(), names,
+        FiffNamedMatrix vec(1, static_cast<int>(names.size()), StringList(), names,
                             MatrixXd::Constant(1, names.size(), 1.0 / std::sqrt(static_cast<double>(names.size()))));
         info.projs.append(FiffProj(FIFFV_PROJ_ITEM_EEG_AVREF, false, QStringLiteral("Average EEG reference"), vec));
         return;
@@ -136,10 +136,10 @@ void UTILSLIB::setEegReference(MatrixXd& data,
     } else {
         // Specific channel(s): mean of named channels
         QVector<int> refIdx;
-        for (const QString& name : refChannels) {
-            int idx = info.ch_names.indexOf(name);
+        for (const std::string& name : refChannels) {
+            int idx = UTILSLIB::indexOf(info.ch_names, name);
             if (idx < 0) {
-                qWarning("setEegReference: reference channel '%s' not found.", qPrintable(name));
+                qWarning("setEegReference: reference channel '%s' not found.", name.c_str());
                 return;
             }
             refIdx.append(idx);
@@ -160,9 +160,9 @@ void UTILSLIB::setEegReference(MatrixXd& data,
 
 void UTILSLIB::addReferenceChannels(MatrixXd& data,
                                     FiffInfo& info,
-                                    const QStringList& chNames)
+                                    const StringList& chNames)
 {
-    if (chNames.isEmpty()) {
+    if (chNames.empty()) {
         return;
     }
 
@@ -200,7 +200,7 @@ void UTILSLIB::addReferenceChannels(MatrixXd& data,
         ch.logNo = ch.scanNo;
 
         info.chs.append(ch);
-        info.ch_names.append(chNames[n]);
+        info.ch_names.push_back(chNames[n]);
     }
     info.nchan += nNew;
 }
@@ -209,8 +209,8 @@ void UTILSLIB::addReferenceChannels(MatrixXd& data,
 
 void UTILSLIB::setBipolarReference(MatrixXd& data,
                                    FiffInfo& info,
-                                   const QStringList& anodes,
-                                   const QStringList& cathodes,
+                                   const StringList& anodes,
+                                   const StringList& cathodes,
                                    bool dropOriginals)
 {
     if (anodes.size() != cathodes.size()) {
@@ -220,7 +220,7 @@ void UTILSLIB::setBipolarReference(MatrixXd& data,
         return;
     }
 
-    if (anodes.isEmpty()) {
+    if (anodes.empty()) {
         return;
     }
 
@@ -236,14 +236,14 @@ void UTILSLIB::setBipolarReference(MatrixXd& data,
     // Resolve anode and cathode indices
     QVector<int> anodeIdx(nPairs), cathodeIdx(nPairs);
     for (int i = 0; i < nPairs; ++i) {
-        anodeIdx[i] = info.ch_names.indexOf(anodes[i]);
+        anodeIdx[i] = UTILSLIB::indexOf(info.ch_names, anodes[i]);
         if (anodeIdx[i] < 0) {
-            qWarning("setBipolarReference: anode channel '%s' not found.", qPrintable(anodes[i]));
+            qWarning("setBipolarReference: anode channel '%s' not found.", anodes[i].c_str());
             return;
         }
-        cathodeIdx[i] = info.ch_names.indexOf(cathodes[i]);
+        cathodeIdx[i] = UTILSLIB::indexOf(info.ch_names, cathodes[i]);
         if (cathodeIdx[i] < 0) {
-            qWarning("setBipolarReference: cathode channel '%s' not found.", qPrintable(cathodes[i]));
+            qWarning("setBipolarReference: cathode channel '%s' not found.", cathodes[i].c_str());
             return;
         }
     }
@@ -263,13 +263,13 @@ void UTILSLIB::setBipolarReference(MatrixXd& data,
 
     // Build bipolar channel info
     QList<FiffChInfo> bipolarChs;
-    QStringList bipolarNames;
+    StringList bipolarNames;
     for (int i = 0; i < nPairs; ++i) {
         FiffChInfo ch = info.chs[anodeIdx[i]];
-        ch.ch_name = anodes[i] + "-" + cathodes[i];
+        ch.ch_name = (anodes[i] + "-" + cathodes[i]);
         ch.logNo = i + 1;
         bipolarChs.append(ch);
-        bipolarNames.append(ch.ch_name);
+        bipolarNames.push_back(ch.ch_name);
     }
 
     if (dropOriginals) {
@@ -284,17 +284,17 @@ void UTILSLIB::setBipolarReference(MatrixXd& data,
         const int nKeep = keepIdx.size();
         MatrixXd newData(nKeep + nPairs, nTimes);
         QList<FiffChInfo> newChs;
-        QStringList newNames;
+        StringList newNames;
 
         for (int i = 0; i < nKeep; ++i) {
             newData.row(i) = data.row(keepIdx[i]);
             newChs.append(info.chs[keepIdx[i]]);
-            newNames.append(info.ch_names[keepIdx[i]]);
+            newNames.push_back(info.ch_names[keepIdx[i]]);
         }
         for (int i = 0; i < nPairs; ++i) {
             newData.row(nKeep + i) = bipolarData.row(i);
             newChs.append(bipolarChs[i]);
-            newNames.append(bipolarNames[i]);
+            newNames.push_back(bipolarNames[i]);
         }
 
         // Update scan numbers
@@ -317,7 +317,7 @@ void UTILSLIB::setBipolarReference(MatrixXd& data,
         }
 
         info.chs.append(bipolarChs);
-        info.ch_names.append(bipolarNames);
+        info.ch_names.insert(info.ch_names.end(), bipolarNames.begin(), bipolarNames.end());
         info.nchan += nPairs;
         data = newData;
     }
