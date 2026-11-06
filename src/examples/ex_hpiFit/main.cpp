@@ -141,7 +141,7 @@ int main(int argc, char* argv[])
     // create time vector that specifies when to fit
     int iQuantum = floor(static_cast<double>(fWindow) * pFiffInfo->sfreq); // window size
     int iQuantumT = floor(static_cast<double>(fStep) * pFiffInfo->sfreq);  // samples between fits
-    int iN = floor((last - first) / iQuantumT) - floor(iQuantum / iQuantumT);
+    int iN = (last - first) / iQuantumT - iQuantum / iQuantumT;
     RowVectorXf vecTime = RowVectorXf::LinSpaced(iN, 0, iN - 1);
 
     // matPosition matrix to save hpi fit results

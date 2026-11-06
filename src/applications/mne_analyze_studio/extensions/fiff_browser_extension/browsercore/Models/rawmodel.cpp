@@ -428,7 +428,7 @@ bool RawModel::writeFiffData(QIODevice* p_IODevice)
     fiff_int_t from = firstSample();
     fiff_int_t to = lastSample();
     float quantum_sec = 10.0f; //read and write in 10 sec junks
-    fiff_int_t quantum = ceil(quantum_sec * m_pFiffInfo->sfreq);
+    fiff_int_t quantum = std::ceil(static_cast<double>(quantum_sec * m_pFiffInfo->sfreq));
 
     // Uncomment to read the whole file at once. Warning MAtrix may be none-initialisable because its huge
     //quantum = to - from + 1;
@@ -531,7 +531,7 @@ void RawModel::resetPosition(qint32 position)
 
     //calculate multiple integer of m_iWindowSize from beginning of Fiff file (rounded down)
     qint32 distance = position - firstSample();
-    qint32 mult = floor(distance / m_iWindowSize);
+    qint32 mult = distance / m_iWindowSize;
 
     m_iAbsFiffCursor = firstSample() + mult * m_iWindowSize;
 

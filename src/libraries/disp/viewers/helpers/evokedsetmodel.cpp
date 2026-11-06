@@ -566,7 +566,7 @@ int EvokedSetModel::getNumberOfTimeSpacers() const
         iNumSamples = m_matData.first().cols();
     }
 
-    return floor((iNumSamples / m_fSps) * 10);
+    return std::floor(static_cast<double>((iNumSamples / m_fSps) * 10));
 }
 
 //=============================================================================================================

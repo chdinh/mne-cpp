@@ -673,11 +673,11 @@ void MNECovMatrix::regularize(const Eigen::Vector3f& regs)
         if (nn[j] > 0) {
             sums[j] = sums[j] / nn[j];
             if (j == MNE_COV_CH_MEG_MAG)
-                qInfo("\tMagnetometers       : %-7.2f fT    reg = %-6.2f", 1e15 * sqrt(sums[j]), regs[j]);
+                qInfo("\tMagnetometers       : %-7.2f fT    reg = %-6.2f", 1e15 * std::sqrt(static_cast<double>(sums[j])), regs[j]);
             else if (j == MNE_COV_CH_MEG_GRAD)
-                qInfo("\tPlanar gradiometers : %-7.2f fT/cm reg = %-6.2f", 1e13 * sqrt(sums[j]), regs[j]);
+                qInfo("\tPlanar gradiometers : %-7.2f fT/cm reg = %-6.2f", 1e13 * std::sqrt(static_cast<double>(sums[j])), regs[j]);
             else
-                qInfo("\tEEG                 : %-7.2f uV    reg = %-6.2f", 1e6 * sqrt(sums[j]), regs[j]);
+                qInfo("\tEEG                 : %-7.2f uV    reg = %-6.2f", 1e6 * std::sqrt(static_cast<double>(sums[j])), regs[j]);
             sums[j] = regs[j] * sums[j];
         }
     }

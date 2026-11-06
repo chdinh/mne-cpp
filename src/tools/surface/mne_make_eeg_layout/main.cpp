@@ -69,8 +69,8 @@ static void azimuthalProjection(const Vector3f& pos, const Vector3f& center,
 
     // Azimuthal equidistant projection
     float r = theta;
-    x = r * cos(phi);
-    y = r * sin(phi);
+    x = r * std::cos(static_cast<double>(phi));
+    y = r * std::sin(static_cast<double>(phi));
 }
 
 //=============================================================================================================

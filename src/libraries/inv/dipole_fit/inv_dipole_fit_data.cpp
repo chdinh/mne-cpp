@@ -895,12 +895,12 @@ std::unique_ptr<InvDipoleForward> dipole_forward(InvDipoleFitData* d,
                 S[p] = res->fwd.row(3 * k + p).squaredNorm();
             if (d->column_norm == COLUMN_NORM_COMP) {
                 for (int p = 0; p < 3; p++)
-                    res->scales[3 * k + p] = sqrt(S[p]);
+                    res->scales[3 * k + p] = std::sqrt(static_cast<double>(S[p]));
             } else {
                 /*
      * Divide by three or not?
      */
-                res->scales[3 * k + 0] = res->scales[3 * k + 1] = res->scales[3 * k + 2] = sqrt(S[0] + S[1] + S[2]) / 3.0;
+                res->scales[3 * k + 0] = res->scales[3 * k + 1] = res->scales[3 * k + 2] = std::sqrt(static_cast<double>(S[0] + S[1] + S[2])) / 3.0;
             }
             for (int p = 0; p < 3; p++) {
                 if (res->scales[3 * k + p] > 0.0) {
@@ -1029,8 +1029,8 @@ static MatrixXf make_initial_dipole_simplex(const Eigen::Vector3f& r0,
    * http://mathworld.wolfram.com/Tetrahedron.html
    *
    */
-    float x = sqrt(3.0f) / 3.0f;
-    float r = sqrt(6.0f) / 12.0f;
+    float x = std::sqrt(3.0) / 3.0f;
+    float r = std::sqrt(6.0) / 12.0f;
     float R = 3 * r;
     float d = x / 2.0f;
     float rr[][3] = {{x, 0.0f, -r},
