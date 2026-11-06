@@ -402,10 +402,9 @@ private slots:
         if (!hasData())
             QSKIP("No test data");
 
-        QFile file(m_sDataPath + "/MEG/sample/sample_audvis-cov.fif");
 
         // Reference values produced by mne.read_cov (mne 1.11.0)
-        FiffCov cov(file);
+        FiffCov cov((m_sDataPath + "/MEG/sample/sample_audvis-cov.fif").toStdString());
         QCOMPARE(cov.dim, 366);
         QCOMPARE(cov.nfree, 15972);
         QCOMPARE(cov.bads.size(), 2);
@@ -430,8 +429,7 @@ private slots:
         QFile rawFile(m_sDataPath + "/MEG/sample/sample_audvis_trunc_raw.fif");
         FiffRawData raw(rawFile);
 
-        QFile covFile(m_sDataPath + "/MEG/sample/sample_audvis-cov.fif");
-        FiffCov cov(covFile);
+        FiffCov cov((m_sDataPath + "/MEG/sample/sample_audvis-cov.fif").toStdString());
 
         if (cov.dim > 0) {
             QVERIFY(static_cast<int>(cov.names.size()) == cov.dim);

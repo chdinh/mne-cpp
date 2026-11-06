@@ -368,8 +368,7 @@ private slots:
         if (!QFile::exists(m_sCovFile) || !QFile::exists(m_sRawFile))
             QSKIP("Data files not found");
 
-        QFile covFile(m_sCovFile);
-        FiffCov noiseCov(covFile);
+        FiffCov noiseCov(m_sCovFile.toStdString());
 
         QFile rawFile(m_sRawFile);
         FiffRawData raw(rawFile);

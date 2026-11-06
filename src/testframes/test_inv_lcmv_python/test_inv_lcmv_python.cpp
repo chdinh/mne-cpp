@@ -150,7 +150,7 @@ void TestInvLcmvPython::initTestCase()
     m_evoked.info.bads.clear();
     m_info = m_evoked.info;
 
-    FiffCov cov(covFile);
+    FiffCov cov((base + "/MEG/sample/sample_audvis-cov.fif").toStdString());
     m_noiseCov = cov.pick_channels(good).prepare_noise_cov(m_info, good);
     QCOMPARE(static_cast<int>(m_noiseCov.eig.size()), 305);
 

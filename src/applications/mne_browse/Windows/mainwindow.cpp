@@ -55,6 +55,7 @@
 
 #include <inv/minimum_norm/inv_minimum_norm.h>
 #include <inv/inv_source_estimate.h>
+#include <utils/string_utils.h>
 
 
 //*************************************************************************************************************
@@ -2852,9 +2853,8 @@ void MainWindow::openProject()
 
     // Load additional files that auto-discovery might miss
     if (!covPath.isEmpty() && QFileInfo::exists(covPath)) {
-        QFile covFile(covPath);
         FIFFLIB::FiffCov cov;
-        if (FIFFLIB::FiffCov::read(covFile, cov) && !cov.isEmpty()) {
+        if (FIFFLIB::FiffCov::read(UTILSLIB::pathFromUtf8(covPath.toStdString()), cov) && !cov.isEmpty()) {
             m_qCovFile.setFileName(covPath);
             m_covariance = cov;
             m_pAverageWindow->setNoiseCovariance(m_covariance);
@@ -4304,10 +4304,9 @@ void MainWindow::loadCovariance()
         return;
     }
 
-    QFile covarianceFile(filename);
     FIFFLIB::FiffCov covariance;
 
-    if (!FIFFLIB::FiffCov::read(covarianceFile, covariance) || covariance.isEmpty()) {
+    if (!FIFFLIB::FiffCov::read(UTILSLIB::pathFromUtf8(filename.toStdString()), covariance) || covariance.isEmpty()) {
         QMessageBox::warning(this,
                              "Load Covariance",
                              QString("Could not load covariance data from %1.").arg(filename));
@@ -4368,7 +4367,7 @@ void MainWindow::saveCovariance()
     }
     m_qCovFile.setFileName(filename);
 
-    if (m_covariance.save(filename)) {
+    if (m_covariance.save(UTILSLIB::pathFromUtf8(filename.toStdString()))) {
         qInfo() << "Fiff covariance data file" << filename << "saved.";
         setWindowStatus();
     } else {

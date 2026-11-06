@@ -249,7 +249,7 @@ int main(int argc, char* argv[])
     cov.data = selCov;
     cov.nfree = nFree;
 
-    if (!cov.save(covFile)) {
+    if (!cov.save(UTILSLIB::pathFromUtf8(covFile.toStdString()))) {
         qCritical("Cannot write output file: %s", qPrintable(covFile));
         return 1;
     }

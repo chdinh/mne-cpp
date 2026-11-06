@@ -141,7 +141,7 @@ private slots:
         QString tmpPath = tmpFile.fileName();
         tmpFile.close();
 
-        bool saved = cov.save(tmpPath);
+        bool saved = cov.save(tmpPath.toStdString());
         QVERIFY(saved);
         QVERIFY(QFileInfo(tmpPath).size() > 0);
     }
@@ -179,8 +179,7 @@ private slots:
         if (!QFile::exists(covPath)) {
             QSKIP("Sample covariance file not found");
         }
-        QFile file(covPath);
-        FiffCov cov(file);
+        FiffCov cov(covPath.toStdString());
         QVERIFY(!cov.isEmpty());
         QVERIFY(cov.dim > 0);
         QVERIFY(cov.names.size() > 0);
@@ -193,8 +192,7 @@ private slots:
         if (!QFile::exists(covPath) || !QFile::exists(rawPath)) {
             QSKIP("Sample data not found");
         }
-        QFile covFile(covPath);
-        FiffCov cov(covFile);
+        FiffCov cov(covPath.toStdString());
 
         QFile rawFile(rawPath);
         FiffRawData raw(rawFile);
@@ -210,10 +208,10 @@ private slots:
         if (!QFile::exists(covPath) || !QFile::exists(rawPath)) {
             QSKIP("Sample data not found");
         }
-        QFile covFile(covPath);
-        FiffCov cov(covFile);
+        FiffCov cov(covPath.toStdString());
 
         QFile rawFile(rawPath);
+
         FiffRawData raw(rawFile);
 
         // prepare_noise_cov requires only MEG+EEG channels that exist in both info and cov

@@ -1435,22 +1435,17 @@ bool CorticalSurface::runComputeSourceEstimate(const QString& fwdPath,
         fwdFile.close();
     }
 
-    QFile covFile(covPath);
     if (!QFileInfo::exists(covPath)) {
         qWarning() << "[CorticalSurface] Cannot open cov file" << covPath;
         return false;
     }
     FiffCov noiseCov;
     try {
-        noiseCov = FiffCov(covFile);
+        noiseCov = FiffCov(UTILSLIB::pathFromUtf8(covPath.toStdString()));
     } catch (const std::exception& e) {
         qWarning() << "[CorticalSurface] read cov failed:" << e.what();
         return false;
     }
-    if (covFile.isOpen()) {
-        covFile.close();
-    }
-
     QFile aveFile(evokedPath);
     if (!QFileInfo::exists(evokedPath)) {
         qWarning() << "[CorticalSurface] Cannot open evoked file" << evokedPath;

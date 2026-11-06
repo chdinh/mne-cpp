@@ -152,7 +152,6 @@ int main(int argc, char* argv[])
 
     QString t_sFileClusteredInverse(parser.value(invOpOption));
 
-    QFile t_fileCov(parser.value(covFileOption));
     QFile t_fileEvoked(parser.value(evokedFileOption));
 
     //########################################################################################
@@ -182,7 +181,7 @@ int main(int argc, char* argv[])
         if (t_Fwd.isEmpty())
             return 1;
 
-        FiffCov noise_cov(t_fileCov);
+        FiffCov noise_cov(parser.value(covFileOption).toStdString());
 
         // regularize noise covariance
         noise_cov = noise_cov.regularize(evoked.info, 0.05, 0.05, 0.1, true);

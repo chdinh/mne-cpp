@@ -221,14 +221,13 @@ void TestMneCovPython::whitensProjected()
 
 void TestMneCovPython::readsPrecomputedEigen()
 {
-    QFile covFile(m_covPath);
-    FiffCov cov(covFile);
+    FiffCov cov(m_covPath.toStdString());
     FiffCov prepared = cov.pick_channels(m_names).prepare_noise_cov(m_evoked.info, m_names);
     QCOMPARE(static_cast<int>(prepared.eig.size()), 305);
     prepared.projs.clear();
     prepared.bads.clear();
     const QString path = m_dir.filePath("eig-cov.fif");
-    QVERIFY(prepared.save(path));
+    QVERIFY(prepared.save(path.toStdString()));
 
     auto read = MNECovMatrix::read(path, prepared.kind);
     QVERIFY(read);
@@ -263,7 +262,7 @@ void TestMneCovPython::readsDiagonal()
         adHoc.data(k, 0) = sd * sd;
     }
     const QString path = m_dir.filePath("diag-cov.fif");
-    QVERIFY(adHoc.save(path));
+    QVERIFY(adHoc.save(path.toStdString()));
 
     auto read = MNECovMatrix::read(path, FIFFV_MNE_NOISE_COV);
     QVERIFY(read);

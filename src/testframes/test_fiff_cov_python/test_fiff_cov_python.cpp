@@ -113,8 +113,7 @@ void TestFiffCovPython::initTestCase()
         QSKIP("Covariance test data not found");
     }
 
-    QFile covFile(covPath());
-    m_cov = FiffCov(covFile);
+    m_cov = FiffCov(covPath().toStdString());
 
     QVERIFY2(m_cov.dim > 0, "covariance did not load");
 }
@@ -268,7 +267,7 @@ void TestFiffCovPython::data_isSymmetric()
     QCOMPARE(FiffCov::computeGrandAverage({}).dim, -1);
     FiffCov smaller = m_cov.pick_channels(StringList(m_cov.names.begin() + 0, m_cov.names.begin() + 0 + 3));
     QCOMPARE(FiffCov::computeGrandAverage({m_cov, smaller}).dim, -1);
-    QVERIFY(!m_cov.save(QString()));
+    QVERIFY(!m_cov.save({}));
 }
 
 //=============================================================================================================

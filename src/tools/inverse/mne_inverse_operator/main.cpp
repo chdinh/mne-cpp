@@ -436,8 +436,7 @@ int main(int argc, char* argv[])
     qInfo("\nReading noise covariance from %s...",
           parser.value(noisecovOpt).toUtf8().constData());
 
-    QFile covFile(parser.value(noisecovOpt));
-    FiffCov noiseCov(covFile);
+    FiffCov noiseCov(UTILSLIB::pathFromUtf8(parser.value(noisecovOpt).toStdString()));
 
     if (noiseCov.data.rows() == 0) {
         qCritical() << "Error: Could not read noise covariance from"

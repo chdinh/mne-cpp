@@ -153,7 +153,7 @@ void TestInvLoreta::initTestCase()
     QString covPath = m_sDataPath + "/MEG/sample/sample_audvis-cov.fif";
     QFile covFile(covPath);
     if (covFile.exists())
-        m_noiseCov = FiffCov(covFile);
+        m_noiseCov = FiffCov(covFile.fileName().toStdString());
 
     QString rawPath = m_sDataPath + "/MEG/sample/sample_audvis_trunc_raw.fif";
     QFile rawFile(rawPath);

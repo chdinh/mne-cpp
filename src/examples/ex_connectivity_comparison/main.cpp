@@ -187,8 +187,7 @@ int main(int argc, char* argv[])
     FsSurfaceSet tSurfSetInflated(sSubj, 2, "inflated", sSubjDir);
     FsAnnotationSet tAnnotSet(sSubj, 2, sAnnotType, sSubjDir);
 
-    QFile t_fileCov(sCov);
-    FiffCov noise_cov(t_fileCov);
+    FiffCov noise_cov(sCov.toStdString());
 
     bool keep_comp = false;
     fiff_int_t dest_comp = 0;

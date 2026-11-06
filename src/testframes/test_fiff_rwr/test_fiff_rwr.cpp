@@ -484,10 +484,9 @@ void TestFiffRWR::writersStable()
         const FiffEvokedSet evoked(in);
         QVERIFY(evoked.save(out));
     } else if (writer == "cov") {
-        QFile in(meg + "sample_audvis-cov.fif");
-        const FiffCov cov(in);
+        const FiffCov cov((meg + "sample_audvis-cov.fif").toStdString());
         const QString path = m_tempDir.filePath("stable-cov.fif");
-        QVERIFY(cov.save(path));
+        QVERIFY(cov.save(path.toStdString()));
         QFile written(path);
         QVERIFY(written.open(QIODevice::ReadOnly));
         bytes = written.readAll();

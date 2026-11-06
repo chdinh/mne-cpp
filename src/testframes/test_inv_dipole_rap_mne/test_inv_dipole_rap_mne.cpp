@@ -205,8 +205,7 @@ void TestInvDipoleRapMne::initTestCase()
     // Load noise covariance
     QVERIFY2(QFile::exists(covPath()),
              qPrintable(QString("Noise covariance not found: %1").arg(covPath())));
-    QFile covFile(covPath());
-    m_noiseCov = FiffCov(covFile);
+    m_noiseCov = FiffCov(covPath().toStdString());
     QVERIFY2(!m_noiseCov.isEmpty(), "Failed to load noise covariance");
 
     // Load measurement info

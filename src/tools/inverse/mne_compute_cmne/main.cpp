@@ -35,6 +35,7 @@
 #include <ml/ml_trainer.h>
 #include <utils/python_runner.h>
 #include <utils/generics/mne_logger.h>
+#include <utils/string_utils.h>
 
 //=============================================================================================================
 // QT INCLUDES
@@ -150,8 +151,7 @@ static int doCompute(const QCommandLineParser& parser)
     // ── Read noise covariance ──────────────────────────────────────────
     out << "Reading noise covariance: " << covPath << "\n";
     out.flush();
-    QFile covFile(covPath);
-    FiffCov noiseCov(covFile);
+    FiffCov noiseCov(UTILSLIB::pathFromUtf8(covPath.toStdString()));
     if (noiseCov.isEmpty()) {
         err << "Error: Failed to read noise covariance from " << covPath << "\n";
         return 1;

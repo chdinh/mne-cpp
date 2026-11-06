@@ -547,8 +547,7 @@ void TestMneInvCoverage::testMinNormSetup()
     FiffRawData raw(rawFile);
 
     // Load noise covariance
-    QFile covFile(covPath());
-    FiffCov noiseCov(covFile);
+    FiffCov noiseCov(covPath().toStdString());
 
     // Prepare inverse operator
     MNEInverseOperator invOp = MNEInverseOperator::make_inverse_operator(
@@ -571,8 +570,7 @@ void TestMneInvCoverage::testMinNormCalculateInverse()
     QFile rawFile(rawPath());
     FiffRawData raw(rawFile);
 
-    QFile covFile(covPath());
-    FiffCov noiseCov(covFile);
+    FiffCov noiseCov(covPath().toStdString());
 
     // Prepare inverse operator
     MNEInverseOperator invOp = MNEInverseOperator::make_inverse_operator(

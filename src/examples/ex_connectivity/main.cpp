@@ -294,8 +294,7 @@ int main(int argc, char* argv[])
         QString method(sSourceLocMethod);
 
         // regularize noise covariance
-        QFile t_fileCov(sCov);
-        FiffCov noise_cov(t_fileCov);
+        FiffCov noise_cov(sCov.toStdString());
         noise_cov = noise_cov.regularize(raw.info,
                                          0.05,
                                          0.05,

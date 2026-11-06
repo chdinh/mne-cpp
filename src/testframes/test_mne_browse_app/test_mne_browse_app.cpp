@@ -337,8 +337,7 @@ void TestMneBrowseApp::computesAndSavesCovarianceLikePython()
 
     // Reference values produced by mne.compute_covariance(mne.Epochs(raw, find_events(raw, "STI 014"), all codes,
     // -0.2, 0.0, baseline=None, proj=False), keep_sample_mean=False, method="empirical", rank="full") (mne 1.11.0)
-    QFile covFile(covPath);
-    const FIFFLIB::FiffCov cov(covFile);
+    const FIFFLIB::FiffCov cov(covPath.toStdString());
     QVERIFY(!cov.isEmpty());
     QCOMPARE(cov.nfree, 1524);
     const int meg = static_cast<int>(UTILSLIB::indexOf(cov.names, "MEG1332"));
@@ -574,11 +573,10 @@ void TestMneBrowseApp::exportsSourceEstimatesLikePython()
     {
         QFile rawFile(rawPath);
         QFile fwdFile(fwdPath);
-        QFile covFile(covPath);
         MNELIB::MNEForwardSolution fwd;
         QVERIFY(MNELIB::MNEForwardSolution::read(fwdFile, fwd));
         MNELIB::MNEInverseOperator inv = MNELIB::MNEInverseOperator::make_inverse_operator(
-            FIFFLIB::FiffRawData(rawFile).info, fwd, FIFFLIB::FiffCov(covFile), 0.2f, 0.8f);
+            FIFFLIB::FiffRawData(rawFile).info, fwd, FIFFLIB::FiffCov(covPath.toStdString()), 0.2f, 0.8f);
         QFile invFile(invPath);
         QVERIFY(inv.write(invFile));
     }

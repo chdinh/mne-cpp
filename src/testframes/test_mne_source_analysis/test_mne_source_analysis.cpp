@@ -282,8 +282,7 @@ private slots:
         if (!QFile::exists(m_sCovFile))
             QSKIP("Cov file not found");
 
-        QFile file(m_sCovFile);
-        FiffCov cov(file);
+        FiffCov cov(m_sCovFile.toStdString());
         QVERIFY(!cov.isEmpty());
         QVERIFY(cov.names.size() > 0);
     }
@@ -293,8 +292,7 @@ private slots:
         if (!QFile::exists(m_sCovFile))
             QSKIP("Cov file not found");
 
-        QFile file(m_sCovFile);
-        FiffCov cov(file);
+        FiffCov cov(m_sCovFile.toStdString());
 
         StringList include;
         include.push_back("MEG0111");
@@ -310,10 +308,10 @@ private slots:
         if (!QFile::exists(m_sCovFile) || !QFile::exists(m_sRawFile))
             QSKIP("Data not found");
 
-        QFile covFile(m_sCovFile);
-        FiffCov cov(covFile);
+        FiffCov cov(m_sCovFile.toStdString());
 
         QFile rawFile(m_sRawFile);
+
         FiffRawData raw(rawFile);
 
         FiffCov regCov = cov.regularize(raw.info, 0.1, 0.1, 0.1, true, {});
@@ -325,8 +323,7 @@ private slots:
         if (!QFile::exists(m_sCovFile) || !QFile::exists(m_sRawFile))
             QSKIP("Data not found");
 
-        QFile covFile(m_sCovFile);
-        FiffCov cov(covFile);
+        FiffCov cov(m_sCovFile.toStdString());
 
         QFile rawFile(m_sRawFile);
         FiffRawData raw(rawFile);
@@ -408,8 +405,7 @@ private slots:
         QFile fwdFile(m_sFwdFile);
         MNEForwardSolution fwd(fwdFile);
 
-        QFile covFile(m_sCovFile);
-        FiffCov cov(covFile);
+        FiffCov cov(m_sCovFile.toStdString());
 
         QFile rawFile(m_sRawFile);
         FiffRawData raw(rawFile);
@@ -428,8 +424,7 @@ private slots:
         QFile fwdFile(m_sFwdFile);
         MNEForwardSolution fwd(fwdFile);
 
-        QFile covFile(m_sCovFile);
-        FiffCov cov(covFile);
+        FiffCov cov(m_sCovFile.toStdString());
 
         QFile rawFile(m_sRawFile);
         FiffRawData raw(rawFile);
@@ -460,8 +455,7 @@ private slots:
         QFile fwdFile(m_sFwdFile);
         MNEForwardSolution fwd(fwdFile);
 
-        QFile covFile(m_sCovFile);
-        FiffCov cov(covFile);
+        FiffCov cov(m_sCovFile.toStdString());
 
         QFile rawFile(m_sRawFile);
         FiffRawData raw(rawFile);
@@ -492,8 +486,7 @@ private slots:
         MNEForwardSolution fwd(fwdFile);
 
         // Read cov
-        QFile covFile(m_sCovFile);
-        FiffCov cov(covFile);
+        FiffCov cov(m_sCovFile.toStdString());
 
         // Read raw for info
         QFile rawFile(m_sRawFile);
@@ -532,8 +525,7 @@ private slots:
         QFile fwdFile(m_sFwdFile);
         MNEForwardSolution fwd(fwdFile);
 
-        QFile covFile(m_sCovFile);
-        FiffCov cov(covFile);
+        FiffCov cov(m_sCovFile.toStdString());
 
         QFile rawFile(m_sRawFile);
         FiffRawData raw(rawFile);

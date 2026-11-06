@@ -250,7 +250,7 @@ private slots:
         // Read noise covariance
         QFile covFile(covPath);
         if (covFile.exists()) {
-            m_noiseCov = FiffCov(covFile);
+            m_noiseCov = FiffCov(covFile.fileName().toStdString());
         }
 
         // Read info from raw
@@ -767,7 +767,7 @@ private slots:
         if (!file.exists())
             QSKIP("Covariance file not found");
 
-        FiffCov cov(file);
+        FiffCov cov(path.toStdString());
         QVERIFY(!cov.isEmpty());
         QVERIFY(cov.data.rows() > 0);
         QCOMPARE(cov.data.rows(), cov.data.cols()); // Should be square
@@ -788,8 +788,7 @@ private slots:
             QSKIP("No test data");
 
         QString path = m_sDataPath + "/MEG/sample/sample_audvis-cov.fif";
-        QFile file(path);
-        FiffCov cov(file);
+        FiffCov cov(path.toStdString());
         if (cov.isEmpty())
             QSKIP("Failed to read covariance");
 

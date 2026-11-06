@@ -72,13 +72,13 @@ FiffCov::FiffCov()
 
 //=============================================================================================================
 
-FiffCov::FiffCov(QIODevice& p_IODevice)
+FiffCov::FiffCov(const std::filesystem::path& path)
 : kind(-1)
 , diag(false)
 , dim(-1)
 , nfree(-1)
 {
-    if (!read(p_IODevice, *this))
+    if (!read(path, *this))
         throw std::runtime_error("Fiff covariance not found");
 
     qRegisterMetaType<QSharedPointer<FIFFLIB::FiffCov>>("QSharedPointer<FIFFLIB::FiffCov>");
@@ -87,10 +87,10 @@ FiffCov::FiffCov(QIODevice& p_IODevice)
 
 //=============================================================================================================
 
-bool FiffCov::read(QIODevice& p_IODevice, FiffCov& p_cov)
+bool FiffCov::read(const std::filesystem::path& path, FiffCov& p_cov)
 {
-    FiffStream::SPtr t_pStream(new FiffStream(&p_IODevice));
-    if (!t_pStream->open()) {
+    FiffStream::SPtr t_pStream = FiffStream::open(path);
+    if (!t_pStream) {
         return false;
     }
 
@@ -595,17 +595,15 @@ FiffCov FiffCov::compute_from_epochs(const QList<QList<MatrixXd>>& epochs,
 
 //=============================================================================================================
 
-bool FiffCov::save(const QString& fileName) const
+bool FiffCov::save(const std::filesystem::path& path) const
 {
-    if (fileName.isEmpty()) {
+    if (path.empty()) {
         qWarning() << "[FiffCov::save] Output file not specified.";
         return false;
     }
 
-    QFile file(fileName);
-    FiffStream::SPtr pStream = FiffStream::start_file(file);
+    FiffStream::SPtr pStream = FiffStream::start_file(path);
     if (!pStream) {
-        qWarning() << "[FiffCov::save] Cannot open" << fileName;
         return false;
     }
 
@@ -614,8 +612,9 @@ bool FiffCov::save(const QString& fileName) const
     pStream->write_cov(*this);
     pStream->end_block(FIFFB_MEAS);
     pStream->end_file();
+    pStream->close();
 
-    qInfo() << "[FiffCov::save] Saved covariance matrix to" << fileName;
+    qInfo("[FiffCov::save] Saved covariance matrix to %s", pStream->streamName().toUtf8().constData());
     return true;
 }
 

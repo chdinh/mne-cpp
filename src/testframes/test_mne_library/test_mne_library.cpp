@@ -1223,8 +1223,7 @@ void TestMneLibrary::forwardSolution_prepareForward()
     QFile rawFile(rawPath());
     FiffRawData raw(rawFile);
 
-    QFile covFile(covPath());
-    FiffCov noise_cov(covFile);
+    FiffCov noise_cov(covPath().toStdString());
 
     FiffInfo fwdInfo;
     MatrixXd gain;
@@ -1881,8 +1880,7 @@ void TestMneLibrary::inverseOp_makeSmallChannelSet()
     QVERIFY(!fwd.isEmpty());
 
     // Read noise covariance
-    QFile covFile(covPath);
-    FiffCov noiseCov(covFile);
+    FiffCov noiseCov(covPath.toStdString());
 
     // Make inverse operator
     MNEInverseOperator inv = MNEInverseOperator::make_inverse_operator(info, fwd, noiseCov, 0.2f, 0.8f);

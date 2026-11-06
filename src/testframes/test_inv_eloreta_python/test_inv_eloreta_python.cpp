@@ -137,8 +137,7 @@ void TestInvEloretaPython::initTestCase()
     QVERIFY(FsLabel::read(data("subjects/sample/label/lh.V1.label"), v1));
     m_v1 = v1;
 
-    QFile covFile(data("MEG/sample/sample_audvis-cov.fif"));
-    const FiffCov cov(covFile);
+    const FiffCov cov(data("MEG/sample/sample_audvis-cov.fif").toStdString());
     m_cov = cov;
     QFile aveFile(data("MEG/sample/sample_audvis-ave.fif"));
     const FiffEvoked evoked(aveFile, 0);

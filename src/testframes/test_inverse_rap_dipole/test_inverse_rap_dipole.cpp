@@ -422,7 +422,7 @@ private slots:
             QSKIP("Required files not found");
 
         MNEForwardSolution fwd(fwdFile);
-        FiffCov noiseCov(covFile);
+        FiffCov noiseCov(covFile.fileName().toStdString());
         FiffRawData raw(rawFile);
 
         if (fwd.isEmpty() || noiseCov.isEmpty())
@@ -455,7 +455,7 @@ private slots:
             QSKIP("Required files not found");
 
         MNEForwardSolution fwd(fwdFile);
-        FiffCov noiseCov(covFile);
+        FiffCov noiseCov(covFile.fileName().toStdString());
         FiffRawData raw(rawFile);
 
         MNELIB::MNEInverseOperator invOp = MNELIB::MNEInverseOperator::make_inverse_operator(
@@ -500,7 +500,7 @@ private slots:
             QSKIP("Required files not found");
 
         MNEForwardSolution fwd(fwdFile);
-        FiffCov noiseCov(covFile);
+        FiffCov noiseCov(covFile.fileName().toStdString());
         FiffRawData raw(rawFile);
 
         MNELIB::MNEInverseOperator invOp = MNELIB::MNEInverseOperator::make_inverse_operator(
@@ -544,7 +544,7 @@ private slots:
             QSKIP("Required files not found");
 
         MNEForwardSolution fwd(fwdFile);
-        FiffCov noiseCov(covFile);
+        FiffCov noiseCov(covFile.fileName().toStdString());
         FiffRawData raw(rawFile);
 
         MNELIB::MNEInverseOperator invOp = MNELIB::MNEInverseOperator::make_inverse_operator(
@@ -587,7 +587,7 @@ private slots:
             QSKIP("Required files not found");
 
         MNEForwardSolution fwd(fwdFile);
-        FiffCov noiseCov(covFile);
+        FiffCov noiseCov(covFile.fileName().toStdString());
         FiffRawData raw(rawFile);
 
         MNELIB::MNEInverseOperator invOp = MNELIB::MNEInverseOperator::make_inverse_operator(

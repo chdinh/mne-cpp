@@ -908,8 +908,7 @@ void TestFiffFsLibrary::fiffCov_readFromFile()
 {
     if (!hasData())
         QSKIP("No test data");
-    QFile covFile(covPath());
-    FiffCov cov(covFile);
+    FiffCov cov(covPath().toStdString());
     QVERIFY(!cov.isEmpty());
     QVERIFY(cov.dim > 0);
     QVERIFY(cov.names.size() > 0);
@@ -920,8 +919,7 @@ void TestFiffFsLibrary::fiffCov_pickChannels()
 {
     if (!hasData())
         QSKIP("No test data");
-    QFile covFile(covPath());
-    FiffCov cov(covFile);
+    FiffCov cov(covPath().toStdString());
     QVERIFY(!cov.isEmpty());
     StringList pickNames;
     int nPick = std::min(20, static_cast<int>(cov.names.size()));
@@ -937,8 +935,7 @@ void TestFiffFsLibrary::fiffCov_saveAndReload()
     if (!hasData())
         QSKIP("No test data");
     // Read cov and verify basic properties (full round-trip write is slow in debug+coverage)
-    QFile covFile(covPath());
-    FiffCov cov(covFile);
+    FiffCov cov(covPath().toStdString());
     QVERIFY(!cov.isEmpty());
     QVERIFY(cov.dim > 0);
     QVERIFY(static_cast<int>(cov.names.size()) == cov.dim);
@@ -948,8 +945,7 @@ void TestFiffFsLibrary::fiffCov_regularize()
 {
     if (!hasData())
         QSKIP("No test data");
-    QFile covFile(covPath());
-    FiffCov cov(covFile);
+    FiffCov cov(covPath().toStdString());
     QVERIFY(!cov.isEmpty());
     QFile rawFile(rawPath());
     FiffRawData raw(rawFile);
@@ -962,8 +958,7 @@ void TestFiffFsLibrary::fiffCov_computeGrandAverage()
 {
     if (!hasData())
         QSKIP("No test data");
-    QFile covFile(covPath());
-    FiffCov cov(covFile);
+    FiffCov cov(covPath().toStdString());
     QVERIFY(!cov.isEmpty());
     QList<FiffCov> covList;
     covList.append(cov);
@@ -979,8 +974,7 @@ void TestFiffFsLibrary::fiffCov_copyAndAssign()
 {
     if (!hasData())
         QSKIP("No test data");
-    QFile covFile(covPath());
-    FiffCov cov(covFile);
+    FiffCov cov(covPath().toStdString());
     QVERIFY(!cov.isEmpty());
     FiffCov cov2(cov);
     QCOMPARE(cov2.dim, cov.dim);
@@ -995,8 +989,7 @@ void TestFiffFsLibrary::fiffCov_isEmpty()
     QVERIFY(emptyCov.isEmpty());
     if (!hasData())
         return;
-    QFile covFile(covPath());
-    FiffCov cov(covFile);
+    FiffCov cov(covPath().toStdString());
     QVERIFY(!cov.isEmpty());
     cov.clear();
     QVERIFY(cov.isEmpty());

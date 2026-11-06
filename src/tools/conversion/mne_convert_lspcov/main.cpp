@@ -351,7 +351,7 @@ int main(int argc, char* argv[])
         cov.data = covMat;
         cov.nfree = 1;
 
-        if (!cov.save(outFile)) {
+        if (!cov.save(UTILSLIB::pathFromUtf8(outFile.toStdString()))) {
             qCritical("Cannot write output file: %s", qPrintable(outFile));
             return 1;
         }

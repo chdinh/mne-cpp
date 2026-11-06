@@ -132,7 +132,6 @@ int main(int argc, char* argv[])
 
     // Load files
     QFile t_fileFwd(parser.value(fwdOption));
-    QFile t_fileCov(parser.value(covFileOption));
     QFile t_fileRaw(parser.value(inputOption));
     QString t_sEventName = parser.value(eventsFileOption);
 
@@ -431,7 +430,7 @@ int main(int argc, char* argv[])
     if (t_Fwd.isEmpty())
         return 1;
 
-    FiffCov noise_cov(t_fileCov);
+    FiffCov noise_cov(parser.value(covFileOption).toStdString());
 
     //
     // regularize noise covariance

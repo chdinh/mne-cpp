@@ -95,22 +95,22 @@ public:
 
     //=========================================================================================================
     /**
-     * Constructs a covariance data matrix, by reading from a IO device.
+     * Reads the noise covariance of a FIFF file.
      *
-     * @param[in] p_IODevice     IO device to read from the evoked data set.
+     * @param[in] path   The file.
      */
-    FiffCov(QIODevice& p_IODevice);
+    explicit FiffCov(const std::filesystem::path& path);
 
     //=========================================================================================================
     /**
      * Reads the noise covariance stored in a FIFF file, like mne.read_cov.
      *
-     * @param[in] p_IODevice     IO device to read from.
-     * @param[out] p_cov         The covariance; unchanged when reading fails.
+     * @param[in] path    The file.
+     * @param[out] p_cov  The covariance; unchanged when reading fails.
      *
-     * @return true when the device holds a noise covariance, false otherwise.
+     * @return true when the file holds a noise covariance, false otherwise.
      */
-    static bool read(QIODevice& p_IODevice, FiffCov& p_cov);
+    static bool read(const std::filesystem::path& path, FiffCov& p_cov);
 
     //=========================================================================================================
     /**
@@ -233,10 +233,10 @@ public:
     /**
      * Save this covariance matrix to a FIFF file.
      *
-     * @param[in] fileName  Output file path.
+     * @param[in] path  Output file.
      * @return true on success.
      */
-    bool save(const QString& fileName) const;
+    bool save(const std::filesystem::path& path) const;
 
     //=========================================================================================================
     /**

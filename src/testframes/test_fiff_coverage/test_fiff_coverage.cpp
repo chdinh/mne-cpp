@@ -609,8 +609,7 @@ void TestFiffCoverage::testFiffCovFromFile()
     QVERIFY2(QFile::exists(covPath()),
              qPrintable(QString("Covariance test data not found: %1").arg(covPath())));
 
-    QFile file(covPath());
-    FiffCov cov(file);
+    FiffCov cov(covPath().toStdString());
     QVERIFY(cov.data.size() > 0);
     QVERIFY(cov.names.size() > 0);
 }
@@ -620,8 +619,7 @@ void TestFiffCoverage::testFiffCovDimensions()
     QVERIFY2(QFile::exists(covPath()),
              qPrintable(QString("Covariance test data not found: %1").arg(covPath())));
 
-    QFile file(covPath());
-    FiffCov cov(file);
+    FiffCov cov(covPath().toStdString());
     // Covariance matrix should be square
     QCOMPARE(cov.data.rows(), cov.data.cols());
     QCOMPARE(cov.data.rows(), (Eigen::Index)cov.names.size());

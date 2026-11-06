@@ -130,7 +130,6 @@ int main(int argc, char* argv[])
 
     // Source Estimate
     QFile t_fileFwd(parser.value(sampleFwdFileOption));
-    QFile t_fileCov(parser.value(sampleCovFileOption));
     QFile t_fileEvoked(parser.value(sampleEvokedFileOption));
 
     double snr = parser.value(snrOption).toDouble();
@@ -158,7 +157,7 @@ int main(int argc, char* argv[])
 
     FsAnnotationSet t_annotationSet("sample", 2, "aparc.a2009s", QCoreApplication::applicationDirPath() + "/../resources/data/MNE-sample-data/subjects");
 
-    FiffCov noise_cov(t_fileCov);
+    FiffCov noise_cov(parser.value(sampleCovFileOption).toStdString());
 
     // regularize noise covariance
     noise_cov = noise_cov.regularize(evoked.info, 0.05, 0.05, 0.1, true);

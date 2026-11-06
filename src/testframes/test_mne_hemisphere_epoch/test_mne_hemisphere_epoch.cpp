@@ -882,7 +882,7 @@ private slots:
         if (!file.exists())
             QSKIP("Covariance file not found");
 
-        FiffCov cov(file);
+        FiffCov cov(path.toStdString());
         QVERIFY(!cov.isEmpty());
         QVERIFY(cov.data.rows() > 0);
         QCOMPARE(cov.data.rows(), cov.data.cols());
@@ -898,7 +898,7 @@ private slots:
         if (!file.exists())
             QSKIP("Covariance file not found");
 
-        FiffCov cov(file);
+        FiffCov cov(path.toStdString());
         if (cov.isEmpty())
             QSKIP("Failed to read cov");
 
@@ -957,7 +957,7 @@ private slots:
             QSKIP("Required files not found");
 
         MNEForwardSolution fwd(fwdFile);
-        FiffCov noiseCov(covFile);
+        FiffCov noiseCov(covPath.toStdString());
         FiffRawData raw(rawFile);
 
         if (fwd.isEmpty() || noiseCov.isEmpty())

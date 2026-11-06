@@ -19,6 +19,7 @@
 #include <fiff/fiff_raw_data.h>
 #include <fiff/fiff_stream.h>
 #include <utils/generics/mne_logger.h>
+#include <utils/string_utils.h>
 
 //=============================================================================================================
 // QT INCLUDES
@@ -165,8 +166,7 @@ int main(int argc, char* argv[])
 
     // Add noise if covariance provided
     if (!covFile.isEmpty()) {
-        QFile fCov(covFile);
-        FiffCov cov(fCov);
+        FiffCov cov(UTILSLIB::pathFromUtf8(covFile.toStdString()));
         if (!cov.isEmpty() && cov.dim == nChan) {
             // Cholesky decomposition for correlated noise
             LLT<MatrixXd> llt(cov.data);

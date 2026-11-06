@@ -96,10 +96,9 @@ int main(int argc, char* argv[])
     }
 
     // Read covariance
-    QFile fCov(covFile);
     FiffCov cov;
     try {
-        cov = FiffCov(fCov);
+        cov = FiffCov(UTILSLIB::pathFromUtf8(covFile.toStdString()));
     } catch (const std::exception& error) {
         qCritical("Cannot read covariance from %s: %s",
                   qPrintable(covFile), error.what());

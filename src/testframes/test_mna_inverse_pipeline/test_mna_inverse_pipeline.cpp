@@ -204,8 +204,7 @@ void TestMnaInversePipeline::registerRealOps()
                            QString covPath = attrs.value(QStringLiteral("cov_path")).toString();
                            covPath.replace(QLatin1String("${TEST_DATA}"), dataPath);
 
-                           QFile covFile(covPath);
-                           auto cov = QSharedPointer<FiffCov>::create(covFile);
+                           auto cov = QSharedPointer<FiffCov>::create(covPath.toStdString());
 
                            return {{QStringLiteral("noise_cov"), QVariant::fromValue(cov)}};
                        });

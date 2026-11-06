@@ -120,8 +120,7 @@ int main(int argc, char* argv[])
                    {"superiortemporal-lh", "transversetemporal-lh", "superiortemporal-rh", "transversetemporal-rh"});
     QFile fwdFile(data + "/Result/ref-sample_audvis-meg-eeg-oct-6-fwd.fif");
     const MNEForwardSolution fwd = MNEForwardSolution(fwdFile, true, true).pick_regions(auditory);
-    QFile covFile(data + "/MEG/sample/sample_audvis-cov.fif");
-    const FiffCov noiseCov = FiffCov(covFile).pick_channels(fwd.sol->row_names);
+    const FiffCov noiseCov = FiffCov((data + "/MEG/sample/sample_audvis-cov.fif").toStdString()).pick_channels(fwd.sol->row_names);
     QFile aveFile(data + "/MEG/sample/sample_audvis-ave.fif");
     const FiffEvoked evoked = FiffEvoked(aveFile, 0).pick_channels(fwd.sol->row_names); // "Left Auditory"
     const QList<VectorXi> vertno = fwd.src.get_vertno();

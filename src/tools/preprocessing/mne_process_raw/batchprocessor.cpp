@@ -397,7 +397,7 @@ int BatchProcessor::run(const ProcessingSettings& settings)
                 }
 
                 if (!covSaveName.isEmpty()) {
-                    cov.save(covSaveName);
+                    cov.save(UTILSLIB::pathFromUtf8(covSaveName.toStdString()));
                 }
                 writeLog(covLogName, covLog);
 
@@ -440,7 +440,7 @@ int BatchProcessor::run(const ProcessingSettings& settings)
             qInfo() << "\n--- Computing grand average covariance ---";
             FiffCov grandCov = FiffCov::computeGrandAverage(allCovariances);
             if (grandCov.dim > 0) {
-                grandCov.save(settings.grandCovFile);
+                grandCov.save(UTILSLIB::pathFromUtf8(settings.grandCovFile.toStdString()));
             }
         }
     }

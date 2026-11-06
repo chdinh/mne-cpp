@@ -335,8 +335,7 @@ void TestMneLabelPython::clusterForward_invariants()
 
     // With a noise covariance the clusters are found on the whitened gain (MEG and EEG in
     // comparable units) but the centroids remain averages of the original gain.
-    QFile covFile(dataPath("MEG/sample/sample_audvis-cov.fif"));
-    const FiffCov cov(covFile);
+    const FiffCov cov(dataPath("MEG/sample/sample_audvis-cov.fif").toStdString());
     QFile aveFile(dataPath("MEG/sample/sample_audvis-ave.fif"));
     const FiffEvoked evoked(aveFile, 0);
     MatrixXd Dw;
@@ -377,8 +376,7 @@ void TestMneLabelPython::assembleKernel_label()
 
     const QString covPath = dataPath("MEG/sample/sample_audvis-cov.fif");
     const QString avePath = dataPath("MEG/sample/sample_audvis-ave.fif");
-    QFile covFile(covPath);
-    const FiffCov cov(covFile);
+    const FiffCov cov(covPath.toStdString());
     QFile aveFile(avePath);
     const FiffEvoked evoked(aveFile, 0);
 
@@ -462,8 +460,7 @@ void TestMneLabelPython::assembleKernel_label()
 void TestMneLabelPython::clusterKernel_invariants()
 {
     const QString covPath = dataPath("MEG/sample/sample_audvis-cov.fif");
-    QFile covFile(covPath);
-    const FiffCov cov(covFile);
+    const FiffCov cov(covPath.toStdString());
     QFile aveFile(dataPath("MEG/sample/sample_audvis-ave.fif"));
     const FiffEvoked evoked(aveFile, 0);
 

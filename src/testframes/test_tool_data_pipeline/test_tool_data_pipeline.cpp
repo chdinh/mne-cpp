@@ -2786,8 +2786,7 @@ private slots:
                                  {"--ncov", ncovPath, "--meas", rawFile,
                                   "--meg", "--cov", outputPath}),
                  0);
-        QFile outputFile(outputPath);
-        const FIFFLIB::FiffCov covariance(outputFile);
+        const FIFFLIB::FiffCov covariance(outputPath.toStdString());
         QCOMPARE(covariance.dim, megCount);
         QCOMPARE(covariance.nfree, 42);
         QCOMPARE(covariance.data.rows(), megCount * (megCount + 1) / 2);
