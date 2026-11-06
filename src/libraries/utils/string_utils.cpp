@@ -118,9 +118,9 @@ std::string_view UTILSLIB::trimmed(std::string_view text)
 
 //=============================================================================================================
 
-std::vector<std::string> UTILSLIB::split(std::string_view text, char separator, bool skipEmpty)
+UTILSLIB::StringList UTILSLIB::split(std::string_view text, char separator, bool skipEmpty)
 {
-    std::vector<std::string> fields;
+    StringList fields;
     for (std::size_t start = 0;;) {
         const std::size_t end = text.find(separator, start);
         const std::string_view field = text.substr(start, end == std::string_view::npos ? std::string_view::npos : end - start);
@@ -132,6 +132,34 @@ std::vector<std::string> UTILSLIB::split(std::string_view text, char separator, 
         }
         start = end + 1;
     }
+}
+
+//=============================================================================================================
+
+int UTILSLIB::indexOf(const StringList& list, std::string_view name)
+{
+    const auto it = std::find(list.begin(), list.end(), name);
+    return it == list.end() ? -1 : static_cast<int>(it - list.begin());
+}
+
+//=============================================================================================================
+
+bool UTILSLIB::contains(const StringList& list, std::string_view name)
+{
+    return std::find(list.begin(), list.end(), name) != list.end();
+}
+
+//=============================================================================================================
+
+std::string UTILSLIB::join(const StringList& list, std::string_view separator)
+{
+    std::string out;
+    for (std::size_t i = 0; i < list.size(); ++i) {
+        if (i > 0)
+            out += separator;
+        out += list[i];
+    }
+    return out;
 }
 
 //=============================================================================================================

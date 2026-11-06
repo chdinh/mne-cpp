@@ -39,6 +39,9 @@
 namespace UTILSLIB
 {
 
+/** Ordered list of names, e.g. channel names; the standard-library counterpart of QStringList. */
+using StringList = std::vector<std::string>;
+
 /**
  * @param[in] text   Any text.
  *
@@ -53,7 +56,34 @@ UTILSSHARED_EXPORT std::string_view trimmed(std::string_view text);
  *
  * @return The fields of @p text, like QString::split(); empty text gives one empty field unless skipped.
  */
-UTILSSHARED_EXPORT std::vector<std::string> split(std::string_view text, char separator, bool skipEmpty = false);
+UTILSSHARED_EXPORT StringList split(std::string_view text, char separator, bool skipEmpty = false);
+
+//=============================================================================================================
+/**
+ * @param[in] list   A list of names, e.g. channel names.
+ * @param[in] name   The name to look for, compared exactly.
+ *
+ * @return Index of the first occurrence of @p name, or -1, like QStringList::indexOf().
+ */
+UTILSSHARED_EXPORT int indexOf(const StringList& list, std::string_view name);
+
+//=============================================================================================================
+/**
+ * @param[in] list   A list of names, e.g. channel names.
+ * @param[in] name   The name to look for, compared exactly.
+ *
+ * @return Whether @p list holds @p name.
+ */
+UTILSSHARED_EXPORT bool contains(const StringList& list, std::string_view name);
+
+//=============================================================================================================
+/**
+ * @param[in] list        A list of names.
+ * @param[in] separator   Text put between two names.
+ *
+ * @return The names joined by @p separator, like QStringList::join().
+ */
+UTILSSHARED_EXPORT std::string join(const StringList& list, std::string_view separator);
 
 /**
  * @param[in] text   UTF-8 text.

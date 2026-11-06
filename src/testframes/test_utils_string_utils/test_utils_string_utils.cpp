@@ -57,6 +57,7 @@ private slots:
     void splitMatchesQString_data();
     void splitMatchesQString();
     void caseHelpersMatchQString();
+    void nameListHelpersMatchQStringList();
     void toDoubleMatchesQString_data();
     void toDoubleMatchesQString();
     void toIntMatchesQString_data();
@@ -108,11 +109,26 @@ void TestUtilsStringUtils::splitMatchesQString()
     QFETCH(QString, text);
     QFETCH(bool, skipEmpty);
     const QStringList expected = text.split(QLatin1Char(','), skipEmpty ? Qt::SkipEmptyParts : Qt::KeepEmptyParts);
-    const std::vector<std::string> actual = split(text.toStdString(), ',', skipEmpty);
+    const StringList actual = split(text.toStdString(), ',', skipEmpty);
     QCOMPARE(static_cast<qsizetype>(actual.size()), expected.size());
     for (std::size_t i = 0; i < actual.size(); ++i) {
         QCOMPARE(QString::fromStdString(actual[i]), expected[static_cast<qsizetype>(i)]);
     }
+}
+
+//=============================================================================================================
+
+void TestUtilsStringUtils::nameListHelpersMatchQStringList()
+{
+    const QStringList qnames{"MEG 0113", "EEG 001", "STI 014", "EEG 001"};
+    const StringList names{"MEG 0113", "EEG 001", "STI 014", "EEG 001"};
+    for (const char* name : {"MEG 0113", "EEG 001", "STI 014", "eeg 001", ""}) {
+        QCOMPARE(indexOf(names, name), static_cast<int>(qnames.indexOf(QString::fromUtf8(name))));
+        QCOMPARE(contains(names, name), qnames.contains(QString::fromUtf8(name)));
+    }
+    QCOMPARE(QString::fromStdString(join(names, ", ")), qnames.join(", "));
+    QCOMPARE(join({}, ","), std::string());
+    QCOMPARE(join({"Cz"}, ","), std::string("Cz"));
 }
 
 //=============================================================================================================
