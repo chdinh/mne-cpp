@@ -7,7 +7,6 @@
 #include <QBuffer>
 #include <QFile>
 #include <QTemporaryDir>
-#include <QTemporaryFile>
 #include <Eigen/Dense>
 
 #include <fiff/fiff_cov.h>
@@ -137,11 +136,9 @@ private slots:
     void testFiffCovSave()
     {
         FiffCov cov = createSyntheticCov(4);
-        QTemporaryFile tmpFile;
-        tmpFile.setAutoRemove(true);
-        QVERIFY(tmpFile.open());
-        QString tmpPath = tmpFile.fileName();
-        tmpFile.close();
+        // A closed QTemporaryFile is still held by Qt on Windows, so write into a temporary directory
+        QTemporaryDir dir;
+        const QString tmpPath = dir.filePath("cov.fif");
 
         bool saved = cov.save(tmpPath.toStdString());
         QVERIFY(saved);
