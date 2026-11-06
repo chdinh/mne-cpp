@@ -142,7 +142,7 @@ int main(int argc, char* argv[])
     }
 
     MNEBem bem;
-    if (!MNEBem::readFromStream(stream, true, bem)) {
+    if (!MNEBem::readFromStream(*stream, true, bem)) {
         qCritical("Cannot read BEM surfaces from: %s", qPrintable(bemName));
         return 1;
     }

@@ -140,13 +140,13 @@ public:
      *
      * Reads Bem surface from a fif file
      *
-     * @param[in, out] p_pStream     The opened fif file.
+     * @param[in, out] stream     The opened fif file.
      * @param[in] add_geom          Add geometry information to the Bem FsSurface.
      * @param[in, out] p_Bem The BEM that receives the surfaces read.
      *
      * @return true if succeeded, false otherwise.
      */
-    static bool readFromStream(FIFFLIB::FiffStream::SPtr& p_pStream, bool add_geom, MNEBem& p_Bem);
+    static bool readFromStream(FIFFLIB::FiffStream& stream, bool add_geom, MNEBem& p_Bem);
 
     //=========================================================================================================
     /**
@@ -174,9 +174,9 @@ public:
      *
      * Write the Bem to a FIF stream
      *
-     * @param[in] p_pStream  The stream to write to.
+     * @param[in] stream  The stream to write to.
      */
-    void writeToStream(FIFFLIB::FiffStream* p_pStream);
+    void writeToStream(FIFFLIB::FiffStream& stream);
 
     //=========================================================================================================
     /**
@@ -249,13 +249,13 @@ protected:
      * Definition of the read_bem_surface function in e.g. mne_read_bem_surface.m
      * Reads a single bem surface
      *
-     * @param[in] p_pStream         The opened fif file.
+     * @param[in] stream         The opened fif file.
      * @param[in] p_Tree            Search for the bem surface here.
      * @param[in, out] p_BemSurface     The read BemSurface.
      *
      * @return true if succeeded, false otherwise.
      */
-    static bool readBemSurface(FIFFLIB::FiffStream::SPtr& p_pStream, const FIFFLIB::FiffDirNode::SPtr& p_Tree, MNEBemSurface& p_BemSurface);
+    static bool readBemSurface(FIFFLIB::FiffStream& stream, const FIFFLIB::FiffDirNode::SPtr& p_Tree, MNEBemSurface& p_BemSurface);
 
 private:
     QList<MNEBemSurface> m_qListBemSurface; /**< List of the BEM Surfaces. */

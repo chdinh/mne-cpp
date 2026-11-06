@@ -180,7 +180,7 @@ int main(int argc, char* argv[])
         return 1;
     }
     MNESourceSpaces src;
-    if (!MNESourceSpaces::readFromStream(stream, true, src) || src.size() == 0) {
+    if (!MNESourceSpaces::readFromStream(*stream, true, src) || src.size() == 0) {
         qCritical("Cannot read source space: %s", qPrintable(srcFile));
         return 1;
     }
@@ -255,7 +255,7 @@ int main(int argc, char* argv[])
         qCritical("Cannot open output file: %s", qPrintable(outFile));
         return 1;
     }
-    src.writeToStream(outStream.data());
+    src.writeToStream(*outStream);
     outStream->end_file();
 
     qInfo("Done.");

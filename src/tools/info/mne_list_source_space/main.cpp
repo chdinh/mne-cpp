@@ -150,7 +150,7 @@ int main(int argc, char* argv[])
     }
 
     MNESourceSpaces sourceSpaces;
-    if (!MNESourceSpaces::readFromStream(stream, true, sourceSpaces)) {
+    if (!MNESourceSpaces::readFromStream(*stream, true, sourceSpaces)) {
         qCritical("Cannot read source spaces from file.");
         return 1;
     }

@@ -195,7 +195,7 @@ void TestFiffStreamPython::sparseMatrices()
 {
     QFETCH(int, kind);
     FiffTag::UPtr tag;
-    QVERIFY(m_stream->dirtree()->find_tag(m_stream, kind, tag));
+    QVERIFY(m_stream->dirtree()->find_tag(*m_stream, kind, tag));
     QVERIFY(tag->isMatrix());
     const MatrixXd back = MatrixXd(tag->toSparseFloatMatrix());
     QCOMPARE(back.rows(), 3);
@@ -209,7 +209,7 @@ void TestFiffStreamPython::sparseMatrices()
 void TestFiffStreamPython::intMatrix()
 {
     FiffTag::UPtr tag;
-    QVERIFY(m_stream->dirtree()->find_tag(m_stream, FIFF_MNE_SOURCE_SPACE_TRIANGLES, tag));
+    QVERIFY(m_stream->dirtree()->find_tag(*m_stream, FIFF_MNE_SOURCE_SPACE_TRIANGLES, tag));
     MatrixXi expected(2, 3);
     expected << 1, 2, 3, 4, 5, 6;
     // Like the float decoders, toIntMatrix returns the transpose of the
@@ -255,7 +255,7 @@ void TestFiffStreamPython::projectors()
 void TestFiffStreamPython::coordTrans()
 {
     FiffTag::UPtr tag;
-    QVERIFY(m_stream->dirtree()->find_tag(m_stream, FIFF_COORD_TRANS, tag));
+    QVERIFY(m_stream->dirtree()->find_tag(*m_stream, FIFF_COORD_TRANS, tag));
     const FiffCoordTrans t = tag->toCoordTrans();
     QCOMPARE(t.from, static_cast<fiff_int_t>(FIFFV_COORD_DEVICE));
     QCOMPARE(t.to, static_cast<fiff_int_t>(FIFFV_COORD_HEAD));
@@ -374,15 +374,15 @@ void TestFiffStreamPython::attachesEnvironment()
     const QList<FiffDirNode::SPtr> env = r->dirtree()->dir_tree_find(FIFFB_MNE_ENV);
     QCOMPARE(env.size(), 1);
     FiffTag::UPtr tag;
-    QVERIFY(env[0]->find_tag(r, FIFF_MNE_ENV_WORKING_DIR, tag));
+    QVERIFY(env[0]->find_tag(*r, FIFF_MNE_ENV_WORKING_DIR, tag));
     // Strings are written as UTF-8: the tag holds the bytes, not the characters, of a non-ASCII path.
     QCOMPARE(tag->toString(), QStringLiteral("/data/stüdy"));
-    QVERIFY(env[0]->find_tag(r, FIFF_MNE_ENV_COMMAND_LINE, tag));
+    QVERIFY(env[0]->find_tag(*r, FIFF_MNE_ENV_COMMAND_LINE, tag));
     QCOMPARE(tag->toString(), QString("mne_process --raw a.fif"));
     // The measurement block written before is still there.
     const QList<FiffDirNode::SPtr> meas = r->dirtree()->dir_tree_find(FIFFB_MEAS);
     QCOMPARE(meas.size(), 1);
-    QVERIFY(meas[0]->find_tag(r, FIFF_NCHAN, tag));
+    QVERIFY(meas[0]->find_tag(*r, FIFF_NCHAN, tag));
     QCOMPARE(*tag->toInt(), 3);
     r->close();
 }
@@ -486,7 +486,7 @@ void TestFiffStreamPython::readsTagTypes()
     QVERIFY(stream.open());
     auto tag = [&](int kind) {
         FiffTag::UPtr t;
-        stream.dirtree()->find_tag(&stream, kind, t);
+        stream.dirtree()->find_tag(stream, kind, t);
         return t;
     };
 
@@ -558,7 +558,7 @@ void TestFiffStreamPython::readsTagTypes()
     QVERIFY(copy.open());
     for (int kind = 901; kind <= 910; ++kind) {
         FiffTag::UPtr back;
-        QVERIFY(copy.dirtree()->find_tag(&copy, kind, back));
+        QVERIFY(copy.dirtree()->find_tag(copy, kind, back));
         const FiffTag::UPtr orig = tag(kind);
         QVERIFY2(back->size() == orig->size() && std::memcmp(back->data(), orig->data(), static_cast<size_t>(orig->size())) == 0,
                  qPrintable(QStringLiteral("tag %1 changed in write_tag").arg(kind)));
@@ -778,10 +778,10 @@ void TestFiffStreamPython::writesAnnotationsAndDevice()
     FiffStream packedReader(&packedBack);
     QVERIFY(packedReader.open());
     FiffTag::UPtr pack;
-    QVERIFY(packedReader.dirtree()->dir_tree_find(FIFFB_MEAS_INFO).first()->find_tag(&packedReader, FIFF_DATA_PACK, pack));
+    QVERIFY(packedReader.dirtree()->dir_tree_find(FIFFB_MEAS_INFO).first()->find_tag(packedReader, FIFF_DATA_PACK, pack));
     QCOMPARE(*pack->toInt(), FIFFT_DAU_PACK16);
     FiffTag::UPtr lineFreq;
-    QVERIFY(!packedReader.dirtree()->dir_tree_find(FIFFB_MEAS_INFO).first()->find_tag(&packedReader, FIFF_LINE_FREQ, lineFreq));
+    QVERIFY(!packedReader.dirtree()->dir_tree_find(FIFFB_MEAS_INFO).first()->find_tag(packedReader, FIFF_LINE_FREQ, lineFreq));
 }
 
 //=============================================================================================================

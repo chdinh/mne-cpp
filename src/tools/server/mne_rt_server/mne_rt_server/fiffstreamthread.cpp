@@ -188,7 +188,7 @@ void FiffStreamThread::sendMeasurementInfo(qint32 ID, const FiffInfo& p_fiffInfo
 
         //FiffStream::start_writing_raw
 
-        p_fiffInfo.writeToStream(&t_FiffStreamOut);
+        p_fiffInfo.writeToStream(t_FiffStreamOut);
         m_qMutex.unlock();
 
         //        qDebug() << "MeasInfo Blocksize: " << m_qSendBlock.size();

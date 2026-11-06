@@ -827,11 +827,11 @@ void TestFiffCorePython::readTransformFromNode()
     QFETCH(float, tz);
 
     QFile file(dataPath("all-trans.fif"));
-    FiffStream::SPtr stream(new FiffStream(&file));
-    QVERIFY(stream->open());
+    FiffStream stream(&file);
+    QVERIFY(stream.open());
 
-    const FiffCoordTrans t = FiffCoordTrans::readTransformFromNode(stream, stream->dirtree(), from, to);
-    stream->close();
+    const FiffCoordTrans t = FiffCoordTrans::readTransformFromNode(stream, stream.dirtree(), from, to);
+    stream.close();
 
     QCOMPARE(!t.isEmpty(), found);
     if (!found) {

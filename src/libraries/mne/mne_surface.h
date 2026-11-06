@@ -88,9 +88,9 @@ public:
      * Writes the surface tags of a FIFFB_BEM_SURF block (MNE-C mne_write_bem_surfaces_block): conductivity if
      * set, id, coordinate frame, vertices, triangles and normals.
      *
-     * @param[in] p_pStream  The stream to write to; the caller opens and closes the block.
+     * @param[in] stream  The stream to write to; the caller opens and closes the block.
      */
-    void writeToStream(FIFFLIB::FiffStream* p_pStream);
+    void writeToStream(FIFFLIB::FiffStream& stream);
 
     //=========================================================================================================
     // FsSurface geometry const methods

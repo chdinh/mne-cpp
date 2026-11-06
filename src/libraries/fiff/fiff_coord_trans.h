@@ -455,9 +455,9 @@ public:
     /**
      * @brief Writes the transformation to a FIFF stream.
      *
-     * @param[in] p_pStream   Pointer to the FIFF stream to write to.
+     * @param[in] stream   Pointer to the FIFF stream to write to.
      */
-    void writeToStream(FiffStream* p_pStream);
+    void writeToStream(FiffStream& stream);
 
     //=========================================================================================================
     /**
@@ -519,7 +519,7 @@ public:
      *
      * @return The coordinate transform, or an empty transform if not found.
      */
-    static FiffCoordTrans readTransformFromNode(FiffStream::SPtr& stream,
+    static FiffCoordTrans readTransformFromNode(FiffStream& stream,
                                                 const FiffDirNode::SPtr& node,
                                                 int from, int to);
 

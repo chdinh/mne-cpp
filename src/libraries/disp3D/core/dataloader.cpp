@@ -335,7 +335,7 @@ MNESourceSpaces DataLoader::loadSourceSpace(const QString& fwdPath)
         return {};
     }
 
-    if (!MNESourceSpaces::readFromStream(stream, true, srcSpace)) {
+    if (!MNESourceSpaces::readFromStream(*stream, true, srcSpace)) {
         qWarning() << "DataLoader: Failed to read source space from" << fwdPath;
         return {};
     }

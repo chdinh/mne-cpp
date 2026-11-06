@@ -230,7 +230,7 @@ void TestMneSourceSpaceOpsPython::writeRoundTrip()
         FiffStream::SPtr stream = FiffStream::start_file(file);
         QVERIFY(stream);
         for (const auto& s : m_spaces)
-            QCOMPARE(s->writeToStream(stream, false), 0);
+            QCOMPARE(s->writeToStream(*stream, false), 0);
         stream->end_file();
     }
 
@@ -256,7 +256,7 @@ void TestMneSourceSpaceOpsPython::writeRoundTrip()
         QFile file(selPath);
         FiffStream::SPtr stream = FiffStream::start_file(file);
         QVERIFY(stream);
-        QCOMPARE(m_spaces[0]->writeToStream(stream, true), 0);
+        QCOMPARE(m_spaces[0]->writeToStream(*stream, true), 0);
         stream->end_file();
     }
     std::vector<std::unique_ptr<MNESourceSpace>> sel;
@@ -308,7 +308,7 @@ void TestMneSourceSpaceOpsPython::volumeNeighborsRoundTrip()
         QFile file(selected ? selPath : path);
         FiffStream::SPtr stream = FiffStream::start_file(file);
         QVERIFY(stream);
-        QCOMPARE(vol->writeToStream(stream, selected), 0);
+        QCOMPARE(vol->writeToStream(*stream, selected), 0);
         stream->end_file();
     }
 
@@ -472,7 +472,7 @@ void TestMneSourceSpaceOpsPython::readsPythonVolumeSpace()
         QFile file(path);
         FiffStream::SPtr stream = FiffStream::start_file(file);
         QVERIFY(stream);
-        QCOMPARE(v.writeToStream(stream, false), 0);
+        QCOMPARE(v.writeToStream(*stream, false), 0);
         stream->end_file();
     }
     std::vector<std::unique_ptr<MNESourceSpace>> back;
@@ -521,7 +521,7 @@ void TestMneSourceSpaceOpsPython::bemNormals_matchPython()
     QFile file(QStringLiteral(MNE_SOURCE_SPACE_DATA_DIR "/ico2-bem.fif"));
     FiffStream::SPtr stream(new FiffStream(&file));
     MNEBem bem;
-    QVERIFY(MNEBem::readFromStream(stream, addGeom, bem));
+    QVERIFY(MNEBem::readFromStream(*stream, addGeom, bem));
     QCOMPARE(bem.size(), 2);
 
     // mne.read_bem_surfaces(patch_stats=addGeom): normals from the triangles when

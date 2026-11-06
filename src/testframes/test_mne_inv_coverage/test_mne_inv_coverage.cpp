@@ -218,7 +218,7 @@ void TestMneInvCoverage::testReadBemFromFile()
     QFile file(bemPath());
     FiffStream::SPtr stream(new FiffStream(&file));
     QVERIFY(stream->open());
-    QVERIFY(MNEBem::readFromStream(stream, true, bem));
+    QVERIFY(MNEBem::readFromStream(*stream, true, bem));
     stream->close();
 
     QVERIFY(bem.size() > 0);
@@ -233,7 +233,7 @@ void TestMneInvCoverage::testBemSurfaceProperties()
     QFile file(bemPath());
     FiffStream::SPtr stream(new FiffStream(&file));
     QVERIFY(stream->open());
-    QVERIFY(MNEBem::readFromStream(stream, true, bem));
+    QVERIFY(MNEBem::readFromStream(*stream, true, bem));
     stream->close();
 
     const MNEBemSurface& surf = bem[0];
@@ -254,7 +254,7 @@ void TestMneInvCoverage::testBemSurfaceNormals()
     QFile file(bemPath());
     FiffStream::SPtr stream(new FiffStream(&file));
     QVERIFY(stream->open());
-    QVERIFY(MNEBem::readFromStream(stream, true, bem));
+    QVERIFY(MNEBem::readFromStream(*stream, true, bem));
     stream->close();
 
     const MNEBemSurface& surf = bem[0];
@@ -321,7 +321,7 @@ void TestMneInvCoverage::testReadBemRejectsDamagedSurfaces()
         if (!stream->open())
             return -1;
         MNEBem bem;
-        const bool ok = MNEBem::readFromStream(stream, true, bem);
+        const bool ok = MNEBem::readFromStream(*stream, true, bem);
         return ok ? static_cast<int>(bem.size()) : -static_cast<int>(bem.size()) - 2;
     };
     QCOMPARE(damaged([](MNEBemSurface&) {}), 2);
@@ -344,7 +344,7 @@ void TestMneInvCoverage::testSourceSpaceFromFile()
     QVERIFY(stream->open());
 
     MNESourceSpaces srcSpaces;
-    QVERIFY(MNESourceSpaces::readFromStream(stream, true, srcSpaces));
+    QVERIFY(MNESourceSpaces::readFromStream(*stream, true, srcSpaces));
     stream->close();
 
     QVERIFY(srcSpaces.size() >= 2); // left + right hemispheres
@@ -360,7 +360,7 @@ void TestMneInvCoverage::testSourceSpaceVertexCount()
     QVERIFY(stream->open());
 
     MNESourceSpaces srcSpaces;
-    QVERIFY(MNESourceSpaces::readFromStream(stream, true, srcSpaces));
+    QVERIFY(MNESourceSpaces::readFromStream(*stream, true, srcSpaces));
     stream->close();
 
     for (int i = 0; i < srcSpaces.size(); i++) {
@@ -382,7 +382,7 @@ void TestMneInvCoverage::testSourceSpaceHemispheres()
     QVERIFY(stream->open());
 
     MNESourceSpaces srcSpaces;
-    QVERIFY(MNESourceSpaces::readFromStream(stream, true, srcSpaces));
+    QVERIFY(MNESourceSpaces::readFromStream(*stream, true, srcSpaces));
     stream->close();
 
     if (srcSpaces.size() >= 2) {

@@ -92,7 +92,7 @@ FiffDigPointSet::FiffDigPointSet(QList<FIFFLIB::FiffDigPoint> pointList)
 FiffDigPointSet::FiffDigPointSet(const std::filesystem::path& path)
 {
     FiffStream::SPtr t_pStream = FiffStream::open(path);
-    if (!t_pStream || !FiffDigPointSet::readFromStream(t_pStream, *this)) {
+    if (!t_pStream || !FiffDigPointSet::readFromStream(*t_pStream, *this)) {
         throw std::runtime_error("Could not read the FiffDigPointSet");
     }
 
@@ -107,17 +107,17 @@ FiffDigPointSet::~FiffDigPointSet()
 
 //=============================================================================================================
 
-bool FiffDigPointSet::readFromStream(FiffStream::SPtr& p_pStream, FiffDigPointSet& p_Dig)
+bool FiffDigPointSet::readFromStream(FiffStream& stream, FiffDigPointSet& p_Dig)
 {
     //
     //   Open the file, create directory
     //
     bool open_here = false;
 
-    if (!p_pStream->isOpen()) {
-        QString t_sFileName = p_pStream->streamName();
+    if (!stream.isOpen()) {
+        QString t_sFileName = stream.streamName();
 
-        if (!p_pStream->open())
+        if (!stream.open())
             return false;
 
         qInfo("Opening header data %s...\n", t_sFileName.toUtf8().constData());
@@ -128,7 +128,7 @@ bool FiffDigPointSet::readFromStream(FiffStream::SPtr& p_pStream, FiffDigPointSe
     //
     //   Read the measurement info
     //
-    //read_hpi_info(p_pStream,p_Tree, info);
+    //read_hpi_info(stream,p_Tree, info);
     fiff_int_t kind = -1;
     fiff_int_t pos = -1;
     FiffTag::UPtr t_pTag;
@@ -136,7 +136,7 @@ bool FiffDigPointSet::readFromStream(FiffStream::SPtr& p_pStream, FiffDigPointSe
     //
     //   Locate the Electrodes
     //
-    QList<FiffDirNode::SPtr> isotrak = p_pStream->dirtree()->dir_tree_find(FIFFB_ISOTRAK);
+    QList<FiffDirNode::SPtr> isotrak = stream.dirtree()->dir_tree_find(FIFFB_ISOTRAK);
 
     fiff_int_t coord_frame = FIFFV_COORD_HEAD;
     qint32 k = 0;
@@ -146,11 +146,11 @@ bool FiffDigPointSet::readFromStream(FiffStream::SPtr& p_pStream, FiffDigPointSe
             kind = isotrak[0]->dir[k]->kind;
             pos = isotrak[0]->dir[k]->pos;
             if (kind == FIFF_DIG_POINT) {
-                p_pStream->read_tag(t_pTag, pos);
+                stream.read_tag(t_pTag, pos);
                 p_Dig.m_qListDigPoint.append(t_pTag->toDigPoint());
             } else if (kind == FIFF_MNE_COORD_FRAME) {
                 // Applies to every point of the block, as mne's _read_dig_fif
-                p_pStream->read_tag(t_pTag, pos);
+                stream.read_tag(t_pTag, pos);
                 coord_frame = *t_pTag->toInt();
             }
         }
@@ -163,7 +163,7 @@ bool FiffDigPointSet::readFromStream(FiffStream::SPtr& p_pStream, FiffDigPointSe
     //   All kinds of auxliary stuff
     //
     if (open_here) {
-        p_pStream->close();
+        stream.close();
     }
     return true;
 }
@@ -611,7 +611,7 @@ bool FiffDigPointSet::write(const std::filesystem::path& path, std::string* erro
     if (!t_pStream) {
         return fail("Cannot open '" + UTILSLIB::utf8FromPath(path) + "' for writing.");
     }
-    this->writeToStream(t_pStream.data());
+    this->writeToStream(*t_pStream);
     t_pStream->end_file();
     t_pStream->close();
     return true;
@@ -619,20 +619,20 @@ bool FiffDigPointSet::write(const std::filesystem::path& path, std::string* erro
 
 //=============================================================================================================
 
-void FiffDigPointSet::writeToStream(FiffStream* p_pStream)
+void FiffDigPointSet::writeToStream(FiffStream& stream)
 {
-    p_pStream->start_block(FIFFB_MEAS);
-    p_pStream->start_block(FIFFB_MEAS_INFO);
-    p_pStream->start_block(FIFFB_ISOTRAK);
+    stream.start_block(FIFFB_MEAS);
+    stream.start_block(FIFFB_MEAS_INFO);
+    stream.start_block(FIFFB_ISOTRAK);
 
     for (qint32 h = 0; h < m_qListDigPoint.size(); ++h) {
-        p_pStream->write_dig_point(m_qListDigPoint[h]);
+        stream.write_dig_point(m_qListDigPoint[h]);
     }
 
     qInfo("\t%lld digitizer points written\n", static_cast<long long>(m_qListDigPoint.size()));
-    p_pStream->end_block(FIFFB_ISOTRAK);
-    p_pStream->end_block(FIFFB_MEAS_INFO);
-    p_pStream->end_block(FIFFB_MEAS);
+    stream.end_block(FIFFB_ISOTRAK);
+    stream.end_block(FIFFB_MEAS_INFO);
+    stream.end_block(FIFFB_MEAS);
 }
 
 //=============================================================================================================

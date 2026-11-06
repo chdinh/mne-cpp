@@ -513,7 +513,7 @@ void TestFiffIoEvokedInfo::fiffInfo_writeToStream()
 
     FiffStream::SPtr pStream = FiffStream::start_file(outFile);
     pStream->start_block(FIFFB_MEAS);
-    raw.info.writeToStream(pStream.data());
+    raw.info.writeToStream(*pStream);
     pStream->end_block(FIFFB_MEAS);
     pStream->end_file();
     outFile.close();

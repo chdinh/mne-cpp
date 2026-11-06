@@ -257,7 +257,7 @@ int MNEProjOp::project_vector(Eigen::Ref<Eigen::VectorXf> vec, bool do_complemen
 
 //=============================================================================================================
 
-std::unique_ptr<MNEProjOp> MNEProjOp::read_from_node(FiffStream::SPtr& stream, const FiffDirNode::SPtr& start)
+std::unique_ptr<MNEProjOp> MNEProjOp::read_from_node(FiffStream& stream, const FiffDirNode::SPtr& start)
 /*
      * Load all the linear projection data
      */
@@ -275,13 +275,8 @@ std::unique_ptr<MNEProjOp> MNEProjOp::read_from_node(FiffStream::SPtr& stream, c
     int item_active;
     FiffTag::UPtr t_pTag;
 
-    if (!stream) {
-        qCritical("File not open read_from_node");
-        return nullptr;
-    }
-
     if (!start || start->isEmpty())
-        start_node = stream->dirtree();
+        start_node = stream.dirtree();
     else
         start_node = start;
 
@@ -410,7 +405,7 @@ std::unique_ptr<MNEProjOp> MNEProjOp::read(const QString& name)
         return nullptr;
 
     FiffDirNode::SPtr t_default;
-    auto res = read_from_node(stream, t_default);
+    auto res = read_from_node(*stream, t_default);
 
     stream->close();
 

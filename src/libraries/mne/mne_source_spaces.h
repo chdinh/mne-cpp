@@ -193,13 +193,13 @@ public:
      *
      * Reads source spaces from a fif file
      *
-     * @param[in, out] p_pStream         The opened fif file.
+     * @param[in, out] stream         The opened fif file.
      * @param[in] add_geom          Add geometry information to the source spaces.
      * @param[in, out] p_SourceSpace    The read source spaces.
      *
      * @return true if succeeded, false otherwise.
      */
-    static bool readFromStream(FIFFLIB::FiffStream::SPtr& p_pStream,
+    static bool readFromStream(FIFFLIB::FiffStream& stream,
                                bool add_geom,
                                MNESourceSpaces& p_SourceSpace);
 
@@ -235,9 +235,9 @@ public:
      *
      * Write the source spaces to a FIF stream
      *
-     * @param[in] p_pStream  The stream to write to.
+     * @param[in] stream  The stream to write to.
      */
-    void writeToStream(FIFFLIB::FiffStream* p_pStream);
+    void writeToStream(FIFFLIB::FiffStream& stream);
 
     //=========================================================================================================
     /**
@@ -356,13 +356,13 @@ private:
      *
      * Reads a single source space (hemisphere)
      *
-     * @param[in] p_pStream         The opened fif file.
+     * @param[in] stream         The opened fif file.
      * @param[in] p_Tree            Search for the source space here.
      * @param[in, out] p_Hemisphere    The read source space (hemisphere).
      *
      * @return true if succeeded, false otherwise.
      */
-    static bool read_source_space(FIFFLIB::FiffStream::SPtr& p_pStream,
+    static bool read_source_space(FIFFLIB::FiffStream& stream,
                                   const FIFFLIB::FiffDirNode::SPtr& p_Tree,
                                   MNEHemisphere& p_Hemisphere);
 

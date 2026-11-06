@@ -243,7 +243,7 @@ const QString& FwdBemModel::fwd_bem_explain_method(int method)
 
 //=============================================================================================================
 
-int FwdBemModel::get_int(FiffStream::SPtr& stream, const FiffDirNode::SPtr& node, int what, int* res)
+int FwdBemModel::get_int(FiffStream& stream, const FiffDirNode::SPtr& node, int what, int* res)
 /*
      * Wrapper to get int's
      */
@@ -393,7 +393,7 @@ int FwdBemModel::fwd_bem_load_solution(const QString& name, int bemMethod)
     /*
         * Approximation method
         */
-    if (get_int(stream, bem_node, FIFF_BEM_APPROX, &method) != OK) {
+    if (get_int(*stream, bem_node, FIFF_BEM_APPROX, &method) != OK) {
         stream->close();
         return NOT_FOUND;
     }
@@ -414,7 +414,7 @@ int FwdBemModel::fwd_bem_load_solution(const QString& name, int bemMethod)
     {
         int dim, k;
 
-        if (!bem_node->find_tag(stream, FIFF_BEM_POT_SOLUTION, t_pTag)) {
+        if (!bem_node->find_tag(*stream, FIFF_BEM_POT_SOLUTION, t_pTag)) {
             stream->close();
             return FAIL;
         }
@@ -1157,7 +1157,7 @@ int FwdBemModel::fwd_bem_save_model(const QString& name) const
     for (int k = 0; k < nsurf; ++k) {
         surfs[k]->sigma = sigma[k];
         stream->start_block(FIFFB_BEM_SURF);
-        surfs[k]->writeToStream(stream.data());
+        surfs[k]->writeToStream(*stream);
         stream->end_block(FIFFB_BEM_SURF);
     }
     if (solution.size() > 0) {

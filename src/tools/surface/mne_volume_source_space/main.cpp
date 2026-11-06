@@ -159,7 +159,7 @@ int main(int argc, char* argv[])
     }
     outStream->start_block(FIFFB_MNE);
     outStream->start_block(FIFFB_MNE_SOURCE_SPACE);
-    sp->writeToStream(outStream, false);
+    sp->writeToStream(*outStream, false);
     outStream->end_block(FIFFB_MNE_SOURCE_SPACE);
     outStream->end_block(FIFFB_MNE);
     outStream->end_file();

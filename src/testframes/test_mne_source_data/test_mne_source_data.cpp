@@ -86,7 +86,7 @@ private slots:
         MNESourceSpaces srcSpace;
         FiffStream::SPtr srcStream(new FiffStream(&file));
         srcStream->open();
-        QVERIFY(MNESourceSpaces::readFromStream(srcStream, false, srcSpace));
+        QVERIFY(MNESourceSpaces::readFromStream(*srcStream, false, srcSpace));
 
         QVERIFY(srcSpace.size() > 0);
 
@@ -115,7 +115,7 @@ private slots:
         MNESourceSpaces srcSpace;
         FiffStream::SPtr srcStream2(new FiffStream(&file));
         srcStream2->open();
-        MNESourceSpaces::readFromStream(srcStream2, false, srcSpace);
+        MNESourceSpaces::readFromStream(*srcStream2, false, srcSpace);
 
         // Left hemisphere
         auto& lh = srcSpace[0];
@@ -146,7 +146,7 @@ private slots:
         MNESourceSpaces srcSpace;
         FiffStream::SPtr srcStream3(new FiffStream(&file));
         srcStream3->open();
-        MNESourceSpaces::readFromStream(srcStream3, false, srcSpace);
+        MNESourceSpaces::readFromStream(*srcStream3, false, srcSpace);
 
         // Copy
         MNESourceSpaces copy(srcSpace);
@@ -413,7 +413,7 @@ private slots:
         MNESourceSpaces srcSpace;
         FiffStream::SPtr srcStream4(new FiffStream(&file));
         srcStream4->open();
-        MNESourceSpaces::readFromStream(srcStream4, false, srcSpace);
+        MNESourceSpaces::readFromStream(*srcStream4, false, srcSpace);
 
         int totalVerts = 0;
         VectorXi allVertno(0);

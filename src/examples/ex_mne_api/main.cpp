@@ -199,7 +199,7 @@ int main(int argc, char* argv[])
     FiffStream::SPtr stream(new FiffStream(&srcFile));
     MNESourceSpaces src;
     stream->open();
-    MNESourceSpaces::readFromStream(stream, true, src); // add_geom: normals, triangle data and patches
+    MNESourceSpaces::readFromStream(*stream, true, src); // add_geom: normals, triangle data and patches
     stream->close();
     const auto& lh = dynamic_cast<const MNEHemisphere&>(src[0]);
     QList<VectorXi> vertno = src.get_vertno(); // used vertices per hemisphere

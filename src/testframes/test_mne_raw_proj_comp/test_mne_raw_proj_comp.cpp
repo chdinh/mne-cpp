@@ -765,7 +765,7 @@ void TestMneRawProjComp::rawInfo_getMeasInfo()
     FiffCoordTrans trans;
     FiffTime start_time;
 
-    int result = MNERawInfo::get_meas_info(stream, rawNode, id, &nchan,
+    int result = MNERawInfo::get_meas_info(*stream, rawNode, id, &nchan,
                                            &sfreq, &highpass, &lowpass,
                                            chp, trans, start_time);
     QCOMPARE(result, 0);

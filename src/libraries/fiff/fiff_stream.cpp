@@ -448,7 +448,7 @@ bool FiffStream::open(QIODevice::OpenModeFlag mode)
     /*
      * Try to open...
      */
-    if (m_device && !m_device->open(mode)) {
+    if (m_device ? !m_device->open(mode) : !reopen()) {
         qCritical("Cannot open %s\n", t_sFileName.toUtf8().constData()); //consider throw
         return false;
     }
@@ -606,7 +606,7 @@ StringList FiffStream::read_bad_channels(const FiffDirNode::SPtr& p_Node)
     StringList bads;
 
     if (node.size() > 0)
-        if (node[0]->find_tag(this, FIFF_MNE_CH_NAME_LIST, t_pTag))
+        if (node[0]->find_tag(*this, FIFF_MNE_CH_NAME_LIST, t_pTag))
             bads = split_name_list(t_pTag->toString());
 
     return bads;
@@ -901,31 +901,31 @@ bool FiffStream::read_cov(const FiffDirNode::SPtr& p_Node, fiff_int_t cov_kind, 
     VectorXd cov_sparse;
     StringList bads;
     for (p = 0; p < covs.size(); ++p) {
-        success = covs[p]->find_tag(this, FIFF_MNE_COV_KIND, tag);
+        success = covs[p]->find_tag(*this, FIFF_MNE_COV_KIND, tag);
         if (success && *tag->toInt() == cov_kind) {
             FiffDirNode::SPtr current = covs[p];
             //
             //   Find all the necessary data
             //
-            if (!current->find_tag(this, FIFF_MNE_COV_DIM, tag)) {
+            if (!current->find_tag(*this, FIFF_MNE_COV_DIM, tag)) {
                 qWarning("Covariance matrix dimension not found.\n");
                 return false;
             }
             dim = *tag->toInt();
-            if (!current->find_tag(this, FIFF_MNE_COV_NFREE, tag))
+            if (!current->find_tag(*this, FIFF_MNE_COV_NFREE, tag))
                 nfree = -1;
             else
                 nfree = *tag->toInt();
 
-            if (current->find_tag(this, FIFF_MNE_ROW_NAMES, tag)) {
+            if (current->find_tag(*this, FIFF_MNE_ROW_NAMES, tag)) {
                 names = FiffStream::split_name_list(tag->toString());
                 if (static_cast<int>(names.size()) != dim) {
                     qWarning("Number of names does not match covariance matrix dimension\n");
                     return false;
                 }
             }
-            if (!current->find_tag(this, FIFF_MNE_COV, tag)) {
-                if (!current->find_tag(this, FIFF_MNE_COV_DIAG, tag)) {
+            if (!current->find_tag(*this, FIFF_MNE_COV, tag)) {
+                if (!current->find_tag(*this, FIFF_MNE_COV_DIAG, tag)) {
                     qWarning("No covariance matrix data found\n");
                     return false;
                 } else {
@@ -1018,7 +1018,7 @@ bool FiffStream::read_cov(const FiffDirNode::SPtr& p_Node, fiff_int_t cov_kind, 
             //
             FiffTag::UPtr tag1;
             FiffTag::UPtr tag2;
-            if (current->find_tag(this, FIFF_MNE_COV_EIGENVALUES, tag1) && current->find_tag(this, FIFF_MNE_COV_EIGENVECTORS, tag2)) {
+            if (current->find_tag(*this, FIFF_MNE_COV_EIGENVALUES, tag1) && current->find_tag(*this, FIFF_MNE_COV_EIGENVECTORS, tag2)) {
                 eig = VectorXd(Map<const VectorXd>(tag1->toDouble(), dim));
                 eigvec = tag2->toFloatMatrix().cast<double>();
                 eigvec.transposeInPlace();
@@ -1079,7 +1079,7 @@ QList<FiffCtfComp> FiffStream::read_ctf_comp(const FiffDirNode::SPtr& p_Node, co
         //   Read the data we need
         //
         FiffNamedMatrix::SDPtr mat(new FiffNamedMatrix());
-        this->read_named_matrix(node, FIFF_MNE_CTF_COMP_DATA, *mat.data());
+        this->read_named_matrix(node, FIFF_MNE_CTF_COMP_DATA, *mat);
         for (p = 0; p < node->nent(); ++p) {
             kind = node->dir[p]->kind;
             pos = node->dir[p]->pos;
@@ -1252,7 +1252,7 @@ bool FiffStream::read_meas_info_base(const FiffDirNode::SPtr& p_Node, FiffInfoBa
     //
     //   Get the MEG device <-> head coordinate transformation
     //
-    if (parent_meg[0]->find_tag(this, FIFF_COORD_TRANS, t_pTag)) {
+    if (parent_meg[0]->find_tag(*this, FIFF_COORD_TRANS, t_pTag)) {
         cand = t_pTag->toCoordTrans();
         if (cand.from == FIFFV_COORD_DEVICE && cand.to == FIFFV_COORD_HEAD)
             p_InfoForward.dev_head_t = cand;
@@ -1683,7 +1683,7 @@ bool FiffStream::read_named_matrix(const FiffDirNode::SPtr& p_Node, fiff_int_t m
     //
     //   Read everything we need
     //
-    if (!node->find_tag(this, matkind, t_pTag)) {
+    if (!node->find_tag(*this, matkind, t_pTag)) {
         qWarning("Matrix data missing.\n");
         return false;
     } else {
@@ -1695,23 +1695,23 @@ bool FiffStream::read_named_matrix(const FiffDirNode::SPtr& p_Node, fiff_int_t m
     mat.nrow = mat.data.rows();
     mat.ncol = mat.data.cols();
 
-    if (node->find_tag(this, FIFF_MNE_NROW, t_pTag))
+    if (node->find_tag(*this, FIFF_MNE_NROW, t_pTag))
         if (*t_pTag->toInt() != mat.nrow) {
             qWarning("Number of rows in matrix data and FIFF_MNE_NROW tag do not match");
             return false;
         }
-    if (node->find_tag(this, FIFF_MNE_NCOL, t_pTag))
+    if (node->find_tag(*this, FIFF_MNE_NCOL, t_pTag))
         if (*t_pTag->toInt() != mat.ncol) {
             qWarning("Number of columns in matrix data and FIFF_MNE_NCOL tag do not match");
             return false;
         }
 
     std::string row_names;
-    if (node->find_tag(this, FIFF_MNE_ROW_NAMES, t_pTag))
+    if (node->find_tag(*this, FIFF_MNE_ROW_NAMES, t_pTag))
         row_names = t_pTag->toString();
 
     std::string col_names;
-    if (node->find_tag(this, FIFF_MNE_COL_NAMES, t_pTag))
+    if (node->find_tag(*this, FIFF_MNE_COL_NAMES, t_pTag))
         col_names = t_pTag->toString();
 
     //
@@ -1747,7 +1747,7 @@ QList<FiffProj> FiffStream::read_proj(const FiffDirNode::SPtr& p_Node)
         return projdata;
 
     FiffTag::UPtr t_pTag;
-    t_qListNodes[0]->find_tag(this, FIFF_NCHAN, t_pTag);
+    t_qListNodes[0]->find_tag(*this, FIFF_NCHAN, t_pTag);
     fiff_int_t global_nchan = 0;
     if (t_pTag)
         global_nchan = *t_pTag->toInt();
@@ -1759,18 +1759,18 @@ QList<FiffProj> FiffStream::read_proj(const FiffDirNode::SPtr& p_Node)
         //   Find all desired tags in one item
         //
         FiffDirNode::SPtr t_pFiffDirTreeItem = t_qListItems[i];
-        t_pFiffDirTreeItem->find_tag(this, FIFF_NCHAN, t_pTag);
+        t_pFiffDirTreeItem->find_tag(*this, FIFF_NCHAN, t_pTag);
         if (t_pTag)
             nchan = *t_pTag->toInt();
         else
             nchan = global_nchan;
 
-        t_pFiffDirTreeItem->find_tag(this, FIFF_DESCRIPTION, t_pTag);
+        t_pFiffDirTreeItem->find_tag(*this, FIFF_DESCRIPTION, t_pTag);
         QString desc; // maybe, in some cases this has to be a struct.
         if (t_pTag) {
             desc = QString::fromStdString(t_pTag->toString());
         } else {
-            t_pFiffDirTreeItem->find_tag(this, FIFF_NAME, t_pTag);
+            t_pFiffDirTreeItem->find_tag(*this, FIFF_NAME, t_pTag);
             if (t_pTag)
                 desc = QString::fromStdString(t_pTag->toString());
             else {
@@ -1789,7 +1789,7 @@ QList<FiffProj> FiffStream::read_proj(const FiffDirNode::SPtr& p_Node)
         //                qCritical("Projection item channel list missing");
         //                return projdata;
         //            }
-        t_pFiffDirTreeItem->find_tag(this, FIFF_PROJ_ITEM_KIND, t_pTag);
+        t_pFiffDirTreeItem->find_tag(*this, FIFF_PROJ_ITEM_KIND, t_pTag);
         fiff_int_t kind;
         if (t_pTag) {
             kind = *t_pTag->toInt();
@@ -1797,7 +1797,7 @@ QList<FiffProj> FiffStream::read_proj(const FiffDirNode::SPtr& p_Node)
             qWarning("Projection item kind missing");
             return projdata;
         }
-        t_pFiffDirTreeItem->find_tag(this, FIFF_PROJ_ITEM_NVEC, t_pTag);
+        t_pFiffDirTreeItem->find_tag(*this, FIFF_PROJ_ITEM_NVEC, t_pTag);
         fiff_int_t nvec;
         if (t_pTag) {
             nvec = *t_pTag->toInt();
@@ -1805,7 +1805,7 @@ QList<FiffProj> FiffStream::read_proj(const FiffDirNode::SPtr& p_Node)
             qWarning("Number of projection vectors not specified\n");
             return projdata;
         }
-        t_pFiffDirTreeItem->find_tag(this, FIFF_PROJ_ITEM_CH_NAME_LIST, t_pTag);
+        t_pFiffDirTreeItem->find_tag(*this, FIFF_PROJ_ITEM_CH_NAME_LIST, t_pTag);
         StringList names;
         if (t_pTag) {
             names = split_name_list(t_pTag->toString());
@@ -1813,7 +1813,7 @@ QList<FiffProj> FiffStream::read_proj(const FiffDirNode::SPtr& p_Node)
             qWarning("Projection item channel list missing\n");
             return projdata;
         }
-        t_pFiffDirTreeItem->find_tag(this, FIFF_PROJ_ITEM_VECTORS, t_pTag);
+        t_pFiffDirTreeItem->find_tag(*this, FIFF_PROJ_ITEM_VECTORS, t_pTag);
         MatrixXd data; // = nullptr;
         if (t_pTag) {
             data = t_pTag->toFloatMatrix().cast<double>();
@@ -1822,7 +1822,7 @@ QList<FiffProj> FiffStream::read_proj(const FiffDirNode::SPtr& p_Node)
             qWarning("Projection item data missing\n");
             return projdata;
         }
-        t_pFiffDirTreeItem->find_tag(this, FIFF_MNE_PROJ_ITEM_ACTIVE, t_pTag);
+        t_pFiffDirTreeItem->find_tag(*this, FIFF_MNE_PROJ_ITEM_ACTIVE, t_pTag);
         bool active;
         if (t_pTag)
             active = *t_pTag->toInt();
@@ -2433,7 +2433,7 @@ FiffStream::SPtr FiffStream::start_writing_raw(FiffStream::SPtr t_pStream,
 
         for (qint32 k = 0; k < blocks.size(); ++k) {
             QList<FiffDirNode::SPtr> nodes = t_pStream2->dirtree()->dir_tree_find(blocks[k]);
-            FiffDirNode::copy_tree(t_pStream2, t_pStream2->dirtree()->id, nodes, t_pStream);
+            FiffDirNode::copy_tree(*t_pStream2, t_pStream2->dirtree()->id, nodes, *t_pStream);
             if (blocks[k] == FIFFB_HPI_RESULT && nodes.size() > 0)
                 have_hpi_result = true;
 

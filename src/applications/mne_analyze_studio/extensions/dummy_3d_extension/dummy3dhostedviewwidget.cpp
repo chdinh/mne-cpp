@@ -360,7 +360,7 @@ bool Dummy3DHostedViewWidget::loadBemFile(const QString& filePath, QString* erro
 
     FIFFLIB::FiffStream::SPtr stream(new FIFFLIB::FiffStream(&file));
     MNELIB::MNEBem bem;
-    if (!MNELIB::MNEBem::readFromStream(stream, true, bem) || bem.isEmpty()) {
+    if (!MNELIB::MNEBem::readFromStream(*stream, true, bem) || bem.isEmpty()) {
         if (errorMessage) {
             *errorMessage = QString("Failed to load BEM surface set %1.").arg(filePath);
         }

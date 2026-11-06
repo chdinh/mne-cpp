@@ -393,19 +393,19 @@ std::unique_ptr<MNECTFCompDataSet> MNECTFCompDataSet::read(const QString& name)
         * Read each data set
         */
     for (k = 0; k < ncomp; k++) {
-        auto mat = MNENamedMatrix::read(stream, comps[k], FIFF_MNE_CTF_COMP_DATA);
+        auto mat = MNENamedMatrix::read(*stream, comps[k], FIFF_MNE_CTF_COMP_DATA);
         if (!mat) {
             stream->close();
             return nullptr;
         }
-        comps[k]->find_tag(stream, FIFF_MNE_CTF_COMP_KIND, t_pTag);
+        comps[k]->find_tag(*stream, FIFF_MNE_CTF_COMP_KIND, t_pTag);
         if (t_pTag) {
             kind = *t_pTag->toInt();
         } else {
             stream->close();
             return nullptr;
         }
-        comps[k]->find_tag(stream, FIFF_MNE_CTF_COMP_CALIBRATED, t_pTag);
+        comps[k]->find_tag(*stream, FIFF_MNE_CTF_COMP_CALIBRATED, t_pTag);
         if (t_pTag) {
             calibrated = *t_pTag->toInt();
         } else

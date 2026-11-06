@@ -167,9 +167,9 @@ public:
      *
      * Write the hemisphere to a FIF stream
      *
-     * @param[in] p_pStream  The stream to write to.
+     * @param[in] stream  The stream to write to.
      */
-    void writeToStream(FIFFLIB::FiffStream* p_pStream);
+    void writeToStream(FIFFLIB::FiffStream& stream);
 
     //=========================================================================================================
     /**

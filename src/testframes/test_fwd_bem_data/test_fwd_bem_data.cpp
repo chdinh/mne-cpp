@@ -313,7 +313,7 @@ private slots:
         MNESourceSpaces srcSpace;
         FiffStream::SPtr srcStream(new FiffStream(&file));
         srcStream->open();
-        QVERIFY(MNESourceSpaces::readFromStream(srcStream, false, srcSpace));
+        QVERIFY(MNESourceSpaces::readFromStream(*srcStream, false, srcSpace));
         QCOMPARE(srcSpace.size(), 2);
 
         // Check vertices consistency

@@ -203,7 +203,7 @@ public:
      * @return A populated projection operator (possibly with zero items),
      *         or NULL on error. Caller takes ownership.
      */
-    static std::unique_ptr<MNEProjOp> read_from_node(FIFFLIB::FiffStream::SPtr& stream,
+    static std::unique_ptr<MNEProjOp> read_from_node(FIFFLIB::FiffStream& stream,
                                                      const FIFFLIB::FiffDirNode::SPtr& start);
 
     /**

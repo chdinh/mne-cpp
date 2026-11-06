@@ -155,7 +155,7 @@ bool FiffCoordTrans::write(const std::filesystem::path& path)
         return false;
     }
     qInfo("Write coordinate transform in %s...\n", pStream->streamName().toUtf8().constData());
-    this->writeToStream(pStream.data());
+    this->writeToStream(*pStream);
     pStream->end_file();
     pStream->close();
     return true;
@@ -163,9 +163,9 @@ bool FiffCoordTrans::write(const std::filesystem::path& path)
 
 //=============================================================================================================
 
-void FiffCoordTrans::writeToStream(FiffStream* pStream)
+void FiffCoordTrans::writeToStream(FiffStream& pStream)
 {
-    pStream->write_coord_trans(*this);
+    pStream.write_coord_trans(*this);
 }
 
 //=============================================================================================================
@@ -603,7 +603,7 @@ FiffCoordTrans FiffCoordTrans::readFromTag(const FiffTag::UPtr& tag)
 
 //=============================================================================================================
 
-FiffCoordTrans FiffCoordTrans::readTransformFromNode(FiffStream::SPtr& stream,
+FiffCoordTrans FiffCoordTrans::readTransformFromNode(FiffStream& stream,
                                                      const FiffDirNode::SPtr& node,
                                                      int from, int to)
 {
@@ -618,7 +618,7 @@ FiffCoordTrans FiffCoordTrans::readTransformFromNode(FiffStream::SPtr& stream,
         if (entry->kind != FIFF_COORD_TRANS)
             continue;
 
-        if (!stream->read_tag(t_pTag, entry->pos))
+        if (!stream.read_tag(t_pTag, entry->pos))
             continue;
 
         FiffCoordTrans res = readFromTag(t_pTag);

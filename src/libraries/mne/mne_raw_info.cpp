@@ -122,7 +122,7 @@ FiffDirNode::SPtr MNERawInfo::find_maxshield(const FiffDirNode::SPtr& node)
 
 //=============================================================================================================
 
-int MNERawInfo::get_meas_info(FiffStream::SPtr& stream,
+int MNERawInfo::get_meas_info(FiffStream& stream,
                               FiffDirNode::SPtr& node,
                               std::unique_ptr<FiffId>& id,
                               int* nchan,
@@ -138,7 +138,7 @@ int MNERawInfo::get_meas_info(FiffStream::SPtr& stream,
 
 //=============================================================================================================
 
-int MNERawInfo::get_meas_info(FiffStream::SPtr& stream,
+int MNERawInfo::get_meas_info(FiffStream& stream,
                               FiffDirNode::SPtr& node,
                               std::unique_ptr<FiffId>& id,
                               int* nchan,
@@ -196,7 +196,7 @@ int MNERawInfo::get_meas_info(FiffStream::SPtr& stream,
         pos = meas_info->dir[k]->pos;
         switch (kind) {
             case FIFF_NCHAN:
-                if (!stream->read_tag(t_pTag, pos))
+                if (!stream.read_tag(t_pTag, pos))
                     return (-1);
                 *nchan = *t_pTag->toInt();
 
@@ -208,28 +208,28 @@ int MNERawInfo::get_meas_info(FiffStream::SPtr& stream,
                 break;
 
             case FIFF_SFREQ:
-                if (!stream->read_tag(t_pTag, pos))
+                if (!stream.read_tag(t_pTag, pos))
                     return (-1);
                 *sfreq = *t_pTag->toFloat();
                 to_find--;
                 break;
 
             case FIFF_LOWPASS:
-                if (!stream->read_tag(t_pTag, pos))
+                if (!stream.read_tag(t_pTag, pos))
                     return (-1);
                 *lowpass = *t_pTag->toFloat();
                 to_find--;
                 break;
 
             case FIFF_HIGHPASS:
-                if (!stream->read_tag(t_pTag, pos))
+                if (!stream.read_tag(t_pTag, pos))
                     return (-1);
                 *highpass = *t_pTag->toFloat();
                 to_find--;
                 break;
 
             case FIFF_CH_INFO:
-                if (!stream->read_tag(t_pTag, pos))
+                if (!stream.read_tag(t_pTag, pos))
                     return (-1);
 
                 this_ch = t_pTag->toChInfo();
@@ -242,7 +242,7 @@ int MNERawInfo::get_meas_info(FiffStream::SPtr& stream,
                 break;
 
             case FIFF_MEAS_DATE:
-                if (!stream->read_tag(t_pTag, pos))
+                if (!stream.read_tag(t_pTag, pos))
                     return (-1);
                 {
                     const FiffTime* pTime = reinterpret_cast<const FiffTime*>(t_pTag->data());
@@ -252,7 +252,7 @@ int MNERawInfo::get_meas_info(FiffStream::SPtr& stream,
                 break;
 
             case FIFF_COORD_TRANS:
-                if (!stream->read_tag(t_pTag, pos))
+                if (!stream.read_tag(t_pTag, pos))
                     return (-1);
                 t = FiffCoordTrans::readFromTag(t_pTag);
                 /*
@@ -273,7 +273,7 @@ int MNERawInfo::get_meas_info(FiffStream::SPtr& stream,
     if (hpi.size() > 0 && trans.isEmpty())
         for (k = 0; k < hpi[0]->nent(); k++)
             if (hpi[0]->dir[k]->kind == FIFF_COORD_TRANS) {
-                if (!stream->read_tag(t_pTag, hpi[0]->dir[k]->pos))
+                if (!stream.read_tag(t_pTag, hpi[0]->dir[k]->pos))
                     return (-1);
                 t = FiffCoordTrans::readFromTag(t_pTag);
                 if (t.from == FIFFV_COORD_DEVICE && t.to == FIFFV_COORD_HEAD) {
@@ -355,7 +355,7 @@ int MNERawInfo::load(const QString& name, int allow_maxshield, std::unique_ptr<M
     /*
        * Get the essential measurement information
        */
-    if (get_meas_info(stream,
+    if (get_meas_info(*stream,
                       raw,
                       id,
                       &nchan,

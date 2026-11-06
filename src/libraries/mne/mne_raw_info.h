@@ -163,7 +163,7 @@ public:
      *
      * @return 0 on success, -1 on failure.
      */
-    static int get_meas_info(FIFFLIB::FiffStream::SPtr& stream,
+    static int get_meas_info(FIFFLIB::FiffStream& stream,
                              FIFFLIB::FiffDirNode::SPtr& node,
                              std::unique_ptr<FIFFLIB::FiffId>& id,
                              int* nchan,
@@ -190,7 +190,7 @@ public:
      *
      * @return 0 on success, -1 on failure.
      */
-    static int get_meas_info(FIFFLIB::FiffStream::SPtr& stream,
+    static int get_meas_info(FIFFLIB::FiffStream& stream,
                              FIFFLIB::FiffDirNode::SPtr& node,
                              std::unique_ptr<FIFFLIB::FiffId>& id,
                              int* nchan,

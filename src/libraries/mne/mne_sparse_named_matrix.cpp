@@ -30,7 +30,7 @@ using namespace FIFFLIB;
 // DEFINE MEMBER METHODS
 //=============================================================================================================
 
-std::unique_ptr<MNESparseNamedMatrix> MNESparseNamedMatrix::read(FiffStream::SPtr& stream,
+std::unique_ptr<MNESparseNamedMatrix> MNESparseNamedMatrix::read(FiffStream& stream,
                                                                  const FiffDirNode::SPtr& node,
                                                                  int kind)
 {

@@ -196,7 +196,7 @@ QByteArray serverMeasInfo(const FiffInfo& info)
 {
     QByteArray block;
     FiffStream out(&block, QIODevice::WriteOnly);
-    info.writeToStream(&out);
+    info.writeToStream(out);
     return block;
 }
 

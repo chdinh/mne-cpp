@@ -431,7 +431,7 @@ QList<FiffDigPoint> HpiSettingsView::readDigitizersFromFile(const QString& fileN
     QFile t_fileDig(fileName);
     FIFFLIB::FiffStream::SPtr t_pStream(new FIFFLIB::FiffStream(&t_fileDig));
     FiffDigPointSet t_digSet;
-    if (!FiffDigPointSet::readFromStream(t_pStream, t_digSet) || t_digSet.size() == 0) {
+    if (!FiffDigPointSet::readFromStream(*t_pStream, t_digSet) || t_digSet.size() == 0) {
         return {};
     }
 

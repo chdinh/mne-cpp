@@ -142,12 +142,12 @@ public:
     /**
      * Reads FiffDigPointSet from a fif file
      *
-     * @param[in, out] p_Stream     The opened fif file.
+     * @param[in, out] stream     The opened fif file.
      * @param[in, out] p_Dig        The read digitizer point set.
      *
      * @return true if succeeded, false otherwise.
      */
-    static bool readFromStream(FiffStream::SPtr& p_Stream, FiffDigPointSet& p_Dig);
+    static bool readFromStream(FiffStream& stream, FiffDigPointSet& p_Dig);
 
     //=========================================================================================================
     /**
@@ -297,9 +297,9 @@ public:
     /**
      * Writes the FiffDigPointSet to a FIFF stream.
      *
-     * @param[in] p_pStream   Pointer to the FIFF stream to write to.
+     * @param[in] stream   Pointer to the FIFF stream to write to.
      */
-    void writeToStream(FiffStream* p_pStream);
+    void writeToStream(FiffStream& stream);
 
     //=========================================================================================================
     /**

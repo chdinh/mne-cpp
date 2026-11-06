@@ -409,7 +409,7 @@ std::unique_ptr<MNESurface> MNESurface::read_bem_surface(const QString& name, in
     bems = stream->dirtree()->dir_tree_find(FIFFB_BEM);
     if (bems.size() > 0) {
         node = bems[0];
-        if (node->find_tag(stream, FIFF_BEM_COORD_FRAME, t_pTag)) {
+        if (node->find_tag(*stream, FIFF_BEM_COORD_FRAME, t_pTag)) {
             coord_frame = *t_pTag->toInt();
         }
     }
@@ -422,7 +422,7 @@ std::unique_ptr<MNESurface> MNESurface::read_bem_surface(const QString& name, in
     if (which >= 0) {
         for (k = 0; k < surfs.size(); ++k) {
             node = surfs[k];
-            if (node->find_tag(stream, FIFF_BEM_SURF_ID, t_pTag)) {
+            if (node->find_tag(*stream, FIFF_BEM_SURF_ID, t_pTag)) {
                 id = *t_pTag->toInt();
                 if (id == which)
                     break;
@@ -436,40 +436,40 @@ std::unique_ptr<MNESurface> MNESurface::read_bem_surface(const QString& name, in
     } else
         node = surfs[0];
 
-    if (!node->find_tag(stream, FIFF_BEM_SURF_NNODE, t_pTag)) {
+    if (!node->find_tag(*stream, FIFF_BEM_SURF_NNODE, t_pTag)) {
         stream->close();
         return nullptr;
     }
     nnode = *t_pTag->toInt();
 
-    if (!node->find_tag(stream, FIFF_BEM_SURF_NTRI, t_pTag)) {
+    if (!node->find_tag(*stream, FIFF_BEM_SURF_NTRI, t_pTag)) {
         stream->close();
         return nullptr;
     }
     ntri_count = *t_pTag->toInt();
 
-    if (!node->find_tag(stream, FIFF_BEM_SURF_NODES, t_pTag)) {
+    if (!node->find_tag(*stream, FIFF_BEM_SURF_NODES, t_pTag)) {
         stream->close();
         return nullptr;
     }
     tmp_nodes = t_pTag->toFloatMatrix().transpose();
 
-    if (node->find_tag(stream, FIFF_BEM_SURF_NORMALS, t_pTag)) {
+    if (node->find_tag(*stream, FIFF_BEM_SURF_NORMALS, t_pTag)) {
         tmp_node_normals = t_pTag->toFloatMatrix().transpose();
     }
 
-    if (!node->find_tag(stream, FIFF_BEM_SURF_TRIANGLES, t_pTag)) {
+    if (!node->find_tag(*stream, FIFF_BEM_SURF_TRIANGLES, t_pTag)) {
         stream->close();
         return nullptr;
     }
     tmp_triangles = t_pTag->toIntMatrix().transpose();
 
-    if (node->find_tag(stream, FIFF_MNE_COORD_FRAME, t_pTag)) {
+    if (node->find_tag(*stream, FIFF_MNE_COORD_FRAME, t_pTag)) {
         coord_frame = *t_pTag->toInt();
-    } else if (node->find_tag(stream, FIFF_BEM_COORD_FRAME, t_pTag)) {
+    } else if (node->find_tag(*stream, FIFF_BEM_COORD_FRAME, t_pTag)) {
         coord_frame = *t_pTag->toInt();
     }
-    if (node->find_tag(stream, FIFF_BEM_SIGMA, t_pTag)) {
+    if (node->find_tag(*stream, FIFF_BEM_SIGMA, t_pTag)) {
         sigmaLocal = *t_pTag->toFloat();
     }
 
@@ -522,18 +522,18 @@ std::unique_ptr<MNESurface> MNESurface::read_bem_surface(const QString& name, in
 
 //=============================================================================================================
 
-void MNESurface::writeToStream(FiffStream* p_pStream)
+void MNESurface::writeToStream(FiffStream& stream)
 {
     if (this->id <= 0)
         this->id = FIFFV_MNE_SURF_UNKNOWN;
     if (this->sigma > 0.0)
-        p_pStream->write_float(FIFF_BEM_SIGMA, &this->sigma);
-    p_pStream->write_int(FIFF_BEM_SURF_ID, &this->id);
-    p_pStream->write_int(FIFF_MNE_COORD_FRAME, &this->coord_frame);
-    p_pStream->write_int(FIFF_BEM_SURF_NNODE, &this->np);
-    p_pStream->write_int(FIFF_BEM_SURF_NTRI, &this->ntri);
-    p_pStream->write_float_matrix(FIFF_BEM_SURF_NODES, Eigen::MatrixXf(this->rr));
+        stream.write_float(FIFF_BEM_SIGMA, &this->sigma);
+    stream.write_int(FIFF_BEM_SURF_ID, &this->id);
+    stream.write_int(FIFF_MNE_COORD_FRAME, &this->coord_frame);
+    stream.write_int(FIFF_BEM_SURF_NNODE, &this->np);
+    stream.write_int(FIFF_BEM_SURF_NTRI, &this->ntri);
+    stream.write_float_matrix(FIFF_BEM_SURF_NODES, Eigen::MatrixXf(this->rr));
     if (this->ntri > 0)
-        p_pStream->write_int_matrix(FIFF_BEM_SURF_TRIANGLES, Eigen::MatrixXi(this->itris.array() + 1));
-    p_pStream->write_float_matrix(FIFF_BEM_SURF_NORMALS, Eigen::MatrixXf(this->nn));
+        stream.write_int_matrix(FIFF_BEM_SURF_TRIANGLES, Eigen::MatrixXi(this->itris.array() + 1));
+    stream.write_float_matrix(FIFF_BEM_SURF_NORMALS, Eigen::MatrixXf(this->nn));
 }

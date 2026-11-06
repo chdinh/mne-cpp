@@ -268,9 +268,9 @@ public:
     /**
      * Writes the fiff information to a FIF stream.
      *
-     * @param[in] p_pStream  The stream to write to.
+     * @param[in] stream  The stream to write to.
      */
-    void writeToStream(FiffStream* p_pStream) const;
+    void writeToStream(FiffStream& stream) const;
 
     //=========================================================================================================
     /**

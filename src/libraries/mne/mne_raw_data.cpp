@@ -358,7 +358,7 @@ std::unique_ptr<FilterData> mne_create_filter_response(const MNEFilterDef& filte
 //============================= mne_raw_routines.c =============================
 
 int mne_read_raw_buffer_t( //fiffFile     in,        /* Input file */
-    FiffStream::SPtr& stream,
+    FiffStream& stream,
     const FiffDirEntry::SPtr& ent,         /* The directory entry to read */
     RowMajorMatrixXf& data,                /* Matrix [npick x nsamp] to fill */
     int nchan,                             /* Number of channels in the data */
@@ -391,7 +391,7 @@ int mne_read_raw_buffer_t( //fiffFile     in,        /* Input file */
 
     //    if (fiff_read_this_tag(in->fd,ent->pos,&tag) ==  FIFF_FAIL)
     //        goto bad;
-    if (!stream->read_tag(t_pTag, ent->pos))
+    if (!stream.read_tag(t_pTag, ent->pos))
         return FAIL;
 
     if (ent->type == FIFFT_FLOAT) {
@@ -443,7 +443,7 @@ int mne_read_raw_buffer_t( //fiffFile     in,        /* Input file */
 
 //============================= mne_process_bads.c =============================
 
-int mne_read_bad_channel_list_from_node(FiffStream::SPtr& stream,
+int mne_read_bad_channel_list_from_node(FiffStream& stream,
                                         const FiffDirNode::SPtr& pNode, StringList& listp, int& nlistp)
 {
     FiffDirNode::SPtr node, bad;
@@ -454,7 +454,7 @@ int mne_read_bad_channel_list_from_node(FiffStream::SPtr& stream,
     QString names;
 
     if (pNode->isEmpty())
-        node = stream->dirtree();
+        node = stream.dirtree();
     else
         node = pNode;
 
@@ -485,7 +485,7 @@ int mne_read_bad_channel_list(const QString& name, StringList& listp, int& nlist
     if (!stream->open())
         return FAIL;
 
-    res = mne_read_bad_channel_list_from_node(stream, stream->dirtree(), listp, nlistp);
+    res = mne_read_bad_channel_list_from_node(*stream, stream->dirtree(), listp, nlistp);
 
     stream->close();
 
@@ -675,7 +675,7 @@ int MNERawData::load_one_buffer(MNERawBufDef* buf)
     qDebug("Read buffer %d .. %d\n", buf->firsts, buf->lasts);
 #endif
 
-    if (mne_read_raw_buffer_t(stream,
+    if (mne_read_raw_buffer_t(*stream,
                               buf->ent,
                               buf->vals,
                               buf->nchan,

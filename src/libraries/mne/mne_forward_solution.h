@@ -505,13 +505,13 @@ private:
      *
      * Reads all interesting stuff for one forward solution
      *
-     * @param[in] p_pStream  The opened fif file to read from.
+     * @param[in] stream  The opened fif file to read from.
      * @param[in] p_Node     The forward solution node.
      * @param[out] one       The read forward solution.
      *
      * @return True if succeeded, false otherwise.
      */
-    static bool read_one(FIFFLIB::FiffStream::SPtr& p_pStream,
+    static bool read_one(FIFFLIB::FiffStream& stream,
                          const FIFFLIB::FiffDirNode::SPtr& p_Node,
                          MNEForwardSolution& one);
 

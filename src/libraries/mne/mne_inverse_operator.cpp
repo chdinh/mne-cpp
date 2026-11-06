@@ -938,7 +938,7 @@ bool MNEInverseOperator::read_inverse_operator(QIODevice& p_IODevice, MNEInverse
     //   Methods and source orientations
     //
     FiffTag::UPtr t_pTag;
-    if (!invs->find_tag(t_pStream, FIFF_MNE_INCLUDED_METHODS, t_pTag)) {
+    if (!invs->find_tag(*t_pStream, FIFF_MNE_INCLUDED_METHODS, t_pTag)) {
         qCritical("Modalities not found\n");
         return false;
     }
@@ -946,13 +946,13 @@ bool MNEInverseOperator::read_inverse_operator(QIODevice& p_IODevice, MNEInverse
     inv = MNEInverseOperator();
     inv.methods = *t_pTag->toInt();
     //
-    if (!invs->find_tag(t_pStream, FIFF_MNE_SOURCE_ORIENTATION, t_pTag)) {
+    if (!invs->find_tag(*t_pStream, FIFF_MNE_SOURCE_ORIENTATION, t_pTag)) {
         qCritical("Source orientation constraints not found\n");
         return false;
     }
     inv.source_ori = *t_pTag->toInt();
     //
-    if (!invs->find_tag(t_pStream, FIFF_MNE_SOURCE_SPACE_NPOINTS, t_pTag)) {
+    if (!invs->find_tag(*t_pStream, FIFF_MNE_SOURCE_SPACE_NPOINTS, t_pTag)) {
         qCritical("Number of sources not found\n");
         return false;
     }
@@ -961,7 +961,7 @@ bool MNEInverseOperator::read_inverse_operator(QIODevice& p_IODevice, MNEInverse
     //
     //   Coordinate frame
     //
-    if (!invs->find_tag(t_pStream, FIFF_MNE_COORD_FRAME, t_pTag)) {
+    if (!invs->find_tag(*t_pStream, FIFF_MNE_COORD_FRAME, t_pTag)) {
         qCritical("Coordinate frame tag not found\n");
         return false;
     }
@@ -970,14 +970,14 @@ bool MNEInverseOperator::read_inverse_operator(QIODevice& p_IODevice, MNEInverse
     //   Units of the source estimates. Optional: files written before this was
     //   recorded simply do not carry it, so a missing tag is not an error.
     //
-    if (invs->find_tag(t_pStream, FIFF_MNE_INVERSE_SOURCE_UNIT, t_pTag))
+    if (invs->find_tag(*t_pStream, FIFF_MNE_INVERSE_SOURCE_UNIT, t_pTag))
         inv.units = *t_pTag->toInt();
     else
         inv.units = -1;
     //
     //   The actual source orientation vectors
     //
-    if (!invs->find_tag(t_pStream, FIFF_MNE_INVERSE_SOURCE_ORIENTATIONS, t_pTag)) {
+    if (!invs->find_tag(*t_pStream, FIFF_MNE_INVERSE_SOURCE_ORIENTATIONS, t_pTag)) {
         qCritical("Source orientation information not found\n");
         return false;
     }
@@ -990,7 +990,7 @@ bool MNEInverseOperator::read_inverse_operator(QIODevice& p_IODevice, MNEInverse
     //   The SVD decomposition...
     //
     qInfo("\tReading inverse operator decomposition...");
-    if (!invs->find_tag(t_pStream, FIFF_MNE_INVERSE_SING, t_pTag)) {
+    if (!invs->find_tag(*t_pStream, FIFF_MNE_INVERSE_SING, t_pTag)) {
         qCritical("Singular values not found\n");
         return false;
     }
@@ -1055,7 +1055,7 @@ bool MNEInverseOperator::read_inverse_operator(QIODevice& p_IODevice, MNEInverse
     //
     //   Read the source spaces
     //
-    if (!MNESourceSpaces::readFromStream(t_pStream, false, inv.src)) {
+    if (!MNESourceSpaces::readFromStream(*t_pStream, false, inv.src)) {
         qCritical("\tError: Could not read the source spaces.\n");
         return false;
     }
@@ -1065,7 +1065,7 @@ bool MNEInverseOperator::read_inverse_operator(QIODevice& p_IODevice, MNEInverse
     //   Get the MRI <-> head coordinate transformation
     //
     FiffCoordTrans mri_head_t;
-    if (!parent_mri[0]->find_tag(t_pStream, FIFF_COORD_TRANS, t_pTag)) {
+    if (!parent_mri[0]->find_tag(*t_pStream, FIFF_COORD_TRANS, t_pTag)) {
         qCritical("MRI/head coordinate transformation not found\n");
         return false;
     } else {
@@ -1122,32 +1122,32 @@ bool MNEInverseOperator::write(QIODevice& p_IODevice)
         return false;
     }
     qInfo("Write inverse operator decomposition in %s...", t_pStream->streamName().toUtf8().constData());
-    this->writeToStream(t_pStream.data());
+    this->writeToStream(*t_pStream);
     t_pStream->end_file();
     return true;
 }
 
 //=============================================================================================================
 
-void MNEInverseOperator::writeToStream(FiffStream* p_pStream)
+void MNEInverseOperator::writeToStream(FiffStream& stream)
 {
-    p_pStream->start_block(FIFFB_MNE_INVERSE_SOLUTION);
+    stream.start_block(FIFFB_MNE_INVERSE_SOLUTION);
 
     qInfo("\tWriting inverse operator info...\n");
 
-    p_pStream->write_int(FIFF_MNE_INCLUDED_METHODS, &this->methods);
-    p_pStream->write_int(FIFF_MNE_SOURCE_ORIENTATION, &this->source_ori);
-    p_pStream->write_int(FIFF_MNE_SOURCE_SPACE_NPOINTS, &this->nsource);
-    p_pStream->write_int(FIFF_MNE_COORD_FRAME, &this->coord_frame);
+    stream.write_int(FIFF_MNE_INCLUDED_METHODS, &this->methods);
+    stream.write_int(FIFF_MNE_SOURCE_ORIENTATION, &this->source_ori);
+    stream.write_int(FIFF_MNE_SOURCE_SPACE_NPOINTS, &this->nsource);
+    stream.write_int(FIFF_MNE_COORD_FRAME, &this->coord_frame);
 
     // mne-python reads this to label the source estimates. It is optional
     // there, but omitting it leaves inv["units"] as None, so an operator that
     // travelled through MNE-CPP lost information the original file carried.
     if (this->units > 0)
-        p_pStream->write_int(FIFF_MNE_INVERSE_SOURCE_UNIT, &this->units);
-    p_pStream->write_float_matrix(FIFF_MNE_INVERSE_SOURCE_ORIENTATIONS, this->source_nn);
+        stream.write_int(FIFF_MNE_INVERSE_SOURCE_UNIT, &this->units);
+    stream.write_float_matrix(FIFF_MNE_INVERSE_SOURCE_ORIENTATIONS, this->source_nn);
     VectorXf tmp_sing = this->sing.cast<float>();
-    p_pStream->write_float(FIFF_MNE_INVERSE_SING, tmp_sing.data(), tmp_sing.size());
+    stream.write_float(FIFF_MNE_INVERSE_SING, tmp_sing.data(), tmp_sing.size());
 
     //
     //   The eigenleads and eigenfields
@@ -1155,59 +1155,59 @@ void MNEInverseOperator::writeToStream(FiffStream* p_pStream)
     if (this->eigen_leads_weighted) {
         FiffNamedMatrix tmpMatrix(*this->eigen_leads.data());
         tmpMatrix.transpose_named_matrix();
-        p_pStream->write_named_matrix(FIFF_MNE_INVERSE_LEADS_WEIGHTED, tmpMatrix);
+        stream.write_named_matrix(FIFF_MNE_INVERSE_LEADS_WEIGHTED, tmpMatrix);
     } else {
         FiffNamedMatrix tmpMatrix(*this->eigen_leads.data());
         tmpMatrix.transpose_named_matrix();
-        p_pStream->write_named_matrix(FIFF_MNE_INVERSE_LEADS, tmpMatrix);
+        stream.write_named_matrix(FIFF_MNE_INVERSE_LEADS, tmpMatrix);
     }
 
-    p_pStream->write_named_matrix(FIFF_MNE_INVERSE_FIELDS, *this->eigen_fields.data());
+    stream.write_named_matrix(FIFF_MNE_INVERSE_FIELDS, *this->eigen_fields.data());
     qInfo("\t[done]\n");
     //
     //   write the covariance matrices
     //
     qInfo("\tWriting noise covariance matrix.");
-    p_pStream->write_cov(*this->noise_cov.data());
+    stream.write_cov(*this->noise_cov.data());
 
     qInfo("\tWriting source covariance matrix.\n");
-    p_pStream->write_cov(*this->source_cov.data());
+    stream.write_cov(*this->source_cov.data());
     //
     //   write the various priors
     //
     qInfo("\tWriting orientation priors.\n");
     if (this->orient_prior && !this->orient_prior->isEmpty())
-        p_pStream->write_cov(*this->orient_prior.data());
+        stream.write_cov(*this->orient_prior.data());
     if (this->depth_prior && !this->depth_prior->isEmpty())
-        p_pStream->write_cov(*this->depth_prior.data());
+        stream.write_cov(*this->depth_prior.data());
     if (this->fmri_prior && !this->fmri_prior->isEmpty())
-        p_pStream->write_cov(*this->fmri_prior.data());
+        stream.write_cov(*this->fmri_prior.data());
 
     //
     //   Parent MRI data
     //
-    p_pStream->start_block(FIFFB_MNE_PARENT_MRI_FILE);
+    stream.start_block(FIFFB_MNE_PARENT_MRI_FILE);
     //   write the MRI <-> head coordinate transformation
-    p_pStream->write_coord_trans(this->mri_head_t);
-    p_pStream->end_block(FIFFB_MNE_PARENT_MRI_FILE);
+    stream.write_coord_trans(this->mri_head_t);
+    stream.end_block(FIFFB_MNE_PARENT_MRI_FILE);
 
     //
     //   Parent MEG measurement info
     //
-    p_pStream->write_info_base(this->info);
+    stream.write_info_base(this->info);
 
     //
     //   Write the source spaces
     //
     if (!src.isEmpty())
-        this->src.writeToStream(p_pStream);
+        this->src.writeToStream(stream);
 
     //
     //  We also need the SSP operator
     //
-    p_pStream->write_proj(this->projs);
+    stream.write_proj(this->projs);
     //
     //   Done!
     //
-    p_pStream->end_block(FIFFB_MNE_INVERSE_SOLUTION);
+    stream.end_block(FIFFB_MNE_INVERSE_SOLUTION);
 }

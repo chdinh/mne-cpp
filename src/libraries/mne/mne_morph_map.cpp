@@ -285,16 +285,16 @@ std::optional<MNEMorphMap> MNEMorphMap::read(const QString& path, const QString&
     }
     FiffTag::UPtr tag;
     for (const FiffDirNode::SPtr& node : stream->dirtree()->dir_tree_find(FIFFB_MNE_MORPH_MAP)) {
-        if (!node->find_tag(stream, FIFF_MNE_HEMI, tag) || *tag->toInt() != kHemiKind[hemi]) {
+        if (!node->find_tag(*stream, FIFF_MNE_HEMI, tag) || *tag->toInt() != kHemiKind[hemi]) {
             continue;
         }
-        if (!node->find_tag(stream, FIFF_MNE_MORPH_MAP_FROM, tag) || tag->toString() != fromSubj) {
+        if (!node->find_tag(*stream, FIFF_MNE_MORPH_MAP_FROM, tag) || tag->toString() != fromSubj) {
             continue;
         }
-        if (!node->find_tag(stream, FIFF_MNE_MORPH_MAP_TO, tag) || tag->toString() != toSubj) {
+        if (!node->find_tag(*stream, FIFF_MNE_MORPH_MAP_TO, tag) || tag->toString() != toSubj) {
             continue;
         }
-        if (!node->find_tag(stream, FIFF_MNE_MORPH_MAP, tag)) {
+        if (!node->find_tag(*stream, FIFF_MNE_MORPH_MAP, tag)) {
             break;
         }
         MNEMorphMap result;

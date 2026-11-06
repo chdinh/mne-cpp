@@ -190,7 +190,7 @@ private slots:
             FiffCoordTrans trans;
             FiffTime startTime;
 
-            int rc = MNERawInfo::get_meas_info(stream, meas, id, &nchan, &sfreq,
+            int rc = MNERawInfo::get_meas_info(*stream, meas, id, &nchan, &sfreq,
                                                &highpass, &lowpass, chInfo, trans, startTime);
             if (rc == 0) {
                 QVERIFY(nchan > 0);

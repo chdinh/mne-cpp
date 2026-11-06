@@ -170,7 +170,7 @@ std::unique_ptr<MNECovMatrix> MNECovMatrix::read(const QString& name, int kind)
      * Locate the desired matrix
      */
     for (k = 0; k < nodes.size(); ++k) {
-        if (!nodes[k]->find_tag(stream, FIFF_MNE_COV_KIND, t_pTag))
+        if (!nodes[k]->find_tag(*stream, FIFF_MNE_COV_KIND, t_pTag))
             continue;
 
         if (*t_pTag->toInt() == kind) {
@@ -186,16 +186,16 @@ std::unique_ptr<MNECovMatrix> MNECovMatrix::read(const QString& name, int kind)
     /*
      * Read the data
      */
-    if (!nodes[k]->find_tag(stream, FIFF_MNE_COV_DIM, t_pTag)) {
+    if (!nodes[k]->find_tag(*stream, FIFF_MNE_COV_DIM, t_pTag)) {
         stream->close();
         return nullptr;
     }
     ncov = *t_pTag->toInt();
 
-    if (nodes[k]->find_tag(stream, FIFF_MNE_COV_NFREE, t_pTag)) {
+    if (nodes[k]->find_tag(*stream, FIFF_MNE_COV_NFREE, t_pTag)) {
         nfree = *t_pTag->toInt();
     }
-    if (covnode->find_tag(stream, FIFF_MNE_ROW_NAMES, t_pTag)) {
+    if (covnode->find_tag(*stream, FIFF_MNE_ROW_NAMES, t_pTag)) {
         names = FiffStream::split_name_list(t_pTag->toString());
         nnames = static_cast<int>(names.size());
         if (nnames != ncov) {
@@ -204,8 +204,8 @@ std::unique_ptr<MNECovMatrix> MNECovMatrix::read(const QString& name, int kind)
             return nullptr;
         }
     }
-    if (!nodes[k]->find_tag(stream, FIFF_MNE_COV, t_pTag)) {
-        if (!nodes[k]->find_tag(stream, FIFF_MNE_COV_DIAG, t_pTag)) {
+    if (!nodes[k]->find_tag(*stream, FIFF_MNE_COV, t_pTag)) {
+        if (!nodes[k]->find_tag(*stream, FIFF_MNE_COV_DIAG, t_pTag)) {
             stream->close();
             return nullptr;
         } else {
@@ -258,10 +258,10 @@ std::unique_ptr<MNECovMatrix> MNECovMatrix::read(const QString& name, int kind)
             }
         }
 
-        if (nodes[k]->find_tag(stream, FIFF_MNE_COV_EIGENVALUES, t_pTag)) {
+        if (nodes[k]->find_tag(*stream, FIFF_MNE_COV_EIGENVALUES, t_pTag)) {
             const double* lambda_data = static_cast<const double*>(t_pTag->toDouble());
             lambda = Eigen::Map<const Eigen::VectorXd>(lambda_data, ncov);
-            if (!nodes[k]->find_tag(stream, FIFF_MNE_COV_EIGENVECTORS, t_pTag)) {
+            if (!nodes[k]->find_tag(*stream, FIFF_MNE_COV_EIGENVECTORS, t_pTag)) {
                 stream->close();
                 return nullptr;
             }
@@ -275,7 +275,7 @@ std::unique_ptr<MNECovMatrix> MNECovMatrix::read(const QString& name, int kind)
         /*
          * Read the optional projection operator
          */
-        op = MNEProjOp::read_from_node(stream, nodes[k]);
+        op = MNEProjOp::read_from_node(*stream, nodes[k]);
         if (!op) {
             stream->close();
             return nullptr;
@@ -283,7 +283,7 @@ std::unique_ptr<MNECovMatrix> MNECovMatrix::read(const QString& name, int kind)
         /*
          * Read the optional SSS data
          */
-        sss = MNESssData::read_from_node(stream, nodes[k]);
+        sss = MNESssData::read_from_node(*stream, nodes[k]);
         if (!sss) {
             stream->close();
             return nullptr;

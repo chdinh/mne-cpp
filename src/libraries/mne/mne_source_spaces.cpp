@@ -247,7 +247,7 @@ MNESourceSpaces MNESourceSpaces::pick_regions(const QList<FsLabel>& p_qListLabel
 
 //=============================================================================================================
 
-bool MNESourceSpaces::readFromStream(FiffStream::SPtr& p_pStream,
+bool MNESourceSpaces::readFromStream(FiffStream& stream,
                                      bool add_geom,
                                      MNESourceSpaces& p_SourceSpace)
 {
@@ -259,26 +259,18 @@ bool MNESourceSpaces::readFromStream(FiffStream::SPtr& p_pStream,
     //   Open the file, create directory
     //
     bool open_here = false;
-    QFile t_file; //ToDo TCPSocket;
-
-    if (!p_pStream->isOpen()) {
-        QString t_sFileName = p_pStream->streamName();
-
-        t_file.setFileName(t_sFileName);
-        p_pStream = FiffStream::SPtr(new FiffStream(&t_file));
-        if (!p_pStream->open())
+    if (!stream.isOpen()) {
+        if (!stream.open())
             return false;
         open_here = true;
-        //        if(t_pDir)
-        //            delete t_pDir;
     }
     //
     //   Find all source spaces
     //
-    QList<FiffDirNode::SPtr> spaces = p_pStream->dirtree()->dir_tree_find(FIFFB_MNE_SOURCE_SPACE);
+    QList<FiffDirNode::SPtr> spaces = stream.dirtree()->dir_tree_find(FIFFB_MNE_SOURCE_SPACE);
     if (spaces.size() == 0) {
         if (open_here)
-            p_pStream->close();
+            stream.close();
         qWarning() << "No source spaces found";
         return false;
     }
@@ -286,7 +278,7 @@ bool MNESourceSpaces::readFromStream(FiffStream::SPtr& p_pStream,
     for (int k = 0; k < spaces.size(); ++k) {
         auto p_Hemisphere = std::make_shared<MNEHemisphere>();
         qInfo("\tReading a source space...");
-        MNESourceSpaces::read_source_space(p_pStream, spaces[k], *p_Hemisphere);
+        MNESourceSpaces::read_source_space(stream, spaces[k], *p_Hemisphere);
         qInfo("\t[done]\n");
         if (add_geom)
             p_Hemisphere->complete_source_space_info();
@@ -299,7 +291,7 @@ bool MNESourceSpaces::readFromStream(FiffStream::SPtr& p_pStream,
     qInfo("\t%lld source spaces read\n", static_cast<long long>(spaces.size()));
 
     if (open_here)
-        p_pStream->close();
+        stream.close();
 
     return true;
 }
@@ -329,14 +321,14 @@ bool MNESourceSpaces::transform_source_space_to(fiff_int_t dest, FiffCoordTrans&
 
 //=============================================================================================================
 
-bool MNESourceSpaces::read_source_space(FiffStream::SPtr& p_pStream, const FiffDirNode::SPtr& p_Tree, MNEHemisphere& p_Hemisphere)
+bool MNESourceSpaces::read_source_space(FiffStream& stream, const FiffDirNode::SPtr& p_Tree, MNEHemisphere& p_Hemisphere)
 {
     p_Hemisphere.clear();
 
     FiffTag::UPtr t_pTag;
 
     //=====================================================================
-    if (!p_Tree->find_tag(p_pStream, FIFF_MNE_SOURCE_SPACE_ID, t_pTag))
+    if (!p_Tree->find_tag(stream, FIFF_MNE_SOURCE_SPACE_ID, t_pTag))
         p_Hemisphere.id = FIFFV_MNE_SURF_UNKNOWN;
     else
         p_Hemisphere.id = *t_pTag->toInt();
@@ -344,16 +336,16 @@ bool MNESourceSpaces::read_source_space(FiffStream::SPtr& p_pStream, const FiffD
     //        qDebug() << "Read SourceSpace ID; type:" << t_pTag->getType() << "value:" << *t_pTag->toInt();
 
     //=====================================================================
-    if (!p_Tree->find_tag(p_pStream, FIFF_MNE_SOURCE_SPACE_NPOINTS, t_pTag)) {
-        p_pStream->close();
+    if (!p_Tree->find_tag(stream, FIFF_MNE_SOURCE_SPACE_NPOINTS, t_pTag)) {
+        stream.close();
         throw std::runtime_error("error: Number of vertices not found.");
     }
     //        qDebug() << "Number of vertice; type:" << t_pTag->getType() << "value:" << *t_pTag->toInt();
     p_Hemisphere.np = *t_pTag->toInt();
 
     //=====================================================================
-    if (!p_Tree->find_tag(p_pStream, FIFF_BEM_SURF_NTRI, t_pTag)) {
-        if (!p_Tree->find_tag(p_pStream, FIFF_MNE_SOURCE_SPACE_NTRI, t_pTag))
+    if (!p_Tree->find_tag(stream, FIFF_BEM_SURF_NTRI, t_pTag)) {
+        if (!p_Tree->find_tag(stream, FIFF_MNE_SOURCE_SPACE_NTRI, t_pTag))
             p_Hemisphere.ntri = 0;
         else
             p_Hemisphere.ntri = *t_pTag->toInt();
@@ -363,8 +355,8 @@ bool MNESourceSpaces::read_source_space(FiffStream::SPtr& p_pStream, const FiffD
     //        qDebug() << "Number of Tris; type:" << t_pTag->getType() << "value:" << *t_pTag->toInt();
 
     //=====================================================================
-    if (!p_Tree->find_tag(p_pStream, FIFF_MNE_COORD_FRAME, t_pTag)) {
-        p_pStream->close();
+    if (!p_Tree->find_tag(stream, FIFF_MNE_COORD_FRAME, t_pTag)) {
+        stream.close();
         throw std::runtime_error("Coordinate frame information not found.");
     }
     p_Hemisphere.coord_frame = *t_pTag->toInt();
@@ -374,8 +366,8 @@ bool MNESourceSpaces::read_source_space(FiffStream::SPtr& p_pStream, const FiffD
     //
     //   Vertices, normals, and triangles
     //
-    if (!p_Tree->find_tag(p_pStream, FIFF_MNE_SOURCE_SPACE_POINTS, t_pTag)) {
-        p_pStream->close();
+    if (!p_Tree->find_tag(stream, FIFF_MNE_SOURCE_SPACE_POINTS, t_pTag)) {
+        stream.close();
         throw std::runtime_error("Vertex data not found.");
     }
 
@@ -384,14 +376,14 @@ bool MNESourceSpaces::read_source_space(FiffStream::SPtr& p_pStream, const FiffD
     //        qDebug() << "last element rr: " << p_Hemisphere.rr(rows_rr-1, 0) << p_Hemisphere.rr(rows_rr-1, 1) << p_Hemisphere.rr(rows_rr-1, 2);
 
     if (rows_rr != p_Hemisphere.np) {
-        p_pStream->close();
+        stream.close();
         throw std::runtime_error("Vertex information is incorrect.");
     }
     //        qDebug() << "Source Space Points; type:" << t_pTag->getType();
 
     //=====================================================================
-    if (!p_Tree->find_tag(p_pStream, FIFF_MNE_SOURCE_SPACE_NORMALS, t_pTag)) {
-        p_pStream->close();
+    if (!p_Tree->find_tag(stream, FIFF_MNE_SOURCE_SPACE_NORMALS, t_pTag)) {
+        stream.close();
         throw std::runtime_error("Vertex normals not found.");
     }
 
@@ -399,16 +391,16 @@ bool MNESourceSpaces::read_source_space(FiffStream::SPtr& p_pStream, const FiffD
     qint32 rows_nn = p_Hemisphere.nn.rows();
 
     if (rows_nn != p_Hemisphere.np) {
-        p_pStream->close();
+        stream.close();
         throw std::runtime_error("Vertex normal information is incorrect.");
     }
     //        qDebug() << "Source Space Normals; type:" << t_pTag->getType();
 
     //=====================================================================
     if (p_Hemisphere.ntri > 0) {
-        if (!p_Tree->find_tag(p_pStream, FIFF_BEM_SURF_TRIANGLES, t_pTag)) {
-            if (!p_Tree->find_tag(p_pStream, FIFF_MNE_SOURCE_SPACE_TRIANGLES, t_pTag)) {
-                p_pStream->close();
+        if (!p_Tree->find_tag(stream, FIFF_BEM_SURF_TRIANGLES, t_pTag)) {
+            if (!p_Tree->find_tag(stream, FIFF_MNE_SOURCE_SPACE_TRIANGLES, t_pTag)) {
+                stream.close();
                 throw std::runtime_error("Triangulation not found.");
             } else {
                 p_Hemisphere.itris = t_pTag->toIntMatrix().transpose();
@@ -419,7 +411,7 @@ bool MNESourceSpaces::read_source_space(FiffStream::SPtr& p_pStream, const FiffD
             p_Hemisphere.itris.array() -= 1; //0 based indizes
         }
         if (p_Hemisphere.itris.rows() != p_Hemisphere.ntri) {
-            p_pStream->close();
+            stream.close();
             throw std::runtime_error("Triangulation information is incorrect.");
         }
     } else {
@@ -430,22 +422,22 @@ bool MNESourceSpaces::read_source_space(FiffStream::SPtr& p_pStream, const FiffD
     //
     //   Which vertices are active
     //
-    if (!p_Tree->find_tag(p_pStream, FIFF_MNE_SOURCE_SPACE_NUSE, t_pTag)) {
+    if (!p_Tree->find_tag(stream, FIFF_MNE_SOURCE_SPACE_NUSE, t_pTag)) {
         p_Hemisphere.nuse = 0;
         p_Hemisphere.inuse = VectorXi::Zero(p_Hemisphere.nuse);
         VectorXi p_defaultVector;
         p_Hemisphere.vertno = p_defaultVector;
     } else {
         p_Hemisphere.nuse = *t_pTag->toInt();
-        if (!p_Tree->find_tag(p_pStream, FIFF_MNE_SOURCE_SPACE_SELECTION, t_pTag)) {
-            p_pStream->close();
+        if (!p_Tree->find_tag(stream, FIFF_MNE_SOURCE_SPACE_SELECTION, t_pTag)) {
+            stream.close();
             throw std::runtime_error("Source selection information missing.");
         }
         p_Hemisphere.inuse = VectorXi(Map<const VectorXi>(t_pTag->toInt(), t_pTag->size() / 4, 1)); //use copy constructor, for the sake of easy memory management
 
         p_Hemisphere.vertno = VectorXi::Zero(p_Hemisphere.nuse);
         if (p_Hemisphere.inuse.rows() != p_Hemisphere.np) {
-            p_pStream->close();
+            stream.close();
             throw std::runtime_error("Incorrect number of entries in source space selection.");
         }
         int pp = 0;
@@ -463,7 +455,7 @@ bool MNESourceSpaces::read_source_space(FiffStream::SPtr& p_pStream, const FiffD
     //
     FiffTag::UPtr t_pTag1;
     FiffTag::UPtr t_pTag2;
-    if (!p_Tree->find_tag(p_pStream, FIFF_MNE_SOURCE_SPACE_NUSE_TRI, t_pTag1) || !p_Tree->find_tag(p_pStream, FIFF_MNE_SOURCE_SPACE_USE_TRIANGLES, t_pTag2)) {
+    if (!p_Tree->find_tag(stream, FIFF_MNE_SOURCE_SPACE_NUSE_TRI, t_pTag1) || !p_Tree->find_tag(stream, FIFF_MNE_SOURCE_SPACE_USE_TRIANGLES, t_pTag2)) {
         MatrixX3i p_defaultMatrix;
         p_Hemisphere.nuse_tri = 0;
         p_Hemisphere.use_itris = p_defaultMatrix;
@@ -477,7 +469,7 @@ bool MNESourceSpaces::read_source_space(FiffStream::SPtr& p_pStream, const FiffD
     //
     //   Patch-related information
     //
-    if (!p_Tree->find_tag(p_pStream, FIFF_MNE_SOURCE_SPACE_NEAREST, t_pTag1) || !p_Tree->find_tag(p_pStream, FIFF_MNE_SOURCE_SPACE_NEAREST_DIST, t_pTag2)) {
+    if (!p_Tree->find_tag(stream, FIFF_MNE_SOURCE_SPACE_NEAREST, t_pTag1) || !p_Tree->find_tag(stream, FIFF_MNE_SOURCE_SPACE_NEAREST_DIST, t_pTag2)) {
         p_Hemisphere.nearest.clear();
     } else {
         //res.nearest = tag1.data + 1;
@@ -492,7 +484,7 @@ bool MNESourceSpaces::read_source_space(FiffStream::SPtr& p_pStream, const FiffD
     //
     // Distances
     //
-    if (!p_Tree->find_tag(p_pStream, FIFF_MNE_SOURCE_SPACE_DIST, t_pTag1) || !p_Tree->find_tag(p_pStream, FIFF_MNE_SOURCE_SPACE_DIST_LIMIT, t_pTag2)) {
+    if (!p_Tree->find_tag(stream, FIFF_MNE_SOURCE_SPACE_DIST, t_pTag1) || !p_Tree->find_tag(stream, FIFF_MNE_SOURCE_SPACE_DIST_LIMIT, t_pTag2)) {
         p_Hemisphere.dist = FiffSparseMatrix();
         p_Hemisphere.dist_limit = 0;
     } else {
@@ -525,15 +517,15 @@ bool MNESourceSpaces::complete_source_space_info(MNEHemisphere& p_Hemisphere)
 
 //=============================================================================================================
 
-void MNESourceSpaces::writeToStream(FiffStream* p_pStream)
+void MNESourceSpaces::writeToStream(FiffStream& stream)
 {
     for (size_t h = 0; h < m_sourceSpaces.size(); ++h) {
         qInfo("\tWrite a source space... ");
-        p_pStream->start_block(FIFFB_MNE_SOURCE_SPACE);
+        stream.start_block(FIFFB_MNE_SOURCE_SPACE);
         auto* hemi = dynamic_cast<MNEHemisphere*>(m_sourceSpaces[h].get());
         if (hemi)
-            hemi->writeToStream(p_pStream);
-        p_pStream->end_block(FIFFB_MNE_SOURCE_SPACE);
+            hemi->writeToStream(stream);
+        stream.end_block(FIFFB_MNE_SOURCE_SPACE);
         qInfo("[done]\n");
     }
     qInfo("\t%zu source spaces written\n", m_sourceSpaces.size());

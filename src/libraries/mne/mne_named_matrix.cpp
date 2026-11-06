@@ -182,7 +182,7 @@ std::unique_ptr<MNENamedMatrix> MNENamedMatrix::pick(const StringList& pickrowli
 
 //=============================================================================================================
 
-std::unique_ptr<MNENamedMatrix> MNENamedMatrix::read(FiffStream::SPtr& stream,
+std::unique_ptr<MNENamedMatrix> MNENamedMatrix::read(FiffStream& stream,
                                                      const FiffDirNode::SPtr& node,
                                                      int kind)
 {

@@ -247,7 +247,7 @@ public:
      *
      * @return FIFF_OK on success, FIFF_FAIL on error.
      */
-    int writeToStream(FIFFLIB::FiffStream::SPtr& stream, bool selected_only) const;
+    int writeToStream(FIFFLIB::FiffStream& stream, bool selected_only) const;
 
     //=========================================================================================================
     /**
@@ -289,7 +289,7 @@ private:
      *
      * @return OK on success, FAIL on error.
      */
-    int writeVolumeInfo(FIFFLIB::FiffStream::SPtr& stream, bool selected_only) const;
+    int writeVolumeInfo(FIFFLIB::FiffStream& stream, bool selected_only) const;
 };
 
 //=============================================================================================================

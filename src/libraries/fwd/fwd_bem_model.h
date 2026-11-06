@@ -199,7 +199,7 @@ public:
      * @param[out] res    Receives the integer value on success.
      * @return OK if the tag was found and is of type FIFFT_INT, FAIL otherwise.
      */
-    static int get_int(FIFFLIB::FiffStream::SPtr& stream, const FIFFLIB::FiffDirNode::SPtr& node, int what, int* res);
+    static int get_int(FIFFLIB::FiffStream& stream, const FIFFLIB::FiffDirNode::SPtr& node, int what, int* res);
 
     /**
      * @brief Find a surface of the given kind in this BEM model.

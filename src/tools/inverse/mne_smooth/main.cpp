@@ -172,7 +172,7 @@ int main(int argc, char* argv[])
         }
         FiffStream::SPtr stream(new FiffStream(&file));
         MNESourceSpaces srcSpaces;
-        if (!MNESourceSpaces::readFromStream(stream, true, srcSpaces) || srcSpaces.size() == 0) {
+        if (!MNESourceSpaces::readFromStream(*stream, true, srcSpaces) || srcSpaces.size() == 0) {
             qCritical("Cannot read source space: %s", qPrintable(srcFile));
             return 1;
         }

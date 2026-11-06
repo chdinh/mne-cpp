@@ -97,7 +97,7 @@ int main(int argc, char* argv[])
     }
 
     MNESourceSpaces srcSpaces;
-    if (!MNESourceSpaces::readFromStream(pStream, true, srcSpaces)) {
+    if (!MNESourceSpaces::readFromStream(*pStream, true, srcSpaces)) {
         qCritical() << "Failed to read source spaces from:" << parser.value(srcOpt);
         return 1;
     }

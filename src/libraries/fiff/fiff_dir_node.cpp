@@ -73,7 +73,7 @@ FiffDirNode::~FiffDirNode()
 
 //=============================================================================================================
 
-bool FiffDirNode::copy_tree(FiffStream::SPtr& p_pStreamIn, const FiffId& in_id, const QList<FiffDirNode::SPtr>& p_Nodes, FiffStream::SPtr& p_pStreamOut)
+bool FiffDirNode::copy_tree(FiffStream& source, const FiffId& in_id, const QList<FiffDirNode::SPtr>& p_Nodes, FiffStream& target)
 {
     if (p_Nodes.size() <= 0)
         return false;
@@ -81,13 +81,13 @@ bool FiffDirNode::copy_tree(FiffStream::SPtr& p_pStreamIn, const FiffId& in_id, 
     qint32 k, p;
 
     for (k = 0; k < p_Nodes.size(); ++k) {
-        p_pStreamOut->start_block(p_Nodes[k]->type); //8
+        target.start_block(p_Nodes[k]->type); //8
         if (p_Nodes[k]->id.version != -1) {
             if (in_id.version != -1)
-                p_pStreamOut->write_id(FIFF_PARENT_FILE_ID, in_id); //9
+                target.write_id(FIFF_PARENT_FILE_ID, in_id); //9
 
-            p_pStreamOut->write_id(FIFF_BLOCK_ID);                        //10
-            p_pStreamOut->write_id(FIFF_PARENT_BLOCK_ID, p_Nodes[k]->id); //11
+            target.write_id(FIFF_BLOCK_ID);                        //10
+            target.write_id(FIFF_PARENT_BLOCK_ID, p_Nodes[k]->id); //11
         }
         for (p = 0; p < p_Nodes[k]->nent(); ++p) {
             //
@@ -99,27 +99,27 @@ bool FiffDirNode::copy_tree(FiffStream::SPtr& p_pStreamIn, const FiffId& in_id, 
             //
             //   Read and write tags, pass data through transparently
             //
-            if (!p_pStreamIn->device()->seek(p_Nodes[k]->dir[p]->pos)) //fseek(fidin, nodes(k).dir(p).pos, 'bof') == -1
+            if (!source.device()->seek(p_Nodes[k]->dir[p]->pos)) //fseek(fidin, nodes(k).dir(p).pos, 'bof') == -1
             {
                 qWarning("Could not seek to the tag\n");
                 return false;
             }
 
             // Copy the tag verbatim; read_tag and write_tag reproduce its bytes
-            p_pStreamIn->setLittleEndian(false);
+            source.setLittleEndian(false);
             FiffTag::UPtr tag;
-            if (!p_pStreamIn->read_tag(tag, p_Nodes[k]->dir[p]->pos))
+            if (!source.read_tag(tag, p_Nodes[k]->dir[p]->pos))
                 return false;
             tag->next = FIFFV_NEXT_SEQ;
-            p_pStreamOut->setLittleEndian(false);
-            p_pStreamOut->write_tag(tag);
+            target.setLittleEndian(false);
+            target.write_tag(tag);
         }
         for (p = 0; p < p_Nodes[k]->nchild(); ++p) {
             QList<FiffDirNode::SPtr> childList;
             childList << p_Nodes[k]->children[p];
-            FiffDirNode::copy_tree(p_pStreamIn, in_id, childList, p_pStreamOut);
+            FiffDirNode::copy_tree(source, in_id, childList, target);
         }
-        p_pStreamOut->end_block(p_Nodes[k]->type);
+        target.end_block(p_Nodes[k]->type);
     }
     return true;
 }
@@ -141,11 +141,11 @@ QList<FiffDirNode::SPtr> FiffDirNode::dir_tree_find(fiff_int_t p_kind) const
 
 //=============================================================================================================
 
-bool FiffDirNode::find_tag(FiffStream* p_pStream, fiff_int_t findkind, FiffTag::UPtr& p_pTag) const
+bool FiffDirNode::find_tag(FiffStream& stream, fiff_int_t findkind, FiffTag::UPtr& p_pTag) const
 {
     for (qint32 p = 0; p < this->nent(); ++p) {
         if (this->dir[p]->kind == findkind) {
-            p_pStream->read_tag(p_pTag, this->dir[p]->pos);
+            stream.read_tag(p_pTag, this->dir[p]->pos);
             return true;
         }
     }

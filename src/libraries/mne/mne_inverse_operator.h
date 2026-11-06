@@ -339,9 +339,9 @@ public:
     /**
      * @brief Write the inverse operator into an already-open FIFF stream.
      *
-     * @param[in] p_pStream  Open FIFF stream.
+     * @param[in] stream  Open FIFF stream.
      */
-    void writeToStream(FIFFLIB::FiffStream* p_pStream);
+    void writeToStream(FIFFLIB::FiffStream& stream);
 
     //=========================================================================================================
     /**

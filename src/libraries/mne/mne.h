@@ -472,21 +472,21 @@ public:
      *
      * Reads a covariance matrix from a fiff file
      *
-     * @param[in] p_pStream     an open fiff file.
+     * @param[in] stream     an open fiff file.
      * @param[in] p_Node        look for the matrix in here.
      * @param[in] cov_kind      what kind of a covariance matrix do we want?.
      * @param[in, out] p_covData    the read covariance matrix.
      *
      * @return true if succeeded, false otherwise.
      */
-    inline static bool read_cov(FIFFLIB::FiffStream::SPtr& p_pStream,
+    inline static bool read_cov(FIFFLIB::FiffStream& stream,
                                 const FIFFLIB::FiffDirNode::SPtr& p_Node,
                                 FIFFLIB::fiff_int_t cov_kind,
                                 FIFFLIB::FiffCov& p_covData)
     {
-        return p_pStream->read_cov(p_Node,
-                                   cov_kind,
-                                   p_covData);
+        return stream.read_cov(p_Node,
+                               cov_kind,
+                               p_covData);
     }
 
     //=========================================================================================================
@@ -499,17 +499,17 @@ public:
      *
      * Reads source spaces from a fif file
      *
-     * @param[in] p_pStream         The open fiff file.
+     * @param[in] stream         The open fiff file.
      * @param[in] add_geom          Add geometry information to the source spaces.
      * @param[in, out] p_SourceSpace    The read source spaces.
      *
      * @return true if succeeded, false otherwise.
      */
-    static bool read_source_spaces(FIFFLIB::FiffStream::SPtr& p_pStream,
+    static bool read_source_spaces(FIFFLIB::FiffStream& stream,
                                    bool add_geom,
                                    MNESourceSpaces& p_SourceSpace)
     {
-        return MNESourceSpaces::readFromStream(p_pStream,
+        return MNESourceSpaces::readFromStream(stream,
                                                add_geom,
                                                p_SourceSpace);
     }

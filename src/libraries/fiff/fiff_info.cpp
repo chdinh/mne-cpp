@@ -369,7 +369,7 @@ bool FiffInfo::readMegEegChannels(const std::string& name,
 
 //=============================================================================================================
 
-void FiffInfo::writeToStream(FiffStream* p_pStream) const
+void FiffInfo::writeToStream(FiffStream& stream) const
 {
     //
     //   We will always write floats
@@ -385,15 +385,15 @@ void FiffInfo::writeToStream(FiffStream* p_pStream) const
     //
     // write the essentials
     //
-    p_pStream->start_block(FIFFB_MEAS); //4
-    p_pStream->write_id(FIFF_BLOCK_ID); //5
+    stream.start_block(FIFFB_MEAS); //4
+    stream.write_id(FIFF_BLOCK_ID); //5
     if (this->meas_id.version != -1) {
-        p_pStream->write_id(FIFF_PARENT_BLOCK_ID, this->meas_id); //6
+        stream.write_id(FIFF_PARENT_BLOCK_ID, this->meas_id); //6
     }
     //
     //    Measurement info
     //
-    p_pStream->start_block(FIFFB_MEAS_INFO); //7
+    stream.start_block(FIFFB_MEAS_INFO); //7
 
     //
     //    Blocks from the original -> skip this
@@ -406,70 +406,70 @@ void FiffInfo::writeToStream(FiffStream* p_pStream) const
     //    megacq parameters
     //
     if (!this->acq_pars.empty() || !this->acq_stim.empty()) {
-        p_pStream->start_block(FIFFB_DACQ_PARS);
+        stream.start_block(FIFFB_DACQ_PARS);
         if (!this->acq_pars.empty())
-            p_pStream->write_string(FIFF_DACQ_PARS, this->acq_pars);
+            stream.write_string(FIFF_DACQ_PARS, this->acq_pars);
 
         if (!this->acq_stim.empty())
-            p_pStream->write_string(FIFF_DACQ_STIM, this->acq_stim);
+            stream.write_string(FIFF_DACQ_STIM, this->acq_stim);
 
-        p_pStream->end_block(FIFFB_DACQ_PARS);
+        stream.end_block(FIFFB_DACQ_PARS);
     }
-    p_pStream->write_device_info(this->device_info);
+    stream.write_device_info(this->device_info);
     //
     //    Coordinate transformations if the HPI result block was not there
     //
     if (!have_hpi_result) {
         if (!this->dev_head_t.isEmpty())
-            p_pStream->write_coord_trans(this->dev_head_t);
+            stream.write_coord_trans(this->dev_head_t);
 
         if (!this->ctf_head_t.isEmpty())
-            p_pStream->write_coord_trans(this->ctf_head_t);
+            stream.write_coord_trans(this->ctf_head_t);
     }
     //
     //    Polhemus data
     //
     if (this->dig.size() > 0 && !have_isotrak) {
-        p_pStream->start_block(FIFFB_ISOTRAK);
+        stream.start_block(FIFFB_ISOTRAK);
         for (qint32 k = 0; k < this->dig.size(); ++k)
-            p_pStream->write_dig_point(this->dig[k]);
+            stream.write_dig_point(this->dig[k]);
 
-        p_pStream->end_block(FIFFB_ISOTRAK);
+        stream.end_block(FIFFB_ISOTRAK);
     }
     //
     //    Projectors
     //
-    p_pStream->write_proj(this->projs);
+    stream.write_proj(this->projs);
     //
     //    CTF compensation info
     //
-    p_pStream->write_ctf_comp(this->comps);
+    stream.write_ctf_comp(this->comps);
     //
     //    Bad channels
     //
     if (this->bads.size() > 0) {
-        p_pStream->start_block(FIFFB_MNE_BAD_CHANNELS);
-        p_pStream->write_name_list(FIFF_MNE_CH_NAME_LIST, this->bads);
-        p_pStream->end_block(FIFFB_MNE_BAD_CHANNELS);
+        stream.start_block(FIFFB_MNE_BAD_CHANNELS);
+        stream.write_name_list(FIFF_MNE_CH_NAME_LIST, this->bads);
+        stream.end_block(FIFFB_MNE_BAD_CHANNELS);
     }
     //
     //    General
     //
-    p_pStream->write_float(FIFF_SFREQ, &this->sfreq);
+    stream.write_float(FIFF_SFREQ, &this->sfreq);
     if (this->linefreq >= 0.0f)
-        p_pStream->write_float(FIFF_LINE_FREQ, &this->linefreq);
-    p_pStream->write_float(FIFF_HIGHPASS, &this->highpass);
-    p_pStream->write_float(FIFF_LOWPASS, &this->lowpass);
-    p_pStream->write_string(FIFF_EXPERIMENTER, this->experimenter);
-    p_pStream->write_string(FIFF_DESCRIPTION, this->description);
-    p_pStream->write_string(FIFF_UTC_OFFSET, this->utc_offset);
-    p_pStream->write_string(FIFF_PROJ_NAME, this->proj_name);
-    p_pStream->write_int(FIFF_PROJ_ID, &this->proj_id);
-    p_pStream->write_int(FIFF_GANTRY_ANGLE, &this->gantry_angle);
-    p_pStream->write_int(FIFF_NCHAN, &nchanToWrite);
-    p_pStream->write_int(FIFF_DATA_PACK, &data_type);
+        stream.write_float(FIFF_LINE_FREQ, &this->linefreq);
+    stream.write_float(FIFF_HIGHPASS, &this->highpass);
+    stream.write_float(FIFF_LOWPASS, &this->lowpass);
+    stream.write_string(FIFF_EXPERIMENTER, this->experimenter);
+    stream.write_string(FIFF_DESCRIPTION, this->description);
+    stream.write_string(FIFF_UTC_OFFSET, this->utc_offset);
+    stream.write_string(FIFF_PROJ_NAME, this->proj_name);
+    stream.write_int(FIFF_PROJ_ID, &this->proj_id);
+    stream.write_int(FIFF_GANTRY_ANGLE, &this->gantry_angle);
+    stream.write_int(FIFF_NCHAN, &nchanToWrite);
+    stream.write_int(FIFF_DATA_PACK, &data_type);
     if (this->meas_date[0] != -1)
-        p_pStream->write_int(FIFF_MEAS_DATE, this->meas_date, 2);
+        stream.write_int(FIFF_MEAS_DATE, this->meas_date, 2);
     //
     //    Channel info
     //
@@ -482,11 +482,11 @@ void FiffInfo::writeToStream(FiffStream* p_pStream) const
         chsToWrite[k].scanNo = k + 1;                        //+1 because
                                                              //        chs[k].range  = 1.0f;//Why? -> cause its already calibrated through reading
         cals(0, k) = static_cast<double>(chsToWrite[k].cal); //ToDo whats going on with cals?
-        p_pStream->write_ch_info(chsToWrite[k]);
+        stream.write_ch_info(chsToWrite[k]);
     }
     //
     //
-    p_pStream->end_block(FIFFB_MEAS_INFO);
+    stream.end_block(FIFFB_MEAS_INFO);
 }
 
 //=============================================================================================================

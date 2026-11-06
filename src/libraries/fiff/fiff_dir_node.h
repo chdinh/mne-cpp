@@ -112,14 +112,14 @@ public:
     /**
      * Copies directory subtrees from fidin to fidout
      *
-     * @param[in] p_pStreamIn    fiff file to copy from.
+     * @param[in] source         fiff file to copy from.
      * @param[in] in_id          file id description.
      * @param[in] p_Nodes        subtree directories to be copied.
-     * @param[out] p_pStreamOut   fiff file to write to.
+     * @param[in] target         fiff file to write to.
      *
      * @return true if succeeded, false otherwise.
      */
-    static bool copy_tree(QSharedPointer<FiffStream>& p_pStreamIn, const FiffId& in_id, const QList<QSharedPointer<FiffDirNode>>& p_Nodes, QSharedPointer<FiffStream>& p_pStreamOut);
+    static bool copy_tree(FiffStream& source, const FiffId& in_id, const QList<QSharedPointer<FiffDirNode>>& p_Nodes, FiffStream& target);
 
     //=========================================================================================================
     /**
@@ -142,21 +142,6 @@ public:
      */
     QList<FiffDirNode::SPtr> dir_tree_find(fiff_int_t p_kind) const;
 
-    //=========================================================================================================
-    /**
-     * Definition of the find_tag function in various files e.g. fiff_read_named_matrix.m,
-     *
-     * Founds a tag of a given kind within a tree, and reeds it from file.
-     * Note: In difference to mne-matlab this is not a static function. This is a method of the FiffDirNode
-     *       class, that's why a tree object doesn't need to be handed to the function.
-     *
-     * @param[in] p_pStream the opened fif file.
-     * @param[in] findkind the kind which should be found.
-     * @param[out] p_pTag the found tag.
-     *
-     * @return true if found, false otherwise.
-     */
-    inline bool find_tag(QSharedPointer<FiffStream>& p_pStream, fiff_int_t findkind, std::unique_ptr<FiffTag>& p_pTag) const;
 
     //=========================================================================================================
     /**
@@ -166,13 +151,13 @@ public:
      * Note: In difference to mne-matlab this is not a static function. This is a method of the FiffDirNode
      *       class, that's why a tree object doesn't need to be handed to the function.
      *
-     * @param[in] p_pStream the opened fif file.
+     * @param[in] stream the opened fif file.
      * @param[in] findkind the kind which should be found.
      * @param[out] p_pTag the found tag.
      *
      * @return true if found, false otherwise.
      */
-    bool find_tag(FiffStream* p_pStream, fiff_int_t findkind, std::unique_ptr<FiffTag>& p_pTag) const;
+    bool find_tag(FiffStream& stream, fiff_int_t findkind, std::unique_ptr<FiffTag>& p_pTag) const;
 
     //=========================================================================================================
     /**
@@ -238,10 +223,6 @@ public:
 // INLINE DEFINITIONS
 //=============================================================================================================
 
-inline bool FiffDirNode::find_tag(QSharedPointer<FiffStream>& p_pStream, fiff_int_t findkind, std::unique_ptr<FiffTag>& p_pTag) const
-{
-    return find_tag(p_pStream.data(), findkind, p_pTag);
-}
 } // NAMESPACE
 
 #endif // FIFF_DIR_NODE_H

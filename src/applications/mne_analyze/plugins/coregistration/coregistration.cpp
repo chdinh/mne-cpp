@@ -316,7 +316,7 @@ void CoRegistration::onDigitizersChanged(const QString& sFilePath)
     QFile fileDig(sFilePath);
     FiffStream::SPtr stream(new FiffStream(&fileDig));
     FiffDigPointSet digSet;
-    if (!FiffDigPointSet::readFromStream(stream, digSet)) {
+    if (!FiffDigPointSet::readFromStream(*stream, digSet)) {
         qWarning() << "[CoRegistration::onDigitizersChanged] No digitizer points found in" << sFilePath;
         return;
     }
@@ -342,7 +342,7 @@ void CoRegistration::onFiducialsChanged(const QString& sFilePath)
     QFile fileDig(sFilePath);
     FiffStream::SPtr stream(new FiffStream(&fileDig));
     FiffDigPointSet fiducials;
-    if (!FiffDigPointSet::readFromStream(stream, fiducials)) {
+    if (!FiffDigPointSet::readFromStream(*stream, fiducials)) {
         qWarning() << "[CoRegistration::onFiducialsChanged] No fiducials found in" << sFilePath;
         return;
     }
@@ -521,7 +521,7 @@ void CoRegistration::onFitICP()
     m_Future = QtConcurrent::run([&, this] {
         return this->computeICP(m_transHeadMri,
                                 m_digSetHead,
-                                *m_pBem.data());
+                                *m_pBem);
     });
 
     m_FutureWatcher.setFuture(m_Future);

@@ -98,7 +98,7 @@ int main(int argc, char* argv[])
         FiffStream::SPtr stream(new FiffStream(&bemFile));
         if (stream->open()) {
             MNEBem bem;
-            if (MNEBem::readFromStream(stream, true, bem) && bem.size() > 0) {
+            if (MNEBem::readFromStream(*stream, true, bem) && bem.size() > 0) {
                 vertices = bem[0].rr;
                 qInfo("Read FIFF BEM surface: %d vertices", static_cast<int>(vertices.rows()));
                 loaded = true;

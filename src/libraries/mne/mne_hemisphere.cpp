@@ -436,26 +436,26 @@ bool MNEHemisphere::transform_hemisphere_to(fiff_int_t dest, const FiffCoordTran
 
 //=============================================================================================================
 //ToDo
-void MNEHemisphere::writeToStream(FiffStream* p_pStream)
+void MNEHemisphere::writeToStream(FiffStream& stream)
 {
     if (this->type == 1 || this->type == 2)
-        p_pStream->write_int(FIFF_MNE_SOURCE_SPACE_TYPE, &this->type);
+        stream.write_int(FIFF_MNE_SOURCE_SPACE_TYPE, &this->type);
     else
         qWarning("Unknown source space type (%d)", this->type);
-    p_pStream->write_int(FIFF_MNE_SOURCE_SPACE_ID, &this->id);
+    stream.write_int(FIFF_MNE_SOURCE_SPACE_ID, &this->id);
 
     //    data = this.get('subject_his_id', None)
     //    if data:
     //        write_string(fid, FIFF.FIFF_SUBJ_HIS_ID, data)
-    p_pStream->write_int(FIFF_MNE_COORD_FRAME, &this->coord_frame);
+    stream.write_int(FIFF_MNE_COORD_FRAME, &this->coord_frame);
 
     if (this->type == 2) //2 = Vol
     {
         qDebug() << "ToDo: Write Volume not implemented yet!!!!!!!!";
-        //        p_pStream->write_int(FIFF_MNE_SOURCE_SPACE_VOXEL_DIMS, this->shape)
-        //        p_pStream->write_coord_trans(this->src_mri_t);
+        //        stream.write_int(FIFF_MNE_SOURCE_SPACE_VOXEL_DIMS, this->shape)
+        //        stream.write_coord_trans(this->src_mri_t);
 
-        p_pStream->start_block(FIFFB_MNE_PARENT_MRI_FILE);
+        stream.start_block(FIFFB_MNE_PARENT_MRI_FILE);
         //        write_coord_trans(fid, this['vox_mri_t'])
 
         //        write_coord_trans(fid, this['mri_ras_t'])
@@ -471,33 +471,33 @@ void MNEHemisphere::writeToStream(FiffStream* p_pStream)
         //        write_int(fid, FIFF.FIFF_MRI_HEIGHT, this['mri_height'])
         //        write_int(fid, FIFF.FIFF_MRI_DEPTH, this['mri_depth'])
 
-        p_pStream->end_block(FIFFB_MNE_PARENT_MRI_FILE);
+        stream.end_block(FIFFB_MNE_PARENT_MRI_FILE);
     }
 
-    p_pStream->write_int(FIFF_MNE_SOURCE_SPACE_NPOINTS, &this->np);
-    p_pStream->write_float_matrix(FIFF_MNE_SOURCE_SPACE_POINTS, this->rr);
-    p_pStream->write_float_matrix(FIFF_MNE_SOURCE_SPACE_NORMALS, this->nn);
+    stream.write_int(FIFF_MNE_SOURCE_SPACE_NPOINTS, &this->np);
+    stream.write_float_matrix(FIFF_MNE_SOURCE_SPACE_POINTS, this->rr);
+    stream.write_float_matrix(FIFF_MNE_SOURCE_SPACE_NORMALS, this->nn);
 
     //   Which vertices are active
-    p_pStream->write_int(FIFF_MNE_SOURCE_SPACE_SELECTION, this->inuse.data(), this->inuse.size());
-    p_pStream->write_int(FIFF_MNE_SOURCE_SPACE_NUSE, &this->nuse);
+    stream.write_int(FIFF_MNE_SOURCE_SPACE_SELECTION, this->inuse.data(), this->inuse.size());
+    stream.write_int(FIFF_MNE_SOURCE_SPACE_NUSE, &this->nuse);
 
-    p_pStream->write_int(FIFF_MNE_SOURCE_SPACE_NTRI, &this->ntri);
+    stream.write_int(FIFF_MNE_SOURCE_SPACE_NTRI, &this->ntri);
     if (this->ntri > 0)
-        p_pStream->write_int_matrix(FIFF_MNE_SOURCE_SPACE_TRIANGLES, (this->itris.array() + 1).matrix());
+        stream.write_int_matrix(FIFF_MNE_SOURCE_SPACE_TRIANGLES, (this->itris.array() + 1).matrix());
 
     if (this->type != 2 && this->use_itris.rows() > 0) {
         //   Use triangulation
-        p_pStream->write_int(FIFF_MNE_SOURCE_SPACE_NUSE_TRI, &this->nuse_tri);
-        p_pStream->write_int_matrix(FIFF_MNE_SOURCE_SPACE_USE_TRIANGLES, (this->use_itris.array() + 1).matrix());
+        stream.write_int(FIFF_MNE_SOURCE_SPACE_NUSE_TRI, &this->nuse_tri);
+        stream.write_int_matrix(FIFF_MNE_SOURCE_SPACE_USE_TRIANGLES, (this->use_itris.array() + 1).matrix());
     }
 
     //   Patch-related information
     if (!this->nearest.empty()) {
         Eigen::VectorXi nearestIdx = this->nearestVertIdx();
         Eigen::VectorXf nearestDistF = this->nearestDistVec().cast<float>();
-        p_pStream->write_int(FIFF_MNE_SOURCE_SPACE_NEAREST, nearestIdx.data(), nearestIdx.size());
-        p_pStream->write_float(FIFF_MNE_SOURCE_SPACE_NEAREST_DIST, nearestDistF.data(), nearestDistF.size());
+        stream.write_int(FIFF_MNE_SOURCE_SPACE_NEAREST, nearestIdx.data(), nearestIdx.size());
+        stream.write_float(FIFF_MNE_SOURCE_SPACE_NEAREST_DIST, nearestDistF.data(), nearestDistF.size());
     }
 
     //   Distances
@@ -514,8 +514,8 @@ void MNEHemisphere::writeToStream(FiffStream* p_pStream)
         Eigen::SparseMatrix<float> dists(eigenDist.rows(), eigenDist.cols());
         dists.setFromTriplets(tripletList.begin(), tripletList.end());
 
-        p_pStream->write_float_sparse_rcs(FIFF_MNE_SOURCE_SPACE_DIST, dists);
+        stream.write_float_sparse_rcs(FIFF_MNE_SOURCE_SPACE_DIST, dists);
         //ToDo check if write_float_matrix or write float is okay
-        p_pStream->write_float(FIFF_MNE_SOURCE_SPACE_DIST_LIMIT, &this->dist_limit); //p_pStream->write_float_matrix(FIFF_MNE_SOURCE_SPACE_DIST_LIMIT, this->dist_limit);
+        stream.write_float(FIFF_MNE_SOURCE_SPACE_DIST_LIMIT, &this->dist_limit); //stream.write_float_matrix(FIFF_MNE_SOURCE_SPACE_DIST_LIMIT, this->dist_limit);
     }
 }

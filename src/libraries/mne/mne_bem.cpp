@@ -61,7 +61,7 @@ MNEBem::MNEBem(QIODevice& p_IODevice) //const MNEBem &p_MNEBem
 {
     FiffStream::SPtr t_pStream(new FiffStream(&p_IODevice));
 
-    if (!MNEBem::readFromStream(t_pStream, true, *this)) {
+    if (!MNEBem::readFromStream(*t_pStream, true, *this)) {
         t_pStream->close();
         throw std::runtime_error("Could not read the bem surfaces\n");
         //ToDo error(me,'Could not read the bem surfaces (%s)',mne_omit_first_line(lasterr));
@@ -86,45 +86,36 @@ void MNEBem::clear()
 
 //=============================================================================================================
 
-bool MNEBem::readFromStream(FiffStream::SPtr& p_pStream, bool add_geom, MNEBem& p_Bem)
+bool MNEBem::readFromStream(FiffStream& stream, bool add_geom, MNEBem& p_Bem)
 {
     //
     //   Open the file, create directory
     //
     bool open_here = false;
-    QFile t_file; //ToDo TCPSocket;
-
-    if (!p_pStream->isOpen()) {
-        QString t_sFileName = p_pStream->streamName();
-
-        t_file.setFileName(t_sFileName);
-        p_pStream = FiffStream::SPtr(new FiffStream(&t_file));
-        if (!p_pStream->open()) {
+    if (!stream.isOpen()) {
+        if (!stream.open()) {
             return false;
         }
         open_here = true;
-        //        if(t_pDir)
-        //            delete t_pDir;
     }
-
     //
     //   Find all BEM surfaces
     //
 
-    QList<FiffDirNode::SPtr> bem = p_pStream->dirtree()->dir_tree_find(FIFFB_BEM);
+    QList<FiffDirNode::SPtr> bem = stream.dirtree()->dir_tree_find(FIFFB_BEM);
     if (bem.isEmpty()) {
         qCritical() << "No BEM block found!";
         if (open_here) {
-            p_pStream->close();
+            stream.close();
         }
         return false;
     }
 
-    QList<FiffDirNode::SPtr> bemsurf = p_pStream->dirtree()->dir_tree_find(FIFFB_BEM_SURF);
+    QList<FiffDirNode::SPtr> bemsurf = stream.dirtree()->dir_tree_find(FIFFB_BEM_SURF);
     if (bemsurf.isEmpty()) {
         qCritical() << "No BEM surfaces found!";
         if (open_here) {
-            p_pStream->close();
+            stream.close();
         }
         return false;
     }
@@ -133,9 +124,9 @@ bool MNEBem::readFromStream(FiffStream::SPtr& p_pStream, bool add_geom, MNEBem& 
     for (int k = 0; k < bemsurf.size(); ++k) {
         MNEBemSurface p_BemSurface;
         qInfo("\tReading a BEM surface...");
-        if (!MNEBem::readBemSurface(p_pStream, bemsurf[k], p_BemSurface)) {
+        if (!MNEBem::readBemSurface(stream, bemsurf[k], p_BemSurface)) {
             if (open_here) {
-                p_pStream->close();
+                stream.close();
             }
             return false;
         }
@@ -152,21 +143,21 @@ bool MNEBem::readFromStream(FiffStream::SPtr& p_pStream, bool add_geom, MNEBem& 
     qInfo("\t%lld bem surfaces read\n", static_cast<long long>(bemsurf.size()));
 
     if (open_here) {
-        p_pStream->close();
+        stream.close();
     }
     return true;
 }
 
 //=============================================================================================================
 
-bool MNEBem::readBemSurface(FiffStream::SPtr& p_pStream, const FiffDirNode::SPtr& p_Tree, MNEBemSurface& p_BemSurface)
+bool MNEBem::readBemSurface(FiffStream& stream, const FiffDirNode::SPtr& p_Tree, MNEBemSurface& p_BemSurface)
 {
     p_BemSurface.clear();
 
     FiffTag::UPtr t_pTag;
 
     //=====================================================================
-    if (!p_Tree->find_tag(p_pStream, FIFF_BEM_SURF_ID, t_pTag)) {
+    if (!p_Tree->find_tag(stream, FIFF_BEM_SURF_ID, t_pTag)) {
         p_BemSurface.id = FIFFV_BEM_SURF_ID_UNKNOWN;
     } else {
         p_BemSurface.id = *t_pTag->toInt();
@@ -175,7 +166,7 @@ bool MNEBem::readBemSurface(FiffStream::SPtr& p_pStream, const FiffDirNode::SPtr
     //    qDebug() << "Read BemSurface ID; type:" << t_pTag->getType() << "value:" << *t_pTag->toInt();
 
     //=====================================================================
-    if (!p_Tree->find_tag(p_pStream, FIFF_BEM_SIGMA, t_pTag)) {
+    if (!p_Tree->find_tag(stream, FIFF_BEM_SIGMA, t_pTag)) {
         p_BemSurface.sigma = 1.0;
     } else {
         p_BemSurface.sigma = *t_pTag->toFloat();
@@ -184,7 +175,7 @@ bool MNEBem::readBemSurface(FiffStream::SPtr& p_pStream, const FiffDirNode::SPtr
     //    qDebug() <<
 
     //=====================================================================
-    if (!p_Tree->find_tag(p_pStream, FIFF_BEM_SURF_NNODE, t_pTag)) {
+    if (!p_Tree->find_tag(stream, FIFF_BEM_SURF_NNODE, t_pTag)) {
         qWarning() << "np not found!";
         return false;
     } else {
@@ -194,7 +185,7 @@ bool MNEBem::readBemSurface(FiffStream::SPtr& p_pStream, const FiffDirNode::SPtr
     //    qDebug() <<
 
     //=====================================================================
-    if (!p_Tree->find_tag(p_pStream, FIFF_BEM_SURF_NTRI, t_pTag)) {
+    if (!p_Tree->find_tag(stream, FIFF_BEM_SURF_NTRI, t_pTag)) {
         qWarning() << "ntri not found!";
         return false;
     } else {
@@ -204,9 +195,9 @@ bool MNEBem::readBemSurface(FiffStream::SPtr& p_pStream, const FiffDirNode::SPtr
     //    qDebug() <<
 
     //=====================================================================
-    if (!p_Tree->find_tag(p_pStream, FIFF_MNE_COORD_FRAME, t_pTag)) {
+    if (!p_Tree->find_tag(stream, FIFF_MNE_COORD_FRAME, t_pTag)) {
         qWarning() << "FIFF_MNE_COORD_FRAME not found, trying FIFF_BEM_COORD_FRAME.";
-        if (!p_Tree->find_tag(p_pStream, FIFF_BEM_COORD_FRAME, t_pTag)) {
+        if (!p_Tree->find_tag(stream, FIFF_BEM_COORD_FRAME, t_pTag)) {
             qWarning() << "Coordinate frame information not found.";
             return false;
         } else {
@@ -223,7 +214,7 @@ bool MNEBem::readBemSurface(FiffStream::SPtr& p_pStream, const FiffDirNode::SPtr
     //   Vertices, normals, and triangles
     //
     //=====================================================================
-    if (!p_Tree->find_tag(p_pStream, FIFF_BEM_SURF_NODES, t_pTag)) {
+    if (!p_Tree->find_tag(stream, FIFF_BEM_SURF_NODES, t_pTag)) {
         qWarning() << "Vertex data not found.";
         return false;
     }
@@ -240,7 +231,7 @@ bool MNEBem::readBemSurface(FiffStream::SPtr& p_pStream, const FiffDirNode::SPtr
 
     //=====================================================================
     // Stored normals are optional (mne-python, MNE-C); readFromStream computes missing ones.
-    if (p_Tree->find_tag(p_pStream, FIFF_BEM_SURF_NORMALS, t_pTag) || p_Tree->find_tag(p_pStream, FIFF_MNE_SOURCE_SPACE_NORMALS, t_pTag)) {
+    if (p_Tree->find_tag(stream, FIFF_BEM_SURF_NORMALS, t_pTag) || p_Tree->find_tag(stream, FIFF_MNE_SOURCE_SPACE_NORMALS, t_pTag)) {
         p_BemSurface.nn = t_pTag->toFloatMatrix().transpose();
         if (p_BemSurface.nn.rows() != p_BemSurface.np) {
             qWarning() << "Vertex normal information is incorrect.";
@@ -254,8 +245,8 @@ bool MNEBem::readBemSurface(FiffStream::SPtr& p_pStream, const FiffDirNode::SPtr
 
     //=====================================================================
     if (p_BemSurface.ntri > 0) {
-        if (!p_Tree->find_tag(p_pStream, FIFF_BEM_SURF_TRIANGLES, t_pTag)) {
-            if (!p_Tree->find_tag(p_pStream, FIFF_MNE_SOURCE_SPACE_TRIANGLES, t_pTag)) {
+        if (!p_Tree->find_tag(stream, FIFF_BEM_SURF_TRIANGLES, t_pTag)) {
+            if (!p_Tree->find_tag(stream, FIFF_MNE_SOURCE_SPACE_TRIANGLES, t_pTag)) {
                 qWarning() << "Triangulation not found.";
                 return false;
             } else {
@@ -287,25 +278,25 @@ bool MNEBem::write(QIODevice& p_IODevice)
         return false;
     }
     qInfo("Write BEM surface in %s...\n", t_pStream->streamName().toUtf8().constData());
-    this->writeToStream(t_pStream.data());
+    this->writeToStream(*t_pStream);
     t_pStream->end_file();
     return true;
 }
 
 //=============================================================================================================
 
-void MNEBem::writeToStream(FiffStream* p_pStream)
+void MNEBem::writeToStream(FiffStream& stream)
 {
-    p_pStream->start_block(FIFFB_BEM);
+    stream.start_block(FIFFB_BEM);
     for (qint32 h = 0; h < m_qListBemSurface.size(); ++h) {
         qInfo("\tWrite a bem surface... ");
-        p_pStream->start_block(FIFFB_BEM_SURF);
-        m_qListBemSurface[h].writeToStream(p_pStream);
-        p_pStream->end_block(FIFFB_BEM_SURF);
+        stream.start_block(FIFFB_BEM_SURF);
+        m_qListBemSurface[h].writeToStream(stream);
+        stream.end_block(FIFFB_BEM_SURF);
         qInfo("[done]\n");
     }
     qInfo("\t%lld bem surfaces written\n", static_cast<long long>(m_qListBemSurface.size()));
-    p_pStream->end_block(FIFFB_BEM);
+    stream.end_block(FIFFB_BEM);
 }
 
 //=============================================================================================================

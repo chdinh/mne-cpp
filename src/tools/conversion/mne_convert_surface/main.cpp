@@ -224,7 +224,7 @@ static bool readFifSurface(const QString& filename, MatrixX3f& rr, MatrixX3i& tr
         qCritical() << "Cannot open FIF file:" << filename;
         return false;
     }
-    if (!MNEBem::readFromStream(stream, true, bem) || bem.size() == 0) {
+    if (!MNEBem::readFromStream(*stream, true, bem) || bem.size() == 0) {
         qCritical() << "No BEM surfaces found in:" << filename;
         stream->close();
         return false;

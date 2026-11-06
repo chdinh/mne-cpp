@@ -312,7 +312,7 @@ bool MNEForwardSolution::write(QIODevice& p_IODevice) const
     //   Write the source spaces
     //
     for (int k = 0; k < src.size(); ++k) {
-        if (src[k].writeToStream(t_pStream, false) == FIFF_FAIL) {
+        if (src[k].writeToStream(*t_pStream, false) == FIFF_FAIL) {
             t_pStream->close();
             return false;
         }
@@ -356,12 +356,12 @@ bool MNEForwardSolution::write(QIODevice& p_IODevice) const
         t_pStream->write_int(FIFF_MNE_SOURCE_SPACE_NPOINTS, &nvert);
         t_pStream->write_int(FIFF_NCHAN, &nmeg);
 
-        FiffNamedMatrix megSol = extractRows(*sol.data(), megIdx);
+        FiffNamedMatrix megSol = extractRows(*sol, megIdx);
         megSol.transpose_named_matrix();
         t_pStream->write_named_matrix(FIFF_MNE_FORWARD_SOLUTION, megSol);
 
         if (!sol_grad->isEmpty()) {
-            FiffNamedMatrix megGrad = extractRows(*sol_grad.data(), megIdx);
+            FiffNamedMatrix megGrad = extractRows(*sol_grad, megIdx);
             megGrad.transpose_named_matrix();
             t_pStream->write_named_matrix(FIFF_MNE_FORWARD_SOLUTION_GRAD, megGrad);
         }
@@ -381,12 +381,12 @@ bool MNEForwardSolution::write(QIODevice& p_IODevice) const
         t_pStream->write_int(FIFF_NCHAN, &neeg);
         t_pStream->write_int(FIFF_MNE_SOURCE_SPACE_NPOINTS, &nvert);
 
-        FiffNamedMatrix eegSol = extractRows(*sol.data(), eegIdx);
+        FiffNamedMatrix eegSol = extractRows(*sol, eegIdx);
         eegSol.transpose_named_matrix();
         t_pStream->write_named_matrix(FIFF_MNE_FORWARD_SOLUTION, eegSol);
 
         if (!sol_grad->isEmpty()) {
-            FiffNamedMatrix eegGrad = extractRows(*sol_grad.data(), eegIdx);
+            FiffNamedMatrix eegGrad = extractRows(*sol_grad, eegIdx);
             eegGrad.transpose_named_matrix();
             t_pStream->write_named_matrix(FIFF_MNE_FORWARD_SOLUTION_GRAD, eegGrad);
         }
@@ -1181,7 +1181,7 @@ bool MNEForwardSolution::read(QIODevice& p_IODevice,
     }
 
     MNELIB::MNESourceSpaces t_SourceSpace;
-    if (!MNELIB::MNESourceSpaces::readFromStream(t_pStream, true, t_SourceSpace)) {
+    if (!MNELIB::MNESourceSpaces::readFromStream(*t_pStream, true, t_SourceSpace)) {
         t_pStream->close();
         qWarning("Could not read the source spaces");
         //ToDo error(me,'Could not read the source spaces (%s)',mne_omit_first_line(lasterr));
@@ -1212,7 +1212,7 @@ bool MNEForwardSolution::read(QIODevice& p_IODevice,
     FiffDirNode::SPtr megnode;
     FiffDirNode::SPtr eegnode;
     for (qint32 k = 0; k < fwds.size(); ++k) {
-        if (!fwds[k]->find_tag(t_pStream, FIFF_MNE_INCLUDED_METHODS, t_pTag)) {
+        if (!fwds[k]->find_tag(*t_pStream, FIFF_MNE_INCLUDED_METHODS, t_pTag)) {
             t_pStream->close();
             qWarning("Methods not listed for one of the forward solutions");
             return false;
@@ -1228,7 +1228,7 @@ bool MNEForwardSolution::read(QIODevice& p_IODevice,
 
     MNEForwardSolution megfwd;
     QString ori;
-    if (read_one(t_pStream, megnode, megfwd)) {
+    if (read_one(*t_pStream, megnode, megfwd)) {
         if (megfwd.source_ori == FIFFV_MNE_FIXED_ORI)
             ori = QString("fixed");
         else
@@ -1236,7 +1236,7 @@ bool MNEForwardSolution::read(QIODevice& p_IODevice,
         qInfo("\tRead MEG forward solution (%d sources, %d channels, %s orientations)", megfwd.nsource, megfwd.nchan, ori.toUtf8().constData());
     }
     MNEForwardSolution eegfwd;
-    if (read_one(t_pStream, eegnode, eegfwd)) {
+    if (read_one(*t_pStream, eegnode, eegfwd)) {
         if (eegfwd.source_ori == FIFFV_MNE_FIXED_ORI)
             ori = QString("fixed");
         else
@@ -1286,7 +1286,7 @@ bool MNEForwardSolution::read(QIODevice& p_IODevice,
     //
     //   Get the MRI <-> head coordinate transformation
     //
-    if (!parent_mri[0]->find_tag(t_pStream, FIFF_COORD_TRANS, t_pTag)) {
+    if (!parent_mri[0]->find_tag(*t_pStream, FIFF_COORD_TRANS, t_pTag)) {
         t_pStream->close();
         qWarning("MRI/head coordinate transformation not found");
         return false;
@@ -1421,7 +1421,7 @@ bool MNEForwardSolution::read(QIODevice& p_IODevice,
 
 //=============================================================================================================
 
-bool MNEForwardSolution::read_one(FiffStream::SPtr& p_pStream,
+bool MNEForwardSolution::read_one(FiffStream& stream,
                                   const FiffDirNode::SPtr& p_Node,
                                   MNEForwardSolution& one)
 {
@@ -1434,55 +1434,55 @@ bool MNEForwardSolution::read_one(FiffStream::SPtr& p_pStream,
     one.clear();
     FiffTag::UPtr t_pTag;
 
-    if (!p_Node->find_tag(p_pStream, FIFF_MNE_SOURCE_ORIENTATION, t_pTag)) {
-        p_pStream->close();
+    if (!p_Node->find_tag(stream, FIFF_MNE_SOURCE_ORIENTATION, t_pTag)) {
+        stream.close();
         qWarning("Source orientation tag not found.");
         return false;
     }
 
     one.source_ori = *t_pTag->toInt();
 
-    if (!p_Node->find_tag(p_pStream, FIFF_MNE_COORD_FRAME, t_pTag)) {
-        p_pStream->close();
+    if (!p_Node->find_tag(stream, FIFF_MNE_COORD_FRAME, t_pTag)) {
+        stream.close();
         qWarning("Coordinate frame tag not found.");
         return false;
     }
 
     one.coord_frame = *t_pTag->toInt();
 
-    if (!p_Node->find_tag(p_pStream, FIFF_MNE_SOURCE_SPACE_NPOINTS, t_pTag)) {
-        p_pStream->close();
+    if (!p_Node->find_tag(stream, FIFF_MNE_SOURCE_SPACE_NPOINTS, t_pTag)) {
+        stream.close();
         qWarning("Number of sources not found.");
         return false;
     }
 
     one.nsource = *t_pTag->toInt();
 
-    if (!p_Node->find_tag(p_pStream, FIFF_NCHAN, t_pTag)) {
-        p_pStream->close();
+    if (!p_Node->find_tag(stream, FIFF_NCHAN, t_pTag)) {
+        stream.close();
         qWarning("Number of channels not found.");
         return false;
     }
 
     one.nchan = *t_pTag->toInt();
 
-    if (p_pStream->read_named_matrix(p_Node, FIFF_MNE_FORWARD_SOLUTION, *one.sol.data()))
+    if (stream.read_named_matrix(p_Node, FIFF_MNE_FORWARD_SOLUTION, *one.sol.data()))
         one.sol->transpose_named_matrix();
     else {
-        p_pStream->close();
+        stream.close();
         qWarning("Forward solution data not found.");
         //error(me,'Forward solution data not found (%s)',mne_omit_first_line(lasterr));
         return false;
     }
 
-    if (p_pStream->read_named_matrix(p_Node, FIFF_MNE_FORWARD_SOLUTION_GRAD, *one.sol_grad.data()))
+    if (stream.read_named_matrix(p_Node, FIFF_MNE_FORWARD_SOLUTION_GRAD, *one.sol_grad.data()))
         one.sol_grad->transpose_named_matrix();
     else
         one.sol_grad->clear();
 
     if (one.sol->data.rows() != one.nchan ||
         (one.sol->data.cols() != one.nsource && one.sol->data.cols() != 3 * one.nsource)) {
-        p_pStream->close();
+        stream.close();
         qWarning("Forward solution matrix has wrong dimensions.");
         //error(me,'Forward solution matrix has wrong dimensions');
         return false;
@@ -1490,7 +1490,7 @@ bool MNEForwardSolution::read_one(FiffStream::SPtr& p_pStream,
     if (!one.sol_grad->isEmpty()) {
         if (one.sol_grad->data.rows() != one.nchan ||
             (one.sol_grad->data.cols() != 3 * one.nsource && one.sol_grad->data.cols() != 3 * 3 * one.nsource)) {
-            p_pStream->close();
+            stream.close();
             qWarning("Forward solution gradient matrix has wrong dimensions.");
             //error(me,'Forward solution gradient matrix has wrong dimensions');
         }

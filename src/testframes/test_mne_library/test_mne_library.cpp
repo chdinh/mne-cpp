@@ -118,7 +118,7 @@ private:
         FiffStream::SPtr stream(new FiffStream(&file));
         if (!stream->open())
             return false;
-        return MNESourceSpaces::readFromStream(stream, false, out);
+        return MNESourceSpaces::readFromStream(*stream, false, out);
     }
 
 private slots:
@@ -428,7 +428,7 @@ void TestMneLibrary::sourceSpaces_readWithGeometry()
         QSKIP("Could not open source space");
 
     MNESourceSpaces srcSpaces;
-    bool ok = MNESourceSpaces::readFromStream(stream, true, srcSpaces);
+    bool ok = MNESourceSpaces::readFromStream(*stream, true, srcSpaces);
     QVERIFY(ok);
     QVERIFY(srcSpaces.size() >= 2);
     QVERIFY(srcSpaces[0].np > 0);
@@ -444,7 +444,7 @@ void TestMneLibrary::sourceSpaces_filterAndTransform()
     QVERIFY(stream->open());
 
     MNESourceSpaces srcSpaces;
-    bool ok = MNESourceSpaces::readFromStream(stream, true, srcSpaces);
+    bool ok = MNESourceSpaces::readFromStream(*stream, true, srcSpaces);
     QVERIFY(ok);
 
     QList<VectorXi> vertno = srcSpaces.get_vertno();
@@ -463,7 +463,7 @@ void TestMneLibrary::sourceSpaces_readAddGeom()
     QVERIFY(stream->open());
 
     MNESourceSpaces srcSpaces;
-    bool ok = MNESourceSpaces::readFromStream(stream, true, srcSpaces);
+    bool ok = MNESourceSpaces::readFromStream(*stream, true, srcSpaces);
     QVERIFY(ok);
     QVERIFY(srcSpaces.size() >= 2);
 
