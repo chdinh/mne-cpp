@@ -272,8 +272,7 @@ int main(int argc, char* argv[])
     FsLabel::read(data + "/subjects/sample/label/lh.V1.label", v1);
     QFile fwdFile(data + "/Result/ref-sample_audvis-meg-eeg-oct-6-fwd.fif");
     const MNEForwardSolution fwd = MNEForwardSolution(fwdFile).pick_regions({v1}); // 70 sources x 3 orientations
-    QFile covFile(data + "/MEG/sample/sample_audvis-cov.fif");
-    const FiffCov noiseCov(covFile);
+    const FiffCov noiseCov((data + "/MEG/sample/sample_audvis-cov.fif").toStdString());
     QFile aveFile(data + "/MEG/sample/sample_audvis-ave.fif");
     const FiffEvoked evoked(aveFile, 0); // "Left Auditory"
 

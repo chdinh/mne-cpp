@@ -26,8 +26,7 @@ FIFF noise / data covariance: matrix, channel names, kind, applied projectors, b
 Round-trips with `*-cov.fif` files and with `mne.Covariance` in MNE-Python. Carries both the raw matrix and the metadata needed to regularize, project away SSP subspaces, and pre-whiten downstream forward / inverse computations.
 
 ```cpp title="src/examples/ex_fiff_api/main.cpp"
-QFile covFile(dir + "/sample_audvis-cov.fif");
-FiffCov cov(covFile);
+FiffCov cov((dir + "/sample_audvis-cov.fif").toStdString());
 const FiffCov megCov = cov.pick_channels(StringList(info.ch_names.begin() + 0, info.ch_names.begin() + 0 + 306), cov.bads); // good MEG channels only
 ```
 
@@ -48,14 +47,14 @@ Constructs the covariance data matrix.
 
 ---
 
-### FiffCov(p_IODevice)
+### FiffCov(path)
 
-Constructs a covariance data matrix, by reading from a IO device.
+Reads the noise covariance of a FIFF file.
 
 **Parameters:**
 
-- **p_IODevice** : *QIODevice &*
-  IO device to read from the evoked data set.
+- **path** : *const std::filesystem::path &*
+  The file.
 
 ---
 
@@ -164,14 +163,14 @@ This method works by adding a constant to the diagonal for each channel type sep
 
 ---
 
-### save(fileName)
+### save(path)
 
 Save this covariance matrix to a FIFF file.
 
 **Parameters:**
 
-- **fileName** : *const QString &*
-  Output file path.
+- **path** : *const std::filesystem::path &*
+  Output file.
 
 **Returns:**
 
@@ -196,21 +195,21 @@ Assignment Operator.
 
 ## Static Methods
 
-### read(p_IODevice, p_cov)
+### read(path, p_cov)
 
 Reads the noise covariance stored in a FIFF file, like mne.read_cov.
 
 **Parameters:**
 
-- **p_IODevice** : *QIODevice &*
-  IO device to read from.
+- **path** : *const std::filesystem::path &*
+  The file.
 
 - **p_cov** : *[FiffCov](/docs/api/fiff/fiff-cov) &*
   The covariance; unchanged when reading fails.
 
 **Returns:**
 
-- *bool* — true when the device holds a noise covariance, false otherwise.
+- *bool* — true when the file holds a noise covariance, false otherwise.
 
 ---
 
@@ -316,8 +315,7 @@ Compute a weighted grand-average covariance from multiple covariance matrices, w
 FIFF library: measurement info, channels, digitizer, transforms, projectors, covariance, events, annotations, evoked sets and the low-level file structure.
 
 ````cpp title="src/examples/ex_fiff_api/main.cpp, line 165"
-QFile covFile(dir + "/sample_audvis-cov.fif");
-FiffCov cov(covFile);
+FiffCov cov((dir + "/sample_audvis-cov.fif").toStdString());
 const FiffCov megCov = cov.pick_channels(StringList(info.ch_names.begin() + 0, info.ch_names.begin() + 0 + 306), cov.bads); // good MEG channels only
 // mne.read_cov: dim 366, nfree 15972, 2 bads, 4 projectors, C[0, 0] = 2.272355891906954e-23
 ok &= expect(cov.dim == 366 && cov.nfree == 15972 && cov.bads.size() == 2 && cov.projs.size() == 4 && near(cov.data(0, 0), 2.272355891906954e-23) && megCov.dim == 305,
@@ -343,11 +341,11 @@ ok &= expect(cov.dim == 2 && cov.names == StringList{"MEG0111", "MEG0121"} && co
 
 Inverse library: minimum-norm estimates, resolution matrices, label time courses, sparse solvers and source-estimate I/O.
 
-````cpp title="src/examples/ex_inv_api/main.cpp, line 113"
+````cpp title="src/examples/ex_inv_api/main.cpp, line 112"
+FsLabel::read(data + "/subjects/sample/label/lh.V1.label", v1);
 QFile fwdFile(data + "/Result/ref-sample_audvis-meg-eeg-oct-6-fwd.fif");
 const MNEForwardSolution fwd = MNEForwardSolution(fwdFile).pick_regions({v1}); // 70 sources x 3 orientations
-QFile covFile(data + "/MEG/sample/sample_audvis-cov.fif");
-const FiffCov noiseCov(covFile);
+const FiffCov noiseCov((data + "/MEG/sample/sample_audvis-cov.fif").toStdString());
 QFile aveFile(data + "/MEG/sample/sample_audvis-ave.fif");
 const FiffEvoked evoked(aveFile, 0); // "Left Auditory"
 ````

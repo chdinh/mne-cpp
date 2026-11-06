@@ -208,7 +208,6 @@ int main(int argc, char* argv[])
 
     QFile t_fileFwdMeeg(parser.value(fwdMEGOption));
     QFile t_fileFwdEeg(parser.value(fwdEEGOption));
-    QFile t_fileCov(parser.value(covFileOption));
     QFile t_fileEvoked(parser.value(evokedFileOption));
 
     double snr = parser.value(snrOption).toDouble();
@@ -224,7 +223,7 @@ int main(int argc, char* argv[])
 
     MNEForwardSolution t_forwardMeeg(t_fileFwdMeeg, false, true);
 
-    FiffCov noise_cov(t_fileCov);
+    FiffCov noise_cov(parser.value(covFileOption).toStdString());
 
     // regularize noise covariance
     noise_cov = noise_cov.regularize(evoked.info, 0.05, 0.05, 0.1, true);

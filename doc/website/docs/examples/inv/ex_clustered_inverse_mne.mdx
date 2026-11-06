@@ -188,7 +188,6 @@ int main(int argc, char* argv[])
 
     //Parse inputs
     QFile t_fileFwd(parser.value(sampleFwdFileOption));
-    QFile t_fileCov(parser.value(sampleCovFileOption));
     QFile t_fileEvoked(parser.value(sampleEvokedFileOption));
 
     double snr = parser.value(snrOption).toDouble();
@@ -217,7 +216,7 @@ int main(int argc, char* argv[])
     if (t_Fwd.isEmpty())
         return 1;
 
-    FiffCov noise_cov(t_fileCov);
+    FiffCov noise_cov(parser.value(sampleCovFileOption).toStdString());
 
     // regularize noise covariance
     noise_cov = noise_cov.regularize(evoked.info, 0.05, 0.05, 0.1, true);

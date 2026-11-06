@@ -146,7 +146,7 @@ Even so the base class RAP MUSIC implementation is called.
 
 Inverse library: LCMV and DICS beamformers and the RAP-MUSIC family of dipole scanners.
 
-````cpp title="src/examples/ex_inv_beamformer/main.cpp, line 158"
+````cpp title="src/examples/ex_inv_beamformer/main.cpp, line 157"
 InvRapMusic rap(fwd, false, 1, 0.5); // one correlated pair, subspace correlation >= 0.5
 rap.calculateInverse(measured, pairs);
 QList<InvDipolePair<double>> powellPairs;

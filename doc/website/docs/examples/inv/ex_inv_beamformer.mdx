@@ -255,8 +255,7 @@ int main(int argc, char* argv[])
     MNEForwardSolution fwd = MNEForwardSolution(fwdFile).pick_regions({v1}).pick_channels(good);
     FiffEvoked evoked = sample.pick_channels(good);
     const FiffInfo info = evoked.info;
-    QFile covFile(data + "/MEG/sample/sample_audvis-cov.fif");
-    const FiffCov noiseCov = FiffCov(covFile).pick_channels(good).prepare_noise_cov(info, good);
+    const FiffCov noiseCov = FiffCov((data + "/MEG/sample/sample_audvis-cov.fif").toStdString()).pick_channels(good).prepare_noise_cov(info, good);
 
     // 20 nAm at V1 source 10 and 30 nAm at source 50, both along z.
     const MatrixXd& G = fwd.sol->data;

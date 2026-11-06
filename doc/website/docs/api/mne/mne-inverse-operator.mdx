@@ -30,8 +30,7 @@ FsLabel v1;
 FsLabel::read(data + "/subjects/sample/label/lh.V1.label", v1);
 QFile fwdFile(data + "/Result/ref-sample_audvis-meg-eeg-oct-6-fwd.fif");
 const MNEForwardSolution fwd = MNEForwardSolution(fwdFile).pick_regions({v1}); // 70 sources x 3 orientations
-QFile covFile(data + "/MEG/sample/sample_audvis-cov.fif");
-const FiffCov noiseCov(covFile);
+const FiffCov noiseCov((data + "/MEG/sample/sample_audvis-cov.fif").toStdString());
 QFile aveFile(data + "/MEG/sample/sample_audvis-ave.fif");
 const FiffEvoked evoked(aveFile, 0); // "Left Auditory"
 
@@ -356,7 +355,7 @@ Read an inverse operator from a FIFF file.
 
 Inverse library: minimum-norm estimates, resolution matrices, label time courses, sparse solvers and source-estimate I/O.
 
-````cpp title="src/examples/ex_inv_api/main.cpp, line 120"
+````cpp title="src/examples/ex_inv_api/main.cpp, line 119"
 const MNEInverseOperator inverse = MNEInverseOperator::make_inverse_operator(evoked.info, fwd, noiseCov, 0.2f, 0.8f);
 const float lambda2 = 1.0f / 9.0f; // SNR 3
 InvMinimumNorm dspm(inverse, lambda2, "dSPM");
@@ -390,7 +389,7 @@ rtInvOp.stop();
 
 Average a raw recording and compute an MNE, dSPM or sLORETA estimate with a parcellation-clustered forward solution.
 
-````cpp title="src/examples/ex_clustered_inverse_mne_raw/main.cpp, line 452"
+````cpp title="src/examples/ex_clustered_inverse_mne_raw/main.cpp, line 451"
 MNEInverseOperator inverse_operator(info, t_clusteredFwd, noise_cov, 0.2f, 0.8f);
 ````
 
