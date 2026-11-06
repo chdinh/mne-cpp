@@ -188,7 +188,6 @@ int main(int argc, char* argv[])
 
     //Parse inputs
     QFile t_fileFwd(parser.value(sampleFwdFileOption));
-    QFile t_fileEvoked(parser.value(sampleEvokedFileOption));
 
     double snr = parser.value(snrOption).toDouble();
     QString method = parser.value(methodOption);
@@ -206,7 +205,7 @@ int main(int argc, char* argv[])
     // Load data
     fiff_int_t setno = 0;
     QPair<float, float> baseline(-1.0f, -1.0f);
-    FiffEvoked evoked(t_fileEvoked, setno, baseline);
+    FiffEvoked evoked(parser.value(sampleEvokedFileOption).toStdString(), setno, baseline);
     if (evoked.isEmpty())
         return 1;
 

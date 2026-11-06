@@ -65,7 +65,7 @@ TFplot tfplot(dataSpectrum, raw.info.sfreq, 0, 100, ColorMaps::Jet, times(0, 0))
 
 Spectrogram of one evoked channel shown as a time-frequency plot.
 
-````cpp title="src/examples/ex_tf_plot/main.cpp, line 79"
+````cpp title="src/examples/ex_tf_plot/main.cpp, line 78"
 //tf plot
 VectorXd dataCol = p_FiffEvoked.data.row(83).transpose();
 MatrixXd dataSpectrum = Spectrogram::makeSpectrogram(dataCol, p_FiffEvoked.info.sfreq * 0.1);

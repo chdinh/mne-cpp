@@ -219,7 +219,6 @@ int main(int argc, char* argv[])
     parser.addOption(stcFileOption);
     parser.process(app);
 
-    QFile t_fileEvoked(parser.value(evokedFileOption));
     QFile t_fileInv(parser.value(invFileOption));
 
     float snr = parser.value(snrOption).toFloat();
@@ -235,7 +234,7 @@ int main(int argc, char* argv[])
     fiff_int_t setno = 0;
     // Without a baseline the DC offset of the average dominates the estimate
     QPair<float, float> baseline(-0.2f, 0.0f);
-    FiffEvoked evoked(t_fileEvoked, setno, baseline);
+    FiffEvoked evoked(parser.value(evokedFileOption).toStdString(), setno, baseline);
     if (evoked.isEmpty())
         return 1;
 

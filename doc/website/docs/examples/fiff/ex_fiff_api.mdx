@@ -349,8 +349,7 @@ int main(int argc, char* argv[])
                  "FiffAnnotations: events become onsets in seconds and back, with descriptions as codes");
 
     //! [fiff_evoked_set_usage]
-    QFile aveFile(dir + "/sample_audvis-ave.fif");
-    FiffEvokedSet evokedSet(aveFile); // all conditions of an -ave.fif file
+    FiffEvokedSet evokedSet((dir + "/sample_audvis-ave.fif").toStdString()); // all conditions of an -ave.fif file
     const FiffEvoked& leftAuditory = evokedSet.evoked[0];
     //! [fiff_evoked_set_usage]
     // mne.read_evokeds: 4 conditions, "Left Auditory" nave 55, 376 x 421 samples starting at -0.1998 s

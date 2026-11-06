@@ -157,8 +157,7 @@ int main(int argc, char* argv[])
     parser.process(a);
 
     //generate FiffEvoked object
-    QFile t_sampleFile(parser.value(evokedFileOption));
-    FiffEvoked p_FiffEvoked(t_sampleFile, QVariant(parser.value(evokedIdxOption)));
+    FiffEvoked p_FiffEvoked(parser.value(evokedFileOption).toStdString(), QVariant(parser.value(evokedIdxOption)));
 
     //tf plot
     VectorXd dataCol = p_FiffEvoked.data.row(83).transpose();

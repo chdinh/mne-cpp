@@ -26,8 +26,7 @@ Single averaged evoked response: time axis, data, baseline, channel info and ave
 Holds one `FIFFB_EVOKED` block: `times`, `data`, `first` / `last` sample indices, `baseline`, `kind`, `nave`, `comment` and the [`FiffInfo`](/docs/api/fiff/fiff-info) describing the channels. Use [`FiffEvokedSet`](/docs/api/fiff/fiff-evoked-set) for recordings that contain multiple averaging conditions.
 
 ```cpp title="src/examples/ex_fiff_api/main.cpp"
-QFile aveFile(dir + "/sample_audvis-ave.fif");
-FiffEvokedSet evokedSet(aveFile); // all conditions of an -ave.fif file
+FiffEvokedSet evokedSet((dir + "/sample_audvis-ave.fif").toStdString()); // all conditions of an -ave.fif file
 const FiffEvoked& leftAuditory = evokedSet.evoked[0];
 ```
 
@@ -41,14 +40,14 @@ Constructs a fiff evoked data.
 
 ---
 
-### FiffEvoked(p_IODevice, setno, t_baseline, proj, p_aspect_kind)
+### FiffEvoked(path, setno, t_baseline, proj, p_aspect_kind)
 
-Constructs fiff evoked data, by reading from a IO device.
+Constructs fiff evoked data by reading a FIFF file.
 
 **Parameters:**
 
-- **p_IODevice** : *QIODevice &*
-  IO device to read from the evoked data set.
+- **path** : *const std::filesystem::path &*
+  FIFF file to read the evoked data set from.
 
 - **setno** : *QVariant*
   The set to pick. Dataset ID number (int) or comment/name (str). Optional if there isonly one data set in file.
@@ -198,7 +197,7 @@ Applies baseline correction to the evoked data.
 
 ## Static Methods
 
-### read(p_IODevice, p_FiffEvoked, setno, t_baseline, proj, p_aspect_kind)
+### read(path, p_FiffEvoked, setno, t_baseline, proj, p_aspect_kind)
 
 fiff_read_evoked
 
@@ -208,8 +207,8 @@ Read one evoked data set
 
 **Parameters:**
 
-- **p_IODevice** : *QIODevice &*
-  An fiff IO device like a fiff QFile or QTCPSocket.
+- **path** : *const std::filesystem::path &*
+  FIFF file to read.
 
 - **p_FiffEvoked** : *[FiffEvoked](/docs/api/fiff/fiff-evoked) &*
   The read evoked data.

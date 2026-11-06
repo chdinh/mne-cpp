@@ -39,8 +39,7 @@ FsLabel::read(data + "/subjects/sample/label/lh.V1.label", v1);
 QFile fwdFile(data + "/Result/ref-sample_audvis-meg-eeg-oct-6-fwd.fif");
 const MNEForwardSolution fwd = MNEForwardSolution(fwdFile).pick_regions({v1}); // 70 sources x 3 orientations
 const FiffCov noiseCov((data + "/MEG/sample/sample_audvis-cov.fif").toStdString());
-QFile aveFile(data + "/MEG/sample/sample_audvis-ave.fif");
-const FiffEvoked evoked(aveFile, 0); // "Left Auditory"
+const FiffEvoked evoked((data + "/MEG/sample/sample_audvis-ave.fif").toStdString(), 0); // "Left Auditory"
 
 const MNEInverseOperator inverse = MNEInverseOperator::make_inverse_operator(evoked.info, fwd, noiseCov, 0.2f, 0.8f);
 const float lambda2 = 1.0f / 9.0f; // SNR 3
@@ -256,7 +255,7 @@ Get the assembled kernel.
 
 Inverse library: minimum-norm estimates, resolution matrices, label time courses, sparse solvers and source-estimate I/O.
 
-````cpp title="src/examples/ex_inv_api/main.cpp, line 119"
+````cpp title="src/examples/ex_inv_api/main.cpp, line 118"
 const MNEInverseOperator inverse = MNEInverseOperator::make_inverse_operator(evoked.info, fwd, noiseCov, 0.2f, 0.8f);
 const float lambda2 = 1.0f / 9.0f; // SNR 3
 InvMinimumNorm dspm(inverse, lambda2, "dSPM");
@@ -270,7 +269,7 @@ ok &= expect(stc.data.rows() == 70 && stc.data.cols() == 421 && near(stc.data.cw
 
 Assemble MEG+EEG, MEG-only and EEG-only inverse operators from a forward solution and a regularized noise covariance, then apply them.
 
-````cpp title="src/examples/ex_make_inverse_operator/main.cpp, line 116"
+````cpp title="src/examples/ex_make_inverse_operator/main.cpp, line 115"
 // Compute inverse solution
 InvMinimumNorm minimumNorm_meeg(inverse_operator_meeg, lambda2, method);
 InvSourceEstimate sourceEstimate_meeg = minimumNorm_meeg.calculateInverse(evoked);

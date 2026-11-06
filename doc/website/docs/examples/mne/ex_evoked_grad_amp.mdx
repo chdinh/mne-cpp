@@ -189,8 +189,7 @@ int main(int argc, char* argv[])
     parser.process(a);
 
     //generate FiffEvokedSet
-    QFile t_sampleFile(parser.value(evokedFileOption));
-    FiffEvokedSet p_FiffEvokedSet(t_sampleFile);
+    FiffEvokedSet p_FiffEvokedSet(parser.value(evokedFileOption).toStdString());
 
     //mne_ex_evoked_grad_amp.m example
     fiff_int_t coil1, coil2;

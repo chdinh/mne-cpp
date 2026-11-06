@@ -205,8 +205,7 @@ int main(int argc, char* argv[])
     parser.process(a);
 
     //generate FiffEvoked object
-    QFile t_sampleFile(parser.value(evokedFileOption));
-    FiffEvoked p_FiffEvoked(t_sampleFile, QVariant(parser.value(evokedIdxOption)));
+    FiffEvoked p_FiffEvoked(parser.value(evokedFileOption).toStdString(), QVariant(parser.value(evokedIdxOption)));
 
     //Select the head coordinate system
     bool use_ctf_head = parser.isSet(useCTFCompOption);

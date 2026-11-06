@@ -351,7 +351,7 @@ Read the CTF software compensation data from the given node
 
 ---
 
-### read_evoked(p_IODevice, data, setno, baseline, proj, p_aspect_kind)
+### read_evoked(path, data, setno, baseline, proj, p_aspect_kind)
 
 fiff_read_evoked
 
@@ -361,8 +361,8 @@ Read one evoked data set
 
 **Parameters:**
 
-- **p_IODevice** : *QIODevice &*
-  A fiff IO device like a fiff QFile or QTCPSocket.
+- **path** : *const std::filesystem::path &*
+  FIFF file to read.
 
 - **data** : *[FiffEvoked](/docs/api/fiff/fiff-evoked) &*
   The read evoked data.
@@ -385,14 +385,14 @@ Read one evoked data set
 
 ---
 
-### read_evoked_set(p_IODevice, data)
+### read_evoked_set(path, data)
 
 Read all evoked data from one file.
 
 **Parameters:**
 
-- **p_IODevice** : *QIODevice &*
-  A fiff IO device like a fiff QFile or QTCPSocket.
+- **path** : *const std::filesystem::path &*
+  FIFF file to read.
 
 - **data** : *[FiffEvokedSet](/docs/api/fiff/fiff-evoked-set) &*
   The read evoked data.
@@ -989,7 +989,7 @@ Writes a string tag
 
 FIFF library: measurement info, channels, digitizer, transforms, projectors, covariance, events, annotations, evoked sets and the low-level file structure.
 
-````cpp title="src/examples/ex_fiff_api/main.cpp, line 260"
+````cpp title="src/examples/ex_fiff_api/main.cpp, line 259"
 QFile facadeFile(dir + "/sample_audvis_trunc_raw.fif");
 FiffStream::SPtr facadeStream;
 const bool facadeOpened = Fiff::open(facadeFile, facadeStream); // static wrappers around FiffStream
