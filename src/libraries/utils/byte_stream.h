@@ -96,6 +96,12 @@ public:
         return true;
     }
 
+    /** Opens a closed stream again at position 0, keeping its contents. @return Whether the stream is open. */
+    virtual bool reopen()
+    {
+        return isOpen();
+    }
+
     /** @return Whether the position is at or past the end. */
     bool atEnd() const
     {
@@ -243,18 +249,19 @@ public:
     std::uint64_t size() const override;
     void close() override;
     bool isOpen() const override;
-
+    bool reopen() override;
     /** @return Whether everything written has reached the operating system. */
     bool flush();
 
 private:
-    FileByteStream(std::FILE* file, Mode mode);
+    FileByteStream(std::FILE* file, Mode mode, std::filesystem::path path);
 
     /** C streams need a seek between a write and a following read, and vice versa. */
     void switchDirection(bool writing);
 
     std::FILE* m_file = nullptr;
     Mode m_mode = Mode::Read;
+    std::filesystem::path m_path;
     std::uint64_t m_pos = 0;
     std::uint64_t m_size = 0;
     bool m_lastWrite = false;

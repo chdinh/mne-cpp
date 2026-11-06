@@ -130,7 +130,7 @@ std::unique_ptr<FileByteStream> FileByteStream::open(const std::filesystem::path
     if (!file) {
         return nullptr;
     }
-    std::unique_ptr<FileByteStream> stream(new FileByteStream(file, mode));
+    std::unique_ptr<FileByteStream> stream(new FileByteStream(file, mode, path));
     std::error_code ec;
     const std::uintmax_t bytes = std::filesystem::file_size(path, ec);
     stream->m_size = ec ? 0 : static_cast<std::uint64_t>(bytes);
@@ -139,9 +139,10 @@ std::unique_ptr<FileByteStream> FileByteStream::open(const std::filesystem::path
 
 //=============================================================================================================
 
-FileByteStream::FileByteStream(std::FILE* file, Mode mode)
+FileByteStream::FileByteStream(std::FILE* file, Mode mode, std::filesystem::path path)
 : m_file(file)
 , m_mode(mode)
+, m_path(std::move(path))
 {
 }
 
@@ -229,6 +230,24 @@ std::uint64_t FileByteStream::size() const
 bool FileByteStream::isOpen() const
 {
     return m_file != nullptr;
+}
+
+//=============================================================================================================
+
+bool FileByteStream::reopen()
+{
+    if (m_file)
+        return true;
+    // A written file is opened for update, so reopening does not truncate it
+    m_file = openFile(m_path, m_mode == Mode::Read ? Mode::Read : Mode::ReadWrite);
+    if (!m_file)
+        return false;
+    std::error_code ec;
+    const std::uintmax_t bytes = std::filesystem::file_size(m_path, ec);
+    m_size = ec ? 0 : static_cast<std::uint64_t>(bytes);
+    m_pos = 0;
+    m_lastWrite = false;
+    return true;
 }
 
 //=============================================================================================================

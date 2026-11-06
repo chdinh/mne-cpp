@@ -298,6 +298,18 @@ void TestUtilsByteStream::fileStreamCloseWritesAndEnds()
     QCOMPARE(stream->read(&byte, 1), std::size_t(0));
     QVERIFY(!stream->seek(0));
     stream->close();
+
+    // Reopening reads what was written, without truncating it
+    QVERIFY(stream->reopen());
+    QVERIFY(stream->isOpen());
+    std::int32_t value = 0;
+    QVERIFY(stream->readBigEndian(value));
+    QCOMPARE(value, std::int32_t{7});
+    QCOMPARE(std::filesystem::file_size(path), std::uintmax_t(4));
+    QVERIFY(stream->reopen());
+    MemoryByteStream memory;
+    memory.close();
+    QVERIFY(memory.reopen());
 }
 
 //=============================================================================================================
