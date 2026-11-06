@@ -979,8 +979,7 @@ private slots:
     void mneGlobal_buildInfo()
     {
         const char* dt = MNELIB::buildDateTime();
-        QVERIFY(dt != nullptr);
-        QVERIFY(strlen(dt) > 0);
+        QVERIFY(dt != nullptr && dt[0] != '\0');
 
         const char* hash = MNELIB::buildHash();
         QVERIFY(hash != nullptr);
