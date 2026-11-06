@@ -97,6 +97,7 @@ private slots:
     void memoryStreamOverwritesAndGrows();
     void fileStreamRoundTripAndModes();
     void fileStreamFailsOnMissingFile();
+    void fileStreamCloseWritesAndEnds();
     void benchmarkReadBigEndianFloats_data();
     void benchmarkReadBigEndianFloats();
 };
@@ -276,6 +277,25 @@ void TestUtilsByteStream::fileStreamFailsOnMissingFile()
     QVERIFY(!FileByteStream::open(dir.filePath(QStringLiteral("missing.bin")).toStdString(), FileByteStream::Mode::Read));
     QVERIFY(!FileByteStream::open(dir.filePath(QStringLiteral("missing.bin")).toStdString(), FileByteStream::Mode::ReadWrite));
     QVERIFY(!FileByteStream::open(dir.filePath(QStringLiteral("no/dir/out.bin")).toStdString(), FileByteStream::Mode::Write));
+}
+
+//=============================================================================================================
+
+void TestUtilsByteStream::fileStreamCloseWritesAndEnds()
+{
+    QTemporaryDir dir;
+    const std::filesystem::path path = dir.filePath(QStringLiteral("closed.bin")).toStdString();
+    auto stream = FileByteStream::open(path, FileByteStream::Mode::Write);
+    QVERIFY(stream);
+    QVERIFY(stream->writeBigEndian(std::int32_t{7}));
+    stream->close();
+    // The bytes are on disk while the stream object still exists, and later calls fail instead of crashing.
+    QCOMPARE(std::filesystem::file_size(path), std::uintmax_t(4));
+    QCOMPARE(stream->write("x", 1), std::size_t(0));
+    char byte = 0;
+    QCOMPARE(stream->read(&byte, 1), std::size_t(0));
+    QVERIFY(!stream->seek(0));
+    stream->close();
 }
 
 //=============================================================================================================

@@ -85,6 +85,11 @@ public:
     /** @return The number of bytes in the stream. */
     virtual std::uint64_t size() const = 0;
 
+    /** Releases the underlying resource; later reads, writes and seeks fail. */
+    virtual void close()
+    {
+    }
+
     /** @return Whether the position is at or past the end. */
     bool atEnd() const
     {
@@ -230,6 +235,7 @@ public:
     bool seek(std::uint64_t position) override;
     std::uint64_t pos() const override;
     std::uint64_t size() const override;
+    void close() override;
 
     /** @return Whether everything written has reached the operating system. */
     bool flush();

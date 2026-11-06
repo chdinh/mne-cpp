@@ -149,7 +149,17 @@ FileByteStream::FileByteStream(std::FILE* file, Mode mode)
 
 FileByteStream::~FileByteStream()
 {
-    std::fclose(m_file);
+    close();
+}
+
+//=============================================================================================================
+
+void FileByteStream::close()
+{
+    if (m_file) {
+        std::fclose(m_file);
+        m_file = nullptr;
+    }
 }
 
 //=============================================================================================================
@@ -166,6 +176,9 @@ void FileByteStream::switchDirection(bool writing)
 
 std::size_t FileByteStream::read(void* data, std::size_t bytes)
 {
+    if (!m_file) {
+        return 0;
+    }
     switchDirection(false);
     const std::size_t n = std::fread(data, 1, bytes, m_file);
     m_pos += n;
@@ -176,7 +189,7 @@ std::size_t FileByteStream::read(void* data, std::size_t bytes)
 
 std::size_t FileByteStream::write(const void* data, std::size_t bytes)
 {
-    if (m_mode == Mode::Read || bytes == 0) {
+    if (!m_file || m_mode == Mode::Read || bytes == 0) {
         return 0;
     }
     switchDirection(true);
@@ -190,7 +203,7 @@ std::size_t FileByteStream::write(const void* data, std::size_t bytes)
 
 bool FileByteStream::seek(std::uint64_t position)
 {
-    if (position > m_size || !seekFile(m_file, position)) {
+    if (!m_file || position > m_size || !seekFile(m_file, position)) {
         return false;
     }
     m_pos = position;
@@ -215,5 +228,5 @@ std::uint64_t FileByteStream::size() const
 
 bool FileByteStream::flush()
 {
-    return std::fflush(m_file) == 0;
+    return m_file && std::fflush(m_file) == 0;
 }
