@@ -371,7 +371,7 @@ MatrixXd StatsCluster::computeFMap(const std::vector<std::vector<MatrixXd>>& con
     MatrixXd ssWithin = MatrixXd::Zero(nVertices, nTimes);
 
     for (int c = 0; c < nConditions; ++c) {
-        int nc = conditions[c].size();
+        const auto nc = static_cast<int>(conditions[c].size());
         MatrixXd condSum = MatrixXd::Zero(nVertices, nTimes);
         for (int s = 0; s < nc; ++s) {
             condSum += conditions[c][s];

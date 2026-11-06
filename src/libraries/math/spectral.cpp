@@ -228,9 +228,9 @@ VectorXd Spectral::calculateFFTFreqs(int iNfft, double dSampFreq)
     //Compute FFT frequencies
     RowVectorXd vecFFTFreqs;
     if (iNfft % 2 == 0) {
-        vecFFTFreqs = (dSampFreq / iNfft) * RowVectorXd::LinSpaced(iNfft / 2.0 + 1, 0.0, iNfft / 2.0);
+        vecFFTFreqs = (dSampFreq / iNfft) * RowVectorXd::LinSpaced(iNfft / 2 + 1, 0.0, iNfft / 2.0);
     } else {
-        vecFFTFreqs = (dSampFreq / iNfft) * RowVectorXd::LinSpaced((iNfft - 1) / 2.0 + 1, 0.0, (iNfft - 1) / 2.0);
+        vecFFTFreqs = (dSampFreq / iNfft) * RowVectorXd::LinSpaced((iNfft - 1) / 2 + 1, 0.0, (iNfft - 1) / 2.0);
     }
     return vecFFTFreqs;
 }

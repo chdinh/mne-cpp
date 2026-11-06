@@ -43,7 +43,7 @@ using namespace Eigen;
 
 StatsFtestResult StatsFtest::oneWay(const std::vector<MatrixXd>& groups)
 {
-    const int k = groups.size();
+    const auto k = static_cast<int>(groups.size());
     const int nVars = static_cast<int>(groups[0].cols());
 
     // Total number of observations

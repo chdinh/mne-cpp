@@ -164,7 +164,7 @@ MatrixXf Warp::readsLm(const std::string& electrodeFileName)
         //Read number of electrodes
         if (i == 0) {
             numberElectrodes = std::stod(fields.at(fields.size() - 1));
-            electrodes = MatrixXf::Zero(numberElectrodes, 3);
+            electrodes = MatrixXf::Zero(static_cast<Eigen::Index>(numberElectrodes), 3);
         }
 
         //Read actual electrode positions

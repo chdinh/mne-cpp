@@ -159,12 +159,12 @@ T SimplexAlgorithm::tryit(Eigen::Matrix<T, Eigen::Dynamic, Eigen::Dynamic>& p,
                           int& neval,
                           T fac)
 {
-    int ndim = p.cols();
+    const int ndim = static_cast<int>(p.cols());
     T fac1, fac2, ytry;
 
     Eigen::Matrix<T, Eigen::Dynamic, 1> ptry(ndim);
 
-    fac1 = (1.0 - fac) / ndim;
+    fac1 = (T(1) - fac) / ndim;
     fac2 = fac1 - fac;
 
     ptry = psum * fac1 - p.row(ihi).transpose() * fac2;
@@ -213,7 +213,7 @@ bool SimplexAlgorithm::simplex_minimize(Eigen::Matrix<T, Eigen::Dynamic, Eigen::
                                         ReportFunc&& report_func)
 {
     constexpr int MIN_STOL_LOOP = 5;
-    int ndim = p.cols();
+    const int ndim = static_cast<int>(p.cols());
     int i, ilo, ihi, inhi;
     int mpts = ndim + 1;
     T ytry, ysave, rtol;
@@ -247,7 +247,7 @@ bool SimplexAlgorithm::simplex_minimize(Eigen::Matrix<T, Eigen::Dynamic, Eigen::
                 if (i != ihi)
                     inhi = i;
         }
-        rtol = 2.0 * std::fabs(y[ihi] - y[ilo]) / (std::fabs(y[ihi]) + std::fabs(y[ilo]));
+        rtol = T(2) * std::fabs(y[ihi] - y[ilo]) / (std::fabs(y[ihi]) + std::fabs(y[ilo]));
         /*
          * Report that we are proceeding...
          */

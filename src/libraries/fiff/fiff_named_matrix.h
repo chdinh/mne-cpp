@@ -41,6 +41,8 @@
 
 #include <Eigen/Core>
 
+#include <algorithm>
+
 //=============================================================================================================
 // QT INCLUDES
 //=============================================================================================================
@@ -211,54 +213,54 @@ inline std::ostream& operator<<(std::ostream& out, const FIFFLIB::FiffNamedMatri
 
     out << "\trow_names " << p_FiffNamedMatrix.row_names.size() << ":\n\t";
     if (t_bIsShort) {
-        qint32 nchan = p_FiffNamedMatrix.row_names.size() > 6 ? 6 : p_FiffNamedMatrix.row_names.size();
-        for (qint32 i = 0; i < nchan / 2; ++i)
+        const std::size_t nchan = std::min<std::size_t>(p_FiffNamedMatrix.row_names.size(), 6);
+        for (std::size_t i = 0; i < nchan / 2; ++i)
             out << p_FiffNamedMatrix.row_names[i].c_str() << " ";
         out << "... ";
-        for (qint32 i = p_FiffNamedMatrix.row_names.size() - nchan / 2; i < static_cast<int>(p_FiffNamedMatrix.row_names.size()); ++i)
+        for (std::size_t i = p_FiffNamedMatrix.row_names.size() - nchan / 2; i < p_FiffNamedMatrix.row_names.size(); ++i)
             out << p_FiffNamedMatrix.row_names[i].c_str() << " ";
         out << std::endl;
     }
 
     out << "\tcol_names " << p_FiffNamedMatrix.col_names.size() << ":\n\t";
     if (t_bIsShort) {
-        qint32 nchan = p_FiffNamedMatrix.col_names.size() > 6 ? 6 : p_FiffNamedMatrix.col_names.size();
-        for (qint32 i = 0; i < nchan / 2; ++i)
+        const std::size_t nchan = std::min<std::size_t>(p_FiffNamedMatrix.col_names.size(), 6);
+        for (std::size_t i = 0; i < nchan / 2; ++i)
             out << p_FiffNamedMatrix.col_names[i].c_str() << " ";
         out << "... ";
-        for (qint32 i = p_FiffNamedMatrix.col_names.size() - nchan / 2; i < static_cast<int>(p_FiffNamedMatrix.col_names.size()); ++i)
+        for (std::size_t i = p_FiffNamedMatrix.col_names.size() - nchan / 2; i < p_FiffNamedMatrix.col_names.size(); ++i)
             out << p_FiffNamedMatrix.col_names[i].c_str() << " ";
         out << std::endl;
     }
 
     out << "\tdata " << p_FiffNamedMatrix.data.rows() << " x " << p_FiffNamedMatrix.data.cols() << ":\n\t";
     if (t_bIsShort) {
-        qint32 nrows = p_FiffNamedMatrix.data.rows() > 6 ? 6 : p_FiffNamedMatrix.data.rows();
-        qint32 ncols = p_FiffNamedMatrix.data.cols() > 6 ? 6 : p_FiffNamedMatrix.data.cols();
+        const Eigen::Index nrows = std::min<Eigen::Index>(p_FiffNamedMatrix.data.rows(), 6);
+        const Eigen::Index ncols = std::min<Eigen::Index>(p_FiffNamedMatrix.data.cols(), 6);
         if (nrows == 1) {
-            for (qint32 i = 0; i < nrows; ++i) {
-                for (qint32 j = 0; j < ncols / 2; ++j)
+            for (Eigen::Index i = 0; i < nrows; ++i) {
+                for (Eigen::Index j = 0; j < ncols / 2; ++j)
                     out << p_FiffNamedMatrix.data(i, j) << " ";
                 out << "... ";
-                for (qint32 j = p_FiffNamedMatrix.data.cols() - ncols / 2; j < p_FiffNamedMatrix.data.cols(); ++j)
+                for (Eigen::Index j = p_FiffNamedMatrix.data.cols() - ncols / 2; j < p_FiffNamedMatrix.data.cols(); ++j)
                     out << p_FiffNamedMatrix.data(i, j) << " ";
                 out << "\n\t";
             }
         } else {
-            for (qint32 i = 0; i < nrows / 2; ++i) {
-                for (qint32 j = 0; j < ncols / 2; ++j)
+            for (Eigen::Index i = 0; i < nrows / 2; ++i) {
+                for (Eigen::Index j = 0; j < ncols / 2; ++j)
                     out << p_FiffNamedMatrix.data(i, j) << " ";
                 out << "... ";
-                for (qint32 j = p_FiffNamedMatrix.data.cols() - ncols / 2; j < p_FiffNamedMatrix.data.cols(); ++j)
+                for (Eigen::Index j = p_FiffNamedMatrix.data.cols() - ncols / 2; j < p_FiffNamedMatrix.data.cols(); ++j)
                     out << p_FiffNamedMatrix.data(i, j) << " ";
                 out << "\n\t";
             }
             out << "...\n\t";
-            for (qint32 i = p_FiffNamedMatrix.data.rows() - nrows / 2; i < p_FiffNamedMatrix.data.rows(); ++i) {
-                for (qint32 j = 0; j < ncols / 2; ++j)
+            for (Eigen::Index i = p_FiffNamedMatrix.data.rows() - nrows / 2; i < p_FiffNamedMatrix.data.rows(); ++i) {
+                for (Eigen::Index j = 0; j < ncols / 2; ++j)
                     out << p_FiffNamedMatrix.data(i, j) << " ";
                 out << "... ";
-                for (qint32 j = p_FiffNamedMatrix.data.cols() - ncols / 2; j < p_FiffNamedMatrix.data.cols(); ++j)
+                for (Eigen::Index j = p_FiffNamedMatrix.data.cols() - ncols / 2; j < p_FiffNamedMatrix.data.cols(); ++j)
                     out << p_FiffNamedMatrix.data(i, j) << " ";
                 out << "\n\t";
             }

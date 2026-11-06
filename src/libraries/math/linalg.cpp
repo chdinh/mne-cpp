@@ -161,11 +161,11 @@ VectorXi Linalg::intersect(const VectorXi& v1,
 SparseMatrix<double> Linalg::make_block_diag(const MatrixXd& A,
                                              std::int32_t n)
 {
-    std::int32_t ma = A.rows();
-    std::int32_t na = A.cols();
+    const auto ma = static_cast<std::int32_t>(A.rows());
+    const auto na = static_cast<std::int32_t>(A.cols());
     float bdn = static_cast<float>(na) / n;
 
-    if (bdn - std::floor(bdn)) {
+    if (bdn != std::floor(bdn)) {
         return SparseMatrix<double>();
     }
 

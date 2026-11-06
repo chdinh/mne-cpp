@@ -413,7 +413,7 @@ inline bool FiffDigPointSet::isEmpty() const
 
 inline qint32 FiffDigPointSet::size() const
 {
-    return m_qListDigPoint.size();
+    return static_cast<qint32>(m_qListDigPoint.size());
 }
 } // namespace FIFFLIB
 

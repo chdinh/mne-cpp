@@ -167,8 +167,8 @@ bool KMeans::calculate(const MatrixXd& X_in,
 
     const MatrixXd X = normalizedRows(X_in);
     k = kClusters;
-    n = X.rows();
-    p = X.cols();
+    n = static_cast<std::int32_t>(X.rows());
+    p = static_cast<std::int32_t>(X.cols());
 
     // Set up uniform initialization bounds if needed
     RowVectorXd Xmins, Xmaxs;
@@ -269,8 +269,8 @@ bool KMeans::calculate(const MatrixXd& X_in,
 
     const MatrixXd X = normalizedRows(X_in);
     k = static_cast<std::int32_t>(start.rows());
-    n = X.rows();
-    p = X.cols();
+    n = static_cast<std::int32_t>(X.rows());
+    p = static_cast<std::int32_t>(X.cols());
     emptyErrCnt = 0;
     C = normalizedRows(start);
     return runReplicate(X, C, idx, sumD, D, 0);
@@ -741,7 +741,7 @@ bool KMeans::onlineUpdate(const MatrixXd& X, MatrixXd& C, VectorXi& idx)
 
 MatrixXd KMeans::distfun(const MatrixXd& X, const MatrixXd& C)
 {
-    const std::int32_t nclusts = C.rows();
+    const auto nclusts = static_cast<std::int32_t>(C.rows());
     MatrixXd D = MatrixXd::Zero(n, nclusts);
 
     switch (m_distance) {
@@ -779,7 +779,7 @@ MatrixXd KMeans::distfun(const MatrixXd& X, const MatrixXd& C)
 void KMeans::gcentroids(const MatrixXd& X, const VectorXi& index, const VectorXi& clusts,
                         MatrixXd& centroids, VectorXi& counts)
 {
-    const std::int32_t num = clusts.rows();
+    const auto num = static_cast<std::int32_t>(clusts.rows());
     centroids = MatrixXd::Constant(num, p, std::numeric_limits<double>::quiet_NaN());
     counts = VectorXi::Zero(num);
 

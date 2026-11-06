@@ -103,7 +103,7 @@ Sphere Sphere::fit_sphere_simplex(const MatrixX3f& points, double simplex_size)
 {
     VectorXf center;
     float R;
-    if (fit_sphere_to_points(points, simplex_size, center, R)) {
+    if (fit_sphere_to_points(points, static_cast<float>(simplex_size), center, R)) {
         return Sphere(center, R);
     }
 
@@ -224,7 +224,7 @@ MatrixXf Sphere::make_initial_simplex(const VectorXf& pars, float size)
     /*
      * Make the initial tetrahedron
      */
-    int npar = pars.size();
+    const auto npar = static_cast<int>(pars.size());
 
     MatrixXf simplex = MatrixXf::Zero(npar + 1, npar);
 
@@ -256,7 +256,7 @@ float Sphere::fit_eval(const VectorXf& fitpar, const void* user_data)
     float sum = one.sum();
     float sum2 = one.dot(one);
 
-    F = sum2 - sum * sum / user->rr.rows();
+    F = sum2 - sum * sum / static_cast<float>(user->rr.rows());
 
 
     return F;

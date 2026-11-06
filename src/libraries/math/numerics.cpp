@@ -69,7 +69,7 @@ int Numerics::gcd(int iA, int iB)
 bool Numerics::issparse(VectorXd& v)
 {
     std::int32_t c = 0;
-    std::int32_t n = v.rows();
+    const auto n = static_cast<std::int32_t>(v.rows());
     std::int32_t t = n / 2;
 
     for (std::int32_t i = 0; i < n; ++i) {
@@ -134,7 +134,7 @@ MatrixXd Numerics::rescale(const MatrixXd& data,
 
 
     std::int32_t imin = 0;
-    std::int32_t imax = times.size();
+    auto imax = static_cast<std::int32_t>(times.size());
 
     if (baseline.second == baseline.first) {
         imin = 0;
@@ -154,7 +154,7 @@ MatrixXd Numerics::rescale(const MatrixXd& data,
         bmax = 0;
     }
 
-    for (std::int32_t i = times.size() - 1; i >= 0; --i) {
+    for (auto i = static_cast<std::int32_t>(times.size()) - 1; i >= 0; --i) {
         if (times[i] <= bmax) {
             imax = i + 1;
             break;

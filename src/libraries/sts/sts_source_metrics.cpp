@@ -55,7 +55,7 @@ double StatsSourceMetrics::spatialDispersion(
     const MatrixXd& sourcePositions,
     int peakIndex)
 {
-    int nSources = sourceAmplitudes.size();
+    const auto nSources = static_cast<int>(sourceAmplitudes.size());
     Vector3d peakPos = sourcePositions.row(peakIndex);
 
     double weightedSum = 0.0;
