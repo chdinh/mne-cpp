@@ -33,14 +33,16 @@
 #include "fiff_tag.h"
 #include "fiff_types.h"
 #include <QDebug>
-#include <QDir>
 #include <QFile>
 #include <QFileInfo>
 #include <QHash>
 #include <QRegularExpression>
 #include <QXmlStreamReader>
 
+#include <utils/string_utils.h>
+
 #include <optional>
+#include <system_error>
 
 //=============================================================================================================
 // QT INCLUDES
@@ -87,15 +89,10 @@ FiffDigPointSet::FiffDigPointSet(QList<FIFFLIB::FiffDigPoint> pointList)
 
 //=============================================================================================================
 
-FiffDigPointSet::FiffDigPointSet(QIODevice& p_IODevice) //const FiffDigPointSet &p_FiffDigPointSet
+FiffDigPointSet::FiffDigPointSet(const std::filesystem::path& path)
 {
-    //
-    //   Open the file
-    //
-    FiffStream::SPtr t_pStream(new FiffStream(&p_IODevice));
-
-    if (!FiffDigPointSet::readFromStream(t_pStream, *this)) {
-        t_pStream->close();
+    FiffStream::SPtr t_pStream = FiffStream::open(path);
+    if (!t_pStream || !FiffDigPointSet::readFromStream(t_pStream, *this)) {
         throw std::runtime_error("Could not read the FiffDigPointSet");
     }
 
@@ -591,56 +588,32 @@ bool FiffDigPointSet::readNeuroscanDat(const QString& path, FiffDigPointSet& dig
 
 //=============================================================================================================
 
-bool FiffDigPointSet::write(QIODevice& p_IODevice)
+bool FiffDigPointSet::write(const std::filesystem::path& path, std::string* errorMessage)
 {
-    FiffStream::SPtr t_pStream = FiffStream::start_file(p_IODevice);
-    if (!t_pStream) {
+    const auto fail = [errorMessage](std::string message) {
+        if (errorMessage) {
+            *errorMessage = std::move(message);
+        }
         return false;
+    };
+
+    if (path.empty()) {
+        return fail("Output path is empty.");
     }
-    qInfo("Write Digitizer Points in %s...\n", t_pStream->streamName().toUtf8().constData());
+
+    std::error_code ec;
+    const std::filesystem::path dir = path.has_parent_path() ? path.parent_path() : std::filesystem::path(".");
+    if (!std::filesystem::is_directory(dir, ec)) {
+        return fail("Destination directory '" + UTILSLIB::utf8FromPath(dir) + "' does not exist.");
+    }
+
+    FiffStream::SPtr t_pStream = FiffStream::start_file(path);
+    if (!t_pStream) {
+        return fail("Cannot open '" + UTILSLIB::utf8FromPath(path) + "' for writing.");
+    }
     this->writeToStream(t_pStream.data());
     t_pStream->end_file();
-    return true;
-}
-
-//=============================================================================================================
-
-bool FiffDigPointSet::write(const QString& filePath, QString* errorMessage)
-{
-    if (filePath.isEmpty()) {
-        if (errorMessage)
-            *errorMessage = QStringLiteral("Output path is empty.");
-        return false;
-    }
-
-    const QFileInfo info(filePath);
-    if (!info.dir().exists()) {
-        if (errorMessage) {
-            *errorMessage = QStringLiteral("Destination directory '%1' does not exist.")
-                                .arg(info.dir().absolutePath());
-        }
-        return false;
-    }
-
-    QFile file(filePath);
-    if (!file.open(QIODevice::WriteOnly | QIODevice::Truncate)) {
-        if (errorMessage) {
-            *errorMessage = QStringLiteral("Cannot open '%1' for writing: %2")
-                                .arg(filePath, file.errorString());
-        }
-        return false;
-    }
-
-    write(file);
-    file.close();
-
-    if (!QFileInfo::exists(filePath)) {
-        if (errorMessage) {
-            *errorMessage = QStringLiteral("FiffDigPointSet::write produced no file at '%1'.")
-                                .arg(filePath);
-        }
-        return false;
-    }
+    t_pStream->close();
     return true;
 }
 

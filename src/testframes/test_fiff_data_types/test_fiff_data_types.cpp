@@ -4,6 +4,8 @@
 
 #include <QtTest/QtTest>
 #include <QBuffer>
+#include <QFileInfo>
+#include <QTemporaryDir>
 #include <QTemporaryFile>
 #include <Eigen/Dense>
 
@@ -253,10 +255,10 @@ private slots:
         p.r[2] = 0.0f;
         dps << p;
 
-        QBuffer buf;
-        buf.open(QIODevice::ReadWrite);
-        dps.write(buf);
-        QVERIFY(buf.size() > 0);
+        QTemporaryDir dir;
+        const QString path = dir.filePath("dig.fif");
+        QVERIFY(dps.write(path.toStdString()));
+        QVERIFY(QFileInfo(path).size() > 0);
     }
 
     //=========================================================================

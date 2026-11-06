@@ -19,6 +19,7 @@
 #include <fiff/fiff_dig_point_set.h>
 
 #include <utils/montage/standard_montage.h>
+#include <utils/string_utils.h>
 
 #include <QComboBox>
 #include <QFile>
@@ -963,10 +964,9 @@ void AlignWizard::onLoadDigiFiff()
     if (path.isEmpty())
         return;
 
-    QFile file(path);
     FIFFLIB::FiffDigPointSet set;
     try {
-        set = FIFFLIB::FiffDigPointSet(file);
+        set = FIFFLIB::FiffDigPointSet(UTILSLIB::pathFromUtf8(path.toStdString()));
     } catch (const std::exception& e) {
         QMessageBox::warning(this, QStringLiteral("Load digitisation"),
                              QStringLiteral("Failed to read %1:\n%2").arg(path, QString::fromUtf8(e.what())));

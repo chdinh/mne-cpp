@@ -48,6 +48,9 @@
 #include <fiff/fiff_stream.h>
 
 #include <cmath>
+#include <filesystem>
+#include <stdexcept>
+#include <string>
 
 //=============================================================================================================
 // QT INCLUDES
@@ -118,8 +121,7 @@ void TestFiffDigPointPython::initTestCase()
         QSKIP("Raw test data not found");
     }
 
-    QFile rawFile(rawPath());
-    m_dig = FiffDigPointSet(rawFile);
+    m_dig = FiffDigPointSet(rawPath().toStdString());
 
     QCOMPARE(m_dig.size(), 146);
 }
@@ -255,11 +257,10 @@ void TestFiffDigPointPython::writeRoundTrip()
 {
     // The written isotrak file reads back with every point; mne.channels.read_dig_fif reads it too (146 points).
     QTemporaryDir dir;
-    const QString path = dir.filePath("dig.fif");
-    QString error;
-    QVERIFY2(m_dig.write(path, &error), qPrintable(error));
-    QFile file(path);
-    const FiffDigPointSet back(file);
+    const std::string path = dir.filePath("dig.fif").toStdString();
+    std::string error;
+    QVERIFY2(m_dig.write(path, &error), error.c_str());
+    const FiffDigPointSet back(path);
     QCOMPARE(back.size(), m_dig.size());
     for (qint32 i = 0; i < m_dig.size(); ++i) {
         QCOMPARE(back[i].kind, m_dig[i].kind);
@@ -268,12 +269,13 @@ void TestFiffDigPointPython::writeRoundTrip()
             QCOMPARE(back[i].r[c], m_dig[i].r[c]);
     }
 
-    QVERIFY(!m_dig.write(QString(), &error));
-    QCOMPARE(error, QStringLiteral("Output path is empty."));
-    QVERIFY(!m_dig.write(dir.filePath("missing/dig.fif"), &error));
-    QVERIFY(error.startsWith(QStringLiteral("Destination directory")));
-    QVERIFY(!m_dig.write(dir.path(), &error));
-    QVERIFY(error.startsWith(QStringLiteral("Cannot open")));
+    QVERIFY(!m_dig.write(std::filesystem::path(), &error));
+    QCOMPARE(error, std::string("Output path is empty."));
+    QVERIFY(!m_dig.write(dir.filePath("missing/dig.fif").toStdString(), &error));
+    QVERIFY(error.starts_with("Destination directory"));
+    QVERIFY(!m_dig.write(dir.path().toStdString(), &error));
+    QVERIFY(error.starts_with("Cannot open"));
+    QVERIFY_THROWS_EXCEPTION(std::runtime_error, FiffDigPointSet(dir.filePath("absent.fif").toStdString()));
 
     // FIFF_MNE_COORD_FRAME in the isotrak block puts every point into that frame, as mne's _read_dig_fif
     QFile framed(dir.filePath("framed.fif"));
@@ -291,7 +293,7 @@ void TestFiffDigPointPython::writeRoundTrip()
     stream->end_block(FIFFB_MEAS);
     stream->end_file();
     framed.close();
-    const FiffDigPointSet inMri(framed);
+    const FiffDigPointSet inMri(framed.fileName().toStdString());
     QCOMPARE(inMri.size(), 2);
     QCOMPARE(inMri[0].coord_frame, FIFFV_COORD_MRI);
     QCOMPARE(inMri[1].coord_frame, FIFFV_COORD_MRI);

@@ -42,6 +42,7 @@
 #include <mne/mne_msh_display_surface_set.h>
 #include <mne/mne_msh_display_surface.h>
 #include <mne/mne_surface_or_volume.h>
+#include <utils/string_utils.h>
 
 #include <memory>
 
@@ -202,8 +203,7 @@ void RealTime3DWidget::update(SCMEASLIB::Measurement::SPtr pMeasurement)
         if (QSharedPointer<HpiFitResult> pHpiFitResult = pRTHR->getValue()) {
             if (m_sFilePathDigitizers != pHpiFitResult->sFilePathDigitzers && m_pBemHeadAvr) {
                 //Add all digitizer but additional points to the 3D view
-                QFile fileDig(pHpiFitResult->sFilePathDigitzers);
-                FiffDigPointSet digSet(fileDig);
+                FiffDigPointSet digSet(UTILSLIB::pathFromUtf8(pHpiFitResult->sFilePathDigitzers.toStdString()));
                 addDigSetToView(digSet);
                 alignFiducials(pHpiFitResult->sFilePathDigitzers);
             }

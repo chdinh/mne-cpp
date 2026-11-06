@@ -430,14 +430,12 @@ void TestFiffFsLibrary::fiff_digPointSetRoundtrip()
     QString tmpPath = QCoreApplication::applicationDirPath() + "/test_dig_tmp.fif";
     QFile::remove(tmpPath);
     {
-        QFile outFile(tmpPath);
-        digSet.write(outFile);
+        digSet.write(tmpPath.toStdString());
     }
 
     // Read back
     {
-        QFile inFile(tmpPath);
-        FiffDigPointSet readSet(inFile);
+        FiffDigPointSet readSet(tmpPath.toStdString());
         QVERIFY(readSet.size() > 0);
     }
 

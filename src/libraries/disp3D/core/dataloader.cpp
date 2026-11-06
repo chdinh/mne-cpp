@@ -242,8 +242,7 @@ DataLoader::SensorLoadResult DataLoader::loadSensors(const QString& fifPath,
         result.digitizerPoints = info.dig;
         result.hasDigitizer = true;
     } else if (!result.hasInfo) {
-        file.reset();
-        digSet = FiffDigPointSet(file);
+        digSet = FiffDigPointSet(UTILSLIB::pathFromUtf8(fifPath.toStdString()));
         if (digSet.size() > 0) {
             for (int i = 0; i < digSet.size(); ++i) {
                 result.digitizerPoints.append(digSet[i]);

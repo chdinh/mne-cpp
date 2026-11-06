@@ -449,10 +449,10 @@ void MneAlign::onWizardSaveDigitisation(const QString& outPath)
         set << dig;
     }
 
-    QString err;
-    if (!set.write(outPath, &err)) {
+    std::string err;
+    if (!set.write(UTILSLIB::pathFromUtf8(outPath.toStdString()), &err)) {
         QMessageBox::warning(this, windowTitle(),
-                             QStringLiteral("Save digitisation failed:\n%1").arg(err));
+                             QStringLiteral("Save digitisation failed:\n%1").arg(QString::fromStdString(err)));
         return;
     }
     statusBar()->showMessage(

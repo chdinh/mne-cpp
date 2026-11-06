@@ -38,13 +38,15 @@
 //=============================================================================================================
 
 #include <QSharedPointer>
-#include <QIODevice>
 #include <QList>
 #include <QStringList>
 
 #include "fiff_stream.h"
 #include "fiff_dig_point.h"
+
+#include <filesystem>
 #include <memory>
+#include <string>
 
 //=============================================================================================================
 // EIGEN INCLUDES
@@ -124,11 +126,11 @@ public:
 
     //=========================================================================================================
     /**
-     * Constructs a FiffDigPointSet by reading from a IO device.
+     * Constructs a FiffDigPointSet by reading a FIFF file.
      *
-     * @param[in] p_IODevice   IO device to read the digitizer point set from.
+     * @param[in] path   FIFF file to read the digitizer point set from.
      */
-    FiffDigPointSet(QIODevice& p_IODevice);
+    explicit FiffDigPointSet(const std::filesystem::path& path);
 
     //=========================================================================================================
     /**
@@ -282,27 +284,14 @@ public:
 
     //=========================================================================================================
     /**
-     * Writes the FiffDigPointSet to a FIFF file.
+     * Writes the digitizer point set to a FIFF file, replacing any existing file.
      *
-     * @param[in] p_IODevice   IO device to write the digitizer point set to.
-     *
-     * @return false if the device cannot be opened for writing.
-     */
-    bool write(QIODevice& p_IODevice);
-
-    //=========================================================================================================
-    /**
-     * Convenience overload: write the digitizer point set to a path on disk.
-     *
-     * Verifies that the destination directory exists and that the file was
-     * actually produced. The file is opened in WriteOnly|Truncate mode.
-     *
-     * @param[in]  filePath      Destination .fif file path.
+     * @param[in]  path          Destination .fif file path.
      * @param[out] errorMessage  Optional, populated on failure.
      *
      * @return true on success, false on error.
      */
-    bool write(const QString& filePath, QString* errorMessage = nullptr);
+    bool write(const std::filesystem::path& path, std::string* errorMessage = nullptr);
 
     //=========================================================================================================
     /**

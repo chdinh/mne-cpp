@@ -642,8 +642,7 @@ void TestFiffStreamPython::refusesUnwritablePath()
     RowVectorXd cals;
     QVERIFY(!FiffStream::start_writing_raw(raw, info, cals));
     QVERIFY(!FiffCoordTrans().write(path.toStdString()));
-    QFile dig(path);
-    QVERIFY(!FiffDigPointSet().write(dig));
+    QVERIFY(!FiffDigPointSet().write(path.toStdString()));
     QVERIFY(!QFileInfo::exists(path));
 
     // The channel list, not the nchan field (-1 when never set), decides what is written.

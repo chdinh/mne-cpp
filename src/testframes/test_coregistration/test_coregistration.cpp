@@ -95,7 +95,6 @@ TestCoregistration::TestCoregistration()
 void TestCoregistration::initTestCase()
 {
     // Create files
-    QFile t_fileDig(QCoreApplication::applicationDirPath() + "/../resources/data/mne-cpp-test-data/MEG/sample/sample_audvis-ave.fif");
     QFile t_fileBem(QCoreApplication::applicationDirPath() + "/../resources/data/mne-cpp-test-data/subjects/sample/bem/sample-1280-1280-1280-bem.fif");
     QFile t_fileTransRefFit(QCoreApplication::applicationDirPath() + "/../resources/data/mne-cpp-test-data/MEG/sample/all-trans.fif");
     QFile t_fileTransRefIcp(QCoreApplication::applicationDirPath() + "/../resources/data/mne-cpp-test-data/Result/icp-trans.fif");
@@ -115,10 +114,10 @@ void TestCoregistration::initTestCase()
     // read digitizer data
     QList<int> lPickFiducials({FIFFV_POINT_CARDINAL});
     QList<int> lPickHSP({FIFFV_POINT_CARDINAL, FIFFV_POINT_HPI, FIFFV_POINT_EXTRA});
-    FiffDigPointSet digSetSrc = FiffDigPointSet(t_fileDig).pickTypes(lPickFiducials); // Fiducials Head-Space
-    FiffDigPointSet digSetDst = FiffDigPointSet(t_fileDig).pickTypes(lPickFiducials);
-    digSetDst.applyTransform(transFitMatchedRef, false);                        // Fiducials MRI-Space
-    FiffDigPointSet digSetHsp = FiffDigPointSet(t_fileDig).pickTypes(lPickHSP); // Head shape points Head-Space
+    FiffDigPointSet digSetSrc = FiffDigPointSet((QCoreApplication::applicationDirPath() + "/../resources/data/mne-cpp-test-data/MEG/sample/sample_audvis-ave.fif").toStdString()).pickTypes(lPickFiducials); // Fiducials Head-Space
+    FiffDigPointSet digSetDst = FiffDigPointSet((QCoreApplication::applicationDirPath() + "/../resources/data/mne-cpp-test-data/MEG/sample/sample_audvis-ave.fif").toStdString()).pickTypes(lPickFiducials);
+    digSetDst.applyTransform(transFitMatchedRef, false);                                                                                                                                               // Fiducials MRI-Space
+    FiffDigPointSet digSetHsp = FiffDigPointSet((QCoreApplication::applicationDirPath() + "/../resources/data/mne-cpp-test-data/MEG/sample/sample_audvis-ave.fif").toStdString()).pickTypes(lPickHSP); // Head shape points Head-Space
 
     // Initial Fiducial Alignment
     // Declare variables

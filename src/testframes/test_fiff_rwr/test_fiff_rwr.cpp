@@ -505,10 +505,13 @@ void TestFiffRWR::writersStable()
         QVERIFY(written.open(QIODevice::ReadOnly));
         bytes = written.readAll();
     } else if (writer == "dig") {
-        QFile in(meg + "sample_audvis_trunc_raw.fif");
-        FiffDigPointSet dig(in);
+        FiffDigPointSet dig((meg + "sample_audvis_trunc_raw.fif").toStdString());
         QVERIFY(dig.size() > 0);
-        QVERIFY(dig.write(out));
+        const QString path = m_tempDir.filePath("stable-dig.fif");
+        QVERIFY(dig.write(path.toStdString()));
+        QFile written(path);
+        QVERIFY(written.open(QIODevice::ReadOnly));
+        bytes = written.readAll();
     } else if (writer == "fwd") {
         QFile in(testDataDir() + "/Result/ref-sample_audvis-meg-eeg-oct-6-fwd.fif");
         const MNELIB::MNEForwardSolution fwd(in);

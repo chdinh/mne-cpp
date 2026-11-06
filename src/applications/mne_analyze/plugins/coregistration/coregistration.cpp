@@ -357,8 +357,7 @@ void CoRegistration::onFiducialsChanged(const QString& sFilePath)
 
 void CoRegistration::onStoreFiducials(const QString& sFilePath)
 {
-    QFile fileDig(sFilePath);
-    m_digFidMri.write(fileDig);
+    m_digFidMri.write(UTILSLIB::pathFromUtf8(sFilePath.toStdString()));
     return;
 }
 

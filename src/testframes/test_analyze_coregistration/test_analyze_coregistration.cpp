@@ -70,11 +70,10 @@ void prepareFit(CoRegistration& plugin, AnalyzeData& data, CoregSettingsView* vi
     auto bem = data.loadModel<BemDataModel>(sampleFile("subjects/sample/bem/sample-1280-1280-1280-bem.fif"));
     plugin.handleEvent(QSharedPointer<Event>::create(SELECTED_MODEL_CHANGED, nullptr, QVariant::fromValue(bem.staticCast<AbstractModel>())));
     const QString avePath = sampleFile("MEG/sample/sample_audvis-ave.fif");
-    QFile aveFile(avePath);
-    FiffDigPointSet fids = FiffDigPointSet(aveFile).pickTypes({FIFFV_POINT_CARDINAL});
+    FiffDigPointSet fids = FiffDigPointSet(avePath.toStdString()).pickTypes({FIFFV_POINT_CARDINAL});
     fids.applyTransform(FiffCoordTrans::readTransform(sampleFile("MEG/sample/all-trans.fif"), FIFFV_COORD_HEAD, FIFFV_COORD_MRI));
     const QString fidPath = sDir + "/sample-fiducials.fif";
-    QVERIFY(fids.write(fidPath));
+    QVERIFY(fids.write(fidPath.toStdString()));
     emit view->digFileChanged(avePath);
     emit view->fidFileChanged(fidPath);
     emit view->fitFiducials();
@@ -145,8 +144,7 @@ void TestAnalyzeCoregistration::fitsFiducialsByIdentity()
     // Stored in another order than the digitizer's, they must still be matched by identity.
     const QString avePath = sampleFile("MEG/sample/sample_audvis-ave.fif");
     const FiffCoordTrans reference = FiffCoordTrans::readTransform(sampleFile("MEG/sample/all-trans.fif"), FIFFV_COORD_HEAD, FIFFV_COORD_MRI);
-    QFile aveFile(avePath);
-    FiffDigPointSet fids = FiffDigPointSet(aveFile).pickTypes({FIFFV_POINT_CARDINAL});
+    FiffDigPointSet fids = FiffDigPointSet(avePath.toStdString()).pickTypes({FIFFV_POINT_CARDINAL});
     QCOMPARE(fids.size(), 3);
     fids.applyTransform(reference);
     FiffDigPointSet reordered;
@@ -158,7 +156,7 @@ void TestAnalyzeCoregistration::fitsFiducialsByIdentity()
     }
     QTemporaryDir dir;
     const QString fidPath = dir.filePath("sample-fiducials.fif");
-    QVERIFY(reordered.write(fidPath));
+    QVERIFY(reordered.write(fidPath.toStdString()));
 
     emit view->digFileChanged(avePath);
     emit view->fidFileChanged(fidPath);
