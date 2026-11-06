@@ -25,6 +25,7 @@
 #include <fiff/fiff_coord_trans.h>
 
 #include <mne/mne_forward_solution.h>
+#include <utils/string_utils.h>
 
 #include <scMeas/realtimesourceestimate.h>
 
@@ -142,11 +143,10 @@ void RtClustMneSetupWidget::showMriHeadFileDialog()
                                                           QString(),
                                                           tr("Fif Files (*.fif)"));
 
-    QFile file(t_sMriHeadFile);
 
     FIFFLIB::FiffCoordTrans mriHeadTrans;
 
-    if (FIFFLIB::FiffCoordTrans::read(file, mriHeadTrans) && !mriHeadTrans.isEmpty()) {
+    if (FIFFLIB::FiffCoordTrans::read(UTILSLIB::pathFromUtf8(t_sMriHeadFile.toStdString()), mriHeadTrans) && !mriHeadTrans.isEmpty()) {
         m_pMNE->m_mriHeadTrans = mriHeadTrans;
         ui.m_qLineEdit_MriHeadTrans->setText(t_sMriHeadFile);
     }

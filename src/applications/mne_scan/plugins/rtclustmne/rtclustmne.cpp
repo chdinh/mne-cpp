@@ -118,7 +118,7 @@ void RtClustMne::init()
     m_pAnnotationSet = FsAnnotationSet::SPtr(new FsAnnotationSet(m_sAtlasDir + "/lh.aparc.a2009s.annot", m_sAtlasDir + "/rh.aparc.a2009s.annot"));
     m_pSurfaceSet = FsSurfaceSet::SPtr(new FsSurfaceSet(m_sSurfaceDir + "/lh.orig", m_sSurfaceDir + "/rh.orig"));
     // The sample-data transform is optional; a missing file leaves the identity
-    if (!FIFFLIB::FiffCoordTrans::read(m_fMriHeadTrans, m_mriHeadTrans)) {
+    if (!FIFFLIB::FiffCoordTrans::read(UTILSLIB::pathFromUtf8(m_fMriHeadTrans.fileName().toStdString()), m_mriHeadTrans)) {
         m_mriHeadTrans = FIFFLIB::FiffCoordTrans();
     }
 

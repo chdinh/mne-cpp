@@ -29,6 +29,7 @@
 #include <mne/mne_bem.h>
 #include <mne/mne_project_to_surface.h>
 #include <mne/mne_icp.h>
+#include <utils/string_utils.h>
 
 //=============================================================================================================
 // EIGEN INCLUDES
@@ -365,9 +366,8 @@ void CoRegistration::onStoreFiducials(const QString& sFilePath)
 
 void CoRegistration::onLoadTrans(const QString& sFilePath)
 {
-    QFile fileTrans(sFilePath);
     FiffCoordTrans transTemp;
-    if (!FiffCoordTrans::read(fileTrans, transTemp)) {
+    if (!FiffCoordTrans::read(UTILSLIB::pathFromUtf8(sFilePath.toStdString()), transTemp)) {
         qWarning() << "[CoRegistration::onLoadTrans] No transformation found in" << sFilePath;
         return;
     }
@@ -411,10 +411,8 @@ void CoRegistration::onLoadTrans(const QString& sFilePath)
 
 void CoRegistration::onStoreTrans(const QString& sFilePath)
 {
-    QFile fileTrans(sFilePath);
-
     if (!m_transHeadMri.isEmpty()) {
-        m_transHeadMri.write(fileTrans);
+        m_transHeadMri.write(UTILSLIB::pathFromUtf8(sFilePath.toStdString()));
     }
     return;
 }

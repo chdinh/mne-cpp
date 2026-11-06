@@ -531,8 +531,7 @@ void TestFiffFsLibrary::fiff_coordTransReadWrite()
 
     // Without frames the first transform is read, as mne.read_trans does (device -> head in all-trans.fif)
     FiffCoordTrans trans2;
-    QFile transFile(transPath());
-    QVERIFY(FiffCoordTrans::read(transFile, trans2));
+    QVERIFY(FiffCoordTrans::read(transPath().toStdString(), trans2));
     QCOMPARE(trans2.from, FIFFV_COORD_DEVICE);
     QCOMPARE(trans2.to, FIFFV_COORD_HEAD);
     QVERIFY(std::fabs(trans2.trans(0, 3) + 6.129309069e-03f) < 1e-8f);

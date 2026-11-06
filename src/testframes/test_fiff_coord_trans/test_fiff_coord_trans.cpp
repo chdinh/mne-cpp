@@ -83,17 +83,10 @@ void TestFiffCoordTrans::initTestCase()
     qInstallMessageHandler(UTILSLIB::MNELogger::customLogWriter);
 
     QVERIFY(m_tempDir.isValid());
-    QFile fileTransRef(transPath());
-    QFile fileTransTest(m_tempDir.filePath("test-trans.fif"));
-
-    // read reference
-    m_transRef = FiffCoordTrans(fileTransRef);
-
-    // write to test file
-    m_transRef.write(fileTransTest);
-
-    // read test again
-    m_transTest = FiffCoordTrans(fileTransTest);
+    const std::string testPath = m_tempDir.filePath("test-trans.fif").toStdString();
+    m_transRef = FiffCoordTrans(transPath().toStdString());
+    QVERIFY(m_transRef.write(testPath));
+    m_transTest = FiffCoordTrans(testPath);
 }
 
 //=============================================================================================================

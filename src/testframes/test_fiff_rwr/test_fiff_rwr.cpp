@@ -492,9 +492,12 @@ void TestFiffRWR::writersStable()
         QVERIFY(written.open(QIODevice::ReadOnly));
         bytes = written.readAll();
     } else if (writer == "trans") {
-        QFile in(meg + "all-trans.fif");
-        FiffCoordTrans trans(in);
-        QVERIFY(trans.write(out));
+        FiffCoordTrans trans((meg + "all-trans.fif").toStdString());
+        const QString path = m_tempDir.filePath("stable-trans.fif");
+        QVERIFY(trans.write(path.toStdString()));
+        QFile written(path);
+        QVERIFY(written.open(QIODevice::ReadOnly));
+        bytes = written.readAll();
     } else if (writer == "dig") {
         QFile in(meg + "sample_audvis_trunc_raw.fif");
         FiffDigPointSet dig(in);

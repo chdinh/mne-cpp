@@ -4,7 +4,7 @@
   "policy": "scripts/quality/api_evidence_policy.json",
   "summary": {
     "exported_classes": 487,
-    "exported_free_functions": 159,
+    "exported_free_functions": 160,
     "registered_classes": 577,
     "exported_not_registered": 1,
     "registered_function_modules": 13,
@@ -810,6 +810,11 @@
     {
       "name": "buildHashLong",
       "header": "lsl/lsl_global.h",
+      "library": "lsl"
+    },
+    {
+      "name": "discoveryGroups",
+      "header": "lsl/lsl_protocol.h",
       "library": "lsl"
     },
     {

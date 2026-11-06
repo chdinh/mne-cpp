@@ -41,14 +41,14 @@ Constructs the coordinate transformation descriptor.
 
 ---
 
-### FiffCoordTrans(p_IODevice)
+### FiffCoordTrans(path)
 
-Constructs a coordinate transformation, by reading from a IO device.
+Reads the first coordinate transformation of a FIFF file.
 
 **Parameters:**
 
-- **p_IODevice** : *QIODevice &*
-  IO device to read from the coordinate transform.
+- **path** : *const std::filesystem::path &*
+  FIFF file holding the coordinate transform.
 
 ---
 
@@ -204,14 +204,14 @@ Prints the coordinate transform.
 
 ---
 
-### write(p_IODevice)
+### write(path)
 
 Writes the transformation to file.
 
 **Parameters:**
 
-- **p_IODevice** : *QIODevice &*
-  IO device to write the transformation to.
+- **path** : *const std::filesystem::path &*
+  FIFF file to create.
 
 **Returns:**
 
@@ -262,7 +262,7 @@ Calculate translation between two rotation matrices in meter.
 
 ## Static Methods
 
-### read(p_IODevice, p_Trans)
+### read(path, p_Trans)
 
 Reads the first coordinate transform from a fif file (as mne.read_trans).
 
@@ -270,8 +270,8 @@ Use `readTransform()` to select a transform by its coordinate frames.
 
 **Parameters:**
 
-- **p_IODevice** : *QIODevice &*
-  A fiff IO device like a fiff QFile or QTCPSocket.
+- **path** : *const std::filesystem::path &*
+  FIFF file holding the coordinate transform.
 
 - **p_Trans** : *[FiffCoordTrans](/docs/api/fiff/fiff-coord-trans) &*
   A coordinate transform from a fif file.

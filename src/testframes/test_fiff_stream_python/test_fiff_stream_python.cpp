@@ -641,8 +641,7 @@ void TestFiffStreamPython::refusesUnwritablePath()
     QFile raw(path);
     RowVectorXd cals;
     QVERIFY(!FiffStream::start_writing_raw(raw, info, cals));
-    QFile trans(path);
-    QVERIFY(!FiffCoordTrans().write(trans));
+    QVERIFY(!FiffCoordTrans().write(path.toStdString()));
     QFile dig(path);
     QVERIFY(!FiffDigPointSet().write(dig));
     QVERIFY(!QFileInfo::exists(path));

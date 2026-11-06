@@ -45,7 +45,7 @@
 // QT INCLUDES
 //=============================================================================================================
 
-#include <QIODevice>
+#include <filesystem>
 #include <QSharedPointer>
 
 #include <memory>
@@ -95,11 +95,11 @@ public:
 
     //=========================================================================================================
     /**
-     * Constructs a coordinate transformation, by reading from a IO device.
+     * Reads the first coordinate transformation of a FIFF file.
      *
-     * @param[in] p_IODevice     IO device to read from the coordinate transform.
+     * @param[in] path   FIFF file holding the coordinate transform.
      */
-    FiffCoordTrans(QIODevice& p_IODevice);
+    explicit FiffCoordTrans(const std::filesystem::path& path);
 
     //=========================================================================================================
     /**
@@ -267,12 +267,12 @@ public:
      * Reads the first coordinate transform from a fif file (as mne.read_trans). Use readTransform()
      * to select a transform by its coordinate frames.
      *
-     * @param[in] p_IODevice    A fiff IO device like a fiff QFile or QTCPSocket.
+     * @param[in] path   FIFF file holding the coordinate transform.
      * @param[out] p_Trans      A coordinate transform from a fif file.
      *
      * @return true if succeeded, false otherwise.
      */
-    static bool read(QIODevice& p_IODevice, FiffCoordTrans& p_Trans);
+    static bool read(const std::filesystem::path& path, FiffCoordTrans& p_Trans);
 
     //=========================================================================================================
     /**
@@ -445,11 +445,11 @@ public:
     /**
      * @brief Writes the transformation to file.
      *
-     * @param[in] p_IODevice   IO device to write the transformation to.
+     * @param[in] path   FIFF file to create.
      *
      * @return false if the device cannot be opened for writing.
      */
-    bool write(QIODevice& p_IODevice);
+    bool write(const std::filesystem::path& path);
 
     //=========================================================================================================
     /**

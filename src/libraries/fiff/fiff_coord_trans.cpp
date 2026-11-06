@@ -68,13 +68,13 @@ FiffCoordTrans::FiffCoordTrans()
 
 //=============================================================================================================
 
-FiffCoordTrans::FiffCoordTrans(QIODevice& p_IODevice)
+FiffCoordTrans::FiffCoordTrans(const std::filesystem::path& path)
 : from(-1)
 , to(-1)
 , trans(MatrixXf::Identity(4, 4))
 , invtrans(MatrixXf::Identity(4, 4))
 {
-    if (!read(p_IODevice, *this)) {
+    if (!read(path, *this)) {
         throw std::runtime_error("Coordinate transform not found");
     }
 }
@@ -120,13 +120,12 @@ bool FiffCoordTrans::invert_transform()
 
 //=============================================================================================================
 
-bool FiffCoordTrans::read(QIODevice& p_IODevice, FiffCoordTrans& p_Trans)
+bool FiffCoordTrans::read(const std::filesystem::path& path, FiffCoordTrans& p_Trans)
 {
-    FiffStream::SPtr pStream(new FiffStream(&p_IODevice));
-
-    qInfo("Reading coordinate transform from %s...\n", pStream->streamName().toUtf8().constData());
-    if (!pStream->open())
+    FiffStream::SPtr pStream = FiffStream::open(path);
+    if (!pStream)
         return false;
+    qInfo("Reading coordinate transform from %s...\n", pStream->streamName().toUtf8().constData());
 
     //
     //   Locate and read the coordinate transformation
@@ -149,17 +148,16 @@ bool FiffCoordTrans::read(QIODevice& p_IODevice, FiffCoordTrans& p_Trans)
 
 //=============================================================================================================
 
-bool FiffCoordTrans::write(QIODevice& qIODevice)
+bool FiffCoordTrans::write(const std::filesystem::path& path)
 {
-    // Create the file and save the essentials
-    FiffStream::SPtr pStream = FiffStream::start_file(qIODevice);
+    FiffStream::SPtr pStream = FiffStream::start_file(path);
     if (!pStream) {
         return false;
     }
     qInfo("Write coordinate transform in %s...\n", pStream->streamName().toUtf8().constData());
     this->writeToStream(pStream.data());
     pStream->end_file();
-    qIODevice.close();
+    pStream->close();
     return true;
 }
 
