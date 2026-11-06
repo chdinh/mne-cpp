@@ -58,7 +58,7 @@ inline constexpr std::uint8_t kTagTransmitted = 2;     /**< Sample tag: an 8-byt
 std::vector<QHostAddress> discoveryTargets();
 
 /** @return The multicast groups an outlet joins to hear queries. */
-std::vector<QHostAddress> discoveryGroups();
+LSLSHARED_EXPORT std::vector<QHostAddress> discoveryGroups();
 
 /**
  * Joins the discovery groups on the default and the loopback interface; outlets on one host share the port.
