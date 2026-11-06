@@ -231,9 +231,10 @@ ok &= expect(pca.desc == "PCA-v1" && !pca.active && pca.data->nrow == 1 && pca.d
 
 MNE library: BEM surfaces, surface projection, ICP, source spaces and epochs.
 
-````cpp title="src/examples/ex_mne_api/main.cpp, line 452"
+````cpp title="src/examples/ex_mne_api/main.cpp, line 448"
+MNE::write_events_to_fif(eveName, events.events);
 MatrixXi eventsBack;
-MNE::read_events(eveName, rawFile.fileName(), eventsBack);
+MNE::read_events(eveName, rawFile.fileName().toStdString(), eventsBack);
 QList<FiffProj> projs = raw.info.projs; // stored inactive in the raw file
 FiffProj::activate_projs(projs);
 MatrixXd ssp; // like mne._fiff.proj.make_projector(info['projs'], ch_names, bads)

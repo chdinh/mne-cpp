@@ -179,7 +179,7 @@ Size of the old struct (`fiffIdRec`) 5*int = 5*4 = 20.
 
 FIFF library: measurement info, channels, digitizer, transforms, projectors, covariance, events, annotations, evoked sets and the low-level file structure.
 
-````cpp title="src/examples/ex_fiff_api/main.cpp, line 210"
+````cpp title="src/examples/ex_fiff_api/main.cpp, line 209"
 std::unique_ptr<FiffTag> tag;
 const bool hasNchan = measNodes.first()->find_tag(stream, FIFF_NCHAN, tag); // raw tag access
 const int nchanTag = *tag->toInt();

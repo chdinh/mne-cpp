@@ -289,8 +289,8 @@ int main(int argc, char* argv[])
                             keep_comp);
 
     // Read the events
-    MNE::read_events(sEve,
-                     sRaw,
+    MNE::read_events(sEve.toStdString(),
+                     sRaw.toStdString(),
                      events);
 
     // Read the epochs and reject bad epochs. Note, that SSPs are automatically applied to the data if MNE::setup_compensators was called beforehand.

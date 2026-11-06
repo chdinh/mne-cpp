@@ -22,10 +22,9 @@ On-disk representation matches `mne.io.write.write_events` output and the `-eve.
 ```cpp title="src/examples/ex_fiff_api/main.cpp"
 FiffEvents events;
 FiffEvents::detect_from_raw(raw, events, "STI 014"); // rising edges of the trigger channel
-QFile eventFile(tmp.filePath("sample-eve.fif"));
-const bool eventsWritten = eventFile.open(QIODevice::WriteOnly) && events.write_to_fif(eventFile);
-eventFile.close();
-FiffEvents eventsBack(eventFile); // mne.read_events reads this file too
+const std::string eventPath = tmp.filePath("sample-eve.fif").toStdString();
+const bool eventsWritten = events.write_to_fif(eventPath);
+FiffEvents eventsBack(eventPath); // mne.read_events reads this file too
 ```
 
 ---
@@ -40,27 +39,27 @@ Creates an empty event set.
 
 ---
 
-### FiffEvents(p_IODevice)
+### FiffEvents(path)
 
-Constructs [`FiffEvents`](/docs/api/fiff/fiff-events) by reading from an I/O device.
+Constructs [`FiffEvents`](/docs/api/fiff/fiff-events) by reading an event file.
 
 Attempts to read as FIFF first; if that fails, tries ASCII format.
 
 **Parameters:**
 
-- **p_IODevice** : *QIODevice &*
-  The I/O device to read from.
+- **path** : *const std::filesystem::path &*
+  The event file.
 
 ---
 
-### write_to_fif(p_IODevice)
+### write_to_fif(path)
 
 Write the event list to a FIFF file.
 
 **Parameters:**
 
-- **p_IODevice** : *QIODevice &*
-  The I/O device to write to.
+- **path** : *const std::filesystem::path &*
+  The FIFF file to write.
 
 **Returns:**
 
@@ -68,14 +67,14 @@ Write the event list to a FIFF file.
 
 ---
 
-### write_to_ascii(p_IODevice, sfreq)
+### write_to_ascii(path, sfreq)
 
 Write the event list to a text file (MNE-C compatible format).
 
 **Parameters:**
 
-- **p_IODevice** : *QIODevice &*
-  The I/O device to write to.
+- **path** : *const std::filesystem::path &*
+  The text file to write.
 
 - **sfreq** : *float*
   Sampling frequency for time column computation.
@@ -173,10 +172,10 @@ If t_sEventName is empty, the event file name is derived from the raw file name 
 
 **Parameters:**
 
-- **t_sEventName** : *const QString &*
+- **t_sEventName** : *const std::filesystem::path &*
   Path to the event file (empty = derive from raw file name).
 
-- **t_fileRawName** : *const QString &*
+- **t_fileRawName** : *const std::filesystem::path &*
   Path to the raw data file (used to derive event file name if needed).
 
 - **p_Events** : *[FiffEvents](/docs/api/fiff/fiff-events) &*
@@ -188,14 +187,14 @@ If t_sEventName is empty, the event file name is derived from the raw file name 
 
 ---
 
-### read_from_fif(p_IODevice, p_Events)
+### read_from_fif(path, p_Events)
 
 Read an event list from a FIFF file.
 
 **Parameters:**
 
-- **p_IODevice** : *QIODevice &*
-  The I/O device to read from.
+- **path** : *const std::filesystem::path &*
+  The FIFF file.
 
 - **p_Events** : *[FiffEvents](/docs/api/fiff/fiff-events) &*
   The loaded events.
@@ -206,14 +205,14 @@ Read an event list from a FIFF file.
 
 ---
 
-### read_from_ascii(p_IODevice, p_Events)
+### read_from_ascii(path, p_Events)
 
 Read a list of events from an ASCII event file.
 
 **Parameters:**
 
-- **p_IODevice** : *QIODevice &*
-  The I/O device to read from.
+- **path** : *const std::filesystem::path &*
+  The text file.
 
 - **p_Events** : *[FiffEvents](/docs/api/fiff/fiff-events) &*
   The loaded events.
@@ -371,10 +370,9 @@ FIFF library: measurement info, channels, digitizer, transforms, projectors, cov
 ````cpp title="src/examples/ex_fiff_api/main.cpp, line 173"
 FiffEvents events;
 FiffEvents::detect_from_raw(raw, events, "STI 014"); // rising edges of the trigger channel
-QFile eventFile(tmp.filePath("sample-eve.fif"));
-const bool eventsWritten = eventFile.open(QIODevice::WriteOnly) && events.write_to_fif(eventFile);
-eventFile.close();
-FiffEvents eventsBack(eventFile); // mne.read_events reads this file too
+const std::string eventPath = tmp.filePath("sample-eve.fif").toStdString();
+const bool eventsWritten = events.write_to_fif(eventPath);
+FiffEvents eventsBack(eventPath); // mne.read_events reads this file too
 // mne.find_events(raw, "STI 014"): 25 events, first [13988, 0, 2], [14172, 0, 3], [14385, 0, 1]
 ok &= expect(events.num_events() == 25 && events.events.row(0) == RowVector3i(13988, 0, 2) && events.events.row(2) == RowVector3i(14385, 0, 1) && eventsWritten && eventsBack.events == events.events,
              "FiffEvents: 25 trigger events match mne.find_events and round-trip through -eve.fif");

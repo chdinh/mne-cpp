@@ -21,13 +21,10 @@ The [`MNE`](/docs/api/mne/mne-class) class provides wrapper functions to stay co
 
 ```cpp title="src/examples/ex_mne_api/main.cpp"
 // The MNE facade mirrors the MNE-Matlab/Python toolbox functions
-const QString eveName = tmp.filePath("audvis-eve.fif");
-{
-    QFile eveOut(eveName);
-    MNE::write_events_to_fif(eveOut, events.events);
-}
+const std::string eveName = tmp.filePath("audvis-eve.fif").toStdString();
+MNE::write_events_to_fif(eveName, events.events);
 MatrixXi eventsBack;
-MNE::read_events(eveName, rawFile.fileName(), eventsBack);
+MNE::read_events(eveName, rawFile.fileName().toStdString(), eventsBack);
 QList<FiffProj> projs = raw.info.projs; // stored inactive in the raw file
 FiffProj::activate_projs(projs);
 MatrixXd ssp; // like mne._fiff.proj.make_projector(info['projs'], ch_names, bads)
@@ -200,7 +197,7 @@ mne_patch_info
 
 ---
 
-### read_events_from_fif(p_IODevice, eventlist)
+### read_events_from_fif(path, eventlist)
 
 mne_read_events
 
@@ -208,8 +205,8 @@ Read an event list from a fif file
 
 **Parameters:**
 
-- **p_IODevice** : *QIODevice &*
-  The I/O device to read from.
+- **path** : *const std::filesystem::path &*
+  The FIFF file.
 
 - **eventlist** : *Eigen::MatrixXi &*
   The read eventlist m x 3; with m events; colum: 1 - position in samples, 3 - eventcode.
@@ -220,7 +217,7 @@ Read an event list from a fif file
 
 ---
 
-### read_events_from_ascii(p_IODevice, eventlist)
+### read_events_from_ascii(path, eventlist)
 
 read_events
 
@@ -228,8 +225,8 @@ Read a list of events from an eve file
 
 **Parameters:**
 
-- **p_IODevice** : *QIODevice &*
-  The I/O device to read from.
+- **path** : *const std::filesystem::path &*
+  The text file.
 
 - **eventlist** : *Eigen::MatrixXi &*
   List of events.
@@ -240,7 +237,7 @@ Read a list of events from an eve file
 
 ---
 
-### write_events_to_fif(p_IODevice, eventlist)
+### write_events_to_fif(path, eventlist)
 
 write_events_to_fif
 
@@ -248,8 +245,8 @@ Write an event list to a FIFF file.
 
 **Parameters:**
 
-- **p_IODevice** : *QIODevice &*
-  The I/O device to write to.
+- **path** : *const std::filesystem::path &*
+  The FIFF file to write.
 
 - **eventlist** : *const Eigen::MatrixXi &*
   The event list (nEvents x 3): [sample, before, after].
@@ -260,7 +257,7 @@ Write an event list to a FIFF file.
 
 ---
 
-### write_events_to_ascii(p_IODevice, eventlist, sfreq)
+### write_events_to_ascii(path, eventlist, sfreq)
 
 write_events_to_ascii
 
@@ -268,8 +265,8 @@ Write an event list to a text file (MNE-C compatible format).
 
 **Parameters:**
 
-- **p_IODevice** : *QIODevice &*
-  The I/O device to write to.
+- **path** : *const std::filesystem::path &*
+  The text file to write.
 
 - **eventlist** : *const Eigen::MatrixXi &*
   The event list (nEvents x 3): [sample, before, after].

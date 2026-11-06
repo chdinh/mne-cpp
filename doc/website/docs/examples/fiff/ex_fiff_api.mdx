@@ -326,10 +326,9 @@ int main(int argc, char* argv[])
     //! [fiff_events_usage]
     FiffEvents events;
     FiffEvents::detect_from_raw(raw, events, "STI 014"); // rising edges of the trigger channel
-    QFile eventFile(tmp.filePath("sample-eve.fif"));
-    const bool eventsWritten = eventFile.open(QIODevice::WriteOnly) && events.write_to_fif(eventFile);
-    eventFile.close();
-    FiffEvents eventsBack(eventFile); // mne.read_events reads this file too
+    const std::string eventPath = tmp.filePath("sample-eve.fif").toStdString();
+    const bool eventsWritten = events.write_to_fif(eventPath);
+    FiffEvents eventsBack(eventPath); // mne.read_events reads this file too
     //! [fiff_events_usage]
     // mne.find_events(raw, "STI 014"): 25 events, first [13988, 0, 2], [14172, 0, 3], [14385, 0, 1]
     ok &= expect(events.num_events() == 25 && events.events.row(0) == RowVector3i(13988, 0, 2) && events.events.row(2) == RowVector3i(14385, 0, 1) && eventsWritten && eventsBack.events == events.events,
