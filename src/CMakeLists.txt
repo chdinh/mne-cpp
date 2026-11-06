@@ -73,6 +73,8 @@ if(WASM)
   add_compile_definitions(WASMBUILD)
   # Qt's threaded wasm links with -pthread + ALLOW_MEMORY_GROWTH; em++ only advises about JS-side speed.
   add_link_options(-Wno-pthreads-mem-growth)
+  # Libraries without Qt do not inherit Qt's -pthread, but every object must share the threaded memory.
+  add_compile_options(-pthread)
   set(BUILD_SHARED_LIBS OFF)
   set(NO_TESTS ON)
   set(NO_EXAMPLES ON)
