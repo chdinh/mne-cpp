@@ -53,6 +53,12 @@ class RatchetTests(unittest.TestCase):
                                 {"src/libraries/fiff/a.cpp"})
         self.assertEqual(problems, ["src/libraries/fiff/a.cpp: bugprone-x: 1 finding(s), 0 accepted"])
 
+    def test_problems_list_their_locations(self) -> None:
+        findings = [("src/a.cpp", 12, 5, "bugprone-x"), ("src/a.cpp", 3, 1, "bugprone-x"), ("src/a.cpp", 7, 2, "perf-y")]
+        problems = ["src/a.cpp: bugprone-x: 2 finding(s), 0 accepted"]
+        self.assertEqual(tidy.locate(problems, findings),
+                         ["src/a.cpp: bugprone-x: 2 finding(s), 0 accepted", "    src/a.cpp:3:1", "    src/a.cpp:12:5"])
+
     def test_findings_are_parsed_per_check(self) -> None:
         output = (f"{_REPO_ROOT}/src/libraries/fiff/a.cpp:12:5: warning: text [bugprone-x,cert-y]\n"
                   f"{_REPO_ROOT}/src/external/eigen/x.h:1:1: warning: text [bugprone-x]\n")

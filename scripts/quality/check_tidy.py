@@ -222,6 +222,17 @@ def compare(observed: dict[str, dict[str, int]], baseline: dict, scope: set[str]
     return problems
 
 
+def locate(problems: list[str], findings: list[Finding]) -> list[str]:
+    """Each problem followed by the locations of its findings, so a CI-only finding can be found."""
+    lines = []
+    for problem in problems:
+        lines.append(problem)
+        file, check = (problem.split(": ") + ["", ""])[:2]
+        for _file, line, column, _check in sorted({f for f in findings if f[0] == file and f[3] == check}):
+            lines.append(f"    {file}:{line}:{column}")
+    return lines
+
+
 def main(argv: list[str] | None = None) -> int:
     parser = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     parser.add_argument("-p", "--build-dir", type=Path, required=True, help="build directory with compile_commands.json")
@@ -287,7 +298,7 @@ def main(argv: list[str] | None = None) -> int:
 
     total = sum(sum(c.values()) for c in observed.values())
     if problems:
-        print("\n".join(problems))
+        print("\n".join(locate(problems, all_findings)))
         print(f"FAIL: {len(problems)} problem(s) in {len(selected)} translation unit(s) ({total} findings observed).")
         return 1
     print(f"PASS: {len(selected)} translation unit(s), {total} finding(s), none new.")
