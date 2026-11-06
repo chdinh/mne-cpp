@@ -140,7 +140,7 @@ VectorXi Linalg::intersect(const VectorXi& v1,
     for (std::int32_t i = 0; i < v2.size(); ++i) {
         it = std::search(tmp.begin(), tmp.end(), &v2[i], &v2[i] + 1);
         if (it != tmp.end())
-            t_vecIntIdxValue.push_back(std::pair<int, int>(v2[i], it - tmp.begin()));
+            t_vecIntIdxValue.push_back(std::pair<int, int>(v2[i], static_cast<int>(it - tmp.begin())));
     }
 
     std::sort(t_vecIntIdxValue.begin(), t_vecIntIdxValue.end(), Linalg::compareIdxValuePairSmallerThan<int>);

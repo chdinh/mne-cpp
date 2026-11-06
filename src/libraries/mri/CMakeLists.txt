@@ -63,6 +63,7 @@ list(TRANSFORM SOURCE_PATHS PREPEND "${CMAKE_CURRENT_SOURCE_DIR}/")
 set_source_files_properties(${FILE_TO_UPDATE} PROPERTIES OBJECT_DEPENDS "${SOURCE_PATHS}")
 
 add_library(${PROJECT_NAME} ${SOURCES} ${HEADERS} ${PRIVATE_HEADERS})
+include(${CMAKE_CURRENT_LIST_DIR}/../../../cmake/MneWarnings.cmake)
 mne_warn_on_narrowing(${PROJECT_NAME})
 
 set(FFTW_LIBS "")

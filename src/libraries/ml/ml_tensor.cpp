@@ -202,7 +202,7 @@ const float* MlTensor::data() const
 MlTensor::RowMajorMatrixMap MlTensor::matrix()
 {
     assert(ndim() == 2);
-    return RowMajorMatrixMap(m_data, m_shape[0], m_shape[1]);
+    return RowMajorMatrixMap(m_data, rows(), cols());
 }
 
 //=============================================================================================================
@@ -210,7 +210,7 @@ MlTensor::RowMajorMatrixMap MlTensor::matrix()
 MlTensor::ConstRowMajorMatrixMap MlTensor::matrix() const
 {
     assert(ndim() == 2);
-    return ConstRowMajorMatrixMap(m_data, m_shape[0], m_shape[1]);
+    return ConstRowMajorMatrixMap(m_data, rows(), cols());
 }
 
 //=============================================================================================================
@@ -219,7 +219,7 @@ MatrixXf MlTensor::toMatrixXf() const
 {
     assert(ndim() == 2);
     // Assign row-major map to column-major MatrixXf (Eigen transposes layout)
-    return Map<const RowMajorMatrixXf>(m_data, m_shape[0], m_shape[1]);
+    return Map<const RowMajorMatrixXf>(m_data, rows(), cols());
 }
 
 //=============================================================================================================
@@ -227,7 +227,7 @@ MatrixXf MlTensor::toMatrixXf() const
 MatrixXd MlTensor::toMatrixXd() const
 {
     assert(ndim() == 2);
-    return Map<const RowMajorMatrixXf>(m_data, m_shape[0], m_shape[1]).cast<double>();
+    return Map<const RowMajorMatrixXf>(m_data, rows(), cols()).cast<double>();
 }
 
 //=============================================================================================================
