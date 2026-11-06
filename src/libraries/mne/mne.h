@@ -440,7 +440,7 @@ public:
      * Ported from save.c (MNE-C).
      *
      * @param[in] raw       The raw data to save.
-     * @param[in] p_IODevice Output device to write to.
+     * @param[in] path      The file to write.
      * @param[in] picks     Channel indices to include (empty = all channels).
      * @param[in] decim     Decimation factor (1 = no decimation).
      * @param[in] from      First sample to save (-1 = from start of raw data).
@@ -449,13 +449,13 @@ public:
      * @return true on success.
      */
     inline static bool save_raw(const FIFFLIB::FiffRawData& raw,
-                                QIODevice& p_IODevice,
+                                const std::filesystem::path& path,
                                 const Eigen::RowVectorXi& picks = Eigen::RowVectorXi(),
                                 int decim = 1,
                                 int from = -1,
                                 int to = -1)
     {
-        return raw.save(p_IODevice, picks, decim, from, to);
+        return raw.save(path, picks, decim, from, to);
     }
 
     static void setup_compensators(FIFFLIB::FiffRawData& raw,

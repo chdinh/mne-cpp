@@ -476,8 +476,7 @@ QJsonObject TestAcqRecorder::spec(const Recorded& r, const QString& fif, std::si
     spec[QStringLiteral("orig_format")] = formatName(r.format, r.physical);
     spec[QStringLiteral("files")] = static_cast<int>(r.files.size());
     spec[QStringLiteral("ch_names")] = QJsonArray::fromStringList(r.chNames);
-    QFile file(QString::fromStdString(r.files.front()));
-    FiffRawData raw(file);
+    FiffRawData raw(QString::fromStdString(r.files.front()).toStdString());
     spec[QStringLiteral("meas_date")] = QJsonArray{raw.info.meas_date[0], raw.info.meas_date[1]};
     spec[QStringLiteral("device_info")] = QJsonObject{{QStringLiteral("type"), QStringLiteral("test")},
                                                       {QStringLiteral("serial"), QStringLiteral("test:42")}};
@@ -674,8 +673,7 @@ void TestAcqRecorder::recordsNativeFormats()
 #endif
 
     // MNE-CPP reads raw * cal * range of every stored sample.
-    QFile file(path);
-    FiffRawData raw(file);
+    FiffRawData raw(path.toStdString());
     QCOMPARE(raw.first_samp, static_cast<fiff_int_t>(first));
     QCOMPARE(raw.last_samp, static_cast<fiff_int_t>(first + samples - 1));
     QCOMPARE(raw.info.device_info.type, QStringLiteral("test"));
@@ -743,8 +741,7 @@ void TestAcqRecorder::recordsLostSamplesAsSkips()
     QCOMPARE(stats.samples, std::uint64_t(samples));
 
     // Every sample is either the produced value or a zero inside a BAD_ACQ_SKIP annotation.
-    QFile file(path);
-    FiffRawData raw(file);
+    FiffRawData raw(path.toStdString());
     Eigen::MatrixXd data, times;
     QVERIFY(raw.read_raw_segment(data, times));
     QCOMPARE(data.cols(), static_cast<Eigen::Index>(samples));
@@ -820,8 +817,7 @@ void TestAcqRecorder::splitsFiles()
     std::uint64_t next = 0;
     for (const std::string& part : r.files) {
         QVERIFY(QFileInfo(QString::fromStdString(part)).size() <= static_cast<qint64>(options.splitBytes));
-        QFile file(QString::fromStdString(part));
-        FiffRawData raw(file);
+        FiffRawData raw(QString::fromStdString(part).toStdString());
         QCOMPARE(raw.first_samp, static_cast<fiff_int_t>(next));
         next = static_cast<std::uint64_t>(raw.last_samp) + 1;
     }
@@ -940,8 +936,7 @@ void TestAcqRecorder::survivesSigkill()
     QVERIFY(child.waitForFinished(10000));
 
     // Everything reported as flushed is there, in whole buffers, and identical to what was produced.
-    QFile file(path);
-    FiffRawData raw(file);
+    FiffRawData raw(path.toStdString());
     QCOMPARE(raw.first_samp, 0);
     const auto samples = static_cast<std::uint64_t>(raw.last_samp) + 1;
     QVERIFY2(samples >= flushed, qPrintable(QStringLiteral("%1 < %2").arg(samples).arg(flushed)));
@@ -1071,8 +1066,7 @@ void TestAcqRecorder::reportsDiskFailure()
     QCOMPARE(recorder->stop().code(), AcqErrorCode::DeviceIo);
 
     // What reached the disk is still readable.
-    QFile file(path);
-    FiffRawData raw(file);
+    FiffRawData raw(path.toStdString());
     QVERIFY(raw.last_samp >= 0);
 #endif
 }
@@ -1110,8 +1104,7 @@ void TestAcqRecorder::lifeCycle()
     other = std::move(*second);
     QVERIFY(other.isRecording());
     other = AcqRecorder();
-    QFile file(path);
-    FiffRawData raw(file);
+    FiffRawData raw(path.toStdString());
     QCOMPARE(raw.last_samp, 1499);
 }
 

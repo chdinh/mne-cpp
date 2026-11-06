@@ -139,8 +139,7 @@ void TestFwdPython::initTestCase()
     }
     QVERIFY(m_dir.isValid());
 
-    QFile rawFile(data("MEG/sample/sample_audvis_trunc_raw.fif"));
-    m_raw = FiffRawData(rawFile);
+    m_raw = FiffRawData(data("MEG/sample/sample_audvis_trunc_raw.fif").toStdString());
     for (const FiffChInfo& ch : m_raw.info.chs) {
         if (ch.kind == FIFFV_MEG_CH) {
             m_meg << ch;

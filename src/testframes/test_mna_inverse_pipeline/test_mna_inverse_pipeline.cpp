@@ -171,8 +171,7 @@ void TestMnaInversePipeline::registerRealOps()
                            QString rawPath = attrs.value(QStringLiteral("raw_path")).toString();
                            rawPath.replace(QLatin1String("${TEST_DATA}"), dataPath);
 
-                           QFile rawFile(rawPath);
-                           FiffRawData raw(rawFile);
+                           FiffRawData raw(rawPath.toStdString());
                            auto info = QSharedPointer<FiffInfo>::create(raw.info);
 
                            return {

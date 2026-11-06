@@ -188,7 +188,7 @@ void TestWriteToFileStatus::recording_refusesUnwritableFile()
 
     // A split whose next file cannot be created stops writing instead of crashing
     QFile first(tmpDir.filePath(QStringLiteral("rec_raw.fif")));
-    plugin.m_pOutfid = FIFFLIB::FiffStream::start_writing_raw(first, *plugin.m_pFiffInfo, plugin.m_mCals);
+    plugin.m_pOutfid = FIFFLIB::FiffStream::start_writing_raw(tmpDir.filePath(QStringLiteral("rec_raw.fif")).toStdString(), *plugin.m_pFiffInfo, plugin.m_mCals);
     QVERIFY(plugin.m_pOutfid);
     plugin.m_bWriteToFile = true;
     QTest::ignoreMessage(QtCriticalMsg, QRegularExpression("Cannot write"));
@@ -204,7 +204,7 @@ void TestWriteToFileStatus::recording_refusesUnwritableFile()
     plugin.m_sRecordFileName = recordFileName;
     plugin.m_iSplitCount = 0;
     plugin.m_qFileOut.setFileName(recordFileName);
-    plugin.m_pOutfid = FIFFLIB::FiffStream::start_writing_raw(plugin.m_qFileOut, *plugin.m_pFiffInfo, plugin.m_mCals);
+    plugin.m_pOutfid = FIFFLIB::FiffStream::start_writing_raw(FIFFLIB::FiffStream::byteStream(plugin.m_qFileOut, QIODevice::WriteOnly), *plugin.m_pFiffInfo, plugin.m_mCals);
     plugin.m_bWriteToFile = true;
     plugin.splitRecordingFile();
     QVERIFY(plugin.m_pOutfid);

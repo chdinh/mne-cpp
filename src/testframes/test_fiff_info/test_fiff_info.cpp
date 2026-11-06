@@ -197,8 +197,7 @@ private slots:
         //   mne.pick_types(info, meg, eeg, stim) (exclude="bads"), pick_types(..., exclude=[]),
         //   mne.pick_channels(ch_names, include=["EEG 001", "MEG 0113", "STI 014"]), pick_channels(exclude=bads),
         //   mne.pick_info(info, [3, 10, 316]) -> MEG 0122, MEG 0142, EEG 002 and no bads
-        QFile file(m_sDataPath + "/MEG/sample/sample_audvis_trunc_raw.fif");
-        const FiffRawData raw(file);
+        const FiffRawData raw((m_sDataPath + "/MEG/sample/sample_audvis_trunc_raw.fif").toStdString());
         const FiffInfo& info = raw.info;
         QCOMPARE(info.nchan, 376);
         QCOMPARE(info.bads, StringList({"MEG2443", "EEG053"}));
@@ -309,8 +308,7 @@ private slots:
         if (!QFile::exists(rawPath)) {
             QSKIP("Sample raw file not found");
         }
-        QFile file(rawPath);
-        FiffRawData raw(file);
+        FiffRawData raw(rawPath.toStdString());
         QVERIFY(raw.info.nchan > 0);
         QVERIFY(raw.info.sfreq > 0);
 
@@ -333,8 +331,7 @@ private slots:
         if (!QFile::exists(rawPath)) {
             QSKIP("Sample raw file not found");
         }
-        QFile file(rawPath);
-        FiffRawData raw(file);
+        FiffRawData raw(rawPath.toStdString());
 
         StringList chTypes = raw.info.get_channel_types();
         QVERIFY(chTypes.size() > 0);
@@ -348,8 +345,7 @@ private slots:
     {
         if (!hasData())
             QSKIP("No test data");
-        QFile file(m_sDataPath + "/MEG/sample/sample_audvis_trunc_raw.fif");
-        FiffRawData raw(file);
+        FiffRawData raw((m_sDataPath + "/MEG/sample/sample_audvis_trunc_raw.fif").toStdString());
 
         // Pick magnetometers
         RowVectorXi magPicks = raw.info.pick_types("mag", false, false);
@@ -377,8 +373,7 @@ private slots:
     {
         if (!hasData())
             QSKIP("No test data");
-        QFile file(m_sDataPath + "/MEG/sample/sample_audvis_trunc_raw.fif");
-        FiffRawData raw(file);
+        FiffRawData raw((m_sDataPath + "/MEG/sample/sample_audvis_trunc_raw.fif").toStdString());
 
         // Pick first 50 channels
         RowVectorXi picks(50);
@@ -398,8 +393,7 @@ private slots:
     {
         if (!hasData())
             QSKIP("No test data");
-        QFile file(m_sDataPath + "/MEG/sample/sample_audvis_trunc_raw.fif");
-        FiffRawData raw(file);
+        FiffRawData raw((m_sDataPath + "/MEG/sample/sample_audvis_trunc_raw.fif").toStdString());
 
         QList<FiffProj>& projs = raw.info.projs;
         if (projs.isEmpty())
@@ -485,8 +479,7 @@ private slots:
     {
         if (!hasData())
             QSKIP("No test data");
-        QFile file(m_sDataPath + "/MEG/sample/sample_audvis_trunc_raw.fif");
-        FiffRawData raw(file);
+        FiffRawData raw((m_sDataPath + "/MEG/sample/sample_audvis_trunc_raw.fif").toStdString());
 
         FiffDigPointSet digSet = raw.info.dig;
         if (digSet.size() == 0)
@@ -508,8 +501,7 @@ private slots:
     {
         if (!hasData())
             QSKIP("No test data");
-        QFile file(m_sDataPath + "/MEG/sample/sample_audvis_trunc_raw.fif");
-        FiffRawData raw(file);
+        FiffRawData raw((m_sDataPath + "/MEG/sample/sample_audvis_trunc_raw.fif").toStdString());
 
         // Get current compensation
         fiff_int_t comp = raw.info.get_current_comp();
@@ -536,7 +528,7 @@ private slots:
         if (!file.exists())
             QSKIP("test_hpiFit_raw.fif not available");
 
-        FiffRawData raw(file);
+        FiffRawData raw((m_sDataPath + "/MEG/sample/test_hpiFit_raw.fif").toStdString());
 
         // This file carries a FIFFB_HPI_MEAS block with one FIFFB_HPI_COIL
         // sub block per coil, each holding a FIFF_HPI_COIL_FREQ tag.
@@ -552,8 +544,7 @@ private slots:
         if (m_sDataPath.isEmpty())
             QSKIP("Test data not available");
 
-        QFile file(m_sDataPath + "/MEG/sample/sample_audvis_trunc_raw.fif");
-        FiffRawData raw(file);
+        FiffRawData raw((m_sDataPath + "/MEG/sample/sample_audvis_trunc_raw.fif").toStdString());
 
         // No HPI measurement block in this file, so the list stays empty
         // rather than being filled with garbage.

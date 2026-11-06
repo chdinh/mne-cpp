@@ -106,9 +106,8 @@ int main(int argc, char* argv[])
     bool ok = tmp.isValid();
 
     //! [fiff_info_usage]
-    QFile rawFile(dir + "/sample_audvis_trunc_raw.fif");
-    FiffRawData raw(rawFile);        // reads the measurement info, raw data is read on demand
-    const FiffInfo& info = raw.info; // channels, sampling rate, bads, projectors, digitizer, transforms
+    FiffRawData raw((dir + "/sample_audvis_trunc_raw.fif").toStdString()); // reads the measurement info, raw data is read on demand
+    const FiffInfo& info = raw.info;                                       // channels, sampling rate, bads, projectors, digitizer, transforms
     const FiffChInfo& first = info.chs[0];
     const RowVectorXi megPicks = info.pick_types(true, false, false, {}, info.bads); // good MEG channels
     //! [fiff_info_usage]

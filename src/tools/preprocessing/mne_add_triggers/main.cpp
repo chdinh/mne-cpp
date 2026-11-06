@@ -20,6 +20,7 @@
 #include <fiff/fiff_ch_info.h>
 #include <fiff/fiff_file.h>
 #include <utils/generics/mne_logger.h>
+#include <utils/string_utils.h>
 
 //=============================================================================================================
 // QT INCLUDES
@@ -139,8 +140,7 @@ int main(int argc, char* argv[])
           static_cast<long long>(triggers.size()), qPrintable(trgFile));
 
     // Open raw data
-    QFile fileIn(rawFile);
-    FiffRawData raw(fileIn);
+    FiffRawData raw(UTILSLIB::pathFromUtf8(rawFile.toStdString()));
     if (raw.info.isEmpty()) {
         qCritical("Cannot read raw data from: %s", qPrintable(rawFile));
         return 1;
@@ -187,9 +187,8 @@ int main(int argc, char* argv[])
     qInfo("Added %d trigger events.", nAdded);
 
     // Write output
-    QFile fileOut(outFile);
     RowVectorXd cals;
-    FiffStream::SPtr outStream = FiffStream::start_writing_raw(fileOut, raw.info, cals);
+    FiffStream::SPtr outStream = FiffStream::start_writing_raw(UTILSLIB::pathFromUtf8(outFile.toStdString()), raw.info, cals);
     if (!outStream) {
         qCritical("Cannot open output file: %s", qPrintable(outFile));
         return 1;

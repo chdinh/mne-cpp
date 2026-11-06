@@ -524,10 +524,10 @@ struct AcqRecorder::Impl
 
     std::unique_ptr<Block> header(std::size_t index, std::uint64_t firstTag) const
     {
-        QByteArray bytes;
-        QBuffer buffer(&bytes);
+        auto memory = std::make_unique<UTILSLIB::MemoryByteStream>();
+        const UTILSLIB::MemoryByteStream& written = *memory;
         Eigen::RowVectorXd cals;
-        FiffStream::SPtr tags = FiffStream::start_writing_raw(buffer, fiffInfo, cals, defaultMatrixXi, false,
+        FiffStream::SPtr tags = FiffStream::start_writing_raw(std::move(memory), fiffInfo, cals, defaultMatrixXi, false,
                                                               fiffType(pack));
         if (firstTag != 0) {
             const auto value = static_cast<fiff_int_t>(firstTag);
@@ -542,7 +542,7 @@ struct AcqRecorder::Impl
             tags->write_int(FIFF_REF_FILE_NUM, &number);
             tags->end_block(FIFFB_REF);
         }
-        auto block = metadataBlock(bytes);
+        auto block = metadataBlock(QByteArray(reinterpret_cast<const char*>(written.data().data()), static_cast<qsizetype>(written.size())));
         block->file = index;
         block->opensFile = true;
         return block;

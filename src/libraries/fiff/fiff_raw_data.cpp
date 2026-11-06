@@ -49,24 +49,22 @@ FiffRawData::FiffRawData()
 
 //=============================================================================================================
 
-FiffRawData::FiffRawData(QIODevice& p_IODevice)
+FiffRawData::FiffRawData(const std::filesystem::path& path, bool b_littleEndian)
 : first_samp(-1)
 , last_samp(-1)
 {
-    //setup FiffRawData object
-    if (!FiffStream::setup_read_raw(p_IODevice, *this)) {
+    if (!FiffStream::setup_read_raw(path, *this, false, b_littleEndian)) {
         throw std::runtime_error("Error during fiff setup raw read");
     }
 }
 
 //=============================================================================================================
 
-FiffRawData::FiffRawData(QIODevice& p_IODevice, bool b_littleEndian)
+FiffRawData::FiffRawData(std::unique_ptr<UTILSLIB::ByteStream> bytes, bool b_littleEndian)
 : first_samp(-1)
 , last_samp(-1)
 {
-    //setup FiffRawData object
-    if (!FiffStream::setup_read_raw(p_IODevice, *this, false, b_littleEndian)) {
+    if (!FiffStream::setup_read_raw(std::move(bytes), *this, false, b_littleEndian)) {
         throw std::runtime_error("Error during fiff setup raw read");
     }
 }
@@ -216,14 +214,11 @@ bool FiffRawData::read_raw_segment(MatrixXd& data,
         mult.setFromTriplets(tripletList.begin(), tripletList.end());
     //    mult.makeCompressed();
 
-    FiffStream::SPtr fid;
-    if (!this->file->isOpen()) {
-        if (!this->file->device()->open(QIODevice::ReadOnly)) {
-            qWarning("Cannot open file %s", this->info.filename.c_str());
-        }
-        fid = this->file;
-    } else {
-        fid = this->file;
+    const FiffStream::SPtr fid = this->file;
+    const bool open_here = !fid->isOpen();
+    if (open_here && !fid->reopen()) {
+        qWarning("Cannot open file %s", this->info.filename.c_str());
+        return false;
     }
 
     MatrixXd one, newData, tmp_data;
@@ -268,7 +263,8 @@ bool FiffRawData::read_raw_segment(MatrixXd& data,
                             one = cal * Map<const MatrixXd>(t_pTag->toDouble(), nchan, thisRawDir.nsamp);
                         else {
                             qWarning("Data Storage Format not known yet [1]!! Type: %d\n", t_pTag->type);
-                            this->file->device()->close();
+                            if (open_here)
+                                this->file->close();
                             return false;
                         }
                     } else {
@@ -302,7 +298,8 @@ bool FiffRawData::read_raw_segment(MatrixXd& data,
                                 newData.block(r, 0, 1, thisRawDir.nsamp) = tmp_data.block(sel[r], 0, 1, thisRawDir.nsamp);
                         } else {
                             qWarning("Data Storage Format not known yet [2]!! Type: %d\n", t_pTag->type);
-                            this->file->device()->close();
+                            if (open_here)
+                                this->file->close();
                             return false;
                         }
 
@@ -321,7 +318,8 @@ bool FiffRawData::read_raw_segment(MatrixXd& data,
                         one = mult * Map<const MatrixXd>(t_pTag->toDouble(), nchan, thisRawDir.nsamp);
                     else {
                         qWarning("Data Storage Format not known yet [3]!! Type: %d\n", t_pTag->type);
-                        this->file->device()->close();
+                        if (open_here)
+                            this->file->close();
                         return false;
                     }
                 }
@@ -393,8 +391,8 @@ bool FiffRawData::read_raw_segment(MatrixXd& data,
         }
     }
 
-    if (!this->file->isOpen()) {
-        this->file->device()->close();
+    if (open_here) {
+        this->file->close();
     }
 
     times = MatrixXd(1, to - from + 1);
@@ -519,14 +517,11 @@ bool FiffRawData::read_raw_segment(MatrixXd& data,
 
     //
 
-    FiffStream::SPtr fid;
-    if (!this->file->isOpen()) {
-        if (!this->file->device()->open(QIODevice::ReadOnly)) {
-            qWarning("Cannot open file %s", this->info.filename.c_str());
-        }
-        fid = this->file;
-    } else {
-        fid = this->file;
+    const FiffStream::SPtr fid = this->file;
+    const bool open_here = !fid->isOpen();
+    if (open_here && !fid->reopen()) {
+        qWarning("Cannot open file %s", this->info.filename.c_str());
+        return false;
     }
 
     MatrixXd one;
@@ -570,7 +565,8 @@ bool FiffRawData::read_raw_segment(MatrixXd& data,
                             one = cal * Map<const MatrixXd>(t_pTag->toDouble(), nchan, thisRawDir.nsamp);
                         else {
                             qWarning("Data Storage Format not known yet [1]!! Type: %d\n", t_pTag->type);
-                            this->file->device()->close();
+                            if (open_here)
+                                this->file->close();
                             return false;
                         }
                     } else {
@@ -604,7 +600,8 @@ bool FiffRawData::read_raw_segment(MatrixXd& data,
                                 newData.block(r, 0, 1, thisRawDir.nsamp) = tmp_data.block(sel[r], 0, 1, thisRawDir.nsamp);
                         } else {
                             qWarning("Data Storage Format not known yet [2]!! Type: %d\n", t_pTag->type);
-                            this->file->device()->close();
+                            if (open_here)
+                                this->file->close();
                             return false;
                         }
 
@@ -623,7 +620,8 @@ bool FiffRawData::read_raw_segment(MatrixXd& data,
                         one = mult * Map<const MatrixXd>(t_pTag->toDouble(), nchan, thisRawDir.nsamp);
                     else {
                         qWarning("Data Storage Format not known yet [3]!! Type: %d\n", t_pTag->type);
-                        this->file->device()->close();
+                        if (open_here)
+                            this->file->close();
                         return false;
                     }
                 }
@@ -700,8 +698,8 @@ bool FiffRawData::read_raw_segment(MatrixXd& data,
     else
         multSegment = mult;
 
-    if (!this->file->isOpen()) {
-        this->file->device()->close();
+    if (open_here) {
+        this->file->close();
     }
 
     times = MatrixXd(1, to - from + 1);
@@ -733,7 +731,7 @@ bool FiffRawData::read_raw_segment_times(MatrixXd& data,
 
 //=============================================================================================================
 
-bool FiffRawData::save(QIODevice& p_IODevice,
+bool FiffRawData::save(const std::filesystem::path& path,
                        const RowVectorXi& picks,
                        int decim,
                        int from,
@@ -760,7 +758,7 @@ bool FiffRawData::save(QIODevice& p_IODevice,
 
     // Use the standard start_writing_raw pipeline
     RowVectorXd calsOut;
-    FiffStream::SPtr pStream = FiffStream::start_writing_raw(p_IODevice, outInfo, calsOut, picks);
+    FiffStream::SPtr pStream = FiffStream::start_writing_raw(path, outInfo, calsOut, picks);
     if (!pStream) {
         qWarning() << "[FiffRawData::save] Cannot start writing raw file.";
         return false;

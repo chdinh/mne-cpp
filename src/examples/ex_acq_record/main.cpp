@@ -97,8 +97,7 @@ int main(int argc, char* argv[])
     //! [acq_record_fiff]
 
     //! [acq_record_read]
-    QFile file(QString::fromStdString(path));
-    FiffRawData raw(file);
+    FiffRawData raw(QString::fromStdString(path).toStdString());
     const FiffDeviceInfo& recorded = raw.info.device_info; // backend, device and source id of the recording
     std::printf("%s: %d channels, samples %d to %d, device %s '%s' (%s)\n", path.c_str(), raw.info.nchan,
                 raw.first_samp, raw.last_samp, recorded.type.c_str(), recorded.model.c_str(),

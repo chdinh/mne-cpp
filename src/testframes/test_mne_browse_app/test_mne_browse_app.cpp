@@ -464,8 +464,7 @@ void TestMneBrowseApp::writesRawCopyButNotOverItsSource()
     window->hide();
     QCoreApplication::processEvents();
 
-    QFile sourceFile(sourcePath);
-    FIFFLIB::FiffRawData source(sourceFile);
+    FIFFLIB::FiffRawData source(sourcePath.toStdString());
     Eigen::MatrixXd sourceData, times;
     QVERIFY(source.read_raw_segment(sourceData, times));
     const int meg = static_cast<int>(UTILSLIB::indexOf(source.info.ch_names, "MEG1332"));
@@ -473,8 +472,7 @@ void TestMneBrowseApp::writesRawCopyButNotOverItsSource()
     const int eog = static_cast<int>(UTILSLIB::indexOf(source.info.ch_names, "EOG061"));
     QVERIFY(meg >= 0 && eeg >= 0 && eog >= 0);
     for (const QString& path : {copyPath, filteredPath}) {
-        QFile file(path);
-        FIFFLIB::FiffRawData written(file);
+        FIFFLIB::FiffRawData written(path.toStdString());
         QCOMPARE(written.info.nchan, source.info.nchan);
         QCOMPARE(written.first_samp, source.first_samp);
         QCOMPARE(written.last_samp, source.last_samp);
@@ -570,12 +568,11 @@ void TestMneBrowseApp::exportsSourceEstimatesLikePython()
     QTemporaryDir dir;
     const QString invPath = dir.filePath("sample-inv.fif");
     {
-        QFile rawFile(rawPath);
         QFile fwdFile(fwdPath);
         MNELIB::MNEForwardSolution fwd;
         QVERIFY(MNELIB::MNEForwardSolution::read(fwdFile, fwd));
         MNELIB::MNEInverseOperator inv = MNELIB::MNEInverseOperator::make_inverse_operator(
-            FIFFLIB::FiffRawData(rawFile).info, fwd, FIFFLIB::FiffCov(covPath.toStdString()), 0.2f, 0.8f);
+            FIFFLIB::FiffRawData(rawPath.toStdString()).info, fwd, FIFFLIB::FiffCov(covPath.toStdString()), 0.2f, 0.8f);
         QFile invFile(invPath);
         QVERIFY(inv.write(invFile));
     }
@@ -789,8 +786,7 @@ void TestMneBrowseApp::savesAndOpensProjects()
         window->show();
         return window;
     };
-    QFile rawFile(rawPath);
-    const int nchan = FIFFLIB::FiffRawData(rawFile).info.nchan;
+    const int nchan = FIFFLIB::FiffRawData(rawPath.toStdString()).info.nchan;
 
     // A binary project embeds the recording
     auto* first = openWindow();

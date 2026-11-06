@@ -106,7 +106,7 @@ void TestHpiDataUpdater::initTestCase()
     QDir().mkdir(t_fileInInfo.path());
 
     // Setup for reading the raw data
-    m_raw = FiffRawData(t_fileIn);
+    m_raw = FiffRawData((QCoreApplication::applicationDirPath() + "/../resources/data/mne-cpp-test-data/MEG/sample/test_hpiFit_raw.fif").toStdString());
     m_pFiffInfo = QSharedPointer<FiffInfo>::create(m_raw.info);
 
     // read data segment (200 samples)

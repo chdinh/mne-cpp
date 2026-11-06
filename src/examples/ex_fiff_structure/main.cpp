@@ -92,8 +92,7 @@ int main(int argc, char* argv[])
     bool ok = tmp.isValid();
 
     //! [fiff_epochs_usage]
-    QFile rawFile(rawPath);
-    FiffRawData raw(rawFile);
+    FiffRawData raw(rawPath.toStdString());
     MatrixXd data;
     MatrixXd times;
     ok &= raw.read_raw_segment(data, times); // all 6007 samples
@@ -138,8 +137,7 @@ int main(int argc, char* argv[])
 
     //! [fiff_ctf_comp_usage]
     // CTF third-order gradient compensation: info.comps holds one FiffCtfComp per grade.
-    QFile ctfFile(parser.value(ctfOption));
-    const FiffRawData ctf(ctfFile);
+    const FiffRawData ctf(parser.value(ctfOption).toStdString());
     FiffCtfComp toGrade1;
     ok &= ctf.info.make_compensator(0, 1, toGrade1); // uncompensated -> grade 1
     //! [fiff_ctf_comp_usage]
@@ -163,8 +161,7 @@ int main(int argc, char* argv[])
     QObject::connect(&consumer, &FiffFileSharer::newFileAtPath, &loop, &QEventLoop::quit);
     if (arrived.isEmpty())
         loop.exec();
-    QFile shared(tmp.filePath("shared/realtime_file0_raw.fif"));
-    const FiffRawData sharedRaw(shared);
+    const FiffRawData sharedRaw(tmp.filePath("shared/realtime_file0_raw.fif").toStdString());
     ok &= expect(!arrived.isEmpty() && sharedRaw.last_samp - sharedRaw.first_samp + 1 == 6007,
                  "FiffFileSharer: the copied recording arrives at the watcher and reads back with all 6007 samples");
 

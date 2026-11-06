@@ -70,7 +70,6 @@ private:
 
     QString m_rawPath;
     QTemporaryDir m_dir;
-    QFile m_file; /**< FiffRawData reads lazily from this device. */
     FiffRawData m_raw;
 };
 
@@ -81,8 +80,7 @@ void TestFiffRawSavePython::initTestCase()
     m_rawPath = QCoreApplication::applicationDirPath() + "/../resources/data/mne-cpp-test-data/MEG/sample/sample_audvis_trunc_raw.fif";
     QVERIFY2(QFile::exists(m_rawPath), "test data missing");
     QVERIFY(m_dir.isValid());
-    m_file.setFileName(m_rawPath);
-    m_raw = FiffRawData(m_file);
+    m_raw = FiffRawData(m_rawPath.toStdString());
     QCOMPARE(m_raw.first_samp, 12900);
     QCOMPARE(m_raw.last_samp, 12900 + 6007 - 1);
 }
@@ -123,12 +121,10 @@ void TestFiffRawSavePython::savesSubRange()
     QVERIFY(sel.minCoeff() >= 0);
     const QString path = m_dir.filePath(QStringLiteral("save-decim%1-raw.fif").arg(decim));
     {
-        QFile out(path);
-        QVERIFY(m_raw.save(out, sel, decim, 13900, 15899));
+        QVERIFY(m_raw.save(path.toStdString(), sel, decim, 13900, 15899));
     }
 
-    QFile in(path);
-    FiffRawData back(in);
+    FiffRawData back(path.toStdString());
     QCOMPARE(back.info.nchan, 6);
     QCOMPARE(back.info.ch_names[4], QString("STI014"));
     QCOMPARE(back.first_samp, decim == 1 ? 13900 : 13900 / decim);
@@ -158,8 +154,7 @@ void TestFiffRawSavePython::savesSubRange()
 
 void TestFiffRawSavePython::rejectsInvalidRange()
 {
-    QFile out(m_dir.filePath("invalid-raw.fif"));
-    QVERIFY(!m_raw.save(out, picks(), 1, 15000, 14000));
+    QVERIFY(!m_raw.save(m_dir.filePath("invalid-raw.fif").toStdString(), picks(), 1, 15000, 14000));
 }
 
 //=============================================================================================================

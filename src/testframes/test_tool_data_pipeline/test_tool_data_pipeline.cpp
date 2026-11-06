@@ -293,8 +293,7 @@ private slots:
         if (!QFile::exists(rawFile))
             QSKIP("Raw data not available");
 
-        QFile sourceFile(rawFile);
-        FIFFLIB::FiffRawData sourceRaw(sourceFile);
+        FIFFLIB::FiffRawData sourceRaw(rawFile.toStdString());
         QVERIFY(!sourceRaw.info.isEmpty());
         Eigen::MatrixXd sourceData;
         Eigen::MatrixXd sourceTimes;
@@ -315,8 +314,7 @@ private slots:
         QCOMPARE(m_lastExitStatus, QProcess::NormalExit);
         QVERIFY2(m_lastExitCode == 0, qPrintable(output));
 
-        QFile mergedFile(outFile);
-        FIFFLIB::FiffRawData mergedRaw(mergedFile);
+        FIFFLIB::FiffRawData mergedRaw(outFile.toStdString());
         QVERIFY(!mergedRaw.info.isEmpty());
         QCOMPARE(mergedRaw.info.nchan, sourceRaw.info.nchan + 2);
         QCOMPARE(mergedRaw.first_samp, sourceRaw.first_samp);
@@ -463,8 +461,7 @@ private slots:
         if (!QFile::exists(rawFile))
             QSKIP("Raw data not available");
 
-        QFile inputRawFile(rawFile);
-        FIFFLIB::FiffRawData inputRaw(inputRawFile);
+        FIFFLIB::FiffRawData inputRaw(rawFile.toStdString());
         QVERIFY(!inputRaw.info.isEmpty());
         const int firstSample = inputRaw.first_samp;
 
@@ -485,8 +482,7 @@ private slots:
         QCOMPARE(m_lastExitCode, 0);
         QVERIFY(QFileInfo(outFile).size() > 0);
 
-        QFile outputRawFile(outFile);
-        FIFFLIB::FiffRawData outputRaw(outputRawFile);
+        FIFFLIB::FiffRawData outputRaw(outFile.toStdString());
         QVERIFY(!outputRaw.info.isEmpty());
         QCOMPARE(outputRaw.first_samp, firstSample);
         int stimIndex = -1;
@@ -518,8 +514,7 @@ private slots:
         if (!QFile::exists(rawFile))
             QSKIP("Raw data not available");
 
-        QFile inputFile(rawFile);
-        FIFFLIB::FiffRawData inputRaw(inputFile);
+        FIFFLIB::FiffRawData inputRaw(rawFile.toStdString());
         QVERIFY(!inputRaw.info.isEmpty());
 
         const QString outFile = m_tempDir.filePath("raw-fixed-stim14.fif");
@@ -715,8 +710,7 @@ private slots:
         runTool("mne_eximia2fiff", {"--nxe", QStringLiteral(TOOL_DATA_DIR "/eximia.nxe"), "--out", outPath});
         QCOMPARE(m_lastExitCode, 0);
 
-        QFile file(outPath);
-        FIFFLIB::FiffRawData raw(file);
+        FIFFLIB::FiffRawData raw(outPath.toStdString());
         QCOMPARE(raw.info.sfreq, 1450.0);
         QCOMPARE(raw.info.nchan, 64);
         QCOMPARE(raw.last_samp - raw.first_samp + 1, 100);
@@ -761,8 +755,7 @@ private slots:
         runTool("mne_eximia2fiff", {"--nxe", QStringLiteral(TOOL_DATA_DIR "/eximia.nxe"), "--dig", digPath, "--out", outPath});
         QCOMPARE(m_lastExitCode, 0);
 
-        QFile file(outPath);
-        FIFFLIB::FiffRawData raw(file);
+        FIFFLIB::FiffRawData raw(outPath.toStdString());
         QCOMPARE(raw.info.dig.size(), 4);
         for (const FIFFLIB::FiffDigPoint& p : raw.info.dig)
             QCOMPARE(p.coord_frame, FIFFV_COORD_HEAD);
@@ -2752,8 +2745,7 @@ private slots:
         if (!QFile::exists(rawFile))
             QSKIP("Raw data not available");
 
-        QFile measurement(rawFile);
-        const FIFFLIB::FiffRawData raw(measurement);
+        const FIFFLIB::FiffRawData raw(rawFile.toStdString());
         QVERIFY(!raw.info.isEmpty());
         int megCount = 0;
         int eegCount = 0;

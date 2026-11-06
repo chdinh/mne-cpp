@@ -343,8 +343,7 @@ private slots:
             patchAreas = 1e-4 * (1.0 + 0.5 * VectorXd::LinSpaced(fwd.nsource, 0, fwd.nsource - 1).array().sin()).matrix();
         }
         // The measurement info restricted to the forward's channels, in its order
-        QFile rawFile(m_sRawFile);
-        const FiffRawData raw(rawFile);
+        const FiffRawData raw(m_sRawFile.toStdString());
         Eigen::RowVectorXi sel(fwd.info.ch_names.size());
         for (int i = 0; i < sel.size(); ++i) {
             sel(i) = static_cast<int>(UTILSLIB::indexOf(raw.info.ch_names, fwd.info.ch_names[i]));
@@ -369,8 +368,7 @@ private slots:
 
         FiffCov noiseCov(m_sCovFile.toStdString());
 
-        QFile rawFile(m_sRawFile);
-        FiffRawData raw(rawFile);
+        FiffRawData raw(m_sRawFile.toStdString());
 
         FiffInfo outFwdInfo;
         Eigen::MatrixXd gain;

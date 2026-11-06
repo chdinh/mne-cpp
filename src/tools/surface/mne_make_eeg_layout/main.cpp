@@ -19,6 +19,7 @@
 #include <fiff/fiff_raw_data.h>
 
 #include <utils/generics/mne_logger.h>
+#include <utils/string_utils.h>
 
 //=============================================================================================================
 // QT INCLUDES
@@ -112,8 +113,7 @@ int main(int argc, char* argv[])
     }
 
     // Read the FIFF file to get channel info
-    QFile file(fifName);
-    FiffRawData raw(file);
+    FiffRawData raw(UTILSLIB::pathFromUtf8(fifName.toStdString()));
     if (raw.info.isEmpty()) {
         qCritical("Cannot read FIFF file: %s", qPrintable(fifName));
         return 1;

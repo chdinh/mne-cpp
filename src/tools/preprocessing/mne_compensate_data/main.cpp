@@ -20,6 +20,7 @@
 #include <fiff/fiff_ctf_comp.h>
 #include <fiff/fiff_stream.h>
 #include <utils/generics/mne_logger.h>
+#include <utils/string_utils.h>
 
 //=============================================================================================================
 // QT INCLUDES
@@ -94,8 +95,7 @@ int main(int argc, char* argv[])
     }
 
     // Open input file
-    QFile fileIn(inFile);
-    FiffRawData raw(fileIn);
+    FiffRawData raw(UTILSLIB::pathFromUtf8(inFile.toStdString()));
     if (raw.info.isEmpty()) {
         qCritical("Cannot read raw data from: %s", qPrintable(inFile));
         return 1;
@@ -138,9 +138,8 @@ int main(int argc, char* argv[])
     raw.info.set_current_comp(grade);
 
     // Write output
-    QFile fileOut(outFile);
     Eigen::RowVectorXd cals;
-    FiffStream::SPtr outStream = FiffStream::start_writing_raw(fileOut, raw.info, cals);
+    FiffStream::SPtr outStream = FiffStream::start_writing_raw(UTILSLIB::pathFromUtf8(outFile.toStdString()), raw.info, cals);
     if (!outStream) {
         qCritical("Cannot open output file: %s", qPrintable(outFile));
         return 1;

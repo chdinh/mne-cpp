@@ -19,6 +19,7 @@
 #include <fiff/fiff_info.h>
 #include <fiff/fiff_raw_data.h>
 #include <utils/generics/mne_logger.h>
+#include <utils/string_utils.h>
 
 //=============================================================================================================
 // QT INCLUDES
@@ -117,8 +118,7 @@ int main(int argc, char* argv[])
     //=========================================================================
     // Read measurement info for channel names and types
     //=========================================================================
-    QFile fMeas(measFile);
-    FiffRawData raw(fMeas);
+    FiffRawData raw(UTILSLIB::pathFromUtf8(measFile.toStdString()));
     if (raw.info.isEmpty()) {
         qCritical("Cannot read measurement info from: %s", qPrintable(measFile));
         return 1;

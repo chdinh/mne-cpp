@@ -97,7 +97,7 @@ bool RTPROCESSINGLIB::filterFile(QIODevice& pIODevice,
     RowVectorXd cals;
     SparseMatrix<double> mult;
     RowVectorXi sel;
-    FiffStream::SPtr outfid = FiffStream::start_writing_raw(pIODevice, pFiffRawData->info, cals);
+    FiffStream::SPtr outfid = FiffStream::start_writing_raw(FiffStream::byteStream(pIODevice, QIODevice::WriteOnly), pFiffRawData->info, cals);
     if (!outfid) {
         return false;
     }
@@ -190,7 +190,7 @@ MatrixXd RTPROCESSINGLIB::filterData(const MatrixXd& matData,
 {
     // Check for size of data
     if (matData.cols() < iOrder) {
-        qWarning() << QString("[Filter::filterData] Filter length/order is bigger than data length. Returning.");
+        qWarning() << "[Filter::filterData] Filter length/order is bigger than data length. Returning.";
         return matData;
     }
 
@@ -302,7 +302,7 @@ MatrixXd RTPROCESSINGLIB::filterDataBlock(const MatrixXd& matData,
 
     // Check for size of data
     if (matData.cols() < iOrder) {
-        qWarning() << QString("[Filter::filterDataBlock] Filter length/order is bigger than data length. Returning.");
+        qWarning() << "[Filter::filterDataBlock] Filter length/order is bigger than data length. Returning.";
         return matData;
     }
 
@@ -381,7 +381,7 @@ MatrixXd FilterOverlapAdd::calculate(const MatrixXd& matData,
 {
     // Check for size of data
     if (matData.cols() < iOrder) {
-        qWarning() << QString("[Filter::filterData] Filter length/order is bigger than data length. Returning.");
+        qWarning() << "[Filter::filterData] Filter length/order is bigger than data length. Returning.";
         return matData;
     }
 

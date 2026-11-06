@@ -110,7 +110,7 @@
       ]
     },
     "dsp": {
-      "tokens": 829,
+      "tokens": 827,
       "public_header_includes": 54,
       "modules": [
         "Concurrent",
@@ -119,7 +119,7 @@
       ]
     },
     "fiff": {
-      "tokens": 1730,
+      "tokens": 1723,
       "public_header_includes": 94,
       "modules": [
         "Core",
@@ -186,7 +186,7 @@
       ]
     },
     "mne": {
-      "tokens": 1785,
+      "tokens": 1784,
       "public_header_includes": 98,
       "modules": [
         "Concurrent",

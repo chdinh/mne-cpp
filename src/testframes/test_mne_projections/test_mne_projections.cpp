@@ -355,8 +355,7 @@ private slots:
         if (!QFile::exists(m_sRawFile))
             QSKIP("Raw file not found");
 
-        QFile file(m_sRawFile);
-        FiffRawData raw(file);
+        FiffRawData raw(m_sRawFile.toStdString());
 
         // The raw file should have projection operators
         int nProj = raw.info.projs.size();

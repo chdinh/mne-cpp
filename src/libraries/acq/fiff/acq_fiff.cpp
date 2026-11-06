@@ -163,14 +163,12 @@ QByteArray serialize(const FiffInfo& info)
     // The blocks of the source file are not copied: the payload must not depend on files elsewhere.
     FiffInfo copy = info;
     copy.filename.clear();
-    QByteArray bytes;
-    QBuffer buffer(&bytes);
+    auto memory = std::make_unique<UTILSLIB::MemoryByteStream>();
+    const UTILSLIB::MemoryByteStream& written = *memory;
     Eigen::RowVectorXd cals;
-    FiffStream::SPtr stream = FiffStream::start_writing_raw(buffer, copy, cals, defaultMatrixXi, false);
-    if (stream) {
-        stream->finish_writing_raw();
-    }
-    return bytes;
+    FiffStream::SPtr stream = FiffStream::start_writing_raw(std::move(memory), copy, cals, defaultMatrixXi, false);
+    stream->finish_writing_raw();
+    return QByteArray(reinterpret_cast<const char*>(written.data().data()), static_cast<qsizetype>(written.size()));
 }
 
 // FiffStream drops the spaces of names read from name lists ("MEG 0113" -> "MEG0113"); restore them from the channels.

@@ -437,8 +437,7 @@ void TestFiffIoEvokedInfo::fiffInfo_defaultConstruction()
 
 void TestFiffIoEvokedInfo::fiffInfo_copyConstruction()
 {
-    QFile file(rawPath());
-    FiffRawData raw(file);
+    FiffRawData raw(rawPath().toStdString());
     FiffInfo copy(raw.info);
 
     QCOMPARE(copy.nchan, raw.info.nchan);
@@ -448,8 +447,7 @@ void TestFiffIoEvokedInfo::fiffInfo_copyConstruction()
 
 void TestFiffIoEvokedInfo::fiffInfo_clear()
 {
-    QFile file(rawPath());
-    FiffRawData raw(file);
+    FiffRawData raw(rawPath().toStdString());
     FiffInfo info = raw.info;
     QVERIFY(info.nchan > 0);
 
@@ -460,8 +458,7 @@ void TestFiffIoEvokedInfo::fiffInfo_clear()
 
 void TestFiffIoEvokedInfo::fiffInfo_pickInfo()
 {
-    QFile file(rawPath());
-    FiffRawData raw(file);
+    FiffRawData raw(rawPath().toStdString());
 
     // Pick first 10 channels
     RowVectorXi sel(10);
@@ -476,8 +473,7 @@ void TestFiffIoEvokedInfo::fiffInfo_pickInfo()
 
 void TestFiffIoEvokedInfo::fiffInfo_getCurrentComp()
 {
-    QFile file(rawPath());
-    FiffRawData raw(file);
+    FiffRawData raw(rawPath().toStdString());
 
     qint32 comp = raw.info.get_current_comp();
     QVERIFY(comp >= 0); // Neuromag data: grade 0
@@ -485,8 +481,7 @@ void TestFiffIoEvokedInfo::fiffInfo_getCurrentComp()
 
 void TestFiffIoEvokedInfo::fiffInfo_setCurrentComp()
 {
-    QFile file(rawPath());
-    FiffRawData raw(file);
+    FiffRawData raw(rawPath().toStdString());
     FiffInfo info = raw.info;
 
     info.set_current_comp(0);
@@ -495,8 +490,7 @@ void TestFiffIoEvokedInfo::fiffInfo_setCurrentComp()
 
 void TestFiffIoEvokedInfo::fiffInfo_makeCompensator()
 {
-    QFile file(rawPath());
-    FiffRawData raw(file);
+    FiffRawData raw(rawPath().toStdString());
 
     FiffCtfComp comp;
     bool ok = raw.info.make_compensator(0, 0, comp);
@@ -509,8 +503,7 @@ void TestFiffIoEvokedInfo::fiffInfo_makeCompensator()
 
 void TestFiffIoEvokedInfo::fiffInfo_writeToStream()
 {
-    QFile file(rawPath());
-    FiffRawData raw(file);
+    FiffRawData raw(rawPath().toStdString());
 
     QTemporaryDir tmpDir;
     QVERIFY(tmpDir.isValid());
@@ -650,8 +643,7 @@ void TestFiffIoEvokedInfo::fileSharer_withDirectory()
     QDir::setCurrent(previous);
 
     for (const QList<QVariant>& signal : arrived) {
-        QFile file(signal.at(0).toString());
-        const FiffRawData raw(file);
+        const FiffRawData raw(signal.at(0).toString().toStdString());
         QCOMPARE(raw.last_samp - raw.first_samp + 1, 6007);
     }
     QVERIFY(arrived.at(0).at(0).toString().endsWith("realtime_file0_raw.fif"));

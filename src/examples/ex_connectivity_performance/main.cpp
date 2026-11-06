@@ -152,8 +152,7 @@ int main(int argc, char* argv[])
     QString sRaw = QCoreApplication::applicationDirPath() + "/../resources/data/MNE-sample-data/MEG/sample/sample_audvis_raw.fif";
     MatrixXd matDataOrig, matData;
     MatrixXd times;
-    QFile t_fileRaw(sRaw);
-    FiffRawData raw(t_fileRaw);
+    FiffRawData raw(sRaw.toStdString());
 
     bool readSuccessful = false;
 

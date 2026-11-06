@@ -423,7 +423,7 @@ private slots:
 
         MNEForwardSolution fwd(fwdFile);
         FiffCov noiseCov(covFile.fileName().toStdString());
-        FiffRawData raw(rawFile);
+        FiffRawData raw(rawPath.toStdString());
 
         if (fwd.isEmpty() || noiseCov.isEmpty())
             QSKIP("Data load failed");
@@ -456,7 +456,7 @@ private slots:
 
         MNEForwardSolution fwd(fwdFile);
         FiffCov noiseCov(covFile.fileName().toStdString());
-        FiffRawData raw(rawFile);
+        FiffRawData raw(rawPath.toStdString());
 
         MNELIB::MNEInverseOperator invOp = MNELIB::MNEInverseOperator::make_inverse_operator(
             raw.info, fwd, noiseCov, 0.2f, 0.8f, false, true);
@@ -500,7 +500,7 @@ private slots:
 
         MNEForwardSolution fwd(fwdFile);
         FiffCov noiseCov(covFile.fileName().toStdString());
-        FiffRawData raw(rawFile);
+        FiffRawData raw(rawPath.toStdString());
 
         MNELIB::MNEInverseOperator invOp = MNELIB::MNEInverseOperator::make_inverse_operator(
             raw.info, fwd, noiseCov, 0.2f, 0.8f, false, true);
@@ -543,7 +543,7 @@ private slots:
 
         MNEForwardSolution fwd(fwdFile);
         FiffCov noiseCov(covFile.fileName().toStdString());
-        FiffRawData raw(rawFile);
+        FiffRawData raw(rawPath.toStdString());
 
         MNELIB::MNEInverseOperator invOp = MNELIB::MNEInverseOperator::make_inverse_operator(
             raw.info, fwd, noiseCov, 0.2f, 0.8f, false, true);
@@ -585,7 +585,7 @@ private slots:
 
         MNEForwardSolution fwd(fwdFile);
         FiffCov noiseCov(covFile.fileName().toStdString());
-        FiffRawData raw(rawFile);
+        FiffRawData raw(rawPath.toStdString());
 
         MNELIB::MNEInverseOperator invOp = MNELIB::MNEInverseOperator::make_inverse_operator(
             raw.info, fwd, noiseCov, 0.2f, 0.8f, false, true);

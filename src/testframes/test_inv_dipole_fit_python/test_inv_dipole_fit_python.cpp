@@ -135,17 +135,15 @@ bool writeSyntheticEvoked(const QString& sourceFile, const QString& outFile, con
  */
 bool writeSyntheticRaw(const QString& sourceFile, const QString& outFile, const StringList& chNames, const MatrixXd& data)
 {
-    QFile file(sourceFile);
-    FiffRawData source(file);
+    FiffRawData source(sourceFile.toStdString());
     const RowVectorXi sel = FiffInfoBase::pick_channels(source.info.ch_names, chNames);
     if (sel.size() != data.rows())
         return false;
     FiffInfo info = source.info.pick_info(sel);
     info.bads.clear();
 
-    QFile out(outFile);
     RowVectorXd cals;
-    FiffStream::SPtr stream = FiffStream::start_writing_raw(out, info, cals);
+    FiffStream::SPtr stream = FiffStream::start_writing_raw(outFile.toStdString(), info, cals);
     if (!stream)
         return false;
     constexpr int kBuffer = 100;

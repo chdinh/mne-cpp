@@ -125,8 +125,26 @@ public:
         return static_cast<std::uint64_t>(m_device->size());
     }
 
+    void close() override
+    {
+        m_writable = m_device->isWritable();
+        m_device->close();
+    }
+
+    bool isOpen() const override
+    {
+        return m_device->isOpen();
+    }
+
+    bool reopen() override
+    {
+        // Reopening never truncates: a device written to comes back read-write
+        return m_device->isOpen() || m_device->open(m_writable ? QIODevice::ReadWrite : QIODevice::ReadOnly);
+    }
+
 private:
     QIODevice* m_device;
+    bool m_writable = false;
 };
 
 } // namespace
@@ -184,12 +202,27 @@ FiffStream::SPtr FiffStream::start_file(const std::filesystem::path& path)
         qWarning("Cannot write to %s", UTILSLIB::utf8FromPath(path).c_str());
         return {};
     }
-    FiffStream::SPtr stream(new FiffStream(std::move(bytes), UTILSLIB::utf8FromPath(path)));
+    return start_file(FiffStream::SPtr(new FiffStream(std::move(bytes), UTILSLIB::utf8FromPath(path))));
+}
+
+//=============================================================================================================
+
+FiffStream::SPtr FiffStream::start_file(FiffStream::SPtr stream)
+{
     stream->write_id(FIFF_FILE_ID);
     int null_pointer = FIFFV_NEXT_NONE;
     stream->write_int(FIFF_DIR_POINTER, &null_pointer);
     stream->write_int(FIFF_FREE_LIST, &null_pointer);
     return stream;
+}
+
+//=============================================================================================================
+
+std::unique_ptr<UTILSLIB::ByteStream> FiffStream::byteStream(QIODevice& device, QIODevice::OpenMode mode)
+{
+    if (device.isOpen() ? (device.openMode() & mode) != mode : !device.open(mode))
+        return {};
+    return std::make_unique<QIODeviceByteStream>(&device);
 }
 
 //=============================================================================================================
@@ -207,7 +240,16 @@ QIODevice* FiffStream::device() const
 
 bool FiffStream::isOpen() const
 {
-    return m_device ? m_device->isOpen() : m_bytes && m_bytes->isOpen();
+    return m_bytes && m_bytes->isOpen();
+}
+
+//=============================================================================================================
+
+bool FiffStream::reopen()
+{
+    if (isOpen())
+        return true;
+    return m_bytes && m_bytes->reopen();
 }
 
 //=============================================================================================================
@@ -485,11 +527,8 @@ bool FiffStream::open(QIODevice::OpenModeFlag mode)
 
 bool FiffStream::close()
 {
-    if (m_device && m_device->isOpen())
-        m_device->close();
-    else if (!m_device)
+    if (m_bytes && m_bytes->isOpen())
         m_bytes->close();
-
     return true;
 }
 
@@ -1957,15 +1996,38 @@ bool FiffStream::read_tag(FiffTag::UPtr& p_pTag,
 
 //=============================================================================================================
 
-bool FiffStream::setup_read_raw(QIODevice& p_IODevice,
+bool FiffStream::setup_read_raw(const std::filesystem::path& path,
                                 FiffRawData& data,
                                 bool allow_maxshield,
                                 bool is_littleEndian)
 {
-    //
-    //   Open the file
-    //
-    FiffStream::SPtr t_pStream(new FiffStream(&p_IODevice));
+    auto bytes = UTILSLIB::FileByteStream::open(path, UTILSLIB::FileByteStream::Mode::Read);
+    if (!bytes) {
+        qCritical("Cannot open %s", UTILSLIB::utf8FromPath(path).c_str());
+        return false;
+    }
+    return setup_read_raw(FiffStream::SPtr(new FiffStream(std::move(bytes), UTILSLIB::utf8FromPath(path))), data, allow_maxshield, is_littleEndian);
+}
+
+//=============================================================================================================
+
+bool FiffStream::setup_read_raw(std::unique_ptr<UTILSLIB::ByteStream> bytes,
+                                FiffRawData& data,
+                                bool allow_maxshield,
+                                bool is_littleEndian)
+{
+    if (!bytes)
+        return false;
+    return setup_read_raw(FiffStream::SPtr(new FiffStream(std::move(bytes))), data, allow_maxshield, is_littleEndian);
+}
+
+//=============================================================================================================
+
+bool FiffStream::setup_read_raw(FiffStream::SPtr t_pStream,
+                                FiffRawData& data,
+                                bool allow_maxshield,
+                                bool is_littleEndian)
+{
     QString t_sFileName = t_pStream->streamName();
 
     if (is_littleEndian) {
@@ -2289,7 +2351,33 @@ FiffStream::SPtr FiffStream::open_update(QIODevice& p_IODevice)
 
 //=============================================================================================================
 
-FiffStream::SPtr FiffStream::start_writing_raw(QIODevice& p_IODevice,
+FiffStream::SPtr FiffStream::start_writing_raw(const std::filesystem::path& path,
+                                               const FiffInfo& info,
+                                               RowVectorXd& cals,
+                                               MatrixXi sel,
+                                               bool bResetRange,
+                                               fiff_int_t dataType)
+{
+    return start_writing_raw(start_file(path), info, cals, std::move(sel), bResetRange, dataType);
+}
+
+//=============================================================================================================
+
+FiffStream::SPtr FiffStream::start_writing_raw(std::unique_ptr<UTILSLIB::ByteStream> bytes,
+                                               const FiffInfo& info,
+                                               RowVectorXd& cals,
+                                               MatrixXi sel,
+                                               bool bResetRange,
+                                               fiff_int_t dataType)
+{
+    if (!bytes)
+        return {};
+    return start_writing_raw(start_file(FiffStream::SPtr(new FiffStream(std::move(bytes)))), info, cals, std::move(sel), bResetRange, dataType);
+}
+
+//=============================================================================================================
+
+FiffStream::SPtr FiffStream::start_writing_raw(FiffStream::SPtr t_pStream,
                                                const FiffInfo& info,
                                                RowVectorXd& cals,
                                                MatrixXi sel,
@@ -2312,10 +2400,6 @@ FiffStream::SPtr FiffStream::start_writing_raw(QIODevice& p_IODevice,
 
     fiff_int_t nchan = chs.size();
 
-    //
-    //  Create the file and save the essentials
-    //
-    FiffStream::SPtr t_pStream = start_file(p_IODevice); //1, 2, 3
     if (!t_pStream) {
         return t_pStream;
     }

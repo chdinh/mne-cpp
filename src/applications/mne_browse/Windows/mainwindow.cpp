@@ -55,9 +55,8 @@
 
 #include <inv/minimum_norm/inv_minimum_norm.h>
 #include <inv/inv_source_estimate.h>
+#include <utils/byte_stream.h>
 #include <utils/string_utils.h>
-
-
 //*************************************************************************************************************
 //=============================================================================================================
 // USED NAMESPACES
@@ -67,8 +66,13 @@ using namespace MNEBROWSE;
 
 #ifdef WASMBUILD
 static QByteArray s_wasmByteArray;
-#endif
 
+static std::unique_ptr<UTILSLIB::ByteStream> wasmRawBytes()
+{
+    const auto* begin = reinterpret_cast<const std::byte*>(s_wasmByteArray.constData());
+    return std::make_unique<UTILSLIB::MemoryByteStream>(std::vector<std::byte>(begin, begin + s_wasmByteArray.size()));
+}
+#endif
 namespace
 {
 
@@ -216,8 +220,7 @@ bool writeFilteredRawFile(const QString& rawFilePath,
                           QIODevice* pIODevice,
                           const MNEBROWSE::SessionFilter& filter)
 {
-    QFile rawFile(rawFilePath);
-    FIFFLIB::FiffRawData raw(rawFile);
+    FIFFLIB::FiffRawData raw(UTILSLIB::pathFromUtf8(rawFilePath.toStdString()));
     if (raw.isEmpty()) {
         qWarning() << "[MainWindow] Could not reopen raw data for filtered write" << rawFilePath;
         return false;
@@ -225,7 +228,7 @@ bool writeFilteredRawFile(const QString& rawFilePath,
 
     Eigen::RowVectorXd cals;
 
-    FIFFLIB::FiffStream::SPtr outfid = FIFFLIB::FiffStream::start_writing_raw(*pIODevice, raw.info, cals);
+    FIFFLIB::FiffStream::SPtr outfid = FIFFLIB::FiffStream::start_writing_raw(FIFFLIB::FiffStream::byteStream(*pIODevice, QIODevice::WriteOnly), raw.info, cals);
     if (!outfid) {
         qWarning() << "[MainWindow] Could not open output stream for filtered write.";
         return false;
@@ -341,8 +344,7 @@ bool populateEventModelFromRaw(const QString& rawFilePath,
         return false;
     }
 
-    QFile rawFile(rawFilePath);
-    FIFFLIB::FiffRawData raw(rawFile);
+    FIFFLIB::FiffRawData raw(UTILSLIB::pathFromUtf8(rawFilePath.toStdString()));
     if (raw.isEmpty()) {
         return false;
     }
@@ -1145,12 +1147,7 @@ bool MainWindow::openFiffRawData(FIFFLIB::FiffRawData& raw, const QString& featu
         statusBar()->showMessage(tr("Load a raw FIF file before using %1.").arg(label), 5000);
         return false;
     }
-    // Use the persistent member buffer so FiffRawData's internal FiffStream
-    // keeps a valid QIODevice* after this function returns.
-    if (m_wasmRawBuffer.isOpen())
-        m_wasmRawBuffer.close();
-    m_wasmRawBuffer.setBuffer(&s_wasmByteArray);
-    raw = FIFFLIB::FiffRawData(m_wasmRawBuffer);
+    raw = FIFFLIB::FiffRawData(wasmRawBytes());
 #else
     if (m_qFileRaw.fileName().isEmpty() || !QFile::exists(m_qFileRaw.fileName())) {
         statusBar()->showMessage(tr("Load a raw FIF file before using %1.").arg(label), 5000);
@@ -1160,7 +1157,7 @@ bool MainWindow::openFiffRawData(FIFFLIB::FiffRawData& raw, const QString& featu
     // valid QIODevice* that outlives this function call.
     if (m_qFileRaw.isOpen())
         m_qFileRaw.close();
-    raw = FIFFLIB::FiffRawData(m_qFileRaw);
+    raw = FIFFLIB::FiffRawData(UTILSLIB::pathFromUtf8(m_qFileRaw.fileName().toStdString()));
 #endif
 
     if (raw.isEmpty()) {
@@ -2721,8 +2718,7 @@ void MainWindow::openFile()
                                          m_pDataWindow->firstSample(),
                                          m_pDataWindow->lastSample());
 
-                QBuffer rawBuffer(&s_wasmByteArray);
-                FIFFLIB::FiffRawData raw(rawBuffer);
+                FIFFLIB::FiffRawData raw(wasmRawBytes());
                 MatrixXi events;
                 QString detectedEventSource;
                 if (!raw.isEmpty() && detectFallbackStimEvents(raw, events, detectedEventSource) && events.rows() > 0) {

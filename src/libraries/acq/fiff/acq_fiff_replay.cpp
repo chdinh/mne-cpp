@@ -287,7 +287,7 @@ private:
         if (!m_file.exists()) {
             return {AcqErrorCode::DeviceNotFound, "fiff://" + m_config.path + ": no such file"};
         }
-        if (!FiffStream::setup_read_raw(m_file, m_raw) || m_raw.info.nchan <= 0) {
+        if (!FiffStream::setup_read_raw(m_config.path, m_raw) || m_raw.info.nchan <= 0) {
             return {AcqErrorCode::UnsupportedFormat, m_config.path + " is not a raw FIFF file"};
         }
         auto format = nativeFormat(m_raw);

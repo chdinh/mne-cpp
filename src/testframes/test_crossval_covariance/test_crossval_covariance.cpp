@@ -153,8 +153,7 @@ void TestCrossvalCovariance::initTestCase()
 void TestCrossvalCovariance::computeCppCovariance()
 {
     // 1. Load raw FIFF file
-    QFile file(m_sRawFile);
-    FiffRawData raw(file);
+    FiffRawData raw(m_sRawFile.toStdString());
 
     // 2. Pick MEG channels only
     RowVectorXi picks = raw.info.pick_types(true /*meg*/,

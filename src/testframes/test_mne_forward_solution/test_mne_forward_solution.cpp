@@ -117,9 +117,8 @@ void TestMneForwardSolution::computeForward()
     pSettingsMEGEEG->mindist = 5.0f / 1000.0f;
     pSettingsMEGEEG->solname = QCoreApplication::applicationDirPath() + "/../resources/data/mne-cpp-test-data/Result/sample_audvis-meg-eeg-oct-6-fwd.fif";
 
-    QFile t_name(pSettingsMEGEEG->measname);
 
-    FIFFLIB::FiffRawData raw(t_name);
+    FIFFLIB::FiffRawData raw(pSettingsMEGEEG->measname.toStdString());
     QSharedPointer<FIFFLIB::FiffInfo> pFiffInfo = QSharedPointer<FIFFLIB::FiffInfo>(new FIFFLIB::FiffInfo(raw.info));
 
     pSettingsMEGEEG->pFiffInfo = pFiffInfo;

@@ -210,8 +210,7 @@ void TestFiffCoverage::testReadDigitizerData()
 
 void TestFiffCoverage::testReadDigitizerDataPoints()
 {
-    QFile file(rawPath());
-    FiffRawData raw(file);
+    FiffRawData raw(rawPath().toStdString());
 
     // Check that digitizer points from the raw info are accessible
     QVERIFY(raw.info.dig.size() > 0);

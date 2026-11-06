@@ -24,6 +24,7 @@
 #include <utils/byte_stream.h>
 
 #include <iostream>
+#include <stdexcept>
 
 //=============================================================================================================
 // QT INCLUDES
@@ -116,6 +117,7 @@ private slots:
     void tagsRewriteByteIdentical();
     void readsWithoutQtDevice();
     void opensAndStartsFilesByPath();
+    void readsRawByPathAndStream();
     void writersStable_data();
     void writersStable();
     void cleanupTestCase();
@@ -149,9 +151,7 @@ void TestFiffRWR::initTestCase()
     qInstallMessageHandler(UTILSLIB::MNELogger::customLogWriter);
     qDebug() << "dEpsilon" << dEpsilon;
 
-    QFile t_fileIn(QCoreApplication::applicationDirPath() + "/../resources/data/mne-cpp-test-data/MEG/sample/sample_audvis_trunc_raw.fif");
     QVERIFY(m_tempDir.isValid());
-    QFile t_fileOut(m_tempDir.filePath("sample_audvis_trunc_raw_test_rwr_out.fif"));
 
     //*********************************************************************************************************
     // First Read & Write
@@ -162,7 +162,7 @@ void TestFiffRWR::initTestCase()
     //
     //   Setup for reading the raw data
     //
-    rawFirstInRaw = FiffRawData(t_fileIn);
+    rawFirstInRaw = FiffRawData((QCoreApplication::applicationDirPath() + "/../resources/data/mne-cpp-test-data/MEG/sample/sample_audvis_trunc_raw.fif").toStdString());
 
     //
     //   Set up pick list: MEG + STI 014 - bad channels
@@ -184,7 +184,7 @@ void TestFiffRWR::initTestCase()
     //
     RowVectorXd vCals;
 
-    FiffStream::SPtr outfid = FiffStream::start_writing_raw(t_fileOut, rawFirstInRaw.info, vCals /*, vPicks*/);
+    FiffStream::SPtr outfid = FiffStream::start_writing_raw(m_tempDir.filePath("sample_audvis_trunc_raw_test_rwr_out.fif").toStdString(), rawFirstInRaw.info, vCals /*, vPicks*/);
 
     //
     //   Set up the reading parameters
@@ -241,7 +241,7 @@ void TestFiffRWR::initTestCase()
     //
     //   Setup for reading the raw data from out file
     //
-    rawSecondInRaw = FiffRawData(t_fileOut);
+    rawSecondInRaw = FiffRawData(m_tempDir.filePath("sample_audvis_trunc_raw_test_rwr_out.fif").toStdString());
 
     //
     //   Set up pick list: MEG + STI 014 - bad channels
@@ -380,6 +380,66 @@ void TestFiffRWR::tagsRewriteByteIdentical()
 
 //=============================================================================================================
 
+void TestFiffRWR::readsRawByPathAndStream()
+{
+    // A path, a stream on a QFile and a stream on bytes in memory give the same raw data
+    const QString path = testDataDir() + "/MEG/sample/sample_audvis_trunc_raw.fif";
+    const FiffRawData byPath(path.toStdString());
+    QFile qtFile(path);
+    const FiffRawData byDevice(FiffStream::byteStream(qtFile, QIODevice::ReadOnly));
+    QVERIFY(!qtFile.isOpen());
+    QVERIFY(qtFile.open(QIODevice::ReadOnly));
+    QVERIFY(!FiffStream::byteStream(qtFile, QIODevice::WriteOnly | QIODevice::Append));
+    std::vector<std::byte> fileBytes(static_cast<std::size_t>(qtFile.size()));
+    QVERIFY(qtFile.read(reinterpret_cast<char*>(fileBytes.data()), qtFile.size()) == qtFile.size());
+    qtFile.close();
+    const FiffRawData inMemory(std::make_unique<UTILSLIB::MemoryByteStream>(std::move(fileBytes)));
+    const fiff_int_t from = byPath.first_samp + 1000;
+    const fiff_int_t to = from + 2 * static_cast<fiff_int_t>(byPath.info.sfreq);
+    MatrixXd expected, times, data;
+    QVERIFY(byPath.read_raw_segment(expected, times, from, to));
+    QVERIFY(byPath.read_raw_segment(data, times, from, to));
+    QVERIFY(data == expected);
+    QVERIFY(byDevice.read_raw_segment(data, times, from, to));
+    QVERIFY(data == expected);
+    QVERIFY(inMemory.read_raw_segment(data, times, from, to));
+    QVERIFY(data == expected);
+    QCOMPARE(byPath.info.nchan, inMemory.info.nchan);
+
+    QVERIFY_THROWS_EXCEPTION(std::runtime_error, FiffRawData(m_tempDir.filePath("missing_raw.fif").toStdString()));
+    FiffRawData setup;
+    QVERIFY(FiffStream::setup_read_raw(path.toStdString(), setup));
+    QCOMPARE(setup.last_samp, byPath.last_samp);
+    QVERIFY(!FiffStream::setup_read_raw(std::unique_ptr<UTILSLIB::ByteStream>(), setup));
+
+    // Writing to a file and to bytes in memory gives the same bytes
+    const std::string outPath = m_tempDir.filePath("written_raw.fif").toStdString();
+    RowVectorXd cals;
+    FiffStream::SPtr toFile = FiffStream::start_writing_raw(outPath, byPath.info, cals);
+    QVERIFY(toFile);
+    toFile->write_raw_buffer(expected, cals);
+    toFile->finish_writing_raw();
+    auto memory = std::make_unique<UTILSLIB::MemoryByteStream>();
+    const UTILSLIB::MemoryByteStream& written = *memory;
+    FiffStream::SPtr toMemory = FiffStream::start_writing_raw(std::move(memory), byPath.info, cals);
+    QVERIFY(toMemory);
+    toMemory->write_raw_buffer(expected, cals);
+    toMemory->finish_writing_raw();
+    QFile fileOut(QString::fromStdString(outPath));
+    QVERIFY(fileOut.open(QIODevice::ReadOnly));
+    QCOMPARE(stableBytes(fileOut.readAll()), stableBytes(QByteArray(reinterpret_cast<const char*>(written.data().data()), static_cast<qsizetype>(written.size()))));
+    QVERIFY(!FiffStream::start_writing_raw(std::unique_ptr<UTILSLIB::ByteStream>(), byPath.info, cals));
+    QVERIFY(!FiffStream::start_writing_raw(m_tempDir.filePath("no/dir/raw.fif").toStdString(), byPath.info, cals));
+
+    const std::string savedPath = m_tempDir.filePath("saved_raw.fif").toStdString();
+    QVERIFY(byPath.save(savedPath, RowVectorXi(), 1, from, to));
+    const FiffRawData back(savedPath);
+    QVERIFY(back.read_raw_segment(data, times, from, to));
+    QVERIFY(data.isApprox(expected, 1e-6));
+}
+
+//=============================================================================================================
+
 void TestFiffRWR::readsWithoutQtDevice()
 {
     // A stream on a plain file byte stream sees the same directory and tags as one on a QFile
@@ -428,6 +488,19 @@ void TestFiffRWR::opensAndStartsFilesByPath()
     QCOMPARE(in->streamName(), QString::fromStdString(path));
     QVERIFY(in->nent() > 0);
     QVERIFY(!FiffStream::open(m_tempDir.filePath("missing.fif").toStdString()));
+
+    // A closed stream reopens its file and still reads by the directory it read before
+    FiffTag::UPtr firstTag;
+    QVERIFY(in->read_tag(firstTag, in->dir()[1]->pos));
+    in->close();
+    QVERIFY(!in->isOpen());
+    QVERIFY(in->reopen());
+    QVERIFY(in->isOpen());
+    FiffTag::UPtr again;
+    QVERIFY(in->read_tag(again, in->dir()[1]->pos));
+    QCOMPARE(again->kind, firstTag->kind);
+    QCOMPARE(static_cast<const QByteArray&>(*again), static_cast<const QByteArray&>(*firstTag));
+    QVERIFY(in->reopen());
 
     // A file started by path is complete on disk once the stream is closed, before the stream goes away
     const std::string outPath = m_tempDir.filePath("by-path.fif").toStdString();
@@ -480,9 +553,12 @@ void TestFiffRWR::writersStable()
     QBuffer out(&bytes);
     const QString meg = testDataDir() + "/MEG/sample/";
     if (writer == "raw") {
-        QFile in(meg + "sample_audvis_trunc_raw.fif");
-        const FiffRawData raw(in);
-        QVERIFY(raw.save(out));
+        const FiffRawData raw((meg + "sample_audvis_trunc_raw.fif").toStdString());
+        const QString path = m_tempDir.filePath("stable-raw.fif");
+        QVERIFY(raw.save(path.toStdString()));
+        QFile written(path);
+        QVERIFY(written.open(QIODevice::ReadOnly));
+        bytes = written.readAll();
     } else if (writer == "evoked") {
         const FiffEvokedSet evoked((meg + "sample_audvis-ave.fif").toStdString());
         const QString path = m_tempDir.filePath("stable-ave.fif");

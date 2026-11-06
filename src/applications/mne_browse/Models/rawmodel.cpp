@@ -414,7 +414,7 @@ bool RawModel::writeFiffData(QIODevice* p_IODevice)
     RowVectorXd cals;
 
     //    std::cout << "Writing file " << QFile(&p_IODevice).fileName().toUtf8() << std::endl;
-    FiffStream::SPtr outfid = FiffStream::start_writing_raw(*p_IODevice, *m_pFiffInfo, cals);
+    FiffStream::SPtr outfid = FiffStream::start_writing_raw(FiffStream::byteStream(*p_IODevice, QIODevice::WriteOnly), *m_pFiffInfo, cals);
     if (!outfid) {
         return false;
     }

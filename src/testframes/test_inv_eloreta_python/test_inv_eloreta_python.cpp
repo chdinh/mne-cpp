@@ -429,8 +429,7 @@ void TestInvEloretaPython::applyInverseRaw_matchesPython()
     QFETCH(double, value10_5);
     QFETCH(double, value60_50);
 
-    QFile rawFile(data("MEG/sample/sample_audvis_trunc_raw.fif"));
-    const FiffRawData raw(rawFile);
+    const FiffRawData raw(data("MEG/sample/sample_audvis_trunc_raw.fif").toStdString());
     const int from = raw.first_samp + 1000;
 
     const InvSourceEstimate stc = applyInverseRaw(raw, m_loose, 1.0f / 9.0f, method, from, from + 99);

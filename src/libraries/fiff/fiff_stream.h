@@ -178,6 +178,14 @@ public:
 
     //=========================================================================================================
     /**
+     * Opens a closed stream again without truncating it; the directory read before stays valid.
+     *
+     * @return Whether the stream is open.
+     */
+    bool reopen();
+
+    //=========================================================================================================
+    /**
      * Sets the byte order of the stream; FIFF files are big-endian, some raw data files little-endian.
      *
      * @param[in] littleEndian  True to read and write little-endian.
@@ -534,17 +542,44 @@ public:
      *
      * Read information about raw data file
      *
-     * @param[in] p_IODevice        An fiff IO device like a fiff QFile or QTCPSocket.
+     * @param[in] path               The raw data file.
      * @param[out] data              The raw data information - contains the opened fiff file.
      * @param[in] allow_maxshield    Accept unprocessed MaxShield data.
      * @param[in] is_littleEndian The file is stored in little-endian byte order.
      *
      * @return true if succeeded, false otherwise.
      */
-    static bool setup_read_raw(QIODevice& p_IODevice,
+    static bool setup_read_raw(const std::filesystem::path& path,
                                FiffRawData& data,
                                bool allow_maxshield = true,
                                bool is_littleEndian = false);
+
+    //=========================================================================================================
+    /**
+     * Read information about raw data held in bytes that are not a file, e.g. in memory.
+     *
+     * @param[in] bytes              The raw data; data keeps them for reading segments.
+     * @param[out] data              The raw data information.
+     * @param[in] allow_maxshield    Accept unprocessed MaxShield data.
+     * @param[in] is_littleEndian The bytes are in little-endian byte order.
+     *
+     * @return true if succeeded, false otherwise.
+     */
+    static bool setup_read_raw(std::unique_ptr<UTILSLIB::ByteStream> bytes,
+                               FiffRawData& data,
+                               bool allow_maxshield = true,
+                               bool is_littleEndian = false);
+
+    //=========================================================================================================
+    /**
+     * Byte stream over a Qt device, for callers that hold a QIODevice such as a socket or a QBuffer.
+     *
+     * @param[in] device   The device; it must outlive the byte stream. It is opened in @p mode unless already open.
+     * @param[in] mode     How to open the device.
+     *
+     * @return The byte stream, or nullptr if the device cannot be opened.
+     */
+    static std::unique_ptr<UTILSLIB::ByteStream> byteStream(QIODevice& device, QIODevice::OpenMode mode);
 
     //=========================================================================================================
     /**
@@ -604,7 +639,7 @@ public:
      *
      * function [fid,cals] = fiff_start_writing_raw(name,info,sel)
      *
-     * @param[in] p_IODevice     A fiff IO device like a fiff QFile or QTCPSocket.
+     * @param[in] path           The file to create.
      * @param[in] info           The measurement info block of the source file.
      * @param[out] cals          A copy of the calibration values.
      * @param[in] sel            Which channels will be included in the output file (optional).
@@ -612,9 +647,29 @@ public:
      * @param[in] dataType       FIFF_DATA_PACK of the buffers that follow: FIFFT_FLOAT (write_raw_buffer), or
      *                           FIFFT_DAU_PACK16, FIFFT_INT, FIFFT_DOUBLE for writers of native samples.
      *
-     * @return the started fiff file, or null if the device cannot be opened for writing.
+     * @return the started fiff file, or null if the file cannot be created.
      */
-    static FiffStream::SPtr start_writing_raw(QIODevice& p_IODevice,
+    static FiffStream::SPtr start_writing_raw(const std::filesystem::path& path,
+                                              const FiffInfo& info,
+                                              Eigen::RowVectorXd& cals,
+                                              Eigen::MatrixXi sel = defaultMatrixXi,
+                                              bool bResetRange = true,
+                                              fiff_int_t dataType = FIFFT_FLOAT);
+
+    //=========================================================================================================
+    /**
+     * Starts raw data in bytes that are not a file, e.g. in memory.
+     *
+     * @param[in] bytes          Where to write; the returned stream owns them.
+     * @param[in] info           The measurement info block of the source file.
+     * @param[out] cals          A copy of the calibration values.
+     * @param[in] sel            Which channels will be included in the output (optional).
+     * @param[in] bResetRange    Flag whether to reset the channel range to 1.0. Default is true.
+     * @param[in] dataType       FIFF_DATA_PACK of the buffers that follow, as for the path overload.
+     *
+     * @return the started stream, or null if @p bytes is null.
+     */
+    static FiffStream::SPtr start_writing_raw(std::unique_ptr<UTILSLIB::ByteStream> bytes,
                                               const FiffInfo& info,
                                               Eigen::RowVectorXd& cals,
                                               Eigen::MatrixXi sel = defaultMatrixXi,
@@ -961,6 +1016,20 @@ public:
     static bool copyProcessingHistory(const QString& fromPath, const QString& toPath);
 
 private:
+    /** Writes the file id, directory pointer and free list that open every FIFF file. */
+    static FiffStream::SPtr start_file(FiffStream::SPtr stream);
+
+    /** Reads the raw data information from an unopened stream. */
+    static bool setup_read_raw(FiffStream::SPtr stream, FiffRawData& data, bool allow_maxshield, bool is_littleEndian);
+
+    /** Writes the measurement info and starts the raw data block of a started file. */
+    static FiffStream::SPtr start_writing_raw(FiffStream::SPtr stream,
+                                              const FiffInfo& info,
+                                              Eigen::RowVectorXd& cals,
+                                              Eigen::MatrixXi sel,
+                                              bool bResetRange,
+                                              fiff_int_t dataType);
+
     //=========================================================================================================
     /**
      * Check that the file starts properly.

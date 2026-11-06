@@ -78,9 +78,8 @@ void TestFiffSimulatorSsp::sspAndBadsRoundTripThroughFiffWrite()
     // ---------------------------------------------------------------------
     // 1. Read source raw + info, ensure it has SSP projectors and bad chans.
     // ---------------------------------------------------------------------
-    QFile srcFile(src);
     FiffRawData srcRaw;
-    QVERIFY2(FiffStream::setup_read_raw(srcFile, srcRaw),
+    QVERIFY2(FiffStream::setup_read_raw(src.toStdString(), srcRaw),
              qPrintable(QStringLiteral("setup_read_raw failed for %1").arg(src)));
 
     const FiffInfo srcInfo = srcRaw.info;
@@ -106,8 +105,7 @@ void TestFiffSimulatorSsp::sspAndBadsRoundTripThroughFiffWrite()
 
     Eigen::RowVectorXd cals;
     {
-        QFile outFile(outPath);
-        FiffStream::SPtr pOut = FiffStream::start_writing_raw(outFile, infoForWrite, cals);
+        FiffStream::SPtr pOut = FiffStream::start_writing_raw(outPath.toStdString(), infoForWrite, cals);
         QVERIFY2(!pOut.isNull(), "start_writing_raw returned null");
 
         const fiff_int_t firstSamp = srcRaw.first_samp;
@@ -125,9 +123,8 @@ void TestFiffSimulatorSsp::sspAndBadsRoundTripThroughFiffWrite()
     // ---------------------------------------------------------------------
     // 3. Re-read output and compare projectors + bads byte-by-byte.
     // ---------------------------------------------------------------------
-    QFile reopened(outPath);
     FiffRawData outRaw;
-    QVERIFY(FiffStream::setup_read_raw(reopened, outRaw));
+    QVERIFY(FiffStream::setup_read_raw(outPath.toStdString(), outRaw));
 
     const FiffInfo& outInfo = outRaw.info;
 

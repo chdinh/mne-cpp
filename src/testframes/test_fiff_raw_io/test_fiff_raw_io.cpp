@@ -15,6 +15,7 @@
 #include <QFile>
 #include <QDir>
 #include <QBuffer>
+#include <QTemporaryDir>
 #include <QTemporaryFile>
 #include <stdexcept>
 #include <Eigen/Dense>
@@ -162,8 +163,7 @@ private slots:
         if (!hasData())
             QSKIP("No test data");
 
-        QFile file(m_sDataPath + "/MEG/sample/sample_audvis_trunc_raw.fif");
-        FiffRawData raw(file);
+        FiffRawData raw((m_sDataPath + "/MEG/sample/sample_audvis_trunc_raw.fif").toStdString());
 
         QVERIFY(raw.info.nchan > 0);
         QVERIFY(raw.info.sfreq > 0);
@@ -178,8 +178,7 @@ private slots:
         if (!hasData())
             QSKIP("No test data");
 
-        QFile file(m_sDataPath + "/MEG/sample/sample_audvis_trunc_raw.fif");
-        FiffRawData raw(file);
+        FiffRawData raw((m_sDataPath + "/MEG/sample/sample_audvis_trunc_raw.fif").toStdString());
 
         MatrixXd data, times;
         fiff_int_t from = raw.first_samp;
@@ -196,8 +195,7 @@ private slots:
         if (!hasData())
             QSKIP("No test data");
 
-        QFile file(m_sDataPath + "/MEG/sample/sample_audvis_trunc_raw.fif");
-        FiffRawData raw(file);
+        FiffRawData raw((m_sDataPath + "/MEG/sample/sample_audvis_trunc_raw.fif").toStdString());
 
         // Pick only MEG channels
         RowVectorXi picks = raw.info.pick_types(true, false, false);
@@ -216,8 +214,7 @@ private slots:
         if (!hasData())
             QSKIP("No test data");
 
-        QFile file(m_sDataPath + "/MEG/sample/sample_audvis_trunc_raw.fif");
-        FiffRawData raw(file);
+        FiffRawData raw((m_sDataPath + "/MEG/sample/sample_audvis_trunc_raw.fif").toStdString());
 
         // Read the whole file in chunks
         fiff_int_t quantum = (fiff_int_t)(raw.info.sfreq * 0.5);
@@ -240,8 +237,7 @@ private slots:
         if (!hasData())
             QSKIP("No test data");
 
-        QFile file(m_sDataPath + "/MEG/sample/sample_audvis_trunc_raw.fif");
-        FiffRawData raw(file);
+        FiffRawData raw((m_sDataPath + "/MEG/sample/sample_audvis_trunc_raw.fif").toStdString());
 
         // Verify FiffInfo fields thoroughly
         FiffInfo& info = raw.info;
@@ -289,15 +285,14 @@ private slots:
         if (!hasData())
             QSKIP("No test data");
 
-        QFile file(m_sDataPath + "/MEG/sample/sample_audvis_trunc_raw.fif");
-        FiffRawData raw(file);
+        FiffRawData raw((m_sDataPath + "/MEG/sample/sample_audvis_trunc_raw.fif").toStdString());
 
         // Write a portion to temp file
         QTemporaryFile tmpFile;
         QVERIFY(tmpFile.open());
 
         RowVectorXd cals;
-        FiffStream::SPtr outStream = FiffStream::start_writing_raw(tmpFile, raw.info, cals);
+        FiffStream::SPtr outStream = FiffStream::start_writing_raw(FiffStream::byteStream(tmpFile, QIODevice::WriteOnly), raw.info, cals);
         QVERIFY(outStream != nullptr);
 
         // Read and write first 1 second
@@ -312,8 +307,7 @@ private slots:
         tmpFile.close();
 
         // Re-read and verify
-        QFile tmpIn(tmpFile.fileName());
-        FiffRawData raw2(tmpIn);
+        FiffRawData raw2(tmpFile.fileName().toStdString());
         QCOMPARE(raw2.info.nchan, raw.info.nchan);
         QVERIFY(raw2.info.sfreq == raw.info.sfreq);
 
@@ -423,8 +417,7 @@ private slots:
             QSKIP("No test data");
 
         // Read raw to get info, then read cov
-        QFile rawFile(m_sDataPath + "/MEG/sample/sample_audvis_trunc_raw.fif");
-        FiffRawData raw(rawFile);
+        FiffRawData raw((m_sDataPath + "/MEG/sample/sample_audvis_trunc_raw.fif").toStdString());
 
         FiffCov cov((m_sDataPath + "/MEG/sample/sample_audvis-cov.fif").toStdString());
 
@@ -517,8 +510,7 @@ private slots:
         if (!hasData())
             QSKIP("No test data");
 
-        QFile file(m_sDataPath + "/MEG/sample/test_hpiFit_raw.fif");
-        FiffRawData raw(file);
+        FiffRawData raw((m_sDataPath + "/MEG/sample/test_hpiFit_raw.fif").toStdString());
 
         QVERIFY(raw.info.nchan > 0);
         QVERIFY(raw.info.sfreq > 0);
@@ -659,8 +651,7 @@ private slots:
         if (!hasData())
             QSKIP("No test data");
 
-        QFile file(m_sDataPath + "/MEG/sample/sample_audvis_trunc_raw.fif");
-        FiffRawData raw(file);
+        FiffRawData raw((m_sDataPath + "/MEG/sample/sample_audvis_trunc_raw.fif").toStdString());
 
         FiffInfo& info = raw.info;
 
@@ -707,7 +698,7 @@ private slots:
         if (!file.exists())
             QSKIP("Filter reference data not found");
 
-        FiffRawData raw(file);
+        FiffRawData raw(path.toStdString());
         QVERIFY(raw.info.nchan > 0);
 
         MatrixXd data, times;
@@ -760,8 +751,7 @@ private slots:
             QSKIP("No test data");
 
         // Persistent QFile — mirrors the fixed application code
-        QFile file(m_sDataPath + "/MEG/sample/sample_audvis_trunc_raw.fif");
-        FiffRawData raw(file);
+        FiffRawData raw((m_sDataPath + "/MEG/sample/sample_audvis_trunc_raw.fif").toStdString());
         QVERIFY(!raw.isEmpty());
 
         // Read a 1-second segment
@@ -789,21 +779,17 @@ private slots:
 
         // Borrow a valid measurement info from the real test file so the
         // written file has a well-formed meas-info block ...
-        QFile srcFile(m_sDataPath + "/MEG/sample/sample_audvis_trunc_raw.fif");
-        FiffRawData src(srcFile);
+        FiffRawData src((m_sDataPath + "/MEG/sample/sample_audvis_trunc_raw.fif").toStdString());
         QVERIFY(!src.isEmpty());
 
         // ... then write a raw file that opens a FIFFB_RAW_DATA block but never
         // writes a single data buffer, leaving that block's directory empty.
-        QTemporaryFile tmpFile;
-        QVERIFY(tmpFile.open());
-        tmpFile.close();
+        QTemporaryDir dir;
+        const std::string path = dir.filePath("empty_raw.fif").toStdString();
 
         {
-            QFile outFile(tmpFile.fileName());
             RowVectorXd cals;
-            FiffStream::SPtr outStream =
-                FiffStream::start_writing_raw(outFile, src.info, cals);
+            FiffStream::SPtr outStream = FiffStream::start_writing_raw(path, src.info, cals);
             QVERIFY(outStream);
             // Deliberately write no raw buffers before finishing.
             outStream->finish_writing_raw();
@@ -813,10 +799,9 @@ private slots:
         // the empty directory, which FiffRawData surfaces as a runtime_error
         // rather than an out-of-bounds crash. The point of the regression is
         // that we reach this controlled failure at all.
-        QFile badFile(tmpFile.fileName());
         bool threw = false;
         try {
-            FiffRawData bad(badFile);
+            FiffRawData bad(path);
         } catch (const std::runtime_error&) {
             threw = true;
         }

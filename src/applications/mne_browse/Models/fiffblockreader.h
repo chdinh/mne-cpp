@@ -27,7 +27,6 @@
 
 #include <QObject>
 #include <QFile>
-#include <QBuffer>
 #include <QSharedPointer>
 #include <QFutureWatcher>
 #include <QtConcurrent>
@@ -218,8 +217,6 @@ private:
     Eigen::MatrixXd doRead(int from, int to);
 
     QFile* m_file = nullptr;                      /**< File-backed source device for desktop paths. */
-    QBuffer* m_buffer = nullptr;                  /**< Memory-backed source device used for in-memory loads. */
-    QByteArray m_bufferData;                      /**< Owned buffer for memory-backed FIFF content. */
     QSharedPointer<FIFFLIB::FiffRawData> m_raw;   /**< Raw FIFF reader used for header and block access. */
     QSharedPointer<FIFFLIB::FiffInfo> m_fiffInfo; /**< Cached measurement information of the open file. */
     int m_firstSample = 0;                        /**< First sample index of the open raw file. */

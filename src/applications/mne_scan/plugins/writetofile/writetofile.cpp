@@ -402,7 +402,7 @@ void WriteToFile::toggleRecordingFile()
 
         //Start/Prepare writing process. Actual writing is done in run() method.
         m_mutex.lock();
-        m_pOutfid = FiffStream::start_writing_raw(m_qFileOut,
+        m_pOutfid = FiffStream::start_writing_raw(FiffStream::byteStream(m_qFileOut, QIODevice::WriteOnly),
                                                   *m_pFiffInfo,
                                                   m_mCals);
         if (!m_pOutfid) {
@@ -462,7 +462,7 @@ void WriteToFile::splitRecordingFile()
     //start next file
     m_qFileOut.setFileName(nextFileName);
     MatrixXi sel;
-    m_pOutfid = FiffStream::start_writing_raw(m_qFileOut,
+    m_pOutfid = FiffStream::start_writing_raw(FiffStream::byteStream(m_qFileOut, QIODevice::WriteOnly),
                                               *m_pFiffInfo,
                                               m_mCals,
                                               sel,

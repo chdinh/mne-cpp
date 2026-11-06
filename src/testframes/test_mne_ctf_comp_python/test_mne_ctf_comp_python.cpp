@@ -97,8 +97,7 @@ double relError(const MatrixXd& actual, const MatrixXd& expected, const MatrixXd
  */
 MatrixXd readFiff(int fileGrade, int destGrade = -1)
 {
-    QFile file(fixture(fileGrade));
-    FiffRawData raw(file);
+    FiffRawData raw(fixture(fileGrade).toStdString());
     if (destGrade >= 0)
         MNE::setup_compensators(raw, destGrade, false);
     MatrixXd data, times;
@@ -172,8 +171,7 @@ void TestMneCtfCompPython::initTestCase()
 
 void TestMneCtfCompPython::readsCompensationData()
 {
-    QFile file(fixture(3));
-    FiffRawData raw(file);
+    FiffRawData raw(fixture(3).toStdString());
     QCOMPARE(raw.info.get_current_comp(), 3);
     QCOMPARE(raw.info.comps.size(), 5);
     QCOMPARE(raw.info.comps[0].kind, 1);
@@ -272,8 +270,7 @@ void TestMneCtfCompPython::fiffRawDataPicksCompensated()
     QFETCH(bool, withProj);
     QFETCH(bool, returnMult);
 
-    QFile file(fixture(3));
-    FiffRawData raw(file);
+    FiffRawData raw(fixture(3).toStdString());
     MNE::setup_compensators(raw, 0, false);
     // Expected: mne-python's grade-0 data, projected away from the mean MEG signal if asked.
     MatrixXd expected = m_reference[0];
@@ -355,8 +352,7 @@ void TestMneCtfCompPython::evokedSetChangesGrade()
     QFETCH(int, to);
 
     // An evoked set holding the stored fixture data at grade 'from'
-    QFile file(fixture(from));
-    FiffRawData raw(file);
+    FiffRawData raw(fixture(from).toStdString());
     FiffEvokedSet set;
     set.info = raw.info;
     FiffEvoked evoked;

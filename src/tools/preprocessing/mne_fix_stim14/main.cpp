@@ -99,8 +99,7 @@ int main(int argc, char* argv[])
     }
 
     // Open raw data
-    QFile fileIn(rawFile);
-    FiffRawData raw(fileIn);
+    FiffRawData raw(UTILSLIB::pathFromUtf8(rawFile.toStdString()));
     if (raw.info.isEmpty()) {
         qCritical("Cannot read raw data from: %s", qPrintable(rawFile));
         return 1;
@@ -151,9 +150,8 @@ int main(int argc, char* argv[])
     qInfo("STI 014 recomputed from STI 001-006.");
 
     // Write output
-    QFile fileOut(outFile);
     RowVectorXd cals;
-    FiffStream::SPtr outStream = FiffStream::start_writing_raw(fileOut, raw.info, cals);
+    FiffStream::SPtr outStream = FiffStream::start_writing_raw(UTILSLIB::pathFromUtf8(outFile.toStdString()), raw.info, cals);
     if (!outStream) {
         qCritical("Cannot open output file: %s", qPrintable(outFile));
         return 1;

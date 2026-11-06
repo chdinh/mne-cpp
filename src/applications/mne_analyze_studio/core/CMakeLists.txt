@@ -71,6 +71,7 @@ target_link_libraries(${PROJECT_NAME} PUBLIC
     ${QT_REQUIRED_COMPONENT_LIBS}
     mne_analyze_studio_sdk
     mne_fiff
+    mne_utils
     mne_bids
     mne_fs
     Eigen3::Eigen

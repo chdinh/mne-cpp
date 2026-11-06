@@ -530,10 +530,6 @@ protected:
     FIFFLIB::FiffCov m_covariance;                /**< Last computed covariance matrix. */
     MNELIB::MNEInverseOperator m_inverseOperator; /**< Last loaded inverse operator. */
 
-#ifdef WASMBUILD
-    QBuffer m_wasmRawBuffer; /**< Persistent QBuffer wrapping s_wasmByteArray so FiffRawData\n                                                                 keeps a valid QIODevice after openFiffRawData returns. */
-#endif
-
     //Window widgets
     EventWindow* m_pEventWindow;                   /**< Event widget which display the event view. */
     AnnotationWindow* m_pAnnotationWindow;         /**< Annotation widget which displays browser annotations. */

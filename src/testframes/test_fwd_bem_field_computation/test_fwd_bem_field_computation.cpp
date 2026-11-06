@@ -159,8 +159,7 @@ private slots:
         auto coilDefs = FwdCoilSet::read_coil_defs(coilDefPath());
         QVERIFY(coilDefs != nullptr);
 
-        QFile rawFile(rawPath());
-        FiffRawData raw(rawFile);
+        FiffRawData raw(rawPath().toStdString());
 
         // Collect MEG channels
         QList<FiffChInfo> megChs;
@@ -194,8 +193,7 @@ private slots:
         QVERIFY(model != nullptr);
         model->fwd_bem_load_recompute_solution(bemSolPath(), FWD_BEM_LINEAR_COLL, 0);
 
-        QFile rawFile(rawPath());
-        FiffRawData raw(rawFile);
+        FiffRawData raw(rawPath().toStdString());
 
         // Collect only EEG channels
         QList<FiffChInfo> eegChs;
@@ -229,8 +227,7 @@ private slots:
         model->fwd_bem_load_recompute_solution(bemSolPath(), FWD_BEM_CONSTANT_COLL, 0);
 
         auto coilDefs = FwdCoilSet::read_coil_defs(coilDefPath());
-        QFile rawFile(rawPath());
-        FiffRawData raw(rawFile);
+        FiffRawData raw(rawPath().toStdString());
         QList<FiffChInfo> megChs;
         for (int i = 0; i < raw.info.nchan; ++i) {
             if (raw.info.chs[i].kind == FIFFV_MEG_CH)
@@ -261,8 +258,7 @@ private slots:
         model->fwd_bem_load_recompute_solution(bemSolPath(), FWD_BEM_LINEAR_COLL, 0);
 
         auto coilDefs = FwdCoilSet::read_coil_defs(coilDefPath());
-        QFile rawFile(rawPath());
-        FiffRawData raw(rawFile);
+        FiffRawData raw(rawPath().toStdString());
         QList<FiffChInfo> megChs;
         for (int i = 0; i < raw.info.nchan; ++i) {
             if (raw.info.chs[i].kind == FIFFV_MEG_CH)
@@ -289,8 +285,7 @@ private slots:
         QVERIFY(model != nullptr);
         model->fwd_bem_load_recompute_solution(bemSolPath(), FWD_BEM_CONSTANT_COLL, 0);
 
-        QFile rawFile(rawPath());
-        FiffRawData raw(rawFile);
+        FiffRawData raw(rawPath().toStdString());
         QList<FiffChInfo> eegChs;
         for (int i = 0; i < raw.info.nchan; ++i) {
             if (raw.info.chs[i].kind == FIFFV_EEG_CH)
@@ -318,8 +313,7 @@ private slots:
         QVERIFY(model != nullptr);
         model->fwd_bem_load_recompute_solution(bemSolPath(), FWD_BEM_LINEAR_COLL, 0);
 
-        QFile rawFile(rawPath());
-        FiffRawData raw(rawFile);
+        FiffRawData raw(rawPath().toStdString());
         QList<FiffChInfo> eegChs;
         for (int i = 0; i < raw.info.nchan; ++i) {
             if (raw.info.chs[i].kind == FIFFV_EEG_CH)
@@ -348,8 +342,7 @@ private slots:
         model->fwd_bem_load_recompute_solution(bemSolPath(), FWD_BEM_CONSTANT_COLL, 0);
 
         auto coilDefs = FwdCoilSet::read_coil_defs(coilDefPath());
-        QFile rawFile(rawPath());
-        FiffRawData raw(rawFile);
+        FiffRawData raw(rawPath().toStdString());
         QList<FiffChInfo> megChs;
         for (int i = 0; i < raw.info.nchan; ++i) {
             if (raw.info.chs[i].kind == FIFFV_MEG_CH)
@@ -381,8 +374,7 @@ private slots:
         auto model = FwdBemModel::fwd_bem_load_homog_surface(bemPath());
         model->fwd_bem_load_recompute_solution(bemSolPath(), FWD_BEM_CONSTANT_COLL, 0);
 
-        QFile rawFile(rawPath());
-        FiffRawData raw(rawFile);
+        FiffRawData raw(rawPath().toStdString());
         QList<FiffChInfo> eegChs;
         for (int i = 0; i < raw.info.nchan; ++i) {
             if (raw.info.chs[i].kind == FIFFV_EEG_CH)
@@ -417,8 +409,7 @@ private slots:
         model->fwd_bem_load_recompute_solution(bemSolPath(), FWD_BEM_LINEAR_COLL, 0);
 
         auto coilDefs = FwdCoilSet::read_coil_defs(coilDefPath());
-        QFile rawFile(rawPath());
-        FiffRawData raw(rawFile);
+        FiffRawData raw(rawPath().toStdString());
         QList<FiffChInfo> megChs;
         for (int i = 0; i < raw.info.nchan; ++i) {
             if (raw.info.chs[i].kind == FIFFV_MEG_CH)
@@ -445,8 +436,7 @@ private slots:
         auto model = FwdBemModel::fwd_bem_load_homog_surface(bemPath());
         model->fwd_bem_load_recompute_solution(bemSolPath(), FWD_BEM_LINEAR_COLL, 0);
 
-        QFile rawFile(rawPath());
-        FiffRawData raw(rawFile);
+        FiffRawData raw(rawPath().toStdString());
         QList<FiffChInfo> eegChs;
         for (int i = 0; i < raw.info.nchan; ++i) {
             if (raw.info.chs[i].kind == FIFFV_EEG_CH)
@@ -473,8 +463,7 @@ private slots:
         // Test spherical head model MEG field computation
 
         auto coilDefs = FwdCoilSet::read_coil_defs(coilDefPath());
-        QFile rawFile(rawPath());
-        FiffRawData raw(rawFile);
+        FiffRawData raw(rawPath().toStdString());
         QList<FiffChInfo> megChs;
         for (int i = 0; i < raw.info.nchan; ++i) {
             if (raw.info.chs[i].kind == FIFFV_MEG_CH)
@@ -498,8 +487,7 @@ private slots:
         // Test vectorized sphere field computation (3 dipole orientations)
 
         auto coilDefs = FwdCoilSet::read_coil_defs(coilDefPath());
-        QFile rawFile(rawPath());
-        FiffRawData raw(rawFile);
+        FiffRawData raw(rawPath().toStdString());
         QList<FiffChInfo> megChs;
         for (int i = 0; i < raw.info.nchan; ++i) {
             if (raw.info.chs[i].kind == FIFFV_MEG_CH)
@@ -522,8 +510,7 @@ private slots:
         // Test sphere field with spatial gradients
 
         auto coilDefs = FwdCoilSet::read_coil_defs(coilDefPath());
-        QFile rawFile(rawPath());
-        FiffRawData raw(rawFile);
+        FiffRawData raw(rawPath().toStdString());
         QList<FiffChInfo> megChs;
         for (int i = 0; i < raw.info.nchan; ++i) {
             if (raw.info.chs[i].kind == FIFFV_MEG_CH)
@@ -556,8 +543,7 @@ private slots:
         // Test magnetic dipole field computation (used for MEG sensor modeling)
 
         auto coilDefs = FwdCoilSet::read_coil_defs(coilDefPath());
-        QFile rawFile(rawPath());
-        FiffRawData raw(rawFile);
+        FiffRawData raw(rawPath().toStdString());
         QList<FiffChInfo> megChs;
         for (int i = 0; i < raw.info.nchan; ++i) {
             if (raw.info.chs[i].kind == FIFFV_MEG_CH)
@@ -580,8 +566,7 @@ private slots:
         // Test vectorized magnetic dipole field (3 orientations simultaneously)
 
         auto coilDefs = FwdCoilSet::read_coil_defs(coilDefPath());
-        QFile rawFile(rawPath());
-        FiffRawData raw(rawFile);
+        FiffRawData raw(rawPath().toStdString());
         QList<FiffChInfo> megChs;
         for (int i = 0; i < raw.info.nchan; ++i) {
             if (raw.info.chs[i].kind == FIFFV_MEG_CH)
@@ -601,8 +586,7 @@ private slots:
     {
         // A magnetic dipole has no electric potential: the magnetic dipole fit uses these functions as its EEG model.
         // The sphere-model fields likewise apply to MEG coils only.
-        QFile rawFile(rawPath());
-        FiffRawData raw(rawFile);
+        FiffRawData raw(rawPath().toStdString());
         QList<FiffChInfo> eegChs;
         for (int i = 0; i < raw.info.nchan; ++i) {
             if (raw.info.chs[i].kind == FIFFV_EEG_CH)
@@ -714,8 +698,7 @@ private slots:
         QString tmpDir = QDir::tempPath();
         pSettings->solname = tmpDir + "/test_fwd_coverage_output.fif";
 
-        QFile rawFile(rawPath());
-        FiffRawData raw(rawFile);
+        FiffRawData raw(rawPath().toStdString());
         pSettings->pFiffInfo = QSharedPointer<FiffInfo>::create(raw.info);
         pSettings->checkIntegrity();
 

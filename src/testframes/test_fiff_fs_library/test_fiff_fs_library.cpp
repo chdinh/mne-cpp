@@ -276,8 +276,7 @@ void TestFiffFsLibrary::fiff_readRawSegment()
 {
     if (!hasData())
         QSKIP("No test data");
-    QFile rawFile(rawPath());
-    FiffRawData raw(rawFile);
+    FiffRawData raw(rawPath().toStdString());
 
     MatrixXd data, times;
     fiff_int_t from = raw.first_samp;
@@ -293,8 +292,7 @@ void TestFiffFsLibrary::fiff_readRawSegmentWithSel()
 {
     if (!hasData())
         QSKIP("No test data");
-    QFile rawFile(rawPath());
-    FiffRawData raw(rawFile);
+    FiffRawData raw(rawPath().toStdString());
 
     int nPick = qMin(10, (int)raw.info.nchan);
     RowVectorXi sel(nPick);
@@ -315,8 +313,7 @@ void TestFiffFsLibrary::fiff_readRawSegmentTimes()
 {
     if (!hasData())
         QSKIP("No test data");
-    QFile rawFile(rawPath());
-    FiffRawData raw(rawFile);
+    FiffRawData raw(rawPath().toStdString());
 
     MatrixXd data, times;
     float tmin = (float)(raw.first_samp + 10) / raw.info.sfreq;
@@ -469,8 +466,7 @@ void TestFiffFsLibrary::fiff_infoPickMeg()
 {
     if (!hasData())
         QSKIP("No test data");
-    QFile rawFile(rawPath());
-    FiffRawData raw(rawFile);
+    FiffRawData raw(rawPath().toStdString());
 
     RowVectorXi megSel = raw.info.pick_types(true, false, false);
     QVERIFY(megSel.size() > 0);
@@ -488,8 +484,7 @@ void TestFiffFsLibrary::fiff_infoPickEeg()
 {
     if (!hasData())
         QSKIP("No test data");
-    QFile rawFile(rawPath());
-    FiffRawData raw(rawFile);
+    FiffRawData raw(rawPath().toStdString());
 
     RowVectorXi eegSel = raw.info.pick_types(false, true, false);
     if (eegSel.size() == 0)
@@ -576,8 +571,7 @@ void TestFiffFsLibrary::fiff_infoBaseAccessors()
 {
     if (!hasData())
         QSKIP("No test data");
-    QFile rawFile(rawPath());
-    FiffRawData raw(rawFile);
+    FiffRawData raw(rawPath().toStdString());
 
     for (int i = 0; i < qMin(5, raw.info.nchan); i++) {
         QString chType = QString::fromStdString(raw.info.channel_type(i));
@@ -938,8 +932,7 @@ void TestFiffFsLibrary::fiffCov_regularize()
         QSKIP("No test data");
     FiffCov cov(covPath().toStdString());
     QVERIFY(!cov.isEmpty());
-    QFile rawFile(rawPath());
-    FiffRawData raw(rawFile);
+    FiffRawData raw(rawPath().toStdString());
     FiffCov regCov = cov.regularize(raw.info, 0.1, 0.1, 0.1, true);
     QVERIFY(!regCov.isEmpty());
     QCOMPARE(regCov.dim, cov.dim);
@@ -994,8 +987,7 @@ void TestFiffFsLibrary::fiffRaw_saveSubset()
 {
     if (!hasData())
         QSKIP("No test data");
-    QFile rawFile(rawPath());
-    FiffRawData raw(rawFile);
+    FiffRawData raw(rawPath().toStdString());
     QVERIFY(!raw.isEmpty());
     QTemporaryDir tmpDir;
     QVERIFY(tmpDir.isValid());
@@ -1004,8 +996,7 @@ void TestFiffFsLibrary::fiffRaw_saveSubset()
     RowVectorXi picks(nPick);
     for (int i = 0; i < nPick; ++i)
         picks(i) = i;
-    QFile outFile(tmpPath);
-    bool saved = raw.save(outFile, picks, 1, raw.first_samp, raw.first_samp + 2000);
+    bool saved = raw.save(tmpPath.toStdString(), picks, 1, raw.first_samp, raw.first_samp + 2000);
     QVERIFY(saved);
     QVERIFY(QFile::exists(tmpPath));
 }
@@ -1014,8 +1005,7 @@ void TestFiffFsLibrary::fiffRaw_saveAndReload()
 {
     if (!hasData())
         QSKIP("No test data");
-    QFile rawFile(rawPath());
-    FiffRawData raw(rawFile);
+    FiffRawData raw(rawPath().toStdString());
     QVERIFY(!raw.isEmpty());
     QTemporaryDir tmpDir;
     QVERIFY(tmpDir.isValid());
@@ -1024,11 +1014,9 @@ void TestFiffFsLibrary::fiffRaw_saveAndReload()
     RowVectorXi picks(nPick);
     for (int i = 0; i < nPick; ++i)
         picks(i) = i;
-    QFile outFile(tmpPath);
-    bool saved = raw.save(outFile, picks, 1, raw.first_samp, raw.first_samp + 1000);
+    bool saved = raw.save(tmpPath.toStdString(), picks, 1, raw.first_samp, raw.first_samp + 1000);
     QVERIFY(saved);
-    QFile reloadFile(tmpPath);
-    FiffRawData raw2(reloadFile);
+    FiffRawData raw2(tmpPath.toStdString());
     QVERIFY(!raw2.isEmpty());
     QCOMPARE(raw2.info.nchan, nPick);
 }
@@ -1037,8 +1025,7 @@ void TestFiffFsLibrary::fiffRaw_copyConstructor()
 {
     if (!hasData())
         QSKIP("No test data");
-    QFile rawFile(rawPath());
-    FiffRawData raw(rawFile);
+    FiffRawData raw(rawPath().toStdString());
     QVERIFY(!raw.isEmpty());
     FiffRawData raw2(raw);
     QVERIFY(!raw2.isEmpty());
@@ -1132,8 +1119,7 @@ void TestFiffFsLibrary::fiffInfo_pickChannels()
 {
     if (!hasData())
         QSKIP("No test data");
-    QFile rawFile(rawPath());
-    FiffRawData raw(rawFile);
+    FiffRawData raw(rawPath().toStdString());
     FiffInfo info = raw.info;
     int nPick = std::min(15, static_cast<int>(info.ch_names.size()));
     RowVectorXi picks(nPick);
@@ -1147,8 +1133,7 @@ void TestFiffFsLibrary::fiffInfo_writeAndRead()
 {
     if (!hasData())
         QSKIP("No test data");
-    QFile rawFile(rawPath());
-    FiffRawData raw(rawFile);
+    FiffRawData raw(rawPath().toStdString());
     FiffInfo info = raw.info;
     QVERIFY(info.nchan > 0);
     QVERIFY(info.sfreq > 0);

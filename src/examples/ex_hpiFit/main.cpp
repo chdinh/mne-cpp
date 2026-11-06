@@ -114,14 +114,13 @@ int main(int argc, char* argv[])
         fStep = 0.1f;
     }
     QStringList lFreqs = parser.value(inFreqs).split(",");
-    QFile t_fileIn(parser.value(inFile));
     bool bSave = parser.value(inSave).toInt();
     bool bVerbose = parser.value(inVerbose).toInt();
     bool bFast = parser.value(inFast).toInt();
     QString sNameOut(parser.value(outName));
 
     // Init data loading and writing
-    FiffRawData raw(t_fileIn);
+    FiffRawData raw(parser.value(inFile).toStdString());
     QSharedPointer<FiffInfo> pFiffInfo = QSharedPointer<FiffInfo>::create(raw.info);
 
     // Setup comparison of transformation matrices

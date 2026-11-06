@@ -23,6 +23,7 @@
 #include <capabilityutils.h>
 
 #include <dsp/welch_psd.h>
+#include <utils/string_utils.h>
 
 #include <QJsonArray>
 #include <QFile>
@@ -190,9 +191,8 @@ QJsonObject NeuroKernelService::handleToolCallUnchecked(const QJsonObject& param
                 {"message", QString("Neuro-Kernel could not find raw file: %1").arg(filePath)}};
         }
 
-        QFile file(filePath);
         FIFFLIB::FiffRawData raw;
-        if (!FIFFLIB::FiffStream::setup_read_raw(file, raw)) {
+        if (!FIFFLIB::FiffStream::setup_read_raw(UTILSLIB::pathFromUtf8(filePath.toStdString()), raw)) {
             return QJsonObject{
                 {"status", "error"},
                 {"message", QString("Neuro-Kernel could not parse raw file: %1").arg(filePath)}};
@@ -276,9 +276,8 @@ QJsonObject NeuroKernelService::handleToolCallUnchecked(const QJsonObject& param
                 {"message", QString("Neuro-Kernel could not find raw file: %1").arg(filePath)}};
         }
 
-        QFile file(filePath);
         FIFFLIB::FiffRawData raw;
-        if (!FIFFLIB::FiffStream::setup_read_raw(file, raw)) {
+        if (!FIFFLIB::FiffStream::setup_read_raw(UTILSLIB::pathFromUtf8(filePath.toStdString()), raw)) {
             return QJsonObject{
                 {"status", "error"},
                 {"message", QString("Neuro-Kernel could not parse raw file: %1").arg(filePath)}};
@@ -362,9 +361,8 @@ QJsonObject NeuroKernelService::handleToolCallUnchecked(const QJsonObject& param
                 {"message", QString("Neuro-Kernel could not find raw file: %1").arg(filePath)}};
         }
 
-        QFile file(filePath);
         FIFFLIB::FiffRawData raw;
-        if (!FIFFLIB::FiffStream::setup_read_raw(file, raw)) {
+        if (!FIFFLIB::FiffStream::setup_read_raw(UTILSLIB::pathFromUtf8(filePath.toStdString()), raw)) {
             return QJsonObject{
                 {"status", "error"},
                 {"message", QString("Neuro-Kernel could not parse raw file: %1").arg(filePath)}};
@@ -434,9 +432,8 @@ QJsonObject NeuroKernelService::handleToolCallUnchecked(const QJsonObject& param
                 {"message", QString("Neuro-Kernel could not find raw file: %1").arg(filePath)}};
         }
 
-        QFile file(filePath);
         FIFFLIB::FiffRawData raw;
-        if (!FIFFLIB::FiffStream::setup_read_raw(file, raw)) {
+        if (!FIFFLIB::FiffStream::setup_read_raw(UTILSLIB::pathFromUtf8(filePath.toStdString()), raw)) {
             return QJsonObject{
                 {"status", "error"},
                 {"message", QString("Neuro-Kernel could not parse raw file: %1").arg(filePath)}};

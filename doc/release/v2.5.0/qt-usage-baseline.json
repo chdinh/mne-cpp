@@ -30,7 +30,7 @@
       "decoding",
       "math"
     ],
-    "tokens": 20033,
+    "tokens": 20023,
     "gui_outside_design": []
   },
   "libraries": {
@@ -45,8 +45,8 @@
     "acq/fiff": {
       "tokens": 49,
       "by_category": {
-        "files": 7,
-        "global": 4,
+        "files": 5,
+        "global": 6,
         "strings": 38
       },
       "public_header_includes": 0,
@@ -217,17 +217,17 @@
       ]
     },
     "dsp": {
-      "tokens": 829,
+      "tokens": 827,
       "by_category": {
         "containers": 279,
-        "files": 32,
+        "files": 33,
         "global": 146,
         "logging": 89,
         "objects_signals": 84,
         "other": 3,
         "regex": 3,
         "smart_pointers": 31,
-        "strings": 140,
+        "strings": 137,
         "threads": 21,
         "time": 1
       },
@@ -241,19 +241,19 @@
       ]
     },
     "fiff": {
-      "tokens": 1730,
+      "tokens": 1723,
       "by_category": {
-        "containers": 305,
-        "files": 120,
+        "containers": 304,
+        "files": 114,
         "global": 453,
         "json": 27,
-        "logging": 295,
+        "logging": 296,
         "network": 7,
         "objects_signals": 21,
         "other": 3,
         "regex": 15,
         "smart_pointers": 73,
-        "strings": 410,
+        "strings": 409,
         "time": 1
       },
       "public_header_includes": 94,
@@ -404,10 +404,10 @@
       ]
     },
     "mne": {
-      "tokens": 1785,
+      "tokens": 1784,
       "by_category": {
         "containers": 172,
-        "files": 113,
+        "files": 112,
         "global": 402,
         "logging": 629,
         "objects_signals": 4,

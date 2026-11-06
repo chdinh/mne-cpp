@@ -99,7 +99,7 @@ int main(int argc, char* argv[])
     bool ok = tmp.isValid();
 
     QFile rawFile(data + "/MEG/sample/sample_audvis_trunc_raw.fif");
-    const FiffRawData raw(rawFile);
+    const FiffRawData raw((data + "/MEG/sample/sample_audvis_trunc_raw.fif").toStdString());
     QList<FiffChInfo> meg;
     QList<FiffChInfo> goodMeg;
     QList<FiffChInfo> eeg;

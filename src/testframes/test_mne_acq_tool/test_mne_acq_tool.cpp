@@ -278,8 +278,7 @@ void TestMneAcqTool::recordWritesTheSource()
     const std::vector<double>& expected = source.values;
     QCOMPARE(expected.size(), names.size() * 2000);
 
-    QFile file(path);
-    FiffRawData raw(file);
+    FiffRawData raw(path.toStdString());
     QCOMPARE(raw.last_samp - raw.first_samp + 1, 2000);
     Eigen::MatrixXd data, times;
     QVERIFY(raw.read_raw_segment(data, times));

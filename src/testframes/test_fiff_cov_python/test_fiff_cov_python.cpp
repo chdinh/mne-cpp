@@ -312,8 +312,7 @@ void TestFiffCovPython::regularize_matchesPython()
     QFETCH(double, eeg1);
     QFETCH(double, mag12);
 
-    QFile rawFile(QCoreApplication::applicationDirPath() + "/../resources/data/mne-cpp-test-data/MEG/sample/sample_audvis_trunc_raw.fif");
-    const FiffRawData raw(rawFile);
+    const FiffRawData raw((QCoreApplication::applicationDirPath() + "/../resources/data/mne-cpp-test-data/MEG/sample/sample_audvis_trunc_raw.fif").toStdString());
     // The covariance names channels as stored ("MEG 0111"); MNE-CPP's info strips the space.
     FiffInfo info = raw.info;
     FiffCov cov = m_cov;

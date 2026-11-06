@@ -696,8 +696,7 @@ void TestMneLibrary::ctfComp_makeComp()
     if (!compSet)
         QSKIP("No compensation data read");
 
-    QFile rawFile(rawPath());
-    FiffRawData raw(rawFile);
+    FiffRawData raw(rawPath().toStdString());
 
     QList<FiffChInfo> compchs;
     for (const auto& ch : raw.info.chs) {
@@ -1198,8 +1197,7 @@ void TestMneLibrary::forwardSolution_restrictGainMatrix()
     if (!QFile::exists(rawPath()))
         QSKIP("Raw file not found");
 
-    QFile rawFile(rawPath());
-    FiffRawData raw(rawFile);
+    FiffRawData raw(rawPath().toStdString());
 
     MatrixXd G = MatrixXd::Ones(raw.info.nchan, 30);
     MNEForwardSolution::restrict_gain_matrix(G, raw.info);
@@ -1219,8 +1217,7 @@ void TestMneLibrary::forwardSolution_prepareForward()
     if (fwd.isEmpty())
         QSKIP("Could not read forward solution");
 
-    QFile rawFile(rawPath());
-    FiffRawData raw(rawFile);
+    FiffRawData raw(rawPath().toStdString());
 
     FiffCov noise_cov(covPath().toStdString());
 
@@ -1289,8 +1286,7 @@ void TestMneLibrary::forwardSolution_computeDepthPrior()
     if (fwd.isEmpty())
         QSKIP("Could not read forward solution");
 
-    QFile rawFile(rawPath());
-    FiffRawData raw(rawFile);
+    FiffRawData raw(rawPath().toStdString());
 
     MNEForwardSolution fwdMeg = fwd.pick_types(true, false);
     if (fwdMeg.isEmpty())
@@ -1318,8 +1314,7 @@ void TestMneLibrary::forwardSolution_pickRegions()
     MNEForwardSolution fwdBoth = fwd.pick_types(true, true);
     QVERIFY(!fwdBoth.isEmpty());
 
-    QFile rawFile(rawPath());
-    FiffRawData raw(rawFile);
+    FiffRawData raw(rawPath().toStdString());
     FiffCov depthPrior = MNEForwardSolution::compute_depth_prior(
         fwd.sol->data, raw.info, (fwd.source_ori == FIFFV_MNE_FIXED_ORI));
     QVERIFY(depthPrior.data.rows() > 0);
@@ -1455,8 +1450,7 @@ void TestMneLibrary::epochData_readEpochs()
 {
     if (!hasData())
         QSKIP("No test data");
-    QFile rawFile(rawPath());
-    FiffRawData raw(rawFile);
+    FiffRawData raw(rawPath().toStdString());
 
     MatrixXi events(5, 3);
     for (int i = 0; i < 5; i++) {
@@ -1866,8 +1860,7 @@ void TestMneLibrary::inverseOp_makeSmallChannelSet()
         QSKIP("Required MNE sample data files not found");
 
     // Read raw info
-    QFile rawFile(rawPath);
-    FiffRawData raw(rawFile);
+    FiffRawData raw(rawPath.toStdString());
     FiffInfo info = raw.info;
 
     // Read forward solution

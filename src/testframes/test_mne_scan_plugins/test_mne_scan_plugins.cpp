@@ -90,8 +90,7 @@ void TestMneScanPlugins::initTestCase()
     m_rawPath = QCoreApplication::applicationDirPath() + "/../resources/data/mne-cpp-test-data/MEG/sample/sample_audvis_trunc_raw.fif";
     if (!QFile::exists(m_rawPath))
         return;
-    QFile file(m_rawPath);
-    FiffRawData raw(file);
+    FiffRawData raw(m_rawPath.toStdString());
     Eigen::MatrixXd times;
     QVERIFY(raw.read_raw_segment(m_data, times));
     m_info = QSharedPointer<FiffInfo>::create(raw.info);

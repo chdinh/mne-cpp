@@ -24,6 +24,7 @@
 #include <fiff/fiff_stream.h>
 
 #include <utils/generics/mne_logger.h>
+#include <utils/string_utils.h>
 
 //=============================================================================================================
 // QT INCLUDES
@@ -92,9 +93,8 @@ int main(int argc, char* argv[])
     }
 
     const FiffRawData fiffRaw = reader.toFiffRawData();
-    QFile fileOut(sOutputFile);
     RowVectorXd cals;
-    FiffStream::SPtr outfid = FiffStream::start_writing_raw(fileOut, fiffRaw.info, cals);
+    FiffStream::SPtr outfid = FiffStream::start_writing_raw(UTILSLIB::pathFromUtf8(sOutputFile.toStdString()), fiffRaw.info, cals);
     if (!outfid) {
         qCritical() << "Could not write" << sOutputFile;
         return 1;

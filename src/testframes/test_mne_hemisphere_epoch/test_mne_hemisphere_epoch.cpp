@@ -784,7 +784,7 @@ private slots:
         if (!file.exists())
             QSKIP("Raw file not found");
 
-        FiffRawData raw(file);
+        FiffRawData raw((m_sDataPath + "/MEG/sample/sample_audvis_trunc_raw.fif").toStdString());
         fiff_int_t epochSamples = (fiff_int_t)(0.5 * raw.info.sfreq);
         fiff_int_t from = raw.first_samp;
 
@@ -818,7 +818,7 @@ private slots:
         if (!file.exists())
             QSKIP("Raw file not found");
 
-        FiffRawData raw(file);
+        FiffRawData raw((m_sDataPath + "/MEG/sample/sample_audvis_trunc_raw.fif").toStdString());
         fiff_int_t epochSamples = (fiff_int_t)(0.3 * raw.info.sfreq);
         fiff_int_t from = raw.first_samp;
 
@@ -846,7 +846,7 @@ private slots:
         if (!file.exists())
             QSKIP("Raw file not found");
 
-        FiffRawData raw(file);
+        FiffRawData raw((m_sDataPath + "/MEG/sample/sample_audvis_trunc_raw.fif").toStdString());
         fiff_int_t epochSamples = (fiff_int_t)(0.2 * raw.info.sfreq);
         fiff_int_t from = raw.first_samp;
 
@@ -920,7 +920,7 @@ private slots:
         if (!file.exists())
             QSKIP("Raw file not found");
 
-        FiffRawData raw(file);
+        FiffRawData raw((m_sDataPath + "/MEG/sample/sample_audvis_trunc_raw.fif").toStdString());
         QList<FiffProj>& projs = raw.info.projs;
         if (projs.isEmpty())
             QSKIP("No projectors in raw");
@@ -958,7 +958,7 @@ private slots:
 
         MNEForwardSolution fwd(fwdFile);
         FiffCov noiseCov(covPath.toStdString());
-        FiffRawData raw(rawFile);
+        FiffRawData raw(rawPath.toStdString());
 
         if (fwd.isEmpty() || noiseCov.isEmpty())
             QSKIP("Failed to load");

@@ -288,7 +288,7 @@ private slots:
         if (fwd.isEmpty())
             QSKIP("Fwd load failed");
 
-        FiffRawData raw(rawFile);
+        FiffRawData raw(rawPath.toStdString());
 
         // Compute depth prior using raw info
         FiffCov depth_prior = fwd.compute_depth_prior(

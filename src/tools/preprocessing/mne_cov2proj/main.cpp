@@ -21,6 +21,7 @@
 #include <fiff/fiff_constants.h>
 #include <fiff/fiff_raw_data.h>
 #include <utils/generics/mne_logger.h>
+#include <utils/string_utils.h>
 
 //=============================================================================================================
 // QT INCLUDES
@@ -113,8 +114,7 @@ int main(int argc, char* argv[])
     // Get channel names
     StringList chNames = cov.names;
     if (chNames.empty() && !rawFile.isEmpty()) {
-        QFile fRaw(rawFile);
-        FiffRawData raw(fRaw);
+        FiffRawData raw(UTILSLIB::pathFromUtf8(rawFile.toStdString()));
         chNames = raw.info.ch_names;
     }
 

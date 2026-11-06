@@ -109,8 +109,7 @@ void TestEDF2FIFFRWR::convertMatchesPython()
     const QString fif = m_tempDir.filePath(QStringLiteral("test_reduced_raw.fif"));
     QCOMPARE(run({"--fileIn", m_sEdf, "--fileOut", fif}), 0);
 
-    QFile file(fif);
-    FiffRawData raw(file);
+    FiffRawData raw(fif.toStdString());
     QCOMPARE(raw.info.sfreq, 512.0f);
     QCOMPARE(raw.first_samp, 0);
     QCOMPARE(raw.last_samp, 3071);

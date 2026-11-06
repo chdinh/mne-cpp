@@ -209,8 +209,7 @@ void TestInvDipoleRapMne::initTestCase()
     QVERIFY2(!m_noiseCov.isEmpty(), "Failed to load noise covariance");
 
     // Load measurement info
-    QFile rawFile(rawPath());
-    FiffRawData raw(rawFile);
+    FiffRawData raw(rawPath().toStdString());
     m_info = raw.info;
     QVERIFY2(m_info.nchan > 0, "Failed to load measurement info");
 }

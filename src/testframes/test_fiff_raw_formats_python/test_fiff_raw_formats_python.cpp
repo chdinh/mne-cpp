@@ -124,8 +124,7 @@ void TestFiffRawFormatsPython::readsFormat()
     QFETCH(double, selSum);
     QFETCH(double, selProjSum);
 
-    QFile file(fixture(fmt));
-    FiffRawData raw(file);
+    FiffRawData raw(fixture(fmt).toStdString());
     QCOMPARE(raw.first_samp, 13900);
     QCOMPARE(raw.last_samp, 14019);
     QCOMPARE(raw.info.nchan, 12);
@@ -197,8 +196,7 @@ void TestFiffRawFormatsPython::readsAcquisitionSkip()
 {
     // data/raw_skip_raw.fif (make_skip_fixture.py): ramp data whose samples 70-89 were written as a
     // two-buffer FIFF_DATA_SKIP; mne-python reads them as zeros.
-    QFile file(fixture("skip"));
-    FiffRawData raw(file);
+    FiffRawData raw(fixture("skip").toStdString());
     QCOMPARE(raw.first_samp, 50);
     QCOMPARE(raw.last_samp, 149);
 
@@ -250,8 +248,7 @@ void TestFiffRawFormatsPython::readsLeadingSkip()
 {
     // data/raw_skip_start_raw.fif (make_skip_fixture.py): the first two buffers (samples 0-19 of
     // first_samp 50) are a FIFF_DATA_SKIP; mne-python starts the recording at sample 70.
-    QFile file(fixture("skip_start"));
-    FiffRawData raw(file);
+    FiffRawData raw(fixture("skip_start").toStdString());
     QCOMPARE(raw.first_samp, 70);
     QCOMPARE(raw.last_samp, 149);
     MatrixXd ref, times;
@@ -344,8 +341,7 @@ void TestFiffRawFormatsPython::mneRawDataMatches()
 {
     // MNE-C's buffered reader must return what FiffRawData (checked against mne-python above) does.
     QFETCH(QString, fmt);
-    QFile file(fixture(fmt));
-    FiffRawData raw(file);
+    FiffRawData raw(fixture(fmt).toStdString());
     MatrixXd ref, times;
     QVERIFY(raw.read_raw_segment(ref, times));
 
@@ -370,8 +366,7 @@ void TestFiffRawFormatsPython::mneRawDataNormalisesChannels()
 {
     // data/raw_unit_mul_raw.fif (make_unit_mul_fixture.py): EEG 002 has unit_mul -6 and STI 014 range 2.
     // As in MNE-C's mne_open_raw_data, unit_mul is folded into cal and the trigger range reset to 1.
-    QFile file(fixture("unit_mul"));
-    FiffRawData raw(file);
+    FiffRawData raw(fixture("unit_mul").toStdString());
     MatrixXd ref, times;
     QVERIFY(raw.read_raw_segment(ref, times));
 

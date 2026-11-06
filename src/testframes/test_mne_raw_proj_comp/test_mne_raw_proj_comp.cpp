@@ -413,8 +413,7 @@ void TestMneRawProjComp::ctfCompDataSet_makeCompensator()
 {
     auto compSet = MNECTFCompDataSet::read(rawPath());
     if (compSet && compSet->ncomp > 0) {
-        QFile file(rawPath());
-        FiffRawData rawData(file);
+        FiffRawData rawData(rawPath().toStdString());
         // make_comp(chs, nch, compchs, ncomp)
         int result = compSet->make_comp(rawData.info.chs, rawData.info.nchan,
                                         rawData.info.chs, rawData.info.nchan);
@@ -591,8 +590,7 @@ void TestMneRawProjComp::projOp_assignChannelsAndMake()
     QVERIFY(proj != nullptr);
 
     // Read channel names from the raw file
-    QFile file(rawPath());
-    FiffRawData rawData(file);
+    FiffRawData rawData(rawPath().toStdString());
 
     StringList chNames;
     for (const auto& ch : rawData.info.chs) {
@@ -611,8 +609,7 @@ void TestMneRawProjComp::projOp_affectChannels()
     auto proj = MNEProjOp::read(rawPath());
     QVERIFY(proj != nullptr);
 
-    QFile file(rawPath());
-    FiffRawData rawData(file);
+    FiffRawData rawData(rawPath().toStdString());
 
     int affecting = proj->affect_chs(rawData.info.chs, rawData.info.nchan);
     QVERIFY(affecting >= 0);
@@ -620,8 +617,7 @@ void TestMneRawProjComp::projOp_affectChannels()
 
 void TestMneRawProjComp::projOp_createAvgEegRef()
 {
-    QFile file(rawPath());
-    FiffRawData rawData(file);
+    FiffRawData rawData(rawPath().toStdString());
 
     auto eegRef =
         MNEProjOp::create_average_eeg_ref(rawData.info.chs, rawData.info.nchan);

@@ -20,6 +20,7 @@
 #include <fiff/fiff_tag.h>
 #include <fiff/fiff_types.h>
 #include <utils/generics/mne_logger.h>
+#include <utils/string_utils.h>
 
 //=============================================================================================================
 // QT INCLUDES
@@ -121,10 +122,9 @@ int main(int argc, char* argv[])
     }
 
     // Open the FIFF file and read raw data
-    QFile file(fifName);
     FiffRawData raw;
     try {
-        raw = FiffRawData(file);
+        raw = FiffRawData(UTILSLIB::pathFromUtf8(fifName.toStdString()));
     } catch (const std::exception& error) {
         qCritical("Cannot read FIFF file %s: %s", qPrintable(fifName), error.what());
         return 1;
@@ -149,9 +149,8 @@ int main(int argc, char* argv[])
 
     // Write to temp file, then replace
     QString tmpName = fifName + ".tmp";
-    QFile outFile(tmpName);
     Eigen::RowVectorXd cals;
-    FiffStream::SPtr outStream = FiffStream::start_writing_raw(outFile, raw.info, cals);
+    FiffStream::SPtr outStream = FiffStream::start_writing_raw(UTILSLIB::pathFromUtf8(tmpName.toStdString()), raw.info, cals);
     if (!outStream) {
         qCritical("Cannot open temp file for writing.");
         return 1;

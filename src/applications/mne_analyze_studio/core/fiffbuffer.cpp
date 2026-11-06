@@ -13,6 +13,7 @@
  */
 
 #include "fiffbuffer.h"
+#include <utils/string_utils.h>
 
 #include <QJsonArray>
 #include <QJsonObject>
@@ -57,7 +58,7 @@ bool FiffBuffer::open()
     }
 
     try {
-        m_rawData = FIFFLIB::FiffRawData(m_file);
+        m_rawData = FIFFLIB::FiffRawData(UTILSLIB::pathFromUtf8(m_file.fileName().toStdString()));
     } catch (const std::exception& e) {
         // FiffRawData reports a bad file by throwing. A buffer that cannot be
         // read is an ordinary outcome for a caller handed an arbitrary path,

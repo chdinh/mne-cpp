@@ -23,6 +23,7 @@
 #include <acq/fiff/acq_fiff_replay.h>
 #include <fiff/fiff.h>
 #include <fiff/fiff_types.h>
+#include <utils/string_utils.h>
 
 #include <com/rt_command/command.h>
 
@@ -334,11 +335,9 @@ void FiffSimulator::info(qint32 ID)
 bool FiffSimulator::readRawInfo()
 {
     if (m_RawInfo.isEmpty()) {
-        QFile t_File(m_sResourceDataPath);
-
         mutex.lock();
 
-        if (!FiffStream::setup_read_raw(t_File, m_RawInfo)) {
+        if (!FiffStream::setup_read_raw(UTILSLIB::pathFromUtf8(m_sResourceDataPath.toStdString()), m_RawInfo)) {
             qInfo("Error: Not able to read raw info!");
             m_RawInfo.clear();
             return false;

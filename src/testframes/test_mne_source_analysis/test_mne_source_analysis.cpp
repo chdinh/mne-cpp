@@ -172,8 +172,7 @@ private slots:
 
     void testFiffInfoPickTypes()
     {
-        QFile file(m_sRawFile);
-        FiffRawData raw(file);
+        FiffRawData raw(m_sRawFile.toStdString());
         FiffInfo& info = raw.info;
 
         Eigen::RowVectorXi megSel = info.pick_types(true, false, false, {}, {});
@@ -187,8 +186,7 @@ private slots:
 
     void testFiffInfoMakeProjector()
     {
-        QFile file(m_sRawFile);
-        FiffRawData raw(file);
+        FiffRawData raw(m_sRawFile.toStdString());
         FiffInfo& info = raw.info;
 
         Eigen::MatrixXd proj;
@@ -202,8 +200,7 @@ private slots:
 
     void testFiffInfoPickInfo()
     {
-        QFile file(m_sRawFile);
-        FiffRawData raw(file);
+        FiffRawData raw(m_sRawFile.toStdString());
         FiffInfo& info = raw.info;
 
         Eigen::RowVectorXi sel = info.pick_types(true, false, false, {}, {});
@@ -213,8 +210,7 @@ private slots:
 
     void testFiffInfoChannelType()
     {
-        QFile file(m_sRawFile);
-        FiffRawData raw(file);
+        FiffRawData raw(m_sRawFile.toStdString());
         FiffInfo& info = raw.info;
 
         for (int i = 0; i < qMin(5, info.nchan); ++i) {
@@ -225,8 +221,7 @@ private slots:
 
     void testFiffInfoPickChannels()
     {
-        QFile file(m_sRawFile);
-        FiffRawData raw(file);
+        FiffRawData raw(m_sRawFile.toStdString());
         FiffInfo& info = raw.info;
 
         StringList include;
@@ -238,8 +233,7 @@ private slots:
 
     void testFiffInfoGetChannelTypes()
     {
-        QFile file(m_sRawFile);
-        FiffRawData raw(file);
+        FiffRawData raw(m_sRawFile.toStdString());
         FiffInfo& info = raw.info;
 
         StringList types = info.get_channel_types();
@@ -248,8 +242,7 @@ private slots:
 
     void testFiffInfoPickTypesString()
     {
-        QFile file(m_sRawFile);
-        FiffRawData raw(file);
+        FiffRawData raw(m_sRawFile.toStdString());
         FiffInfo& info = raw.info;
 
         Eigen::RowVectorXi magSel = info.pick_types("mag", false, false, {}, {});
@@ -261,8 +254,7 @@ private slots:
 
     void testFiffInfoCompensation()
     {
-        QFile file(m_sRawFile);
-        FiffRawData raw(file);
+        FiffRawData raw(m_sRawFile.toStdString());
         FiffInfo& info = raw.info;
 
         qint32 comp = info.get_current_comp();
@@ -304,9 +296,8 @@ private slots:
 
         FiffCov cov(m_sCovFile.toStdString());
 
-        QFile rawFile(m_sRawFile);
 
-        FiffRawData raw(rawFile);
+        FiffRawData raw(m_sRawFile.toStdString());
 
         FiffCov regCov = cov.regularize(raw.info, 0.1, 0.1, 0.1, true, {});
         QCOMPARE(regCov.dim, cov.dim);
@@ -319,8 +310,7 @@ private slots:
 
         FiffCov cov(m_sCovFile.toStdString());
 
-        QFile rawFile(m_sRawFile);
-        FiffRawData raw(rawFile);
+        FiffRawData raw(m_sRawFile.toStdString());
 
         // Use channel names that exist in both the cov and the raw info
 
@@ -401,8 +391,7 @@ private slots:
 
         FiffCov cov(m_sCovFile.toStdString());
 
-        QFile rawFile(m_sRawFile);
-        FiffRawData raw(rawFile);
+        FiffRawData raw(m_sRawFile.toStdString());
 
         MNEInverseOperator invOp = MNEInverseOperator::make_inverse_operator(
             raw.info, fwd, cov, 0.2f, 0.8f, false, true);
@@ -420,8 +409,7 @@ private slots:
 
         FiffCov cov(m_sCovFile.toStdString());
 
-        QFile rawFile(m_sRawFile);
-        FiffRawData raw(rawFile);
+        FiffRawData raw(m_sRawFile.toStdString());
 
         MNEInverseOperator invOp = MNEInverseOperator::make_inverse_operator(
             raw.info, fwd, cov, 0.2f, 0.8f, false, true);
@@ -451,8 +439,7 @@ private slots:
 
         FiffCov cov(m_sCovFile.toStdString());
 
-        QFile rawFile(m_sRawFile);
-        FiffRawData raw(rawFile);
+        FiffRawData raw(m_sRawFile.toStdString());
 
         MNEInverseOperator invOp = MNEInverseOperator::make_inverse_operator(
             raw.info, fwd, cov, 0.2f, 0.8f, false, true);
@@ -482,8 +469,7 @@ private slots:
         FiffCov cov(m_sCovFile.toStdString());
 
         // Read raw for info
-        QFile rawFile(m_sRawFile);
-        FiffRawData raw(rawFile);
+        FiffRawData raw(m_sRawFile.toStdString());
 
         // Make and prepare inverse
         MNEInverseOperator invOp = MNEInverseOperator::make_inverse_operator(
@@ -520,8 +506,7 @@ private slots:
 
         FiffCov cov(m_sCovFile.toStdString());
 
-        QFile rawFile(m_sRawFile);
-        FiffRawData raw(rawFile);
+        FiffRawData raw(m_sRawFile.toStdString());
 
         MNEInverseOperator invOp = MNEInverseOperator::make_inverse_operator(
             raw.info, fwd, cov, 0.2f, 0.8f, false, true);
@@ -587,8 +572,7 @@ private slots:
         auto cov = MNECovMatrix::read(m_sCovFile, FIFFV_MNE_NOISE_COV);
         QVERIFY(cov != nullptr);
 
-        QFile rawFile(m_sRawFile);
-        FiffRawData raw(rawFile);
+        FiffRawData raw(m_sRawFile.toStdString());
 
         int result = cov->classify_channels(raw.info.chs, cov->ncov);
         QCOMPARE(result, 0);
@@ -604,8 +588,7 @@ private slots:
 
         if (!QFile::exists(m_sRawFile))
             QSKIP("Raw file not found");
-        QFile rawFile(m_sRawFile);
-        FiffRawData raw(rawFile);
+        FiffRawData raw(m_sRawFile.toStdString());
 
         int rc = cov->classify_channels(raw.info.chs, cov->ncov);
         QCOMPARE(rc, 0);
@@ -633,8 +616,7 @@ private slots:
         auto cov = MNECovMatrix::read(m_sCovFile, FIFFV_MNE_NOISE_COV);
         QVERIFY(cov != nullptr);
 
-        QFile rawFile(m_sRawFile);
-        FiffRawData raw(rawFile);
+        FiffRawData raw(m_sRawFile.toStdString());
         cov->classify_channels(raw.info.chs, cov->ncov);
 
         int rank = cov->condition(1e-6f, -1);

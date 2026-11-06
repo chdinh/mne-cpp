@@ -158,7 +158,7 @@ void TestInvLoreta::initTestCase()
     QString rawPath = m_sDataPath + "/MEG/sample/sample_audvis_trunc_raw.fif";
     QFile rawFile(rawPath);
     if (rawFile.exists()) {
-        FiffRawData raw(rawFile);
+        FiffRawData raw(rawPath.toStdString());
         m_info = raw.info;
     }
 

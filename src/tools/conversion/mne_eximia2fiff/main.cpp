@@ -21,6 +21,7 @@
 #include <fiff/fiff_info.h>
 #include <fiff/fiff_stream.h>
 #include <utils/generics/mne_logger.h>
+#include <utils/string_utils.h>
 
 //=============================================================================================================
 // QT INCLUDES
@@ -212,9 +213,8 @@ int main(int argc, char* argv[])
         for (int c = 0; c < kChannels; ++c)
             data(c, s) = qFromLittleEndian<qint16>(raw + (s * kChannels + c) * qint64(sizeof(qint16))) * double(info.chs[c].cal);
 
-    QFile out(outFile);
     Eigen::RowVectorXd cals;
-    FiffStream::SPtr stream = FiffStream::start_writing_raw(out, info, cals);
+    FiffStream::SPtr stream = FiffStream::start_writing_raw(UTILSLIB::pathFromUtf8(outFile.toStdString()), info, cals);
     if (!stream) {
         qCritical("Cannot open output: %s", qPrintable(outFile));
         return 1;

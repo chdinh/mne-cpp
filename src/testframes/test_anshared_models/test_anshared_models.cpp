@@ -146,8 +146,7 @@ void TestAnSharedModels::rawModel_saveToFileRoundTrips()
     const QString out = dir.filePath("saved_raw.fif");
     QVERIFY(model.saveToFile(out));
 
-    QFile file(out);
-    const FIFFLIB::FiffRawData saved(file);
+    const FIFFLIB::FiffRawData saved(out.toStdString());
     QCOMPARE(static_cast<int>(saved.first_samp), 12900);
     QCOMPARE(static_cast<int>(saved.last_samp), 18906);
     QCOMPARE(saved.info.nchan, 376);
@@ -162,10 +161,8 @@ void TestAnSharedModels::rawModel_saveToFileRoundTrips()
     model.setFilterActive(true);
     const QString filtered = dir.filePath("filtered_raw.fif");
     QVERIFY(model.saveToFile(filtered));
-    QFile filteredFile(filtered);
-    const FIFFLIB::FiffRawData lowpassed(filteredFile);
-    QFile originalFile(rawPath());
-    const FIFFLIB::FiffRawData original(originalFile);
+    const FIFFLIB::FiffRawData lowpassed(filtered.toStdString());
+    const FIFFLIB::FiffRawData original(rawPath().toStdString());
     Eigen::MatrixXd a, b, t;
     QVERIFY(original.read_raw_segment(a, t, 14000, 14999));
     QVERIFY(lowpassed.read_raw_segment(b, t, 14000, 14999));

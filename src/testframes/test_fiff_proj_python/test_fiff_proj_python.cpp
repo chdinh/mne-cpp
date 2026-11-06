@@ -101,8 +101,7 @@ void TestFiffProjPython::initTestCase()
         QSKIP("Raw test data not found");
     }
 
-    QFile rawFile(rawPath());
-    FiffRawData raw(rawFile);
+    FiffRawData raw(rawPath().toStdString());
     m_info = raw.info;
 
     // mne-python reports four projections and 376 channels for this file.

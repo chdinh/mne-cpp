@@ -230,7 +230,7 @@ void TestFiffCov::computeFromEpochs_sampleRaw()
         QSKIP("Sample raw file not found");
     }
 
-    FiffRawData raw(rawFile);
+    FiffRawData raw((sampleDataPath() + "/sample_audvis_trunc_raw.fif").toStdString());
     const MatrixXi events = deriveStimEvents(raw);
     QVERIFY(events.rows() > 0);
 
@@ -299,7 +299,7 @@ void TestFiffCov::computeFromEpochs_matchesPython()
     if (!rawFile.exists()) {
         QSKIP("Sample raw file not found");
     }
-    FiffRawData raw(rawFile);
+    FiffRawData raw((sampleDataPath() + "/sample_audvis_trunc_raw.fif").toStdString());
     const MatrixXi events = deriveStimEvents(raw);
 
     RejectionParams rej; // 0 turns a limit off; only the EEG one is under test
@@ -323,7 +323,7 @@ void TestFiffCov::saveRoundTrip_computedCovariance()
         QSKIP("Sample raw file not found");
     }
 
-    FiffRawData raw(rawFile);
+    FiffRawData raw((sampleDataPath() + "/sample_audvis_trunc_raw.fif").toStdString());
     const MatrixXi events = deriveStimEvents(raw);
     QVERIFY(events.rows() > 0);
 

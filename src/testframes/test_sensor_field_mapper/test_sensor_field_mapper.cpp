@@ -182,8 +182,7 @@ void TestSensorFieldMapper::sphereFit()
     QVERIFY(std::abs(radius - expectedRadius) < 1.0e-5f);
 
     // Sample head shape: mne.bem.fit_sphere_to_headshape(info, units="m") gives these values
-    QFile file(QCoreApplication::applicationDirPath() + QStringLiteral("/../resources/data/mne-cpp-test-data/MEG/sample/sample_audvis_trunc_raw.fif"));
-    const FiffRawData raw(file);
+    const FiffRawData raw((QCoreApplication::applicationDirPath() + QStringLiteral("/../resources/data/mne-cpp-test-data/MEG/sample/sample_audvis_trunc_raw.fif")).toStdString());
     const Vector3f sampleCenter = SensorFieldMapper::fitSphereOrigin(raw.info, &radius);
     QVERIFY((sampleCenter - Vector3f(-0.004151959f, 0.016358261f, 0.051831485f)).norm() < 1.0e-6f);
     QVERIFY(std::abs(radius - 0.091177324f) < 1.0e-6f);

@@ -111,8 +111,7 @@ void TestRtServerFiffReplay::streamsTheFile()
     const FiffInfo::SPtr info = data.readMetadata().m_pInfo;
     QVERIFY(info);
 
-    QFile reference(file);
-    FiffRawData raw(reference);
+    FiffRawData raw(file.toStdString());
     QCOMPARE(info->nchan, raw.info.nchan);
     QCOMPARE(info->sfreq, raw.info.sfreq * 100.0F); // the acceleration factor scales the advertised rate
 

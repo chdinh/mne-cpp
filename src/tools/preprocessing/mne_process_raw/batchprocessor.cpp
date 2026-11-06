@@ -124,10 +124,9 @@ int BatchProcessor::run(const ProcessingSettings& settings)
         qInfo() << "\n--- Opening" << rawName << "---\n";
 
         // Open raw data file
-        QFile rawFile(rawName);
         std::optional<FiffRawData> rawData;
         try {
-            rawData.emplace(rawFile);
+            rawData.emplace(UTILSLIB::pathFromUtf8(rawName.toStdString()));
         } catch (const std::exception& error) {
             qCritical() << "Failed to open raw data file:" << rawName << error.what();
             return 1;
@@ -274,8 +273,7 @@ int BatchProcessor::run(const ProcessingSettings& settings)
 
         if (!saveFile.isEmpty()) {
             qInfo() << "\n--- Saving data to" << saveFile << "(decim =" << settings.decimation << ") ---\n";
-            QFile rawOutFile(saveFile);
-            if (!MNE::save_raw(raw, rawOutFile, RowVectorXi(), settings.decimation)) {
+            if (!MNE::save_raw(raw, UTILSLIB::pathFromUtf8(saveFile.toStdString()), RowVectorXi(), settings.decimation)) {
                 qCritical() << "Failed to save raw data.";
                 return 1;
             }

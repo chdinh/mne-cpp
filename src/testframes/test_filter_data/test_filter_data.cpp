@@ -192,8 +192,7 @@ private slots:
         if (!QFile::exists(rawPath)) {
             QSKIP("Sample raw file not found");
         }
-        QFile file(rawPath);
-        FiffRawData::SPtr raw(new FiffRawData(file));
+        FiffRawData::SPtr raw(new FiffRawData(rawPath.toStdString()));
 
         QTemporaryDir tmpDir;
         QVERIFY(tmpDir.isValid());
@@ -209,8 +208,7 @@ private slots:
         QVERIFY(ok);
 
         // Same samples, and the channels not picked are copied unchanged at their own times
-        QFile filteredFile(outPath);
-        FiffRawData filtered(filteredFile);
+        FiffRawData filtered(outPath.toStdString());
         QCOMPARE(filtered.first_samp, raw->first_samp);
         QCOMPARE(filtered.last_samp, raw->last_samp);
         MatrixXd a, b, t;

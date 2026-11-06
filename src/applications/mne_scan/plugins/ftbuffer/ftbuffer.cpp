@@ -212,17 +212,10 @@ bool FtBuffer::setupRTMSA()
 {
     qInfo() << "[FtBuffer::setupRTMSA] Attempting to set up parameters from .fif file...";
 
-    QBuffer qbuffInputSampleFif;
-    qbuffInputSampleFif.open(QIODevice::ReadWrite);
-
-    QFile infile("neuromag2ft.fif");
-
-    if (!infile.open(QIODevice::ReadOnly)) {
+    if (!QFile::exists("neuromag2ft.fif")) {
         qInfo() << "[FtBuffer::setupRTMSA] Could not open file.  Plugin output won't be based on local fif parameters.";
     } else {
-        qbuffInputSampleFif.write(infile.readAll());
-
-        m_pNeuromagHeadChunkData = QSharedPointer<FIFFLIB::FiffRawData>(new FiffRawData(qbuffInputSampleFif));
+        m_pNeuromagHeadChunkData = QSharedPointer<FIFFLIB::FiffRawData>(new FiffRawData(std::filesystem::path("neuromag2ft.fif")));
         m_pFiffInfo = QSharedPointer<FIFFLIB::FiffInfo>(new FiffInfo(m_pNeuromagHeadChunkData->info));
 
         //Set the RMTSA parameters

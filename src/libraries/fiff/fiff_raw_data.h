@@ -116,20 +116,21 @@ public:
 
     //=========================================================================================================
     /**
-     * Constructs fiff raw data, by reading from a IO device.
+     * Constructs fiff raw data by reading a FIFF file.
      *
-     * @param[in] p_IODevice     IO device to read the raw data from .
+     * @param[in] path             The raw data file.
+     * @param[in] b_littleEndian   If true, read data as little-endian.
      */
-    FiffRawData(QIODevice& p_IODevice);
+    explicit FiffRawData(const std::filesystem::path& path, bool b_littleEndian = false);
 
     //=========================================================================================================
     /**
-     * Constructs fiff raw data, by reading from a IO device with specified endianness.
+     * Constructs fiff raw data held in bytes that are not a file, e.g. in memory.
      *
-     * @param[in] p_IODevice       IO device to read the raw data from.
+     * @param[in] bytes            The raw data; kept for reading segments.
      * @param[in] b_littleEndian   If true, read data as little-endian.
      */
-    FiffRawData(QIODevice& p_IODevice, bool b_littleEndian);
+    explicit FiffRawData(std::unique_ptr<UTILSLIB::ByteStream> bytes, bool b_littleEndian = false);
 
     //=========================================================================================================
     /**
@@ -219,7 +220,7 @@ public:
      * Save raw data to a FIFF file, optionally with decimation and channel picking.
      * Ported from save.c (MNE-C).
      *
-     * @param[in] p_IODevice Output device to write to.
+     * @param[in] path      The file to write.
      * @param[in] picks     Channel indices to include (empty = all channels).
      * @param[in] decim     Decimation factor (1 = no decimation).
      * @param[in] from      First sample to save (-1 = from start of raw data).
@@ -227,7 +228,7 @@ public:
      *
      * @return true on success.
      */
-    bool save(QIODevice& p_IODevice,
+    bool save(const std::filesystem::path& path,
               const Eigen::RowVectorXi& picks = Eigen::RowVectorXi(),
               int decim = 1,
               int from = -1,

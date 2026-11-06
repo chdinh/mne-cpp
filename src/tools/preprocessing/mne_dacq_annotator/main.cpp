@@ -18,6 +18,7 @@
 #include <fiff/fiff_info.h>
 #include <fiff/fiff_raw_data.h>
 #include <utils/generics/mne_logger.h>
+#include <utils/string_utils.h>
 
 //=============================================================================================================
 // QT INCLUDES
@@ -167,8 +168,7 @@ int main(int argc, char* argv[])
     float sfreq = 0.0f;
 
     if (!measFile.isEmpty()) {
-        QFile fMeas(measFile);
-        FiffRawData rawData(fMeas);
+        FiffRawData rawData(UTILSLIB::pathFromUtf8(measFile.toStdString()));
         if (rawData.info.isEmpty()) {
             qCritical("Cannot read measurement info from: %s", qPrintable(measFile));
             return 1;
@@ -195,8 +195,7 @@ int main(int argc, char* argv[])
         QString stimName = parser.value(stim_chOpt);
         double thresh = parser.value(threshOpt).toDouble();
 
-        QFile fMeas(measFile);
-        FiffRawData raw(fMeas);
+        FiffRawData raw(UTILSLIB::pathFromUtf8(measFile.toStdString()));
 
         // Find stimulus channel
         int stimIdx = -1;

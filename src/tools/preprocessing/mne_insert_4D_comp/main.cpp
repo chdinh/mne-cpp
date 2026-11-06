@@ -17,6 +17,7 @@
 #include <fiff/fiff.h>
 #include <fiff/fiff_file.h>
 #include <utils/generics/mne_logger.h>
+#include <utils/string_utils.h>
 
 //=============================================================================================================
 // QT INCLUDES
@@ -213,8 +214,7 @@ int main(int argc, char* argv[])
     //
     // Read input FIFF
     //
-    QFile fIn(inFile);
-    FiffRawData raw(fIn);
+    FiffRawData raw(UTILSLIB::pathFromUtf8(inFile.toStdString()));
     if (!raw.info.isEmpty()) {
         qInfo("Read input: %d channels at %.1f Hz",
               raw.info.nchan, raw.info.sfreq);

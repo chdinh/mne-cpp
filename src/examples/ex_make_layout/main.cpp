@@ -91,9 +91,7 @@ int main(int argc, char* argv[])
     QStringList names;
 
     if (parser.value(inputOption).contains(".fif")) {
-        QFile t_fileRaw(parser.value(inputOption));
-
-        FiffRawData raw(t_fileRaw);
+        FiffRawData raw(parser.value(inputOption).toStdString());
         FiffInfo fiffInfo = raw.info;
 
         int chKind = parser.value(chKindOption).toInt();

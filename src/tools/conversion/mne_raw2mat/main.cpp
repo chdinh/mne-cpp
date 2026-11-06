@@ -17,6 +17,7 @@
 #include <fiff/fiff_raw_data.h>
 #include <fiff/fiff_stream.h>
 #include <utils/generics/mne_logger.h>
+#include <utils/string_utils.h>
 
 //=============================================================================================================
 // QT INCLUDES
@@ -195,8 +196,7 @@ int main(int argc, char* argv[])
     }
 
     // Load raw data
-    QFile fRaw(rawFile);
-    FiffRawData raw(fRaw);
+    FiffRawData raw(UTILSLIB::pathFromUtf8(rawFile.toStdString()));
     if (raw.info.isEmpty()) {
         qCritical("Cannot read raw: %s", qPrintable(rawFile));
         return 1;

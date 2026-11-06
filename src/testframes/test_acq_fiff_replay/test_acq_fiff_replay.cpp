@@ -121,9 +121,8 @@ bool writeFixture(const QString& path, fiff_int_t type, fiff_int_t lastType = -1
     info->chs[0].cal = 0.3F; // range * cal is not exact in float: scale must be computed in double
     info->chs[0].range = 2.7F;
     info->chs[1].cal = 1e-6F;
-    QFile file(path);
     Eigen::RowVectorXd cals;
-    FiffStream::SPtr out = FiffStream::start_writing_raw(file, *info, cals, defaultMatrixXi, false, type);
+    FiffStream::SPtr out = FiffStream::start_writing_raw(path.toStdString(), *info, cals, defaultMatrixXi, false, type);
     if (!out) {
         return false;
     }
@@ -246,8 +245,7 @@ Replayed replay(const std::string& uri, std::uint64_t limit = 0)
 /** @return read_raw_segment of the whole file, frame-major. */
 std::vector<double> reference(const QString& path)
 {
-    QFile file(path);
-    FiffRawData raw(file);
+    FiffRawData raw(path.toStdString());
     Eigen::MatrixXd data, times;
     if (!raw.read_raw_segment(data, times)) {
         return {};

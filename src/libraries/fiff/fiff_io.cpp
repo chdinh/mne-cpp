@@ -73,10 +73,8 @@ FiffIO::FiffIO(QIODevice& pIODevice)
 
 FiffIO::FiffIO(QList<QIODevice*>& p_qlistIODevices)
 {
-    QList<QIODevice*>::iterator i;
-    for (i = p_qlistIODevices.begin(); i != p_qlistIODevices.end(); ++i) {
-        FiffIO::read((**i));
-    }
+    for (auto* device : p_qlistIODevices)
+        read(*device);
 }
 
 //=============================================================================================================
@@ -138,7 +136,7 @@ bool FiffIO::read(QIODevice& pIODevice)
     //raw data
     if (hasRaw) {
         try {
-            QSharedPointer<FiffRawData> p_fiffRawData(new FiffRawData(pIODevice));
+            QSharedPointer<FiffRawData> p_fiffRawData(new FiffRawData(FiffStream::byteStream(pIODevice, QIODevice::ReadOnly)));
             pIODevice.close();
 
             //append to corresponding member qlist
@@ -218,7 +216,7 @@ bool FiffIO::write(QFile& p_QFile,
                     QString t_fname;
                     //insert
                     qint32 p = p_QFile.fileName().indexOf(".fif");
-                    t_fname = p_QFile.fileName().insert(p, QString("_" + t_nameoftype + "-" + QString::number(i)));
+                    t_fname = p_QFile.fileName().insert(p, "_" + t_nameoftype + "-" + QString::number(i));
 
                     //assign new file name
                     qInfo("\nWriting set with index %i to file %s ...\n", i, t_fname.toUtf8().constData());
@@ -248,7 +246,7 @@ bool FiffIO::write_raw(QIODevice& pIODevice,
     RowVectorXd cals;
     SparseMatrix<double> mult;
     RowVectorXi sel;
-    FiffStream::SPtr outfid = FiffStream::start_writing_raw(pIODevice, this->m_qlistRaw[idx]->info, cals);
+    FiffStream::SPtr outfid = FiffStream::start_writing_raw(FiffStream::byteStream(pIODevice, QIODevice::WriteOnly), this->m_qlistRaw[idx]->info, cals);
     if (!outfid) {
         return false;
     }

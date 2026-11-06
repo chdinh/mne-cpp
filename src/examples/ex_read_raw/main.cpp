@@ -84,7 +84,6 @@ int main(int argc, char* argv[])
 
     parser.process(app);
 
-    QFile t_fileRaw(parser.value(inputOption));
 
     float from = parser.value(fromOption).toFloat();
     float to = parser.value(toOption).toFloat();
@@ -107,7 +106,7 @@ int main(int argc, char* argv[])
     //
     //   Setup for reading the raw data
     //
-    FiffRawData raw(t_fileRaw);
+    FiffRawData raw(parser.value(inputOption).toStdString());
 
     //
     //   Set up pick list: MEG + STI 014 - bad channels

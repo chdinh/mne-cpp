@@ -94,8 +94,7 @@ void TestSensorSet::initTestCase()
     m_pCoilDefinitions = FwdCoilSet::SPtr(FwdCoilSet::read_coil_defs(qPath).release());
 
     // Setup for reading the raw data
-    QFile t_fileIn(QCoreApplication::applicationDirPath() + "/../resources/data/mne-cpp-test-data/MEG/sample/test_hpiFit_raw.fif");
-    FiffRawData raw = FiffRawData(t_fileIn);
+    FiffRawData raw = FiffRawData((QCoreApplication::applicationDirPath() + "/../resources/data/mne-cpp-test-data/MEG/sample/test_hpiFit_raw.fif").toStdString());
     FiffInfo::SPtr pFiffInfo = FiffInfo::SPtr(new FiffInfo(raw.info));
 
     // create meg channel list

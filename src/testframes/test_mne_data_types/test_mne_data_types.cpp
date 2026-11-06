@@ -1008,8 +1008,7 @@ private slots:
         if (!QFile::exists(rawPath))
             QSKIP("sample_audvis_raw.fif not found");
 
-        QFile file(rawPath);
-        FiffRawData raw(file);
+        FiffRawData raw(rawPath.toStdString());
         QVERIFY(raw.info.ch_names.size() > 0);
 
         // setup_compensators activates projs and sets up CTF compensation

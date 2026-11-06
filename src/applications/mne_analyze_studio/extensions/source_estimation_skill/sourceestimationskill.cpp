@@ -30,6 +30,7 @@
 #include <mne/mne_inverse_operator.h>
 #include <inv/minimum_norm/inv_minimum_norm.h>
 #include <inv/inv_source_estimate.h>
+#include <utils/string_utils.h>
 
 #include <Eigen/Core>
 
@@ -160,9 +161,8 @@ QJsonObject SourceEstimationSkill::executeSkill(const WorkflowNode& nodeState)
     const float lambda2 = static_cast<float>(1.0 / (snr * snr));
 
     // ── Load raw FIFF ─────────────────────────────────────────────────────────
-    QFile rawFile(rawPath);
     FiffRawData raw;
-    if (!FiffStream::setup_read_raw(rawFile, raw)) {
+    if (!FiffStream::setup_read_raw(UTILSLIB::pathFromUtf8(rawPath.toStdString()), raw)) {
         return QJsonObject{
             {"status", "error"},
             {"message", QString("Source estimation node `%1`: could not parse FIFF file `%2`.").arg(nodeState.uid, rawPath)}};

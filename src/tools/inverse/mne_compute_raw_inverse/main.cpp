@@ -755,8 +755,7 @@ int main(int argc, char* argv[])
             nave = 1;
         qInfo("  nave = %d", nave);
 
-        QFile rawFile(inName);
-        FiffRawData raw(rawFile);
+        FiffRawData raw(UTILSLIB::pathFromUtf8(inName.toStdString()));
 
         // Pick channels that match the inverse operator
         StringList invChNames;

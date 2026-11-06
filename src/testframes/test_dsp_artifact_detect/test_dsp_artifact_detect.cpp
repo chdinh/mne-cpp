@@ -386,8 +386,7 @@ private slots:
         QFETCH(double, last);
         QFETCH(double, norm);
 
-        QFile file(QCoreApplication::applicationDirPath() + "/../resources/data/mne-cpp-test-data/MEG/sample/sample_audvis_trunc_raw.fif");
-        const FiffRawData raw(file);
+        const FiffRawData raw((QCoreApplication::applicationDirPath() + "/../resources/data/mne-cpp-test-data/MEG/sample/sample_audvis_trunc_raw.fif").toStdString());
         MatrixXd data;
         MatrixXd times;
         QVERIFY(raw.read_raw_segment(data, times));
@@ -456,8 +455,7 @@ private slots:
         QFETCH(QVector<double>, peaks);
         QFETCH(QVector<double>, firsts);
 
-        QFile file(QCoreApplication::applicationDirPath() + "/../resources/data/mne-cpp-test-data/MEG/sample/sample_audvis_trunc_raw.fif");
-        const FiffRawData raw(file);
+        const FiffRawData raw((QCoreApplication::applicationDirPath() + "/../resources/data/mne-cpp-test-data/MEG/sample/sample_audvis_trunc_raw.fif").toStdString());
         MatrixXd data;
         MatrixXd times;
         QVERIFY(raw.read_raw_segment(data, times));

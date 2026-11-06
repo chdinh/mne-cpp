@@ -101,8 +101,7 @@ int main(int argc, char* argv[])
 
     // bring in dev_head transformation and FiffInfo
     // Init data loading and writing
-    QFile t_fileIn(pSettings->measname);
-    FiffRawData raw(t_fileIn);
+    FiffRawData raw(pSettings->measname.toStdString());
     QSharedPointer<FiffInfo> pFiffInfo = QSharedPointer<FiffInfo>::create(raw.info);
 
     FiffCoordTrans meg_head_t = pFiffInfo->dev_head_t;

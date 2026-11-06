@@ -120,7 +120,7 @@ void TestHpiFitIntegration::initTestCase()
 
     // Setup for reading the raw data
     FiffRawData raw;
-    raw = FiffRawData(t_fileIn);
+    raw = FiffRawData((QCoreApplication::applicationDirPath() + "/../resources/data/mne-cpp-test-data/MEG/sample/test_hpiFit_raw.fif").toStdString());
     QSharedPointer<FiffInfo> pFiffInfo = QSharedPointer<FIFFLIB::FiffInfo>(new FiffInfo(raw.info));
 
     // Only filter MEG channels

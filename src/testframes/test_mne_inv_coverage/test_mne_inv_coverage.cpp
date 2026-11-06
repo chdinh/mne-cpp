@@ -480,8 +480,7 @@ void TestMneInvCoverage::testForwardSolutionPickChannelTypes()
     MNEForwardSolution fwd(file);
 
     // Pick MEG only
-    QFile rawFile(rawPath());
-    FiffRawData raw(rawFile);
+    FiffRawData raw(rawPath().toStdString());
     FiffInfo info = raw.info;
 
     MNEForwardSolution fwdMeg = fwd.pick_channels(info.ch_names);
@@ -495,8 +494,7 @@ void TestMneInvCoverage::testForwardSolutionPickChannelTypes()
 
 void TestMneInvCoverage::testEpochDataListFromRaw()
 {
-    QFile rawFile(rawPath());
-    FiffRawData raw(rawFile);
+    FiffRawData raw(rawPath().toStdString());
 
     // Create synthetic events (every 1000 samples, event ID 1)
     MatrixXi events(5, 3);
@@ -543,8 +541,7 @@ void TestMneInvCoverage::testMinNormSetup()
     QVERIFY2(fwd.sol != nullptr, "Could not load forward solution");
 
     // Load raw info
-    QFile rawFile(rawPath());
-    FiffRawData raw(rawFile);
+    FiffRawData raw(rawPath().toStdString());
 
     // Load noise covariance
     FiffCov noiseCov(covPath().toStdString());
@@ -567,8 +564,7 @@ void TestMneInvCoverage::testMinNormCalculateInverse()
     MNEForwardSolution fwd(fwdFile);
     QVERIFY2(fwd.sol != nullptr, "Could not load forward solution");
 
-    QFile rawFile(rawPath());
-    FiffRawData raw(rawFile);
+    FiffRawData raw(rawPath().toStdString());
 
     FiffCov noiseCov(covPath().toStdString());
 

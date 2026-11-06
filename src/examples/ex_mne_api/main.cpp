@@ -231,7 +231,7 @@ int main(int argc, char* argv[])
 
     //! [mne_epoch_data_list_usage]
     QFile rawFile(data + "/MEG/sample/sample_audvis_trunc_raw.fif");
-    const FiffRawData raw(rawFile);
+    const FiffRawData raw((data + "/MEG/sample/sample_audvis_trunc_raw.fif").toStdString());
     FiffEvents events;
     FiffEvents::detect_from_raw(raw, events); // rising edges on STI 014
     // Epochs of event 1 from -100 to 300 ms, no rejection

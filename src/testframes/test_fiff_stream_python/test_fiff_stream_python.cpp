@@ -638,9 +638,8 @@ void TestFiffStreamPython::refusesUnwritablePath()
     info.ch_names.push_back(ch.ch_name);
     info.nchan = 1;
     info.sfreq = 100.0f;
-    QFile raw(path);
     RowVectorXd cals;
-    QVERIFY(!FiffStream::start_writing_raw(raw, info, cals));
+    QVERIFY(!FiffStream::start_writing_raw(path.toStdString(), info, cals));
     QVERIFY(!FiffCoordTrans().write(path.toStdString()));
     QVERIFY(!FiffDigPointSet().write(path.toStdString()));
     QVERIFY(!QFileInfo::exists(path));
@@ -664,13 +663,12 @@ void TestFiffStreamPython::refusesUnwritablePath()
     ctf(0, 3) = 0.004f;
     info.ctf_head_t = FiffCoordTrans(FIFFV_MNE_COORD_CTF_HEAD, FIFFV_COORD_HEAD, ctf);
     QFile written(dir.filePath(QStringLiteral("one_channel_raw.fif")));
-    FiffStream::SPtr stream = FiffStream::start_writing_raw(written, info, cals);
+    FiffStream::SPtr stream = FiffStream::start_writing_raw(dir.filePath(QStringLiteral("one_channel_raw.fif")).toStdString(), info, cals);
     QVERIFY(stream);
     QCOMPARE(cals.size(), Eigen::Index(1));
     stream->write_raw_buffer(MatrixXd::Constant(1, 10, 2e-6), cals);
     stream->finish_writing_raw();
-    QFile readBack(written.fileName());
-    FiffRawData raw1(readBack);
+    FiffRawData raw1(written.fileName().toStdString());
     QCOMPARE(raw1.info.nchan, 1);
     QCOMPARE(raw1.last_samp, 9);
     QCOMPARE(raw1.info.dig.size(), 3);
@@ -683,12 +681,11 @@ void TestFiffStreamPython::refusesUnwritablePath()
     // A source file that has gone away only loses the blocks copied from it, not the measurement info.
     info.filename = (dir.filePath(QStringLiteral("deleted_raw.fif"))).toStdString();
     QFile orphan(dir.filePath(QStringLiteral("orphan_raw.fif")));
-    FiffStream::SPtr orphanStream = FiffStream::start_writing_raw(orphan, info, cals);
+    FiffStream::SPtr orphanStream = FiffStream::start_writing_raw(dir.filePath(QStringLiteral("orphan_raw.fif")).toStdString(), info, cals);
     QVERIFY(orphanStream);
     orphanStream->write_raw_buffer(MatrixXd::Constant(1, 10, 2e-6), cals);
     orphanStream->finish_writing_raw();
-    QFile orphanBack(orphan.fileName());
-    FiffRawData raw2(orphanBack);
+    FiffRawData raw2(orphan.fileName().toStdString());
     QCOMPARE(raw2.info.nchan, 1);
     QCOMPARE(raw2.last_samp, 9);
     QCOMPARE(raw2.info.dig.size(), 3);
@@ -727,9 +724,8 @@ void TestFiffStreamPython::writesAnnotationsAndDevice()
     annotations.append(3.0, 0.25, QString());
 
     const QString path = dir.filePath(QStringLiteral("annotated_raw.fif"));
-    QFile file(path);
     RowVectorXd cals;
-    FiffStream::SPtr stream = FiffStream::start_writing_raw(file, info, cals);
+    FiffStream::SPtr stream = FiffStream::start_writing_raw(path.toStdString(), info, cals);
     QVERIFY(stream);
     stream->write_raw_buffer(MatrixXd::Constant(1, 400, 1e-6), cals);
     stream->end_block(FIFFB_RAW_DATA);
@@ -738,8 +734,7 @@ void TestFiffStreamPython::writesAnnotationsAndDevice()
     stream->end_file();
     stream->close();
 
-    QFile readBack(path);
-    FiffRawData raw(readBack);
+    FiffRawData raw(path.toStdString());
     QCOMPARE(raw.info.device_info.type, info.device_info.type);
     QCOMPARE(raw.info.device_info.model, info.device_info.model);
     QCOMPARE(raw.info.device_info.serial, info.device_info.serial);
@@ -775,7 +770,7 @@ void TestFiffStreamPython::writesAnnotationsAndDevice()
     // info["line_freq"] stays None instead of reading -1).
     info.linefreq = -1.0f;
     QFile packedFile(dir.filePath(QStringLiteral("packed_raw.fif")));
-    FiffStream::SPtr packed = FiffStream::start_writing_raw(packedFile, info, cals, defaultMatrixXi, false,
+    FiffStream::SPtr packed = FiffStream::start_writing_raw(dir.filePath(QStringLiteral("packed_raw.fif")).toStdString(), info, cals, defaultMatrixXi, false,
                                                             FIFFT_DAU_PACK16);
     QVERIFY(packed);
     packed->finish_writing_raw();

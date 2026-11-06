@@ -571,15 +571,15 @@ public:
      *
      * Read information about raw data file
      *
-     * @param[in] p_IODevice         A fiff IO device like a fiff QFile or QTCPSocket.
+     * @param[in] path               The raw data file.
      * @param[out] data              The raw data information - contains the opened fiff file.
      * @param[in] allow_maxshield    Accept unprocessed MaxShield data.
      *
      * @return true if succeeded, false otherwise.
      */
-    inline static bool setup_read_raw(QIODevice& p_IODevice, FiffRawData& data, bool allow_maxshield = false)
+    inline static bool setup_read_raw(const std::filesystem::path& path, FiffRawData& data, bool allow_maxshield = false)
     {
-        return FiffStream::setup_read_raw(p_IODevice, data, allow_maxshield);
+        return FiffStream::setup_read_raw(path, data, allow_maxshield);
     }
 
     //=========================================================================================================
@@ -640,19 +640,19 @@ public:
      *
      * function [fid,cals] = fiff_start_writing_raw(name,info,sel)
      *
-     * @param[in] p_IODevice     A fiff IO device like a fiff QFile or QTCPSocket.
+     * @param[in] path           The file to create.
      * @param[in] info           The measurement info block of the source file.
      * @param[out] cals          Thecalibration matrix.
      * @param[in] sel            Which channels will be included in the output file (optional).
      *
      * @return the started fiff file.
      */
-    inline static FiffStream::SPtr start_writing_raw(QIODevice& p_IODevice,
+    inline static FiffStream::SPtr start_writing_raw(const std::filesystem::path& path,
                                                      const FiffInfo& info,
                                                      Eigen::RowVectorXd& cals,
                                                      Eigen::MatrixXi sel = defaultMatrixXi)
     {
-        return FiffStream::start_writing_raw(p_IODevice, info, cals, sel);
+        return FiffStream::start_writing_raw(path, info, cals, sel);
     }
 
     //=========================================================================================================

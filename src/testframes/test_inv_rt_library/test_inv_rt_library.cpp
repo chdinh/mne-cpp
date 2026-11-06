@@ -506,8 +506,7 @@ void TestInvRtLibrary::rtprocessing_filterFile()
 {
     if (!hasData())
         QSKIP("No test data");
-    QFile rawFile(rawPath());
-    FiffRawData::SPtr pRaw(new FiffRawData(rawFile));
+    FiffRawData::SPtr pRaw(new FiffRawData(rawPath().toStdString()));
 
     QTemporaryFile tmpFile;
     tmpFile.setAutoRemove(true);
@@ -527,8 +526,7 @@ void TestInvRtLibrary::hpiFit_constructWithSensorSet()
 {
     if (!hasData())
         QSKIP("No test data");
-    QFile rawFile(rawPath());
-    FiffRawData raw(rawFile);
+    FiffRawData raw(rawPath().toStdString());
     InvSensorSetCreator creator;
     // Only MEG channels have coils: a list with EEG/stim channels gives no sensor set
     QCOMPARE(creator.updateSensorSet(raw.info.chs, Accuracy::medium).ncoils(), 0);
@@ -561,8 +559,7 @@ void TestInvRtLibrary::hpiFit_fitWithSyntheticData()
 {
     if (!hasData())
         QSKIP("No test data");
-    QFile rawFile(rawPath());
-    FiffRawData raw(rawFile);
+    FiffRawData raw(rawPath().toStdString());
     RowVectorXi megPicks = raw.info.pick_types(true, false, false);
     QList<FiffChInfo> megChs;
     for (int i = 0; i < megPicks.size(); ++i)
@@ -727,8 +724,7 @@ void TestInvRtLibrary::filter_applyToRawData()
 {
     if (!hasData())
         QSKIP("No test data");
-    QFile rawFile(rawPath());
-    FiffRawData raw(rawFile);
+    FiffRawData raw(rawPath().toStdString());
     MatrixXd data, times;
     raw.read_raw_segment(data, times, raw.first_samp, raw.first_samp + 4000);
     FilterKernel kernel("test_lp", 0, 256, 40.0, 0.0, 0.0, raw.info.sfreq, 0);
@@ -742,8 +738,7 @@ void TestInvRtLibrary::filter_applyWithChannelSelection()
 {
     if (!hasData())
         QSKIP("No test data");
-    QFile rawFile(rawPath());
-    FiffRawData raw(rawFile);
+    FiffRawData raw(rawPath().toStdString());
     MatrixXd data, times;
     raw.read_raw_segment(data, times, raw.first_samp, raw.first_samp + 2000);
     FilterKernel kernel("test_hp", 1, 128, 0.0, 1.0, 0.0, raw.info.sfreq, 0);

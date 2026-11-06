@@ -687,8 +687,7 @@ void TestFwdLibrary::coilSet_readDefs()
 {
     if (!hasData())
         QSKIP("No test data");
-    QFile rawFile(rawPath());
-    FiffRawData raw(rawFile);
+    FiffRawData raw(rawPath().toStdString());
 
     // Electrodes are made from EEG channels only
     QVERIFY(!FwdCoilSet::create_eeg_els(raw.info.chs, raw.info.nchan));

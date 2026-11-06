@@ -196,8 +196,7 @@ private slots:
         }
         FiffCov cov(covPath.toStdString());
 
-        QFile rawFile(rawPath);
-        FiffRawData raw(rawFile);
+        FiffRawData raw(rawPath.toStdString());
 
         FiffCov reg = cov.regularize(raw.info, 0.1, 0.1, 0.1, true);
         QCOMPARE(reg.dim, cov.dim);
@@ -212,9 +211,8 @@ private slots:
         }
         FiffCov cov(covPath.toStdString());
 
-        QFile rawFile(rawPath);
 
-        FiffRawData raw(rawFile);
+        FiffRawData raw(rawPath.toStdString());
 
         // prepare_noise_cov requires only MEG+EEG channels that exist in both info and cov
         // Must also exclude bad channels since prepare_noise_cov excludes them internally
@@ -349,10 +347,8 @@ private slots:
     void testFiffInfoWriteToStream()
     {
         FiffInfo info = createSyntheticInfo(5);
-        QBuffer buffer;
-        buffer.open(QIODevice::ReadWrite);
         RowVectorXd cals;
-        FiffStream::SPtr pStream = FiffStream::start_writing_raw(buffer, info, cals);
+        FiffStream::SPtr pStream = FiffStream::start_writing_raw(std::make_unique<UTILSLIB::MemoryByteStream>(), info, cals);
         QVERIFY(!pStream.isNull());
         pStream->finish_writing_raw();
     }
@@ -363,8 +359,7 @@ private slots:
         if (!QFile::exists(rawPath)) {
             QSKIP("Sample raw file not found");
         }
-        QFile rawFile(rawPath);
-        FiffRawData raw(rawFile);
+        FiffRawData raw(rawPath.toStdString());
         QVERIFY(raw.info.nchan > 0);
         QVERIFY(raw.info.sfreq > 0);
 
@@ -484,8 +479,7 @@ private slots:
         if (!QFile::exists(rawPath)) {
             QSKIP("Sample raw file not found");
         }
-        QFile rawFile(rawPath);
-        FiffRawData raw(rawFile);
+        FiffRawData raw(rawPath.toStdString());
         QVERIFY(raw.info.nchan > 0);
         raw.clear();
         QCOMPARE(raw.info.nchan, -1);
@@ -497,8 +491,7 @@ private slots:
         if (!QFile::exists(rawPath)) {
             QSKIP("Sample raw file not found");
         }
-        QFile rawFile(rawPath);
-        FiffRawData raw(rawFile);
+        FiffRawData raw(rawPath.toStdString());
 
         MatrixXd data;
         MatrixXd times;
@@ -513,8 +506,7 @@ private slots:
         if (!QFile::exists(rawPath)) {
             QSKIP("Sample raw file not found");
         }
-        QFile rawFile(rawPath);
-        FiffRawData raw(rawFile);
+        FiffRawData raw(rawPath.toStdString());
 
         RowVectorXi sel(5);
         sel << 0, 1, 2, 3, 4;
@@ -532,8 +524,7 @@ private slots:
         if (!QFile::exists(rawPath)) {
             QSKIP("Sample raw file not found");
         }
-        QFile rawFile(rawPath);
-        FiffRawData raw(rawFile);
+        FiffRawData raw(rawPath.toStdString());
 
         // Verify info was loaded correctly
         QVERIFY(raw.info.nchan > 0);

@@ -195,7 +195,6 @@ private:
     static QString dataPath(const QString& file);
     MatrixXi events(bool withBoundaryEvents) const;
 
-    std::unique_ptr<QFile> m_rawFile;
     std::unique_ptr<FiffRawData> m_raw;
 
 private slots:
@@ -281,8 +280,7 @@ void TestFiffCorePython::initTestCase()
     if (!QFile::exists(dataPath("sample_audvis_trunc_raw.fif"))) {
         QSKIP("Sample test data not found");
     }
-    m_rawFile = std::make_unique<QFile>(dataPath("sample_audvis_trunc_raw.fif"));
-    m_raw = std::make_unique<FiffRawData>(*m_rawFile);
+    m_raw = std::make_unique<FiffRawData>(dataPath("sample_audvis_trunc_raw.fif").toStdString());
 
     QCOMPARE(m_raw->info.nchan, 376);
     QCOMPARE(static_cast<int>(m_raw->first_samp), 12900);
@@ -1164,8 +1162,7 @@ void TestFiffCorePython::channelTypes_matchPython()
                               "fnirs_fd_ac_amplitude", "fnirs_fd_phase", "fnirs_td_gated_amplitude", "fnirs_td_moments_intensity",
                               "fnirs_td_moments_mean", "fnirs_td_moments_variance", "fnirs_od", "hbo", "hbr", "csd", "temperature",
                               "gsr", "eyegaze", "pupil"};
-    QFile file(QStringLiteral(FIFF_CORE_DATA_DIR "/channel-types-raw.fif"));
-    const FiffRawData raw(file);
+    const FiffRawData raw(QStringLiteral(FIFF_CORE_DATA_DIR "/channel-types-raw.fif").toStdString());
     QCOMPARE(raw.info.chs.size(), static_cast<qsizetype>(expected.size()));
     for (int k = 0; k < static_cast<int>(expected.size()); ++k) {
         QCOMPARE(raw.info.channel_type(k), expected[k]);

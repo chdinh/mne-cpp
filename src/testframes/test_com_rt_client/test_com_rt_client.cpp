@@ -226,8 +226,7 @@ void TestComRtClient::testRtDataClientReadsWhatTheServerWrites_data()
 void TestComRtClient::testRtDataClientReadsWhatTheServerWrites()
 {
     QFETCH(bool, withProjector);
-    QFile raw(QStringLiteral(MNE_CTF_COMP_DATA_DIR "/ctf_grade1_raw.fif"));
-    FiffRawData rawData(raw);
+    FiffRawData rawData(QStringLiteral(MNE_CTF_COMP_DATA_DIR "/ctf_grade1_raw.fif").toStdString());
     FiffInfo info = rawData.info;
     QCOMPARE(info.nchan, 36);
     QCOMPARE(info.comps.size(), 5);

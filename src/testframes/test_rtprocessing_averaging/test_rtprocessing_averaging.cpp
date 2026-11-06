@@ -257,8 +257,7 @@ private slots:
     {
         if (!hasData())
             QSKIP("No test data");
-        QFile file(m_sDataPath + "/MEG/sample/sample_audvis_trunc_raw.fif");
-        FiffRawData raw(file);
+        FiffRawData raw((m_sDataPath + "/MEG/sample/sample_audvis_trunc_raw.fif").toStdString());
         FiffInfo::SPtr info = FiffInfo::SPtr::create(raw.info);
         const int stiIdx = UTILSLIB::indexOf(info->ch_names, "STI014");
         QVERIFY(stiIdx >= 0);
@@ -312,7 +311,7 @@ private slots:
         if (!file.exists())
             QSKIP("Raw file not found");
 
-        FiffRawData raw(file);
+        FiffRawData raw((m_sDataPath + "/MEG/sample/sample_audvis_trunc_raw.fif").toStdString());
 
         // Read a small segment
         MatrixXd data, times;
@@ -352,7 +351,7 @@ private slots:
         if (!file.exists())
             QSKIP("Raw file not found");
 
-        FiffRawData raw(file);
+        FiffRawData raw((m_sDataPath + "/MEG/sample/sample_audvis_trunc_raw.fif").toStdString());
 
         MatrixXd data, times;
         const fiff_int_t from = raw.first_samp;
@@ -400,7 +399,7 @@ private slots:
         if (!file.exists())
             QSKIP("Raw file not found");
 
-        FiffRawData raw(file);
+        FiffRawData raw((m_sDataPath + "/MEG/sample/sample_audvis_trunc_raw.fif").toStdString());
 
         MatrixXd data, times;
         const fiff_int_t from = raw.first_samp;
@@ -562,7 +561,7 @@ private slots:
         if (!file.exists())
             QSKIP("Raw file not found");
 
-        FiffRawData raw(file);
+        FiffRawData raw((m_sDataPath + "/MEG/sample/sample_audvis_trunc_raw.fif").toStdString());
         const MatrixXi events = deriveStimEvents(raw);
         QVERIFY(events.rows() > 0);
 
@@ -634,7 +633,7 @@ private slots:
         if (!file.exists())
             QSKIP("Raw file not found");
 
-        FiffRawData raw(file);
+        FiffRawData raw((m_sDataPath + "/MEG/sample/sample_audvis_trunc_raw.fif").toStdString());
         const MatrixXi events = deriveStimEvents(raw);
         QVERIFY(events.rows() > 0);
 
@@ -711,7 +710,7 @@ private slots:
         if (!file.exists())
             QSKIP("Raw file not found");
 
-        FiffRawData raw(file);
+        FiffRawData raw((m_sDataPath + "/MEG/sample/sample_audvis_trunc_raw.fif").toStdString());
         const MatrixXi events = deriveStimEvents(raw);
         QVERIFY(events.rows() > 0);
 
@@ -752,7 +751,7 @@ private slots:
         if (!file.exists())
             QSKIP("Raw file not found");
 
-        FiffRawData raw(file);
+        FiffRawData raw((m_sDataPath + "/MEG/sample/sample_audvis_trunc_raw.fif").toStdString());
         const MatrixXi events = deriveStimEvents(raw);
         QVERIFY(events.rows() > 0);
 
@@ -787,7 +786,7 @@ private slots:
         if (!file.exists())
             QSKIP("Raw file not found");
 
-        FiffRawData raw(file);
+        FiffRawData raw((m_sDataPath + "/MEG/sample/sample_audvis_trunc_raw.fif").toStdString());
         MatrixXd data, times;
         QVERIFY(raw.read_raw_segment(data, times));
         const int stiIdx = UTILSLIB::indexOf(raw.info.ch_names, "STI014");

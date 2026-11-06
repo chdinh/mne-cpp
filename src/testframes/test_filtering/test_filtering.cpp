@@ -93,14 +93,12 @@ void TestFiltering::initTestCase()
     qInstallMessageHandler(UTILSLIB::MNELogger::customLogWriter);
     qDebug() << "Epsilon" << dEpsilon;
 
-    QFile t_fileIn(QCoreApplication::applicationDirPath() + "/../resources/data/mne-cpp-test-data/MEG/sample/sample_audvis_trunc_raw.fif");
     QFile t_fileOut(QCoreApplication::applicationDirPath() + "/../resources/data/mne-cpp-test-data/MEG/sample/rtfilter_filterdata_out_raw.fif");
 
     // Filter in Python is created with following function: mne.filter.design_mne_c_filter(raw.info['sfreq'], 5, 10, 1, 1)
     // This will create a filter with with 8193 elements/taps/Order. In order to be concise with the MNE-CPP implementation
     // the filter is cut to the Order used in mne-cpp (1024, see below).//
     // The actual filtering was performed with the function: mne.filter._overlap_add_filter(dataIn, filter_python, phase = 'linear')
-    QFile t_fileRef(QCoreApplication::applicationDirPath() + "/../resources/data/mne-cpp-test-data/Result/ref_rtfilter_filterdata_raw.fif");
 
     // Make sure test folder exists
     QFileInfo t_fileOutInfo(t_fileOut);
@@ -114,12 +112,12 @@ void TestFiltering::initTestCase()
 
     // Setup for reading the raw data
     FiffRawData rawFirstInRaw;
-    rawFirstInRaw = FiffRawData(t_fileIn);
+    rawFirstInRaw = FiffRawData((QCoreApplication::applicationDirPath() + "/../resources/data/mne-cpp-test-data/MEG/sample/sample_audvis_trunc_raw.fif").toStdString());
 
     // Only filter MEG channels
     RowVectorXi vPicks = rawFirstInRaw.info.pick_types(true, true, false);
     RowVectorXd vCals;
-    FiffStream::SPtr outfid = FiffStream::start_writing_raw(t_fileOut, rawFirstInRaw.info, vCals);
+    FiffStream::SPtr outfid = FiffStream::start_writing_raw((QCoreApplication::applicationDirPath() + "/../resources/data/mne-cpp-test-data/MEG/sample/rtfilter_filterdata_out_raw.fif").toStdString(), rawFirstInRaw.info, vCals);
 
     //   Set up the reading parameters
     //   To read the whole file at once set
@@ -166,7 +164,7 @@ void TestFiltering::initTestCase()
 
     // Read filtered data from the filtered output file to check if read and write is working correctly
     FiffRawData rawSecondInRaw;
-    rawSecondInRaw = FiffRawData(t_fileOut);
+    rawSecondInRaw = FiffRawData((QCoreApplication::applicationDirPath() + "/../resources/data/mne-cpp-test-data/MEG/sample/rtfilter_filterdata_out_raw.fif").toStdString());
 
     // Reading
     if (!rawSecondInRaw.read_raw_segment(mFirstFiltered, mFirstInTimes, from, to, vPicks)) {
@@ -182,7 +180,7 @@ void TestFiltering::initTestCase()
     printf(">>>>>>>>>>>>>>>>>>>>>>>>> Read MNE-PYTHON Results As Reference >>>>>>>>>>>>>>>>>>>>>>>>>\n");
 
     FiffRawData ref_in_raw;
-    ref_in_raw = FiffRawData(t_fileRef);
+    ref_in_raw = FiffRawData((QCoreApplication::applicationDirPath() + "/../resources/data/mne-cpp-test-data/Result/ref_rtfilter_filterdata_raw.fif").toStdString());
 
     // Reading
     if (!ref_in_raw.read_raw_segment(mRefFiltered, mRefInTimes, from, to, vPicks)) {

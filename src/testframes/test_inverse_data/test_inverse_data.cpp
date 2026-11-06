@@ -256,7 +256,7 @@ private slots:
         // Read info from raw
         QFile rawFile(rawPath);
         if (rawFile.exists()) {
-            FiffRawData raw(rawFile);
+            FiffRawData raw(rawPath.toStdString());
             m_info = raw.info;
         }
 

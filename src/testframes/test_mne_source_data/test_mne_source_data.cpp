@@ -337,8 +337,7 @@ private slots:
         if (!hasData())
             QSKIP("No test data");
 
-        QFile file(m_sDataPath + "/MEG/sample/sample_audvis_trunc_raw.fif");
-        FiffRawData raw(file);
+        FiffRawData raw((m_sDataPath + "/MEG/sample/sample_audvis_trunc_raw.fif").toStdString());
 
         // Read some data segments to create synthetic epochs
         float epochDuration = 0.5f; // 500ms epochs
@@ -376,8 +375,7 @@ private slots:
         if (!hasData())
             QSKIP("No test data");
 
-        QFile file(m_sDataPath + "/MEG/sample/sample_audvis_trunc_raw.fif");
-        FiffRawData raw(file);
+        FiffRawData raw((m_sDataPath + "/MEG/sample/sample_audvis_trunc_raw.fif").toStdString());
 
         fiff_int_t epochSamples = (fiff_int_t)(0.3 * raw.info.sfreq);
         fiff_int_t from = raw.first_samp;
