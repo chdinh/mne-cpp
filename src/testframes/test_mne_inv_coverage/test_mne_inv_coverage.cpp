@@ -577,9 +577,8 @@ void TestMneInvCoverage::testMinNormCalculateInverse()
         raw.info, fwd, noiseCov);
 
     // Read evoked data
-    QFile aveFile(avePath());
     FiffEvokedSet evokedSet;
-    FiffEvokedSet::read(aveFile, evokedSet);
+    FiffEvokedSet::read(avePath().toStdString(), evokedSet);
     QVERIFY2(!evokedSet.evoked.isEmpty(), "No evoked data found in file");
 
     // Setup minimum norm and calculate inverse

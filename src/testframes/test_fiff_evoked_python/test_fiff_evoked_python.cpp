@@ -50,6 +50,7 @@
 #include <QtTest>
 #include <QCoreApplication>
 #include <QFile>
+#include <QTemporaryDir>
 
 //=============================================================================================================
 // EIGEN INCLUDES
@@ -91,6 +92,7 @@ private slots:
     void dataSumsAreDistinct();
     void oldStyleEvoked_matchesPython();
     void readSelectors_matchPython();
+    void readsAndSavesByPath();
 };
 
 //=============================================================================================================
@@ -110,8 +112,7 @@ void TestFiffEvokedPython::initTestCase()
         QSKIP("Averaged test data not found");
     }
 
-    QFile aveFile(avePath());
-    m_set = FiffEvokedSet(aveFile);
+    m_set = FiffEvokedSet(avePath().toStdString());
 
     QCOMPARE(m_set.evoked.size(), 4);
 }
@@ -176,8 +177,7 @@ void TestFiffEvokedPython::conditions_matchPython()
 void TestFiffEvokedPython::readSelectors_matchPython()
 {
     auto read = [](const QVariant& setno, QPair<float, float> baseline, bool proj, fiff_int_t kind, FiffEvoked& e) {
-        QFile file(avePath());
-        return FiffEvoked::read(file, e, setno, baseline, proj, kind);
+        return FiffEvoked::read(avePath().toStdString(), e, setno, baseline, proj, kind);
     };
     const QPair<float, float> none(-1.0f, -1.0f);
 
@@ -282,8 +282,7 @@ void TestFiffEvokedPython::dataSumsAreDistinct()
 
 void TestFiffEvokedPython::oldStyleEvoked_matchesPython()
 {
-    QFile file(QStringLiteral(MNE_FIFF_EVOKED_DATA_DIR) + "/old_style-ave.fif");
-    const FiffEvoked e(file, 0, QPair<float, float>(-1.0f, -1.0f), false);
+    const FiffEvoked e(MNE_FIFF_EVOKED_DATA_DIR "/old_style-ave.fif", 0, QPair<float, float>(-1.0f, -1.0f), false);
 
     // mne.read_evokeds(..., baseline=None, proj=False): the local 200 Hz channel
     // definitions and calibrations replace the measurement info's.
@@ -300,6 +299,31 @@ void TestFiffEvokedPython::oldStyleEvoked_matchesPython()
     QVERIFY(std::fabs(e.data(5, 19) + 0.12329661194235086) < 1e-12);
     QVERIFY2(std::fabs(e.data.cwiseAbs().sum() - 304.2275329530239) < 1e-9,
              qPrintable(QString("abs sum %1").arg(e.data.cwiseAbs().sum(), 0, 'g', 17)));
+}
+
+void TestFiffEvokedPython::readsAndSavesByPath()
+{
+    QTemporaryDir dir;
+    QVERIFY(dir.isValid());
+    const std::string out = dir.filePath("set-ave.fif").toStdString();
+
+    QVERIFY(m_set.save(out));
+    const FiffEvokedSet back(out);
+    QCOMPARE(back.evoked.size(), m_set.evoked.size());
+    for (qsizetype i = 0; i < back.evoked.size(); ++i) {
+        QCOMPARE(back.evoked[i].comment, m_set.evoked[i].comment);
+        QVERIFY(back.evoked[i].data.isApprox(m_set.evoked[i].data, 1e-6));
+    }
+
+    FiffEvoked e;
+    QVERIFY(FiffEvoked::read(out, e, 2));
+    QCOMPARE(e.comment, m_set.evoked[2].comment);
+
+    const std::string missing = dir.filePath("missing-ave.fif").toStdString();
+    FiffEvokedSet none;
+    QVERIFY(!FiffEvokedSet::read(missing, none));
+    QVERIFY(!FiffEvoked::read(missing, e, 0));
+    QVERIFY(!m_set.save(dir.filePath("no/dir/set-ave.fif").toStdString()));
 }
 
 //=============================================================================================================

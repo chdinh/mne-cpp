@@ -463,9 +463,8 @@ private slots:
         if (invOp.nchan == 0)
             QSKIP("Inverse operator build failed");
 
-        QFile evkFile(evkPath);
         QPair<float, float> noBaseline(-1.0f, -1.0f);
-        FiffEvoked evoked(evkFile, 0, noBaseline);
+        FiffEvoked evoked(evkPath.toStdString(), 0, noBaseline);
         FiffEvoked picked = evoked.pick_channels(invOp.noise_cov->names);
 
         float tmin = picked.times(0);
@@ -508,9 +507,8 @@ private slots:
         if (invOp.nchan == 0)
             QSKIP("Inverse operator build failed");
 
-        QFile evkFile(evkPath);
         QPair<float, float> noBaseline(-1.0f, -1.0f);
-        FiffEvoked evoked(evkFile, 0, noBaseline);
+        FiffEvoked evoked(evkPath.toStdString(), 0, noBaseline);
         FiffEvoked picked = evoked.pick_channels(invOp.noise_cov->names);
 
         float tmin = picked.times(0);
@@ -552,9 +550,8 @@ private slots:
         if (invOp.nchan == 0)
             QSKIP("Inverse operator build failed");
 
-        QFile evkFile(evkPath);
         QPair<float, float> noBaseline(-1.0f, -1.0f);
-        FiffEvoked evoked(evkFile, 0, noBaseline);
+        FiffEvoked evoked(evkPath.toStdString(), 0, noBaseline);
         FiffEvoked picked = evoked.pick_channels(invOp.noise_cov->names);
 
         float tmin = picked.times(0);
@@ -645,7 +642,7 @@ private slots:
         if (!file.exists())
             QSKIP("Evoked file not found");
 
-        FiffEvokedSet evokedSet(file);
+        FiffEvokedSet evokedSet(path.toStdString());
         QVERIFY(evokedSet.evoked.size() > 0);
 
         for (int i = 0; i < evokedSet.evoked.size(); ++i) {

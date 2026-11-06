@@ -92,10 +92,9 @@ void TestInterpolation::initTestCase()
     QFile t_filesensorSurfaceVV(QCoreApplication::applicationDirPath() + "/../resources/data/mne-cpp-test-data/subjects/sample/bem/sample-5120-bem.fif");
     MNEBem t_sensorSurfaceVV(t_filesensorSurfaceVV);
     realSurface = t_sensorSurfaceVV[0];
-    QFile t_fileEvoked(QCoreApplication::applicationDirPath() + "/../resources/data/mne-cpp-test-data/MEG/sample/sample_audvis-ave.fif");
     fiff_int_t setno = 0;
     QPair<float, float> baseline(-1.0f, -1.0f);
-    evoked = FiffEvoked(t_fileEvoked, setno, baseline);
+    evoked = FiffEvoked((QCoreApplication::applicationDirPath() + "/../resources/data/mne-cpp-test-data/MEG/sample/sample_audvis-ave.fif").toStdString(), setno, baseline);
     if (evoked.isEmpty()) {
         return;
     }

@@ -189,9 +189,8 @@ void TestMnaInversePipeline::registerRealOps()
                            evkPath.replace(QLatin1String("${TEST_DATA}"), dataPath);
                            int setno = attrs.value(QStringLiteral("setno"), 0).toInt();
 
-                           QFile evkFile(evkPath);
                            QPair<float, float> noBaseline(-1.0f, -1.0f);
-                           auto evoked = QSharedPointer<FiffEvoked>::create(evkFile, setno, noBaseline);
+                           auto evoked = QSharedPointer<FiffEvoked>::create(evkPath.toStdString(), setno, noBaseline);
 
                            return {{QStringLiteral("evoked"), QVariant::fromValue(evoked)}};
                        });

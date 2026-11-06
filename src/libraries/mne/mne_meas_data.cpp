@@ -136,9 +136,8 @@ bool MNEMeasData::read_evoked_set(const QString& name,
        * Read evoked data via FiffEvoked (no baseline correction, no projection
        * — MNEMeasData handles projections separately via MNEProjOp).
        */
-    QFile file(name);
     FiffEvoked evoked;
-    if (!FiffEvoked::read(file, evoked, set - 1,
+    if (!FiffEvoked::read(UTILSLIB::pathFromUtf8(name.toStdString()), evoked, set - 1,
                           QPair<float, float>(-1.0f, -1.0f), false)) {
         qCritical("Failed to read evoked data from %s\n", name.toUtf8().constData());
         return false;

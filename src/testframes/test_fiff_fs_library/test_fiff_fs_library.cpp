@@ -334,8 +334,7 @@ void TestFiffFsLibrary::fiff_readEvokedSet()
 {
     if (!hasData())
         QSKIP("No test data");
-    QFile aveFile(avePath());
-    FiffEvokedSet evokedSet(aveFile);
+    FiffEvokedSet evokedSet(avePath().toStdString());
     QVERIFY(evokedSet.evoked.size() > 0);
     QVERIFY(evokedSet.info.nchan > 0);
 }
@@ -344,8 +343,7 @@ void TestFiffFsLibrary::fiff_evokedSetPickChannels()
 {
     if (!hasData())
         QSKIP("No test data");
-    QFile aveFile(avePath());
-    FiffEvokedSet evokedSet(aveFile);
+    FiffEvokedSet evokedSet(avePath().toStdString());
     QVERIFY(evokedSet.evoked.size() > 0);
 
     StringList include;
@@ -362,17 +360,15 @@ void TestFiffFsLibrary::fiff_evokedSetSave()
 {
     if (!hasData())
         QSKIP("No test data");
-    QFile aveFile(avePath());
-    FiffEvokedSet evokedSet(aveFile);
+    FiffEvokedSet evokedSet(avePath().toStdString());
     QVERIFY(evokedSet.evoked.size() > 0);
 
     QString tmpPath = QCoreApplication::applicationDirPath() + "/test_evoked_save_tmp.fif";
-    bool saved = evokedSet.save(tmpPath);
+    bool saved = evokedSet.save(tmpPath.toStdString());
     QVERIFY(saved);
     QVERIFY(QFile::exists(tmpPath));
 
-    QFile tmpFile(tmpPath);
-    FiffEvokedSet evokedRead(tmpFile);
+    FiffEvokedSet evokedRead(tmpPath.toStdString());
     QFile::remove(tmpPath);
 }
 
@@ -380,12 +376,10 @@ void TestFiffFsLibrary::fiff_evokedSetGrandAverage()
 {
     if (!hasData())
         QSKIP("No test data");
-    QFile aveFile1(avePath());
-    FiffEvokedSet set1(aveFile1);
+    FiffEvokedSet set1(avePath().toStdString());
     QVERIFY(set1.evoked.size() > 0);
 
-    QFile aveFile2(avePath());
-    FiffEvokedSet set2(aveFile2);
+    FiffEvokedSet set2(avePath().toStdString());
 
     QList<FiffEvokedSet> sets;
     sets << set1 << set2;
@@ -403,8 +397,7 @@ void TestFiffFsLibrary::fiff_evokedSetCompensate()
 {
     if (!hasData())
         QSKIP("No test data");
-    QFile aveFile(avePath());
-    FiffEvokedSet evokedSet(aveFile);
+    FiffEvokedSet evokedSet(avePath().toStdString());
     QVERIFY(evokedSet.evoked.size() > 0);
 
     // Neuromag data carry no CTF compensation: nothing to change, data untouched
@@ -1073,8 +1066,7 @@ void TestFiffFsLibrary::fiffEvokedSet_findEvoked()
 {
     if (!hasData())
         QSKIP("No test data");
-    QFile aveFile(avePath());
-    FiffEvokedSet evokedSet(aveFile);
+    FiffEvokedSet evokedSet(avePath().toStdString());
     QVERIFY(evokedSet.evoked.size() > 0);
     bool found = evokedSet.find_evoked(evokedSet);
     qDebug() << "find_evoked result:" << found;

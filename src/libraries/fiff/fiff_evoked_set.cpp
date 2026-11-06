@@ -68,12 +68,12 @@ FiffEvokedSet::FiffEvokedSet()
 
 //=============================================================================================================
 
-FiffEvokedSet::FiffEvokedSet(QIODevice& p_IODevice)
+FiffEvokedSet::FiffEvokedSet(const std::filesystem::path& path)
 {
     qRegisterMetaType<FIFFLIB::FiffEvokedSet>("FIFFLIB::FiffEvokedSet");
     qRegisterMetaType<FIFFLIB::FiffEvokedSet::SPtr>("FIFFLIB::FiffEvokedSet::SPtr");
 
-    if (!FiffEvokedSet::read(p_IODevice, *this)) {
+    if (!FiffEvokedSet::read(path, *this)) {
         throw std::runtime_error("Fiff evoked data set not found");
     }
 }
@@ -169,22 +169,18 @@ bool FiffEvokedSet::find_evoked(const FiffEvokedSet& p_FiffEvokedSet) const
 
 //=============================================================================================================
 
-bool FiffEvokedSet::read(QIODevice& p_IODevice,
+bool FiffEvokedSet::read(const std::filesystem::path& path,
                          FiffEvokedSet& p_FiffEvokedSet, QPair<float, float> baseline,
                          bool proj)
 {
     p_FiffEvokedSet.clear();
 
-    //
-    //   Open the file
-    //
-    FiffStream::SPtr t_pStream(new FiffStream(&p_IODevice));
+    FiffStream::SPtr t_pStream = FiffStream::open(path);
+    if (!t_pStream)
+        return false;
     QString t_sFileName = t_pStream->streamName();
 
     qInfo("Exploring %s ...\n", t_sFileName.toUtf8().constData());
-
-    if (!t_pStream->open())
-        return false;
     //
     //   Read the measurement info
     //
@@ -215,10 +211,9 @@ bool FiffEvokedSet::read(QIODevice& p_IODevice,
     qInfo("\tFound %lld datasets\n", static_cast<long long>(evoked_node.size()));
 
     for (qint32 i = 0; i < comments.size(); ++i) {
-        QFile t_file(QString::fromStdString(p_FiffEvokedSet.info.filename));
         qInfo(">> Processing %s <<\n", comments[i].toUtf8().constData());
         FiffEvoked t_FiffEvoked;
-        if (FiffEvoked::read(t_file, t_FiffEvoked, i, baseline, proj))
+        if (FiffEvoked::read(path, t_FiffEvoked, i, baseline, proj))
             p_FiffEvokedSet.evoked.push_back(t_FiffEvoked);
     }
 
@@ -227,36 +222,23 @@ bool FiffEvokedSet::read(QIODevice& p_IODevice,
 
 //=============================================================================================================
 
-bool FiffEvokedSet::save(const QString& fileName) const
+bool FiffEvokedSet::save(const std::filesystem::path& path) const
 {
-    if (fileName.isEmpty()) {
+    if (path.empty()) {
         qWarning() << "[FiffEvokedSet::save] Output file not specified.";
         return false;
     }
 
-    QFile file(fileName);
-    if (!save(file)) {
-        qWarning() << "[FiffEvokedSet::save] Cannot open" << fileName;
-        return false;
-    }
-
-    qInfo() << "[FiffEvokedSet::save] Saved" << evoked.size()
-            << "average(s) to" << fileName;
-    return true;
-}
-
-//=============================================================================================================
-
-bool FiffEvokedSet::save(QIODevice& device) const
-{
-    FiffStream::SPtr pStream = FiffStream::start_file(device);
+    FiffStream::SPtr pStream = FiffStream::start_file(path);
     if (!pStream) {
         return false;
     }
 
     pStream->write_evoked_set(*this);
     pStream->end_file();
-    device.close();
+    pStream->close();
+
+    qInfo("[FiffEvokedSet::save] Saved %lld average(s) to %s", static_cast<long long>(evoked.size()), pStream->streamName().toUtf8().constData());
     return true;
 }
 

@@ -832,8 +832,7 @@ void TestInvDipoleRapMne::minimumNorm_calculateInverse()
     QVERIFY2(QFile::exists(avePath),
              qPrintable(QString("Evoked data not found: %1").arg(avePath)));
 
-    QFile aveFile(avePath);
-    FiffEvokedSet evokedSet(aveFile);
+    FiffEvokedSet evokedSet(avePath.toStdString());
     QVERIFY2(!evokedSet.evoked.isEmpty(), "No evoked data loaded");
 
     FiffEvoked evoked = evokedSet.evoked.first();
@@ -856,8 +855,7 @@ void TestInvDipoleRapMne::minimumNorm_dSPM()
     QVERIFY2(QFile::exists(avePath),
              qPrintable(QString("Evoked data not found: %1").arg(avePath)));
 
-    QFile aveFile(avePath);
-    FiffEvokedSet evokedSet(aveFile);
+    FiffEvokedSet evokedSet(avePath.toStdString());
     QVERIFY2(!evokedSet.evoked.isEmpty(), "No evoked data loaded");
 
     FiffEvoked evoked = evokedSet.evoked.first();
@@ -877,8 +875,7 @@ void TestInvDipoleRapMne::minimumNorm_sLORETA()
     QVERIFY2(QFile::exists(avePath),
              qPrintable(QString("Evoked data not found: %1").arg(avePath)));
 
-    QFile aveFile(avePath);
-    FiffEvokedSet evokedSet(aveFile);
+    FiffEvokedSet evokedSet(avePath.toStdString());
     QVERIFY2(!evokedSet.evoked.isEmpty(), "No evoked data loaded");
 
     FiffEvoked evoked = evokedSet.evoked.first();

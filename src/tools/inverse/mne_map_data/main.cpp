@@ -31,6 +31,7 @@
 #include <mne/mne_inverse_operator.h>
 
 #include <utils/generics/mne_logger.h>
+#include <utils/string_utils.h>
 
 //=============================================================================================================
 // QT INCLUDES
@@ -116,9 +117,8 @@ int main(int argc, char* argv[])
 
     // 1. Load source evoked data
     qInfo("Loading source evoked: %s", qPrintable(fromFile));
-    QFile fFrom(fromFile);
     FiffEvokedSet srcEvokedSet;
-    if (!FiffEvokedSet::read(fFrom, srcEvokedSet)) {
+    if (!FiffEvokedSet::read(UTILSLIB::pathFromUtf8(fromFile.toStdString()), srcEvokedSet)) {
         qCritical("Cannot read source evoked data: %s", qPrintable(fromFile));
         return 1;
     }
@@ -238,7 +238,7 @@ int main(int argc, char* argv[])
 
     // 7. Write output
     qInfo("Writing output: %s", qPrintable(outFile));
-    if (!outEvokedSet.save(outFile)) {
+    if (!outEvokedSet.save(UTILSLIB::pathFromUtf8(outFile.toStdString()))) {
         qCritical("Cannot write output evoked: %s", qPrintable(outFile));
         return 1;
     }

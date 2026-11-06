@@ -322,7 +322,7 @@ int BatchProcessor::run(const ProcessingSettings& settings)
             }
 
             if (!aveSaveName.isEmpty()) {
-                evokedSet.save(aveSaveName);
+                evokedSet.save(UTILSLIB::pathFromUtf8(aveSaveName.toStdString()));
             }
             writeLog(aveLogName, aveLog);
 
@@ -432,7 +432,7 @@ int BatchProcessor::run(const ProcessingSettings& settings)
                 grandAvg.evoked.append(avg);
             }
             if (!grandAvg.evoked.isEmpty()) {
-                grandAvg.save(settings.grandAveFile);
+                grandAvg.save(UTILSLIB::pathFromUtf8(settings.grandAveFile.toStdString()));
             }
         }
 

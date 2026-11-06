@@ -54,13 +54,13 @@ FiffEvoked::FiffEvoked()
 
 //=============================================================================================================
 
-FiffEvoked::FiffEvoked(QIODevice& p_IODevice,
+FiffEvoked::FiffEvoked(const std::filesystem::path& path,
                        QVariant setno,
                        QPair<float, float> t_baseline,
                        bool proj,
                        fiff_int_t p_aspect_kind)
 {
-    if (!FiffEvoked::read(p_IODevice, *this, setno, t_baseline, proj, p_aspect_kind)) {
+    if (!FiffEvoked::read(path, *this, setno, t_baseline, proj, p_aspect_kind)) {
         baseline = t_baseline;
 
         throw std::runtime_error("Fiff evoked data not found");
@@ -142,7 +142,7 @@ FiffEvoked FiffEvoked::pick_channels(const StringList& include,
 
 //=============================================================================================================
 
-bool FiffEvoked::read(QIODevice& p_IODevice,
+bool FiffEvoked::read(const std::filesystem::path& path,
                       FiffEvoked& p_FiffEvoked,
                       QVariant setno,
                       QPair<float, float> t_baseline,
@@ -151,16 +151,12 @@ bool FiffEvoked::read(QIODevice& p_IODevice,
 {
     p_FiffEvoked.clear();
 
-    //
-    //   Open the file
-    //
-    FiffStream::SPtr t_pStream(new FiffStream(&p_IODevice));
+    FiffStream::SPtr t_pStream = FiffStream::open(path);
+    if (!t_pStream)
+        return false;
     QString t_sFileName = t_pStream->streamName();
 
     qInfo("Reading %s ...\n", t_sFileName.toUtf8().constData());
-
-    if (!t_pStream->open())
-        return false;
     //
     //   Read the measurement info
     //

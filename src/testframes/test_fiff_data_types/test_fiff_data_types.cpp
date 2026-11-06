@@ -285,8 +285,7 @@ private slots:
         if (!QFile::exists(path)) {
             QSKIP("Sample evoked file not found");
         }
-        QFile file(path);
-        FiffEvokedSet es(file);
+        FiffEvokedSet es(path.toStdString());
         QVERIFY(!es.evoked.isEmpty());
         QVERIFY(es.info.nchan > 0);
     }
@@ -297,8 +296,7 @@ private slots:
         if (!QFile::exists(path)) {
             QSKIP("Sample evoked file not found");
         }
-        QFile file(path);
-        FiffEvokedSet es(file);
+        FiffEvokedSet es(path.toStdString());
         if (es.evoked.isEmpty())
             QSKIP("Failed to load evoked set");
 

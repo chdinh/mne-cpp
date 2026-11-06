@@ -37,6 +37,7 @@
 #include <fs/fs_label.h>
 
 #include <utils/generics/mne_logger.h>
+#include <utils/string_utils.h>
 
 //=============================================================================================================
 // QT INCLUDES
@@ -800,7 +801,6 @@ int main(int argc, char* argv[])
         //-----------------------------------------------------------------------------------------------------
         qInfo("\nReading evoked data file: %s", inName.toUtf8().constData());
 
-        QFile evokedFile(inName);
         QPair<float, float> baseline;
         if (doBaseline) {
             baseline = QPair<float, float>(bmin, bmax);
@@ -809,7 +809,7 @@ int main(int argc, char* argv[])
         }
 
         FiffEvokedSet evokedSet;
-        if (!FiffEvokedSet::read(evokedFile, evokedSet, baseline)) {
+        if (!FiffEvokedSet::read(UTILSLIB::pathFromUtf8(inName.toStdString()), evokedSet, baseline)) {
             qCritical("Error: Failed to read evoked data from %s", inName.toUtf8().constData());
             return 1;
         }

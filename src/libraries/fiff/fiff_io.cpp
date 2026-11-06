@@ -29,10 +29,13 @@
 #include "fiff_evoked_set.h"
 #include "fiff_stream.h"
 
+#include <utils/string_utils.h>
+
 //=============================================================================================================
 // STL INCLUDES
 //=============================================================================================================
 
+#include <cmath>
 #include <iostream>
 #include <stdexcept>
 #include <QDebug>
@@ -150,17 +153,18 @@ bool FiffIO::read(QIODevice& pIODevice)
 
     //evoked data + projections
     if (hasEvoked) {
-        try {
-            FiffEvokedSet p_fiffEvokedSet(pIODevice);
-            pIODevice.close();
-
-            //append to corresponding member qlist
-            for (qint32 i = 0; i < p_fiffEvokedSet.evoked.size(); ++i) {
-                m_qlistEvoked.append(QSharedPointer<FiffEvoked>(new FiffEvoked(p_fiffEvokedSet.evoked[i])));
+        const auto* file = qobject_cast<const QFile*>(&pIODevice);
+        if (!file) {
+            qWarning() << "[FiffIO::read] Evoked data can only be read from a file.";
+        } else {
+            FiffEvokedSet p_fiffEvokedSet;
+            if (FiffEvokedSet::read(UTILSLIB::pathFromUtf8(file->fileName().toStdString()), p_fiffEvokedSet)) {
+                for (qint32 i = 0; i < p_fiffEvokedSet.evoked.size(); ++i) {
+                    m_qlistEvoked.append(QSharedPointer<FiffEvoked>(new FiffEvoked(p_fiffEvokedSet.evoked[i])));
+                }
+            } else {
+                qWarning() << "[FiffIO::read] Could not read evoked data.";
             }
-        } catch (const std::exception& e) {
-            qWarning() << "[FiffIO::read] Could not read evoked data:" << e.what();
-            pIODevice.close();
         }
     }
 
@@ -252,8 +256,8 @@ bool FiffIO::write_raw(QIODevice& pIODevice,
     //Setup reading parameters
     fiff_int_t from = m_qlistRaw[idx]->first_samp;
     fiff_int_t to = m_qlistRaw[idx]->last_samp;
-    float quantum_sec = 30.0f; //read and write in 30 sec junks
-    fiff_int_t quantum = ceil(quantum_sec * m_qlistRaw[idx]->info.sfreq);
+    const double quantum_sec = 30.0; //read and write in 30 sec junks
+    fiff_int_t quantum = static_cast<fiff_int_t>(std::ceil(quantum_sec * m_qlistRaw[idx]->info.sfreq));
 
     // Uncomment to read the whole file at once. Warning Matrix may be none-initialisable because its huge
     //quantum = to - from + 1;

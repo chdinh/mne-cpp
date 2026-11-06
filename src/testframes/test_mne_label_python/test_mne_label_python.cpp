@@ -336,8 +336,7 @@ void TestMneLabelPython::clusterForward_invariants()
     // With a noise covariance the clusters are found on the whitened gain (MEG and EEG in
     // comparable units) but the centroids remain averages of the original gain.
     const FiffCov cov(dataPath("MEG/sample/sample_audvis-cov.fif").toStdString());
-    QFile aveFile(dataPath("MEG/sample/sample_audvis-ave.fif"));
-    const FiffEvoked evoked(aveFile, 0);
+    const FiffEvoked evoked(dataPath("MEG/sample/sample_audvis-ave.fif").toStdString(), 0);
     MatrixXd Dw;
     const MNEForwardSolution cw = small.cluster_forward_solution(m_annot, 40, Dw, cov, evoked.info, "cityblock");
     QVERIFY(cw.isClustered());
@@ -377,8 +376,7 @@ void TestMneLabelPython::assembleKernel_label()
     const QString covPath = dataPath("MEG/sample/sample_audvis-cov.fif");
     const QString avePath = dataPath("MEG/sample/sample_audvis-ave.fif");
     const FiffCov cov(covPath.toStdString());
-    QFile aveFile(avePath);
-    const FiffEvoked evoked(aveFile, 0);
+    const FiffEvoked evoked(avePath.toStdString(), 0);
 
     // A restricted forward keeps the inverse small while leaving sources in
     // both hemispheres, so the rh offset is exercised.
@@ -461,8 +459,7 @@ void TestMneLabelPython::clusterKernel_invariants()
 {
     const QString covPath = dataPath("MEG/sample/sample_audvis-cov.fif");
     const FiffCov cov(covPath.toStdString());
-    QFile aveFile(dataPath("MEG/sample/sample_audvis-ave.fif"));
-    const FiffEvoked evoked(aveFile, 0);
+    const FiffEvoked evoked(dataPath("MEG/sample/sample_audvis-ave.fif").toStdString(), 0);
 
     const MNEForwardSolution fwd = m_fwd.pick_regions({m_v1, label("superiortemporal-rh")});
     MNEInverseOperator inv = MNEInverseOperator::make_inverse_operator(evoked.info, fwd, cov, 0.2f, 0.8f, false, true)

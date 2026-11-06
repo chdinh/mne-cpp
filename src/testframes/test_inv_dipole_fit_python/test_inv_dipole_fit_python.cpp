@@ -106,8 +106,7 @@ Vector3f truthMoment(int k)
  */
 bool writeSyntheticEvoked(const QString& sourceFile, const QString& outFile, const StringList& chNames, const MatrixXd& data)
 {
-    QFile file(sourceFile);
-    FiffEvokedSet source(file);
+    FiffEvokedSet source(sourceFile.toStdString());
     if (source.evoked.isEmpty())
         return false;
 
@@ -127,7 +126,7 @@ bool writeSyntheticEvoked(const QString& sourceFile, const QString& outFile, con
     FiffEvokedSet out;
     out.info = evoked.info;
     out.evoked.append(evoked);
-    return out.save(outFile);
+    return out.save(outFile.toStdString());
 }
 
 //=============================================================================================================

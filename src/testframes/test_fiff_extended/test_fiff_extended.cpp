@@ -442,8 +442,7 @@ private slots:
         if (!QFile::exists(avePath)) {
             QSKIP("Sample evoked file not found");
         }
-        QFile file(avePath);
-        FiffEvokedSet evokedSet(file);
+        FiffEvokedSet evokedSet(avePath.toStdString());
         QVERIFY(evokedSet.evoked.size() > 0);
     }
 
@@ -453,8 +452,7 @@ private slots:
         if (!QFile::exists(avePath)) {
             QSKIP("Sample evoked file not found");
         }
-        QFile file(avePath);
-        FiffEvokedSet evokedSet(file);
+        FiffEvokedSet evokedSet(avePath.toStdString());
 
         StringList include;
         include.push_back(evokedSet.info.ch_names[0]);

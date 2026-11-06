@@ -202,9 +202,8 @@ void TestFiffIoEvokedInfo::evokedSet_defaultConstruction()
 
 void TestFiffIoEvokedInfo::evokedSet_readFromFile()
 {
-    QFile file(avePath());
     FiffEvokedSet set;
-    bool ok = FiffEvokedSet::read(file, set);
+    bool ok = FiffEvokedSet::read(avePath().toStdString(), set);
     QVERIFY(ok);
     QVERIFY(!set.evoked.isEmpty());
     QVERIFY(set.info.nchan > 0);
@@ -218,9 +217,8 @@ void TestFiffIoEvokedInfo::evokedSet_readFromFile()
 
 void TestFiffIoEvokedInfo::evokedSet_pickChannels()
 {
-    QFile file(avePath());
     FiffEvokedSet set;
-    FiffEvokedSet::read(file, set);
+    FiffEvokedSet::read(avePath().toStdString(), set);
     QVERIFY2(!set.evoked.isEmpty(), "No evoked data loaded");
 
     // Pick first 10 channels by name
@@ -243,9 +241,8 @@ void TestFiffIoEvokedInfo::evokedSet_clear()
 
 void TestFiffIoEvokedInfo::evokedSet_copyConstruction()
 {
-    QFile file(avePath());
     FiffEvokedSet set;
-    FiffEvokedSet::read(file, set);
+    FiffEvokedSet::read(avePath().toStdString(), set);
 
     FiffEvokedSet copy(set);
     QCOMPARE(copy.evoked.size(), set.evoked.size());
@@ -254,21 +251,19 @@ void TestFiffIoEvokedInfo::evokedSet_copyConstruction()
 
 void TestFiffIoEvokedInfo::evokedSet_saveAndReload()
 {
-    QFile file(avePath());
     FiffEvokedSet setOrig;
-    FiffEvokedSet::read(file, setOrig);
+    FiffEvokedSet::read(avePath().toStdString(), setOrig);
     QVERIFY2(!setOrig.evoked.isEmpty(), "No evoked data loaded");
 
     // Save to temp file
     QTemporaryDir tmpDir;
     QVERIFY(tmpDir.isValid());
     QString outPath = tmpDir.path() + "/test_evoked.fif";
-    QVERIFY(setOrig.save(outPath));
+    QVERIFY(setOrig.save(outPath.toStdString()));
 
     // Reload
-    QFile reloadFile(outPath);
     FiffEvokedSet setReload;
-    bool ok = FiffEvokedSet::read(reloadFile, setReload);
+    bool ok = FiffEvokedSet::read(outPath.toStdString(), setReload);
     QVERIFY(ok);
     QCOMPARE(setReload.evoked.size(), setOrig.evoked.size());
     QCOMPARE(setReload.info.nchan, setOrig.info.nchan);
@@ -324,12 +319,10 @@ void TestFiffIoEvokedInfo::evokedSet_grandAverage()
     // Reference values produced by mne.grand_average([e0, e1], interpolate_bads=False,
     // drop_bads=True) with MNE-Python 1.11, where e0/e1 are conditions 0 and 1 of
     // sample_audvis-ave.fif read with proj=False.
-    QFile file0(avePath());
-    QFile file1(avePath());
     FiffEvokedSet set0;
     FiffEvokedSet set1;
-    set0.evoked.append(FiffEvoked(file0, 0, defaultFloatPair, false));
-    set1.evoked.append(FiffEvoked(file1, 1, defaultFloatPair, false));
+    set0.evoked.append(FiffEvoked(avePath().toStdString(), 0, defaultFloatPair, false));
+    set1.evoked.append(FiffEvoked(avePath().toStdString(), 1, defaultFloatPair, false));
     set0.info = set0.evoked.first().info;
     set1.info = set1.evoked.first().info;
 
@@ -351,10 +344,8 @@ void TestFiffIoEvokedInfo::evoked_combineMatchesMnePython()
     // Reference values produced by mne.combine_evoked([e0, e1], weights) with
     // MNE-Python 1.11, where e0/e1 are conditions 0 and 1 of sample_audvis-ave.fif
     // read with proj=False (nave 55 and 61, bads MEG 2443 and EEG 053 in both).
-    QFile file0(avePath());
-    QFile file1(avePath());
-    const FiffEvoked e0(file0, 0, defaultFloatPair, false);
-    const FiffEvoked e1(file1, 1, defaultFloatPair, false);
+    const FiffEvoked e0(avePath().toStdString(), 0, defaultFloatPair, false);
+    const FiffEvoked e1(avePath().toStdString(), 1, defaultFloatPair, false);
     QCOMPARE(e0.nave, 55);
     QCOMPARE(e1.nave, 61);
 

@@ -163,7 +163,7 @@ int main(int argc, char* argv[])
     // Load data
     QPair<float, float> baseline(-1.0f, -1.0f);
     InvSourceEstimate sourceEstimate;
-    FiffEvoked evoked(t_fileEvoked, parser.value(evokedIndexOption).toInt(), baseline);
+    FiffEvoked evoked(parser.value(evokedFileOption).toStdString(), parser.value(evokedIndexOption).toInt(), baseline);
 
     if (bAddRtSourceLoc) {
         double snr = parser.value(snrOption).toDouble();

@@ -480,9 +480,12 @@ void TestFiffRWR::writersStable()
         const FiffRawData raw(in);
         QVERIFY(raw.save(out));
     } else if (writer == "evoked") {
-        QFile in(meg + "sample_audvis-ave.fif");
-        const FiffEvokedSet evoked(in);
-        QVERIFY(evoked.save(out));
+        const FiffEvokedSet evoked((meg + "sample_audvis-ave.fif").toStdString());
+        const QString path = m_tempDir.filePath("stable-ave.fif");
+        QVERIFY(evoked.save(path.toStdString()));
+        QFile written(path);
+        QVERIFY(written.open(QIODevice::ReadOnly));
+        bytes = written.readAll();
     } else if (writer == "cov") {
         const FiffCov cov((meg + "sample_audvis-cov.fif").toStdString());
         const QString path = m_tempDir.filePath("stable-cov.fif");

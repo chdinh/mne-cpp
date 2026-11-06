@@ -46,7 +46,6 @@
 // QT INCLUDES
 //=============================================================================================================
 
-#include <QIODevice>
 #include <QList>
 #include <QSharedPointer>
 #include <QStringList>
@@ -56,6 +55,8 @@
 //=============================================================================================================
 
 #include <Eigen/Core>
+
+#include <filesystem>
 #include <memory>
 
 //=============================================================================================================
@@ -177,11 +178,11 @@ public:
 
     //=========================================================================================================
     /**
-     * Constructs a fiff evoked data set, by reading from a IO device.
+     * Constructs a fiff evoked data set by reading a FIFF file.
      *
-     * @param[in] p_IODevice     IO device to read from the evoked data set.
+     * @param[in] path   FIFF file to read the evoked data set from.
      */
-    FiffEvokedSet(QIODevice& p_IODevice);
+    explicit FiffEvokedSet(const std::filesystem::path& path);
 
     //=========================================================================================================
     /**
@@ -262,7 +263,7 @@ public:
      *
      * Read one evoked data set
      *
-     * @param[in] p_IODevice         An fiff IO device like a fiff QFile or QTCPSocket.
+     * @param[in] path               FIFF file to read.
      * @param[out] p_FiffEvokedSet   The read evoked data set.
      * @param[in] baseline           The time interval to apply rescaling / baseline correction. If None do not apply it. If baseline is (a, b).
      *                               the interval is between "a (s)" and "b (s)". If a is None the beginning of the data is used and if b is
@@ -272,7 +273,7 @@ public:
      *
      * @return true when successful, false otherwise.
      */
-    static bool read(QIODevice& p_IODevice,
+    static bool read(const std::filesystem::path& path,
                      FiffEvokedSet& p_FiffEvokedSet,
                      QPair<float, float> baseline = defaultFloatPair,
                      bool proj = true);
@@ -281,19 +282,10 @@ public:
     /**
      * Save this evoked data set to a FIFF file.
      *
-     * @param[in] fileName  Output file path.
+     * @param[in] path  Output file path.
      * @return true on success.
      */
-    bool save(const QString& fileName) const;
-
-    //=========================================================================================================
-    /**
-     * Save this evoked data set as FIFF to an I/O device, e.g. a QBuffer.
-     *
-     * @param[in] device  The device to write to; it is opened for writing.
-     * @return true on success.
-     */
-    bool save(QIODevice& device) const;
+    bool save(const std::filesystem::path& path) const;
 
     //=========================================================================================================
     /**

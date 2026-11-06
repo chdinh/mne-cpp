@@ -371,8 +371,7 @@ void TestFieldMap::initTestCase()
 
     // ── Load evoked data ───────────────────────────────────────────────
     {
-        QFile evokedFile(evokedPath);
-        QVERIFY(FiffEvokedSet::read(evokedFile, m_evokedSet));
+        QVERIFY(FiffEvokedSet::read(evokedPath.toStdString(), m_evokedSet));
     }
     QVERIFY(m_evokedSet.evoked.size() > 0);
     m_evoked = m_evokedSet.evoked[0];

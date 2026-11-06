@@ -30,6 +30,7 @@
 #include <fiff/fiff_stream.h>
 #include <fiff/fiff_dig_point_set.h>
 #include <mne/mne_bem.h>
+#include <utils/string_utils.h>
 #include <fs/fs_surface.h>
 
 using namespace FIFFLIB;
@@ -368,7 +369,7 @@ FiffEvoked DataLoader::loadEvoked(const QString& evokedPath, int aveIndex)
         return {};
     }
 
-    FiffEvoked evoked(file, aveIndex);
+    FiffEvoked evoked(UTILSLIB::pathFromUtf8(evokedPath.toStdString()), aveIndex);
     if (evoked.isEmpty()) {
         qWarning() << "DataLoader: Failed to read evoked data from" << evokedPath;
     }
@@ -386,7 +387,7 @@ QStringList DataLoader::probeEvokedSets(const QString& evokedPath)
     }
 
     FiffEvokedSet evokedSet;
-    if (!FiffEvokedSet::read(file, evokedSet)) {
+    if (!FiffEvokedSet::read(UTILSLIB::pathFromUtf8(evokedPath.toStdString()), evokedSet)) {
         return result;
     }
     for (int i = 0; i < evokedSet.evoked.size(); ++i) {

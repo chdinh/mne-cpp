@@ -390,7 +390,7 @@ void TestInvBeamformer::lcmv_makeAndApply()
     if (!evkFile.exists())
         QSKIP("Evoked file not found");
     QPair<float, float> noBaseline(-1.0f, -1.0f);
-    FiffEvoked evoked(evkFile, 0, noBaseline);
+    FiffEvoked evoked(evkPath.toStdString(), 0, noBaseline);
     QVERIFY(evoked.data.rows() > 0);
     InvBeamformer filters = InvLCMV::makeLCMV(
         m_info, m_fwd, m_noiseCov, 0.05, m_noiseCov,

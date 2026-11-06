@@ -81,7 +81,6 @@ int main(int argc, char* argv[])
 
     QFile t_fileFwdMeeg(parser.value(fwdMEGOption));
     QFile t_fileFwdEeg(parser.value(fwdEEGOption));
-    QFile t_fileEvoked(parser.value(evokedFileOption));
 
     double snr = parser.value(snrOption).toDouble();
     double lambda2 = 1.0 / pow(snr, 2);
@@ -90,7 +89,7 @@ int main(int argc, char* argv[])
     // Load data
     fiff_int_t setno = 0;
     QPair<float, float> baseline(-1.0f, -1.0f);
-    FiffEvoked evoked(t_fileEvoked, setno, baseline);
+    FiffEvoked evoked(parser.value(evokedFileOption).toStdString(), setno, baseline);
     if (evoked.isEmpty())
         return 1;
 

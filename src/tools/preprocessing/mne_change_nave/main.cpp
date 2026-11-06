@@ -16,6 +16,7 @@
 
 #include <fiff/fiff_evoked_set.h>
 #include <fiff/fiff_evoked.h>
+#include <utils/string_utils.h>
 #include <utils/generics/mne_logger.h>
 
 //=============================================================================================================
@@ -95,9 +96,8 @@ int main(int argc, char* argv[])
     int setIdx = parser.value(setOpt).toInt();
 
     // Read evoked data
-    QFile file(measFile);
     FiffEvokedSet evokedSet;
-    if (!FiffEvokedSet::read(file, evokedSet, QPair<float, float>(0.0f, 0.0f), false)) {
+    if (!FiffEvokedSet::read(UTILSLIB::pathFromUtf8(measFile.toStdString()), evokedSet, QPair<float, float>(0.0f, 0.0f), false)) {
         qCritical("Cannot read evoked data from: %s", qPrintable(measFile));
         return 1;
     }
@@ -115,7 +115,7 @@ int main(int argc, char* argv[])
     evokedSet.evoked[setIdx].nave = newNave;
 
     // Save
-    if (!evokedSet.save(outFile)) {
+    if (!evokedSet.save(UTILSLIB::pathFromUtf8(outFile.toStdString()))) {
         qCritical("Cannot write output file: %s", qPrintable(outFile));
         return 1;
     }

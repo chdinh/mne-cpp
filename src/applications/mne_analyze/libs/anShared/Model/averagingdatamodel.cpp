@@ -18,6 +18,7 @@
 #include "averagingdatamodel.h"
 
 #include <fiff/fiff_evoked_set.h>
+#include <utils/string_utils.h>
 
 //=============================================================================================================
 // QT INCLUDES
@@ -25,8 +26,8 @@
 
 #include <QFile>
 #ifdef WASMBUILD
-#include <QBuffer>
 #include <QFileDialog>
+#include <QTemporaryDir>
 #endif
 
 //=============================================================================================================
@@ -61,8 +62,7 @@ AveragingDataModel::AveragingDataModel(const QString& sFilePath,
 {
     Q_UNUSED(byteLoadedData);
 
-    QFile file(sFilePath);
-    m_pFiffEvokedSet = QSharedPointer<FIFFLIB::FiffEvokedSet>::create(file);
+    m_pFiffEvokedSet = QSharedPointer<FIFFLIB::FiffEvokedSet>::create(UTILSLIB::pathFromUtf8(sFilePath.toStdString()));
 }
 
 //=============================================================================================================
@@ -144,13 +144,18 @@ bool AveragingDataModel::saveToFile(const QString& sPath)
 #ifdef WASMBUILD
     // The browser offers the bytes as a download; sPath has no meaning there.
     Q_UNUSED(sPath)
-    QBuffer device;
-    const bool ok = m_pFiffEvokedSet->save(device);
-    if (ok) {
-        QFileDialog::saveFileContent(device.data(), getModelName());
+    QTemporaryDir dir;
+    const QString tmpPath = dir.filePath("evoked-ave.fif");
+    if (!dir.isValid() || !m_pFiffEvokedSet->save(UTILSLIB::pathFromUtf8(tmpPath.toStdString()))) {
+        return false;
     }
-    return ok;
+    QFile file(tmpPath);
+    if (!file.open(QIODevice::ReadOnly)) {
+        return false;
+    }
+    QFileDialog::saveFileContent(file.readAll(), getModelName());
+    return true;
 #else
-    return m_pFiffEvokedSet->save(sPath);
+    return m_pFiffEvokedSet->save(UTILSLIB::pathFromUtf8(sPath.toStdString()));
 #endif
 }

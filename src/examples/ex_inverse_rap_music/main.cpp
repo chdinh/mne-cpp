@@ -105,7 +105,6 @@ int main(int argc, char* argv[])
 
     //Load data
     QFile t_fileFwd(parser.value(fwdFileOption));
-    QFile t_fileEvoked(parser.value(evokedFileOption));
     QString subject(parser.value(subjectOption));
     QString subjectDir(parser.value(subjectDirectoryOption));
 
@@ -128,7 +127,7 @@ int main(int argc, char* argv[])
     // Load data
     fiff_int_t setno = 1;
     QPair<float, float> baseline(-1.0f, -1.0f);
-    FiffEvoked evoked(t_fileEvoked, setno, baseline);
+    FiffEvoked evoked(parser.value(evokedFileOption).toStdString(), setno, baseline);
     if (evoked.isEmpty())
         return 1;
 

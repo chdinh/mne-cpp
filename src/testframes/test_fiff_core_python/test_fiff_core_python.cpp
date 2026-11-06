@@ -608,8 +608,7 @@ void TestFiffCorePython::computeFromEvoked_matchesPython()
     // Reference values produced by mne.compute_proj_evoked(ev, n_grad=2, n_mag=1, n_eeg=2) on
     // condition 0 of sample_audvis-ave.fif read with proj=False: peak channel, |peak| and |first
     // good channel of the type|; signs are arbitrary for an SVD.
-    QFile file(dataPath("sample_audvis-ave.fif"));
-    const FiffEvoked evoked(file, 0, defaultFloatPair, false);
+    const FiffEvoked evoked(dataPath("sample_audvis-ave.fif").toStdString(), 0, defaultFloatPair, false);
     const QList<FiffProj> projs = FiffProj::compute_from_evoked(evoked, 2, 1, 2);
     QCOMPARE(projs.size(), 5);
 
@@ -759,9 +758,8 @@ void TestFiffCorePython::readEvoked_selection()
     QFETCH(double, sum);
     QFETCH(double, absSum);
 
-    QFile file(dataPath("sample_audvis-ave.fif"));
     FiffEvoked e;
-    QVERIFY(FiffEvoked::read(file, e, setno, qMakePair(bmin, bmax), proj));
+    QVERIFY(FiffEvoked::read(dataPath("sample_audvis-ave.fif").toStdString(), e, setno, qMakePair(bmin, bmax), proj));
 
     QCOMPARE(e.comment, QString("Right Auditory"));
     QCOMPARE(static_cast<int>(e.nave), nave);
@@ -798,9 +796,8 @@ void TestFiffCorePython::readEvoked_invalidSelector()
     QFETCH(QVariant, setno);
     QFETCH(int, aspectKind);
 
-    QFile file(dataPath("sample_audvis-ave.fif"));
     FiffEvoked e;
-    QVERIFY(!FiffEvoked::read(file, e, setno, defaultFloatPair, false, aspectKind));
+    QVERIFY(!FiffEvoked::read(dataPath("sample_audvis-ave.fif").toStdString(), e, setno, defaultFloatPair, false, aspectKind));
 }
 
 //=============================================================================================================

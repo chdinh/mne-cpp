@@ -41,6 +41,8 @@
 #include <inv/sparse/inv_gamma_map.h>
 #include <inv/sparse/inv_mxne.h>
 
+#include <utils/string_utils.h>
+
 //=============================================================================================================
 // QT INCLUDES
 //=============================================================================================================
@@ -1446,20 +1448,15 @@ bool CorticalSurface::runComputeSourceEstimate(const QString& fwdPath,
         qWarning() << "[CorticalSurface] read cov failed:" << e.what();
         return false;
     }
-    QFile aveFile(evokedPath);
     if (!QFileInfo::exists(evokedPath)) {
         qWarning() << "[CorticalSurface] Cannot open evoked file" << evokedPath;
         return false;
     }
     FiffEvoked evoked;
-    if (!FiffEvoked::read(aveFile, evoked)) {
+    if (!FiffEvoked::read(UTILSLIB::pathFromUtf8(evokedPath.toStdString()), evoked)) {
         qWarning() << "[CorticalSurface] read evoked failed";
         return false;
     }
-    if (aveFile.isOpen()) {
-        aveFile.close();
-    }
-
     QGuiApplication::setOverrideCursor(Qt::WaitCursor);
     const float lambda2 = (opts.snr > 0.0) ? static_cast<float>(1.0 / (opts.snr * opts.snr)) : 0.111111f;
 

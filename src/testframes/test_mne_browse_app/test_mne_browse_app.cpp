@@ -244,8 +244,7 @@ void TestMneBrowseApp::recomputesEvokedLikePython()
         static_cast<QDialog*>(dialog)->accept();
     });
     findAction(window, QStringLiteral("Save Evoked (fif)..."))->trigger();
-    QFile aveFile(avePath);
-    const FIFFLIB::FiffEvokedSet saved(aveFile);
+    const FIFFLIB::FiffEvokedSet saved(avePath.toStdString());
     QCOMPARE(saved.evoked.size(), 2);
     for (int row = 0; row < 2; ++row) {
         QCOMPARE(saved.evoked[row].nave, 6);

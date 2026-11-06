@@ -18,6 +18,7 @@
 #include <fiff/fiff_evoked.h>
 #include <fiff/fiff_info.h>
 #include <fiff/fiff_constants.h>
+#include <utils/string_utils.h>
 
 #include <utils/generics/mne_logger.h>
 
@@ -121,9 +122,8 @@ int main(int argc, char* argv[])
     }
 
     // Read evoked data
-    QFile fMeas(measFile);
     FiffEvokedSet evokedSet;
-    if (!FiffEvokedSet::read(fMeas, evokedSet, defaultFloatPair, false)) {
+    if (!FiffEvokedSet::read(UTILSLIB::pathFromUtf8(measFile.toStdString()), evokedSet, defaultFloatPair, false)) {
         qCritical("Cannot read evoked data from: %s", qPrintable(measFile));
         return 1;
     }

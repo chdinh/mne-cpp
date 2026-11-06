@@ -888,7 +888,6 @@ int main(int argc, char* argv[])
         qInfo("\nReading evoked data from %s (set %d)...",
               measName.toUtf8().constData(), setNo + 1);
 
-        QFile measFile(measName);
         QPair<float, float> baseline(-1.0f, -1.0f); // No baseline by default
         if (parser.isSet(bminOpt) || parser.isSet(bmaxOpt)) {
             float bmin = parser.isSet(bminOpt) ? parser.value(bminOpt).toFloat() / 1000.0f : -1.0f;
@@ -897,7 +896,7 @@ int main(int argc, char* argv[])
             qInfo("  Baseline: %.1f - %.1f ms",
                   bmin * 1000.0f, bmax * 1000.0f);
         }
-        FiffEvoked evoked(measFile, setNo, baseline);
+        FiffEvoked evoked(UTILSLIB::pathFromUtf8(measName.toStdString()), setNo, baseline);
 
         if (evoked.isEmpty()) {
             qCritical() << "Error: Could not read evoked data set" << (setNo + 1)

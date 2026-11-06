@@ -374,7 +374,7 @@ public:
      *
      * Read one evoked data set
      *
-     * @param[in] p_IODevice     A fiff IO device like a fiff QFile or QTCPSocket.
+     * @param[in] path           FIFF file to read.
      * @param[out] data          The read evoked data.
      * @param[in] setno          the set to pick.
      * @param[in] baseline       The time interval to apply rescaling / baseline correction. If None do not apply it. If baseline is (a, b).
@@ -386,28 +386,28 @@ public:
      *
      * @return true if successful, false otherwise.
      */
-    static inline bool read_evoked(QIODevice& p_IODevice,
+    static inline bool read_evoked(const std::filesystem::path& path,
                                    FiffEvoked& data,
                                    QVariant setno = 0,
                                    QPair<float, float> baseline = defaultFloatPair,
                                    bool proj = true,
                                    fiff_int_t p_aspect_kind = FIFFV_ASPECT_AVERAGE)
     {
-        return FiffEvoked::read(p_IODevice, data, setno, baseline, proj, p_aspect_kind);
+        return FiffEvoked::read(path, data, setno, baseline, proj, p_aspect_kind);
     }
 
     //=========================================================================================================
     /**
      * Read all evoked data from one file
      *
-     * @param[in] p_IODevice     A fiff IO device like a fiff QFile or QTCPSocket.
+     * @param[in] path           FIFF file to read.
      * @param[out] data          The read evoked data.
      *
      * @return true if successful, false otherwise.
      */
-    static inline bool read_evoked_set(QIODevice& p_IODevice, FiffEvokedSet& data)
+    static inline bool read_evoked_set(const std::filesystem::path& path, FiffEvokedSet& data)
     {
-        return FiffEvokedSet::read(p_IODevice, data);
+        return FiffEvokedSet::read(path, data);
     }
 
     //=========================================================================================================

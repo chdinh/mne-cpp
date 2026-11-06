@@ -164,8 +164,7 @@ static int doCompute(const QCommandLineParser& parser)
     const int setno = parser.value(QStringLiteral("setno")).toInt();
     out << "Reading evoked data: " << evokedPath << " (set " << setno << ")\n";
     out.flush();
-    QFile evokedFile(evokedPath);
-    FiffEvoked evoked(evokedFile, setno);
+    FiffEvoked evoked(UTILSLIB::pathFromUtf8(evokedPath.toStdString()), setno);
     if (evoked.isEmpty()) {
         err << "Error: Failed to read evoked data from " << evokedPath << "\n";
         return 1;

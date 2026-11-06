@@ -16,6 +16,7 @@
 
 #include <fiff/fiff_evoked_set.h>
 #include <fiff/fiff_evoked.h>
+#include <utils/string_utils.h>
 #include <utils/generics/mne_logger.h>
 
 //=============================================================================================================
@@ -99,10 +100,9 @@ int main(int argc, char* argv[])
     float bmax = parser.value(bmaxOpt).toFloat();
 
     // Read evoked data without baseline correction
-    QFile file(measFile);
     FiffEvokedSet evokedSet;
     QPair<float, float> noBl(0.0f, 0.0f);
-    if (!FiffEvokedSet::read(file, evokedSet, noBl, false)) {
+    if (!FiffEvokedSet::read(UTILSLIB::pathFromUtf8(measFile.toStdString()), evokedSet, noBl, false)) {
         qCritical("Cannot read evoked data from: %s", qPrintable(measFile));
         return 1;
     }
@@ -119,7 +119,7 @@ int main(int argc, char* argv[])
     }
 
     // Save
-    if (!evokedSet.save(outFile)) {
+    if (!evokedSet.save(UTILSLIB::pathFromUtf8(outFile.toStdString()))) {
         qCritical("Cannot write output file: %s", qPrintable(outFile));
         return 1;
     }

@@ -313,7 +313,7 @@ int main(int argc, char* argv[])
     //! [mne_cov_matrix_usage]
     // Whiten one time point of the evoked response with the projected noise covariance
     QFile aveFile(data + "/MEG/sample/sample_audvis-ave.fif");
-    FiffEvoked ave(aveFile, 0, QPair<float, float>(-1.0f, -1.0f), false);
+    FiffEvoked ave((data + "/MEG/sample/sample_audvis-ave.fif").toStdString(), 0, QPair<float, float>(-1.0f, -1.0f), false);
     StringList megNames; // the 305 good MEG channels
     for (const std::string& name : ave.info.ch_names) {
         if (name.starts_with("MEG") && !UTILSLIB::contains(ave.info.bads, name)) {

@@ -23,6 +23,7 @@
 #include <fs/fs_surface.h>
 #include <fs/fs_label.h>
 #include <utils/generics/mne_logger.h>
+#include <utils/string_utils.h>
 
 //=============================================================================================================
 // QT INCLUDES
@@ -368,9 +369,8 @@ int main(int argc, char* argv[])
             return 1;
         }
 
-        QFile fMeas(measFile);
         FiffEvokedSet evokedSet;
-        if (!FiffEvokedSet::read(fMeas, evokedSet)) {
+        if (!FiffEvokedSet::read(UTILSLIB::pathFromUtf8(measFile.toStdString()), evokedSet)) {
             qCritical("Cannot read evoked data: %s", qPrintable(measFile));
             return 1;
         }

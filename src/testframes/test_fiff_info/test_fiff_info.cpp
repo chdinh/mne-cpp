@@ -465,7 +465,7 @@ private slots:
         if (!file.exists())
             QSKIP("Evoked file not found");
 
-        FiffEvokedSet evokedSet(file);
+        FiffEvokedSet evokedSet(path.toStdString());
         QVERIFY(evokedSet.evoked.size() > 0);
         QVERIFY(evokedSet.info.nchan > 0);
 

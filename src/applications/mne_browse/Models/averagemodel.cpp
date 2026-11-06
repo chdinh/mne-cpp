@@ -18,6 +18,7 @@
 
 #include "averagemodel.h"
 #include <fiff/fiff_io.h>
+#include <utils/string_utils.h>
 
 
 //*************************************************************************************************************
@@ -288,7 +289,7 @@ bool AverageModel::setData(const QModelIndex& index, const QVariant& value, int 
 bool AverageModel::loadEvokedData(QFile& qFile)
 {
     FiffEvokedSet evokedSet;
-    FiffEvokedSet::read(qFile, evokedSet);
+    FiffEvokedSet::read(UTILSLIB::pathFromUtf8(qFile.fileName().toStdString()), evokedSet);
 
     return setEvokedData(evokedSet);
 }
@@ -329,7 +330,7 @@ bool AverageModel::saveEvokedData(QFile& qFile)
         return false;
     }
 
-    return m_pEvokedDataSet->save(qFile.fileName());
+    return m_pEvokedDataSet->save(UTILSLIB::pathFromUtf8(qFile.fileName().toStdString()));
 }
 
 

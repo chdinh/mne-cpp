@@ -53,6 +53,8 @@
 #include <QVariant>
 #include <QPair>
 #include <QSharedPointer>
+
+#include <filesystem>
 #include <memory>
 
 //=============================================================================================================
@@ -89,9 +91,9 @@ public:
 
     //=========================================================================================================
     /**
-     * Constructs fiff evoked data, by reading from a IO device.
+     * Constructs fiff evoked data by reading a FIFF file.
      *
-     * @param[in] p_IODevice     IO device to read from the evoked data set.
+     * @param[in] path           FIFF file to read the evoked data set from.
      * @param[in] setno          The set to pick. Dataset ID number (int) or comment/name (str). Optional if there isonly one data set in file.
      * @param[in] t_baseline     The time interval to apply rescaling / baseline correction. If None do not apply it. If baseline is (a, b).
      *                           the interval is between "a (s)" and "b (s)". If a is None the beginning of the data is used and if b is
@@ -100,11 +102,11 @@ public:
      * @param[in] proj           Apply SSP projection vectors (optional, default = true).
      * @param[in] p_aspect_kind  Either "FIFFV_ASPECT_AVERAGE" or "FIFFV_ASPECT_STD_ERR". The type of data to read. Only used if "setno" is a str.
      */
-    FiffEvoked(QIODevice& p_IODevice,
-               QVariant setno = 0,
-               QPair<float, float> t_baseline = defaultFloatPair,
-               bool proj = true,
-               fiff_int_t p_aspect_kind = FIFFV_ASPECT_AVERAGE);
+    explicit FiffEvoked(const std::filesystem::path& path,
+                        QVariant setno = 0,
+                        QPair<float, float> t_baseline = defaultFloatPair,
+                        bool proj = true,
+                        fiff_int_t p_aspect_kind = FIFFV_ASPECT_AVERAGE);
 
     //=========================================================================================================
     /**
@@ -188,7 +190,7 @@ public:
      *
      * Read one evoked data set
      *
-     * @param[in] p_IODevice     An fiff IO device like a fiff QFile or QTCPSocket.
+     * @param[in] path           FIFF file to read.
      * @param[out] p_FiffEvoked  The read evoked data.
      * @param[in] setno          the set to pick. Dataset ID number (int) or comment/name (str). Optional if there isonly one data set in file.
      * @param[in] t_baseline       The time interval to apply rescaling / baseline correction. If None do not apply it. If baseline is (a, b).
@@ -200,7 +202,7 @@ public:
      *
      * @return true if successful, false otherwise.
      */
-    static bool read(QIODevice& p_IODevice,
+    static bool read(const std::filesystem::path& path,
                      FiffEvoked& p_FiffEvoked,
                      QVariant setno = 0, QPair<float, float> t_baseline = defaultFloatPair,
                      bool proj = true,
