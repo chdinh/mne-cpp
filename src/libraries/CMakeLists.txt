@@ -89,3 +89,6 @@ add_subdirectory(sts)
 add_subdirectory(disp)
 
 add_subdirectory(disp3D)
+
+include(${CMAKE_CURRENT_SOURCE_DIR}/../../cmake/MnePrecompiledHeaders.cmake)
+mne_precompile_headers(${CMAKE_CURRENT_SOURCE_DIR})

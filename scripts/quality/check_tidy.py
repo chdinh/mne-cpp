@@ -109,6 +109,41 @@ def relative(path: str | Path) -> str:
         return Path(path).as_posix()
 
 
+_PCH_PAIRS = {("-Xclang", "-include-pch"), ("-Xclang", "-include")}
+
+
+def without_pch(arguments: list[str]) -> list[str]:
+    """The compile arguments without CMake's precompiled header, which clang-tidy cannot read from another compiler."""
+    out: list[str] = []
+    i = 0
+    while i < len(arguments):
+        a = arguments[i]
+        pair = tuple(arguments[i:i + 2])
+        if pair in _PCH_PAIRS and i + 3 < len(arguments) and "cmake_pch" in arguments[i + 3]:
+            i += 4
+        elif a in ("-include", "-include-pch") and i + 1 < len(arguments) and "cmake_pch" in arguments[i + 1]:
+            i += 2
+        elif a == "-Winvalid-pch" or (a[:3] in ("/Yu", "/Fp", "/FI", "-Yu", "-Fp", "-FI") and "cmake_pch" in a):
+            i += 1
+        else:
+            out.append(a)
+            i += 1
+    return out
+
+
+def tidy_database(units: dict[str, dict]) -> Path:
+    """A compile database of @p units, already without precompiled headers, for clang-tidy -p."""
+    directory = CACHE_DIR / "database"
+    directory.mkdir(parents=True, exist_ok=True)
+    (directory / "compile_commands.json").write_text(json.dumps(list(units.values())), encoding="utf-8")
+    return directory
+
+
+def unlocated_errors(output: str) -> list[str]:
+    """Errors clang-tidy reports without a file position, e.g. an unreadable precompiled header."""
+    return [line for line in output.splitlines() if line.startswith(("error:", "fatal error:"))]
+
+
 def load_database(build_dir: Path) -> dict[str, dict]:
     """In-scope translation units of the compile database, keyed by repository-relative path."""
     database = build_dir / "compile_commands.json"
@@ -118,7 +153,8 @@ def load_database(build_dir: Path) -> dict[str, dict]:
     for entry in json.loads(database.read_text(encoding="utf-8")):
         path = relative(Path(entry["directory"], entry["file"]))
         if in_scope(path) and path.endswith(SOURCE_EXTENSIONS):
-            units[path] = entry
+            arguments = without_pch(entry.get("arguments") or shlex.split(entry["command"]))
+            units[path] = {"directory": entry["directory"], "file": entry["file"], "arguments": arguments}
     return units
 
 
@@ -186,6 +222,9 @@ def run_unit(binary: str, build_dir: Path, path: str, entry: dict, extra: list[s
         run = subprocess.run(command, cwd=REPO_ROOT, capture_output=True, text=True, timeout=timeout)
     except subprocess.TimeoutExpired:
         return path, [], f"timed out after {timeout} s"
+    unlocated = unlocated_errors(run.stdout + run.stderr)
+    if unlocated:
+        return path, [], f"does not compile under clang-tidy: {unlocated[0][:300]}"
     findings = []
     for match in FINDING_RE.finditer(run.stdout):
         file = relative(match.group("file"))
@@ -269,7 +308,8 @@ def main(argv: list[str] | None = None) -> int:
     all_findings: list[Finding] = []
     errors = []
     with concurrent.futures.ThreadPoolExecutor(max_workers=max(args.jobs, 1)) as pool:
-        futures = [pool.submit(run_unit, binary, args.build_dir.resolve(), path, units[path], args.extra_arg,
+        database = tidy_database(units)
+        futures = [pool.submit(run_unit, binary, database, path, units[path], args.extra_arg,
                                args.timeout, tool_version, not args.no_cache) for path in selected]
         for future in concurrent.futures.as_completed(futures):
             path, unit_findings, error = future.result()

@@ -224,7 +224,9 @@ jobs:
         if [ "${{ inputs.with_code_coverage }}" = "true" ]; then
           COV_FLAG="-DWITH_CODE_COV=ON"
         fi
-        cmake -B build -S . -DCMAKE_BUILD_TYPE=Release -DBUILD_TESTS=ON -DMNE_WARNINGS_AS_ERRORS=ON ${COV_FLAG}
+        # Without precompiled headers here, a missing #include still fails one job.
+        PCH_FLAG="-DMNE_PRECOMPILED_HEADERS=${{ inputs.qt_version == 'min' && 'OFF' || 'ON' }}"
+        cmake -B build -S . -DCMAKE_BUILD_TYPE=Release -DBUILD_TESTS=ON -DMNE_WARNINGS_AS_ERRORS=ON ${COV_FLAG} ${PCH_FLAG}
         cmake --build build -j "$(nproc)"
 
     # Findings per file and check may only shrink (scripts/quality/tidy_baseline.json).

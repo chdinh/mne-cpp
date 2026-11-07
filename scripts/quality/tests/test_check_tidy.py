@@ -66,6 +66,26 @@ class RatchetTests(unittest.TestCase):
         self.assertEqual(matches[0], ("src/libraries/fiff/a.cpp", "bugprone-x,cert-y"))
         self.assertFalse(tidy.in_scope(matches[1][0]))
 
+    def test_errors_without_a_location_fail_the_unit(self) -> None:
+        output = "error: PCH file 'x/cmake_pch.hxx.pch' uses an older format that is no longer supported [clang-diagnostic-error]\n"
+        self.assertTrue(tidy.unlocated_errors(output))
+        self.assertFalse(tidy.unlocated_errors(f"{_REPO_ROOT}/src/a.cpp:1:1: error: text [clang-diagnostic-error]\n"))
+
+
+class DatabaseTests(unittest.TestCase):
+    """clang-tidy parses every unit itself, without the compiler's precompiled header."""
+
+    def test_precompiled_header_flags_are_dropped(self) -> None:
+        clang = ["c++", "-DX", "-Xclang", "-include-pch", "-Xclang", "/b/cmake_pch.hxx.pch",
+                 "-Xclang", "-include", "-Xclang", "/b/cmake_pch.hxx", "-c", "a.cpp"]
+        gcc = ["g++", "-DX", "-include", "/b/cmake_pch.hxx", "-Winvalid-pch", "-c", "a.cpp"]
+        msvc = ["cl", "/DX", "/Yu/b/cmake_pch.hxx", "/Fp/b/cmake_pch.pch", "/FI/b/cmake_pch.hxx", "/c", "a.cpp"]
+        self.assertEqual(tidy.without_pch(clang), ["c++", "-DX", "-c", "a.cpp"])
+        self.assertEqual(tidy.without_pch(gcc), ["g++", "-DX", "-c", "a.cpp"])
+        self.assertEqual(tidy.without_pch(msvc), ["cl", "/DX", "/c", "a.cpp"])
+        self.assertEqual(tidy.without_pch(["c++", "-include", "config.h", "-c", "a.cpp"]),
+                         ["c++", "-include", "config.h", "-c", "a.cpp"])
+
 
 class SuppressionTests(unittest.TestCase):
     """A suppression needs a check name and a reason."""
