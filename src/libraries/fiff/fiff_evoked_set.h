@@ -177,6 +177,11 @@ public:
     //=========================================================================================================
     /**
      * Reads evoked data sets of a FIFF file, like read(); throws UTILSLIB::Error if it cannot.
+     *
+     * @param[in] path         The file.
+     * @param[in] conditions   Indices or comments of the averages to read, in this order; empty reads all.
+     * @param[in] baseline     Interval to subtract the mean of, or none for no baseline correction.
+     * @param[in] proj         Apply the SSP projectors of the file.
      */
     explicit FiffEvokedSet(const std::filesystem::path& path,
                            const std::vector<FiffEvoked::Condition>& conditions = {},

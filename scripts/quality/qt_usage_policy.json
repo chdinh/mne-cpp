@@ -56,7 +56,7 @@
       ]
     },
     "bids": {
-      "tokens": 1086,
+      "tokens": 1081,
       "public_header_includes": 33,
       "modules": [
         "Core"
@@ -119,7 +119,7 @@
       ]
     },
     "fiff": {
-      "tokens": 1668,
+      "tokens": 1561,
       "public_header_includes": 94,
       "modules": [
         "Core",
@@ -186,7 +186,7 @@
       ]
     },
     "mne": {
-      "tokens": 1776,
+      "tokens": 1772,
       "public_header_includes": 98,
       "modules": [
         "Concurrent",

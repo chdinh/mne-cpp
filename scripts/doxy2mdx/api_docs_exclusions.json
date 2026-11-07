@@ -6,7 +6,8 @@
     "SURFACEKEYS": "String-key constants for disp3D surface lookups, not types."
   },
   "classes": {
+    "ACQLIB::AcqExtension": "Declared ahead of its implementation; registered with the FIFF bridge that implements and exercises it.",
     "ACQLIB::AcqFiffChannel": "Declared ahead of its implementation; registered with the FIFF bridge that implements and exercises it.",
-    "ACQLIB::AcqExtension": "Declared ahead of its implementation; registered with the FIFF bridge that implements and exercises it."
+    "FIFFLIB::FiffEvokedFile": "Internal reader behind FiffEvoked::read and FiffEvokedSet::read; its header is not installed."
   }
 }

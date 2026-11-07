@@ -315,7 +315,10 @@ public:
 
     //=========================================================================================================
     /**
-     * Builds the block tree of @p dentry from the block that starts at @p current.
+     * Builds the block tree of a directory from the block that starts at an entry.
+     *
+     * @param[in] dentry    The directory.
+     * @param[in] current   Index of the entry that starts the block.
      *
      * @return The block, or null if a tag cannot be read.
      */

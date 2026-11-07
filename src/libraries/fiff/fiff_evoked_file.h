@@ -44,7 +44,10 @@ namespace FIFFLIB
 class FiffEvokedFile
 {
 public:
-    /** @return The opened file, or why it holds no evoked data. */
+    /**
+     * @param[in] path   The file.
+     * @return The opened file, or why it holds no evoked data.
+     */
     static UTILSLIB::Expected<FiffEvokedFile> open(const std::filesystem::path& path);
 
     /** @return The number of evoked data sets. */
@@ -53,10 +56,19 @@ public:
         return m_sets.size();
     }
 
-    /** @return The index of the data set selected by @p condition, or why there is none. */
+    /**
+     * @param[in] condition   Index of the data set, or its comment together with @p kind.
+     * @param[in] kind        FIFFV_ASPECT_AVERAGE or FIFFV_ASPECT_STD_ERR.
+     * @return The index of the selected data set, or why there is none.
+     */
     UTILSLIB::Expected<int> find(const FiffEvoked::Condition& condition, fiff_int_t kind) const;
 
-    /** @return Data set @p set, calibrated, projected and baseline corrected as requested. */
+    /**
+     * @param[in] set        Index of the data set.
+     * @param[in] baseline   Interval to subtract the mean of, or none for no baseline correction.
+     * @param[in] proj       Apply the SSP projectors of the file.
+     * @return The data set, calibrated, projected and baseline corrected as requested.
+     */
     UTILSLIB::Expected<FiffEvoked> read(int set, const FiffEvoked::Baseline& baseline, bool proj);
 
     FiffInfo info; /**< The measurement info shared by all data sets. */

@@ -101,6 +101,12 @@ public:
     //=========================================================================================================
     /**
      * Reads one evoked data set, like read(); throws UTILSLIB::Error if it cannot.
+     *
+     * @param[in] path        The file.
+     * @param[in] condition   Index of the data set, or its comment together with @p kind.
+     * @param[in] baseline    Interval to subtract the mean of, or none for no baseline correction.
+     * @param[in] proj        Apply the SSP projectors of the file.
+     * @param[in] kind        FIFFV_ASPECT_AVERAGE or FIFFV_ASPECT_STD_ERR; selects among sets of the same comment.
      */
     explicit FiffEvoked(const std::filesystem::path& path,
                         const Condition& condition = 0,
