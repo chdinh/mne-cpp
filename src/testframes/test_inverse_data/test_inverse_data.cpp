@@ -427,8 +427,7 @@ private slots:
         if (!evkFile.exists())
             QSKIP("Evoked file not found");
 
-        QPair<float, float> noBaseline(-1.0f, -1.0f);
-        FiffEvoked evoked(evkPath.toStdString(), 0, noBaseline);
+        FiffEvoked evoked(evkPath.toStdU16String(), 0);
         QVERIFY(evoked.data.rows() > 0);
 
         // Pick channels matching the inverse operator's noise covariance
@@ -468,8 +467,7 @@ private slots:
         if (!evkFile.exists())
             QSKIP("Evoked file not found");
 
-        QPair<float, float> noBaseline(-1.0f, -1.0f);
-        FiffEvoked evoked(evkPath.toStdString(), 0, noBaseline);
+        FiffEvoked evoked(evkPath.toStdU16String(), 0);
         FiffEvoked pickedEvoked = evoked.pick_channels(invOp.noise_cov->names);
 
         float tmin = pickedEvoked.times(0);
@@ -504,8 +502,7 @@ private slots:
         if (!evkFile.exists())
             QSKIP("Evoked file not found");
 
-        QPair<float, float> noBaseline(-1.0f, -1.0f);
-        FiffEvoked evoked(evkPath.toStdString(), 0, noBaseline);
+        FiffEvoked evoked(evkPath.toStdU16String(), 0);
         FiffEvoked pickedEvoked = evoked.pick_channels(invOp.noise_cov->names);
 
         float tmin = pickedEvoked.times(0);
@@ -569,8 +566,7 @@ private slots:
         if (!evkFile.exists())
             QSKIP("Evoked file not found");
 
-        QPair<float, float> noBaseline(-1.0f, -1.0f);
-        FiffEvoked evoked(evkPath.toStdString(), 0, noBaseline);
+        FiffEvoked evoked(evkPath.toStdU16String(), 0);
         FiffEvoked pickedEvoked = evoked.pick_channels(invOp.noise_cov->names);
 
         float tmin = pickedEvoked.times(0);

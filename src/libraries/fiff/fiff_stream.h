@@ -20,7 +20,7 @@
  * directory and block tree on the way in. The high-level methods then
  * trade tag streams for typed objects: @ref FIFFLIB::FiffStream::read_meas_info "read_meas_info" returns a
  * @ref FIFFLIB::FiffInfo, @c read_raw_data returns a @ref FIFFLIB::FiffRawData,
- * @ref FIFFLIB::Fiff::read_evoked "read_evoked" returns a @ref FIFFLIB::FiffEvoked, @ref FIFFLIB::FiffStream::read_cov "read_cov" returns a
+ * @ref FIFFLIB::FiffEvoked::read "FiffEvoked::read" returns a @ref FIFFLIB::FiffEvoked, @ref FIFFLIB::FiffStream::read_cov "read_cov" returns a
  * @ref FIFFLIB::FiffCov, etc. On the writing side @ref FIFFLIB::FiffStream::start_writing_raw "start_writing_raw",
  * @ref FIFFLIB::FiffStream::write_tag "write_tag", @ref FIFFLIB::FiffStream::write_int "write_int" / @ref FIFFLIB::FiffStream::write_float "write_float" /
  * @ref FIFFLIB::FiffStream::write_float_matrix "write_float_matrix", @ref FIFFLIB::FiffStream::start_block "start_block" / @ref FIFFLIB::FiffStream::end_block "end_block" and the

@@ -137,11 +137,11 @@ int nproj;
 FiffProj::make_projector(raw.info.projs, raw.info.ch_names, proj, nproj);
 data = proj * data;
 
-// Read evoked data
-QList<FiffEvoked> evokeds = FiffEvoked::read("sample_audvis-ave.fif");
+// Read one condition of evoked data, baseline-corrected over -200 to 0 ms
+const FiffEvoked evoked("sample_audvis-ave.fif", "Left Auditory", {{-0.2f, 0.0f}});
 
-// Read noise covariance
-FiffCov cov = FiffCov::read("sample_audvis-cov.fif");
+// Read noise covariance; throws UTILSLIB::Error if the file holds none
+const FiffCov cov("sample_audvis-cov.fif");
 ```
 
 ## Doxygen Reference

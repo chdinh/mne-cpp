@@ -888,21 +888,20 @@ int main(int argc, char* argv[])
         qInfo("\nReading evoked data from %s (set %d)...",
               measName.toUtf8().constData(), setNo + 1);
 
-        QPair<float, float> baseline(-1.0f, -1.0f); // No baseline by default
+        FiffEvoked::Baseline baseline;
         if (parser.isSet(bminOpt) || parser.isSet(bmaxOpt)) {
             float bmin = parser.isSet(bminOpt) ? parser.value(bminOpt).toFloat() / 1000.0f : -1.0f;
             float bmax = parser.isSet(bmaxOpt) ? parser.value(bmaxOpt).toFloat() / 1000.0f : -1.0f;
-            baseline = QPair<float, float>(bmin, bmax);
+            baseline = std::pair(bmin, bmax);
             qInfo("  Baseline: %.1f - %.1f ms",
                   bmin * 1000.0f, bmax * 1000.0f);
         }
-        FiffEvoked evoked(measName.toStdU16String(), setNo, baseline);
-
-        if (evoked.isEmpty()) {
-            qCritical() << "Error: Could not read evoked data set" << (setNo + 1)
-                        << "from" << measName;
+        auto read = FiffEvoked::read(measName.toStdU16String(), setNo, baseline);
+        if (!read) {
+            qCritical("Error: %s", read.error().what());
             return 1;
         }
+        FiffEvoked& evoked = *read;
 
         qInfo("  Evoked data: %d channels, %d time points",
               static_cast<int>(evoked.data.rows()), static_cast<int>(evoked.data.cols()));

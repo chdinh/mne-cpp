@@ -32,7 +32,7 @@
 #include <QDebug>
 
 #include <cmath>
-#include <stdexcept>
+#include <format>
 //=============================================================================================================
 // USED NAMESPACES
 //=============================================================================================================
@@ -57,16 +57,12 @@ FiffEvoked::FiffEvoked()
 //=============================================================================================================
 
 FiffEvoked::FiffEvoked(const std::filesystem::path& path,
-                       QVariant setno,
-                       QPair<float, float> t_baseline,
+                       const Condition& condition,
+                       const Baseline& baseline,
                        bool proj,
-                       fiff_int_t p_aspect_kind)
+                       fiff_int_t kind)
+: FiffEvoked(read(path, condition, baseline, proj, kind).value())
 {
-    if (!FiffEvoked::read(path, *this, setno, t_baseline, proj, p_aspect_kind)) {
-        baseline = t_baseline;
-
-        throw std::runtime_error("Fiff evoked data not found");
-    }
 }
 
 //=============================================================================================================
@@ -144,20 +140,17 @@ FiffEvoked FiffEvoked::pick_channels(const StringList& include,
 
 //=============================================================================================================
 
-bool FiffEvoked::read(const std::filesystem::path& path,
-                      FiffEvoked& p_FiffEvoked,
-                      QVariant setno,
-                      QPair<float, float> t_baseline,
-                      bool proj,
-                      fiff_int_t p_aspect_kind)
+Expected<FiffEvoked> FiffEvoked::read(const std::filesystem::path& path,
+                                      const Condition& condition,
+                                      const Baseline& baseline,
+                                      bool proj,
+                                      fiff_int_t kind)
 {
-    p_FiffEvoked.clear();
-
     auto t_pStream = FiffStream::open(path);
     if (!t_pStream) {
-        UTILSLIB::Log::critical("{}", t_pStream.error().what());
-        return false;
+        return std::unexpected(t_pStream.error());
     }
+    const std::string file = utf8FromPath(path);
     QString t_sFileName = t_pStream->streamName();
 
     qInfo("Reading %s ...\n", t_sFileName.toUtf8().constData());
@@ -166,72 +159,45 @@ bool FiffEvoked::read(const std::filesystem::path& path,
     //
     FiffInfo info;
     FiffDirNode::SPtr meas;
-    if (!t_pStream->read_meas_info(t_pStream->dirtree(), info, meas))
-        return false;
+    if (!t_pStream->read_meas_info(t_pStream->dirtree(), info, meas)) {
+        return fail(ErrorCode::Format, "No measurement info in {}", file);
+    }
     info.filename = t_sFileName.toStdString(); //move fname storage to read_meas_info member function
     //
     //   Locate the data of interest
     //
-    QList<FiffDirNode::SPtr> processed = meas->dir_tree_find(FIFFB_PROCESSED_DATA);
-    if (processed.size() == 0) {
-        qWarning("Could not find processed data");
-        return false;
+    if (meas->dir_tree_find(FIFFB_PROCESSED_DATA).isEmpty()) {
+        return fail(ErrorCode::NotFound, "No processed data in {}", file);
     }
-    //
     QList<FiffDirNode::SPtr> evoked_node = meas->dir_tree_find(FIFFB_EVOKED);
-    if (evoked_node.size() == 0) {
-        qWarning("Could not find evoked data");
-        return false;
+    if (evoked_node.isEmpty()) {
+        return fail(ErrorCode::NotFound, "No evoked data in {}", file);
     }
 
-    // convert setno to an integer
-    if (!setno.isValid()) {
-        if (evoked_node.size() > 1) {
-            QStringList comments;
-            QList<fiff_int_t> aspect_kinds;
-            QString t;
-            if (!t_pStream->get_evoked_entries(evoked_node, comments, aspect_kinds, t))
-                t = QString("None found, must use integer");
-            qWarning("%lld datasets present, setno parameter must be set. Candidate setno names:\n%s", static_cast<long long>(evoked_node.size()), t.toUtf8().constData());
-            return false;
-        } else
-            setno = 0;
+    int setno = -1;
+    if (const int* index = std::get_if<int>(&condition)) {
+        setno = *index;
     } else {
-        // find string-based entry
-        bool t_bIsInteger = true;
-        setno.toInt(&t_bIsInteger);
-        if (!t_bIsInteger) {
-            if (p_aspect_kind != FIFFV_ASPECT_AVERAGE && p_aspect_kind != FIFFV_ASPECT_STD_ERR) {
-                qWarning("kindStat must be \"FIFFV_ASPECT_AVERAGE\" or \"FIFFV_ASPECT_STD_ERR\"");
-                return false;
-            }
-
-            QStringList comments;
-            QList<fiff_int_t> aspect_kinds;
-            QString t;
-            t_pStream->get_evoked_entries(evoked_node, comments, aspect_kinds, t);
-
-            bool found = false;
-            for (qint32 i = 0; i < comments.size(); ++i) {
-                if (comments[i].compare(setno.toString()) == 0 && p_aspect_kind == aspect_kinds[i]) {
-                    setno = i;
-                    found = true;
-                    break;
-                }
-            }
-            if (!found) {
-                qWarning() << "setno " << setno << " (" << p_aspect_kind << ") not found, out of found datasets:\n " << t;
-                return false;
+        const QString wanted = QString::fromStdString(std::get<std::string>(condition));
+        QStringList comments;
+        QList<fiff_int_t> aspect_kinds;
+        QString t;
+        t_pStream->get_evoked_entries(evoked_node, comments, aspect_kinds, t);
+        setno = static_cast<int>(comments.size());
+        for (qsizetype i = 0; i < comments.size(); ++i) {
+            if (comments[i] == wanted && aspect_kinds[i] == kind) {
+                setno = static_cast<int>(i);
+                break;
             }
         }
     }
-
-    if (setno.toInt() >= evoked_node.size() || setno.toInt() < 0) {
-        qWarning("Data set selector out of range");
-        return false;
+    if (setno < 0 || setno >= evoked_node.size()) {
+        return fail(ErrorCode::NotFound, "No evoked data set {} of kind {} in {}",
+                    std::visit([](const auto& c) { return std::format("{}", c); }, condition), kind, file);
     }
 
-    FiffDirNode::SPtr my_evoked = evoked_node[setno.toInt()];
+    FiffEvoked p_FiffEvoked;
+    FiffDirNode::SPtr my_evoked = evoked_node[setno];
 
     //
     //   Identify the aspects
@@ -249,14 +215,14 @@ bool FiffEvoked::read(const std::filesystem::path& path,
     fiff_int_t nchan = 0;
     float sfreq = -1.0f;
     QList<FiffChInfo> chs;
-    fiff_int_t kind, pos, first = 0, last = 0;
+    fiff_int_t tag_kind, pos, first = 0, last = 0;
     FiffTag::UPtr t_pTag;
     QString comment("");
     qint32 k;
     for (k = 0; k < my_evoked->nent(); ++k) {
-        kind = my_evoked->dir[k]->kind;
+        tag_kind = my_evoked->dir[k]->kind;
         pos = my_evoked->dir[k]->pos;
-        switch (kind) {
+        switch (tag_kind) {
             case FIFF_COMMENT:
                 t_pStream->read_tag(t_pTag, pos);
                 comment = QString::fromStdString(t_pTag->toString());
@@ -291,12 +257,10 @@ bool FiffEvoked::read(const std::filesystem::path& path,
     //
     if (nchan > 0) {
         if (chs.size() == 0) {
-            qWarning("Local channel information was not found when it was expected.");
-            return false;
+            return fail(ErrorCode::Format, "Local channel information missing in {}", file);
         }
         if (chs.size() != nchan) {
-            qWarning("Number of channels and number of channel definitions are different.");
-            return false;
+            return fail(ErrorCode::Format, "{} channels but {} channel definitions in {}", nchan, chs.size(), file);
         }
         info.chs = chs;
         info.nchan = nchan;
@@ -317,10 +281,10 @@ bool FiffEvoked::read(const std::filesystem::path& path,
     fiff_int_t nave = -1;
     QList<FiffTag> epoch;
     for (k = 0; k < my_aspect->nent(); ++k) {
-        kind = my_aspect->dir[k]->kind;
+        tag_kind = my_aspect->dir[k]->kind;
         pos = my_aspect->dir[k]->pos;
 
-        switch (kind) {
+        switch (tag_kind) {
             case FIFF_COMMENT:
                 t_pStream->read_tag(t_pTag, pos);
                 comment = QString::fromStdString(t_pTag->toString());
@@ -345,8 +309,7 @@ bool FiffEvoked::read(const std::filesystem::path& path,
 
     qint32 nepoch = epoch.size();
     if (nepoch != 1 && nepoch != info.nchan) {
-        qWarning("Number of epoch tags is unreasonable (nepoch = %d nchan = %d)", nepoch, info.nchan);
-        return false;
+        return fail(ErrorCode::Format, "{} epoch tags for {} channels in {}", nepoch, info.nchan, file);
     }
     MatrixXd all_data;
     if (nepoch == 1) {
@@ -368,15 +331,13 @@ bool FiffEvoked::read(const std::filesystem::path& path,
         for (k = 0; k < nepoch; ++k) {
             const int n = epoch[k].size() / static_cast<int>(sizeof(float));
             if (n != all_data.cols()) {
-                qWarning("Old style epochs have different lengths (%d and %d)", n, static_cast<int>(all_data.cols()));
-                return false;
+                return fail(ErrorCode::Format, "Old style epochs of lengths {} and {} in {}", n, all_data.cols(), file);
             }
             all_data.row(k) = Map<const RowVectorXf>(epoch[k].toFloat(), n).cast<double>();
         }
     }
     if (all_data.cols() != nsamp) {
-        qWarning("Incorrect number of samples (%d instead of %d)", static_cast<int>(all_data.cols()), nsamp);
-        return false;
+        return fail(ErrorCode::Format, "{} samples instead of {} in {}", all_data.cols(), nsamp, file);
     }
 
     //
@@ -436,17 +397,15 @@ bool FiffEvoked::read(const std::filesystem::path& path,
     p_FiffEvoked.times = times;
     p_FiffEvoked.data = all_data;
 
-    // Run baseline correction only if explicitly requested
-    // A baseline of (-1, -1) or (first == second) means "no baseline correction"
-    // This matches mne-python (baseline=None) and SVN-MNE (no --bmin/--bmax) behavior
-    if (t_baseline.first != t_baseline.second) {
-        p_FiffEvoked.applyBaselineCorrection(t_baseline);
+    QPair<float, float> window = baseline.value_or(defaultFloatPair);
+    if (window.first != window.second) {
+        p_FiffEvoked.applyBaselineCorrection(window);
     } else {
-        p_FiffEvoked.baseline = t_baseline;
+        p_FiffEvoked.baseline = window;
         qInfo("\tNo baseline correction applied\n");
     }
 
-    return true;
+    return p_FiffEvoked;
 }
 
 //=============================================================================================================

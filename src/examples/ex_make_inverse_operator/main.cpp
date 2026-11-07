@@ -87,11 +87,7 @@ int main(int argc, char* argv[])
     QString method(parser.value(methodOption));
 
     // Load data
-    fiff_int_t setno = 0;
-    QPair<float, float> baseline(-1.0f, -1.0f);
-    FiffEvoked evoked(parser.value(evokedFileOption).toStdString(), setno, baseline);
-    if (evoked.isEmpty())
-        return 1;
+    FiffEvoked evoked(parser.value(evokedFileOption).toStdU16String(), 0);
 
     MNEForwardSolution t_forwardMeeg(t_fileFwdMeeg, false, true);
 

@@ -321,8 +321,8 @@ void TestFiffIoEvokedInfo::evokedSet_grandAverage()
     // sample_audvis-ave.fif read with proj=False.
     FiffEvokedSet set0;
     FiffEvokedSet set1;
-    set0.evoked.append(FiffEvoked(avePath().toStdString(), 0, defaultFloatPair, false));
-    set1.evoked.append(FiffEvoked(avePath().toStdString(), 1, defaultFloatPair, false));
+    set0.evoked.append(FiffEvoked(avePath().toStdU16String(), 0, {}, false));
+    set1.evoked.append(FiffEvoked(avePath().toStdU16String(), 1, {}, false));
     set0.info = set0.evoked.first().info;
     set1.info = set1.evoked.first().info;
 
@@ -344,8 +344,8 @@ void TestFiffIoEvokedInfo::evoked_combineMatchesMnePython()
     // Reference values produced by mne.combine_evoked([e0, e1], weights) with
     // MNE-Python 1.11, where e0/e1 are conditions 0 and 1 of sample_audvis-ave.fif
     // read with proj=False (nave 55 and 61, bads MEG 2443 and EEG 053 in both).
-    const FiffEvoked e0(avePath().toStdString(), 0, defaultFloatPair, false);
-    const FiffEvoked e1(avePath().toStdString(), 1, defaultFloatPair, false);
+    const FiffEvoked e0(avePath().toStdU16String(), 0, {}, false);
+    const FiffEvoked e1(avePath().toStdU16String(), 1, {}, false);
     QCOMPARE(e0.nave, 55);
     QCOMPARE(e1.nave, 61);
 

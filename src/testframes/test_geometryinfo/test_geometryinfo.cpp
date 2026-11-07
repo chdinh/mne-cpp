@@ -128,9 +128,7 @@ void TestGeometryInfo::initTestCase()
 void TestGeometryInfo::testBadChannelFiltering()
 {
     //acquire real sensor positions
-    fiff_int_t setno = 0;
-    QPair<float, float> baseline(-1.0f, -1.0f);
-    FiffEvoked evoked((QCoreApplication::applicationDirPath() + "/../resources/data/mne-cpp-test-data/MEG/sample/sample_audvis-ave.fif").toStdString(), setno, baseline);
+    FiffEvoked evoked((QCoreApplication::applicationDirPath() + "/../resources/data/mne-cpp-test-data/MEG/sample/sample_audvis-ave.fif").toStdU16String(), 0);
     if (evoked.isEmpty()) {
         return;
     }

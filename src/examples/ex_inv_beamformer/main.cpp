@@ -104,7 +104,7 @@ int main(int argc, char* argv[])
     bool ok = true;
 
     // The 305 good MEG channels; the forward names them without the space ("MEG0113").
-    const FiffEvoked sample((data + "/MEG/sample/sample_audvis-ave.fif").toStdString(), 0);
+    const FiffEvoked sample((data + "/MEG/sample/sample_audvis-ave.fif").toStdU16String(), 0);
     StringList good;
     for (const std::string& name : sample.info.ch_names) {
         if (name.starts_with("MEG") && !UTILSLIB::contains(sample.info.bads, name))

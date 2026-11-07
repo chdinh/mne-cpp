@@ -216,9 +216,11 @@ bool FiffEvokedSet::read(const std::filesystem::path& path,
 
     for (qint32 i = 0; i < comments.size(); ++i) {
         qInfo(">> Processing %s <<\n", comments[i].toUtf8().constData());
-        FiffEvoked t_FiffEvoked;
-        if (FiffEvoked::read(path, t_FiffEvoked, i, baseline, proj))
-            p_FiffEvokedSet.evoked.push_back(t_FiffEvoked);
+        if (auto evoked = FiffEvoked::read(path, static_cast<int>(i), baseline, proj)) {
+            p_FiffEvokedSet.evoked.push_back(std::move(*evoked));
+        } else {
+            qWarning("%s", evoked.error().what());
+        }
     }
 
     return true;

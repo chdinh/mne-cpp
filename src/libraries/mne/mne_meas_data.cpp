@@ -136,12 +136,12 @@ bool MNEMeasData::read_evoked_set(const QString& name,
        * Read evoked data via FiffEvoked (no baseline correction, no projection
        * — MNEMeasData handles projections separately via MNEProjOp).
        */
-    FiffEvoked evoked;
-    if (!FiffEvoked::read(name.toStdU16String(), evoked, set - 1,
-                          QPair<float, float>(-1.0f, -1.0f), false)) {
-        qCritical("Failed to read evoked data from %s\n", name.toUtf8().constData());
+    auto read = FiffEvoked::read(name.toStdU16String(), set - 1, {}, false);
+    if (!read) {
+        qCritical("%s", read.error().what());
         return false;
     }
+    const FiffEvoked& evoked = *read;
 
     /*
        * Extract fields from the FiffEvoked object

@@ -176,38 +176,33 @@ void TestFiffEvokedPython::conditions_matchPython()
 
 void TestFiffEvokedPython::readSelectors_matchPython()
 {
-    auto read = [](const QVariant& setno, QPair<float, float> baseline, bool proj, fiff_int_t kind, FiffEvoked& e) {
-        return FiffEvoked::read(avePath().toStdString(), e, setno, baseline, proj, kind);
-    };
-    const QPair<float, float> none(-1.0f, -1.0f);
+    const auto path = avePath().toStdU16String();
 
     // mne.read_evokeds(..., condition="Right visual", proj=False / True, baseline=None): the file's
     // projectors are already active, so both give 94.42361010079253.
-    FiffEvoked e;
     for (const bool proj : {false, true}) {
-        QVERIFY(read(QStringLiteral("Right visual"), none, proj, FIFFV_ASPECT_AVERAGE, e));
+        const FiffEvoked e(path, "Right visual", {}, proj);
         QCOMPARE(static_cast<int>(e.nave), 58);
         QVERIFY(std::fabs(e.data.sum() - 94.42361010079253) < 1e-7 * 94.42361010079253);
         QCOMPARE(e.proj.rows() > 0, proj);
     }
 
     // condition=1, baseline=(-0.2, 0.0): sum 4.109845103910902, data[0, 0] 4.086686400793876e-13.
-    QVERIFY(read(1, QPair<float, float>(-0.2f, 0.0f), true, FIFFV_ASPECT_AVERAGE, e));
+    const FiffEvoked e(path, 1, {{-0.2f, 0.0f}});
     QCOMPARE(e.comment, QString("Right Auditory"));
+    QCOMPARE(e.baseline, QPair(-0.2f, 0.0f));
     QVERIFY2(std::fabs(e.data.sum() - 4.109845103910902) < 1e-6 * 4.109845103910902, qPrintable(QString::number(e.data.sum(), 'g', 17)));
     QVERIFY(std::fabs(e.data(0, 0) - 4.086686400793876e-13) < 1e-6 * 4.086686400793876e-13);
 
     // Selectors that mne-python rejects too.
-    QTest::ignoreMessage(QtWarningMsg, QRegularExpression("setno parameter must be set"));
-    QVERIFY(!read(QVariant(), none, true, FIFFV_ASPECT_AVERAGE, e));
-    QTest::ignoreMessage(QtWarningMsg, QRegularExpression("not found, out of found datasets"));
-    QVERIFY(!read(QStringLiteral("Left Auditory"), none, true, FIFFV_ASPECT_STD_ERR, e));
-    QTest::ignoreMessage(QtWarningMsg, QRegularExpression("kindStat must be"));
-    QVERIFY(!read(QStringLiteral("Left Auditory"), none, true, 99, e));
-    QTest::ignoreMessage(QtWarningMsg, "Data set selector out of range");
-    QVERIFY(!read(4, none, true, FIFFV_ASPECT_AVERAGE, e));
-    QTest::ignoreMessage(QtWarningMsg, "Data set selector out of range");
-    QVERIFY(!read(-1, none, true, FIFFV_ASPECT_AVERAGE, e));
+    for (const auto& bad : {FiffEvoked::read(path, "Left Auditory", {}, true, FIFFV_ASPECT_STD_ERR),
+                            FiffEvoked::read(path, "Left Auditory", {}, true, 99),
+                            FiffEvoked::read(path, 4),
+                            FiffEvoked::read(path, -1)}) {
+        QVERIFY(!bad);
+        QCOMPARE(bad.error().code, UTILSLIB::ErrorCode::NotFound);
+    }
+    QVERIFY_THROWS_EXCEPTION(UTILSLIB::Error, FiffEvoked(path, "No such condition"));
 }
 
 //=============================================================================================================
@@ -282,7 +277,7 @@ void TestFiffEvokedPython::dataSumsAreDistinct()
 
 void TestFiffEvokedPython::oldStyleEvoked_matchesPython()
 {
-    const FiffEvoked e(MNE_FIFF_EVOKED_DATA_DIR "/old_style-ave.fif", 0, QPair<float, float>(-1.0f, -1.0f), false);
+    const FiffEvoked e(MNE_FIFF_EVOKED_DATA_DIR "/old_style-ave.fif", 0, {}, false);
 
     // mne.read_evokeds(..., baseline=None, proj=False): the local 200 Hz channel
     // definitions and calibrations replace the measurement info's.
@@ -315,14 +310,12 @@ void TestFiffEvokedPython::readsAndSavesByPath()
         QVERIFY(back.evoked[i].data.isApprox(m_set.evoked[i].data, 1e-6));
     }
 
-    FiffEvoked e;
-    QVERIFY(FiffEvoked::read(out, e, 2));
-    QCOMPARE(e.comment, m_set.evoked[2].comment);
+    QCOMPARE(FiffEvoked(out, 2).comment, m_set.evoked[2].comment);
 
     const std::string missing = dir.filePath("missing-ave.fif").toStdString();
     FiffEvokedSet none;
     QVERIFY(!FiffEvokedSet::read(missing, none));
-    QVERIFY(!FiffEvoked::read(missing, e, 0));
+    QCOMPARE(FiffEvoked::read(missing).error().code, UTILSLIB::ErrorCode::Io);
     QVERIFY(!m_set.save(dir.filePath("no/dir/set-ave.fif").toStdString()));
 }
 

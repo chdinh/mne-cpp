@@ -212,8 +212,7 @@ void TestInvLoreta::eloreta_fromEvoked()
     if (!evkFile.exists())
         QSKIP("Evoked file not found");
 
-    QPair<float, float> noBaseline(-1.0f, -1.0f);
-    FiffEvoked evoked(evkPath.toStdString(), 0, noBaseline);
+    FiffEvoked evoked(evkPath.toStdU16String(), 0);
     QVERIFY(evoked.data.rows() > 0);
 
     FiffEvoked pickedEvoked = evoked.pick_channels(m_invOp.noise_cov->names);
@@ -255,8 +254,7 @@ void TestInvLoreta::eloreta_forceEqual()
     if (!evkFile.exists())
         QSKIP("Evoked file not found");
 
-    QPair<float, float> noBaseline(-1.0f, -1.0f);
-    FiffEvoked evoked(evkPath.toStdString(), 0, noBaseline);
+    FiffEvoked evoked(evkPath.toStdU16String(), 0);
     FiffEvoked pickedEvoked = evoked.pick_channels(m_invOp.noise_cov->names);
 
     float tmin = pickedEvoked.times(0);
@@ -289,8 +287,7 @@ void TestInvLoreta::eloreta_vs_dSPM()
     if (!evkFile.exists())
         QSKIP("Evoked file not found");
 
-    QPair<float, float> noBaseline(-1.0f, -1.0f);
-    FiffEvoked evoked(evkPath.toStdString(), 0, noBaseline);
+    FiffEvoked evoked(evkPath.toStdU16String(), 0);
     FiffEvoked pickedEvoked = evoked.pick_channels(m_invOp.noise_cov->names);
 
     float tmin = pickedEvoked.times(0);

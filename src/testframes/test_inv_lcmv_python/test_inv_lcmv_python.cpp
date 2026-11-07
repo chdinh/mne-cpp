@@ -125,7 +125,7 @@ void TestInvLcmvPython::initTestCase()
     QFile aveFile(base + "/MEG/sample/sample_audvis-ave.fif");
     QVERIFY2(fwdFile.exists() && covFile.exists() && aveFile.exists(), "test data missing");
 
-    FiffEvoked sampleEvoked((base + "/MEG/sample/sample_audvis-ave.fif").toStdString(), 0, QPair<float, float>(-1.0f, -1.0f), false);
+    FiffEvoked sampleEvoked((base + "/MEG/sample/sample_audvis-ave.fif").toStdU16String(), 0, {}, false);
     StringList good;
     for (const std::string& name : sampleEvoked.info.ch_names) {
         if (name.starts_with("MEG") && !UTILSLIB::contains(sampleEvoked.info.bads, name))

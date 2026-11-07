@@ -134,6 +134,14 @@ QString mismatch(const QString& what, double actual, double expected)
     return QString("%1 is %2, mne-python says %3").arg(what).arg(actual, 0, 'g', 17).arg(expected, 0, 'g', 17);
 }
 
+FiffEvoked::Condition condition(const QVariant& setno)
+{
+    if (setno.typeId() == QMetaType::QString) {
+        return setno.toString().toStdString();
+    }
+    return setno.toInt();
+}
+
 // A rejection setting with every limit off; each test row switches one on.
 RejectionParams noRejection()
 {
@@ -607,7 +615,7 @@ void TestFiffCorePython::computeFromEvoked_matchesPython()
     // Reference values produced by mne.compute_proj_evoked(ev, n_grad=2, n_mag=1, n_eeg=2) on
     // condition 0 of sample_audvis-ave.fif read with proj=False: peak channel, |peak| and |first
     // good channel of the type|; signs are arbitrary for an SVD.
-    const FiffEvoked evoked(dataPath("sample_audvis-ave.fif").toStdString(), 0, defaultFloatPair, false);
+    const FiffEvoked evoked(dataPath("sample_audvis-ave.fif").toStdU16String(), 0, {}, false);
     const QList<FiffProj> projs = FiffProj::compute_from_evoked(evoked, 2, 1, 2);
     QCOMPARE(projs.size(), 5);
 
@@ -757,8 +765,7 @@ void TestFiffCorePython::readEvoked_selection()
     QFETCH(double, sum);
     QFETCH(double, absSum);
 
-    FiffEvoked e;
-    QVERIFY(FiffEvoked::read(dataPath("sample_audvis-ave.fif").toStdString(), e, setno, qMakePair(bmin, bmax), proj));
+    const FiffEvoked e(dataPath("sample_audvis-ave.fif").toStdU16String(), condition(setno), {{bmin, bmax}}, proj);
 
     QCOMPARE(e.comment, QString("Right Auditory"));
     QCOMPARE(static_cast<int>(e.nave), nave);
@@ -785,7 +792,6 @@ void TestFiffCorePython::readEvoked_invalidSelector_data()
     QTest::newRow("bad aspect kind") << QVariant(QString("Right Auditory")) << 12345;
     QTest::newRow("index too large") << QVariant(4) << static_cast<int>(FIFFV_ASPECT_AVERAGE);
     QTest::newRow("negative index") << QVariant(-1) << static_cast<int>(FIFFV_ASPECT_AVERAGE);
-    QTest::newRow("unset with four sets") << QVariant() << static_cast<int>(FIFFV_ASPECT_AVERAGE);
 }
 
 //=============================================================================================================
@@ -795,8 +801,9 @@ void TestFiffCorePython::readEvoked_invalidSelector()
     QFETCH(QVariant, setno);
     QFETCH(int, aspectKind);
 
-    FiffEvoked e;
-    QVERIFY(!FiffEvoked::read(dataPath("sample_audvis-ave.fif").toStdString(), e, setno, defaultFloatPair, false, aspectKind));
+    const auto e = FiffEvoked::read(dataPath("sample_audvis-ave.fif").toStdU16String(), condition(setno), {}, false, aspectKind);
+    QVERIFY(!e);
+    QCOMPARE(e.error().code, UTILSLIB::ErrorCode::NotFound);
 }
 
 //=============================================================================================================

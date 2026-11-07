@@ -220,7 +220,7 @@ private slots:
         // (converted to fixed with cortical patch statistics), info of sample_audvis-ave.fif with space-free names:
         //   stc vertices lh [841, 3046], rh [713], data = vstack([sin(t + 1), cos(0.5 t), 0.3 t - 0.4]) * 1e-8,
         //   t = 0..4, tmin 0.1, tstep 0.002. Rows: channel, samples 0, 2, 4.
-        const FiffEvoked ave((m_sDataPath + "/MEG/sample/sample_audvis-ave.fif").toStdString(), 0);
+        const FiffEvoked ave((m_sDataPath + "/MEG/sample/sample_audvis-ave.fif").toStdU16String(), 0);
         MatrixXd data(3, 5);
         for (int t = 0; t < 5; ++t) {
             data(0, t) = std::sin(t + 1.0) * 1e-8;

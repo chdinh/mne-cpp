@@ -39,6 +39,8 @@
 #include "fiff_types.h"
 #include "fiff_file.h"
 
+#include <utils/error.h>
+
 //=============================================================================================================
 // EIGEN INCLUDES
 //=============================================================================================================
@@ -50,12 +52,15 @@
 //=============================================================================================================
 
 #include <QString>
-#include <QVariant>
 #include <QPair>
 #include <QSharedPointer>
 
 #include <filesystem>
 #include <memory>
+#include <optional>
+#include <string>
+#include <utility>
+#include <variant>
 
 //=============================================================================================================
 // DEFINE NAMESPACE MNELIB
@@ -89,24 +94,39 @@ public:
      */
     FiffEvoked();
 
+    /** Selects a data set by its index in the file or by its comment. */
+    using Condition = std::variant<int, std::string>;
+
+    /** Baseline interval [from, to] in seconds; equal bounds mean no correction. */
+    using Baseline = std::optional<std::pair<float, float>>;
+
     //=========================================================================================================
     /**
-     * Constructs fiff evoked data by reading a FIFF file.
-     *
-     * @param[in] path           FIFF file to read the evoked data set from.
-     * @param[in] setno          The set to pick. Dataset ID number (int) or comment/name (str). Optional if there isonly one data set in file.
-     * @param[in] t_baseline     The time interval to apply rescaling / baseline correction. If None do not apply it. If baseline is (a, b).
-     *                           the interval is between "a (s)" and "b (s)". If a is None the beginning of the data is used and if b is
-     *                           None then b is set to the end of the interval. If baseline is equal ot (None, None) all the time interval is used.
-     *                           If None, no correction is applied.
-     * @param[in] proj           Apply SSP projection vectors (optional, default = true).
-     * @param[in] p_aspect_kind  Either "FIFFV_ASPECT_AVERAGE" or "FIFFV_ASPECT_STD_ERR". The type of data to read. Only used if "setno" is a str.
+     * Reads one evoked data set, like read(); throws UTILSLIB::Error if it cannot.
      */
     explicit FiffEvoked(const std::filesystem::path& path,
-                        QVariant setno = 0,
-                        QPair<float, float> t_baseline = defaultFloatPair,
+                        const Condition& condition = 0,
+                        const Baseline& baseline = {},
                         bool proj = true,
-                        fiff_int_t p_aspect_kind = FIFFV_ASPECT_AVERAGE);
+                        fiff_int_t kind = FIFFV_ASPECT_AVERAGE);
+
+    //=========================================================================================================
+    /**
+     * Reads one evoked data set of a FIFF file, like mne.read_evokeds.
+     *
+     * @param[in] path        The file.
+     * @param[in] condition   Index of the data set, or its comment together with @p kind.
+     * @param[in] baseline    Interval to subtract the mean of, or none for no baseline correction.
+     * @param[in] proj        Apply the SSP projectors of the file.
+     * @param[in] kind        FIFFV_ASPECT_AVERAGE or FIFFV_ASPECT_STD_ERR; selects among sets of the same comment.
+     *
+     * @return The evoked data, or why the file holds none matching @p condition.
+     */
+    [[nodiscard]] static UTILSLIB::Expected<FiffEvoked> read(const std::filesystem::path& path,
+                                                             const Condition& condition = 0,
+                                                             const Baseline& baseline = {},
+                                                             bool proj = true,
+                                                             fiff_int_t kind = FIFFV_ASPECT_AVERAGE);
 
     //=========================================================================================================
     /**
@@ -180,33 +200,6 @@ public:
      */
     FiffEvoked pick_channels(const StringList& include = {},
                              const StringList& exclude = {}) const;
-
-    //=========================================================================================================
-    /**
-     * fiff_read_evoked
-     *
-     *
-     * Wrapper for the FiffEvokedDataSet::read_evoked static function
-     *
-     * Read one evoked data set
-     *
-     * @param[in] path           FIFF file to read.
-     * @param[out] p_FiffEvoked  The read evoked data.
-     * @param[in] setno          the set to pick. Dataset ID number (int) or comment/name (str). Optional if there isonly one data set in file.
-     * @param[in] t_baseline       The time interval to apply rescaling / baseline correction. If None do not apply it. If baseline is (a, b).
-     *                           the interval is between "a (s)" and "b (s)". If a is None the beginning of the data is used and if b is
-     *                           None then b is set to the end of the interval. If baseline is equal ot (None, None) all the time interval is used.
-     *                           If None, no correction is applied.
-     * @param[in] proj           Apply SSP projection vectors (optional, default = true).
-     * @param[in] p_aspect_kind  Either "FIFFV_ASPECT_AVERAGE" or "FIFFV_ASPECT_STD_ERR". The type of data to read. Only used if "setno" is a str.
-     *
-     * @return true if successful, false otherwise.
-     */
-    static bool read(const std::filesystem::path& path,
-                     FiffEvoked& p_FiffEvoked,
-                     QVariant setno = 0, QPair<float, float> t_baseline = defaultFloatPair,
-                     bool proj = true,
-                     fiff_int_t p_aspect_kind = FIFFV_ASPECT_AVERAGE);
 
     //=========================================================================================================
     /**

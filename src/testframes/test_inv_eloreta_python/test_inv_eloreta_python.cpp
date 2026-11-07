@@ -139,7 +139,7 @@ void TestInvEloretaPython::initTestCase()
 
     const FiffCov cov(data("MEG/sample/sample_audvis-cov.fif").toStdString());
     m_cov = cov;
-    const FiffEvoked evoked(data("MEG/sample/sample_audvis-ave.fif").toStdString(), 0);
+    const FiffEvoked evoked(data("MEG/sample/sample_audvis-ave.fif").toStdU16String(), 0);
     m_nave = evoked.nave;
     m_info = evoked.info;
     m_evoked = evoked;

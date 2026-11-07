@@ -463,8 +463,7 @@ private slots:
         if (invOp.nchan == 0)
             QSKIP("Inverse operator build failed");
 
-        QPair<float, float> noBaseline(-1.0f, -1.0f);
-        FiffEvoked evoked(evkPath.toStdString(), 0, noBaseline);
+        FiffEvoked evoked(evkPath.toStdU16String(), 0);
         FiffEvoked picked = evoked.pick_channels(invOp.noise_cov->names);
 
         float tmin = picked.times(0);
@@ -507,8 +506,7 @@ private slots:
         if (invOp.nchan == 0)
             QSKIP("Inverse operator build failed");
 
-        QPair<float, float> noBaseline(-1.0f, -1.0f);
-        FiffEvoked evoked(evkPath.toStdString(), 0, noBaseline);
+        FiffEvoked evoked(evkPath.toStdU16String(), 0);
         FiffEvoked picked = evoked.pick_channels(invOp.noise_cov->names);
 
         float tmin = picked.times(0);
@@ -550,8 +548,7 @@ private slots:
         if (invOp.nchan == 0)
             QSKIP("Inverse operator build failed");
 
-        QPair<float, float> noBaseline(-1.0f, -1.0f);
-        FiffEvoked evoked(evkPath.toStdString(), 0, noBaseline);
+        FiffEvoked evoked(evkPath.toStdU16String(), 0);
         FiffEvoked picked = evoked.pick_channels(invOp.noise_cov->names);
 
         float tmin = picked.times(0);

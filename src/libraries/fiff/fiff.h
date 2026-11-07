@@ -262,37 +262,6 @@ public:
         return info.pick_types(meg, eeg, stim, include, exclude);
     }
 
-
-    //=========================================================================================================
-    /**
-     * fiff_read_evoked
-     *
-     * Wrapper for the FiffEvoked::read static function
-     *
-     * Read one evoked data set
-     *
-     * @param[in] path           FIFF file to read.
-     * @param[out] data          The read evoked data.
-     * @param[in] setno          the set to pick.
-     * @param[in] baseline       The time interval to apply rescaling / baseline correction. If None do not apply it. If baseline is (a, b).
-     *                           the interval is between "a (s)" and "b (s)". If a is None the beginning of the data is used and if b is
-     *                           None then b is set to the end of the interval. If baseline is equal ot (None, None) all the time interval is used.
-     *                           If None, no correction is applied.
-     * @param[in] proj           Apply SSP projection vectors (optional, default = true).
-     * @param[in] p_aspect_kind  Either "FIFFV_ASPECT_AVERAGE" or "FIFFV_ASPECT_STD_ERR". The type of data to read. Only used if "setno" is a str.
-     *
-     * @return true if successful, false otherwise.
-     */
-    static inline bool read_evoked(const std::filesystem::path& path,
-                                   FiffEvoked& data,
-                                   QVariant setno = 0,
-                                   QPair<float, float> baseline = defaultFloatPair,
-                                   bool proj = true,
-                                   fiff_int_t p_aspect_kind = FIFFV_ASPECT_AVERAGE)
-    {
-        return FiffEvoked::read(path, data, setno, baseline, proj, p_aspect_kind);
-    }
-
     //=========================================================================================================
     /**
      * Read all evoked data from one file

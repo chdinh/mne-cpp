@@ -73,7 +73,7 @@ int main(int argc, char* argv[])
     parser.process(a);
 
     //generate FiffEvoked object
-    FiffEvoked p_FiffEvoked(parser.value(evokedFileOption).toStdString(), QVariant(parser.value(evokedIdxOption)));
+    FiffEvoked p_FiffEvoked(parser.value(evokedFileOption).toStdU16String(), parser.value(evokedIdxOption).toInt());
 
     //tf plot
     VectorXd dataCol = p_FiffEvoked.data.row(83).transpose();

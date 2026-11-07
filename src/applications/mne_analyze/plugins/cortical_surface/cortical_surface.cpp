@@ -1452,11 +1452,12 @@ bool CorticalSurface::runComputeSourceEstimate(const QString& fwdPath,
         qWarning() << "[CorticalSurface] Cannot open evoked file" << evokedPath;
         return false;
     }
-    FiffEvoked evoked;
-    if (!FiffEvoked::read(evokedPath.toStdU16String(), evoked)) {
-        qWarning() << "[CorticalSurface] read evoked failed";
+    auto read = FiffEvoked::read(evokedPath.toStdU16String());
+    if (!read) {
+        qWarning() << "[CorticalSurface]" << read.error().what();
         return false;
     }
+    const FiffEvoked& evoked = *read;
     QGuiApplication::setOverrideCursor(Qt::WaitCursor);
     const float lambda2 = (opts.snr > 0.0) ? static_cast<float>(1.0 / (opts.snr * opts.snr)) : 0.111111f;
 

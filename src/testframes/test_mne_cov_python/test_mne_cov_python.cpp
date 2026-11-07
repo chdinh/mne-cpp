@@ -118,7 +118,7 @@ void TestMneCovPython::initTestCase()
     QVERIFY2(QFile::exists(m_covPath) && aveFile.exists(), "test data missing");
     QVERIFY(m_dir.isValid());
 
-    FiffEvoked evoked((base + "/sample_audvis-ave.fif").toStdString(), 0, QPair<float, float>(-1.0f, -1.0f), false);
+    FiffEvoked evoked((base + "/sample_audvis-ave.fif").toStdU16String(), 0, {}, false);
     for (const std::string& name : evoked.info.ch_names) {
         if (name.starts_with("MEG") && !UTILSLIB::contains(evoked.info.bads, name))
             m_names.push_back(name);

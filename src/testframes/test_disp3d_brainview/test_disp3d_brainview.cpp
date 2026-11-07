@@ -848,7 +848,7 @@ void TestDisp3dBrainView::rtSensorInterpolationMatWorker_basics()
     QCOMPARE(eegCount, 0);
 
     // EEG of the sample data onto a small scalp patch: one mapping row per vertex, one column per picked EEG channel
-    const FIFFLIB::FiffEvoked evoked((QCoreApplication::applicationDirPath() + QStringLiteral("/../resources/data/mne-cpp-test-data/MEG/sample/sample_audvis-ave.fif")).toStdString(), 0);
+    const FIFFLIB::FiffEvoked evoked((QCoreApplication::applicationDirPath() + QStringLiteral("/../resources/data/mne-cpp-test-data/MEG/sample/sample_audvis-ave.fif")).toStdU16String(), 0);
     QVERIFY(!evoked.isEmpty());
     Eigen::MatrixX3f scalp(6, 3);
     scalp << 0.09f, 0.0f, 0.04f, -0.09f, 0.0f, 0.04f, 0.0f, 0.09f, 0.04f, 0.0f, -0.09f, 0.04f, 0.0f, 0.0f, 0.13f, 0.05f, 0.05f, 0.1f;
@@ -1029,7 +1029,7 @@ void TestDisp3dBrainView::rtSensorStreamManager_basics()
     QVERIFY(!manager.isStreaming());
 
     // EEG of the sample data mapped onto a small scalp surface
-    mapper.setEvoked(FIFFLIB::FiffEvoked((QCoreApplication::applicationDirPath() + QStringLiteral("/../resources/data/mne-cpp-test-data/MEG/sample/sample_audvis-ave.fif")).toStdString(), 0));
+    mapper.setEvoked(FIFFLIB::FiffEvoked((QCoreApplication::applicationDirPath() + QStringLiteral("/../resources/data/mne-cpp-test-data/MEG/sample/sample_audvis-ave.fif")).toStdU16String(), 0));
     Eigen::MatrixX3f rr(6, 3);
     rr << 0.09f, 0.0f, 0.04f, -0.09f, 0.0f, 0.04f, 0.0f, 0.09f, 0.04f, 0.0f, -0.09f, 0.04f, 0.0f, 0.0f, 0.13f, 0.05f, 0.05f, 0.1f;
     Eigen::MatrixX3i tris(4, 3);

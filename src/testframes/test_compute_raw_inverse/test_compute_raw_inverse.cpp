@@ -196,8 +196,7 @@ void TestComputeRawInverse::testInverseDSPM()
     printf(">>>>>>>>>>>>>>>>>>>>>>>>> Test dSPM Inverse >>>>>>>>>>>>>>>>>>>>>>>>>\n");
 
     // Read evoked without baseline correction
-    QPair<float, float> noBaseline(-1.0f, -1.0f);
-    FiffEvoked evoked(m_sEvokedFile.toStdString(), s_iSetNo, noBaseline);
+    FiffEvoked evoked(m_sEvokedFile.toStdU16String(), s_iSetNo);
     QVERIFY2(evoked.data.size() > 0, "Failed to read evoked data");
 
     // Pick channels matching inverse operator
@@ -276,8 +275,7 @@ void TestComputeRawInverse::testInverseSLORETA()
 
     printf(">>>>>>>>>>>>>>>>>>>>>>>>> Test sLORETA Inverse >>>>>>>>>>>>>>>>>>>>>>>>>\n");
 
-    QPair<float, float> noBaseline(-1.0f, -1.0f);
-    FiffEvoked evoked(m_sEvokedFile.toStdString(), s_iSetNo, noBaseline);
+    FiffEvoked evoked(m_sEvokedFile.toStdU16String(), s_iSetNo);
     QVERIFY2(evoked.data.size() > 0, "Failed to read evoked data");
 
     FiffEvoked pickedEvoked = evoked.pick_channels(m_invOp.noise_cov->names);
@@ -311,8 +309,7 @@ void TestComputeRawInverse::testInverseMNE()
 
     printf(">>>>>>>>>>>>>>>>>>>>>>>>> Test MNE Inverse >>>>>>>>>>>>>>>>>>>>>>>>>\n");
 
-    QPair<float, float> noBaseline(-1.0f, -1.0f);
-    FiffEvoked evoked(m_sEvokedFile.toStdString(), s_iSetNo, noBaseline);
+    FiffEvoked evoked(m_sEvokedFile.toStdU16String(), s_iSetNo);
     QVERIFY2(evoked.data.size() > 0, "Failed to read evoked data");
 
     FiffEvoked pickedEvoked = evoked.pick_channels(m_invOp.noise_cov->names);
@@ -346,13 +343,11 @@ void TestComputeRawInverse::testBaselineNotAppliedByDefault()
     printf(">>>>>>>>>>>>>>>>>>>>>>>>> Test Baseline Not Applied By Default >>>>>>>>>>>>>>>>>>>>>>>>>\n");
 
     // Read evoked data WITHOUT baseline (-1, -1 sentinel = no baseline)
-    QPair<float, float> noBaseline(-1.0f, -1.0f);
-    FiffEvoked evokedNoBaseline(m_sEvokedFile.toStdString(), s_iSetNo, noBaseline);
+    FiffEvoked evokedNoBaseline(m_sEvokedFile.toStdU16String(), s_iSetNo);
     QVERIFY2(evokedNoBaseline.data.size() > 0, "Failed to read evoked data (no baseline)");
 
     // Read evoked data WITH baseline correction (tmin to 0)
-    QPair<float, float> withBaseline(evokedNoBaseline.times(0), 0.0f);
-    FiffEvoked evokedWithBaseline(m_sEvokedFile.toStdString(), s_iSetNo, withBaseline);
+    FiffEvoked evokedWithBaseline(m_sEvokedFile.toStdU16String(), s_iSetNo, {{evokedNoBaseline.times(0), 0.0f}});
     QVERIFY2(evokedWithBaseline.data.size() > 0, "Failed to read evoked data (with baseline)");
 
     // The two datasets should differ if baseline correction was only applied to one
@@ -416,8 +411,7 @@ void TestComputeRawInverse::testBaselineAppliedWhenRequested()
     printf(">>>>>>>>>>>>>>>>>>>>>>>>> Test Baseline Applied When Requested >>>>>>>>>>>>>>>>>>>>>>>>>\n");
 
     // Read with explicit baseline (tmin to 0)
-    QPair<float, float> baseline(-0.2f, 0.0f);
-    FiffEvoked evoked(m_sEvokedFile.toStdString(), s_iSetNo, baseline);
+    FiffEvoked evoked(m_sEvokedFile.toStdU16String(), s_iSetNo, {{-0.2f, 0.0f}});
     QVERIFY2(evoked.data.size() > 0, "Failed to read evoked data with baseline");
 
     // Find prestimulus samples for the baseline window
@@ -595,8 +589,7 @@ void TestComputeRawInverse::testLabelRestrictedInverse()
     QVERIFY2(label.vertices.rows() > 0, "FsLabel has no vertices");
 
     // Read evoked
-    QPair<float, float> noBaseline(-1.0f, -1.0f);
-    FiffEvoked evoked(m_sEvokedFile.toStdString(), s_iSetNo, noBaseline);
+    FiffEvoked evoked(m_sEvokedFile.toStdU16String(), s_iSetNo);
     FiffEvoked pickedEvoked = evoked.pick_channels(m_invOp.noise_cov->names);
     float tmin = pickedEvoked.times(0);
     float tstep = 1.0f / pickedEvoked.info.sfreq;
