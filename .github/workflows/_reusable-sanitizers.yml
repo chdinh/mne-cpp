@@ -31,6 +31,13 @@ jobs:
     - name: Clone repository
       uses: actions/checkout@v5
 
+    # <print> needs libstdc++ 14; the runner defaults to GCC 13.
+    - name: Use GCC 14 (Linux)
+      if: runner.os == 'Linux'
+      run: |
+        echo "CC=gcc-14" >> "$GITHUB_ENV"
+        echo "CXX=g++-14" >> "$GITHUB_ENV"
+
     # Ubuntu 24.04 kernels randomise 32 bits of mmap addresses, which TSan and ASan cannot map around.
     - name: Allow sanitizer shadow memory
       run: sudo sysctl vm.mmap_rnd_bits=28

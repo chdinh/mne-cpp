@@ -42,6 +42,13 @@ jobs:
     - name: Checkout repository
       uses: actions/checkout@v5
 
+    # <print> needs libstdc++ 14; the runner defaults to GCC 13.
+    - name: Use GCC 14 (Linux)
+      if: runner.os == 'Linux'
+      run: |
+        echo "CC=gcc-14" >> "$GITHUB_ENV"
+        echo "CXX=g++-14" >> "$GITHUB_ENV"
+
     - name: Install Python 3.10
       uses: actions/setup-python@v6
       with:

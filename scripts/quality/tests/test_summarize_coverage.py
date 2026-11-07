@@ -223,7 +223,7 @@ class TestRepositoryConfiguration(unittest.TestCase):
 
     def test_workflow_uses_the_model(self) -> None:
         text = (_REPO_ROOT / ".github" / "workflows" / "_reusable-tests.yml").read_text(encoding="utf-8")
-        self.assertIn("fastcov --process-gcno --branch-coverage", text)
+        self.assertIn("fastcov --gcov gcov-14 --process-gcno --branch-coverage", text)
         self.assertRegex(text, r"summarize_coverage\.py coverage_raw\.info\s+\\\s+--repo-root \. --lcov-out coverage_filtered\.info")
         self.assertIn("disable_file_fixes: true", text)
         self.assertIn("check_coverage_gate.py coverage_filtered.info", text)

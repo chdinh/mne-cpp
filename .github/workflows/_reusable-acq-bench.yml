@@ -35,6 +35,13 @@ jobs:
       with:
         fetch-depth: 0
 
+    # <print> needs libstdc++ 14; the runner defaults to GCC 13.
+    - name: Use GCC 14 (Linux)
+      if: runner.os == 'Linux'
+      run: |
+        echo "CC=gcc-14" >> "$GITHUB_ENV"
+        echo "CXX=g++-14" >> "$GITHUB_ENV"
+
     - name: Load external dependency versions
       shell: bash
       run: ./scripts/ci/load_external_deps.sh max

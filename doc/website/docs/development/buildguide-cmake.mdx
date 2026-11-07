@@ -5,18 +5,19 @@ sidebar_label: Build from Source
 
 # Build from Source
 
-MNE-CPP uses **CMake** as its build system and requires **C++20** and **Qt 6**. This guide walks through compiling MNE-CPP from source on Windows, Linux, and macOS.
+MNE-CPP uses **CMake** as its build system and requires **C++23** and **Qt 6**. This guide walks through compiling MNE-CPP from source on Windows, Linux, and macOS.
 
 ## Prerequisites
 
 ### Recommended Bootstrap
 
-The quickest way to get a reproducible developer setup is to use the repository init scripts. On Linux, first install the compiler, CMake, Git and the OpenGL and XKB development headers the Qt bundle links against:
+The quickest way to get a reproducible developer setup is to use the repository init scripts. On Linux, first install GCC 14, CMake, Git and the OpenGL and XKB development headers the Qt bundle links against, and select GCC 14 (Ubuntu 24.04 defaults to GCC 13, which lacks `<print>`):
 
 {/* onboarding: linux */}
 ```bash
 sudo apt-get update
-sudo apt-get install -y build-essential cmake git libgl1-mesa-dev libxkbcommon-dev
+sudo apt-get install -y build-essential g++-14 cmake git libgl1-mesa-dev libxkbcommon-dev
+export CC=gcc-14 CXX=g++-14
 ```
 
 Then, on Linux and macOS:
@@ -70,11 +71,11 @@ The commands above run unchanged on clean Ubuntu, macOS and Windows runners ever
 
 ### Compiler
 
-MNE-CPP requires a compiler with **C++20 support**. The following compilers are tested in CI:
+MNE-CPP requires a compiler with **C++23 support**, including `<print>`. The following compilers are tested in CI:
 
 | Windows | Linux | macOS |
 |---------|-------|-------|
-| [MSVC](https://visualstudio.microsoft.com/vs/community/) (Visual Studio 2026 in CI. During installation select the **Desktop development with C++** workload.) | GCC 13+ (ships with Ubuntu 24.04) | Apple Clang via [Xcode](https://developer.apple.com/xcode/) (ships with macOS) |
+| [MSVC](https://visualstudio.microsoft.com/vs/community/) (Visual Studio 2026 in CI. During installation select the **Desktop development with C++** workload.) | GCC 14+ (`g++-14` package on Ubuntu 24.04) | Apple Clang via [Xcode](https://developer.apple.com/xcode/) (ships with macOS) |
 
 ### Qt 6
 

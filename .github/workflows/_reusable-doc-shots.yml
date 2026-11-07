@@ -25,6 +25,13 @@ jobs:
     - name: Clone repository
       uses: actions/checkout@v5
 
+    # <print> needs libstdc++ 14; the runner defaults to GCC 13.
+    - name: Use GCC 14 (Linux)
+      if: runner.os == 'Linux'
+      run: |
+        echo "CC=gcc-14" >> "$GITHUB_ENV"
+        echo "CXX=g++-14" >> "$GITHUB_ENV"
+
     - name: Install system dependencies
       run: |
         sudo rm -f /etc/apt/sources.list.d/microsoft-*.list /etc/apt/sources.list.d/azure-*.list /etc/apt/sources.list.d/microsoft-*.sources /etc/apt/sources.list.d/azure-*.sources

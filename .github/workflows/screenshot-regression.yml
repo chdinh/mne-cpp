@@ -45,6 +45,13 @@ jobs:
     - name: Clone repository
       uses: actions/checkout@v5
 
+    # <print> needs libstdc++ 14; the runner defaults to GCC 13.
+    - name: Use GCC 14 (Linux)
+      if: runner.os == 'Linux'
+      run: |
+        echo "CC=gcc-14" >> "$GITHUB_ENV"
+        echo "CXX=g++-14" >> "$GITHUB_ENV"
+
     - name: Clone mne-cpp test data
       run: git clone --depth 1 https://github.com/mne-tools/mne-cpp-test-data.git resources/data/mne-cpp-test-data
 

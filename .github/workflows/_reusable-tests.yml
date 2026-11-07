@@ -65,6 +65,13 @@ jobs:
         # The clang-tidy ratchet checks the units changed since the merge base with staging.
         fetch-depth: 0
 
+    # <print> needs libstdc++ 14; the runner defaults to GCC 13.
+    - name: Use GCC 14 (Linux)
+      if: runner.os == 'Linux'
+      run: |
+        echo "CC=gcc-14" >> "$GITHUB_ENV"
+        echo "CXX=g++-14" >> "$GITHUB_ENV"
+
     - name: Install system dependencies (Linux)
       if: matrix.os == 'ubuntu-24.04'
       run: |
@@ -441,7 +448,7 @@ jobs:
       run: |
         echo "gcno files: $(find build -name '*.gcno' | wc -l)"
         echo "gcda files: $(find build -name '*.gcda' | wc -l)"
-        fastcov --process-gcno --branch-coverage -d build -o coverage.json
+        fastcov --gcov gcov-14 --process-gcno --branch-coverage -d build -o coverage.json
         fastcov -C coverage.json --lcov -o coverage_raw.info \
              --include src/libraries/ src/applications/ src/tools/ \
              --exclude /usr Qt eigen
