@@ -219,13 +219,13 @@ Writes the transformation to file.
 
 ---
 
-### writeToStream(p_pStream)
+### writeToStream(stream)
 
 Writes the transformation to a FIFF stream.
 
 **Parameters:**
 
-- **p_pStream** : *[FiffStream](/docs/api/fiff/fiff-stream) **
+- **stream** : *[FiffStream](/docs/api/fiff/fiff-stream) &*
   Pointer to the FIFF stream to write to.
 
 ---
@@ -533,7 +533,7 @@ Reads a coordinate transform from a FIFF stream node.
 
 **Parameters:**
 
-- **stream** : *[FiffStream](/docs/api/fiff/fiff-stream)::SPtr &*
+- **stream** : *[FiffStream](/docs/api/fiff/fiff-stream) &*
   The FIFF stream.
 
 - **node** : *const [FiffDirNode](/docs/api/fiff/fiff-dir-node)::SPtr &*

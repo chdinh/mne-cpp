@@ -134,13 +134,13 @@ Writes the digitizer point set to a FIFF file, replacing any existing file.
 
 ---
 
-### writeToStream(p_pStream)
+### writeToStream(stream)
 
 Writes the [`FiffDigPointSet`](/docs/api/fiff/fiff-dig-point-set) to a FIFF stream.
 
 **Parameters:**
 
-- **p_pStream** : *[FiffStream](/docs/api/fiff/fiff-stream) **
+- **stream** : *[FiffStream](/docs/api/fiff/fiff-stream) &*
   Pointer to the FIFF stream to write to.
 
 ---
@@ -256,13 +256,13 @@ Returns list of digitizer point the set contains.
 
 ## Static Methods
 
-### readFromStream(p_Stream, p_Dig)
+### readFromStream(stream, p_Dig)
 
 Reads [`FiffDigPointSet`](/docs/api/fiff/fiff-dig-point-set) from a fif file.
 
 **Parameters:**
 
-- **p_Stream** : *[FiffStream](/docs/api/fiff/fiff-stream)::SPtr &*
+- **stream** : *[FiffStream](/docs/api/fiff/fiff-stream) &*
   The opened fif file.
 
 - **p_Dig** : *[FiffDigPointSet](/docs/api/fiff/fiff-dig-point-set) &*

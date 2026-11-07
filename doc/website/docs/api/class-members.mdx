@@ -7,7 +7,7 @@ sidebar_position: 5
 
 # Class Members
 
-Index of 6806 public class members (functions, variables, typedefs, enums) across all documented classes.
+Index of 6778 public class members (functions, variables, typedefs, enums) across all documented classes.
 
 **Jump to:** [A](#a) · [B](#b) · [C](#c) · [D](#d) · [E](#e) · [F](#f) · [G](#g) · [H](#h) · [I](#i) · [J](#j) · [K](#k) · [L](#l) · [M](#m) · [N](#n) · [O](#o) · [P](#p) · [Q](#q) · [R](#r) · [S](#s) · [T](#t) · [U](#u) · [V](#v) · [W](#w) · [X](#x) · [Y](#y) · [Z](#z)
 
@@ -994,7 +994,6 @@ Index of 6806 public class members (functions, variables, typedefs, enums) acros
 - **ConstSPtr** `[type]` in [FiffRawDir](/docs/api/fiff/fiff-raw-dir) — Const shared pointer type for [`FiffRawDir`](/docs/api/fiff/fiff-raw-dir).
 - **ConstSPtr** `[type]` in [FiffRawViewSettings](/docs/api/disp/fiff-raw-view-settings) — Const shared pointer type for [`FiffRawViewSettings`](/docs/api/disp/fiff-raw-view-settings).
 - **ConstSPtr** `[type]` in [FiffSparseMatrix](/docs/api/fiff/fiff-sparse-matrix) — Const shared pointer type for [`FiffSparseMatrix`](/docs/api/fiff/fiff-sparse-matrix).
-- **ConstSPtr** `[type]` in [FiffStream](/docs/api/fiff/fiff-stream) — Const shared pointer type for [`FiffStream`](/docs/api/fiff/fiff-stream).
 - **ConstSPtr** `[type]` in [FiffTag](/docs/api/fiff/fiff-tag) — Const shared pointer type for [`FiffTag`](/docs/api/fiff/fiff-tag).
 - **ConstSPtr** `[type]` in [FilterDesignView](/docs/api/disp/filter-design-view) — Const shared pointer type for [`FilterDesignView`](/docs/api/disp/filter-design-view).
 - **ConstSPtr** `[type]` in [FilterIO](/docs/api/utils/filter-io) — Const shared pointer type for [`FilterIO`](/docs/api/utils/filter-io).
@@ -1146,7 +1145,6 @@ Index of 6806 public class members (functions, variables, typedefs, enums) acros
 - **ConstUPtr** `[type]` in [FiffRawData](/docs/api/fiff/fiff-raw-data) — Const unique pointer type for [`FiffRawData`](/docs/api/fiff/fiff-raw-data).
 - **ConstUPtr** `[type]` in [FiffRawDir](/docs/api/fiff/fiff-raw-dir) — Const unique pointer type for [`FiffRawDir`](/docs/api/fiff/fiff-raw-dir).
 - **ConstUPtr** `[type]` in [FiffSparseMatrix](/docs/api/fiff/fiff-sparse-matrix) — Const unique pointer type for [`FiffSparseMatrix`](/docs/api/fiff/fiff-sparse-matrix).
-- **ConstUPtr** `[type]` in [FiffStream](/docs/api/fiff/fiff-stream) — Const unique pointer type for [`FiffStream`](/docs/api/fiff/fiff-stream).
 - **ConstUPtr** `[type]` in [FiffTag](/docs/api/fiff/fiff-tag) — Const unique pointer type for [`FiffTag`](/docs/api/fiff/fiff-tag).
 - **consumeIdle** `[fn]` in [AcqReader](/docs/api/acq/acq-reader) — Gating reader of an output stream: the device has emitted `samples` samples of underrun fill because the writer had not committed them.
 - **contactAt** `[fn]` in [ElectrodeObject](/docs/api/disp3-d/electrode-object)
@@ -1184,7 +1182,6 @@ Index of 6806 public class members (functions, variables, typedefs, enums) acros
 - **coordinateSystem** `[var]` in [BidsRawData](/docs/api/bids/bids-raw-data) — Coordinate system from *_coordsystem.json.
 - **coordinateSystem** `[fn]` in [IeegImplantation](/docs/api/ieeg/ieeg-implantation)
 - **coordsystemJsonPath** `[fn]` in [BIDSPath](/docs/api/bids/bids-path) — Returns the path for the coordsystem.json sidecar.
-- **copy_tree** `[fn]` in [Fiff](/docs/api/fiff/fiff-class) — fiff_copy_tree
 - **copy_tree** `[fn]` in [FiffDirNode](/docs/api/fiff/fiff-dir-node) — Copies directory subtrees from fidin to fidout.
 - **copyData** `[var]` in `WriteOptions` — Copy the raw data file into the BIDS directory.
 - **copyProcessingHistory** `[fn]` in [FiffStream](/docs/api/fiff/fiff-stream) — Copy the FIFF processing history block from one file to another.
@@ -1624,9 +1621,7 @@ Index of 6806 public class members (functions, variables, typedefs, enums) acros
 - **enable_all_sources** `[fn]` in [MNESourceSpace](/docs/api/mne/mne-source-space) — Enable all source points (set inuse to TRUE, nuse = np).
 - **enabled** `[var]` in [SubView](/docs/api/disp3-d/sub-view)
 - **end** `[var]` in [AcqSampleRange](/docs/api/acq/acq-sample-range) — One past the last sample; equals first for an empty range.
-- **end_block** `[fn]` in [Fiff](/docs/api/fiff/fiff-class) — fiff_end_block
 - **end_block** `[fn]` in [FiffStream](/docs/api/fiff/fiff-stream) — Writes a FIFF_BLOCK_END tag.
-- **end_file** `[fn]` in [Fiff](/docs/api/fiff/fiff-class) — fiff_end_file
 - **end_file** `[fn]` in [FiffStream](/docs/api/fiff/fiff-stream) — Writes the closing tags to a fif file and closes the file.
 - **endian** `[var]` in [FiffDataRef](/docs/api/fiff/fiff-data-ref) — Are the data in the little or big endian byte order.
 - **endPass** `[fn]` in [BrainRenderer](/docs/api/disp3-d/brain-renderer) — End any render pass (clearing or preserving).
@@ -1837,7 +1832,8 @@ Index of 6806 public class members (functions, variables, typedefs, enums) acros
 - **FiffProj** `[fn]` in [FiffProj](/docs/api/fiff/fiff-proj) — Copy constructor.
 - **FiffProj** `[fn]` in [FiffProj](/docs/api/fiff/fiff-proj) — Constructor.
 - **FiffRawData** `[fn]` in [FiffRawData](/docs/api/fiff/fiff-raw-data) — Default constructor.
-- **FiffRawData** `[fn]` in [FiffRawData](/docs/api/fiff/fiff-raw-data) — Copy constructor.
+- **FiffRawData** `[fn]` in [FiffRawData](/docs/api/fiff/fiff-raw-data)
+- **FiffRawData** `[fn]` in [FiffRawData](/docs/api/fiff/fiff-raw-data)
 - **FiffRawData** `[fn]` in [FiffRawData](/docs/api/fiff/fiff-raw-data) — Constructs fiff raw data by reading a FIFF file.
 - **FiffRawData** `[fn]` in [FiffRawData](/docs/api/fiff/fiff-raw-data) — Constructs fiff raw data held in bytes that are not a file, e.g.
 - **FiffRawDir** `[fn]` in [FiffRawDir](/docs/api/fiff/fiff-raw-dir) — Default constructor.
@@ -1931,7 +1927,6 @@ Index of 6806 public class members (functions, variables, typedefs, enums) acros
 - **find_source_space_hemi** `[fn]` in [MNESourceSpaces](/docs/api/mne/mne-source-spaces)
 - **find_stim_steps** `[fn]` in [FiffEvents](/docs/api/fiff/fiff-events) — Find the samples where all stimulus channels change at once, like mne.find_stim_steps.
 - **find_tag** `[fn]` in [FiffDirNode](/docs/api/fiff/fiff-dir-node) — Definition of the find_tag function in various files e.g.
-- **find_tag** `[fn]` in [FiffDirNode](/docs/api/fiff/fiff-dir-node) — Definition of the find_tag function in various files e.g.
 - **findArtifactComponents** `[fn]` in [MlIcaLabel](/docs/api/decoding/ml-ica-label) — Extract indices of artifact components (EOG, ECG, muscle).
 - **findElectrode** `[fn]` in [StandardMontage](/docs/api/utils/standard-montage) — Look up a single electrode position by name.
 - **findEntry** `[fn]` in [FineCalibration](/docs/api/dsp/fine-calibration) — Find entry by channel number.
@@ -1943,7 +1938,6 @@ Index of 6806 public class members (functions, variables, typedefs, enums) acros
 - **findTabWidgetLayout** `[fn]` in [QuickControlView](/docs/api/disp/quick-control-view)
 - **FineCalibration** `[fn]` in [FineCalibration](/docs/api/dsp/fine-calibration)
 - **finish** `[fn]` in [AcqWriter](/docs/api/acq/acq-writer) — Marks the end of the stream; readers drain and then receive EndOfStream.
-- **finish_writing_raw** `[fn]` in [Fiff](/docs/api/fiff/fiff-class) — fiff_finish_writing_raw
 - **finish_writing_raw** `[fn]` in [FiffStream](/docs/api/fiff/fiff-stream) — Finishes a raw file by writing all necessary end tags.
 - **finished** `[signal]` in [PythonRunner](/docs/api/utils/python-runner) — Emitted when the script finishes.
 - **finished** `[signal]` in [StcLoadingWorker](/docs/api/disp3-d/stc-loading-worker) — Emitted when loading is complete.
@@ -4014,7 +4008,8 @@ Index of 6806 public class members (functions, variables, typedefs, enums) acros
 - **operator=** `[fn]` in [FiffInfo](/docs/api/fiff/fiff-info) — Copy assignment.
 - **operator=** `[fn]` in [FiffInfoBase](/docs/api/fiff/fiff-info-base) — Copy assignment.
 - **operator=** `[fn]` in [FiffProj](/docs/api/fiff/fiff-proj) — Copy assignment.
-- **operator=** `[fn]` in [FiffRawData](/docs/api/fiff/fiff-raw-data) — Copy assignment.
+- **operator=** `[fn]` in [FiffRawData](/docs/api/fiff/fiff-raw-data)
+- **operator=** `[fn]` in [FiffRawData](/docs/api/fiff/fiff-raw-data)
 - **operator=** `[fn]` in [FiffRawDir](/docs/api/fiff/fiff-raw-dir) — Copy assignment.
 - **operator=** `[fn]` in [FiffSparseMatrix](/docs/api/fiff/fiff-sparse-matrix) — Default copy-assignment operator.
 - **operator=** `[fn]` in [FiffSparseMatrix](/docs/api/fiff/fiff-sparse-matrix) — Default move-assignment operator.
@@ -4542,7 +4537,6 @@ Index of 6806 public class members (functions, variables, typedefs, enums) acros
 - **read** `[fn]` in [MriVolData](/docs/api/mri/mri-vol-data) — Convenience loader: reads an MGH/MGZ file and populates this volume.
 - **read** `[fn]` in `SampleReader` — Decodes the sample starting at `pos` in `data`.
 - **read_annotations** `[fn]` in [FiffStream](/docs/api/fiff/fiff-stream) — Reads the first MNE-Python annotations block (FIFFB_MNE_ANNOTATIONS) below `p_Node`.
-- **read_bad_channels** `[fn]` in [Fiff](/docs/api/fiff/fiff-class) — fiff_read_bad_channels
 - **read_bad_channels** `[fn]` in [FiffStream](/docs/api/fiff/fiff-stream) — fiff_read_bad_channels
 - **read_bem_surface** `[fn]` in [MNESurface](/docs/api/mne/mne-surface) — Read a BEM surface from a FIFF file (excess-neighbor checking enabled).
 - **read_bem_surface** `[fn]` in [MNESurface](/docs/api/mne/mne-surface) — Read a BEM surface from a FIFF file (excess-neighbor checking enabled).
@@ -4551,7 +4545,6 @@ Index of 6806 public class members (functions, variables, typedefs, enums) acros
 - **read_coil_defs** `[fn]` in [FwdCoilSet](/docs/api/fwd/fwd-coil-set) — Read a coil definitions from file.
 - **read_cov** `[fn]` in [FiffStream](/docs/api/fiff/fiff-stream) — mne_read_cov - also for mne_read_noise_cov
 - **read_cov** `[fn]` in [MNE](/docs/api/mne/mne-class) — mne_read_cov
-- **read_ctf_comp** `[fn]` in [Fiff](/docs/api/fiff/fiff-class) — fiff_read_ctf_comp
 - **read_ctf_comp** `[fn]` in [FiffStream](/docs/api/fiff/fiff-stream) — fiff_read_ctf_comp
 - **read_curv** `[fn]` in [FsSurface](/docs/api/fs/fs-surface) — reads a binary curvature file into a vector
 - **read_digitizer_data** `[fn]` in [FiffStream](/docs/api/fiff/fiff-stream) — Reimplemntation of load_digitizer_data (digitizer.c).
@@ -4574,12 +4567,9 @@ Index of 6806 public class members (functions, variables, typedefs, enums) acros
 - **read_from_node** `[fn]` in [MNESssData](/docs/api/mne/mne-sss-data) — Read the SSS data from the given node of an open fiff stream Refactored: mne_read_from_node (mne_sss_data.c).
 - **read_inverse_operator** `[fn]` in [MNEInverseOperator](/docs/api/mne/mne-inverse-operator) — Read an inverse operator from a FIFF file.
 - **read_label** `[fn]` in [MNESourceSpace](/docs/api/mne/mne-source-space)
-- **read_meas_info** `[fn]` in [Fiff](/docs/api/fiff/fiff-class) — fiff_read_meas_info
 - **read_meas_info** `[fn]` in [FiffStream](/docs/api/fiff/fiff-stream) — fiff_read_meas_info
 - **read_meas_info_base** `[fn]` in [FiffStream](/docs/api/fiff/fiff-stream) — python read_forward_meas_info
-- **read_named_matrix** `[fn]` in [Fiff](/docs/api/fiff/fiff-class) — fiff_read_named_matrix
 - **read_named_matrix** `[fn]` in [FiffStream](/docs/api/fiff/fiff-stream) — fiff_read_named_matrix
-- **read_proj** `[fn]` in [Fiff](/docs/api/fiff/fiff-class) — [ projdata ] = fiff_read_proj(fid,node)
 - **read_proj** `[fn]` in [FiffStream](/docs/api/fiff/fiff-stream) — Read the SSP data under a given directory node.
 - **read_raw_segment** `[fn]` in [Fiff](/docs/api/fiff/fiff-class) — fiff_read_raw_segment
 - **read_raw_segment** `[fn]` in [Fiff](/docs/api/fiff/fiff-class) — fiff_read_raw_segment
@@ -4589,10 +4579,8 @@ Index of 6806 public class members (functions, variables, typedefs, enums) acros
 - **read_rt_tag** `[fn]` in [FiffStream](/docs/api/fiff/fiff-stream) — Read one tag from a fif real-time stream.
 - **read_source_spaces** `[fn]` in [MNE](/docs/api/mne/mne-class) — mne_read_source_spaces
 - **read_source_spaces** `[fn]` in [MNESourceSpace](/docs/api/mne/mne-source-space)
-- **read_tag** `[fn]` in [Fiff](/docs/api/fiff/fiff-class) — fiff_read_tag
 - **read_tag** `[fn]` in [FiffStream](/docs/api/fiff/fiff-stream) — Read one tag from a fif file.
 - **read_tag_data** `[fn]` in [FiffStream](/docs/api/fiff/fiff-stream) — Read tag data from a fif file.
-- **read_tag_info** `[fn]` in [Fiff](/docs/api/fiff/fiff-class) — fiff_read_tag_info
 - **read_tag_info** `[fn]` in [FiffStream](/docs/api/fiff/fiff-stream) — Read tag information of one tag from a fif file.
 - **read_w** `[fn]` in [InvSourceEstimate](/docs/api/inv/inv-source-estimate) — Read a .w file (single time-point source estimate).
 - **readAsaElcFile** `[fn]` in [LayoutLoader](/docs/api/utils/layout-loader) — Reads the specified ANT elc-layout file.
@@ -5831,7 +5819,6 @@ Index of 6806 public class members (functions, variables, typedefs, enums) acros
 - **SPtr** `[type]` in [FiffRawDir](/docs/api/fiff/fiff-raw-dir) — Shared pointer type for [`FiffRawDir`](/docs/api/fiff/fiff-raw-dir).
 - **SPtr** `[type]` in [FiffRawViewSettings](/docs/api/disp/fiff-raw-view-settings) — Shared pointer type for [`FiffRawViewSettings`](/docs/api/disp/fiff-raw-view-settings).
 - **SPtr** `[type]` in [FiffSparseMatrix](/docs/api/fiff/fiff-sparse-matrix) — Shared pointer type for [`FiffSparseMatrix`](/docs/api/fiff/fiff-sparse-matrix).
-- **SPtr** `[type]` in [FiffStream](/docs/api/fiff/fiff-stream) — Shared pointer type for [`FiffStream`](/docs/api/fiff/fiff-stream).
 - **SPtr** `[type]` in [FiffTag](/docs/api/fiff/fiff-tag) — Shared pointer type for [`FiffTag`](/docs/api/fiff/fiff-tag).
 - **SPtr** `[type]` in [FilterDesignView](/docs/api/disp/filter-design-view) — Shared pointer type for [`FilterDesignView`](/docs/api/disp/filter-design-view).
 - **SPtr** `[type]` in [FilterIO](/docs/api/utils/filter-io) — Shared pointer type for [`FilterIO`](/docs/api/utils/filter-io).
@@ -5977,7 +5964,6 @@ Index of 6806 public class members (functions, variables, typedefs, enums) acros
 - **start** `[fn]` in [AcqRecorder](/docs/api/acq/acq-recorder) — Starts recording `stream` to `path` from its next sample; the measurement info is on disk on return.
 - **start** `[fn]` in [AcqRecorder](/docs/api/acq/acq-recorder) — Starts recording `stream` into a BIDS dataset; `stop()` writes the sidecars (channels.tsv, events.tsv, meg.json, dataset_description.json) as mne-bids does.
 - **start** `[fn]` in [RtNoise](/docs/api/dsp/rt-noise) — Starts the worker thread.
-- **start_block** `[fn]` in [Fiff](/docs/api/fiff/fiff-class) — fiff_start_block
 - **start_block** `[fn]` in [FiffStream](/docs/api/fiff/fiff-stream) — Writes a FIFF_BLOCK_START tag.
 - **start_file** `[fn]` in [Fiff](/docs/api/fiff/fiff-class) — fiff_start_file
 - **start_file** `[fn]` in [FiffStream](/docs/api/fiff/fiff-stream) — Opens a fiff file for writing and writes the compulsory header tags.
@@ -6511,7 +6497,6 @@ Index of 6806 public class members (functions, variables, typedefs, enums) acros
 - **UPtr** `[type]` in [FiffRawData](/docs/api/fiff/fiff-raw-data) — Unique pointer type for [`FiffRawData`](/docs/api/fiff/fiff-raw-data).
 - **UPtr** `[type]` in [FiffRawDir](/docs/api/fiff/fiff-raw-dir) — Unique pointer type for [`FiffRawDir`](/docs/api/fiff/fiff-raw-dir).
 - **UPtr** `[type]` in [FiffSparseMatrix](/docs/api/fiff/fiff-sparse-matrix) — Unique pointer type for [`FiffSparseMatrix`](/docs/api/fiff/fiff-sparse-matrix).
-- **UPtr** `[type]` in [FiffStream](/docs/api/fiff/fiff-stream) — Unique pointer type for [`FiffStream`](/docs/api/fiff/fiff-stream).
 - **UPtr** `[type]` in [FiffTag](/docs/api/fiff/fiff-tag) — Unique pointer type for [`FiffTag`](/docs/api/fiff/fiff-tag).
 - **UPtr** `[type]` in [FwdBemModel](/docs/api/fwd/fwd-bem-model) — Unique pointer type for [`FwdBemModel`](/docs/api/fwd/fwd-bem-model).
 - **UPtr** `[type]` in [FwdBemSolution](/docs/api/fwd/fwd-bem-solution) — Unique pointer type for [`FwdBemSolution`](/docs/api/fwd/fwd-bem-solution).
@@ -6747,16 +6732,12 @@ Index of 6806 public class members (functions, variables, typedefs, enums) acros
 - **write** `[fn]` in [MriCorFifIO](/docs/api/mri/mri-cor-fif-io) — Writes COR.fif file from slice data.
 - **write_annotations** `[fn]` in [FiffStream](/docs/api/fiff/fiff-stream) — Writes `annotations` as an MNE-Python annotations block (FIFFB_MNE_ANNOTATIONS): onsets and ends as float, descriptions as a colon-separated list, channel names and extras as JSON.
 - **write_bad_channels** `[fn]` in [FiffStream](/docs/api/fiff/fiff-stream) — Write a bad channel list as a FIFFB_MNE_BAD_CHANNELS block.
-- **write_ch_info** `[fn]` in [Fiff](/docs/api/fiff/fiff-class) — fiff_write_ch_info
 - **write_ch_info** `[fn]` in [FiffStream](/docs/api/fiff/fiff-stream) — Writes a channel information record to a fif file The type, cal, unit, and pos members are explained in Table 9.5 of the MNE manual.
 - **write_ch_pos** `[fn]` in [FiffStream](/docs/api/fiff/fiff-stream) — Writes a channel position to a fif file.
-- **write_coord_trans** `[fn]` in [Fiff](/docs/api/fiff/fiff-class) — fiff_write_coord_trans
 - **write_coord_trans** `[fn]` in [FiffStream](/docs/api/fiff/fiff-stream) — Writes a coordinate transformation structure.
 - **write_cov** `[fn]` in [FiffStream](/docs/api/fiff/fiff-stream) — Write a noise covariance matrix.
-- **write_ctf_comp** `[fn]` in [Fiff](/docs/api/fiff/fiff-class) — fiff_write_ctf_comp
 - **write_ctf_comp** `[fn]` in [FiffStream](/docs/api/fiff/fiff-stream) — fiff_write_ctf_comp
 - **write_device_info** `[fn]` in [FiffStream](/docs/api/fiff/fiff-stream) — Writes a FIFFB_DEVICE block; nothing for an empty `device`.
-- **write_dig_point** `[fn]` in [Fiff](/docs/api/fiff/fiff-class) — fiff_write_dig_point
 - **write_dig_point** `[fn]` in [FiffStream](/docs/api/fiff/fiff-stream) — fiff_write_dig_point
 - **write_dir_entries** `[fn]` in [FiffStream](/docs/api/fiff/fiff-stream) — Writes a list of dir entries to a fif file, as a FIFFT_DIR_ENTRY_STRUCT Returns the postion where the structure was written to.
 - **write_dir_pointer** `[fn]` in [FiffStream](/docs/api/fiff/fiff-stream) — Writes directory position pointer FIFF_DIR_POINTER Returns the postion where the structure was written to.
@@ -6770,31 +6751,22 @@ Index of 6806 public class members (functions, variables, typedefs, enums) acros
 - **write_events_to_ascii** `[fn]` in [MNE](/docs/api/mne/mne-class) — write_events_to_ascii
 - **write_events_to_fif** `[fn]` in [MNE](/docs/api/mne/mne-class) — write_events_to_fif
 - **write_evoked_set** `[fn]` in [FiffStream](/docs/api/fiff/fiff-stream) — fiff_write_evoked_set
-- **write_float** `[fn]` in [Fiff](/docs/api/fiff/fiff-class) — fiff_write_float
 - **write_float** `[fn]` in [FiffStream](/docs/api/fiff/fiff-stream) — Writes a single-precision floating point tag to a fif file.
-- **write_float_matrix** `[fn]` in [Fiff](/docs/api/fiff/fiff-class) — fiff_write_float_matrix
 - **write_float_matrix** `[fn]` in [FiffStream](/docs/api/fiff/fiff-stream) — Writes a single-precision floating-point matrix tag.
 - **write_float_sparse_ccs** `[fn]` in [FiffStream](/docs/api/fiff/fiff-stream) — fiff_write_float_sparse_ccs
 - **write_float_sparse_rcs** `[fn]` in [FiffStream](/docs/api/fiff/fiff-stream) — fiff_write_float_sparse_rcs
-- **write_id** `[fn]` in [Fiff](/docs/api/fiff/fiff-class) — fiff_write_id
 - **write_id** `[fn]` in [FiffStream](/docs/api/fiff/fiff-stream) — Writes fiff id If the id argument is missing it will be generated here.
 - **write_info_base** `[fn]` in [FiffStream](/docs/api/fiff/fiff-stream) — Write measurement info stored in forward solution.
-- **write_int** `[fn]` in [Fiff](/docs/api/fiff/fiff-class) — fiff_write_int
 - **write_int** `[fn]` in [FiffStream](/docs/api/fiff/fiff-stream) — Writes a 32-bit integer tag to a fif file.
 - **write_int_matrix** `[fn]` in [FiffStream](/docs/api/fiff/fiff-stream) — fiff_write_int_matrix
-- **write_name_list** `[fn]` in [Fiff](/docs/api/fiff/fiff-class) — fiff_write_name_list
 - **write_name_list** `[fn]` in [FiffStream](/docs/api/fiff/fiff-stream) — fiff_write_name_list
-- **write_named_matrix** `[fn]` in [Fiff](/docs/api/fiff/fiff-class) — fiff_write_named_matrix
 - **write_named_matrix** `[fn]` in [FiffStream](/docs/api/fiff/fiff-stream) — fiff_write_named_matrix
-- **write_proj** `[fn]` in [Fiff](/docs/api/fiff/fiff-class) — fiff_write_proj
 - **write_proj** `[fn]` in [FiffStream](/docs/api/fiff/fiff-stream) — fiff_write_proj
 - **write_raw** `[fn]` in [FiffIO](/docs/api/fiff/fiff-io) — Write raw data to a pIODevice.
-- **write_raw_buffer** `[fn]` in [Fiff](/docs/api/fiff/fiff-class) — fiff_write_raw_buffer
 - **write_raw_buffer** `[fn]` in [FiffStream](/docs/api/fiff/fiff-stream) — fiff_write_raw_buffer
 - **write_raw_buffer** `[fn]` in [FiffStream](/docs/api/fiff/fiff-stream) — fiff_write_raw_buffer
 - **write_raw_buffer** `[fn]` in [FiffStream](/docs/api/fiff/fiff-stream) — fiff_write_raw_buffer
 - **write_rt_command** `[fn]` in [FiffStream](/docs/api/fiff/fiff-stream) — Writes a real-time command.
-- **write_string** `[fn]` in [Fiff](/docs/api/fiff/fiff-class) — fiff_write_string
 - **write_string** `[fn]` in [FiffStream](/docs/api/fiff/fiff-stream) — Writes a string tag.
 - **write_tag** `[fn]` in [FiffStream](/docs/api/fiff/fiff-stream) — Write one tag to file including its data Data is not written if it is nullptr.
 - **write_to_ascii** `[fn]` in [FiffEvents](/docs/api/fiff/fiff-events) — Write the event list to a text file (MNE-C compatible format).

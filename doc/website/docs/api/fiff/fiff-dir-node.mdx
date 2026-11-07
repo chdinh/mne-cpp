@@ -21,14 +21,14 @@ Each node corresponds to one `FIFFB_BLOCK_START` ... `FIFFB_BLOCK_END` pair in t
 
 ```cpp title="src/examples/ex_fiff_api/main.cpp"
 QFile structureFile(dir + "/sample_audvis-ave.fif");
-FiffStream::SPtr stream(new FiffStream(&structureFile));
-const bool opened = stream->open();
-const QList<FiffDirNode::SPtr> measNodes = stream->dirtree()->dir_tree_find(FIFFB_MEAS_INFO);
+FiffStream stream(&structureFile);
+const bool opened = stream.open();
+const QList<FiffDirNode::SPtr> measNodes = stream.dirtree()->dir_tree_find(FIFFB_MEAS_INFO);
 std::unique_ptr<FiffTag> tag;
 const bool hasNchan = measNodes.first()->find_tag(stream, FIFF_NCHAN, tag); // raw tag access
 const int nchanTag = *tag->toInt();
-const FiffId fileId = stream->id();
-stream->close();
+const FiffId fileId = stream.id();
+stream.close();
 ```
 
 ```cpp title="src/examples/ex_fiff_api/main.cpp"
@@ -96,7 +96,7 @@ Find nodes of the given kind from a directory tree structure.
 
 ---
 
-### find_tag(p_pStream, findkind, p_pTag)
+### find_tag(stream, findkind, p_pTag)
 
 Definition of the find_tag function in various files e.g.
 
@@ -106,32 +106,7 @@ Founds a tag of a given kind within a tree, and reeds it from file. Note: In dif
 
 **Parameters:**
 
-- **p_pStream** : *QSharedPointer&lt;[FiffStream](/docs/api/fiff/fiff-stream)&gt; &*
-  the opened fif file.
-
-- **findkind** : *fiff_int_t*
-  the kind which should be found.
-
-- **p_pTag** : *std::unique_ptr&lt; [FiffTag](/docs/api/fiff/fiff-tag) &gt; &*
-  the found tag.
-
-**Returns:**
-
-- *bool* — true if found, false otherwise.
-
----
-
-### find_tag(p_pStream, findkind, p_pTag)
-
-Definition of the find_tag function in various files e.g.
-
-fiff_read_named_matrix.m,
-
-Founds a tag of a given kind within a tree, and reeds it from file. Note: In difference to mne-matlab this is not a static function. This is a method of the [`FiffDirNode`](/docs/api/fiff/fiff-dir-node) class, that's why a tree object doesn't need to be handed to the function.
-
-**Parameters:**
-
-- **p_pStream** : *[FiffStream](/docs/api/fiff/fiff-stream) **
+- **stream** : *[FiffStream](/docs/api/fiff/fiff-stream) &*
   the opened fif file.
 
 - **findkind** : *fiff_int_t*
@@ -212,13 +187,13 @@ Returns the number of child nodes.
 
 ## Static Methods
 
-### copy_tree(p_pStreamIn, in_id, p_Nodes, p_pStreamOut)
+### copy_tree(source, in_id, p_Nodes, target)
 
 Copies directory subtrees from fidin to fidout.
 
 **Parameters:**
 
-- **p_pStreamIn** : *QSharedPointer&lt;[FiffStream](/docs/api/fiff/fiff-stream)&gt; &*
+- **source** : *[FiffStream](/docs/api/fiff/fiff-stream) &*
   fiff file to copy from.
 
 - **in_id** : *const [FiffId](/docs/api/fiff/fiff-id) &*
@@ -227,7 +202,7 @@ Copies directory subtrees from fidin to fidout.
 - **p_Nodes** : *const QList&lt; QSharedPointer&lt;[FiffDirNode](/docs/api/fiff/fiff-dir-node)&gt; &gt; &*
   subtree directories to be copied.
 
-- **p_pStreamOut** : *QSharedPointer&lt;[FiffStream](/docs/api/fiff/fiff-stream)&gt; &*
+- **target** : *[FiffStream](/docs/api/fiff/fiff-stream) &*
   fiff file to write to.
 
 **Returns:**
@@ -251,14 +226,14 @@ FIFF library: measurement info, channels, digitizer, transforms, projectors, cov
 
 ````cpp title="src/examples/ex_fiff_api/main.cpp, line 204"
 QFile structureFile(dir + "/sample_audvis-ave.fif");
-FiffStream::SPtr stream(new FiffStream(&structureFile));
-const bool opened = stream->open();
-const QList<FiffDirNode::SPtr> measNodes = stream->dirtree()->dir_tree_find(FIFFB_MEAS_INFO);
+FiffStream stream(&structureFile);
+const bool opened = stream.open();
+const QList<FiffDirNode::SPtr> measNodes = stream.dirtree()->dir_tree_find(FIFFB_MEAS_INFO);
 std::unique_ptr<FiffTag> tag;
 const bool hasNchan = measNodes.first()->find_tag(stream, FIFF_NCHAN, tag); // raw tag access
 const int nchanTag = *tag->toInt();
-const FiffId fileId = stream->id();
-stream->close();
+const FiffId fileId = stream.id();
+stream.close();
 ok &= expect(opened && measNodes.size() == 1 && hasNchan && nchanTag == 376 && !fileId.isEmpty() && fileId.version > 0,
              "FiffStream/FiffDirNode/FiffTag/FiffId: the FIFF_NCHAN tag of the measurement block reads 376");
 ````

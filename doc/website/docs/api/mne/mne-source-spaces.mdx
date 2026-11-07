@@ -21,11 +21,11 @@ List of [`MNESourceSpace`](/docs/api/mne/mne-source-space) objects forming a sub
 
 ```cpp title="src/examples/ex_mne_api/main.cpp"
 QFile srcFile(data + "/subjects/sample/bem/sample-oct-6-src.fif");
-FiffStream::SPtr stream(new FiffStream(&srcFile));
+FiffStream stream(&srcFile);
 MNESourceSpaces src;
-stream->open();
+stream.open();
 MNESourceSpaces::readFromStream(stream, true, src); // add_geom: normals, triangle data and patches
-stream->close();
+stream.close();
 const auto& lh = dynamic_cast<const MNEHemisphere&>(src[0]);
 QList<VectorXi> vertno = src.get_vertno(); // used vertices per hemisphere
 ```
@@ -159,11 +159,11 @@ Returns the number of stored hemispheres 0, 1 or 2.
 
 ---
 
-### writeToStream(p_pStream)
+### writeToStream(stream)
 
 **Parameters:**
 
-- **p_pStream** : *[FiffStream](/docs/api/fiff/fiff-stream) **
+- **stream** : *[FiffStream](/docs/api/fiff/fiff-stream) &*
   The stream to write to.
 
 ---
@@ -327,11 +327,11 @@ Access the underlying shared_ptr at the given index (const).
 
 ---
 
-### readFromStream(p_pStream, add_geom, p_SourceSpace)
+### readFromStream(stream, add_geom, p_SourceSpace)
 
 **Parameters:**
 
-- **p_pStream** : *[FIFFLIB::FiffStream](/docs/api/fiff/fiff-stream)::SPtr &*
+- **stream** : *[FiffStream](/docs/api/fiff/fiff-stream) &*
   The opened fif file.
 
 - **add_geom** : *bool*
@@ -361,11 +361,11 @@ MNE library: BEM surfaces, surface projection, ICP, source spaces and epochs.
 
 ````cpp title="src/examples/ex_mne_api/main.cpp, line 198"
 QFile srcFile(data + "/subjects/sample/bem/sample-oct-6-src.fif");
-FiffStream::SPtr stream(new FiffStream(&srcFile));
+FiffStream stream(&srcFile);
 MNESourceSpaces src;
-stream->open();
+stream.open();
 MNESourceSpaces::readFromStream(stream, true, src); // add_geom: normals, triangle data and patches
-stream->close();
+stream.close();
 const auto& lh = dynamic_cast<const MNEHemisphere&>(src[0]);
 QList<VectorXi> vertno = src.get_vertno(); // used vertices per hemisphere
 // mne.read_source_spaces: lh 155407 vertices, 4098 in use (8192 used triangles), vertno 14, 54, 59; rh 156866 / 4098

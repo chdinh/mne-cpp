@@ -27,14 +27,14 @@ Reads or writes one `QIODevice`. Builds the FIFF directory and [`FiffDirNode`](/
 
 ```cpp title="src/examples/ex_fiff_api/main.cpp"
 QFile structureFile(dir + "/sample_audvis-ave.fif");
-FiffStream::SPtr stream(new FiffStream(&structureFile));
-const bool opened = stream->open();
-const QList<FiffDirNode::SPtr> measNodes = stream->dirtree()->dir_tree_find(FIFFB_MEAS_INFO);
+FiffStream stream(&structureFile);
+const bool opened = stream.open();
+const QList<FiffDirNode::SPtr> measNodes = stream.dirtree()->dir_tree_find(FIFFB_MEAS_INFO);
 std::unique_ptr<FiffTag> tag;
 const bool hasNchan = measNodes.first()->find_tag(stream, FIFF_NCHAN, tag); // raw tag access
 const int nchanTag = *tag->toInt();
-const FiffId fileId = stream->id();
-stream->close();
+const FiffId fileId = stream.id();
+stream.close();
 ```
 
 ---
@@ -1145,7 +1145,7 @@ Opens a FIFF file for reading and reads its tag directory.
 
 **Returns:**
 
-- *FiffStream::SPtr* — The open stream, or nullptr if the file cannot be opened or is not a FIFF file.
+- *std::unique_ptr&lt; [FiffStream](/docs/api/fiff/fiff-stream) &gt;* — The open stream, or nullptr if the file cannot be opened or is not a FIFF file.
 
 ---
 
@@ -1247,7 +1247,7 @@ Opens a fiff file for writing and writes the compulsory header tags.
 
 **Returns:**
 
-- *FiffStream::SPtr* — The opened file.
+- *std::unique_ptr&lt; [FiffStream](/docs/api/fiff/fiff-stream) &gt;* — The opened file.
 
 ---
 
@@ -1262,7 +1262,7 @@ Creates or truncates a FIFF file and writes the compulsory header tags.
 
 **Returns:**
 
-- *FiffStream::SPtr* — The stream, or nullptr if the file cannot be created.
+- *std::unique_ptr&lt; [FiffStream](/docs/api/fiff/fiff-stream) &gt;* — The stream, or nullptr if the file cannot be created.
 
 ---
 
@@ -1277,7 +1277,7 @@ Open fiff file for update.
 
 **Returns:**
 
-- *FiffStream::SPtr* — The opened file stream.
+- *std::unique_ptr&lt; [FiffStream](/docs/api/fiff/fiff-stream) &gt;* — The opened file stream.
 
 ---
 
@@ -1309,7 +1309,7 @@ function [fid,cals] = fiff_start_writing_raw(name,info,sel)
 
 **Returns:**
 
-- *FiffStream::SPtr* — the started fiff file, or null if the file cannot be created.
+- *std::unique_ptr&lt; [FiffStream](/docs/api/fiff/fiff-stream) &gt;* — the started fiff file, or null if the file cannot be created.
 
 ---
 
@@ -1341,7 +1341,7 @@ in memory.
 
 **Returns:**
 
-- *FiffStream::SPtr* — the started stream, or null if `bytes` is null.
+- *std::unique_ptr&lt; [FiffStream](/docs/api/fiff/fiff-stream) &gt;* — the started stream, or null if `bytes` is null.
 
 ---
 
@@ -1380,14 +1380,14 @@ FIFF library: measurement info, channels, digitizer, transforms, projectors, cov
 
 ````cpp title="src/examples/ex_fiff_api/main.cpp, line 204"
 QFile structureFile(dir + "/sample_audvis-ave.fif");
-FiffStream::SPtr stream(new FiffStream(&structureFile));
-const bool opened = stream->open();
-const QList<FiffDirNode::SPtr> measNodes = stream->dirtree()->dir_tree_find(FIFFB_MEAS_INFO);
+FiffStream stream(&structureFile);
+const bool opened = stream.open();
+const QList<FiffDirNode::SPtr> measNodes = stream.dirtree()->dir_tree_find(FIFFB_MEAS_INFO);
 std::unique_ptr<FiffTag> tag;
 const bool hasNchan = measNodes.first()->find_tag(stream, FIFF_NCHAN, tag); // raw tag access
 const int nchanTag = *tag->toInt();
-const FiffId fileId = stream->id();
-stream->close();
+const FiffId fileId = stream.id();
+stream.close();
 ok &= expect(opened && measNodes.size() == 1 && hasNchan && nchanTag == 376 && !fileId.isEmpty() && fileId.version > 0,
              "FiffStream/FiffDirNode/FiffTag/FiffId: the FIFF_NCHAN tag of the measurement block reads 376");
 ````
@@ -1407,11 +1407,11 @@ FIFF library: fixed-length epochs, CTF compensation, the file directory and raw 
 
 ````cpp title="src/examples/ex_fiff_structure/main.cpp, line 119"
 QFile structureFile(rawPath);
-FiffStream::SPtr stream(new FiffStream(&structureFile));
-ok &= stream->open();
-const QList<FiffDirEntry::SPtr>& directory = stream->dir(); // every tag (kind, type, size, position) + a kind -1 end
-const FiffTime created = stream->id().time;                 // seconds and microseconds since 1970
-stream->close();
+FiffStream stream(&structureFile);
+ok &= stream.open();
+const QList<FiffDirEntry::SPtr>& directory = stream.dir(); // every tag (kind, type, size, position) + a kind -1 end
+const FiffTime created = stream.id().time;                 // seconds and microseconds since 1970
+stream.close();
 // mne fiff_open: 640 entries; file_id secs 1411146352, usecs 0
 ok &= expect(directory.size() == 641 && directory.last()->kind == -1 && created.secs == 1411146352 && created.usecs == 0 && FiffTime::storageSize() == 8 && FiffDirEntry::storageSize() == 16,
              "FiffDirEntry/FiffTime: the 640 tags of mne fiff_open plus the end entry; the file id was written at 1411146352 s");

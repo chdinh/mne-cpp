@@ -21,11 +21,11 @@ Exact memory image of the legacy ``fiffDirEntryRec`` record: kind (32-bit), type
 
 ```cpp title="src/examples/ex_fiff_structure/main.cpp"
 QFile structureFile(rawPath);
-FiffStream::SPtr stream(new FiffStream(&structureFile));
-ok &= stream->open();
-const QList<FiffDirEntry::SPtr>& directory = stream->dir(); // every tag (kind, type, size, position) + a kind -1 end
-const FiffTime created = stream->id().time;                 // seconds and microseconds since 1970
-stream->close();
+FiffStream stream(&structureFile);
+ok &= stream.open();
+const QList<FiffDirEntry::SPtr>& directory = stream.dir(); // every tag (kind, type, size, position) + a kind -1 end
+const FiffTime created = stream.id().time;                 // seconds and microseconds since 1970
+stream.close();
 ```
 
 ```cpp title="src/examples/ex_fiff_structure/main.cpp"

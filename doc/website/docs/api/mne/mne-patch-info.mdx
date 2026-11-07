@@ -71,11 +71,11 @@ It is exercised by:
 
 ````cpp title="src/examples/ex_mne_api/main.cpp"
 QFile srcFile(data + "/subjects/sample/bem/sample-oct-6-src.fif");
-FiffStream::SPtr stream(new FiffStream(&srcFile));
+FiffStream stream(&srcFile);
 MNESourceSpaces src;
-stream->open();
+stream.open();
 MNESourceSpaces::readFromStream(stream, true, src); // add_geom: normals, triangle data and patches
-stream->close();
+stream.close();
 const auto& lh = dynamic_cast<const MNEHemisphere&>(src[0]);
 QList<VectorXi> vertno = src.get_vertno(); // used vertices per hemisphere
 ````

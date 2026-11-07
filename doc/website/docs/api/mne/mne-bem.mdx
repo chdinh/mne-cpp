@@ -125,7 +125,7 @@ Write the Bem to a FIF file
 
 ---
 
-### writeToStream(p_pStream)
+### writeToStream(stream)
 
 [`MNE`](/docs/api/mne/mne-class) Toolbox function mne_write_bem_surfaces_block.
 
@@ -133,7 +133,7 @@ Write the Bem to a FIF stream
 
 **Parameters:**
 
-- **p_pStream** : *[FiffStream](/docs/api/fiff/fiff-stream) **
+- **stream** : *[FiffStream](/docs/api/fiff/fiff-stream) &*
   The stream to write to.
 
 ---
@@ -236,11 +236,11 @@ Transform the Bem using the inverse.
 
 ## Static Methods
 
-### readFromStream(p_pStream, add_geom, p_Bem)
+### readFromStream(stream, add_geom, p_Bem)
 
 **Parameters:**
 
-- **p_pStream** : *[FIFFLIB::FiffStream](/docs/api/fiff/fiff-stream)::SPtr &*
+- **stream** : *[FiffStream](/docs/api/fiff/fiff-stream) &*
   The opened fif file.
 
 - **add_geom** : *bool*

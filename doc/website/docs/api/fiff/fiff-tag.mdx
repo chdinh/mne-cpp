@@ -21,14 +21,14 @@ Holds the four header fields exactly as stored on disk and a `QByteArray` with t
 
 ```cpp title="src/examples/ex_fiff_api/main.cpp"
 QFile structureFile(dir + "/sample_audvis-ave.fif");
-FiffStream::SPtr stream(new FiffStream(&structureFile));
-const bool opened = stream->open();
-const QList<FiffDirNode::SPtr> measNodes = stream->dirtree()->dir_tree_find(FIFFB_MEAS_INFO);
+FiffStream stream(&structureFile);
+const bool opened = stream.open();
+const QList<FiffDirNode::SPtr> measNodes = stream.dirtree()->dir_tree_find(FIFFB_MEAS_INFO);
 std::unique_ptr<FiffTag> tag;
 const bool hasNchan = measNodes.first()->find_tag(stream, FIFF_NCHAN, tag); // raw tag access
 const int nchanTag = *tag->toInt();
-const FiffId fileId = stream->id();
-stream->close();
+const FiffId fileId = stream.id();
+stream.close();
 ```
 
 ### Inheritance
@@ -483,14 +483,14 @@ This corresponds to the old sizeof(fiffTagRec) - sizeof(fiff_data_t *).
 FIFF library: measurement info, channels, digitizer, transforms, projectors, covariance, events, annotations, evoked sets and the low-level file structure.
 
 ````cpp title="src/examples/ex_fiff_api/main.cpp, line 205"
-FiffStream::SPtr stream(new FiffStream(&structureFile));
-const bool opened = stream->open();
-const QList<FiffDirNode::SPtr> measNodes = stream->dirtree()->dir_tree_find(FIFFB_MEAS_INFO);
+FiffStream stream(&structureFile);
+const bool opened = stream.open();
+const QList<FiffDirNode::SPtr> measNodes = stream.dirtree()->dir_tree_find(FIFFB_MEAS_INFO);
 std::unique_ptr<FiffTag> tag;
 const bool hasNchan = measNodes.first()->find_tag(stream, FIFF_NCHAN, tag); // raw tag access
 const int nchanTag = *tag->toInt();
-const FiffId fileId = stream->id();
-stream->close();
+const FiffId fileId = stream.id();
+stream.close();
 ok &= expect(opened && measNodes.size() == 1 && hasNchan && nchanTag == 376 && !fileId.isEmpty() && fileId.version > 0,
              "FiffStream/FiffDirNode/FiffTag/FiffId: the FIFF_NCHAN tag of the measurement block reads 376");
 ````

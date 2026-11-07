@@ -392,13 +392,13 @@ save_raw
 
 ---
 
-### read_cov(p_pStream, p_Node, cov_kind, p_covData)
+### read_cov(stream, p_Node, cov_kind, p_covData)
 
 mne_read_cov
 
 **Parameters:**
 
-- **p_pStream** : *[FIFFLIB::FiffStream](/docs/api/fiff/fiff-stream)::SPtr &*
+- **stream** : *[FiffStream](/docs/api/fiff/fiff-stream) &*
   an open fiff file.
 
 - **p_Node** : *const [FIFFLIB::FiffDirNode](/docs/api/fiff/fiff-dir-node)::SPtr &*
@@ -416,13 +416,13 @@ mne_read_cov
 
 ---
 
-### read_source_spaces(p_pStream, add_geom, p_SourceSpace)
+### read_source_spaces(stream, add_geom, p_SourceSpace)
 
 mne_read_source_spaces
 
 **Parameters:**
 
-- **p_pStream** : *[FIFFLIB::FiffStream](/docs/api/fiff/fiff-stream)::SPtr &*
+- **stream** : *[FiffStream](/docs/api/fiff/fiff-stream) &*
   The open fiff file.
 
 - **add_geom** : *bool*

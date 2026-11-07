@@ -159,7 +159,7 @@ int main(int argc, char* argv[])
     }
 
     RowVectorXd cals;
-    FiffStream::SPtr outfid = FiffStream::start_writing_raw(parser.value(outputOption).toStdString(), raw.info, cals /*, picks*/);
+    auto outfid = FiffStream::start_writing_raw(parser.value(outputOption).toStdString(), raw.info, cals /*, picks*/);
     if (!outfid) {
         printf("Cannot write %s\n", t_fileOut.fileName().toUtf8().constData());
         return -1;
