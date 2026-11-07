@@ -7,7 +7,7 @@ sidebar_position: 5
 
 # Class Members
 
-Index of 6699 public class members (functions, variables, typedefs, enums) across all documented classes.
+Index of 6697 public class members (functions, variables, typedefs, enums) across all documented classes.
 
 **Jump to:** [A](#a) · [B](#b) · [C](#c) · [D](#d) · [E](#e) · [F](#f) · [G](#g) · [H](#h) · [I](#i) · [J](#j) · [K](#k) · [L](#l) · [M](#m) · [N](#n) · [O](#o) · [P](#p) · [Q](#q) · [R](#r) · [S](#s) · [T](#t) · [U](#u) · [V](#v) · [W](#w) · [X](#x) · [Y](#y) · [Z](#z)
 
@@ -3492,9 +3492,8 @@ Index of 6699 public class members (functions, variables, typedefs, enums) acros
 - **MNEHemisphere** `[fn]` in [MNEHemisphere](/docs/api/mne/mne-hemisphere) — Constructors the hemisphere source space.
 - **MNEHemisphere** `[fn]` in [MNEHemisphere](/docs/api/mne/mne-hemisphere) — Copy constructor.
 - **MNEInverseOperator** `[fn]` in [MNEInverseOperator](/docs/api/mne/mne-inverse-operator) — Constructs an empty inverse operator with invalid sentinel values.
-- **MNEInverseOperator** `[fn]` in [MNEInverseOperator](/docs/api/mne/mne-inverse-operator) — Constructs an inverse operator by reading from a FIFF IO device.
+- **MNEInverseOperator** `[fn]` in [MNEInverseOperator](/docs/api/mne/mne-inverse-operator) — Reads an inverse operator file like `read()`; throws [`Error`](/docs/api/utils/error) if it cannot.
 - **MNEInverseOperator** `[fn]` in [MNEInverseOperator](/docs/api/mne/mne-inverse-operator) — Constructs an inverse operator from measurement info, forward solution, and noise covariance.
-- **MNEInverseOperator** `[fn]` in [MNEInverseOperator](/docs/api/mne/mne-inverse-operator) — Copy constructor.
 - **MNEMeasData** `[fn]` in [MNEMeasData](/docs/api/mne/mne-meas-data) — Constructs an empty measurement data container.
 - **MNEMeasDataSet** `[fn]` in [MNEMeasDataSet](/docs/api/mne/mne-meas-data-set) — Constructs an empty measurement data set.
 - **MNEMghTag** `[fn]` in [MNEMghTag](/docs/api/mne/mne-mgh-tag) — Constructs an empty [`MNEMghTag`](/docs/api/mne/mne-mgh-tag).
@@ -3988,7 +3987,6 @@ Index of 6699 public class members (functions, variables, typedefs, enums) acros
 - **operator=** `[fn]` in [MNEForwardSolution](/docs/api/mne/mne-forward-solution) — Copy assignment operator.
 - **operator=** `[fn]` in [MNEForwardSolution](/docs/api/mne/mne-forward-solution) — Move assignment operator.
 - **operator=** `[fn]` in [MNEHemisphere](/docs/api/mne/mne-hemisphere) — Copy assignment operator.
-- **operator=** `[fn]` in [MNEInverseOperator](/docs/api/mne/mne-inverse-operator) — Copy assignment.
 - **operator=** `[fn]` in [MNEMghTagGroup](/docs/api/mne/mne-mgh-tag-group)
 - **operator=** `[fn]` in [MNEMghTagGroup](/docs/api/mne/mne-mgh-tag-group)
 - **operator=** `[fn]` in [MNEMorphMap](/docs/api/mne/mne-morph-map)
@@ -4493,6 +4491,7 @@ Index of 6699 public class members (functions, variables, typedefs, enums) acros
 - **read** `[fn]` in [MNECTFCompDataSet](/docs/api/mne/mnectf-comp-data-set) — Read all CTF compensation data sets (matrices and channel info) from a FIFF file, calibrate them, and return a populated set.
 - **read** `[fn]` in [MNEDerivSet](/docs/api/mne/mne-deriv-set) — Reads every derivation stored in the `FIFFB_MNE_DERIVATIONS` blocks of a file (MNE-C `mne_read_deriv`).
 - **read** `[fn]` in [MNEForwardSolution](/docs/api/mne/mne-forward-solution)
+- **read** `[fn]` in [MNEInverseOperator](/docs/api/mne/mne-inverse-operator) — Reads an inverse operator file, as mne.minimum_norm.read_inverse_operator does.
 - **read** `[fn]` in [MNELayout](/docs/api/mne/mne-layout) — Reads an MNE-C .lout file.
 - **read** `[fn]` in [MNEMorphMap](/docs/api/mne/mne-morph-map) — Reads one map from a morph-map file (MNE-C `load_one_morph_map`).
 - **read** `[fn]` in [MNENamedMatrix](/docs/api/mne/mne-named-matrix) — Factory: read a named matrix from a FIFF file.
@@ -4536,7 +4535,6 @@ Index of 6699 public class members (functions, variables, typedefs, enums) acros
 - **read_from_node** `[fn]` in [FiffCoordTrans](/docs/api/fiff/fiff-coord-trans) — Reads a coordinate transform from a FIFF stream node.
 - **read_from_node** `[fn]` in [MNEProjOp](/docs/api/mne/mne-proj-op) — Read all linear projection items from a FIFF tree node.
 - **read_from_node** `[fn]` in [MNESssData](/docs/api/mne/mne-sss-data) — Read the SSS data from the given node of an open fiff stream Refactored: mne_read_from_node (mne_sss_data.c).
-- **read_inverse_operator** `[fn]` in [MNEInverseOperator](/docs/api/mne/mne-inverse-operator) — Read an inverse operator from a FIFF file.
 - **read_json** `[fn]` in [FiffAnnotations](/docs/api/fiff/fiff-annotations) — Reads annotations from a JSON file (\{"annotations": [\{"onset", "duration", "description", "channel_names", "comment", "extras"\}, ...]\}).
 - **read_label** `[fn]` in [MNESourceSpace](/docs/api/mne/mne-source-space)
 - **read_localite** `[fn]` in [FiffDigMontage](/docs/api/fiff/fiff-dig-montage) — Reads a Localite .csv file ("#,name,x,y,z" in millimetres after a header row), as mne.channels.read_dig_localite does.
@@ -6648,7 +6646,7 @@ Index of 6699 public class members (functions, variables, typedefs, enums) acros
 - **write** `[fn]` in [MNEClusterInfo](/docs/api/mne/mne-cluster-info) — Writes the cluster info as text, and the centroid vertex numbers to `centroids_&lt;name&gt;` in the same directory.
 - **write** `[fn]` in [MNEDerivSet](/docs/api/mne/mne-deriv-set) — Writes the set as a `FIFFB_MNE_DERIVATIONS` block (MNE-C `mne_write_deriv_file`).
 - **write** `[fn]` in [MNEForwardSolution](/docs/api/mne/mne-forward-solution) — Write the forward solution to a FIFF file.
-- **write** `[fn]` in [MNEInverseOperator](/docs/api/mne/mne-inverse-operator) — Write the inverse operator to a FIFF file.
+- **write** `[fn]` in [MNEInverseOperator](/docs/api/mne/mne-inverse-operator) — Writes the inverse operator, as mne.minimum_norm.write_inverse_operator does.
 - **write** `[fn]` in [MNEMorphMap](/docs/api/mne/mne-morph-map) — Writes maps as `FIFFB_MNE_MORPH_MAP` blocks (MNE-C `mne_save_morph_map_matrices`).
 - **write** `[fn]` in [MNESparseNamedMatrix](/docs/api/mne/mne-sparse-named-matrix) — Writes the matrix as a `FIFFB_MNE_NAMED_MATRIX` block (MNE-C `mne_write_sparse_named_matrix`).
 - **write** `[fn]` in [MriCorFifIO](/docs/api/mri/mri-cor-fif-io) — Writes COR.fif file from slice data.
@@ -6698,6 +6696,7 @@ Index of 6699 public class members (functions, variables, typedefs, enums) acros
 - **write_tag** `[fn]` in [FiffStream](/docs/api/fiff/fiff-stream) — Writes one tag; its payload is taken in host byte order, as `read_tag()` returns it.
 - **write_to_stream** `[fn]` in [FiffCoordTrans](/docs/api/fiff/fiff-coord-trans) — Writes the transformation to a FIFF stream.
 - **write_to_stream** `[fn]` in [FiffDigPointSet](/docs/api/fiff/fiff-dig-point-set) — Writes the points as an isotrak block inside a measurement info block.
+- **write_to_stream** `[fn]` in [MNEInverseOperator](/docs/api/mne/mne-inverse-operator) — Writes the inverse solution block into an open FIFF stream.
 - **write_w** `[fn]` in [InvSourceEstimate](/docs/api/inv/inv-source-estimate) — Writes the first time point as a .w file, as mne.write_w does.
 - **writeBigEndian** `[fn]` in [ByteStream](/docs/api/utils/byte-stream) — Writes `count` values in big-endian byte order.
 - **writeBigEndian** `[fn]` in [ByteStream](/docs/api/utils/byte-stream)
@@ -6719,7 +6718,6 @@ Index of 6699 public class members (functions, variables, typedefs, enums) acros
 - **writeToStream** `[fn]` in [FiffInfo](/docs/api/fiff/fiff-info) — Writes the fiff information to a FIF stream.
 - **writeToStream** `[fn]` in [MNEBem](/docs/api/mne/mne-bem) — [`MNE`](/docs/api/mne/mne-class) Toolbox function mne_write_bem_surfaces_block.
 - **writeToStream** `[fn]` in [MNEHemisphere](/docs/api/mne/mne-hemisphere) — mne_python _write_one_source_space
-- **writeToStream** `[fn]` in [MNEInverseOperator](/docs/api/mne/mne-inverse-operator) — Write the inverse operator into an already-open FIFF stream.
 - **writeToStream** `[fn]` in [MNESourceSpace](/docs/api/mne/mne-source-space) — Write this source space to a FIFF stream.
 - **writeToStream** `[fn]` in [MNESourceSpaces](/docs/api/mne/mne-source-spaces)
 - **writeToStream** `[fn]` in [MNESurface](/docs/api/mne/mne-surface) — Writes the surface tags of a FIFFB_BEM_SURF block (MNE-C mne_write_bem_surfaces_block): conductivity if set, id, coordinate frame, vertices, triangles and normals.

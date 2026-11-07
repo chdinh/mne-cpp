@@ -219,7 +219,7 @@ int main(int argc, char* argv[])
     parser.addOption(stcFileOption);
     parser.process(app);
 
-    QFile t_fileInv(parser.value(invFileOption));
+    const std::filesystem::path t_fileInv = parser.value(invFileOption).toStdU16String();
 
     float snr = parser.value(snrOption).toFloat();
     QString method(parser.value(methodOption));

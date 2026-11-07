@@ -57,14 +57,14 @@ Constructs an empty inverse operator with invalid sentinel values.
 
 ---
 
-### MNEInverseOperator(p_IODevice)
+### MNEInverseOperator(path)
 
-Constructs an inverse operator by reading from a FIFF IO device.
+Reads an inverse operator file like `read()`; throws [`Error`](/docs/api/utils/error) if it cannot.
 
 **Parameters:**
 
-- **p_IODevice** : *QIODevice &*
-  IO device (e.g. QFile) containing the inverse operator.
+- **path** : *const std::filesystem::path &*
+  The -inv.fif file.
 
 ---
 
@@ -94,40 +94,6 @@ Constructs an inverse operator from measurement info, forward solution, and nois
 
 - **limit_depth_chs** : *bool*
   If true, restrict depth weighting to gradiometers (or magnetometers/EEG as fallback).
-
----
-
-### MNEInverseOperator(other)
-
-Copy constructor.
-
-**Parameters:**
-
-- **other** : *const MNEInverseOperator &*
-  Inverse operator to copy.
-
----
-
-### operator=(other)
-
-Copy assignment.
-
-Every member has value semantics, so the compiler-generated member-wise assignment is correct. It is declared explicitly because declaring a copy constructor and/or a destructor deprecates the implicitly generated one.
-
-**Parameters:**
-
-- **other** : *const [MNEInverseOperator](/docs/api/mne/mne-inverse-operator) &*
-  Object to assign from.
-
-**Returns:**
-
-- *[MNEInverseOperator](/docs/api/mne/mne-inverse-operator) &* — reference to this object.
-
----
-
-### ~MNEInverseOperator()
-
-Destructor.
 
 ---
 
@@ -260,24 +226,24 @@ Scales covariances by the number of averages, builds the regularised pseudo-inve
 
 ---
 
-### write(p_IODevice)
+### write(path)
 
-Write the inverse operator to a FIFF file.
+Writes the inverse operator, as mne.minimum_norm.write_inverse_operator does.
 
 **Parameters:**
 
-- **p_IODevice** : *QIODevice &*
-  IO device to write to.
+- **path** : *const std::filesystem::path &*
+  The -inv.fif file.
 
 **Returns:**
 
-- *bool* — false if the device cannot be opened for writing.
+- *[Expected](/docs/api/utils/expected)&lt; void &gt;* — Nothing, or why the file cannot be written (Io).
 
 ---
 
-### writeToStream(stream)
+### write_to_stream(stream)
 
-Write the inverse operator into an already-open FIFF stream.
+Writes the inverse solution block into an open FIFF stream.
 
 **Parameters:**
 
@@ -323,21 +289,18 @@ Performs depth weighting, source-covariance construction, whitening, and SVD dec
 
 ---
 
-### read_inverse_operator(p_IODevice, inv)
+### read(path)
 
-Read an inverse operator from a FIFF file.
+Reads an inverse operator file, as mne.minimum_norm.read_inverse_operator does.
 
 **Parameters:**
 
-- **p_IODevice** : *QIODevice &*
-  FIFF IO device (e.g. QFile or QTcpSocket).
-
-- **inv** : *[MNEInverseOperator](/docs/api/mne/mne-inverse-operator) &*
-  Receives the loaded inverse operator.
+- **path** : *const std::filesystem::path &*
+  The -inv.fif file.
 
 **Returns:**
 
-- *bool* — true on success, false on failure.
+- *[Expected](/docs/api/utils/expected)&lt; [MNEInverseOperator](/docs/api/mne/mne-inverse-operator) &gt;* — The inverse operator, or why the file cannot be read: Io if it cannot be opened, NotFound if it holds no inverse solution, Format if a required part is missing or malformed.
 
 ---
 

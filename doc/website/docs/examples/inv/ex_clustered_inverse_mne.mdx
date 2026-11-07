@@ -235,8 +235,9 @@ int main(int argc, char* argv[])
     // save clustered inverse
     //
     if (!t_sFileNameClusteredInv.isEmpty()) {
-        QFile t_fileClusteredInverse(t_sFileNameClusteredInv);
-        inverse_operator.write(t_fileClusteredInverse);
+        if (auto written = inverse_operator.write(t_sFileNameClusteredInv.toStdU16String()); !written) {
+            qWarning() << written.error().what();
+        }
     }
 
     //
