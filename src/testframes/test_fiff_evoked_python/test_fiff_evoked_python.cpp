@@ -313,9 +313,17 @@ void TestFiffEvokedPython::readsAndSavesByPath()
     QCOMPARE(FiffEvoked(out, 2).comment, m_set.evoked[2].comment);
 
     // The baseline reaches every condition of the set.
-    const FiffEvokedSet corrected(out, {{-0.2f, 0.0f}});
+    const FiffEvokedSet corrected(out, {}, {{-0.2f, 0.0f}});
     QCOMPARE(corrected.evoked[3].baseline, QPair(-0.2f, 0.0f));
     QVERIFY(corrected.evoked[3].data.isApprox(FiffEvoked(out, 3, {{-0.2f, 0.0f}}).data));
+
+    // mne.read_evokeds(fname, condition=["Right visual", 0]) keeps the requested order.
+    const FiffEvokedSet picked(out, {"Right visual", 0});
+    QCOMPARE(picked.evoked.size(), 2);
+    QCOMPARE(picked.evoked[0].comment, QString("Right visual"));
+    QCOMPARE(picked.evoked[1].comment, m_set.evoked[0].comment);
+    QVERIFY(picked.evoked[1].data.isApprox(back.evoked[0].data));
+    QCOMPARE(FiffEvokedSet::read(out, {0, 4}).error().code, UTILSLIB::ErrorCode::NotFound);
 
     const std::string missing = dir.filePath("missing-ave.fif").toStdString();
     QCOMPARE(FiffEvokedSet::read(missing).error().code, UTILSLIB::ErrorCode::Io);

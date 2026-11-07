@@ -31,6 +31,7 @@
 #include "fiff_raw_data.h"
 #include "fiff_tag.h"
 #include "fiff_dir_node.h"
+#include "fiff_evoked_file.h"
 #include "fiff_stream.h"
 #include "fiff_file.h"
 #include "fiff_constants.h"
@@ -42,6 +43,8 @@
 #include <Eigen/SparseCore>
 
 #include <cmath>
+#include <numeric>
+#include <vector>
 
 //=============================================================================================================
 // QT INCLUDES
@@ -71,9 +74,10 @@ FiffEvokedSet::FiffEvokedSet()
 //=============================================================================================================
 
 FiffEvokedSet::FiffEvokedSet(const std::filesystem::path& path,
+                             const std::vector<FiffEvoked::Condition>& conditions,
                              const FiffEvoked::Baseline& baseline,
                              bool proj)
-: FiffEvokedSet(read(path, baseline, proj).value())
+: FiffEvokedSet(read(path, conditions, baseline, proj).value())
 {
 }
 
@@ -169,37 +173,31 @@ bool FiffEvokedSet::find_evoked(const FiffEvokedSet& p_FiffEvokedSet) const
 //=============================================================================================================
 
 Expected<FiffEvokedSet> FiffEvokedSet::read(const std::filesystem::path& path,
+                                            const std::vector<FiffEvoked::Condition>& conditions,
                                             const FiffEvoked::Baseline& baseline,
                                             bool proj)
 {
-    auto t_pStream = FiffStream::open(path);
-    if (!t_pStream) {
-        return std::unexpected(t_pStream.error());
+    auto file = FiffEvokedFile::open(path);
+    if (!file) {
+        return std::unexpected(file.error());
     }
-    const std::string file = utf8FromPath(path);
-    QString t_sFileName = t_pStream->streamName();
+    std::vector<int> sets;
+    for (const FiffEvoked::Condition& condition : conditions) {
+        const auto found = file->find(condition, FIFFV_ASPECT_AVERAGE);
+        if (!found) {
+            return std::unexpected(found.error());
+        }
+        sets.push_back(*found);
+    }
+    if (conditions.empty()) {
+        sets.resize(static_cast<std::size_t>(file->size()));
+        std::iota(sets.begin(), sets.end(), 0);
+    }
 
-    qInfo("Exploring %s ...\n", t_sFileName.toUtf8().constData());
     FiffEvokedSet set;
-    FiffDirNode::SPtr meas;
-    if (t_pStream->dirtree()->dir_tree_find(FIFFB_MEAS).isEmpty()) {
-        return fail(ErrorCode::NotFound, "No measurement in {}", file);
-    }
-    if (!t_pStream->read_meas_info(t_pStream->dirtree(), set.info, meas)) {
-        return fail(ErrorCode::Format, "No measurement info in {}", file);
-    }
-    set.info.filename = t_sFileName.toStdString(); //move fname storage to read_meas_info member function
-    if (meas->dir_tree_find(FIFFB_PROCESSED_DATA).isEmpty()) {
-        return fail(ErrorCode::NotFound, "No processed data in {}", file);
-    }
-    const qsizetype count = meas->dir_tree_find(FIFFB_EVOKED).size();
-    if (count == 0) {
-        return fail(ErrorCode::NotFound, "No evoked data in {}", file);
-    }
-    qInfo("\tFound %lld datasets\n", static_cast<long long>(count));
-
-    for (qsizetype i = 0; i < count; ++i) {
-        auto evoked = FiffEvoked::read(path, static_cast<int>(i), baseline, proj);
+    set.info = file->info;
+    for (const int i : sets) {
+        auto evoked = file->read(i, baseline, proj);
         if (!evoked) {
             return std::unexpected(evoked.error());
         }

@@ -96,7 +96,7 @@ int main(int argc, char* argv[])
     int setIdx = parser.value(setOpt).toInt();
 
     // Read evoked data
-    auto read = FiffEvokedSet::read(measFile.toStdU16String(), {}, false);
+    auto read = FiffEvokedSet::read(measFile.toStdU16String(), {}, {}, false);
     if (!read) {
         qCritical("%s", read.error().what());
         return 1;

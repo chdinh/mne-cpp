@@ -804,7 +804,7 @@ int main(int argc, char* argv[])
         if (doBaseline) {
             baseline = std::pair(bmin, bmax);
         }
-        auto read = FiffEvokedSet::read(inName.toStdU16String(), baseline);
+        auto read = FiffEvokedSet::read(inName.toStdU16String(), {}, baseline);
         if (!read) {
             qCritical("%s", read.error().what());
             return 1;

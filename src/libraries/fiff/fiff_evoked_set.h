@@ -58,6 +58,7 @@
 
 #include <filesystem>
 #include <memory>
+#include <vector>
 
 //=============================================================================================================
 // DEFINE NAMESPACE MNELIB
@@ -178,9 +179,10 @@ public:
 
     //=========================================================================================================
     /**
-     * Reads every evoked data set of a FIFF file, like read(); throws UTILSLIB::Error if it cannot.
+     * Reads evoked data sets of a FIFF file, like read(); throws UTILSLIB::Error if it cannot.
      */
     explicit FiffEvokedSet(const std::filesystem::path& path,
+                           const std::vector<FiffEvoked::Condition>& conditions = {},
                            const FiffEvoked::Baseline& baseline = {},
                            bool proj = true);
 
@@ -257,15 +259,17 @@ public:
 
     //=========================================================================================================
     /**
-     * Reads every evoked data set of a FIFF file, like mne.read_evokeds with condition=None.
+     * Reads evoked data sets of a FIFF file in one pass, like mne.read_evokeds.
      *
-     * @param[in] path       The file.
-     * @param[in] baseline   Interval to subtract the mean of, or none for no baseline correction.
-     * @param[in] proj       Apply the SSP projectors of the file.
+     * @param[in] path         The file.
+     * @param[in] conditions   Indices or comments of the averages to read, in this order; empty reads all.
+     * @param[in] baseline     Interval to subtract the mean of, or none for no baseline correction.
+     * @param[in] proj         Apply the SSP projectors of the file.
      *
-     * @return The evoked data sets, or why the file holds none.
+     * @return The evoked data sets, or why the file does not hold them.
      */
     [[nodiscard]] static UTILSLIB::Expected<FiffEvokedSet> read(const std::filesystem::path& path,
+                                                                const std::vector<FiffEvoked::Condition>& conditions = {},
                                                                 const FiffEvoked::Baseline& baseline = {},
                                                                 bool proj = true);
 

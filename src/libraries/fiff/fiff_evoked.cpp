@@ -27,6 +27,7 @@
 #include "fiff_stream.h"
 #include "fiff_tag.h"
 #include "fiff_dir_node.h"
+#include "fiff_evoked_file.h"
 
 #include <math/numerics.h>
 #include <QDebug>
@@ -146,66 +147,85 @@ Expected<FiffEvoked> FiffEvoked::read(const std::filesystem::path& path,
                                       bool proj,
                                       fiff_int_t kind)
 {
-    auto t_pStream = FiffStream::open(path);
-    if (!t_pStream) {
-        return std::unexpected(t_pStream.error());
+    auto file = FiffEvokedFile::open(path);
+    if (!file) {
+        return std::unexpected(file.error());
     }
-    const std::string file = utf8FromPath(path);
-    QString t_sFileName = t_pStream->streamName();
+    const auto set = file->find(condition, kind);
+    if (!set) {
+        return std::unexpected(set.error());
+    }
+    return file->read(*set, baseline, proj);
+}
 
-    qInfo("Reading %s ...\n", t_sFileName.toUtf8().constData());
-    //
-    //   Read the measurement info
-    //
-    FiffInfo info;
+//=============================================================================================================
+
+Expected<FiffEvokedFile> FiffEvokedFile::open(const std::filesystem::path& path)
+{
+    auto opened = FiffStream::open(path);
+    if (!opened) {
+        return std::unexpected(opened.error());
+    }
+    FiffEvokedFile file(std::move(*opened), utf8FromPath(path));
+    FiffStream& stream = file.m_stream;
+    qInfo("Reading %s ...\n", file.m_file.c_str());
+
     FiffDirNode::SPtr meas;
-    if (t_pStream->dirtree()->dir_tree_find(FIFFB_MEAS).isEmpty()) {
-        return fail(ErrorCode::NotFound, "No measurement in {}", file);
+    if (stream.dirtree()->dir_tree_find(FIFFB_MEAS).isEmpty()) {
+        return fail(ErrorCode::NotFound, "No measurement in {}", file.m_file);
     }
-    if (!t_pStream->read_meas_info(t_pStream->dirtree(), info, meas)) {
-        return fail(ErrorCode::Format, "No measurement info in {}", file);
+    if (!stream.read_meas_info(stream.dirtree(), file.info, meas)) {
+        return fail(ErrorCode::Format, "No measurement info in {}", file.m_file);
     }
-    info.filename = t_sFileName.toStdString(); //move fname storage to read_meas_info member function
-    //
-    //   Locate the data of interest
-    //
+    file.info.filename = stream.streamName().toStdString();
     if (meas->dir_tree_find(FIFFB_PROCESSED_DATA).isEmpty()) {
-        return fail(ErrorCode::NotFound, "No processed data in {}", file);
+        return fail(ErrorCode::NotFound, "No processed data in {}", file.m_file);
     }
-    QList<FiffDirNode::SPtr> evoked_node = meas->dir_tree_find(FIFFB_EVOKED);
-    if (evoked_node.isEmpty()) {
-        return fail(ErrorCode::NotFound, "No evoked data in {}", file);
+    file.m_sets = meas->dir_tree_find(FIFFB_EVOKED);
+    if (file.m_sets.isEmpty()) {
+        return fail(ErrorCode::NotFound, "No evoked data in {}", file.m_file);
     }
+    QString listing;
+    stream.get_evoked_entries(file.m_sets, file.m_comments, file.m_kinds, listing);
+    return file;
+}
 
-    int setno = -1;
+//=============================================================================================================
+
+Expected<int> FiffEvokedFile::find(const FiffEvoked::Condition& condition, fiff_int_t kind) const
+{
     if (const int* index = std::get_if<int>(&condition)) {
-        setno = *index;
+        if (*index >= 0 && *index < m_sets.size()) {
+            return *index;
+        }
     } else {
         const QString wanted = QString::fromStdString(std::get<std::string>(condition));
-        QStringList comments;
-        QList<fiff_int_t> aspect_kinds;
-        QString t;
-        t_pStream->get_evoked_entries(evoked_node, comments, aspect_kinds, t);
-        setno = static_cast<int>(comments.size());
-        for (qsizetype i = 0; i < comments.size(); ++i) {
-            if (comments[i] == wanted && aspect_kinds[i] == kind) {
-                setno = static_cast<int>(i);
-                break;
+        for (qsizetype i = 0; i < m_comments.size(); ++i) {
+            if (m_comments[i] == wanted && m_kinds[i] == kind) {
+                return static_cast<int>(i);
             }
         }
     }
-    if (setno < 0 || setno >= evoked_node.size()) {
-        return fail(ErrorCode::NotFound, "No evoked data set {} of kind {} in {}",
-                    std::visit([](const auto& c) { return std::format("{}", c); }, condition), kind, file);
-    }
+    return fail(ErrorCode::NotFound, "No evoked data set {} of kind {} in {}",
+                std::visit([](const auto& c) { return std::format("{}", c); }, condition), kind, m_file);
+}
 
+//=============================================================================================================
+
+Expected<FiffEvoked> FiffEvokedFile::read(int set, const FiffEvoked::Baseline& baseline, bool proj)
+{
+    FiffInfo info = this->info;
+    const std::string& file = m_file;
     FiffEvoked p_FiffEvoked;
-    FiffDirNode::SPtr my_evoked = evoked_node[setno];
+    FiffDirNode::SPtr my_evoked = m_sets[set];
 
     //
     //   Identify the aspects
     //
     QList<FiffDirNode::SPtr> aspects = my_evoked->dir_tree_find(FIFFB_ASPECT);
+    if (aspects.isEmpty()) {
+        return fail(ErrorCode::Format, "Evoked data set {} without data in {}", set, file);
+    }
 
     if (aspects.size() > 1)
         qInfo("\tMultiple (%lld) aspects found. Taking first one.\n", static_cast<long long>(aspects.size()));
@@ -227,27 +247,27 @@ Expected<FiffEvoked> FiffEvoked::read(const std::filesystem::path& path,
         pos = my_evoked->dir[k]->pos;
         switch (tag_kind) {
             case FIFF_COMMENT:
-                t_pStream->read_tag(t_pTag, pos);
+                m_stream.read_tag(t_pTag, pos);
                 comment = QString::fromStdString(t_pTag->toString());
                 break;
             case FIFF_FIRST_SAMPLE:
-                t_pStream->read_tag(t_pTag, pos);
+                m_stream.read_tag(t_pTag, pos);
                 first = *t_pTag->toInt();
                 break;
             case FIFF_LAST_SAMPLE:
-                t_pStream->read_tag(t_pTag, pos);
+                m_stream.read_tag(t_pTag, pos);
                 last = *t_pTag->toInt();
                 break;
             case FIFF_NCHAN:
-                t_pStream->read_tag(t_pTag, pos);
+                m_stream.read_tag(t_pTag, pos);
                 nchan = *t_pTag->toInt();
                 break;
             case FIFF_SFREQ:
-                t_pStream->read_tag(t_pTag, pos);
+                m_stream.read_tag(t_pTag, pos);
                 sfreq = *t_pTag->toFloat();
                 break;
             case FIFF_CH_INFO:
-                t_pStream->read_tag(t_pTag, pos);
+                m_stream.read_tag(t_pTag, pos);
                 chs.append(t_pTag->toChInfo());
                 break;
         }
@@ -289,19 +309,19 @@ Expected<FiffEvoked> FiffEvoked::read(const std::filesystem::path& path,
 
         switch (tag_kind) {
             case FIFF_COMMENT:
-                t_pStream->read_tag(t_pTag, pos);
+                m_stream.read_tag(t_pTag, pos);
                 comment = QString::fromStdString(t_pTag->toString());
                 break;
             case FIFF_ASPECT_KIND:
-                t_pStream->read_tag(t_pTag, pos);
+                m_stream.read_tag(t_pTag, pos);
                 aspect_kind = *t_pTag->toInt();
                 break;
             case FIFF_NAVE:
-                t_pStream->read_tag(t_pTag, pos);
+                m_stream.read_tag(t_pTag, pos);
                 nave = *t_pTag->toInt();
                 break;
             case FIFF_EPOCH:
-                t_pStream->read_tag(t_pTag, pos);
+                m_stream.read_tag(t_pTag, pos);
                 epoch.append(FiffTag(*t_pTag));
                 break;
         }
