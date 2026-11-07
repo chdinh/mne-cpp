@@ -75,10 +75,7 @@ class FiffCoordTrans;
 class FIFFSHARED_EXPORT FiffDigitizerData
 {
 public:
-    using SPtr = QSharedPointer<FiffDigitizerData>;             /**< Shared pointer type for FiffDigitizerData. */
-    using ConstSPtr = QSharedPointer<const FiffDigitizerData>;  /**< Const shared pointer type for FiffDigitizerData. */
-    using UPtr = std::unique_ptr<FiffDigitizerData>;            /**< Unique pointer type for FiffDigitizerData. */
-    using ConstUPtr = std::unique_ptr<const FiffDigitizerData>; /**< Const unique pointer type for FiffDigitizerData. */
+    using SPtr = QSharedPointer<FiffDigitizerData>; /**< Shared pointer type for FiffDigitizerData. */
 
     //=========================================================================================================
     /**

@@ -87,9 +87,6 @@ namespace BIDSLIB
 class BIDSSHARED_EXPORT BidsRawData
 {
 public:
-    using SPtr = QSharedPointer<BidsRawData>;
-    using ConstSPtr = QSharedPointer<const BidsRawData>;
-
     //=========================================================================================================
     /**
      * @brief Options controlling how write() operates.

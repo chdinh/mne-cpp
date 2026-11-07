@@ -90,11 +90,8 @@ struct RejectionParams;
 class FIFFSHARED_EXPORT FiffCov : public QSharedData
 {
 public:
-    using SPtr = QSharedPointer<FiffCov>;             /**< Shared pointer type for FiffCov. */
-    using ConstSPtr = QSharedPointer<const FiffCov>;  /**< Const shared pointer type for FiffCov. */
-    using UPtr = std::unique_ptr<FiffCov>;            /**< Unique pointer type for FiffCov. */
-    using ConstUPtr = std::unique_ptr<const FiffCov>; /**< Const unique pointer type for FiffCov. */
-    using SDPtr = QSharedDataPointer<FiffCov>;        /**< Shared data pointer type for FiffCov. */
+    using SPtr = QSharedPointer<FiffCov>;      /**< Shared pointer type for FiffCov. */
+    using SDPtr = QSharedDataPointer<FiffCov>; /**< Shared data pointer type for FiffCov. */
 
     //=========================================================================================================
     /**

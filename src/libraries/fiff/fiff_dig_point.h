@@ -69,11 +69,6 @@ namespace FIFFLIB
 class FIFFSHARED_EXPORT FiffDigPoint
 {
 public:
-    using SPtr = QSharedPointer<FiffDigPoint>;             /**< Shared pointer type for FiffDigPoint. */
-    using ConstSPtr = QSharedPointer<const FiffDigPoint>;  /**< Const shared pointer type for FiffDigPoint. */
-    using UPtr = std::unique_ptr<FiffDigPoint>;            /**< Unique pointer type for FiffDigPoint. */
-    using ConstUPtr = std::unique_ptr<const FiffDigPoint>; /**< Const unique pointer type for FiffDigPoint. */
-
     //=========================================================================================================
     /**
      * Constructs the digitization point description

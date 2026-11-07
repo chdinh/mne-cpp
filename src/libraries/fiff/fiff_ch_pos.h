@@ -64,11 +64,6 @@ namespace FIFFLIB
 class FIFFSHARED_EXPORT FiffChPos
 {
 public:
-    using SPtr = QSharedPointer<FiffChPos>;             /**< Shared pointer type for FiffChPos. */
-    using ConstSPtr = QSharedPointer<const FiffChPos>;  /**< Const shared pointer type for FiffChPos. */
-    using UPtr = std::unique_ptr<FiffChPos>;            /**< Unique pointer type for FiffChPos. */
-    using ConstUPtr = std::unique_ptr<const FiffChPos>; /**< Const unique pointer type for FiffChPos. */
-
     //=========================================================================================================
     /**
      * Constructs the coil position descriptor.

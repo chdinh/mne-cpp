@@ -113,9 +113,6 @@ enum class KMeansEmptyAction
 class MATHSHARED_EXPORT KMeans
 {
 public:
-    using SPtr = std::shared_ptr<KMeans>;            /**< Shared pointer type for KMeans. */
-    using ConstSPtr = std::shared_ptr<const KMeans>; /**< Const shared pointer type for KMeans. */
-
     //=========================================================================================================
     /**
      * Constructs a KMeans algorithm object.

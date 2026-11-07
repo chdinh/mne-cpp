@@ -83,10 +83,8 @@ class FiffTag;
 class FIFFSHARED_EXPORT FiffDirNode
 {
 public:
-    using SPtr = QSharedPointer<FiffDirNode>;             /**< Shared pointer type for FiffDirNode. */
-    using ConstSPtr = QSharedPointer<const FiffDirNode>;  /**< Const shared pointer type for FiffDirNode. */
-    using UPtr = std::unique_ptr<FiffDirNode>;            /**< Unique pointer type for FiffDirNode. */
-    using ConstUPtr = std::unique_ptr<const FiffDirNode>; /**< Const unique pointer type for FiffDirNode. */
+    using SPtr = QSharedPointer<FiffDirNode>;  /**< Shared pointer type for FiffDirNode. */
+    using UPtr = std::unique_ptr<FiffDirNode>; /**< Unique pointer type for FiffDirNode. */
 
     //=========================================================================================================
     /**

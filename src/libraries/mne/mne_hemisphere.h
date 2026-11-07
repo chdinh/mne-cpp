@@ -72,8 +72,7 @@ namespace MNELIB
 class MNESHARED_EXPORT MNEHemisphere : public MNESourceSpace
 {
 public:
-    using SPtr = std::shared_ptr<MNEHemisphere>;            /**< Shared pointer type for MNEHemisphere. */
-    using ConstSPtr = std::shared_ptr<const MNEHemisphere>; /**< Const shared pointer type for MNEHemisphere. */
+    using SPtr = std::shared_ptr<MNEHemisphere>; /**< Shared pointer type for MNEHemisphere. */
 
     //=========================================================================================================
     /**

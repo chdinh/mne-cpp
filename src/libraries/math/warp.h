@@ -78,9 +78,6 @@ namespace UTILSLIB
 class MATHSHARED_EXPORT Warp
 {
 public:
-    using SPtr = std::shared_ptr<Warp>;            /**< Shared pointer type for Warp. */
-    using ConstSPtr = std::shared_ptr<const Warp>; /**< Const shared pointer type for Warp. */
-
     //=========================================================================================================
     /**
      * Calculates the TPS Warp of given setup

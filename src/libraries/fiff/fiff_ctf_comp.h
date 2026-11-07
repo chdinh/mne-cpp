@@ -76,11 +76,6 @@ namespace FIFFLIB
 class FIFFSHARED_EXPORT FiffCtfComp
 {
 public:
-    using SPtr = QSharedPointer<FiffCtfComp>;             /**< Shared pointer type for FiffCtfComp. */
-    using ConstSPtr = QSharedPointer<const FiffCtfComp>;  /**< Const shared pointer type for FiffCtfComp. */
-    using UPtr = std::unique_ptr<FiffCtfComp>;            /**< Unique pointer type for FiffCtfComp. */
-    using ConstUPtr = std::unique_ptr<const FiffCtfComp>; /**< Const unique pointer type for FiffCtfComp. */
-
     //=========================================================================================================
     /**
      * Constructs the CTF software compensation data

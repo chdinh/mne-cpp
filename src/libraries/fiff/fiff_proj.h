@@ -81,11 +81,6 @@ class FiffEvoked;
 class FIFFSHARED_EXPORT FiffProj
 {
 public:
-    using SPtr = QSharedPointer<FiffProj>;             /**< Shared pointer type for FiffProj. */
-    using ConstSPtr = QSharedPointer<const FiffProj>;  /**< Const shared pointer type for FiffProj. */
-    using UPtr = std::unique_ptr<FiffProj>;            /**< Unique pointer type for FiffProj. */
-    using ConstUPtr = std::unique_ptr<const FiffProj>; /**< Const unique pointer type for FiffProj. */
-
     //=========================================================================================================
     /**
      * Default constructor.

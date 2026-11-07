@@ -76,11 +76,6 @@ namespace FIFFLIB
 class FIFFSHARED_EXPORT FiffInfoBase
 {
 public:
-    using SPtr = QSharedPointer<FiffInfoBase>;             /**< Shared pointer type for FiffInfoBase. */
-    using ConstSPtr = QSharedPointer<const FiffInfoBase>;  /**< Const shared pointer type for FiffInfoBase. */
-    using UPtr = std::unique_ptr<FiffInfoBase>;            /**< Unique pointer type for FiffInfoBase. */
-    using ConstUPtr = std::unique_ptr<const FiffInfoBase>; /**< Const unique pointer type for FiffInfoBase. */
-
     //=========================================================================================================
     /**
      * Constructors the light fiff measurement file information.

@@ -73,10 +73,7 @@ namespace FIFFLIB
 class FIFFSHARED_EXPORT FiffSparseMatrix
 {
 public:
-    using SPtr = QSharedPointer<FiffSparseMatrix>;             /**< Shared pointer type for FiffSparseMatrix. */
-    using ConstSPtr = QSharedPointer<const FiffSparseMatrix>;  /**< Const shared pointer type for FiffSparseMatrix. */
-    using UPtr = std::unique_ptr<FiffSparseMatrix>;            /**< Unique pointer type for FiffSparseMatrix. */
-    using ConstUPtr = std::unique_ptr<const FiffSparseMatrix>; /**< Const unique pointer type for FiffSparseMatrix. */
+    using UPtr = std::unique_ptr<FiffSparseMatrix>; /**< Unique pointer type for FiffSparseMatrix. */
 
     //=========================================================================================================
     /**

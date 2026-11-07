@@ -72,8 +72,6 @@ using BidsTsvRow = QMap<QString, QString>;
 class BIDSSHARED_EXPORT BidsTsv
 {
 public:
-    using SPtr = QSharedPointer<BidsTsv>;
-
     BidsTsv();
     ~BidsTsv();
 

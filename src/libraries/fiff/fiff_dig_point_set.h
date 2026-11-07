@@ -84,10 +84,8 @@ class FiffDirNode;
 class FIFFSHARED_EXPORT FiffDigPointSet
 {
 public:
-    using SPtr = QSharedPointer<FiffDigPointSet>;             /**< Shared pointer type for FiffDigPointSet. */
-    using ConstSPtr = QSharedPointer<const FiffDigPointSet>;  /**< Const shared pointer type for FiffDigPointSet. */
-    using UPtr = std::unique_ptr<FiffDigPointSet>;            /**< Unique pointer type for FiffDigPointSet. */
-    using ConstUPtr = std::unique_ptr<const FiffDigPointSet>; /**< Const unique pointer type for FiffDigPointSet. */
+    using SPtr = QSharedPointer<FiffDigPointSet>;  /**< Shared pointer type for FiffDigPointSet. */
+    using UPtr = std::unique_ptr<FiffDigPointSet>; /**< Unique pointer type for FiffDigPointSet. */
 
     //=========================================================================================================
     /**

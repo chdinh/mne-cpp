@@ -109,10 +109,7 @@ struct FiffDeviceInfo
 class FIFFSHARED_EXPORT FiffInfo : public FiffInfoBase
 {
 public:
-    using SPtr = QSharedPointer<FiffInfo>;             /**< Shared pointer type for FiffInfo. */
-    using ConstSPtr = QSharedPointer<const FiffInfo>;  /**< Const shared pointer type for FiffInfo. */
-    using UPtr = std::unique_ptr<FiffInfo>;            /**< Unique pointer type for FiffInfo. */
-    using ConstUPtr = std::unique_ptr<const FiffInfo>; /**< Const unique pointer type for FiffInfo. */
+    using SPtr = QSharedPointer<FiffInfo>; /**< Shared pointer type for FiffInfo. */
 
     //=========================================================================================================
     /**

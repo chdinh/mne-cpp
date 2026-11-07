@@ -160,10 +160,7 @@ inline constexpr auto DATA_TYPE = 0x0000FFFF;           /**< DATA_TYPE encoding 
 class FIFFSHARED_EXPORT FiffTag : public QByteArray
 {
 public:
-    using SPtr = QSharedPointer<FiffTag>;             /**< Shared pointer type for FiffTag. */
-    using ConstSPtr = QSharedPointer<const FiffTag>;  /**< Const shared pointer type for FiffTag. */
-    using UPtr = std::unique_ptr<FiffTag>;            /**< Unique pointer type for FiffTag. */
-    using ConstUPtr = std::unique_ptr<const FiffTag>; /**< Const unique pointer type for FiffTag. */
+    using UPtr = std::unique_ptr<FiffTag>; /**< Unique pointer type for FiffTag. */
 
     //=========================================================================================================
     /**

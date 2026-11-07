@@ -82,8 +82,7 @@ namespace MNELIB
 class MNESHARED_EXPORT MNESourceSpaces
 {
 public:
-    using SPtr = std::shared_ptr<MNESourceSpaces>;            /**< Shared pointer type for MNESourceSpaces. */
-    using ConstSPtr = std::shared_ptr<const MNESourceSpaces>; /**< Const shared pointer type for MNESourceSpaces. */
+    using SPtr = std::shared_ptr<MNESourceSpaces>; /**< Shared pointer type for MNESourceSpaces. */
 
     //=========================================================================================================
     /**

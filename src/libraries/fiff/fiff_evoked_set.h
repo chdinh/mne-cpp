@@ -166,10 +166,7 @@ struct FIFFSHARED_EXPORT AverageDescription
 class FIFFSHARED_EXPORT FiffEvokedSet
 {
 public:
-    using SPtr = QSharedPointer<FiffEvokedSet>;             /**< Shared pointer type for FiffEvokedSet. */
-    using ConstSPtr = QSharedPointer<const FiffEvokedSet>;  /**< Const shared pointer type for FiffEvokedSet. */
-    using UPtr = std::unique_ptr<FiffEvokedSet>;            /**< Unique pointer type for FiffEvokedSet. */
-    using ConstUPtr = std::unique_ptr<const FiffEvokedSet>; /**< Const unique pointer type for FiffEvokedSet. */
+    using SPtr = QSharedPointer<FiffEvokedSet>; /**< Shared pointer type for FiffEvokedSet. */
 
     //=========================================================================================================
     /**

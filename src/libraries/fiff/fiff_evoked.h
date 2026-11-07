@@ -83,10 +83,8 @@ namespace FIFFLIB
 class FIFFSHARED_EXPORT FiffEvoked
 {
 public:
-    using SPtr = QSharedPointer<FiffEvoked>;             /**< Shared pointer type for FiffEvoked. */
-    using ConstSPtr = QSharedPointer<const FiffEvoked>;  /**< Const shared pointer type for FiffEvoked. */
-    using UPtr = std::unique_ptr<FiffEvoked>;            /**< Unique pointer type for FiffEvoked. */
-    using ConstUPtr = std::unique_ptr<const FiffEvoked>; /**< Const unique pointer type for FiffEvoked. */
+    using SPtr = QSharedPointer<FiffEvoked>;  /**< Shared pointer type for FiffEvoked. */
+    using UPtr = std::unique_ptr<FiffEvoked>; /**< Unique pointer type for FiffEvoked. */
 
     //=========================================================================================================
     /**

@@ -77,11 +77,6 @@ namespace FIFFLIB
 class FIFFSHARED_EXPORT FiffChInfo
 {
 public:
-    using SPtr = QSharedPointer<FiffChInfo>;             /**< Shared pointer type for FiffChInfo. */
-    using ConstSPtr = QSharedPointer<const FiffChInfo>;  /**< Const shared pointer type for FiffChInfo. */
-    using UPtr = std::unique_ptr<FiffChInfo>;            /**< Unique pointer type for FiffChInfo. */
-    using ConstUPtr = std::unique_ptr<const FiffChInfo>; /**< Const unique pointer type for FiffChInfo. */
-
     //=========================================================================================================
     /**
      * Constructs the channel info descriptor.

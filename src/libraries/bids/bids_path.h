@@ -73,9 +73,6 @@ namespace BIDSLIB
 class BIDSSHARED_EXPORT BIDSPath
 {
 public:
-    using SPtr = QSharedPointer<BIDSPath>;            /**< Shared pointer type for BIDSPath. */
-    using ConstSPtr = QSharedPointer<const BIDSPath>; /**< Const shared pointer type for BIDSPath. */
-
     //=========================================================================================================
     /**
      * Constructs an empty BIDSPath.
