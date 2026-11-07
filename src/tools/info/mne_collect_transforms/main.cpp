@@ -105,9 +105,9 @@ int main(int argc, char* argv[])
 
     FiffCoordTrans devHeadT;
     if (!measName.isEmpty()) {
-        const auto read = FiffCoordTrans::read(UTILSLIB::pathFromUtf8(measName.toStdString()), FIFFV_COORD_DEVICE, FIFFV_COORD_HEAD);
+        const auto read = FiffCoordTrans::read(measName.toStdU16String(), FIFFV_COORD_DEVICE, FIFFV_COORD_HEAD);
         if (!read) {
-            qCritical("%s", read.error().message.c_str());
+            qCritical("%s", read.error().what());
             return 1;
         }
         devHeadT = *read;

@@ -337,7 +337,7 @@ bool FiffSimulator::readRawInfo()
     if (m_RawInfo.isEmpty()) {
         QMutexLocker locker(&mutex);
 
-        if (!FiffStream::setup_read_raw(UTILSLIB::pathFromUtf8(m_sResourceDataPath.toStdString()), m_RawInfo)) {
+        if (!FiffStream::setup_read_raw(m_sResourceDataPath.toStdU16String(), m_RawInfo)) {
             qInfo("Error: Not able to read raw info!");
             m_RawInfo.clear();
             return false;

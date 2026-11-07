@@ -289,7 +289,7 @@ bool AverageModel::setData(const QModelIndex& index, const QVariant& value, int 
 bool AverageModel::loadEvokedData(QFile& qFile)
 {
     FiffEvokedSet evokedSet;
-    FiffEvokedSet::read(UTILSLIB::pathFromUtf8(qFile.fileName().toStdString()), evokedSet);
+    FiffEvokedSet::read(qFile.fileName().toStdU16String(), evokedSet);
 
     return setEvokedData(evokedSet);
 }
@@ -330,7 +330,7 @@ bool AverageModel::saveEvokedData(QFile& qFile)
         return false;
     }
 
-    return m_pEvokedDataSet->save(UTILSLIB::pathFromUtf8(qFile.fileName().toStdString()));
+    return m_pEvokedDataSet->save(qFile.fileName().toStdU16String());
 }
 
 

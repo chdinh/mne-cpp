@@ -118,7 +118,7 @@ int main(int argc, char* argv[])
     //=========================================================================
     // Read measurement info for channel names and types
     //=========================================================================
-    FiffRawData raw(UTILSLIB::pathFromUtf8(measFile.toStdString()));
+    FiffRawData raw(measFile.toStdU16String());
     if (raw.info.isEmpty()) {
         qCritical("Cannot read measurement info from: %s", qPrintable(measFile));
         return 1;
@@ -249,7 +249,7 @@ int main(int argc, char* argv[])
     cov.data = selCov;
     cov.nfree = nFree;
 
-    if (!cov.save(UTILSLIB::pathFromUtf8(covFile.toStdString()))) {
+    if (!cov.save(covFile.toStdU16String())) {
         qCritical("Cannot write output file: %s", qPrintable(covFile));
         return 1;
     }

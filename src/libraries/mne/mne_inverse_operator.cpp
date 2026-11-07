@@ -1176,11 +1176,11 @@ void MNEInverseOperator::writeToStream(FiffStream& stream)
     //   write the various priors
     //
     qInfo("\tWriting orientation priors.\n");
-    if (this->orient_prior && !this->orient_prior->isEmpty())
+    if (this->orient_prior && !this->orient_prior->is_empty())
         stream.write_cov(*this->orient_prior.data());
-    if (this->depth_prior && !this->depth_prior->isEmpty())
+    if (this->depth_prior && !this->depth_prior->is_empty())
         stream.write_cov(*this->depth_prior.data());
-    if (this->fmri_prior && !this->fmri_prior->isEmpty())
+    if (this->fmri_prior && !this->fmri_prior->is_empty())
         stream.write_cov(*this->fmri_prior.data());
 
     //

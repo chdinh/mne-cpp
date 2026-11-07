@@ -243,7 +243,7 @@ DataLoader::SensorLoadResult DataLoader::loadSensors(const QString& fifPath,
         result.digitizerPoints = info.dig;
         result.hasDigitizer = true;
     } else if (!result.hasInfo) {
-        digSet = FiffDigPointSet(UTILSLIB::pathFromUtf8(fifPath.toStdString()));
+        digSet = FiffDigPointSet(fifPath.toStdU16String());
         if (digSet.size() > 0) {
             for (int i = 0; i < digSet.size(); ++i) {
                 result.digitizerPoints.append(digSet[i]);
@@ -355,9 +355,9 @@ bool DataLoader::loadHeadToMriTransform(const QString& transPath,
                                         FiffCoordTrans& trans)
 {
     // A file may hold several transforms (e.g. all-trans.fif: device -> head and MRI -> head)
-    const auto read = FiffCoordTrans::read(UTILSLIB::pathFromUtf8(transPath.toStdString()), FIFFV_COORD_HEAD, FIFFV_COORD_MRI);
+    const auto read = FiffCoordTrans::read(transPath.toStdU16String(), FIFFV_COORD_HEAD, FIFFV_COORD_MRI);
     if (!read) {
-        UTILSLIB::Log::warning("DataLoader: {}", read.error().message);
+        UTILSLIB::Log::warning("DataLoader: {}", read.error().what());
         return false;
     }
     trans = *read;
@@ -374,7 +374,7 @@ FiffEvoked DataLoader::loadEvoked(const QString& evokedPath, int aveIndex)
         return {};
     }
 
-    FiffEvoked evoked(UTILSLIB::pathFromUtf8(evokedPath.toStdString()), aveIndex);
+    FiffEvoked evoked(evokedPath.toStdU16String(), aveIndex);
     if (evoked.isEmpty()) {
         qWarning() << "DataLoader: Failed to read evoked data from" << evokedPath;
     }
@@ -392,7 +392,7 @@ QStringList DataLoader::probeEvokedSets(const QString& evokedPath)
     }
 
     FiffEvokedSet evokedSet;
-    if (!FiffEvokedSet::read(UTILSLIB::pathFromUtf8(evokedPath.toStdString()), evokedSet)) {
+    if (!FiffEvokedSet::read(evokedPath.toStdU16String(), evokedSet)) {
         return result;
     }
     for (int i = 0; i < evokedSet.evoked.size(); ++i) {

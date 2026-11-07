@@ -896,7 +896,7 @@ int main(int argc, char* argv[])
             qInfo("  Baseline: %.1f - %.1f ms",
                   bmin * 1000.0f, bmax * 1000.0f);
         }
-        FiffEvoked evoked(UTILSLIB::pathFromUtf8(measName.toStdString()), setNo, baseline);
+        FiffEvoked evoked(measName.toStdU16String(), setNo, baseline);
 
         if (evoked.isEmpty()) {
             qCritical() << "Error: Could not read evoked data set" << (setNo + 1)

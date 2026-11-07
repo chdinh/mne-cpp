@@ -236,7 +236,7 @@ void TestFwdPython::gradient_bemMeg()
     QVERIFY(model != nullptr);
     QCOMPARE(model->fwd_bem_load_recompute_solution(data("subjects/sample/bem/sample-5120-bem-sol.fif"), method, 0), 0);
     QCOMPARE(model->bem_method, method);
-    model->fwd_bem_set_head_mri_t(FiffCoordTrans::read(UTILSLIB::pathFromUtf8((data("MEG/sample/all-trans.fif")).toStdString()), FIFFV_COORD_MRI, FIFFV_COORD_HEAD).value());
+    model->fwd_bem_set_head_mri_t(FiffCoordTrans(data("MEG/sample/all-trans.fif").toStdU16String(), FIFFV_COORD_MRI, FIFFV_COORD_HEAD));
 
     auto defs = FwdCoilSet::read_coil_defs(QCoreApplication::applicationDirPath() + "/../resources/general/coilDefinitions/coil_def.dat");
     auto coils = defs->create_meg_coils(m_meg, m_meg.size(), FWD_COIL_ACCURACY_NORMAL, m_raw.info.dev_head_t);
@@ -266,7 +266,7 @@ void TestFwdPython::gradient_bemEeg()
     QVERIFY(model != nullptr);
     QCOMPARE(model->fwd_bem_load_recompute_solution(data("subjects/sample/bem/sample-1280-1280-1280-bem-sol.fif"), method, 0), 0);
     QCOMPARE(model->bem_method, method);
-    model->fwd_bem_set_head_mri_t(FiffCoordTrans::read(UTILSLIB::pathFromUtf8((data("MEG/sample/all-trans.fif")).toStdString()), FIFFV_COORD_MRI, FIFFV_COORD_HEAD).value());
+    model->fwd_bem_set_head_mri_t(FiffCoordTrans(data("MEG/sample/all-trans.fif").toStdU16String(), FIFFV_COORD_MRI, FIFFV_COORD_HEAD));
 
     auto els = FwdCoilSet::create_eeg_els(m_eeg, m_eeg.size());
     QVERIFY(els != nullptr);
@@ -482,7 +482,7 @@ void TestFwdPython::labelForward_variants()
     }
     if (asciiTrans) {
         // FreeSurfer-style head -> MRI text transform, translation in mm.
-        const FiffCoordTrans headMri = FiffCoordTrans::read(UTILSLIB::pathFromUtf8((data("MEG/sample/all-trans.fif")).toStdString()), FIFFV_COORD_MRI, FIFFV_COORD_HEAD).value().inverted();
+        const FiffCoordTrans headMri = FiffCoordTrans(data("MEG/sample/all-trans.fif").toStdU16String(), FIFFV_COORD_MRI, FIFFV_COORD_HEAD).inverted();
         QFile file(m_dir.filePath("head-mri.txt"));
         QVERIFY(file.open(QIODevice::WriteOnly | QIODevice::Text));
         QTextStream out(&file);

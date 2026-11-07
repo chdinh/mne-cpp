@@ -357,7 +357,7 @@ void CoRegistration::onFiducialsChanged(const QString& sFilePath)
 
 void CoRegistration::onStoreFiducials(const QString& sFilePath)
 {
-    m_digFidMri.write(UTILSLIB::pathFromUtf8(sFilePath.toStdString()));
+    m_digFidMri.write(sFilePath.toStdU16String());
     return;
 }
 
@@ -365,9 +365,9 @@ void CoRegistration::onStoreFiducials(const QString& sFilePath)
 
 void CoRegistration::onLoadTrans(const QString& sFilePath)
 {
-    const auto read = FiffCoordTrans::read(UTILSLIB::pathFromUtf8(sFilePath.toStdString()));
+    const auto read = FiffCoordTrans::read(sFilePath.toStdU16String());
     if (!read) {
-        qWarning("[CoRegistration::onLoadTrans] %s", read.error().message.c_str());
+        qWarning("[CoRegistration::onLoadTrans] %s", read.error().what());
         return;
     }
     FiffCoordTrans transTemp = *read;
@@ -412,8 +412,8 @@ void CoRegistration::onLoadTrans(const QString& sFilePath)
 void CoRegistration::onStoreTrans(const QString& sFilePath)
 {
     if (!m_transHeadMri.is_empty()) {
-        if (const auto written = m_transHeadMri.write(UTILSLIB::pathFromUtf8(sFilePath.toStdString())); !written) {
-            qWarning("[CoRegistration::onStoreTrans] %s", written.error().message.c_str());
+        if (const auto written = m_transHeadMri.write(sFilePath.toStdU16String()); !written) {
+            qWarning("[CoRegistration::onStoreTrans] %s", written.error().what());
         }
     }
     return;

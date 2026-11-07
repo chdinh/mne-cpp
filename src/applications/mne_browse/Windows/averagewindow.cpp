@@ -130,7 +130,7 @@ bool whitenButterflyEvoked(FIFFLIB::FiffEvoked& evoked,
                            const FIFFLIB::FiffCov& covariance,
                            const WhiteningSettings& settings)
 {
-    if (covariance.isEmpty() || evoked.isEmpty() || evoked.data.rows() == 0) {
+    if (covariance.is_empty() || evoked.isEmpty() || evoked.data.rows() == 0) {
         return false;
     }
 
@@ -144,7 +144,7 @@ bool whitenButterflyEvoked(FIFFLIB::FiffEvoked& evoked,
     const FIFFLIB::FiffCov preparedCov =
         regularizedCov.prepare_noise_cov(evoked.info, evoked.info.ch_names);
 
-    if (preparedCov.isEmpty() || preparedCov.dim != evoked.data.rows()) {
+    if (preparedCov.is_empty() || preparedCov.dim != evoked.data.rows()) {
         return false;
     }
 
@@ -338,7 +338,7 @@ WhiteningSettings AverageWindow::whiteningSettings() const
 
 void AverageWindow::setButterflyWhiteningEnabled(bool enabled)
 {
-    if (enabled && m_noiseCovariance.isEmpty()) {
+    if (enabled && m_noiseCovariance.is_empty()) {
         return;
     }
 

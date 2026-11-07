@@ -184,9 +184,9 @@ void ComputeFwd::initFwd()
 
     // Read the MRI -> head coordinate transformation
     if (!m_pSettings->mriname.isEmpty()) {
-        const auto mriHead = FiffCoordTrans::read(UTILSLIB::pathFromUtf8(m_pSettings->mriname.toStdString()), FIFFV_COORD_MRI, FIFFV_COORD_HEAD);
+        const auto mriHead = FiffCoordTrans::read(m_pSettings->mriname.toStdU16String(), FIFFV_COORD_MRI, FIFFV_COORD_HEAD);
         if (!mriHead) {
-            UTILSLIB::Log::critical("{}", mriHead.error().message);
+            UTILSLIB::Log::critical("{}", mriHead.error().what());
             return;
         }
         m_mri_head_t = *mriHead;
@@ -209,9 +209,9 @@ void ComputeFwd::initFwd()
             return;
         }
     } else if (!m_pSettings->transname.isEmpty()) {
-        const auto headMri = FiffCoordTrans::read_ascii(UTILSLIB::pathFromUtf8(m_pSettings->transname.toStdString()), FIFFV_COORD_HEAD, FIFFV_COORD_MRI);
+        const auto headMri = FiffCoordTrans::read_ascii(m_pSettings->transname.toStdU16String(), FIFFV_COORD_HEAD, FIFFV_COORD_MRI);
         if (!headMri) {
-            UTILSLIB::Log::critical("{}", headMri.error().message);
+            UTILSLIB::Log::critical("{}", headMri.error().what());
             return;
         }
         m_mri_head_t = headMri->inverted();

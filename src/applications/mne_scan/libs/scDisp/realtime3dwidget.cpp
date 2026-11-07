@@ -203,7 +203,7 @@ void RealTime3DWidget::update(SCMEASLIB::Measurement::SPtr pMeasurement)
         if (QSharedPointer<HpiFitResult> pHpiFitResult = pRTHR->getValue()) {
             if (m_sFilePathDigitizers != pHpiFitResult->sFilePathDigitzers && m_pBemHeadAvr) {
                 //Add all digitizer but additional points to the 3D view
-                FiffDigPointSet digSet(UTILSLIB::pathFromUtf8(pHpiFitResult->sFilePathDigitzers.toStdString()));
+                FiffDigPointSet digSet(pHpiFitResult->sFilePathDigitzers.toStdU16String());
                 addDigSetToView(digSet);
                 alignFiducials(pHpiFitResult->sFilePathDigitzers);
             }
@@ -246,7 +246,7 @@ void RealTime3DWidget::alignFiducials(const QString& sFilePath)
 {
     m_sFilePathDigitizers = sFilePath;
 
-    QSharedPointer<FIFFLIB::FiffDigitizerData> t_digData = QSharedPointer<FIFFLIB::FiffDigitizerData>::create(UTILSLIB::pathFromUtf8(sFilePath.toStdString()));
+    QSharedPointer<FIFFLIB::FiffDigitizerData> t_digData = QSharedPointer<FIFFLIB::FiffDigitizerData>::create(sFilePath.toStdU16String());
 
     alignFiducials(t_digData);
 }
@@ -266,7 +266,7 @@ void RealTime3DWidget::alignFiducials(QSharedPointer<FIFFLIB::FiffDigitizerData>
 
 
     Eigen::Vector3f scales;
-    QScopedPointer<FiffDigitizerData> t_digDataReference(new FiffDigitizerData(UTILSLIB::pathFromUtf8((QCoreApplication::applicationDirPath() + "/../resources/general/hpiAlignment/fsaverage-fiducials.fif").toStdString())));
+    QScopedPointer<FiffDigitizerData> t_digDataReference(new FiffDigitizerData((QCoreApplication::applicationDirPath() + "/../resources/general/hpiAlignment/fsaverage-fiducials.fif").toStdU16String()));
     surface->align_fiducials(*pDigData,
                              *t_digDataReference,
                              10,

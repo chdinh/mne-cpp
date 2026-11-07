@@ -126,7 +126,7 @@ int BatchProcessor::run(const ProcessingSettings& settings)
         // Open raw data file
         std::optional<FiffRawData> rawData;
         try {
-            rawData.emplace(UTILSLIB::pathFromUtf8(rawName.toStdString()));
+            rawData.emplace(rawName.toStdU16String());
         } catch (const std::exception& error) {
             qCritical() << "Failed to open raw data file:" << rawName << error.what();
             return 1;
@@ -155,9 +155,9 @@ int BatchProcessor::run(const ProcessingSettings& settings)
         if (!eventInFile.isEmpty()) {
             qInfo() << "Loading events from" << eventInFile;
             if (eventInFile.endsWith(".fif", Qt::CaseInsensitive)) {
-                FiffEvents::read_from_fif(UTILSLIB::pathFromUtf8(eventInFile.toStdString()), fiffEvents);
+                FiffEvents::read_from_fif(eventInFile.toStdU16String(), fiffEvents);
             } else {
-                FiffEvents::read_from_ascii(UTILSLIB::pathFromUtf8(eventInFile.toStdString()), fiffEvents);
+                FiffEvents::read_from_ascii(eventInFile.toStdU16String(), fiffEvents);
             }
         }
 
@@ -184,9 +184,9 @@ int BatchProcessor::run(const ProcessingSettings& settings)
         if (!eventOutFile.isEmpty()) {
             qInfo() << "\n--- Saving events to" << eventOutFile << "---\n";
             if (eventOutFile.endsWith(".fif", Qt::CaseInsensitive)) {
-                fiffEvents.write_to_fif(UTILSLIB::pathFromUtf8(eventOutFile.toStdString()));
+                fiffEvents.write_to_fif(eventOutFile.toStdU16String());
             } else {
-                fiffEvents.write_to_ascii(UTILSLIB::pathFromUtf8(eventOutFile.toStdString()), raw.info.sfreq);
+                fiffEvents.write_to_ascii(eventOutFile.toStdU16String(), raw.info.sfreq);
             }
         }
 
@@ -273,7 +273,7 @@ int BatchProcessor::run(const ProcessingSettings& settings)
 
         if (!saveFile.isEmpty()) {
             qInfo() << "\n--- Saving data to" << saveFile << "(decim =" << settings.decimation << ") ---\n";
-            if (!MNE::save_raw(raw, UTILSLIB::pathFromUtf8(saveFile.toStdString()), RowVectorXi(), settings.decimation)) {
+            if (!MNE::save_raw(raw, saveFile.toStdU16String(), RowVectorXi(), settings.decimation)) {
                 qCritical() << "Failed to save raw data.";
                 return 1;
             }
@@ -316,7 +316,7 @@ int BatchProcessor::run(const ProcessingSettings& settings)
             }
 
             if (!aveSaveName.isEmpty()) {
-                evokedSet.save(UTILSLIB::pathFromUtf8(aveSaveName.toStdString()));
+                evokedSet.save(aveSaveName.toStdU16String());
             }
             writeLog(aveLogName, aveLog);
 
@@ -377,7 +377,7 @@ int BatchProcessor::run(const ProcessingSettings& settings)
             if (defCovs.size() == 1) {
                 cov = defCovs[0];
             } else if (defCovs.size() > 1) {
-                cov = FiffCov::computeGrandAverage(defCovs);
+                cov = FiffCov::compute_grand_average(defCovs);
             }
 
             if (cov.dim > 0) {
@@ -391,7 +391,9 @@ int BatchProcessor::run(const ProcessingSettings& settings)
                 }
 
                 if (!covSaveName.isEmpty()) {
-                    cov.save(UTILSLIB::pathFromUtf8(covSaveName.toStdString()));
+                    if (const auto saved = cov.save(covSaveName.toStdU16String()); !saved) {
+                        qCritical("%s", saved.error().what());
+                    }
                 }
                 writeLog(covLogName, covLog);
 
@@ -426,15 +428,17 @@ int BatchProcessor::run(const ProcessingSettings& settings)
                 grandAvg.evoked.append(avg);
             }
             if (!grandAvg.evoked.isEmpty()) {
-                grandAvg.save(UTILSLIB::pathFromUtf8(settings.grandAveFile.toStdString()));
+                grandAvg.save(settings.grandAveFile.toStdU16String());
             }
         }
 
         if (!settings.grandCovFile.isEmpty() && !allCovariances.isEmpty()) {
             qInfo() << "\n--- Computing grand average covariance ---";
-            FiffCov grandCov = FiffCov::computeGrandAverage(allCovariances);
+            FiffCov grandCov = FiffCov::compute_grand_average(allCovariances);
             if (grandCov.dim > 0) {
-                grandCov.save(UTILSLIB::pathFromUtf8(settings.grandCovFile.toStdString()));
+                if (const auto saved = grandCov.save(settings.grandCovFile.toStdU16String()); !saved) {
+                    qCritical("%s", saved.error().what());
+                }
             }
         }
     }

@@ -394,7 +394,7 @@ void TestMnaInversePipeline::testExecuteRealPipeline()
         QVERIFY2(v.isValid(), "load_cov::noise_cov not in results");
         auto cov = v.value<QSharedPointer<FiffCov>>();
         QVERIFY2(!cov.isNull(), "FiffCov is null");
-        QVERIFY2(!cov->isEmpty(), "Noise covariance is empty");
+        QVERIFY2(!cov->is_empty(), "Noise covariance is empty");
         QVERIFY2(cov->data.rows() > 0, "Covariance matrix has 0 rows");
         QCOMPARE(cov->data.rows(), cov->data.cols()); // must be square
         QVERIFY(cov->names.size() > 0);

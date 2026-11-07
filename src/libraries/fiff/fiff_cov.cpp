@@ -55,6 +55,8 @@
 //=============================================================================================================
 
 using namespace FIFFLIB;
+using UTILSLIB::ErrorCode;
+using UTILSLIB::fail;
 using namespace UTILSLIB;
 using namespace Eigen;
 
@@ -75,35 +77,23 @@ FiffCov::FiffCov()
 //=============================================================================================================
 
 FiffCov::FiffCov(const std::filesystem::path& path)
-: kind(-1)
-, diag(false)
-, dim(-1)
-, nfree(-1)
+: FiffCov(read(path).value())
 {
-    if (!read(path, *this))
-        throw std::runtime_error("Fiff covariance not found");
-
-    qRegisterMetaType<QSharedPointer<FIFFLIB::FiffCov>>("QSharedPointer<FIFFLIB::FiffCov>");
-    qRegisterMetaType<FIFFLIB::FiffCov>("FIFFLIB::FiffCov");
 }
 
 //=============================================================================================================
 
-bool FiffCov::read(const std::filesystem::path& path, FiffCov& p_cov)
+UTILSLIB::Expected<FiffCov> FiffCov::read(const std::filesystem::path& path)
 {
-    auto t_pStream = FiffStream::open(path);
-    if (!t_pStream) {
-        UTILSLIB::Log::critical("{}", t_pStream.error().message);
-        return false;
+    auto stream = FiffStream::open(path);
+    if (!stream) {
+        return std::unexpected(stream.error());
     }
-
     FiffCov cov;
-    const bool found = t_pStream->read_cov(t_pStream->dirtree(), FIFFV_MNE_NOISE_COV, cov);
-    t_pStream->close();
-    if (found) {
-        p_cov = cov;
+    if (!stream->read_cov(stream->dirtree(), FIFFV_MNE_NOISE_COV, cov)) {
+        return fail(ErrorCode::NotFound, "No noise covariance in {}", UTILSLIB::utf8FromPath(path));
     }
-    return found;
+    return cov;
 }
 
 //=============================================================================================================
@@ -598,16 +588,11 @@ FiffCov FiffCov::compute_from_epochs(const QList<QList<MatrixXd>>& epochs,
 
 //=============================================================================================================
 
-bool FiffCov::save(const std::filesystem::path& path) const
+UTILSLIB::Expected<void> FiffCov::save(const std::filesystem::path& path) const
 {
-    if (path.empty()) {
-        qWarning() << "[FiffCov::save] Output file not specified.";
-        return false;
-    }
-
-    auto pStream = FiffStream::start_file(path);
+    auto pStream = path.empty() ? nullptr : FiffStream::start_file(path);
     if (!pStream) {
-        return false;
+        return fail(ErrorCode::Io, "Cannot write the covariance to '{}'", UTILSLIB::utf8FromPath(path));
     }
 
     pStream->start_block(FIFFB_MEAS);
@@ -617,18 +602,17 @@ bool FiffCov::save(const std::filesystem::path& path) const
     pStream->end_file();
     pStream->close();
 
-    qInfo("[FiffCov::save] Saved covariance matrix to %s", pStream->streamName().toUtf8().constData());
-    return true;
+    return {};
 }
 
 //=============================================================================================================
 
-FiffCov FiffCov::computeGrandAverage(const QList<FiffCov>& covs)
+FiffCov FiffCov::compute_grand_average(const QList<FiffCov>& covs)
 {
     FiffCov grandCov;
 
     if (covs.isEmpty()) {
-        qWarning() << "[FiffCov::computeGrandAverage] No covariance matrices provided.";
+        qWarning() << "[FiffCov::compute_grand_average] No covariance matrices provided.";
         return grandCov;
     }
 
@@ -638,7 +622,7 @@ FiffCov FiffCov::computeGrandAverage(const QList<FiffCov>& covs)
 
     for (int k = 1; k < covs.size(); ++k) {
         if (covs[k].dim != grandCov.dim) {
-            qWarning() << "[FiffCov::computeGrandAverage] Dimension mismatch.";
+            qWarning() << "[FiffCov::compute_grand_average] Dimension mismatch.";
             return FiffCov();
         }
         sumCov += covs[k].data * static_cast<double>(covs[k].nfree);

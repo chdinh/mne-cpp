@@ -379,7 +379,7 @@ private slots:
         ts.flush();
         tmp.close();
 
-        FiffCoordTrans t = FiffCoordTrans::read_ascii(UTILSLIB::pathFromUtf8((tmp.fileName()).toStdString()), FIFFV_COORD_HEAD, FIFFV_COORD_MRI).value();
+        FiffCoordTrans t = FiffCoordTrans::read_ascii(tmp.fileName().toStdU16String(), FIFFV_COORD_HEAD, FIFFV_COORD_MRI).value();
         QCOMPARE(t.from, (int)FIFFV_COORD_HEAD);
         QCOMPARE(t.to, (int)FIFFV_COORD_MRI);
         // Translation values are divided by 1000 (mm -> m)
@@ -402,7 +402,7 @@ private slots:
         ts.flush();
         tmp.close();
 
-        FiffCoordTrans t = FiffCoordTrans::read_ascii(UTILSLIB::pathFromUtf8((tmp.fileName()).toStdString()), FIFFV_COORD_MRI, FIFFV_COORD_HEAD).value();
+        FiffCoordTrans t = FiffCoordTrans::read_ascii(tmp.fileName().toStdU16String(), FIFFV_COORD_MRI, FIFFV_COORD_HEAD).value();
         QCOMPARE(t.from, (int)FIFFV_COORD_MRI);
         QVERIFY(qAbs(t.trans(0, 3) - 0.005f) < 1e-5f);
     }

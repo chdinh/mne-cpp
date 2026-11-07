@@ -196,7 +196,7 @@ int main(int argc, char* argv[])
     }
 
     // Load raw data
-    FiffRawData raw(UTILSLIB::pathFromUtf8(rawFile.toStdString()));
+    FiffRawData raw(rawFile.toStdU16String());
     if (raw.info.isEmpty()) {
         qCritical("Cannot read raw: %s", qPrintable(rawFile));
         return 1;

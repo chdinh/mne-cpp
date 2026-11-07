@@ -99,7 +99,7 @@ int main(int argc, char* argv[])
     }
 
     // Open raw data
-    FiffRawData raw(UTILSLIB::pathFromUtf8(rawFile.toStdString()));
+    FiffRawData raw(rawFile.toStdU16String());
     if (raw.info.isEmpty()) {
         qCritical("Cannot read raw data from: %s", qPrintable(rawFile));
         return 1;
@@ -151,7 +151,7 @@ int main(int argc, char* argv[])
 
     // Write output
     RowVectorXd cals;
-    auto outStream = FiffStream::start_writing_raw(UTILSLIB::pathFromUtf8(outFile.toStdString()), raw.info, cals);
+    auto outStream = FiffStream::start_writing_raw(outFile.toStdU16String(), raw.info, cals);
     if (!outStream) {
         qCritical("Cannot open output file: %s", qPrintable(outFile));
         return 1;

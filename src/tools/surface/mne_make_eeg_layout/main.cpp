@@ -113,7 +113,7 @@ int main(int argc, char* argv[])
     }
 
     // Read the FIFF file to get channel info
-    FiffRawData raw(UTILSLIB::pathFromUtf8(fifName.toStdString()));
+    FiffRawData raw(fifName.toStdU16String());
     if (raw.info.isEmpty()) {
         qCritical("Cannot read FIFF file: %s", qPrintable(fifName));
         return 1;

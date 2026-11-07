@@ -79,6 +79,8 @@
 //=============================================================================================================
 
 using namespace FIFFLIB;
+using UTILSLIB::ErrorCode;
+using UTILSLIB::fail;
 using namespace UTILSLIB;
 using namespace Eigen;
 
@@ -180,16 +182,16 @@ FiffStream::FiffStream(std::unique_ptr<UTILSLIB::ByteStream> bytes, std::string 
 
 //=============================================================================================================
 
-std::expected<FiffStream, UTILSLIB::Error> FiffStream::open(const std::filesystem::path& path)
+UTILSLIB::Expected<FiffStream> FiffStream::open(const std::filesystem::path& path)
 {
     const std::string name = UTILSLIB::utf8FromPath(path);
     auto bytes = UTILSLIB::FileByteStream::open(path, UTILSLIB::FileByteStream::Mode::Read);
     if (!bytes) {
-        return std::unexpected(UTILSLIB::Error{UTILSLIB::ErrorCode::Io, "Cannot open " + name});
+        return fail(ErrorCode::Io, "Cannot open {}", name);
     }
     FiffStream stream(std::move(bytes), name);
     if (!stream.open()) {
-        return std::unexpected(UTILSLIB::Error{UTILSLIB::ErrorCode::Format, name + " is not a FIFF file"});
+        return fail(ErrorCode::Format, "{} is not a FIFF file", name);
     }
     return stream;
 }

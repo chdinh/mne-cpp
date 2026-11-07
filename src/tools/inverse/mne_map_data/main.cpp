@@ -118,7 +118,7 @@ int main(int argc, char* argv[])
     // 1. Load source evoked data
     qInfo("Loading source evoked: %s", qPrintable(fromFile));
     FiffEvokedSet srcEvokedSet;
-    if (!FiffEvokedSet::read(UTILSLIB::pathFromUtf8(fromFile.toStdString()), srcEvokedSet)) {
+    if (!FiffEvokedSet::read(fromFile.toStdU16String(), srcEvokedSet)) {
         qCritical("Cannot read source evoked data: %s", qPrintable(fromFile));
         return 1;
     }
@@ -238,7 +238,7 @@ int main(int argc, char* argv[])
 
     // 7. Write output
     qInfo("Writing output: %s", qPrintable(outFile));
-    if (!outEvokedSet.save(UTILSLIB::pathFromUtf8(outFile.toStdString()))) {
+    if (!outEvokedSet.save(outFile.toStdU16String())) {
         qCritical("Cannot write output evoked: %s", qPrintable(outFile));
         return 1;
     }

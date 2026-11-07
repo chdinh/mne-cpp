@@ -192,7 +192,7 @@ QJsonObject NeuroKernelService::handleToolCallUnchecked(const QJsonObject& param
         }
 
         FIFFLIB::FiffRawData raw;
-        if (!FIFFLIB::FiffStream::setup_read_raw(UTILSLIB::pathFromUtf8(filePath.toStdString()), raw)) {
+        if (!FIFFLIB::FiffStream::setup_read_raw(filePath.toStdU16String(), raw)) {
             return QJsonObject{
                 {"status", "error"},
                 {"message", QString("Neuro-Kernel could not parse raw file: %1").arg(filePath)}};
@@ -277,7 +277,7 @@ QJsonObject NeuroKernelService::handleToolCallUnchecked(const QJsonObject& param
         }
 
         FIFFLIB::FiffRawData raw;
-        if (!FIFFLIB::FiffStream::setup_read_raw(UTILSLIB::pathFromUtf8(filePath.toStdString()), raw)) {
+        if (!FIFFLIB::FiffStream::setup_read_raw(filePath.toStdU16String(), raw)) {
             return QJsonObject{
                 {"status", "error"},
                 {"message", QString("Neuro-Kernel could not parse raw file: %1").arg(filePath)}};
@@ -362,7 +362,7 @@ QJsonObject NeuroKernelService::handleToolCallUnchecked(const QJsonObject& param
         }
 
         FIFFLIB::FiffRawData raw;
-        if (!FIFFLIB::FiffStream::setup_read_raw(UTILSLIB::pathFromUtf8(filePath.toStdString()), raw)) {
+        if (!FIFFLIB::FiffStream::setup_read_raw(filePath.toStdU16String(), raw)) {
             return QJsonObject{
                 {"status", "error"},
                 {"message", QString("Neuro-Kernel could not parse raw file: %1").arg(filePath)}};
@@ -433,7 +433,7 @@ QJsonObject NeuroKernelService::handleToolCallUnchecked(const QJsonObject& param
         }
 
         FIFFLIB::FiffRawData raw;
-        if (!FIFFLIB::FiffStream::setup_read_raw(UTILSLIB::pathFromUtf8(filePath.toStdString()), raw)) {
+        if (!FIFFLIB::FiffStream::setup_read_raw(filePath.toStdU16String(), raw)) {
             return QJsonObject{
                 {"status", "error"},
                 {"message", QString("Neuro-Kernel could not parse raw file: %1").arg(filePath)}};

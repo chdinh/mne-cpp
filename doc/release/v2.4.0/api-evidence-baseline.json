@@ -5,22 +5,22 @@
   "summary": {
     "exported_classes": 487,
     "exported_free_functions": 160,
-    "registered_classes": 578,
+    "registered_classes": 579,
     "exported_not_registered": 1,
     "registered_function_modules": 13,
-    "registered_header_only": 79,
+    "registered_header_only": 80,
     "registered_stale": 0,
-    "registered_with_test": 222,
+    "registered_with_test": 223,
     "registered_test_unresolved": 0,
-    "registered_with_example": 417,
+    "registered_with_example": 418,
     "registered_example_not_built": 0,
     "registered_with_python_equiv": 95,
     "registered_without_api_page": 0,
-    "with_snippet": 452,
-    "public_api_units": 579,
-    "example_eligible": 417,
+    "with_snippet": 453,
+    "public_api_units": 580,
+    "example_eligible": 418,
     "example_exempt": 162,
-    "eligible_backed_by_registry_example": 416,
+    "eligible_backed_by_registry_example": 417,
     "eligible_used_by_some_example": 365,
     "examples_on_disk": 75,
     "examples_built": 75
@@ -207,13 +207,13 @@
       "with_snippet": 10
     },
     "utils": {
-      "public": 24,
-      "registered": 24,
-      "with_test": 9,
-      "eligible": 23,
-      "eligible_with_registry_example": 23,
+      "public": 25,
+      "registered": 25,
+      "with_test": 10,
+      "eligible": 24,
+      "eligible_with_registry_example": 24,
       "eligible_used_by_example": 22,
-      "with_snippet": 24
+      "with_snippet": 25
     }
   },
   "exported_free_functions": [
@@ -14019,9 +14019,32 @@
       "example_state": "built",
       "including_examples": [],
       "snippets": [
-        "ex_fiff_api/main.cpp#fiff_coord_trans_usage"
+        "ex_fiff_api/main.cpp#fiff_coord_trans_usage",
+        "ex_fiff_api/main.cpp#expected_usage"
       ],
       "api_page": "doc/website/docs/api/utils/error.mdx",
+      "python_equiv": null,
+      "example_eligible": true,
+      "exempt_reason": null
+    },
+    {
+      "name": "Expected",
+      "header": "utils/error.h",
+      "library": "utils",
+      "kind": "header-only",
+      "exported": false,
+      "registered": true,
+      "registry_status": "documented",
+      "test": "test_fiff_coord_trans",
+      "test_resolves": true,
+      "example": "ex_fiff_api",
+      "example_state": "built",
+      "including_examples": [],
+      "snippets": [
+        "ex_fiff_api/main.cpp#fiff_coord_trans_usage",
+        "ex_fiff_api/main.cpp#expected_usage"
+      ],
+      "api_page": "doc/website/docs/api/utils/expected.mdx",
       "python_equiv": null,
       "example_eligible": true,
       "exempt_reason": null

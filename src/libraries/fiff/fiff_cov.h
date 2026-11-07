@@ -37,6 +37,8 @@
 #include "fiff_types.h"
 #include "fiff_info.h"
 
+#include <utils/error.h>
+
 //=============================================================================================================
 // QT INCLUDES
 //=============================================================================================================
@@ -51,6 +53,13 @@
 //=============================================================================================================
 
 #include <Eigen/Core>
+
+//=============================================================================================================
+// STL INCLUDES
+//=============================================================================================================
+
+#include <expected>
+#include <filesystem>
 #include <memory>
 
 //=============================================================================================================
@@ -95,7 +104,7 @@ public:
 
     //=========================================================================================================
     /**
-     * Reads the noise covariance of a FIFF file.
+     * Reads the noise covariance of a FIFF file, like read(); throws UTILSLIB::Error if it cannot.
      *
      * @param[in] path   The file.
      */
@@ -105,12 +114,11 @@ public:
     /**
      * Reads the noise covariance stored in a FIFF file, like mne.read_cov.
      *
-     * @param[in] path    The file.
-     * @param[out] p_cov  The covariance; unchanged when reading fails.
+     * @param[in] path   The file.
      *
-     * @return true when the file holds a noise covariance, false otherwise.
+     * @return The covariance, or why the file holds none.
      */
-    static bool read(const std::filesystem::path& path, FiffCov& p_cov);
+    [[nodiscard]] static UTILSLIB::Expected<FiffCov> read(const std::filesystem::path& path);
 
     //=========================================================================================================
     /**
@@ -138,7 +146,7 @@ public:
      *
      * @return true if FIFF covariance is empty.
      */
-    inline bool isEmpty() const;
+    inline bool is_empty() const;
 
     //=========================================================================================================
     /**
@@ -231,12 +239,13 @@ public:
 
     //=========================================================================================================
     /**
-     * Save this covariance matrix to a FIFF file.
+     * Writes the covariance to a new FIFF file, like mne.Covariance.save.
      *
-     * @param[in] path  Output file.
-     * @return true on success.
+     * @param[in] path   Output file.
+     *
+     * @return Nothing, or why the file cannot be written.
      */
-    bool save(const std::filesystem::path& path) const;
+    [[nodiscard]] UTILSLIB::Expected<void> save(const std::filesystem::path& path) const;
 
     //=========================================================================================================
     /**
@@ -246,7 +255,7 @@ public:
      * @param[in] covs      List of covariance matrices to combine.
      * @return The grand-average covariance matrix, or empty FiffCov if covs is empty.
      */
-    static FiffCov computeGrandAverage(const QList<FiffCov>& covs);
+    static FiffCov compute_grand_average(const QList<FiffCov>& covs);
 
     //=========================================================================================================
     /**
@@ -287,7 +296,7 @@ public:
 // INLINE DEFINITIONS
 //=============================================================================================================
 
-inline bool FiffCov::isEmpty() const
+inline bool FiffCov::is_empty() const
 {
     return this->dim <= -1;
 }

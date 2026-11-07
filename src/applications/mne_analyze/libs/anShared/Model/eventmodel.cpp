@@ -588,9 +588,9 @@ void EventModel::initFromFile(const QString& sFilePath)
     Eigen::MatrixXi eventList;
 
     if (fileInfo.exists() && (fileInfo.completeSuffix() == "eve")) {
-        MNELIB::MNE::read_events_from_ascii(UTILSLIB::pathFromUtf8(sFilePath.toStdString()), eventList);
+        MNELIB::MNE::read_events_from_ascii(sFilePath.toStdU16String(), eventList);
     } else if (fileInfo.exists() && (fileInfo.completeSuffix() == "fif")) {
-        MNELIB::MNE::read_events_from_fif(UTILSLIB::pathFromUtf8(sFilePath.toStdString()), eventList);
+        MNELIB::MNE::read_events_from_fif(sFilePath.toStdU16String(), eventList);
     } else {
         return;
     }

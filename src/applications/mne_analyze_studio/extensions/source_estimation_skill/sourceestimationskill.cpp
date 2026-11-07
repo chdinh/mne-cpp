@@ -162,7 +162,7 @@ QJsonObject SourceEstimationSkill::executeSkill(const WorkflowNode& nodeState)
 
     // ── Load raw FIFF ─────────────────────────────────────────────────────────
     FiffRawData raw;
-    if (!FiffStream::setup_read_raw(UTILSLIB::pathFromUtf8(rawPath.toStdString()), raw)) {
+    if (!FiffStream::setup_read_raw(rawPath.toStdU16String(), raw)) {
         return QJsonObject{
             {"status", "error"},
             {"message", QString("Source estimation node `%1`: could not parse FIFF file `%2`.").arg(nodeState.uid, rawPath)}};

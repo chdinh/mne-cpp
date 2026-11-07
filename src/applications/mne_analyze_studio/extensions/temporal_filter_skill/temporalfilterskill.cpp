@@ -123,7 +123,7 @@ QJsonObject TemporalFilterSkill::executeSkill(const WorkflowNode& nodeState)
 
     // Open FIFF raw data.
     FiffRawData raw;
-    if (!FiffStream::setup_read_raw(UTILSLIB::pathFromUtf8(inputPath.toStdString()), raw)) {
+    if (!FiffStream::setup_read_raw(inputPath.toStdU16String(), raw)) {
         return QJsonObject{
             {"status", "error"},
             {"message", QString("Temporal filter node `%1`: could not parse FIFF file `%2`.").arg(nodeState.uid, inputPath)}};
@@ -168,7 +168,7 @@ QJsonObject TemporalFilterSkill::executeSkill(const WorkflowNode& nodeState)
     // calibration scalings; write_raw_buffer divides the calibrated data by cals
     // before writing so the stored samples are in raw ADC units.
     RowVectorXd cals;
-    auto outStream = FiffStream::start_writing_raw(UTILSLIB::pathFromUtf8(outputPath.toStdString()), raw.info, cals);
+    auto outStream = FiffStream::start_writing_raw(outputPath.toStdU16String(), raw.info, cals);
     if (!outStream) {
         return QJsonObject{
             {"status", "error"},

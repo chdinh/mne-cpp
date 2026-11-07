@@ -97,7 +97,7 @@ int main(int argc, char* argv[])
 
     // Read evoked data
     FiffEvokedSet evokedSet;
-    if (!FiffEvokedSet::read(UTILSLIB::pathFromUtf8(measFile.toStdString()), evokedSet, QPair<float, float>(0.0f, 0.0f), false)) {
+    if (!FiffEvokedSet::read(measFile.toStdU16String(), evokedSet, QPair<float, float>(0.0f, 0.0f), false)) {
         qCritical("Cannot read evoked data from: %s", qPrintable(measFile));
         return 1;
     }
@@ -115,7 +115,7 @@ int main(int argc, char* argv[])
     evokedSet.evoked[setIdx].nave = newNave;
 
     // Save
-    if (!evokedSet.save(UTILSLIB::pathFromUtf8(outFile.toStdString()))) {
+    if (!evokedSet.save(outFile.toStdU16String())) {
         qCritical("Cannot write output file: %s", qPrintable(outFile));
         return 1;
     }

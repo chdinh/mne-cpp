@@ -91,7 +91,7 @@ bool FiffBlockReader::open(const QString& path)
     }
 
     try {
-        m_raw = QSharedPointer<FiffRawData>(new FiffRawData(UTILSLIB::pathFromUtf8(path.toStdString())));
+        m_raw = QSharedPointer<FiffRawData>(new FiffRawData(path.toStdU16String()));
     } catch (const std::exception& e) {
         qWarning() << "[FiffBlockReader] Exception constructing FiffRawData:" << e.what();
         return false;

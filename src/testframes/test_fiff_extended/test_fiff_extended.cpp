@@ -85,7 +85,7 @@ private slots:
     void testFiffCovDefaultCtor()
     {
         FiffCov cov;
-        QVERIFY(cov.isEmpty());
+        QVERIFY(cov.is_empty());
     }
 
     void testFiffCovCopyCtor()
@@ -109,7 +109,7 @@ private slots:
     {
         FiffCov cov = createSyntheticCov(5);
         cov.clear();
-        QVERIFY(cov.isEmpty());
+        QVERIFY(cov.is_empty());
     }
 
     void testFiffCovPickChannels()
@@ -140,8 +140,7 @@ private slots:
         QTemporaryDir dir;
         const QString tmpPath = dir.filePath("cov.fif");
 
-        bool saved = cov.save(tmpPath.toStdString());
-        QVERIFY(saved);
+        QVERIFY(cov.save(tmpPath.toStdString()));
         QVERIFY(QFileInfo(tmpPath).size() > 0);
     }
 
@@ -156,7 +155,7 @@ private slots:
         QList<FiffCov> covList;
         covList << cov1 << cov2;
 
-        FiffCov avg = FiffCov::computeGrandAverage(covList);
+        FiffCov avg = FiffCov::compute_grand_average(covList);
         QCOMPARE(avg.dim, 3);
         QCOMPARE(avg.nfree, 150);
         // Weighted average: (50*1e-12 + 100*2e-12) / 150 = 250e-12/150
@@ -179,7 +178,7 @@ private slots:
             QSKIP("Sample covariance file not found");
         }
         FiffCov cov(covPath.toStdString());
-        QVERIFY(!cov.isEmpty());
+        QVERIFY(!cov.is_empty());
         QVERIFY(cov.dim > 0);
         QVERIFY(cov.names.size() > 0);
     }
@@ -220,7 +219,7 @@ private slots:
                 chNames.push_back(raw.info.ch_names[picks(i)]);
         }
         FiffCov prepared = cov.prepare_noise_cov(raw.info, chNames);
-        QVERIFY(!prepared.isEmpty());
+        QVERIFY(!prepared.is_empty());
     }
 
     // === FiffEvents tests ===

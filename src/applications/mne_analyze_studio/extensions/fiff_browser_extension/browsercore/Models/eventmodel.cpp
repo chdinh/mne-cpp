@@ -354,9 +354,9 @@ bool EventModel::loadEventData(QFile& qFile)
     QFileInfo fileInfo(qFile);
     bool readSuccess = false;
     if (fileInfo.suffix() == "eve") {
-        readSuccess = MNE::read_events_from_ascii(UTILSLIB::pathFromUtf8(qFile.fileName().toStdString()), events);
+        readSuccess = MNE::read_events_from_ascii(qFile.fileName().toStdU16String(), events);
     } else {
-        readSuccess = MNE::read_events_from_fif(UTILSLIB::pathFromUtf8(qFile.fileName().toStdString()), events);
+        readSuccess = MNE::read_events_from_fif(qFile.fileName().toStdU16String(), events);
     }
 
     if (!readSuccess) {

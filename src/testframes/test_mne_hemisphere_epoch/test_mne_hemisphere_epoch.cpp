@@ -883,7 +883,7 @@ private slots:
             QSKIP("Covariance file not found");
 
         FiffCov cov(path.toStdString());
-        QVERIFY(!cov.isEmpty());
+        QVERIFY(!cov.is_empty());
         QVERIFY(cov.data.rows() > 0);
         QCOMPARE(cov.data.rows(), cov.data.cols());
         QVERIFY(cov.names.size() > 0);
@@ -899,7 +899,7 @@ private slots:
             QSKIP("Covariance file not found");
 
         FiffCov cov(path.toStdString());
-        if (cov.isEmpty())
+        if (cov.is_empty())
             QSKIP("Failed to read cov");
 
         int nPick = std::min(30, static_cast<int>(cov.names.size()));
@@ -960,7 +960,7 @@ private slots:
         FiffCov noiseCov(covPath.toStdString());
         FiffRawData raw(rawPath.toStdString());
 
-        if (fwd.isEmpty() || noiseCov.isEmpty())
+        if (fwd.isEmpty() || noiseCov.is_empty())
             QSKIP("Failed to load");
 
         MNEInverseOperator invOp = MNEInverseOperator::make_inverse_operator(

@@ -435,7 +435,7 @@ private slots:
             QSKIP("Covariance file not found");
 
         FiffCov cov(path.toStdString());
-        QVERIFY(!cov.isEmpty());
+        QVERIFY(!cov.is_empty());
         QVERIFY(cov.data.rows() > 0);
         QCOMPARE(cov.data.rows(), cov.data.cols());
         QVERIFY(cov.names.size() > 0);

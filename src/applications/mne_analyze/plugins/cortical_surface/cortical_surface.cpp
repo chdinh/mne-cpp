@@ -1443,7 +1443,7 @@ bool CorticalSurface::runComputeSourceEstimate(const QString& fwdPath,
     }
     FiffCov noiseCov;
     try {
-        noiseCov = FiffCov(UTILSLIB::pathFromUtf8(covPath.toStdString()));
+        noiseCov = FiffCov(covPath.toStdU16String());
     } catch (const std::exception& e) {
         qWarning() << "[CorticalSurface] read cov failed:" << e.what();
         return false;
@@ -1453,7 +1453,7 @@ bool CorticalSurface::runComputeSourceEstimate(const QString& fwdPath,
         return false;
     }
     FiffEvoked evoked;
-    if (!FiffEvoked::read(UTILSLIB::pathFromUtf8(evokedPath.toStdString()), evoked)) {
+    if (!FiffEvoked::read(evokedPath.toStdU16String(), evoked)) {
         qWarning() << "[CorticalSurface] read evoked failed";
         return false;
     }

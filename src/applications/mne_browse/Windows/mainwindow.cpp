@@ -220,7 +220,7 @@ bool writeFilteredRawFile(const QString& rawFilePath,
                           QIODevice* pIODevice,
                           const MNEBROWSE::SessionFilter& filter)
 {
-    FIFFLIB::FiffRawData raw(UTILSLIB::pathFromUtf8(rawFilePath.toStdString()));
+    FIFFLIB::FiffRawData raw(rawFilePath.toStdU16String());
     if (raw.isEmpty()) {
         qWarning() << "[MainWindow] Could not reopen raw data for filtered write" << rawFilePath;
         return false;
@@ -344,7 +344,7 @@ bool populateEventModelFromRaw(const QString& rawFilePath,
         return false;
     }
 
-    FIFFLIB::FiffRawData raw(UTILSLIB::pathFromUtf8(rawFilePath.toStdString()));
+    FIFFLIB::FiffRawData raw(rawFilePath.toStdU16String());
     if (raw.isEmpty()) {
         return false;
     }
@@ -1157,7 +1157,7 @@ bool MainWindow::openFiffRawData(FIFFLIB::FiffRawData& raw, const QString& featu
     // valid QIODevice* that outlives this function call.
     if (m_qFileRaw.isOpen())
         m_qFileRaw.close();
-    raw = FIFFLIB::FiffRawData(UTILSLIB::pathFromUtf8(m_qFileRaw.fileName().toStdString()));
+    raw = FIFFLIB::FiffRawData(m_qFileRaw.fileName().toStdU16String());
 #endif
 
     if (raw.isEmpty()) {
@@ -1199,7 +1199,7 @@ void MainWindow::setCovarianceWhiteningSettings(const WhiteningSettings& setting
     }
 
     // Recompute raw whitener when regularisation parameters change
-    if (m_pDataWindow && !m_covariance.isEmpty()) {
+    if (m_pDataWindow && !m_covariance.is_empty()) {
         m_pDataWindow->updateRawWhitener(m_covariance, settings);
     }
 }
@@ -1373,7 +1373,7 @@ void MainWindow::setupWindowWidgets()
     connect(m_pCovarianceWindow, &CovarianceWindow::whiteningSettingsChanged,
             this, [this](const WhiteningSettings& settings) {
                 setCovarianceWhiteningSettings(settings);
-                if ((settings.enableButterfly || settings.enableLayout) && !m_covariance.isEmpty() && !m_pAverageWindow->isVisible()) {
+                if ((settings.enableButterfly || settings.enableLayout) && !m_covariance.is_empty() && !m_pAverageWindow->isVisible()) {
                     showWindow(m_pAverageWindow);
                 }
             });
@@ -2053,7 +2053,7 @@ void MainWindow::connectMenus()
     connect(saveEvokedAction, &QAction::triggered, this, &MainWindow::saveEvoked);
     connect(computeSourceEstimateAction, &QAction::triggered, this, &MainWindow::computeSourceEstimate);
     connect(m_pWhitenButterflyAction, &QAction::toggled, this, [this](bool checked) {
-        if (checked && m_covariance.isEmpty()) {
+        if (checked && m_covariance.is_empty()) {
             QMessageBox::warning(this,
                                  "Whiten Butterfly Plot",
                                  "Load or compute a covariance matrix before enabling whitening.");
@@ -2301,7 +2301,7 @@ void MainWindow::toggleWhitening()
     // Also toggle raw-trace whitening
     if (m_pDataWindow) {
         const bool newState = !m_pDataWindow->isRawWhiteningEnabled();
-        if (newState && !m_covariance.isEmpty()) {
+        if (newState && !m_covariance.is_empty()) {
             // Build whitener on first toggle if covariance is available
             m_pDataWindow->updateRawWhitener(m_covariance, covarianceWhiteningSettings());
         }
@@ -2577,7 +2577,7 @@ void MainWindow::setWindowStatus()
     } else
         title.append("  -  No evoked file");
 
-    if (!m_covariance.isEmpty()) {
+    if (!m_covariance.is_empty()) {
         if (m_qCovFile.fileName().isEmpty()) {
             title.append("  -  Covariance: unsaved");
         } else {
@@ -2622,7 +2622,7 @@ void MainWindow::syncAuxWindowsToFiffInfo(FiffInfo::SPtr fiffInfo,
     m_pAnnotationWindow->getAnnotationModel()->setFiffInfo(fiffInfo);
     m_pAnnotationWindow->getAnnotationModel()->setFirstLastSample(firstSample, lastSample);
     m_pVirtualChannelWindow->setAvailableChannelNames(fiffInfo->ch_names);
-    if (!m_covariance.isEmpty()) {
+    if (!m_covariance.is_empty()) {
         const QString covarianceSource = m_qCovFile.fileName().isEmpty()
             ? QStringLiteral("Computed during this session")
             : QStringLiteral("Loaded from %1").arg(QFileInfo(m_qCovFile.fileName()).fileName());
@@ -2849,10 +2849,10 @@ void MainWindow::openProject()
 
     // Load additional files that auto-discovery might miss
     if (!covPath.isEmpty() && QFileInfo::exists(covPath)) {
-        FIFFLIB::FiffCov cov;
-        if (FIFFLIB::FiffCov::read(UTILSLIB::pathFromUtf8(covPath.toStdString()), cov) && !cov.isEmpty()) {
+        const auto cov = FIFFLIB::FiffCov::read(covPath.toStdU16String());
+        if (cov && !cov->is_empty()) {
             m_qCovFile.setFileName(covPath);
-            m_covariance = cov;
+            m_covariance = *cov;
             m_pAverageWindow->setNoiseCovariance(m_covariance);
             m_pCovarianceWindow->setCovariance(m_covariance,
                                                QStringLiteral("Loaded from project"),
@@ -4220,7 +4220,7 @@ void MainWindow::computeCovariance()
 
     QApplication::restoreOverrideCursor();
 
-    if (covariance.isEmpty()) {
+    if (covariance.is_empty()) {
         QMessageBox::warning(this,
                              "Compute Covariance",
                              "No covariance matrix could be computed. Check the selected events and time window.");
@@ -4300,14 +4300,15 @@ void MainWindow::loadCovariance()
         return;
     }
 
-    FIFFLIB::FiffCov covariance;
-
-    if (!FIFFLIB::FiffCov::read(UTILSLIB::pathFromUtf8(filename.toStdString()), covariance) || covariance.isEmpty()) {
+    const auto read = FIFFLIB::FiffCov::read(filename.toStdU16String());
+    if (!read || read->is_empty()) {
         QMessageBox::warning(this,
                              "Load Covariance",
-                             QString("Could not load covariance data from %1.").arg(filename));
+                             QString("Could not load covariance data from %1:\n%2")
+                                 .arg(filename, read ? QStringLiteral("the covariance is empty") : QString::fromUtf8(read.error().what())));
         return;
     }
+    const FIFFLIB::FiffCov& covariance = *read;
 
     if (m_qCovFile.isOpen()) {
         m_qCovFile.close();
@@ -4338,7 +4339,7 @@ void MainWindow::loadCovariance()
 
 void MainWindow::saveCovariance()
 {
-    if (m_covariance.isEmpty()) {
+    if (m_covariance.is_empty()) {
         QMessageBox::warning(this,
                              "Save Covariance",
                              "There is no covariance matrix to save.");
@@ -4363,7 +4364,7 @@ void MainWindow::saveCovariance()
     }
     m_qCovFile.setFileName(filename);
 
-    if (m_covariance.save(UTILSLIB::pathFromUtf8(filename.toStdString()))) {
+    if (m_covariance.save(filename.toStdU16String())) {
         qInfo() << "Fiff covariance data file" << filename << "saved.";
         setWindowStatus();
     } else {

@@ -3560,6 +3560,7 @@
       },
       "registry_classes": [
         "Error",
+        "Expected",
         "FiffCoordTrans"
       ]
     },

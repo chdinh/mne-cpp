@@ -219,7 +219,7 @@ void TestInvBeamformer::initTestCase()
         FiffRawData raw(rawPath.toStdString());
         m_info = raw.info;
     }
-    m_bDataLoaded = !m_fwd.isEmpty() && !m_noiseCov.isEmpty() && m_info.nchan > 0;
+    m_bDataLoaded = !m_fwd.isEmpty() && !m_noiseCov.is_empty() && m_info.nchan > 0;
 }
 
 //=============================================================================================================

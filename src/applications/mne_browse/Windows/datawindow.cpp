@@ -736,7 +736,7 @@ void DataWindow::updateRawWhitener(const FIFFLIB::FiffCov& cov, const WhiteningS
     m_rawWhitener = Eigen::MatrixXd(); // clear old
 
     auto info = m_pFiffReader ? m_pFiffReader->fiffInfo() : nullptr;
-    if (!info || cov.isEmpty()) {
+    if (!info || cov.is_empty()) {
         return;
     }
 
@@ -751,7 +751,7 @@ void DataWindow::updateRawWhitener(const FIFFLIB::FiffCov& cov, const WhiteningS
     const FIFFLIB::FiffCov preparedCov =
         regularizedCov.prepare_noise_cov(*info, info->ch_names);
 
-    if (preparedCov.isEmpty() || preparedCov.dim <= 0) {
+    if (preparedCov.is_empty() || preparedCov.dim <= 0) {
         return;
     }
 

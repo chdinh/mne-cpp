@@ -104,7 +104,7 @@ void TestCoregistration::initTestCase()
     float fMaxDist = 0.02f;
 
     // read reference Transformation
-    transFitMatchedRef = FiffCoordTrans::read(UTILSLIB::pathFromUtf8((t_fileTransRefFit.fileName()).toStdString()), FIFFV_COORD_HEAD, FIFFV_COORD_MRI).value();
+    transFitMatchedRef = FiffCoordTrans(t_fileTransRefFit.fileName().toStdU16String(), FIFFV_COORD_HEAD, FIFFV_COORD_MRI);
 
 
     // read Bem
@@ -190,7 +190,7 @@ void TestCoregistration::initTestCase()
     if (!MNELIB::performIcp(mneSurfacePoints, matHspClean, transPerformICP, fRMSE, bScale, iMaxIter, fTol, vecWeightsICPClean)) {
         qWarning() << "ICP was not succesfull.";
     }
-    transPerformICPRef = FiffCoordTrans::read(UTILSLIB::pathFromUtf8((t_fileTransRefIcp.fileName()).toStdString()), FIFFV_COORD_HEAD, FIFFV_COORD_MRI).value();
+    transPerformICPRef = FiffCoordTrans(t_fileTransRefIcp.fileName().toStdU16String(), FIFFV_COORD_HEAD, FIFFV_COORD_MRI);
 }
 
 //=============================================================================================================

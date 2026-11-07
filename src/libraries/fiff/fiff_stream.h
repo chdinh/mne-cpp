@@ -154,7 +154,7 @@ public:
      *
      * @return The open stream, or why the file cannot be opened or is not a FIFF file.
      */
-    [[nodiscard]] static std::expected<FiffStream, UTILSLIB::Error> open(const std::filesystem::path& path);
+    [[nodiscard]] static UTILSLIB::Expected<FiffStream> open(const std::filesystem::path& path);
 
     ~FiffStream();
 

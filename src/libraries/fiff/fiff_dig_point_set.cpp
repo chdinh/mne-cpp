@@ -93,7 +93,7 @@ FiffDigPointSet::FiffDigPointSet(const std::filesystem::path& path)
 {
     auto t_pStream = FiffStream::open(path);
     if (!t_pStream || !FiffDigPointSet::readFromStream(*t_pStream, *this)) {
-        throw std::runtime_error(t_pStream ? "Could not read the FiffDigPointSet" : t_pStream.error().message);
+        throw std::runtime_error(t_pStream ? "Could not read the FiffDigPointSet" : t_pStream.error().what());
     }
 
     qInfo("[FiffDigPointSet::FiffDigPointSet] %i digitizer Points read from file.", this->size());

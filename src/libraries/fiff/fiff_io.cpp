@@ -156,7 +156,7 @@ bool FiffIO::read(QIODevice& pIODevice)
             qWarning() << "[FiffIO::read] Evoked data can only be read from a file.";
         } else {
             FiffEvokedSet p_fiffEvokedSet;
-            if (FiffEvokedSet::read(UTILSLIB::pathFromUtf8(file->fileName().toStdString()), p_fiffEvokedSet)) {
+            if (FiffEvokedSet::read(file->fileName().toStdU16String(), p_fiffEvokedSet)) {
                 for (qint32 i = 0; i < p_fiffEvokedSet.evoked.size(); ++i) {
                     m_qlistEvoked.append(QSharedPointer<FiffEvoked>(new FiffEvoked(p_fiffEvokedSet.evoked[i])));
                 }

@@ -168,7 +168,7 @@ int main(int argc, char* argv[])
     float sfreq = 0.0f;
 
     if (!measFile.isEmpty()) {
-        FiffRawData rawData(UTILSLIB::pathFromUtf8(measFile.toStdString()));
+        FiffRawData rawData(measFile.toStdU16String());
         if (rawData.info.isEmpty()) {
             qCritical("Cannot read measurement info from: %s", qPrintable(measFile));
             return 1;
@@ -195,7 +195,7 @@ int main(int argc, char* argv[])
         QString stimName = parser.value(stim_chOpt);
         double thresh = parser.value(threshOpt).toDouble();
 
-        FiffRawData raw(UTILSLIB::pathFromUtf8(measFile.toStdString()));
+        FiffRawData raw(measFile.toStdU16String());
 
         // Find stimulus channel
         int stimIdx = -1;

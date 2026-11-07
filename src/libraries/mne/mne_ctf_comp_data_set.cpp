@@ -166,7 +166,7 @@ int mne_read_meg_comp_eeg_ch_info_32(const QString& name,
         /*
      * Try again in a more general fashion
      */
-        t = FiffCoordTrans::read(UTILSLIB::pathFromUtf8(name.toStdString()), FIFFV_COORD_DEVICE, FIFFV_COORD_HEAD).value_or(FiffCoordTrans());
+        t = FiffCoordTrans::read(name.toStdU16String(), FIFFV_COORD_DEVICE, FIFFV_COORD_HEAD).value_or(FiffCoordTrans());
         if (t.is_empty()) {
             qCritical("MEG -> head coordinate transformation not found.");
             stream.close();

@@ -99,6 +99,24 @@ public:
 
     //=========================================================================================================
     /**
+     * Reads the first coordinate transform of a FIFF file, like read(); throws UTILSLIB::Error if it cannot.
+     *
+     * @param[in] path   The file.
+     */
+    explicit FiffCoordTrans(const std::filesystem::path& path);
+
+    //=========================================================================================================
+    /**
+     * Reads the transform between two frames, like read(path, from, to); throws UTILSLIB::Error if there is none.
+     *
+     * @param[in] path   The file.
+     * @param[in] from   Source coordinate frame.
+     * @param[in] to     Destination coordinate frame.
+     */
+    FiffCoordTrans(const std::filesystem::path& path, int from, int to);
+
+    //=========================================================================================================
+    /**
      * Copy constructor.
      *
      * @param[in] p_FiffCoordTrans   Coordinate transformation description which should be copied.
@@ -266,7 +284,7 @@ public:
      *
      * @return The transform, or why the file holds none.
      */
-    [[nodiscard]] static std::expected<FiffCoordTrans, UTILSLIB::Error> read(const std::filesystem::path& path);
+    [[nodiscard]] static UTILSLIB::Expected<FiffCoordTrans> read(const std::filesystem::path& path);
 
     //=========================================================================================================
     /**
@@ -279,7 +297,7 @@ public:
      *
      * @return The transform, or why the file holds none between these frames.
      */
-    [[nodiscard]] static std::expected<FiffCoordTrans, UTILSLIB::Error> read(const std::filesystem::path& path, int from, int to);
+    [[nodiscard]] static UTILSLIB::Expected<FiffCoordTrans> read(const std::filesystem::path& path, int from, int to);
 
     //=========================================================================================================
     /**
@@ -291,7 +309,7 @@ public:
      *
      * @return The transform with its translation in m, or why the file cannot be read.
      */
-    [[nodiscard]] static std::expected<FiffCoordTrans, UTILSLIB::Error> read_ascii(const std::filesystem::path& path, int from, int to);
+    [[nodiscard]] static UTILSLIB::Expected<FiffCoordTrans> read_ascii(const std::filesystem::path& path, int from, int to);
 
     //=========================================================================================================
     /**
@@ -414,7 +432,7 @@ public:
      *
      * @return Nothing, or why the file cannot be written.
      */
-    [[nodiscard]] std::expected<void, UTILSLIB::Error> write(const std::filesystem::path& path) const;
+    [[nodiscard]] UTILSLIB::Expected<void> write(const std::filesystem::path& path) const;
 
     //=========================================================================================================
     /**
@@ -484,9 +502,9 @@ public:
      *
      * @return The coordinate transform, inverted if stored the other way round, or NotFound.
      */
-    [[nodiscard]] static std::expected<FiffCoordTrans, UTILSLIB::Error> read_from_node(FiffStream& stream,
-                                                                                       const FiffDirNode::SPtr& node,
-                                                                                       int from, int to);
+    [[nodiscard]] static UTILSLIB::Expected<FiffCoordTrans> read_from_node(FiffStream& stream,
+                                                                           const FiffDirNode::SPtr& node,
+                                                                           int from, int to);
 
     //========================================================================================================
     /**

@@ -458,7 +458,7 @@ MNEForwardSolution MNEForwardSolution::cluster_forward_solution(const FsAnnotati
     //
     //Whiten gain matrix before clustering -> cause diffenerent units Magnetometer, Gradiometer and EEG
     //
-    if (!p_pNoise_cov.isEmpty() && !p_pInfo.isEmpty()) {
+    if (!p_pNoise_cov.is_empty() && !p_pInfo.isEmpty()) {
         FiffInfo p_outFwdInfo;
         FiffCov p_outNoiseCov;
         MatrixXd p_outWhitener;

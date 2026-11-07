@@ -151,8 +151,8 @@ static int doCompute(const QCommandLineParser& parser)
     // ── Read noise covariance ──────────────────────────────────────────
     out << "Reading noise covariance: " << covPath << "\n";
     out.flush();
-    FiffCov noiseCov(UTILSLIB::pathFromUtf8(covPath.toStdString()));
-    if (noiseCov.isEmpty()) {
+    FiffCov noiseCov(covPath.toStdU16String());
+    if (noiseCov.is_empty()) {
         err << "Error: Failed to read noise covariance from " << covPath << "\n";
         return 1;
     }
@@ -164,7 +164,7 @@ static int doCompute(const QCommandLineParser& parser)
     const int setno = parser.value(QStringLiteral("setno")).toInt();
     out << "Reading evoked data: " << evokedPath << " (set " << setno << ")\n";
     out.flush();
-    FiffEvoked evoked(UTILSLIB::pathFromUtf8(evokedPath.toStdString()), setno);
+    FiffEvoked evoked(evokedPath.toStdU16String(), setno);
     if (evoked.isEmpty()) {
         err << "Error: Failed to read evoked data from " << evokedPath << "\n";
         return 1;

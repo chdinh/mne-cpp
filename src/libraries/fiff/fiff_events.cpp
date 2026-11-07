@@ -143,7 +143,7 @@ bool FiffEvents::read_from_fif(const std::filesystem::path& path,
 {
     auto t_pStream = FiffStream::open(path);
     if (!t_pStream) {
-        UTILSLIB::Log::critical("{}", t_pStream.error().message);
+        UTILSLIB::Log::critical("{}", t_pStream.error().what());
         return false;
     }
 

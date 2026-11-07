@@ -124,7 +124,7 @@ int main(int argc, char* argv[])
     // Open the FIFF file and read raw data
     FiffRawData raw;
     try {
-        raw = FiffRawData(UTILSLIB::pathFromUtf8(fifName.toStdString()));
+        raw = FiffRawData(fifName.toStdU16String());
     } catch (const std::exception& error) {
         qCritical("Cannot read FIFF file %s: %s", qPrintable(fifName), error.what());
         return 1;
@@ -150,7 +150,7 @@ int main(int argc, char* argv[])
     // Write to temp file, then replace
     QString tmpName = fifName + ".tmp";
     Eigen::RowVectorXd cals;
-    auto outStream = FiffStream::start_writing_raw(UTILSLIB::pathFromUtf8(tmpName.toStdString()), raw.info, cals);
+    auto outStream = FiffStream::start_writing_raw(tmpName.toStdU16String(), raw.info, cals);
     if (!outStream) {
         qCritical("Cannot open temp file for writing.");
         return 1;

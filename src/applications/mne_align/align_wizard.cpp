@@ -966,7 +966,7 @@ void AlignWizard::onLoadDigiFiff()
 
     FIFFLIB::FiffDigPointSet set;
     try {
-        set = FIFFLIB::FiffDigPointSet(UTILSLIB::pathFromUtf8(path.toStdString()));
+        set = FIFFLIB::FiffDigPointSet(path.toStdU16String());
     } catch (const std::exception& e) {
         QMessageBox::warning(this, QStringLiteral("Load digitisation"),
                              QStringLiteral("Failed to read %1:\n%2").arg(path, QString::fromUtf8(e.what())));

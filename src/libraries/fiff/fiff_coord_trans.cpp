@@ -58,6 +58,8 @@
 //=============================================================================================================
 
 using namespace FIFFLIB;
+using UTILSLIB::ErrorCode;
+using UTILSLIB::fail;
 using namespace Eigen;
 
 //=============================================================================================================
@@ -68,7 +70,7 @@ namespace
 {
 
 // The first transform among entries from @p from to @p to, inverted if stored the other way round.
-std::expected<FiffCoordTrans, UTILSLIB::Error> find_transform(FiffStream& stream, const QList<FiffDirEntry::SPtr>& entries, int from, int to)
+UTILSLIB::Expected<FiffCoordTrans> find_transform(FiffStream& stream, const QList<FiffDirEntry::SPtr>& entries, int from, int to)
 {
     FiffTag::UPtr tag;
     for (const FiffDirEntry::SPtr& entry : entries) {
@@ -82,8 +84,7 @@ std::expected<FiffCoordTrans, UTILSLIB::Error> find_transform(FiffStream& stream
         if (t.from == to && t.to == from)
             return t.inverted();
     }
-    return std::unexpected(UTILSLIB::Error{UTILSLIB::ErrorCode::NotFound,
-                                           std::format("No {} -> {} coordinate transform", FiffCoordTrans::frame_name(from), FiffCoordTrans::frame_name(to))});
+    return fail(ErrorCode::NotFound, "No {} -> {} coordinate transform", FiffCoordTrans::frame_name(from), FiffCoordTrans::frame_name(to));
 }
 
 } // namespace
@@ -97,6 +98,20 @@ FiffCoordTrans::FiffCoordTrans()
 , to(-1)
 , trans(MatrixXf::Identity(4, 4))
 , invtrans(MatrixXf::Identity(4, 4))
+{
+}
+
+//=============================================================================================================
+
+FiffCoordTrans::FiffCoordTrans(const std::filesystem::path& path)
+: FiffCoordTrans(read(path).value())
+{
+}
+
+//=============================================================================================================
+
+FiffCoordTrans::FiffCoordTrans(const std::filesystem::path& path, int from, int to)
+: FiffCoordTrans(read(path, from, to).value())
 {
 }
 
@@ -141,7 +156,7 @@ bool FiffCoordTrans::invert_transform()
 
 //=============================================================================================================
 
-std::expected<FiffCoordTrans, UTILSLIB::Error> FiffCoordTrans::read(const std::filesystem::path& path)
+UTILSLIB::Expected<FiffCoordTrans> FiffCoordTrans::read(const std::filesystem::path& path)
 {
     auto stream = FiffStream::open(path);
     if (!stream) {
@@ -153,31 +168,29 @@ std::expected<FiffCoordTrans, UTILSLIB::Error> FiffCoordTrans::read(const std::f
             return from_tag(tag);
         }
     }
-    return std::unexpected(UTILSLIB::Error{UTILSLIB::ErrorCode::NotFound,
-                                           "No coordinate transform in " + UTILSLIB::utf8FromPath(path)});
+    return fail(ErrorCode::NotFound, "No coordinate transform in {}", UTILSLIB::utf8FromPath(path));
 }
 
 //=============================================================================================================
 
-std::expected<FiffCoordTrans, UTILSLIB::Error> FiffCoordTrans::read(const std::filesystem::path& path, int from, int to)
+UTILSLIB::Expected<FiffCoordTrans> FiffCoordTrans::read(const std::filesystem::path& path, int from, int to)
 {
     auto stream = FiffStream::open(path);
     if (!stream) {
         return std::unexpected(stream.error());
     }
-    return find_transform(*stream, stream->dir(), from, to).transform_error([&path](UTILSLIB::Error error) {
-        error.message += " in " + UTILSLIB::utf8FromPath(path);
-        return error;
+    return find_transform(*stream, stream->dir(), from, to).transform_error([&path](const UTILSLIB::Error& error) {
+        return UTILSLIB::Error(error.code, std::format("{} in {}", error.what(), UTILSLIB::utf8FromPath(path)));
     });
 }
 
 //=============================================================================================================
 
-std::expected<void, UTILSLIB::Error> FiffCoordTrans::write(const std::filesystem::path& path) const
+UTILSLIB::Expected<void> FiffCoordTrans::write(const std::filesystem::path& path) const
 {
     auto stream = FiffStream::start_file(path);
     if (!stream) {
-        return std::unexpected(UTILSLIB::Error{UTILSLIB::ErrorCode::Io, "Cannot write " + UTILSLIB::utf8FromPath(path)});
+        return fail(ErrorCode::Io, "Cannot write {}", UTILSLIB::utf8FromPath(path));
     }
     write_to_stream(*stream);
     stream->end_file();
@@ -473,12 +486,12 @@ FiffCoordTrans FiffCoordTrans::from_cardinal_points(int from, int to,
 
 //=============================================================================================================
 
-std::expected<FiffCoordTrans, UTILSLIB::Error> FiffCoordTrans::read_ascii(const std::filesystem::path& path, int from, int to)
+UTILSLIB::Expected<FiffCoordTrans> FiffCoordTrans::read_ascii(const std::filesystem::path& path, int from, int to)
 {
     const std::string name = UTILSLIB::utf8FromPath(path);
     std::ifstream in(path);
     if (!in) {
-        return std::unexpected(UTILSLIB::Error{UTILSLIB::ErrorCode::Io, "Cannot open " + name});
+        return fail(ErrorCode::Io, "Cannot open {}", name);
     }
     Matrix3f rot;
     Vector3f move;
@@ -493,13 +506,13 @@ std::expected<FiffCoordTrans, UTILSLIB::Error> FiffCoordTrans::read_ascii(const 
         if (row < 3) {
             std::istringstream values(line);
             if (!(values >> rot(row, 0) >> rot(row, 1) >> rot(row, 2) >> move[row])) {
-                return std::unexpected(UTILSLIB::Error{UTILSLIB::ErrorCode::Format, "Bad number in the coordinate transform in " + name});
+                return fail(ErrorCode::Format, "Bad number in the coordinate transform in {}", name);
             }
         }
         ++row;
     }
     if (row < 4) {
-        return std::unexpected(UTILSLIB::Error{UTILSLIB::ErrorCode::Format, "Fewer than 4 rows of coordinate transform in " + name});
+        return fail(ErrorCode::Format, "Fewer than 4 rows of coordinate transform in {}", name);
     }
     return FiffCoordTrans(from, to, rot, move / 1000.0f);
 }
@@ -549,9 +562,9 @@ FiffCoordTrans FiffCoordTrans::from_tag(const FiffTag::UPtr& tag)
 
 //=============================================================================================================
 
-std::expected<FiffCoordTrans, UTILSLIB::Error> FiffCoordTrans::read_from_node(FiffStream& stream,
-                                                                              const FiffDirNode::SPtr& node,
-                                                                              int from, int to)
+UTILSLIB::Expected<FiffCoordTrans> FiffCoordTrans::read_from_node(FiffStream& stream,
+                                                                  const FiffDirNode::SPtr& node,
+                                                                  int from, int to)
 {
     return find_transform(stream, node->dir, from, to);
 }

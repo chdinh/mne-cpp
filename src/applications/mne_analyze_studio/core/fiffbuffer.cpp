@@ -58,7 +58,7 @@ bool FiffBuffer::open()
     }
 
     try {
-        m_rawData = FIFFLIB::FiffRawData(UTILSLIB::pathFromUtf8(m_file.fileName().toStdString()));
+        m_rawData = FIFFLIB::FiffRawData(m_file.fileName().toStdU16String());
     } catch (const std::exception& e) {
         // FiffRawData reports a bad file by throwing. A buffer that cannot be
         // read is an ordinary outcome for a caller handed an arbitrary path,

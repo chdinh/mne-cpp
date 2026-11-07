@@ -755,7 +755,7 @@ int main(int argc, char* argv[])
             nave = 1;
         qInfo("  nave = %d", nave);
 
-        FiffRawData raw(UTILSLIB::pathFromUtf8(inName.toStdString()));
+        FiffRawData raw(inName.toStdU16String());
 
         // Pick channels that match the inverse operator
         StringList invChNames;
@@ -808,7 +808,7 @@ int main(int argc, char* argv[])
         }
 
         FiffEvokedSet evokedSet;
-        if (!FiffEvokedSet::read(UTILSLIB::pathFromUtf8(inName.toStdString()), evokedSet, baseline)) {
+        if (!FiffEvokedSet::read(inName.toStdU16String(), evokedSet, baseline)) {
             qCritical("Error: Failed to read evoked data from %s", inName.toUtf8().constData());
             return 1;
         }

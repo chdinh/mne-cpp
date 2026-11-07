@@ -123,7 +123,7 @@ int main(int argc, char* argv[])
 
     // Read evoked data
     FiffEvokedSet evokedSet;
-    if (!FiffEvokedSet::read(UTILSLIB::pathFromUtf8(measFile.toStdString()), evokedSet, defaultFloatPair, false)) {
+    if (!FiffEvokedSet::read(measFile.toStdU16String(), evokedSet, defaultFloatPair, false)) {
         qCritical("Cannot read evoked data from: %s", qPrintable(measFile));
         return 1;
     }

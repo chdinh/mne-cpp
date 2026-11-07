@@ -99,13 +99,13 @@ int main(int argc, char* argv[])
     // Read covariance
     FiffCov cov;
     try {
-        cov = FiffCov(UTILSLIB::pathFromUtf8(covFile.toStdString()));
+        cov = FiffCov(covFile.toStdU16String());
     } catch (const std::exception& error) {
         qCritical("Cannot read covariance from %s: %s",
                   qPrintable(covFile), error.what());
         return 1;
     }
-    if (cov.isEmpty()) {
+    if (cov.is_empty()) {
         qCritical("Cannot read covariance from: %s", qPrintable(covFile));
         return 1;
     }
@@ -114,7 +114,7 @@ int main(int argc, char* argv[])
     // Get channel names
     StringList chNames = cov.names;
     if (chNames.empty() && !rawFile.isEmpty()) {
-        FiffRawData raw(UTILSLIB::pathFromUtf8(rawFile.toStdString()));
+        FiffRawData raw(rawFile.toStdU16String());
         chNames = raw.info.ch_names;
     }
 

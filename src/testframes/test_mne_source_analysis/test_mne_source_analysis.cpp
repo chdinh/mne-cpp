@@ -269,7 +269,7 @@ private slots:
             QSKIP("Cov file not found");
 
         FiffCov cov(m_sCovFile.toStdString());
-        QVERIFY(!cov.isEmpty());
+        QVERIFY(!cov.is_empty());
         QVERIFY(cov.names.size() > 0);
     }
 

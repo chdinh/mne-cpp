@@ -165,7 +165,7 @@ void TestFiffCov::initTestCase()
     qInstallMessageHandler(UTILSLIB::MNELogger::customLogWriter);
     qDebug() << "Epsilon" << dEpsilon;
     //Read the results produced with MNE-CPP
-    covLoaded = FiffCov((QCoreApplication::applicationDirPath() + "/../resources/data/mne-cpp-test-data/MEG/sample/sample_audvis-cov.fif").toStdString());
+    covLoaded = FiffCov((QCoreApplication::applicationDirPath() + "/../resources/data/mne-cpp-test-data/MEG/sample/sample_audvis-cov.fif").toStdU16String());
 
     //Read the result data produced with mne_matlab
     MatrixXd data;
@@ -247,7 +247,7 @@ void TestFiffCov::computeFromEpochs_sampleRaw()
                                                      true,
                                                      true);
 
-    QVERIFY(!cov.isEmpty());
+    QVERIFY(!cov.is_empty());
     QCOMPARE(cov.dim, raw.info.nchan);
     QCOMPARE(cov.data.rows(), static_cast<Index>(raw.info.nchan));
     QCOMPARE(cov.data.cols(), static_cast<Index>(raw.info.nchan));
@@ -339,7 +339,7 @@ void TestFiffCov::saveRoundTrip_computedCovariance()
                                                      0.0f,
                                                      true,
                                                      true);
-    QVERIFY(!cov.isEmpty());
+    QVERIFY(!cov.is_empty());
 
     QTemporaryDir tempDir;
     QVERIFY(tempDir.isValid());
@@ -347,20 +347,25 @@ void TestFiffCov::saveRoundTrip_computedCovariance()
     const std::string outPath = (tempDir.path() + "/computed-cov.fif").toStdString();
     QVERIFY(cov.save(outPath));
 
-    FiffCov roundTrip(outPath);
-    QVERIFY(!roundTrip.isEmpty());
-    QCOMPARE(roundTrip.dim, cov.dim);
-    QCOMPARE(roundTrip.names, cov.names);
-    QVERIFY(roundTrip.data.isApprox(cov.data, 1e-9));
+    const auto roundTrip = FiffCov::read(outPath);
+    QVERIFY(roundTrip);
+    QVERIFY(!roundTrip->is_empty());
+    QCOMPARE(roundTrip->dim, cov.dim);
+    QCOMPARE(roundTrip->names, cov.names);
+    QVERIFY(roundTrip->data.isApprox(cov.data, 1e-9));
 
-    FiffCov readBack;
-    QVERIFY(FiffCov::read(outPath, readBack));
-    QVERIFY(readBack.data.isApprox(cov.data, 1e-9));
-    QVERIFY(!FiffCov::read(rawFile.fileName().toStdString(), readBack));
-    QVERIFY(!FiffCov::read(tempDir.filePath("missing-cov.fif").toStdString(), readBack));
-    QVERIFY(!cov.save(tempDir.filePath("no/dir/cov.fif").toStdString()));
-    QCOMPARE(readBack.names, cov.names);
-    QVERIFY(readBack.data.isApprox(cov.data, 1e-9));
+    // A raw file is FIFF but holds no covariance.
+    const auto noCov = FiffCov::read(rawFile.fileName().toStdString());
+    QVERIFY(!noCov);
+    QCOMPARE(noCov.error().code, UTILSLIB::ErrorCode::NotFound);
+    QVERIFY(std::string_view(noCov.error().what()).contains(rawFile.fileName().toStdString()));
+    QVERIFY_THROWS_EXCEPTION(UTILSLIB::Error, FiffCov(rawFile.fileName().toStdU16String()));
+    const auto missing = FiffCov::read(tempDir.filePath("missing-cov.fif").toStdString());
+    QVERIFY(!missing);
+    QCOMPARE(missing.error().code, UTILSLIB::ErrorCode::Io);
+    const auto unwritable = cov.save(tempDir.filePath("no/dir/cov.fif").toStdString());
+    QVERIFY(!unwritable);
+    QCOMPARE(unwritable.error().code, UTILSLIB::ErrorCode::Io);
 }
 
 //=============================================================================================================

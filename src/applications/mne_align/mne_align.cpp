@@ -450,7 +450,7 @@ void MneAlign::onWizardSaveDigitisation(const QString& outPath)
     }
 
     std::string err;
-    if (!set.write(UTILSLIB::pathFromUtf8(outPath.toStdString()), &err)) {
+    if (!set.write(outPath.toStdU16String(), &err)) {
         QMessageBox::warning(this, windowTitle(),
                              QStringLiteral("Save digitisation failed:\n%1").arg(QString::fromStdString(err)));
         return;
@@ -476,7 +476,7 @@ void MneAlign::onWizardSaveTrans(const QString& outPath)
     FiffCoordTrans trans(FIFFV_COORD_HEAD, FIFFV_COORD_MRI, mat);
     FiffCoordTrans::add_inverse(trans);
 
-    if (!trans.write(UTILSLIB::pathFromUtf8(outPath.toStdString()))) {
+    if (!trans.write(outPath.toStdU16String())) {
         QMessageBox::warning(this, windowTitle(),
                              QStringLiteral("Cannot open %1 for writing.").arg(outPath));
         return;

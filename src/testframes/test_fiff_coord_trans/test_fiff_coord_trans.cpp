@@ -133,10 +133,10 @@ void TestFiffCoordTrans::transformsMatchMnePython()
         QVERIFY(std::abs(inv.trans(k / 4, k % 4) - invTrans[k]) < 1e-6);
     }
 
-    const FiffCoordTrans mriHead = FiffCoordTrans::read(transPath().toStdString(), FIFFV_COORD_MRI, FIFFV_COORD_HEAD).value();
+    const FiffCoordTrans mriHead(transPath().toStdString(), FIFFV_COORD_MRI, FIFFV_COORD_HEAD);
     QCOMPARE(mriHead.from, FIFFV_COORD_MRI);
     // A transform stored the other way round is returned inverted.
-    const FiffCoordTrans headDevice = FiffCoordTrans::read(transPath().toStdString(), FIFFV_COORD_HEAD, FIFFV_COORD_DEVICE).value();
+    const FiffCoordTrans headDevice(transPath().toStdString(), FIFFV_COORD_HEAD, FIFFV_COORD_DEVICE);
     QVERIFY(headDevice == m_transRef.inverted());
     Eigen::MatrixX3f pos(3, 3);
     pos << 0.01f, -0.02f, 0.05f, -0.07f, 0.03f, 0.04f, 0.0f, 0.09f, -0.01f;
@@ -199,7 +199,19 @@ void TestFiffCoordTrans::readersReportWhyTheyFail()
     const auto noFile = FiffCoordTrans::read(missing);
     QVERIFY(!noFile);
     QCOMPARE(noFile.error().code, ErrorCode::Io);
-    QVERIFY(noFile.error().message.find("missing-trans.fif") != std::string::npos);
+    QVERIFY(std::string_view(noFile.error().what()).contains("missing-trans.fif"));
+    // The compact forms throw the same error, so an unhandled failure still names its cause.
+    try {
+        const FiffCoordTrans trans(missing);
+        QFAIL("no exception");
+    } catch (const UTILSLIB::Error& error) {
+        QCOMPARE(error.code, ErrorCode::Io);
+        QVERIFY(std::string_view(error.what()).contains("missing-trans.fif"));
+    }
+    QVERIFY_THROWS_EXCEPTION(UTILSLIB::Error, std::ignore = FiffCoordTrans::read(missing).value());
+    QVERIFY_THROWS_EXCEPTION(UTILSLIB::Error, FiffCoordTrans(transPath().toStdU16String(), FIFFV_COORD_MRI, FIFFV_COORD_DEVICE));
+    const FiffCoordTrans mriHead(transPath().toStdU16String(), FIFFV_COORD_MRI, FIFFV_COORD_HEAD);
+    QCOMPARE(mriHead.to, FIFFV_COORD_HEAD);
 
     QFile text(m_tempDir.filePath("not-fiff.fif"));
     QVERIFY(text.open(QIODevice::WriteOnly));

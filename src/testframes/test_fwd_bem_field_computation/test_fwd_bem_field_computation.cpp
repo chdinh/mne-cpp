@@ -178,7 +178,7 @@ private slots:
         QVERIFY(coils->ncoil() > 0);
 
         // Load head->MRI transform and pass it to the model
-        FiffCoordTrans head_mri_t = FiffCoordTrans::read(UTILSLIB::pathFromUtf8((transPath()).toStdString()), FIFFV_COORD_MRI, FIFFV_COORD_HEAD).value();
+        FiffCoordTrans head_mri_t(transPath().toStdU16String(), FIFFV_COORD_MRI, FIFFV_COORD_HEAD);
         QVERIFY(!head_mri_t.is_empty());
         model->fwd_bem_set_head_mri_t(head_mri_t);
 
@@ -210,7 +210,7 @@ private slots:
         QVERIFY(eegEls->ncoil() > 0);
 
         // Load head->MRI transform
-        FiffCoordTrans head_mri_t = FiffCoordTrans::read(UTILSLIB::pathFromUtf8((transPath()).toStdString()), FIFFV_COORD_MRI, FIFFV_COORD_HEAD).value();
+        FiffCoordTrans head_mri_t(transPath().toStdU16String(), FIFFV_COORD_MRI, FIFFV_COORD_HEAD);
         QVERIFY(!head_mri_t.is_empty());
         model->fwd_bem_set_head_mri_t(head_mri_t);
 
@@ -235,7 +235,7 @@ private slots:
                 megChs.append(raw.info.chs[i]);
         }
         auto coils = coilDefs->create_meg_coils(megChs, megChs.size(), FWD_COIL_ACCURACY_NORMAL, raw.info.dev_head_t);
-        FiffCoordTrans head_mri_t = FiffCoordTrans::read(UTILSLIB::pathFromUtf8((transPath()).toStdString()), FIFFV_COORD_MRI, FIFFV_COORD_HEAD).value();
+        FiffCoordTrans head_mri_t(transPath().toStdU16String(), FIFFV_COORD_MRI, FIFFV_COORD_HEAD);
         model->fwd_bem_set_head_mri_t(head_mri_t);
         model->fwd_bem_specify_coils(coils.get());
 
@@ -266,7 +266,7 @@ private slots:
                 megChs.append(raw.info.chs[i]);
         }
         auto coils = coilDefs->create_meg_coils(megChs, megChs.size(), FWD_COIL_ACCURACY_NORMAL, raw.info.dev_head_t);
-        FiffCoordTrans head_mri_t = FiffCoordTrans::read(UTILSLIB::pathFromUtf8((transPath()).toStdString()), FIFFV_COORD_MRI, FIFFV_COORD_HEAD).value();
+        FiffCoordTrans head_mri_t(transPath().toStdU16String(), FIFFV_COORD_MRI, FIFFV_COORD_HEAD);
         model->fwd_bem_set_head_mri_t(head_mri_t);
         model->fwd_bem_specify_coils(coils.get());
 
@@ -293,7 +293,7 @@ private slots:
                 eegChs.append(raw.info.chs[i]);
         }
         auto eegEls = FwdCoilSet::create_eeg_els(eegChs, eegChs.size());
-        FiffCoordTrans head_mri_t = FiffCoordTrans::read(UTILSLIB::pathFromUtf8((transPath()).toStdString()), FIFFV_COORD_MRI, FIFFV_COORD_HEAD).value();
+        FiffCoordTrans head_mri_t(transPath().toStdU16String(), FIFFV_COORD_MRI, FIFFV_COORD_HEAD);
         model->fwd_bem_set_head_mri_t(head_mri_t);
         model->fwd_bem_specify_els(eegEls.get());
 
@@ -321,7 +321,7 @@ private slots:
                 eegChs.append(raw.info.chs[i]);
         }
         auto eegEls = FwdCoilSet::create_eeg_els(eegChs, eegChs.size());
-        FiffCoordTrans head_mri_t = FiffCoordTrans::read(UTILSLIB::pathFromUtf8((transPath()).toStdString()), FIFFV_COORD_MRI, FIFFV_COORD_HEAD).value();
+        FiffCoordTrans head_mri_t(transPath().toStdU16String(), FIFFV_COORD_MRI, FIFFV_COORD_HEAD);
         model->fwd_bem_set_head_mri_t(head_mri_t);
         model->fwd_bem_specify_els(eegEls.get());
 
@@ -350,7 +350,7 @@ private slots:
                 megChs.append(raw.info.chs[i]);
         }
         auto coils = coilDefs->create_meg_coils(megChs, megChs.size(), FWD_COIL_ACCURACY_NORMAL, raw.info.dev_head_t);
-        FiffCoordTrans head_mri_t = FiffCoordTrans::read(UTILSLIB::pathFromUtf8((transPath()).toStdString()), FIFFV_COORD_MRI, FIFFV_COORD_HEAD).value();
+        FiffCoordTrans head_mri_t(transPath().toStdU16String(), FIFFV_COORD_MRI, FIFFV_COORD_HEAD);
         model->fwd_bem_set_head_mri_t(head_mri_t);
         model->fwd_bem_specify_coils(coils.get());
 
@@ -382,7 +382,7 @@ private slots:
                 eegChs.append(raw.info.chs[i]);
         }
         auto eegEls = FwdCoilSet::create_eeg_els(eegChs, eegChs.size());
-        FiffCoordTrans head_mri_t = FiffCoordTrans::read(UTILSLIB::pathFromUtf8((transPath()).toStdString()), FIFFV_COORD_MRI, FIFFV_COORD_HEAD).value();
+        FiffCoordTrans head_mri_t(transPath().toStdU16String(), FIFFV_COORD_MRI, FIFFV_COORD_HEAD);
         model->fwd_bem_set_head_mri_t(head_mri_t);
         model->fwd_bem_specify_els(eegEls.get());
 
@@ -417,7 +417,7 @@ private slots:
                 megChs.append(raw.info.chs[i]);
         }
         auto coils = coilDefs->create_meg_coils(megChs, megChs.size(), FWD_COIL_ACCURACY_NORMAL, raw.info.dev_head_t);
-        FiffCoordTrans head_mri_t = FiffCoordTrans::read(UTILSLIB::pathFromUtf8((transPath()).toStdString()), FIFFV_COORD_MRI, FIFFV_COORD_HEAD).value();
+        FiffCoordTrans head_mri_t(transPath().toStdU16String(), FIFFV_COORD_MRI, FIFFV_COORD_HEAD);
         model->fwd_bem_set_head_mri_t(head_mri_t);
         model->fwd_bem_specify_coils(coils.get());
 
@@ -444,7 +444,7 @@ private slots:
                 eegChs.append(raw.info.chs[i]);
         }
         auto eegEls = FwdCoilSet::create_eeg_els(eegChs, eegChs.size());
-        FiffCoordTrans head_mri_t = FiffCoordTrans::read(UTILSLIB::pathFromUtf8((transPath()).toStdString()), FIFFV_COORD_MRI, FIFFV_COORD_HEAD).value();
+        FiffCoordTrans head_mri_t(transPath().toStdU16String(), FIFFV_COORD_MRI, FIFFV_COORD_HEAD);
         model->fwd_bem_set_head_mri_t(head_mri_t);
         model->fwd_bem_specify_els(eegEls.get());
 

@@ -102,7 +102,7 @@ FiffDigitizerData::FiffDigitizerData(const std::filesystem::path& path)
 {
     auto t_pStream = FiffStream::open(path);
     if (!t_pStream) {
-        throw std::runtime_error(t_pStream ? "Could not open the digitizer data file" : t_pStream.error().message);
+        throw std::runtime_error(t_pStream ? "Could not open the digitizer data file" : t_pStream.error().what());
     }
     if (!t_pStream->read_digitizer_data(t_pStream->dirtree(), *this)) {
         throw std::runtime_error("Could not read the FiffDigitizerData");

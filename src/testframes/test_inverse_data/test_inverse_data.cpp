@@ -260,7 +260,7 @@ private slots:
             m_info = raw.info;
         }
 
-        m_bDataLoaded = !m_fwd.isEmpty() && !m_noiseCov.isEmpty() && m_info.nchan > 0;
+        m_bDataLoaded = !m_fwd.isEmpty() && !m_noiseCov.is_empty() && m_info.nchan > 0;
 
         // Pre-compute the standard inverse operator (most tests share it)
         if (m_bDataLoaded) {
@@ -768,7 +768,7 @@ private slots:
             QSKIP("Covariance file not found");
 
         FiffCov cov(path.toStdString());
-        QVERIFY(!cov.isEmpty());
+        QVERIFY(!cov.is_empty());
         QVERIFY(cov.data.rows() > 0);
         QCOMPARE(cov.data.rows(), cov.data.cols()); // Should be square
         QVERIFY(cov.names.size() > 0);
@@ -789,7 +789,7 @@ private slots:
 
         QString path = m_sDataPath + "/MEG/sample/sample_audvis-cov.fif";
         FiffCov cov(path.toStdString());
-        if (cov.isEmpty())
+        if (cov.is_empty())
             QSKIP("Failed to read covariance");
 
         // Pick first 50 channels

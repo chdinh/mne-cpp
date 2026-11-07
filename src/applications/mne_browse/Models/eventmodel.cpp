@@ -337,9 +337,9 @@ bool EventModel::loadEventData(QFile& qFile)
     QFileInfo fileInfo(qFile);
     bool readSuccess = false;
     if (fileInfo.suffix() == "eve") {
-        readSuccess = MNE::read_events_from_ascii(UTILSLIB::pathFromUtf8(qFile.fileName().toStdString()), events);
+        readSuccess = MNE::read_events_from_ascii(qFile.fileName().toStdU16String(), events);
     } else {
-        readSuccess = MNE::read_events_from_fif(UTILSLIB::pathFromUtf8(qFile.fileName().toStdString()), events);
+        readSuccess = MNE::read_events_from_fif(qFile.fileName().toStdU16String(), events);
     }
 
     if (!readSuccess) {
@@ -373,9 +373,9 @@ bool EventModel::saveEventData(QFile& qFile)
     QFileInfo fileInfo(qFile);
     bool writeSuccess = false;
     if (fileInfo.suffix() == "eve") {
-        writeSuccess = MNE::write_events_to_ascii(UTILSLIB::pathFromUtf8(qFile.fileName().toStdString()), events);
+        writeSuccess = MNE::write_events_to_ascii(qFile.fileName().toStdU16String(), events);
     } else {
-        writeSuccess = MNE::write_events_to_fif(UTILSLIB::pathFromUtf8(qFile.fileName().toStdString()), events);
+        writeSuccess = MNE::write_events_to_fif(qFile.fileName().toStdU16String(), events);
     }
     qFile.close();
 

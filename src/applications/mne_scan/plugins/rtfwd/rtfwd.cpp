@@ -157,7 +157,7 @@ bool RtFwd::start()
         {m_pFwdSettings->measname, "The meaurement file cannot be opend. Chosse another file."},
     };
     for (const auto& [path, message] : inputs) {
-        if (!FiffStream::open(UTILSLIB::pathFromUtf8(path.toStdString()))) {
+        if (!FiffStream::open(path.toStdU16String())) {
             QMessageBox msgBox;
             msgBox.setText(message);
             msgBox.setInformativeText(path);

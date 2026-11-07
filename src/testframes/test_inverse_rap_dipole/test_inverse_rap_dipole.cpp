@@ -425,7 +425,7 @@ private slots:
         FiffCov noiseCov(covFile.fileName().toStdString());
         FiffRawData raw(rawPath.toStdString());
 
-        if (fwd.isEmpty() || noiseCov.isEmpty())
+        if (fwd.isEmpty() || noiseCov.is_empty())
             QSKIP("Data load failed");
 
         MNELIB::MNEInverseOperator invOp = MNELIB::MNEInverseOperator::make_inverse_operator(

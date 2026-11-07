@@ -497,7 +497,7 @@ void TestFiffRWR::opensAndStartsFilesByPath()
     const auto notFiff = FiffStream::open(text.fileName().toStdString());
     QVERIFY(!notFiff);
     QCOMPARE(notFiff.error().code, UTILSLIB::ErrorCode::Format);
-    QVERIFY(notFiff.error().message.find("text.fif") != std::string::npos);
+    QVERIFY(std::string_view(notFiff.error().what()).contains("text.fif"));
 
     // The stream is a value: it moves out of the result and keeps reading.
     FiffStream moved = std::move(*FiffStream::open(path));
@@ -588,7 +588,7 @@ void TestFiffRWR::writersStable()
         QVERIFY(written.open(QIODevice::ReadOnly));
         bytes = written.readAll();
     } else if (writer == "trans") {
-        const FiffCoordTrans trans = FiffCoordTrans::read((meg + "all-trans.fif").toStdString()).value();
+        const FiffCoordTrans trans((meg + "all-trans.fif").toStdString());
         const QString path = m_tempDir.filePath("stable-trans.fif");
         QVERIFY(trans.write(path.toStdString()));
         QFile written(path);

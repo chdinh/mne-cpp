@@ -62,7 +62,7 @@ AveragingDataModel::AveragingDataModel(const QString& sFilePath,
 {
     Q_UNUSED(byteLoadedData);
 
-    m_pFiffEvokedSet = QSharedPointer<FIFFLIB::FiffEvokedSet>::create(UTILSLIB::pathFromUtf8(sFilePath.toStdString()));
+    m_pFiffEvokedSet = QSharedPointer<FIFFLIB::FiffEvokedSet>::create(sFilePath.toStdU16String());
 }
 
 //=============================================================================================================
@@ -146,7 +146,7 @@ bool AveragingDataModel::saveToFile(const QString& sPath)
     Q_UNUSED(sPath)
     QTemporaryDir dir;
     const QString tmpPath = dir.filePath("evoked-ave.fif");
-    if (!dir.isValid() || !m_pFiffEvokedSet->save(UTILSLIB::pathFromUtf8(tmpPath.toStdString()))) {
+    if (!dir.isValid() || !m_pFiffEvokedSet->save(tmpPath.toStdU16String())) {
         return false;
     }
     QFile file(tmpPath);
@@ -156,6 +156,6 @@ bool AveragingDataModel::saveToFile(const QString& sPath)
     QFileDialog::saveFileContent(file.readAll(), getModelName());
     return true;
 #else
-    return m_pFiffEvokedSet->save(UTILSLIB::pathFromUtf8(sPath.toStdString()));
+    return m_pFiffEvokedSet->save(sPath.toStdU16String());
 #endif
 }

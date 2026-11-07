@@ -214,7 +214,7 @@ int main(int argc, char* argv[])
     //
     // Read input FIFF
     //
-    FiffRawData raw(UTILSLIB::pathFromUtf8(inFile.toStdString()));
+    FiffRawData raw(inFile.toStdU16String());
     if (!raw.info.isEmpty()) {
         qInfo("Read input: %d channels at %.1f Hz",
               raw.info.nchan, raw.info.sfreq);

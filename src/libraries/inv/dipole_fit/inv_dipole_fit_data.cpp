@@ -511,9 +511,9 @@ InvDipoleFitData* InvDipoleFitData::setup_dipole_fit_data(const QString& mriname
        * Read the coordinate transformations
        */
     if (!mriname.isEmpty()) {
-        const auto mriHead = FiffCoordTrans::read(UTILSLIB::pathFromUtf8(mriname.toStdString()), FIFFV_COORD_MRI, FIFFV_COORD_HEAD);
+        const auto mriHead = FiffCoordTrans::read(mriname.toStdU16String(), FIFFV_COORD_MRI, FIFFV_COORD_HEAD);
         if (!mriHead) {
-            UTILSLIB::Log::critical("{}", mriHead.error().message);
+            UTILSLIB::Log::critical("{}", mriHead.error().what());
             return nullptr;
         }
         res->mri_head_t = std::make_unique<FiffCoordTrans>(*mriHead);
@@ -534,9 +534,9 @@ InvDipoleFitData* InvDipoleFitData::setup_dipole_fit_data(const QString& mriname
     }
 
     res->mri_head_t->print();
-    const auto megHead = FiffCoordTrans::read(UTILSLIB::pathFromUtf8(measname.toStdString()), FIFFV_COORD_DEVICE, FIFFV_COORD_HEAD);
+    const auto megHead = FiffCoordTrans::read(measname.toStdU16String(), FIFFV_COORD_DEVICE, FIFFV_COORD_HEAD);
     if (!megHead) {
-        UTILSLIB::Log::critical("{}", megHead.error().message);
+        UTILSLIB::Log::critical("{}", megHead.error().what());
         return nullptr;
     }
     res->meg_head_t = std::make_unique<FiffCoordTrans>(*megHead);

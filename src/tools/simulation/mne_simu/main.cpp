@@ -139,7 +139,7 @@ int main(int argc, char* argv[])
     }
 
     // Load raw file for channel info
-    FiffRawData raw(UTILSLIB::pathFromUtf8(rawFile.toStdString()));
+    FiffRawData raw(rawFile.toStdU16String());
     if (raw.info.isEmpty()) {
         qCritical("Cannot read raw: %s", qPrintable(rawFile));
         return 1;
@@ -165,8 +165,8 @@ int main(int argc, char* argv[])
 
     // Add noise if covariance provided
     if (!covFile.isEmpty()) {
-        FiffCov cov(UTILSLIB::pathFromUtf8(covFile.toStdString()));
-        if (!cov.isEmpty() && cov.dim == nChan) {
+        FiffCov cov(covFile.toStdU16String());
+        if (!cov.is_empty() && cov.dim == nChan) {
             // Cholesky decomposition for correlated noise
             LLT<MatrixXd> llt(cov.data);
             MatrixXd L = llt.matrixL();
@@ -208,7 +208,7 @@ int main(int argc, char* argv[])
 
     // Write output
     Eigen::RowVectorXd cals;
-    auto stream = FiffStream::start_writing_raw(UTILSLIB::pathFromUtf8(outFile.toStdString()), raw.info, cals);
+    auto stream = FiffStream::start_writing_raw(outFile.toStdU16String(), raw.info, cals);
     if (!stream) {
         qCritical("Cannot open output file: %s", qPrintable(outFile));
         return 1;

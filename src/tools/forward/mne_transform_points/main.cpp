@@ -125,9 +125,9 @@ int main(int argc, char* argv[])
     }
 
     // Read the transform between the requested frames (inverted if stored the other way round)
-    const auto read = FiffCoordTrans::read(UTILSLIB::pathFromUtf8(transName.toStdString()), fromFrame, toFrame);
+    const auto read = FiffCoordTrans::read(transName.toStdU16String(), fromFrame, toFrame);
     if (!read) {
-        qCritical("%s", read.error().message.c_str());
+        qCritical("%s", read.error().what());
         return 1;
     }
     const FiffCoordTrans& trans = *read;
