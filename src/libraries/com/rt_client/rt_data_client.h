@@ -127,7 +127,7 @@ public:
     /**
      * Requests the ID at mne_rt_server and returns it
      *
-     * @return the requested id.
+     * @return the requested id, or -1 while the socket is not connected.
      */
     qint32 getClientId();
 

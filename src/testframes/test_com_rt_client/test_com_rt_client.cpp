@@ -168,8 +168,10 @@ void TestComRtClient::testRtCmdClientDisconnectedState()
 
 void TestComRtClient::testRtDataClientConstruction()
 {
+    QTest::failOnWarning();
     RtDataClient client;
     QCOMPARE(client.state(), QAbstractSocket::UnconnectedState);
+    QCOMPARE(client.getClientId(), -1); // nothing to ask before a connection
 }
 
 //=============================================================================================================

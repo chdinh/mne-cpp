@@ -62,7 +62,6 @@ RtDataClient::RtDataClient(QObject* parent)
 : QTcpSocket(parent)
 , m_clientID(-1)
 {
-    getClientId();
 }
 
 //=============================================================================================================
@@ -77,7 +76,7 @@ void RtDataClient::disconnectFromHost()
 
 qint32 RtDataClient::getClientId()
 {
-    if (m_clientID == -1) {
+    if (m_clientID == -1 && state() == QAbstractSocket::ConnectedState) {
         //            sendFiffCommand(1);//MNE_RT.MNE_RT_GET_CLIENT_ID)
 
         FiffStream t_fiffStream(this);
