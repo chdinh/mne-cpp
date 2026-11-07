@@ -35,7 +35,6 @@
 #include <QCoreApplication>
 #include <QCommandLineParser>
 #include <QDataStream>
-#include <QDebug>
 #include <QFile>
 #include <QTemporaryDir>
 
@@ -45,8 +44,11 @@
 
 #include <algorithm>
 #include <cmath>
-#include <functional>
 #include <cstdlib>
+#include <format>
+#include <functional>
+#include <print>
+#include <string_view>
 
 //=============================================================================================================
 // USED NAMESPACES
@@ -62,9 +64,9 @@ using namespace Eigen;
 namespace
 {
 
-bool expect(bool condition, const QString& what)
+bool expect(bool condition, std::string_view what)
 {
-    qInfo().noquote() << (condition ? "  ok  " : "  FAIL") << what;
+    std::println("{} {}", condition ? "  ok  " : "  FAIL", what);
     return condition;
 }
 
@@ -118,12 +120,12 @@ int main(int argc, char* argv[])
     //! [fs_surface_read]
     // nibabel.freesurfer.read_geometry / read_morph_data: 155407 vertices, 310810 triangles, curv[0] = -0.205397
     ok &= expect(rr.rows() == 155407 && tris.rows() == 310810 && std::fabs(curv(0) + 0.205397367477417f) < 1e-6f && (rr.row(0) * 1000.0f - RowVector3f(-20.95193099975586f, -86.27677917480469f, 13.240333557128906f)).norm() < 1e-3f,
-                 QString("lh.white: %1 vertices, %2 triangles, first vertex and curvature = nibabel").arg(rr.rows()).arg(tris.rows()));
+                 std::format("lh.white: {} vertices, {} triangles, first vertex and curvature = nibabel", rr.rows(), tris.rows()));
 
     //! [fs_surface_set_read]
     FsSurfaceSet both("sample", 2, "white", subjectsDir); // 2 = both hemispheres
     //! [fs_surface_set_read]
-    ok &= expect(both.size() == 2 && both[0].rr().rows() == 155407, QString("FsSurfaceSet holds %1 hemispheres").arg(both.size()));
+    ok &= expect(both.size() == 2 && both[0].rr().rows() == 155407, std::format("FsSurfaceSet holds {} hemispheres", both.size()));
 
     //! [fs_annotation_read]
     FsAnnotation aparc("sample", 0, "aparc", subjectsDir);
@@ -140,9 +142,7 @@ int main(int argc, char* argv[])
     }
     // nibabel.freesurfer.read_annot: 36 table entries; mne.read_labels_from_annot: 34 labels, precentral-lh 9505 vertices
     ok &= expect(colors.getNames().size() == 36 && regions.size() == 34 && precentral >= 0 && regions[precentral].vertices.size() == 9505,
-                 QString("aparc: %1 colour-table entries, precentral %2 vertices (9505)")
-                     .arg(colors.getNames().size())
-                     .arg(precentral >= 0 ? regions[precentral].vertices.size() : -1));
+                 std::format("aparc: {} colour-table entries, precentral {} vertices (9505)", colors.getNames().size(), precentral >= 0 ? regions[precentral].vertices.size() : -1));
 
     //! [fs_annotation_set_read]
     FsAnnotationSet parcellation("sample", 2, "aparc", subjectsDir);
@@ -155,7 +155,7 @@ int main(int argc, char* argv[])
     //! [fs_label_read]
     // File order (mne.read_label sorts): first vertex 1093 at (-15.435, -83.078, -1.042) mm
     ok &= expect(v1.vertices.size() == 5638 && v1.vertices(0) == 1093 && (v1.pos.row(0) - RowVector3f(-0.015435f, -0.083078f, -0.001042f)).norm() < 1e-6f,
-                 QString("lh.V1.label: %1 vertices = mne.read_label").arg(v1.vertices.size()));
+                 std::format("lh.V1.label: {} vertices = mne.read_label", v1.vertices.size()));
 
     //! [fs_label_utils_usage]
     const FsLabel grown = FsLabelUtils::growLabel(v1, white, 1); // add the one-ring neighbours
@@ -168,7 +168,7 @@ int main(int argc, char* argv[])
     }
     std::sort(sizes.begin(), sizes.end(), std::greater<int>());
     ok &= expect(grown.vertices.size() - v1.vertices.size() == 447 && sizes == QList<int>({5635, 2, 1}),
-                 QString("growLabel adds %1 vertices (447); splitLabel parts %2").arg(grown.vertices.size() - v1.vertices.size()).arg(sizes.size()));
+                 std::format("growLabel adds {} vertices (447); splitLabel parts {}", grown.vertices.size() - v1.vertices.size(), sizes.size()));
 
     //! [fs_atlas_lookup_usage]
     QTemporaryDir dir;
@@ -180,8 +180,8 @@ int main(int argc, char* argv[])
     //! [fs_atlas_lookup_usage]
     // nibabel: inv(affine) maps (-4,-4,-4) to voxel (0,0,0) and (2,0,-2) to voxel (3,2,1)
     ok &= expect(atlas.isLoaded() && regionsAt == QStringList({"Left-Hippocampus", "Right-Hippocampus", "Unknown"}),
-                 QString("atlas lookup: %1").arg(regionsAt.join(", ")));
+                 std::format("atlas lookup: {}", regionsAt.join(", ").toStdString()));
 
-    qInfo() << (ok ? "All fs checks passed." : "fs checks FAILED.");
+    std::println("{}", ok ? "All fs checks passed." : "fs checks FAILED.");
     return ok ? EXIT_SUCCESS : EXIT_FAILURE;
 }

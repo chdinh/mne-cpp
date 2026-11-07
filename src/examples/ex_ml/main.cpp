@@ -29,7 +29,6 @@
 //=============================================================================================================
 
 #include <QCoreApplication>
-#include <QDebug>
 #include <QFile>
 #include <QTemporaryDir>
 
@@ -38,7 +37,10 @@
 //=============================================================================================================
 
 #include <cstdlib>
+#include <format>
 #include <memory>
+#include <print>
+#include <string_view>
 
 //=============================================================================================================
 // USED NAMESPACES
@@ -54,9 +56,9 @@ using namespace Eigen;
 namespace
 {
 
-bool expect(bool condition, const QString& what)
+bool expect(bool condition, std::string_view what)
 {
-    qInfo().noquote() << (condition ? "  ok  " : "  FAIL") << what;
+    std::println("{} {}", condition ? "  ok  " : "  FAIL", what);
     return condition;
 }
 
@@ -93,9 +95,9 @@ int main(int argc, char* argv[])
     Matrix2f expected;
     expected << 0.6681878f, 0.33181223f, 0.00235232f, 0.9976477f;
     ok &= expect(loaded && model->modelType() == "onnx" && probabilities.shape() == std::vector<int64_t>({2, 2}) && (probabilities.toMatrixXf() - expected).cwiseAbs().maxCoeff() < 1e-6f && classes == "rest,task",
-                 QString("MlOnnxModel: p(task) = %1, %2 match NumPy; classes '%3'").arg(probabilities.matrix()(0, 1)).arg(probabilities.matrix()(1, 1)).arg(QString::fromStdString(classes)));
+                 std::format("MlOnnxModel: p(task) = {:g}, {:g} match NumPy; classes '{}'", probabilities.matrix()(0, 1), probabilities.matrix()(1, 1), classes));
 #else
-    qInfo().noquote() << "  skip  MlOnnxModel (built without ONNX Runtime)";
+    std::println("  skip  MlOnnxModel (built without ONNX Runtime)");
 #endif
 
     //! [ml_trainer_usage]
@@ -110,9 +112,9 @@ int main(int argc, char* argv[])
         ok &= expect(written && result.success && result.stdOut.trimmed() == "trained on 5 epochs" && trainer.checkPrerequisites({"json", "no_such_package_xyz"}) == QStringList({"no_such_package_xyz"}),
                      "MLTrainer runs the script with its arguments and reports the missing package");
     } else {
-        qInfo().noquote() << "  skip  MLTrainer (python3 not found)";
+        std::println("  skip  MLTrainer (python3 not found)");
     }
 
-    qInfo().noquote() << (ok ? "All ml checks passed." : "ml checks FAILED.");
+    std::println("{}", ok ? "All ml checks passed." : "ml checks FAILED.");
     return ok ? EXIT_SUCCESS : EXIT_FAILURE;
 }

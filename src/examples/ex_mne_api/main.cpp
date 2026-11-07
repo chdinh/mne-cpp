@@ -72,7 +72,6 @@
 
 #include <QCoreApplication>
 #include <QCommandLineParser>
-#include <QDebug>
 #include <QFile>
 #include <QTemporaryDir>
 
@@ -88,7 +87,10 @@
 
 #include <cmath>
 #include <cstdlib>
+#include <format>
 #include <memory>
+#include <print>
+#include <string_view>
 #include <vector>
 
 //=============================================================================================================
@@ -107,9 +109,9 @@ using namespace Eigen;
 namespace
 {
 
-bool expect(bool condition, const QString& what)
+bool expect(bool condition, std::string_view what)
 {
-    qInfo().noquote() << (condition ? "  ok  " : "  FAIL") << what;
+    std::println("{} {}", condition ? "  ok  " : "  FAIL", what);
     return condition;
 }
 
@@ -418,7 +420,7 @@ int main(int argc, char* argv[])
     // keep_sample_mean=False, rank="full"): 6 of 12 epochs kept, nfree 365, C[EEG001, EEG001] = 8.784207369943824e-18
     const int eeg001 = UTILSLIB::indexOf(noiseCov.names, "EEG001");
     ok &= expect(preStim.events == QVector<unsigned int>({1, 2}) && noiseCov.nfree == 365 && near(noiseCov.data(eeg001, eeg001), 8.784207369943824e-18, 1e-6),
-                 QString("MNEDescriptionParser: a .cov description with EEG rejection gives nfree %1 like mne.compute_covariance").arg(noiseCov.nfree));
+                 std::format("MNEDescriptionParser: a .cov description with EEG rejection gives nfree {} like mne.compute_covariance", noiseCov.nfree));
 
     //! [mne_meas_data_usage]
     // MNE-C measurement container: data set 1 of the evoked file, MEG and EEG channels, time-major
@@ -548,6 +550,6 @@ int main(int argc, char* argv[])
     ok &= expect(weights.rows() == 642 && weights.cols() == 162 && std::abs(weights.coeff(0, 0) - 0.43720984) < 1e-5 && std::abs(weights.coeff(0, 42) - 0.37262118) < 1e-5 && std::abs(weights.coeff(0, 51) - 0.19016896) < 1e-5,
                  "MNEMorphMap: sphere-registered morph map like mne.read_morph_map, saved and reloaded");
 
-    qInfo().noquote() << (ok ? "All mne checks passed." : "mne checks FAILED.");
+    std::println("{}", ok ? "All mne checks passed." : "mne checks FAILED.");
     return ok ? EXIT_SUCCESS : EXIT_FAILURE;
 }

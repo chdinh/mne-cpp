@@ -34,7 +34,6 @@
 //=============================================================================================================
 
 #include <QApplication>
-#include <QDebug>
 #include <QTemporaryDir>
 
 //=============================================================================================================
@@ -44,6 +43,9 @@
 #include <cmath>
 #include <complex>
 #include <cstdlib>
+#include <format>
+#include <print>
+#include <string_view>
 
 //=============================================================================================================
 // USED NAMESPACES
@@ -64,9 +66,9 @@ namespace
 constexpr double kPi = 3.14159265358979323846;
 constexpr double kSFreq = 1000.0;
 
-bool expect(bool condition, const QString& what)
+bool expect(bool condition, std::string_view what)
 {
-    qInfo().noquote() << (condition ? "  ok  " : "  FAIL") << what;
+    std::println("{} {}", condition ? "  ok  " : "  FAIL", what);
     return condition;
 }
 
@@ -118,7 +120,7 @@ int main(int argc, char* argv[])
         const double g10 = gain(taps, 10.0, kSFreq);
         const double g100 = gain(taps, 100.0, kSFreq);
         ok &= expect(std::fabs(g10 - 1.0) < 0.01 && g100 < 0.01,
-                     QString("%1 (%2): |H(10 Hz)| %3, |H(100 Hz)| %4").arg(kernel->getName(), kernel->getDesignMethod().getName()).arg(g10).arg(g100));
+                     std::format("{} ({}): |H(10 Hz)| {:g}, |H(100 Hz)| {:g}", kernel->getName().toStdString(), kernel->getDesignMethod().getName().toStdString(), g10, g100));
     }
 
     //! [cosine_filter_design]
@@ -131,7 +133,7 @@ int main(int argc, char* argv[])
     const double c40 = std::abs(response(41));
     const double c100 = std::abs(response(102));
     ok &= expect(response.size() == 513 && c10 == 1.0 && c40 > 0.3 && c40 < 0.7 && c100 == 0.0,
-                 QString("CosineFilter response at 10/40/100 Hz: %1 / %2 / %3").arg(c10).arg(c40).arg(c100));
+                 std::format("CosineFilter response at 10/40/100 Hz: {:g} / {:g} / {:g}", c10, c40, c100));
 
     //! [parks_mcclellan_design]
     // Equiripple 65-tap low-pass, corner 0.08 pi (40 Hz at 1 kHz), transition 0.04 pi
@@ -140,7 +142,7 @@ int main(int argc, char* argv[])
     const double pm10 = gain(parksMcClellan.FirCoeff, 10.0, kSFreq);
     const double pm100 = gain(parksMcClellan.FirCoeff, 100.0, kSFreq);
     ok &= expect(parksMcClellan.FirCoeff.size() == 65 && std::fabs(pm10 - 1.0) < 0.05 && pm100 < 0.05,
-                 QString("ParksMcClellan 65 taps: |H(10 Hz)| %1, |H(100 Hz)| %2").arg(pm10).arg(pm100));
+                 std::format("ParksMcClellan 65 taps: |H(10 Hz)| {:g}, |H(100 Hz)| {:g}", pm10, pm100));
 
     const int n = 4000;
     MatrixXd data(2, n);
@@ -152,7 +154,7 @@ int main(int argc, char* argv[])
     //! [filter_data_usage]
     const double filterErr = (filtered.row(0) - tone(10.0, n)).segment(500, n - 1000).cwiseAbs().maxCoeff();
     ok &= expect(filtered.cols() == n && filterErr < 0.02,
-                 QString("filterData removes 100 Hz and keeps 10 Hz in phase (max error %1)").arg(filterErr));
+                 std::format("filterData removes 100 Hz and keeps 10 Hz in phase (max error {:g})", filterErr));
 
     //! [filter_overlap_add_usage]
     FilterOverlapAdd overlapAdd; // keeps the filter tail between calls
@@ -169,7 +171,7 @@ int main(int argc, char* argv[])
         delayedTone(t) = std::sin(2.0 * kPi * 10.0 * (t - delay) / kSFreq);
     }
     const double streamErr = (streamed.row(0) - delayedTone).segment(1000, n - 1500).cwiseAbs().maxCoeff();
-    ok &= expect(streamErr < 0.02, QString("overlap-add over 4 blocks equals the delayed 10 Hz tone (max error %1)").arg(streamErr));
+    ok &= expect(streamErr < 0.02, std::format("overlap-add over 4 blocks equals the delayed 10 Hz tone (max error {:g})", streamErr));
 
     //! [filter_io_round_trip]
     QTemporaryDir dir;
@@ -180,14 +182,15 @@ int main(int argc, char* argv[])
     //! [filter_io_round_trip]
     const double ioErr = (reloaded.getCoefficients() - lowPass.getCoefficients()).cwiseAbs().maxCoeff();
     ok &= expect(written && read && reloaded.getCoefficients().size() == lowPass.getCoefficients().size() && ioErr < 1e-6,
-                 QString("FilterIO round trip keeps %1 taps (max error %2)").arg(reloaded.getCoefficients().size()).arg(ioErr));
+                 std::format("FilterIO round trip keeps {} taps (max error {:g})", reloaded.getCoefficients().size(), ioErr));
 
     // Magnitude responses of the three designs from 0 to 150 Hz
     QVector<double> freqs;
     QVector<double> gainCosine;
     QVector<double> gainTscheb;
     QVector<double> gainPm;
-    for (double f = 0.0; f <= 150.0; f += 0.5) {
+    for (int step = 0; step <= 300; ++step) {
+        const double f = 0.5 * step;
         freqs.append(f);
         gainCosine.append(gain(lowPass.getCoefficients(), f, kSFreq));
         gainTscheb.append(gain(lowPassPm.getCoefficients(), f, kSFreq));
@@ -222,6 +225,6 @@ int main(int argc, char* argv[])
     traces.addSeries(ms, stream, "FilterOverlapAdd, delay removed", QColor(), Qt::DashLine);
     FigureExporter::save(traces, "filtered_signal", "filterData and the block-wise FilterOverlapAdd both keep the 10 Hz tone and remove the 100 Hz tone.");
 
-    qInfo() << (ok ? "All dsp filter checks passed." : "dsp filter checks FAILED.");
+    std::println("{}", ok ? "All dsp filter checks passed." : "dsp filter checks FAILED.");
     return ok ? EXIT_SUCCESS : EXIT_FAILURE;
 }

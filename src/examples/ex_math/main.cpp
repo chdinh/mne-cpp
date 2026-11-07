@@ -32,7 +32,6 @@
 //=============================================================================================================
 
 #include <QCoreApplication>
-#include <QDebug>
 
 //=============================================================================================================
 // STL INCLUDES
@@ -40,8 +39,11 @@
 
 #include <cmath>
 #include <cstdlib>
+#include <format>
 #include <initializer_list>
+#include <print>
 #include <string>
+#include <string_view>
 
 //=============================================================================================================
 // USED NAMESPACES
@@ -59,22 +61,22 @@ namespace
 
 constexpr double kPi = 3.14159265358979323846;
 
-bool expect(bool condition, const QString& what)
+bool expect(bool condition, std::string_view what)
 {
-    qInfo().noquote() << (condition ? "  ok  " : "  FAIL") << what;
+    std::println("{} {}", condition ? "  ok  " : "  FAIL", what);
     return condition;
 }
 
 //=============================================================================================================
 
-bool expectValues(const MatrixXd& actual, std::initializer_list<double> expected, double tol, const QString& what)
+bool expectValues(const MatrixXd& actual, std::initializer_list<double> expected, double tol, std::string_view what)
 {
     double err = 0.0;
     int k = 0;
     for (double value : expected) {
         err = std::max(err, std::fabs(actual.data()[k++] - value)); // column-major, as NumPy ravel(order="F")
     }
-    return expect(k == actual.size() && err < tol, QString("%1 (max error %2)").arg(what).arg(err));
+    return expect(k == actual.size() && err < tol, std::format("{} (max error {:g})", what, err));
 }
 
 } // namespace
@@ -99,7 +101,7 @@ int main(int argc, char* argv[])
     const double condition = Linalg::getConditionNumber(square, singular); // s_max / s_min
     //! [linalg_usage]
     ok &= expectValues(tallPinv, {-1.3333333333333324, 1.0833333333333326, -0.3333333333333325, 0.33333333333333265, 0.6666666666666657, -0.41666666666666596}, 1e-12, "pinv = numpy.linalg.pinv");
-    ok &= expect(std::fabs(condition - 2.6180339887498945) < 1e-12, QString("condition number %1 = numpy.linalg.cond").arg(condition));
+    ok &= expect(std::fabs(condition - 2.6180339887498945) < 1e-12, std::format("condition number {:g} = numpy.linalg.cond", condition));
 
     //! [numerics_rescale]
     MatrixXd data(2, 6);
@@ -127,8 +129,8 @@ int main(int argc, char* argv[])
     psd.maxCoeff(&peak);
     const double power = psd.sum() * (freqs(1) - freqs(0)); // integrated one-sided PSD = signal variance
     ok &= expect(freqs.size() == nSamples / 2 + 1 && std::fabs(freqs(peak) - 10.0) < 1e-12,
-                 QString("PSD peaks at %1 Hz; %2 bins match numpy.fft.rfftfreq").arg(freqs(peak)).arg(freqs.size()));
-    ok &= expect(std::fabs(power - 2.0) < 0.05, QString("Parseval: integrated PSD %1 = variance 2").arg(power));
+                 std::format("PSD peaks at {:g} Hz; {} bins match numpy.fft.rfftfreq", freqs(peak), freqs.size()));
+    ok &= expect(std::fabs(power - 2.0) < 0.05, std::format("Parseval: integrated PSD {:g} = variance 2", power));
 
     //! [sphere_fit]
     MatrixX3f points(6, 3); // six points on a sphere of radius 0.09 around (0, 0, 0.04)
@@ -137,7 +139,7 @@ int main(int argc, char* argv[])
     Sphere sphere = Sphere::fit_sphere(points);
     //! [sphere_fit]
     ok &= expect((sphere.center() - Vector3f(0.0f, 0.0f, 0.04f)).norm() < 1e-5f && std::fabs(sphere.radius() - 0.09f) < 1e-5f,
-                 QString("sphere centre (0, 0, 0.04), radius %1").arg(sphere.radius()));
+                 std::format("sphere centre (0, 0, 0.04), radius {:g}", sphere.radius()));
 
     //! [simplex_minimize]
     // Minimise the Rosenbrock function from a 3-vertex simplex around (-1, 1); ftol is relative, so the
@@ -157,7 +159,7 @@ int main(int argc, char* argv[])
     values.minCoeff(&best); // vertices are not sorted on return
     //! [simplex_minimize]
     ok &= expect(converged && (simplex.row(best) - RowVector2d(1.0, 1.0)).norm() < 1e-3,
-                 QString("Rosenbrock minimum (1, 1) after %1 evaluations").arg(evaluations));
+                 std::format("Rosenbrock minimum (1, 1) after {} evaluations", evaluations));
 
     //! [kmeans_calculate]
     MatrixXd X(6, 2); // two well separated groups of three points
@@ -183,8 +185,8 @@ int main(int argc, char* argv[])
     const MatrixXf warped = warp.calculate(sourceLm, destLm, vertices);
     //! [warp_calculate]
     const float warpErr = (warped - (vertices.rowwise() + RowVector3f(0.5f, -0.2f, 0.1f))).cwiseAbs().maxCoeff();
-    ok &= expect(warpErr < 1e-4f, QString("TPS warp reproduces the translation (max error %1)").arg(warpErr));
+    ok &= expect(warpErr < 1e-4f, std::format("TPS warp reproduces the translation (max error {:g})", warpErr));
 
-    qInfo() << (ok ? "All math checks passed." : "Math checks FAILED.");
+    std::println("{}", ok ? "All math checks passed." : "Math checks FAILED.");
     return ok ? EXIT_SUCCESS : EXIT_FAILURE;
 }

@@ -51,8 +51,11 @@
 #include <cmath>
 #include <cstdint>
 #include <cstdlib>
+#include <format>
 #include <optional>
+#include <print>
 #include <string>
+#include <string_view>
 #include <vector>
 
 //=============================================================================================================
@@ -69,9 +72,9 @@ using namespace Eigen;
 namespace
 {
 
-bool expect(bool condition, const QString& what)
+bool expect(bool condition, std::string_view what)
 {
-    qInfo().noquote() << (condition ? "  ok  " : "  FAIL") << what;
+    std::println("{} {}", condition ? "  ok  " : "  FAIL", what);
     return condition;
 }
 
@@ -218,7 +221,7 @@ int main(int argc, char* argv[])
     counter.increment();
     counter.detach(&observer);
     counter.increment();
-    ok &= expect(observer.seen() == 2, QString("observer saw %1 before detaching (2)").arg(observer.seen()));
+    ok &= expect(observer.seen() == 2, std::format("observer saw {} before detaching (2)", observer.seen()));
 
     QStringList journal;
     QList<AppendCommand*> queue = {new AppendCommand(journal, "a"), new AppendCommand(journal, "b")};
@@ -257,7 +260,7 @@ int main(int argc, char* argv[])
     const bool found = StandardMontage::findElectrode("Cz", cz); // mne's standard_1005 positions, metres, MNI frame
     //! [standard_montage_usage]
     ok &= expect(montage1020.size() == StandardMontage::electrodeCount(StandardMontage::System::Standard_1020) && found && (cz - Vector3d(0.0004009, -0.009167, 0.100244)).norm() < 1e-12,
-                 QString("10-20 montage: %1 electrodes, Cz at (0.4, -9.2, 100.2) mm").arg(montage1020.size()));
+                 std::format("10-20 montage: {} electrodes, Cz at (0.4, -9.2, 100.2) mm", montage1020.size()));
 
     //! [layout_maker_usage]
     // Azimuthal equidistant projection around the fitted sphere: Cz lands near the centre, the nose points up
@@ -279,7 +282,7 @@ int main(int argc, char* argv[])
     const float czX = layout2d[iCz][0] + 2.5f;
     const float czY = layout2d[iCz][1] + 2.0f;
     ok &= expect(layout2d.size() == names.size() && std::hypot(czX, czY) < 1.0f && layout2d[iFp1][1] > layout2d[iCz][1] && layout2d[iO1][1] < layout2d[iCz][1] && layout2d[iFp1][0] < layout2d[iCz][0] && layout2d[iT8][0] > layout2d[iCz][0],
-                 QString("LayoutMaker: Cz at (%1, %2), Fp1 front-left, O1 back, T8 right").arg(czX).arg(czY));
+                 std::format("LayoutMaker: Cz at ({:g}, {:g}), Fp1 front-left, O1 back, T8 right", czX, czY));
 
     QFile capFile(dir.filePath("cap.elc"));
     ok &= capFile.open(QIODevice::WriteOnly | QIODevice::Text);
@@ -321,9 +324,9 @@ int main(int argc, char* argv[])
         ok &= expect(run.success && run.stdOut.trimmed().endsWith("5") && progress == QStringList({"50 half"}) && fromNumpy == (Matrix2d() << 1, 2, 3, 4).finished(),
                      "PythonRunner passes arguments and parses [progress] lines; PythonTestHelper reads a matrix");
     } else {
-        qInfo().noquote() << "  skip  PythonRunner (python3 not found)";
+        std::println("  skip  PythonRunner (python3 not found)");
     }
 
-    qInfo() << (ok ? "All utils checks passed." : "utils checks FAILED.");
+    std::println("{}", ok ? "All utils checks passed." : "utils checks FAILED.");
     return ok ? EXIT_SUCCESS : EXIT_FAILURE;
 }

@@ -33,7 +33,6 @@
 //=============================================================================================================
 
 #include <QApplication>
-#include <QDebug>
 #include <QImage>
 #include <QVector3D>
 
@@ -42,8 +41,11 @@
 //=============================================================================================================
 
 #include <cmath>
-#include <cstdlib>
 #include <cstdio>
+#include <cstdlib>
+#include <format>
+#include <print>
+#include <string_view>
 
 //=============================================================================================================
 // USED NAMESPACES
@@ -59,9 +61,9 @@ using namespace Eigen;
 namespace
 {
 
-bool expect(bool condition, const QString& what)
+bool expect(bool condition, std::string_view what)
 {
-    qInfo().noquote() << (condition ? "  ok  " : "  FAIL") << what;
+    std::println("{} {}", condition ? "  ok  " : "  FAIL", what);
     return condition;
 }
 
@@ -134,7 +136,7 @@ int main(int argc, char* argv[])
         heights.append(h);
     }
     ok &= expect(std::abs(heights[1] - 160) <= 2 && std::abs(heights[0] - 40) <= 2 && std::abs(heights[2] - 80) <= 2 && std::abs(heights[3] - 120) <= 2,
-                 QString("Bar heights %1, %2, %3, %4 px for counts 5, 20, 10, 15").arg(heights[0]).arg(heights[1]).arg(heights[2]).arg(heights[3]));
+                 std::format("Bar heights {}, {}, {}, {} px for counts 5, 20, 10, 15", heights[0], heights[1], heights[2], heights[3]));
 
     //! [spline_usage]
     Spline spline(nullptr, "Amplitude spline");
@@ -167,7 +169,7 @@ int main(int argc, char* argv[])
             }
         }
     }
-    ok &= expect(bottom > top + 100, QString("LinePlot spans %1 px vertically for a full sine period").arg(bottom - top));
+    ok &= expect(bottom > top + 100, std::format("LinePlot spans {} px vertically for a full sine period", bottom - top));
 
     //! [image_sc_usage]
     MatrixXd ramp(4, 8);
@@ -196,7 +198,7 @@ int main(int argc, char* argv[])
             brightX = px;
         }
     }
-    ok &= expect(darkX >= 0 && brightX > darkX + 150, QString("ImageSc maps the first and last columns to the ends of viridis (x %1 and %2)").arg(darkX).arg(brightX));
+    ok &= expect(darkX >= 0 && brightX > darkX + 150, std::format("ImageSc maps the first and last columns to the ends of viridis (x {} and {})", darkX, brightX));
 
     //! [plot_usage]
     VectorXd samples = VectorXd::LinSpaced(50, -1.0, 1.0);
@@ -226,6 +228,6 @@ int main(int argc, char* argv[])
     FigureExporter::save(image, "image_sc", "ImageSc: a left-to-right ramp in the viridis colour map.");
     FigureExporter::save(tfPlot, "tf_plot", "TFplot: power confined to the 20-29 Hz bins.");
 
-    qInfo().noquote() << (ok ? "All disp plot checks passed." : "disp plot checks FAILED.");
+    std::println("{}", ok ? "All disp plot checks passed." : "disp plot checks FAILED.");
     return ok ? EXIT_SUCCESS : EXIT_FAILURE;
 }

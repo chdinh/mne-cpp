@@ -35,7 +35,6 @@
 
 #include <QCoreApplication>
 #include <QCommandLineParser>
-#include <QDebug>
 #include <QFile>
 #include <QTemporaryDir>
 
@@ -45,6 +44,9 @@
 
 #include <cmath>
 #include <cstdlib>
+#include <format>
+#include <print>
+#include <string_view>
 
 //=============================================================================================================
 // USED NAMESPACES
@@ -63,9 +65,9 @@ namespace
 
 constexpr double kPi = 3.14159265358979323846;
 
-bool expect(bool condition, const QString& what)
+bool expect(bool condition, std::string_view what)
 {
-    qInfo().noquote() << (condition ? "  ok  " : "  FAIL") << what;
+    std::println("{} {}", condition ? "  ok  " : "  FAIL", what);
     return condition;
 }
 
@@ -137,7 +139,7 @@ int main(int argc, char* argv[])
     const double keptBrain = (megOut.col(0) - megIn.col(0)).norm() / megIn.col(0).norm();
     const double keptNoise = megOut.col(1).norm() / megIn.col(1).norm();
     ok &= expect(meg.size() == 306 && keptBrain < 0.05 && keptNoise < 1e-3,
-                 QString("SSS keeps the inside dipole (error %1) and removes the uniform field (residual %2)").arg(keptBrain, 0, 'g', 3).arg(keptNoise, 0, 'g', 3));
+                 std::format("SSS keeps the inside dipole (error {:.3g}) and removes the uniform field (residual {:.3g})", keptBrain, keptNoise));
 
     //! [bad_channels_maxwell_usage]
     MatrixXd broken = data;
@@ -150,7 +152,7 @@ int main(int argc, char* argv[])
     int worst = 0;
     bads.zScores.maxCoeff(&worst);
     ok &= expect(worst == 40 && bads.badIndices.contains(meg[40]) && UTILSLIB::contains(bads.badChannels, info.ch_names[meg[40]]),
-                 QString("findBadChannelsMaxwell ranks %1 worst (z = %2), flagged: %3").arg(info.ch_names[meg[worst]]).arg(bads.zScores(worst), 0, 'f', 0).arg(QString::fromStdString(UTILSLIB::join(bads.badChannels, ", "))));
+                 std::format("findBadChannelsMaxwell ranks {} worst (z = {:.0f}), flagged: {}", info.ch_names[meg[worst]], bads.zScores(worst), UTILSLIB::join(bads.badChannels, ", ")));
 
     //! [maxwell_movement_comp_usage]
     QList<HeadPosEntry> headPos(1); // one position from t = 0: identity rotation, no translation
@@ -201,8 +203,8 @@ int main(int argc, char* argv[])
         at83 += chpi(meg[0], t) * std::sin(2.0 * kPi * 83.0 * t / sFreq);
     }
     ok &= expect(std::fabs(at10 / 1000.0 - 1.0) < 0.05 && std::fabs(at83 / 1000.0) < 0.05,
-                 QString("filterChpi keeps 10 Hz (%1) and removes the 83 Hz coil (%2)").arg(at10 / 1000.0, 0, 'f', 3).arg(at83 / 1000.0, 0, 'f', 3));
+                 std::format("filterChpi keeps 10 Hz ({:.3f}) and removes the 83 Hz coil ({:.3f})", at10 / 1000.0, at83 / 1000.0));
 
-    qInfo().noquote() << (ok ? "All dsp Maxwell checks passed." : "dsp Maxwell checks FAILED.");
+    std::println("{}", ok ? "All dsp Maxwell checks passed." : "dsp Maxwell checks FAILED.");
     return ok ? EXIT_SUCCESS : EXIT_FAILURE;
 }

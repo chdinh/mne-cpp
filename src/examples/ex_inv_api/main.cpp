@@ -50,7 +50,6 @@
 
 #include <QCoreApplication>
 #include <QCommandLineParser>
-#include <QDebug>
 #include <QFile>
 #include <QTemporaryDir>
 
@@ -60,6 +59,9 @@
 
 #include <cmath>
 #include <cstdlib>
+#include <format>
+#include <print>
+#include <string_view>
 
 //=============================================================================================================
 // USED NAMESPACES
@@ -78,9 +80,9 @@ using namespace Eigen;
 namespace
 {
 
-bool expect(bool condition, const QString& what)
+bool expect(bool condition, std::string_view what)
 {
-    qInfo().noquote() << (condition ? "  ok  " : "  FAIL") << what;
+    std::println("{} {}", condition ? "  ok  " : "  FAIL", what);
     return condition;
 }
 
@@ -248,7 +250,7 @@ int main(int argc, char* argv[])
     const InvGammaMapResult gammaMap = InvGammaMap::compute(gain, measured, MatrixXd::Identity(gain.rows(), gain.rows()), 1000, 1e-8);
     //! [inv_gamma_map_usage]
     ok &= expect(!gammaMap.activeVertices.isEmpty() && gammaMap.activeVertices.size() < 70 && gammaMap.vecGamma.size() == 70,
-                 QString("InvGammaMap: %1 of 70 V1 sources keep a nonzero variance").arg(gammaMap.activeVertices.size()));
+                 std::format("InvGammaMap: {} of 70 V1 sources keep a nonzero variance", gammaMap.activeVertices.size()));
 
     //! [inv_tf_mxne_usage]
     // TF-MxNE: sparse in space and in a Gabor time-frequency dictionary; 40 samples at 150 Hz.
@@ -262,7 +264,7 @@ int main(int argc, char* argv[])
     const InvTfMxneResult tfMxne = InvTfMxne::compute(gain, measured, tfParams);
     //! [inv_tf_mxne_usage]
     ok &= expect(!tfMxne.activeVertices.isEmpty() && tfMxne.activeVertices.size() <= 5 && tfMxne.activeVertices.contains(8),
-                 QString("InvTfMxne: %1 V1 sources, including the strongest MxNE source 8").arg(tfMxne.activeVertices.size()));
+                 std::format("InvTfMxne: {} V1 sources, including the strongest MxNE source 8", tfMxne.activeVertices.size()));
 
     //! [inv_source_estimate_token_usage]
     InvSourceEstimate layered = stc;
@@ -289,7 +291,7 @@ int main(int argc, char* argv[])
     const InvSourceEstimate fromTokenStream = fromTokens(tokens);
     //! [inv_source_estimate_token_usage]
     ok &= expect(tokens.front().id == InvTokenId::Bos && tokens.back().id == InvTokenId::Eos && fromTokenStream.data.rows() == 5 && fromTokenStream.data.cols() == 10 && fromTokenStream.focalDipoles.size() == 1 && std::fabs(fromTokenStream.focalDipoles[0].moment.z() - 20e-9f) < 1e-15f && fromTokenStream.couplings.size() == 1 && std::fabs(fromTokenStream.couplings[0].correlations(0, 1) - 0.8) < 1e-7 && fromTokenStream.connectivity.size() == 1 && fromTokenStream.connectivity[0].fmax == 12.0f,
-                 QString("tokenize/fromTokens: %1 tokens carry 5 x 10 samples and the dipole, coupling and connectivity layers").arg(tokens.size()));
+                 std::format("tokenize/fromTokens: {} tokens carry 5 x 10 samples and the dipole, coupling and connectivity layers", tokens.size()));
 
     //! [inv_source_estimate_io_usage]
     InvSourceEstimateIO::writeCsv(stc, tmp.filePath("v1-dspm.csv"));
@@ -302,6 +304,6 @@ int main(int argc, char* argv[])
     ok &= expect(fromCsv.data.rows() == 70 && (fromCsv.data - stc.data).norm() <= 1e-6 * stc.data.norm() && fromStc.vertices == stc.vertices && (fromStc.data - stc.data).norm() <= 1e-6 * stc.data.norm(),
                  "InvSourceEstimateIO/InvSourceEstimate: CSV and .stc round trips");
 
-    qInfo().noquote() << (ok ? "All inv checks passed." : "inv checks FAILED.");
+    std::println("{}", ok ? "All inv checks passed." : "inv checks FAILED.");
     return ok ? EXIT_SUCCESS : EXIT_FAILURE;
 }

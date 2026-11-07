@@ -49,7 +49,6 @@
 //=============================================================================================================
 
 #include <QApplication>
-#include <QDebug>
 
 //=============================================================================================================
 // STL INCLUDES
@@ -58,7 +57,10 @@
 #include <algorithm>
 #include <cmath>
 #include <cstdlib>
+#include <format>
+#include <print>
 #include <random>
+#include <string_view>
 
 //=============================================================================================================
 // USED NAMESPACES
@@ -128,9 +130,9 @@ double edgeWeight(const Network& network, int start, int end)
 
 //=============================================================================================================
 
-bool expect(bool condition, const QString& what)
+bool expect(bool condition, std::string_view what)
 {
-    qInfo().noquote() << (condition ? "  ok  " : "  FAIL") << what;
+    std::println("{} {}", condition ? "  ok  " : "  FAIL", what);
     return condition;
 }
 
@@ -173,7 +175,7 @@ int main(int argc, char* argv[])
     const QList<Network> networks = Connectivity::calculate(settings);
     for (Network network : networks) {
         network.setFrequencyRange(8.0f, 12.0f); // average the per-bin weights over the alpha band
-        qInfo().noquote() << network.getConnectivityMethod() << "0-1:" << edgeWeight(network, 0, 1);
+        std::println("{} 0-1: {:g}", network.getConnectivityMethod().toStdString(), edgeWeight(network, 0, 1));
     }
     //! [connectivity_calculate]
     ok &= expect(networks.size() == 3, "Connectivity::calculate returns one network per method");
@@ -184,14 +186,14 @@ int main(int argc, char* argv[])
     const double coh01 = edgeWeight(coherence, 0, 1);
     const double coh02 = edgeWeight(coherence, 0, 2);
     //! [coherence_calculate]
-    ok &= expect(coh01 > coh02 + 0.3, QString("COH 0-1 %1 > 0-2 %2 + 0.3").arg(coh01).arg(coh02));
+    ok &= expect(coh01 > coh02 + 0.3, std::format("COH 0-1 {:g} > 0-2 {:g} + 0.3", coh01, coh02));
 
     //! [imag_coherence_calculate]
     Network imagCoherence = ImagCoherence::calculate(settings);
     imagCoherence.setFrequencyRange(8.0f, 12.0f);
     const double icoh01 = std::fabs(edgeWeight(imagCoherence, 0, 1));
     //! [imag_coherence_calculate]
-    ok &= expect(icoh01 > 0.2, QString("|ImCOH| 0-1 %1 > 0.2 (12 ms lag)").arg(icoh01));
+    ok &= expect(icoh01 > 0.2, std::format("|ImCOH| 0-1 {:g} > 0.2 (12 ms lag)", icoh01));
 
     //! [coherency_calculate_abs]
     // Coherency fills a network whose nodes already exist; the metric classes above wrap this.
@@ -232,7 +234,7 @@ int main(int argc, char* argv[])
         const double w01 = edgeWeight(*network, 0, 1);
         const double w02 = edgeWeight(*network, 0, 2);
         ok &= expect(w01 > w02 + 0.3,
-                     QString("%1 0-1 %2 > 0-2 %3 + 0.3").arg(network->getConnectivityMethod()).arg(w01).arg(w02));
+                     std::format("{} 0-1 {:g} > 0-2 {:g} + 0.3", network->getConnectivityMethod().toStdString(), w01, w02));
     }
 
     //! [correlation_calculate]
@@ -245,9 +247,9 @@ int main(int argc, char* argv[])
     //! [cross_correlation_calculate]
     // Zero-lag Pearson r of the model: 0.5 cos(2 pi 10 Hz 12 ms) / sqrt(0.75 * 1.0) = 0.42
     ok &= expect(std::fabs(cor01 - 0.42) < 0.05 && std::fabs(edgeWeight(correlation, 0, 2)) < 0.1,
-                 QString("COR 0-1 %1 within 0.05 of 0.42, |0-2| < 0.1").arg(cor01));
+                 std::format("COR 0-1 {:g} within 0.05 of 0.42, |0-2| < 0.1", cor01));
     ok &= expect(xcor01 > 2.0 * std::fabs(edgeWeight(crossCorrelation, 0, 2)),
-                 QString("XCOR 0-1 %1 > 2 x |0-2|").arg(xcor01));
+                 std::format("XCOR 0-1 {:g} > 2 x |0-2|", xcor01));
 
     //! [mvar_model_fit]
     MatrixXd average = MatrixXd::Zero(3, kSamples);
@@ -262,8 +264,7 @@ int main(int argc, char* argv[])
     ok &= expect(mvar.order() == 4 && coefficients.size() == 4 && transfer.size() == 5,
                  "MvarModel stores order 4 and evaluates H(f) at 5 frequencies");
     ok &= expect(std::fabs(coefficients[kDelay - 1](1, 0)) > 0.5,
-                 QString("|A_3(1,0)| %1 > 0.5: channel 1 depends on channel 0 three samples back")
-                     .arg(std::fabs(coefficients[kDelay - 1](1, 0))));
+                 std::format("|A_3(1,0)| {:g} > 0.5: channel 1 depends on channel 0 three samples back", std::fabs(coefficients[kDelay - 1](1, 0))));
 
     //! [granger_causality_calculate]
     Network granger = GrangerCausality::calculate(settings); // edge j -> i: j Granger-causes i
@@ -278,7 +279,7 @@ int main(int argc, char* argv[])
         const double forward = edgeWeight(*network, 0, 1);
         const double backward = edgeWeight(*network, 1, 0);
         ok &= expect(forward > 2.0 * backward,
-                     QString("%1 0->1 %2 > 2 x 1->0 %3").arg(network->getConnectivityMethod()).arg(forward).arg(backward));
+                     std::format("{} 0->1 {:g} > 2 x 1->0 {:g}", network->getConnectivityMethod().toStdString(), forward, backward));
     }
 
     //! [network_build]
@@ -370,6 +371,6 @@ int main(int argc, char* argv[])
     grangerImage.setColorbarLabel("Granger causality");
     FigureExporter::save(grangerImage, "granger", "GrangerCausality::calculate recovers the direction of the coupling: channel 0 drives channel 1.", QSize(560, 450));
 
-    qInfo() << (ok ? "All connectivity checks passed." : "Connectivity checks FAILED.");
+    std::println("{}", ok ? "All connectivity checks passed." : "Connectivity checks FAILED.");
     return ok ? EXIT_SUCCESS : EXIT_FAILURE;
 }

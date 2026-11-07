@@ -40,7 +40,6 @@
 //=============================================================================================================
 
 #include <QCoreApplication>
-#include <QDebug>
 
 //=============================================================================================================
 // STL INCLUDES
@@ -49,7 +48,10 @@
 #include <algorithm>
 #include <cmath>
 #include <cstdlib>
+#include <format>
+#include <print>
 #include <random>
+#include <string_view>
 
 //=============================================================================================================
 // USED NAMESPACES
@@ -72,9 +74,9 @@ constexpr int kEeg = 8;
 constexpr int kEog = kEeg;
 constexpr int kEcg = kEeg + 1;
 
-bool expect(bool condition, const QString& what)
+bool expect(bool condition, std::string_view what)
 {
-    qInfo().noquote() << (condition ? "  ok  " : "  FAIL") << what;
+    std::println("{} {}", condition ? "  ok  " : "  FAIL", what);
     return condition;
 }
 
@@ -141,9 +143,9 @@ int main(int argc, char* argv[])
     const QVector<int> blinks = ArtifactDetect::detectEog(data, info, kSFreq, eog); // blink peaks on the EOG channel
     //! [artifact_detect_usage]
     ok &= expect(beats.size() == 12 && std::abs(beats[0] - 100) <= 2 && std::abs(beats[1] - beats[0] - 200) <= 2,
-                 QString("ECG: %1 beats, first at sample %2 (12 beats every 200 samples from 100)").arg(beats.size()).arg(beats.value(0)));
+                 std::format("ECG: {} beats, first at sample {} (12 beats every 200 samples from 100)", beats.size(), beats.value(0)));
     ok &= expect(blinks.size() == 3 && std::abs(blinks[1] - (1100 + 25)) <= 15,
-                 QString("EOG: %1 blinks, second at sample %2 (3 blinks around 325, 1125, 1925)").arg(blinks.size()).arg(blinks.value(1)));
+                 std::format("EOG: {} blinks, second at sample {} (3 blinks around 325, 1125, 1925)", blinks.size(), blinks.value(1)));
 
     //! [bad_channel_detect_usage]
     BadChannelDetect::Params badParams;
@@ -152,7 +154,7 @@ int main(int argc, char* argv[])
     const QVector<int> bad = BadChannelDetect::detect(data.topRows(kEeg), badParams);
     //! [bad_channel_detect_usage]
     ok &= expect(flat == QVector<int>({2}) && bad.contains(2) && bad.contains(5),
-                 QString("BadChannelDetect: flat %1, bad %2 (flat 2, noisy 5)").arg(flat.size() == 1 ? flat[0] : -1).arg(bad.size()));
+                 std::format("BadChannelDetect: flat {}, bad {} (flat 2, noisy 5)", flat.size() == 1 ? flat[0] : -1, bad.size()));
 
     //! [find_bad_channels_lof_usage]
     LofBadChannelParams lofParams;
@@ -168,14 +170,14 @@ int main(int argc, char* argv[])
     VectorXd sklearnLof(6);
     sklearnLof << 0.96745631, 0.96745631, 0.96745631, 0.96745631, 1.10819419, 44.47792863;
     ok &= expect((lofScores - sklearnLof).cwiseAbs().maxCoeff() < 1e-6,
-                 QString("LOF scores = sklearn (far point %1); %2 EEG channel(s) flagged").arg(lofScores(5)).arg(static_cast<int>(lofBad.size())));
+                 std::format("LOF scores = sklearn (far point {:g}); {} EEG channel(s) flagged", lofScores(5), static_cast<int>(lofBad.size())));
 
     //! [bridged_electrodes_usage]
     BridgedElectrodeParams bridging; // electrical distance below 0.3 flags a pair
     const QList<QPair<int, int>> bridged = computeBridgedElectrodes(data, info, bridging);
     //! [bridged_electrodes_usage]
     ok &= expect(bridged.size() == 1 && bridged[0] == qMakePair(6, 7),
-                 QString("bridged electrodes: %1 pair(s), first %2-%3 (6-7)").arg(bridged.size()).arg(bridged.value(0).first).arg(bridged.value(0).second));
+                 std::format("bridged electrodes: {} pair(s), first {}-{} (6-7)", bridged.size(), bridged.value(0).first, bridged.value(0).second));
 
     //! [eog_regression_usage]
     MatrixXd cleaned = data;
@@ -190,7 +192,7 @@ int main(int argc, char* argv[])
     const double beforeBlink = blinkDeflection(data.row(0));
     const double afterBlink = blinkDeflection(cleaned.row(0));
     ok &= expect(std::fabs(regression.coefficients()(0, 0) - 0.4) < 0.02 && std::fabs(afterBlink) < 0.1 * std::fabs(beforeBlink),
-                 QString("EOG regression: beta %1 (0.4), blink on EEG0 %2 -> %3 V").arg(regression.coefficients()(0, 0)).arg(beforeBlink).arg(afterBlink));
+                 std::format("EOG regression: beta {:g} (0.4), blink on EEG0 {:g} -> {:g} V", regression.coefficients()(0, 0), beforeBlink, afterBlink));
 
     //! [set_eeg_reference_usage]
     MatrixXd averageRef = data;
@@ -214,7 +216,7 @@ int main(int argc, char* argv[])
         const VectorXd line = data.col(499) + (data.col(502) - data.col(499)) * (s / 3.0);
         stimErr = std::max(stimErr, (stim.col(499 + s) - line).topRows(kEeg).cwiseAbs().maxCoeff());
     }
-    ok &= expect(stimErr < 1e-12, QString("stimulus artefact replaced by linear interpolation (max deviation %1 V)").arg(stimErr));
+    ok &= expect(stimErr < 1e-12, std::format("stimulus artefact replaced by linear interpolation (max deviation {:g} V)", stimErr));
 
     // Besides the flat EEG2, EEG3 loses contact from 1.0 to 1.2 s
     MatrixXd loose = data;
@@ -226,7 +228,7 @@ int main(int argc, char* argv[])
     const FiffAnnotations flatSpans = annotateAmplitude(loose, info, kSFreq, amplitude, &flatChannels);
     //! [annotate_amplitude_usage]
     ok &= expect(flatSpans.size() == 1 && flatSpans[0].description == "BAD_flat" && std::abs(flatSpans[0].onset - 1.0) < 1e-12 && flatChannels == StringList{"EEG2"},
-                 QString("annotateAmplitude: %1 flat span(s), bad %2").arg(flatSpans.size()).arg(QString::fromStdString(UTILSLIB::join(flatChannels, ", "))));
+                 std::format("annotateAmplitude: {} flat span(s), bad {}", flatSpans.size(), UTILSLIB::join(flatChannels, ", ")));
 
     // 4 s of 8 EEG channels at 1 kHz: alpha, a few tones and a 125 Hz EMG burst from 1.5 to 2.5 s
     const double emgSFreq = 1000.0;
@@ -247,11 +249,8 @@ int main(int argc, char* argv[])
     //! [annotate_muscle_zscore_usage]
     // mne.preprocessing.annotate_muscle_zscore on the same data: one BAD_muscle, onset 1.563 s, duration 0.875 s
     ok &= expect(emgBad.size() == 1 && std::fabs(emgBad[0].onset - 1.563) < 1e-9 && std::fabs(emgBad[0].duration - 0.875) < 1e-9,
-                 QString("annotateMusclZscore marks %1 EMG burst(s), first at %2 s for %3 s (mne: 1.563 s, 0.875 s)")
-                     .arg(emgBad.size())
-                     .arg(emgBad.isEmpty() ? -1.0 : emgBad[0].onset)
-                     .arg(emgBad.isEmpty() ? -1.0 : emgBad[0].duration));
+                 std::format("annotateMusclZscore marks {} EMG burst(s), first at {:g} s for {:g} s (mne: 1.563 s, 0.875 s)", emgBad.size(), emgBad.isEmpty() ? -1.0 : emgBad[0].onset, emgBad.isEmpty() ? -1.0 : emgBad[0].duration));
 
-    qInfo() << (ok ? "All dsp artifact checks passed." : "dsp artifact checks FAILED.");
+    std::println("{}", ok ? "All dsp artifact checks passed." : "dsp artifact checks FAILED.");
     return ok ? EXIT_SUCCESS : EXIT_FAILURE;
 }

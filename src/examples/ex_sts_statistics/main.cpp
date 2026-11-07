@@ -31,7 +31,6 @@
 //=============================================================================================================
 
 #include <QCoreApplication>
-#include <QDebug>
 
 //=============================================================================================================
 // STL INCLUDES
@@ -39,7 +38,10 @@
 
 #include <cmath>
 #include <cstdlib>
+#include <format>
 #include <initializer_list>
+#include <print>
+#include <string_view>
 
 //=============================================================================================================
 // USED NAMESPACES
@@ -55,22 +57,22 @@ using namespace Eigen;
 namespace
 {
 
-bool expect(bool condition, const QString& what)
+bool expect(bool condition, std::string_view what)
 {
-    qInfo().noquote() << (condition ? "  ok  " : "  FAIL") << what;
+    std::println("{} {}", condition ? "  ok  " : "  FAIL", what);
     return condition;
 }
 
 //=============================================================================================================
 
-bool expectRow(const MatrixXd& actual, std::initializer_list<double> expected, double tol, const QString& what)
+bool expectRow(const MatrixXd& actual, std::initializer_list<double> expected, double tol, std::string_view what)
 {
     double err = 0.0;
     int k = 0;
     for (double value : expected) {
         err = std::max(err, std::fabs(actual.data()[k++] - value));
     }
-    return expect(k == actual.size() && err < tol, QString("%1 (max error %2)").arg(what).arg(err));
+    return expect(k == actual.size() && err < tol, std::format("{} (max error {:g})", what, err));
 }
 
 } // namespace
@@ -138,7 +140,7 @@ int main(int argc, char* argv[])
     //! [sts_cov_estimators_usage]
     // sklearn.covariance.ledoit_wolf / oas with assume_centered=True
     ok &= expect(std::fabs(shrinkLw - 0.201822477072047) < 1e-12 && std::fabs(shrinkOas - 0.4393235385375307) < 1e-12,
-                 QString("shrinkage LW %1, OAS %2 = sklearn").arg(shrinkLw).arg(shrinkOas));
+                 std::format("shrinkage LW {:g}, OAS {:g} = sklearn", shrinkLw, shrinkOas));
     ok &= expectRow(covLw.row(0), {0.5436421771536946, 0.4140545900188756, -0.08730066657024485}, 1e-12, "LW covariance row 0 = sklearn");
     ok &= expectRow(covOas.row(0), {0.5037989001234694, 0.29085091438365596, -0.06132398797245758}, 1e-12, "OAS covariance row 0 = sklearn");
     ok &= expect(method >= 0 && method <= 5 && covBest.rows() == 3, "autoSelect returns a 3 x 3 covariance and a method index 0-5");
@@ -181,7 +183,7 @@ int main(int argc, char* argv[])
     const double clusterP = clusterOk ? clusters.vecClusterPvals[-effectCluster - 1] : -1.0;
     // The observed statistic counts as one permutation, so p >= 1 / (500 + 1) as in MNE-Python
     ok &= expect(clusterOk && clusterP >= 1.0 / 501.0 && clusterP < 0.05,
-                 QString("channels 2-4 form one negative cluster, 1/501 <= p %1 < 0.05").arg(clusterP));
+                 std::format("channels 2-4 form one negative cluster, 1/501 <= p {:g} < 0.05", clusterP));
 
     //! [stats_source_metrics_usage]
     VectorXd amplitudes(4);
@@ -195,8 +197,8 @@ int main(int argc, char* argv[])
     //! [stats_source_metrics_usage]
     // SD = (0.1 * 0.01 + 0.5 * 0.01 + 0.4 * 0.01) / (0.1 + 2.0 + 0.5 + 0.4)
     ok &= expect(peak == 1 && std::fabs(localizationError - 0.003) < 1e-15 && std::fabs(dispersion - 0.01 / 3.0) < 1e-15,
-                 QString("peak 1, PLE 3 mm, SD %1 m = 1/300").arg(dispersion));
+                 std::format("peak 1, PLE 3 mm, SD {:g} m = 1/300", dispersion));
 
-    qInfo() << (ok ? "All statistics checks passed." : "Statistics checks FAILED.");
+    std::println("{}", ok ? "All statistics checks passed." : "Statistics checks FAILED.");
     return ok ? EXIT_SUCCESS : EXIT_FAILURE;
 }

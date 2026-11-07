@@ -36,7 +36,6 @@
 
 #include <QCoreApplication>
 #include <QCommandLineParser>
-#include <QDebug>
 #include <QFileInfo>
 #include <QTemporaryDir>
 
@@ -46,6 +45,9 @@
 
 #include <cmath>
 #include <cstdlib>
+#include <format>
+#include <print>
+#include <string_view>
 
 //=============================================================================================================
 // USED NAMESPACES
@@ -61,9 +63,9 @@ using namespace Eigen;
 namespace
 {
 
-bool expect(bool condition, const QString& what)
+bool expect(bool condition, std::string_view what)
 {
-    qInfo().noquote() << (condition ? "  ok  " : "  FAIL") << what;
+    std::println("{} {}", condition ? "  ok  " : "  FAIL", what);
     return condition;
 }
 
@@ -122,7 +124,7 @@ int main(int argc, char* argv[])
     //! [brain_vision_reader_usage]
     // mne.io.read_raw_brainvision: 32 channels at 1000 Hz, 7900 samples; data[0, 0] = -23.5 uV, data[5, 100] = 38.5 uV
     ok &= expect(bvOpen && brainVision.getChannelCount() == 32 && brainVision.getSampleCount() == 7900 && brainVision.getFrequency() == 1000.0f && near(bvHead(0, 0), -2.35e-5, 1e-4) && near(bvHead(5, 100), 3.85e-5, 1e-4),
-                 QString("BrainVision: %1 x %2 samples, (0,0) = %3 V match mne").arg(brainVision.getChannelCount()).arg(brainVision.getSampleCount()).arg(bvHead(0, 0)));
+                 std::format("BrainVision: {} x {} samples, (0,0) = {:g} V match mne", brainVision.getChannelCount(), brainVision.getSampleCount(), bvHead(0, 0)));
 
     //! [brain_vision_metadata]
     const QVector<BrainVisionChannelInfo> bvChannels = brainVision.getChannelInfos(); // name, resolution, unit per Ch<n>= line
@@ -130,7 +132,7 @@ int main(int argc, char* argv[])
     //! [brain_vision_metadata]
     // mne.io.read_raw_brainvision annotations: 13 after the "New Segment", first "Stimulus/S253" at 0.486 s
     ok &= expect(bvChannels.size() == 32 && bvChannels[0].name == "FP1" && bvChannels[0].resolution == 0.5f && markers.size() == 14 && markers[1].type == "Stimulus" && markers[1].description == "S253" && markers[1].position == 486,
-                 QString("BrainVision metadata: %1 channels, %2 markers, S253 at sample %3 (mne 0.486 s)").arg(bvChannels.size()).arg(markers.size()).arg(markers.value(1).position));
+                 std::format("BrainVision metadata: {} channels, {} markers, S253 at sample {} (mne 0.486 s)", bvChannels.size(), markers.size(), markers.value(1).position));
 
     //! [edf_reader_usage]
     std::unique_ptr<AbstractFormatReader> edf = BidsRawData::createReader(".edf"); // or construct EDFReader directly
@@ -140,14 +142,14 @@ int main(int argc, char* argv[])
     //! [edf_reader_usage]
     // mne.io.read_raw_edf: 25 channels at 128 Hz, 1228 samples, first channel "EEG Fp1"; data[3, 200] = 0.1757724
     ok &= expect(edfOpen && dynamic_cast<EDFReader*>(edf.get()) != nullptr && edf->formatName() == "EDF" && edfInfo.nchan == 25 && edfInfo.ch_names.front() == "EEG Fp1" && edf->getSampleCount() == 1228 && near(edfHead(0, 0), 0.17594066, 1e-5) && near(edfHead(3, 200), 0.17577240650034331, 1e-5),
-                 QString("EDF: %1 channels, %2 samples, (3,200) = %3 match mne").arg(edfInfo.nchan).arg(edf->getSampleCount()).arg(edfHead(3, 200), 0, 'g', 8));
+                 std::format("EDF: {} channels, {} samples, (3,200) = {:.8g} match mne", edfInfo.nchan, edf->getSampleCount(), edfHead(3, 200)));
 
     //! [edf_channel_info]
     const QVector<EDFChannelInfo> edfChannels = static_cast<EDFReader*>(edf.get())->getMeasurementChannelInfos(); // header fields per signal
     //! [edf_channel_info]
     // mne.io.read_raw_edf: physical_max of the first two signals 175946, -217624
     ok &= expect(edfChannels.size() == 25 && edfChannels[0].label == "EEG Fp1" && edfChannels[0].physicalMax == 175946.0f && edfChannels[1].physicalMax == -217624.0f && edfChannels[0].frequency == 128.0f,
-                 QString("EDF header: %1 signals, %2 physical max %3").arg(edfChannels.size()).arg(edfChannels.value(0).label).arg(edfChannels.value(0).physicalMax));
+                 std::format("EDF header: {} signals, {} physical max {:g}", edfChannels.size(), edfChannels.value(0).label.toStdString(), edfChannels.value(0).physicalMax));
 
     //! [bids_raw_data_read]
     BidsRawData data = BidsRawData::read(ieeg); // raw data plus channels, events, electrodes and sidecar metadata
@@ -170,8 +172,8 @@ int main(int argc, char* argv[])
         }
     }
     ok &= expect(out.isValid() && QFileInfo::exists(written.filePath()) && readBack.isValid() && readBack.raw.info.bads == data.raw.info.bads && readBack.events.size() == 4 && samePositions == 10,
-                 QString("write() then read() keeps bads, events and %1/10 electrode positions").arg(samePositions));
+                 std::format("write() then read() keeps bads, events and {}/10 electrode positions", samePositions));
 
-    qInfo().noquote() << (ok ? "All bids checks passed." : "bids checks FAILED.");
+    std::println("{}", ok ? "All bids checks passed." : "bids checks FAILED.");
     return ok ? EXIT_SUCCESS : EXIT_FAILURE;
 }

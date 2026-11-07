@@ -36,7 +36,6 @@
 
 #include <QCoreApplication>
 #include <QCommandLineParser>
-#include <QDebug>
 #include <QFile>
 #include <QTemporaryDir>
 
@@ -46,6 +45,8 @@
 
 #include <cstdlib>
 #include <memory>
+#include <print>
+#include <string_view>
 
 //=============================================================================================================
 // USED NAMESPACES
@@ -62,9 +63,9 @@ using namespace Eigen;
 namespace
 {
 
-bool expect(bool condition, const QString& what)
+bool expect(bool condition, std::string_view what)
 {
-    qInfo().noquote() << (condition ? "  ok  " : "  FAIL") << what;
+    std::println("{} {}", condition ? "  ok  " : "  FAIL", what);
     return condition;
 }
 
@@ -144,6 +145,6 @@ int main(int argc, char* argv[])
     ok &= expect(saved && dipoles.size() == 1 && dipoles[0].valid && (posMm - mnePosMm).norm() < 1.0 && std::abs(100.0 * dipoles[0].good - 99.99996959113513) < 0.01 && dipoles[0].nfree == 297 && reread.size() == 1 && (reread[0].rd - dipoles[0].rd).norm() < 1e-4f,
                  "InvDipoleFitSettings/InvDipoleFit/InvEcdSet: the pipeline fit matches mne.fit_dipole and round-trips through .dip");
 
-    qInfo().noquote() << (ok ? "All dipole fit checks passed." : "dipole fit checks FAILED.");
+    std::println("{}", ok ? "All dipole fit checks passed." : "dipole fit checks FAILED.");
     return ok ? EXIT_SUCCESS : EXIT_FAILURE;
 }

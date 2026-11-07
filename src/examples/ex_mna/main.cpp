@@ -34,7 +34,6 @@
 //=============================================================================================================
 
 #include <QCoreApplication>
-#include <QDebug>
 #include <QFile>
 #include <QTemporaryDir>
 
@@ -43,6 +42,9 @@
 //=============================================================================================================
 
 #include <cstdlib>
+#include <format>
+#include <print>
+#include <string_view>
 
 //=============================================================================================================
 // USED NAMESPACES
@@ -57,9 +59,9 @@ using namespace MNALIB;
 namespace
 {
 
-bool expect(bool condition, const QString& what)
+bool expect(bool condition, std::string_view what)
 {
-    qInfo().noquote() << (condition ? "  ok  " : "  FAIL") << what;
+    std::println("{} {}", condition ? "  ok  " : "  FAIL", what);
     return condition;
 }
 
@@ -167,7 +169,7 @@ int main(int argc, char* argv[])
     // Before execution the binding has no source::out yet, so gain stays 2: 2 * 3 + 0.5 = 6.5.
     // After it, gain = clamp(3 * 2, 0, 5) = 5, so the incremental run gives 5 * 1 + 0.5 = 5.5 and re-binds gain to 2.
     ok &= expect(first == 6.5 && gainAfterFirst == 5.0 && second == 5.5 && graph.paramTree.param("scale/gain").toDouble() == 2.0,
-                 QString("MnaGraphExecutor: shift::out = %1, then %2 after the binding sets gain to %3").arg(first).arg(second).arg(gainAfterFirst));
+                 std::format("MnaGraphExecutor: shift::out = {:g}, then {:g} after the binding sets gain to {:g}", first, second, gainAfterFirst));
 
     //! [mna_verification_usage]
     MnaVerification& checks = graph.node("shift").verification;
@@ -187,7 +189,7 @@ int main(int argc, char* argv[])
     //! [mna_verification_usage]
     // gain is 2 again, so shift::out = 2 * -2 + 0.5 = -3.5 fails the check
     ok &= expect(!verdict.passed && verdict.actualValue == QVariant(false) && checked.abortedNode == "shift" && checked.results.value("shift::out").toDouble() == -3.5 && provenance.mneCppVersion == MNE_CPP_VERSION && provenance.inputHashes.contains("in"),
-                 "MnaVerification: " + verdict.message);
+                 "MnaVerification: " + verdict.message.toStdString());
 
     //! [mna_project_files]
     MnaFileRef raw;
@@ -223,6 +225,6 @@ int main(int argc, char* argv[])
     ok &= expect(saved && fromJson.name == "ex_mna" && fromCbor.subjects.size() == 1 && fromCbor.subjects[0].sessions[0].recordings[0].files[0].path == raw.path && fromJson.pipeline[2].verification.postResults.first().message == verdict.message && report.language == "python" && fromJson.pipeline.size() == 3 && fromCbor.pipeline.size() == 3 && fromCbor.pipeline[1].inputs[0].sourceNodeId == "source" && fromJson.pipeline[1].attributes.value("gain").toDouble() == 2.0,
                  "MnaIO round-trips the 3-node pipeline through .mna and .mnx");
 
-    qInfo().noquote() << (ok ? "All mna checks passed." : "mna checks FAILED.");
+    std::println("{}", ok ? "All mna checks passed." : "mna checks FAILED.");
     return ok ? EXIT_SUCCESS : EXIT_FAILURE;
 }

@@ -25,7 +25,6 @@
 //=============================================================================================================
 
 #include <QCoreApplication>
-#include <QDebug>
 
 //=============================================================================================================
 // STL INCLUDES
@@ -33,6 +32,9 @@
 
 #include <cmath>
 #include <cstdlib>
+#include <format>
+#include <print>
+#include <string_view>
 
 //=============================================================================================================
 // USED NAMESPACES
@@ -43,9 +45,9 @@ using namespace IEEGLIB;
 namespace
 {
 
-bool expect(bool condition, const QString& what)
+bool expect(bool condition, std::string_view what)
 {
-    qInfo().noquote() << (condition ? "  ok  " : "  FAIL") << what;
+    std::println("{} {}", condition ? "  ok  " : "  FAIL", what);
     return condition;
 }
 
@@ -96,8 +98,8 @@ int main(int argc, char* argv[])
     //! [ieeg_surface_map_usage]
     // Vertex 0 is at LA1 (weight 1), LA2 3.5 mm (0.65) and LA3 7 mm (0.3) away; vertex 1 is beyond reach
     ok &= expect(std::fabs(vertexData(0, 0) - (10.0 + 0.65 * 15.0 + 0.3 * 30.0)) < 1e-4 && vertexData(1, 0) == 0.0,
-                 QString("IeegSurfaceMap: vertex 0 = %1, vertex 1 = %2").arg(vertexData(0, 0)).arg(vertexData(1, 0)));
+                 std::format("IeegSurfaceMap: vertex 0 = {:g}, vertex 1 = {:g}", vertexData(0, 0), vertexData(1, 0)));
 
-    qInfo().noquote() << (ok ? "All iEEG checks passed." : "iEEG checks FAILED.");
+    std::println("{}", ok ? "All iEEG checks passed." : "iEEG checks FAILED.");
     return ok ? EXIT_SUCCESS : EXIT_FAILURE;
 }

@@ -33,7 +33,6 @@
 //=============================================================================================================
 
 #include <QCoreApplication>
-#include <QDebug>
 
 //=============================================================================================================
 // STL INCLUDES
@@ -41,6 +40,9 @@
 
 #include <cmath>
 #include <cstdlib>
+#include <format>
+#include <print>
+#include <string_view>
 
 //=============================================================================================================
 // USED NAMESPACES
@@ -58,9 +60,9 @@ namespace
 
 constexpr double kPi = 3.14159265358979323846;
 
-bool expect(bool condition, const QString& what)
+bool expect(bool condition, std::string_view what)
 {
-    qInfo().noquote() << (condition ? "  ok  " : "  FAIL") << what;
+    std::println("{} {}", condition ? "  ok  " : "  FAIL", what);
     return condition;
 }
 
@@ -109,7 +111,7 @@ int main(int argc, char* argv[])
     //! [welch_psd_compute]
     // mne.time_frequency.psd_array_welch(x, 250, n_fft=250, n_overlap=125, window="hann")
     ok &= expect(welch.vecFreqs.size() == 126 && std::fabs(welch.matPsd(0, 10) - 0.3333333333333334) < 1e-9 && std::fabs(welch.matPsd(0, 40) - 0.08333333333333323) < 1e-9 && std::fabs(welch.matPsd.sum() - 0.6250000000000001) < 1e-9,
-                 QString("WelchPsd: P(10 Hz) = %1, P(40 Hz) = %2 match mne psd_array_welch").arg(welch.matPsd(0, 10)).arg(welch.matPsd(0, 40)));
+                 std::format("WelchPsd: P(10 Hz) = {:g}, P(40 Hz) = {:g} match mne psd_array_welch", welch.matPsd(0, 10), welch.matPsd(0, 40)));
 
     //! [fir_filter_usage]
     FilterKernel lowPass = FirFilter::design(256, FirFilter::LowPass, 20.0, 0.0, sFreq, 5.0); // order, type, cutoff(s), Hz, transition
@@ -118,7 +120,7 @@ int main(int argc, char* argv[])
     const double kept = toneAmplitude(smooth.segment(250, 500), 10.0, sFreq);
     const double removed = toneAmplitude(smooth.segment(250, 500), 40.0, sFreq);
     ok &= expect(smooth.size() == tones.size() && std::fabs(kept - 1.0) < 0.02 && removed < 0.01,
-                 QString("FirFilter 20 Hz low-pass keeps 10 Hz (%1) and removes 40 Hz (%2)").arg(kept, 0, 'f', 4).arg(removed, 0, 'f', 4));
+                 std::format("FirFilter 20 Hz low-pass keeps 10 Hz ({:.4f}) and removes 40 Hz ({:.4f})", kept, removed));
 
     //! [fir_filter_mne_usage]
     const RowVectorXd mneKernel = FirFilter::designMne(sFreq, -1.0, 20.0);   // mne.filter.create_filter defaults: 165 taps
@@ -126,7 +128,7 @@ int main(int argc, char* argv[])
     //! [fir_filter_mne_usage]
     // mne.filter.filter_data(tones, 250, None, 20, fir_design="firwin"): y[500] = 1.252432598430886e-4, sum |y| = 635.2187231296152
     ok &= expect(mneKernel.size() == 165 && std::fabs(mneLow(0, 500) - 1.252432598430886e-4) < 1e-12 && std::fabs(mneLow.cwiseAbs().sum() - 635.2187231296152) < 1e-9,
-                 QString("FirFilter::filterData = mne.filter.filter_data (y[500] = %1)").arg(mneLow(0, 500), 0, 'g', 12));
+                 std::format("FirFilter::filterData = mne.filter.filter_data (y[500] = {:.12g})", mneLow(0, 500)));
 
     // sin(t/40) + 0.3 sin(t/7) + slow drift
     VectorXd wave(200);
@@ -162,7 +164,7 @@ int main(int argc, char* argv[])
     //! [connectivity_aec_compute]
     // numpy corrcoef(|scipy.signal.hilbert(x)|): r(a,b) = 0.98006658, r(a,c) = -0.00701172; orthogonalized r(a,c) = 0.09799620
     ok &= expect(std::fabs(aec(0, 1) - 0.9800665778412415) < 1e-9 && std::fabs(aec(0, 2) + 0.007011719607347298) < 1e-9 && std::fabs(aecOrth(0, 2) - 0.09799619541278072) < 1e-9 && aecOrth(0, 1) > 0.98,
-                 QString("ConnectivityAec: r(a,b) = %1, r(a,c) = %2 match scipy").arg(aec(0, 1), 0, 'f', 6).arg(aec(0, 2), 0, 'f', 6));
+                 std::format("ConnectivityAec: r(a,b) = {:.6f}, r(a,c) = {:.6f} match scipy", aec(0, 1), aec(0, 2)));
 
     // Orthonormal basis of a 6-channel layout: constant pattern plus a gradient
     MatrixXd basis = MatrixXd::Zero(3, 3);
@@ -195,6 +197,6 @@ int main(int argc, char* argv[])
     ok &= expect(stc.data.rows() == 5 && stc.data.row(1) == waveforms.row(0) && stc.data.row(4) == waveforms.row(1) && stc.data.row(0).isZero() && std::fabs(stc.tstep - 0.01f) < 1e-7f && random.data.cols() == 100 && std::fabs(random.data.row(2).maxCoeff() - 1.0) < 0.01 && random.data.row(0).isZero(),
                  "simulateStcFromWaveforms places rows on their vertices; simulateStc draws a unit Gaussian bump");
 
-    qInfo().noquote() << (ok ? "All dsp analysis checks passed." : "dsp analysis checks FAILED.");
+    std::println("{}", ok ? "All dsp analysis checks passed." : "dsp analysis checks FAILED.");
     return ok ? EXIT_SUCCESS : EXIT_FAILURE;
 }

@@ -40,7 +40,6 @@
 
 #include <QCoreApplication>
 #include <QCommandLineParser>
-#include <QDebug>
 #include <QFile>
 
 //=============================================================================================================
@@ -50,6 +49,9 @@
 #include <algorithm>
 #include <cmath>
 #include <cstdlib>
+#include <format>
+#include <print>
+#include <string_view>
 
 //=============================================================================================================
 // USED NAMESPACES
@@ -68,9 +70,9 @@ using namespace Eigen;
 namespace
 {
 
-bool expect(bool condition, const QString& what)
+bool expect(bool condition, std::string_view what)
 {
-    qInfo().noquote() << (condition ? "  ok  " : "  FAIL") << what;
+    std::println("{} {}", condition ? "  ok  " : "  FAIL", what);
     return condition;
 }
 
@@ -160,8 +162,7 @@ int main(int argc, char* argv[])
     pwlRap.calculateInverse(measured, powellPairs);
     //! [inv_rap_music_usage]
     ok &= expect(pairs.size() == 1 && isPair(pairs[0], 10, 50) && pairs[0].m_vCorrelation > 1.0 - 1e-6 && powellPairs.size() == 1 && powellPairs[0].m_vCorrelation > 0.99,
-                 QString("InvRapMusic/InvPwlRapMusic/InvDipolePair: the exhaustive scan finds sources 10 and 50 (correlation 1), Powell a pair at %1")
-                     .arg(powellPairs.isEmpty() ? 0.0 : powellPairs[0].m_vCorrelation, 0, 'f', 4));
+                 std::format("InvRapMusic/InvPwlRapMusic/InvDipolePair: the exhaustive scan finds sources 10 and 50 (correlation 1), Powell a pair at {:.4f}", powellPairs.isEmpty() ? 0.0 : powellPairs[0].m_vCorrelation));
 
     //! [inv_trap_music_usage]
     MatrixX3d positions = fwd.source_rr.cast<double>();
@@ -175,6 +176,6 @@ int main(int argc, char* argv[])
     ok &= expect(found == QVector<int>({10, 50}) && std::abs(dipoles[0].orientation.z()) > 0.999,
                  "InvTrapMusic: TRAP-MUSIC finds both sources one at a time, oriented along z");
 
-    qInfo().noquote() << (ok ? "All beamformer checks passed." : "beamformer checks FAILED.");
+    std::println("{}", ok ? "All beamformer checks passed." : "beamformer checks FAILED.");
     return ok ? EXIT_SUCCESS : EXIT_FAILURE;
 }

@@ -28,7 +28,6 @@
 //=============================================================================================================
 
 #include <QCoreApplication>
-#include <QDebug>
 #include <QElapsedTimer>
 #include <QThread>
 
@@ -37,6 +36,9 @@
 //=============================================================================================================
 
 #include <cstdlib>
+#include <format>
+#include <print>
+#include <string_view>
 #include <vector>
 
 //=============================================================================================================
@@ -52,9 +54,9 @@ using namespace LSLLIB;
 namespace
 {
 
-bool expect(bool condition, const QString& what)
+bool expect(bool condition, std::string_view what)
 {
-    qInfo().noquote() << (condition ? "  ok  " : "  FAIL") << what;
+    std::println("{} {}", condition ? "  ok  " : "  FAIL", what);
     return condition;
 }
 
@@ -74,7 +76,7 @@ int main(int argc, char* argv[])
     stream_outlet outlet(info);                                                        // starts serving immediately
     //! [lsl_stream_outlet_usage]
     ok &= expect(outlet.info().name() == "ex_lsl_eeg" && outlet.info().channel_count() == 3 && outlet.info().nominal_srate() == 250.0 && outlet.info().data_port() > 0 && !outlet.info().uid().empty(),
-                 QString("stream_info: 3 channels at 250 Hz, served on port %1").arg(outlet.info().data_port()));
+                 std::format("stream_info: 3 channels at 250 Hz, served on port {}", outlet.info().data_port()));
 
     //! [lsl_stream_inlet_usage]
     stream_info source = outlet.info(); // normally an entry of resolve_stream("name", "ex_lsl_eeg")
@@ -100,18 +102,18 @@ int main(int argc, char* argv[])
     inlet.close_stream();
     //! [lsl_stream_inlet_usage]
     ok &= expect(received == std::vector<std::vector<float>>({{1.0f, 2.0f, 3.0f}, {4.0f, 5.0f, 6.0f}, {7.0f, 8.0f, 9.0f}}),
-                 QString("stream_inlet received %1 of 3 samples in order").arg(received.size()));
+                 std::format("stream_inlet received {} of 3 samples in order", received.size()));
 
     //! [lsl_resolve_stream_usage]
     const std::vector<stream_info> found = resolve_stream("name", "ex_lsl_eeg", 1.5); // multicast discovery
     //! [lsl_resolve_stream_usage]
     if (found.empty()) {
-        qInfo().noquote() << "  skip  resolve_stream (multicast discovery not available here)";
+        std::println("  skip  resolve_stream (multicast discovery not available here)");
     } else {
         ok &= expect(found.front().uid() == outlet.info().uid() && found.front().data_port() == outlet.info().data_port(),
                      "resolve_stream finds the outlet by name");
     }
 
-    qInfo().noquote() << (ok ? "All lsl checks passed." : "lsl checks FAILED.");
+    std::println("{}", ok ? "All lsl checks passed." : "lsl checks FAILED.");
     return ok ? EXIT_SUCCESS : EXIT_FAILURE;
 }

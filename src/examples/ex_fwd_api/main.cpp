@@ -40,7 +40,6 @@
 
 #include <QCoreApplication>
 #include <QCommandLineParser>
-#include <QDebug>
 #include <QFile>
 #include <QTemporaryDir>
 
@@ -51,6 +50,8 @@
 #include <cmath>
 #include <cstdlib>
 #include <memory>
+#include <print>
+#include <string_view>
 
 //=============================================================================================================
 // USED NAMESPACES
@@ -68,9 +69,9 @@ using namespace Eigen;
 namespace
 {
 
-bool expect(bool condition, const QString& what)
+bool expect(bool condition, std::string_view what)
 {
-    qInfo().noquote() << (condition ? "  ok  " : "  FAIL") << what;
+    std::println("{} {}", condition ? "  ok  " : "  FAIL", what);
     return condition;
 }
 
@@ -202,6 +203,6 @@ int main(int argc, char* argv[])
     ok &= expect(back.nsource == 78 && back.nchan == 366 && good.nchan == 364 && (back.sol->data - fwd->sol->data).norm() <= 1e-6 * fwd->sol->data.norm(),
                  "Fwd::read_forward_solution reads all 366 rows back; bExcludeBads drops the 2 bads");
 
-    qInfo().noquote() << (ok ? "All fwd checks passed." : "fwd checks FAILED.");
+    std::println("{}", ok ? "All fwd checks passed." : "fwd checks FAILED.");
     return ok ? EXIT_SUCCESS : EXIT_FAILURE;
 }
