@@ -18,6 +18,7 @@
 #include <fiff/fiff_constants.h>
 
 #include <utils/generics/mne_logger.h>
+#include <utils/string_utils.h>
 
 //=============================================================================================================
 // QT INCLUDES
@@ -124,15 +125,16 @@ int main(int argc, char* argv[])
     }
 
     // Read the transform between the requested frames (inverted if stored the other way round)
-    const FiffCoordTrans trans = FiffCoordTrans::readTransform(transName, fromFrame, toFrame);
-    if (trans.isEmpty()) {
-        qCritical("No %s <-> %s coordinate transform in: %s", qPrintable(fromName), qPrintable(toName), qPrintable(transName));
+    const auto read = FiffCoordTrans::read(UTILSLIB::pathFromUtf8(transName.toStdString()), fromFrame, toFrame);
+    if (!read) {
+        qCritical("%s", read.error().message.c_str());
         return 1;
     }
+    const FiffCoordTrans& trans = *read;
 
     qInfo("Read transform: %s -> %s",
-          qPrintable(FiffCoordTrans::frame_name(trans.from)),
-          qPrintable(FiffCoordTrans::frame_name(trans.to)));
+          std::string(FiffCoordTrans::frame_name(trans.from)).c_str(),
+          std::string(FiffCoordTrans::frame_name(trans.to)).c_str());
 
     // Read input points
     QFile inFile(inName);

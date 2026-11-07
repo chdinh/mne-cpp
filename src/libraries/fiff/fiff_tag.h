@@ -703,7 +703,7 @@ inline FiffDigPoint FiffTag::toDigPoint() const
 inline FiffCoordTrans FiffTag::toCoordTrans() const
 {
     FiffCoordTrans p_FiffCoordTrans;
-    if (this->isMatrix() || this->getType() != FIFFT_COORD_TRANS_STRUCT || this->isNull() || this->size() < FiffCoordTrans::storageSize())
+    if (this->isMatrix() || this->getType() != FIFFT_COORD_TRANS_STRUCT || this->isNull() || this->size() < FiffCoordTrans::storage_size())
         return p_FiffCoordTrans;
     else {
         auto* t_pInt32 = reinterpret_cast<const qint32*>(this->data());

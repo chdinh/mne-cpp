@@ -8316,6 +8316,28 @@
       "python_url": null
     },
     {
+      "name": "Error",
+      "module": "utils",
+      "header": "utils/error.h",
+      "origin": "custom",
+      "mne_c_tool": null,
+      "mne_python": null,
+      "sklearn": null,
+      "test": "test_fiff_coord_trans",
+      "example": "ex_fiff_api",
+      "example_snippet": [
+        "ex_fiff_api/main.cpp#fiff_coord_trans_usage"
+      ],
+      "example_mode": "run",
+      "status": "documented",
+      "skigen_candidate": false,
+      "documented": true,
+      "sidebar_position": 69,
+      "guide": null,
+      "python_equiv": null,
+      "python_url": null
+    },
+    {
       "name": "ByteStream",
       "module": "utils",
       "header": "utils/byte_stream.h",
@@ -8332,7 +8354,7 @@
       "status": "documented",
       "skigen_candidate": false,
       "documented": true,
-      "sidebar_position": 69,
+      "sidebar_position": 70,
       "guide": null,
       "python_equiv": null,
       "python_url": null
@@ -8354,7 +8376,7 @@
       "status": "documented",
       "skigen_candidate": false,
       "documented": true,
-      "sidebar_position": 70,
+      "sidebar_position": 71,
       "guide": null,
       "python_equiv": null,
       "python_url": null
@@ -8376,7 +8398,7 @@
       "status": "documented",
       "skigen_candidate": false,
       "documented": true,
-      "sidebar_position": 71,
+      "sidebar_position": 72,
       "guide": null,
       "python_equiv": null,
       "python_url": null
@@ -8398,7 +8420,7 @@
       "status": "documented",
       "skigen_candidate": false,
       "documented": true,
-      "sidebar_position": 72,
+      "sidebar_position": 73,
       "guide": null,
       "python_equiv": null,
       "python_url": null

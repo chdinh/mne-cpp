@@ -38,6 +38,7 @@ set(HEADERS
   utils_global.h
   byte_stream.h
   endian.h
+  error.h
   ioutils.h
   layoutloader.h
   layoutmaker.h

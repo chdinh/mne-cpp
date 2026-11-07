@@ -144,10 +144,9 @@ void RtClustMneSetupWidget::showMriHeadFileDialog()
                                                           tr("Fif Files (*.fif)"));
 
 
-    FIFFLIB::FiffCoordTrans mriHeadTrans;
-
-    if (FIFFLIB::FiffCoordTrans::read(UTILSLIB::pathFromUtf8(t_sMriHeadFile.toStdString()), mriHeadTrans) && !mriHeadTrans.isEmpty()) {
-        m_pMNE->m_mriHeadTrans = mriHeadTrans;
+    const auto mriHeadTrans = FIFFLIB::FiffCoordTrans::read(UTILSLIB::pathFromUtf8(t_sMriHeadFile.toStdString()));
+    if (mriHeadTrans) {
+        m_pMNE->m_mriHeadTrans = *mriHeadTrans;
         ui.m_qLineEdit_MriHeadTrans->setText(t_sMriHeadFile);
     }
 }

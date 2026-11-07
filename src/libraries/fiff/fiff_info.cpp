@@ -420,10 +420,10 @@ void FiffInfo::writeToStream(FiffStream& stream) const
     //    Coordinate transformations if the HPI result block was not there
     //
     if (!have_hpi_result) {
-        if (!this->dev_head_t.isEmpty())
+        if (!this->dev_head_t.is_empty())
             stream.write_coord_trans(this->dev_head_t);
 
-        if (!this->ctf_head_t.isEmpty())
+        if (!this->ctf_head_t.is_empty())
             stream.write_coord_trans(this->ctf_head_t);
     }
     //

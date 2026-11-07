@@ -28,9 +28,9 @@
 #include "fiff_tag.h"
 #include "fiff_dir_node.h"
 
+#include <utils/generics/log.h>
+#include <utils/string_utils.h>
 
-#include <QFile>
-#include <QTextStream>
 
 // MSVC builds already define _USE_MATH_DEFINES globally (see src/CMakeLists.txt),
 // so define it here only for the toolchains that do not.
@@ -46,13 +46,47 @@
 #include <Eigen/Dense>
 #include <QDebug>
 
-#include <stdexcept>
+//=============================================================================================================
+// STL INCLUDES
+//=============================================================================================================
+
+#include <format>
+#include <fstream>
+#include <sstream>
 //=============================================================================================================
 // USED NAMESPACES
 //=============================================================================================================
 
 using namespace FIFFLIB;
 using namespace Eigen;
+
+//=============================================================================================================
+// DEFINE LOCAL METHODS
+//=============================================================================================================
+
+namespace
+{
+
+// The first transform among entries from @p from to @p to, inverted if stored the other way round.
+std::expected<FiffCoordTrans, UTILSLIB::Error> find_transform(FiffStream& stream, const QList<FiffDirEntry::SPtr>& entries, int from, int to)
+{
+    FiffTag::UPtr tag;
+    for (const FiffDirEntry::SPtr& entry : entries) {
+        if (entry->kind != FIFF_COORD_TRANS || !stream.read_tag(tag, entry->pos))
+            continue;
+        FiffCoordTrans t = FiffCoordTrans::from_tag(tag);
+        if (t.is_empty())
+            continue;
+        if (t.from == from && t.to == to)
+            return t;
+        if (t.from == to && t.to == from)
+            return t.inverted();
+    }
+    return std::unexpected(UTILSLIB::Error{UTILSLIB::ErrorCode::NotFound,
+                                           std::format("No {} -> {} coordinate transform", FiffCoordTrans::frame_name(from), FiffCoordTrans::frame_name(to))});
+}
+
+} // namespace
 
 //=============================================================================================================
 // DEFINE MEMBER METHODS
@@ -64,19 +98,6 @@ FiffCoordTrans::FiffCoordTrans()
 , trans(MatrixXf::Identity(4, 4))
 , invtrans(MatrixXf::Identity(4, 4))
 {
-}
-
-//=============================================================================================================
-
-FiffCoordTrans::FiffCoordTrans(const std::filesystem::path& path)
-: from(-1)
-, to(-1)
-, trans(MatrixXf::Identity(4, 4))
-, invtrans(MatrixXf::Identity(4, 4))
-{
-    if (!read(path, *this)) {
-        throw std::runtime_error("Coordinate transform not found");
-    }
 }
 
 //=============================================================================================================
@@ -120,52 +141,55 @@ bool FiffCoordTrans::invert_transform()
 
 //=============================================================================================================
 
-bool FiffCoordTrans::read(const std::filesystem::path& path, FiffCoordTrans& p_Trans)
+std::expected<FiffCoordTrans, UTILSLIB::Error> FiffCoordTrans::read(const std::filesystem::path& path)
 {
-    auto pStream = FiffStream::open(path);
-    if (!pStream)
-        return false;
-    qInfo("Reading coordinate transform from %s...\n", pStream->streamName().toUtf8().constData());
-
-    //
-    //   Locate and read the coordinate transformation
-    //
-    FiffTag::UPtr t_pTag;
-    bool success = false;
-
-    //
-    //   Get the MRI <-> head coordinate transformation
-    //
-    for (qint32 k = 0; k < pStream->dir().size() && !success; ++k) {
-        if (pStream->dir()[k]->kind == FIFF_COORD_TRANS && pStream->read_tag(t_pTag, pStream->dir()[k]->pos)) {
-            p_Trans = t_pTag->toCoordTrans();
-            success = true;
+    auto stream = FiffStream::open(path);
+    if (!stream) {
+        return std::unexpected(stream.error());
+    }
+    FiffTag::UPtr tag;
+    for (const FiffDirEntry::SPtr& entry : stream->dir()) {
+        if (entry->kind == FIFF_COORD_TRANS && stream->read_tag(tag, entry->pos)) {
+            return from_tag(tag);
         }
     }
-
-    return success;
+    return std::unexpected(UTILSLIB::Error{UTILSLIB::ErrorCode::NotFound,
+                                           "No coordinate transform in " + UTILSLIB::utf8FromPath(path)});
 }
 
 //=============================================================================================================
 
-bool FiffCoordTrans::write(const std::filesystem::path& path)
+std::expected<FiffCoordTrans, UTILSLIB::Error> FiffCoordTrans::read(const std::filesystem::path& path, int from, int to)
 {
-    auto pStream = FiffStream::start_file(path);
-    if (!pStream) {
-        return false;
+    auto stream = FiffStream::open(path);
+    if (!stream) {
+        return std::unexpected(stream.error());
     }
-    qInfo("Write coordinate transform in %s...\n", pStream->streamName().toUtf8().constData());
-    this->writeToStream(*pStream);
-    pStream->end_file();
-    pStream->close();
-    return true;
+    return find_transform(*stream, stream->dir(), from, to).transform_error([&path](UTILSLIB::Error error) {
+        error.message += " in " + UTILSLIB::utf8FromPath(path);
+        return error;
+    });
 }
 
 //=============================================================================================================
 
-void FiffCoordTrans::writeToStream(FiffStream& pStream)
+std::expected<void, UTILSLIB::Error> FiffCoordTrans::write(const std::filesystem::path& path) const
 {
-    pStream.write_coord_trans(*this);
+    auto stream = FiffStream::start_file(path);
+    if (!stream) {
+        return std::unexpected(UTILSLIB::Error{UTILSLIB::ErrorCode::Io, "Cannot write " + UTILSLIB::utf8FromPath(path)});
+    }
+    write_to_stream(*stream);
+    stream->end_file();
+    stream->close();
+    return {};
+}
+
+//=============================================================================================================
+
+void FiffCoordTrans::write_to_stream(FiffStream& stream) const
+{
+    stream.write_coord_trans(*this);
 }
 
 //=============================================================================================================
@@ -198,7 +222,7 @@ MatrixX3f FiffCoordTrans::apply_inverse_trans(const MatrixX3f& rr, bool do_move)
 
 //=============================================================================================================
 
-QString FiffCoordTrans::frame_name(int frame)
+std::string_view FiffCoordTrans::frame_name(int frame)
 {
     switch (frame) {
         case FIFFV_COORD_UNKNOWN:
@@ -249,7 +273,7 @@ FiffCoordTrans::FiffCoordTrans(int from, int to, const Matrix3f& rot, const Vect
     this->trans.block<3, 1>(0, 3) = move;
     this->trans(3, 3) = 1.0f;
 
-    FiffCoordTrans::addInverse(*this);
+    add_inverse(*this);
 }
 
 //=============================================================================================================
@@ -265,12 +289,12 @@ FiffCoordTrans::FiffCoordTrans(int from, int to, const Matrix4f& matTrans, bool 
         this->trans.row(3) = Vector4f(0, 0, 0, 1).transpose();
     }
 
-    FiffCoordTrans::addInverse(*this);
+    add_inverse(*this);
 }
 
 //=============================================================================================================
 
-bool FiffCoordTrans::addInverse(FiffCoordTrans& t)
+bool FiffCoordTrans::add_inverse(FiffCoordTrans& t)
 {
     t.invtrans = t.trans.inverse().eval();
     return true;
@@ -280,16 +304,15 @@ bool FiffCoordTrans::addInverse(FiffCoordTrans& t)
 
 void FiffCoordTrans::print() const
 {
-    qInfo().noquote() << QString("Coordinate transformation: %1 -> %2").arg(frame_name(this->from), frame_name(this->to));
-
+    UTILSLIB::Log::info("Coordinate transformation: {} -> {}", frame_name(from), frame_name(to));
     for (int p = 0; p < 3; p++)
-        qInfo("\t% 8.6f % 8.6f % 8.6f\t% 7.2f mm", trans(p, 0), trans(p, 1), trans(p, 2), 1000 * trans(p, 3));
-    qInfo("\t% 8.6f % 8.6f % 8.6f   % 7.2f", trans(3, 0), trans(3, 1), trans(3, 2), trans(3, 3));
+        UTILSLIB::Log::info("\t{: 8.6f} {: 8.6f} {: 8.6f}\t{: 7.2f} mm", trans(p, 0), trans(p, 1), trans(p, 2), 1000 * trans(p, 3));
+    UTILSLIB::Log::info("\t{: 8.6f} {: 8.6f} {: 8.6f}   {: 7.2f}", trans(3, 0), trans(3, 1), trans(3, 2), trans(3, 3));
 }
 
 //=============================================================================================================
 
-float FiffCoordTrans::angleTo(Eigen::MatrixX4f mTransDest)
+float FiffCoordTrans::angle_to(const Eigen::MatrixX4f& mTransDest) const
 {
     MatrixX4f mDevHeadT = this->trans;
     Matrix3f mRot = mDevHeadT.block(0, 0, 3, 3);
@@ -312,7 +335,7 @@ float FiffCoordTrans::angleTo(Eigen::MatrixX4f mTransDest)
 
 //=============================================================================================================
 
-float FiffCoordTrans::translationTo(Eigen::MatrixX4f mTransDest)
+float FiffCoordTrans::translation_to(const Eigen::MatrixX4f& mTransDest) const
 {
     VectorXf vTrans = this->trans.col(3);
     VectorXf vTransDest = mTransDest.col(3);
@@ -413,16 +436,16 @@ FiffCoordTrans FiffCoordTrans::combine(int from, int to, const FiffCoordTrans& t
     result.to = a.to;
     result.trans = a.trans * b.trans;
     result.trans.row(3) << 0.0f, 0.0f, 0.0f, 1.0f;
-    addInverse(result);
+    add_inverse(result);
     return result;
 }
 
 //=============================================================================================================
 
-FiffCoordTrans FiffCoordTrans::fromCardinalPoints(int from, int to,
-                                                  const float* rL,
-                                                  const float* rN,
-                                                  const float* rR)
+FiffCoordTrans FiffCoordTrans::from_cardinal_points(int from, int to,
+                                                    const float* rL,
+                                                    const float* rN,
+                                                    const float* rR)
 {
     Map<const Vector3f> L(rL);
     Map<const Vector3f> N(rN);
@@ -444,123 +467,46 @@ FiffCoordTrans FiffCoordTrans::fromCardinalPoints(int from, int to,
     result.rot().col(1) = ey;
     result.rot().col(2) = ez;
     result.move() = r0;
-    addInverse(result);
+    add_inverse(result);
     return result;
 }
 
 //=============================================================================================================
 
-FiffCoordTrans FiffCoordTrans::readTransform(const QString& name, int from, int to)
+std::expected<FiffCoordTrans, UTILSLIB::Error> FiffCoordTrans::read_ascii(const std::filesystem::path& path, int from, int to)
 {
-    QFile file(name);
-    FiffStream stream(&file);
-
-    if (!stream.open()) {
-        return FiffCoordTrans();
+    const std::string name = UTILSLIB::utf8FromPath(path);
+    std::ifstream in(path);
+    if (!in) {
+        return std::unexpected(UTILSLIB::Error{UTILSLIB::ErrorCode::Io, "Cannot open " + name});
     }
-
-    FiffTag::UPtr t_pTag;
-    for (int k = 0; k < stream.dir().size(); k++) {
-        if (stream.dir()[k]->kind == FIFF_COORD_TRANS) {
-            if (!stream.read_tag(t_pTag, stream.dir()[k]->pos))
-                continue;
-
-            FiffCoordTrans t = t_pTag->toCoordTrans();
-            if (t.from == from && t.to == to) {
-                stream.close();
-                return t;
-            } else if (t.from == to && t.to == from) {
-                t.invert_transform();
-                stream.close();
-                return t;
-            }
-        }
-    }
-
-    qCritical("No suitable coordinate transformation found in %s.", name.toUtf8().constData());
-    stream.close();
-    return FiffCoordTrans();
-}
-
-//=============================================================================================================
-
-FiffCoordTrans FiffCoordTrans::readMriTransform(const QString& name)
-{
-    return readTransform(name, FIFFV_COORD_MRI, FIFFV_COORD_HEAD);
-}
-
-//=============================================================================================================
-
-FiffCoordTrans FiffCoordTrans::readMeasTransform(const QString& name)
-{
-    return readTransform(name, FIFFV_COORD_DEVICE, FIFFV_COORD_HEAD);
-}
-
-//=============================================================================================================
-
-FiffCoordTrans FiffCoordTrans::readTransformAscii(const QString& name, int from, int to)
-{
-    QFile file(name);
-    if (!file.open(QIODevice::ReadOnly | QIODevice::Text)) {
-        qCritical("Cannot open %s", name.toUtf8().constData());
-        return FiffCoordTrans();
-    }
-
-    QTextStream in(&file);
     Matrix3f rot;
-    Vector3f moveVec;
-
+    Vector3f move;
     int row = 0;
-    while (!in.atEnd() && row < 4) {
-        QString line = in.readLine();
-        // Strip comments and whitespace
-        int commentIdx = line.indexOf('#');
-        if (commentIdx >= 0)
-            line = line.left(commentIdx);
-        line = line.trimmed();
-        if (line.isEmpty())
+    std::string line;
+    while (row < 4 && std::getline(in, line)) {
+        line = line.substr(0, line.find('#'));
+        if (line.find_first_not_of(" \t\r") == std::string::npos) {
             continue;
-
+        }
+        // The last row of the 4 x 4 matrix is read but not used.
         if (row < 3) {
-            QStringList parts = line.simplified().split(' ', Qt::SkipEmptyParts);
-            if (parts.size() < 4) {
-                qCritical("Cannot read the coordinate transformation from %s",
-                          name.toUtf8().constData());
-                return FiffCoordTrans();
-            }
-            bool ok1, ok2, ok3, ok4;
-            rot(row, 0) = parts[0].toFloat(&ok1);
-            rot(row, 1) = parts[1].toFloat(&ok2);
-            rot(row, 2) = parts[2].toFloat(&ok3);
-            moveVec[row] = parts[3].toFloat(&ok4) / 1000.0f;
-            if (!ok1 || !ok2 || !ok3 || !ok4) {
-                qCritical("Bad floating point number in coordinate transformation");
-                return FiffCoordTrans();
+            std::istringstream values(line);
+            if (!(values >> rot(row, 0) >> rot(row, 1) >> rot(row, 2) >> move[row])) {
+                return std::unexpected(UTILSLIB::Error{UTILSLIB::ErrorCode::Format, "Bad number in the coordinate transform in " + name});
             }
         }
-        // Row 3 (the last row of the 4x4 matrix) is consumed but ignored
-        row++;
+        ++row;
     }
-
     if (row < 4) {
-        qCritical("Cannot read the coordinate transformation from %s",
-                  name.toUtf8().constData());
-        return FiffCoordTrans();
+        return std::unexpected(UTILSLIB::Error{UTILSLIB::ErrorCode::Format, "Fewer than 4 rows of coordinate transform in " + name});
     }
-
-    return FiffCoordTrans(from, to, rot, moveVec);
+    return FiffCoordTrans(from, to, rot, move / 1000.0f);
 }
 
 //=============================================================================================================
 
-FiffCoordTrans FiffCoordTrans::readFShead2mriTransform(const QString& name)
-{
-    return readTransformAscii(name, FIFFV_COORD_HEAD, FIFFV_COORD_MRI);
-}
-
-//=============================================================================================================
-
-FiffCoordTrans FiffCoordTrans::readFromTag(const FiffTag::UPtr& tag)
+FiffCoordTrans FiffCoordTrans::from_tag(const FiffTag::UPtr& tag)
 {
     FiffCoordTrans t;
     if (tag->isMatrix() || tag->getType() != FIFFT_COORD_TRANS_STRUCT || tag->data() == nullptr)
@@ -603,48 +549,21 @@ FiffCoordTrans FiffCoordTrans::readFromTag(const FiffTag::UPtr& tag)
 
 //=============================================================================================================
 
-FiffCoordTrans FiffCoordTrans::readTransformFromNode(FiffStream& stream,
-                                                     const FiffDirNode::SPtr& node,
-                                                     int from, int to)
+std::expected<FiffCoordTrans, UTILSLIB::Error> FiffCoordTrans::read_from_node(FiffStream& stream,
+                                                                              const FiffDirNode::SPtr& node,
+                                                                              int from, int to)
 {
-    FiffTag::UPtr t_pTag;
-
-    // Scan every directory entry of the node for a coordinate transformation
-    // matching the requested frames. The loop previously had no braces, so it
-    // only recorded the last entry's kind and then indexed dir[nent()], which
-    // is one past the end - and left `kind` uninitialised for an empty node.
-    for (int k = 0; k < node->nent(); ++k) {
-        const FiffDirEntry::SPtr& entry = node->dir[k];
-        if (entry->kind != FIFF_COORD_TRANS)
-            continue;
-
-        if (!stream.read_tag(t_pTag, entry->pos))
-            continue;
-
-        FiffCoordTrans res = readFromTag(t_pTag);
-        if (res.isEmpty())
-            continue;
-
-        if (res.from == from && res.to == to) {
-            return res;
-        }
-        if (res.from == to && res.to == from) {
-            return res.inverted();
-        }
-    }
-
-    qWarning("No suitable coordinate transformation found");
-    return FiffCoordTrans();
+    return find_transform(stream, node->dir, from, to);
 }
 
 //=============================================================================================================
 
-FiffCoordTrans FiffCoordTrans::procrustesAlign(int from_frame,
-                                               int to_frame,
-                                               const Eigen::MatrixXf& fromPts,
-                                               const Eigen::MatrixXf& toPts,
-                                               const Eigen::VectorXf& w,
-                                               float max_diff)
+FiffCoordTrans FiffCoordTrans::procrustes_align(int from_frame,
+                                                int to_frame,
+                                                const Eigen::MatrixXf& fromPts,
+                                                const Eigen::MatrixXf& toPts,
+                                                const Eigen::VectorXf& w,
+                                                float max_diff)
 {
     int np = fromPts.rows();
 

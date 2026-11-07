@@ -495,8 +495,7 @@ private slots:
                 QVERIFY(inv.to == trans.from);
 
                 // Frame name
-                QString fromName = FiffCoordTrans::frame_name(trans.from);
-                QVERIFY(!fromName.isEmpty() || true);
+                QVERIFY(!FiffCoordTrans::frame_name(trans.from).empty());
             }
         }
         stream.close();

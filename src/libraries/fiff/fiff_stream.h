@@ -49,6 +49,7 @@
 #include "fiff_dir_entry.h"
 
 #include <utils/byte_stream.h>
+#include <utils/error.h>
 
 //=============================================================================================================
 // EIGEN INCLUDES
@@ -67,6 +68,7 @@
 #include <QSharedPointer>
 #include <QString>
 #include <QStringList>
+#include <expected>
 #include <filesystem>
 #include <memory>
 #include <string>
@@ -150,14 +152,16 @@ public:
      *
      * @param[in] path   The file.
      *
-     * @return The open stream, or nullptr if the file cannot be opened or is not a FIFF file.
+     * @return The open stream, or why the file cannot be opened or is not a FIFF file.
      */
-    static std::unique_ptr<FiffStream> open(const std::filesystem::path& path);
+    [[nodiscard]] static std::expected<FiffStream, UTILSLIB::Error> open(const std::filesystem::path& path);
 
     ~FiffStream();
 
     FiffStream(const FiffStream&) = delete;
     FiffStream& operator=(const FiffStream&) = delete;
+    FiffStream(FiffStream&&) noexcept;
+    FiffStream& operator=(FiffStream&&) noexcept;
 
     //=========================================================================================================
     /**

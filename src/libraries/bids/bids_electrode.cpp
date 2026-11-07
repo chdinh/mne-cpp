@@ -119,7 +119,7 @@ FIFFLIB::FiffDigPointSet BidsElectrode::toFiffDigPoints(
     FiffDigPointSet digSet;
     int ident = 1;
 
-    const bool hasTransform = !trans.isEmpty();
+    const bool hasTransform = !trans.is_empty();
 
     for (const BidsElectrode& elec : electrodes) {
         // Skip electrodes with "n/a" coordinates

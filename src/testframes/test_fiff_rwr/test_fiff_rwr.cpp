@@ -487,7 +487,21 @@ void TestFiffRWR::opensAndStartsFilesByPath()
     QVERIFY(in->isOpen());
     QCOMPARE(in->streamName(), QString::fromStdString(path));
     QVERIFY(in->nent() > 0);
-    QVERIFY(!FiffStream::open(m_tempDir.filePath("missing.fif").toStdString()));
+    const auto missing = FiffStream::open(m_tempDir.filePath("missing.fif").toStdString());
+    QVERIFY(!missing);
+    QCOMPARE(missing.error().code, UTILSLIB::ErrorCode::Io);
+    QFile text(m_tempDir.filePath("text.fif"));
+    QVERIFY(text.open(QIODevice::WriteOnly));
+    text.write("not a FIFF file");
+    text.close();
+    const auto notFiff = FiffStream::open(text.fileName().toStdString());
+    QVERIFY(!notFiff);
+    QCOMPARE(notFiff.error().code, UTILSLIB::ErrorCode::Format);
+    QVERIFY(notFiff.error().message.find("text.fif") != std::string::npos);
+
+    // The stream is a value: it moves out of the result and keeps reading.
+    FiffStream moved = std::move(*FiffStream::open(path));
+    QCOMPARE(moved.nent(), in->nent());
 
     // A closed stream reopens its file and still reads by the directory it read before
     FiffTag::UPtr firstTag;
@@ -574,7 +588,7 @@ void TestFiffRWR::writersStable()
         QVERIFY(written.open(QIODevice::ReadOnly));
         bytes = written.readAll();
     } else if (writer == "trans") {
-        FiffCoordTrans trans((meg + "all-trans.fif").toStdString());
+        const FiffCoordTrans trans = FiffCoordTrans::read((meg + "all-trans.fif").toStdString()).value();
         const QString path = m_tempDir.filePath("stable-trans.fif");
         QVERIFY(trans.write(path.toStdString()));
         QFile written(path);

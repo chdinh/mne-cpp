@@ -448,17 +448,17 @@ void TestMneSourceSpaceOpsPython::readsPythonVolumeSpace()
     QCOMPARE(v.MRI_vol_dims[2], 32);
     QCOMPARE(v.MRI_volume, QString("T1.mgz"));
 
-    QVERIFY(v.voxel_surf_RAS_t && !v.voxel_surf_RAS_t->isEmpty());
+    QVERIFY(v.voxel_surf_RAS_t && !v.voxel_surf_RAS_t->is_empty());
     Matrix<float, 3, 4> srcMri;
     srcMri << 0.025f, 0.0f, 0.0f, -0.075f, 0.0f, 0.025f, 0.0f, -0.1f, 0.0f, 0.0f, 0.025f, -0.05f;
     QVERIFY((v.voxel_surf_RAS_t->trans.topRows<3>() - srcMri).cwiseAbs().maxCoeff() < 1e-7f);
 
-    QVERIFY(v.MRI_voxel_surf_RAS_t && !v.MRI_voxel_surf_RAS_t->isEmpty());
+    QVERIFY(v.MRI_voxel_surf_RAS_t && !v.MRI_voxel_surf_RAS_t->is_empty());
     Matrix<float, 3, 4> voxMri;
     voxMri << -0.001f, 0.0f, 0.0f, 0.128f, 0.0f, 0.0f, 0.001f, -0.128f, 0.0f, -0.001f, 0.0f, 0.128f;
     QVERIFY((v.MRI_voxel_surf_RAS_t->trans.topRows<3>() - voxMri).cwiseAbs().maxCoeff() < 1e-7f);
 
-    QVERIFY(v.MRI_surf_RAS_RAS_t && !v.MRI_surf_RAS_RAS_t->isEmpty());
+    QVERIFY(v.MRI_surf_RAS_RAS_t && !v.MRI_surf_RAS_RAS_t->is_empty());
     QVERIFY((v.MRI_surf_RAS_RAS_t->trans.block<3, 1>(0, 3) - Vector3f(-0.0052736131f, 0.0090390854f, -0.0272879638f)).cwiseAbs().maxCoeff() < 1e-8f);
 
     QVERIFY(v.interpolator);

@@ -131,7 +131,7 @@ int main(int argc, char* argv[])
     //! [fwd_bem_model_usage]
     auto bem = FwdBemModel::fwd_bem_load_homog_surface(data + "/subjects/sample/bem/sample-5120-bem.fif");
     bem->fwd_bem_load_recompute_solution(data + "/subjects/sample/bem/sample-5120-bem-sol.fif", FWD_BEM_LINEAR_COLL, 0);
-    bem->fwd_bem_set_head_mri_t(FiffCoordTrans::readMriTransform(data + "/MEG/sample/all-trans.fif"));
+    bem->fwd_bem_set_head_mri_t(FiffCoordTrans::read(UTILSLIB::pathFromUtf8((data + "/MEG/sample/all-trans.fif").toStdString()), FIFFV_COORD_MRI, FIFFV_COORD_HEAD).value());
     bem->fwd_bem_specify_coils(coils.get()); // stores a FwdBemSolution per coil set in coils->user_data
     VectorXf B(coils->ncoil());
     FwdBemModel::fwd_bem_field(rd, Q, *coils, B, bem.get()); // T per A m

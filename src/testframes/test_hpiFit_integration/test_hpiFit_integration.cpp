@@ -210,8 +210,8 @@ void TestHpiFitIntegration::initTestCase()
         }
 
         InvHpiFit::storeHeadPosition(mRefPos(i, 0), hpiFitResult.devHeadTrans.trans, mHpiPos, hpiFitResult.GoF, hpiFitResult.errorDistances);
-        mHpiResult(i, 0) = devHeadT.translationTo(hpiFitResult.devHeadTrans.trans);
-        mHpiResult(i, 1) = devHeadT.angleTo(hpiFitResult.devHeadTrans.trans);
+        mHpiResult(i, 0) = devHeadT.translation_to(hpiFitResult.devHeadTrans.trans);
+        mHpiResult(i, 1) = devHeadT.angle_to(hpiFitResult.devHeadTrans.trans);
     }
     // For debug: position file for InvHpiFit
     //    UTILSLIB::IOUtils::write_eigen_matrix(mHpiPos, QCoreApplication::applicationDirPath() + "/../resources/data/MNE-sample-data/mHpiPos.txt");

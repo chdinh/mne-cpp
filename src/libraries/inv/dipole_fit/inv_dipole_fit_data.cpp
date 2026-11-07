@@ -42,6 +42,7 @@
 
 #include <math/simplex_algorithm.h>
 #include <math/sphere.h>
+#include <utils/generics/log.h>
 #include <utils/string_utils.h>
 
 #include <Eigen/Dense>
@@ -510,9 +511,12 @@ InvDipoleFitData* InvDipoleFitData::setup_dipole_fit_data(const QString& mriname
        * Read the coordinate transformations
        */
     if (!mriname.isEmpty()) {
-        res->mri_head_t = std::make_unique<FiffCoordTrans>(FiffCoordTrans::readMriTransform(mriname));
-        if (res->mri_head_t->isEmpty())
+        const auto mriHead = FiffCoordTrans::read(UTILSLIB::pathFromUtf8(mriname.toStdString()), FIFFV_COORD_MRI, FIFFV_COORD_HEAD);
+        if (!mriHead) {
+            UTILSLIB::Log::critical("{}", mriHead.error().message);
             return nullptr;
+        }
+        res->mri_head_t = std::make_unique<FiffCoordTrans>(*mriHead);
     } else if (!bemname.isEmpty()) {
         qWarning("Source of MRI / head transform required for the BEM model is missing");
         return nullptr;
@@ -530,9 +534,12 @@ InvDipoleFitData* InvDipoleFitData::setup_dipole_fit_data(const QString& mriname
     }
 
     res->mri_head_t->print();
-    res->meg_head_t = std::make_unique<FiffCoordTrans>(FiffCoordTrans::readMeasTransform(measname));
-    if (res->meg_head_t->isEmpty())
+    const auto megHead = FiffCoordTrans::read(UTILSLIB::pathFromUtf8(measname.toStdString()), FIFFV_COORD_DEVICE, FIFFV_COORD_HEAD);
+    if (!megHead) {
+        UTILSLIB::Log::critical("{}", megHead.error().message);
         return nullptr;
+    }
+    res->meg_head_t = std::make_unique<FiffCoordTrans>(*megHead);
     res->meg_head_t->print();
     /*
        * Read the bad channel lists
@@ -630,7 +637,7 @@ InvDipoleFitData* InvDipoleFitData::setup_dipole_fit_data(const QString& mriname
             return nullptr;
         qInfo("Head coordinate coil definitions created.");
     } else {
-        qWarning("Cannot handle computations in %s coordinates", FiffCoordTrans::frame_name(coord_frame).toUtf8().constData());
+        qWarning("Cannot handle computations in %s coordinates", std::string(FiffCoordTrans::frame_name(coord_frame)).c_str());
         return nullptr;
     }
     /*

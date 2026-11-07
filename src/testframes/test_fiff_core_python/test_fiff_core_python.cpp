@@ -830,13 +830,15 @@ void TestFiffCorePython::readTransformFromNode()
     FiffStream stream(&file);
     QVERIFY(stream.open());
 
-    const FiffCoordTrans t = FiffCoordTrans::readTransformFromNode(stream, stream.dirtree(), from, to);
+    const auto read = FiffCoordTrans::read_from_node(stream, stream.dirtree(), from, to);
     stream.close();
 
-    QCOMPARE(!t.isEmpty(), found);
+    QCOMPARE(read.has_value(), found);
     if (!found) {
+        QCOMPARE(read.error().code, UTILSLIB::ErrorCode::NotFound);
         return;
     }
+    const FiffCoordTrans& t = *read;
     QCOMPARE(t.from, from);
     QCOMPARE(t.to, to);
 
@@ -852,18 +854,18 @@ void TestFiffCorePython::readTransformFromNode()
 
 void TestFiffCorePython::readTransform_fromFile()
 {
-    const QString path = dataPath("all-trans.fif");
+    const std::string path = dataPath("all-trans.fif").toStdString();
 
     // Stored as 1 -> 4; asking for 4 -> 1 must invert it.
-    const FiffCoordTrans fwd = FiffCoordTrans::readTransform(path, FIFFV_COORD_DEVICE, FIFFV_COORD_HEAD);
-    const FiffCoordTrans inv = FiffCoordTrans::readTransform(path, FIFFV_COORD_HEAD, FIFFV_COORD_DEVICE);
+    const FiffCoordTrans fwd = FiffCoordTrans::read(path, FIFFV_COORD_DEVICE, FIFFV_COORD_HEAD).value();
+    const FiffCoordTrans inv = FiffCoordTrans::read(path, FIFFV_COORD_HEAD, FIFFV_COORD_DEVICE).value();
     QCOMPARE(fwd.trans(0, 3), -0.006129309069365263f);
     QCOMPARE(inv.from, FIFFV_COORD_HEAD);
     QCOMPARE(inv.to, FIFFV_COORD_DEVICE);
     QVERIFY((inv.trans - fwd.invtrans).cwiseAbs().maxCoeff() < 1e-6f);
 
-    QVERIFY(FiffCoordTrans::readTransform(path, FIFFV_COORD_DEVICE, FIFFV_COORD_MRI).isEmpty());
-    QVERIFY(FiffCoordTrans::readTransform(dataPath("does-not-exist.fif"), FIFFV_COORD_DEVICE, FIFFV_COORD_HEAD).isEmpty());
+    QVERIFY(!FiffCoordTrans::read(path, FIFFV_COORD_DEVICE, FIFFV_COORD_MRI));
+    QVERIFY(!FiffCoordTrans::read(dataPath("does-not-exist.fif").toStdString(), FIFFV_COORD_DEVICE, FIFFV_COORD_HEAD));
 }
 
 //=============================================================================================================
@@ -900,9 +902,10 @@ void TestFiffCorePython::readTransformAscii_errors()
         QTextStream(&f) << content;
     }
 
-    const FiffCoordTrans t = FiffCoordTrans::readFShead2mriTransform(path);
-    QCOMPARE(!t.isEmpty(), valid);
+    const auto read = FiffCoordTrans::read_ascii(path.toStdString(), FIFFV_COORD_HEAD, FIFFV_COORD_MRI);
+    QCOMPARE(read.has_value(), valid);
     if (valid) {
+        const FiffCoordTrans& t = *read;
         QCOMPARE(t.from, FIFFV_COORD_HEAD);
         QCOMPARE(t.to, FIFFV_COORD_MRI);
         // Translations are given in millimetres and stored in metres.
@@ -955,7 +958,7 @@ void TestFiffCorePython::combine_orientations()
     QVERIFY((res.apply_trans(p) - viaHead).cwiseAbs().maxCoeff() < 1e-6f);
 
     // Frames that cannot be chained.
-    QVERIFY(FiffCoordTrans::combine(FIFFV_COORD_DEVICE, FIFFV_MNE_COORD_MNI_TAL, t1, t2).isEmpty());
+    QVERIFY(FiffCoordTrans::combine(FIFFV_COORD_DEVICE, FIFFV_MNE_COORD_MNI_TAL, t1, t2).is_empty());
 }
 
 //=============================================================================================================

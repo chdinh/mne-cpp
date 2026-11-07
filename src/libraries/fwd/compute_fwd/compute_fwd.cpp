@@ -19,6 +19,8 @@
 
 #include <fiff/fiff_stream.h>
 #include <fiff/fiff_info.h>
+#include <utils/generics/log.h>
+#include <utils/string_utils.h>
 
 //=============================================================================================================
 // QT INCLUDES
@@ -147,7 +149,7 @@ void ComputeFwd::initFwd()
         }
     }
     qInfo("%s field computations", m_pSettings->accurate ? "Accurate" : "Standard");
-    qInfo("Do computations in %s coordinates.", FiffCoordTrans::frame_name(m_pSettings->coord_frame).toUtf8().constData());
+    qInfo("Do computations in %s coordinates.", std::string(FiffCoordTrans::frame_name(m_pSettings->coord_frame)).c_str());
     qInfo("%s source orientations", m_pSettings->fixed_ori ? "Fixed" : "Free");
     if (m_pSettings->compute_grad) {
         qInfo("Compute derivatives with respect to source location coordinates");
@@ -182,10 +184,12 @@ void ComputeFwd::initFwd()
 
     // Read the MRI -> head coordinate transformation
     if (!m_pSettings->mriname.isEmpty()) {
-        m_mri_head_t = FiffCoordTrans::readMriTransform(m_pSettings->mriname);
-        if (m_mri_head_t.isEmpty()) {
+        const auto mriHead = FiffCoordTrans::read(UTILSLIB::pathFromUtf8(m_pSettings->mriname.toStdString()), FIFFV_COORD_MRI, FIFFV_COORD_HEAD);
+        if (!mriHead) {
+            UTILSLIB::Log::critical("{}", mriHead.error().message);
             return;
         }
+        m_mri_head_t = *mriHead;
         {
             QFile mriFile(m_pSettings->mriname);
             FiffStream mriStream(&mriFile);
@@ -205,11 +209,12 @@ void ComputeFwd::initFwd()
             return;
         }
     } else if (!m_pSettings->transname.isEmpty()) {
-        FiffCoordTrans t = FiffCoordTrans::readFShead2mriTransform(m_pSettings->transname.toUtf8().data());
-        if (t.isEmpty()) {
+        const auto headMri = FiffCoordTrans::read_ascii(UTILSLIB::pathFromUtf8(m_pSettings->transname.toStdString()), FIFFV_COORD_HEAD, FIFFV_COORD_MRI);
+        if (!headMri) {
+            UTILSLIB::Log::critical("{}", headMri.error().message);
             return;
         }
-        m_mri_head_t = t.inverted();
+        m_mri_head_t = headMri->inverted();
     } else {
         m_mri_head_t = FiffCoordTrans::identity(FIFFV_COORD_MRI, FIFFV_COORD_HEAD);
     }
@@ -248,10 +253,10 @@ void ComputeFwd::initFwd()
                                                iNEeg,
                                                m_meg_head_t,
                                                m_meas_id);
-    if (!m_pSettings->meg_head_t.isEmpty()) {
+    if (!m_pSettings->meg_head_t.is_empty()) {
         m_meg_head_t = m_pSettings->meg_head_t;
     }
-    if (m_meg_head_t.isEmpty()) {
+    if (m_meg_head_t.is_empty()) {
         qCritical("MEG -> head coordinate transformation not found.");
         return;
     }
@@ -318,7 +323,7 @@ void ComputeFwd::initFwd()
     if (m_pSettings->coord_frame == FIFFV_COORD_MRI) {
         FiffCoordTrans head_mri_t = m_mri_head_t.inverted();
         FiffCoordTrans meg_mri_t = FiffCoordTrans::combine(FIFFV_COORD_DEVICE, FIFFV_COORD_MRI, m_meg_head_t, head_mri_t);
-        if (meg_mri_t.isEmpty()) {
+        if (meg_mri_t.is_empty()) {
             return;
         }
         m_megcoils = m_templates->create_meg_coils(m_listMegChs,
@@ -376,7 +381,7 @@ void ComputeFwd::initFwd()
             return;
         }
     }
-    qInfo("Source spaces are now in %s coordinates.", FiffCoordTrans::frame_name(m_pSettings->coord_frame).toUtf8().constData());
+    qInfo("Source spaces are now in %s coordinates.", std::string(FiffCoordTrans::frame_name(m_pSettings->coord_frame)).c_str());
 
     // Prepare the BEM model if necessary
 
@@ -638,7 +643,7 @@ bool ComputeFwd::updateHeadPos(const FiffCoordTrans& transDevHead, MNEForwardSol
     if (m_pSettings->coord_frame == FIFFV_COORD_MRI) {
         FiffCoordTrans head_mri_t = m_mri_head_t.inverted();
         FiffCoordTrans meg_mri_t = FiffCoordTrans::combine(FIFFV_COORD_DEVICE, FIFFV_COORD_MRI, transDevHead, head_mri_t);
-        if (meg_mri_t.isEmpty()) {
+        if (meg_mri_t.is_empty()) {
             return false;
         }
         m_megcoils = m_templates->create_meg_coils(m_listMegChs,

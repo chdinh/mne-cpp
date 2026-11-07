@@ -24,6 +24,7 @@
 
 #include <fiff/fiff_constants.h>
 #include <fiff/fiff_coord_trans.h>
+#include <utils/string_utils.h>
 #include <fiff/fiff_dig_point_set.h>
 
 #include <QtTest>
@@ -71,7 +72,7 @@ void prepareFit(CoRegistration& plugin, AnalyzeData& data, CoregSettingsView* vi
     plugin.handleEvent(QSharedPointer<Event>::create(SELECTED_MODEL_CHANGED, nullptr, QVariant::fromValue(bem.staticCast<AbstractModel>())));
     const QString avePath = sampleFile("MEG/sample/sample_audvis-ave.fif");
     FiffDigPointSet fids = FiffDigPointSet(avePath.toStdString()).pickTypes({FIFFV_POINT_CARDINAL});
-    fids.applyTransform(FiffCoordTrans::readTransform(sampleFile("MEG/sample/all-trans.fif"), FIFFV_COORD_HEAD, FIFFV_COORD_MRI));
+    fids.applyTransform(FiffCoordTrans::read(UTILSLIB::pathFromUtf8((sampleFile("MEG/sample/all-trans.fif")).toStdString()), FIFFV_COORD_HEAD, FIFFV_COORD_MRI).value());
     const QString fidPath = sDir + "/sample-fiducials.fif";
     QVERIFY(fids.write(fidPath.toStdString()));
     emit view->digFileChanged(avePath);
@@ -103,7 +104,7 @@ FiffCoordTrans runIcp(CoRegistration& plugin, CoregSettingsView* view, const QSt
         return FiffCoordTrans();
     const QString transPath = sDir + "/icp-trans.fif";
     emit view->storeTrans(transPath);
-    return FiffCoordTrans::readTransform(transPath, FIFFV_COORD_HEAD, FIFFV_COORD_MRI);
+    return FiffCoordTrans::read(UTILSLIB::pathFromUtf8((transPath).toStdString()), FIFFV_COORD_HEAD, FIFFV_COORD_MRI).value();
 }
 
 } // namespace
@@ -143,7 +144,7 @@ void TestAnalyzeCoregistration::fitsFiducialsByIdentity()
     // MRI fiducials as stored by mne (LPA, nasion, RPA) are the head fiducials moved by the reference transform.
     // Stored in another order than the digitizer's, they must still be matched by identity.
     const QString avePath = sampleFile("MEG/sample/sample_audvis-ave.fif");
-    const FiffCoordTrans reference = FiffCoordTrans::readTransform(sampleFile("MEG/sample/all-trans.fif"), FIFFV_COORD_HEAD, FIFFV_COORD_MRI);
+    const FiffCoordTrans reference = FiffCoordTrans::read(UTILSLIB::pathFromUtf8((sampleFile("MEG/sample/all-trans.fif")).toStdString()), FIFFV_COORD_HEAD, FIFFV_COORD_MRI).value();
     FiffDigPointSet fids = FiffDigPointSet(avePath.toStdString()).pickTypes({FIFFV_POINT_CARDINAL});
     QCOMPARE(fids.size(), 3);
     fids.applyTransform(reference);
@@ -164,7 +165,7 @@ void TestAnalyzeCoregistration::fitsFiducialsByIdentity()
     const QString transPath = dir.filePath("fit-trans.fif");
     emit view->storeTrans(transPath);
 
-    const FiffCoordTrans fitted = FiffCoordTrans::readTransform(transPath, FIFFV_COORD_HEAD, FIFFV_COORD_MRI);
+    const FiffCoordTrans fitted = FiffCoordTrans::read(UTILSLIB::pathFromUtf8((transPath).toStdString()), FIFFV_COORD_HEAD, FIFFV_COORD_MRI).value();
     QVERIFY2((fitted.trans - reference.trans).cwiseAbs().maxCoeff() < 1e-4f,
              qPrintable(QStringLiteral("max deviation %1").arg((fitted.trans - reference.trans).cwiseAbs().maxCoeff())));
 
@@ -178,13 +179,13 @@ void TestAnalyzeCoregistration::fitsFiducialsByIdentity()
     emit view->fidFileChanged(notTrans);
     emit view->fitFiducials();
     emit view->storeTrans(transPath);
-    QVERIFY(FiffCoordTrans::readTransform(transPath, FIFFV_COORD_HEAD, FIFFV_COORD_MRI).trans.isApprox(fitted.trans));
+    QVERIFY(FiffCoordTrans::read(UTILSLIB::pathFromUtf8((transPath).toStdString()), FIFFV_COORD_HEAD, FIFFV_COORD_MRI).value().trans.isApprox(fitted.trans));
 
     // Loading a file without a transform keeps the current one; the reference loads as stored
     emit view->loadTrans(notTrans);
     emit view->loadTrans(sampleFile("MEG/sample/all-trans.fif"));
     emit view->storeTrans(transPath);
-    const FiffCoordTrans loaded = FiffCoordTrans::readTransform(transPath, FIFFV_COORD_HEAD, FIFFV_COORD_MRI);
+    const FiffCoordTrans loaded = FiffCoordTrans::read(UTILSLIB::pathFromUtf8((transPath).toStdString()), FIFFV_COORD_HEAD, FIFFV_COORD_MRI).value();
     QVERIFY(loaded.trans.isApprox(reference.trans));
 }
 
@@ -205,15 +206,15 @@ void TestAnalyzeCoregistration::icpUsesTheSettingsAtClickTime()
     };
 
     const FiffCoordTrans clicked = fit({});
-    QVERIFY(!clicked.isEmpty());
+    QVERIFY(!clicked.is_empty());
     // ICP moves the fiducial fit onto the head shape
-    const FiffCoordTrans fiducialFit = FiffCoordTrans::readTransform(sampleFile("MEG/sample/all-trans.fif"), FIFFV_COORD_HEAD, FIFFV_COORD_MRI);
+    const FiffCoordTrans fiducialFit = FiffCoordTrans::read(UTILSLIB::pathFromUtf8((sampleFile("MEG/sample/all-trans.fif")).toStdString()), FIFFV_COORD_HEAD, FIFFV_COORD_MRI).value();
     QVERIFY((clicked.trans - fiducialFit.trans).cwiseAbs().maxCoeff() > 1e-4f);
     // Unticking the head shape points after Fit ICP was clicked must not change the running fit
     const FiffCoordTrans changed = fit([](CoregSettingsView* view) {
         view->findChild<QCheckBox*>(QStringLiteral("m_qCheckBox_HSP"))->setChecked(false);
     });
-    QVERIFY(!changed.isEmpty());
+    QVERIFY(!changed.is_empty());
     QVERIFY2((changed.trans - clicked.trans).cwiseAbs().maxCoeff() < 1e-6f,
              qPrintable(QStringLiteral("max deviation %1").arg((changed.trans - clicked.trans).cwiseAbs().maxCoeff())));
 }

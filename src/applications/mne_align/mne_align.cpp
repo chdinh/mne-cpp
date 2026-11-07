@@ -474,7 +474,7 @@ void MneAlign::onWizardSaveTrans(const QString& outPath)
             mat(r, c) = h2m(r, c);
 
     FiffCoordTrans trans(FIFFV_COORD_HEAD, FIFFV_COORD_MRI, mat);
-    FiffCoordTrans::addInverse(trans);
+    FiffCoordTrans::add_inverse(trans);
 
     if (!trans.write(UTILSLIB::pathFromUtf8(outPath.toStdString()))) {
         QMessageBox::warning(this, windowTitle(),
@@ -556,7 +556,7 @@ void MneAlign::onIcpFit()
 
     // Run ICP refinement
     FiffCoordTrans trans(FIFFV_COORD_HEAD, FIFFV_COORD_MRI, matInit);
-    FiffCoordTrans::addInverse(trans);
+    FiffCoordTrans::add_inverse(trans);
     float rmse = 0.0f;
     if (!performIcp(projSurface, cloud, trans, rmse, false, 20, 0.001f)) {
         QMessageBox::warning(this, windowTitle(), QStringLiteral("ICP convergence failed."));

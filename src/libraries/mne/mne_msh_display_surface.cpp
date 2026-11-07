@@ -147,8 +147,8 @@ int MNEMshDisplaySurface::align_fiducials(FiffDigitizerData& head_dig,
     }
 
     // Initial alignment
-    head_dig.head_mri_t_adj = std::make_unique<FiffCoordTrans>(FIFFLIB::FiffCoordTrans::fromCardinalPoints(FIFFV_COORD_HEAD, FIFFV_COORD_MRI,
-                                                                                                           mri_fid.row(0).data(), mri_fid.row(1).data(), mri_fid.row(2).data()));
+    head_dig.head_mri_t_adj = std::make_unique<FiffCoordTrans>(FIFFLIB::FiffCoordTrans::from_cardinal_points(FIFFV_COORD_HEAD, FIFFV_COORD_MRI,
+                                                                                                             mri_fid.row(0).data(), mri_fid.row(1).data(), mri_fid.row(2).data()));
 
     // Populate mri_fids from cardinal digitizer points transformed into MRI coords
     head_dig.pickCardinalFiducials();
@@ -271,7 +271,7 @@ void MNEMshDisplaySurface::calculate_digitizer_distances(FIFFLIB::FiffDigitizerD
     int k, nactive;
     FiffDigPoint point;
     Q_ASSERT(dig.head_mri_t);
-    const FiffCoordTrans& t = (dig.head_mri_t_adj && !dig.head_mri_t_adj->isEmpty()) ? *dig.head_mri_t_adj : *dig.head_mri_t;
+    const FiffCoordTrans& t = (dig.head_mri_t_adj && !dig.head_mri_t_adj->is_empty()) ? *dig.head_mri_t_adj : *dig.head_mri_t;
     int nstep = 4;
 
     if (dig.dist_valid)
@@ -424,12 +424,12 @@ int MNEMshDisplaySurface::iterate_alignment_once(FIFFLIB::FiffDigitizerData& dig
         qCritical() << "Not enough points to do the alignment";
         return FAIL;
     }
-    if ((t = FiffCoordTrans::procrustesAlign(FIFFV_COORD_HEAD, FIFFV_COORD_MRI,
-                                             rr_head.topRows(nactive),
-                                             rr_mri.topRows(nactive),
-                                             w.head(nactive),
-                                             max_diff))
-            .isEmpty())
+    if ((t = FiffCoordTrans::procrustes_align(FIFFV_COORD_HEAD, FIFFV_COORD_MRI,
+                                              rr_head.topRows(nactive),
+                                              rr_mri.topRows(nactive),
+                                              w.head(nactive),
+                                              max_diff))
+            .is_empty())
         return FAIL;
 
     if (dig.head_mri_t_adj)

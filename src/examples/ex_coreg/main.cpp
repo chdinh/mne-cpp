@@ -32,6 +32,7 @@
 #include "mne/mne_project_to_surface.h"
 
 #include <utils/generics/mne_logger.h>
+#include <utils/string_utils.h>
 #include "mne/mne_icp.h"
 
 //=============================================================================================================
@@ -121,7 +122,7 @@ int main(int argc, char* argv[])
     int iMaxIter = parser.value(iterOption).toInt();
 
     // read Trans
-    const FiffCoordTrans transHeadMriRef = FiffCoordTrans::readTransform(t_fileTrans.fileName(), FIFFV_COORD_HEAD, FIFFV_COORD_MRI);
+    const FiffCoordTrans transHeadMriRef = FiffCoordTrans::read(UTILSLIB::pathFromUtf8((t_fileTrans.fileName()).toStdString()), FIFFV_COORD_HEAD, FIFFV_COORD_MRI).value();
 
     // read Bem
     MNEBem bemHead(t_fileBem);

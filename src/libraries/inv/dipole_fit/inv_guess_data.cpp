@@ -111,7 +111,7 @@ InvGuessData::InvGuessData(const QString& guessname, const QString& guess_surfna
             return;
         guesses = std::move(guesses_vec[0]);
     }
-    qInfo("Guess locations are now in %s coordinates.\n", FiffCoordTrans::frame_name(f->coord_frame).toUtf8().constData());
+    qInfo("Guess locations are now in %s coordinates.\n", std::string(FiffCoordTrans::frame_name(f->coord_frame)).c_str());
 
     this->nguess = guesses->nuse;
     this->rr.resize(guesses->nuse, 3);

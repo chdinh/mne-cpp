@@ -45,10 +45,19 @@
 // QT INCLUDES
 //=============================================================================================================
 
-#include <filesystem>
-#include <QSharedPointer>
+#include <utils/error.h>
 
+#include <QMetaType>
+
+//=============================================================================================================
+// STL INCLUDES
+//=============================================================================================================
+
+#include <expected>
+#include <filesystem>
 #include <memory>
+#include <string>
+#include <string_view>
 
 //=============================================================================================================
 // EIGEN INCLUDES
@@ -82,24 +91,11 @@ class FiffTag;
 class FIFFSHARED_EXPORT FiffCoordTrans
 {
 public:
-    using SPtr = QSharedPointer<FiffCoordTrans>;             /**< Shared pointer type for FiffCoordTrans. */
-    using ConstSPtr = QSharedPointer<const FiffCoordTrans>;  /**< Const shared pointer type for FiffCoordTrans. */
-    using UPtr = std::unique_ptr<FiffCoordTrans>;            /**< Unique pointer type for FiffCoordTrans. */
-    using ConstUPtr = std::unique_ptr<const FiffCoordTrans>; /**< Const unique pointer type for FiffCoordTrans. */
-
     //=========================================================================================================
     /**
      * Constructs the coordinate transformation descriptor.
      */
     FiffCoordTrans();
-
-    //=========================================================================================================
-    /**
-     * Reads the first coordinate transformation of a FIFF file.
-     *
-     * @param[in] path   FIFF file holding the coordinate transform.
-     */
-    explicit FiffCoordTrans(const std::filesystem::path& path);
 
     //=========================================================================================================
     /**
@@ -171,7 +167,7 @@ public:
      *
      * @return true if coordinate transform is empty.
      */
-    inline bool isEmpty() const
+    inline bool is_empty() const
     {
         return this->from < 0;
     }
@@ -264,69 +260,38 @@ public:
 
     //=========================================================================================================
     /**
-     * Reads the first coordinate transform from a fif file (as mne.read_trans). Use readTransform()
-     * to select a transform by its coordinate frames.
+     * Reads the first coordinate transform of a FIFF file, as mne.read_trans.
      *
      * @param[in] path   FIFF file holding the coordinate transform.
-     * @param[out] p_Trans      A coordinate transform from a fif file.
      *
-     * @return true if succeeded, false otherwise.
+     * @return The transform, or why the file holds none.
      */
-    static bool read(const std::filesystem::path& path, FiffCoordTrans& p_Trans);
+    [[nodiscard]] static std::expected<FiffCoordTrans, UTILSLIB::Error> read(const std::filesystem::path& path);
 
     //=========================================================================================================
     /**
-     * Reads a specified coordinate transform from a FIFF file.
+     * Reads the transform between two coordinate frames from a FIFF file; one stored the other way round is
+     * returned inverted.
      *
-     * @param[in] name   FIFF file path.
-     * @param[in] from   Expected source coordinate system.
-     * @param[in] to     Expected destination coordinate system.
+     * @param[in] path   FIFF file holding the coordinate transform.
+     * @param[in] from   Source coordinate frame.
+     * @param[in] to     Destination coordinate frame.
      *
-     * @return The coordinate transform, or an empty transform if not found.
+     * @return The transform, or why the file holds none between these frames.
      */
-    static FiffCoordTrans readTransform(const QString& name, int from, int to);
+    [[nodiscard]] static std::expected<FiffCoordTrans, UTILSLIB::Error> read(const std::filesystem::path& path, int from, int to);
 
     //=========================================================================================================
     /**
-     * Reads the MRI → head coordinate transform from a FIFF file.
+     * Reads a transform from a text file of four rows, rotation and translation in mm, as MNE-C writes it.
      *
-     * @param[in] name   FIFF file path.
+     * @param[in] path   Text file; '#' starts a comment.
+     * @param[in] from   Source coordinate frame.
+     * @param[in] to     Destination coordinate frame.
      *
-     * @return The MRI→head transform, or an empty transform if not found.
+     * @return The transform with its translation in m, or why the file cannot be read.
      */
-    static FiffCoordTrans readMriTransform(const QString& name);
-
-    //=========================================================================================================
-    /**
-     * Reads the MEG device → head coordinate transform from a FIFF file.
-     *
-     * @param[in] name   FIFF file path.
-     *
-     * @return The device→head transform, or an empty transform if not found.
-     */
-    static FiffCoordTrans readMeasTransform(const QString& name);
-
-    //=========================================================================================================
-    /**
-     * Reads a coordinate transform from an ASCII 4×3 matrix file (mm-to-m conversion applied).
-     *
-     * @param[in] name   ASCII file path.
-     * @param[in] from   Source coordinate system.
-     * @param[in] to     Destination coordinate system.
-     *
-     * @return The coordinate transform, or an empty transform on failure.
-     */
-    static FiffCoordTrans readTransformAscii(const QString& name, int from, int to);
-
-    //=========================================================================================================
-    /**
-     * Reads the FreeSurfer head → MRI transform from an ASCII file.
-     *
-     * @param[in] name   ASCII file path.
-     *
-     * @return The head→MRI transform, or an empty transform on failure.
-     */
-    static FiffCoordTrans readFShead2mriTransform(const QString& name);
+    [[nodiscard]] static std::expected<FiffCoordTrans, UTILSLIB::Error> read_ascii(const std::filesystem::path& path, int from, int to);
 
     //=========================================================================================================
     /**
@@ -378,7 +343,7 @@ public:
      *
      * @return Human readable form of the coordinate frame.
      */
-    static QString frame_name(int frame);
+    static std::string_view frame_name(int frame);
 
     //=========================================================================================================
     /**
@@ -425,7 +390,7 @@ public:
      *
      * @return The coordinate transformation.
      */
-    static FiffCoordTrans fromCardinalPoints(int from, int to, const float* rL, const float* rN, const float* rR);
+    static FiffCoordTrans from_cardinal_points(int from, int to, const float* rL, const float* rN, const float* rR);
 
     //=========================================================================================================
     /**
@@ -433,7 +398,7 @@ public:
      *
      * @return True when successful.
      */
-    static bool addInverse(FiffCoordTrans& t);
+    static bool add_inverse(FiffCoordTrans& t);
 
     //=========================================================================================================
     /**
@@ -443,13 +408,13 @@ public:
 
     //=========================================================================================================
     /**
-     * @brief Writes the transformation to file.
+     * Writes the transform to a new FIFF file, as mne.write_trans.
      *
      * @param[in] path   FIFF file to create.
      *
-     * @return false if the device cannot be opened for writing.
+     * @return Nothing, or why the file cannot be written.
      */
-    bool write(const std::filesystem::path& path);
+    [[nodiscard]] std::expected<void, UTILSLIB::Error> write(const std::filesystem::path& path) const;
 
     //=========================================================================================================
     /**
@@ -457,7 +422,7 @@ public:
      *
      * @param[in] stream   Pointer to the FIFF stream to write to.
      */
-    void writeToStream(FiffStream& stream);
+    void write_to_stream(FiffStream& stream) const;
 
     //=========================================================================================================
     /**
@@ -465,7 +430,7 @@ public:
      *
      * @return the size of the old struct fiffCoordTransRec.
      */
-    inline static qint32 storageSize();
+    inline static qint32 storage_size();
 
     //========================================================================================================
     /**
@@ -486,7 +451,7 @@ public:
      *
      * @return The angle of rotation between two rotation matrices in degrees.
      */
-    float angleTo(Eigen::MatrixX4f mTransDest);
+    float angle_to(const Eigen::MatrixX4f& mTransDest) const;
 
     //========================================================================================================
     /**
@@ -496,7 +461,7 @@ public:
      *
      * @return The translation between two rotation matrices in m.
      */
-    float translationTo(Eigen::MatrixX4f mTransDest);
+    float translation_to(const Eigen::MatrixX4f& mTransDest) const;
 
     //========================================================================================================
     /**
@@ -506,7 +471,7 @@ public:
      *
      * @return The coordinate transform, or an empty transform if the tag is invalid.
      */
-    static FiffCoordTrans readFromTag(const std::unique_ptr<FiffTag>& tag);
+    static FiffCoordTrans from_tag(const std::unique_ptr<FiffTag>& tag);
 
     //========================================================================================================
     /**
@@ -517,11 +482,11 @@ public:
      * @param[in] from     Expected source coordinate system.
      * @param[in] to       Expected destination coordinate system.
      *
-     * @return The coordinate transform, or an empty transform if not found.
+     * @return The coordinate transform, inverted if stored the other way round, or NotFound.
      */
-    static FiffCoordTrans readTransformFromNode(FiffStream& stream,
-                                                const FiffDirNode::SPtr& node,
-                                                int from, int to);
+    [[nodiscard]] static std::expected<FiffCoordTrans, UTILSLIB::Error> read_from_node(FiffStream& stream,
+                                                                                       const FiffDirNode::SPtr& node,
+                                                                                       int from, int to);
 
     //========================================================================================================
     /**
@@ -536,11 +501,11 @@ public:
      *
      * @return The alignment transform, or an empty transform on failure.
      */
-    static FiffCoordTrans procrustesAlign(int from_frame, int to_frame,
-                                          const Eigen::MatrixXf& fromp,
-                                          const Eigen::MatrixXf& top,
-                                          const Eigen::VectorXf& w,
-                                          float max_diff);
+    static FiffCoordTrans procrustes_align(int from_frame, int to_frame,
+                                           const Eigen::MatrixXf& fromp,
+                                           const Eigen::MatrixXf& top,
+                                           const Eigen::VectorXf& w,
+                                           float max_diff);
 
 public:
     fiff_int_t from;                                       /**< Source coordinate system. */
@@ -553,7 +518,7 @@ public:
 // INLINE DEFINITIONS
 //=============================================================================================================
 
-inline qint32 FiffCoordTrans::storageSize()
+inline qint32 FiffCoordTrans::storage_size()
 {
     // On-disk layout: from, to, rot[3][3], move[3], invrot[3][3], invmove[3]
     // (C++ class uses Matrix4f but on-disk stores 3x3 rot + 3-vec separately)
@@ -574,11 +539,6 @@ inline bool operator==(const FiffCoordTrans& a, const FiffCoordTrans& b)
 #ifndef metatype_fiffcoordtrans
 #define metatype_fiffcoordtrans
 Q_DECLARE_METATYPE(FIFFLIB::FiffCoordTrans); /**< Provides QT META type declaration of the FIFFLIB::FiffCoordTrans type. For signal/slot usage.*/
-#endif
-
-#ifndef metatype_fiffcoordtrans_sptr
-#define metatype_fiffcoordtrans_sptr
-Q_DECLARE_METATYPE(FIFFLIB::FiffCoordTrans::SPtr); /**< Provides QT META type declaration of the FIFFLIB::FiffCoordTrans::SPtr type. For signal/slot usage.*/
 #endif
 
 #endif // FIFF_COORD_TRANS_H

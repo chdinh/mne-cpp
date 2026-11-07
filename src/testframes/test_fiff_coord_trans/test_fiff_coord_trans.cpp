@@ -61,6 +61,8 @@ private slots:
     void compareTrans();
     void transformsMatchMnePython();
     void transformToHeadMatchesMnePython();
+    void readersReportWhyTheyFail();
+    void readsAsciiTransforms();
 
 private:
     QString transPath() const;
@@ -84,9 +86,13 @@ void TestFiffCoordTrans::initTestCase()
 
     QVERIFY(m_tempDir.isValid());
     const std::string testPath = m_tempDir.filePath("test-trans.fif").toStdString();
-    m_transRef = FiffCoordTrans(transPath().toStdString());
+    const auto ref = FiffCoordTrans::read(transPath().toStdString());
+    QVERIFY(ref);
+    m_transRef = *ref;
     QVERIFY(m_transRef.write(testPath));
-    m_transTest = FiffCoordTrans(testPath);
+    const auto test = FiffCoordTrans::read(testPath);
+    QVERIFY(test);
+    m_transTest = *test;
 }
 
 //=============================================================================================================
@@ -127,8 +133,11 @@ void TestFiffCoordTrans::transformsMatchMnePython()
         QVERIFY(std::abs(inv.trans(k / 4, k % 4) - invTrans[k]) < 1e-6);
     }
 
-    const FiffCoordTrans mriHead = FiffCoordTrans::readTransform(transPath(), FIFFV_COORD_MRI, FIFFV_COORD_HEAD);
+    const FiffCoordTrans mriHead = FiffCoordTrans::read(transPath().toStdString(), FIFFV_COORD_MRI, FIFFV_COORD_HEAD).value();
     QCOMPARE(mriHead.from, FIFFV_COORD_MRI);
+    // A transform stored the other way round is returned inverted.
+    const FiffCoordTrans headDevice = FiffCoordTrans::read(transPath().toStdString(), FIFFV_COORD_HEAD, FIFFV_COORD_DEVICE).value();
+    QVERIFY(headDevice == m_transRef.inverted());
     Eigen::MatrixX3f pos(3, 3);
     pos << 0.01f, -0.02f, 0.05f, -0.07f, 0.03f, 0.04f, 0.0f, 0.09f, -0.01f;
     // head_to_mri = head -> MRI in mm
@@ -179,6 +188,63 @@ void TestFiffCoordTrans::transformToHeadMatchesMnePython()
     FiffDigPointSet noFiducials;
     noFiducials << point(FIFFV_POINT_EEG, 1, 0.02f, 0.05f, 0.09f);
     QVERIFY(!noFiducials.transformToHead());
+}
+
+//=============================================================================================================
+
+void TestFiffCoordTrans::readersReportWhyTheyFail()
+{
+    using UTILSLIB::ErrorCode;
+    const std::string missing = m_tempDir.filePath("missing-trans.fif").toStdString();
+    const auto noFile = FiffCoordTrans::read(missing);
+    QVERIFY(!noFile);
+    QCOMPARE(noFile.error().code, ErrorCode::Io);
+    QVERIFY(noFile.error().message.find("missing-trans.fif") != std::string::npos);
+
+    QFile text(m_tempDir.filePath("not-fiff.fif"));
+    QVERIFY(text.open(QIODevice::WriteOnly));
+    text.write("not a FIFF file");
+    text.close();
+    const auto notFiff = FiffCoordTrans::read(text.fileName().toStdString());
+    QVERIFY(!notFiff);
+    QCOMPARE(notFiff.error().code, ErrorCode::Format);
+
+    const auto noSuchFrames = FiffCoordTrans::read(transPath().toStdString(), FIFFV_COORD_MRI, FIFFV_COORD_DEVICE);
+    QVERIFY(!noSuchFrames);
+    QCOMPARE(noSuchFrames.error().code, ErrorCode::NotFound);
+
+    const auto unwritable = m_transRef.write(m_tempDir.filePath("no-dir/trans.fif").toStdString());
+    QVERIFY(!unwritable);
+    QCOMPARE(unwritable.error().code, ErrorCode::Io);
+}
+
+//=============================================================================================================
+
+void TestFiffCoordTrans::readsAsciiTransforms()
+{
+    using UTILSLIB::ErrorCode;
+    QFile file(m_tempDir.filePath("head-mri.txt"));
+    QVERIFY(file.open(QIODevice::WriteOnly));
+    file.write("# head -> MRI, translation in mm\n0 -1 0 10\n1 0 0 -20\n0 0 1 30\n0 0 0 1\n");
+    file.close();
+    const auto headMri = FiffCoordTrans::read_ascii(file.fileName().toStdString(), FIFFV_COORD_HEAD, FIFFV_COORD_MRI);
+    QVERIFY(headMri);
+    QCOMPARE(headMri->from, FIFFV_COORD_HEAD);
+    QCOMPARE(headMri->to, FIFFV_COORD_MRI);
+    QCOMPARE(headMri->rot()(0, 1), -1.0f);
+    QVERIFY((headMri->move() - Eigen::Vector3f(0.01f, -0.02f, 0.03f)).norm() < 1e-7f);
+
+    QFile shortFile(m_tempDir.filePath("short.txt"));
+    QVERIFY(shortFile.open(QIODevice::WriteOnly));
+    shortFile.write("1 0 0 0\n0 1 0 0\n");
+    shortFile.close();
+    const auto truncated = FiffCoordTrans::read_ascii(shortFile.fileName().toStdString(), FIFFV_COORD_HEAD, FIFFV_COORD_MRI);
+    QVERIFY(!truncated);
+    QCOMPARE(truncated.error().code, ErrorCode::Format);
+
+    const auto noFile = FiffCoordTrans::read_ascii(m_tempDir.filePath("none.txt").toStdString(), FIFFV_COORD_HEAD, FIFFV_COORD_MRI);
+    QVERIFY(!noFile);
+    QCOMPARE(noFile.error().code, ErrorCode::Io);
 }
 
 //=============================================================================================================

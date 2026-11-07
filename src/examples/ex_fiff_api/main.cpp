@@ -42,6 +42,7 @@
 #include <fiff/fiff_sparse_matrix.h>
 #include <fiff/fiff_stream.h>
 #include <fiff/fiff_tag.h>
+#include <utils/string_utils.h>
 
 //=============================================================================================================
 // QT INCLUDES
@@ -128,14 +129,14 @@ int main(int argc, char* argv[])
                  "FiffDigPointSet/FiffDigPoint: 146 points, LPA at x = -71.38 mm");
 
     //! [fiff_coord_trans_usage]
-    const FiffCoordTrans headToMri = FiffCoordTrans::readTransform(dir + "/all-trans.fif", FIFFV_COORD_HEAD, FIFFV_COORD_MRI);
-    const FiffCoordTrans devHead = info.dev_head_t; // device -> head, from the measurement info
+    const auto headToMri = FiffCoordTrans::read(UTILSLIB::pathFromUtf8((dir + "/all-trans.fif").toStdString()), FIFFV_COORD_HEAD, FIFFV_COORD_MRI); // a value or an Error
+    const FiffCoordTrans devHead = info.dev_head_t;                                                                                                 // device -> head, from the measurement info
     FiffCoordTrans back = devHead.inverted();
     float r[3] = {0.0f, 0.0f, 0.0f};
     FiffCoordTrans::apply_trans(r, devHead, true); // the device origin in head coordinates
     //! [fiff_coord_trans_usage]
     // mne.read_trans: 1 -> 4 ... ; info["dev_head_t"] translation (-0.006129, 0.000064, 0.064742) m
-    ok &= expect(devHead.from == FIFFV_COORD_DEVICE && devHead.to == FIFFV_COORD_HEAD && (Vector3f(r[0], r[1], r[2]) - Vector3f(-0.006129f, 0.000064f, 0.064742f)).norm() < 1e-6f && (back.trans * devHead.trans).isIdentity(1e-5f) && headToMri.from == FIFFV_COORD_HEAD && headToMri.to == FIFFV_COORD_MRI,
+    ok &= expect(devHead.from == FIFFV_COORD_DEVICE && devHead.to == FIFFV_COORD_HEAD && (Vector3f(r[0], r[1], r[2]) - Vector3f(-0.006129f, 0.000064f, 0.064742f)).norm() < 1e-6f && (back.trans * devHead.trans).isIdentity(1e-5f) && headToMri && headToMri->from == FIFFV_COORD_HEAD && headToMri->to == FIFFV_COORD_MRI,
                  "FiffCoordTrans: device origin maps to (-6.13, 0.06, 64.74) mm in head coordinates");
 
     //! [fiff_coord_trans_set_usage]
@@ -238,7 +239,7 @@ int main(int argc, char* argv[])
     digData.points = info.dig;
     digData.npoint = info.dig.size();
     digData.coord_frame = FIFFV_COORD_HEAD;
-    digData.head_mri_t_adj = std::make_unique<FiffCoordTrans>(headToMri);
+    digData.head_mri_t_adj = std::make_unique<FiffCoordTrans>(*headToMri);
     digData.pickCardinalFiducials(); // LPA, nasion and RPA moved into MRI coordinates
     //! [fiff_digitizer_data_usage]
     // mne: apply_trans(invert_transform(mri_head_t), dig[0]["r"]) = (-0.06925742, 0.01058946, -0.02500086)

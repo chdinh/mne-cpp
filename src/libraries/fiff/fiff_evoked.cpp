@@ -21,6 +21,8 @@
 //=============================================================================================================
 
 #include "fiff_evoked.h"
+
+#include <utils/generics/log.h>
 #include <utils/string_utils.h>
 #include "fiff_stream.h"
 #include "fiff_tag.h"
@@ -152,8 +154,10 @@ bool FiffEvoked::read(const std::filesystem::path& path,
     p_FiffEvoked.clear();
 
     auto t_pStream = FiffStream::open(path);
-    if (!t_pStream)
+    if (!t_pStream) {
+        UTILSLIB::Log::critical("{}", t_pStream.error().message);
         return false;
+    }
     QString t_sFileName = t_pStream->streamName();
 
     qInfo("Reading %s ...\n", t_sFileName.toUtf8().constData());

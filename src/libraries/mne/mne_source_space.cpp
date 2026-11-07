@@ -1416,7 +1416,7 @@ std::unique_ptr<MNESourceSpace> MNESourceSpace::make_volume_source_space(const M
         int depth = (maxn[2] - minn[2] + 1);
 
         sp->voxel_surf_RAS_t = make_voxel_ras_trans(r0, x_ras, y_ras, z_ras, voxel_size);
-        if (!sp->voxel_surf_RAS_t || sp->voxel_surf_RAS_t->isEmpty())
+        if (!sp->voxel_surf_RAS_t || sp->voxel_surf_RAS_t->is_empty())
             return nullptr;
 
         sp->vol_dims[0] = width;
@@ -1443,7 +1443,7 @@ int MNESourceSpace::filter_source_spaces(const MNESurface& surf, float limit, co
     double tot_angle;
     int nspace = static_cast<int>(spaces.size());
 
-    if (spaces[0]->coord_frame == FIFFV_COORD_HEAD && mri_head_t.isEmpty()) {
+    if (spaces[0]->coord_frame == FIFFV_COORD_HEAD && mri_head_t.is_empty()) {
         qCritical("Source spaces are in head coordinates and no coordinate transform was provided!");
         return FAIL;
     }
@@ -1897,7 +1897,7 @@ int MNESourceSpace::read_source_spaces(const QString& name, std::vector<std::uni
             /*
                 * There might be a coordinate transformation and dimensions
                 */
-            new_space->voxel_surf_RAS_t = FiffCoordTrans(FiffCoordTrans::readTransformFromNode(stream, node, FIFFV_MNE_COORD_MRI_VOXEL, FIFFV_MNE_COORD_SURFACE_RAS));
+            new_space->voxel_surf_RAS_t = FiffCoordTrans::read_from_node(stream, node, FIFFV_MNE_COORD_MRI_VOXEL, FIFFV_MNE_COORD_SURFACE_RAS).value_or(FiffCoordTrans());
             if (node->find_tag(stream, FIFF_MNE_SOURCE_SPACE_VOXEL_DIMS, t_pTag)) {
                 Eigen::Map<const Eigen::Vector3i> volDimsMap(t_pTag->toInt());
                 Eigen::Map<Eigen::Vector3i>(new_space->vol_dims) = volDimsMap;
@@ -1906,7 +1906,7 @@ int MNESourceSpace::read_source_spaces(const QString& name, std::vector<std::uni
                 QList<FiffDirNode::SPtr> mris = node->dir_tree_find(FIFFB_MNE_PARENT_MRI_FILE);
 
                 if (mris.size() == 0) { /* The old way */
-                    new_space->MRI_surf_RAS_RAS_t = FiffCoordTrans(FiffCoordTrans::readTransformFromNode(stream, node, FIFFV_MNE_COORD_SURFACE_RAS, FIFFV_MNE_COORD_RAS));
+                    new_space->MRI_surf_RAS_RAS_t = FiffCoordTrans::read_from_node(stream, node, FIFFV_MNE_COORD_SURFACE_RAS, FIFFV_MNE_COORD_RAS).value_or(FiffCoordTrans());
                     if (node->find_tag(stream, FIFF_MNE_SOURCE_SPACE_MRI_FILE, t_pTag)) {
                         new_space->MRI_volume = QString::fromStdString(t_pTag->toString());
                     }
@@ -1917,8 +1917,8 @@ int MNESourceSpace::read_source_spaces(const QString& name, std::vector<std::uni
                     if (mris[0]->find_tag(stream, FIFF_MNE_FILE_NAME, t_pTag)) {
                         new_space->MRI_volume = QString::fromStdString(t_pTag->toString());
                     }
-                    new_space->MRI_surf_RAS_RAS_t = FiffCoordTrans(FiffCoordTrans::readTransformFromNode(stream, mris[0], FIFFV_MNE_COORD_SURFACE_RAS, FIFFV_MNE_COORD_RAS));
-                    new_space->MRI_voxel_surf_RAS_t = FiffCoordTrans(FiffCoordTrans::readTransformFromNode(stream, mris[0], FIFFV_MNE_COORD_MRI_VOXEL, FIFFV_MNE_COORD_SURFACE_RAS));
+                    new_space->MRI_surf_RAS_RAS_t = FiffCoordTrans::read_from_node(stream, mris[0], FIFFV_MNE_COORD_SURFACE_RAS, FIFFV_MNE_COORD_RAS).value_or(FiffCoordTrans());
+                    new_space->MRI_voxel_surf_RAS_t = FiffCoordTrans::read_from_node(stream, mris[0], FIFFV_MNE_COORD_MRI_VOXEL, FIFFV_MNE_COORD_SURFACE_RAS).value_or(FiffCoordTrans());
 
                     if (mris[0]->find_tag(stream, FIFF_MNE_SOURCE_SPACE_INTERPOLATOR, t_pTag)) {
                         new_space->interpolator = std::move(*FiffSparseMatrix::fiff_get_float_sparse_matrix(t_pTag));
@@ -1959,7 +1959,7 @@ int MNESourceSpace::transform_source_spaces_to(int coord_frame, const FiffCoordT
     for (k = 0; k < nspace; k++) {
         s = spaces[k].get();
         if (s->coord_frame != coord_frame) {
-            if (!t.isEmpty()) {
+            if (!t.is_empty()) {
                 if (s->coord_frame == t.from && t.to == coord_frame) {
                     if (s->transform_source_space(t) != OK)
                         return FAIL;
@@ -2157,15 +2157,15 @@ int MNESourceSpace::writeVolumeInfo(FiffStream& stream, bool selected_only) cons
     stream.write_int(FIFF_MNE_SOURCE_SPACE_NEIGHBORS, neighbors.data(), ntot);
 
     if (!selected_only) {
-        if (voxel_surf_RAS_t && !voxel_surf_RAS_t->isEmpty()) {
+        if (voxel_surf_RAS_t && !voxel_surf_RAS_t->is_empty()) {
             stream.write_coord_trans(*voxel_surf_RAS_t);
             stream.write_int(FIFF_MNE_SOURCE_SPACE_VOXEL_DIMS, vol_dims, 3);
         }
         if (interpolator && !MRI_volume.isEmpty()) {
             stream.start_block(FIFFB_MNE_PARENT_MRI_FILE);
-            if (MRI_surf_RAS_RAS_t && !MRI_surf_RAS_RAS_t->isEmpty())
+            if (MRI_surf_RAS_RAS_t && !MRI_surf_RAS_RAS_t->is_empty())
                 stream.write_coord_trans(*MRI_surf_RAS_RAS_t);
-            if (MRI_voxel_surf_RAS_t && !MRI_voxel_surf_RAS_t->isEmpty())
+            if (MRI_voxel_surf_RAS_t && !MRI_voxel_surf_RAS_t->is_empty())
                 stream.write_coord_trans(*MRI_voxel_surf_RAS_t);
             stream.write_string(FIFF_MNE_FILE_NAME, MRI_volume.toStdString());
             if (interpolator)

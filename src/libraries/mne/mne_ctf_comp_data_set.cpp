@@ -19,6 +19,8 @@
 //=============================================================================================================
 
 #include "mne_ctf_comp_data_set.h"
+
+#include <utils/string_utils.h>
 #include "mne_ctf_comp_data.h"
 
 #include "mne_types.h"
@@ -133,7 +135,7 @@ int mne_read_meg_comp_eeg_ch_info_32(const QString& name,
                     return FIFF_FAIL;
                 }
                 //            t = t_pTag->toCoordTrans();
-                t = FiffCoordTrans::readFromTag(t_pTag);
+                t = FiffCoordTrans::from_tag(t_pTag);
                 if (t.from != FIFFV_COORD_DEVICE || t.to != FIFFV_COORD_HEAD)
                     t = FiffCoordTrans();
                 break;
@@ -160,12 +162,12 @@ int mne_read_meg_comp_eeg_ch_info_32(const QString& name,
         stream.close();
         return FIFF_FAIL;
     }
-    if (t.isEmpty() && meg_head_t != nullptr) {
+    if (t.is_empty() && meg_head_t != nullptr) {
         /*
      * Try again in a more general fashion
      */
-        t = FiffCoordTrans::readMeasTransform(name);
-        if (t.isEmpty()) {
+        t = FiffCoordTrans::read(UTILSLIB::pathFromUtf8(name.toStdString()), FIFFV_COORD_DEVICE, FIFFV_COORD_HEAD).value_or(FiffCoordTrans());
+        if (t.is_empty()) {
             qCritical("MEG -> head coordinate transformation not found.");
             stream.close();
             return FIFF_FAIL;

@@ -170,7 +170,7 @@ FwdCoil::UPtr FwdCoilSet::create_meg_coil(const FiffChInfo& ch, int acc, const F
     /*
      * Apply a coordinate transformation if so desired
      */
-    if (!t.isEmpty()) {
+    if (!t.is_empty()) {
         FiffCoordTrans::apply_trans(res->r0.data(), t, FIFFV_MOVE);
         FiffCoordTrans::apply_trans(res->ex.data(), t, FIFFV_NO_MOVE);
         FiffCoordTrans::apply_trans(res->ey.data(), t, FIFFV_NO_MOVE);
@@ -202,7 +202,7 @@ FwdCoilSet::UPtr FwdCoilSet::create_meg_coils(const QList<FIFFLIB::FiffChInfo>& 
             return nullptr;
         res->coils.push_back(std::move(next));
     }
-    if (!t.isEmpty())
+    if (!t.is_empty())
         res->coord_frame = t.to;
     return res;
 }
@@ -221,7 +221,7 @@ FwdCoilSet::UPtr FwdCoilSet::create_eeg_els(const QList<FIFFLIB::FiffChInfo>& ch
             return nullptr;
         res->coils.push_back(std::move(next));
     }
-    if (!t.isEmpty())
+    if (!t.is_empty())
         res->coord_frame = t.to;
     return res;
 }
@@ -315,14 +315,14 @@ FwdCoilSet::UPtr FwdCoilSet::dup_coil_set(const FiffCoordTrans& t) const
 {
     FwdCoilSet::UPtr res;
 
-    if (!t.isEmpty()) {
+    if (!t.is_empty()) {
         if (this->coord_frame != t.from) {
             qWarning("Coordinate frame of the transformation does not match the coil set in fwd_dup_coil_set");
             return nullptr;
         }
     }
     res = std::make_unique<FwdCoilSet>();
-    if (!t.isEmpty())
+    if (!t.is_empty())
         res->coord_frame = t.to;
     else
         res->coord_frame = this->coord_frame;
@@ -334,7 +334,7 @@ FwdCoilSet::UPtr FwdCoilSet::dup_coil_set(const FiffCoordTrans& t) const
         /*
      * Optional coordinate transformation
      */
-        if (!t.isEmpty()) {
+        if (!t.is_empty()) {
             FiffCoordTrans::apply_trans(coil->r0.data(), t, FIFFV_MOVE);
             FiffCoordTrans::apply_trans(coil->ex.data(), t, FIFFV_NO_MOVE);
             FiffCoordTrans::apply_trans(coil->ey.data(), t, FIFFV_NO_MOVE);

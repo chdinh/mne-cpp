@@ -2833,7 +2833,7 @@ QMatrix4x4 BrainView::itemTransform(const QStandardItem* item) const
     // Sensors, digitizer points and dipoles are in head coordinates
     const int type = absItem->type();
     const bool inHead = type == AbstractTreeItem::itemTypeId(AbstractTreeItem::SensorItem) || type == AbstractTreeItem::itemTypeId(AbstractTreeItem::DigitizerItem) || type == AbstractTreeItem::itemTypeId(AbstractTreeItem::DipoleItem);
-    if (inHead && m_applySensorTrans && !m_headToMriTrans.isEmpty())
+    if (inHead && m_applySensorTrans && !m_headToMriTrans.is_empty())
         trans = SURFACEKEYS::toQMatrix4x4(m_headToMriTrans.trans) * trans;
     return trans;
 }
@@ -2843,7 +2843,7 @@ QMatrix4x4 BrainView::itemTransform(const QStandardItem* item) const
 void BrainView::refreshSensorTransforms()
 {
     QMatrix4x4 qmat;
-    if (m_applySensorTrans && !m_headToMriTrans.isEmpty()) {
+    if (m_applySensorTrans && !m_headToMriTrans.is_empty()) {
         qmat = SURFACEKEYS::toQMatrix4x4(m_headToMriTrans.trans);
     }
 

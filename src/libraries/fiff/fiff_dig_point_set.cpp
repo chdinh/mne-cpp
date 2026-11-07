@@ -93,7 +93,7 @@ FiffDigPointSet::FiffDigPointSet(const std::filesystem::path& path)
 {
     auto t_pStream = FiffStream::open(path);
     if (!t_pStream || !FiffDigPointSet::readFromStream(*t_pStream, *this)) {
-        throw std::runtime_error("Could not read the FiffDigPointSet");
+        throw std::runtime_error(t_pStream ? "Could not read the FiffDigPointSet" : t_pStream.error().message);
     }
 
     qInfo("[FiffDigPointSet::FiffDigPointSet] %i digitizer Points read from file.", this->size());
@@ -728,7 +728,7 @@ bool FiffDigPointSet::transformToHead()
         return true;
     }
     // head -> native, built from the fiducials given in the native frame
-    const FiffCoordTrans headNative = FiffCoordTrans::fromCardinalPoints(FIFFV_COORD_HEAD, frame, fid[0]->r, fid[1]->r, fid[2]->r);
+    const FiffCoordTrans headNative = FiffCoordTrans::from_cardinal_points(FIFFV_COORD_HEAD, frame, fid[0]->r, fid[1]->r, fid[2]->r);
     for (FiffDigPoint& p : m_qListDigPoint) {
         if (p.coord_frame == frame) {
             FiffCoordTrans::apply_inverse_trans(p.r, headNative, true);

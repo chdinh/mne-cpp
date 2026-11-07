@@ -459,7 +459,7 @@ void Align3DView::recomputeAlignment()
     //
     // Once we have all 3 captured fiducials in device/tracker space, we
     // can define the Neuromag HEAD coordinate system using
-    // FiffCoordTrans::fromCardinalPoints.  With fewer points we fall
+    // FiffCoordTrans::from_cardinal_points.  With fewer points we fall
     // back to a progressive translation/rotation.
 
     const bool hasCapNas = m_pPoints->hasFiducial(FiducialId::NAS);
@@ -474,7 +474,7 @@ void Align3DView::recomputeAlignment()
         const float rL[3] = {cL.x(), cL.y(), cL.z()};
         const float rN[3] = {cN.x(), cN.y(), cN.z()};
         const float rR[3] = {cR.x(), cR.y(), cR.z()};
-        auto fct = FIFFLIB::FiffCoordTrans::fromCardinalPoints(
+        auto fct = FIFFLIB::FiffCoordTrans::from_cardinal_points(
             FIFFV_COORD_DEVICE, FIFFV_COORD_HEAD, rL, rN, rR);
         // Copy the 4×4 inverse (device→head = invtrans of the "from device, to head" result)
         // fromCardinalPoints stores the axes in `trans` columns with origin in move(),

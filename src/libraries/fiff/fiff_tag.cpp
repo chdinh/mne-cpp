@@ -661,10 +661,10 @@ void FiffTag::convert_tag_data(const FiffTag::UPtr& tag, int from_endian, int to
             //        }
             //    }
 
-            np = tag->size() / FiffCoordTrans::storageSize();
+            np = tag->size() / FiffCoordTrans::storage_size();
 
             for (k = 0; k < np; ++k) {
-                offset = tag->data() + k * FiffCoordTrans::storageSize();
+                offset = tag->data() + k * FiffCoordTrans::storage_size();
                 ithis = reinterpret_cast<fiff_int_t*>(offset);
                 fthis = reinterpret_cast<float*>(offset);
 

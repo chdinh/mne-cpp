@@ -23,6 +23,8 @@
 //=============================================================================================================
 
 #include "fiff_cov.h"
+
+#include <utils/generics/log.h>
 #include <utils/string_utils.h>
 #include "fiff_stream.h"
 #include "fiff_raw_data.h"
@@ -91,6 +93,7 @@ bool FiffCov::read(const std::filesystem::path& path, FiffCov& p_cov)
 {
     auto t_pStream = FiffStream::open(path);
     if (!t_pStream) {
+        UTILSLIB::Log::critical("{}", t_pStream.error().message);
         return false;
     }
 

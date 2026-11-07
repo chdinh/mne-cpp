@@ -254,7 +254,7 @@ int MNERawInfo::get_meas_info(FiffStream& stream,
             case FIFF_COORD_TRANS:
                 if (!stream.read_tag(t_pTag, pos))
                     return (-1);
-                t = FiffCoordTrans::readFromTag(t_pTag);
+                t = FiffCoordTrans::from_tag(t_pTag);
                 /*
                 * Require this particular transform!
                 */
@@ -270,12 +270,12 @@ int MNERawInfo::get_meas_info(FiffStream& stream,
         */
     hpi = meas_info->dir_tree_find(FIFFB_HPI_RESULT);
 
-    if (hpi.size() > 0 && trans.isEmpty())
+    if (hpi.size() > 0 && trans.is_empty())
         for (k = 0; k < hpi[0]->nent(); k++)
             if (hpi[0]->dir[k]->kind == FIFF_COORD_TRANS) {
                 if (!stream.read_tag(t_pTag, hpi[0]->dir[k]->pos))
                     return (-1);
-                t = FiffCoordTrans::readFromTag(t_pTag);
+                t = FiffCoordTrans::from_tag(t_pTag);
                 if (t.from == FIFFV_COORD_DEVICE && t.to == FIFFV_COORD_HEAD) {
                     trans = t;
                     break;

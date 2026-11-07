@@ -27,6 +27,7 @@
 #include "mne/mne_project_to_surface.h"
 
 #include <utils/generics/mne_logger.h>
+#include <utils/string_utils.h>
 #include "mne/mne_icp.h"
 
 //=============================================================================================================
@@ -103,7 +104,7 @@ void TestCoregistration::initTestCase()
     float fMaxDist = 0.02f;
 
     // read reference Transformation
-    transFitMatchedRef = FiffCoordTrans::readTransform(t_fileTransRefFit.fileName(), FIFFV_COORD_HEAD, FIFFV_COORD_MRI);
+    transFitMatchedRef = FiffCoordTrans::read(UTILSLIB::pathFromUtf8((t_fileTransRefFit.fileName()).toStdString()), FIFFV_COORD_HEAD, FIFFV_COORD_MRI).value();
 
 
     // read Bem
@@ -189,7 +190,7 @@ void TestCoregistration::initTestCase()
     if (!MNELIB::performIcp(mneSurfacePoints, matHspClean, transPerformICP, fRMSE, bScale, iMaxIter, fTol, vecWeightsICPClean)) {
         qWarning() << "ICP was not succesfull.";
     }
-    transPerformICPRef = FiffCoordTrans::readTransform(t_fileTransRefIcp.fileName(), FIFFV_COORD_HEAD, FIFFV_COORD_MRI);
+    transPerformICPRef = FiffCoordTrans::read(UTILSLIB::pathFromUtf8((t_fileTransRefIcp.fileName()).toStdString()), FIFFV_COORD_HEAD, FIFFV_COORD_MRI).value();
 }
 
 //=============================================================================================================

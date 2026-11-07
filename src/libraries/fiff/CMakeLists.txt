@@ -138,6 +138,9 @@ target_link_libraries(${PROJECT_NAME} PRIVATE
     Eigen3::Eigen
     ${FFTW_LIBS})
 
+# The public headers return std::expected.
+target_compile_features(${PROJECT_NAME} PUBLIC cxx_std_23)
+
 target_compile_definitions(${PROJECT_NAME} PRIVATE MNE_FIFF_LIBRARY MNE_GIT_HASH_SHORT="${MNE_GIT_HASH_SHORT}" MNE_GIT_HASH_LONG="${MNE_GIT_HASH_LONG}")
 
 if(NOT BUILD_SHARED_LIBS)

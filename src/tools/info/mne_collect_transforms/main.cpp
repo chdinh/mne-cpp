@@ -18,6 +18,7 @@
 #include <fiff/fiff_coord_trans.h>
 #include <fiff/fiff_coord_trans_set.h>
 #include <fiff/fiff_stream.h>
+#include <utils/string_utils.h>
 #include <mri/mri_mgh_io.h>
 #include <mri/mri_vol_data.h>
 
@@ -59,8 +60,8 @@ using namespace UTILSLIB;
 static void printTransform(const FiffCoordTrans& t)
 {
     qInfo("%s -> %s transform:",
-          qPrintable(FiffCoordTrans::frame_name(t.from)),
-          qPrintable(FiffCoordTrans::frame_name(t.to)));
+          std::string(FiffCoordTrans::frame_name(t.from)).c_str(),
+          std::string(FiffCoordTrans::frame_name(t.to)).c_str());
     for (int i = 0; i < 3; i++) {
         qInfo("  %10.6f %10.6f %10.6f  %10.4f mm",
               t.trans(i, 0), t.trans(i, 1), t.trans(i, 2),
@@ -104,11 +105,12 @@ int main(int argc, char* argv[])
 
     FiffCoordTrans devHeadT;
     if (!measName.isEmpty()) {
-        devHeadT = FiffCoordTrans::readMeasTransform(measName);
-        if (devHeadT.isEmpty()) {
-            qCritical("No device->head transform in %s", qPrintable(measName));
+        const auto read = FiffCoordTrans::read(UTILSLIB::pathFromUtf8(measName.toStdString()), FIFFV_COORD_DEVICE, FIFFV_COORD_HEAD);
+        if (!read) {
+            qCritical("%s", read.error().message.c_str());
             return 1;
         }
+        devHeadT = *read;
     }
 
     FiffCoordTransSet chain;
@@ -132,7 +134,7 @@ int main(int argc, char* argv[])
     }
     if (!mriName.isEmpty()) {
         FiffCoordTransSet fromFile;
-        if (fromFile.read(mriName) < 0 || fromFile.head_surf_RAS_t.isEmpty()) {
+        if (fromFile.read(mriName) < 0 || fromFile.head_surf_RAS_t.is_empty()) {
             qCritical("No MRI->head transform in %s", qPrintable(mriName));
             return 1;
         }
@@ -142,11 +144,11 @@ int main(int argc, char* argv[])
         }
     }
 
-    if (!devHeadT.isEmpty()) {
+    if (!devHeadT.is_empty()) {
         printTransform(devHeadT);
     }
     for (const FiffCoordTrans* t : {&chain.head_surf_RAS_t, &chain.surf_RAS_RAS_t, &chain.RAS_MNI_tal_t, &chain.MNI_tal_tal_gtz_t, &chain.MNI_tal_tal_ltz_t}) {
-        if (!t->isEmpty()) {
+        if (!t->is_empty()) {
             printTransform(*t);
         }
     }
@@ -158,7 +160,7 @@ int main(int argc, char* argv[])
             qCritical("Cannot open output file: %s", qPrintable(outName));
             return 1;
         }
-        if (!devHeadT.isEmpty()) {
+        if (!devHeadT.is_empty()) {
             outStream->write_coord_trans(devHeadT);
         }
         chain.write(*outStream);

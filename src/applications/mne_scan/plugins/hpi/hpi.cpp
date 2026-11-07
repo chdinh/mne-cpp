@@ -660,8 +660,8 @@ void Hpi::run()
                         emit devHeadTransAvailable(fitResult.devHeadTrans);
 
                         // check for large head movement
-                        dMovement = transDevHeadRef.translationTo(fitResult.devHeadTrans.trans);
-                        dRotation = transDevHeadRef.angleTo(fitResult.devHeadTrans.trans);
+                        dMovement = transDevHeadRef.translation_to(fitResult.devHeadTrans.trans);
+                        dRotation = transDevHeadRef.angle_to(fitResult.devHeadTrans.trans);
 
                         emit movementResultsChanged(dMovement, dRotation);
 

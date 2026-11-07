@@ -19,6 +19,8 @@
 //=============================================================================================================
 
 #include "fiff_events.h"
+
+#include <utils/generics/log.h>
 #include "fiff_evoked_set.h"
 #include "fiff_raw_data.h"
 #include "fiff_stream.h"
@@ -141,6 +143,7 @@ bool FiffEvents::read_from_fif(const std::filesystem::path& path,
 {
     auto t_pStream = FiffStream::open(path);
     if (!t_pStream) {
+        UTILSLIB::Log::critical("{}", t_pStream.error().message);
         return false;
     }
 

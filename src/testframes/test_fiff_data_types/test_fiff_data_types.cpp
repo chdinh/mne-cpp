@@ -14,6 +14,7 @@
 #include <fiff/fiff_evoked_set.h>
 #include <fiff/fiff_evoked.h>
 #include <fiff/fiff_coord_trans.h>
+#include <utils/string_utils.h>
 #include <fiff/fiff_constants.h>
 #include <fiff/fiff_proj.h>
 #include <fiff/fiff_digitizer_data.h>
@@ -378,9 +379,7 @@ private slots:
         ts.flush();
         tmp.close();
 
-        FiffCoordTrans t = FiffCoordTrans::readTransformAscii(tmp.fileName(),
-                                                              FIFFV_COORD_HEAD,
-                                                              FIFFV_COORD_MRI);
+        FiffCoordTrans t = FiffCoordTrans::read_ascii(UTILSLIB::pathFromUtf8((tmp.fileName()).toStdString()), FIFFV_COORD_HEAD, FIFFV_COORD_MRI).value();
         QCOMPARE(t.from, (int)FIFFV_COORD_HEAD);
         QCOMPARE(t.to, (int)FIFFV_COORD_MRI);
         // Translation values are divided by 1000 (mm -> m)
@@ -403,9 +402,7 @@ private slots:
         ts.flush();
         tmp.close();
 
-        FiffCoordTrans t = FiffCoordTrans::readTransformAscii(tmp.fileName(),
-                                                              FIFFV_COORD_MRI,
-                                                              FIFFV_COORD_HEAD);
+        FiffCoordTrans t = FiffCoordTrans::read_ascii(UTILSLIB::pathFromUtf8((tmp.fileName()).toStdString()), FIFFV_COORD_MRI, FIFFV_COORD_HEAD).value();
         QCOMPARE(t.from, (int)FIFFV_COORD_MRI);
         QVERIFY(qAbs(t.trans(0, 3) - 0.005f) < 1e-5f);
     }
@@ -419,10 +416,10 @@ private slots:
         Eigen::VectorXf w(4);
         w << 1.0f, 1.0f, 1.0f, 1.0f;
 
-        FiffCoordTrans t = FiffCoordTrans::procrustesAlign(
+        FiffCoordTrans t = FiffCoordTrans::procrustes_align(
             FIFFV_COORD_HEAD, FIFFV_COORD_DEVICE,
             fromPts, toPts, w, 0.01f);
-        QVERIFY(!t.isEmpty());
+        QVERIFY(!t.is_empty());
         QCOMPARE(t.from, (int)FIFFV_COORD_HEAD);
         QCOMPARE(t.to, (int)FIFFV_COORD_DEVICE);
         // The translation should be approximately (0.1, 0, 0)
@@ -436,10 +433,10 @@ private slots:
         fromPts << 0, 0, 0, 1, 0, 0, 0, 1, 0;
         toPts << 0, 0, 0, 1, 0, 0, 0, 1, 0;
 
-        FiffCoordTrans t = FiffCoordTrans::procrustesAlign(
+        FiffCoordTrans t = FiffCoordTrans::procrustes_align(
             FIFFV_COORD_HEAD, FIFFV_COORD_MRI,
             fromPts, toPts, Eigen::VectorXf(), 0.01f);
-        QVERIFY(!t.isEmpty());
+        QVERIFY(!t.is_empty());
         // Identity-like — rotation should be close to identity
         QVERIFY(qAbs(t.trans(0, 0) - 1.0f) < 0.01f);
     }
@@ -454,7 +451,7 @@ private slots:
         t.invtrans = Matrix4f::Identity();
 
         MatrixX4f dest = Matrix4f::Identity();
-        float angle = t.angleTo(dest);
+        float angle = t.angle_to(dest);
         QVERIFY(qAbs(angle) < 1e-3f); // Same rotation, angle should be 0
     }
 
@@ -469,7 +466,7 @@ private slots:
 
         MatrixX4f dest = Matrix4f::Identity();
         dest(0, 3) = 0.1f;
-        float dist = t.translationTo(dest);
+        float dist = t.translation_to(dest);
         QVERIFY(qAbs(dist - 0.1f) < 1e-3f);
     }
 

@@ -86,7 +86,7 @@ void RealTimeHpiResult::setValue(const HpiFitResult& v)
     // drawn later. The device-to-head transform maps device to head, so the
     // head origin expressed in device coordinates is the translation of the
     // inverse transform.
-    if (m_iMaxHeadPositions > 0 && !v.devHeadTrans.isEmpty()) {
+    if (m_iMaxHeadPositions > 0 && !v.devHeadTrans.is_empty()) {
         m_vecHeadPositions.append(v.devHeadTrans.invtrans.block<3, 1>(0, 3));
 
         while (m_vecHeadPositions.size() > m_iMaxHeadPositions) {

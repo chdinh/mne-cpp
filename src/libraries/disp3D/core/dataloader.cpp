@@ -30,6 +30,7 @@
 #include <fiff/fiff_stream.h>
 #include <fiff/fiff_dig_point_set.h>
 #include <mne/mne_bem.h>
+#include <utils/generics/log.h>
 #include <utils/string_utils.h>
 #include <fs/fs_surface.h>
 
@@ -71,7 +72,7 @@ DataLoader::SensorLoadResult DataLoader::loadSensors(const QString& fifPath,
         // Prepare Device->Head transformation
         QMatrix4x4 devHeadQTrans;
         bool hasDevHead = false;
-        if (!info.dev_head_t.isEmpty() &&
+        if (!info.dev_head_t.is_empty() &&
             info.dev_head_t.from == FIFFV_COORD_DEVICE &&
             info.dev_head_t.to == FIFFV_COORD_HEAD &&
             !info.dev_head_t.trans.isIdentity()) {
@@ -354,8 +355,13 @@ bool DataLoader::loadHeadToMriTransform(const QString& transPath,
                                         FiffCoordTrans& trans)
 {
     // A file may hold several transforms (e.g. all-trans.fif: device -> head and MRI -> head)
-    trans = FiffCoordTrans::readTransform(transPath, FIFFV_COORD_HEAD, FIFFV_COORD_MRI);
-    return !trans.isEmpty();
+    const auto read = FiffCoordTrans::read(UTILSLIB::pathFromUtf8(transPath.toStdString()), FIFFV_COORD_HEAD, FIFFV_COORD_MRI);
+    if (!read) {
+        UTILSLIB::Log::warning("DataLoader: {}", read.error().message);
+        return false;
+    }
+    trans = *read;
+    return true;
 }
 
 //=============================================================================================================

@@ -508,9 +508,10 @@ void TestFiffCoverage::testCtfCompRoundTrip()
 
 void TestFiffCoverage::testReadMeasTransform()
 {
-    FiffCoordTrans t = FiffCoordTrans::readMeasTransform(rawPath());
-    if (t.from != 0 && t.to != 0) {
-        // Should be device -> head transform
+    const auto read = FiffCoordTrans::read(rawPath().toStdString(), FIFFV_COORD_DEVICE, FIFFV_COORD_HEAD);
+    QVERIFY(read);
+    const FiffCoordTrans& t = *read;
+    {
         QCOMPARE(t.from, (int)FIFFV_COORD_DEVICE);
         QCOMPARE(t.to, (int)FIFFV_COORD_HEAD);
         // Transform should be non-identity (device is not at head position)

@@ -28,13 +28,13 @@ private slots:
     void coordTrans_defaultCtor()
     {
         FiffCoordTrans t;
-        QVERIFY(t.isEmpty());
+        QVERIFY(t.is_empty());
     }
 
     void coordTrans_identity()
     {
         FiffCoordTrans t = FiffCoordTrans::identity(FIFFV_COORD_HEAD, FIFFV_COORD_MRI);
-        QVERIFY(!t.isEmpty());
+        QVERIFY(!t.is_empty());
         QCOMPARE(t.from, (int)FIFFV_COORD_HEAD);
         QCOMPARE(t.to, (int)FIFFV_COORD_MRI);
         QVERIFY(t.trans.isApprox(Matrix4f::Identity()));
@@ -94,7 +94,7 @@ private slots:
         m(0, 3) = 1.0f; // translate X by 1
 
         FiffCoordTrans t(FIFFV_COORD_HEAD, FIFFV_COORD_MRI, m);
-        t.addInverse(t);
+        t.add_inverse(t);
 
         MatrixX3f pts(2, 3);
         pts << 0, 0, 0,
@@ -112,7 +112,7 @@ private slots:
         m(0, 3) = 1.0f;
 
         FiffCoordTrans t(FIFFV_COORD_HEAD, FIFFV_COORD_MRI, m);
-        t.addInverse(t);
+        t.add_inverse(t);
 
         MatrixX3f pts(1, 3);
         pts << 1, 0, 0;
@@ -126,11 +126,11 @@ private slots:
     {
         FiffCoordTrans t1 = FiffCoordTrans::identity(FIFFV_COORD_HEAD, FIFFV_COORD_MRI);
         t1.trans(0, 3) = 0.1f;
-        t1.addInverse(t1);
+        t1.add_inverse(t1);
 
         FiffCoordTrans t2 = FiffCoordTrans::identity(FIFFV_COORD_MRI, FIFFV_COORD_DEVICE);
         t2.trans(0, 3) = 0.2f;
-        t2.addInverse(t2);
+        t2.add_inverse(t2);
 
         FiffCoordTrans combined = FiffCoordTrans::combine(
             FIFFV_COORD_HEAD, FIFFV_COORD_DEVICE, t1, t2);
@@ -140,13 +140,9 @@ private slots:
 
     void coordTrans_frameName()
     {
-        QString head = FiffCoordTrans::frame_name(FIFFV_COORD_HEAD);
-        QString mri = FiffCoordTrans::frame_name(FIFFV_COORD_MRI);
-        QString dev = FiffCoordTrans::frame_name(FIFFV_COORD_DEVICE);
-
-        QVERIFY(!head.isEmpty());
-        QVERIFY(!mri.isEmpty());
-        QVERIFY(!dev.isEmpty());
+        QCOMPARE(FiffCoordTrans::frame_name(FIFFV_COORD_HEAD), std::string_view("head"));
+        QCOMPARE(FiffCoordTrans::frame_name(FIFFV_COORD_MRI), std::string_view("MRI (surface RAS)"));
+        QCOMPARE(FiffCoordTrans::frame_name(FIFFV_COORD_DEVICE), std::string_view("MEG device"));
     }
 
     void coordTrans_angleTo()
@@ -154,7 +150,7 @@ private slots:
         FiffCoordTrans t1 = FiffCoordTrans::identity(FIFFV_COORD_HEAD, FIFFV_COORD_MRI);
         FiffCoordTrans t2 = FiffCoordTrans::identity(FIFFV_COORD_HEAD, FIFFV_COORD_MRI);
 
-        float angle = t1.angleTo(t2.trans);
+        float angle = t1.angle_to(t2.trans);
         QVERIFY(qFuzzyIsNull(angle));
     }
 
@@ -164,7 +160,7 @@ private slots:
         FiffCoordTrans t2 = FiffCoordTrans::identity(FIFFV_COORD_HEAD, FIFFV_COORD_MRI);
         t2.trans(0, 3) = 0.01f;
 
-        float dist = t1.translationTo(t2.trans);
+        float dist = t1.translation_to(t2.trans);
         QVERIFY(dist > 0.0f);
         QVERIFY(qFuzzyCompare(dist, 0.01f));
     }
@@ -179,13 +175,13 @@ private slots:
     void coordTrans_clear()
     {
         FiffCoordTrans t = FiffCoordTrans::identity(FIFFV_COORD_HEAD, FIFFV_COORD_MRI);
-        QVERIFY(!t.isEmpty());
+        QVERIFY(!t.is_empty());
         t.clear();
-        QVERIFY(t.isEmpty());
+        QVERIFY(t.is_empty());
     }
 
     //=========================================================================
-    // FiffCoordTrans::fromCardinalPoints
+    // FiffCoordTrans::from_cardinal_points
     //=========================================================================
     void coordTrans_fromCardinalPoints()
     {
@@ -194,12 +190,12 @@ private slots:
         float nas[3] = {0.0f, 0.08f, 0.0f};
         float rpa[3] = {0.07f, 0.0f, 0.0f};
 
-        FiffCoordTrans t = FiffCoordTrans::fromCardinalPoints(
+        FiffCoordTrans t = FiffCoordTrans::from_cardinal_points(
             FIFFV_COORD_HEAD, FIFFV_COORD_MRI, lpa, nas, rpa);
 
         QCOMPARE(t.from, (int)FIFFV_COORD_HEAD);
         QCOMPARE(t.to, (int)FIFFV_COORD_MRI);
-        QVERIFY(!t.isEmpty());
+        QVERIFY(!t.is_empty());
     }
 
     //=========================================================================

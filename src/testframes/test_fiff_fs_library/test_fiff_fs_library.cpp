@@ -31,6 +31,7 @@
 #include <fiff/fiff_info.h>
 #include <fiff/fiff_info_base.h>
 #include <fiff/fiff_coord_trans.h>
+#include <utils/string_utils.h>
 #include <fiff/fiff_dig_point.h>
 #include <fiff/fiff_named_matrix.h>
 #include <fiff/fiff_ch_info.h>
@@ -512,12 +513,11 @@ void TestFiffFsLibrary::fiff_coordTransReadWrite()
         QSKIP("No test data");
     QVERIFY(QFile::exists(transPath()));
 
-    FiffCoordTrans trans = FiffCoordTrans::readMriTransform(transPath());
+    FiffCoordTrans trans = FiffCoordTrans::read(UTILSLIB::pathFromUtf8((transPath()).toStdString()), FIFFV_COORD_MRI, FIFFV_COORD_HEAD).value();
     QVERIFY(trans.from != 0 || trans.to != 0);
 
     // Without frames the first transform is read, as mne.read_trans does (device -> head in all-trans.fif)
-    FiffCoordTrans trans2;
-    QVERIFY(FiffCoordTrans::read(transPath().toStdString(), trans2));
+    const FiffCoordTrans trans2 = FiffCoordTrans::read(transPath().toStdString()).value();
     QCOMPARE(trans2.from, FIFFV_COORD_DEVICE);
     QCOMPARE(trans2.to, FIFFV_COORD_HEAD);
     QVERIFY(std::fabs(trans2.trans(0, 3) + 6.129309069e-03f) < 1e-8f);

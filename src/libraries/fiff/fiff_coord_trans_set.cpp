@@ -84,7 +84,7 @@ FiffCoordTrans FiffCoordTransSet::readMniTransform(const QString& path)
 bool FiffCoordTransSet::addTalairach(const QString& xfmPath)
 {
     const FiffCoordTrans rasMni = readMniTransform(xfmPath);
-    if (rasMni.isEmpty()) {
+    if (rasMni.is_empty()) {
         return false;
     }
     // M. Brett's MNI -> Talairach approximation, separately above and below the AC-PC plane.
@@ -145,7 +145,7 @@ int FiffCoordTransSet::read(const QString& path)
 void FiffCoordTransSet::write(FiffStream& stream) const
 {
     for (const FiffCoordTrans* t : {&head_surf_RAS_t, &surf_RAS_RAS_t, &RAS_MNI_tal_t, &MNI_tal_tal_gtz_t, &MNI_tal_tal_ltz_t}) {
-        if (!t->isEmpty()) {
+        if (!t->is_empty()) {
             stream.write_coord_trans(*t);
         }
     }
@@ -155,7 +155,7 @@ void FiffCoordTransSet::write(FiffStream& stream) const
 
 MatrixX3f FiffCoordTransSet::headToMni(const MatrixX3f& rr) const
 {
-    if (head_surf_RAS_t.isEmpty() || surf_RAS_RAS_t.isEmpty() || RAS_MNI_tal_t.isEmpty()) {
+    if (head_surf_RAS_t.is_empty() || surf_RAS_RAS_t.is_empty() || RAS_MNI_tal_t.is_empty()) {
         return MatrixX3f();
     }
     return RAS_MNI_tal_t.apply_trans(surf_RAS_RAS_t.apply_trans(head_surf_RAS_t.apply_trans(rr)));
@@ -165,7 +165,7 @@ MatrixX3f FiffCoordTransSet::headToMni(const MatrixX3f& rr) const
 
 MatrixX3f FiffCoordTransSet::mniToTalairach(const MatrixX3f& rr) const
 {
-    if (MNI_tal_tal_gtz_t.isEmpty() || MNI_tal_tal_ltz_t.isEmpty()) {
+    if (MNI_tal_tal_gtz_t.is_empty() || MNI_tal_tal_ltz_t.is_empty()) {
         return MatrixX3f();
     }
     const MatrixX3f above = MNI_tal_tal_gtz_t.apply_trans(rr);

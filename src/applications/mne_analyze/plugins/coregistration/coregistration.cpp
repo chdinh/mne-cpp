@@ -327,7 +327,7 @@ void CoRegistration::onDigitizersChanged(const QString& sFilePath)
     m_pCommu->publishEvent(EVENT_TYPE::NEW_DIGITIZER_ADDED, data);
 
     // set transformation if not empty
-    if (!m_transHeadMri.isEmpty()) {
+    if (!m_transHeadMri.is_empty()) {
         QVariant transData = QVariant::fromValue(m_transHeadMri);
         m_pCommu->publishEvent(EVENT_TYPE::NEW_TRANS_AVAILABE, transData);
     }
@@ -365,11 +365,12 @@ void CoRegistration::onStoreFiducials(const QString& sFilePath)
 
 void CoRegistration::onLoadTrans(const QString& sFilePath)
 {
-    FiffCoordTrans transTemp;
-    if (!FiffCoordTrans::read(UTILSLIB::pathFromUtf8(sFilePath.toStdString()), transTemp)) {
-        qWarning() << "[CoRegistration::onLoadTrans] No transformation found in" << sFilePath;
+    const auto read = FiffCoordTrans::read(UTILSLIB::pathFromUtf8(sFilePath.toStdString()));
+    if (!read) {
+        qWarning("[CoRegistration::onLoadTrans] %s", read.error().message.c_str());
         return;
     }
+    FiffCoordTrans transTemp = *read;
 
     // Transformation parameters
     Vector3f vecRot;
@@ -410,8 +411,10 @@ void CoRegistration::onLoadTrans(const QString& sFilePath)
 
 void CoRegistration::onStoreTrans(const QString& sFilePath)
 {
-    if (!m_transHeadMri.isEmpty()) {
-        m_transHeadMri.write(UTILSLIB::pathFromUtf8(sFilePath.toStdString()));
+    if (!m_transHeadMri.is_empty()) {
+        if (const auto written = m_transHeadMri.write(UTILSLIB::pathFromUtf8(sFilePath.toStdString())); !written) {
+            qWarning("[CoRegistration::onStoreTrans] %s", written.error().message.c_str());
+        }
     }
     return;
 }
