@@ -33,7 +33,7 @@ const MNEVolGeom& geometry = *white->vol_geom; // sizes and centre converted to 
 // Drop sources outside the inner skull or closer than 5 mm to it (mne make_forward_solution(mindist=5))
 std::vector<std::unique_ptr<MNESourceSpace>> spaces;
 MNESourceSpace::read_source_spaces(srcFile.fileName(), spaces);
-const FiffCoordTrans mriHeadT = FiffCoordTrans::readTransform(data + "/MEG/sample/all-trans.fif", FIFFV_COORD_MRI, FIFFV_COORD_HEAD);
+const FiffCoordTrans mriHeadT = FiffCoordTrans::read(UTILSLIB::pathFromUtf8((data + "/MEG/sample/all-trans.fif").toStdString()), FIFFV_COORD_MRI, FIFFV_COORD_HEAD).value_or(FiffCoordTrans());
 MNESourceSpace::filter_source_spaces(0.005f, data + "/subjects/sample/bem/sample-5120-bem.fif", mriHeadT, spaces, nullptr, true);
 ```
 

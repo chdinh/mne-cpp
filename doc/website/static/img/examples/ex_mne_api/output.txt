@@ -71,13 +71,13 @@ Checking that the sources are inside the inner skull
 and at least    5.0 mm away
  (will take a few...)
 
-1 source space points omitted because they are outside the inner skull surface.
-
-331 source space points omitted because of the    5.0-mm distance limit.
-
 2 source space points omitted because they are outside the inner skull surface.
 
 364 source space points omitted because of the    5.0-mm distance limit.
+
+1 source space points omitted because they are outside the inner skull surface.
+
+331 source space points omitted because of the    5.0-mm distance limit.
 
 Computing patch statistics...
 
@@ -355,8 +355,8 @@ EEG053
   ok   MNEMeasData/MNEMeasDataSet: evoked set, baseline and interpolated values match mne
 Creating tag directory for src/examples/ex_mne_api/../../testframes/test_fiff_raw_formats_python/data/raw_sss_raw.fif...
   ok   MNESssData: Maxwell filter parameters like info['proc_history'] of the fixture
-Creating tag directory for /var/folders/lk/dqv220515jx568p47_pgxkm80000gn/T/ex_mne_api-XQYWcS/audvis-eve.fif...
-Binary event file /var/folders/lk/dqv220515jx568p47_pgxkm80000gn/T/ex_mne_api-XQYWcS/audvis-eve.fif read
+Creating tag directory for /var/folders/lk/dqv220515jx568p47_pgxkm80000gn/T/ex_mne_api-Ireebo/audvis-eve.fif...
+Binary event file /var/folders/lk/dqv220515jx568p47_pgxkm80000gn/T/ex_mne_api-Ireebo/audvis-eve.fif read
 
 	4 projection items activated.
 
@@ -387,9 +387,9 @@ normals and neighboring triangles...
 
   ok   MNESurface: solid angles show the inner skull is closed, like mne._get_solids
   ok   MNEMshDisplaySurfaceSet/MNEMshDisplaySurface: the BEM surface and its extent in the viewer
-Creating tag directory for /var/folders/lk/dqv220515jx568p47_pgxkm80000gn/T/ex_mne_api-XQYWcS/commented-eve.fif...
+Creating tag directory for /var/folders/lk/dqv220515jx568p47_pgxkm80000gn/T/ex_mne_api-Ireebo/commented-eve.fif...
   ok   MNEEventList/MNEEvent: commented event file, onsets selected like mne.find_events
-Creating tag directory for /var/folders/lk/dqv220515jx568p47_pgxkm80000gn/T/ex_mne_api-XQYWcS/montage-deriv.fif...
+Creating tag directory for /var/folders/lk/dqv220515jx568p47_pgxkm80000gn/T/ex_mne_api-Ireebo/montage-deriv.fif...
 MNEDerivSet::match - 1 of 2 derivations were matched.
 1 of 1 of the matched derivations are valid for these raw data.
   ok   MNEDerivSet/MNEDeriv/MNESparseNamedMatrix: MNE-C montage file, matched to the recording and read by MNERawData
@@ -416,6 +416,6 @@ Reading surface...
 	Read a surface with 642 vertices from src/examples/ex_mne_api/../../testframes/test_mne_source_space_ops_python/data/morph-subjects/large/surf/lh.sphere.reg
 [done]
 
-Creating tag directory for /var/folders/lk/dqv220515jx568p47_pgxkm80000gn/T/ex_mne_api-XQYWcS/small-large-morph.fif...
+Creating tag directory for /var/folders/lk/dqv220515jx568p47_pgxkm80000gn/T/ex_mne_api-Ireebo/small-large-morph.fif...
   ok   MNEMorphMap: sphere-registered morph map like mne.read_morph_map, saved and reloaded
 All mne checks passed.

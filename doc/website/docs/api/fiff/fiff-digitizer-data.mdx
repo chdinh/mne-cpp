@@ -24,7 +24,7 @@ FiffDigitizerData digData;
 digData.points = info.dig;
 digData.npoint = info.dig.size();
 digData.coord_frame = FIFFV_COORD_HEAD;
-digData.head_mri_t_adj = std::make_unique<FiffCoordTrans>(headToMri);
+digData.head_mri_t_adj = std::make_unique<FiffCoordTrans>(*headToMri);
 digData.pickCardinalFiducials(); // LPA, nasion and RPA moved into MRI coordinates
 ```
 
@@ -120,12 +120,12 @@ This is a port of the original C function update_fids_from_dig_data from mne_ana
 
 FIFF library: measurement info, channels, digitizer, transforms, projectors, covariance, events, annotations, evoked sets and the low-level file structure.
 
-````cpp title="src/examples/ex_fiff_api/main.cpp, line 237"
+````cpp title="src/examples/ex_fiff_api/main.cpp, line 238"
 FiffDigitizerData digData;
 digData.points = info.dig;
 digData.npoint = info.dig.size();
 digData.coord_frame = FIFFV_COORD_HEAD;
-digData.head_mri_t_adj = std::make_unique<FiffCoordTrans>(headToMri);
+digData.head_mri_t_adj = std::make_unique<FiffCoordTrans>(*headToMri);
 digData.pickCardinalFiducials(); // LPA, nasion and RPA moved into MRI coordinates
 // mne: apply_trans(invert_transform(mri_head_t), dig[0]["r"]) = (-0.06925742, 0.01058946, -0.02500086)
 ok &= expect(digData.nfids() == 3 && (Map<Vector3f>(digData.mri_fids[0].r) - Vector3f(-0.06925742f, 0.01058946f, -0.02500086f)).norm() < 1e-6f, "FiffDigitizerData moves the 3 cardinal fiducials into MRI coordinates");

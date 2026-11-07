@@ -501,6 +501,7 @@ const apiSidebar: SidebarsConfig['apiSidebar'] = [
         'api/utils/artifact-detect-proj-params',
         'api/utils/log',
         'api/utils/log-capture',
+        'api/utils/error',
         'api/utils/byte-stream',
         'api/utils/memory-byte-stream',
         'api/utils/file-byte-stream',
