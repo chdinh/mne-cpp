@@ -52,7 +52,7 @@ Constructs a [`DigitizerSetTreeItem`](/docs/api/disp3-d/digitizer-set-tree-item)
 - **text** : *const QString &*
   Display text (e.g. "Digitizer").
 
-- **digitizerPoints** : *const QList&lt; [FiffDigPoint](/docs/api/fiff/fiff-dig-point) &gt; &*
+- **digitizerPoints** : *std::span&lt; const [FiffDigPoint](/docs/api/fiff/fiff-dig-point) &gt;*
   List of FIFF digitizer points to categorize.
 
 ---

@@ -17,11 +17,11 @@ class FIFFLIB::FiffDigPointSet
 
 Collection of [`FiffDigPoint`](/docs/api/fiff/fiff-dig-point) records as parsed from a FIFFB_ISOTRAK block.
 
-Indexed access plus convenience filters (cardinals only, HPI only, EEG only, extras only) so registration code can pick out the subset it needs without re-walking the underlying QList of dig points.
+A contiguous range of points with the container interface of std::vector, plus the selection, transformation and file operations of mne.io.Info["dig"].
 
 ```cpp title="src/examples/ex_fiff_api/main.cpp"
-FiffDigPointSet digitizer(info.dig);                                    // 146 points in head coordinates
-FiffDigPointSet cardinal = digitizer.pickTypes({FIFFV_POINT_CARDINAL}); // LPA, nasion, RPA
+const FiffDigPointSet& digitizer = info.dig;                             // 146 points in head coordinates
+FiffDigPointSet cardinal = digitizer.pick_types({FIFFV_POINT_CARDINAL}); // LPA, nasion, RPA
 ```
 
 ---
@@ -30,213 +30,216 @@ FiffDigPointSet cardinal = digitizer.pickTypes({FIFFV_POINT_CARDINAL}); // LPA, 
 
 ### FiffDigPointSet()
 
-Constructs a [`FiffDigPointSet`](/docs/api/fiff/fiff-dig-point-set) object.
+Constructs an empty set.
 
 ---
 
-### FiffDigPointSet(p_FiffDigPointSet)
+### FiffDigPointSet(points)
 
-Copy constructor.
-
-**Parameters:**
-
-- **p_FiffDigPointSet** : *const FiffDigPointSet &*
-  [`FiffDigPointSet`](/docs/api/fiff/fiff-dig-point-set) which should be copied.
-
----
-
-### operator=(other)
-
-Copy assignment.
-
-Every member has value semantics, so the compiler-generated member-wise assignment is correct. It is declared explicitly because declaring a copy constructor and/or a destructor deprecates the implicitly generated one.
+Constructs a set holding `points`.
 
 **Parameters:**
 
-- **other** : *const [FiffDigPointSet](/docs/api/fiff/fiff-dig-point-set) &*
-  Object to assign from.
-
-**Returns:**
-
-- *[FiffDigPointSet](/docs/api/fiff/fiff-dig-point-set) &* — reference to this object.
-
----
-
-### FiffDigPointSet(pointList)
-
-Construct [`FiffDigPointSet`](/docs/api/fiff/fiff-dig-point-set) based on input pointList.
-
-**Parameters:**
-
-- **pointList** : *QList&lt; [FiffDigPoint](/docs/api/fiff/fiff-dig-point) &gt;*
-  list of digitizer points
+- **points** : *std::vector&lt; [FiffDigPoint](/docs/api/fiff/fiff-dig-point) &gt;*
+  The digitizer points.
 
 ---
 
 ### FiffDigPointSet(path)
 
-Constructs a [`FiffDigPointSet`](/docs/api/fiff/fiff-dig-point-set) by reading a FIFF file.
+Reads the digitizer points of a FIFF file, like `read()`; throws [`Error`](/docs/api/utils/error) if it cannot.
 
 **Parameters:**
 
 - **path** : *const std::filesystem::path &*
-  FIFF file to read the digitizer point set from.
+  The file.
 
 ---
 
-### ~FiffDigPointSet()
-
-Destroys the [`FiffDigPointSet`](/docs/api/fiff/fiff-dig-point-set).
-
----
-
-### clear()
-
-Initializes [`FiffDigPointSet`](/docs/api/fiff/fiff-dig-point-set).
-
----
-
-### isEmpty()
-
-True if [`FiffDigPointSet`](/docs/api/fiff/fiff-dig-point-set) is empty.
+### empty()
 
 **Returns:**
 
-- *bool* — true if [`FiffDigPointSet`](/docs/api/fiff/fiff-dig-point-set) is empty.
+- *bool* — Whether the set holds no point.
 
 ---
 
 ### size()
 
-Returns the number of stored FiffDigPoints.
-
 **Returns:**
 
-- *qint32* — number of stored FiffDigPoints.
+- *std::size_t* — The number of points.
 
 ---
 
-### write(path, errorMessage)
+### clear()
 
-Writes the digitizer point set to a FIFF file, replacing any existing file.
+Removes every point.
+
+---
+
+### push_back(point)
+
+Appends a point.
+
+**Parameters:**
+
+- **point** : *const [FiffDigPoint](/docs/api/fiff/fiff-dig-point) &*
+  The point.
+
+---
+
+### front()
+
+**Returns:**
+
+- *const [FiffDigPoint](/docs/api/fiff/fiff-dig-point) &* — The first point; the set must not be empty.
+
+---
+
+### back()
+
+**Returns:**
+
+- *const [FiffDigPoint](/docs/api/fiff/fiff-dig-point) &* — The last point; the set must not be empty.
+
+---
+
+### operator\[\](idx)
+
+**Parameters:**
+
+- **idx** : *std::size_t*
+  Index below `size()`.
+
+**Returns:**
+
+- *const [FiffDigPoint](/docs/api/fiff/fiff-dig-point) &* — Point `idx`.
+
+---
+
+### operator\[\](idx)
+
+**Parameters:**
+
+- **idx** : *std::size_t*
+  Index below `size()`.
+
+**Returns:**
+
+- *[FiffDigPoint](/docs/api/fiff/fiff-dig-point) &* — Point `idx`.
+
+---
+
+### begin()
+
+**Returns:**
+
+- *iterator* — First point.
+
+---
+
+### end()
+
+**Returns:**
+
+- *iterator* — Past the last point.
+
+---
+
+### begin()
+
+**Returns:**
+
+- *const_iterator* — First point.
+
+---
+
+### end()
+
+**Returns:**
+
+- *const_iterator* — Past the last point.
+
+---
+
+### points()
+
+**Returns:**
+
+- *std::span&lt; const [FiffDigPoint](/docs/api/fiff/fiff-dig-point) &gt;* — The points, contiguous in memory.
+
+---
+
+### write(path)
+
+Writes the points to a FIFF file, replacing it, like mne.io.write_info writes info["dig"].
 
 **Parameters:**
 
 - **path** : *const std::filesystem::path &*
-  Destination .fif file path.
-
-- **errorMessage** : *std::string **
-  Optional, populated on failure.
+  The file.
 
 **Returns:**
 
-- *bool* — true on success, false on error.
+- *[Expected](/docs/api/utils/expected)&lt; void &gt;* — Nothing, or why the file cannot be written.
 
 ---
 
-### writeToStream(stream)
+### write_to_stream(stream)
 
-Writes the [`FiffDigPointSet`](/docs/api/fiff/fiff-dig-point-set) to a FIFF stream.
+Writes the points as an isotrak block inside a measurement info block.
 
 **Parameters:**
 
 - **stream** : *[FiffStream](/docs/api/fiff/fiff-stream) &*
-  Pointer to the FIFF stream to write to.
+  The stream.
 
 ---
 
-### operator\[\](idx)
-
-Subscript operator [] to access [`FiffDigPoint`](/docs/api/fiff/fiff-dig-point) by index.
+### pick_types(kinds)
 
 **Parameters:**
 
-- **idx** : *qint32*
-  the [`FiffDigPoint`](/docs/api/fiff/fiff-dig-point) index.
+- **kinds** : *std::span&lt; const int &gt;*
+  Point kinds to keep: FIFFV_POINT_CARDINAL, FIFFV_POINT_HPI, FIFFV_POINT_EEG, FIFFV_POINT_EXTRA or FIFFV_POINT_ECG.
 
 **Returns:**
 
-- *const [FiffDigPoint](/docs/api/fiff/fiff-dig-point) &* — [`FiffDigPoint`](/docs/api/fiff/fiff-dig-point) related to the parameter index.
+- *[FiffDigPointSet](/docs/api/fiff/fiff-dig-point-set)* — The points of those kinds, in their order in this set.
 
 ---
 
-### operator\[\](idx)
-
-Subscript operator [] to access [`FiffDigPoint`](/docs/api/fiff/fiff-dig-point) by index.
+### pick_types(kinds)
 
 **Parameters:**
 
-- **idx** : *qint32*
-  the [`FiffDigPoint`](/docs/api/fiff/fiff-dig-point) index.
+- **kinds** : *std::initializer_list&lt; int &gt;*
+  Point kinds to keep: FIFFV_POINT_CARDINAL, FIFFV_POINT_HPI, FIFFV_POINT_EEG, FIFFV_POINT_EXTRA or FIFFV_POINT_ECG.
 
 **Returns:**
 
-- *[FiffDigPoint](/docs/api/fiff/fiff-dig-point) &* — [`FiffDigPoint`](/docs/api/fiff/fiff-dig-point) related to the parameter index.
+- *[FiffDigPointSet](/docs/api/fiff/fiff-dig-point-set)* — The points of those kinds, in their order in this set.
 
 ---
 
-### pickTypes(includeTypes)
+### apply_transform(coordTrans, inverse)
 
-Pick the wanted types from this set and returns them.
-
-**Parameters:**
-
-- **includeTypes** : *QList&lt; int &gt;*
-  The include types (FIFFV_POINT_HPI, FIFFV_POINT_CARDINAL, FIFFV_POINT_EEG, FIFFV_POINT_ECG, FIFFV_POINT_EXTRA, FIFFV_POINT_LPA, FIFFV_POINT_NASION, FIFFV_POINT_RPA).
-
-**Returns:**
-
-- *[FiffDigPointSet](/docs/api/fiff/fiff-dig-point-set)* — [`FiffDigPointSet`](/docs/api/fiff/fiff-dig-point-set).
-
----
-
-### operator&lt;&lt;(dig)
-
-Subscript operator &lt;&lt; to add a new [`FiffDigPoint`](/docs/api/fiff/fiff-dig-point).
-
-**Parameters:**
-
-- **dig** : *const [FiffDigPoint](/docs/api/fiff/fiff-dig-point) &*
-  [`FiffDigPoint`](/docs/api/fiff/fiff-dig-point) to be added.
-
-**Returns:**
-
-- *[FiffDigPointSet](/docs/api/fiff/fiff-dig-point-set) &* — [`FiffDigPointSet`](/docs/api/fiff/fiff-dig-point-set).
-
----
-
-### operator&lt;&lt;(dig)
-
-Subscript operator &lt;&lt; to add a new [`FiffDigPoint`](/docs/api/fiff/fiff-dig-point).
-
-**Parameters:**
-
-- **dig** : *const [FiffDigPoint](/docs/api/fiff/fiff-dig-point) **
-  [`FiffDigPoint`](/docs/api/fiff/fiff-dig-point) to be added.
-
-**Returns:**
-
-- *[FiffDigPointSet](/docs/api/fiff/fiff-dig-point-set) &* — [`FiffDigPointSet`](/docs/api/fiff/fiff-dig-point-set).
-
----
-
-### applyTransform(coordTrans, bApplyInverse)
-
-Apply a transformation matrix on the 3D position of the digitized points.
+Applies a coordinate transformation to every point.
 
 **Parameters:**
 
 - **coordTrans** : *const [FiffCoordTrans](/docs/api/fiff/fiff-coord-trans) &*
-  [`FiffCoordTrans`](/docs/api/fiff/fiff-coord-trans) which is to be applied.
+  The transformation.
 
-- **bApplyInverse** : *bool*
-  Whether to apply the inverse. False by default.
+- **inverse** : *bool*
+  Apply its inverse instead.
 
 ---
 
-### transformToHead()
+### transform_to_head()
 
-Move every point that shares the frame of the LPA, nasion and RPA points into the Neuromag head frame defined by these fiducials (mne.channels.transform_to_head).
+Moves every point that shares the frame of the LPA, nasion and RPA points into the Neuromag head frame defined by these fiducials (mne.channels.transform_to_head).
 
 **Returns:**
 
@@ -244,33 +247,35 @@ Move every point that shares the frame of the LPA, nasion and RPA points into th
 
 ---
 
-### getList()
+## Static Methods
 
-Returns list of digitizer point the set contains.
+### read(path)
+
+Reads the digitizer points of a FIFF file, like mne.io.read_info(path)["dig"].
+
+**Parameters:**
+
+- **path** : *const std::filesystem::path &*
+  The file.
 
 **Returns:**
 
-- *QList&lt; [FiffDigPoint](/docs/api/fiff/fiff-dig-point) &gt;* — list of digitizer points
+- *[Expected](/docs/api/utils/expected)&lt; [FiffDigPointSet](/docs/api/fiff/fiff-dig-point-set) &gt;* — The points, or why the file cannot be read.
 
 ---
 
-## Static Methods
+### read(stream)
 
-### readFromStream(stream, p_Dig)
-
-Reads [`FiffDigPointSet`](/docs/api/fiff/fiff-dig-point-set) from a fif file.
+Reads the digitizer points of the isotrak block of a FIFF stream, opening it if needed.
 
 **Parameters:**
 
 - **stream** : *[FiffStream](/docs/api/fiff/fiff-stream) &*
-  The opened fif file.
-
-- **p_Dig** : *[FiffDigPointSet](/docs/api/fiff/fiff-dig-point-set) &*
-  The read digitizer point set.
+  The stream.
 
 **Returns:**
 
-- *bool* — true if succeeded, false otherwise.
+- *[Expected](/docs/api/utils/expected)&lt; [FiffDigPointSet](/docs/api/fiff/fiff-dig-point-set) &gt;* — The points, which are none if the stream holds no isotrak block, or why the stream cannot be read.
 
 ---
 
@@ -435,8 +440,8 @@ Reads a Neuroscan .dat electrode file ("name number x y z" per line), as mne.cha
 FIFF library: measurement info, channels, digitizer, transforms, projectors, covariance, events, annotations, evoked sets and the low-level file structure.
 
 ````cpp title="src/examples/ex_fiff_api/main.cpp, line 124"
-FiffDigPointSet digitizer(info.dig);                                    // 146 points in head coordinates
-FiffDigPointSet cardinal = digitizer.pickTypes({FIFFV_POINT_CARDINAL}); // LPA, nasion, RPA
+const FiffDigPointSet& digitizer = info.dig;                             // 146 points in head coordinates
+FiffDigPointSet cardinal = digitizer.pick_types({FIFFV_POINT_CARDINAL}); // LPA, nasion, RPA
 // mne: 146 points; dig[0] = LPA at (-0.0713766, 0, 5.1e-9)
 ok &= expect(digitizer.size() == 146 && cardinal.size() == 3 && cardinal[0].ident == FIFFV_POINT_LPA && std::fabs(cardinal[0].r[0] + 0.07137661f) < 1e-7f,
              "FiffDigPointSet/FiffDigPoint: 146 points, LPA at x = -71.38 mm");

@@ -181,12 +181,11 @@ int main(int argc, char* argv[])
     MNEProjectToSurface::SPtr mneSurfacePoints = MNEProjectToSurface::SPtr::create(*bemSurface);
 
     // read digitizer data
-    QList<int> lPickFiducials({FIFFV_POINT_CARDINAL});
-    QList<int> lPickHSP({FIFFV_POINT_CARDINAL, FIFFV_POINT_HPI, FIFFV_POINT_EXTRA, FIFFV_POINT_EEG});
-    FiffDigPointSet digSetSrc = FiffDigPointSet(parser.value(digOption).toStdString()).pickTypes(lPickFiducials); // Fiducials Head-Space
-    FiffDigPointSet digSetDst = FiffDigPointSet(parser.value(digOption).toStdString()).pickTypes(lPickFiducials);
-    digSetDst.applyTransform(transHeadMriRef, false);
-    FiffDigPointSet digSetHsp = FiffDigPointSet(parser.value(digOption).toStdString()).pickTypes(lPickHSP); // Head shape points Head-Space
+    const FiffDigPointSet dig(parser.value(digOption).toStdString());
+    FiffDigPointSet digSetSrc = dig.pick_types({FIFFV_POINT_CARDINAL}); // Fiducials Head-Space
+    FiffDigPointSet digSetDst = digSetSrc;
+    digSetDst.apply_transform(transHeadMriRef);
+    FiffDigPointSet digSetHsp = dig.pick_types({FIFFV_POINT_CARDINAL, FIFFV_POINT_HPI, FIFFV_POINT_EXTRA, FIFFV_POINT_EEG}); // Head shape points Head-Space
 
     // Initial Fiducial Alignment
     // Declare variables
@@ -197,7 +196,7 @@ int main(int argc, char* argv[])
     float fScale = 1.0f;
 
     // get coordinates
-    for (int i = 0; i < digSetSrc.size(); ++i) {
+    for (int i = 0; i < std::ssize(digSetSrc); ++i) {
         matSrc(i, 0) = digSetSrc[i].r[0];
         matSrc(i, 1) = digSetSrc[i].r[1];
         matSrc(i, 2) = digSetSrc[i].r[2];
@@ -226,7 +225,7 @@ int main(int argc, char* argv[])
     VectorXf vecWeightsICP(digSetHsp.size()); // Weigths vector
     MatrixXf matHsp(digSetHsp.size(), 3);
 
-    for (int i = 0; i < digSetHsp.size(); ++i) {
+    for (int i = 0; i < std::ssize(digSetHsp); ++i) {
         matHsp(i, 0) = digSetHsp[i].r[0];
         matHsp(i, 1) = digSetHsp[i].r[1];
         matHsp(i, 2) = digSetHsp[i].r[2];
@@ -264,8 +263,8 @@ int main(int argc, char* argv[])
     BrainView* pBrainView = new BrainView();
     BrainTreeModel* pModel = new BrainTreeModel();
     pBrainView->setModel(pModel);
-    pModel->addDigitizerData(digSetSrc.getList());
-    pModel->addDigitizerData(digSetHsp.getList());
+    pModel->addDigitizerData(digSetSrc.points());
+    pModel->addDigitizerData(digSetHsp.points());
 
     // Add BEM surfaces
     for (int i = 0; i < bemHead.size(); ++i) {
