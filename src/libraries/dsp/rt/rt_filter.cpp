@@ -254,7 +254,7 @@ MatrixXd RTPROCESSINGLIB::filterData(const MatrixXd& matData,
 
     if (matData.cols() > iSize) {
         int from = 0;
-        int numSlices = ceil(static_cast<float>(matData.cols()) / static_cast<float>(iSize)); //calculate number of data slices
+        const int numSlices = static_cast<int>((matData.cols() + iSize - 1) / iSize);
 
         for (int i = 0; i < numSlices; i++) {
             if (i == numSlices - 1) {
@@ -458,7 +458,7 @@ MatrixXd FilterOverlapAdd::calculate(const MatrixXd& matData,
 
     if (matData.cols() > iSize) {
         int from = 0;
-        int numSlices = ceil(static_cast<float>(matData.cols()) / static_cast<float>(iSize)); //calculate number of data slices
+        const int numSlices = static_cast<int>((matData.cols() + iSize - 1) / iSize);
 
         for (int i = 0; i < numSlices; i++) {
             if (i == numSlices - 1) {
