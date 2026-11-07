@@ -86,14 +86,14 @@ MNESssData::~MNESssData() = default;
 std::unique_ptr<MNESssData> MNESssData::read(const QString& name)
 {
     QFile file(name);
-    FiffStream::SPtr stream(new FiffStream(&file));
+    FiffStream stream(&file);
 
     std::unique_ptr<MNESssData> s;
 
-    if (stream->open())
-        s = read_from_node(*stream, stream->dirtree());
+    if (stream.open())
+        s = read_from_node(stream, stream.dirtree());
 
-    stream->close();
+    stream.close();
     return s;
 }
 

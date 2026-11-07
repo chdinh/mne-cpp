@@ -50,13 +50,13 @@ using namespace FIFFLIB;
 std::optional<MNEEventList> MNEEventList::readFif(const QString& path, int offset)
 {
     QFile file(path);
-    FiffStream::SPtr stream(new FiffStream(&file));
-    if (!stream->open()) {
+    FiffStream stream(&file);
+    if (!stream.open()) {
         return std::nullopt;
     }
-    const QList<FiffDirNode::SPtr> blocks = stream->dirtree()->dir_tree_find(FIFFB_MNE_EVENTS);
+    const QList<FiffDirNode::SPtr> blocks = stream.dirtree()->dir_tree_find(FIFFB_MNE_EVENTS);
     FiffTag::UPtr tag;
-    if (blocks.isEmpty() || !blocks[0]->find_tag(*stream, FIFF_MNE_EVENT_LIST, tag)) {
+    if (blocks.isEmpty() || !blocks[0]->find_tag(stream, FIFF_MNE_EVENT_LIST, tag)) {
         qWarning("MNEEventList::readFif - No event data in %s", qPrintable(path));
         return std::nullopt;
     }
@@ -71,7 +71,7 @@ std::optional<MNEEventList> MNEEventList::readFif(const QString& path, int offse
         list.events[k].to = static_cast<unsigned int>(values[3 * k + 2]);
     }
     // The comments are one NUL-separated string, one entry per event.
-    if (blocks[0]->find_tag(*stream, FIFF_MNE_EVENT_COMMENTS, tag)) {
+    if (blocks[0]->find_tag(stream, FIFF_MNE_EVENT_COMMENTS, tag)) {
         const QList<QByteArray> comments = tag->split('\0');
         for (int k = 0; k < nevent && k < comments.size(); ++k) {
             list.events[k].comment = QString::fromLatin1(comments[k]);
@@ -139,7 +139,7 @@ std::optional<MNEEventList> MNEEventList::readText(const QString& path, int offs
 bool MNEEventList::writeFif(const QString& path, int offset) const
 {
     QFile file(path);
-    FiffStream::SPtr stream = FiffStream::start_file(file);
+    auto stream = FiffStream::start_file(file);
     if (!stream) {
         return false;
     }

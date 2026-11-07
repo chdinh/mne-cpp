@@ -1675,7 +1675,7 @@ int MNESourceSpace::read_source_spaces(const QString& name, std::vector<std::uni
  */
 {
     QFile file(name);
-    FiffStream::SPtr stream(new FiffStream(&file));
+    FiffStream stream(&file);
 
     std::vector<std::unique_ptr<MNESourceSpace>> local_spaces;
     std::unique_ptr<MNESourceSpace> new_space;
@@ -1685,15 +1685,15 @@ int MNESourceSpace::read_source_spaces(const QString& name, std::vector<std::uni
     int j, k, p, q;
     int ntri;
 
-    if (!stream->open()) {
-        stream->close();
+    if (!stream.open()) {
+        stream.close();
         return FIFF_FAIL;
     }
 
-    sources = stream->dirtree()->dir_tree_find(FIFFB_MNE_SOURCE_SPACE);
+    sources = stream.dirtree()->dir_tree_find(FIFFB_MNE_SOURCE_SPACE);
     if (sources.size() == 0) {
         qCritical("No source spaces available here");
-        stream->close();
+        stream.close();
         return FIFF_FAIL;
     }
     for (j = 0; j < sources.size(); j++) {
@@ -1702,52 +1702,52 @@ int MNESourceSpace::read_source_spaces(const QString& name, std::vector<std::uni
         /*
             * Get the mandatory data first
             */
-        if (!node->find_tag(*stream, FIFF_MNE_SOURCE_SPACE_NPOINTS, t_pTag)) {
-            stream->close();
+        if (!node->find_tag(stream, FIFF_MNE_SOURCE_SPACE_NPOINTS, t_pTag)) {
+            stream.close();
             return FIFF_FAIL;
         }
         new_space->np = *t_pTag->toInt();
         if (new_space->np == 0) {
             qCritical("No points in this source space");
-            stream->close();
+            stream.close();
             return FIFF_FAIL;
         }
-        if (!node->find_tag(*stream, FIFF_MNE_SOURCE_SPACE_POINTS, t_pTag)) {
-            stream->close();
+        if (!node->find_tag(stream, FIFF_MNE_SOURCE_SPACE_POINTS, t_pTag)) {
+            stream.close();
             return FIFF_FAIL;
         }
         MatrixXf tmp_rr = t_pTag->toFloatMatrix().transpose();
         new_space->rr = tmp_rr;
-        if (!node->find_tag(*stream, FIFF_MNE_SOURCE_SPACE_NORMALS, t_pTag)) {
-            stream->close();
+        if (!node->find_tag(stream, FIFF_MNE_SOURCE_SPACE_NORMALS, t_pTag)) {
+            stream.close();
             return FIFF_FAIL;
         }
         MatrixXf tmp_nn = t_pTag->toFloatMatrix().transpose();
         new_space->nn = tmp_nn;
-        if (!node->find_tag(*stream, FIFF_MNE_COORD_FRAME, t_pTag)) {
+        if (!node->find_tag(stream, FIFF_MNE_COORD_FRAME, t_pTag)) {
             new_space->coord_frame = FIFFV_COORD_MRI;
         } else {
             new_space->coord_frame = *t_pTag->toInt();
         }
-        if (node->find_tag(*stream, FIFF_MNE_SOURCE_SPACE_ID, t_pTag)) {
+        if (node->find_tag(stream, FIFF_MNE_SOURCE_SPACE_ID, t_pTag)) {
             new_space->id = *t_pTag->toInt();
         }
-        if (node->find_tag(*stream, FIFF_SUBJ_HIS_ID, t_pTag)) {
+        if (node->find_tag(stream, FIFF_SUBJ_HIS_ID, t_pTag)) {
             new_space->subject = QString::fromStdString(t_pTag->toString());
         }
-        if (node->find_tag(*stream, FIFF_MNE_SOURCE_SPACE_TYPE, t_pTag)) {
+        if (node->find_tag(stream, FIFF_MNE_SOURCE_SPACE_TYPE, t_pTag)) {
             new_space->type = *t_pTag->toInt();
         }
         ntri = 0;
-        if (node->find_tag(*stream, FIFF_BEM_SURF_NTRI, t_pTag)) {
+        if (node->find_tag(stream, FIFF_BEM_SURF_NTRI, t_pTag)) {
             ntri = *t_pTag->toInt();
-        } else if (node->find_tag(*stream, FIFF_MNE_SOURCE_SPACE_NTRI, t_pTag)) {
+        } else if (node->find_tag(stream, FIFF_MNE_SOURCE_SPACE_NTRI, t_pTag)) {
             ntri = *t_pTag->toInt();
         }
         if (ntri > 0) {
-            if (!node->find_tag(*stream, FIFF_BEM_SURF_TRIANGLES, t_pTag)) {
-                if (!node->find_tag(*stream, FIFF_MNE_SOURCE_SPACE_TRIANGLES, t_pTag)) {
-                    stream->close();
+            if (!node->find_tag(stream, FIFF_BEM_SURF_TRIANGLES, t_pTag)) {
+                if (!node->find_tag(stream, FIFF_MNE_SOURCE_SPACE_TRIANGLES, t_pTag)) {
+                    stream.close();
                     return FIFF_FAIL;
                 }
             }
@@ -1757,7 +1757,7 @@ int MNESourceSpace::read_source_spaces(const QString& name, std::vector<std::uni
             new_space->itris = tmp_itris;
             new_space->ntri = ntri;
         }
-        if (!node->find_tag(*stream, FIFF_MNE_SOURCE_SPACE_NUSE, t_pTag)) {
+        if (!node->find_tag(stream, FIFF_MNE_SOURCE_SPACE_NUSE, t_pTag)) {
             if (new_space->type == FIFFV_MNE_SPACE_VOLUME) {
                 /*
                     * Use all
@@ -1776,8 +1776,8 @@ int MNESourceSpace::read_source_spaces(const QString& name, std::vector<std::uni
             }
         } else {
             new_space->nuse = *t_pTag->toInt();
-            if (!node->find_tag(*stream, FIFF_MNE_SOURCE_SPACE_SELECTION, t_pTag)) {
-                stream->close();
+            if (!node->find_tag(stream, FIFF_MNE_SOURCE_SPACE_SELECTION, t_pTag)) {
+                stream.close();
                 return FIFF_FAIL;
             }
 
@@ -1798,12 +1798,12 @@ int MNESourceSpace::read_source_spaces(const QString& name, std::vector<std::uni
                 * Selection triangulation
                 */
             ntri = 0;
-            if (node->find_tag(*stream, FIFF_MNE_SOURCE_SPACE_NUSE_TRI, t_pTag)) {
+            if (node->find_tag(stream, FIFF_MNE_SOURCE_SPACE_NUSE_TRI, t_pTag)) {
                 ntri = *t_pTag->toInt();
             }
             if (ntri > 0) {
-                if (!node->find_tag(*stream, FIFF_MNE_SOURCE_SPACE_USE_TRIANGLES, t_pTag)) {
-                    stream->close();
+                if (!node->find_tag(stream, FIFF_MNE_SOURCE_SPACE_USE_TRIANGLES, t_pTag)) {
+                    stream.close();
                     return FIFF_FAIL;
                 }
 
@@ -1815,7 +1815,7 @@ int MNESourceSpace::read_source_spaces(const QString& name, std::vector<std::uni
             /*
                 * The patch information becomes relevant here
                 */
-            if (node->find_tag(*stream, FIFF_MNE_SOURCE_SPACE_NEAREST, t_pTag)) {
+            if (node->find_tag(stream, FIFF_MNE_SOURCE_SPACE_NEAREST, t_pTag)) {
                 Eigen::Map<const Eigen::VectorXi> nearestMap(t_pTag->toInt(), new_space->np);
                 new_space->nearest.resize(new_space->np);
                 for (k = 0; k < new_space->np; k++) {
@@ -1824,8 +1824,8 @@ int MNESourceSpace::read_source_spaces(const QString& name, std::vector<std::uni
                     new_space->nearest[k].patch = nullptr;
                 }
 
-                if (!node->find_tag(*stream, FIFF_MNE_SOURCE_SPACE_NEAREST_DIST, t_pTag)) {
-                    stream->close();
+                if (!node->find_tag(stream, FIFF_MNE_SOURCE_SPACE_NEAREST_DIST, t_pTag)) {
+                    stream.close();
                     return FIFF_FAIL;
                 }
                 Eigen::Map<const Eigen::VectorXf> nearestDistMap(t_pTag->toFloat(), new_space->np);
@@ -1836,18 +1836,18 @@ int MNESourceSpace::read_source_spaces(const QString& name, std::vector<std::uni
             /*
             * We may have the distance matrix
             */
-            if (node->find_tag(*stream, FIFF_MNE_SOURCE_SPACE_DIST_LIMIT, t_pTag)) {
+            if (node->find_tag(stream, FIFF_MNE_SOURCE_SPACE_DIST_LIMIT, t_pTag)) {
                 new_space->dist_limit = *t_pTag->toFloat();
-                if (node->find_tag(*stream, FIFF_MNE_SOURCE_SPACE_DIST, t_pTag)) {
+                if (node->find_tag(stream, FIFF_MNE_SOURCE_SPACE_DIST, t_pTag)) {
                     //                    SparseMatrix<double> tmpSparse = t_pTag->toSparseFloatMatrix();
                     auto dist_lower = FiffSparseMatrix::fiff_get_float_sparse_matrix(t_pTag);
                     if (!dist_lower) {
-                        stream->close();
+                        stream.close();
                         return FIFF_FAIL;
                     }
                     auto dist_full = dist_lower->mne_add_upper_triangle_rcs();
                     if (!dist_full) {
-                        stream->close();
+                        stream.close();
                         return FIFF_FAIL;
                     }
                     new_space->dist = std::move(*dist_full);
@@ -1864,25 +1864,25 @@ int MNESourceSpace::read_source_spaces(const QString& name, std::vector<std::uni
             Eigen::VectorXi neighborsVec;
             Eigen::VectorXi nneighborsVec;
             ntot = nvert = 0;
-            if (node->find_tag(*stream, FIFF_MNE_SOURCE_SPACE_NEIGHBORS, t_pTag)) {
+            if (node->find_tag(stream, FIFF_MNE_SOURCE_SPACE_NEIGHBORS, t_pTag)) {
                 ntot = static_cast<int>(t_pTag->size() / sizeof(fiff_int_t));
                 neighborsVec = Eigen::Map<const Eigen::VectorXi>(t_pTag->toInt(), ntot);
             }
-            if (node->find_tag(*stream, FIFF_MNE_SOURCE_SPACE_NNEIGHBORS, t_pTag)) {
+            if (node->find_tag(stream, FIFF_MNE_SOURCE_SPACE_NNEIGHBORS, t_pTag)) {
                 nvert = static_cast<int>(t_pTag->size() / sizeof(fiff_int_t));
                 nneighborsVec = Eigen::Map<const Eigen::VectorXi>(t_pTag->toInt(), nvert);
             }
             if (neighborsVec.size() > 0 && nneighborsVec.size() > 0) {
                 if (nvert != new_space->np) {
                     qCritical("Inconsistent neighborhood data in file.");
-                    stream->close();
+                    stream.close();
                     return FIFF_FAIL;
                 }
                 for (k = 0, ntot_count = 0; k < nvert; k++)
                     ntot_count += nneighborsVec[k];
                 if (ntot_count != ntot) {
                     qCritical("Inconsistent neighborhood data in file.");
-                    stream->close();
+                    stream.close();
                     return FIFF_FAIL;
                 }
                 new_space->nneighbor_vert = Eigen::VectorXi::Zero(nvert);
@@ -1897,8 +1897,8 @@ int MNESourceSpace::read_source_spaces(const QString& name, std::vector<std::uni
             /*
                 * There might be a coordinate transformation and dimensions
                 */
-            new_space->voxel_surf_RAS_t = FiffCoordTrans(FiffCoordTrans::readTransformFromNode(*stream, node, FIFFV_MNE_COORD_MRI_VOXEL, FIFFV_MNE_COORD_SURFACE_RAS));
-            if (node->find_tag(*stream, FIFF_MNE_SOURCE_SPACE_VOXEL_DIMS, t_pTag)) {
+            new_space->voxel_surf_RAS_t = FiffCoordTrans(FiffCoordTrans::readTransformFromNode(stream, node, FIFFV_MNE_COORD_MRI_VOXEL, FIFFV_MNE_COORD_SURFACE_RAS));
+            if (node->find_tag(stream, FIFF_MNE_SOURCE_SPACE_VOXEL_DIMS, t_pTag)) {
                 Eigen::Map<const Eigen::Vector3i> volDimsMap(t_pTag->toInt());
                 Eigen::Map<Eigen::Vector3i>(new_space->vol_dims) = volDimsMap;
             }
@@ -1906,30 +1906,30 @@ int MNESourceSpace::read_source_spaces(const QString& name, std::vector<std::uni
                 QList<FiffDirNode::SPtr> mris = node->dir_tree_find(FIFFB_MNE_PARENT_MRI_FILE);
 
                 if (mris.size() == 0) { /* The old way */
-                    new_space->MRI_surf_RAS_RAS_t = FiffCoordTrans(FiffCoordTrans::readTransformFromNode(*stream, node, FIFFV_MNE_COORD_SURFACE_RAS, FIFFV_MNE_COORD_RAS));
-                    if (node->find_tag(*stream, FIFF_MNE_SOURCE_SPACE_MRI_FILE, t_pTag)) {
+                    new_space->MRI_surf_RAS_RAS_t = FiffCoordTrans(FiffCoordTrans::readTransformFromNode(stream, node, FIFFV_MNE_COORD_SURFACE_RAS, FIFFV_MNE_COORD_RAS));
+                    if (node->find_tag(stream, FIFF_MNE_SOURCE_SPACE_MRI_FILE, t_pTag)) {
                         new_space->MRI_volume = QString::fromStdString(t_pTag->toString());
                     }
-                    if (node->find_tag(*stream, FIFF_MNE_SOURCE_SPACE_INTERPOLATOR, t_pTag)) {
+                    if (node->find_tag(stream, FIFF_MNE_SOURCE_SPACE_INTERPOLATOR, t_pTag)) {
                         new_space->interpolator = std::move(*FiffSparseMatrix::fiff_get_float_sparse_matrix(t_pTag));
                     }
                 } else {
-                    if (mris[0]->find_tag(*stream, FIFF_MNE_FILE_NAME, t_pTag)) {
+                    if (mris[0]->find_tag(stream, FIFF_MNE_FILE_NAME, t_pTag)) {
                         new_space->MRI_volume = QString::fromStdString(t_pTag->toString());
                     }
-                    new_space->MRI_surf_RAS_RAS_t = FiffCoordTrans(FiffCoordTrans::readTransformFromNode(*stream, mris[0], FIFFV_MNE_COORD_SURFACE_RAS, FIFFV_MNE_COORD_RAS));
-                    new_space->MRI_voxel_surf_RAS_t = FiffCoordTrans(FiffCoordTrans::readTransformFromNode(*stream, mris[0], FIFFV_MNE_COORD_MRI_VOXEL, FIFFV_MNE_COORD_SURFACE_RAS));
+                    new_space->MRI_surf_RAS_RAS_t = FiffCoordTrans(FiffCoordTrans::readTransformFromNode(stream, mris[0], FIFFV_MNE_COORD_SURFACE_RAS, FIFFV_MNE_COORD_RAS));
+                    new_space->MRI_voxel_surf_RAS_t = FiffCoordTrans(FiffCoordTrans::readTransformFromNode(stream, mris[0], FIFFV_MNE_COORD_MRI_VOXEL, FIFFV_MNE_COORD_SURFACE_RAS));
 
-                    if (mris[0]->find_tag(*stream, FIFF_MNE_SOURCE_SPACE_INTERPOLATOR, t_pTag)) {
+                    if (mris[0]->find_tag(stream, FIFF_MNE_SOURCE_SPACE_INTERPOLATOR, t_pTag)) {
                         new_space->interpolator = std::move(*FiffSparseMatrix::fiff_get_float_sparse_matrix(t_pTag));
                     }
-                    if (mris[0]->find_tag(*stream, FIFF_MRI_WIDTH, t_pTag)) {
+                    if (mris[0]->find_tag(stream, FIFF_MRI_WIDTH, t_pTag)) {
                         new_space->MRI_vol_dims[0] = *t_pTag->toInt();
                     }
-                    if (mris[0]->find_tag(*stream, FIFF_MRI_HEIGHT, t_pTag)) {
+                    if (mris[0]->find_tag(stream, FIFF_MRI_HEIGHT, t_pTag)) {
                         new_space->MRI_vol_dims[1] = *t_pTag->toInt();
                     }
-                    if (mris[0]->find_tag(*stream, FIFF_MRI_DEPTH, t_pTag)) {
+                    if (mris[0]->find_tag(stream, FIFF_MRI_DEPTH, t_pTag)) {
                         new_space->MRI_vol_dims[2] = *t_pTag->toInt();
                     }
                 }
@@ -1938,7 +1938,7 @@ int MNESourceSpace::read_source_spaces(const QString& name, std::vector<std::uni
         new_space->add_triangle_data();
         local_spaces.push_back(std::move(new_space));
     }
-    stream->close();
+    stream.close();
 
     spaces = std::move(local_spaces);
 

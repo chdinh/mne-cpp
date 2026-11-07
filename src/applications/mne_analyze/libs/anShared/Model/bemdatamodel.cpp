@@ -78,9 +78,9 @@ BemDataModel::~BemDataModel()
 void BemDataModel::initBemData(QIODevice& qIODevice)
 {
     // build Bem
-    FIFFLIB::FiffStream::SPtr stream(new FIFFLIB::FiffStream(&qIODevice));
+    FIFFLIB::FiffStream stream(&qIODevice);
     MNEBem bem;
-    const bool read = MNEBem::readFromStream(*stream, true, bem);
+    const bool read = MNEBem::readFromStream(stream, true, bem);
     qIODevice.close();
     if (!read || bem.isEmpty()) {
         qWarning() << "[BemDataModel::initBemData] File does not contain any Bem data";

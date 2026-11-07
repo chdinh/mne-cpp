@@ -545,11 +545,11 @@ InvDipoleFitData* InvDipoleFitData::setup_dipole_fit_data(const QString& mriname
     }
     {
         QFile measFile(measname);
-        FiffStream::SPtr measStream(new FiffStream(&measFile));
-        if (measStream->open()) {
-            file_bads = measStream->read_bad_channels(measStream->dirtree());
+        FiffStream measStream(&measFile);
+        if (measStream.open()) {
+            file_bads = measStream.read_bad_channels(measStream.dirtree());
             file_nbad = static_cast<int>(file_bads.size());
-            measStream->close();
+            measStream.close();
         }
     }
     if (file_nbad > 0) {
@@ -654,16 +654,16 @@ InvDipoleFitData* InvDipoleFitData::setup_dipole_fit_data(const QString& mriname
         qInfo("%d compensation data sets in %s", comp_data->ncomp, measname.toUtf8().data());
         {
             QFile compFile(measname);
-            FiffStream::SPtr compStream(new FiffStream(&compFile));
-            if (!compStream->open())
+            FiffStream compStream(&compFile);
+            if (!compStream.open())
                 return nullptr;
             FiffInfo compInfo;
             FiffDirNode::SPtr compInfoNode;
-            if (!compStream->read_meas_info(compStream->dirtree(), compInfo, compInfoNode)) {
-                compStream->close();
+            if (!compStream.read_meas_info(compStream.dirtree(), compInfo, compInfoNode)) {
+                compStream.close();
                 return nullptr;
             }
-            compStream->close();
+            compStream.close();
             for (int k = 0; k < compInfo.chs.size(); k++) {
                 if (compInfo.chs[k].kind == FIFFV_REF_MEG_CH) {
                     comp_chs.append(compInfo.chs[k]);

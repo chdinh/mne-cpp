@@ -48,7 +48,7 @@ private:
     QString m_filePath;
     mutable QJsonObject m_metadata;
     QFile m_file;
-    FIFFLIB::FiffStream::SPtr m_stream;
+    FIFFLIB::FiffStream* m_stream = nullptr; // owned by m_rawData
     FIFFLIB::FiffRawData m_rawData;
 };
 

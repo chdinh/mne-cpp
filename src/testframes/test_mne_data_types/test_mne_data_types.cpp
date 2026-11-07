@@ -435,12 +435,12 @@ private slots:
         if (!QFile::exists(srcPath))
             QSKIP("Source space file not found");
         QFile file(srcPath);
-        FiffStream::SPtr stream(new FiffStream(&file));
-        if (!stream->open())
+        FiffStream stream(&file);
+        if (!stream.open())
             QSKIP("Failed to open source space file");
         MNESourceSpaces ss;
-        bool ok = MNESourceSpaces::readFromStream(*stream, true, ss);
-        stream->close();
+        bool ok = MNESourceSpaces::readFromStream(stream, true, ss);
+        stream.close();
         if (!ok || ss.isEmpty())
             QSKIP("Failed to read source spaces");
 
@@ -1232,7 +1232,7 @@ private slots:
         QBuffer buf;
         buf.open(QIODevice::ReadWrite);
         {
-            FiffStream::SPtr stream = FiffStream::start_file(buf);
+            auto stream = FiffStream::start_file(buf);
             fwd.src.writeToStream(*stream);
             stream->end_file();
         }

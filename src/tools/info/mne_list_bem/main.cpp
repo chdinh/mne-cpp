@@ -135,18 +135,18 @@ int main(int argc, char* argv[])
 
     // Read BEM surfaces
     QFile bemFile(bemName);
-    FiffStream::SPtr stream(new FiffStream(&bemFile));
-    if (!stream->open()) {
+    FiffStream stream(&bemFile);
+    if (!stream.open()) {
         qCritical("Cannot open BEM file: %s", qPrintable(bemName));
         return 1;
     }
 
     MNEBem bem;
-    if (!MNEBem::readFromStream(*stream, true, bem)) {
+    if (!MNEBem::readFromStream(stream, true, bem)) {
         qCritical("Cannot read BEM surfaces from: %s", qPrintable(bemName));
         return 1;
     }
-    stream->close();
+    stream.close();
 
     // Find the requested surface
     int surfIdx = -1;

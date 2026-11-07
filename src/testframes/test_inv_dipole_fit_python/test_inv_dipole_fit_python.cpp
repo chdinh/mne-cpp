@@ -143,7 +143,7 @@ bool writeSyntheticRaw(const QString& sourceFile, const QString& outFile, const 
     info.bads.clear();
 
     RowVectorXd cals;
-    FiffStream::SPtr stream = FiffStream::start_writing_raw(outFile.toStdString(), info, cals);
+    auto stream = FiffStream::start_writing_raw(outFile.toStdString(), info, cals);
     if (!stream)
         return false;
     constexpr int kBuffer = 100;

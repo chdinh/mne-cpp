@@ -541,7 +541,7 @@ void TestMneRawProjComp::projOp_readFromFile()
         QFile file(dir.filePath(name));
         if (!file.open(QIODevice::WriteOnly))
             return QString();
-        FiffStream::SPtr stream = FiffStream::start_file(file);
+        auto stream = FiffStream::start_file(file);
         if (block) {
             stream->start_block(FIFFB_PROJ);
             const fiff_int_t two = 2;
@@ -728,11 +728,11 @@ void TestMneRawProjComp::rawInfo_loadFromFile()
 void TestMneRawProjComp::rawInfo_findNodes()
 {
     QFile file(rawPath());
-    FiffStream::SPtr stream(new FiffStream(&file));
-    QVERIFY(stream->open());
+    FiffStream stream(&file);
+    QVERIFY(stream.open());
 
     // find_raw searches from the root via dir_tree_find
-    auto rawNode = MNERawInfo::find_raw(stream->dirtree());
+    auto rawNode = MNERawInfo::find_raw(stream.dirtree());
     QVERIFY(rawNode != nullptr);
     QVERIFY(!rawNode->isEmpty());
 
@@ -744,18 +744,18 @@ void TestMneRawProjComp::rawInfo_findNodes()
     QVERIFY(measInfoNode != nullptr);
 
     // MaxShield node may or may not exist
-    auto maxNode = MNERawInfo::find_maxshield(stream->dirtree());
+    auto maxNode = MNERawInfo::find_maxshield(stream.dirtree());
     // It's OK if this is null for non-MaxShield data
 }
 
 void TestMneRawProjComp::rawInfo_getMeasInfo()
 {
     QFile file(rawPath());
-    FiffStream::SPtr stream(new FiffStream(&file));
-    QVERIFY(stream->open());
+    FiffStream stream(&file);
+    QVERIFY(stream.open());
 
     // find_raw to get a node inside the FIFFB_MEAS block
-    auto rawNode = MNERawInfo::find_raw(stream->dirtree());
+    auto rawNode = MNERawInfo::find_raw(stream.dirtree());
     QVERIFY(rawNode != nullptr);
 
     std::unique_ptr<FiffId> id;
@@ -765,7 +765,7 @@ void TestMneRawProjComp::rawInfo_getMeasInfo()
     FiffCoordTrans trans;
     FiffTime start_time;
 
-    int result = MNERawInfo::get_meas_info(*stream, rawNode, id, &nchan,
+    int result = MNERawInfo::get_meas_info(stream, rawNode, id, &nchan,
                                            &sfreq, &highpass, &lowpass,
                                            chp, trans, start_time);
     QCOMPARE(result, 0);

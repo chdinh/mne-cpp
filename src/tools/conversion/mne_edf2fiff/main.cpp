@@ -94,7 +94,7 @@ int main(int argc, char* argv[])
 
     const FiffRawData fiffRaw = reader.toFiffRawData();
     RowVectorXd cals;
-    FiffStream::SPtr outfid = FiffStream::start_writing_raw(UTILSLIB::pathFromUtf8(sOutputFile.toStdString()), fiffRaw.info, cals);
+    auto outfid = FiffStream::start_writing_raw(UTILSLIB::pathFromUtf8(sOutputFile.toStdString()), fiffRaw.info, cals);
     if (!outfid) {
         qCritical() << "Could not write" << sOutputFile;
         return 1;

@@ -65,7 +65,7 @@ int mne_read_meg_comp_eeg_ch_info_32(const QString& name,
       */
 {
     QFile file(name);
-    FiffStream::SPtr stream(new FiffStream(&file));
+    FiffStream stream(&file);
 
     QList<FIFFLIB::FiffChInfo> chs;
     int nchan = 0;
@@ -84,18 +84,18 @@ int mne_read_meg_comp_eeg_ch_info_32(const QString& name,
     fiff_int_t kind, pos;
     int j, k, to_find;
 
-    if (!stream->open()) {
-        stream->close();
+    if (!stream.open()) {
+        stream.close();
         return FIFF_FAIL;
     }
 
-    nodes = stream->dirtree()->dir_tree_find(FIFFB_MNE_PARENT_MEAS_FILE);
+    nodes = stream.dirtree()->dir_tree_find(FIFFB_MNE_PARENT_MEAS_FILE);
 
     if (nodes.size() == 0) {
-        nodes = stream->dirtree()->dir_tree_find(FIFFB_MEAS_INFO);
+        nodes = stream.dirtree()->dir_tree_find(FIFFB_MEAS_INFO);
         if (nodes.size() == 0) {
             qCritical("Could not find the channel information.");
-            stream->close();
+            stream.close();
             return FIFF_FAIL;
         }
     }
@@ -106,8 +106,8 @@ int mne_read_meg_comp_eeg_ch_info_32(const QString& name,
         pos = info->dir[k]->pos;
         switch (kind) {
             case FIFF_NCHAN:
-                if (!stream->read_tag(t_pTag, pos)) {
-                    stream->close();
+                if (!stream.read_tag(t_pTag, pos)) {
+                    stream.close();
                     return FIFF_FAIL;
                 }
                 nchan = *t_pTag->toInt();
@@ -120,16 +120,16 @@ int mne_read_meg_comp_eeg_ch_info_32(const QString& name,
                 break;
 
             case FIFF_PARENT_BLOCK_ID:
-                if (!stream->read_tag(t_pTag, pos)) {
-                    stream->close();
+                if (!stream.read_tag(t_pTag, pos)) {
+                    stream.close();
                     return FIFF_FAIL;
                 }
                 id = std::make_unique<FiffId>(*(FiffId*)t_pTag->data());
                 break;
 
             case FIFF_COORD_TRANS:
-                if (!stream->read_tag(t_pTag, pos)) {
-                    stream->close();
+                if (!stream.read_tag(t_pTag, pos)) {
+                    stream.close();
                     return FIFF_FAIL;
                 }
                 //            t = t_pTag->toCoordTrans();
@@ -139,15 +139,15 @@ int mne_read_meg_comp_eeg_ch_info_32(const QString& name,
                 break;
 
             case FIFF_CH_INFO: /* Information about one channel */
-                if (!stream->read_tag(t_pTag, pos)) {
-                    stream->close();
+                if (!stream.read_tag(t_pTag, pos)) {
+                    stream.close();
                     return FIFF_FAIL;
                 }
 
                 this_ch = t_pTag->toChInfo();
                 if (this_ch.scanNo <= 0 || this_ch.scanNo > nchan) {
                     qCritical("FIFF_CH_INFO : scan # out of range %d (%d)!", this_ch.scanNo, nchan);
-                    stream->close();
+                    stream.close();
                     return FIFF_FAIL;
                 } else
                     chs[this_ch.scanNo - 1] = this_ch;
@@ -157,7 +157,7 @@ int mne_read_meg_comp_eeg_ch_info_32(const QString& name,
     }
     if (to_find != 0) {
         qCritical("Some of the channel information was missing.");
-        stream->close();
+        stream.close();
         return FIFF_FAIL;
     }
     if (t.isEmpty() && meg_head_t != nullptr) {
@@ -167,7 +167,7 @@ int mne_read_meg_comp_eeg_ch_info_32(const QString& name,
         t = FiffCoordTrans::readMeasTransform(name);
         if (t.isEmpty()) {
             qCritical("MEG -> head coordinate transformation not found.");
-            stream->close();
+            stream.close();
             return FIFF_FAIL;
         }
     }
@@ -187,7 +187,7 @@ int mne_read_meg_comp_eeg_ch_info_32(const QString& name,
         }
     }
     //    fiff_close(in);
-    stream->close();
+    stream.close();
 
     megp = meg;
     if (nmegp) {
@@ -328,7 +328,7 @@ std::unique_ptr<MNECTFCompDataSet> MNECTFCompDataSet::read(const QString& name)
      */
 {
     QFile file(name);
-    FiffStream::SPtr stream(new FiffStream(&file));
+    FiffStream stream(&file);
 
     std::unique_ptr<MNECTFCompDataSet> set;
     QList<FiffDirNode::SPtr> nodes;
@@ -365,22 +365,22 @@ std::unique_ptr<MNECTFCompDataSet> MNECTFCompDataSet::read(const QString& name)
     /*
         * Read the rest of the stuff
         */
-    if (!stream->open()) {
-        stream->close();
+    if (!stream.open()) {
+        stream.close();
         return nullptr;
     }
     set = std::make_unique<MNECTFCompDataSet>();
     /*
         * Locate the compensation data sets
         */
-    nodes = stream->dirtree()->dir_tree_find(FIFFB_MNE_CTF_COMP);
+    nodes = stream.dirtree()->dir_tree_find(FIFFB_MNE_CTF_COMP);
     if (nodes.size() == 0) {
-        stream->close();
+        stream.close();
         return set;
     }
     comps = nodes[0]->dir_tree_find(FIFFB_MNE_CTF_COMP_DATA);
     if (comps.size() == 0) {
-        stream->close();
+        stream.close();
         return set;
     }
     ncomp = comps.size();
@@ -393,19 +393,19 @@ std::unique_ptr<MNECTFCompDataSet> MNECTFCompDataSet::read(const QString& name)
         * Read each data set
         */
     for (k = 0; k < ncomp; k++) {
-        auto mat = MNENamedMatrix::read(*stream, comps[k], FIFF_MNE_CTF_COMP_DATA);
+        auto mat = MNENamedMatrix::read(stream, comps[k], FIFF_MNE_CTF_COMP_DATA);
         if (!mat) {
-            stream->close();
+            stream.close();
             return nullptr;
         }
-        comps[k]->find_tag(*stream, FIFF_MNE_CTF_COMP_KIND, t_pTag);
+        comps[k]->find_tag(stream, FIFF_MNE_CTF_COMP_KIND, t_pTag);
         if (t_pTag) {
             kind = *t_pTag->toInt();
         } else {
-            stream->close();
+            stream.close();
             return nullptr;
         }
-        comps[k]->find_tag(*stream, FIFF_MNE_CTF_COMP_CALIBRATED, t_pTag);
+        comps[k]->find_tag(stream, FIFF_MNE_CTF_COMP_CALIBRATED, t_pTag);
         if (t_pTag) {
             calibrated = *t_pTag->toInt();
         } else
@@ -429,7 +429,7 @@ std::unique_ptr<MNECTFCompDataSet> MNECTFCompDataSet::read(const QString& name)
 #ifdef DEBUG
     qInfo("%d CTF compensation data sets read from %s\n", set->ncomp, name);
 #endif
-    stream->close();
+    stream.close();
     return set;
 }
 

@@ -175,7 +175,7 @@ bool FiffEvokedSet::read(const std::filesystem::path& path,
 {
     p_FiffEvokedSet.clear();
 
-    FiffStream::SPtr t_pStream = FiffStream::open(path);
+    auto t_pStream = FiffStream::open(path);
     if (!t_pStream)
         return false;
     QString t_sFileName = t_pStream->streamName();
@@ -229,7 +229,7 @@ bool FiffEvokedSet::save(const std::filesystem::path& path) const
         return false;
     }
 
-    FiffStream::SPtr pStream = FiffStream::start_file(path);
+    auto pStream = FiffStream::start_file(path);
     if (!pStream) {
         return false;
     }

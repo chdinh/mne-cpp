@@ -311,9 +311,9 @@ private slots:
             QSKIP("Source space not found");
 
         MNESourceSpaces srcSpace;
-        FiffStream::SPtr srcStream(new FiffStream(&file));
-        srcStream->open();
-        QVERIFY(MNESourceSpaces::readFromStream(*srcStream, false, srcSpace));
+        FiffStream srcStream(&file);
+        srcStream.open();
+        QVERIFY(MNESourceSpaces::readFromStream(srcStream, false, srcSpace));
         QCOMPARE(srcSpace.size(), 2);
 
         // Check vertices consistency
@@ -375,28 +375,28 @@ private slots:
         if (!file.exists())
             QSKIP("BEM solution not found");
 
-        FiffStream::SPtr stream(new FiffStream(&file));
-        QVERIFY(stream->open());
+        FiffStream stream(&file);
+        QVERIFY(stream.open());
 
         // Navigate the tree
-        QVERIFY(stream->dir().size() > 0);
-        QVERIFY(stream->dirtree() != nullptr);
+        QVERIFY(stream.dir().size() > 0);
+        QVERIFY(stream.dirtree() != nullptr);
 
         // Find BEM blocks
-        QList<FiffDirNode::SPtr> bemBlocks = stream->dirtree()->dir_tree_find(FIFFB_BEM);
+        QList<FiffDirNode::SPtr> bemBlocks = stream.dirtree()->dir_tree_find(FIFFB_BEM);
         if (bemBlocks.isEmpty())
-            bemBlocks = stream->dirtree()->dir_tree_find(FIFFB_BEM_SURF);
+            bemBlocks = stream.dirtree()->dir_tree_find(FIFFB_BEM_SURF);
 
         // Read tags to exercise parsing
-        int nTags = qMin((int)stream->dir().size(), 100);
+        int nTags = qMin((int)stream.dir().size(), 100);
         for (int i = 0; i < nTags; ++i) {
             FiffTag::UPtr tag;
-            stream->read_tag(tag, stream->dir()[i]->pos);
+            stream.read_tag(tag, stream.dir()[i]->pos);
             QVERIFY(tag != nullptr);
             QVERIFY(tag->kind >= 0);
         }
 
-        stream->close();
+        stream.close();
     }
 
     //=========================================================================
@@ -413,18 +413,18 @@ private slots:
             QSKIP("Transform file not found");
 
         FiffCoordTrans trans;
-        FiffStream::SPtr stream(new FiffStream(&file));
-        QVERIFY(stream->open());
+        FiffStream stream(&file);
+        QVERIFY(stream.open());
 
-        QList<FiffDirNode::SPtr> nodes = stream->dirtree()->dir_tree_find(FIFFB_MNE_PARENT_MRI_FILE);
+        QList<FiffDirNode::SPtr> nodes = stream.dirtree()->dir_tree_find(FIFFB_MNE_PARENT_MRI_FILE);
         if (nodes.isEmpty())
-            nodes = stream->dirtree()->dir_tree_find(FIFFB_MEAS_INFO);
+            nodes = stream.dirtree()->dir_tree_find(FIFFB_MEAS_INFO);
 
         // Read any coord transform tags
-        for (int i = 0; i < stream->dir().size(); ++i) {
-            if (stream->dir()[i]->kind == FIFF_COORD_TRANS) {
+        for (int i = 0; i < stream.dir().size(); ++i) {
+            if (stream.dir()[i]->kind == FIFF_COORD_TRANS) {
                 FiffTag::UPtr tag;
-                stream->read_tag(tag, stream->dir()[i]->pos);
+                stream.read_tag(tag, stream.dir()[i]->pos);
                 trans = tag->toCoordTrans();
                 break;
             }
@@ -440,7 +440,7 @@ private slots:
             QVERIFY(inv.to == trans.from);
         }
 
-        stream->close();
+        stream.close();
     }
 
     //=========================================================================

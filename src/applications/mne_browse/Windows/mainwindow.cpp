@@ -228,7 +228,7 @@ bool writeFilteredRawFile(const QString& rawFilePath,
 
     Eigen::RowVectorXd cals;
 
-    FIFFLIB::FiffStream::SPtr outfid = FIFFLIB::FiffStream::start_writing_raw(FIFFLIB::FiffStream::byteStream(*pIODevice, QIODevice::WriteOnly), raw.info, cals);
+    auto outfid = FIFFLIB::FiffStream::start_writing_raw(FIFFLIB::FiffStream::byteStream(*pIODevice, QIODevice::WriteOnly), raw.info, cals);
     if (!outfid) {
         qWarning() << "[MainWindow] Could not open output stream for filtered write.";
         return false;

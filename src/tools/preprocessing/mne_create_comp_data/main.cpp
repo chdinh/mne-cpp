@@ -172,7 +172,7 @@ int main(int argc, char* argv[])
     // Write FIFF output with CTF compensation data
     //
     QFile fOut(outFile);
-    FiffStream::SPtr stream = FiffStream::start_file(fOut);
+    auto stream = FiffStream::start_file(fOut);
     if (!stream) {
         qCritical("Cannot create output FIFF file.");
         return 1;

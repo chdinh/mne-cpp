@@ -227,7 +227,7 @@ void TestMneSourceSpaceOpsPython::writeRoundTrip()
     const QString path = m_dir.filePath("roundtrip-src.fif");
     {
         QFile file(path);
-        FiffStream::SPtr stream = FiffStream::start_file(file);
+        auto stream = FiffStream::start_file(file);
         QVERIFY(stream);
         for (const auto& s : m_spaces)
             QCOMPARE(s->writeToStream(*stream, false), 0);
@@ -254,7 +254,7 @@ void TestMneSourceSpaceOpsPython::writeRoundTrip()
     const QString selPath = m_dir.filePath("selected-src.fif");
     {
         QFile file(selPath);
-        FiffStream::SPtr stream = FiffStream::start_file(file);
+        auto stream = FiffStream::start_file(file);
         QVERIFY(stream);
         QCOMPARE(m_spaces[0]->writeToStream(*stream, true), 0);
         stream->end_file();
@@ -306,7 +306,7 @@ void TestMneSourceSpaceOpsPython::volumeNeighborsRoundTrip()
     const QString selPath = m_dir.filePath("volume-selected-src.fif");
     for (bool selected : {false, true}) {
         QFile file(selected ? selPath : path);
-        FiffStream::SPtr stream = FiffStream::start_file(file);
+        auto stream = FiffStream::start_file(file);
         QVERIFY(stream);
         QCOMPARE(vol->writeToStream(*stream, selected), 0);
         stream->end_file();
@@ -470,7 +470,7 @@ void TestMneSourceSpaceOpsPython::readsPythonVolumeSpace()
     const QString path = m_dir.filePath("python-vol-src.fif");
     {
         QFile file(path);
-        FiffStream::SPtr stream = FiffStream::start_file(file);
+        auto stream = FiffStream::start_file(file);
         QVERIFY(stream);
         QCOMPARE(v.writeToStream(*stream, false), 0);
         stream->end_file();
@@ -519,9 +519,9 @@ void TestMneSourceSpaceOpsPython::bemNormals_matchPython()
     QFETCH(Vector3d, normal17);
 
     QFile file(QStringLiteral(MNE_SOURCE_SPACE_DATA_DIR "/ico2-bem.fif"));
-    FiffStream::SPtr stream(new FiffStream(&file));
+    FiffStream stream(&file);
     MNEBem bem;
-    QVERIFY(MNEBem::readFromStream(*stream, addGeom, bem));
+    QVERIFY(MNEBem::readFromStream(stream, addGeom, bem));
     QCOMPARE(bem.size(), 2);
 
     // mne.read_bem_surfaces(patch_stats=addGeom): normals from the triangles when

@@ -1027,10 +1027,17 @@ void TestFiffFsLibrary::fiffRaw_copyConstructor()
         QSKIP("No test data");
     FiffRawData raw(rawPath().toStdString());
     QVERIFY(!raw.isEmpty());
-    FiffRawData raw2(raw);
+    const fiff_int_t nchan = raw.info.nchan;
+    const fiff_int_t firstSamp = raw.first_samp;
+    // Raw data owns its open file, so it moves and still reads
+    FiffRawData raw2(std::move(raw));
     QVERIFY(!raw2.isEmpty());
-    QCOMPARE(raw2.info.nchan, raw.info.nchan);
-    QCOMPARE(raw2.first_samp, raw.first_samp);
+    QCOMPARE(raw2.info.nchan, nchan);
+    QCOMPARE(raw2.first_samp, firstSamp);
+    Eigen::MatrixXd data, times;
+    QVERIFY(raw2.read_raw_segment(data, times, firstSamp, firstSamp + 9));
+    QCOMPARE(data.cols(), Eigen::Index(10));
+    static_assert(!std::is_copy_constructible_v<FiffRawData>);
 }
 
 //=============================================================================================================
@@ -1149,8 +1156,8 @@ void TestFiffFsLibrary::fiffStream_startAndEndFile()
 {
     QBuffer buffer;
     buffer.open(QIODevice::ReadWrite);
-    FiffStream::SPtr stream = FiffStream::start_file(buffer);
-    QVERIFY(!stream.isNull());
+    auto stream = FiffStream::start_file(buffer);
+    QVERIFY(stream);
     stream->end_file();
     QVERIFY(buffer.size() > 0);
 }
@@ -1159,7 +1166,7 @@ void TestFiffFsLibrary::fiffStream_writeIntAndFloat()
 {
     QBuffer buffer;
     buffer.open(QIODevice::ReadWrite);
-    FiffStream::SPtr stream = FiffStream::start_file(buffer);
+    auto stream = FiffStream::start_file(buffer);
     fiff_int_t intData[] = {1, 2, 3, 4, 5};
     fiff_long_t pos1 = stream->write_int(FIFF_MNE_NROW, intData, 5);
     QVERIFY(pos1 >= 0);
@@ -1176,7 +1183,7 @@ void TestFiffFsLibrary::fiffStream_writeMatrices()
 {
     QBuffer buffer;
     buffer.open(QIODevice::ReadWrite);
-    FiffStream::SPtr stream = FiffStream::start_file(buffer);
+    auto stream = FiffStream::start_file(buffer);
     MatrixXf floatMat = MatrixXf::Random(3, 4);
     fiff_long_t pos1 = stream->write_float_matrix(FIFF_MNE_FORWARD_SOLUTION, floatMat);
     QVERIFY(pos1 >= 0);
@@ -1191,7 +1198,7 @@ void TestFiffFsLibrary::fiffStream_writeStringAndNameList()
 {
     QBuffer buffer;
     buffer.open(QIODevice::ReadWrite);
-    FiffStream::SPtr stream = FiffStream::start_file(buffer);
+    auto stream = FiffStream::start_file(buffer);
     fiff_long_t pos1 = stream->write_string(FIFF_DESCRIPTION, "Test description string");
     QVERIFY(pos1 >= 0);
     StringList names;
@@ -1208,7 +1215,7 @@ void TestFiffFsLibrary::fiffStream_writeId()
 {
     QBuffer buffer;
     buffer.open(QIODevice::ReadWrite);
-    FiffStream::SPtr stream = FiffStream::start_file(buffer);
+    auto stream = FiffStream::start_file(buffer);
     fiff_long_t pos1 = stream->write_id(FIFF_FILE_ID);
     QVERIFY(pos1 >= 0);
     FiffId id = FiffId::new_file_id();
@@ -1221,7 +1228,7 @@ void TestFiffFsLibrary::fiffStream_writeChInfo()
 {
     QBuffer buffer;
     buffer.open(QIODevice::ReadWrite);
-    FiffStream::SPtr stream = FiffStream::start_file(buffer);
+    auto stream = FiffStream::start_file(buffer);
     stream->start_block(FIFFB_MEAS_INFO);
     FiffChInfo chInfo;
     chInfo.ch_name = "MEG 0113";
@@ -1245,7 +1252,7 @@ void TestFiffFsLibrary::fiffStream_writeCoordTrans()
 {
     QBuffer buffer;
     buffer.open(QIODevice::ReadWrite);
-    FiffStream::SPtr stream = FiffStream::start_file(buffer);
+    auto stream = FiffStream::start_file(buffer);
     FiffCoordTrans trans;
     trans.from = FIFFV_COORD_HEAD;
     trans.to = FIFFV_COORD_MRI;
@@ -1260,7 +1267,7 @@ void TestFiffFsLibrary::fiffStream_writeDigPoint()
 {
     QBuffer buffer;
     buffer.open(QIODevice::ReadWrite);
-    FiffStream::SPtr stream = FiffStream::start_file(buffer);
+    auto stream = FiffStream::start_file(buffer);
     FiffDigPoint digPoint;
     digPoint.kind = FIFFV_POINT_HPI;
     digPoint.ident = 1;
@@ -1276,7 +1283,7 @@ void TestFiffFsLibrary::fiffStream_writeCov()
 {
     QBuffer buffer;
     buffer.open(QIODevice::ReadWrite);
-    FiffStream::SPtr stream = FiffStream::start_file(buffer);
+    auto stream = FiffStream::start_file(buffer);
     FiffCov cov;
     cov.kind = FIFFV_MNE_NOISE_COV;
     cov.dim = 3;
@@ -1294,7 +1301,7 @@ void TestFiffFsLibrary::fiffStream_writeProj()
 {
     QBuffer buffer;
     buffer.open(QIODevice::ReadWrite);
-    FiffStream::SPtr stream = FiffStream::start_file(buffer);
+    auto stream = FiffStream::start_file(buffer);
     QList<FiffProj> projs;
     FiffProj proj;
     proj.kind = 1;
@@ -1319,7 +1326,7 @@ void TestFiffFsLibrary::fiffStream_writeNamedMatrix()
 {
     QBuffer buffer;
     buffer.open(QIODevice::ReadWrite);
-    FiffStream::SPtr stream = FiffStream::start_file(buffer);
+    auto stream = FiffStream::start_file(buffer);
     FiffNamedMatrix named;
     named.nrow = 2;
     named.ncol = 3;
@@ -1338,7 +1345,7 @@ void TestFiffFsLibrary::fiffStream_writeRawBuffer()
 {
     QBuffer buffer;
     buffer.open(QIODevice::ReadWrite);
-    FiffStream::SPtr stream = FiffStream::start_file(buffer);
+    auto stream = FiffStream::start_file(buffer);
     stream->start_block(FIFFB_RAW_DATA);
     MatrixXd rawBuf = MatrixXd::Random(5, 100);
     bool ok1 = stream->write_raw_buffer(rawBuf);
@@ -1358,7 +1365,7 @@ void TestFiffFsLibrary::fiffStream_writeSparseMatrix()
 {
     QBuffer buffer;
     buffer.open(QIODevice::ReadWrite);
-    FiffStream::SPtr stream = FiffStream::start_file(buffer);
+    auto stream = FiffStream::start_file(buffer);
     SparseMatrix<float> sparseMat(4, 4);
     sparseMat.insert(0, 0) = 1.0f;
     sparseMat.insert(1, 1) = 2.0f;
@@ -1376,7 +1383,7 @@ void TestFiffFsLibrary::fiffStream_writeDirEntries()
 {
     QBuffer buffer;
     buffer.open(QIODevice::ReadWrite);
-    FiffStream::SPtr stream = FiffStream::start_file(buffer);
+    auto stream = FiffStream::start_file(buffer);
     QList<FiffDirEntry::SPtr> dir;
     FiffDirEntry::SPtr entry1(new FiffDirEntry());
     entry1->kind = FIFF_FILE_ID;
@@ -1395,7 +1402,7 @@ void TestFiffFsLibrary::fiffStream_startEndBlocks()
 {
     QBuffer buffer;
     buffer.open(QIODevice::ReadWrite);
-    FiffStream::SPtr stream = FiffStream::start_file(buffer);
+    auto stream = FiffStream::start_file(buffer);
     fiff_long_t p1 = stream->start_block(FIFFB_MEAS);
     QVERIFY(p1 >= 0);
     fiff_long_t p2 = stream->start_block(FIFFB_MEAS_INFO);
@@ -1411,7 +1418,7 @@ void TestFiffFsLibrary::fiffStream_writeRtCommand()
 {
     QBuffer buffer;
     buffer.open(QIODevice::ReadWrite);
-    FiffStream::SPtr stream = FiffStream::start_file(buffer);
+    auto stream = FiffStream::start_file(buffer);
     stream->write_rt_command(1, "test_command");
     stream->write_rt_command(2, "another_command");
     stream->end_file();
@@ -1422,7 +1429,7 @@ void TestFiffFsLibrary::fiffStream_readTagInfoAndData()
 {
     QBuffer buffer;
     buffer.open(QIODevice::ReadWrite);
-    FiffStream::SPtr stream = FiffStream::start_file(buffer);
+    auto stream = FiffStream::start_file(buffer);
     fiff_int_t val = 42;
     stream->write_int(FIFF_MNE_NROW, &val, 1);
     stream->end_file();
@@ -1453,7 +1460,7 @@ void TestFiffFsLibrary::fiff_microCoveragePush()
     QVERIFY(digData.nfids() == 0);
     QBuffer buffer;
     buffer.open(QIODevice::ReadWrite);
-    FiffStream::SPtr stream = FiffStream::start_file(buffer);
+    auto stream = FiffStream::start_file(buffer);
     fiff_int_t val2 = 1;
     stream->write_int(FIFF_MNE_NROW, &val2, 1);
     stream->end_file();

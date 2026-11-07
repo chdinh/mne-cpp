@@ -97,7 +97,7 @@ bool RTPROCESSINGLIB::filterFile(QIODevice& pIODevice,
     RowVectorXd cals;
     SparseMatrix<double> mult;
     RowVectorXi sel;
-    FiffStream::SPtr outfid = FiffStream::start_writing_raw(FiffStream::byteStream(pIODevice, QIODevice::WriteOnly), pFiffRawData->info, cals);
+    auto outfid = FiffStream::start_writing_raw(FiffStream::byteStream(pIODevice, QIODevice::WriteOnly), pFiffRawData->info, cals);
     if (!outfid) {
         return false;
     }

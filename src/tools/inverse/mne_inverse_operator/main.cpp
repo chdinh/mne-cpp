@@ -164,13 +164,13 @@ static QList<FiffProj> readProjFile(const QString& fileName)
 {
     QList<FiffProj> projs;
     QFile file(fileName);
-    FiffStream::SPtr stream(new FiffStream(&file));
-    if (!stream->open()) {
+    FiffStream stream(&file);
+    if (!stream.open()) {
         qWarning() << "  WARNING: Could not open projection file" << fileName;
         return projs;
     }
-    projs = stream->read_proj(stream->dirtree());
-    stream->close();
+    projs = stream.read_proj(stream.dirtree());
+    stream.close();
     return projs;
 }
 

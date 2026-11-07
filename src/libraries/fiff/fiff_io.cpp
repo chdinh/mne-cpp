@@ -84,16 +84,16 @@ bool FiffIO::setup_read(QIODevice& pIODevice,
                         FiffDirNode::SPtr& dirTree)
 {
     //Open the file
-    FiffStream::SPtr p_pStream(new FiffStream(&pIODevice));
-    QString t_sFileName = p_pStream->streamName();
+    FiffStream p_pStream(&pIODevice);
+    QString t_sFileName = p_pStream.streamName();
 
     qInfo("Opening fiff data %s...\n", t_sFileName.toUtf8().constData());
 
-    if (!p_pStream->open())
+    if (!p_pStream.open())
         return false;
 
     //Read the measurement info
-    if (!p_pStream->read_meas_info(p_pStream->dirtree(), info, dirTree))
+    if (!p_pStream.read_meas_info(p_pStream.dirtree(), info, dirTree))
         return false;
 
     return true;
@@ -246,7 +246,7 @@ bool FiffIO::write_raw(QIODevice& pIODevice,
     RowVectorXd cals;
     SparseMatrix<double> mult;
     RowVectorXi sel;
-    FiffStream::SPtr outfid = FiffStream::start_writing_raw(FiffStream::byteStream(pIODevice, QIODevice::WriteOnly), this->m_qlistRaw[idx]->info, cals);
+    auto outfid = FiffStream::start_writing_raw(FiffStream::byteStream(pIODevice, QIODevice::WriteOnly), this->m_qlistRaw[idx]->info, cals);
     if (!outfid) {
         return false;
     }

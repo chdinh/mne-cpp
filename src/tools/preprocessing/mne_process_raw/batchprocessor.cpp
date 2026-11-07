@@ -219,7 +219,7 @@ int BatchProcessor::run(const ProcessingSettings& settings)
                         composeSaveNames(rawName, settings.saveProjTag, settings.saveHere,
                                          projSaveName, projLogName);
                         QFile projOutFile(projSaveName);
-                        FiffStream::SPtr pProjStream = FiffStream::start_file(projOutFile);
+                        auto pProjStream = FiffStream::start_file(projOutFile);
                         if (pProjStream) {
                             pProjStream->write_proj(newProjs);
                             pProjStream->end_file();
@@ -231,14 +231,14 @@ int BatchProcessor::run(const ProcessingSettings& settings)
                 QList<FiffProj> loadedProjs;
                 for (const QString& projFile : settings.projFiles) {
                     QFile pFile(projFile);
-                    FiffStream::SPtr pStream(new FiffStream(&pFile));
-                    if (pStream->open()) {
-                        QList<FiffDirNode::SPtr> projNodes = pStream->dirtree()->dir_tree_find(FIFFB_PROJ);
+                    FiffStream pStream(&pFile);
+                    if (pStream.open()) {
+                        QList<FiffDirNode::SPtr> projNodes = pStream.dirtree()->dir_tree_find(FIFFB_PROJ);
                         if (!projNodes.isEmpty()) {
-                            QList<FiffProj> fileProjs = pStream->read_proj(projNodes[0]);
+                            QList<FiffProj> fileProjs = pStream.read_proj(projNodes[0]);
                             loadedProjs.append(fileProjs);
                         }
-                        pStream->close();
+                        pStream.close();
                     }
                 }
                 if (!loadedProjs.isEmpty()) {

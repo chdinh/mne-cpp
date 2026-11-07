@@ -1614,10 +1614,10 @@ private slots:
         QVERIFY2(m_lastExitCode == 0, qPrintable(output));
 
         QFile file(outFile);
-        FIFFLIB::FiffStream::SPtr stream(new FIFFLIB::FiffStream(&file));
-        QVERIFY(stream->open());
-        const QList<FIFFLIB::FiffProj> projectors = stream->read_proj(stream->dirtree());
-        stream->close();
+        FIFFLIB::FiffStream stream(&file);
+        QVERIFY(stream.open());
+        const QList<FIFFLIB::FiffProj> projectors = stream.read_proj(stream.dirtree());
+        stream.close();
         QCOMPARE(projectors.size(), 2);
         for (const FIFFLIB::FiffProj& projector : projectors) {
             QVERIFY(projector.data);

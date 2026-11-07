@@ -166,7 +166,7 @@ QByteArray serialize(const FiffInfo& info)
     auto memory = std::make_unique<UTILSLIB::MemoryByteStream>();
     const UTILSLIB::MemoryByteStream& written = *memory;
     Eigen::RowVectorXd cals;
-    FiffStream::SPtr stream = FiffStream::start_writing_raw(std::move(memory), copy, cals, defaultMatrixXi, false);
+    auto stream = FiffStream::start_writing_raw(std::move(memory), copy, cals, defaultMatrixXi, false);
     stream->finish_writing_raw();
     return QByteArray(reinterpret_cast<const char*>(written.data().data()), static_cast<qsizetype>(written.size()));
 }

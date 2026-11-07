@@ -138,14 +138,14 @@ std::unique_ptr<MNEDeriv> makeDeriv(const QList<MNEDerivSet::Definition>& defini
 std::optional<MNEDerivSet> MNEDerivSet::read(const QString& path)
 {
     QFile file(path);
-    FiffStream::SPtr stream(new FiffStream(&file));
-    if (!stream->open()) {
+    FiffStream stream(&file);
+    if (!stream.open()) {
         return std::nullopt;
     }
     MNEDerivSet set;
-    for (const FiffDirNode::SPtr& block : stream->dirtree()->dir_tree_find(FIFFB_MNE_DERIVATIONS)) {
+    for (const FiffDirNode::SPtr& block : stream.dirtree()->dir_tree_find(FIFFB_MNE_DERIVATIONS)) {
         for (const FiffDirNode::SPtr& matrix : block->dir_tree_find(FIFFB_MNE_NAMED_MATRIX)) {
-            auto data = MNESparseNamedMatrix::read(*stream, matrix, FIFF_MNE_DERIVATION_DATA);
+            auto data = MNESparseNamedMatrix::read(stream, matrix, FIFF_MNE_DERIVATION_DATA);
             if (!data) {
                 qWarning("MNEDerivSet::read - Bad derivation data in %s", qPrintable(path));
                 return std::nullopt;
@@ -248,7 +248,7 @@ bool MNEDerivSet::write(const QString& path) const
         return false;
     }
     QFile file(path);
-    FiffStream::SPtr stream = FiffStream::start_file(file);
+    auto stream = FiffStream::start_file(file);
     if (!stream) {
         return false;
     }

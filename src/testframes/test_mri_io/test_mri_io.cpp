@@ -606,8 +606,8 @@ void TestMriIO::testCorFifWriteRead()
 
     // Read back and verify FIFF structure
     QFile file(corFifPath);
-    FiffStream::SPtr stream(new FiffStream(&file));
-    QVERIFY(stream->open());
+    FiffStream stream(&file);
+    QVERIFY(stream.open());
 
     // Find and verify blocks
     // The file should have FIFFB_MRI block
@@ -617,9 +617,9 @@ void TestMriIO::testCorFifWriteRead()
     int sliceCount = 0;
 
     // Scan through the file tags
-    stream->device()->seek(0);
-    while (!stream->device()->atEnd()) {
-        stream->read_tag(tag);
+    stream.device()->seek(0);
+    while (!stream.device()->atEnd()) {
+        stream.read_tag(tag);
         if (!tag)
             break;
 
@@ -638,7 +638,7 @@ void TestMriIO::testCorFifWriteRead()
     QVERIFY2(foundMriSet, "No FIFFB_MRI_SET block found");
     QCOMPARE(sliceCount, 256);
 
-    stream->close();
+    stream.close();
 }
 
 //=============================================================================================================
@@ -973,14 +973,14 @@ void TestMriIO::testCorFifWriteReadSynthetic()
 
     // Read back and verify structure
     QFile file(corPath);
-    FiffStream::SPtr stream(new FiffStream(&file));
-    QVERIFY(stream->open());
+    FiffStream stream(&file);
+    QVERIFY(stream.open());
 
     FiffTag::UPtr tag;
     int sliceCount = 0;
-    stream->device()->seek(0);
-    while (!stream->device()->atEnd()) {
-        stream->read_tag(tag);
+    stream.device()->seek(0);
+    while (!stream.device()->atEnd()) {
+        stream.read_tag(tag);
         if (!tag)
             break;
         if (tag->kind == FIFF_BLOCK_START) {
@@ -990,7 +990,7 @@ void TestMriIO::testCorFifWriteReadSynthetic()
         }
     }
     QCOMPARE(sliceCount, 3);
-    stream->close();
+    stream.close();
 }
 
 //=============================================================================================================

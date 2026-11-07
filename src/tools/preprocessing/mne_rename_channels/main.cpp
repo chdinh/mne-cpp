@@ -189,7 +189,7 @@ int main(int argc, char* argv[])
 
     // Open FIFF file for in-place update
     QFile file(fifName);
-    FiffStream::SPtr stream = FiffStream::open_update(file);
+    auto stream = FiffStream::open_update(file);
     if (!stream) {
         qCritical("Cannot open file for update: %s", qPrintable(fifName));
         return 1;

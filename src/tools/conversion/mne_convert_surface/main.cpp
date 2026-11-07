@@ -219,20 +219,20 @@ static bool readFifSurface(const QString& filename, MatrixX3f& rr, MatrixX3i& tr
 {
     MNEBem bem;
     QFile file(filename);
-    FiffStream::SPtr stream(new FiffStream(&file));
-    if (!stream->open()) {
+    FiffStream stream(&file);
+    if (!stream.open()) {
         qCritical() << "Cannot open FIF file:" << filename;
         return false;
     }
-    if (!MNEBem::readFromStream(*stream, true, bem) || bem.size() == 0) {
+    if (!MNEBem::readFromStream(stream, true, bem) || bem.size() == 0) {
         qCritical() << "No BEM surfaces found in:" << filename;
-        stream->close();
+        stream.close();
         return false;
     }
     // Take the first surface
     rr = bem[0].rr;
     tris = bem[0].itris;
-    stream->close();
+    stream.close();
     return true;
 }
 
@@ -241,7 +241,7 @@ static bool readFifSurface(const QString& filename, MatrixX3f& rr, MatrixX3i& tr
 static bool writeFifSurface(const QString& filename, const MatrixX3f& rr, const MatrixX3i& tris, int surfId)
 {
     QFile file(filename);
-    FiffStream::SPtr stream = FiffStream::start_file(file);
+    auto stream = FiffStream::start_file(file);
     if (!stream) {
         qCritical() << "Cannot create FIF file:" << filename;
         return false;

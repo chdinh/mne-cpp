@@ -71,20 +71,6 @@ FiffRawData::FiffRawData(std::unique_ptr<UTILSLIB::ByteStream> bytes, bool b_lit
 
 //=============================================================================================================
 
-FiffRawData::FiffRawData(const FiffRawData& p_FiffRawData)
-: file(p_FiffRawData.file)
-, info(p_FiffRawData.info)
-, first_samp(p_FiffRawData.first_samp)
-, last_samp(p_FiffRawData.last_samp)
-, cals(p_FiffRawData.cals)
-, rawdir(p_FiffRawData.rawdir)
-, proj(p_FiffRawData.proj)
-, comp(p_FiffRawData.comp)
-{
-}
-
-//=============================================================================================================
-
 FiffRawData::~FiffRawData()
 {
 }
@@ -214,9 +200,9 @@ bool FiffRawData::read_raw_segment(MatrixXd& data,
         mult.setFromTriplets(tripletList.begin(), tripletList.end());
     //    mult.makeCompressed();
 
-    const FiffStream::SPtr fid = this->file;
-    const bool open_here = !fid->isOpen();
-    if (open_here && !fid->reopen()) {
+    FiffStream& fid = *this->file;
+    const bool open_here = !fid.isOpen();
+    if (open_here && !fid.reopen()) {
         qWarning("Cannot open file %s", this->info.filename.c_str());
         return false;
     }
@@ -244,7 +230,7 @@ bool FiffRawData::read_raw_segment(MatrixXd& data,
 
                 one.setZero();
             } else {
-                fid->read_tag(t_pTag, thisRawDir.ent->pos);
+                fid.read_tag(t_pTag, thisRawDir.ent->pos);
                 //
                 //   Depending on the state of the projection and selection
                 //   we proceed a little bit differently
@@ -517,9 +503,9 @@ bool FiffRawData::read_raw_segment(MatrixXd& data,
 
     //
 
-    const FiffStream::SPtr fid = this->file;
-    const bool open_here = !fid->isOpen();
-    if (open_here && !fid->reopen()) {
+    FiffStream& fid = *this->file;
+    const bool open_here = !fid.isOpen();
+    if (open_here && !fid.reopen()) {
         qWarning("Cannot open file %s", this->info.filename.c_str());
         return false;
     }
@@ -546,7 +532,7 @@ bool FiffRawData::read_raw_segment(MatrixXd& data,
                 one.setZero();
             } else {
                 FiffTag::UPtr t_pTag;
-                fid->read_tag(t_pTag, thisRawDir.ent->pos);
+                fid.read_tag(t_pTag, thisRawDir.ent->pos);
                 //
                 //   Depending on the state of the projection and selection
                 //   we proceed a little bit differently
@@ -758,7 +744,7 @@ bool FiffRawData::save(const std::filesystem::path& path,
 
     // Use the standard start_writing_raw pipeline
     RowVectorXd calsOut;
-    FiffStream::SPtr pStream = FiffStream::start_writing_raw(path, outInfo, calsOut, picks);
+    auto pStream = FiffStream::start_writing_raw(path, outInfo, calsOut, picks);
     if (!pStream) {
         qWarning() << "[FiffRawData::save] Cannot start writing raw file.";
         return false;

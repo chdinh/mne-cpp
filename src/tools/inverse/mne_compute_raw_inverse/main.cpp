@@ -85,23 +85,23 @@ constexpr auto BIG_TIME = 1e6f;
 static bool isRawFile(const QString& fileName)
 {
     QFile file(fileName);
-    FiffStream::SPtr stream(new FiffStream(&file));
-    if (!stream->open()) {
+    FiffStream stream(&file);
+    if (!stream.open()) {
         return false;
     }
 
-    FiffDirNode::SPtr dirTree = stream->dirtree();
+    FiffDirNode::SPtr dirTree = stream.dirtree();
 
     // Check for evoked data first — evoked files also use FIFFB_PROCESSED_DATA
     bool hasEvoked = dirTree->has_kind(FIFFB_EVOKED);
     if (hasEvoked) {
-        stream->close();
+        stream.close();
         return false;
     }
 
     bool hasRaw = dirTree->has_kind(FIFFB_RAW_DATA) ||
         dirTree->has_kind(FIFFB_CONTINUOUS_DATA);
-    stream->close();
+    stream.close();
     return hasRaw;
 }
 

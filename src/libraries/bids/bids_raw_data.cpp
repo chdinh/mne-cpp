@@ -617,7 +617,7 @@ bool copyRawDataFile(const QString& sourcePath, const BIDSPath& bidsPath, bool o
 //=============================================================================================================
 
 BidsRawData::BidsRawData(BidsRawData&& other) noexcept
-: raw(other.raw) // FiffRawData has only copy ctor
+: raw(std::move(other.raw))
 , events(std::move(other.events))
 , eventIdMap(std::move(other.eventIdMap))
 , electrodes(std::move(other.electrodes))
@@ -639,7 +639,7 @@ BidsRawData::BidsRawData(BidsRawData&& other) noexcept
 BidsRawData& BidsRawData::operator=(BidsRawData&& other) noexcept
 {
     if (this != &other) {
-        raw = other.raw; // FiffRawData has only copy ctor
+        raw = std::move(other.raw);
         events = std::move(other.events);
         eventIdMap = std::move(other.eventIdMap);
         electrodes = std::move(other.electrodes);

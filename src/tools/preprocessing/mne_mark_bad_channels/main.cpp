@@ -150,7 +150,7 @@ int main(int argc, char* argv[])
     // Write to temp file, then replace
     QString tmpName = fifName + ".tmp";
     Eigen::RowVectorXd cals;
-    FiffStream::SPtr outStream = FiffStream::start_writing_raw(UTILSLIB::pathFromUtf8(tmpName.toStdString()), raw.info, cals);
+    auto outStream = FiffStream::start_writing_raw(UTILSLIB::pathFromUtf8(tmpName.toStdString()), raw.info, cals);
     if (!outStream) {
         qCritical("Cannot open temp file for writing.");
         return 1;

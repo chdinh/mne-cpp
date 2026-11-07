@@ -208,7 +208,7 @@ int main(int argc, char* argv[])
 
     // Write output
     Eigen::RowVectorXd cals;
-    FiffStream::SPtr stream = FiffStream::start_writing_raw(UTILSLIB::pathFromUtf8(outFile.toStdString()), raw.info, cals);
+    auto stream = FiffStream::start_writing_raw(UTILSLIB::pathFromUtf8(outFile.toStdString()), raw.info, cals);
     if (!stream) {
         qCritical("Cannot open output file: %s", qPrintable(outFile));
         return 1;

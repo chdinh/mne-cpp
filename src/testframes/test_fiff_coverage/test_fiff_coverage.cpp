@@ -148,17 +148,17 @@ void TestFiffCoverage::testGetEvokedEntries()
              qPrintable(QString("Evoked test data not found: %1").arg(avePath())));
 
     QFile file(avePath());
-    FiffStream::SPtr stream(new FiffStream(&file));
-    QVERIFY(stream->open());
+    FiffStream stream(&file);
+    QVERIFY(stream.open());
 
     // Find evoked nodes in the directory tree
-    QList<FiffDirNode::SPtr> evoked_nodes = stream->dirtree()->dir_tree_find(FIFFB_EVOKED);
+    QList<FiffDirNode::SPtr> evoked_nodes = stream.dirtree()->dir_tree_find(FIFFB_EVOKED);
     QStringList comments;
     QList<fiff_int_t> aspect_kinds;
     QString t;
-    QVERIFY(stream->get_evoked_entries(evoked_nodes, comments, aspect_kinds, t));
+    QVERIFY(stream.get_evoked_entries(evoked_nodes, comments, aspect_kinds, t));
 
-    stream->close();
+    stream.close();
     QVERIFY(comments.size() > 0);
     QCOMPARE(comments.size(), aspect_kinds.size());
 }
@@ -169,15 +169,15 @@ void TestFiffCoverage::testGetEvokedEntriesCount()
              qPrintable(QString("Evoked test data not found: %1").arg(avePath())));
 
     QFile file(avePath());
-    FiffStream::SPtr stream(new FiffStream(&file));
-    QVERIFY(stream->open());
+    FiffStream stream(&file);
+    QVERIFY(stream.open());
 
-    QList<FiffDirNode::SPtr> evoked_nodes = stream->dirtree()->dir_tree_find(FIFFB_EVOKED);
+    QList<FiffDirNode::SPtr> evoked_nodes = stream.dirtree()->dir_tree_find(FIFFB_EVOKED);
     QStringList comments;
     QList<fiff_int_t> aspect_kinds;
     QString t;
-    QVERIFY(stream->get_evoked_entries(evoked_nodes, comments, aspect_kinds, t));
-    stream->close();
+    QVERIFY(stream.get_evoked_entries(evoked_nodes, comments, aspect_kinds, t));
+    stream.close();
 
     // The sample evoked file should have at least 1 entry
     QVERIFY(comments.size() >= 1);
@@ -194,13 +194,13 @@ void TestFiffCoverage::testGetEvokedEntriesCount()
 void TestFiffCoverage::testReadDigitizerData()
 {
     QFile file(rawPath());
-    FiffStream::SPtr stream(new FiffStream(&file));
-    QVERIFY(stream->open());
+    FiffStream stream(&file);
+    QVERIFY(stream.open());
 
     FiffDigitizerData digData;
     // Read from the measurement node
-    bool ok = stream->read_digitizer_data(stream->dirtree(), digData);
-    stream->close();
+    bool ok = stream.read_digitizer_data(stream.dirtree(), digData);
+    stream.close();
 
     // Raw data typically has digitizer points
     if (ok) {
@@ -234,12 +234,12 @@ void TestFiffCoverage::testReadMeasInfoBase()
              qPrintable(QString("Forward solution not found: %1").arg(fwdPath())));
 
     QFile file(fwdPath());
-    FiffStream::SPtr stream(new FiffStream(&file));
-    QVERIFY(stream->open());
+    FiffStream stream(&file);
+    QVERIFY(stream.open());
 
     FiffInfoBase infoBase;
-    bool ok = stream->read_meas_info_base(stream->dirtree(), infoBase);
-    stream->close();
+    bool ok = stream.read_meas_info_base(stream.dirtree(), infoBase);
+    stream.close();
 
     QVERIFY(ok);
     QVERIFY(infoBase.nchan > 0);
@@ -251,12 +251,12 @@ void TestFiffCoverage::testReadMeasInfoBaseChannels()
              qPrintable(QString("Forward solution not found: %1").arg(fwdPath())));
 
     QFile file(fwdPath());
-    FiffStream::SPtr stream(new FiffStream(&file));
-    QVERIFY(stream->open());
+    FiffStream stream(&file);
+    QVERIFY(stream.open());
 
     FiffInfoBase infoBase;
-    QVERIFY(stream->read_meas_info_base(stream->dirtree(), infoBase));
-    stream->close();
+    QVERIFY(stream.read_meas_info_base(stream.dirtree(), infoBase));
+    stream.close();
 
     // Should have channel info
     QCOMPARE(infoBase.chs.size(), infoBase.nchan);
@@ -320,7 +320,7 @@ void TestFiffCoverage::testWriteBadChannels()
     QString tmpPath = m_tmpDir.path() + "/bads.fif";
     {
         QFile outFile(tmpPath);
-        FiffStream::SPtr stream = FiffStream::start_file(outFile);
+        auto stream = FiffStream::start_file(outFile);
         QVERIFY(stream != nullptr);
 
         StringList bads;
@@ -348,7 +348,7 @@ void TestFiffCoverage::testOpenUpdateAttachEnv()
     QString tmpPath = m_tmpDir.path() + "/update_test.fif";
     {
         QFile f(tmpPath);
-        FiffStream::SPtr s = FiffStream::start_file(f);
+        auto s = FiffStream::start_file(f);
         QVERIFY(s != nullptr);
         fiff_int_t val = 42;
         s->write_int(FIFF_NCHAN, &val);
@@ -358,7 +358,7 @@ void TestFiffCoverage::testOpenUpdateAttachEnv()
 
     // Open for update
     QFile updateFile(tmpPath);
-    FiffStream::SPtr stream = FiffStream::open_update(updateFile);
+    auto stream = FiffStream::open_update(updateFile);
     QVERIFY2(stream != nullptr, "open_update returned null");
     // Should be able to read the file
     QVERIFY(stream->nent() > 0);
@@ -375,17 +375,17 @@ void TestFiffCoverage::testReadNamedMatrix()
              qPrintable(QString("Forward solution not found: %1").arg(fwdPath())));
 
     QFile file(fwdPath());
-    FiffStream::SPtr stream(new FiffStream(&file));
-    QVERIFY(stream->open());
+    FiffStream stream(&file);
+    QVERIFY(stream.open());
 
     // The forward solution file should contain named matrices
     // Search for a named matrix in the directory tree
     FiffDirNode::SPtr megNode;
-    QList<FiffDirNode::SPtr> nodes = stream->dirtree()->dir_tree_find(FIFFB_MNE_FORWARD_SOLUTION);
+    QList<FiffDirNode::SPtr> nodes = stream.dirtree()->dir_tree_find(FIFFB_MNE_FORWARD_SOLUTION);
     if (!nodes.isEmpty()) {
         megNode = nodes[0];
         FiffNamedMatrix namedMat;
-        bool ok = stream->read_named_matrix(megNode, FIFF_MNE_FORWARD_SOLUTION, namedMat);
+        bool ok = stream.read_named_matrix(megNode, FIFF_MNE_FORWARD_SOLUTION, namedMat);
         if (ok) {
             QVERIFY(namedMat.nrow > 0);
             QVERIFY(namedMat.ncol > 0);
@@ -394,7 +394,7 @@ void TestFiffCoverage::testReadNamedMatrix()
         }
     }
 
-    stream->close();
+    stream.close();
 }
 
 //=============================================================================================================
@@ -405,15 +405,15 @@ void TestFiffCoverage::testCtfCompRoundTrip()
 {
     // Read CTF comp data from raw file (if present)
     QFile rawFile(rawPath());
-    FiffStream::SPtr stream(new FiffStream(&rawFile));
-    QVERIFY(stream->open());
+    FiffStream stream(&rawFile);
+    QVERIFY(stream.open());
 
     QList<FiffCtfComp> comps;
     FiffInfo info;
     FiffDirNode::SPtr nodeInfo;
-    stream->read_meas_info(stream->dirtree(), info, nodeInfo);
+    stream.read_meas_info(stream.dirtree(), info, nodeInfo);
     comps = info.comps;
-    stream->close();
+    stream.close();
 
     if (comps.isEmpty()) {
         // Create synthetic CTF comp data
@@ -438,7 +438,7 @@ void TestFiffCoverage::testCtfCompRoundTrip()
     QString tmpPath = m_tmpDir.path() + "/ctf_comp.fif";
     {
         QFile outFile(tmpPath);
-        FiffStream::SPtr outStream = FiffStream::start_file(outFile);
+        auto outStream = FiffStream::start_file(outFile);
         QVERIFY(outStream != nullptr);
         outStream->write_ctf_comp(comps);
         outStream->end_file();
@@ -466,17 +466,17 @@ void TestFiffCoverage::testCtfCompRoundTrip()
     raw.data = FiffNamedMatrix::SDPtr(new FiffNamedMatrix(2, 3, {"MEG0111", "MEG0121"}, {"REF01", "REF02", "REF03"}, MatrixXd::Constant(2, 3, 1.0)));
     const auto writeComps = [](const QString& path, const QList<FiffCtfComp>& list) {
         QFile out(path);
-        FiffStream::SPtr w = FiffStream::start_file(out);
+        auto w = FiffStream::start_file(out);
         w->write_ctf_comp(list);
         w->end_file();
         w->close();
     };
     const auto readComps = [&chs](const QString& path) {
         QFile in(path);
-        FiffStream::SPtr r(new FiffStream(&in));
+        FiffStream r(&in);
         QList<FiffCtfComp> read;
-        if (r->open())
-            read = r->read_ctf_comp(r->dirtree(), chs);
+        if (r.open())
+            read = r.read_ctf_comp(r.dirtree(), chs);
         return read;
     };
     const QString firstPath = m_tmpDir.path() + "/ctf_comp_raw.fif";

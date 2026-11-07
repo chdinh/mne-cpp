@@ -122,7 +122,7 @@ bool FiffCoordTrans::invert_transform()
 
 bool FiffCoordTrans::read(const std::filesystem::path& path, FiffCoordTrans& p_Trans)
 {
-    FiffStream::SPtr pStream = FiffStream::open(path);
+    auto pStream = FiffStream::open(path);
     if (!pStream)
         return false;
     qInfo("Reading coordinate transform from %s...\n", pStream->streamName().toUtf8().constData());
@@ -150,7 +150,7 @@ bool FiffCoordTrans::read(const std::filesystem::path& path, FiffCoordTrans& p_T
 
 bool FiffCoordTrans::write(const std::filesystem::path& path)
 {
-    FiffStream::SPtr pStream = FiffStream::start_file(path);
+    auto pStream = FiffStream::start_file(path);
     if (!pStream) {
         return false;
     }
@@ -453,32 +453,32 @@ FiffCoordTrans FiffCoordTrans::fromCardinalPoints(int from, int to,
 FiffCoordTrans FiffCoordTrans::readTransform(const QString& name, int from, int to)
 {
     QFile file(name);
-    FiffStream::SPtr stream(new FiffStream(&file));
+    FiffStream stream(&file);
 
-    if (!stream->open()) {
+    if (!stream.open()) {
         return FiffCoordTrans();
     }
 
     FiffTag::UPtr t_pTag;
-    for (int k = 0; k < stream->dir().size(); k++) {
-        if (stream->dir()[k]->kind == FIFF_COORD_TRANS) {
-            if (!stream->read_tag(t_pTag, stream->dir()[k]->pos))
+    for (int k = 0; k < stream.dir().size(); k++) {
+        if (stream.dir()[k]->kind == FIFF_COORD_TRANS) {
+            if (!stream.read_tag(t_pTag, stream.dir()[k]->pos))
                 continue;
 
             FiffCoordTrans t = t_pTag->toCoordTrans();
             if (t.from == from && t.to == to) {
-                stream->close();
+                stream.close();
                 return t;
             } else if (t.from == to && t.to == from) {
                 t.invert_transform();
-                stream->close();
+                stream.close();
                 return t;
             }
         }
     }
 
     qCritical("No suitable coordinate transformation found in %s.", name.toUtf8().constData());
-    stream->close();
+    stream.close();
     return FiffCoordTrans();
 }
 

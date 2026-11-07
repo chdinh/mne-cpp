@@ -167,7 +167,7 @@ int main(int argc, char* argv[])
         qCritical("Cannot open output file: %s", qPrintable(outFile));
         return 1;
     }
-    FiffStream::SPtr stream = FiffStream::start_file(outF);
+    auto stream = FiffStream::start_file(outF);
     if (!stream) {
         qCritical("Cannot open output file: %s", qPrintable(outFile));
         return 1;

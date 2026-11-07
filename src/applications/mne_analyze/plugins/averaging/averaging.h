@@ -220,7 +220,7 @@ private:
      *
      * @return Retruns FiffEvoked setwith averaged data.
      */
-    QSharedPointer<FIFFLIB::FiffEvokedSet> averageCalculation(FIFFLIB::FiffRawData pFiffRaw,
+    QSharedPointer<FIFFLIB::FiffEvokedSet> averageCalculation(const FIFFLIB::FiffRawData& pFiffRaw,
                                                               MatrixXi matEvents,
                                                               UTILSLIB::FilterKernel filterKernel,
                                                               FIFFLIB::FiffInfo fiffInfo);

@@ -68,16 +68,16 @@ static QList<DigPt> readFifDig(const QString& filename)
 {
     QList<DigPt> points;
     QFile file(filename);
-    FiffStream::SPtr stream(new FiffStream(&file));
-    if (!stream->open()) {
+    FiffStream stream(&file);
+    if (!stream.open()) {
         qCritical("Cannot open FIFF file: %s", qPrintable(filename));
         return points;
     }
 
-    for (int k = 0; k < stream->nent(); k++) {
-        if (stream->dir()[k]->kind == FIFF_DIG_POINT) {
+    for (int k = 0; k < stream.nent(); k++) {
+        if (stream.dir()[k]->kind == FIFF_DIG_POINT) {
             FiffTag::UPtr tag;
-            stream->read_tag(tag, stream->dir()[k]->pos);
+            stream.read_tag(tag, stream.dir()[k]->pos);
             FiffDigPoint dp = tag->toDigPoint();
             DigPt p;
             p.kind = dp.kind;
@@ -88,7 +88,7 @@ static QList<DigPt> readFifDig(const QString& filename)
             points.append(p);
         }
     }
-    stream->close();
+    stream.close();
     return points;
 }
 
@@ -140,7 +140,7 @@ static QList<DigPt> readHpts(const QString& filename)
 static bool writeFifDig(const QString& filename, const QList<DigPt>& points)
 {
     QFile outFile(filename);
-    FiffStream::SPtr outStream = FiffStream::start_file(outFile);
+    auto outStream = FiffStream::start_file(outFile);
     if (!outStream) {
         qCritical("Cannot open output FIFF file: %s", qPrintable(filename));
         return false;

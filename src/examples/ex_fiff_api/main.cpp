@@ -202,14 +202,14 @@ int main(int argc, char* argv[])
 
     //! [fiff_stream_usage]
     QFile structureFile(dir + "/sample_audvis-ave.fif");
-    FiffStream::SPtr stream(new FiffStream(&structureFile));
-    const bool opened = stream->open();
-    const QList<FiffDirNode::SPtr> measNodes = stream->dirtree()->dir_tree_find(FIFFB_MEAS_INFO);
+    FiffStream stream(&structureFile);
+    const bool opened = stream.open();
+    const QList<FiffDirNode::SPtr> measNodes = stream.dirtree()->dir_tree_find(FIFFB_MEAS_INFO);
     std::unique_ptr<FiffTag> tag;
-    const bool hasNchan = measNodes.first()->find_tag(*stream, FIFF_NCHAN, tag); // raw tag access
+    const bool hasNchan = measNodes.first()->find_tag(stream, FIFF_NCHAN, tag); // raw tag access
     const int nchanTag = *tag->toInt();
-    const FiffId fileId = stream->id();
-    stream->close();
+    const FiffId fileId = stream.id();
+    stream.close();
     //! [fiff_stream_usage]
     ok &= expect(opened && measNodes.size() == 1 && hasNchan && nchanTag == 376 && !fileId.isEmpty() && fileId.version > 0,
                  "FiffStream/FiffDirNode/FiffTag/FiffId: the FIFF_NCHAN tag of the measurement block reads 376");
@@ -255,7 +255,7 @@ int main(int argc, char* argv[])
 
     //! [fiff_facade_usage]
     QFile facadeFile(dir + "/sample_audvis_trunc_raw.fif");
-    FiffStream::SPtr facadeStream;
+    std::unique_ptr<FiffStream> facadeStream;
     const bool facadeOpened = Fiff::open(facadeFile, facadeStream); // static wrappers around FiffStream
     FiffDirNode::SPtr facadeRoot = facadeStream->dirtree();
     const StringList facadeBads = facadeStream->read_bad_channels(facadeRoot);

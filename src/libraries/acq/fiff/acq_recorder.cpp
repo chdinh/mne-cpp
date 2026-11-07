@@ -527,8 +527,8 @@ struct AcqRecorder::Impl
         auto memory = std::make_unique<UTILSLIB::MemoryByteStream>();
         const UTILSLIB::MemoryByteStream& written = *memory;
         Eigen::RowVectorXd cals;
-        FiffStream::SPtr tags = FiffStream::start_writing_raw(std::move(memory), fiffInfo, cals, defaultMatrixXi, false,
-                                                              fiffType(pack));
+        auto tags = FiffStream::start_writing_raw(std::move(memory), fiffInfo, cals, defaultMatrixXi, false,
+                                                  fiffType(pack));
         if (firstTag != 0) {
             const auto value = static_cast<fiff_int_t>(firstTag);
             tags->write_int(FIFF_FIRST_SAMPLE, &value);

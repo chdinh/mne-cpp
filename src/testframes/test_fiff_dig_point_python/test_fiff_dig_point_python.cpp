@@ -280,7 +280,7 @@ void TestFiffDigPointPython::writeRoundTrip()
     // FIFF_MNE_COORD_FRAME in the isotrak block puts every point into that frame, as mne's _read_dig_fif
     QFile framed(dir.filePath("framed.fif"));
     QVERIFY(framed.open(QIODevice::WriteOnly));
-    FiffStream::SPtr stream = FiffStream::start_file(framed);
+    auto stream = FiffStream::start_file(framed);
     stream->start_block(FIFFB_MEAS);
     stream->start_block(FIFFB_MEAS_INFO);
     stream->start_block(FIFFB_ISOTRAK);

@@ -399,15 +399,15 @@ std::unique_ptr<MNEProjOp> MNEProjOp::read_from_node(FiffStream& stream, const F
 std::unique_ptr<MNEProjOp> MNEProjOp::read(const QString& name)
 {
     QFile file(name);
-    FiffStream::SPtr stream(new FiffStream(&file));
+    FiffStream stream(&file);
 
-    if (!stream->open())
+    if (!stream.open())
         return nullptr;
 
     FiffDirNode::SPtr t_default;
-    auto res = read_from_node(*stream, t_default);
+    auto res = read_from_node(stream, t_default);
 
-    stream->close();
+    stream.close();
 
     return res;
 }

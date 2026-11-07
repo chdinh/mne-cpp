@@ -345,8 +345,8 @@ private slots:
     {
         FiffInfo info = createSyntheticInfo(5);
         RowVectorXd cals;
-        FiffStream::SPtr pStream = FiffStream::start_writing_raw(std::make_unique<UTILSLIB::MemoryByteStream>(), info, cals);
-        QVERIFY(!pStream.isNull());
+        auto pStream = FiffStream::start_writing_raw(std::make_unique<UTILSLIB::MemoryByteStream>(), info, cals);
+        QVERIFY(pStream);
         pStream->finish_writing_raw();
     }
 

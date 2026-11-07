@@ -55,12 +55,12 @@ DataLoader::SensorLoadResult DataLoader::loadSensors(const QString& fifPath,
 
     FiffInfo info;
     FiffDigPointSet digSet;
-    FiffStream::SPtr stream(new FiffStream(&file));
+    FiffStream stream(&file);
 
-    if (stream->open()) {
-        FiffDirNode::SPtr tree = stream->dirtree();
+    if (stream.open()) {
+        FiffDirNode::SPtr tree = stream.dirtree();
         FiffDirNode::SPtr nodeInfo;
-        if (stream->read_meas_info(tree, info, nodeInfo)) {
+        if (stream.read_meas_info(tree, info, nodeInfo)) {
             result.hasInfo = !info.isEmpty();
         }
     }
@@ -329,13 +329,13 @@ MNESourceSpaces DataLoader::loadSourceSpace(const QString& fwdPath)
     }
 
     MNESourceSpaces srcSpace;
-    FiffStream::SPtr stream(new FiffStream(&file));
-    if (!stream->open()) {
+    FiffStream stream(&file);
+    if (!stream.open()) {
         qWarning() << "DataLoader: Failed to open FIF stream for source space";
         return {};
     }
 
-    if (!MNESourceSpaces::readFromStream(*stream, true, srcSpace)) {
+    if (!MNESourceSpaces::readFromStream(stream, true, srcSpace)) {
         qWarning() << "DataLoader: Failed to read source space from" << fwdPath;
         return {};
     }

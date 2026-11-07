@@ -216,10 +216,10 @@ void TestMneInvCoverage::testReadBemFromFile()
 
     MNEBem bem;
     QFile file(bemPath());
-    FiffStream::SPtr stream(new FiffStream(&file));
-    QVERIFY(stream->open());
-    QVERIFY(MNEBem::readFromStream(*stream, true, bem));
-    stream->close();
+    FiffStream stream(&file);
+    QVERIFY(stream.open());
+    QVERIFY(MNEBem::readFromStream(stream, true, bem));
+    stream.close();
 
     QVERIFY(bem.size() > 0);
 }
@@ -231,10 +231,10 @@ void TestMneInvCoverage::testBemSurfaceProperties()
 
     MNEBem bem;
     QFile file(bemPath());
-    FiffStream::SPtr stream(new FiffStream(&file));
-    QVERIFY(stream->open());
-    QVERIFY(MNEBem::readFromStream(*stream, true, bem));
-    stream->close();
+    FiffStream stream(&file);
+    QVERIFY(stream.open());
+    QVERIFY(MNEBem::readFromStream(stream, true, bem));
+    stream.close();
 
     const MNEBemSurface& surf = bem[0];
     QVERIFY(surf.np > 0);
@@ -252,10 +252,10 @@ void TestMneInvCoverage::testBemSurfaceNormals()
 
     MNEBem bem;
     QFile file(bemPath());
-    FiffStream::SPtr stream(new FiffStream(&file));
-    QVERIFY(stream->open());
-    QVERIFY(MNEBem::readFromStream(*stream, true, bem));
-    stream->close();
+    FiffStream stream(&file);
+    QVERIFY(stream.open());
+    QVERIFY(MNEBem::readFromStream(stream, true, bem));
+    stream.close();
 
     const MNEBemSurface& surf = bem[0];
     // Normals should be present and unit length
@@ -317,11 +317,11 @@ void TestMneInvCoverage::testReadBemRejectsDamagedSurfaces()
         if (!source.write(buffer))
             return -1;
         buffer.close();
-        FiffStream::SPtr stream(new FiffStream(&buffer));
-        if (!stream->open())
+        FiffStream stream(&buffer);
+        if (!stream.open())
             return -1;
         MNEBem bem;
-        const bool ok = MNEBem::readFromStream(*stream, true, bem);
+        const bool ok = MNEBem::readFromStream(stream, true, bem);
         return ok ? static_cast<int>(bem.size()) : -static_cast<int>(bem.size()) - 2;
     };
     QCOMPARE(damaged([](MNEBemSurface&) {}), 2);
@@ -340,12 +340,12 @@ void TestMneInvCoverage::testSourceSpaceFromFile()
              qPrintable(QString("Source space not found: %1").arg(srcPath())));
 
     QFile file(srcPath());
-    FiffStream::SPtr stream(new FiffStream(&file));
-    QVERIFY(stream->open());
+    FiffStream stream(&file);
+    QVERIFY(stream.open());
 
     MNESourceSpaces srcSpaces;
-    QVERIFY(MNESourceSpaces::readFromStream(*stream, true, srcSpaces));
-    stream->close();
+    QVERIFY(MNESourceSpaces::readFromStream(stream, true, srcSpaces));
+    stream.close();
 
     QVERIFY(srcSpaces.size() >= 2); // left + right hemispheres
 }
@@ -356,12 +356,12 @@ void TestMneInvCoverage::testSourceSpaceVertexCount()
              qPrintable(QString("Source space not found: %1").arg(srcPath())));
 
     QFile file(srcPath());
-    FiffStream::SPtr stream(new FiffStream(&file));
-    QVERIFY(stream->open());
+    FiffStream stream(&file);
+    QVERIFY(stream.open());
 
     MNESourceSpaces srcSpaces;
-    QVERIFY(MNESourceSpaces::readFromStream(*stream, true, srcSpaces));
-    stream->close();
+    QVERIFY(MNESourceSpaces::readFromStream(stream, true, srcSpaces));
+    stream.close();
 
     for (int i = 0; i < srcSpaces.size(); i++) {
         const MNESourceSpace& sp = srcSpaces[i];
@@ -378,12 +378,12 @@ void TestMneInvCoverage::testSourceSpaceHemispheres()
              qPrintable(QString("Source space not found: %1").arg(srcPath())));
 
     QFile file(srcPath());
-    FiffStream::SPtr stream(new FiffStream(&file));
-    QVERIFY(stream->open());
+    FiffStream stream(&file);
+    QVERIFY(stream.open());
 
     MNESourceSpaces srcSpaces;
-    QVERIFY(MNESourceSpaces::readFromStream(*stream, true, srcSpaces));
-    stream->close();
+    QVERIFY(MNESourceSpaces::readFromStream(stream, true, srcSpaces));
+    stream.close();
 
     if (srcSpaces.size() >= 2) {
         // Check hemisphere labels

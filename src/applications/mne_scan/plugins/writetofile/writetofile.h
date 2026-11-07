@@ -298,8 +298,8 @@ private:
 
     QMutex m_mutex; /**< The threads mutex.*/
 
-    QSharedPointer<FIFFLIB::FiffInfo> m_pFiffInfo; /**< Fiff measurement info.*/
-    QSharedPointer<FIFFLIB::FiffStream> m_pOutfid; /**< FiffStream to write to.*/
+    QSharedPointer<FIFFLIB::FiffInfo> m_pFiffInfo;  /**< Fiff measurement info.*/
+    std::unique_ptr<FIFFLIB::FiffStream> m_pOutfid; /**< FiffStream to write to.*/
 
     QSharedPointer<QTimer> m_pUpdateTimeInfoTimer;       /**< timer to control remaining time. */
     QSharedPointer<QTimer> m_pBlinkingRecordButtonTimer; /**< timer to control blinking recording button. */

@@ -89,7 +89,7 @@ FiffCov::FiffCov(const std::filesystem::path& path)
 
 bool FiffCov::read(const std::filesystem::path& path, FiffCov& p_cov)
 {
-    FiffStream::SPtr t_pStream = FiffStream::open(path);
+    auto t_pStream = FiffStream::open(path);
     if (!t_pStream) {
         return false;
     }
@@ -602,7 +602,7 @@ bool FiffCov::save(const std::filesystem::path& path) const
         return false;
     }
 
-    FiffStream::SPtr pStream = FiffStream::start_file(path);
+    auto pStream = FiffStream::start_file(path);
     if (!pStream) {
         return false;
     }

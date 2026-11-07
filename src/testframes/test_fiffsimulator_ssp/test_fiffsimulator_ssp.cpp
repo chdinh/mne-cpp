@@ -105,8 +105,8 @@ void TestFiffSimulatorSsp::sspAndBadsRoundTripThroughFiffWrite()
 
     Eigen::RowVectorXd cals;
     {
-        FiffStream::SPtr pOut = FiffStream::start_writing_raw(outPath.toStdString(), infoForWrite, cals);
-        QVERIFY2(!pOut.isNull(), "start_writing_raw returned null");
+        auto pOut = FiffStream::start_writing_raw(outPath.toStdString(), infoForWrite, cals);
+        QVERIFY2(pOut, "start_writing_raw returned null");
 
         const fiff_int_t firstSamp = srcRaw.first_samp;
         const fiff_int_t lastSamp = std::min<fiff_int_t>(

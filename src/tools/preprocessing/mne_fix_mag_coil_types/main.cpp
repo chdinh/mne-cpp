@@ -49,7 +49,7 @@ using namespace UTILSLIB;
 static int processFile(const QString& name, bool doMagnes, QString& summary)
 {
     QFile file(name);
-    FiffStream::SPtr stream = FiffStream::open_update(file);
+    auto stream = FiffStream::open_update(file);
     if (!stream) {
         qCritical("Cannot open file for update: %s", qPrintable(name));
         return -1;

@@ -168,7 +168,7 @@ QJsonObject TemporalFilterSkill::executeSkill(const WorkflowNode& nodeState)
     // calibration scalings; write_raw_buffer divides the calibrated data by cals
     // before writing so the stored samples are in raw ADC units.
     RowVectorXd cals;
-    FiffStream::SPtr outStream = FiffStream::start_writing_raw(UTILSLIB::pathFromUtf8(outputPath.toStdString()), raw.info, cals);
+    auto outStream = FiffStream::start_writing_raw(UTILSLIB::pathFromUtf8(outputPath.toStdString()), raw.info, cals);
     if (!outStream) {
         return QJsonObject{
             {"status", "error"},

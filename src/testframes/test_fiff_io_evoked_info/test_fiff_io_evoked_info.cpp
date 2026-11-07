@@ -511,7 +511,7 @@ void TestFiffIoEvokedInfo::fiffInfo_writeToStream()
     QFile outFile(outPath);
     QVERIFY(outFile.open(QIODevice::WriteOnly));
 
-    FiffStream::SPtr pStream = FiffStream::start_file(outFile);
+    auto pStream = FiffStream::start_file(outFile);
     pStream->start_block(FIFFB_MEAS);
     raw.info.writeToStream(*pStream);
     pStream->end_block(FIFFB_MEAS);

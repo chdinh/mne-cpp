@@ -130,7 +130,7 @@ MNECovMatrix::~MNECovMatrix()
 std::unique_ptr<MNECovMatrix> MNECovMatrix::read(const QString& name, int kind)
 {
     QFile file(name);
-    FiffStream::SPtr stream(new FiffStream(&file));
+    FiffStream stream(&file);
 
     FiffTag::UPtr t_pTag;
     QList<FiffDirNode::SPtr> nodes;
@@ -156,21 +156,21 @@ std::unique_ptr<MNECovMatrix> MNECovMatrix::read(const QString& name, int kind)
     std::unique_ptr<MNEProjOp> op;
     std::unique_ptr<MNESssData> sss;
 
-    if (!stream->open())
+    if (!stream.open())
         return nullptr;
 
-    nodes = stream->dirtree()->dir_tree_find(FIFFB_MNE_COV);
+    nodes = stream.dirtree()->dir_tree_find(FIFFB_MNE_COV);
 
     if (nodes.size() == 0) {
         qWarning("No covariance matrix available in %s", name.toUtf8().data());
-        stream->close();
+        stream.close();
         return nullptr;
     }
     /*
      * Locate the desired matrix
      */
     for (k = 0; k < nodes.size(); ++k) {
-        if (!nodes[k]->find_tag(*stream, FIFF_MNE_COV_KIND, t_pTag))
+        if (!nodes[k]->find_tag(stream, FIFF_MNE_COV_KIND, t_pTag))
             continue;
 
         if (*t_pTag->toInt() == kind) {
@@ -180,33 +180,33 @@ std::unique_ptr<MNECovMatrix> MNECovMatrix::read(const QString& name, int kind)
     }
     if (!covnode || covnode->isEmpty()) {
         qWarning("Desired covariance matrix not found from %s", name.toUtf8().data());
-        stream->close();
+        stream.close();
         return nullptr;
     }
     /*
      * Read the data
      */
-    if (!nodes[k]->find_tag(*stream, FIFF_MNE_COV_DIM, t_pTag)) {
-        stream->close();
+    if (!nodes[k]->find_tag(stream, FIFF_MNE_COV_DIM, t_pTag)) {
+        stream.close();
         return nullptr;
     }
     ncov = *t_pTag->toInt();
 
-    if (nodes[k]->find_tag(*stream, FIFF_MNE_COV_NFREE, t_pTag)) {
+    if (nodes[k]->find_tag(stream, FIFF_MNE_COV_NFREE, t_pTag)) {
         nfree = *t_pTag->toInt();
     }
-    if (covnode->find_tag(*stream, FIFF_MNE_ROW_NAMES, t_pTag)) {
+    if (covnode->find_tag(stream, FIFF_MNE_ROW_NAMES, t_pTag)) {
         names = FiffStream::split_name_list(t_pTag->toString());
         nnames = static_cast<int>(names.size());
         if (nnames != ncov) {
             qCritical("Incorrect number of channel names for a covariance matrix");
-            stream->close();
+            stream.close();
             return nullptr;
         }
     }
-    if (!nodes[k]->find_tag(*stream, FIFF_MNE_COV, t_pTag)) {
-        if (!nodes[k]->find_tag(*stream, FIFF_MNE_COV_DIAG, t_pTag)) {
-            stream->close();
+    if (!nodes[k]->find_tag(stream, FIFF_MNE_COV, t_pTag)) {
+        if (!nodes[k]->find_tag(stream, FIFF_MNE_COV_DIAG, t_pTag)) {
+            stream.close();
             return nullptr;
         } else {
             if (t_pTag->getType() == FIFFT_DOUBLE) {
@@ -219,7 +219,7 @@ std::unique_ptr<MNECovMatrix> MNECovMatrix::read(const QString& name, int kind)
                  */
                 if (cov_diag.sum() == 0.0) {
                     qCritical("Sum of covariance matrix elements is zero!");
-                    stream->close();
+                    stream.close();
                     return nullptr;
                 }
             } else if (t_pTag->getType() == FIFFT_FLOAT) {
@@ -229,7 +229,7 @@ std::unique_ptr<MNECovMatrix> MNECovMatrix::read(const QString& name, int kind)
                     cov_diag[p] = f[p];
             } else {
                 qWarning("Illegal data type for covariance matrix");
-                stream->close();
+                stream.close();
                 return nullptr;
             }
         }
@@ -242,7 +242,7 @@ std::unique_ptr<MNECovMatrix> MNECovMatrix::read(const QString& name, int kind)
                 cov[p] = d[p];
             if (cov.sum() == 0.0) {
                 qCritical("Sum of covariance matrix elements is zero!");
-                stream->close();
+                stream.close();
                 return nullptr;
             }
         } else if (t_pTag->getType() == FIFFT_FLOAT) {
@@ -253,16 +253,16 @@ std::unique_ptr<MNECovMatrix> MNECovMatrix::read(const QString& name, int kind)
         } else {
             cov_sparse_owner = FiffSparseMatrix::fiff_get_float_sparse_matrix(t_pTag);
             if (!cov_sparse_owner) {
-                stream->close();
+                stream.close();
                 return nullptr;
             }
         }
 
-        if (nodes[k]->find_tag(*stream, FIFF_MNE_COV_EIGENVALUES, t_pTag)) {
+        if (nodes[k]->find_tag(stream, FIFF_MNE_COV_EIGENVALUES, t_pTag)) {
             const double* lambda_data = static_cast<const double*>(t_pTag->toDouble());
             lambda = Eigen::Map<const Eigen::VectorXd>(lambda_data, ncov);
-            if (!nodes[k]->find_tag(*stream, FIFF_MNE_COV_EIGENVECTORS, t_pTag)) {
-                stream->close();
+            if (!nodes[k]->find_tag(stream, FIFF_MNE_COV_EIGENVECTORS, t_pTag)) {
+                stream.close();
                 return nullptr;
             }
 
@@ -275,23 +275,23 @@ std::unique_ptr<MNECovMatrix> MNECovMatrix::read(const QString& name, int kind)
         /*
          * Read the optional projection operator
          */
-        op = MNEProjOp::read_from_node(*stream, nodes[k]);
+        op = MNEProjOp::read_from_node(stream, nodes[k]);
         if (!op) {
-            stream->close();
+            stream.close();
             return nullptr;
         }
         /*
          * Read the optional SSS data
          */
-        sss = MNESssData::read_from_node(*stream, nodes[k]);
+        sss = MNESssData::read_from_node(stream, nodes[k]);
         if (!sss) {
-            stream->close();
+            stream.close();
             return nullptr;
         }
         /*
          * Read the optional bad channel list
          */
-        bads = stream->read_bad_channels(nodes[k]);
+        bads = stream.read_bad_channels(nodes[k]);
         nbad = static_cast<int>(bads.size());
     }
     if (cov_sparse_owner)
@@ -302,7 +302,7 @@ std::unique_ptr<MNECovMatrix> MNECovMatrix::read(const QString& name, int kind)
         res = create_diag(kind, ncov, names, cov_diag);
     else {
         qCritical("MNECovMatrix::read : covariance matrix data is not defined.");
-        stream->close();
+        stream.close();
         return nullptr;
     }
     res->eigen = std::move(eigen);
@@ -327,7 +327,7 @@ std::unique_ptr<MNECovMatrix> MNECovMatrix::read(const QString& name, int kind)
         res->sss = std::move(sss);
     }
 
-    stream->close();
+    stream.close();
     return res;
 }
 

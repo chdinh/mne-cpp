@@ -477,16 +477,16 @@ bool BabyMEG::readProjectors()
     QFile t_projFiffFile(m_sFiffProjections);
 
     // Open the file
-    FiffStream::SPtr t_pStream(new FiffStream(&t_projFiffFile));
-    QString t_sFileName = t_pStream->streamName();
+    FiffStream t_pStream(&t_projFiffFile);
+    QString t_sFileName = t_pStream.streamName();
 
     qInfo("[BabyMEG::readProjectors] Opening header data %s...", t_sFileName.toUtf8().constData());
 
-    if (!t_pStream->open()) {
+    if (!t_pStream.open()) {
         return false;
     }
 
-    QList<FiffProj> q_ListProj = t_pStream->read_proj(t_pStream->dirtree());
+    QList<FiffProj> q_ListProj = t_pStream.read_proj(t_pStream.dirtree());
 
     //Set all projectors to zero
     for (int i = 0; i < q_ListProj.size(); i++)
@@ -500,7 +500,7 @@ bool BabyMEG::readProjectors()
     m_pFiffInfo->projs = q_ListProj;
 
     //garbage collecting
-    t_pStream->close();
+    t_pStream.close();
 
     return true;
 }
@@ -512,16 +512,16 @@ bool BabyMEG::readCompensators()
     QFile t_compFiffFile(m_sFiffCompensators);
 
     // Open the file
-    FiffStream::SPtr t_pStream(new FiffStream(&t_compFiffFile));
-    QString t_sFileName = t_pStream->streamName();
+    FiffStream t_pStream(&t_compFiffFile);
+    QString t_sFileName = t_pStream.streamName();
 
     qInfo("[BabyMEG::readCompensators] Opening compensator data %s...", t_sFileName.toUtf8().constData());
 
-    if (!t_pStream->open()) {
+    if (!t_pStream.open()) {
         return false;
     }
 
-    QList<FiffCtfComp> q_ListComp = t_pStream->read_ctf_comp(t_pStream->dirtree(), m_pFiffInfo->chs);
+    QList<FiffCtfComp> q_ListComp = t_pStream.read_ctf_comp(t_pStream.dirtree(), m_pFiffInfo->chs);
 
     if (q_ListComp.size() == 0) {
         qInfo("[BabyMEG::readCompensators] Could not find compensators");
@@ -531,7 +531,7 @@ bool BabyMEG::readCompensators()
     m_pFiffInfo->comps = q_ListComp;
 
     //garbage collecting
-    t_pStream->close();
+    t_pStream.close();
 
     return true;
 }

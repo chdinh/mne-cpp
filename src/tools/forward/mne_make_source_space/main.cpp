@@ -577,7 +577,7 @@ int main(int argc, char* argv[])
         return 1;
     }
 
-    FiffStream::SPtr pStream = FiffStream::start_file(srcFile);
+    auto pStream = FiffStream::start_file(srcFile);
     pStream->start_block(FIFFB_MNE);
     for (int h = 0; h < hemispheres.size(); ++h) {
         hemispheres[h].writeToStream(*pStream);

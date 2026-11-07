@@ -314,9 +314,9 @@ void CoRegistration::onPickedFiducialChanged(const int iFiducial)
 void CoRegistration::onDigitizersChanged(const QString& sFilePath)
 {
     QFile fileDig(sFilePath);
-    FiffStream::SPtr stream(new FiffStream(&fileDig));
+    FiffStream stream(&fileDig);
     FiffDigPointSet digSet;
-    if (!FiffDigPointSet::readFromStream(*stream, digSet)) {
+    if (!FiffDigPointSet::readFromStream(stream, digSet)) {
         qWarning() << "[CoRegistration::onDigitizersChanged] No digitizer points found in" << sFilePath;
         return;
     }
@@ -340,9 +340,9 @@ void CoRegistration::onDigitizersChanged(const QString& sFilePath)
 void CoRegistration::onFiducialsChanged(const QString& sFilePath)
 {
     QFile fileDig(sFilePath);
-    FiffStream::SPtr stream(new FiffStream(&fileDig));
+    FiffStream stream(&fileDig);
     FiffDigPointSet fiducials;
-    if (!FiffDigPointSet::readFromStream(*stream, fiducials)) {
+    if (!FiffDigPointSet::readFromStream(stream, fiducials)) {
         qWarning() << "[CoRegistration::onFiducialsChanged] No fiducials found in" << sFilePath;
         return;
     }

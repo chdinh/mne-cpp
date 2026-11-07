@@ -96,19 +96,19 @@ int main(int argc, char* argv[])
 
     // Read measurement info
     QFile fMeas(measFile);
-    FiffStream::SPtr stream(new FiffStream(&fMeas));
-    if (!stream->open()) {
+    FiffStream stream(&fMeas);
+    if (!stream.open()) {
         qCritical("Cannot open FIFF file: %s", qPrintable(measFile));
         return 1;
     }
 
     FiffInfo info;
     FiffDirNode::SPtr infoNode;
-    if (!stream->read_meas_info(stream->dirtree(), info, infoNode)) {
+    if (!stream.read_meas_info(stream.dirtree(), info, infoNode)) {
         qCritical("Cannot read measurement info from: %s", qPrintable(measFile));
         return 1;
     }
-    stream->close();
+    stream.close();
 
     // Prepare coordinate transform if device frame requested
     // Channel positions for MEG are in device coords by default;

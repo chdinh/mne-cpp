@@ -113,7 +113,7 @@ private:
     QTemporaryDir m_dir;
     QString m_path;
     QFile m_file;
-    FiffStream::SPtr m_stream;
+    std::unique_ptr<FiffStream> m_stream;
     Matrix3f m_rot;
     Vector3f m_move;
 };
@@ -130,7 +130,7 @@ void TestFiffStreamPython::initTestCase()
 
     {
         QFile out(m_path);
-        FiffStream::SPtr w = FiffStream::start_file(out);
+        auto w = FiffStream::start_file(out);
         QVERIFY(w);
         const SparseMatrix<float> sp = sparseReference().sparseView();
         w->write_float_sparse_ccs(FIFF_MNE_FORWARD_SOLUTION, sp);
@@ -170,7 +170,7 @@ void TestFiffStreamPython::initTestCase()
     }
 
     m_file.setFileName(m_path);
-    m_stream = FiffStream::SPtr(new FiffStream(&m_file));
+    m_stream = std::make_unique<FiffStream>(&m_file);
     QVERIFY(m_stream->open());
 }
 
@@ -287,14 +287,14 @@ void TestFiffStreamPython::copiesProcessingHistory()
     const QString src = QStringLiteral(MNE_FIFF_STREAM_DATA_DIR "/sss_history_raw.fif");
     auto historyOf = [](const QString& path, QList<FiffDirNode::SPtr>& runs) {
         auto file = std::make_shared<QFile>(path);
-        FiffStream::SPtr stream(new FiffStream(file.get()));
-        if (!stream->open())
+        FiffStream stream(file.get());
+        if (!stream.open())
             return false;
-        const QList<FiffDirNode::SPtr> hist = stream->dirtree()->dir_tree_find(FIFFB_PROCESSING_HISTORY);
+        const QList<FiffDirNode::SPtr> hist = stream.dirtree()->dir_tree_find(FIFFB_PROCESSING_HISTORY);
         if (hist.isEmpty())
             return false;
         runs = hist[0]->dir_tree_find(FIFFB_PROCESSING_RECORD);
-        stream->close();
+        stream.close();
         return true;
     };
     QList<FiffDirNode::SPtr> srcRuns;
@@ -304,7 +304,7 @@ void TestFiffStreamPython::copiesProcessingHistory()
     const QString dst = m_dir.filePath("history-copy.fif");
     {
         QFile out(dst);
-        FiffStream::SPtr w = FiffStream::start_file(out);
+        auto w = FiffStream::start_file(out);
         QVERIFY(w);
         fiff_int_t nchan = 3;
         w->write_int(FIFF_NCHAN, &nchan);
@@ -331,7 +331,7 @@ void TestFiffStreamPython::copiesProcessingHistory()
     const QString plain = m_dir.filePath("history-none.fif");
     {
         QFile out(plain);
-        FiffStream::SPtr w = FiffStream::start_file(out);
+        auto w = FiffStream::start_file(out);
         QVERIFY(w);
         fiff_int_t nchan = 1;
         w->write_int(FIFF_NCHAN, &nchan);
@@ -352,7 +352,7 @@ void TestFiffStreamPython::attachesEnvironment()
     const QString path = m_dir.filePath("env.fif");
     {
         QFile out(path);
-        FiffStream::SPtr w = FiffStream::start_file(out);
+        auto w = FiffStream::start_file(out);
         QVERIFY(w);
         w->start_block(FIFFB_MEAS);
         fiff_int_t nchan = 3;
@@ -362,29 +362,29 @@ void TestFiffStreamPython::attachesEnvironment()
     }
     {
         QFile f(path);
-        FiffStream::SPtr u = FiffStream::open_update(f);
+        auto u = FiffStream::open_update(f);
         QVERIFY(u);
         QVERIFY(u->attach_env(QStringLiteral("/data/stüdy"), QStringLiteral("mne_process --raw a.fif")));
         u->close();
     }
 
     QFile f(path);
-    FiffStream::SPtr r(new FiffStream(&f));
-    QVERIFY(r->open());
-    const QList<FiffDirNode::SPtr> env = r->dirtree()->dir_tree_find(FIFFB_MNE_ENV);
+    FiffStream r(&f);
+    QVERIFY(r.open());
+    const QList<FiffDirNode::SPtr> env = r.dirtree()->dir_tree_find(FIFFB_MNE_ENV);
     QCOMPARE(env.size(), 1);
     FiffTag::UPtr tag;
-    QVERIFY(env[0]->find_tag(*r, FIFF_MNE_ENV_WORKING_DIR, tag));
+    QVERIFY(env[0]->find_tag(r, FIFF_MNE_ENV_WORKING_DIR, tag));
     // Strings are written as UTF-8: the tag holds the bytes, not the characters, of a non-ASCII path.
     QCOMPARE(tag->toString(), QStringLiteral("/data/stüdy"));
-    QVERIFY(env[0]->find_tag(*r, FIFF_MNE_ENV_COMMAND_LINE, tag));
+    QVERIFY(env[0]->find_tag(r, FIFF_MNE_ENV_COMMAND_LINE, tag));
     QCOMPARE(tag->toString(), QString("mne_process --raw a.fif"));
     // The measurement block written before is still there.
-    const QList<FiffDirNode::SPtr> meas = r->dirtree()->dir_tree_find(FIFFB_MEAS);
+    const QList<FiffDirNode::SPtr> meas = r.dirtree()->dir_tree_find(FIFFB_MEAS);
     QCOMPARE(meas.size(), 1);
-    QVERIFY(meas[0]->find_tag(*r, FIFF_NCHAN, tag));
+    QVERIFY(meas[0]->find_tag(r, FIFF_NCHAN, tag));
     QCOMPARE(*tag->toInt(), 3);
-    r->close();
+    r.close();
 }
 
 void TestFiffStreamPython::readsFloatCovariance()
@@ -547,7 +547,7 @@ void TestFiffStreamPython::readsTagTypes()
     const QString copyPath = m_dir.filePath("tag-types-copy.fif");
     {
         QFile out(copyPath);
-        FiffStream::SPtr w = FiffStream::start_file(out);
+        auto w = FiffStream::start_file(out);
         QVERIFY(w);
         for (int kind = 901; kind <= 910; ++kind)
             w->write_tag(tag(kind));
@@ -663,7 +663,7 @@ void TestFiffStreamPython::refusesUnwritablePath()
     ctf(0, 3) = 0.004f;
     info.ctf_head_t = FiffCoordTrans(FIFFV_MNE_COORD_CTF_HEAD, FIFFV_COORD_HEAD, ctf);
     QFile written(dir.filePath(QStringLiteral("one_channel_raw.fif")));
-    FiffStream::SPtr stream = FiffStream::start_writing_raw(dir.filePath(QStringLiteral("one_channel_raw.fif")).toStdString(), info, cals);
+    auto stream = FiffStream::start_writing_raw(dir.filePath(QStringLiteral("one_channel_raw.fif")).toStdString(), info, cals);
     QVERIFY(stream);
     QCOMPARE(cals.size(), Eigen::Index(1));
     stream->write_raw_buffer(MatrixXd::Constant(1, 10, 2e-6), cals);
@@ -681,7 +681,7 @@ void TestFiffStreamPython::refusesUnwritablePath()
     // A source file that has gone away only loses the blocks copied from it, not the measurement info.
     info.filename = (dir.filePath(QStringLiteral("deleted_raw.fif"))).toStdString();
     QFile orphan(dir.filePath(QStringLiteral("orphan_raw.fif")));
-    FiffStream::SPtr orphanStream = FiffStream::start_writing_raw(dir.filePath(QStringLiteral("orphan_raw.fif")).toStdString(), info, cals);
+    auto orphanStream = FiffStream::start_writing_raw(dir.filePath(QStringLiteral("orphan_raw.fif")).toStdString(), info, cals);
     QVERIFY(orphanStream);
     orphanStream->write_raw_buffer(MatrixXd::Constant(1, 10, 2e-6), cals);
     orphanStream->finish_writing_raw();
@@ -725,7 +725,7 @@ void TestFiffStreamPython::writesAnnotationsAndDevice()
 
     const QString path = dir.filePath(QStringLiteral("annotated_raw.fif"));
     RowVectorXd cals;
-    FiffStream::SPtr stream = FiffStream::start_writing_raw(path.toStdString(), info, cals);
+    auto stream = FiffStream::start_writing_raw(path.toStdString(), info, cals);
     QVERIFY(stream);
     stream->write_raw_buffer(MatrixXd::Constant(1, 400, 1e-6), cals);
     stream->end_block(FIFFB_RAW_DATA);
@@ -770,8 +770,8 @@ void TestFiffStreamPython::writesAnnotationsAndDevice()
     // info["line_freq"] stays None instead of reading -1).
     info.linefreq = -1.0f;
     QFile packedFile(dir.filePath(QStringLiteral("packed_raw.fif")));
-    FiffStream::SPtr packed = FiffStream::start_writing_raw(dir.filePath(QStringLiteral("packed_raw.fif")).toStdString(), info, cals, defaultMatrixXi, false,
-                                                            FIFFT_DAU_PACK16);
+    auto packed = FiffStream::start_writing_raw(dir.filePath(QStringLiteral("packed_raw.fif")).toStdString(), info, cals, defaultMatrixXi, false,
+                                                FIFFT_DAU_PACK16);
     QVERIFY(packed);
     packed->finish_writing_raw();
     QFile packedBack(packedFile.fileName());

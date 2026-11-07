@@ -188,15 +188,15 @@ void ComputeFwd::initFwd()
         }
         {
             QFile mriFile(m_pSettings->mriname);
-            FiffStream::SPtr mriStream(new FiffStream(&mriFile));
-            if (mriStream->open()) {
-                m_mri_id.version = mriStream->id().version;
-                m_mri_id.machid[0] = mriStream->id().machid[0];
-                m_mri_id.machid[1] = mriStream->id().machid[1];
-                m_mri_id.time = mriStream->id().time;
-                mriStream->close();
+            FiffStream mriStream(&mriFile);
+            if (mriStream.open()) {
+                m_mri_id.version = mriStream.id().version;
+                m_mri_id.machid[0] = mriStream.id().machid[0];
+                m_mri_id.machid[1] = mriStream.id().machid[1];
+                m_mri_id.time = mriStream.id().time;
+                mriStream.close();
             } else {
-                mriStream->close();
+                mriStream.close();
                 m_mri_id = FiffId();
             }
         }
@@ -220,18 +220,18 @@ void ComputeFwd::initFwd()
     if (!m_pSettings->pFiffInfo) {
         QFile measname(m_pSettings->measname);
         FIFFLIB::FiffDirNode::SPtr DirNode;
-        FiffStream::SPtr pStream(new FiffStream(&measname));
+        FiffStream pStream(&measname);
         FIFFLIB::FiffInfo fiffInfo;
-        if (!pStream->open()) {
+        if (!pStream.open()) {
             qCritical() << "Could not open Stream.";
             return;
         }
 
-        if (!pStream->read_meas_info(pStream->dirtree(), fiffInfo, DirNode)) {
+        if (!pStream.read_meas_info(pStream.dirtree(), fiffInfo, DirNode)) {
             qCritical() << "Could not find the channel information.";
             return;
         }
-        pStream->close();
+        pStream.close();
         m_pInfoBase = QSharedPointer<FIFFLIB::FiffInfo>(new FiffInfo(fiffInfo));
     } else {
         m_pInfoBase = m_pSettings->pFiffInfo;
@@ -506,10 +506,10 @@ void ComputeFwd::populateMetadata(MNEForwardSolution& fwd)
     // Bad channels
     if (!m_pSettings->measname.isEmpty()) {
         QFile fileBad(m_pSettings->measname);
-        FiffStream::SPtr t_pStreamBads(new FiffStream(&fileBad));
-        if (t_pStreamBads->open()) {
-            fwd.info.bads = t_pStreamBads->read_bad_channels(t_pStreamBads->dirtree());
-            t_pStreamBads->close();
+        FiffStream t_pStreamBads(&fileBad);
+        if (t_pStreamBads.open()) {
+            fwd.info.bads = t_pStreamBads.read_bad_channels(t_pStreamBads.dirtree());
+            t_pStreamBads.close();
         }
     }
 }

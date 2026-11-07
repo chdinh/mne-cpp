@@ -126,7 +126,7 @@ private slots:
 private:
     QSharedPointer<QStack<int32_t>> m_pBlockTypeList;
 
-    void verifyTags(FIFFLIB::FiffStream::SPtr& outStream,
+    void verifyTags(FIFFLIB::FiffStream& outStream,
                     QString testArg = "blank");
     int mDaysToOffsetDates;
     QDateTime mDefaultMeasDate;
@@ -429,14 +429,14 @@ void TestMneAnonymize::testDefaultAnonymizationOfTags()
     controller.run();
 
     QFile fFileOut(sFileOut);
-    FiffStream::SPtr outStream(new FiffStream(&fFileOut));
+    auto outStream = std::make_unique<FiffStream>(&fFileOut);
     if (outStream->open(QIODevice::ReadOnly)) {
         qInfo() << "output file opened correctly " << sFileIn;
     } else {
         QFAIL("Output file could not be loaded.");
     }
 
-    verifyTags(outStream);
+    verifyTags(*outStream);
 
     QFile::remove(sFileOut);
 }
@@ -468,8 +468,8 @@ void TestMneAnonymize::compareBirthdayOffsetOption()
     controller.run();
 
     QFile fFileOut(sFileOut);
-    FiffStream::SPtr outStream(new FiffStream(&fFileOut));
-    if (outStream->open(QIODevice::ReadOnly)) {
+    FiffStream outStream(&fFileOut);
+    if (outStream.open(QIODevice::ReadOnly)) {
         qInfo() << "output file opened correctly " << sFileIn;
     } else {
         QFAIL("Output file could not be loaded.");
@@ -508,8 +508,8 @@ void TestMneAnonymize::compareMeasureDateOffsetOption()
 
     QFile fFileOut(sFileOut);
 
-    FiffStream::SPtr outStream(new FiffStream(&fFileOut));
-    if (outStream->open(QIODevice::ReadOnly)) {
+    FiffStream outStream(&fFileOut);
+    if (outStream.open(QIODevice::ReadOnly)) {
         qInfo() << "output file opened correctly " << sFileIn;
     } else {
         QFAIL("Output file could not be loaded.");
@@ -522,15 +522,15 @@ void TestMneAnonymize::compareMeasureDateOffsetOption()
 
 //=============================================================================================================
 
-void TestMneAnonymize::verifyTags(FIFFLIB::FiffStream::SPtr& stream,
+void TestMneAnonymize::verifyTags(FIFFLIB::FiffStream& stream,
                                   QString testArg)
 {
     FiffTag::UPtr pTag = std::make_unique<FiffTag>();
 
-    stream->device()->seek(0);
+    stream.device()->seek(0);
 
     while (pTag->next != -1) {
-        stream->read_tag(pTag);
+        stream.read_tag(pTag);
 
         switch (pTag->kind) {
             //all these 'kinds' of tags contain a fileID struct, which contains info related to

@@ -80,15 +80,15 @@ int main(int argc, char* argv[])
 
     // Read all tags from the source file
     QFile addFile(addName);
-    FiffStream::SPtr addStream(new FiffStream(&addFile));
-    if (!addStream->open()) {
+    FiffStream addStream(&addFile);
+    if (!addStream.open()) {
         qCritical("Cannot open source file: %s", qPrintable(addName));
         return 1;
     }
 
     std::vector<FiffTag::UPtr> tagsToAdd;
-    for (int k = 0; k < addStream->nent(); k++) {
-        fiff_int_t kind = addStream->dir()[k]->kind;
+    for (int k = 0; k < addStream.nent(); k++) {
+        fiff_int_t kind = addStream.dir()[k]->kind;
         // Skip file-level structural tags
         if (kind == FIFF_FILE_ID || kind == FIFF_DIR_POINTER ||
             kind == FIFF_FREE_LIST || kind == FIFF_NOP ||
@@ -96,10 +96,10 @@ int main(int argc, char* argv[])
             continue;
         }
         FiffTag::UPtr tag;
-        addStream->read_tag(tag, addStream->dir()[k]->pos);
+        addStream.read_tag(tag, addStream.dir()[k]->pos);
         tagsToAdd.push_back(std::move(tag));
     }
-    addStream->close();
+    addStream.close();
 
     qInfo("%d tags to add", static_cast<int>(tagsToAdd.size()));
 
@@ -110,7 +110,7 @@ int main(int argc, char* argv[])
 
     // Open destination file for update and append tags
     QFile destFile(destName);
-    FiffStream::SPtr destStream = FiffStream::open_update(destFile);
+    auto destStream = FiffStream::open_update(destFile);
     if (!destStream) {
         qCritical("Cannot open destination file for update: %s", qPrintable(destName));
         return 1;

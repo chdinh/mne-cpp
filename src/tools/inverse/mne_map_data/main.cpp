@@ -132,18 +132,18 @@ int main(int argc, char* argv[])
     // 2. Load target measurement info
     qInfo("Loading target info: %s", qPrintable(toFile));
     QFile fTo(toFile);
-    FiffStream::SPtr toStream(new FiffStream(&fTo));
-    if (!toStream->open()) {
+    FiffStream toStream(&fTo);
+    if (!toStream.open()) {
         qCritical("Cannot open target file: %s", qPrintable(toFile));
         return 1;
     }
     FiffInfo targetInfo;
     FiffDirNode::SPtr targetNode;
-    if (!toStream->read_meas_info(toStream->dirtree(), targetInfo, targetNode)) {
+    if (!toStream.read_meas_info(toStream.dirtree(), targetInfo, targetNode)) {
         qCritical("Cannot read target measurement info: %s", qPrintable(toFile));
         return 1;
     }
-    toStream->close();
+    toStream.close();
     qInfo("  %d channels in target", targetInfo.nchan);
 
     // 3. Load forward solution

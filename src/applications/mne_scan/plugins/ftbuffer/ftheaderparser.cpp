@@ -56,13 +56,13 @@ void FTBUFFERPLUGIN::parseNeuromagHeader(MetaData& data, QBuffer& neuromagBuffer
 
     neuromagBuffer.reset();
 
-    FIFFLIB::FiffStream::SPtr pStream(new FIFFLIB::FiffStream(&neuromagBuffer));
-    pStream->setLittleEndian(true);
+    FIFFLIB::FiffStream pStream(&neuromagBuffer);
+    pStream.setLittleEndian(true);
 
-    if (pStream->open()) {
+    if (pStream.open()) {
         FIFFLIB::FiffInfo FifInfo;
         FIFFLIB::FiffDirNode::SPtr DirNode;
-        if (pStream->read_meas_info(pStream->dirtree(), FifInfo, DirNode)) {
+        if (pStream.read_meas_info(pStream.dirtree(), FifInfo, DirNode)) {
             data.setFiffinfo(FifInfo);
         }
     }

@@ -118,11 +118,6 @@ struct FiffDeviceInfo;
 class FIFFSHARED_EXPORT FiffStream
 {
 public:
-    using SPtr = QSharedPointer<FiffStream>;             /**< Shared pointer type for FiffStream. */
-    using ConstSPtr = QSharedPointer<const FiffStream>;  /**< Const shared pointer type for FiffStream. */
-    using UPtr = std::unique_ptr<FiffStream>;            /**< Unique pointer type for FiffStream. */
-    using ConstUPtr = std::unique_ptr<const FiffStream>; /**< Const unique pointer type for FiffStream. */
-
     //=========================================================================================================
     /**
      * Constructs a fiff stream that uses the I/O device p_pIODevice.
@@ -157,7 +152,7 @@ public:
      *
      * @return The open stream, or nullptr if the file cannot be opened or is not a FIFF file.
      */
-    static FiffStream::SPtr open(const std::filesystem::path& path);
+    static std::unique_ptr<FiffStream> open(const std::filesystem::path& path);
 
     ~FiffStream();
 
@@ -611,7 +606,7 @@ public:
      *
      * @return The opened file.
      */
-    static FiffStream::SPtr start_file(QIODevice& p_IODevice);
+    static std::unique_ptr<FiffStream> start_file(QIODevice& p_IODevice);
 
     //=========================================================================================================
     /**
@@ -621,7 +616,7 @@ public:
      *
      * @return The stream, or nullptr if the file cannot be created.
      */
-    static FiffStream::SPtr start_file(const std::filesystem::path& path);
+    static std::unique_ptr<FiffStream> start_file(const std::filesystem::path& path);
 
     //=========================================================================================================
     /**
@@ -631,7 +626,7 @@ public:
      *
      * @return The opened file stream.
      */
-    static FiffStream::SPtr open_update(QIODevice& p_IODevice);
+    static std::unique_ptr<FiffStream> open_update(QIODevice& p_IODevice);
 
     //=========================================================================================================
     /**
@@ -649,12 +644,12 @@ public:
      *
      * @return the started fiff file, or null if the file cannot be created.
      */
-    static FiffStream::SPtr start_writing_raw(const std::filesystem::path& path,
-                                              const FiffInfo& info,
-                                              Eigen::RowVectorXd& cals,
-                                              Eigen::MatrixXi sel = defaultMatrixXi,
-                                              bool bResetRange = true,
-                                              fiff_int_t dataType = FIFFT_FLOAT);
+    static std::unique_ptr<FiffStream> start_writing_raw(const std::filesystem::path& path,
+                                                         const FiffInfo& info,
+                                                         Eigen::RowVectorXd& cals,
+                                                         Eigen::MatrixXi sel = defaultMatrixXi,
+                                                         bool bResetRange = true,
+                                                         fiff_int_t dataType = FIFFT_FLOAT);
 
     //=========================================================================================================
     /**
@@ -669,12 +664,12 @@ public:
      *
      * @return the started stream, or null if @p bytes is null.
      */
-    static FiffStream::SPtr start_writing_raw(std::unique_ptr<UTILSLIB::ByteStream> bytes,
-                                              const FiffInfo& info,
-                                              Eigen::RowVectorXd& cals,
-                                              Eigen::MatrixXi sel = defaultMatrixXi,
-                                              bool bResetRange = true,
-                                              fiff_int_t dataType = FIFFT_FLOAT);
+    static std::unique_ptr<FiffStream> start_writing_raw(std::unique_ptr<UTILSLIB::ByteStream> bytes,
+                                                         const FiffInfo& info,
+                                                         Eigen::RowVectorXd& cals,
+                                                         Eigen::MatrixXi sel = defaultMatrixXi,
+                                                         bool bResetRange = true,
+                                                         fiff_int_t dataType = FIFFT_FLOAT);
 
     //=========================================================================================================
     /**
@@ -1017,18 +1012,18 @@ public:
 
 private:
     /** Writes the file id, directory pointer and free list that open every FIFF file. */
-    static FiffStream::SPtr start_file(FiffStream::SPtr stream);
+    static std::unique_ptr<FiffStream> start_file(std::unique_ptr<FiffStream> stream);
 
     /** Reads the raw data information from an unopened stream. */
-    static bool setup_read_raw(FiffStream::SPtr stream, FiffRawData& data, bool allow_maxshield, bool is_littleEndian);
+    static bool setup_read_raw(std::unique_ptr<FiffStream> stream, FiffRawData& data, bool allow_maxshield, bool is_littleEndian);
 
     /** Writes the measurement info and starts the raw data block of a started file. */
-    static FiffStream::SPtr start_writing_raw(FiffStream::SPtr stream,
-                                              const FiffInfo& info,
-                                              Eigen::RowVectorXd& cals,
-                                              Eigen::MatrixXi sel,
-                                              bool bResetRange,
-                                              fiff_int_t dataType);
+    static std::unique_ptr<FiffStream> start_writing_raw(std::unique_ptr<FiffStream> stream,
+                                                         const FiffInfo& info,
+                                                         Eigen::RowVectorXd& cals,
+                                                         Eigen::MatrixXi sel,
+                                                         bool bResetRange,
+                                                         fiff_int_t dataType);
 
     //=========================================================================================================
     /**

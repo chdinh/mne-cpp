@@ -765,14 +765,14 @@ bool AnnotationModel::loadAnnotationJson(QFile& qFile)
 
 bool AnnotationModel::loadAnnotationFif(QFile& qFile)
 {
-    FIFFLIB::FiffStream::SPtr stream(new FIFFLIB::FiffStream(&qFile));
-    if (!stream->open()) {
+    FIFFLIB::FiffStream stream(&qFile);
+    if (!stream.open()) {
         qWarning() << "AnnotationModel: could not open annotation fif" << qFile.fileName();
         return false;
     }
 
     const QList<FIFFLIB::FiffDirNode::SPtr> annotationBlocks =
-        stream->dirtree()->dir_tree_find(FiffBlockMneAnnotations);
+        stream.dirtree()->dir_tree_find(FiffBlockMneAnnotations);
 
     if (annotationBlocks.isEmpty()) {
         qFile.close();
@@ -790,7 +790,7 @@ bool AnnotationModel::loadAnnotationFif(QFile& qFile)
     for (int entryIndex = 0; entryIndex < annotationBlocks.first()->nent(); ++entryIndex) {
         const auto& directoryEntry = annotationBlocks.first()->dir.at(entryIndex);
         FIFFLIB::FiffTag::UPtr tag;
-        if (!stream->read_tag(tag, directoryEntry->pos) || !tag) {
+        if (!stream.read_tag(tag, directoryEntry->pos) || !tag) {
             continue;
         }
 
@@ -1164,7 +1164,7 @@ bool AnnotationModel::saveAnnotationJson(QFile& qFile) const
 
 bool AnnotationModel::saveAnnotationFif(QFile& qFile) const
 {
-    FIFFLIB::FiffStream::SPtr stream = FIFFLIB::FiffStream::start_file(qFile);
+    auto stream = FIFFLIB::FiffStream::start_file(qFile);
     if (!stream) {
         qWarning() << "AnnotationModel: could not write annotation fif" << qFile.fileName();
         return false;

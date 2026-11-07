@@ -31,6 +31,7 @@
 
 #include <mne/mne_forward_solution.h>
 
+#include <utils/string_utils.h>
 #include <scMeas/realtimehpiresult.h>
 #include <scMeas/realtimefwdsolution.h>
 #include <scMeas/realtimemultisamplearray.h>
@@ -149,62 +150,23 @@ void RtFwd::unload()
 bool RtFwd::start()
 {
     // Maybe we can move all of this to the run() method?
-    // Read BEM
-    QFile t_fBem(m_pFwdSettings->bemname);
-    FiffStream::SPtr stream(new FiffStream(&t_fBem));
-    if (!stream->open()) {
-        QMessageBox msgBox;
-        msgBox.setText("The bem model cannot be opend. Chosse another file.");
-        msgBox.setStandardButtons(QMessageBox::Ok);
-        msgBox.setWindowFlags(Qt::WindowStaysOnTopHint);
-        msgBox.exec();
-        stream->close();
-        return false;
+    const std::pair<QString, QString> inputs[] = {
+        {m_pFwdSettings->bemname, "The bem model cannot be opend. Chosse another file."},
+        {m_pFwdSettings->srcname, "The source space cannot be opend. Chosse another file."},
+        {m_pFwdSettings->mriname, "The mri - head transformation cannot be opend. Chosse another file."},
+        {m_pFwdSettings->measname, "The meaurement file cannot be opend. Chosse another file."},
+    };
+    for (const auto& [path, message] : inputs) {
+        if (!FiffStream::open(UTILSLIB::pathFromUtf8(path.toStdString()))) {
+            QMessageBox msgBox;
+            msgBox.setText(message);
+            msgBox.setInformativeText(path);
+            msgBox.setStandardButtons(QMessageBox::Ok);
+            msgBox.setWindowFlags(Qt::WindowStaysOnTopHint);
+            msgBox.exec();
+            return false;
+        }
     }
-    stream->close();
-
-    // Read source space
-    QFile t_fSource(m_pFwdSettings->srcname);
-    stream = FiffStream::SPtr(new FiffStream(&t_fSource));
-    if (!stream->open()) {
-        QMessageBox msgBox;
-        msgBox.setText("The source space cannot be opend. Chosse another file.");
-        msgBox.setInformativeText(m_pFwdSettings->srcname);
-        msgBox.setStandardButtons(QMessageBox::Ok);
-        msgBox.setWindowFlags(Qt::WindowStaysOnTopHint);
-        msgBox.exec();
-        stream->close();
-        return false;
-    }
-    stream->close();
-
-    // Read MRI transformation
-    QFile t_fMri(m_pFwdSettings->mriname);
-    stream = FiffStream::SPtr(new FiffStream(&t_fMri));
-    if (!stream->open()) {
-        QMessageBox msgBox;
-        msgBox.setText("The mri - head transformation cannot be opend. Chosse another file.");
-        msgBox.setStandardButtons(QMessageBox::Ok);
-        msgBox.setWindowFlags(Qt::WindowStaysOnTopHint);
-        msgBox.exec();
-        stream->close();
-        return false;
-    }
-    stream->close();
-
-    // Read measurement
-    QFile t_fMeas(m_pFwdSettings->measname);
-    stream = FiffStream::SPtr(new FiffStream(&t_fMeas));
-    if (!stream->open()) {
-        QMessageBox msgBox;
-        msgBox.setText("The meaurement file cannot be opend. Chosse another file.");
-        msgBox.setStandardButtons(QMessageBox::Ok);
-        msgBox.setWindowFlags(Qt::WindowStaysOnTopHint);
-        msgBox.exec();
-        stream->close();
-        return false;
-    }
-    stream->close();
 
     //Start thread
     QThread::start();

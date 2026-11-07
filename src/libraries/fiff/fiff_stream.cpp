@@ -180,14 +180,14 @@ FiffStream::FiffStream(std::unique_ptr<UTILSLIB::ByteStream> bytes, std::string 
 
 //=============================================================================================================
 
-FiffStream::SPtr FiffStream::open(const std::filesystem::path& path)
+std::unique_ptr<FiffStream> FiffStream::open(const std::filesystem::path& path)
 {
     auto bytes = UTILSLIB::FileByteStream::open(path, UTILSLIB::FileByteStream::Mode::Read);
     if (!bytes) {
         qCritical("Cannot open %s", UTILSLIB::utf8FromPath(path).c_str());
         return {};
     }
-    FiffStream::SPtr stream(new FiffStream(std::move(bytes), UTILSLIB::utf8FromPath(path)));
+    auto stream = std::make_unique<FiffStream>(std::move(bytes), UTILSLIB::utf8FromPath(path));
     if (!stream->open())
         return {};
     return stream;
@@ -195,19 +195,19 @@ FiffStream::SPtr FiffStream::open(const std::filesystem::path& path)
 
 //=============================================================================================================
 
-FiffStream::SPtr FiffStream::start_file(const std::filesystem::path& path)
+std::unique_ptr<FiffStream> FiffStream::start_file(const std::filesystem::path& path)
 {
     auto bytes = UTILSLIB::FileByteStream::open(path, UTILSLIB::FileByteStream::Mode::Write);
     if (!bytes) {
         qWarning("Cannot write to %s", UTILSLIB::utf8FromPath(path).c_str());
         return {};
     }
-    return start_file(FiffStream::SPtr(new FiffStream(std::move(bytes), UTILSLIB::utf8FromPath(path))));
+    return start_file(std::make_unique<FiffStream>(std::move(bytes), UTILSLIB::utf8FromPath(path)));
 }
 
 //=============================================================================================================
 
-FiffStream::SPtr FiffStream::start_file(FiffStream::SPtr stream)
+std::unique_ptr<FiffStream> FiffStream::start_file(std::unique_ptr<FiffStream> stream)
 {
     stream->write_id(FIFF_FILE_ID);
     int null_pointer = FIFFV_NEXT_NONE;
@@ -2006,7 +2006,7 @@ bool FiffStream::setup_read_raw(const std::filesystem::path& path,
         qCritical("Cannot open %s", UTILSLIB::utf8FromPath(path).c_str());
         return false;
     }
-    return setup_read_raw(FiffStream::SPtr(new FiffStream(std::move(bytes), UTILSLIB::utf8FromPath(path))), data, allow_maxshield, is_littleEndian);
+    return setup_read_raw(std::make_unique<FiffStream>(std::move(bytes), UTILSLIB::utf8FromPath(path)), data, allow_maxshield, is_littleEndian);
 }
 
 //=============================================================================================================
@@ -2018,12 +2018,12 @@ bool FiffStream::setup_read_raw(std::unique_ptr<UTILSLIB::ByteStream> bytes,
 {
     if (!bytes)
         return false;
-    return setup_read_raw(FiffStream::SPtr(new FiffStream(std::move(bytes))), data, allow_maxshield, is_littleEndian);
+    return setup_read_raw(std::make_unique<FiffStream>(std::move(bytes)), data, allow_maxshield, is_littleEndian);
 }
 
 //=============================================================================================================
 
-bool FiffStream::setup_read_raw(FiffStream::SPtr t_pStream,
+bool FiffStream::setup_read_raw(std::unique_ptr<FiffStream> t_pStream,
                                 FiffRawData& data,
                                 bool allow_maxshield,
                                 bool is_littleEndian)
@@ -2079,7 +2079,7 @@ bool FiffStream::setup_read_raw(FiffStream::SPtr t_pStream,
     info.filename = t_sFileName.toStdString();
 
     data.clear();
-    data.file = t_pStream; // fid;
+    data.file = std::move(t_pStream);
     data.info = info;
     data.first_samp = 0;
     data.last_samp = 0;
@@ -2114,7 +2114,7 @@ bool FiffStream::setup_read_raw(FiffStream::SPtr t_pStream,
     //
     FiffTag::UPtr t_pTag;
     if (dir[first]->kind == FIFF_FIRST_SAMPLE) {
-        t_pStream->read_tag(t_pTag, dir[first]->pos);
+        data.file->read_tag(t_pTag, dir[first]->pos);
         first_samp = *t_pTag->toInt();
         ++first;
     }
@@ -2125,7 +2125,7 @@ bool FiffStream::setup_read_raw(FiffStream::SPtr t_pStream,
         //
         //  This first skip can be applied only after we know the buffer size
         //
-        t_pStream->read_tag(t_pTag, dir[first]->pos);
+        data.file->read_tag(t_pTag, dir[first]->pos);
         first_skip = *t_pTag->toInt();
         ++first;
     }
@@ -2140,7 +2140,7 @@ bool FiffStream::setup_read_raw(FiffStream::SPtr t_pStream,
     for (qint32 k = first; k < nent; ++k) {
         FiffDirEntry::SPtr ent = dir[k];
         if (ent->kind == FIFF_DATA_SKIP) {
-            t_pStream->read_tag(t_pTag, ent->pos);
+            data.file->read_tag(t_pTag, ent->pos);
             nskip = *t_pTag->toInt();
         } else if (ent->kind == FIFF_DATA_BUFFER) {
             //
@@ -2247,15 +2247,15 @@ fiff_long_t FiffStream::start_block(fiff_int_t kind)
 
 //=============================================================================================================
 
-FiffStream::SPtr FiffStream::start_file(QIODevice& p_IODevice)
+std::unique_ptr<FiffStream> FiffStream::start_file(QIODevice& p_IODevice)
 {
-    FiffStream::SPtr p_pStream(new FiffStream(&p_IODevice));
+    auto p_pStream = std::make_unique<FiffStream>(&p_IODevice);
     QString t_sFileName = p_pStream->streamName();
 
     if (!p_IODevice.isOpen()) {
         if (!p_pStream->device()->open(QIODevice::WriteOnly)) {
             qWarning("Cannot write to %s\n", t_sFileName.toUtf8().constData()); //consider throw
-            FiffStream::SPtr p_pEmptyStream;
+            std::unique_ptr<FiffStream> p_pEmptyStream;
             return p_pEmptyStream;
         }
     }
@@ -2275,9 +2275,9 @@ FiffStream::SPtr FiffStream::start_file(QIODevice& p_IODevice)
 
 //=============================================================================================================
 
-FiffStream::SPtr FiffStream::open_update(QIODevice& p_IODevice)
+std::unique_ptr<FiffStream> FiffStream::open_update(QIODevice& p_IODevice)
 {
-    FiffStream::SPtr t_pStream(new FiffStream(&p_IODevice));
+    auto t_pStream = std::make_unique<FiffStream>(&p_IODevice);
     QString t_sFileName = t_pStream->streamName();
 
     /*
@@ -2288,7 +2288,7 @@ FiffStream::SPtr FiffStream::open_update(QIODevice& p_IODevice)
     QFile* t_pFile = qobject_cast<QFile*>(&p_IODevice);
     if (t_pFile != nullptr && !t_pFile->exists()) {
         qCritical("Cannot open %s for update: no such file", t_sFileName.toUtf8().constData());
-        return FiffStream::SPtr();
+        return std::unique_ptr<FiffStream>();
     }
 
     /*
@@ -2296,7 +2296,7 @@ FiffStream::SPtr FiffStream::open_update(QIODevice& p_IODevice)
      */
     if (!t_pStream->open(QIODevice::ReadWrite)) {
         qCritical("Cannot open %s\n", t_sFileName.toUtf8().constData()); //consider throw
-        return FiffStream::SPtr();
+        return std::unique_ptr<FiffStream>();
     }
 
     FiffTag::UPtr t_pTag;
@@ -2312,7 +2312,7 @@ FiffStream::SPtr FiffStream::open_update(QIODevice& p_IODevice)
         if (!t_pStream->read_tag(t_pTag, pointerpos)) {
             qCritical("Could not read last tag in the directory list!");
             t_pStream->close();
-            return FiffStream::SPtr();
+            return std::unique_ptr<FiffStream>();
         }
         if (t_pTag->next != FIFFV_NEXT_NONE) {
             t_pTag->next = FIFFV_NEXT_NONE;
@@ -2325,7 +2325,7 @@ FiffStream::SPtr FiffStream::open_update(QIODevice& p_IODevice)
         if (!t_pStream->read_tag(t_pTag, pointerpos)) {
             qCritical("Could not read directory pointer!");
             t_pStream->close();
-            return FiffStream::SPtr();
+            return std::unique_ptr<FiffStream>();
         }
         /*
         * Do we have a directory?
@@ -2351,38 +2351,38 @@ FiffStream::SPtr FiffStream::open_update(QIODevice& p_IODevice)
 
 //=============================================================================================================
 
-FiffStream::SPtr FiffStream::start_writing_raw(const std::filesystem::path& path,
-                                               const FiffInfo& info,
-                                               RowVectorXd& cals,
-                                               MatrixXi sel,
-                                               bool bResetRange,
-                                               fiff_int_t dataType)
+std::unique_ptr<FiffStream> FiffStream::start_writing_raw(const std::filesystem::path& path,
+                                                          const FiffInfo& info,
+                                                          RowVectorXd& cals,
+                                                          MatrixXi sel,
+                                                          bool bResetRange,
+                                                          fiff_int_t dataType)
 {
     return start_writing_raw(start_file(path), info, cals, std::move(sel), bResetRange, dataType);
 }
 
 //=============================================================================================================
 
-FiffStream::SPtr FiffStream::start_writing_raw(std::unique_ptr<UTILSLIB::ByteStream> bytes,
-                                               const FiffInfo& info,
-                                               RowVectorXd& cals,
-                                               MatrixXi sel,
-                                               bool bResetRange,
-                                               fiff_int_t dataType)
+std::unique_ptr<FiffStream> FiffStream::start_writing_raw(std::unique_ptr<UTILSLIB::ByteStream> bytes,
+                                                          const FiffInfo& info,
+                                                          RowVectorXd& cals,
+                                                          MatrixXi sel,
+                                                          bool bResetRange,
+                                                          fiff_int_t dataType)
 {
     if (!bytes)
         return {};
-    return start_writing_raw(start_file(FiffStream::SPtr(new FiffStream(std::move(bytes)))), info, cals, std::move(sel), bResetRange, dataType);
+    return start_writing_raw(start_file(std::make_unique<FiffStream>(std::move(bytes))), info, cals, std::move(sel), bResetRange, dataType);
 }
 
 //=============================================================================================================
 
-FiffStream::SPtr FiffStream::start_writing_raw(FiffStream::SPtr t_pStream,
-                                               const FiffInfo& info,
-                                               RowVectorXd& cals,
-                                               MatrixXi sel,
-                                               bool bResetRange,
-                                               fiff_int_t dataType)
+std::unique_ptr<FiffStream> FiffStream::start_writing_raw(std::unique_ptr<FiffStream> t_pStream,
+                                                          const FiffInfo& info,
+                                                          RowVectorXd& cals,
+                                                          MatrixXi sel,
+                                                          bool bResetRange,
+                                                          fiff_int_t dataType)
 {
     fiff_int_t data_type = dataType;
 
@@ -2424,24 +2424,22 @@ FiffStream::SPtr FiffStream::start_writing_raw(FiffStream::SPtr t_pStream,
     bool have_isotrak = false;
     if (blocks.size() > 0 && !info.filename.empty()) {
         QFile t_qFile(QString::fromStdString(info.filename)); //ToDo this has to be adapted for TCPSocket
-        FiffStream::SPtr t_pStream2(new FiffStream(&t_qFile));
+        FiffStream source(&t_qFile);
 
-        if (!t_pStream2->open()) {
+        if (!source.open()) {
             qWarning() << "Cannot copy the measurement blocks of" << info.filename << "; writing the info without them";
             blocks.clear();
         }
 
         for (qint32 k = 0; k < blocks.size(); ++k) {
-            QList<FiffDirNode::SPtr> nodes = t_pStream2->dirtree()->dir_tree_find(blocks[k]);
-            FiffDirNode::copy_tree(*t_pStream2, t_pStream2->dirtree()->id, nodes, *t_pStream);
+            QList<FiffDirNode::SPtr> nodes = source.dirtree()->dir_tree_find(blocks[k]);
+            FiffDirNode::copy_tree(source, source.dirtree()->id, nodes, *t_pStream);
             if (blocks[k] == FIFFB_HPI_RESULT && nodes.size() > 0)
                 have_hpi_result = true;
 
             if (blocks[k] == FIFFB_ISOTRAK && nodes.size() > 0)
                 have_isotrak = true;
         }
-
-        t_pStream2 = FiffStream::SPtr();
     }
 #endif
 
@@ -3692,7 +3690,7 @@ bool FiffStream::copyProcessingHistory(const QString& fromPath, const QString& t
 
     // Open destination file for update
     QFile dstFile(toPath);
-    FiffStream::SPtr dstStream = FiffStream::open_update(dstFile);
+    auto dstStream = FiffStream::open_update(dstFile);
     if (!dstStream) {
         qWarning("FiffStream::copyProcessingHistory - Cannot open destination file %s for update",
                  toPath.toUtf8().constData());

@@ -331,19 +331,19 @@ bool FiffInfo::readMegEegChannels(const std::string& name,
                                   int& neegp)
 {
     QFile file(QString::fromStdString(name));
-    FiffStream::SPtr stream(new FiffStream(&file));
+    FiffStream stream(&file);
 
-    if (!stream->open())
+    if (!stream.open())
         return false;
 
     FiffInfo info;
     FiffDirNode::SPtr infoNode;
-    if (!stream->read_meas_info(stream->dirtree(), info, infoNode)) {
+    if (!stream.read_meas_info(stream.dirtree(), info, infoNode)) {
         qCritical("%s : could not read measurement info", name.c_str());
-        stream->close();
+        stream.close();
         return false;
     }
-    stream->close();
+    stream.close();
 
     QList<FiffChInfo> meg;
     QList<FiffChInfo> eeg;

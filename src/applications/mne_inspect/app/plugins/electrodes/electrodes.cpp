@@ -165,12 +165,12 @@ bool ElectrodesPlugin::loadFiff(const QString& path)
 
     FiffDigPointSet dig;
     {
-        FiffStream::SPtr stream = FiffStream::SPtr(new FiffStream(&file));
-        if (!stream->open()) {
+        FiffStream stream(&file);
+        if (!stream.open()) {
             qWarning() << "ElectrodesPlugin::loadFiff: failed to open FIFF stream:" << path;
             return false;
         }
-        if (!FiffDigPointSet::readFromStream(*stream, dig)) {
+        if (!FiffDigPointSet::readFromStream(stream, dig)) {
             qWarning() << "ElectrodesPlugin::loadFiff: no digitiser data in" << path;
             return false;
         }

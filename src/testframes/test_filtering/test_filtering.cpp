@@ -117,7 +117,7 @@ void TestFiltering::initTestCase()
     // Only filter MEG channels
     RowVectorXi vPicks = rawFirstInRaw.info.pick_types(true, true, false);
     RowVectorXd vCals;
-    FiffStream::SPtr outfid = FiffStream::start_writing_raw((QCoreApplication::applicationDirPath() + "/../resources/data/mne-cpp-test-data/MEG/sample/rtfilter_filterdata_out_raw.fif").toStdString(), rawFirstInRaw.info, vCals);
+    auto outfid = FiffStream::start_writing_raw((QCoreApplication::applicationDirPath() + "/../resources/data/mne-cpp-test-data/MEG/sample/rtfilter_filterdata_out_raw.fif").toStdString(), rawFirstInRaw.info, vCals);
 
     //   Set up the reading parameters
     //   To read the whole file at once set

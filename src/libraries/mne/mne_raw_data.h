@@ -254,7 +254,7 @@ public:
     QString filename; /**< Path to the raw FIFF file. */
     //  FIFFLIB::fiffFile       file;
     std::unique_ptr<QFile> file;                     /**< Owned QFile backing the FIFF stream. */
-    FIFFLIB::FiffStream::SPtr stream;                /**< Open FIFF stream for reading. */
+    std::unique_ptr<FIFFLIB::FiffStream> stream;     /**< Open FIFF stream for reading. */
     std::unique_ptr<MNELIB::MNERawInfo> info;        /**< Raw data information loaded using MNE routines. */
     StringList ch_names;                             /**< Channel names as a flat list. */
     StringList badlist;                              /**< Bad channel names. */

@@ -63,15 +63,15 @@ namespace
 bool containsBemSurfaces(const QString& sFilePath)
 {
     QFile file(sFilePath);
-    FIFFLIB::FiffStream::SPtr pStream(new FIFFLIB::FiffStream(&file));
+    FIFFLIB::FiffStream pStream(&file);
 
-    if (!pStream->open()) {
+    if (!pStream.open()) {
         return false;
     }
 
-    const bool bHasBem = !pStream->dirtree()->dir_tree_find(FIFFB_BEM).isEmpty() || !pStream->dirtree()->dir_tree_find(FIFFB_BEM_SURF).isEmpty();
+    const bool bHasBem = !pStream.dirtree()->dir_tree_find(FIFFB_BEM).isEmpty() || !pStream.dirtree()->dir_tree_find(FIFFB_BEM_SURF).isEmpty();
 
-    pStream->close();
+    pStream.close();
 
     return bHasBem;
 }

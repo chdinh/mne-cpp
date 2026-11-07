@@ -279,22 +279,22 @@ MNEMorphMap MNEMorphMap::compute(const MatrixX3f& fromRr, const MatrixX3i& fromT
 std::optional<MNEMorphMap> MNEMorphMap::read(const QString& path, const QString& fromSubj, const QString& toSubj, int hemi)
 {
     QFile file(path);
-    FiffStream::SPtr stream(new FiffStream(&file));
-    if (hemi < 0 || hemi > 1 || !stream->open()) {
+    FiffStream stream(&file);
+    if (hemi < 0 || hemi > 1 || !stream.open()) {
         return std::nullopt;
     }
     FiffTag::UPtr tag;
-    for (const FiffDirNode::SPtr& node : stream->dirtree()->dir_tree_find(FIFFB_MNE_MORPH_MAP)) {
-        if (!node->find_tag(*stream, FIFF_MNE_HEMI, tag) || *tag->toInt() != kHemiKind[hemi]) {
+    for (const FiffDirNode::SPtr& node : stream.dirtree()->dir_tree_find(FIFFB_MNE_MORPH_MAP)) {
+        if (!node->find_tag(stream, FIFF_MNE_HEMI, tag) || *tag->toInt() != kHemiKind[hemi]) {
             continue;
         }
-        if (!node->find_tag(*stream, FIFF_MNE_MORPH_MAP_FROM, tag) || tag->toString() != fromSubj) {
+        if (!node->find_tag(stream, FIFF_MNE_MORPH_MAP_FROM, tag) || tag->toString() != fromSubj) {
             continue;
         }
-        if (!node->find_tag(*stream, FIFF_MNE_MORPH_MAP_TO, tag) || tag->toString() != toSubj) {
+        if (!node->find_tag(stream, FIFF_MNE_MORPH_MAP_TO, tag) || tag->toString() != toSubj) {
             continue;
         }
-        if (!node->find_tag(*stream, FIFF_MNE_MORPH_MAP, tag)) {
+        if (!node->find_tag(stream, FIFF_MNE_MORPH_MAP, tag)) {
             break;
         }
         MNEMorphMap result;
@@ -317,7 +317,7 @@ std::optional<MNEMorphMap> MNEMorphMap::read(const QString& path, const QString&
 bool MNEMorphMap::write(const QString& path, const QList<const MNEMorphMap*>& maps)
 {
     QFile file(path);
-    FiffStream::SPtr stream = FiffStream::start_file(file);
+    auto stream = FiffStream::start_file(file);
     if (!stream) {
         return false;
     }

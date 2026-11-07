@@ -87,18 +87,18 @@ private slots:
         QFile file(m_sDataPath + "/MEG/sample/sample_audvis_trunc_raw.fif");
         QVERIFY(file.exists());
 
-        FiffStream::SPtr stream(new FiffStream(&file));
-        QVERIFY(stream->open());
+        FiffStream stream(&file);
+        QVERIFY(stream.open());
 
         // Check the directory tree was read
-        QVERIFY(stream->dirtree() != nullptr);
-        QVERIFY(stream->dir().size() > 0);
+        QVERIFY(stream.dirtree() != nullptr);
+        QVERIFY(stream.dir().size() > 0);
 
         // Read file ID
-        FiffId fileId = stream->id();
+        FiffId fileId = stream.id();
         QVERIFY(fileId.version > 0 || fileId.machid[0] != 0 || fileId.machid[1] != 0);
 
-        stream->close();
+        stream.close();
     }
 
     void fiffStream_findDirTree()
@@ -107,7 +107,7 @@ private slots:
             QSKIP("No test data");
 
         QFile file(m_sDataPath + "/MEG/sample/sample_audvis_trunc_raw.fif");
-        FiffStream::SPtr stream(new FiffStream(&file));
+        auto stream = std::make_unique<FiffStream>(&file);
         stream->open();
 
         // Find measurement info block
@@ -140,19 +140,19 @@ private slots:
             QSKIP("No test data");
 
         QFile file(m_sDataPath + "/MEG/sample/sample_audvis_trunc_raw.fif");
-        FiffStream::SPtr stream(new FiffStream(&file));
-        stream->open();
+        FiffStream stream(&file);
+        stream.open();
 
         // Read first few tags from directory
-        int nTags = qMin((int)stream->dir().size(), 20);
+        int nTags = qMin((int)stream.dir().size(), 20);
         for (int i = 0; i < nTags; ++i) {
             FiffTag::UPtr tag;
-            stream->read_tag(tag, stream->dir()[i]->pos);
+            stream.read_tag(tag, stream.dir()[i]->pos);
             QVERIFY(tag != nullptr);
             QVERIFY(tag->kind > 0 || tag->kind == 0);
         }
 
-        stream->close();
+        stream.close();
     }
 
     //=========================================================================
@@ -292,7 +292,7 @@ private slots:
         QVERIFY(tmpFile.open());
 
         RowVectorXd cals;
-        FiffStream::SPtr outStream = FiffStream::start_writing_raw(FiffStream::byteStream(tmpFile, QIODevice::WriteOnly), raw.info, cals);
+        auto outStream = FiffStream::start_writing_raw(FiffStream::byteStream(tmpFile, QIODevice::WriteOnly), raw.info, cals);
         QVERIFY(outStream != nullptr);
 
         // Read and write first 1 second
@@ -403,11 +403,11 @@ private slots:
 
         // Try stream-based reading
         QFile file2(m_sDataPath + "/MEG/sample/sample_audvis-cov.fif");
-        FiffStream::SPtr stream(new FiffStream(&file2));
-        if (stream->open()) {
-            QList<FiffDirNode::SPtr> covNodes = stream->dirtree()->dir_tree_find(FIFFB_MNE_COV);
+        FiffStream stream(&file2);
+        if (stream.open()) {
+            QList<FiffDirNode::SPtr> covNodes = stream.dirtree()->dir_tree_find(FIFFB_MNE_COV);
             QVERIFY(covNodes.size() > 0 || true);
-            stream->close();
+            stream.close();
         }
     }
 
@@ -445,19 +445,19 @@ private slots:
 
         // Read the head<->MRI transform
         QFile file(m_sDataPath + "/MEG/sample/all-trans.fif");
-        FiffStream::SPtr stream(new FiffStream(&file));
-        QVERIFY(stream->open());
+        FiffStream stream(&file);
+        QVERIFY(stream.open());
 
         // Search for coordinate transforms
-        QList<FiffDirNode::SPtr> nodes = stream->dirtree()->dir_tree_find(FIFFB_MEAS);
+        QList<FiffDirNode::SPtr> nodes = stream.dirtree()->dir_tree_find(FIFFB_MEAS);
         if (nodes.isEmpty())
-            nodes = stream->dirtree()->dir_tree_find(FIFFB_MNE);
+            nodes = stream.dirtree()->dir_tree_find(FIFFB_MNE);
 
         // Read tags to find FIFF_COORD_TRANS
-        for (int i = 0; i < stream->dir().size(); ++i) {
-            if (stream->dir()[i]->kind == FIFF_COORD_TRANS) {
+        for (int i = 0; i < stream.dir().size(); ++i) {
+            if (stream.dir()[i]->kind == FIFF_COORD_TRANS) {
                 FiffTag::UPtr tag;
-                stream->read_tag(tag, stream->dir()[i]->pos);
+                stream.read_tag(tag, stream.dir()[i]->pos);
                 QVERIFY(tag != nullptr);
                 FiffCoordTrans trans = tag->toCoordTrans();
                 QVERIFY(trans.from >= 0);
@@ -467,7 +467,7 @@ private slots:
                 QVERIFY(trans.trans.cols() == 4);
             }
         }
-        stream->close();
+        stream.close();
     }
 
     void fiffCoordTrans_readIcpTrans()
@@ -480,13 +480,13 @@ private slots:
         if (!file.exists())
             QSKIP("icp-trans.fif not found");
 
-        FiffStream::SPtr stream(new FiffStream(&file));
-        QVERIFY(stream->open());
+        FiffStream stream(&file);
+        QVERIFY(stream.open());
 
-        for (int i = 0; i < stream->dir().size(); ++i) {
-            if (stream->dir()[i]->kind == FIFF_COORD_TRANS) {
+        for (int i = 0; i < stream.dir().size(); ++i) {
+            if (stream.dir()[i]->kind == FIFF_COORD_TRANS) {
                 FiffTag::UPtr tag;
-                stream->read_tag(tag, stream->dir()[i]->pos);
+                stream.read_tag(tag, stream.dir()[i]->pos);
                 FiffCoordTrans trans = tag->toCoordTrans();
 
                 // Test operations on the transform
@@ -499,7 +499,7 @@ private slots:
                 QVERIFY(!fromName.isEmpty() || true);
             }
         }
-        stream->close();
+        stream.close();
     }
 
     //=========================================================================
@@ -534,22 +534,22 @@ private slots:
             QSKIP("No test data");
 
         QFile file(m_sDataPath + "/MEG/sample/sample_audvis-ave.fif");
-        FiffStream::SPtr stream(new FiffStream(&file));
-        QVERIFY(stream->open());
+        FiffStream stream(&file);
+        QVERIFY(stream.open());
 
         // Find evoked blocks
-        QList<FiffDirNode::SPtr> evoked = stream->dirtree()->dir_tree_find(FIFFB_EVOKED);
+        QList<FiffDirNode::SPtr> evoked = stream.dirtree()->dir_tree_find(FIFFB_EVOKED);
         QVERIFY(evoked.size() > 0);
 
         // Find measurement info
-        QList<FiffDirNode::SPtr> measInfo = stream->dirtree()->dir_tree_find(FIFFB_MEAS_INFO);
+        QList<FiffDirNode::SPtr> measInfo = stream.dirtree()->dir_tree_find(FIFFB_MEAS_INFO);
         QVERIFY(measInfo.size() > 0);
 
         // Read specific tags from measurement info
         if (measInfo.size() > 0) {
             FiffTag::UPtr tag;
             for (int i = 0; i < measInfo[0]->dir.size(); ++i) {
-                stream->read_tag(tag, measInfo[0]->dir[i]->pos);
+                stream.read_tag(tag, measInfo[0]->dir[i]->pos);
                 QVERIFY(tag != nullptr);
                 if (tag->kind == FIFF_SFREQ) {
                     float sfreq = *tag->toFloat();
@@ -558,7 +558,7 @@ private slots:
             }
         }
 
-        stream->close();
+        stream.close();
     }
 
     //=========================================================================
@@ -574,18 +574,18 @@ private slots:
         if (!file.exists())
             QSKIP("Forward solution file not found");
 
-        FiffStream::SPtr stream(new FiffStream(&file));
-        QVERIFY(stream->open());
+        FiffStream stream(&file);
+        QVERIFY(stream.open());
 
         // Find MNE forward solution block
-        QList<FiffDirNode::SPtr> fwdBlocks = stream->dirtree()->dir_tree_find(FIFFB_MNE_FORWARD_SOLUTION);
+        QList<FiffDirNode::SPtr> fwdBlocks = stream.dirtree()->dir_tree_find(FIFFB_MNE_FORWARD_SOLUTION);
         QVERIFY(fwdBlocks.size() > 0);
 
         // Find source space blocks
-        QList<FiffDirNode::SPtr> srcBlocks = stream->dirtree()->dir_tree_find(FIFFB_MNE_SOURCE_SPACE);
+        QList<FiffDirNode::SPtr> srcBlocks = stream.dirtree()->dir_tree_find(FIFFB_MNE_SOURCE_SPACE);
         QVERIFY(srcBlocks.size() > 0);
 
-        stream->close();
+        stream.close();
     }
 
     //=========================================================================
@@ -601,14 +601,14 @@ private slots:
         if (!file.exists())
             QSKIP("BEM file not found");
 
-        FiffStream::SPtr stream(new FiffStream(&file));
-        QVERIFY(stream->open());
+        FiffStream stream(&file);
+        QVERIFY(stream.open());
 
         // Find BEM surface blocks
-        QList<FiffDirNode::SPtr> bemBlocks = stream->dirtree()->dir_tree_find(FIFFB_BEM_SURF);
+        QList<FiffDirNode::SPtr> bemBlocks = stream.dirtree()->dir_tree_find(FIFFB_BEM_SURF);
         QVERIFY(bemBlocks.size() > 0);
 
-        stream->close();
+        stream.close();
     }
 
     //=========================================================================
@@ -624,23 +624,23 @@ private slots:
         if (!file.exists())
             QSKIP("Source space file not found");
 
-        FiffStream::SPtr stream(new FiffStream(&file));
-        QVERIFY(stream->open());
+        FiffStream stream(&file);
+        QVERIFY(stream.open());
 
         // Find source space blocks
-        QList<FiffDirNode::SPtr> srcBlocks = stream->dirtree()->dir_tree_find(FIFFB_MNE_SOURCE_SPACE);
+        QList<FiffDirNode::SPtr> srcBlocks = stream.dirtree()->dir_tree_find(FIFFB_MNE_SOURCE_SPACE);
         QVERIFY(srcBlocks.size() > 0);
 
         // Read tags from first source space
         if (srcBlocks.size() > 0) {
             FiffTag::UPtr tag;
             for (int i = 0; i < qMin((int)srcBlocks[0]->dir.size(), 30); ++i) {
-                stream->read_tag(tag, srcBlocks[0]->dir[i]->pos);
+                stream.read_tag(tag, srcBlocks[0]->dir[i]->pos);
                 QVERIFY(tag != nullptr);
             }
         }
 
-        stream->close();
+        stream.close();
     }
 
     //=========================================================================
@@ -789,7 +789,7 @@ private slots:
 
         {
             RowVectorXd cals;
-            FiffStream::SPtr outStream = FiffStream::start_writing_raw(path, src.info, cals);
+            auto outStream = FiffStream::start_writing_raw(path, src.info, cals);
             QVERIFY(outStream);
             // Deliberately write no raw buffers before finishing.
             outStream->finish_writing_raw();

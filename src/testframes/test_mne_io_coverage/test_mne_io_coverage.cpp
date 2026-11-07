@@ -152,23 +152,23 @@ private slots:
             QSKIP("Raw file not found");
 
         QFile file(m_sRawFile);
-        FiffStream::SPtr stream(new FiffStream(&file));
-        if (!stream->open())
+        FiffStream stream(&file);
+        if (!stream.open())
             QSKIP("Could not open FIFF stream");
 
-        FiffDirNode::SPtr meas = MNERawInfo::find_meas(stream->dirtree());
+        FiffDirNode::SPtr meas = MNERawInfo::find_meas(stream.dirtree());
         // find_meas may return null depending on tree structure; code path exercised
 
-        FiffDirNode::SPtr measInfo = MNERawInfo::find_meas_info(stream->dirtree());
+        FiffDirNode::SPtr measInfo = MNERawInfo::find_meas_info(stream.dirtree());
         // find_meas_info may return null; code path exercised
 
-        FiffDirNode::SPtr raw = MNERawInfo::find_raw(stream->dirtree());
+        FiffDirNode::SPtr raw = MNERawInfo::find_raw(stream.dirtree());
         // Raw might be null if structure differs, but code path is exercised
 
-        FiffDirNode::SPtr maxshield = MNERawInfo::find_maxshield(stream->dirtree());
+        FiffDirNode::SPtr maxshield = MNERawInfo::find_maxshield(stream.dirtree());
         // MaxShield block may not be present; code path is exercised
 
-        stream->close();
+        stream.close();
     }
 
     void testMneRawInfoGetMeasInfo()
@@ -177,11 +177,11 @@ private slots:
             QSKIP("Raw file not found");
 
         QFile file(m_sRawFile);
-        FiffStream::SPtr stream(new FiffStream(&file));
-        if (!stream->open())
+        FiffStream stream(&file);
+        if (!stream.open())
             QSKIP("Could not open FIFF stream");
 
-        FiffDirNode::SPtr meas = MNERawInfo::find_meas(stream->dirtree());
+        FiffDirNode::SPtr meas = MNERawInfo::find_meas(stream.dirtree());
         if (meas) {
             std::unique_ptr<FiffId> id;
             int nchan = 0;
@@ -190,7 +190,7 @@ private slots:
             FiffCoordTrans trans;
             FiffTime startTime;
 
-            int rc = MNERawInfo::get_meas_info(*stream, meas, id, &nchan, &sfreq,
+            int rc = MNERawInfo::get_meas_info(stream, meas, id, &nchan, &sfreq,
                                                &highpass, &lowpass, chInfo, trans, startTime);
             if (rc == 0) {
                 QVERIFY(nchan > 0);
@@ -198,7 +198,7 @@ private slots:
             }
         }
 
-        stream->close();
+        stream.close();
     }
 
     // ── InvSourceEstimate tokenization ──────────────────────────────────────

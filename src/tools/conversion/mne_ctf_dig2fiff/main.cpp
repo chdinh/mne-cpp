@@ -238,7 +238,7 @@ int main(int argc, char* argv[])
     // Write FIFF output
     if (!fifName.isEmpty()) {
         QFile outFile(fifName);
-        FiffStream::SPtr outStream = FiffStream::start_file(outFile);
+        auto outStream = FiffStream::start_file(outFile);
         if (!outStream) {
             qCritical("Cannot open output file: %s", qPrintable(fifName));
             return 1;

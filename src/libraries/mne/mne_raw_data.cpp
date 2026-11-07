@@ -478,16 +478,16 @@ int mne_read_bad_channel_list(const QString& name, StringList& listp, int& nlist
 
 {
     QFile file(name);
-    FiffStream::SPtr stream(new FiffStream(&file));
+    FiffStream stream(&file);
 
     int res;
 
-    if (!stream->open())
+    if (!stream.open())
         return FAIL;
 
-    res = mne_read_bad_channel_list_from_node(*stream, stream->dirtree(), listp, nlistp);
+    res = mne_read_bad_channel_list_from_node(stream, stream.dirtree(), listp, nlistp);
 
-    stream->close();
+    stream.close();
 
     return res;
 }
@@ -1253,7 +1253,7 @@ MNERawData* MNERawData::open_file_comp(const QString& name,
     std::unique_ptr<MNERawData> data;
 
     auto filePtr = std::make_unique<QFile>(name);
-    FiffStream::SPtr stream(new FiffStream(filePtr.get()));
+    auto stream = std::make_unique<FiffStream>(filePtr.get());
     //    fiffFile           in    = NULL;
 
     FiffDirEntry::SPtr dir;
@@ -1294,7 +1294,7 @@ MNERawData* MNERawData::open_file_comp(const QString& name,
     data = std::make_unique<MNERawData>();
     data->filename = name;
     data->file = std::move(filePtr);
-    data->stream = stream;
+    data->stream = std::move(stream);
     data->info = std::move(info);
     /*
        * Add the channel name list
@@ -1359,7 +1359,7 @@ MNERawData* MNERawData::open_file_comp(const QString& name,
     if (dir0[current_dir0]->kind == FIFF_FIRST_SAMPLE) {
         //        if (fiff_read_this_tag(in->fd,dir0->pos,&tag) == FIFF_FAIL)
         //            goto bad;
-        if (!stream->read_tag(t_pTag, dir0[current_dir0]->pos))
+        if (!data->stream->read_tag(t_pTag, dir0[current_dir0]->pos))
             return nullptr;
         data->first_samp = *t_pTag->toInt();
         current_dir0++;
@@ -1369,7 +1369,7 @@ MNERawData* MNERawData::open_file_comp(const QString& name,
         int nsamp_skip;
         //        if (fiff_read_this_tag(in->fd,dir0->pos,&tag) == FIFF_FAIL)
         //            goto bad;
-        if (!stream->read_tag(t_pTag, dir0[current_dir0]->pos))
+        if (!data->stream->read_tag(t_pTag, dir0[current_dir0]->pos))
             return nullptr;
         nsamp_skip = data->info->buf_size * (*t_pTag->toInt());
         qInfo("Data skip of %d samples in the beginning\n", nsamp_skip);
@@ -1378,7 +1378,7 @@ MNERawData* MNERawData::open_file_comp(const QString& name,
         if (dir0[current_dir0]->kind == FIFF_FIRST_SAMPLE) {
             //            if (fiff_read_this_tag(in->fd,dir0->pos,&tag) == FIFF_FAIL)
             //                goto bad;
-            if (!stream->read_tag(t_pTag, dir0[current_dir0]->pos))
+            if (!data->stream->read_tag(t_pTag, dir0[current_dir0]->pos))
                 return nullptr;
             data->first_samp += *t_pTag->toInt();
             current_dir0++;
@@ -1438,7 +1438,7 @@ MNERawData* MNERawData::open_file_comp(const QString& name,
         } else if (dir->kind == FIFF_DATA_SKIP) {
             //            if (fiff_read_this_tag(in->fd,dir->pos,&tag) == FIFF_FAIL)
             //                goto bad;
-            if (!stream->read_tag(t_pTag, dir->pos))
+            if (!data->stream->read_tag(t_pTag, dir->pos))
                 return nullptr;
             data->bufs[k].ns = data->info->buf_size * (*t_pTag->toInt());
         }

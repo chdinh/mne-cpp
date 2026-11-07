@@ -1002,7 +1002,7 @@ void TestFiffCorePython::transSet_headToMniMatchesPython()
     const QString file = dir.filePath("chain-trans.fif");
     {
         QFile out(file);
-        FiffStream::SPtr stream = FiffStream::start_file(out);
+        auto stream = FiffStream::start_file(out);
         chain.write(*stream);
         stream->write_coord_trans(chain.RAS_MNI_tal_t.inverted());
         stream->end_file();

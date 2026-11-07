@@ -115,10 +115,10 @@ private:
     bool readSourceSpaces(const QString& path, MNESourceSpaces& out)
     {
         QFile file(path);
-        FiffStream::SPtr stream(new FiffStream(&file));
-        if (!stream->open())
+        FiffStream stream(&file);
+        if (!stream.open())
             return false;
-        return MNESourceSpaces::readFromStream(*stream, false, out);
+        return MNESourceSpaces::readFromStream(stream, false, out);
     }
 
 private slots:
@@ -423,12 +423,12 @@ void TestMneLibrary::sourceSpaces_readWithGeometry()
     if (!hasData())
         QSKIP("No test data");
     QFile file(srcPath());
-    FiffStream::SPtr stream(new FiffStream(&file));
-    if (!stream->open())
+    FiffStream stream(&file);
+    if (!stream.open())
         QSKIP("Could not open source space");
 
     MNESourceSpaces srcSpaces;
-    bool ok = MNESourceSpaces::readFromStream(*stream, true, srcSpaces);
+    bool ok = MNESourceSpaces::readFromStream(stream, true, srcSpaces);
     QVERIFY(ok);
     QVERIFY(srcSpaces.size() >= 2);
     QVERIFY(srcSpaces[0].np > 0);
@@ -440,11 +440,11 @@ void TestMneLibrary::sourceSpaces_filterAndTransform()
     if (!hasData())
         QSKIP("No test data");
     QFile file(srcPath());
-    FiffStream::SPtr stream(new FiffStream(&file));
-    QVERIFY(stream->open());
+    FiffStream stream(&file);
+    QVERIFY(stream.open());
 
     MNESourceSpaces srcSpaces;
-    bool ok = MNESourceSpaces::readFromStream(*stream, true, srcSpaces);
+    bool ok = MNESourceSpaces::readFromStream(stream, true, srcSpaces);
     QVERIFY(ok);
 
     QList<VectorXi> vertno = srcSpaces.get_vertno();
@@ -459,11 +459,11 @@ void TestMneLibrary::sourceSpaces_readAddGeom()
     if (!hasData())
         QSKIP("No test data");
     QFile file(srcPath());
-    FiffStream::SPtr stream(new FiffStream(&file));
-    QVERIFY(stream->open());
+    FiffStream stream(&file);
+    QVERIFY(stream.open());
 
     MNESourceSpaces srcSpaces;
-    bool ok = MNESourceSpaces::readFromStream(*stream, true, srcSpaces);
+    bool ok = MNESourceSpaces::readFromStream(stream, true, srcSpaces);
     QVERIFY(ok);
     QVERIFY(srcSpaces.size() >= 2);
 

@@ -103,8 +103,8 @@ bool FiffCoordTransSet::addTalairach(const QString& xfmPath)
 int FiffCoordTransSet::read(const QString& path)
 {
     QFile file(path);
-    FiffStream::SPtr stream(new FiffStream(&file));
-    if (!stream->open()) {
+    FiffStream stream(&file);
+    if (!stream.open()) {
         return -1;
     }
     const struct
@@ -121,8 +121,8 @@ int FiffCoordTransSet::read(const QString& path)
     };
     int count = 0;
     FiffTag::UPtr tag;
-    for (const auto& entry : stream->dir()) {
-        if (entry->kind != FIFF_COORD_TRANS || !stream->read_tag(tag, entry->pos)) {
+    for (const auto& entry : stream.dir()) {
+        if (entry->kind != FIFF_COORD_TRANS || !stream.read_tag(tag, entry->pos)) {
             continue;
         }
         const FiffCoordTrans t = tag->toCoordTrans();
@@ -136,7 +136,7 @@ int FiffCoordTransSet::read(const QString& path)
             }
         }
     }
-    stream->close();
+    stream.close();
     return count;
 }
 

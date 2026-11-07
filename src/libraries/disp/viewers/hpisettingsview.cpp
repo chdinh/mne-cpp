@@ -429,9 +429,9 @@ void HpiSettingsView::onRemoveCoil()
 QList<FiffDigPoint> HpiSettingsView::readDigitizersFromFile(const QString& fileName)
 {
     QFile t_fileDig(fileName);
-    FIFFLIB::FiffStream::SPtr t_pStream(new FIFFLIB::FiffStream(&t_fileDig));
+    FIFFLIB::FiffStream t_pStream(&t_fileDig);
     FiffDigPointSet t_digSet;
-    if (!FiffDigPointSet::readFromStream(*t_pStream, t_digSet) || t_digSet.size() == 0) {
+    if (!FiffDigPointSet::readFromStream(t_pStream, t_digSet) || t_digSet.size() == 0) {
         return {};
     }
 

@@ -91,7 +91,7 @@ FiffDigPointSet::FiffDigPointSet(QList<FIFFLIB::FiffDigPoint> pointList)
 
 FiffDigPointSet::FiffDigPointSet(const std::filesystem::path& path)
 {
-    FiffStream::SPtr t_pStream = FiffStream::open(path);
+    auto t_pStream = FiffStream::open(path);
     if (!t_pStream || !FiffDigPointSet::readFromStream(*t_pStream, *this)) {
         throw std::runtime_error("Could not read the FiffDigPointSet");
     }
@@ -607,7 +607,7 @@ bool FiffDigPointSet::write(const std::filesystem::path& path, std::string* erro
         return fail("Destination directory '" + UTILSLIB::utf8FromPath(dir) + "' does not exist.");
     }
 
-    FiffStream::SPtr t_pStream = FiffStream::start_file(path);
+    auto t_pStream = FiffStream::start_file(path);
     if (!t_pStream) {
         return fail("Cannot open '" + UTILSLIB::utf8FromPath(path) + "' for writing.");
     }

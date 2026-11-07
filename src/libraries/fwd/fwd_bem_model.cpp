@@ -365,15 +365,15 @@ int FwdBemModel::fwd_bem_load_solution(const QString& name, int bemMethod)
      */
 {
     QFile file(name);
-    FiffStream::SPtr stream(new FiffStream(&file));
+    FiffStream stream(&file);
 
     FiffDirNode::SPtr bem_node;
     int method;
     FiffTag::UPtr t_pTag;
     int nSolutions;
 
-    if (!stream->open()) {
-        stream->close();
+    if (!stream.open()) {
+        stream.close();
         return NOT_FOUND;
     }
 
@@ -381,11 +381,11 @@ int FwdBemModel::fwd_bem_load_solution(const QString& name, int bemMethod)
        * Find the BEM data
        */
     {
-        QList<FiffDirNode::SPtr> nodes = stream->dirtree()->dir_tree_find(FIFFB_BEM);
+        QList<FiffDirNode::SPtr> nodes = stream.dirtree()->dir_tree_find(FIFFB_BEM);
 
         if (nodes.size() == 0) {
             qWarning("No BEM data in %s", name.toUtf8().constData());
-            stream->close();
+            stream.close();
             return NOT_FOUND;
         }
         bem_node = nodes[0];
@@ -393,8 +393,8 @@ int FwdBemModel::fwd_bem_load_solution(const QString& name, int bemMethod)
     /*
         * Approximation method
         */
-    if (get_int(*stream, bem_node, FIFF_BEM_APPROX, &method) != OK) {
-        stream->close();
+    if (get_int(stream, bem_node, FIFF_BEM_APPROX, &method) != OK) {
+        stream.close();
         return NOT_FOUND;
     }
     if (method == FIFFV_BEM_APPROX_CONST)
@@ -403,19 +403,19 @@ int FwdBemModel::fwd_bem_load_solution(const QString& name, int bemMethod)
         method = FWD_BEM_LINEAR_COLL;
     else {
         qWarning("Cannot handle BEM approximation method : %d", method);
-        stream->close();
+        stream.close();
         return FAIL;
     }
     if (bemMethod != FWD_BEM_UNKNOWN && method != bemMethod) {
         qWarning("Approximation method in file : %d desired : %d", method, bemMethod);
-        stream->close();
+        stream.close();
         return NOT_FOUND;
     }
     {
         int dim, k;
 
-        if (!bem_node->find_tag(*stream, FIFF_BEM_POT_SOLUTION, t_pTag)) {
-            stream->close();
+        if (!bem_node->find_tag(stream, FIFF_BEM_POT_SOLUTION, t_pTag)) {
+            stream.close();
             return FAIL;
         }
         qint32 ndim;
@@ -424,14 +424,14 @@ int FwdBemModel::fwd_bem_load_solution(const QString& name, int bemMethod)
 
         if (ndim != 2) {
             qWarning("Expected a two-dimensional solution matrix instead of a %d dimensional one", ndim);
-            stream->close();
+            stream.close();
             return FAIL;
         }
         for (k = 0, dim = 0; k < nsurf; k++)
             dim = dim + ((method == FWD_BEM_LINEAR_COLL) ? surfs[k]->np : surfs[k]->ntri);
         if (dims[0] != dim || dims[1] != dim) {
             qWarning("Expected a %d x %d solution matrix instead of a %d x %d  one", dim, dim, dims[0], dims[1]);
-            stream->close();
+            stream.close();
             return NOT_FOUND;
         }
 
@@ -443,7 +443,7 @@ int FwdBemModel::fwd_bem_load_solution(const QString& name, int bemMethod)
     solution = t_pTag->toFloatMatrix().transpose();
     this->nsol = nSolutions;
     this->bem_method = method;
-    stream->close();
+    stream.close();
 
     return LOADED;
 }
@@ -1147,7 +1147,7 @@ int FwdBemModel::fwd_bem_save_model(const QString& name) const
         return FAIL;
     }
     QFile file(name);
-    FiffStream::SPtr stream = FiffStream::start_file(file);
+    auto stream = FiffStream::start_file(file);
     if (!stream) {
         return FAIL;
     }

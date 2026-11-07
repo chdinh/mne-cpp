@@ -123,21 +123,21 @@ int main(int argc, char* argv[])
     // Open both files
     QFile f1(file1);
     QFile f2(file2);
-    FiffStream::SPtr stream1(new FiffStream(&f1));
-    FiffStream::SPtr stream2(new FiffStream(&f2));
+    FiffStream stream1(&f1);
+    FiffStream stream2(&f2);
 
-    if (!stream1->open()) {
+    if (!stream1.open()) {
         qCritical("Cannot parse FIFF: %s", qPrintable(file1));
         return 1;
     }
 
-    if (!stream2->open()) {
+    if (!stream2.open()) {
         qCritical("Cannot parse FIFF: %s", qPrintable(file2));
         return 1;
     }
 
-    const QList<FiffDirEntry::SPtr>& dir1 = stream1->dir();
-    const QList<FiffDirEntry::SPtr>& dir2 = stream2->dir();
+    const QList<FiffDirEntry::SPtr>& dir1 = stream1.dir();
+    const QList<FiffDirEntry::SPtr>& dir2 = stream2.dir();
 
     qInfo("File 1: %s (%d directory entries)", qPrintable(file1), static_cast<int>(dir1.size()));
     qInfo("File 2: %s (%d directory entries)", qPrintable(file2), static_cast<int>(dir2.size()));
@@ -148,8 +148,8 @@ int main(int argc, char* argv[])
 
     for (int i = 0; i < minEntries; ++i) {
         FiffTag::UPtr tag1, tag2;
-        stream1->read_tag(tag1, dir1[i]->pos);
-        stream2->read_tag(tag2, dir2[i]->pos);
+        stream1.read_tag(tag1, dir1[i]->pos);
+        stream2.read_tag(tag2, dir2[i]->pos);
 
         bool kindMatch = (dir1[i]->kind == dir2[i]->kind);
         bool typeMatch = (dir1[i]->type == dir2[i]->type);
@@ -196,8 +196,8 @@ int main(int argc, char* argv[])
     bool identical = (nDiff == 0 && nMissing == 0);
     qInfo("Files are %s.", identical ? "IDENTICAL" : "DIFFERENT");
 
-    stream1->close();
-    stream2->close();
+    stream1.close();
+    stream2.close();
 
     return identical ? 0 : 1;
 }

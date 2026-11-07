@@ -152,7 +152,7 @@ int main(int argc, char* argv[])
         qCritical("Cannot write output file: %s", qPrintable(outFile));
         return 1;
     }
-    FiffStream::SPtr outStream = FiffStream::start_file(outF);
+    auto outStream = FiffStream::start_file(outF);
     if (!outStream) {
         qCritical("Cannot write output file: %s", qPrintable(outFile));
         return 1;

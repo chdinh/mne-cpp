@@ -117,11 +117,11 @@ int main(int argc, char* argv[])
 
     //! [fiff_dir_entry_usage]
     QFile structureFile(rawPath);
-    FiffStream::SPtr stream(new FiffStream(&structureFile));
-    ok &= stream->open();
-    const QList<FiffDirEntry::SPtr>& directory = stream->dir(); // every tag (kind, type, size, position) + a kind -1 end
-    const FiffTime created = stream->id().time;                 // seconds and microseconds since 1970
-    stream->close();
+    FiffStream stream(&structureFile);
+    ok &= stream.open();
+    const QList<FiffDirEntry::SPtr>& directory = stream.dir(); // every tag (kind, type, size, position) + a kind -1 end
+    const FiffTime created = stream.id().time;                 // seconds and microseconds since 1970
+    stream.close();
     //! [fiff_dir_entry_usage]
     // mne fiff_open: 640 entries; file_id secs 1411146352, usecs 0
     ok &= expect(directory.size() == 641 && directory.last()->kind == -1 && created.secs == 1411146352 && created.usecs == 0 && FiffTime::storageSize() == 8 && FiffDirEntry::storageSize() == 16,

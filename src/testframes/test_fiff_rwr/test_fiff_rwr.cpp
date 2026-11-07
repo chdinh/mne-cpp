@@ -184,7 +184,7 @@ void TestFiffRWR::initTestCase()
     //
     RowVectorXd vCals;
 
-    FiffStream::SPtr outfid = FiffStream::start_writing_raw(m_tempDir.filePath("sample_audvis_trunc_raw_test_rwr_out.fif").toStdString(), rawFirstInRaw.info, vCals /*, vPicks*/);
+    auto outfid = FiffStream::start_writing_raw(m_tempDir.filePath("sample_audvis_trunc_raw_test_rwr_out.fif").toStdString(), rawFirstInRaw.info, vCals /*, vPicks*/);
 
     //
     //   Set up the reading parameters
@@ -415,13 +415,13 @@ void TestFiffRWR::readsRawByPathAndStream()
     // Writing to a file and to bytes in memory gives the same bytes
     const std::string outPath = m_tempDir.filePath("written_raw.fif").toStdString();
     RowVectorXd cals;
-    FiffStream::SPtr toFile = FiffStream::start_writing_raw(outPath, byPath.info, cals);
+    auto toFile = FiffStream::start_writing_raw(outPath, byPath.info, cals);
     QVERIFY(toFile);
     toFile->write_raw_buffer(expected, cals);
     toFile->finish_writing_raw();
     auto memory = std::make_unique<UTILSLIB::MemoryByteStream>();
     const UTILSLIB::MemoryByteStream& written = *memory;
-    FiffStream::SPtr toMemory = FiffStream::start_writing_raw(std::move(memory), byPath.info, cals);
+    auto toMemory = FiffStream::start_writing_raw(std::move(memory), byPath.info, cals);
     QVERIFY(toMemory);
     toMemory->write_raw_buffer(expected, cals);
     toMemory->finish_writing_raw();
@@ -481,7 +481,7 @@ void TestFiffRWR::readsWithoutQtDevice()
 void TestFiffRWR::opensAndStartsFilesByPath()
 {
     const std::string path = (testDataDir() + "/MEG/sample/all-trans.fif").toStdString();
-    FiffStream::SPtr in = FiffStream::open(path);
+    auto in = FiffStream::open(path);
     QVERIFY(in);
     QVERIFY(in->device() == nullptr);
     QVERIFY(in->isOpen());
@@ -504,7 +504,7 @@ void TestFiffRWR::opensAndStartsFilesByPath()
 
     // A file started by path is complete on disk once the stream is closed, before the stream goes away
     const std::string outPath = m_tempDir.filePath("by-path.fif").toStdString();
-    FiffStream::SPtr out = FiffStream::start_file(outPath);
+    auto out = FiffStream::start_file(outPath);
     QVERIFY(out);
     for (const FiffDirEntry::SPtr& entry : in->dir()) {
         FiffTag::UPtr tag;
@@ -514,7 +514,7 @@ void TestFiffRWR::opensAndStartsFilesByPath()
     out->end_file();
     out->close();
     QVERIFY(!out->isOpen());
-    FiffStream::SPtr back = FiffStream::open(outPath);
+    auto back = FiffStream::open(outPath);
     QVERIFY(back);
     int transforms = 0;
     for (const FiffDirEntry::SPtr& entry : back->dir())

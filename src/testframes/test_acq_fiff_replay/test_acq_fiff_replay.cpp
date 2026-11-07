@@ -122,7 +122,7 @@ bool writeFixture(const QString& path, fiff_int_t type, fiff_int_t lastType = -1
     info->chs[0].range = 2.7F;
     info->chs[1].cal = 1e-6F;
     Eigen::RowVectorXd cals;
-    FiffStream::SPtr out = FiffStream::start_writing_raw(path.toStdString(), *info, cals, defaultMatrixXi, false, type);
+    auto out = FiffStream::start_writing_raw(path.toStdString(), *info, cals, defaultMatrixXi, false, type);
     if (!out) {
         return false;
     }

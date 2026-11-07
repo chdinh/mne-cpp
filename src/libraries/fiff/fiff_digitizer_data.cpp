@@ -100,7 +100,7 @@ FiffDigitizerData::FiffDigitizerData(const std::filesystem::path& path)
 , show_minimal(false)
 , dist_valid(false)
 {
-    FiffStream::SPtr t_pStream = FiffStream::open(path);
+    auto t_pStream = FiffStream::open(path);
     if (!t_pStream) {
         throw std::runtime_error("Could not open the digitizer data file");
     }

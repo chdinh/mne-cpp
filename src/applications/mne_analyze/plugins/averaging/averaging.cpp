@@ -396,7 +396,7 @@ void Averaging::computeAverage()
 
 //=============================================================================================================
 
-QSharedPointer<FIFFLIB::FiffEvokedSet> Averaging::averageCalculation(FIFFLIB::FiffRawData FiffRaw,
+QSharedPointer<FIFFLIB::FiffEvokedSet> Averaging::averageCalculation(const FIFFLIB::FiffRawData& FiffRaw,
                                                                      MatrixXi matEvents,
                                                                      UTILSLIB::FilterKernel filterKernel,
                                                                      FIFFLIB::FiffInfo fiffInfo)

@@ -2310,8 +2310,8 @@ void MainWindow::loadBem(const QString& subjectName, const QString& bemPath)
     QFile bemFile(bemPath);
     if (bemFile.exists()) {
         MNEBem bem;
-        FIFFLIB::FiffStream::SPtr stream(new FIFFLIB::FiffStream(&bemFile));
-        if (!MNEBem::readFromStream(*stream, true, bem)) {
+        FIFFLIB::FiffStream stream(&bemFile);
+        if (!MNEBem::readFromStream(stream, true, bem)) {
             qWarning() << "No BEM surfaces found in" << bemPath;
             return;
         }

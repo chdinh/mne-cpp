@@ -84,9 +84,9 @@ private slots:
             QSKIP("Source space file not found");
 
         MNESourceSpaces srcSpace;
-        FiffStream::SPtr srcStream(new FiffStream(&file));
-        srcStream->open();
-        QVERIFY(MNESourceSpaces::readFromStream(*srcStream, false, srcSpace));
+        FiffStream srcStream(&file);
+        srcStream.open();
+        QVERIFY(MNESourceSpaces::readFromStream(srcStream, false, srcSpace));
 
         QVERIFY(srcSpace.size() > 0);
 
@@ -113,9 +113,9 @@ private slots:
             QSKIP("Source space file not found");
 
         MNESourceSpaces srcSpace;
-        FiffStream::SPtr srcStream2(new FiffStream(&file));
-        srcStream2->open();
-        MNESourceSpaces::readFromStream(*srcStream2, false, srcSpace);
+        FiffStream srcStream2(&file);
+        srcStream2.open();
+        MNESourceSpaces::readFromStream(srcStream2, false, srcSpace);
 
         // Left hemisphere
         auto& lh = srcSpace[0];
@@ -144,9 +144,9 @@ private slots:
             QSKIP("Source space file not found");
 
         MNESourceSpaces srcSpace;
-        FiffStream::SPtr srcStream3(new FiffStream(&file));
-        srcStream3->open();
-        MNESourceSpaces::readFromStream(*srcStream3, false, srcSpace);
+        FiffStream srcStream3(&file);
+        srcStream3.open();
+        MNESourceSpaces::readFromStream(srcStream3, false, srcSpace);
 
         // Copy
         MNESourceSpaces copy(srcSpace);
@@ -411,9 +411,9 @@ private slots:
             QSKIP("Source space file not found");
 
         MNESourceSpaces srcSpace;
-        FiffStream::SPtr srcStream4(new FiffStream(&file));
-        srcStream4->open();
-        MNESourceSpaces::readFromStream(*srcStream4, false, srcSpace);
+        FiffStream srcStream4(&file);
+        srcStream4.open();
+        MNESourceSpaces::readFromStream(srcStream4, false, srcSpace);
 
         int totalVerts = 0;
         VectorXi allVertno(0);
@@ -484,24 +484,24 @@ private slots:
             QSKIP("BEM solution file not found");
 
         // Read via stream to exercise file parsing
-        FiffStream::SPtr stream(new FiffStream(&file));
-        QVERIFY(stream->open());
+        FiffStream stream(&file);
+        QVERIFY(stream.open());
 
-        QList<FiffDirNode::SPtr> bemSolBlocks = stream->dirtree()->dir_tree_find(FIFFB_BEM);
+        QList<FiffDirNode::SPtr> bemSolBlocks = stream.dirtree()->dir_tree_find(FIFFB_BEM);
         if (bemSolBlocks.isEmpty())
-            bemSolBlocks = stream->dirtree()->dir_tree_find(FIFFB_BEM_SURF);
+            bemSolBlocks = stream.dirtree()->dir_tree_find(FIFFB_BEM_SURF);
 
-        QVERIFY(bemSolBlocks.size() > 0 || stream->dir().size() > 0);
+        QVERIFY(bemSolBlocks.size() > 0 || stream.dir().size() > 0);
 
         // Read tags to exercise parsing
-        int nTags = qMin((int)stream->dir().size(), 50);
+        int nTags = qMin((int)stream.dir().size(), 50);
         for (int i = 0; i < nTags; ++i) {
             FiffTag::UPtr tag;
-            stream->read_tag(tag, stream->dir()[i]->pos);
+            stream.read_tag(tag, stream.dir()[i]->pos);
             QVERIFY(tag != nullptr);
         }
 
-        stream->close();
+        stream.close();
     }
 
     //=========================================================================

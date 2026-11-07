@@ -385,7 +385,7 @@ std::unique_ptr<MNESurface> MNESurface::read_bem_surface2(const QString& name, i
 std::unique_ptr<MNESurface> MNESurface::read_bem_surface(const QString& name, int which, bool add_geometry, float& sigma, bool check_too_many_neighbors)
 {
     QFile file(name);
-    FiffStream::SPtr stream(new FiffStream(&file));
+    FiffStream stream(&file);
 
     QList<FiffDirNode::SPtr> surfs;
     QList<FiffDirNode::SPtr> bems;
@@ -403,26 +403,26 @@ std::unique_ptr<MNESurface> MNESurface::read_bem_surface(const QString& name, in
     MatrixXf tmp_nodes;
     MatrixXi tmp_triangles;
 
-    if (!stream->open())
+    if (!stream.open())
         return nullptr;
 
-    bems = stream->dirtree()->dir_tree_find(FIFFB_BEM);
+    bems = stream.dirtree()->dir_tree_find(FIFFB_BEM);
     if (bems.size() > 0) {
         node = bems[0];
-        if (node->find_tag(*stream, FIFF_BEM_COORD_FRAME, t_pTag)) {
+        if (node->find_tag(stream, FIFF_BEM_COORD_FRAME, t_pTag)) {
             coord_frame = *t_pTag->toInt();
         }
     }
-    surfs = stream->dirtree()->dir_tree_find(FIFFB_BEM_SURF);
+    surfs = stream.dirtree()->dir_tree_find(FIFFB_BEM_SURF);
     if (surfs.size() == 0) {
         qCritical("No BEM surfaces found in %s", name.toUtf8().constData());
-        stream->close();
+        stream.close();
         return nullptr;
     }
     if (which >= 0) {
         for (k = 0; k < surfs.size(); ++k) {
             node = surfs[k];
-            if (node->find_tag(*stream, FIFF_BEM_SURF_ID, t_pTag)) {
+            if (node->find_tag(stream, FIFF_BEM_SURF_ID, t_pTag)) {
                 id = *t_pTag->toInt();
                 if (id == which)
                     break;
@@ -430,50 +430,50 @@ std::unique_ptr<MNESurface> MNESurface::read_bem_surface(const QString& name, in
         }
         if (id != which) {
             qCritical("Desired surface not found in %s", name.toUtf8().constData());
-            stream->close();
+            stream.close();
             return nullptr;
         }
     } else
         node = surfs[0];
 
-    if (!node->find_tag(*stream, FIFF_BEM_SURF_NNODE, t_pTag)) {
-        stream->close();
+    if (!node->find_tag(stream, FIFF_BEM_SURF_NNODE, t_pTag)) {
+        stream.close();
         return nullptr;
     }
     nnode = *t_pTag->toInt();
 
-    if (!node->find_tag(*stream, FIFF_BEM_SURF_NTRI, t_pTag)) {
-        stream->close();
+    if (!node->find_tag(stream, FIFF_BEM_SURF_NTRI, t_pTag)) {
+        stream.close();
         return nullptr;
     }
     ntri_count = *t_pTag->toInt();
 
-    if (!node->find_tag(*stream, FIFF_BEM_SURF_NODES, t_pTag)) {
-        stream->close();
+    if (!node->find_tag(stream, FIFF_BEM_SURF_NODES, t_pTag)) {
+        stream.close();
         return nullptr;
     }
     tmp_nodes = t_pTag->toFloatMatrix().transpose();
 
-    if (node->find_tag(*stream, FIFF_BEM_SURF_NORMALS, t_pTag)) {
+    if (node->find_tag(stream, FIFF_BEM_SURF_NORMALS, t_pTag)) {
         tmp_node_normals = t_pTag->toFloatMatrix().transpose();
     }
 
-    if (!node->find_tag(*stream, FIFF_BEM_SURF_TRIANGLES, t_pTag)) {
-        stream->close();
+    if (!node->find_tag(stream, FIFF_BEM_SURF_TRIANGLES, t_pTag)) {
+        stream.close();
         return nullptr;
     }
     tmp_triangles = t_pTag->toIntMatrix().transpose();
 
-    if (node->find_tag(*stream, FIFF_MNE_COORD_FRAME, t_pTag)) {
+    if (node->find_tag(stream, FIFF_MNE_COORD_FRAME, t_pTag)) {
         coord_frame = *t_pTag->toInt();
-    } else if (node->find_tag(*stream, FIFF_BEM_COORD_FRAME, t_pTag)) {
+    } else if (node->find_tag(stream, FIFF_BEM_COORD_FRAME, t_pTag)) {
         coord_frame = *t_pTag->toInt();
     }
-    if (node->find_tag(*stream, FIFF_BEM_SIGMA, t_pTag)) {
+    if (node->find_tag(stream, FIFF_BEM_SIGMA, t_pTag)) {
         sigmaLocal = *t_pTag->toFloat();
     }
 
-    stream->close();
+    stream.close();
 
     s_ptr = std::make_unique<MNESurface>();
     s = s_ptr.get();

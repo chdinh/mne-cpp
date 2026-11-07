@@ -139,7 +139,7 @@ bool FiffEvents::read(const std::filesystem::path& t_sEventName,
 bool FiffEvents::read_from_fif(const std::filesystem::path& path,
                                FiffEvents& p_Events)
 {
-    FiffStream::SPtr t_pStream = FiffStream::open(path);
+    auto t_pStream = FiffStream::open(path);
     if (!t_pStream) {
         return false;
     }
@@ -262,7 +262,7 @@ bool FiffEvents::write_to_fif(const std::filesystem::path& path) const
     if (events.rows() == 0 || events.cols() < 3)
         return false;
 
-    FiffStream::SPtr pStream = FiffStream::start_file(path);
+    auto pStream = FiffStream::start_file(path);
     if (!pStream)
         return false;
 

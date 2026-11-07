@@ -70,7 +70,7 @@ bool FiffBuffer::open()
         return false;
     }
 
-    m_stream = m_rawData.file;
+    m_stream = m_rawData.file.get();
     loadHeaderMetadata();
     emit metadataChanged(m_metadata);
 

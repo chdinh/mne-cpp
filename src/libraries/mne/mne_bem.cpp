@@ -59,16 +59,16 @@ MNEBem::MNEBem()
 MNEBem::MNEBem(QIODevice& p_IODevice) //const MNEBem &p_MNEBem
 //: m_qListBemSurface()
 {
-    FiffStream::SPtr t_pStream(new FiffStream(&p_IODevice));
+    FiffStream t_pStream(&p_IODevice);
 
-    if (!MNEBem::readFromStream(*t_pStream, true, *this)) {
-        t_pStream->close();
+    if (!MNEBem::readFromStream(t_pStream, true, *this)) {
+        t_pStream.close();
         throw std::runtime_error("Could not read the bem surfaces\n");
         //ToDo error(me,'Could not read the bem surfaces (%s)',mne_omit_first_line(lasterr));
         //        return false;
     }
 
-    //    bool testStream =t_pStream->isOpen();
+    //    bool testStream =t_pStream.isOpen();
 }
 
 //=============================================================================================================
@@ -273,7 +273,7 @@ bool MNEBem::readBemSurface(FiffStream& stream, const FiffDirNode::SPtr& p_Tree,
 
 bool MNEBem::write(QIODevice& p_IODevice)
 {
-    FiffStream::SPtr t_pStream = FiffStream::start_file(p_IODevice);
+    auto t_pStream = FiffStream::start_file(p_IODevice);
     if (!t_pStream) {
         return false;
     }

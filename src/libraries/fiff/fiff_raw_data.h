@@ -93,27 +93,11 @@ public:
      */
     FiffRawData();
 
-    //=========================================================================================================
-    /**
-     * Copy constructor.
-     *
-     * @param[in] p_FiffRawData  FIFF raw measurement which should be copied.
-     */
-    FiffRawData(const FiffRawData& p_FiffRawData);
-
-    //=========================================================================================================
-    /**
-     * Copy assignment. Every member has value semantics, so the
-     * compiler-generated member-wise assignment is correct. It is declared
-     * explicitly because declaring a copy constructor and/or a destructor
-     * deprecates the implicitly generated one.
-     *
-     * @param[in] other   Object to assign from.
-     *
-     * @return reference to this object.
-     */
-    FiffRawData& operator=(const FiffRawData& other) = default;
-
+    // Raw data owns the open file, so it moves but does not copy
+    FiffRawData(const FiffRawData&) = delete;
+    FiffRawData& operator=(const FiffRawData&) = delete;
+    FiffRawData(FiffRawData&&) noexcept = default;
+    FiffRawData& operator=(FiffRawData&&) noexcept = default;
     //=========================================================================================================
     /**
      * Constructs fiff raw data by reading a FIFF file.
@@ -235,14 +219,14 @@ public:
               int to = -1) const;
 
 public:
-    FiffStream::SPtr file;    /**< replaces fid. */
-    FiffInfo info;            /**< Fiff measurement information. */
-    fiff_int_t first_samp;    /**< First sample number. */
-    fiff_int_t last_samp;     /**< Last sample number. */
-    Eigen::RowVectorXd cals;  /**< Calibration values. */
-    QList<FiffRawDir> rawdir; /**< Special fiff directory entry for raw data. */
-    Eigen::MatrixXd proj;     /**< SSP operator to apply to the data. */
-    FiffCtfComp comp;         /**< Compensator. */
+    std::unique_ptr<FiffStream> file; /**< replaces fid. */
+    FiffInfo info;                    /**< Fiff measurement information. */
+    fiff_int_t first_samp;            /**< First sample number. */
+    fiff_int_t last_samp;             /**< Last sample number. */
+    Eigen::RowVectorXd cals;          /**< Calibration values. */
+    QList<FiffRawDir> rawdir;         /**< Special fiff directory entry for raw data. */
+    Eigen::MatrixXd proj;             /**< SSP operator to apply to the data. */
+    FiffCtfComp comp;                 /**< Compensator. */
 };
 } // NAMESPACE
 

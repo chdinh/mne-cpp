@@ -772,9 +772,9 @@ void FiffAnonymizer::setSubjectHisId(const QString& sSubjectHisId)
 
 int FiffAnonymizer::openInOutStreams()
 {
-    m_pInStream = FIFFLIB::FiffStream::SPtr(new FIFFLIB::FiffStream(&m_fFileIn));
+    m_pInStream = std::make_unique<FIFFLIB::FiffStream>(&m_fFileIn);
 
-    m_pOutStream = FIFFLIB::FiffStream::SPtr(new FIFFLIB::FiffStream(&m_fFileOut));
+    m_pOutStream = std::make_unique<FIFFLIB::FiffStream>(&m_fFileOut);
 
     if (m_pInStream->device()->open(QIODevice::ReadOnly)) {
         printIfVerbose("Input file opened correctly: " + m_fFileIn.fileName());

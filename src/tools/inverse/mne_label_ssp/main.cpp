@@ -239,7 +239,7 @@ int main(int argc, char* argv[])
     qInfo("Writing %lld projector(s) to %s...", static_cast<long long>(projectors.size()), outFile.toUtf8().constData());
 
     QFile outIO(outFile);
-    FiffStream::SPtr stream = FiffStream::start_file(outIO);
+    auto stream = FiffStream::start_file(outIO);
 
     if (!stream) {
         qCritical("Could not open %s for writing.", outFile.toUtf8().constData());

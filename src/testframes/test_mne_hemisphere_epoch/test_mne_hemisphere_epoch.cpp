@@ -598,9 +598,9 @@ private slots:
             QSKIP("Source space file not found");
 
         MNESourceSpaces srcSpace;
-        FiffStream::SPtr srcStream(new FiffStream(&file));
-        srcStream->open();
-        QVERIFY(MNESourceSpaces::readFromStream(*srcStream, false, srcSpace));
+        FiffStream srcStream(&file);
+        srcStream.open();
+        QVERIFY(MNESourceSpaces::readFromStream(srcStream, false, srcSpace));
 
         for (int h = 0; h < srcSpace.size(); ++h) {
             auto& hemi = srcSpace[h];
@@ -624,9 +624,9 @@ private slots:
             QSKIP("Source space file not found");
 
         MNESourceSpaces srcSpace;
-        FiffStream::SPtr srcStream2(new FiffStream(&file));
-        srcStream2->open();
-        MNESourceSpaces::readFromStream(*srcStream2, false, srcSpace);
+        FiffStream srcStream2(&file);
+        srcStream2.open();
+        MNESourceSpaces::readFromStream(srcStream2, false, srcSpace);
         QVERIFY(srcSpace[0].id == FIFFV_MNE_SURF_LEFT_HEMI);
         // Right hemisphere
         QVERIFY(srcSpace[1].id == FIFFV_MNE_SURF_RIGHT_HEMI);

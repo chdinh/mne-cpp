@@ -313,7 +313,7 @@ int MNERawInfo::get_meas_info(FiffStream& stream,
 int MNERawInfo::load(const QString& name, int allow_maxshield, std::unique_ptr<MNERawInfo>& infop)
 {
     QFile file(name);
-    FiffStream::SPtr stream(new FiffStream(&file));
+    FiffStream stream(&file);
 
     int res = FIFF_FAIL;
     QList<FiffChInfo> chs;            /* Channel info */
@@ -332,30 +332,30 @@ int MNERawInfo::load(const QString& name, int allow_maxshield, std::unique_ptr<M
     /*
        * Open file
        */
-    if (!stream->open()) {
-        stream->close();
+    if (!stream.open()) {
+        stream.close();
         return FIFF_FAIL;
     }
-    raw = find_raw(stream->dirtree());
+    raw = find_raw(stream.dirtree());
     if (raw->isEmpty()) {
         if (allow_maxshield) {
-            raw = find_maxshield(stream->dirtree());
+            raw = find_maxshield(stream.dirtree());
             if (raw->isEmpty()) {
                 qCritical("No raw data in this file.");
-                stream->close();
+                stream.close();
                 return FIFF_FAIL;
             }
             maxshield_data = true;
         } else {
             qCritical("No raw data in this file.");
-            stream->close();
+            stream.close();
             return FIFF_FAIL;
         }
     }
     /*
        * Get the essential measurement information
        */
-    if (get_meas_info(*stream,
+    if (get_meas_info(stream,
                       raw,
                       id,
                       &nchan,
@@ -365,7 +365,7 @@ int MNERawInfo::load(const QString& name, int allow_maxshield, std::unique_ptr<M
                       chs,
                       trans,
                       start_time) < 0) {
-        stream->close();
+        stream.close();
         return FIFF_FAIL;
     }
     /*
@@ -405,7 +405,7 @@ int MNERawInfo::load(const QString& name, int allow_maxshield, std::unique_ptr<M
                 info->buf_size = raw->dir[k]->size / (nchan * sizeof(double));
             else {
                 qCritical("We are not prepared to handle raw data type: %d", raw->dir[k]->type);
-                stream->close();
+                stream.close();
                 return FIFF_FAIL;
             }
             break;
@@ -413,7 +413,7 @@ int MNERawInfo::load(const QString& name, int allow_maxshield, std::unique_ptr<M
     }
     if (info->buf_size <= 0) {
         qCritical("No raw data buffers available.");
-        stream->close();
+        stream.close();
         return FIFF_FAIL;
     }
     info->rawDir = rawDir;
@@ -421,6 +421,6 @@ int MNERawInfo::load(const QString& name, int allow_maxshield, std::unique_ptr<M
     infop = std::move(info);
     res = FIFF_OK;
 
-    stream->close();
+    stream.close();
     return res;
 }

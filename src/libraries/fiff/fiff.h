@@ -151,9 +151,9 @@ public:
      *
      * @return true if succeeded, false otherwise.
      */
-    static bool open(QIODevice& p_IODevice, FiffStream::SPtr& p_pStream)
+    static bool open(QIODevice& p_IODevice, std::unique_ptr<FiffStream>& p_pStream)
     {
-        p_pStream = FiffStream::SPtr(new FiffStream(&p_IODevice));
+        p_pStream = std::make_unique<FiffStream>(&p_IODevice);
 
         return p_pStream->open();
     }
@@ -413,7 +413,7 @@ public:
      *
      * @return The opened file.
      */
-    inline static FiffStream::SPtr start_file(QIODevice& p_IODevice)
+    inline static std::unique_ptr<FiffStream> start_file(QIODevice& p_IODevice)
     {
         return FiffStream::start_file(p_IODevice);
     }
@@ -433,10 +433,10 @@ public:
      *
      * @return the started fiff file.
      */
-    inline static FiffStream::SPtr start_writing_raw(const std::filesystem::path& path,
-                                                     const FiffInfo& info,
-                                                     Eigen::RowVectorXd& cals,
-                                                     Eigen::MatrixXi sel = defaultMatrixXi)
+    inline static std::unique_ptr<FiffStream> start_writing_raw(const std::filesystem::path& path,
+                                                                const FiffInfo& info,
+                                                                Eigen::RowVectorXd& cals,
+                                                                Eigen::MatrixXi sel = defaultMatrixXi)
     {
         return FiffStream::start_writing_raw(path, info, cals, sel);
     }

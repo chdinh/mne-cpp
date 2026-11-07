@@ -277,14 +277,14 @@ void TestFiffCovPython::missingKind_isReported()
     // Asking for a kind the file does not contain has to fail rather than
     // return whatever covariance happens to be there first.
     QFile covFile(covPath());
-    FiffStream::SPtr stream(new FiffStream(&covFile));
-    QVERIFY(stream->open());
+    FiffStream stream(&covFile);
+    QVERIFY(stream.open());
 
     FiffCov cov;
-    const bool ok = stream->read_cov(stream->dirtree(), FIFFV_MNE_FMRI_PRIOR_COV, cov);
+    const bool ok = stream.read_cov(stream.dirtree(), FIFFV_MNE_FMRI_PRIOR_COV, cov);
     QVERIFY2(!ok, "reading an absent covariance kind reported success");
 
-    stream->close();
+    stream.close();
 }
 
 //=============================================================================================================

@@ -151,7 +151,7 @@ bool FiffEvoked::read(const std::filesystem::path& path,
 {
     p_FiffEvoked.clear();
 
-    FiffStream::SPtr t_pStream = FiffStream::open(path);
+    auto t_pStream = FiffStream::open(path);
     if (!t_pStream)
         return false;
     QString t_sFileName = t_pStream->streamName();

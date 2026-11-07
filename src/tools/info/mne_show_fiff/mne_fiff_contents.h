@@ -81,7 +81,7 @@ private:
 
     static void print_dig_point(QTextStream& out, const FIFFLIB::FiffTag::UPtr& tag);
 
-    static void print_matrix(QTextStream& out, FIFFLIB::FiffStream::SPtr stream, FIFFLIB::FiffDirEntry::SPtr this_ent);
+    static void print_matrix(QTextStream& out, FIFFLIB::FiffStream& stream, FIFFLIB::FiffDirEntry::SPtr this_ent);
 };
 
 } // NAMESPACE SHOWFIFF

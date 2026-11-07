@@ -202,12 +202,12 @@ void TestSurfaceChecks::testIsCompleteWithRealBemData()
 
     QFile file(bemPath);
 
-    FIFFLIB::FiffStream::SPtr stream(new FIFFLIB::FiffStream(&file));
-    if (!stream->open())
+    FIFFLIB::FiffStream stream(&file);
+    if (!stream.open())
         QSKIP("Cannot open FiffStream");
 
     MNELIB::MNEBem bem;
-    if (!MNELIB::MNEBem::readFromStream(*stream, true, bem))
+    if (!MNELIB::MNEBem::readFromStream(stream, true, bem))
         QSKIP("Cannot read BEM surfaces");
 
     QVERIFY(bem.size() > 0);
