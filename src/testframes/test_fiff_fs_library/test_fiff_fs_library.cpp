@@ -1429,16 +1429,11 @@ void TestFiffFsLibrary::fiffStream_readTagInfoAndData()
     buffer.seek(0);
     FiffStream readStream(&buffer);
     readStream.open(QIODevice::ReadOnly);
-    auto pTag = std::make_unique<FiffTag>();
-    fiff_long_t tagPos = readStream.read_tag_info(pTag, false);
-    if (tagPos >= 0) {
-        bool readOk = readStream.read_tag_data(pTag);
-        Q_UNUSED(readOk);
-    }
-    auto pTag2 = std::make_unique<FiffTag>();
-    readStream.read_tag_info(pTag2, true);
-    FiffTag::UPtr pTag3;
-    readStream.read_tag(pTag3, 0);
+    std::optional<FiffTag> header = readStream.read_tag_info(false);
+    QVERIFY(header);
+    QVERIFY(readStream.read_tag_data(*header));
+    QVERIFY(readStream.read_tag_info());
+    QVERIFY(readStream.read_tag(0));
 }
 
 //=============================================================================================================

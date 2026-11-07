@@ -2131,10 +2131,11 @@ private slots:
         QVERIFY(stream.open());
         const std::vector<FIFFLIB::FiffDirNode::SPtr> bemNodes = stream.dirtree()->dir_tree_find(FIFFB_BEM);
         QCOMPARE(bemNodes.size(), 1);
-        FIFFLIB::FiffTag::UPtr tag;
-        QVERIFY(bemNodes[0]->find_tag(stream, FIFF_BEM_APPROX, tag));
-        QCOMPARE(*tag->toInt(), FIFFV_BEM_APPROX_LINEAR);
-        QVERIFY(bemNodes[0]->find_tag(stream, FIFF_BEM_POT_SOLUTION, tag));
+        const auto approx = bemNodes[0]->find_tag(stream, FIFF_BEM_APPROX);
+        QVERIFY(approx);
+        QCOMPARE(*approx->toInt(), FIFFV_BEM_APPROX_LINEAR);
+        const auto tag = bemNodes[0]->find_tag(stream, FIFF_BEM_POT_SOLUTION);
+        QVERIFY(tag);
         qint32 ndim;
         QVector<qint32> dims;
         tag->getMatrixDimensions(ndim, dims);

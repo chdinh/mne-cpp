@@ -49,7 +49,7 @@ using namespace MNEANONYMIZE;
 //=============================================================================================================
 
 FiffAnonymizer::FiffAnonymizer()
-: m_pTag(std::make_unique<FIFFLIB::FiffTag>())
+: m_pTag(FIFFLIB::FiffTag{})
 , m_bFileInSet(false)
 , m_bFileOutSet(false)
 , m_bVerboseMode(false)
@@ -99,7 +99,7 @@ FiffAnonymizer::FiffAnonymizer()
 
 FiffAnonymizer::FiffAnonymizer(const FiffAnonymizer& obj)
 : QObject()
-, m_pTag(std::make_unique<FIFFLIB::FiffTag>())
+, m_pTag(FIFFLIB::FiffTag{})
 , m_bFileInSet(obj.m_bFileInSet)
 , m_bFileOutSet(obj.m_bFileOutSet)
 , m_bVerboseMode(obj.m_bVerboseMode)
@@ -135,7 +135,7 @@ FiffAnonymizer::FiffAnonymizer(const FiffAnonymizer& obj)
 , m_sMNEWorkingDir(obj.m_sDefaultString)
 , m_sMNECommand(obj.m_sDefaultString)
 {
-    memcpy(m_pTag->data(), obj.m_pTag->data(), static_cast<size_t>(obj.m_pTag->size()));
+    m_pTag = obj.m_pTag;
 
     m_BDfltMAC[0] = obj.m_BDfltMAC[0];
     m_BDfltMAC[1] = obj.m_BDfltMAC[1];
@@ -146,7 +146,7 @@ FiffAnonymizer::FiffAnonymizer(const FiffAnonymizer& obj)
 //=============================================================================================================
 
 FiffAnonymizer::FiffAnonymizer(FiffAnonymizer&& obj)
-: m_pTag(std::make_unique<FIFFLIB::FiffTag>())
+: m_pTag(FIFFLIB::FiffTag{})
 , m_bFileInSet(obj.m_bFileInSet)
 , m_bFileOutSet(obj.m_bFileOutSet)
 , m_bVerboseMode(obj.m_bVerboseMode)
@@ -182,7 +182,7 @@ FiffAnonymizer::FiffAnonymizer(FiffAnonymizer&& obj)
 , m_sMNEWorkingDir(obj.m_sDefaultString)
 , m_sMNECommand(obj.m_sDefaultString)
 {
-    memcpy(m_pTag->data(), obj.m_pTag->data(), static_cast<size_t>(obj.m_pTag->size()));
+    m_pTag = obj.m_pTag;
 
     m_BDfltMAC[0] = obj.m_BDfltMAC[0];
     m_BDfltMAC[1] = obj.m_BDfltMAC[1];
@@ -512,7 +512,7 @@ void FiffAnonymizer::censorTag()
 
 void FiffAnonymizer::readTag()
 {
-    m_pInStream->read_tag(m_pTag, -1);
+    m_pTag = m_pInStream->read_tag(-1);
     updateBlockTypeList();
 }
 
@@ -525,7 +525,7 @@ void FiffAnonymizer::writeTag()
         m_pTag->next = FIFFV_NEXT_SEQ;
     }
 
-    m_pOutStream->write_tag(m_pTag, -1);
+    m_pOutStream->write_tag(*m_pTag, -1);
 }
 
 //=============================================================================================================

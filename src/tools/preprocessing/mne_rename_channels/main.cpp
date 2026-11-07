@@ -198,8 +198,8 @@ int main(int argc, char* argv[])
     int nMod = 0;
     for (int k = 0; k < stream->nent(); k++) {
         if (stream->dir()[k].kind == FIFF_CH_INFO) {
-            FiffTag::UPtr tag;
-            stream->read_tag(tag, stream->dir()[k].pos);
+            std::optional<FiffTag> tag;
+            tag = stream->read_tag(stream->dir()[k].pos);
             FiffChInfo ch = tag->toChInfo();
 
             for (const ChannelAlias& a : aliases) {
@@ -212,7 +212,7 @@ int main(int argc, char* argv[])
                         ch.kind = a.toKind;
                     }
                     qInfo("%s", qPrintable(line));
-                    FiffTag::UPtr dummyTag; // unused
+                    std::optional<FiffTag> dummyTag; // unused
                     stream->device()->seek(stream->dir()[k].pos);
                     stream->write_ch_info(ch);
                     break;

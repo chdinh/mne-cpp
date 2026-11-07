@@ -72,11 +72,13 @@ namespace
 // The first transform among entries from @p from to @p to, inverted if stored the other way round.
 UTILSLIB::Expected<FiffCoordTrans> find_transform(FiffStream& stream, const std::vector<FiffDirEntry>& entries, int from, int to)
 {
-    FiffTag::UPtr tag;
     for (const FiffDirEntry& entry : entries) {
-        if (entry.kind != FIFF_COORD_TRANS || !stream.read_tag(tag, entry.pos))
+        if (entry.kind != FIFF_COORD_TRANS)
             continue;
-        FiffCoordTrans t = FiffCoordTrans::from_tag(tag);
+        const auto tag = stream.read_tag(entry.pos);
+        if (!tag)
+            continue;
+        FiffCoordTrans t = FiffCoordTrans::from_tag(*tag);
         if (t.is_empty())
             continue;
         if (t.from == from && t.to == to)
@@ -162,10 +164,12 @@ UTILSLIB::Expected<FiffCoordTrans> FiffCoordTrans::read(const std::filesystem::p
     if (!stream) {
         return std::unexpected(stream.error());
     }
-    FiffTag::UPtr tag;
     for (const FiffDirEntry& entry : stream->dir()) {
-        if (entry.kind == FIFF_COORD_TRANS && stream->read_tag(tag, entry.pos)) {
-            return from_tag(tag);
+        if (entry.kind != FIFF_COORD_TRANS) {
+            continue;
+        }
+        if (const auto tag = stream->read_tag(entry.pos)) {
+            return from_tag(*tag);
         }
     }
     return fail(ErrorCode::NotFound, "No coordinate transform in {}", UTILSLIB::utf8FromPath(path));
@@ -519,17 +523,17 @@ UTILSLIB::Expected<FiffCoordTrans> FiffCoordTrans::read_ascii(const std::filesys
 
 //=============================================================================================================
 
-FiffCoordTrans FiffCoordTrans::from_tag(const FiffTag::UPtr& tag)
+FiffCoordTrans FiffCoordTrans::from_tag(const FiffTag& tag)
 {
     FiffCoordTrans t;
-    if (tag->isMatrix() || tag->getType() != FIFFT_COORD_TRANS_STRUCT || tag->data() == nullptr)
+    if (tag.isMatrix() || tag.getType() != FIFFT_COORD_TRANS_STRUCT || tag.data() == nullptr)
         return t;
 
-    qint32* t_pInt32 = reinterpret_cast<qint32*>(tag->data());
+    const auto* t_pInt32 = reinterpret_cast<const qint32*>(tag.data());
     t.from = t_pInt32[0];
     t.to = t_pInt32[1];
 
-    float* t_pFloat = reinterpret_cast<float*>(tag->data());
+    const auto* t_pFloat = reinterpret_cast<const float*>(tag.data());
     int count = 0;
     int r, c;
     for (r = 0; r < 3; ++r) {

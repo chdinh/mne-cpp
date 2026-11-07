@@ -103,6 +103,8 @@
 
 #include <QDebug>
 #include <QByteArray>
+
+#include <optional>
 #include <QList>
 #include <QSharedPointer>
 #include <QVector>
@@ -161,8 +163,6 @@ inline constexpr auto DATA_TYPE = 0x0000FFFF;           /**< DATA_TYPE encoding 
 class FIFFSHARED_EXPORT FiffTag : public QByteArray
 {
 public:
-    using UPtr = std::unique_ptr<FiffTag>; /**< Unique pointer type for FiffTag. */
-
     //=========================================================================================================
     /**
      * Constructs a default FiffTag.
@@ -453,7 +453,7 @@ public:
      *
      * @param[in, out] tag   Matrix tag whose dimensions, indices and data are byte-swapped in place; non-matrix tags are left untouched.
      */
-    static void convert_matrix_from_file_data(const FiffTag::UPtr& tag);
+    static void convert_matrix_from_file_data(FiffTag& tag);
 
     //=========================================================================================================
     /**
@@ -461,7 +461,7 @@ public:
      *
      * @param[in, out] tag    matrix data to convert.
      */
-    static void convert_matrix_to_file_data(const FiffTag::UPtr& tag);
+    static void convert_matrix_to_file_data(FiffTag& tag);
 
     //
     // Data type conversions for the little endian systems.
@@ -480,7 +480,7 @@ public:
      * @param[in] from_endian    from endian encoding.
      * @param[in] to_endian      to endian encoding.
      */
-    static void convert_tag_data(const FiffTag::UPtr& tag, int from_endian, int to_endian);
+    static void convert_tag_data(FiffTag& tag, int from_endian, int to_endian);
 
     //
     // from fiff_type_spec.c

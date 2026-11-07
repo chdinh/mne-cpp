@@ -248,8 +248,8 @@ int FwdBemModel::get_int(FiffStream& stream, const FiffDirNode::SPtr& node, int 
      * Wrapper to get int's
      */
 {
-    FiffTag::UPtr t_pTag;
-    if (node->find_tag(stream, what, t_pTag)) {
+    std::optional<FiffTag> t_pTag;
+    if (t_pTag = node->find_tag(stream, what); t_pTag) {
         if (t_pTag->getType() != FIFFT_INT) {
             qWarning("Expected an integer tag : %d (found data type %d instead)", what, t_pTag->getType());
             return FAIL;
@@ -369,7 +369,7 @@ int FwdBemModel::fwd_bem_load_solution(const QString& name, int bemMethod)
 
     FiffDirNode::SPtr bem_node;
     int method;
-    FiffTag::UPtr t_pTag;
+    std::optional<FiffTag> t_pTag;
     int nSolutions;
 
     if (!stream.open()) {
@@ -414,7 +414,7 @@ int FwdBemModel::fwd_bem_load_solution(const QString& name, int bemMethod)
     {
         int dim, k;
 
-        if (!bem_node->find_tag(stream, FIFF_BEM_POT_SOLUTION, t_pTag)) {
+        if (t_pTag = bem_node->find_tag(stream, FIFF_BEM_POT_SOLUTION); !t_pTag) {
             stream.close();
             return FAIL;
         }

@@ -64,9 +64,9 @@ static QString explained(const QString& name)
 //=============================================================================================================
 //*************************************************************************************************************
 
-void MNEFiffContents::print_file_id(QTextStream& out, const FiffTag::UPtr& tag)
+void MNEFiffContents::print_file_id(QTextStream& out, const FiffTag& tag)
 {
-    FiffId id = tag->toFiffID();
+    FiffId id = tag.toFiffID();
     struct tm* ltime;
     time_t time_val;
     char buf[100];
@@ -99,9 +99,9 @@ void MNEFiffContents::print_file_id(QTextStream& out, const FiffTag::UPtr& tag)
 
 //*************************************************************************************************************
 
-void MNEFiffContents::print_ch_info(QTextStream& out, const FiffTag::UPtr& tag)
+void MNEFiffContents::print_ch_info(QTextStream& out, const FiffTag& tag)
 {
-    FiffChInfo info = tag->toChInfo();
+    FiffChInfo info = tag.toChInfo();
     // FIFF_UNIT_NONE has an empty symbol; only units the table does not know are "N/A"
     const QString text1 = info.unit == FIFF_UNIT_NONE || !FiffExplain::unit(info.unit).isEmpty() ? FiffExplain::unit(info.unit) : QStringLiteral("N/A");
     const QString text2 = FiffExplain::unitMultiplier(info.unit_mul);
@@ -114,9 +114,9 @@ void MNEFiffContents::print_ch_info(QTextStream& out, const FiffTag::UPtr& tag)
 
 //*************************************************************************************************************
 
-void MNEFiffContents::print_transform(QTextStream& out, const FiffTag::UPtr& tag)
+void MNEFiffContents::print_transform(QTextStream& out, const FiffTag& tag)
 {
-    FiffCoordTrans t = tag->toCoordTrans();
+    FiffCoordTrans t = tag.toCoordTrans();
     int k, p;
     int frame;
     out << "\t";
@@ -137,9 +137,9 @@ void MNEFiffContents::print_transform(QTextStream& out, const FiffTag::UPtr& tag
 
 //*************************************************************************************************************
 
-void MNEFiffContents::print_dig_point(QTextStream& out, const FiffTag::UPtr& tag)
+void MNEFiffContents::print_dig_point(QTextStream& out, const FiffTag& tag)
 {
-    FiffDigPoint point = tag->toDigPoint();
+    FiffDigPoint point = tag.toDigPoint();
     switch (point.kind) {
         case FIFFV_POINT_CARDINAL:
             out << QString::asprintf("\tcardinal %3d ", point.ident);
@@ -186,7 +186,7 @@ bool MNEFiffContents::show_fiff_contents(QTextStream& out, const QString& name, 
     FiffStream stream(&file);
 
     FiffDirEntry this_ent;
-    FiffTag::UPtr tag;
+    std::optional<FiffTag> tag;
     int block;
     int count = 0;
     int prev_kind;
@@ -208,7 +208,7 @@ bool MNEFiffContents::show_fiff_contents(QTextStream& out, const QString& name, 
                 if (this_ent.kind == FIFF_BLOCK_START) {
                     for (int k = 0; k < indent; k++)
                         out << " ";
-                    if (stream.read_tag(tag, this_ent.pos)) {
+                    if (tag = stream.read_tag(this_ent.pos); tag) {
                         block = *tag->toInt();
                         out << QString::asprintf("%-d = %-s\n", block, explained(FiffExplain::block(block)).toUtf8().constData());
                     }
@@ -246,7 +246,7 @@ bool MNEFiffContents::show_fiff_contents(QTextStream& out, const QString& name, 
                     for (int k = 0; k < indent; k++)
                         out << " ";
                     out << QString::asprintf("%4d = %-s", this_ent.kind, explained(FiffExplain::tag(this_ent.kind)).toUtf8().constData());
-                    if (stream.read_tag(tag, this_ent.pos)) {
+                    if (tag = stream.read_tag(this_ent.pos); tag) {
                         block = *tag->toInt();
                         out << QString::asprintf("\t%-d = %-s", block, explained(FiffExplain::block(block)).toUtf8().constData());
                     }
@@ -267,7 +267,7 @@ bool MNEFiffContents::show_fiff_contents(QTextStream& out, const QString& name, 
                     } else {
                         switch (this_ent.type) {
                             case FIFFT_INT:
-                                if (stream.read_tag(tag, this_ent.pos)) {
+                                if (tag = stream.read_tag(this_ent.pos); tag) {
                                     if (this_ent.kind == FIFF_BLOCK_START ||
                                         this_ent.kind == FIFF_BLOCK_END) {
                                         block = *tag->toInt();
@@ -283,7 +283,7 @@ bool MNEFiffContents::show_fiff_contents(QTextStream& out, const QString& name, 
                                 }
                                 break;
                             case FIFFT_UINT:
-                                if (stream.read_tag(tag, this_ent.pos)) {
+                                if (tag = stream.read_tag(this_ent.pos); tag) {
                                     if (tag->size() == sizeof(fiff_int_t))
                                         out << QString::asprintf("\t%d", *tag->toUnsignedInt());
                                     else
@@ -291,13 +291,13 @@ bool MNEFiffContents::show_fiff_contents(QTextStream& out, const QString& name, 
                                 }
                                 break;
                             case FIFFT_JULIAN:
-                                if (stream.read_tag(tag, this_ent.pos)) {
+                                if (tag = stream.read_tag(this_ent.pos); tag) {
                                     // MNE-CPP doesn't seem to have a direct julian to caldate, skipping for now or simplistic print
                                     out << "\tJulian date tag";
                                 }
                                 break;
                             case FIFFT_STRING:
-                                if (stream.read_tag(tag, this_ent.pos)) {
+                                if (tag = stream.read_tag(this_ent.pos); tag) {
                                     s = QString::fromStdString(tag->toString());
                                     if (long_strings)
                                         out << QString::asprintf("\t%s", tag->toString().c_str());
@@ -313,7 +313,7 @@ bool MNEFiffContents::show_fiff_contents(QTextStream& out, const QString& name, 
                                 }
                                 break;
                             case FIFFT_FLOAT:
-                                if (stream.read_tag(tag, this_ent.pos)) {
+                                if (tag = stream.read_tag(this_ent.pos); tag) {
                                     if (tag->size() == sizeof(fiff_float_t))
                                         out << QString::asprintf("\t%g", *tag->toFloat());
                                     else
@@ -321,7 +321,7 @@ bool MNEFiffContents::show_fiff_contents(QTextStream& out, const QString& name, 
                                 }
                                 break;
                             case FIFFT_DOUBLE:
-                                if (stream.read_tag(tag, this_ent.pos)) {
+                                if (tag = stream.read_tag(this_ent.pos); tag) {
                                     if (tag->size() == sizeof(fiff_double_t))
                                         out << QString::asprintf("\t%g", *tag->toDouble());
                                     else
@@ -329,7 +329,7 @@ bool MNEFiffContents::show_fiff_contents(QTextStream& out, const QString& name, 
                                 }
                                 break;
                             case FIFFT_COMPLEX_FLOAT:
-                                if (stream.read_tag(tag, this_ent.pos)) {
+                                if (tag = stream.read_tag(this_ent.pos); tag) {
                                     const float* fdata = tag->toFloat();
                                     if (tag->size() == 2 * sizeof(fiff_float_t))
                                         out << QString::asprintf("\t(%g %g)", fdata[0], fdata[1]);
@@ -339,7 +339,7 @@ bool MNEFiffContents::show_fiff_contents(QTextStream& out, const QString& name, 
                                 }
                                 break;
                             case FIFFT_COMPLEX_DOUBLE:
-                                if (stream.read_tag(tag, this_ent.pos)) {
+                                if (tag = stream.read_tag(this_ent.pos); tag) {
                                     const double* ddata = tag->toDouble();
                                     if (tag->size() == 2 * sizeof(fiff_double_t))
                                         out << QString::asprintf("\t(%g %g)", ddata[0], ddata[1]);
@@ -349,19 +349,19 @@ bool MNEFiffContents::show_fiff_contents(QTextStream& out, const QString& name, 
                                 }
                                 break;
                             case FIFFT_CH_INFO_STRUCT:
-                                if (stream.read_tag(tag, this_ent.pos))
-                                    print_ch_info(out, tag);
+                                if (tag = stream.read_tag(this_ent.pos); tag)
+                                    print_ch_info(out, *tag);
                                 break;
                             case FIFFT_ID_STRUCT:
-                                if (stream.read_tag(tag, this_ent.pos))
-                                    print_file_id(out, tag);
+                                if (tag = stream.read_tag(this_ent.pos); tag)
+                                    print_file_id(out, *tag);
                                 break;
                             case FIFFT_DIG_POINT_STRUCT:
-                                if (stream.read_tag(tag, this_ent.pos))
-                                    print_dig_point(out, tag);
+                                if (tag = stream.read_tag(this_ent.pos); tag)
+                                    print_dig_point(out, *tag);
                                 break;
                             case FIFFT_DIG_STRING_STRUCT:
-                                if (stream.read_tag(tag, this_ent.pos)) {
+                                if (tag = stream.read_tag(this_ent.pos); tag) {
 #ifdef FOO
                                     if ((ds = decode_fiff_dig_string(&tag)) != nullptr)
                                         print_dig_string(ds);
@@ -370,8 +370,8 @@ bool MNEFiffContents::show_fiff_contents(QTextStream& out, const QString& name, 
                                 }
                                 break;
                             case FIFFT_COORD_TRANS_STRUCT:
-                                if (stream.read_tag(tag, this_ent.pos))
-                                    print_transform(out, tag);
+                                if (tag = stream.read_tag(this_ent.pos); tag)
+                                    print_transform(out, *tag);
                                 break;
                             default:
                                 if (this_ent.kind == FIFF_DIG_STRING)

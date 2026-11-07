@@ -49,6 +49,7 @@
 #include <QTextStream>
 
 #include <memory>
+#include <optional>
 #include <span>
 #include <vector>
 
@@ -134,19 +135,14 @@ public:
 
     //=========================================================================================================
     /**
-     * Definition of the find_tag function in various files e.g. fiff_read_named_matrix.m,
+     * Reads the first tag of a kind among the tags of this block.
      *
-     * Founds a tag of a given kind within a tree, and reeds it from file.
-     * Note: In difference to mne-matlab this is not a static function. This is a method of the FiffDirNode
-     *       class, that's why a tree object doesn't need to be handed to the function.
+     * @param[in] stream     The file the block belongs to.
+     * @param[in] findkind   The tag kind.
      *
-     * @param[in] stream the opened fif file.
-     * @param[in] findkind the kind which should be found.
-     * @param[out] p_pTag the found tag.
-     *
-     * @return true if found, false otherwise.
+     * @return The tag, or nothing if the block holds none of that kind.
      */
-    bool find_tag(FiffStream& stream, fiff_int_t findkind, std::unique_ptr<FiffTag>& p_pTag) const;
+    [[nodiscard]] std::optional<FiffTag> find_tag(FiffStream& stream, fiff_int_t findkind) const;
 
     //=========================================================================================================
     /**

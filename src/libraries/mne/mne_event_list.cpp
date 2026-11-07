@@ -55,8 +55,8 @@ std::optional<MNEEventList> MNEEventList::readFif(const QString& path, int offse
         return std::nullopt;
     }
     const std::vector<FiffDirNode::SPtr> blocks = stream.dirtree()->dir_tree_find(FIFFB_MNE_EVENTS);
-    FiffTag::UPtr tag;
-    if (blocks.empty() || !blocks[0]->find_tag(stream, FIFF_MNE_EVENT_LIST, tag)) {
+    const auto tag = blocks.empty() ? std::nullopt : blocks.front()->find_tag(stream, FIFF_MNE_EVENT_LIST);
+    if (!tag) {
         qWarning("MNEEventList::readFif - No event data in %s", qPrintable(path));
         return std::nullopt;
     }
@@ -71,8 +71,8 @@ std::optional<MNEEventList> MNEEventList::readFif(const QString& path, int offse
         list.events[k].to = static_cast<unsigned int>(values[3 * k + 2]);
     }
     // The comments are one NUL-separated string, one entry per event.
-    if (blocks[0]->find_tag(stream, FIFF_MNE_EVENT_COMMENTS, tag)) {
-        const QList<QByteArray> comments = tag->split('\0');
+    if (const auto commentTag = blocks.front()->find_tag(stream, FIFF_MNE_EVENT_COMMENTS)) {
+        const QList<QByteArray> comments = commentTag->split('\0');
         for (int k = 0; k < nevent && k < comments.size(); ++k) {
             list.events[k].comment = QString::fromLatin1(comments[k]);
         }
@@ -156,20 +156,20 @@ bool MNEEventList::writeFif(const QString& path, int offset) const
     }
     stream->start_block(FIFFB_MNE_EVENTS);
     // Unsigned like MNE-C; trigger values are bit masks.
-    auto list = std::make_unique<FiffTag>();
-    list->kind = FIFF_MNE_EVENT_LIST;
-    list->type = FIFFT_UINT;
-    list->next = FIFFV_NEXT_SEQ;
+    FiffTag list;
+    list.kind = FIFF_MNE_EVENT_LIST;
+    list.type = FIFFT_UINT;
+    list.next = FIFFV_NEXT_SEQ;
     const auto nbytes = static_cast<qsizetype>(values.size()) * static_cast<qsizetype>(sizeof(qint32));
-    list->append(reinterpret_cast<const char*>(values.data()), nbytes);
+    list.append(reinterpret_cast<const char*>(values.data()), nbytes);
     stream->write_tag(list);
     if (anyComment) {
         // Latin-1 bytes, one NUL-terminated comment per event, as MNE-C writes and mne-python reads them.
-        auto tag = std::make_unique<FiffTag>();
-        tag->kind = FIFF_MNE_EVENT_COMMENTS;
-        tag->type = FIFFT_BYTE;
-        tag->next = FIFFV_NEXT_SEQ;
-        tag->append(comments);
+        FiffTag tag;
+        tag.kind = FIFF_MNE_EVENT_COMMENTS;
+        tag.type = FIFFT_BYTE;
+        tag.next = FIFFV_NEXT_SEQ;
+        tag.append(comments);
         stream->write_tag(tag);
     }
     stream->end_block(FIFFB_MNE_EVENTS);

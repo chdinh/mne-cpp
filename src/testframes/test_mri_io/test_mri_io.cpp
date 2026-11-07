@@ -611,7 +611,7 @@ void TestMriIO::testCorFifWriteRead()
 
     // Find and verify blocks
     // The file should have FIFFB_MRI block
-    FiffTag::UPtr tag;
+    std::optional<FiffTag> tag;
     bool foundMriBlock = false;
     bool foundMriSet = false;
     int sliceCount = 0;
@@ -619,7 +619,7 @@ void TestMriIO::testCorFifWriteRead()
     // Scan through the file tags
     stream.device()->seek(0);
     while (!stream.device()->atEnd()) {
-        stream.read_tag(tag);
+        tag = stream.read_tag();
         if (!tag)
             break;
 
@@ -976,11 +976,11 @@ void TestMriIO::testCorFifWriteReadSynthetic()
     FiffStream stream(&file);
     QVERIFY(stream.open());
 
-    FiffTag::UPtr tag;
+    std::optional<FiffTag> tag;
     int sliceCount = 0;
     stream.device()->seek(0);
     while (!stream.device()->atEnd()) {
-        stream.read_tag(tag);
+        tag = stream.read_tag();
         if (!tag)
             break;
         if (tag->kind == FIFF_BLOCK_START) {

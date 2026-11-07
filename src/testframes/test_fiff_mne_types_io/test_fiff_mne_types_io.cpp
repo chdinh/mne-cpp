@@ -88,7 +88,7 @@ void TestFiffMneTypesIO::checkFiffCoordTrans()
     if (!stream.open())
         QFAIL("Failed to open data file.");
 
-    FiffTag::UPtr t_pTag;
+    std::optional<FiffTag> t_pTag;
     fiffCoordTransRec_REF refTransReference;
     FiffCoordTrans transTest;
 
@@ -96,7 +96,7 @@ void TestFiffMneTypesIO::checkFiffCoordTrans()
 
     for (std::size_t k = 0; k < stream.dir().size(); k++) {
         if (stream.dir()[k].kind == FIFF_COORD_TRANS) {
-            if (!stream.read_tag(t_pTag, stream.dir()[k].pos))
+            if (t_pTag = stream.read_tag(stream.dir()[k].pos); !t_pTag)
                 QFAIL("Failed to read FIFF_COORD_TRANS tag.");
             refTransReference = *(fiffCoordTrans_REF)t_pTag->data();
             transTest = t_pTag->toCoordTrans();

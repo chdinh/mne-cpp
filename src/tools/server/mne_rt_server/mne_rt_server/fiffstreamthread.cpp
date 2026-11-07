@@ -19,6 +19,8 @@
 //=============================================================================================================
 
 #include "fiffstreamthread.h"
+
+#include <cstring>
 #include "fiffstreamserver.h"
 #include "mne_rt_commands.h"
 
@@ -105,18 +107,18 @@ void FiffStreamThread::stopMeas(qint32 ID)
 
 //=============================================================================================================
 
-void FiffStreamThread::parseCommand(const FiffTag::UPtr& p_pTag)
+void FiffStreamThread::parseCommand(const FiffTag& p_pTag)
 {
-    if (p_pTag->size() >= 4) {
-        qint32* t_pInt = reinterpret_cast<qint32*>(p_pTag->data());
-        FIFFLIB::swap_intp(t_pInt);
-        qint32 t_iCmd = t_pInt[0];
+    if (p_pTag.size() >= 4) {
+        qint32 t_iCmd = 0;
+        std::memcpy(&t_iCmd, p_pTag.data(), sizeof(t_iCmd));
+        t_iCmd = FIFFLIB::swap_int(t_iCmd);
 
         if (t_iCmd == MNE_RT_SET_CLIENT_ALIAS) {
             //
             // Set Client Alias
             //
-            m_sDataClientAlias = QString(p_pTag->mid(4, p_pTag->size() - 4));
+            m_sDataClientAlias = QString(p_pTag.mid(4, p_pTag.size() - 4));
             qInfo("FiffStreamClient (ID %d): new alias = '%s'\r\n", m_iDataClientId, m_sDataClientAlias.toUtf8().constData());
         } else if (t_iCmd == MNE_RT_GET_CLIENT_ID) {
             //
@@ -219,7 +221,7 @@ void FiffStreamThread::writeClientId()
 //    if (p_qTcpSocket.bytesAvailable() >= (int)sizeof(qint32)*4)
 //    {
 //        qDebug() << "goes to read bytes " ;
-//        FiffTag::UPtr t_pTag;
+//        std::optional<FiffTag> t_pTag;
 //        FiffTag::read_tag_info(&t_FiffStreamIn, t_pTag, false);
 
 //        //
@@ -292,8 +294,10 @@ void FiffStreamThread::run()
 
         if (t_qTcpSocket.bytesAvailable() >= static_cast<int>(sizeof(qint32)) * 4) {
             //            qDebug() << "goes to read bytes " ;
-            FiffTag::UPtr t_pTag;
-            t_FiffStreamIn.read_tag_info(t_pTag, false);
+            std::optional<FiffTag> t_pTag = t_FiffStreamIn.read_tag_info(false);
+            if (!t_pTag) {
+                continue;
+            }
 
             //
             // wait until tag size data are available and read the data
@@ -301,13 +305,13 @@ void FiffStreamThread::run()
             while (t_qTcpSocket.bytesAvailable() < t_pTag->size()) {
                 t_qTcpSocket.waitForReadyRead(10);
             }
-            t_FiffStreamIn.read_tag_data(t_pTag);
+            t_FiffStreamIn.read_tag_data(*t_pTag);
 
             //
             // Parse the tag
             //
             if (t_pTag->kind == FIFF_MNE_RT_COMMAND) {
-                parseCommand(t_pTag);
+                parseCommand(*t_pTag);
             }
         }
     }

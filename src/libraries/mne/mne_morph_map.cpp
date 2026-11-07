@@ -283,22 +283,25 @@ std::optional<MNEMorphMap> MNEMorphMap::read(const QString& path, const QString&
     if (hemi < 0 || hemi > 1 || !stream.open()) {
         return std::nullopt;
     }
-    FiffTag::UPtr tag;
+    std::optional<FiffTag> tag;
     for (const FiffDirNode::SPtr& node : stream.dirtree()->dir_tree_find(FIFFB_MNE_MORPH_MAP)) {
-        if (!node->find_tag(stream, FIFF_MNE_HEMI, tag) || *tag->toInt() != kHemiKind[hemi]) {
+        const auto hemiTag = node->find_tag(stream, FIFF_MNE_HEMI);
+        if (!hemiTag || *hemiTag->toInt() != kHemiKind[hemi]) {
             continue;
         }
-        if (!node->find_tag(stream, FIFF_MNE_MORPH_MAP_FROM, tag) || tag->toString() != fromSubj) {
+        const auto fromTag = node->find_tag(stream, FIFF_MNE_MORPH_MAP_FROM);
+        if (!fromTag || fromTag->toString() != fromSubj) {
             continue;
         }
-        if (!node->find_tag(stream, FIFF_MNE_MORPH_MAP_TO, tag) || tag->toString() != toSubj) {
+        const auto toTag = node->find_tag(stream, FIFF_MNE_MORPH_MAP_TO);
+        if (!toTag || toTag->toString() != toSubj) {
             continue;
         }
-        if (!node->find_tag(stream, FIFF_MNE_MORPH_MAP, tag)) {
+        if (tag = node->find_tag(stream, FIFF_MNE_MORPH_MAP); !tag) {
             break;
         }
         MNEMorphMap result;
-        result.map = FiffSparseMatrix::fiff_get_float_sparse_matrix(tag);
+        result.map = FiffSparseMatrix::fiff_get_float_sparse_matrix(*tag);
         if (!result.map) {
             break;
         }

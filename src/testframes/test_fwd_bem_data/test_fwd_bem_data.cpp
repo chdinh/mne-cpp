@@ -14,6 +14,8 @@
 //=============================================================================================================
 
 #include <QtTest/QtTest>
+#include <ranges>
+
 #include <QFile>
 #include <QDir>
 #include <Eigen/Dense>
@@ -388,12 +390,12 @@ private slots:
             bemBlocks = stream.dirtree()->dir_tree_find(FIFFB_BEM_SURF);
 
         // Read tags to exercise parsing
-        int nTags = qMin((int)stream.dir().size(), 100);
-        for (int i = 0; i < nTags; ++i) {
-            FiffTag::UPtr tag;
-            stream.read_tag(tag, stream.dir()[i].pos);
-            QVERIFY(tag != nullptr);
-            QVERIFY(tag->kind >= 0);
+        for (const FiffDirEntry& entry : stream.dir() | std::views::take(100)) {
+            if (entry.pos < 0)
+                continue;
+            const auto tag = stream.read_tag(entry.pos);
+            QVERIFY(tag);
+            QCOMPARE(tag->kind, entry.kind);
         }
 
         stream.close();
@@ -423,8 +425,8 @@ private slots:
         // Read any coord transform tags
         for (std::size_t i = 0; i < stream.dir().size(); ++i) {
             if (stream.dir()[i].kind == FIFF_COORD_TRANS) {
-                FiffTag::UPtr tag;
-                stream.read_tag(tag, stream.dir()[i].pos);
+                std::optional<FiffTag> tag;
+                tag = stream.read_tag(stream.dir()[i].pos);
                 trans = tag->toCoordTrans();
                 break;
             }

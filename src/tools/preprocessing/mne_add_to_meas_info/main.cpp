@@ -86,7 +86,7 @@ int main(int argc, char* argv[])
         return 1;
     }
 
-    std::vector<FiffTag::UPtr> tagsToAdd;
+    std::vector<FiffTag> tagsToAdd;
     for (int k = 0; k < addStream.nent(); k++) {
         fiff_int_t kind = addStream.dir()[k].kind;
         // Skip file-level structural tags
@@ -95,9 +95,9 @@ int main(int argc, char* argv[])
             kind == FIFF_BLOCK_START || kind == FIFF_BLOCK_END) {
             continue;
         }
-        FiffTag::UPtr tag;
-        addStream.read_tag(tag, addStream.dir()[k].pos);
-        tagsToAdd.push_back(std::move(tag));
+        if (auto tag = addStream.read_tag(addStream.dir()[k].pos)) {
+            tagsToAdd.push_back(std::move(*tag));
+        }
     }
     addStream.close();
 
@@ -118,7 +118,7 @@ int main(int argc, char* argv[])
 
     // Append all tags at the end
     int nAdded = 0;
-    for (const FiffTag::UPtr& tag : tagsToAdd) {
+    for (const FiffTag& tag : tagsToAdd) {
         destStream->write_tag(tag);
         nAdded++;
     }

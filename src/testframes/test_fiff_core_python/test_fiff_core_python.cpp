@@ -1268,12 +1268,12 @@ void TestFiffCorePython::sparse_createAndConvert()
     // column storage; a tag of another type or size, or with indices or pointers outside the matrix
     // (a corrupt file) gives no matrix instead of writing outside it
     const auto sparseTag = [](fiff_int_t type, const QList<float>& v, const QList<int>& inds, const QList<int>& ptrs, int ndim = 2) {
-        auto tag = std::make_unique<FiffTag>();
-        tag->type = type;
+        FiffTag tag;
+        tag.type = type;
         QByteArray bytes(reinterpret_cast<const char*>(v.constData()), v.size() * sizeof(float));
         const QList<int> tail = QList<int>(inds) << ptrs << static_cast<int>(v.size()) << 2 << 3 << ndim;
         bytes.append(reinterpret_cast<const char*>(tail.constData()), tail.size() * sizeof(int));
-        static_cast<QByteArray&>(*tag) = bytes;
+        static_cast<QByteArray&>(tag) = bytes;
         return tag;
     };
     const QList<float> values{1.5f, -2.0f, 4.0f};
@@ -1289,29 +1289,29 @@ void TestFiffCorePython::sparse_createAndConvert()
     QVERIFY(!FiffSparseMatrix::fiff_get_float_sparse_matrix(sparseTag(FIFFT_RCS_MATRIX_FLOAT, values, {0, 2, 1}, {0, 2, 9})));
     QVERIFY(!FiffSparseMatrix::fiff_get_float_sparse_matrix(sparseTag(FIFFT_RCS_MATRIX_FLOAT, values, {0, 2, 1}, {2, 0, 3})));
     QVERIFY(!FiffSparseMatrix::fiff_get_float_sparse_matrix(sparseTag(FIFFT_CCS_MATRIX_FLOAT, {1.5f, 4.0f, -2.0f}, {0, 2, 0}, {0, 1, 2, 3})));
-    QCOMPARE(MatrixXf(rcs->eigen()), MatrixXf(sparseTag(FIFFT_RCS_MATRIX_FLOAT, values, {0, 2, 1}, {0, 2, 3})->toSparseFloatMatrix().cast<float>()));
+    QCOMPARE(MatrixXf(rcs->eigen()), MatrixXf(sparseTag(FIFFT_RCS_MATRIX_FLOAT, values, {0, 2, 1}, {0, 2, 3}).toSparseFloatMatrix().cast<float>()));
 
     // Dense tags (data, then dims and ndim) whose dimensions do not fit the data, or that are too short
     // to hold them, have none
     const auto denseTag = [](fiff_int_t type, int nValues, const QList<int>& tail) {
-        auto tag = std::make_unique<FiffTag>();
-        tag->type = type;
+        FiffTag tag;
+        tag.type = type;
         QByteArray bytes(nValues * 4, '\0');
         bytes.append(reinterpret_cast<const char*>(tail.constData()), tail.size() * sizeof(int));
-        static_cast<QByteArray&>(*tag) = bytes;
+        static_cast<QByteArray&>(tag) = bytes;
         return tag;
     };
     qint32 ndim = -1;
     QVector<qint32> dims;
-    QVERIFY(denseTag(FIFFT_MATRIX_FLOAT, 6, {2, 3, 2})->getMatrixDimensions(ndim, dims));
+    QVERIFY(denseTag(FIFFT_MATRIX_FLOAT, 6, {2, 3, 2}).getMatrixDimensions(ndim, dims));
     QCOMPARE(dims, QVector<qint32>({2, 3}));
-    QCOMPARE(denseTag(FIFFT_MATRIX_FLOAT, 6, {2, 3, 2})->toFloatMatrix().size(), Index(6));
-    QCOMPARE(denseTag(FIFFT_MATRIX_FLOAT, 6, {20, 30, 2})->toFloatMatrix().size(), Index(0));
-    QCOMPARE(denseTag(FIFFT_MATRIX_INT, 6, {-2, -3, 2})->toIntMatrix().size(), Index(0));
-    QVERIFY(!denseTag(FIFFT_MATRIX_FLOAT, 0, {1000})->getMatrixDimensions(ndim, dims));
+    QCOMPARE(denseTag(FIFFT_MATRIX_FLOAT, 6, {2, 3, 2}).toFloatMatrix().size(), Index(6));
+    QCOMPARE(denseTag(FIFFT_MATRIX_FLOAT, 6, {20, 30, 2}).toFloatMatrix().size(), Index(0));
+    QCOMPARE(denseTag(FIFFT_MATRIX_INT, 6, {-2, -3, 2}).toIntMatrix().size(), Index(0));
+    QVERIFY(!denseTag(FIFFT_MATRIX_FLOAT, 0, {1000}).getMatrixDimensions(ndim, dims));
     QCOMPARE(ndim, 0);
-    QVERIFY(!denseTag(FIFFT_MATRIX_FLOAT, 0, {-5})->getMatrixDimensions(ndim, dims));
-    QVERIFY(!sparseTag(FIFFT_RCS_MATRIX_FLOAT, {}, {}, {}, 9)->getMatrixDimensions(ndim, dims));
+    QVERIFY(!denseTag(FIFFT_MATRIX_FLOAT, 0, {-5}).getMatrixDimensions(ndim, dims));
+    QVERIFY(!sparseTag(FIFFT_RCS_MATRIX_FLOAT, {}, {}, {}, 9).getMatrixDimensions(ndim, dims));
 }
 
 //=============================================================================================================

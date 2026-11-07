@@ -525,14 +525,17 @@ void TestMneAnonymize::compareMeasureDateOffsetOption()
 void TestMneAnonymize::verifyTags(FIFFLIB::FiffStream& stream,
                                   QString testArg)
 {
-    FiffTag::UPtr pTag = std::make_unique<FiffTag>();
+    FiffTag pTag;
 
     stream.device()->seek(0);
 
-    while (pTag->next != -1) {
-        stream.read_tag(pTag);
+    while (pTag.next != -1) {
+        auto read = stream.read_tag();
+        if (!read)
+            break;
+        pTag = std::move(*read);
 
-        switch (pTag->kind) {
+        switch (pTag.kind) {
             //all these 'kinds' of tags contain a fileID struct, which contains info related to
             //measurement date
             case FIFF_FILE_ID:
@@ -541,7 +544,7 @@ void TestMneAnonymize::verifyTags(FIFFLIB::FiffStream& stream,
             case FIFF_PARENT_BLOCK_ID:
             case FIFF_REF_FILE_ID:
             case FIFF_REF_BLOCK_ID: {
-                FiffId inId = pTag->toFiffID();
+                FiffId inId = pTag.toFiffID();
 
                 if (testArg != "MeasDateOffset") {
                     QDateTime inMeasDate(QDateTime::fromSecsSinceEpoch(inId.time.secs, QTimeZone::LocalTime));
@@ -557,7 +560,7 @@ void TestMneAnonymize::verifyTags(FIFFLIB::FiffStream& stream,
                 break;
             }
             case FIFF_MEAS_DATE: {
-                QDateTime inMeasDate(QDateTime::fromSecsSinceEpoch(*pTag->toInt(), QTimeZone::LocalTime));
+                QDateTime inMeasDate(QDateTime::fromSecsSinceEpoch(*pTag.toInt(), QTimeZone::LocalTime));
                 QDateTime originalDateInFile(QDate(2002, 12, 3), QTime(14, 1, 10));
 
                 qInfo() << "InMeasDate: " << inMeasDate;
@@ -576,7 +579,7 @@ void TestMneAnonymize::verifyTags(FIFFLIB::FiffStream& stream,
             case FIFF_COMMENT: {
                 if (m_pBlockTypeList->first() == FIFFB_MEAS_INFO) {
                     QString defaultComment("mne_anonymize");
-                    QString anonFiffInfoComment(pTag->data());
+                    QString anonFiffInfoComment(pTag.data());
                     QVERIFY(anonFiffInfoComment == defaultComment);
                 }
 
@@ -584,41 +587,41 @@ void TestMneAnonymize::verifyTags(FIFFLIB::FiffStream& stream,
             }
             case FIFF_EXPERIMENTER: {
                 QString defaultComment("mne_anonymize");
-                QString anonFiffExperimenter(pTag->data());
+                QString anonFiffExperimenter(pTag.data());
                 QVERIFY(anonFiffExperimenter == defaultComment);
 
                 break;
             }
             case FIFF_SUBJ_ID: {
-                fiff_int_t intAnnonSubjId(*pTag->toInt());
+                fiff_int_t intAnnonSubjId(*pTag.toInt());
                 QVERIFY(intAnnonSubjId == 0);
 
                 break;
             }
             case FIFF_SUBJ_FIRST_NAME: {
                 QString defaultComment("mne_anonymize");
-                QString anonSubjFirstName(pTag->data());
+                QString anonSubjFirstName(pTag.data());
                 QVERIFY(anonSubjFirstName == defaultComment);
 
                 break;
             }
             case FIFF_SUBJ_MIDDLE_NAME: {
                 QString defaultComment("mne_anonymize");
-                QString anonSubjMiddleName(pTag->data());
+                QString anonSubjMiddleName(pTag.data());
                 QVERIFY(anonSubjMiddleName == defaultComment);
 
                 break;
             }
             case FIFF_SUBJ_LAST_NAME: {
                 QString defaultComment("mne_anonymize");
-                QString anonSubjLastName(pTag->data());
+                QString anonSubjLastName(pTag.data());
                 QVERIFY(anonSubjLastName == defaultComment);
 
                 break;
             }
             case FIFF_SUBJ_BIRTH_DAY: {
                 QDate defaultDate(QDate(2000, 1, 1));
-                QDate inBirthday(QDate::fromJulianDay(*pTag->toJulian()));
+                QDate inBirthday(QDate::fromJulianDay(*pTag.toJulian()));
                 QDate offSetBirtday(defaultDate.addDays(-35));
 
                 if (testArg == "SubjBirthdayOffset") {
@@ -630,47 +633,47 @@ void TestMneAnonymize::verifyTags(FIFFLIB::FiffStream& stream,
                 break;
             }
             case FIFF_SUBJ_SEX: {
-                fiff_int_t intAnonSubjSex(*pTag->toInt());
+                fiff_int_t intAnonSubjSex(*pTag.toInt());
                 QVERIFY(intAnonSubjSex == 0);
 
                 break;
             }
             case FIFF_SUBJ_HAND: {
-                fiff_int_t intAnonSubjHand(*pTag->toInt());
+                fiff_int_t intAnonSubjHand(*pTag.toInt());
                 QVERIFY(intAnonSubjHand == 0);
 
                 break;
             }
             case FIFF_SUBJ_WEIGHT: {
                 if (testArg == "BruteMode") {
-                    fiff_int_t intAnonSubjWeight(*pTag->toInt());
+                    fiff_int_t intAnonSubjWeight(*pTag.toInt());
                     QVERIFY(intAnonSubjWeight == 0);
                 }
                 break;
             }
             case FIFF_SUBJ_HEIGHT: {
                 if (testArg == "BruteMode") {
-                    fiff_int_t intAnonSubjHeight(*pTag->toInt());
+                    fiff_int_t intAnonSubjHeight(*pTag.toInt());
                     QVERIFY(intAnonSubjHeight == 0);
                 }
                 break;
             }
             case FIFF_SUBJ_COMMENT: {
                 QString defaultComment("mne_anonymize");
-                QString anonSubjComment(pTag->data());
+                QString anonSubjComment(pTag.data());
                 QVERIFY(anonSubjComment == defaultComment);
 
                 break;
             }
             case FIFF_SUBJ_HIS_ID: {
                 QString defaultComment("mne_anonymize");
-                QString anonSubjHis(pTag->data());
+                QString anonSubjHis(pTag.data());
                 QVERIFY(anonSubjHis == defaultComment);
                 break;
             }
             case FIFF_PROJ_ID: {
                 if (testArg == "BruteMode") {
-                    fiff_int_t intAnonProjId(*pTag->toInt());
+                    fiff_int_t intAnonProjId(*pTag.toInt());
                     QVERIFY(intAnonProjId == 0);
                 }
                 break;
@@ -678,7 +681,7 @@ void TestMneAnonymize::verifyTags(FIFFLIB::FiffStream& stream,
             case FIFF_PROJ_NAME: {
                 if (testArg == "BruteMode") {
                     QString defaultComment("mne_anonymize");
-                    QString intAnonProjName(pTag->data());
+                    QString intAnonProjName(pTag.data());
                     QVERIFY(intAnonProjName == defaultComment);
                 }
                 break;
@@ -686,14 +689,14 @@ void TestMneAnonymize::verifyTags(FIFFLIB::FiffStream& stream,
             case FIFF_PROJ_AIM: {
                 if (testArg == "BruteMode") {
                     QString defaultComment("mne_anonymize");
-                    QString intAnonProjAim(pTag->data());
+                    QString intAnonProjAim(pTag.data());
                     QVERIFY(intAnonProjAim == defaultComment);
                 }
                 break;
             }
             case FIFF_PROJ_PERSONS: {
                 QString defaultComment("mne_anonymize");
-                QString intAnonProjPersons(pTag->data());
+                QString intAnonProjPersons(pTag.data());
                 QVERIFY(intAnonProjPersons == defaultComment);
 
                 break;
@@ -701,7 +704,7 @@ void TestMneAnonymize::verifyTags(FIFFLIB::FiffStream& stream,
             case FIFF_PROJ_COMMENT: {
                 if (testArg == "BruteMode") {
                     QString defaultComment("mne_anonymize");
-                    QString intAnonProjComment(QString::fromStdString(pTag->toString()));
+                    QString intAnonProjComment(QString::fromStdString(pTag.toString()));
                     QVERIFY(intAnonProjComment == defaultComment);
                 }
                 break;

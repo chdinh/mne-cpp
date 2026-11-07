@@ -758,7 +758,7 @@ private:
 
     std::unique_ptr<FIFFLIB::FiffStream> m_pInStream;  /**< Pointer to FiffStream object for reading.*/
     std::unique_ptr<FIFFLIB::FiffStream> m_pOutStream; /**< Pointer to FiffStream object for writing the result.*/
-    FIFFLIB::FiffTag::UPtr m_pTag;                     /**< Pointer to FiffTag used for reading and writing each tag.*/
+    std::optional<FIFFLIB::FiffTag> m_pTag;            /**< Pointer to FiffTag used for reading and writing each tag.*/
 
     FIFFLIB::fiff_int_t m_BDfltMAC[2]; /**< MAC addresss substitutor.*/
 

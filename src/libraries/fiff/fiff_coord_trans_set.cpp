@@ -120,9 +120,12 @@ int FiffCoordTransSet::read(const QString& path)
         {FIFFV_MNE_COORD_MNI_TAL, FIFFV_MNE_COORD_FS_TAL_LTZ, &FiffCoordTransSet::MNI_tal_tal_ltz_t},
     };
     int count = 0;
-    FiffTag::UPtr tag;
     for (const auto& entry : stream.dir()) {
-        if (entry.kind != FIFF_COORD_TRANS || !stream.read_tag(tag, entry.pos)) {
+        if (entry.kind != FIFF_COORD_TRANS) {
+            continue;
+        }
+        const auto tag = stream.read_tag(entry.pos);
+        if (!tag) {
             continue;
         }
         const FiffCoordTrans t = tag->toCoordTrans();

@@ -133,8 +133,7 @@ fiff_int_t FiffTag::getType() const
 
 Eigen::SparseMatrix<double> FiffTag::toSparseFloatMatrix() const
 {
-    const FiffTag::UPtr copy = std::make_unique<FiffTag>(*this);
-    const FiffSparseMatrix::UPtr mat = FiffSparseMatrix::fiff_get_float_sparse_matrix(copy);
+    const FiffSparseMatrix::UPtr mat = FiffSparseMatrix::fiff_get_float_sparse_matrix(*this);
     return mat ? Eigen::SparseMatrix<double>(mat->eigen().cast<double>()) : Eigen::SparseMatrix<double>();
 }
 
@@ -288,7 +287,7 @@ void FiffTag::convert_ch_pos(FiffChPos* pos)
 
 //=============================================================================================================
 
-void FiffTag::convert_matrix_from_file_data(const FiffTag::UPtr& tag)
+void FiffTag::convert_matrix_from_file_data(FiffTag& tag)
 /*
  * Assumes that the input is in the non-native byte order and needs to be swapped to the other one
  */
@@ -298,19 +297,19 @@ void FiffTag::convert_matrix_from_file_data(const FiffTag::UPtr& tag)
     int *dimp, *data, kind, np, nz;
     float* fdata;
     double* ddata;
-    unsigned int tsize = tag->size();
+    unsigned int tsize = tag.size();
 
-    if (fiff_type_fundamental(tag->type) != FIFFTS_FS_MATRIX)
+    if (fiff_type_fundamental(tag.type) != FIFFTS_FS_MATRIX)
         return;
-    if (tag->data() == nullptr)
+    if (tag.data() == nullptr)
         return;
     if (tsize < sizeof(fiff_int_t))
         return;
 
-    dimp = (reinterpret_cast<fiff_int_t*>((tag->data()) + tag->size() - sizeof(fiff_int_t)));
+    dimp = (reinterpret_cast<fiff_int_t*>((tag.data()) + tag.size() - sizeof(fiff_int_t)));
     swap_intp(dimp);
     ndim = *dimp;
-    if (fiff_type_matrix_coding(tag->type) == FIFFTS_MC_DENSE) {
+    if (fiff_type_matrix_coding(tag.type) == FIFFTS_MC_DENSE) {
         if (tsize < (ndim + 1) * sizeof(fiff_int_t))
             return;
         dimp = dimp - ndim;
@@ -327,37 +326,37 @@ void FiffTag::convert_matrix_from_file_data(const FiffTag::UPtr& tag)
         for (k = 0; k < ndim + 1; k++)
             swap_intp(dimp + k);
         nz = dimp[0];
-        if (fiff_type_matrix_coding(tag->type) == FIFFTS_MC_CCS)
+        if (fiff_type_matrix_coding(tag.type) == FIFFTS_MC_CCS)
             np = nz + dimp[2] + 1; /* nz + n + 1 */
-        else if (fiff_type_matrix_coding(tag->type) == FIFFTS_MC_RCS)
+        else if (fiff_type_matrix_coding(tag.type) == FIFFTS_MC_RCS)
             np = nz + dimp[1] + 1; /* nz + m + 1 */
         else
             return; /* Don't know what to do */
         /*
          * Take care of the indices
         */
-        for (data = reinterpret_cast<int*>(tag->data()) + nz, k = 0; k < np; k++)
+        for (data = reinterpret_cast<int*>(tag.data()) + nz, k = 0; k < np; k++)
             swap_intp(data + k);
         np = nz;
     }
     /*
      * Now convert data...
      */
-    kind = fiff_type_base(tag->type);
+    kind = fiff_type_base(tag.type);
     if (kind == FIFFT_INT) {
-        for (data = reinterpret_cast<int*>(tag->data()), k = 0; k < np; k++)
+        for (data = reinterpret_cast<int*>(tag.data()), k = 0; k < np; k++)
             swap_intp(data + k);
     } else if (kind == FIFFT_FLOAT) {
-        for (fdata = reinterpret_cast<float*>(tag->data()), k = 0; k < np; k++)
+        for (fdata = reinterpret_cast<float*>(tag.data()), k = 0; k < np; k++)
             swap_floatp(fdata + k);
     } else if (kind == FIFFT_DOUBLE) {
-        for (ddata = reinterpret_cast<double*>(tag->data()), k = 0; k < np; k++)
+        for (ddata = reinterpret_cast<double*>(tag.data()), k = 0; k < np; k++)
             swap_doublep(ddata + k);
     } else if (kind == FIFFT_COMPLEX_FLOAT) {
-        for (fdata = reinterpret_cast<float*>(tag->data()), k = 0; k < 2 * np; k++)
+        for (fdata = reinterpret_cast<float*>(tag.data()), k = 0; k < 2 * np; k++)
             swap_floatp(fdata + k);
     } else if (kind == FIFFT_COMPLEX_DOUBLE) {
-        for (ddata = reinterpret_cast<double*>(tag->data()), k = 0; k < 2 * np; k++)
+        for (ddata = reinterpret_cast<double*>(tag.data()), k = 0; k < 2 * np; k++)
             swap_doublep(ddata + k);
     }
     return;
@@ -365,7 +364,7 @@ void FiffTag::convert_matrix_from_file_data(const FiffTag::UPtr& tag)
 
 //=============================================================================================================
 
-void FiffTag::convert_matrix_to_file_data(const FiffTag::UPtr& tag)
+void FiffTag::convert_matrix_to_file_data(FiffTag& tag)
 /*
  * Assumes that the input is in the NATIVE_ENDIAN byte order and needs to be swapped to the other one
  */
@@ -375,20 +374,20 @@ void FiffTag::convert_matrix_to_file_data(const FiffTag::UPtr& tag)
     int *dimp, *data, kind, np;
     float* fdata;
     double* ddata;
-    unsigned int tsize = tag->size();
+    unsigned int tsize = tag.size();
 
-    if (fiff_type_fundamental(tag->type) != FIFFTS_FS_MATRIX)
+    if (fiff_type_fundamental(tag.type) != FIFFTS_FS_MATRIX)
         return;
-    if (tag->data() == nullptr)
+    if (tag.data() == nullptr)
         return;
     if (tsize < sizeof(fiff_int_t))
         return;
 
-    dimp = (reinterpret_cast<fiff_int_t*>((tag->data()) + tag->size() - sizeof(fiff_int_t)));
+    dimp = (reinterpret_cast<fiff_int_t*>((tag.data()) + tag.size() - sizeof(fiff_int_t)));
     ndim = *dimp;
     swap_intp(dimp);
 
-    if (fiff_type_matrix_coding(tag->type) == FIFFTS_MC_DENSE) {
+    if (fiff_type_matrix_coding(tag.type) == FIFFTS_MC_DENSE) {
         if (tsize < (ndim + 1) * sizeof(fiff_int_t))
             return;
         dimp = dimp - ndim;
@@ -403,36 +402,36 @@ void FiffTag::convert_matrix_to_file_data(const FiffTag::UPtr& tag)
             return;
         dimp = dimp - ndim - 1;
         const int nz = dimp[0];
-        if (fiff_type_matrix_coding(tag->type) == FIFFTS_MC_CCS)
+        if (fiff_type_matrix_coding(tag.type) == FIFFTS_MC_CCS)
             np = nz + dimp[2] + 1; /* nz + n + 1 */
-        else if (fiff_type_matrix_coding(tag->type) == FIFFTS_MC_RCS)
+        else if (fiff_type_matrix_coding(tag.type) == FIFFTS_MC_RCS)
             np = nz + dimp[1] + 1; /* nz + m + 1 */
         else
             return; /* Don't know what to do */
         for (k = 0; k < ndim + 1; k++)
             swap_intp(dimp + k);
-        for (data = reinterpret_cast<int*>(tag->data()) + nz, k = 0; k < np; k++)
+        for (data = reinterpret_cast<int*>(tag.data()) + nz, k = 0; k < np; k++)
             swap_intp(data + k);
         np = nz;
     }
     /*
      * Now convert data...
      */
-    kind = fiff_type_base(tag->type);
+    kind = fiff_type_base(tag.type);
     if (kind == FIFFT_INT) {
-        for (data = reinterpret_cast<int*>(tag->data()), k = 0; k < np; k++)
+        for (data = reinterpret_cast<int*>(tag.data()), k = 0; k < np; k++)
             swap_intp(data + k);
     } else if (kind == FIFFT_FLOAT) {
-        for (fdata = reinterpret_cast<float*>(tag->data()), k = 0; k < np; k++)
+        for (fdata = reinterpret_cast<float*>(tag.data()), k = 0; k < np; k++)
             swap_floatp(fdata + k);
     } else if (kind == FIFFT_DOUBLE) {
-        for (ddata = reinterpret_cast<double*>(tag->data()), k = 0; k < np; k++)
+        for (ddata = reinterpret_cast<double*>(tag.data()), k = 0; k < np; k++)
             swap_doublep(ddata + k);
     } else if (kind == FIFFT_COMPLEX_FLOAT) {
-        for (fdata = reinterpret_cast<float*>(tag->data()), k = 0; k < 2 * np; k++)
+        for (fdata = reinterpret_cast<float*>(tag.data()), k = 0; k < 2 * np; k++)
             swap_floatp(fdata + k);
     } else if (kind == FIFFT_COMPLEX_DOUBLE) {
-        for (ddata = reinterpret_cast<double*>(tag->data()), k = 0; k < 2 * np; k++)
+        for (ddata = reinterpret_cast<double*>(tag.data()), k = 0; k < 2 * np; k++)
             swap_doublep(ddata + k);
     }
     return;
@@ -440,7 +439,7 @@ void FiffTag::convert_matrix_to_file_data(const FiffTag::UPtr& tag)
 
 //=============================================================================================================
 //ToDo remove this function by swapping -> define little endian big endian, QByteArray
-void FiffTag::convert_tag_data(const FiffTag::UPtr& tag, int from_endian, int to_endian)
+void FiffTag::convert_tag_data(FiffTag& tag, int from_endian, int to_endian)
 {
     // Element counts derived from tag->size(), which is a size type. A FIFF tag
     // never holds more than INT_MAX elements, so narrowing is safe, but it has
@@ -461,7 +460,7 @@ void FiffTag::convert_tag_data(const FiffTag::UPtr& tag, int from_endian, int to
     //    fiffDigPoint   dpthis;
     FiffDataRef* drthis;
 
-    if (tag->data() == nullptr || tag->size() == 0)
+    if (tag.data() == nullptr || tag.size() == 0)
         return;
 
     if (from_endian == FIFFV_NATIVE_ENDIAN)
@@ -472,7 +471,7 @@ void FiffTag::convert_tag_data(const FiffTag::UPtr& tag, int from_endian, int to
     if (from_endian == to_endian)
         return;
 
-    if (fiff_type_fundamental(tag->type) == FIFFTS_FS_MATRIX) {
+    if (fiff_type_fundamental(tag.type) == FIFFTS_FS_MATRIX) {
         if (from_endian == NATIVE_ENDIAN)
             convert_matrix_to_file_data(tag);
         else
@@ -480,53 +479,53 @@ void FiffTag::convert_tag_data(const FiffTag::UPtr& tag, int from_endian, int to
         return;
     }
 
-    switch (tag->type) {
+    switch (tag.type) {
         case FIFFT_INT:
         case FIFFT_UINT:
         case FIFFT_JULIAN:
-            np = static_cast<int>(tag->size() / sizeof(fiff_int_t));
-            for (ithis = reinterpret_cast<fiff_int_t*>(tag->data()), k = 0; k < np; k++, ithis++)
+            np = static_cast<int>(tag.size() / sizeof(fiff_int_t));
+            for (ithis = reinterpret_cast<fiff_int_t*>(tag.data()), k = 0; k < np; k++, ithis++)
                 swap_intp(ithis);
             break;
 
         case FIFFT_LONG:
         case FIFFT_ULONG:
-            np = static_cast<int>(tag->size() / sizeof(fiff_long_t));
-            for (lthis = reinterpret_cast<fiff_long_t*>(tag->data()), k = 0; k < np; k++, lthis++)
+            np = static_cast<int>(tag.size() / sizeof(fiff_long_t));
+            for (lthis = reinterpret_cast<fiff_long_t*>(tag.data()), k = 0; k < np; k++, lthis++)
                 swap_longp(lthis);
             break;
 
         case FIFFT_SHORT:
         case FIFFT_DAU_PACK16:
         case FIFFT_USHORT:
-            np = static_cast<int>(tag->size() / sizeof(fiff_short_t));
-            for (sthis = reinterpret_cast<fiff_short_t*>(tag->data()), k = 0; k < np; k++, sthis++)
+            np = static_cast<int>(tag.size() / sizeof(fiff_short_t));
+            for (sthis = reinterpret_cast<fiff_short_t*>(tag.data()), k = 0; k < np; k++, sthis++)
                 *sthis = swap_short(*sthis);
             break;
 
         case FIFFT_FLOAT:
         case FIFFT_COMPLEX_FLOAT:
-            np = static_cast<int>(tag->size() / sizeof(fiff_float_t));
-            for (fthis = reinterpret_cast<fiff_float_t*>(tag->data()), k = 0; k < np; k++, fthis++)
+            np = static_cast<int>(tag.size() / sizeof(fiff_float_t));
+            for (fthis = reinterpret_cast<fiff_float_t*>(tag.data()), k = 0; k < np; k++, fthis++)
                 swap_floatp(fthis);
             break;
 
         case FIFFT_DOUBLE:
         case FIFFT_COMPLEX_DOUBLE:
-            np = static_cast<int>(tag->size() / sizeof(fiff_double_t));
-            for (dthis = reinterpret_cast<fiff_double_t*>(tag->data()), k = 0; k < np; k++, dthis++)
+            np = static_cast<int>(tag.size() / sizeof(fiff_double_t));
+            for (dthis = reinterpret_cast<fiff_double_t*>(tag.data()), k = 0; k < np; k++, dthis++)
                 swap_doublep(dthis);
             break;
 
         case FIFFT_OLD_PACK:
-            fthis = reinterpret_cast<float*>(tag->data());
+            fthis = reinterpret_cast<float*>(tag.data());
             /*
      * Offset and scale...
      */
             swap_floatp(fthis + 0);
             swap_floatp(fthis + 1);
             sthis = reinterpret_cast<short*>(fthis + 2);
-            np = static_cast<int>((tag->size() - 2 * sizeof(float)) / sizeof(short));
+            np = static_cast<int>((tag.size() - 2 * sizeof(float)) / sizeof(short));
             for (k = 0; k < np; k++, sthis++)
                 *sthis = swap_short(*sthis);
             break;
@@ -539,9 +538,9 @@ void FiffTag::convert_tag_data(const FiffTag::UPtr& tag, int from_endian, int to
             //            dethis->size = swap_int(dethis->size);
             //            dethis->pos  = swap_int(dethis->pos);
             //        }
-            np = tag->size() / FiffDirEntry::storageSize();
+            np = tag.size() / FiffDirEntry::storageSize();
             for (k = 0; k < np; k++) {
-                offset = static_cast<char*>(tag->data()) + k * FiffDirEntry::storageSize();
+                offset = static_cast<char*>(tag.data()) + k * FiffDirEntry::storageSize();
                 ithis = reinterpret_cast<fiff_int_t*>(offset);
                 ithis[0] = swap_int(ithis[0]); //kind
                 ithis[1] = swap_int(ithis[1]); //type
@@ -559,9 +558,9 @@ void FiffTag::convert_tag_data(const FiffTag::UPtr& tag, int from_endian, int to
             //            idthis->time.secs  = swap_int(idthis->time.secs);
             //            idthis->time.usecs = swap_int(idthis->time.usecs);
             //        }
-            np = tag->size() / FiffId::storageSize();
+            np = tag.size() / FiffId::storageSize();
             for (k = 0; k < np; k++) {
-                offset = static_cast<char*>(tag->data()) + k * FiffId::storageSize();
+                offset = static_cast<char*>(tag.data()) + k * FiffId::storageSize();
                 ithis = reinterpret_cast<fiff_int_t*>(offset);
                 ithis[0] = swap_int(ithis[0]); //version
                 ithis[1] = swap_int(ithis[1]); //machid[0]
@@ -584,9 +583,9 @@ void FiffTag::convert_tag_data(const FiffTag::UPtr& tag, int from_endian, int to
             //            convert_ch_pos(&(chthis->chpos));
             //        }
 
-            np = tag->size() / FiffChInfo::storageSize();
+            np = tag.size() / FiffChInfo::storageSize();
             for (k = 0; k < np; k++) {
-                offset = static_cast<char*>(tag->data()) + k * FiffChInfo::storageSize();
+                offset = static_cast<char*>(tag.data()) + k * FiffChInfo::storageSize();
                 ithis = reinterpret_cast<fiff_int_t*>(offset);
                 fthis = reinterpret_cast<float*>(offset);
 
@@ -609,9 +608,9 @@ void FiffTag::convert_tag_data(const FiffTag::UPtr& tag, int from_endian, int to
             //        for (cpthis = (fiffChPos)tag->data->data(), k = 0; k < np; k++, cpthis++)
             //            convert_ch_pos(cpthis);
 
-            np = tag->size() / FiffChPos::storageSize();
+            np = tag.size() / FiffChPos::storageSize();
             for (k = 0; k < np; ++k) {
-                offset = static_cast<char*>(tag->data()) + k * FiffChPos::storageSize();
+                offset = static_cast<char*>(tag.data()) + k * FiffChPos::storageSize();
                 ithis = reinterpret_cast<fiff_int_t*>(offset);
                 fthis = reinterpret_cast<float*>(offset);
 
@@ -631,10 +630,10 @@ void FiffTag::convert_tag_data(const FiffTag::UPtr& tag, int from_endian, int to
             //                swap_floatp(&dpthis->r[r]);
             //        }
 
-            np = tag->size() / FiffDigPoint::storageSize();
+            np = tag.size() / FiffDigPoint::storageSize();
 
             for (k = 0; k < np; k++) {
-                offset = tag->data() + k * FiffDigPoint::storageSize();
+                offset = tag.data() + k * FiffDigPoint::storageSize();
                 ithis = reinterpret_cast<fiff_int_t*>(offset);
                 fthis = reinterpret_cast<float*>(offset);
 
@@ -661,10 +660,10 @@ void FiffTag::convert_tag_data(const FiffTag::UPtr& tag, int from_endian, int to
             //        }
             //    }
 
-            np = tag->size() / FiffCoordTrans::storage_size();
+            np = tag.size() / FiffCoordTrans::storage_size();
 
             for (k = 0; k < np; ++k) {
-                offset = tag->data() + k * FiffCoordTrans::storage_size();
+                offset = tag.data() + k * FiffCoordTrans::storage_size();
                 ithis = reinterpret_cast<fiff_int_t*>(offset);
                 fthis = reinterpret_cast<float*>(offset);
 
@@ -677,8 +676,8 @@ void FiffTag::convert_tag_data(const FiffTag::UPtr& tag, int from_endian, int to
             break;
 
         case FIFFT_DATA_REF_STRUCT:
-            np = tag->size() / FiffDataRef::storageSize();
-            for (drthis = reinterpret_cast<FiffDataRef*>(tag->data()), k = 0; k < np; k++, drthis++) {
+            np = tag.size() / FiffDataRef::storageSize();
+            for (drthis = reinterpret_cast<FiffDataRef*>(tag.data()), k = 0; k < np; k++, drthis++) {
                 drthis->type = swap_int(drthis->type);
                 drthis->endian = swap_int(drthis->endian);
                 drthis->size = swap_long(drthis->size);

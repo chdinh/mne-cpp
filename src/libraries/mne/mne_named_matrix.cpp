@@ -193,7 +193,7 @@ std::unique_ptr<MNENamedMatrix> MNENamedMatrix::read(FiffStream& stream,
     qint32 ndim;
     QVector<qint32> dims;
     MatrixXf data;
-    FiffTag::UPtr t_pTag;
+    std::optional<FiffTag> t_pTag;
     bool dataFound = false;
 
     FiffDirNode::SPtr tmp_node = node;
@@ -203,7 +203,7 @@ std::unique_ptr<MNENamedMatrix> MNENamedMatrix::read(FiffStream& stream,
      * Otherwise look in its first-generation children for such a block.
      */
     if (tmp_node->type == FIFFB_MNE_NAMED_MATRIX) {
-        if (!tmp_node->find_tag(stream, kind, t_pTag))
+        if (t_pTag = tmp_node->find_tag(stream, kind); !t_pTag)
             return nullptr;
 
         t_pTag->getMatrixDimensions(ndim, dims);
@@ -217,7 +217,7 @@ std::unique_ptr<MNENamedMatrix> MNENamedMatrix::read(FiffStream& stream,
     } else {
         for (int k = 0; k < tmp_node->nchild(); ++k) {
             if (tmp_node->children[k]->type == FIFFB_MNE_NAMED_MATRIX) {
-                if (tmp_node->children[k]->find_tag(stream, kind, t_pTag)) {
+                if (t_pTag = tmp_node->children[k]->find_tag(stream, kind); t_pTag) {
                     t_pTag->getMatrixDimensions(ndim, dims);
                     if (ndim != 2) {
                         qCritical("MNENamedMatrix::read - Only two-dimensional matrices are supported.");
@@ -239,7 +239,7 @@ std::unique_ptr<MNENamedMatrix> MNENamedMatrix::read(FiffStream& stream,
      * Read optional FIFF_MNE_NROW / FIFF_MNE_NCOL dimension tags and
      * cross-check them against the matrix data.
      */
-    if (!tmp_node->find_tag(stream, FIFF_MNE_NROW, t_pTag)) {
+    if (t_pTag = tmp_node->find_tag(stream, FIFF_MNE_NROW); !t_pTag) {
         nrow = static_cast<int>(data.rows());
     } else {
         nrow = *t_pTag->toInt();
@@ -250,7 +250,7 @@ std::unique_ptr<MNENamedMatrix> MNENamedMatrix::read(FiffStream& stream,
         }
     }
 
-    if (!tmp_node->find_tag(stream, FIFF_MNE_NCOL, t_pTag)) {
+    if (t_pTag = tmp_node->find_tag(stream, FIFF_MNE_NCOL); !t_pTag) {
         ncol = static_cast<int>(data.cols());
     } else {
         ncol = *t_pTag->toInt();
@@ -264,7 +264,7 @@ std::unique_ptr<MNENamedMatrix> MNENamedMatrix::read(FiffStream& stream,
     /*
      * Read optional row and column name lists.
      */
-    if (tmp_node->find_tag(stream, FIFF_MNE_ROW_NAMES, t_pTag)) {
+    if (t_pTag = tmp_node->find_tag(stream, FIFF_MNE_ROW_NAMES); t_pTag) {
         const std::string s = t_pTag->toString();
         rownames = FiffStream::split_name_list(s);
         if (static_cast<int>(rownames.size()) != nrow) {
@@ -274,7 +274,7 @@ std::unique_ptr<MNENamedMatrix> MNENamedMatrix::read(FiffStream& stream,
         }
     }
 
-    if (tmp_node->find_tag(stream, FIFF_MNE_COL_NAMES, t_pTag)) {
+    if (t_pTag = tmp_node->find_tag(stream, FIFF_MNE_COL_NAMES); t_pTag) {
         const std::string s = t_pTag->toString();
         colnames = FiffStream::split_name_list(s);
         if (static_cast<int>(colnames.size()) != ncol) {

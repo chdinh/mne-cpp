@@ -73,13 +73,13 @@ public:
     static bool show_fiff_contents(QTextStream& out, const QString& name, bool verbose, const QList<int>& tags, int indent_step, bool long_strings, bool blocks_only);
 
 private:
-    static void print_file_id(QTextStream& out, const FIFFLIB::FiffTag::UPtr& tag);
+    static void print_file_id(QTextStream& out, const FIFFLIB::FiffTag& tag);
 
-    static void print_ch_info(QTextStream& out, const FIFFLIB::FiffTag::UPtr& tag);
+    static void print_ch_info(QTextStream& out, const FIFFLIB::FiffTag& tag);
 
-    static void print_transform(QTextStream& out, const FIFFLIB::FiffTag::UPtr& tag);
+    static void print_transform(QTextStream& out, const FIFFLIB::FiffTag& tag);
 
-    static void print_dig_point(QTextStream& out, const FIFFLIB::FiffTag::UPtr& tag);
+    static void print_dig_point(QTextStream& out, const FIFFLIB::FiffTag& tag);
 
     static void print_matrix(QTextStream& out, FIFFLIB::FiffStream& stream, FIFFLIB::FiffDirEntry this_ent);
 };

@@ -131,7 +131,7 @@ bool FiffDigPointSet::readFromStream(FiffStream& stream, FiffDigPointSet& p_Dig)
     //read_hpi_info(stream,p_Tree, info);
     fiff_int_t kind = -1;
     fiff_int_t pos = -1;
-    FiffTag::UPtr t_pTag;
+    std::optional<FiffTag> t_pTag;
 
     //
     //   Locate the Electrodes
@@ -146,11 +146,11 @@ bool FiffDigPointSet::readFromStream(FiffStream& stream, FiffDigPointSet& p_Dig)
             kind = isotrak[0]->dir[k].kind;
             pos = isotrak[0]->dir[k].pos;
             if (kind == FIFF_DIG_POINT) {
-                stream.read_tag(t_pTag, pos);
+                t_pTag = stream.read_tag(pos);
                 p_Dig.m_qListDigPoint.append(t_pTag->toDigPoint());
             } else if (kind == FIFF_MNE_COORD_FRAME) {
                 // Applies to every point of the block, as mne's _read_dig_fif
-                stream.read_tag(t_pTag, pos);
+                t_pTag = stream.read_tag(pos);
                 coord_frame = *t_pTag->toInt();
             }
         }

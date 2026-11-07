@@ -193,7 +193,7 @@ public:
      *
      * @return A vector with the matrix dimension info, or empty on error.
      */
-    static std::vector<int> fiff_get_matrix_sparse_dims(const FIFFLIB::FiffTag::UPtr& tag);
+    static std::vector<int> fiff_get_matrix_sparse_dims(const FIFFLIB::FiffTag& tag);
 
     /**
      * Conversion of tag data into the standard sparse representation.
@@ -202,7 +202,7 @@ public:
      *
      * @return A unique pointer to the newly constructed FiffSparseMatrix, or nullptr on error.
      */
-    static FiffSparseMatrix::UPtr fiff_get_float_sparse_matrix(const FIFFLIB::FiffTag::UPtr& tag);
+    static FiffSparseMatrix::UPtr fiff_get_float_sparse_matrix(const FIFFLIB::FiffTag& tag);
 
     //============================= mne_sparse_matop.c =============================
 

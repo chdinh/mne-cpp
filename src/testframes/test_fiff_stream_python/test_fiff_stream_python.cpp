@@ -194,8 +194,8 @@ void TestFiffStreamPython::sparseMatrices_data()
 void TestFiffStreamPython::sparseMatrices()
 {
     QFETCH(int, kind);
-    FiffTag::UPtr tag;
-    QVERIFY(m_stream->dirtree()->find_tag(*m_stream, kind, tag));
+    const std::optional<FiffTag> tag = m_stream->dirtree()->find_tag(*m_stream, kind);
+    QVERIFY(tag);
     QVERIFY(tag->isMatrix());
     const MatrixXd back = MatrixXd(tag->toSparseFloatMatrix());
     QCOMPARE(back.rows(), 3);
@@ -208,8 +208,8 @@ void TestFiffStreamPython::sparseMatrices()
 
 void TestFiffStreamPython::intMatrix()
 {
-    FiffTag::UPtr tag;
-    QVERIFY(m_stream->dirtree()->find_tag(*m_stream, FIFF_MNE_SOURCE_SPACE_TRIANGLES, tag));
+    const std::optional<FiffTag> tag = m_stream->dirtree()->find_tag(*m_stream, FIFF_MNE_SOURCE_SPACE_TRIANGLES);
+    QVERIFY(tag);
     MatrixXi expected(2, 3);
     expected << 1, 2, 3, 4, 5, 6;
     // Like the float decoders, toIntMatrix returns the transpose of the
@@ -254,8 +254,8 @@ void TestFiffStreamPython::projectors()
 
 void TestFiffStreamPython::coordTrans()
 {
-    FiffTag::UPtr tag;
-    QVERIFY(m_stream->dirtree()->find_tag(*m_stream, FIFF_COORD_TRANS, tag));
+    const std::optional<FiffTag> tag = m_stream->dirtree()->find_tag(*m_stream, FIFF_COORD_TRANS);
+    QVERIFY(tag);
     const FiffCoordTrans t = tag->toCoordTrans();
     QCOMPARE(t.from, static_cast<fiff_int_t>(FIFFV_COORD_DEVICE));
     QCOMPARE(t.to, static_cast<fiff_int_t>(FIFFV_COORD_HEAD));
@@ -373,17 +373,19 @@ void TestFiffStreamPython::attachesEnvironment()
     QVERIFY(r.open());
     const std::vector<FiffDirNode::SPtr> env = r.dirtree()->dir_tree_find(FIFFB_MNE_ENV);
     QCOMPARE(env.size(), 1);
-    FiffTag::UPtr tag;
-    QVERIFY(env[0]->find_tag(r, FIFF_MNE_ENV_WORKING_DIR, tag));
+    const auto workingDir = env[0]->find_tag(r, FIFF_MNE_ENV_WORKING_DIR);
+    QVERIFY(workingDir);
     // Strings are written as UTF-8: the tag holds the bytes, not the characters, of a non-ASCII path.
-    QCOMPARE(tag->toString(), QStringLiteral("/data/stüdy"));
-    QVERIFY(env[0]->find_tag(r, FIFF_MNE_ENV_COMMAND_LINE, tag));
-    QCOMPARE(tag->toString(), QString("mne_process --raw a.fif"));
+    QCOMPARE(workingDir->toString(), QStringLiteral("/data/stüdy"));
+    const auto commandLine = env[0]->find_tag(r, FIFF_MNE_ENV_COMMAND_LINE);
+    QVERIFY(commandLine);
+    QCOMPARE(commandLine->toString(), QString("mne_process --raw a.fif"));
     // The measurement block written before is still there.
     const std::vector<FiffDirNode::SPtr> meas = r.dirtree()->dir_tree_find(FIFFB_MEAS);
     QCOMPARE(meas.size(), 1);
-    QVERIFY(meas[0]->find_tag(r, FIFF_NCHAN, tag));
-    QCOMPARE(*tag->toInt(), 3);
+    const auto nchan = meas[0]->find_tag(r, FIFF_NCHAN);
+    QVERIFY(nchan);
+    QCOMPARE(*nchan->toInt(), 3);
     r.close();
 }
 
@@ -485,12 +487,12 @@ void TestFiffStreamPython::readsTagTypes()
     FiffStream stream(&file);
     QVERIFY(stream.open());
     auto tag = [&](int kind) {
-        FiffTag::UPtr t;
-        stream.dirtree()->find_tag(stream, kind, t);
+        std::optional<FiffTag> t;
+        t = stream.dirtree()->find_tag(stream, kind);
         return t;
     };
 
-    FiffTag::UPtr t = tag(901);
+    std::optional<FiffTag> t = tag(901);
     QVERIFY(t);
     QCOMPARE(t->toDouble()[0], 1.25);
     QCOMPARE(t->toDouble()[1], -2.5e-12);
@@ -507,13 +509,13 @@ void TestFiffStreamPython::readsTagTypes()
     QCOMPARE(t->toDauPack16()[0], qint16(-7));
     QCOMPARE(t->toDauPack16()[1], qint16(12345));
     // Complex and matrix payloads have no typed accessor; read the swapped data directly.
-    auto floats = [](const FiffTag::UPtr& x) {
-        return reinterpret_cast<const float*>(x->data());
+    auto floats = [](const FiffTag& x) {
+        return reinterpret_cast<const float*>(x.data());
     };
     t = tag(906);
-    QCOMPARE(floats(t)[0], 1.5f);
-    QCOMPARE(floats(t)[1], -2.0f);
-    QCOMPARE(floats(t)[3], 4.0f);
+    QCOMPARE(floats(*t)[0], 1.5f);
+    QCOMPARE(floats(*t)[1], -2.0f);
+    QCOMPARE(floats(*t)[3], 4.0f);
 
     // Dense matrices keep their trailing dimensions (ncol, nrow, ndim) in host order.
     qint32 ndim;
@@ -525,7 +527,7 @@ void TestFiffStreamPython::readsTagTypes()
     t = tag(908);
     QVERIFY(t->getMatrixDimensions(ndim, dims));
     QCOMPARE(dims, QVector<qint32>({2, 1}));
-    QCOMPARE(floats(t)[3], -4.0f);
+    QCOMPARE(floats(*t)[3], -4.0f);
 
     MatrixXd expected(4, 4);
     expected << 1, 0, 2, 0, 0, 0, 3, 4, 5, 0, 0, 6, 0, 7, 0, 0;
@@ -550,16 +552,16 @@ void TestFiffStreamPython::readsTagTypes()
         auto w = FiffStream::start_file(out);
         QVERIFY(w);
         for (int kind = 901; kind <= 910; ++kind)
-            w->write_tag(tag(kind));
+            w->write_tag(*tag(kind));
         w->end_file();
     }
     QFile copyFile(copyPath);
     FiffStream copy(&copyFile);
     QVERIFY(copy.open());
     for (int kind = 901; kind <= 910; ++kind) {
-        FiffTag::UPtr back;
-        QVERIFY(copy.dirtree()->find_tag(copy, kind, back));
-        const FiffTag::UPtr orig = tag(kind);
+        const std::optional<FiffTag> back = copy.dirtree()->find_tag(copy, kind);
+        QVERIFY(back);
+        const std::optional<FiffTag> orig = tag(kind);
         QVERIFY2(back->size() == orig->size() && std::memcmp(back->data(), orig->data(), static_cast<size_t>(orig->size())) == 0,
                  qPrintable(QStringLiteral("tag %1 changed in write_tag").arg(kind)));
     }
@@ -777,11 +779,11 @@ void TestFiffStreamPython::writesAnnotationsAndDevice()
     QFile packedBack(packedFile.fileName());
     FiffStream packedReader(&packedBack);
     QVERIFY(packedReader.open());
-    FiffTag::UPtr pack;
-    QVERIFY(packedReader.dirtree()->dir_tree_find(FIFFB_MEAS_INFO).front()->find_tag(packedReader, FIFF_DATA_PACK, pack));
+    const std::optional<FiffTag> pack = packedReader.dirtree()->dir_tree_find(FIFFB_MEAS_INFO).front()->find_tag(packedReader, FIFF_DATA_PACK);
+    QVERIFY(pack);
     QCOMPARE(*pack->toInt(), FIFFT_DAU_PACK16);
-    FiffTag::UPtr lineFreq;
-    QVERIFY(!packedReader.dirtree()->dir_tree_find(FIFFB_MEAS_INFO).front()->find_tag(packedReader, FIFF_LINE_FREQ, lineFreq));
+    const std::optional<FiffTag> lineFreq = packedReader.dirtree()->dir_tree_find(FIFFB_MEAS_INFO).front()->find_tag(packedReader, FIFF_LINE_FREQ);
+    QVERIFY(!lineFreq);
 }
 
 //=============================================================================================================

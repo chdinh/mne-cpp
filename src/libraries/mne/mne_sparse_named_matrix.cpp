@@ -35,14 +35,17 @@ std::unique_ptr<MNESparseNamedMatrix> MNESparseNamedMatrix::read(FiffStream& str
                                                                  int kind)
 {
     FiffDirNode::SPtr block;
-    FiffTag::UPtr tag;
+    std::optional<FiffTag> tag;
     if (node->type == FIFFB_MNE_NAMED_MATRIX) {
-        if (node->find_tag(stream, kind, tag)) {
+        if (tag = node->find_tag(stream, kind); tag) {
             block = node;
         }
     } else {
         for (const FiffDirNode::SPtr& child : node->children) {
-            if (child->type == FIFFB_MNE_NAMED_MATRIX && child->find_tag(stream, kind, tag)) {
+            if (child->type != FIFFB_MNE_NAMED_MATRIX) {
+                continue;
+            }
+            if (tag = child->find_tag(stream, kind); tag) {
                 block = child;
                 break;
             }
@@ -51,29 +54,29 @@ std::unique_ptr<MNESparseNamedMatrix> MNESparseNamedMatrix::read(FiffStream& str
     if (!block) {
         return nullptr;
     }
-    FiffSparseMatrix::UPtr data = FiffSparseMatrix::fiff_get_float_sparse_matrix(tag);
+    FiffSparseMatrix::UPtr data = FiffSparseMatrix::fiff_get_float_sparse_matrix(*tag);
     if (!data) {
         return nullptr;
     }
     auto matrix = std::make_unique<MNESparseNamedMatrix>();
     matrix->nrow = data->rows();
     matrix->ncol = data->cols();
-    if (block->find_tag(stream, FIFF_MNE_NROW, tag) && *tag->toInt() != matrix->nrow) {
+    if (const auto nrow = block->find_tag(stream, FIFF_MNE_NROW); nrow && *nrow->toInt() != matrix->nrow) {
         qCritical("MNESparseNamedMatrix::read - FIFF_MNE_NROW conflicts with the matrix data.");
         return nullptr;
     }
-    if (block->find_tag(stream, FIFF_MNE_NCOL, tag) && *tag->toInt() != matrix->ncol) {
+    if (const auto ncol = block->find_tag(stream, FIFF_MNE_NCOL); ncol && *ncol->toInt() != matrix->ncol) {
         qCritical("MNESparseNamedMatrix::read - FIFF_MNE_NCOL conflicts with the matrix data.");
         return nullptr;
     }
-    if (block->find_tag(stream, FIFF_MNE_ROW_NAMES, tag)) {
+    if (tag = block->find_tag(stream, FIFF_MNE_ROW_NAMES); tag) {
         matrix->rowlist = FiffStream::split_name_list(tag->toString());
         if (static_cast<int>(matrix->rowlist.size()) != matrix->nrow) {
             qCritical("MNESparseNamedMatrix::read - Incorrect number of entries in the row name list.");
             return nullptr;
         }
     }
-    if (block->find_tag(stream, FIFF_MNE_COL_NAMES, tag)) {
+    if (tag = block->find_tag(stream, FIFF_MNE_COL_NAMES); tag) {
         matrix->collist = FiffStream::split_name_list(tag->toString());
         if (static_cast<int>(matrix->collist.size()) != matrix->ncol) {
             qCritical("MNESparseNamedMatrix::read - Incorrect number of entries in the column name list.");

@@ -61,8 +61,8 @@ static int processFile(const QString& name, bool doMagnes, QString& summary)
 
     for (int k = 0; k < stream->nent(); k++) {
         if (stream->dir()[k].kind == FIFF_CH_INFO) {
-            FiffTag::UPtr tag;
-            stream->read_tag(tag, stream->dir()[k].pos);
+            std::optional<FiffTag> tag;
+            tag = stream->read_tag(stream->dir()[k].pos);
             FiffChInfo ch = tag->toChInfo();
 
             bool modified = false;

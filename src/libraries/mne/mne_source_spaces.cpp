@@ -325,10 +325,10 @@ bool MNESourceSpaces::read_source_space(FiffStream& stream, const FiffDirNode::S
 {
     p_Hemisphere.clear();
 
-    FiffTag::UPtr t_pTag;
+    std::optional<FiffTag> t_pTag;
 
     //=====================================================================
-    if (!p_Tree->find_tag(stream, FIFF_MNE_SOURCE_SPACE_ID, t_pTag))
+    if (t_pTag = p_Tree->find_tag(stream, FIFF_MNE_SOURCE_SPACE_ID); !t_pTag)
         p_Hemisphere.id = FIFFV_MNE_SURF_UNKNOWN;
     else
         p_Hemisphere.id = *t_pTag->toInt();
@@ -336,7 +336,7 @@ bool MNESourceSpaces::read_source_space(FiffStream& stream, const FiffDirNode::S
     //        qDebug() << "Read SourceSpace ID; type:" << t_pTag->getType() << "value:" << *t_pTag->toInt();
 
     //=====================================================================
-    if (!p_Tree->find_tag(stream, FIFF_MNE_SOURCE_SPACE_NPOINTS, t_pTag)) {
+    if (t_pTag = p_Tree->find_tag(stream, FIFF_MNE_SOURCE_SPACE_NPOINTS); !t_pTag) {
         stream.close();
         throw std::runtime_error("error: Number of vertices not found.");
     }
@@ -344,8 +344,8 @@ bool MNESourceSpaces::read_source_space(FiffStream& stream, const FiffDirNode::S
     p_Hemisphere.np = *t_pTag->toInt();
 
     //=====================================================================
-    if (!p_Tree->find_tag(stream, FIFF_BEM_SURF_NTRI, t_pTag)) {
-        if (!p_Tree->find_tag(stream, FIFF_MNE_SOURCE_SPACE_NTRI, t_pTag))
+    if (t_pTag = p_Tree->find_tag(stream, FIFF_BEM_SURF_NTRI); !t_pTag) {
+        if (t_pTag = p_Tree->find_tag(stream, FIFF_MNE_SOURCE_SPACE_NTRI); !t_pTag)
             p_Hemisphere.ntri = 0;
         else
             p_Hemisphere.ntri = *t_pTag->toInt();
@@ -355,7 +355,7 @@ bool MNESourceSpaces::read_source_space(FiffStream& stream, const FiffDirNode::S
     //        qDebug() << "Number of Tris; type:" << t_pTag->getType() << "value:" << *t_pTag->toInt();
 
     //=====================================================================
-    if (!p_Tree->find_tag(stream, FIFF_MNE_COORD_FRAME, t_pTag)) {
+    if (t_pTag = p_Tree->find_tag(stream, FIFF_MNE_COORD_FRAME); !t_pTag) {
         stream.close();
         throw std::runtime_error("Coordinate frame information not found.");
     }
@@ -366,7 +366,7 @@ bool MNESourceSpaces::read_source_space(FiffStream& stream, const FiffDirNode::S
     //
     //   Vertices, normals, and triangles
     //
-    if (!p_Tree->find_tag(stream, FIFF_MNE_SOURCE_SPACE_POINTS, t_pTag)) {
+    if (t_pTag = p_Tree->find_tag(stream, FIFF_MNE_SOURCE_SPACE_POINTS); !t_pTag) {
         stream.close();
         throw std::runtime_error("Vertex data not found.");
     }
@@ -382,7 +382,7 @@ bool MNESourceSpaces::read_source_space(FiffStream& stream, const FiffDirNode::S
     //        qDebug() << "Source Space Points; type:" << t_pTag->getType();
 
     //=====================================================================
-    if (!p_Tree->find_tag(stream, FIFF_MNE_SOURCE_SPACE_NORMALS, t_pTag)) {
+    if (t_pTag = p_Tree->find_tag(stream, FIFF_MNE_SOURCE_SPACE_NORMALS); !t_pTag) {
         stream.close();
         throw std::runtime_error("Vertex normals not found.");
     }
@@ -398,8 +398,8 @@ bool MNESourceSpaces::read_source_space(FiffStream& stream, const FiffDirNode::S
 
     //=====================================================================
     if (p_Hemisphere.ntri > 0) {
-        if (!p_Tree->find_tag(stream, FIFF_BEM_SURF_TRIANGLES, t_pTag)) {
-            if (!p_Tree->find_tag(stream, FIFF_MNE_SOURCE_SPACE_TRIANGLES, t_pTag)) {
+        if (t_pTag = p_Tree->find_tag(stream, FIFF_BEM_SURF_TRIANGLES); !t_pTag) {
+            if (t_pTag = p_Tree->find_tag(stream, FIFF_MNE_SOURCE_SPACE_TRIANGLES); !t_pTag) {
                 stream.close();
                 throw std::runtime_error("Triangulation not found.");
             } else {
@@ -422,14 +422,14 @@ bool MNESourceSpaces::read_source_space(FiffStream& stream, const FiffDirNode::S
     //
     //   Which vertices are active
     //
-    if (!p_Tree->find_tag(stream, FIFF_MNE_SOURCE_SPACE_NUSE, t_pTag)) {
+    if (t_pTag = p_Tree->find_tag(stream, FIFF_MNE_SOURCE_SPACE_NUSE); !t_pTag) {
         p_Hemisphere.nuse = 0;
         p_Hemisphere.inuse = VectorXi::Zero(p_Hemisphere.nuse);
         VectorXi p_defaultVector;
         p_Hemisphere.vertno = p_defaultVector;
     } else {
         p_Hemisphere.nuse = *t_pTag->toInt();
-        if (!p_Tree->find_tag(stream, FIFF_MNE_SOURCE_SPACE_SELECTION, t_pTag)) {
+        if (t_pTag = p_Tree->find_tag(stream, FIFF_MNE_SOURCE_SPACE_SELECTION); !t_pTag) {
             stream.close();
             throw std::runtime_error("Source selection information missing.");
         }
@@ -453,9 +453,11 @@ bool MNESourceSpaces::read_source_space(FiffStream& stream, const FiffDirNode::S
     //
     //   Use triangulation
     //
-    FiffTag::UPtr t_pTag1;
-    FiffTag::UPtr t_pTag2;
-    if (!p_Tree->find_tag(stream, FIFF_MNE_SOURCE_SPACE_NUSE_TRI, t_pTag1) || !p_Tree->find_tag(stream, FIFF_MNE_SOURCE_SPACE_USE_TRIANGLES, t_pTag2)) {
+    std::optional<FiffTag> t_pTag1;
+    std::optional<FiffTag> t_pTag2;
+    t_pTag1 = p_Tree->find_tag(stream, FIFF_MNE_SOURCE_SPACE_NUSE_TRI);
+    t_pTag2 = t_pTag1 ? p_Tree->find_tag(stream, FIFF_MNE_SOURCE_SPACE_USE_TRIANGLES) : std::nullopt;
+    if (!t_pTag1 || !t_pTag2) {
         MatrixX3i p_defaultMatrix;
         p_Hemisphere.nuse_tri = 0;
         p_Hemisphere.use_itris = p_defaultMatrix;
@@ -469,7 +471,9 @@ bool MNESourceSpaces::read_source_space(FiffStream& stream, const FiffDirNode::S
     //
     //   Patch-related information
     //
-    if (!p_Tree->find_tag(stream, FIFF_MNE_SOURCE_SPACE_NEAREST, t_pTag1) || !p_Tree->find_tag(stream, FIFF_MNE_SOURCE_SPACE_NEAREST_DIST, t_pTag2)) {
+    t_pTag1 = p_Tree->find_tag(stream, FIFF_MNE_SOURCE_SPACE_NEAREST);
+    t_pTag2 = t_pTag1 ? p_Tree->find_tag(stream, FIFF_MNE_SOURCE_SPACE_NEAREST_DIST) : std::nullopt;
+    if (!t_pTag1 || !t_pTag2) {
         p_Hemisphere.nearest.clear();
     } else {
         //res.nearest = tag1.data + 1;
@@ -484,11 +488,13 @@ bool MNESourceSpaces::read_source_space(FiffStream& stream, const FiffDirNode::S
     //
     // Distances
     //
-    if (!p_Tree->find_tag(stream, FIFF_MNE_SOURCE_SPACE_DIST, t_pTag1) || !p_Tree->find_tag(stream, FIFF_MNE_SOURCE_SPACE_DIST_LIMIT, t_pTag2)) {
+    t_pTag1 = p_Tree->find_tag(stream, FIFF_MNE_SOURCE_SPACE_DIST);
+    t_pTag2 = t_pTag1 ? p_Tree->find_tag(stream, FIFF_MNE_SOURCE_SPACE_DIST_LIMIT) : std::nullopt;
+    if (!t_pTag1 || !t_pTag2) {
         p_Hemisphere.dist = FiffSparseMatrix();
         p_Hemisphere.dist_limit = 0;
     } else {
-        auto dist_lower = FiffSparseMatrix::fiff_get_float_sparse_matrix(t_pTag1);
+        auto dist_lower = FiffSparseMatrix::fiff_get_float_sparse_matrix(*t_pTag1);
         if (dist_lower) {
             auto dist_full = dist_lower->mne_add_upper_triangle_rcs();
             if (dist_full) {

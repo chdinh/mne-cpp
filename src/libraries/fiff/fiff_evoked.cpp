@@ -239,7 +239,7 @@ Expected<FiffEvoked> FiffEvokedFile::read(int set, const FiffEvoked::Baseline& b
     float sfreq = -1.0f;
     QList<FiffChInfo> chs;
     fiff_int_t tag_kind, pos, first = 0, last = 0;
-    FiffTag::UPtr t_pTag;
+    std::optional<FiffTag> t_pTag;
     QString comment("");
     qint32 k;
     for (k = 0; k < my_evoked->nent(); ++k) {
@@ -247,27 +247,27 @@ Expected<FiffEvoked> FiffEvokedFile::read(int set, const FiffEvoked::Baseline& b
         pos = my_evoked->dir[k].pos;
         switch (tag_kind) {
             case FIFF_COMMENT:
-                m_stream.read_tag(t_pTag, pos);
+                t_pTag = m_stream.read_tag(pos);
                 comment = QString::fromStdString(t_pTag->toString());
                 break;
             case FIFF_FIRST_SAMPLE:
-                m_stream.read_tag(t_pTag, pos);
+                t_pTag = m_stream.read_tag(pos);
                 first = *t_pTag->toInt();
                 break;
             case FIFF_LAST_SAMPLE:
-                m_stream.read_tag(t_pTag, pos);
+                t_pTag = m_stream.read_tag(pos);
                 last = *t_pTag->toInt();
                 break;
             case FIFF_NCHAN:
-                m_stream.read_tag(t_pTag, pos);
+                t_pTag = m_stream.read_tag(pos);
                 nchan = *t_pTag->toInt();
                 break;
             case FIFF_SFREQ:
-                m_stream.read_tag(t_pTag, pos);
+                t_pTag = m_stream.read_tag(pos);
                 sfreq = *t_pTag->toFloat();
                 break;
             case FIFF_CH_INFO:
-                m_stream.read_tag(t_pTag, pos);
+                t_pTag = m_stream.read_tag(pos);
                 chs.append(t_pTag->toChInfo());
                 break;
         }
@@ -309,19 +309,19 @@ Expected<FiffEvoked> FiffEvokedFile::read(int set, const FiffEvoked::Baseline& b
 
         switch (tag_kind) {
             case FIFF_COMMENT:
-                m_stream.read_tag(t_pTag, pos);
+                t_pTag = m_stream.read_tag(pos);
                 comment = QString::fromStdString(t_pTag->toString());
                 break;
             case FIFF_ASPECT_KIND:
-                m_stream.read_tag(t_pTag, pos);
+                t_pTag = m_stream.read_tag(pos);
                 aspect_kind = *t_pTag->toInt();
                 break;
             case FIFF_NAVE:
-                m_stream.read_tag(t_pTag, pos);
+                t_pTag = m_stream.read_tag(pos);
                 nave = *t_pTag->toInt();
                 break;
             case FIFF_EPOCH:
-                m_stream.read_tag(t_pTag, pos);
+                t_pTag = m_stream.read_tag(pos);
                 epoch.append(FiffTag(*t_pTag));
                 break;
         }

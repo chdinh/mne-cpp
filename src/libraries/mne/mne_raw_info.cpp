@@ -140,7 +140,7 @@ int MNERawInfo::get_meas_info(FiffStream& stream,
                               FiffCoordTrans& trans,
                               FiffTime& start_time)
 {
-    FiffTag::UPtr t_pTag;
+    std::optional<FiffTag> t_pTag;
     QList<FiffChInfo> ch;
     FiffChInfo this_ch;
     FiffCoordTrans t;
@@ -158,12 +158,12 @@ int MNERawInfo::get_meas_info(FiffStream& stream,
     /*
         * Find desired parents
         */
-    if (!(meas = find_meas(node))) {
+    if (meas = find_meas(node); !meas) {
         qCritical("Meas. block not found!");
         return (-1);
     }
 
-    if (!(meas_info = find_meas_info(node))) {
+    if (meas_info = find_meas_info(node); !meas_info) {
         qCritical("Meas. info not found!");
         return (-1);
     }
@@ -187,7 +187,7 @@ int MNERawInfo::get_meas_info(FiffStream& stream,
         pos = meas_info->dir[k].pos;
         switch (kind) {
             case FIFF_NCHAN:
-                if (!stream.read_tag(t_pTag, pos))
+                if (t_pTag = stream.read_tag(pos); !t_pTag)
                     return (-1);
                 *nchan = *t_pTag->toInt();
 
@@ -199,28 +199,28 @@ int MNERawInfo::get_meas_info(FiffStream& stream,
                 break;
 
             case FIFF_SFREQ:
-                if (!stream.read_tag(t_pTag, pos))
+                if (t_pTag = stream.read_tag(pos); !t_pTag)
                     return (-1);
                 *sfreq = *t_pTag->toFloat();
                 to_find--;
                 break;
 
             case FIFF_LOWPASS:
-                if (!stream.read_tag(t_pTag, pos))
+                if (t_pTag = stream.read_tag(pos); !t_pTag)
                     return (-1);
                 *lowpass = *t_pTag->toFloat();
                 to_find--;
                 break;
 
             case FIFF_HIGHPASS:
-                if (!stream.read_tag(t_pTag, pos))
+                if (t_pTag = stream.read_tag(pos); !t_pTag)
                     return (-1);
                 *highpass = *t_pTag->toFloat();
                 to_find--;
                 break;
 
             case FIFF_CH_INFO:
-                if (!stream.read_tag(t_pTag, pos))
+                if (t_pTag = stream.read_tag(pos); !t_pTag)
                     return (-1);
 
                 this_ch = t_pTag->toChInfo();
@@ -233,7 +233,7 @@ int MNERawInfo::get_meas_info(FiffStream& stream,
                 break;
 
             case FIFF_MEAS_DATE:
-                if (!stream.read_tag(t_pTag, pos))
+                if (t_pTag = stream.read_tag(pos); !t_pTag)
                     return (-1);
                 {
                     const FiffTime* pTime = reinterpret_cast<const FiffTime*>(t_pTag->data());
@@ -243,9 +243,9 @@ int MNERawInfo::get_meas_info(FiffStream& stream,
                 break;
 
             case FIFF_COORD_TRANS:
-                if (!stream.read_tag(t_pTag, pos))
+                if (t_pTag = stream.read_tag(pos); !t_pTag)
                     return (-1);
-                t = FiffCoordTrans::from_tag(t_pTag);
+                t = FiffCoordTrans::from_tag(*t_pTag);
                 /*
                 * Require this particular transform!
                 */
@@ -264,9 +264,9 @@ int MNERawInfo::get_meas_info(FiffStream& stream,
     if (hpi.size() > 0 && trans.is_empty())
         for (k = 0; k < hpi[0]->nent(); k++)
             if (hpi[0]->dir[k].kind == FIFF_COORD_TRANS) {
-                if (!stream.read_tag(t_pTag, hpi[0]->dir[k].pos))
+                if (t_pTag = stream.read_tag(hpi[0]->dir[k].pos); !t_pTag)
                     return (-1);
-                t = FiffCoordTrans::from_tag(t_pTag);
+                t = FiffCoordTrans::from_tag(*t_pTag);
                 if (t.from == FIFFV_COORD_DEVICE && t.to == FIFFV_COORD_HEAD) {
                     trans = t;
                     break;

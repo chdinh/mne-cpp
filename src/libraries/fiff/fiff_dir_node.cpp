@@ -91,12 +91,12 @@ bool FiffDirNode::copy_tree(FiffStream& source, const FiffId& in_id, std::span<c
 
             // Copy the tag verbatim; read_tag and write_tag reproduce its bytes
             source.setLittleEndian(false);
-            FiffTag::UPtr tag;
-            if (!source.read_tag(tag, p_Nodes[k]->dir[p].pos))
+            std::optional<FiffTag> tag;
+            if (tag = source.read_tag(p_Nodes[k]->dir[p].pos); !tag)
                 return false;
             tag->next = FIFFV_NEXT_SEQ;
             target.setLittleEndian(false);
-            target.write_tag(tag);
+            target.write_tag(*tag);
         }
         for (p = 0; p < p_Nodes[k]->nchild(); ++p) {
             FiffDirNode::copy_tree(source, in_id, std::span(&p_Nodes[k]->children[p], 1), target);
@@ -129,18 +129,10 @@ void FiffDirNode::collect(fiff_int_t kind, std::vector<SPtr>& found)
 
 //=============================================================================================================
 
-bool FiffDirNode::find_tag(FiffStream& stream, fiff_int_t findkind, FiffTag::UPtr& p_pTag) const
+std::optional<FiffTag> FiffDirNode::find_tag(FiffStream& stream, fiff_int_t findkind) const
 {
-    for (qint32 p = 0; p < this->nent(); ++p) {
-        if (this->dir[p].kind == findkind) {
-            stream.read_tag(p_pTag, this->dir[p].pos);
-            return true;
-        }
-    }
-    if (p_pTag)
-        p_pTag.reset();
-
-    return false;
+    const auto entry = std::ranges::find(dir, findkind, &FiffDirEntry::kind);
+    return entry != dir.end() ? stream.read_tag(entry->pos) : std::nullopt;
 }
 
 //=============================================================================================================
@@ -218,5 +210,5 @@ fiff_int_t FiffDirNode::nent() const
 
 fiff_int_t FiffDirNode::nchild() const
 {
-    return children.size();
+    return static_cast<fiff_int_t>(children.size());
 }

@@ -140,27 +140,27 @@ bool MriCorFifIO::write(const std::string& fileName,
         stream->write_int(FIFF_MRI_PIXEL_ENCODING, &encoding);
 
         // Pixel data
-        auto pixelTag = std::make_unique<FiffTag>();
-        pixelTag->kind = FIFF_MRI_PIXEL_DATA;
+        FiffTag pixelTag;
+        pixelTag.kind = FIFF_MRI_PIXEL_DATA;
 
         int nPixels = slice.width * slice.height;
         switch (slice.pixelFormat) {
             case FIFFV_MRI_PIXEL_BYTE: {
-                pixelTag->type = FIFFT_BYTE;
-                pixelTag->resize(nPixels);
-                memcpy(pixelTag->data(), slice.pixels.data(), nPixels);
+                pixelTag.type = FIFFT_BYTE;
+                pixelTag.resize(nPixels);
+                memcpy(pixelTag.data(), slice.pixels.data(), nPixels);
                 break;
             }
             case FIFFV_MRI_PIXEL_WORD: {
-                pixelTag->type = FIFFT_USHORT;
-                pixelTag->resize(nPixels * 2);
-                memcpy(pixelTag->data(), slice.pixelsWord.data(), nPixels * 2);
+                pixelTag.type = FIFFT_USHORT;
+                pixelTag.resize(nPixels * 2);
+                memcpy(pixelTag.data(), slice.pixelsWord.data(), nPixels * 2);
                 break;
             }
             case FIFFV_MRI_PIXEL_FLOAT: {
-                pixelTag->type = FIFFT_FLOAT;
-                pixelTag->resize(nPixels * 4);
-                memcpy(pixelTag->data(), slice.pixelsFloat.data(), nPixels * 4);
+                pixelTag.type = FIFFT_FLOAT;
+                pixelTag.resize(nPixels * 4);
+                memcpy(pixelTag.data(), slice.pixelsFloat.data(), nPixels * 4);
                 break;
             }
         }

@@ -209,7 +209,7 @@ bool FiffRawData::read_raw_segment(MatrixXd& data,
 
     MatrixXd one, newData, tmp_data;
     FiffRawDir thisRawDir;
-    FiffTag::UPtr t_pTag;
+    std::optional<FiffTag> t_pTag;
     fiff_int_t first_pick, last_pick, picksamp;
     for (k = 0; k < this->rawdir.size(); ++k) {
         thisRawDir = this->rawdir[k];
@@ -230,7 +230,7 @@ bool FiffRawData::read_raw_segment(MatrixXd& data,
 
                 one.setZero();
             } else {
-                fid.read_tag(t_pTag, thisRawDir.ent.pos);
+                t_pTag = fid.read_tag(thisRawDir.ent.pos);
                 //
                 //   Depending on the state of the projection and selection
                 //   we proceed a little bit differently
@@ -531,8 +531,8 @@ bool FiffRawData::read_raw_segment(MatrixXd& data,
 
                 one.setZero();
             } else {
-                FiffTag::UPtr t_pTag;
-                fid.read_tag(t_pTag, thisRawDir.ent.pos);
+                std::optional<FiffTag> t_pTag;
+                t_pTag = fid.read_tag(thisRawDir.ent.pos);
                 //
                 //   Depending on the state of the projection and selection
                 //   we proceed a little bit differently

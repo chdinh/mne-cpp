@@ -489,7 +489,7 @@ public:
      *
      * @return The coordinate transform, or an empty transform if the tag is invalid.
      */
-    static FiffCoordTrans from_tag(const std::unique_ptr<FiffTag>& tag);
+    static FiffCoordTrans from_tag(const FiffTag& tag);
 
     //========================================================================================================
     /**

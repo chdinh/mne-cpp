@@ -273,7 +273,7 @@ std::unique_ptr<MNEProjOp> MNEProjOp::read_from_node(FiffStream& stream, const F
     int item_kind;
     int item_nvec;
     int item_active;
-    FiffTag::UPtr t_pTag;
+    std::optional<FiffTag> t_pTag;
 
     if (!start || start->is_empty())
         start_node = stream.dirtree();
@@ -294,7 +294,7 @@ std::unique_ptr<MNEProjOp> MNEProjOp::read_from_node(FiffStream& stream, const F
         * Get a common number of channels
         */
     node = proj[0];
-    if (!node->find_tag(stream, FIFF_NCHAN, t_pTag))
+    if (t_pTag = node->find_tag(stream, FIFF_NCHAN); !t_pTag)
         global_nchan = 0;
     else {
         global_nchan = *t_pTag->toInt();
@@ -310,14 +310,14 @@ std::unique_ptr<MNEProjOp> MNEProjOp::read_from_node(FiffStream& stream, const F
         */
         item_desc.clear();
 
-        if (node->find_tag(stream, FIFF_NAME, t_pTag)) {
+        if (t_pTag = node->find_tag(stream, FIFF_NAME); t_pTag) {
             item_desc += t_pTag->toString();
         }
 
         /*
             * Take the first line of description if it exists
             */
-        if (node->find_tag(stream, FIFF_DESCRIPTION, t_pTag)) {
+        if (t_pTag = node->find_tag(stream, FIFF_DESCRIPTION); t_pTag) {
             desc_tag = QString::fromStdString(t_pTag->toString());
             int pos;
             if ((pos = desc_tag.indexOf("\n")) >= 0)
@@ -329,7 +329,7 @@ std::unique_ptr<MNEProjOp> MNEProjOp::read_from_node(FiffStream& stream, const F
         /*
         * Possibility to override number of channels here
         */
-        if (!node->find_tag(stream, FIFF_NCHAN, t_pTag)) {
+        if (t_pTag = node->find_tag(stream, FIFF_NCHAN); !t_pTag) {
             item_nchan = global_nchan;
         } else {
             item_nchan = *t_pTag->toInt();
@@ -341,7 +341,7 @@ std::unique_ptr<MNEProjOp> MNEProjOp::read_from_node(FiffStream& stream, const F
         /*
             * Take care of the channel names
             */
-        if (!node->find_tag(stream, FIFF_PROJ_ITEM_CH_NAME_LIST, t_pTag)) {
+        if (t_pTag = node->find_tag(stream, FIFF_PROJ_ITEM_CH_NAME_LIST); !t_pTag) {
             return nullptr;
         }
 
@@ -355,21 +355,21 @@ std::unique_ptr<MNEProjOp> MNEProjOp::read_from_node(FiffStream& stream, const F
         /*
             * Kind of item
             */
-        if (!node->find_tag(stream, FIFF_PROJ_ITEM_KIND, t_pTag)) {
+        if (t_pTag = node->find_tag(stream, FIFF_PROJ_ITEM_KIND); !t_pTag) {
             return nullptr;
         }
         item_kind = *t_pTag->toInt();
         /*
             * How many vectors
             */
-        if (!node->find_tag(stream, FIFF_PROJ_ITEM_NVEC, t_pTag)) {
+        if (t_pTag = node->find_tag(stream, FIFF_PROJ_ITEM_NVEC); !t_pTag) {
             return nullptr;
         }
         item_nvec = *t_pTag->toInt();
         /*
             * The projection data
             */
-        if (!node->find_tag(stream, FIFF_PROJ_ITEM_VECTORS, t_pTag)) {
+        if (t_pTag = node->find_tag(stream, FIFF_PROJ_ITEM_VECTORS); !t_pTag) {
             return nullptr;
         }
 
@@ -378,7 +378,7 @@ std::unique_ptr<MNEProjOp> MNEProjOp::read_from_node(FiffStream& stream, const F
         /*
             * Is this item active?
             */
-        if (node->find_tag(stream, FIFF_MNE_PROJ_ITEM_ACTIVE, t_pTag)) {
+        if (t_pTag = node->find_tag(stream, FIFF_MNE_PROJ_ITEM_ACTIVE); t_pTag) {
             item_active = *t_pTag->toInt();
         } else
             item_active = false;

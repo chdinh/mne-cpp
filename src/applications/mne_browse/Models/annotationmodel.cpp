@@ -789,8 +789,8 @@ bool AnnotationModel::loadAnnotationFif(QFile& qFile)
 
     for (int entryIndex = 0; entryIndex < annotationBlocks.front()->nent(); ++entryIndex) {
         const auto& directoryEntry = annotationBlocks.front()->dir.at(entryIndex);
-        FIFFLIB::FiffTag::UPtr tag;
-        if (!stream.read_tag(tag, directoryEntry.pos) || !tag) {
+        std::optional<FIFFLIB::FiffTag> tag;
+        if (tag = stream.read_tag(directoryEntry.pos); !tag) {
             continue;
         }
 

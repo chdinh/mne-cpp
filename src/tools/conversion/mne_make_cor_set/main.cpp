@@ -141,11 +141,11 @@ static bool writeMriDescription(const QString& filename,
                              static_cast<int>(slices[k].size()));
 
         // Write as FIFF_MRI_PIXEL_DATA
-        auto tag = std::make_unique<FiffTag>();
-        tag->kind = FIFF_MRI_PIXEL_DATA;
-        tag->type = FIFFT_BYTE;
-        tag->resize(sliceData.size());
-        memcpy(tag->data(), sliceData.constData(), sliceData.size());
+        FiffTag tag;
+        tag.kind = FIFF_MRI_PIXEL_DATA;
+        tag.type = FIFFT_BYTE;
+        tag.resize(sliceData.size());
+        memcpy(tag.data(), sliceData.constData(), sliceData.size());
         stream->write_tag(tag);
     }
 

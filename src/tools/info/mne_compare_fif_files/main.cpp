@@ -147,9 +147,12 @@ int main(int argc, char* argv[])
     int minEntries = static_cast<int>(std::min(dir1.size(), dir2.size()));
 
     for (int i = 0; i < minEntries; ++i) {
-        FiffTag::UPtr tag1, tag2;
-        stream1.read_tag(tag1, dir1[i].pos);
-        stream2.read_tag(tag2, dir2[i].pos);
+        // The directory ends with an entry that marks its end, not a tag.
+        if (dir1[i].pos < 0 && dir2[i].pos < 0) {
+            continue;
+        }
+        const std::optional<FiffTag> tag1 = stream1.read_tag(dir1[i].pos);
+        const std::optional<FiffTag> tag2 = stream2.read_tag(dir2[i].pos);
 
         bool kindMatch = (dir1[i].kind == dir2[i].kind);
         bool typeMatch = (dir1[i].type == dir2[i].type);

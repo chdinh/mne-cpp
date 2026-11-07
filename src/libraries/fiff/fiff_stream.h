@@ -72,6 +72,7 @@
 #include <filesystem>
 #include <memory>
 #include <string>
+#include <optional>
 #include <vector>
 
 //=============================================================================================================
@@ -491,51 +492,42 @@ public:
 
     //=========================================================================================================
     /**
-     * Read tag data from a fif file.
-     * if pos is not provided, reading starts from the current file position
+     * Reads the payload of a tag whose header read_tag_info() has read.
      *
-     * @param[out] p_pTag the read tag.
-     * @param[in] pos position of the tag inside the fif file.
+     * @param[in, out] tag   The tag; its payload is filled in, in host byte order.
+     * @param[in] pos        Where the payload starts, or -1 for the current position.
      *
-     * @return true if succeeded, false otherwise.
+     * @return Whether the payload could be read.
      */
-    bool read_tag_data(std::unique_ptr<FiffTag>& p_pTag, fiff_long_t pos = -1);
+    bool read_tag_data(FiffTag& tag, fiff_long_t pos = -1);
 
     //=========================================================================================================
     /**
-     * Read tag information of one tag from a fif file.
-     * if pos is not provided, reading starts from the current file position
+     * Reads the header of the tag at the current position.
      *
-     * @param[out] p_pTag the read tag info.
-     * @param[in] p_bDoSkip if true it skips the data of the tag (optional, default = true).
+     * @param[in] skip   Move on to the next tag instead of stopping at the payload.
      *
-     * @return the position where the tag info was read from.
+     * @return The tag with its size but without payload, or nothing if the stream ends.
      */
-    fiff_long_t read_tag_info(std::unique_ptr<FiffTag>& p_pTag, bool p_bDoSkip = true);
+    [[nodiscard]] std::optional<FiffTag> read_tag_info(bool skip = true);
 
     //=========================================================================================================
     /**
-     * Read one tag from a fif real-time stream.
-     * difference to the other read tag functions is: that this function has blocking behaviour (waitForReadyRead)
+     * Reads the next tag of a real-time stream, waiting until it has arrived.
      *
-     * @param[out] p_pTag the read tag.
-     *
-     * @return true if succeeded, false otherwise.
+     * @return The tag, or nothing if it cannot be read.
      */
-    bool read_rt_tag(std::unique_ptr<FiffTag>& p_pTag);
+    [[nodiscard]] std::optional<FiffTag> read_rt_tag();
 
     //=========================================================================================================
     /**
-     * Read one tag from a fif file.
-     * if pos is not provided, reading starts from the current file position
+     * Reads one tag, with its payload in host byte order.
      *
-     * @param[out] p_pTag the read tag.
-     * @param[in] pos position of the tag inside the fif file.
+     * @param[in] pos   Where the tag starts, or -1 for the current position.
      *
-     * @return true if succeeded, false otherwise.
+     * @return The tag, or nothing if it cannot be read.
      */
-    bool read_tag(std::unique_ptr<FiffTag>& p_pTag,
-                  fiff_long_t pos = -1);
+    [[nodiscard]] std::optional<FiffTag> read_tag(fiff_long_t pos = -1);
 
     //=========================================================================================================
     /**
@@ -679,15 +671,14 @@ public:
 
     //=========================================================================================================
     /**
-     * Write one tag to file including its data
-     * Data is not written if it is nullptr. The payload is taken in host byte order (as read_tag returns it).
+     * Writes one tag; its payload is taken in host byte order, as read_tag() returns it.
      *
-     * @param[in] p_pTag     Tag to write;.
-     * @param[in] pos        the position where the entires should be written to (default -1, i.e. end of the file).
+     * @param[in] tag   The tag.
+     * @param[in] pos   Where to write it, or -1 for the end of the file.
      *
-     * @return the position where the tag struct was written to.
+     * @return The position the tag was written to.
      */
-    fiff_long_t write_tag(const std::unique_ptr<FiffTag>& p_pTag, fiff_long_t pos = -1);
+    fiff_long_t write_tag(const FiffTag& tag, fiff_long_t pos = -1);
 
     //=========================================================================================================
     /**
@@ -1033,13 +1024,11 @@ private:
 
     //=========================================================================================================
     /**
-     * Check that the file starts properly.
+     * Reads the file id tag a FIFF file starts with.
      *
-     * @param[out] p_pTag     The tag containing the beginning.
-     *
-     * @return true if beginning is correct, false otherwise.
+     * @return The tag, or nothing if the file does not start with one.
      */
-    bool check_beginning(std::unique_ptr<FiffTag>& p_pTag);
+    [[nodiscard]] std::optional<FiffTag> check_beginning();
 
     //=========================================================================================================
     /**

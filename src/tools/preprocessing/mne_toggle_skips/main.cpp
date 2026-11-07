@@ -85,8 +85,8 @@ int main(int argc, char* argv[])
     for (std::size_t i = 0; i < dirEntries.size(); ++i) {
         if (dirEntries[i].kind == FIFF_DATA_SKIP) {
             // Read the tag
-            std::unique_ptr<FiffTag> tag;
-            if (!stream->read_tag(tag, dirEntries[i].pos)) {
+            std::optional<FiffTag> tag;
+            if (tag = stream->read_tag(dirEntries[i].pos); !tag) {
                 qWarning("Cannot read tag at position %lld, skipping.",
                          static_cast<long long>(dirEntries[i].pos));
                 continue;

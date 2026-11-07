@@ -13,6 +13,8 @@
 //=============================================================================================================
 
 #include <QtTest/QtTest>
+#include <ranges>
+
 #include <QFile>
 #include <QDir>
 #include <Eigen/Dense>
@@ -494,11 +496,9 @@ private slots:
         QVERIFY(bemSolBlocks.size() > 0 || stream.dir().size() > 0);
 
         // Read tags to exercise parsing
-        int nTags = qMin((int)stream.dir().size(), 50);
-        for (int i = 0; i < nTags; ++i) {
-            FiffTag::UPtr tag;
-            stream.read_tag(tag, stream.dir()[i].pos);
-            QVERIFY(tag != nullptr);
+        for (const FiffDirEntry& entry : stream.dir() | std::views::take(50)) {
+            if (entry.pos >= 0)
+                QVERIFY(stream.read_tag(entry.pos));
         }
 
         stream.close();

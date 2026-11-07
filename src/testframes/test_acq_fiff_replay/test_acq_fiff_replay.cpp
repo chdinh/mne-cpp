@@ -136,12 +136,12 @@ bool writeFixture(const QString& path, fiff_int_t type, fiff_int_t lastType = -1
             out->write_int(FIFF_DATA_SKIP, &one);
             continue;
         }
-        auto tag = std::make_unique<FiffTag>();
-        tag->kind = FIFF_DATA_BUFFER;
-        tag->type = type;
-        tag->next = FIFFV_NEXT_SEQ;
-        tag->resize(kBuffer * kChannels * size);
-        char* at = tag->data();
+        FiffTag tag;
+        tag.kind = FIFF_DATA_BUFFER;
+        tag.type = type;
+        tag.next = FIFFV_NEXT_SEQ;
+        tag.resize(kBuffer * kChannels * size);
+        char* at = tag.data();
         for (int s = b * kBuffer; s < (b + 1) * kBuffer; ++s) {
             for (int c = 0; c < kChannels; ++c, at += size) {
                 const double v = storedValue(type, s, c);

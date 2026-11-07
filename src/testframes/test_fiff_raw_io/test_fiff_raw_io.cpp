@@ -146,12 +146,12 @@ private slots:
         stream.open();
 
         // Read first few tags from directory
-        int nTags = qMin((int)stream.dir().size(), 20);
-        for (int i = 0; i < nTags; ++i) {
-            FiffTag::UPtr tag;
-            stream.read_tag(tag, stream.dir()[i].pos);
-            QVERIFY(tag != nullptr);
-            QVERIFY(tag->kind > 0 || tag->kind == 0);
+        for (const FiffDirEntry& entry : stream.dir() | std::views::take(20)) {
+            if (entry.pos < 0)
+                continue;
+            const auto tag = stream.read_tag(entry.pos);
+            QVERIFY(tag);
+            QCOMPARE(tag->kind, entry.kind);
         }
 
         stream.close();
@@ -458,9 +458,8 @@ private slots:
         // Read tags to find FIFF_COORD_TRANS
         for (std::size_t i = 0; i < stream.dir().size(); ++i) {
             if (stream.dir()[i].kind == FIFF_COORD_TRANS) {
-                FiffTag::UPtr tag;
-                stream.read_tag(tag, stream.dir()[i].pos);
-                QVERIFY(tag != nullptr);
+                const auto tag = stream.read_tag(stream.dir()[i].pos);
+                QVERIFY(tag);
                 FiffCoordTrans trans = tag->toCoordTrans();
                 QVERIFY(trans.from >= 0);
                 QVERIFY(trans.to >= 0);
@@ -487,8 +486,7 @@ private slots:
 
         for (std::size_t i = 0; i < stream.dir().size(); ++i) {
             if (stream.dir()[i].kind == FIFF_COORD_TRANS) {
-                FiffTag::UPtr tag;
-                stream.read_tag(tag, stream.dir()[i].pos);
+                const auto tag = stream.read_tag(stream.dir()[i].pos);
                 FiffCoordTrans trans = tag->toCoordTrans();
 
                 // Test operations on the transform
@@ -548,10 +546,9 @@ private slots:
 
         // Read specific tags from measurement info
         if (measInfo.size() > 0) {
-            FiffTag::UPtr tag;
-            for (std::size_t i = 0; i < measInfo[0]->dir.size(); ++i) {
-                stream.read_tag(tag, measInfo[0]->dir[i].pos);
-                QVERIFY(tag != nullptr);
+            for (const FiffDirEntry& entry : measInfo[0]->dir) {
+                const auto tag = stream.read_tag(entry.pos);
+                QVERIFY(tag);
                 if (tag->kind == FIFF_SFREQ) {
                     float sfreq = *tag->toFloat();
                     QVERIFY(sfreq > 0);
@@ -634,10 +631,9 @@ private slots:
 
         // Read tags from first source space
         if (srcBlocks.size() > 0) {
-            FiffTag::UPtr tag;
-            for (int i = 0; i < qMin((int)srcBlocks[0]->dir.size(), 30); ++i) {
-                stream.read_tag(tag, srcBlocks[0]->dir[i].pos);
-                QVERIFY(tag != nullptr);
+            for (const FiffDirEntry& entry : srcBlocks[0]->dir | std::views::take(30)) {
+                const auto tag = stream.read_tag(entry.pos);
+                QVERIFY(tag);
             }
         }
 

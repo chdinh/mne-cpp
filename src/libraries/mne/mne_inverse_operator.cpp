@@ -937,8 +937,8 @@ bool MNEInverseOperator::read_inverse_operator(QIODevice& p_IODevice, MNEInverse
     //
     //   Methods and source orientations
     //
-    FiffTag::UPtr t_pTag;
-    if (!invs->find_tag(t_pStream, FIFF_MNE_INCLUDED_METHODS, t_pTag)) {
+    std::optional<FiffTag> t_pTag;
+    if (t_pTag = invs->find_tag(t_pStream, FIFF_MNE_INCLUDED_METHODS); !t_pTag) {
         qCritical("Modalities not found\n");
         return false;
     }
@@ -946,13 +946,13 @@ bool MNEInverseOperator::read_inverse_operator(QIODevice& p_IODevice, MNEInverse
     inv = MNEInverseOperator();
     inv.methods = *t_pTag->toInt();
     //
-    if (!invs->find_tag(t_pStream, FIFF_MNE_SOURCE_ORIENTATION, t_pTag)) {
+    if (t_pTag = invs->find_tag(t_pStream, FIFF_MNE_SOURCE_ORIENTATION); !t_pTag) {
         qCritical("Source orientation constraints not found\n");
         return false;
     }
     inv.source_ori = *t_pTag->toInt();
     //
-    if (!invs->find_tag(t_pStream, FIFF_MNE_SOURCE_SPACE_NPOINTS, t_pTag)) {
+    if (t_pTag = invs->find_tag(t_pStream, FIFF_MNE_SOURCE_SPACE_NPOINTS); !t_pTag) {
         qCritical("Number of sources not found\n");
         return false;
     }
@@ -961,7 +961,7 @@ bool MNEInverseOperator::read_inverse_operator(QIODevice& p_IODevice, MNEInverse
     //
     //   Coordinate frame
     //
-    if (!invs->find_tag(t_pStream, FIFF_MNE_COORD_FRAME, t_pTag)) {
+    if (t_pTag = invs->find_tag(t_pStream, FIFF_MNE_COORD_FRAME); !t_pTag) {
         qCritical("Coordinate frame tag not found\n");
         return false;
     }
@@ -970,14 +970,14 @@ bool MNEInverseOperator::read_inverse_operator(QIODevice& p_IODevice, MNEInverse
     //   Units of the source estimates. Optional: files written before this was
     //   recorded simply do not carry it, so a missing tag is not an error.
     //
-    if (invs->find_tag(t_pStream, FIFF_MNE_INVERSE_SOURCE_UNIT, t_pTag))
+    if (t_pTag = invs->find_tag(t_pStream, FIFF_MNE_INVERSE_SOURCE_UNIT); t_pTag)
         inv.units = *t_pTag->toInt();
     else
         inv.units = -1;
     //
     //   The actual source orientation vectors
     //
-    if (!invs->find_tag(t_pStream, FIFF_MNE_INVERSE_SOURCE_ORIENTATIONS, t_pTag)) {
+    if (t_pTag = invs->find_tag(t_pStream, FIFF_MNE_INVERSE_SOURCE_ORIENTATIONS); !t_pTag) {
         qCritical("Source orientation information not found\n");
         return false;
     }
@@ -990,7 +990,7 @@ bool MNEInverseOperator::read_inverse_operator(QIODevice& p_IODevice, MNEInverse
     //   The SVD decomposition...
     //
     qInfo("\tReading inverse operator decomposition...");
-    if (!invs->find_tag(t_pStream, FIFF_MNE_INVERSE_SING, t_pTag)) {
+    if (t_pTag = invs->find_tag(t_pStream, FIFF_MNE_INVERSE_SING); !t_pTag) {
         qCritical("Singular values not found\n");
         return false;
     }
@@ -1065,7 +1065,7 @@ bool MNEInverseOperator::read_inverse_operator(QIODevice& p_IODevice, MNEInverse
     //   Get the MRI <-> head coordinate transformation
     //
     FiffCoordTrans mri_head_t;
-    if (!parent_mri[0]->find_tag(t_pStream, FIFF_COORD_TRANS, t_pTag)) {
+    if (t_pTag = parent_mri[0]->find_tag(t_pStream, FIFF_COORD_TRANS); !t_pTag) {
         qCritical("MRI/head coordinate transformation not found\n");
         return false;
     } else {

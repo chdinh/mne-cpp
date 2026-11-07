@@ -104,7 +104,7 @@ std::unique_ptr<MNESssData> MNESssData::read_from_node(FiffStream& stream, const
     auto s = std::make_unique<MNESssData>();
     std::vector<FiffDirNode::SPtr> sss;
     FiffDirNode::SPtr node;
-    FiffTag::UPtr t_pTag;
+    std::optional<FiffTag> t_pTag;
     const float* r0;
     int j, p, q, n;
     /*
@@ -116,38 +116,38 @@ std::unique_ptr<MNESssData> MNESssData::read_from_node(FiffStream& stream, const
         /*
             * Read the SSS information, require all tags to be present
             */
-        if (!node->find_tag(stream, FIFF_SSS_JOB, t_pTag)) {
+        if (t_pTag = node->find_tag(stream, FIFF_SSS_JOB); !t_pTag) {
             return nullptr;
         }
         s->job = *t_pTag->toInt();
 
-        if (!node->find_tag(stream, FIFF_SSS_FRAME, t_pTag)) {
+        if (t_pTag = node->find_tag(stream, FIFF_SSS_FRAME); !t_pTag) {
             return nullptr;
         }
         s->coord_frame = *t_pTag->toInt();
 
-        if (!node->find_tag(stream, FIFF_SSS_ORIGIN, t_pTag)) {
+        if (t_pTag = node->find_tag(stream, FIFF_SSS_ORIGIN); !t_pTag) {
             return nullptr;
         }
         r0 = t_pTag->toFloat();
         Eigen::Map<Eigen::Vector3f>(s->origin) = Eigen::Map<const Eigen::Vector3f>(r0);
 
-        if (!node->find_tag(stream, FIFF_SSS_ORD_IN, t_pTag)) {
+        if (t_pTag = node->find_tag(stream, FIFF_SSS_ORD_IN); !t_pTag) {
             return nullptr;
         }
         s->in_order = *t_pTag->toInt();
 
-        if (!node->find_tag(stream, FIFF_SSS_ORD_OUT, t_pTag)) {
+        if (t_pTag = node->find_tag(stream, FIFF_SSS_ORD_OUT); !t_pTag) {
             return nullptr;
         }
         s->out_order = *t_pTag->toInt();
 
-        if (!node->find_tag(stream, FIFF_SSS_NMAG, t_pTag)) {
+        if (t_pTag = node->find_tag(stream, FIFF_SSS_NMAG); !t_pTag) {
             return nullptr;
         }
         s->nchan = *t_pTag->toInt();
 
-        if (!node->find_tag(stream, FIFF_SSS_COMPONENTS, t_pTag)) {
+        if (t_pTag = node->find_tag(stream, FIFF_SSS_COMPONENTS); !t_pTag) {
             return nullptr;
         }
         {

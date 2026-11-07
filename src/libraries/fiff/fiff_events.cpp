@@ -162,7 +162,7 @@ bool FiffEvents::read_from_fif(const std::filesystem::path& path,
     // indeterminate.
     qint32 k, nelem = 0;
     fiff_int_t kind, pos;
-    FiffTag::UPtr t_pTag;
+    std::optional<FiffTag> t_pTag;
     const quint32* serial_eventlist_uint = nullptr;
     const qint32* serial_eventlist_int = nullptr;
 
@@ -170,7 +170,7 @@ bool FiffEvents::read_from_fif(const std::filesystem::path& path,
         kind = eventsBlocks[0]->dir[k].kind;
         pos = eventsBlocks[0]->dir[k].pos;
         if (kind == FIFF_MNE_EVENT_LIST) {
-            t_pStream->read_tag(t_pTag, pos);
+            t_pTag = t_pStream->read_tag(pos);
             if (t_pTag->type == FIFFT_UINT) {
                 serial_eventlist_uint = t_pTag->toUnsignedInt();
                 nelem = t_pTag->size() / 4;

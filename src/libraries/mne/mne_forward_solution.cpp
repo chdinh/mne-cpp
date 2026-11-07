@@ -1208,11 +1208,11 @@ bool MNEForwardSolution::read(QIODevice& p_IODevice,
     //
     //   Locate and read the forward solutions
     //
-    FiffTag::UPtr t_pTag;
+    std::optional<FiffTag> t_pTag;
     FiffDirNode::SPtr megnode;
     FiffDirNode::SPtr eegnode;
     for (const auto& fwd : fwds) {
-        if (!fwd->find_tag(t_pStream, FIFF_MNE_INCLUDED_METHODS, t_pTag)) {
+        if (t_pTag = fwd->find_tag(t_pStream, FIFF_MNE_INCLUDED_METHODS); !t_pTag) {
             t_pStream.close();
             qWarning("Methods not listed for one of the forward solutions");
             return false;
@@ -1286,7 +1286,7 @@ bool MNEForwardSolution::read(QIODevice& p_IODevice,
     //
     //   Get the MRI <-> head coordinate transformation
     //
-    if (!parent_mri[0]->find_tag(t_pStream, FIFF_COORD_TRANS, t_pTag)) {
+    if (t_pTag = parent_mri[0]->find_tag(t_pStream, FIFF_COORD_TRANS); !t_pTag) {
         t_pStream.close();
         qWarning("MRI/head coordinate transformation not found");
         return false;
@@ -1432,9 +1432,9 @@ bool MNEForwardSolution::read_one(FiffStream& stream,
         return false;
 
     one.clear();
-    FiffTag::UPtr t_pTag;
+    std::optional<FiffTag> t_pTag;
 
-    if (!p_Node->find_tag(stream, FIFF_MNE_SOURCE_ORIENTATION, t_pTag)) {
+    if (t_pTag = p_Node->find_tag(stream, FIFF_MNE_SOURCE_ORIENTATION); !t_pTag) {
         stream.close();
         qWarning("Source orientation tag not found.");
         return false;
@@ -1442,7 +1442,7 @@ bool MNEForwardSolution::read_one(FiffStream& stream,
 
     one.source_ori = *t_pTag->toInt();
 
-    if (!p_Node->find_tag(stream, FIFF_MNE_COORD_FRAME, t_pTag)) {
+    if (t_pTag = p_Node->find_tag(stream, FIFF_MNE_COORD_FRAME); !t_pTag) {
         stream.close();
         qWarning("Coordinate frame tag not found.");
         return false;
@@ -1450,7 +1450,7 @@ bool MNEForwardSolution::read_one(FiffStream& stream,
 
     one.coord_frame = *t_pTag->toInt();
 
-    if (!p_Node->find_tag(stream, FIFF_MNE_SOURCE_SPACE_NPOINTS, t_pTag)) {
+    if (t_pTag = p_Node->find_tag(stream, FIFF_MNE_SOURCE_SPACE_NPOINTS); !t_pTag) {
         stream.close();
         qWarning("Number of sources not found.");
         return false;
@@ -1458,7 +1458,7 @@ bool MNEForwardSolution::read_one(FiffStream& stream,
 
     one.nsource = *t_pTag->toInt();
 
-    if (!p_Node->find_tag(stream, FIFF_NCHAN, t_pTag)) {
+    if (t_pTag = p_Node->find_tag(stream, FIFF_NCHAN); !t_pTag) {
         stream.close();
         qWarning("Number of channels not found.");
         return false;

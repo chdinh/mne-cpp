@@ -78,7 +78,7 @@ int mne_read_meg_comp_eeg_ch_info_32(const QString& name,
     int neeg = 0;
     std::vector<FiffDirNode::SPtr> nodes;
     FiffDirNode::SPtr info;
-    FiffTag::UPtr t_pTag;
+    std::optional<FiffTag> t_pTag;
     FIFFLIB::FiffChInfo this_ch;
     FiffCoordTrans t;
     fiff_int_t kind, pos;
@@ -106,7 +106,7 @@ int mne_read_meg_comp_eeg_ch_info_32(const QString& name,
         pos = info->dir[k].pos;
         switch (kind) {
             case FIFF_NCHAN:
-                if (!stream.read_tag(t_pTag, pos)) {
+                if (t_pTag = stream.read_tag(pos); !t_pTag) {
                     stream.close();
                     return FIFF_FAIL;
                 }
@@ -120,18 +120,18 @@ int mne_read_meg_comp_eeg_ch_info_32(const QString& name,
                 break;
 
             case FIFF_COORD_TRANS:
-                if (!stream.read_tag(t_pTag, pos)) {
+                if (t_pTag = stream.read_tag(pos); !t_pTag) {
                     stream.close();
                     return FIFF_FAIL;
                 }
                 //            t = t_pTag->toCoordTrans();
-                t = FiffCoordTrans::from_tag(t_pTag);
+                t = FiffCoordTrans::from_tag(*t_pTag);
                 if (t.from != FIFFV_COORD_DEVICE || t.to != FIFFV_COORD_HEAD)
                     t = FiffCoordTrans();
                 break;
 
             case FIFF_CH_INFO: /* Information about one channel */
-                if (!stream.read_tag(t_pTag, pos)) {
+                if (t_pTag = stream.read_tag(pos); !t_pTag) {
                     stream.close();
                     return FIFF_FAIL;
                 }
@@ -323,7 +323,7 @@ std::unique_ptr<MNECTFCompDataSet> MNECTFCompDataSet::read(const QString& name)
     std::vector<FiffDirNode::SPtr> comps;
     int ncomp;
     int kind, k;
-    FiffTag::UPtr t_pTag;
+    std::optional<FiffTag> t_pTag;
     QList<FiffChInfo> chs;
     int nch = 0;
     int calibrated;
@@ -370,7 +370,7 @@ std::unique_ptr<MNECTFCompDataSet> MNECTFCompDataSet::read(const QString& name)
         stream.close();
         return set;
     }
-    ncomp = comps.size();
+    ncomp = static_cast<int>(comps.size());
     /*
         * Set the channel info
         */
@@ -385,14 +385,14 @@ std::unique_ptr<MNECTFCompDataSet> MNECTFCompDataSet::read(const QString& name)
             stream.close();
             return nullptr;
         }
-        comps[k]->find_tag(stream, FIFF_MNE_CTF_COMP_KIND, t_pTag);
+        t_pTag = comps[k]->find_tag(stream, FIFF_MNE_CTF_COMP_KIND);
         if (t_pTag) {
             kind = *t_pTag->toInt();
         } else {
             stream.close();
             return nullptr;
         }
-        comps[k]->find_tag(stream, FIFF_MNE_CTF_COMP_CALIBRATED, t_pTag);
+        t_pTag = comps[k]->find_tag(stream, FIFF_MNE_CTF_COMP_CALIBRATED);
         if (t_pTag) {
             calibrated = *t_pTag->toInt();
         } else
