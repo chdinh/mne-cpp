@@ -228,58 +228,6 @@ Create a selector to pick desired channel types from data
 
 ---
 
-### read_evoked(path, data, setno, baseline, proj, p_aspect_kind)
-
-fiff_read_evoked
-
-Wrapper for the `FiffEvoked::read` static function
-
-Read one evoked data set
-
-**Parameters:**
-
-- **path** : *const std::filesystem::path &*
-  FIFF file to read.
-
-- **data** : *[FiffEvoked](/docs/api/fiff/fiff-evoked) &*
-  The read evoked data.
-
-- **setno** : *QVariant*
-  the set to pick.
-
-- **baseline** : *QPair&lt; float, float &gt;*
-  The time interval to apply rescaling / baseline correction. If None do not apply it. If baseline is (a, b). the interval is between "a (s)" and "b (s)". If a is None the beginning of the data is used and if b is None then b is set to the end of the interval. If baseline is equal ot (None, None) all the time interval is used. If None, no correction is applied.
-
-- **proj** : *bool*
-  Apply SSP projection vectors (optional, default = true).
-
-- **p_aspect_kind** : *fiff_int_t*
-  Either "FIFFV_ASPECT_AVERAGE" or "FIFFV_ASPECT_STD_ERR". The type of data to read. Only used if "setno" is a str.
-
-**Returns:**
-
-- *bool* — true if successful, false otherwise.
-
----
-
-### read_evoked_set(path, data)
-
-Read all evoked data from one file.
-
-**Parameters:**
-
-- **path** : *const std::filesystem::path &*
-  FIFF file to read.
-
-- **data** : *[FiffEvokedSet](/docs/api/fiff/fiff-evoked-set) &*
-  The read evoked data.
-
-**Returns:**
-
-- *bool* — true if successful, false otherwise.
-
----
-
 ### read_raw_segment(raw, data, times, from, to, sel)
 
 fiff_read_raw_segment

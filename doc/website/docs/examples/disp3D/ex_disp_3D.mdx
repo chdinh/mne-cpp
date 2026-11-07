@@ -230,9 +230,8 @@ int main(int argc, char* argv[])
     //########################################################################################
 
     // Load data
-    QPair<float, float> baseline(-1.0f, -1.0f);
     InvSourceEstimate sourceEstimate;
-    FiffEvoked evoked(parser.value(evokedFileOption).toStdString(), parser.value(evokedIndexOption).toInt(), baseline);
+    FiffEvoked evoked(parser.value(evokedFileOption).toStdU16String(), parser.value(evokedIndexOption).toInt());
 
     if (bAddRtSourceLoc) {
         double snr = parser.value(snrOption).toDouble();
@@ -241,8 +240,6 @@ int main(int argc, char* argv[])
 
         // Load data
         t_fileEvoked.close();
-        if (evoked.isEmpty())
-            return 1;
 
         std::cout << std::endl;
         std::cout << "Evoked description: " << evoked.comment.toUtf8().constData() << std::endl;

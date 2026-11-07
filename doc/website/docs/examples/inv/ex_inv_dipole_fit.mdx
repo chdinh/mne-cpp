@@ -252,7 +252,7 @@ int main(int argc, char* argv[])
                  "InvDipoleFitData/InvGuessData/InvDipoleForward/InvEcd: one sample fits the dipole like mne.fit_dipole");
 
     // Hand the field to the pipeline as an evoked file with two samples.
-    FiffEvokedSet evokedSet(sampleAve.toStdString());
+    FiffEvokedSet evokedSet(sampleAve.toStdU16String());
     FiffEvoked evoked = evokedSet.evoked[0].pick_channels(StringList(fitData->ch_names.begin() + 0, fitData->ch_names.begin() + 0 + fitData->nmeg));
     evoked.info.bads.clear();
     evoked.data = field.cast<double>().replicate(1, 2);
@@ -263,7 +263,7 @@ int main(int argc, char* argv[])
     FiffEvokedSet synthetic;
     synthetic.info = evoked.info;
     synthetic.evoked.append(evoked);
-    ok &= expect(synthetic.save(tmp.filePath("synthetic-ave.fif").toStdString()), "FiffEvokedSet writes the synthetic field");
+    ok &= expect(synthetic.save(tmp.filePath("synthetic-ave.fif").toStdU16String()).has_value(), "FiffEvokedSet writes the synthetic field");
 
     //! [inv_dipole_fit_usage]
     InvDipoleFitSettings settings; // the options of the MNE-C mne_dipole_fit tool

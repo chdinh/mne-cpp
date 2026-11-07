@@ -23,7 +23,7 @@ Layout is two 32-bit fields (secs, usecs) — the exact representation used by `
 QFile structureFile(rawPath);
 FiffStream stream(&structureFile);
 ok &= stream.open();
-const QList<FiffDirEntry::SPtr>& directory = stream.dir(); // every tag (kind, type, size, position) + a kind -1 end
+const std::vector<FiffDirEntry>& directory = stream.dir(); // every tag (kind, type, size, position) + a kind -1 end
 const FiffTime created = stream.id().time;                 // seconds and microseconds since 1970
 stream.close();
 ```
@@ -88,11 +88,11 @@ FIFF library: fixed-length epochs, CTF compensation, the file directory and raw 
 ````cpp title="src/examples/ex_fiff_structure/main.cpp, line 121"
 FiffStream stream(&structureFile);
 ok &= stream.open();
-const QList<FiffDirEntry::SPtr>& directory = stream.dir(); // every tag (kind, type, size, position) + a kind -1 end
+const std::vector<FiffDirEntry>& directory = stream.dir(); // every tag (kind, type, size, position) + a kind -1 end
 const FiffTime created = stream.id().time;                 // seconds and microseconds since 1970
 stream.close();
 // mne fiff_open: 640 entries; file_id secs 1411146352, usecs 0
-ok &= expect(directory.size() == 641 && directory.last()->kind == -1 && created.secs == 1411146352 && created.usecs == 0 && FiffTime::storageSize() == 8 && FiffDirEntry::storageSize() == 16,
+ok &= expect(directory.size() == 641 && directory.back().kind == -1 && created.secs == 1411146352 && created.usecs == 0 && FiffTime::storageSize() == 8 && FiffDirEntry::storageSize() == 16,
              "FiffDirEntry/FiffTime: the 640 tags of mne fiff_open plus the end entry; the file id was written at 1411146352 s");
 ````
 

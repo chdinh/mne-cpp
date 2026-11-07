@@ -24,7 +24,7 @@ One entry per `FIFF_DATA_BUFFER` tag. The (`first`, `nsamp`) fields let `FiffRaw
 int samples = 0;
 for (const FiffRawDir& buffer : raw.rawdir)
     samples += buffer.nsamp;
-const FiffDirEntry::SPtr firstBuffer = raw.rawdir.first().ent;
+const FiffDirEntry firstBuffer = raw.rawdir.first().ent;
 ```
 
 ---
@@ -89,9 +89,9 @@ FIFF library: fixed-length epochs, CTF compensation, the file directory and raw 
 int samples = 0;
 for (const FiffRawDir& buffer : raw.rawdir)
     samples += buffer.nsamp;
-const FiffDirEntry::SPtr firstBuffer = raw.rawdir.first().ent;
+const FiffDirEntry firstBuffer = raw.rawdir.first().ent;
 // mne.io.read_raw_fif: 2 buffers, 6007 samples from first_samp 12900; fiff_open lists 640 directory entries
-ok &= expect(raw.rawdir.size() == 2 && samples == 6007 && raw.rawdir.first().first == 12900 && firstBuffer->kind == FIFF_DATA_BUFFER,
+ok &= expect(raw.rawdir.size() == 2 && samples == 6007 && raw.rawdir.first().first == 12900 && firstBuffer.kind == FIFF_DATA_BUFFER,
              "FiffRawDir/FiffDirEntry: 2 data buffers cover the 6007 samples from sample 12900");
 ````
 

@@ -7,7 +7,7 @@ sidebar_position: 5
 
 # Class Members
 
-Index of 6768 public class members (functions, variables, typedefs, enums) across all documented classes.
+Index of 6689 public class members (functions, variables, typedefs, enums) across all documented classes.
 
 **Jump to:** [A](#a) · [B](#b) · [C](#c) · [D](#d) · [E](#e) · [F](#f) · [G](#g) · [H](#h) · [I](#i) · [J](#j) · [K](#k) · [L](#l) · [M](#m) · [N](#n) · [O](#o) · [P](#p) · [Q](#q) · [R](#r) · [S](#s) · [T](#t) · [U](#u) · [V](#v) · [W](#w) · [X](#x) · [Y](#y) · [Z](#z)
 
@@ -314,7 +314,8 @@ Index of 6768 public class members (functions, variables, typedefs, enums) acros
 - **Bar** `[fn]` in [Bar](/docs/api/disp/bar) — The constructor for [`Bar`](/docs/api/disp/bar).
 - **base** `[var]` in [FwdCoil](/docs/api/fwd/fwd-coil) — Baseline.
 - **base_arr** `[var]` in [HPISortStruct](/docs/api/inv/hpi-sort-struct)
-- **baseline** `[var]` in [FiffEvoked](/docs/api/fiff/fiff-evoked) — Baseline information in seconds form where the seconds are seen relative to the trigger, meaning they can also be negative [from to].
+- **Baseline** `[type]` in [FiffEvoked](/docs/api/fiff/fiff-evoked) — `Baseline` interval [from, to] in seconds; equal bounds mean no correction.
+- **baseline** `[var]` in [FiffEvoked](/docs/api/fiff/fiff-evoked) — `Baseline` information in seconds form where the seconds are seen relative to the trigger, meaning they can also be negative [from to].
 - **baselineChanged** `[signal]` in [DipoleFitView](/docs/api/disp/dipole-fit-view) — Send new basline values.
 - **baselines** `[var]` in [MNEMeasDataSet](/docs/api/mne/mne-meas-data-set) — Per-channel baseline offsets currently applied.
 - **basename** `[fn]` in [BIDSPath](/docs/api/bids/bids-path) — Constructs the BIDS-compliant filename (without directory).
@@ -923,6 +924,7 @@ Index of 6768 public class members (functions, variables, typedefs, enums) acros
 - **computeVox2RasTkr** `[fn]` in [MriVolData](/docs/api/mri/mri-vol-data) — Builds the voxel-to-surface-RAS (tkRAS / tkregister) 4×4 transform.
 - **concatenate** `[fn]` in [FiffEvents](/docs/api/fiff/fiff-events) — Concatenate the events of consecutive recordings, like mne.concatenate_events.
 - **concatenateEpochs** `[fn]` in [FiffEpochs](/docs/api/fiff/fiff-epochs) — Concatenate multiple epoch sets into a single list.
+- **Condition** `[type]` in [FiffEvoked](/docs/api/fiff/fiff-evoked) — Selects a data set by its index in the file or by its comment.
 - **condition** `[fn]` in [MNECovMatrix](/docs/api/mne/mne-cov-matrix) — Condition the covariance matrix by eigendecomposition with per-channel-type scaling, zeroing sub-threshold eigenvalues, and reconstructing.
 - **confidence** `[var]` in [IcaLabelResult](/docs/api/decoding/ica-label-result) — Confidence score in [0, 1].
 - **config** `[fn]` in [PythonRunner](/docs/api/utils/python-runner) — Get the current configuration.
@@ -945,8 +947,6 @@ Index of 6768 public class members (functions, variables, typedefs, enums) acros
 - **ConstSPtr** `[type]` in [AverageSelectionView](/docs/api/disp/average-selection-view) — Const shared pointer type for [`AverageSelectionView`](/docs/api/disp/average-selection-view).
 - **ConstSPtr** `[type]` in [AveragingSettingsView](/docs/api/disp/averaging-settings-view) — Const shared pointer type for AveragingAdjustmentWidget.
 - **ConstSPtr** `[type]` in [Bar](/docs/api/disp/bar) — Const shared pointer type for [`Bar`](/docs/api/disp/bar) class.
-- **ConstSPtr** `[type]` in [BIDSPath](/docs/api/bids/bids-path) — Const shared pointer type for [`BIDSPath`](/docs/api/bids/bids-path).
-- **ConstSPtr** `[type]` in [BidsRawData](/docs/api/bids/bids-raw-data)
 - **ConstSPtr** `[type]` in [BidsViewModel](/docs/api/disp/bids-view-model) — Const shared pointer type for [`BidsViewModel`](/docs/api/disp/bids-view-model).
 - **ConstSPtr** `[type]` in [ButterflyView](/docs/api/disp/butterfly-view) — Const shared pointer type for [`ButterflyView`](/docs/api/disp/butterfly-view).
 - **ConstSPtr** `[type]` in [ChannelDataModel](/docs/api/disp/channel-data-model)
@@ -972,28 +972,7 @@ Index of 6768 public class members (functions, variables, typedefs, enums) acros
 - **ConstSPtr** `[type]` in [DraggableFramelessWidget](/docs/api/disp/draggable-frameless-widget) — Const shared pointer type for [`DraggableFramelessWidget`](/docs/api/disp/draggable-frameless-widget).
 - **ConstSPtr** `[type]` in [EvokedSetModel](/docs/api/disp/evoked-set-model) — Const shared pointer type for [`EvokedSetModel`](/docs/api/disp/evoked-set-model).
 - **ConstSPtr** `[type]` in [FiffAnnotations](/docs/api/fiff/fiff-annotations) — Const shared pointer type.
-- **ConstSPtr** `[type]` in [FiffChInfo](/docs/api/fiff/fiff-ch-info) — Const shared pointer type for [`FiffChInfo`](/docs/api/fiff/fiff-ch-info).
-- **ConstSPtr** `[type]` in [FiffChPos](/docs/api/fiff/fiff-ch-pos) — Const shared pointer type for [`FiffChPos`](/docs/api/fiff/fiff-ch-pos).
-- **ConstSPtr** `[type]` in [FiffCoordTransSet](/docs/api/fiff/fiff-coord-trans-set) — Const shared pointer type for [`FiffCoordTransSet`](/docs/api/fiff/fiff-coord-trans-set).
-- **ConstSPtr** `[type]` in [FiffCov](/docs/api/fiff/fiff-cov) — Const shared pointer type for [`FiffCov`](/docs/api/fiff/fiff-cov).
-- **ConstSPtr** `[type]` in [FiffCtfComp](/docs/api/fiff/fiff-ctf-comp) — Const shared pointer type for [`FiffCtfComp`](/docs/api/fiff/fiff-ctf-comp).
-- **ConstSPtr** `[type]` in [FiffDigitizerData](/docs/api/fiff/fiff-digitizer-data) — Const shared pointer type for [`FiffDigitizerData`](/docs/api/fiff/fiff-digitizer-data).
-- **ConstSPtr** `[type]` in [FiffDigPoint](/docs/api/fiff/fiff-dig-point) — Const shared pointer type for [`FiffDigPoint`](/docs/api/fiff/fiff-dig-point).
-- **ConstSPtr** `[type]` in [FiffDigPointSet](/docs/api/fiff/fiff-dig-point-set) — Const shared pointer type for [`FiffDigPointSet`](/docs/api/fiff/fiff-dig-point-set).
-- **ConstSPtr** `[type]` in [FiffDirEntry](/docs/api/fiff/fiff-dir-entry) — Const shared pointer type for [`FiffDirEntry`](/docs/api/fiff/fiff-dir-entry).
-- **ConstSPtr** `[type]` in [FiffDirNode](/docs/api/fiff/fiff-dir-node) — Const shared pointer type for [`FiffDirNode`](/docs/api/fiff/fiff-dir-node).
-- **ConstSPtr** `[type]` in [FiffEvoked](/docs/api/fiff/fiff-evoked) — Const shared pointer type for [`FiffEvoked`](/docs/api/fiff/fiff-evoked).
-- **ConstSPtr** `[type]` in [FiffEvokedSet](/docs/api/fiff/fiff-evoked-set) — Const shared pointer type for [`FiffEvokedSet`](/docs/api/fiff/fiff-evoked-set).
-- **ConstSPtr** `[type]` in [FiffId](/docs/api/fiff/fiff-id) — Const shared pointer type for [`FiffId`](/docs/api/fiff/fiff-id).
-- **ConstSPtr** `[type]` in [FiffInfo](/docs/api/fiff/fiff-info) — Const shared pointer type for [`FiffInfo`](/docs/api/fiff/fiff-info).
-- **ConstSPtr** `[type]` in [FiffInfoBase](/docs/api/fiff/fiff-info-base) — Const shared pointer type for [`FiffInfoBase`](/docs/api/fiff/fiff-info-base).
-- **ConstSPtr** `[type]` in [FiffNamedMatrix](/docs/api/fiff/fiff-named-matrix) — Const shared pointer type for [`FiffNamedMatrix`](/docs/api/fiff/fiff-named-matrix).
-- **ConstSPtr** `[type]` in [FiffProj](/docs/api/fiff/fiff-proj) — Const shared pointer type for [`FiffProj`](/docs/api/fiff/fiff-proj).
-- **ConstSPtr** `[type]` in [FiffRawData](/docs/api/fiff/fiff-raw-data) — Const shared pointer type for [`FiffRawData`](/docs/api/fiff/fiff-raw-data).
-- **ConstSPtr** `[type]` in [FiffRawDir](/docs/api/fiff/fiff-raw-dir) — Const shared pointer type for [`FiffRawDir`](/docs/api/fiff/fiff-raw-dir).
 - **ConstSPtr** `[type]` in [FiffRawViewSettings](/docs/api/disp/fiff-raw-view-settings) — Const shared pointer type for [`FiffRawViewSettings`](/docs/api/disp/fiff-raw-view-settings).
-- **ConstSPtr** `[type]` in [FiffSparseMatrix](/docs/api/fiff/fiff-sparse-matrix) — Const shared pointer type for [`FiffSparseMatrix`](/docs/api/fiff/fiff-sparse-matrix).
-- **ConstSPtr** `[type]` in [FiffTag](/docs/api/fiff/fiff-tag) — Const shared pointer type for [`FiffTag`](/docs/api/fiff/fiff-tag).
 - **ConstSPtr** `[type]` in [FilterDesignView](/docs/api/disp/filter-design-view) — Const shared pointer type for [`FilterDesignView`](/docs/api/disp/filter-design-view).
 - **ConstSPtr** `[type]` in [FilterIO](/docs/api/utils/filter-io) — Const shared pointer type for [`FilterIO`](/docs/api/utils/filter-io).
 - **ConstSPtr** `[type]` in [FilterOverlapAdd](/docs/api/dsp/filter-overlap-add) — Const shared pointer type for [`FilterOverlapAdd`](/docs/api/dsp/filter-overlap-add).
@@ -1037,7 +1016,6 @@ Index of 6768 public class members (functions, variables, typedefs, enums) acros
 - **ConstSPtr** `[type]` in [InvVolumeSourceEstimate](/docs/api/inv/inv-volume-source-estimate)
 - **ConstSPtr** `[type]` in [IObserver](/docs/api/utils/i-observer) — Const shared pointer type for [`IObserver`](/docs/api/utils/i-observer).
 - **ConstSPtr** `[type]` in [IOUtils](/docs/api/utils/io-utils) — Const shared pointer type for [`IOUtils`](/docs/api/utils/io-utils) class.
-- **ConstSPtr** `[type]` in [KMeans](/docs/api/math/k-means) — Const shared pointer type for [`KMeans`](/docs/api/math/k-means).
 - **ConstSPtr** `[type]` in [LayoutLoader](/docs/api/utils/layout-loader) — Const shared pointer type for [`LayoutLoader`](/docs/api/utils/layout-loader).
 - **ConstSPtr** `[type]` in [LinePlot](/docs/api/disp/line-plot) — Const shared pointer type for [`LinePlot`](/docs/api/disp/line-plot).
 - **ConstSPtr** `[type]` in [MinimumNormSettingsView](/docs/api/disp/minimum-norm-settings-view) — Const shared pointer type for [`MinimumNormSettingsView`](/docs/api/disp/minimum-norm-settings-view).
@@ -1052,7 +1030,6 @@ Index of 6768 public class members (functions, variables, typedefs, enums) acros
 - **ConstSPtr** `[type]` in [MNEEpochData](/docs/api/mne/mne-epoch-data) — Const shared pointer type for [`MNEEpochData`](/docs/api/mne/mne-epoch-data).
 - **ConstSPtr** `[type]` in [MNEEpochDataList](/docs/api/mne/mne-epoch-data-list) — Const shared pointer type for [`MNEEpochDataList`](/docs/api/mne/mne-epoch-data-list).
 - **ConstSPtr** `[type]` in [MNEForwardSolution](/docs/api/mne/mne-forward-solution) — Const shared pointer type for [`MNEForwardSolution`](/docs/api/mne/mne-forward-solution).
-- **ConstSPtr** `[type]` in [MNEHemisphere](/docs/api/mne/mne-hemisphere) — Const shared pointer type for [`MNEHemisphere`](/docs/api/mne/mne-hemisphere).
 - **ConstSPtr** `[type]` in [MNEInverseOperator](/docs/api/mne/mne-inverse-operator) — Const shared pointer type for [`MNEInverseOperator`](/docs/api/mne/mne-inverse-operator).
 - **ConstSPtr** `[type]` in [MNEMeasData](/docs/api/mne/mne-meas-data) — Const shared pointer type for [`MNEMeasData`](/docs/api/mne/mne-meas-data).
 - **ConstSPtr** `[type]` in [MNEMeasDataSet](/docs/api/mne/mne-meas-data-set) — Const shared pointer type for [`MNEMeasDataSet`](/docs/api/mne/mne-meas-data-set).
@@ -1078,8 +1055,6 @@ Index of 6768 public class members (functions, variables, typedefs, enums) acros
 - **ConstSPtr** `[type]` in [MNERawBufDef](/docs/api/mne/mne-raw-buf-def) — Const shared pointer type for [`MNERawBufDef`](/docs/api/mne/mne-raw-buf-def).
 - **ConstSPtr** `[type]` in [MNERawData](/docs/api/mne/mne-raw-data) — Const shared pointer type for [`MNERawData`](/docs/api/mne/mne-raw-data).
 - **ConstSPtr** `[type]` in [MNERawInfo](/docs/api/mne/mne-raw-info) — Const shared pointer type for [`MNERawInfo`](/docs/api/mne/mne-raw-info).
-- **ConstSPtr** `[type]` in [MNESourceSpace](/docs/api/mne/mne-source-space) — Const shared pointer type for [`MNESourceSpace`](/docs/api/mne/mne-source-space).
-- **ConstSPtr** `[type]` in [MNESourceSpaces](/docs/api/mne/mne-source-spaces) — Const shared pointer type for [`MNESourceSpaces`](/docs/api/mne/mne-source-spaces).
 - **ConstSPtr** `[type]` in [MNESssData](/docs/api/mne/mne-sss-data) — Const shared pointer type for [`MNESssData`](/docs/api/mne/mne-sss-data).
 - **ConstSPtr** `[type]` in [MNESurface](/docs/api/mne/mne-surface) — Const shared pointer type for [`MNESurface`](/docs/api/mne/mne-surface).
 - **ConstSPtr** `[type]` in [MNESurfaceOrVolume](/docs/api/mne/mne-surface-or-volume) — Const shared pointer type for [`MNESurfaceOrVolume`](/docs/api/mne/mne-surface-or-volume).
@@ -1121,29 +1096,7 @@ Index of 6768 public class members (functions, variables, typedefs, enums) acros
 - **ConstSPtr** `[type]` in [TfSettingsView](/docs/api/disp/tf-settings-view) — Const shared pointer type for [`TfSettingsView`](/docs/api/disp/tf-settings-view).
 - **ConstSPtr** `[type]` in [TriggerDetectionView](/docs/api/disp/trigger-detection-view) — Const shared pointer type for [`TriggerDetectionView`](/docs/api/disp/trigger-detection-view).
 - **ConstSPtr** `[type]` in [UnbiasedSquaredPhaseLagIndex](/docs/api/connectivity/unbiased-squared-phase-lag-index) — Const shared pointer type for [`UnbiasedSquaredPhaseLagIndex`](/docs/api/connectivity/unbiased-squared-phase-lag-index).
-- **ConstSPtr** `[type]` in [Warp](/docs/api/math/warp) — Const shared pointer type for [`Warp`](/docs/api/math/warp).
 - **ConstSPtr** `[type]` in [WeightedPhaseLagIndex](/docs/api/connectivity/weighted-phase-lag-index) — Const shared pointer type for [`WeightedPhaseLagIndex`](/docs/api/connectivity/weighted-phase-lag-index).
-- **ConstUPtr** `[type]` in [FiffChInfo](/docs/api/fiff/fiff-ch-info) — Const unique pointer type for [`FiffChInfo`](/docs/api/fiff/fiff-ch-info).
-- **ConstUPtr** `[type]` in [FiffChPos](/docs/api/fiff/fiff-ch-pos) — Const unique pointer type for [`FiffChPos`](/docs/api/fiff/fiff-ch-pos).
-- **ConstUPtr** `[type]` in [FiffCoordTransSet](/docs/api/fiff/fiff-coord-trans-set) — Const unique pointer type for [`FiffCoordTransSet`](/docs/api/fiff/fiff-coord-trans-set).
-- **ConstUPtr** `[type]` in [FiffCov](/docs/api/fiff/fiff-cov) — Const unique pointer type for [`FiffCov`](/docs/api/fiff/fiff-cov).
-- **ConstUPtr** `[type]` in [FiffCtfComp](/docs/api/fiff/fiff-ctf-comp) — Const unique pointer type for [`FiffCtfComp`](/docs/api/fiff/fiff-ctf-comp).
-- **ConstUPtr** `[type]` in [FiffDigitizerData](/docs/api/fiff/fiff-digitizer-data) — Const unique pointer type for [`FiffDigitizerData`](/docs/api/fiff/fiff-digitizer-data).
-- **ConstUPtr** `[type]` in [FiffDigPoint](/docs/api/fiff/fiff-dig-point) — Const unique pointer type for [`FiffDigPoint`](/docs/api/fiff/fiff-dig-point).
-- **ConstUPtr** `[type]` in [FiffDigPointSet](/docs/api/fiff/fiff-dig-point-set) — Const unique pointer type for [`FiffDigPointSet`](/docs/api/fiff/fiff-dig-point-set).
-- **ConstUPtr** `[type]` in [FiffDirEntry](/docs/api/fiff/fiff-dir-entry) — Const unique pointer type for [`FiffDirEntry`](/docs/api/fiff/fiff-dir-entry).
-- **ConstUPtr** `[type]` in [FiffDirNode](/docs/api/fiff/fiff-dir-node) — Const unique pointer type for [`FiffDirNode`](/docs/api/fiff/fiff-dir-node).
-- **ConstUPtr** `[type]` in [FiffEvoked](/docs/api/fiff/fiff-evoked) — Const unique pointer type for [`FiffEvoked`](/docs/api/fiff/fiff-evoked).
-- **ConstUPtr** `[type]` in [FiffEvokedSet](/docs/api/fiff/fiff-evoked-set) — Const unique pointer type for [`FiffEvokedSet`](/docs/api/fiff/fiff-evoked-set).
-- **ConstUPtr** `[type]` in [FiffId](/docs/api/fiff/fiff-id) — Const unique pointer type for [`FiffId`](/docs/api/fiff/fiff-id).
-- **ConstUPtr** `[type]` in [FiffInfo](/docs/api/fiff/fiff-info) — Const unique pointer type for [`FiffInfo`](/docs/api/fiff/fiff-info).
-- **ConstUPtr** `[type]` in [FiffInfoBase](/docs/api/fiff/fiff-info-base) — Const unique pointer type for [`FiffInfoBase`](/docs/api/fiff/fiff-info-base).
-- **ConstUPtr** `[type]` in [FiffNamedMatrix](/docs/api/fiff/fiff-named-matrix) — Const unique pointer type for [`FiffNamedMatrix`](/docs/api/fiff/fiff-named-matrix).
-- **ConstUPtr** `[type]` in [FiffProj](/docs/api/fiff/fiff-proj) — Const unique pointer type for [`FiffProj`](/docs/api/fiff/fiff-proj).
-- **ConstUPtr** `[type]` in [FiffRawData](/docs/api/fiff/fiff-raw-data) — Const unique pointer type for [`FiffRawData`](/docs/api/fiff/fiff-raw-data).
-- **ConstUPtr** `[type]` in [FiffRawDir](/docs/api/fiff/fiff-raw-dir) — Const unique pointer type for [`FiffRawDir`](/docs/api/fiff/fiff-raw-dir).
-- **ConstUPtr** `[type]` in [FiffSparseMatrix](/docs/api/fiff/fiff-sparse-matrix) — Const unique pointer type for [`FiffSparseMatrix`](/docs/api/fiff/fiff-sparse-matrix).
-- **ConstUPtr** `[type]` in [FiffTag](/docs/api/fiff/fiff-tag) — Const unique pointer type for [`FiffTag`](/docs/api/fiff/fiff-tag).
 - **consumeIdle** `[fn]` in [AcqReader](/docs/api/acq/acq-reader) — Gating reader of an output stream: the device has emitted `samples` samples of underrun fill because the writer had not committed them.
 - **contactAt** `[fn]` in [ElectrodeObject](/docs/api/disp3-d/electrode-object)
 - **contactLabel** `[fn]` in [ElectrodeObject](/docs/api/disp3-d/electrode-object)
@@ -1467,7 +1420,6 @@ Index of 6768 public class members (functions, variables, typedefs, enums) acros
 - **dir** `[fn]` in [FiffStream](/docs/api/fiff/fiff-stream) — Returns the directory compiled into a tree dir is set when `open()` was called.
 - **dir** `[fn]` in [FiffStream](/docs/api/fiff/fiff-stream) — Returns the directory compiled into a tree dir is set when `open()` was called.
 - **dir** `[fn]` in [FwdCoil](/docs/api/fwd/fwd-coil) — Return a read-only map to the j-th integration point direction cosine.
-- **dir_tree** `[var]` in [FiffDirNode](/docs/api/fiff/fiff-dir-node) — Directory of tags within this node subtrees as well as FIFF_BLOCK_START and FIFF_BLOCK_END.
 - **dir_tree_find** `[fn]` in [Fiff](/docs/api/fiff/fiff-class) — fiff_dir_tree_find
 - **dir_tree_find** `[fn]` in [FiffDirNode](/docs/api/fiff/fiff-dir-node) — Find nodes of the given kind from a directory tree structure.
 - **directed** `[var]` in [InvConnectivity](/docs/api/inv/inv-connectivity) — True for directed measures (Granger, PDC, DTF); false for undirected (COH, PLV, PLI).
@@ -1801,17 +1753,15 @@ Index of 6768 public class members (functions, variables, typedefs, enums) acros
 - **FiffDigPointSet** `[fn]` in [FiffDigPointSet](/docs/api/fiff/fiff-dig-point-set) — Copy constructor.
 - **FiffDigPointSet** `[fn]` in [FiffDigPointSet](/docs/api/fiff/fiff-dig-point-set) — Construct [`FiffDigPointSet`](/docs/api/fiff/fiff-dig-point-set) based on input pointList.
 - **FiffDigPointSet** `[fn]` in [FiffDigPointSet](/docs/api/fiff/fiff-dig-point-set) — Constructs a [`FiffDigPointSet`](/docs/api/fiff/fiff-dig-point-set) by reading a FIFF file.
-- **FiffDirEntry** `[fn]` in [FiffDirEntry](/docs/api/fiff/fiff-dir-entry) — Constructs the dir entry.
-- **FiffDirEntry** `[fn]` in [FiffDirEntry](/docs/api/fiff/fiff-dir-entry) — Copy constructor.
 - **FiffDirNode** `[fn]` in [FiffDirNode](/docs/api/fiff/fiff-dir-node) — Constructors the directory tree structure.
 - **FiffDirNode** `[fn]` in [FiffDirNode](/docs/api/fiff/fiff-dir-node) — Copy constructor.
 - **FiffEvents** `[fn]` in [FiffEvents](/docs/api/fiff/fiff-events) — Default constructor.
 - **FiffEvents** `[fn]` in [FiffEvents](/docs/api/fiff/fiff-events) — Constructs [`FiffEvents`](/docs/api/fiff/fiff-events) by reading an event file.
 - **FiffEvoked** `[fn]` in [FiffEvoked](/docs/api/fiff/fiff-evoked) — Constructs a fiff evoked data.
-- **FiffEvoked** `[fn]` in [FiffEvoked](/docs/api/fiff/fiff-evoked) — Constructs fiff evoked data by reading a FIFF file.
+- **FiffEvoked** `[fn]` in [FiffEvoked](/docs/api/fiff/fiff-evoked) — Reads one evoked data set, like `read()`; throws [`Error`](/docs/api/utils/error) if it cannot.
 - **FiffEvoked** `[fn]` in [FiffEvoked](/docs/api/fiff/fiff-evoked) — Copy constructor.
 - **FiffEvokedSet** `[fn]` in [FiffEvokedSet](/docs/api/fiff/fiff-evoked-set) — Constructs a fiff evoked data set.
-- **FiffEvokedSet** `[fn]` in [FiffEvokedSet](/docs/api/fiff/fiff-evoked-set) — Constructs a fiff evoked data set by reading a FIFF file.
+- **FiffEvokedSet** `[fn]` in [FiffEvokedSet](/docs/api/fiff/fiff-evoked-set) — Reads evoked data sets of a FIFF file, like `read()`; throws [`Error`](/docs/api/utils/error) if it cannot.
 - **FiffEvokedSet** `[fn]` in [FiffEvokedSet](/docs/api/fiff/fiff-evoked-set) — Copy constructor.
 - **FiffFileSharer** `[fn]` in [FiffFileSharer](/docs/api/fiff/fiff-file-sharer) — Constructs a [`FiffFileSharer`](/docs/api/fiff/fiff-file-sharer) with default paramaters (based on m_sDefaultDirectory and m_sDefaultFileName).
 - **FiffFileSharer** `[fn]` in [FiffFileSharer](/docs/api/fiff/fiff-file-sharer) — Constructs a [`FiffFileSharer`](/docs/api/fiff/fiff-file-sharer) to watch/save to sDirName.
@@ -1915,6 +1865,7 @@ Index of 6768 public class members (functions, variables, typedefs, enums) acros
 - **FilterThreadArg** `[fn]` in [FilterThreadArg](/docs/api/mne/filter-thread-arg) — Constructs the Filter Thread Argument Refactored: new_filter_thread_arg (filter_source_space.c).
 - **FilterType** `[enum]` in [FirFilter](/docs/api/dsp/fir-filter) — FIR filter type — mirrors `IirFilter::FilterType` for a uniform API.
 - **FilterType** `[enum]` in [IirFilter](/docs/api/dsp/iir-filter) — Filter type selector.
+- **find** `[fn]` in `FiffEvokedFile`
 - **find_closest_on_surface** `[fn]` in [MNEProjectToSurface](/docs/api/mne/mne-project-to-surface) — Projects a set of points r on the FsSurface.
 - **find_closest_on_surface_approx** `[fn]` in [MNESurface](/docs/api/mne/mne-surface) — For each point, find the closest point on the surface using neighborhood-restricted search.
 - **find_evoked** `[fn]` in [Fiff](/docs/api/fiff/fiff-class) — fiff_find_evoked
@@ -2727,6 +2678,7 @@ Index of 6768 public class members (functions, variables, typedefs, enums) acros
 - **info** `[fn]` in [AcqError](/docs/api/acq/acq-error)
 - **info** `[fn]` in [AcqStream](/docs/api/acq/acq-stream)
 - **info** `[var]` in [FiffEvoked](/docs/api/fiff/fiff-evoked) — Measurement info.
+- **info** `[var]` in `FiffEvokedFile` — The measurement info shared by all data sets.
 - **info** `[var]` in [FiffEvokedSet](/docs/api/fiff/fiff-evoked-set) — FIFF measurement information.
 - **info** `[var]` in [FiffRawData](/docs/api/fiff/fiff-raw-data) — [`Fiff`](/docs/api/fiff/fiff-class) measurement information.
 - **info** `[fn]` in [Log](/docs/api/utils/log) — As `debug()`, at info level.
@@ -3318,7 +3270,7 @@ Index of 6768 public class members (functions, variables, typedefs, enums) acros
 - **make_projector** `[fn]` in [FiffProj](/docs/api/fiff/fiff-proj) — mne_make_projector
 - **make_projector** `[fn]` in [MNE](/docs/api/mne/mne-class) — make_projector
 - **make_projector** `[fn]` in [MNE](/docs/api/mne/mne-class) — mne_make_projector_info
-- **make_subtree** `[fn]` in [FiffStream](/docs/api/fiff/fiff-stream) — Create the directory tree structure.
+- **make_subtree** `[fn]` in [FiffStream](/docs/api/fiff/fiff-stream) — Builds the block tree of a directory from the block that starts at an entry.
 - **make_volume_source_space** `[fn]` in [MNESourceSpace](/docs/api/mne/mne-source-space) — Create a volumetric source space by laying out a 3D grid of points within the bounding box of a surface, filtering out points that lie outside the surface or closer than `mindist` to the surface, and establishing 26-neighbor connectivity.
 - **makeCorticalMap** `[fn]` in [MNECorticalMap](/docs/api/mne/mne-cortical-map) — Create the resolution matrix M = K G that maps source activity to its estimate.
 - **makeDICS** `[fn]` in [InvDICS](/docs/api/inv/inv-dics) — Compute DICS beamformer spatial filters for one or more frequencies.
@@ -3729,7 +3681,6 @@ Index of 6768 public class members (functions, variables, typedefs, enums) acros
 - **neighbor_vert** `[var]` in [MNESurfaceOrVolume](/docs/api/mne/mne-surface-or-volume) — Vertices neighboring each vertex (np entries, variable length).
 - **nent** `[fn]` in [FiffDirNode](/docs/api/fiff/fiff-dir-node) — Returns the number of entries in this node.
 - **nent** `[fn]` in [FiffStream](/docs/api/fiff/fiff-stream) — How many entries?
-- **nent_tree** `[var]` in [FiffDirNode](/docs/api/fiff/fiff-dir-node) — Number of entries in the directory tree node.
 - **Network** `[fn]` in [Network](/docs/api/connectivity/network) — Constructs a [`Network`](/docs/api/connectivity/network) object.
 - **network** `[var]` in [ViewVisibilityProfile](/docs/api/disp3-d/view-visibility-profile)
 - **NetworkEdge** `[fn]` in [NetworkEdge](/docs/api/connectivity/network-edge) — Constructs a [`NetworkEdge`](/docs/api/connectivity/network-edge) object.
@@ -3945,6 +3896,7 @@ Index of 6768 public class members (functions, variables, typedefs, enums) acros
 - **open** `[fn]` in [BrainVisionReader](/docs/api/bids/brain-vision-reader) — Open and parse the file header.
 - **open** `[fn]` in [EDFReader](/docs/api/bids/edf-reader) — Open and parse the file header.
 - **open** `[fn]` in [Fiff](/docs/api/fiff/fiff-class) — fiff_open
+- **open** `[fn]` in `FiffEvokedFile`
 - **open** `[fn]` in [FiffStream](/docs/api/fiff/fiff-stream) — QFile::open.
 - **open** `[fn]` in [FiffStream](/docs/api/fiff/fiff-stream) — Opens a FIFF file for reading and reads its tag directory.
 - **open** `[fn]` in [FileByteStream](/docs/api/utils/file-byte-stream)
@@ -4294,7 +4246,7 @@ Index of 6768 public class members (functions, variables, typedefs, enums) acros
 - **pos** `[fn]` in [ByteStream](/docs/api/utils/byte-stream)
 - **pos** `[var]` in [CoilParam](/docs/api/inv/coil-param)
 - **pos** `[var]` in [ElectrodePosition](/docs/api/utils/electrode-position) — Position in metres, MNI (fsaverage MRI) coordinates.
-- **pos** `[var]` in [FiffDirEntry](/docs/api/fiff/fiff-dir-entry) — Location in file; Note: the data is located at pos + FIFFC_DATA_OFFSET: 2GB restriction -&gt; change this to fiff_long_t.
+- **pos** `[var]` in [FiffDirEntry](/docs/api/fiff/fiff-dir-entry) — Location in file; the data is located at pos + FIFFC_DATA_OFFSET.
 - **pos** `[fn]` in [FileByteStream](/docs/api/utils/file-byte-stream)
 - **pos** `[var]` in [FsLabel](/docs/api/fs/fs-label) — Locations in meters.
 - **pos** `[fn]` in [FwdCoil](/docs/api/fwd/fwd-coil) — Return a read-only map to the j-th integration point position (3 contiguous floats).
@@ -4501,8 +4453,9 @@ Index of 6768 public class members (functions, variables, typedefs, enums) acros
 - **read** `[fn]` in [FiffCoordTransSet](/docs/api/fiff/fiff-coord-trans-set) — Takes every transform of the chain stored in a FIFF file, such as a `-trans.fif` file or a `COR.fif` MRI set (MNE-C mne_collect_transforms).
 - **read** `[fn]` in [FiffCov](/docs/api/fiff/fiff-cov) — Reads the noise covariance stored in a FIFF file, like mne.read_cov.
 - **read** `[fn]` in [FiffEvents](/docs/api/fiff/fiff-events) — Read events from a FIFF or ASCII event file.
-- **read** `[fn]` in [FiffEvoked](/docs/api/fiff/fiff-evoked) — fiff_read_evoked
-- **read** `[fn]` in [FiffEvokedSet](/docs/api/fiff/fiff-evoked-set) — fiff_read_evoked
+- **read** `[fn]` in [FiffEvoked](/docs/api/fiff/fiff-evoked) — Reads one evoked data set of a FIFF file, like mne.read_evokeds.
+- **read** `[fn]` in `FiffEvokedFile`
+- **read** `[fn]` in [FiffEvokedSet](/docs/api/fiff/fiff-evoked-set) — Reads evoked data sets of a FIFF file in one pass, like mne.read_evokeds.
 - **read** `[fn]` in [FiffIO](/docs/api/fiff/fiff-io) — Read data from a pIODevice.
 - **read** `[fn]` in [FiffIO](/docs/api/fiff/fiff-io) — Read data from a QList of pIODevices.
 - **read** `[fn]` in [FileByteStream](/docs/api/utils/file-byte-stream) — Reads up to `bytes` bytes at the current position and advances past them.
@@ -4558,8 +4511,6 @@ Index of 6768 public class members (functions, variables, typedefs, enums) acros
 - **read_events** `[fn]` in [MNE](/docs/api/mne/mne-class)
 - **read_events_from_ascii** `[fn]` in [MNE](/docs/api/mne/mne-class) — read_events
 - **read_events_from_fif** `[fn]` in [MNE](/docs/api/mne/mne-class) — mne_read_events
-- **read_evoked** `[fn]` in [Fiff](/docs/api/fiff/fiff-class) — fiff_read_evoked
-- **read_evoked_set** `[fn]` in [Fiff](/docs/api/fiff/fiff-class) — Read all evoked data from one file.
 - **read_forward_solution** `[fn]` in [Fwd](/docs/api/fwd/fwd-class) — mne_read_forward_solution
 - **read_from_ascii** `[fn]` in [FiffEvents](/docs/api/fiff/fiff-events) — Read a list of events from an ASCII event file.
 - **read_from_fif** `[fn]` in [FiffEvents](/docs/api/fiff/fiff-events) — Read an event list from a FIFF file.
@@ -4881,7 +4832,7 @@ Index of 6768 public class members (functions, variables, typedefs, enums) acros
 - **sampleValueAt** `[fn]` in [ChannelDataModel](/docs/api/disp/channel-data-model) — Return the raw sample value at a specific absolute sample index for the given channel.
 - **samplingFreq** `[var]` in [BidsChannel](/docs/api/bids/bids-channel) — Sampling frequency in Hz (OPTIONAL).
 - **save** `[fn]` in [FiffCov](/docs/api/fiff/fiff-cov) — Writes the covariance to a new FIFF file, like mne.Covariance.save.
-- **save** `[fn]` in [FiffEvokedSet](/docs/api/fiff/fiff-evoked-set) — Save this evoked data set to a FIFF file.
+- **save** `[fn]` in [FiffEvokedSet](/docs/api/fiff/fiff-evoked-set) — Writes the evoked data sets to a FIFF file, like mne.write_evokeds.
 - **save** `[fn]` in [FiffRawData](/docs/api/fiff/fiff-raw-data) — Save raw data to a FIFF file, optionally with decimation and channel picking.
 - **save** `[fn]` in [FigureExporter](/docs/api/disp/figure-exporter) — Renders `widget` offscreen at `size` and writes it as the next figure.
 - **save** `[fn]` in [FigureExporter](/docs/api/disp/figure-exporter) — Writes `image` as the next figure.
@@ -5655,6 +5606,7 @@ Index of 6768 public class members (functions, variables, typedefs, enums) acros
 - **size** `[var]` in [FiffDataRef](/docs/api/fiff/fiff-data-ref) — Size of the data, can be over 2 GB.
 - **size** `[fn]` in [FiffDigPointSet](/docs/api/fiff/fiff-dig-point-set) — Returns the number of stored FiffDigPoints.
 - **size** `[var]` in [FiffDirEntry](/docs/api/fiff/fiff-dir-entry) — How many bytes.
+- **size** `[fn]` in `FiffEvokedFile`
 - **size** `[fn]` in [FileByteStream](/docs/api/utils/file-byte-stream)
 - **size** `[fn]` in [FineCalibration](/docs/api/dsp/fine-calibration) — Get the number of entries.
 - **size** `[fn]` in [FsAnnotationSet](/docs/api/fs/fs-annotation-set) — Returns number of loaded hemispheres.
@@ -5761,9 +5713,6 @@ Index of 6768 public class members (functions, variables, typedefs, enums) acros
 - **SPtr** `[type]` in [AverageSelectionView](/docs/api/disp/average-selection-view) — Shared pointer type for [`AverageSelectionView`](/docs/api/disp/average-selection-view).
 - **SPtr** `[type]` in [AveragingSettingsView](/docs/api/disp/averaging-settings-view) — Shared pointer type for AveragingAdjustmentWidget.
 - **SPtr** `[type]` in [Bar](/docs/api/disp/bar) — Shared pointer type for [`Bar`](/docs/api/disp/bar) class.
-- **SPtr** `[type]` in [BIDSPath](/docs/api/bids/bids-path) — Shared pointer type for [`BIDSPath`](/docs/api/bids/bids-path).
-- **SPtr** `[type]` in [BidsRawData](/docs/api/bids/bids-raw-data)
-- **SPtr** `[type]` in [BidsTsv](/docs/api/bids/bids-tsv)
 - **SPtr** `[type]` in [BidsViewModel](/docs/api/disp/bids-view-model) — Shared pointer type for [`BidsViewModel`](/docs/api/disp/bids-view-model).
 - **SPtr** `[type]` in [ButterflyView](/docs/api/disp/butterfly-view) — Shared pointer type for [`ButterflyView`](/docs/api/disp/butterfly-view).
 - **SPtr** `[type]` in [ChannelDataModel](/docs/api/disp/channel-data-model)
@@ -5789,28 +5738,16 @@ Index of 6768 public class members (functions, variables, typedefs, enums) acros
 - **SPtr** `[type]` in [DraggableFramelessWidget](/docs/api/disp/draggable-frameless-widget) — Shared pointer type for [`DraggableFramelessWidget`](/docs/api/disp/draggable-frameless-widget).
 - **SPtr** `[type]` in [EvokedSetModel](/docs/api/disp/evoked-set-model) — Shared pointer type for [`EvokedSetModel`](/docs/api/disp/evoked-set-model).
 - **SPtr** `[type]` in [FiffAnnotations](/docs/api/fiff/fiff-annotations) — Shared pointer type.
-- **SPtr** `[type]` in [FiffChInfo](/docs/api/fiff/fiff-ch-info) — Shared pointer type for [`FiffChInfo`](/docs/api/fiff/fiff-ch-info).
-- **SPtr** `[type]` in [FiffChPos](/docs/api/fiff/fiff-ch-pos) — Shared pointer type for [`FiffChPos`](/docs/api/fiff/fiff-ch-pos).
-- **SPtr** `[type]` in [FiffCoordTransSet](/docs/api/fiff/fiff-coord-trans-set) — Shared pointer type for [`FiffCoordTransSet`](/docs/api/fiff/fiff-coord-trans-set).
 - **SPtr** `[type]` in [FiffCov](/docs/api/fiff/fiff-cov) — Shared pointer type for [`FiffCov`](/docs/api/fiff/fiff-cov).
-- **SPtr** `[type]` in [FiffCtfComp](/docs/api/fiff/fiff-ctf-comp) — Shared pointer type for [`FiffCtfComp`](/docs/api/fiff/fiff-ctf-comp).
 - **SPtr** `[type]` in [FiffDigitizerData](/docs/api/fiff/fiff-digitizer-data) — Shared pointer type for [`FiffDigitizerData`](/docs/api/fiff/fiff-digitizer-data).
-- **SPtr** `[type]` in [FiffDigPoint](/docs/api/fiff/fiff-dig-point) — Shared pointer type for [`FiffDigPoint`](/docs/api/fiff/fiff-dig-point).
 - **SPtr** `[type]` in [FiffDigPointSet](/docs/api/fiff/fiff-dig-point-set) — Shared pointer type for [`FiffDigPointSet`](/docs/api/fiff/fiff-dig-point-set).
-- **SPtr** `[type]` in [FiffDirEntry](/docs/api/fiff/fiff-dir-entry) — Shared pointer type for [`FiffDirEntry`](/docs/api/fiff/fiff-dir-entry).
 - **SPtr** `[type]` in [FiffDirNode](/docs/api/fiff/fiff-dir-node) — Shared pointer type for [`FiffDirNode`](/docs/api/fiff/fiff-dir-node).
 - **SPtr** `[type]` in [FiffEvoked](/docs/api/fiff/fiff-evoked) — Shared pointer type for [`FiffEvoked`](/docs/api/fiff/fiff-evoked).
 - **SPtr** `[type]` in [FiffEvokedSet](/docs/api/fiff/fiff-evoked-set) — Shared pointer type for [`FiffEvokedSet`](/docs/api/fiff/fiff-evoked-set).
-- **SPtr** `[type]` in [FiffId](/docs/api/fiff/fiff-id) — Shared pointer type for [`FiffId`](/docs/api/fiff/fiff-id).
 - **SPtr** `[type]` in [FiffInfo](/docs/api/fiff/fiff-info) — Shared pointer type for [`FiffInfo`](/docs/api/fiff/fiff-info).
-- **SPtr** `[type]` in [FiffInfoBase](/docs/api/fiff/fiff-info-base) — Shared pointer type for [`FiffInfoBase`](/docs/api/fiff/fiff-info-base).
-- **SPtr** `[type]` in [FiffNamedMatrix](/docs/api/fiff/fiff-named-matrix) — Shared pointer type for [`FiffNamedMatrix`](/docs/api/fiff/fiff-named-matrix).
-- **SPtr** `[type]` in [FiffProj](/docs/api/fiff/fiff-proj) — Shared pointer type for [`FiffProj`](/docs/api/fiff/fiff-proj).
 - **SPtr** `[type]` in [FiffRawData](/docs/api/fiff/fiff-raw-data) — Shared pointer type for [`FiffRawData`](/docs/api/fiff/fiff-raw-data).
 - **SPtr** `[type]` in [FiffRawDir](/docs/api/fiff/fiff-raw-dir) — Shared pointer type for [`FiffRawDir`](/docs/api/fiff/fiff-raw-dir).
 - **SPtr** `[type]` in [FiffRawViewSettings](/docs/api/disp/fiff-raw-view-settings) — Shared pointer type for [`FiffRawViewSettings`](/docs/api/disp/fiff-raw-view-settings).
-- **SPtr** `[type]` in [FiffSparseMatrix](/docs/api/fiff/fiff-sparse-matrix) — Shared pointer type for [`FiffSparseMatrix`](/docs/api/fiff/fiff-sparse-matrix).
-- **SPtr** `[type]` in [FiffTag](/docs/api/fiff/fiff-tag) — Shared pointer type for [`FiffTag`](/docs/api/fiff/fiff-tag).
 - **SPtr** `[type]` in [FilterDesignView](/docs/api/disp/filter-design-view) — Shared pointer type for [`FilterDesignView`](/docs/api/disp/filter-design-view).
 - **SPtr** `[type]` in [FilterIO](/docs/api/utils/filter-io) — Shared pointer type for [`FilterIO`](/docs/api/utils/filter-io).
 - **SPtr** `[type]` in [FilterOverlapAdd](/docs/api/dsp/filter-overlap-add) — Shared pointer type for [`FilterOverlapAdd`](/docs/api/dsp/filter-overlap-add).
@@ -5854,7 +5791,6 @@ Index of 6768 public class members (functions, variables, typedefs, enums) acros
 - **SPtr** `[type]` in [InvVolumeSourceEstimate](/docs/api/inv/inv-volume-source-estimate)
 - **SPtr** `[type]` in [IObserver](/docs/api/utils/i-observer) — Shared pointer type for [`IObserver`](/docs/api/utils/i-observer).
 - **SPtr** `[type]` in [IOUtils](/docs/api/utils/io-utils) — Shared pointer type for [`IOUtils`](/docs/api/utils/io-utils) class.
-- **SPtr** `[type]` in [KMeans](/docs/api/math/k-means) — Shared pointer type for [`KMeans`](/docs/api/math/k-means).
 - **SPtr** `[type]` in [LayoutLoader](/docs/api/utils/layout-loader) — Shared pointer type for [`LayoutLoader`](/docs/api/utils/layout-loader).
 - **SPtr** `[type]` in [LinePlot](/docs/api/disp/line-plot) — Shared pointer type for [`LinePlot`](/docs/api/disp/line-plot).
 - **SPtr** `[type]` in [MinimumNormSettingsView](/docs/api/disp/minimum-norm-settings-view) — Shared pointer type for [`MinimumNormSettingsView`](/docs/api/disp/minimum-norm-settings-view).
@@ -5939,7 +5875,6 @@ Index of 6768 public class members (functions, variables, typedefs, enums) acros
 - **SPtr** `[type]` in [TfSettingsView](/docs/api/disp/tf-settings-view) — Shared pointer type for [`TfSettingsView`](/docs/api/disp/tf-settings-view).
 - **SPtr** `[type]` in [TriggerDetectionView](/docs/api/disp/trigger-detection-view) — Shared pointer type for [`TriggerDetectionView`](/docs/api/disp/trigger-detection-view).
 - **SPtr** `[type]` in [UnbiasedSquaredPhaseLagIndex](/docs/api/connectivity/unbiased-squared-phase-lag-index) — Shared pointer type for [`UnbiasedSquaredPhaseLagIndex`](/docs/api/connectivity/unbiased-squared-phase-lag-index).
-- **SPtr** `[type]` in [Warp](/docs/api/math/warp) — Shared pointer type for [`Warp`](/docs/api/math/warp).
 - **SPtr** `[type]` in [WeightedPhaseLagIndex](/docs/api/connectivity/weighted-phase-lag-index) — Shared pointer type for [`WeightedPhaseLagIndex`](/docs/api/connectivity/weighted-phase-lag-index).
 - **square** `[fn]` in [Interpolation](/docs/api/disp3-d/interpolation) — square Negative parabola interpolation function with y-offset of 1.
 - **src** `[var]` in [MNEForwardSolution](/docs/api/mne/mne-forward-solution) — Geometric description of the source spaces (hemispheres).
@@ -6024,7 +5959,7 @@ Index of 6768 public class members (functions, variables, typedefs, enums) acros
 - **storageSize** `[fn]` in [FiffChPos](/docs/api/fiff/fiff-ch-pos) — Size of the old struct (fiffChPosRec) 13*int = 13*4 = 52.
 - **storageSize** `[fn]` in [FiffDataRef](/docs/api/fiff/fiff-data-ref) — Size of the old struct (fiffDataRefRec) 2*int + 2*long = 2*4 + 2*8 = 24.
 - **storageSize** `[fn]` in [FiffDigPoint](/docs/api/fiff/fiff-dig-point) — Size of the old struct (fiffDigPointRec) 5*int = 5*4 = 20.
-- **storageSize** `[fn]` in [FiffDirEntry](/docs/api/fiff/fiff-dir-entry) — Size of the old struct (fiffDirEntryRec) 4*int = 4*4 = 16.
+- **storageSize** `[fn]` in [FiffDirEntry](/docs/api/fiff/fiff-dir-entry)
 - **storageSize** `[fn]` in [FiffId](/docs/api/fiff/fiff-id) — Size of the old struct (fiffIdRec) 5*int = 5*4 = 20.
 - **storageSize** `[fn]` in [FiffTag](/docs/api/fiff/fiff-tag) — Size of the on-disk tag info header: kind + type + size + next = 4 x fiff_int_t.
 - **storageSize** `[fn]` in [FiffTime](/docs/api/fiff/fiff-time) — Size of the old struct (fiffTimeRec) 2*int = 2*4 = 8.
@@ -6466,25 +6401,11 @@ Index of 6768 public class members (functions, variables, typedefs, enums) acros
 - **upHint** `[fn]` in [VideoOverlay](/docs/api/disp3-d/video-overlay) — Hint direction used as the quad's "up" axis.
 - **upstreamNodes** `[fn]` in [MnaGraph](/docs/api/mna/mna-graph)
 - **UPtr** `[type]` in [AbstractFormatReader](/docs/api/bids/abstract-format-reader)
-- **UPtr** `[type]` in [FiffChInfo](/docs/api/fiff/fiff-ch-info) — Unique pointer type for [`FiffChInfo`](/docs/api/fiff/fiff-ch-info).
-- **UPtr** `[type]` in [FiffChPos](/docs/api/fiff/fiff-ch-pos) — Unique pointer type for [`FiffChPos`](/docs/api/fiff/fiff-ch-pos).
 - **UPtr** `[type]` in [FiffCoordTransSet](/docs/api/fiff/fiff-coord-trans-set) — Unique pointer type for [`FiffCoordTransSet`](/docs/api/fiff/fiff-coord-trans-set).
-- **UPtr** `[type]` in [FiffCov](/docs/api/fiff/fiff-cov) — Unique pointer type for [`FiffCov`](/docs/api/fiff/fiff-cov).
-- **UPtr** `[type]` in [FiffCtfComp](/docs/api/fiff/fiff-ctf-comp) — Unique pointer type for [`FiffCtfComp`](/docs/api/fiff/fiff-ctf-comp).
-- **UPtr** `[type]` in [FiffDigitizerData](/docs/api/fiff/fiff-digitizer-data) — Unique pointer type for [`FiffDigitizerData`](/docs/api/fiff/fiff-digitizer-data).
-- **UPtr** `[type]` in [FiffDigPoint](/docs/api/fiff/fiff-dig-point) — Unique pointer type for [`FiffDigPoint`](/docs/api/fiff/fiff-dig-point).
 - **UPtr** `[type]` in [FiffDigPointSet](/docs/api/fiff/fiff-dig-point-set) — Unique pointer type for [`FiffDigPointSet`](/docs/api/fiff/fiff-dig-point-set).
-- **UPtr** `[type]` in [FiffDirEntry](/docs/api/fiff/fiff-dir-entry) — Unique pointer type for [`FiffDirEntry`](/docs/api/fiff/fiff-dir-entry).
 - **UPtr** `[type]` in [FiffDirNode](/docs/api/fiff/fiff-dir-node) — Unique pointer type for [`FiffDirNode`](/docs/api/fiff/fiff-dir-node).
 - **UPtr** `[type]` in [FiffEvoked](/docs/api/fiff/fiff-evoked) — Unique pointer type for [`FiffEvoked`](/docs/api/fiff/fiff-evoked).
-- **UPtr** `[type]` in [FiffEvokedSet](/docs/api/fiff/fiff-evoked-set) — Unique pointer type for [`FiffEvokedSet`](/docs/api/fiff/fiff-evoked-set).
-- **UPtr** `[type]` in [FiffId](/docs/api/fiff/fiff-id) — Unique pointer type for [`FiffId`](/docs/api/fiff/fiff-id).
-- **UPtr** `[type]` in [FiffInfo](/docs/api/fiff/fiff-info) — Unique pointer type for [`FiffInfo`](/docs/api/fiff/fiff-info).
-- **UPtr** `[type]` in [FiffInfoBase](/docs/api/fiff/fiff-info-base) — Unique pointer type for [`FiffInfoBase`](/docs/api/fiff/fiff-info-base).
-- **UPtr** `[type]` in [FiffNamedMatrix](/docs/api/fiff/fiff-named-matrix) — Unique pointer type for [`FiffNamedMatrix`](/docs/api/fiff/fiff-named-matrix).
-- **UPtr** `[type]` in [FiffProj](/docs/api/fiff/fiff-proj) — Unique pointer type for [`FiffProj`](/docs/api/fiff/fiff-proj).
 - **UPtr** `[type]` in [FiffRawData](/docs/api/fiff/fiff-raw-data) — Unique pointer type for [`FiffRawData`](/docs/api/fiff/fiff-raw-data).
-- **UPtr** `[type]` in [FiffRawDir](/docs/api/fiff/fiff-raw-dir) — Unique pointer type for [`FiffRawDir`](/docs/api/fiff/fiff-raw-dir).
 - **UPtr** `[type]` in [FiffSparseMatrix](/docs/api/fiff/fiff-sparse-matrix) — Unique pointer type for [`FiffSparseMatrix`](/docs/api/fiff/fiff-sparse-matrix).
 - **UPtr** `[type]` in [FiffTag](/docs/api/fiff/fiff-tag) — Unique pointer type for [`FiffTag`](/docs/api/fiff/fiff-tag).
 - **UPtr** `[type]` in [FwdBemModel](/docs/api/fwd/fwd-bem-model) — Unique pointer type for [`FwdBemModel`](/docs/api/fwd/fwd-bem-model).

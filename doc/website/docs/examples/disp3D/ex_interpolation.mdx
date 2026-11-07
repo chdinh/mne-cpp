@@ -198,12 +198,7 @@ int main(int argc, char* argv[])
     //acquire sensor positions
 
     // Load data
-    fiff_int_t setno = 0;
-    QPair<float, float> baseline(-1.0f, -1.0f);
-    FiffEvoked evoked(parser.value(sampleEvokedFileOption).toStdString(), setno, baseline);
-    if (evoked.isEmpty()) {
-        return 1;
-    }
+    FiffEvoked evoked(parser.value(sampleEvokedFileOption).toStdU16String(), 0);
 
     // Build sensor position matrices
     int nEeg = 0, nMeg = 0;

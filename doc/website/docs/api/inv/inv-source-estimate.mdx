@@ -33,7 +33,7 @@ FsLabel::read(data + "/subjects/sample/label/lh.V1.label", v1);
 QFile fwdFile(data + "/Result/ref-sample_audvis-meg-eeg-oct-6-fwd.fif");
 const MNEForwardSolution fwd = MNEForwardSolution(fwdFile).pick_regions({v1}); // 70 sources x 3 orientations
 const FiffCov noiseCov((data + "/MEG/sample/sample_audvis-cov.fif").toStdString());
-const FiffEvoked evoked((data + "/MEG/sample/sample_audvis-ave.fif").toStdString(), 0); // "Left Auditory"
+const FiffEvoked evoked((data + "/MEG/sample/sample_audvis-ave.fif").toStdU16String(), 0); // "Left Auditory"
 
 const MNEInverseOperator inverse = MNEInverseOperator::make_inverse_operator(evoked.info, fwd, noiseCov, 0.2f, 0.8f);
 const float lambda2 = 1.0f / 9.0f; // SNR 3

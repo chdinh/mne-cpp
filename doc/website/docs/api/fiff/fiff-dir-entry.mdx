@@ -12,7 +12,7 @@ sidebar_position: 20
 `#include <fiff/fiff_dir_entry.h>`
 
 ```cpp
-class FIFFLIB::FiffDirEntry
+struct FIFFLIB::FiffDirEntry
 ```
 
 Directory entry: tag kind + on-disk type + byte size + absolute file offset (16-byte record).
@@ -23,7 +23,7 @@ Exact memory image of the legacy `fiffDirEntryRec` record: kind (32-bit), type (
 QFile structureFile(rawPath);
 FiffStream stream(&structureFile);
 ok &= stream.open();
-const QList<FiffDirEntry::SPtr>& directory = stream.dir(); // every tag (kind, type, size, position) + a kind -1 end
+const std::vector<FiffDirEntry>& directory = stream.dir(); // every tag (kind, type, size, position) + a kind -1 end
 const FiffTime created = stream.id().time;                 // seconds and microseconds since 1970
 stream.close();
 ```
@@ -33,33 +33,8 @@ stream.close();
 int samples = 0;
 for (const FiffRawDir& buffer : raw.rawdir)
     samples += buffer.nsamp;
-const FiffDirEntry::SPtr firstBuffer = raw.rawdir.first().ent;
+const FiffDirEntry firstBuffer = raw.rawdir.first().ent;
 ```
-
----
-
-## Public Methods
-
-### FiffDirEntry()
-
-Constructs the dir entry.
-
----
-
-### FiffDirEntry(p_FiffDirEntry)
-
-Copy constructor.
-
-**Parameters:**
-
-- **p_FiffDirEntry** : *const FiffDirEntry &*
-  Dir Entry which should be copied.
-
----
-
-### ~FiffDirEntry()
-
-Destroys the dir entry.
 
 ---
 
@@ -67,11 +42,9 @@ Destroys the dir entry.
 
 ### storageSize()
 
-Size of the old struct (fiffDirEntryRec) 4*int = 4*4 = 16.
-
 **Returns:**
 
-- *qint32* — the size of the old struct fiffDirEntryRec.
+- *qint32* — The size of one entry in a FIFF directory tag.
 
 ---
 
@@ -92,9 +65,9 @@ FIFF library: fixed-length epochs, CTF compensation, the file directory and raw 
 int samples = 0;
 for (const FiffRawDir& buffer : raw.rawdir)
     samples += buffer.nsamp;
-const FiffDirEntry::SPtr firstBuffer = raw.rawdir.first().ent;
+const FiffDirEntry firstBuffer = raw.rawdir.first().ent;
 // mne.io.read_raw_fif: 2 buffers, 6007 samples from first_samp 12900; fiff_open lists 640 directory entries
-ok &= expect(raw.rawdir.size() == 2 && samples == 6007 && raw.rawdir.first().first == 12900 && firstBuffer->kind == FIFF_DATA_BUFFER,
+ok &= expect(raw.rawdir.size() == 2 && samples == 6007 && raw.rawdir.first().first == 12900 && firstBuffer.kind == FIFF_DATA_BUFFER,
              "FiffRawDir/FiffDirEntry: 2 data buffers cover the 6007 samples from sample 12900");
 ````
 

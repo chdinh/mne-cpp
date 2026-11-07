@@ -26,7 +26,7 @@ Single averaged evoked response: time axis, data, baseline, channel info and ave
 Holds one `FIFFB_EVOKED` block: `times`, `data`, `first` / `last` sample indices, `baseline`, `kind`, `nave`, `comment` and the [`FiffInfo`](/docs/api/fiff/fiff-info) describing the channels. Use [`FiffEvokedSet`](/docs/api/fiff/fiff-evoked-set) for recordings that contain multiple averaging conditions.
 
 ```cpp title="src/examples/ex_fiff_api/main.cpp"
-FiffEvokedSet evokedSet((dir + "/sample_audvis-ave.fif").toStdString()); // all conditions of an -ave.fif file
+FiffEvokedSet evokedSet((dir + "/sample_audvis-ave.fif").toStdU16String()); // all conditions of an -ave.fif file
 const FiffEvoked& leftAuditory = evokedSet.evoked[0];
 ```
 
@@ -40,26 +40,26 @@ Constructs a fiff evoked data.
 
 ---
 
-### FiffEvoked(path, setno, t_baseline, proj, p_aspect_kind)
+### FiffEvoked(path, condition, baseline, proj, kind)
 
-Constructs fiff evoked data by reading a FIFF file.
+Reads one evoked data set, like `read()`; throws [`Error`](/docs/api/utils/error) if it cannot.
 
 **Parameters:**
 
 - **path** : *const std::filesystem::path &*
-  FIFF file to read the evoked data set from.
+  The file.
 
-- **setno** : *QVariant*
-  The set to pick. Dataset ID number (int) or comment/name (str). Optional if there isonly one data set in file.
+- **condition** : *const Condition &*
+  Index of the data set, or its comment together with `kind`.
 
-- **t_baseline** : *QPair&lt; float, float &gt;*
-  The time interval to apply rescaling / baseline correction. If None do not apply it. If baseline is (a, b). the interval is between "a (s)" and "b (s)". If a is None the beginning of the data is used and if b is None then b is set to the end of the interval. If baseline is equal ot (None, None) all the time interval is used. If None, no correction is applied.
+- **baseline** : *const Baseline &*
+  Interval to subtract the mean of, or none for no baseline correction.
 
 - **proj** : *bool*
-  Apply SSP projection vectors (optional, default = true).
+  Apply the SSP projectors of the file.
 
-- **p_aspect_kind** : *fiff_int_t*
-  Either "FIFFV_ASPECT_AVERAGE" or "FIFFV_ASPECT_STD_ERR". The type of data to read. Only used if "setno" is a str.
+- **kind** : *fiff_int_t*
+  FIFFV_ASPECT_AVERAGE or FIFFV_ASPECT_STD_ERR; selects among sets of the same comment.
 
 ---
 
@@ -197,37 +197,30 @@ Applies baseline correction to the evoked data.
 
 ## Static Methods
 
-### read(path, p_FiffEvoked, setno, t_baseline, proj, p_aspect_kind)
+### read(path, condition, baseline, proj, kind)
 
-fiff_read_evoked
-
-Wrapper for the FiffEvokedDataSet::read_evoked static function
-
-Read one evoked data set
+Reads one evoked data set of a FIFF file, like mne.read_evokeds.
 
 **Parameters:**
 
 - **path** : *const std::filesystem::path &*
-  FIFF file to read.
+  The file.
 
-- **p_FiffEvoked** : *[FiffEvoked](/docs/api/fiff/fiff-evoked) &*
-  The read evoked data.
+- **condition** : *const Condition &*
+  Index of the data set, or its comment together with `kind`.
 
-- **setno** : *QVariant*
-  the set to pick. Dataset ID number (int) or comment/name (str). Optional if there isonly one data set in file.
-
-- **t_baseline** : *QPair&lt; float, float &gt;*
-  The time interval to apply rescaling / baseline correction. If None do not apply it. If baseline is (a, b). the interval is between "a (s)" and "b (s)". If a is None the beginning of the data is used and if b is None then b is set to the end of the interval. If baseline is equal ot (None, None) all the time interval is used. If None, no correction is applied.
+- **baseline** : *const Baseline &*
+  Interval to subtract the mean of, or none for no baseline correction.
 
 - **proj** : *bool*
-  Apply SSP projection vectors (optional, default = true).
+  Apply the SSP projectors of the file.
 
-- **p_aspect_kind** : *fiff_int_t*
-  Either "FIFFV_ASPECT_AVERAGE" or "FIFFV_ASPECT_STD_ERR". The type of data to read. Only used if "setno" is a str.
+- **kind** : *fiff_int_t*
+  FIFFV_ASPECT_AVERAGE or FIFFV_ASPECT_STD_ERR; selects among sets of the same comment.
 
 **Returns:**
 
-- *bool* — true if successful, false otherwise.
+- *[Expected](/docs/api/utils/expected)&lt; [FiffEvoked](/docs/api/fiff/fiff-evoked) &gt;* — The evoked data, or why the file holds none matching `condition`.
 
 ---
 

@@ -175,7 +175,7 @@ Returns the directory compiled into a tree dir is set when `open()` was called.
 
 **Returns:**
 
-- *QList&lt; [FiffDirEntry](/docs/api/fiff/fiff-dir-entry)::SPtr &gt; &* — the directory.
+- *std::vector&lt; [FiffDirEntry](/docs/api/fiff/fiff-dir-entry) &gt; &* — the directory.
 
 ---
 
@@ -185,7 +185,7 @@ Returns the directory compiled into a tree dir is set when `open()` was called.
 
 **Returns:**
 
-- *const QList&lt; [FiffDirEntry](/docs/api/fiff/fiff-dir-entry)::SPtr &gt; &* — the directory.
+- *const std::vector&lt; [FiffDirEntry](/docs/api/fiff/fiff-dir-entry) &gt; &* — the directory.
 
 ---
 
@@ -292,18 +292,21 @@ Close stream.
 
 ---
 
-### make_subtree(dentry)
+### make_subtree(dentry, current)
 
-Create the directory tree structure.
+Builds the block tree of a directory from the block that starts at an entry.
 
 **Parameters:**
 
-- **dentry** : *QList&lt; [FiffDirEntry](/docs/api/fiff/fiff-dir-entry)::SPtr &gt; &*
-  The dir entries of which the tree should be constructed.
+- **dentry** : *const std::vector&lt; [FiffDirEntry](/docs/api/fiff/fiff-dir-entry) &gt; &*
+  The directory.
+
+- **current** : *qsizetype*
+  Index of the entry that starts the block.
 
 **Returns:**
 
-- *[FiffDirNode](/docs/api/fiff/fiff-dir-node)::SPtr* — The created dir tree.
+- *[FiffDirNode](/docs/api/fiff/fiff-dir-node)::SPtr* — The block, or null if a tag cannot be read.
 
 ---
 
@@ -788,7 +791,7 @@ Writes a list of dir entries to a fif file, as a FIFFT_DIR_ENTRY_STRUCT Returns 
 
 **Parameters:**
 
-- **dir** : *const QList&lt; [FiffDirEntry](/docs/api/fiff/fiff-dir-entry)::SPtr &gt; &*
+- **dir** : *const std::vector&lt; [FiffDirEntry](/docs/api/fiff/fiff-dir-entry) &gt; &*
   The dir entries to write.
 
 - **pos** : *fiff_long_t*
@@ -1417,11 +1420,11 @@ FIFF library: fixed-length epochs, CTF compensation, the file directory and raw 
 QFile structureFile(rawPath);
 FiffStream stream(&structureFile);
 ok &= stream.open();
-const QList<FiffDirEntry::SPtr>& directory = stream.dir(); // every tag (kind, type, size, position) + a kind -1 end
+const std::vector<FiffDirEntry>& directory = stream.dir(); // every tag (kind, type, size, position) + a kind -1 end
 const FiffTime created = stream.id().time;                 // seconds and microseconds since 1970
 stream.close();
 // mne fiff_open: 640 entries; file_id secs 1411146352, usecs 0
-ok &= expect(directory.size() == 641 && directory.last()->kind == -1 && created.secs == 1411146352 && created.usecs == 0 && FiffTime::storageSize() == 8 && FiffDirEntry::storageSize() == 16,
+ok &= expect(directory.size() == 641 && directory.back().kind == -1 && created.secs == 1411146352 && created.usecs == 0 && FiffTime::storageSize() == 8 && FiffDirEntry::storageSize() == 16,
              "FiffDirEntry/FiffTime: the 640 tags of mne fiff_open plus the end entry; the file id was written at 1411146352 s");
 ````
 

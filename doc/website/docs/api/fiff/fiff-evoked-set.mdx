@@ -22,7 +22,7 @@ Set of [`FiffEvoked`](/docs/api/fiff/fiff-evoked) instances sharing one [`FiffIn
 The on-disk shape of a `*-ave.fif`: one [`FiffInfo`](/docs/api/fiff/fiff-info) and one [`FiffEvoked`](/docs/api/fiff/fiff-evoked) per `FIFFB_EVOKED` block (one per averaging condition). Conversion utilities pick channels and shift compensation state across the whole set in lock-step.
 
 ```cpp title="src/examples/ex_fiff_api/main.cpp"
-FiffEvokedSet evokedSet((dir + "/sample_audvis-ave.fif").toStdString()); // all conditions of an -ave.fif file
+FiffEvokedSet evokedSet((dir + "/sample_audvis-ave.fif").toStdU16String()); // all conditions of an -ave.fif file
 const FiffEvoked& leftAuditory = evokedSet.evoked[0];
 ```
 
@@ -36,14 +36,23 @@ Constructs a fiff evoked data set.
 
 ---
 
-### FiffEvokedSet(path)
+### FiffEvokedSet(path, conditions, baseline, proj)
 
-Constructs a fiff evoked data set by reading a FIFF file.
+Reads evoked data sets of a FIFF file, like `read()`; throws [`Error`](/docs/api/utils/error) if it cannot.
 
 **Parameters:**
 
 - **path** : *const std::filesystem::path &*
-  FIFF file to read the evoked data set from.
+  The file.
+
+- **conditions** : *const std::vector&lt; [FiffEvoked](/docs/api/fiff/fiff-evoked)::Condition &gt; &*
+  Indices or comments of the averages to read, in this order; empty reads all.
+
+- **baseline** : *const [FiffEvoked](/docs/api/fiff/fiff-evoked)::Baseline &*
+  Interval to subtract the mean of, or none for no baseline correction.
+
+- **proj** : *bool*
+  Apply the SSP projectors of the file.
 
 ---
 
@@ -143,46 +152,42 @@ Find evoked data sets
 
 ### save(path)
 
-Save this evoked data set to a FIFF file.
+Writes the evoked data sets to a FIFF file, like mne.write_evokeds.
 
 **Parameters:**
 
 - **path** : *const std::filesystem::path &*
-  Output file path.
+  The file.
 
 **Returns:**
 
-- *bool* — true on success.
+- *[Expected](/docs/api/utils/expected)&lt; void &gt;* — Nothing, or why the file cannot be written.
 
 ---
 
 ## Static Methods
 
-### read(path, p_FiffEvokedSet, baseline, proj)
+### read(path, conditions, baseline, proj)
 
-fiff_read_evoked
-
-Wrapper for the FiffEvokedDataSet::read_evoked static function
-
-Read one evoked data set
+Reads evoked data sets of a FIFF file in one pass, like mne.read_evokeds.
 
 **Parameters:**
 
 - **path** : *const std::filesystem::path &*
-  FIFF file to read.
+  The file.
 
-- **p_FiffEvokedSet** : *[FiffEvokedSet](/docs/api/fiff/fiff-evoked-set) &*
-  The read evoked data set.
+- **conditions** : *const std::vector&lt; [FiffEvoked](/docs/api/fiff/fiff-evoked)::Condition &gt; &*
+  Indices or comments of the averages to read, in this order; empty reads all.
 
-- **baseline** : *QPair&lt; float, float &gt;*
-  The time interval to apply rescaling / baseline correction. If None do not apply it. If baseline is (a, b). the interval is between "a (s)" and "b (s)". If a is None the beginning of the data is used and if b is None then b is set to the end of the interval. If baseline is equal ot (None, None) all the time interval is used. If None, no correction is applied.
+- **baseline** : *const [FiffEvoked](/docs/api/fiff/fiff-evoked)::Baseline &*
+  Interval to subtract the mean of, or none for no baseline correction.
 
 - **proj** : *bool*
-  Apply SSP projection vectors (optional, default = true).
+  Apply the SSP projectors of the file.
 
 **Returns:**
 
-- *bool* — true when successful, false otherwise.
+- *[Expected](/docs/api/utils/expected)&lt; [FiffEvokedSet](/docs/api/fiff/fiff-evoked-set) &gt;* — The evoked data sets, or why the file does not hold them.
 
 ---
 
@@ -310,7 +315,7 @@ Inverse library: equivalent current dipole fitting in a sphere model.
 
 ````cpp title="src/examples/ex_inv_dipole_fit/main.cpp, line 116"
 // Hand the field to the pipeline as an evoked file with two samples.
-FiffEvokedSet evokedSet(sampleAve.toStdString());
+FiffEvokedSet evokedSet(sampleAve.toStdU16String());
 FiffEvoked evoked = evokedSet.evoked[0].pick_channels(StringList(fitData->ch_names.begin() + 0, fitData->ch_names.begin() + 0 + fitData->nmeg));
 evoked.info.bads.clear();
 evoked.data = field.cast<double>().replicate(1, 2);
@@ -321,7 +326,7 @@ evoked.nave = 1;
 FiffEvokedSet synthetic;
 synthetic.info = evoked.info;
 synthetic.evoked.append(evoked);
-ok &= expect(synthetic.save(tmp.filePath("synthetic-ave.fif").toStdString()), "FiffEvokedSet writes the synthetic field");
+ok &= expect(synthetic.save(tmp.filePath("synthetic-ave.fif").toStdU16String()).has_value(), "FiffEvokedSet writes the synthetic field");
 ````
 
 ### [ex_fiff_api](../../examples/fiff/ex_fiff_api.mdx)
@@ -329,7 +334,7 @@ ok &= expect(synthetic.save(tmp.filePath("synthetic-ave.fif").toStdString()), "F
 FIFF library: measurement info, channels, digitizer, transforms, projectors, covariance, events, annotations, evoked sets and the low-level file structure.
 
 ````cpp title="src/examples/ex_fiff_api/main.cpp, line 206"
-FiffEvokedSet evokedSet((dir + "/sample_audvis-ave.fif").toStdString()); // all conditions of an -ave.fif file
+FiffEvokedSet evokedSet((dir + "/sample_audvis-ave.fif").toStdU16String()); // all conditions of an -ave.fif file
 const FiffEvoked& leftAuditory = evokedSet.evoked[0];
 // mne.read_evokeds: 4 conditions, "Left Auditory" nave 55, 376 x 421 samples starting at -0.1998 s
 ok &= expect(evokedSet.evoked.size() == 4 && leftAuditory.comment == "Left Auditory" && leftAuditory.nave == 55 && leftAuditory.data.cols() == 421 && std::fabs(leftAuditory.times(0) + 0.19979521f) < 1e-6f,
