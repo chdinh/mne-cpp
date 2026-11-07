@@ -64,7 +64,8 @@ const apiSidebar: SidebarsConfig['apiSidebar'] = [
         'api/fiff/fiff-epoch-data',
         'api/fiff/fiff-explain',
         'api/fiff/rejection-params',
-        'api/fiff/fiff-device-info'
+        'api/fiff/fiff-device-info',
+        'api/fiff/fiff-dig-montage'
       ],
     },
     {

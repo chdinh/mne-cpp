@@ -7,7 +7,7 @@ sidebar_position: 5
 
 # Class Members
 
-Index of 6694 public class members (functions, variables, typedefs, enums) across all documented classes.
+Index of 6696 public class members (functions, variables, typedefs, enums) across all documented classes.
 
 **Jump to:** [A](#a) · [B](#b) · [C](#c) · [D](#d) · [E](#e) · [F](#f) · [G](#g) · [H](#h) · [I](#i) · [J](#j) · [K](#k) · [L](#l) · [M](#m) · [N](#n) · [O](#o) · [P](#p) · [Q](#q) · [R](#r) · [S](#s) · [T](#t) · [U](#u) · [V](#v) · [W](#w) · [X](#x) · [Y](#y) · [Z](#z)
 
@@ -505,6 +505,7 @@ Index of 6694 public class members (functions, variables, typedefs, enums) acros
 - **ch_kind** `[var]` in [MNEChSelection](/docs/api/mne/mne-ch-selection) — Kinds of the channels corresponding to picks.
 - **ch_major** `[var]` in [MNEMeasData](/docs/api/mne/mne-meas-data) — If true, data rows are channels (not times).
 - **ch_name** `[var]` in [FiffChInfo](/docs/api/fiff/fiff-ch-info) — Descriptive name for the channel.
+- **ch_names** `[var]` in [FiffDigMontage](/docs/api/fiff/fiff-dig-montage) — Names of the EEG electrodes, in the order of their points.
 - **ch_names** `[fn]` in [FiffEvoked](/docs/api/fiff/fiff-evoked) — Returns list of channel names stored in fiff info -&gt; this is to stay consistent with python.
 - **ch_names** `[var]` in [FiffInfoBase](/docs/api/fiff/fiff-info-base) — List of all channel names.
 - **ch_names** `[var]` in [InvDipoleFitData](/docs/api/inv/inv-dipole-fit-data) — List of all channel names.
@@ -1383,6 +1384,7 @@ Index of 6694 public class members (functions, variables, typedefs, enums) acros
 - **diagnoise** `[var]` in [InvDipoleFitSettings](/docs/api/inv/inv-dipole-fit-settings) — Use only the diagonals of the noise-covariance matrix.
 - **diagonalFixed** `[fn]` in [StsCovEstimators](/docs/api/sts/sts-cov-estimators) — Fixed diagonal regularisation.
 - **diff** `[var]` in [MNEMshLight](/docs/api/mne/mne-msh-light)
+- **dig** `[var]` in [FiffDigMontage](/docs/api/fiff/fiff-dig-montage) — The digitizer points.
 - **dig** `[var]` in [FiffInfo](/docs/api/fiff/fiff-info) — The digitization points.
 - **dig** `[var]` in [ViewVisibilityProfile](/docs/api/disp3-d/view-visibility-profile)
 - **dig_trans** `[var]` in [FiffInfo](/docs/api/fiff/fiff-info) — Digitizer coordinate transformation.
@@ -4502,6 +4504,7 @@ Index of 6694 public class members (functions, variables, typedefs, enums) acros
 - **read_bem_surface** `[fn]` in [MNESurface](/docs/api/mne/mne-surface) — Read a BEM surface from a FIFF file (excess-neighbor checking enabled).
 - **read_bem_surface** `[fn]` in [MNESurface](/docs/api/mne/mne-surface) — Read a BEM surface from a FIFF file.
 - **read_bem_surface2** `[fn]` in [MNESurface](/docs/api/mne/mne-surface) — Read a BEM surface from a FIFF file (excess-neighbor checking disabled).
+- **read_captrak** `[fn]` in [FiffDigMontage](/docs/api/fiff/fiff-dig-montage) — Reads a BrainVision CapTrak .bvct file, as mne.channels.read_dig_captrak does: the electrodes named Nasion, LPA and RPA are the cardinal points, every other one an EEG electrode.
 - **read_coil_defs** `[fn]` in [FwdCoilSet](/docs/api/fwd/fwd-coil-set) — Read a coil definitions from file.
 - **read_cov** `[fn]` in [FiffStream](/docs/api/fiff/fiff-stream) — mne_read_cov - also for mne_read_noise_cov
 - **read_cov** `[fn]` in [MNE](/docs/api/mne/mne-class) — mne_read_cov
@@ -4509,6 +4512,7 @@ Index of 6694 public class members (functions, variables, typedefs, enums) acros
 - **read_curv** `[fn]` in [FsSurface](/docs/api/fs/fs-surface) — reads a binary curvature file into a vector
 - **read_digitizer_data** `[fn]` in [FiffStream](/docs/api/fiff/fiff-stream) — Reimplemntation of load_digitizer_data (digitizer.c).
 - **read_dipoles_dip** `[fn]` in [InvEcdSet](/docs/api/inv/inv-ecd-set) — Read dipoles from the dip format compatible with mrilab.
+- **read_egi** `[fn]` in [FiffDigMontage](/docs/api/fiff/fiff-dig-montage) — Reads the coordinates.xml of an EGI MFF recording, as mne.channels.read_dig_egi does.
 - **read_eigen_matrix** `[fn]` in [IOUtils](/docs/api/utils/io-utils) — Read Eigen Matrix from file (QString path).
 - **read_eigen_matrix** `[fn]` in [IOUtils](/docs/api/utils/io-utils)
 - **read_eigen_matrix** `[fn]` in [IOUtils](/docs/api/utils/io-utils)
@@ -4526,9 +4530,13 @@ Index of 6694 public class members (functions, variables, typedefs, enums) acros
 - **read_from_node** `[fn]` in [MNESssData](/docs/api/mne/mne-sss-data) — Read the SSS data from the given node of an open fiff stream Refactored: mne_read_from_node (mne_sss_data.c).
 - **read_inverse_operator** `[fn]` in [MNEInverseOperator](/docs/api/mne/mne-inverse-operator) — Read an inverse operator from a FIFF file.
 - **read_label** `[fn]` in [MNESourceSpace](/docs/api/mne/mne-source-space)
+- **read_localite** `[fn]` in [FiffDigMontage](/docs/api/fiff/fiff-dig-montage) — Reads a Localite .csv file ("#,name,x,y,z" in millimetres after a header row), as mne.channels.read_dig_localite does.
 - **read_meas_info** `[fn]` in [FiffStream](/docs/api/fiff/fiff-stream) — fiff_read_meas_info
 - **read_meas_info_base** `[fn]` in [FiffStream](/docs/api/fiff/fiff-stream) — python read_forward_meas_info
 - **read_named_matrix** `[fn]` in [FiffStream](/docs/api/fiff/fiff-stream) — fiff_read_named_matrix
+- **read_neuroscan_dat** `[fn]` in [FiffDigMontage](/docs/api/fiff/fiff-dig-montage) — Reads a Neuroscan .dat electrode file ("name number x y z" per line), as mne.channels.read_dig_dat does: point numbers 78, 76 and 82 are the nasion, LPA and RPA, 67 (the centroid) is skipped, and the coordinates are kept as they are.
+- **read_polhemus_fastscan** `[fn]` in [FiffDigMontage](/docs/api/fiff/fiff-dig-montage) — Reads the points of a Polhemus FastSCAN .txt file, as mne.channels.read_polhemus_fastscan does.
+- **read_polhemus_isotrak** `[fn]` in [FiffDigMontage](/docs/api/fiff/fiff-dig-montage) — Reads a Polhemus Isotrak file, as mne.channels.read_dig_polhemus_isotrak does.
 - **read_proj** `[fn]` in [FiffStream](/docs/api/fiff/fiff-stream) — Read the SSP data under a given directory node.
 - **read_raw_segment** `[fn]` in [Fiff](/docs/api/fiff/fiff-class) — fiff_read_raw_segment
 - **read_raw_segment** `[fn]` in [Fiff](/docs/api/fiff/fiff-class) — fiff_read_raw_segment
@@ -4551,11 +4559,9 @@ Index of 6694 public class members (functions, variables, typedefs, enums) acros
 - **readBigEndian** `[fn]` in [ByteStream](/docs/api/utils/byte-stream)
 - **readBrainstormMonFile** `[fn]` in [SelectionIO](/docs/api/utils/selection-io) — Reads the specified Brainstorm montage file.
 - **readBrainstormMonFile** `[fn]` in [SelectionIO](/docs/api/utils/selection-io) — Reads the specified Brainstorm montage file.
-- **readCaptrak** `[fn]` in [FiffDigPointSet](/docs/api/fiff/fiff-dig-point-set) — Reads a BrainVision CapTrak .bvct file, as mne.channels.read_dig_captrak does.
 - **readCsv** `[fn]` in [FiffAnnotations](/docs/api/fiff/fiff-annotations) — Reads annotations from a CSV file.
 - **readCsv** `[fn]` in [InvSourceEstimateIO](/docs/api/inv/inv-source-estimate-io) — Read source estimate from CSV format.
 - **readDefinitionFile** `[fn]` in [ChannelDerivation](/docs/api/utils/channel-derivation) — Read derivation rules from an MNE-C derivation text file (`MNELIB::MNEDerivSet::readText`).
-- **readEgi** `[fn]` in [FiffDigPointSet](/docs/api/fiff/fiff-dig-point-set) — Reads the coordinates.xml of an EGI MFF recording, as mne.channels.read_dig_egi does.
 - **readEpochs** `[fn]` in [MNEEpochDataList](/docs/api/mne/mne-epoch-data-list) — Read the epochs from a raw file based on provided events.
 - **reader** `[fn]` in [AcqStream](/docs/api/acq/acq-stream) — Attaches a reader (control path; before or after start()).
 - **reader** `[var]` in [BidsRawData](/docs/api/bids/bids-raw-data) — The underlying format reader (keeps file open).
@@ -4567,7 +4573,6 @@ Index of 6694 public class members (functions, variables, typedefs, enums) acros
 - **readInfo** `[fn]` in [RtDataClient](/docs/api/com/rt-data-client) — Reads fiff measurement information of a data the connection.
 - **readJson** `[fn]` in [BidsCoordinateSystem](/docs/api/bids/bids-coordinate-system) — Read a BIDS *_coordsystem.json file.
 - **readJson** `[fn]` in [FiffAnnotations](/docs/api/fiff/fiff-annotations) — Reads annotations from a JSON file.
-- **readLocalite** `[fn]` in [FiffDigPointSet](/docs/api/fiff/fiff-dig-point-set) — Reads a Localite .csv file ("#,name,x,y,z" in millimetres after a header row), as mne.channels.read_dig_localite does.
 - **readMatrix** `[fn]` in [PythonTestHelper](/docs/api/utils/python-test-helper) — Read an Eigen matrix from a text file (space-separated values, one row per line).
 - **readMegEegChannels** `[fn]` in [FiffInfo](/docs/api/fiff/fiff-info) — Read MEG and EEG channel information from a FIFF file, excluding bad channels.
 - **readMetadata** `[fn]` in [RtDataClient](/docs/api/com/rt-data-client) — Reads fiff metaata class from data connection.
@@ -4575,9 +4580,6 @@ Index of 6694 public class members (functions, variables, typedefs, enums) acros
 - **readMNESelFile** `[fn]` in [SelectionIO](/docs/api/utils/selection-io) — Reads the specified MNE sel file.
 - **readMniTransform** `[fn]` in [FiffCoordTransSet](/docs/api/fiff/fiff-coord-trans-set) — Reads the scanner RAS -&gt; MNI Talairach transform of a FreeSurfer/MNI .xfm file (MNE-C read_mni_coord_transform_file).
 - **ReadMode** `[enum]` in [AcqReader](/docs/api/acq/acq-reader) — Consumption mode.
-- **readNeuroscanDat** `[fn]` in [FiffDigPointSet](/docs/api/fiff/fiff-dig-point-set) — Reads a Neuroscan .dat electrode file ("name number x y z" per line), as mne.channels.read_dig_dat does: point numbers 78, 76 and 82 are the nasion, LPA and RPA, 67 (the centroid) is skipped, and the coordinates are kept as they are.
-- **readPolhemusFastscan** `[fn]` in [FiffDigPointSet](/docs/api/fiff/fiff-dig-point-set) — Reads the points of a Polhemus FastSCAN .txt file in metres, as mne.channels.read_polhemus_fastscan does.
-- **readPolhemusIsotrak** `[fn]` in [FiffDigPointSet](/docs/api/fiff/fiff-dig-point-set) — Reads a Polhemus Isotrak digitizer file, as mne.channels.read_dig_polhemus_isotrak does.
 - **readRawBuffer** `[fn]` in [RtDataClient](/docs/api/com/rt-data-client) — Reads fiff measurement information of a data the connection.
 - **readRawSegment** `[fn]` in [AbstractFormatReader](/docs/api/bids/abstract-format-reader) — Read a segment of raw data.
 - **readRawSegment** `[fn]` in [BrainVisionReader](/docs/api/bids/brain-vision-reader) — Read a segment of raw data.
