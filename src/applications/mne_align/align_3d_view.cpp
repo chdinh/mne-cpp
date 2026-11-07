@@ -12,7 +12,7 @@
 
 #include "align_3d_view.h"
 
-#include "acquired_points.h"
+#include "qt_conversions.h"
 
 #include <disp3D/model/braintreemodel.h>
 #include <disp3D/scene/multimodalscene.h>
@@ -27,6 +27,7 @@
 
 #include <QVBoxLayout>
 
+using namespace ACQLIB;
 using namespace MNEALIGN;
 using namespace DISP3DLIB;
 using DISP3DLIB::MultimodalScene;

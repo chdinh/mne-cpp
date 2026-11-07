@@ -12,10 +12,9 @@
 
 #include "mne_align.h"
 
-#include "acquired_points.h"
+#include "qt_conversions.h"
 #include "align_3d_view.h"
 #include "align_wizard.h"
-#include "polhemus_connection.h"
 
 #include <fiff/fiff_constants.h>
 #include <fiff/fiff_dig_point.h>
@@ -42,6 +41,7 @@
 #include <QStatusBar>
 #include <QToolBar>
 
+using namespace ACQLIB;
 using namespace MNEALIGN;
 
 //=============================================================================================================

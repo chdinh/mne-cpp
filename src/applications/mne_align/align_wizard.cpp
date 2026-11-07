@@ -11,8 +11,7 @@
  */
 
 #include "align_wizard.h"
-
-#include "polhemus_connection.h"
+#include "qt_conversions.h"
 
 #include <fiff/fiff_constants.h>
 #include <fiff/fiff_dig_point.h>
@@ -34,6 +33,7 @@
 #include <QVBoxLayout>
 #include <QWidget>
 
+using namespace ACQLIB;
 using namespace MNEALIGN;
 using UTILSLIB::StandardMontage;
 

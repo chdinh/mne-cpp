@@ -102,7 +102,7 @@ bool FastrakParser::parseRecord(const QByteArray& record, Units units, FastrakSa
         }
     } else if (tokens.size() >= 7) {
         // Euler angle output (O-item 4): azimuth, elevation, roll.
-        // Kept for backward compatibility; suffers from gimbal lock at elevation ±90°.
+        // Gimbal lock at elevation ±90°; units configured for quaternions avoid it.
         const float az = parseFloat(tokens[4]);
         const float el = parseFloat(tokens[5]);
         const float ro = parseFloat(tokens[6]);

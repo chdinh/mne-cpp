@@ -2,11 +2,9 @@
 // Copyright (c) 2010-2026 MNE-CPP Authors
 //   Christoph Dinh <christoph.dinh@mne-cpp.org>
 
-// Forwarding header for the digitiser types, plus conversions to the Qt types the 3D view uses.
-#ifndef MNE_ALIGN_ACQUIRED_POINTS_H
-#define MNE_ALIGN_ACQUIRED_POINTS_H
-
-#include <acq/polhemus/acquired_points.h>
+// Conversions between the Eigen types of the digitiser and the Qt types the 3D view draws with.
+#ifndef MNE_ALIGN_QT_CONVERSIONS_H
+#define MNE_ALIGN_QT_CONVERSIONS_H
 
 #include <Eigen/Geometry>
 #include <QQuaternion>
@@ -14,11 +12,6 @@
 
 namespace MNEALIGN
 {
-using ACQLIB::PointKind;
-using ACQLIB::FiducialId;
-using ACQLIB::DigitizedPoint;
-using ACQLIB::AcquiredPoints;
-
 inline QVector3D toQt(const Eigen::Vector3f& v)
 {
     return QVector3D(v.x(), v.y(), v.z());
@@ -35,4 +28,4 @@ inline Eigen::Vector3f toEigen(const QVector3D& v)
 }
 } // namespace MNEALIGN
 
-#endif // MNE_ALIGN_ACQUIRED_POINTS_H
+#endif // MNE_ALIGN_QT_CONVERSIONS_H

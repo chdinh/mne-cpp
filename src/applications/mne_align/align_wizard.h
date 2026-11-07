@@ -11,8 +11,8 @@
  *
  *           Steps: Setup → Fiducials → EegCap → HeadShape → Verify → Save → Done.
  *           Each digitisation step listens to a single
- *           @ref PolhemusConnection signal for the live cursor and
- *           appends to a shared @ref AcquiredPoints store on demand.
+ *           @ref ACQLIB::PolhemusConnection signal for the live cursor and
+ *           appends to a shared @ref ACQLIB::AcquiredPoints store on demand.
  *           Digitisation can alternatively be imported from a FIFF .fif
  *           file via the Fiducials page.
  */
@@ -24,8 +24,8 @@
 // INCLUDES
 //=============================================================================================================
 
-#include "acquired_points.h"
-#include "polhemus_connection.h"
+#include <acq/polhemus/acquired_points.h>
+#include <acq/polhemus/polhemus_connection.h>
 
 #include <utils/montage/standard_montage.h>
 
@@ -71,8 +71,8 @@ enum class AlignStep
  * @brief Seven-step coregistration wizard for the MNE Align workflow.
  *
  * Steps: Setup → Fiducials → EegCap → HeadShape → Verify → Save → Done.
- * Each digitisation step listens to the @ref PolhemusConnection for the
- * live cursor and appends to a shared @ref AcquiredPoints store. The
+ * Each digitisation step listens to the @ref ACQLIB::PolhemusConnection for the
+ * live cursor and appends to a shared @ref ACQLIB::AcquiredPoints store. The
  * Fiducials page also exposes a “Load digitisation (FIFF …)” action
  * which imports an existing ISOTRAK point set in lieu of live capture.
  */
@@ -89,8 +89,8 @@ public:
      * @param[in] digitizer   Polhemus connection (not owned, may be null).
      * @param[in] parent      Parent widget.
      */
-    AlignWizard(AcquiredPoints* acquired,
-                PolhemusConnection* digitizer,
+    AlignWizard(ACQLIB::AcquiredPoints* acquired,
+                ACQLIB::PolhemusConnection* digitizer,
                 QWidget* parent = nullptr);
 
     //=========================================================================================================
@@ -243,12 +243,12 @@ private:
     void refreshSetupTwinUi();
 
     /** @return next un-captured fiducial in the {NAS,LPA,RPA} order. */
-    FiducialId nextFiducial(bool* allDone) const;
+    ACQLIB::FiducialId nextFiducial(bool* allDone) const;
     /** @return next un-captured EEG label, or empty string when complete. */
     QString nextEegLabel(int* outIdent) const;
 
-    AcquiredPoints* m_pPoints = nullptr;
-    PolhemusConnection* m_pDigitizer = nullptr;
+    ACQLIB::AcquiredPoints* m_pPoints = nullptr;
+    ACQLIB::PolhemusConnection* m_pDigitizer = nullptr;
 
     QString m_bemPath;
     UTILSLIB::StandardMontage::System m_capSystem = UTILSLIB::StandardMontage::System::Standard_1020;
@@ -256,7 +256,7 @@ private:
     QVector3D m_lastLivePos;
     bool m_haveLive = false;
     int m_penStation = 1;
-    FiducialId m_selectedFiducial = FiducialId::NAS;
+    ACQLIB::FiducialId m_selectedFiducial = ACQLIB::FiducialId::NAS;
     QMatrix4x4 m_trackerToMri;
 
     QPointer<QLabel> m_pSetupBemLabel;
@@ -265,7 +265,7 @@ private:
     QPointer<QPushButton> m_pTwinNasBtn;
     QPointer<QPushButton> m_pTwinLpaBtn;
     QPointer<QPushButton> m_pTwinRpaBtn;
-    FiducialId m_selectedTwinFid = FiducialId::NAS;
+    ACQLIB::FiducialId m_selectedTwinFid = ACQLIB::FiducialId::NAS;
 
     QPointer<QLabel> m_pFidStatusLabel;
     QPointer<QLabel> m_pFidLiveLabel;

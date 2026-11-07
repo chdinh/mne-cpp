@@ -46,8 +46,7 @@ set(MNE_ALIGN_CORE_HEADERS
     mne_align.h
     align_wizard.h
     align_3d_view.h
-    acquired_points.h
-    polhemus_connection.h
+    qt_conversions.h
 )
 
 add_library(mne_align_app_core STATIC

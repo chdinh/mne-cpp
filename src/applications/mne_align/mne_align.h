@@ -22,8 +22,8 @@
 #include <QMainWindow>
 #include <QPointer>
 
-#include "acquired_points.h"
-#include "polhemus_connection.h"
+#include <acq/polhemus/acquired_points.h>
+#include <acq/polhemus/polhemus_connection.h>
 
 //=============================================================================================================
 // FORWARD DECLARATIONS
@@ -56,7 +56,7 @@ class Align3DView;
  * @brief Top-level window for the MNE Align digitisation application.
  *
  * Hosts an @ref AlignWizard and an @ref Align3DView side-by-side,
- * coordinates the @ref PolhemusConnection, and provides menu/toolbar
+ * coordinates the @ref ACQLIB::PolhemusConnection, and provides menu/toolbar
  * actions for BEM loading, digitizer connection, and ICP fitting.
  */
 class MneAlign : public QMainWindow
@@ -85,13 +85,13 @@ public:
     Align3DView* view3d() const;
 
     /** @return The shared digitised-point store (never null after construction). */
-    AcquiredPoints* points() const
+    ACQLIB::AcquiredPoints* points() const
     {
         return m_pPoints;
     }
 
     /** @return The Polhemus digitizer connection (never null after construction; not opened). */
-    PolhemusConnection* digitizer() const
+    ACQLIB::PolhemusConnection* digitizer() const
     {
         return m_pDigitizer;
     }
@@ -118,8 +118,8 @@ private:
     void loadSettings();
     void saveSettings();
 
-    AcquiredPoints* m_pPoints = nullptr;
-    PolhemusConnection* m_pDigitizer = nullptr;
+    ACQLIB::AcquiredPoints* m_pPoints = nullptr;
+    ACQLIB::PolhemusConnection* m_pDigitizer = nullptr;
 
     QPointer<QSplitter> m_pSplitter;
     QPointer<AlignWizard> m_pWizard;
