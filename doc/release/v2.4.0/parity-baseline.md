@@ -94,7 +94,7 @@ Tolerance is the range of comparison thresholds the test asserts (`exact` when i
 | `mne.convert_forward_solution` | `MNEForwardSolution` | equivalent | `test_fwd_python` | 1e-06 to 0.001 |
 | `mne.count_events` | `FiffEvents::count` | equivalent | `test_fiff_core_python` | 1e-12 to 1e-09 |
 | `mne.filter.filter_data` | `FirFilter` | equivalent | `test_dsp_firfilter` | 1e-10 to 1e-08 |
-| `mne.find_events` | `RTPROCESSINGLIB event detection` | equivalent | `test_fiff_core_python` | 1e-12 to 1e-09 |
+| `mne.find_events` | `FiffEvents::find_events` | equivalent | `test_fiff_core_python` | 1e-12 to 1e-09 |
 | `mne.find_stim_steps` | `FiffEvents::find_stim_steps` | equivalent | `test_fiff_core_python` | 1e-12 to 1e-09 |
 | `mne.fit_dipole` | `InvDipoleFit` | equivalent | `test_inv_dipole_fit_python` | 1e-12 to 0.02 |
 | `mne.forward.apply_forward` | `INVLIB::applyForward` | equivalent | `test_mne_forward_ops` | 1e-12 to 0.001 |

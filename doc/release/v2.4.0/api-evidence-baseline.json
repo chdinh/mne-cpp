@@ -663,17 +663,17 @@
       "library": "dsp"
     },
     {
-      "name": "annotationsFromEvents",
+      "name": "annotations_from_events",
       "header": "fiff/fiff_annotation_event_utils.h",
       "library": "fiff"
     },
     {
-      "name": "eventsFromAnnotations",
+      "name": "events_from_annotations",
       "header": "fiff/fiff_annotation_event_utils.h",
       "library": "fiff"
     },
     {
-      "name": "countAnnotations",
+      "name": "count_annotations",
       "header": "fiff/fiff_annotation_event_utils.h",
       "library": "fiff"
     },

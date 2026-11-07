@@ -34,7 +34,7 @@
       "modules": []
     },
     "acq/fiff": {
-      "tokens": 49,
+      "tokens": 46,
       "public_header_includes": 0,
       "modules": [
         "Core"
@@ -110,7 +110,7 @@
       ]
     },
     "dsp": {
-      "tokens": 827,
+      "tokens": 825,
       "public_header_includes": 54,
       "modules": [
         "Concurrent",
@@ -119,8 +119,8 @@
       ]
     },
     "fiff": {
-      "tokens": 1295,
-      "public_header_includes": 89,
+      "tokens": 1192,
+      "public_header_includes": 82,
       "modules": [
         "Core",
         "Network"

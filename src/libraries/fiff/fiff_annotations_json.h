@@ -24,16 +24,32 @@
 namespace FIFFLIB
 {
 
-/** @return The names as a JSON array of strings. */
+/**
+ * @param[in] names   Channel names.
+ *
+ * @return The names as a JSON array of strings.
+ */
 QJsonArray namesToJson(const std::vector<std::string>& names);
 
-/** @return The strings of a JSON array. */
+/**
+ * @param[in] array   A JSON array of strings.
+ *
+ * @return The strings.
+ */
 std::vector<std::string> namesFromJson(const QJsonArray& array);
 
-/** @return The extras as a JSON object. */
+/**
+ * @param[in] extras   Annotation extras.
+ *
+ * @return The extras as a JSON object.
+ */
 QJsonObject extrasToJson(const FiffAnnotation::Extras& extras);
 
-/** @return The extras of a JSON object; values other than null, bool, number or string are skipped. */
+/**
+ * @param[in] object   A JSON object.
+ *
+ * @return Its values as extras; values other than null, bool, number or string are skipped.
+ */
 FiffAnnotation::Extras extrasFromJson(const QJsonObject& object);
 
 } // namespace FIFFLIB

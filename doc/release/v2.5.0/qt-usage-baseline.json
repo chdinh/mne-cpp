@@ -30,7 +30,7 @@
       "decoding",
       "math"
     ],
-    "tokens": 19526,
+    "tokens": 19418,
     "gui_outside_design": []
   },
   "libraries": {
@@ -43,11 +43,11 @@
       "modules": []
     },
     "acq/fiff": {
-      "tokens": 49,
+      "tokens": 46,
       "by_category": {
         "files": 5,
         "global": 6,
-        "strings": 38
+        "strings": 35
       },
       "public_header_includes": 0,
       "q_object": 0,
@@ -216,7 +216,7 @@
       ]
     },
     "dsp": {
-      "tokens": 827,
+      "tokens": 825,
       "by_category": {
         "containers": 279,
         "files": 33,
@@ -226,7 +226,7 @@
         "other": 3,
         "regex": 3,
         "smart_pointers": 31,
-        "strings": 137,
+        "strings": 135,
         "threads": 21,
         "time": 1
       },
@@ -240,24 +240,24 @@
       ]
     },
     "fiff": {
-      "tokens": 1295,
+      "tokens": 1192,
       "by_category": {
-        "containers": 192,
-        "files": 105,
-        "global": 412,
-        "json": 27,
-        "logging": 240,
+        "containers": 154,
+        "files": 89,
+        "global": 410,
+        "json": 37,
+        "logging": 225,
         "network": 6,
-        "objects_signals": 15,
+        "objects_signals": 14,
         "other": 3,
         "regex": 9,
         "smart_pointers": 23,
-        "strings": 262,
+        "strings": 221,
         "time": 1
       },
-      "public_header_includes": 89,
+      "public_header_includes": 82,
       "q_object": 1,
-      "files": 72,
+      "files": 73,
       "modules": [
         "Core",
         "Network"

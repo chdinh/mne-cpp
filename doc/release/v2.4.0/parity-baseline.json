@@ -1106,7 +1106,7 @@
     },
     {
       "source": "parity",
-      "mne_cpp": "FiffAnnotationEventUtils",
+      "mne_cpp": "FIFFLIB::annotations_from_events",
       "python": "mne.annotations_from_events",
       "claimed": "implemented",
       "equivalence": null,
@@ -1599,11 +1599,11 @@
     },
     {
       "source": "parity",
-      "mne_cpp": "FiffAnnotations",
+      "mne_cpp": "FIFFLIB::count_annotations",
       "python": "mne.count_annotations",
       "claimed": "implemented",
       "equivalence": null,
-      "test": "test_fiff_annotations",
+      "test": "test_fiff_annotation_event_utils",
       "evidence": "tested"
     },
     {
@@ -1708,7 +1708,7 @@
     },
     {
       "source": "parity",
-      "mne_cpp": "FiffAnnotationEventUtils",
+      "mne_cpp": "FIFFLIB::events_from_annotations",
       "python": "mne.events_from_annotations",
       "claimed": "implemented",
       "equivalence": null,
@@ -1717,7 +1717,7 @@
     },
     {
       "source": "parity",
-      "mne_cpp": "RTPROCESSINGLIB event detection",
+      "mne_cpp": "FiffEvents::find_events",
       "python": "mne.find_events",
       "claimed": "implemented",
       "equivalence": "equivalent",
@@ -2679,7 +2679,7 @@
     },
     {
       "source": "parity",
-      "mne_cpp": "FiffAnnotations",
+      "mne_cpp": "FiffAnnotations::read",
       "python": "mne.read_annotations",
       "claimed": "implemented",
       "equivalence": null,
@@ -2735,7 +2735,7 @@
     },
     {
       "source": "parity",
-      "mne_cpp": "FiffEvents::read, read_from_fif, read_from_ascii",
+      "mne_cpp": "FiffEvents::read, read_fif, read_ascii",
       "python": "mne.read_events",
       "claimed": "implemented",
       "equivalence": null,
@@ -3464,7 +3464,7 @@
     },
     {
       "source": "parity",
-      "mne_cpp": "FiffEvents::write_to_fif, write_to_ascii",
+      "mne_cpp": "FiffEvents::write, write_fif, write_ascii",
       "python": "mne.write_events",
       "claimed": "implemented",
       "equivalence": null,
