@@ -38,7 +38,6 @@ set(HEADERS
     fiffbuffer.h
     ibuffer.h
     iskilloperator.h
-    imcpneuroskill.h
     jsonrpcmessage.h
     llmtoolplanner.h
     manifestparser.h
