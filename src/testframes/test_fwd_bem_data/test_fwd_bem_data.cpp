@@ -391,7 +391,7 @@ private slots:
         int nTags = qMin((int)stream.dir().size(), 100);
         for (int i = 0; i < nTags; ++i) {
             FiffTag::UPtr tag;
-            stream.read_tag(tag, stream.dir()[i]->pos);
+            stream.read_tag(tag, stream.dir()[i].pos);
             QVERIFY(tag != nullptr);
             QVERIFY(tag->kind >= 0);
         }
@@ -421,10 +421,10 @@ private slots:
             nodes = stream.dirtree()->dir_tree_find(FIFFB_MEAS_INFO);
 
         // Read any coord transform tags
-        for (int i = 0; i < stream.dir().size(); ++i) {
-            if (stream.dir()[i]->kind == FIFF_COORD_TRANS) {
+        for (std::size_t i = 0; i < stream.dir().size(); ++i) {
+            if (stream.dir()[i].kind == FIFF_COORD_TRANS) {
                 FiffTag::UPtr tag;
-                stream.read_tag(tag, stream.dir()[i]->pos);
+                stream.read_tag(tag, stream.dir()[i].pos);
                 trans = tag->toCoordTrans();
                 break;
             }

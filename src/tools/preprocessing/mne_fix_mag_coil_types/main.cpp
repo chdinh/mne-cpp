@@ -60,9 +60,9 @@ static int processFile(const QString& name, bool doMagnes, QString& summary)
     int nCoilNone = 0;
 
     for (int k = 0; k < stream->nent(); k++) {
-        if (stream->dir()[k]->kind == FIFF_CH_INFO) {
+        if (stream->dir()[k].kind == FIFF_CH_INFO) {
             FiffTag::UPtr tag;
-            stream->read_tag(tag, stream->dir()[k]->pos);
+            stream->read_tag(tag, stream->dir()[k].pos);
             FiffChInfo ch = tag->toChInfo();
 
             bool modified = false;
@@ -97,7 +97,7 @@ static int processFile(const QString& name, bool doMagnes, QString& summary)
             }
 
             if (modified) {
-                stream->device()->seek(stream->dir()[k]->pos);
+                stream->device()->seek(stream->dir()[k].pos);
                 stream->write_ch_info(ch);
             }
         }

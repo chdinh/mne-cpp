@@ -136,8 +136,8 @@ int main(int argc, char* argv[])
         return 1;
     }
 
-    const QList<FiffDirEntry::SPtr>& dir1 = stream1.dir();
-    const QList<FiffDirEntry::SPtr>& dir2 = stream2.dir();
+    const std::vector<FiffDirEntry>& dir1 = stream1.dir();
+    const std::vector<FiffDirEntry>& dir2 = stream2.dir();
 
     qInfo("File 1: %s (%d directory entries)", qPrintable(file1), static_cast<int>(dir1.size()));
     qInfo("File 2: %s (%d directory entries)", qPrintable(file2), static_cast<int>(dir2.size()));
@@ -148,12 +148,12 @@ int main(int argc, char* argv[])
 
     for (int i = 0; i < minEntries; ++i) {
         FiffTag::UPtr tag1, tag2;
-        stream1.read_tag(tag1, dir1[i]->pos);
-        stream2.read_tag(tag2, dir2[i]->pos);
+        stream1.read_tag(tag1, dir1[i].pos);
+        stream2.read_tag(tag2, dir2[i].pos);
 
-        bool kindMatch = (dir1[i]->kind == dir2[i]->kind);
-        bool typeMatch = (dir1[i]->type == dir2[i]->type);
-        bool sizeMatch = (dir1[i]->size == dir2[i]->size);
+        bool kindMatch = (dir1[i].kind == dir2[i].kind);
+        bool typeMatch = (dir1[i].type == dir2[i].type);
+        bool sizeMatch = (dir1[i].size == dir2[i].size);
 
         bool dataMatch = false;
         if (sizeMatch && tag1 && tag2) {
@@ -166,18 +166,18 @@ int main(int argc, char* argv[])
             nMatch++;
             if (verbose)
                 qInfo("  [%4d] %s : MATCH (size=%d)",
-                      i, qPrintable(tagName(dir1[i]->kind)), dir1[i]->size);
+                      i, qPrintable(tagName(dir1[i].kind)), dir1[i].size);
         } else {
             nDiff++;
             QString line = QString::asprintf("  [%4d] DIFF:", i);
             if (!kindMatch)
-                line += QString::asprintf(" kind=%d vs %d", dir1[i]->kind, dir2[i]->kind);
+                line += QString::asprintf(" kind=%d vs %d", dir1[i].kind, dir2[i].kind);
             else
-                line += " kind=" + tagName(dir1[i]->kind);
+                line += " kind=" + tagName(dir1[i].kind);
             if (!typeMatch)
-                line += QString::asprintf(" type=%d vs %d", dir1[i]->type, dir2[i]->type);
+                line += QString::asprintf(" type=%d vs %d", dir1[i].type, dir2[i].type);
             if (!sizeMatch)
-                line += QString::asprintf(" size=%d vs %d", dir1[i]->size, dir2[i]->size);
+                line += QString::asprintf(" size=%d vs %d", dir1[i].size, dir2[i].size);
             if (sizeMatch && !dataMatch)
                 line += " DATA_DIFFERS";
             qInfo("%s", qPrintable(line));
@@ -185,7 +185,7 @@ int main(int argc, char* argv[])
     }
 
     if (dir1.size() != dir2.size()) {
-        nMissing = static_cast<int>(abs(dir1.size() - dir2.size()));
+        nMissing = static_cast<int>(std::abs(std::ssize(dir1) - std::ssize(dir2)));
         qInfo("\n  File %s has %d extra directory entries.",
               dir1.size() > dir2.size() ? "1" : "2", nMissing);
     }

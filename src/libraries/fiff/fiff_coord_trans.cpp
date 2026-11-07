@@ -70,11 +70,11 @@ namespace
 {
 
 // The first transform among entries from @p from to @p to, inverted if stored the other way round.
-UTILSLIB::Expected<FiffCoordTrans> find_transform(FiffStream& stream, const QList<FiffDirEntry::SPtr>& entries, int from, int to)
+UTILSLIB::Expected<FiffCoordTrans> find_transform(FiffStream& stream, const std::vector<FiffDirEntry>& entries, int from, int to)
 {
     FiffTag::UPtr tag;
-    for (const FiffDirEntry::SPtr& entry : entries) {
-        if (entry->kind != FIFF_COORD_TRANS || !stream.read_tag(tag, entry->pos))
+    for (const FiffDirEntry& entry : entries) {
+        if (entry.kind != FIFF_COORD_TRANS || !stream.read_tag(tag, entry.pos))
             continue;
         FiffCoordTrans t = FiffCoordTrans::from_tag(tag);
         if (t.is_empty())
@@ -163,8 +163,8 @@ UTILSLIB::Expected<FiffCoordTrans> FiffCoordTrans::read(const std::filesystem::p
         return std::unexpected(stream.error());
     }
     FiffTag::UPtr tag;
-    for (const FiffDirEntry::SPtr& entry : stream->dir()) {
-        if (entry->kind == FIFF_COORD_TRANS && stream->read_tag(tag, entry->pos)) {
+    for (const FiffDirEntry& entry : stream->dir()) {
+        if (entry.kind == FIFF_COORD_TRANS && stream->read_tag(tag, entry.pos)) {
             return from_tag(tag);
         }
     }

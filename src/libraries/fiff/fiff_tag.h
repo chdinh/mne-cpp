@@ -113,6 +113,7 @@
 
 #include <iostream>
 #include <memory>
+#include <vector>
 
 //=============================================================================================================
 // DEFINE NAMESPACE FIFFLIB
@@ -393,7 +394,7 @@ public:
      *
      * @return List of directory entry descriptors.
      */
-    inline QList<QSharedPointer<FiffDirEntry>> toDirEntry() const;
+    inline std::vector<FiffDirEntry> toDirEntry() const;
 
     //
     // MATRIX
@@ -830,25 +831,19 @@ inline FiffChInfo FiffTag::toChInfo() const
 
 //=============================================================================================================
 
-inline QList<QSharedPointer<FiffDirEntry>> FiffTag::toDirEntry() const
+inline std::vector<FiffDirEntry> FiffTag::toDirEntry() const
 {
-    //         tag.data = struct('kind',{},'type',{},'size',{},'pos',{});
-    QList<QSharedPointer<FiffDirEntry>> p_ListFiffDir;
-    if (this->isMatrix() || this->getType() != FIFFT_DIR_ENTRY_STRUCT || this->data() == nullptr)
-        return p_ListFiffDir;
-    else {
-        QSharedPointer<FiffDirEntry> t_pFiffDirEntry;
-        const auto* t_pInt32 = reinterpret_cast<const qint32*>(this->data());
-        for (int k = 0; k < this->size() / 16; ++k) {
-            t_pFiffDirEntry = QSharedPointer<FiffDirEntry>(new FiffDirEntry);
-            t_pFiffDirEntry->kind = t_pInt32[k * 4];     //fread(fid,1,'int32');
-            t_pFiffDirEntry->type = t_pInt32[k * 4 + 1]; //fread(fid,1,'uint32');
-            t_pFiffDirEntry->size = t_pInt32[k * 4 + 2]; //fread(fid,1,'int32');
-            t_pFiffDirEntry->pos = t_pInt32[k * 4 + 3];  //fread(fid,1,'int32');
-            p_ListFiffDir.append(t_pFiffDirEntry);
-        }
+    std::vector<FiffDirEntry> entries;
+    if (this->isMatrix() || this->getType() != FIFFT_DIR_ENTRY_STRUCT || this->data() == nullptr) {
+        return entries;
     }
-    return p_ListFiffDir;
+    const auto* ints = reinterpret_cast<const qint32*>(this->data());
+    const auto count = static_cast<std::size_t>(this->size() / FiffDirEntry::storageSize());
+    entries.reserve(count);
+    for (std::size_t k = 0; k < count; ++k) {
+        entries.push_back({ints[k * 4], ints[k * 4 + 1], ints[k * 4 + 2], ints[k * 4 + 3]});
+    }
+    return entries;
 }
 
 //=============================================================================================================

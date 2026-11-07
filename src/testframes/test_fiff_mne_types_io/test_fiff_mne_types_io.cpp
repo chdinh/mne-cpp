@@ -94,9 +94,9 @@ void TestFiffMneTypesIO::checkFiffCoordTrans()
 
     bool bTransFound = false;
 
-    for (int k = 0; k < stream.dir().size(); k++) {
-        if (stream.dir()[k]->kind == FIFF_COORD_TRANS) {
-            if (!stream.read_tag(t_pTag, stream.dir()[k]->pos))
+    for (std::size_t k = 0; k < stream.dir().size(); k++) {
+        if (stream.dir()[k].kind == FIFF_COORD_TRANS) {
+            if (!stream.read_tag(t_pTag, stream.dir()[k].pos))
                 QFAIL("Failed to read FIFF_COORD_TRANS tag.");
             refTransReference = *(fiffCoordTrans_REF)t_pTag->data();
             transTest = t_pTag->toCoordTrans();

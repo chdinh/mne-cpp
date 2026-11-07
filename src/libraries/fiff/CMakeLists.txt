@@ -32,7 +32,6 @@ set(SOURCES
     fiff_ch_pos.cpp
     fiff_cov.cpp
     fiff_stream.cpp
-    fiff_dir_entry.cpp
     fiff_info_base.cpp
     fiff_evoked.cpp
     fiff_evoked_file.h

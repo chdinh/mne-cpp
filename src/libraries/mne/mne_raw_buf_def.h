@@ -82,7 +82,7 @@ public:
 
 
 public:
-    FIFFLIB::FiffDirEntry::SPtr ent;                                            /**< Directory entry locating this buffer in the FIFF file (file buffers only). */
+    FIFFLIB::FiffDirEntry ent;                                                  /**< Directory entry locating this buffer in the FIFF file (file buffers only). */
     int firsts = 0;                                                             /**< First sample index. */
     int lasts = 0;                                                              /**< Last sample index. */
     int ntaper = 0;                                                             /**< Taper length for filtered buffers. */

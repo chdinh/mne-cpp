@@ -122,7 +122,7 @@ int FiffCoordTransSet::read(const QString& path)
     int count = 0;
     FiffTag::UPtr tag;
     for (const auto& entry : stream.dir()) {
-        if (entry->kind != FIFF_COORD_TRANS || !stream.read_tag(tag, entry->pos)) {
+        if (entry.kind != FIFF_COORD_TRANS || !stream.read_tag(tag, entry.pos)) {
             continue;
         }
         const FiffCoordTrans t = tag->toCoordTrans();

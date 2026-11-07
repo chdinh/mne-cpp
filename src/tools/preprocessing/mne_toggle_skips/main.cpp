@@ -80,15 +80,15 @@ int main(int argc, char* argv[])
 
     // Scan directory for FIFF_DATA_SKIP tags
     int nToggled = 0;
-    const QList<FiffDirEntry::SPtr>& dirEntries = stream->dir();
+    const std::vector<FiffDirEntry>& dirEntries = stream->dir();
 
-    for (int i = 0; i < dirEntries.size(); ++i) {
-        if (dirEntries[i]->kind == FIFF_DATA_SKIP) {
+    for (std::size_t i = 0; i < dirEntries.size(); ++i) {
+        if (dirEntries[i].kind == FIFF_DATA_SKIP) {
             // Read the tag
             std::unique_ptr<FiffTag> tag;
-            if (!stream->read_tag(tag, dirEntries[i]->pos)) {
+            if (!stream->read_tag(tag, dirEntries[i].pos)) {
                 qWarning("Cannot read tag at position %lld, skipping.",
-                         static_cast<long long>(dirEntries[i]->pos));
+                         static_cast<long long>(dirEntries[i].pos));
                 continue;
             }
 
@@ -99,14 +99,14 @@ int main(int argc, char* argv[])
 
             // Write back the modified skip count at the data position
             // The data starts after the tag header (12 bytes)
-            fiff_long_t dataPos = dirEntries[i]->pos + 16; // kind(4) + type(4) + size(4) + next(4)
+            fiff_long_t dataPos = dirEntries[i].pos + 16; // kind(4) + type(4) + size(4) + next(4)
             stream->device()->seek(dataPos);
             fiff_int_t beVal = newSkipCount;
             // Write as big-endian int32
             stream->device()->write(reinterpret_cast<const char*>(&beVal), sizeof(fiff_int_t));
 
             qInfo("  Tag at pos %lld: skip count %d -> %d",
-                  static_cast<long long>(dirEntries[i]->pos), skipCount, newSkipCount);
+                  static_cast<long long>(dirEntries[i].pos), skipCount, newSkipCount);
             ++nToggled;
         }
     }

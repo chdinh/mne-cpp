@@ -126,13 +126,13 @@ AcqExpected<AcqSampleFormat> nativeFormat(const FiffRawData& raw)
 {
     fiff_int_t type = -1;
     for (const FiffRawDir& dir : raw.rawdir) {
-        if (dir.ent->kind == -1) {
+        if (dir.ent.kind == -1) {
             continue; // skip
         }
-        if (type != -1 && dir.ent->type != type) {
+        if (type != -1 && dir.ent.type != type) {
             return AcqError(AcqErrorCode::UnsupportedFormat, "data buffers of different types in one file");
         }
-        type = dir.ent->type;
+        type = dir.ent.type;
     }
     switch (type) {
         case FIFFT_DAU_PACK16:
@@ -346,12 +346,12 @@ private:
             return {};
         }
         const FiffRawDir& dir = m_raw.rawdir[static_cast<int>(index)];
-        if (dir.ent->kind != -1) {
+        if (dir.ent.kind != -1) {
             const auto bytes = static_cast<std::size_t>(dir.nsamp) * m_frameBytes;
             if (!m_file.isOpen() && !m_file.open(QIODevice::ReadOnly)) {
                 return {AcqErrorCode::DeviceIo, "cannot open " + m_config.path};
             }
-            if (!m_file.seek(static_cast<qint64>(dir.ent->pos) + kTagHeaderBytes) ||
+            if (!m_file.seek(static_cast<qint64>(dir.ent.pos) + kTagHeaderBytes) ||
                 m_file.read(reinterpret_cast<char*>(m_bytes.data()), static_cast<qint64>(bytes)) !=
                     static_cast<qint64>(bytes)) {
                 return {AcqErrorCode::DeviceIo, "cannot read data buffer " + std::to_string(index) + " of " + m_config.path};
@@ -380,7 +380,7 @@ private:
             const std::uint64_t offset = sample - m_starts[index];
             const std::size_t take = static_cast<std::size_t>(
                 std::min<std::uint64_t>(count, static_cast<std::uint64_t>(dir.nsamp) - offset));
-            if (dir.ent->kind == -1) {
+            if (dir.ent.kind == -1) {
                 std::memset(dst, 0, take * m_frameBytes);
             } else {
                 std::memcpy(dst, m_bytes.data() + offset * m_frameBytes, take * m_frameBytes);
@@ -406,7 +406,7 @@ private:
             const FiffRawDir& dir = m_raw.rawdir[static_cast<int>(index)];
             for (std::size_t i = 0; i < static_cast<std::size_t>(dir.nsamp); ++i, ++sample) {
                 std::int64_t value = 0;
-                if (dir.ent->kind != -1) {
+                if (dir.ent.kind != -1) {
                     value = std::llround(stored(m_bytes.data() + i * m_frameBytes + channel * m_sampleBytes) * scale);
                 }
                 if (sample > 0 && value != previous) {

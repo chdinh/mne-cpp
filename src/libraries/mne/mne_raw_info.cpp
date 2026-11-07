@@ -192,8 +192,8 @@ int MNERawInfo::get_meas_info(FiffStream& stream,
     *lowpass = -1;
     *highpass = -1;
     for (k = 0; k < meas_info->nent(); k++) {
-        kind = meas_info->dir[k]->kind;
-        pos = meas_info->dir[k]->pos;
+        kind = meas_info->dir[k].kind;
+        pos = meas_info->dir[k].pos;
         switch (kind) {
             case FIFF_NCHAN:
                 if (!stream.read_tag(t_pTag, pos))
@@ -272,8 +272,8 @@ int MNERawInfo::get_meas_info(FiffStream& stream,
 
     if (hpi.size() > 0 && trans.is_empty())
         for (k = 0; k < hpi[0]->nent(); k++)
-            if (hpi[0]->dir[k]->kind == FIFF_COORD_TRANS) {
-                if (!stream.read_tag(t_pTag, hpi[0]->dir[k]->pos))
+            if (hpi[0]->dir[k].kind == FIFF_COORD_TRANS) {
+                if (!stream.read_tag(t_pTag, hpi[0]->dir[k].pos))
                     return (-1);
                 t = FiffCoordTrans::from_tag(t_pTag);
                 if (t.from == FIFFV_COORD_DEVICE && t.to == FIFFV_COORD_HEAD) {
@@ -319,7 +319,7 @@ int MNERawInfo::load(const QString& name, int allow_maxshield, std::unique_ptr<M
     QList<FiffChInfo> chs;            /* Channel info */
     FiffCoordTrans trans;             /* The coordinate transformation */
     std::unique_ptr<FiffId> id;       /* Measurement id */
-    QList<FiffDirEntry::SPtr> rawDir; /* Directory of raw data tags */
+    std::vector<FiffDirEntry> rawDir; /* Directory of raw data tags */
     std::unique_ptr<MNERawInfo> info;
     int nchan = 0;     /* Number of channels */
     float sfreq = 0.0; /* Sampling frequency */
@@ -394,17 +394,17 @@ int MNERawInfo::load(const QString& name, int allow_maxshield, std::unique_ptr<M
     info->start_time = start_time;
     info->buf_size = 0;
     for (k = 0; k < raw->nent(); k++) {
-        if (raw->dir[k]->kind == FIFF_DATA_BUFFER) {
-            if (raw->dir[k]->type == FIFFT_DAU_PACK16 || raw->dir[k]->type == FIFFT_SHORT)
-                info->buf_size = raw->dir[k]->size / (nchan * sizeof(fiff_short_t));
-            else if (raw->dir[k]->type == FIFFT_FLOAT)
-                info->buf_size = raw->dir[k]->size / (nchan * sizeof(fiff_float_t));
-            else if (raw->dir[k]->type == FIFFT_INT)
-                info->buf_size = raw->dir[k]->size / (nchan * sizeof(fiff_int_t));
-            else if (raw->dir[k]->type == FIFFT_DOUBLE)
-                info->buf_size = raw->dir[k]->size / (nchan * sizeof(double));
+        if (raw->dir[k].kind == FIFF_DATA_BUFFER) {
+            if (raw->dir[k].type == FIFFT_DAU_PACK16 || raw->dir[k].type == FIFFT_SHORT)
+                info->buf_size = raw->dir[k].size / (nchan * sizeof(fiff_short_t));
+            else if (raw->dir[k].type == FIFFT_FLOAT)
+                info->buf_size = raw->dir[k].size / (nchan * sizeof(fiff_float_t));
+            else if (raw->dir[k].type == FIFFT_INT)
+                info->buf_size = raw->dir[k].size / (nchan * sizeof(fiff_int_t));
+            else if (raw->dir[k].type == FIFFT_DOUBLE)
+                info->buf_size = raw->dir[k].size / (nchan * sizeof(double));
             else {
-                qCritical("We are not prepared to handle raw data type: %d", raw->dir[k]->type);
+                qCritical("We are not prepared to handle raw data type: %d", raw->dir[k].type);
                 stream.close();
                 return FIFF_FAIL;
             }

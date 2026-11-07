@@ -722,7 +722,7 @@ void TestMneRawProjComp::rawInfo_loadFromFile()
     QVERIFY(info->sfreq > 0);
     QVERIFY(!info->chInfo.isEmpty());
     QCOMPARE(info->chInfo.size(), info->nchan);
-    QVERIFY(!info->rawDir.isEmpty());
+    QVERIFY(!info->rawDir.empty());
 }
 
 void TestMneRawProjComp::rawInfo_findNodes()

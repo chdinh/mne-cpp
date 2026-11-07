@@ -406,11 +406,11 @@ bool MNEForwardSolution::write(QIODevice& p_IODevice) const
         auto t_pStreamIn = FiffStream::open_update(fileIn);
         if (t_pStreamIn) {
             const auto& dir = t_pStreamIn->dir();
-            for (int i = 0; i < dir.size(); ++i) {
-                if (dir[i]->kind == FIFF_DIR_POINTER) {
+            for (const FiffDirEntry& entry : dir) {
+                if (entry.kind == FIFF_DIR_POINTER) {
                     fiff_int_t dirpos = static_cast<fiff_int_t>(t_pStreamIn->write_dir_entries(dir));
                     if (dirpos >= 0)
-                        t_pStreamIn->write_dir_pointer(dirpos, dir[i]->pos);
+                        t_pStreamIn->write_dir_pointer(dirpos, entry.pos);
                     break;
                 }
             }

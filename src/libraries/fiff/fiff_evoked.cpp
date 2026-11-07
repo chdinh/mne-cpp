@@ -243,8 +243,8 @@ Expected<FiffEvoked> FiffEvokedFile::read(int set, const FiffEvoked::Baseline& b
     QString comment("");
     qint32 k;
     for (k = 0; k < my_evoked->nent(); ++k) {
-        tag_kind = my_evoked->dir[k]->kind;
-        pos = my_evoked->dir[k]->pos;
+        tag_kind = my_evoked->dir[k].kind;
+        pos = my_evoked->dir[k].pos;
         switch (tag_kind) {
             case FIFF_COMMENT:
                 m_stream.read_tag(t_pTag, pos);
@@ -304,8 +304,8 @@ Expected<FiffEvoked> FiffEvokedFile::read(int set, const FiffEvoked::Baseline& b
     fiff_int_t nave = -1;
     QList<FiffTag> epoch;
     for (k = 0; k < my_aspect->nent(); ++k) {
-        tag_kind = my_aspect->dir[k]->kind;
-        pos = my_aspect->dir[k]->pos;
+        tag_kind = my_aspect->dir[k].kind;
+        pos = my_aspect->dir[k].pos;
 
         switch (tag_kind) {
             case FIFF_COMMENT:

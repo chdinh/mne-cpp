@@ -1383,13 +1383,7 @@ void TestFiffFsLibrary::fiffStream_writeDirEntries()
     QBuffer buffer;
     buffer.open(QIODevice::ReadWrite);
     auto stream = FiffStream::start_file(buffer);
-    QList<FiffDirEntry::SPtr> dir;
-    FiffDirEntry::SPtr entry1(new FiffDirEntry());
-    entry1->kind = FIFF_FILE_ID;
-    entry1->type = FIFFT_ID_STRUCT;
-    entry1->size = 20;
-    entry1->pos = 0;
-    dir.append(entry1);
+    const std::vector<FiffDirEntry> dir{{FIFF_FILE_ID, FIFFT_ID_STRUCT, 20, 0}};
     fiff_long_t pos = stream->write_dir_entries(dir);
     QVERIFY(pos >= 0);
     fiff_long_t pos2 = stream->write_dir_pointer(static_cast<fiff_int_t>(pos));

@@ -51,6 +51,7 @@
 #include <QStringList>
 #include <QTextStream>
 #include <memory>
+#include <vector>
 
 //=============================================================================================================
 // DEFINE NAMESPACE FIFFLIB
@@ -206,7 +207,7 @@ public:
 public:
     fiff_int_t type;                   /**< Block type for this directory. */
     FiffId id;                         /**< Id of this block if any. */
-    QList<FiffDirEntry::SPtr> dir;     /**< Directory of tags in this node. */
+    std::vector<FiffDirEntry> dir;     /**< Directory of tags in this node. */
     QWeakPointer<FiffDirNode> parent;  /**< Parent node; weak, since the parent owns its children. */
     FiffId parent_id;                  /**< Newly added to stay consistent with MATLAB implementation. */
     QList<FiffDirNode::SPtr> children; /**< Child nodes. */

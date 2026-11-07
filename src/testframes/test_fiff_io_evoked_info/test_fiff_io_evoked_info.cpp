@@ -238,9 +238,9 @@ void TestFiffIoEvokedInfo::evokedSet_clear()
 
 void TestFiffIoEvokedInfo::evokedSet_copyConstruction()
 {
-    FiffEvokedSet set(avePath().toStdU16String());
+    const FiffEvokedSet set(avePath().toStdU16String());
 
-    FiffEvokedSet copy(set);
+    const FiffEvokedSet copy(set); // NOLINT(performance-unnecessary-copy-initialization): the copy is under test
     QCOMPARE(copy.evoked.size(), set.evoked.size());
     QCOMPARE(copy.info.nchan, set.info.nchan);
 }

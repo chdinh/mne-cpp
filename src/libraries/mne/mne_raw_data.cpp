@@ -359,7 +359,7 @@ std::unique_ptr<FilterData> mne_create_filter_response(const MNEFilterDef& filte
 
 int mne_read_raw_buffer_t( //fiffFile     in,        /* Input file */
     FiffStream& stream,
-    const FiffDirEntry::SPtr& ent,         /* The directory entry to read */
+    const FiffDirEntry& ent,               /* The directory entry to read */
     RowMajorMatrixXf& data,                /* Matrix [npick x nsamp] to fill */
     int nchan,                             /* Number of channels in the data */
     int nsamp,                             /* Expected number of samples */
@@ -391,10 +391,10 @@ int mne_read_raw_buffer_t( //fiffFile     in,        /* Input file */
 
     //    if (fiff_read_this_tag(in->fd,ent->pos,&tag) ==  FIFF_FAIL)
     //        goto bad;
-    if (!stream.read_tag(t_pTag, ent->pos))
+    if (!stream.read_tag(t_pTag, ent.pos))
         return FAIL;
 
-    if (ent->type == FIFFT_FLOAT) {
+    if (ent.type == FIFFT_FLOAT) {
         if (static_cast<int>(t_pTag->size() / (sizeof(fiff_float_t) * nchan)) != nsamp) {
             qCritical("Incorrect number of samples in buffer.");
             return FAIL;
@@ -404,7 +404,7 @@ int mne_read_raw_buffer_t( //fiffFile     in,        /* Input file */
             for (c = 0; c < npick; c++)
                 data(c, s) = mult[c] * this_samplef[pickno[c]];
         }
-    } else if (ent->type == FIFFT_SHORT || ent->type == FIFFT_DAU_PACK16) {
+    } else if (ent.type == FIFFT_SHORT || ent.type == FIFFT_DAU_PACK16) {
         if (static_cast<int>(t_pTag->size() / (sizeof(fiff_short_t) * nchan)) != nsamp) {
             qCritical("Incorrect number of samples in buffer.");
             return FAIL;
@@ -414,7 +414,7 @@ int mne_read_raw_buffer_t( //fiffFile     in,        /* Input file */
             for (c = 0; c < npick; c++)
                 data(c, s) = mult[c] * this_samples[pickno[c]];
         }
-    } else if (ent->type == FIFFT_INT) {
+    } else if (ent.type == FIFFT_INT) {
         if (static_cast<int>(t_pTag->size() / (sizeof(fiff_int_t) * nchan)) != nsamp) {
             qCritical("Incorrect number of samples in buffer.");
             return FAIL;
@@ -424,7 +424,7 @@ int mne_read_raw_buffer_t( //fiffFile     in,        /* Input file */
             for (c = 0; c < npick; c++)
                 data(c, s) = mult[c] * this_sample[pickno[c]];
         }
-    } else if (ent->type == FIFFT_DOUBLE) {
+    } else if (ent.type == FIFFT_DOUBLE) {
         if (static_cast<int>(t_pTag->size() / (sizeof(double) * nchan)) != nsamp) {
             qCritical("Incorrect number of samples in buffer.");
             return FAIL;
@@ -435,7 +435,7 @@ int mne_read_raw_buffer_t( //fiffFile     in,        /* Input file */
                 data(c, s) = static_cast<float>(mult[c] * this_sampled[pickno[c]]);
         }
     } else {
-        qCritical("We are not prepared to handle raw data type: %d", ent->type);
+        qCritical("We are not prepared to handle raw data type: %d", ent.type);
         return FAIL;
     }
     return OK;
@@ -660,7 +660,7 @@ int MNERawData::load_one_buffer(MNERawBufDef* buf)
      * load just one
      */
 {
-    if (buf->ent->kind == FIFF_DATA_SKIP) {
+    if (buf->ent.kind == FIFF_DATA_SKIP) {
         qCritical("Cannot load a skip");
         return FAIL;
     }
@@ -1256,8 +1256,8 @@ MNERawData* MNERawData::open_file_comp(const QString& name,
     auto stream = std::make_unique<FiffStream>(filePtr.get());
     //    fiffFile           in    = NULL;
 
-    FiffDirEntry::SPtr dir;
-    QList<FiffDirEntry::SPtr> dir0;
+    FiffDirEntry dir;
+    std::vector<FiffDirEntry> dir0;
     //    fiffTagRec   tag;
     FiffTag::UPtr t_pTag;
     int k, b, nbuf, ndir;
@@ -1356,29 +1356,29 @@ MNERawData* MNERawData::open_file_comp(const QString& name,
     /*
        * Take into account the first sample
        */
-    if (dir0[current_dir0]->kind == FIFF_FIRST_SAMPLE) {
+    if (dir0[current_dir0].kind == FIFF_FIRST_SAMPLE) {
         //        if (fiff_read_this_tag(in->fd,dir0->pos,&tag) == FIFF_FAIL)
         //            goto bad;
-        if (!data->stream->read_tag(t_pTag, dir0[current_dir0]->pos))
+        if (!data->stream->read_tag(t_pTag, dir0[current_dir0].pos))
             return nullptr;
         data->first_samp = *t_pTag->toInt();
         current_dir0++;
         ndir--;
     }
-    if (dir0[current_dir0]->kind == FIFF_DATA_SKIP) {
+    if (dir0[current_dir0].kind == FIFF_DATA_SKIP) {
         int nsamp_skip;
         //        if (fiff_read_this_tag(in->fd,dir0->pos,&tag) == FIFF_FAIL)
         //            goto bad;
-        if (!data->stream->read_tag(t_pTag, dir0[current_dir0]->pos))
+        if (!data->stream->read_tag(t_pTag, dir0[current_dir0].pos))
             return nullptr;
         nsamp_skip = data->info->buf_size * (*t_pTag->toInt());
         qInfo("Data skip of %d samples in the beginning\n", nsamp_skip);
         current_dir0++;
         ndir--;
-        if (dir0[current_dir0]->kind == FIFF_FIRST_SAMPLE) {
+        if (dir0[current_dir0].kind == FIFF_FIRST_SAMPLE) {
             //            if (fiff_read_this_tag(in->fd,dir0->pos,&tag) == FIFF_FAIL)
             //                goto bad;
-            if (!data->stream->read_tag(t_pTag, dir0[current_dir0]->pos))
+            if (!data->stream->read_tag(t_pTag, dir0[current_dir0].pos))
                 return nullptr;
             data->first_samp += *t_pTag->toInt();
             current_dir0++;
@@ -1403,18 +1403,18 @@ MNERawData* MNERawData::open_file_comp(const QString& name,
        */
     // ndir counts the entries after the consumed leading ones (MNE-C advances dir0 instead).
     for (k = current_dir0, nbuf = 0; k < current_dir0 + ndir; k++)
-        if (dir0[k]->kind == FIFF_DATA_BUFFER ||
-            dir0[k]->kind == FIFF_DATA_SKIP)
+        if (dir0[k].kind == FIFF_DATA_BUFFER ||
+            dir0[k].kind == FIFF_DATA_SKIP)
             nbuf++;
     data->bufs.resize(nbuf);
 
     for (k = current_dir0, nbuf = 0; k < current_dir0 + ndir; k++)
-        if (dir0[k]->kind == FIFF_DATA_BUFFER ||
-            dir0[k]->kind == FIFF_DATA_SKIP) {
+        if (dir0[k].kind == FIFF_DATA_BUFFER ||
+            dir0[k].kind == FIFF_DATA_SKIP) {
             data->bufs[nbuf].ns = 0;
             data->bufs[nbuf].ent = dir0[k];
             data->bufs[nbuf].nchan = data->info->nchan;
-            data->bufs[nbuf].is_skip = dir0[k]->kind == FIFF_DATA_SKIP;
+            data->bufs[nbuf].is_skip = dir0[k].kind == FIFF_DATA_SKIP;
             data->bufs[nbuf].valid = false;
             data->bufs[nbuf].comp_status = data->comp_file;
             nbuf++;
@@ -1422,23 +1422,23 @@ MNERawData* MNERawData::open_file_comp(const QString& name,
     data->nsamp = 0;
     for (k = 0; k < nbuf; k++) {
         dir = data->bufs[k].ent;
-        if (dir->kind == FIFF_DATA_BUFFER) {
-            if (dir->type == FIFFT_DAU_PACK16 || dir->type == FIFFT_SHORT)
-                data->bufs[k].ns = dir->size / (data->info->nchan * sizeof(fiff_dau_pack16_t));
-            else if (dir->type == FIFFT_FLOAT)
-                data->bufs[k].ns = dir->size / (data->info->nchan * sizeof(fiff_float_t));
-            else if (dir->type == FIFFT_INT)
-                data->bufs[k].ns = dir->size / (data->info->nchan * sizeof(fiff_int_t));
-            else if (dir->type == FIFFT_DOUBLE)
-                data->bufs[k].ns = dir->size / (data->info->nchan * sizeof(double));
+        if (dir.kind == FIFF_DATA_BUFFER) {
+            if (dir.type == FIFFT_DAU_PACK16 || dir.type == FIFFT_SHORT)
+                data->bufs[k].ns = dir.size / (data->info->nchan * sizeof(fiff_dau_pack16_t));
+            else if (dir.type == FIFFT_FLOAT)
+                data->bufs[k].ns = dir.size / (data->info->nchan * sizeof(fiff_float_t));
+            else if (dir.type == FIFFT_INT)
+                data->bufs[k].ns = dir.size / (data->info->nchan * sizeof(fiff_int_t));
+            else if (dir.type == FIFFT_DOUBLE)
+                data->bufs[k].ns = dir.size / (data->info->nchan * sizeof(double));
             else {
-                qCritical("We are not prepared to handle raw data type: %d", dir->type);
+                qCritical("We are not prepared to handle raw data type: %d", dir.type);
                 return nullptr;
             }
-        } else if (dir->kind == FIFF_DATA_SKIP) {
+        } else if (dir.kind == FIFF_DATA_SKIP) {
             //            if (fiff_read_this_tag(in->fd,dir->pos,&tag) == FIFF_FAIL)
             //                goto bad;
-            if (!data->stream->read_tag(t_pTag, dir->pos))
+            if (!data->stream->read_tag(t_pTag, dir.pos))
                 return nullptr;
             data->bufs[k].ns = data->info->buf_size * (*t_pTag->toInt());
         }

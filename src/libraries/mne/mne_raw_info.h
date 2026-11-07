@@ -33,6 +33,7 @@
 //=============================================================================================================
 
 #include <memory>
+#include <vector>
 
 //=============================================================================================================
 // EIGEN INCLUDES
@@ -233,7 +234,7 @@ public:
     FIFFLIB::FiffTime start_time;                   /**< Acquisition start time (from meas date or block id). */
     int buf_size;                                   /**< Buffer size in samples. */
     int maxshield_data;                             /**< Are these unprocessed MaxShield data. */
-    QList<FIFFLIB::FiffDirEntry::SPtr> rawDir;      /**< Directory of raw data tags (FIFF_DATA_BUFFER, FIFF_DATA_SKIP, etc.). */
+    std::vector<FIFFLIB::FiffDirEntry> rawDir;      /**< Directory of raw data tags (FIFF_DATA_BUFFER, FIFF_DATA_SKIP, etc.). */
     int ndir;                                       /**< Number of tags in the above directory. */
 };
 

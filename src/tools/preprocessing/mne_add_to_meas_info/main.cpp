@@ -88,7 +88,7 @@ int main(int argc, char* argv[])
 
     std::vector<FiffTag::UPtr> tagsToAdd;
     for (int k = 0; k < addStream.nent(); k++) {
-        fiff_int_t kind = addStream.dir()[k]->kind;
+        fiff_int_t kind = addStream.dir()[k].kind;
         // Skip file-level structural tags
         if (kind == FIFF_FILE_ID || kind == FIFF_DIR_POINTER ||
             kind == FIFF_FREE_LIST || kind == FIFF_NOP ||
@@ -96,7 +96,7 @@ int main(int argc, char* argv[])
             continue;
         }
         FiffTag::UPtr tag;
-        addStream.read_tag(tag, addStream.dir()[k]->pos);
+        addStream.read_tag(tag, addStream.dir()[k].pos);
         tagsToAdd.push_back(std::move(tag));
     }
     addStream.close();

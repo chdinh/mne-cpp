@@ -143,8 +143,8 @@ bool FiffDigPointSet::readFromStream(FiffStream& stream, FiffDigPointSet& p_Dig)
 
     if (isotrak.size() == 1) {
         for (k = 0; k < isotrak[0]->nent(); ++k) {
-            kind = isotrak[0]->dir[k]->kind;
-            pos = isotrak[0]->dir[k]->pos;
+            kind = isotrak[0]->dir[k].kind;
+            pos = isotrak[0]->dir[k].pos;
             if (kind == FIFF_DIG_POINT) {
                 stream.read_tag(t_pTag, pos);
                 p_Dig.m_qListDigPoint.append(t_pTag->toDigPoint());

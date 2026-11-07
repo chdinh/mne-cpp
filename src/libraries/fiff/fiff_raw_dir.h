@@ -97,10 +97,10 @@ public:
     ~FiffRawDir();
 
 public:
-    FiffDirEntry::SPtr ent; /**< Directory entry description. */
-    fiff_int_t first;       /**< first sample. */
-    fiff_int_t last;        /**< last sample. */
-    fiff_int_t nsamp;       /**< Number of samples. */
+    FiffDirEntry ent; /**< Directory entry description. */
+    fiff_int_t first; /**< first sample. */
+    fiff_int_t last;  /**< last sample. */
+    fiff_int_t nsamp; /**< Number of samples. */
 };
 } // NAMESPACE
 

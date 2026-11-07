@@ -531,8 +531,8 @@ void TestMneBrowseApp::annotatesDraggedRangeLikePython()
     QMap<int, QVector<float>> times;
     for (const auto& entry : blocks.first()->dir) {
         FIFFLIB::FiffTag::UPtr tag;
-        if ((entry->kind == 3568 || entry->kind == 3569) && stream.read_tag(tag, entry->pos))
-            times[entry->kind] = QVector<float>(tag->toFloat(), tag->toFloat() + tag->size() / 4);
+        if ((entry.kind == 3568 || entry.kind == 3569) && stream.read_tag(tag, entry.pos))
+            times[entry.kind] = QVector<float>(tag->toFloat(), tag->toFloat() + tag->size() / 4);
     }
     annotFile.close();
     QCOMPARE(times[3568].size(), 1);

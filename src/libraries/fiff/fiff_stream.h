@@ -72,6 +72,7 @@
 #include <filesystem>
 #include <memory>
 #include <string>
+#include <vector>
 
 //=============================================================================================================
 // DEFINE NAMESPACE FIFFLIB
@@ -220,7 +221,7 @@ public:
      *
      * @return the directory.
      */
-    QList<FiffDirEntry::SPtr>& dir();
+    std::vector<FiffDirEntry>& dir();
 
     //=========================================================================================================
     /**
@@ -229,7 +230,7 @@ public:
      *
      * @return the directory.
      */
-    const QList<FiffDirEntry::SPtr>& dir() const;
+    const std::vector<FiffDirEntry>& dir() const;
 
     //=========================================================================================================
     /**
@@ -318,7 +319,7 @@ public:
      *
      * @return The block, or null if a tag cannot be read.
      */
-    FiffDirNode::SPtr make_subtree(const QList<FiffDirEntry::SPtr>& dentry, qsizetype current);
+    FiffDirNode::SPtr make_subtree(const std::vector<FiffDirEntry>& dentry, qsizetype current);
 
     //=========================================================================================================
     /**
@@ -774,7 +775,7 @@ public:
      *
      * @return the position where the directory entries struct was written to.
      */
-    fiff_long_t write_dir_entries(const QList<FiffDirEntry::SPtr>& dir, fiff_long_t pos = -1);
+    fiff_long_t write_dir_entries(const std::vector<FiffDirEntry>& dir, fiff_long_t pos = -1);
 
     //=========================================================================================================
     /**
@@ -1045,7 +1046,7 @@ private:
      *
      * @return The created directory.
      */
-    QList<FiffDirEntry::SPtr> make_dir(bool* ok = nullptr);
+    std::vector<FiffDirEntry> make_dir(bool* ok = nullptr);
 
     fiff_long_t tell() const;
     bool seekTo(fiff_long_t pos);
@@ -1085,7 +1086,7 @@ private:
     //    char         *file_name;    /**< Name of the file. */ -> Use streamName() instead
     //    FILE         *fd;           /**< The normal file descriptor. */ -> file descitpion is part of the stream: stream->device()
     FiffId m_id;                     /**< The file identifier. */
-    QList<FiffDirEntry::SPtr> m_dir; /**< This is the directory. If no directory exists, open automatically scans the file to create one. */
+    std::vector<FiffDirEntry> m_dir; /**< This is the directory. If no directory exists, open automatically scans the file to create one. */
                                      //    int         nent;           /**< How many entries? */ -> Use nent() instead
     FiffDirNode::SPtr m_dirtree;     /**< Directory compiled into a tree. */
     //    char        *ext_file_name; /**< Name of the file holding the external data. */

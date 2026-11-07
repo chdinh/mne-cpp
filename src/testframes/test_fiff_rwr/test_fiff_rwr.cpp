@@ -69,11 +69,11 @@ QByteArray stableBytes(QByteArray bytes)
     FiffStream stream(&buffer);
     if (!stream.open())
         return {};
-    const QList<FiffDirEntry::SPtr> dir = stream.dir();
+    const std::vector<FiffDirEntry> dir = stream.dir();
     stream.close();
-    for (const FiffDirEntry::SPtr& entry : dir) {
-        if (entry->pos >= 0 && (entry->kind == FIFF_FILE_ID || entry->kind == FIFF_BLOCK_ID || entry->kind == FIFF_PARENT_FILE_ID || entry->kind == FIFF_PARENT_BLOCK_ID))
-            bytes.replace(entry->pos + 16, entry->size, QByteArray(entry->size, '\0'));
+    for (const FiffDirEntry& entry : dir) {
+        if (entry.pos >= 0 && (entry.kind == FIFF_FILE_ID || entry.kind == FIFF_BLOCK_ID || entry.kind == FIFF_PARENT_FILE_ID || entry.kind == FIFF_PARENT_BLOCK_ID))
+            bytes.replace(entry.pos + 16, entry.size, QByteArray(entry.size, '\0'));
     }
     return bytes;
 }
@@ -86,8 +86,8 @@ QByteArray tagLayout(QByteArray bytes)
     if (!stream.open())
         return {};
     QByteArray layout;
-    for (const FiffDirEntry::SPtr& entry : stream.dir())
-        layout += QByteArray::number(entry->kind) + ':' + QByteArray::number(entry->type) + ':' + QByteArray::number(entry->size) + ';';
+    for (const FiffDirEntry& entry : stream.dir())
+        layout += QByteArray::number(entry.kind) + ':' + QByteArray::number(entry.type) + ':' + QByteArray::number(entry.size) + ';';
     stream.close();
     return layout;
 }
@@ -355,25 +355,25 @@ void TestFiffRWR::tagsRewriteByteIdentical()
 
     FiffStream stream(&file);
     QVERIFY(stream.open());
-    QVERIFY(!stream.dir().isEmpty());
+    QVERIFY(!stream.dir().empty());
 
     // Every tag read and written again must reproduce the bytes in the file, header and payload
     QByteArray rewritten;
     QBuffer buffer(&rewritten);
     QVERIFY(buffer.open(QIODevice::WriteOnly));
     FiffStream out(&buffer);
-    for (const FiffDirEntry::SPtr& entry : stream.dir()) {
+    for (const FiffDirEntry& entry : stream.dir()) {
         // The stored directory ends with a sentinel entry
-        if (entry->pos < 0)
+        if (entry.pos < 0)
             continue;
         FiffTag::UPtr tag;
-        QVERIFY(stream.read_tag(tag, entry->pos));
+        QVERIFY(stream.read_tag(tag, entry.pos));
         rewritten.clear();
         buffer.seek(0);
         out.write_tag(tag, 0);
-        const QByteArray expected = original.mid(entry->pos, 16 + entry->size);
+        const QByteArray expected = original.mid(entry.pos, 16 + entry.size);
         if (rewritten != expected)
-            QFAIL(qPrintable(QString("tag kind %1 type %2 at %3 differs").arg(entry->kind).arg(entry->type).arg(entry->pos)));
+            QFAIL(qPrintable(QString("tag kind %1 type %2 at %3 differs").arg(entry.kind).arg(entry.type).arg(entry.pos)));
     }
     stream.close();
 }
@@ -459,13 +459,13 @@ void TestFiffRWR::readsWithoutQtDevice()
     QCOMPARE(stream.id().machid[0], qtStream.id().machid[0]);
 
     for (int i = 0; i < stream.nent(); ++i) {
-        const FiffDirEntry::SPtr& entry = stream.dir()[i];
-        if (entry->pos < 0)
+        const FiffDirEntry& entry = stream.dir()[i];
+        if (entry.pos < 0)
             continue;
         FiffTag::UPtr tag;
         FiffTag::UPtr qtTag;
-        QVERIFY(stream.read_tag(tag, entry->pos));
-        QVERIFY(qtStream.read_tag(qtTag, entry->pos));
+        QVERIFY(stream.read_tag(tag, entry.pos));
+        QVERIFY(qtStream.read_tag(qtTag, entry.pos));
         QCOMPARE(tag->kind, qtTag->kind);
         QCOMPARE(QByteArray(tag->data(), tag->size()), QByteArray(qtTag->data(), qtTag->size()));
     }
@@ -505,13 +505,13 @@ void TestFiffRWR::opensAndStartsFilesByPath()
 
     // A closed stream reopens its file and still reads by the directory it read before
     FiffTag::UPtr firstTag;
-    QVERIFY(in->read_tag(firstTag, in->dir()[1]->pos));
+    QVERIFY(in->read_tag(firstTag, in->dir()[1].pos));
     in->close();
     QVERIFY(!in->isOpen());
     QVERIFY(in->reopen());
     QVERIFY(in->isOpen());
     FiffTag::UPtr again;
-    QVERIFY(in->read_tag(again, in->dir()[1]->pos));
+    QVERIFY(in->read_tag(again, in->dir()[1].pos));
     QCOMPARE(again->kind, firstTag->kind);
     QCOMPARE(static_cast<const QByteArray&>(*again), static_cast<const QByteArray&>(*firstTag));
     QVERIFY(in->reopen());
@@ -520,9 +520,9 @@ void TestFiffRWR::opensAndStartsFilesByPath()
     const std::string outPath = m_tempDir.filePath("by-path.fif").toStdString();
     auto out = FiffStream::start_file(outPath);
     QVERIFY(out);
-    for (const FiffDirEntry::SPtr& entry : in->dir()) {
+    for (const FiffDirEntry& entry : in->dir()) {
         FiffTag::UPtr tag;
-        if (entry->kind == FIFF_COORD_TRANS && in->read_tag(tag, entry->pos))
+        if (entry.kind == FIFF_COORD_TRANS && in->read_tag(tag, entry.pos))
             out->write_tag(tag);
     }
     out->end_file();
@@ -531,8 +531,8 @@ void TestFiffRWR::opensAndStartsFilesByPath()
     auto back = FiffStream::open(outPath);
     QVERIFY(back);
     int transforms = 0;
-    for (const FiffDirEntry::SPtr& entry : back->dir())
-        transforms += entry->kind == FIFF_COORD_TRANS ? 1 : 0;
+    for (const FiffDirEntry& entry : back->dir())
+        transforms += entry.kind == FIFF_COORD_TRANS ? 1 : 0;
     QVERIFY(transforms > 0);
     QVERIFY(!FiffStream::start_file(m_tempDir.filePath("no/dir/out.fif").toStdString()));
 }

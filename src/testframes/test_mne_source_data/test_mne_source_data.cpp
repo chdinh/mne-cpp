@@ -497,7 +497,7 @@ private slots:
         int nTags = qMin((int)stream.dir().size(), 50);
         for (int i = 0; i < nTags; ++i) {
             FiffTag::UPtr tag;
-            stream.read_tag(tag, stream.dir()[i]->pos);
+            stream.read_tag(tag, stream.dir()[i].pos);
             QVERIFY(tag != nullptr);
         }
 

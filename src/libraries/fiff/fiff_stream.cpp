@@ -340,14 +340,14 @@ FiffId FiffStream::id() const
 
 //=============================================================================================================
 
-QList<FiffDirEntry::SPtr>& FiffStream::dir()
+std::vector<FiffDirEntry>& FiffStream::dir()
 {
     return m_dir;
 }
 
 //=============================================================================================================
 
-const QList<FiffDirEntry::SPtr>& FiffStream::dir() const
+const std::vector<FiffDirEntry>& FiffStream::dir() const
 {
     return m_dir;
 }
@@ -356,7 +356,7 @@ const QList<FiffDirEntry::SPtr>& FiffStream::dir() const
 
 int FiffStream::nent() const
 {
-    return m_dir.size();
+    return static_cast<int>(m_dir.size());
 }
 
 //=============================================================================================================
@@ -408,8 +408,8 @@ bool FiffStream::get_evoked_entries(const QList<FiffDirNode::SPtr>& evoked_node,
 
     for (ev = evoked_node.begin(); ev != evoked_node.end(); ++ev) {
         for (k = 0; k < (*ev)->nent(); ++k) {
-            kind = (*ev)->dir[k]->kind;
-            pos = (*ev)->dir[k]->pos;
+            kind = (*ev)->dir[k].kind;
+            pos = (*ev)->dir[k].pos;
             if (kind == FIFF_COMMENT) {
                 this->read_tag(t_pTag, pos);
                 comments.append(QString::fromStdString(t_pTag->toString()));
@@ -417,8 +417,8 @@ bool FiffStream::get_evoked_entries(const QList<FiffDirNode::SPtr>& evoked_node,
         }
         FiffDirNode::SPtr my_aspect = (*ev)->dir_tree_find(FIFFB_ASPECT)[0];
         for (k = 0; k < my_aspect->nent(); ++k) {
-            kind = my_aspect->dir[k]->kind;
-            pos = my_aspect->dir[k]->pos;
+            kind = my_aspect->dir[k].kind;
+            pos = my_aspect->dir[k].pos;
             if (kind == FIFF_ASPECT_KIND) {
                 this->read_tag(t_pTag, pos);
                 aspect_kinds.append(*t_pTag->toInt());
@@ -507,12 +507,9 @@ bool FiffStream::open(QIODevice::OpenModeFlag mode)
     /*
      * Check for a mistake
      */
-    if (m_dir[m_dir.size() - 2]->kind == FIFF_DIR) {
-        m_dir.removeLast();
-        m_dir[m_dir.size() - 1]->kind = -1;
-        m_dir[m_dir.size() - 1]->type = -1;
-        m_dir[m_dir.size() - 1]->size = -1;
-        m_dir[m_dir.size() - 1]->pos = -1;
+    if (m_dir[m_dir.size() - 2].kind == FIFF_DIR) {
+        m_dir.pop_back();
+        m_dir.back() = FiffDirEntry{};
     }
 
     //
@@ -541,18 +538,18 @@ bool FiffStream::close()
 
 //=============================================================================================================
 
-FiffDirNode::SPtr FiffStream::make_subtree(const QList<FiffDirEntry::SPtr>& dentry, qsizetype current)
+FiffDirNode::SPtr FiffStream::make_subtree(const std::vector<FiffDirEntry>& dentry, qsizetype current)
 {
     FiffDirNode::SPtr defaultNode;
     FiffDirNode::SPtr node = FiffDirNode::SPtr(new FiffDirNode);
     FiffDirNode::SPtr child;
     FiffTag::UPtr t_pTag;
-    QList<FiffDirEntry::SPtr> dir;
+    std::vector<FiffDirEntry> dir;
 
     node->type = FIFFB_ROOT;
 
-    if (dentry[current]->kind == FIFF_BLOCK_START) {
-        if (!this->read_tag(t_pTag, dentry[current]->pos))
+    if (dentry[current].kind == FIFF_BLOCK_START) {
+        if (!this->read_tag(t_pTag, dentry[current].pos))
             return defaultNode;
         else
             node->type = *t_pTag->toInt();
@@ -562,8 +559,8 @@ FiffDirNode::SPtr FiffStream::make_subtree(const QList<FiffDirEntry::SPtr>& dent
 
     ++current;
     int level = 0;
-    for (; current < dentry.size(); ++current) {
-        if (dentry[current]->kind == FIFF_BLOCK_START) {
+    for (; current < std::ssize(dentry); ++current) {
+        if (dentry[current].kind == FIFF_BLOCK_START) {
             level++;
             if (level == 1) {
                 if (!(child = this->make_subtree(dentry, current)))
@@ -571,11 +568,11 @@ FiffDirNode::SPtr FiffStream::make_subtree(const QList<FiffDirEntry::SPtr>& dent
                 child->parent = node;
                 node->children.append(child);
             }
-        } else if (dentry[current]->kind == FIFF_BLOCK_END) {
+        } else if (dentry[current].kind == FIFF_BLOCK_END) {
             level--;
             if (level < 0)
                 break;
-        } else if (dentry[current]->kind == -1)
+        } else if (dentry[current].kind == -1)
             break;
         else if (level == 0) {
             /*
@@ -583,12 +580,12 @@ FiffDirNode::SPtr FiffStream::make_subtree(const QList<FiffDirEntry::SPtr>& dent
             * block id, or file id. Let the block id
             * take precedence over parent block id and file id
             */
-            if (((dentry[current]->kind == FIFF_PARENT_BLOCK_ID || dentry[current]->kind == FIFF_FILE_ID) && node->id.isEmpty()) || dentry[current]->kind == FIFF_BLOCK_ID) {
-                if (!this->read_tag(t_pTag, dentry[current]->pos))
+            if (((dentry[current].kind == FIFF_PARENT_BLOCK_ID || dentry[current].kind == FIFF_FILE_ID) && node->id.isEmpty()) || dentry[current].kind == FIFF_BLOCK_ID) {
+                if (!this->read_tag(t_pTag, dentry[current].pos))
                     return defaultNode;
                 node->id = t_pTag->toFiffID();
             }
-            dir.append(FiffDirEntry::SPtr(new FiffDirEntry(*dentry[current]))); //Memcopy necessary here - or is a pointer fine?
+            dir.push_back(dentry[current]);
         }
     }
     /*
@@ -640,11 +637,11 @@ bool FiffStream::read_annotations(const FiffDirNode::SPtr& p_Node, FiffAnnotatio
     QJsonArray channelNames;
     QJsonArray extras;
     FiffTag::UPtr tag;
-    for (const FiffDirEntry::SPtr& entry : blocks.first()->dir) {
-        if (!this->read_tag(tag, entry->pos)) {
+    for (const FiffDirEntry& entry : blocks.first()->dir) {
+        if (!this->read_tag(tag, entry.pos)) {
             continue;
         }
-        switch (entry->kind) {
+        switch (entry.kind) {
             case FIFF_MNE_BASELINE_MIN:
                 onsets = QVector<float>(tag->toFloat(), tag->toFloat() + tag->size() / 4);
                 break;
@@ -772,8 +769,8 @@ bool FiffStream::attach_env(const QString& workingDir, const QString& command)
      */
     for (insert = -1, b = 0; insert_blocks[b] >= 0; b++) {
         for (k = 0; k < nent(); k++) {
-            if (dir()[k]->kind == FIFF_BLOCK_START) {
-                if (!read_tag(t_pTag, dir()[k]->pos))
+            if (dir()[k].kind == FIFF_BLOCK_START) {
+                if (!read_tag(t_pTag, dir()[k].pos))
                     return false;
                 if (*(t_pTag->toInt()) == insert_blocks[b]) {
                     insert = k;
@@ -799,10 +796,10 @@ bool FiffStream::attach_env(const QString& workingDir, const QString& command)
     }
 
     FiffTag::UPtr t_pTagNext;
-    QList<FiffDirEntry::SPtr> old_dir = dir();
-    QList<FiffDirEntry::SPtr> this_ent = old_dir.mid(where);
+    const std::vector<FiffDirEntry> old_dir = dir();
+    const FiffDirEntry this_ent = old_dir[static_cast<std::size_t>(where)];
 
-    if (!read_tag(t_pTagNext, this_ent[0]->pos))
+    if (!read_tag(t_pTagNext, this_ent.pos))
         return false;
     /*
      * Update next info to be sequential
@@ -815,58 +812,25 @@ bool FiffStream::attach_env(const QString& workingDir, const QString& command)
     /*
      * Copy the beginning of old directory
      */
-    QList<FiffDirEntry::SPtr> new_dir = old_dir.mid(0, where + 1);
+    std::vector<FiffDirEntry> new_dir(old_dir.begin(), old_dir.begin() + where + 1);
 
     qint64 old_end = device()->pos();
     /*
      * Write the MNE_ENV block tags
      */
-    FiffDirEntry::SPtr new_this;
-
-    new_this = FiffDirEntry::SPtr(new FiffDirEntry);
-    new_this->kind = FIFF_BLOCK_START;
-    new_this->type = FIFFT_INT;
-    new_this->size = 1 * 4;
-    new_this->pos = start_block(FIFFB_MNE_ENV);
-    new_dir.append(new_this);
-
-    new_this = FiffDirEntry::SPtr(new FiffDirEntry);
-    new_this->kind = FIFF_BLOCK_ID;
-    new_this->type = FIFFT_ID_STRUCT;
-    new_this->size = 5 * 4;
-    new_this->pos = write_id(FIFF_BLOCK_ID, id);
-    new_dir.append(new_this);
-
-    new_this = FiffDirEntry::SPtr(new FiffDirEntry);
-    new_this->kind = FIFF_MNE_ENV_WORKING_DIR;
-    new_this->type = FIFFT_STRING;
-    new_this->size = workingDir.size();
-    new_this->pos = write_string(FIFF_MNE_ENV_WORKING_DIR, workingDir.toStdString());
-    new_dir.append(new_this);
-
-    new_this = FiffDirEntry::SPtr(new FiffDirEntry);
-    new_this->kind = FIFF_MNE_ENV_COMMAND_LINE;
-    new_this->type = FIFFT_STRING;
-    new_this->size = command.size();
-    new_this->pos = write_string(FIFF_MNE_ENV_COMMAND_LINE, command.toStdString());
-    new_dir.append(new_this);
-
-    new_this = FiffDirEntry::SPtr(new FiffDirEntry);
-    new_this->kind = FIFF_BLOCK_END;
-    new_this->type = FIFFT_INT;
-    new_this->size = 1 * 4;
-    new_this->pos = end_block(FIFFB_MNE_ENV, next_tmp);
-    new_dir.append(new_this);
-
-    /*
-     * Copy the rest of the old directory
-     */
-    new_dir.append(old_dir.mid(where + 1));
+    new_dir.push_back({FIFF_BLOCK_START, FIFFT_INT, 1 * 4, static_cast<fiff_int_t>(start_block(FIFFB_MNE_ENV))});
+    new_dir.push_back({FIFF_BLOCK_ID, FIFFT_ID_STRUCT, 5 * 4, static_cast<fiff_int_t>(write_id(FIFF_BLOCK_ID, id))});
+    new_dir.push_back({FIFF_MNE_ENV_WORKING_DIR, FIFFT_STRING, static_cast<fiff_int_t>(workingDir.size()),
+                       static_cast<fiff_int_t>(write_string(FIFF_MNE_ENV_WORKING_DIR, workingDir.toStdString()))});
+    new_dir.push_back({FIFF_MNE_ENV_COMMAND_LINE, FIFFT_STRING, static_cast<fiff_int_t>(command.size()),
+                       static_cast<fiff_int_t>(write_string(FIFF_MNE_ENV_COMMAND_LINE, command.toStdString()))});
+    new_dir.push_back({FIFF_BLOCK_END, FIFFT_INT, 1 * 4, static_cast<fiff_int_t>(end_block(FIFFB_MNE_ENV, next_tmp))});
+    new_dir.insert(new_dir.end(), old_dir.begin() + where + 1, old_dir.end());
     /*
      * Update the branching tag
      */
     t_pTagNext->next = static_cast<qint32>(old_end);
-    write_tag(t_pTagNext, this_ent[0]->pos);
+    write_tag(t_pTagNext, this_ent.pos);
 
     dir() = new_dir;
 
@@ -1083,8 +1047,8 @@ QList<FiffCtfComp> FiffStream::read_ctf_comp(const FiffDirNode::SPtr& p_Node, co
         FiffNamedMatrix::SDPtr mat(new FiffNamedMatrix());
         this->read_named_matrix(node, FIFF_MNE_CTF_COMP_DATA, *mat);
         for (p = 0; p < node->nent(); ++p) {
-            kind = node->dir[p]->kind;
-            pos = node->dir[p]->pos;
+            kind = node->dir[p].kind;
+            pos = node->dir[p].pos;
             if (kind == FIFF_MNE_CTF_COMP_KIND) {
                 this->read_tag(t_pTag, pos);
                 break;
@@ -1117,8 +1081,8 @@ QList<FiffCtfComp> FiffStream::read_ctf_comp(const FiffDirNode::SPtr& p_Node, co
             one.kind = one.ctfkind;
 
         for (p = 0; p < node->nent(); ++p) {
-            kind = node->dir[p]->kind;
-            pos = node->dir[p]->pos;
+            kind = node->dir[p].kind;
+            pos = node->dir[p].pos;
             if (kind == FIFF_MNE_CTF_COMP_CALIBRATED) {
                 this->read_tag(t_pTag, pos);
                 break;
@@ -1171,8 +1135,8 @@ bool FiffStream::read_digitizer_data(const FiffDirNode::SPtr& p_Node, FiffDigiti
 
     // Read actual data and store it
     for (int k = 0; k < t_qListDigData.first()->nent(); ++k) {
-        kind = t_qListDigData.first()->dir[k]->kind;
-        pos = t_qListDigData.first()->dir[k]->pos;
+        kind = t_qListDigData.first()->dir[k].kind;
+        pos = t_qListDigData.first()->dir[k].pos;
 
         switch (kind) {
             case FIFF_DIG_POINT:
@@ -1233,8 +1197,8 @@ bool FiffStream::read_meas_info_base(const FiffDirNode::SPtr& p_Node, FiffInfoBa
     fiff_int_t pos = -1;
 
     for (qint32 k = 0; k < parent_meg[0]->nent(); ++k) {
-        kind = parent_meg[0]->dir[k]->kind;
-        pos = parent_meg[0]->dir[k]->pos;
+        kind = parent_meg[0]->dir[k].kind;
+        pos = parent_meg[0]->dir[k].pos;
         if (kind == FIFF_CH_INFO) {
             this->read_tag(t_pTag, pos);
             chs.append(t_pTag->toChInfo());
@@ -1333,8 +1297,8 @@ bool FiffStream::read_meas_info(const FiffDirNode::SPtr& p_Node, FiffInfo& info,
     fiff_int_t pos = -1;
 
     for (qint32 k = 0; k < meas_info[0]->nent(); ++k) {
-        kind = meas_info[0]->dir[k]->kind;
-        pos = meas_info[0]->dir[k]->pos;
+        kind = meas_info[0]->dir[k].kind;
+        pos = meas_info[0]->dir[k].pos;
         switch (kind) {
             case FIFF_NCHAN:
                 this->read_tag(t_pTag, pos);
@@ -1437,8 +1401,8 @@ bool FiffStream::read_meas_info(const FiffDirNode::SPtr& p_Node, FiffInfo& info,
         QList<FiffDirNode::SPtr> hpi_result = meas_info[0]->dir_tree_find(FIFFB_HPI_RESULT);
         if (hpi_result.size() == 1) {
             for (qint32 k = 0; k < hpi_result[0]->nent(); ++k) {
-                kind = hpi_result[0]->dir[k]->kind;
-                pos = hpi_result[0]->dir[k]->pos;
+                kind = hpi_result[0]->dir[k].kind;
+                pos = hpi_result[0]->dir[k].pos;
                 if (kind == FIFF_COORD_TRANS) {
                     this->read_tag(t_pTag, pos);
                     cand = t_pTag->toCoordTrans();
@@ -1462,8 +1426,8 @@ bool FiffStream::read_meas_info(const FiffDirNode::SPtr& p_Node, FiffInfo& info,
 
     if (isotrak.size() == 1) {
         for (k = 0; k < isotrak[0]->nent(); ++k) {
-            kind = isotrak[0]->dir[k]->kind;
-            pos = isotrak[0]->dir[k]->pos;
+            kind = isotrak[0]->dir[k].kind;
+            pos = isotrak[0]->dir[k].pos;
             if (kind == FIFF_DIG_POINT) {
                 this->read_tag(t_pTag, pos);
                 dig.append(t_pTag->toDigPoint());
@@ -1493,8 +1457,8 @@ bool FiffStream::read_meas_info(const FiffDirNode::SPtr& p_Node, FiffInfo& info,
     std::string acq_stim;
     if (acqpars.size() == 1) {
         for (k = 0; k < acqpars[0]->nent(); ++k) {
-            kind = acqpars[0]->dir[k]->kind;
-            pos = acqpars[0]->dir[k]->pos;
+            kind = acqpars[0]->dir[k].kind;
+            pos = acqpars[0]->dir[k].pos;
             if (kind == FIFF_DACQ_PARS) {
                 this->read_tag(t_pTag, pos);
                 acq_pars = t_pTag->toString();
@@ -1508,13 +1472,13 @@ bool FiffStream::read_meas_info(const FiffDirNode::SPtr& p_Node, FiffInfo& info,
     FiffDeviceInfo device_info;
     if (device.size() == 1) {
         for (k = 0; k < device[0]->nent(); ++k) {
-            kind = device[0]->dir[k]->kind;
+            kind = device[0]->dir[k].kind;
             std::string* field = kind == FIFF_DEVICE_TYPE ? &device_info.type
                 : kind == FIFF_DEVICE_MODEL               ? &device_info.model
                 : kind == FIFF_DEVICE_SERIAL              ? &device_info.serial
                 : kind == FIFF_DEVICE_SITE                ? &device_info.site
                                                           : nullptr;
-            if (field != nullptr && this->read_tag(t_pTag, device[0]->dir[k]->pos)) {
+            if (field != nullptr && this->read_tag(t_pTag, device[0]->dir[k].pos)) {
                 *field = t_pTag->toString();
             }
         }
@@ -1633,11 +1597,11 @@ bool FiffStream::read_meas_info(const FiffDirNode::SPtr& p_Node, FiffInfo& info,
 
         for (qint32 c = 0; c < hpi_coils.size(); ++c) {
             for (qint32 e = 0; e < hpi_coils[c]->nent(); ++e) {
-                if (hpi_coils[c]->dir[e]->kind != FIFF_HPI_COIL_FREQ) {
+                if (hpi_coils[c]->dir[e].kind != FIFF_HPI_COIL_FREQ) {
                     continue;
                 }
 
-                this->read_tag(t_pTag, hpi_coils[c]->dir[e]->pos);
+                this->read_tag(t_pTag, hpi_coils[c]->dir[e].pos);
                 info.hpi_coil_freqs.append(*t_pTag->toFloat());
                 break;
             }
@@ -2088,7 +2052,7 @@ bool FiffStream::setup_read_raw(std::unique_ptr<FiffStream> t_pStream,
     //
     //   Process the directory
     //
-    QList<FiffDirEntry::SPtr> dir = raw[0]->dir;
+    std::vector<FiffDirEntry> dir = raw[0]->dir;
     fiff_int_t nent = raw[0]->nent();
     fiff_int_t nchan = info.nchan;
     fiff_int_t first = 0;
@@ -2098,7 +2062,7 @@ bool FiffStream::setup_read_raw(std::unique_ptr<FiffStream> t_pStream,
     //  A malformed file may have a raw data block with an empty directory.
     //  Bail out cleanly instead of indexing past the end of dir below.
     //
-    if (dir.isEmpty()) {
+    if (dir.empty()) {
         qWarning("No directory entries in raw data block of %s\n", t_sFileName.toUtf8().constData());
         return false;
     }
@@ -2115,19 +2079,19 @@ bool FiffStream::setup_read_raw(std::unique_ptr<FiffStream> t_pStream,
     //  Get first sample tag if it is there
     //
     FiffTag::UPtr t_pTag;
-    if (dir[first]->kind == FIFF_FIRST_SAMPLE) {
-        data.file->read_tag(t_pTag, dir[first]->pos);
+    if (dir[first].kind == FIFF_FIRST_SAMPLE) {
+        data.file->read_tag(t_pTag, dir[first].pos);
         first_samp = *t_pTag->toInt();
         ++first;
     }
     //
     //  Omit initial skip
     //
-    if (first < dir.size() && dir[first]->kind == FIFF_DATA_SKIP) {
+    if (first < std::ssize(dir) && dir[first].kind == FIFF_DATA_SKIP) {
         //
         //  This first skip can be applied only after we know the buffer size
         //
-        data.file->read_tag(t_pTag, dir[first]->pos);
+        data.file->read_tag(t_pTag, dir[first].pos);
         first_skip = *t_pTag->toInt();
         ++first;
     }
@@ -2140,32 +2104,32 @@ bool FiffStream::setup_read_raw(std::unique_ptr<FiffStream> t_pStream,
     fiff_int_t nskip = 0;
     fiff_int_t nsamp = 0;
     for (qint32 k = first; k < nent; ++k) {
-        FiffDirEntry::SPtr ent = dir[k];
-        if (ent->kind == FIFF_DATA_SKIP) {
-            data.file->read_tag(t_pTag, ent->pos);
+        FiffDirEntry ent = dir[k];
+        if (ent.kind == FIFF_DATA_SKIP) {
+            data.file->read_tag(t_pTag, ent.pos);
             nskip = *t_pTag->toInt();
-        } else if (ent->kind == FIFF_DATA_BUFFER) {
+        } else if (ent.kind == FIFF_DATA_BUFFER) {
             //
             //   Figure out the number of samples in this buffer
             //
-            switch (ent->type) {
+            switch (ent.type) {
                 case FIFFT_DAU_PACK16:
-                    nsamp = ent->size / (2 * nchan);
+                    nsamp = ent.size / (2 * nchan);
                     break;
                 case FIFFT_SHORT:
-                    nsamp = ent->size / (2 * nchan);
+                    nsamp = ent.size / (2 * nchan);
                     break;
                 case FIFFT_FLOAT:
-                    nsamp = ent->size / (4 * nchan);
+                    nsamp = ent.size / (4 * nchan);
                     break;
                 case FIFFT_INT:
-                    nsamp = ent->size / (4 * nchan);
+                    nsamp = ent.size / (4 * nchan);
                     break;
                 case FIFFT_DOUBLE:
-                    nsamp = ent->size / (8 * nchan);
+                    nsamp = ent.size / (8 * nchan);
                     break;
                 default:
-                    qWarning("Cannot handle data buffers of type %d\n", ent->type);
+                    qWarning("Cannot handle data buffers of type %d\n", ent.type);
                     return false;
             }
             //
@@ -2181,8 +2145,8 @@ bool FiffStream::setup_read_raw(std::unique_ptr<FiffStream> t_pStream,
             //
             if (nskip > 0) {
                 FiffRawDir t_RawDir;
-                // Readers recognise a skip by ent->kind == -1 (the FiffDirEntry default) and fill it with zeros.
-                t_RawDir.ent = FiffDirEntry::SPtr(new FiffDirEntry);
+                // Readers recognise a skip by ent.kind == -1 (the FiffDirEntry default) and fill it with zeros.
+                t_RawDir.ent = FiffDirEntry{};
                 t_RawDir.first = first_samp;
                 t_RawDir.last = first_samp + nskip * nsamp - 1; //ToDo -1 right or is that MATLAB syntax
                 t_RawDir.nsamp = nskip * nsamp;
@@ -2310,7 +2274,7 @@ std::unique_ptr<FiffStream> FiffStream::open_update(QIODevice& p_IODevice)
         /*
         * Ensure that the last tag in the directory has next set to FIFF_NEXT_NONE
         */
-        pointerpos = t_pStream->dir()[t_pStream->nent() - 2]->pos;
+        pointerpos = t_pStream->dir()[t_pStream->nent() - 2].pos;
         if (!t_pStream->read_tag(t_pTag, pointerpos)) {
             qCritical("Could not read last tag in the directory list!");
             t_pStream->close();
@@ -2323,7 +2287,7 @@ std::unique_ptr<FiffStream> FiffStream::open_update(QIODevice& p_IODevice)
         /*
         * Read directory pointer
         */
-        pointerpos = t_pStream->dir()[1]->pos;
+        pointerpos = t_pStream->dir()[1].pos;
         if (!t_pStream->read_tag(t_pTag, pointerpos)) {
             qCritical("Could not read directory pointer!");
             t_pStream->close();
@@ -2903,7 +2867,7 @@ fiff_long_t FiffStream::write_dir_pointer(fiff_int_t dirpos, fiff_long_t pos, fi
 
 //=============================================================================================================
 
-fiff_long_t FiffStream::write_dir_entries(const QList<FiffDirEntry::SPtr>& dir, fiff_long_t pos)
+fiff_long_t FiffStream::write_dir_entries(const std::vector<FiffDirEntry>& dir, fiff_long_t pos)
 {
     //    /** Directories are composed of these structures. *
     //     typedef struct _fiffDirEntryRec {
@@ -2926,7 +2890,7 @@ fiff_long_t FiffStream::write_dir_entries(const QList<FiffDirEntry::SPtr>& dir, 
 
     pos = tell();
 
-    fiff_int_t nent = dir.size();
+    const auto nent = static_cast<fiff_int_t>(dir.size());
     fiff_int_t datasize = nent * static_cast<fiff_int_t>(sizeof(FiffDirEntry));
 
     write(static_cast<qint32>(FIFF_DIR));
@@ -2938,10 +2902,10 @@ fiff_long_t FiffStream::write_dir_entries(const QList<FiffDirEntry::SPtr>& dir, 
     //   Start writing FiffDirEntries
     //
     for (qint32 i = 0; i < nent; ++i) {
-        write(static_cast<qint32>(dir[i]->kind));
-        write(static_cast<qint32>(dir[i]->type));
-        write(static_cast<qint32>(dir[i]->size));
-        write(static_cast<qint32>(dir[i]->pos));
+        write(static_cast<qint32>(dir[i].kind));
+        write(static_cast<qint32>(dir[i].type));
+        write(static_cast<qint32>(dir[i].size));
+        write(static_cast<qint32>(dir[i].pos));
     }
 
     return pos;
@@ -3591,11 +3555,10 @@ void FiffStream::write_rt_command(fiff_int_t command, const QString& data)
 
 //=============================================================================================================
 
-QList<FiffDirEntry::SPtr> FiffStream::make_dir(bool* ok)
+std::vector<FiffDirEntry> FiffStream::make_dir(bool* ok)
 {
     FiffTag::UPtr t_pTag;
-    QList<FiffDirEntry::SPtr> dir;
-    FiffDirEntry::SPtr t_pFiffDirEntry;
+    std::vector<FiffDirEntry> dir;
     fiff_long_t pos;
     if (ok)
         *ok = false;
@@ -3618,25 +3581,14 @@ QList<FiffDirEntry::SPtr> FiffStream::make_dir(bool* ok)
         /*
         * Put in the new entry
         */
-        t_pFiffDirEntry = FiffDirEntry::SPtr(new FiffDirEntry);
-        t_pFiffDirEntry->kind = t_pTag->kind;
-        t_pFiffDirEntry->type = t_pTag->type;
-        t_pFiffDirEntry->size = t_pTag->size();
-        t_pFiffDirEntry->pos = pos;
-
-        dir.append(t_pFiffDirEntry);
+        dir.push_back({t_pTag->kind, t_pTag->type, static_cast<fiff_int_t>(t_pTag->size()), static_cast<fiff_int_t>(pos)});
         if (t_pTag->next < 0)
             break;
     }
     /*
      * Put in the new the terminating entry
      */
-    t_pFiffDirEntry = FiffDirEntry::SPtr(new FiffDirEntry);
-    t_pFiffDirEntry->kind = -1;
-    t_pFiffDirEntry->type = -1;
-    t_pFiffDirEntry->size = -1;
-    t_pFiffDirEntry->pos = -1;
-    dir.append(t_pFiffDirEntry);
+    dir.push_back(FiffDirEntry{});
 
     if (ok)
         *ok = true;
@@ -3676,11 +3628,11 @@ bool FiffStream::copyProcessingHistory(const QString& fromPath, const QString& t
     std::function<void(const FiffDirNode::SPtr&)> collect = [&](const FiffDirNode::SPtr& node) {
         items.push_back({node->type, 0, nullptr});
         for (int i = 0; i < node->nent(); ++i) {
-            const int kind = node->dir[i]->kind;
+            const int kind = node->dir[i].kind;
             if (kind == FIFF_BLOCK_START || kind == FIFF_BLOCK_END)
                 continue;
             FiffTag::UPtr tag;
-            if (srcStream.read_tag(tag, node->dir[i]->pos))
+            if (srcStream.read_tag(tag, node->dir[i].pos))
                 items.push_back({0, 0, std::move(tag)});
         }
         for (int c = 0; c < node->nchild(); ++c)
@@ -3700,7 +3652,7 @@ bool FiffStream::copyProcessingHistory(const QString& fromPath, const QString& t
     }
 
     // open_update marks the last tag as the end of the file; chain it to the appended block
-    const fiff_long_t lastPos = dstStream->dir()[dstStream->nent() - 2]->pos;
+    const fiff_long_t lastPos = dstStream->dir()[dstStream->nent() - 2].pos;
     FiffTag::UPtr lastTag;
     if (!dstStream->read_tag(lastTag, lastPos)) {
         dstStream->close();

@@ -790,11 +790,11 @@ bool AnnotationModel::loadAnnotationFif(QFile& qFile)
     for (int entryIndex = 0; entryIndex < annotationBlocks.first()->nent(); ++entryIndex) {
         const auto& directoryEntry = annotationBlocks.first()->dir.at(entryIndex);
         FIFFLIB::FiffTag::UPtr tag;
-        if (!stream.read_tag(tag, directoryEntry->pos) || !tag) {
+        if (!stream.read_tag(tag, directoryEntry.pos) || !tag) {
             continue;
         }
 
-        if (directoryEntry->kind == FiffMneBaselineMin) {
+        if (directoryEntry.kind == FiffMneBaselineMin) {
             if (const float* values = tag->toFloat()) {
                 const int count = tag->size() / static_cast<int>(sizeof(float));
                 onsetSeconds.resize(count);
@@ -802,7 +802,7 @@ bool AnnotationModel::loadAnnotationFif(QFile& qFile)
                     onsetSeconds[index] = values[index];
                 }
             }
-        } else if (directoryEntry->kind == FiffMneBaselineMax) {
+        } else if (directoryEntry.kind == FiffMneBaselineMax) {
             if (const float* values = tag->toFloat()) {
                 const int count = tag->size() / static_cast<int>(sizeof(float));
                 endSeconds.resize(count);
@@ -810,11 +810,11 @@ bool AnnotationModel::loadAnnotationFif(QFile& qFile)
                     endSeconds[index] = values[index];
                 }
             }
-        } else if (directoryEntry->kind == FIFF_MEAS_DATE) {
+        } else if (directoryEntry.kind == FIFF_MEAS_DATE) {
             haveOrigTime = true;
-        } else if (directoryEntry->kind == FIFF_COMMENT) {
+        } else if (directoryEntry.kind == FIFF_COMMENT) {
             descriptions = decodeMneChannelNames(QString::fromStdString(tag->toString()));
-        } else if (directoryEntry->kind == FiffMneEpochsDropLog) {
+        } else if (directoryEntry.kind == FiffMneEpochsDropLog) {
             const QJsonDocument document = QJsonDocument::fromJson(QByteArray::fromStdString(tag->toString()));
             const QJsonArray rows = document.array();
             channelNames.resize(rows.size());
@@ -827,7 +827,7 @@ bool AnnotationModel::loadAnnotationFif(QFile& qFile)
                     }
                 }
             }
-        } else if (directoryEntry->kind == FIFF_FREE_LIST) {
+        } else if (directoryEntry.kind == FIFF_FREE_LIST) {
             const QJsonDocument document = QJsonDocument::fromJson(QByteArray::fromStdString(tag->toString()));
             const QJsonArray rows = document.array();
             extras.resize(rows.size());

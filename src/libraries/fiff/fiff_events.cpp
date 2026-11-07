@@ -167,8 +167,8 @@ bool FiffEvents::read_from_fif(const std::filesystem::path& path,
     const qint32* serial_eventlist_int = nullptr;
 
     for (k = 0; k < eventsBlocks[0]->nent(); ++k) {
-        kind = eventsBlocks[0]->dir[k]->kind;
-        pos = eventsBlocks[0]->dir[k]->pos;
+        kind = eventsBlocks[0]->dir[k].kind;
+        pos = eventsBlocks[0]->dir[k].pos;
         if (kind == FIFF_MNE_EVENT_LIST) {
             t_pStream->read_tag(t_pTag, pos);
             if (t_pTag->type == FIFFT_UINT) {

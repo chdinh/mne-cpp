@@ -37,13 +37,6 @@
 #include "fiff_types.h"
 
 //=============================================================================================================
-// QT INCLUDES
-//=============================================================================================================
-
-#include <QSharedPointer>
-#include <memory>
-
-//=============================================================================================================
 // DEFINE NAMESPACE FIFFLIB
 //=============================================================================================================
 
@@ -64,54 +57,22 @@ namespace FIFFLIB
  * @snippet ex_fiff_structure/main.cpp fiff_raw_dir_usage
  */
 
-class FIFFSHARED_EXPORT FiffDirEntry
+struct FiffDirEntry
 {
-public:
-    using SPtr = QSharedPointer<FiffDirEntry>; /**< Shared pointer type for FiffDirEntry. */
+    fiff_int_t kind = -1; /**< Tag number. */
+    fiff_int_t type = -1; /**< Data type. */
+    fiff_int_t size = -1; /**< How many bytes. */
+    fiff_int_t pos = -1;  /**< Location in file; the data is located at pos + FIFFC_DATA_OFFSET. */
 
-    //=========================================================================================================
-    /**
-     * Constructs the dir entry.
-     */
-    FiffDirEntry();
+    /** @return The size of one entry in a FIFF directory tag. */
+    static constexpr qint32 storageSize()
+    {
+        return 4 * sizeof(fiff_int_t);
+    }
 
-    //=========================================================================================================
-    /**
-     * Copy constructor.
-     *
-     * @param[in] p_FiffDirEntry   Dir Entry which should be copied.
-     */
-    FiffDirEntry(const FiffDirEntry& p_FiffDirEntry);
-
-    //=========================================================================================================
-    /**
-     * Destroys the dir entry.
-     */
-    ~FiffDirEntry();
-
-    //=========================================================================================================
-    /**
-     * Size of the old struct (fiffDirEntryRec) 4*int = 4*4 = 16
-     *
-     * @return the size of the old struct fiffDirEntryRec.
-     */
-    inline static qint32 storageSize();
-
-public:
-    fiff_int_t kind; /**< Tag number. */
-    fiff_int_t type; /**< Data type. */
-    fiff_int_t size; /**< How many bytes. */
-    fiff_int_t pos;  /**< Location in file; Note: the data is located at pos + FIFFC_DATA_OFFSET: 2GB restriction -> change this to fiff_long_t. */
+    friend bool operator==(const FiffDirEntry&, const FiffDirEntry&) = default;
 };
 
-//=============================================================================================================
-// INLINE DEFINITIONS
-//=============================================================================================================
-
-inline qint32 FiffDirEntry::storageSize()
-{
-    return sizeof(FiffDirEntry::kind) + sizeof(FiffDirEntry::type) + sizeof(FiffDirEntry::size) + sizeof(FiffDirEntry::pos);
-}
 } // NAMESPACE
 
 #endif // FIFF_DIR_ENTRY_H

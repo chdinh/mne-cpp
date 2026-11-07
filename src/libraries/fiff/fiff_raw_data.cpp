@@ -217,7 +217,7 @@ bool FiffRawData::read_raw_segment(MatrixXd& data,
         //  Do we need this buffer
         //
         if (thisRawDir.last > from) {
-            if (thisRawDir.ent->kind == -1) {
+            if (thisRawDir.ent.kind == -1) {
                 //
                 //  Take the easy route: skip is translated to zeros
                 //
@@ -230,7 +230,7 @@ bool FiffRawData::read_raw_segment(MatrixXd& data,
 
                 one.setZero();
             } else {
-                fid.read_tag(t_pTag, thisRawDir.ent->pos);
+                fid.read_tag(t_pTag, thisRawDir.ent.pos);
                 //
                 //   Depending on the state of the projection and selection
                 //   we proceed a little bit differently
@@ -518,7 +518,7 @@ bool FiffRawData::read_raw_segment(MatrixXd& data,
         //  Do we need this buffer
         //
         if (thisRawDir.last > from) {
-            if (thisRawDir.ent->kind == -1) {
+            if (thisRawDir.ent.kind == -1) {
                 //
                 //  Take the easy route: skip is translated to zeros
                 //
@@ -532,7 +532,7 @@ bool FiffRawData::read_raw_segment(MatrixXd& data,
                 one.setZero();
             } else {
                 FiffTag::UPtr t_pTag;
-                fid.read_tag(t_pTag, thisRawDir.ent->pos);
+                fid.read_tag(t_pTag, thisRawDir.ent.pos);
                 //
                 //   Depending on the state of the projection and selection
                 //   we proceed a little bit differently
