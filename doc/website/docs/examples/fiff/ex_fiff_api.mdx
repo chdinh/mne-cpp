@@ -111,12 +111,12 @@ The documented classes this example uses most:
 |---|---|
 | [`FiffCoordTrans`](../../api/fiff/fiff-coord-trans.mdx) | FIFF I/O |
 | [`FiffStream`](../../api/fiff/fiff-stream.mdx) | FIFF I/O |
-| [`FiffAnnotations`](../../api/fiff/fiff-annotations.mdx) | FIFF I/O |
 | [`FiffDirNode`](../../api/fiff/fiff-dir-node.mdx) | FIFF I/O |
-| [`FiffEvents`](../../api/fiff/fiff-events.mdx) | FIFF I/O |
 | [`FiffProj`](../../api/fiff/fiff-proj.mdx) | FIFF I/O |
+| [`FiffAnnotations`](../../api/fiff/fiff-annotations.mdx) | FIFF I/O |
 | [`FiffCov`](../../api/fiff/fiff-cov.mdx) | FIFF I/O |
 | [`FiffDigPointSet`](../../api/fiff/fiff-dig-point-set.mdx) | FIFF I/O |
+| [`FiffEvents`](../../api/fiff/fiff-events.mdx) | FIFF I/O |
 
 ## Used in the API reference
 
@@ -349,10 +349,9 @@ int main(int argc, char* argv[])
                  "FiffCov: 366 channels, 15972 degrees of freedom, C[0,0] matches mne.read_cov");
 
     //! [fiff_events_usage]
-    FiffEvents events;
-    FiffEvents::detect_from_raw(raw, events, "STI 014"); // rising edges of the trigger channel
+    const FiffEvents events = FiffEvents::find_events(raw, "STI 014").value(); // rising edges, like mne.find_events
     const std::string eventPath = tmp.filePath("sample-eve.fif").toStdString();
-    const bool eventsWritten = events.write_to_fif(eventPath);
+    const bool eventsWritten = events.write(eventPath).has_value();
     FiffEvents eventsBack(eventPath); // mne.read_events reads this file too
     //! [fiff_events_usage]
     // mne.find_events(raw, "STI 014"): 25 events, first [13988, 0, 2], [14172, 0, 3], [14385, 0, 1]
@@ -361,15 +360,15 @@ int main(int argc, char* argv[])
 
     //! [fiff_annotations_usage]
     MatrixXi firstThree = events.events.topRows(3);
-    FiffAnnotations annotations = annotationsFromEvents(firstThree, info.sfreq, {{1, "auditory/left"}, {2, "auditory/right"}}, raw.first_samp);
-    const FiffAnnotation blink{0.5, 1.0, "BAD_blink", {}, {}, {}}; // onset s, duration s, description, channels, ...
-    annotations.append(blink);
-    FiffAnnotations::write(tmp.filePath("annot.csv"), annotations);
-    const FiffAnnotations annotationsBack = FiffAnnotations::read(tmp.filePath("annot.csv"));
-    const MatrixXi eventsAgain = eventsFromAnnotations(annotationsBack.select("auditory"), info.sfreq, {{"auditory/left", 1}, {"auditory/right", 2}}, raw.first_samp);
+    FiffAnnotations annotations = annotations_from_events(firstThree, info.sfreq, {{1, "auditory/left"}, {2, "auditory/right"}}, raw.first_samp);
+    annotations.append(0.5, 1.0, "BAD_blink"); // onset s, duration s, description
+    const std::filesystem::path csv = tmp.filePath("annot.csv").toStdString();
+    const bool annotationsWritten = annotations.write(csv).has_value();
+    const FiffAnnotations annotationsBack = FiffAnnotations::read(csv).value(); // value() throws UTILSLIB::Error
+    const MatrixXi eventsAgain = events_from_annotations(annotationsBack.select("auditory"), info.sfreq, {{"auditory/left", 1}, {"auditory/right", 2}}, raw.first_samp);
     //! [fiff_annotations_usage]
     // Event 13988 (code 2) is (13988 - 12900) / 300.307 s = 3.6230 s after the first sample; code 3 has no description and stays "3"; the CSV keeps onsets to well within half a sample
-    ok &= expect(annotationsBack.size() == 4 && std::fabs(annotationsBack.select("auditory/right").toVector()[0].onset - (13988 - 12900) / info.sfreq) < 0.5 / info.sfreq && eventsAgain.rows() == 2 && eventsAgain(0, 0) == 13988 && eventsAgain(1, 0) == 14385 && eventsAgain(1, 2) == 1 && annotationsBack.select("3").size() == 1,
+    ok &= expect(annotationsWritten && annotationsBack.size() == 4 && std::fabs(annotationsBack.select("auditory/right")[0].onset - (13988 - 12900) / info.sfreq) < 0.5 / info.sfreq && eventsAgain.rows() == 2 && eventsAgain(0, 0) == 13988 && eventsAgain(1, 0) == 14385 && eventsAgain(1, 2) == 1 && annotationsBack.select("3").size() == 1,
                  "FiffAnnotations: events become onsets in seconds and back, with descriptions as codes");
 
     //! [fiff_evoked_set_usage]

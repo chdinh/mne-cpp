@@ -7,7 +7,7 @@ sidebar_position: 6
 
 # Namespace Members
 
-Index of 434 namespace-level symbols (functions, typedefs, enums, variables) across all public namespaces.
+Index of 438 namespace-level symbols (functions, typedefs, enums, variables) across all public namespaces.
 
 - **Accuracy** `[enum]` in [INVLIB](/docs/api/inv/)
 - **acqApplyThreadPolicy** `[fn]` in [ACQLIB](/docs/api/acq/) — Applies `policy` to the calling thread: CPUs first, then priority.
@@ -40,7 +40,7 @@ Index of 434 namespace-level symbols (functions, typedefs, enums, variables) acr
 - **allowedElectrophysiologyDatatypes** `[fn]` in [BIDSLIB](/docs/api/bids/) — All allowed BIDS electrophysiology datatypes.
 - **annotateAmplitude** `[fn]` in [UTILSLIB](/docs/api/utils/) — Annotate spans where consecutive samples jump or stay flat, as mne.preprocessing.annotate_amplitude.
 - **annotateMusclZscore** `[fn]` in [UTILSLIB](/docs/api/utils/) — Detect muscle artifacts via high-frequency z-score and annotate bad segments.
-- **annotationsFromEvents** `[fn]` in [FIFFLIB](/docs/api/fiff/) — Convert a FIFF event matrix to [`FiffAnnotations`](/docs/api/fiff/fiff-annotations).
+- **annotations_from_events** `[fn]` in [FIFFLIB](/docs/api/fiff/) — Converts events to annotations, like mne.annotations_from_events.
 - **applyForward** `[fn]` in [INVLIB](/docs/api/inv/) — Project a source estimate to the sensors, as mne.apply_forward.
 - **applyInverseEpochs** `[fn]` in [INVLIB](/docs/api/inv/) — Apply inverse operator to each epoch in a list.
 - **applyInverseRaw** `[fn]` in [INVLIB](/docs/api/inv/) — Apply inverse operator to raw data.
@@ -152,7 +152,7 @@ Index of 434 namespace-level symbols (functions, typedefs, enums, variables) acr
 - **COR_NSLICE** `[var]` in [MRILIB](/docs/api/mri/) — Number of COR slices.
 - **COR_PIXEL_SIZE** `[var]` in [MRILIB](/docs/api/mri/) — Pixel size for COR slices (1mm in meters).
 - **COR_WIDTH** `[var]` in [MRILIB](/docs/api/mri/) — Width of each COR slice in pixels.
-- **countAnnotations** `[fn]` in [FIFFLIB](/docs/api/fiff/) — Count annotations by description.
+- **count_annotations** `[fn]` in [FIFFLIB](/docs/api/fiff/) — Counts annotations by description, like mne.count_annotations.
 - **DATA_TYPE** `[var]` in [FIFFLIB](/docs/api/fiff/) — DATA_TYPE encoding 0000ffff.
 - **dateTimeNow** `[fn]` in [UTILSLIB](/docs/api/utils/) — Returns build date and time (time preprocessor was run).
 - **dateToday** `[fn]` in [UTILSLIB](/docs/api/utils/) — Returns build date (time preprocessor was run).
@@ -186,7 +186,9 @@ Index of 434 namespace-level symbols (functions, typedefs, enums, variables) acr
 - **equalsIgnoreCase** `[fn]` in [UTILSLIB](/docs/api/utils/)
 - **ErrorCode** `[enum]` in [UTILSLIB](/docs/api/utils/) — What went wrong, so callers can react without parsing the message.
 - **estimateSnr** `[fn]` in [INVLIB](/docs/api/inv/) — Estimate the SNR of evoked data as a function of time.
-- **eventsFromAnnotations** `[fn]` in [FIFFLIB](/docs/api/fiff/) — Convert [`FiffAnnotations`](/docs/api/fiff/fiff-annotations) to a FIFF event matrix.
+- **events_from_annotations** `[fn]` in [FIFFLIB](/docs/api/fiff/) — Converts annotations to events, like mne.events_from_annotations.
+- **extrasFromJson** `[fn]` in [FIFFLIB](/docs/api/fiff/)
+- **extrasToJson** `[fn]` in [FIFFLIB](/docs/api/fiff/)
 - **fail** `[fn]` in [UTILSLIB](/docs/api/utils/)
 - **FiducialId** `[enum]` in [ACQLIB](/docs/api/acq/) — Identifier for the three cardinal fiducials.
 - **fiff_byte_t** `[type]` in [FIFFLIB](/docs/api/fiff/)
@@ -349,6 +351,8 @@ Index of 434 namespace-level symbols (functions, typedefs, enums, variables) acr
 - **multiViewPresetIsPerspective** `[fn]` in [DISP3DLIB](/docs/api/disp3-d/) — Whether a preset is a perspective (free-rotate) camera rather than an orthographic-style fixed camera.
 - **multiViewPresetName** `[fn]` in [DISP3DLIB](/docs/api/disp3-d/) — Human-readable name for a multi-view preset index (0–6).
 - **multiViewPresetOffset** `[fn]` in [DISP3DLIB](/docs/api/disp3-d/) — Camera rotation quaternion for a multi-view preset index (0–6).
+- **namesFromJson** `[fn]` in [FIFFLIB](/docs/api/fiff/)
+- **namesToJson** `[fn]` in [FIFFLIB](/docs/api/fiff/)
 - **normalizedVisualizationTarget** `[fn]` in [DISP3DLIB](/docs/api/disp3-d/) — Clamp a visualization target index to [-1, maxIndex].
 - **NOT_TRANSPOSED** `[var]` in [INVLIB](/docs/api/inv/) — Defines NOT_TRANSPOSED.
 - **operator!=** `[fn]` in [FIFFLIB](/docs/api/fiff/) — Compares two [`FiffTime`](/docs/api/fiff/fiff-time) instances for inequality.

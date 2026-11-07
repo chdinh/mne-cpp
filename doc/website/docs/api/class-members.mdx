@@ -7,7 +7,7 @@ sidebar_position: 5
 
 # Class Members
 
-Index of 6696 public class members (functions, variables, typedefs, enums) across all documented classes.
+Index of 6707 public class members (functions, variables, typedefs, enums) across all documented classes.
 
 **Jump to:** [A](#a) · [B](#b) · [C](#c) · [D](#d) · [E](#e) · [F](#f) · [G](#g) · [H](#h) · [I](#i) · [J](#j) · [K](#k) · [L](#l) · [M](#m) · [N](#n) · [O](#o) · [P](#p) · [Q](#q) · [R](#r) · [S](#s) · [T](#t) · [U](#u) · [V](#v) · [W](#w) · [X](#x) · [Y](#y) · [Z](#z)
 
@@ -174,8 +174,7 @@ Index of 6696 public class members (functions, variables, typedefs, enums) acros
 - **append** `[fn]` in [ConnectivitySettings](/docs/api/connectivity/connectivity-settings)
 - **append** `[fn]` in [ConnectivitySettings](/docs/api/connectivity/connectivity-settings)
 - **append** `[fn]` in [FastrakParser](/docs/api/acq/fastrak-parser) — Append raw bytes received from the serial port.
-- **append** `[fn]` in [FiffAnnotations](/docs/api/fiff/fiff-annotations) — Appends an annotation.
-- **append** `[fn]` in [FiffAnnotations](/docs/api/fiff/fiff-annotations) — Appends an annotation by fields.
+- **append** `[fn]` in [FiffAnnotations](/docs/api/fiff/fiff-annotations) — Appends an annotation, like mne.Annotations.append.
 - **append** `[fn]` in [MNEDerivSet](/docs/api/mne/mne-deriv-set) — Appends copies of the derivations of another set (MNE-C `mne_merge_deriv_sets`).
 - **append** `[fn]` in [MNEEventList](/docs/api/mne/mne-event-list) — Appends the events of another list (MNE-C `mne_add_to_event_list`).
 - **append** `[fn]` in [MNESourceSpaces](/docs/api/mne/mne-source-spaces) — Appends a deep copy of the given source space.
@@ -326,6 +325,8 @@ Index of 6696 public class members (functions, variables, typedefs, enums) acros
 - **bDebias** `[var]` in [InvTfMxneParams](/docs/api/inv/inv-tf-mxne-params) — Whether to debias the final solution.
 - **bdipname** `[var]` in [InvDipoleFitSettings](/docs/api/inv/inv-dipole-fit-settings) — Output file in bdip format.
 - **bEegOnly** `[var]` in [LofBadChannelParams](/docs/api/dsp/lof-bad-channel-params) — If true, only check EEG channels.
+- **begin** `[fn]` in [FiffAnnotations](/docs/api/fiff/fiff-annotations)
+- **begin** `[fn]` in [FiffAnnotations](/docs/api/fiff/fiff-annotations)
 - **begin** `[fn]` in [FiffDigPointSet](/docs/api/fiff/fiff-dig-point-set)
 - **begin** `[fn]` in [FiffDigPointSet](/docs/api/fiff/fiff-dig-point-set)
 - **beginFrame** `[fn]` in [BrainRenderer](/docs/api/disp3-d/brain-renderer) — Begin the first render pass of a frame.
@@ -505,6 +506,7 @@ Index of 6696 public class members (functions, variables, typedefs, enums) acros
 - **ch_kind** `[var]` in [MNEChSelection](/docs/api/mne/mne-ch-selection) — Kinds of the channels corresponding to picks.
 - **ch_major** `[var]` in [MNEMeasData](/docs/api/mne/mne-meas-data) — If true, data rows are channels (not times).
 - **ch_name** `[var]` in [FiffChInfo](/docs/api/fiff/fiff-ch-info) — Descriptive name for the channel.
+- **ch_names** `[var]` in [FiffAnnotation](/docs/api/fiff/fiff-annotation) — Channels the annotation applies to; none for all.
 - **ch_names** `[var]` in [FiffDigMontage](/docs/api/fiff/fiff-dig-montage) — Names of the EEG electrodes, in the order of their points.
 - **ch_names** `[fn]` in [FiffEvoked](/docs/api/fiff/fiff-evoked) — Returns list of channel names stored in fiff info -&gt; this is to stay consistent with python.
 - **ch_names** `[var]` in [FiffInfoBase](/docs/api/fiff/fiff-info-base) — List of all channel names.
@@ -542,7 +544,6 @@ Index of 6696 public class members (functions, variables, typedefs, enums) acros
 - **channelKind** `[fn]` in [FiffExplain](/docs/api/fiff/fiff-explain) — Name of a channel kind (FIFFV_*_CH), e.g.
 - **ChannelLabelPanel** `[fn]` in [ChannelLabelPanel](/docs/api/disp/channel-label-panel)
 - **channelMarkingChanged** `[signal]` in [RtFiffRawView](/docs/api/disp/rt-fiff-raw-view) — Emmited when marking of bad channels is changed.
-- **channelNames** `[var]` in [FiffAnnotation](/docs/api/fiff/fiff-annotation) — Empty = global annotation.
 - **channelNumber** `[var]` in [BrainVisionChannelInfo](/docs/api/bids/brain-vision-channel-info)
 - **channelNumber** `[var]` in [EDFChannelInfo](/docs/api/bids/edf-channel-info)
 - **channelOffsetChanged** `[signal]` in [ChannelRhiView](/docs/api/disp/channel-rhi-view) — Emitted whenever the first visible channel index changes.
@@ -926,7 +927,7 @@ Index of 6696 public class members (functions, variables, typedefs, enums) acros
 - **computeVector** `[fn]` in [WelchPsd](/docs/api/dsp/welch-psd) — Compute Welch PSD for a single channel row vector.
 - **computeVox2Ras** `[fn]` in [MriVolData](/docs/api/mri/mri-vol-data) — Builds the voxel-to-surface-RAS (MRI) 4×4 transform matrix.
 - **computeVox2RasTkr** `[fn]` in [MriVolData](/docs/api/mri/mri-vol-data) — Builds the voxel-to-surface-RAS (tkRAS / tkregister) 4×4 transform.
-- **concatenate** `[fn]` in [FiffEvents](/docs/api/fiff/fiff-events) — Concatenate the events of consecutive recordings, like mne.concatenate_events.
+- **concatenate** `[fn]` in [FiffEvents](/docs/api/fiff/fiff-events) — Concatenates the events of consecutive recordings, like mne.concatenate_events.
 - **concatenateEpochs** `[fn]` in [FiffEpochs](/docs/api/fiff/fiff-epochs) — Concatenate multiple epoch sets into a single list.
 - **Condition** `[type]` in [FiffEvoked](/docs/api/fiff/fiff-evoked) — Selects a data set by its index in the file or by its comment.
 - **condition** `[fn]` in [MNECovMatrix](/docs/api/mne/mne-cov-matrix) — Condition the covariance matrix by eigendecomposition with per-channel-type scaling, zeroing sub-threshold eigenvalues, and reconstructing.
@@ -942,6 +943,7 @@ Index of 6696 public class members (functions, variables, typedefs, enums) acros
 - **connectivityMetricChanged** `[signal]` in [ConnectivitySettingsView](/docs/api/disp/connectivity-settings-view) — Emit signal whenever the connectivity metric changed.
 - **ConnectivitySettings** `[fn]` in [ConnectivitySettings](/docs/api/connectivity/connectivity-settings) — Constructs a [`ConnectivitySettings`](/docs/api/connectivity/connectivity-settings) object.
 - **ConnectivitySettingsView** `[fn]` in [ConnectivitySettingsView](/docs/api/disp/connectivity-settings-view) — Constructs a [`ConnectivitySettingsView`](/docs/api/disp/connectivity-settings-view) which is a child of parent.
+- **const_iterator** `[type]` in [FiffAnnotations](/docs/api/fiff/fiff-annotations) — Constant iterator.
 - **const_iterator** `[type]` in [FiffDigPointSet](/docs/api/fiff/fiff-dig-point-set) — Constant iterator.
 - **ConstRowMajorMatrixMap** `[type]` in [MlTensor](/docs/api/ml/ml-tensor)
 - **ConstSPtr** `[type]` in [AbstractMetric](/docs/api/connectivity/abstract-metric) — Const shared pointer type for [`AbstractMetric`](/docs/api/connectivity/abstract-metric).
@@ -1154,7 +1156,7 @@ Index of 6696 public class members (functions, variables, typedefs, enums) acros
 - **cosmag** `[fn]` in [InvSensorSet](/docs/api/inv/inv-sensor-set)
 - **count** `[var]` in [AcqChannelRange](/docs/api/acq/acq-channel-range) — Number of channels; max = to the end.
 - **count** `[fn]` in [Command](/docs/api/com/command) — Returns the number of parameters.
-- **count** `[fn]` in [FiffEvents](/docs/api/fiff/fiff-events) — Count the events per code (column 2), like mne.count_events.
+- **count** `[fn]` in [FiffEvents](/docs/api/fiff/fiff-events) — Counts the events per code (column 2), like mne.count_events.
 - **count** `[fn]` in [LogCapture](/docs/api/utils/log-capture)
 - **count** `[fn]` in [MNEDerivSet](/docs/api/mne/mne-deriv-set) — Returns the number of derived channels over all derivations (MNE-C `mne_count_deriv`).
 - **count** `[fn]` in [RawCommand](/docs/api/com/raw-command) — Returns the number of parameters.
@@ -1193,7 +1195,7 @@ Index of 6696 public class members (functions, variables, typedefs, enums) acros
 - **createReader** `[fn]` in [BidsRawData](/docs/api/bids/bids-raw-data) — Create the appropriate format reader for a given file extension.
 - **createSphere** `[fn]` in [MeshFactory](/docs/api/disp3-d/mesh-factory) — Create a subdivided icosahedron sphere.
 - **critical** `[fn]` in [Log](/docs/api/utils/log) — As `debug()`, at critical level.
-- **crop** `[fn]` in [FiffAnnotations](/docs/api/fiff/fiff-annotations) — Returns annotations overlapping [tmin, tmax], clipping partially overlapping ones.
+- **crop** `[fn]` in [FiffAnnotations](/docs/api/fiff/fiff-annotations)
 - **CrossCorrelation** `[fn]` in [CrossCorrelation](/docs/api/connectivity/cross-correlation) — Constructs a [`CrossCorrelation`](/docs/api/connectivity/cross-correlation) object.
 - **crosshairEnabled** `[fn]` in [ChannelDataView](/docs/api/disp/channel-data-view)
 - **crosshairEnabled** `[fn]` in [ChannelRhiView](/docs/api/disp/channel-rhi-view)
@@ -1342,7 +1344,6 @@ Index of 6696 public class members (functions, variables, typedefs, enums) acros
 - **detach** `[fn]` in [Subject](/docs/api/utils/subject) — Detaches an observer of the subject.
 - **detail** `[var]` in [AcqDiscoveredDevice](/docs/api/acq/acq-discovered-device) — e.g.
 - **detect** `[fn]` in [BadChannelDetect](/docs/api/utils/bad-channel-detect) — Run all three detectors and return the union of bad channel row indices.
-- **detect_from_raw** `[fn]` in [FiffEvents](/docs/api/fiff/fiff-events) — Detect trigger events from raw data using a stimulus channel.
 - **detectEcg** `[fn]` in [ArtifactDetect](/docs/api/utils/artifact-detect) — Detect ECG R-peak events as mne.preprocessing.find_ecg_events does.
 - **detectEog** `[fn]` in [ArtifactDetect](/docs/api/utils/artifact-detect) — Detect EOG blink/saccade events as mne.preprocessing.find_eog_events does.
 - **detectFlat** `[fn]` in [BadChannelDetect](/docs/api/utils/bad-channel-detect) — Detect flat (dead) channels.
@@ -1572,19 +1573,22 @@ Index of 6696 public class members (functions, variables, typedefs, enums) acros
 - **emitChanged** `[fn]` in [AcquiredPoints](/docs/api/acq/acquired-points)
 - **empty** `[fn]` in [AcqBlockView](/docs/api/acq/acq-block-view)
 - **empty** `[fn]` in [AcqSpanPair](/docs/api/acq/acq-span-pair)
+- **empty** `[fn]` in [FiffAnnotations](/docs/api/fiff/fiff-annotations)
 - **empty** `[fn]` in [FiffDigPointSet](/docs/api/fiff/fiff-dig-point-set)
 - **empty** `[fn]` in [MlTensor](/docs/api/ml/ml-tensor)
 - **enable_all_sources** `[fn]` in [MNESourceSpace](/docs/api/mne/mne-source-space) — Enable all source points (set inuse to TRUE, nuse = np).
 - **enabled** `[var]` in [SubView](/docs/api/disp3-d/sub-view)
 - **end** `[var]` in [AcqSampleRange](/docs/api/acq/acq-sample-range) — One past the last sample; equals first for an empty range.
+- **end** `[fn]` in [FiffAnnotations](/docs/api/fiff/fiff-annotations)
+- **end** `[fn]` in [FiffAnnotations](/docs/api/fiff/fiff-annotations)
 - **end** `[fn]` in [FiffDigPointSet](/docs/api/fiff/fiff-dig-point-set)
 - **end** `[fn]` in [FiffDigPointSet](/docs/api/fiff/fiff-dig-point-set)
 - **end_block** `[fn]` in [FiffStream](/docs/api/fiff/fiff-stream) — Writes a FIFF_BLOCK_END tag.
 - **end_file** `[fn]` in [FiffStream](/docs/api/fiff/fiff-stream) — Writes the closing tags to a fif file and closes the file.
+- **end_to_sample** `[fn]` in [FiffAnnotations](/docs/api/fiff/fiff-annotations)
 - **endian** `[var]` in [FiffDataRef](/docs/api/fiff/fiff-data-ref) — Are the data in the little or big endian byte order.
 - **endPass** `[fn]` in [BrainRenderer](/docs/api/disp3-d/brain-renderer) — End any render pass (clearing or preserving).
 - **endSample** `[var]` in `AnnotationSpan` — Absolute last sample covered by the annotation.
-- **endToSample** `[fn]` in [FiffAnnotations](/docs/api/fiff/fiff-annotations) — Converts end (onset+duration) of annotation at index to a sample number.
 - **ensureRenderTargets** `[fn]` in [BrainRenderer](/docs/api/disp3-d/brain-renderer) — Create the dual render-target pair for multi-pass rendering.
 - **ensureVenv** `[fn]` in [PythonRunner](/docs/api/utils/python-runner) — Ensure a virtual environment exists, is up-to-date, and has all required packages installed.
 - **ent** `[var]` in [FiffRawDir](/docs/api/fiff/fiff-raw-dir) — Directory entry description.
@@ -1608,6 +1612,8 @@ Index of 6696 public class members (functions, variables, typedefs, enums) acros
 - **epochMarkersToggled** `[signal]` in [ChannelDataView](/docs/api/disp/channel-data-view)
 - **epochMarkersVisible** `[fn]` in [ChannelDataView](/docs/api/disp/channel-data-view)
 - **epochMarkersVisible** `[fn]` in [ChannelRhiView](/docs/api/disp/channel-rhi-view)
+- **erase** `[fn]` in [FiffAnnotations](/docs/api/fiff/fiff-annotations) — Removes an annotation.
+- **erase** `[fn]` in [FiffAnnotations](/docs/api/fiff/fiff-annotations) — Removes a range of annotations.
 - **error** `[fn]` in [AcqExpected](/docs/api/acq/acq-expected)
 - **error** `[var]` in [DipFitError](/docs/api/inv/dip-fit-error)
 - **error** `[signal]` in [StcLoadingWorker](/docs/api/disp3-d/stc-loading-worker) — Emitted when an error occurs.
@@ -1685,6 +1691,7 @@ Index of 6696 public class members (functions, variables, typedefs, enums) acros
 - **extent** `[fn]` in [MNELayout](/docs/api/mne/mne-layout) — Returns the drawing area given on the first line of the file.
 - **external** `[var]` in [AcqStreamOptions](/docs/api/acq/acq-stream-options) — Adopt this buffer instead of allocating one.
 - **externalToolVersion** `[var]` in [MnaProvenance](/docs/api/mna/mna-provenance) — e.g. "FreeSurfer 7.4.1", "Python 3.11.5"
+- **Extra** `[type]` in [FiffAnnotation](/docs/api/fiff/fiff-annotation) — A value of mne.Annotations.extras: None, bool, int, float or str.
 - **extract** `[fn]` in [EpochExtractor](/docs/api/utils/epoch-extractor) — Extract epochs from a continuous raw data matrix.
 - **extract** `[fn]` in [InvLabelTimeCourse](/docs/api/inv/inv-label-time-course) — Extract label time courses from a source estimate.
 - **extractOrthogonal** `[fn]` in [MriSlicer](/docs/api/mri/mri-slicer) — Extract all three orthogonal slices at a given RAS point.
@@ -1692,7 +1699,7 @@ Index of 6696 public class members (functions, variables, typedefs, enums) acros
 - **extractSlice** `[fn]` in [MriSlicer](/docs/api/mri/mri-slicer) — Extract a 2D slice from a 3D volume stored as a flat array.
 - **extractSlice** `[fn]` in [MriSlicer](/docs/api/mri/mri-slicer) — Extract a 2D slice from an [`MriVolData`](/docs/api/mri/mri-vol-data) volume.
 - **extraEnv** `[var]` in [PythonRunnerConfig](/docs/api/utils/python-runner-config) — KEY=VALUE pairs appended to environment.
-- **extras** `[var]` in [FiffAnnotation](/docs/api/fiff/fiff-annotation) — Format-specific metadata.
+- **extras** `[var]` in [FiffAnnotation](/docs/api/fiff/fiff-annotation) — Format-specific metadata, like mne.Annotations.extras.
 - **extras** `[var]` in [MnaFileRef](/docs/api/mna/mna-file-ref) — Unknown keys preserved for lossless round-trip.
 - **extras** `[var]` in [MnaNode](/docs/api/mna/mna-node) — Unknown keys preserved for lossless round-trip.
 - **extras** `[var]` in [MnaPort](/docs/api/mna/mna-port) — Unknown keys preserved for lossless round-trip.
@@ -1701,6 +1708,7 @@ Index of 6696 public class members (functions, variables, typedefs, enums) acros
 - **extras** `[var]` in [MnaSession](/docs/api/mna/mna-session) — Unknown keys preserved for lossless round-trip.
 - **extras** `[var]` in [MnaSubject](/docs/api/mna/mna-subject) — Unknown keys preserved for lossless round-trip.
 - **extras** `[var]` in [PickResult](/docs/api/disp3-d/pick-result) — Catch-all for renderable-specific extras (shaft name, atlas region, dipole amplitude vector, …).
+- **Extras** `[type]` in [FiffAnnotation](/docs/api/fiff/fiff-annotation) — The extras of one annotation, by key.
 - **ey** `[var]` in [FiffChPos](/docs/api/fiff/fiff-ch-pos) — Coil coordinate system y-axis unit vector.
 - **ey** `[var]` in [FwdCoil](/docs/api/fwd/fwd-coil) — Coil coordinate system y unit vector.
 - **ey** `[var]` in [MNETriangle](/docs/api/mne/mne-triangle) — In-plane unit vector (normalized r13; used by BEM).
@@ -1737,7 +1745,6 @@ Index of 6696 public class members (functions, variables, typedefs, enums) acros
 - **fiff_type_base** `[fn]` in [FiffTag](/docs/api/fiff/fiff-tag) — These return information about fiff type base.
 - **fiff_type_fundamental** `[fn]` in [FiffTag](/docs/api/fiff/fiff-tag) — These return information about a fiff type.
 - **fiff_type_matrix_coding** `[fn]` in [FiffTag](/docs/api/fiff/fiff-tag) — These return information about the matrix coding.
-- **FiffAnnotations** `[fn]` in [FiffAnnotations](/docs/api/fiff/fiff-annotations) — Constructs an empty [`FiffAnnotations`](/docs/api/fiff/fiff-annotations) object.
 - **FiffChInfo** `[fn]` in [FiffChInfo](/docs/api/fiff/fiff-ch-info) — Constructs the channel info descriptor.
 - **FiffChInfo** `[fn]` in [FiffChInfo](/docs/api/fiff/fiff-ch-info) — Copy constructor.
 - **FiffChPos** `[fn]` in [FiffChPos](/docs/api/fiff/fiff-ch-pos) — Constructs the coil position descriptor.
@@ -1762,8 +1769,9 @@ Index of 6696 public class members (functions, variables, typedefs, enums) acros
 - **FiffDigPointSet** `[fn]` in [FiffDigPointSet](/docs/api/fiff/fiff-dig-point-set) — Constructs a set holding `points`.
 - **FiffDigPointSet** `[fn]` in [FiffDigPointSet](/docs/api/fiff/fiff-dig-point-set) — Reads the digitizer points of a FIFF file, like `read()`; throws [`Error`](/docs/api/utils/error) if it cannot.
 - **FiffDirNode** `[fn]` in [FiffDirNode](/docs/api/fiff/fiff-dir-node) — Constructors the directory tree structure.
-- **FiffEvents** `[fn]` in [FiffEvents](/docs/api/fiff/fiff-events) — Default constructor.
-- **FiffEvents** `[fn]` in [FiffEvents](/docs/api/fiff/fiff-events) — Constructs [`FiffEvents`](/docs/api/fiff/fiff-events) by reading an event file.
+- **FiffEvents** `[fn]` in [FiffEvents](/docs/api/fiff/fiff-events) — Constructs an empty event list.
+- **FiffEvents** `[fn]` in [FiffEvents](/docs/api/fiff/fiff-events) — Constructs an event list.
+- **FiffEvents** `[fn]` in [FiffEvents](/docs/api/fiff/fiff-events) — Reads an event file like `read()`; throws [`Error`](/docs/api/utils/error) if it cannot.
 - **FiffEvoked** `[fn]` in [FiffEvoked](/docs/api/fiff/fiff-evoked) — Constructs a fiff evoked data.
 - **FiffEvoked** `[fn]` in [FiffEvoked](/docs/api/fiff/fiff-evoked) — Reads one evoked data set, like `read()`; throws [`Error`](/docs/api/utils/error) if it cannot.
 - **FiffEvoked** `[fn]` in [FiffEvoked](/docs/api/fiff/fiff-evoked) — Copy constructor.
@@ -1875,6 +1883,7 @@ Index of 6696 public class members (functions, variables, typedefs, enums) acros
 - **find** `[fn]` in `FiffEvokedFile`
 - **find_closest_on_surface** `[fn]` in [MNEProjectToSurface](/docs/api/mne/mne-project-to-surface) — Projects a set of points r on the FsSurface.
 - **find_closest_on_surface_approx** `[fn]` in [MNESurface](/docs/api/mne/mne-surface) — For each point, find the closest point on the surface using neighborhood-restricted search.
+- **find_events** `[fn]` in [FiffEvents](/docs/api/fiff/fiff-events) — Finds the trigger events of a stimulus channel, like mne.find_events.
 - **find_evoked** `[fn]` in [Fiff](/docs/api/fiff/fiff-class) — fiff_find_evoked
 - **find_evoked** `[fn]` in [FiffEvokedSet](/docs/api/fiff/fiff-evoked-set) — fiff_find_evoked
 - **find_maxshield** `[fn]` in [MNERawInfo](/docs/api/mne/mne-raw-info) — Finds the MaxShield raw data block in the FIFF directory tree.
@@ -2833,7 +2842,7 @@ Index of 6696 public class members (functions, variables, typedefs, enums) acros
 - **is_empty** `[fn]` in [FiffCoordTrans](/docs/api/fiff/fiff-coord-trans) — Returns true if coordinate transform contains no data.
 - **is_empty** `[fn]` in [FiffCov](/docs/api/fiff/fiff-cov) — True if FIFF covariance is empty.
 - **is_empty** `[fn]` in [FiffDirNode](/docs/api/fiff/fiff-dir-node) — Returns true if directory tree structure contains no data.
-- **is_empty** `[fn]` in [FiffEvents](/docs/api/fiff/fiff-events) — Returns true if no events are stored.
+- **is_empty** `[fn]` in [FiffEvents](/docs/api/fiff/fiff-events)
 - **is_empty** `[fn]` in [FiffSparseMatrix](/docs/api/fiff/fiff-sparse-matrix) — Check whether this sparse matrix is empty (no non-zero elements).
 - **is_left_hemi** `[fn]` in [MNESourceSpace](/docs/api/mne/mne-source-space) — Determine whether this source space is on the left hemisphere based on the average x-coordinate of all vertices.
 - **is_magnetometer_coil** `[fn]` in [FwdCoil](/docs/api/fwd/fwd-coil) — Checks if this is an magnetometer.
@@ -2856,7 +2865,6 @@ Index of 6696 public class members (functions, variables, typedefs, enums) acros
 - **isDepthEnabled** `[fn]` in [VideoOverlay](/docs/api/disp3-d/video-overlay)
 - **isDipole** `[var]` in [RayHit](/docs/api/disp3-d/ray-hit) — True if a dipole was hit.
 - **isEmpty** `[fn]` in [ConnectivitySettings](/docs/api/connectivity/connectivity-settings)
-- **isEmpty** `[fn]` in [FiffAnnotations](/docs/api/fiff/fiff-annotations) — Returns true if no annotations are stored.
 - **isEmpty** `[fn]` in [FiffDeviceInfo](/docs/api/fiff/fiff-device-info)
 - **isEmpty** `[fn]` in [FiffEvoked](/docs/api/fiff/fiff-evoked) — Returns whether [`FiffEvoked`](/docs/api/fiff/fiff-evoked) is empty.
 - **isEmpty** `[fn]` in [FiffId](/docs/api/fiff/fiff-id) — True if FIFF id is empty.
@@ -2961,6 +2969,7 @@ Index of 6696 public class members (functions, variables, typedefs, enums) acros
 - **ItemType** `[enum]` in [AbstractTreeItem](/docs/api/disp3-d/abstract-tree-item)
 - **itemTypeId** `[fn]` in [AbstractTreeItem](/docs/api/disp3-d/abstract-tree-item)
 - **iterate_alignment_once** `[fn]` in [MNEMshDisplaySurface](/docs/api/mne/mne-msh-display-surface) — Perform one iteration of ICP-like alignment.
+- **iterator** `[type]` in [FiffAnnotations](/docs/api/fiff/fiff-annotations) — Iterator.
 - **iterator** `[type]` in [FiffDigPointSet](/docs/api/fiff/fiff-dig-point-set) — Iterator.
 - **itris** `[var]` in [MNESurfaceOrVolume](/docs/api/mne/mne-surface-or-volume) — Triangle vertex indices (ntri x 3, row-major).
 
@@ -3307,10 +3316,10 @@ Index of 6696 public class members (functions, variables, typedefs, enums) acros
 - **markerMoved** `[fn]` in [RtFiffRawViewDelegate](/docs/api/disp/rt-fiff-raw-view-delegate) — markerMoved is called whenever user moves the mouse inside of the table view viewport
 - **match** `[fn]` in [BIDSPath](/docs/api/bids/bids-path) — Searches the BIDS root (all subject, session and datatype folders) for files whose entities, datatype, suffix and extension equal the ones set here; unset ones match anything, as in mne_bids.BIDSPath.match.
 - **match** `[fn]` in [MNEDerivSet](/docs/api/mne/mne-deriv-set) — Keeps the derivations whose inputs are all among `chNames` and merges them into one derivation whose columns are exactly `chNames` (MNE-C `mne_match_merge_deriv`).
+- **match_event** `[fn]` in [FiffEvents](/docs/api/fiff/fiff-events) — Checks whether an event matches an averaging category, as MNE-C's mne_process_raw does.
 - **matched** `[var]` in [MNELayoutPort](/docs/api/mne/mne-layout-port) — Set by the last `MNELayout::matchPorts` call.
 - **matches** `[fn]` in [MNELayout](/docs/api/mne/mne-layout) — Returns which port shows which channel after `matchPorts(const QStringList&)`.
 - **matchesSurfaceType** `[fn]` in [SubView](/docs/api/disp3-d/sub-view) — True when the brain-surface `key` matches this view's surfaceType (e.g.
-- **matchEvent** `[fn]` in [FiffEvents](/docs/api/fiff/fiff-events) — Check whether an event matches a category definition.
 - **matchPorts** `[fn]` in [MNELayout](/docs/api/mne/mne-layout) — Marks the visible ports that show `channel` (MNE-C `mne_lout_match_ports`).
 - **matchPorts** `[fn]` in [MNELayout](/docs/api/mne/mne-layout) — Matches many channels at once (MNE-C `mne_lout_match_ports_many`) and fills `matches()`.
 - **matClusterIds** `[var]` in [StatsClusterResult](/docs/api/sts/stats-cluster-result) — Cluster label at each (channel, time) point; 0 = not in cluster.
@@ -3411,7 +3420,7 @@ Index of 6696 public class members (functions, variables, typedefs, enums) acros
 - **memory** `[fn]` in [AcqViewBase](/docs/api/acq/acq-view-base)
 - **MemoryByteStream** `[fn]` in [MemoryByteStream](/docs/api/utils/memory-byte-stream)
 - **memoryLocked** `[var]` in [AcqStreamStats](/docs/api/acq/acq-stream-stats) — Whether lockMemory succeeded.
-- **merge** `[fn]` in [FiffEvents](/docs/api/fiff/fiff-events) — Replace codes in both code columns by a new one, like mne.merge_events.
+- **merge** `[fn]` in [FiffEvents](/docs/api/fiff/fiff-events) — Replaces codes in both code columns by a new one, like mne.merge_events.
 - **MeshFactory** `[fn]` in [MeshFactory](/docs/api/disp3-d/mesh-factory)
 - **message** `[var]` in [AcqErrorInfo](/docs/api/acq/acq-error-info) — What went wrong, naming the cause.
 - **message** `[var]` in `Entry`
@@ -3817,7 +3826,7 @@ Index of 6696 public class members (functions, variables, typedefs, enums) acros
 - **nterms** `[var]` in [FwdEegSphereModel](/docs/api/fwd/fwd-eeg-sphere-model) — How many?
 - **ntri** `[var]` in [FwdBemModel](/docs/api/fwd/fwd-bem-model) — Triangle count per surface (length nsurf).
 - **ntri** `[var]` in [MNESurfaceOrVolume](/docs/api/mne/mne-surface-or-volume) — Number of triangles in the surface.
-- **num_events** `[fn]` in [FiffEvents](/docs/api/fiff/fiff-events) — Returns the number of events.
+- **num_events** `[fn]` in [FiffEvents](/docs/api/fiff/fiff-events)
 - **numaNode** `[var]` in [AcqStreamOptions](/docs/api/acq/acq-stream-options) — NUMA node of the ring, e.g.
 - **numaNode** `[var]` in [AcqStreamStats](/docs/api/acq/acq-stream-stats) — NUMA node the ring is bound to, -1 if not bound.
 - **numberTrialRowChanged** `[signal]` in [TfSettingsView](/docs/api/disp/tf-settings-view) — Emit signal whenever trial number changed.
@@ -3889,7 +3898,7 @@ Index of 6696 public class members (functions, variables, typedefs, enums) acros
 - **onRowsInserted** `[slot]` in [BrainView](/docs/api/disp3-d/brain-view)
 - **onset** `[var]` in [BidsEvent](/docs/api/bids/bids-event) — Onset in seconds from the start of the recording.
 - **onset** `[var]` in [FiffAnnotation](/docs/api/fiff/fiff-annotation) — Onset in seconds.
-- **onsetToSample** `[fn]` in [FiffAnnotations](/docs/api/fiff/fiff-annotations) — Converts onset of annotation at index to a sample number.
+- **onset_to_sample** `[fn]` in [FiffAnnotations](/docs/api/fiff/fiff-annotations)
 - **onTreeViewDescriptionHide** `[fn]` in [Control3DView](/docs/api/disp/control3-d-view) — Slot called when tree view description visibilty changed.
 - **onTreeViewHeaderHide** `[fn]` in [Control3DView](/docs/api/disp/control3-d-view) — Slot called when tree view header visibilty changed.
 - **onTreeViewRemoveItem** `[fn]` in [Control3DView](/docs/api/disp/control3-d-view) — Slot called when an item should be removed.
@@ -4002,6 +4011,7 @@ Index of 6696 public class members (functions, variables, typedefs, enums) acros
 - **operator=** `[fn]` in [RenderKey](/docs/api/disp3-d/render-key)
 - **operator=** `[fn]` in [stream_info](/docs/api/lsl/stream_info) — Copy assignment operator.
 - **operator=** `[fn]` in [ThreadPool](/docs/api/utils/thread-pool)
+- **operator==** `[fn]` in [FiffAnnotation](/docs/api/fiff/fiff-annotation)
 - **operator==** `[fn]` in [InvHpiModelParameters](/docs/api/inv/inv-hpi-model-parameters)
 - **operator==** `[fn]` in [InvSensorSet](/docs/api/inv/inv-sensor-set)
 - **operator[]** `[fn]` in [AcqSpanPair](/docs/api/acq/acq-span-pair)
@@ -4010,8 +4020,8 @@ Index of 6696 public class members (functions, variables, typedefs, enums) acros
 - **operator[]** `[fn]` in [Command](/docs/api/com/command) — Subscript operator [].
 - **operator[]** `[fn]` in [CommandManager](/docs/api/com/command-manager) — Subscript operator [] to access commands by command name.
 - **operator[]** `[fn]` in [CommandManager](/docs/api/com/command-manager) — Subscript operator [] to access commands by command name.
-- **operator[]** `[fn]` in [FiffAnnotations](/docs/api/fiff/fiff-annotations) — Const subscript operator.
-- **operator[]** `[fn]` in [FiffAnnotations](/docs/api/fiff/fiff-annotations) — Subscript operator.
+- **operator[]** `[fn]` in [FiffAnnotations](/docs/api/fiff/fiff-annotations)
+- **operator[]** `[fn]` in [FiffAnnotations](/docs/api/fiff/fiff-annotations)
 - **operator[]** `[fn]` in [FiffDigPointSet](/docs/api/fiff/fiff-dig-point-set)
 - **operator[]** `[fn]` in [FiffDigPointSet](/docs/api/fiff/fiff-dig-point-set)
 - **operator[]** `[fn]` in [FsAnnotationSet](/docs/api/fs/fs-annotation-set) — Subscript operator [] to access annotation by index.
@@ -4170,7 +4180,7 @@ Index of 6696 public class members (functions, variables, typedefs, enums) acros
 - **physicalMax** `[var]` in [EDFChannelInfo](/docs/api/bids/edf-channel-info)
 - **physicalMin** `[var]` in [EDFChannelInfo](/docs/api/bids/edf-channel-info)
 - **physicalNs** `[fn]` in [AcqClockModel](/docs/api/acq/acq-clock-model)
-- **pick** `[fn]` in [FiffEvents](/docs/api/fiff/fiff-events) — Select events by code, like mne.pick_events.
+- **pick** `[fn]` in [FiffEvents](/docs/api/fiff/fiff-events) — Selects events by code, like mne.pick_events.
 - **pick** `[var]` in [InvDipoleFitData](/docs/api/inv/inv-dipole-fit-data) — Matrix to pick data from the full data set which may contain channels we are not interested in (currently unused).
 - **pick** `[var]` in [MNEChSelection](/docs/api/mne/mne-ch-selection) — Corresponding channels in raw data (&lt; 0 indicates missing).
 - **pick** `[fn]` in [MNENamedMatrix](/docs/api/mne/mne-named-matrix) — Create a sub-matrix by picking named rows and columns.
@@ -4377,6 +4387,7 @@ Index of 6696 public class members (functions, variables, typedefs, enums) acros
 - **pull_chunk_float** `[fn]` in [stream_inlet](/docs/api/lsl/stream_inlet) — Pull a chunk of float data with the timestamp of every sample.
 - **push** `[fn]` in [CircularBuffer](/docs/api/utils/circular-buffer) — Adds a whole array at the end buffer.
 - **push** `[fn]` in [CircularBuffer](/docs/api/utils/circular-buffer) — Adds an element at the end of the buffer.
+- **push_back** `[fn]` in [FiffAnnotations](/docs/api/fiff/fiff-annotations) — Appends an annotation.
 - **push_back** `[fn]` in [FiffDigPointSet](/docs/api/fiff/fiff-dig-point-set) — Appends a point.
 - **push_chunk** `[fn]` in [stream_outlet](/docs/api/lsl/stream_outlet) — Push a chunk of multichannel samples into the outlet.
 - **push_sample** `[fn]` in [stream_outlet](/docs/api/lsl/stream_outlet) — Push a single multichannel sample into the outlet.
@@ -4454,14 +4465,14 @@ Index of 6696 public class members (functions, variables, typedefs, enums) acros
 - **read** `[fn]` in [BidsDatasetDescription](/docs/api/bids/bids-dataset-description) — Read a dataset_description.json file.
 - **read** `[fn]` in [BidsRawData](/docs/api/bids/bids-raw-data) — Read a BIDS dataset from disk.
 - **read** `[fn]` in [ByteStream](/docs/api/utils/byte-stream) — Reads up to `bytes` bytes at the current position and advances past them.
-- **read** `[fn]` in [FiffAnnotations](/docs/api/fiff/fiff-annotations) — Auto-detects format and reads annotations.
+- **read** `[fn]` in [FiffAnnotations](/docs/api/fiff/fiff-annotations) — Reads annotations from a .json or .csv file; other extensions are tried as JSON, then as CSV.
 - **read** `[fn]` in [FiffCoordTrans](/docs/api/fiff/fiff-coord-trans) — Reads the first coordinate transform of a FIFF file, as mne.read_trans.
 - **read** `[fn]` in [FiffCoordTrans](/docs/api/fiff/fiff-coord-trans) — Reads the transform between two coordinate frames from a FIFF file; one stored the other way round is returned inverted.
 - **read** `[fn]` in [FiffCoordTransSet](/docs/api/fiff/fiff-coord-trans-set) — Takes every transform of the chain stored in a FIFF file, such as a `-trans.fif` file or a `COR.fif` MRI set (MNE-C mne_collect_transforms).
 - **read** `[fn]` in [FiffCov](/docs/api/fiff/fiff-cov) — Reads the noise covariance stored in a FIFF file, like mne.read_cov.
 - **read** `[fn]` in [FiffDigPointSet](/docs/api/fiff/fiff-dig-point-set) — Reads the digitizer points of a FIFF file, like mne.io.read_info(path)["dig"].
 - **read** `[fn]` in [FiffDigPointSet](/docs/api/fiff/fiff-dig-point-set) — Reads the digitizer points of the isotrak block of a FIFF stream, opening it if needed.
-- **read** `[fn]` in [FiffEvents](/docs/api/fiff/fiff-events) — Read events from a FIFF or ASCII event file.
+- **read** `[fn]` in [FiffEvents](/docs/api/fiff/fiff-events) — Reads an event file, like mne.read_events: a FIFF file if its name holds ".fif", text otherwise.
 - **read** `[fn]` in [FiffEvoked](/docs/api/fiff/fiff-evoked) — Reads one evoked data set of a FIFF file, like mne.read_evokeds.
 - **read** `[fn]` in `FiffEvokedFile`
 - **read** `[fn]` in [FiffEvokedSet](/docs/api/fiff/fiff-evoked-set) — Reads evoked data sets of a FIFF file in one pass, like mne.read_evokeds.
@@ -4499,6 +4510,7 @@ Index of 6696 public class members (functions, variables, typedefs, enums) acros
 - **read** `[fn]` in `SampleReader` — Decodes the sample starting at `pos` in `data`.
 - **read_annotations** `[fn]` in [FiffStream](/docs/api/fiff/fiff-stream) — Reads the first MNE-Python annotations block (FIFFB_MNE_ANNOTATIONS) below `p_Node`.
 - **read_ascii** `[fn]` in [FiffCoordTrans](/docs/api/fiff/fiff-coord-trans) — Reads a transform from a text file of four rows, rotation and translation in mm, as MNE-C writes it.
+- **read_ascii** `[fn]` in [FiffEvents](/docs/api/fiff/fiff-events) — Reads a text event file: one event per line as "sample [time] before after"; lines starting with '' or '#' are comments.
 - **read_bad_channels** `[fn]` in [FiffStream](/docs/api/fiff/fiff-stream) — fiff_read_bad_channels
 - **read_bem_surface** `[fn]` in [MNESurface](/docs/api/mne/mne-surface) — Read a BEM surface from a FIFF file (excess-neighbor checking enabled).
 - **read_bem_surface** `[fn]` in [MNESurface](/docs/api/mne/mne-surface) — Read a BEM surface from a FIFF file (excess-neighbor checking enabled).
@@ -4508,6 +4520,7 @@ Index of 6696 public class members (functions, variables, typedefs, enums) acros
 - **read_coil_defs** `[fn]` in [FwdCoilSet](/docs/api/fwd/fwd-coil-set) — Read a coil definitions from file.
 - **read_cov** `[fn]` in [FiffStream](/docs/api/fiff/fiff-stream) — mne_read_cov - also for mne_read_noise_cov
 - **read_cov** `[fn]` in [MNE](/docs/api/mne/mne-class) — mne_read_cov
+- **read_csv** `[fn]` in [FiffAnnotations](/docs/api/fiff/fiff-annotations) — Reads annotations from a CSV file ("onset,duration,description" after a header row); rows whose onset or duration is not a number are skipped.
 - **read_ctf_comp** `[fn]` in [FiffStream](/docs/api/fiff/fiff-stream) — fiff_read_ctf_comp
 - **read_curv** `[fn]` in [FsSurface](/docs/api/fs/fs-surface) — reads a binary curvature file into a vector
 - **read_digitizer_data** `[fn]` in [FiffStream](/docs/api/fiff/fiff-stream) — Reimplemntation of load_digitizer_data (digitizer.c).
@@ -4522,13 +4535,13 @@ Index of 6696 public class members (functions, variables, typedefs, enums) acros
 - **read_events** `[fn]` in [MNE](/docs/api/mne/mne-class)
 - **read_events_from_ascii** `[fn]` in [MNE](/docs/api/mne/mne-class) — read_events
 - **read_events_from_fif** `[fn]` in [MNE](/docs/api/mne/mne-class) — mne_read_events
+- **read_fif** `[fn]` in [FiffEvents](/docs/api/fiff/fiff-events) — Reads the event list of a FIFF file.
 - **read_forward_solution** `[fn]` in [Fwd](/docs/api/fwd/fwd-class) — mne_read_forward_solution
-- **read_from_ascii** `[fn]` in [FiffEvents](/docs/api/fiff/fiff-events) — Read a list of events from an ASCII event file.
-- **read_from_fif** `[fn]` in [FiffEvents](/docs/api/fiff/fiff-events) — Read an event list from a FIFF file.
 - **read_from_node** `[fn]` in [FiffCoordTrans](/docs/api/fiff/fiff-coord-trans) — Reads a coordinate transform from a FIFF stream node.
 - **read_from_node** `[fn]` in [MNEProjOp](/docs/api/mne/mne-proj-op) — Read all linear projection items from a FIFF tree node.
 - **read_from_node** `[fn]` in [MNESssData](/docs/api/mne/mne-sss-data) — Read the SSS data from the given node of an open fiff stream Refactored: mne_read_from_node (mne_sss_data.c).
 - **read_inverse_operator** `[fn]` in [MNEInverseOperator](/docs/api/mne/mne-inverse-operator) — Read an inverse operator from a FIFF file.
+- **read_json** `[fn]` in [FiffAnnotations](/docs/api/fiff/fiff-annotations) — Reads annotations from a JSON file (\{"annotations": [\{"onset", "duration", "description", "channel_names", "comment", "extras"\}, ...]\}).
 - **read_label** `[fn]` in [MNESourceSpace](/docs/api/mne/mne-source-space)
 - **read_localite** `[fn]` in [FiffDigMontage](/docs/api/fiff/fiff-dig-montage) — Reads a Localite .csv file ("#,name,x,y,z" in millimetres after a header row), as mne.channels.read_dig_localite does.
 - **read_meas_info** `[fn]` in [FiffStream](/docs/api/fiff/fiff-stream) — fiff_read_meas_info
@@ -4559,7 +4572,6 @@ Index of 6696 public class members (functions, variables, typedefs, enums) acros
 - **readBigEndian** `[fn]` in [ByteStream](/docs/api/utils/byte-stream)
 - **readBrainstormMonFile** `[fn]` in [SelectionIO](/docs/api/utils/selection-io) — Reads the specified Brainstorm montage file.
 - **readBrainstormMonFile** `[fn]` in [SelectionIO](/docs/api/utils/selection-io) — Reads the specified Brainstorm montage file.
-- **readCsv** `[fn]` in [FiffAnnotations](/docs/api/fiff/fiff-annotations) — Reads annotations from a CSV file.
 - **readCsv** `[fn]` in [InvSourceEstimateIO](/docs/api/inv/inv-source-estimate-io) — Read source estimate from CSV format.
 - **readDefinitionFile** `[fn]` in [ChannelDerivation](/docs/api/utils/channel-derivation) — Read derivation rules from an MNE-C derivation text file (`MNELIB::MNEDerivSet::readText`).
 - **readEpochs** `[fn]` in [MNEEpochDataList](/docs/api/mne/mne-epoch-data-list) — Read the epochs from a raw file based on provided events.
@@ -4572,7 +4584,6 @@ Index of 6696 public class members (functions, variables, typedefs, enums) acros
 - **readHeadPos** `[fn]` in [MaxwellMovementComp](/docs/api/dsp/maxwell-movement-comp) — Read head positions from a file.
 - **readInfo** `[fn]` in [RtDataClient](/docs/api/com/rt-data-client) — Reads fiff measurement information of a data the connection.
 - **readJson** `[fn]` in [BidsCoordinateSystem](/docs/api/bids/bids-coordinate-system) — Read a BIDS *_coordsystem.json file.
-- **readJson** `[fn]` in [FiffAnnotations](/docs/api/fiff/fiff-annotations) — Reads annotations from a JSON file.
 - **readMatrix** `[fn]` in [PythonTestHelper](/docs/api/utils/python-test-helper) — Read an Eigen matrix from a text file (space-separated values, one row per line).
 - **readMegEegChannels** `[fn]` in [FiffInfo](/docs/api/fiff/fiff-info) — Read MEG and EEG channel information from a FIFF file, excluding bad channels.
 - **readMetadata** `[fn]` in [RtDataClient](/docs/api/com/rt-data-client) — Reads fiff metaata class from data connection.
@@ -4634,7 +4645,6 @@ Index of 6696 public class members (functions, variables, typedefs, enums) acros
 - **release** `[fn]` in [AcqReader](/docs/api/acq/acq-reader) — Returns `view` to the ring and advances the reader; clears `view`.
 - **release** `[fn]` in [AcqViewLease](/docs/api/acq/acq-view-lease) — Returns the view now.
 - **Remez2** `[fn]` in [ParksMcClellan](/docs/api/utils/parks-mc-clellan)
-- **remove** `[fn]` in [FiffAnnotations](/docs/api/fiff/fiff-annotations) — Removes the annotation at the given index.
 - **removeBinding** `[fn]` in [MnaParamTree](/docs/api/mna/mna-param-tree)
 - **removeDC** `[fn]` in [ChannelDataModel](/docs/api/disp/channel-data-model)
 - **removeFiducial** `[fn]` in [AcquiredPoints](/docs/api/acq/acquired-points) — Remove a previously captured fiducial so it can be re-recorded.
@@ -4968,10 +4978,10 @@ Index of 6696 public class members (functions, variables, typedefs, enums) acros
 - **segments** `[fn]` in [AcqBlockView](/docs/api/acq/acq-block-view)
 - **segments** `[var]` in [AcqStreamStats](/docs/api/acq/acq-stream-stats) — Segment headers pushed.
 - **segmentsLost** `[var]` in [AcqReaderStats](/docs/api/acq/acq-reader-stats) — Segment headers not received, likewise.
-- **select** `[fn]` in [FiffAnnotations](/docs/api/fiff/fiff-annotations) — Selects annotations whose description starts with the filter string.
+- **select** `[fn]` in [FiffAnnotations](/docs/api/fiff/fiff-annotations)
+- **select_by_channel** `[fn]` in [FiffAnnotations](/docs/api/fiff/fiff-annotations)
 - **select_dipole_fit_noise_cov** `[fn]` in [InvDipoleFitData](/docs/api/inv/inv-dipole-fit-data) — Select and weight the noise-covariance for the active channel set.
 - **selectAll** `[fn]` in [ApplyToView](/docs/api/disp/apply-to-view) — Selects all View Select checkboxes.
-- **selectByChannel** `[fn]` in [FiffAnnotations](/docs/api/fiff/fiff-annotations) — Selects annotations that reference the given channel name.
 - **selectChannels** `[fn]` in [ChannelSelectionView](/docs/api/disp/channel-selection-view) — Select channels This function selects channels which were selected outside this selection manager (i.e in the DataWindow's Table View).
 - **selectClear** `[fn]` in [ApplyToView](/docs/api/disp/apply-to-view) — Clear all View Select checkboxes.
 - **selectContact** `[fn]` in [ElectrodeObject](/docs/api/disp3-d/electrode-object) — Select a contact by name.
@@ -5610,7 +5620,7 @@ Index of 6696 public class members (functions, variables, typedefs, enums) acros
 - **size** `[var]` in [BidsElectrode](/docs/api/bids/bids-electrode) — Electrode size in mm or "n/a" (RECOMMENDED for iEEG).
 - **size** `[fn]` in [ByteStream](/docs/api/utils/byte-stream)
 - **size** `[fn]` in [ConnectivitySettings](/docs/api/connectivity/connectivity-settings)
-- **size** `[fn]` in [FiffAnnotations](/docs/api/fiff/fiff-annotations) — Returns the number of annotations.
+- **size** `[fn]` in [FiffAnnotations](/docs/api/fiff/fiff-annotations)
 - **size** `[var]` in [FiffDataRef](/docs/api/fiff/fiff-data-ref) — Size of the data, can be over 2 GB.
 - **size** `[fn]` in [FiffDigPointSet](/docs/api/fiff/fiff-dig-point-set)
 - **size** `[var]` in [FiffDirEntry](/docs/api/fiff/fiff-dir-entry) — How many bytes.
@@ -6226,7 +6236,6 @@ Index of 6696 public class members (functions, variables, typedefs, enums) acros
 - **totalSamples** `[fn]` in [ChannelDataModel](/docs/api/disp/channel-data-model)
 - **toUnsignedInt** `[fn]` in [FiffTag](/docs/api/fiff/fiff-tag) — to Int Fast access; Data are deleted if tag gets deleted, and vice versa
 - **toUnsignedShort** `[fn]` in [FiffTag](/docs/api/fiff/fiff-tag) — to unsigned Short Fast access; Data are deleted if tag gets deleted, and vice versa
-- **toVector** `[fn]` in [FiffAnnotations](/docs/api/fiff/fiff-annotations) — Returns a const reference to the underlying vector.
 - **toVolume** `[fn]` in [InvVolumeSourceEstimate](/docs/api/inv/inv-volume-source-estimate) — Extract a 3D volume for a given time point, filling the grid with zeros where no source is active.
 - **TPassType** `[enum]` in [CosineFilter](/docs/api/utils/cosine-filter)
 - **TPassType** `[enum]` in [ParksMcClellan](/docs/api/utils/parks-mc-clellan)
@@ -6473,6 +6482,7 @@ Index of 6696 public class members (functions, variables, typedefs, enums) acros
 - **value** `[var]` in [InvToken](/docs/api/inv/inv-token) — Continuous value (0 for structural tokens).
 - **value** `[var]` in [PickResult](/docs/api/disp3-d/pick-result) — Optional scalar overlay value at the picked element (uV, dSPM, MRI intensity).
 - **value** `[fn]` in [ScaleControl](/docs/api/disp/scale-control) — Return the value of the control.
+- **value_type** `[type]` in [FiffAnnotations](/docs/api/fiff/fiff-annotations) — Element type.
 - **value_type** `[type]` in [FiffDigPointSet](/docs/api/fiff/fiff-dig-point-set) — Element type.
 - **valueChanged** `[signal]` in [ScaleControl](/docs/api/disp/scale-control) — Signal emitted when the value of the control changes.
 - **values** `[var]` in [FsLabel](/docs/api/fs/fs-label) — Values at the vertices.
@@ -6628,10 +6638,11 @@ Index of 6696 public class members (functions, variables, typedefs, enums) acros
 - **write** `[fn]` in [BidsRawData](/docs/api/bids/bids-raw-data) — Write this dataset to a BIDS-compliant directory.
 - **write** `[fn]` in [BidsRawData](/docs/api/bids/bids-raw-data) — Convenience overload — write with default options.
 - **write** `[fn]` in [ByteStream](/docs/api/utils/byte-stream) — Writes `bytes` bytes at the current position, overwriting or extending the stream.
-- **write** `[fn]` in [FiffAnnotations](/docs/api/fiff/fiff-annotations) — Auto-detects format and writes annotations.
+- **write** `[fn]` in [FiffAnnotations](/docs/api/fiff/fiff-annotations) — Writes the annotations to a .csv file, or to JSON for any other extension.
 - **write** `[fn]` in [FiffCoordTrans](/docs/api/fiff/fiff-coord-trans) — Writes the transform to a new FIFF file, as mne.write_trans.
 - **write** `[fn]` in [FiffCoordTransSet](/docs/api/fiff/fiff-coord-trans-set) — Writes every non-empty transform, head -&gt; MRI first.
 - **write** `[fn]` in [FiffDigPointSet](/docs/api/fiff/fiff-dig-point-set) — Writes the points to a FIFF file, replacing it, like mne.io.write_info writes info["dig"].
+- **write** `[fn]` in [FiffEvents](/docs/api/fiff/fiff-events) — Writes the events, like mne.write_events: to FIFF if the name holds ".fif", as text otherwise.
 - **write** `[fn]` in [FiffIO](/docs/api/fiff/fiff-io) — Write data to a single pIODevice.
 - **write** `[fn]` in [FiffIO](/docs/api/fiff/fiff-io) — Write whole data of a type to a fiff file.
 - **write** `[fn]` in [FileByteStream](/docs/api/utils/file-byte-stream) — Writes `bytes` bytes at the current position, overwriting or extending the stream.
@@ -6650,11 +6661,13 @@ Index of 6696 public class members (functions, variables, typedefs, enums) acros
 - **write** `[fn]` in [MNESparseNamedMatrix](/docs/api/mne/mne-sparse-named-matrix) — Writes the matrix as a `FIFFB_MNE_NAMED_MATRIX` block (MNE-C `mne_write_sparse_named_matrix`).
 - **write** `[fn]` in [MriCorFifIO](/docs/api/mri/mri-cor-fif-io) — Writes COR.fif file from slice data.
 - **write_annotations** `[fn]` in [FiffStream](/docs/api/fiff/fiff-stream) — Writes `annotations` as an MNE-Python annotations block (FIFFB_MNE_ANNOTATIONS): onsets and ends as float, descriptions as a colon-separated list, channel names and extras as JSON.
+- **write_ascii** `[fn]` in [FiffEvents](/docs/api/fiff/fiff-events) — Writes the events as text, one "sample time before after" line each, as MNE-C does.
 - **write_bad_channels** `[fn]` in [FiffStream](/docs/api/fiff/fiff-stream) — Write a bad channel list as a FIFFB_MNE_BAD_CHANNELS block.
 - **write_ch_info** `[fn]` in [FiffStream](/docs/api/fiff/fiff-stream) — Writes a channel information record to a fif file The type, cal, unit, and pos members are explained in Table 9.5 of the MNE manual.
 - **write_ch_pos** `[fn]` in [FiffStream](/docs/api/fiff/fiff-stream) — Writes a channel position to a fif file.
 - **write_coord_trans** `[fn]` in [FiffStream](/docs/api/fiff/fiff-stream) — Writes a coordinate transformation structure.
 - **write_cov** `[fn]` in [FiffStream](/docs/api/fiff/fiff-stream) — Write a noise covariance matrix.
+- **write_csv** `[fn]` in [FiffAnnotations](/docs/api/fiff/fiff-annotations) — Writes onset, duration and description of the annotations to a CSV file.
 - **write_ctf_comp** `[fn]` in [FiffStream](/docs/api/fiff/fiff-stream) — fiff_write_ctf_comp
 - **write_device_info** `[fn]` in [FiffStream](/docs/api/fiff/fiff-stream) — Writes a FIFFB_DEVICE block; nothing for an empty `device`.
 - **write_dig_point** `[fn]` in [FiffStream](/docs/api/fiff/fiff-stream) — fiff_write_dig_point
@@ -6670,6 +6683,7 @@ Index of 6696 public class members (functions, variables, typedefs, enums) acros
 - **write_events_to_ascii** `[fn]` in [MNE](/docs/api/mne/mne-class) — write_events_to_ascii
 - **write_events_to_fif** `[fn]` in [MNE](/docs/api/mne/mne-class) — write_events_to_fif
 - **write_evoked_set** `[fn]` in [FiffStream](/docs/api/fiff/fiff-stream) — fiff_write_evoked_set
+- **write_fif** `[fn]` in [FiffEvents](/docs/api/fiff/fiff-events) — Writes the events to a FIFF file.
 - **write_float** `[fn]` in [FiffStream](/docs/api/fiff/fiff-stream) — Writes a single-precision floating point tag to a fif file.
 - **write_float_matrix** `[fn]` in [FiffStream](/docs/api/fiff/fiff-stream) — Writes a single-precision floating-point matrix tag.
 - **write_float_sparse_ccs** `[fn]` in [FiffStream](/docs/api/fiff/fiff-stream) — fiff_write_float_sparse_ccs
@@ -6678,6 +6692,7 @@ Index of 6696 public class members (functions, variables, typedefs, enums) acros
 - **write_info_base** `[fn]` in [FiffStream](/docs/api/fiff/fiff-stream) — Write measurement info stored in forward solution.
 - **write_int** `[fn]` in [FiffStream](/docs/api/fiff/fiff-stream) — Writes a 32-bit integer tag to a fif file.
 - **write_int_matrix** `[fn]` in [FiffStream](/docs/api/fiff/fiff-stream) — fiff_write_int_matrix
+- **write_json** `[fn]` in [FiffAnnotations](/docs/api/fiff/fiff-annotations) — Writes the annotations to a JSON file.
 - **write_name_list** `[fn]` in [FiffStream](/docs/api/fiff/fiff-stream) — fiff_write_name_list
 - **write_named_matrix** `[fn]` in [FiffStream](/docs/api/fiff/fiff-stream) — fiff_write_named_matrix
 - **write_proj** `[fn]` in [FiffStream](/docs/api/fiff/fiff-stream) — fiff_write_proj
@@ -6688,8 +6703,6 @@ Index of 6696 public class members (functions, variables, typedefs, enums) acros
 - **write_rt_command** `[fn]` in [FiffStream](/docs/api/fiff/fiff-stream) — Writes a real-time command.
 - **write_string** `[fn]` in [FiffStream](/docs/api/fiff/fiff-stream) — Writes a string tag.
 - **write_tag** `[fn]` in [FiffStream](/docs/api/fiff/fiff-stream) — Writes one tag; its payload is taken in host byte order, as `read_tag()` returns it.
-- **write_to_ascii** `[fn]` in [FiffEvents](/docs/api/fiff/fiff-events) — Write the event list to a text file (MNE-C compatible format).
-- **write_to_fif** `[fn]` in [FiffEvents](/docs/api/fiff/fiff-events) — Write the event list to a FIFF file.
 - **write_to_stream** `[fn]` in [FiffCoordTrans](/docs/api/fiff/fiff-coord-trans) — Writes the transformation to a FIFF stream.
 - **write_to_stream** `[fn]` in [FiffDigPointSet](/docs/api/fiff/fiff-dig-point-set) — Writes the points as an isotrak block inside a measurement info block.
 - **write_w** `[fn]` in [InvSourceEstimate](/docs/api/inv/inv-source-estimate) — Write the first time point of this source estimate to a .w file.
@@ -6697,7 +6710,6 @@ Index of 6696 public class members (functions, variables, typedefs, enums) acros
 - **writeBigEndian** `[fn]` in [ByteStream](/docs/api/utils/byte-stream)
 - **writeBrainstormMonFiles** `[fn]` in [SelectionIO](/docs/api/utils/selection-io) — Writes the specified selection groups to different Brainstorm .mon files.
 - **writeBrainstormMonFiles** `[fn]` in [SelectionIO](/docs/api/utils/selection-io) — Writes the specified selection groups to different Brainstorm .mon files.
-- **writeCsv** `[fn]` in [FiffAnnotations](/docs/api/fiff/fiff-annotations) — Writes annotations to a CSV file.
 - **writeCsv** `[fn]` in [InvSourceEstimateIO](/docs/api/inv/inv-source-estimate-io) — Export source estimate to CSV format.
 - **writeDefinitionFile** `[fn]` in [ChannelDerivation](/docs/api/utils/channel-derivation) — Write derivation rules in MNE-C derivation text syntax, readable by readDefinitionFile and mne_make_derivations.
 - **writeFif** `[fn]` in [MNEEventList](/docs/api/mne/mne-event-list) — Writes the list as an event block with comments, readable by `mne.read_events`.
@@ -6705,7 +6717,6 @@ Index of 6696 public class members (functions, variables, typedefs, enums) acros
 - **writeHeadPos** `[fn]` in [MaxwellMovementComp](/docs/api/dsp/maxwell-movement-comp) — Write head positions to a file.
 - **writeHemispherePair** `[fn]` in [InvSourceEstimate](/docs/api/inv/inv-source-estimate) — Write the estimate as an MNE-C / MNE-Python compatible hemisphere pair.
 - **writeJson** `[fn]` in [BidsCoordinateSystem](/docs/api/bids/bids-coordinate-system) — Write a BIDS *_coordsystem.json file.
-- **writeJson** `[fn]` in [FiffAnnotations](/docs/api/fiff/fiff-annotations) — Writes annotations to a JSON file.
 - **writeMatrix** `[fn]` in [InvSourceEstimateIO](/docs/api/inv/inv-source-estimate-io) — Export source estimate as a tab-separated matrix for easy import.
 - **writeMatrix** `[fn]` in [PythonTestHelper](/docs/api/utils/python-test-helper) — Write an Eigen matrix to a text file with full double precision.
 - **writeMNESelFile** `[fn]` in [SelectionIO](/docs/api/utils/selection-io) — Writes the specified selection groups to a single MNE .sel file.

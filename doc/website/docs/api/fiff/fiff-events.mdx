@@ -20,10 +20,9 @@ FIFF event list: (sample, prev, new) integer triples with read / write / detect 
 On-disk representation matches `mne.io.write.write_events` output and the `-eve.fif` files consumed by `mne.read_events`; the detection path mirrors `mne.find_events`. Used by [`FiffEpochs`](/docs/api/fiff/fiff-epochs) and the batch-averaging path in [`FiffEvokedSet`](/docs/api/fiff/fiff-evoked-set) to drive epoch extraction.
 
 ```cpp title="src/examples/ex_fiff_api/main.cpp"
-FiffEvents events;
-FiffEvents::detect_from_raw(raw, events, "STI 014"); // rising edges of the trigger channel
+const FiffEvents events = FiffEvents::find_events(raw, "STI 014").value(); // rising edges, like mne.find_events
 const std::string eventPath = tmp.filePath("sample-eve.fif").toStdString();
-const bool eventsWritten = events.write_to_fif(eventPath);
+const bool eventsWritten = events.write(eventPath).has_value();
 FiffEvents eventsBack(eventPath); // mne.read_events reads this file too
 ```
 
@@ -33,17 +32,24 @@ FiffEvents eventsBack(eventPath); // mne.read_events reads this file too
 
 ### FiffEvents()
 
-Default constructor.
+Constructs an empty event list.
 
-Creates an empty event set.
+---
+
+### FiffEvents(events)
+
+Constructs an event list.
+
+**Parameters:**
+
+- **events** : *Eigen::MatrixXi*
+  Events, one row [sample, before, after] each.
 
 ---
 
 ### FiffEvents(path)
 
-Constructs [`FiffEvents`](/docs/api/fiff/fiff-events) by reading an event file.
-
-Attempts to read as FIFF first; if that fails, tries ASCII format.
+Reads an event file like `read()`; throws [`Error`](/docs/api/utils/error) if it cannot.
 
 **Parameters:**
 
@@ -52,69 +58,83 @@ Attempts to read as FIFF first; if that fails, tries ASCII format.
 
 ---
 
-### write_to_fif(path)
+### write(path, sfreq)
 
-Write the event list to a FIFF file.
+Writes the events, like mne.write_events: to FIFF if the name holds ".fif", as text otherwise.
 
 **Parameters:**
 
 - **path** : *const std::filesystem::path &*
-  The FIFF file to write.
+  The file.
+
+- **sfreq** : *float*
+  Sampling frequency for the time column of a text file; 0 writes zeros.
 
 **Returns:**
 
-- *bool* — true if succeeded, false otherwise.
+- *[Expected](/docs/api/utils/expected)&lt; void &gt;* — Nothing, or why the file cannot be written.
 
 ---
 
-### write_to_ascii(path, sfreq)
+### write_fif(path)
 
-Write the event list to a text file (MNE-C compatible format).
+Writes the events to a FIFF file.
 
 **Parameters:**
 
 - **path** : *const std::filesystem::path &*
-  The text file to write.
-
-- **sfreq** : *float*
-  Sampling frequency for time column computation.
+  The FIFF file.
 
 **Returns:**
 
-- *bool* — true if succeeded, false otherwise.
+- *[Expected](/docs/api/utils/expected)&lt; void &gt;* — Nothing, or why the file cannot be written: Format if there are no events, Io otherwise.
+
+---
+
+### write_ascii(path, sfreq)
+
+Writes the events as text, one "sample time before after" line each, as MNE-C does.
+
+**Parameters:**
+
+- **path** : *const std::filesystem::path &*
+  The text file.
+
+- **sfreq** : *float*
+  Sampling frequency for the time column; 0 writes zeros.
+
+**Returns:**
+
+- *[Expected](/docs/api/utils/expected)&lt; void &gt;* — Nothing, or why the file cannot be written (Io).
 
 ---
 
 ### num_events()
 
-Returns the number of events.
-
 **Returns:**
 
-- *int* — Number of events.
+- *int* — The number of events.
 
 ---
 
 ### is_empty()
 
-Returns true if no events are stored.
-
 **Returns:**
 
-- *bool* — true if the event matrix has zero rows.
+- *bool* — Whether there is no event.
 
 ---
 
 ### pick(include, exclude, step)
 
-Select events by code, like mne.pick_events.
+Selects events by code, like mne.pick_events.
 
 **Parameters:**
 
-- **include** : *const QList&lt; int &gt; &*
-  Codes to keep; if empty, all codes except `exclude` are kept.
+- **include** : *const std::vector&lt; int &gt; &*
+  Codes to keep; if none, all codes except \p exclude are kept.
 
-- **exclude** : *const QList&lt; int &gt; &*
+- **exclude** : *const std::vector&lt; int &gt; &*
   Codes to drop when `include` is empty.
 
 - **step** : *bool*
@@ -126,19 +146,19 @@ Select events by code, like mne.pick_events.
 
 ---
 
-### merge(ids, newId, replaceEvents)
+### merge(ids, new_id, replace_events)
 
-Replace codes in both code columns by a new one, like mne.merge_events.
+Replaces codes in both code columns by a new one, like mne.merge_events.
 
 **Parameters:**
 
-- **ids** : *const QList&lt; int &gt; &*
+- **ids** : *const std::vector&lt; int &gt; &*
   Codes to replace.
 
-- **newId** : *int*
+- **new_id** : *int*
   The new code.
 
-- **replaceEvents** : *bool*
+- **replace_events** : *bool*
   If false, the original events are kept as well, sorted by row.
 
 **Returns:**
@@ -149,167 +169,148 @@ Replace codes in both code columns by a new one, like mne.merge_events.
 
 ### count(ids)
 
-Count the events per code (column 2), like mne.count_events.
+Counts the events per code (column 2), like mne.count_events.
 
 **Parameters:**
 
-- **ids** : *const QList&lt; int &gt; &*
-  Codes to report (0 if absent); if empty, every code that occurs.
+- **ids** : *const std::vector&lt; int &gt; &*
+  Codes to report (0 if absent); if none, every code that occurs.
 
 **Returns:**
 
-- *QMap&lt; int, int &gt;* — Code to count.
+- *std::map&lt; int, int &gt;* — The number of events with each code.
 
 ---
 
 ## Static Methods
 
-### read(t_sEventName, t_fileRawName, p_Events)
+### read(path)
 
-Read events from a FIFF or ASCII event file.
-
-If t_sEventName is empty, the event file name is derived from the raw file name (replacing ".fif" with "-eve.fif").
+Reads an event file, like mne.read_events: a FIFF file if its name holds ".fif", text otherwise.
 
 **Parameters:**
 
-- **t_sEventName** : *const std::filesystem::path &*
-  Path to the event file (empty = derive from raw file name).
-
-- **t_fileRawName** : *const std::filesystem::path &*
-  Path to the raw data file (used to derive event file name if needed).
-
-- **p_Events** : *[FiffEvents](/docs/api/fiff/fiff-events) &*
-  The loaded events.
+- **path** : *const std::filesystem::path &*
+  The event file.
 
 **Returns:**
 
-- *bool* — true if succeeded, false otherwise.
+- *[Expected](/docs/api/utils/expected)&lt; [FiffEvents](/docs/api/fiff/fiff-events) &gt;* — The events, or why the file cannot be read.
 
 ---
 
-### read_from_fif(path, p_Events)
+### read_fif(path)
 
-Read an event list from a FIFF file.
+Reads the event list of a FIFF file.
 
 **Parameters:**
 
 - **path** : *const std::filesystem::path &*
   The FIFF file.
 
-- **p_Events** : *[FiffEvents](/docs/api/fiff/fiff-events) &*
-  The loaded events.
-
 **Returns:**
 
-- *bool* — true if succeeded, false otherwise.
+- *[Expected](/docs/api/utils/expected)&lt; [FiffEvents](/docs/api/fiff/fiff-events) &gt;* — The events, or why the file cannot be read: Io if it cannot be opened, NotFound if it holds no event list.
 
 ---
 
-### read_from_ascii(path, p_Events)
+### read_ascii(path)
 
-Read a list of events from an ASCII event file.
+Reads a text event file: one event per line as "sample [time] before after"; lines starting with '' or '#' are comments.
 
 **Parameters:**
 
 - **path** : *const std::filesystem::path &*
   The text file.
 
-- **p_Events** : *[FiffEvents](/docs/api/fiff/fiff-events) &*
-  The loaded events.
-
 **Returns:**
 
-- *bool* — true if succeeded, false otherwise.
+- *[Expected](/docs/api/utils/expected)&lt; [FiffEvents](/docs/api/fiff/fiff-events) &gt;* — The events, or why the file cannot be read: Io if it cannot be opened, Format if a line does not start with a sample number.
 
 ---
 
-### detect_from_raw(raw, p_Events, triggerCh, triggerMask, leadingEdge)
+### find_events(raw, stim_channel, mask, leading_edge)
 
-Detect trigger events from raw data using a stimulus channel.
-
-Ported from detect_events (MNE-C).
+Finds the trigger events of a stimulus channel, like mne.find_events.
 
 **Parameters:**
 
 - **raw** : *const [FiffRawData](/docs/api/fiff/fiff-raw-data) &*
-  The raw data.
+  The recording.
 
-- **p_Events** : *[FiffEvents](/docs/api/fiff/fiff-events) &*
-  The detected events.
+- **stim_channel** : *std::string_view*
+  Name of the stimulus channel; spaces are ignored ("STI 014" matches "STI014").
 
-- **triggerCh** : *const QString &*
-  Name of the trigger channel (empty = default "STI 014").
+- **mask** : *unsigned int*
+  Bits of the channel value that count.
 
-- **triggerMask** : *unsigned int*
-  Bitmask to apply to trigger values.
-
-- **leadingEdge** : *bool*
-  If true, only detect rising edges (default = true).
+- **leading_edge** : *bool*
+  Only changes from 0 to a non-zero value, rather than every change.
 
 **Returns:**
 
-- *bool* — true if events were detected, false otherwise.
+- *[Expected](/docs/api/utils/expected)&lt; [FiffEvents](/docs/api/fiff/fiff-events) &gt;* — The events, which may be none, or why there are none: NotFound if the channel is missing, Io if its data cannot be read.
 
 ---
 
-### matchEvent(cat, events, eventIdx)
+### match_event(cat, events, event_idx)
 
-Check whether an event matches a category definition.
+Checks whether an event matches an averaging category, as MNE-C's mne_process_raw does.
 
 **Parameters:**
 
 - **cat** : *const [AverageCategory](/docs/api/fiff/average-category) &*
-  The averaging category to match against.
+  The category.
 
 - **events** : *const Eigen::MatrixXi &*
-  Full event matrix (nEvents x 3): [sample, from, to].
+  Events, one row [sample, before, after] each.
 
-- **eventIdx** : *int*
-  Index of the current event row.
+- **event_idx** : *int*
+  Row of the event.
 
 **Returns:**
 
-- *bool* — true if the event matches.
+- *bool* — Whether the event matches, including the category's conditions on the events around it.
 
 ---
 
-### concatenate(events, firstSamps, lastSamps)
+### concatenate(events, first_samps, last_samps)
 
-Concatenate the events of consecutive recordings, like mne.concatenate_events.
+Concatenates the events of consecutive recordings, like mne.concatenate_events.
 
 **Parameters:**
 
-- **events** : *const QList&lt; [FiffEvents](/docs/api/fiff/fiff-events) &gt; &*
+- **events** : *const std::vector&lt; [FiffEvents](/docs/api/fiff/fiff-events) &gt; &*
   Events of each recording.
 
-- **firstSamps** : *const QList&lt; int &gt; &*
+- **first_samps** : *const std::vector&lt; int &gt; &*
   First sample of each recording.
 
-- **lastSamps** : *const QList&lt; int &gt; &*
+- **last_samps** : *const std::vector&lt; int &gt; &*
   Last sample of each recording.
 
 **Returns:**
 
-- *[FiffEvents](/docs/api/fiff/fiff-events)* — Events on the sample axis of the concatenated recording (empty if the list lengths differ).
+- *[FiffEvents](/docs/api/fiff/fiff-events)* — Events on the sample axis of the concatenated recording (none if the list lengths differ).
 
 ---
 
-### find_stim_steps(stimData, firstSamp, padStart, padStop, merge)
+### find_stim_steps(stim_data, first_samp, pad_start, pad_stop, merge)
 
 Find the samples where all stimulus channels change at once, like mne.find_stim_steps.
 
 **Parameters:**
 
-- **stimData** : *const Eigen::MatrixXi &*
+- **stim_data** : *const Eigen::MatrixXi &*
   Stimulus channel data (channels x samples); steps carry the values of the first row.
 
-- **firstSamp** : *int*
+- **first_samp** : *int*
   Sample number of the first column.
 
-- **padStart** : *std::optional&lt; int &gt;*
+- **pad_start** : *std::optional&lt; int &gt;*
   If set, a step from this value at sample 0 is added when the data start elsewhere.
 
-- **padStop** : *std::optional&lt; int &gt;*
+- **pad_stop** : *std::optional&lt; int &gt;*
   If set, a step to this value after the last sample is added.
 
 - **merge** : *int*
@@ -321,7 +322,7 @@ Find the samples where all stimulus channels change at once, like mne.find_stim_
 
 ---
 
-### make_fixed_length(raw, id, start, stop, duration, firstSamp, overlap)
+### make_fixed_length(raw, id, start, stop, duration, first_samp, overlap)
 
 Events at regular intervals, like mne.make_fixed_length_events.
 
@@ -342,7 +343,7 @@ Events at regular intervals, like mne.make_fixed_length_events.
 - **duration** : *double*
   Duration of each segment in s.
 
-- **firstSamp** : *bool*
+- **first_samp** : *bool*
   Whether times count from the recording's first sample (true) or from 0.
 
 - **overlap** : *double*
@@ -368,10 +369,9 @@ Events at regular intervals, like mne.make_fixed_length_events.
 FIFF library: measurement info, channels, digitizer, transforms, projectors, covariance, events, annotations, evoked sets and the low-level file structure.
 
 ````cpp title="src/examples/ex_fiff_api/main.cpp, line 195"
-FiffEvents events;
-FiffEvents::detect_from_raw(raw, events, "STI 014"); // rising edges of the trigger channel
+const FiffEvents events = FiffEvents::find_events(raw, "STI 014").value(); // rising edges, like mne.find_events
 const std::string eventPath = tmp.filePath("sample-eve.fif").toStdString();
-const bool eventsWritten = events.write_to_fif(eventPath);
+const bool eventsWritten = events.write(eventPath).has_value();
 FiffEvents eventsBack(eventPath); // mne.read_events reads this file too
 // mne.find_events(raw, "STI 014"): 25 events, first [13988, 0, 2], [14172, 0, 3], [14385, 0, 1]
 ok &= expect(events.num_events() == 25 && events.events.row(0) == RowVector3i(13988, 0, 2) && events.events.row(2) == RowVector3i(14385, 0, 1) && eventsWritten && eventsBack.events == events.events,
@@ -385,8 +385,7 @@ MNE library: BEM surfaces, surface projection, ICP, source spaces and epochs.
 ````cpp title="src/examples/ex_mne_api/main.cpp, line 235"
 QFile rawFile(data + "/MEG/sample/sample_audvis_trunc_raw.fif");
 const FiffRawData raw((data + "/MEG/sample/sample_audvis_trunc_raw.fif").toStdString());
-FiffEvents events;
-FiffEvents::detect_from_raw(raw, events); // rising edges on STI 014
+const FiffEvents events = FiffEvents::find_events(raw).value(); // rising edges on STI 014
 // Epochs of event 1 from -100 to 300 ms, no rejection
 MNEEpochDataList epochs = MNEEpochDataList::readEpochs(raw, events.events, -0.1f, 0.3f, 1, {});
 const MNEEpochData& firstEpoch = *epochs.first();
@@ -396,6 +395,7 @@ ok &= expect(epochs.size() == 6 && firstEpoch.eventSample == 14385 && firstEpoch
              "MNEEpochDataList/MNEEpochData: 6 epochs of event 1 match mne.Epochs");
 // mne Epochs.average(): |MEG| = 6.0801e-13 over 6 epochs, times from -99.898 to 299.693 ms with 0 at sample 30
 ok &= expect(evoked.nave == 6 && near(evoked.data.topRows(306).norm(), 6.080119131626428e-13, 1e-6) && evoked.times.size() == 121 && near(evoked.times[0], -0.09989760657919393, 1e-6) && near(evoked.times[120], 0.2996928197375818, 1e-6) && evoked.times[30] == 0.0f,
+             "MNEEpochDataList::average matches mne Epochs.average");
 ````
 
 ## Authors of this file

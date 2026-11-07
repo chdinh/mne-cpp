@@ -422,8 +422,7 @@ int main(int argc, char* argv[])
     //! [mne_epoch_data_list_usage]
     QFile rawFile(data + "/MEG/sample/sample_audvis_trunc_raw.fif");
     const FiffRawData raw((data + "/MEG/sample/sample_audvis_trunc_raw.fif").toStdString());
-    FiffEvents events;
-    FiffEvents::detect_from_raw(raw, events); // rising edges on STI 014
+    const FiffEvents events = FiffEvents::find_events(raw).value(); // rising edges on STI 014
     // Epochs of event 1 from -100 to 300 ms, no rejection
     MNEEpochDataList epochs = MNEEpochDataList::readEpochs(raw, events.events, -0.1f, 0.3f, 1, {});
     const MNEEpochData& firstEpoch = *epochs.first();

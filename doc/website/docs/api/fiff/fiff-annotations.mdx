@@ -21,92 +21,110 @@ class FIFFLIB::FiffAnnotations
 
 Container for [`FiffAnnotation`](/docs/api/fiff/fiff-annotation) entries with FIFF, JSON and CSV serializers.
 
-Read and written under `FIFFB_MNE_ANNOTATIONS` by `FiffStream::read_annotations()` and `FiffStream::write_annotations()`, so the annotation list travels with the FIFF file. The JSON and CSV exporters let the same annotations be consumed by BIDS sidecars and by external scoring tools that do not understand FIFF directly.
+Read and written under `FIFFB_MNE_ANNOTATIONS` by `FiffStream::read_annotations()` and `FiffStream::write_annotations()`, so the annotation list travels with the FIFF file. The JSON and CSV files let the same annotations be consumed by BIDS sidecars and by external scoring tools that do not understand FIFF.
 
 ```cpp title="src/examples/ex_fiff_api/main.cpp"
 MatrixXi firstThree = events.events.topRows(3);
-FiffAnnotations annotations = annotationsFromEvents(firstThree, info.sfreq, {{1, "auditory/left"}, {2, "auditory/right"}}, raw.first_samp);
-const FiffAnnotation blink{0.5, 1.0, "BAD_blink", {}, {}, {}}; // onset s, duration s, description, channels, ...
-annotations.append(blink);
-FiffAnnotations::write(tmp.filePath("annot.csv"), annotations);
-const FiffAnnotations annotationsBack = FiffAnnotations::read(tmp.filePath("annot.csv"));
-const MatrixXi eventsAgain = eventsFromAnnotations(annotationsBack.select("auditory"), info.sfreq, {{"auditory/left", 1}, {"auditory/right", 2}}, raw.first_samp);
+FiffAnnotations annotations = annotations_from_events(firstThree, info.sfreq, {{1, "auditory/left"}, {2, "auditory/right"}}, raw.first_samp);
+annotations.append(0.5, 1.0, "BAD_blink"); // onset s, duration s, description
+const std::filesystem::path csv = tmp.filePath("annot.csv").toStdString();
+const bool annotationsWritten = annotations.write(csv).has_value();
+const FiffAnnotations annotationsBack = FiffAnnotations::read(csv).value(); // value() throws UTILSLIB::Error
+const MatrixXi eventsAgain = events_from_annotations(annotationsBack.select("auditory"), info.sfreq, {{"auditory/left", 1}, {"auditory/right", 2}}, raw.first_samp);
 ```
 
 ---
 
 ## Public Methods
 
-### FiffAnnotations()
-
-Constructs an empty [`FiffAnnotations`](/docs/api/fiff/fiff-annotations) object.
-
----
-
 ### size()
 
-Returns the number of annotations.
-
 **Returns:**
 
-- *int* — Number of annotations.
+- *std::size_t* — The number of annotations.
 
 ---
 
-### isEmpty()
-
-Returns true if no annotations are stored.
+### empty()
 
 **Returns:**
 
-- *bool* — True if empty.
+- *bool* — Whether there is no annotation.
 
 ---
 
 ### operator\[\](index)
 
-Const subscript operator.
-
 **Parameters:**
 
-- **index** : *int*
-  Index of the annotation.
+- **index** : *std::size_t*
+  Index below `size()`.
 
 **Returns:**
 
-- *const [FiffAnnotation](/docs/api/fiff/fiff-annotation) &* — Const reference to the annotation.
+- *const [FiffAnnotation](/docs/api/fiff/fiff-annotation) &* — Annotation `index`.
 
 ---
 
 ### operator\[\](index)
 
-Subscript operator.
-
 **Parameters:**
 
-- **index** : *int*
-  Index of the annotation.
+- **index** : *std::size_t*
+  Index below `size()`.
 
 **Returns:**
 
-- *[FiffAnnotation](/docs/api/fiff/fiff-annotation) &* — Reference to the annotation.
+- *[FiffAnnotation](/docs/api/fiff/fiff-annotation) &* — Annotation `index`.
 
 ---
 
-### append(annotation)
+### begin()
+
+**Returns:**
+
+- *iterator* — First annotation.
+
+---
+
+### end()
+
+**Returns:**
+
+- *iterator* — Past the last annotation.
+
+---
+
+### begin()
+
+**Returns:**
+
+- *const_iterator* — First annotation.
+
+---
+
+### end()
+
+**Returns:**
+
+- *const_iterator* — Past the last annotation.
+
+---
+
+### push_back(annotation)
 
 Appends an annotation.
 
 **Parameters:**
 
-- **annotation** : *const [FiffAnnotation](/docs/api/fiff/fiff-annotation) &*
-  The annotation to append.
+- **annotation** : *[FiffAnnotation](/docs/api/fiff/fiff-annotation)*
+  The annotation.
 
 ---
 
-### append(onset, duration, description, channelNames, comment)
+### append(onset, duration, description, ch_names)
 
-Appends an annotation by fields.
+Appends an annotation, like mne.Annotations.append.
 
 **Parameters:**
 
@@ -116,25 +134,44 @@ Appends an annotation by fields.
 - **duration** : *double*
   Duration in seconds.
 
-- **description** : *const QString &*
+- **description** : *std::string*
   Description label.
 
-- **channelNames** : *const QStringList &*
-  Channel names (empty for global).
-
-- **comment** : *const QString &*
-  Optional comment.
+- **ch_names** : *std::vector&lt; std::string &gt;*
+  Channels it applies to; none for all.
 
 ---
 
-### remove(index)
+### erase(position)
 
-Removes the annotation at the given index.
+Removes an annotation.
 
 **Parameters:**
 
-- **index** : *int*
-  Index to remove.
+- **position** : *const_iterator*
+  The annotation.
+
+**Returns:**
+
+- *iterator* — The annotation after it.
+
+---
+
+### erase(first, last)
+
+Removes a range of annotations.
+
+**Parameters:**
+
+- **first** : *const_iterator*
+  The first annotation to remove.
+
+- **last** : *const_iterator*
+  Past the last annotation to remove.
+
+**Returns:**
+
+- *iterator* — The annotation after the range.
 
 ---
 
@@ -144,91 +181,71 @@ Removes all annotations.
 
 ---
 
-### toVector()
-
-Returns a const reference to the underlying vector.
-
-**Returns:**
-
-- *const QVector&lt; [FiffAnnotation](/docs/api/fiff/fiff-annotation) &gt; &* — Const reference to annotation vector.
-
----
-
-### onsetToSample(index, sfreq, firstSample)
-
-Converts onset of annotation at index to a sample number.
+### onset_to_sample(index, sfreq, first_sample)
 
 **Parameters:**
 
-- **index** : *int*
+- **index** : *std::size_t*
   Annotation index.
 
 - **sfreq** : *double*
   Sampling frequency in Hz.
 
-- **firstSample** : *int*
-  First sample offset.
+- **first_sample** : *int*
+  First sample of the recording.
 
 **Returns:**
 
-- *int* — Sample number.
+- *int* — The sample at the onset of annotation `index`.
 
 ---
 
-### endToSample(index, sfreq, firstSample)
-
-Converts end (onset+duration) of annotation at index to a sample number.
+### end_to_sample(index, sfreq, first_sample)
 
 **Parameters:**
 
-- **index** : *int*
+- **index** : *std::size_t*
   Annotation index.
 
 - **sfreq** : *double*
   Sampling frequency in Hz.
 
-- **firstSample** : *int*
-  First sample offset.
+- **first_sample** : *int*
+  First sample of the recording.
 
 **Returns:**
 
-- *int* — Sample number.
+- *int* — The sample at the end (onset + duration) of annotation `index`.
 
 ---
 
-### select(descriptionFilter)
-
-Selects annotations whose description starts with the filter string.
+### select(prefix)
 
 **Parameters:**
 
-- **descriptionFilter** : *const QString &*
-  Prefix to match.
+- **prefix** : *std::string_view*
+  Description prefix.
 
 **Returns:**
 
-- *[FiffAnnotations](/docs/api/fiff/fiff-annotations)* — Filtered annotations.
+- *[FiffAnnotations](/docs/api/fiff/fiff-annotations)* — The annotations whose description starts with `prefix`.
 
 ---
 
-### selectByChannel(channelName)
-
-Selects annotations that reference the given channel name.
+### select_by_channel(ch_name)
 
 **Parameters:**
 
-- **channelName** : *const QString &*
-  Channel name to match.
+- **ch_name** : *std::string_view*
+  Channel name.
 
 **Returns:**
 
-- *[FiffAnnotations](/docs/api/fiff/fiff-annotations)* — Filtered annotations.
+- *[FiffAnnotations](/docs/api/fiff/fiff-annotations)* — The annotations that apply to `ch_name`, including those that apply to all channels.
 
 ---
 
 ### crop(tmin, tmax)
-
-Returns annotations overlapping [tmin, tmax], clipping partially overlapping ones.
 
 **Parameters:**
 
@@ -240,108 +257,99 @@ Returns annotations overlapping [tmin, tmax], clipping partially overlapping one
 
 **Returns:**
 
-- *[FiffAnnotations](/docs/api/fiff/fiff-annotations)* — Cropped annotations.
+- *[FiffAnnotations](/docs/api/fiff/fiff-annotations)* — The annotations overlapping [tmin, tmax], clipped to it, like mne.Annotations.crop.
+
+---
+
+### write_json(path)
+
+Writes the annotations to a JSON file.
+
+**Parameters:**
+
+- **path** : *const std::filesystem::path &*
+  The file.
+
+**Returns:**
+
+- *[Expected](/docs/api/utils/expected)&lt; void &gt;* — Nothing, or why the file cannot be written (Io).
+
+---
+
+### write_csv(path)
+
+Writes onset, duration and description of the annotations to a CSV file.
+
+**Parameters:**
+
+- **path** : *const std::filesystem::path &*
+  The file.
+
+**Returns:**
+
+- *[Expected](/docs/api/utils/expected)&lt; void &gt;* — Nothing, or why the file cannot be written (Io).
+
+---
+
+### write(path)
+
+Writes the annotations to a .csv file, or to JSON for any other extension.
+
+**Parameters:**
+
+- **path** : *const std::filesystem::path &*
+  The file.
+
+**Returns:**
+
+- *[Expected](/docs/api/utils/expected)&lt; void &gt;* — Nothing, or why the file cannot be written (Io).
 
 ---
 
 ## Static Methods
 
-### readJson(path)
+### read_json(path)
 
-Reads annotations from a JSON file.
+Reads annotations from a JSON file (\{"annotations": [\{"onset", "duration", "description", "channel_names", "comment", "extras"\}, ...]\}).
 
 **Parameters:**
 
-- **path** : *const QString &*
-  File path.
+- **path** : *const std::filesystem::path &*
+  The file.
 
 **Returns:**
 
-- *[FiffAnnotations](/docs/api/fiff/fiff-annotations)* — Parsed annotations.
+- *[Expected](/docs/api/utils/expected)&lt; [FiffAnnotations](/docs/api/fiff/fiff-annotations) &gt;* — The annotations, or why the file cannot be read (Io or Format).
 
 ---
 
-### writeJson(path, annot)
+### read_csv(path)
 
-Writes annotations to a JSON file.
-
-**Parameters:**
-
-- **path** : *const QString &*
-  File path.
-
-- **annot** : *const [FiffAnnotations](/docs/api/fiff/fiff-annotations) &*
-  Annotations to write.
-
-**Returns:**
-
-- *bool* — True on success.
-
----
-
-### readCsv(path)
-
-Reads annotations from a CSV file.
+Reads annotations from a CSV file ("onset,duration,description" after a header row); rows whose onset or duration is not a number are skipped.
 
 **Parameters:**
 
-- **path** : *const QString &*
-  File path.
+- **path** : *const std::filesystem::path &*
+  The file.
 
 **Returns:**
 
-- *[FiffAnnotations](/docs/api/fiff/fiff-annotations)* — Parsed annotations.
-
----
-
-### writeCsv(path, annot)
-
-Writes annotations to a CSV file.
-
-**Parameters:**
-
-- **path** : *const QString &*
-  File path.
-
-- **annot** : *const [FiffAnnotations](/docs/api/fiff/fiff-annotations) &*
-  Annotations to write.
-
-**Returns:**
-
-- *bool* — True on success.
+- *[Expected](/docs/api/utils/expected)&lt; [FiffAnnotations](/docs/api/fiff/fiff-annotations) &gt;* — The annotations, or why the file cannot be read (Io).
 
 ---
 
 ### read(path)
 
-Auto-detects format and reads annotations.
+Reads annotations from a .json or .csv file; other extensions are tried as JSON, then as CSV.
 
 **Parameters:**
 
-- **path** : *const QString &*
-  File path (.json or .csv).
+- **path** : *const std::filesystem::path &*
+  The file.
 
 **Returns:**
 
-- *[FiffAnnotations](/docs/api/fiff/fiff-annotations)* — Parsed annotations.
-
----
-
-### write(path, annot)
-
-Auto-detects format and writes annotations.
-
-**Parameters:**
-
-- **path** : *const QString &*
-  File path (.json or .csv).
-
-- **annot** : *const [FiffAnnotations](/docs/api/fiff/fiff-annotations) &*
-  Annotations to write.
-
-**Returns:**
-
-- *bool* — True on success.
+- *[Expected](/docs/api/utils/expected)&lt; [FiffAnnotations](/docs/api/fiff/fiff-annotations) &gt;* — The annotations, or why the file cannot be read.
 
 ---
 
@@ -358,16 +366,16 @@ Auto-detects format and writes annotations.
 
 FIFF library: measurement info, channels, digitizer, transforms, projectors, covariance, events, annotations, evoked sets and the low-level file structure.
 
-````cpp title="src/examples/ex_fiff_api/main.cpp, line 206"
+````cpp title="src/examples/ex_fiff_api/main.cpp, line 205"
 MatrixXi firstThree = events.events.topRows(3);
-FiffAnnotations annotations = annotationsFromEvents(firstThree, info.sfreq, {{1, "auditory/left"}, {2, "auditory/right"}}, raw.first_samp);
-const FiffAnnotation blink{0.5, 1.0, "BAD_blink", {}, {}, {}}; // onset s, duration s, description, channels, ...
-annotations.append(blink);
-FiffAnnotations::write(tmp.filePath("annot.csv"), annotations);
-const FiffAnnotations annotationsBack = FiffAnnotations::read(tmp.filePath("annot.csv"));
-const MatrixXi eventsAgain = eventsFromAnnotations(annotationsBack.select("auditory"), info.sfreq, {{"auditory/left", 1}, {"auditory/right", 2}}, raw.first_samp);
+FiffAnnotations annotations = annotations_from_events(firstThree, info.sfreq, {{1, "auditory/left"}, {2, "auditory/right"}}, raw.first_samp);
+annotations.append(0.5, 1.0, "BAD_blink"); // onset s, duration s, description
+const std::filesystem::path csv = tmp.filePath("annot.csv").toStdString();
+const bool annotationsWritten = annotations.write(csv).has_value();
+const FiffAnnotations annotationsBack = FiffAnnotations::read(csv).value(); // value() throws UTILSLIB::Error
+const MatrixXi eventsAgain = events_from_annotations(annotationsBack.select("auditory"), info.sfreq, {{"auditory/left", 1}, {"auditory/right", 2}}, raw.first_samp);
 // Event 13988 (code 2) is (13988 - 12900) / 300.307 s = 3.6230 s after the first sample; code 3 has no description and stays "3"; the CSV keeps onsets to well within half a sample
-ok &= expect(annotationsBack.size() == 4 && std::fabs(annotationsBack.select("auditory/right").toVector()[0].onset - (13988 - 12900) / info.sfreq) < 0.5 / info.sfreq && eventsAgain.rows() == 2 && eventsAgain(0, 0) == 13988 && eventsAgain(1, 0) == 14385 && eventsAgain(1, 2) == 1 && annotationsBack.select("3").size() == 1,
+ok &= expect(annotationsWritten && annotationsBack.size() == 4 && std::fabs(annotationsBack.select("auditory/right")[0].onset - (13988 - 12900) / info.sfreq) < 0.5 / info.sfreq && eventsAgain.rows() == 2 && eventsAgain(0, 0) == 13988 && eventsAgain(1, 0) == 14385 && eventsAgain(1, 2) == 1 && annotationsBack.select("3").size() == 1,
              "FiffAnnotations: events become onsets in seconds and back, with descriptions as codes");
 ````
 

@@ -333,7 +333,7 @@ ok &= expect(synthetic.save(tmp.filePath("synthetic-ave.fif").toStdU16String()).
 
 FIFF library: measurement info, channels, digitizer, transforms, projectors, covariance, events, annotations, evoked sets and the low-level file structure.
 
-````cpp title="src/examples/ex_fiff_api/main.cpp, line 219"
+````cpp title="src/examples/ex_fiff_api/main.cpp, line 218"
 FiffEvokedSet evokedSet((dir + "/sample_audvis-ave.fif").toStdU16String()); // all conditions of an -ave.fif file
 const FiffEvoked& leftAuditory = evokedSet.evoked[0];
 // mne.read_evokeds: 4 conditions, "Left Auditory" nave 55, 376 x 421 samples starting at -0.1998 s

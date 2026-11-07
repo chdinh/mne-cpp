@@ -41,7 +41,7 @@ AnnotateMusclParams muscle; // mne defaults: z > 4 in the 110-140 Hz envelope, g
 const FiffAnnotations emgBad = annotateMusclZscore(emgData, info.pick_info(RowVectorXi::LinSpaced(kEeg, 0, kEeg - 1)), emgSFreq, muscle);
 // mne.preprocessing.annotate_muscle_zscore on the same data: one BAD_muscle, onset 1.563 s, duration 0.875 s
 ok &= expect(emgBad.size() == 1 && std::fabs(emgBad[0].onset - 1.563) < 1e-9 && std::fabs(emgBad[0].duration - 0.875) < 1e-9,
-             std::format("annotateMusclZscore marks {} EMG burst(s), first at {:g} s for {:g} s (mne: 1.563 s, 0.875 s)", emgBad.size(), emgBad.isEmpty() ? -1.0 : emgBad[0].onset, emgBad.isEmpty() ? -1.0 : emgBad[0].duration));
+             std::format("annotateMusclZscore marks {} EMG burst(s), first at {:g} s for {:g} s (mne: 1.563 s, 0.875 s)", emgBad.size(), emgBad.empty() ? -1.0 : emgBad[0].onset, emgBad.empty() ? -1.0 : emgBad[0].duration));
 ````
 
 ## Authors of this file
