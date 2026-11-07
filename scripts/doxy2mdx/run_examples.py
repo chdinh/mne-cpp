@@ -37,6 +37,7 @@ import shutil
 import subprocess
 import sys
 import tempfile
+import time
 from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
@@ -63,6 +64,43 @@ def executable(bin_dir: Path, name: str) -> Path | None:
     return None
 
 
+def capture(command: list[str], cwd: str, env: dict[str, str]) -> tuple[int, str]:
+    """Run *command* and return its exit code and console output, stdout and stderr in the order written.
+
+    On POSIX both streams share a pseudo-terminal, so the program line-buffers stdout as in a terminal.
+    """
+    if os.name == "nt":
+        done = subprocess.run(command, cwd=cwd, env=env, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, text=True,
+                              errors="replace", timeout=TIMEOUT)
+        return done.returncode, done.stdout
+    import pty
+    import select
+    master, slave = pty.openpty()
+    chunks = []
+    try:
+        with subprocess.Popen(command, cwd=cwd, env=env, stdin=subprocess.DEVNULL, stdout=slave, stderr=slave) as process:
+            os.close(slave)
+            deadline = time.monotonic() + TIMEOUT
+            while True:
+                remaining = deadline - time.monotonic()
+                if remaining <= 0:
+                    process.kill()
+                    raise subprocess.TimeoutExpired(command, TIMEOUT)
+                if not select.select([master], [], [], remaining)[0]:
+                    continue
+                try:
+                    data = os.read(master, 65536)
+                except OSError:  # EIO once the program has closed the terminal
+                    break
+                if not data:
+                    break
+                chunks.append(data)
+            returncode = process.wait()
+    finally:
+        os.close(master)
+    return returncode, b"".join(chunks).decode("utf-8", "replace").replace("\r\n", "\n")
+
+
 def run(name: str, binary: Path, root: Path) -> tuple[bool, str]:
     """Run one example into a scratch directory; on success move its results into the gallery."""
     with tempfile.TemporaryDirectory() as tmp:
@@ -70,15 +108,14 @@ def run(name: str, binary: Path, root: Path) -> tuple[bool, str]:
         figures.mkdir()
         env = dict(os.environ, MNE_CPP_FIGURE_DIR=str(figures), QT_QPA_PLATFORM="offscreen")
         try:
-            done = subprocess.run([str(binary)], cwd=tmp, env=env, capture_output=True, text=True,
-                                  errors="replace", timeout=TIMEOUT)
+            returncode, output = capture([str(binary)], tmp, env)
         except subprocess.TimeoutExpired:
             return False, f"timed out after {TIMEOUT} s"
-        output = (done.stdout + done.stderr).replace(f"{binary.parent}/../", "").replace(f"{root}/", "")
+        output = output.replace(f"{binary.parent}/../", "").replace(f"{root}/", "")
         output = "\n".join(line for line in output.splitlines() if not QT_NOISE.search(line))
-        if done.returncode != 0:
+        if returncode != 0:
             tail = "\n    ".join(output.strip().splitlines()[-5:])
-            return False, f"exit code {done.returncode}\n    {tail}"
+            return False, f"exit code {returncode}\n    {tail}"
         target = root / gen.GALLERY / name
         shutil.rmtree(target, ignore_errors=True)
         target.mkdir(parents=True)
