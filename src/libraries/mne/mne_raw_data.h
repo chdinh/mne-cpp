@@ -160,7 +160,7 @@ public:
      *
      * @return OK on success, FAIL on error.
      */
-    int pick_data(mneChSelection sel,
+    int pick_data(MNEChSelection* sel,
                   int firsts,
                   int ns,
                   float** picked);
@@ -176,7 +176,7 @@ public:
      *
      * @return OK on success, FAIL on error.
      */
-    int pick_data_proj(mneChSelection sel,
+    int pick_data_proj(MNEChSelection* sel,
                        int firsts,
                        int ns,
                        float** picked);
@@ -203,7 +203,7 @@ public:
      *
      * @return OK on success, FAIL on error.
      */
-    int pick_data_filt(mneChSelection sel,
+    int pick_data_filt(MNEChSelection* sel,
                        int firsts,
                        int ns,
                        float** picked);

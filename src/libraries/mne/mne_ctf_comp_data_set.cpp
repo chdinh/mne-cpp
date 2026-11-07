@@ -59,8 +59,7 @@ int mne_read_meg_comp_eeg_ch_info_32(const QString& name,
                                      int* nmeg_compp,
                                      QList<FIFFLIB::FiffChInfo>& eegp, /* EEG channels */
                                      int* neegp,
-                                     FiffCoordTrans* meg_head_t,
-                                     fiffId* idp) /* The measurement ID */
+                                     FiffCoordTrans* meg_head_t)
 /*
       * Read the channel information and split it into three arrays,
       * one for MEG, one for MEG compensation channels, and one for EEG
@@ -77,7 +76,6 @@ int mne_read_meg_comp_eeg_ch_info_32(const QString& name,
     int nmeg_comp = 0;
     QList<FIFFLIB::FiffChInfo> eeg;
     int neeg = 0;
-    std::unique_ptr<FiffId> id;
     QList<FiffDirNode::SPtr> nodes;
     FiffDirNode::SPtr info;
     FiffTag::UPtr t_pTag;
@@ -119,14 +117,6 @@ int mne_read_meg_comp_eeg_ch_info_32(const QString& name,
                     chs[j].scanNo = -1;
                 }
                 to_find = nchan;
-                break;
-
-            case FIFF_PARENT_BLOCK_ID:
-                if (!stream.read_tag(t_pTag, pos)) {
-                    stream.close();
-                    return FIFF_FAIL;
-                }
-                id = std::make_unique<FiffId>(*(FiffId*)t_pTag->data());
                 break;
 
             case FIFF_COORD_TRANS:
@@ -206,10 +196,6 @@ int mne_read_meg_comp_eeg_ch_info_32(const QString& name,
         *neegp = neeg;
     }
 
-    if (idp == nullptr) {
-        /* id is auto-deleted by unique_ptr */
-    } else
-        *idp = id.release();
     if (meg_head_t == nullptr) {
     } else
         *meg_head_t = t;
@@ -354,7 +340,6 @@ std::unique_ptr<MNECTFCompDataSet> MNECTFCompDataSet::read(const QString& name)
                                              comp_chs,
                                              &ncompch,
                                              temp,
-                                             nullptr,
                                              nullptr,
                                              nullptr) == FAIL)
             return nullptr;

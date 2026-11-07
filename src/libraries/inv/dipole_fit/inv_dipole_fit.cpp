@@ -84,7 +84,7 @@ static std::unique_ptr<MNEChSelection> mne_ch_selection_these(const QString& sel
  *
  * @return Number of directly matched channels (excluding derivations).
  */
-static int mne_ch_selection_assign_chs(mneChSelection sel,
+static int mne_ch_selection_assign_chs(MNEChSelection* sel,
                                        MNERawData* data)
 {
     if (!sel || !data)
@@ -341,7 +341,7 @@ bool InvDipoleFit::fit_dipoles(const QString& dataname, MNEMeasData* data, InvDi
 
 //=============================================================================================================
 
-bool InvDipoleFit::fit_dipoles_raw(const QString& dataname, MNERawData* raw, mneChSelection sel, InvDipoleFitData* fit, InvGuessData* guess, float tmin, float tmax, float tstep, float integ, int verbose, InvEcdSet& p_set)
+bool InvDipoleFit::fit_dipoles_raw(const QString& dataname, MNERawData* raw, MNEChSelection* sel, InvDipoleFitData* fit, InvGuessData* guess, float tmin, float tmax, float tstep, float integ, int verbose, InvEcdSet& p_set)
 {
     const int nchan = sel->nchan;
     const float sfreq = raw->info->sfreq;
@@ -408,7 +408,7 @@ bool InvDipoleFit::fit_dipoles_raw(const QString& dataname, MNERawData* raw, mne
 
 //=============================================================================================================
 
-bool InvDipoleFit::fit_dipoles_raw(const QString& dataname, MNERawData* raw, mneChSelection sel, InvDipoleFitData* fit, InvGuessData* guess, float tmin, float tmax, float tstep, float integ, int verbose)
+bool InvDipoleFit::fit_dipoles_raw(const QString& dataname, MNERawData* raw, MNEChSelection* sel, InvDipoleFitData* fit, InvGuessData* guess, float tmin, float tmax, float tstep, float integ, int verbose)
 {
     InvEcdSet set;
     return fit_dipoles_raw(dataname, raw, sel, fit, guess, tmin, tmax, tstep, integ, verbose, set);

@@ -740,7 +740,7 @@ int MNERawData::compensate_buffer(MNERawBufDef* buf)
 
 //=============================================================================================================
 
-int MNERawData::pick_data(mneChSelection sel, int firsts, int ns, float** picked)
+int MNERawData::pick_data(MNEChSelection* sel, int firsts, int ns, float** picked)
 /*
      * Data from a selection of channels
      */
@@ -882,7 +882,7 @@ int MNERawData::pick_data(mneChSelection sel, int firsts, int ns, float** picked
 
 //=============================================================================================================
 
-int MNERawData::pick_data_proj(mneChSelection sel, int firsts, int ns, float** picked)
+int MNERawData::pick_data_proj(MNEChSelection* sel, int firsts, int ns, float** picked)
 /*
      * Data from a set of channels, apply projection
      */
@@ -1040,7 +1040,7 @@ int MNERawData::load_one_filt_buf(MNERawBufDef* buf)
 
 //=============================================================================================================
 
-int MNERawData::pick_data_filt(mneChSelection sel, int firsts, int ns, float** picked)
+int MNERawData::pick_data_filt(MNEChSelection* sel, int firsts, int ns, float** picked)
 /*
      * Data for a selection (filtered and picked)
      */

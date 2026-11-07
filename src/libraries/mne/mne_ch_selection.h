@@ -61,10 +61,6 @@ public:
     int kind = 0;               /**< Loaded from file or created here? */
 };
 
-/** Backward-compatible typedef aliases. */
-typedef MNEChSelection mneChSelectionRec;
-typedef MNEChSelection* mneChSelection;
-
 } // namespace MNELIB
 
 #endif // MNE_CH_SELECTION_H
