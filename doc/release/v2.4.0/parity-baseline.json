@@ -1323,7 +1323,7 @@
     },
     {
       "source": "parity",
-      "mne_cpp": "FiffDigPointSet(QList<FiffDigPoint>)",
+      "mne_cpp": "FiffDigPointSet(std::vector<FiffDigPoint>)",
       "python": "mne.channels.make_dig_montage",
       "claimed": "partial",
       "equivalence": null,
@@ -1466,7 +1466,7 @@
     },
     {
       "source": "parity",
-      "mne_cpp": "FiffDigPointSet::transformToHead",
+      "mne_cpp": "FiffDigPointSet::transform_to_head",
       "python": "mne.channels.transform_to_head",
       "claimed": "implemented",
       "equivalence": "equivalent",
@@ -2016,7 +2016,7 @@
     },
     {
       "source": "parity",
-      "mne_cpp": "FiffDigPointSet(QIODevice&), FiffDigitizerData",
+      "mne_cpp": "FiffDigPointSet::read, FiffDigitizerData",
       "python": "mne.io.read_fiducials",
       "claimed": "implemented",
       "equivalence": null,

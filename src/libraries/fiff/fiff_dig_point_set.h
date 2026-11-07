@@ -265,7 +265,11 @@ public:
         m_points.clear();
     }
 
-    /** Appends a point. */
+    /**
+     * Appends a point.
+     *
+     * @param[in] point   The point.
+     */
     void push_back(const FiffDigPoint& point)
     {
         m_points.push_back(point);
@@ -283,13 +287,21 @@ public:
         return m_points.back();
     }
 
-    /** @return Point @p idx; @p idx must be below size(). */
+    /**
+     * @param[in] idx   Index below size().
+     *
+     * @return Point @p idx.
+     */
     const FiffDigPoint& operator[](std::size_t idx) const
     {
         return m_points[idx];
     }
 
-    /** @copydoc operator[](std::size_t) const */
+    /**
+     * @param[in] idx   Index below size().
+     *
+     * @return Point @p idx.
+     */
     FiffDigPoint& operator[](std::size_t idx)
     {
         return m_points[idx];

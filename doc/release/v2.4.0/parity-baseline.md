@@ -85,7 +85,7 @@ Tolerance is the range of comparison thresholds the test asserts (`exact` when i
 | `mne.channels.read_dig_localite` | `FIFFLIB::FiffDigPointSet::readLocalite` | equivalent | `test_fiff_dig_point_python` | 1e-06 |
 | `mne.channels.read_dig_polhemus_isotrak` | `FIFFLIB::FiffDigPointSet::readPolhemusIsotrak` | equivalent | `test_fiff_dig_point_python` | 1e-06 |
 | `mne.channels.read_polhemus_fastscan` | `FIFFLIB::FiffDigPointSet::readPolhemusFastscan` | equivalent | `test_fiff_dig_point_python` | 1e-06 |
-| `mne.channels.transform_to_head` | `FiffDigPointSet::transformToHead` | equivalent | `test_fiff_coord_trans` | 1e-07 to 1e-06 |
+| `mne.channels.transform_to_head` | `FiffDigPointSet::transform_to_head` | equivalent | `test_fiff_coord_trans` | 1e-07 to 1e-06 |
 | `mne.combine_evoked` | `FiffEvoked::combine` | equivalent | `test_fiff_io_evoked_info` | 1e-06 to 0.01 |
 | `mne.compute_proj_epochs` | `FiffProj::compute_from_raw` | equivalent | `test_fiff_core_python` | 1e-12 to 1e-09 |
 | `mne.compute_proj_evoked` | `FiffProj::compute_from_evoked` | equivalent | `test_fiff_core_python` | 1e-12 to 1e-09 |
