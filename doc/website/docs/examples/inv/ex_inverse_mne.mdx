@@ -275,11 +275,14 @@ int main(int argc, char* argv[])
     FigureExporter::save(courses, "time_courses", QString("%1 time courses of the five sources with the largest peak, SNR %2, baseline -200 to 0 ms.").arg(method).arg(snr));
 
     if (!t_sFileNameStc.isEmpty()) {
-        QFile t_fileStc(t_sFileNameStc);
-        sourceEstimate.write(t_fileStc);
+        const std::filesystem::path stcPath = t_sFileNameStc.toStdU16String();
+        if (auto written = sourceEstimate.write(stcPath); !written) {
+            qWarning() << written.error().what();
+            return 1;
+        }
 
         //test if everything was written correctly
-        InvSourceEstimate readSourceEstimate(t_fileStc);
+        const InvSourceEstimate readSourceEstimate(stcPath);
 
         std::cout << "\npart ( block( 0, 0, 10, 10) ) of the inverse solution:\n"
                   << readSourceEstimate.data.block(0, 0, 10, 10) << std::endl;

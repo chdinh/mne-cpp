@@ -44,10 +44,9 @@ const InvSourceEstimate stc = dspm.calculateInverse(evoked); // one row per sour
 ```cpp title="src/examples/ex_inv_api/main.cpp"
 InvSourceEstimateIO::writeCsv(stc, tmp.filePath("v1-dspm.csv"));
 const InvSourceEstimate fromCsv = InvSourceEstimateIO::readCsv(tmp.filePath("v1-dspm.csv"));
-QFile stcFile(tmp.filePath("v1-dspm-lh.stc"));
-InvSourceEstimate(stc).write(stcFile); // MNE .stc format, readable by mne.read_source_estimate
-QFile stcBack(stcFile.fileName());
-const InvSourceEstimate fromStc(stcBack);
+const std::filesystem::path stcPath = tmp.filePath("v1-dspm-lh.stc").toStdU16String();
+const bool stcWritten = stc.write(stcPath).has_value(); // MNE .stc format, readable by mne.read_source_estimate
+const InvSourceEstimate fromStc(stcPath);
 ```
 
 ### Inheritance
@@ -66,262 +65,209 @@ classDiagram
 
 ### InvSourceEstimate()
 
-Default constructor.
+Constructs an empty source estimate.
 
 ---
 
-### InvSourceEstimate(p_sol, p_vertices, p_tmin, p_tstep)
+### InvSourceEstimate(data, vertices, tmin, tstep)
 
-Constructs a source estimation from given data.
+Constructs a source estimate from its data.
 
 **Parameters:**
 
-- **p_sol** : *const Eigen::MatrixXd &*
+- **data** : *Eigen::MatrixXd*
   Source amplitudes (sources x time points).
 
-- **p_vertices** : *const Eigen::VectorXi &*
-  Source space vertex numbers of the rows of p_sol.
+- **vertices** : *Eigen::VectorXi*
+  Source space vertex numbers of the rows of `data`.
 
-- **p_tmin** : *float*
+- **tmin** : *float*
   Time of the first sample in seconds.
 
-- **p_tstep** : *float*
+- **tstep** : *float*
   Time between samples in seconds.
 
 ---
 
-### InvSourceEstimate(p_SourceEstimate)
+### InvSourceEstimate(path)
 
-Copy constructor.
-
-**Parameters:**
-
-- **p_SourceEstimate** : *const InvSourceEstimate &*
-  Source estimate data which should be copied.
-
----
-
-### InvSourceEstimate(p_IODevice)
-
-Constructs a source estimation, by reading from a IO device.
+Reads an .stc file like `read()`; throws [`Error`](/docs/api/utils/error) if it cannot.
 
 **Parameters:**
 
-- **p_IODevice** : *QIODevice &*
-  IO device to read from the source estimation.
+- **path** : *const std::filesystem::path &*
+  The .stc file.
 
 ---
 
-### clear()
+### write(path)
 
-Initializes source estimate.
-
----
-
-### reduce(start, n)
-
-Reduces the source estimate to selected samples.
+Writes the estimate as an .stc file, as MNE-C's mne_write_stc_file and mne.SourceEstimate.save do.
 
 **Parameters:**
 
-- **start** : *qint32*
-  The start index to cut the estimate from.
-
-- **n** : *qint32*
-  Number of samples to cut from start index.
+- **path** : *const std::filesystem::path &*
+  The .stc file.
 
 **Returns:**
 
-- *[InvSourceEstimate](/docs/api/inv/inv-source-estimate)* — Copy of this estimate restricted to samples [start, start + n), with tmin updated accordingly.
+- *[Expected](/docs/api/utils/expected)&lt; void &gt;* — Nothing, or why the file cannot be written (Io).
 
 ---
 
-### write(p_IODevice)
+### write_hemisphere_pair(base)
 
-mne_write_stc_file
-
-Writes a stc file
+Writes a surface estimate as the "&lt;base&gt;-lh.stc" and "&lt;base&gt;-rh.stc" pair mne.read_source_estimate expects, splitting at n_vertices_lh.
 
 **Parameters:**
 
-- **p_IODevice** : *QIODevice &*
-  IO device to write the stc to.
+- **base** : *const std::filesystem::path &*
+  Path without the "-lh.stc"/"-rh.stc" suffix; a trailing "-lh.stc", "-rh.stc" or ".stc" is dropped.
 
 **Returns:**
 
-- *bool* — True if successful, false if the device could not be opened for writing.
-
----
-
-### writeHemispherePair(sBasePath)
-
-Write the estimate as an MNE-C / MNE-Python compatible hemisphere pair.
-
-MNE-Python expects a surface source estimate to be stored as two files, "&lt;base&gt;-lh.stc" and "&lt;base&gt;-rh.stc", each containing only the vertices of its own hemisphere. This writes exactly that, splitting at `nVerticesLh`.
-
-**Parameters:**
-
-- **sBasePath** : *const QString &*
-  Path without the "-lh.stc"/"-rh.stc" suffix. A trailing "-lh.stc", "-rh.stc" or ".stc" is stripped if present.
-
-**Returns:**
-
-- *bool* — true when both files were written, false otherwise. Fails when nVerticesLh is unknown (-1) or out of range, since the split point cannot then be determined.
+- *[Expected](/docs/api/utils/expected)&lt; void &gt;* — Nothing, or why the pair cannot be written: Format if the split point is unknown or the data do not match the vertices, Io if a file cannot be written.
 
 ---
 
 ### write_w(path)
 
-Write the first time point of this source estimate to a .w file.
+Writes the first time point as a .w file, as mne.write_w does.
 
 **Parameters:**
 
-- **path** : *const QString &*
-  Path to the .w file to write.
-
----
-
-### isEmpty()
-
-Returns whether SourceEstimate is empty.
+- **path** : *const std::filesystem::path &*
+  The .w file.
 
 **Returns:**
 
-- *bool* — true if is empty, false otherwise.
+- *[Expected](/docs/api/utils/expected)&lt; void &gt;* — Nothing, or why the file cannot be written: Format if the estimate is empty, Io otherwise.
 
 ---
 
-### operator=(rhs)
+### clear()
 
-Assignment Operator.
+Resets to an empty estimate.
+
+---
+
+### reduce(start, n)
 
 **Parameters:**
 
-- **rhs** : *const [InvSourceEstimate](/docs/api/inv/inv-source-estimate) &*
-  SourceEstimate which should be assigned.
+- **start** : *int*
+  First sample.
+
+- **n** : *int*
+  Number of samples.
 
 **Returns:**
 
-- *[InvSourceEstimate](/docs/api/inv/inv-source-estimate) &* — the copied source estimate.
+- *[InvSourceEstimate](/docs/api/inv/inv-source-estimate)* — The estimate restricted to samples [start, start + n), its tmin moved to the first of them.
+
+---
+
+### is_empty()
+
+**Returns:**
+
+- *bool* — Whether the estimate holds no time axis.
 
 ---
 
 ### samples()
 
-Returns the number of samples.
-
 **Returns:**
 
-- *int* — the number of samples.
+- *int* — The number of time samples.
 
 ---
 
-### getIndicesByLabel(lPickedLabels, bIsClustered)
-
-Returns the indices of sources in the data matrix based on their beloning label.
+### indices_by_label(labels, clustered)
 
 **Parameters:**
 
-- **lPickedLabels** : *const QList&lt; [FsLabel](/docs/api/fs/fs-label) &gt; &*
-  The labels base the selection on.
+- **labels** : *std::span&lt; const [FsLabel](/docs/api/fs/fs-label) &gt;*
+  The labels.
 
-- **bIsClustered** : *bool*
-  Whether the source space was clustered.
+- **clustered** : *bool*
+  Whether the rows are clustered ROIs (matched by label id) rather than vertices.
 
 **Returns:**
 
-- *Eigen::VectorXi* — the indices.
+- *Eigen::VectorXi* — The rows of the sources inside the labels, in row order.
 
 ---
 
-### hasGridData()
-
-Returns true if the estimate contains grid-based data (distributed methods or RAP-MUSIC amplitudes).
+### has_grid_data()
 
 **Returns:**
 
-- *bool* — true if grid data is present.
+- *bool* — Whether the estimate holds grid data (distributed methods or RAP-MUSIC amplitudes).
 
 ---
 
-### hasCouplings()
-
-Returns true if the estimate contains source coupling annotations (e.g.
-
-RAP-MUSIC pairs/N-tuples).
+### has_couplings()
 
 **Returns:**
 
-- *bool* — true if couplings are present.
+- *bool* — Whether the estimate holds correlated source groups (e.g. RAP-MUSIC pairs).
 
 ---
 
-### hasFocalDipoles()
-
-Returns true if the estimate contains focal (off-grid) dipole results.
+### has_focal_dipoles()
 
 **Returns:**
 
-- *bool* — true if focal dipoles are present.
+- *bool* — Whether the estimate holds off-grid focal dipoles.
 
 ---
 
-### hasPositions()
-
-Returns true if the estimate carries explicit source positions (discrete source space).
+### has_positions()
 
 **Returns:**
 
-- *bool* — true if positions are present.
+- *bool* — Whether the estimate carries explicit source positions (discrete source space).
 
 ---
 
-### hasConnectivity()
-
-Returns true if the estimate contains connectivity results.
+### has_connectivity()
 
 **Returns:**
 
-- *bool* — true if connectivity data is present.
+- *bool* — Whether the estimate holds connectivity results.
 
 ---
 
 ## Static Methods
 
-### read(p_IODevice, p_stc)
+### read(path)
 
-mne_read_stc_file
-
-Reads a source estimate from a given file
+Reads an .stc file, as mne.read_source_estimate does for one hemisphere.
 
 **Parameters:**
 
-- **p_IODevice** : *QIODevice &*
-  IO device to red the stc from.
-
-- **p_stc** : *[InvSourceEstimate](/docs/api/inv/inv-source-estimate) &*
-  the read stc.
+- **path** : *const std::filesystem::path &*
+  The .stc file.
 
 **Returns:**
 
-- *bool* — true if successful, false otherwise.
+- *[Expected](/docs/api/utils/expected)&lt; [InvSourceEstimate](/docs/api/inv/inv-source-estimate) &gt;* — The source estimate, or why the file cannot be read: Io if it cannot be opened, Format if it ends before the data its header announces.
 
 ---
 
 ### read_w(path)
 
-Read a .w file (single time-point source estimate).
-
-The .w format stores vertex indices (3-byte big-endian) and float values (4-byte big-endian) for a single time point.
+Reads a .w file (one value per vertex), as mne.read_w does.
 
 **Parameters:**
 
-- **path** : *const QString &*
-  Path to the .w file.
+- **path** : *const std::filesystem::path &*
+  The .w file.
 
 **Returns:**
 
-- *[InvSourceEstimate](/docs/api/inv/inv-source-estimate)* — The source estimate with single-column data.
+- *[Expected](/docs/api/utils/expected)&lt; [InvSourceEstimate](/docs/api/inv/inv-source-estimate) &gt;* — A single-column source estimate, or why the file cannot be read (Io or Format).
 
 ---
 

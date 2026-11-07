@@ -7,7 +7,7 @@ sidebar_position: 5
 
 # Class Members
 
-Index of 6701 public class members (functions, variables, typedefs, enums) across all documented classes.
+Index of 6699 public class members (functions, variables, typedefs, enums) across all documented classes.
 
 **Jump to:** [A](#a) · [B](#b) · [C](#c) · [D](#d) · [E](#e) · [F](#f) · [G](#g) · [H](#h) · [I](#i) · [J](#j) · [K](#k) · [L](#l) · [M](#m) · [N](#n) · [O](#o) · [P](#p) · [Q](#q) · [R](#r) · [S](#s) · [T](#t) · [U](#u) · [V](#v) · [W](#w) · [X](#x) · [Y](#y) · [Z](#z)
 
@@ -615,7 +615,7 @@ Index of 6701 public class members (functions, variables, typedefs, enums) acros
 - **clear** `[fn]` in [FsLabel](/docs/api/fs/fs-label) — Initializes the [`FsLabel`](/docs/api/fs/fs-label).
 - **clear** `[fn]` in [FsSurface](/docs/api/fs/fs-surface) — Initializes the [`FsSurface`](/docs/api/fs/fs-surface).
 - **clear** `[fn]` in [FsSurfaceSet](/docs/api/fs/fs-surface-set) — Initializes the [`FsAnnotationSet`](/docs/api/fs/fs-annotation-set).
-- **clear** `[fn]` in [InvSourceEstimate](/docs/api/inv/inv-source-estimate) — Initializes source estimate.
+- **clear** `[fn]` in [InvSourceEstimate](/docs/api/inv/inv-source-estimate) — Resets to an empty estimate.
 - **clear** `[fn]` in [LogCapture](/docs/api/utils/log-capture) — Forgets the messages recorded so far.
 - **clear** `[fn]` in [MNEBem](/docs/api/mne/mne-bem) — Initializes [`MNE`](/docs/api/mne/mne-class) Bem.
 - **clear** `[fn]` in [MNEBemSurface](/docs/api/mne/mne-bem-surface) — Initializes the BEM surface.
@@ -939,7 +939,7 @@ Index of 6701 public class members (functions, variables, typedefs, enums) acros
 - **connection** `[fn]` in [PolhemusCoregistration](/docs/api/acq/polhemus-coregistration)
 - **connectionChanged** `[signal]` in [RtClient](/docs/api/com/rt-client) — Emitted when connection status changed.
 - **Connectivity** `[fn]` in [Connectivity](/docs/api/connectivity/connectivity-class) — Constructs a [`Connectivity`](/docs/api/connectivity/connectivity-class) object.
-- **connectivity** `[var]` in [InvSourceEstimate](/docs/api/inv/inv-source-estimate) — Pairwise connectivity matrices between sources (one per metric / freq band).
+- **connectivity** `[var]` in [InvSourceEstimate](/docs/api/inv/inv-source-estimate) — Pairwise connectivity between sources (one per metric / frequency band).
 - **connectivityMetricChanged** `[signal]` in [ConnectivitySettingsView](/docs/api/disp/connectivity-settings-view) — Emit signal whenever the connectivity metric changed.
 - **ConnectivitySettings** `[fn]` in [ConnectivitySettings](/docs/api/connectivity/connectivity-settings) — Constructs a [`ConnectivitySettings`](/docs/api/connectivity/connectivity-settings) object.
 - **ConnectivitySettingsView** `[fn]` in [ConnectivitySettingsView](/docs/api/disp/connectivity-settings-view) — Constructs a [`ConnectivitySettingsView`](/docs/api/disp/connectivity-settings-view) which is a child of parent.
@@ -1247,7 +1247,7 @@ Index of 6701 public class members (functions, variables, typedefs, enums) acros
 - **data** `[fn]` in [FsAnnotationSet](/docs/api/fs/fs-annotation-set) — Returns The [`FsAnnotation`](/docs/api/fs/fs-annotation) set map.
 - **data** `[fn]` in [FsSurfaceSet](/docs/api/fs/fs-surface-set) — Returns The surface set map.
 - **data** `[var]` in [GpuStream](/docs/api/disp3-d/gpu-stream) — First byte, or nullptr when the stream is empty.
-- **data** `[var]` in [InvSourceEstimate](/docs/api/inv/inv-source-estimate) — Matrix of shape [n_dipoles x n_times] which contains the data in source space.
+- **data** `[var]` in [InvSourceEstimate](/docs/api/inv/inv-source-estimate) — Source amplitudes (sources x time points).
 - **data** `[fn]` in [MemoryByteStream](/docs/api/utils/memory-byte-stream)
 - **data** `[fn]` in [MlTensor](/docs/api/ml/ml-tensor)
 - **data** `[fn]` in [MlTensor](/docs/api/ml/ml-tensor)
@@ -2318,7 +2318,6 @@ Index of 6701 public class members (functions, variables, typedefs, enums) acros
 - **getIdxSelMap** `[fn]` in [RtFiffRawViewModel](/docs/api/disp/rt-fiff-raw-view-model) — Returns a map which conatins the channel idx and its corresponding selection status.
 - **getIndexFromMappedChName** `[fn]` in [ChannelInfoModel](/docs/api/disp/channel-info-model) — Returns the model index for the given input channel fro mthe mapped channel list.
 - **getIndexFromOrigChName** `[fn]` in [ChannelInfoModel](/docs/api/disp/channel-info-model) — Returns the model index for the given input channel fro mthe original channel list.
-- **getIndicesByLabel** `[fn]` in [InvSourceEstimate](/docs/api/inv/inv-source-estimate) — Returns the indices of sources in the data matrix based on their beloning label.
 - **getInfo** `[fn]` in [AbstractFormatReader](/docs/api/bids/abstract-format-reader) — Return measurement metadata as FiffInfo.
 - **getInfo** `[fn]` in [BrainVisionReader](/docs/api/bids/brain-vision-reader) — Return measurement metadata as FiffInfo.
 - **getInfo** `[fn]` in [EDFReader](/docs/api/bids/edf-reader) — Return measurement metadata as FiffInfo.
@@ -2510,9 +2509,14 @@ Index of 6701 public class members (functions, variables, typedefs, enums) acros
 
 ## H {#h}
 
+- **has_connectivity** `[fn]` in [InvSourceEstimate](/docs/api/inv/inv-source-estimate)
+- **has_couplings** `[fn]` in [InvSourceEstimate](/docs/api/inv/inv-source-estimate)
 - **has_eeg** `[var]` in [MNEProjItem](/docs/api/mne/mne-proj-item) — Whether the projection covers EEG channels.
+- **has_focal_dipoles** `[fn]` in [InvSourceEstimate](/docs/api/inv/inv-source-estimate)
+- **has_grid_data** `[fn]` in [InvSourceEstimate](/docs/api/inv/inv-source-estimate)
 - **has_kind** `[fn]` in [FiffDirNode](/docs/api/fiff/fiff-dir-node) — Checks whether a [`FiffDirNode`](/docs/api/fiff/fiff-dir-node) has a specific kind.
 - **has_meg** `[var]` in [MNEProjItem](/docs/api/mne/mne-proj-item) — Whether the projection covers MEG channels.
+- **has_positions** `[fn]` in [InvSourceEstimate](/docs/api/inv/inv-source-estimate)
 - **has_tag** `[fn]` in [FiffDirNode](/docs/api/fiff/fiff-dir-node) — Definition of the has_tag function in fiff_read_named_matrix.m.
 - **hasAllFiducials** `[fn]` in [AcquiredPoints](/docs/api/acq/acquired-points) — True iff all three cardinal fiducials have been captured.
 - **hasAllModelFiducials** `[fn]` in [PolhemusCoregistration](/docs/api/acq/polhemus-coregistration)
@@ -2521,17 +2525,13 @@ Index of 6701 public class members (functions, variables, typedefs, enums) acros
 - **hasBinding** `[fn]` in [MnaParamTree](/docs/api/mna/mna-param-tree)
 - **hasCommand** `[fn]` in [CommandManager](/docs/api/com/command-manager) — Checks if a command is managed;.
 - **hasCommand** `[fn]` in [RtCmdClient](/docs/api/com/rt-cmd-client) — Checks if a command is managed;.
-- **hasConnectivity** `[fn]` in [InvSourceEstimate](/docs/api/inv/inv-source-estimate) — Returns true if the estimate contains connectivity results.
-- **hasCouplings** `[fn]` in [InvSourceEstimate](/docs/api/inv/inv-source-estimate) — Returns true if the estimate contains source coupling annotations (e.g.
 - **hasData** `[fn]` in [NetworkObject](/docs/api/disp3-d/network-object)
 - **hasData** `[fn]` in [PolylineObject](/docs/api/disp3-d/polyline-object)
 - **hasDepthFrame** `[fn]` in [VideoOverlay](/docs/api/disp3-d/video-overlay)
 - **hasDevHead** `[var]` in `SensorLoadResult` — Whether a valid dev→head transform was found.
 - **hasDigitizer** `[var]` in `SensorLoadResult`
 - **hasFiducial** `[fn]` in [AcquiredPoints](/docs/api/acq/acquired-points) — True iff a fiducial of the given id has been captured.
-- **hasFocalDipoles** `[fn]` in [InvSourceEstimate](/docs/api/inv/inv-source-estimate) — Returns true if the estimate contains focal (off-grid) dipole results.
 - **hasFrame** `[fn]` in [VideoOverlay](/docs/api/disp3-d/video-overlay)
-- **hasGridData** `[fn]` in [InvSourceEstimate](/docs/api/inv/inv-source-estimate) — Returns true if the estimate contains grid-based data (distributed methods or RAP-MUSIC amplitudes).
 - **hasInfo** `[var]` in `SensorLoadResult`
 - **hasLh** `[fn]` in [StcLoadingWorker](/docs/api/disp3-d/stc-loading-worker) — Check if left hemisphere data was loaded.
 - **hasMappingFor** `[fn]` in [SensorFieldMapper](/docs/api/disp3-d/sensor-field-mapper) — Check whether the current mapping matrices can be reused for a new evoked data set (i.e., same sensor configuration: same channels, same SSP projectors, same bad channels).
@@ -2545,7 +2545,6 @@ Index of 6701 public class members (functions, variables, typedefs, enums) acros
 - **hasPackage** `[fn]` in [PythonTestHelper](/docs/api/utils/python-test-helper) — Check if a specific Python package is importable.
 - **hasParam** `[fn]` in [MnaParamTree](/docs/api/mna/mna-param-tree)
 - **hasPenVertex** `[fn]` in [PolhemusCoregistration](/docs/api/acq/polhemus-coregistration)
-- **hasPositions** `[fn]` in [InvSourceEstimate](/docs/api/inv/inv-source-estimate) — Returns true if the estimate carries explicit source positions (discrete source space).
 - **hasRh** `[fn]` in [StcLoadingWorker](/docs/api/disp3-d/stc-loading-worker) — Check if right hemisphere data was loaded.
 - **hasShape** `[fn]` in [InvVolumeSourceEstimate](/docs/api/inv/inv-volume-source-estimate) — Check whether the grid shape has been set.
 - **hasTwinFiducial** `[fn]` in [AcquiredPoints](/docs/api/acq/acquired-points)
@@ -2686,6 +2685,7 @@ Index of 6701 public class members (functions, variables, typedefs, enums) acros
 - **indexOf** `[fn]` in [IeegImplantation](/docs/api/ieeg/ieeg-implantation)
 - **indexStream** `[fn]` in [BrainSurface](/docs/api/disp3-d/brain-surface)
 - **indices** `[var]` in [InstancedStreams](/docs/api/disp3-d/instanced-streams) — Shape triangle indices (uint32).
+- **indices_by_label** `[fn]` in [InvSourceEstimate](/docs/api/inv/inv-source-estimate)
 - **iNeighbours** `[var]` in [BadChannelDetectParams](/docs/api/utils/bad-channel-detect-params) — Number of channels on each side to use as neighbours.
 - **iNfft** `[var]` in [TaperedSpectraInputData](/docs/api/utils/tapered-spectra-input-data)
 - **info** `[fn]` in [AcqError](/docs/api/acq/acq-error)
@@ -2800,10 +2800,9 @@ Index of 6701 public class members (functions, variables, typedefs, enums) acros
 - **InvSensorSetCreator** `[fn]` in [InvSensorSetCreator](/docs/api/inv/inv-sensor-set-creator) — Constructs a MEG [`InvSensorSet`](/docs/api/inv/inv-sensor-set) object.
 - **InvSignalModel** `[fn]` in [InvSignalModel](/docs/api/inv/inv-signal-model) — Constructs a [`InvSignalModel`](/docs/api/inv/inv-signal-model) object.
 - **InvSourceCoupling** `[fn]` in [InvSourceCoupling](/docs/api/inv/inv-source-coupling)
-- **InvSourceEstimate** `[fn]` in [InvSourceEstimate](/docs/api/inv/inv-source-estimate) — Default constructor.
-- **InvSourceEstimate** `[fn]` in [InvSourceEstimate](/docs/api/inv/inv-source-estimate) — Constructs a source estimation from given data.
-- **InvSourceEstimate** `[fn]` in [InvSourceEstimate](/docs/api/inv/inv-source-estimate) — Copy constructor.
-- **InvSourceEstimate** `[fn]` in [InvSourceEstimate](/docs/api/inv/inv-source-estimate) — Constructs a source estimation, by reading from a IO device.
+- **InvSourceEstimate** `[fn]` in [InvSourceEstimate](/docs/api/inv/inv-source-estimate) — Constructs an empty source estimate.
+- **InvSourceEstimate** `[fn]` in [InvSourceEstimate](/docs/api/inv/inv-source-estimate) — Constructs a source estimate from its data.
+- **InvSourceEstimate** `[fn]` in [InvSourceEstimate](/docs/api/inv/inv-source-estimate) — Reads an .stc file like `read()`; throws [`Error`](/docs/api/utils/error) if it cannot.
 - **InvToken** `[fn]` in [InvToken](/docs/api/inv/inv-token)
 - **InvToken** `[fn]` in [InvToken](/docs/api/inv/inv-token)
 - **InvToken** `[fn]` in [InvToken](/docs/api/inv/inv-token)
@@ -2842,6 +2841,7 @@ Index of 6701 public class members (functions, variables, typedefs, enums) acros
 - **is_empty** `[fn]` in [FiffEvents](/docs/api/fiff/fiff-events)
 - **is_empty** `[fn]` in [FiffRawData](/docs/api/fiff/fiff-raw-data)
 - **is_empty** `[fn]` in [FiffSparseMatrix](/docs/api/fiff/fiff-sparse-matrix) — Check whether this sparse matrix is empty (no non-zero elements).
+- **is_empty** `[fn]` in [InvSourceEstimate](/docs/api/inv/inv-source-estimate)
 - **is_left_hemi** `[fn]` in [MNESourceSpace](/docs/api/mne/mne-source-space) — Determine whether this source space is on the left hemisphere based on the average x-coordinate of all vertices.
 - **is_magnetometer_coil** `[fn]` in [FwdCoil](/docs/api/fwd/fwd-coil) — Checks if this is an magnetometer.
 - **is_magnetometer_coil_type** `[fn]` in [FwdCoilSet](/docs/api/fwd/fwd-coil-set) — Checks if a set of templates contains a magnetometer of a specified type.
@@ -2875,7 +2875,6 @@ Index of 6701 public class members (functions, variables, typedefs, enums) acros
 - **isEmpty** `[fn]` in [FsSurface](/docs/api/fs/fs-surface) — Returns whether [`FsSurface`](/docs/api/fs/fs-surface) is empty.
 - **isEmpty** `[fn]` in [FsSurfaceSet](/docs/api/fs/fs-surface-set) — True if [`FsSurfaceSet`](/docs/api/fs/fs-surface-set) is empty.
 - **isEmpty** `[fn]` in [IeegImplantation](/docs/api/ieeg/ieeg-implantation)
-- **isEmpty** `[fn]` in [InvSourceEstimate](/docs/api/inv/inv-source-estimate) — Returns whether SourceEstimate is empty.
 - **isEmpty** `[fn]` in [MNEBem](/docs/api/mne/mne-bem) — True if [`MNE`](/docs/api/mne/mne-class) Bem is empty.
 - **isEmpty** `[fn]` in [MNEClusterInfo](/docs/api/mne/mne-cluster-info) — Returns true if [`MNE`](/docs/api/mne/mne-class) cluster information contains no data.
 - **isEmpty** `[fn]` in [MNEForwardSolution](/docs/api/mne/mne-forward-solution) — True if FIFF measurement file information is empty.
@@ -3843,7 +3842,7 @@ Index of 6701 public class members (functions, variables, typedefs, enums) acros
 - **nvertex_colors** `[var]` in [MNEMshDisplaySurface](/docs/api/mne/mne-msh-display-surface) — Number of color components per vertex.
 - **nVertices** `[fn]` in [InvVectorSourceEstimate](/docs/api/inv/inv-vector-source-estimate) — Number of source vertices (data.rows() / 3).
 - **nVerticesLh** `[var]` in [InvBeamformer](/docs/api/inv/inv-beamformer) — Leading entries of vertices belonging to the left hemisphere.
-- **nVerticesLh** `[var]` in [InvSourceEstimate](/docs/api/inv/inv-source-estimate) — Number of leading entries in vertices/data that belong to the left hemisphere.
+- **nVerticesLh** `[var]` in [InvSourceEstimate](/docs/api/inv/inv-source-estimate) — Number of leading rows from the left hemisphere; -1 when unknown, as for non-surface source spaces.
 - **nVerticesTo** `[fn]` in [SourceMorph](/docs/api/inv/source-morph) — Get the number of target vertices.
 - **nx** `[var]` in [VertexData](/docs/api/disp3-d/vertex-data)
 - **nx** `[var]` in [VertexData](/docs/api/disp3-d/vertex-data)
@@ -3980,7 +3979,6 @@ Index of 6701 public class members (functions, variables, typedefs, enums) acros
 - **operator=** `[fn]` in [InvEcdSet](/docs/api/inv/inv-ecd-set) — Copy assignment.
 - **operator=** `[fn]` in [InvGuessData](/docs/api/inv/inv-guess-data)
 - **operator=** `[fn]` in [InvHpiModelParameters](/docs/api/inv/inv-hpi-model-parameters)
-- **operator=** `[fn]` in [InvSourceEstimate](/docs/api/inv/inv-source-estimate) — Assignment Operator.
 - **operator=** `[fn]` in [LogCapture](/docs/api/utils/log-capture)
 - **operator=** `[fn]` in [MNEBem](/docs/api/mne/mne-bem) — Copy assignment.
 - **operator=** `[fn]` in [MNEBemSurface](/docs/api/mne/mne-bem-surface) — Copy assignment.
@@ -4278,7 +4276,7 @@ Index of 6701 public class members (functions, variables, typedefs, enums) acros
 - **position** `[var]` in [TrapMusicDipole](/docs/api/inv/trap-music-dipole) — 3D position (meters).
 - **positions** `[fn]` in [DigitizerTreeItem](/docs/api/disp3-d/digitizer-tree-item) — Returns all point positions in this category.
 - **positions** `[fn]` in [IeegImplantation](/docs/api/ieeg/ieeg-implantation)
-- **positions** `[var]` in [InvSourceEstimate](/docs/api/inv/inv-source-estimate) — 3D positions (m) in head coordinates, one row per source.
+- **positions** `[var]` in [InvSourceEstimate](/docs/api/inv/inv-source-estimate) — Positions (m) in head coordinates, one row per source; empty when they live in a source space.
 - **positions** `[fn]` in [SourceSpaceTreeItem](/docs/api/disp3-d/source-space-tree-item) — Returns all source point positions.
 - **postResults** `[var]` in [MnaVerification](/docs/api/mna/mna-verification) — Results of post-execution checks (populated by executor).
 - **postsel** `[var]` in [MNECTFCompData](/docs/api/mne/mnectf-comp-data) — Sparse selector applied after compensation.
@@ -4487,7 +4485,7 @@ Index of 6701 public class members (functions, variables, typedefs, enums) acros
 - **read** `[fn]` in [FsSurface](/docs/api/fs/fs-surface) — mne_read_surface
 - **read** `[fn]` in [FsSurface](/docs/api/fs/fs-surface) — mne_read_surface
 - **read** `[fn]` in [FsSurfaceSet](/docs/api/fs/fs-surface-set) — Reads different surface files and assembles them to a [`FsSurfaceSet`](/docs/api/fs/fs-surface-set).
-- **read** `[fn]` in [InvSourceEstimate](/docs/api/inv/inv-source-estimate) — mne_read_stc_file
+- **read** `[fn]` in [InvSourceEstimate](/docs/api/inv/inv-source-estimate) — Reads an .stc file, as mne.read_source_estimate does for one hemisphere.
 - **read** `[fn]` in [MemoryByteStream](/docs/api/utils/memory-byte-stream) — Reads up to `bytes` bytes at the current position and advances past them.
 - **read** `[fn]` in [MnaIO](/docs/api/mna/mna-io) — Read an MNA project from file.
 - **read** `[fn]` in [MnaProject](/docs/api/mna/mna-project) — Read an MNA project from file.
@@ -4560,7 +4558,7 @@ Index of 6701 public class members (functions, variables, typedefs, enums) acros
 - **read_tag** `[fn]` in [FiffStream](/docs/api/fiff/fiff-stream) — Reads one tag, with its payload in host byte order.
 - **read_tag_data** `[fn]` in [FiffStream](/docs/api/fiff/fiff-stream) — Reads the payload of a tag whose header `read_tag_info()` has read.
 - **read_tag_info** `[fn]` in [FiffStream](/docs/api/fiff/fiff-stream) — Reads the header of the tag at the current position.
-- **read_w** `[fn]` in [InvSourceEstimate](/docs/api/inv/inv-source-estimate) — Read a .w file (single time-point source estimate).
+- **read_w** `[fn]` in [InvSourceEstimate](/docs/api/inv/inv-source-estimate) — Reads a .w file (one value per vertex), as mne.read_w does.
 - **readAsaElcFile** `[fn]` in [LayoutLoader](/docs/api/utils/layout-loader) — Reads the specified ANT elc-layout file.
 - **readAsaElcFile** `[fn]` in [LayoutLoader](/docs/api/utils/layout-loader) — Reads the specified ANT elc-layout file.
 - **readAvailableData** `[fn]` in [RtCmdClient](/docs/api/com/rt-cmd-client) — Returns the available data.
@@ -4611,7 +4609,7 @@ Index of 6701 public class members (functions, variables, typedefs, enums) acros
 - **recordingType** `[var]` in [BidsRawData](/docs/api/bids/bids-raw-data) — "continuous", "epoched", or "discontinuous" (RECOMMENDED).
 - **rect** `[fn]` in [MNELayoutPort](/docs/api/mne/mne-layout-port) — Returns the viewport box.
 - **redrawGUI** `[fn]` in [ProjectorsView](/docs/api/disp/projectors-view) — Redraw the view.
-- **reduce** `[fn]` in [InvSourceEstimate](/docs/api/inv/inv-source-estimate) — Reduces the source estimate to selected samples.
+- **reduce** `[fn]` in [InvSourceEstimate](/docs/api/inv/inv-source-estimate)
 - **reduce_forward_solution** `[fn]` in [MNEForwardSolution](/docs/api/mne/mne-forward-solution) — reduces the forward solution and stores the result to p_fwdOut.
 - **reference** `[var]` in [BrainVisionChannelInfo](/docs/api/bids/brain-vision-channel-info)
 - **referenceMarkerAddRequested** `[signal]` in [ChannelDataView](/docs/api/disp/channel-data-view) — Emitted when the ruler context menu requests a new sample marker.
@@ -4836,7 +4834,7 @@ Index of 6701 public class members (functions, variables, typedefs, enums) acros
 - **samples** `[var]` in [AcqPart](/docs/api/acq/acq-part) — Samples per channel in the run.
 - **samples** `[var]` in [AcqReadResult](/docs/api/acq/acq-read-result) — Columns written.
 - **samples** `[var]` in [AcqRecorderStats](/docs/api/acq/acq-recorder-stats) — Samples per channel flushed to disk, including zero-filled lost ones.
-- **samples** `[fn]` in [InvSourceEstimate](/docs/api/inv/inv-source-estimate) — Returns the number of samples.
+- **samples** `[fn]` in [InvSourceEstimate](/docs/api/inv/inv-source-estimate)
 - **samples_available** `[fn]` in [stream_inlet](/docs/api/lsl/stream_inlet) — Check whether new samples are available in the internal buffer.
 - **samplesChanged** `[signal]` in [CovarianceSettingsView](/docs/api/disp/covariance-settings-view)
 - **samplesPerPixel** `[fn]` in [ChannelRhiView](/docs/api/disp/channel-rhi-view)
@@ -6111,7 +6109,7 @@ Index of 6701 public class members (functions, variables, typedefs, enums) acros
 - **timerChanged** `[signal]` in [ProjectSettingsView](/docs/api/disp/project-settings-view)
 - **TimeRulerWidget** `[fn]` in [TimeRulerWidget](/docs/api/disp/time-ruler-widget)
 - **times** `[var]` in [FiffEvoked](/docs/api/fiff/fiff-evoked) — Vector of time instants in seconds.
-- **times** `[var]` in [InvSourceEstimate](/docs/api/inv/inv-source-estimate) — The time vector with n_times steps.
+- **times** `[var]` in [InvSourceEstimate](/docs/api/inv/inv-source-estimate) — Time of each sample in seconds.
 - **timeSample** `[var]` in [PickResult](/docs/api/disp3-d/pick-result) — Time index for time-varying overlays (`-1` = not time-resolved).
 - **timeSampleChanged** `[signal]` in [MultimodalScene](/docs/api/disp3-d/multimodal-scene) — Emitted when the shared time index changes.
 - **timeWindowChanged** `[signal]` in [FiffRawViewSettings](/docs/api/disp/fiff-raw-view-settings) — Emit this signal whenever the user changes the window size.
@@ -6135,7 +6133,7 @@ Index of 6701 public class members (functions, variables, typedefs, enums) acros
 - **tmin** `[var]` in [InvDipoleFitSettings](/docs/api/inv/inv-dipole-fit-settings) — Fit start time (s).
 - **tmin** `[var]` in [InvFocalDipole](/docs/api/inv/inv-focal-dipole) — Start of the time window (s) this dipole represents.
 - **tmin** `[var]` in [InvSourceCoupling](/docs/api/inv/inv-source-coupling) — Start of the time window (s) this coupling represents.
-- **tmin** `[var]` in [InvSourceEstimate](/docs/api/inv/inv-source-estimate) — Time starting point.
+- **tmin** `[var]` in [InvSourceEstimate](/docs/api/inv/inv-source-estimate) — Time of the first sample in seconds.
 - **tmin** `[var]` in [MNEEpochData](/docs/api/mne/mne-epoch-data) — New start time (must be &gt;= 0).
 - **tmin** `[var]` in [MNEMeasDataSet](/docs/api/mne/mne-meas-data-set) — Start time of the epoch (seconds).
 - **tmin** `[var]` in [SimulateStcParams](/docs/api/dsp/simulate-stc-params) — Start time (seconds).
@@ -6300,7 +6298,7 @@ Index of 6701 public class members (functions, variables, typedefs, enums) acros
 - **tris** `[fn]` in [FsSurface](/docs/api/fs/fs-surface) — The triangle descriptions.
 - **tris** `[var]` in [MNESurfaceOrVolume](/docs/api/mne/mne-surface-or-volume) — The full triangulation data (ntri elements).
 - **tstep** `[var]` in [InvDipoleFitSettings](/docs/api/inv/inv-dipole-fit-settings) — Step between fits (s).
-- **tstep** `[var]` in [InvSourceEstimate](/docs/api/inv/inv-source-estimate) — Time steps within the times vector.
+- **tstep** `[var]` in [InvSourceEstimate](/docs/api/inv/inv-source-estimate) — Time between samples in seconds; -1 for an empty estimate.
 - **tstep** `[var]` in [MNEMeasDataSet](/docs/api/mne/mne-meas-data-set) — Sampling interval (seconds).
 - **tstep** `[fn]` in [SourceEstimateManager](/docs/api/disp3-d/source-estimate-manager)
 - **tstep** `[fn]` in [SourceEstimateOverlay](/docs/api/disp3-d/source-estimate-overlay) — Get the time step between samples.
@@ -6549,7 +6547,7 @@ Index of 6701 public class members (functions, variables, typedefs, enums) acros
 - **vertices** `[var]` in [FsLabel](/docs/api/fs/fs-label) — Vertex indices (0 based).
 - **vertices** `[var]` in [InstancedStreams](/docs/api/disp3-d/instanced-streams) — Shape vertices.
 - **vertices** `[var]` in [InvBeamformer](/docs/api/inv/inv-beamformer) — Source vertex indices.
-- **vertices** `[var]` in [InvSourceEstimate](/docs/api/inv/inv-source-estimate) — The indices of the dipoles in the different source spaces.
+- **vertices** `[var]` in [InvSourceEstimate](/docs/api/inv/inv-source-estimate) — Vertex of each row; the ROI index for clustered estimates.
 - **verticesAsMatrix** `[fn]` in [BrainSurface](/docs/api/disp3-d/brain-surface) — Get vertex positions as Eigen matrix.
 - **vertno** `[var]` in [MNESurfaceOrVolume](/docs/api/mne/mne-surface-or-volume) — Vertex numbers of the used vertices in the full source space (nuse elements).
 - **VideoOverlay** `[fn]` in [VideoOverlay](/docs/api/disp3-d/video-overlay)
@@ -6641,7 +6639,7 @@ Index of 6701 public class members (functions, variables, typedefs, enums) acros
 - **write** `[fn]` in [FiffIO](/docs/api/fiff/fiff-io) — Write whole data of a type to a fiff file.
 - **write** `[fn]` in [FileByteStream](/docs/api/utils/file-byte-stream) — Writes `bytes` bytes at the current position, overwriting or extending the stream.
 - **write** `[fn]` in [FineCalibration](/docs/api/dsp/fine-calibration) — Write fine calibration to a .dat file.
-- **write** `[fn]` in [InvSourceEstimate](/docs/api/inv/inv-source-estimate) — mne_write_stc_file
+- **write** `[fn]` in [InvSourceEstimate](/docs/api/inv/inv-source-estimate) — Writes the estimate as an .stc file, as MNE-C's mne_write_stc_file and mne.SourceEstimate.save do.
 - **write** `[fn]` in [Log](/docs/api/utils/log) — Hands `message` to the current sink.
 - **write** `[fn]` in [MemoryByteStream](/docs/api/utils/memory-byte-stream) — Writes `bytes` bytes at the current position, overwriting or extending the stream.
 - **write** `[fn]` in [MnaIO](/docs/api/mna/mna-io) — Write an MNA project to file.
@@ -6682,6 +6680,7 @@ Index of 6701 public class members (functions, variables, typedefs, enums) acros
 - **write_float_matrix** `[fn]` in [FiffStream](/docs/api/fiff/fiff-stream) — Writes a single-precision floating-point matrix tag.
 - **write_float_sparse_ccs** `[fn]` in [FiffStream](/docs/api/fiff/fiff-stream) — fiff_write_float_sparse_ccs
 - **write_float_sparse_rcs** `[fn]` in [FiffStream](/docs/api/fiff/fiff-stream) — fiff_write_float_sparse_rcs
+- **write_hemisphere_pair** `[fn]` in [InvSourceEstimate](/docs/api/inv/inv-source-estimate) — Writes a surface estimate as the "&lt;base&gt;-lh.stc" and "&lt;base&gt;-rh.stc" pair mne.read_source_estimate expects, splitting at n_vertices_lh.
 - **write_id** `[fn]` in [FiffStream](/docs/api/fiff/fiff-stream) — Writes fiff id If the id argument is missing it will be generated here.
 - **write_info_base** `[fn]` in [FiffStream](/docs/api/fiff/fiff-stream) — Write measurement info stored in forward solution.
 - **write_int** `[fn]` in [FiffStream](/docs/api/fiff/fiff-stream) — Writes a 32-bit integer tag to a fif file.
@@ -6699,7 +6698,7 @@ Index of 6701 public class members (functions, variables, typedefs, enums) acros
 - **write_tag** `[fn]` in [FiffStream](/docs/api/fiff/fiff-stream) — Writes one tag; its payload is taken in host byte order, as `read_tag()` returns it.
 - **write_to_stream** `[fn]` in [FiffCoordTrans](/docs/api/fiff/fiff-coord-trans) — Writes the transformation to a FIFF stream.
 - **write_to_stream** `[fn]` in [FiffDigPointSet](/docs/api/fiff/fiff-dig-point-set) — Writes the points as an isotrak block inside a measurement info block.
-- **write_w** `[fn]` in [InvSourceEstimate](/docs/api/inv/inv-source-estimate) — Write the first time point of this source estimate to a .w file.
+- **write_w** `[fn]` in [InvSourceEstimate](/docs/api/inv/inv-source-estimate) — Writes the first time point as a .w file, as mne.write_w does.
 - **writeBigEndian** `[fn]` in [ByteStream](/docs/api/utils/byte-stream) — Writes `count` values in big-endian byte order.
 - **writeBigEndian** `[fn]` in [ByteStream](/docs/api/utils/byte-stream)
 - **writeBrainstormMonFiles** `[fn]` in [SelectionIO](/docs/api/utils/selection-io) — Writes the specified selection groups to different Brainstorm .mon files.
@@ -6709,7 +6708,6 @@ Index of 6701 public class members (functions, variables, typedefs, enums) acros
 - **writeFif** `[fn]` in [MNEEventList](/docs/api/mne/mne-event-list) — Writes the list as an event block with comments, readable by `mne.read_events`.
 - **writeFilter** `[fn]` in [FilterIO](/docs/api/utils/filter-io) — Writes a given filter to txt file .
 - **writeHeadPos** `[fn]` in [MaxwellMovementComp](/docs/api/dsp/maxwell-movement-comp) — Write head positions to a file.
-- **writeHemispherePair** `[fn]` in [InvSourceEstimate](/docs/api/inv/inv-source-estimate) — Write the estimate as an MNE-C / MNE-Python compatible hemisphere pair.
 - **writeJson** `[fn]` in [BidsCoordinateSystem](/docs/api/bids/bids-coordinate-system) — Write a BIDS *_coordsystem.json file.
 - **writeMatrix** `[fn]` in [InvSourceEstimateIO](/docs/api/inv/inv-source-estimate-io) — Export source estimate as a tab-separated matrix for easy import.
 - **writeMatrix** `[fn]` in [PythonTestHelper](/docs/api/utils/python-test-helper) — Write an Eigen matrix to a text file with full double precision.

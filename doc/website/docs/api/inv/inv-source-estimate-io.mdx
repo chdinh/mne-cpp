@@ -24,10 +24,9 @@ Extended I/O methods for [`InvSourceEstimate`](/docs/api/inv/inv-source-estimate
 ```cpp title="src/examples/ex_inv_api/main.cpp"
 InvSourceEstimateIO::writeCsv(stc, tmp.filePath("v1-dspm.csv"));
 const InvSourceEstimate fromCsv = InvSourceEstimateIO::readCsv(tmp.filePath("v1-dspm.csv"));
-QFile stcFile(tmp.filePath("v1-dspm-lh.stc"));
-InvSourceEstimate(stc).write(stcFile); // MNE .stc format, readable by mne.read_source_estimate
-QFile stcBack(stcFile.fileName());
-const InvSourceEstimate fromStc(stcBack);
+const std::filesystem::path stcPath = tmp.filePath("v1-dspm-lh.stc").toStdU16String();
+const bool stcWritten = stc.write(stcPath).has_value(); // MNE .stc format, readable by mne.read_source_estimate
+const InvSourceEstimate fromStc(stcPath);
 ```
 
 ---
@@ -111,11 +110,10 @@ Inverse library: minimum-norm estimates, resolution matrices, label time courses
 ````cpp title="src/examples/ex_inv_api/main.cpp, line 297"
 InvSourceEstimateIO::writeCsv(stc, tmp.filePath("v1-dspm.csv"));
 const InvSourceEstimate fromCsv = InvSourceEstimateIO::readCsv(tmp.filePath("v1-dspm.csv"));
-QFile stcFile(tmp.filePath("v1-dspm-lh.stc"));
-InvSourceEstimate(stc).write(stcFile); // MNE .stc format, readable by mne.read_source_estimate
-QFile stcBack(stcFile.fileName());
-const InvSourceEstimate fromStc(stcBack);
-ok &= expect(fromCsv.data.rows() == 70 && (fromCsv.data - stc.data).norm() <= 1e-6 * stc.data.norm() && fromStc.vertices == stc.vertices && (fromStc.data - stc.data).norm() <= 1e-6 * stc.data.norm(),
+const std::filesystem::path stcPath = tmp.filePath("v1-dspm-lh.stc").toStdU16String();
+const bool stcWritten = stc.write(stcPath).has_value(); // MNE .stc format, readable by mne.read_source_estimate
+const InvSourceEstimate fromStc(stcPath);
+ok &= expect(stcWritten && fromCsv.data.rows() == 70 && (fromCsv.data - stc.data).norm() <= 1e-6 * stc.data.norm() && fromStc.vertices == stc.vertices && (fromStc.data - stc.data).norm() <= 1e-6 * stc.data.norm(),
              "InvSourceEstimateIO/InvSourceEstimate: CSV and .stc round trips");
 ````
 
