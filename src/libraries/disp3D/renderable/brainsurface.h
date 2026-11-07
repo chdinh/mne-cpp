@@ -93,14 +93,6 @@ public:
      */
     ~BrainSurface();
 
-    // VisualizationMode is defined in core/rendertypes.h for lightweight inclusion.
-    // These aliases preserve backward compatibility.
-    using VisualizationMode = DISP3DLIB::VisualizationMode;
-    static constexpr VisualizationMode ModeSurface = DISP3DLIB::ModeSurface;
-    static constexpr VisualizationMode ModeAnnotation = DISP3DLIB::ModeAnnotation;
-    static constexpr VisualizationMode ModeScientific = DISP3DLIB::ModeScientific;
-    static constexpr VisualizationMode ModeSourceEstimate = DISP3DLIB::ModeSourceEstimate;
-
     enum TissueType
     {
         TissueUnknown = 0,

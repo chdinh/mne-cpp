@@ -545,13 +545,13 @@ void SensorFieldMapper::apply(
 
         auto surface = surfaces[key];
         if (!visible || !mat || pick.size() == 0) {
-            surface->setVisualizationMode(BrainSurface::ModeSurface);
+            surface->setVisualizationMode(DISP3DLIB::ModeSurface);
             updateContourSurfaces(surfaces, contourPrefix, *surface,
                                   QVector<float>(), 0.0f, false);
             return;
         }
         if (mat->cols() != pick.size()) {
-            surface->setVisualizationMode(BrainSurface::ModeSurface);
+            surface->setVisualizationMode(DISP3DLIB::ModeSurface);
             updateContourSurfaces(surfaces, contourPrefix, *surface,
                                   QVector<float>(), 0.0f, false);
             return;

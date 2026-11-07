@@ -88,16 +88,6 @@ public:
      */
     ~BrainRenderer();
 
-    // ShaderMode is defined in core/rendertypes.h for lightweight inclusion.
-    // These aliases preserve backward compatibility.
-    using ShaderMode = DISP3DLIB::ShaderMode;
-    static constexpr ShaderMode Standard = DISP3DLIB::Standard;
-    static constexpr ShaderMode Holographic = DISP3DLIB::Holographic;
-    static constexpr ShaderMode Anatomical = DISP3DLIB::Anatomical;
-    static constexpr ShaderMode Dipole = DISP3DLIB::Dipole;
-    static constexpr ShaderMode XRay = DISP3DLIB::XRay;
-    static constexpr ShaderMode ShowNormals = DISP3DLIB::ShowNormals;
-
     /**
      * @brief Per-draw scene uniforms: camera matrices, light and overlay mode.
      */

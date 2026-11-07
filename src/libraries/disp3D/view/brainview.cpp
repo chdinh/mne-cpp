@@ -607,7 +607,7 @@ void BrainView::updateSceneBounds()
 
 void BrainView::setShaderMode(const QString& modeName)
 {
-    const BrainRenderer::ShaderMode mode = shaderModeFromName(modeName);
+    const DISP3DLIB::ShaderMode mode = shaderModeFromName(modeName);
     subViewForTarget(m_visualizationEditTarget).brainShader = mode;
 
     m_brainShaderMode = mode;
@@ -779,7 +779,7 @@ void BrainView::updateInflatedSurfaceTransforms()
 
 void BrainView::setBemShaderMode(const QString& modeName)
 {
-    const BrainRenderer::ShaderMode mode = shaderModeFromName(modeName);
+    const DISP3DLIB::ShaderMode mode = shaderModeFromName(modeName);
 
     subViewForTarget(m_visualizationEditTarget).bemShader = mode;
 
@@ -865,7 +865,7 @@ void BrainView::setDipoleVisible(bool visible)
 
 void BrainView::setVisualizationMode(const QString& modeName)
 {
-    const BrainSurface::VisualizationMode mode = visualizationModeFromName(modeName);
+    const DISP3DLIB::VisualizationMode mode = visualizationModeFromName(modeName);
     SubView& sv = subViewForTarget(m_visualizationEditTarget);
     sv.overlayMode = mode;
 
@@ -1731,7 +1731,7 @@ void BrainView::render(QRhiCommandBuffer* cb)
     struct DrawItem
     {
         BrainSurface* surface;
-        BrainRenderer::ShaderMode mode;
+        DISP3DLIB::ShaderMode mode;
         float overlayMode;
         float distSq;      // for transparent back-to-front sort
         int uniformOffset; // filled by prepareSurfaceDraw
@@ -1834,7 +1834,7 @@ void BrainView::render(QRhiCommandBuffer* cb)
 
         // Pass 1: Opaque Surfaces (Brain surfaces)
         // Use viewport-specific shader from subview
-        BrainRenderer::ShaderMode currentShader = sv.brainShader;
+        DISP3DLIB::ShaderMode currentShader = sv.brainShader;
         const QString overlayName = visualizationModeName(sv.overlayMode);
 
         // Collect matched brain surface keys for this pane's info panel
@@ -1867,7 +1867,7 @@ void BrainView::render(QRhiCommandBuffer* cb)
         // Determine per-viewport field-map visibility
         const bool megFieldVisible = sv.visibility.megFieldMap;
         const bool eegFieldVisible = sv.visibility.eegFieldMap;
-        const BrainRenderer::ShaderMode currentBemShader = sv.bemShader;
+        const DISP3DLIB::ShaderMode currentBemShader = sv.bemShader;
         const QString& megFieldKey = m_fieldMapper.megSurfaceKey();
         const QString& eegFieldKey = m_fieldMapper.eegSurfaceKey();
 
@@ -1892,12 +1892,12 @@ void BrainView::render(QRhiCommandBuffer* cb)
                     surf->boundingBox(bmin, bmax);
                     QVector3D ctr = (bmin + bmax) * 0.5f;
                     float dist = (sceneData.cameraPos - ctr).lengthSquared();
-                    transparentDraws.append({surf, BrainRenderer::Holographic,
-                                             static_cast<float>(BrainSurface::ModeScientific),
+                    transparentDraws.append({surf, DISP3DLIB::Holographic,
+                                             static_cast<float>(DISP3DLIB::ModeScientific),
                                              dist, -1});
                 } else {
                     opaqueDraws.append({surf, currentShader,
-                                        static_cast<float>(BrainSurface::ModeScientific),
+                                        static_cast<float>(DISP3DLIB::ModeScientific),
                                         0.0f, -1});
                 }
             } else {
@@ -1915,12 +1915,12 @@ void BrainView::render(QRhiCommandBuffer* cb)
                 QVector3D center = (bmin + bmax) * 0.5f;
                 float dist = (sceneData.cameraPos - center).lengthSquared();
 
-                auto mode = isBem ? currentBemShader : BrainRenderer::Holographic;
-                float itemOverlay = static_cast<float>(BrainSurface::ModeScientific);
+                auto mode = isBem ? currentBemShader : DISP3DLIB::Holographic;
+                float itemOverlay = static_cast<float>(DISP3DLIB::ModeScientific);
                 if (key == megFieldKey && !megFieldVisible)
-                    itemOverlay = static_cast<float>(BrainSurface::ModeSurface);
+                    itemOverlay = static_cast<float>(DISP3DLIB::ModeSurface);
                 else if (key == eegFieldKey && !eegFieldVisible)
-                    itemOverlay = static_cast<float>(BrainSurface::ModeSurface);
+                    itemOverlay = static_cast<float>(DISP3DLIB::ModeSurface);
 
                 transparentDraws.append({surf, mode, itemOverlay, dist, -1});
             }
@@ -2024,7 +2024,7 @@ void BrainView::render(QRhiCommandBuffer* cb)
         m_renderer->issueNetworkDraw(cb, m_network.get(), pane.networkOffset);
         m_renderer->issuePolylineDraw(cb, m_headPath.get(), pane.headPathOffset);
 
-        m_renderer->issueSurfaceDraw(cb, m_debugPointerSurface.get(), BrainRenderer::Holographic, pane.pointerOffset);
+        m_renderer->issueSurfaceDraw(cb, m_debugPointerSurface.get(), DISP3DLIB::Holographic, pane.pointerOffset);
     }
 
     m_renderer->endPass(cb);

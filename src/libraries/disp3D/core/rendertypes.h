@@ -61,7 +61,6 @@ inline uint32_t packABGR(uint32_t r, uint32_t g, uint32_t b, uint32_t a = 0xFF)
  * Shader pipeline modes supported by the renderer.
  *
  * Each mode corresponds to a different GPU shader program and visual style.
- * Values are kept compatible with the original BrainRenderer::ShaderMode enum.
  */
 enum ShaderMode
 {
@@ -78,7 +77,6 @@ enum ShaderMode
  * Overlay visualisation modes for brain surfaces.
  *
  * Controls which vertex-colour channel drives the final appearance.
- * Values are kept compatible with the original BrainSurface::VisualizationMode enum.
  */
 enum VisualizationMode
 {

@@ -1537,7 +1537,7 @@ void TestDisp3dBrainView::brainRenderer_nullRhi()
 
     // The uniform buffer grows to one slot per draw (at most 16384); a whole frame must stay usable when it overflows
     QTest::failOnWarning(QRegularExpression(QStringLiteral("exhausted|uniform buffer|inside a render pass")));
-    const auto modes = {BrainRenderer::Standard, BrainRenderer::Holographic, BrainRenderer::Anatomical, BrainRenderer::XRay, BrainRenderer::ShowNormals};
+    const auto modes = {DISP3DLIB::Standard, DISP3DLIB::Holographic, DISP3DLIB::Anatomical, DISP3DLIB::XRay, DISP3DLIB::ShowNormals};
     for (int frameIndex = 0; frameIndex < 2; ++frameIndex) {
         QRhiCommandBuffer* cb = nullptr;
         QCOMPARE(rhi->beginOffscreenFrame(&cb), QRhi::FrameOpSuccess);
@@ -1592,8 +1592,8 @@ void TestDisp3dBrainView::brainRenderer_nullRhi()
         renderer.issueElectrodeDraw(cb, &electrodes, electrodeOffset);
         renderer.issueVideoOverlayDraw(cb, &video, nullptr, quadOffset);
         renderer.issueVideoOverlayDraw(cb, &video, &surface, decalOffset);
-        renderer.issueSurfaceDraw(cb, &surface, BrainRenderer::Standard, last);
-        renderer.issueSurfaceDraw(cb, &surface, BrainRenderer::Standard, -1);
+        renderer.issueSurfaceDraw(cb, &surface, DISP3DLIB::Standard, last);
+        renderer.issueSurfaceDraw(cb, &surface, DISP3DLIB::Standard, -1);
 
         // QRhi forbids resource updates inside a pass, so preparing one there is refused
         QRhiResourceUpdateBatch* late = rhi->nextResourceUpdateBatch();
@@ -1610,7 +1610,7 @@ void TestDisp3dBrainView::brainRenderer_nullRhi()
         renderer.endPass(cb);
 
         renderer.beginPreservingPass(cb);
-        renderer.issueSurfaceDraw(cb, &surface, BrainRenderer::Standard, surfaceOffset);
+        renderer.issueSurfaceDraw(cb, &surface, DISP3DLIB::Standard, surfaceOffset);
         renderer.endPass(cb);
         QCOMPARE(rhi->endOffscreenFrame(), QRhi::FrameOpSuccess);
     }
@@ -1653,7 +1653,7 @@ void TestDisp3dBrainView::brainRenderer_uniformSlotsDoNotOverlap()
     BrainRenderer::SceneData scene;
     scene.cameraPos = QVector3D(0.0f, 0.0f, 1.0f);
     scene.lightDir = QVector3D(0.0f, 0.0f, 1.0f);
-    scene.overlayMode = static_cast<float>(BrainSurface::ModeScientific);
+    scene.overlayMode = static_cast<float>(DISP3DLIB::ModeScientific);
 
     const bool hasOpenGl = QGuiApplicationPrivate::platformIntegration()->hasCapability(QPlatformIntegration::OpenGL);
     std::unique_ptr<QOffscreenSurface> glSurface(hasOpenGl ? QRhiGles2InitParams::newFallbackSurface() : nullptr);
@@ -1693,8 +1693,8 @@ void TestDisp3dBrainView::brainRenderer_uniformSlotsDoNotOverlap()
         QVERIFY2(second >= 256, qPrintable(QStringLiteral("%1: second slot at byte %2").arg(rhi->backendName()).arg(second)));
         QCOMPARE(second % rhi->ubufAlignment(), 0);
         renderer.beginFrame(cb, updates);
-        renderer.issueSurfaceDraw(cb, &left, BrainRenderer::Standard, first);
-        renderer.issueSurfaceDraw(cb, &right, BrainRenderer::Standard, second);
+        renderer.issueSurfaceDraw(cb, &left, DISP3DLIB::Standard, first);
+        renderer.issueSurfaceDraw(cb, &right, DISP3DLIB::Standard, second);
         renderer.endPass(cb);
         QRhiReadbackResult readback;
         QRhiResourceUpdateBatch* read = rhi->nextResourceUpdateBatch();
@@ -2021,10 +2021,10 @@ void TestDisp3dBrainView::brainSurface_advanced()
     surf.applyTransform(QMatrix4x4());
     QCOMPARE(surf.vertexDataRef()[1].pos, QVector3D(0.01f, 0.0f, 0.0f));
     QCOMPARE(surf.colorsRef()[1], packABGR(10, 20, 30, 128));
-    surf.setVisualizationMode(BrainSurface::ModeSurface);
-    surf.setVisualizationMode(BrainSurface::ModeScientific);
-    surf.setVisualizationMode(BrainSurface::ModeSourceEstimate);
-    surf.setVisualizationMode(BrainSurface::ModeAnnotation);
+    surf.setVisualizationMode(DISP3DLIB::ModeSurface);
+    surf.setVisualizationMode(DISP3DLIB::ModeScientific);
+    surf.setVisualizationMode(DISP3DLIB::ModeSourceEstimate);
+    surf.setVisualizationMode(DISP3DLIB::ModeAnnotation);
 
     // applySourceEstimateColors
     QVector<uint32_t> colors(3, 0xFF808080u);
