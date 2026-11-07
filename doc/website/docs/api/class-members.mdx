@@ -7,7 +7,7 @@ sidebar_position: 5
 
 # Class Members
 
-Index of 6705 public class members (functions, variables, typedefs, enums) across all documented classes.
+Index of 6701 public class members (functions, variables, typedefs, enums) across all documented classes.
 
 **Jump to:** [A](#a) · [B](#b) · [C](#c) · [D](#d) · [E](#e) · [F](#f) · [G](#g) · [H](#h) · [I](#i) · [J](#j) · [K](#k) · [L](#l) · [M](#m) · [N](#n) · [O](#o) · [P](#p) · [Q](#q) · [R](#r) · [S](#s) · [T](#t) · [U](#u) · [V](#v) · [W](#w) · [X](#x) · [Y](#y) · [Z](#z)
 
@@ -608,7 +608,7 @@ Index of 6705 public class members (functions, variables, typedefs, enums) acros
 - **clear** `[fn]` in [FiffInfo](/docs/api/fiff/fiff-info) — Initializes FIFF measurement information.
 - **clear** `[fn]` in [FiffInfoBase](/docs/api/fiff/fiff-info-base) — Initializes light FIFF measurement information.
 - **clear** `[fn]` in [FiffNamedMatrix](/docs/api/fiff/fiff-named-matrix) — Initializes the named matrix.
-- **clear** `[fn]` in [FiffRawData](/docs/api/fiff/fiff-raw-data) — Initializes the fiff raw measurement data.
+- **clear** `[fn]` in [FiffRawData](/docs/api/fiff/fiff-raw-data) — Resets to empty raw data.
 - **clear** `[fn]` in [FsAnnotation](/docs/api/fs/fs-annotation) — Initializes the [`FsAnnotation`](/docs/api/fs/fs-annotation).
 - **clear** `[fn]` in [FsAnnotationSet](/docs/api/fs/fs-annotation-set) — Initializes the [`FsAnnotationSet`](/docs/api/fs/fs-annotation-set).
 - **clear** `[fn]` in [FsColortable](/docs/api/fs/fs-colortable) — Initializes colortable.
@@ -1591,7 +1591,7 @@ Index of 6705 public class members (functions, variables, typedefs, enums) acros
 - **endSample** `[var]` in `AnnotationSpan` — Absolute last sample covered by the annotation.
 - **ensureRenderTargets** `[fn]` in [BrainRenderer](/docs/api/disp3-d/brain-renderer) — Create the dual render-target pair for multi-pass rendering.
 - **ensureVenv** `[fn]` in [PythonRunner](/docs/api/utils/python-runner) — Ensure a virtual environment exists, is up-to-date, and has all required packages installed.
-- **ent** `[var]` in [FiffRawDir](/docs/api/fiff/fiff-raw-dir) — Directory entry description.
+- **ent** `[var]` in [FiffRawDir](/docs/api/fiff/fiff-raw-dir) — The data buffer; the default entry (kind -1) for a skip.
 - **ent** `[var]` in [MNERawBufDef](/docs/api/mne/mne-raw-buf-def) — Directory entry locating this buffer in the FIFF file (file buffers only).
 - **entries** `[fn]` in [FineCalibration](/docs/api/dsp/fine-calibration) — Get the calibration entries.
 - **entries** `[fn]` in [LogCapture](/docs/api/utils/log-capture)
@@ -1795,13 +1795,11 @@ Index of 6705 public class members (functions, variables, typedefs, enums) acros
 - **FiffProj** `[fn]` in [FiffProj](/docs/api/fiff/fiff-proj) — Default constructor.
 - **FiffProj** `[fn]` in [FiffProj](/docs/api/fiff/fiff-proj) — Copy constructor.
 - **FiffProj** `[fn]` in [FiffProj](/docs/api/fiff/fiff-proj) — Constructor.
-- **FiffRawData** `[fn]` in [FiffRawData](/docs/api/fiff/fiff-raw-data) — Default constructor.
+- **FiffRawData** `[fn]` in [FiffRawData](/docs/api/fiff/fiff-raw-data) — Constructs empty raw data.
 - **FiffRawData** `[fn]` in [FiffRawData](/docs/api/fiff/fiff-raw-data)
 - **FiffRawData** `[fn]` in [FiffRawData](/docs/api/fiff/fiff-raw-data)
-- **FiffRawData** `[fn]` in [FiffRawData](/docs/api/fiff/fiff-raw-data) — Constructs fiff raw data by reading a FIFF file.
-- **FiffRawData** `[fn]` in [FiffRawData](/docs/api/fiff/fiff-raw-data) — Constructs fiff raw data held in bytes that are not a file, e.g.
-- **FiffRawDir** `[fn]` in [FiffRawDir](/docs/api/fiff/fiff-raw-dir) — Default constructor.
-- **FiffRawDir** `[fn]` in [FiffRawDir](/docs/api/fiff/fiff-raw-dir) — Copy constructor.
+- **FiffRawData** `[fn]` in [FiffRawData](/docs/api/fiff/fiff-raw-data) — Opens a raw FIFF file like `read()`; throws [`Error`](/docs/api/utils/error) if it cannot.
+- **FiffRawData** `[fn]` in [FiffRawData](/docs/api/fiff/fiff-raw-data) — Opens raw FIFF data held in bytes that are not a file, e.g.
 - **FiffRawViewSettings** `[fn]` in [FiffRawViewSettings](/docs/api/disp/fiff-raw-view-settings) — Constructs a [`FiffRawViewSettings`](/docs/api/disp/fiff-raw-view-settings) which is a child of parent.
 - **FiffSparseMatrix** `[fn]` in [FiffSparseMatrix](/docs/api/fiff/fiff-sparse-matrix) — Constructs an empty [`FiffSparseMatrix`](/docs/api/fiff/fiff-sparse-matrix).
 - **FiffSparseMatrix** `[fn]` in [FiffSparseMatrix](/docs/api/fiff/fiff-sparse-matrix) — Constructs a [`FiffSparseMatrix`](/docs/api/fiff/fiff-sparse-matrix) wrapping an existing Eigen sparse matrix.
@@ -1914,7 +1912,7 @@ Index of 6705 public class members (functions, variables, typedefs, enums) acros
 - **first** `[var]` in [AcqSampleRange](/docs/api/acq/acq-sample-range) — First sample.
 - **first** `[var]` in [AcqSpanPair](/docs/api/acq/acq-span-pair) — Elements up to the end of the ring.
 - **first** `[var]` in [FiffEvoked](/docs/api/fiff/fiff-evoked) — First time sample.
-- **first** `[var]` in [FiffRawDir](/docs/api/fiff/fiff-raw-dir) — first sample.
+- **first** `[var]` in [FiffRawDir](/docs/api/fiff/fiff-raw-dir) — First sample.
 - **first** `[var]` in [MNEMeasDataSet](/docs/api/mne/mne-meas-data-set) — First sample index (for raw-data processing).
 - **first_samp** `[var]` in [FiffRawData](/docs/api/fiff/fiff-raw-data) — First sample number.
 - **first_samp** `[var]` in [MNERawData](/docs/api/mne/mne-raw-data) — First sample index in the file.
@@ -2842,6 +2840,7 @@ Index of 6705 public class members (functions, variables, typedefs, enums) acros
 - **is_empty** `[fn]` in [FiffCov](/docs/api/fiff/fiff-cov) — True if FIFF covariance is empty.
 - **is_empty** `[fn]` in [FiffDirNode](/docs/api/fiff/fiff-dir-node) — Returns true if directory tree structure contains no data.
 - **is_empty** `[fn]` in [FiffEvents](/docs/api/fiff/fiff-events)
+- **is_empty** `[fn]` in [FiffRawData](/docs/api/fiff/fiff-raw-data)
 - **is_empty** `[fn]` in [FiffSparseMatrix](/docs/api/fiff/fiff-sparse-matrix) — Check whether this sparse matrix is empty (no non-zero elements).
 - **is_left_hemi** `[fn]` in [MNESourceSpace](/docs/api/mne/mne-source-space) — Determine whether this source space is on the left hemisphere based on the average x-coordinate of all vertices.
 - **is_magnetometer_coil** `[fn]` in [FwdCoil](/docs/api/fwd/fwd-coil) — Checks if this is an magnetometer.
@@ -2869,7 +2868,6 @@ Index of 6705 public class members (functions, variables, typedefs, enums) acros
 - **isEmpty** `[fn]` in [FiffId](/docs/api/fiff/fiff-id) — True if FIFF id is empty.
 - **isEmpty** `[fn]` in [FiffInfoBase](/docs/api/fiff/fiff-info-base) — True if FIFF measurement file information is empty.
 - **isEmpty** `[fn]` in [FiffNamedMatrix](/docs/api/fiff/fiff-named-matrix) — Returns true if named matrix contains no data.
-- **isEmpty** `[fn]` in [FiffRawData](/docs/api/fiff/fiff-raw-data) — True if fiff raw data are empty.
 - **isEmpty** `[fn]` in [FineCalibration](/docs/api/dsp/fine-calibration) — Check if empty.
 - **isEmpty** `[fn]` in [FsAnnotation](/docs/api/fs/fs-annotation) — Returns whether [`FsAnnotation`](/docs/api/fs/fs-annotation) is empty.
 - **isEmpty** `[fn]` in [FsAnnotationSet](/docs/api/fs/fs-annotation-set) — True if [`FsAnnotationSet`](/docs/api/fs/fs-annotation-set) is empty.
@@ -3045,7 +3043,7 @@ Index of 6705 public class members (functions, variables, typedefs, enums) acros
 - **lambda2_est** `[var]` in [MNEMneData](/docs/api/mne/mne-mne-data) — Regularization parameter estimated from available data.
 - **language** `[var]` in [MnaScript](/docs/api/mna/mna-script) — "python", "shell", "r", "matlab", "octave", "julia"
 - **last** `[var]` in [FiffEvoked](/docs/api/fiff/fiff-evoked) — Last time sample.
-- **last** `[var]` in [FiffRawDir](/docs/api/fiff/fiff-raw-dir) — last sample.
+- **last** `[var]` in [FiffRawDir](/docs/api/fiff/fiff-raw-dir) — Last sample.
 - **last_samp** `[var]` in [FiffRawData](/docs/api/fiff/fiff-raw-data) — Last sample number.
 - **lastError** `[fn]` in [AcqDevice](/docs/api/acq/acq-device)
 - **lastFileSample** `[fn]` in [ChannelRhiView](/docs/api/disp/channel-rhi-view)
@@ -3969,7 +3967,6 @@ Index of 6705 public class members (functions, variables, typedefs, enums) acros
 - **operator=** `[fn]` in [FiffProj](/docs/api/fiff/fiff-proj) — Copy assignment.
 - **operator=** `[fn]` in [FiffRawData](/docs/api/fiff/fiff-raw-data)
 - **operator=** `[fn]` in [FiffRawData](/docs/api/fiff/fiff-raw-data)
-- **operator=** `[fn]` in [FiffRawDir](/docs/api/fiff/fiff-raw-dir) — Copy assignment.
 - **operator=** `[fn]` in [FiffSparseMatrix](/docs/api/fiff/fiff-sparse-matrix) — Default copy-assignment operator.
 - **operator=** `[fn]` in [FiffSparseMatrix](/docs/api/fiff/fiff-sparse-matrix) — Default move-assignment operator.
 - **operator=** `[fn]` in [FiffStream](/docs/api/fiff/fiff-stream)
@@ -4009,6 +4006,7 @@ Index of 6705 public class members (functions, variables, typedefs, enums) acros
 - **operator=** `[fn]` in [stream_info](/docs/api/lsl/stream_info) — Copy assignment operator.
 - **operator=** `[fn]` in [ThreadPool](/docs/api/utils/thread-pool)
 - **operator==** `[fn]` in [FiffAnnotation](/docs/api/fiff/fiff-annotation)
+- **operator==** `[fn]` in [FiffRawDir](/docs/api/fiff/fiff-raw-dir)
 - **operator==** `[fn]` in [InvHpiModelParameters](/docs/api/inv/inv-hpi-model-parameters)
 - **operator==** `[fn]` in [InvSensorSet](/docs/api/inv/inv-sensor-set)
 - **operator[]** `[fn]` in [AcqSpanPair](/docs/api/acq/acq-span-pair)
@@ -4449,7 +4447,7 @@ Index of 6705 public class members (functions, variables, typedefs, enums) acros
 - **RawCommand** `[fn]` in [RawCommand](/docs/api/com/raw-command) — Default constructor.
 - **RawCommand** `[fn]` in [RawCommand](/docs/api/com/raw-command) — Constructor which parses a command stored in a json object.
 - **RawCommand** `[fn]` in [RawCommand](/docs/api/com/raw-command) — Copy constructor.
-- **rawdir** `[var]` in [FiffRawData](/docs/api/fiff/fiff-raw-data) — Special fiff directory entry for raw data.
+- **rawdir** `[var]` in [FiffRawData](/docs/api/fiff/fiff-raw-data) — The data buffers and skips, in sample order.
 - **rawDir** `[var]` in [MNERawInfo](/docs/api/mne/mne-raw-info) — Directory of raw data tags (FIFF_DATA_BUFFER, FIFF_DATA_SKIP, etc.).
 - **rawFiles** `[var]` in [ProcessingSettings](/docs/api/mne/processing-settings) — Raw data file(s).
 - **rcvMouseLoc** `[fn]` in [FrequencySpectrumDelegate](/docs/api/disp/frequency-spectrum-delegate) — Receive Mouse location.
@@ -4476,6 +4474,8 @@ Index of 6705 public class members (functions, variables, typedefs, enums) acros
 - **read** `[fn]` in [FiffEvokedSet](/docs/api/fiff/fiff-evoked-set) — Reads evoked data sets of a FIFF file in one pass, like mne.read_evokeds.
 - **read** `[fn]` in [FiffIO](/docs/api/fiff/fiff-io) — Read data from a pIODevice.
 - **read** `[fn]` in [FiffIO](/docs/api/fiff/fiff-io) — Read data from a QList of pIODevices.
+- **read** `[fn]` in [FiffRawData](/docs/api/fiff/fiff-raw-data) — Opens a raw FIFF file, like mne.io.read_raw_fif(path, preload=False): reads the measurement info and the directory of data buffers, and keeps the file for reading segments.
+- **read** `[fn]` in [FiffRawData](/docs/api/fiff/fiff-raw-data) — Opens raw FIFF data held in bytes that are not a file, e.g.
 - **read** `[fn]` in [FileByteStream](/docs/api/utils/file-byte-stream) — Reads up to `bytes` bytes at the current position and advances past them.
 - **read** `[fn]` in [FineCalibration](/docs/api/dsp/fine-calibration) — Read a fine calibration file (.dat format).
 - **read** `[fn]` in [FsAnnotation](/docs/api/fs/fs-annotation) — Reads a FreeSurfer annotation file.
@@ -5504,9 +5504,6 @@ Index of 6705 public class members (functions, variables, typedefs, enums) acros
 - **setup_forward_model** `[fn]` in [InvDipoleFitData](/docs/api/inv/inv-dipole-fit-data) — Set up the sphere-model and (optionally) BEM forward functions.
 - **setup_lights** `[fn]` in [MNEMshDisplaySurfaceSet](/docs/api/mne/mne-msh-display-surface-set) — Replace the current active lighting with a deep copy of the provided light set.
 - **setup_read** `[fn]` in [FiffIO](/docs/api/fiff/fiff-io) — Setup a [`FiffStream`](/docs/api/fiff/fiff-stream).
-- **setup_read_raw** `[fn]` in [Fiff](/docs/api/fiff/fiff-class) — fiff_setup_read_raw
-- **setup_read_raw** `[fn]` in [FiffStream](/docs/api/fiff/fiff-stream) — fiff_setup_read_raw
-- **setup_read_raw** `[fn]` in [FiffStream](/docs/api/fiff/fiff-stream) — Read information about raw data held in bytes that are not a file, e.g.
 - **setUpHint** `[fn]` in [VideoOverlay](/docs/api/disp3-d/video-overlay)
 - **setUpperItemIndex** `[fn]` in [RtFiffRawViewDelegate](/docs/api/disp/rt-fiff-raw-view-delegate) — Set the new upper item index color.
 - **setUseDefaultColor** `[fn]` in [BrainSurface](/docs/api/disp3-d/brain-surface) — Set/Get whether to use the default surface color.
@@ -5762,7 +5759,6 @@ Index of 6705 public class members (functions, variables, typedefs, enums) acros
 - **SPtr** `[type]` in [FiffEvokedSet](/docs/api/fiff/fiff-evoked-set) — Shared pointer type for [`FiffEvokedSet`](/docs/api/fiff/fiff-evoked-set).
 - **SPtr** `[type]` in [FiffInfo](/docs/api/fiff/fiff-info) — Shared pointer type for [`FiffInfo`](/docs/api/fiff/fiff-info).
 - **SPtr** `[type]` in [FiffRawData](/docs/api/fiff/fiff-raw-data) — Shared pointer type for [`FiffRawData`](/docs/api/fiff/fiff-raw-data).
-- **SPtr** `[type]` in [FiffRawDir](/docs/api/fiff/fiff-raw-dir) — Shared pointer type for [`FiffRawDir`](/docs/api/fiff/fiff-raw-dir).
 - **SPtr** `[type]` in [FiffRawViewSettings](/docs/api/disp/fiff-raw-view-settings) — Shared pointer type for [`FiffRawViewSettings`](/docs/api/disp/fiff-raw-view-settings).
 - **SPtr** `[type]` in [FilterDesignView](/docs/api/disp/filter-design-view) — Shared pointer type for [`FilterDesignView`](/docs/api/disp/filter-design-view).
 - **SPtr** `[type]` in [FilterIO](/docs/api/utils/filter-io) — Shared pointer type for [`FilterIO`](/docs/api/utils/filter-io).

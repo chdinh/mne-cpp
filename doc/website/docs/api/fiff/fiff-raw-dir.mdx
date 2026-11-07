@@ -12,7 +12,7 @@ sidebar_position: 27
 `#include <fiff/fiff_raw_dir.h>`
 
 ```cpp
-class FIFFLIB::FiffRawDir
+struct FIFFLIB::FiffRawDir
 ```
 
 Per-buffer raw-data directory entry: data kind, first sample, sample count, on-disk tag position.
@@ -24,50 +24,18 @@ One entry per `FIFF_DATA_BUFFER` tag. The (`first`, `nsamp`) fields let `FiffRaw
 int samples = 0;
 for (const FiffRawDir& buffer : raw.rawdir)
     samples += buffer.nsamp;
-const FiffDirEntry firstBuffer = raw.rawdir.first().ent;
+const FiffDirEntry firstBuffer = raw.rawdir.front().ent;
 ```
 
 ---
 
 ## Public Methods
 
-### FiffRawDir()
-
-Default constructor.
-
----
-
-### FiffRawDir(p_FiffRawDir)
-
-Copy constructor.
-
-**Parameters:**
-
-- **p_FiffRawDir** : *const FiffRawDir &*
-  Raw directory entry which should be copied.
-
----
-
-### operator=(other)
-
-Copy assignment.
-
-Every member has value semantics, so the compiler-generated member-wise assignment is correct. It is declared explicitly because declaring a copy constructor and/or a destructor deprecates the implicitly generated one.
-
-**Parameters:**
-
-- **other** : *const [FiffRawDir](/docs/api/fiff/fiff-raw-dir) &*
-  Object to assign from.
+### operator==()
 
 **Returns:**
 
-- *[FiffRawDir](/docs/api/fiff/fiff-raw-dir) &* — reference to this object.
-
----
-
-### ~FiffRawDir()
-
-Destroys the raw Directory entry.
+- *bool* — Whether both describe the same samples of the same buffer.
 
 ---
 
@@ -89,9 +57,9 @@ FIFF library: fixed-length epochs, CTF compensation, the file directory and raw 
 int samples = 0;
 for (const FiffRawDir& buffer : raw.rawdir)
     samples += buffer.nsamp;
-const FiffDirEntry firstBuffer = raw.rawdir.first().ent;
+const FiffDirEntry firstBuffer = raw.rawdir.front().ent;
 // mne.io.read_raw_fif: 2 buffers, 6007 samples from first_samp 12900; fiff_open lists 640 directory entries
-ok &= expect(raw.rawdir.size() == 2 && samples == 6007 && raw.rawdir.first().first == 12900 && firstBuffer.kind == FIFF_DATA_BUFFER,
+ok &= expect(raw.rawdir.size() == 2 && samples == 6007 && raw.rawdir.front().first == 12900 && firstBuffer.kind == FIFF_DATA_BUFFER,
              "FiffRawDir/FiffDirEntry: 2 data buffers cover the 6007 samples from sample 12900");
 ````
 

@@ -1132,58 +1132,6 @@ Opens a FIFF file for reading and reads its tag directory.
 
 ---
 
-### setup_read_raw(path, data, allow_maxshield, is_littleEndian)
-
-fiff_setup_read_raw
-
-Read information about raw data file
-
-**Parameters:**
-
-- **path** : *const std::filesystem::path &*
-  The raw data file.
-
-- **data** : *[FiffRawData](/docs/api/fiff/fiff-raw-data) &*
-  The raw data information - contains the opened fiff file.
-
-- **allow_maxshield** : *bool*
-  Accept unprocessed MaxShield data.
-
-- **is_littleEndian** : *bool*
-  The file is stored in little-endian byte order.
-
-**Returns:**
-
-- *bool* — true if succeeded, false otherwise.
-
----
-
-### setup_read_raw(bytes, data, allow_maxshield, is_littleEndian)
-
-Read information about raw data held in bytes that are not a file, e.g.
-
-in memory.
-
-**Parameters:**
-
-- **bytes** : *std::unique_ptr&lt; [ByteStream](/docs/api/utils/byte-stream) &gt;*
-  The raw data; data keeps them for reading segments.
-
-- **data** : *[FiffRawData](/docs/api/fiff/fiff-raw-data) &*
-  The raw data information.
-
-- **allow_maxshield** : *bool*
-  Accept unprocessed MaxShield data.
-
-- **is_littleEndian** : *bool*
-  The bytes are in little-endian byte order.
-
-**Returns:**
-
-- *bool* — true if succeeded, false otherwise.
-
----
-
 ### byteStream(device, mode)
 
 Byte stream over a Qt device, for callers that hold a QIODevice such as a socket or a QBuffer.

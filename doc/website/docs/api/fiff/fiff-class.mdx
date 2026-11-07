@@ -239,7 +239,7 @@ Read a specific raw data segment
 **Parameters:**
 
 - **raw** : *[FiffRawData](/docs/api/fiff/fiff-raw-data) &*
-  structure returned by fiff_setup_read_raw.
+  raw data from `FiffRawData::read`.
 
 - **data** : *Eigen::MatrixXd &*
   returns the data matrix (channels x samples).
@@ -273,7 +273,7 @@ Read a specific raw data segment
 **Parameters:**
 
 - **raw** : *[FiffRawData](/docs/api/fiff/fiff-raw-data) &*
-  structure returned by fiff_setup_read_raw.
+  raw data from `FiffRawData::read`.
 
 - **data** : *Eigen::MatrixXd &*
   returns the data matrix (channels x samples).
@@ -292,31 +292,6 @@ Read a specific raw data segment
 
 - **sel** : *Eigen::MatrixXi*
   channel selection vector (optional).
-
-**Returns:**
-
-- *bool* — true if succeeded, false otherwise.
-
----
-
-### setup_read_raw(path, data, allow_maxshield)
-
-fiff_setup_read_raw
-
-Wrapper for the `FiffStream::setup_read_raw` static function
-
-Read information about raw data file
-
-**Parameters:**
-
-- **path** : *const std::filesystem::path &*
-  The raw data file.
-
-- **data** : *[FiffRawData](/docs/api/fiff/fiff-raw-data) &*
-  The raw data information - contains the opened fiff file.
-
-- **allow_maxshield** : *bool*
-  Accept unprocessed MaxShield data.
 
 **Returns:**
 

@@ -71,7 +71,7 @@ if (!readSuccessful) {
 
 ### FiffRawData()
 
-Default constructor.
+Constructs empty raw data.
 
 ---
 
@@ -91,55 +91,45 @@ Default constructor.
 
 ---
 
-### FiffRawData(path, b_littleEndian)
+### ~FiffRawData()
 
-Constructs fiff raw data by reading a FIFF file.
+---
+
+### FiffRawData(path)
+
+Opens a raw FIFF file like `read()`; throws [`Error`](/docs/api/utils/error) if it cannot.
 
 **Parameters:**
 
 - **path** : *const std::filesystem::path &*
   The raw data file.
 
-- **b_littleEndian** : *bool*
-  If true, read data as little-endian.
-
 ---
 
-### FiffRawData(bytes, b_littleEndian)
+### FiffRawData(bytes)
 
-Constructs fiff raw data held in bytes that are not a file, e.g.
+Opens raw FIFF data held in bytes that are not a file, e.g.
 
-in memory.
+in memory, like `read()`; throws [`Error`](/docs/api/utils/error) if it cannot.
 
 **Parameters:**
 
 - **bytes** : *std::unique_ptr&lt; [ByteStream](/docs/api/utils/byte-stream) &gt;*
   The raw data; kept for reading segments.
 
-- **b_littleEndian** : *bool*
-  If true, read data as little-endian.
-
----
-
-### ~FiffRawData()
-
-Destroys the [`FiffInfo`](/docs/api/fiff/fiff-info).
-
 ---
 
 ### clear()
 
-Initializes the fiff raw measurement data.
+Resets to empty raw data.
 
 ---
 
-### isEmpty()
-
-True if fiff raw data are empty.
+### is_empty()
 
 **Returns:**
 
-- *bool* — true if fiff raw data are empty.
+- *bool* — Whether there is no recording.
 
 ---
 
@@ -259,6 +249,46 @@ Ported from save.c (MNE-C).
 **Returns:**
 
 - *bool* — true on success.
+
+---
+
+## Static Methods
+
+### read(path, allow_maxshield)
+
+Opens a raw FIFF file, like mne.io.read_raw_fif(path, preload=False): reads the measurement info and the directory of data buffers, and keeps the file for reading segments.
+
+**Parameters:**
+
+- **path** : *const std::filesystem::path &*
+  The raw data file.
+
+- **allow_maxshield** : *bool*
+  Accept unprocessed Internal Active Shielding (MaxShield) data.
+
+**Returns:**
+
+- *[Expected](/docs/api/utils/expected)&lt; [FiffRawData](/docs/api/fiff/fiff-raw-data) &gt;* — The raw data, or why the file cannot be read: Io if it cannot be opened, NotFound if it holds no raw data, Format if it is damaged or holds MaxShield data that is not allowed.
+
+---
+
+### read(bytes, allow_maxshield)
+
+Opens raw FIFF data held in bytes that are not a file, e.g.
+
+in memory, like read(path).
+
+**Parameters:**
+
+- **bytes** : *std::unique_ptr&lt; [ByteStream](/docs/api/utils/byte-stream) &gt;*
+  The raw data; kept for reading segments.
+
+- **allow_maxshield** : *bool*
+  Accept unprocessed Internal Active Shielding (MaxShield) data.
+
+**Returns:**
+
+- *[Expected](/docs/api/utils/expected)&lt; [FiffRawData](/docs/api/fiff/fiff-raw-data) &gt;* — The raw data, or why it cannot be read.
 
 ---
 
