@@ -44,7 +44,6 @@ using namespace FIFFLIB;
 
 FiffDirNode::FiffDirNode()
 : type(-1)
-, nent_tree(-1)
 {
 }
 
@@ -54,7 +53,6 @@ FiffDirNode::FiffDirNode(const FiffDirNode* p_FiffDirTree)
 : type(p_FiffDirTree->type)
 , id(p_FiffDirTree->id)
 , dir(p_FiffDirTree->dir)
-, nent_tree(p_FiffDirTree->nent_tree)
 , parent(p_FiffDirTree->parent)
 , parent_id(p_FiffDirTree->parent_id)
 , children(p_FiffDirTree->children)
@@ -65,10 +63,6 @@ FiffDirNode::FiffDirNode(const FiffDirNode* p_FiffDirTree)
 
 FiffDirNode::~FiffDirNode()
 {
-    //    QList<FiffDirNode*>::iterator i;
-    //    for (i = this->children.begin(); i != this->children.end(); ++i)
-    //        if (*i)
-    //            delete *i;
 }
 
 //=============================================================================================================

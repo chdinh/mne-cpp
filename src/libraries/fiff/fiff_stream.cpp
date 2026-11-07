@@ -518,7 +518,7 @@ bool FiffStream::open(QIODevice::OpenModeFlag mode)
     //
     //   Create the directory tree structure
     //
-    if ((this->m_dirtree = this->make_subtree(m_dir)) == nullptr)
+    if ((this->m_dirtree = this->make_subtree(m_dir, 0)) == nullptr)
         return false;
     else
         this->m_dirtree->parent.clear();
@@ -541,17 +541,14 @@ bool FiffStream::close()
 
 //=============================================================================================================
 
-FiffDirNode::SPtr FiffStream::make_subtree(QList<FiffDirEntry::SPtr>& dentry)
+FiffDirNode::SPtr FiffStream::make_subtree(const QList<FiffDirEntry::SPtr>& dentry, qsizetype current)
 {
     FiffDirNode::SPtr defaultNode;
     FiffDirNode::SPtr node = FiffDirNode::SPtr(new FiffDirNode);
     FiffDirNode::SPtr child;
     FiffTag::UPtr t_pTag;
     QList<FiffDirEntry::SPtr> dir;
-    qint32 current = 0;
 
-    node->dir_tree = dentry;
-    node->nent_tree = 1;
     node->type = FIFFB_ROOT;
 
     if (dentry[current]->kind == FIFF_BLOCK_START) {
@@ -566,12 +563,10 @@ FiffDirNode::SPtr FiffStream::make_subtree(QList<FiffDirEntry::SPtr>& dentry)
     ++current;
     int level = 0;
     for (; current < dentry.size(); ++current) {
-        ++node->nent_tree;
         if (dentry[current]->kind == FIFF_BLOCK_START) {
             level++;
             if (level == 1) {
-                QList<FiffDirEntry::SPtr> sub_dentry = dentry.mid(current);
-                if (!(child = this->make_subtree(sub_dentry)))
+                if (!(child = this->make_subtree(dentry, current)))
                     return defaultNode;
                 child->parent = node;
                 node->children.append(child);

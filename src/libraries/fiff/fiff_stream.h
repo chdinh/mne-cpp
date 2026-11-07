@@ -314,13 +314,11 @@ public:
 
     //=========================================================================================================
     /**
-     * Create the directory tree structure
+     * Builds the block tree of @p dentry from the block that starts at @p current.
      *
-     * @param[in] dentry     The dir entries of which the tree should be constructed.
-     *
-     * @return The created dir tree.
+     * @return The block, or null if a tag cannot be read.
      */
-    FiffDirNode::SPtr make_subtree(QList<FiffDirEntry::SPtr>& dentry);
+    FiffDirNode::SPtr make_subtree(const QList<FiffDirEntry::SPtr>& dentry, qsizetype current);
 
     //=========================================================================================================
     /**
