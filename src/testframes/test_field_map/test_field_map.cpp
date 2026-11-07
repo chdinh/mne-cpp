@@ -7,7 +7,7 @@
  * @author   Christoph Dinh <christoph.dinh@mne-cpp.org>
  * @since    2.0.0
  * @date     February, 2026
- * @brief    Cross-validation test for FieldMap against MNE-Python reference.
+ * @brief    Cross-validation test for FwdFieldMap against MNE-Python reference.
  *
  * This test:
  *   1. Loads the evoked data, coil definitions, and head surface of the MNE

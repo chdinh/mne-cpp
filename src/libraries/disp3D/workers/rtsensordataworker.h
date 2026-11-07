@@ -87,7 +87,7 @@ public:
     //=========================================================================================================
     /**
      * Set the dense mapping matrix (sensor → surface vertices).
-     * This matrix is typically produced by FieldMap::computeMegMapping() or
+     * This matrix is typically produced by FWDLIB::FwdFieldMap::computeMegMapping() or
      * computeEegMapping(). Size: (nVertices × nChannels).
      *
      * @param[in] surfaceKey Key of the surface the matrix maps onto; colours are emitted for it.

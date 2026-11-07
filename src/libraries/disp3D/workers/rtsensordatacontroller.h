@@ -60,7 +60,7 @@ class RtSensorInterpolationMatWorker;
  *
  * Unlike the source-estimate controller (which uses sparse interpolation matrices
  * split by hemisphere), this controller uses a single dense mapping matrix
- * produced by FieldMap::computeMeg/EegMapping() that maps sensor measurements
+ * produced by FWDLIB::FwdFieldMap::computeMeg/EegMapping() that maps sensor measurements
  * directly to surface vertex values.
  *
  * The controller can either accept a precomputed mapping matrix via

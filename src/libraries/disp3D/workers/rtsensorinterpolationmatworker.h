@@ -50,7 +50,7 @@ namespace DISP3DLIB
  * RtSensorInterpolationMatWorker computes dense sensor-to-surface field-mapping
  * matrices in a background thread.
  *
- * This worker encapsulates the expensive FieldMap::computeMegMapping() and
+ * This worker encapsulates the expensive FWDLIB::FwdFieldMap::computeMegMapping() and
  * computeEegMapping() calls that were previously performed synchronously on the
  * main thread inside BrainView::buildSensorFieldMapping().
  *
@@ -141,7 +141,7 @@ public slots:
      * Compute the sensor-to-surface mapping matrices.
      * This slot can be called directly or connected to a signal.
      * The computation reads the stored parameters and builds dense mapping
-     * matrices via FieldMap::computeMegMapping() / computeEegMapping().
+     * matrices via FWDLIB::FwdFieldMap::computeMegMapping() / computeEegMapping().
      */
     void computeMapping();
 
