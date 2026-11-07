@@ -459,7 +459,7 @@ void FiffTag::convert_tag_data(const FiffTag::UPtr& tag, int from_endian, int to
     //    fiffChPos      cpthis;
     //    fiffCoordTrans ctthis;
     //    fiffDigPoint   dpthis;
-    fiffDataRef drthis;
+    FiffDataRef* drthis;
 
     if (tag->data() == nullptr || tag->size() == 0)
         return;
@@ -678,7 +678,7 @@ void FiffTag::convert_tag_data(const FiffTag::UPtr& tag, int from_endian, int to
 
         case FIFFT_DATA_REF_STRUCT:
             np = tag->size() / FiffDataRef::storageSize();
-            for (drthis = reinterpret_cast<fiffDataRef>(tag->data()), k = 0; k < np; k++, drthis++) {
+            for (drthis = reinterpret_cast<FiffDataRef*>(tag->data()), k = 0; k < np; k++, drthis++) {
                 drthis->type = swap_int(drthis->type);
                 drthis->endian = swap_int(drthis->endian);
                 drthis->size = swap_long(drthis->size);

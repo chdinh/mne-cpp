@@ -90,15 +90,6 @@ public:
 };
 
 //=============================================================================================================
-// BACKWARD COMPATIBILITY TYPEDEFS
-//=============================================================================================================
-
-/** @brief Backward-compatible typedef for the old fiffDataRefRec struct. */
-typedef FiffDataRef fiffDataRefRec;
-/** @brief Backward-compatible pointer typedef for the old fiffDataRef pointer. */
-typedef FiffDataRef* fiffDataRef;
-
-//=============================================================================================================
 // INLINE DEFINITIONS
 //=============================================================================================================
 

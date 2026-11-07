@@ -98,63 +98,6 @@ typedef qint16 fiff_dau_pack16_t;
 typedef qint32 fiff_julian_t;
 typedef char fiff_data_t; //unsig char instead of void -> avoid void in C++ cause of its undefined behaviour using delete -> this can happen during lots of casting
 
-//=============================================================================================================
-// TYPEDEFS Structured types:
-// Note: The old C structs have been replaced by proper C++ classes.
-// - fiffTimeRec     -> FiffTime      (fiff_time.h)       - typedefs removed; use FiffTime directly
-// - fiffDataRefRec  -> FiffDataRef   (fiff_data_ref.h)   - backward compat typedefs provided
-// - fiffTagRec      -> FiffTag       (fiff_tag.h)        - use FiffTag::storageSize() for on-disk header size
-// - fiffIdRec       -> FiffId        (fiff_id.h)         - backward compat typedefs below
-// - fiffDirEntryRec -> FiffDirEntry  (fiff_dir_entry.h)
-// - fiffDigPointRec -> FiffDigPoint  (fiff_dig_point.h)
-// - fiffCoordTransRec -> FiffCoordTrans (fiff_coord_trans.h)
-// - fiffChPosRec    -> FiffChPos     (fiff_ch_pos.h)
-// - fiffSparseMatrixRec -> FiffSparseMatrix (fiff_sparse_matrix.h)
-// - fiffDigStringRec, fiff_event_bits, fiff_hpi_coil, fiff_hpi_subsys -> removed (unused)
-//=============================================================================================================
-
-//=============================================================================================================
-// BACKWARD COMPATIBILITY TYPEDEFS for FiffId (fiff_id.h provides the class)
-// The old fiffIdRec struct has been replaced by FiffId.
-// These typedefs are kept so that legacy C-compat code compiles without changes.
-//=============================================================================================================
-
-// Forward declare FiffId - actual class is in fiff_id.h
-class FiffId;
-
-/** @brief Backward-compatible typedef for the old fiffIdRec struct. */
-typedef FiffId fiffIdRec;
-/** @brief Backward-compatible typedef for the old fiff_id_t. */
-typedef FiffId fiff_id_t;
-/** @brief Backward-compatible pointer typedef for the old fiffId pointer. */
-typedef FiffId* fiffId;
-
-//=============================================================================================================
-// BACKWARD COMPATIBILITY TYPEDEFS for FiffDirEntry (fiff_dir_entry.h provides the class)
-//=============================================================================================================
-
-// Forward declare FiffDirEntry - actual class is in fiff_dir_entry.h
-class FiffDirEntry;
-
-/** @brief Backward-compatible typedef for the old fiffDirEntryRec struct. */
-typedef FiffDirEntry fiffDirEntryRec;
-/** @brief Backward-compatible typedef for the old fiff_dir_entry_t. */
-typedef FiffDirEntry fiff_dir_entry_t;
-/** @brief Backward-compatible pointer typedef for the old fiffDirEntry pointer. */
-typedef FiffDirEntry* fiffDirEntry;
-
-//=============================================================================================================
-// BACKWARD COMPATIBILITY TYPEDEFS for FiffDigPoint (fiff_dig_point.h provides the class)
-//=============================================================================================================
-
-// Forward declare FiffDigPoint - actual class is in fiff_dig_point.h
-class FiffDigPoint;
-
-/** @brief Backward-compatible typedef for the old fiffDigPointRec struct. */
-typedef FiffDigPoint fiffDigPointRec;
-
-#define FIFFM_CHPOS(x) &((x)->chpos)
-
 } //NAMESPACE
 
 #endif // FIFF_TYPES_H
