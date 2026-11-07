@@ -279,12 +279,12 @@ std::vector<InvToken> tokenize(const InvSourceEstimate& estimate, const InvToken
     int effTime = (nTimes + timeStride - 1) / timeStride;
 
     size_t est = 10; // structural overhead
-    if (options.includeGridData && estimate.hasGridData())
+    if (options.includeGridData && estimate.has_grid_data())
         est += static_cast<size_t>(effSrc) * (1 + effTime) + effSrc + 6;
     est += estimate.focalDipoles.size() * 16;
     est += estimate.couplings.size() * 20;
     est += estimate.connectivity.size() * 10;
-    if (estimate.hasPositions())
+    if (estimate.has_positions())
         est += static_cast<size_t>(estimate.positions.rows()) * 3 + 2;
     tokens.reserve(est);
 
@@ -299,7 +299,7 @@ std::vector<InvToken> tokenize(const InvSourceEstimate& estimate, const InvToken
     tokens.emplace_back(InvTokenId::MetaEnd);
 
     // --- Grid data ---
-    if (options.includeGridData && estimate.hasGridData()) {
+    if (options.includeGridData && estimate.has_grid_data()) {
         tokens.emplace_back(InvTokenId::GridBegin);
         tokens.emplace_back(InvTokenId::NSources, static_cast<float>(effSrc));
         tokens.emplace_back(InvTokenId::NTimes, static_cast<float>(effTime));
@@ -320,7 +320,7 @@ std::vector<InvToken> tokenize(const InvSourceEstimate& estimate, const InvToken
     }
 
     // --- Positions ---
-    if (options.includePositions && estimate.hasPositions()) {
+    if (options.includePositions && estimate.has_positions()) {
         tokens.emplace_back(InvTokenId::PosBegin);
         int nPos = static_cast<int>(estimate.positions.rows());
         for (int i = 0; i < nPos; i += srcStride) {
@@ -332,7 +332,7 @@ std::vector<InvToken> tokenize(const InvSourceEstimate& estimate, const InvToken
     }
 
     // --- Couplings ---
-    if (options.includeCouplings && estimate.hasCouplings()) {
+    if (options.includeCouplings && estimate.has_couplings()) {
         tokens.emplace_back(InvTokenId::CouplingBegin);
         tokens.emplace_back(InvTokenId::NGroups, static_cast<float>(estimate.couplings.size()));
 
@@ -363,7 +363,7 @@ std::vector<InvToken> tokenize(const InvSourceEstimate& estimate, const InvToken
     }
 
     // --- Focal dipoles ---
-    if (options.includeFocalDipoles && estimate.hasFocalDipoles()) {
+    if (options.includeFocalDipoles && estimate.has_focal_dipoles()) {
         tokens.emplace_back(InvTokenId::FocalBegin);
         tokens.emplace_back(InvTokenId::NDipoles, static_cast<float>(estimate.focalDipoles.size()));
 
@@ -388,7 +388,7 @@ std::vector<InvToken> tokenize(const InvSourceEstimate& estimate, const InvToken
     }
 
     // --- Connectivity ---
-    if (options.includeConnectivity && estimate.hasConnectivity()) {
+    if (options.includeConnectivity && estimate.has_connectivity()) {
         tokens.emplace_back(InvTokenId::ConnBegin);
         tokens.emplace_back(InvTokenId::NMeasures, static_cast<float>(estimate.connectivity.size()));
 

@@ -467,8 +467,7 @@ void TestToolInverseComputation::testReadStcFileSynthetic()
     VectorXi inputVertices(2);
     inputVertices << 10, 20;
     InvSourceEstimate input(inputData, inputVertices, 0.0f, 0.001f);
-    QFile outputFile(stcPath);
-    QVERIFY(input.write(outputFile));
+    QVERIFY(input.write(stcPath.toStdU16String()));
 
     MatrixXd data;
     VectorXi vertices;

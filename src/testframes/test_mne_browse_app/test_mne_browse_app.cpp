@@ -622,11 +622,8 @@ void TestMneBrowseApp::exportsSourceEstimatesLikePython()
     QCoreApplication::processEvents();
     QVERIFY2(result.startsWith("Exported 8 source-estimate file(s)"), qPrintable(result));
 
-    INVLIB::InvSourceEstimate lh, rh;
-    QFile lhFile(QDir(outDir).filePath("sample_audvis_left_auditory_dspm-lh.stc"));
-    QFile rhFile(QDir(outDir).filePath("sample_audvis_left_auditory_dspm-rh.stc"));
-    QVERIFY(INVLIB::InvSourceEstimate::read(lhFile, lh));
-    QVERIFY(INVLIB::InvSourceEstimate::read(rhFile, rh));
+    const INVLIB::InvSourceEstimate lh(QDir(outDir).filePath("sample_audvis_left_auditory_dspm-lh.stc").toStdU16String());
+    const INVLIB::InvSourceEstimate rh(QDir(outDir).filePath("sample_audvis_left_auditory_dspm-rh.stc").toStdU16String());
     // Reference values produced by mne.minimum_norm.apply_inverse(evoked["Left Auditory"], inv, 1 / 9, "dSPM")
     // with the inverse above (mne 1.11.0, channel names without spaces like the forward's)
     QCOMPARE(lh.data.rows(), Eigen::Index(3956));

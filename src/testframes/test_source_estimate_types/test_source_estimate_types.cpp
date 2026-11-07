@@ -85,7 +85,7 @@ void TestSourceEstimateTypes::testVectorConstruct()
     VectorXi verts = VectorXi::LinSpaced(nVert, 0, nVert - 1);
 
     InvVectorSourceEstimate vstc(data, verts, 0.0f, 0.001f);
-    QVERIFY(!vstc.isEmpty());
+    QVERIFY(!vstc.is_empty());
     QCOMPARE(static_cast<int>(vstc.data.rows()), nVert * 3);
     QCOMPARE(static_cast<int>(vstc.data.cols()), nTimes);
 }
@@ -228,7 +228,7 @@ void TestSourceEstimateTypes::testVolumeConstruct()
     VectorXi verts = VectorXi::LinSpaced(nVox, 0, nVox - 1);
 
     InvVolumeSourceEstimate vol(data, verts, 0.0f, 0.001f);
-    QVERIFY(!vol.isEmpty());
+    QVERIFY(!vol.is_empty());
     QCOMPARE(static_cast<int>(vol.data.rows()), nVox);
 }
 

@@ -446,7 +446,7 @@ void TestMnaInversePipeline::testExecuteRealPipeline()
         QVERIFY2(v.isValid(), "apply_dspm::source_estimate not in results");
         auto stc = v.value<QSharedPointer<InvSourceEstimate>>();
         QVERIFY2(!stc.isNull(), "InvSourceEstimate is null");
-        QVERIFY2(!stc->isEmpty(), "Source estimate is empty");
+        QVERIFY2(!stc->is_empty(), "Source estimate is empty");
 
         // Dimensions: nsources x ntimes
         QCOMPARE((int)stc->data.rows(), expectedNsource);

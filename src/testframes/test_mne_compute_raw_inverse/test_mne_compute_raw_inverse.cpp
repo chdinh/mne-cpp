@@ -275,8 +275,11 @@ int TestMneComputeRawInverse::runApp(const QStringList& args, QString& stdoutStr
 
 bool TestMneComputeRawInverse::readStc(const QString& path, InvSourceEstimate& stc)
 {
-    QFile f(path);
-    return InvSourceEstimate::read(f, stc);
+    auto read = InvSourceEstimate::read(path.toStdU16String());
+    if (read) {
+        stc = std::move(*read);
+    }
+    return read.has_value();
 }
 
 //=============================================================================================================

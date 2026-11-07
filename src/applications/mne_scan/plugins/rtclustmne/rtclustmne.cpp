@@ -641,7 +641,7 @@ void RtClustMne::run()
                                                                     tstep,
                                                                     true);
 
-                    if (!sourceEstimate.isEmpty()) {
+                    if (!sourceEstimate.is_empty()) {
                         if (iTimePointSps < sourceEstimate.data.cols() && iTimePointSps >= 0) {
                             sourceEstimate = sourceEstimate.reduce(iTimePointSps, 1);
                             m_pRTSEOutput->measurementData()->setValue(sourceEstimate);
@@ -662,7 +662,7 @@ void RtClustMne::run()
                     if (((skip_count % iDownSample) == 0)) {
                         sourceEstimate = computeCmneInverse(evoked, lambda2, sModelCheckpoint);
 
-                        if (!sourceEstimate.isEmpty()) {
+                        if (!sourceEstimate.is_empty()) {
                             if (iTimePointSps < sourceEstimate.data.cols() && iTimePointSps >= 0) {
                                 sourceEstimate = sourceEstimate.reduce(iTimePointSps, 1);
                             }
@@ -676,7 +676,7 @@ void RtClustMne::run()
                     if (((skip_count % iDownSample) == 0)) {
                         sourceEstimate = pMinimumNorm->calculateInverse(evoked);
 
-                        if (!sourceEstimate.isEmpty()) {
+                        if (!sourceEstimate.is_empty()) {
                             if (iTimePointSps < sourceEstimate.data.cols() && iTimePointSps >= 0) {
                                 sourceEstimate = sourceEstimate.reduce(iTimePointSps, 1);
                                 m_pRTSEOutput->measurementData()->setValue(sourceEstimate);

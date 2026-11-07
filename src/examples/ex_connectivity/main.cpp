@@ -326,7 +326,7 @@ int main(int argc, char* argv[])
                                                           1.0 / raw.info.sfreq,
                                                           true);
 
-            if (sourceEstimate.isEmpty()) {
+            if (sourceEstimate.is_empty()) {
                 printf("Source estimate is empty");
             } else {
                 matDataList << sourceEstimate.data;
@@ -346,7 +346,7 @@ int main(int argc, char* argv[])
         tAnnotSet.toLabels(tSurfSetInflated, lLabels, qListLabelRGBAs, lWantedLabels);
 
         //Get active source indices based on picked labels
-        vDataIndices = sourceEstimateEvoked.getIndicesByLabel(lLabels, bDoClust);
+        vDataIndices = sourceEstimateEvoked.indices_by_label(lLabels, bDoClust);
 
         //Generate node vertices based on picked labels
         MatrixX3f matNodePositions = t_clusteredFwd.getSourcePositionsByLabel(lLabels, tSurfSetInflated);
@@ -427,10 +427,12 @@ int main(int argc, char* argv[])
         QString tmpDir = QDir::tempPath();
         QString lhStcPath = tmpDir + "/mnecpp_connectivity-lh.stc";
         QString rhStcPath = tmpDir + "/mnecpp_connectivity-rh.stc";
-        QFile lhStcFile(lhStcPath);
-        stcLh.write(lhStcFile);
-        QFile rhStcFile(rhStcPath);
-        stcRh.write(rhStcFile);
+        if (auto written = stcLh.write(lhStcPath.toStdU16String()); !written) {
+            qWarning() << written.error().what();
+        }
+        if (auto written = stcRh.write(rhStcPath.toStdU16String()); !written) {
+            qWarning() << written.error().what();
+        }
 
         // Add hemisphere surfaces
         for (auto it = tSurfSetInflated.data().constBegin(); it != tSurfSetInflated.data().constEnd(); ++it) {

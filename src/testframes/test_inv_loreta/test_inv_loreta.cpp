@@ -230,7 +230,7 @@ void TestInvLoreta::eloreta_fromEvoked()
     InvSourceEstimate stc = mn.calculateInverse(
         pickedEvoked.data, tmin, tstep, false);
 
-    QVERIFY(!stc.isEmpty());
+    QVERIFY(!stc.is_empty());
     QCOMPARE((int)stc.data.rows(), m_invOp.nsource);
     QVERIFY(stc.data.allFinite());
 
@@ -269,7 +269,7 @@ void TestInvLoreta::eloreta_forceEqual()
     InvSourceEstimate stc = mn.calculateInverse(
         pickedEvoked.data, tmin, tstep, false);
 
-    QVERIFY(!stc.isEmpty());
+    QVERIFY(!stc.is_empty());
     QVERIFY(stc.data.allFinite());
 }
 
@@ -305,7 +305,7 @@ void TestInvLoreta::eloreta_vs_dSPM()
     InvSourceEstimate stcEloreta = mnEloreta.calculateInverse(
         pickedEvoked.data, tmin, tstep, false);
 
-    if (stcDspm.isEmpty() || stcEloreta.isEmpty())
+    if (stcDspm.is_empty() || stcEloreta.is_empty())
         QSKIP("Could not compute both STCs");
 
     QCOMPARE(stcDspm.data.rows(), stcEloreta.data.rows());

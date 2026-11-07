@@ -401,7 +401,7 @@ void TestInvCmne::testDspmKernelMatchesDefinition()
     QTest::ignoreMessage(QtWarningMsg, QRegularExpression("Cannot load CMNE model"));
     QTest::ignoreMessage(QtWarningMsg, QRegularExpression("returning the dSPM estimate only"));
     const InvCMNEResult failed = InvCMNE::compute(evoked, gain, noiseCov, srcCov, settings);
-    QVERIFY(failed.stcCmne.isEmpty());
+    QVERIFY(failed.stcCmne.is_empty());
     QVERIFY((failed.stcDspm.data - dspm).norm() < 1e-9 * dspm.norm());
 }
 

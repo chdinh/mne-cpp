@@ -486,7 +486,7 @@ void TestMneLibrary::sourceSpaces_readAddGeom()
 void TestMneLibrary::sourceEstimate_fullLifecycle()
 {
     InvSourceEstimate stc0;
-    QVERIFY(stc0.isEmpty());
+    QVERIFY(stc0.is_empty());
     QCOMPARE(stc0.samples(), 0);
 
     MatrixXd sol = MatrixXd::Random(20, 10);
@@ -495,7 +495,7 @@ void TestMneLibrary::sourceEstimate_fullLifecycle()
         verts[i] = i;
 
     InvSourceEstimate stc1(sol, verts, 0.0f, 0.001f);
-    QVERIFY(!stc1.isEmpty());
+    QVERIFY(!stc1.is_empty());
     QCOMPARE(stc1.samples(), 10);
 
     InvSourceEstimate stc2(stc1);
@@ -519,16 +519,10 @@ void TestMneLibrary::sourceEstimate_writeReadBuffer()
     VectorXi verts = VectorXi::LinSpaced(10, 0, 9);
     InvSourceEstimate stc(sol, verts, 0.0f, 0.001f);
 
-    QBuffer buffer;
-    buffer.open(QIODevice::ReadWrite);
-    bool written = stc.write(buffer);
-    QVERIFY(written);
-
-    buffer.seek(0);
-    InvSourceEstimate stcRead;
-    bool readOk = InvSourceEstimate::read(buffer, stcRead);
-    QVERIFY(readOk);
-    QCOMPARE(stcRead.samples(), 5);
+    QTemporaryDir dir;
+    const std::filesystem::path path = dir.filePath("buffer.stc").toStdU16String();
+    QVERIFY(stc.write(path));
+    QCOMPARE(InvSourceEstimate::read(path).value().samples(), 5);
 }
 
 void TestMneLibrary::sourceEstimate_writeReadFile()
@@ -537,17 +531,11 @@ void TestMneLibrary::sourceEstimate_writeReadFile()
     MatrixXd data = MatrixXd::Random(nSources, nTimes);
     VectorXi vertices = VectorXi::LinSpaced(nSources, 0, nSources - 1);
     InvSourceEstimate stc(data, vertices, 0.0f, 0.01f);
-    QVERIFY(!stc.isEmpty());
+    QVERIFY(!stc.is_empty());
 
     QString tmpPath = QCoreApplication::applicationDirPath() + "/test_stc_tmp.stc";
-    // write() and read() open the file themselves
-    QFile outFile(tmpPath);
-    QVERIFY(stc.write(outFile));
-    outFile.close();
-    QFile inFile(tmpPath);
-    InvSourceEstimate stcRead;
-    QVERIFY(InvSourceEstimate::read(inFile, stcRead));
-    inFile.close();
+    QVERIFY(stc.write(tmpPath.toStdU16String()));
+    const InvSourceEstimate stcRead(tmpPath.toStdU16String());
     QFile::remove(tmpPath);
     QCOMPARE(stcRead.vertices, stc.vertices);
     QVERIFY(stcRead.data.isApprox(stc.data, 1e-6));

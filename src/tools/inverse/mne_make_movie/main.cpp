@@ -328,28 +328,30 @@ int main(int argc, char* argv[])
         QString lhFile = stcPrefix + "-lh.stc";
         QString rhFile = stcPrefix + "-rh.stc";
 
-        QFile fLH(lhFile);
-        if (fLH.exists()) {
-            if (!InvSourceEstimate::read(fLH, stcLH)) {
-                qCritical("Cannot read LH STC from: %s", qPrintable(lhFile));
+        if (QFile::exists(lhFile)) {
+            auto read = InvSourceEstimate::read(lhFile.toStdU16String());
+            if (!read) {
+                qCritical("%s", read.error().what());
                 return 1;
             }
+            stcLH = std::move(*read);
             qInfo("Read LH STC: %d sources x %d time points (tmin=%.3f, tstep=%.6f)",
                   static_cast<int>(stcLH.data.rows()), static_cast<int>(stcLH.data.cols()),
                   stcLH.tmin, stcLH.tstep);
         }
 
-        QFile fRH(rhFile);
-        if (fRH.exists()) {
-            if (!InvSourceEstimate::read(fRH, stcRH)) {
-                qCritical("Cannot read RH STC from: %s", qPrintable(rhFile));
+        if (QFile::exists(rhFile)) {
+            auto read = InvSourceEstimate::read(rhFile.toStdU16String());
+            if (!read) {
+                qCritical("%s", read.error().what());
                 return 1;
             }
+            stcRH = std::move(*read);
             qInfo("Read RH STC: %d sources x %d time points",
                   static_cast<int>(stcRH.data.rows()), static_cast<int>(stcRH.data.cols()));
         }
 
-        if (stcLH.isEmpty() && stcRH.isEmpty()) {
+        if (stcLH.is_empty() && stcRH.is_empty()) {
             qCritical("No STC data loaded from prefix: %s", qPrintable(stcPrefix));
             return 1;
         }
@@ -387,7 +389,7 @@ int main(int argc, char* argv[])
 
         InvMinimumNorm minimumNorm(invOp, lambda2, method);
         stcLH = minimumNorm.calculateInverse(evoked);
-        if (stcLH.isEmpty()) {
+        if (stcLH.is_empty()) {
             qCritical("Inverse computation failed.");
             return 1;
         }
@@ -405,7 +407,7 @@ int main(int argc, char* argv[])
     }
 
     // Use the non-empty STC for time parameters
-    const InvSourceEstimate& refStc = stcLH.isEmpty() ? stcRH : stcLH;
+    const InvSourceEstimate& refStc = stcLH.is_empty() ? stcRH : stcLH;
 
     //=========================================================================
     // Time windowing
@@ -505,7 +507,7 @@ int main(int argc, char* argv[])
 
         // Select the appropriate STC for this hemisphere
         const InvSourceEstimate& hemiStc = (hemi == "lh") ? stcLH : stcRH;
-        if (hemiStc.isEmpty()) {
+        if (hemiStc.is_empty()) {
             qInfo("No STC data for %s hemisphere, skipping.", qPrintable(hemi));
             return;
         }

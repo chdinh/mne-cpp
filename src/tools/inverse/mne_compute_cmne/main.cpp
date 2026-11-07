@@ -238,7 +238,7 @@ static int doCompute(const QCommandLineParser& parser)
 
     InvCMNEResult result = InvCMNE::compute(
         matEvoked, matGain, matNoiseCovPicked, matSrcCov, settings);
-    if (result.stcCmne.isEmpty()) {
+    if (result.stcCmne.is_empty()) {
         err << "Error: the model cannot be applied to these data (see warnings above).\n";
         return 1;
     }
@@ -260,13 +260,13 @@ static int doCompute(const QCommandLineParser& parser)
         << result.stcCmne.data.cols() << " samples\n";
 
     // ── Write STC files ────────────────────────────────────────────────
-    if (!result.stcDspm.writeHemispherePair(outPrefix + QStringLiteral("-dspm"))) {
+    if (!result.stcDspm.write_hemisphere_pair((outPrefix + QStringLiteral("-dspm")).toStdU16String())) {
         err << "Error: Failed to write dSPM STC.\n";
         return 1;
     }
     out << "Wrote dSPM STC: " << outPrefix << "-dspm-{lh,rh}.stc\n";
 
-    if (!result.stcCmne.writeHemispherePair(outPrefix + QStringLiteral("-cmne"))) {
+    if (!result.stcCmne.write_hemisphere_pair((outPrefix + QStringLiteral("-cmne")).toStdU16String())) {
         err << "Error: Failed to write CMNE STC.\n";
         return 1;
     }

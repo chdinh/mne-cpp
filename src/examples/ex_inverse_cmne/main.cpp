@@ -137,7 +137,7 @@ int main(int argc, char* argv[])
     //! [inv_cmne_usage]
     const MatrixXd sourceCov = MatrixXd::Identity(fwd.nsource, fwd.nsource);
     InvCMNEResult cmne = InvCMNE::compute(evoked.data, fwd.sol->data, noiseCov.data, sourceCov, settings);
-    if (cmne.stcCmne.isEmpty()) {
+    if (cmne.stcCmne.is_empty()) {
         std::println(stderr, "The CMNE model does not fit {} sources.", fwd.nsource);
         return EXIT_FAILURE;
     }
@@ -191,7 +191,7 @@ int main(int argc, char* argv[])
 
     if (parser.isSet(stcOption)) {
         const QString prefix = parser.value(stcOption);
-        ok &= expect(cmne.stcDspm.writeHemispherePair(prefix + "-dspm") && cmne.stcCmne.writeHemispherePair(prefix + "-cmne"),
+        ok &= expect(cmne.stcDspm.write_hemisphere_pair((prefix + "-dspm").toStdU16String()) && cmne.stcCmne.write_hemisphere_pair((prefix + "-cmne").toStdU16String()),
                      std::format("wrote {}-{{dspm,cmne}}-{{lh,rh}}.stc", prefix.toStdString()));
     }
 

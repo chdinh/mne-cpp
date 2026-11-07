@@ -118,7 +118,7 @@ int main(int argc, char* argv[])
     InvMinimumNorm minimumNorm_eeg(inverse_operator_eeg, lambda2, method);
     InvSourceEstimate sourceEstimate_eeg = minimumNorm_eeg.calculateInverse(evoked);
 
-    if (sourceEstimate_meeg.isEmpty() || sourceEstimate_meg.isEmpty() || sourceEstimate_eeg.isEmpty())
+    if (sourceEstimate_meeg.is_empty() || sourceEstimate_meg.is_empty() || sourceEstimate_eeg.is_empty())
         return 1;
 
     // View activation time-series

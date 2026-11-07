@@ -98,12 +98,12 @@ static bool readWFile(const QString& filename, VectorXd& data, VectorXi& vertice
 static bool readStcFile(const QString& filename, MatrixXd& data, VectorXi& vertices,
                         float& tmin, float& tstep)
 {
-    QFile file(filename);
-    InvSourceEstimate stc;
-    if (!InvSourceEstimate::read(file, stc)) {
-        qCritical() << "Cannot read STC file:" << filename;
+    auto read = InvSourceEstimate::read(filename.toStdU16String());
+    if (!read) {
+        qCritical() << read.error().what();
         return false;
     }
+    const InvSourceEstimate& stc = *read;
 
     data = stc.data;
     vertices = stc.vertices;

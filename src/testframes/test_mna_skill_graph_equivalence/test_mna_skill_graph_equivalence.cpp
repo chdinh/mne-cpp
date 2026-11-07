@@ -141,10 +141,11 @@ QByteArray readAllBytes(const QString& path)
 
 bool readStc(const QString& path, InvSourceEstimate& out)
 {
-    // InvSourceEstimate::read() opens the device itself, so pass an unopened
-    // QFile (otherwise the second open() emits "File already open" and fails).
-    QFile f(path);
-    return InvSourceEstimate::read(f, out);
+    auto read = InvSourceEstimate::read(path.toStdU16String());
+    if (read) {
+        out = std::move(*read);
+    }
+    return read.has_value();
 }
 
 // Build the patched JSON for path A:

@@ -234,7 +234,7 @@ void TestInvDipoleRapMne::sourceEstimate_gridData()
     QCOMPARE(stc.data.cols(), (Index)5);
     QCOMPARE(stc.vertices.size(), (Index)10);
     QCOMPARE(stc.samples(), 5);
-    QVERIFY(!stc.isEmpty());
+    QVERIFY(!stc.is_empty());
 }
 
 void TestInvDipoleRapMne::sourceEstimate_couplings()
@@ -254,7 +254,7 @@ void TestInvDipoleRapMne::sourceEstimate_couplings()
     coupling.tmax = 0.1f;
     stc.couplings.push_back(coupling);
 
-    QVERIFY(stc.hasCouplings());
+    QVERIFY(stc.has_couplings());
     QCOMPARE(stc.couplings.size(), (size_t)1);
     QCOMPARE(stc.couplings[0].gridIndices.size(), (size_t)2);
 }
@@ -274,7 +274,7 @@ void TestInvDipoleRapMne::sourceEstimate_focalDipoles()
     fd.valid = true;
     stc.focalDipoles.push_back(fd);
 
-    QVERIFY(stc.hasFocalDipoles());
+    QVERIFY(stc.has_focal_dipoles());
     QCOMPARE(stc.focalDipoles.size(), (size_t)1);
     QVERIFY(qAbs(stc.focalDipoles[0].goodness - 0.95f) < 1e-6);
 }
@@ -294,7 +294,7 @@ void TestInvDipoleRapMne::sourceEstimate_connectivity()
     conn.fmax = 12.0f;
     stc.connectivity.push_back(conn);
 
-    QVERIFY(stc.hasConnectivity());
+    QVERIFY(stc.has_connectivity());
 }
 
 void TestInvDipoleRapMne::sourceEstimate_metadata()
@@ -334,18 +334,9 @@ void TestInvDipoleRapMne::sourceEstimate_writeReadRoundTrip()
     QTemporaryDir tmpDir;
     QVERIFY(tmpDir.isValid());
 
-    // Write to buffer
-    QByteArray ba;
-    QBuffer buf(&ba);
-    buf.open(QIODevice::WriteOnly);
-    QVERIFY(stcOrig.write(buf));
-    buf.close();
-
-    // Read back
-    buf.open(QIODevice::ReadOnly);
-    InvSourceEstimate stcRead;
-    QVERIFY(InvSourceEstimate::read(buf, stcRead));
-    buf.close();
+    const std::filesystem::path stcPath = tmpDir.filePath("orig.stc").toStdU16String();
+    QVERIFY(stcOrig.write(stcPath));
+    const InvSourceEstimate stcRead = InvSourceEstimate::read(stcPath).value();
 
     QCOMPARE(stcRead.data.rows(), stcOrig.data.rows());
     QCOMPARE(stcRead.data.cols(), stcOrig.data.cols());
@@ -483,7 +474,7 @@ void TestInvDipoleRapMne::token_roundTripWithCouplings()
     auto tokens = tokenize(stc);
     InvSourceEstimate stcRecon = fromTokens(tokens);
 
-    QVERIFY(stcRecon.hasCouplings());
+    QVERIFY(stcRecon.has_couplings());
     QCOMPARE(stcRecon.couplings.size(), (size_t)1);
 }
 
@@ -757,7 +748,7 @@ void TestInvDipoleRapMne::rapMusic_initAndCalculate()
 
     InvSourceEstimate stc = rap.calculateInverse(measurement, 0.0f, 0.001f);
     // RAP-MUSIC should produce some output (may be empty with random data)
-    QVERIFY(stc.isEmpty() || stc.data.rows() > 0);
+    QVERIFY(stc.is_empty() || stc.data.rows() > 0);
 }
 
 void TestInvDipoleRapMne::rapMusic_getName()
@@ -839,7 +830,7 @@ void TestInvDipoleRapMne::minimumNorm_calculateInverse()
     InvMinimumNorm mn(m_invOp, 1.0f / 9.0f, QString("MNE"));
     InvSourceEstimate stc = mn.calculateInverse(evoked);
 
-    QVERIFY(!stc.isEmpty());
+    QVERIFY(!stc.is_empty());
     QVERIFY(stc.data.rows() > 0);
     QVERIFY(stc.data.cols() > 0);
     QVERIFY(stc.data.allFinite());
@@ -861,7 +852,7 @@ void TestInvDipoleRapMne::minimumNorm_dSPM()
     InvMinimumNorm mn(m_invOp, 1.0f / 9.0f, true, false); // dSPM=true, sLORETA=false
     InvSourceEstimate stc = mn.calculateInverse(evoked);
 
-    QVERIFY(!stc.isEmpty());
+    QVERIFY(!stc.is_empty());
     QVERIFY(stc.data.allFinite());
 }
 
@@ -881,7 +872,7 @@ void TestInvDipoleRapMne::minimumNorm_sLORETA()
     InvMinimumNorm mn(m_invOp, 1.0f / 9.0f, false, true); // dSPM=false, sLORETA=true
     InvSourceEstimate stc = mn.calculateInverse(evoked);
 
-    QVERIFY(!stc.isEmpty());
+    QVERIFY(!stc.is_empty());
     QVERIFY(stc.data.allFinite());
 }
 
@@ -925,12 +916,12 @@ void TestInvDipoleRapMne::sourceEstimate_assignment()
         vertices(i) = i;
 
     InvSourceEstimate stc(data, vertices, 0.0f, 0.001f);
-    QVERIFY(!stc.isEmpty());
+    QVERIFY(!stc.is_empty());
 
     // Assignment operator
     InvSourceEstimate stc2;
     stc2 = stc;
-    QVERIFY(!stc2.isEmpty());
+    QVERIFY(!stc2.is_empty());
     QCOMPARE(stc2.data.rows(), 20);
     QCOMPARE(stc2.data.cols(), 5);
     QCOMPARE(stc2.samples(), 5);

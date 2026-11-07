@@ -122,12 +122,12 @@ int main(int argc, char* argv[])
         double w = entries[i].first;
         const QString& path = entries[i].second;
 
-        QFile stcFile(path);
-        InvSourceEstimate stc;
-        if (!InvSourceEstimate::read(stcFile, stc)) {
-            qCritical() << "Failed to read STC file:" << path;
+        auto read = InvSourceEstimate::read(path.toStdU16String());
+        if (!read) {
+            qCritical() << read.error().what();
             return 1;
         }
+        const InvSourceEstimate& stc = *read;
 
         if (i == 0) {
             result = stc;
@@ -150,8 +150,7 @@ int main(int argc, char* argv[])
     result.data /= weightSum;
 
     //--- Write output ---
-    QFile outFile(parser.value(outOpt));
-    if (!result.write(outFile)) {
+    if (!result.write(parser.value(outOpt).toStdU16String())) {
         qCritical() << "Failed to write output STC.";
         return 1;
     }

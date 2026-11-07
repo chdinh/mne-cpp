@@ -358,7 +358,7 @@ QList<InvSourceEstimate> InvLCMV::applyLCMVEpochs(const QList<MatrixXd>& epochs,
 
     for (int i = 0; i < epochs.size(); ++i) {
         InvSourceEstimate stc = applyLCMVRaw(epochs[i], tmin, tstep, filters);
-        if (stc.isEmpty()) {
+        if (stc.is_empty()) {
             qWarning("InvLCMV::applyLCMVEpochs - Epoch %d produced empty source estimate.", i);
         }
         results.append(stc);

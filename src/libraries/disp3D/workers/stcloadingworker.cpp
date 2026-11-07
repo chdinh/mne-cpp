@@ -107,13 +107,11 @@ void StcLoadingWorker::process()
 
     // Load LH STC file
     if (!m_lhPath.isEmpty()) {
-        QFile file(m_lhPath);
-        INVLIB::InvSourceEstimate stc;
-        if (INVLIB::InvSourceEstimate::read(file, stc)) {
-            m_stcLh = stc;
+        if (auto stc = INVLIB::InvSourceEstimate::read(m_lhPath.toStdU16String())) {
+            m_stcLh = std::move(*stc);
             m_hasLh = true;
         } else {
-            emit error(QString("Failed to read LH STC file: %1").arg(m_lhPath));
+            emit error(QString("Failed to read LH STC file: %1").arg(QString::fromStdString(stc.error().what())));
         }
     }
 
@@ -121,13 +119,11 @@ void StcLoadingWorker::process()
 
     // Load RH STC file
     if (!m_rhPath.isEmpty()) {
-        QFile file(m_rhPath);
-        INVLIB::InvSourceEstimate stc;
-        if (INVLIB::InvSourceEstimate::read(file, stc)) {
-            m_stcRh = stc;
+        if (auto stc = INVLIB::InvSourceEstimate::read(m_rhPath.toStdU16String())) {
+            m_stcRh = std::move(*stc);
             m_hasRh = true;
         } else {
-            emit error(QString("Failed to read RH STC file: %1").arg(m_rhPath));
+            emit error(QString("Failed to read RH STC file: %1").arg(QString::fromStdString(stc.error().what())));
         }
     }
 

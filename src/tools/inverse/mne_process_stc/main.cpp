@@ -90,12 +90,12 @@ int main(int argc, char* argv[])
     }
 
     //--- Read input STC ---
-    QFile inFile(parser.value(inOpt));
-    InvSourceEstimate stc;
-    if (!InvSourceEstimate::read(inFile, stc)) {
-        qCritical() << "Failed to read STC file:" << parser.value(inOpt);
+    auto read = InvSourceEstimate::read(parser.value(inOpt).toStdU16String());
+    if (!read) {
+        qCritical() << read.error().what();
         return 1;
     }
+    InvSourceEstimate& stc = *read;
     //--- Apply scaling ---
     if (parser.isSet(scaleByOpt)) {
         bool ok;
@@ -126,8 +126,7 @@ int main(int argc, char* argv[])
 
     //--- Write binary STC ---
     if (parser.isSet(outOpt)) {
-        QFile outFile(parser.value(outOpt));
-        if (!stc.write(outFile)) {
+        if (!stc.write(parser.value(outOpt).toStdU16String())) {
             qCritical() << "Failed to write output STC.";
             return 1;
         }

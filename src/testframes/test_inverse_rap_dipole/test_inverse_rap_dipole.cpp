@@ -474,7 +474,7 @@ private slots:
         mn.doInverseSetup(evoked.nave, false);
         InvSourceEstimate stc = mn.calculateInverse(picked.data, tmin, tstep, false);
 
-        QVERIFY(!stc.isEmpty());
+        QVERIFY(!stc.is_empty());
         QCOMPARE((int)stc.data.rows(), invOp.nsource);
         QVERIFY(stc.data.allFinite());
         QVERIFY(stc.data.minCoeff() >= 0.0);
@@ -517,7 +517,7 @@ private slots:
         mn.doInverseSetup(evoked.nave, false);
         InvSourceEstimate stc = mn.calculateInverse(picked.data, tmin, tstep, false);
 
-        QVERIFY(!stc.isEmpty());
+        QVERIFY(!stc.is_empty());
         QCOMPARE((int)stc.data.rows(), invOp.nsource);
         QVERIFY(stc.data.allFinite());
     }
@@ -559,7 +559,7 @@ private slots:
         mn.doInverseSetup(evoked.nave, false);
         InvSourceEstimate stc = mn.calculateInverse(picked.data, tmin, tstep, false);
 
-        QVERIFY(!stc.isEmpty());
+        QVERIFY(!stc.is_empty());
         QCOMPARE((int)stc.data.rows(), invOp.nsource);
         QVERIFY(stc.data.allFinite());
     }

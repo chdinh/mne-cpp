@@ -206,7 +206,7 @@ private slots:
     void testSourceEstimateDefault()
     {
         InvSourceEstimate stc;
-        QVERIFY(stc.isEmpty());
+        QVERIFY(stc.is_empty());
     }
 
     void testSourceEstimateFromData()
@@ -217,7 +217,7 @@ private slots:
         Eigen::VectorXi vertices = Eigen::VectorXi::LinSpaced(nSources, 0, nSources - 1);
 
         InvSourceEstimate stc(sol, vertices, 0.0f, 0.001f);
-        QVERIFY(!stc.isEmpty());
+        QVERIFY(!stc.is_empty());
         QCOMPARE(stc.data.rows(), nSources);
         QCOMPARE(stc.data.cols(), nTimes);
     }
@@ -249,24 +249,10 @@ private slots:
         QVERIFY(tmpDir.isValid());
         QString stcFile = tmpDir.path() + "/test.stc";
 
-        // Write
-        QFile outFile(stcFile);
-        QVERIFY(outFile.open(QIODevice::WriteOnly));
-        bool written = stc.write(outFile);
-        outFile.close();
-
-        if (written) {
-            // Read back
-            QFile inFile(stcFile);
-            InvSourceEstimate stcRead;
-            bool readOk = InvSourceEstimate::read(inFile, stcRead);
-            if (readOk) {
-                QCOMPARE(stcRead.data.rows(), nSources);
-                QCOMPARE(stcRead.data.cols(), nTimes);
-            }
-        } else {
-            qWarning() << "STC write failed — code path exercised";
-        }
+        QVERIFY(stc.write(stcFile.toStdU16String()));
+        const InvSourceEstimate stcRead = InvSourceEstimate::read(stcFile.toStdU16String()).value();
+        QCOMPARE(stcRead.data.rows(), nSources);
+        QCOMPARE(stcRead.data.cols(), nTimes);
     }
 
     void testTokenize()
@@ -348,7 +334,7 @@ private slots:
         InvSourceEstimate reconstructed = INVLIB::fromTokens(tokens);
 
         // Verify basic properties match
-        QVERIFY(!reconstructed.isEmpty());
+        QVERIFY(!reconstructed.is_empty());
         QCOMPARE(reconstructed.data.rows(), stc.data.rows());
         QCOMPARE(reconstructed.data.cols(), stc.data.cols());
     }
@@ -362,7 +348,7 @@ private slots:
 
         InvSourceEstimate stc(sol, vertices, 0.0f, 0.001f);
         InvSourceEstimate copy(stc);
-        QVERIFY(!copy.isEmpty());
+        QVERIFY(!copy.is_empty());
         QCOMPARE(copy.data.rows(), nSources);
         QCOMPARE(copy.data.cols(), nTimes);
     }
@@ -375,7 +361,7 @@ private slots:
         Eigen::VectorXi vertices = Eigen::VectorXi::LinSpaced(nSources, 0, nSources - 1);
 
         InvSourceEstimate stc(sol, vertices, 0.0f, 0.001f);
-        QVERIFY(!stc.isEmpty());
+        QVERIFY(!stc.is_empty());
 
         stc.clear();
         // clear() sets tstep=0, but isEmpty() checks tstep==-1

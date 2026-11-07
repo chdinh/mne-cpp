@@ -226,7 +226,7 @@ private slots:
     void sourceEstimate_defaultCtor()
     {
         InvSourceEstimate se;
-        QVERIFY(se.isEmpty());
+        QVERIFY(se.is_empty());
         QCOMPARE(se.samples(), 0);
     }
 
@@ -238,7 +238,7 @@ private slots:
             verts(i) = i;
 
         InvSourceEstimate se(data, verts, 0.0f, 0.001f);
-        QVERIFY(!se.isEmpty());
+        QVERIFY(!se.is_empty());
         QCOMPARE(se.samples(), 5);
         QCOMPARE(se.data.rows(), (Eigen::Index)10);
     }
@@ -251,7 +251,7 @@ private slots:
         InvSourceEstimate se(data, verts, 0.1f, 0.002f);
 
         InvSourceEstimate copy(se);
-        QVERIFY(!copy.isEmpty());
+        QVERIFY(!copy.is_empty());
         QCOMPARE(copy.samples(), 3);
         QVERIFY(copy.data.isApprox(se.data));
     }
@@ -275,7 +275,7 @@ private slots:
         VectorXi verts(5);
         verts << 0, 1, 2, 3, 4;
         InvSourceEstimate se(data, verts, 0.0f, 0.001f);
-        QVERIFY(!se.isEmpty());
+        QVERIFY(!se.is_empty());
         se.clear();
         // After clear, check data is zeroed or empty
         QCOMPARE(se.data.rows(), (Eigen::Index)0);
@@ -290,7 +290,7 @@ private slots:
 
         InvSourceEstimate se2;
         se2 = se;
-        QVERIFY(!se2.isEmpty());
+        QVERIFY(!se2.is_empty());
         QCOMPARE(se2.samples(), 3);
     }
 

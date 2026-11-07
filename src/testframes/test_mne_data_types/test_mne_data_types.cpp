@@ -314,7 +314,7 @@ private slots:
     void sourceEstimate_defaultCtor()
     {
         InvSourceEstimate stc;
-        QVERIFY(stc.isEmpty());
+        QVERIFY(stc.is_empty());
     }
 
     void sourceEstimate_paramCtor()
@@ -327,7 +327,7 @@ private slots:
         float tstep = 0.001f;
 
         InvSourceEstimate stc(data, vertices, tmin, tstep);
-        QVERIFY(!stc.isEmpty());
+        QVERIFY(!stc.is_empty());
         QCOMPARE(stc.data.rows(), 100);
         QCOMPARE(stc.data.cols(), 10);
     }
@@ -394,7 +394,7 @@ private slots:
         InvSourceEstimate stc(data, vertices, 0.0f, 0.001f);
 
         InvSourceEstimate copy(stc);
-        QVERIFY(!copy.isEmpty());
+        QVERIFY(!copy.is_empty());
         QCOMPARE(copy.data.rows(), 50);
         QCOMPARE(copy.data.cols(), 5);
     }
@@ -418,7 +418,7 @@ private slots:
         for (int i = 0; i < 10; ++i)
             vertices(i) = i;
         InvSourceEstimate stc(data, vertices, 0.0f, 0.001f);
-        QVERIFY(!stc.isEmpty());
+        QVERIFY(!stc.is_empty());
 
         stc.clear();
         // After clear, data is reset to empty matrix

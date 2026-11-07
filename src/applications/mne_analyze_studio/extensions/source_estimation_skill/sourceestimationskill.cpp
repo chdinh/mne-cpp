@@ -241,7 +241,7 @@ QJsonObject SourceEstimationSkill::executeSkill(const WorkflowNode& nodeState)
 
     InvSourceEstimate stc = mnNorm.calculateInverse(data, tminSample, tstep);
 
-    if (stc.isEmpty()) {
+    if (stc.is_empty()) {
         return QJsonObject{
             {"status", "error"},
             {"message", QString("Source estimation node `%1`: inverse calculation returned an empty estimate.").arg(nodeState.uid)}};
@@ -249,8 +249,7 @@ QJsonObject SourceEstimationSkill::executeSkill(const WorkflowNode& nodeState)
 
     // ── Write STC file ────────────────────────────────────────────────────────
     const QString stcPath = deriveStcPath(rawPath, method);
-    QFile stcFile(stcPath);
-    if (!stc.write(stcFile)) {
+    if (!stc.write(stcPath.toStdU16String())) {
         return QJsonObject{
             {"status", "error"},
             {"message", QString("Source estimation node `%1`: failed to write STC file `%2`.").arg(nodeState.uid, stcPath)}};

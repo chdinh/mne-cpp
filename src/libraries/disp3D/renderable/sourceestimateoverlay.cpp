@@ -47,14 +47,12 @@ SourceEstimateOverlay::~SourceEstimateOverlay()
 
 bool SourceEstimateOverlay::loadStc(const QString& path, int hemi)
 {
-    QFile file(path);
-    // Note: InvSourceEstimate::read() opens the file internally, don't open it here
-
-    INVLIB::InvSourceEstimate stc;
-    if (!INVLIB::InvSourceEstimate::read(file, stc)) {
-        qWarning() << "SourceEstimateOverlay::loadStc - Failed to read STC file:" << path;
+    auto read = INVLIB::InvSourceEstimate::read(path.toStdU16String());
+    if (!read) {
+        qWarning() << "SourceEstimateOverlay::loadStc -" << read.error().what();
         return false;
     }
+    INVLIB::InvSourceEstimate& stc = *read;
 
     if (hemi == 0) {
         m_stcLh = stc;
@@ -110,7 +108,7 @@ void SourceEstimateOverlay::applyToSurface(BrainSurface* surface, int timeIndex)
         return; // No data for this hemisphere
     }
 
-    if (stc->isEmpty())
+    if (stc->is_empty())
         return;
 
     // Clamp time index
@@ -316,7 +314,7 @@ void SourceEstimateOverlay::computeInterpolationMatrix(BrainSurface* surface, in
         return;
     }
 
-    if (stc->isEmpty())
+    if (stc->is_empty())
         return;
 
     qDebug() << "SourceEstimateOverlay: Computing interpolation matrix for hemi" << hemi;

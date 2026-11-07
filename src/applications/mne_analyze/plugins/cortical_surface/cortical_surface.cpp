@@ -651,21 +651,16 @@ void CorticalSurface::refreshSceneLayers()
 
 bool CorticalSurface::loadSourceEstimate(const QString& path)
 {
-    QFile file(path);
-    if (!QFileInfo::exists(path)) {
-        qWarning() << "[CorticalSurface] STC file not found:" << path;
+    auto stc = InvSourceEstimate::read(path.toStdU16String());
+    if (!stc) {
+        qWarning() << "[CorticalSurface]" << stc.error().what();
         return false;
     }
-    InvSourceEstimate stc;
-    if (!InvSourceEstimate::read(file, stc)) {
-        qWarning() << "[CorticalSurface] InvSourceEstimate::read failed for" << path;
-        return false;
-    }
-    if (stc.isEmpty() || stc.data.rows() == 0) {
+    if (stc->is_empty() || stc->data.rows() == 0) {
         qWarning() << "[CorticalSurface] STC produced an empty estimate:" << path;
         return false;
     }
-    setSourceEstimate(stc);
+    setSourceEstimate(*stc);
     m_lastStcDir = QFileInfo(path).absolutePath();
     return true;
 }
@@ -992,7 +987,7 @@ void CorticalSurface::refreshOverlayLayer()
         return;
     }
     const QString layerId = QStringLiteral("stc_overlay");
-    if (m_stc.isEmpty() || m_stc.data.size() == 0) {
+    if (m_stc.is_empty() || m_stc.data.size() == 0) {
         m_pScene->removeLayer(layerId);
         return;
     }
@@ -1207,7 +1202,7 @@ QVector<CorticalPickedVertex> CorticalSurface::pickedVertices() const
 
 int CorticalSurface::findStcRowFor(int hemi, int vertex) const
 {
-    if (m_stc.isEmpty() || m_stc.vertices.size() == 0) {
+    if (m_stc.is_empty() || m_stc.vertices.size() == 0) {
         return -1;
     }
     // Convention used across mne-cpp / mne-python single-VectorXi stacking:
@@ -1476,17 +1471,17 @@ bool CorticalSurface::runComputeSourceEstimate(const QString& fwdPath,
             mnEst.setELoretaOptions();
         }
         stc = mnEst.calculateInverse(evoked);
-        ok = !stc.isEmpty();
+        ok = !stc.is_empty();
     } else if (m == QStringLiteral("MxNE")) {
         const Eigen::MatrixXd& gain = fwd.sol->data;
         InvMxneResult res = InvMxne::compute(gain, evoked.data, opts.alpha);
         stc = res.stc;
-        ok = !stc.isEmpty();
+        ok = !stc.is_empty();
     } else if (m == QStringLiteral("Gamma-MAP")) {
         const Eigen::MatrixXd& gain = fwd.sol->data;
         InvGammaMapResult res = InvGammaMap::compute(gain, evoked.data, noiseCov.data);
         stc = res.stc;
-        ok = !stc.isEmpty();
+        ok = !stc.is_empty();
     } else if (m == QStringLiteral("CMNE")) {
         InvCMNESettings settings;
         settings.onnxModelPath = opts.onnxPath;
@@ -1495,7 +1490,7 @@ bool CorticalSurface::runComputeSourceEstimate(const QString& fwdPath,
         const Eigen::MatrixXd srcCov = Eigen::MatrixXd::Identity(gain.cols(), gain.cols());
         InvCMNEResult res = InvCMNE::compute(evoked.data, gain, noiseCov.data, srcCov, settings);
         stc = res.stcCmne;
-        ok = !stc.isEmpty();
+        ok = !stc.is_empty();
     } else {
         qWarning() << "[CorticalSurface] Unknown inverse method" << m;
     }
@@ -1750,7 +1745,7 @@ int CorticalSurface::loadAnnot(const QString& path)
 
 bool CorticalSurface::extractLabelTimeCourse(const FsLabel& lbl, const QString& mode)
 {
-    if (lbl.isEmpty() || m_stc.isEmpty()) {
+    if (lbl.isEmpty() || m_stc.is_empty()) {
         return false;
     }
     QList<FsLabel> single;

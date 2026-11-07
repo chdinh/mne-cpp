@@ -73,7 +73,7 @@ private slots:
         QVERIFY(InvSourceEstimateIO::writeCsv(stc, path));
 
         auto loaded = InvSourceEstimateIO::readCsv(path);
-        QVERIFY(!loaded.isEmpty());
+        QVERIFY(!loaded.is_empty());
         QCOMPARE(loaded.data.rows(), stc.data.rows());
         QCOMPARE(loaded.data.cols(), stc.data.cols());
 
@@ -99,7 +99,7 @@ private slots:
         QVERIFY(InvSourceEstimateIO::writeCsv(stc, path, '\t'));
 
         auto loaded = InvSourceEstimateIO::readCsv(path, '\t');
-        QVERIFY(!loaded.isEmpty());
+        QVERIFY(!loaded.is_empty());
         QCOMPARE(loaded.data.rows(), static_cast<Index>(2));
         QCOMPARE(loaded.data.cols(), static_cast<Index>(4));
     }
@@ -140,7 +140,7 @@ private slots:
     void testReadNonexistent()
     {
         auto stc = InvSourceEstimateIO::readCsv("/nonexistent/path.csv");
-        QVERIFY(stc.isEmpty());
+        QVERIFY(stc.is_empty());
     }
 
     void testCsvPreservesTimingInfo()
@@ -178,12 +178,8 @@ private slots:
         verts << 3, 17, 42, 1000, 5, 99, 70000;
         const QString dir = QStringLiteral(MNE_STC_DATA_DIR);
 
-        InvSourceEstimate lh;
-        InvSourceEstimate rh;
-        QFile lhFile(dir + "/py-lh.stc");
-        QFile rhFile(dir + "/py-rh.stc");
-        QVERIFY(InvSourceEstimate::read(lhFile, lh));
-        QVERIFY(InvSourceEstimate::read(rhFile, rh));
+        const InvSourceEstimate lh((dir + "/py-lh.stc").toStdU16String());
+        const InvSourceEstimate rh((dir + "/py-rh.stc").toStdU16String());
         QCOMPARE(lh.vertices, verts.head(4));
         QCOMPARE(rh.vertices, verts.tail(3));
         QVERIFY((lh.data - ref.topRows(4)).cwiseAbs().maxCoeff() < 1e-6);
@@ -194,7 +190,7 @@ private slots:
         QVERIFY(std::abs(lh.times[3] + 0.088f) < 1e-6f);
 
         for (const QString& hemi : {QStringLiteral("lh"), QStringLiteral("rh")}) {
-            const InvSourceEstimate w = InvSourceEstimate::read_w(dir + "/pyw-" + hemi + ".w");
+            const InvSourceEstimate w = InvSourceEstimate::read_w((dir + "/pyw-" + hemi + ".w").toStdU16String()).value();
             const int offset = hemi == "lh" ? 0 : 4;
             QCOMPARE(w.vertices, verts.segment(offset, w.vertices.size()));
             QVERIFY((w.data.col(0) - ref.col(0).segment(offset, w.vertices.size())).cwiseAbs().maxCoeff() < 1e-6);
@@ -207,24 +203,28 @@ private slots:
             return f.open(QIODevice::ReadOnly) ? f.readAll() : QByteArray();
         };
         InvSourceEstimate both(ref, verts, -0.1f, 0.004f);
-        QTest::ignoreMessage(QtWarningMsg, QRegularExpression("nVerticesLh is -1"));
-        QVERIFY(!both.writeHemispherePair(tmp.filePath("cpp")));
+        QCOMPARE(both.write_hemisphere_pair(tmp.filePath("cpp").toStdU16String()).error().code, UTILSLIB::ErrorCode::Format);
         both.nVerticesLh = 4;
-        QVERIFY(both.writeHemispherePair(tmp.filePath("cpp-rh.stc")));
+        QVERIFY(both.write_hemisphere_pair(tmp.filePath("cpp-rh.stc").toStdU16String()));
         QCOMPARE(bytes(tmp.filePath("cpp-lh.stc")), bytes(dir + "/py-lh.stc"));
         QCOMPARE(bytes(tmp.filePath("cpp-rh.stc")), bytes(dir + "/py-rh.stc"));
-        InvSourceEstimate(ref.col(0).tail(3), verts.tail(3), 0.0f, 0.0f).write_w(tmp.filePath("cpp-rh.w"));
+        QVERIFY(InvSourceEstimate(ref.col(0).tail(3), verts.tail(3), 0.0f, 0.0f).write_w(tmp.filePath("cpp-rh.w").toStdU16String()));
         QCOMPARE(bytes(tmp.filePath("cpp-rh.w")), bytes(dir + "/pyw-rh.w"));
 
         InvSourceEstimate bad(ref, verts.head(4), 0.0f, 1.0f);
         bad.nVerticesLh = 2;
-        QTest::ignoreMessage(QtWarningMsg, QRegularExpression("data has 7 rows"));
-        QVERIFY(!bad.writeHemispherePair(tmp.filePath("bad")));
-        QTest::ignoreMessage(QtWarningMsg, QRegularExpression("Cannot open file"));
-        QVERIFY(InvSourceEstimate::read_w(tmp.filePath("missing.w")).isEmpty());
-        QTest::ignoreMessage(QtWarningMsg, QRegularExpression("Source estimate is empty"));
-        InvSourceEstimate().write_w(tmp.filePath("empty.w"));
+        QCOMPARE(bad.write_hemisphere_pair(tmp.filePath("bad").toStdU16String()).error().code, UTILSLIB::ErrorCode::Format);
+        QCOMPARE(InvSourceEstimate::read_w(tmp.filePath("missing.w").toStdU16String()).error().code, UTILSLIB::ErrorCode::Io);
+        QCOMPARE(InvSourceEstimate().write_w(tmp.filePath("empty.w").toStdU16String()).error().code, UTILSLIB::ErrorCode::Format);
         QVERIFY(!QFile::exists(tmp.filePath("empty.w")));
+        QCOMPARE(InvSourceEstimate::read(tmp.filePath("missing.stc").toStdU16String()).error().code, UTILSLIB::ErrorCode::Io);
+
+        // A file shorter than its header announces is rejected, not padded
+        QFile cut(tmp.filePath("cut-lh.stc"));
+        QVERIFY(cut.open(QIODevice::WriteOnly));
+        cut.write(bytes(dir + "/py-lh.stc").chopped(4));
+        cut.close();
+        QCOMPARE(InvSourceEstimate::read(cut.fileName().toStdU16String()).error().code, UTILSLIB::ErrorCode::Format);
 
         // Label lookup: by vertex and hemisphere (rh starts where vertex numbers drop), or by cluster id.
         FsLabel lhLabel;
@@ -237,12 +237,12 @@ private slots:
         rhLabel.vertices << 70000, 3;
         VectorXi want(3);
         want << 1, 2, 6;
-        QCOMPARE(both.getIndicesByLabel({lhLabel, rhLabel}, false), want);
+        QCOMPARE(both.indices_by_label(std::array{lhLabel, rhLabel}, false), want);
         lhLabel.label_id = 42;
         want.resize(1);
         want << 2;
-        QCOMPARE(both.getIndicesByLabel({lhLabel}, true), want);
-        QVERIFY(both.getIndicesByLabel({}, false).size() == 0);
+        QCOMPARE(both.indices_by_label(std::span(&lhLabel, 1), true), want);
+        QVERIFY(both.indices_by_label({}, false).size() == 0);
     }
 };
 

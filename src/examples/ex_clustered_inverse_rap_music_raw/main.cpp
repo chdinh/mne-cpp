@@ -444,7 +444,7 @@ int main(int argc, char* argv[])
         sourceEstimate.data = dataPicked;
     }
 
-    if (sourceEstimate.isEmpty()) {
+    if (sourceEstimate.is_empty()) {
         return 1;
     }
 
@@ -488,10 +488,12 @@ int main(int argc, char* argv[])
     QString tmpDir = QDir::tempPath();
     QString lhStcPath = tmpDir + "/mnecpp_ex_clustered_inverse_rap_music_raw-lh.stc";
     QString rhStcPath = tmpDir + "/mnecpp_ex_clustered_inverse_rap_music_raw-rh.stc";
-    QFile lhStcFile(lhStcPath);
-    stcLh.write(lhStcFile);
-    QFile rhStcFile(rhStcPath);
-    stcRh.write(rhStcFile);
+    if (auto written = stcLh.write(lhStcPath.toStdU16String()); !written) {
+        qWarning() << written.error().what();
+    }
+    if (auto written = stcRh.write(rhStcPath.toStdU16String()); !written) {
+        qWarning() << written.error().what();
+    }
 
     BrainView* pBrainView = new BrainView();
     BrainTreeModel* pModel = new BrainTreeModel();
@@ -516,8 +518,9 @@ int main(int argc, char* argv[])
     pBrainView->loadSourceEstimate(lhStcPath, rhStcPath);
 
     if (!t_sFileNameStc.isEmpty()) {
-        QFile t_fileClusteredStc(t_sFileNameStc);
-        sourceEstimate.write(t_fileClusteredStc);
+        if (auto written = sourceEstimate.write(t_sFileNameStc.toStdU16String()); !written) {
+            qWarning() << written.error().what();
+        }
     }
 
     pBrainView->show();

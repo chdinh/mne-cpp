@@ -54,7 +54,7 @@ private slots:
 
         InvSourceEstimate morphed = morph.apply(stc);
 
-        QVERIFY(!morphed.isEmpty());
+        QVERIFY(!morphed.is_empty());
         QCOMPARE(morphed.data.rows(), static_cast<Index>(nTo));
         QCOMPARE(morphed.data.cols(), static_cast<Index>(nTimes));
 
@@ -100,7 +100,7 @@ private slots:
 
         InvSourceEstimate stc;
         InvSourceEstimate result = morph.apply(stc);
-        QVERIFY(result.isEmpty());
+        QVERIFY(result.is_empty());
     }
 
     void testDimensionMismatch()
@@ -123,7 +123,7 @@ private slots:
         InvSourceEstimate stc(data, VectorXi::LinSpaced(5, 0, 4), 0.0f, 0.001f);
 
         InvSourceEstimate result = morph.apply(stc);
-        QVERIFY(result.isEmpty());
+        QVERIFY(result.is_empty());
     }
 
     void testPreservesMetadata()
@@ -168,7 +168,7 @@ private slots:
 
         InvSourceEstimate empty;
         InvSourceEstimate result = morph.apply(empty);
-        QVERIFY(result.isEmpty());
+        QVERIFY(result.is_empty());
     }
 };
 

@@ -210,7 +210,7 @@ int main(int argc, char* argv[])
         InvMinimumNorm minimumNorm(inverse_operator, lambda2, method);
         sourceEstimate = minimumNorm.calculateInverse(evoked);
 
-        if (sourceEstimate.isEmpty())
+        if (sourceEstimate.is_empty())
             return 1;
 
         // View activation time-series
@@ -283,10 +283,12 @@ int main(int argc, char* argv[])
         QString tmpDir = QDir::tempPath();
         QString lhStcPath = tmpDir + "/mnecpp_disp3d-lh.stc";
         QString rhStcPath = tmpDir + "/mnecpp_disp3d-rh.stc";
-        QFile lhStcFile(lhStcPath);
-        stcLh.write(lhStcFile);
-        QFile rhStcFile(rhStcPath);
-        stcRh.write(rhStcFile);
+        if (auto written = stcLh.write(lhStcPath.toStdU16String()); !written) {
+            qWarning() << written.error().what();
+        }
+        if (auto written = stcRh.write(rhStcPath.toStdU16String()); !written) {
+            qWarning() << written.error().what();
+        }
 
         // Load source estimate and configure visualization
         QObject::connect(pBrainView, &BrainView::sourceEstimateLoaded, [&](int /*nTimePoints*/) {

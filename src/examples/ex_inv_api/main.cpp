@@ -296,12 +296,11 @@ int main(int argc, char* argv[])
     //! [inv_source_estimate_io_usage]
     InvSourceEstimateIO::writeCsv(stc, tmp.filePath("v1-dspm.csv"));
     const InvSourceEstimate fromCsv = InvSourceEstimateIO::readCsv(tmp.filePath("v1-dspm.csv"));
-    QFile stcFile(tmp.filePath("v1-dspm-lh.stc"));
-    InvSourceEstimate(stc).write(stcFile); // MNE .stc format, readable by mne.read_source_estimate
-    QFile stcBack(stcFile.fileName());
-    const InvSourceEstimate fromStc(stcBack);
+    const std::filesystem::path stcPath = tmp.filePath("v1-dspm-lh.stc").toStdU16String();
+    const bool stcWritten = stc.write(stcPath).has_value(); // MNE .stc format, readable by mne.read_source_estimate
+    const InvSourceEstimate fromStc(stcPath);
     //! [inv_source_estimate_io_usage]
-    ok &= expect(fromCsv.data.rows() == 70 && (fromCsv.data - stc.data).norm() <= 1e-6 * stc.data.norm() && fromStc.vertices == stc.vertices && (fromStc.data - stc.data).norm() <= 1e-6 * stc.data.norm(),
+    ok &= expect(stcWritten && fromCsv.data.rows() == 70 && (fromCsv.data - stc.data).norm() <= 1e-6 * stc.data.norm() && fromStc.vertices == stc.vertices && (fromStc.data - stc.data).norm() <= 1e-6 * stc.data.norm(),
                  "InvSourceEstimateIO/InvSourceEstimate: CSV and .stc round trips");
 
     std::println("{}", ok ? "All inv checks passed." : "inv checks FAILED.");

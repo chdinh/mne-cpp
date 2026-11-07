@@ -4035,7 +4035,7 @@ void MainWindow::computeSourceEstimate()
         INVLIB::InvMinimumNorm minimumNorm(m_inverseOperator, lambda2, method);
         INVLIB::InvSourceEstimate sourceEstimate = minimumNorm.calculateInverse(*evoked, pickNormal);
 
-        if (sourceEstimate.isEmpty()) {
+        if (sourceEstimate.is_empty()) {
             failedSets.append(comment);
             continue;
         }
@@ -4060,10 +4060,7 @@ void MainWindow::computeSourceEstimate()
             const QString leftPath = outputDir.filePath(stem + QStringLiteral("-lh.stc"));
             const QString rightPath = outputDir.filePath(stem + QStringLiteral("-rh.stc"));
 
-            QFile leftFile(leftPath);
-            QFile rightFile(rightPath);
-
-            if (!leftHemisphere.write(leftFile) || !rightHemisphere.write(rightFile)) {
+            if (!leftHemisphere.write(leftPath.toStdU16String()) || !rightHemisphere.write(rightPath.toStdU16String())) {
                 failedSets.append(comment);
                 continue;
             }
@@ -4071,8 +4068,7 @@ void MainWindow::computeSourceEstimate()
             writtenFiles << leftPath << rightPath;
         } else {
             const QString outputPath = outputDir.filePath(stem + QStringLiteral(".stc"));
-            QFile outputFile(outputPath);
-            if (!sourceEstimate.write(outputFile)) {
+            if (!sourceEstimate.write(outputPath.toStdU16String())) {
                 failedSets.append(comment);
                 continue;
             }

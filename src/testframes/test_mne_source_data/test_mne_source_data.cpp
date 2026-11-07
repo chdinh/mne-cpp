@@ -433,7 +433,7 @@ private slots:
         float tstep = 0.001f;
 
         InvSourceEstimate stc(data, allVertno, tmin, tstep);
-        QVERIFY(!stc.isEmpty());
+        QVERIFY(!stc.is_empty());
         QCOMPARE(stc.samples(), nTimes);
         QCOMPARE(stc.data.rows(), (Index)totalVerts);
     }

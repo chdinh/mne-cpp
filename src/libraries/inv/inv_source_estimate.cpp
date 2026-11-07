@@ -24,17 +24,17 @@
 
 #include "inv_source_estimate.h"
 
-//=============================================================================================================
-// QT INCLUDES
-//=============================================================================================================
+#include <utils/string_utils.h>
 
-#include <QFile>
-#include <QDataStream>
-#include <QSharedPointer>
-#include <QDebug>
+#include <QtGlobal>
 
-#include <stdexcept>
-#include <QtEndian>
+#include <algorithm>
+#include <array>
+#include <bit>
+#include <cstdint>
+#include <fstream>
+#include <string>
+
 //=============================================================================================================
 // USED NAMESPACES
 //=============================================================================================================
@@ -42,450 +42,278 @@
 using namespace INVLIB;
 using namespace FSLIB;
 using namespace Eigen;
+using UTILSLIB::ErrorCode;
+using UTILSLIB::Expected;
+using UTILSLIB::fail;
+
+//=============================================================================================================
+// DEFINE GLOBAL METHODS
+//=============================================================================================================
+
+namespace
+{
+
+// Big-endian 4-byte values, as MNE-C and mne-python store .stc and .w files.
+template<typename T>
+bool readBig(std::istream& in, T& value)
+{
+    static_assert(sizeof(T) == 4);
+    std::array<char, 4> bytes{};
+    if (!in.read(bytes.data(), 4)) {
+        return false;
+    }
+    if constexpr (std::endian::native == std::endian::little) {
+        std::ranges::reverse(bytes);
+    }
+    value = std::bit_cast<T>(bytes);
+    return true;
+}
+
+template<typename T>
+void writeBig(std::ostream& out, T value)
+{
+    static_assert(sizeof(T) == 4);
+    auto bytes = std::bit_cast<std::array<char, 4>>(value);
+    if constexpr (std::endian::native == std::endian::little) {
+        std::ranges::reverse(bytes);
+    }
+    out.write(bytes.data(), 4);
+}
+
+// 3-byte big-endian unsigned integers of .w files
+bool readBig24(std::istream& in, std::int32_t& value)
+{
+    std::array<unsigned char, 3> bytes{};
+    if (!in.read(reinterpret_cast<char*>(bytes.data()), 3)) {
+        return false;
+    }
+    value = (std::int32_t{bytes[0]} << 16) | (std::int32_t{bytes[1]} << 8) | std::int32_t{bytes[2]};
+    return true;
+}
+
+void writeBig24(std::ostream& out, std::int32_t value)
+{
+    const std::array<char, 3> bytes{static_cast<char>((value >> 16) & 0xFF), static_cast<char>((value >> 8) & 0xFF), static_cast<char>(value & 0xFF)};
+    out.write(bytes.data(), 3);
+}
+
+} // namespace
 
 //=============================================================================================================
 // DEFINE MEMBER METHODS
 //=============================================================================================================
 
-InvSourceEstimate::InvSourceEstimate()
-: tmin(0)
-, tstep(-1)
-, nVerticesLh(-1)
-, method(InvEstimateMethod::Unknown)
-, sourceSpaceType(InvSourceSpaceType::Unknown)
-, orientationType(InvOrientationType::Unknown)
+InvSourceEstimate::InvSourceEstimate(MatrixXd data, VectorXi vertices, float tmin, float tstep)
+: data(std::move(data))
+, vertices(std::move(vertices))
+, tmin(tmin)
+, tstep(tstep)
 {
+    update_times();
 }
 
 //=============================================================================================================
 
-InvSourceEstimate::InvSourceEstimate(const MatrixXd& p_sol, const VectorXi& p_vertices, float p_tmin, float p_tstep)
-: data(p_sol)
-, vertices(p_vertices)
-, tmin(p_tmin)
-, tstep(p_tstep)
-, nVerticesLh(-1)
-, method(InvEstimateMethod::Unknown)
-, sourceSpaceType(InvSourceSpaceType::Unknown)
-, orientationType(InvOrientationType::Unknown)
+InvSourceEstimate::InvSourceEstimate(const std::filesystem::path& path)
+: InvSourceEstimate(read(path).value())
 {
-    this->update_times();
-}
-
-//=============================================================================================================
-
-InvSourceEstimate::InvSourceEstimate(const InvSourceEstimate& p_SourceEstimate)
-: data(p_SourceEstimate.data)
-, vertices(p_SourceEstimate.vertices)
-, times(p_SourceEstimate.times)
-, tmin(p_SourceEstimate.tmin)
-, tstep(p_SourceEstimate.tstep)
-, nVerticesLh(p_SourceEstimate.nVerticesLh)
-, method(p_SourceEstimate.method)
-, sourceSpaceType(p_SourceEstimate.sourceSpaceType)
-, orientationType(p_SourceEstimate.orientationType)
-, positions(p_SourceEstimate.positions)
-, couplings(p_SourceEstimate.couplings)
-, focalDipoles(p_SourceEstimate.focalDipoles)
-, connectivity(p_SourceEstimate.connectivity)
-{
-}
-
-//=============================================================================================================
-
-InvSourceEstimate::InvSourceEstimate(QIODevice& p_IODevice)
-: tmin(0)
-, tstep(-1)
-, nVerticesLh(-1)
-, method(InvEstimateMethod::Unknown)
-, sourceSpaceType(InvSourceSpaceType::Unknown)
-, orientationType(InvOrientationType::Unknown)
-{
-    if (!read(p_IODevice, *this)) {
-        throw std::runtime_error("Source estimation not found");
-    }
 }
 
 //=============================================================================================================
 
 void InvSourceEstimate::clear()
 {
-    data = MatrixXd();
-    vertices = VectorXi();
-    times = RowVectorXf();
-    tmin = 0;
-    tstep = 0;
-    nVerticesLh = -1;
-    method = InvEstimateMethod::Unknown;
-    sourceSpaceType = InvSourceSpaceType::Unknown;
-    orientationType = InvOrientationType::Unknown;
-    positions = MatrixX3f();
-    couplings.clear();
-    focalDipoles.clear();
-    connectivity.clear();
+    *this = InvSourceEstimate();
 }
 
 //=============================================================================================================
 
-InvSourceEstimate InvSourceEstimate::reduce(qint32 start, qint32 n)
+InvSourceEstimate InvSourceEstimate::reduce(int start, int n) const
 {
-    InvSourceEstimate p_sourceEstimateReduced;
-
-    qint32 rows = this->data.rows();
-
-    p_sourceEstimateReduced.data = MatrixXd::Zero(rows, n);
-    p_sourceEstimateReduced.data = this->data.block(0, start, rows, n);
-    p_sourceEstimateReduced.vertices = this->vertices;
-    p_sourceEstimateReduced.times = RowVectorXf::Zero(n);
-    p_sourceEstimateReduced.times = this->times.block(0, start, 1, n);
-    p_sourceEstimateReduced.tmin = p_sourceEstimateReduced.times(0);
-    p_sourceEstimateReduced.tstep = this->tstep;
-    p_sourceEstimateReduced.method = this->method;
-    p_sourceEstimateReduced.sourceSpaceType = this->sourceSpaceType;
-    p_sourceEstimateReduced.orientationType = this->orientationType;
-    p_sourceEstimateReduced.positions = this->positions;
-    p_sourceEstimateReduced.couplings = this->couplings;
-    p_sourceEstimateReduced.focalDipoles = this->focalDipoles;
-    p_sourceEstimateReduced.connectivity = this->connectivity;
-
-    return p_sourceEstimateReduced;
+    InvSourceEstimate reduced = *this;
+    reduced.data = data.middleCols(start, n);
+    reduced.times = times.segment(start, n);
+    reduced.tmin = reduced.times(0);
+    return reduced;
 }
 
 //=============================================================================================================
 
-bool InvSourceEstimate::read(QIODevice& p_IODevice, InvSourceEstimate& p_stc)
+Expected<InvSourceEstimate> InvSourceEstimate::read(const std::filesystem::path& path)
 {
-    QSharedPointer<QDataStream> t_pStream(new QDataStream(&p_IODevice));
-
-    t_pStream->setFloatingPointPrecision(QDataStream::SinglePrecision);
-    t_pStream->setByteOrder(QDataStream::BigEndian);
-    t_pStream->setVersion(QDataStream::Qt_5_0);
-
-    if (!t_pStream->device()->open(QIODevice::ReadOnly))
-        return false;
-
-    QFile* t_pFile = qobject_cast<QFile*>(&p_IODevice);
-    if (t_pFile)
-        qInfo("Reading source estimate from %s...", t_pFile->fileName().toUtf8().constData());
-    else
-        qInfo("Reading source estimate...");
-
-    // read start time in ms
-    *t_pStream >> p_stc.tmin;
-    p_stc.tmin /= 1000;
-    // read sampling rate in ms
-    *t_pStream >> p_stc.tstep;
-    p_stc.tstep /= 1000;
-    // read number of vertices
-    quint32 t_nVertices;
-    *t_pStream >> t_nVertices;
-    p_stc.vertices = VectorXi(t_nVertices);
-    // read the vertex indices
-    for (quint32 i = 0; i < t_nVertices; ++i)
-        *t_pStream >> p_stc.vertices[i];
-    // read the number of timepts
-    quint32 t_nTimePts;
-    *t_pStream >> t_nTimePts;
-    //
-    // read the data
-    //
-    p_stc.data = MatrixXd(t_nVertices, t_nTimePts);
-    for (qint32 i = 0; i < p_stc.data.array().size(); ++i) {
-        float value;
-        *t_pStream >> value;
-        p_stc.data.array()(i) = value;
+    const std::string file = UTILSLIB::utf8FromPath(path);
+    std::ifstream in(path, std::ios::binary);
+    if (!in) {
+        return fail(ErrorCode::Io, "cannot read {}", file);
     }
-
-    //Update time vector
-    p_stc.update_times();
-
-    // close the file
-    t_pStream->device()->close();
-
-    qInfo("[done]");
-
-    return true;
-}
-
-//=============================================================================================================
-
-bool InvSourceEstimate::write(QIODevice& p_IODevice)
-{
-    // Create the file and save the essentials
-    QSharedPointer<QDataStream> t_pStream(new QDataStream(&p_IODevice));
-
-    t_pStream->setFloatingPointPrecision(QDataStream::SinglePrecision);
-    t_pStream->setByteOrder(QDataStream::BigEndian);
-    t_pStream->setVersion(QDataStream::Qt_5_0);
-
-    if (!t_pStream->device()->open(QIODevice::WriteOnly)) {
-        qWarning("Failed to write source estimate!");
-        return false;
+    // Times in ms, the vertex numbers, then the data time point by time point
+    InvSourceEstimate stc;
+    std::uint32_t nVertices = 0;
+    if (!readBig(in, stc.tmin) || !readBig(in, stc.tstep) || !readBig(in, nVertices)) {
+        return fail(ErrorCode::Format, "{} is not a source estimate", file);
     }
-
-    QFile* t_pFile = qobject_cast<QFile*>(&p_IODevice);
-    if (t_pFile)
-        qInfo("Write source estimate to %s...", t_pFile->fileName().toUtf8().constData());
-    else
-        qInfo("Write source estimate...");
-
-    // write start time in ms
-    *t_pStream << static_cast<float>(1000 * this->tmin);
-    // write sampling rate in ms
-    *t_pStream << static_cast<float>(1000 * this->tstep);
-    // write number of vertices
-    *t_pStream << static_cast<quint32>(this->vertices.size());
-    // write the vertex indices
-    for (qint32 i = 0; i < this->vertices.size(); ++i)
-        *t_pStream << static_cast<quint32>(this->vertices[i]);
-    // write the number of timepts
-    *t_pStream << static_cast<quint32>(this->data.cols());
-    //
-    // write the data
-    //
-    for (qint32 i = 0; i < this->data.array().size(); ++i)
-        *t_pStream << static_cast<float>(this->data.array()(i));
-
-    // close the file
-    t_pStream->device()->close();
-
-    qInfo("[done]");
-    return true;
-}
-
-//=============================================================================================================
-
-bool InvSourceEstimate::writeHemispherePair(const QString& sBasePath)
-{
-    if (nVerticesLh < 0 || nVerticesLh > vertices.size()) {
-        qWarning("InvSourceEstimate::writeHemispherePair - nVerticesLh is %d for %lld vertices."
-                 " The hemisphere split point is unknown, cannot write an MNE compatible pair.",
-                 nVerticesLh, static_cast<long long>(vertices.size()));
-        return false;
-    }
-
-    if (data.rows() != vertices.size()) {
-        qWarning("InvSourceEstimate::writeHemispherePair - data has %lld rows but there are"
-                 " %lld vertices.",
-                 static_cast<long long>(data.rows()), static_cast<long long>(vertices.size()));
-        return false;
-    }
-
-    // Accept a path that already carries one of the usual suffixes so callers
-    // can pass back a name they got from a file dialog.
-    QString sBase = sBasePath;
-    for (const QString& sSuffix : {QStringLiteral("-lh.stc"),
-                                   QStringLiteral("-rh.stc"),
-                                   QStringLiteral(".stc")}) {
-        if (sBase.endsWith(sSuffix, Qt::CaseInsensitive)) {
-            sBase.chop(sSuffix.size());
-            break;
+    stc.tmin /= 1000.0f;
+    stc.tstep /= 1000.0f;
+    stc.vertices.resize(static_cast<Index>(nVertices));
+    for (Index i = 0; i < stc.vertices.size(); ++i) {
+        if (!readBig(in, stc.vertices[i])) {
+            return fail(ErrorCode::Format, "{} ends inside its vertex list", file);
         }
     }
-
-    const int iNumRh = static_cast<int>(vertices.size()) - nVerticesLh;
-
-    struct Hemisphere
-    {
-        QString sPath;
-        int iOffset;
-        int iCount;
-    };
-
-    const Hemisphere hemispheres[2] = {
-        {sBase + QStringLiteral("-lh.stc"), 0, nVerticesLh},
-        {sBase + QStringLiteral("-rh.stc"), nVerticesLh, iNumRh}};
-
-    for (const Hemisphere& hemi : hemispheres) {
-        InvSourceEstimate stcHemi;
-        stcHemi.tmin = this->tmin;
-        stcHemi.tstep = this->tstep;
-        stcHemi.times = this->times;
-        stcHemi.vertices = this->vertices.segment(hemi.iOffset, hemi.iCount);
-        stcHemi.data = this->data.block(hemi.iOffset, 0, hemi.iCount, this->data.cols());
-
-        QFile file(hemi.sPath);
-        if (!stcHemi.write(file)) {
-            qWarning("InvSourceEstimate::writeHemispherePair - Failed to write %s",
-                     hemi.sPath.toUtf8().constData());
-            return false;
+    std::uint32_t nTimes = 0;
+    if (!readBig(in, nTimes)) {
+        return fail(ErrorCode::Format, "{} ends before its number of time points", file);
+    }
+    stc.data.resize(static_cast<Index>(nVertices), static_cast<Index>(nTimes));
+    for (Index i = 0; i < stc.data.size(); ++i) {
+        float value = 0.0f;
+        if (!readBig(in, value)) {
+            return fail(ErrorCode::Format, "{} ends inside its data", file);
         }
+        stc.data.data()[i] = value;
     }
-
-    return true;
-}
-
-//=============================================================================================================
-
-InvSourceEstimate InvSourceEstimate::read_w(const QString& path)
-{
-    QFile file(path);
-    if (!file.open(QIODevice::ReadOnly)) {
-        qWarning("InvSourceEstimate::read_w - Cannot open file %s", path.toUtf8().constData());
-        return InvSourceEstimate();
-    }
-
-    QDataStream stream(&file);
-    stream.setByteOrder(QDataStream::BigEndian);
-    stream.setFloatingPointPrecision(QDataStream::SinglePrecision);
-
-    // Skip 2-byte magic
-    quint16 magic;
-    stream >> magic;
-
-    // Read number of vertices (3-byte big-endian integer)
-    quint8 b0, b1, b2;
-    stream >> b0 >> b1 >> b2;
-    qint32 nVertices = (static_cast<qint32>(b0) << 16) | (static_cast<qint32>(b1) << 8) | static_cast<qint32>(b2);
-
-    VectorXi vertices(nVertices);
-    MatrixXd data(nVertices, 1);
-
-    for (qint32 i = 0; i < nVertices; ++i) {
-        // Read 3-byte vertex index
-        stream >> b0 >> b1 >> b2;
-        vertices[i] = (static_cast<qint32>(b0) << 16) | (static_cast<qint32>(b1) << 8) | static_cast<qint32>(b2);
-
-        // Read 4-byte big-endian float
-        float val;
-        stream >> val;
-        data(i, 0) = static_cast<double>(val);
-    }
-
-    file.close();
-
-    InvSourceEstimate stc(data, vertices, 0.0f, 0.0f);
+    stc.update_times();
     return stc;
 }
 
 //=============================================================================================================
 
-void InvSourceEstimate::write_w(const QString& path) const
+Expected<void> InvSourceEstimate::write(const std::filesystem::path& path) const
 {
-    if (isEmpty()) {
-        qWarning("InvSourceEstimate::write_w - Source estimate is empty");
-        return;
+    std::ofstream out(path, std::ios::binary | std::ios::trunc);
+    if (!out) {
+        return fail(ErrorCode::Io, "cannot write {}", UTILSLIB::utf8FromPath(path));
     }
-
-    QFile file(path);
-    if (!file.open(QIODevice::WriteOnly)) {
-        qWarning("InvSourceEstimate::write_w - Cannot open file %s for writing", path.toUtf8().constData());
-        return;
+    writeBig(out, 1000.0f * tmin);
+    writeBig(out, 1000.0f * tstep);
+    writeBig(out, static_cast<std::uint32_t>(vertices.size()));
+    for (const int vertex : vertices) {
+        writeBig(out, static_cast<std::uint32_t>(vertex));
     }
-
-    QDataStream stream(&file);
-    stream.setByteOrder(QDataStream::BigEndian);
-    stream.setFloatingPointPrecision(QDataStream::SinglePrecision);
-
-    // Write 2-byte magic (zeros)
-    stream << static_cast<quint8>(0) << static_cast<quint8>(0);
-
-    // Write number of vertices as 3-byte big-endian integer
-    qint32 nVertices = static_cast<qint32>(vertices.size());
-    stream << static_cast<quint8>((nVertices >> 16) & 0xFF)
-           << static_cast<quint8>((nVertices >> 8) & 0xFF)
-           << static_cast<quint8>(nVertices & 0xFF);
-
-    // Write each vertex index (3 bytes) and value (4-byte float)
-    for (qint32 i = 0; i < nVertices; ++i) {
-        qint32 idx = vertices[i];
-        stream << static_cast<quint8>((idx >> 16) & 0xFF)
-               << static_cast<quint8>((idx >> 8) & 0xFF)
-               << static_cast<quint8>(idx & 0xFF);
-
-        stream << static_cast<float>(data(i, 0));
+    writeBig(out, static_cast<std::uint32_t>(data.cols()));
+    for (Index i = 0; i < data.size(); ++i) {
+        writeBig(out, static_cast<float>(data.data()[i]));
     }
+    if (!out.flush()) {
+        return fail(ErrorCode::Io, "cannot write {}", UTILSLIB::utf8FromPath(path));
+    }
+    return {};
+}
 
-    file.close();
+//=============================================================================================================
+
+Expected<void> InvSourceEstimate::write_hemisphere_pair(const std::filesystem::path& base) const
+{
+    if (nVerticesLh < 0 || nVerticesLh > vertices.size()) {
+        return fail(ErrorCode::Format, "the left hemisphere has {} of {} vertices, so the estimate cannot be split into hemispheres", nVerticesLh, vertices.size());
+    }
+    if (data.rows() != vertices.size()) {
+        return fail(ErrorCode::Format, "the data have {} rows for {} vertices", data.rows(), vertices.size());
+    }
+    // A name from a file dialog may already carry one of the suffixes
+    std::string stem = UTILSLIB::utf8FromPath(base);
+    for (const std::string_view suffix : {"-lh.stc", "-rh.stc", ".stc"}) {
+        if (stem.size() > suffix.size() && UTILSLIB::equalsIgnoreCase(std::string_view(stem).substr(stem.size() - suffix.size()), suffix)) {
+            stem.resize(stem.size() - suffix.size());
+            break;
+        }
+    }
+    const Index nRh = vertices.size() - nVerticesLh;
+    const struct
+    {
+        const char* suffix;
+        Index offset;
+        Index count;
+    } hemispheres[] = {{"-lh.stc", 0, nVerticesLh}, {"-rh.stc", nVerticesLh, nRh}};
+    for (const auto& hemi : hemispheres) {
+        InvSourceEstimate part(data.middleRows(hemi.offset, hemi.count), vertices.segment(hemi.offset, hemi.count), tmin, tstep);
+        if (Expected<void> written = part.write(UTILSLIB::pathFromUtf8(stem + hemi.suffix)); !written) {
+            return written;
+        }
+    }
+    return {};
+}
+
+//=============================================================================================================
+
+Expected<InvSourceEstimate> InvSourceEstimate::read_w(const std::filesystem::path& path)
+{
+    const std::string file = UTILSLIB::utf8FromPath(path);
+    std::ifstream in(path, std::ios::binary);
+    if (!in) {
+        return fail(ErrorCode::Io, "cannot read {}", file);
+    }
+    // Two padding bytes, the number of vertices, then a 3-byte vertex and a 4-byte value each
+    in.ignore(2);
+    std::int32_t nVertices = 0;
+    if (!readBig24(in, nVertices)) {
+        return fail(ErrorCode::Format, "{} is not a .w file", file);
+    }
+    VectorXi vertices(nVertices);
+    MatrixXd values(nVertices, 1);
+    for (std::int32_t i = 0; i < nVertices; ++i) {
+        float value = 0.0f;
+        if (!readBig24(in, vertices[i]) || !readBig(in, value)) {
+            return fail(ErrorCode::Format, "{} ends after {} of its {} vertices", file, i, nVertices);
+        }
+        values(i, 0) = value;
+    }
+    return InvSourceEstimate(std::move(values), std::move(vertices), 0.0f, 0.0f);
+}
+
+//=============================================================================================================
+
+Expected<void> InvSourceEstimate::write_w(const std::filesystem::path& path) const
+{
+    if (data.size() == 0) {
+        return fail(ErrorCode::Format, "the source estimate is empty");
+    }
+    std::ofstream out(path, std::ios::binary | std::ios::trunc);
+    if (!out) {
+        return fail(ErrorCode::Io, "cannot write {}", UTILSLIB::utf8FromPath(path));
+    }
+    out.write("\0\0", 2);
+    writeBig24(out, static_cast<std::int32_t>(vertices.size()));
+    for (Index i = 0; i < vertices.size(); ++i) {
+        writeBig24(out, vertices[i]);
+        writeBig(out, static_cast<float>(data(i, 0)));
+    }
+    if (!out.flush()) {
+        return fail(ErrorCode::Io, "cannot write {}", UTILSLIB::utf8FromPath(path));
+    }
+    return {};
 }
 
 //=============================================================================================================
 
 void InvSourceEstimate::update_times()
 {
-    if (data.cols() > 0) {
-        this->times = RowVectorXf(data.cols());
-        this->times[0] = this->tmin;
-        for (float i = 1; i < this->times.size(); ++i)
-            this->times[i] = this->times[i - 1] + this->tstep;
-    } else
-        this->times = RowVectorXf();
-}
-
-//=============================================================================================================
-
-InvSourceEstimate& InvSourceEstimate::operator=(const InvSourceEstimate& rhs)
-{
-    if (this != &rhs) // protect against invalid self-assignment
-    {
-        data = rhs.data;
-        vertices = rhs.vertices;
-        times = rhs.times;
-        tmin = rhs.tmin;
-        tstep = rhs.tstep;
-        nVerticesLh = rhs.nVerticesLh;
-        method = rhs.method;
-        sourceSpaceType = rhs.sourceSpaceType;
-        orientationType = rhs.orientationType;
-        positions = rhs.positions;
-        couplings = rhs.couplings;
-        focalDipoles = rhs.focalDipoles;
-        connectivity = rhs.connectivity;
+    times.resize(data.cols());
+    for (Index i = 0; i < times.size(); ++i) {
+        times[i] = tmin + static_cast<float>(i) * tstep;
     }
-    // to support chained assignment operators (a=b=c), always return *this
-    return *this;
 }
 
 //=============================================================================================================
 
-int InvSourceEstimate::samples() const
+VectorXi InvSourceEstimate::indices_by_label(std::span<const FsLabel> labels, bool clustered) const
 {
-    return data.cols();
-}
-
-//=============================================================================================================
-
-VectorXi InvSourceEstimate::getIndicesByLabel(const QList<FsLabel>& lPickedLabels, bool bIsClustered) const
-{
-    VectorXi vIndexSourceLabels;
-
-    if (lPickedLabels.isEmpty()) {
-        qWarning() << "InvSourceEstimate::getIndicesByLabel - picked label list is empty. Returning.";
-        return vIndexSourceLabels;
-    }
-
-    if (bIsClustered) {
-        for (int i = 0; i < this->vertices.rows(); i++) {
-            for (int k = 0; k < lPickedLabels.size(); k++) {
-                if (this->vertices(i) == lPickedLabels.at(k).label_id) {
-                    vIndexSourceLabels.conservativeResize(vIndexSourceLabels.rows() + 1, 1);
-                    vIndexSourceLabels(vIndexSourceLabels.rows() - 1) = i;
-                    break;
-                }
-            }
+    std::vector<int> rows;
+    // Without clustering the vertex numbers restart at the first right-hemisphere row
+    int hemi = 0;
+    for (Index i = 0; i < vertices.size(); ++i) {
+        if (i > 0 && vertices(i) < vertices(i - 1)) {
+            hemi = 1;
         }
-    } else {
-        int hemi = 0;
-
-        for (int i = 0; i < this->vertices.rows(); i++) {
-            // Detect left right hemi separation
-            if (i > 0) {
-                if (this->vertices(i) < this->vertices(i - 1)) {
-                    hemi = 1;
-                }
+        const bool inside = std::ranges::any_of(labels, [&](const FsLabel& label) {
+            if (clustered) {
+                return vertices(i) == label.label_id;
             }
-
-            for (int k = 0; k < lPickedLabels.size(); k++) {
-                for (int l = 0; l < lPickedLabels.at(k).vertices.rows(); l++) {
-                    if (this->vertices(i) == lPickedLabels.at(k).vertices(l) && lPickedLabels.at(k).hemi == hemi) {
-                        vIndexSourceLabels.conservativeResize(vIndexSourceLabels.rows() + 1, 1);
-                        vIndexSourceLabels(vIndexSourceLabels.rows() - 1) = i;
-                        break;
-                    }
-                }
-            }
+            return label.hemi == hemi && (label.vertices.array() == vertices(i)).any();
+        });
+        if (inside) {
+            rows.push_back(static_cast<int>(i));
         }
     }
-
-    return vIndexSourceLabels;
+    return Map<const VectorXi>(rows.data(), static_cast<Index>(rows.size()));
 }

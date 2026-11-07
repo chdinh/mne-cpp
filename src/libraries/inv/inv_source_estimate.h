@@ -38,29 +38,15 @@
 
 #include <fs/fs_label.h>
 
-//=============================================================================================================
-// STL INCLUDES
-//=============================================================================================================
-
-#include <vector>
-
-//=============================================================================================================
-// EIGEN INCLUDES
-//=============================================================================================================
+#include <utils/error.h>
 
 #include <Eigen/Core>
 
-//=============================================================================================================
-// QT INCLUDES
-//=============================================================================================================
-
 #include <QSharedPointer>
-#include <QList>
-#include <QIODevice>
 
-//=============================================================================================================
-// FORWARD DECLARATIONS
-//=============================================================================================================
+#include <filesystem>
+#include <span>
+#include <vector>
 
 //=============================================================================================================
 // DEFINE NAMESPACE INVLIB
@@ -68,10 +54,6 @@
 
 namespace INVLIB
 {
-
-//=============================================================================================================
-// MNELIB FORWARD DECLARATIONS
-//=============================================================================================================
 
 //=============================================================================================================
 /**
@@ -91,282 +73,172 @@ namespace INVLIB
 class INVSHARED_EXPORT InvSourceEstimate
 {
 public:
-    typedef QSharedPointer<InvSourceEstimate> SPtr;            /**< Shared pointer type for InvSourceEstimate. */
-    typedef QSharedPointer<const InvSourceEstimate> ConstSPtr; /**< Const shared pointer type for InvSourceEstimate. */
+    using SPtr = QSharedPointer<InvSourceEstimate>;            /**< Shared pointer type for InvSourceEstimate. */
+    using ConstSPtr = QSharedPointer<const InvSourceEstimate>; /**< Const shared pointer type for InvSourceEstimate. */
+
+    /** Constructs an empty source estimate. */
+    InvSourceEstimate() = default;
 
     //=========================================================================================================
     /**
-     * Default constructor
-     */
-    InvSourceEstimate();
-
-    //=========================================================================================================
-    /**
-     * Constructs a source estimation from given data
+     * Constructs a source estimate from its data.
      *
-     * @param[in] p_sol Source amplitudes (sources x time points).
-     * @param[in] p_vertices Source space vertex numbers of the rows of p_sol.
-     * @param[in] p_tmin Time of the first sample in seconds.
-     * @param[in] p_tstep Time between samples in seconds.
+     * @param[in] data       Source amplitudes (sources x time points).
+     * @param[in] vertices   Source space vertex numbers of the rows of @p data.
+     * @param[in] tmin       Time of the first sample in seconds.
+     * @param[in] tstep      Time between samples in seconds.
      */
-    InvSourceEstimate(const Eigen::MatrixXd& p_sol, const Eigen::VectorXi& p_vertices, float p_tmin, float p_tstep);
+    InvSourceEstimate(Eigen::MatrixXd data, Eigen::VectorXi vertices, float tmin, float tstep);
 
     //=========================================================================================================
     /**
-     * Copy constructor.
+     * Reads an .stc file like read(); throws UTILSLIB::Error if it cannot.
      *
-     * @param[in] p_SourceEstimate    Source estimate data which should be copied.
+     * @param[in] path   The .stc file.
      */
-    InvSourceEstimate(const InvSourceEstimate& p_SourceEstimate);
+    explicit InvSourceEstimate(const std::filesystem::path& path);
 
     //=========================================================================================================
     /**
-     * Constructs a source estimation, by reading from a IO device.
+     * Reads an .stc file, as mne.read_source_estimate does for one hemisphere.
      *
-     * @param[in] p_IODevice     IO device to read from the source estimation.
+     * @param[in] path   The .stc file.
      *
+     * @return The source estimate, or why the file cannot be read: Io if it cannot be opened, Format if
+     *         it ends before the data its header announces.
      */
-    InvSourceEstimate(QIODevice& p_IODevice);
+    [[nodiscard]] static UTILSLIB::Expected<InvSourceEstimate> read(const std::filesystem::path& path);
 
     //=========================================================================================================
     /**
-     * Initializes source estimate.
+     * Writes the estimate as an .stc file, as MNE-C's mne_write_stc_file and mne.SourceEstimate.save do.
+     *
+     * @param[in] path   The .stc file.
+     *
+     * @return Nothing, or why the file cannot be written (Io).
+     */
+    [[nodiscard]] UTILSLIB::Expected<void> write(const std::filesystem::path& path) const;
+
+    //=========================================================================================================
+    /**
+     * Writes a surface estimate as the "<base>-lh.stc" and "<base>-rh.stc" pair mne.read_source_estimate
+     * expects, splitting at n_vertices_lh.
+     *
+     * @param[in] base   Path without the "-lh.stc"/"-rh.stc" suffix; a trailing "-lh.stc", "-rh.stc" or
+     *                   ".stc" is dropped.
+     *
+     * @return Nothing, or why the pair cannot be written: Format if the split point is unknown or the
+     *         data do not match the vertices, Io if a file cannot be written.
+     */
+    [[nodiscard]] UTILSLIB::Expected<void> write_hemisphere_pair(const std::filesystem::path& base) const;
+
+    //=========================================================================================================
+    /**
+     * Reads a .w file (one value per vertex), as mne.read_w does.
+     *
+     * @param[in] path   The .w file.
+     *
+     * @return A single-column source estimate, or why the file cannot be read (Io or Format).
+     */
+    [[nodiscard]] static UTILSLIB::Expected<InvSourceEstimate> read_w(const std::filesystem::path& path);
+
+    //=========================================================================================================
+    /**
+     * Writes the first time point as a .w file, as mne.write_w does.
+     *
+     * @param[in] path   The .w file.
+     *
+     * @return Nothing, or why the file cannot be written: Format if the estimate is empty, Io otherwise.
+     */
+    [[nodiscard]] UTILSLIB::Expected<void> write_w(const std::filesystem::path& path) const;
+
+    //=========================================================================================================
+    /**
+     * Resets to an empty estimate.
      */
     void clear();
 
     //=========================================================================================================
     /**
-     * Reduces the source estimate to selected samples.
+     * @param[in] start   First sample.
+     * @param[in] n       Number of samples.
      *
-     * @param[in] start  The start index to cut the estimate from.
-     * @param[in] n      Number of samples to cut from start index.
-     *
-     * @return Copy of this estimate restricted to samples [start, start + n), with tmin updated accordingly.
+     * @return The estimate restricted to samples [start, start + n), its tmin moved to the first of them.
      */
-    InvSourceEstimate reduce(qint32 start, qint32 n);
+    InvSourceEstimate reduce(int start, int n) const;
+
+    /** @return Whether the estimate holds no time axis. */
+    bool is_empty() const
+    {
+        return tstep == -1;
+    }
+
+    /** @return The number of time samples. */
+    int samples() const
+    {
+        return static_cast<int>(data.cols());
+    }
 
     //=========================================================================================================
     /**
-     * mne_read_stc_file
+     * @param[in] labels      The labels.
+     * @param[in] clustered   Whether the rows are clustered ROIs (matched by label id) rather than vertices.
      *
-     * Reads a source estimate from a given file
-     *
-     * @param[in] p_IODevice    IO device to red the stc from.
-     * @param[in, out] p_stc        the read stc.
-     *
-     * @return true if successful, false otherwise.
+     * @return The rows of the sources inside the labels, in row order.
      */
-    static bool read(QIODevice& p_IODevice, InvSourceEstimate& p_stc);
+    Eigen::VectorXi indices_by_label(std::span<const FSLIB::FsLabel> labels, bool clustered) const;
 
-    //=========================================================================================================
-    /**
-     * mne_write_stc_file
-     *
-     * Writes a stc file
-     *
-     * @param[in] p_IODevice   IO device to write the stc to.
-     *
-     * @return True if successful, false if the device could not be opened for writing.
-     */
-    bool write(QIODevice& p_IODevice);
+    /** @return Whether the estimate holds grid data (distributed methods or RAP-MUSIC amplitudes). */
+    bool has_grid_data() const
+    {
+        return data.size() > 0;
+    }
 
-    //=========================================================================================================
-    /**
-     * Write the estimate as an MNE-C / MNE-Python compatible hemisphere pair.
-     *
-     * MNE-Python expects a surface source estimate to be stored as two files,
-     * "<base>-lh.stc" and "<base>-rh.stc", each containing only the vertices
-     * of its own hemisphere. This writes exactly that, splitting at
-     * @ref nVerticesLh.
-     *
-     * @param[in] sBasePath   Path without the "-lh.stc"/"-rh.stc" suffix. A
-     *                        trailing "-lh.stc", "-rh.stc" or ".stc" is
-     *                        stripped if present.
-     *
-     * @return true when both files were written, false otherwise. Fails when
-     *         nVerticesLh is unknown (-1) or out of range, since the split
-     *         point cannot then be determined.
-     */
-    bool writeHemispherePair(const QString& sBasePath);
+    /** @return Whether the estimate holds correlated source groups (e.g. RAP-MUSIC pairs). */
+    bool has_couplings() const
+    {
+        return !couplings.empty();
+    }
 
-    //=========================================================================================================
-    /**
-     * Read a .w file (single time-point source estimate).
-     *
-     * The .w format stores vertex indices (3-byte big-endian) and float
-     * values (4-byte big-endian) for a single time point.
-     *
-     * @param[in] path   Path to the .w file.
-     *
-     * @return The source estimate with single-column data.
-     *
-     * @since 2.2.0
-     */
-    static InvSourceEstimate read_w(const QString& path);
+    /** @return Whether the estimate holds off-grid focal dipoles. */
+    bool has_focal_dipoles() const
+    {
+        return !focalDipoles.empty();
+    }
 
-    //=========================================================================================================
-    /**
-     * Write the first time point of this source estimate to a .w file.
-     *
-     * @param[in] path   Path to the .w file to write.
-     *
-     * @since 2.2.0
-     */
-    void write_w(const QString& path) const;
+    /** @return Whether the estimate carries explicit source positions (discrete source space). */
+    bool has_positions() const
+    {
+        return positions.rows() > 0;
+    }
 
-    //=========================================================================================================
-    /**
-     * Returns whether SourceEstimate is empty.
-     *
-     * @return true if is empty, false otherwise.
-     */
-    inline bool isEmpty() const;
+    /** @return Whether the estimate holds connectivity results. */
+    bool has_connectivity() const
+    {
+        return !connectivity.empty();
+    }
 
-    //=========================================================================================================
-    /**
-     * Assignment Operator
-     *
-     * @param[in] rhs     SourceEstimate which should be assigned.
-     *
-     * @return the copied source estimate.
-     */
-    InvSourceEstimate& operator=(const InvSourceEstimate& rhs);
+    Eigen::MatrixXd data;     /**< Source amplitudes (sources x time points). */
+    Eigen::VectorXi vertices; /**< Vertex of each row; the ROI index for clustered estimates. */
+    Eigen::RowVectorXf times; /**< Time of each sample in seconds. */
+    float tmin = 0.0f;        /**< Time of the first sample in seconds. */
+    float tstep = -1.0f;      /**< Time between samples in seconds; -1 for an empty estimate. */
+    int nVerticesLh = -1;     /**< Number of leading rows from the left hemisphere; -1 when unknown, as for non-surface source spaces. */
 
-    //=========================================================================================================
-    /**
-     * Returns the number of samples.
-     *
-     * @return the number of samples.
-     */
-    int samples() const;
+    InvEstimateMethod method = InvEstimateMethod::Unknown;            /**< The inverse method that produced this estimate. */
+    InvSourceSpaceType sourceSpaceType = InvSourceSpaceType::Unknown; /**< Source space type (surface, volume, mixed, discrete). */
+    InvOrientationType orientationType = InvOrientationType::Unknown; /**< Orientation constraint used (fixed, free, loose). */
 
-    //=========================================================================================================
-    /**
-     * Returns the indices of sources in the data matrix based on their beloning label.
-     *
-     * @param[in] lPickedLabels      The labels base the selection on.
-     * @param[in] bIsClustered       Whether the source space was clustered.
-     *
-     * @return the indices.
-     */
-    Eigen::VectorXi getIndicesByLabel(const QList<FSLIB::FsLabel>& lPickedLabels, bool bIsClustered) const;
-
-public:
-    Eigen::MatrixXd data;     /**< Matrix of shape [n_dipoles x n_times] which contains the data in source space. */
-    Eigen::VectorXi vertices; /**< The indices of the dipoles in the different source spaces. In the clustered case, holds the ROI indices. */
-    Eigen::RowVectorXf times; /**< The time vector with n_times steps. */
-    float tmin;               /**< Time starting point. */
-    float tstep;              /**< Time steps within the times vector. */
-    int nVerticesLh;          /**< Number of leading entries in vertices/data that belong to the left hemisphere. -1 when unknown, which is the case for non surface source spaces. */
-
-    // --- Metadata ---
-    InvEstimateMethod method;           /**< The inverse method that produced this estimate. */
-    InvSourceSpaceType sourceSpaceType; /**< Source space type (surface, volume, mixed, discrete). */
-    InvOrientationType orientationType; /**< Orientation constraint used (fixed, free, loose). */
-
-    // --- Positions (for discrete source spaces: sEEG contacts, ECoG electrodes, custom ROIs) ---
-    Eigen::MatrixX3f positions; /**< 3D positions (m) in head coordinates, one row per source. Empty when positions live in an external source space. */
-
-    // --- Coupling layer (e.g. RAP-MUSIC correlated N-tuples on the grid) ---
-    std::vector<InvSourceCoupling> couplings; /**< Correlated source groups overlaid on the grid. */
-
-    // --- Focal layer (e.g. ECD off-grid dipoles) ---
-    std::vector<InvFocalDipole> focalDipoles; /**< Off-grid focal dipoles (ECD results). */
-
-    // --- Connectivity layer (pairwise source connectivity) ---
-    std::vector<InvConnectivity> connectivity; /**< Pairwise connectivity matrices between sources (one per metric / freq band). */
-
-    //=========================================================================================================
-    /**
-     * Returns true if the estimate contains grid-based data (distributed methods or RAP-MUSIC amplitudes).
-     *
-     * @return true if grid data is present.
-     */
-    inline bool hasGridData() const;
-
-    //=========================================================================================================
-    /**
-     * Returns true if the estimate contains source coupling annotations (e.g. RAP-MUSIC pairs/N-tuples).
-     *
-     * @return true if couplings are present.
-     */
-    inline bool hasCouplings() const;
-
-    //=========================================================================================================
-    /**
-     * Returns true if the estimate contains focal (off-grid) dipole results.
-     *
-     * @return true if focal dipoles are present.
-     */
-    inline bool hasFocalDipoles() const;
-
-    //=========================================================================================================
-    /**
-     * Returns true if the estimate carries explicit source positions (discrete source space).
-     *
-     * @return true if positions are present.
-     */
-    inline bool hasPositions() const;
-
-    //=========================================================================================================
-    /**
-     * Returns true if the estimate contains connectivity results.
-     *
-     * @return true if connectivity data is present.
-     */
-    inline bool hasConnectivity() const;
+    Eigen::MatrixX3f positions;                /**< Positions (m) in head coordinates, one row per source; empty when they live in a source space. */
+    std::vector<InvSourceCoupling> couplings;  /**< Correlated source groups overlaid on the grid. */
+    std::vector<InvFocalDipole> focalDipoles;  /**< Off-grid focal dipoles (ECD results). */
+    std::vector<InvConnectivity> connectivity; /**< Pairwise connectivity between sources (one per metric / frequency band). */
 
 private:
-    //=========================================================================================================
-    /**
-     * Update the times attribute after changing tmin, tmax, or tstep
-     */
+    /** Recomputes times from tmin, tstep and the number of samples. */
     void update_times();
 };
 
-//=============================================================================================================
-// INLINE DEFINITIONS
-//=============================================================================================================
-
-inline bool InvSourceEstimate::isEmpty() const
-{
-    return tstep == -1;
-}
-
-//=============================================================================================================
-
-inline bool InvSourceEstimate::hasGridData() const
-{
-    return data.size() > 0;
-}
-
-//=============================================================================================================
-
-inline bool InvSourceEstimate::hasCouplings() const
-{
-    return !couplings.empty();
-}
-
-//=============================================================================================================
-
-inline bool InvSourceEstimate::hasFocalDipoles() const
-{
-    return !focalDipoles.empty();
-}
-
-//=============================================================================================================
-
-inline bool InvSourceEstimate::hasPositions() const
-{
-    return positions.rows() > 0;
-}
-
-//=============================================================================================================
-
-inline bool InvSourceEstimate::hasConnectivity() const
-{
-    return !connectivity.empty();
-}
 } //NAMESPACE
 
 #endif // INV_SOURCE_ESTIMATE_H

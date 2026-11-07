@@ -957,8 +957,7 @@ void TestDisp3dBrainView::sourceEstimateManager_basics()
     Eigen::VectorXi vertices(2);
     vertices << 0, 3;
     {
-        QFile out(lhPath);
-        QVERIFY(INVLIB::InvSourceEstimate(data, vertices, -0.01f, 0.005f).write(out));
+        QVERIFY(INVLIB::InvSourceEstimate(data, vertices, -0.01f, 0.005f).write(lhPath.toStdU16String()));
     }
     Eigen::MatrixX3f rr(4, 3);
     rr << 0.0f, 0.0f, 0.0f, 0.01f, 0.0f, 0.0f, 0.0f, 0.01f, 0.0f, 0.01f, 0.01f, 0.0f;
@@ -1097,8 +1096,7 @@ void TestDisp3dBrainView::stcLoadingWorker_basics()
     Eigen::VectorXi vertices(2);
     vertices << 0, 3;
     {
-        QFile out(lhPath);
-        QVERIFY(INVLIB::InvSourceEstimate(data, vertices, 0.0f, 0.001f).write(out));
+        QVERIFY(INVLIB::InvSourceEstimate(data, vertices, 0.0f, 0.001f).write(lhPath.toStdU16String()));
     }
     Eigen::MatrixX3f rr(4, 3);
     rr << 0.0f, 0.0f, 0.0f, 0.01f, 0.0f, 0.0f, 0.0f, 0.01f, 0.0f, 0.01f, 0.01f, 0.0f;

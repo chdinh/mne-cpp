@@ -1005,7 +1005,7 @@ int main(int argc, char* argv[])
 
     InvSourceEstimate stc = minimumNorm.calculateInverse(data, tmin, tstep, pickNormal);
 
-    if (stc.isEmpty()) {
+    if (stc.is_empty()) {
         qCritical() << "Error: Inverse computation returned empty result.";
         return 1;
     }
@@ -1095,8 +1095,7 @@ int main(int argc, char* argv[])
             MatrixXd lhData = stc.data.topRows(nLh);
             InvSourceEstimate lhStc(lhData, vertno[0], stc.tmin, stc.tstep);
 
-            QFile lhOut(lhFile);
-            if (!lhStc.write(lhOut)) {
+            if (!lhStc.write(lhFile.toStdU16String())) {
                 qWarning() << "Warning: Failed to write" << lhFile;
             } else {
                 qInfo("  %d vertices, %d time points", nLh, static_cast<int>(lhData.cols()));
@@ -1111,8 +1110,7 @@ int main(int argc, char* argv[])
             MatrixXd rhData = stc.data.bottomRows(nRh);
             InvSourceEstimate rhStc(rhData, vertno[1], stc.tmin, stc.tstep);
 
-            QFile rhOut(rhFile);
-            if (!rhStc.write(rhOut)) {
+            if (!rhStc.write(rhFile.toStdU16String())) {
                 qWarning() << "Warning: Failed to write" << rhFile;
             } else {
                 qInfo("  %d vertices, %d time points", nRh, static_cast<int>(rhData.cols()));
@@ -1174,9 +1172,8 @@ int main(int argc, char* argv[])
         QString outFile = stcBase + ".stc";
         qInfo("\nWriting STC to %s...", outFile.toUtf8().constData());
 
-        QFile out(outFile);
-        if (!stc.write(out)) {
-            qCritical() << "Error: Failed to write" << outFile;
+        if (auto written = stc.write(outFile.toStdU16String()); !written) {
+            qCritical() << written.error().what();
             return 1;
         }
         qInfo("  %d vertices, %d time points",

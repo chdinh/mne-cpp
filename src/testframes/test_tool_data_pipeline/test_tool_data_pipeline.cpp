@@ -582,13 +582,13 @@ private slots:
         const QString firstPath = m_tempDir.filePath("average-first.stc");
         const QString secondPath = m_tempDir.filePath("average-second.stc");
         {
-            QFile firstFile(firstPath);
+            const std::filesystem::path firstFile = firstPath.toStdU16String();
             INVLIB::InvSourceEstimate first(Eigen::MatrixXd::Constant(3, 4, 2.0),
                                             vertices, 0.0f, 0.001f);
             QVERIFY(first.write(firstFile));
         }
         {
-            QFile secondFile(secondPath);
+            const std::filesystem::path secondFile = secondPath.toStdU16String();
             INVLIB::InvSourceEstimate second(Eigen::MatrixXd::Constant(3, 4, 8.0),
                                              vertices, 0.0f, 0.001f);
             QVERIFY(second.write(secondFile));
@@ -609,9 +609,7 @@ private slots:
         QCOMPARE(m_lastExitStatus, QProcess::NormalExit);
         QVERIFY2(m_lastExitCode == 0, qPrintable(output));
 
-        QFile resultFile(outPath);
-        INVLIB::InvSourceEstimate result;
-        QVERIFY(INVLIB::InvSourceEstimate::read(resultFile, result));
+        const INVLIB::InvSourceEstimate result(outPath.toStdU16String());
         QCOMPARE(result.vertices, vertices);
         QVERIFY(result.data.isApprox(Eigen::MatrixXd::Constant(3, 4, 6.5)));
     }
@@ -1455,11 +1453,13 @@ private slots:
         QCOMPARE(m_lastExitStatus, QProcess::NormalExit);
         QVERIFY2(m_lastExitCode == 0, qPrintable(output));
         INVLIB::InvSourceEstimate left;
-        QFile leftFile(outBase + "-lh.stc");
-        QVERIFY2(INVLIB::InvSourceEstimate::read(leftFile, left), qPrintable(output));
+        auto leftRead = INVLIB::InvSourceEstimate::read((outBase + "-lh.stc").toStdU16String());
+        QVERIFY2(leftRead.has_value(), qPrintable(output));
+        left = std::move(*leftRead);
         INVLIB::InvSourceEstimate right;
-        QFile rightFile(outBase + "-rh.stc");
-        QVERIFY2(INVLIB::InvSourceEstimate::read(rightFile, right), qPrintable(output));
+        auto rightRead = INVLIB::InvSourceEstimate::read((outBase + "-rh.stc").toStdU16String());
+        QVERIFY2(rightRead.has_value(), qPrintable(output));
+        right = std::move(*rightRead);
         QVERIFY(left.data.rows() > 0);
         QCOMPARE(left.data.cols(), right.data.cols());
         QCOMPARE(left.tmin, right.tmin);
@@ -1488,11 +1488,13 @@ private slots:
         QCOMPARE(m_lastExitStatus, QProcess::NormalExit);
         QVERIFY2(m_lastExitCode == 0, qPrintable(output));
         INVLIB::InvSourceEstimate left;
-        QFile leftFile(outBase + "-lh.stc");
-        QVERIFY2(INVLIB::InvSourceEstimate::read(leftFile, left), qPrintable(output));
+        auto leftRead = INVLIB::InvSourceEstimate::read((outBase + "-lh.stc").toStdU16String());
+        QVERIFY2(leftRead.has_value(), qPrintable(output));
+        left = std::move(*leftRead);
         INVLIB::InvSourceEstimate right;
-        QFile rightFile(outBase + "-rh.stc");
-        QVERIFY2(INVLIB::InvSourceEstimate::read(rightFile, right), qPrintable(output));
+        auto rightRead = INVLIB::InvSourceEstimate::read((outBase + "-rh.stc").toStdU16String());
+        QVERIFY2(rightRead.has_value(), qPrintable(output));
+        right = std::move(*rightRead);
         QVERIFY(left.data.allFinite());
         QVERIFY(right.data.allFinite());
     }
@@ -1517,11 +1519,13 @@ private slots:
         QCOMPARE(m_lastExitStatus, QProcess::NormalExit);
         QVERIFY2(m_lastExitCode == 0, qPrintable(output));
         INVLIB::InvSourceEstimate left;
-        QFile leftFile(outBase + "-lh.stc");
-        QVERIFY2(INVLIB::InvSourceEstimate::read(leftFile, left), qPrintable(output));
+        auto leftRead = INVLIB::InvSourceEstimate::read((outBase + "-lh.stc").toStdU16String());
+        QVERIFY2(leftRead.has_value(), qPrintable(output));
+        left = std::move(*leftRead);
         INVLIB::InvSourceEstimate right;
-        QFile rightFile(outBase + "-rh.stc");
-        QVERIFY2(INVLIB::InvSourceEstimate::read(rightFile, right), qPrintable(output));
+        auto rightRead = INVLIB::InvSourceEstimate::read((outBase + "-rh.stc").toStdU16String());
+        QVERIFY2(rightRead.has_value(), qPrintable(output));
+        right = std::move(*rightRead);
         QVERIFY(left.data.allFinite());
         QVERIFY(right.data.allFinite());
     }
@@ -1546,11 +1550,13 @@ private slots:
         QCOMPARE(m_lastExitStatus, QProcess::NormalExit);
         QVERIFY2(m_lastExitCode == 0, qPrintable(output));
         INVLIB::InvSourceEstimate left;
-        QFile leftFile(outBase + "-lh.stc");
-        QVERIFY2(INVLIB::InvSourceEstimate::read(leftFile, left), qPrintable(output));
+        auto leftRead = INVLIB::InvSourceEstimate::read((outBase + "-lh.stc").toStdU16String());
+        QVERIFY2(leftRead.has_value(), qPrintable(output));
+        left = std::move(*leftRead);
         INVLIB::InvSourceEstimate right;
-        QFile rightFile(outBase + "-rh.stc");
-        QVERIFY2(INVLIB::InvSourceEstimate::read(rightFile, right), qPrintable(output));
+        auto rightRead = INVLIB::InvSourceEstimate::read((outBase + "-rh.stc").toStdU16String());
+        QVERIFY2(rightRead.has_value(), qPrintable(output));
+        right = std::move(*rightRead);
         QVERIFY(left.data.allFinite());
         QVERIFY(right.data.allFinite());
     }
@@ -1650,15 +1656,13 @@ private slots:
                  0);
 
         // One file per hemisphere, holding the forward solution's vertex numbers
-        INVLIB::InvSourceEstimate dspm, dspmRh;
-        QFile dspmFile(outPrefix + "-dspm-lh.stc");
-        QFile dspmRhFile(outPrefix + "-dspm-rh.stc");
-        QVERIFY(INVLIB::InvSourceEstimate::read(dspmFile, dspm));
-        QVERIFY(INVLIB::InvSourceEstimate::read(dspmRhFile, dspmRh));
+        const INVLIB::InvSourceEstimate dspm((outPrefix + "-dspm-lh.stc").toStdU16String());
+        const INVLIB::InvSourceEstimate dspmRh((outPrefix + "-dspm-rh.stc").toStdU16String());
 
         INVLIB::InvSourceEstimate cmne;
-        QFile cmneFile(outPrefix + "-cmne-lh.stc");
-        QVERIFY(INVLIB::InvSourceEstimate::read(cmneFile, cmne));
+        auto cmneRead = INVLIB::InvSourceEstimate::read((outPrefix + "-cmne-lh.stc").toStdU16String());
+        QVERIFY(cmneRead.has_value());
+        cmne = std::move(*cmneRead);
         QVERIFY(QFile::exists(outPrefix + "-cmne-rh.stc"));
 
         QFile fwdIn(fwdFile);
@@ -1720,8 +1724,7 @@ private slots:
 
         const QString stcPrefix = m_tempDir.filePath("movie-source");
         INVLIB::InvSourceEstimate stc(data, vertices, 0.0f, 0.001f);
-        QFile stcFile(stcPrefix + "-lh.stc");
-        QVERIFY(stc.write(stcFile));
+        QVERIFY(stc.write(QString(stcPrefix + "-lh.stc").toStdU16String()));
 
         const QString pngPrefix = m_tempDir.filePath("movie-frame");
         QCOMPARE(runToolExitCode("mne_make_movie", {"--stcin", stcPrefix, "--subject", "sample", "--subjects-dir", m_sResourcePath + "subjects", "--surface", "white", "--lh", "--signed", "--tmin", "0", "--tmax", "0", "--width", "320", "--height", "240", "--png", pngPrefix}),
@@ -1766,8 +1769,7 @@ private slots:
             4.0, 8.0;
         const QString stcPath = m_tempDir.filePath("volume-source.stc");
         INVLIB::InvSourceEstimate stc(data, vertices, 0.0f, 0.001f);
-        QFile stcFile(stcPath);
-        QVERIFY(stc.write(stcFile));
+        QVERIFY(stc.write(stcPath.toStdU16String()));
 
         const QString outFile = m_tempDir.filePath("volume-overlay.txt");
         const QString output = runTool("mne_volume_data2mri", {"--src", sourceFile, "--stc", stcPath, "--tpoint", "1", "--out", outFile});
@@ -1809,8 +1811,9 @@ private slots:
         QVERIFY2(m_lastExitCode == 0, qPrintable(output));
 
         INVLIB::InvSourceEstimate result;
-        QFile resultFile(outFile);
-        QVERIFY2(INVLIB::InvSourceEstimate::read(resultFile, result), qPrintable(output));
+        auto resultRead = INVLIB::InvSourceEstimate::read(outFile.toStdU16String());
+        QVERIFY2(resultRead.has_value(), qPrintable(output));
+        result = std::move(*resultRead);
         QVERIFY(result.data.rows() > 0);
         QCOMPARE(result.data.cols(), 1);
         QVERIFY(result.data.isConstant(2.5));
@@ -1829,8 +1832,7 @@ private slots:
             4.0, -8.0;
         const QString inputPath = m_tempDir.filePath("process-input.stc");
         INVLIB::InvSourceEstimate input(data, vertices, 0.1f, 0.002f);
-        QFile inputFile(inputPath);
-        QVERIFY(input.write(inputFile));
+        QVERIFY(input.write(inputPath.toStdU16String()));
 
         const QString outFile = m_tempDir.filePath("process-output.stc");
         const QString asciiFile = m_tempDir.filePath("process-output.txt");
@@ -1840,8 +1842,9 @@ private slots:
         QVERIFY2(m_lastExitCode == 0, qPrintable(output));
 
         INVLIB::InvSourceEstimate result;
-        QFile resultFile(outFile);
-        QVERIFY2(INVLIB::InvSourceEstimate::read(resultFile, result), qPrintable(output));
+        auto resultRead = INVLIB::InvSourceEstimate::read(outFile.toStdU16String());
+        QVERIFY2(resultRead.has_value(), qPrintable(output));
+        result = std::move(*resultRead);
         QVERIFY(result.data.isApprox(data * 1.5, 1e-6));
         QFile ascii(asciiFile);
         QVERIFY(ascii.open(QIODevice::ReadOnly | QIODevice::Text));
@@ -1869,8 +1872,9 @@ private slots:
         QCOMPARE(m_lastExitStatus, QProcess::NormalExit);
         QVERIFY2(m_lastExitCode == 0, qPrintable(output));
         INVLIB::InvSourceEstimate result;
-        QFile resultFile(outBase);
-        QVERIFY2(INVLIB::InvSourceEstimate::read(resultFile, result), qPrintable(output));
+        auto resultRead = INVLIB::InvSourceEstimate::read(outBase.toStdU16String());
+        QVERIFY2(resultRead.has_value(), qPrintable(output));
+        result = std::move(*resultRead);
         QVERIFY(result.data.rows() > 0);
         QVERIFY(result.data.cols() > 0);
         QVERIFY(result.data.allFinite());
@@ -2345,8 +2349,9 @@ private slots:
         QCOMPARE(m_lastExitStatus, QProcess::NormalExit);
         QVERIFY2(m_lastExitCode == 0, qPrintable(output));
         INVLIB::InvSourceEstimate result;
-        QFile resultFile(outBase);
-        QVERIFY2(INVLIB::InvSourceEstimate::read(resultFile, result), qPrintable(output));
+        auto resultRead = INVLIB::InvSourceEstimate::read(outBase.toStdU16String());
+        QVERIFY2(resultRead.has_value(), qPrintable(output));
+        result = std::move(*resultRead);
         QVERIFY(result.data.allFinite());
     }
 
@@ -2371,8 +2376,9 @@ private slots:
         QCOMPARE(m_lastExitStatus, QProcess::NormalExit);
         QVERIFY2(m_lastExitCode == 0, qPrintable(output));
         INVLIB::InvSourceEstimate result;
-        QFile resultFile(outBase);
-        QVERIFY2(INVLIB::InvSourceEstimate::read(resultFile, result), qPrintable(output));
+        auto resultRead = INVLIB::InvSourceEstimate::read(outBase.toStdU16String());
+        QVERIFY2(resultRead.has_value(), qPrintable(output));
+        result = std::move(*resultRead);
         QVERIFY(result.data.allFinite());
     }
 
@@ -2397,8 +2403,9 @@ private slots:
         QCOMPARE(m_lastExitStatus, QProcess::NormalExit);
         QVERIFY2(m_lastExitCode == 0, qPrintable(output));
         INVLIB::InvSourceEstimate result;
-        QFile resultFile(outBase);
-        QVERIFY2(INVLIB::InvSourceEstimate::read(resultFile, result), qPrintable(output));
+        auto resultRead = INVLIB::InvSourceEstimate::read(outBase.toStdU16String());
+        QVERIFY2(resultRead.has_value(), qPrintable(output));
+        result = std::move(*resultRead);
         QVERIFY(result.data.allFinite());
     }
 

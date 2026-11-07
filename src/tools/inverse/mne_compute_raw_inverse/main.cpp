@@ -207,13 +207,13 @@ static InvSourceEstimate processLabel(const QString& labelFile,
     // Compute inverse for all data
     InvSourceEstimate stc = minimumNorm.calculateInverse(data, tmin, tstep, pickNormal);
 
-    if (stc.isEmpty()) {
+    if (stc.is_empty()) {
         qWarning() << "Inverse computation returned empty result for label:" << labelFile;
         return InvSourceEstimate();
     }
 
     // Restrict to label vertices
-    VectorXi labelIndices = stc.getIndicesByLabel(QList<FsLabel>() << label, false);
+    VectorXi labelIndices = stc.indices_by_label(std::span(&label, 1), false);
 
     if (labelIndices.size() == 0) {
         qWarning() << "No source vertices found in label:" << labelFile;
@@ -257,7 +257,7 @@ static InvSourceEstimate processLabelDir(const QString& labelDir,
     minimumNorm.doInverseSetup(1, true);
 
     InvSourceEstimate fullStc = minimumNorm.calculateInverse(data, tmin, tstep, true);
-    if (fullStc.isEmpty()) {
+    if (fullStc.is_empty()) {
         qWarning() << "Full inverse computation returned empty result.";
         return InvSourceEstimate();
     }
@@ -283,7 +283,7 @@ static InvSourceEstimate processLabelDir(const QString& labelDir,
         label.hemi = hemi;
 
         // Find label vertices in the source estimate
-        VectorXi labelIndices = fullStc.getIndicesByLabel(QList<FsLabel>() << label, false);
+        VectorXi labelIndices = fullStc.indices_by_label(std::span(&label, 1), false);
 
         if (labelIndices.size() == 0) {
             qWarning() << "  No source vertices found in label:" << labelFiles[i];
@@ -574,7 +574,7 @@ int main(int argc, char* argv[])
                                                     inputData, tmin, tstep,
                                                     lambda2, method, labelNames);
 
-            if (stc.isEmpty()) {
+            if (stc.is_empty()) {
                 qCritical("Error: FsLabel directory processing failed.");
                 return 1;
             }
@@ -586,8 +586,7 @@ int main(int argc, char* argv[])
                 stcOut += "-lh.stc";
             }
 
-            QFile stcFile(stcOut);
-            if (!stc.write(stcFile)) {
+            if (!stc.write(stcOut.toStdU16String())) {
                 qCritical("Error: Failed to write STC file: %s", stcOut.toUtf8().constData());
                 return 1;
             }
@@ -618,7 +617,7 @@ int main(int argc, char* argv[])
                                                      inputData, tmin, tstep,
                                                      lambda2, method, pickNormal);
 
-                if (stc.isEmpty()) {
+                if (stc.is_empty()) {
                     qWarning("Warning: Skipping label %s (no result).", labelFile.toUtf8().constData());
                     continue;
                 }
@@ -642,8 +641,7 @@ int main(int argc, char* argv[])
                     }
                 }
 
-                QFile stcFile(stcOut);
-                if (!stc.write(stcFile)) {
+                if (!stc.write(stcOut.toStdU16String())) {
                     qCritical("Error: Failed to write STC file: %s", stcOut.toUtf8().constData());
                     continue;
                 }
@@ -662,7 +660,7 @@ int main(int argc, char* argv[])
 
             InvSourceEstimate stc = minimumNorm.calculateInverse(inputData, tmin, tstep, pickNormal);
 
-            if (stc.isEmpty()) {
+            if (stc.is_empty()) {
                 qCritical("Error: Full source space inverse computation failed.");
                 return 1;
             }
@@ -697,8 +695,7 @@ int main(int argc, char* argv[])
                          nSrcLh, nSrcRh, nSrcTotal);
 
                 QString stcOutLh = stcOut + "-lh.stc";
-                QFile stcFileLh(stcOutLh);
-                if (!stc.write(stcFileLh)) {
+                if (!stc.write(stcOutLh.toStdU16String())) {
                     qCritical("Error: Failed to write STC file: %s", stcOutLh.toUtf8().constData());
                     return 1;
                 }
@@ -712,8 +709,7 @@ int main(int argc, char* argv[])
                                             stc.tmin, stc.tstep);
 
                     QString stcOutLh = stcOut + "-lh.stc";
-                    QFile stcFileLh(stcOutLh);
-                    if (!stcLh.write(stcFileLh)) {
+                    if (!stcLh.write(stcOutLh.toStdU16String())) {
                         qCritical("Error: Failed to write LH STC file: %s", stcOutLh.toUtf8().constData());
                         return 1;
                     }
@@ -728,8 +724,7 @@ int main(int argc, char* argv[])
                                             stc.tmin, stc.tstep);
 
                     QString stcOutRh = stcOut + "-rh.stc";
-                    QFile stcFileRh(stcOutRh);
-                    if (!stcRh.write(stcFileRh)) {
+                    if (!stcRh.write(stcOutRh.toStdU16String())) {
                         qCritical("Error: Failed to write RH STC file: %s", stcOutRh.toUtf8().constData());
                         return 1;
                     }

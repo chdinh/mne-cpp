@@ -444,7 +444,7 @@ private slots:
         InvSourceEstimate stc = mn.calculateInverse(
             pickedEvoked.data, tmin, tstep, false);
 
-        QVERIFY(!stc.isEmpty());
+        QVERIFY(!stc.is_empty());
         QCOMPARE((int)stc.data.rows(), invOp.nsource);
         QVERIFY(stc.data.allFinite());
         QVERIFY(stc.data.minCoeff() >= 0.0); // dSPM is non-negative
@@ -480,7 +480,7 @@ private slots:
         InvSourceEstimate stc = mn.calculateInverse(
             pickedEvoked.data, tmin, tstep, false);
 
-        QVERIFY(!stc.isEmpty());
+        QVERIFY(!stc.is_empty());
         QCOMPARE((int)stc.data.rows(), invOp.nsource);
         QVERIFY(stc.data.allFinite());
     }
@@ -515,7 +515,7 @@ private slots:
         InvSourceEstimate stc = mn.calculateInverse(
             pickedEvoked.data, tmin, tstep, false);
 
-        QVERIFY(!stc.isEmpty());
+        QVERIFY(!stc.is_empty());
         QCOMPARE((int)stc.data.rows(), invOp.nsource);
         QVERIFY(stc.data.allFinite());
     }
@@ -578,7 +578,7 @@ private slots:
         InvSourceEstimate stc = mn.calculateInverse(
             pickedEvoked.data, tmin, tstep, false);
 
-        if (stc.isEmpty())
+        if (stc.is_empty())
             QSKIP("Failed to compute STC");
 
         QTemporaryDir tmpDir;
@@ -586,18 +586,12 @@ private slots:
         QString basePath = tmpDir.path() + "/test_stc";
 
         // Write
-        QFile stcOutFile(basePath);
-        stc.write(stcOutFile);
+        QVERIFY(stc.write(basePath.toStdU16String()));
 
         // Read back
-        QFile stcInFile(basePath);
-        InvSourceEstimate stc2;
-        InvSourceEstimate::read(stcInFile, stc2);
-
-        if (!stc2.isEmpty()) {
-            QCOMPARE(stc2.data.rows(), stc.data.rows());
-            QCOMPARE(stc2.data.cols(), stc.data.cols());
-        }
+        const InvSourceEstimate stc2(basePath.toStdU16String());
+        QCOMPARE(stc2.data.rows(), stc.data.rows());
+        QCOMPARE(stc2.data.cols(), stc.data.cols());
     }
 
     //=========================================================================

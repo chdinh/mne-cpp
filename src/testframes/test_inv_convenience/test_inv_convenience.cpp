@@ -427,7 +427,7 @@ private slots:
 
         QTemporaryDir tmpDir;
         QVERIFY(tmpDir.isValid());
-        QVERIFY(!volumeStc.writeHemispherePair(tmpDir.path() + "/volume"));
+        QVERIFY(!volumeStc.write_hemisphere_pair((tmpDir.path() + "/volume").toStdU16String()));
     }
 
     void testWriteHemispherePair()
@@ -453,23 +453,19 @@ private slots:
         stc.nVerticesLh = nLh;
 
         const QString sBase = tmpDir.path() + "/estimate";
-        QVERIFY(stc.writeHemispherePair(sBase));
+        QVERIFY(stc.write_hemisphere_pair(sBase.toStdU16String()));
 
         QVERIFY(QFile::exists(sBase + "-lh.stc"));
         QVERIFY(QFile::exists(sBase + "-rh.stc"));
 
         // Each file must contain only its own hemisphere.
-        QFile fileLh(sBase + "-lh.stc");
-        InvSourceEstimate stcLh;
-        QVERIFY(InvSourceEstimate::read(fileLh, stcLh));
+        const InvSourceEstimate stcLh((sBase + "-lh.stc").toStdU16String());
         QCOMPARE(static_cast<int>(stcLh.vertices.size()), nLh);
         QCOMPARE(stcLh.vertices(0), 10);
         QCOMPARE(stcLh.vertices(2), 12);
         QCOMPARE(static_cast<int>(stcLh.data.rows()), nLh);
 
-        QFile fileRh(sBase + "-rh.stc");
-        InvSourceEstimate stcRh;
-        QVERIFY(InvSourceEstimate::read(fileRh, stcRh));
+        const InvSourceEstimate stcRh((sBase + "-rh.stc").toStdU16String());
         QCOMPARE(static_cast<int>(stcRh.vertices.size()), nRh);
         QCOMPARE(stcRh.vertices(0), 20);
         QCOMPARE(stcRh.vertices(1), 21);
@@ -495,7 +491,7 @@ private slots:
         // A caller passing a name that already ends in -lh.stc must not end up
         // with "estimate-lh-lh.stc".
         const QString sBase = tmpDir.path() + "/estimate";
-        QVERIFY(stc.writeHemispherePair(sBase + "-lh.stc"));
+        QVERIFY(stc.write_hemisphere_pair((sBase + "-lh.stc").toStdU16String()));
 
         QVERIFY(QFile::exists(sBase + "-lh.stc"));
         QVERIFY(QFile::exists(sBase + "-rh.stc"));
@@ -514,7 +510,7 @@ private slots:
         // nVerticesLh defaults to -1, meaning the split point is unknown.
         InvSourceEstimate stc(data, verts, 0.0f, 1.0f / 256.0f);
         QCOMPARE(stc.nVerticesLh, -1);
-        QVERIFY(!stc.writeHemispherePair(tmpDir.path() + "/estimate"));
+        QVERIFY(!stc.write_hemisphere_pair((tmpDir.path() + "/estimate").toStdU16String()));
     }
 
     void cleanupTestCase()

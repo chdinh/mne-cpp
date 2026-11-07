@@ -130,8 +130,7 @@ int main(int argc, char* argv[])
     InvSourceEstimate stc(data, allVertices, tmin, tstep);
 
     //--- Write output ---
-    QFile outFile(parser.value(outOpt));
-    if (!stc.write(outFile)) {
+    if (!stc.write(parser.value(outOpt).toStdU16String())) {
         qCritical() << "Failed to write output STC.";
         return 1;
     }
