@@ -33,6 +33,11 @@
 #include <QtMath>
 
 #include <algorithm>
+#include <cstdint>
+#include <iterator>
+#include <string>
+#include <variant>
+#include <vector>
 
 using namespace MNEBROWSE;
 using namespace FIFFLIB;
@@ -56,6 +61,82 @@ constexpr int FiffBlockMneAnnotations = 3810;
 constexpr int FiffMneBaselineMin = 3568;
 constexpr int FiffMneBaselineMax = 3569;
 constexpr int FiffMneEpochsDropLog = 3801;
+
+QString qText(const std::string& text)
+{
+    return QString::fromStdString(text);
+}
+
+QStringList qNames(const std::vector<std::string>& names)
+{
+    QStringList list;
+    list.reserve(static_cast<qsizetype>(names.size()));
+    for (const std::string& name : names) {
+        list.append(QString::fromStdString(name));
+    }
+    return list;
+}
+
+std::vector<std::string> stdNames(const QStringList& names)
+{
+    std::vector<std::string> list;
+    list.reserve(static_cast<std::size_t>(names.size()));
+    for (const QString& name : names) {
+        list.push_back(name.toStdString());
+    }
+    return list;
+}
+
+QVariantMap qExtras(const FiffAnnotation::Extras& extras)
+{
+    QVariantMap map;
+    for (const auto& [key, value] : extras) {
+        map.insert(QString::fromStdString(key), std::visit([](const auto& v) -> QVariant {
+                       using T = std::decay_t<decltype(v)>;
+                       if constexpr (std::is_same_v<T, std::monostate>) {
+                           return QVariant();
+                       } else if constexpr (std::is_same_v<T, std::string>) {
+                           return QString::fromStdString(v);
+                       } else if constexpr (std::is_same_v<T, std::int64_t>) {
+                           return QVariant::fromValue(static_cast<qlonglong>(v));
+                       } else {
+                           return QVariant(v);
+                       }
+                   },
+                                                           value));
+    }
+    return map;
+}
+
+FiffAnnotation::Extras stdExtras(const QVariantMap& map)
+{
+    FiffAnnotation::Extras extras;
+    for (auto it = map.constBegin(); it != map.constEnd(); ++it) {
+        const QVariant& value = it.value();
+        FiffAnnotation::Extra extra;
+        switch (value.typeId()) {
+            case QMetaType::Bool:
+                extra = value.toBool();
+                break;
+            case QMetaType::Int:
+            case QMetaType::UInt:
+            case QMetaType::LongLong:
+            case QMetaType::ULongLong:
+                extra = static_cast<std::int64_t>(value.toLongLong());
+                break;
+            case QMetaType::Double:
+            case QMetaType::Float:
+                extra = value.toDouble();
+                break;
+            default:
+                if (value.isValid() && !value.isNull()) {
+                    extra = value.toString().toStdString();
+                }
+        }
+        extras.insert_or_assign(it.key().toStdString(), std::move(extra));
+    }
+    return extras;
+}
 
 QString defaultAnnotationDescription()
 {
@@ -309,7 +390,7 @@ AnnotationModel::~AnnotationModel() = default;
 int AnnotationModel::rowCount(const QModelIndex& parent) const
 {
     Q_UNUSED(parent)
-    return m_fiffAnnotations.size();
+    return std::ssize(m_fiffAnnotations);
 }
 
 //=============================================================================================================
@@ -362,7 +443,7 @@ QVariant AnnotationModel::headerData(int section, Qt::Orientation orientation, i
 
 QVariant AnnotationModel::data(const QModelIndex& index, int role) const
 {
-    if (!index.isValid() || index.row() < 0 || index.row() >= m_fiffAnnotations.size()) {
+    if (!index.isValid() || index.row() < 0 || index.row() >= std::ssize(m_fiffAnnotations)) {
         return QVariant();
     }
 
@@ -375,7 +456,7 @@ QVariant AnnotationModel::data(const QModelIndex& index, int role) const
     if (role == Qt::BackgroundRole) {
         QBrush brush;
         brush.setStyle(Qt::SolidPattern);
-        QColor color = colorForLabel(annot.description);
+        QColor color = colorForLabel(qText(annot.description));
         color.setAlpha(40);
         brush.setColor(color);
         return QVariant(brush);
@@ -401,11 +482,11 @@ QVariant AnnotationModel::data(const QModelIndex& index, int role) const
         case DurationSecondsColumn:
             return QVariant(annot.duration);
         case DescriptionColumn:
-            return QVariant(annot.description);
+            return QVariant(qText(annot.description));
         case ChannelsColumn:
-            return QVariant(displayChannelNames(annot.channelNames));
+            return QVariant(displayChannelNames(qNames(annot.ch_names)));
         case CommentColumn:
-            return QVariant(annot.comment);
+            return QVariant(qText(annot.comment));
         default:
             return QVariant();
     }
@@ -426,7 +507,7 @@ Qt::ItemFlags AnnotationModel::flags(const QModelIndex& index) const
 
 bool AnnotationModel::setData(const QModelIndex& index, const QVariant& value, int role)
 {
-    if (role != Qt::EditRole || !index.isValid() || index.row() < 0 || index.row() >= m_fiffAnnotations.size()) {
+    if (role != Qt::EditRole || !index.isValid() || index.row() < 0 || index.row() >= std::ssize(m_fiffAnnotations)) {
         return false;
     }
 
@@ -450,13 +531,13 @@ bool AnnotationModel::setData(const QModelIndex& index, const QVariant& value, i
             annot.duration = qMax(0.0, value.toDouble());
             break;
         case DescriptionColumn:
-            annot.description = value.toString().trimmed();
+            annot.description = value.toString().trimmed().toStdString();
             break;
         case ChannelsColumn:
-            annot.channelNames = parseDisplayChannelNames(value.toString());
+            annot.ch_names = stdNames(parseDisplayChannelNames(value.toString()));
             break;
         case CommentColumn:
-            annot.comment = value.toString().trimmed();
+            annot.comment = value.toString().trimmed().toStdString();
             break;
         default:
             return false;
@@ -482,14 +563,12 @@ bool AnnotationModel::removeRows(int position, int rows, const QModelIndex& pare
 {
     Q_UNUSED(parent)
 
-    if (position < 0 || rows <= 0 || position + rows > m_fiffAnnotations.size()) {
+    if (position < 0 || rows <= 0 || position + rows > std::ssize(m_fiffAnnotations)) {
         return false;
     }
 
     beginRemoveRows(QModelIndex(), position, position + rows - 1);
-    for (int index = 0; index < rows; ++index) {
-        m_fiffAnnotations.remove(position);
-    }
+    m_fiffAnnotations.erase(m_fiffAnnotations.begin() + position, m_fiffAnnotations.begin() + position + rows);
     endRemoveRows();
 
     notifyAnnotationsChanged();
@@ -525,9 +604,9 @@ int AnnotationModel::addAnnotation(int startSample,
     const double sfreq = (m_pFiffInfo && m_pFiffInfo->sfreq > 0.0f) ? m_pFiffInfo->sfreq : 1.0;
     // Auto-merge: absorb any existing same-description annotations that overlap or are adjacent
     QVector<int> mergeIndices;
-    for (int i = 0; i < m_fiffAnnotations.size(); ++i) {
+    for (int i = 0; i < std::ssize(m_fiffAnnotations); ++i) {
         const FiffAnnotation& existing = m_fiffAnnotations[i];
-        if (existing.description != entry.description)
+        if (qText(existing.description) != entry.description)
             continue;
         // Convert existing to samples for overlap check
         int existStart = m_iFirstSample + static_cast<int>(qRound(existing.onset * sfreq));
@@ -548,18 +627,18 @@ int AnnotationModel::addAnnotation(int startSample,
     // Remove merged entries in reverse order
     std::sort(mergeIndices.begin(), mergeIndices.end(), std::greater<int>());
     for (int idx : mergeIndices)
-        m_fiffAnnotations.remove(idx);
+        m_fiffAnnotations.erase(m_fiffAnnotations.begin() + idx);
 
-    m_fiffAnnotations.append(onset, duration, entry.description, entry.channelNames, entry.comment);
+    m_fiffAnnotations.push_back({onset, duration, entry.description.toStdString(), stdNames(entry.channelNames), entry.comment.toStdString(), {}});
     sortEntries();
     endResetModel();
 
     notifyAnnotationsChanged();
 
     // Find the row of the newly inserted annotation
-    for (int row = 0; row < m_fiffAnnotations.size(); ++row) {
+    for (int row = 0; row < std::ssize(m_fiffAnnotations); ++row) {
         const FiffAnnotation& candidate = m_fiffAnnotations[row];
-        if (qAbs(candidate.onset - onset) < 1e-9 && qAbs(candidate.duration - duration) < 1e-9 && candidate.description == entry.description) {
+        if (qAbs(candidate.onset - onset) < 1e-9 && qAbs(candidate.duration - duration) < 1e-9 && qText(candidate.description) == entry.description) {
             return row;
         }
     }
@@ -571,7 +650,7 @@ int AnnotationModel::addAnnotation(int startSample,
 
 QPair<int, int> AnnotationModel::getSampleRange(int row) const
 {
-    if (row < 0 || row >= m_fiffAnnotations.size()) {
+    if (row < 0 || row >= std::ssize(m_fiffAnnotations)) {
         return QPair<int, int>(0, 0);
     }
 
@@ -586,7 +665,7 @@ QPair<int, int> AnnotationModel::getSampleRange(int row) const
 
 bool AnnotationModel::updateAnnotationBoundary(int row, bool isStart, int absoluteSample)
 {
-    if (row < 0 || row >= m_fiffAnnotations.size()) {
+    if (row < 0 || row >= std::ssize(m_fiffAnnotations)) {
         return false;
     }
 
@@ -627,19 +706,19 @@ bool AnnotationModel::updateAnnotationBoundary(int row, bool isStart, int absolu
 QVector<AnnotationSpanData> AnnotationModel::getAnnotationSpans() const
 {
     QVector<AnnotationSpanData> spans;
-    spans.reserve(m_fiffAnnotations.size());
+    spans.reserve(std::ssize(m_fiffAnnotations));
 
     const double sfreq = (m_pFiffInfo && m_pFiffInfo->sfreq > 0.0f) ? m_pFiffInfo->sfreq : 1.0;
 
-    for (int i = 0; i < m_fiffAnnotations.size(); ++i) {
+    for (int i = 0; i < std::ssize(m_fiffAnnotations); ++i) {
         const FiffAnnotation& annot = m_fiffAnnotations[i];
         AnnotationSpanData span;
         span.startSample = m_iFirstSample + static_cast<int>(qRound(annot.onset * sfreq));
         span.endSample = span.startSample + static_cast<int>(qRound(annot.duration * sfreq));
-        span.color = colorForLabel(annot.description);
-        span.label = annot.description;
-        span.comment = annot.comment;
-        span.channelNames = annot.channelNames;
+        span.label = qText(annot.description);
+        span.color = colorForLabel(span.label);
+        span.comment = qText(annot.comment);
+        span.channelNames = qNames(annot.ch_names);
         spans.append(span);
     }
 
@@ -1172,11 +1251,11 @@ bool AnnotationModel::saveAnnotationFif(QFile& qFile) const
 
     QVector<float> onsetSeconds;
     QVector<float> endSeconds;
-    onsetSeconds.reserve(m_fiffAnnotations.size());
-    endSeconds.reserve(m_fiffAnnotations.size());
+    onsetSeconds.reserve(std::ssize(m_fiffAnnotations));
+    endSeconds.reserve(std::ssize(m_fiffAnnotations));
 
     QStringList descriptions;
-    descriptions.reserve(m_fiffAnnotations.size());
+    descriptions.reserve(std::ssize(m_fiffAnnotations));
 
     QJsonArray channelNameRows;
     bool haveChannelNames = false;
@@ -1548,14 +1627,7 @@ void AnnotationModel::importEntries(const QVector<AnnotationEntry>& entries)
         if (duration < 0.0)
             duration = 0.0;
 
-        FiffAnnotation annot;
-        annot.onset = onset;
-        annot.duration = duration;
-        annot.description = e.description;
-        annot.channelNames = e.channelNames;
-        annot.comment = e.comment;
-        annot.extras = e.extras;
-        m_fiffAnnotations.append(annot);
+        m_fiffAnnotations.push_back({onset, duration, e.description.toStdString(), stdNames(e.channelNames), e.comment.toStdString(), stdExtras(e.extras)});
     }
 }
 
@@ -1566,17 +1638,17 @@ QVector<AnnotationModel::AnnotationEntry> AnnotationModel::exportEntries() const
     const double sfreq = (m_pFiffInfo && m_pFiffInfo->sfreq > 0.0f) ? m_pFiffInfo->sfreq : 1.0;
 
     QVector<AnnotationEntry> entries;
-    entries.reserve(m_fiffAnnotations.size());
+    entries.reserve(std::ssize(m_fiffAnnotations));
 
-    for (int i = 0; i < m_fiffAnnotations.size(); ++i) {
+    for (int i = 0; i < std::ssize(m_fiffAnnotations); ++i) {
         const FiffAnnotation& annot = m_fiffAnnotations[i];
         AnnotationEntry e;
         e.startSample = m_iFirstSample + static_cast<int>(qRound(annot.onset * sfreq));
         e.endSample = e.startSample + static_cast<int>(qRound(annot.duration * sfreq));
-        e.description = annot.description;
-        e.channelNames = annot.channelNames;
-        e.comment = annot.comment;
-        e.extras = annot.extras;
+        e.description = qText(annot.description);
+        e.channelNames = qNames(annot.ch_names);
+        e.comment = qText(annot.comment);
+        e.extras = qExtras(annot.extras);
         entries.append(e);
     }
 
@@ -1587,10 +1659,7 @@ QVector<AnnotationModel::AnnotationEntry> AnnotationModel::exportEntries() const
 
 void AnnotationModel::sortEntries()
 {
-    // Sort the underlying QVector directly via toVector() — FiffAnnotations
-    // exposes its internal vector for in-place sorting.
-    QVector<FiffAnnotation>& vec = const_cast<QVector<FiffAnnotation>&>(m_fiffAnnotations.toVector());
-    std::sort(vec.begin(), vec.end(),
+    std::sort(m_fiffAnnotations.begin(), m_fiffAnnotations.end(),
               [](const FiffAnnotation& left, const FiffAnnotation& right) {
                   if (qAbs(left.onset - right.onset) > 1e-12) {
                       return left.onset < right.onset;

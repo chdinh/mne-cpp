@@ -23,11 +23,13 @@
 // QT INCLUDES
 //=============================================================================================================
 
-#include <QDebug>
+#include <QtGlobal>
 
 //=============================================================================================================
 // STL INCLUDES
 //=============================================================================================================
+
+#include <utils/string_utils.h>
 
 #include <cmath>
 
@@ -42,95 +44,60 @@ using namespace Eigen;
 // DEFINE FUNCTIONS
 //=============================================================================================================
 
-FiffAnnotations FIFFLIB::annotationsFromEvents(
-    const MatrixXi& events,
-    double sfreq,
-    const QMap<int, QString>& eventDescriptions,
-    int firstSample)
+FiffAnnotations FIFFLIB::annotations_from_events(const MatrixXi& events,
+                                                 double sfreq,
+                                                 const std::map<int, std::string>& event_desc,
+                                                 int first_sample)
 {
     FiffAnnotations annotations;
-
     if (events.rows() == 0 || events.cols() < 3) {
         return annotations;
     }
-
     if (sfreq <= 0.0) {
-        qWarning("annotationsFromEvents: sfreq must be positive, got %f", sfreq);
+        qWarning("annotations_from_events: sfreq must be positive, got %f", sfreq);
         return annotations;
     }
-
-    for (int i = 0; i < static_cast<int>(events.rows()); ++i) {
-        const int sample = events(i, 0);
-        const int eventId = events(i, 2);
-
-        const double onset = static_cast<double>(sample - firstSample) / sfreq;
-
-        QString description;
-        if (eventDescriptions.contains(eventId)) {
-            description = eventDescriptions.value(eventId);
-        } else {
-            description = QString::number(eventId);
-        }
-
-        annotations.append(onset, 0.0, description);
+    for (Index i = 0; i < events.rows(); ++i) {
+        const int id = events(i, 2);
+        const auto label = event_desc.find(id);
+        annotations.append(static_cast<double>(events(i, 0) - first_sample) / sfreq, 0.0, label != event_desc.end() ? label->second : std::to_string(id));
     }
-
     return annotations;
 }
 
 //=============================================================================================================
 
-MatrixXi FIFFLIB::eventsFromAnnotations(
-    const FiffAnnotations& annotations,
-    double sfreq,
-    const QMap<QString, int>& eventIds,
-    int firstSample)
+MatrixXi FIFFLIB::events_from_annotations(const FiffAnnotations& annotations,
+                                          double sfreq,
+                                          const std::map<std::string, int, std::less<>>& event_id,
+                                          int first_sample)
 {
-    if (annotations.isEmpty()) {
+    if (annotations.empty()) {
         return MatrixXi(0, 3);
     }
-
     if (sfreq <= 0.0) {
-        qWarning("eventsFromAnnotations: sfreq must be positive, got %f", sfreq);
+        qWarning("events_from_annotations: sfreq must be positive, got %f", sfreq);
         return MatrixXi(0, 3);
     }
-
-    const int n = annotations.size();
-    MatrixXi result(n, 3);
-
-    for (int i = 0; i < n; ++i) {
-        const FiffAnnotation& a = annotations[i];
-
-        const int sample = static_cast<int>(std::round(a.onset * sfreq)) + firstSample;
-
-        int eventId = 0;
-        if (eventIds.contains(a.description)) {
-            eventId = eventIds.value(a.description);
-        } else {
-            bool ok = false;
-            const int parsed = a.description.toInt(&ok);
-            if (ok) {
-                eventId = parsed;
-            }
-        }
-
-        result(i, 0) = sample;
-        result(i, 1) = 0;
-        result(i, 2) = eventId;
+    MatrixXi result(static_cast<Index>(annotations.size()), 3);
+    Index row = 0;
+    for (const FiffAnnotation& a : annotations) {
+        const auto id = event_id.find(a.description);
+        result(row, 0) = static_cast<int>(std::round(a.onset * sfreq)) + first_sample;
+        result(row, 1) = 0;
+        result(row, 2) = id != event_id.end() ? id->second : UTILSLIB::toInt(a.description).value_or(0);
+        ++row;
     }
-
     return result;
 }
 
 //=============================================================================================================
 
-QMap<QString, int> FIFFLIB::countAnnotations(const FiffAnnotations& annotations)
+std::map<std::string, int, std::less<>> FIFFLIB::count_annotations(const FiffAnnotations& annotations)
 {
-    QMap<QString, int> counts;
-
-    for (int i = 0; i < annotations.size(); ++i) {
-        counts[annotations[i].description] += 1;
+    std::map<std::string, int, std::less<>> counts;
+    for (const FiffAnnotation& a : annotations) {
+        ++counts[a.description];
     }
-
     return counts;
 }

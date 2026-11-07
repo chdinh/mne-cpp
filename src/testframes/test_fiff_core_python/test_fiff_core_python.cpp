@@ -78,6 +78,9 @@
 #include <Eigen/Geometry>
 #include <Eigen/SparseCore>
 
+#include <fstream>
+#include <map>
+
 //=============================================================================================================
 // USED NAMESPACES
 //=============================================================================================================
@@ -1028,14 +1031,12 @@ void TestFiffCorePython::events_matchPython()
 {
     const MatrixXi onsets = events(false);
 
-    FiffEvents found;
-    QVERIFY(FiffEvents::detect_from_raw(*m_raw, found));
+    const FiffEvents found = FiffEvents::find_events(*m_raw).value();
     QVERIFY(found.events == onsets);
 
     // find_events(output='step', consecutive=True): each pulse returns to 0 after this many samples.
     const QByteArray widths = "5555455545555545554445554";
-    FiffEvents steps;
-    QVERIFY(FiffEvents::detect_from_raw(*m_raw, steps, QStringLiteral("STI 014"), 0xFFFFFFFF, false));
+    const FiffEvents steps = FiffEvents::find_events(*m_raw, "STI 014", 0xFFFFFFFF, false).value();
     QCOMPARE(static_cast<int>(steps.events.rows()), 2 * static_cast<int>(onsets.rows()));
     for (int k = 0; k < onsets.rows(); ++k) {
         QVERIFY(steps.events.row(2 * k) == onsets.row(k));
@@ -1045,35 +1046,27 @@ void TestFiffCorePython::events_matchPython()
     }
 
     // find_events(mask=3, mask_type='and'): codes 4 and 32 vanish, 5 becomes 1.
-    FiffEvents masked;
-    QVERIFY(FiffEvents::detect_from_raw(*m_raw, masked, QString(), 3));
+    const FiffEvents masked = FiffEvents::find_events(*m_raw, "STI014", 3).value();
     const QList<int> maskedCodes{2, 3, 1, 2, 3, 1, 2, 3, 1, 2, 3, 1, 1, 2, 3, 1, 2, 3, 1};
     QCOMPARE(static_cast<int>(masked.events.rows()), static_cast<int>(maskedCodes.size()));
     for (int k = 0; k < maskedCodes.size(); ++k)
         QCOMPARE(masked.events(k, 2), maskedCodes[k]);
 
-    FiffEvents none;
-    QVERIFY(!FiffEvents::detect_from_raw(*m_raw, none, QStringLiteral("STI 999")));
+    QCOMPARE(FiffEvents::find_events(*m_raw, "STI 999").error().code, UTILSLIB::ErrorCode::NotFound);
 
-    // FIF and ASCII round trips; read() derives <raw>-eve.fif from the raw file name.
+    // FIF and ASCII round trips; read() picks the format by the ".fif" in the name, as mne.read_events.
     QTemporaryDir dir;
     const auto path = [&dir](const char* name) {
         return dir.filePath(name).toStdString();
     };
-    QVERIFY(found.write_to_fif(path("run-eve.fif")));
-    QVERIFY(!FiffEvents().write_to_fif(path("empty-eve.fif")));
+    QVERIFY(found.write(path("run-eve.fif")).has_value());
+    QCOMPARE(FiffEvents().write_fif(path("empty-eve.fif")).error().code, UTILSLIB::ErrorCode::Format);
     QVERIFY(!QFile::exists(dir.filePath("empty-eve.fif")));
-    FiffEvents back;
-    QVERIFY(FiffEvents::read({}, path("run.fif"), back));
-    QVERIFY(back.events == onsets);
-    FiffEvents byName;
-    QVERIFY(FiffEvents::read(path("run-eve.fif"), {}, byName));
-    QVERIFY(byName.events == onsets);
-    QVERIFY(!FiffEvents::read({}, path("run.raw"), byName));
-    QVERIFY(!FiffEvents::read(path("missing-eve.fif"), {}, byName));
-    QVERIFY(!FiffEvents::read({}, path("missing.fif"), byName));
-    FiffEvents noBlock;
-    QVERIFY(!FiffEvents::read_from_fif(dataPath("sample_audvis_trunc_raw.fif").toStdString(), noBlock));
+    QVERIFY(FiffEvents::read(path("run-eve.fif")).value().events == onsets);
+    QVERIFY(FiffEvents(path("run-eve.fif")).events == onsets);
+    QCOMPARE(FiffEvents::read(path("missing-eve.fif")).error().code, UTILSLIB::ErrorCode::Io);
+    QVERIFY_THROWS_EXCEPTION(UTILSLIB::Error, FiffEvents{path("missing-eve.fif")});
+    QCOMPARE(FiffEvents::read_fif(dataPath("sample_audvis_trunc_raw.fif").toStdString()).error().code, UTILSLIB::ErrorCode::NotFound);
 
     // The text file keeps the layout MNE-C writes, also under a locale with a decimal comma.
     const float sfreq = static_cast<float>(m_raw->info.sfreq);
@@ -1081,19 +1074,23 @@ void TestFiffCorePython::events_matchPython()
     for (int k = 0; k < found.events.rows(); ++k)
         expected += QString("%1 %2 %3 %4\n").arg(found.events(k, 0), 6).arg(static_cast<float>(found.events(k, 0)) / sfreq, -10, 'f', 3).arg(found.events(k, 1), 3).arg(found.events(k, 2), 3);
     const bool comma = std::setlocale(LC_NUMERIC, "de_DE.UTF-8") != nullptr;
-    QVERIFY(found.write_to_ascii(path("run.eve"), sfreq));
+    QVERIFY(found.write(path("run.eve"), sfreq).has_value());
     std::setlocale(LC_NUMERIC, "C");
     QFile eveFile(dir.filePath("run.eve"));
     QVERIFY(eveFile.open(QIODevice::ReadOnly | QIODevice::Text));
     QCOMPARE(QString::fromUtf8(eveFile.readAll()), expected);
     qInfo("decimal comma locale %s", comma ? "tested" : "not installed");
-    QVERIFY(!found.write_to_ascii(path("no/dir/run.eve"), sfreq));
+    QCOMPARE(found.write_ascii(path("no/dir/run.eve"), sfreq).error().code, UTILSLIB::ErrorCode::Io);
     const FiffEvents ascii(path("run.eve"));
     QVERIFY(ascii.events == onsets);
-    FiffEvents fromText;
-    QVERIFY(FiffEvents::read_from_ascii(path("run.eve"), fromText));
-    QVERIFY(fromText.events == onsets);
-    QVERIFY(!FiffEvents::read_from_ascii(path("missing.eve"), fromText));
+    QVERIFY(FiffEvents::read_ascii(path("run.eve")).value().events == onsets);
+    QCOMPARE(FiffEvents::read_ascii(path("missing.eve")).error().code, UTILSLIB::ErrorCode::Io);
+
+    // Comment lines are skipped; a line that does not start with a sample is an error rather than event 0
+    std::ofstream(path("commented.eve")) << "% sample time before after\n  100 0.166 0 5\n# trailer\n";
+    QVERIFY(FiffEvents::read_ascii(path("commented.eve")).value().events == (Eigen::RowVector3i(100, 0, 5)));
+    std::ofstream(path("broken.eve")) << "100 0 5\nonset 0 5\n";
+    QCOMPARE(FiffEvents::read_ascii(path("broken.eve")).error().code, UTILSLIB::ErrorCode::Format);
 }
 
 //=============================================================================================================
@@ -1122,8 +1119,8 @@ void TestFiffCorePython::eventUtilities_matchPython()
     QCOMPARE(ev.merge({1, 2}, 9, false).events,
              rows({{10, 0, 1}, {10, 0, 9}, {20, 1, 0}, {20, 9, 0}, {35, 0, 2}, {35, 0, 9}, {40, 2, 3}, {40, 9, 3}, {52, 3, 0}, {60, 0, 1}, {60, 0, 9}, {75, 0, 4}, {80, 4, 0}}));
 
-    QCOMPARE(ev.count(), (QMap<int, int>{{0, 3}, {1, 2}, {2, 1}, {3, 1}, {4, 1}}));
-    QCOMPARE(ev.count({1, 5}), (QMap<int, int>{{1, 2}, {5, 0}}));
+    QCOMPARE(ev.count(), (std::map<int, int>{{0, 3}, {1, 2}, {2, 1}, {3, 1}, {4, 1}}));
+    QCOMPARE(ev.count({1, 5}), (std::map<int, int>{{1, 2}, {5, 0}}));
 
     FiffEvents second;
     second.events = rows({{105, 0, 7}, {130, 7, 0}});

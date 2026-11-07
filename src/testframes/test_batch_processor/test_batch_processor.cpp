@@ -298,8 +298,7 @@ void TestBatchProcessor::testRunDetectsEventsWithoutMask()
     settings.eventsOutFiles << m_tempDir.path() + "/detected-eve.fif";
     QCOMPARE(BatchProcessor::run(settings), 0);
 
-    FIFFLIB::FiffEvents events;
-    QVERIFY(FIFFLIB::FiffEvents::read_from_fif(settings.eventsOutFiles.first().toStdString(), events));
+    const FIFFLIB::FiffEvents events = FIFFLIB::FiffEvents::read_fif(settings.eventsOutFiles.first().toStdString()).value();
     QVERIFY2(events.num_events() > 0, "No events detected on STI 014");
 }
 

@@ -754,8 +754,8 @@ void TestAcqRecorder::recordsLostSamplesAsSkips()
     std::vector<bool> skipped(samples, false);
     std::uint64_t total = 0;
     QJsonArray expectedAnnotations;
-    for (int i = 0; i < annotations.size(); ++i) {
-        QCOMPARE(annotations[i].description, QStringLiteral("BAD_ACQ_SKIP"));
+    for (std::size_t i = 0; i < annotations.size(); ++i) {
+        QCOMPARE(annotations[i].description, std::string("BAD_ACQ_SKIP"));
         const auto first = static_cast<std::uint64_t>(std::llround(annotations[i].onset * kSfreq));
         const auto count = static_cast<std::uint64_t>(std::llround(annotations[i].duration * kSfreq));
         total += count;

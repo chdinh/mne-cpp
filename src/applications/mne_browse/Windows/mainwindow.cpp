@@ -325,9 +325,8 @@ bool detectFallbackStimEvents(const FIFFLIB::FiffRawData& raw,
 
     const QStringList stimChannels = preferredStimChannels + fallbackStimChannels;
     for (const QString& stimChannel : stimChannels) {
-        FIFFLIB::FiffEvents detectedEvents;
-        if (FIFFLIB::FiffEvents::detect_from_raw(raw, detectedEvents, stimChannel)) {
-            events = detectedEvents.events;
+        if (auto detected = FIFFLIB::FiffEvents::find_events(raw, stimChannel.toStdString()); detected && !detected->is_empty()) {
+            events = std::move(detected->events);
             sourceDescription = QString("Using trigger events detected from %1.").arg(stimChannel);
             return true;
         }

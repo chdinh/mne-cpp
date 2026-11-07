@@ -44,6 +44,7 @@
 #include <fiff/fiff_cov.h>
 #include <fiff/fiff_proj.h>
 #include <fiff/fiff_events.h>
+#include <utils/string_utils.h>
 #include <fiff/fiff_evoked_set.h>
 #include <fiff/fiff_raw_data.h>
 
@@ -269,10 +270,19 @@ public:
                                    const std::filesystem::path& t_fileRawName,
                                    Eigen::MatrixXi& events)
     {
-        FIFFLIB::FiffEvents fiffEvents;
-        if (!FIFFLIB::FiffEvents::read(t_sEventName, t_fileRawName, fiffEvents))
+        std::filesystem::path path = t_sEventName;
+        if (path.empty()) {
+            // The events of "<name>.fif" are in "<name>-eve.fif"
+            std::string name = UTILSLIB::utf8FromPath(t_fileRawName);
+            const std::size_t fif = name.find(".fif");
+            if (fif == std::string::npos || fif == 0)
+                return false;
+            path = UTILSLIB::pathFromUtf8(name.replace(fif, 4, "-eve.fif"));
+        }
+        auto read = FIFFLIB::FiffEvents::read(path);
+        if (!read)
             return false;
-        events = fiffEvents.events;
+        events = std::move(read->events);
         return true;
     }
 
@@ -290,10 +300,10 @@ public:
     inline static bool read_events_from_fif(const std::filesystem::path& path,
                                             Eigen::MatrixXi& eventlist)
     {
-        FIFFLIB::FiffEvents fiffEvents;
-        if (!FIFFLIB::FiffEvents::read_from_fif(path, fiffEvents))
+        auto read = FIFFLIB::FiffEvents::read_fif(path);
+        if (!read)
             return false;
-        eventlist = fiffEvents.events;
+        eventlist = std::move(read->events);
         return true;
     }
 
@@ -311,10 +321,10 @@ public:
     inline static bool read_events_from_ascii(const std::filesystem::path& path,
                                               Eigen::MatrixXi& eventlist)
     {
-        FIFFLIB::FiffEvents fiffEvents;
-        if (!FIFFLIB::FiffEvents::read_from_ascii(path, fiffEvents))
+        auto read = FIFFLIB::FiffEvents::read_ascii(path);
+        if (!read)
             return false;
-        eventlist = fiffEvents.events;
+        eventlist = std::move(read->events);
         return true;
     }
 
@@ -332,9 +342,7 @@ public:
     inline static bool write_events_to_fif(const std::filesystem::path& path,
                                            const Eigen::MatrixXi& eventlist)
     {
-        FIFFLIB::FiffEvents fiffEvents;
-        fiffEvents.events = eventlist;
-        return fiffEvents.write_to_fif(path);
+        return FIFFLIB::FiffEvents(eventlist).write_fif(path).has_value();
     }
 
     //=========================================================================================================
@@ -353,9 +361,7 @@ public:
                                              const Eigen::MatrixXi& eventlist,
                                              float sfreq = 0.0f)
     {
-        FIFFLIB::FiffEvents fiffEvents;
-        fiffEvents.events = eventlist;
-        return fiffEvents.write_to_ascii(path, sfreq);
+        return FIFFLIB::FiffEvents(eventlist).write_ascii(path, sfreq).has_value();
     }
 
     //=========================================================================================================

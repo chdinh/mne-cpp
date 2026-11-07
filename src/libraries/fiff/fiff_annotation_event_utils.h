@@ -32,12 +32,9 @@
 #include "fiff_global.h"
 #include "fiff_annotations.h"
 
-//=============================================================================================================
-// QT INCLUDES
-//=============================================================================================================
-
-#include <QMap>
-#include <QString>
+#include <functional>
+#include <map>
+#include <string>
 
 //=============================================================================================================
 // EIGEN INCLUDES
@@ -54,53 +51,51 @@ namespace FIFFLIB
 
 //=============================================================================================================
 /**
- * Convert a FIFF event matrix to FiffAnnotations.
+ * Converts events to annotations, like mne.annotations_from_events.
  *
- * Each event becomes an annotation with onset = (sample - firstSample) / sfreq
- * and duration = 0.  The description is looked up from eventDescriptions
- * (event_id -> label).  If not found, the event id is used as a string.
+ * Each event becomes a point annotation at (sample - first_sample) / sfreq, described by the label of
+ * its id (the third column) or, without a label, by the id itself.
  *
- * @param[in] events              FIFF events (Nx3: [sample, before, after]).
- * @param[in] sfreq               Sampling frequency in Hz.
- * @param[in] eventDescriptions   Map from event id (the "after" column) to description string.
- * @param[in] firstSample         First sample offset (default 0).
- * @return FiffAnnotations containing one annotation per event.
+ * @param[in] events          Events, one row [sample, before, id] each.
+ * @param[in] sfreq           Sampling frequency in Hz.
+ * @param[in] event_desc      Label of each event id.
+ * @param[in] first_sample    First sample of the recording.
+ *
+ * @return One annotation per event; none if @p sfreq is not positive.
  */
-FIFFSHARED_EXPORT FiffAnnotations annotationsFromEvents(
-    const Eigen::MatrixXi& events,
-    double sfreq,
-    const QMap<int, QString>& eventDescriptions = QMap<int, QString>(),
-    int firstSample = 0);
+FIFFSHARED_EXPORT FiffAnnotations annotations_from_events(const Eigen::MatrixXi& events,
+                                                          double sfreq,
+                                                          const std::map<int, std::string>& event_desc = {},
+                                                          int first_sample = 0);
 
 //=============================================================================================================
 /**
- * Convert FiffAnnotations to a FIFF event matrix.
+ * Converts annotations to events, like mne.events_from_annotations.
  *
- * Each annotation becomes an event row [sample, 0, event_id].
- * The event_id is looked up from eventIds (description -> id).
- * If not found, the description is parsed as an integer; if that also
- * fails, event_id is set to 0.
+ * Each annotation becomes a row [sample, 0, id], with the id of its description in @p event_id or,
+ * failing that, the description read as an integer, or 0.
  *
- * @param[in] annotations   The annotations to convert.
- * @param[in] sfreq         Sampling frequency in Hz.
- * @param[in] eventIds      Map from description string to event id integer.
- * @param[in] firstSample   First sample offset (default 0).
- * @return Eigen::MatrixXi  Nx3 event matrix [sample, 0, event_id].
+ * @param[in] annotations    The annotations.
+ * @param[in] sfreq          Sampling frequency in Hz.
+ * @param[in] event_id       Id of each description.
+ * @param[in] first_sample   First sample of the recording.
+ *
+ * @return One event row per annotation; none if @p sfreq is not positive.
  */
-FIFFSHARED_EXPORT Eigen::MatrixXi eventsFromAnnotations(
-    const FiffAnnotations& annotations,
-    double sfreq,
-    const QMap<QString, int>& eventIds = QMap<QString, int>(),
-    int firstSample = 0);
+FIFFSHARED_EXPORT Eigen::MatrixXi events_from_annotations(const FiffAnnotations& annotations,
+                                                          double sfreq,
+                                                          const std::map<std::string, int, std::less<>>& event_id = {},
+                                                          int first_sample = 0);
 
 //=============================================================================================================
 /**
- * Count annotations by description.
+ * Counts annotations by description, like mne.count_annotations.
  *
- * @param[in] annotations   The annotations to count.
- * @return QMap<QString, int>  Map from description to count.
+ * @param[in] annotations   The annotations.
+ *
+ * @return The number of annotations with each description.
  */
-FIFFSHARED_EXPORT QMap<QString, int> countAnnotations(const FiffAnnotations& annotations);
+FIFFSHARED_EXPORT std::map<std::string, int, std::less<>> count_annotations(const FiffAnnotations& annotations);
 
 } // namespace FIFFLIB
 

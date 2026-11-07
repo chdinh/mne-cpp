@@ -1619,8 +1619,7 @@ void TestMneLibrary::eventList_fifRoundTrip()
     QCOMPARE(back->events, list.events);
 
     // FiffEvents reads the same block, without comments and without the offset.
-    FiffEvents plain;
-    QVERIFY(FiffEvents::read_from_fif(dir.filePath("t-eve.fif").toStdString(), plain));
+    const FiffEvents plain = FiffEvents::read_fif(dir.filePath("t-eve.fif").toStdString()).value();
     QCOMPARE(plain.events.col(0), (list.toMatrix().col(0).array() + 12900).matrix());
 
     MNEEventList sorted = *back;

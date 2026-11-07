@@ -13240,7 +13240,7 @@
       {
         "python": "mne.annotations_from_events",
         "status": "implemented",
-        "mne_cpp": "FiffAnnotationEventUtils",
+        "mne_cpp": "FIFFLIB::annotations_from_events",
         "note": "",
         "test": "test_fiff_annotation_event_utils"
       },
@@ -13699,9 +13699,9 @@
       {
         "python": "mne.count_annotations",
         "status": "implemented",
-        "mne_cpp": "FiffAnnotations",
+        "mne_cpp": "FIFFLIB::count_annotations",
         "note": "",
-        "test": "test_fiff_annotations"
+        "test": "test_fiff_annotation_event_utils"
       },
       {
         "python": "mne.count_events",
@@ -13898,7 +13898,7 @@
       {
         "python": "mne.events_from_annotations",
         "status": "implemented",
-        "mne_cpp": "FiffAnnotationEventUtils",
+        "mne_cpp": "FIFFLIB::events_from_annotations",
         "note": "",
         "test": "test_fiff_annotation_event_utils"
       },
@@ -13929,7 +13929,7 @@
       {
         "python": "mne.find_events",
         "status": "implemented",
-        "mne_cpp": "RTPROCESSINGLIB event detection",
+        "mne_cpp": "FiffEvents::find_events",
         "note": "",
         "test": "test_fiff_core_python",
         "equivalence": "equivalent"
@@ -15027,7 +15027,7 @@
       {
         "python": "mne.read_annotations",
         "status": "implemented",
-        "mne_cpp": "FiffAnnotations",
+        "mne_cpp": "FiffAnnotations::read",
         "note": "",
         "test": "test_fiff_annotations"
       },
@@ -15089,7 +15089,7 @@
       {
         "python": "mne.read_events",
         "status": "implemented",
-        "mne_cpp": "FiffEvents::read, read_from_fif, read_from_ascii",
+        "mne_cpp": "FiffEvents::read, read_fif, read_ascii",
         "note": "",
         "test": "test_fiff_data_types"
       },
@@ -15934,7 +15934,7 @@
       {
         "python": "mne.write_events",
         "status": "implemented",
-        "mne_cpp": "FiffEvents::write_to_fif, write_to_ascii",
+        "mne_cpp": "FiffEvents::write, write_fif, write_ascii",
         "note": "",
         "test": "test_fiff_core_python"
       },

@@ -184,10 +184,10 @@ void TestDspAnnotateArtifact::testMusclZscoreMatchesPython()
     QVERIFY(std::fabs(scores(1700) + 1.4815054738007716) < 1e-6);
 
     QCOMPARE(annot.size(), onsets.size());
-    for (int i = 0; i < annot.size(); ++i) {
+    for (std::size_t i = 0; i < annot.size(); ++i) {
         QVERIFY(std::fabs(annot[i].onset - onsets[i]) < 1e-9);
         QVERIFY(std::fabs(annot[i].duration - durations[i]) < 1e-9);
-        QCOMPARE(annot[i].description, QStringLiteral("BAD_muscle"));
+        QCOMPARE(annot[i].description, std::string("BAD_muscle"));
     }
 }
 

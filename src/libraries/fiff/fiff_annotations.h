@@ -31,15 +31,19 @@
 
 #include "fiff_global.h"
 
-//=============================================================================================================
-// QT INCLUDES
-//=============================================================================================================
+#include <utils/error.h>
 
 #include <QSharedPointer>
-#include <QString>
-#include <QStringList>
-#include <QVariantMap>
-#include <QVector>
+
+#include <cstddef>
+#include <cstdint>
+#include <filesystem>
+#include <functional>
+#include <map>
+#include <string>
+#include <string_view>
+#include <variant>
+#include <vector>
 
 //=============================================================================================================
 // DEFINE NAMESPACE FIFFLIB
@@ -60,12 +64,20 @@ namespace FIFFLIB
  */
 struct FIFFSHARED_EXPORT FiffAnnotation
 {
-    double onset;             /**< Onset in seconds. */
-    double duration;          /**< Duration in seconds (0 for point events). */
-    QString description;      /**< Label: "BAD", "BAD_ACQ_SKIP", etc. */
-    QStringList channelNames; /**< Empty = global annotation. */
-    QString comment;          /**< Optional free-form comment. */
-    QVariantMap extras;       /**< Format-specific metadata. */
+    /** A value of mne.Annotations.extras: None, bool, int, float or str. */
+    using Extra = std::variant<std::monostate, bool, std::int64_t, double, std::string>;
+    /** The extras of one annotation, by key. */
+    using Extras = std::map<std::string, Extra, std::less<>>;
+
+    double onset = 0.0;                /**< Onset in seconds. */
+    double duration = 0.0;             /**< Duration in seconds (0 for point events). */
+    std::string description;           /**< Label: "BAD", "BAD_ACQ_SKIP", etc. */
+    std::vector<std::string> ch_names; /**< Channels the annotation applies to; none for all. */
+    std::string comment;               /**< Optional free-form comment. */
+    Extras extras;                     /**< Format-specific metadata, like mne.Annotations.extras. */
+
+    /** @return Whether both annotations hold the same values. */
+    bool operator==(const FiffAnnotation&) const = default;
 };
 
 //=============================================================================================================
@@ -74,211 +86,230 @@ struct FIFFSHARED_EXPORT FiffAnnotation
  *
  * Read and written under @c FIFFB_MNE_ANNOTATIONS by FiffStream::read_annotations()
  * and FiffStream::write_annotations(), so the annotation list travels with the
- * FIFF file. The JSON and CSV exporters let the same
- * annotations be consumed by BIDS sidecars and by external scoring
- * tools that do not understand FIFF directly.
+ * FIFF file. The JSON and CSV files let the same annotations be consumed by
+ * BIDS sidecars and by external scoring tools that do not understand FIFF.
  *
  * @snippet ex_fiff_api/main.cpp fiff_annotations_usage
  */
 class FIFFSHARED_EXPORT FiffAnnotations
 {
 public:
-    typedef QSharedPointer<FiffAnnotations> SPtr;            /**< Shared pointer type. */
-    typedef QSharedPointer<const FiffAnnotations> ConstSPtr; /**< Const shared pointer type. */
+    using SPtr = QSharedPointer<FiffAnnotations>;                       /**< Shared pointer type. */
+    using ConstSPtr = QSharedPointer<const FiffAnnotations>;            /**< Const shared pointer type. */
+    using value_type = FiffAnnotation;                                  /**< Element type. */
+    using iterator = std::vector<FiffAnnotation>::iterator;             /**< Iterator. */
+    using const_iterator = std::vector<FiffAnnotation>::const_iterator; /**< Constant iterator. */
 
-    //=========================================================================================================
-    /**
-     * Constructs an empty FiffAnnotations object.
-     */
-    FiffAnnotations();
+    /** @return The number of annotations. */
+    std::size_t size() const noexcept
+    {
+        return m_annotations.size();
+    }
 
-    //=========================================================================================================
+    /** @return Whether there is no annotation. */
+    bool empty() const noexcept
+    {
+        return m_annotations.empty();
+    }
+
     /**
-     * Returns the number of annotations.
+     * @param[in] index   Index below size().
      *
-     * @return Number of annotations.
+     * @return Annotation @p index.
      */
-    int size() const;
+    const FiffAnnotation& operator[](std::size_t index) const
+    {
+        return m_annotations[index];
+    }
 
-    //=========================================================================================================
     /**
-     * Returns true if no annotations are stored.
+     * @param[in] index   Index below size().
      *
-     * @return True if empty.
+     * @return Annotation @p index.
      */
-    bool isEmpty() const;
+    FiffAnnotation& operator[](std::size_t index)
+    {
+        return m_annotations[index];
+    }
 
-    //=========================================================================================================
-    /**
-     * Const subscript operator.
-     *
-     * @param[in] index    Index of the annotation.
-     * @return Const reference to the annotation.
-     */
-    const FiffAnnotation& operator[](int index) const;
+    iterator begin() noexcept
+    {
+        return m_annotations.begin();
+    } /**< @return First annotation. */
+    iterator end() noexcept
+    {
+        return m_annotations.end();
+    } /**< @return Past the last annotation. */
+    const_iterator begin() const noexcept
+    {
+        return m_annotations.begin();
+    } /**< @return First annotation. */
+    const_iterator end() const noexcept
+    {
+        return m_annotations.end();
+    } /**< @return Past the last annotation. */
 
-    //=========================================================================================================
-    /**
-     * Subscript operator.
-     *
-     * @param[in] index    Index of the annotation.
-     * @return Reference to the annotation.
-     */
-    FiffAnnotation& operator[](int index);
-
-    //=========================================================================================================
     /**
      * Appends an annotation.
      *
-     * @param[in] annotation   The annotation to append.
+     * @param[in] annotation   The annotation.
      */
-    void append(const FiffAnnotation& annotation);
+    void push_back(FiffAnnotation annotation)
+    {
+        m_annotations.push_back(std::move(annotation));
+    }
 
     //=========================================================================================================
     /**
-     * Appends an annotation by fields.
+     * Appends an annotation, like mne.Annotations.append.
      *
-     * @param[in] onset          Onset in seconds.
-     * @param[in] duration       Duration in seconds.
-     * @param[in] description    Description label.
-     * @param[in] channelNames   Channel names (empty for global).
-     * @param[in] comment        Optional comment.
+     * @param[in] onset         Onset in seconds.
+     * @param[in] duration      Duration in seconds.
+     * @param[in] description   Description label.
+     * @param[in] ch_names      Channels it applies to; none for all.
      */
-    void append(double onset, double duration, const QString& description,
-                const QStringList& channelNames = QStringList(),
-                const QString& comment = QString());
+    void append(double onset, double duration, std::string description, std::vector<std::string> ch_names = {});
 
-    //=========================================================================================================
     /**
-     * Removes the annotation at the given index.
+     * Removes an annotation.
      *
-     * @param[in] index    Index to remove.
-     */
-    void remove(int index);
-
-    //=========================================================================================================
-    /**
-     * Removes all annotations.
-     */
-    void clear();
-
-    //=========================================================================================================
-    /**
-     * Returns a const reference to the underlying vector.
+     * @param[in] position   The annotation.
      *
-     * @return Const reference to annotation vector.
+     * @return The annotation after it.
      */
-    const QVector<FiffAnnotation>& toVector() const;
+    iterator erase(const_iterator position)
+    {
+        return m_annotations.erase(position);
+    }
+
+    /**
+     * Removes a range of annotations.
+     *
+     * @param[in] first   The first annotation to remove.
+     * @param[in] last    Past the last annotation to remove.
+     *
+     * @return The annotation after the range.
+     */
+    iterator erase(const_iterator first, const_iterator last)
+    {
+        return m_annotations.erase(first, last);
+    }
+
+    /** Removes all annotations. */
+    void clear() noexcept
+    {
+        m_annotations.clear();
+    }
 
     //=========================================================================================================
     /**
-     * Converts onset of annotation at index to a sample number.
+     * @param[in] index          Annotation index.
+     * @param[in] sfreq          Sampling frequency in Hz.
+     * @param[in] first_sample   First sample of the recording.
      *
-     * @param[in] index        Annotation index.
-     * @param[in] sfreq        Sampling frequency in Hz.
-     * @param[in] firstSample  First sample offset.
-     * @return Sample number.
+     * @return The sample at the onset of annotation @p index.
      */
-    int onsetToSample(int index, double sfreq, int firstSample = 0) const;
+    int onset_to_sample(std::size_t index, double sfreq, int first_sample = 0) const;
 
     //=========================================================================================================
     /**
-     * Converts end (onset+duration) of annotation at index to a sample number.
+     * @param[in] index          Annotation index.
+     * @param[in] sfreq          Sampling frequency in Hz.
+     * @param[in] first_sample   First sample of the recording.
      *
-     * @param[in] index        Annotation index.
-     * @param[in] sfreq        Sampling frequency in Hz.
-     * @param[in] firstSample  First sample offset.
-     * @return Sample number.
+     * @return The sample at the end (onset + duration) of annotation @p index.
      */
-    int endToSample(int index, double sfreq, int firstSample = 0) const;
+    int end_to_sample(std::size_t index, double sfreq, int first_sample = 0) const;
 
     //=========================================================================================================
     /**
-     * Selects annotations whose description starts with the filter string.
+     * @param[in] prefix   Description prefix.
      *
-     * @param[in] descriptionFilter    Prefix to match.
-     * @return Filtered annotations.
+     * @return The annotations whose description starts with @p prefix.
      */
-    FiffAnnotations select(const QString& descriptionFilter) const;
+    FiffAnnotations select(std::string_view prefix) const;
 
     //=========================================================================================================
     /**
-     * Selects annotations that reference the given channel name.
+     * @param[in] ch_name   Channel name.
      *
-     * @param[in] channelName    Channel name to match.
-     * @return Filtered annotations.
+     * @return The annotations that apply to @p ch_name, including those that apply to all channels.
      */
-    FiffAnnotations selectByChannel(const QString& channelName) const;
+    FiffAnnotations select_by_channel(std::string_view ch_name) const;
 
     //=========================================================================================================
     /**
-     * Returns annotations overlapping [tmin, tmax], clipping partially overlapping ones.
+     * @param[in] tmin   Start time in seconds.
+     * @param[in] tmax   End time in seconds.
      *
-     * @param[in] tmin    Start time in seconds.
-     * @param[in] tmax    End time in seconds.
-     * @return Cropped annotations.
+     * @return The annotations overlapping [tmin, tmax], clipped to it, like mne.Annotations.crop.
      */
     FiffAnnotations crop(double tmin, double tmax) const;
 
     //=========================================================================================================
     /**
-     * Reads annotations from a JSON file.
+     * Reads annotations from a JSON file ({"annotations": [{"onset", "duration", "description",
+     * "channel_names", "comment", "extras"}, ...]}).
      *
-     * @param[in] path    File path.
-     * @return Parsed annotations.
+     * @param[in] path   The file.
+     *
+     * @return The annotations, or why the file cannot be read (Io or Format).
      */
-    static FiffAnnotations readJson(const QString& path);
+    [[nodiscard]] static UTILSLIB::Expected<FiffAnnotations> read_json(const std::filesystem::path& path);
 
     //=========================================================================================================
     /**
-     * Writes annotations to a JSON file.
+     * Reads annotations from a CSV file ("onset,duration,description" after a header row); rows
+     * whose onset or duration is not a number are skipped.
      *
-     * @param[in] path     File path.
-     * @param[in] annot    Annotations to write.
-     * @return True on success.
+     * @param[in] path   The file.
+     *
+     * @return The annotations, or why the file cannot be read (Io).
      */
-    static bool writeJson(const QString& path, const FiffAnnotations& annot);
+    [[nodiscard]] static UTILSLIB::Expected<FiffAnnotations> read_csv(const std::filesystem::path& path);
 
     //=========================================================================================================
     /**
-     * Reads annotations from a CSV file.
+     * Reads annotations from a .json or .csv file; other extensions are tried as JSON, then as CSV.
      *
-     * @param[in] path    File path.
-     * @return Parsed annotations.
+     * @param[in] path   The file.
+     *
+     * @return The annotations, or why the file cannot be read.
      */
-    static FiffAnnotations readCsv(const QString& path);
+    [[nodiscard]] static UTILSLIB::Expected<FiffAnnotations> read(const std::filesystem::path& path);
 
     //=========================================================================================================
     /**
-     * Writes annotations to a CSV file.
+     * Writes the annotations to a JSON file.
      *
-     * @param[in] path     File path.
-     * @param[in] annot    Annotations to write.
-     * @return True on success.
+     * @param[in] path   The file.
+     *
+     * @return Nothing, or why the file cannot be written (Io).
      */
-    static bool writeCsv(const QString& path, const FiffAnnotations& annot);
+    [[nodiscard]] UTILSLIB::Expected<void> write_json(const std::filesystem::path& path) const;
 
     //=========================================================================================================
     /**
-     * Auto-detects format and reads annotations.
+     * Writes onset, duration and description of the annotations to a CSV file.
      *
-     * @param[in] path    File path (.json or .csv).
-     * @return Parsed annotations.
+     * @param[in] path   The file.
+     *
+     * @return Nothing, or why the file cannot be written (Io).
      */
-    static FiffAnnotations read(const QString& path);
+    [[nodiscard]] UTILSLIB::Expected<void> write_csv(const std::filesystem::path& path) const;
 
     //=========================================================================================================
     /**
-     * Auto-detects format and writes annotations.
+     * Writes the annotations to a .csv file, or to JSON for any other extension.
      *
-     * @param[in] path     File path (.json or .csv).
-     * @param[in] annot    Annotations to write.
-     * @return True on success.
+     * @param[in] path   The file.
+     *
+     * @return Nothing, or why the file cannot be written (Io).
      */
-    static bool write(const QString& path, const FiffAnnotations& annot);
+    [[nodiscard]] UTILSLIB::Expected<void> write(const std::filesystem::path& path) const;
 
 private:
-    QVector<FiffAnnotation> m_annotations; /**< Annotation storage. */
+    std::vector<FiffAnnotation> m_annotations; /**< Annotation storage. */
 };
 
 } // namespace FIFFLIB

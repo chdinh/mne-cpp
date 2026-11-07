@@ -1612,10 +1612,8 @@ private slots:
 
         QTemporaryDir dir;
         const std::string path = dir.filePath("events.eve").toStdString();
-        QVERIFY(evWrite.write_to_ascii(path, 1000.0f));
-        FiffEvents evRead;
-        QVERIFY(FiffEvents::read_from_ascii(path, evRead));
-        QVERIFY(evRead.events == evMat);
+        QVERIFY(evWrite.write_ascii(path, 1000.0f).has_value());
+        QVERIFY(FiffEvents::read_ascii(path).value().events == evMat);
     }
 
     void fiffEvents_fifRoundtrip()
@@ -1629,10 +1627,8 @@ private slots:
 
         QTemporaryDir dir;
         const std::string path = dir.filePath("events-eve.fif").toStdString();
-        QVERIFY(evWrite.write_to_fif(path));
-        FiffEvents evRead;
-        QVERIFY(FiffEvents::read_from_fif(path, evRead));
-        QVERIFY(evRead.events == evMat);
+        QVERIFY(evWrite.write_fif(path).has_value());
+        QVERIFY(FiffEvents::read_fif(path).value().events == evMat);
     }
 
     //=========================================================================
@@ -2021,7 +2017,7 @@ private slots:
     }
 
     //=========================================================================
-    // FiffEvents::matchEvent coverage
+    // FiffEvents::match_event coverage
     //=========================================================================
 
     void fiffEvents_matchEventBasicMatch()
@@ -2039,11 +2035,11 @@ private slots:
         cat.nextEvent = 0;
 
         // Event 0: from=0, to=1 → matches cat.events[0]=1
-        QVERIFY(FiffEvents::matchEvent(cat, events, 0));
+        QVERIFY(FiffEvents::match_event(cat, events, 0));
         // Event 1: from=0, to=2 → no match
-        QVERIFY(!FiffEvents::matchEvent(cat, events, 1));
+        QVERIFY(!FiffEvents::match_event(cat, events, 1));
         // Event 2: from=0, to=1 → matches
-        QVERIFY(FiffEvents::matchEvent(cat, events, 2));
+        QVERIFY(FiffEvents::match_event(cat, events, 2));
     }
 
     void fiffEvents_matchEventOutOfRange()
@@ -2059,8 +2055,8 @@ private slots:
         cat.nextEvent = 0;
 
         // Out of range indices
-        QVERIFY(!FiffEvents::matchEvent(cat, events, -1));
-        QVERIFY(!FiffEvents::matchEvent(cat, events, 2));
+        QVERIFY(!FiffEvents::match_event(cat, events, -1));
+        QVERIFY(!FiffEvents::match_event(cat, events, 2));
     }
 
     void fiffEvents_matchEventWithPrevEvent()
@@ -2079,9 +2075,9 @@ private slots:
         cat.nextEvent = 0;
 
         // Event 0: to=1 matches events, but no previous event → false
-        QVERIFY(!FiffEvents::matchEvent(cat, events, 0));
+        QVERIFY(!FiffEvents::match_event(cat, events, 0));
         // Event 2: to=1 matches events, prev event 1 has from=0, to=2 → prevEvent==2 ✓
-        QVERIFY(FiffEvents::matchEvent(cat, events, 2));
+        QVERIFY(FiffEvents::match_event(cat, events, 2));
     }
 
     void fiffEvents_matchEventWithNextEvent()
@@ -2099,7 +2095,7 @@ private slots:
         cat.nextIgnore = 0;
 
         // Event 0: to=1 matches, next event 1 has from=0 (from & ~ignore==0 ✓), to=2==nextEvent ✓
-        QVERIFY(FiffEvents::matchEvent(cat, events, 0));
+        QVERIFY(FiffEvents::match_event(cat, events, 0));
     }
 
     void fiffEvents_matchEventNextNotFound()
@@ -2119,7 +2115,7 @@ private slots:
         // The loop finds j=1 where (events(1,1) & ~0) = 5 ≠ 0, so found stays false
         // Actually: found = true only when (from & ~ignore) == 0. from=5, ~0=0xFFFF..→ 5≠0 → found stays false
         // So "if (!found) match = false" → false
-        QVERIFY(!FiffEvents::matchEvent(cat, events, 0));
+        QVERIFY(!FiffEvents::match_event(cat, events, 0));
     }
 
     //=========================================================================

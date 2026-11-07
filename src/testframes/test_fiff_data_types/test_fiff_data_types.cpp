@@ -49,19 +49,14 @@ private slots:
         text.write("100 0 1\n200 0 2\n300 0 3\n");
         text.close();
 
-        FiffEvents ev;
-        QVERIFY(FiffEvents::read_from_ascii(path("in.eve"), ev));
+        const FiffEvents ev = FiffEvents::read_ascii(path("in.eve")).value();
         QCOMPARE(ev.num_events(), 3);
 
-        FiffEvents ascii;
-        QVERIFY(ev.write_to_ascii(path("out.eve"), 1000.0f));
-        QVERIFY(FiffEvents::read_from_ascii(path("out.eve"), ascii));
-        QVERIFY(ascii.events == ev.events);
+        QVERIFY(ev.write_ascii(path("out.eve"), 1000.0f).has_value());
+        QVERIFY(FiffEvents::read_ascii(path("out.eve")).value().events == ev.events);
 
-        FiffEvents fif;
-        QVERIFY(ev.write_to_fif(path("out-eve.fif")));
-        QVERIFY(FiffEvents::read_from_fif(path("out-eve.fif"), fif));
-        QVERIFY(fif.events == ev.events);
+        QVERIFY(ev.write_fif(path("out-eve.fif")).has_value());
+        QVERIFY(FiffEvents::read_fif(path("out-eve.fif")).value().events == ev.events);
     }
 
     //=========================================================================

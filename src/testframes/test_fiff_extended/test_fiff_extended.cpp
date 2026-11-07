@@ -242,11 +242,9 @@ private slots:
 
         QTemporaryDir dir;
         const std::string path = dir.filePath("events.eve").toStdString();
-        QVERIFY(events.write_to_ascii(path, 1000.0f));
+        QVERIFY(events.write_ascii(path, 1000.0f).has_value());
 
-        FiffEvents eventsRead;
-        bool ok = FiffEvents::read_from_ascii(path, eventsRead);
-        QVERIFY(ok);
+        const FiffEvents eventsRead = FiffEvents::read_ascii(path).value();
         QCOMPARE(eventsRead.num_events(), 3);
 
         // Counting the events is not enough. The writer emits four fields per
@@ -271,8 +269,7 @@ private slots:
         file.write("  100   0   1\n  200   0   2\n");
         file.close();
 
-        FiffEvents eventsRead;
-        QVERIFY(FiffEvents::read_from_ascii(file.fileName().toStdString(), eventsRead));
+        const FiffEvents eventsRead = FiffEvents::read_ascii(file.fileName().toStdString()).value();
         QCOMPARE(eventsRead.num_events(), 2);
         QCOMPARE(eventsRead.events(0, 0), 100);
         QCOMPARE(eventsRead.events(0, 2), 1);
@@ -292,11 +289,9 @@ private slots:
 
         QTemporaryDir dir;
         const std::string path = dir.filePath("events-eve.fif").toStdString();
-        QVERIFY(events.write_to_fif(path));
+        QVERIFY(events.write_fif(path).has_value());
 
-        FiffEvents eventsRead;
-        bool ok = FiffEvents::read_from_fif(path, eventsRead);
-        QVERIFY(ok);
+        const FiffEvents eventsRead = FiffEvents::read_fif(path).value();
         QCOMPARE(eventsRead.num_events(), 3);
     }
 

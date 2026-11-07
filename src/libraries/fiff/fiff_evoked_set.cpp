@@ -336,7 +336,7 @@ FiffEvokedSet FiffEvokedSet::computeAverages(const FiffRawData& raw,
 
         // Iterate over events
         for (int k = 0; k < events.rows(); ++k) {
-            if (!FiffEvents::matchEvent(cat, events, k))
+            if (!FiffEvents::match_event(cat, events, k))
                 continue;
 
             int evSample = events(k, 0);

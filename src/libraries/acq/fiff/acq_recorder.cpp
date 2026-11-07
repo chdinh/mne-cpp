@@ -555,11 +555,11 @@ struct AcqRecorder::Impl
             const auto code = static_cast<std::size_t>(e.code);
             const bool labelled = e.code >= 0 && code < info->eventLabels.size() && !info->eventLabels[code].empty();
             list.append(static_cast<double>(e.sample - origin) / sfreq, static_cast<double>(e.duration) / sfreq,
-                        labelled ? QString::fromStdString(info->eventLabels[code]) : QString::number(e.code));
+                        labelled ? info->eventLabels[code] : std::to_string(e.code));
         }
         for (const Skip& s : skips) {
             list.append(static_cast<double>(s.first - origin) / sfreq, static_cast<double>(s.count) / sfreq,
-                        QString::fromLatin1(kSkipDescription));
+                        kSkipDescription);
         }
         return list;
     }

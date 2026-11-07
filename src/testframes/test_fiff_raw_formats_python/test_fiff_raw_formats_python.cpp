@@ -229,17 +229,17 @@ void TestFiffRawFormatsPython::readsAcquisitionSkip()
     fiff_int_t origTime[2] = {0, 0};
     QVERIFY(stream.read_annotations(stream.dirtree(), annotations, origTime));
     QCOMPARE(origTime[0], -1);
-    QCOMPARE(annotations.size(), 1);
+    QCOMPARE(annotations.size(), std::size_t{1});
     QCOMPARE(annotations[0].onset, 1.2000000476837158);
     QCOMPARE(annotations[0].duration, 0.19999992847442627);
-    QCOMPARE(annotations[0].description, QStringLiteral("bad_acq_skip"));
-    QVERIFY(annotations[0].channelNames.isEmpty());
+    QCOMPARE(annotations[0].description, std::string("bad_acq_skip"));
+    QVERIFY(annotations[0].ch_names.empty());
 
     QFile none(fixture("single"));
     FiffStream noAnnotations(&none);
     QVERIFY(noAnnotations.open());
     QVERIFY(!noAnnotations.read_annotations(noAnnotations.dirtree(), annotations, origTime));
-    QVERIFY(annotations.isEmpty());
+    QVERIFY(annotations.empty());
 }
 
 //=============================================================================================================

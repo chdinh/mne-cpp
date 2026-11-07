@@ -163,7 +163,7 @@ FiffAnnotations UTILSLIB::annotateMusclZscore(
     }
     for (const auto& seg : findContiguousSegments(mask)) {
         const int last = std::min(seg.second + 1, static_cast<int>(nTimes) - 1);
-        annot.append(seg.first / sfreq, (last - seg.first) / sfreq, QStringLiteral("BAD_muscle"));
+        annot.append(seg.first / sfreq, (last - seg.first) / sfreq, "BAD_muscle");
     }
     return annot;
 }
@@ -219,7 +219,7 @@ FiffAnnotations UTILSLIB::annotateAmplitude(
 
     for (const auto& [any, description] : {std::pair{&anyFlat, "BAD_flat"}, std::pair{&anyPeak, "BAD_peak"}}) {
         for (const auto& seg : findContiguousSegments(*any))
-            annot.append(seg.first / sfreq, (seg.second - seg.first + 1) / sfreq, QString::fromLatin1(description));
+            annot.append(seg.first / sfreq, (seg.second - seg.first + 1) / sfreq, description);
     }
     return annot;
 }

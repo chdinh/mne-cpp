@@ -22,7 +22,8 @@
 //=============================================================================================================
 
 #include <QtTest/QtTest>
-#include <QMap>
+#include <map>
+#include <string>
 
 //=============================================================================================================
 // EIGEN INCLUDES
@@ -39,7 +40,7 @@ using namespace Eigen;
 
 //=============================================================================================================
 /**
- * Tests for annotationsFromEvents, eventsFromAnnotations, and countAnnotations.
+ * Tests for annotations_from_events, events_from_annotations, and count_annotations.
  */
 class TestFiffAnnotationEventUtils : public QObject
 {
@@ -68,9 +69,9 @@ void TestFiffAnnotationEventUtils::testAnnotationsFromEvents()
         200, 0, 3;
 
     const double sfreq = 100.0;
-    FiffAnnotations annot = annotationsFromEvents(events, sfreq);
+    FiffAnnotations annot = annotations_from_events(events, sfreq);
 
-    QCOMPARE(annot.size(), 3);
+    QCOMPARE(annot.size(), std::size_t{3});
 
     // Check onsets
     QCOMPARE(annot[0].onset, 0.0);
@@ -83,9 +84,9 @@ void TestFiffAnnotationEventUtils::testAnnotationsFromEvents()
     QCOMPARE(annot[2].duration, 0.0);
 
     // Without a map, descriptions should be the event id as string
-    QCOMPARE(annot[0].description, QString("1"));
-    QCOMPARE(annot[1].description, QString("2"));
-    QCOMPARE(annot[2].description, QString("3"));
+    QCOMPARE(annot[0].description, std::string("1"));
+    QCOMPARE(annot[1].description, std::string("2"));
+    QCOMPARE(annot[2].description, std::string("3"));
 }
 
 //=============================================================================================================
@@ -97,18 +98,18 @@ void TestFiffAnnotationEventUtils::testAnnotationsFromEventsWithMap()
         100, 0, 2,
         200, 0, 3;
 
-    QMap<int, QString> descMap;
+    std::map<int, std::string> descMap;
     descMap[1] = "auditory/left";
     descMap[2] = "auditory/right";
     // event id 3 not in map -> should fall back to "3"
 
     const double sfreq = 100.0;
-    FiffAnnotations annot = annotationsFromEvents(events, sfreq, descMap);
+    FiffAnnotations annot = annotations_from_events(events, sfreq, descMap);
 
-    QCOMPARE(annot.size(), 3);
-    QCOMPARE(annot[0].description, QString("auditory/left"));
-    QCOMPARE(annot[1].description, QString("auditory/right"));
-    QCOMPARE(annot[2].description, QString("3"));
+    QCOMPARE(annot.size(), std::size_t{3});
+    QCOMPARE(annot[0].description, std::string("auditory/left"));
+    QCOMPARE(annot[1].description, std::string("auditory/right"));
+    QCOMPARE(annot[2].description, std::string("3"));
 }
 
 //=============================================================================================================
@@ -121,7 +122,7 @@ void TestFiffAnnotationEventUtils::testEventsFromAnnotations()
     annot.append(2.0, 0.0, "3");
 
     const double sfreq = 100.0;
-    MatrixXi events = eventsFromAnnotations(annot, sfreq);
+    MatrixXi events = events_from_annotations(annot, sfreq);
 
     QCOMPARE(static_cast<int>(events.rows()), 3);
     QCOMPARE(static_cast<int>(events.cols()), 3);
@@ -151,13 +152,13 @@ void TestFiffAnnotationEventUtils::testEventsFromAnnotationsWithMap()
     annot.append(1.0, 0.0, "auditory/right");
     annot.append(2.0, 0.0, "visual");
 
-    QMap<QString, int> eventIds;
+    std::map<std::string, int, std::less<>> eventIds;
     eventIds["auditory/left"] = 1;
     eventIds["auditory/right"] = 2;
     // "visual" not in map and not parseable as int -> event_id = 0
 
     const double sfreq = 100.0;
-    MatrixXi events = eventsFromAnnotations(annot, sfreq, eventIds);
+    MatrixXi events = events_from_annotations(annot, sfreq, eventIds);
 
     QCOMPARE(static_cast<int>(events.rows()), 3);
     QCOMPARE(events(0, 2), 1);
@@ -178,18 +179,18 @@ void TestFiffAnnotationEventUtils::testRoundTrip()
 
     const double sfreq = 500.0;
 
-    QMap<int, QString> descMap;
+    std::map<int, std::string> descMap;
     descMap[10] = "stim_a";
     descMap[20] = "stim_b";
     descMap[30] = "stim_c";
 
-    QMap<QString, int> idMap;
+    std::map<std::string, int, std::less<>> idMap;
     idMap["stim_a"] = 10;
     idMap["stim_b"] = 20;
     idMap["stim_c"] = 30;
 
-    FiffAnnotations annot = annotationsFromEvents(original, sfreq, descMap);
-    MatrixXi recovered = eventsFromAnnotations(annot, sfreq, idMap);
+    FiffAnnotations annot = annotations_from_events(original, sfreq, descMap);
+    MatrixXi recovered = events_from_annotations(annot, sfreq, idMap);
 
     QCOMPARE(static_cast<int>(recovered.rows()), static_cast<int>(original.rows()));
     for (int i = 0; i < static_cast<int>(original.rows()); ++i) {
@@ -210,11 +211,11 @@ void TestFiffAnnotationEventUtils::testRoundTripAnnotations()
 
     const double sfreq = 1000.0;
 
-    MatrixXi events = eventsFromAnnotations(original, sfreq);
-    FiffAnnotations recovered = annotationsFromEvents(events, sfreq);
+    MatrixXi events = events_from_annotations(original, sfreq);
+    FiffAnnotations recovered = annotations_from_events(events, sfreq);
 
     QCOMPARE(recovered.size(), original.size());
-    for (int i = 0; i < original.size(); ++i) {
+    for (std::size_t i = 0; i < original.size(); ++i) {
         QVERIFY(qAbs(recovered[i].onset - original[i].onset) < 1e-9);
         QCOMPARE(recovered[i].description, original[i].description);
     }
@@ -232,12 +233,12 @@ void TestFiffAnnotationEventUtils::testCountAnnotations()
     annot.append(4.0, 0.0, "BAD");
     annot.append(5.0, 0.0, "response");
 
-    QMap<QString, int> counts = countAnnotations(annot);
+    const auto counts = count_annotations(annot);
 
-    QCOMPARE(counts.size(), 3);
-    QCOMPARE(counts["BAD"], 3);
-    QCOMPARE(counts["stimulus"], 2);
-    QCOMPARE(counts["response"], 1);
+    QCOMPARE(counts.size(), std::size_t{3});
+    QCOMPARE(counts.at("BAD"), 3);
+    QCOMPARE(counts.at("stimulus"), 2);
+    QCOMPARE(counts.at("response"), 1);
 }
 
 //=============================================================================================================
@@ -246,17 +247,17 @@ void TestFiffAnnotationEventUtils::testEmptyInputs()
 {
     // Empty events
     MatrixXi emptyEvents(0, 3);
-    FiffAnnotations annot = annotationsFromEvents(emptyEvents, 100.0);
-    QVERIFY(annot.isEmpty());
+    FiffAnnotations annot = annotations_from_events(emptyEvents, 100.0);
+    QVERIFY(annot.empty());
 
     // Empty annotations
     FiffAnnotations emptyAnnot;
-    MatrixXi events = eventsFromAnnotations(emptyAnnot, 100.0);
+    MatrixXi events = events_from_annotations(emptyAnnot, 100.0);
     QCOMPARE(static_cast<int>(events.rows()), 0);
 
     // Count of empty
-    QMap<QString, int> counts = countAnnotations(emptyAnnot);
-    QVERIFY(counts.isEmpty());
+    const auto counts = count_annotations(emptyAnnot);
+    QVERIFY(counts.empty());
 }
 
 //=============================================================================================================
@@ -271,14 +272,14 @@ void TestFiffAnnotationEventUtils::testFirstSampleOffset()
     events << 1000, 0, 1,
         1200, 0, 2;
 
-    FiffAnnotations annot = annotationsFromEvents(events, sfreq, QMap<int, QString>(), firstSample);
+    FiffAnnotations annot = annotations_from_events(events, sfreq, std::map<int, std::string>(), firstSample);
 
-    QCOMPARE(annot.size(), 2);
+    QCOMPARE(annot.size(), std::size_t{2});
     QVERIFY(qAbs(annot[0].onset - 0.0) < 1e-9); // (1000 - 1000) / 200 = 0.0
     QVERIFY(qAbs(annot[1].onset - 1.0) < 1e-9); // (1200 - 1000) / 200 = 1.0
 
     // Convert back with firstSample
-    MatrixXi recovered = eventsFromAnnotations(annot, sfreq, QMap<QString, int>(), firstSample);
+    MatrixXi recovered = events_from_annotations(annot, sfreq, std::map<std::string, int, std::less<>>(), firstSample);
 
     QCOMPARE(recovered(0, 0), 1000);
     QCOMPARE(recovered(1, 0), 1200);

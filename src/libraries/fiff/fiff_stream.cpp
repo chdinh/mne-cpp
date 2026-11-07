@@ -29,6 +29,7 @@
 
 #include "fiff_stream.h"
 #include "fiff_annotations.h"
+#include "fiff_annotations_json.h"
 #include "fiff_tag.h"
 #include "fiff_dir_node.h"
 #include "fiff_ctf_comp.h"
@@ -628,9 +629,9 @@ bool FiffStream::read_annotations(const FiffDirNode::SPtr& p_Node, FiffAnnotatio
     if (blocks.empty()) {
         return false;
     }
-    QVector<float> onsets;
-    QVector<float> ends;
-    QStringList descriptions;
+    std::vector<float> onsets;
+    std::vector<float> ends;
+    std::vector<std::string> descriptions;
     QJsonArray channelNames;
     QJsonArray extras;
     std::optional<FiffTag> tag;
@@ -640,16 +641,19 @@ bool FiffStream::read_annotations(const FiffDirNode::SPtr& p_Node, FiffAnnotatio
         }
         switch (entry.kind) {
             case FIFF_MNE_BASELINE_MIN:
-                onsets = QVector<float>(tag->toFloat(), tag->toFloat() + tag->size() / 4);
+                onsets.assign(tag->toFloat(), tag->toFloat() + tag->size() / 4);
                 break;
             case FIFF_MNE_BASELINE_MAX:
-                ends = QVector<float>(tag->toFloat(), tag->toFloat() + tag->size() / 4);
+                ends.assign(tag->toFloat(), tag->toFloat() + tag->size() / 4);
                 break;
             case FIFF_COMMENT:
                 // Unlike channel name lists, descriptions keep spaces; colons inside them are stored as {COLON}.
                 if (!tag->toString().empty()) {
-                    for (const std::string& name : UTILSLIB::split(tag->toString(), ':')) {
-                        descriptions << QString::fromStdString(name).replace(QStringLiteral("{COLON}"), QStringLiteral(":"));
+                    for (std::string& name : UTILSLIB::split(tag->toString(), ':')) {
+                        for (std::size_t at = name.find("{COLON}"); at != std::string::npos; at = name.find("{COLON}", at + 1)) {
+                            name.replace(at, 7, ":");
+                        }
+                        descriptions.push_back(std::move(name));
                     }
                 }
                 break;
@@ -673,18 +677,15 @@ bool FiffStream::read_annotations(const FiffDirNode::SPtr& p_Node, FiffAnnotatio
                 break;
         }
     }
-    const int count = std::min({static_cast<int>(onsets.size()), static_cast<int>(ends.size()),
-                                static_cast<int>(descriptions.size())});
-    for (int i = 0; i < count; ++i) {
-        FiffAnnotation annotation;
-        annotation.onset = static_cast<double>(onsets[i]);
-        annotation.duration = static_cast<double>(ends[i] - onsets[i]); // float32, as MNE-Python
-        annotation.description = descriptions[i];
-        for (const auto& name : channelNames.at(i).toArray()) {
-            annotation.channelNames << name.toString();
-        }
-        annotation.extras = extras.at(i).toObject().toVariantMap();
-        annotations.append(annotation);
+    const std::size_t count = std::min({onsets.size(), ends.size(), descriptions.size()});
+    for (std::size_t i = 0; i < count; ++i) {
+        const auto at = static_cast<qsizetype>(i);
+        annotations.push_back({static_cast<double>(onsets[i]),
+                               static_cast<double>(ends[i] - onsets[i]), // float32, as MNE-Python
+                               std::move(descriptions[i]),
+                               namesFromJson(channelNames.at(at).toArray()),
+                               {},
+                               extrasFromJson(extras.at(at).toObject())});
     }
     return true;
 }
@@ -694,27 +695,31 @@ bool FiffStream::read_annotations(const FiffDirNode::SPtr& p_Node, FiffAnnotatio
 fiff_long_t FiffStream::write_annotations(const FiffAnnotations& annotations, const fiff_int_t* origTime)
 {
     const fiff_long_t pos = start_block(FIFFB_MNE_ANNOTATIONS);
-    const int count = annotations.size();
-    QVector<float> onsets(count);
-    QVector<float> ends(count);
-    QStringList descriptions;
+    const auto count = static_cast<fiff_int_t>(annotations.size());
+    std::vector<float> onsets;
+    std::vector<float> ends;
+    std::string descriptions;
     QJsonArray channelNames;
     QJsonArray extras;
     bool anyChannels = false;
     bool anyExtras = false;
-    for (int i = 0; i < count; ++i) {
-        const FiffAnnotation& annotation = annotations[i];
-        onsets[i] = static_cast<float>(annotation.onset);
-        ends[i] = static_cast<float>(annotation.onset + annotation.duration);
-        descriptions << QString(annotation.description).replace(QLatin1Char(':'), QStringLiteral("{COLON}"));
-        channelNames.append(QJsonArray::fromStringList(annotation.channelNames));
-        extras.append(QJsonObject::fromVariantMap(annotation.extras));
-        anyChannels = anyChannels || !annotation.channelNames.isEmpty();
-        anyExtras = anyExtras || !annotation.extras.isEmpty();
+    for (const FiffAnnotation& annotation : annotations) {
+        if (!onsets.empty()) {
+            descriptions += ':';
+        }
+        onsets.push_back(static_cast<float>(annotation.onset));
+        ends.push_back(static_cast<float>(annotation.onset + annotation.duration));
+        for (const char c : annotation.description) {
+            descriptions += c == ':' ? std::string_view("{COLON}") : std::string_view(&c, 1);
+        }
+        channelNames.append(namesToJson(annotation.ch_names));
+        extras.append(extrasToJson(annotation.extras));
+        anyChannels = anyChannels || !annotation.ch_names.empty();
+        anyExtras = anyExtras || !annotation.extras.empty();
     }
-    write_float(FIFF_MNE_BASELINE_MIN, onsets.constData(), count);
-    write_float(FIFF_MNE_BASELINE_MAX, ends.constData(), count);
-    write_string(FIFF_COMMENT, (descriptions.join(QLatin1Char(':'))).toStdString());
+    write_float(FIFF_MNE_BASELINE_MIN, onsets.data(), count);
+    write_float(FIFF_MNE_BASELINE_MAX, ends.data(), count);
+    write_string(FIFF_COMMENT, descriptions);
     if (origTime != nullptr) {
         const double stamp[2] = {static_cast<double>(origTime[0]), static_cast<double>(origTime[1])};
         write_double(FIFF_MEAS_DATE, stamp, 2);

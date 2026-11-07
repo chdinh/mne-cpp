@@ -35,6 +35,7 @@ set(SOURCES
     fiff_info_base.cpp
     fiff_evoked.cpp
     fiff_evoked_file.h
+    fiff_annotations_json.h
     fiff_epochs.cpp
     fiff_evoked_set.cpp
     fiff_events.cpp

@@ -721,9 +721,9 @@ void TestFiffStreamPython::writesAnnotationsAndDevice()
     info.device_info.serial = "seed=3";
 
     FiffAnnotations annotations;
-    annotations.append(1.5, 0.0, QStringLiteral("Stimulus 1"));
-    annotations.append(2.25, 0.5, QStringLiteral("a:b"), {QStringLiteral("EEG 001")});
-    annotations.append(3.0, 0.25, QString());
+    annotations.append(1.5, 0.0, "Stimulus 1");
+    annotations.append(2.25, 0.5, "a:b", {"EEG 001"});
+    annotations.append(3.0, 0.25, "");
 
     const QString path = dir.filePath(QStringLiteral("annotated_raw.fif"));
     RowVectorXd cals;
@@ -751,14 +751,14 @@ void TestFiffStreamPython::writesAnnotationsAndDevice()
     QVERIFY(reader.read_annotations(reader.dirtree(), back, origTime));
     QCOMPARE(origTime[0], info.meas_date[0]);
     QCOMPARE(origTime[1], info.meas_date[1]);
-    QCOMPARE(back.size(), 3);
-    QCOMPARE(back[0].description, QStringLiteral("Stimulus 1"));
-    QCOMPARE(back[1].description, QStringLiteral("a:b"));
-    QVERIFY(back[2].description.isEmpty());
+    QCOMPARE(back.size(), std::size_t{3});
+    QCOMPARE(back[0].description, std::string("Stimulus 1"));
+    QCOMPARE(back[1].description, std::string("a:b"));
+    QVERIFY(back[2].description.empty());
     QCOMPARE(back[1].onset, 2.25);
     QCOMPARE(back[1].duration, 0.5);
-    QVERIFY(back[0].channelNames.isEmpty());
-    QCOMPARE(back[1].channelNames, QStringList{QStringLiteral("EEG 001")});
+    QVERIFY(back[0].ch_names.empty());
+    QCOMPARE(back[1].ch_names, std::vector<std::string>{"EEG 001"});
 
     // Without devices and orig_time nothing of either is written.
     info.device_info = FiffDeviceInfo();

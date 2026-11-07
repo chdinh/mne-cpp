@@ -20,7 +20,6 @@
 
 #include "fiff_events.h"
 
-#include <utils/generics/log.h>
 #include "fiff_evoked_set.h"
 #include "fiff_raw_data.h"
 #include "fiff_stream.h"
@@ -35,12 +34,12 @@
 
 #include <utils/string_utils.h>
 
-#include <QDebug>
 
 #include <algorithm>
 #include <charconv>
 #include <cmath>
 #include <fstream>
+#include <iterator>
 #include <numeric>
 #include <sstream>
 #include <string>
@@ -54,18 +53,12 @@
 using namespace FIFFLIB;
 using namespace Eigen;
 
+using UTILSLIB::ErrorCode;
+using UTILSLIB::Expected;
+using UTILSLIB::fail;
+
 namespace
 {
-
-// A whole-token integer, else 0 like QString::toInt.
-int toInt(std::string_view token)
-{
-    if (!token.empty() && token.front() == '+')
-        token.remove_prefix(1);
-    int value = 0;
-    const auto [end, ec] = std::from_chars(token.data(), token.data() + token.size(), value);
-    return ec == std::errc() && end == token.data() + token.size() ? value : 0;
-}
 
 // Pads to |width|, right-aligned for a positive width and left-aligned for a negative one.
 std::string padded(const std::string& text, int width)
@@ -77,223 +70,133 @@ std::string padded(const std::string& text, int width)
     return width < 0 ? text + fill : fill + text;
 }
 
+bool isFif(const std::filesystem::path& path)
+{
+    return UTILSLIB::utf8FromPath(path.filename()).find(".fif") != std::string::npos;
+}
+
 } // namespace
 
 //=============================================================================================================
 // DEFINE MEMBER METHODS
 //=============================================================================================================
 
-FiffEvents::FiffEvents()
-{
-}
-
-//=============================================================================================================
-
 FiffEvents::FiffEvents(const std::filesystem::path& path)
+: FiffEvents(read(path).value())
 {
-    if (!read_from_fif(path, *this)) {
-        read_from_ascii(path, *this);
-    }
 }
 
 //=============================================================================================================
 
-bool FiffEvents::read(const std::filesystem::path& t_sEventName,
-                      const std::filesystem::path& t_fileRawName,
-                      FiffEvents& p_Events)
+Expected<FiffEvents> FiffEvents::read(const std::filesystem::path& path)
 {
-    std::string eventName = UTILSLIB::utf8FromPath(t_sEventName);
-
-    if (eventName.empty()) {
-        eventName = UTILSLIB::utf8FromPath(t_fileRawName);
-        const std::size_t p = eventName.find(".fif");
-        if (p == std::string::npos || p == 0) {
-            qWarning("Raw file name does not end properly\n");
-            return false;
-        }
-        eventName.replace(p, 4, "-eve.fif");
-
-        if (!read_from_fif(UTILSLIB::pathFromUtf8(eventName), p_Events)) {
-            qWarning("Error while read events.\n");
-            return false;
-        }
-        qInfo("Events read from %s\n", eventName.c_str());
-    } else {
-        // Binary file
-        if (eventName.find(".fif") != std::string::npos) {
-            if (!read_from_fif(t_sEventName, p_Events)) {
-                qWarning("Error while read events.\n");
-                return false;
-            }
-            qInfo("Binary event file %s read\n", eventName.c_str());
-        } else if (eventName.find(".eve") != std::string::npos) {
-        } else {
-            // Text file
-            qWarning("Text file %s is not supported jet.\n", eventName.c_str());
-        }
-    }
-
-    return true;
+    return isFif(path) ? read_fif(path) : read_ascii(path);
 }
 
 //=============================================================================================================
 
-bool FiffEvents::read_from_fif(const std::filesystem::path& path,
-                               FiffEvents& p_Events)
+Expected<FiffEvents> FiffEvents::read_fif(const std::filesystem::path& path)
 {
-    auto t_pStream = FiffStream::open(path);
-    if (!t_pStream) {
-        UTILSLIB::Log::critical("{}", t_pStream.error().what());
-        return false;
+    auto stream = FiffStream::open(path);
+    if (!stream) {
+        return std::unexpected(stream.error());
     }
-
-    //
-    //   Find the desired block
-    //
-    std::vector<FiffDirNode::SPtr> eventsBlocks = t_pStream->dirtree()->dir_tree_find(FIFFB_MNE_EVENTS);
-
-    if (eventsBlocks.size() == 0) {
-        qWarning("Could not find event data\n");
-        return false;
+    const std::vector<FiffDirNode::SPtr> blocks = stream->dirtree()->dir_tree_find(FIFFB_MNE_EVENTS);
+    if (blocks.empty()) {
+        return fail(ErrorCode::NotFound, "{} holds no events", UTILSLIB::utf8FromPath(path));
     }
-
-    // nelem is only assigned when a matching tag is found; the guard below
-    // returns before it is read in that case, but it must not start out
-    // indeterminate.
-    qint32 k, nelem = 0;
-    fiff_int_t kind, pos;
-    std::optional<FiffTag> t_pTag;
-    const quint32* serial_eventlist_uint = nullptr;
-    const qint32* serial_eventlist_int = nullptr;
-
-    for (k = 0; k < eventsBlocks[0]->nent(); ++k) {
-        kind = eventsBlocks[0]->dir[k].kind;
-        pos = eventsBlocks[0]->dir[k].pos;
-        if (kind == FIFF_MNE_EVENT_LIST) {
-            t_pTag = t_pStream->read_tag(pos);
-            if (t_pTag->type == FIFFT_UINT) {
-                serial_eventlist_uint = t_pTag->toUnsignedInt();
-                nelem = t_pTag->size() / 4;
-            }
-
-            if (t_pTag->type == FIFFT_INT) {
-                serial_eventlist_int = t_pTag->toInt();
-                nelem = t_pTag->size() / 4;
-            }
-
+    for (const FiffDirEntry& entry : blocks.front()->dir) {
+        if (entry.kind != FIFF_MNE_EVENT_LIST) {
+            continue;
+        }
+        const std::optional<FiffTag> tag = stream->read_tag(entry.pos);
+        if (!tag || (tag->type != FIFFT_INT && tag->type != FIFFT_UINT)) {
             break;
         }
+        // Stored row by row (sample, before, after); unsigned lists are read as their bit patterns
+        const Eigen::Index rows = tag->size() / 12;
+        return FiffEvents(Eigen::Map<const Eigen::Matrix<int, Eigen::Dynamic, 3, Eigen::RowMajor>>(reinterpret_cast<const int*>(tag->data()), rows, 3));
     }
-
-    if (serial_eventlist_uint == nullptr && serial_eventlist_int == nullptr) {
-        qWarning("Could not find any events\n");
-        return false;
-    }
-
-    p_Events.events.resize(nelem / 3, 3);
-    if (serial_eventlist_uint != nullptr) {
-        for (k = 0; k < nelem / 3; ++k) {
-            p_Events.events(k, 0) = serial_eventlist_uint[k * 3];
-            p_Events.events(k, 1) = serial_eventlist_uint[k * 3 + 1];
-            p_Events.events(k, 2) = serial_eventlist_uint[k * 3 + 2];
-        }
-    }
-
-    if (serial_eventlist_int != nullptr) {
-        for (k = 0; k < nelem / 3; ++k) {
-            p_Events.events(k, 0) = serial_eventlist_int[k * 3];
-            p_Events.events(k, 1) = serial_eventlist_int[k * 3 + 1];
-            p_Events.events(k, 2) = serial_eventlist_int[k * 3 + 2];
-        }
-    }
-
-    return true;
+    return fail(ErrorCode::NotFound, "{} holds no event list", UTILSLIB::utf8FromPath(path));
 }
 
 //=============================================================================================================
 
-bool FiffEvents::read_from_ascii(const std::filesystem::path& path,
-                                 FiffEvents& p_Events)
+Expected<FiffEvents> FiffEvents::read_ascii(const std::filesystem::path& path)
 {
     std::ifstream file(path);
     if (!file) {
-        return false;
+        return fail(ErrorCode::Io, "cannot read {}", UTILSLIB::utf8FromPath(path));
     }
-
-    std::vector<int> sampleList;
-    std::vector<int> beforeList;
-    std::vector<int> afterList;
-
+    std::vector<Eigen::RowVector3i> rows;
     std::string line;
-    while (std::getline(file, line)) {
-        // A standard .eve line has four fields: sample, onset in seconds,
-        // value before and value after the transition. The onset is redundant
-        // with the sample and is skipped, which is what write_to_ascii emits.
-        // Reading it as an integer used to shift every later field along by
-        // one, so the trigger code was lost and the event looked like it had
-        // a code of zero. Files carrying only the three integer fields are
-        // still accepted.
+    for (int number = 1; std::getline(file, line); ++number) {
+        // "sample time before after" as written by write_ascii, or just "sample before after"
         std::vector<std::string> fields;
         std::istringstream words(line);
         for (std::string word; words >> word;)
             fields.push_back(word);
-        if (fields.empty())
+        if (fields.empty() || fields.front().starts_with('%') || fields.front().starts_with('#'))
             continue;
-
-        const std::size_t iOffset = (fields.size() >= 4) ? 1 : 0;
-
-        sampleList.push_back(toInt(fields[0]));
-        beforeList.push_back(fields.size() > 1 + iOffset ? toInt(fields[1 + iOffset]) : 0);
-        afterList.push_back(fields.size() > 2 + iOffset ? toInt(fields[2 + iOffset]) : 0);
+        const std::size_t offset = fields.size() >= 4 ? 1 : 0;
+        const auto field = [&fields](std::size_t i) {
+            return i < fields.size() ? UTILSLIB::toInt(fields[i]) : std::optional<int>(0);
+        };
+        const std::optional<int> sample = field(0), before = field(1 + offset), after = field(2 + offset);
+        if (!sample || !before || !after) {
+            return fail(ErrorCode::Format, "{} line {} is not 'sample [time] before after': {}", UTILSLIB::utf8FromPath(path), number, line);
+        }
+        rows.emplace_back(*sample, *before, *after);
     }
-
-    p_Events.events.resize(static_cast<Eigen::Index>(sampleList.size()), 3);
-
-    for (std::size_t i = 0; i < sampleList.size(); i++) {
-        const auto row = static_cast<Eigen::Index>(i);
-        p_Events.events(row, 0) = sampleList[i];
-        p_Events.events(row, 1) = beforeList[i];
-        p_Events.events(row, 2) = afterList[i];
+    FiffEvents out;
+    out.events.resize(static_cast<Eigen::Index>(rows.size()), 3);
+    for (std::size_t i = 0; i < rows.size(); ++i) {
+        out.events.row(static_cast<Eigen::Index>(i)) = rows[i];
     }
-    return true;
+    return out;
 }
 
 //=============================================================================================================
 
-bool FiffEvents::write_to_fif(const std::filesystem::path& path) const
+Expected<void> FiffEvents::write(const std::filesystem::path& path, float sfreq) const
 {
-    if (events.rows() == 0 || events.cols() < 3)
-        return false;
+    return isFif(path) ? write_fif(path) : write_ascii(path, sfreq);
+}
 
-    auto pStream = FiffStream::start_file(path);
-    if (!pStream)
-        return false;
+//=============================================================================================================
 
+Expected<void> FiffEvents::write_fif(const std::filesystem::path& path) const
+{
+    if (events.rows() == 0 || events.cols() < 3) {
+        return fail(ErrorCode::Format, "no events to write to {}", UTILSLIB::utf8FromPath(path));
+    }
+    auto stream = FiffStream::start_file(path);
+    if (!stream) {
+        return fail(ErrorCode::Io, "cannot write {}", UTILSLIB::utf8FromPath(path));
+    }
     // FIFF stores the list row by row (sample, before, after).
     const Eigen::Matrix<int, Eigen::Dynamic, 3, Eigen::RowMajor> rows = events.leftCols(3);
-    pStream->start_block(FIFFB_MNE_EVENTS);
-    pStream->write_int(FIFF_MNE_EVENT_LIST, rows.data(), rows.rows() * 3);
-    pStream->end_block(FIFFB_MNE_EVENTS);
-    pStream->end_file();
-    pStream->close();
-
-    return true;
+    stream->start_block(FIFFB_MNE_EVENTS);
+    stream->write_int(FIFF_MNE_EVENT_LIST, rows.data(), rows.rows() * 3);
+    stream->end_block(FIFFB_MNE_EVENTS);
+    stream->end_file();
+    stream->close();
+    return {};
 }
 
 //=============================================================================================================
 
-bool FiffEvents::write_to_ascii(const std::filesystem::path& path,
-                                float sfreq) const
+Expected<void> FiffEvents::write_ascii(const std::filesystem::path& path, float sfreq) const
 {
     std::ofstream out(path);
-    if (!out)
-        return false;
-
-    for (int k = 0; k < events.rows(); ++k) {
-        int sample = events(k, 0);
-        int before = (events.cols() > 1) ? events(k, 1) : 0;
-        int after = (events.cols() > 2) ? events(k, 2) : 0;
-        float time = (sfreq > 0.0f) ? static_cast<float>(sample) / sfreq : 0.0f;
+    if (!out) {
+        return fail(ErrorCode::Io, "cannot write {}", UTILSLIB::utf8FromPath(path));
+    }
+    for (Eigen::Index k = 0; k < events.rows(); ++k) {
+        const int sample = events(k, 0);
+        const int before = events.cols() > 1 ? events(k, 1) : 0;
+        const int after = events.cols() > 2 ? events(k, 2) : 0;
+        const float time = sfreq > 0.0f ? static_cast<float>(sample) / sfreq : 0.0f;
         char digits[64];
         const auto result = std::to_chars(digits, digits + sizeof(digits), static_cast<double>(time), std::chars_format::fixed, 3);
         out << padded(std::to_string(sample), 6) << ' '
@@ -301,86 +204,64 @@ bool FiffEvents::write_to_ascii(const std::filesystem::path& path,
             << padded(std::to_string(before), 3) << ' '
             << padded(std::to_string(after), 3) << '\n';
     }
-
-    return static_cast<bool>(out.flush());
+    if (!out.flush()) {
+        return fail(ErrorCode::Io, "cannot write {}", UTILSLIB::utf8FromPath(path));
+    }
+    return {};
 }
 
 //=============================================================================================================
 
-bool FiffEvents::detect_from_raw(const FiffRawData& raw,
-                                 FiffEvents& p_Events,
-                                 const QString& triggerCh,
-                                 unsigned int triggerMask,
-                                 bool leadingEdge)
+Expected<FiffEvents> FiffEvents::find_events(const FiffRawData& raw, std::string_view stim_channel, unsigned int mask, bool leading_edge)
 {
-    QString stimCh = triggerCh.isEmpty() ? QString("STI 014") : triggerCh;
-
     // Channel names are read without spaces ("STI014"), so compare without them.
-    const QString wanted = QString(stimCh).remove(' ');
-    int triggerChIdx = -1;
-    for (int k = 0; k < static_cast<int>(raw.info.ch_names.size()); ++k) {
-        if (QString::fromStdString(raw.info.ch_names[static_cast<std::size_t>(k)]).remove(' ') == wanted) {
-            triggerChIdx = k;
-            break;
-        }
+    const auto withoutSpaces = [](std::string_view name) {
+        std::string out;
+        std::ranges::copy_if(name, std::back_inserter(out), [](char c) { return c != ' '; });
+        return out;
+    };
+    const std::string wanted = withoutSpaces(stim_channel);
+    const auto channel = std::ranges::find_if(raw.info.ch_names, [&](const std::string& name) { return withoutSpaces(name) == wanted; });
+    if (channel == raw.info.ch_names.end()) {
+        return fail(ErrorCode::NotFound, "no stimulus channel {}", stim_channel);
     }
-    if (triggerChIdx < 0) {
-        qWarning() << "[FiffEvents::detect_from_raw] Trigger channel" << stimCh << "not found.";
-        return false;
-    }
+    const int index = static_cast<int>(channel - raw.info.ch_names.begin());
 
-    // Read trigger channel data
     MatrixXd data;
     MatrixXd times;
-    if (!raw.read_raw_segment(data, times, raw.first_samp, raw.last_samp,
-                              RowVectorXi::LinSpaced(1, triggerChIdx, triggerChIdx))) {
-        qWarning() << "[FiffEvents::detect_from_raw] Could not read trigger channel data.";
-        return false;
+    if (!raw.read_raw_segment(data, times, raw.first_samp, raw.last_samp, RowVectorXi::Constant(1, index))) {
+        return fail(ErrorCode::Io, "cannot read stimulus channel {}", stim_channel);
     }
 
-    RowVectorXd trigData = data.row(0);
-    int nSamples = static_cast<int>(trigData.cols());
-
-    // Detect flanks
-    QList<int> eventSamples;
-    QList<int> eventBefore;
-    QList<int> eventAfter;
-
-    int prevVal = static_cast<int>(trigData(0)) & triggerMask;
-    for (int s = 1; s < nSamples; ++s) {
-        int curVal = static_cast<int>(trigData(s)) & triggerMask;
-        if (curVal != prevVal) {
-            if (!leadingEdge || (leadingEdge && prevVal == 0 && curVal != 0)) {
-                eventSamples.append(static_cast<int>(raw.first_samp) + s);
-                eventBefore.append(prevVal);
-                eventAfter.append(curVal);
-            }
+    std::vector<Eigen::RowVector3i> rows;
+    const auto value = [&data, mask](Eigen::Index s) {
+        return static_cast<int>(static_cast<unsigned int>(static_cast<int>(data(0, s))) & mask);
+    };
+    int previous = value(0);
+    for (Eigen::Index s = 1; s < data.cols(); ++s) {
+        const int current = value(s);
+        if (current != previous && (!leading_edge || (previous == 0 && current != 0))) {
+            rows.emplace_back(static_cast<int>(raw.first_samp + s), previous, current);
         }
-        prevVal = curVal;
+        previous = current;
     }
-
-    int nEvents = eventSamples.size();
-    p_Events.events.resize(nEvents, 3);
-    for (int k = 0; k < nEvents; ++k) {
-        p_Events.events(k, 0) = eventSamples[k];
-        p_Events.events(k, 1) = eventBefore[k];
-        p_Events.events(k, 2) = eventAfter[k];
+    FiffEvents out;
+    out.events.resize(static_cast<Eigen::Index>(rows.size()), 3);
+    for (std::size_t i = 0; i < rows.size(); ++i) {
+        out.events.row(static_cast<Eigen::Index>(i)) = rows[i];
     }
-
-    return nEvents > 0;
+    return out;
 }
 
 //=============================================================================================================
 
-bool FiffEvents::matchEvent(const AverageCategory& cat,
-                            const MatrixXi& events,
-                            int eventIdx)
+bool FiffEvents::match_event(const AverageCategory& cat, const MatrixXi& events, int event_idx)
 {
-    if (eventIdx < 0 || eventIdx >= events.rows())
+    if (event_idx < 0 || event_idx >= events.rows())
         return false;
 
-    int evFrom = events(eventIdx, 1);
-    int evTo = events(eventIdx, 2);
+    int evFrom = events(event_idx, 1);
+    int evTo = events(event_idx, 2);
 
     // Check if any of the category's event codes match
     bool match = false;
@@ -397,7 +278,7 @@ bool FiffEvents::matchEvent(const AverageCategory& cat,
     // Check previous event constraint
     if (cat.prevEvent != 0) {
         bool found = false;
-        for (int j = eventIdx - 1; j >= 0; --j) {
+        for (int j = event_idx - 1; j >= 0; --j) {
             if ((events(j, 1) & ~cat.prevIgnore) == 0) {
                 found = true;
                 match = match && ((events(j, 2) & ~cat.prevIgnore) == cat.prevEvent);
@@ -411,7 +292,7 @@ bool FiffEvents::matchEvent(const AverageCategory& cat,
     // Check next event constraint
     if (cat.nextEvent != 0) {
         bool found = false;
-        for (int j = eventIdx + 1; j < events.rows(); ++j) {
+        for (int j = event_idx + 1; j < events.rows(); ++j) {
             if ((events(j, 1) & ~cat.nextIgnore) == 0) {
                 found = true;
                 match = match && ((events(j, 2) & ~cat.nextIgnore) == cat.nextEvent);
@@ -446,14 +327,16 @@ MatrixXi selectRows(const MatrixXi& events, const std::vector<bool>& keep)
 
 //=============================================================================================================
 
-FiffEvents FiffEvents::pick(const QList<int>& include, const QList<int>& exclude, bool step) const
+FiffEvents FiffEvents::pick(const std::vector<int>& include, const std::vector<int>& exclude, bool step) const
 {
-    std::vector<bool> keep(events.rows());
+    const auto contains = [](const std::vector<int>& codes, int code) {
+        return std::ranges::find(codes, code) != codes.end();
+    };
+    std::vector<bool> keep(static_cast<std::size_t>(events.rows()));
     for (Index i = 0; i < events.rows(); ++i) {
-        const bool matches = !include.isEmpty()
-            ? include.contains(events(i, 2)) || (step && include.contains(events(i, 1)))
-            : !(exclude.contains(events(i, 2)) || (step && exclude.contains(events(i, 1))));
-        keep[i] = matches;
+        keep[static_cast<std::size_t>(i)] = !include.empty()
+            ? contains(include, events(i, 2)) || (step && contains(include, events(i, 1)))
+            : !(contains(exclude, events(i, 2)) || (step && contains(exclude, events(i, 1))));
     }
     FiffEvents out;
     out.events = selectRows(events, keep);
@@ -462,20 +345,20 @@ FiffEvents FiffEvents::pick(const QList<int>& include, const QList<int>& exclude
 
 //=============================================================================================================
 
-FiffEvents FiffEvents::merge(const QList<int>& ids, int newId, bool replaceEvents) const
+FiffEvents FiffEvents::merge(const std::vector<int>& ids, int new_id, bool replace_events) const
 {
     FiffEvents out;
     out.events = events;
     std::vector<bool> touched(events.rows(), false);
     for (Index i = 0; i < events.rows(); ++i) {
         for (int col = 1; col <= 2; ++col) {
-            if (ids.contains(events(i, col))) {
-                out.events(i, col) = newId;
+            if (std::ranges::find(ids, events(i, col)) != ids.end()) {
+                out.events(i, col) = new_id;
                 touched[i] = true;
             }
         }
     }
-    if (!replaceEvents) {
+    if (!replace_events) {
         const MatrixXi originals = selectRows(events, touched);
         MatrixXi all(out.events.rows() + originals.rows(), 3);
         all << out.events, originals;
@@ -493,13 +376,13 @@ FiffEvents FiffEvents::merge(const QList<int>& ids, int newId, bool replaceEvent
 
 //=============================================================================================================
 
-QMap<int, int> FiffEvents::count(const QList<int>& ids) const
+std::map<int, int> FiffEvents::count(const std::vector<int>& ids) const
 {
-    QMap<int, int> counts;
+    std::map<int, int> counts;
     for (const int id : ids)
-        counts.insert(id, 0);
+        counts.emplace(id, 0);
     for (Index i = 0; i < events.rows(); ++i) {
-        if (ids.isEmpty() || ids.contains(events(i, 2)))
+        if (ids.empty() || counts.contains(events(i, 2)))
             ++counts[events(i, 2)];
     }
     return counts;
@@ -507,10 +390,10 @@ QMap<int, int> FiffEvents::count(const QList<int>& ids) const
 
 //=============================================================================================================
 
-FiffEvents FiffEvents::concatenate(const QList<FiffEvents>& events, const QList<int>& firstSamps, const QList<int>& lastSamps)
+FiffEvents FiffEvents::concatenate(const std::vector<FiffEvents>& events, const std::vector<int>& first_samps, const std::vector<int>& last_samps)
 {
     FiffEvents out;
-    if (events.isEmpty() || events.size() != firstSamps.size() || events.size() != lastSamps.size())
+    if (events.empty() || events.size() != first_samps.size() || events.size() != last_samps.size())
         return out;
     Index rows = 0;
     for (const FiffEvents& e : events)
@@ -518,33 +401,33 @@ FiffEvents FiffEvents::concatenate(const QList<FiffEvents>& events, const QList<
     out.events.resize(rows, 3);
     Index r = 0;
     int offset = 0;
-    for (qsizetype k = 0; k < events.size(); ++k) {
+    for (std::size_t k = 0; k < events.size(); ++k) {
         MatrixXi shifted = events[k].events;
         if (k > 0)
-            shifted.col(0).array() += offset + firstSamps[0] - firstSamps[k];
+            shifted.col(0).array() += offset + first_samps[0] - first_samps[k];
         out.events.middleRows(r, shifted.rows()) = shifted;
         r += shifted.rows();
-        offset += lastSamps[k] - firstSamps[k] + 1;
+        offset += last_samps[k] - first_samps[k] + 1;
     }
     return out;
 }
 
 //=============================================================================================================
 
-FiffEvents FiffEvents::find_stim_steps(const MatrixXi& stimData, int firstSamp, std::optional<int> padStart, std::optional<int> padStop, int merge)
+FiffEvents FiffEvents::find_stim_steps(const MatrixXi& stim_data, int first_samp, std::optional<int> pad_start, std::optional<int> pad_stop, int merge)
 {
     std::vector<RowVector3i> steps;
-    for (Index t = 0; t + 1 < stimData.cols(); ++t) {
-        if ((stimData.col(t + 1).array() != stimData.col(t).array()).all())
-            steps.emplace_back(static_cast<int>(t + 1) + firstSamp, stimData(0, t), stimData(0, t + 1));
+    for (Index t = 0; t + 1 < stim_data.cols(); ++t) {
+        if ((stim_data.col(t + 1).array() != stim_data.col(t).array()).all())
+            steps.emplace_back(static_cast<int>(t + 1) + first_samp, stim_data(0, t), stim_data(0, t + 1));
     }
     FiffEvents out;
     if (steps.empty())
         return out;
-    if (padStart && steps.front()(1) != *padStart)
-        steps.insert(steps.begin(), RowVector3i(0, *padStart, steps.front()(1)));
-    if (padStop && steps.back()(2) != *padStop)
-        steps.emplace_back(static_cast<int>(stimData.cols()) + firstSamp, steps.back()(2), *padStop);
+    if (pad_start && steps.front()(1) != *pad_start)
+        steps.insert(steps.begin(), RowVector3i(0, *pad_start, steps.front()(1)));
+    if (pad_stop && steps.back()(2) != *pad_stop)
+        steps.emplace_back(static_cast<int>(stim_data.cols()) + first_samp, steps.back()(2), *pad_stop);
     if (merge != 0) {
         const size_t n = steps.size();
         std::vector<bool> close(n > 0 ? n - 1 : 0);
@@ -581,7 +464,7 @@ FiffEvents FiffEvents::find_stim_steps(const MatrixXi& stimData, int firstSamp, 
 
 //=============================================================================================================
 
-FiffEvents FiffEvents::make_fixed_length(const FiffRawData& raw, int id, double start, double stop, double duration, bool firstSamp, double overlap)
+FiffEvents FiffEvents::make_fixed_length(const FiffRawData& raw, int id, double start, double stop, double duration, bool first_samp, double overlap)
 {
     FiffEvents out;
     const double sfreq = raw.info.sfreq;
@@ -589,7 +472,7 @@ FiffEvents FiffEvents::make_fixed_length(const FiffRawData& raw, int id, double 
         return out;
     double first = std::nearbyint(start * sfreq);
     double last = stop >= 0.0 ? std::nearbyint(stop * sfreq) : raw.last_samp + 1.0;
-    if (firstSamp) {
+    if (first_samp) {
         first += raw.first_samp;
         last = std::min(last + (stop >= 0.0 ? raw.first_samp : 0), raw.last_samp + 1.0);
     } else {

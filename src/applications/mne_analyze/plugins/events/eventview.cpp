@@ -490,13 +490,14 @@ QMap<double, QList<int>> EventView::detectTriggerCalculations(const QString& sCh
                                                               const FIFFLIB::FiffRawData& fiffRaw)
 {
     QMap<double, QList<int>> mEventsinTypes;
-    FIFFLIB::FiffEvents events;
-    if (!FIFFLIB::FiffEvents::detect_from_raw(fiffRaw, events, sChannelName)) {
+    const auto found = FIFFLIB::FiffEvents::find_events(fiffRaw, sChannelName.toStdString());
+    if (!found) {
         return mEventsinTypes;
     }
-    for (int k = 0; k < events.events.rows(); ++k) {
-        if (events.events(k, 2) >= dThreshold) {
-            mEventsinTypes[events.events(k, 2)].append(events.events(k, 0));
+    const Eigen::MatrixXi& events = found->events;
+    for (Eigen::Index k = 0; k < events.rows(); ++k) {
+        if (events(k, 2) >= dThreshold) {
+            mEventsinTypes[events(k, 2)].append(events(k, 0));
         }
     }
     return mEventsinTypes;

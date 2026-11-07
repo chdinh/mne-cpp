@@ -154,10 +154,10 @@ int BatchProcessor::run(const ProcessingSettings& settings)
 
         if (!eventInFile.isEmpty()) {
             qInfo() << "Loading events from" << eventInFile;
-            if (eventInFile.endsWith(".fif", Qt::CaseInsensitive)) {
-                FiffEvents::read_from_fif(eventInFile.toStdU16String(), fiffEvents);
+            if (auto read = FiffEvents::read(eventInFile.toStdU16String())) {
+                fiffEvents = std::move(*read);
             } else {
-                FiffEvents::read_from_ascii(eventInFile.toStdU16String(), fiffEvents);
+                qWarning() << read.error().what();
             }
         }
 
@@ -165,11 +165,11 @@ int BatchProcessor::run(const ProcessingSettings& settings)
             // Detect from trigger channel
             qInfo() << "Detecting events from trigger channel" << settings.digTrigger;
             // As in MNE-C (mne_raw_scan_triggers), a mask of 0 means no masking.
-            FiffEvents::detect_from_raw(raw,
-                                        fiffEvents,
-                                        settings.digTrigger,
-                                        settings.digTriggerMask == 0 ? 0xFFFFFFFFu : settings.digTriggerMask,
-                                        true);
+            if (auto found = FiffEvents::find_events(raw, settings.digTrigger.isEmpty() ? "STI 014" : settings.digTrigger.toStdString(), settings.digTriggerMask == 0 ? 0xFFFFFFFFu : settings.digTriggerMask)) {
+                fiffEvents = std::move(*found);
+            } else {
+                qWarning() << found.error().what();
+            }
         }
 
         qInfo() << fiffEvents.num_events() << "events found.";
@@ -183,10 +183,8 @@ int BatchProcessor::run(const ProcessingSettings& settings)
 
         if (!eventOutFile.isEmpty()) {
             qInfo() << "\n--- Saving events to" << eventOutFile << "---\n";
-            if (eventOutFile.endsWith(".fif", Qt::CaseInsensitive)) {
-                fiffEvents.write_to_fif(eventOutFile.toStdU16String());
-            } else {
-                fiffEvents.write_to_ascii(eventOutFile.toStdU16String(), raw.info.sfreq);
+            if (auto written = fiffEvents.write(eventOutFile.toStdU16String(), raw.info.sfreq); !written) {
+                qWarning() << written.error().what();
             }
         }
 
