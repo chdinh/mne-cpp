@@ -293,7 +293,7 @@ void MNEMshDisplaySurface::calculate_digitizer_distances(FIFFLIB::FiffDigitizerD
 
     for (k = 0, nactive = 0; k < dig.npoint; k++) {
         if ((dig.active[k] && !dig.discard[k]) || do_all) {
-            point = dig.points.at(k);
+            point = dig.points[k];
             digPoints.row(nactive) = Eigen::Map<const Eigen::RowVector3f>(point.r);
             FiffCoordTrans::apply_trans(digPoints.row(nactive).data(), t, FIFFV_MOVE);
             if (do_approx) {
@@ -396,7 +396,7 @@ int MNEMshDisplaySurface::iterate_alignment_once(FIFFLIB::FiffDigitizerData& dig
 
     for (k = 0, nactive = 0; k < dig.npoint; k++) {
         if (dig.active[k] && !dig.discard[k]) {
-            point = dig.points.at(k);
+            point = dig.points[k];
             rr_head.row(nactive) = Eigen::Map<const Eigen::RowVector3f>(point.r);
             rr_mri.row(nactive) = dig.closest_point.row(k);
             /*

@@ -121,8 +121,8 @@ int main(int argc, char* argv[])
                  "FiffChInfo/FiffChPos: MEG0113 is a 3012 planar gradiometer at (-0.1066, 0.0464, -0.0604) m");
 
     //! [fiff_dig_point_set_usage]
-    FiffDigPointSet digitizer(info.dig);                                    // 146 points in head coordinates
-    FiffDigPointSet cardinal = digitizer.pickTypes({FIFFV_POINT_CARDINAL}); // LPA, nasion, RPA
+    const FiffDigPointSet& digitizer = info.dig;                             // 146 points in head coordinates
+    FiffDigPointSet cardinal = digitizer.pick_types({FIFFV_POINT_CARDINAL}); // LPA, nasion, RPA
     //! [fiff_dig_point_set_usage]
     // mne: 146 points; dig[0] = LPA at (-0.0713766, 0, 5.1e-9)
     ok &= expect(digitizer.size() == 146 && cardinal.size() == 3 && cardinal[0].ident == FIFFV_POINT_LPA && std::fabs(cardinal[0].r[0] + 0.07137661f) < 1e-7f,
@@ -243,7 +243,7 @@ int main(int argc, char* argv[])
     //! [fiff_digitizer_data_usage]
     FiffDigitizerData digData;
     digData.points = info.dig;
-    digData.npoint = info.dig.size();
+    digData.npoint = static_cast<int>(info.dig.size());
     digData.coord_frame = FIFFV_COORD_HEAD;
     digData.head_mri_t_adj = std::make_unique<FiffCoordTrans>(headToMri);
     digData.pickCardinalFiducials(); // LPA, nasion and RPA moved into MRI coordinates

@@ -1139,7 +1139,7 @@ bool FiffStream::read_digitizer_data(const FiffDirNode::SPtr& p_Node, FiffDigiti
         switch (kind) {
             case FIFF_DIG_POINT:
                 t_pTag = this->read_tag(pos);
-                p_digData.points.append(t_pTag->toDigPoint());
+                p_digData.points.push_back(t_pTag->toDigPoint());
                 break;
             case FIFF_MNE_COORD_FRAME:
                 t_pTag = this->read_tag(pos);
@@ -1148,7 +1148,7 @@ bool FiffStream::read_digitizer_data(const FiffDirNode::SPtr& p_Node, FiffDigiti
         }
     }
 
-    npoint = p_digData.points.size();
+    npoint = static_cast<int>(p_digData.points.size());
 
     if (npoint == 0) {
         qWarning("No digitizer data in %s", this->streamName().toLatin1().data());
@@ -1417,7 +1417,7 @@ bool FiffStream::read_meas_info(const FiffDirNode::SPtr& p_Node, FiffInfo& info,
     //
     std::vector<FiffDirNode::SPtr> isotrak = meas_info[0]->dir_tree_find(FIFFB_ISOTRAK);
 
-    QList<FiffDigPoint> dig;
+    FiffDigPointSet dig;
     fiff_int_t coord_frame = FIFFV_COORD_HEAD;
     FiffCoordTrans dig_trans;
     qint32 k = 0;
@@ -1428,7 +1428,7 @@ bool FiffStream::read_meas_info(const FiffDirNode::SPtr& p_Node, FiffInfo& info,
             pos = isotrak[0]->dir[k].pos;
             if (kind == FIFF_DIG_POINT) {
                 t_pTag = this->read_tag(pos);
-                dig.append(t_pTag->toDigPoint());
+                dig.push_back(t_pTag->toDigPoint());
             } else {
                 if (kind == FIFF_MNE_COORD_FRAME) {
                     t_pTag = this->read_tag(pos);
@@ -1440,8 +1440,8 @@ bool FiffStream::read_meas_info(const FiffDirNode::SPtr& p_Node, FiffInfo& info,
             }
         }
     }
-    for (k = 0; k < dig.size(); ++k)
-        dig[k].coord_frame = coord_frame;
+    for (FiffDigPoint& point : dig)
+        point.coord_frame = coord_frame;
 
     if (!dig_trans.is_empty()) //if exist('dig_trans','var')
         if (dig_trans.from != coord_frame && dig_trans.to != coord_frame)
@@ -1566,7 +1566,7 @@ bool FiffStream::read_meas_info(const FiffDirNode::SPtr& p_Node, FiffInfo& info,
     //
     //   All kinds of auxliary stuff
     //
-    info.dig = dig;
+    info.dig = std::move(dig);
     if (!dig_trans.is_empty())
         info.dig_trans = dig_trans;
 
@@ -2400,7 +2400,7 @@ std::unique_ptr<FiffStream> FiffStream::start_writing_raw(std::unique_ptr<FiffSt
     //
     if (info.dig.size() > 0 && !have_isotrak) {
         t_pStream->start_block(FIFFB_ISOTRAK);
-        for (qint32 k = 0; k < info.dig.size(); ++k)
+        for (qint32 k = 0; k < std::ssize(info.dig); ++k)
             t_pStream->write_dig_point(info.dig[k]);
 
         t_pStream->end_block(FIFFB_ISOTRAK);

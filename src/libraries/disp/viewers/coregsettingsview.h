@@ -38,6 +38,7 @@
 #include <QVector3D>
 
 #include <memory>
+#include <vector>
 
 //=============================================================================================================
 // EIGEN INCLUDES
@@ -233,7 +234,7 @@ public:
      *
      * @return  The list containing the digitizer types to use for coregistration.
      */
-    QList<int> getDigitizerCheckState();
+    std::vector<int> getDigitizerCheckState();
 
     //=========================================================================================================
     /**

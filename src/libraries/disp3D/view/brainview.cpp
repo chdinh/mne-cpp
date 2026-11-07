@@ -2642,15 +2642,11 @@ bool BrainView::loadSensors(const QString& fifPath)
         qWarning() << "BrainView::loadSensors: NO helmet surface returned from DataLoader!";
     }
 
-    if (!r.digitizerPoints.isEmpty())
-        m_model->addDigitizerData(r.digitizerPoints);
+    if (!r.digitizerPoints.empty())
+        m_model->addDigitizerData(r.digitizerPoints.points());
 
     // Extract cardinal dig points for later fiducial queries
-    m_cardinalDigPoints.clear();
-    for (const auto& dp : r.digitizerPoints) {
-        if (dp.kind == FIFFV_POINT_CARDINAL)
-            m_cardinalDigPoints.append(dp);
-    }
+    m_cardinalDigPoints = r.digitizerPoints.pick_types({FIFFV_POINT_CARDINAL});
 
     return true;
 }
@@ -2660,7 +2656,7 @@ bool BrainView::loadSensors(const QString& fifPath)
 QMap<int, QVector3D> BrainView::cardinalFiducialsInMri() const
 {
     QMap<int, QVector3D> result;
-    if (m_cardinalDigPoints.isEmpty())
+    if (m_cardinalDigPoints.empty())
         return result;
 
     // Cardinal points are in Head coordinates; transform to MRI if available

@@ -42,7 +42,7 @@
 #include <fiff/fiff_info.h>
 #include <fiff/fiff_evoked.h>
 #include <fiff/fiff_coord_trans.h>
-#include <fiff/fiff_dig_point.h>
+#include <fiff/fiff_dig_point_set.h>
 #include <mne/mne_source_spaces.h>
 #include <inv/dipole_fit/inv_ecd_set.h>
 
@@ -86,7 +86,7 @@ public:
         QList<QStandardItem*> megGradItems; ///< Ownership passes to caller
         QList<QStandardItem*> megMagItems;
         QList<QStandardItem*> eegItems;
-        QList<FIFFLIB::FiffDigPoint> digitizerPoints;
+        FIFFLIB::FiffDigPointSet digitizerPoints;
 
         std::shared_ptr<BrainSurface> helmetSurface; ///< May be null
 

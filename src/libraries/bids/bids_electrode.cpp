@@ -149,7 +149,7 @@ FIFFLIB::FiffDigPointSet BidsElectrode::toFiffDigPoints(
             point.r[2] = transformed(2);
         }
 
-        digSet << point;
+        digSet.push_back(point);
     }
 
     return digSet;

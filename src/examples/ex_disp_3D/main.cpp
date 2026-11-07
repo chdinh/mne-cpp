@@ -260,7 +260,7 @@ int main(int argc, char* argv[])
     // Read and show digitizer points
     FiffDigPointSet t_Dig((QCoreApplication::applicationDirPath() + "/../resources/data/MNE-sample-data/MEG/sample/sample_audvis-ave.fif").toStdString());
 
-    pModel->addDigitizerData(t_Dig.getList());
+    pModel->addDigitizerData(t_Dig.points());
 
     // Load sensor field data from evoked file for MEG/EEG field mapping
     pBrainView->loadSensorField(parser.value(evokedFileOption), parser.value(evokedIndexOption).toInt());

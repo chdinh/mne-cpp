@@ -488,7 +488,7 @@ private slots:
         qDebug() << "Found" << digSet.size() << "digitization points";
 
         // Check that dig points have valid coordinates
-        for (int i = 0; i < digSet.size(); ++i) {
+        for (int i = 0; i < std::ssize(digSet); ++i) {
             FiffDigPoint dp = digSet[i];
             QVERIFY(dp.kind >= 0);
         }

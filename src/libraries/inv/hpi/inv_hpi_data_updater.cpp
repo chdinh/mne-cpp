@@ -105,30 +105,16 @@ void InvHpiDataUpdater::updateSensors(const QList<FIFFLIB::FiffChInfo>& lChannel
 
 //=============================================================================================================
 
-void InvHpiDataUpdater::updateHpiDigitizer(const QList<FiffDigPoint>& lDig)
+void InvHpiDataUpdater::updateHpiDigitizer(const FiffDigPointSet& dig)
 {
-    // extract hpi coils from digitizer
-    QList<FiffDigPoint> lHPIPoints;
-    int iNumCoils = 0;
-
-    for (int i = 0; i < lDig.size(); ++i) {
-        if (lDig[i].kind == FIFFV_POINT_HPI) {
-            iNumCoils++;
-            lHPIPoints.append(lDig[i]);
-        }
-    }
-
-    // convert to matrix iNumCoils x 3
-    if (lHPIPoints.size() > 0) {
-        m_matHpiDigitizer = MatrixXd(iNumCoils, 3);
-        for (int i = 0; i < lHPIPoints.size(); ++i) {
-            m_matHpiDigitizer(i, 0) = lHPIPoints.at(i).r[0];
-            m_matHpiDigitizer(i, 1) = lHPIPoints.at(i).r[1];
-            m_matHpiDigitizer(i, 2) = lHPIPoints.at(i).r[2];
-        }
-    } else {
+    const FiffDigPointSet coils = dig.pick_types({FIFFV_POINT_HPI});
+    if (coils.empty()) {
         qWarning().noquote().nospace() << "InvHpiFit::updateHpiDigitizer - No HPI coils digitized. Returning.";
         return;
+    }
+    m_matHpiDigitizer = MatrixXd(static_cast<Eigen::Index>(coils.size()), 3);
+    for (std::size_t i = 0; i < coils.size(); ++i) {
+        m_matHpiDigitizer.row(static_cast<Eigen::Index>(i)) << coils[i].r[0], coils[i].r[1], coils[i].r[2];
     }
 }
 

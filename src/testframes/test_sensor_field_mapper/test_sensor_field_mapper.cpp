@@ -172,10 +172,10 @@ void TestSensorFieldMapper::sphereFit()
     FiffInfo info;
     for (int i = 0; i < 6; ++i) {
         const int kind = i < 3 ? FIFFV_POINT_EXTRA : FIFFV_POINT_EEG;
-        info.dig.append(makeDigPoint(kind, center + offsets[i]));
+        info.dig.push_back(makeDigPoint(kind, center + offsets[i]));
     }
-    info.dig.append(makeDigPoint(FIFFV_POINT_EXTRA, Vector3f(1.0f, 1.0f, -1.0f)));
-    info.dig.append(makeDigPoint(FIFFV_POINT_EXTRA, Vector3f(2.0f, 2.0f, 2.0f), FIFFV_COORD_MRI));
+    info.dig.push_back(makeDigPoint(FIFFV_POINT_EXTRA, Vector3f(1.0f, 1.0f, -1.0f)));
+    info.dig.push_back(makeDigPoint(FIFFV_POINT_EXTRA, Vector3f(2.0f, 2.0f, 2.0f), FIFFV_COORD_MRI));
 
     const Vector3f fittedCenter = SensorFieldMapper::fitSphereOrigin(info, &radius);
     QVERIFY((fittedCenter - center).norm() < 1.0e-5f);

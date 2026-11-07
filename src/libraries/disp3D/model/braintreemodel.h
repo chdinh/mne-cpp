@@ -37,6 +37,8 @@
 #include <mne/mne_bem_surface.h>
 #include <mne/mne_source_spaces.h>
 #include <fiff/fiff_dig_point.h>
+
+#include <span>
 #include <connectivity/network/network.h>
 
 namespace INVLIB
@@ -77,7 +79,7 @@ public:
     void addDipoles(const INVLIB::InvEcdSet& set);
 
     // Add digitizer points with proper categorization (Cardinal, HPI, EEG, Extra)
-    void addDigitizerData(const QList<FIFFLIB::FiffDigPoint>& digitizerPoints);
+    void addDigitizerData(std::span<const FIFFLIB::FiffDigPoint> digitizerPoints);
 
     // Add source space points
     void addSourceSpace(const MNELIB::MNESourceSpaces& srcSpace);

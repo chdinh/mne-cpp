@@ -28,7 +28,7 @@
 
 #include "fiff_global.h"
 #include "fiff_types.h"
-#include "fiff_dig_point.h"
+#include "fiff_dig_point_set.h"
 
 //=============================================================================================================
 // EIGEN INCLUDES
@@ -148,12 +148,12 @@ public:
     QString filename;                                                       /**< Source file path. */
     std::unique_ptr<FiffCoordTrans> head_mri_t;                             /**< Head to MRI coordinate transformation. */
     std::unique_ptr<FiffCoordTrans> head_mri_t_adj;                         /**< Adjusted head to MRI transformation. */
-    QList<FIFFLIB::FiffDigPoint> points;                                    /**< The digitizer points. */
+    FiffDigPointSet points;                                                 /**< The digitizer points. */
     int coord_frame;                                                        /**< The coordinate frame of the above points. */
     QList<int> active;                                                      /**< Which points are active. */
     QList<int> discard;                                                     /**< Which points should be discarded. */
     int npoint;                                                             /**< Number of points. */
-    QList<FIFFLIB::FiffDigPoint> mri_fids;                                  /**< MRI coordinate system fiducials. */
+    FiffDigPointSet mri_fids;                                               /**< MRI coordinate system fiducials. */
     bool show;                                                              /**< Whether the digitizer data should be shown. */
     bool show_minimal;                                                      /**< Show fiducials and coils only. */
     Eigen::VectorXf dist;                                                   /**< Distance of each point from the head surface. */

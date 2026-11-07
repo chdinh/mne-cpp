@@ -143,10 +143,10 @@ private:
     //=========================================================================================================
     /**
      * Update the digitized HPI coils.
-     * @param[in]   lDig            The digitizer list to extract the hpi coils from.
+     * @param[in]   dig             The digitizer points to extract the hpi coils from.
      *
      */
-    void updateHpiDigitizer(const QList<FIFFLIB::FiffDigPoint>& lDig);
+    void updateHpiDigitizer(const FIFFLIB::FiffDigPointSet& dig);
 
     //=========================================================================================================
     /**

@@ -165,13 +165,12 @@ void TestFiffCoordTrans::transformToHeadMatchesMnePython()
         p.r[2] = z;
         return p;
     };
-    FiffDigPointSet dig;
-    dig << point(FIFFV_POINT_CARDINAL, FIFFV_POINT_LPA, -0.071f, 0.008f, -0.013f)
-        << point(FIFFV_POINT_CARDINAL, FIFFV_POINT_NASION, 0.012f, 0.105f, 0.021f)
-        << point(FIFFV_POINT_CARDINAL, FIFFV_POINT_RPA, 0.077f, 0.011f, -0.004f)
-        << point(FIFFV_POINT_EEG, 1, 0.02f, 0.05f, 0.09f)
-        << point(FIFFV_POINT_EEG, 2, -0.06f, -0.03f, 0.07f);
-    QVERIFY(dig.transformToHead());
+    FiffDigPointSet dig({point(FIFFV_POINT_CARDINAL, FIFFV_POINT_LPA, -0.071f, 0.008f, -0.013f),
+                         point(FIFFV_POINT_CARDINAL, FIFFV_POINT_NASION, 0.012f, 0.105f, 0.021f),
+                         point(FIFFV_POINT_CARDINAL, FIFFV_POINT_RPA, 0.077f, 0.011f, -0.004f),
+                         point(FIFFV_POINT_EEG, 1, 0.02f, 0.05f, 0.09f),
+                         point(FIFFV_POINT_EEG, 2, -0.06f, -0.03f, 0.07f)});
+    QVERIFY(dig.transform_to_head());
 
     const double expected[5][3] = {{-8.6855529027317899e-02, 0.0, 0.0},
                                    {0.0, 9.9549570955302175e-02, 0.0},
@@ -186,8 +185,8 @@ void TestFiffCoordTrans::transformToHeadMatchesMnePython()
     }
 
     FiffDigPointSet noFiducials;
-    noFiducials << point(FIFFV_POINT_EEG, 1, 0.02f, 0.05f, 0.09f);
-    QVERIFY(!noFiducials.transformToHead());
+    noFiducials.push_back(point(FIFFV_POINT_EEG, 1, 0.02f, 0.05f, 0.09f));
+    QVERIFY(!noFiducials.transform_to_head());
 }
 
 //=============================================================================================================

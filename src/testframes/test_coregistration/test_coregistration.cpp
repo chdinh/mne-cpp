@@ -113,12 +113,11 @@ void TestCoregistration::initTestCase()
     MNEProjectToSurface::SPtr mneSurfacePoints = MNEProjectToSurface::SPtr::create(*bemSurface);
 
     // read digitizer data
-    QList<int> lPickFiducials({FIFFV_POINT_CARDINAL});
-    QList<int> lPickHSP({FIFFV_POINT_CARDINAL, FIFFV_POINT_HPI, FIFFV_POINT_EXTRA});
-    FiffDigPointSet digSetSrc = FiffDigPointSet((QCoreApplication::applicationDirPath() + "/../resources/data/mne-cpp-test-data/MEG/sample/sample_audvis-ave.fif").toStdString()).pickTypes(lPickFiducials); // Fiducials Head-Space
-    FiffDigPointSet digSetDst = FiffDigPointSet((QCoreApplication::applicationDirPath() + "/../resources/data/mne-cpp-test-data/MEG/sample/sample_audvis-ave.fif").toStdString()).pickTypes(lPickFiducials);
-    digSetDst.applyTransform(transFitMatchedRef, false);                                                                                                                                               // Fiducials MRI-Space
-    FiffDigPointSet digSetHsp = FiffDigPointSet((QCoreApplication::applicationDirPath() + "/../resources/data/mne-cpp-test-data/MEG/sample/sample_audvis-ave.fif").toStdString()).pickTypes(lPickHSP); // Head shape points Head-Space
+    const FiffDigPointSet dig((QCoreApplication::applicationDirPath() + "/../resources/data/mne-cpp-test-data/MEG/sample/sample_audvis-ave.fif").toStdString());
+    FiffDigPointSet digSetSrc = dig.pick_types({FIFFV_POINT_CARDINAL}); // Fiducials Head-Space
+    FiffDigPointSet digSetDst = digSetSrc;                              // Fiducials MRI-Space
+    digSetDst.apply_transform(transFitMatchedRef);
+    FiffDigPointSet digSetHsp = dig.pick_types({FIFFV_POINT_CARDINAL, FIFFV_POINT_HPI, FIFFV_POINT_EXTRA}); // Head shape points Head-Space
 
     // Initial Fiducial Alignment
     // Declare variables
@@ -130,7 +129,7 @@ void TestCoregistration::initTestCase()
     bool bScale = true;
 
     // get coordinates
-    for (int i = 0; i < digSetSrc.size(); ++i) {
+    for (int i = 0; i < std::ssize(digSetSrc); ++i) {
         matSrc(i, 0) = digSetSrc[i].r[0];
         matSrc(i, 1) = digSetSrc[i].r[1];
         matSrc(i, 2) = digSetSrc[i].r[2];
@@ -161,7 +160,7 @@ void TestCoregistration::initTestCase()
     int iMaxIter = 20;
     MatrixXf matHsp(digSetHsp.size(), 3);
 
-    for (int i = 0; i < digSetHsp.size(); ++i) {
+    for (int i = 0; i < std::ssize(digSetHsp); ++i) {
         matHsp(i, 0) = digSetHsp[i].r[0];
         matHsp(i, 1) = digSetHsp[i].r[1];
         matHsp(i, 2) = digSetHsp[i].r[2];

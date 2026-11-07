@@ -210,22 +210,22 @@ void View3D::updateCoregBem(QSharedPointer<ANSHAREDLIB::BemDataModel> pNewModel)
 
 //=============================================================================================================
 
-void View3D::updateCoregDigitizer(FiffDigPointSet digSet)
+void View3D::updateCoregDigitizer(const FiffDigPointSet& digSet)
 {
-    m_p3DModel->addDigitizerData(digSet.getList());
+    m_p3DModel->addDigitizerData(digSet.points());
     return;
 }
 
 //=============================================================================================================
-void View3D::updateCoregMriFid(FiffDigPointSet digSetFid)
+void View3D::updateCoregMriFid(const FiffDigPointSet& digSetFid)
 {
-    m_p3DModel->addDigitizerData(digSetFid.getList());
+    m_p3DModel->addDigitizerData(digSetFid.points());
     return;
 }
 
 //=============================================================================================================
 
-void View3D::updateCoregTrans(FiffCoordTrans headMriTrans)
+void View3D::updateCoregTrans(const FiffCoordTrans& headMriTrans)
 {
     // Note: Per-item transforms for digitizers are not yet supported in disp3D.
     // The coregistration transform will need to be applied via BrainView's scene transform

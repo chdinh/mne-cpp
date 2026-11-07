@@ -316,7 +316,7 @@ void TestComRtClient::testRtDataClientReadsWhatTheServerWrites()
             QCOMPARE(dig->npoint, info.dig.size());
             QCOMPARE(dig->points.size(), info.dig.size());
             QCOMPARE(dig->active.size(), info.dig.size());
-            for (int k = 0; k < info.dig.size(); ++k) {
+            for (int k = 0; k < std::ssize(info.dig); ++k) {
                 QCOMPARE(dig->points[k].ident, info.dig[k].ident);
                 QCOMPARE(dig->points[k].r[0], info.dig[k].r[0]);
             }

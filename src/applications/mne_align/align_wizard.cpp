@@ -972,7 +972,7 @@ void AlignWizard::onLoadDigiFiff()
                              QStringLiteral("Failed to read %1:\n%2").arg(path, QString::fromUtf8(e.what())));
         return;
     }
-    if (set.isEmpty()) {
+    if (set.empty()) {
         QMessageBox::warning(this, QStringLiteral("Load digitisation"),
                              QStringLiteral("No digitisation points found in:\n%1").arg(path));
         return;
@@ -982,7 +982,7 @@ void AlignWizard::onLoadDigiFiff()
     m_pPoints->clear();
     int hspIdent = 1;
     int eegIdent = 1;
-    for (qint32 i = 0; i < set.size(); ++i) {
+    for (qint32 i = 0; i < std::ssize(set); ++i) {
         const FIFFLIB::FiffDigPoint& dp = set[i];
         DigitizedPoint p;
         p.position = Eigen::Vector3f(dp.r[0], dp.r[1], dp.r[2]);

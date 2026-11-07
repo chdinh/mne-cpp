@@ -969,7 +969,7 @@ void TestMneLibrary::displaySurf_alignFiducials()
     for (const FiffDigPoint& fid : mriDig.points) {
         FiffDigPoint p = fid;
         Map<Vector3f>(p.r) = toHead(Map<const Vector3f>(fid.r));
-        headDig.points << p;
+        headDig.points.push_back(p);
     }
     for (int k = 0; k < surf->np; k += 20) {
         if (mriRr(k, 2) < 0.0f)
@@ -978,7 +978,7 @@ void TestMneLibrary::displaySurf_alignFiducials()
         p.kind = FIFFV_POINT_EXTRA;
         p.ident = k;
         Map<Vector3f>(p.r) = toHead(Vector3f(mriRr.row(k).transpose()));
-        headDig.points << p;
+        headDig.points.push_back(p);
     }
     for (int i = 0; i < outliers; ++i) {
         const Vector3f r = mriRr.row(350 * (i + 1)).transpose();
@@ -986,7 +986,7 @@ void TestMneLibrary::displaySurf_alignFiducials()
         p.kind = FIFFV_POINT_EXTRA;
         p.ident = -1;
         Map<Vector3f>(p.r) = toHead(Vector3f(r + 0.03f * r.normalized()));
-        headDig.points << p;
+        headDig.points.push_back(p);
     }
     headDig.npoint = static_cast<int>(headDig.points.size());
     headDig.active = QList<int>(headDig.npoint, 1);
@@ -1046,7 +1046,7 @@ void TestMneLibrary::displaySurf_alignment()
         pt.r[0] = cardinals[i][0];
         pt.r[1] = cardinals[i][1];
         pt.r[2] = cardinals[i][2];
-        headDig.points.append(pt);
+        headDig.points.push_back(pt);
         headDig.active.append(1);
         headDig.discard.append(0);
     }
@@ -1058,7 +1058,7 @@ void TestMneLibrary::displaySurf_alignment()
         pt.r[0] = 0.08f * cosf(theta);
         pt.r[1] = 0.08f * sinf(theta);
         pt.r[2] = 0.06f;
-        headDig.points.append(pt);
+        headDig.points.push_back(pt);
         headDig.active.append(1);
         headDig.discard.append(0);
     }

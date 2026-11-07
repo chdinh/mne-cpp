@@ -21,6 +21,8 @@
 
 #include "hpisettingsview.h"
 
+#include <utils/string_utils.h>
+
 #include "ui_hpisettingsview.h"
 
 #include <fiff/fiff_dig_point_set.h>
@@ -309,9 +311,8 @@ void HpiSettingsView::onLoadDigitizers()
         fileName_HPI = fileName_HPI.trimmed();
         QFileInfo checkFile(fileName_HPI);
 
-        const QList<FiffDigPoint> digitizers = checkFile.isFile() ? readDigitizersFromFile(fileName_HPI)
-                                                                  : QList<FiffDigPoint>();
-        if (!digitizers.isEmpty()) {
+        const FiffDigPointSet digitizers = checkFile.isFile() ? readDigitizersFromFile(fileName_HPI) : FiffDigPointSet();
+        if (!digitizers.empty()) {
             // Stop cont HPI first
             m_pUi->m_checkBox_continousHPI->setChecked(false);
             emit digitizersChanged(digitizers, fileName_HPI);
@@ -426,29 +427,25 @@ void HpiSettingsView::onRemoveCoil()
 
 //=============================================================================================================
 
-QList<FiffDigPoint> HpiSettingsView::readDigitizersFromFile(const QString& fileName)
+FiffDigPointSet HpiSettingsView::readDigitizersFromFile(const QString& fileName)
 {
-    QFile t_fileDig(fileName);
-    FIFFLIB::FiffStream t_pStream(&t_fileDig);
-    FiffDigPointSet t_digSet;
-    if (!FiffDigPointSet::readFromStream(t_pStream, t_digSet) || t_digSet.size() == 0) {
+    auto dig = FiffDigPointSet::read(UTILSLIB::pathFromUtf8(fileName.toStdString()));
+    if (!dig || dig->empty()) {
         return {};
     }
 
     clearCoilGUI();
-    updateDigitizerInfoGUI(t_digSet);
+    updateDigitizerInfoGUI(*dig);
 
-    return t_digSet.getList();
+    return std::move(*dig);
 }
 
 //=============================================================================================================
 
-void HpiSettingsView::newDigitizerList(QList<FIFFLIB::FiffDigPoint> pointList)
+void HpiSettingsView::newDigitizerList(const FIFFLIB::FiffDigPointSet& digitizers)
 {
     clearCoilGUI();
-
-    FiffDigPointSet t_digSet(pointList);
-    updateDigitizerInfoGUI(t_digSet);
+    updateDigitizerInfoGUI(digitizers);
 }
 
 //=============================================================================================================
@@ -460,8 +457,8 @@ void HpiSettingsView::updateDigitizerInfoGUI(const FiffDigPointSet& digSet)
     qint16 numEEG = 0;
     qint16 numAdditional = 0;
 
-    for (int i = 0; i < digSet.size(); ++i) {
-        switch (digSet[i].kind) {
+    for (const FiffDigPoint& point : digSet) {
+        switch (point.kind) {
             case FIFFV_POINT_HPI:
                 if (m_vCoilFreqs.size() <= numHPI) {
                     m_vCoilFreqs.append(-1);

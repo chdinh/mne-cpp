@@ -534,7 +534,7 @@ void TestFiffIoEvokedInfo::digitizerData_defaultConstruction()
 {
     FiffDigitizerData dd;
     QCOMPARE(dd.npoint, 0);
-    QVERIFY(dd.points.isEmpty());
+    QVERIFY(dd.points.empty());
     QVERIFY(!dd.dist_valid);
 }
 
@@ -580,7 +580,7 @@ void TestFiffIoEvokedInfo::digitizerData_pickCardinalFiducials()
     dp1.r[1] = 0.0f;
     dp1.r[2] = 0.0f;
     dp1.coord_frame = FIFFV_COORD_HEAD;
-    dd.points.append(dp1);
+    dd.points.push_back(dp1);
 
     FiffDigPoint dp2;
     dp2.kind = FIFFV_POINT_CARDINAL;
@@ -589,7 +589,7 @@ void TestFiffIoEvokedInfo::digitizerData_pickCardinalFiducials()
     dp2.r[1] = 0.0f;
     dp2.r[2] = 0.0f;
     dp2.coord_frame = FIFFV_COORD_HEAD;
-    dd.points.append(dp2);
+    dd.points.push_back(dp2);
 
     FiffDigPoint dp3;
     dp3.kind = FIFFV_POINT_CARDINAL;
@@ -598,7 +598,7 @@ void TestFiffIoEvokedInfo::digitizerData_pickCardinalFiducials()
     dp3.r[1] = 0.1f;
     dp3.r[2] = 0.0f;
     dp3.coord_frame = FIFFV_COORD_HEAD;
-    dd.points.append(dp3);
+    dd.points.push_back(dp3);
 
     dd.npoint = 3;
     dd.coord_frame = FIFFV_COORD_HEAD;

@@ -357,7 +357,7 @@ void Align3DView::rebuildDigitizerLayer()
         return;
     }
 
-    QList<FIFFLIB::FiffDigPoint> fiffPts;
+    std::vector<FIFFLIB::FiffDigPoint> fiffPts;
     fiffPts.reserve(m_pPoints->points().size());
 
     const QMatrix4x4 devToMri = trackerToMri();
@@ -384,7 +384,7 @@ void Align3DView::rebuildDigitizerLayer()
                 dig.ident = pt.identNumber;
                 break;
         }
-        fiffPts.append(dig);
+        fiffPts.push_back(dig);
     }
 
     m_pBrainModel->addDigitizerData(fiffPts);

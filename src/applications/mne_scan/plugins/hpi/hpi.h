@@ -25,7 +25,7 @@
 #include <utils/generics/circularbuffer.h>
 #include <scShared/Plugins/abstractalgorithm.h>
 
-#include <fiff/fiff_dig_point.h>
+#include <fiff/fiff_dig_point_set.h>
 
 //=============================================================================================================
 // QT INCLUDES
@@ -46,7 +46,7 @@
 namespace FIFFLIB
 {
 class FiffInfo;
-class FiffDigPoint;
+class FiffDigPointSet;
 class FiffCoordTrans;
 class FiffDigitizerData;
 }
@@ -164,12 +164,12 @@ private:
 
     //=========================================================================================================
     /**
-     * Call this funciton whenever new digitzers were loaded.
+     * Call this function whenever new digitizers were loaded.
      *
-     * @param[in] lDigitzers    The new digitzers.
-     * @param[in] sFilePath     The file path to the new digitzers.
+     * @param[in] digitizers   The new digitizers.
+     * @param[in] sFilePath    The file path to the new digitizers.
      */
-    void onDigitizersChanged(const QList<FIFFLIB::FiffDigPoint>& lDigitzers,
+    void onDigitizersChanged(const FIFFLIB::FiffDigPointSet& digitizers,
                              const QString& sFilePath);
 
     //=========================================================================================================
@@ -231,12 +231,6 @@ private:
      * @param[in] winSize    window size in samples
      */
     void setFittingWindowSize(int winSize);
-
-    //=========================================================================================================
-    /**
-     * Read Polhemus data from fif file.
-     */
-    QList<FIFFLIB::FiffDigPoint> readPolhemusDig(const QString& fileName);
 
     //=========================================================================================================
     /**
@@ -314,7 +308,7 @@ signals:
                                 double dRotation);
     void devHeadTransAvailable(const FIFFLIB::FiffCoordTrans& devHeadTrans);
 
-    void newDigitizerList(QList<FIFFLIB::FiffDigPoint> pointList);
+    void newDigitizerList(const FIFFLIB::FiffDigPointSet& digitizers);
 };
 } // NAMESPACE
 

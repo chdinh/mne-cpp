@@ -166,7 +166,7 @@ void applyElectrodePositions(FiffInfo& info,
         dp.r[2] = elec.z.toFloat() * scaleFactor;
         dp.coord_frame = coordFrame;
 
-        info.dig.append(dp);
+        info.dig.push_back(dp);
     }
 }
 
@@ -386,7 +386,7 @@ QJsonObject buildSidecarJson(const BidsRawData& data,
     if (datatype == QLatin1String("meg")) {
         json[QStringLiteral("DewarPosition")] = QStringLiteral("n/a");
         json[QStringLiteral("DigitizedLandmarks")] = false;
-        json[QStringLiteral("DigitizedHeadPoints")] = !info.dig.isEmpty();
+        json[QStringLiteral("DigitizedHeadPoints")] = !info.dig.empty();
     } else if (datatype == QLatin1String("eeg")) {
         json[QStringLiteral("EEGReference")] = reference;
     } else {
@@ -911,11 +911,11 @@ BIDSPath BidsRawData::write(const BIDSPath& bidsPath,
             // Build coordinate system, deriving defaults from FiffInfo if needed
             BidsCoordinateSystem cs = coordinateSystem;
             if (cs.system.isEmpty()) {
-                if (raw.info.dig.isEmpty()) {
+                if (raw.info.dig.empty()) {
                     cs.system = QStringLiteral("Other");
                     cs.units = isMeg ? QStringLiteral("m") : QStringLiteral("n/a");
                 } else {
-                    int coordFrame = raw.info.dig.first().coord_frame;
+                    int coordFrame = raw.info.dig.front().coord_frame;
                     QMap<int, QString> frameMap = fiffFrameToBidsCoord();
                     cs.system = frameMap.contains(coordFrame)
                         ? frameMap[coordFrame]
@@ -923,7 +923,7 @@ BIDSPath BidsRawData::write(const BIDSPath& bidsPath,
                     cs.units = QStringLiteral("m");
                 }
             }
-            if (cs.description.isEmpty() && !raw.info.dig.isEmpty())
+            if (cs.description.isEmpty() && !raw.info.dig.empty())
                 cs.description = QStringLiteral("Coordinate system derived from recording data");
             // REQUIRED by BIDS for "Other".
             if (cs.description.isEmpty() && cs.system == QLatin1String("Other"))

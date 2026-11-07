@@ -93,7 +93,7 @@ void TestFiffDigitizer::initTestCase()
 void TestFiffDigitizer::comparePoints()
 {
     double dSum = 0.0;
-    for (int i = 0; i < digDataLoaded.points.size(); ++i) {
+    for (int i = 0; i < std::ssize(digDataLoaded.points); ++i) {
         dSum += digDataLoaded.points[i].r[0];
         dSum += digDataLoaded.points[i].r[1];
         dSum += digDataLoaded.points[i].r[2];

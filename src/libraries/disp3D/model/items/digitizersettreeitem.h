@@ -9,7 +9,7 @@
  * @date     March 2026
  * @brief    Container item that groups raw FIFF digitizer points by category (Cardinal, HPI, EEG, Extra).
  *
- * Takes a flat @c QList<FiffDigPoint> from the FIFF info block
+ * Takes the flat digitizer points of the FIFF info block
  * and fans it into one @ref DISP3DLIB::DigitizerTreeItem child per category
  * with the canonical colour scheme (Nasion green, LPA red, RPA
  * blue, HPI dark-red, EEG cyan, Extra magenta) and per-category
@@ -32,6 +32,8 @@
 #include <QList>
 
 #include <fiff/fiff_dig_point.h>
+
+#include <span>
 
 //=============================================================================================================
 // FORWARD DECLARATIONS
@@ -72,7 +74,7 @@ public:
      * @param[in] digitizerPoints List of FIFF digitizer points to categorize.
      */
     explicit DigitizerSetTreeItem(const QString& text,
-                                  const QList<FIFFLIB::FiffDigPoint>& digitizerPoints);
+                                  std::span<const FIFFLIB::FiffDigPoint> digitizerPoints);
     ~DigitizerSetTreeItem() = default;
 
     //=========================================================================================================

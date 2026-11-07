@@ -499,7 +499,7 @@ FIFFLIB::FiffDigPointSet InvHpiFit::getFittedPointSet(const Eigen::MatrixXd& mat
         digPoint.r[1] = matCoilsDev(i, 1);
         digPoint.r[2] = matCoilsDev(i, 2);
 
-        fittedPointSet << digPoint;
+        fittedPointSet.push_back(digPoint);
     }
     return fittedPointSet;
 }

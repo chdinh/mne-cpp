@@ -988,7 +988,7 @@ void TestBids::testWriteFromInfoAndReadRejects()
         dp.ident = ident;
         dp.coord_frame = FIFFV_COORD_HEAD;
         std::copy(r.data(), r.data() + 3, dp.r);
-        info.dig << dp;
+        info.dig.push_back(dp);
     }
     data.raw.first_samp = 0;
     data.raw.last_samp = 511;

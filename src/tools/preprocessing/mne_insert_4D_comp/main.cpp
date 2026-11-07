@@ -300,9 +300,9 @@ int main(int argc, char* argv[])
     }
 
     // Copy digitization data if present
-    if (!raw.info.dig.isEmpty()) {
+    if (!raw.info.dig.empty()) {
         outStream->start_block(FIFFB_ISOTRAK);
-        for (int k = 0; k < raw.info.dig.size(); k++) {
+        for (int k = 0; k < std::ssize(raw.info.dig); k++) {
             outStream->write_dig_point(raw.info.dig[k]);
         }
         outStream->end_block(FIFFB_ISOTRAK);

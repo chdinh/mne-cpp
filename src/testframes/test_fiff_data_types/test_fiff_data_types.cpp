@@ -67,159 +67,110 @@ private slots:
     //=========================================================================
     // FiffDigPointSet
     //=========================================================================
-    void digPointSet_defaultCtor()
+    static FiffDigPoint digPoint(int kind, int ident, float x, float y, float z)
     {
-        FiffDigPointSet dps;
-        QVERIFY(dps.isEmpty());
-        QCOMPARE(dps.size(), 0);
-    }
-
-    void digPointSet_addPoints()
-    {
-        FiffDigPointSet dps;
-        FiffDigPoint p1;
-        p1.kind = FIFFV_POINT_CARDINAL;
-        p1.ident = FIFFV_POINT_LPA;
-        p1.r[0] = -0.07f;
-        p1.r[1] = 0.0f;
-        p1.r[2] = 0.0f;
-        p1.coord_frame = FIFFV_COORD_HEAD;
-
-        FiffDigPoint p2;
-        p2.kind = FIFFV_POINT_CARDINAL;
-        p2.ident = FIFFV_POINT_RPA;
-        p2.r[0] = 0.07f;
-        p2.r[1] = 0.0f;
-        p2.r[2] = 0.0f;
-        p2.coord_frame = FIFFV_COORD_HEAD;
-
-        FiffDigPoint p3;
-        p3.kind = FIFFV_POINT_CARDINAL;
-        p3.ident = FIFFV_POINT_NASION;
-        p3.r[0] = 0.0f;
-        p3.r[1] = 0.07f;
-        p3.r[2] = 0.0f;
-        p3.coord_frame = FIFFV_COORD_HEAD;
-
-        dps << p1 << p2 << p3;
-        QCOMPARE(dps.size(), 3);
-        QVERIFY(!dps.isEmpty());
-    }
-
-    void digPointSet_copyCtor()
-    {
-        FiffDigPointSet dps;
         FiffDigPoint p;
-        p.kind = FIFFV_POINT_CARDINAL;
-        p.r[0] = 1.0f;
-        p.r[1] = 2.0f;
-        p.r[2] = 3.0f;
-        dps << p;
-
-        FiffDigPointSet copy(dps);
-        QCOMPARE(copy.size(), 1);
-    }
-
-    void digPointSet_clear()
-    {
-        FiffDigPointSet dps;
-        FiffDigPoint p;
-        p.kind = FIFFV_POINT_EEG;
-        dps << p;
-        dps.clear();
-        QVERIFY(dps.isEmpty());
-    }
-
-    void digPointSet_pickTypes()
-    {
-        FiffDigPointSet dps;
-        FiffDigPoint p1;
-        p1.kind = FIFFV_POINT_CARDINAL;
-        p1.r[0] = 0;
-        p1.r[1] = 0;
-        p1.r[2] = 0;
-        FiffDigPoint p2;
-        p2.kind = FIFFV_POINT_EEG;
-        p2.r[0] = 0;
-        p2.r[1] = 0;
-        p2.r[2] = 0;
-        FiffDigPoint p3;
-        p3.kind = FIFFV_POINT_EXTRA;
-        p3.r[0] = 0;
-        p3.r[1] = 0;
-        p3.r[2] = 0;
-        dps << p1 << p2 << p3;
-
-        QList<int> types;
-        types << FIFFV_POINT_CARDINAL;
-        FiffDigPointSet picked = dps.pickTypes(types);
-        QCOMPARE(picked.size(), 1);
-    }
-
-    void digPointSet_indexAccess()
-    {
-        FiffDigPointSet dps;
-        FiffDigPoint p;
-        p.kind = FIFFV_POINT_CARDINAL;
-        p.r[0] = 1.0f;
-        p.r[1] = 2.0f;
-        p.r[2] = 3.0f;
-        dps << p;
-
-        const FiffDigPoint& ref = dps[0];
-        QVERIFY(qAbs(ref.r[0] - 1.0f) < 1e-5f);
-    }
-
-    void digPointSet_applyTransform()
-    {
-        FiffDigPointSet dps;
-        FiffDigPoint p;
-        p.kind = FIFFV_POINT_CARDINAL;
+        p.kind = kind;
+        p.ident = ident;
         p.coord_frame = FIFFV_COORD_HEAD;
-        p.r[0] = 1.0f;
-        p.r[1] = 0.0f;
-        p.r[2] = 0.0f;
-        dps << p;
+        p.r[0] = x;
+        p.r[1] = y;
+        p.r[2] = z;
+        return p;
+    }
 
+    static FiffDigPointSet fiducialsAndEeg()
+    {
+        return FiffDigPointSet({digPoint(FIFFV_POINT_CARDINAL, FIFFV_POINT_LPA, -0.07f, 0.0f, 0.0f),
+                                digPoint(FIFFV_POINT_CARDINAL, FIFFV_POINT_NASION, 0.0f, 0.07f, 0.0f),
+                                digPoint(FIFFV_POINT_CARDINAL, FIFFV_POINT_RPA, 0.07f, 0.0f, 0.0f),
+                                digPoint(FIFFV_POINT_EEG, 1, 0.0f, 0.0f, 0.09f),
+                                digPoint(FIFFV_POINT_EXTRA, 1, 0.0f, -0.05f, 0.05f)});
+    }
+
+    void digPointSet_container()
+    {
+        FiffDigPointSet dps;
+        QVERIFY(dps.empty());
+        QCOMPARE(dps.size(), std::size_t{0});
+
+        dps.push_back(digPoint(FIFFV_POINT_EEG, 7, 1.0f, 2.0f, 3.0f));
+        QCOMPARE(dps.size(), std::size_t{1});
+        QCOMPARE(dps[0].ident, 7);
+        QCOMPARE(dps.points().size(), std::size_t{1});
+        QCOMPARE(dps.points().data(), &dps[0]);
+
+        const FiffDigPointSet copy = fiducialsAndEeg();
+        int eeg = 0;
+        for (const FiffDigPoint& point : copy) {
+            eeg += point.kind == FIFFV_POINT_EEG ? 1 : 0;
+        }
+        QCOMPARE(eeg, 1);
+
+        dps.clear();
+        QVERIFY(dps.empty());
+    }
+
+    void digPointSet_pick_types()
+    {
+        const FiffDigPointSet dps = fiducialsAndEeg();
+        const FiffDigPointSet cardinal = dps.pick_types({FIFFV_POINT_CARDINAL});
+        QCOMPARE(cardinal.size(), std::size_t{3});
+        QCOMPARE(cardinal[1].ident, FIFFV_POINT_NASION);
+
+        const std::vector<int> kinds{FIFFV_POINT_EXTRA, FIFFV_POINT_EEG};
+        const FiffDigPointSet head = dps.pick_types(kinds);
+        QCOMPARE(head.size(), std::size_t{2});
+        QCOMPARE(head[0].kind, FIFFV_POINT_EEG); // keeps the order of the set
+        QVERIFY(dps.pick_types({FIFFV_POINT_HPI}).empty());
+    }
+
+    void digPointSet_apply_transform()
+    {
+        FiffDigPointSet dps({digPoint(FIFFV_POINT_CARDINAL, FIFFV_POINT_LPA, 1.0f, 0.0f, 0.0f)});
         FiffCoordTrans trans;
         trans.from = FIFFV_COORD_HEAD;
         trans.to = FIFFV_COORD_MRI;
         trans.trans = Matrix4f::Identity();
         trans.trans(0, 3) = 0.1f;
+        trans.invtrans = trans.trans.inverse();
 
-        dps.applyTransform(trans, false);
-        QVERIFY(qAbs(dps[0].r[0] - 1.1f) < 1e-4f);
-    }
-
-    void digPointSet_getList()
-    {
-        FiffDigPointSet dps;
-        FiffDigPoint p;
-        p.kind = FIFFV_POINT_CARDINAL;
-        p.r[0] = 0;
-        p.r[1] = 0;
-        p.r[2] = 0;
-        dps << p;
-        QList<FiffDigPoint> list = dps.getList();
-        QCOMPARE(list.size(), 1);
+        dps.apply_transform(trans);
+        QVERIFY(qAbs(dps[0].r[0] - 1.1f) < 1e-5f);
+        dps.apply_transform(trans, true);
+        QVERIFY(qAbs(dps[0].r[0] - 1.0f) < 1e-5f);
     }
 
     void digPointSet_writeRead()
     {
-        FiffDigPointSet dps;
-        FiffDigPoint p;
-        p.kind = FIFFV_POINT_CARDINAL;
-        p.ident = FIFFV_POINT_LPA;
-        p.coord_frame = FIFFV_COORD_HEAD;
-        p.r[0] = -0.07f;
-        p.r[1] = 0.0f;
-        p.r[2] = 0.0f;
-        dps << p;
-
+        const FiffDigPointSet dps = fiducialsAndEeg();
         QTemporaryDir dir;
-        const QString path = dir.filePath("dig.fif");
-        QVERIFY(dps.write(path.toStdString()));
-        QVERIFY(QFileInfo(path).size() > 0);
+        const std::filesystem::path path = dir.filePath("dig.fif").toStdString();
+        QVERIFY(dps.write(path).has_value());
+
+        const auto read = FiffDigPointSet::read(path);
+        QVERIFY(read.has_value());
+        QCOMPARE(read->size(), dps.size());
+        for (std::size_t i = 0; i < dps.size(); ++i) {
+            QCOMPARE((*read)[i].kind, dps[i].kind);
+            QCOMPARE((*read)[i].ident, dps[i].ident);
+            QCOMPARE((*read)[i].r[0], dps[i].r[0]);
+        }
+        QCOMPARE(FiffDigPointSet(path).size(), dps.size());
+    }
+
+    void digPointSet_errors()
+    {
+        QTemporaryDir dir;
+        const std::filesystem::path missing = dir.filePath("missing.fif").toStdString();
+        const auto read = FiffDigPointSet::read(missing);
+        QVERIFY(!read.has_value());
+        QVERIFY_THROWS_EXCEPTION(UTILSLIB::Error, FiffDigPointSet{missing});
+
+        const auto write = fiducialsAndEeg().write(dir.filePath("no/such/dir/dig.fif").toStdString());
+        QVERIFY(!write.has_value());
+        QCOMPARE(write.error().code, UTILSLIB::ErrorCode::NotFound);
+        QVERIFY(!fiducialsAndEeg().write({}).has_value());
     }
 
     //=========================================================================
@@ -490,7 +441,7 @@ private slots:
         p.r[0] = 1.0f;
         p.r[1] = 2.0f;
         p.r[2] = 3.0f;
-        dd.points.append(p);
+        dd.points.push_back(p);
 
         // Copy
         FiffDigitizerData dd2(dd);

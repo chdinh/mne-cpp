@@ -339,12 +339,11 @@ void Hpi::initPluginControlWidgets()
         // connected to it. Push the current list so they show up right away.
         m_mutex.lock();
         const bool bHaveDigitizers = !m_pFiffDigitizerData.isNull();
-        const QList<FIFFLIB::FiffDigPoint> lDigPoints =
-            bHaveDigitizers ? m_pFiffDigitizerData->points : QList<FIFFLIB::FiffDigPoint>();
+        const FIFFLIB::FiffDigPointSet digitizers = bHaveDigitizers ? m_pFiffDigitizerData->points : FIFFLIB::FiffDigPointSet();
         m_mutex.unlock();
 
         if (bHaveDigitizers) {
-            pHpiSettingsView->newDigitizerList(lDigPoints);
+            pHpiSettingsView->newDigitizerList(digitizers);
         }
 
         plControlWidgets.append(pHpiSettingsView);
@@ -434,12 +433,12 @@ void Hpi::onAllowedRotationChanged(double dAllowedRotation)
 
 //=============================================================================================================
 
-void Hpi::onDigitizersChanged(const QList<FIFFLIB::FiffDigPoint>& lDigitzers,
+void Hpi::onDigitizersChanged(const FIFFLIB::FiffDigPointSet& digitizers,
                               const QString& sFilePath)
 {
     m_mutex.lock();
     if (m_pFiffInfo) {
-        m_pFiffInfo->dig = lDigitzers;
+        m_pFiffInfo->dig = digitizers;
     }
 
     m_sFilePathDigitzers = sFilePath;

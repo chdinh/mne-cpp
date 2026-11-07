@@ -200,9 +200,9 @@ void BrainTreeModel::addSourceSpace(const MNELIB::MNESourceSpaces& srcSpace)
 
 //=============================================================================================================
 
-void BrainTreeModel::addDigitizerData(const QList<FIFFLIB::FiffDigPoint>& digitizerPoints)
+void BrainTreeModel::addDigitizerData(std::span<const FIFFLIB::FiffDigPoint> digitizerPoints)
 {
-    if (digitizerPoints.isEmpty())
+    if (digitizerPoints.empty())
         return;
 
     auto* setItem = new DigitizerSetTreeItem("Digitizer", digitizerPoints);

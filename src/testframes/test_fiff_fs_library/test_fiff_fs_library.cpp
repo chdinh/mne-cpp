@@ -418,17 +418,15 @@ void TestFiffFsLibrary::fiff_digPointSetRoundtrip()
         pt.r[0] = 0.01f * i;
         pt.r[1] = 0.02f * i;
         pt.r[2] = 0.03f;
-        digSet << pt;
+        digSet.push_back(pt);
     }
     QCOMPARE(digSet.size(), 5);
-    QVERIFY(!digSet.isEmpty());
+    QVERIFY(!digSet.empty());
 
     // Write to file
     QString tmpPath = QCoreApplication::applicationDirPath() + "/test_dig_tmp.fif";
     QFile::remove(tmpPath);
-    {
-        digSet.write(tmpPath.toStdString());
-    }
+    QVERIFY(digSet.write(tmpPath.toStdString()).has_value());
 
     // Read back
     {
@@ -436,24 +434,19 @@ void TestFiffFsLibrary::fiff_digPointSetRoundtrip()
         QVERIFY(readSet.size() > 0);
     }
 
-    // pickTypes
-    QList<int> types;
-    types << FIFFV_POINT_EXTRA;
-    FiffDigPointSet extras = digSet.pickTypes(types);
-    QCOMPARE(extras.size(), 5);
+    FiffDigPointSet extras = digSet.pick_types({FIFFV_POINT_EXTRA});
+    QCOMPARE(extras.size(), std::size_t{5});
 
     // operator[]
     FiffDigPoint& pt0 = digSet[0];
     QCOMPARE(pt0.kind, FIFFV_POINT_EXTRA);
 
-    // getList
-    QList<FiffDigPoint> list = digSet.getList();
-    QCOMPARE(list.size(), 5);
+    QCOMPARE(digSet.points().size(), std::size_t{5});
 
     // clear
     FiffDigPointSet copy(digSet);
     copy.clear();
-    QVERIFY(copy.isEmpty());
+    QVERIFY(copy.empty());
 
     QFile::remove(tmpPath);
 }

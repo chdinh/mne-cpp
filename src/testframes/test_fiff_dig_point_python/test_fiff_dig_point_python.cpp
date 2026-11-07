@@ -150,7 +150,7 @@ void TestFiffDigPointPython::countByKind_matchesPython()
     QFETCH(int, count);
 
     int found = 0;
-    for (qint32 i = 0; i < m_dig.size(); ++i) {
+    for (qint32 i = 0; i < std::ssize(m_dig); ++i) {
         if (m_dig[i].kind == kind) {
             ++found;
         }
@@ -191,7 +191,7 @@ void TestFiffDigPointPython::cardinals_matchPython()
     QFETCH(double, z);
 
     bool found = false;
-    for (qint32 i = 0; i < m_dig.size(); ++i) {
+    for (qint32 i = 0; i < std::ssize(m_dig); ++i) {
         const FiffDigPoint& p = m_dig[i];
         if (p.kind != FIFFV_POINT_CARDINAL || p.ident != ident) {
             continue;
@@ -233,7 +233,7 @@ void TestFiffDigPointPython::allPoints_matchPython()
     // checked individually above, so a point read at the wrong offset shows up.
     double rSum = 0.0;
     int identSum = 0;
-    for (qint32 i = 0; i < m_dig.size(); ++i) {
+    for (qint32 i = 0; i < std::ssize(m_dig); ++i) {
         const FiffDigPoint& p = m_dig[i];
         rSum += static_cast<double>(p.r[0]) + static_cast<double>(p.r[1]) + static_cast<double>(p.r[2]);
         identSum += static_cast<int>(p.ident);
@@ -258,24 +258,20 @@ void TestFiffDigPointPython::writeRoundTrip()
     // The written isotrak file reads back with every point; mne.channels.read_dig_fif reads it too (146 points).
     QTemporaryDir dir;
     const std::string path = dir.filePath("dig.fif").toStdString();
-    std::string error;
-    QVERIFY2(m_dig.write(path, &error), error.c_str());
+    QVERIFY(m_dig.write(path).has_value());
     const FiffDigPointSet back(path);
     QCOMPARE(back.size(), m_dig.size());
-    for (qint32 i = 0; i < m_dig.size(); ++i) {
+    for (qint32 i = 0; i < std::ssize(m_dig); ++i) {
         QCOMPARE(back[i].kind, m_dig[i].kind);
         QCOMPARE(back[i].ident, m_dig[i].ident);
         for (int c = 0; c < 3; ++c)
             QCOMPARE(back[i].r[c], m_dig[i].r[c]);
     }
 
-    QVERIFY(!m_dig.write(std::filesystem::path(), &error));
-    QCOMPARE(error, std::string("Output path is empty."));
-    QVERIFY(!m_dig.write(dir.filePath("missing/dig.fif").toStdString(), &error));
-    QVERIFY(error.starts_with("Destination directory"));
-    QVERIFY(!m_dig.write(dir.path().toStdString(), &error));
-    QVERIFY(error.starts_with("Cannot open"));
-    QVERIFY_THROWS_EXCEPTION(std::runtime_error, FiffDigPointSet(dir.filePath("absent.fif").toStdString()));
+    QCOMPARE(m_dig.write(std::filesystem::path()).error().code, UTILSLIB::ErrorCode::Io);
+    QCOMPARE(m_dig.write(dir.filePath("missing/dig.fif").toStdString()).error().code, UTILSLIB::ErrorCode::NotFound);
+    QCOMPARE(m_dig.write(dir.path().toStdString()).error().code, UTILSLIB::ErrorCode::Io);
+    QVERIFY_THROWS_EXCEPTION(UTILSLIB::Error, FiffDigPointSet(dir.filePath("absent.fif").toStdString()));
 
     // FIFF_MNE_COORD_FRAME in the isotrak block puts every point into that frame, as mne's _read_dig_fif
     QFile framed(dir.filePath("framed.fif"));
@@ -298,18 +294,16 @@ void TestFiffDigPointPython::writeRoundTrip()
     QCOMPARE(inMri[0].coord_frame, FIFFV_COORD_MRI);
     QCOMPARE(inMri[1].coord_frame, FIFFV_COORD_MRI);
 
-    // An index past the end falls back to the first point; a transform and its inverse cancel
-    QCOMPARE(inMri[2].ident, inMri[0].ident);
+    // A transform and its inverse cancel
     FiffDigPointSet moved = inMri;
-    QCOMPARE(moved[5].ident, inMri[0].ident);
     FiffCoordTrans shift;
     shift.trans = Eigen::Matrix4f::Identity();
     shift.trans(0, 3) = 0.5f;
     shift.invtrans = Eigen::Matrix4f::Identity();
     shift.invtrans(0, 3) = -0.5f;
-    moved.applyTransform(shift);
+    moved.apply_transform(shift);
     QCOMPARE(moved[0].r[0], inMri[0].r[0] + 0.5f);
-    moved.applyTransform(shift, true);
+    moved.apply_transform(shift, true);
     QVERIFY(std::abs(moved[0].r[0] - inMri[0].r[0]) < 1e-6f);
 }
 
@@ -320,7 +314,7 @@ void TestFiffDigPointPython::coordFrame_isHeadEverywhere()
     // Every point in this file is in head coordinates. A point left in device
     // or unknown coordinates would be silently combined with the rest and
     // shift the coregistration.
-    for (qint32 i = 0; i < m_dig.size(); ++i) {
+    for (qint32 i = 0; i < std::ssize(m_dig); ++i) {
         const FiffDigPoint& p = m_dig[i];
         QVERIFY2(p.coord_frame == FIFFV_COORD_HEAD,
                  qPrintable(QString("point %1 is in coordinate frame %2, expected %3 (head)")
@@ -408,12 +402,12 @@ void TestFiffDigPointPython::polhemusIsotrak_matchesPython()
         QCOMPARE(dig[i].ident, kindIdents[2 * i + 1]);
     }
     Point total{0.0, 0.0, 0.0};
-    for (int i = 0; i < dig.size(); ++i) {
+    for (int i = 0; i < std::ssize(dig); ++i) {
         QCOMPARE(dig[i].coord_frame, FIFFV_COORD_UNKNOWN);
         for (int c = 0; c < 3; ++c)
             total[c] += dig[i].r[c];
     }
-    if (kindIdents.size() / 2 < dig.size()) // head shape points are numbered 1..n after the cardinals
+    if (kindIdents.size() / 2 < std::ssize(dig)) // head shape points are numbered 1..n after the cardinals
         QCOMPARE(dig[dig.size() - 1].ident, dig.size() - 3);
     compareRows({dig[0].r[0], dig[0].r[1], dig[0].r[2]}, first, "first point");
     const FiffDigPoint& end = dig[dig.size() - 1];
@@ -555,7 +549,7 @@ void TestFiffDigPointPython::montageReaders_matchPython()
     QCOMPARE(dig.size(), count + 3);
     const QList<int> cardinals{FIFFV_POINT_LPA, FIFFV_POINT_NASION, FIFFV_POINT_RPA};
     Point total{0.0, 0.0, 0.0};
-    for (int i = 0; i < dig.size(); ++i) {
+    for (int i = 0; i < std::ssize(dig); ++i) {
         QCOMPARE(dig[i].kind, i < 3 ? FIFFV_POINT_CARDINAL : FIFFV_POINT_EEG);
         if (i < 3)
             QCOMPARE(dig[i].ident, cardinals[i]);

@@ -30,7 +30,7 @@ namespace DISP3DLIB
 //=============================================================================================================
 
 DigitizerSetTreeItem::DigitizerSetTreeItem(const QString& text,
-                                           const QList<FIFFLIB::FiffDigPoint>& digitizerPoints)
+                                           std::span<const FIFFLIB::FiffDigPoint> digitizerPoints)
 : QStandardItem(text)
 {
     setCheckable(true);

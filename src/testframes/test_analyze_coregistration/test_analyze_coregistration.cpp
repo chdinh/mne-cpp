@@ -71,8 +71,8 @@ void prepareFit(CoRegistration& plugin, AnalyzeData& data, CoregSettingsView* vi
     auto bem = data.loadModel<BemDataModel>(sampleFile("subjects/sample/bem/sample-1280-1280-1280-bem.fif"));
     plugin.handleEvent(QSharedPointer<Event>::create(SELECTED_MODEL_CHANGED, nullptr, QVariant::fromValue(bem.staticCast<AbstractModel>())));
     const QString avePath = sampleFile("MEG/sample/sample_audvis-ave.fif");
-    FiffDigPointSet fids = FiffDigPointSet(avePath.toStdString()).pickTypes({FIFFV_POINT_CARDINAL});
-    fids.applyTransform(FiffCoordTrans(sampleFile("MEG/sample/all-trans.fif").toStdU16String(), FIFFV_COORD_HEAD, FIFFV_COORD_MRI));
+    FiffDigPointSet fids = FiffDigPointSet(avePath.toStdString()).pick_types({FIFFV_POINT_CARDINAL});
+    fids.apply_transform(FiffCoordTrans(sampleFile("MEG/sample/all-trans.fif").toStdU16String(), FIFFV_COORD_HEAD, FIFFV_COORD_MRI));
     const QString fidPath = sDir + "/sample-fiducials.fif";
     QVERIFY(fids.write(fidPath.toStdString()));
     emit view->digFileChanged(avePath);
@@ -145,14 +145,14 @@ void TestAnalyzeCoregistration::fitsFiducialsByIdentity()
     // Stored in another order than the digitizer's, they must still be matched by identity.
     const QString avePath = sampleFile("MEG/sample/sample_audvis-ave.fif");
     const FiffCoordTrans reference(sampleFile("MEG/sample/all-trans.fif").toStdU16String(), FIFFV_COORD_HEAD, FIFFV_COORD_MRI);
-    FiffDigPointSet fids = FiffDigPointSet(avePath.toStdString()).pickTypes({FIFFV_POINT_CARDINAL});
+    FiffDigPointSet fids = FiffDigPointSet(avePath.toStdString()).pick_types({FIFFV_POINT_CARDINAL});
     QCOMPARE(fids.size(), 3);
-    fids.applyTransform(reference);
+    fids.apply_transform(reference);
     FiffDigPointSet reordered;
     for (int ident : {FIFFV_POINT_NASION, FIFFV_POINT_RPA, FIFFV_POINT_LPA}) {
-        for (int i = 0; i < fids.size(); ++i) {
+        for (int i = 0; i < std::ssize(fids); ++i) {
             if (fids[i].ident == ident)
-                reordered << fids[i];
+                reordered.push_back(fids[i]);
         }
     }
     QTemporaryDir dir;

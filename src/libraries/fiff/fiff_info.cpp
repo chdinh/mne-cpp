@@ -431,7 +431,7 @@ void FiffInfo::writeToStream(FiffStream& stream) const
     //
     if (this->dig.size() > 0 && !have_isotrak) {
         stream.start_block(FIFFB_ISOTRAK);
-        for (qint32 k = 0; k < this->dig.size(); ++k)
+        for (qint32 k = 0; k < std::ssize(this->dig); ++k)
             stream.write_dig_point(this->dig[k]);
 
         stream.end_block(FIFFB_ISOTRAK);

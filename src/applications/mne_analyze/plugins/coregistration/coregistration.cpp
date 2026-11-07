@@ -84,7 +84,7 @@ CoRegistration::CoRegistration()
     digNAS.coord_frame = FIFFV_COORD_MRI;
     digRPA.coord_frame = FIFFV_COORD_MRI;
 
-    m_digFidMri << digLPA << digNAS << digRPA;
+    m_digFidMri = FiffDigPointSet({digLPA, digNAS, digRPA});
     m_iFiducial = 0;
 }
 
@@ -313,14 +313,12 @@ void CoRegistration::onPickedFiducialChanged(const int iFiducial)
 
 void CoRegistration::onDigitizersChanged(const QString& sFilePath)
 {
-    QFile fileDig(sFilePath);
-    FiffStream stream(&fileDig);
-    FiffDigPointSet digSet;
-    if (!FiffDigPointSet::readFromStream(stream, digSet)) {
-        qWarning() << "[CoRegistration::onDigitizersChanged] No digitizer points found in" << sFilePath;
+    auto digSet = FiffDigPointSet::read(sFilePath.toStdU16String());
+    if (!digSet) {
+        qWarning() << "[CoRegistration::onDigitizersChanged]" << digSet.error().what();
         return;
     }
-    m_digSetHead = digSet;
+    m_digSetHead = std::move(*digSet);
 
     // send digitizer to 3DView
     QVariant data = QVariant::fromValue(m_digSetHead);
@@ -339,14 +337,12 @@ void CoRegistration::onDigitizersChanged(const QString& sFilePath)
 
 void CoRegistration::onFiducialsChanged(const QString& sFilePath)
 {
-    QFile fileDig(sFilePath);
-    FiffStream stream(&fileDig);
-    FiffDigPointSet fiducials;
-    if (!FiffDigPointSet::readFromStream(stream, fiducials)) {
-        qWarning() << "[CoRegistration::onFiducialsChanged] No fiducials found in" << sFilePath;
+    auto fiducials = FiffDigPointSet::read(sFilePath.toStdU16String());
+    if (!fiducials) {
+        qWarning() << "[CoRegistration::onFiducialsChanged]" << fiducials.error().what();
         return;
     }
-    m_digFidMri = fiducials;
+    m_digFidMri = std::move(*fiducials);
 
     QVariant data = QVariant::fromValue(m_digFidMri);
     m_pCommu->publishEvent(EVENT_TYPE::NEW_FIDUCIALS_ADDED, data);
@@ -357,8 +353,9 @@ void CoRegistration::onFiducialsChanged(const QString& sFilePath)
 
 void CoRegistration::onStoreFiducials(const QString& sFilePath)
 {
-    m_digFidMri.write(sFilePath.toStdU16String());
-    return;
+    if (auto written = m_digFidMri.write(sFilePath.toStdU16String()); !written) {
+        qWarning() << "[CoRegistration::onStoreFiducials]" << written.error().what();
+    }
 }
 
 //=============================================================================================================
@@ -423,7 +420,7 @@ void CoRegistration::onStoreTrans(const QString& sFilePath)
 
 void CoRegistration::onFitFiducials()
 {
-    if (m_digSetHead.isEmpty() || m_digFidMri.isEmpty() || m_pBem->isEmpty()) {
+    if (m_digSetHead.empty() || m_digFidMri.empty() || m_pBem->isEmpty()) {
         qWarning() << "[CoRegistration::onFitFiducials] Make sure to load all the necessary data.";
         return;
     }
@@ -446,11 +443,11 @@ void CoRegistration::onFitFiducials()
     for (int i = 0; i < 3; ++i) {
         const FiffDigPoint* pHead = nullptr;
         const FiffDigPoint* pMri = nullptr;
-        for (int k = 0; k < m_digSetHead.size(); ++k) {
+        for (int k = 0; k < std::ssize(m_digSetHead); ++k) {
             if (m_digSetHead[k].kind == FIFFV_POINT_CARDINAL && m_digSetHead[k].ident == fiducials[i])
                 pHead = &m_digSetHead[k];
         }
-        for (int k = 0; k < m_digFidMri.size(); ++k) {
+        for (int k = 0; k < std::ssize(m_digFidMri); ++k) {
             if (m_digFidMri[k].kind == FIFFV_POINT_CARDINAL && m_digFidMri[k].ident == fiducials[i])
                 pMri = &m_digFidMri[k];
         }
@@ -505,7 +502,7 @@ void CoRegistration::triggerLoadingEnd(QString sMessage)
 
 void CoRegistration::onFitICP()
 {
-    if (m_digSetHead.isEmpty() || m_digFidMri.isEmpty() || m_pBem->isEmpty()) {
+    if (m_digSetHead.empty() || m_digFidMri.empty() || m_pBem->isEmpty()) {
         qWarning() << "[CoRegistration::onFitICP] Make sure to load all the necessary data.";
         return;
     }
@@ -568,7 +565,7 @@ FiffCoordTrans CoRegistration::computeICP(FiffCoordTrans transInit,
     float fMaxDist = m_fMaxDist;
     float fTol = m_fTol;
     int iMaxIter = m_iMaxIter;
-    const QList<int> lPickHSP = m_lPickHSP;
+    const std::vector<int> lPickHSP = m_lPickHSP;
     m_ParameterMutex.unlock();
 
     float fRMSE = 0.0;
@@ -578,12 +575,12 @@ FiffCoordTrans CoRegistration::computeICP(FiffCoordTrans transInit,
     MNEProjectToSurface::SPtr mneSurfacePoints = MNEProjectToSurface::SPtr::create(*bemSurface);
 
     // get selected digitizers
-    FiffDigPointSet digSetHSP = digSetHead.pickTypes(lPickHSP);
+    FiffDigPointSet digSetHSP = digSetHead.pick_types(lPickHSP);
 
     VectorXf vecWeightsICP(digSetHSP.size()); // Weigths vector
     MatrixXf matHsp(digSetHSP.size(), 3);
 
-    for (int i = 0; i < digSetHSP.size(); ++i) {
+    for (int i = 0; i < std::ssize(digSetHSP); ++i) {
         matHsp(i, 0) = digSetHSP[i].r[0];
         matHsp(i, 1) = digSetHSP[i].r[1];
         matHsp(i, 2) = digSetHSP[i].r[2];

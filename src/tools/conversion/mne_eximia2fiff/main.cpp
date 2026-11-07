@@ -107,7 +107,7 @@ FiffInfo eximiaInfo()
 
 // eXimia digitizer text, as MNE-C's mne_eximia2fiff reads it: "Scalp" lines naming Left, Nasion or Right are
 // the fiducials and "Point ... Original" lines the EEG electrodes (number in the fifth column); x y z in mm
-bool readDigitizer(const QString& path, QList<FiffDigPoint>& points)
+bool readDigitizer(const QString& path, FiffDigPointSet& points)
 {
     QFile file(path);
     if (!file.open(QIODevice::ReadOnly | QIODevice::Text)) {
@@ -139,14 +139,12 @@ bool readDigitizer(const QString& path, QList<FiffDigPoint>& points)
             return false;
         }
         p.coord_frame = FIFFV_COORD_UNKNOWN;
-        points.append(p);
+        points.push_back(p);
     }
-    FiffDigPointSet set(points);
-    if (!set.transformToHead()) {
+    if (!points.transform_to_head()) {
         qCritical("%s lacks the Left, Nasion and Right fiducials needed for head coordinates", qPrintable(path));
         return false;
     }
-    points = set.getList();
     return true;
 }
 

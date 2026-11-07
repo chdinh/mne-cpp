@@ -154,7 +154,7 @@ void FiffDigitizerData::pickCardinalFiducials()
         if (points[k].kind == FIFFV_POINT_CARDINAL) {
             FiffDigPoint fid = points[k];
             FiffCoordTrans::apply_trans(fid.r, *head_mri_t_adj, true);
-            mri_fids.append(fid);
+            mri_fids.push_back(fid);
         }
     }
 }

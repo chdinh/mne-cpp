@@ -13440,7 +13440,7 @@
       {
         "python": "mne.channels.make_dig_montage",
         "status": "partial",
-        "mne_cpp": "FiffDigPointSet(QList<FiffDigPoint>)",
+        "mne_cpp": "FiffDigPointSet(std::vector<FiffDigPoint>)",
         "note": "no name\u2192position mapping",
         "test": "test_fiff_dig_point_python"
       },
@@ -13570,7 +13570,7 @@
       {
         "python": "mne.channels.transform_to_head",
         "status": "implemented",
-        "mne_cpp": "FiffDigPointSet::transformToHead",
+        "mne_cpp": "FiffDigPointSet::transform_to_head",
         "note": "Fiducials must be present (no sphere-projected fallback).",
         "test": "test_fiff_coord_trans",
         "equivalence": "equivalent"
@@ -14205,7 +14205,7 @@
       {
         "python": "mne.io.read_fiducials",
         "status": "implemented",
-        "mne_cpp": "FiffDigPointSet(QIODevice&), FiffDigitizerData",
+        "mne_cpp": "FiffDigPointSet::read, FiffDigitizerData",
         "note": "",
         "test": "test_mne_library"
       },

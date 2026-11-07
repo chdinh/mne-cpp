@@ -210,15 +210,13 @@ void RealTime3DWidget::update(SCMEASLIB::Measurement::SPtr pMeasurement)
             if (!m_pFiffDigitizerData && m_pBemHeadAvr) {
                 if (auto pDigData = pRTHR->digitizerData()) {
                     m_pFiffDigitizerData = pDigData;
-                    FiffDigPointSet digSet(pDigData->points);
-                    addDigSetToView(digSet);
+                    addDigSetToView(pDigData->points);
                     alignFiducials(pDigData);
                 }
             }
 
             //Add fitted digitizers to 3D view
-            m_pData3DModel->addDigitizerData(
-                pHpiFitResult->fittedCoils.pickTypes(QList<int>() << FIFFV_POINT_EEG).getList());
+            m_pData3DModel->addDigitizerData(pHpiFitResult->fittedCoils.pick_types({FIFFV_POINT_EEG}).points());
 
             // Draw where the subject's head has been over the course of the
             // measurement, so drift is visible rather than just the current
@@ -236,8 +234,8 @@ void RealTime3DWidget::update(SCMEASLIB::Measurement::SPtr pMeasurement)
 
 void RealTime3DWidget::addDigSetToView(const FIFFLIB::FiffDigPointSet& digSet)
 {
-    FiffDigPointSet digSetWithoutAdditional = digSet.pickTypes(QList<int>() << FIFFV_POINT_HPI << FIFFV_POINT_CARDINAL << FIFFV_POINT_EEG << FIFFV_POINT_EXTRA);
-    m_pData3DModel->addDigitizerData(digSetWithoutAdditional.getList());
+    const FiffDigPointSet digSetWithoutAdditional = digSet.pick_types({FIFFV_POINT_HPI, FIFFV_POINT_CARDINAL, FIFFV_POINT_EEG, FIFFV_POINT_EXTRA});
+    m_pData3DModel->addDigitizerData(digSetWithoutAdditional.points());
 }
 
 //=============================================================================================================

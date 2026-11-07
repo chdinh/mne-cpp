@@ -732,7 +732,7 @@ void TestDispViewers2::hpiSettingsView_coilTablesPresetsAndFeedback()
     view.loadCoilPresets(presets.fileName());
 
     // 4 HPI coils, 3 fiducials, 2 EEG and 1 extra point
-    QList<FiffDigPoint> points;
+    FiffDigPointSet points;
     const QVector<int> kinds = {FIFFV_POINT_CARDINAL, FIFFV_POINT_CARDINAL, FIFFV_POINT_CARDINAL, FIFFV_POINT_HPI,
                                 FIFFV_POINT_HPI, FIFFV_POINT_HPI, FIFFV_POINT_HPI, FIFFV_POINT_EEG,
                                 FIFFV_POINT_EEG, FIFFV_POINT_EXTRA};
@@ -740,7 +740,7 @@ void TestDispViewers2::hpiSettingsView_coilTablesPresetsAndFeedback()
         FiffDigPoint p;
         p.kind = kinds[i];
         p.ident = i + 1;
-        points.append(p);
+        points.push_back(p);
     }
     view.newDigitizerList(points);
     auto label = [&view](const char* name) {
@@ -846,7 +846,7 @@ void TestDispViewers2::hpiSettingsView_lifecycle()
     QVERIFY(view.getAllowedRotationChanged() > 0.0);
 
     // Pass empty digitizer list
-    view.newDigitizerList(QList<FiffDigPoint>());
+    view.newDigitizerList(FiffDigPointSet());
 
     // Pass non-trivial error and GoF data
     view.setErrorLabels(QVector<double>() << 1.2 << 0.8, 1.0);
@@ -1102,10 +1102,10 @@ void TestDispViewers2::coregSettingsView_fiducialsAndParams()
     pEeg->setChecked(true);
     pHpi->setChecked(true);
     pHsp->setChecked(true);
-    QCOMPARE(view.getDigitizerCheckState(), QList<int>({FIFFV_POINT_CARDINAL, FIFFV_POINT_EEG, FIFFV_POINT_HPI, FIFFV_POINT_EXTRA}));
+    QCOMPARE(view.getDigitizerCheckState(), std::vector<int>({FIFFV_POINT_CARDINAL, FIFFV_POINT_EEG, FIFFV_POINT_HPI, FIFFV_POINT_EXTRA}));
     pEeg->setChecked(false);
     pHsp->setChecked(false);
-    QCOMPARE(view.getDigitizerCheckState(), QList<int>({FIFFV_POINT_CARDINAL, FIFFV_POINT_HPI}));
+    QCOMPARE(view.getDigitizerCheckState(), std::vector<int>({FIFFV_POINT_CARDINAL, FIFFV_POINT_HPI}));
     view.setOmittedPoints(5);
     QCOMPARE(view.findChild<QLabel*>(QStringLiteral("m_qLabel_NOmitted"))->text(), QStringLiteral("5"));
     view.setRMSE(0.0025f);

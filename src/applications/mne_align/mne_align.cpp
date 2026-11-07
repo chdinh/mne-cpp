@@ -446,13 +446,12 @@ void MneAlign::onWizardSaveDigitisation(const QString& outPath)
                 dig.ident = hspIdent++;
                 break;
         }
-        set << dig;
+        set.push_back(dig);
     }
 
-    std::string err;
-    if (!set.write(outPath.toStdU16String(), &err)) {
+    if (auto written = set.write(outPath.toStdU16String()); !written) {
         QMessageBox::warning(this, windowTitle(),
-                             QStringLiteral("Save digitisation failed:\n%1").arg(QString::fromStdString(err)));
+                             QStringLiteral("Save digitisation failed:\n%1").arg(QString::fromStdString(written.error().what())));
         return;
     }
     statusBar()->showMessage(

@@ -683,7 +683,7 @@ void TestDisp3dBrainView::brainTreeModel_basics()
     QVERIFY(model.columnCount() >= 0);
 
     // addDigitizerData with empty list must not crash
-    model.addDigitizerData(QList<FiffDigPoint>());
+    model.addDigitizerData({});
 
     // rowCount must be ≥ 0 after empty digitizer list
     QVERIFY(model.rowCount() >= 0);
@@ -1308,12 +1308,12 @@ void TestDisp3dBrainView::cameraController_basics()
 void TestDisp3dBrainView::digitizerSetTreeItem_basics()
 {
     // Empty list: item constructs without crashing, zero points
-    DigitizerSetTreeItem emptyItem("Digitizer", QList<FIFFLIB::FiffDigPoint>());
+    DigitizerSetTreeItem emptyItem("Digitizer", {});
     QCOMPARE(emptyItem.totalPointCount(), 0);
     QVERIFY(emptyItem.categoryItem(FIFFV_POINT_CARDINAL) == nullptr);
 
     // Build a list with one point of each known kind
-    QList<FIFFLIB::FiffDigPoint> pts;
+    std::vector<FIFFLIB::FiffDigPoint> pts;
 
     FIFFLIB::FiffDigPoint cardinal;
     cardinal.kind = FIFFV_POINT_CARDINAL;
@@ -1321,7 +1321,7 @@ void TestDisp3dBrainView::digitizerSetTreeItem_basics()
     cardinal.r[0] = 0.0f;
     cardinal.r[1] = 0.08f;
     cardinal.r[2] = 0.0f;
-    pts << cardinal;
+    pts.push_back(cardinal);
 
     FIFFLIB::FiffDigPoint lpa;
     lpa.kind = FIFFV_POINT_CARDINAL;
@@ -1329,7 +1329,7 @@ void TestDisp3dBrainView::digitizerSetTreeItem_basics()
     lpa.r[0] = -0.07f;
     lpa.r[1] = 0.0f;
     lpa.r[2] = 0.0f;
-    pts << lpa;
+    pts.push_back(lpa);
 
     FIFFLIB::FiffDigPoint hpi;
     hpi.kind = FIFFV_POINT_HPI;
@@ -1337,7 +1337,7 @@ void TestDisp3dBrainView::digitizerSetTreeItem_basics()
     hpi.r[0] = 0.01f;
     hpi.r[1] = 0.01f;
     hpi.r[2] = 0.06f;
-    pts << hpi;
+    pts.push_back(hpi);
 
     FIFFLIB::FiffDigPoint eeg;
     eeg.kind = FIFFV_POINT_EEG;
@@ -1345,7 +1345,7 @@ void TestDisp3dBrainView::digitizerSetTreeItem_basics()
     eeg.r[0] = 0.02f;
     eeg.r[1] = 0.02f;
     eeg.r[2] = 0.07f;
-    pts << eeg;
+    pts.push_back(eeg);
 
     FIFFLIB::FiffDigPoint extra;
     extra.kind = FIFFV_POINT_EXTRA;
@@ -1353,7 +1353,7 @@ void TestDisp3dBrainView::digitizerSetTreeItem_basics()
     extra.r[0] = 0.03f;
     extra.r[1] = 0.03f;
     extra.r[2] = 0.05f;
-    pts << extra;
+    pts.push_back(extra);
 
     DigitizerSetTreeItem item("Digitizer", pts);
 
@@ -1831,17 +1831,17 @@ void TestDisp3dBrainView::brainTreeModel_advanced()
     QCOMPARE(model.columnCount(), 2);
 
     // addDigitizerData with empty list — no crash
-    model.addDigitizerData(QList<FIFFLIB::FiffDigPoint>());
+    model.addDigitizerData({});
 
     // addDigitizerData with a real set of points
-    QList<FIFFLIB::FiffDigPoint> pts;
+    std::vector<FIFFLIB::FiffDigPoint> pts;
     FIFFLIB::FiffDigPoint nasion;
     nasion.kind = FIFFV_POINT_CARDINAL;
     nasion.ident = FIFFV_POINT_NASION;
     nasion.r[0] = 0.0f;
     nasion.r[1] = 0.08f;
     nasion.r[2] = 0.0f;
-    pts << nasion;
+    pts.push_back(nasion);
 
     FIFFLIB::FiffDigPoint hpi;
     hpi.kind = FIFFV_POINT_HPI;
@@ -1849,7 +1849,7 @@ void TestDisp3dBrainView::brainTreeModel_advanced()
     hpi.r[0] = 0.01f;
     hpi.r[1] = 0.01f;
     hpi.r[2] = 0.06f;
-    pts << hpi;
+    pts.push_back(hpi);
 
     model.addDigitizerData(pts);
     QVERIFY(model.rowCount() >= 0); // items were added to invisible root

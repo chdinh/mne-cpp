@@ -130,19 +130,19 @@ private:
     /**
      * Updates the digitizer set for the coregistration.
      */
-    void updateCoregDigitizer(FIFFLIB::FiffDigPointSet digSet);
+    void updateCoregDigitizer(const FIFFLIB::FiffDigPointSet& digSet);
 
     //=========================================================================================================
     /**
      * Updates the mri fiducials stored as digitizer set for the coregistration.
      */
-    void updateCoregMriFid(FIFFLIB::FiffDigPointSet digSetFid);
+    void updateCoregMriFid(const FIFFLIB::FiffDigPointSet& digSetFid);
 
     //=========================================================================================================
     /**
      * Transforms the digitizers to mri space with the new transformation.
      */
-    void updateCoregTrans(FIFFLIB::FiffCoordTrans headMriTrans);
+    void updateCoregTrans(const FIFFLIB::FiffCoordTrans& headMriTrans);
 
     //=========================================================================================================
     /**

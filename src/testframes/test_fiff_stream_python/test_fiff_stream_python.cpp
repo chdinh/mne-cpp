@@ -657,7 +657,7 @@ void TestFiffStreamPython::refusesUnwritablePath()
         point.coord_frame = FIFFV_COORD_HEAD;
         point.r[0] = 0.01f * (k + 1);
         point.r[1] = point.r[2] = 0.0f;
-        info.dig << point;
+        info.dig.push_back(point);
     }
     info.acq_pars = "ACQch001 110113";
     info.acq_stim = "STIM 1";

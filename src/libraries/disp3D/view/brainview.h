@@ -41,7 +41,7 @@
 #include "scene/rtsensorstreammanager.h"
 
 #include <fiff/fiff_coord_trans.h>
-#include <fiff/fiff_dig_point.h>
+#include <fiff/fiff_dig_point_set.h>
 #include <QRhiWidget>
 #include <QMap>
 #include <QElapsedTimer>
@@ -1358,14 +1358,14 @@ private:
     void updateSceneBounds();
 
     // ── Coordinate transforms ──────────────────────────────────────────
-    FIFFLIB::FiffCoordTrans m_headToMriTrans;         /**< Head-to-MRI coordinate transform. */
-    QList<FIFFLIB::FiffDigPoint> m_cardinalDigPoints; /**< Cardinal dig points from last sensor load. */
-    bool m_applySensorTrans = true;                   /**< Whether to apply the transform to sensors/digitizers. */
-    QString m_megHelmetOverridePath;                  /**< Optional override path for MEG helmet surface. */
-    QMatrix4x4 m_devHeadTrans;                        /**< Device→Head transformation from last sensor load. */
-    bool m_hasDevHead = false;                        /**< Whether a valid Device→Head transform is available. */
-    bool m_dipolesVisible = true;                     /**< Whether dipoles are rendered. */
-    bool m_networkVisible = false;                    /**< Whether the connectivity network is rendered. */
+    FIFFLIB::FiffCoordTrans m_headToMriTrans;     /**< Head-to-MRI coordinate transform. */
+    FIFFLIB::FiffDigPointSet m_cardinalDigPoints; /**< Cardinal dig points from last sensor load. */
+    bool m_applySensorTrans = true;               /**< Whether to apply the transform to sensors/digitizers. */
+    QString m_megHelmetOverridePath;              /**< Optional override path for MEG helmet surface. */
+    QMatrix4x4 m_devHeadTrans;                    /**< Device→Head transformation from last sensor load. */
+    bool m_hasDevHead = false;                    /**< Whether a valid Device→Head transform is available. */
+    bool m_dipolesVisible = true;                 /**< Whether dipoles are rendered. */
+    bool m_networkVisible = false;                /**< Whether the connectivity network is rendered. */
 
     // ── Ray-pick hover state ───────────────────────────────────────────
     QStandardItem* m_hoveredItem = nullptr; /**< Model item currently under the cursor. */

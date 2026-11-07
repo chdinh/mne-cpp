@@ -45,7 +45,7 @@
 #include "fiff_types.h"
 #include "fiff_id.h"
 #include "fiff_ch_info.h"
-#include "fiff_dig_point.h"
+#include "fiff_dig_point_set.h"
 #include "fiff_ctf_comp.h"
 #include "fiff_coord_trans.h"
 #include "fiff_proj.h"
@@ -304,7 +304,7 @@ public:                          //Public because it's a mne struct
     std::string utc_offset;      /**< UTC offset of related meas_date (sHH:MM).*/
     fiff_int_t gantry_angle;     /**< Tilt angle of the dewar in degrees.*/
     FiffCoordTrans dev_ctf_t;    /**< Device to CTF coordinate transformation. */
-    QList<FiffDigPoint> dig;     /**< List of all digitization point descriptors. */
+    FiffDigPointSet dig;         /**< The digitization points. */
     FiffCoordTrans dig_trans;    /**< Digitizer coordinate transformation. */
     QList<FiffProj> projs;       /**< List of available SSP projectors. */
     QList<FiffCtfComp> comps;    /**< List of available CTF software compensators. */

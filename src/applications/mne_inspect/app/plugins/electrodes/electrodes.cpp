@@ -157,29 +157,14 @@ void ElectrodesPlugin::setImplantation(const IEEGLIB::IeegImplantation& implanta
 
 bool ElectrodesPlugin::loadFiff(const QString& path)
 {
-    QFile file(path);
-    if (!file.exists()) {
-        qWarning() << "ElectrodesPlugin::loadFiff: file does not exist:" << path;
+    const auto dig = FiffDigPointSet::read(path.toStdU16String());
+    if (!dig) {
+        qWarning() << "ElectrodesPlugin::loadFiff:" << dig.error().what();
         return false;
     }
+    const FiffDigPointSet picked = dig->pick_types({FIFFV_POINT_EEG, FIFFV_POINT_EXTRA});
 
-    FiffDigPointSet dig;
-    {
-        FiffStream stream(&file);
-        if (!stream.open()) {
-            qWarning() << "ElectrodesPlugin::loadFiff: failed to open FIFF stream:" << path;
-            return false;
-        }
-        if (!FiffDigPointSet::readFromStream(stream, dig)) {
-            qWarning() << "ElectrodesPlugin::loadFiff: no digitiser data in" << path;
-            return false;
-        }
-    }
-
-    const QList<int> keepKinds{FIFFV_POINT_EEG, FIFFV_POINT_EXTRA};
-    const FiffDigPointSet picked = dig.pickTypes(keepKinds);
-
-    if (picked.isEmpty()) {
+    if (picked.empty()) {
         qWarning() << "ElectrodesPlugin::loadFiff: no EEG/EXTRA points in" << path;
         return false;
     }
@@ -188,7 +173,7 @@ bool ElectrodesPlugin::loadFiff(const QString& path)
     const QString lead = QFileInfo(path).baseName();
     std::vector<IEEGLIB::IeegContact> contacts;
     contacts.reserve(std::size_t(picked.size()));
-    for (qint32 i = 0; i < picked.size(); ++i) {
+    for (qint32 i = 0; i < std::ssize(picked); ++i) {
         const FiffDigPoint& dp = picked[i];
         IEEGLIB::IeegContact contact;
         contact.name = QStringLiteral("%1_%2").arg(lead).arg(dp.ident).toStdString();

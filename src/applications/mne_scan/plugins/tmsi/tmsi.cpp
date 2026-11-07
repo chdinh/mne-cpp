@@ -182,7 +182,7 @@ void TMSI::setUpFiffInfo()
     //
     //Write electrode positions to the digitizer info in the fiffinfo
     //
-    QList<FiffDigPoint> digitizerInfo;
+    FiffDigPointSet digitizerInfo;
 
     //Only write the EEG channel positions to the fiff info. The Refa devices have next to the EEG input channels 10 other input channels (Bipolar, Auxilary, Digital, Test)
     int numberEEGCh;
@@ -261,7 +261,7 @@ void TMSI::setUpFiffInfo()
     }
 
     //Set the final digitizer values to the fiff info
-    m_pFiffInfo->dig = digitizerInfo;
+    m_pFiffInfo->dig = std::move(digitizerInfo);
 
     //Set up the channel info
     QStringList QSLChNames;

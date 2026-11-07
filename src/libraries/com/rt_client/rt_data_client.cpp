@@ -157,7 +157,7 @@ FiffInfo::SPtr RtDataClient::readInfo()
                 t_pTag = t_fiffStream.read_rt_tag();
 
                 if (t_pTag->kind == FIFF_DIG_POINT)
-                    p_pFiffInfo->dig.append(t_pTag->toDigPoint());
+                    p_pFiffInfo->dig.push_back(t_pTag->toDigPoint());
             }
         }
         //
@@ -407,8 +407,8 @@ MetaData RtDataClient::readMetadata()
                 t_pTag = t_fiffStream.read_rt_tag();
 
                 if (t_pTag->kind == FIFF_DIG_POINT) {
-                    p_pFiffInfo->dig.append(t_pTag->toDigPoint());
-                    p_pDigData->points.append(t_pTag->toDigPoint());
+                    p_pFiffInfo->dig.push_back(t_pTag->toDigPoint());
+                    p_pDigData->points.push_back(t_pTag->toDigPoint());
                 }
                 if (t_pTag->kind == FIFF_MNE_COORD_FRAME) {
                     p_pDigData->coord_frame = *t_pTag->toInt();
@@ -594,7 +594,7 @@ MetaData RtDataClient::readMetadata()
         p_pFiffInfo->ch_names.push_back(p_pFiffInfo->chs[c].ch_name);
     calibrateCompensators(*p_pFiffInfo);
 
-    p_pDigData->npoint = p_pDigData->points.size();
+    p_pDigData->npoint = static_cast<int>(p_pDigData->points.size());
 
     for (int k = 0; k < p_pDigData->npoint; k++) {
         p_pDigData->active.append(1);

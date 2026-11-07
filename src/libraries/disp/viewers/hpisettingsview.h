@@ -30,7 +30,7 @@
 
 #include "../disp_global.h"
 #include "abstractview.h"
-#include <fiff/fiff_dig_point.h>
+#include <fiff/fiff_dig_point_set.h>
 
 //=============================================================================================================
 // QT INCLUDES
@@ -183,11 +183,11 @@ public:
 
     //=========================================================================================================
     /**
-     * Display digitizer metadata bsed on input pointList
+     * Displays the metadata of digitizer points.
      *
-     * @param[in] pointList     list of digitizer points
+     * @param[in] digitizers   The digitizer points.
      */
-    void newDigitizerList(QList<FIFFLIB::FiffDigPoint> pointList);
+    void newDigitizerList(const FIFFLIB::FiffDigPointSet& digitizers);
 
     //=========================================================================================================
     /**
@@ -268,7 +268,7 @@ protected:
      *
      * @return Digitizer points read from the file; empty if none could be read.
      */
-    QList<FIFFLIB::FiffDigPoint> readDigitizersFromFile(const QString& fileName);
+    FIFFLIB::FiffDigPointSet readDigitizersFromFile(const QString& fileName);
 
     //=========================================================================================================
     /**
@@ -349,10 +349,10 @@ signals:
     /**
      * Emit this signal whenever new digitzers were loaded.
      *
-     * @param[in] lDigitzers    The new digitzers.
-     * @param[in] sFilePath     The file path to the new digitzers.
+     * @param[in] digitizers   The new digitizers.
+     * @param[in] sFilePath    The file path to the new digitizers.
      */
-    void digitizersChanged(const QList<FIFFLIB::FiffDigPoint>& lDigitzers,
+    void digitizersChanged(const FIFFLIB::FiffDigPointSet& digitizers,
                            const QString& sFilePath);
 
     //=========================================================================================================

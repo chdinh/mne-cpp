@@ -210,7 +210,7 @@ void EEGoSports::setUpFiffInfo()
     //
     //Write electrode positions to the digitizer info in the fiffinfo
     //
-    QList<FiffDigPoint> digitizerInfo;
+    FiffDigPointSet digitizerInfo;
 
     //Only write the EEG channel positions to the fiff info. The Refa devices have next to the EEG input channels 10 other input channels (Bipolar, Auxilary, Digital, Test)
     //Check if channel size by user corresponds with read channel informations from the elc file. Adding 1 for reference channel. If not append zeros and string 'unknown' until the size matches.
@@ -339,7 +339,7 @@ void EEGoSports::setUpFiffInfo()
     }
 
     //Set the final digitizer values to the fiff info
-    m_pFiffInfo->dig = digitizerInfo;
+    m_pFiffInfo->dig = std::move(digitizerInfo);
 
     //
     //Set up the channel info

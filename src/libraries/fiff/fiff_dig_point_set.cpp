@@ -41,6 +41,7 @@
 
 #include <utils/string_utils.h>
 
+#include <algorithm>
 #include <optional>
 #include <system_error>
 
@@ -52,7 +53,6 @@
 // EIGEN INCLUDES
 //=============================================================================================================
 
-#include <stdexcept>
 //=============================================================================================================
 // USED NAMESPACES
 //=============================================================================================================
@@ -68,104 +68,66 @@ using namespace Eigen;
 // DEFINE MEMBER METHODS
 //=============================================================================================================
 
-FiffDigPointSet::FiffDigPointSet()
-: m_qListDigPoint()
-{
-}
-
-//=============================================================================================================
-
-FiffDigPointSet::FiffDigPointSet(const FiffDigPointSet& p_FiffDigPointSet)
-: m_qListDigPoint(p_FiffDigPointSet.m_qListDigPoint)
-{
-}
-
-//=============================================================================================================
-
-FiffDigPointSet::FiffDigPointSet(QList<FIFFLIB::FiffDigPoint> pointList)
-: m_qListDigPoint(pointList)
+FiffDigPointSet::FiffDigPointSet(std::vector<FiffDigPoint> points)
+: m_points(std::move(points))
 {
 }
 
 //=============================================================================================================
 
 FiffDigPointSet::FiffDigPointSet(const std::filesystem::path& path)
-{
-    auto t_pStream = FiffStream::open(path);
-    if (!t_pStream || !FiffDigPointSet::readFromStream(*t_pStream, *this)) {
-        throw std::runtime_error(t_pStream ? "Could not read the FiffDigPointSet" : t_pStream.error().what());
-    }
-
-    qInfo("[FiffDigPointSet::FiffDigPointSet] %i digitizer Points read from file.", this->size());
-}
-
-//=============================================================================================================
-
-FiffDigPointSet::~FiffDigPointSet()
+: FiffDigPointSet(read(path).value())
 {
 }
 
 //=============================================================================================================
 
-bool FiffDigPointSet::readFromStream(FiffStream& stream, FiffDigPointSet& p_Dig)
+UTILSLIB::Expected<FiffDigPointSet> FiffDigPointSet::read(const std::filesystem::path& path)
 {
-    //
-    //   Open the file, create directory
-    //
-    bool open_here = false;
+    auto stream = FiffStream::open(path);
+    if (!stream) {
+        return std::unexpected(stream.error());
+    }
+    return read(*stream);
+}
 
-    if (!stream.isOpen()) {
-        QString t_sFileName = stream.streamName();
+//=============================================================================================================
 
-        if (!stream.open())
-            return false;
-
-        qInfo("Opening header data %s...\n", t_sFileName.toUtf8().constData());
-
-        open_here = true;
+UTILSLIB::Expected<FiffDigPointSet> FiffDigPointSet::read(FiffStream& stream)
+{
+    const bool openHere = !stream.isOpen();
+    if (openHere && !stream.open()) {
+        return UTILSLIB::fail(UTILSLIB::ErrorCode::Io, "cannot open {}", stream.streamName().toStdString());
     }
 
-    //
-    //   Read the measurement info
-    //
-    //read_hpi_info(stream,p_Tree, info);
-    fiff_int_t kind = -1;
-    fiff_int_t pos = -1;
-    std::optional<FiffTag> t_pTag;
-
-    //
-    //   Locate the Electrodes
-    //
-    std::vector<FiffDirNode::SPtr> isotrak = stream.dirtree()->dir_tree_find(FIFFB_ISOTRAK);
-
-    fiff_int_t coord_frame = FIFFV_COORD_HEAD;
-    qint32 k = 0;
-
+    FiffDigPointSet dig;
+    fiff_int_t coordFrame = FIFFV_COORD_HEAD;
+    const std::vector<FiffDirNode::SPtr> isotrak = stream.dirtree()->dir_tree_find(FIFFB_ISOTRAK);
     if (isotrak.size() == 1) {
-        for (k = 0; k < isotrak[0]->nent(); ++k) {
-            kind = isotrak[0]->dir[k].kind;
-            pos = isotrak[0]->dir[k].pos;
-            if (kind == FIFF_DIG_POINT) {
-                t_pTag = stream.read_tag(pos);
-                p_Dig.m_qListDigPoint.append(t_pTag->toDigPoint());
-            } else if (kind == FIFF_MNE_COORD_FRAME) {
+        for (const FiffDirEntry& entry : isotrak[0]->dir) {
+            if (entry.kind != FIFF_DIG_POINT && entry.kind != FIFF_MNE_COORD_FRAME) {
+                continue;
+            }
+            const std::optional<FiffTag> tag = stream.read_tag(entry.pos);
+            if (!tag) {
+                return UTILSLIB::fail(UTILSLIB::ErrorCode::Format, "cannot read the digitizer tag at {}", entry.pos);
+            }
+            if (entry.kind == FIFF_DIG_POINT) {
+                dig.m_points.push_back(tag->toDigPoint());
+            } else {
                 // Applies to every point of the block, as mne's _read_dig_fif
-                t_pTag = stream.read_tag(pos);
-                coord_frame = *t_pTag->toInt();
+                coordFrame = *tag->toInt();
             }
         }
     }
-    for (k = 0; k < p_Dig.size(); ++k) {
-        p_Dig[k].coord_frame = coord_frame;
+    for (FiffDigPoint& point : dig.m_points) {
+        point.coord_frame = coordFrame;
     }
 
-    //
-    //   All kinds of auxliary stuff
-    //
-    if (open_here) {
+    if (openHere) {
         stream.close();
     }
-    return true;
+    return dig;
 }
 
 //=============================================================================================================
@@ -268,7 +230,7 @@ struct Montage
 // which keep the number at the end of their names when every name has one (1..n otherwise).
 FiffDigPointSet makeDigMontage(const Montage& montage, QStringList* chNames)
 {
-    QList<FiffDigPoint> points;
+    std::vector<FiffDigPoint> points;
     const auto append = [&points](int kind, int ident, const Vector3d& r) {
         FiffDigPoint point;
         point.kind = kind;
@@ -276,7 +238,7 @@ FiffDigPointSet makeDigMontage(const Montage& montage, QStringList* chNames)
         point.coord_frame = FIFFV_COORD_UNKNOWN;
         for (int c = 0; c < 3; ++c)
             point.r[c] = static_cast<float>(r[c]);
-        points.append(point);
+        points.push_back(point);
     };
     if (montage.lpa)
         append(FIFFV_POINT_CARDINAL, FIFFV_POINT_LPA, *montage.lpa);
@@ -302,7 +264,7 @@ FiffDigPointSet makeDigMontage(const Montage& montage, QStringList* chNames)
         append(FIFFV_POINT_EEG, idents.isEmpty() ? static_cast<int>(i) + 1 : idents[i], montage.chPos[i]);
     if (chNames)
         *chNames = montage.chNames;
-    return FiffDigPointSet(points);
+    return FiffDigPointSet(std::move(points));
 }
 
 // The text of a file, or nothing with a warning.
@@ -588,48 +550,36 @@ bool FiffDigPointSet::readNeuroscanDat(const QString& path, FiffDigPointSet& dig
 
 //=============================================================================================================
 
-bool FiffDigPointSet::write(const std::filesystem::path& path, std::string* errorMessage)
+UTILSLIB::Expected<void> FiffDigPointSet::write(const std::filesystem::path& path) const
 {
-    const auto fail = [errorMessage](std::string message) {
-        if (errorMessage) {
-            *errorMessage = std::move(message);
-        }
-        return false;
-    };
-
     if (path.empty()) {
-        return fail("Output path is empty.");
+        return UTILSLIB::fail(UTILSLIB::ErrorCode::Io, "the output path is empty");
     }
-
     std::error_code ec;
     const std::filesystem::path dir = path.has_parent_path() ? path.parent_path() : std::filesystem::path(".");
     if (!std::filesystem::is_directory(dir, ec)) {
-        return fail("Destination directory '" + UTILSLIB::utf8FromPath(dir) + "' does not exist.");
+        return UTILSLIB::fail(UTILSLIB::ErrorCode::NotFound, "the directory {} does not exist", UTILSLIB::utf8FromPath(dir));
     }
-
-    auto t_pStream = FiffStream::start_file(path);
-    if (!t_pStream) {
-        return fail("Cannot open '" + UTILSLIB::utf8FromPath(path) + "' for writing.");
+    auto stream = FiffStream::start_file(path);
+    if (!stream) {
+        return UTILSLIB::fail(UTILSLIB::ErrorCode::Io, "cannot open {} for writing", UTILSLIB::utf8FromPath(path));
     }
-    this->writeToStream(*t_pStream);
-    t_pStream->end_file();
-    t_pStream->close();
-    return true;
+    write_to_stream(*stream);
+    stream->end_file();
+    stream->close();
+    return {};
 }
 
 //=============================================================================================================
 
-void FiffDigPointSet::writeToStream(FiffStream& stream)
+void FiffDigPointSet::write_to_stream(FiffStream& stream) const
 {
     stream.start_block(FIFFB_MEAS);
     stream.start_block(FIFFB_MEAS_INFO);
     stream.start_block(FIFFB_ISOTRAK);
-
-    for (qint32 h = 0; h < m_qListDigPoint.size(); ++h) {
-        stream.write_dig_point(m_qListDigPoint[h]);
+    for (const FiffDigPoint& point : m_points) {
+        stream.write_dig_point(point);
     }
-
-    qInfo("\t%lld digitizer points written\n", static_cast<long long>(m_qListDigPoint.size()));
     stream.end_block(FIFFB_ISOTRAK);
     stream.end_block(FIFFB_MEAS_INFO);
     stream.end_block(FIFFB_MEAS);
@@ -637,90 +587,42 @@ void FiffDigPointSet::writeToStream(FiffStream& stream)
 
 //=============================================================================================================
 
-const FiffDigPoint& FiffDigPointSet::operator[](qint32 idx) const
+FiffDigPointSet FiffDigPointSet::pick_types(std::span<const int> kinds) const
 {
-    if (idx >= m_qListDigPoint.length()) {
-        qWarning("Warning: Required DigPoint doesn't exist! Returning DigPoint '0'.");
-        idx = 0;
-    }
-    return m_qListDigPoint[idx];
-}
-
-//=============================================================================================================
-
-FiffDigPoint& FiffDigPointSet::operator[](qint32 idx)
-{
-    if (idx >= m_qListDigPoint.length()) {
-        qWarning("Warning: Required DigPoint doesn't exist! Returning DigPoint '0'.");
-        idx = 0;
-    }
-    return m_qListDigPoint[idx];
-}
-
-//=============================================================================================================
-
-FiffDigPointSet FiffDigPointSet::pickTypes(QList<int> includeTypes) const
-{
-    FiffDigPointSet pickedSet;
-
-    for (int i = 0; i < m_qListDigPoint.size(); ++i) {
-        if (includeTypes.contains(m_qListDigPoint[i].kind)) {
-            pickedSet << m_qListDigPoint[i];
+    FiffDigPointSet picked;
+    for (const FiffDigPoint& point : m_points) {
+        if (std::ranges::find(kinds, point.kind) != kinds.end()) {
+            picked.m_points.push_back(point);
         }
     }
-
-    return pickedSet;
+    return picked;
 }
 
 //=============================================================================================================
 
-FiffDigPointSet& FiffDigPointSet::operator<<(const FiffDigPoint& dig)
+void FiffDigPointSet::apply_transform(const FiffCoordTrans& coordTrans, bool inverse)
 {
-    this->m_qListDigPoint.append(dig);
-    return *this;
-}
-
-//=============================================================================================================
-
-FiffDigPointSet& FiffDigPointSet::operator<<(const FiffDigPoint* dig)
-{
-    this->m_qListDigPoint.append(*dig);
-    return *this;
-}
-
-//=============================================================================================================
-
-void FiffDigPointSet::applyTransform(const FiffCoordTrans& coordTrans, bool bApplyInverse)
-{
-    Vector4f tempvec;
-    for (int i = 0; i < m_qListDigPoint.size(); ++i) {
-        tempvec(0) = m_qListDigPoint.at(i).r[0];
-        tempvec(1) = m_qListDigPoint.at(i).r[1];
-        tempvec(2) = m_qListDigPoint.at(i).r[2];
-        tempvec(3) = 1.0f;
-        if (bApplyInverse) {
-            tempvec = coordTrans.invtrans * tempvec;
-        } else {
-            tempvec = coordTrans.trans * tempvec;
-        }
-        m_qListDigPoint[i].r[0] = tempvec(0);
-        m_qListDigPoint[i].r[1] = tempvec(1);
-        m_qListDigPoint[i].r[2] = tempvec(2);
+    const auto& trans = inverse ? coordTrans.invtrans : coordTrans.trans;
+    for (FiffDigPoint& point : m_points) {
+        const Vector4f r = trans * Vector4f(point.r[0], point.r[1], point.r[2], 1.0f);
+        point.r[0] = r(0);
+        point.r[1] = r(1);
+        point.r[2] = r(2);
     }
 }
 
 //=============================================================================================================
 
-bool FiffDigPointSet::transformToHead()
+bool FiffDigPointSet::transform_to_head()
 {
     const FiffDigPoint* fid[3] = {nullptr, nullptr, nullptr};
-    for (const FiffDigPoint& p : m_qListDigPoint) {
+    for (const FiffDigPoint& p : m_points) {
         if (p.kind == FIFFV_POINT_CARDINAL && p.ident >= FIFFV_POINT_LPA && p.ident <= FIFFV_POINT_RPA) {
             fid[p.ident - FIFFV_POINT_LPA] = &p;
         }
     }
     if (!fid[0] || !fid[1] || !fid[2] || fid[0]->coord_frame != fid[1]->coord_frame || fid[0]->coord_frame != fid[2]->coord_frame) {
-        qWarning() << "[FiffDigPointSet::transformToHead] LPA, nasion and RPA in one frame are required.";
+        qWarning() << "[FiffDigPointSet::transform_to_head] LPA, nasion and RPA in one frame are required.";
         return false;
     }
     const int frame = fid[0]->coord_frame;
@@ -729,18 +631,11 @@ bool FiffDigPointSet::transformToHead()
     }
     // head -> native, built from the fiducials given in the native frame
     const FiffCoordTrans headNative = FiffCoordTrans::from_cardinal_points(FIFFV_COORD_HEAD, frame, fid[0]->r, fid[1]->r, fid[2]->r);
-    for (FiffDigPoint& p : m_qListDigPoint) {
+    for (FiffDigPoint& p : m_points) {
         if (p.coord_frame == frame) {
             FiffCoordTrans::apply_inverse_trans(p.r, headNative, true);
             p.coord_frame = FIFFV_COORD_HEAD;
         }
     }
     return true;
-}
-
-//=============================================================================================================
-
-QList<FiffDigPoint> FiffDigPointSet::getList()
-{
-    return m_qListDigPoint;
 }
