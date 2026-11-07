@@ -24,9 +24,9 @@ Labelled 4x4 FIFF affine: source frame, destination frame, rotation, translation
 Each transform carries its source (`from`) and destination (`to`) `FIFFV_COORD_*` frame identifiers so the inverse and any chained composition can be type-checked at runtime. The inverse is stored alongside the forward transform because both directions are routinely needed (device→head for head-position tracking, head→MRI for source space registration, etc.).
 
 ```cpp title="src/examples/ex_fiff_api/main.cpp"
-const auto headToMri = FiffCoordTrans::read(UTILSLIB::pathFromUtf8((dir + "/all-trans.fif").toStdString()), FIFFV_COORD_HEAD, FIFFV_COORD_MRI); // a value or an Error
-const FiffCoordTrans devHead = info.dev_head_t;                                                                                                 // device -> head, from the measurement info
-FiffCoordTrans back = devHead.inverted();
+const std::filesystem::path trans = (dir + "/all-trans.fif").toStdU16String();
+const FiffCoordTrans headToMri(trans, FIFFV_COORD_HEAD, FIFFV_COORD_MRI); // throws UTILSLIB::Error if it is missing
+const FiffCoordTrans devHead = info.dev_head_t;                           // device -> head, from the measurement info
 float r[3] = {0.0f, 0.0f, 0.0f};
 FiffCoordTrans::apply_trans(r, devHead, true); // the device origin in head coordinates
 ```
@@ -38,6 +38,34 @@ FiffCoordTrans::apply_trans(r, devHead, true); // the device origin in head coor
 ### FiffCoordTrans()
 
 Constructs the coordinate transformation descriptor.
+
+---
+
+### FiffCoordTrans(path)
+
+Reads the first coordinate transform of a FIFF file, like `read()`; throws [`Error`](/docs/api/utils/error) if it cannot.
+
+**Parameters:**
+
+- **path** : *const std::filesystem::path &*
+  The file.
+
+---
+
+### FiffCoordTrans(path, from, to)
+
+Reads the transform between two frames, like read(path, from, to); throws [`Error`](/docs/api/utils/error) if there is none.
+
+**Parameters:**
+
+- **path** : *const std::filesystem::path &*
+  The file.
+
+- **from** : *int*
+  Source coordinate frame.
+
+- **to** : *int*
+  Destination coordinate frame.
 
 ---
 
@@ -204,7 +232,7 @@ Writes the transform to a new FIFF file, as mne.write_trans.
 
 **Returns:**
 
-- *std::expected&lt; void, [Error](/docs/api/utils/error) &gt;* — Nothing, or why the file cannot be written.
+- *[Expected](/docs/api/utils/expected)&lt; void &gt;* — Nothing, or why the file cannot be written.
 
 ---
 
@@ -262,7 +290,7 @@ Reads the first coordinate transform of a FIFF file, as mne.read_trans.
 
 **Returns:**
 
-- *std::expected&lt; [FiffCoordTrans](/docs/api/fiff/fiff-coord-trans), [Error](/docs/api/utils/error) &gt;* — The transform, or why the file holds none.
+- *[Expected](/docs/api/utils/expected)&lt; [FiffCoordTrans](/docs/api/fiff/fiff-coord-trans) &gt;* — The transform, or why the file holds none.
 
 ---
 
@@ -283,7 +311,7 @@ Reads the transform between two coordinate frames from a FIFF file; one stored t
 
 **Returns:**
 
-- *std::expected&lt; [FiffCoordTrans](/docs/api/fiff/fiff-coord-trans), [Error](/docs/api/utils/error) &gt;* — The transform, or why the file holds none between these frames.
+- *[Expected](/docs/api/utils/expected)&lt; [FiffCoordTrans](/docs/api/fiff/fiff-coord-trans) &gt;* — The transform, or why the file holds none between these frames.
 
 ---
 
@@ -304,7 +332,7 @@ Reads a transform from a text file of four rows, rotation and translation in mm,
 
 **Returns:**
 
-- *std::expected&lt; [FiffCoordTrans](/docs/api/fiff/fiff-coord-trans), [Error](/docs/api/utils/error) &gt;* — The transform with its translation in m, or why the file cannot be read.
+- *[Expected](/docs/api/utils/expected)&lt; [FiffCoordTrans](/docs/api/fiff/fiff-coord-trans) &gt;* — The transform with its translation in m, or why the file cannot be read.
 
 ---
 
@@ -486,7 +514,7 @@ Reads a coordinate transform from a FIFF stream node.
 
 **Returns:**
 
-- *std::expected&lt; [FiffCoordTrans](/docs/api/fiff/fiff-coord-trans), [Error](/docs/api/utils/error) &gt;* — The coordinate transform, inverted if stored the other way round, or NotFound.
+- *[Expected](/docs/api/utils/expected)&lt; [FiffCoordTrans](/docs/api/fiff/fiff-coord-trans) &gt;* — The coordinate transform, inverted if stored the other way round, or NotFound.
 
 ---
 
@@ -534,14 +562,17 @@ Performs a Procrustes alignment between two sets of corresponding 3D points.
 FIFF library: measurement info, channels, digitizer, transforms, projectors, covariance, events, annotations, evoked sets and the low-level file structure.
 
 ````cpp title="src/examples/ex_fiff_api/main.cpp, line 132"
-const auto headToMri = FiffCoordTrans::read(UTILSLIB::pathFromUtf8((dir + "/all-trans.fif").toStdString()), FIFFV_COORD_HEAD, FIFFV_COORD_MRI); // a value or an Error
-const FiffCoordTrans devHead = info.dev_head_t;                                                                                                 // device -> head, from the measurement info
-FiffCoordTrans back = devHead.inverted();
+const std::filesystem::path trans = (dir + "/all-trans.fif").toStdU16String();
+const FiffCoordTrans headToMri(trans, FIFFV_COORD_HEAD, FIFFV_COORD_MRI); // throws UTILSLIB::Error if it is missing
+const FiffCoordTrans devHead = info.dev_head_t;                           // device -> head, from the measurement info
 float r[3] = {0.0f, 0.0f, 0.0f};
 FiffCoordTrans::apply_trans(r, devHead, true); // the device origin in head coordinates
-// mne.read_trans: 1 -> 4 ... ; info["dev_head_t"] translation (-0.006129, 0.000064, 0.064742) m
-ok &= expect(devHead.from == FIFFV_COORD_DEVICE && devHead.to == FIFFV_COORD_HEAD && (Vector3f(r[0], r[1], r[2]) - Vector3f(-0.006129f, 0.000064f, 0.064742f)).norm() < 1e-6f && (back.trans * devHead.trans).isIdentity(1e-5f) && headToMri && headToMri->from == FIFFV_COORD_HEAD && headToMri->to == FIFFV_COORD_MRI,
-             "FiffCoordTrans: device origin maps to (-6.13, 0.06, 64.74) mm in head coordinates");
+if (auto mriToDevice = FiffCoordTrans::read(trans, FIFFV_COORD_MRI, FIFFV_COORD_DEVICE)) {
+    ok = false; // all-trans.fif holds no MRI -> device transform
+} else {
+    std::println("  ok   {}", mriToDevice.error().what()); // No MRI (surface RAS) -> MEG device coordinate transform in ...
+}
+const FiffCoordTrans back = devHead.inverted();
 ````
 
 ### [ex_read_evoked](../../examples/mne/ex_read_evoked.mdx)

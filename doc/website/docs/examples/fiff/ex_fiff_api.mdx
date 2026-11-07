@@ -12,7 +12,7 @@ FIFF library: measurement info, channels, digitizer, transforms, projectors, cov
 
 <ExampleFacts name="ex_fiff_api" />
 
-**Libraries:** [FIFF I/O](../../api/fiff/index.mdx), [Utilities](../../api/utils/index.mdx)
+**Libraries:** [FIFF I/O](../../api/fiff/index.mdx)
 
 ## What it demonstrates
 
@@ -41,7 +41,8 @@ Ready.
   ok   FiffInfo: 376 channels at 300.307 Hz, 2 bads, 4 projectors, 305 good MEG channels
   ok   FiffChInfo/FiffChPos: MEG0113 is a 3012 planar gradiometer at (-0.1066, 0.0464, -0.0604) m
   ok   FiffDigPointSet/FiffDigPoint: 146 points, LPA at x = -71.38 mm
-Creating tag directory for resources/data/mne-cpp-test-data/MEG/sample/all-trans.fif...
+Creating tag directory for resources/data/mne-cpp-test-data/MEG/sample/all-trans.fif... [×2]
+  ok   No MRI (surface RAS) -> MEG device coordinate transform in resources/data/mne-cpp-test-data/MEG/sample/all-trans.fif
   ok   FiffCoordTrans: device origin maps to (-6.13, 0.06, 64.74) mm in head coordinates
 Creating tag directory for resources/data/mne-cpp-test-data/MEG/sample/../../subjects/sample/mri/brain-neuromag/sets/COR.fif...
 Creating tag directory for resources/data/mne-cpp-test-data/MEG/sample/all-trans.fif...
@@ -63,7 +64,7 @@ Creating tag directory for resources/data/mne-cpp-test-data/MEG/sample/sample_au
 		Average EEG reference (1 x 60) active
 
   ok   FiffCov: 366 channels, 15972 degrees of freedom, C[0,0] matches mne.read_cov
-Creating tag directory for /var/folders/lk/dqv220515jx568p47_pgxkm80000gn/T/ex_fiff_api-EHaVwW/sample-eve.fif...
+Creating tag directory for /var/folders/lk/dqv220515jx568p47_pgxkm80000gn/T/ex_fiff_api-aNQkgn/sample-eve.fif...
   ok   FiffEvents: 25 trigger events match mne.find_events and round-trip through -eve.fif
   ok   FiffAnnotations: events become onsets in seconds and back, with descriptions as codes
 Creating tag directory for resources/data/mne-cpp-test-data/MEG/sample/sample_audvis-ave.fif...
@@ -80,8 +81,7 @@ Line frequency is not defined
 		PCA-v3 (1 x 102) active
 
 		Average EEG reference (1 x 60) active
-
-… 343 more lines
+… 344 more lines
 ````
 
 ## Background
@@ -147,6 +147,7 @@ The documented classes this example uses most:
 - [FiffStream](../../api/fiff/fiff-stream.mdx)
 - [FiffTag](../../api/fiff/fiff-tag.mdx)
 - [Error](../../api/utils/error.mdx)
+- [Expected](../../api/utils/expected.mdx)
 
 ## Source
 
@@ -197,7 +198,6 @@ The documented classes this example uses most:
 #include <fiff/fiff_sparse_matrix.h>
 #include <fiff/fiff_stream.h>
 #include <fiff/fiff_tag.h>
-#include <utils/string_utils.h>
 
 //=============================================================================================================
 // QT INCLUDES
@@ -215,6 +215,7 @@ The documented classes this example uses most:
 
 #include <cmath>
 #include <cstdlib>
+#include <filesystem>
 #include <memory>
 #include <print>
 #include <string_view>
@@ -284,14 +285,22 @@ int main(int argc, char* argv[])
                  "FiffDigPointSet/FiffDigPoint: 146 points, LPA at x = -71.38 mm");
 
     //! [fiff_coord_trans_usage]
-    const auto headToMri = FiffCoordTrans::read(UTILSLIB::pathFromUtf8((dir + "/all-trans.fif").toStdString()), FIFFV_COORD_HEAD, FIFFV_COORD_MRI); // a value or an Error
-    const FiffCoordTrans devHead = info.dev_head_t;                                                                                                 // device -> head, from the measurement info
-    FiffCoordTrans back = devHead.inverted();
+    const std::filesystem::path trans = (dir + "/all-trans.fif").toStdU16String();
+    const FiffCoordTrans headToMri(trans, FIFFV_COORD_HEAD, FIFFV_COORD_MRI); // throws UTILSLIB::Error if it is missing
+    const FiffCoordTrans devHead = info.dev_head_t;                           // device -> head, from the measurement info
     float r[3] = {0.0f, 0.0f, 0.0f};
     FiffCoordTrans::apply_trans(r, devHead, true); // the device origin in head coordinates
     //! [fiff_coord_trans_usage]
+    //! [expected_usage]
+    if (auto mriToDevice = FiffCoordTrans::read(trans, FIFFV_COORD_MRI, FIFFV_COORD_DEVICE)) {
+        ok = false; // all-trans.fif holds no MRI -> device transform
+    } else {
+        std::println("  ok   {}", mriToDevice.error().what()); // No MRI (surface RAS) -> MEG device coordinate transform in ...
+    }
+    //! [expected_usage]
+    const FiffCoordTrans back = devHead.inverted();
     // mne.read_trans: 1 -> 4 ... ; info["dev_head_t"] translation (-0.006129, 0.000064, 0.064742) m
-    ok &= expect(devHead.from == FIFFV_COORD_DEVICE && devHead.to == FIFFV_COORD_HEAD && (Vector3f(r[0], r[1], r[2]) - Vector3f(-0.006129f, 0.000064f, 0.064742f)).norm() < 1e-6f && (back.trans * devHead.trans).isIdentity(1e-5f) && headToMri && headToMri->from == FIFFV_COORD_HEAD && headToMri->to == FIFFV_COORD_MRI,
+    ok &= expect(devHead.from == FIFFV_COORD_DEVICE && devHead.to == FIFFV_COORD_HEAD && (Vector3f(r[0], r[1], r[2]) - Vector3f(-0.006129f, 0.000064f, 0.064742f)).norm() < 1e-6f && (back.trans * devHead.trans).isIdentity(1e-5f) && headToMri.from == FIFFV_COORD_HEAD && headToMri.to == FIFFV_COORD_MRI,
                  "FiffCoordTrans: device origin maps to (-6.13, 0.06, 64.74) mm in head coordinates");
 
     //! [fiff_coord_trans_set_usage]
@@ -394,7 +403,7 @@ int main(int argc, char* argv[])
     digData.points = info.dig;
     digData.npoint = info.dig.size();
     digData.coord_frame = FIFFV_COORD_HEAD;
-    digData.head_mri_t_adj = std::make_unique<FiffCoordTrans>(*headToMri);
+    digData.head_mri_t_adj = std::make_unique<FiffCoordTrans>(headToMri);
     digData.pickCardinalFiducials(); // LPA, nasion and RPA moved into MRI coordinates
     //! [fiff_digitizer_data_usage]
     // mne: apply_trans(invert_transform(mri_head_t), dig[0]["r"]) = (-0.06925742, 0.01058946, -0.02500086)

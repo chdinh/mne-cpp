@@ -7,7 +7,7 @@ sidebar_position: 5
 
 # Class Members
 
-Index of 6774 public class members (functions, variables, typedefs, enums) across all documented classes.
+Index of 6780 public class members (functions, variables, typedefs, enums) across all documented classes.
 
 **Jump to:** [A](#a) · [B](#b) · [C](#c) · [D](#d) · [E](#e) · [F](#f) · [G](#g) · [H](#h) · [I](#i) · [J](#j) · [K](#k) · [L](#l) · [M](#m) · [N](#n) · [O](#o) · [P](#p) · [Q](#q) · [R](#r) · [S](#s) · [T](#t) · [U](#u) · [V](#v) · [W](#w) · [X](#x) · [Y](#y) · [Z](#z)
 
@@ -877,6 +877,7 @@ Index of 6774 public class members (functions, variables, typedefs, enums) acros
 - **compute_from_evoked** `[fn]` in [FiffProj](/docs/api/fiff/fiff-proj) — Create SSP operators from averaged artifact data (mne.compute_proj_evoked).
 - **compute_from_raw** `[fn]` in [FiffProj](/docs/api/fiff/fiff-proj) — compute_from_raw
 - **compute_grad** `[var]` in [ComputeFwdSettings](/docs/api/fwd/compute-fwd-settings)
+- **compute_grand_average** `[fn]` in [FiffCov](/docs/api/fiff/fiff-cov) — Compute a weighted grand-average covariance from multiple covariance matrices, weighting each by its degrees of freedom (nfree).
 - **compute_guess_fields** `[fn]` in [InvGuessData](/docs/api/inv/inv-guess-data) — Once the guess locations have been set up we can compute the fields Refactored: compute_guess_fields (dipole_fit_setup.c).
 - **compute_linear_parameters** `[fn]` in [FwdEegSphereModel](/docs/api/fwd/fwd-eeg-sphere-model) — Solve for the optimal lambda (dipole magnitude) parameters given fixed mu values using SVD.
 - **compute_normals** `[fn]` in [FsSurface](/docs/api/fs/fs-surface) — Efficiently compute vertex normals for triangulated surface.
@@ -894,7 +895,6 @@ Index of 6774 public class members (functions, variables, typedefs, enums) acros
 - **computeFourier** `[fn]` in [Csd](/docs/api/utils/csd) — Compute CSD using Welch-style Fourier segmented estimation.
 - **ComputeFwd** `[fn]` in [ComputeFwd](/docs/api/fwd/compute-fwd) — Constructs a [`ComputeFwd`](/docs/api/fwd/compute-fwd) and initialises all data structures needed for the forward computation according to *pSettings*.
 - **ComputeFwdSettings** `[fn]` in [ComputeFwdSettings](/docs/api/fwd/compute-fwd-settings) — Default Constructor.
-- **computeGrandAverage** `[fn]` in [FiffCov](/docs/api/fiff/fiff-cov) — Compute a weighted grand-average covariance from multiple covariance matrices, weighting each by its degrees of freedom (nfree).
 - **computeGrandAverage** `[fn]` in [FiffEvokedSet](/docs/api/fiff/fiff-evoked-set) — Compute a grand average across multiple evoked data sets (mne.grand_average with interpolate_bads=False, drop_bads=True).
 - **computeInterpolationMatrix** `[slot]` in [RtSourceInterpolationMatWorker](/docs/api/disp3-d/rt-source-interpolation-mat-worker) — Compute the interpolation matrices for both hemispheres.
 - **computeInterpolationMatrix** `[fn]` in [SourceEstimateOverlay](/docs/api/disp3-d/source-estimate-overlay) — Compute interpolation matrix for a surface.
@@ -1652,6 +1652,7 @@ Index of 6774 public class members (functions, variables, typedefs, enums) acros
 - **error** `[fn]` in [AcqExpected](/docs/api/acq/acq-expected)
 - **error** `[var]` in [DipFitError](/docs/api/inv/dip-fit-error)
 - **error** `[signal]` in [StcLoadingWorker](/docs/api/disp3-d/stc-loading-worker) — Emitted when an error occurs.
+- **Error** `[fn]` in [Error](/docs/api/utils/error)
 - **errorDistances** `[var]` in [HpiFitResult](/docs/api/inv/hpi-fit-result)
 - **errorOccurred** `[signal]` in [PolhemusConnection](/docs/api/acq/polhemus-connection) — Non-fatal protocol/IO error (already logged by the backend).
 - **ErrTest** `[fn]` in [ParksMcClellan](/docs/api/utils/parks-mc-clellan) — This was added by IowaHills and is used in Remez() in 6 places.
@@ -1714,6 +1715,7 @@ Index of 6774 public class members (functions, variables, typedefs, enums) acros
 - **exists** `[fn]` in [BIDSPath](/docs/api/bids/bids-path) — Checks whether the file at `filePath()` exists on disk.
 - **exists** `[fn]` in [CommandParser](/docs/api/com/command-parser) — Checks if a command exists.
 - **exitCode** `[var]` in [PythonRunnerResult](/docs/api/utils/python-runner-result) — Process exit code (-1 if never started).
+- **Expected** `[fn]` in [Expected](/docs/api/utils/expected)
 - **experimenter** `[var]` in [FiffInfo](/docs/api/fiff/fiff-info) — Experimenter name.
 - **explain_comp** `[fn]` in [MNECTFCompDataSet](/docs/api/mne/mnectf-comp-data-set) — Return a human-readable description string for a compensation kind constant.
 - **explanation** `[var]` in [MnaVerification](/docs/api/mna/mna-verification) — Human-readable explanation of what this node does and why.
@@ -1782,11 +1784,13 @@ Index of 6774 public class members (functions, variables, typedefs, enums) acros
 - **FiffChPos** `[fn]` in [FiffChPos](/docs/api/fiff/fiff-ch-pos) — Constructs the coil position descriptor.
 - **FiffChPos** `[fn]` in [FiffChPos](/docs/api/fiff/fiff-ch-pos) — Copy constructor.
 - **FiffCoordTrans** `[fn]` in [FiffCoordTrans](/docs/api/fiff/fiff-coord-trans) — Constructs the coordinate transformation descriptor.
+- **FiffCoordTrans** `[fn]` in [FiffCoordTrans](/docs/api/fiff/fiff-coord-trans) — Reads the first coordinate transform of a FIFF file, like `read()`; throws [`Error`](/docs/api/utils/error) if it cannot.
+- **FiffCoordTrans** `[fn]` in [FiffCoordTrans](/docs/api/fiff/fiff-coord-trans) — Reads the transform between two frames, like read(path, from, to); throws [`Error`](/docs/api/utils/error) if there is none.
 - **FiffCoordTrans** `[fn]` in [FiffCoordTrans](/docs/api/fiff/fiff-coord-trans) — Copy constructor.
 - **FiffCoordTrans** `[fn]` in [FiffCoordTrans](/docs/api/fiff/fiff-coord-trans) — Constructs a coordinate transformation from a rotation matrix and translation vector.
 - **FiffCoordTrans** `[fn]` in [FiffCoordTrans](/docs/api/fiff/fiff-coord-trans) — Constructs a coordinate transformation from a 4×4 homogeneous matrix.
 - **FiffCov** `[fn]` in [FiffCov](/docs/api/fiff/fiff-cov) — Constructs the covariance data matrix.
-- **FiffCov** `[fn]` in [FiffCov](/docs/api/fiff/fiff-cov) — Reads the noise covariance of a FIFF file.
+- **FiffCov** `[fn]` in [FiffCov](/docs/api/fiff/fiff-cov) — Reads the noise covariance of a FIFF file, like `read()`; throws [`Error`](/docs/api/utils/error) if it cannot.
 - **FiffCov** `[fn]` in [FiffCov](/docs/api/fiff/fiff-cov) — Copy constructor.
 - **FiffCtfComp** `[fn]` in [FiffCtfComp](/docs/api/fiff/fiff-ctf-comp) — Constructs the CTF software compensation data.
 - **FiffCtfComp** `[fn]` in [FiffCtfComp](/docs/api/fiff/fiff-ctf-comp) — Copy constructor.
@@ -2871,6 +2875,7 @@ Index of 6774 public class members (functions, variables, typedefs, enums) acros
 - **is_eeg_electrode** `[fn]` in [FwdCoil](/docs/api/fwd/fwd-coil) — Checks if this is an EEG electrode.
 - **is_eeg_electrode_type** `[fn]` in [FwdCoilSet](/docs/api/fwd/fwd-coil-set) — Checks if a set of templates contains an EEG electrode of a specified type.
 - **is_empty** `[fn]` in [FiffCoordTrans](/docs/api/fiff/fiff-coord-trans) — Returns true if coordinate transform contains no data.
+- **is_empty** `[fn]` in [FiffCov](/docs/api/fiff/fiff-cov) — True if FIFF covariance is empty.
 - **is_empty** `[fn]` in [FiffEvents](/docs/api/fiff/fiff-events) — Returns true if no events are stored.
 - **is_empty** `[fn]` in [FiffSparseMatrix](/docs/api/fiff/fiff-sparse-matrix) — Check whether this sparse matrix is empty (no non-zero elements).
 - **is_left_hemi** `[fn]` in [MNESourceSpace](/docs/api/mne/mne-source-space) — Determine whether this source space is on the left hemisphere based on the average x-coordinate of all vertices.
@@ -2895,7 +2900,6 @@ Index of 6774 public class members (functions, variables, typedefs, enums) acros
 - **isDipole** `[var]` in [RayHit](/docs/api/disp3-d/ray-hit) — True if a dipole was hit.
 - **isEmpty** `[fn]` in [ConnectivitySettings](/docs/api/connectivity/connectivity-settings)
 - **isEmpty** `[fn]` in [FiffAnnotations](/docs/api/fiff/fiff-annotations) — Returns true if no annotations are stored.
-- **isEmpty** `[fn]` in [FiffCov](/docs/api/fiff/fiff-cov) — True if FIFF covariance is empty.
 - **isEmpty** `[fn]` in [FiffDeviceInfo](/docs/api/fiff/fiff-device-info)
 - **isEmpty** `[fn]` in [FiffDigPointSet](/docs/api/fiff/fiff-dig-point-set) — True if [`FiffDigPointSet`](/docs/api/fiff/fiff-dig-point-set) is empty.
 - **isEmpty** `[fn]` in [FiffDirNode](/docs/api/fiff/fiff-dir-node) — Returns true if directory tree structure contains no data.
@@ -3455,7 +3459,6 @@ Index of 6774 public class members (functions, variables, typedefs, enums) acros
 - **MeshFactory** `[fn]` in [MeshFactory](/docs/api/disp3-d/mesh-factory)
 - **message** `[var]` in [AcqErrorInfo](/docs/api/acq/acq-error-info) — What went wrong, naming the cause.
 - **message** `[var]` in `Entry`
-- **message** `[var]` in [Error](/docs/api/utils/error) — Names the cause and the file, ready for printing.
 - **message** `[var]` in [MnaVerificationResult](/docs/api/mna/mna-verification-result) — Formatted message: "PASS: ..." or "FAIL [error]: ...".
 - **metaChanged** `[signal]` in [ChannelDataModel](/docs/api/disp/channel-data-model) — Emitted when channel metadata (scale, colour, bad-flag) changes.
 - **metadata** `[fn]` in [MlOnnxModel](/docs/api/ml/ml-onnx-model)
@@ -4884,7 +4887,7 @@ Index of 6774 public class members (functions, variables, typedefs, enums) acros
 - **sampleToViewportX** `[fn]` in [ChannelDataView](/docs/api/disp/channel-data-view) — Maps an absolute sample index to an x coordinate inside the signal viewport.
 - **sampleValueAt** `[fn]` in [ChannelDataModel](/docs/api/disp/channel-data-model) — Return the raw sample value at a specific absolute sample index for the given channel.
 - **samplingFreq** `[var]` in [BidsChannel](/docs/api/bids/bids-channel) — Sampling frequency in Hz (OPTIONAL).
-- **save** `[fn]` in [FiffCov](/docs/api/fiff/fiff-cov) — Save this covariance matrix to a FIFF file.
+- **save** `[fn]` in [FiffCov](/docs/api/fiff/fiff-cov) — Writes the covariance to a new FIFF file, like mne.Covariance.save.
 - **save** `[fn]` in [FiffEvokedSet](/docs/api/fiff/fiff-evoked-set) — Save this evoked data set to a FIFF file.
 - **save** `[fn]` in [FiffRawData](/docs/api/fiff/fiff-raw-data) — Save raw data to a FIFF file, optionally with decimation and channel picking.
 - **save** `[fn]` in [FigureExporter](/docs/api/disp/figure-exporter) — Renders `widget` offscreen at `size` and writes it as the next figure.
@@ -6547,6 +6550,9 @@ Index of 6774 public class members (functions, variables, typedefs, enums) acros
 - **value** `[fn]` in [AcqExpected](/docs/api/acq/acq-expected)
 - **value** `[fn]` in [AcqInt24](/docs/api/acq/acq-int24)
 - **value** `[var]` in [BidsEvent](/docs/api/bids/bids-event) — Numeric event value / trigger code.
+- **value** `[fn]` in [Expected](/docs/api/utils/expected)
+- **value** `[fn]` in [Expected](/docs/api/utils/expected)
+- **value** `[fn]` in [Expected](/docs/api/utils/expected)
 - **value** `[var]` in [InvToken](/docs/api/inv/inv-token) — Continuous value (0 for structural tokens).
 - **value** `[var]` in [PickResult](/docs/api/disp3-d/pick-result) — Optional scalar overlay value at the picked element (uV, dSPM, MRI intensity).
 - **value** `[fn]` in [ScaleControl](/docs/api/disp/scale-control) — Return the value of the control.

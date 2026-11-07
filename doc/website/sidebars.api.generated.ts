@@ -502,6 +502,7 @@ const apiSidebar: SidebarsConfig['apiSidebar'] = [
         'api/utils/log',
         'api/utils/log-capture',
         'api/utils/error',
+        'api/utils/expected',
         'api/utils/byte-stream',
         'api/utils/memory-byte-stream',
         'api/utils/file-byte-stream',

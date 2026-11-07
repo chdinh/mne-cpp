@@ -49,7 +49,7 @@ Constructs the covariance data matrix.
 
 ### FiffCov(path)
 
-Reads the noise covariance of a FIFF file.
+Reads the noise covariance of a FIFF file, like `read()`; throws [`Error`](/docs/api/utils/error) if it cannot.
 
 **Parameters:**
 
@@ -81,7 +81,7 @@ Initializes the covariance data matrix.
 
 ---
 
-### isEmpty()
+### is_empty()
 
 True if FIFF covariance is empty.
 
@@ -165,7 +165,7 @@ This method works by adding a constant to the diagonal for each channel type sep
 
 ### save(path)
 
-Save this covariance matrix to a FIFF file.
+Writes the covariance to a new FIFF file, like mne.Covariance.save.
 
 **Parameters:**
 
@@ -174,7 +174,7 @@ Save this covariance matrix to a FIFF file.
 
 **Returns:**
 
-- *bool* — true on success.
+- *[Expected](/docs/api/utils/expected)&lt; void &gt;* — Nothing, or why the file cannot be written.
 
 ---
 
@@ -195,7 +195,7 @@ Assignment Operator.
 
 ## Static Methods
 
-### read(path, p_cov)
+### read(path)
 
 Reads the noise covariance stored in a FIFF file, like mne.read_cov.
 
@@ -204,12 +204,9 @@ Reads the noise covariance stored in a FIFF file, like mne.read_cov.
 - **path** : *const std::filesystem::path &*
   The file.
 
-- **p_cov** : *[FiffCov](/docs/api/fiff/fiff-cov) &*
-  The covariance; unchanged when reading fails.
-
 **Returns:**
 
-- *bool* — true when the file holds a noise covariance, false otherwise.
+- *[Expected](/docs/api/utils/expected)&lt; [FiffCov](/docs/api/fiff/fiff-cov) &gt;* — The covariance, or why the file holds none.
 
 ---
 
@@ -286,7 +283,7 @@ filtered ones.
 
 ---
 
-### computeGrandAverage(covs)
+### compute_grand_average(covs)
 
 Compute a weighted grand-average covariance from multiple covariance matrices, weighting each by its degrees of freedom (nfree).
 
@@ -314,7 +311,7 @@ Compute a weighted grand-average covariance from multiple covariance matrices, w
 
 FIFF library: measurement info, channels, digitizer, transforms, projectors, covariance, events, annotations, evoked sets and the low-level file structure.
 
-````cpp title="src/examples/ex_fiff_api/main.cpp, line 166"
+````cpp title="src/examples/ex_fiff_api/main.cpp, line 174"
 FiffCov cov((dir + "/sample_audvis-cov.fif").toStdString());
 const FiffCov megCov = cov.pick_channels(StringList(info.ch_names.begin() + 0, info.ch_names.begin() + 0 + 306), cov.bads); // good MEG channels only
 // mne.read_cov: dim 366, nfree 15972, 2 bads, 4 projectors, C[0, 0] = 2.272355891906954e-23

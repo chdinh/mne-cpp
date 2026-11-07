@@ -12,18 +12,31 @@ sidebar_position: 69
 `#include <utils/error.h>`
 
 ```cpp
-struct UTILSLIB::Error
+class UTILSLIB::Error
 ```
 
-The error value of the std::expected that readers and writers return.
+Why a reader or writer failed; what() names the cause and the file.
 
 ```cpp title="src/examples/ex_fiff_api/main.cpp"
-const auto headToMri = FiffCoordTrans::read(UTILSLIB::pathFromUtf8((dir + "/all-trans.fif").toStdString()), FIFFV_COORD_HEAD, FIFFV_COORD_MRI); // a value or an Error
-const FiffCoordTrans devHead = info.dev_head_t;                                                                                                 // device -> head, from the measurement info
-FiffCoordTrans back = devHead.inverted();
+const std::filesystem::path trans = (dir + "/all-trans.fif").toStdU16String();
+const FiffCoordTrans headToMri(trans, FIFFV_COORD_HEAD, FIFFV_COORD_MRI); // throws UTILSLIB::Error if it is missing
+const FiffCoordTrans devHead = info.dev_head_t;                           // device -> head, from the measurement info
 float r[3] = {0.0f, 0.0f, 0.0f};
 FiffCoordTrans::apply_trans(r, devHead, true); // the device origin in head coordinates
 ```
+
+### Inheritance
+
+```mermaid
+classDiagram
+    runtime_error <|-- Error
+```
+
+---
+
+## Public Methods
+
+### Error(code, message)
 
 ---
 
@@ -94,7 +107,7 @@ Average a raw recording and localize dipole pairs with Powell RAP-MUSIC on a par
     //            end
 ````
 
-Also used in [ex_clustered_inverse_rap_music_raw](../../examples/inv/ex_clustered_inverse_rap_music_raw.mdx), [ex_fiff_api](../../examples/fiff/ex_fiff_api.mdx), [ex_inverse_mne_raw](../../examples/inv/ex_inverse_mne_raw.mdx).
+Also used in [ex_clustered_inverse_rap_music_raw](../../examples/inv/ex_clustered_inverse_rap_music_raw.mdx), [ex_inverse_mne_raw](../../examples/inv/ex_inverse_mne_raw.mdx).
 
 ## Authors of this file
 

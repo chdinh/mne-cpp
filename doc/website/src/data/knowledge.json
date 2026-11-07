@@ -781,8 +781,7 @@
       "url": "/docs/examples/fiff/ex_fiff_api/",
       "library": "fiff",
       "libraries": [
-        "fiff",
-        "utils"
+        "fiff"
       ],
       "tasks": [
         "io"
