@@ -27,9 +27,12 @@
 #include "fiff_events.h"
 #include "fiff_tag.h"
 #include "fiff_stream.h"
-#include "cstdlib"
+#include <utils/byte_stream.h>
+#include <utils/string_utils.h>
 
-#include <stdexcept>
+#include <cstdlib>
+#include <optional>
+
 //=============================================================================================================
 // USED NAMESPACES
 //=============================================================================================================
@@ -41,32 +44,165 @@ using namespace Eigen;
 // DEFINE MEMBER METHODS
 //=============================================================================================================
 
-FiffRawData::FiffRawData()
-: first_samp(-1)
-, last_samp(-1)
+FiffRawData::FiffRawData(const std::filesystem::path& path)
+: FiffRawData(read(path).value())
 {
 }
 
 //=============================================================================================================
 
-FiffRawData::FiffRawData(const std::filesystem::path& path, bool b_littleEndian)
-: first_samp(-1)
-, last_samp(-1)
+FiffRawData::FiffRawData(std::unique_ptr<UTILSLIB::ByteStream> bytes)
+: FiffRawData(read(std::move(bytes)).value())
 {
-    if (!FiffStream::setup_read_raw(path, *this, false, b_littleEndian)) {
-        throw std::runtime_error("Error during fiff setup raw read");
-    }
 }
 
 //=============================================================================================================
 
-FiffRawData::FiffRawData(std::unique_ptr<UTILSLIB::ByteStream> bytes, bool b_littleEndian)
-: first_samp(-1)
-, last_samp(-1)
+UTILSLIB::Expected<FiffRawData> FiffRawData::read(const std::filesystem::path& path, bool allow_maxshield)
 {
-    if (!FiffStream::setup_read_raw(std::move(bytes), *this, false, b_littleEndian)) {
-        throw std::runtime_error("Error during fiff setup raw read");
+    auto bytes = UTILSLIB::FileByteStream::open(path, UTILSLIB::FileByteStream::Mode::Read);
+    if (!bytes) {
+        return UTILSLIB::fail(UTILSLIB::ErrorCode::Io, "cannot open {}", UTILSLIB::utf8FromPath(path));
     }
+    return read(std::make_unique<FiffStream>(std::move(bytes), UTILSLIB::utf8FromPath(path)), allow_maxshield);
+}
+
+//=============================================================================================================
+
+UTILSLIB::Expected<FiffRawData> FiffRawData::read(std::unique_ptr<UTILSLIB::ByteStream> bytes, bool allow_maxshield)
+{
+    if (!bytes) {
+        return UTILSLIB::fail(UTILSLIB::ErrorCode::Io, "no raw data bytes");
+    }
+    return read(std::make_unique<FiffStream>(std::move(bytes)), allow_maxshield);
+}
+
+//=============================================================================================================
+
+UTILSLIB::Expected<FiffRawData> FiffRawData::read(std::unique_ptr<FiffStream> stream, bool allow_maxshield)
+{
+    using UTILSLIB::ErrorCode;
+    using UTILSLIB::fail;
+    const std::string name = stream->streamName().toStdString();
+    if (!stream->open()) {
+        return fail(ErrorCode::Io, "cannot open {}", name);
+    }
+    if (stream->dirtree()->dir_tree_find(FIFFB_MEAS).empty()) {
+        return fail(ErrorCode::NotFound, "no measurement in {}", name);
+    }
+    FiffRawData data;
+    FiffInfo& info = data.info;
+    FiffDirNode::SPtr meas;
+    if (!stream->read_meas_info(stream->dirtree(), info, meas)) {
+        return fail(ErrorCode::Format, "cannot read the measurement info of {}", name);
+    }
+
+    // The block of interest, as mne.io.read_raw_fif looks for it
+    std::vector<FiffDirNode::SPtr> blocks = meas->dir_tree_find(FIFFB_RAW_DATA);
+    if (blocks.empty()) {
+        blocks = meas->dir_tree_find(FIFFB_CONTINUOUS_DATA);
+    }
+    if (blocks.empty()) {
+        blocks = meas->dir_tree_find(FIFFB_SMSH_RAW_DATA);
+        if (blocks.empty()) {
+            return fail(ErrorCode::NotFound, "no raw data in {}", name);
+        }
+        if (!allow_maxshield) {
+            return fail(ErrorCode::Format, "{} holds raw Internal Active Shielding data, which must be processed with MaxFilter first", name);
+        }
+    }
+    const std::vector<FiffDirEntry>& dir = blocks.front()->dir;
+    // An empty directory or no channels would leave no buffer to index and no sample count to derive
+    if (dir.empty()) {
+        return fail(ErrorCode::Format, "the raw data block of {} is empty", name);
+    }
+    if (info.nchan <= 0) {
+        return fail(ErrorCode::Format, "the measurement info of {} reports {} channels", name, info.nchan);
+    }
+    const auto readInt = [&stream](const FiffDirEntry& entry) -> std::optional<fiff_int_t> {
+        const std::optional<FiffTag> tag = stream->read_tag(entry.pos);
+        const fiff_int_t* value = tag ? tag->toInt() : nullptr;
+        return value ? std::optional<fiff_int_t>(*value) : std::nullopt;
+    };
+
+    std::size_t first = 0;
+    fiff_int_t firstSamp = 0;
+    fiff_int_t firstSkip = 0;
+    if (dir[first].kind == FIFF_FIRST_SAMPLE) {
+        const std::optional<fiff_int_t> value = readInt(dir[first++]);
+        if (!value) {
+            return fail(ErrorCode::Format, "cannot read the first sample of {}", name);
+        }
+        firstSamp = *value;
+    }
+    // An initial skip can only be applied once the buffer size is known
+    if (first < dir.size() && dir[first].kind == FIFF_DATA_SKIP) {
+        const std::optional<fiff_int_t> value = readInt(dir[first++]);
+        if (!value) {
+            return fail(ErrorCode::Format, "cannot read the initial skip of {}", name);
+        }
+        firstSkip = *value;
+    }
+
+    data.first_samp = firstSamp;
+    fiff_int_t nskip = 0;
+    for (std::size_t k = first; k < dir.size(); ++k) {
+        const FiffDirEntry& ent = dir[k];
+        if (ent.kind == FIFF_DATA_SKIP) {
+            const std::optional<fiff_int_t> value = readInt(ent);
+            if (!value) {
+                return fail(ErrorCode::Format, "cannot read a skip of {}", name);
+            }
+            nskip = *value;
+            continue;
+        }
+        if (ent.kind != FIFF_DATA_BUFFER) {
+            continue;
+        }
+        fiff_int_t bytesPerValue = 0;
+        switch (ent.type) {
+            case FIFFT_DAU_PACK16:
+            case FIFFT_SHORT:
+                bytesPerValue = 2;
+                break;
+            case FIFFT_FLOAT:
+            case FIFFT_INT:
+                bytesPerValue = 4;
+                break;
+            case FIFFT_DOUBLE:
+                bytesPerValue = 8;
+                break;
+            default:
+                return fail(ErrorCode::Format, "{} has data buffers of type {}, which cannot be read", name, ent.type);
+        }
+        const fiff_int_t nsamp = ent.size / (bytesPerValue * info.nchan);
+        if (firstSkip > 0) {
+            firstSamp += nsamp * firstSkip;
+            data.first_samp = firstSamp;
+            firstSkip = 0;
+        }
+        if (nskip > 0) {
+            // A skip has the default entry (kind -1); readers fill it with zeros
+            data.rawdir.push_back({FiffDirEntry{}, firstSamp, firstSamp + nskip * nsamp - 1, nskip * nsamp});
+            firstSamp += nskip * nsamp;
+            nskip = 0;
+        }
+        data.rawdir.push_back({ent, firstSamp, firstSamp + nsamp - 1, nsamp});
+        firstSamp += nsamp;
+    }
+    data.last_samp = firstSamp - 1;
+
+    data.cals.resize(info.nchan);
+    for (fiff_int_t k = 0; k < info.nchan; ++k) {
+        data.cals[k] = static_cast<double>(info.chs[k].range) * info.chs[k].cal;
+    }
+    info.filename = name;
+    data.file = std::move(stream);
+    data.file->close();
+
+    qInfo("\tRange : %d ... %d  =  %9.3f ... %9.3f secs", data.first_samp, data.last_samp,
+          static_cast<double>(data.first_samp) / data.info.sfreq, static_cast<double>(data.last_samp) / data.info.sfreq);
+    return data;
 }
 
 //=============================================================================================================
@@ -208,11 +344,9 @@ bool FiffRawData::read_raw_segment(MatrixXd& data,
     }
 
     MatrixXd one, newData, tmp_data;
-    FiffRawDir thisRawDir;
     std::optional<FiffTag> t_pTag;
     fiff_int_t first_pick, last_pick, picksamp;
-    for (k = 0; k < this->rawdir.size(); ++k) {
-        thisRawDir = this->rawdir[k];
+    for (const FiffRawDir& thisRawDir : this->rawdir) {
         //
         //  Do we need this buffer
         //
@@ -512,8 +646,7 @@ bool FiffRawData::read_raw_segment(MatrixXd& data,
 
     MatrixXd one;
     fiff_int_t first_pick, last_pick, picksamp;
-    for (k = 0; k < this->rawdir.size(); ++k) {
-        FiffRawDir thisRawDir = this->rawdir[k];
+    for (const FiffRawDir& thisRawDir : this->rawdir) {
         //
         //  Do we need this buffer
         //

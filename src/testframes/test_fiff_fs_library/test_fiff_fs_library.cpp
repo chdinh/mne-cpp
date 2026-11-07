@@ -980,7 +980,7 @@ void TestFiffFsLibrary::fiffRaw_saveSubset()
     if (!hasData())
         QSKIP("No test data");
     FiffRawData raw(rawPath().toStdString());
-    QVERIFY(!raw.isEmpty());
+    QVERIFY(!raw.is_empty());
     QTemporaryDir tmpDir;
     QVERIFY(tmpDir.isValid());
     QString tmpPath = tmpDir.path() + "/raw_subset.fif";
@@ -998,7 +998,7 @@ void TestFiffFsLibrary::fiffRaw_saveAndReload()
     if (!hasData())
         QSKIP("No test data");
     FiffRawData raw(rawPath().toStdString());
-    QVERIFY(!raw.isEmpty());
+    QVERIFY(!raw.is_empty());
     QTemporaryDir tmpDir;
     QVERIFY(tmpDir.isValid());
     QString tmpPath = tmpDir.path() + "/raw_roundtrip.fif";
@@ -1009,7 +1009,7 @@ void TestFiffFsLibrary::fiffRaw_saveAndReload()
     bool saved = raw.save(tmpPath.toStdString(), picks, 1, raw.first_samp, raw.first_samp + 1000);
     QVERIFY(saved);
     FiffRawData raw2(tmpPath.toStdString());
-    QVERIFY(!raw2.isEmpty());
+    QVERIFY(!raw2.is_empty());
     QCOMPARE(raw2.info.nchan, nPick);
 }
 
@@ -1018,12 +1018,12 @@ void TestFiffFsLibrary::fiffRaw_copyConstructor()
     if (!hasData())
         QSKIP("No test data");
     FiffRawData raw(rawPath().toStdString());
-    QVERIFY(!raw.isEmpty());
+    QVERIFY(!raw.is_empty());
     const fiff_int_t nchan = raw.info.nchan;
     const fiff_int_t firstSamp = raw.first_samp;
     // Raw data owns its open file, so it moves and still reads
     FiffRawData raw2(std::move(raw));
-    QVERIFY(!raw2.isEmpty());
+    QVERIFY(!raw2.is_empty());
     QCOMPARE(raw2.info.nchan, nchan);
     QCOMPARE(raw2.first_samp, firstSamp);
     Eigen::MatrixXd data, times;

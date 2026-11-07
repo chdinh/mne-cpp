@@ -122,12 +122,13 @@ QJsonObject TemporalFilterSkill::executeSkill(const WorkflowNode& nodeState)
     }
 
     // Open FIFF raw data.
-    FiffRawData raw;
-    if (!FiffStream::setup_read_raw(inputPath.toStdU16String(), raw)) {
+    auto rawRead = FiffRawData::read(inputPath.toStdU16String());
+    if (!rawRead) {
         return QJsonObject{
             {"status", "error"},
             {"message", QString("Temporal filter node `%1`: could not parse FIFF file `%2`.").arg(nodeState.uid, inputPath)}};
     }
+    FiffRawData raw = std::move(*rawRead);
 
     // Read the full raw segment (calibrated physical units).
     MatrixXd data;

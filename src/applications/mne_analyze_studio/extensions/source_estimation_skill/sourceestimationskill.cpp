@@ -161,12 +161,13 @@ QJsonObject SourceEstimationSkill::executeSkill(const WorkflowNode& nodeState)
     const float lambda2 = static_cast<float>(1.0 / (snr * snr));
 
     // ── Load raw FIFF ─────────────────────────────────────────────────────────
-    FiffRawData raw;
-    if (!FiffStream::setup_read_raw(rawPath.toStdU16String(), raw)) {
+    auto rawRead = FiffRawData::read(rawPath.toStdU16String());
+    if (!rawRead) {
         return QJsonObject{
             {"status", "error"},
             {"message", QString("Source estimation node `%1`: could not parse FIFF file `%2`.").arg(nodeState.uid, rawPath)}};
     }
+    FiffRawData raw = std::move(*rawRead);
 
     // Activate projectors so the recorded SSPs participate in the whitening
     // applied by the inverse operator.

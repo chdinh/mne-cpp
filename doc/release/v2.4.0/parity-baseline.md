@@ -115,7 +115,7 @@ Tolerance is the range of comparison thresholds the test asserts (`exact` when i
 | `mne.io.read_raw_brainvision` | `BIDSLIB::BrainVisionReader / mne_brain_vision2fiff (CLI)` | equivalent | `test_bids` | 1e-07 to 0.001 |
 | `mne.io.read_raw_edf` | `BIDSLIB::EDFReader / mne_edf2fiff (CLI)` | equivalent | `test_edf2fiff_rwr` | 1e-06 to 1e-05 |
 | `mne.io.read_raw_eximia` | `mne_eximia2fiff (CLI)` | equivalent | `test_tool_data_pipeline` | 1e-07 to 1e-06 |
-| `mne.io.read_raw_fif` | `FiffRawData` | equivalent | `test_fiff_raw_formats_python` | 1e-12 to 1e-06 |
+| `mne.io.read_raw_fif` | `FiffRawData::read` | equivalent | `test_fiff_raw_formats_python` | 1e-12 to 1e-06 |
 | `mne.make_bem_solution` | `mne_setup_forward_model (CLI)` | equivalent | `test_fwd_bem_driver_python` | 1e-06 to 0.02 |
 | `mne.make_fixed_length_epochs` | `FIFFLIB::FiffEpochs::makeFixedLengthEpochs` | equivalent | `test_epochs` | 1e-10 |
 | `mne.make_fixed_length_events` | `FiffEvents::make_fixed_length` | equivalent | `test_fiff_core_python` | 1e-12 to 1e-09 |

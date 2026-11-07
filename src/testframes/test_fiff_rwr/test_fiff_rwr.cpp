@@ -412,11 +412,10 @@ void TestFiffRWR::readsRawByPathAndStream()
     QVERIFY(data == expected);
     QCOMPARE(byPath.info.nchan, inMemory.info.nchan);
 
-    QVERIFY_THROWS_EXCEPTION(std::runtime_error, FiffRawData(m_tempDir.filePath("missing_raw.fif").toStdString()));
-    FiffRawData setup;
-    QVERIFY(FiffStream::setup_read_raw(path.toStdString(), setup));
-    QCOMPARE(setup.last_samp, byPath.last_samp);
-    QVERIFY(!FiffStream::setup_read_raw(std::unique_ptr<UTILSLIB::ByteStream>(), setup));
+    QVERIFY_THROWS_EXCEPTION(UTILSLIB::Error, FiffRawData(m_tempDir.filePath("missing_raw.fif").toStdString()));
+    QCOMPARE(FiffRawData::read(m_tempDir.filePath("missing_raw.fif").toStdString()).error().code, UTILSLIB::ErrorCode::Io);
+    QCOMPARE(FiffRawData::read(path.toStdString()).value().last_samp, byPath.last_samp);
+    QCOMPARE(FiffRawData::read(std::unique_ptr<UTILSLIB::ByteStream>()).error().code, UTILSLIB::ErrorCode::Io);
 
     // Writing to a file and to bytes in memory gives the same bytes
     const std::string outPath = m_tempDir.filePath("written_raw.fif").toStdString();

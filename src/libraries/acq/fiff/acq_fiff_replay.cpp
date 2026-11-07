@@ -287,9 +287,11 @@ private:
         if (!m_file.exists()) {
             return {AcqErrorCode::DeviceNotFound, "fiff://" + m_config.path + ": no such file"};
         }
-        if (!FiffStream::setup_read_raw(m_config.path, m_raw) || m_raw.info.nchan <= 0) {
-            return {AcqErrorCode::UnsupportedFormat, m_config.path + " is not a raw FIFF file"};
+        auto raw = FiffRawData::read(m_config.path);
+        if (!raw) {
+            return {AcqErrorCode::UnsupportedFormat, m_config.path + " is not a raw FIFF file: " + raw.error().what()};
         }
+        m_raw = std::move(*raw);
         auto format = nativeFormat(m_raw);
         if (!format) {
             return format.error();
@@ -345,7 +347,7 @@ private:
         if (index == m_loaded) {
             return {};
         }
-        const FiffRawDir& dir = m_raw.rawdir[static_cast<int>(index)];
+        const FiffRawDir& dir = m_raw.rawdir[index];
         if (dir.ent.kind != -1) {
             const auto bytes = static_cast<std::size_t>(dir.nsamp) * m_frameBytes;
             if (!m_file.isOpen() && !m_file.open(QIODevice::ReadOnly)) {
@@ -376,7 +378,7 @@ private:
             if (const AcqError error = loadBuffer(index); !error.ok()) {
                 return error;
             }
-            const FiffRawDir& dir = m_raw.rawdir[static_cast<int>(index)];
+            const FiffRawDir& dir = m_raw.rawdir[index];
             const std::uint64_t offset = sample - m_starts[index];
             const std::size_t take = static_cast<std::size_t>(
                 std::min<std::uint64_t>(count, static_cast<std::uint64_t>(dir.nsamp) - offset));
@@ -403,7 +405,7 @@ private:
             if (const AcqError error = loadBuffer(index); !error.ok()) {
                 return error;
             }
-            const FiffRawDir& dir = m_raw.rawdir[static_cast<int>(index)];
+            const FiffRawDir& dir = m_raw.rawdir[index];
             for (std::size_t i = 0; i < static_cast<std::size_t>(dir.nsamp); ++i, ++sample) {
                 std::int64_t value = 0;
                 if (dir.ent.kind != -1) {

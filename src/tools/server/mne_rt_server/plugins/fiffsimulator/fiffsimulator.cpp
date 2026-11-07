@@ -281,7 +281,7 @@ void FiffSimulator::init()
 bool FiffSimulator::start()
 {
     this->init();
-    if (m_RawInfo.isEmpty() && !readRawInfo()) {
+    if (m_RawInfo.is_empty() && !readRawInfo()) {
         return false;
     }
     registerFiffScheme();
@@ -323,10 +323,10 @@ bool FiffSimulator::stop()
 
 void FiffSimulator::info(qint32 ID)
 {
-    if (m_RawInfo.isEmpty())
+    if (m_RawInfo.is_empty())
         readRawInfo();
 
-    if (!m_RawInfo.isEmpty())
+    if (!m_RawInfo.is_empty())
         emit remitMeasInfo(ID, m_RawInfo.info);
 }
 
@@ -334,14 +334,15 @@ void FiffSimulator::info(qint32 ID)
 
 bool FiffSimulator::readRawInfo()
 {
-    if (m_RawInfo.isEmpty()) {
+    if (m_RawInfo.is_empty()) {
         QMutexLocker locker(&mutex);
 
-        if (!FiffStream::setup_read_raw(m_sResourceDataPath.toStdU16String(), m_RawInfo)) {
-            qInfo("Error: Not able to read raw info!");
-            m_RawInfo.clear();
+        auto raw = FiffRawData::read(m_sResourceDataPath.toStdU16String());
+        if (!raw) {
+            qInfo("Error: Not able to read raw info: %s", raw.error().what());
             return false;
         }
+        m_RawInfo = std::move(*raw);
 
         m_TrueSamplingRate = m_RawInfo.info.sfreq;
         m_RawInfo.info.sfreq *= m_AccelerationFactor;

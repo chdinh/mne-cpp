@@ -33,12 +33,6 @@
 #include "fiff_types.h"
 #include "fiff_dir_entry.h"
 
-//=============================================================================================================
-// QT INCLUDES
-//=============================================================================================================
-
-#include <QSharedPointer>
-#include <memory>
 
 //=============================================================================================================
 // DEFINE NAMESPACE FIFFLIB
@@ -58,49 +52,15 @@ namespace FIFFLIB
  *
  * @snippet ex_fiff_structure/main.cpp fiff_raw_dir_usage
  */
-class FIFFSHARED_EXPORT FiffRawDir
+struct FIFFSHARED_EXPORT FiffRawDir
 {
-public:
-    using SPtr = QSharedPointer<FiffRawDir>; /**< Shared pointer type for FiffRawDir. */
+    FiffDirEntry ent;      /**< The data buffer; the default entry (kind -1) for a skip. */
+    fiff_int_t first = -1; /**< First sample. */
+    fiff_int_t last = -1;  /**< Last sample. */
+    fiff_int_t nsamp = -1; /**< Number of samples. */
 
-    //=========================================================================================================
-    /**
-     * Default constructor
-     */
-    FiffRawDir();
-
-    //=========================================================================================================
-    /**
-     * Copy constructor.
-     *
-     * @param[in] p_FiffRawDir   Raw directory entry which should be copied.
-     */
-    FiffRawDir(const FiffRawDir& p_FiffRawDir);
-
-    //=========================================================================================================
-    /**
-     * Copy assignment. Every member has value semantics, so the
-     * compiler-generated member-wise assignment is correct. It is declared
-     * explicitly because declaring a copy constructor and/or a destructor
-     * deprecates the implicitly generated one.
-     *
-     * @param[in] other   Object to assign from.
-     *
-     * @return reference to this object.
-     */
-    FiffRawDir& operator=(const FiffRawDir& other) = default;
-
-    //=========================================================================================================
-    /**
-     * Destroys the raw Directory entry.
-     */
-    ~FiffRawDir();
-
-public:
-    FiffDirEntry ent; /**< Directory entry description. */
-    fiff_int_t first; /**< first sample. */
-    fiff_int_t last;  /**< last sample. */
-    fiff_int_t nsamp; /**< Number of samples. */
+    /** @return Whether both describe the same samples of the same buffer. */
+    bool operator==(const FiffRawDir&) const = default;
 };
 } // NAMESPACE
 

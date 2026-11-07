@@ -27,7 +27,6 @@ set(SOURCES
     fiff_ctf_comp.cpp
     fiff_id.cpp
     fiff_info.cpp
-    fiff_raw_dir.cpp
     fiff_dig_point.cpp
     fiff_ch_pos.cpp
     fiff_cov.cpp

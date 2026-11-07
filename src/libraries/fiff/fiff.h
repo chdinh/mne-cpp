@@ -270,7 +270,7 @@ public:
      *
      * Read a specific raw data segment
      *
-     * @param[in] raw        structure returned by fiff_setup_read_raw.
+     * @param[in] raw        raw data from FiffRawData::read.
      * @param[out] data      returns the data matrix (channels x samples).
      * @param[out] times     returns the time values corresponding to the samples.
      * @param[in] from       first sample to include. If omitted, defaults to the first sample in data (optional).
@@ -296,7 +296,7 @@ public:
      *
      * Read a specific raw data segment
      *
-     * @param[in] raw        structure returned by fiff_setup_read_raw.
+     * @param[in] raw        raw data from FiffRawData::read.
      * @param[out] data      returns the data matrix (channels x samples).
      * @param[out] times     returns the time values corresponding to the samples.
      * @param[out] mult      matrix to store used multiplication matrix (compensator,projection,calibration).
@@ -317,25 +317,6 @@ public:
         return raw.read_raw_segment(data, times, mult, from, to, sel);
     }
 
-
-    //=========================================================================================================
-    /**
-     * fiff_setup_read_raw
-     *
-     * Wrapper for the FiffStream::setup_read_raw static function
-     *
-     * Read information about raw data file
-     *
-     * @param[in] path               The raw data file.
-     * @param[out] data              The raw data information - contains the opened fiff file.
-     * @param[in] allow_maxshield    Accept unprocessed MaxShield data.
-     *
-     * @return true if succeeded, false otherwise.
-     */
-    inline static bool setup_read_raw(const std::filesystem::path& path, FiffRawData& data, bool allow_maxshield = false)
-    {
-        return FiffStream::setup_read_raw(path, data, allow_maxshield);
-    }
 
     //=========================================================================================================
     /**

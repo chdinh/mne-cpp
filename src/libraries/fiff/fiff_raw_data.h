@@ -48,10 +48,13 @@
 // QT INCLUDES
 //=============================================================================================================
 
-#include <QList>
+#include <utils/error.h>
+
 #include <QSharedPointer>
-#include <QString>
+
+#include <filesystem>
 #include <memory>
+#include <vector>
 
 //=============================================================================================================
 // DEFINE NAMESPACE FIFFLIB
@@ -85,54 +88,65 @@ public:
     using SPtr = QSharedPointer<FiffRawData>;  /**< Shared pointer type for FiffRawData. */
     using UPtr = std::unique_ptr<FiffRawData>; /**< Unique pointer type for FiffRawData. */
 
-    //=========================================================================================================
-    /**
-     * Default constructor.
-     */
-    FiffRawData();
+    /** Constructs empty raw data. */
+    FiffRawData() = default;
 
     // Raw data owns the open file, so it moves but does not copy
     FiffRawData(const FiffRawData&) = delete;
     FiffRawData& operator=(const FiffRawData&) = delete;
     FiffRawData(FiffRawData&&) noexcept = default;
     FiffRawData& operator=(FiffRawData&&) noexcept = default;
-    //=========================================================================================================
-    /**
-     * Constructs fiff raw data by reading a FIFF file.
-     *
-     * @param[in] path             The raw data file.
-     * @param[in] b_littleEndian   If true, read data as little-endian.
-     */
-    explicit FiffRawData(const std::filesystem::path& path, bool b_littleEndian = false);
-
-    //=========================================================================================================
-    /**
-     * Constructs fiff raw data held in bytes that are not a file, e.g. in memory.
-     *
-     * @param[in] bytes            The raw data; kept for reading segments.
-     * @param[in] b_littleEndian   If true, read data as little-endian.
-     */
-    explicit FiffRawData(std::unique_ptr<UTILSLIB::ByteStream> bytes, bool b_littleEndian = false);
-
-    //=========================================================================================================
-    /**
-     * Destroys the FiffInfo.
-     */
     ~FiffRawData();
 
     //=========================================================================================================
     /**
-     * Initializes the fiff raw measurement data.
+     * Opens a raw FIFF file like read(); throws UTILSLIB::Error if it cannot.
+     *
+     * @param[in] path   The raw data file.
      */
-    void clear();
+    explicit FiffRawData(const std::filesystem::path& path);
 
     //=========================================================================================================
     /**
-     * True if fiff raw data are empty.
+     * Opens raw FIFF data held in bytes that are not a file, e.g. in memory, like read(); throws
+     * UTILSLIB::Error if it cannot.
      *
-     * @return true if fiff raw data are empty.
+     * @param[in] bytes   The raw data; kept for reading segments.
      */
-    inline bool isEmpty() const
+    explicit FiffRawData(std::unique_ptr<UTILSLIB::ByteStream> bytes);
+
+    //=========================================================================================================
+    /**
+     * Opens a raw FIFF file, like mne.io.read_raw_fif(path, preload=False): reads the measurement info
+     * and the directory of data buffers, and keeps the file for reading segments.
+     *
+     * @param[in] path              The raw data file.
+     * @param[in] allow_maxshield   Accept unprocessed Internal Active Shielding (MaxShield) data.
+     *
+     * @return The raw data, or why the file cannot be read: Io if it cannot be opened, NotFound if it
+     *         holds no raw data, Format if it is damaged or holds MaxShield data that is not allowed.
+     */
+    [[nodiscard]] static UTILSLIB::Expected<FiffRawData> read(const std::filesystem::path& path, bool allow_maxshield = false);
+
+    //=========================================================================================================
+    /**
+     * Opens raw FIFF data held in bytes that are not a file, e.g. in memory, like read(path).
+     *
+     * @param[in] bytes             The raw data; kept for reading segments.
+     * @param[in] allow_maxshield   Accept unprocessed Internal Active Shielding (MaxShield) data.
+     *
+     * @return The raw data, or why it cannot be read.
+     */
+    [[nodiscard]] static UTILSLIB::Expected<FiffRawData> read(std::unique_ptr<UTILSLIB::ByteStream> bytes, bool allow_maxshield = false);
+
+    //=========================================================================================================
+    /**
+     * Resets to empty raw data.
+     */
+    void clear();
+
+    /** @return Whether there is no recording. */
+    bool is_empty() const
     {
         return first_samp == -1 && info.isEmpty();
     }
@@ -219,12 +233,15 @@ public:
 public:
     std::unique_ptr<FiffStream> file; /**< replaces fid. */
     FiffInfo info;                    /**< Fiff measurement information. */
-    fiff_int_t first_samp;            /**< First sample number. */
-    fiff_int_t last_samp;             /**< Last sample number. */
+    fiff_int_t first_samp = -1;       /**< First sample number. */
+    fiff_int_t last_samp = -1;        /**< Last sample number. */
     Eigen::RowVectorXd cals;          /**< Calibration values. */
-    QList<FiffRawDir> rawdir;         /**< Special fiff directory entry for raw data. */
+    std::vector<FiffRawDir> rawdir;   /**< The data buffers and skips, in sample order. */
     Eigen::MatrixXd proj;             /**< SSP operator to apply to the data. */
     FiffCtfComp comp;                 /**< Compensator. */
+
+private:
+    static UTILSLIB::Expected<FiffRawData> read(std::unique_ptr<FiffStream> stream, bool allow_maxshield);
 };
 } // NAMESPACE
 

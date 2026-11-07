@@ -2103,7 +2103,7 @@
     },
     {
       "source": "parity",
-      "mne_cpp": "FiffRawData",
+      "mne_cpp": "FiffRawData::read",
       "python": "mne.io.read_raw_fif",
       "claimed": "implemented",
       "equivalence": "equivalent",

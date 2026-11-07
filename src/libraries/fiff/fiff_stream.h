@@ -529,40 +529,6 @@ public:
 
     //=========================================================================================================
     /**
-     * fiff_setup_read_raw
-     *
-     * Read information about raw data file
-     *
-     * @param[in] path               The raw data file.
-     * @param[out] data              The raw data information - contains the opened fiff file.
-     * @param[in] allow_maxshield    Accept unprocessed MaxShield data.
-     * @param[in] is_littleEndian The file is stored in little-endian byte order.
-     *
-     * @return true if succeeded, false otherwise.
-     */
-    static bool setup_read_raw(const std::filesystem::path& path,
-                               FiffRawData& data,
-                               bool allow_maxshield = true,
-                               bool is_littleEndian = false);
-
-    //=========================================================================================================
-    /**
-     * Read information about raw data held in bytes that are not a file, e.g. in memory.
-     *
-     * @param[in] bytes              The raw data; data keeps them for reading segments.
-     * @param[out] data              The raw data information.
-     * @param[in] allow_maxshield    Accept unprocessed MaxShield data.
-     * @param[in] is_littleEndian The bytes are in little-endian byte order.
-     *
-     * @return true if succeeded, false otherwise.
-     */
-    static bool setup_read_raw(std::unique_ptr<UTILSLIB::ByteStream> bytes,
-                               FiffRawData& data,
-                               bool allow_maxshield = true,
-                               bool is_littleEndian = false);
-
-    //=========================================================================================================
-    /**
      * Byte stream over a Qt device, for callers that hold a QIODevice such as a socket or a QBuffer.
      *
      * @param[in] device   The device; it must outlive the byte stream. It is opened in @p mode unless already open.
@@ -1009,8 +975,6 @@ private:
     /** Writes the file id, directory pointer and free list that open every FIFF file. */
     static std::unique_ptr<FiffStream> start_file(std::unique_ptr<FiffStream> stream);
 
-    /** Reads the raw data information from an unopened stream. */
-    static bool setup_read_raw(std::unique_ptr<FiffStream> stream, FiffRawData& data, bool allow_maxshield, bool is_littleEndian);
 
     /** Writes the measurement info and starts the raw data block of a started file. */
     static std::unique_ptr<FiffStream> start_writing_raw(std::unique_ptr<FiffStream> stream,

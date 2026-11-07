@@ -110,10 +110,10 @@ int main(int argc, char* argv[])
     int samples = 0;
     for (const FiffRawDir& buffer : raw.rawdir)
         samples += buffer.nsamp;
-    const FiffDirEntry firstBuffer = raw.rawdir.first().ent;
+    const FiffDirEntry firstBuffer = raw.rawdir.front().ent;
     //! [fiff_raw_dir_usage]
     // mne.io.read_raw_fif: 2 buffers, 6007 samples from first_samp 12900; fiff_open lists 640 directory entries
-    ok &= expect(raw.rawdir.size() == 2 && samples == 6007 && raw.rawdir.first().first == 12900 && firstBuffer.kind == FIFF_DATA_BUFFER,
+    ok &= expect(raw.rawdir.size() == 2 && samples == 6007 && raw.rawdir.front().first == 12900 && firstBuffer.kind == FIFF_DATA_BUFFER,
                  "FiffRawDir/FiffDirEntry: 2 data buffers cover the 6007 samples from sample 12900");
 
     //! [fiff_dir_entry_usage]

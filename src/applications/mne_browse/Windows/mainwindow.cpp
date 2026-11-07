@@ -221,7 +221,7 @@ bool writeFilteredRawFile(const QString& rawFilePath,
                           const MNEBROWSE::SessionFilter& filter)
 {
     FIFFLIB::FiffRawData raw(rawFilePath.toStdU16String());
-    if (raw.isEmpty()) {
+    if (raw.is_empty()) {
         qWarning() << "[MainWindow] Could not reopen raw data for filtered write" << rawFilePath;
         return false;
     }
@@ -344,7 +344,7 @@ bool populateEventModelFromRaw(const QString& rawFilePath,
     }
 
     FIFFLIB::FiffRawData raw(rawFilePath.toStdU16String());
-    if (raw.isEmpty()) {
+    if (raw.is_empty()) {
         return false;
     }
 
@@ -1159,7 +1159,7 @@ bool MainWindow::openFiffRawData(FIFFLIB::FiffRawData& raw, const QString& featu
     raw = FIFFLIB::FiffRawData(m_qFileRaw.fileName().toStdU16String());
 #endif
 
-    if (raw.isEmpty()) {
+    if (raw.is_empty()) {
         statusBar()->showMessage(tr("Could not open raw data for %1.").arg(label), 5000);
         return false;
     }

@@ -749,7 +749,7 @@ private slots:
 
         // Persistent QFile — mirrors the fixed application code
         FiffRawData raw((m_sDataPath + "/MEG/sample/sample_audvis_trunc_raw.fif").toStdString());
-        QVERIFY(!raw.isEmpty());
+        QVERIFY(!raw.is_empty());
 
         // Read a 1-second segment
         MatrixXd data, times;
@@ -766,8 +766,7 @@ private slots:
     //=========================================================================
     // Regression: loading a raw FIFF whose raw-data block has an empty
     // directory (no data buffers) must fail gracefully instead of indexing
-    // past the end of the directory and crashing. See PR #1003 and the
-    // FiffStream::setup_read_raw guards.
+    // past the end of the directory and crashing.
     //=========================================================================
     void fiffRawData_emptyRawDirectoryFailsGracefully()
     {
@@ -777,7 +776,7 @@ private slots:
         // Borrow a valid measurement info from the real test file so the
         // written file has a well-formed meas-info block ...
         FiffRawData src((m_sDataPath + "/MEG/sample/sample_audvis_trunc_raw.fif").toStdString());
-        QVERIFY(!src.isEmpty());
+        QVERIFY(!src.is_empty());
 
         // ... then write a raw file that opens a FIFFB_RAW_DATA block but never
         // writes a single data buffer, leaving that block's directory empty.
@@ -792,18 +791,11 @@ private slots:
             outStream->finish_writing_raw();
         }
 
-        // Reading it back must fail cleanly. setup_read_raw returns false for
-        // the empty directory, which FiffRawData surfaces as a runtime_error
-        // rather than an out-of-bounds crash. The point of the regression is
-        // that we reach this controlled failure at all.
-        bool threw = false;
-        try {
-            FiffRawData bad(path);
-        } catch (const std::runtime_error&) {
-            threw = true;
-        }
-        QVERIFY2(threw,
-                 "raw with empty data directory should fail to load, not crash");
+        // Reading it back must fail with a format error rather than an out-of-bounds crash.
+        QCOMPARE(FiffRawData::read(path).error().code, UTILSLIB::ErrorCode::Format);
+        QVERIFY_THROWS_EXCEPTION(UTILSLIB::Error, FiffRawData{path});
+        // A FIFF file without raw data is not raw data
+        QCOMPARE(FiffRawData::read((m_sDataPath + "/MEG/sample/sample_audvis-cov.fif").toStdString()).error().code, UTILSLIB::ErrorCode::NotFound);
     }
 
     //=========================================================================

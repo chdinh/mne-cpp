@@ -14351,7 +14351,7 @@
       {
         "python": "mne.io.read_raw_fif",
         "status": "implemented",
-        "mne_cpp": "FiffRawData",
+        "mne_cpp": "FiffRawData::read",
         "note": "",
         "test": "test_fiff_raw_formats_python",
         "equivalence": "equivalent"

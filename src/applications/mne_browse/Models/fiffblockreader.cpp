@@ -96,7 +96,7 @@ bool FiffBlockReader::open(const QString& path)
         qWarning() << "[FiffBlockReader] Exception constructing FiffRawData:" << e.what();
         return false;
     }
-    if (m_raw->isEmpty()) {
+    if (m_raw->is_empty()) {
         qWarning() << "[FiffBlockReader] Not a valid FIFF raw file:" << path;
         m_raw.reset();
         return false;
@@ -131,7 +131,7 @@ bool FiffBlockReader::openBuffer(const QByteArray& data, const QString& displayN
         return false;
     }
 
-    if (m_raw->isEmpty()) {
+    if (m_raw->is_empty()) {
         qWarning() << "[FiffBlockReader] Not a valid FIFF raw buffer";
         m_raw.reset();
         return false;

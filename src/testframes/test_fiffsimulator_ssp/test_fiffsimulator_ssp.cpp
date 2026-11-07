@@ -12,7 +12,7 @@
  * @brief    Smoke test for the FiffSimulator → WriteToFile replay path:
  *           verifies that SSP projectors and the bad-channel list survive a full
  *           in-memory FIFF round trip through FiffStream::start_writing_raw +
- *           FiffStream::setup_read_raw (the exact APIs WriteToFile drives).
+ *           FiffRawData::read (the exact APIs WriteToFile drives).
  *           QSKIPped when sample data is not available.
  */
 
@@ -78,9 +78,9 @@ void TestFiffSimulatorSsp::sspAndBadsRoundTripThroughFiffWrite()
     // ---------------------------------------------------------------------
     // 1. Read source raw + info, ensure it has SSP projectors and bad chans.
     // ---------------------------------------------------------------------
-    FiffRawData srcRaw;
-    QVERIFY2(FiffStream::setup_read_raw(src.toStdString(), srcRaw),
-             qPrintable(QStringLiteral("setup_read_raw failed for %1").arg(src)));
+    auto srcRead = FiffRawData::read(src.toStdString());
+    QVERIFY2(srcRead.has_value(), srcRead ? "" : srcRead.error().what());
+    FiffRawData srcRaw = std::move(*srcRead);
 
     const FiffInfo srcInfo = srcRaw.info;
     QVERIFY2(!srcInfo.projs.isEmpty(),
@@ -123,8 +123,7 @@ void TestFiffSimulatorSsp::sspAndBadsRoundTripThroughFiffWrite()
     // ---------------------------------------------------------------------
     // 3. Re-read output and compare projectors + bads byte-by-byte.
     // ---------------------------------------------------------------------
-    FiffRawData outRaw;
-    QVERIFY(FiffStream::setup_read_raw(outPath.toStdString(), outRaw));
+    const FiffRawData outRaw = FiffRawData::read(outPath.toStdString()).value();
 
     const FiffInfo& outInfo = outRaw.info;
 

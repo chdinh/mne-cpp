@@ -115,7 +115,7 @@ public:
      */
     bool isOpen() const
     {
-        return !m_raw.isNull() && !m_raw->isEmpty();
+        return !m_raw.isNull() && !m_raw->is_empty();
     }
 
     // ── File metadata ─────────────────────────────────────────────────

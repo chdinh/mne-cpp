@@ -47,7 +47,7 @@ bool FiffBuffer::open()
     // This used to open m_file, then hand it to Fiff::open, then hand it to
     // FiffRawData, and each of those opens the device itself. The second open
     // failed on an already open QFile, so no file ever loaded through here and
-    // the third attempt threw. Only FiffRawData is needed: setup_read_raw opens
+    // the third attempt threw. Only FiffRawData is needed: FiffRawData::read opens
     // the device and leaves the stream on the object.
     if (!m_file.exists()) {
         return false;
