@@ -25,17 +25,17 @@
     "lock_mismatch": []
   },
   "summary": {
-    "claims": 358,
+    "claims": 359,
     "by_evidence": {
       "cross-validated-static": 174,
       "cross-validated-live": 0,
-      "tested": 184,
+      "tested": 185,
       "unverified": 0
     },
     "by_claim": {
       "equivalent": 139,
       "exceeds": 0,
-      "implemented": 124,
+      "implemented": 125,
       "partial": 95
     },
     "equivalence_without_static_evidence": [],
@@ -43,7 +43,7 @@
       "classes": {
         "cross-validated-static": 32,
         "cross-validated-live": 0,
-        "tested": 63,
+        "tested": 64,
         "unverified": 0
       },
       "parity": {
@@ -974,6 +974,15 @@
     },
     {
       "source": "classes",
+      "mne_cpp": "FiffDigMontage",
+      "python": "mne.channels.DigMontage",
+      "claimed": "implemented",
+      "equivalence": null,
+      "test": "test_fiff_dig_point_python",
+      "evidence": "tested"
+    },
+    {
+      "source": "classes",
       "mne_cpp": "MNEMneData",
       "python": "mne.minimum_norm.estimate_snr",
       "claimed": "implemented",
@@ -1360,7 +1369,7 @@
     },
     {
       "source": "parity",
-      "mne_cpp": "FIFFLIB::FiffDigPointSet::readCaptrak",
+      "mne_cpp": "FIFFLIB::FiffDigMontage::read_captrak",
       "python": "mne.channels.read_dig_captrak",
       "claimed": "implemented",
       "equivalence": "equivalent",
@@ -1370,7 +1379,7 @@
     },
     {
       "source": "parity",
-      "mne_cpp": "FIFFLIB::FiffDigPointSet::readNeuroscanDat",
+      "mne_cpp": "FIFFLIB::FiffDigMontage::read_neuroscan_dat",
       "python": "mne.channels.read_dig_dat",
       "claimed": "implemented",
       "equivalence": "equivalent",
@@ -1380,7 +1389,7 @@
     },
     {
       "source": "parity",
-      "mne_cpp": "FIFFLIB::FiffDigPointSet::readEgi",
+      "mne_cpp": "FIFFLIB::FiffDigMontage::read_egi",
       "python": "mne.channels.read_dig_egi",
       "claimed": "implemented",
       "equivalence": "equivalent",
@@ -1409,7 +1418,7 @@
     },
     {
       "source": "parity",
-      "mne_cpp": "FIFFLIB::FiffDigPointSet::readLocalite",
+      "mne_cpp": "FIFFLIB::FiffDigMontage::read_localite",
       "python": "mne.channels.read_dig_localite",
       "claimed": "implemented",
       "equivalence": "equivalent",
@@ -1419,7 +1428,7 @@
     },
     {
       "source": "parity",
-      "mne_cpp": "FIFFLIB::FiffDigPointSet::readPolhemusIsotrak",
+      "mne_cpp": "FIFFLIB::FiffDigMontage::read_polhemus_isotrak",
       "python": "mne.channels.read_dig_polhemus_isotrak",
       "claimed": "implemented",
       "equivalence": "equivalent",
@@ -1438,7 +1447,7 @@
     },
     {
       "source": "parity",
-      "mne_cpp": "FIFFLIB::FiffDigPointSet::readPolhemusFastscan",
+      "mne_cpp": "FIFFLIB::FiffDigMontage::read_polhemus_fastscan",
       "python": "mne.channels.read_polhemus_fastscan",
       "claimed": "implemented",
       "equivalence": "equivalent",

@@ -30,7 +30,7 @@
       "decoding",
       "math"
     ],
-    "tokens": 19716,
+    "tokens": 19526,
     "gui_outside_design": []
   },
   "libraries": {
@@ -240,24 +240,24 @@
       ]
     },
     "fiff": {
-      "tokens": 1485,
+      "tokens": 1295,
       "by_category": {
-        "containers": 215,
-        "files": 109,
-        "global": 430,
+        "containers": 192,
+        "files": 105,
+        "global": 412,
         "json": 27,
-        "logging": 255,
+        "logging": 240,
         "network": 6,
         "objects_signals": 15,
         "other": 3,
-        "regex": 15,
+        "regex": 9,
         "smart_pointers": 23,
-        "strings": 386,
+        "strings": 262,
         "time": 1
       },
-      "public_header_includes": 90,
+      "public_header_includes": 89,
       "q_object": 1,
-      "files": 70,
+      "files": 72,
       "modules": [
         "Core",
         "Network"

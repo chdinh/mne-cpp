@@ -20,7 +20,7 @@ tested, not that its output was compared with MNE-Python.
 |---|---:|
 | equivalent | 139 |
 | exceeds | 0 |
-| implemented | 124 |
+| implemented | 125 |
 | partial | 95 |
 
 Equivalence claims without static cross-validation: none
@@ -31,9 +31,9 @@ Equivalence claims without static cross-validation: none
 |---|---:|---:|---:|
 | cross-validated-static | 32 | 142 | 174 |
 | cross-validated-live | 0 | 0 | 0 |
-| tested | 63 | 121 | 184 |
+| tested | 64 | 121 | 185 |
 | unverified | 0 | 0 | 0 |
-| **all claims** | 95 | 263 | 358 |
+| **all claims** | 96 | 263 | 359 |
 
 `cross-validated-live` tests call whatever `mne` is installed, so they are neither pinned nor deterministic.
 
@@ -78,13 +78,13 @@ Tolerance is the range of comparison thresholds the test asserts (`exact` when i
 | `mne.channel_indices_by_type` | `FiffInfoBase::channel_indices_by_type` | equivalent | `test_fiff_core_python` | 1e-12 to 1e-09 |
 | `mne.channel_type` | `FiffInfoBase::channel_type` | equivalent | `test_fiff_core_python` | 1e-12 to 1e-09 |
 | `mne.channels.make_standard_montage` | `StandardMontage` | equivalent | `test_standard_montage` | 1e-12 to 0.005 |
-| `mne.channels.read_dig_captrak` | `FIFFLIB::FiffDigPointSet::readCaptrak` | equivalent | `test_fiff_dig_point_python` | 1e-06 |
-| `mne.channels.read_dig_dat` | `FIFFLIB::FiffDigPointSet::readNeuroscanDat` | equivalent | `test_fiff_dig_point_python` | 1e-06 |
-| `mne.channels.read_dig_egi` | `FIFFLIB::FiffDigPointSet::readEgi` | equivalent | `test_fiff_dig_point_python` | 1e-06 |
+| `mne.channels.read_dig_captrak` | `FIFFLIB::FiffDigMontage::read_captrak` | equivalent | `test_fiff_dig_point_python` | 1e-06 |
+| `mne.channels.read_dig_dat` | `FIFFLIB::FiffDigMontage::read_neuroscan_dat` | equivalent | `test_fiff_dig_point_python` | 1e-06 |
+| `mne.channels.read_dig_egi` | `FIFFLIB::FiffDigMontage::read_egi` | equivalent | `test_fiff_dig_point_python` | 1e-06 |
 | `mne.channels.read_dig_fif` | `FIFFLIB dig I/O` | equivalent | `test_fiff_dig_point_python` | 1e-06 |
-| `mne.channels.read_dig_localite` | `FIFFLIB::FiffDigPointSet::readLocalite` | equivalent | `test_fiff_dig_point_python` | 1e-06 |
-| `mne.channels.read_dig_polhemus_isotrak` | `FIFFLIB::FiffDigPointSet::readPolhemusIsotrak` | equivalent | `test_fiff_dig_point_python` | 1e-06 |
-| `mne.channels.read_polhemus_fastscan` | `FIFFLIB::FiffDigPointSet::readPolhemusFastscan` | equivalent | `test_fiff_dig_point_python` | 1e-06 |
+| `mne.channels.read_dig_localite` | `FIFFLIB::FiffDigMontage::read_localite` | equivalent | `test_fiff_dig_point_python` | 1e-06 |
+| `mne.channels.read_dig_polhemus_isotrak` | `FIFFLIB::FiffDigMontage::read_polhemus_isotrak` | equivalent | `test_fiff_dig_point_python` | 1e-06 |
+| `mne.channels.read_polhemus_fastscan` | `FIFFLIB::FiffDigMontage::read_polhemus_fastscan` | equivalent | `test_fiff_dig_point_python` | 1e-06 |
 | `mne.channels.transform_to_head` | `FiffDigPointSet::transform_to_head` | equivalent | `test_fiff_coord_trans` | 1e-07 to 1e-06 |
 | `mne.combine_evoked` | `FiffEvoked::combine` | equivalent | `test_fiff_io_evoked_info` | 1e-06 to 0.01 |
 | `mne.compute_proj_epochs` | `FiffProj::compute_from_raw` | equivalent | `test_fiff_core_python` | 1e-12 to 1e-09 |

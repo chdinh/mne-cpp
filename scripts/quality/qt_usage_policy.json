@@ -119,8 +119,8 @@
       ]
     },
     "fiff": {
-      "tokens": 1485,
-      "public_header_includes": 90,
+      "tokens": 1295,
+      "public_header_includes": 89,
       "modules": [
         "Core",
         "Network"
