@@ -87,6 +87,15 @@ void TestRtServerFiffReplay::streamsTheFile()
     QVERIFY2(command.hasCommand(QStringLiteral("simfile")),
              qPrintable(QStringLiteral("help reply: ") + command.readAvailableData().left(400) + "\nserver: " +
                         QString::fromUtf8(output + m_server.readAll())));
+    // A file the simulator cannot read is refused, and the simulator still accepts the next one.
+    QTemporaryDir dir;
+    QFile notFiff(dir.filePath(QStringLiteral("not_fiff.fif")));
+    QVERIFY(notFiff.open(QIODevice::WriteOnly));
+    notFiff.write("not a FIFF file");
+    notFiff.close();
+    command[QStringLiteral("simfile")].pValues()[0].setValue(notFiff.fileName());
+    command[QStringLiteral("simfile")].send();
+    QVERIFY(command.readAvailableData().contains(QStringLiteral("not set")));
     command[QStringLiteral("simfile")].pValues()[0].setValue(file);
     command[QStringLiteral("simfile")].send();
     QVERIFY(command.waitForDataAvailable(10000));
