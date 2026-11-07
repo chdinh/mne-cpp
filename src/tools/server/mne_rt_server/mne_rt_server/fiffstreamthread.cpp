@@ -199,6 +199,7 @@ void FiffStreamThread::sendMeasurementInfo(qint32 ID, const FiffInfo& p_fiffInfo
 
 void FiffStreamThread::writeClientId()
 {
+    QMutexLocker locker(&m_qMutex);
     FiffStream t_FiffStreamOut(&m_qSendBlock, QIODevice::WriteOnly | QIODevice::Append);
 
     t_FiffStreamOut.write_int(FIFF_MNE_RT_CLIENT_ID, &m_iDataClientId);
@@ -275,22 +276,14 @@ void FiffStreamThread::run()
         //
         // Write available data
         //
+        QByteArray t_qBlock;
         m_qMutex.lock();
-        qint32 t_iBlockSize = m_qSendBlock.size();
-        //        qDebug() << "data available" << t_iBlockSize;
-        if (t_iBlockSize > 0) {
-            qint32 t_iBytesWritten = t_qTcpSocket.write(m_qSendBlock);
-            //            qDebug() << ++i<< "[wrote bytes] " << t_iBytesWritten;
-            t_qTcpSocket.waitForBytesWritten();
-            if (t_iBytesWritten == t_iBlockSize) {
-                m_qSendBlock.clear();
-            } else {
-                //we have to store bytes which were not written to the socket, due to writing limit
-                //m_qSendBlock = m_qSendBlock.mid(t_iBytesWritten, t_iBlockSize-t_iBytesWritten);
-                m_qSendBlock.remove(0, t_iBytesWritten); //higher performance then mid
-            }
-        }
+        t_qBlock.swap(m_qSendBlock);
         m_qMutex.unlock();
+        // The socket buffers the block and flushes it in waitForReadyRead; blocking here would stall the producers.
+        if (!t_qBlock.isEmpty()) {
+            t_qTcpSocket.write(t_qBlock);
+        }
 
         //
         // Read: Wait 10ms for incomming tag header, read and continue

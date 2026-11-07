@@ -144,7 +144,12 @@ void TestRtServerFiffReplay::streamsTheFile()
         QVERIFY2(offset >= 0, "the received buffer is no segment of the file");
         QVERIFY(received == segment(offset + b));
     }
+    // A client that stops reading must not keep the server from answering commands.
+    QThread::msleep(1000);
+    QElapsedTimer reply;
+    reply.start();
     command[QStringLiteral("stop-all")].send();
+    QVERIFY2(reply.elapsed() < 2000, qPrintable(QStringLiteral("stop-all took %1 ms").arg(reply.elapsed())));
     data.disconnectFromHost();
     command.disconnectFromHost();
 }
