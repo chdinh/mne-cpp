@@ -154,7 +154,7 @@ public:
      *
      * @param[in] msecs  time to wait in milliseconds, if -1 function will not time out. Default value is 30000.
      *
-     * @return Command object related to command key word.
+     * @return true if a reply is available before the timeout.
      */
     bool waitForDataAvailable(qint32 msecs = 30000) const;
 

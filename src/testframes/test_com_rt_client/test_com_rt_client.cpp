@@ -140,6 +140,10 @@ void TestComRtClient::testRtCmdClientReadAvailableDataEmpty()
     // No data available before any connection
     QString data = client.readAvailableData();
     QVERIFY(data.isEmpty());
+    QElapsedTimer timer;
+    timer.start();
+    QVERIFY(!client.waitForDataAvailable(200));
+    QVERIFY(timer.elapsed() >= 150); // waits for the timeout before giving up
 }
 
 //=============================================================================================================

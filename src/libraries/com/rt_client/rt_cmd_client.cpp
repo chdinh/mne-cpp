@@ -29,7 +29,7 @@
 // QT INCLUDES
 //=============================================================================================================
 
-#include <QDateTime>
+#include <QDeadlineTimer>
 #include <QThread>
 
 #include <iostream>
@@ -301,9 +301,8 @@ bool RtCmdClient::waitForDataAvailable(qint32 msecs) const
     if (m_sAvailableData.size() > 0)
         return true;
 
-    qint64 t_msecsStart = QDateTime::currentMSecsSinceEpoch();
-
-    while (msecs == -1 || static_cast<qint64>(msecs) < QDateTime::currentMSecsSinceEpoch() - t_msecsStart) {
+    const QDeadlineTimer deadline(msecs); // -1 never expires
+    while (!deadline.hasExpired()) {
         QThread::msleep(5);
         if (m_sAvailableData.size() > 0)
             return true;
