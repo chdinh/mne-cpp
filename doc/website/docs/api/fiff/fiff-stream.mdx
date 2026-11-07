@@ -455,23 +455,18 @@ Read the CTF software compensation data from the given node
 
 ---
 
-### read_digitizer_data(p_Node, p_digData)
+### read_digitizer_data(node)
 
-Reimplemntation of load_digitizer_data (digitizer.c).
-
-Read the digitizer data from the given node.
+Reads the digitizer data below a node, as MNE-C's load_digitizer_data (digitizer.c): the points of its isotrak block in head coordinates, or of its MRI set in MRI coordinates.
 
 **Parameters:**
 
-- **p_Node** : *const [FiffDirNode](/docs/api/fiff/fiff-dir-node)::SPtr &*
-  The node of interest.
-
-- **p_digData** : *[FiffDigitizerData](/docs/api/fiff/fiff-digitizer-data) &*
-  The read digitizer data.
+- **node** : *const [FiffDirNode](/docs/api/fiff/fiff-dir-node)::SPtr &*
+  The node.
 
 **Returns:**
 
-- *bool* — true if succeeded, false otherwise.
+- *[Expected](/docs/api/utils/expected)&lt; [FiffDigitizerData](/docs/api/fiff/fiff-digitizer-data) &gt;* — The data, all points active, or NotFound if the node holds no digitizer points.
 
 ---
 

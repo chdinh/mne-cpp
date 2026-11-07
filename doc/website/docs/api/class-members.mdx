@@ -7,7 +7,7 @@ sidebar_position: 5
 
 # Class Members
 
-Index of 6707 public class members (functions, variables, typedefs, enums) across all documented classes.
+Index of 6705 public class members (functions, variables, typedefs, enums) across all documented classes.
 
 **Jump to:** [A](#a) · [B](#b) · [C](#c) · [D](#d) · [E](#e) · [F](#f) · [G](#g) · [H](#h) · [I](#i) · [J](#j) · [K](#k) · [L](#l) · [M](#m) · [N](#n) · [O](#o) · [P](#p) · [Q](#q) · [R](#r) · [S](#s) · [T](#t) · [U](#u) · [V](#v) · [W](#w) · [X](#x) · [Y](#y) · [Z](#z)
 
@@ -715,7 +715,7 @@ Index of 6707 public class members (functions, variables, typedefs, enums) acros
 - **close** `[fn]` in [PolhemusConnection](/docs/api/acq/polhemus-connection) — Close the active connection.
 - **close_stream** `[fn]` in [stream_inlet](/docs/api/lsl/stream_inlet) — Close the TCP connection to the outlet.
 - **closest** `[var]` in [FiffDigitizerData](/docs/api/fiff/fiff-digitizer-data) — Closest vertex number on the head surface.
-- **closest_point** `[var]` in [FiffDigitizerData](/docs/api/fiff/fiff-digitizer-data) — Closest vertex locations on the head surface (npoint x 3).
+- **closest_point** `[var]` in [FiffDigitizerData](/docs/api/fiff/fiff-digitizer-data) — Closest vertex locations on the head surface (points x 3).
 - **closestIndex** `[fn]` in [SourceEstimateManager](/docs/api/disp3-d/source-estimate-manager)
 - **closestSensorFieldIndex** `[slot]` in [BrainView](/docs/api/disp3-d/brain-view) — Find the closest sensor field time index for a given time in seconds.
 - **closestStcIndex** `[slot]` in [BrainView](/docs/api/disp3-d/brain-view) — Find the closest STC time index for a given time in seconds.
@@ -1126,7 +1126,7 @@ Index of 6707 public class members (functions, variables, typedefs, enums) acros
 - **convert_to_surf_ori** `[fn]` in [MNEForwardSolution](/docs/api/mne/mne-forward-solution) — Rotates a free-orientation solution into local surface coordinates (two tangential components, then the normal), using average patch normals when the source spaces carry them.
 - **coord_frame** `[var]` in [ComputeFwdSettings](/docs/api/fwd/compute-fwd-settings) — Can be changed with the mricoord option.
 - **coord_frame** `[var]` in [FiffChInfo](/docs/api/fiff/fiff-ch-info) — Coordinate Frame.
-- **coord_frame** `[var]` in [FiffDigitizerData](/docs/api/fiff/fiff-digitizer-data) — The coordinate frame of the above points.
+- **coord_frame** `[var]` in [FiffDigitizerData](/docs/api/fiff/fiff-digitizer-data) — The coordinate frame of the points.
 - **coord_frame** `[var]` in [FiffDigPoint](/docs/api/fiff/fiff-dig-point) — Newly added to stay consistent with fiff MATLAB implementation.
 - **coord_frame** `[var]` in [FwdCoil](/docs/api/fwd/fwd-coil) — Which coordinate frame are we in?
 - **coord_frame** `[var]` in [FwdCoilSet](/docs/api/fwd/fwd-coil-set) — Common coordinate frame.
@@ -1761,9 +1761,8 @@ Index of 6707 public class members (functions, variables, typedefs, enums) acros
 - **FiffCtfComp** `[fn]` in [FiffCtfComp](/docs/api/fiff/fiff-ctf-comp) — Constructs the CTF software compensation data.
 - **FiffCtfComp** `[fn]` in [FiffCtfComp](/docs/api/fiff/fiff-ctf-comp) — Copy constructor.
 - **FiffDataRef** `[fn]` in [FiffDataRef](/docs/api/fiff/fiff-data-ref) — Default constructor.
-- **FiffDigitizerData** `[fn]` in [FiffDigitizerData](/docs/api/fiff/fiff-digitizer-data) — Constructs the [`FiffDigitizerData`](/docs/api/fiff/fiff-digitizer-data).
-- **FiffDigitizerData** `[fn]` in [FiffDigitizerData](/docs/api/fiff/fiff-digitizer-data) — Copy constructor.
-- **FiffDigitizerData** `[fn]` in [FiffDigitizerData](/docs/api/fiff/fiff-digitizer-data) — Constructs a [`FiffDigitizerData`](/docs/api/fiff/fiff-digitizer-data) by reading a FIFF file.
+- **FiffDigitizerData** `[fn]` in [FiffDigitizerData](/docs/api/fiff/fiff-digitizer-data) — Constructs empty digitizer data.
+- **FiffDigitizerData** `[fn]` in [FiffDigitizerData](/docs/api/fiff/fiff-digitizer-data) — Reads the digitizer data of a FIFF file like `read()`; throws [`Error`](/docs/api/utils/error) if it cannot.
 - **FiffDigPoint** `[fn]` in [FiffDigPoint](/docs/api/fiff/fiff-dig-point) — Constructs the digitization point description.
 - **FiffDigPointSet** `[fn]` in [FiffDigPointSet](/docs/api/fiff/fiff-dig-point-set) — Constructs an empty set.
 - **FiffDigPointSet** `[fn]` in [FiffDigPointSet](/docs/api/fiff/fiff-dig-point-set) — Constructs a set holding `points`.
@@ -1824,7 +1823,7 @@ Index of 6707 public class members (functions, variables, typedefs, enums) acros
 - **FileByteStream** `[fn]` in [FileByteStream](/docs/api/utils/file-byte-stream)
 - **filename** `[var]` in [AverageDescription](/docs/api/fiff/average-description) — Output file.
 - **filename** `[var]` in [CovDescription](/docs/api/mne/cov-description) — Output file.
-- **filename** `[var]` in [FiffDigitizerData](/docs/api/fiff/fiff-digitizer-data) — Source file path.
+- **filename** `[var]` in [FiffDigitizerData](/docs/api/fiff/fiff-digitizer-data) — Source file.
 - **filename** `[var]` in [FiffInfoBase](/docs/api/fiff/fiff-info-base) — Filename when the info is read of a fiff file.
 - **filename** `[var]` in [MNEDeriv](/docs/api/mne/mne-deriv) — Source file name the derivation was loaded from.
 - **filename** `[var]` in [MNEMeasData](/docs/api/mne/mne-meas-data) — Path to the source FIFF file.
@@ -3745,7 +3744,7 @@ Index of 6707 public class members (functions, variables, typedefs, enums) acros
 - **nextEvent** `[var]` in [AverageCategory](/docs/api/fiff/average-category) — Require this event next.
 - **nextIgnore** `[var]` in [AverageCategory](/docs/api/fiff/average-category) — Ignore mask for next event.
 - **nextSample** `[fn]` in [FastrakParser](/docs/api/acq/fastrak-parser) — Pop the next fully-decoded sample, if any.
-- **nfids** `[fn]` in [FiffDigitizerData](/docs/api/fiff/fiff-digitizer-data) — Returns the number of MRI fiducial points (cardinal points transformed into MRI coordinates via head_mri_t_adj).
+- **nfids** `[fn]` in [FiffDigitizerData](/docs/api/fiff/fiff-digitizer-data)
 - **nfit** `[var]` in [fitUserRec](/docs/api/fwd/fit-user-rec)
 - **nfit** `[var]` in [FwdEegSphereModel](/docs/api/fwd/fwd-eeg-sphere-model) — How many?
 - **nframes** `[var]` in [MriVolData](/docs/api/mri/mri-vol-data) — Number of frames (scalar components per voxel).
@@ -3804,7 +3803,6 @@ Index of 6707 public class members (functions, variables, typedefs, enums) acros
 - **np** `[fn]` in [InvSensorSet](/docs/api/inv/inv-sensor-set)
 - **np** `[var]` in [MNEMeasDataSet](/docs/api/mne/mne-meas-data-set) — Number of time samples.
 - **np** `[var]` in [MNESurfaceOrVolume](/docs/api/mne/mne-surface-or-volume) — Number of vertices.
-- **npoint** `[var]` in [FiffDigitizerData](/docs/api/fiff/fiff-digitizer-data) — Number of points.
 - **nproj** `[var]` in [MNECovMatrix](/docs/api/mne/mne-cov-matrix) — Number of dimensions projected out.
 - **nrow** `[var]` in [FiffNamedMatrix](/docs/api/fiff/fiff-named-matrix) — Number of rows.
 - **nrow** `[var]` in [MNENamedMatrix](/docs/api/mne/mne-named-matrix) — Number of rows in `data`.
@@ -3963,7 +3961,6 @@ Index of 6707 public class members (functions, variables, typedefs, enums) acros
 - **operator=** `[fn]` in [FiffCoordTrans](/docs/api/fiff/fiff-coord-trans) — Copy assignment.
 - **operator=** `[fn]` in [FiffCov](/docs/api/fiff/fiff-cov) — Assignment Operator.
 - **operator=** `[fn]` in [FiffCtfComp](/docs/api/fiff/fiff-ctf-comp) — Copy assignment.
-- **operator=** `[fn]` in [FiffDigitizerData](/docs/api/fiff/fiff-digitizer-data) — Copy assignment operator (deep-copies unique_ptr members).
 - **operator=** `[fn]` in [FiffEvoked](/docs/api/fiff/fiff-evoked) — Copy assignment.
 - **operator=** `[fn]` in [FiffEvokedSet](/docs/api/fiff/fiff-evoked-set) — Copy assignment.
 - **operator=** `[fn]` in [FiffId](/docs/api/fiff/fiff-id) — Copy assignment.
@@ -4186,6 +4183,7 @@ Index of 6707 public class members (functions, variables, typedefs, enums) acros
 - **pick** `[fn]` in [MNENamedMatrix](/docs/api/mne/mne-named-matrix) — Create a sub-matrix by picking named rows and columns.
 - **pick** `[fn]` in [MNENamedVector](/docs/api/mne/mne-named-vector) — Pick elements from this named vector by name matching, writing them into a result vector ordered according to the supplied name list.
 - **pick** `[fn]` in [RayPicker](/docs/api/disp3-d/ray-picker) — Cast a ray against all surfaces in the scene.
+- **pick_cardinal_fiducials** `[fn]` in [FiffDigitizerData](/docs/api/fiff/fiff-digitizer-data) — Sets mri_fids to the cardinal points moved into MRI coordinates by head_mri_t_adj, as MNE-C's update_fids_from_dig_data (mne_analyze/adjust_alignment.c); clears them without that transform.
 - **pick_channels** `[fn]` in [Fiff](/docs/api/fiff/fiff-class) — fiff_pick_channels
 - **pick_channels** `[fn]` in [Fiff](/docs/api/fiff/fiff-class) — fiff_pick_channels_evoked
 - **pick_channels** `[fn]` in [FiffCov](/docs/api/fiff/fiff-cov) — python pick_channels_cov
@@ -4214,7 +4212,6 @@ Index of 6707 public class members (functions, variables, typedefs, enums) acros
 - **pick_types** `[fn]` in [FiffInfoBase](/docs/api/fiff/fiff-info-base)
 - **pick_types** `[fn]` in [FiffInfoBase](/docs/api/fiff/fiff-info-base) — fiff_pick_types
 - **pick_types** `[fn]` in [MNEForwardSolution](/docs/api/mne/mne-forward-solution) — mne.fiff.pick_types_forward
-- **pickCardinalFiducials** `[fn]` in [FiffDigitizerData](/docs/api/fiff/fiff-digitizer-data) — Extracts cardinal digitizer points (LPA, Nasion, RPA) from the digitizer point list and transforms them into MRI coordinates using head_mri_t_adj, populating the mri_fids list.
 - **picked** `[var]` in [MNEMshDisplaySurface](/docs/api/mne/mne-msh-display-surface) — Picked locations in world coordinates.
 - **picked** `[signal]` in [MultimodalScene](/docs/api/disp3-d/multimodal-scene) — Emitted when a pick is reported.
 - **pickFiducials** `[signal]` in [CoregSettingsView](/docs/api/disp/coreg-settings-view) — Emit this signal whenever fiducial picking from 3DView should be activated.
@@ -4316,7 +4313,7 @@ Index of 6707 public class members (functions, variables, typedefs, enums) acros
 - **prevEvent** `[var]` in [AverageCategory](/docs/api/fiff/average-category) — Require this event just before.
 - **prevIgnore** `[var]` in [AverageCategory](/docs/api/fiff/average-category) — Ignore mask for previous event.
 - **print** `[fn]` in [FiffCoordTrans](/docs/api/fiff/fiff-coord-trans) — Prints the coordinate transform.
-- **print** `[fn]` in [FiffDigitizerData](/docs/api/fiff/fiff-digitizer-data) — Prints class contents.
+- **print** `[fn]` in [FiffDigitizerData](/docs/api/fiff/fiff-digitizer-data) — Prints the number of points, their frame, the HPI coils and the number of MRI fiducials.
 - **print** `[fn]` in [FiffDirNode](/docs/api/fiff/fiff-dir-node) — Prints this block and its sub-blocks like MNE-C's fiff_dir_tree: one line per block with its id, one line per run of equal tag kinds with the run length in brackets, sub-blocks indented by five.
 - **print** `[fn]` in [FiffId](/docs/api/fiff/fiff-id) — Prints the id.
 - **print** `[fn]` in [FiffInfo](/docs/api/fiff/fiff-info) — Prints class contents.
@@ -4470,6 +4467,7 @@ Index of 6707 public class members (functions, variables, typedefs, enums) acros
 - **read** `[fn]` in [FiffCoordTrans](/docs/api/fiff/fiff-coord-trans) — Reads the transform between two coordinate frames from a FIFF file; one stored the other way round is returned inverted.
 - **read** `[fn]` in [FiffCoordTransSet](/docs/api/fiff/fiff-coord-trans-set) — Takes every transform of the chain stored in a FIFF file, such as a `-trans.fif` file or a `COR.fif` MRI set (MNE-C mne_collect_transforms).
 - **read** `[fn]` in [FiffCov](/docs/api/fiff/fiff-cov) — Reads the noise covariance stored in a FIFF file, like mne.read_cov.
+- **read** `[fn]` in [FiffDigitizerData](/docs/api/fiff/fiff-digitizer-data) — Reads the digitizer data of a FIFF file: the points of its isotrak block in head coordinates, or of its MRI set in MRI coordinates.
 - **read** `[fn]` in [FiffDigPointSet](/docs/api/fiff/fiff-dig-point-set) — Reads the digitizer points of a FIFF file, like mne.io.read_info(path)["dig"].
 - **read** `[fn]` in [FiffDigPointSet](/docs/api/fiff/fiff-dig-point-set) — Reads the digitizer points of the isotrak block of a FIFF stream, opening it if needed.
 - **read** `[fn]` in [FiffEvents](/docs/api/fiff/fiff-events) — Reads an event file, like mne.read_events: a FIFF file if its name holds ".fif", text otherwise.
@@ -4523,7 +4521,7 @@ Index of 6707 public class members (functions, variables, typedefs, enums) acros
 - **read_csv** `[fn]` in [FiffAnnotations](/docs/api/fiff/fiff-annotations) — Reads annotations from a CSV file ("onset,duration,description" after a header row); rows whose onset or duration is not a number are skipped.
 - **read_ctf_comp** `[fn]` in [FiffStream](/docs/api/fiff/fiff-stream) — fiff_read_ctf_comp
 - **read_curv** `[fn]` in [FsSurface](/docs/api/fs/fs-surface) — reads a binary curvature file into a vector
-- **read_digitizer_data** `[fn]` in [FiffStream](/docs/api/fiff/fiff-stream) — Reimplemntation of load_digitizer_data (digitizer.c).
+- **read_digitizer_data** `[fn]` in [FiffStream](/docs/api/fiff/fiff-stream) — Reads the digitizer data below a node, as MNE-C's load_digitizer_data (digitizer.c): the points of its isotrak block in head coordinates, or of its MRI set in MRI coordinates.
 - **read_dipoles_dip** `[fn]` in [InvEcdSet](/docs/api/inv/inv-ecd-set) — Read dipoles from the dip format compatible with mrilab.
 - **read_egi** `[fn]` in [FiffDigMontage](/docs/api/fiff/fiff-dig-montage) — Reads the coordinates.xml of an EGI MFF recording, as mne.channels.read_dig_egi does.
 - **read_eigen_matrix** `[fn]` in [IOUtils](/docs/api/utils/io-utils) — Read Eigen Matrix from file (QString path).
