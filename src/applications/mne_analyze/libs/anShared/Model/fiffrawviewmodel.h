@@ -876,8 +876,8 @@ public:
         }
     }
 
-    ChannelData(const std::list<QSharedPointer<QPair<MatrixXd, MatrixXd>>> data,
-                unsigned long rowNumber)
+    ChannelData(const std::list<QSharedPointer<QPair<MatrixXd, MatrixXd>>>& data,
+                quint32 rowNumber)
     : ChannelData(data.begin(), static_cast<qint32>(data.size()), rowNumber)
     {
     }
