@@ -108,7 +108,7 @@ Tolerance is the range of comparison thresholds the test asserts (`exact` when i
 | `mne.grade_to_vertices` | `MNESourceSpace::gradeToVertices` | equivalent | `test_mne_source_space_ops_python` | 1e-06 to 1e-05 |
 | `mne.inverse_sparse.gamma_map` | `InvGammaMap` | equivalent | `test_inv_sparse` | exact |
 | `mne.inverse_sparse.mixed_norm` | `InvMxne` | equivalent | `test_inv_sparse` | exact |
-| `mne.io.Raw` | `FiffRawData` | equivalent | `test_fiff_raw_io` | exact |
+| `mne.io.Raw` | `FiffRawData` | equivalent | `test_fiff_raw_formats_python` | 1e-12 to 1e-06 |
 | `mne.io.fiff.FiffStream` | `FiffStream` | equivalent | `test_fiff_raw_io` | exact |
 | `mne.io.read_info` | `FiffInfo::read` | equivalent | `test_fiff_stream_python` | 1e-07 to 1e-05 |
 | `mne.io.read_raw_bdf` | `BIDSLIB::EDFReader / mne_edf2fiff (CLI)` | equivalent | `test_bids` | 1e-07 to 0.001 |

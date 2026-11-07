@@ -58,7 +58,7 @@ Find nodes of the given kind from a directory tree structure
 
 **Returns:**
 
-- *QList&lt; [FiffDirNode](/docs/api/fiff/fiff-dir-node)::SPtr &gt;* — the found nodes.
+- *std::vector&lt; [FiffDirNode](/docs/api/fiff/fiff-dir-node)::SPtr &gt;* — the found nodes.
 
 ---
 
@@ -403,7 +403,7 @@ function [fid,cals] = fiff_start_writing_raw(name,info,sel)
 
 FIFF library: measurement info, channels, digitizer, transforms, projectors, covariance, events, annotations, evoked sets and the low-level file structure.
 
-````cpp title="src/examples/ex_fiff_api/main.cpp, line 267"
+````cpp title="src/examples/ex_fiff_api/main.cpp, line 265"
 QFile facadeFile(dir + "/sample_audvis_trunc_raw.fif");
 std::unique_ptr<FiffStream> facadeStream;
 const bool facadeOpened = Fiff::open(facadeFile, facadeStream); // static wrappers around FiffStream

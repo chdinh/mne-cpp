@@ -23,10 +23,8 @@ On-disk layout is a 20-byte record (version + 2x4-byte machine ID + 8-byte [`Fif
 QFile structureFile(dir + "/sample_audvis-ave.fif");
 FiffStream stream(&structureFile);
 const bool opened = stream.open();
-const QList<FiffDirNode::SPtr> measNodes = stream.dirtree()->dir_tree_find(FIFFB_MEAS_INFO);
-std::unique_ptr<FiffTag> tag;
-const bool hasNchan = measNodes.first()->find_tag(stream, FIFF_NCHAN, tag); // raw tag access
-const int nchanTag = *tag->toInt();
+const std::vector<FiffDirNode::SPtr> measNodes = stream.dirtree()->dir_tree_find(FIFFB_MEAS_INFO);
+const std::optional<FiffTag> nchan = measNodes.front()->find_tag(stream, FIFF_NCHAN); // raw tag access
 const FiffId fileId = stream.id();
 stream.close();
 ```
@@ -179,13 +177,13 @@ Size of the old struct (fiffIdRec) 5*int = 5*4 = 20.
 
 FIFF library: measurement info, channels, digitizer, transforms, projectors, covariance, events, annotations, evoked sets and the low-level file structure.
 
-````cpp title="src/examples/ex_fiff_api/main.cpp, line 218"
-std::unique_ptr<FiffTag> tag;
-const bool hasNchan = measNodes.first()->find_tag(stream, FIFF_NCHAN, tag); // raw tag access
-const int nchanTag = *tag->toInt();
+````cpp title="src/examples/ex_fiff_api/main.cpp, line 216"
+const bool opened = stream.open();
+const std::vector<FiffDirNode::SPtr> measNodes = stream.dirtree()->dir_tree_find(FIFFB_MEAS_INFO);
+const std::optional<FiffTag> nchan = measNodes.front()->find_tag(stream, FIFF_NCHAN); // raw tag access
 const FiffId fileId = stream.id();
 stream.close();
-ok &= expect(opened && measNodes.size() == 1 && hasNchan && nchanTag == 376 && !fileId.isEmpty() && fileId.version > 0,
+ok &= expect(opened && measNodes.size() == 1 && nchan && *nchan->toInt() == 376 && !fileId.isEmpty() && fileId.version > 0,
              "FiffStream/FiffDirNode/FiffTag/FiffId: the FIFF_NCHAN tag of the measurement block reads 376");
 ````
 

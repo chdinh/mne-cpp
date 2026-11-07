@@ -157,9 +157,9 @@
       "python": "mne.io.Raw",
       "claimed": "implemented",
       "equivalence": "equivalent",
-      "test": "test_fiff_raw_io",
+      "test": "test_fiff_raw_formats_python",
       "evidence": "cross-validated-static",
-      "tolerance": "exact"
+      "tolerance": "1e-12 to 1e-06"
     },
     {
       "source": "classes",

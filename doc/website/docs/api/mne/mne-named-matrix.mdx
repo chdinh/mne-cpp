@@ -147,7 +147,7 @@ Reads a two-dimensional tagged matrix of the given `kind` from `node` (or its fi
 - **stream** : *[FiffStream](/docs/api/fiff/fiff-stream) &*
   Open FIFF stream to read from.
 
-- **node** : *const QSharedPointer&lt;[FiffDirNode](/docs/api/fiff/fiff-dir-node)&gt; &*
+- **node** : *const std::shared_ptr&lt; [FiffDirNode](/docs/api/fiff/fiff-dir-node) &gt; &*
   Directory node that contains (or is) the named-matrix block.
 
 - **kind** : *int*

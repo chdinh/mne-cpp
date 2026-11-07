@@ -29,10 +29,8 @@ Reads or writes one `QIODevice`. Builds the FIFF directory and [`FiffDirNode`](/
 QFile structureFile(dir + "/sample_audvis-ave.fif");
 FiffStream stream(&structureFile);
 const bool opened = stream.open();
-const QList<FiffDirNode::SPtr> measNodes = stream.dirtree()->dir_tree_find(FIFFB_MEAS_INFO);
-std::unique_ptr<FiffTag> tag;
-const bool hasNchan = measNodes.first()->find_tag(stream, FIFF_NCHAN, tag); // raw tag access
-const int nchanTag = *tag->toInt();
+const std::vector<FiffDirNode::SPtr> measNodes = stream.dirtree()->dir_tree_find(FIFFB_MEAS_INFO);
+const std::optional<FiffTag> nchan = measNodes.front()->find_tag(stream, FIFF_NCHAN); // raw tag access
 const FiffId fileId = stream.id();
 stream.close();
 ```
@@ -245,7 +243,7 @@ Helper to get all evoked entries.
 
 **Parameters:**
 
-- **evoked_node** : *const QList&lt; [FiffDirNode](/docs/api/fiff/fiff-dir-node)::SPtr &gt; &*
+- **evoked_node** : *const std::vector&lt; [FiffDirNode](/docs/api/fiff/fiff-dir-node)::SPtr &gt; &*
   evoked tree nodes.
 
 - **comments** : *QStringList &*
@@ -558,80 +556,61 @@ Read the SSP data under a given directory node.
 
 ---
 
-### read_tag_data(p_pTag, pos)
+### read_tag_data(tag, pos)
 
-Read tag data from a fif file.
-
-if pos is not provided, reading starts from the current file position
+Reads the payload of a tag whose header `read_tag_info()` has read.
 
 **Parameters:**
 
-- **p_pTag** : *std::unique_ptr&lt; [FiffTag](/docs/api/fiff/fiff-tag) &gt; &*
-  the read tag.
+- **tag** : *[FiffTag](/docs/api/fiff/fiff-tag) &*
+  The tag; its payload is filled in, in host byte order.
 
 - **pos** : *fiff_long_t*
-  position of the tag inside the fif file.
+  Where the payload starts, or -1 for the current position.
 
 **Returns:**
 
-- *bool* — true if succeeded, false otherwise.
+- *bool* — Whether the payload could be read.
 
 ---
 
-### read_tag_info(p_pTag, p_bDoSkip)
+### read_tag_info(skip)
 
-Read tag information of one tag from a fif file.
-
-if pos is not provided, reading starts from the current file position
+Reads the header of the tag at the current position.
 
 **Parameters:**
 
-- **p_pTag** : *std::unique_ptr&lt; [FiffTag](/docs/api/fiff/fiff-tag) &gt; &*
-  the read tag info.
-
-- **p_bDoSkip** : *bool*
-  if true it skips the data of the tag (optional, default = true).
+- **skip** : *bool*
+  Move on to the next tag instead of stopping at the payload.
 
 **Returns:**
 
-- *fiff_long_t* — the position where the tag info was read from.
+- *std::optional&lt; [FiffTag](/docs/api/fiff/fiff-tag) &gt;* — The tag with its size but without payload, or nothing if the stream ends.
 
 ---
 
-### read_rt_tag(p_pTag)
+### read_rt_tag()
 
-Read one tag from a fif real-time stream.
-
-difference to the other read tag functions is: that this function has blocking behaviour (waitForReadyRead)
-
-**Parameters:**
-
-- **p_pTag** : *std::unique_ptr&lt; [FiffTag](/docs/api/fiff/fiff-tag) &gt; &*
-  the read tag.
+Reads the next tag of a real-time stream, waiting until it has arrived.
 
 **Returns:**
 
-- *bool* — true if succeeded, false otherwise.
+- *std::optional&lt; [FiffTag](/docs/api/fiff/fiff-tag) &gt;* — The tag, or nothing if it cannot be read.
 
 ---
 
-### read_tag(p_pTag, pos)
+### read_tag(pos)
 
-Read one tag from a fif file.
-
-if pos is not provided, reading starts from the current file position
+Reads one tag, with its payload in host byte order.
 
 **Parameters:**
-
-- **p_pTag** : *std::unique_ptr&lt; [FiffTag](/docs/api/fiff/fiff-tag) &gt; &*
-  the read tag.
 
 - **pos** : *fiff_long_t*
-  position of the tag inside the fif file.
+  Where the tag starts, or -1 for the current position.
 
 **Returns:**
 
-- *bool* — true if succeeded, false otherwise.
+- *std::optional&lt; [FiffTag](/docs/api/fiff/fiff-tag) &gt;* — The tag, or nothing if it cannot be read.
 
 ---
 
@@ -650,23 +629,21 @@ Writes a FIFF_BLOCK_START tag.
 
 ---
 
-### write_tag(p_pTag, pos)
+### write_tag(tag, pos)
 
-Write one tag to file including its data Data is not written if it is nullptr.
-
-The payload is taken in host byte order (as read_tag returns it).
+Writes one tag; its payload is taken in host byte order, as `read_tag()` returns it.
 
 **Parameters:**
 
-- **p_pTag** : *const std::unique_ptr&lt; [FiffTag](/docs/api/fiff/fiff-tag) &gt; &*
-  Tag to write;.
+- **tag** : *const [FiffTag](/docs/api/fiff/fiff-tag) &*
+  The tag.
 
 - **pos** : *fiff_long_t*
-  the position where the entires should be written to (default -1, i.e. end of the file).
+  Where to write it, or -1 for the end of the file.
 
 **Returns:**
 
-- *fiff_long_t* — the position where the tag struct was written to.
+- *fiff_long_t* — The position the tag was written to.
 
 ---
 
@@ -1393,13 +1370,11 @@ FIFF library: measurement info, channels, digitizer, transforms, projectors, cov
 QFile structureFile(dir + "/sample_audvis-ave.fif");
 FiffStream stream(&structureFile);
 const bool opened = stream.open();
-const QList<FiffDirNode::SPtr> measNodes = stream.dirtree()->dir_tree_find(FIFFB_MEAS_INFO);
-std::unique_ptr<FiffTag> tag;
-const bool hasNchan = measNodes.first()->find_tag(stream, FIFF_NCHAN, tag); // raw tag access
-const int nchanTag = *tag->toInt();
+const std::vector<FiffDirNode::SPtr> measNodes = stream.dirtree()->dir_tree_find(FIFFB_MEAS_INFO);
+const std::optional<FiffTag> nchan = measNodes.front()->find_tag(stream, FIFF_NCHAN); // raw tag access
 const FiffId fileId = stream.id();
 stream.close();
-ok &= expect(opened && measNodes.size() == 1 && hasNchan && nchanTag == 376 && !fileId.isEmpty() && fileId.version > 0,
+ok &= expect(opened && measNodes.size() == 1 && nchan && *nchan->toInt() == 376 && !fileId.isEmpty() && fileId.version > 0,
              "FiffStream/FiffDirNode/FiffTag/FiffId: the FIFF_NCHAN tag of the measurement block reads 376");
 ````
 

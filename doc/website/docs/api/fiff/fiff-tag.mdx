@@ -23,10 +23,8 @@ Holds the four header fields exactly as stored on disk and a `QByteArray` with t
 QFile structureFile(dir + "/sample_audvis-ave.fif");
 FiffStream stream(&structureFile);
 const bool opened = stream.open();
-const QList<FiffDirNode::SPtr> measNodes = stream.dirtree()->dir_tree_find(FIFFB_MEAS_INFO);
-std::unique_ptr<FiffTag> tag;
-const bool hasNchan = measNodes.first()->find_tag(stream, FIFF_NCHAN, tag); // raw tag access
-const int nchanTag = *tag->toInt();
+const std::vector<FiffDirNode::SPtr> measNodes = stream.dirtree()->dir_tree_find(FIFFB_MEAS_INFO);
+const std::optional<FiffTag> nchan = measNodes.front()->find_tag(stream, FIFF_NCHAN); // raw tag access
 const FiffId fileId = stream.id();
 stream.close();
 ```
@@ -375,7 +373,7 @@ Either of these may be specified as FIFFV_LITTLE_ENDIAN, FIFFV_BIG_ENDIAN, or FI
 
 **Parameters:**
 
-- **tag** : *const FiffTag::UPtr &*
+- **tag** : *[FiffTag](/docs/api/fiff/fiff-tag) &*
   Matrix tag whose dimensions, indices and data are byte-swapped in place; non-matrix tags are left untouched.
 
 ---
@@ -386,7 +384,7 @@ Convert matrix data before writing to a file inside a fiff tag.
 
 **Parameters:**
 
-- **tag** : *const FiffTag::UPtr &*
+- **tag** : *[FiffTag](/docs/api/fiff/fiff-tag) &*
   matrix data to convert.
 
 ---
@@ -401,7 +399,7 @@ Either of these may be specified as FIFFV_LITTLE_ENDIAN, FIFFV_BIG_ENDIAN, or FI
 
 **Parameters:**
 
-- **tag** : *const FiffTag::UPtr &*
+- **tag** : *[FiffTag](/docs/api/fiff/fiff-tag) &*
   matrix data to convert.
 
 - **from_endian** : *int*
@@ -485,13 +483,11 @@ FIFF library: measurement info, channels, digitizer, transforms, projectors, cov
 ````cpp title="src/examples/ex_fiff_api/main.cpp, line 215"
 FiffStream stream(&structureFile);
 const bool opened = stream.open();
-const QList<FiffDirNode::SPtr> measNodes = stream.dirtree()->dir_tree_find(FIFFB_MEAS_INFO);
-std::unique_ptr<FiffTag> tag;
-const bool hasNchan = measNodes.first()->find_tag(stream, FIFF_NCHAN, tag); // raw tag access
-const int nchanTag = *tag->toInt();
+const std::vector<FiffDirNode::SPtr> measNodes = stream.dirtree()->dir_tree_find(FIFFB_MEAS_INFO);
+const std::optional<FiffTag> nchan = measNodes.front()->find_tag(stream, FIFF_NCHAN); // raw tag access
 const FiffId fileId = stream.id();
 stream.close();
-ok &= expect(opened && measNodes.size() == 1 && hasNchan && nchanTag == 376 && !fileId.isEmpty() && fileId.version > 0,
+ok &= expect(opened && measNodes.size() == 1 && nchan && *nchan->toInt() == 376 && !fileId.isEmpty() && fileId.version > 0,
              "FiffStream/FiffDirNode/FiffTag/FiffId: the FIFF_NCHAN tag of the measurement block reads 376");
 ````
 

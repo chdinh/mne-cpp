@@ -4134,7 +4134,9 @@
         "windows-2025-vs2026": "run",
         "windows-2025-vs2026-qt-min": "run"
       },
-      "registry_classes": []
+      "registry_classes": [
+        "FiffRawData"
+      ]
     },
     {
       "name": "test_fiff_raw_io",
@@ -4171,7 +4173,6 @@
         "windows-2025-vs2026-qt-min": "run"
       },
       "registry_classes": [
-        "FiffRawData",
         "FiffStream"
       ]
     },

@@ -370,14 +370,12 @@ int main(int argc, char* argv[])
     QFile structureFile(dir + "/sample_audvis-ave.fif");
     FiffStream stream(&structureFile);
     const bool opened = stream.open();
-    const QList<FiffDirNode::SPtr> measNodes = stream.dirtree()->dir_tree_find(FIFFB_MEAS_INFO);
-    std::unique_ptr<FiffTag> tag;
-    const bool hasNchan = measNodes.first()->find_tag(stream, FIFF_NCHAN, tag); // raw tag access
-    const int nchanTag = *tag->toInt();
+    const std::vector<FiffDirNode::SPtr> measNodes = stream.dirtree()->dir_tree_find(FIFFB_MEAS_INFO);
+    const std::optional<FiffTag> nchan = measNodes.front()->find_tag(stream, FIFF_NCHAN); // raw tag access
     const FiffId fileId = stream.id();
     stream.close();
     //! [fiff_stream_usage]
-    ok &= expect(opened && measNodes.size() == 1 && hasNchan && nchanTag == 376 && !fileId.isEmpty() && fileId.version > 0,
+    ok &= expect(opened && measNodes.size() == 1 && nchan && *nchan->toInt() == 376 && !fileId.isEmpty() && fileId.version > 0,
                  "FiffStream/FiffDirNode/FiffTag/FiffId: the FIFF_NCHAN tag of the measurement block reads 376");
 
     //! [fiff_explain_usage]

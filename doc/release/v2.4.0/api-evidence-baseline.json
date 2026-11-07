@@ -8922,7 +8922,7 @@
       "exported": true,
       "registered": true,
       "registry_status": "done",
-      "test": "test_fiff_raw_io",
+      "test": "test_fiff_raw_formats_python",
       "test_resolves": true,
       "example": "ex_read_raw",
       "example_state": "built",
