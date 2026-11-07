@@ -77,7 +77,7 @@ int main(int argc, char* argv[])
     parser.process(a);
 
     //generate FiffEvokedSet
-    FiffEvokedSet p_FiffEvokedSet(parser.value(evokedFileOption).toStdString());
+    FiffEvokedSet p_FiffEvokedSet(parser.value(evokedFileOption).toStdU16String());
 
     //mne_ex_evoked_grad_amp.m example
     fiff_int_t coil1, coil2;

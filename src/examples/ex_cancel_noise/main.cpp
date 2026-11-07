@@ -73,7 +73,7 @@ int main(int argc, char* argv[])
     parser.process(app);
 
     //generate FiffEvokedSet
-    FiffEvokedSet p_FiffEvokedSet(parser.value(evokedFileOption).toStdString());
+    FiffEvokedSet p_FiffEvokedSet(parser.value(evokedFileOption).toStdU16String());
 
     //cancelNoise example
     qint32 comp_now = p_FiffEvokedSet.info.get_current_comp();

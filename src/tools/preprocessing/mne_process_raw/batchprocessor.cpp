@@ -316,7 +316,9 @@ int BatchProcessor::run(const ProcessingSettings& settings)
             }
 
             if (!aveSaveName.isEmpty()) {
-                evokedSet.save(aveSaveName.toStdU16String());
+                if (const auto saved = evokedSet.save(aveSaveName.toStdU16String()); !saved) {
+                    qCritical("%s", saved.error().what());
+                }
             }
             writeLog(aveLogName, aveLog);
 
@@ -428,7 +430,9 @@ int BatchProcessor::run(const ProcessingSettings& settings)
                 grandAvg.evoked.append(avg);
             }
             if (!grandAvg.evoked.isEmpty()) {
-                grandAvg.save(settings.grandAveFile.toStdU16String());
+                if (const auto saved = grandAvg.save(settings.grandAveFile.toStdU16String()); !saved) {
+                    qCritical("%s", saved.error().what());
+                }
             }
         }
 

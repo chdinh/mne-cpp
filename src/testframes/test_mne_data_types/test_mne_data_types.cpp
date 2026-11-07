@@ -350,7 +350,7 @@ private slots:
         if (!QFile::exists(avePath)) {
             QSKIP("Sample evoked file not found");
         }
-        FiffEvokedSet es(avePath.toStdString());
+        FiffEvokedSet es(avePath.toStdU16String());
         if (es.evoked.isEmpty()) {
             QSKIP("Failed to read evoked set");
         }
@@ -1285,9 +1285,7 @@ private slots:
         if (!QFile::exists(avePath))
             QSKIP("sample_audvis-ave.fif not found");
 
-        FiffEvokedSet evokedSet;
-        bool ok = FiffEvokedSet::read(avePath.toStdString(), evokedSet);
-        QVERIFY(ok);
+        FiffEvokedSet evokedSet(avePath.toStdU16String());
         QVERIFY(evokedSet.evoked.size() > 0);
 
         // Test pick_channels with include list
@@ -1306,18 +1304,14 @@ private slots:
         if (!QFile::exists(avePath))
             QSKIP("sample_audvis-ave.fif not found");
 
-        FiffEvokedSet evokedSet;
-        FiffEvokedSet::read(avePath.toStdString(), evokedSet);
+        FiffEvokedSet evokedSet(avePath.toStdU16String());
 
         // Save to temp file
         QString tmpPath = QDir::tempPath() + "/test_evoked_set_save.fif";
-        bool ok = evokedSet.save(tmpPath.toStdString());
-        QVERIFY(ok);
+        QVERIFY(evokedSet.save(tmpPath.toStdU16String()));
 
         // Read back and verify
-        FiffEvokedSet readBack;
-        ok = FiffEvokedSet::read(tmpPath.toStdString(), readBack);
-        QVERIFY(ok);
+        FiffEvokedSet readBack(tmpPath.toStdU16String());
         QCOMPARE(readBack.evoked.size(), evokedSet.evoked.size());
 
         QFile::remove(tmpPath);

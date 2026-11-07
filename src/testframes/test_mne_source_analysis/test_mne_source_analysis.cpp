@@ -70,10 +70,8 @@ private slots:
         if (!QFile::exists(m_sEvokedFile))
             QSKIP("Evoked file not found");
 
-        FiffEvokedSet evokedSet;
-        bool ok = FiffEvokedSet::read(m_sEvokedFile.toStdString(), evokedSet, QPair<float, float>(-0.2f, 0.0f), true);
+        FiffEvokedSet evokedSet(m_sEvokedFile.toStdU16String(), {{-0.2f, 0.0f}}, true);
 
-        QVERIFY(ok);
         QVERIFY(!evokedSet.info.isEmpty());
         QVERIFY(evokedSet.evoked.size() > 0);
         QVERIFY(evokedSet.info.nchan > 0);
@@ -84,8 +82,7 @@ private slots:
         if (!QFile::exists(m_sEvokedFile))
             QSKIP("Evoked file not found");
 
-        FiffEvokedSet evokedSet;
-        FiffEvokedSet::read(m_sEvokedFile.toStdString(), evokedSet, QPair<float, float>(-0.2f, 0.0f), true);
+        FiffEvokedSet evokedSet(m_sEvokedFile.toStdU16String(), {{-0.2f, 0.0f}}, true);
 
         StringList include;
         include.push_back("MEG0111");
@@ -102,8 +99,7 @@ private slots:
         if (!QFile::exists(m_sEvokedFile))
             QSKIP("Evoked file not found");
 
-        FiffEvokedSet evokedSet;
-        FiffEvokedSet::read(m_sEvokedFile.toStdString(), evokedSet, QPair<float, float>(-0.2f, 0.0f), true);
+        FiffEvokedSet evokedSet(m_sEvokedFile.toStdU16String(), {{-0.2f, 0.0f}}, true);
 
         QVERIFY(!evokedSet.evoked.isEmpty());
         FiffEvoked& evoked = evokedSet.evoked[0];
@@ -118,8 +114,7 @@ private slots:
         if (!QFile::exists(m_sEvokedFile))
             QSKIP("Evoked file not found");
 
-        FiffEvokedSet evokedSet;
-        FiffEvokedSet::read(m_sEvokedFile.toStdString(), evokedSet, QPair<float, float>(-0.2f, 0.0f), true);
+        FiffEvokedSet evokedSet(m_sEvokedFile.toStdU16String(), {{-0.2f, 0.0f}}, true);
 
         StringList include;
         include.push_back("MEG0111");
@@ -134,23 +129,16 @@ private slots:
             QSKIP("Evoked file not found");
 
         // Read without baseline correction for clean round-trip
-        FiffEvokedSet evokedSet;
-        FiffEvokedSet::read(m_sEvokedFile.toStdString(), evokedSet);
+        FiffEvokedSet evokedSet(m_sEvokedFile.toStdU16String());
 
         QString tmpFile = QDir::tempPath() + "/test_evoked_roundtrip.fif";
-        bool saved = evokedSet.save(tmpFile.toStdString());
-        QVERIFY2(saved, "FiffEvokedSet::save() returned false");
+        QVERIFY2(evokedSet.save(tmpFile.toStdU16String()), "FiffEvokedSet::save() returned false");
 
         QFileInfo fi(tmpFile);
         QVERIFY(fi.exists() && fi.size() > 0);
 
-        FiffEvokedSet reloaded;
-        bool ok = FiffEvokedSet::read(tmpFile.toStdString(), reloaded);
-        if (ok) {
-            QCOMPARE(reloaded.evoked.size(), evokedSet.evoked.size());
-        } else {
-            qWarning("Re-read of saved evoked set failed — save() code path was still exercised");
-        }
+        FiffEvokedSet reloaded(tmpFile.toStdU16String());
+        QCOMPARE(reloaded.evoked.size(), evokedSet.evoked.size());
         QFile::remove(tmpFile);
     }
 
@@ -457,8 +445,7 @@ private slots:
             QSKIP("Data files not found");
 
         // Read evoked
-        FiffEvokedSet evokedSet;
-        FiffEvokedSet::read(m_sEvokedFile.toStdString(), evokedSet, QPair<float, float>(-0.2f, 0.0f), true);
+        FiffEvokedSet evokedSet(m_sEvokedFile.toStdU16String(), {{-0.2f, 0.0f}}, true);
         QVERIFY(evokedSet.evoked.size() > 0);
 
         // Read forward

@@ -391,10 +391,11 @@ QStringList DataLoader::probeEvokedSets(const QString& evokedPath)
         return result;
     }
 
-    FiffEvokedSet evokedSet;
-    if (!FiffEvokedSet::read(evokedPath.toStdU16String(), evokedSet)) {
+    const auto read = FiffEvokedSet::read(evokedPath.toStdU16String());
+    if (!read) {
         return result;
     }
+    const FiffEvokedSet& evokedSet = *read;
     for (int i = 0; i < evokedSet.evoked.size(); ++i) {
         const auto& ev = evokedSet.evoked.at(i);
         QString label = QString("%1: %2 (%3, nave=%4)")

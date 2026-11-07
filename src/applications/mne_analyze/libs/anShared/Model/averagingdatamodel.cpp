@@ -156,6 +156,10 @@ bool AveragingDataModel::saveToFile(const QString& sPath)
     QFileDialog::saveFileContent(file.readAll(), getModelName());
     return true;
 #else
-    return m_pFiffEvokedSet->save(sPath.toStdU16String());
+    const auto saved = m_pFiffEvokedSet->save(sPath.toStdU16String());
+    if (!saved) {
+        qWarning() << "[AveragingDataModel]" << saved.error().what();
+    }
+    return saved.has_value();
 #endif
 }

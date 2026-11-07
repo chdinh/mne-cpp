@@ -273,17 +273,15 @@ void TestFiffCoverage::testWriteReadEvokedSetRoundTrip()
              qPrintable(QString("Evoked test data not found: %1").arg(avePath())));
 
     // Read original
-    FiffEvokedSet origSet;
-    QVERIFY(FiffEvokedSet::read(avePath().toStdString(), origSet));
+    FiffEvokedSet origSet(avePath().toStdU16String());
     QVERIFY(origSet.evoked.size() > 0);
 
     // Write to temp file using save() which handles open/write/close
     QString tmpPath = m_tmpDir.path() + "/evoked_roundtrip.fif";
-    QVERIFY(origSet.save(tmpPath.toStdString()));
+    QVERIFY(origSet.save(tmpPath.toStdU16String()));
 
     // Read back
-    FiffEvokedSet readSet;
-    QVERIFY(FiffEvokedSet::read(tmpPath.toStdString(), readSet));
+    FiffEvokedSet readSet(tmpPath.toStdU16String());
 
     QCOMPARE(readSet.evoked.size(), origSet.evoked.size());
 }
@@ -293,15 +291,13 @@ void TestFiffCoverage::testWriteReadEvokedSetPreserveData()
     QVERIFY2(QFile::exists(avePath()),
              qPrintable(QString("Evoked test data not found: %1").arg(avePath())));
 
-    FiffEvokedSet origSet;
-    QVERIFY(FiffEvokedSet::read(avePath().toStdString(), origSet));
+    FiffEvokedSet origSet(avePath().toStdU16String());
 
     // Write and read back using save()
     QString tmpPath = m_tmpDir.path() + "/evoked_preserve.fif";
-    QVERIFY(origSet.save(tmpPath.toStdString()));
+    QVERIFY(origSet.save(tmpPath.toStdU16String()));
 
-    FiffEvokedSet readSet;
-    QVERIFY(FiffEvokedSet::read(tmpPath.toStdString(), readSet));
+    FiffEvokedSet readSet(tmpPath.toStdU16String());
 
     // Check data dimensions match
     for (int i = 0; i < qMin(origSet.evoked.size(), readSet.evoked.size()); i++) {

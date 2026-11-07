@@ -639,7 +639,7 @@ private slots:
         if (!file.exists())
             QSKIP("Evoked file not found");
 
-        FiffEvokedSet evokedSet(path.toStdString());
+        FiffEvokedSet evokedSet(path.toStdU16String());
         QVERIFY(evokedSet.evoked.size() > 0);
 
         for (int i = 0; i < evokedSet.evoked.size(); ++i) {

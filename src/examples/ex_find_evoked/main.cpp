@@ -70,7 +70,7 @@ int main(int argc, char* argv[])
     parser.process(a);
 
     //generate FiffEvokedSet
-    FiffEvokedSet p_FiffEvokedSet(parser.value(evokedFileOption).toStdString());
+    FiffEvokedSet p_FiffEvokedSet(parser.value(evokedFileOption).toStdU16String());
 
     //run find_evoked function
     p_FiffEvokedSet.find_evoked(p_FiffEvokedSet);

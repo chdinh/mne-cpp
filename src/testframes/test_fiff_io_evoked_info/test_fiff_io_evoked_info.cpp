@@ -202,9 +202,7 @@ void TestFiffIoEvokedInfo::evokedSet_defaultConstruction()
 
 void TestFiffIoEvokedInfo::evokedSet_readFromFile()
 {
-    FiffEvokedSet set;
-    bool ok = FiffEvokedSet::read(avePath().toStdString(), set);
-    QVERIFY(ok);
+    FiffEvokedSet set(avePath().toStdU16String());
     QVERIFY(!set.evoked.isEmpty());
     QVERIFY(set.info.nchan > 0);
 
@@ -217,8 +215,7 @@ void TestFiffIoEvokedInfo::evokedSet_readFromFile()
 
 void TestFiffIoEvokedInfo::evokedSet_pickChannels()
 {
-    FiffEvokedSet set;
-    FiffEvokedSet::read(avePath().toStdString(), set);
+    FiffEvokedSet set(avePath().toStdU16String());
     QVERIFY2(!set.evoked.isEmpty(), "No evoked data loaded");
 
     // Pick first 10 channels by name
@@ -241,8 +238,7 @@ void TestFiffIoEvokedInfo::evokedSet_clear()
 
 void TestFiffIoEvokedInfo::evokedSet_copyConstruction()
 {
-    FiffEvokedSet set;
-    FiffEvokedSet::read(avePath().toStdString(), set);
+    FiffEvokedSet set(avePath().toStdU16String());
 
     FiffEvokedSet copy(set);
     QCOMPARE(copy.evoked.size(), set.evoked.size());
@@ -251,20 +247,17 @@ void TestFiffIoEvokedInfo::evokedSet_copyConstruction()
 
 void TestFiffIoEvokedInfo::evokedSet_saveAndReload()
 {
-    FiffEvokedSet setOrig;
-    FiffEvokedSet::read(avePath().toStdString(), setOrig);
+    FiffEvokedSet setOrig(avePath().toStdU16String());
     QVERIFY2(!setOrig.evoked.isEmpty(), "No evoked data loaded");
 
     // Save to temp file
     QTemporaryDir tmpDir;
     QVERIFY(tmpDir.isValid());
     QString outPath = tmpDir.path() + "/test_evoked.fif";
-    QVERIFY(setOrig.save(outPath.toStdString()));
+    QVERIFY(setOrig.save(outPath.toStdU16String()));
 
     // Reload
-    FiffEvokedSet setReload;
-    bool ok = FiffEvokedSet::read(outPath.toStdString(), setReload);
-    QVERIFY(ok);
+    FiffEvokedSet setReload(outPath.toStdU16String());
     QCOMPARE(setReload.evoked.size(), setOrig.evoked.size());
     QCOMPARE(setReload.info.nchan, setOrig.info.nchan);
 

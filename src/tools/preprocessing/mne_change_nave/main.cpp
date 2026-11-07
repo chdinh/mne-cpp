@@ -96,11 +96,12 @@ int main(int argc, char* argv[])
     int setIdx = parser.value(setOpt).toInt();
 
     // Read evoked data
-    FiffEvokedSet evokedSet;
-    if (!FiffEvokedSet::read(measFile.toStdU16String(), evokedSet, QPair<float, float>(0.0f, 0.0f), false)) {
-        qCritical("Cannot read evoked data from: %s", qPrintable(measFile));
+    auto read = FiffEvokedSet::read(measFile.toStdU16String(), {}, false);
+    if (!read) {
+        qCritical("%s", read.error().what());
         return 1;
     }
+    FiffEvokedSet& evokedSet = *read;
 
     if (setIdx < 0 || setIdx >= evokedSet.evoked.size()) {
         qCritical("Set index %d out of range (0..%lld).", setIdx,

@@ -369,11 +369,12 @@ int main(int argc, char* argv[])
             return 1;
         }
 
-        FiffEvokedSet evokedSet;
-        if (!FiffEvokedSet::read(measFile.toStdU16String(), evokedSet)) {
-            qCritical("Cannot read evoked data: %s", qPrintable(measFile));
+        auto read = FiffEvokedSet::read(measFile.toStdU16String());
+        if (!read) {
+            qCritical("%s", read.error().what());
             return 1;
         }
+        FiffEvokedSet& evokedSet = *read;
         if (setNo >= evokedSet.evoked.size()) {
             qCritical("Set number %d out of range (have %lld sets).",
                       setNo, static_cast<long long>(evokedSet.evoked.size()));

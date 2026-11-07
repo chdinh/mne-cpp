@@ -1571,11 +1571,11 @@ private slots:
         }
 
         FIFFLIB::FiffEvokedSet sourceSet;
-        QVERIFY(FIFFLIB::FiffEvokedSet::read(evokedFile.toStdString(), sourceSet));
+        sourceSet = FIFFLIB::FiffEvokedSet(evokedFile.toStdU16String());
         QVERIFY(!sourceSet.evoked.isEmpty());
         sourceSet.evoked = {sourceSet.evoked.first()};
         const QString sourceEvokedFile = m_tempDir.filePath("single-condition-evoked.fif");
-        QVERIFY(sourceSet.save(sourceEvokedFile.toStdString()));
+        QVERIFY(sourceSet.save(sourceEvokedFile.toStdU16String()));
 
         const QString invalidInvFile = m_tempDir.filePath("invalid-inverse.fif");
         QFile invalidInv(invalidInvFile);

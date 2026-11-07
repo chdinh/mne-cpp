@@ -159,6 +159,9 @@ Expected<FiffEvoked> FiffEvoked::read(const std::filesystem::path& path,
     //
     FiffInfo info;
     FiffDirNode::SPtr meas;
+    if (t_pStream->dirtree()->dir_tree_find(FIFFB_MEAS).isEmpty()) {
+        return fail(ErrorCode::NotFound, "No measurement in {}", file);
+    }
     if (!t_pStream->read_meas_info(t_pStream->dirtree(), info, meas)) {
         return fail(ErrorCode::Format, "No measurement info in {}", file);
     }
@@ -397,11 +400,10 @@ Expected<FiffEvoked> FiffEvoked::read(const std::filesystem::path& path,
     p_FiffEvoked.times = times;
     p_FiffEvoked.data = all_data;
 
-    QPair<float, float> window = baseline.value_or(defaultFloatPair);
-    if (window.first != window.second) {
+    if (baseline && baseline->first != baseline->second) {
+        QPair<float, float> window(baseline->first, baseline->second);
         p_FiffEvoked.applyBaselineCorrection(window);
     } else {
-        p_FiffEvoked.baseline = window;
         qInfo("\tNo baseline correction applied\n");
     }
 

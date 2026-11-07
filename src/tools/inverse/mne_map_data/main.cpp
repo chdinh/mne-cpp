@@ -117,11 +117,12 @@ int main(int argc, char* argv[])
 
     // 1. Load source evoked data
     qInfo("Loading source evoked: %s", qPrintable(fromFile));
-    FiffEvokedSet srcEvokedSet;
-    if (!FiffEvokedSet::read(fromFile.toStdU16String(), srcEvokedSet)) {
-        qCritical("Cannot read source evoked data: %s", qPrintable(fromFile));
+    auto read = FiffEvokedSet::read(fromFile.toStdU16String());
+    if (!read) {
+        qCritical("%s", read.error().what());
         return 1;
     }
+    FiffEvokedSet& srcEvokedSet = *read;
     if (srcEvokedSet.evoked.isEmpty()) {
         qCritical("No evoked data sets found in: %s", qPrintable(fromFile));
         return 1;

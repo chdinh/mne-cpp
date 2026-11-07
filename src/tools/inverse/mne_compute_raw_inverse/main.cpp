@@ -800,18 +800,16 @@ int main(int argc, char* argv[])
         //-----------------------------------------------------------------------------------------------------
         qInfo("\nReading evoked data file: %s", inName.toUtf8().constData());
 
-        QPair<float, float> baseline;
+        FiffEvoked::Baseline baseline;
         if (doBaseline) {
-            baseline = QPair<float, float>(bmin, bmax);
-        } else {
-            baseline = QPair<float, float>(-1.0f, -1.0f);
+            baseline = std::pair(bmin, bmax);
         }
-
-        FiffEvokedSet evokedSet;
-        if (!FiffEvokedSet::read(inName.toStdU16String(), evokedSet, baseline)) {
-            qCritical("Error: Failed to read evoked data from %s", inName.toUtf8().constData());
+        auto read = FiffEvokedSet::read(inName.toStdU16String(), baseline);
+        if (!read) {
+            qCritical("%s", read.error().what());
             return 1;
         }
+        FiffEvokedSet& evokedSet = *read;
 
         if (evokedSet.evoked.isEmpty()) {
             qCritical("Error: No evoked data sets found in %s", inName.toUtf8().constData());

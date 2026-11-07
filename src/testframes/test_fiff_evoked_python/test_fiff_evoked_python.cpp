@@ -312,11 +312,18 @@ void TestFiffEvokedPython::readsAndSavesByPath()
 
     QCOMPARE(FiffEvoked(out, 2).comment, m_set.evoked[2].comment);
 
+    // The baseline reaches every condition of the set.
+    const FiffEvokedSet corrected(out, {{-0.2f, 0.0f}});
+    QCOMPARE(corrected.evoked[3].baseline, QPair(-0.2f, 0.0f));
+    QVERIFY(corrected.evoked[3].data.isApprox(FiffEvoked(out, 3, {{-0.2f, 0.0f}}).data));
+
     const std::string missing = dir.filePath("missing-ave.fif").toStdString();
-    FiffEvokedSet none;
-    QVERIFY(!FiffEvokedSet::read(missing, none));
+    QCOMPARE(FiffEvokedSet::read(missing).error().code, UTILSLIB::ErrorCode::Io);
     QCOMPARE(FiffEvoked::read(missing).error().code, UTILSLIB::ErrorCode::Io);
-    QVERIFY(!m_set.save(dir.filePath("no/dir/set-ave.fif").toStdString()));
+    QVERIFY_THROWS_EXCEPTION(UTILSLIB::Error, FiffEvokedSet{missing});
+    const auto covariance = FiffEvokedSet::read(QString(avePath()).replace("-ave.fif", "-cov.fif").toStdU16String());
+    QCOMPARE(covariance.error().code, UTILSLIB::ErrorCode::NotFound);
+    QCOMPARE(m_set.save(dir.filePath("no/dir/set-ave.fif").toStdString()).error().code, UTILSLIB::ErrorCode::Io);
 }
 
 //=============================================================================================================

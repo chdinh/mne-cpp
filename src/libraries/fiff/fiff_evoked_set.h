@@ -178,11 +178,11 @@ public:
 
     //=========================================================================================================
     /**
-     * Constructs a fiff evoked data set by reading a FIFF file.
-     *
-     * @param[in] path   FIFF file to read the evoked data set from.
+     * Reads every evoked data set of a FIFF file, like read(); throws UTILSLIB::Error if it cannot.
      */
-    explicit FiffEvokedSet(const std::filesystem::path& path);
+    explicit FiffEvokedSet(const std::filesystem::path& path,
+                           const FiffEvoked::Baseline& baseline = {},
+                           bool proj = true);
 
     //=========================================================================================================
     /**
@@ -257,35 +257,27 @@ public:
 
     //=========================================================================================================
     /**
-     * fiff_read_evoked
+     * Reads every evoked data set of a FIFF file, like mne.read_evokeds with condition=None.
      *
-     * Wrapper for the FiffEvokedDataSet::read_evoked static function
+     * @param[in] path       The file.
+     * @param[in] baseline   Interval to subtract the mean of, or none for no baseline correction.
+     * @param[in] proj       Apply the SSP projectors of the file.
      *
-     * Read one evoked data set
-     *
-     * @param[in] path               FIFF file to read.
-     * @param[out] p_FiffEvokedSet   The read evoked data set.
-     * @param[in] baseline           The time interval to apply rescaling / baseline correction. If None do not apply it. If baseline is (a, b).
-     *                               the interval is between "a (s)" and "b (s)". If a is None the beginning of the data is used and if b is
-     *                               None then b is set to the end of the interval. If baseline is equal ot (None, None) all the time interval is used.
-     *                               If None, no correction is applied.
-     * @param[in] proj               Apply SSP projection vectors (optional, default = true).
-     *
-     * @return true when successful, false otherwise.
+     * @return The evoked data sets, or why the file holds none.
      */
-    static bool read(const std::filesystem::path& path,
-                     FiffEvokedSet& p_FiffEvokedSet,
-                     QPair<float, float> baseline = defaultFloatPair,
-                     bool proj = true);
+    [[nodiscard]] static UTILSLIB::Expected<FiffEvokedSet> read(const std::filesystem::path& path,
+                                                                const FiffEvoked::Baseline& baseline = {},
+                                                                bool proj = true);
 
     //=========================================================================================================
     /**
-     * Save this evoked data set to a FIFF file.
+     * Writes the evoked data sets to a FIFF file, like mne.write_evokeds.
      *
-     * @param[in] path  Output file path.
-     * @return true on success.
+     * @param[in] path  The file.
+     *
+     * @return Nothing, or why the file cannot be written.
      */
-    bool save(const std::filesystem::path& path) const;
+    [[nodiscard]] UTILSLIB::Expected<void> save(const std::filesystem::path& path) const;
 
     //=========================================================================================================
     /**

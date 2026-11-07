@@ -100,12 +100,12 @@ int main(int argc, char* argv[])
     float bmax = parser.value(bmaxOpt).toFloat();
 
     // Read evoked data without baseline correction
-    FiffEvokedSet evokedSet;
-    QPair<float, float> noBl(0.0f, 0.0f);
-    if (!FiffEvokedSet::read(measFile.toStdU16String(), evokedSet, noBl, false)) {
-        qCritical("Cannot read evoked data from: %s", qPrintable(measFile));
+    auto read = FiffEvokedSet::read(measFile.toStdU16String(), {}, false);
+    if (!read) {
+        qCritical("%s", read.error().what());
         return 1;
     }
+    FiffEvokedSet& evokedSet = *read;
 
     qInfo("Read %lld evoked data set(s) from %s",
           static_cast<long long>(evokedSet.evoked.size()), qPrintable(measFile));

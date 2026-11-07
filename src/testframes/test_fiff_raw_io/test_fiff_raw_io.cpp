@@ -328,7 +328,7 @@ private slots:
 
         QString path = m_sDataPath + "/MEG/sample/sample_audvis-ave.fif";
 
-        FiffEvokedSet evokedSet(path.toStdString());
+        FiffEvokedSet evokedSet(path.toStdU16String());
         QVERIFY(evokedSet.info.nchan > 0);
         QVERIFY(evokedSet.evoked.size() > 0);
 
@@ -348,7 +348,7 @@ private slots:
         if (!hasData())
             QSKIP("No test data");
 
-        FiffEvokedSet evokedSet((m_sDataPath + "/MEG/sample/sample_audvis-ave.fif").toStdString());
+        FiffEvokedSet evokedSet((m_sDataPath + "/MEG/sample/sample_audvis-ave.fif").toStdU16String());
 
         // Pick MEG channels
         RowVectorXi picks = evokedSet.info.pick_types(true, false, false);
@@ -370,7 +370,7 @@ private slots:
         if (!hasData())
             QSKIP("No test data");
 
-        FiffEvokedSet evokedSet((m_sDataPath + "/MEG/sample/sample_audvis-ave.fif").toStdString());
+        FiffEvokedSet evokedSet((m_sDataPath + "/MEG/sample/sample_audvis-ave.fif").toStdU16String());
 
         // Apply baseline correction (use first part as baseline)
         if (evokedSet.evoked.size() > 0) {

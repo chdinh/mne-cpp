@@ -50,13 +50,13 @@
 #include <QFile>
 #include <QDebug>
 
-#include <stdexcept>
 //=============================================================================================================
 // USED NAMESPACES
 //=============================================================================================================
 
 using namespace FIFFLIB;
 using namespace Eigen;
+using namespace UTILSLIB;
 
 //=============================================================================================================
 // DEFINE MEMBER METHODS
@@ -70,14 +70,11 @@ FiffEvokedSet::FiffEvokedSet()
 
 //=============================================================================================================
 
-FiffEvokedSet::FiffEvokedSet(const std::filesystem::path& path)
+FiffEvokedSet::FiffEvokedSet(const std::filesystem::path& path,
+                             const FiffEvoked::Baseline& baseline,
+                             bool proj)
+: FiffEvokedSet(read(path, baseline, proj).value())
 {
-    qRegisterMetaType<FIFFLIB::FiffEvokedSet>("FIFFLIB::FiffEvokedSet");
-    qRegisterMetaType<FIFFLIB::FiffEvokedSet::SPtr>("FIFFLIB::FiffEvokedSet::SPtr");
-
-    if (!FiffEvokedSet::read(path, *this)) {
-        throw std::runtime_error("Fiff evoked data set not found");
-    }
 }
 
 //=============================================================================================================
@@ -171,81 +168,59 @@ bool FiffEvokedSet::find_evoked(const FiffEvokedSet& p_FiffEvokedSet) const
 
 //=============================================================================================================
 
-bool FiffEvokedSet::read(const std::filesystem::path& path,
-                         FiffEvokedSet& p_FiffEvokedSet, QPair<float, float> baseline,
-                         bool proj)
+Expected<FiffEvokedSet> FiffEvokedSet::read(const std::filesystem::path& path,
+                                            const FiffEvoked::Baseline& baseline,
+                                            bool proj)
 {
-    p_FiffEvokedSet.clear();
-
     auto t_pStream = FiffStream::open(path);
     if (!t_pStream) {
-        UTILSLIB::Log::critical("{}", t_pStream.error().what());
-        return false;
+        return std::unexpected(t_pStream.error());
     }
+    const std::string file = utf8FromPath(path);
     QString t_sFileName = t_pStream->streamName();
 
     qInfo("Exploring %s ...\n", t_sFileName.toUtf8().constData());
-    //
-    //   Read the measurement info
-    //
+    FiffEvokedSet set;
     FiffDirNode::SPtr meas;
-    if (!t_pStream->read_meas_info(t_pStream->dirtree(), p_FiffEvokedSet.info, meas))
-        return false;
-    p_FiffEvokedSet.info.filename = t_sFileName.toStdString(); //move fname storage to read_meas_info member function
-    //
-    //   Locate the data of interest
-    //
-    QList<FiffDirNode::SPtr> processed = meas->dir_tree_find(FIFFB_PROCESSED_DATA);
-    if (processed.size() == 0) {
-        qWarning("Could not find processed data");
-        return false;
+    if (t_pStream->dirtree()->dir_tree_find(FIFFB_MEAS).isEmpty()) {
+        return fail(ErrorCode::NotFound, "No measurement in {}", file);
     }
-    //
-    QList<FiffDirNode::SPtr> evoked_node = meas->dir_tree_find(FIFFB_EVOKED);
-    if (evoked_node.size() == 0) {
-        qWarning("Could not find evoked data");
-        return false;
+    if (!t_pStream->read_meas_info(t_pStream->dirtree(), set.info, meas)) {
+        return fail(ErrorCode::Format, "No measurement info in {}", file);
     }
+    set.info.filename = t_sFileName.toStdString(); //move fname storage to read_meas_info member function
+    if (meas->dir_tree_find(FIFFB_PROCESSED_DATA).isEmpty()) {
+        return fail(ErrorCode::NotFound, "No processed data in {}", file);
+    }
+    const qsizetype count = meas->dir_tree_find(FIFFB_EVOKED).size();
+    if (count == 0) {
+        return fail(ErrorCode::NotFound, "No evoked data in {}", file);
+    }
+    qInfo("\tFound %lld datasets\n", static_cast<long long>(count));
 
-    QStringList comments;
-    QList<fiff_int_t> aspect_kinds;
-    QString t;
-    if (!t_pStream->get_evoked_entries(evoked_node, comments, aspect_kinds, t))
-        t = QString("None found, must use integer");
-    qInfo("\tFound %lld datasets\n", static_cast<long long>(evoked_node.size()));
-
-    for (qint32 i = 0; i < comments.size(); ++i) {
-        qInfo(">> Processing %s <<\n", comments[i].toUtf8().constData());
-        if (auto evoked = FiffEvoked::read(path, static_cast<int>(i), baseline, proj)) {
-            p_FiffEvokedSet.evoked.push_back(std::move(*evoked));
-        } else {
-            qWarning("%s", evoked.error().what());
+    for (qsizetype i = 0; i < count; ++i) {
+        auto evoked = FiffEvoked::read(path, static_cast<int>(i), baseline, proj);
+        if (!evoked) {
+            return std::unexpected(evoked.error());
         }
+        set.evoked.push_back(std::move(*evoked));
     }
-
-    return true;
+    return set;
 }
 
 //=============================================================================================================
 
-bool FiffEvokedSet::save(const std::filesystem::path& path) const
+Expected<void> FiffEvokedSet::save(const std::filesystem::path& path) const
 {
-    if (path.empty()) {
-        qWarning() << "[FiffEvokedSet::save] Output file not specified.";
-        return false;
-    }
-
-    auto pStream = FiffStream::start_file(path);
+    auto pStream = path.empty() ? nullptr : FiffStream::start_file(path);
     if (!pStream) {
-        return false;
+        return fail(ErrorCode::Io, "Cannot write the evoked data to '{}'", utf8FromPath(path));
     }
 
     pStream->write_evoked_set(*this);
     pStream->end_file();
     pStream->close();
-
-    qInfo("[FiffEvokedSet::save] Saved %lld average(s) to %s", static_cast<long long>(evoked.size()), pStream->streamName().toUtf8().constData());
-    return true;
+    return {};
 }
 
 //=============================================================================================================

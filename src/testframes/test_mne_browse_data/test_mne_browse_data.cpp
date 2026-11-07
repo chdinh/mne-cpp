@@ -880,7 +880,7 @@ void TestMneBrowseData::testAverageModelSetEvoked()
         QSKIP("Average data not available");
 
     // Load via FiffEvokedSet
-    FiffEvokedSet evokedSet(avePath.toStdString());
+    FiffEvokedSet evokedSet(avePath.toStdU16String());
 
     AverageModel model;
     bool ok = model.setEvokedData(evokedSet);

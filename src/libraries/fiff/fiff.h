@@ -264,21 +264,6 @@ public:
 
     //=========================================================================================================
     /**
-     * Read all evoked data from one file
-     *
-     * @param[in] path           FIFF file to read.
-     * @param[out] data          The read evoked data.
-     *
-     * @return true if successful, false otherwise.
-     */
-    static inline bool read_evoked_set(const std::filesystem::path& path, FiffEvokedSet& data)
-    {
-        return FiffEvokedSet::read(path, data);
-    }
-
-
-    //=========================================================================================================
-    /**
      * fiff_read_raw_segment
      *
      * Wrapper for the FiffRawData read_raw_segment member function

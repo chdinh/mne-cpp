@@ -195,8 +195,8 @@ void TestAnalyzeDataLoader::savesTheSelectedAverage()
     pSave->trigger();
     QVERIFY(QFile::exists(outPath));
 
-    const FIFFLIB::FiffEvokedSet expected(avePath.toStdString());
-    const FIFFLIB::FiffEvokedSet saved(outPath.toStdString());
+    const FIFFLIB::FiffEvokedSet expected(avePath.toStdU16String());
+    const FIFFLIB::FiffEvokedSet saved(outPath.toStdU16String());
     QCOMPARE(saved.evoked.size(), expected.evoked.size());
     for (int k = 0; k < expected.evoked.size(); ++k) {
         QCOMPARE(saved.evoked[k].comment, expected.evoked[k].comment);

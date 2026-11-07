@@ -332,7 +332,7 @@ void TestFiffFsLibrary::fiff_readEvokedSet()
 {
     if (!hasData())
         QSKIP("No test data");
-    FiffEvokedSet evokedSet(avePath().toStdString());
+    FiffEvokedSet evokedSet(avePath().toStdU16String());
     QVERIFY(evokedSet.evoked.size() > 0);
     QVERIFY(evokedSet.info.nchan > 0);
 }
@@ -341,7 +341,7 @@ void TestFiffFsLibrary::fiff_evokedSetPickChannels()
 {
     if (!hasData())
         QSKIP("No test data");
-    FiffEvokedSet evokedSet(avePath().toStdString());
+    FiffEvokedSet evokedSet(avePath().toStdU16String());
     QVERIFY(evokedSet.evoked.size() > 0);
 
     StringList include;
@@ -358,15 +358,14 @@ void TestFiffFsLibrary::fiff_evokedSetSave()
 {
     if (!hasData())
         QSKIP("No test data");
-    FiffEvokedSet evokedSet(avePath().toStdString());
+    FiffEvokedSet evokedSet(avePath().toStdU16String());
     QVERIFY(evokedSet.evoked.size() > 0);
 
     QString tmpPath = QCoreApplication::applicationDirPath() + "/test_evoked_save_tmp.fif";
-    bool saved = evokedSet.save(tmpPath.toStdString());
-    QVERIFY(saved);
+    QVERIFY(evokedSet.save(tmpPath.toStdU16String()));
     QVERIFY(QFile::exists(tmpPath));
 
-    FiffEvokedSet evokedRead(tmpPath.toStdString());
+    FiffEvokedSet evokedRead(tmpPath.toStdU16String());
     QFile::remove(tmpPath);
 }
 
@@ -395,7 +394,7 @@ void TestFiffFsLibrary::fiff_evokedSetCompensate()
 {
     if (!hasData())
         QSKIP("No test data");
-    FiffEvokedSet evokedSet(avePath().toStdString());
+    FiffEvokedSet evokedSet(avePath().toStdU16String());
     QVERIFY(evokedSet.evoked.size() > 0);
 
     // Neuromag data carry no CTF compensation: nothing to change, data untouched
@@ -1058,7 +1057,7 @@ void TestFiffFsLibrary::fiffEvokedSet_findEvoked()
 {
     if (!hasData())
         QSKIP("No test data");
-    FiffEvokedSet evokedSet(avePath().toStdString());
+    FiffEvokedSet evokedSet(avePath().toStdU16String());
     QVERIFY(evokedSet.evoked.size() > 0);
     bool found = evokedSet.find_evoked(evokedSet);
     qDebug() << "find_evoked result:" << found;

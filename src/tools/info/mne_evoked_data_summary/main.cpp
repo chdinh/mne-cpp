@@ -122,11 +122,12 @@ int main(int argc, char* argv[])
     }
 
     // Read evoked data
-    FiffEvokedSet evokedSet;
-    if (!FiffEvokedSet::read(measFile.toStdU16String(), evokedSet, defaultFloatPair, false)) {
-        qCritical("Cannot read evoked data from: %s", qPrintable(measFile));
+    auto read = FiffEvokedSet::read(measFile.toStdU16String(), {}, false);
+    if (!read) {
+        qCritical("%s", read.error().what());
         return 1;
     }
+    FiffEvokedSet& evokedSet = *read;
 
     qInfo("File: %s", qPrintable(measFile));
     qInfo("Number of evoked data sets: %lld\n", static_cast<long long>(evokedSet.evoked.size()));
