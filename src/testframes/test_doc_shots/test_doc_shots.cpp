@@ -22,6 +22,7 @@
 #include <QMetaObject>
 #include <QPainter>
 #include <QProcess>
+#include <QStandardPaths>
 #include <QString>
 #include <QStringList>
 #include <QTemporaryDir>
@@ -209,8 +210,14 @@ void TestDocShots::producesDeclaredSizeDeterministically()
                                              {QStringLiteral("scan/pipeline"), QSize(1280, 800)},
                                              {QStringLiteral("studio/graph"), QSize(1440, 900)}};
 
+    // Concurrent runs must not read each other's saved pipelines, so nothing may persist.
+    QStandardPaths::setTestModeEnabled(true);
+    QDir shared(QStandardPaths::writableLocation(QStandardPaths::GenericDataLocation) + QStringLiteral("/mne_doc_shots"));
+    shared.removeRecursively();
+
     const ToolRun first = runTool(manifest, tmp.filePath(QStringLiteral("first")));
     QVERIFY2(first.exitCode == 0, qPrintable(first.out + first.err));
+    QVERIFY2(!shared.exists(), qPrintable(shared.path()));
     QVERIFY2(first.out.contains(QStringLiteral("font 'DejaVu Sans' 13px, device pixel ratio 1")),
              qPrintable(first.out));
     const ToolRun second = runTool(manifest, tmp.filePath(QStringLiteral("second")));

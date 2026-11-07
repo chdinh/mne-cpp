@@ -38,7 +38,9 @@
 #include <QApplication>
 #include <QCommandLineParser>
 #include <QCoreApplication>
+#include <QDir>
 #include <QFileInfo>
+#include <QStandardPaths>
 #include <QTextStream>
 #ifdef Q_OS_WIN
 #include <cstdio>
@@ -54,6 +56,14 @@ int main(int argc, char* argv[])
     QApplication app(argc, argv);
     QCoreApplication::setApplicationName(QStringLiteral("mne_doc_shots"));
     QCoreApplication::setApplicationVersion(QStringLiteral("2.4.0"));
+    // The apps save pipelines and layouts on exit; a private location keeps concurrent runs apart.
+    QStandardPaths::setTestModeEnabled(true);
+    QCoreApplication::setOrganizationName(QStringLiteral("mne_doc_shots-%1").arg(QCoreApplication::applicationPid()));
+    const auto removeSandbox = [] {
+        QDir(QStandardPaths::writableLocation(QStandardPaths::GenericDataLocation) + QLatin1Char('/') +
+             QCoreApplication::organizationName())
+            .removeRecursively();
+    };
 
     QCommandLineParser parser;
     parser.setApplicationDescription(
@@ -97,6 +107,7 @@ int main(int argc, char* argv[])
 #ifdef Q_OS_WIN
     // Qt teardown of the real app windows fails or hangs on headless Windows after the PNGs are written.
     const int exitCode = runner.run() ? 0 : 1;
+    removeSandbox();
     std::fflush(stdout);
     std::fflush(stderr);
     std::_Exit(exitCode);
@@ -104,6 +115,8 @@ int main(int argc, char* argv[])
     QTimer::singleShot(0, &app, [&app, &runner]() {
         app.exit(runner.run() ? 0 : 1);
     });
-    return app.exec();
+    const int exitCode = app.exec();
+    removeSandbox();
+    return exitCode;
 #endif
 }
