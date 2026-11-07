@@ -146,15 +146,14 @@ Even so the base class RAP MUSIC implementation is called.
 
 Inverse library: LCMV and DICS beamformers and the RAP-MUSIC family of dipole scanners.
 
-````cpp title="src/examples/ex_inv_beamformer/main.cpp, line 156"
+````cpp title="src/examples/ex_inv_beamformer/main.cpp, line 158"
 InvRapMusic rap(fwd, false, 1, 0.5); // one correlated pair, subspace correlation >= 0.5
 rap.calculateInverse(measured, pairs);
 QList<InvDipolePair<double>> powellPairs;
 InvPwlRapMusic pwlRap(fwd, false, 1, 0.5); // Powell coordinate search: far fewer pairs, may stop at a local optimum
 pwlRap.calculateInverse(measured, powellPairs);
 ok &= expect(pairs.size() == 1 && isPair(pairs[0], 10, 50) && pairs[0].m_vCorrelation > 1.0 - 1e-6 && powellPairs.size() == 1 && powellPairs[0].m_vCorrelation > 0.99,
-             QString("InvRapMusic/InvPwlRapMusic/InvDipolePair: the exhaustive scan finds sources 10 and 50 (correlation 1), Powell a pair at %1")
-                 .arg(powellPairs.isEmpty() ? 0.0 : powellPairs[0].m_vCorrelation, 0, 'f', 4));
+             std::format("InvRapMusic/InvPwlRapMusic/InvDipolePair: the exhaustive scan finds sources 10 and 50 (correlation 1), Powell a pair at {:.4f}", powellPairs.isEmpty() ? 0.0 : powellPairs[0].m_vCorrelation));
 ````
 
 ### [ex_clustered_inverse_pwl_rap_music_raw](../../examples/inv/ex_clustered_inverse_pwl_rap_music_raw.mdx)

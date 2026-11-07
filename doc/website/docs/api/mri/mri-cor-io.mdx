@@ -65,11 +65,11 @@ Expects files named COR-001 through COR-256, each containing 256×256 unsigned c
 
 MRI library: MGH/MGZ and NIfTI volumes, voxel/RAS transforms, slicing and COR sets.
 
-````cpp title="src/examples/ex_mri/main.cpp, line 139"
+````cpp title="src/examples/ex_mri/main.cpp, line 141"
 std::vector<MriSlice> corSlices;
 MriCorIO::read(corDir.toStdString(), corSlices);
 ok &= expect(corSlices.size() == 256 && corSlices[7].pixels.size() == 256 * 256 && corSlices[7].pixels[0] == 7,
-             QString("COR set: %1 slices of 256x256, slice 7 holds 7").arg(corSlices.size()));
+             std::format("COR set: {} slices of 256x256, slice 7 holds 7", corSlices.size()));
 ````
 
 ## Authors of this file

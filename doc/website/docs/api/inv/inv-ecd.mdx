@@ -100,7 +100,7 @@ Prints the [`InvEcd`](/docs/api/inv/inv-ecd) dipole information to the debug out
 
 Disp3D scene data: sensor-to-surface interpolation, electrodes, MRI slices, video overlay and layers.
 
-````cpp title="src/examples/ex_disp3d_scene/main.cpp, line 255"
+````cpp title="src/examples/ex_disp3d_scene/main.cpp, line 257"
 InvEcdSet dipoles;
 InvEcd strong;
 strong.rd = Vector3f(0.0f, 0.0f, 0.05f);
@@ -120,7 +120,7 @@ const int pickedDipole = dipoleGlyphs.intersect(QVector3D(0.03f, 0.0f, 0.2f), QV
 
 Inverse library: equivalent current dipole fitting in a sphere model.
 
-````cpp title="src/examples/ex_inv_dipole_fit/main.cpp, line 106"
+````cpp title="src/examples/ex_inv_dipole_fit/main.cpp, line 107"
 InvGuessData guesses(QString(), QString(), 0.0f, 0.02f, 0.015f, fitData.get(), 0.08f); // 15 mm grid in an 80 mm sphere
 std::unique_ptr<InvDipoleForward> atTruth(InvDipoleFitData::dipole_forward_one(fitData.get(), truePos, nullptr));
 InvEcd dipole;

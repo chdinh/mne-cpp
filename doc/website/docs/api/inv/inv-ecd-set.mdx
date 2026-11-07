@@ -206,7 +206,7 @@ Read dipoles from the dip format compatible with mrilab.
 
 Inverse library: equivalent current dipole fitting in a sphere model.
 
-````cpp title="src/examples/ex_inv_dipole_fit/main.cpp, line 136"
+````cpp title="src/examples/ex_inv_dipole_fit/main.cpp, line 137"
 settings.dipname = tmp.filePath("fit.dat"); // MNE-C .dat dipole file
 settings.checkIntegrity();
 InvDipoleFit fit(&settings);
@@ -222,7 +222,7 @@ ok &= expect(saved && dipoles.size() == 1 && dipoles[0].valid && (posMm - mnePos
 
 Disp3D scene data: sensor-to-surface interpolation, electrodes, MRI slices, video overlay and layers.
 
-````cpp title="src/examples/ex_disp3d_scene/main.cpp, line 255"
+````cpp title="src/examples/ex_disp3d_scene/main.cpp, line 257"
 InvEcdSet dipoles;
 InvEcd strong;
 strong.rd = Vector3f(0.0f, 0.0f, 0.05f);

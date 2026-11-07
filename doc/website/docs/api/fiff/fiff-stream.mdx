@@ -1378,7 +1378,7 @@ Opens the source file, locates the FIFFB_PROCESSING_HISTORY block, reads all tag
 
 FIFF library: measurement info, channels, digitizer, transforms, projectors, covariance, events, annotations, evoked sets and the low-level file structure.
 
-````cpp title="src/examples/ex_fiff_api/main.cpp, line 204"
+````cpp title="src/examples/ex_fiff_api/main.cpp, line 205"
 QFile structureFile(dir + "/sample_audvis-ave.fif");
 FiffStream stream(&structureFile);
 const bool opened = stream.open();
@@ -1405,7 +1405,7 @@ stream.setLittleEndian(littleEndian);
 
 FIFF library: fixed-length epochs, CTF compensation, the file directory and raw buffers, and handing recordings to another application.
 
-````cpp title="src/examples/ex_fiff_structure/main.cpp, line 119"
+````cpp title="src/examples/ex_fiff_structure/main.cpp, line 120"
 QFile structureFile(rawPath);
 FiffStream stream(&structureFile);
 ok &= stream.open();

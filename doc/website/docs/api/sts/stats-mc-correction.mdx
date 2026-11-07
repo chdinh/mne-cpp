@@ -103,7 +103,7 @@ False Discovery Rate correction as mne.stats.fdr_correction.
 
 Statistics library on small literal data sets with known answers.
 
-````cpp title="src/examples/ex_sts_statistics/main.cpp, line 118"
+````cpp title="src/examples/ex_sts_statistics/main.cpp, line 120"
 MatrixXd pValues(1, 8);
 pValues << 0.001, 0.008, 0.039, 0.041, 0.042, 0.06, 0.074, 0.205;
 const MatrixXd pBonferroni = StatsMcCorrection::bonferroni(pValues);

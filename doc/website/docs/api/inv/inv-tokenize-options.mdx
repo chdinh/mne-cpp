@@ -60,7 +60,7 @@ const InvSourceEstimate fromTokenStream = fromTokens(tokens);
 
 Inverse library: minimum-norm estimates, resolution matrices, label time courses, sparse solvers and source-estimate I/O.
 
-````cpp title="src/examples/ex_inv_api/main.cpp, line 282"
+````cpp title="src/examples/ex_inv_api/main.cpp, line 284"
 coherence.fmin = 8.0f;
 coherence.fmax = 12.0f;
 layered.connectivity.push_back(coherence);
@@ -70,7 +70,7 @@ options.maxTimePoints = 10;
 const std::vector<InvToken> tokens = tokenize(layered, options);
 const InvSourceEstimate fromTokenStream = fromTokens(tokens);
 ok &= expect(tokens.front().id == InvTokenId::Bos && tokens.back().id == InvTokenId::Eos && fromTokenStream.data.rows() == 5 && fromTokenStream.data.cols() == 10 && fromTokenStream.focalDipoles.size() == 1 && std::fabs(fromTokenStream.focalDipoles[0].moment.z() - 20e-9f) < 1e-15f && fromTokenStream.couplings.size() == 1 && std::fabs(fromTokenStream.couplings[0].correlations(0, 1) - 0.8) < 1e-7 && fromTokenStream.connectivity.size() == 1 && fromTokenStream.connectivity[0].fmax == 12.0f,
-             QString("tokenize/fromTokens: %1 tokens carry 5 x 10 samples and the dipole, coupling and connectivity layers").arg(tokens.size()));
+             std::format("tokenize/fromTokens: {} tokens carry 5 x 10 samples and the dipole, coupling and connectivity layers", tokens.size()));
 ````
 
 ## Authors of this file

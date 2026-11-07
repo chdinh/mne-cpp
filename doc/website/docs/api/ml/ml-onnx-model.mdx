@@ -144,7 +144,7 @@ Load a model from disk.
 
 ML library: tensors, ONNX inference through the MlModel interface, and the Python trainer.
 
-````cpp title="src/examples/ex_ml/main.cpp, line 85"
+````cpp title="src/examples/ex_ml/main.cpp, line 87"
 #ifdef MNE_USE_ONNXRUNTIME
     std::unique_ptr<MlModel> model = std::make_unique<MlOnnxModel>();
     const bool loaded = model->load(MNE_EX_ML_DATA_DIR "/affine_softmax.onnx");
@@ -154,9 +154,9 @@ ML library: tensors, ONNX inference through the MlModel interface, and the Pytho
     Matrix2f expected;
     expected << 0.6681878f, 0.33181223f, 0.00235232f, 0.9976477f;
     ok &= expect(loaded && model->modelType() == "onnx" && probabilities.shape() == std::vector<int64_t>({2, 2}) && (probabilities.toMatrixXf() - expected).cwiseAbs().maxCoeff() < 1e-6f && classes == "rest,task",
-                 QString("MlOnnxModel: p(task) = %1, %2 match NumPy; classes '%3'").arg(probabilities.matrix()(0, 1)).arg(probabilities.matrix()(1, 1)).arg(QString::fromStdString(classes)));
+                 std::format("MlOnnxModel: p(task) = {:g}, {:g} match NumPy; classes '{}'", probabilities.matrix()(0, 1), probabilities.matrix()(1, 1), classes));
 #else
-    qInfo().noquote() << "  skip  MlOnnxModel (built without ONNX Runtime)";
+    std::println("  skip  MlOnnxModel (built without ONNX Runtime)");
 ````
 
 ## Authors of this file

@@ -44,7 +44,7 @@ hpi.fit(updater.getProjectedData(), updater.getProjectors(), model, updater.getH
 
 DSP real-time workers: averaging, covariance, noise spectrum, connectivity, HPI fitting and inverse operators.
 
-````cpp title="src/examples/ex_dsp_rt/main.cpp, line 294"
+````cpp title="src/examples/ex_dsp_rt/main.cpp, line 296"
 RtHpiWorker hpiWorker(updater.getSensors());
 HpiFitResult workerFit;
 QObject::connect(&hpiWorker, &RtHpiWorker::resultReady, [&](const HpiFitResult& fit) { workerFit = fit; });
@@ -52,7 +52,7 @@ hpiWorker.doWork(updater.getProjectedData(), updater.getProjectors(), model, upd
 HpiFitResult direct;
 InvHpiFit(updater.getSensors()).fit(updater.getProjectedData(), updater.getProjectors(), model, updater.getHpiDigitizer(), direct);
 ok &= expect(workerFit.GoF.size() == 4 && workerFit.GoF.minCoeff() > 0.98 && workerFit.devHeadTrans.trans.isApprox(direct.devHeadTrans.trans, 1e-6f),
-             QString("RtHpiWorker fits 4 coils (GoF >= %1) like InvHpiFit").arg(workerFit.GoF.size() ? workerFit.GoF.minCoeff() : 0.0, 0, 'f', 4));
+             std::format("RtHpiWorker fits 4 coils (GoF >= {:.4f}) like InvHpiFit", workerFit.GoF.size() ? workerFit.GoF.minCoeff() : 0.0));
 ````
 
 ### [ex_hpiFit](../../examples/inv/ex_hpiFit.mdx)
@@ -72,7 +72,7 @@ hpiModelParameters = InvHpiModelParameters(hpiFitResult.hpiFreqs,
 
 Inverse library: continuous head position (HPI) fitting.
 
-````cpp title="src/examples/ex_inv_hpi/main.cpp, line 107"
+````cpp title="src/examples/ex_inv_hpi/main.cpp, line 109"
 // The coil frequencies are known but not their order; the first fit with bOrderFrequencies finds it.
 const InvHpiModelParameters model(QVector<int>({154, 158, 161, 166}), info->sfreq, info->linefreq, true);
 InvHpiFit hpi(updater.getSensors());
@@ -85,7 +85,7 @@ IOUtils::read_eigen_matrix(maxfilter, data + "/Result/ref_hpiFit_pos.txt");
 const Vector3d translation = fit.devHeadTrans.trans.block<3, 1>(0, 3).cast<double>();
 const Vector3d reference = maxfilter.block<1, 3>(0, 4).transpose();
 ok &= expect(fit.hpiFreqs == QVector<int>({166, 154, 161, 158}) && fit.GoF.minCoeff() > 0.98 && (translation - reference).norm() < 0.001,
-             QString("InvHpiDataUpdater/InvHpiModelParameters/InvHpiFit: coils ordered 166/154/161/158 Hz, head position within %1 mm of MaxFilter")
+             std::format("InvHpiDataUpdater/InvHpiModelParameters/InvHpiFit: coils ordered 166/154/161/158 Hz, head position within {:.3f} mm of MaxFilter", 1e3 * (translation - reference).norm()));
 ````
 
 ## Authors of this file

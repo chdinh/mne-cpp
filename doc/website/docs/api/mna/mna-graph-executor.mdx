@@ -157,7 +157,7 @@ Iterates nodes in reverse topological order and deletes the live plugin objects.
 
 MNA library: register operations, build and run a graph, bind parameters and save a project.
 
-````cpp title="src/examples/ex_mna/main.cpp, line 159"
+````cpp title="src/examples/ex_mna/main.cpp, line 161"
 MnaGraphExecutor::Context ctx = MnaGraphExecutor::execute(graph, {});
 const double first = ctx.results.value("shift::out").toDouble(); // "nodeId::port"
 const double gainAfterFirst = graph.paramTree.param("scale/gain").toDouble();

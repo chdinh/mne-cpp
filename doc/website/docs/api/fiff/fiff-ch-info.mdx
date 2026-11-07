@@ -127,7 +127,7 @@ Formerly mne_check_chinfo ([MNE](/docs/api/mne/mne-class) C).
 
 Forward library: coil definitions, BEM and sphere models, field maps and forward solutions.
 
-````cpp title="src/examples/ex_fwd_api/main.cpp, line 101"
+````cpp title="src/examples/ex_fwd_api/main.cpp, line 102"
 QFile rawFile(data + "/MEG/sample/sample_audvis_trunc_raw.fif");
 const FiffRawData raw((data + "/MEG/sample/sample_audvis_trunc_raw.fif").toStdString());
 QList<FiffChInfo> meg;
@@ -148,7 +148,7 @@ for (const FiffChInfo& ch : raw.info.chs) {
 
 DSP Maxwell filtering: SSS, bad-channel detection, movement compensation, fine calibration and cHPI removal.
 
-````cpp title="src/examples/ex_dsp_maxwell/main.cpp, line 77"
+````cpp title="src/examples/ex_dsp_maxwell/main.cpp, line 79"
         const FiffChInfo& ch = info.chs[meg[k]];
         const Vector3d r = ch.chpos.r0.cast<double>() - pos;
         const double d = r.norm();
@@ -163,7 +163,7 @@ DSP Maxwell filtering: SSS, bad-channel detection, movement compensation, fine c
 
 FIFF library: measurement info, channels, digitizer, transforms, projectors, covariance, events, annotations, evoked sets and the low-level file structure.
 
-````cpp title="src/examples/ex_fiff_api/main.cpp, line 109"
+````cpp title="src/examples/ex_fiff_api/main.cpp, line 110"
 FiffRawData raw((dir + "/sample_audvis_trunc_raw.fif").toStdString()); // reads the measurement info, raw data is read on demand
 const FiffInfo& info = raw.info;                                       // channels, sampling rate, bads, projectors, digitizer, transforms
 const FiffChInfo& first = info.chs[0];

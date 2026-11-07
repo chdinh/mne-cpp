@@ -18,7 +18,7 @@ class UTILSLIB::Log
 Writes library messages to the current sink; thread-safe.
 
 ```cpp title="src/examples/ex_utils/main.cpp"
-Log::warning("channel MEG 0113 is flat"); // reaches Qt's handler, here MNELogger
+Log::warning("channel {} is flat", "MEG 0113"); // formatted as by std::format, then passed to Qt's handler
 ```
 
 ---
@@ -45,23 +45,63 @@ Hands `message` to the current sink.
 
 ---
 
-### debug(message)
+### debug(format, args)
+
+Formats `args` with `format` as std::format does and writes the result at debug level.
+
+**Parameters:**
+
+- **format** : *std::format_string&lt; Args... &gt;*
+  A std::format string, checked at compile time.
+
+- **args** : *Args &&...*
+  The values it formats.
 
 ---
 
-### info(message)
+### info(format, args)
+
+As `debug()`, at info level.
+
+**Parameters:**
+
+- **format** : *std::format_string&lt; Args... &gt;*
+  A std::format string, checked at compile time.
+
+- **args** : *Args &&...*
+  The values it formats.
 
 ---
 
-### warning(message)
+### warning(format, args)
+
+As `debug()`, at warning level.
+
+**Parameters:**
+
+- **format** : *std::format_string&lt; Args... &gt;*
+  A std::format string, checked at compile time.
+
+- **args** : *Args &&...*
+  The values it formats.
 
 ---
 
-### critical(message)
+### critical(format, args)
+
+As `debug()`, at critical level.
+
+**Parameters:**
+
+- **format** : *std::format_string&lt; Args... &gt;*
+  A std::format string, checked at compile time.
+
+- **args** : *Args &&...*
+  The values it formats.
 
 ---
 
-### setSink(sink)
+### set_sink(sink)
 
 Replaces the sink.
 
@@ -88,8 +128,8 @@ Replaces the sink.
 
 Utilities library: buffers, observers, logging, file formats, montages, layouts and reports.
 
-````cpp title="src/examples/ex_utils/main.cpp, line 159"
-Log::warning("channel MEG 0113 is flat"); // reaches Qt's handler, here MNELogger
+````cpp title="src/examples/ex_utils/main.cpp, line 162"
+Log::warning("channel {} is flat", "MEG 0113"); // formatted as by std::format, then passed to Qt's handler
 ````
 
 ## Authors of this file

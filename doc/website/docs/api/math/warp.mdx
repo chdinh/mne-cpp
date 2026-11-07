@@ -101,14 +101,14 @@ Read electrode positions from MRI Database.
 
 Math library on inputs with known answers.
 
-````cpp title="src/examples/ex_math/main.cpp, line 179"
+````cpp title="src/examples/ex_math/main.cpp, line 181"
 const MatrixXf destLm = sourceLm.rowwise() + RowVector3f(0.5f, -0.2f, 0.1f);
 MatrixXf vertices(2, 3);
 vertices << 0.3f, 0.4f, 0.5f, 0.9f, 0.1f, 0.2f;
 Warp warp;
 const MatrixXf warped = warp.calculate(sourceLm, destLm, vertices);
 const float warpErr = (warped - (vertices.rowwise() + RowVector3f(0.5f, -0.2f, 0.1f))).cwiseAbs().maxCoeff();
-ok &= expect(warpErr < 1e-4f, QString("TPS warp reproduces the translation (max error %1)").arg(warpErr));
+ok &= expect(warpErr < 1e-4f, std::format("TPS warp reproduces the translation (max error {:g})", warpErr));
 ````
 
 ### [ex_warp](../../examples/math/ex_warp.mdx)

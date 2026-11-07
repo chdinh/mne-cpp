@@ -45,7 +45,7 @@ const IeegLead& lead = implantation.leads().front(); // contacts ordered LA1, LA
 
 Disp3D scene data: sensor-to-surface interpolation, electrodes, MRI slices, video overlay and layers.
 
-````cpp title="src/examples/ex_disp3d_scene/main.cpp, line 134"
+````cpp title="src/examples/ex_disp3d_scene/main.cpp, line 136"
 std::vector<IeegContact> shaft(4); // LH1..LH4, 3.5 mm apart: grouped into the sEEG depth lead "LH"
 for (int k = 0; k < 4; ++k) {
     shaft[k].name = "LH" + std::to_string(k + 1);
@@ -64,7 +64,7 @@ ok &= expect(electrodes.totalContactCount() == 4 && electrodes.selectedContact()
 
 IEEG library: group sEEG contacts into a lead, derive a bipolar montage and paint contact values onto a surface.
 
-````cpp title="src/examples/ex_ieeg/main.cpp, line 64"
+````cpp title="src/examples/ex_ieeg/main.cpp, line 66"
 // Contacts of one depth lead, 3.5 mm apart, in metres; the lead comes from the names
 std::vector<IeegContact> contacts;
 for (int k : {3, 1, 2}) {

@@ -37,6 +37,7 @@ ok   DPSS concentration ratios = scipy (max error 6.66134e-16)
   ok   resampled to 100 Hz: 20 Hz kept, 55 Hz removed (max error 0.0389095)
   ok   Butterworth gain at 10/30/60 Hz = scipy
   ok   zero-phase low-pass: 55 Hz removed, 20 Hz in phase (deviation 0.0259255, scipy 0.02593)
+  ok   block-wise streaming filter = one pass, bit for bit
   ok   peaks [1, 3, 5, 7], prominences [1, 3, 2, 5], prominence >= 2.5 keeps [3, 7] (scipy)
 All dsp spectral checks passed.
 ````
@@ -132,7 +133,6 @@ The documented classes this example uses most:
 //=============================================================================================================
 
 #include <QApplication>
-#include <QDebug>
 
 //=============================================================================================================
 // STL INCLUDES
@@ -141,7 +141,10 @@ The documented classes this example uses most:
 #include <cmath>
 #include <complex>
 #include <cstdlib>
+#include <format>
 #include <initializer_list>
+#include <print>
+#include <string_view>
 
 //=============================================================================================================
 // USED NAMESPACES
@@ -161,9 +164,9 @@ namespace
 constexpr double kPi = 3.14159265358979323846;
 constexpr double kSFreq = 200.0;
 
-bool expect(bool condition, const QString& what)
+bool expect(bool condition, std::string_view what)
 {
-    qInfo().noquote() << (condition ? "  ok  " : "  FAIL") << what;
+    std::println("{} {}", condition ? "  ok  " : "  FAIL", what);
     return condition;
 }
 
@@ -225,7 +228,7 @@ int main(int argc, char* argv[])
     //! [dpss_compute]
     // scipy.signal.windows.dpss(64, 2.5, 4, return_ratios=True)
     const double dpssErr = maxError(dpss.vecEigenvalues, {0.9999972774351693, 0.9998465484588153, 0.9962668597877571, 0.9524259615013084});
-    ok &= expect(dpss.matTapers.rows() == 4 && dpssErr < 1e-8, QString("DPSS concentration ratios = scipy (max error %1)").arg(dpssErr));
+    ok &= expect(dpss.matTapers.rows() == 4 && dpssErr < 1e-8, std::format("DPSS concentration ratios = scipy (max error {:g})", dpssErr));
     ok &= expect((dpss.matTapers * dpss.matTapers.transpose() - MatrixXd::Identity(4, 4)).cwiseAbs().maxCoeff() < 1e-10,
                  "DPSS tapers are orthonormal");
 
@@ -238,14 +241,14 @@ int main(int argc, char* argv[])
     const double psd20 = psd.matPsd(0, 40);
     const double psd55 = psd.matPsd(0, 110);
     ok &= expect(frequencyOfMax(psd.matPsd.row(0), psd.vecFreqs) == 20.0 && std::fabs(psd20 - 0.316593412495819) < 1e-3 && std::fabs(psd55 - 0.07913494397010905) < 1e-3 && std::fabs(power - 0.625) < 0.01,
-                 QString("multitaper PSD at 20/55 Hz %1/%2 = mne, integral %3").arg(psd20).arg(psd55).arg(power));
+                 std::format("multitaper PSD at 20/55 Hz {:g}/{:g} = mne, integral {:g}", psd20, psd55, power));
 
     //! [multitaper_tfr_compute]
     const MultitaperTfrResult tfr = MultitaperTfr::compute(signal, kSFreq, 128, 32); // 128-sample windows, 32-sample hop
     //! [multitaper_tfr_compute]
     const RowVectorXd tfrMean = tfr.tfrData[0].rowwise().mean().transpose();
     ok &= expect(std::fabs(frequencyOfMax(tfrMean, tfr.vecFreqs) - 20.0) < 2.0 && tfr.vecTimes.size() == tfr.tfrData[0].cols(),
-                 QString("multitaper TFR: %1 windows, strongest band near 20 Hz").arg(tfr.vecTimes.size()));
+                 std::format("multitaper TFR: {} windows, strongest band near 20 Hz", tfr.vecTimes.size()));
 
     //! [morlet_tfr_compute]
     RowVectorXd morletFreqs(3);
@@ -255,13 +258,13 @@ int main(int argc, char* argv[])
     const VectorXd middle = morlet.matPower.col(n / 2);
     // Power of a sine of amplitude A is ~ A^2 times a common wavelet gain: 20 Hz carries 4x the 55 Hz power
     ok &= expect(middle(0) > 3.0 * middle(2) && middle(2) > 10.0 * middle(1),
-                 QString("Morlet power at 20/35/55 Hz: %1 / %2 / %3").arg(middle(0)).arg(middle(1)).arg(middle(2)));
+                 std::format("Morlet power at 20/35/55 Hz: {:g} / {:g} / {:g}", middle(0), middle(1), middle(2)));
 
     //! [spectrogram_make]
     const MatrixXd spectrogram = Spectrogram::makeSpectrogram(signal.transpose(), 64); // frequency bins x samples
     //! [spectrogram_make]
     ok &= expect(spectrogram.cols() == n && spectrogram.rows() > 0 && spectrogram.allFinite(),
-                 QString("spectrogram is %1 x %2 and finite").arg(spectrogram.rows()).arg(spectrogram.cols()));
+                 std::format("spectrogram is {} x {} and finite", spectrogram.rows(), spectrogram.cols()));
 
     //! [csd_compute]
     MatrixXd twoChannels(2, n);
@@ -273,7 +276,7 @@ int main(int argc, char* argv[])
     const std::complex<double> cross = csd.matCsd(0, 1);
     //! [csd_compute]
     ok &= expect(csd.matCsd.rows() == 2 && std::fabs(std::fabs(std::arg(cross)) - kPi / 2.0) < 0.1,
-                 QString("CSD phase between sine and cosine at 20 Hz: %1 rad (pi/2)").arg(std::arg(cross)));
+                 std::format("CSD phase between sine and cosine at 20 Hz: {:g} rad (pi/2)", std::arg(cross)));
 
     //! [resample_usage]
     const RowVectorXd downsampled = Resample::resample(signal, 100.0, kSFreq); // 200 Hz -> 100 Hz
@@ -285,7 +288,7 @@ int main(int argc, char* argv[])
     }
     const double resampleErr = (downsampled - expected20).segment(20, downsampled.size() - 40).cwiseAbs().maxCoeff();
     ok &= expect(downsampled.size() == n / 2 && resampleErr < 0.05,
-                 QString("resampled to 100 Hz: 20 Hz kept, 55 Hz removed (max error %1)").arg(resampleErr));
+                 std::format("resampled to 100 Hz: 20 Hz kept, 55 Hz removed (max error {:g})", resampleErr));
 
     //! [iir_filter_usage]
     const QVector<IirBiquad> sos = IirFilter::designButterworth(4, IirFilter::LowPass, 30.0, 0.0, kSFreq);
@@ -301,7 +304,7 @@ int main(int argc, char* argv[])
     // scipy.signal.sosfiltfilt deviates from the 20 Hz sine by 0.02593 in the interior (|H(20 Hz)|^2 < 1)
     const double lowPassErr = (lowPassed - only20).segment(50, n - 100).cwiseAbs().maxCoeff();
     ok &= expect(std::fabs(lowPassErr - 0.02592545936305224) < 1e-3,
-                 QString("zero-phase low-pass: 55 Hz removed, 20 Hz in phase (deviation %1, scipy 0.02593)").arg(lowPassErr));
+                 std::format("zero-phase low-pass: 55 Hz removed, 20 Hz in phase (deviation {:g}, scipy 0.02593)", lowPassErr));
 
     //! [iir_stream_usage]
     // Online: the same low-pass, causal, applied to blocks as they arrive (e.g. from an acquisition stream).
@@ -359,7 +362,7 @@ int main(int argc, char* argv[])
     butterworth.addSeries(times.mid(100, 100), toVector(only20).mid(100, 100), "20 Hz component", QColor(), Qt::DashLine);
     FigureExporter::save(butterworth, "butterworth", "IirFilter::applyZeroPhase removes the 55 Hz tone and leaves the 20 Hz tone in phase.");
 
-    qInfo() << (ok ? "All dsp spectral checks passed." : "dsp spectral checks FAILED.");
+    std::println("{}", ok ? "All dsp spectral checks passed." : "dsp spectral checks FAILED.");
     return ok ? EXIT_SUCCESS : EXIT_FAILURE;
 }
 ````

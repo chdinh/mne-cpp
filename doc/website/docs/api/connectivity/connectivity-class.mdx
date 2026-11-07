@@ -46,7 +46,7 @@ settings.setConnectivityMethods({"COH", "PLV", "WPLI"});
 const QList<Network> networks = Connectivity::calculate(settings);
 for (Network network : networks) {
     network.setFrequencyRange(8.0f, 12.0f); // average the per-bin weights over the alpha band
-    qInfo().noquote() << network.getConnectivityMethod() << "0-1:" << edgeWeight(network, 0, 1);
+    std::println("{} 0-1: {:g}", network.getConnectivityMethod().toStdString(), edgeWeight(network, 0, 1));
 }
 ```
 
@@ -89,12 +89,12 @@ Computes the network based on the current settings.
 
 Connectivity metrics on synthetic data with a known coupling.
 
-````cpp title="src/examples/ex_connectivity_metrics/main.cpp, line 172"
+````cpp title="src/examples/ex_connectivity_metrics/main.cpp, line 174"
 settings.setConnectivityMethods({"COH", "PLV", "WPLI"});
 const QList<Network> networks = Connectivity::calculate(settings);
 for (Network network : networks) {
     network.setFrequencyRange(8.0f, 12.0f); // average the per-bin weights over the alpha band
-    qInfo().noquote() << network.getConnectivityMethod() << "0-1:" << edgeWeight(network, 0, 1);
+    std::println("{} 0-1: {:g}", network.getConnectivityMethod().toStdString(), edgeWeight(network, 0, 1));
 }
 ok &= expect(networks.size() == 3, "Connectivity::calculate returns one network per method");
 ````

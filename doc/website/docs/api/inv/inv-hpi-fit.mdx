@@ -169,19 +169,19 @@ InvHpiFit HPI = InvHpiFit(hpiDataUpdater.getSensors());
 
 DSP real-time workers: averaging, covariance, noise spectrum, connectivity, HPI fitting and inverse operators.
 
-````cpp title="src/examples/ex_dsp_rt/main.cpp, line 297"
+````cpp title="src/examples/ex_dsp_rt/main.cpp, line 299"
 hpiWorker.doWork(updater.getProjectedData(), updater.getProjectors(), model, updater.getHpiDigitizer());
 HpiFitResult direct;
 InvHpiFit(updater.getSensors()).fit(updater.getProjectedData(), updater.getProjectors(), model, updater.getHpiDigitizer(), direct);
 ok &= expect(workerFit.GoF.size() == 4 && workerFit.GoF.minCoeff() > 0.98 && workerFit.devHeadTrans.trans.isApprox(direct.devHeadTrans.trans, 1e-6f),
-             QString("RtHpiWorker fits 4 coils (GoF >= %1) like InvHpiFit").arg(workerFit.GoF.size() ? workerFit.GoF.minCoeff() : 0.0, 0, 'f', 4));
+             std::format("RtHpiWorker fits 4 coils (GoF >= {:.4f}) like InvHpiFit", workerFit.GoF.size() ? workerFit.GoF.minCoeff() : 0.0));
 ````
 
 ### [ex_inv_hpi](../../examples/inv/ex_inv_hpi.mdx)
 
 Inverse library: continuous head position (HPI) fitting.
 
-````cpp title="src/examples/ex_inv_hpi/main.cpp, line 106"
+````cpp title="src/examples/ex_inv_hpi/main.cpp, line 108"
 updater.prepareDataAndProjectors(segment, MatrixXd::Identity(info->nchan, info->nchan));
 // The coil frequencies are known but not their order; the first fit with bOrderFrequencies finds it.
 const InvHpiModelParameters model(QVector<int>({154, 158, 161, 166}), info->sfreq, info->linefreq, true);

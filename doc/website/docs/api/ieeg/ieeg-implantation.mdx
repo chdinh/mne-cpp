@@ -194,7 +194,7 @@ Units and the coordinate system come from the `*_coordsystem.json` in the same f
 
 IEEG library: group sEEG contacts into a lead, derive a bipolar montage and paint contact values onto a surface.
 
-````cpp title="src/examples/ex_ieeg/main.cpp, line 72"
+````cpp title="src/examples/ex_ieeg/main.cpp, line 74"
 const IeegImplantation implantation(contacts, "ACPC");
 const IeegLead& lead = implantation.leads().front(); // contacts ordered LA1, LA2, LA3
 // IeegImplantation::readBids("sub-01_electrodes.tsv") reads the same from BIDS iEEG
@@ -206,7 +206,7 @@ ok &= expect(implantation.leads().size() == 1 && lead.name == "LA" && lead.type 
 
 Disp3D scene data: sensor-to-surface interpolation, electrodes, MRI slices, video overlay and layers.
 
-````cpp title="src/examples/ex_disp3d_scene/main.cpp, line 139"
+````cpp title="src/examples/ex_disp3d_scene/main.cpp, line 141"
 ElectrodeObject electrodes; // a view of the implantation, drawn by BrainView::setElectrodes()
 electrodes.setImplantation(IeegImplantation(shaft));
 electrodes.selectContact("LH3");

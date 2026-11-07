@@ -176,7 +176,7 @@ Apply DICS beamformer to each epoch in a list.
 
 Inverse library: LCMV and DICS beamformers and the RAP-MUSIC family of dipole scanners.
 
-````cpp title="src/examples/ex_inv_beamformer/main.cpp, line 139"
+````cpp title="src/examples/ex_inv_beamformer/main.cpp, line 141"
 // A single real cross-spectral density at 10 Hz equal to the data covariance gives the LCMV power.
 const VectorXd frequencies = VectorXd::Constant(1, 10.0);
 const InvBeamformer dics = InvDICS::makeDICS(info, fwd, {dataCov.data}, frequencies, 0.05, true, noiseCov,

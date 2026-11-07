@@ -77,11 +77,11 @@ Compute [`ICA`](/docs/api/dsp/ica) decomposition using the extended infomax algo
 
 Preprocessing tools of the dsp library on synthetic data with a known ground truth.
 
-````cpp title="src/examples/ex_dsp_preprocessing/main.cpp, line 135"
+````cpp title="src/examples/ex_dsp_preprocessing/main.cpp, line 137"
 const MatrixXd centered = mixed.colwise() - mixed.rowwise().mean();                            // infomax expects zero-mean data
 const InfomaxResult infomax = ExtendedInfomax::compute(centered, 3, 500, 0.1, 1e-7, true, 42); // the 0.001 default is too slow here
 ok &= expect(infomax.converged && worstRecovery(infomax.matSources, sources) > 0.99,
-             QString("extended Infomax recovers the sub-Gaussian sources (worst |r| %1)").arg(worstRecovery(infomax.matSources, sources)));
+             std::format("extended Infomax recovers the sub-Gaussian sources (worst |r| {:g})", worstRecovery(infomax.matSources, sources)));
 ````
 
 ## Authors of this file

@@ -99,7 +99,7 @@ Writes rows to a TSV file.
 
 BIDS library: paths, sidecar TSVs, BrainVision/EDF readers and a raw-data round trip.
 
-````cpp title="src/examples/ex_bids/main.cpp, line 101"
+````cpp title="src/examples/ex_bids/main.cpp, line 103"
 QStringList headers;
 const QList<BidsTsvRow> rows = BidsTsv::readTsv(ieeg.eventsTsvPath().filePath(), headers);
 // each row maps column name -> cell text, e.g. rows[1]["trial_type"] == "response"

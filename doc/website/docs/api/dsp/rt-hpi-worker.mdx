@@ -85,7 +85,7 @@ Perform one single HPI fit.
 
 DSP real-time workers: averaging, covariance, noise spectrum, connectivity, HPI fitting and inverse operators.
 
-````cpp title="src/examples/ex_dsp_rt/main.cpp, line 294"
+````cpp title="src/examples/ex_dsp_rt/main.cpp, line 296"
 RtHpiWorker hpiWorker(updater.getSensors());
 HpiFitResult workerFit;
 QObject::connect(&hpiWorker, &RtHpiWorker::resultReady, [&](const HpiFitResult& fit) { workerFit = fit; });
@@ -93,7 +93,7 @@ hpiWorker.doWork(updater.getProjectedData(), updater.getProjectors(), model, upd
 HpiFitResult direct;
 InvHpiFit(updater.getSensors()).fit(updater.getProjectedData(), updater.getProjectors(), model, updater.getHpiDigitizer(), direct);
 ok &= expect(workerFit.GoF.size() == 4 && workerFit.GoF.minCoeff() > 0.98 && workerFit.devHeadTrans.trans.isApprox(direct.devHeadTrans.trans, 1e-6f),
-             QString("RtHpiWorker fits 4 coils (GoF >= %1) like InvHpiFit").arg(workerFit.GoF.size() ? workerFit.GoF.minCoeff() : 0.0, 0, 'f', 4));
+             std::format("RtHpiWorker fits 4 coils (GoF >= {:.4f}) like InvHpiFit", workerFit.GoF.size() ? workerFit.GoF.minCoeff() : 0.0));
 ````
 
 ## Authors of this file

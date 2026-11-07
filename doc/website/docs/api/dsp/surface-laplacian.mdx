@@ -122,7 +122,7 @@ VectorXd mneCsd(8);
 mneCsd << 984.4089021671608, 1280.7679646395302, 457.7070056428769, -775.4476983026417,
     -977.028371298518, -378.06791643722704, -311.9232346310464, 211.576727857144;
 const double csdErr = (csd.matData.col(3) - mneCsd).cwiseAbs().maxCoeff() / mneCsd.cwiseAbs().maxCoeff();
-ok &= expect(csdErr < 1e-6, QString("surface Laplacian = mne compute_current_source_density (relative error %1)").arg(csdErr));
+ok &= expect(csdErr < 1e-6, std::format("surface Laplacian = mne compute_current_source_density (relative error {:g})", csdErr));
 ````
 
 ## Authors of this file

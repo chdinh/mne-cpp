@@ -270,9 +270,9 @@ FsSurfaceSet tSurfSetPial(subject, hemi, "pial", subjectPath);
 
 FreeSurfer library: surfaces, curvature, parcellations, labels and an atlas volume.
 
-````cpp title="src/examples/ex_fs/main.cpp, line 124"
+````cpp title="src/examples/ex_fs/main.cpp, line 126"
 FsSurfaceSet both("sample", 2, "white", subjectsDir); // 2 = both hemispheres
-ok &= expect(both.size() == 2 && both[0].rr().rows() == 155407, QString("FsSurfaceSet holds %1 hemispheres").arg(both.size()));
+ok &= expect(both.size() == 2 && both[0].rr().rows() == 155407, std::format("FsSurfaceSet holds {} hemispheres", both.size()));
 ````
 
 ### [ex_clustered_inverse_mne](../../examples/inv/ex_clustered_inverse_mne.mdx)

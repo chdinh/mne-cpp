@@ -28,7 +28,7 @@ CMNE inverse solver
 const MatrixXd sourceCov = MatrixXd::Identity(fwd.nsource, fwd.nsource);
 InvCMNEResult cmne = InvCMNE::compute(evoked.data, fwd.sol->data, noiseCov.data, sourceCov, settings);
 if (cmne.stcCmne.isEmpty()) {
-    qCritical() << "The CMNE model does not fit" << fwd.nsource << "sources.";
+    std::println(stderr, "The CMNE model does not fit {} sources.", fwd.nsource);
     return EXIT_FAILURE;
 }
 for (InvSourceEstimate* stc : {&cmne.stcDspm, &cmne.stcSensing, &cmne.stcCmne}) {
@@ -202,11 +202,11 @@ This is a convenience wrapper that calls `scripts/ml/training/train_cmne_lstm.py
 
 Contextual minimum-norm estimate (CMNE) of the auditory evoked response in both auditory cortices.
 
-````cpp title="src/examples/ex_inverse_cmne/main.cpp, line 139"
+````cpp title="src/examples/ex_inverse_cmne/main.cpp, line 138"
 const MatrixXd sourceCov = MatrixXd::Identity(fwd.nsource, fwd.nsource);
 InvCMNEResult cmne = InvCMNE::compute(evoked.data, fwd.sol->data, noiseCov.data, sourceCov, settings);
 if (cmne.stcCmne.isEmpty()) {
-    qCritical() << "The CMNE model does not fit" << fwd.nsource << "sources.";
+    std::println(stderr, "The CMNE model does not fit {} sources.", fwd.nsource);
     return EXIT_FAILURE;
 }
 for (InvSourceEstimate* stc : {&cmne.stcDspm, &cmne.stcSensing, &cmne.stcCmne}) {

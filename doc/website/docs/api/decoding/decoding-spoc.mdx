@@ -151,12 +151,12 @@ Fit and transform in one step.
 
 Spatial decoders and ICA labelling on synthetic mixtures with a known ground truth.
 
-````cpp title="src/examples/ex_decoding/main.cpp, line 153"
+````cpp title="src/examples/ex_decoding/main.cpp, line 155"
 DecodingSpoc spoc(1);
 spoc.fit(spocEpochs, target);
 const MatrixXd spocFeatures = spoc.transform(spocEpochs); // epochs x 1, log band power
 const double spocCorr = correlation(spocFeatures.col(0), target.array().log().matrix());
-ok &= expect(std::fabs(spocCorr) > 0.9, QString("SPoC power follows log(target): |r| %1 > 0.9").arg(std::fabs(spocCorr)));
+ok &= expect(std::fabs(spocCorr) > 0.9, std::format("SPoC power follows log(target): |r| {:g} > 0.9", std::fabs(spocCorr)));
 ````
 
 ## Authors of this file

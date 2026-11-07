@@ -194,7 +194,7 @@ Generate quad index buffer: 2 triangles = 6 indices.
 
 Disp3D scene data: sensor-to-surface interpolation, electrodes, MRI slices, video overlay and layers.
 
-````cpp title="src/examples/ex_disp3d_scene/main.cpp, line 150"
+````cpp title="src/examples/ex_disp3d_scene/main.cpp, line 152"
 axial.fill(128);
 Matrix4d voxelToWorld = Matrix4d::Identity(); // 1 mm voxels, origin at the volume centre
 voxelToWorld.block<3, 1>(0, 3) = Vector3d(-128.0, -128.0, -128.0);

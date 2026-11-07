@@ -156,7 +156,7 @@ Estimates the offset between the outlet host's clock and `local_clock()` from ro
 
 LSL library: publish a stream, discover it and receive its samples over loopback.
 
-````cpp title="src/examples/ex_lsl/main.cpp, line 80"
+````cpp title="src/examples/ex_lsl/main.cpp, line 82"
 stream_info source = outlet.info(); // normally an entry of resolve_stream("name", "ex_lsl_eeg")
 source.set_data_host("127.0.0.1");
 stream_inlet inlet(source);

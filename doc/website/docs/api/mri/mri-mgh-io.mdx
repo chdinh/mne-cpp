@@ -78,7 +78,7 @@ For .mgz files, automatic gzip decompression is performed via zlib.
 
 MRI library: MGH/MGZ and NIfTI volumes, voxel/RAS transforms, slicing and COR sets.
 
-````cpp title="src/examples/ex_mri/main.cpp, line 92"
+````cpp title="src/examples/ex_mri/main.cpp, line 94"
 MriVolData mgh;
 std::vector<FiffCoordTrans> extraTransforms; // e.g. Talairach, if the footer names one
 MriMghIO::read((dataDir + "/gradient.mgz").toStdString(), mgh, extraTransforms);

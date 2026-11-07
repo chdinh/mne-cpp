@@ -115,7 +115,7 @@ atlas.load(atlasPath);
 const QStringList regionsAt = atlas.labelsForPositions({Vector3f(-4.0f, -4.0f, -4.0f), Vector3f(2.0f, 0.0f, -2.0f), Vector3f(0.0f, 0.0f, 0.0f)});
 // nibabel: inv(affine) maps (-4,-4,-4) to voxel (0,0,0) and (2,0,-2) to voxel (3,2,1)
 ok &= expect(atlas.isLoaded() && regionsAt == QStringList({"Left-Hippocampus", "Right-Hippocampus", "Unknown"}),
-             QString("atlas lookup: %1").arg(regionsAt.join(", ")));
+             std::format("atlas lookup: {}", regionsAt.join(", ").toStdString()));
 ````
 
 ## Authors of this file

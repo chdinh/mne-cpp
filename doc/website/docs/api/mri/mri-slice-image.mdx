@@ -39,12 +39,12 @@ const std::vector<MriSliceImage> planes = MriSlicer::extractOrthogonal(voxels, m
 
 MRI library: MGH/MGZ and NIfTI volumes, voxel/RAS transforms, slicing and COR sets.
 
-````cpp title="src/examples/ex_mri/main.cpp, line 119"
+````cpp title="src/examples/ex_mri/main.cpp, line 121"
 const Vector3f ras(0.001f, -0.0005f, -0.002f); // metres; voxel (2,3,1)
 const Vector3i voxel = MriSlicer::rasToVoxel(vox2ras, ras);
 const std::vector<MriSliceImage> planes = MriSlicer::extractOrthogonal(voxels, mgh.dims(), vox2ras, ras); // axial, coronal, sagittal
 ok &= expect(voxel == Vector3i(2, 3, 1) && (MriSlicer::voxelToRas(vox2ras, voxel) - ras).norm() < 1e-7f && planes.size() == 3,
-             QString("RAS (1, -0.5, -2) mm -> voxel (%1, %2, %3); three orthogonal planes").arg(voxel(0)).arg(voxel(1)).arg(voxel(2)));
+             std::format("RAS (1, -0.5, -2) mm -> voxel ({}, {}, {}); three orthogonal planes", voxel(0), voxel(1), voxel(2)));
 ````
 
 ## Authors of this file

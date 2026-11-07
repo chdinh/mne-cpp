@@ -178,7 +178,6 @@ The documented classes this example uses most:
 
 #include <QApplication>
 #include <QCommandLineParser>
-#include <QDebug>
 #include <QFile>
 
 //=============================================================================================================
@@ -187,6 +186,9 @@ The documented classes this example uses most:
 
 #include <cmath>
 #include <cstdlib>
+#include <format>
+#include <print>
+#include <string_view>
 #include <tuple>
 
 //=============================================================================================================
@@ -207,22 +209,19 @@ using namespace Eigen;
 namespace
 {
 
-bool expect(bool condition, const QString& what)
+bool expect(bool condition, std::string_view what)
 {
-    qInfo().noquote() << (condition ? "  ok  " : "  FAIL") << what;
+    std::println("{} {}", condition ? "  ok  " : "  FAIL", what);
     return condition;
 }
 
 //=============================================================================================================
 
-QString describePeak(const InvSourceEstimate& stc, int from, int to)
+std::string describePeak(const InvSourceEstimate& stc, int from, int to)
 {
     Index source = 0, sample = 0;
     stc.data.middleCols(from, to - from).cwiseAbs().maxCoeff(&source, &sample);
-    return QString("%1 vertex %2 at %3 ms")
-        .arg(source < stc.nVerticesLh ? "lh" : "rh")
-        .arg(stc.vertices(source))
-        .arg(std::lround(1000.0 * (stc.tmin + (from + sample) * stc.tstep)));
+    return std::format("{} vertex {} at {} ms", source < stc.nVerticesLh ? "lh" : "rh", stc.vertices(source), std::lround(1000.0 * (stc.tmin + (from + sample) * stc.tstep)));
 }
 
 } // namespace
@@ -278,7 +277,7 @@ int main(int argc, char* argv[])
     const MatrixXd sourceCov = MatrixXd::Identity(fwd.nsource, fwd.nsource);
     InvCMNEResult cmne = InvCMNE::compute(evoked.data, fwd.sol->data, noiseCov.data, sourceCov, settings);
     if (cmne.stcCmne.isEmpty()) {
-        qCritical() << "The CMNE model does not fit" << fwd.nsource << "sources.";
+        std::println(stderr, "The CMNE model does not fit {} sources.", fwd.nsource);
         return EXIT_FAILURE;
     }
     for (InvSourceEstimate* stc : {&cmne.stcDspm, &cmne.stcSensing, &cmne.stcCmne}) {
@@ -294,10 +293,10 @@ int main(int argc, char* argv[])
     const MatrixXd& kernel = cmne.matKernelDspm;
     const VectorXd unitNoise = (kernel * noiseCov.data * kernel.transpose()).diagonal();
     ok &= expect(cmne.stcCmne.data.rows() == fwd.nsource && cmne.stcCmne.data.cols() == n && (unitNoise.array() - 1.0).abs().maxCoeff() < 1e-6,
-                 QString("%1 auditory sources x %2 samples; the dSPM kernel maps sensor noise to unit variance").arg(fwd.nsource).arg(n));
+                 std::format("{} auditory sources x {} samples; the dSPM kernel maps sensor noise to unit variance", fwd.nsource, n));
     // The LSTM runs in float32, so compare to single precision.
     ok &= expect((cmne.stcCmne.data.leftCols(k) - cmne.stcSensing.data.leftCols(k)).cwiseAbs().maxCoeff() < 1e-5 && (cmne.stcSensing.data - InvCMNE::zScoreRectify(cmne.stcDspm.data)).norm() == 0.0,
-                 QString("the first k = %1 samples have no context: CMNE equals the rectified, z-scored dSPM").arg(k));
+                 std::format("the first k = {} samples have no context: CMNE equals the rectified, z-scored dSPM", k));
     if (settings.onnxModelPath.isEmpty()) {
         ok &= expect(cmne.stcCmne.data == InvCMNE::controlEstimate(cmne.stcDspm.data, k),
                      "without a model, CMNE is the control estimate");
@@ -306,8 +305,8 @@ int main(int argc, char* argv[])
     // Peaks of the N100m window, 50-150 ms after the tone
     const int from = static_cast<int>(std::lround((0.05 - evoked.times(0)) * evoked.info.sfreq));
     const int to = static_cast<int>(std::lround((0.15 - evoked.times(0)) * evoked.info.sfreq));
-    qInfo().noquote() << "  dSPM peak:" << describePeak(cmne.stcDspm, from, to);
-    qInfo().noquote() << "  CMNE peak:" << describePeak(cmne.stcCmne, from, to);
+    std::println("  dSPM peak: {}", describePeak(cmne.stcDspm, from, to));
+    std::println("  CMNE peak: {}", describePeak(cmne.stcCmne, from, to));
 
     // Mean over the auditory sources of each hemisphere
     QVector<double> ms(n);
@@ -332,10 +331,10 @@ int main(int argc, char* argv[])
     if (parser.isSet(stcOption)) {
         const QString prefix = parser.value(stcOption);
         ok &= expect(cmne.stcDspm.writeHemispherePair(prefix + "-dspm") && cmne.stcCmne.writeHemispherePair(prefix + "-cmne"),
-                     "wrote " + prefix + "-{dspm,cmne}-{lh,rh}.stc");
+                     std::format("wrote {}-{{dspm,cmne}}-{{lh,rh}}.stc", prefix.toStdString()));
     }
 
-    qInfo().noquote() << (ok ? "All CMNE checks passed." : "CMNE checks FAILED.");
+    std::println("{}", ok ? "All CMNE checks passed." : "CMNE checks FAILED.");
     return ok ? EXIT_SUCCESS : EXIT_FAILURE;
 }
 ````

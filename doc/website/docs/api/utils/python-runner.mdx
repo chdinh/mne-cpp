@@ -256,7 +256,7 @@ Get the Python interpreter path inside the configured venv.
 
 Utilities library: buffers, observers, logging, file formats, montages, layouts and reports.
 
-````cpp title="src/examples/ex_utils/main.cpp, line 311"
+````cpp title="src/examples/ex_utils/main.cpp, line 314"
 PythonRunner python; // "python3" from PATH; a venv is configured via PythonRunnerConfig
 QStringList progress;
 python.setProgressCallback([&](float pct, const QString& msg) { progress << QString("%1 %2").arg(pct).arg(msg); });
@@ -267,7 +267,7 @@ if (python.isPythonAvailable()) {
     ok &= expect(run.success && run.stdOut.trimmed().endsWith("5") && progress == QStringList({"50 half"}) && fromNumpy == (Matrix2d() << 1, 2, 3, 4).finished(),
                  "PythonRunner passes arguments and parses [progress] lines; PythonTestHelper reads a matrix");
 } else {
-    qInfo().noquote() << "  skip  PythonRunner (python3 not found)";
+    std::println("  skip  PythonRunner (python3 not found)");
 ````
 
 ## Authors of this file

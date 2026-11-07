@@ -85,7 +85,7 @@ Size of the old struct (fiffTimeRec) 2*int = 2*4 = 8.
 
 FIFF library: fixed-length epochs, CTF compensation, the file directory and raw buffers, and handing recordings to another application.
 
-````cpp title="src/examples/ex_fiff_structure/main.cpp, line 120"
+````cpp title="src/examples/ex_fiff_structure/main.cpp, line 121"
 FiffStream stream(&structureFile);
 ok &= stream.open();
 const QList<FiffDirEntry::SPtr>& directory = stream.dir(); // every tag (kind, type, size, position) + a kind -1 end

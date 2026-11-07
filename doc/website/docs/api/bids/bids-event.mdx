@@ -78,7 +78,7 @@ Write a BIDS *_events.tsv file.
 
 BIDS library: paths, sidecar TSVs, BrainVision/EDF readers and a raw-data round trip.
 
-````cpp title="src/examples/ex_bids/main.cpp, line 109"
+````cpp title="src/examples/ex_bids/main.cpp, line 111"
 const BidsDatasetDescription description = BidsDatasetDescription::read(root + "/dataset_description.json");
 const QList<BidsChannel> channels = BidsChannel::readTsv(channelsTsv);               // one row per channel
 const QList<BidsEvent> events = BidsEvent::readTsv(ieeg.eventsTsvPath().filePath()); // onset, duration, sample, value, trial_type

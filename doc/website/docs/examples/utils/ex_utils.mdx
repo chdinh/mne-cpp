@@ -21,8 +21,14 @@ Every step checks its result (round trips, known electrode positions) and the ex
 ## Results
 
 ````text title="Console output"
-logging to "/var/folders/lk/dqv220515jx568p47_pgxkm80000gn/T/ex_utils-zzSOps/example.log"
+logging to "/var/folders/lk/dqv220515jx568p47_pgxkm80000gn/T/ex_utils-IVKMJf/example.log"
   ok   MNELogger wrote the message to the log file
+channel MEG 0113 is flat
+  ok   LogCapture recorded the warning
+  ok   FileByteStream read back the big-endian samples
+  ok   MemoryByteStream stores values most significant byte first
+  ok   ThreadPool mapped the channels in order
+  ok   string helpers parsed the line
   ok   CircularBuffer pops in FIFO order, one element left
   ok   observer saw 2 before detaching (2)
   ok   commands executed in order
@@ -35,17 +41,7 @@ torigin: 0.000708525, -0.0164468, -0.00234483; tradius: 0.0984577
 Successfully wrote the layout file.
   ok   LayoutMaker: Cz at (-0.0381155, 0.901983), Fp1 front-left, O1 back, T8 right
   ok   LayoutLoader reads the electrode names, positions and unit of an .elc file
-  ok   FastrakParser converts centimetres to metres and waits for the partial record
   ok   Report renders text and table sections to HTML
-Fiducial captured: NAS  (87.3018, 48.7688, 37.6336) mm
-Fiducial captured: LPA  (67.9586, 73.3596, 50) mm
-  LPA ↔ NAS: 33.6422 mm
-Fiducial captured: RPA  (32.2452, 94.6586, 29.2705) mm
-  RPA ↔ LPA: 46.4629 mm
-  RPA ↔ NAS: 72.1599 mm
-Registration succeeded (analytical paired).
-  ok   PolhemusCoregistration maps the captured LPA onto its model position from the mock digitiser
-  ok   AcquiredPoints keeps Cz after undoing the head-shape point
   ok   PythonRunner passes arguments and parses [progress] lines; PythonTestHelper reads a matrix
 All utils checks passed.
 ````
@@ -156,8 +152,11 @@ The documented classes this example uses most:
 #include <cmath>
 #include <cstdint>
 #include <cstdlib>
+#include <format>
 #include <optional>
+#include <print>
 #include <string>
+#include <string_view>
 #include <vector>
 
 //=============================================================================================================
@@ -174,9 +173,9 @@ using namespace Eigen;
 namespace
 {
 
-bool expect(bool condition, const QString& what)
+bool expect(bool condition, std::string_view what)
 {
-    qInfo().noquote() << (condition ? "  ok  " : "  FAIL") << what;
+    std::println("{} {}", condition ? "  ok  " : "  FAIL", what);
     return condition;
 }
 
@@ -261,7 +260,7 @@ int main(int argc, char* argv[])
     ok &= expect(log.open(QIODevice::ReadOnly) && log.readAll().contains("logging to"), "MNELogger wrote the message to the log file");
 
     //! [log_usage]
-    Log::warning("channel MEG 0113 is flat"); // reaches Qt's handler, here MNELogger
+    Log::warning("channel {} is flat", "MEG 0113"); // formatted as by std::format, then passed to Qt's handler
     //! [log_usage]
 
     //! [log_capture_usage]
@@ -323,7 +322,7 @@ int main(int argc, char* argv[])
     counter.increment();
     counter.detach(&observer);
     counter.increment();
-    ok &= expect(observer.seen() == 2, QString("observer saw %1 before detaching (2)").arg(observer.seen()));
+    ok &= expect(observer.seen() == 2, std::format("observer saw {} before detaching (2)", observer.seen()));
 
     QStringList journal;
     QList<AppendCommand*> queue = {new AppendCommand(journal, "a"), new AppendCommand(journal, "b")};
@@ -362,7 +361,7 @@ int main(int argc, char* argv[])
     const bool found = StandardMontage::findElectrode("Cz", cz); // mne's standard_1005 positions, metres, MNI frame
     //! [standard_montage_usage]
     ok &= expect(montage1020.size() == StandardMontage::electrodeCount(StandardMontage::System::Standard_1020) && found && (cz - Vector3d(0.0004009, -0.009167, 0.100244)).norm() < 1e-12,
-                 QString("10-20 montage: %1 electrodes, Cz at (0.4, -9.2, 100.2) mm").arg(montage1020.size()));
+                 std::format("10-20 montage: {} electrodes, Cz at (0.4, -9.2, 100.2) mm", montage1020.size()));
 
     //! [layout_maker_usage]
     // Azimuthal equidistant projection around the fitted sphere: Cz lands near the centre, the nose points up
@@ -384,7 +383,7 @@ int main(int argc, char* argv[])
     const float czX = layout2d[iCz][0] + 2.5f;
     const float czY = layout2d[iCz][1] + 2.0f;
     ok &= expect(layout2d.size() == names.size() && std::hypot(czX, czY) < 1.0f && layout2d[iFp1][1] > layout2d[iCz][1] && layout2d[iO1][1] < layout2d[iCz][1] && layout2d[iFp1][0] < layout2d[iCz][0] && layout2d[iT8][0] > layout2d[iCz][0],
-                 QString("LayoutMaker: Cz at (%1, %2), Fp1 front-left, O1 back, T8 right").arg(czX).arg(czY));
+                 std::format("LayoutMaker: Cz at ({:g}, {:g}), Fp1 front-left, O1 back, T8 right", czX, czY));
 
     QFile capFile(dir.filePath("cap.elc"));
     ok &= capFile.open(QIODevice::WriteOnly | QIODevice::Text);
@@ -426,10 +425,10 @@ int main(int argc, char* argv[])
         ok &= expect(run.success && run.stdOut.trimmed().endsWith("5") && progress == QStringList({"50 half"}) && fromNumpy == (Matrix2d() << 1, 2, 3, 4).finished(),
                      "PythonRunner passes arguments and parses [progress] lines; PythonTestHelper reads a matrix");
     } else {
-        qInfo().noquote() << "  skip  PythonRunner (python3 not found)";
+        std::println("  skip  PythonRunner (python3 not found)");
     }
 
-    qInfo() << (ok ? "All utils checks passed." : "utils checks FAILED.");
+    std::println("{}", ok ? "All utils checks passed." : "utils checks FAILED.");
     return ok ? EXIT_SUCCESS : EXIT_FAILURE;
 }
 ````

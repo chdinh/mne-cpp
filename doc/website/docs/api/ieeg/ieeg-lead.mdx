@@ -45,7 +45,7 @@ const IeegLead& lead = implantation.leads().front(); // contacts ordered LA1, LA
 
 IEEG library: group sEEG contacts into a lead, derive a bipolar montage and paint contact values onto a surface.
 
-````cpp title="src/examples/ex_ieeg/main.cpp, line 72"
+````cpp title="src/examples/ex_ieeg/main.cpp, line 74"
 const IeegImplantation implantation(contacts, "ACPC");
 const IeegLead& lead = implantation.leads().front(); // contacts ordered LA1, LA2, LA3
 // IeegImplantation::readBids("sub-01_electrodes.tsv") reads the same from BIDS iEEG

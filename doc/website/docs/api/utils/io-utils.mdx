@@ -160,7 +160,7 @@ Read Eigen Matrix from file (std::string path).
 
 Utilities library: buffers, observers, logging, file formats, montages, layouts and reports.
 
-````cpp title="src/examples/ex_utils/main.cpp, line 232"
+````cpp title="src/examples/ex_utils/main.cpp, line 235"
 MatrixXd matrix(2, 3);
 matrix << 1.5, -2.0, 3.25, 0.0, 1e-6, 42.0;
 const QString matrixPath = dir.filePath("matrix.txt");
@@ -185,7 +185,7 @@ Fit continuous HPI coils on raw data with SSP and write the head positions for c
 
 Inverse library: continuous head position (HPI) fitting.
 
-````cpp title="src/examples/ex_inv_hpi/main.cpp, line 113"
+````cpp title="src/examples/ex_inv_hpi/main.cpp, line 115"
 // MaxFilter head position at t = 0: translation (-0.814, -11.046, 53.572) mm. One 200 ms window, so allow 1 mm
 // (test_hpiFit_integration holds the mean over the whole recording to 0.3 mm).
 MatrixXd maxfilter;
@@ -193,8 +193,7 @@ IOUtils::read_eigen_matrix(maxfilter, data + "/Result/ref_hpiFit_pos.txt");
 const Vector3d translation = fit.devHeadTrans.trans.block<3, 1>(0, 3).cast<double>();
 const Vector3d reference = maxfilter.block<1, 3>(0, 4).transpose();
 ok &= expect(fit.hpiFreqs == QVector<int>({166, 154, 161, 158}) && fit.GoF.minCoeff() > 0.98 && (translation - reference).norm() < 0.001,
-             QString("InvHpiDataUpdater/InvHpiModelParameters/InvHpiFit: coils ordered 166/154/161/158 Hz, head position within %1 mm of MaxFilter")
-                 .arg(1e3 * (translation - reference).norm(), 0, 'f', 3));
+             std::format("InvHpiDataUpdater/InvHpiModelParameters/InvHpiFit: coils ordered 166/154/161/158 Hz, head position within {:.3f} mm of MaxFilter", 1e3 * (translation - reference).norm()));
 ````
 
 Also used in [ex_read_fwd](../../examples/fs/ex_read_fwd.mdx).

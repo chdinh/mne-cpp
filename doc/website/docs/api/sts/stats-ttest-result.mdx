@@ -40,7 +40,7 @@ const StatsTtestResult rightTail = StatsTtest::oneSample(a, 0.0, StatsTailType::
 
 Statistics library on small literal data sets with known answers.
 
-````cpp title="src/examples/ex_sts_statistics/main.cpp, line 94"
+````cpp title="src/examples/ex_sts_statistics/main.cpp, line 96"
 const StatsTtestResult oneSample = StatsTtest::oneSample(a);        // H0: column mean = 0
 const StatsTtestResult paired = StatsTtest::paired(a, b);           // H0: mean(a - b) = 0
 const StatsTtestResult independent = StatsTtest::independent(a, b); // pooled variance, df = 10

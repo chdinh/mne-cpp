@@ -305,7 +305,7 @@ Compatible with numpy.savetxt() output.
 
 Utilities library: buffers, observers, logging, file formats, montages, layouts and reports.
 
-````cpp title="src/examples/ex_utils/main.cpp, line 314"
+````cpp title="src/examples/ex_utils/main.cpp, line 317"
 const PythonRunnerResult run = python.runCode("import sys\nprint('[progress] 50% half')\nprint(sum(map(int, sys.argv[1:])))", {"2", "3"});
 PythonTestHelper helper;                                                    // oracle access for tests
 const MatrixXd fromNumpy = helper.evalMatrix("print('1 2'); print('3 4')"); // one line per row
@@ -313,7 +313,7 @@ if (python.isPythonAvailable()) {
     ok &= expect(run.success && run.stdOut.trimmed().endsWith("5") && progress == QStringList({"50 half"}) && fromNumpy == (Matrix2d() << 1, 2, 3, 4).finished(),
                  "PythonRunner passes arguments and parses [progress] lines; PythonTestHelper reads a matrix");
 } else {
-    qInfo().noquote() << "  skip  PythonRunner (python3 not found)";
+    std::println("  skip  PythonRunner (python3 not found)");
 }
 ````
 

@@ -301,7 +301,7 @@ Automatically decides whether to add to the in or out edges.
 
 Connectivity metrics on synthetic data with a known coupling.
 
-````cpp title="src/examples/ex_connectivity_metrics/main.cpp, line 204"
+````cpp title="src/examples/ex_connectivity_metrics/main.cpp, line 206"
     coherency.append(NetworkNode::SPtr(new NetworkNode(i, positions.row(i))));
 }
 Coherency::calculateAbs(coherency, settings);
@@ -313,7 +313,7 @@ ok &= expect(std::fabs(edgeWeight(coherency, 0, 1) - coh01) < 1e-9, "Coherency::
 
 Disp3D scene data: sensor-to-surface interpolation, electrodes, MRI slices, video overlay and layers.
 
-````cpp title="src/examples/ex_disp3d_scene/main.cpp, line 275"
+````cpp title="src/examples/ex_disp3d_scene/main.cpp, line 277"
     graph.append(NetworkNode::SPtr(new NetworkNode(i, RowVectorXf::Constant(3, 0.01f * static_cast<float>(i)))));
 }
 const QList<QPair<int, int>> links = {{0, 1}, {1, 2}};

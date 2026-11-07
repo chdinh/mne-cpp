@@ -64,7 +64,7 @@ dipfit function is adapted from Fieldtrip Software.
 
 Inverse library: continuous head position (HPI) fitting.
 
-````cpp title="src/examples/ex_inv_hpi/main.cpp, line 133"
+````cpp title="src/examples/ex_inv_hpi/main.cpp, line 134"
 // One coil's magnetic-dipole fit, as InvHpiFit runs it per coil: seeded 5 mm off the fitted position.
 const MatrixXd coilsDevice = fit.devHeadTrans.apply_inverse_trans(updater.getHpiDigitizer().cast<float>()).cast<double>();
 InvHpiFitData coilFit;
@@ -77,7 +77,7 @@ coilFit.m_iMaxIterations = 500;
 coilFit.m_fAbortError = 1e-9f;
 coilFit.doDipfitConcurrent();
 ok &= expect((coilFit.m_coilPos - coilsDevice.row(0)).norm() < 0.002 && coilFit.m_errorInfo.error < 0.05,
-             QString("InvHpiFitData: the single-coil fit returns to within %1 mm of the full fit").arg(1e3 * (coilFit.m_coilPos - coilsDevice.row(0)).norm(), 0, 'f', 2));
+             std::format("InvHpiFitData: the single-coil fit returns to within {:.2f} mm of the full fit", 1e3 * (coilFit.m_coilPos - coilsDevice.row(0)).norm()));
 ````
 
 ## Authors of this file

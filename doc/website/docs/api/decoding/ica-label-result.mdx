@@ -23,8 +23,7 @@ Pairs a component index with its winning `IcaComponentLabel` and a confidence sc
 const std::vector<IcaLabelResult> labels = MlIcaLabel::classify(icaSources, eog, ecg, kSFreq);
 const std::vector<int> reject = MlIcaLabel::findArtifactComponents(labels); // indices to drop before back-projection
 for (const IcaLabelResult& label : labels) {
-    qInfo().noquote() << "component" << label.componentIndex << IcaLabelResult::labelToString(label.label).c_str()
-                      << "confidence" << label.confidence;
+    std::println("component {} {} confidence {:g}", label.componentIndex, IcaLabelResult::labelToString(label.label), label.confidence);
 }
 ```
 
@@ -48,12 +47,11 @@ for (const IcaLabelResult& label : labels) {
 
 Spatial decoders and ICA labelling on synthetic mixtures with a known ground truth.
 
-````cpp title="src/examples/ex_decoding/main.cpp, line 190"
+````cpp title="src/examples/ex_decoding/main.cpp, line 192"
 const std::vector<IcaLabelResult> labels = MlIcaLabel::classify(icaSources, eog, ecg, kSFreq);
 const std::vector<int> reject = MlIcaLabel::findArtifactComponents(labels); // indices to drop before back-projection
 for (const IcaLabelResult& label : labels) {
-    qInfo().noquote() << "component" << label.componentIndex << IcaLabelResult::labelToString(label.label).c_str()
-                      << "confidence" << label.confidence;
+    std::println("component {} {} confidence {:g}", label.componentIndex, IcaLabelResult::labelToString(label.label), label.confidence);
 }
 ok &= expect(labels.size() == 4 && labels[0].label == IcaComponentLabel::Eog && labels[1].label == IcaComponentLabel::Ecg && labels[2].label == IcaComponentLabel::Muscle && labels[3].label == IcaComponentLabel::Brain,
              "ICA labels: EOG, ECG, muscle, brain");

@@ -55,7 +55,7 @@ const int effectCluster = clusters.matClusterIds(3, 0);
 
 Statistics library on small literal data sets with known answers.
 
-````cpp title="src/examples/ex_sts_statistics/main.cpp, line 176"
+````cpp title="src/examples/ex_sts_statistics/main.cpp, line 178"
 const StatsClusterResult clusters = StatsCluster::permutationTest(condA, condB, chain, 500);
 // Cluster ids are negative where A < B; |id| - 1 indexes vecClusterStats and vecClusterPvals
 const int effectCluster = clusters.matClusterIds(3, 0);
@@ -63,7 +63,7 @@ const bool clusterOk = effectCluster < 0 && clusters.matClusterIds(2, 0) == effe
 const double clusterP = clusterOk ? clusters.vecClusterPvals[-effectCluster - 1] : -1.0;
 // The observed statistic counts as one permutation, so p >= 1 / (500 + 1) as in MNE-Python
 ok &= expect(clusterOk && clusterP >= 1.0 / 501.0 && clusterP < 0.05,
-             QString("channels 2-4 form one negative cluster, 1/501 <= p %1 < 0.05").arg(clusterP));
+             std::format("channels 2-4 form one negative cluster, 1/501 <= p {:g} < 0.05", clusterP));
 ````
 
 ## Authors of this file

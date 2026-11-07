@@ -53,9 +53,9 @@ Line frequency is not defined
 	Range : 0 ... 20  =      0.000 ...     0.042 secs
 Ready.
   ok   FiffCtfComp: 5 compensation grades; the grade-1 compensator matches mne make_compensator
-Opening raw data /var/folders/lk/dqv220515jx568p47_pgxkm80000gn/T/ex_fiff_structure-Awzpwo/shared/realtime_file0_raw.fif...
+Opening raw data /var/folders/lk/dqv220515jx568p47_pgxkm80000gn/T/ex_fiff_structure-NwVLpS/shared/realtime_file0_raw.fif...
 
-Creating tag directory for /var/folders/lk/dqv220515jx568p47_pgxkm80000gn/T/ex_fiff_structure-Awzpwo/shared/realtime_file0_raw.fif...
+Creating tag directory for /var/folders/lk/dqv220515jx568p47_pgxkm80000gn/T/ex_fiff_structure-NwVLpS/shared/realtime_file0_raw.fif...
 Line frequency is not defined
 
 	Read a total of 4 projection items:
@@ -165,7 +165,6 @@ The documented classes this example uses most:
 
 #include <QCoreApplication>
 #include <QCommandLineParser>
-#include <QDebug>
 #include <QDir>
 #include <QFile>
 #include <QEventLoop>
@@ -179,6 +178,8 @@ The documented classes this example uses most:
 #include <cmath>
 #include <cstdlib>
 #include <limits>
+#include <print>
+#include <string_view>
 
 //=============================================================================================================
 // USED NAMESPACES
@@ -194,9 +195,9 @@ using namespace Eigen;
 namespace
 {
 
-bool expect(bool condition, const QString& what)
+bool expect(bool condition, std::string_view what)
 {
-    qInfo().noquote() << (condition ? "  ok  " : "  FAIL") << what;
+    std::println("{} {}", condition ? "  ok  " : "  FAIL", what);
     return condition;
 }
 
@@ -294,7 +295,7 @@ int main(int argc, char* argv[])
     ok &= expect(!arrived.isEmpty() && sharedRaw.last_samp - sharedRaw.first_samp + 1 == 6007,
                  "FiffFileSharer: the copied recording arrives at the watcher and reads back with all 6007 samples");
 
-    qInfo().noquote() << (ok ? "All fiff structure checks passed." : "fiff structure checks FAILED.");
+    std::println("{}", ok ? "All fiff structure checks passed." : "fiff structure checks FAILED.");
     return ok ? EXIT_SUCCESS : EXIT_FAILURE;
 }
 ````

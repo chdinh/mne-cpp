@@ -219,7 +219,7 @@ For each of gradiometers, magnetometers and EEG (bad channels excluded) the lead
 
 FIFF library: measurement info, channels, digitizer, transforms, projectors, covariance, events, annotations, evoked sets and the low-level file structure.
 
-````cpp title="src/examples/ex_fiff_api/main.cpp, line 156"
+````cpp title="src/examples/ex_fiff_api/main.cpp, line 157"
 const FiffProj& pca = info.projs[0]; // "PCA-v1", 1 vector over 102 magnetometers, inactive
 QList<FiffProj> projs = info.projs;
 FiffProj::activate_projs(projs);
@@ -231,7 +231,7 @@ ok &= expect(pca.desc == "PCA-v1" && !pca.active && pca.data->nrow == 1 && pca.d
 
 MNE library: BEM surfaces, surface projection, ICP, source spaces and epochs.
 
-````cpp title="src/examples/ex_mne_api/main.cpp, line 448"
+````cpp title="src/examples/ex_mne_api/main.cpp, line 450"
 MNE::write_events_to_fif(eveName, events.events);
 MatrixXi eventsBack;
 MNE::read_events(eveName, rawFile.fileName().toStdString(), eventsBack);
@@ -248,7 +248,7 @@ ok &= expect(eventsBack.rows() == 25 && eventsBack(0, 0) == 13988 && eventsBack(
 
 DSP real-time workers: averaging, covariance, noise spectrum, connectivity, HPI fitting and inverse operators.
 
-````cpp title="src/examples/ex_dsp_rt/main.cpp, line 281"
+````cpp title="src/examples/ex_dsp_rt/main.cpp, line 283"
 ok &= hpiRaw.read_raw_segment(hpiData, hpiTimes, hpiRaw.first_samp, hpiRaw.first_samp + 399);
 MatrixXd projectors = MatrixXd::Identity(hpiInfo->nchan, hpiInfo->nchan);
 FiffInfo projInfo = *hpiInfo;

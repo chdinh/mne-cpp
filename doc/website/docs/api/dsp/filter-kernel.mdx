@@ -233,7 +233,7 @@ Applies the current filter to the input data using multiplication in frequency d
 
 FIR filter design, application and storage with the dsp library.
 
-````cpp title="src/examples/ex_dsp_filter/main.cpp, line 109"
+````cpp title="src/examples/ex_dsp_filter/main.cpp, line 111"
 // Frequencies are normalised to Nyquist (500 Hz): 40 Hz cut-off, 10 Hz transition
 const int typeLpf = FilterKernel::m_filterTypes.indexOf(FilterParameter("LPF"));
 const int cosine = FilterKernel::m_designMethods.indexOf(FilterParameter("Cosine"));
@@ -245,7 +245,7 @@ for (const FilterKernel* kernel : {&lowPass, &lowPassPm}) {
     const double g10 = gain(taps, 10.0, kSFreq);
     const double g100 = gain(taps, 100.0, kSFreq);
     ok &= expect(std::fabs(g10 - 1.0) < 0.01 && g100 < 0.01,
-                 QString("%1 (%2): |H(10 Hz)| %3, |H(100 Hz)| %4").arg(kernel->getName(), kernel->getDesignMethod().getName()).arg(g10).arg(g100));
+                 std::format("{} ({}): |H(10 Hz)| {:g}, |H(100 Hz)| {:g}", kernel->getName().toStdString(), kernel->getDesignMethod().getName().toStdString(), g10, g100));
 }
 ````
 
@@ -274,13 +274,13 @@ if (RTPROCESSINGLIB::filterFile(fileOut,
 
 DSP library: Welch PSD, FIR filtering, peak finding, envelope correlation, SPHARA and simulation.
 
-````cpp title="src/examples/ex_dsp_analysis/main.cpp, line 115"
+````cpp title="src/examples/ex_dsp_analysis/main.cpp, line 117"
 FilterKernel lowPass = FirFilter::design(256, FirFilter::LowPass, 20.0, 0.0, sFreq, 5.0); // order, type, cutoff(s), Hz, transition
 const RowVectorXd smooth = FirFilter::applyZeroPhase(tones, lowPass);
 const double kept = toneAmplitude(smooth.segment(250, 500), 10.0, sFreq);
 const double removed = toneAmplitude(smooth.segment(250, 500), 40.0, sFreq);
 ok &= expect(smooth.size() == tones.size() && std::fabs(kept - 1.0) < 0.02 && removed < 0.01,
-             QString("FirFilter 20 Hz low-pass keeps 10 Hz (%1) and removes 40 Hz (%2)").arg(kept, 0, 'f', 4).arg(removed, 0, 'f', 4));
+             std::format("FirFilter 20 Hz low-pass keeps 10 Hz ({:.4f}) and removes 40 Hz ({:.4f})", kept, removed));
 ````
 
 ## Authors of this file

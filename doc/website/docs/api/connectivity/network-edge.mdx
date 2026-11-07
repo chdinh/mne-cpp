@@ -180,7 +180,7 @@ Returns the current frequency bins to average from/to.
 
 Connectivity metrics on synthetic data with a known coupling.
 
-````cpp title="src/examples/ex_connectivity_metrics/main.cpp, line 121"
+````cpp title="src/examples/ex_connectivity_metrics/main.cpp, line 123"
     for (const NetworkEdge::SPtr& edge : network.getFullEdges()) {
         if (edge->getStartNodeID() == start && edge->getEndNodeID() == end) {
             return edge->getWeight();
@@ -194,7 +194,7 @@ Connectivity metrics on synthetic data with a known coupling.
 
 Disp3D scene data: sensor-to-surface interpolation, electrodes, MRI slices, video overlay and layers.
 
-````cpp title="src/examples/ex_disp3d_scene/main.cpp, line 280"
+````cpp title="src/examples/ex_disp3d_scene/main.cpp, line 282"
     NetworkEdge::SPtr edge(new NetworkEdge(links[k].first, links[k].second, MatrixXd::Constant(1, 1, strengths[k])));
     graph.getNodeAt(links[k].first)->append(edge);
     graph.getNodeAt(links[k].second)->append(edge);

@@ -72,14 +72,14 @@ const MnaProvenance& provenance = checks.provenance; // versions, host, input SH
 
 MNA library: register operations, build and run a graph, bind parameters and save a project.
 
-````cpp title="src/examples/ex_mna/main.cpp, line 183"
+````cpp title="src/examples/ex_mna/main.cpp, line 185"
 graph.node("source").dirty = true;
 const MnaGraphExecutor::Context checked = MnaGraphExecutor::executeIncremental(graph, ctx);
 const MnaVerificationResult& verdict = checks.postResults.first();
 const MnaProvenance& provenance = checks.provenance; // versions, host, input SHA-256, timing
 // gain is 2 again, so shift::out = 2 * -2 + 0.5 = -3.5 fails the check
 ok &= expect(!verdict.passed && verdict.actualValue == QVariant(false) && checked.abortedNode == "shift" && checked.results.value("shift::out").toDouble() == -3.5 && provenance.mneCppVersion == MNE_CPP_VERSION && provenance.inputHashes.contains("in"),
-             "MnaVerification: " + verdict.message);
+             "MnaVerification: " + verdict.message.toStdString());
 ````
 
 ## Authors of this file

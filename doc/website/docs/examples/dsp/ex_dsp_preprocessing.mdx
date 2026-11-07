@@ -112,7 +112,6 @@ The documented classes this example uses most:
 //=============================================================================================================
 
 #include <QCoreApplication>
-#include <QDebug>
 
 //=============================================================================================================
 // STL INCLUDES
@@ -120,7 +119,10 @@ The documented classes this example uses most:
 
 #include <cmath>
 #include <cstdlib>
+#include <format>
+#include <print>
 #include <random>
+#include <string_view>
 
 //=============================================================================================================
 // USED NAMESPACES
@@ -140,9 +142,9 @@ namespace
 constexpr double kPi = 3.14159265358979323846;
 constexpr double kSFreq = 250.0;
 
-bool expect(bool condition, const QString& what)
+bool expect(bool condition, std::string_view what)
 {
-    qInfo().noquote() << (condition ? "  ok  " : "  FAIL") << what;
+    std::println("{} {}", condition ? "  ok  " : "  FAIL", what);
     return condition;
 }
 
@@ -199,21 +201,21 @@ int main(int argc, char* argv[])
     const IcaResult ica = ICA::run(mixed, 3);                         // FastICA, logcosh, fixed seed
     const MatrixXd cleaned = ICA::excludeComponents(mixed, ica, {0}); // drop component 0, back-project the rest
     //! [ica_run]
-    ok &= expect(worstRecovery(ica.matSources, sources) > 0.99, QString("FastICA recovers all sources (worst |r| %1)").arg(worstRecovery(ica.matSources, sources)));
+    ok &= expect(worstRecovery(ica.matSources, sources) > 0.99, std::format("FastICA recovers all sources (worst |r| {:g})", worstRecovery(ica.matSources, sources)));
     ok &= expect((mixed - cleaned - ica.matMixing.col(0) * ica.matSources.row(0)).cwiseAbs().maxCoeff() < 1e-9,
                  "excluding a component removes exactly its back-projection");
 
     //! [picard_ica_run]
     const IcaResult picard = PicardIca::run(mixed, 3);
     //! [picard_ica_run]
-    ok &= expect(worstRecovery(picard.matSources, sources) > 0.99, QString("Picard recovers all sources (worst |r| %1)").arg(worstRecovery(picard.matSources, sources)));
+    ok &= expect(worstRecovery(picard.matSources, sources) > 0.99, std::format("Picard recovers all sources (worst |r| {:g})", worstRecovery(picard.matSources, sources)));
 
     //! [extended_infomax_compute]
     const MatrixXd centered = mixed.colwise() - mixed.rowwise().mean();                            // infomax expects zero-mean data
     const InfomaxResult infomax = ExtendedInfomax::compute(centered, 3, 500, 0.1, 1e-7, true, 42); // the 0.001 default is too slow here
     //! [extended_infomax_compute]
     ok &= expect(infomax.converged && worstRecovery(infomax.matSources, sources) > 0.99,
-                 QString("extended Infomax recovers the sub-Gaussian sources (worst |r| %1)").arg(worstRecovery(infomax.matSources, sources)));
+                 std::format("extended Infomax recovers the sub-Gaussian sources (worst |r| {:g})", worstRecovery(infomax.matSources, sources)));
 
     // Continuous data with an evoked response on channels 0-1 after each event of code 1
     std::seed_seq seed{3}; // fixed on purpose: the checks below need reproducible data
@@ -255,9 +257,7 @@ int main(int argc, char* argv[])
     //! [epoch_extractor_usage]
     // Samples 25 + 25 after the event, i.e. 50 samples after the epoch start at -0.1 s (25 samples)
     ok &= expect(epochs.size() == 40 && evoked.cols() == 126 && std::fabs(evoked(0, 25 + 50) - 2.0) < 0.15 && std::fabs(evoked(3, 25 + 50)) < 0.15,
-                 QString("40 epochs of 126 samples; evoked peak %1 on channel 0 (2.0), %2 on channel 3 (0)")
-                     .arg(evoked(0, 75))
-                     .arg(evoked(3, 75)));
+                 std::format("40 epochs of 126 samples; evoked peak {:g} on channel 0 (2.0), {:g} on channel 3 (0)", evoked(0, 75), evoked(3, 75)));
 
     //! [xdawn_fit]
     const XdawnResult xdawn = Xdawn::fit(epochs, 1, 1); // enhance the response to event code 1
@@ -265,7 +265,7 @@ int main(int argc, char* argv[])
     //! [xdawn_fit]
     const VectorXd pattern = xdawn.matPatterns.col(0) / xdawn.matPatterns.col(0).cwiseAbs().maxCoeff();
     ok &= expect(xdawn.bValid && component.rows() == 1 && std::fabs(std::fabs(pattern(1) / pattern(0)) - 0.5) < 0.1 && std::fabs(pattern(2)) < 0.15,
-                 QString("xDAWN pattern ratio ch1/ch0 %1 (0.5), ch2 %2 (0)").arg(pattern(1) / pattern(0)).arg(pattern(2)));
+                 std::format("xDAWN pattern ratio ch1/ch0 {:g} (0.5), ch2 {:g} (0)", pattern(1) / pattern(0), pattern(2)));
 
     //! [channel_derivation_usage]
     const QStringList names = {"LH1", "LH2", "LH3", "RA1"};
@@ -300,9 +300,9 @@ int main(int argc, char* argv[])
     mneCsd << 984.4089021671608, 1280.7679646395302, 457.7070056428769, -775.4476983026417,
         -977.028371298518, -378.06791643722704, -311.9232346310464, 211.576727857144;
     const double csdErr = (csd.matData.col(3) - mneCsd).cwiseAbs().maxCoeff() / mneCsd.cwiseAbs().maxCoeff();
-    ok &= expect(csdErr < 1e-6, QString("surface Laplacian = mne compute_current_source_density (relative error %1)").arg(csdErr));
+    ok &= expect(csdErr < 1e-6, std::format("surface Laplacian = mne compute_current_source_density (relative error {:g})", csdErr));
 
-    qInfo() << (ok ? "All dsp preprocessing checks passed." : "dsp preprocessing checks FAILED.");
+    std::println("{}", ok ? "All dsp preprocessing checks passed." : "dsp preprocessing checks FAILED.");
     return ok ? EXIT_SUCCESS : EXIT_FAILURE;
 }
 ````

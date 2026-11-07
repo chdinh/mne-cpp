@@ -358,7 +358,7 @@ Auto-detects format and writes annotations.
 
 FIFF library: measurement info, channels, digitizer, transforms, projectors, covariance, events, annotations, evoked sets and the low-level file structure.
 
-````cpp title="src/examples/ex_fiff_api/main.cpp, line 183"
+````cpp title="src/examples/ex_fiff_api/main.cpp, line 184"
 MatrixXi firstThree = events.events.topRows(3);
 FiffAnnotations annotations = annotationsFromEvents(firstThree, info.sfreq, {{1, "auditory/left"}, {2, "auditory/right"}}, raw.first_samp);
 const FiffAnnotation blink{0.5, 1.0, "BAD_blink", {}, {}, {}}; // onset s, duration s, description, channels, ...
@@ -375,13 +375,13 @@ ok &= expect(annotationsBack.size() == 4 && std::fabs(annotationsBack.select("au
 
 Artifact detection and repair with the dsp library on a recording with planted defects.
 
-````cpp title="src/examples/ex_dsp_artifacts/main.cpp, line 223"
+````cpp title="src/examples/ex_dsp_artifacts/main.cpp, line 225"
 AnnotateAmplitudeParams amplitude;
 amplitude.flat = 1e-12; // consecutive samples within 1 pV of each other
 StringList flatChannels;
 const FiffAnnotations flatSpans = annotateAmplitude(loose, info, kSFreq, amplitude, &flatChannels);
 ok &= expect(flatSpans.size() == 1 && flatSpans[0].description == "BAD_flat" && std::abs(flatSpans[0].onset - 1.0) < 1e-12 && flatChannels == StringList{"EEG2"},
-             QString("annotateAmplitude: %1 flat span(s), bad %2").arg(flatSpans.size()).arg(QString::fromStdString(UTILSLIB::join(flatChannels, ", "))));
+             std::format("annotateAmplitude: {} flat span(s), bad {}", flatSpans.size(), UTILSLIB::join(flatChannels, ", ")));
 ````
 
 ## Authors of this file

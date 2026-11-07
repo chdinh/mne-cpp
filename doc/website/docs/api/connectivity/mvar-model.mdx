@@ -131,7 +131,7 @@ Computes the spectral matrix S(f) = H(f) * Sigma * H(f)^H.
 
 Connectivity metrics on synthetic data with a known coupling.
 
-````cpp title="src/examples/ex_connectivity_metrics/main.cpp, line 257"
+````cpp title="src/examples/ex_connectivity_metrics/main.cpp, line 259"
 MvarModel mvar;
 mvar.fit(average, 4);                                       // pass 0 to select the order by BIC
 const QVector<MatrixXd> coefficients = mvar.coefficients(); // A_1 .. A_p
@@ -139,8 +139,7 @@ const QVector<MatrixXcd> transfer = mvar.transferFunction(VectorXd::LinSpaced(5,
 ok &= expect(mvar.order() == 4 && coefficients.size() == 4 && transfer.size() == 5,
              "MvarModel stores order 4 and evaluates H(f) at 5 frequencies");
 ok &= expect(std::fabs(coefficients[kDelay - 1](1, 0)) > 0.5,
-             QString("|A_3(1,0)| %1 > 0.5: channel 1 depends on channel 0 three samples back")
-                 .arg(std::fabs(coefficients[kDelay - 1](1, 0))));
+             std::format("|A_3(1,0)| {:g} > 0.5: channel 1 depends on channel 0 three samples back", std::fabs(coefficients[kDelay - 1](1, 0))));
 ````
 
 ## Authors of this file

@@ -79,7 +79,7 @@ Calculates the phase locking value between the rows of the data matrix.
 
 Connectivity metrics on synthetic data with a known coupling.
 
-````cpp title="src/examples/ex_connectivity_metrics/main.cpp, line 225"
+````cpp title="src/examples/ex_connectivity_metrics/main.cpp, line 227"
 dswpli.setFrequencyRange(8.0f, 12.0f);
 Network plv = PhaseLockingValue::calculate(settings);
 plv.setFrequencyRange(8.0f, 12.0f);
@@ -87,7 +87,7 @@ for (const Network* network : {&pli, &wpli, &uspli, &dswpli, &plv}) {
     const double w01 = edgeWeight(*network, 0, 1);
     const double w02 = edgeWeight(*network, 0, 2);
     ok &= expect(w01 > w02 + 0.3,
-                 QString("%1 0-1 %2 > 0-2 %3 + 0.3").arg(network->getConnectivityMethod()).arg(w01).arg(w02));
+                 std::format("{} 0-1 {:g} > 0-2 {:g} + 0.3", network->getConnectivityMethod().toStdString(), w01, w02));
 }
 ````
 

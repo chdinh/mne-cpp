@@ -49,7 +49,7 @@ pwlRap.calculateInverse(measured, powellPairs);
 
 Inverse library: LCMV and DICS beamformers and the RAP-MUSIC family of dipole scanners.
 
-````cpp title="src/examples/ex_inv_beamformer/main.cpp, line 82"
+````cpp title="src/examples/ex_inv_beamformer/main.cpp, line 84"
 bool isPair(const InvDipolePair<double>& pair, int a, int b)
 {
     return std::min(pair.m_iIdx1, pair.m_iIdx2) == std::min(a, b) && std::max(pair.m_iIdx1, pair.m_iIdx2) == std::max(a, b);

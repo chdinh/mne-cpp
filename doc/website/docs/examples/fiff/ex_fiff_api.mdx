@@ -63,12 +63,12 @@ Creating tag directory for resources/data/mne-cpp-test-data/MEG/sample/sample_au
 		Average EEG reference (1 x 60) active
 
   ok   FiffCov: 366 channels, 15972 degrees of freedom, C[0,0] matches mne.read_cov
-Creating tag directory for /var/folders/lk/dqv220515jx568p47_pgxkm80000gn/T/ex_fiff_api-CHvkEq/sample-eve.fif...
+Creating tag directory for /var/folders/lk/dqv220515jx568p47_pgxkm80000gn/T/ex_fiff_api-YUwJyJ/sample-eve.fif...
   ok   FiffEvents: 25 trigger events match mne.find_events and round-trip through -eve.fif
   ok   FiffAnnotations: events become onsets in seconds and back, with descriptions as codes
+Creating tag directory for resources/data/mne-cpp-test-data/MEG/sample/sample_audvis-ave.fif...
 Exploring resources/data/mne-cpp-test-data/MEG/sample/sample_audvis-ave.fif ...
 
-Creating tag directory for resources/data/mne-cpp-test-data/MEG/sample/sample_audvis-ave.fif...
 Line frequency is not defined
 
 	Read a total of 4 projection items:
@@ -81,7 +81,7 @@ Line frequency is not defined
 
 		Average EEG reference (1 x 60) active
 
-… 345 more lines
+… 343 more lines
 ````
 
 ## Background
@@ -203,7 +203,6 @@ The documented classes this example uses most:
 
 #include <QCoreApplication>
 #include <QCommandLineParser>
-#include <QDebug>
 #include <QFile>
 #include <QTemporaryDir>
 #include <QTextStream>
@@ -215,6 +214,8 @@ The documented classes this example uses most:
 #include <cmath>
 #include <cstdlib>
 #include <memory>
+#include <print>
+#include <string_view>
 
 //=============================================================================================================
 // USED NAMESPACES
@@ -230,9 +231,9 @@ using namespace Eigen;
 namespace
 {
 
-bool expect(bool condition, const QString& what)
+bool expect(bool condition, std::string_view what)
 {
-    qInfo().noquote() << (condition ? "  ok  " : "  FAIL") << what;
+    std::println("{} {}", condition ? "  ok  " : "  FAIL", what);
     return condition;
 }
 
@@ -423,7 +424,7 @@ int main(int argc, char* argv[])
     //! [fiff_io_usage]
     ok &= expect(io.m_qlistEvoked.size() == 4 && io.m_qlistRaw.isEmpty(), "FiffIO finds the 4 evoked sets in an -ave.fif file");
 
-    qInfo().noquote() << (ok ? "All fiff checks passed." : "fiff checks FAILED.");
+    std::println("{}", ok ? "All fiff checks passed." : "fiff checks FAILED.");
     return ok ? EXIT_SUCCESS : EXIT_FAILURE;
 }
 ````

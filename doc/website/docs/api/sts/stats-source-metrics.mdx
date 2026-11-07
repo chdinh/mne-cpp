@@ -104,7 +104,7 @@ Find the index of the source with maximum absolute amplitude.
 
 Statistics library on small literal data sets with known answers.
 
-````cpp title="src/examples/ex_sts_statistics/main.cpp, line 188"
+````cpp title="src/examples/ex_sts_statistics/main.cpp, line 190"
 amplitudes << 0.1, 2.0, 0.5, -0.4;
 MatrixXd positions(4, 3); // metres
 positions << 0.00, 0.00, 0.00, 0.01, 0.00, 0.00, 0.02, 0.00, 0.00, 0.01, 0.01, 0.00;
@@ -114,7 +114,7 @@ const double localizationError = StatsSourceMetrics::peakLocalizationError(Vecto
 const double dispersion = StatsSourceMetrics::spatialDispersion(amplitudes, positions, peak);
 // SD = (0.1 * 0.01 + 0.5 * 0.01 + 0.4 * 0.01) / (0.1 + 2.0 + 0.5 + 0.4)
 ok &= expect(peak == 1 && std::fabs(localizationError - 0.003) < 1e-15 && std::fabs(dispersion - 0.01 / 3.0) < 1e-15,
-             QString("peak 1, PLE 3 mm, SD %1 m = 1/300").arg(dispersion));
+             std::format("peak 1, PLE 3 mm, SD {:g} m = 1/300", dispersion));
 ````
 
 ## Authors of this file

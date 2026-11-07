@@ -1236,7 +1236,7 @@ Index of 6778 public class members (functions, variables, typedefs, enums) acros
 - **createPlate** `[fn]` in [MeshFactory](/docs/api/disp3-d/mesh-factory) — Create a thin oriented rectangular plate (used for MEG magnetometers).
 - **createReader** `[fn]` in [BidsRawData](/docs/api/bids/bids-raw-data) — Create the appropriate format reader for a given file extension.
 - **createSphere** `[fn]` in [MeshFactory](/docs/api/disp3-d/mesh-factory) — Create a subdivided icosahedron sphere.
-- **critical** `[fn]` in [Log](/docs/api/utils/log)
+- **critical** `[fn]` in [Log](/docs/api/utils/log) — As `debug()`, at critical level.
 - **crop** `[fn]` in [FiffAnnotations](/docs/api/fiff/fiff-annotations) — Returns annotations overlapping [tmin, tmax], clipping partially overlapping ones.
 - **CrossCorrelation** `[fn]` in [CrossCorrelation](/docs/api/connectivity/cross-correlation) — Constructs a [`CrossCorrelation`](/docs/api/connectivity/cross-correlation) object.
 - **crosshairEnabled** `[fn]` in [ChannelDataView](/docs/api/disp/channel-data-view)
@@ -1321,7 +1321,7 @@ Index of 6778 public class members (functions, variables, typedefs, enums) acros
 - **dBaseMin** `[var]` in [EpochExtractorParams](/docs/api/utils/epoch-extractor-params) — Baseline start in seconds (relative to event).
 - **dCorrThresh** `[var]` in [BadChannelDetectParams](/docs/api/utils/bad-channel-detect-params) — Mean absolute neighbour correlation below this -&gt; isolated.
 - **DebiasedSquaredWeightedPhaseLagIndex** `[fn]` in [DebiasedSquaredWeightedPhaseLagIndex](/docs/api/connectivity/debiased-squared-weighted-phase-lag-index) — Constructs a [`DebiasedSquaredWeightedPhaseLagIndex`](/docs/api/connectivity/debiased-squared-weighted-phase-lag-index) object.
-- **debug** `[fn]` in [Log](/docs/api/utils/log)
+- **debug** `[fn]` in [Log](/docs/api/utils/log) — Formats `args` with `format` as std::format does and writes the result at debug level.
 - **decide_curv_display** `[fn]` in [MNEMshDisplaySurface](/docs/api/mne/mne-msh-display-surface) — Set the curvature display mode based on a surface type name.
 - **decide_search_restriction** `[fn]` in [MNESurface](/docs/api/mne/mne-surface) — Set up the triangle activation mask for a restricted surface search.
 - **decide_surface_extent** `[fn]` in [MNEMshDisplaySurface](/docs/api/mne/mne-msh-display-surface) — Compute and store the axis-aligned bounding box and field-of-view radius by iterating all vertex positions.
@@ -2728,7 +2728,7 @@ Index of 6778 public class members (functions, variables, typedefs, enums) acros
 - **info** `[var]` in [FiffEvoked](/docs/api/fiff/fiff-evoked) — Measurement info.
 - **info** `[var]` in [FiffEvokedSet](/docs/api/fiff/fiff-evoked-set) — FIFF measurement information.
 - **info** `[var]` in [FiffRawData](/docs/api/fiff/fiff-raw-data) — [`Fiff`](/docs/api/fiff/fiff-class) measurement information.
-- **info** `[fn]` in [Log](/docs/api/utils/log)
+- **info** `[fn]` in [Log](/docs/api/utils/log) — As `debug()`, at info level.
 - **info** `[var]` in [MNEForwardSolution](/docs/api/mne/mne-forward-solution) — light weighted measurement info.
 - **info** `[var]` in [MNEInverseOperator](/docs/api/mne/mne-inverse-operator) — Lightweight measurement info (channel names, types, etc.).
 - **info** `[var]` in [MNERawData](/docs/api/mne/mne-raw-data) — Raw data information loaded using [`MNE`](/docs/api/mne/mne-class) routines.
@@ -5072,6 +5072,7 @@ Index of 6778 public class members (functions, variables, typedefs, enums) acros
 - **set_current_comp** `[fn]` in [FiffInfo](/docs/api/fiff/fiff-info) — Set the current compensation value in the channel info structures.
 - **set_current_comp** `[fn]` in [FiffInfo](/docs/api/fiff/fiff-info) — mne_set_current_comp
 - **set_current_comp** `[fn]` in [MNE](/docs/api/mne/mne-class) — mne_set_current_comp
+- **set_sink** `[fn]` in [Log](/docs/api/utils/log) — Replaces the sink.
 - **setAcquisition** `[fn]` in [BIDSPath](/docs/api/bids/bids-path) — Set the acquisition label.
 - **setActivationPerAverage** `[fn]` in [AverageScene](/docs/api/disp/average-scene) — Set the activation per average map information.
 - **setActive** `[fn]` in [NetworkEdge](/docs/api/connectivity/network-edge) — Sets the activity flag of this edge.
@@ -5467,7 +5468,6 @@ Index of 6778 public class members (functions, variables, typedefs, enums) acros
 - **setSignalItemColor** `[fn]` in [AverageScene](/docs/api/disp/average-scene) — Sets the signal color for the items the scene holds.
 - **setSingleAverageColor** `[fn]` in [AverageLayoutView](/docs/api/disp/average-layout-view) — Sets the color used to draw the average to avgColor.
 - **setSingleAverageColor** `[fn]` in [ButterflyView](/docs/api/disp/butterfly-view) — Sets the color used to draw the average to avgColor.
-- **setSink** `[fn]` in [Log](/docs/api/utils/log) — Replaces the sink.
 - **setSizeMeters** `[fn]` in [VideoOverlay](/docs/api/disp3-d/video-overlay)
 - **setSlice** `[slot]` in [BrainView](/docs/api/disp3-d/brain-view) — Set an MRI slice to be rendered in the 3-D scene.
 - **setSlice** `[fn]` in [SliceObject](/docs/api/disp3-d/slice-object) — Set the slice image data and orientation.
@@ -6676,7 +6676,7 @@ Index of 6778 public class members (functions, variables, typedefs, enums) acros
 - **waitForDataAvailable** `[fn]` in [RtCmdClient](/docs/api/com/rt-cmd-client) — Wait for ready read until data are available.
 - **waitForSpace** `[fn]` in [AcqWriter](/docs/api/acq/acq-writer) — Waits until beginWrite(`samples`) would not wait.
 - **wallTimeMs** `[var]` in [MnaProvenance](/docs/api/mna/mna-provenance) — Wall-clock duration in milliseconds.
-- **warning** `[fn]` in [Log](/docs/api/utils/log)
+- **warning** `[fn]` in [Log](/docs/api/utils/log) — As `debug()`, at warning level.
 - **warp** `[fn]` in [MNEBem](/docs/api/mne/mne-bem) — Warp the Bem.
 - **WeightedPhaseLagIndex** `[fn]` in [WeightedPhaseLagIndex](/docs/api/connectivity/weighted-phase-lag-index) — Constructs a [`WeightedPhaseLagIndex`](/docs/api/connectivity/weighted-phase-lag-index) object.
 - **weightNorm** `[var]` in [InvBeamformer](/docs/api/inv/inv-beamformer) — Applied weight normalization.

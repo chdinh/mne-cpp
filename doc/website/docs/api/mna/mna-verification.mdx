@@ -72,7 +72,7 @@ const MnaProvenance& provenance = checks.provenance; // versions, host, input SH
 
 MNA library: register operations, build and run a graph, bind parameters and save a project.
 
-````cpp title="src/examples/ex_mna/main.cpp, line 173"
+````cpp title="src/examples/ex_mna/main.cpp, line 175"
 MnaVerification& checks = graph.node("shift").verification;
 checks.explanation = "Adds the offset; the result must stay positive.";
 MnaVerificationCheck positive;

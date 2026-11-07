@@ -85,7 +85,7 @@ Returns the path of the current log file, empty if file logging is off.
 
 Utilities library: buffers, observers, logging, file formats, montages, layouts and reports.
 
-````cpp title="src/examples/ex_utils/main.cpp, line 150"
+````cpp title="src/examples/ex_utils/main.cpp, line 153"
 qInstallMessageHandler(MNELogger::customLogWriter); // coloured console output
 MNELogger::setLogFile(dir.filePath("example.log")); // and a plain-text copy
 qInfo() << "logging to" << MNELogger::logFile();

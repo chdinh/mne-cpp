@@ -88,7 +88,7 @@ Size of the old struct (`fiffDirEntryRec`) 4*int = 4*4 = 16.
 
 FIFF library: fixed-length epochs, CTF compensation, the file directory and raw buffers, and handing recordings to another application.
 
-````cpp title="src/examples/ex_fiff_structure/main.cpp, line 109"
+````cpp title="src/examples/ex_fiff_structure/main.cpp, line 110"
 int samples = 0;
 for (const FiffRawDir& buffer : raw.rawdir)
     samples += buffer.nsamp;

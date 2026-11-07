@@ -111,7 +111,7 @@ public:
 
 DSP real-time workers: averaging, covariance, noise spectrum, connectivity, HPI fitting and inverse operators.
 
-````cpp title="src/examples/ex_dsp_rt/main.cpp, line 260"
+````cpp title="src/examples/ex_dsp_rt/main.cpp, line 262"
 RtConnectivity rtConnectivity;
 MatrixXd online;
 bool connectivityDone = false;
@@ -123,7 +123,7 @@ QObject::connect(&rtConnectivity, &RtConnectivity::newConnectivityResultAvailabl
 rtConnectivity.append(settings); // computed on the worker thread
 const bool connectivityArrived = waitFor(connectivityDone, 10000);
 ok &= expect(connectivityArrived && online.isApprox(offline),
-             QString("RtConnectivity equals Connectivity::calculate (coherence %1)").arg(online.size() ? online(0, 1) : 0.0, 0, 'f', 3));
+             std::format("RtConnectivity equals Connectivity::calculate (coherence {:.3f})", online.size() ? online(0, 1) : 0.0));
 rtConnectivity.stop();
 ````
 

@@ -44,7 +44,7 @@ const FiffEvoked average = FiffEpochs::averageEpochs(epochs, sfreq);
 
 FIFF library: fixed-length epochs, CTF compensation, the file directory and raw buffers, and handing recordings to another application.
 
-````cpp title="src/examples/ex_fiff_structure/main.cpp, line 97"
+````cpp title="src/examples/ex_fiff_structure/main.cpp, line 98"
 MatrixXd times;
 ok &= raw.read_raw_segment(data, times); // all 6007 samples
 const double sfreq = raw.info.sfreq;

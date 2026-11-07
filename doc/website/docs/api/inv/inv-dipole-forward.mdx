@@ -70,7 +70,7 @@ Eigen members are cleaned up automatically.
 
 Inverse library: equivalent current dipole fitting in a sphere model.
 
-````cpp title="src/examples/ex_inv_dipole_fit/main.cpp, line 106"
+````cpp title="src/examples/ex_inv_dipole_fit/main.cpp, line 107"
 InvGuessData guesses(QString(), QString(), 0.0f, 0.02f, 0.015f, fitData.get(), 0.08f); // 15 mm grid in an 80 mm sphere
 std::unique_ptr<InvDipoleForward> atTruth(InvDipoleFitData::dipole_forward_one(fitData.get(), truePos, nullptr));
 InvEcd dipole;

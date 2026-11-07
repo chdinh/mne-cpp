@@ -165,7 +165,7 @@ Access the singleton instance.
 
 MNA library: register operations, build and run a graph, bind parameters and save a project.
 
-````cpp title="src/examples/ex_mna/main.cpp, line 102"
+````cpp title="src/examples/ex_mna/main.cpp, line 104"
 MnaOpRegistry& registry = MnaOpRegistry::instance();
 const int nLoaded = MnaRegistryLoader::loadFile(registryFile.fileName(), registry); // schemas only
 registry.registerOpFunc("ex_constant", [](const QVariantMap&, const QVariantMap& attrs) -> QVariantMap {

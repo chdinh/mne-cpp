@@ -154,7 +154,7 @@ Sets the source estimate attributes.
 
 Inverse library: LCMV and DICS beamformers and the RAP-MUSIC family of dipole scanners.
 
-````cpp title="src/examples/ex_inv_beamformer/main.cpp, line 153"
+````cpp title="src/examples/ex_inv_beamformer/main.cpp, line 155"
 for (int t = 0; t < nSamples; ++t)
     measured.col(t) = g1 * std::sin(0.21 * t) + g2 * std::sin(0.53 * t + 0.4);
 QList<InvDipolePair<double>> pairs;
@@ -164,8 +164,7 @@ QList<InvDipolePair<double>> powellPairs;
 InvPwlRapMusic pwlRap(fwd, false, 1, 0.5); // Powell coordinate search: far fewer pairs, may stop at a local optimum
 pwlRap.calculateInverse(measured, powellPairs);
 ok &= expect(pairs.size() == 1 && isPair(pairs[0], 10, 50) && pairs[0].m_vCorrelation > 1.0 - 1e-6 && powellPairs.size() == 1 && powellPairs[0].m_vCorrelation > 0.99,
-             QString("InvRapMusic/InvPwlRapMusic/InvDipolePair: the exhaustive scan finds sources 10 and 50 (correlation 1), Powell a pair at %1")
-                 .arg(powellPairs.isEmpty() ? 0.0 : powellPairs[0].m_vCorrelation, 0, 'f', 4));
+             std::format("InvRapMusic/InvPwlRapMusic/InvDipolePair: the exhaustive scan finds sources 10 and 50 (correlation 1), Powell a pair at {:.4f}", powellPairs.isEmpty() ? 0.0 : powellPairs[0].m_vCorrelation));
 ````
 
 ### [ex_inverse_rap_music](../../examples/inv/ex_inverse_rap_music.mdx)

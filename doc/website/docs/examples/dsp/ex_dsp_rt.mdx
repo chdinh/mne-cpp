@@ -81,7 +81,7 @@ Line frequency is not defined
 	Range : 12900 ... 18906  =     42.956 ...    62.955 secs
 Ready.
 Reading forward solution from resources/data/mne-cpp-test-data/Result/ref-sample_audvis-meg-eeg-oct-6-fwd.fif...
-… 92 more lines
+… 90 more lines
 ````
 
 ## Background
@@ -198,7 +198,6 @@ The documented classes this example uses most:
 
 #include <QCoreApplication>
 #include <QCommandLineParser>
-#include <QDebug>
 #include <QEventLoop>
 #include <QFile>
 #include <QTimer>
@@ -209,7 +208,10 @@ The documented classes this example uses most:
 
 #include <cmath>
 #include <cstdlib>
+#include <format>
+#include <print>
 #include <random>
+#include <string_view>
 
 //=============================================================================================================
 // USED NAMESPACES
@@ -231,9 +233,9 @@ namespace
 
 constexpr double kPi = 3.14159265358979323846;
 
-bool expect(bool condition, const QString& what)
+bool expect(bool condition, std::string_view what)
 {
-    qInfo().noquote() << (condition ? "  ok  " : "  FAIL") << what;
+    std::println("{} {}", condition ? "  ok  " : "  FAIL", what);
     return condition;
 }
 
@@ -354,7 +356,7 @@ int main(int argc, char* argv[])
     //! [rt_cov_usage]
     // regularize() adds 0.1 x mean MEG variance to the diagonal; the off-diagonal term is untouched
     ok &= expect(cov.dim == 2 && cov.names == StringList{"MEG0111", "MEG0121"} && cov.nfree == 4000 && std::fabs(cov.data(0, 1) - numpyCov(0, 1)) < 1e-6 * std::fabs(numpyCov(0, 1)),
-                 QString("RtCov: covariance of 4000 samples matches numpy.cov off the diagonal (%1)").arg(cov.data(0, 1), 0, 'g', 6));
+                 std::format("RtCov: covariance of 4000 samples matches numpy.cov off the diagonal ({:.6g})", cov.data(0, 1)));
 
     // ---------------------------------------------------------------------------------------------------------
     // Noise spectrum: sin(25 Hz) + 0.1 cos(50 Hz) at 200 Hz in ten 64-sample blocks
@@ -376,7 +378,7 @@ int main(int argc, char* argv[])
     //! [rt_noise_usage]
     // scipy.signal.welch(x, 200, window=hann(66)[1:-1], nperseg=64, noverlap=0, detrend=False): 25 Hz -9.6521 dB, 50 Hz -29.6587 dB
     ok &= expect(spectrum.cols() == 33 && std::fabs(spectrum(0, 8) + 9.652129129685868) < 1e-6 && std::fabs(spectrum(0, 16) + 29.658719433796943) < 1e-6,
-                 QString("RtNoiseWorker: 25 Hz at %1 dB, 50 Hz at %2 dB match scipy.signal.welch").arg(spectrum(0, 8), 0, 'f', 4).arg(spectrum(0, 16), 0, 'f', 4));
+                 std::format("RtNoiseWorker: 25 Hz at {:.4f} dB, 50 Hz at {:.4f} dB match scipy.signal.welch", spectrum(0, 8), spectrum(0, 16)));
 
     RtNoise rtNoise(64, info200, 10);
     bool noiseDone = false;
@@ -421,7 +423,7 @@ int main(int argc, char* argv[])
     //! [rt_connectivity_usage]
     const bool connectivityArrived = waitFor(connectivityDone, 10000);
     ok &= expect(connectivityArrived && online.isApprox(offline),
-                 QString("RtConnectivity equals Connectivity::calculate (coherence %1)").arg(online.size() ? online(0, 1) : 0.0, 0, 'f', 3));
+                 std::format("RtConnectivity equals Connectivity::calculate (coherence {:.3f})", online.size() ? online(0, 1) : 0.0));
     rtConnectivity.stop();
 
     // ---------------------------------------------------------------------------------------------------------
@@ -451,7 +453,7 @@ int main(int argc, char* argv[])
     HpiFitResult direct;
     InvHpiFit(updater.getSensors()).fit(updater.getProjectedData(), updater.getProjectors(), model, updater.getHpiDigitizer(), direct);
     ok &= expect(workerFit.GoF.size() == 4 && workerFit.GoF.minCoeff() > 0.98 && workerFit.devHeadTrans.trans.isApprox(direct.devHeadTrans.trans, 1e-6f),
-                 QString("RtHpiWorker fits 4 coils (GoF >= %1) like InvHpiFit").arg(workerFit.GoF.size() ? workerFit.GoF.minCoeff() : 0.0, 0, 'f', 4));
+                 std::format("RtHpiWorker fits 4 coils (GoF >= {:.4f}) like InvHpiFit", workerFit.GoF.size() ? workerFit.GoF.minCoeff() : 0.0));
 
     // ---------------------------------------------------------------------------------------------------------
     // Inverse operator from the sample forward solution and the covariance of the sample raw data
@@ -478,10 +480,10 @@ int main(int argc, char* argv[])
     const bool inverseArrived = waitFor(inverseDone, 60000);
     // 306 MEG channels in the forward solution, minus the bad MEG2443
     ok &= expect(inverseArrived && inverse.nsource == fwd->nsource && inverse.nchan == 305 && UTILSLIB::contains(rawInfo->bads, "MEG2443"),
-                 QString("RtInvOp builds a %1-channel operator for %2 sources").arg(inverse.nchan).arg(inverse.nsource));
+                 std::format("RtInvOp builds a {}-channel operator for {} sources", inverse.nchan, inverse.nsource));
     rtInvOp.stop();
 
-    qInfo().noquote() << (ok ? "All dsp real-time checks passed." : "dsp real-time checks FAILED.");
+    std::println("{}", ok ? "All dsp real-time checks passed." : "dsp real-time checks FAILED.");
     return ok ? EXIT_SUCCESS : EXIT_FAILURE;
 }
 ````

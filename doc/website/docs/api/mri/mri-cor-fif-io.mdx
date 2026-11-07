@@ -63,10 +63,10 @@ Writes COR.fif file from slice data.
 
 MRI library: MGH/MGZ and NIfTI volumes, voxel/RAS transforms, slicing and COR sets.
 
-````cpp title="src/examples/ex_mri/main.cpp, line 146"
+````cpp title="src/examples/ex_mri/main.cpp, line 148"
 const QString corFif = dir.filePath("COR.fif");
 MriCorFifIO::write(corFif.toStdString(), corSlices, extraTransforms);
-ok &= expect(QFile(corFif).size() > 256 * 256 * 256, QString("COR.fif written (%1 bytes)").arg(QFile(corFif).size()));
+ok &= expect(QFile(corFif).size() > 256 * 256 * 256, std::format("COR.fif written ({} bytes)", QFile(corFif).size()));
 ````
 
 ## Authors of this file

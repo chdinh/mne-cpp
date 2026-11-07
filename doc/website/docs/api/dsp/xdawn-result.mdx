@@ -41,7 +41,7 @@ const XdawnResult xdawn = Xdawn::fit(epochs, 1, 1); // enhance the response to e
 const MatrixXd component = Xdawn::apply(epochs[0].epoch, xdawn);
 const VectorXd pattern = xdawn.matPatterns.col(0) / xdawn.matPatterns.col(0).cwiseAbs().maxCoeff();
 ok &= expect(xdawn.bValid && component.rows() == 1 && std::fabs(std::fabs(pattern(1) / pattern(0)) - 0.5) < 0.1 && std::fabs(pattern(2)) < 0.15,
-             QString("xDAWN pattern ratio ch1/ch0 %1 (0.5), ch2 %2 (0)").arg(pattern(1) / pattern(0)).arg(pattern(2)));
+             std::format("xDAWN pattern ratio ch1/ch0 {:g} (0.5), ch2 {:g} (0)", pattern(1) / pattern(0), pattern(2)));
 ````
 
 ## Authors of this file

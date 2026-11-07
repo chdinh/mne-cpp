@@ -83,7 +83,7 @@ Exposed for direct use by tests; `read` calls it transparently when the input pa
 
 MRI library: MGH/MGZ and NIfTI volumes, voxel/RAS transforms, slicing and COR sets.
 
-````cpp title="src/examples/ex_mri/main.cpp, line 113"
+````cpp title="src/examples/ex_mri/main.cpp, line 115"
 MriVolData direct;
 MriNiftiIO::read((dataDir + "/gradient.nii.gz").toStdString(), direct);
 ok &= expect(direct.voxelDataAsFloat() == voxels, "MriNiftiIO::read equals MriVolData::read");

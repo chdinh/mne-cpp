@@ -354,7 +354,7 @@ Read an inverse operator from a FIFF file.
 
 Inverse library: minimum-norm estimates, resolution matrices, label time courses, sparse solvers and source-estimate I/O.
 
-````cpp title="src/examples/ex_inv_api/main.cpp, line 118"
+````cpp title="src/examples/ex_inv_api/main.cpp, line 120"
 const MNEInverseOperator inverse = MNEInverseOperator::make_inverse_operator(evoked.info, fwd, noiseCov, 0.2f, 0.8f);
 const float lambda2 = 1.0f / 9.0f; // SNR 3
 InvMinimumNorm dspm(inverse, lambda2, "dSPM");
@@ -368,7 +368,7 @@ ok &= expect(stc.data.rows() == 70 && stc.data.cols() == 421 && near(stc.data.cw
 
 DSP real-time workers: averaging, covariance, noise spectrum, connectivity, HPI fitting and inverse operators.
 
-````cpp title="src/examples/ex_dsp_rt/main.cpp, line 317"
+````cpp title="src/examples/ex_dsp_rt/main.cpp, line 319"
 RtInvOp rtInvOp(rawInfo, fwd); // MEG-only operator, loose 0.2, depth 0.8
 MNEInverseOperator inverse;
 bool inverseDone = false;
@@ -380,7 +380,7 @@ rtInvOp.append(noiseCov); // e.g. each new RtCov estimate
 const bool inverseArrived = waitFor(inverseDone, 60000);
 // 306 MEG channels in the forward solution, minus the bad MEG2443
 ok &= expect(inverseArrived && inverse.nsource == fwd->nsource && inverse.nchan == 305 && UTILSLIB::contains(rawInfo->bads, "MEG2443"),
-             QString("RtInvOp builds a %1-channel operator for %2 sources").arg(inverse.nchan).arg(inverse.nsource));
+             std::format("RtInvOp builds a {}-channel operator for {} sources", inverse.nchan, inverse.nsource));
 rtInvOp.stop();
 ````
 

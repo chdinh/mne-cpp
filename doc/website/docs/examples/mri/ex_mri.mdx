@@ -111,7 +111,6 @@ The documented classes this example uses most:
 
 #include <QCoreApplication>
 #include <QCommandLineParser>
-#include <QDebug>
 #include <QDir>
 #include <QFile>
 #include <QTemporaryDir>
@@ -122,6 +121,9 @@ The documented classes this example uses most:
 
 #include <cmath>
 #include <cstdlib>
+#include <format>
+#include <print>
+#include <string_view>
 
 //=============================================================================================================
 // USED NAMESPACES
@@ -138,9 +140,9 @@ using namespace Eigen;
 namespace
 {
 
-bool expect(bool condition, const QString& what)
+bool expect(bool condition, std::string_view what)
 {
-    qInfo().noquote() << (condition ? "  ok  " : "  FAIL") << what;
+    std::println("{} {}", condition ? "  ok  " : "  FAIL", what);
     return condition;
 }
 
@@ -197,7 +199,7 @@ int main(int argc, char* argv[])
     const std::vector<MriSliceImage> planes = MriSlicer::extractOrthogonal(voxels, mgh.dims(), vox2ras, ras); // axial, coronal, sagittal
     //! [mri_slicer_usage]
     ok &= expect(voxel == Vector3i(2, 3, 1) && (MriSlicer::voxelToRas(vox2ras, voxel) - ras).norm() < 1e-7f && planes.size() == 3,
-                 QString("RAS (1, -0.5, -2) mm -> voxel (%1, %2, %3); three orthogonal planes").arg(voxel(0)).arg(voxel(1)).arg(voxel(2)));
+                 std::format("RAS (1, -0.5, -2) mm -> voxel ({}, {}, {}); three orthogonal planes", voxel(0), voxel(1), voxel(2)));
 
     // A COR set is 256 coronal 256x256 byte slices
     QTemporaryDir dir;
@@ -206,7 +208,7 @@ int main(int argc, char* argv[])
     for (int k = 0; k < 256; ++k) {
         QFile slice(QString("%1/COR-%2").arg(corDir).arg(k + 1, 3, 10, QChar('0')));
         if (!slice.open(QIODevice::WriteOnly) || slice.write(QByteArray(256 * 256, static_cast<char>(k))) != 256 * 256) {
-            qCritical() << "cannot write" << slice.fileName();
+            std::println(stderr, "cannot write {}", slice.fileName().toStdString());
             return EXIT_FAILURE;
         }
     }
@@ -216,15 +218,15 @@ int main(int argc, char* argv[])
     MriCorIO::read(corDir.toStdString(), corSlices);
     //! [mri_cor_io_read]
     ok &= expect(corSlices.size() == 256 && corSlices[7].pixels.size() == 256 * 256 && corSlices[7].pixels[0] == 7,
-                 QString("COR set: %1 slices of 256x256, slice 7 holds 7").arg(corSlices.size()));
+                 std::format("COR set: {} slices of 256x256, slice 7 holds 7", corSlices.size()));
 
     //! [mri_cor_fif_io_write]
     const QString corFif = dir.filePath("COR.fif");
     MriCorFifIO::write(corFif.toStdString(), corSlices, extraTransforms);
     //! [mri_cor_fif_io_write]
-    ok &= expect(QFile(corFif).size() > 256 * 256 * 256, QString("COR.fif written (%1 bytes)").arg(QFile(corFif).size()));
+    ok &= expect(QFile(corFif).size() > 256 * 256 * 256, std::format("COR.fif written ({} bytes)", QFile(corFif).size()));
 
-    qInfo() << (ok ? "All mri checks passed." : "mri checks FAILED.");
+    std::println("{}", ok ? "All mri checks passed." : "mri checks FAILED.");
     return ok ? EXIT_SUCCESS : EXIT_FAILURE;
 }
 ````
