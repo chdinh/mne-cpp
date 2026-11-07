@@ -594,12 +594,8 @@ MetaData RtDataClient::readMetadata()
         p_pFiffInfo->ch_names.push_back(p_pFiffInfo->chs[c].ch_name);
     calibrateCompensators(*p_pFiffInfo);
 
-    p_pDigData->npoint = static_cast<int>(p_pDigData->points.size());
-
-    for (int k = 0; k < p_pDigData->npoint; k++) {
-        p_pDigData->active.append(1);
-        p_pDigData->discard.append(0);
-    }
+    p_pDigData->active.assign(p_pDigData->points.size(), true);
+    p_pDigData->discard.assign(p_pDigData->points.size(), false);
 
     return MetaData(p_pFiffInfo, p_pDigData);
 }

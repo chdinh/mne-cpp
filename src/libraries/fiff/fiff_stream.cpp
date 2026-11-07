@@ -1112,68 +1112,41 @@ QList<FiffCtfComp> FiffStream::read_ctf_comp(const FiffDirNode::SPtr& p_Node, co
 
 //=============================================================================================================
 
-bool FiffStream::read_digitizer_data(const FiffDirNode::SPtr& p_Node, FiffDigitizerData& p_digData)
+UTILSLIB::Expected<FiffDigitizerData> FiffStream::read_digitizer_data(const FiffDirNode::SPtr& node)
 {
-    p_digData.coord_frame = FIFFV_COORD_UNKNOWN;
-    fiff_int_t kind = -1;
-    fiff_int_t pos = -1;
-    int npoint = 0;
-    std::optional<FiffTag> t_pTag;
-
-    std::vector<FiffDirNode::SPtr> t_qListDigData = p_Node->dir_tree_find(FIFFB_ISOTRAK);
-
-    //Check if digitizer data is available
-    if (t_qListDigData.empty()) {
-        t_qListDigData = p_Node->dir_tree_find(FIFFB_MRI_SET);
-
-        if (t_qListDigData.empty()) {
-            qWarning("No Isotrak data found in %s", this->streamName().toLatin1().data());
-            return false;
-        } else {
-            p_digData.coord_frame = FIFFV_COORD_MRI;
-        }
-    } else {
-        p_digData.coord_frame = FIFFV_COORD_HEAD;
+    FiffDigitizerData dig;
+    std::vector<FiffDirNode::SPtr> blocks = node->dir_tree_find(FIFFB_ISOTRAK);
+    dig.coord_frame = FIFFV_COORD_HEAD;
+    if (blocks.empty()) {
+        blocks = node->dir_tree_find(FIFFB_MRI_SET);
+        dig.coord_frame = FIFFV_COORD_MRI;
     }
-
-    // Read actual data and store it
-    for (int k = 0; k < t_qListDigData.front()->nent(); ++k) {
-        kind = t_qListDigData.front()->dir[k].kind;
-        pos = t_qListDigData.front()->dir[k].pos;
-
-        switch (kind) {
-            case FIFF_DIG_POINT:
-                t_pTag = this->read_tag(pos);
-                p_digData.points.push_back(t_pTag->toDigPoint());
-                break;
-            case FIFF_MNE_COORD_FRAME:
-                t_pTag = this->read_tag(pos);
-                p_digData.coord_frame = *t_pTag->toInt();
-                break;
+    if (!blocks.empty()) {
+        for (const FiffDirEntry& entry : blocks.front()->dir) {
+            if (entry.kind != FIFF_DIG_POINT && entry.kind != FIFF_MNE_COORD_FRAME) {
+                continue;
+            }
+            const std::optional<FiffTag> tag = this->read_tag(entry.pos);
+            if (!tag) {
+                return UTILSLIB::fail(UTILSLIB::ErrorCode::Format, "cannot read the digitizer tag at {} of {}", entry.pos, this->streamName().toStdString());
+            }
+            if (entry.kind == FIFF_DIG_POINT) {
+                dig.points.push_back(tag->toDigPoint());
+            } else {
+                dig.coord_frame = *tag->toInt();
+            }
         }
     }
-
-    npoint = static_cast<int>(p_digData.points.size());
-
-    if (npoint == 0) {
-        qWarning("No digitizer data in %s", this->streamName().toLatin1().data());
-        return false;
+    if (dig.points.empty()) {
+        return UTILSLIB::fail(UTILSLIB::ErrorCode::NotFound, "no digitizer points in {}", this->streamName().toStdString());
     }
-
-    for (auto& dig : p_digData.points) {
-        dig.coord_frame = p_digData.coord_frame;
+    for (FiffDigPoint& point : dig.points) {
+        point.coord_frame = dig.coord_frame;
     }
-
-    //Add other information as default
-    p_digData.filename = this->streamName();
-    p_digData.npoint = npoint;
-
-    for (int k = 0; k < p_digData.npoint; k++) {
-        p_digData.active.append(1);
-        p_digData.discard.append(0);
-    }
-
-    return true;
+    dig.filename = this->streamName().toStdU16String();
+    dig.active.assign(dig.points.size(), true);
+    dig.discard.assign(dig.points.size(), false);
+    return dig;
 }
 
 //=============================================================================================================

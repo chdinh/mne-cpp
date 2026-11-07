@@ -313,7 +313,6 @@ void TestComRtClient::testRtDataClientReadsWhatTheServerWrites()
             QVERIFY(got->comps[c].data->data.isApprox(info.comps[c].data->data, 1e-6));
         }
         if (dig) {
-            QCOMPARE(dig->npoint, info.dig.size());
             QCOMPARE(dig->points.size(), info.dig.size());
             QCOMPARE(dig->active.size(), info.dig.size());
             for (int k = 0; k < std::ssize(info.dig); ++k) {

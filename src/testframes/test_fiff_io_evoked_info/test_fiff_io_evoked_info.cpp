@@ -533,39 +533,41 @@ void TestFiffIoEvokedInfo::fiffInfo_readMegEegChannels()
 void TestFiffIoEvokedInfo::digitizerData_defaultConstruction()
 {
     FiffDigitizerData dd;
-    QCOMPARE(dd.npoint, 0);
     QVERIFY(dd.points.empty());
+    QCOMPARE(dd.coord_frame, FIFFV_COORD_UNKNOWN);
     QVERIFY(!dd.dist_valid);
 }
 
 void TestFiffIoEvokedInfo::digitizerData_copyConstruction()
 {
     FiffDigitizerData orig;
-    orig.npoint = 3;
+    orig.points.push_back(FiffDigPoint());
     orig.coord_frame = FIFFV_COORD_HEAD;
+    orig.head_mri_t = FiffCoordTrans(FIFFV_COORD_HEAD, FIFFV_COORD_MRI, Matrix4f::Identity());
 
     FiffDigitizerData copy(orig);
-    QCOMPARE(copy.npoint, 3);
+    QCOMPARE(copy.points.size(), std::size_t{1});
+    QVERIFY(copy.head_mri_t.has_value());
     QCOMPARE(copy.coord_frame, (int)FIFFV_COORD_HEAD);
 }
 
 void TestFiffIoEvokedInfo::digitizerData_assignment()
 {
     FiffDigitizerData orig;
-    orig.npoint = 5;
+    orig.filename = "dig.fif";
     orig.coord_frame = FIFFV_COORD_MRI;
 
     FiffDigitizerData assigned;
     assigned = orig;
-    QCOMPARE(assigned.npoint, 5);
+    QCOMPARE(assigned.filename, std::filesystem::path("dig.fif"));
     QCOMPARE(assigned.coord_frame, (int)FIFFV_COORD_MRI);
 }
 
 void TestFiffIoEvokedInfo::digitizerData_readFromFile()
 {
-    FiffDigitizerData dd(rawPath().toStdString());
-    // The raw file should have digitizer points
-    QVERIFY(dd.points.size() >= 0);
+    const FiffDigitizerData dd(rawPath().toStdString());
+    QCOMPARE(dd.points.size(), std::size_t{146});
+    QCOMPARE(dd.coord_frame, FIFFV_COORD_HEAD);
 }
 
 void TestFiffIoEvokedInfo::digitizerData_pickCardinalFiducials()
@@ -600,18 +602,19 @@ void TestFiffIoEvokedInfo::digitizerData_pickCardinalFiducials()
     dp3.coord_frame = FIFFV_COORD_HEAD;
     dd.points.push_back(dp3);
 
-    dd.npoint = 3;
     dd.coord_frame = FIFFV_COORD_HEAD;
 
-    // Set up a head->MRI transform
-    dd.head_mri_t = std::make_unique<FiffCoordTrans>();
-    dd.head_mri_t->from = FIFFV_COORD_HEAD;
-    dd.head_mri_t->to = FIFFV_COORD_MRI;
-    dd.head_mri_t->trans = Matrix4f::Identity();
+    // Without the adjusted transform there are no MRI fiducials
+    dd.pick_cardinal_fiducials();
+    QCOMPARE(dd.nfids(), 0);
 
-    dd.pickCardinalFiducials();
-    // Should have extracted the fiducial points
-    QVERIFY(dd.mri_fids.size() >= 0);
+    Matrix4f shift = Matrix4f::Identity();
+    shift(2, 3) = 0.01f;
+    dd.head_mri_t_adj = FiffCoordTrans(FIFFV_COORD_HEAD, FIFFV_COORD_MRI, shift);
+    dd.pick_cardinal_fiducials();
+    QCOMPARE(dd.nfids(), 3);
+    QCOMPARE(dd.mri_fids[2].ident, FIFFV_POINT_NASION);
+    QCOMPARE(dd.mri_fids[2].r[2], 0.01f);
 }
 
 //=============================================================================================================

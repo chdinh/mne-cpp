@@ -945,7 +945,7 @@ void TestMneLibrary::displaySurf_alignFiducials()
     MNEMshDisplaySurface* surf = set.surfs[0].get();
     const MatrixX3f mriRr = surf->rr;
     FiffDigitizerData mriDig((dir + "fsaverage-fiducials.fif").toStdString());
-    QCOMPARE(mriDig.npoint, 3);
+    QCOMPARE(mriDig.points.size(), std::size_t{3});
 
     // mne-python get_ras_to_neuromag_trans(nasion, lpa, rpa) of the fsaverage fiducials.
     Matrix4f mriHead;
@@ -988,15 +988,14 @@ void TestMneLibrary::displaySurf_alignFiducials()
         Map<Vector3f>(p.r) = toHead(Vector3f(r + 0.03f * r.normalized()));
         headDig.points.push_back(p);
     }
-    headDig.npoint = static_cast<int>(headDig.points.size());
-    headDig.active = QList<int>(headDig.npoint, 1);
-    headDig.discard = QList<int>(headDig.npoint, 0);
-    headDig.head_mri_t = std::make_unique<FiffCoordTrans>(FIFFV_COORD_HEAD, FIFFV_COORD_MRI, Matrix4f::Identity());
+    headDig.active.assign(headDig.points.size(), true);
+    headDig.discard.assign(headDig.points.size(), false);
+    headDig.head_mri_t = FiffCoordTrans(FIFFV_COORD_HEAD, FIFFV_COORD_MRI, Matrix4f::Identity());
 
     Vector3f scales;
     QCOMPARE(surf->align_fiducials(headDig, mriDig, niter, scaleHead, outliers > 0 ? 0.01f : 0.0f, scales), 0);
-    for (int k = 0; k < headDig.npoint; ++k)
-        QCOMPARE(headDig.discard[k], headDig.points[k].ident == -1 ? 1 : 0);
+    for (std::size_t k = 0; k < headDig.points.size(); ++k)
+        QCOMPARE(static_cast<bool>(headDig.discard[k]), headDig.points[k].ident == -1);
     QVERIFY(headDig.head_mri_t_adj);
     QCOMPARE(headDig.nfids(), 3);
     if (scaleHead)
@@ -1010,7 +1009,7 @@ void TestMneLibrary::displaySurf_alignFiducials()
     }
     // Scalp points must land back on their MRI vertices (align_fiducials scales the surface in place).
     double sum2 = 0.0;
-    const int nScalp = headDig.npoint - 3 - outliers;
+    const int nScalp = static_cast<int>(headDig.points.size()) - 3 - outliers;
     for (int k = 3; k < 3 + nScalp; ++k) {
         Vector3f r = Map<const Vector3f>(headDig.points[k].r);
         FiffCoordTrans::apply_trans(r.data(), *headDig.head_mri_t_adj, FIFFV_MOVE);
@@ -1035,7 +1034,6 @@ void TestMneLibrary::displaySurf_alignment()
 
     FiffDigitizerData headDig;
     headDig.coord_frame = FIFFV_COORD_HEAD;
-    headDig.npoint = 13;
 
     float cardinals[3][3] = {{-0.07f, 0, 0}, {0, 0.08f, 0}, {0.07f, 0, 0}};
     int cardIdents[3] = {FIFFV_POINT_LPA, FIFFV_POINT_NASION, FIFFV_POINT_RPA};
@@ -1047,8 +1045,8 @@ void TestMneLibrary::displaySurf_alignment()
         pt.r[1] = cardinals[i][1];
         pt.r[2] = cardinals[i][2];
         headDig.points.push_back(pt);
-        headDig.active.append(1);
-        headDig.discard.append(0);
+        headDig.active.push_back(true);
+        headDig.discard.push_back(false);
     }
     for (int i = 0; i < 10; i++) {
         FiffDigPoint pt;
@@ -1059,14 +1057,14 @@ void TestMneLibrary::displaySurf_alignment()
         pt.r[1] = 0.08f * sinf(theta);
         pt.r[2] = 0.06f;
         headDig.points.push_back(pt);
-        headDig.active.append(1);
-        headDig.discard.append(0);
+        headDig.active.push_back(true);
+        headDig.discard.push_back(false);
     }
-    headDig.head_mri_t = std::make_unique<FiffCoordTrans>(
-        FIFFV_COORD_HEAD, FIFFV_COORD_MRI, Matrix4f::Identity());
-    headDig.dist = VectorXf::Zero(headDig.npoint);
-    headDig.closest = VectorXi::Constant(headDig.npoint, -1);
-    headDig.closest_point.setZero(headDig.npoint, 3);
+    headDig.head_mri_t = FiffCoordTrans(FIFFV_COORD_HEAD, FIFFV_COORD_MRI, Matrix4f::Identity());
+    const auto npoint = static_cast<Index>(headDig.points.size());
+    headDig.dist = VectorXf::Zero(npoint);
+    headDig.closest = VectorXi::Constant(npoint, -1);
+    headDig.closest_point.setZero(npoint, 3);
     headDig.dist_valid = false;
 
     dispSurf->calculate_digitizer_distances(headDig, 1, 0);

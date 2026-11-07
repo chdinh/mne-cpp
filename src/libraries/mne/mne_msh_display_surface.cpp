@@ -106,7 +106,7 @@ int MNEMshDisplaySurface::align_fiducials(FiffDigitizerData& head_dig,
         FidMatrix& fid = (j == 0) ? head_fid : mri_fid;
         bool* found = (j == 0) ? head_fid_found : mri_fid_found;
 
-        for (k = 0; k < d.npoint; k++) {
+        for (k = 0; k < static_cast<int>(d.points.size()); k++) {
             p = d.points[k];
             if (p.kind == FIFFV_POINT_CARDINAL) {
                 if (p.ident == FIFFV_POINT_LPA) {
@@ -147,11 +147,11 @@ int MNEMshDisplaySurface::align_fiducials(FiffDigitizerData& head_dig,
     }
 
     // Initial alignment
-    head_dig.head_mri_t_adj = std::make_unique<FiffCoordTrans>(FIFFLIB::FiffCoordTrans::from_cardinal_points(FIFFV_COORD_HEAD, FIFFV_COORD_MRI,
-                                                                                                             mri_fid.row(0).data(), mri_fid.row(1).data(), mri_fid.row(2).data()));
+    head_dig.head_mri_t_adj = FIFFLIB::FiffCoordTrans::from_cardinal_points(FIFFV_COORD_HEAD, FIFFV_COORD_MRI,
+                                                                            mri_fid.row(0).data(), mri_fid.row(1).data(), mri_fid.row(2).data());
 
     // Populate mri_fids from cardinal digitizer points transformed into MRI coords
-    head_dig.pickCardinalFiducials();
+    head_dig.pick_cardinal_fiducials();
 
     // Overwrite the fiducial locations with the ones from the MRI digitizer data
     for (k = 0; k < head_dig.nfids(); k++)
@@ -192,11 +192,11 @@ void MNEMshDisplaySurface::get_head_scale(FIFFLIB::FiffDigitizerData& dig,
 
     scales[0] = scales[1] = scales[2] = 1.0;
 
-    Eigen::MatrixXf dig_rr(dig.npoint, 3);
+    Eigen::MatrixXf dig_rr(static_cast<int>(dig.points.size()), 3);
     Eigen::MatrixXf head_rr(np, 3);
 
     // Pick only the points with positive z
-    for (k = 0, ndig = 0; k < dig.npoint; k++) {
+    for (k = 0, ndig = 0; k < static_cast<int>(dig.points.size()); k++) {
         if (dig.points[k].r[2] > 0) {
             dig_rr.row(ndig++) = Eigen::Map<const Eigen::RowVector3f>(dig.points[k].r);
         }
@@ -243,8 +243,8 @@ int MNEMshDisplaySurface::discard_outlier_digitizer_points(FIFFLIB::FiffDigitize
 
     d.dist_valid = false;
     calculate_digitizer_distances(d, true, true);
-    for (k = 0; k < d.npoint; k++) {
-        d.discard[k] = 0;
+    for (k = 0; k < static_cast<int>(d.points.size()); k++) {
+        d.discard[k] = false;
         /*
         * Discard unless cardinal landmark or HPI coil
         */
@@ -252,7 +252,7 @@ int MNEMshDisplaySurface::discard_outlier_digitizer_points(FIFFLIB::FiffDigitize
             d.points[k].kind != FIFFV_POINT_CARDINAL &&
             d.points[k].kind != FIFFV_POINT_HPI) {
             discarded++;
-            d.discard[k] = 1;
+            d.discard[k] = true;
         }
     }
     qInfo("%d points discarded (maxdist = %6.1f mm).\n", discarded, 1000 * maxdist);
@@ -277,21 +277,21 @@ void MNEMshDisplaySurface::calculate_digitizer_distances(FIFFLIB::FiffDigitizerD
     if (dig.dist_valid)
         return;
 
-    PointsT digPoints(dig.npoint, 3);
+    PointsT digPoints(static_cast<int>(dig.points.size()), 3);
 
-    dig.dist.conservativeResize(dig.npoint);
+    dig.dist.conservativeResize(static_cast<int>(dig.points.size()));
     if (dig.closest.size() == 0) {
         /*
         * Ensure that all closest values are initialized correctly
         */
-        dig.closest = Eigen::VectorXi::Constant(dig.npoint, -1);
+        dig.closest = Eigen::VectorXi::Constant(static_cast<int>(dig.points.size()), -1);
     }
 
-    dig.closest_point.setZero(dig.npoint, 3);
-    Eigen::VectorXi closest(dig.npoint);
-    Eigen::VectorXf dists(dig.npoint);
+    dig.closest_point.setZero(static_cast<int>(dig.points.size()), 3);
+    Eigen::VectorXi closest(static_cast<int>(dig.points.size()));
+    Eigen::VectorXf dists(static_cast<int>(dig.points.size()));
 
-    for (k = 0, nactive = 0; k < dig.npoint; k++) {
+    for (k = 0, nactive = 0; k < static_cast<int>(dig.points.size()); k++) {
         if ((dig.active[k] && !dig.discard[k]) || do_all) {
             point = dig.points[k];
             digPoints.row(nactive) = Eigen::Map<const Eigen::RowVector3f>(point.r);
@@ -312,7 +312,7 @@ void MNEMshDisplaySurface::calculate_digitizer_distances(FIFFLIB::FiffDigitizerD
      */
     if (!do_approx)
         qInfo("Inside or outside for %d points...", nactive);
-    for (k = 0, nactive = 0; k < dig.npoint; k++) {
+    for (k = 0, nactive = 0; k < static_cast<int>(dig.points.size()); k++) {
         if ((dig.active[k] && !dig.discard[k]) || do_all) {
             dig.dist(k) = dists[nactive];
             dig.closest(k) = closest[nactive];
@@ -377,9 +377,9 @@ int MNEMshDisplaySurface::iterate_alignment_once(FIFFLIB::FiffDigitizerData& dig
  * Find the best alignment of the coordinate frames
  */
 {
-    Eigen::MatrixXf rr_head(dig.npoint, 3);
-    Eigen::MatrixXf rr_mri(dig.npoint, 3);
-    Eigen::VectorXf w = Eigen::VectorXf::Zero(dig.npoint);
+    Eigen::MatrixXf rr_head(static_cast<int>(dig.points.size()), 3);
+    Eigen::MatrixXf rr_mri(static_cast<int>(dig.points.size()), 3);
+    Eigen::VectorXf w = Eigen::VectorXf::Zero(static_cast<int>(dig.points.size()));
     int k, nactive;
     FiffDigPoint point;
     FiffCoordTrans t;
@@ -394,7 +394,7 @@ int MNEMshDisplaySurface::iterate_alignment_once(FIFFLIB::FiffDigitizerData& dig
      */
     calculate_digitizer_distances(dig, false, true);
 
-    for (k = 0, nactive = 0; k < dig.npoint; k++) {
+    for (k = 0, nactive = 0; k < static_cast<int>(dig.points.size()); k++) {
         if (dig.active[k] && !dig.discard[k]) {
             point = dig.points[k];
             rr_head.row(nactive) = Eigen::Map<const Eigen::RowVector3f>(point.r);
@@ -433,7 +433,7 @@ int MNEMshDisplaySurface::iterate_alignment_once(FIFFLIB::FiffDigitizerData& dig
         return FAIL;
 
     if (dig.head_mri_t_adj)
-        dig.head_mri_t_adj = std::make_unique<FiffCoordTrans>(t);
+        dig.head_mri_t_adj = t;
     /*
      * Calculate final distances
      */
@@ -451,7 +451,7 @@ float MNEMshDisplaySurface::rms_digitizer_distance(FIFFLIB::FiffDigitizerData& d
 
     calculate_digitizer_distances(dig, false, true);
 
-    for (k = 0, rms = 0.0, nactive = 0; k < dig.npoint; k++)
+    for (k = 0, rms = 0.0, nactive = 0; k < static_cast<int>(dig.points.size()); k++)
         if (dig.active[k] && !dig.discard[k]) {
             rms = rms + dig.dist(k) * dig.dist(k);
             nactive++;

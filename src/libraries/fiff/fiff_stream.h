@@ -427,16 +427,14 @@ public:
 
     //=========================================================================================================
     /**
-     * Reimplemntation of load_digitizer_data (digitizer.c)
+     * Reads the digitizer data below a node, as MNE-C's load_digitizer_data (digitizer.c): the points
+     * of its isotrak block in head coordinates, or of its MRI set in MRI coordinates.
      *
-     * Read the digitizer data from the given node.
+     * @param[in] node   The node.
      *
-     * @param[in] p_Node     The node of interest.
-     * @param[out] p_digData  The read digitizer data.
-     *
-     * @return true if succeeded, false otherwise.
+     * @return The data, all points active, or NotFound if the node holds no digitizer points.
      */
-    bool read_digitizer_data(const FiffDirNode::SPtr& p_Node, FiffDigitizerData& p_digData);
+    [[nodiscard]] UTILSLIB::Expected<FiffDigitizerData> read_digitizer_data(const FiffDirNode::SPtr& node);
 
     //=========================================================================================================
     /**

@@ -255,10 +255,9 @@ int main(int argc, char* argv[])
     //! [fiff_digitizer_data_usage]
     FiffDigitizerData digData;
     digData.points = info.dig;
-    digData.npoint = static_cast<int>(info.dig.size());
     digData.coord_frame = FIFFV_COORD_HEAD;
-    digData.head_mri_t_adj = std::make_unique<FiffCoordTrans>(headToMri);
-    digData.pickCardinalFiducials(); // LPA, nasion and RPA moved into MRI coordinates
+    digData.head_mri_t_adj = headToMri;
+    digData.pick_cardinal_fiducials(); // LPA, nasion and RPA moved into MRI coordinates
     //! [fiff_digitizer_data_usage]
     // mne: apply_trans(invert_transform(mri_head_t), dig[0]["r"]) = (-0.06925742, 0.01058946, -0.02500086)
     ok &= expect(digData.nfids() == 3 && (Map<Vector3f>(digData.mri_fids[0].r) - Vector3f(-0.06925742f, 0.01058946f, -0.02500086f)).norm() < 1e-6f, "FiffDigitizerData moves the 3 cardinal fiducials into MRI coordinates");

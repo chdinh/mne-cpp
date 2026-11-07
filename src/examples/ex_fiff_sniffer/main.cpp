@@ -163,7 +163,8 @@ int main(int argc, char* argv[])
                 std::cout << "--- \n";
                 std::cout << "--------------------------------------\n";
             }
-            if (stream.read_digitizer_data(stream.dirtree(), digData)) {
+            if (auto read = stream.read_digitizer_data(stream.dirtree())) {
+                const FiffDigitizerData& digData = *read;
                 std::cout << "Digitizer data found.\n";
                 std::cout << "Number of digitizer points: " << digData.points.size() << "\n";
                 for (auto& point : digData.points) {

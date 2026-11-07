@@ -197,15 +197,12 @@ void TestFiffCoverage::testReadDigitizerData()
     FiffStream stream(&file);
     QVERIFY(stream.open());
 
-    FiffDigitizerData digData;
-    // Read from the measurement node
-    bool ok = stream.read_digitizer_data(stream.dirtree(), digData);
+    const auto digData = stream.read_digitizer_data(stream.dirtree());
     stream.close();
 
-    // Raw data typically has digitizer points
-    if (ok) {
-        QVERIFY(digData.points.size() >= 0);
-    }
+    QVERIFY(digData.has_value());
+    QCOMPARE(digData->points.size(), std::size_t{146});
+    QCOMPARE(digData->active.size(), digData->points.size());
 }
 
 void TestFiffCoverage::testReadDigitizerDataPoints()

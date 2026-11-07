@@ -443,10 +443,9 @@ void TestFiffStreamPython::readsMeasInfo()
     QVERIFY(stream.read_meas_info(stream.dirtree(), info, meas));
 
     // The Isotrak's own FIFF_MNE_COORD_FRAME overrides the head-frame default.
-    FiffDigitizerData digData;
-    QVERIFY(stream.read_digitizer_data(stream.dirtree(), digData));
+    const FiffDigitizerData digData = stream.read_digitizer_data(stream.dirtree()).value();
     QCOMPARE(digData.coord_frame, FIFFV_COORD_MRI);
-    QCOMPARE(digData.npoint, 3);
+    QCOMPARE(digData.points.size(), std::size_t{3});
     QCOMPARE(digData.points[2].coord_frame, FIFFV_COORD_MRI);
     QCOMPARE(digData.points[2].ident, 3);
     stream.close();

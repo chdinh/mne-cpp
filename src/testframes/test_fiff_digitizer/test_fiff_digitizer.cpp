@@ -81,7 +81,14 @@ void TestFiffDigitizer::initTestCase()
     //Read the results produced with MNE-CPP
     const QString dataDir = QCoreApplication::applicationDirPath() + "/../resources/data/mne-cpp-test-data/MEG/sample/";
     digDataLoaded = FiffDigitizerData((dataDir + "sample_audvis_trunc_raw.fif").toStdString());
-    QVERIFY_THROWS_EXCEPTION(std::runtime_error, FiffDigitizerData((dataDir + "missing.fif").toStdString()));
+    QVERIFY_THROWS_EXCEPTION(UTILSLIB::Error, FiffDigitizerData((dataDir + "missing.fif").toStdString()));
+    QCOMPARE(FiffDigitizerData::read((dataDir + "sample_audvis-cov.fif").toStdString()).error().code, UTILSLIB::ErrorCode::NotFound);
+    // Copies keep the source file and the transforms
+    digDataLoaded.head_mri_t_adj = FiffCoordTrans((dataDir + "all-trans.fif").toStdU16String(), FIFFV_COORD_HEAD, FIFFV_COORD_MRI);
+    const FiffDigitizerData copy = digDataLoaded;
+    QCOMPARE(copy.filename, digDataLoaded.filename);
+    QVERIFY(!copy.filename.empty());
+    QVERIFY(copy.head_mri_t_adj.has_value());
     //Prepare reference result
     m_iCoordFrameDigDataResult = FIFFV_COORD_HEAD;
     m_iNPointDigDataResult = 146;
@@ -115,7 +122,7 @@ void TestFiffDigitizer::compareCoordFrame()
 
 void TestFiffDigitizer::compareNPoint()
 {
-    QVERIFY(m_iNPointDigDataResult == digDataLoaded.npoint);
+    QCOMPARE(static_cast<int>(digDataLoaded.points.size()), m_iNPointDigDataResult);
 }
 
 //=============================================================================================================
