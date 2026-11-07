@@ -49,16 +49,6 @@ FiffDirNode::FiffDirNode()
 
 //=============================================================================================================
 
-FiffDirNode::FiffDirNode(const FiffDirNode* p_FiffDirTree)
-: type(p_FiffDirTree->type)
-, id(p_FiffDirTree->id)
-, dir(p_FiffDirTree->dir)
-, parent(p_FiffDirTree->parent)
-, parent_id(p_FiffDirTree->parent_id)
-, children(p_FiffDirTree->children)
-{
-}
-
 //=============================================================================================================
 
 FiffDirNode::~FiffDirNode()
@@ -67,14 +57,14 @@ FiffDirNode::~FiffDirNode()
 
 //=============================================================================================================
 
-bool FiffDirNode::copy_tree(FiffStream& source, const FiffId& in_id, const QList<FiffDirNode::SPtr>& p_Nodes, FiffStream& target)
+bool FiffDirNode::copy_tree(FiffStream& source, const FiffId& in_id, std::span<const SPtr> p_Nodes, FiffStream& target)
 {
     if (p_Nodes.size() <= 0)
         return false;
 
     qint32 k, p;
 
-    for (k = 0; k < p_Nodes.size(); ++k) {
+    for (k = 0; k < std::ssize(p_Nodes); ++k) {
         target.start_block(p_Nodes[k]->type); //8
         if (p_Nodes[k]->id.version != -1) {
             if (in_id.version != -1)
@@ -109,9 +99,7 @@ bool FiffDirNode::copy_tree(FiffStream& source, const FiffId& in_id, const QList
             target.write_tag(tag);
         }
         for (p = 0; p < p_Nodes[k]->nchild(); ++p) {
-            QList<FiffDirNode::SPtr> childList;
-            childList << p_Nodes[k]->children[p];
-            FiffDirNode::copy_tree(source, in_id, childList, target);
+            FiffDirNode::copy_tree(source, in_id, std::span(&p_Nodes[k]->children[p], 1), target);
         }
         target.end_block(p_Nodes[k]->type);
     }
@@ -120,17 +108,23 @@ bool FiffDirNode::copy_tree(FiffStream& source, const FiffId& in_id, const QList
 
 //=============================================================================================================
 
-QList<FiffDirNode::SPtr> FiffDirNode::dir_tree_find(fiff_int_t p_kind) const
+std::vector<FiffDirNode::SPtr> FiffDirNode::dir_tree_find(fiff_int_t p_kind)
 {
-    QList<FiffDirNode::SPtr> nodes;
-    if (this->type == p_kind)
-        nodes.append(FiffDirNode::SPtr(new FiffDirNode(this)));
+    std::vector<SPtr> found;
+    collect(p_kind, found);
+    return found;
+}
 
-    QList<FiffDirNode::SPtr>::const_iterator i;
-    for (i = this->children.begin(); i != this->children.end(); ++i)
-        nodes.append((*i)->dir_tree_find(p_kind));
+//=============================================================================================================
 
-    return nodes;
+void FiffDirNode::collect(fiff_int_t kind, std::vector<SPtr>& found)
+{
+    if (type == kind) {
+        found.push_back(shared_from_this());
+    }
+    for (const SPtr& child : children) {
+        child->collect(kind, found);
+    }
 }
 
 //=============================================================================================================
@@ -166,7 +160,7 @@ bool FiffDirNode::has_kind(fiff_int_t p_kind) const
     if (this->type == p_kind)
         return true;
 
-    QList<FiffDirNode::SPtr>::const_iterator i;
+    std::vector<FiffDirNode::SPtr>::const_iterator i;
     for (i = this->children.begin(); i != this->children.end(); ++i)
         if ((*i)->has_kind(p_kind))
             return true;

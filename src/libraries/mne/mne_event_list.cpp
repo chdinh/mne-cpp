@@ -54,9 +54,9 @@ std::optional<MNEEventList> MNEEventList::readFif(const QString& path, int offse
     if (!stream.open()) {
         return std::nullopt;
     }
-    const QList<FiffDirNode::SPtr> blocks = stream.dirtree()->dir_tree_find(FIFFB_MNE_EVENTS);
+    const std::vector<FiffDirNode::SPtr> blocks = stream.dirtree()->dir_tree_find(FIFFB_MNE_EVENTS);
     FiffTag::UPtr tag;
-    if (blocks.isEmpty() || !blocks[0]->find_tag(stream, FIFF_MNE_EVENT_LIST, tag)) {
+    if (blocks.empty() || !blocks[0]->find_tag(stream, FIFF_MNE_EVENT_LIST, tag)) {
         qWarning("MNEEventList::readFif - No event data in %s", qPrintable(path));
         return std::nullopt;
     }

@@ -487,8 +487,8 @@ private slots:
         FiffStream stream(&file);
         QVERIFY(stream.open());
 
-        QList<FiffDirNode::SPtr> bemSolBlocks = stream.dirtree()->dir_tree_find(FIFFB_BEM);
-        if (bemSolBlocks.isEmpty())
+        std::vector<FiffDirNode::SPtr> bemSolBlocks = stream.dirtree()->dir_tree_find(FIFFB_BEM);
+        if (bemSolBlocks.empty())
             bemSolBlocks = stream.dirtree()->dir_tree_find(FIFFB_BEM_SURF);
 
         QVERIFY(bemSolBlocks.size() > 0 || stream.dir().size() > 0);

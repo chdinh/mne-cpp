@@ -2129,7 +2129,7 @@ private slots:
         QFile solFile(outPath);
         FIFFLIB::FiffStream stream(&solFile);
         QVERIFY(stream.open());
-        const QList<FIFFLIB::FiffDirNode::SPtr> bemNodes = stream.dirtree()->dir_tree_find(FIFFB_BEM);
+        const std::vector<FIFFLIB::FiffDirNode::SPtr> bemNodes = stream.dirtree()->dir_tree_find(FIFFB_BEM);
         QCOMPARE(bemNodes.size(), 1);
         FIFFLIB::FiffTag::UPtr tag;
         QVERIFY(bemNodes[0]->find_tag(stream, FIFF_BEM_APPROX, tag));

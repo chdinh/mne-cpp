@@ -381,7 +381,7 @@ int FwdBemModel::fwd_bem_load_solution(const QString& name, int bemMethod)
        * Find the BEM data
        */
     {
-        QList<FiffDirNode::SPtr> nodes = stream.dirtree()->dir_tree_find(FIFFB_BEM);
+        std::vector<FiffDirNode::SPtr> nodes = stream.dirtree()->dir_tree_find(FIFFB_BEM);
 
         if (nodes.size() == 0) {
             qWarning("No BEM data in %s", name.toUtf8().constData());

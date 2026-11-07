@@ -919,7 +919,7 @@ bool MNEInverseOperator::read_inverse_operator(QIODevice& p_IODevice, MNEInverse
     //
     //   Find all inverse operators
     //
-    QList<FiffDirNode::SPtr> invs_list = t_pStream.dirtree()->dir_tree_find(FIFFB_MNE_INVERSE_SOLUTION);
+    std::vector<FiffDirNode::SPtr> invs_list = t_pStream.dirtree()->dir_tree_find(FIFFB_MNE_INVERSE_SOLUTION);
     if (invs_list.size() == 0) {
         qCritical("No inverse solutions in %s\n", t_pStream.streamName().toUtf8().constData());
         return false;
@@ -928,7 +928,7 @@ bool MNEInverseOperator::read_inverse_operator(QIODevice& p_IODevice, MNEInverse
     //
     //   Parent MRI data
     //
-    QList<FiffDirNode::SPtr> parent_mri = t_pStream.dirtree()->dir_tree_find(FIFFB_MNE_PARENT_MRI_FILE);
+    std::vector<FiffDirNode::SPtr> parent_mri = t_pStream.dirtree()->dir_tree_find(FIFFB_MNE_PARENT_MRI_FILE);
     if (parent_mri.size() == 0) {
         qCritical("No parent MRI information in %s", t_pStream.streamName().toUtf8().constData());
         return false;

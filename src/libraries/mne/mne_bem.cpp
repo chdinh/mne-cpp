@@ -102,8 +102,8 @@ bool MNEBem::readFromStream(FiffStream& stream, bool add_geom, MNEBem& p_Bem)
     //   Find all BEM surfaces
     //
 
-    QList<FiffDirNode::SPtr> bem = stream.dirtree()->dir_tree_find(FIFFB_BEM);
-    if (bem.isEmpty()) {
+    std::vector<FiffDirNode::SPtr> bem = stream.dirtree()->dir_tree_find(FIFFB_BEM);
+    if (bem.empty()) {
         qCritical() << "No BEM block found!";
         if (open_here) {
             stream.close();
@@ -111,8 +111,8 @@ bool MNEBem::readFromStream(FiffStream& stream, bool add_geom, MNEBem& p_Bem)
         return false;
     }
 
-    QList<FiffDirNode::SPtr> bemsurf = stream.dirtree()->dir_tree_find(FIFFB_BEM_SURF);
-    if (bemsurf.isEmpty()) {
+    std::vector<FiffDirNode::SPtr> bemsurf = stream.dirtree()->dir_tree_find(FIFFB_BEM_SURF);
+    if (bemsurf.empty()) {
         qCritical() << "No BEM surfaces found!";
         if (open_here) {
             stream.close();
@@ -121,7 +121,7 @@ bool MNEBem::readFromStream(FiffStream& stream, bool add_geom, MNEBem& p_Bem)
     }
 
     QList<MNEBemSurface> surfaces;
-    for (int k = 0; k < bemsurf.size(); ++k) {
+    for (int k = 0; k < std::ssize(bemsurf); ++k) {
         MNEBemSurface p_BemSurface;
         qInfo("\tReading a BEM surface...");
         if (!MNEBem::readBemSurface(stream, bemsurf[k], p_BemSurface)) {

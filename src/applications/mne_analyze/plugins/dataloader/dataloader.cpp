@@ -69,7 +69,7 @@ bool containsBemSurfaces(const QString& sFilePath)
         return false;
     }
 
-    const bool bHasBem = !pStream.dirtree()->dir_tree_find(FIFFB_BEM).isEmpty() || !pStream.dirtree()->dir_tree_find(FIFFB_BEM_SURF).isEmpty();
+    const bool bHasBem = !pStream.dirtree()->dir_tree_find(FIFFB_BEM).empty() || !pStream.dirtree()->dir_tree_find(FIFFB_BEM_SURF).empty();
 
     pStream.close();
 

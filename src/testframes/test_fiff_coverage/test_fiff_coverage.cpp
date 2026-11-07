@@ -152,7 +152,7 @@ void TestFiffCoverage::testGetEvokedEntries()
     QVERIFY(stream.open());
 
     // Find evoked nodes in the directory tree
-    QList<FiffDirNode::SPtr> evoked_nodes = stream.dirtree()->dir_tree_find(FIFFB_EVOKED);
+    std::vector<FiffDirNode::SPtr> evoked_nodes = stream.dirtree()->dir_tree_find(FIFFB_EVOKED);
     QStringList comments;
     QList<fiff_int_t> aspect_kinds;
     QString t;
@@ -172,7 +172,7 @@ void TestFiffCoverage::testGetEvokedEntriesCount()
     FiffStream stream(&file);
     QVERIFY(stream.open());
 
-    QList<FiffDirNode::SPtr> evoked_nodes = stream.dirtree()->dir_tree_find(FIFFB_EVOKED);
+    std::vector<FiffDirNode::SPtr> evoked_nodes = stream.dirtree()->dir_tree_find(FIFFB_EVOKED);
     QStringList comments;
     QList<fiff_int_t> aspect_kinds;
     QString t;
@@ -377,8 +377,8 @@ void TestFiffCoverage::testReadNamedMatrix()
     // The forward solution file should contain named matrices
     // Search for a named matrix in the directory tree
     FiffDirNode::SPtr megNode;
-    QList<FiffDirNode::SPtr> nodes = stream.dirtree()->dir_tree_find(FIFFB_MNE_FORWARD_SOLUTION);
-    if (!nodes.isEmpty()) {
+    std::vector<FiffDirNode::SPtr> nodes = stream.dirtree()->dir_tree_find(FIFFB_MNE_FORWARD_SOLUTION);
+    if (!nodes.empty()) {
         megNode = nodes[0];
         FiffNamedMatrix namedMat;
         bool ok = stream.read_named_matrix(megNode, FIFF_MNE_FORWARD_SOLUTION, namedMat);

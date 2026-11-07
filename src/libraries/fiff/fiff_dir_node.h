@@ -46,11 +46,10 @@
 // QT INCLUDES
 //=============================================================================================================
 
-#include <QList>
-#include <QSharedPointer>
-#include <QStringList>
 #include <QTextStream>
+
 #include <memory>
+#include <span>
 #include <vector>
 
 //=============================================================================================================
@@ -81,25 +80,16 @@ class FiffTag;
  *
  * @snippet ex_fiff_api/main.cpp fiff_explain_usage
  */
-class FIFFSHARED_EXPORT FiffDirNode
+class FIFFSHARED_EXPORT FiffDirNode : public std::enable_shared_from_this<FiffDirNode>
 {
 public:
-    using SPtr = QSharedPointer<FiffDirNode>;  /**< Shared pointer type for FiffDirNode. */
-    using UPtr = std::unique_ptr<FiffDirNode>; /**< Unique pointer type for FiffDirNode. */
+    using SPtr = std::shared_ptr<FiffDirNode>; /**< Shared pointer type for FiffDirNode. */
 
     //=========================================================================================================
     /**
      * Constructors the directory tree structure.
      */
     FiffDirNode();
-
-    //=========================================================================================================
-    /**
-     * Copy constructor.
-     *
-     * @param[in] p_FiffDirTree  Directory tree structure which should be copied.
-     */
-    FiffDirNode(const FiffDirNode* p_FiffDirTree);
 
     //=========================================================================================================
     /**
@@ -118,7 +108,7 @@ public:
      *
      * @return true if succeeded, false otherwise.
      */
-    static bool copy_tree(FiffStream& source, const FiffId& in_id, const QList<QSharedPointer<FiffDirNode>>& p_Nodes, FiffStream& target);
+    static bool copy_tree(FiffStream& source, const FiffId& in_id, std::span<const SPtr> p_Nodes, FiffStream& target);
 
     //=========================================================================================================
     /**
@@ -126,20 +116,20 @@ public:
      *
      * @return true if directory tree structure is empty.
      */
-    inline bool isEmpty() const
+    bool is_empty() const
     {
         return this->type < 0;
     }
 
     //=========================================================================================================
     /**
-     * Find nodes of the given kind from a directory tree structure
+     * Finds the blocks of a kind in this block and its sub-blocks, in file order.
      *
      * @param[in] p_kind the given kind.
      *
-     * @return list of the found nodes.
+     * @return The blocks of the tree itself, not copies.
      */
-    QList<FiffDirNode::SPtr> dir_tree_find(fiff_int_t p_kind) const;
+    std::vector<SPtr> dir_tree_find(fiff_int_t p_kind);
 
 
     //=========================================================================================================
@@ -208,10 +198,12 @@ public:
     fiff_int_t type;                   /**< Block type for this directory. */
     FiffId id;                         /**< Id of this block if any. */
     std::vector<FiffDirEntry> dir;     /**< Directory of tags in this node. */
-    QWeakPointer<FiffDirNode> parent;  /**< Parent node; weak, since the parent owns its children. */
+    std::weak_ptr<FiffDirNode> parent; /**< Parent node; weak, since the parent owns its children. */
     FiffId parent_id;                  /**< Newly added to stay consistent with MATLAB implementation. */
-    QList<FiffDirNode::SPtr> children; /**< Child nodes. */
-    //    fiff_int_t                  nchild;     /**< Number of child nodes. */ -> use nchild() instead
+    std::vector<SPtr> children;        /**< Child nodes. */
+
+private:
+    void collect(fiff_int_t kind, std::vector<SPtr>& found);
 };
 
 //=============================================================================================================

@@ -262,9 +262,9 @@ std::unique_ptr<MNEProjOp> MNEProjOp::read_from_node(FiffStream& stream, const F
      * Load all the linear projection data
      */
 {
-    QList<FiffDirNode::SPtr> proj;
+    std::vector<FiffDirNode::SPtr> proj;
     FiffDirNode::SPtr start_node;
-    QList<FiffDirNode::SPtr> items;
+    std::vector<FiffDirNode::SPtr> items;
     FiffDirNode::SPtr node;
     int k;
     QString item_desc, desc_tag;
@@ -275,20 +275,20 @@ std::unique_ptr<MNEProjOp> MNEProjOp::read_from_node(FiffStream& stream, const F
     int item_active;
     FiffTag::UPtr t_pTag;
 
-    if (!start || start->isEmpty())
+    if (!start || start->is_empty())
         start_node = stream.dirtree();
     else
         start_node = start;
 
     auto op = std::make_unique<MNEProjOp>();
     proj = start_node->dir_tree_find(FIFFB_PROJ);
-    if (proj.size() == 0 || proj[0]->isEmpty()) /* The caller must recognize an empty projection */
+    if (proj.size() == 0 || proj[0]->is_empty()) /* The caller must recognize an empty projection */
         return op;
     /*
         * Only the first projection block is recognized
         */
     items = proj[0]->dir_tree_find(FIFFB_PROJ_ITEM);
-    if (items.size() == 0 || items[0]->isEmpty()) /* The caller must recognize an empty projection */
+    if (items.size() == 0 || items[0]->is_empty()) /* The caller must recognize an empty projection */
         return op;
     /*
         * Get a common number of channels
@@ -303,7 +303,7 @@ std::unique_ptr<MNEProjOp> MNEProjOp::read_from_node(FiffStream& stream, const F
     /*
        * Proceess each item
        */
-    for (k = 0; k < items.size(); k++) {
+    for (k = 0; k < std::ssize(items); k++) {
         node = items[k];
         /*
         * Complicated procedure for getting the description

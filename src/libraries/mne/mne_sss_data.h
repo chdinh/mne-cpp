@@ -119,7 +119,7 @@ public:
      *
      * @return   The read SSS data.
      */
-    static std::unique_ptr<MNESssData> read_from_node(FIFFLIB::FiffStream& stream, const QSharedPointer<FIFFLIB::FiffDirNode>& start);
+    static std::unique_ptr<MNESssData> read_from_node(FIFFLIB::FiffStream& stream, const std::shared_ptr<FIFFLIB::FiffDirNode>& start);
 
     //=========================================================================================================
     /**

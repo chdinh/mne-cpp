@@ -1163,7 +1163,7 @@ bool MNEForwardSolution::read(QIODevice& p_IODevice,
     //
     //   Find all forward solutions
     //
-    QList<FiffDirNode::SPtr> fwds = t_pStream.dirtree()->dir_tree_find(FIFFB_MNE_FORWARD_SOLUTION);
+    std::vector<FiffDirNode::SPtr> fwds = t_pStream.dirtree()->dir_tree_find(FIFFB_MNE_FORWARD_SOLUTION);
 
     if (fwds.size() == 0) {
         t_pStream.close();
@@ -1173,7 +1173,7 @@ bool MNEForwardSolution::read(QIODevice& p_IODevice,
     //
     //   Parent MRI data
     //
-    QList<FiffDirNode::SPtr> parent_mri = t_pStream.dirtree()->dir_tree_find(FIFFB_MNE_PARENT_MRI_FILE);
+    std::vector<FiffDirNode::SPtr> parent_mri = t_pStream.dirtree()->dir_tree_find(FIFFB_MNE_PARENT_MRI_FILE);
     if (parent_mri.size() == 0) {
         t_pStream.close();
         qWarning("No parent MRI information in %s", t_pStream.streamName().toUtf8().constData());
@@ -1211,7 +1211,7 @@ bool MNEForwardSolution::read(QIODevice& p_IODevice,
     FiffTag::UPtr t_pTag;
     FiffDirNode::SPtr megnode;
     FiffDirNode::SPtr eegnode;
-    for (qint32 k = 0; k < fwds.size(); ++k) {
+    for (qint32 k = 0; k < std::ssize(fwds); ++k) {
         if (!fwds[k]->find_tag(t_pStream, FIFF_MNE_INCLUDED_METHODS, t_pTag)) {
             t_pStream.close();
             qWarning("Methods not listed for one of the forward solutions");

@@ -24,6 +24,8 @@
 
 #include <Eigen/Core>
 
+#include <algorithm>
+
 #include <QFile>
 #include <QDebug>
 
@@ -61,34 +63,23 @@ MNERawInfo::~MNERawInfo()
 
 FiffDirNode::SPtr MNERawInfo::find_meas(const FiffDirNode::SPtr& node)
 {
-    FiffDirNode::SPtr empty_node;
-    FiffDirNode::SPtr tmp_node = node;
-
-    while (tmp_node->type != FIFFB_MEAS) {
-        if (tmp_node->parent == nullptr)
-            return empty_node;
-        tmp_node = tmp_node->parent;
+    FiffDirNode::SPtr block = node;
+    while (block && block->type != FIFFB_MEAS) {
+        block = block->parent.lock();
     }
-    return tmp_node;
+    return block;
 }
 
 //=============================================================================================================
 
 FiffDirNode::SPtr MNERawInfo::find_meas_info(const FiffDirNode::SPtr& node)
 {
-    int k;
-    FiffDirNode::SPtr empty_node;
-    FiffDirNode::SPtr tmp_node = node;
-
-    while (tmp_node->type != FIFFB_MEAS) {
-        if (tmp_node->parent == nullptr)
-            return empty_node;
-        tmp_node = tmp_node->parent;
+    const FiffDirNode::SPtr meas = find_meas(node);
+    if (!meas) {
+        return {};
     }
-    for (k = 0; k < tmp_node->nchild(); k++)
-        if (tmp_node->children[k]->type == FIFFB_MEAS_INFO)
-            return (tmp_node->children[k]);
-    return empty_node;
+    const auto info = std::ranges::find(meas->children, FIFFB_MEAS_INFO, &FiffDirNode::type);
+    return info != meas->children.end() ? *info : FiffDirNode::SPtr{};
 }
 
 //=============================================================================================================
@@ -96,7 +87,7 @@ FiffDirNode::SPtr MNERawInfo::find_meas_info(const FiffDirNode::SPtr& node)
 FiffDirNode::SPtr MNERawInfo::find_raw(const FiffDirNode::SPtr& node)
 {
     FiffDirNode::SPtr raw;
-    QList<FiffDirNode::SPtr> temp;
+    std::vector<FiffDirNode::SPtr> temp;
     temp = node->dir_tree_find(FIFFB_RAW_DATA);
     if (temp.size() == 0) {
         temp = node->dir_tree_find(FIFFB_CONTINUOUS_DATA);
@@ -113,7 +104,7 @@ FiffDirNode::SPtr MNERawInfo::find_maxshield(const FiffDirNode::SPtr& node)
 
 {
     FiffDirNode::SPtr raw;
-    QList<FiffDirNode::SPtr> temp;
+    std::vector<FiffDirNode::SPtr> temp;
     temp = node->dir_tree_find(FIFFB_SMSH_RAW_DATA);
     if (temp.size() > 0)
         raw = temp[0];
@@ -155,7 +146,7 @@ int MNERawInfo::get_meas_info(FiffStream& stream,
     FiffCoordTrans t;
     int j, k;
     int to_find = 4;
-    QList<FiffDirNode::SPtr> hpi;
+    std::vector<FiffDirNode::SPtr> hpi;
     FiffDirNode::SPtr meas;
     FiffDirNode::SPtr meas_info;
     fiff_int_t kind, pos;
@@ -337,10 +328,10 @@ int MNERawInfo::load(const QString& name, int allow_maxshield, std::unique_ptr<M
         return FIFF_FAIL;
     }
     raw = find_raw(stream.dirtree());
-    if (raw->isEmpty()) {
+    if (raw->is_empty()) {
         if (allow_maxshield) {
             raw = find_maxshield(stream.dirtree());
-            if (raw->isEmpty()) {
+            if (raw->is_empty()) {
                 qCritical("No raw data in this file.");
                 stream.close();
                 return FIFF_FAIL;

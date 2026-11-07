@@ -150,7 +150,7 @@ bool FiffEvents::read_from_fif(const std::filesystem::path& path,
     //
     //   Find the desired block
     //
-    QList<FiffDirNode::SPtr> eventsBlocks = t_pStream->dirtree()->dir_tree_find(FIFFB_MNE_EVENTS);
+    std::vector<FiffDirNode::SPtr> eventsBlocks = t_pStream->dirtree()->dir_tree_find(FIFFB_MNE_EVENTS);
 
     if (eventsBlocks.size() == 0) {
         qWarning("Could not find event data\n");

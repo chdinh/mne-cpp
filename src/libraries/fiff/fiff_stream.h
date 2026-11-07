@@ -284,7 +284,7 @@ public:
      *
      * @return true if information is available, false otherwise.
      */
-    bool get_evoked_entries(const QList<FiffDirNode::SPtr>& evoked_node, QStringList& comments, QList<fiff_int_t>& aspect_kinds, QString& t);
+    bool get_evoked_entries(const std::vector<FiffDirNode::SPtr>& evoked_node, QStringList& comments, QList<fiff_int_t>& aspect_kinds, QString& t);
 
     //=========================================================================================================
     /**

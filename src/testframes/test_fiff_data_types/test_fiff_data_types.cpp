@@ -546,7 +546,7 @@ private slots:
         FiffDirNode node;
         QCOMPARE(node.type, -1);
         QCOMPARE(node.nent(), 0);
-        QVERIFY(node.children.isEmpty());
+        QVERIFY(node.children.empty());
     }
 };
 

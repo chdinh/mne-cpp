@@ -447,13 +447,13 @@ int mne_read_bad_channel_list_from_node(FiffStream& stream,
                                         const FiffDirNode::SPtr& pNode, StringList& listp, int& nlistp)
 {
     FiffDirNode::SPtr node, bad;
-    QList<FiffDirNode::SPtr> temp;
+    std::vector<FiffDirNode::SPtr> temp;
     StringList list;
     int nlist = 0;
     FiffTag::UPtr t_pTag;
     QString names;
 
-    if (pNode->isEmpty())
+    if (pNode->is_empty())
         node = stream.dirtree();
     else
         node = pNode;

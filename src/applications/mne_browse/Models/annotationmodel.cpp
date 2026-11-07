@@ -771,10 +771,10 @@ bool AnnotationModel::loadAnnotationFif(QFile& qFile)
         return false;
     }
 
-    const QList<FIFFLIB::FiffDirNode::SPtr> annotationBlocks =
+    const std::vector<FIFFLIB::FiffDirNode::SPtr> annotationBlocks =
         stream.dirtree()->dir_tree_find(FiffBlockMneAnnotations);
 
-    if (annotationBlocks.isEmpty()) {
+    if (annotationBlocks.empty()) {
         qFile.close();
         qWarning() << "AnnotationModel: could not find annotation block in" << qFile.fileName();
         return false;
@@ -787,8 +787,8 @@ bool AnnotationModel::loadAnnotationFif(QFile& qFile)
     QVector<QVariantMap> extras;
     bool haveOrigTime = false;
 
-    for (int entryIndex = 0; entryIndex < annotationBlocks.first()->nent(); ++entryIndex) {
-        const auto& directoryEntry = annotationBlocks.first()->dir.at(entryIndex);
+    for (int entryIndex = 0; entryIndex < annotationBlocks.front()->nent(); ++entryIndex) {
+        const auto& directoryEntry = annotationBlocks.front()->dir.at(entryIndex);
         FIFFLIB::FiffTag::UPtr tag;
         if (!stream.read_tag(tag, directoryEntry.pos) || !tag) {
             continue;

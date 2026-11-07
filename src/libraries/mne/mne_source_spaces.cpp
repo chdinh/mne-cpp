@@ -267,7 +267,7 @@ bool MNESourceSpaces::readFromStream(FiffStream& stream,
     //
     //   Find all source spaces
     //
-    QList<FiffDirNode::SPtr> spaces = stream.dirtree()->dir_tree_find(FIFFB_MNE_SOURCE_SPACE);
+    std::vector<FiffDirNode::SPtr> spaces = stream.dirtree()->dir_tree_find(FIFFB_MNE_SOURCE_SPACE);
     if (spaces.size() == 0) {
         if (open_here)
             stream.close();
@@ -275,7 +275,7 @@ bool MNESourceSpaces::readFromStream(FiffStream& stream,
         return false;
     }
 
-    for (int k = 0; k < spaces.size(); ++k) {
+    for (int k = 0; k < std::ssize(spaces); ++k) {
         auto p_Hemisphere = std::make_shared<MNEHemisphere>();
         qInfo("\tReading a source space...");
         MNESourceSpaces::read_source_space(stream, spaces[k], *p_Hemisphere);

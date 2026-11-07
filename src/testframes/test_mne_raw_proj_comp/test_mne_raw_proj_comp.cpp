@@ -734,7 +734,7 @@ void TestMneRawProjComp::rawInfo_findNodes()
     // find_raw searches from the root via dir_tree_find
     auto rawNode = MNERawInfo::find_raw(stream.dirtree());
     QVERIFY(rawNode != nullptr);
-    QVERIFY(!rawNode->isEmpty());
+    QVERIFY(!rawNode->is_empty());
 
     // find_meas walks UP from a child node — pass rawNode (inside FIFFB_MEAS)
     auto measNode = MNERawInfo::find_meas(rawNode);

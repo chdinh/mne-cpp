@@ -171,18 +171,18 @@ Expected<FiffEvokedFile> FiffEvokedFile::open(const std::filesystem::path& path)
     qInfo("Reading %s ...\n", file.m_file.c_str());
 
     FiffDirNode::SPtr meas;
-    if (stream.dirtree()->dir_tree_find(FIFFB_MEAS).isEmpty()) {
+    if (stream.dirtree()->dir_tree_find(FIFFB_MEAS).empty()) {
         return fail(ErrorCode::NotFound, "No measurement in {}", file.m_file);
     }
     if (!stream.read_meas_info(stream.dirtree(), file.info, meas)) {
         return fail(ErrorCode::Format, "No measurement info in {}", file.m_file);
     }
     file.info.filename = stream.streamName().toStdString();
-    if (meas->dir_tree_find(FIFFB_PROCESSED_DATA).isEmpty()) {
+    if (meas->dir_tree_find(FIFFB_PROCESSED_DATA).empty()) {
         return fail(ErrorCode::NotFound, "No processed data in {}", file.m_file);
     }
     file.m_sets = meas->dir_tree_find(FIFFB_EVOKED);
-    if (file.m_sets.isEmpty()) {
+    if (file.m_sets.empty()) {
         return fail(ErrorCode::NotFound, "No evoked data in {}", file.m_file);
     }
     QString listing;
@@ -195,7 +195,7 @@ Expected<FiffEvokedFile> FiffEvokedFile::open(const std::filesystem::path& path)
 Expected<int> FiffEvokedFile::find(const FiffEvoked::Condition& condition, fiff_int_t kind) const
 {
     if (const int* index = std::get_if<int>(&condition)) {
-        if (*index >= 0 && *index < m_sets.size()) {
+        if (*index >= 0 && *index < std::ssize(m_sets)) {
             return *index;
         }
     } else {
@@ -222,8 +222,8 @@ Expected<FiffEvoked> FiffEvokedFile::read(int set, const FiffEvoked::Baseline& b
     //
     //   Identify the aspects
     //
-    QList<FiffDirNode::SPtr> aspects = my_evoked->dir_tree_find(FIFFB_ASPECT);
-    if (aspects.isEmpty()) {
+    std::vector<FiffDirNode::SPtr> aspects = my_evoked->dir_tree_find(FIFFB_ASPECT);
+    if (aspects.empty()) {
         return fail(ErrorCode::Format, "Evoked data set {} without data in {}", set, file);
     }
 

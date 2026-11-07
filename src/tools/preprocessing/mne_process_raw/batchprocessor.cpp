@@ -233,8 +233,8 @@ int BatchProcessor::run(const ProcessingSettings& settings)
                     QFile pFile(projFile);
                     FiffStream pStream(&pFile);
                     if (pStream.open()) {
-                        QList<FiffDirNode::SPtr> projNodes = pStream.dirtree()->dir_tree_find(FIFFB_PROJ);
-                        if (!projNodes.isEmpty()) {
+                        std::vector<FiffDirNode::SPtr> projNodes = pStream.dirtree()->dir_tree_find(FIFFB_PROJ);
+                        if (!projNodes.empty()) {
                             QList<FiffProj> fileProjs = pStream.read_proj(projNodes[0]);
                             loadedProjs.append(fileProjs);
                         }

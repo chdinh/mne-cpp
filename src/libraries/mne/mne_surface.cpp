@@ -387,8 +387,8 @@ std::unique_ptr<MNESurface> MNESurface::read_bem_surface(const QString& name, in
     QFile file(name);
     FiffStream stream(&file);
 
-    QList<FiffDirNode::SPtr> surfs;
-    QList<FiffDirNode::SPtr> bems;
+    std::vector<FiffDirNode::SPtr> surfs;
+    std::vector<FiffDirNode::SPtr> bems;
     FiffDirNode::SPtr node;
     FiffTag::UPtr t_pTag;
 
@@ -420,7 +420,7 @@ std::unique_ptr<MNESurface> MNESurface::read_bem_surface(const QString& name, in
         return nullptr;
     }
     if (which >= 0) {
-        for (k = 0; k < surfs.size(); ++k) {
+        for (k = 0; k < std::ssize(surfs); ++k) {
             node = surfs[k];
             if (node->find_tag(stream, FIFF_BEM_SURF_ID, t_pTag)) {
                 id = *t_pTag->toInt();

@@ -111,27 +111,29 @@ private slots:
         stream->open();
 
         // Find measurement info block
-        QList<FiffDirNode::SPtr> meas = stream->dirtree()->dir_tree_find(FIFFB_MEAS);
+        std::vector<FiffDirNode::SPtr> meas = stream->dirtree()->dir_tree_find(FIFFB_MEAS);
         QVERIFY(meas.size() > 0);
 
-        QList<FiffDirNode::SPtr> measInfo = stream->dirtree()->dir_tree_find(FIFFB_MEAS_INFO);
+        std::vector<FiffDirNode::SPtr> measInfo = stream->dirtree()->dir_tree_find(FIFFB_MEAS_INFO);
         QVERIFY(measInfo.size() > 0);
 
-        // Check raw data blocks
-        QList<FiffDirNode::SPtr> rawBlocks = stream->dirtree()->dir_tree_find(FIFFB_RAW_DATA);
-        // Raw file should have raw data blocks
-        QVERIFY(rawBlocks.size() > 0 || true); // might be FIFFB_PROCESSED_DATA
+        // Searching returns the tree's own nodes, not copies of them.
+        QCOMPARE(meas.front()->dir_tree_find(FIFFB_MEAS_INFO).front(), measInfo.front());
+        QCOMPARE(measInfo.front()->parent.lock(), meas.front());
+
+        std::vector<FiffDirNode::SPtr> rawBlocks = stream->dirtree()->dir_tree_find(FIFFB_RAW_DATA);
+        QVERIFY(!rawBlocks.empty());
 
         stream->close();
 
         // The tree is released with its last owner, although children point back to their parents.
-        const QWeakPointer<FiffDirNode> root = stream->dirtree();
-        QVERIFY(!meas.first()->parent.isNull());
+        const std::weak_ptr<FiffDirNode> root = stream->dirtree();
+        QVERIFY(!meas.front()->parent.expired());
         meas.clear();
         measInfo.clear();
         rawBlocks.clear();
         stream.reset();
-        QVERIFY(root.isNull());
+        QVERIFY(root.expired());
     }
 
     void fiffStream_readTags()
@@ -405,7 +407,7 @@ private slots:
         QFile file2(m_sDataPath + "/MEG/sample/sample_audvis-cov.fif");
         FiffStream stream(&file2);
         if (stream.open()) {
-            QList<FiffDirNode::SPtr> covNodes = stream.dirtree()->dir_tree_find(FIFFB_MNE_COV);
+            std::vector<FiffDirNode::SPtr> covNodes = stream.dirtree()->dir_tree_find(FIFFB_MNE_COV);
             QVERIFY(covNodes.size() > 0 || true);
             stream.close();
         }
@@ -449,8 +451,8 @@ private slots:
         QVERIFY(stream.open());
 
         // Search for coordinate transforms
-        QList<FiffDirNode::SPtr> nodes = stream.dirtree()->dir_tree_find(FIFFB_MEAS);
-        if (nodes.isEmpty())
+        std::vector<FiffDirNode::SPtr> nodes = stream.dirtree()->dir_tree_find(FIFFB_MEAS);
+        if (nodes.empty())
             nodes = stream.dirtree()->dir_tree_find(FIFFB_MNE);
 
         // Read tags to find FIFF_COORD_TRANS
@@ -537,11 +539,11 @@ private slots:
         QVERIFY(stream.open());
 
         // Find evoked blocks
-        QList<FiffDirNode::SPtr> evoked = stream.dirtree()->dir_tree_find(FIFFB_EVOKED);
+        std::vector<FiffDirNode::SPtr> evoked = stream.dirtree()->dir_tree_find(FIFFB_EVOKED);
         QVERIFY(evoked.size() > 0);
 
         // Find measurement info
-        QList<FiffDirNode::SPtr> measInfo = stream.dirtree()->dir_tree_find(FIFFB_MEAS_INFO);
+        std::vector<FiffDirNode::SPtr> measInfo = stream.dirtree()->dir_tree_find(FIFFB_MEAS_INFO);
         QVERIFY(measInfo.size() > 0);
 
         // Read specific tags from measurement info
@@ -577,11 +579,11 @@ private slots:
         QVERIFY(stream.open());
 
         // Find MNE forward solution block
-        QList<FiffDirNode::SPtr> fwdBlocks = stream.dirtree()->dir_tree_find(FIFFB_MNE_FORWARD_SOLUTION);
+        std::vector<FiffDirNode::SPtr> fwdBlocks = stream.dirtree()->dir_tree_find(FIFFB_MNE_FORWARD_SOLUTION);
         QVERIFY(fwdBlocks.size() > 0);
 
         // Find source space blocks
-        QList<FiffDirNode::SPtr> srcBlocks = stream.dirtree()->dir_tree_find(FIFFB_MNE_SOURCE_SPACE);
+        std::vector<FiffDirNode::SPtr> srcBlocks = stream.dirtree()->dir_tree_find(FIFFB_MNE_SOURCE_SPACE);
         QVERIFY(srcBlocks.size() > 0);
 
         stream.close();
@@ -604,7 +606,7 @@ private slots:
         QVERIFY(stream.open());
 
         // Find BEM surface blocks
-        QList<FiffDirNode::SPtr> bemBlocks = stream.dirtree()->dir_tree_find(FIFFB_BEM_SURF);
+        std::vector<FiffDirNode::SPtr> bemBlocks = stream.dirtree()->dir_tree_find(FIFFB_BEM_SURF);
         QVERIFY(bemBlocks.size() > 0);
 
         stream.close();
@@ -627,7 +629,7 @@ private slots:
         QVERIFY(stream.open());
 
         // Find source space blocks
-        QList<FiffDirNode::SPtr> srcBlocks = stream.dirtree()->dir_tree_find(FIFFB_MNE_SOURCE_SPACE);
+        std::vector<FiffDirNode::SPtr> srcBlocks = stream.dirtree()->dir_tree_find(FIFFB_MNE_SOURCE_SPACE);
         QVERIFY(srcBlocks.size() > 0);
 
         // Read tags from first source space

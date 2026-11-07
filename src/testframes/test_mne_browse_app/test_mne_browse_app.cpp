@@ -526,10 +526,10 @@ void TestMneBrowseApp::annotatesDraggedRangeLikePython()
     QFile annotFile(annotPath);
     FIFFLIB::FiffStream stream(&annotFile);
     QVERIFY(stream.open());
-    const QList<FIFFLIB::FiffDirNode::SPtr> blocks = stream.dirtree()->dir_tree_find(3810);
+    const std::vector<FIFFLIB::FiffDirNode::SPtr> blocks = stream.dirtree()->dir_tree_find(3810);
     QCOMPARE(blocks.size(), 1);
     QMap<int, QVector<float>> times;
-    for (const auto& entry : blocks.first()->dir) {
+    for (const auto& entry : blocks.front()->dir) {
         FIFFLIB::FiffTag::UPtr tag;
         if ((entry.kind == 3568 || entry.kind == 3569) && stream.read_tag(tag, entry.pos))
             times[entry.kind] = QVector<float>(tag->toFloat(), tag->toFloat() + tag->size() / 4);

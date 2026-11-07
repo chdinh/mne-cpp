@@ -82,7 +82,7 @@ private:
 
     FiffStream m_stream;
     std::string m_file;
-    QList<FiffDirNode::SPtr> m_sets;
+    std::vector<FiffDirNode::SPtr> m_sets;
     QStringList m_comments;
     QList<fiff_int_t> m_kinds;
 };

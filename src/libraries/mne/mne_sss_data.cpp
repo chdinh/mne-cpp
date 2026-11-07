@@ -99,10 +99,10 @@ std::unique_ptr<MNESssData> MNESssData::read(const QString& name)
 
 //=============================================================================================================
 
-std::unique_ptr<MNESssData> MNESssData::read_from_node(FiffStream& stream, const QSharedPointer<FiffDirNode>& start)
+std::unique_ptr<MNESssData> MNESssData::read_from_node(FiffStream& stream, const FiffDirNode::SPtr& start)
 {
     auto s = std::make_unique<MNESssData>();
-    QList<FiffDirNode::SPtr> sss;
+    std::vector<FiffDirNode::SPtr> sss;
     FiffDirNode::SPtr node;
     FiffTag::UPtr t_pTag;
     const float* r0;

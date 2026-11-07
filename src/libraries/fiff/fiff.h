@@ -116,7 +116,7 @@ public:
      *
      * @return the found nodes.
      */
-    inline static QList<FiffDirNode::SPtr> dir_tree_find(const FiffDirNode::SPtr& p_Node, fiff_int_t p_kind)
+    inline static std::vector<FiffDirNode::SPtr> dir_tree_find(const FiffDirNode::SPtr& p_Node, fiff_int_t p_kind)
     {
         return p_Node->dir_tree_find(p_kind);
     }

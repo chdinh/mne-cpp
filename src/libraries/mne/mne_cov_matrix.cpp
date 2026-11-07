@@ -133,7 +133,7 @@ std::unique_ptr<MNECovMatrix> MNECovMatrix::read(const QString& name, int kind)
     FiffStream stream(&file);
 
     FiffTag::UPtr t_pTag;
-    QList<FiffDirNode::SPtr> nodes;
+    std::vector<FiffDirNode::SPtr> nodes;
     FiffDirNode::SPtr covnode;
 
     StringList names;
@@ -169,7 +169,7 @@ std::unique_ptr<MNECovMatrix> MNECovMatrix::read(const QString& name, int kind)
     /*
      * Locate the desired matrix
      */
-    for (k = 0; k < nodes.size(); ++k) {
+    for (k = 0; k < std::ssize(nodes); ++k) {
         if (!nodes[k]->find_tag(stream, FIFF_MNE_COV_KIND, t_pTag))
             continue;
 
@@ -178,7 +178,7 @@ std::unique_ptr<MNECovMatrix> MNECovMatrix::read(const QString& name, int kind)
             break;
         }
     }
-    if (!covnode || covnode->isEmpty()) {
+    if (!covnode || covnode->is_empty()) {
         qWarning("Desired covariance matrix not found from %s", name.toUtf8().data());
         stream.close();
         return nullptr;

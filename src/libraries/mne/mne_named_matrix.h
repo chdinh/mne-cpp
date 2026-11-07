@@ -156,7 +156,7 @@ public:
      * @return A unique pointer to the read matrix, or @c nullptr on failure.
      */
     static std::unique_ptr<MNENamedMatrix> read(FIFFLIB::FiffStream& stream,
-                                                const QSharedPointer<FIFFLIB::FiffDirNode>& node,
+                                                const std::shared_ptr<FIFFLIB::FiffDirNode>& node,
                                                 int kind);
 
     //=========================================================================================================

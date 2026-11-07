@@ -383,8 +383,8 @@ private slots:
         QVERIFY(stream.dirtree() != nullptr);
 
         // Find BEM blocks
-        QList<FiffDirNode::SPtr> bemBlocks = stream.dirtree()->dir_tree_find(FIFFB_BEM);
-        if (bemBlocks.isEmpty())
+        std::vector<FiffDirNode::SPtr> bemBlocks = stream.dirtree()->dir_tree_find(FIFFB_BEM);
+        if (bemBlocks.empty())
             bemBlocks = stream.dirtree()->dir_tree_find(FIFFB_BEM_SURF);
 
         // Read tags to exercise parsing
@@ -416,8 +416,8 @@ private slots:
         FiffStream stream(&file);
         QVERIFY(stream.open());
 
-        QList<FiffDirNode::SPtr> nodes = stream.dirtree()->dir_tree_find(FIFFB_MNE_PARENT_MRI_FILE);
-        if (nodes.isEmpty())
+        std::vector<FiffDirNode::SPtr> nodes = stream.dirtree()->dir_tree_find(FIFFB_MNE_PARENT_MRI_FILE);
+        if (nodes.empty())
             nodes = stream.dirtree()->dir_tree_find(FIFFB_MEAS_INFO);
 
         // Read any coord transform tags
