@@ -287,9 +287,9 @@ private slots:
 
         FiffRawData raw((m_sDataPath + "/MEG/sample/sample_audvis_trunc_raw.fif").toStdString());
 
-        // Write a portion to temp file
-        QTemporaryFile tmpFile;
-        QVERIFY(tmpFile.open());
+        // A closed QTemporaryFile is still held by Qt on Windows, so write into a temporary directory
+        QTemporaryDir dir;
+        QFile tmpFile(dir.filePath("raw.fif"));
 
         RowVectorXd cals;
         auto outStream = FiffStream::start_writing_raw(FiffStream::byteStream(tmpFile, QIODevice::WriteOnly), raw.info, cals);
