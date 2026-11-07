@@ -12,7 +12,7 @@
  * data/raw_{short,int,single,double}_raw.fif hold 12 channels x 120 samples of
  * the sample raw file, written by mne-python in each storage format
  * (make_raw_format_fixtures.py). Each file is read whole and with a channel
- * selection, with and without SSP, and compared with mne-python's get_data()
+ * selection, with and without SSP, and compared with mne.io.Raw.get_data()
  * on the same file (values printed by the fixture script).
  */
 

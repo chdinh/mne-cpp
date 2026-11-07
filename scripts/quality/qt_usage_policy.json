@@ -119,8 +119,8 @@
       ]
     },
     "fiff": {
-      "tokens": 1561,
-      "public_header_includes": 94,
+      "tokens": 1512,
+      "public_header_includes": 91,
       "modules": [
         "Core",
         "Network"
@@ -136,7 +136,7 @@
       ]
     },
     "fwd": {
-      "tokens": 339,
+      "tokens": 338,
       "public_header_includes": 13,
       "modules": [
         "Concurrent",
@@ -186,7 +186,7 @@
       ]
     },
     "mne": {
-      "tokens": 1772,
+      "tokens": 1743,
       "public_header_includes": 98,
       "modules": [
         "Concurrent",

@@ -1007,7 +1007,7 @@
       "mne_c_tool": "libmne (mne_raw_data.c)",
       "mne_python": "mne.io.Raw",
       "sklearn": null,
-      "test": "test_fiff_raw_io",
+      "test": "test_fiff_raw_formats_python",
       "example": "ex_read_raw",
       "example_snippet": [
         "ex_read_raw/main.cpp#fiff_raw_data_open",
