@@ -156,7 +156,7 @@ int main(int argc, char* argv[])
     ok &= expect(log.open(QIODevice::ReadOnly) && log.readAll().contains("logging to"), "MNELogger wrote the message to the log file");
 
     //! [log_usage]
-    Log::warning("channel MEG 0113 is flat"); // reaches Qt's handler, here MNELogger
+    Log::warning("channel {} is flat", "MEG 0113"); // formatted as by std::format, then passed to Qt's handler
     //! [log_usage]
 
     //! [log_capture_usage]

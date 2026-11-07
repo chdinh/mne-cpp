@@ -251,23 +251,23 @@ void TestUtilsLogger::testLogCaptureNestsAndRestores()
 void TestUtilsLogger::testLogCustomSink()
 {
     StringList seen;
-    Log::Sink previous = Log::setSink([&seen](Log::Level level, std::string_view message) {
+    Log::Sink previous = Log::set_sink([&seen](Log::Level level, std::string_view message) {
         seen.emplace_back(std::to_string(static_cast<int>(level)) + ":" + std::string(message));
     });
-    Log::critical("boom");
+    Log::critical("boom {} of {:.1f}", 3, 4.0);
     Log::write(Log::Level::Debug, "trace");
-    Log::Sink mine = Log::setSink(std::move(previous));
+    Log::Sink mine = Log::set_sink(std::move(previous));
 
     QVERIFY(mine);
     QCOMPARE(seen.size(), std::size_t(2));
-    QCOMPARE(seen[0], std::string("3:boom"));
+    QCOMPARE(seen[0], std::string("3:boom 3 of 4.0"));
     QCOMPARE(seen[1], std::string("0:trace"));
 
     // An empty sink restores forwarding to Qt.
     g_qtMessages.clear();
     const QtMessageHandler handler = qInstallMessageHandler(recordQtMessage);
-    Log::setSink([](Log::Level, std::string_view) {});
-    Log::setSink({});
+    Log::set_sink([](Log::Level, std::string_view) {});
+    Log::set_sink({});
     Log::info("forwarded");
     qInstallMessageHandler(handler);
     QCOMPARE(g_qtMessages.size(), std::size_t(1));
@@ -285,7 +285,7 @@ void TestUtilsLogger::testLogCaptureFromManyThreads()
     for (int t = 0; t < kThreads; ++t) {
         threads.emplace_back([t] {
             for (int i = 0; i < kMessages; ++i) {
-                Log::warning("thread " + std::to_string(t));
+                Log::warning("thread {}", t);
             }
         });
     }

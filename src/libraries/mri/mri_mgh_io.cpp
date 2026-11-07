@@ -76,14 +76,6 @@ using UTILSLIB::Log;
 namespace
 {
 
-template<typename... Args>
-std::string format(const char* pattern, Args... args)
-{
-    char buffer[512];
-    std::snprintf(buffer, sizeof(buffer), pattern, args...);
-    return buffer;
-}
-
 // Reads @p count big-endian values of type T and converts each one with @p convert into @p out
 template<typename T, typename Out, typename Convert>
 bool readBigEndianInto(UTILSLIB::ByteStream& stream, std::vector<Out>& out, std::size_t count, Convert convert)
@@ -115,12 +107,12 @@ bool MriMghIO::read(const std::string& mgzFile,
     std::string error;
     const std::optional<std::vector<std::byte>> fileData = detail::readFileBytes(mgzFile, isCompressed, error);
     if (!fileData) {
-        Log::critical("MriMghIO::read - " + error);
+        Log::critical("MriMghIO::read - {}", error);
         return false;
     }
 
     if (fileData->size() < MRI_MGH_DATA_OFFSET) {
-        Log::critical("MriMghIO::read - File " + mgzFile + " is too small to be a valid MGH file (" + std::to_string(fileData->size()) + " bytes)");
+        Log::critical("MriMghIO::read - File {} is too small to be a valid MGH file ({} bytes)", mgzFile, fileData->size());
         return false;
     }
 
@@ -137,8 +129,7 @@ bool MriMghIO::read(const std::string& mgzFile,
     if (verbose) {
         Log::info("Voxel -> FsSurface RAS transform:");
         for (int r = 0; r < 4; ++r) {
-            Log::info(format("  %10.6f %10.6f %10.6f %10.6f",
-                             double(vox2ras(r, 0)), double(vox2ras(r, 1)), double(vox2ras(r, 2)), double(vox2ras(r, 3))));
+            Log::info("  {:10.6f} {:10.6f} {:10.6f} {:10.6f}", vox2ras(r, 0), vox2ras(r, 1), vox2ras(r, 2), vox2ras(r, 3));
         }
     }
 
@@ -154,8 +145,7 @@ bool MriMghIO::read(const std::string& mgzFile,
     parseFooter(*fileData, volData, additionalTrans, subjectMriDir, verbose);
 
     if (verbose) {
-        Log::info(format("Read %d slices from %s (%dx%d pixels)",
-                         static_cast<int>(volData.slices.size()), mgzFile.c_str(), volData.width, volData.height));
+        Log::info("Read {} slices from {} ({}x{} pixels)", volData.slices.size(), mgzFile, volData.width, volData.height);
     }
 
     return true;
@@ -188,7 +178,7 @@ bool MriMghIO::parseHeader(const std::vector<std::byte>& data, MriVolData& volDa
     const auto [version, width, height, depth, nframes, type, dof] = header;
 
     if (version != MRI_MGH_VERSION) {
-        Log::critical("MriMghIO::parseHeader - Unknown MGH version: " + std::to_string(version));
+        Log::critical("MriMghIO::parseHeader - Unknown MGH version: {}", version);
         return false;
     }
 
@@ -201,7 +191,7 @@ bool MriMghIO::parseHeader(const std::vector<std::byte>& data, MriVolData& volDa
     volData.dof = dof;
 
     if (verbose) {
-        Log::info(format("MGH file: %dx%dx%d, %d frame(s), type=%d", width, height, depth, nframes, type));
+        Log::info("MGH file: {}x{}x{}, {} frame(s), type={}", width, height, depth, nframes, type);
     }
 
     std::int16_t goodRASflag = 0;
@@ -223,9 +213,9 @@ bool MriMghIO::parseHeader(const std::vector<std::byte>& data, MriVolData& volDa
     // Else: default values from MriVolData constructor are used
 
     if (verbose) {
-        Log::info(format("Voxel sizes: %.4f x %.4f x %.4f mm", double(volData.xsize), double(volData.ysize), double(volData.zsize)));
-        Log::info(format("goodRAS: %d", int(goodRASflag)));
-        Log::info(format("c_ras: %.4f %.4f %.4f", double(volData.c_ras[0]), double(volData.c_ras[1]), double(volData.c_ras[2])));
+        Log::info("Voxel sizes: {:.4f} x {:.4f} x {:.4f} mm", volData.xsize, volData.ysize, volData.zsize);
+        Log::info("goodRAS: {}", int(goodRASflag));
+        Log::info("c_ras: {:.4f} {:.4f} {:.4f}", volData.c_ras[0], volData.c_ras[1], volData.c_ras[2]);
     }
 
     return true;
@@ -243,7 +233,7 @@ bool MriMghIO::readVoxelData(const std::vector<std::byte>& data, MriVolData& vol
 
     const int bpv = bytesPerVoxel(volData.type);
     if (bpv == 0) {
-        Log::critical("MriMghIO::readVoxelData - Unsupported MGH data type: " + std::to_string(volData.type));
+        Log::critical("MriMghIO::readVoxelData - Unsupported MGH data type: {}", volData.type);
         return false;
     }
 
@@ -380,7 +370,7 @@ bool MriMghIO::parseFooter(const std::vector<std::byte>& data,
             volData.talairachXfmPath = xfmPath;
 
             if (verbose) {
-                Log::info("Found Talairach transform reference: " + xfmPath);
+                Log::info("Found Talairach transform reference: {}", xfmPath);
             }
 
             // Resolve relative paths using subject MRI directory
@@ -394,10 +384,10 @@ bool MriMghIO::parseFooter(const std::vector<std::byte>& data,
                 additionalTrans.push_back(talairach.MNI_tal_tal_gtz_t);
                 additionalTrans.push_back(talairach.MNI_tal_tal_ltz_t);
                 if (verbose) {
-                    Log::info("Read Talairach transform from " + xfmPath);
+                    Log::info("Read Talairach transform from {}", xfmPath);
                 }
             } else if (verbose) {
-                Log::warning("Talairach transform not readable: " + xfmPath);
+                Log::warning("Talairach transform not readable: {}", xfmPath);
             }
         }
     }

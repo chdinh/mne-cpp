@@ -107,7 +107,7 @@ bool MriNiftiIO::decompress(const std::string& gzFile, std::vector<std::byte>& r
     std::string error;
     std::optional<std::vector<std::byte>> bytes = detail::readFileBytes(gzFile, true, error);
     if (!bytes) {
-        Log::critical("MriNiftiIO::decompress - " + error);
+        Log::critical("MriNiftiIO::decompress - {}", error);
         return false;
     }
     rawData = std::move(*bytes);
@@ -124,13 +124,13 @@ bool MriNiftiIO::read(const std::string& niiFile, MriVolData& volData, bool verb
     std::string error;
     const std::optional<std::vector<std::byte>> content = detail::readFileBytes(niiFile, compressed, error);
     if (!content) {
-        Log::critical("MriNiftiIO::read - " + error);
+        Log::critical("MriNiftiIO::read - {}", error);
         return false;
     }
     const std::vector<std::byte>& bytes = *content;
 
     if (bytes.size() < NIFTI_HDR_SIZE) {
-        Log::critical("MriNiftiIO::read - file too small (" + std::to_string(bytes.size()) + " bytes) : " + niiFile);
+        Log::critical("MriNiftiIO::read - file too small ({} bytes) : {}", bytes.size(), niiFile);
         return false;
     }
 
@@ -143,7 +143,7 @@ bool MriNiftiIO::read(const std::string& niiFile, MriVolData& volData, bool verb
         bigEndian = true;
         sizeofHdr = readValue<std::int32_t>(hdr, bigEndian);
         if (sizeofHdr != std::int32_t(NIFTI_HDR_SIZE)) {
-            Log::critical("MriNiftiIO::read - not a NIfTI-1 file (sizeof_hdr = " + std::to_string(sizeofHdr) + "): " + niiFile);
+            Log::critical("MriNiftiIO::read - not a NIfTI-1 file (sizeof_hdr = {}): {}", sizeofHdr, niiFile);
             return false;
         }
     }
@@ -162,7 +162,7 @@ bool MriNiftiIO::read(const std::string& niiFile, MriVolData& volData, bool verb
     const std::int16_t nz = i16(46);
     const std::int16_t nt = i16(48);
     if (ndim < 3 || nx <= 0 || ny <= 0 || nz <= 0) {
-        Log::critical("MriNiftiIO::read - degenerate dims " + std::to_string(ndim) + " " + std::to_string(nx) + " " + std::to_string(ny) + " " + std::to_string(nz));
+        Log::critical("MriNiftiIO::read - degenerate dims {} {} {} {}", ndim, nx, ny, nz);
         return false;
     }
 
@@ -213,7 +213,7 @@ bool MriNiftiIO::read(const std::string& niiFile, MriVolData& volData, bool verb
             bpv = 4;
             break;
         default:
-            Log::critical("MriNiftiIO::read - unsupported datatype " + std::to_string(datatype));
+            Log::critical("MriNiftiIO::read - unsupported datatype {}", datatype);
             return false;
     }
 
@@ -300,7 +300,7 @@ bool MriNiftiIO::read(const std::string& niiFile, MriVolData& volData, bool verb
     const std::size_t nslice = static_cast<std::size_t>(nz);
     const std::size_t frameSize = nPixels * nslice * static_cast<std::size_t>(bpv);
     if (bytes.size() < dataOff + frameSize) {
-        Log::critical("MriNiftiIO::read - data section truncated (need " + std::to_string(dataOff + frameSize) + " bytes, got " + std::to_string(bytes.size()) + ")");
+        Log::critical("MriNiftiIO::read - data section truncated (need {} bytes, got {})", dataOff + frameSize, bytes.size());
         return false;
     }
 
@@ -369,11 +369,8 @@ bool MriNiftiIO::read(const std::string& niiFile, MriVolData& volData, bool verb
     }
 
     if (verbose) {
-        char line[256];
-        std::snprintf(line, sizeof(line), "NIfTI file: %dx%dx%d, datatype=%d, voxel %.3fx%.3fx%.3f mm, c_ras=(%.2f, %.2f, %.2f)",
-                      nx, ny, nz, datatype, double(sx), double(sy), double(sz),
-                      double(volData.c_ras[0]), double(volData.c_ras[1]), double(volData.c_ras[2]));
-        Log::info(line);
+        Log::info("NIfTI file: {}x{}x{}, datatype={}, voxel {:.3f}x{:.3f}x{:.3f} mm, c_ras=({:.2f}, {:.2f}, {:.2f})",
+                  nx, ny, nz, datatype, sx, sy, sz, volData.c_ras[0], volData.c_ras[1], volData.c_ras[2]);
     }
 
     return true;

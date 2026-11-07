@@ -10,7 +10,7 @@
  * @brief    Library logging facade with a replaceable sink and a capture sink for tests.
  *
  * Libraries report through @ref UTILSLIB::Log instead of @c qWarning and friends, so the
- * interface is standard C++ only. By default every message is forwarded to Qt's message
+ * interface is standard C++ only; messages are formatted as by std::format. By default every message is forwarded to Qt's message
  * handler, where applications format it (for example with @ref UTILSLIB::MNELogger).
  * @ref UTILSLIB::LogCapture swallows and records messages for the lifetime of a scope.
  */
@@ -28,10 +28,12 @@
 // STL INCLUDES
 //=============================================================================================================
 
+#include <format>
 #include <functional>
 #include <memory>
 #include <string>
 #include <string_view>
+#include <utility>
 #include <vector>
 
 //=============================================================================================================
@@ -73,24 +75,52 @@ public:
      */
     static void write(Level level, std::string_view message);
 
-    static void debug(std::string_view message)
+    /**
+     * Formats @p args with @p format as std::format does and writes the result at debug level.
+     *
+     * @param[in] format   A std::format string, checked at compile time.
+     * @param[in] args     The values it formats.
+     */
+    template<class... Args>
+    static void debug(std::format_string<Args...> format, Args&&... args)
     {
-        write(Level::Debug, message);
+        write(Level::Debug, std::format(format, std::forward<Args>(args)...));
     }
 
-    static void info(std::string_view message)
+    /**
+     * As debug(), at info level.
+     *
+     * @param[in] format   A std::format string, checked at compile time.
+     * @param[in] args     The values it formats.
+     */
+    template<class... Args>
+    static void info(std::format_string<Args...> format, Args&&... args)
     {
-        write(Level::Info, message);
+        write(Level::Info, std::format(format, std::forward<Args>(args)...));
     }
 
-    static void warning(std::string_view message)
+    /**
+     * As debug(), at warning level.
+     *
+     * @param[in] format   A std::format string, checked at compile time.
+     * @param[in] args     The values it formats.
+     */
+    template<class... Args>
+    static void warning(std::format_string<Args...> format, Args&&... args)
     {
-        write(Level::Warning, message);
+        write(Level::Warning, std::format(format, std::forward<Args>(args)...));
     }
 
-    static void critical(std::string_view message)
+    /**
+     * As debug(), at critical level.
+     *
+     * @param[in] format   A std::format string, checked at compile time.
+     * @param[in] args     The values it formats.
+     */
+    template<class... Args>
+    static void critical(std::format_string<Args...> format, Args&&... args)
     {
-        write(Level::Critical, message);
+        write(Level::Critical, std::format(format, std::forward<Args>(args)...));
     }
 
     //=========================================================================================================
@@ -101,7 +131,7 @@ public:
      *
      * @return The sink that was installed before, empty if messages were forwarded to Qt.
      */
-    static Sink setSink(Sink sink);
+    static Sink set_sink(Sink sink);
 };
 
 //=============================================================================================================

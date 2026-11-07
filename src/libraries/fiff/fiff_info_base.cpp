@@ -345,7 +345,7 @@ bool FiffInfoBase::readBadChannelsFromFile(const std::string& name, StringList& 
     }
     std::ifstream file(UTILSLIB::pathFromUtf8(name));
     if (!file) {
-        UTILSLIB::Log::critical("Cannot open bad channel file: " + name);
+        UTILSLIB::Log::critical("Cannot open bad channel file: {}", name);
         return false;
     }
     StringList list;
@@ -357,7 +357,7 @@ bool FiffInfoBase::readBadChannelsFromFile(const std::string& name, StringList& 
         list.emplace_back(trimmed);
     }
     if (file.bad()) {
-        UTILSLIB::Log::critical("Error reading bad channel file: " + name);
+        UTILSLIB::Log::critical("Error reading bad channel file: {}", name);
         return false;
     }
     listOut = std::move(list);

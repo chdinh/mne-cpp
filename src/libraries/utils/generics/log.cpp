@@ -106,7 +106,7 @@ void Log::write(Level level, std::string_view message)
 
 //=============================================================================================================
 
-Log::Sink Log::setSink(Sink sink)
+Log::Sink Log::set_sink(Sink sink)
 {
     std::shared_ptr<const Sink> next = sink ? std::make_shared<const Sink>(std::move(sink)) : nullptr;
     std::lock_guard<std::mutex> lock(sinkSlot().mutex);
@@ -119,7 +119,7 @@ Log::Sink Log::setSink(Sink sink)
 LogCapture::LogCapture()
 : m_state(std::make_shared<State>())
 {
-    m_previous = Log::setSink([state = m_state](Log::Level level, std::string_view message) {
+    m_previous = Log::set_sink([state = m_state](Log::Level level, std::string_view message) {
         std::lock_guard<std::mutex> lock(state->mutex);
         state->entries.push_back({level, std::string(message)});
     });
@@ -129,7 +129,7 @@ LogCapture::LogCapture()
 
 LogCapture::~LogCapture()
 {
-    Log::setSink(std::move(m_previous));
+    Log::set_sink(std::move(m_previous));
 }
 
 //=============================================================================================================

@@ -91,7 +91,7 @@ bool MriCorFifIO::write(const std::string& fileName,
     auto stream = FiffStream::start_file(file);
 
     if (!stream) {
-        UTILSLIB::Log::critical("MriCorFifIO::write - Could not open file for writing: " + fileName);
+        UTILSLIB::Log::critical("MriCorFifIO::write - Could not open file for writing: {}", fileName);
         return false;
     }
 

@@ -86,12 +86,12 @@ bool MriCorIO::read(const std::string& dir,
         std::string error;
         const std::optional<std::vector<std::byte>> data = detail::readFileBytes(fileName, false, error);
         if (!data) {
-            UTILSLIB::Log::critical("MriCorIO::read - Could not open COR file " + fileName);
+            UTILSLIB::Log::critical("MriCorIO::read - Could not open COR file {}", fileName);
             return false;
         }
 
         if (data->size() < nPixels) {
-            UTILSLIB::Log::critical("MriCorIO::read - COR file " + fileName + " is too small: " + std::to_string(data->size()) + " bytes (expected " + std::to_string(nPixels) + ")");
+            UTILSLIB::Log::critical("MriCorIO::read - COR file {} is too small: {} bytes (expected {})", fileName, data->size(), nPixels);
             return false;
         }
 
@@ -124,7 +124,7 @@ bool MriCorIO::read(const std::string& dir,
     }
 
     if (verbose) {
-        UTILSLIB::Log::info("Read " + std::to_string(COR_NSLICE) + " COR slices from " + dir);
+        UTILSLIB::Log::info("Read {} COR slices from {}", COR_NSLICE, dir);
     }
 
     return true;

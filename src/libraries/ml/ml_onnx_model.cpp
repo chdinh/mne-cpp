@@ -157,7 +157,7 @@ bool MlOnnxModel::load(const std::string& path)
     const std::filesystem::path file = UTILSLIB::pathFromUtf8(path);
     std::error_code ec;
     if (!std::filesystem::exists(file, ec)) {
-        UTILSLIB::Log::warning("MlOnnxModel::load – File does not exist: " + path);
+        UTILSLIB::Log::warning("MlOnnxModel::load – File does not exist: {}", path);
         return false;
     }
 
@@ -203,11 +203,11 @@ bool MlOnnxModel::load(const std::string& path)
             m_outputNames.emplace_back(namePtr.get());
         }
 
-        UTILSLIB::Log::debug("MlOnnxModel::load – Session created for " + path + " (" + std::to_string(numInputs) + " inputs, " + std::to_string(numOutputs) + " outputs)");
+        UTILSLIB::Log::debug("MlOnnxModel::load – Session created for {} ({} inputs, {} outputs)", path, numInputs, numOutputs);
         return true;
 
     } catch (const Ort::Exception& e) {
-        UTILSLIB::Log::warning(std::string("MlOnnxModel::load – ORT error: ") + e.what());
+        UTILSLIB::Log::warning("MlOnnxModel::load – ORT error: {}", e.what());
         m_session.reset();
         return false;
     }
