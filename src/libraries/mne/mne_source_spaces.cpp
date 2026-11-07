@@ -164,11 +164,11 @@ MNESourceSpaces MNESourceSpaces::pick_regions(const QList<FsLabel>& p_qListLabel
 
         //get vertices indeces for new selection
         qint32 iSize = 0;
-        for (qint32 i = 0; i < p_qListLabels.size(); ++i) {
-            if (p_qListLabels[i].hemi == h) {
+        for (const auto& label : p_qListLabels) {
+            if (label.hemi == h) {
                 VectorXi currentSelection;
 
-                Linalg::intersect(origSpace.vertno, p_qListLabels[i].vertices, currentSelection);
+                Linalg::intersect(origSpace.vertno, label.vertices, currentSelection);
 
                 selVertices.conservativeResize(iSize + currentSelection.size());
                 selVertices.block(iSize, 0, currentSelection.size(), 1) = currentSelection;

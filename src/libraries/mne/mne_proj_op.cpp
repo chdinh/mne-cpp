@@ -700,16 +700,16 @@ bool MNEProjOp::makeProjection(const QList<QString>& projnames,
 
     std::unique_ptr<MNEProjOp> all;
 
-    for (int k = 0; k < projnames.size(); k++) {
-        std::unique_ptr<MNEProjOp> one(MNEProjOp::read(projnames[k]));
+    for (const auto& projname : projnames) {
+        std::unique_ptr<MNEProjOp> one(MNEProjOp::read(projname));
         if (!one) {
-            qCritical("Failed to read projection from %s.", projnames[k].toUtf8().data());
+            qCritical("Failed to read projection from %s.", projname.toUtf8().data());
             return false;
         }
         if (one->nitems == 0) {
-            qInfo("No linear projection information in %s.", projnames[k].toUtf8().data());
+            qInfo("No linear projection information in %s.", projname.toUtf8().data());
         } else {
-            qInfo("Loaded projection from %s:", projnames[k].toUtf8().data());
+            qInfo("Loaded projection from %s:", projname.toUtf8().data());
             {
                 QTextStream errStream(stderr);
                 one->report(errStream, QStringLiteral("\t"));

@@ -1007,9 +1007,9 @@ MNEForwardSolution MNEForwardSolution::pick_regions(const QList<FsLabel>& p_qLis
     VectorXi selVertices;
 
     qint32 iSize = 0;
-    for (qint32 i = 0; i < p_qListLabels.size(); ++i) {
+    for (const auto& label : p_qListLabels) {
         VectorXi currentSelection;
-        this->src.label_src_vertno_sel(p_qListLabels[i], currentSelection);
+        this->src.label_src_vertno_sel(label, currentSelection);
 
         selVertices.conservativeResize(iSize + currentSelection.size());
         selVertices.block(iSize, 0, currentSelection.size(), 1) = currentSelection;
@@ -1211,18 +1211,18 @@ bool MNEForwardSolution::read(QIODevice& p_IODevice,
     FiffTag::UPtr t_pTag;
     FiffDirNode::SPtr megnode;
     FiffDirNode::SPtr eegnode;
-    for (qint32 k = 0; k < std::ssize(fwds); ++k) {
-        if (!fwds[k]->find_tag(t_pStream, FIFF_MNE_INCLUDED_METHODS, t_pTag)) {
+    for (const auto& fwd : fwds) {
+        if (!fwd->find_tag(t_pStream, FIFF_MNE_INCLUDED_METHODS, t_pTag)) {
             t_pStream.close();
             qWarning("Methods not listed for one of the forward solutions");
             return false;
         }
         if (*t_pTag->toInt() == FIFFV_MNE_MEG) {
             qInfo("MEG solution found");
-            megnode = fwds[k];
+            megnode = fwd;
         } else if (*t_pTag->toInt() == FIFFV_MNE_EEG) {
             qInfo("EEG solution found");
-            eegnode = fwds[k];
+            eegnode = fwd;
         }
     }
 

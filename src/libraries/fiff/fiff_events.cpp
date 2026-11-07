@@ -384,9 +384,9 @@ bool FiffEvents::matchEvent(const AverageCategory& cat,
 
     // Check if any of the category's event codes match
     bool match = false;
-    for (int k = 0; k < cat.events.size(); ++k) {
+    for (const auto event : cat.events) {
         if ((evFrom & ~cat.ignore) == 0 &&
-            (evTo & ~cat.ignore) == cat.events[k]) {
+            (evTo & ~cat.ignore) == event) {
             match = true;
             break;
         }

@@ -248,8 +248,8 @@ int BatchProcessor::run(const ProcessingSettings& settings)
 
             // Activate/deactivate projections
             if (settings.projOn >= 0) {
-                for (int k = 0; k < raw.info.projs.size(); ++k) {
-                    raw.info.projs[k].active = (settings.projOn > 0);
+                for (auto& proj : raw.info.projs) {
+                    proj.active = (settings.projOn > 0);
                 }
                 qInfo() << "Projections turned" << (settings.projOn ? "on." : "off.");
             }
@@ -257,9 +257,9 @@ int BatchProcessor::run(const ProcessingSettings& settings)
             // Report projection status
             if (!raw.info.projs.isEmpty()) {
                 qInfo() << "\n--- Projection status ---";
-                for (int k = 0; k < raw.info.projs.size(); ++k) {
-                    qInfo() << "  " << raw.info.projs[k].desc
-                            << (raw.info.projs[k].active ? "[active]" : "[off]");
+                for (const auto& proj : raw.info.projs) {
+                    qInfo() << "  " << proj.desc
+                            << (proj.active ? "[active]" : "[off]");
                 }
             }
         }

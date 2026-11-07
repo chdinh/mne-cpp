@@ -1592,13 +1592,13 @@ bool FiffStream::read_meas_info(const FiffDirNode::SPtr& p_Node, FiffInfo& info,
     if (!hpi_meas.empty()) {
         std::vector<FiffDirNode::SPtr> hpi_coils = hpi_meas[0]->dir_tree_find(FIFFB_HPI_COIL);
 
-        for (qint32 c = 0; c < std::ssize(hpi_coils); ++c) {
-            for (qint32 e = 0; e < hpi_coils[c]->nent(); ++e) {
-                if (hpi_coils[c]->dir[e].kind != FIFF_HPI_COIL_FREQ) {
+        for (const auto& hpi_coil : hpi_coils) {
+            for (qint32 e = 0; e < hpi_coil->nent(); ++e) {
+                if (hpi_coil->dir[e].kind != FIFF_HPI_COIL_FREQ) {
                     continue;
                 }
 
-                this->read_tag(t_pTag, hpi_coils[c]->dir[e].pos);
+                this->read_tag(t_pTag, hpi_coil->dir[e].pos);
                 info.hpi_coil_freqs.append(*t_pTag->toFloat());
                 break;
             }
@@ -2394,13 +2394,13 @@ std::unique_ptr<FiffStream> FiffStream::start_writing_raw(std::unique_ptr<FiffSt
             blocks.clear();
         }
 
-        for (qint32 k = 0; k < blocks.size(); ++k) {
-            std::vector<FiffDirNode::SPtr> nodes = source.dirtree()->dir_tree_find(blocks[k]);
+        for (const fiff_int_t block : blocks) {
+            std::vector<FiffDirNode::SPtr> nodes = source.dirtree()->dir_tree_find(block);
             FiffDirNode::copy_tree(source, source.dirtree()->id, nodes, *t_pStream);
-            if (blocks[k] == FIFFB_HPI_RESULT && nodes.size() > 0)
+            if (block == FIFFB_HPI_RESULT && nodes.size() > 0)
                 have_hpi_result = true;
 
-            if (blocks[k] == FIFFB_ISOTRAK && nodes.size() > 0)
+            if (block == FIFFB_ISOTRAK && nodes.size() > 0)
                 have_isotrak = true;
         }
     }
@@ -3360,21 +3360,21 @@ fiff_long_t FiffStream::write_proj(const QList<FiffProj>& projs)
 
     this->start_block(FIFFB_PROJ);
 
-    for (qint32 k = 0; k < projs.size(); ++k) {
+    for (auto& proj : projs) {
         this->start_block(FIFFB_PROJ_ITEM);
-        this->write_string(FIFF_NAME, projs[k].desc.toStdString());
-        this->write_int(FIFF_PROJ_ITEM_KIND, &projs[k].kind);
-        if (projs[k].kind == FIFFV_PROJ_ITEM_FIELD) {
+        this->write_string(FIFF_NAME, proj.desc.toStdString());
+        this->write_int(FIFF_PROJ_ITEM_KIND, &proj.kind);
+        if (proj.kind == FIFFV_PROJ_ITEM_FIELD) {
             float fValue = 0.0f;
             this->write_float(FIFF_PROJ_ITEM_TIME, &fValue);
         }
 
-        this->write_int(FIFF_NCHAN, &projs[k].data->ncol);
-        this->write_int(FIFF_PROJ_ITEM_NVEC, &projs[k].data->nrow);
-        qint32 bValue = static_cast<qint32>(projs[k].active);
+        this->write_int(FIFF_NCHAN, &proj.data->ncol);
+        this->write_int(FIFF_PROJ_ITEM_NVEC, &proj.data->nrow);
+        qint32 bValue = static_cast<qint32>(proj.active);
         this->write_int(FIFF_MNE_PROJ_ITEM_ACTIVE, &bValue);
-        this->write_name_list(FIFF_PROJ_ITEM_CH_NAME_LIST, projs[k].data->col_names);
-        this->write_float_matrix(FIFF_PROJ_ITEM_VECTORS, projs[k].data->data.cast<float>()); //rows == length(names)
+        this->write_name_list(FIFF_PROJ_ITEM_CH_NAME_LIST, proj.data->col_names);
+        this->write_float_matrix(FIFF_PROJ_ITEM_VECTORS, proj.data->data.cast<float>()); //rows == length(names)
         this->end_block(FIFFB_PROJ_ITEM);
     }
     this->end_block(FIFFB_PROJ);

@@ -182,8 +182,8 @@ void TestFiffCoverage::testGetEvokedEntriesCount()
     // The sample evoked file should have at least 1 entry
     QVERIFY(comments.size() >= 1);
     // Aspect kinds should be valid (typically FIFFV_ASPECT_AVERAGE=100)
-    for (int i = 0; i < aspect_kinds.size(); i++) {
-        QVERIFY(aspect_kinds[i] >= 0);
+    for (const auto& aspect_kind : aspect_kinds) {
+        QVERIFY(aspect_kind >= 0);
     }
 }
 
