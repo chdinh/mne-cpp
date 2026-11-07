@@ -27,6 +27,7 @@
 #include <fiff/fiff_coord_trans.h>
 #include <fiff/fiff_coord_trans_set.h>
 #include <fiff/fiff_cov.h>
+#include <fiff/fiff_dig_montage.h>
 #include <fiff/fiff_dig_point_set.h>
 #include <fiff/fiff_digitizer_data.h>
 #include <fiff/fiff_dir_node.h>
@@ -60,9 +61,12 @@
 #include <cmath>
 #include <cstdlib>
 #include <filesystem>
+#include <fstream>
 #include <memory>
 #include <print>
+#include <string>
 #include <string_view>
+#include <vector>
 
 //=============================================================================================================
 // USED NAMESPACES
@@ -127,6 +131,15 @@ int main(int argc, char* argv[])
     // mne: 146 points; dig[0] = LPA at (-0.0713766, 0, 5.1e-9)
     ok &= expect(digitizer.size() == 146 && cardinal.size() == 3 && cardinal[0].ident == FIFFV_POINT_LPA && std::fabs(cardinal[0].r[0] + 0.07137661f) < 1e-7f,
                  "FiffDigPointSet/FiffDigPoint: 146 points, LPA at x = -71.38 mm");
+
+    const std::filesystem::path datPath = tmp.filePath("electrodes.dat").toStdString();
+    std::ofstream(datPath) << "Nz 78 0 0.1 0\nLPA 76 -0.08 0 0\nRPA 82 0.08 0 0\nFz 1 0 0.06 0.08\nCz 2 0 0 0.1\n";
+    //! [fiff_dig_montage_usage]
+    const auto montage = FiffDigMontage::read_neuroscan_dat(datPath); // UTILSLIB::Expected, like mne.channels.read_dig_dat
+    //! [fiff_dig_montage_usage]
+    ok &= expect(montage && montage->ch_names == std::vector<std::string>{"Fz", "Cz"} && montage->dig.size() == 5 && montage->dig[0].ident == FIFFV_POINT_LPA &&
+                     montage->dig[4].kind == FIFFV_POINT_EEG,
+                 "FiffDigMontage: the Neuroscan .dat file holds Fz and Cz after LPA, nasion and RPA");
 
     //! [fiff_coord_trans_usage]
     const std::filesystem::path trans = (dir + "/all-trans.fif").toStdU16String();

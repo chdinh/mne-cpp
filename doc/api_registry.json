@@ -5602,6 +5602,31 @@
       "python_url": null
     },
     {
+      "name": "FiffDigMontage",
+      "module": "fiff",
+      "header": "fiff/fiff_dig_montage.h",
+      "origin": "mne-python",
+      "mne_c_tool": null,
+      "mne_python": "mne.channels.DigMontage",
+      "sklearn": null,
+      "test": "test_fiff_dig_point_python",
+      "example": "ex_fiff_api",
+      "example_snippet": [
+        "ex_fiff_api/main.cpp#fiff_dig_montage_usage"
+      ],
+      "example_mode": "run",
+      "required_data": [
+        "mne-cpp-test-data"
+      ],
+      "status": "documented",
+      "skigen_candidate": false,
+      "documented": true,
+      "sidebar_position": 40,
+      "guide": null,
+      "python_equiv": null,
+      "python_url": null
+    },
+    {
       "name": "FiffDigPointSet",
       "module": "fiff",
       "header": "fiff/fiff_dig_point_set.h",
@@ -13480,7 +13505,7 @@
       {
         "python": "mne.channels.read_dig_captrak",
         "status": "implemented",
-        "mne_cpp": "FIFFLIB::FiffDigPointSet::readCaptrak",
+        "mne_cpp": "FIFFLIB::FiffDigMontage::read_captrak",
         "note": "",
         "test": "test_fiff_dig_point_python",
         "equivalence": "equivalent"
@@ -13494,7 +13519,7 @@
       {
         "python": "mne.channels.read_dig_dat",
         "status": "implemented",
-        "mne_cpp": "FIFFLIB::FiffDigPointSet::readNeuroscanDat",
+        "mne_cpp": "FIFFLIB::FiffDigMontage::read_neuroscan_dat",
         "note": "",
         "test": "test_fiff_dig_point_python",
         "equivalence": "equivalent"
@@ -13502,7 +13527,7 @@
       {
         "python": "mne.channels.read_dig_egi",
         "status": "implemented",
-        "mne_cpp": "FIFFLIB::FiffDigPointSet::readEgi",
+        "mne_cpp": "FIFFLIB::FiffDigMontage::read_egi",
         "note": "positions in metres; mne.channels.read_dig_egi keeps the file's centimetres",
         "test": "test_fiff_dig_point_python",
         "equivalence": "equivalent"
@@ -13525,7 +13550,7 @@
       {
         "python": "mne.channels.read_dig_localite",
         "status": "implemented",
-        "mne_cpp": "FIFFLIB::FiffDigPointSet::readLocalite",
+        "mne_cpp": "FIFFLIB::FiffDigMontage::read_localite",
         "note": "",
         "test": "test_fiff_dig_point_python",
         "equivalence": "equivalent"
@@ -13533,7 +13558,7 @@
       {
         "python": "mne.channels.read_dig_polhemus_isotrak",
         "status": "implemented",
-        "mne_cpp": "FIFFLIB::FiffDigPointSet::readPolhemusIsotrak",
+        "mne_cpp": "FIFFLIB::FiffDigMontage::read_polhemus_isotrak",
         "note": "",
         "test": "test_fiff_dig_point_python",
         "equivalence": "equivalent"
@@ -13548,7 +13573,7 @@
       {
         "python": "mne.channels.read_polhemus_fastscan",
         "status": "implemented",
-        "mne_cpp": "FIFFLIB::FiffDigPointSet::readPolhemusFastscan",
+        "mne_cpp": "FIFFLIB::FiffDigMontage::read_polhemus_fastscan",
         "note": "",
         "test": "test_fiff_dig_point_python",
         "equivalence": "equivalent"

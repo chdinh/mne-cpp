@@ -40,6 +40,7 @@
 // INCLUDES
 //=============================================================================================================
 
+#include <fiff/fiff_dig_montage.h>
 #include <fiff/fiff_dig_point_set.h>
 #include <fiff/fiff_dig_point.h>
 #include <fiff/fiff_constants.h>
@@ -51,6 +52,7 @@
 #include <filesystem>
 #include <stdexcept>
 #include <string>
+#include <vector>
 
 //=============================================================================================================
 // QT INCLUDES
@@ -330,9 +332,17 @@ namespace
 {
 
 // Digitizer files in data/: the Polhemus ones are mne-python's own (mne/io/kit/tests/data, BSD-3-Clause).
-QString digFile(const QString& name)
+std::filesystem::path digFile(const QString& name)
 {
-    return QStringLiteral(DIG_DATA_DIR "/") + name;
+    return (QStringLiteral(DIG_DATA_DIR "/") + name).toStdString();
+}
+
+std::vector<std::string> stdNames(const QStringList& names)
+{
+    std::vector<std::string> result;
+    for (const QString& name : names)
+        result.push_back(name.toStdString());
+    return result;
 }
 
 using Point = QList<double>;
@@ -394,9 +404,11 @@ void TestFiffDigPointPython::polhemusIsotrak_matchesPython()
     QFETCH(Point, last);
     QFETCH(Point, sum);
 
-    FiffDigPointSet dig;
-    QVERIFY(FiffDigPointSet::readPolhemusIsotrak(digFile(file), dig, chNames, unit));
-    QCOMPARE(dig.size(), count);
+    const auto montage = FiffDigMontage::read_polhemus_isotrak(digFile(file), stdNames(chNames), unit.toStdString());
+    QVERIFY(montage.has_value());
+    QCOMPARE(montage->ch_names, stdNames(chNames));
+    const FiffDigPointSet& dig = montage->dig;
+    QCOMPARE(dig.size(), std::size_t(count));
     for (int i = 0; i < kindIdents.size() / 2; ++i) {
         QCOMPARE(dig[i].kind, kindIdents[2 * i]);
         QCOMPARE(dig[i].ident, kindIdents[2 * i + 1]);
@@ -408,7 +420,7 @@ void TestFiffDigPointPython::polhemusIsotrak_matchesPython()
             total[c] += dig[i].r[c];
     }
     if (kindIdents.size() / 2 < std::ssize(dig)) // head shape points are numbered 1..n after the cardinals
-        QCOMPARE(dig[dig.size() - 1].ident, dig.size() - 3);
+        QCOMPARE(dig.back().ident, static_cast<int>(dig.size()) - 3);
     compareRows({dig[0].r[0], dig[0].r[1], dig[0].r[2]}, first, "first point");
     const FiffDigPoint& end = dig[dig.size() - 1];
     compareRows({end.r[0], end.r[1], end.r[2]}, last, "last point");
@@ -443,8 +455,9 @@ void TestFiffDigPointPython::polhemusFastscan_matchesPython()
     QFETCH(Point, last);
     QFETCH(Point, sum);
 
-    Eigen::MatrixX3d points;
-    QVERIFY(FiffDigPointSet::readPolhemusFastscan(digFile(file), points));
+    const auto read = FiffDigMontage::read_polhemus_fastscan(digFile(file));
+    QVERIFY(read.has_value());
+    const Eigen::MatrixX3d& points = *read;
     QCOMPARE(points.rows(), count);
     compareRows({points(0, 0), points(0, 1), points(0, 2)}, first, "first point");
     compareRows({points(count - 1, 0), points(count - 1, 1), points(count - 1, 2)}, last, "last point");
@@ -452,9 +465,9 @@ void TestFiffDigPointPython::polhemusFastscan_matchesPython()
     compareRows({total(0), total(1), total(2)}, sum, "sum");
 
     // In metres the same file is a thousand times larger
-    Eigen::MatrixX3d metres;
-    QVERIFY(FiffDigPointSet::readPolhemusFastscan(digFile(file), metres, QStringLiteral("m")));
-    QVERIFY(metres.isApprox(1000.0 * points));
+    const auto metres = FiffDigMontage::read_polhemus_fastscan(digFile(file), "m");
+    QVERIFY(metres.has_value());
+    QVERIFY(metres->isApprox(1000.0 * points));
 }
 
 //=============================================================================================================
@@ -462,25 +475,26 @@ void TestFiffDigPointPython::polhemusFastscan_matchesPython()
 void TestFiffDigPointPython::polhemusReaders_rejectBadInput()
 {
     // Each of these raises in mne-python.
-    FiffDigPointSet dig;
-    QVERIFY(!FiffDigPointSet::readPolhemusIsotrak(digFile("test.elp"), dig, {"Fp1"}));
-    QVERIFY(!FiffDigPointSet::readPolhemusIsotrak(digFile("test.elp"), dig, {}, "inch"));
-    QVERIFY(!FiffDigPointSet::readPolhemusIsotrak(digFile("test_elp.txt"), dig));
-    QVERIFY(!FiffDigPointSet::readPolhemusIsotrak(digFile("missing.hsp"), dig));
+    const std::vector<std::string> oneName{"Fp1"};
+    QCOMPARE(FiffDigMontage::read_polhemus_isotrak(digFile("test.elp"), oneName).error().code, UTILSLIB::ErrorCode::Format);
+    QCOMPARE(FiffDigMontage::read_polhemus_isotrak(digFile("test.elp"), {}, "inch").error().code, UTILSLIB::ErrorCode::Format);
+    QCOMPARE(FiffDigMontage::read_polhemus_isotrak(digFile("test_elp.txt")).error().code, UTILSLIB::ErrorCode::Format);
+    QCOMPARE(FiffDigMontage::read_polhemus_isotrak(digFile("missing.hsp")).error().code, UTILSLIB::ErrorCode::Io);
 
     // A FastSCAN file whose header does not name FastSCAN is rejected unless asked not to
     QTemporaryDir dir;
-    QFile in(digFile("test_elp.txt"));
+    QFile in(QString::fromStdString(digFile("test_elp.txt").string()));
     QVERIFY(in.open(QIODevice::ReadOnly));
     QFile out(dir.filePath("other.txt"));
     QVERIFY(out.open(QIODevice::WriteOnly));
     out.write(in.readAll().replace("FastSCAN", "XxxxXXXX"));
     out.close();
-    Eigen::MatrixX3d points;
-    QVERIFY(!FiffDigPointSet::readPolhemusFastscan(out.fileName(), points));
-    QVERIFY(FiffDigPointSet::readPolhemusFastscan(out.fileName(), points, QStringLiteral("mm"), false));
-    QCOMPARE(points.rows(), 8);
-    QVERIFY(!FiffDigPointSet::readPolhemusFastscan(digFile("test.elp"), points));
+    const std::filesystem::path other = out.fileName().toStdString();
+    QVERIFY(!FiffDigMontage::read_polhemus_fastscan(other).has_value());
+    const auto points = FiffDigMontage::read_polhemus_fastscan(other, "mm", false);
+    QVERIFY(points.has_value());
+    QCOMPARE(points->rows(), 8);
+    QVERIFY(!FiffDigMontage::read_polhemus_fastscan(digFile("test.elp")).has_value());
 }
 
 //=============================================================================================================
@@ -529,24 +543,19 @@ void TestFiffDigPointPython::montageReaders_matchPython()
     QFETCH(Point, last);
     QFETCH(Point, sum);
 
-    FiffDigPointSet dig;
-    QStringList names;
-    const QString path = digFile(file);
-    bool ok = false;
-    if (file.endsWith(".bvct"))
-        ok = FiffDigPointSet::readCaptrak(path, dig, &names);
-    else if (file.endsWith(".xml"))
-        ok = FiffDigPointSet::readEgi(path, dig, &names);
-    else if (file.endsWith(".csv"))
-        ok = FiffDigPointSet::readLocalite(path, dig, &names, "Nasion", "LPA", "RPA");
-    else
-        ok = FiffDigPointSet::readNeuroscanDat(path, dig, &names);
-    QVERIFY(ok);
+    const std::filesystem::path path = digFile(file);
+    const auto montage = file.endsWith(".bvct") ? FiffDigMontage::read_captrak(path)
+        : file.endsWith(".xml")                 ? FiffDigMontage::read_egi(path)
+        : file.endsWith(".csv")                 ? FiffDigMontage::read_localite(path, "Nasion", "LPA", "RPA")
+                                                : FiffDigMontage::read_neuroscan_dat(path);
+    QVERIFY(montage.has_value());
+    const std::vector<std::string>& names = montage->ch_names;
+    const FiffDigPointSet& dig = montage->dig;
 
-    QCOMPARE(names.size(), count);
-    QCOMPARE(names.first(), firstLastNames.first());
-    QCOMPARE(names.last(), firstLastNames.last());
-    QCOMPARE(dig.size(), count + 3);
+    QCOMPARE(names.size(), std::size_t(count));
+    QCOMPARE(names.front(), firstLastNames.first().toStdString());
+    QCOMPARE(names.back(), firstLastNames.last().toStdString());
+    QCOMPARE(dig.size(), std::size_t(count) + 3);
     const QList<int> cardinals{FIFFV_POINT_LPA, FIFFV_POINT_NASION, FIFFV_POINT_RPA};
     Point total{0.0, 0.0, 0.0};
     for (int i = 0; i < std::ssize(dig); ++i) {
@@ -574,30 +583,32 @@ void TestFiffDigPointPython::montageReaders_rejectBadInput()
         QFile out(dir.filePath(name));
         if (out.open(QIODevice::WriteOnly))
             out.write(content);
-        return out.fileName();
+        return std::filesystem::path(out.fileName().toStdString());
     };
-    FiffDigPointSet dig;
-    QStringList names;
-    Eigen::MatrixX3d points;
+    const auto missing = [&dir](const QString& name) {
+        return std::filesystem::path(dir.filePath(name).toStdString());
+    };
 
     // Isotrak .hsp: the three fiducials, then "<count> 3" and the points (in cm here)
     const QByteArray fiducials = "% position of fiducials\n%F 1 0 0\n%F 0 1 0\n%F 0 -1 0\n% points\n";
-    QVERIFY(FiffDigPointSet::readPolhemusIsotrak(file("a.hsp", fiducials + "2 3\n1 2 3\n4 5 6\n"), dig, {}, "cm"));
-    QCOMPARE(dig.size(), 5);
-    QCOMPARE(dig[4].r[2], 0.06f);
-    QVERIFY(FiffDigPointSet::readPolhemusIsotrak(file("b.hsp", fiducials.left(fiducials.size() - 9)), dig));
-    QCOMPARE(dig.size(), 3);
-    QVERIFY(!FiffDigPointSet::readPolhemusIsotrak(file("c.hsp", fiducials + "2 4\n1 2 3 4\n"), dig));
-    QVERIFY(!FiffDigPointSet::readPolhemusIsotrak(file("d.hsp", fiducials + "2 3\n1 2 3\n"), dig));
-    QVERIFY(!FiffDigPointSet::readPolhemusIsotrak(file("e.hsp", fiducials + "x 3\n"), dig));
-    QVERIFY(!FiffDigPointSet::readPolhemusIsotrak(file("f.hsp", "% position of fiducials\n%F 1 0\n"), dig));
-    QVERIFY(!FiffDigPointSet::readPolhemusIsotrak(file("g.hsp", "no fiducials\n"), dig));
+    const auto hsp = FiffDigMontage::read_polhemus_isotrak(file("a.hsp", fiducials + "2 3\n1 2 3\n4 5 6\n"), {}, "cm");
+    QVERIFY(hsp.has_value());
+    QCOMPARE(hsp->dig.size(), std::size_t{5});
+    QCOMPARE(hsp->dig[4].r[2], 0.06f);
+    const auto fiducialsOnly = FiffDigMontage::read_polhemus_isotrak(file("b.hsp", fiducials.left(fiducials.size() - 9)));
+    QVERIFY(fiducialsOnly.has_value());
+    QCOMPARE(fiducialsOnly->dig.size(), std::size_t{3});
+    QVERIFY(!FiffDigMontage::read_polhemus_isotrak(file("c.hsp", fiducials + "2 4\n1 2 3 4\n")).has_value());
+    QVERIFY(!FiffDigMontage::read_polhemus_isotrak(file("d.hsp", fiducials + "2 3\n1 2 3\n")).has_value());
+    QVERIFY(!FiffDigMontage::read_polhemus_isotrak(file("e.hsp", fiducials + "x 3\n")).has_value());
+    QVERIFY(!FiffDigMontage::read_polhemus_isotrak(file("f.hsp", "% position of fiducials\n%F 1 0\n")).has_value());
+    QVERIFY(!FiffDigMontage::read_polhemus_isotrak(file("g.hsp", "no fiducials\n")).has_value());
 
     // FastSCAN: a known unit, a .txt that exists, three numbers per row
-    QVERIFY(!FiffDigPointSet::readPolhemusFastscan(file("a.txt", "% FastSCAN\n1 2 3\n"), points, "inch"));
-    QVERIFY(!FiffDigPointSet::readPolhemusFastscan(dir.filePath("missing.txt"), points));
-    QVERIFY(!FiffDigPointSet::readPolhemusFastscan(file("b.txt", "% FastSCAN\n1 2\n"), points));
-    QVERIFY(!FiffDigPointSet::readPolhemusFastscan(file("c.txt", "% FastSCAN\n1 2 x\n"), points));
+    QVERIFY(!FiffDigMontage::read_polhemus_fastscan(file("a.txt", "% FastSCAN\n1 2 3\n"), "inch").has_value());
+    QCOMPARE(FiffDigMontage::read_polhemus_fastscan(missing("missing.txt")).error().code, UTILSLIB::ErrorCode::Io);
+    QVERIFY(!FiffDigMontage::read_polhemus_fastscan(file("b.txt", "% FastSCAN\n1 2\n")).has_value());
+    QVERIFY(!FiffDigMontage::read_polhemus_fastscan(file("c.txt", "% FastSCAN\n1 2 x\n")).has_value());
 
     // CapTrak: every electrode has a position, and the three fiducials are there
     const auto captrak = [](const QByteArray& electrodes) {
@@ -605,10 +616,10 @@ void TestFiffDigPointPython::montageReaders_rejectBadInput()
     };
     const QByteArray nasion = "<CapTrakElectrode><Name>Nasion</Name><X>0</X><Y>90</Y><Z>0</Z></CapTrakElectrode>"
                               "<CapTrakElectrode><Name>LPA</Name><X>-80</X><Y>0</Y><Z>0</Z></CapTrakElectrode>";
-    QVERIFY(!FiffDigPointSet::readCaptrak(file("a.bvct", captrak(nasion)), dig, &names));
-    QVERIFY(!FiffDigPointSet::readCaptrak(file("b.bvct", captrak(nasion + "<CapTrakElectrode><Name>RPA</Name><X>80</X></CapTrakElectrode>")), dig, &names));
-    QVERIFY(!FiffDigPointSet::readCaptrak(file("c.bvct", captrak(nasion).chopped(4)), dig, &names));
-    QVERIFY(!FiffDigPointSet::readCaptrak(dir.filePath("missing.bvct"), dig, &names));
+    QVERIFY(!FiffDigMontage::read_captrak(file("a.bvct", captrak(nasion))).has_value());
+    QVERIFY(!FiffDigMontage::read_captrak(file("b.bvct", captrak(nasion + "<CapTrakElectrode><Name>RPA</Name><X>80</X></CapTrakElectrode>"))).has_value());
+    QVERIFY(!FiffDigMontage::read_captrak(file("c.bvct", captrak(nasion).chopped(4))).has_value());
+    QVERIFY(!FiffDigMontage::read_captrak(missing("missing.bvct")).has_value());
 
     // EGI: sensors of an unknown type are skipped, a sensor needs a number, all fiducials must be present
     const auto egi = [](const QByteArray& sensors) {
@@ -618,27 +629,31 @@ void TestFiffDigPointPython::montageReaders_rejectBadInput()
         return "<sensor><name>" + name + "</name><number>" + number + "</number><type>" + QByteArray::number(type) + "</type><x>1</x><y>2</y><z>3</z></sensor>";
     };
     const QByteArray egiFiducials = sensor("Nasion", "1", 2) + sensor("Left periauricular point", "2", 2) + sensor("Right periauricular point", "3", 2);
-    QVERIFY(FiffDigPointSet::readEgi(file("a.xml", egi(egiFiducials + sensor("", "4", 0) + sensor("", "5", 7) + sensor("", "6", 1))), dig, &names));
-    QCOMPARE(names, QStringList({"EEG 004", "EEG 002"}));
-    QVERIFY(!FiffDigPointSet::readEgi(file("b.xml", egi(egiFiducials + sensor("", "x", 0))), dig, &names));
-    QVERIFY(!FiffDigPointSet::readEgi(file("c.xml", egi(sensor("Nasion", "1", 2) + sensor("", "4", 0))), dig, &names));
+    const auto egiMontage = FiffDigMontage::read_egi(file("a.xml", egi(egiFiducials + sensor("", "4", 0) + sensor("", "5", 7) + sensor("", "6", 1))));
+    QVERIFY(egiMontage.has_value());
+    QCOMPARE(egiMontage->ch_names, std::vector<std::string>({"EEG 004", "EEG 002"}));
+    QVERIFY(!FiffDigMontage::read_egi(file("b.xml", egi(egiFiducials + sensor("", "x", 0)))).has_value());
+    QVERIFY(!FiffDigMontage::read_egi(file("c.xml", egi(sensor("Nasion", "1", 2) + sensor("", "4", 0)))).has_value());
 
     // Localite: five comma-separated fields per row, fiducials that exist (or none asked for)
     const QByteArray localite = "#,name,x,y,z\n0,Nasion,0,90,0\n1,ch01,10,20,30\n\n";
-    QVERIFY(FiffDigPointSet::readLocalite(file("a.csv", localite), dig, &names, "Nasion", QString(), QString()));
-    QCOMPARE(dig.size(), 2);
-    QCOMPARE(dig[0].ident, FIFFV_POINT_NASION);
-    QVERIFY(!FiffDigPointSet::readLocalite(file("b.csv", localite), dig, &names, "Nasion", "LPA", "RPA"));
-    QVERIFY(!FiffDigPointSet::readLocalite(file("c.csv", localite + "2,ch02,1,2\n"), dig, &names, "Nasion", QString(), QString()));
-    QVERIFY(!FiffDigPointSet::readLocalite(dir.filePath("missing.csv"), dig, &names, "Nasion", "LPA", "RPA"));
+    const auto csv = FiffDigMontage::read_localite(file("a.csv", localite), "Nasion");
+    QVERIFY(csv.has_value());
+    QCOMPARE(csv->dig.size(), std::size_t{2});
+    QCOMPARE(csv->dig[0].ident, FIFFV_POINT_NASION);
+    QCOMPARE(FiffDigMontage::read_localite(file("b.csv", localite), "Nasion", "LPA", "RPA").error().code, UTILSLIB::ErrorCode::NotFound);
+    QCOMPARE(FiffDigMontage::read_localite(file("c.csv", localite + "2,ch02,1,2\n"), "Nasion").error().code, UTILSLIB::ErrorCode::Format);
+    QCOMPARE(FiffDigMontage::read_localite(missing("missing.csv"), "Nasion", "LPA", "RPA").error().code, UTILSLIB::ErrorCode::Io);
 
     // Neuroscan .dat: "name number x y z" rows; without fiducials only the electrodes remain
-    QVERIFY(FiffDigPointSet::readNeuroscanDat(file("a.dat", "Fz 1 0 1 2\n"), dig, &names));
-    QCOMPARE(dig.size(), 1);
-    QCOMPARE(dig[0].kind, FIFFV_POINT_EEG);
-    QVERIFY(!FiffDigPointSet::readNeuroscanDat(file("b.dat", "Fz 1 0 1\n"), dig, &names));
-    QVERIFY(!FiffDigPointSet::readNeuroscanDat(file("c.dat", "Fz 1 0 x 2\n"), dig, &names));
-    QVERIFY(!FiffDigPointSet::readNeuroscanDat(dir.filePath("missing.dat"), dig, &names));
+    const auto dat = FiffDigMontage::read_neuroscan_dat(file("a.dat", "Fz 1 0 1 2\n"));
+    QVERIFY(dat.has_value());
+    QCOMPARE(dat->dig.size(), std::size_t{1});
+    QCOMPARE(dat->dig[0].kind, FIFFV_POINT_EEG);
+    QCOMPARE(dat->ch_names, std::vector<std::string>{"Fz"});
+    QVERIFY(!FiffDigMontage::read_neuroscan_dat(file("b.dat", "Fz 1 0 1\n")).has_value());
+    QVERIFY(!FiffDigMontage::read_neuroscan_dat(file("c.dat", "Fz 1 0 x 2\n")).has_value());
+    QCOMPARE(FiffDigMontage::read_neuroscan_dat(missing("missing.dat")).error().code, UTILSLIB::ErrorCode::Io);
 }
 
 //=============================================================================================================

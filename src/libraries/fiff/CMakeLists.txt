@@ -39,6 +39,7 @@ set(SOURCES
     fiff_evoked_set.cpp
     fiff_events.cpp
     fiff_io.cpp
+    fiff_dig_montage.cpp
     fiff_dig_point_set.cpp
     fiff_dir_node.cpp
     fiff_explain.cpp
@@ -80,6 +81,7 @@ set(HEADERS
     fiff_evoked_set.h
     fiff_events.h
     fiff_io.h
+    fiff_dig_montage.h
     fiff_dig_point_set.h
     fiff_dir_node.h
     fiff_sparse_matrix.h
