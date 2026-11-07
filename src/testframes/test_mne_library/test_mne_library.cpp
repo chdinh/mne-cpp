@@ -552,7 +552,7 @@ void TestMneLibrary::writersRefuseUnwritablePath()
     const QString path = dir.filePath(QStringLiteral("no/such/dir/out.fif"));
     QFile bem(path);
     QVERIFY(!MNEBem().write(bem));
-    QFile inv(path);
+    const std::filesystem::path inv = path.toStdU16String();
     QVERIFY(!MNEInverseOperator().write(inv));
     QFile fwd(path);
     QVERIFY(!MNEForwardSolution().write(fwd));
@@ -728,10 +728,9 @@ void TestMneLibrary::inverseOp_readFromFile()
     MNEInverseOperator invOp;
     QVERIFY(!invOp.isFixedOrient());
 
-    QFile fwdFile2(fwdPath());
-    MNEInverseOperator invOp2;
-    bool readRes = MNEInverseOperator::read_inverse_operator(fwdFile2, invOp2);
-    Q_UNUSED(readRes);
+    // A forward solution holds no inverse solution
+    QCOMPARE(MNEInverseOperator::read(fwdPath().toStdU16String()).error().code, UTILSLIB::ErrorCode::NotFound);
+    QCOMPARE(MNEInverseOperator::read("no-such-inv.fif").error().code, UTILSLIB::ErrorCode::Io);
 }
 
 void TestMneLibrary::inverseOp_basicGetters()
@@ -767,10 +766,7 @@ void TestMneLibrary::inverseOp_readFullFile()
             QSKIP("Inverse operator file not found");
     }
 
-    QFile invFile(invPath);
-    MNEInverseOperator inv;
-    if (!MNEInverseOperator::read_inverse_operator(invFile, inv))
-        QSKIP("Could not read inverse operator");
+    const MNEInverseOperator inv(invPath.toStdU16String());
 
     QVERIFY(inv.eigen_fields->data.rows() > 0);
     QVERIFY(inv.source_cov->data.rows() > 0);
@@ -1870,24 +1866,15 @@ void TestMneLibrary::inverseOp_writeReadRoundTrip()
     if (!QFile::exists(invPath))
         QSKIP("Inverse operator file not found");
 
-    QFile invFile(invPath);
-    MNEInverseOperator inv;
-    QVERIFY(MNEInverseOperator::read_inverse_operator(invFile, inv));
+    const MNEInverseOperator inv(invPath.toStdU16String());
     QVERIFY(inv.eigen_fields->data.rows() > 0);
 
-    // Write to temp file
-    QString tmpPath = QDir::tempPath() + "/test_inv_round_trip.fif";
-    QFile outFile(tmpPath);
-    inv.write(outFile);
-
-    // Read back
-    QFile inFile(tmpPath);
-    MNEInverseOperator inv2;
-    QVERIFY(MNEInverseOperator::read_inverse_operator(inFile, inv2));
+    QTemporaryDir dir;
+    const std::filesystem::path path = dir.filePath("round-trip-inv.fif").toStdU16String();
+    QVERIFY(inv.write(path));
+    const MNEInverseOperator inv2(path);
     QCOMPARE(inv2.eigen_fields->data.rows(), inv.eigen_fields->data.rows());
     QCOMPARE(inv2.source_cov->data.rows(), inv.source_cov->data.rows());
-
-    QFile::remove(tmpPath);
 }
 
 void TestMneLibrary::inverseOp_checkChNames()
@@ -1896,9 +1883,7 @@ void TestMneLibrary::inverseOp_checkChNames()
     if (!QFile::exists(invPath))
         QSKIP("Inverse operator file not found");
 
-    QFile invFile(invPath);
-    MNEInverseOperator inv;
-    QVERIFY(MNEInverseOperator::read_inverse_operator(invFile, inv));
+    const MNEInverseOperator inv(invPath.toStdU16String());
 
     // Inverse operator should have channel names
     QVERIFY(inv.eigen_fields->data.rows() > 0);

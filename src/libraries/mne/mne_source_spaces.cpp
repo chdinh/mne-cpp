@@ -523,12 +523,12 @@ bool MNESourceSpaces::complete_source_space_info(MNEHemisphere& p_Hemisphere)
 
 //=============================================================================================================
 
-void MNESourceSpaces::writeToStream(FiffStream& stream)
+void MNESourceSpaces::writeToStream(FiffStream& stream) const
 {
     for (size_t h = 0; h < m_sourceSpaces.size(); ++h) {
         qInfo("\tWrite a source space... ");
         stream.start_block(FIFFB_MNE_SOURCE_SPACE);
-        auto* hemi = dynamic_cast<MNEHemisphere*>(m_sourceSpaces[h].get());
+        const auto* hemi = dynamic_cast<const MNEHemisphere*>(m_sourceSpaces[h].get());
         if (hemi)
             hemi->writeToStream(stream);
         stream.end_block(FIFFB_MNE_SOURCE_SPACE);

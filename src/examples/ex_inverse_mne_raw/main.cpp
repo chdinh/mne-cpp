@@ -468,8 +468,9 @@ int main(int argc, char* argv[])
     // save inverse operator
     //
     if (!t_sFileNameInv.isEmpty()) {
-        QFile t_fileInverse(t_sFileNameInv);
-        inverse_operator.write(t_fileInverse);
+        if (auto written = inverse_operator.write(t_sFileNameInv.toStdU16String()); !written) {
+            qWarning() << written.error().what();
+        }
     }
 
     //

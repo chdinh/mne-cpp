@@ -197,17 +197,16 @@ QJsonObject SourceEstimationSkill::executeSkill(const WorkflowNode& nodeState)
     }
 
     // ── Load inverse operator ─────────────────────────────────────────────────
-    QFile invFile(invPath);
-    MNEInverseOperator invOp;
-    if (!MNEInverseOperator::read_inverse_operator(invFile, invOp)) {
+    auto invOp = MNEInverseOperator::read(invPath.toStdU16String());
+    if (!invOp) {
         return QJsonObject{
             {"status", "error"},
-            {"message", QString("Source estimation node `%1`: failed to read inverse operator from `%2`.").arg(nodeState.uid, invPath)}};
+            {"message", QString("Source estimation node `%1`: %2").arg(nodeState.uid, QString::fromStdString(invOp.error().what()))}};
     }
 
     // ── Prepare the inverse operator ──────────────────────────────────────────
     const qint32 nave = 1;
-    const MNEInverseOperator prepInv = invOp.prepare_inverse_operator(nave, lambda2, isDSPM, isSLORETA);
+    const MNEInverseOperator prepInv = invOp->prepare_inverse_operator(nave, lambda2, isDSPM, isSLORETA);
     InvMinimumNorm mnNorm(prepInv, lambda2, method);
     // The MatrixXd overload of calculateInverse() requires the inverse operator
     // to be fully set up first; the FiffEvoked overload does this internally.
@@ -215,9 +214,9 @@ QJsonObject SourceEstimationSkill::executeSkill(const WorkflowNode& nodeState)
 
     // ── Pick raw channels that match the inverse operator ────────────────────
     StringList invChNames;
-    invChNames.reserve(invOp.noise_cov->names.size());
-    for (int i = 0; i < static_cast<int>(invOp.noise_cov->names.size()); ++i) {
-        invChNames.push_back(invOp.noise_cov->names[i]);
+    invChNames.reserve(invOp->noise_cov->names.size());
+    for (int i = 0; i < static_cast<int>(invOp->noise_cov->names.size()); ++i) {
+        invChNames.push_back(invOp->noise_cov->names[i]);
     }
     const RowVectorXi picks = raw.info.pick_channels(invChNames);
     if (picks.size() == 0) {

@@ -574,8 +574,7 @@ void TestMneBrowseApp::exportsSourceEstimatesLikePython()
         QVERIFY(MNELIB::MNEForwardSolution::read(fwdFile, fwd));
         MNELIB::MNEInverseOperator inv = MNELIB::MNEInverseOperator::make_inverse_operator(
             FIFFLIB::FiffRawData(rawPath.toStdString()).info, fwd, FIFFLIB::FiffCov(covPath.toStdString()), 0.2f, 0.8f);
-        QFile invFile(invPath);
-        QVERIFY(inv.write(invFile));
+        QVERIFY(inv.write(invPath.toStdU16String()));
     }
 
     QSettings settings;

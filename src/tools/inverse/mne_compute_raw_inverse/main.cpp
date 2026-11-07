@@ -543,7 +543,7 @@ int main(int argc, char* argv[])
     //=========================================================================================================
 
     qInfo("\nReading the inverse operator...");
-    QFile invFile(invName);
+    const std::filesystem::path invFile = invName.toStdU16String();
     MNEInverseOperator inverseOperator(invFile);
 
     if (inverseOperator.eigen_leads->data.size() == 0) {

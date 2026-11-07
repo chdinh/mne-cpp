@@ -75,6 +75,10 @@ RtInvOp::RtInvOp(FiffInfo::SPtr& p_pFiffInfo,
 , m_pFiffInfo(p_pFiffInfo)
 , m_pFwd(p_pFwd)
 {
+    // The operator crosses from the worker thread to this one in a queued connection
+    qRegisterMetaType<MNELIB::MNEInverseOperator>();
+    qRegisterMetaType<RtInvOpInput>("RtInvOpInput");
+
     RtInvOpWorker* worker = new RtInvOpWorker;
     worker->moveToThread(&m_workerThread);
 
@@ -88,8 +92,6 @@ RtInvOp::RtInvOp(FiffInfo::SPtr& p_pFiffInfo,
             this, &RtInvOp::handleResults);
 
     m_workerThread.start();
-
-    qRegisterMetaType<RtInvOpInput>("RtInvOpInput");
 }
 
 //=============================================================================================================

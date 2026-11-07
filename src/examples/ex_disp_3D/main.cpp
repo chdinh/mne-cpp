@@ -200,8 +200,9 @@ int main(int argc, char* argv[])
         MNEInverseOperator inverse_operator(info, t_clusteredFwd, noise_cov, 0.2f, 0.8f);
 
         if (!t_sFileClusteredInverse.isEmpty()) {
-            QFile t_fileClusteredInverse(t_sFileClusteredInverse);
-            inverse_operator.write(t_fileClusteredInverse);
+            if (auto written = inverse_operator.write(t_sFileClusteredInverse.toStdU16String()); !written) {
+                qWarning() << written.error().what();
+            }
         }
 
         //

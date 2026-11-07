@@ -547,8 +547,10 @@ int main(int argc, char* argv[])
 
     qInfo("\nWriting inverse operator to %s...", invName.toUtf8().constData());
 
-    QFile invFile(invName);
-    invOp.write(invFile);
+    if (auto written = invOp.write(invName.toStdU16String()); !written) {
+        qCritical() << written.error().what();
+        return 1;
+    }
 
     qInfo("Done.\n");
     qInfo("The inverse operator is ready.");

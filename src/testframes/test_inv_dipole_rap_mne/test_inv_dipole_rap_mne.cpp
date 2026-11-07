@@ -187,7 +187,7 @@ void TestInvDipoleRapMne::initTestCase()
     QString invPath = m_sMneSamplePath + "/MEG/sample/sample_audvis-meg-oct-6-meg-inv.fif";
     if (QFile::exists(invPath)) {
         m_bMneSampleAvailable = true;
-        QFile invFile(invPath);
+        const std::filesystem::path invFile = invPath.toStdU16String();
         m_invOp = MNEInverseOperator(invFile);
         QVERIFY2(m_invOp.nsource > 0, "Failed to load inverse operator");
     } else {

@@ -805,7 +805,7 @@ int main(int argc, char* argv[])
     qInfo("========================================");
     qInfo("Reading inverse operator from %s...", invName.toUtf8().constData());
 
-    QFile invFile(invName);
+    const std::filesystem::path invFile = invName.toStdU16String();
     MNEInverseOperator invOp(invFile);
 
     if (invOp.nsource <= 0) {

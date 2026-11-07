@@ -168,7 +168,7 @@ public:
      *
      * @param[in] stream  The stream to write to.
      */
-    void writeToStream(FIFFLIB::FiffStream& stream);
+    void writeToStream(FIFFLIB::FiffStream& stream) const;
 
     //=========================================================================================================
     /**

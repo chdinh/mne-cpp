@@ -309,10 +309,7 @@ private slots:
         QString invPath = tmpDir.path() + "/test_inv-inv.fif";
 
         // Write the inverse operator to a temporary file
-        {
-            QFile outFile(invPath);
-            smallInv.write(outFile);
-        }
+        QVERIFY(smallInv.write(invPath.toStdU16String()));
 
         // Verify the file was created and has content
         QFileInfo fi(invPath);
@@ -322,12 +319,7 @@ private slots:
                  << "(" << (fi.size() / 1024.0 / 1024.0) << "MB)";
 
         // Read it back
-        MNEInverseOperator invRead;
-        {
-            QFile inFile(invPath);
-            bool ok = MNEInverseOperator::read_inverse_operator(inFile, invRead);
-            QVERIFY2(ok, "Failed to read inverse operator back");
-        }
+        const MNEInverseOperator invRead(invPath.toStdU16String());
 
         // Compare key fields
         QCOMPARE(invRead.nchan, smallInv.nchan);

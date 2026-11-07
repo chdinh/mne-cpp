@@ -404,14 +404,10 @@ private slots:
 
         // Write
         QString tmpFile = QDir::tempPath() + "/test_inv_op_roundtrip.fif";
-        QFile outFile(tmpFile);
-        invOp.write(outFile);
+        QVERIFY(invOp.write(tmpFile.toStdU16String()));
 
         // Read back
-        QFile inFile(tmpFile);
-        MNEInverseOperator invOp2;
-        bool ok = MNEInverseOperator::read_inverse_operator(inFile, invOp2);
-        QVERIFY(ok);
+        const MNEInverseOperator invOp2(tmpFile.toStdU16String());
         QVERIFY(invOp2.source_nn.rows() > 0);
 
         QFile::remove(tmpFile);

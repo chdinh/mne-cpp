@@ -575,11 +575,9 @@ void TestInvEloretaPython::writtenOperator_readsBack()
     const MNEInverseOperator& inv = fixed ? m_fixed : m_loose;
 
     QTemporaryDir dir;
-    QFile file(dir.filePath("label-inv.fif"));
-    QVERIFY(MNEInverseOperator(inv).write(file));
-    file.close();
-    MNEInverseOperator read;
-    QVERIFY(MNEInverseOperator::read_inverse_operator(file, read));
+    const std::filesystem::path path = dir.filePath("label-inv.fif").toStdU16String();
+    QVERIFY(inv.write(path));
+    const MNEInverseOperator read(path);
 
     QCOMPARE(read.isFixedOrient(), fixed);
     QCOMPARE(read.nsource, inv.nsource);

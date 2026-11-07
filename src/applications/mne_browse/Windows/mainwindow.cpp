@@ -3469,15 +3469,14 @@ bool MainWindow::loadVirtualChannelsFile(const QString& filename, bool showWindo
 
 bool MainWindow::loadInverseOperatorFile(const QString& filename)
 {
-    QFile inverseOperatorFile(filename);
-    MNELIB::MNEInverseOperator inverseOperator;
-
-    if (!MNELIB::MNEInverseOperator::read_inverse_operator(inverseOperatorFile, inverseOperator) || inverseOperator.nsource <= 0 || inverseOperator.src.isEmpty()) {
+    auto read = MNELIB::MNEInverseOperator::read(filename.toStdU16String());
+    if (!read || read->nsource <= 0 || read->src.isEmpty()) {
         QMessageBox::warning(this,
                              QStringLiteral("Load Inverse Operator"),
-                             QStringLiteral("Could not load an inverse operator from %1.").arg(filename));
+                             read ? QStringLiteral("%1 holds no source space.").arg(filename) : QString::fromStdString(read.error().what()));
         return false;
     }
+    MNELIB::MNEInverseOperator& inverseOperator = *read;
 
     if (m_qInverseOperatorFile.isOpen()) {
         m_qInverseOperatorFile.close();

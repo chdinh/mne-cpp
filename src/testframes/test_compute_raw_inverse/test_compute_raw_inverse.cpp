@@ -180,7 +180,7 @@ void TestComputeRawInverse::initTestCase()
     printf("  Inverse:   %s\n", m_sInvFile.toUtf8().constData());
 
     // Read the inverse operator once for reuse
-    QFile invFile(m_sInvFile);
+    const std::filesystem::path invFile = m_sInvFile.toStdU16String();
     m_invOp = MNEInverseOperator(invFile);
     QVERIFY2(m_invOp.eigen_leads->data.size() > 0, "Failed to read inverse operator");
     printf("  Inverse operator: %d channels, %d sources\n", m_invOp.nchan, m_invOp.nsource);

@@ -531,8 +531,7 @@ private slots:
         }
         if (!QFile::exists(invPath))
             QSKIP("Inverse operator file not found");
-        QFile file(invPath);
-        MNEInverseOperator inv(file);
+        MNEInverseOperator inv(invPath.toStdU16String());
 
         // Verify construction loaded data
         QVERIFY(inv.noise_cov->data.rows() > 0);
@@ -915,8 +914,7 @@ private slots:
         if (!QFile::exists(invPath))
             QSKIP("Inverse operator file not found");
 
-        QFile file(invPath);
-        MNEInverseOperator invOp(file);
+        MNEInverseOperator invOp(invPath.toStdU16String());
         QVERIFY(invOp.noise_cov->data.rows() > 0);
 
         // Prepare inverse operator
@@ -937,20 +935,12 @@ private slots:
         if (!QFile::exists(invPath))
             QSKIP("Inverse operator file not found");
 
-        QFile file(invPath);
-        MNEInverseOperator invOp(file);
+        const MNEInverseOperator invOp(invPath.toStdU16String());
 
-        // Write to buffer
-        QBuffer buf;
-        buf.open(QIODevice::ReadWrite);
-        invOp.write(buf);
-        QVERIFY(buf.size() > 0);
-
-        // Read back
-        buf.seek(0);
-        MNEInverseOperator invRead;
-        bool ok = MNEInverseOperator::read_inverse_operator(buf, invRead);
-        QVERIFY(ok);
+        QTemporaryDir dir;
+        const std::filesystem::path path = dir.filePath("round-trip-inv.fif").toStdU16String();
+        QVERIFY(invOp.write(path));
+        const MNEInverseOperator invRead(path);
 
         // Comparing only nsource would pass even if every other field were
         // lost. The unit in particular used to be dropped, because the writer

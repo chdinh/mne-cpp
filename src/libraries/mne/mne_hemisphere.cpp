@@ -436,7 +436,7 @@ bool MNEHemisphere::transform_hemisphere_to(fiff_int_t dest, const FiffCoordTran
 
 //=============================================================================================================
 //ToDo
-void MNEHemisphere::writeToStream(FiffStream& stream)
+void MNEHemisphere::writeToStream(FiffStream& stream) const
 {
     if (this->type == 1 || this->type == 2)
         stream.write_int(FIFF_MNE_SOURCE_SPACE_TYPE, &this->type);

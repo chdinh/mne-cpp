@@ -593,12 +593,10 @@ private slots:
         QVERIFY(tmpDir.isValid());
         QString tmpPath = tmpDir.path() + "/test-inv.fif";
 
-        QFile outFile(tmpPath);
-        invOp.write(outFile);
-        outFile.close();
+        QVERIFY(invOp.write(tmpPath.toStdU16String()));
         QVERIFY(QFile::exists(tmpPath));
 
-        QFile inFile(tmpPath);
+        const std::filesystem::path inFile = tmpPath.toStdU16String();
         MNELIB::MNEInverseOperator invOp2(inFile);
         QVERIFY(invOp2.nchan > 0);
         QCOMPARE(invOp2.nsource, invOp.nsource);

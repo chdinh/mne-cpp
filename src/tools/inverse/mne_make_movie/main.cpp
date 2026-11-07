@@ -364,7 +364,7 @@ int main(int argc, char* argv[])
         double lambda2 = 1.0 / (snr * snr);
         QString method = parser.value(methodOpt);
 
-        QFile fInv(invFile);
+        const std::filesystem::path fInv = invFile.toStdU16String();
         MNEInverseOperator invOp(fInv);
         if (invOp.nsource <= 0) {
             qCritical("Cannot read inverse operator: %s", qPrintable(invFile));
