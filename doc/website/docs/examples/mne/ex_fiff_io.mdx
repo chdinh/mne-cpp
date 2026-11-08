@@ -150,8 +150,8 @@ int main(int argc, char* argv[])
     QCoreApplication a(argc, argv);
 
     //create list of fiff data to read
-    QList<QIODevice*> t_listSampleFilesIn;
-    t_listSampleFilesIn.append(new QFile(QCoreApplication::applicationDirPath() + "/../resources/data/MNE-sample-data/MEG/sample/sample_audvis_raw.fif"));
+    std::vector<QIODevice*> t_listSampleFilesIn;
+    t_listSampleFilesIn.push_back(new QFile(QCoreApplication::applicationDirPath() + "/../resources/data/MNE-sample-data/MEG/sample/sample_audvis_raw.fif"));
     //    t_listSampleFilesIn.append(new QFile(QCoreApplication::applicationDirPath() + "/../resources/data/MNE-sample-data/MEG/sample/sample_audvis_raw.fif"));
     //    t_listSampleFilesIn.append(new QFile(QCoreApplication::applicationDirPath() + "/../resources/data/MNE-sample-data/MEG/sample/sample_audvis-ave.fif"));
     //    t_listSampleFilesIn.append(new QFile(QCoreApplication::applicationDirPath() + "/../resources/data/MNE-sample-data/MEG/sample/sample_audvis-no-filter-ave.fif"));

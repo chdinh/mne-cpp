@@ -183,7 +183,7 @@ Reduces a forward solution to selected regions.
 
 **Parameters:**
 
-- **p_qListLabels** : *const QList&lt; [FsLabel](/docs/api/fs/fs-label) &gt; &*
+- **p_qListLabels** : *const std::vector&lt; [FsLabel](/docs/api/fs/fs-label) &gt; &*
   ROIs.
 
 **Returns:**
@@ -311,7 +311,7 @@ Returns the positions of the specified sources based on their beloning labels.
 
 **Parameters:**
 
-- **lPickedLabels** : *const QList&lt; [FsLabel](/docs/api/fs/fs-label) &gt; &*
+- **lPickedLabels** : *const std::vector&lt; [FsLabel](/docs/api/fs/fs-label) &gt; &*
   The stream to which the MNE forward solution should be assigned to.
 
 - **tSurfSetInflated** : *const [FsSurfaceSet](/docs/api/fs/fs-surface-set) &*

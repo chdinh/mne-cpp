@@ -27,7 +27,7 @@ Maps one `FIFFB_PROJ_ITEM` block to a C++ value: description, kind, `nvec`, `act
 
 ```cpp title="src/examples/ex_fiff_api/main.cpp"
 const FiffProj& pca = info.projs[0]; // "PCA-v1", 1 vector over 102 magnetometers, inactive
-QList<FiffProj> projs = info.projs;
+std::vector<FiffProj> projs = info.projs;
 FiffProj::activate_projs(projs);
 ```
 
@@ -103,7 +103,7 @@ Set all projections to active.
 
 **Parameters:**
 
-- **p_qListFiffProj** : *QList&lt; [FiffProj](/docs/api/fiff/fiff-proj) &gt; &*
+- **p_qListFiffProj** : *std::vector&lt; [FiffProj](/docs/api/fiff/fiff-proj) &gt; &*
   activates projectors in place.
 
 ---
@@ -118,7 +118,7 @@ Make an SSP operator
 
 **Parameters:**
 
-- **projs** : *const QList&lt; [FiffProj](/docs/api/fiff/fiff-proj) &gt; &*
+- **projs** : *const std::vector&lt; [FiffProj](/docs/api/fiff/fiff-proj) &gt; &*
   A set of projection vectors.
 
 - **ch_names** : *const StringList &*
@@ -176,7 +176,7 @@ Create SSP (Signal-Space Projection) operators from raw data via SVD. Ported fro
 
 **Returns:**
 
-- *QList&lt; [FiffProj](/docs/api/fiff/fiff-proj) &gt;* — List of [`FiffProj`](/docs/api/fiff/fiff-proj) items, or empty list on failure.
+- *std::vector&lt; [FiffProj](/docs/api/fiff/fiff-proj) &gt;* — List of [`FiffProj`](/docs/api/fiff/fiff-proj) items, or empty list on failure.
 
 ---
 
@@ -202,7 +202,7 @@ For each of gradiometers, magnetometers and EEG (bad channels excluded) the lead
 
 **Returns:**
 
-- *QList&lt; [FiffProj](/docs/api/fiff/fiff-proj) &gt;* — List of [`FiffProj`](/docs/api/fiff/fiff-proj) items (all channels as columns), or empty list for empty data.
+- *std::vector&lt; [FiffProj](/docs/api/fiff/fiff-proj) &gt;* — List of [`FiffProj`](/docs/api/fiff/fiff-proj) items (all channels as columns), or empty list for empty data.
 
 ---
 
@@ -221,7 +221,7 @@ FIFF library: measurement info, channels, digitizer, transforms, projectors, cov
 
 ````cpp title="src/examples/ex_fiff_api/main.cpp, line 179"
 const FiffProj& pca = info.projs[0]; // "PCA-v1", 1 vector over 102 magnetometers, inactive
-QList<FiffProj> projs = info.projs;
+std::vector<FiffProj> projs = info.projs;
 FiffProj::activate_projs(projs);
 ok &= expect(pca.desc == "PCA-v1" && !pca.active && pca.data->nrow == 1 && pca.data->ncol == 102 && projs[0].active,
              "FiffProj/FiffNamedMatrix: PCA-v1 is 1 x 102 and inactive until activated");
@@ -235,7 +235,7 @@ MNE library: BEM surfaces, surface projection, ICP, source spaces and epochs.
 const std::filesystem::path eveName = tmp.filePath("audvis-eve.fif").toStdU16String();
 const bool eventsWritten = events.write_fif(eveName).has_value();
 const MatrixXi eventsBack = FiffEvents::read(eveName).value().events;
-QList<FiffProj> projs = raw.info.projs; // stored inactive in the raw file
+std::vector<FiffProj> projs = raw.info.projs; // stored inactive in the raw file
 FiffProj::activate_projs(projs);
 MatrixXd ssp; // like mne._fiff.proj.make_projector(info['projs'], ch_names, bads)
 const int nProj = FiffProj::make_projector(projs, raw.info.ch_names, ssp, raw.info.bads);

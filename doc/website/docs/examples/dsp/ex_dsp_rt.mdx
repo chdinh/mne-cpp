@@ -267,10 +267,10 @@ FiffInfo::SPtr makeInfo(double sfreq)
         ch.unit = name.startsWith("STI") ? FIFF_UNIT_NONE : FIFF_UNIT_T;
         ch.cal = 1.0f;
         ch.range = 1.0f;
-        info->chs.append(ch);
+        info->chs.push_back(ch);
         info->ch_names.push_back(name.toStdString());
     }
-    info->nchan = info->chs.size();
+    info->nchan = static_cast<int>(info->chs.size());
     return info;
 }
 
@@ -318,7 +318,7 @@ int main(int argc, char* argv[])
     // Average of k = 1..4 is 2.5 after the trigger and 0 before it; MEG0121 stays at -2
     bool avgOk = evokedSet.evoked.size() == 1;
     if (avgOk) {
-        const FiffEvoked& evoked = evokedSet.evoked.first();
+        const FiffEvoked& evoked = evokedSet.evoked.front();
         avgOk = evoked.nave == nBlocks && evoked.data.cols() == 100 && evoked.comment == "1" && std::fabs(evoked.data(0, 30) - 2.5) < 1e-12 && std::fabs(evoked.data(0, 10)) < 1e-12 && std::fabs(evoked.data(1, 60) + 2.0) < 1e-12 && std::fabs(evoked.times(20)) < 1e-6;
     }
     ok &= expect(avgOk, "RtAveragingWorker: 4 epochs average to 2.5 after the trigger, 0 before it");
@@ -327,7 +327,7 @@ int main(int argc, char* argv[])
     RtAveraging threaded(10, 20, 80, 0, 0, 2, info); // owns the worker thread
     bool averaged = false;
     QObject::connect(&threaded, &RtAveraging::evokedStim,
-                     [&](const FiffEvokedSet& set, const QStringList&) { averaged = set.evoked.first().nave == nBlocks; });
+                     [&](const FiffEvokedSet& set, const QStringList&) { averaged = set.evoked.front().nave == nBlocks; });
     for (const MatrixXd& block : blocks) {
         threaded.append(block);
     }

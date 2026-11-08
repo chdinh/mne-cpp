@@ -73,13 +73,13 @@ Build the current compensation operator for the given channel set by locating th
 
 **Parameters:**
 
-- **chList** : *const QList&lt; [FiffChInfo](/docs/api/fiff/fiff-ch-info) &gt; &*
+- **chList** : *const std::vector&lt; [FiffChInfo](/docs/api/fiff/fiff-ch-info) &gt; &*
   Channels to compensate (may include non-MEG channels).
 
 - **nChan** : *int*
   Number of channels.
 
-- **compchs** : *QList&lt; [FiffChInfo](/docs/api/fiff/fiff-ch-info) &gt;*
+- **compchs** : *std::vector&lt; [FiffChInfo](/docs/api/fiff/fiff-ch-info) &gt;*
   Compensation input channels (may include non-reference channels).
 
 - **nCompChan** : *int*
@@ -157,13 +157,13 @@ Configure the full compensation pipeline: determine current compensation, build 
 - **compensate_to** : *int*
   Desired compensation grade.
 
-- **chList** : *QList&lt; [FiffChInfo](/docs/api/fiff/fiff-ch-info) &gt; &*
+- **chList** : *std::vector&lt; [FiffChInfo](/docs/api/fiff/fiff-ch-info) &gt; &*
   Channels to compensate (coil_type is updated).
 
 - **nchan** : *int*
   Number of channels.
 
-- **comp_chs** : *QList&lt; [FiffChInfo](/docs/api/fiff/fiff-ch-info) &gt;*
+- **comp_chs** : *std::vector&lt; [FiffChInfo](/docs/api/fiff/fiff-ch-info) &gt;*
   Compensation input channels.
 
 - **ncomp_chan** : *int*
@@ -198,7 +198,7 @@ Write the compensation grade into the upper 16 bits of coil_type for all MEG cha
 
 **Parameters:**
 
-- **chs** : *QList&lt; [FiffChInfo](/docs/api/fiff/fiff-ch-info) &gt; &*
+- **chs** : *std::vector&lt; [FiffChInfo](/docs/api/fiff/fiff-ch-info) &gt; &*
   Channel information list.
 
 - **nch** : *int*
@@ -219,7 +219,7 @@ Extract the compensation grade from MEG channel coil types.
 
 **Parameters:**
 
-- **chs** : *const QList&lt; [FiffChInfo](/docs/api/fiff/fiff-ch-info) &gt; &*
+- **chs** : *const std::vector&lt; [FiffChInfo](/docs/api/fiff/fiff-ch-info) &gt; &*
   Channel information list.
 
 - **nch** : *int*

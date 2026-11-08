@@ -29,7 +29,7 @@ MatrixXd data;
 MatrixXd times;
 ok &= raw.read_raw_segment(data, times); // all 6007 samples
 const double sfreq = raw.info.sfreq;
-const QList<FiffEpochData> epochs = FiffEpochs::makeFixedLengthEpochs(data, sfreq, 2.0, 0.5); // 2 s, 0.5 s overlap
+const std::vector<FiffEpochData> epochs = FiffEpochs::makeFixedLengthEpochs(data, sfreq, 2.0, 0.5); // 2 s, 0.5 s overlap
 const FiffEvoked average = FiffEpochs::averageEpochs(epochs, sfreq);
 ```
 
@@ -62,7 +62,7 @@ Segments the data matrix into non-overlapping (or overlapping) epochs of the spe
 
 **Returns:**
 
-- *QList&lt; [FiffEpochData](/docs/api/fiff/fiff-epoch-data) &gt;* — List of epoch data structures.
+- *std::vector&lt; [FiffEpochData](/docs/api/fiff/fiff-epoch-data) &gt;* — List of epoch data structures.
 
 ---
 
@@ -72,12 +72,12 @@ Concatenate multiple epoch sets into a single list.
 
 **Parameters:**
 
-- **epochSets** : *const QList&lt; QList&lt; [FiffEpochData](/docs/api/fiff/fiff-epoch-data) &gt; &gt; &*
+- **epochSets** : *const std::vector&lt; std::vector&lt; [FiffEpochData](/docs/api/fiff/fiff-epoch-data) &gt; &gt; &*
   List of epoch sets to concatenate.
 
 **Returns:**
 
-- *QList&lt; [FiffEpochData](/docs/api/fiff/fiff-epoch-data) &gt;* — Combined list of all epochs.
+- *std::vector&lt; [FiffEpochData](/docs/api/fiff/fiff-epoch-data) &gt;* — Combined list of all epochs.
 
 ---
 
@@ -89,7 +89,7 @@ All epochs must have the same dimensions. Returns a [`FiffEvoked`](/docs/api/fif
 
 **Parameters:**
 
-- **epochs** : *const QList&lt; [FiffEpochData](/docs/api/fiff/fiff-epoch-data) &gt; &*
+- **epochs** : *const std::vector&lt; [FiffEpochData](/docs/api/fiff/fiff-epoch-data) &gt; &*
   List of epochs.
 
 - **dSFreq** : *double*
@@ -112,12 +112,12 @@ Convenience method to get a list of data matrices from epoch structures, suitabl
 
 **Parameters:**
 
-- **epochs** : *const QList&lt; [FiffEpochData](/docs/api/fiff/fiff-epoch-data) &gt; &*
+- **epochs** : *const std::vector&lt; [FiffEpochData](/docs/api/fiff/fiff-epoch-data) &gt; &*
   List of epoch data.
 
 **Returns:**
 
-- *QList&lt; Eigen::MatrixXd &gt;* — List of data matrices (n_channels × n_times).
+- *std::vector&lt; Eigen::MatrixXd &gt;* — List of data matrices (n_channels × n_times).
 
 ---
 
@@ -138,7 +138,7 @@ FIFF library: fixed-length epochs, CTF compensation, the file directory and raw 
 MatrixXd times;
 ok &= raw.read_raw_segment(data, times); // all 6007 samples
 const double sfreq = raw.info.sfreq;
-const QList<FiffEpochData> epochs = FiffEpochs::makeFixedLengthEpochs(data, sfreq, 2.0, 0.5); // 2 s, 0.5 s overlap
+const std::vector<FiffEpochData> epochs = FiffEpochs::makeFixedLengthEpochs(data, sfreq, 2.0, 0.5); // 2 s, 0.5 s overlap
 const FiffEvoked average = FiffEpochs::averageEpochs(epochs, sfreq);
 // mne.make_fixed_length_epochs(raw, duration=2, overlap=0.5): 13 epochs of 601 samples, 450 samples apart
 ok &= expect(epochs.size() == 13 && epochs[0].data.cols() == 601 && std::lround((epochs[1].tmin - epochs[0].tmin) * sfreq) == 450 && average.nave == 13,

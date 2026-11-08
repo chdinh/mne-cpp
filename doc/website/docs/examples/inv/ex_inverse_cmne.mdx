@@ -256,10 +256,10 @@ int main(int argc, char* argv[])
     QList<RowVector4i> colors;
     aparc.toLabels(FsSurfaceSet("sample", 2, "white", subjects), auditory, colors,
                    {"superiortemporal-lh", "transversetemporal-lh", "superiortemporal-rh", "transversetemporal-rh"});
-    const MNEForwardSolution fwd = MNEForwardSolution((data + "/Result/ref-sample_audvis-meg-eeg-oct-6-fwd.fif").toStdU16String(), {.force_fixed = true, .surf_ori = true}).pick_regions(auditory);
+    const MNEForwardSolution fwd = MNEForwardSolution((data + "/Result/ref-sample_audvis-meg-eeg-oct-6-fwd.fif").toStdU16String(), {.force_fixed = true, .surf_ori = true}).pick_regions({auditory.begin(), auditory.end()});
     const FiffCov noiseCov = FiffCov((data + "/MEG/sample/sample_audvis-cov.fif").toStdString()).pick_channels(fwd.sol->row_names);
     const FiffEvoked evoked = FiffEvoked((data + "/MEG/sample/sample_audvis-ave.fif").toStdU16String(), 0).pick_channels(fwd.sol->row_names); // "Left Auditory"
-    const QList<VectorXi> vertno = fwd.src.get_vertno();
+    const std::vector<VectorXi> vertno = fwd.src.get_vertno();
     const int nLh = static_cast<int>(vertno[0].size());
     VectorXi vertices(nLh + vertno[1].size());
     vertices << vertno[0], vertno[1];

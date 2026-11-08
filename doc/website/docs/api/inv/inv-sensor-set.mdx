@@ -19,10 +19,10 @@ Stores MEG sensor geometry (positions, orientations, weights, coil count) for a 
 
 ```cpp title="src/examples/ex_inv_hpi/main.cpp"
 InvSensorSetCreator creator; // reads resources/general/coilDefinitions/coil_def.dat
-QList<FiffChInfo> megChannels;
+std::vector<FiffChInfo> megChannels;
 for (const FiffChInfo& ch : info->chs) {
     if (ch.kind == FIFFV_MEG_CH)
-        megChannels << ch;
+        megChannels.push_back(ch);
 }
 const InvSensorSet sensors = creator.updateSensorSet(megChannels, Accuracy::high); // integration points per coil
 ```
@@ -125,7 +125,7 @@ Default Constructor.
 
 Inverse library: continuous head position (HPI) fitting.
 
-````cpp title="src/examples/ex_inv_hpi/main.cpp, line 102"
+````cpp title="src/examples/ex_inv_hpi/main.cpp, line 104"
 const InvSensorSet sensors = creator.updateSensorSet(megChannels, Accuracy::high); // integration points per coil
 ok &= expect(sensors.ncoils() == 306 && sensors.np() == 8 && sensors.rmag().rows() == 306 * 8, "InvSensorSetCreator/InvSensorSet: 306 MEG sensors with 8 integration points each");
 ````

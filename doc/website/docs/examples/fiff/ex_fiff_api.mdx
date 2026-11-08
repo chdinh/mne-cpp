@@ -333,7 +333,7 @@ int main(int argc, char* argv[])
 
     //! [fiff_proj_usage]
     const FiffProj& pca = info.projs[0]; // "PCA-v1", 1 vector over 102 magnetometers, inactive
-    QList<FiffProj> projs = info.projs;
+    std::vector<FiffProj> projs = info.projs;
     FiffProj::activate_projs(projs);
     //! [fiff_proj_usage]
     ok &= expect(pca.desc == "PCA-v1" && !pca.active && pca.data->nrow == 1 && pca.data->ncol == 102 && projs[0].active,
@@ -436,7 +436,7 @@ int main(int argc, char* argv[])
     QFile ioFile(dir + "/sample_audvis-ave.fif");
     FiffIO io(ioFile); // detects what the file holds (raw, evoked, fwd, ...)
     //! [fiff_io_usage]
-    ok &= expect(io.m_qlistEvoked.size() == 4 && io.m_qlistRaw.isEmpty(), "FiffIO finds the 4 evoked sets in an -ave.fif file");
+    ok &= expect(io.m_qlistEvoked.size() == 4 && io.m_qlistRaw.empty(), "FiffIO finds the 4 evoked sets in an -ave.fif file");
 
     std::println("{}", ok ? "All fiff checks passed." : "fiff checks FAILED.");
     return ok ? EXIT_SUCCESS : EXIT_FAILURE;

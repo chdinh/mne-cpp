@@ -21,7 +21,7 @@ Used wherever the on-disk FIFF block pairs a matrix with channel-name metadata: 
 
 ```cpp title="src/examples/ex_fiff_api/main.cpp"
 const FiffProj& pca = info.projs[0]; // "PCA-v1", 1 vector over 102 magnetometers, inactive
-QList<FiffProj> projs = info.projs;
+std::vector<FiffProj> projs = info.projs;
 FiffProj::activate_projs(projs);
 ```
 

@@ -24,7 +24,7 @@ Resolution matrix of an inverse operator
 MNEInverseOperator prepared = inverse.prepare_inverse_operator(evoked.nave, lambda2, false, false);
 MatrixXd surfaceKernel;
 SparseMatrix<double> noNormals;
-QList<VectorXi> kernelVertices;
+std::vector<VectorXi> kernelVertices;
 prepared.assemble_kernel(FsLabel(), "MNE", false, surfaceKernel, noNormals, kernelVertices);
 prepared.getKernel() = surfaceKernel;
 const MatrixXd corticalMap = MNECorticalMap::makeCorticalMap(fwd, prepared, evoked.info);
@@ -77,7 +77,7 @@ K is the inverse operator kernel; G holds the rows of the forward gain for the k
 Inverse library: minimum-norm estimates, resolution matrices, label time courses, sparse solvers and source-estimate I/O.
 
 ````cpp title="src/examples/ex_inv_api/main.cpp, line 156"
-QList<VectorXi> kernelVertices;
+std::vector<VectorXi> kernelVertices;
 prepared.assemble_kernel(FsLabel(), "MNE", false, surfaceKernel, noNormals, kernelVertices);
 prepared.getKernel() = surfaceKernel;
 const MatrixXd corticalMap = MNECorticalMap::makeCorticalMap(fwd, prepared, evoked.info);

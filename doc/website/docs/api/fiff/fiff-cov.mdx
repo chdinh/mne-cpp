@@ -224,7 +224,7 @@ Ported from compute_cov.c (MNE-C).
 - **events** : *const Eigen::MatrixXi &*
   Event matrix (nEvents x 3): [sample, before, after].
 
-- **eventCodes** : *const QList&lt; int &gt; &*
+- **eventCodes** : *const std::vector&lt; int &gt; &*
   Which event codes to include.
 
 - **tmin** : *float*
@@ -268,7 +268,7 @@ filtered ones.
 
 **Parameters:**
 
-- **epochs** : *const QList&lt; QList&lt; Eigen::MatrixXd &gt; &gt; &*
+- **epochs** : *const std::vector&lt; std::vector&lt; Eigen::MatrixXd &gt; &gt; &*
   The epochs (channels x samples), grouped by event code.
 
 - **info** : *const [FiffInfo](/docs/api/fiff/fiff-info) &*
@@ -289,7 +289,7 @@ Compute a weighted grand-average covariance from multiple covariance matrices, w
 
 **Parameters:**
 
-- **covs** : *const QList&lt; [FiffCov](/docs/api/fiff/fiff-cov) &gt; &*
+- **covs** : *const std::vector&lt; [FiffCov](/docs/api/fiff/fiff-cov) &gt; &*
   List of covariance matrices to combine.
 
 **Returns:**

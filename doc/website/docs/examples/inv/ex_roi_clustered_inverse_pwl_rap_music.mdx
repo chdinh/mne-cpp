@@ -210,12 +210,18 @@ int main(int argc, char* argv[])
     //ToDo overload toLabels using instead of t_surfSet rr of MNESourceSpaces
     t_annotationSet.toLabels(t_surfSet, t_qListLabels, t_qListRGBAs);
 
-    QList<FsLabel> t_qListLabelSelection;
+    std::vector<FsLabel> t_qListLabelSelection;
 
     //LH
-    t_qListLabelSelection << t_qListLabels[28] << t_qListLabels[29] << t_qListLabels[45] << t_qListLabels[66];
+    t_qListLabelSelection.push_back(t_qListLabels[28]);
+    t_qListLabelSelection.push_back(t_qListLabels[29]);
+    t_qListLabelSelection.push_back(t_qListLabels[45]);
+    t_qListLabelSelection.push_back(t_qListLabels[66]);
     //RH
-    t_qListLabelSelection << t_qListLabels[103] << t_qListLabels[104] << t_qListLabels[120] << t_qListLabels[141];
+    t_qListLabelSelection.push_back(t_qListLabels[103]);
+    t_qListLabelSelection.push_back(t_qListLabels[104]);
+    t_qListLabelSelection.push_back(t_qListLabels[120]);
+    t_qListLabelSelection.push_back(t_qListLabels[141]);
 
     //    std::cout << "t_qListLabels.size " << t_qListLabels.size() << std::endl;
 

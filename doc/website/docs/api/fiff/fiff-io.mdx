@@ -64,7 +64,7 @@ Constructs a [`FiffIO`](/docs/api/fiff/fiff-io) object that uses the I/O device 
 
 **Parameters:**
 
-- **p_qlistIODevices** : *QList&lt; QIODevice * &gt; &*
+- **p_qlistIODevices** : *std::vector&lt; QIODevice * &gt; &*
   A QList of fiff IO devices like a fiff QFile or QTCPSocket.
 
 ---
@@ -101,7 +101,7 @@ Read data from a QList of pIODevices.
 
 **Parameters:**
 
-- **p_qlistIODevices** : *QList&lt; QIODevice &gt; &*
+- **p_qlistIODevices** : *std::vector&lt; QIODevice &gt; &*
   A QList of fiff IO devices like a fiff QFile or QTCPSocket.
 
 **Returns:**
@@ -209,7 +209,7 @@ FIFF library: measurement info, channels, digitizer, transforms, projectors, cov
 ````cpp title="src/examples/ex_fiff_api/main.cpp, line 280"
 QFile ioFile(dir + "/sample_audvis-ave.fif");
 FiffIO io(ioFile); // detects what the file holds (raw, evoked, fwd, ...)
-ok &= expect(io.m_qlistEvoked.size() == 4 && io.m_qlistRaw.isEmpty(), "FiffIO finds the 4 evoked sets in an -ave.fif file");
+ok &= expect(io.m_qlistEvoked.size() == 4 && io.m_qlistRaw.empty(), "FiffIO finds the 4 evoked sets in an -ave.fif file");
 ````
 
 ### [ex_fiff_io](../../examples/mne/ex_fiff_io.mdx)

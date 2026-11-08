@@ -72,7 +72,7 @@ hpiModelParameters = InvHpiModelParameters(hpiFitResult.hpiFreqs,
 
 Inverse library: continuous head position (HPI) fitting.
 
-````cpp title="src/examples/ex_inv_hpi/main.cpp, line 109"
+````cpp title="src/examples/ex_inv_hpi/main.cpp, line 111"
 // The coil frequencies are known but not their order; the first fit with bOrderFrequencies finds it.
 const InvHpiModelParameters model(QVector<int>({154, 158, 161, 166}), info->sfreq, info->linefreq, true);
 InvHpiFit hpi(updater.getSensors());

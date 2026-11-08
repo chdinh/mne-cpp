@@ -134,7 +134,7 @@ Writes maps as `FIFFB_MNE_MORPH_MAP` blocks (MNE-C `mne_save_morph_map_matrices`
 - **path** : *const QString &*
   The output file.
 
-- **maps** : *const QList&lt; const MNEMorphMap * &gt; &*
+- **maps** : *const std::vector&lt; const MNEMorphMap * &gt; &*
   The maps; from_subj, to_subj and hemi identify each one.
 
 **Returns:**

@@ -249,7 +249,7 @@ Helper to get all evoked entries.
 - **comments** : *QStringList &*
   found comments.
 
-- **aspect_kinds** : *QList&lt; fiff_int_t &gt; &*
+- **aspect_kinds** : *std::vector&lt; fiff_int_t &gt; &*
   found aspect_kinds.
 
 - **t** : *QString &*
@@ -446,12 +446,12 @@ Read the CTF software compensation data from the given node
 - **p_Node** : *const [FiffDirNode](/docs/api/fiff/fiff-dir-node)::SPtr &*
   The node of interest.
 
-- **p_Chs** : *const QList&lt; [FiffChInfo](/docs/api/fiff/fiff-ch-info) &gt; &*
+- **p_Chs** : *const std::vector&lt; [FiffChInfo](/docs/api/fiff/fiff-ch-info) &gt; &*
   channels with the calibration info.
 
 **Returns:**
 
-- *QList&lt; [FiffCtfComp](/docs/api/fiff/fiff-ctf-comp) &gt;* — the CTF software compensation data, or none if a compensator is incomplete or names a channel that is missing from, or ambiguous in, p_Chs.
+- *std::vector&lt; [FiffCtfComp](/docs/api/fiff/fiff-ctf-comp) &gt;* — the CTF software compensation data, or none if a compensator is incomplete or names a channel that is missing from, or ambiguous in, p_Chs.
 
 ---
 
@@ -547,7 +547,7 @@ Read the SSP data under a given directory node.
 
 **Returns:**
 
-- *QList&lt; [FiffProj](/docs/api/fiff/fiff-proj) &gt;* — a list of SSP projectors.
+- *std::vector&lt; [FiffProj](/docs/api/fiff/fiff-proj) &gt;* — a list of SSP projectors.
 
 ---
 
@@ -710,7 +710,7 @@ Writes the CTF compensation data into a fif file
 
 **Parameters:**
 
-- **comps** : *const QList&lt; [FiffCtfComp](/docs/api/fiff/fiff-ctf-comp) &gt; &*
+- **comps** : *const std::vector&lt; [FiffCtfComp](/docs/api/fiff/fiff-ctf-comp) &gt; &*
   The compensation data to write.
 
 **Returns:**
@@ -1017,7 +1017,7 @@ Writes the projection data into a fif stream (file)
 
 **Parameters:**
 
-- **projs** : *const QList&lt; [FiffProj](/docs/api/fiff/fiff-proj) &gt; &*
+- **projs** : *const std::vector&lt; [FiffProj](/docs/api/fiff/fiff-proj) &gt; &*
   The compensation data to write.
 
 **Returns:**

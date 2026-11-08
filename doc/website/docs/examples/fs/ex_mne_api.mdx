@@ -387,7 +387,7 @@ int main(int argc, char* argv[])
     const QString srcPath = data + "/subjects/sample/bem/sample-oct-6-src.fif";
     const MNESourceSpaces src(srcPath.toStdU16String()); // with normals, triangle data and patches
     const auto& lh = dynamic_cast<const MNEHemisphere&>(src[0]);
-    QList<VectorXi> vertno = src.get_vertno(); // used vertices per hemisphere
+    std::vector<VectorXi> vertno = src.get_vertno(); // used vertices per hemisphere
     //! [mne_source_spaces_usage]
     // mne.read_source_spaces: lh 155407 vertices, 4098 in use (8192 used triangles), vertno 14, 54, 59; rh 156866 / 4098
     ok &= expect(src.size() == 2 && lh.np == 155407 && lh.nuse == 4098 && lh.nuse_tri == 8192 && lh.coord_frame == FIFFV_COORD_MRI && vertno[0].head(3) == Vector3i(14, 54, 59) && src[1].np == 156866 && vertno[1].size() == 4098 && lh.pinfo.size() == 4098,
@@ -435,7 +435,7 @@ int main(int argc, char* argv[])
     const QMap<QString, double> reject{{"grad", 1.6e-14}, {"eeg", 1.6e-8}};
     MNEEpochDataList checked = MNEEpochDataList::readEpochs(raw, events.events, -0.1f, 0.3f, 1, reject);
     QList<int> keptEpochs;
-    for (int i = 0; i < checked.size(); ++i) {
+    for (int i = 0; i < std::ssize(checked); ++i) {
         if (!checked.at(i)->bReject) {
             keptEpochs << i;
         }
@@ -566,13 +566,13 @@ int main(int argc, char* argv[])
     descFile.close();
     AverageDescription averaging;
     MNEDescriptionParser::parseAverageFile(aveDesc, averaging);
-    const AverageCategory& leftCategory = averaging.categories.first(); // name, events, tmin/tmax, baseline
+    const AverageCategory& leftCategory = averaging.categories.front(); // name, events, tmin/tmax, baseline
     const RejectionParams& rejection = averaging.rej;                   // MNE-C defaults unless the file sets them (EEG 100 uV, ...)
     QString log;
     const FiffEvokedSet averages = FiffEvokedSet::computeAverages(raw, averaging, events.events, log);
     //! [mne_description_parser_usage]
     // mne.Epochs(event_id=1, tmin=-0.1, tmax=0.3, baseline=(-0.1, 0)).average(): 6 epochs, |MEG| 2.01258e-13, EEG 001 at 0 s 7.77233e-10
-    const bool averaged = averaging.categories.size() == 1 && leftCategory.doBaseline && leftCategory.comment == "Left Auditory" && leftCategory.events == QVector<unsigned int>{1} && rejection.eegReject == 100e-6f && averages.evoked.size() == 1;
+    const bool averaged = averaging.categories.size() == 1 && leftCategory.doBaseline && leftCategory.comment == "Left Auditory" && leftCategory.events == std::vector<unsigned int>{1} && rejection.eegReject == 100e-6f && averages.evoked.size() == 1;
     ok &= expect(averaged && averages.evoked[0].nave == 6 && averages.evoked[0].data.cols() == 121 && near(averages.evoked[0].data.topRows(306).norm(), 2.0125814419559757e-13, 1e-5) && near(averages.evoked[0].data(315, 30), 7.77233498919796e-10, 1e-5),
                  "MNEDescriptionParser: an .ave description averages like mne.Epochs with a baseline");
 
@@ -594,14 +594,14 @@ int main(int argc, char* argv[])
     CovDescription covariance;
     MNEDescriptionParser::parseCovarianceFile(covDescPath, covariance);
     covariance.rej.megGradReject = covariance.rej.megMagReject = covariance.rej.eogReject = 0.0f; // EEG limit only
-    const CovDefinition& preStim = covariance.defs.first();
+    const CovDefinition& preStim = covariance.defs.front();
     const FiffCov noiseCov = FiffCov::compute_from_epochs(raw, events.events, {1, 2}, preStim.tmin, preStim.tmax, preStim.bmin, preStim.bmax, preStim.doBaseline,
                                                           covariance.removeSampleMean, preStim.ignore, preStim.delay, &covariance.rej);
     //! [mne_cov_description_usage]
     // mne.compute_covariance(mne.Epochs(event_id=[1, 2], tmin=-0.2, tmax=0, baseline=None, reject=dict(eeg=14.23e-9)),
     // keep_sample_mean=False, rank="full"): 6 of 12 epochs kept, nfree 365, C[EEG001, EEG001] = 8.784207369943824e-18
     const int eeg001 = UTILSLIB::indexOf(noiseCov.names, "EEG001");
-    ok &= expect(preStim.events == QVector<unsigned int>({1, 2}) && noiseCov.nfree == 365 && near(noiseCov.data(eeg001, eeg001), 8.784207369943824e-18, 1e-6),
+    ok &= expect(preStim.events == std::vector<unsigned int>({1, 2}) && noiseCov.nfree == 365 && near(noiseCov.data(eeg001, eeg001), 8.784207369943824e-18, 1e-6),
                  std::format("MNEDescriptionParser: a .cov description with EEG rejection gives nfree {} like mne.compute_covariance", noiseCov.nfree));
 
     //! [mne_meas_data_usage]
@@ -629,7 +629,7 @@ int main(int argc, char* argv[])
     const std::filesystem::path eveName = tmp.filePath("audvis-eve.fif").toStdU16String();
     const bool eventsWritten = events.write_fif(eveName).has_value();
     const MatrixXi eventsBack = FiffEvents::read(eveName).value().events;
-    QList<FiffProj> projs = raw.info.projs; // stored inactive in the raw file
+    std::vector<FiffProj> projs = raw.info.projs; // stored inactive in the raw file
     FiffProj::activate_projs(projs);
     MatrixXd ssp; // like mne._fiff.proj.make_projector(info['projs'], ch_names, bads)
     const int nProj = FiffProj::make_projector(projs, raw.info.ch_names, ssp, raw.info.bads);

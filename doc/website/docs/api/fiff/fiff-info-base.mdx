@@ -131,12 +131,12 @@ Channel indices of each channel type, like mne.channel_indices_by_type.
 
 **Parameters:**
 
-- **picks** : *const QList&lt; int &gt; &*
+- **picks** : *const std::vector&lt; int &gt; &*
   Channels to classify (empty: all).
 
 **Returns:**
 
-- *QMap&lt; QString, QList&lt; int &gt; &gt;* — Every channel type mapped to the indices of its channels (empty lists for absent types).
+- *std::map&lt; std::string, std::vector&lt; int &gt; &gt;* — Every channel type mapped to the indices of its channels (empty lists for absent types).
 
 ---
 
@@ -252,19 +252,19 @@ Classifies channels by kind (FIFFV_MEG_CH, FIFFV_REF_MEG_CH, FIFFV_EEG_CH) and r
 
 **Parameters:**
 
-- **megp** : *QList&lt; [FiffChInfo](/docs/api/fiff/fiff-ch-info) &gt; &*
+- **megp** : *std::vector&lt; [FiffChInfo](/docs/api/fiff/fiff-ch-info) &gt; &*
   List of MEG channel info descriptors.
 
 - **nmegp** : *int &*
   Number of MEG channels found.
 
-- **meg_compp** : *QList&lt; [FiffChInfo](/docs/api/fiff/fiff-ch-info) &gt; &*
+- **meg_compp** : *std::vector&lt; [FiffChInfo](/docs/api/fiff/fiff-ch-info) &gt; &*
   List of MEG compensation (reference) channel info descriptors.
 
 - **nmeg_compp** : *int &*
   Number of compensation channels found.
 
-- **eegp** : *QList&lt; [FiffChInfo](/docs/api/fiff/fiff-ch-info) &gt; &*
+- **eegp** : *std::vector&lt; [FiffChInfo](/docs/api/fiff/fiff-ch-info) &gt; &*
   List of EEG channel info descriptors.
 
 - **neegp** : *int &*

@@ -30,7 +30,7 @@ It is exercised by:
 const QMap<QString, double> reject{{"grad", 1.6e-14}, {"eeg", 1.6e-8}};
 MNEEpochDataList checked = MNEEpochDataList::readEpochs(raw, events.events, -0.1f, 0.3f, 1, reject);
 QList<int> keptEpochs;
-for (int i = 0; i < checked.size(); ++i) {
+for (int i = 0; i < std::ssize(checked); ++i) {
     if (!checked.at(i)->bReject) {
         keptEpochs << i;
     }

@@ -121,7 +121,7 @@ Inline functions to get acces to parameters.
 
 Inverse library: continuous head position (HPI) fitting.
 
-````cpp title="src/examples/ex_inv_hpi/main.cpp, line 107"
+````cpp title="src/examples/ex_inv_hpi/main.cpp, line 109"
 InvHpiDataUpdater updater(info); // good MEG channels, their sensors and the digitised coil positions
 updater.prepareDataAndProjectors(segment, MatrixXd::Identity(info->nchan, info->nchan));
 // The coil frequencies are known but not their order; the first fit with bOrderFrequencies finds it.

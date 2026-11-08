@@ -23,7 +23,7 @@ Container of [`FwdCoil`](/docs/api/fwd/fwd-coil) instances acting both as the in
 
 ```cpp title="src/examples/ex_fwd_api/main.cpp"
 auto templates = FwdCoilSet::read_coil_defs(coilDefs); // integration points per coil type
-auto coils = templates->create_meg_coils(meg, meg.size(), FWD_COIL_ACCURACY_ACCURATE, raw.info.dev_head_t);
+auto coils = templates->create_meg_coils(meg, static_cast<int>(meg.size()), FWD_COIL_ACCURACY_ACCURATE, raw.info.dev_head_t);
 const FwdCoil& first = *coils->coils[0]; // MEG 0113 in head coordinates
 ```
 
@@ -70,7 +70,7 @@ Create a MEG coil set definition using a database of templates Change the coordi
 
 **Parameters:**
 
-- **chs** : *const QList&lt; [FiffChInfo](/docs/api/fiff/fiff-ch-info) &gt; &*
+- **chs** : *const std::vector&lt; [FiffChInfo](/docs/api/fiff/fiff-ch-info) &gt; &*
   Channel information to use.
 
 - **nch** : *int*
@@ -181,7 +181,7 @@ Create a EEG coil set definition using a channel information Change the coordina
 
 **Parameters:**
 
-- **chs** : *const QList&lt; [FiffChInfo](/docs/api/fiff/fiff-ch-info) &gt; &*
+- **chs** : *const std::vector&lt; [FiffChInfo](/docs/api/fiff/fiff-ch-info) &gt; &*
   Channel information to use.
 
 - **nch** : *int*
@@ -224,9 +224,9 @@ Read a coil definitions from file.
 
 Forward library: coil definitions, BEM and sphere models, field maps and forward solutions.
 
-````cpp title="src/examples/ex_fwd_api/main.cpp, line 114"
+````cpp title="src/examples/ex_fwd_api/main.cpp, line 116"
 auto templates = FwdCoilSet::read_coil_defs(coilDefs); // integration points per coil type
-auto coils = templates->create_meg_coils(meg, meg.size(), FWD_COIL_ACCURACY_ACCURATE, raw.info.dev_head_t);
+auto coils = templates->create_meg_coils(meg, static_cast<int>(meg.size()), FWD_COIL_ACCURACY_ACCURATE, raw.info.dev_head_t);
 const FwdCoil& first = *coils->coils[0]; // MEG 0113 in head coordinates
 // mne _create_meg_coils(accurate): 3012 planar gradiometer, 8 points, r0 (-106.15, 29.14, -14.73) mm
 ok &= expect(coils->ncoil() == 306 && first.type == 3012 && first.np == 8 && coils->is_planar_coil_type(first.type) && (first.r0 - Vector3f(-0.10614990f, 0.02914091f, -0.01472596f)).norm() < 1e-6f,

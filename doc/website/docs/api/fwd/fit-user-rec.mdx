@@ -31,7 +31,7 @@ std::unique_ptr<FwdEegSphereModel> sphere(models->fwd_select_eeg_sphere_model("D
 // Scalp radius 90 mm; 3 Berg-Scherg dipoles approximate the layered potentials
 sphere->fwd_setup_eeg_sphere_model(0.09f, true, 3);
 sphere->r0 = Vector3f(0.0f, 0.0f, 0.04f);
-auto els = FwdCoilSet::create_eeg_els(eeg, eeg.size());
+auto els = FwdCoilSet::create_eeg_els(eeg, static_cast<int>(eeg.size()));
 VectorXf V(els->ncoil());
 FwdEegSphereModel::fwd_eeg_spherepot_coil(rd, Q, *els, V, sphere.get()); // V per A m
 ````

@@ -190,7 +190,7 @@ Applies baseline correction to the evoked data.
 
 **Parameters:**
 
-- **p_baseline** : *QPair&lt; float, float &gt; &*
+- **p_baseline** : *std::pair&lt; float, float &gt; &*
   time definition of the baseline in seconds [from, to].
 
 ---
@@ -232,7 +232,7 @@ All data sets must have the same channels and time instants. The result carries 
 
 **Parameters:**
 
-- **evokeds** : *const QList&lt; [FiffEvoked](/docs/api/fiff/fiff-evoked) &gt; &*
+- **evokeds** : *const std::vector&lt; [FiffEvoked](/docs/api/fiff/fiff-evoked) &gt; &*
   The evoked data sets.
 
 - **weights** : *const Eigen::VectorXd &*
@@ -250,7 +250,7 @@ Merges evoked data with a predefined weighting strategy (weights="nave" or "equa
 
 **Parameters:**
 
-- **evokeds** : *const QList&lt; [FiffEvoked](/docs/api/fiff/fiff-evoked) &gt; &*
+- **evokeds** : *const std::vector&lt; [FiffEvoked](/docs/api/fiff/fiff-evoked) &gt; &*
   The evoked data sets.
 
 - **weights** : *CombineWeights*

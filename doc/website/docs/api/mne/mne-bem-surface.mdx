@@ -145,12 +145,12 @@ Decimate the outer skin surface to the target vertex counts using iterative edge
 - **outerSkin** : *const [MNEBemSurface](/docs/api/mne/mne-bem-surface) &*
   The outer skin BEM surface to decimate.
 
-- **targetVertices** : *const QList&lt; int &gt; &*
+- **targetVertices** : *const std::vector&lt; int &gt; &*
   List of target vertex counts (default: \{2562, 10242, 40962\}).
 
 **Returns:**
 
-- *QList&lt; [MNEBemSurface](/docs/api/mne/mne-bem-surface) &gt;* — A list of decimated BEM surfaces, one per target resolution.
+- *std::vector&lt; [MNEBemSurface](/docs/api/mne/mne-bem-surface) &gt;* — A list of decimated BEM surfaces, one per target resolution.
 
 ---
 

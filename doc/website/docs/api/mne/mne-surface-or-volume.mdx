@@ -289,7 +289,7 @@ From [ex_mne_api](../../examples/fs/ex_mne_api.mdx).
 const QString srcPath = data + "/subjects/sample/bem/sample-oct-6-src.fif";
 const MNESourceSpaces src(srcPath.toStdU16String()); // with normals, triangle data and patches
 const auto& lh = dynamic_cast<const MNEHemisphere&>(src[0]);
-QList<VectorXi> vertno = src.get_vertno(); // used vertices per hemisphere
+std::vector<VectorXi> vertno = src.get_vertno(); // used vertices per hemisphere
 ````
 
 From [ex_mne_api](../../examples/fs/ex_mne_api.mdx).

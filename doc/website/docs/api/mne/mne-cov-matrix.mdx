@@ -166,7 +166,7 @@ Assign channel-type classifications (MEG mag, MEG grad, EEG) to channels in this
 
 **Parameters:**
 
-- **chs** : *const QList&lt; [FiffChInfo](/docs/api/fiff/fiff-ch-info) &gt; &*
+- **chs** : *const std::vector&lt; [FiffChInfo](/docs/api/fiff/fiff-ch-info) &gt; &*
   Channel information list.
 
 - **nchan** : *int*
@@ -231,7 +231,7 @@ Pick designated channels from this covariance matrix, optionally omitting MEG-EE
 - **omit_meg_eeg** : *int*
   If non-zero, zero out MEG-EEG cross entries.
 
-- **chs** : *const QList&lt; [FiffChInfo](/docs/api/fiff/fiff-ch-info) &gt; &*
+- **chs** : *const std::vector&lt; [FiffChInfo](/docs/api/fiff/fiff-ch-info) &gt; &*
   Channel information list (for MEG/EEG classification).
 
 **Returns:**

@@ -21,10 +21,10 @@ Builds [`InvSensorSet`](/docs/api/inv/inv-sensor-set) objects from [FiffInfo](/d
 
 ```cpp title="src/examples/ex_inv_hpi/main.cpp"
 InvSensorSetCreator creator; // reads resources/general/coilDefinitions/coil_def.dat
-QList<FiffChInfo> megChannels;
+std::vector<FiffChInfo> megChannels;
 for (const FiffChInfo& ch : info->chs) {
     if (ch.kind == FIFFV_MEG_CH)
-        megChannels << ch;
+        megChannels.push_back(ch);
 }
 const InvSensorSet sensors = creator.updateSensorSet(megChannels, Accuracy::high); // integration points per coil
 ```
@@ -45,7 +45,7 @@ Update [`InvSensorSet`](/docs/api/inv/inv-sensor-set) from new channel list with
 
 **Parameters:**
 
-- **channelList** : *const QList&lt; [FiffChInfo](/docs/api/fiff/fiff-ch-info) &gt; &*
+- **channelList** : *const std::vector&lt; [FiffChInfo](/docs/api/fiff/fiff-ch-info) &gt; &*
   The channel list to create the MEG sensor set from.
 
 - **accuracy** : *const Accuracy &*
@@ -70,12 +70,12 @@ Update [`InvSensorSet`](/docs/api/inv/inv-sensor-set) from new channel list with
 
 Inverse library: continuous head position (HPI) fitting.
 
-````cpp title="src/examples/ex_inv_hpi/main.cpp, line 96"
+````cpp title="src/examples/ex_inv_hpi/main.cpp, line 98"
 InvSensorSetCreator creator; // reads resources/general/coilDefinitions/coil_def.dat
-QList<FiffChInfo> megChannels;
+std::vector<FiffChInfo> megChannels;
 for (const FiffChInfo& ch : info->chs) {
     if (ch.kind == FIFFV_MEG_CH)
-        megChannels << ch;
+        megChannels.push_back(ch);
 }
 const InvSensorSet sensors = creator.updateSensorSet(megChannels, Accuracy::high); // integration points per coil
 ok &= expect(sensors.ncoils() == 306 && sensors.np() == 8 && sensors.rmag().rows() == 306 * 8, "InvSensorSetCreator/InvSensorSet: 306 MEG sensors with 8 integration points each");

@@ -36,7 +36,7 @@ FiffEvoked evoked = epochs.average(raw.info, raw.first_samp, raw.last_samp);
 const QMap<QString, double> reject{{"grad", 1.6e-14}, {"eeg", 1.6e-8}};
 MNEEpochDataList checked = MNEEpochDataList::readEpochs(raw, events.events, -0.1f, 0.3f, 1, reject);
 QList<int> keptEpochs;
-for (int i = 0; i < checked.size(); ++i) {
+for (int i = 0; i < std::ssize(checked); ++i) {
     if (!checked.at(i)->bReject) {
         keptEpochs << i;
     }
@@ -102,7 +102,7 @@ Applies baseline correction to the evoked data.
 
 **Parameters:**
 
-- **baseline** : *const QPair&lt; float, float &gt; &*
+- **baseline** : *const std::pair&lt; float, float &gt; &*
   time definition of the baseline in seconds [from, to].
 
 ---
@@ -200,7 +200,7 @@ Multi-category offline averaging. Reads epochs from raw data for multiple event 
 - **events** : *const Eigen::MatrixXi &*
   Event matrix (nEvents x 3): [sample, before, after].
 
-- **eventCodes** : *const QList&lt; int &gt; &*
+- **eventCodes** : *const std::vector&lt; int &gt; &*
   List of event codes, one per category.
 
 - **comments** : *const QStringList &*
@@ -215,7 +215,7 @@ Multi-category offline averaging. Reads epochs from raw data for multiple event 
 - **mapReject** : *const QMap&lt; QString, double &gt; &*
   Rejection thresholds (key = channel type string, value = threshold).
 
-- **baseline** : *const QPair&lt; float, float &gt; &*
+- **baseline** : *const std::pair&lt; float, float &gt; &*
   Baseline interval [from, to] in seconds. If from==to, no baseline correction.
 
 - **proj** : *bool*

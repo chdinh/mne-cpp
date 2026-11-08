@@ -222,7 +222,7 @@ Set the current compensation value in the channel info structures
 
 **Parameters:**
 
-- **listFiffChInfo** : *QList&lt; [FiffChInfo](/docs/api/fiff/fiff-ch-info) &gt; &*
+- **listFiffChInfo** : *std::vector&lt; [FiffChInfo](/docs/api/fiff/fiff-ch-info) &gt; &*
   fiff channel info list.
 
 - **value** : *fiff_int_t*
@@ -230,7 +230,7 @@ Set the current compensation value in the channel info structures
 
 **Returns:**
 
-- *QList&lt; [FiffChInfo](/docs/api/fiff/fiff-ch-info) &gt;* — the current compensation.
+- *std::vector&lt; [FiffChInfo](/docs/api/fiff/fiff-ch-info) &gt;* — the current compensation.
 
 ---
 
@@ -254,7 +254,7 @@ Opens the file, reads measurement info, and splits channels into MEG and EEG lis
 - **bads** : *const StringList &*
   List of bad channel names to exclude.
 
-- **chsp** : *QList&lt; [FiffChInfo](/docs/api/fiff/fiff-ch-info) &gt; &*
+- **chsp** : *std::vector&lt; [FiffChInfo](/docs/api/fiff/fiff-ch-info) &gt; &*
   Combined list of accepted channels (MEG first, then EEG).
 
 - **nmegp** : *int &*
@@ -295,7 +295,7 @@ FiffInfo::SPtr makeInfo(double sfreq)
         ch.unit = name.startsWith("STI") ? FIFF_UNIT_NONE : FIFF_UNIT_T;
         ch.cal = 1.0f;
         ch.range = 1.0f;
-        info->chs.append(ch);
+        info->chs.push_back(ch);
         info->ch_names.push_back(name.toStdString());
 ````
 
@@ -315,7 +315,7 @@ FiffInfo makeInfo()
         ch.ch_name = i < kEeg ? "EEG" + std::to_string(i) : (i == kEog ? "EOG" : "ECG");
         ch.range = ch.cal = 1.0f;
         ch.unit = FIFF_UNIT_V;
-        info.chs.append(ch);
+        info.chs.push_back(ch);
         info.ch_names.push_back(ch.ch_name);
     }
 ````

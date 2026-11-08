@@ -181,7 +181,7 @@ Convenience wrapper that extracts channel names and delegates to `affect()`.
 
 **Parameters:**
 
-- **chs** : *const QList&lt; [FiffChInfo](/docs/api/fiff/fiff-ch-info) &gt; &*
+- **chs** : *const std::vector&lt; [FiffChInfo](/docs/api/fiff/fiff-ch-info) &gt; &*
   Channel information list.
 
 - **nChan** : *int*
@@ -339,7 +339,7 @@ Builds a uniform-weight vector ( $1/\sqrt\{N_\{\text\{EEG\}\}\}$) across all EEG
 
 **Parameters:**
 
-- **chs** : *const QList&lt; [FiffChInfo](/docs/api/fiff/fiff-ch-info) &gt; &*
+- **chs** : *const std::vector&lt; [FiffChInfo](/docs/api/fiff/fiff-ch-info) &gt; &*
   Channel information list.
 
 - **nch** : *int*
@@ -396,10 +396,10 @@ Refactored: make_projection (dipole_fit_setup.c)
 
 **Parameters:**
 
-- **projnames** : *const QList&lt; QString &gt; &*
+- **projnames** : *const std::vector&lt; QString &gt; &*
   List of FIFF file paths containing projection data.
 
-- **chs** : *const QList&lt; [FiffChInfo](/docs/api/fiff/fiff-ch-info) &gt; &*
+- **chs** : *const std::vector&lt; [FiffChInfo](/docs/api/fiff/fiff-ch-info) &gt; &*
   Channel information list.
 
 - **nch** : *int*
