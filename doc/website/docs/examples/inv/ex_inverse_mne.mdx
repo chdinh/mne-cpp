@@ -118,6 +118,7 @@ The documented classes this example uses most:
 | [`FigureExporter`](../../api/disp/figure-exporter.mdx) | Visualization |
 | [`InvMinimumNorm`](../../api/inv/inv-minimum-norm.mdx) | Inverse |
 | [`LinePlot`](../../api/disp/line-plot.mdx) | Visualization |
+| [`Log`](../../api/utils/log.mdx) | Utilities |
 | [`MNEInverseOperator`](../../api/mne/mne-inverse-operator.mdx) | MNE Core |
 
 ## Source
@@ -158,7 +159,7 @@ The documented classes this example uses most:
 #include <inv/inv_source_estimate.h>
 #include <inv/minimum_norm/inv_minimum_norm.h>
 
-#include <utils/generics/mne_logger.h>
+#include <utils/logger/log.h>
 
 #include <disp/plots/helpers/figureexporter.h>
 #include <disp/plots/lineplot.h>
@@ -197,7 +198,7 @@ using namespace UTILSLIB;
  */
 int main(int argc, char* argv[])
 {
-    qInstallMessageHandler(MNELogger::customLogWriter);
+    UTILSLIB::Log::install_qt_message_handler();
     QApplication app(argc, argv);
 
     // Command Line Parser

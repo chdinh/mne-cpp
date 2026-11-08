@@ -182,7 +182,7 @@ Opens a closed stream again at position 0, keeping its contents.
 
 Utilities library: buffers, observers, logging, file formats, montages, layouts and reports.
 
-````cpp title="src/examples/ex_utils/main.cpp, line 175"
+````cpp title="src/examples/ex_utils/main.cpp, line 174"
     auto out = FileByteStream::open(dir.filePath("data.bin").toStdString(), FileByteStream::Mode::Write);
     out->writeBigEndian(std::int32_t(samples.size())); // FIFF byte order
     out->writeBigEndian(samples.data(), samples.size());

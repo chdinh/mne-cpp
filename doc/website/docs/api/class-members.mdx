@@ -7,7 +7,7 @@ sidebar_position: 5
 
 # Class Members
 
-Index of 6610 public class members (functions, variables, typedefs, enums) across all documented classes.
+Index of 6613 public class members (functions, variables, typedefs, enums) across all documented classes.
 
 **Jump to:** [A](#a) · [B](#b) · [C](#c) · [D](#d) · [E](#e) · [F](#f) · [G](#g) · [H](#h) · [I](#i) · [J](#j) · [K](#k) · [L](#l) · [M](#m) · [N](#n) · [O](#o) · [P](#p) · [Q](#q) · [R](#r) · [S](#s) · [T](#t) · [U](#u) · [V](#v) · [W](#w) · [X](#x) · [Y](#y) · [Z](#z)
 
@@ -1203,7 +1203,6 @@ Index of 6610 public class members (functions, variables, typedefs, enums) acros
 - **curv** `[fn]` in [FsSurface](/docs/api/fs/fs-surface) — FreeSurfer curvature.
 - **curv** `[var]` in [MNESurfaceOrVolume](/docs/api/mne/mne-surface-or-volume) — The FreeSurfer curvature values (np elements).
 - **curvature_color_mode** `[var]` in [MNEMshDisplaySurface](/docs/api/mne/mne-msh-display-surface) — How curvature is visualized.
-- **customLogWriter** `[fn]` in [MNELogger](/docs/api/utils/mne-logger) — Customized logWriter to colorize type of the message in the terminal.
 
 ## D {#d}
 
@@ -1590,6 +1589,7 @@ Index of 6610 public class members (functions, variables, typedefs, enums) acros
 - **empty** `[fn]` in [MNESourceSpaces](/docs/api/mne/mne-source-spaces) — True if MNE Source Space is empty.
 - **empty** `[fn]` in [Network](/docs/api/connectivity/network)
 - **enable_all_sources** `[fn]` in [MNESourceSpace](/docs/api/mne/mne-source-space) — Enable all source points (set inuse to TRUE, nuse = np).
+- **enabled** `[fn]` in [Log](/docs/api/utils/log)
 - **enabled** `[var]` in [SubView](/docs/api/disp3-d/sub-view)
 - **end** `[var]` in [AcqSampleRange](/docs/api/acq/acq-sample-range) — One past the last sample; equals first for an empty range.
 - **end** `[fn]` in [FiffAnnotations](/docs/api/fiff/fiff-annotations)
@@ -1834,6 +1834,7 @@ Index of 6610 public class members (functions, variables, typedefs, enums) acros
 - **FiffTime** `[fn]` in [FiffTime](/docs/api/fiff/fiff-time) — Default constructor.
 - **FiffTime** `[fn]` in [FiffTime](/docs/api/fiff/fiff-time) — Parameterized constructor.
 - **file** `[var]` in [FiffRawData](/docs/api/fiff/fiff-raw-data) — replaces fid.
+- **file** `[fn]` in [Log](/docs/api/utils/log)
 - **file** `[var]` in [MNERawData](/docs/api/mne/mne-raw-data) — Owned QFile backing the FIFF stream.
 - **file_id** `[var]` in [FiffInfo](/docs/api/fiff/fiff-info) — File ID.
 - **FileByteStream** `[fn]` in [FileByteStream](/docs/api/utils/file-byte-stream)
@@ -2701,6 +2702,7 @@ Index of 6610 public class members (functions, variables, typedefs, enums) acros
 - **insert** `[fn]` in [FsSurfaceSet](/docs/api/fs/fs-surface-set) — Insert a surface.
 - **insertRows** `[fn]` in [ChannelInfoModel](/docs/api/disp/channel-info-model)
 - **insetForSeparator** `[fn]` in [MultiViewLayout](/docs/api/disp3-d/multi-view-layout) — Apply a separator-pixel inset to a pane rect so adjacent panes don't overlap the separator bar.
+- **install_qt_message_handler** `[fn]` in [Log](/docs/api/utils/log) — Installs the Qt message handler that prints every Qt message, and so every forwarded [`Log`](/docs/api/utils/log) message, at or above `level()`: results to stdout, diagnostics to stderr, with coloured level tags when built with MNE_LOG_MODE=FORMATTED.
 - **instance** `[fn]` in [AcqDeviceRegistry](/docs/api/acq/acq-device-registry)
 - **instance** `[fn]` in [MnaOpRegistry](/docs/api/mna/mna-op-registry) — Access the singleton instance.
 - **instanceCount** `[fn]` in [DipoleObject](/docs/api/disp3-d/dipole-object)
@@ -3008,6 +3010,7 @@ Index of 6610 public class members (functions, variables, typedefs, enums) acros
 - **len** `[var]` in [MNEMghTag](/docs/api/mne/mne-mgh-tag) — Byte length of the tag data payload.
 - **Level** `[enum]` in [Log](/docs/api/utils/log) — Severity, matching Qt's debug, info, warning and critical messages.
 - **level** `[var]` in `Entry`
+- **level** `[fn]` in [Log](/docs/api/utils/log)
 - **lh** `[var]` in [ViewVisibilityProfile](/docs/api/disp3-d/view-visibility-profile)
 - **library** `[var]` in [MnaOpSchema](/docs/api/mna/mna-op-schema) — Which library provides the implementation.
 - **license** `[var]` in [BidsDatasetDescription](/docs/api/bids/bids-dataset-description) — License identifier (RECOMMENDED).
@@ -3110,7 +3113,6 @@ Index of 6610 public class members (functions, variables, typedefs, enums) acros
 - **LogCapture** `[fn]` in [LogCapture](/docs/api/utils/log-capture)
 - **logFile** `[var]` in [AverageDescription](/docs/api/fiff/average-description) — Save log here.
 - **logFile** `[var]` in [CovDescription](/docs/api/mne/cov-description) — Save log here.
-- **logFile** `[fn]` in [MNELogger](/docs/api/utils/mne-logger) — Returns the path of the current log file, empty if file logging is off.
 - **logicalNo** `[var]` in `AcqFiffChannel` — logno.
 - **logNo** `[var]` in [FiffChInfo](/docs/api/fiff/fiff-ch-info) — Logical channel #.
 - **lookAt** `[var]` in [CameraResult](/docs/api/disp3-d/camera-result)
@@ -4958,9 +4960,11 @@ Index of 6610 public class members (functions, variables, typedefs, enums) acros
 - **set_current_comp** `[fn]` in [FiffInfo](/docs/api/fiff/fiff-info) — Set the current compensation value in the channel info structures.
 - **set_current_comp** `[fn]` in [FiffInfo](/docs/api/fiff/fiff-info) — mne_set_current_comp
 - **set_fft_size** `[fn]` in [Network](/docs/api/connectivity/network)
+- **set_file** `[fn]` in [Log](/docs/api/utils/log) — Additionally writes every message printed by `install_qt_message_handler()` to a log file, appended, one timestamped and level-tagged line per message.
 - **set_frequency_bins** `[fn]` in [NetworkEdge](/docs/api/connectivity/network-edge) — Sets the frequency-bin window and recomputes the scalar weight.
 - **set_frequency_range** `[fn]` in [Network](/docs/api/connectivity/network) — Averages every edge weight over a new frequency range and updates the weight range.
 - **set_hub** `[fn]` in [NetworkNode](/docs/api/connectivity/network-node) — Marks the node as hub or not.
+- **set_level** `[fn]` in [Log](/docs/api/utils/log) — Sets the lowest level that is written; messages below it are dropped before they are formatted.
 - **set_method** `[fn]` in [Network](/docs/api/connectivity/network)
 - **set_sampling_frequency** `[fn]` in [Network](/docs/api/connectivity/network)
 - **set_sink** `[fn]` in [Log](/docs/api/utils/log) — Replaces the sink.
@@ -5196,7 +5200,6 @@ Index of 6610 public class members (functions, variables, typedefs, enums) acros
 - **setLiveMarkers** `[slot]` in [BrainView](/docs/api/disp3-d/brain-view) — Replace the set of live overlay markers.
 - **setLiveRay** `[slot]` in [BrainView](/docs/api/disp3-d/brain-view) — Set a semi-transparent ray cylinder between two world-space points.
 - **setLoadingBarVisible** `[slot]` in [ProgressView](/docs/api/disp/progress-view) — Sets whether loading bar is visible.
-- **setLogFile** `[fn]` in [MNELogger](/docs/api/utils/mne-logger) — Additionally writes every message to a log file.
 - **setLooping** `[fn]` in [RtSensorStreamManager](/docs/api/disp3-d/rt-sensor-stream-manager) — Enable or disable looping of the streaming queue.
 - **setLooping** `[fn]` in [SourceEstimateManager](/docs/api/disp3-d/source-estimate-manager) — Enable or disable looping of the streaming queue.
 - **setLoopState** `[fn]` in [RtSensorDataController](/docs/api/disp3-d/rt-sensor-data-controller) — Enable or disable looping (replay data when queue is exhausted).
@@ -6552,7 +6555,7 @@ Index of 6610 public class members (functions, variables, typedefs, enums) acros
 - **write** `[fn]` in [FileByteStream](/docs/api/utils/file-byte-stream) — Writes `bytes` bytes at the current position, overwriting or extending the stream.
 - **write** `[fn]` in [FineCalibration](/docs/api/dsp/fine-calibration) — Write fine calibration to a .dat file.
 - **write** `[fn]` in [InvSourceEstimate](/docs/api/inv/inv-source-estimate) — Writes the estimate as an .stc file, as MNE-C's mne_write_stc_file and mne.SourceEstimate.save do.
-- **write** `[fn]` in [Log](/docs/api/utils/log) — Hands `message` to the current sink.
+- **write** `[fn]` in [Log](/docs/api/utils/log) — Hands `message` to the current sink, unless `level` is below `level()`.
 - **write** `[fn]` in [MemoryByteStream](/docs/api/utils/memory-byte-stream) — Writes `bytes` bytes at the current position, overwriting or extending the stream.
 - **write** `[fn]` in [MnaIO](/docs/api/mna/mna-io) — Write an MNA project to file.
 - **write** `[fn]` in [MnaProject](/docs/api/mna/mna-project) — Write an MNA project to file.

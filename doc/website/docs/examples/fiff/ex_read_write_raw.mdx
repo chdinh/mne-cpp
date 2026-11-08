@@ -59,6 +59,7 @@ The documented classes this example uses most:
 |---|---|
 | [`FiffRawData`](../../api/fiff/fiff-raw-data.mdx) | FIFF I/O |
 | [`FiffStream`](../../api/fiff/fiff-stream.mdx) | FIFF I/O |
+| [`Log`](../../api/utils/log.mdx) | Utilities |
 
 ## Source
 
@@ -88,7 +89,7 @@ The documented classes this example uses most:
 #include <math.h>
 
 #include <fiff/fiff.h>
-#include <utils/generics/mne_logger.h>
+#include <utils/logger/log.h>
 
 //=============================================================================================================
 // QT INCLUDES
@@ -121,7 +122,7 @@ using namespace Eigen;
  */
 int main(int argc, char* argv[])
 {
-    qInstallMessageHandler(MNELogger::customLogWriter);
+    UTILSLIB::Log::install_qt_message_handler();
     QCoreApplication a(argc, argv);
 
     // Command Line Parser

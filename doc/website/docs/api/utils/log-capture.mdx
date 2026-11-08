@@ -7,7 +7,7 @@ sidebar_position: 68
 
 # LogCapture
 
-**Namespace:** `UTILSLIB` &nbsp;·&nbsp; **Library:** Utilities Library &nbsp;·&nbsp; **Source:** [`utils/generics/log.h`](https://github.com/mne-tools/mne-cpp/blob/staging/src/libraries/utils/generics/log.h)
+**Namespace:** `UTILSLIB` &nbsp;·&nbsp; **Library:** Utilities Library &nbsp;·&nbsp; **Source:** [`utils/logger/log.h`](https://github.com/mne-tools/mne-cpp/blob/staging/src/libraries/utils/logger/log.h)
 
 `#include <utils/log.h>`
 
@@ -17,7 +17,7 @@ class UTILSLIB::LogCapture
 
 Records every message instead of passing it on, while it exists; replaces `QTest::ignoreMessage`.
 
-The sink installed before is restored on destruction, so captures nest when destroyed in reverse order.
+Records every level; the sink and level before are restored on destruction, so captures nest when destroyed in reverse order.
 
 ```cpp title="src/examples/ex_utils/main.cpp"
 LogCapture capture; // in a test: record instead of printing
@@ -87,7 +87,7 @@ Forgets the messages recorded so far.
 
 Utilities library: buffers, observers, logging, file formats, montages, layouts and reports.
 
-````cpp title="src/examples/ex_utils/main.cpp, line 166"
+````cpp title="src/examples/ex_utils/main.cpp, line 165"
 LogCapture capture; // in a test: record instead of printing
 Log::warning("channel MEG 0113 is flat");
 const int flat = capture.count(Log::Level::Warning, "flat");
@@ -96,4 +96,10 @@ ok &= expect(flat == 1 && capture.entries().size() == 1, "LogCapture recorded th
 
 ## Authors of this file
 
+- Mainak Jas &lt;mainakjas@gmail.com&gt;
+- Ruben Doerfel &lt;doerfelruben@aol.com&gt;
+- Lorenz Esch &lt;lorenz.esch@tu-ilmenau.de&gt;
+- Juan GPC &lt;jgarciaprieto@mgh.harvard.edu&gt;
+- Gabriel Motta &lt;gabrielbenmotta@gmail.com&gt;
+- Johannes Vorwerk &lt;johannes.vorwerk@umit.at&gt;
 - Christoph Dinh &lt;christoph.dinh@mne-cpp.org&gt;

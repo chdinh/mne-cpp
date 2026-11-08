@@ -473,7 +473,6 @@ const apiSidebar: SidebarsConfig['apiSidebar'] = [
         'api/utils/i-observer',
         'api/utils/layout-loader',
         'api/utils/layout-maker',
-        'api/utils/mne-logger',
         'api/utils/numerics',
         'api/utils/parks-mc-clellan',
         'api/utils/python-runner',

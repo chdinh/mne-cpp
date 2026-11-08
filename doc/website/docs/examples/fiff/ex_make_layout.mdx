@@ -62,6 +62,7 @@ The documented classes this example uses most:
 | [`FiffRawData`](../../api/fiff/fiff-raw-data.mdx) | FIFF I/O |
 | [`LayoutLoader`](../../api/utils/layout-loader.mdx) | Utilities |
 | [`LayoutMaker`](../../api/utils/layout-maker.mdx) | Utilities |
+| [`Log`](../../api/utils/log.mdx) | Utilities |
 
 ## Used in the API reference
 
@@ -96,7 +97,7 @@ The documented classes this example uses most:
 
 #include <utils/layoutmaker.h>
 #include <utils/layoutloader.h>
-#include <utils/generics/mne_logger.h>
+#include <utils/logger/log.h>
 
 #include <fiff/fiff.h>
 
@@ -134,7 +135,7 @@ int main(int argc, char* argv[])
     // Please notice that this example only works in release mode.
     // Debug mode somehow corrupts the simplex coder. ToDo: Fix this!
     //
-    qInstallMessageHandler(MNELogger::customLogWriter);
+    UTILSLIB::Log::install_qt_message_handler();
     QCoreApplication a(argc, argv);
 
     // Command Line Parser

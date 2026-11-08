@@ -69,6 +69,7 @@ The documented classes this example uses most:
 |---|---|
 | [`FigureExporter`](../../api/disp/figure-exporter.mdx) | Visualization |
 | [`FiffEvoked`](../../api/fiff/fiff-evoked.mdx) | FIFF I/O |
+| [`Log`](../../api/utils/log.mdx) | Utilities |
 | [`Plot`](../../api/disp/plot.mdx) | Visualization |
 | [`Spectrogram`](../../api/utils/spectrogram.mdx) | Utilities |
 | [`TFplot`](../../api/disp/t-fplot.mdx) | Visualization |
@@ -103,7 +104,7 @@ The documented classes this example uses most:
 #include <fiff/fiff.h>
 
 #include <dsp/spectrogram.h>
-#include <utils/generics/mne_logger.h>
+#include <utils/logger/log.h>
 
 #include <disp/plots/tfplot.h>
 #include <disp/plots/helpers/figureexporter.h>
@@ -140,7 +141,7 @@ using namespace Eigen;
  */
 int main(int argc, char* argv[])
 {
-    qInstallMessageHandler(MNELogger::customLogWriter);
+    UTILSLIB::Log::install_qt_message_handler();
     QApplication a(argc, argv);
 
     // Command Line Parser
