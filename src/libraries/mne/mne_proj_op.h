@@ -25,6 +25,7 @@
 
 #include "mne_global.h"
 
+#include <filesystem>
 #include <string>
 #include <vector>
 #include "mne_named_matrix.h"
@@ -120,7 +121,7 @@ public:
      * @param[in] desc       Human-readable description of the projection.
      * @param[in] is_active  Whether the item is active on load.
      */
-    void add_item_active(const MNENamedMatrix* vecs, int kind, const QString& desc, bool is_active);
+    void add_item_active(const MNENamedMatrix* vecs, int kind, const std::string& desc, bool is_active);
 
     /**
      * @brief Add a projection item that is active by default.
@@ -131,7 +132,7 @@ public:
      * @param[in] kind   Projection kind constant.
      * @param[in] desc   Human-readable description of the projection.
      */
-    void add_item(const MNENamedMatrix* vecs, int kind, const QString& desc);
+    void add_item(const MNENamedMatrix* vecs, int kind, const std::string& desc);
 
     /**
      * @brief Create a deep copy of this projection operator.
@@ -215,7 +216,7 @@ public:
      * @return The loaded projection operator, or NULL on error.
      *         Caller takes ownership.
      */
-    static std::unique_ptr<MNEProjOp> read(const QString& name);
+    static std::unique_ptr<MNEProjOp> read(const std::filesystem::path& name);
 
     /**
      * @brief Load and combine SSP projection operators from files for the selected channels.
@@ -235,7 +236,7 @@ public:
      *
      * @return true on success, false on read error.
      */
-    static bool makeProjection(const std::vector<QString>& projnames,
+    static bool makeProjection(const std::vector<std::filesystem::path>& projnames,
                                const std::vector<FIFFLIB::FiffChInfo>& chs,
                                int nch,
                                std::unique_ptr<MNEProjOp>& result);
@@ -250,7 +251,7 @@ public:
      * @param[in]      list_data  If true, print full vector data.
      * @param[in]      exclude    Channel names to exclude from the display.
      */
-    void report_data(QTextStream& out, const QString& tag, bool list_data, const StringList& exclude);
+    void report_data(QTextStream& out, const std::string& tag, bool list_data, const StringList& exclude);
 
     /**
      * Write a one-line-per-item summary of all projection items to a text
@@ -259,7 +260,7 @@ public:
      * @param[in, out] out   The text stream to write to.
      * @param[in]      tag   Prefix string printed before each line.
      */
-    void report(QTextStream& out, const QString& tag);
+    void report(QTextStream& out, const std::string& tag);
 
     //=========================================================================================================
     /**

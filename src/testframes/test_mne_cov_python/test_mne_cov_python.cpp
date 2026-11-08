@@ -128,7 +128,7 @@ void TestMneCovPython::initTestCase()
     QVERIFY(std::abs(m_evoked.times[200] - 0.1331968087722586) < 1e-6);
     m_raw = m_evoked.data.col(200).cast<float>();
 
-    QVERIFY(MNEProjOp::makeProjection({aveFile.fileName()}, m_evoked.info.chs, static_cast<int>(m_names.size()), m_proj));
+    QVERIFY(MNEProjOp::makeProjection({aveFile.fileName().toStdU16String()}, m_evoked.info.chs, static_cast<int>(m_names.size()), m_proj));
     QVERIFY(m_proj);
     QCOMPARE(m_proj->assign_channels(m_names, static_cast<int>(m_names.size())), 0);
     QCOMPARE(m_proj->make_proj(), 0);
@@ -142,7 +142,7 @@ void TestMneCovPython::initTestCase()
 
 std::unique_ptr<MNECovMatrix> TestMneCovPython::projectedNoise() const
 {
-    auto cov = MNECovMatrix::read(m_covPath, FIFFV_MNE_NOISE_COV);
+    auto cov = MNECovMatrix::read(m_covPath.toStdU16String(), FIFFV_MNE_NOISE_COV);
     if (!cov)
         return nullptr;
     auto picked = cov->pick_chs_omit(m_names, static_cast<int>(m_names.size()), false, m_evoked.info.chs);
@@ -164,7 +164,7 @@ double TestMneCovPython::whitenedNorm2(const MNECovMatrix& cov, const VectorXf& 
 
 void TestMneCovPython::readsHeader()
 {
-    auto cov = MNECovMatrix::read(m_covPath, FIFFV_MNE_NOISE_COV);
+    auto cov = MNECovMatrix::read(m_covPath.toStdU16String(), FIFFV_MNE_NOISE_COV);
     QVERIFY(cov);
     QCOMPARE(cov->ncov, 366);
     QCOMPARE(cov->nfree, 15972);
@@ -229,7 +229,7 @@ void TestMneCovPython::readsPrecomputedEigen()
     const QString path = m_dir.filePath("eig-cov.fif");
     QVERIFY(prepared.save(path.toStdString()));
 
-    auto read = MNECovMatrix::read(path, prepared.kind);
+    auto read = MNECovMatrix::read(path.toStdU16String(), prepared.kind);
     QVERIFY(read);
     QCOMPARE(static_cast<int>(read->lambda.size()), 305);
     QCOMPARE(static_cast<int>(read->eigen.rows()), 305);
@@ -264,7 +264,7 @@ void TestMneCovPython::readsDiagonal()
     const QString path = m_dir.filePath("diag-cov.fif");
     QVERIFY(adHoc.save(path.toStdString()));
 
-    auto read = MNECovMatrix::read(path, FIFFV_MNE_NOISE_COV);
+    auto read = MNECovMatrix::read(path.toStdU16String(), FIFFV_MNE_NOISE_COV);
     QVERIFY(read);
     QVERIFY(read->is_diag());
     QCOMPARE(read->ncov, 305);
@@ -284,7 +284,7 @@ void TestMneCovPython::readsDiagonal()
 
 void TestMneCovPython::rejectsBadInput()
 {
-    auto cov = MNECovMatrix::read(m_covPath, FIFFV_MNE_NOISE_COV);
+    auto cov = MNECovMatrix::read(m_covPath.toStdU16String(), FIFFV_MNE_NOISE_COV);
     QVERIFY(cov);
     QVERIFY(!cov->pick_chs_omit(StringList{"NOT A CHANNEL"}, 1, false, {}));
     QVERIFY(!cov->pick_chs_omit({}, 0, false, {}));
@@ -295,16 +295,16 @@ void TestMneCovPython::rejectsBadInput()
     QVERIFY(cov->add_inv() != 0);
     QVERIFY(cov->condition(1e-6f, -1) != 0);
 
-    QVERIFY(!MNECovMatrix::read(m_covPath, 99));
-    QVERIFY(!MNECovMatrix::read(m_dir.filePath("missing-cov.fif"), FIFFV_MNE_NOISE_COV));
+    QVERIFY(!MNECovMatrix::read(m_covPath.toStdU16String(), 99));
+    QVERIFY(!MNECovMatrix::read(m_dir.filePath("missing-cov.fif").toStdU16String(), FIFFV_MNE_NOISE_COV));
 
     // Hand-written covariance blocks, read as MNE-C mne_read_cov does: float data is accepted, all-zero
     // double data, a data tag of another type, missing data, a wrong name count or eigenvalues without
     // eigenvectors are not
-    const auto covFile = [this](const QString& name, const std::function<void(FiffStream&)>& body, bool block = true) {
+    const auto covFile = [this](const QString& name, const std::function<void(FiffStream&)>& body, bool block = true) -> std::filesystem::path {
         QFile file(m_dir.filePath(name));
         if (!file.open(QIODevice::WriteOnly))
-            return QString();
+            return {};
         auto stream = FiffStream::start_file(file);
         if (block)
             stream->start_block(FIFFB_MNE_COV);
@@ -314,7 +314,7 @@ void TestMneCovPython::rejectsBadInput()
         if (block)
             stream->end_block(FIFFB_MNE_COV);
         stream->end_file();
-        return file.fileName();
+        return file.fileName().toStdU16String();
     };
     const fiff_int_t three = 3;
     const float floats[6] = {1.0f, 0.0f, 2.0f, 0.0f, 0.0f, 3.0f};

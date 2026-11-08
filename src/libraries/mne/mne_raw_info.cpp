@@ -303,7 +303,7 @@ int MNERawInfo::get_meas_info(FiffStream& stream,
 
 //=============================================================================================================
 
-int MNERawInfo::load(const QString& name, int allow_maxshield, std::unique_ptr<MNERawInfo>& infop)
+int MNERawInfo::load(const std::filesystem::path& name, int allow_maxshield, std::unique_ptr<MNERawInfo>& infop)
 {
     QFile file(name);
     FiffStream stream(&file);

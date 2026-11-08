@@ -391,8 +391,8 @@ void RtClustMne::updateRTMSA(SCMEASLIB::Measurement::SPtr pMeasurement)
 
             if (this->isRunning()) {
                 // Check for artifacts
-                QMap<QString, double> mapReject;
-                mapReject.insert("eog", 150e-06);
+                std::map<std::string, double> mapReject;
+                mapReject.emplace("eog", 150e-06);
 
                 for (qint32 i = 0; i < pRTMSA->getMultiSampleArray().size(); ++i) {
                     bool bArtifactDetected = MNEEpochDataList::checkForArtifact(pRTMSA->getMultiSampleArray()[i],

@@ -544,7 +544,7 @@ private slots:
         if (!QFile::exists(m_sCovFile) || !QFile::exists(m_sRawFile))
             QSKIP("Data not found");
 
-        auto cov = MNECovMatrix::read(m_sCovFile, FIFFV_MNE_NOISE_COV);
+        auto cov = MNECovMatrix::read(m_sCovFile.toStdU16String(), FIFFV_MNE_NOISE_COV);
         QVERIFY(cov != nullptr);
 
         FiffRawData raw(m_sRawFile.toStdString());
@@ -558,7 +558,7 @@ private slots:
         if (!QFile::exists(m_sCovFile))
             QSKIP("Cov file not found");
 
-        auto cov = MNECovMatrix::read(m_sCovFile, FIFFV_MNE_NOISE_COV);
+        auto cov = MNECovMatrix::read(m_sCovFile.toStdU16String(), FIFFV_MNE_NOISE_COV);
         QVERIFY(cov != nullptr);
 
         if (!QFile::exists(m_sRawFile))
@@ -588,7 +588,7 @@ private slots:
         if (!QFile::exists(m_sCovFile) || !QFile::exists(m_sRawFile))
             QSKIP("Data not found");
 
-        auto cov = MNECovMatrix::read(m_sCovFile, FIFFV_MNE_NOISE_COV);
+        auto cov = MNECovMatrix::read(m_sCovFile.toStdU16String(), FIFFV_MNE_NOISE_COV);
         QVERIFY(cov != nullptr);
 
         FiffRawData raw(m_sRawFile.toStdString());

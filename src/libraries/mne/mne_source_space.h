@@ -29,6 +29,8 @@
 
 #include "mne_global.h"
 
+#include <filesystem>
+#include <string>
 #include <vector>
 #include "mne_surface_or_volume.h"
 
@@ -169,8 +171,8 @@ public:
      * @param[in] curv_file   Path to the curvature file (may be empty).
      * @return Unique pointer to the loaded source space, or nullptr on error.
      */
-    static std::unique_ptr<MNESourceSpace> load_surface(const QString& surf_file,
-                                                        const QString& curv_file);
+    static std::unique_ptr<MNESourceSpace> load_surface(const std::filesystem::path& surf_file,
+                                                        const std::filesystem::path& curv_file);
 
     //=========================================================================================================
     /**
@@ -182,8 +184,8 @@ public:
      * @param[in] check_too_many_neighbors  Whether to error on excess neighbors.
      * @return Unique pointer to the loaded source space, or nullptr on error.
      */
-    static std::unique_ptr<MNESourceSpace> load_surface_geom(const QString& surf_file,
-                                                             const QString& curv_file,
+    static std::unique_ptr<MNESourceSpace> load_surface_geom(const std::filesystem::path& surf_file,
+                                                             const std::filesystem::path& curv_file,
                                                              bool add_geometry,
                                                              bool check_too_many_neighbors);
 
@@ -219,13 +221,13 @@ public:
     static void filter_source_space(FilterThreadArg* arg);
 
     static int filter_source_spaces(float limit,
-                                    const QString& bemfile,
+                                    const std::filesystem::path& bemfile,
                                     const FIFFLIB::FiffCoordTrans& mri_head_t,
                                     std::vector<std::unique_ptr<MNESourceSpace>>& spaces,
                                     QTextStream* filtered,
                                     bool use_threads);
 
-    static int read_source_spaces(const QString& name,
+    static int read_source_spaces(const std::filesystem::path& name,
                                   std::vector<std::unique_ptr<MNESourceSpace>>& spaces);
 
     static int transform_source_spaces_to(int coord_frame,
@@ -233,10 +235,10 @@ public:
                                           std::vector<std::unique_ptr<MNESourceSpace>>& spaces);
 
     static int restrict_sources_to_labels(std::vector<std::unique_ptr<MNESourceSpace>>& spaces,
-                                          const QStringList& labels,
+                                          const std::vector<std::filesystem::path>& labels,
                                           int nlabel);
 
-    static int read_label(const QString& label,
+    static int read_label(const std::filesystem::path& label,
                           Eigen::VectorXi& sel);
 
     //=========================================================================================================
@@ -279,7 +281,7 @@ public:
      * @return Sorted vertex numbers for lh and rh, or an empty list if a sphere cannot be read or the grade
      *         maps two icosahedron vertices onto the same surface vertex.
      */
-    static std::vector<Eigen::VectorXi> gradeToVertices(const QString& subjectsDir, const QString& subject, int grade);
+    static std::vector<Eigen::VectorXi> gradeToVertices(const std::filesystem::path& subjectsDir, const std::string& subject, int grade);
 
 private:
     /**

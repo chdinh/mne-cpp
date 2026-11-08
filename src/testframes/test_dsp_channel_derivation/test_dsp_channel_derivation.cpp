@@ -85,7 +85,7 @@ void TestDspChannelDerivation::initTestCase()
 
 void TestDspChannelDerivation::testBuildBipolar()
 {
-    QStringList channels = {"EEG01", "EEG02", "EEG03", "EEG04"};
+    StringList channels = {"EEG01", "EEG02", "EEG03", "EEG04"};
     std::vector<DerivationRule> rules = ChannelDerivation::buildBipolar(channels);
 
     // Bipolar: n-1 pairs
@@ -96,7 +96,7 @@ void TestDspChannelDerivation::testBuildBipolar()
         QCOMPARE(rule.inputWeights.size(), 2);
         double sumWeights = 0;
         for (auto it = rule.inputWeights.begin(); it != rule.inputWeights.end(); ++it) {
-            sumWeights += it.value();
+            sumWeights += it->second;
         }
         QVERIFY(qAbs(sumWeights) < 1e-10); // Weights sum to zero
     }
@@ -106,7 +106,7 @@ void TestDspChannelDerivation::testBuildBipolar()
 
 void TestDspChannelDerivation::testBipolarApply()
 {
-    QStringList channels = {"C1", "C2", "C3"};
+    StringList channels = {"C1", "C2", "C3"};
     int nSamples = 100;
 
     // Create known data
@@ -133,20 +133,28 @@ void TestDspChannelDerivation::testBipolarApply()
 
 void TestDspChannelDerivation::testBipolarNaming()
 {
-    QStringList channels = {"Fp1", "Fp2", "F3"};
+    StringList channels = {"Fp1", "Fp2", "F3"};
     std::vector<DerivationRule> rules = ChannelDerivation::buildBipolar(channels);
 
     // Output names should reflect the bipolar pair
     for (const DerivationRule& rule : rules) {
-        QVERIFY(!rule.outputName.isEmpty());
+        QVERIFY(!rule.outputName.empty());
     }
+
+    // Pairs stay within a shaft, shafts in first-seen order, channels in input order
+    const std::vector<DerivationRule> shafts = ChannelDerivation::buildBipolar({"LH1", "RA1", "LH2", "A'1", "RA2", "LH3", "A'2"});
+    StringList names;
+    for (const DerivationRule& rule : shafts) {
+        names.push_back(rule.outputName);
+    }
+    QCOMPARE(names, (StringList{"LH1-LH2", "LH2-LH3", "RA1-RA2", "A'1-A'2"}));
 }
 
 //=============================================================================================================
 
 void TestDspChannelDerivation::testBuildCommonAverage()
 {
-    QStringList channels = {"C1", "C2", "C3", "C4"};
+    StringList channels = {"C1", "C2", "C3", "C4"};
     std::vector<DerivationRule> rules = ChannelDerivation::buildCommonAverage(channels);
 
     // CAR: one rule per channel
@@ -162,7 +170,7 @@ void TestDspChannelDerivation::testBuildCommonAverage()
 
 void TestDspChannelDerivation::testCommonAverageApply()
 {
-    QStringList channels = {"C1", "C2", "C3"};
+    StringList channels = {"C1", "C2", "C3"};
     int nSamples = 50;
 
     MatrixXd data(3, nSamples);
@@ -183,7 +191,7 @@ void TestDspChannelDerivation::testCommonAverageApply()
 
 void TestDspChannelDerivation::testCommonAverageZeroMean()
 {
-    QStringList channels = {"C1", "C2", "C3", "C4"};
+    StringList channels = {"C1", "C2", "C3", "C4"};
     int nSamples = 100;
 
     MatrixXd data = MatrixXd::Random(4, nSamples);
@@ -202,7 +210,7 @@ void TestDspChannelDerivation::testCommonAverageZeroMean()
 
 void TestDspChannelDerivation::testApplyCustomRules()
 {
-    QStringList channels = {"A", "B", "C"};
+    StringList channels = {"A", "B", "C"};
     int nSamples = 10;
 
     MatrixXd data(3, nSamples);
@@ -215,9 +223,9 @@ void TestDspChannelDerivation::testApplyCustomRules()
     // Custom rule: 2*A + 0.5*B - C
     DerivationRule rule;
     rule.outputName = "custom";
-    rule.inputWeights.insert("A", 2.0);
-    rule.inputWeights.insert("B", 0.5);
-    rule.inputWeights.insert("C", -1.0);
+    rule.inputWeights.emplace("A", 2.0);
+    rule.inputWeights.emplace("B", 0.5);
+    rule.inputWeights.emplace("C", -1.0);
 
     std::vector<DerivationRule> rules;
     rules.push_back(rule);
@@ -233,17 +241,17 @@ void TestDspChannelDerivation::testApplyCustomRules()
 
 void TestDspChannelDerivation::testApplyOutputDimensions()
 {
-    QStringList channels = {"C1", "C2", "C3"};
+    StringList channels = {"C1", "C2", "C3"};
     int nSamples = 50;
     MatrixXd data = MatrixXd::Random(3, nSamples);
 
     // 2 custom rules
     DerivationRule r1, r2;
     r1.outputName = "r1";
-    r1.inputWeights.insert("C1", 1.0);
+    r1.inputWeights.emplace("C1", 1.0);
     r2.outputName = "r2";
-    r2.inputWeights.insert("C2", 1.0);
-    r2.inputWeights.insert("C3", -1.0);
+    r2.inputWeights.emplace("C2", 1.0);
+    r2.inputWeights.emplace("C3", -1.0);
 
     std::vector<DerivationRule> rules = {r1, r2};
     auto [derived, names] = ChannelDerivation::apply(data, channels, rules);
@@ -251,8 +259,8 @@ void TestDspChannelDerivation::testApplyOutputDimensions()
     QCOMPARE(derived.rows(), 2);
     QCOMPARE(derived.cols(), nSamples);
     QCOMPARE(names.size(), 2);
-    QCOMPARE(names[0], QString("r1"));
-    QCOMPARE(names[1], QString("r2"));
+    QCOMPARE(names[0], std::string("r1"));
+    QCOMPARE(names[1], std::string("r2"));
 }
 
 //=============================================================================================================
@@ -261,23 +269,25 @@ void TestDspChannelDerivation::testWriteReadDefinitionFile()
 {
     DerivationRule r1;
     r1.outputName = "Bipolar1";
-    r1.inputWeights.insert("EEG01", 1.0);
-    r1.inputWeights.insert("EEG02", -1.0);
+    r1.inputWeights.emplace("EEG01", 1.0);
+    r1.inputWeights.emplace("EEG02", -1.0);
 
     DerivationRule r2;
     r2.outputName = "Bipolar2";
-    r2.inputWeights.insert("EEG02", 1.0);
-    r2.inputWeights.insert("EEG03", -1.0);
+    r2.inputWeights.emplace("EEG02", 1.0);
+    r2.inputWeights.emplace("EEG03", -1.0);
 
     std::vector<DerivationRule> rules = {r1, r2};
 
-    QString path = m_tempDir.filePath("derivations.json");
+    const std::filesystem::path path = m_tempDir.filePath("derivations.txt").toStdU16String();
     QVERIFY(ChannelDerivation::writeDefinitionFile(path, rules));
 
     std::vector<DerivationRule> loaded = ChannelDerivation::readDefinitionFile(path);
     QCOMPARE(loaded.size(), 2);
-    QCOMPARE(loaded[0].outputName, QString("Bipolar1"));
-    QCOMPARE(loaded[1].outputName, QString("Bipolar2"));
+    QCOMPARE(loaded[0].outputName, std::string("Bipolar1"));
+    QCOMPARE(loaded[1].outputName, std::string("Bipolar2"));
+    QCOMPARE(loaded[0].inputWeights, r1.inputWeights);
+    QCOMPARE(loaded[1].inputWeights, r2.inputWeights);
 }
 
 //=============================================================================================================

@@ -185,7 +185,7 @@ QString defaultVirtualChannelFilePath(const QString& rawFilePath)
 void applySessionFilterToEpochList(MNELIB::MNEEpochDataList& epochList,
                                    const MNEBROWSE::SessionFilter& filter,
                                    const FIFFLIB::FiffInfo& info,
-                                   const QMap<QString, double>& rejectMap)
+                                   const std::map<std::string, double>& rejectMap)
 {
     for (const auto& epoch : epochList) {
         if (epoch.isNull()) {
@@ -193,7 +193,7 @@ void applySessionFilterToEpochList(MNELIB::MNEEpochDataList& epochList,
         }
 
         epoch->epoch = filter.applyToMatrix(epoch->epoch, info);
-        if (!rejectMap.isEmpty()) {
+        if (!rejectMap.empty()) {
             epoch->bReject = MNELIB::MNEEpochDataList::checkForArtifact(epoch->epoch,
                                                                         info,
                                                                         rejectMap);
@@ -3775,12 +3775,9 @@ bool MainWindow::runEvokedComputation(bool promptForSettings)
         selectedEventCodes = filteredEventCodes;
     }
 
-    QMap<QString, double> rejectMap;
+    std::map<std::string, double> rejectMap;
     if (dropRejected) {
-        rejectMap.insert("grad", 2000e-13);
-        rejectMap.insert("mag", 3e-12);
-        rejectMap.insert("eeg", 100e-6);
-        rejectMap.insert("eog", 150e-6);
+        rejectMap = {{"grad", 2000e-13}, {"mag", 3e-12}, {"eeg", 100e-6}, {"eog", 150e-6}};
     }
 
     const QPair<float, float> baseline = applyBaseline
@@ -3795,7 +3792,7 @@ bool MainWindow::runEvokedComputation(bool promptForSettings)
     QStringList epochComments;
     const QSharedPointer<SessionFilter> activeFilter = m_pDataWindow->activeSessionFilter();
     const bool useSessionFilter = activeFilter && activeFilter->isValid();
-    const QMap<QString, double> epochRejectMap = useSessionFilter ? QMap<QString, double>() : rejectMap;
+    const std::map<std::string, double> epochRejectMap = useSessionFilter ? std::map<std::string, double>() : rejectMap;
 
     for (int eventCode : selectedEventCodes) {
         MNELIB::MNEEpochDataList epochList = MNELIB::MNEEpochDataList::readEpochs(raw,

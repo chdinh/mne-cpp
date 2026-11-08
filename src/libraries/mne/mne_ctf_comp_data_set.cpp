@@ -54,7 +54,7 @@ using namespace MNELIB;
 
 //============================= mne_read_forward_solution.c =============================
 
-int mne_read_meg_comp_eeg_ch_info_32(const QString& name,
+int mne_read_meg_comp_eeg_ch_info_32(const std::filesystem::path& name,
                                      std::vector<FIFFLIB::FiffChInfo>& megp, /* MEG channels */
                                      int* nmegp,
                                      std::vector<FIFFLIB::FiffChInfo>& meg_compp,
@@ -158,7 +158,7 @@ int mne_read_meg_comp_eeg_ch_info_32(const QString& name,
         /*
      * Try again in a more general fashion
      */
-        t = FiffCoordTrans::read(name.toStdU16String(), FIFFV_COORD_DEVICE, FIFFV_COORD_HEAD).value_or(FiffCoordTrans());
+        t = FiffCoordTrans::read(name, FIFFV_COORD_DEVICE, FIFFV_COORD_HEAD).value_or(FiffCoordTrans());
         if (t.empty()) {
             qCritical("MEG -> head coordinate transformation not found.");
             stream.close();
@@ -312,7 +312,7 @@ MNECTFCompDataSet::~MNECTFCompDataSet()
 
 //=============================================================================================================
 
-std::unique_ptr<MNECTFCompDataSet> MNECTFCompDataSet::read(const QString& name)
+std::unique_ptr<MNECTFCompDataSet> MNECTFCompDataSet::read(const std::filesystem::path& name)
 /*
      * Read all CTF compensation data from a given file
      */
@@ -409,7 +409,7 @@ std::unique_ptr<MNECTFCompDataSet> MNECTFCompDataSet::read(const QString& name)
         one->calibrated = calibrated;
 
         if (one->calibrate(set->chs, set->nch, true) == FAIL) {
-            qWarning("Warning: Compensation data for '%s' omitted\n", explain_comp(one->kind).toUtf8().constData());
+            qWarning("Warning: Compensation data for '%s' omitted\n", explain_comp(one->kind).c_str());
         } else {
             set->comps.push_back(std::move(one));
             set->ncomp++;
@@ -489,10 +489,10 @@ int MNECTFCompDataSet::make_comp(const std::vector<FiffChInfo>& chList,
     }
     if (!this_comp) {
         qCritical("Did not find the desired compensation data : %s",
-                  explain_comp(map_comp_kind(first_comp)).toUtf8().constData());
+                  explain_comp(map_comp_kind(first_comp)).c_str());
         return FAIL;
     }
-    qInfo("\tDesired compensation data (%s) found.\n", explain_comp(map_comp_kind(first_comp)).toUtf8().constData());
+    qInfo("\tDesired compensation data (%s) found.\n", explain_comp(map_comp_kind(first_comp)).c_str());
     /*
         * Find the compensation channels
         */
@@ -581,7 +581,7 @@ int MNECTFCompDataSet::set_comp(std::vector<FIFFLIB::FiffChInfo>& chs,
         }
     }
     qInfo("A new compensation value (%s) was assigned to %d MEG channels.\n",
-          explain_comp(map_comp_kind(comp)).toUtf8().constData(), nset);
+          explain_comp(map_comp_kind(comp)).c_str(), nset);
     return nset;
 }
 
@@ -787,7 +787,7 @@ int MNECTFCompDataSet::map_comp_kind(int grad)
 
 //=============================================================================================================
 
-QString MNECTFCompDataSet::explain_comp(int kind)
+std::string MNECTFCompDataSet::explain_comp(int kind)
 {
     static const struct
     {
@@ -803,8 +803,8 @@ QString MNECTFCompDataSet::explain_comp(int kind)
 
     for (k = 0; explain[k].kind != MNE_CTFV_COMP_UNKNOWN; k++)
         if (explain[k].kind == kind)
-            return QString::fromLatin1(explain[k].expl);
-    return QString::fromLatin1(explain[k].expl);
+            return QString::fromLatin1(explain[k].expl).toStdString();
+    return QString::fromLatin1(explain[k].expl).toStdString();
 }
 
 //=============================================================================================================
@@ -844,7 +844,7 @@ int MNECTFCompDataSet::set_compensation(int compensate_to,
         * Are we there already?
         */
     if (current && current->mne_kind == compensate_to) {
-        qInfo("No further compensation necessary (comp = %s)\n", explain_comp(current->kind).toUtf8().constData());
+        qInfo("No further compensation necessary (comp = %s)\n", explain_comp(current->kind).c_str());
         current.reset();
         return OK;
     }
@@ -865,8 +865,8 @@ int MNECTFCompDataSet::set_compensation(int compensate_to,
             return FAIL;
         }
         qInfo("Compensation set up as requested (%s -> %s).\n",
-              explain_comp(map_comp_kind(comp_was)).toUtf8().constData(),
-              explain_comp(current->kind).toUtf8().constData());
+              explain_comp(map_comp_kind(comp_was)).c_str(),
+              explain_comp(current->kind).c_str());
     }
     return OK;
 }

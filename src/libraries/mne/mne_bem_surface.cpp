@@ -240,7 +240,7 @@ bool MNEBemSurface::addVertexNormals()
 
 //=============================================================================================================
 
-QString MNEBemSurface::id_name(int id)
+std::string MNEBemSurface::id_name(int id)
 {
     switch (id) {
         case FIFFV_BEM_SURF_ID_BRAIN:

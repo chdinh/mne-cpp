@@ -201,8 +201,8 @@ Expected<void> MNEForwardSolution::write(const std::filesystem::path& path) cons
     {
         t_pStream->start_block(FIFFB_MNE_PARENT_MRI_FILE);
 
-        if (!mri_filename.isEmpty())
-            t_pStream->write_string(FIFF_MNE_FILE_NAME, mri_filename.toStdString());
+        if (!mri_filename.empty())
+            t_pStream->write_string(FIFF_MNE_FILE_NAME, mri_filename);
         if (!mri_id.empty())
             t_pStream->write_id(FIFF_PARENT_FILE_ID, mri_id);
         t_pStream->write_coord_trans(mri_head_t);
@@ -362,9 +362,9 @@ MNEForwardSolution MNEForwardSolution::cluster_forward_solution(const FsAnnotati
                                                                 MatrixXd& p_D,
                                                                 const FiffCov& p_pNoise_cov,
                                                                 const FiffInfo& p_pInfo,
-                                                                QString p_sMethod) const
+                                                                const std::string& p_sMethod) const
 {
-    qInfo("Cluster forward solution using %s.", p_sMethod.toUtf8().constData());
+    qInfo("Cluster forward solution using %s.", p_sMethod.c_str());
 
     MNEForwardSolution p_fwdOut = MNEForwardSolution(*this);
 
@@ -576,7 +576,7 @@ MNEForwardSolution MNEForwardSolution::cluster_forward_solution(const FsAnnotati
                 p_fwdOut.src.hemisphereAt(h)->cluster_info.clusterSource_rr.push_back(clusterSource_rr);
                 p_fwdOut.src.hemisphereAt(h)->cluster_info.clusterDistances.push_back(clusterDistance);
                 p_fwdOut.src.hemisphereAt(h)->cluster_info.clusterLabelIds.push_back(label_ids[itOut->iLabelIdxOut]);
-                p_fwdOut.src.hemisphereAt(h)->cluster_info.clusterLabelNames.push_back(t_CurrentColorTable.getNames()[itOut->iLabelIdxOut]);
+                p_fwdOut.src.hemisphereAt(h)->cluster_info.clusterLabelNames.push_back(t_CurrentColorTable.getNames()[itOut->iLabelIdxOut].toStdString());
             }
 
             //

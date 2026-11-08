@@ -205,7 +205,7 @@ private slots:
 
     void bemSurface_idName()
     {
-        QString brain = MNEBemSurface::id_name(FIFFV_BEM_SURF_ID_BRAIN);
+        QString brain = QString::fromStdString(MNEBemSurface::id_name(FIFFV_BEM_SURF_ID_BRAIN));
         QVERIFY(!brain.isEmpty());
     }
 

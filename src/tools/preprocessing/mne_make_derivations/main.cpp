@@ -74,13 +74,13 @@ int main(int argc, char* argv[])
         return 1;
     }
 
-    const std::optional<MNEDerivSet> derivations = MNEDerivSet::readText(inFile);
+    const std::optional<MNEDerivSet> derivations = MNEDerivSet::readText(inFile.toStdU16String());
     if (!derivations) {
         qCritical("No derivations read from: %s", qPrintable(inFile));
         return 1;
     }
     qInfo("Read %d derivation(s) from %s", derivations->count(), qPrintable(inFile));
-    if (!derivations->write(outFile)) {
+    if (!derivations->write(outFile.toStdU16String())) {
         qCritical("Cannot write output file: %s", qPrintable(outFile));
         return 1;
     }

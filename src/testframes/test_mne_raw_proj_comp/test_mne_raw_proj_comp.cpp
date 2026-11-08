@@ -403,7 +403,7 @@ void TestMneRawProjComp::ctfCompDataSet_defaultConstruction()
 
 void TestMneRawProjComp::ctfCompDataSet_readFromRawFile()
 {
-    auto compSet = MNECTFCompDataSet::read(rawPath());
+    auto compSet = MNECTFCompDataSet::read(rawPath().toStdU16String());
     QVERIFY(compSet != nullptr);
     // Neuromag data typically has no CTF compensation but the read should succeed
     QVERIFY(compSet->ncomp >= 0);
@@ -411,7 +411,7 @@ void TestMneRawProjComp::ctfCompDataSet_readFromRawFile()
 
 void TestMneRawProjComp::ctfCompDataSet_makeCompensator()
 {
-    auto compSet = MNECTFCompDataSet::read(rawPath());
+    auto compSet = MNECTFCompDataSet::read(rawPath().toStdU16String());
     if (compSet && compSet->ncomp > 0) {
         FiffRawData rawData(rawPath().toStdString());
         // make_comp(chs, nch, compchs, ncomp)
@@ -428,8 +428,8 @@ void TestMneRawProjComp::ctfCompDataSet_makeCompensator()
 void TestMneRawProjComp::deriv_defaultConstruction()
 {
     MNEDeriv deriv;
-    QVERIFY(deriv.filename.isEmpty());
-    QVERIFY(deriv.shortname.isEmpty());
+    QVERIFY(deriv.filename.empty());
+    QVERIFY(deriv.shortname.empty());
     QVERIFY(!deriv.deriv_data);
 }
 
@@ -446,26 +446,26 @@ void TestMneRawProjComp::derivSet_textFifAndValidation()
                "neg = - 2 * \"EEG 003\"\n"
                "none = \"EEG 001\" - \"EEG 001\"\n");
     text.close();
-    const auto set = MNEDerivSet::readText(text.fileName());
+    const auto set = MNEDerivSet::readText(text.fileName().toStdU16String());
     QVERIFY(set);
     QCOMPARE(set->count(), 3);
     const std::vector<MNEDerivSet::Definition> defs = set->definitions();
-    QCOMPARE(defs[0].first, QString("EEG 001-EEG 002"));
-    QCOMPARE(defs[0].second, (QMap<QString, double>{{"EEG 001", 1.0}, {"EEG 002", -1.0}}));
-    QCOMPARE(defs[1].second.value("EEG 003"), -0.5);
-    QCOMPARE(defs[2].second, (QMap<QString, double>{{"EEG 003", -2.0}}));
+    QCOMPARE(defs[0].first, std::string("EEG 001-EEG 002"));
+    QCOMPARE(defs[0].second, (std::map<std::string, double>{{"EEG 001", 1.0}, {"EEG 002", -1.0}}));
+    QCOMPARE(defs[1].second.at("EEG 003"), -0.5);
+    QCOMPARE(defs[2].second, (std::map<std::string, double>{{"EEG 003", -2.0}}));
 
     // FIFF round trip of the FIFFB_MNE_DERIVATIONS block; FIFF name lists carry no spaces.
     MNEDerivSet both = *set;
     both.append(MNEDerivSet::fromDefinitions({{"EOG", {{"EOG061", 1.0}}}}, "eog"));
-    QVERIFY(both.write(dir.filePath("deriv.fif")));
-    const auto back = MNEDerivSet::read(dir.filePath("deriv.fif"));
+    QVERIFY(both.write(dir.filePath("deriv.fif").toStdU16String()));
+    const auto back = MNEDerivSet::read(dir.filePath("deriv.fif").toStdU16String());
     QVERIFY(back);
     QCOMPARE(static_cast<int>(back->derivs.size()), 2);
     QCOMPARE(back->count(), 4);
-    QCOMPARE(back->definitions()[0].first, QString("EEG001-EEG002"));
-    QCOMPARE(back->definitions()[1].second.value("EEG003"), -0.5);
-    QCOMPARE(back->definitions()[3].second, (QMap<QString, double>{{"EOG061", 1.0}}));
+    QCOMPARE(back->definitions()[0].first, std::string("EEG001-EEG002"));
+    QCOMPARE(back->definitions()[1].second.at("EEG003"), -0.5);
+    QCOMPARE(back->definitions()[3].second, (std::map<std::string, double>{{"EOG061", 1.0}}));
 
     // Validation: inputs must exist and share kind and unit.
     std::vector<FiffChInfo> chs;
@@ -487,8 +487,8 @@ void TestMneRawProjComp::derivSet_textFifAndValidation()
     QVERIFY(bad.open(QIODevice::WriteOnly | QIODevice::Text));
     bad.write("a = b + c\nd = e = f\n"); // an equal sign after inputs
     bad.close();
-    QVERIFY(!MNEDerivSet::readText(bad.fileName()));
-    QVERIFY(!MNEDerivSet().write(dir.filePath("none.fif")));
+    QVERIFY(!MNEDerivSet::readText(bad.fileName().toStdU16String()));
+    QVERIFY(!MNEDerivSet().write(dir.filePath("none.fif").toStdU16String()));
 }
 
 //=============================================================================================================
@@ -529,7 +529,7 @@ void TestMneRawProjComp::projOp_addItemAndDuplicate()
 
 void TestMneRawProjComp::projOp_readFromFile()
 {
-    auto proj = MNEProjOp::read(rawPath());
+    auto proj = MNEProjOp::read(rawPath().toStdU16String());
     QVERIFY(proj != nullptr);
     QVERIFY(proj->nitems > 0); // Neuromag data should have SSP projectors
 
@@ -568,25 +568,25 @@ void TestMneRawProjComp::projOp_readFromFile()
         stream->end_file();
         return file.fileName();
     };
-    const auto empty = MNEProjOp::read(projFile("none.fif", 0, -1, false));
+    const auto empty = MNEProjOp::read(projFile("none.fif", 0, -1, false).toStdU16String());
     QVERIFY(empty && empty->nitems == 0);
-    const auto item = MNEProjOp::read(projFile("item.fif", 0, -1));
+    const auto item = MNEProjOp::read(projFile("item.fif", 0, -1).toStdU16String());
     QVERIFY(item && item->nitems == 1);
     QCOMPARE(item->items[0].desc, QStringLiteral("PCA v1"));
     QVERIFY(item->items[0].active);
-    const auto described = MNEProjOp::read(projFile("described.fif", FIFF_NAME, 2));
+    const auto described = MNEProjOp::read(projFile("described.fif", FIFF_NAME, 2).toStdU16String());
     QVERIFY(described && described->items[0].desc == QStringLiteral("v1"));
-    const auto inactive = MNEProjOp::read(projFile("inactive.fif", FIFF_MNE_PROJ_ITEM_ACTIVE, -1));
+    const auto inactive = MNEProjOp::read(projFile("inactive.fif", FIFF_MNE_PROJ_ITEM_ACTIVE, -1).toStdU16String());
     QVERIFY(inactive && !inactive->items[0].active);
-    QVERIFY(!MNEProjOp::read(projFile("nchan0.fif", 0, 0)));
-    QVERIFY(!MNEProjOp::read(projFile("nchan3.fif", 0, 3)));
+    QVERIFY(!MNEProjOp::read(projFile("nchan0.fif", 0, 0).toStdU16String()));
+    QVERIFY(!MNEProjOp::read(projFile("nchan3.fif", 0, 3).toStdU16String()));
     for (const fiff_int_t tag : {FIFF_PROJ_ITEM_CH_NAME_LIST, FIFF_PROJ_ITEM_KIND, FIFF_PROJ_ITEM_NVEC, FIFF_PROJ_ITEM_VECTORS})
-        QVERIFY2(!MNEProjOp::read(projFile(QStringLiteral("skip%1.fif").arg(tag), tag, -1)), qPrintable(QString::number(tag)));
+        QVERIFY2(!MNEProjOp::read(projFile(QStringLiteral("skip%1.fif").arg(tag), tag, -1).toStdU16String()), qPrintable(QString::number(tag)));
 }
 
 void TestMneRawProjComp::projOp_assignChannelsAndMake()
 {
-    auto proj = MNEProjOp::read(rawPath());
+    auto proj = MNEProjOp::read(rawPath().toStdU16String());
     QVERIFY(proj != nullptr);
 
     // Read channel names from the raw file
@@ -606,7 +606,7 @@ void TestMneRawProjComp::projOp_assignChannelsAndMake()
 
 void TestMneRawProjComp::projOp_affectChannels()
 {
-    auto proj = MNEProjOp::read(rawPath());
+    auto proj = MNEProjOp::read(rawPath().toStdU16String());
     QVERIFY(proj != nullptr);
 
     FiffRawData rawData(rawPath().toStdString());
@@ -663,12 +663,12 @@ void TestMneRawProjComp::projOp_projectVector()
 
 void TestMneRawProjComp::projOp_report()
 {
-    auto proj = MNEProjOp::read(rawPath());
+    auto proj = MNEProjOp::read(rawPath().toStdU16String());
     QVERIFY(proj != nullptr);
 
     QString output;
     QTextStream stream(&output);
-    proj->report(stream, QStringLiteral("Test"));
+    proj->report(stream, "Test");
     QVERIFY(!output.isEmpty());
 }
 
@@ -709,13 +709,13 @@ void TestMneRawProjComp::rawInfo_defaultConstruction()
     MNERawInfo info;
     QCOMPARE(info.nchan, 0);
     QVERIFY(qFuzzyIsNull(info.sfreq));
-    QVERIFY(info.filename.isEmpty());
+    QVERIFY(info.filename.empty());
 }
 
 void TestMneRawProjComp::rawInfo_loadFromFile()
 {
     std::unique_ptr<MNERawInfo> info;
-    int result = MNERawInfo::load(rawPath(), 0, info);
+    int result = MNERawInfo::load(rawPath().toStdU16String(), 0, info);
     QCOMPARE(result, 0);
     QVERIFY(info != nullptr);
     QVERIFY(info->nchan > 0);
@@ -783,7 +783,7 @@ void TestMneRawProjComp::rawData_defaultConstruction()
     MNERawData raw;
     QCOMPARE(raw.nsamp, 0);
     QCOMPARE(raw.nbad, 0);
-    QVERIFY(raw.filename.isEmpty());
+    QVERIFY(raw.filename.empty());
     QVERIFY(!raw.info);
     QVERIFY(!raw.proj);
     QVERIFY(!raw.comp);
@@ -795,7 +795,7 @@ void TestMneRawProjComp::rawData_openFile()
 {
     MNEFilterDef filter;
     std::unique_ptr<MNERawData> raw(
-        MNERawData::open_file(rawPath(), 0, 0, filter));
+        MNERawData::open_file(rawPath().toStdU16String(), 0, 0, filter));
     QVERIFY(raw != nullptr);
     QVERIFY(raw->nsamp > 0);
     QVERIFY(raw->info != nullptr);
@@ -809,7 +809,7 @@ void TestMneRawProjComp::rawData_openFileComp()
     MNEFilterDef filter;
     // Open with explicit compensation grade 0
     std::unique_ptr<MNERawData> raw(
-        MNERawData::open_file_comp(rawPath(), 0, 0, filter, 0));
+        MNERawData::open_file_comp(rawPath().toStdU16String(), 0, 0, filter, 0));
     QVERIFY(raw != nullptr);
     QVERIFY(raw->nsamp > 0);
     QCOMPARE(raw->comp_now, 0);
@@ -819,11 +819,11 @@ void TestMneRawProjComp::rawData_members()
 {
     MNEFilterDef filter;
     std::unique_ptr<MNERawData> raw(
-        MNERawData::open_file(rawPath(), 0, 0, filter));
+        MNERawData::open_file(rawPath().toStdU16String(), 0, 0, filter));
     QVERIFY(raw != nullptr);
 
     // Verify file-level metadata
-    QVERIFY(!raw->filename.isEmpty());
+    QVERIFY(!raw->filename.empty());
     QVERIFY(raw->stream != nullptr);
     QVERIFY(raw->first_samp >= 0);
     QVERIFY(raw->nsamp > 0);
@@ -844,7 +844,7 @@ void TestMneRawProjComp::rawData_loadBuffer()
 {
     MNEFilterDef filter;
     std::unique_ptr<MNERawData> raw(
-        MNERawData::open_file(rawPath(), 0, 0, filter));
+        MNERawData::open_file(rawPath().toStdU16String(), 0, 0, filter));
     QVERIFY(raw != nullptr);
     QVERIFY(!raw->bufs.empty());
 
@@ -859,7 +859,7 @@ void TestMneRawProjComp::rawData_pickData()
 {
     MNEFilterDef filter;
     std::unique_ptr<MNERawData> raw(
-        MNERawData::open_file(rawPath(), 0, 0, filter));
+        MNERawData::open_file(rawPath().toStdU16String(), 0, 0, filter));
     QVERIFY(raw != nullptr);
 
     // Create a simple channel selection for 3 MEG channels
@@ -908,7 +908,7 @@ void TestMneRawProjComp::rawData_setupFilterBufs()
     filter.lowpass_width = 5.0f;
 
     std::unique_ptr<MNERawData> raw(
-        MNERawData::open_file(rawPath(), 0, 0, filter));
+        MNERawData::open_file(rawPath().toStdU16String(), 0, 0, filter));
     QVERIFY(raw != nullptr);
 
     // setup_filter_bufs should have been called during open
@@ -921,7 +921,7 @@ void TestMneRawProjComp::rawData_compensateBuffer()
 {
     MNEFilterDef filter;
     std::unique_ptr<MNERawData> raw(
-        MNERawData::open_file(rawPath(), 0, 0, filter));
+        MNERawData::open_file(rawPath().toStdU16String(), 0, 0, filter));
     QVERIFY(raw != nullptr);
     QVERIFY(!raw->bufs.empty());
 
@@ -1028,7 +1028,7 @@ void TestMneRawProjComp::measDataSet_defaultConstruction()
     QCOMPARE(ds.np, 0);
     QCOMPARE(ds.nave, 1);
     QCOMPARE(ds.first, 0);
-    QVERIFY(ds.comment.isEmpty());
+    QVERIFY(ds.comment.empty());
 }
 
 void TestMneRawProjComp::measDataSet_getValuesAtTime()
@@ -1098,7 +1098,7 @@ void TestMneRawProjComp::measData_defaultConstruction()
     QCOMPARE(md.nchan, 0);
     QVERIFY(qFuzzyIsNull(md.sfreq));
     QCOMPARE(md.nset, 0);
-    QVERIFY(md.filename.isEmpty());
+    QVERIFY(md.filename.empty());
     QVERIFY(md.current == nullptr);
 }
 
@@ -1106,7 +1106,7 @@ void TestMneRawProjComp::measData_readFromFile()
 {
     // Read evoked data from the ave file
     std::unique_ptr<MNEMeasData> md(
-        MNEMeasData::mne_read_meas_data(avePath(), 0, nullptr, nullptr,
+        MNEMeasData::mne_read_meas_data(avePath().toStdU16String(), 0, nullptr, nullptr,
                                         {}, 0));
     if (md) {
         QVERIFY(md->nchan > 0);
@@ -1119,7 +1119,7 @@ void TestMneRawProjComp::measData_readFromFile()
 void TestMneRawProjComp::measData_adjustBaselines()
 {
     std::unique_ptr<MNEMeasData> md(
-        MNEMeasData::mne_read_meas_data(avePath(), 0, nullptr, nullptr,
+        MNEMeasData::mne_read_meas_data(avePath().toStdU16String(), 0, nullptr, nullptr,
                                         {}, 0));
     if (md && md->current) {
         // Store original data

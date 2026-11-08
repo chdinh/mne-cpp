@@ -379,7 +379,7 @@ private slots:
     {
         MNEMeasData data;
         QCOMPARE(data.nchan, 0);
-        QVERIFY(data.filename.isEmpty());
+        QVERIFY(data.filename.empty());
     }
 
     void mneMeasDataSet_defaultCtor()

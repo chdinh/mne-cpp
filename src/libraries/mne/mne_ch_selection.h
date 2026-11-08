@@ -48,7 +48,7 @@ public:
     MNEChSelection() = default;
     ~MNEChSelection() = default;
 
-    QString name;               /**< Name of this selection. */
+    std::string name;           /**< Name of this selection. */
     StringList chdef;           /**< Channel definitions (may contain regular expressions). */
     int ndef = 0;               /**< How many of them. */
     StringList chspick;         /**< Translated into channel names using the present data. */

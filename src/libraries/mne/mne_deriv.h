@@ -25,6 +25,7 @@
 
 #include "mne_global.h"
 
+#include <string>
 #include <vector>
 #include "mne_sparse_named_matrix.h"
 
@@ -101,8 +102,8 @@ public:
     int validate(const std::vector<FIFFLIB::FiffChInfo>& chInfo);
 
 public:
-    QString filename;                                 /**< Source file name the derivation was loaded from. */
-    QString shortname;                                /**< Short nickname for this derivation. */
+    std::string filename;                             /**< Source file name the derivation was loaded from. */
+    std::string shortname;                            /**< Short nickname for this derivation. */
     std::unique_ptr<MNESparseNamedMatrix> deriv_data; /**< The derivation data itself (sparse named matrix). */
     Eigen::VectorXi in_use;                           /**< Per-column count of non-zero elements in the derivation data. */
     Eigen::VectorXi valid;                            /**< Per-derivation validity flags considering input channel units. */

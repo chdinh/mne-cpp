@@ -403,7 +403,7 @@ void TestFwdLibrary::bemModel_solidAngles()
     if (!QFile::exists(icosPath))
         QSKIP("icos.fif not found");
 
-    auto sphere = MNESurface::read_bem_surface(icosPath, 9003, false);
+    auto sphere = MNESurface::read_bem_surface(icosPath.toStdU16String(), 9003, false);
     QVERIFY(sphere != nullptr);
     QVERIFY(sphere->ntri > 0);
 
@@ -451,7 +451,7 @@ void TestFwdLibrary::bemModel_freeSolution()
     if (!QFile::exists(icosPath))
         QSKIP("icos.fif not found");
 
-    auto sphere = MNESurface::read_bem_surface(icosPath, 9003, false);
+    auto sphere = MNESurface::read_bem_surface(icosPath.toStdU16String(), 9003, false);
     QVERIFY(sphere != nullptr);
     QVERIFY(sphere->ntri > 0);
     QVERIFY(sphere->np > 0);

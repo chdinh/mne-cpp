@@ -359,7 +359,7 @@ void MNESurface::activate_neighbors(int start, Eigen::VectorXi& act, int nstep) 
 // Static factory methods
 //=============================================================================================================
 
-std::unique_ptr<MNESurface> MNESurface::read_bem_surface(const QString& name, int which, bool add_geometry)
+std::unique_ptr<MNESurface> MNESurface::read_bem_surface(const std::filesystem::path& name, int which, bool add_geometry)
 {
     float sigma;
     return read_bem_surface(name, which, add_geometry, sigma, true);
@@ -367,14 +367,14 @@ std::unique_ptr<MNESurface> MNESurface::read_bem_surface(const QString& name, in
 
 //=============================================================================================================
 
-std::unique_ptr<MNESurface> MNESurface::read_bem_surface(const QString& name, int which, bool add_geometry, float& sigma)
+std::unique_ptr<MNESurface> MNESurface::read_bem_surface(const std::filesystem::path& name, int which, bool add_geometry, float& sigma)
 {
     return read_bem_surface(name, which, add_geometry, sigma, true);
 }
 
 //=============================================================================================================
 
-std::unique_ptr<MNESurface> MNESurface::read_bem_surface2(const QString& name, int which, bool add_geometry)
+std::unique_ptr<MNESurface> MNESurface::read_bem_surface2(const std::filesystem::path& name, int which, bool add_geometry)
 {
     float sigma;
     return read_bem_surface(name, which, add_geometry, sigma, false);
@@ -382,7 +382,7 @@ std::unique_ptr<MNESurface> MNESurface::read_bem_surface2(const QString& name, i
 
 //=============================================================================================================
 
-std::unique_ptr<MNESurface> MNESurface::read_bem_surface(const QString& name, int which, bool add_geometry, float& sigma, bool check_too_many_neighbors)
+std::unique_ptr<MNESurface> MNESurface::read_bem_surface(const std::filesystem::path& name, int which, bool add_geometry, float& sigma, bool check_too_many_neighbors)
 {
     QFile file(name);
     FiffStream stream(&file);
@@ -415,7 +415,7 @@ std::unique_ptr<MNESurface> MNESurface::read_bem_surface(const QString& name, in
     }
     surfs = stream.dirtree()->dir_tree_find(FIFFB_BEM_SURF);
     if (surfs.size() == 0) {
-        qCritical("No BEM surfaces found in %s", name.toUtf8().constData());
+        qCritical("No BEM surfaces found in %s", UTILSLIB::utf8FromPath(name).c_str());
         stream.close();
         return nullptr;
     }
@@ -429,7 +429,7 @@ std::unique_ptr<MNESurface> MNESurface::read_bem_surface(const QString& name, in
             }
         }
         if (id != which) {
-            qCritical("Desired surface not found in %s", name.toUtf8().constData());
+            qCritical("Desired surface not found in %s", UTILSLIB::utf8FromPath(name).c_str());
             stream.close();
             return nullptr;
         }

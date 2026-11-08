@@ -218,7 +218,7 @@ int main(int argc, char* argv[])
         surf.nn = unitVerts; // normals point outward on unit sphere
 
         qInfo("Surface %d (%s): radius=%6.1f mm, sigma=%g S/m, %d vertices",
-              i + 1, qPrintable(MNEBemSurface::id_name(surfId)),
+              i + 1, MNEBemSurface::id_name(surfId).c_str(),
               1000.0f * radius, sigma, surf.np);
 
         bem.push_back(surf);

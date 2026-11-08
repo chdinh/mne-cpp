@@ -476,7 +476,7 @@ int mne_read_bad_channel_list_from_node(FiffStream& stream,
     return OK;
 }
 
-int mne_read_bad_channel_list(const QString& name, StringList& listp, int& nlistp)
+int mne_read_bad_channel_list(const std::filesystem::path& name, StringList& listp, int& nlistp)
 
 {
     QFile file(name);
@@ -1242,7 +1242,7 @@ int MNERawData::pick_data_filt(MNEChSelection* sel, int firsts, int ns, float** 
 
 //=============================================================================================================
 
-MNERawData* MNERawData::open_file_comp(const QString& name,
+MNERawData* MNERawData::open_file_comp(const std::filesystem::path& name,
                                        int omit_skip,
                                        int allow_maxshield,
                                        const MNEFilterDef& filter,
@@ -1314,14 +1314,14 @@ MNERawData* MNERawData::open_file_comp(const QString& name,
     data->comp = MNECTFCompDataSet::read(data->filename);
     if (data->comp) {
         if (data->comp->ncomp > 0)
-            qInfo("Read %d compensation data sets from %s\n", data->comp->ncomp, data->filename.toUtf8().constData());
+            qInfo("Read %d compensation data sets from %s\n", data->comp->ncomp, data->filename.c_str());
         else
-            qInfo("No compensation data in %s\n", data->filename.toUtf8().constData());
+            qInfo("No compensation data in %s\n", data->filename.c_str());
     } else
         qWarning() << "err_print_error()";
     if ((data->comp_file = MNECTFCompDataSet::get_comp(data->info->chInfo, data->info->nchan)) == FAIL)
         return nullptr;
-    qInfo("Compensation in file : %s\n", MNECTFCompDataSet::explain_comp(MNECTFCompDataSet::map_comp_kind(data->comp_file)).toUtf8().constData());
+    qInfo("Compensation in file : %s\n", MNECTFCompDataSet::explain_comp(MNECTFCompDataSet::map_comp_kind(data->comp_file)).c_str());
     if (comp_set < 0)
         data->comp_now = data->comp_file;
     else
@@ -1341,13 +1341,13 @@ MNERawData* MNERawData::open_file_comp(const QString& name,
     /*
        * SSS data
        */
-    data->sss = MNESssData::read(data->filename);
+    data->sss = MNESssData::read(QString::fromStdString(data->filename));
     if (data->sss && data->sss->job != FIFFV_SSS_JOB_NOTHING && data->sss->comp_info.size() > 0) {
-        qInfo("SSS data read from %s :\n", data->filename.toUtf8().constData());
+        qInfo("SSS data read from %s :\n", data->filename.c_str());
         QTextStream errStream(stderr);
         data->sss->print(errStream);
     } else {
-        qInfo("No SSS data in %s\n", data->filename.toUtf8().constData());
+        qInfo("No SSS data in %s\n", data->filename.c_str());
         data->sss.reset();
     }
     /*
@@ -1467,7 +1467,7 @@ MNERawData* MNERawData::open_file_comp(const QString& name,
                     }
                 }
             }
-            qInfo("%d bad channels read from %s%s", data->nbad, name.toUtf8().constData(), data->nbad > 0 ? ":\n" : "\n");
+            qInfo("%d bad channels read from %s%s", data->nbad, UTILSLIB::utf8FromPath(name).c_str(), data->nbad > 0 ? ":\n" : "\n");
             if (data->nbad > 0) {
                 qInfo("\t");
                 for (k = 0; k < data->nbad; k++)
@@ -1500,7 +1500,7 @@ MNERawData* MNERawData::open_file_comp(const QString& name,
             data->first_sample_val[k] = vals[k][0];
         qInfo("Initial dc offsets determined\n");
     }
-    qInfo("Raw data file %s:\n", name.toUtf8().constData());
+    qInfo("Raw data file %s:\n", UTILSLIB::utf8FromPath(name).c_str());
     qInfo("\tnchan  = %d\n", data->info->nchan);
     qInfo("\tnsamp  = %d\n", data->nsamp);
     qInfo("\tsfreq  = %-8.3f Hz\n", data->info->sfreq);
@@ -1511,7 +1511,7 @@ MNERawData* MNERawData::open_file_comp(const QString& name,
 
 //=============================================================================================================
 
-MNERawData* MNERawData::open_file(const QString& name, int omit_skip, int allow_maxshield, const MNEFilterDef& filter)
+MNERawData* MNERawData::open_file(const std::filesystem::path& name, int omit_skip, int allow_maxshield, const MNEFilterDef& filter)
 /*
      * Wrapper for open_file to work as before
      */

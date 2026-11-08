@@ -29,6 +29,7 @@
 // STL INCLUDES
 //=============================================================================================================
 
+#include <string>
 #include <memory>
 
 //=============================================================================================================
@@ -140,7 +141,7 @@ public:
 public:
     std::unique_ptr<MNENamedMatrix> vecs; /**< Projection vectors (nrow = nvec, ncol = nch); may be nullptr when nvec == 0. */
     int nvec;                             /**< Number of projection vectors (== vecs->nrow when vecs is set). */
-    QString desc;                         /**< Human-readable description (e.g. "PCA-v1"). */
+    std::string desc;                     /**< Human-readable description (e.g. "PCA-v1"). */
     int kind;                             /**< FIFF projection item kind (FIFFV_PROJ_ITEM_*). */
     bool active;                          /**< Whether this item is currently active. */
     bool active_file;                     /**< Whether this item was active when loaded from file. */

@@ -419,7 +419,7 @@ void TestInvRtLibrary::rtAveraging_moreWorkerOps()
     rtAvg.setPostStim(250, 250);
     rtAvg.setTriggerChIndx(9);
 
-    QMap<QString, double> thresholds;
+    std::map<std::string, double> thresholds;
     thresholds["eeg"] = 100e-6;
     thresholds["mag"] = 4000e-15;
     rtAvg.setArtifactReduction(thresholds);

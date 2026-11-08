@@ -26,6 +26,9 @@
 
 #include "mne_global.h"
 
+#include <filesystem>
+#include <map>
+#include <string>
 #include <utility>
 #include "mne_deriv.h"
 
@@ -64,7 +67,7 @@ class MNESHARED_EXPORT MNEDerivSet
 {
 public:
     /** Derived channel name and the weight of every input channel. */
-    using Definition = std::pair<QString, QMap<QString, double>>;
+    using Definition = std::pair<std::string, std::map<std::string, double>>;
 
     MNEDerivSet() = default;
     MNEDerivSet(MNEDerivSet&&) = default;
@@ -107,7 +110,7 @@ public:
      *
      * @return The set (empty if the file holds no derivations), or no value if the file cannot be read.
      */
-    static std::optional<MNEDerivSet> read(const QString& path);
+    static std::optional<MNEDerivSet> read(const std::filesystem::path& path);
 
     //=========================================================================================================
     /**
@@ -123,7 +126,7 @@ public:
      *
      * @return One derivation holding all definitions, or no value on a syntax error.
      */
-    static std::optional<MNEDerivSet> readText(const QString& path);
+    static std::optional<MNEDerivSet> readText(const std::filesystem::path& path);
 
     //=========================================================================================================
     /**
@@ -134,7 +137,7 @@ public:
      *
      * @return A set with one derivation; input channels appear in order of first use.
      */
-    static MNEDerivSet fromDefinitions(const std::vector<Definition>& definitions, const QString& name = QString());
+    static MNEDerivSet fromDefinitions(const std::vector<Definition>& definitions, const std::string& name = {});
 
     //=========================================================================================================
     /**
@@ -144,7 +147,7 @@ public:
      *
      * @return True if the file was written; an empty set is not written.
      */
-    bool write(const QString& path) const;
+    bool write(const std::filesystem::path& path) const;
 
     //=========================================================================================================
     /**

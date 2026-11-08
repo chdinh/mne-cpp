@@ -475,11 +475,11 @@ void TestMneInvCoverage::testEpochDataListFromRaw()
     float tmax = 0.5f;
 
     MNEEpochDataList epochList;
-    QMap<QString, double> mapReject; // No rejection thresholds
+    std::map<std::string, double> mapReject; // No rejection thresholds
     epochList = MNEEpochDataList::readEpochs(
         raw, events, tmin, tmax, 1, // event ID
         mapReject,
-        QStringList() // no bads
+        {} // no bads
     );
 
     // Should have created some epochs

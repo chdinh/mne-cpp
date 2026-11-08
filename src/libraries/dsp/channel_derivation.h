@@ -31,16 +31,13 @@
 
 #include "dsp_global.h"
 
-#include <vector>
+#include <utils/string_utils.h>
+
+#include <filesystem>
+#include <map>
+#include <string>
 #include <utility>
-
-//=============================================================================================================
-// QT INCLUDES
-//=============================================================================================================
-
-#include <QMap>
-#include <QString>
-#include <QStringList>
+#include <vector>
 
 //=============================================================================================================
 // EIGEN INCLUDES
@@ -63,8 +60,8 @@ namespace UTILSLIB
  */
 struct DSPSHARED_EXPORT DerivationRule
 {
-    QString outputName;                 ///< Name of the derived output channel.
-    QMap<QString, double> inputWeights; ///< Map of input channel name → weight.
+    std::string outputName;                     ///< Name of the derived output channel.
+    std::map<std::string, double> inputWeights; ///< Map of input channel name → weight.
 };
 
 //=============================================================================================================
@@ -91,7 +88,7 @@ public:
      *
      * @return Vector of DerivationRule, e.g. LH1-LH2 (+1·LH1, −1·LH2), LH2-LH3, RA1-RA2.
      */
-    static std::vector<DerivationRule> buildBipolar(const QStringList& channelNames);
+    static std::vector<DerivationRule> buildBipolar(const StringList& channelNames);
 
     /**
      * @brief Build common-average reference derivation rules.
@@ -103,7 +100,7 @@ public:
      *
      * @return Vector of DerivationRule, one per input channel.
      */
-    static std::vector<DerivationRule> buildCommonAverage(const QStringList& channelNames);
+    static std::vector<DerivationRule> buildCommonAverage(const StringList& channelNames);
 
     /**
      * @brief Apply derivation rules to a data matrix.
@@ -115,9 +112,9 @@ public:
      * @return A pair of (derived data matrix, derived channel names).
      *         The output matrix has n_rules rows × n_times columns.
      */
-    static std::pair<Eigen::MatrixXd, QStringList> apply(
+    static std::pair<Eigen::MatrixXd, StringList> apply(
         const Eigen::MatrixXd& matData,
-        const QStringList& channelNames,
+        const StringList& channelNames,
         const std::vector<DerivationRule>& rules);
 
     /**
@@ -133,7 +130,7 @@ public:
      *
      * @return Vector of parsed DerivationRule. Empty on error.
      */
-    static std::vector<DerivationRule> readDefinitionFile(const QString& path);
+    static std::vector<DerivationRule> readDefinitionFile(const std::filesystem::path& path);
 
     /**
      * @brief Write derivation rules in MNE-C derivation text syntax, readable by readDefinitionFile and mne_make_derivations.
@@ -143,7 +140,7 @@ public:
      *
      * @return True if the file was written successfully.
      */
-    static bool writeDefinitionFile(const QString& path, const std::vector<DerivationRule>& rules);
+    static bool writeDefinitionFile(const std::filesystem::path& path, const std::vector<DerivationRule>& rules);
 };
 
 } // namespace UTILSLIB

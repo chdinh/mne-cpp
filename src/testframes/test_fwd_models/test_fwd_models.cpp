@@ -218,10 +218,10 @@ private slots:
         settings.include_meg = true;
         settings.include_eeg = false;
         settings.compute_grad = false;
-        settings.labels << "label1" << "label2";
+        settings.labels = {"label1", "label2"};
 
         QCOMPARE(settings.srcname, QString("test_src.fif"));
-        QCOMPARE(settings.labels.size(), 2);
+        QCOMPARE(settings.labels.size(), std::size_t{2});
         QVERIFY(settings.fixed_ori);
         QVERIFY(!settings.include_eeg);
     }

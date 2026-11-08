@@ -147,8 +147,8 @@ int main(int argc, char* argv[])
     events = FiffEvents::read(t_sEventName.toStdU16String()).value().events;
 
     // Read the epochs and reject epochs with EOG higher than 300e-06
-    QMap<QString, double> mapReject;
-    mapReject.insert("eog", 300e-06);
+    std::map<std::string, double> mapReject;
+    mapReject.emplace("eog", 300e-06);
 
     MNEEpochDataList data = MNEEpochDataList::readEpochs(raw,
                                                          events,
@@ -156,7 +156,7 @@ int main(int argc, char* argv[])
                                                          fTMax,
                                                          event,
                                                          mapReject,
-                                                         QStringList(),
+                                                         {},
                                                          picks);
 
     // Epochs image of the gradiometer with the largest average response, as mne.Epochs.plot_image draws it

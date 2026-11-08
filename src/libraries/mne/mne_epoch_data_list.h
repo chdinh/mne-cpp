@@ -26,6 +26,8 @@
 // INCLUDES
 //=============================================================================================================
 
+#include <map>
+#include <string>
 #include <fiff/fiff_types.h>
 #include <fiff/fiff_evoked.h>
 #include <fiff/fiff_raw_data.h>
@@ -58,7 +60,7 @@ struct ArtifactRejectionData
     bool bRejected = false;  /**< Set when the channel's peak-to-peak range exceeds dThreshold. */
     Eigen::RowVectorXd data; /**< One channel of the epoch. */
     double dThreshold = 0.0; /**< Peak-to-peak limit for the channel type. */
-    QString sChName;         /**< Channel name. */
+    std::string sChName;     /**< Channel name. */
 };
 
 //=============================================================================================================
@@ -109,8 +111,8 @@ public:
                                        float tmin,
                                        float tmax,
                                        qint32 event,
-                                       const QMap<QString, double>& mapReject,
-                                       const QStringList& lExcludeChs = QStringList(),
+                                       const std::map<std::string, double>& mapReject,
+                                       const UTILSLIB::StringList& lExcludeChs = {},
                                        const Eigen::RowVectorXi& picks = Eigen::RowVectorXi());
 
     //=========================================================================================================
@@ -166,8 +168,8 @@ public:
      */
     static bool checkForArtifact(const Eigen::MatrixXd& data,
                                  const FIFFLIB::FiffInfo& pFiffInfo,
-                                 const QMap<QString, double>& mapReject,
-                                 const QStringList& lExcludeChs = QStringList());
+                                 const std::map<std::string, double>& mapReject,
+                                 const UTILSLIB::StringList& lExcludeChs = {});
 
     //=========================================================================================================
     /**
@@ -192,10 +194,10 @@ public:
     static FIFFLIB::FiffEvokedSet averageCategories(const FIFFLIB::FiffRawData& raw,
                                                     const Eigen::MatrixXi& events,
                                                     const std::vector<int>& eventCodes,
-                                                    const QStringList& comments,
+                                                    const UTILSLIB::StringList& comments,
                                                     float tmin,
                                                     float tmax,
-                                                    const QMap<QString, double>& mapReject = QMap<QString, double>(),
+                                                    const std::map<std::string, double>& mapReject = {},
                                                     const std::pair<float, float>& baseline = std::pair<float, float>(0.0f, 0.0f),
                                                     bool proj = false);
 
@@ -226,8 +228,8 @@ public:
                                               bool bApplyBaseline,
                                               float fTBaselineFromS,
                                               float fTBaselineToS,
-                                              const QMap<QString, double>& mapReject,
-                                              const QStringList& lExcludeChs = QStringList(),
+                                              const std::map<std::string, double>& mapReject,
+                                              const UTILSLIB::StringList& lExcludeChs = {},
                                               const Eigen::RowVectorXi& vecPicks = Eigen::RowVectorXi());
 
 private:

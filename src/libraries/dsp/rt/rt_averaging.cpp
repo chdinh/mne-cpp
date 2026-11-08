@@ -152,13 +152,10 @@ void RtAveragingWorker::setTriggerChIndx(qint32 idx)
 
 //=============================================================================================================
 
-void RtAveragingWorker::setArtifactReduction(const QMap<QString, double>& mapThresholds)
+void RtAveragingWorker::setArtifactReduction(const std::map<std::string, double>& mapThresholds)
 {
-    if (mapThresholds["Active"] == 0.0) {
-        m_bActivateThreshold = false;
-    } else {
-        m_bActivateThreshold = true;
-    }
+    const auto active = mapThresholds.find("Active");
+    m_bActivateThreshold = active != mapThresholds.end() && active->second != 0.0;
 
     m_mapThresholds = mapThresholds;
 }
@@ -341,8 +338,6 @@ void RtAveragingWorker::mergeData(double dTriggerType)
     bool bArtifactDetected = false;
 
     if (m_bActivateThreshold && m_pFiffInfo) {
-        qDebug() << "[RtAveragingWorker::mergeData] Doing artifact reduction for" << m_mapThresholds;
-
         bArtifactDetected = MNEEpochDataList::checkForArtifact(mergedData,
                                                                *m_pFiffInfo,
                                                                m_mapThresholds);
@@ -625,7 +620,7 @@ void RtAveraging::setTriggerChIndx(qint32 idx)
 
 //=============================================================================================================
 
-void RtAveraging::setArtifactReduction(const QMap<QString, double>& mapThresholds)
+void RtAveraging::setArtifactReduction(const std::map<std::string, double>& mapThresholds)
 {
     emit averageArtifactReductionChanged(mapThresholds);
 }

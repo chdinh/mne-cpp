@@ -439,7 +439,7 @@ int read_mgh_tags(QFile& fp, std::optional<MNEMghTagGroup>& tagsp)
 // read_curvature_file
 //=========================================================================
 
-int read_curvature_file(const QString& fname,
+int read_curvature_file(const std::filesystem::path& fname,
                         Eigen::VectorXf& curv)
 
 {
@@ -541,7 +541,7 @@ int read_curvature_file(const QString& fname,
 // read_triangle_file
 //=========================================================================
 
-int read_triangle_file(const QString& fname,
+int read_triangle_file(const std::filesystem::path& fname,
                        PointsT& vertices,
                        TrianglesT& triangles,
                        std::optional<MNEMghTagGroup>* tagsp)
@@ -1104,16 +1104,16 @@ std::unique_ptr<MNESourceSpace> MNESourceSpace::create_source_space(int np)
 
 //=============================================================================================================
 
-std::unique_ptr<MNESourceSpace> MNESourceSpace::load_surface(const QString& surf_file,
-                                                             const QString& curv_file)
+std::unique_ptr<MNESourceSpace> MNESourceSpace::load_surface(const std::filesystem::path& surf_file,
+                                                             const std::filesystem::path& curv_file)
 {
     return load_surface_geom(surf_file, curv_file, true, true);
 }
 
 //=============================================================================================================
 
-std::unique_ptr<MNESourceSpace> MNESourceSpace::load_surface_geom(const QString& surf_file,
-                                                                  const QString& curv_file,
+std::unique_ptr<MNESourceSpace> MNESourceSpace::load_surface_geom(const std::filesystem::path& surf_file,
+                                                                  const std::filesystem::path& curv_file,
                                                                   bool add_geometry,
                                                                   bool check_too_many_neighbors)
 /*
@@ -1132,7 +1132,7 @@ std::unique_ptr<MNESourceSpace> MNESourceSpace::load_surface_geom(const QString&
                            &tags) == -1)
         return nullptr;
 
-    if (!curv_file.isEmpty()) {
+    if (!curv_file.empty()) {
         if (read_curvature_file(curv_file, curvs) == -1)
             return nullptr;
         if (curvs.size() != verts.rows()) {
@@ -1590,7 +1590,7 @@ void MNESourceSpace::filter_source_space(FilterThreadArg* arg)
 
 //=============================================================================================================
 
-int MNESourceSpace::filter_source_spaces(float limit, const QString& bemfile, const FiffCoordTrans& mri_head_t, std::vector<std::unique_ptr<MNESourceSpace>>& spaces, QTextStream* filtered, bool use_threads)
+int MNESourceSpace::filter_source_spaces(float limit, const std::filesystem::path& bemfile, const FiffCoordTrans& mri_head_t, std::vector<std::unique_ptr<MNESourceSpace>>& spaces, QTextStream* filtered, bool use_threads)
 /*
           * Remove all source space points closer to the surface than a given limit
           */
@@ -1600,7 +1600,7 @@ int MNESourceSpace::filter_source_spaces(float limit, const QString& bemfile, co
     int nproc = QThread::idealThreadCount();
     int nspace = static_cast<int>(spaces.size());
 
-    if (bemfile.isEmpty())
+    if (bemfile.empty())
         return OK;
 
     {
@@ -1672,7 +1672,7 @@ int MNESourceSpace::filter_source_spaces(float limit, const QString& bemfile, co
 
 //=============================================================================================================
 
-int MNESourceSpace::read_source_spaces(const QString& name, std::vector<std::unique_ptr<MNESourceSpace>>& spaces)
+int MNESourceSpace::read_source_spaces(const std::filesystem::path& name, std::vector<std::unique_ptr<MNESourceSpace>>& spaces)
 /*
  * Read source spaces from a FIFF file
  */
@@ -1989,7 +1989,7 @@ int MNESourceSpace::transform_source_spaces_to(int coord_frame, const FiffCoordT
 #define LH_LABEL_TAG "-lh.label"
 #define RH_LABEL_TAG "-rh.label"
 
-int MNESourceSpace::restrict_sources_to_labels(std::vector<std::unique_ptr<MNESourceSpace>>& spaces, const QStringList& labels, int nlabel)
+int MNESourceSpace::restrict_sources_to_labels(std::vector<std::unique_ptr<MNESourceSpace>>& spaces, const std::vector<std::filesystem::path>& labels, int nlabel)
 /*
  * Pick only sources within a label
  */
@@ -2023,14 +2023,15 @@ int MNESourceSpace::restrict_sources_to_labels(std::vector<std::unique_ptr<MNESo
         /*
          * Which hemi?
          */
-        if (labels[k].contains(LH_LABEL_TAG)) { //strstr(labels[k],LH_LABEL_TAG) != NULL) {
+        const std::string labelName = UTILSLIB::utf8FromPath(labels[k]);
+        if (labelName.find(LH_LABEL_TAG) != std::string::npos) { //strstr(labels[k],LH_LABEL_TAG) != NULL) {
             sp = lh;
             inuse = &lh_inuse;
-        } else if (labels[k].contains(RH_LABEL_TAG)) { //strstr(labels[k],RH_LABEL_TAG) != NULL) {
+        } else if (labelName.find(RH_LABEL_TAG) != std::string::npos) { //strstr(labels[k],RH_LABEL_TAG) != NULL) {
             sp = rh;
             inuse = &rh_inuse;
         } else {
-            qWarning("\tWarning: cannot assign label file %s to a hemisphere.\n", labels[k].toUtf8().constData());
+            qWarning("\tWarning: cannot assign label file %s to a hemisphere.\n", UTILSLIB::utf8FromPath(labels[k]).c_str());
             continue;
         }
         if (sp) {
@@ -2041,9 +2042,9 @@ int MNESourceSpace::restrict_sources_to_labels(std::vector<std::unique_ptr<MNESo
                     (*inuse)[sel[p]] = sp->inuse[sel[p]];
                 else
                     qWarning("vertex number out of range in %s (%d vs %d)\n",
-                             labels[k].toUtf8().constData(), sel[p], sp->np);
+                             UTILSLIB::utf8FromPath(labels[k]).c_str(), sel[p], sp->np);
             }
-            qInfo("Processed label file %s\n", labels[k].toUtf8().constData());
+            qInfo("Processed label file %s\n", UTILSLIB::utf8FromPath(labels[k]).c_str());
         }
     }
     if (lh)
@@ -2055,7 +2056,7 @@ int MNESourceSpace::restrict_sources_to_labels(std::vector<std::unique_ptr<MNESo
 
 //=============================================================================================================
 
-int MNESourceSpace::read_label(const QString& label, Eigen::VectorXi& sel)
+int MNESourceSpace::read_label(const std::filesystem::path& label, Eigen::VectorXi& sel)
 /*
           * Find the source points within a label
           */
@@ -2351,13 +2352,13 @@ static Eigen::MatrixX3f generateIcoVertices(int grade)
 
 //=============================================================================================================
 
-std::vector<Eigen::VectorXi> MNESourceSpace::gradeToVertices(const QString& subjectsDir, const QString& subject, int grade)
+std::vector<Eigen::VectorXi> MNESourceSpace::gradeToVertices(const std::filesystem::path& subjectsDir, const std::string& subject, int grade)
 {
     std::vector<Eigen::VectorXi> vertices;
     const int nIco = 10 * (1 << (2 * grade)) + 2;
     for (const char* hemi : {"lh", "rh"}) {
-        const QString path = QString("%1/%2/surf/%3.sphere.reg").arg(subjectsDir, subject, hemi);
-        const std::unique_ptr<MNESourceSpace> sphere = load_surface_geom(path, QString(), false, false);
+        const std::filesystem::path path = subjectsDir / UTILSLIB::pathFromUtf8(subject) / "surf" / (std::string(hemi) + ".sphere.reg");
+        const std::unique_ptr<MNESourceSpace> sphere = load_surface_geom(path, {}, false, false);
         if (!sphere) {
             qWarning() << "[MNESourceSpace::gradeToVertices] Cannot read" << path;
             return {};

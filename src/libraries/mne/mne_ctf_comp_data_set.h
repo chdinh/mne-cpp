@@ -26,6 +26,8 @@
 #include "mne_global.h"
 
 #include "mne_named_matrix.h"
+#include <filesystem>
+#include <string>
 #include <fiff/fiff_sparse_matrix.h>
 
 //=============================================================================================================
@@ -106,7 +108,7 @@ public:
      *
      * @return A new compensation data set, or nullptr on failure.
      */
-    static std::unique_ptr<MNECTFCompDataSet> read(const QString& name);
+    static std::unique_ptr<MNECTFCompDataSet> read(const std::filesystem::path& name);
 
     //=========================================================================================================
     /**
@@ -212,7 +214,7 @@ public:
      *
      * @return A string describing the compensation (e.g. "third order gradiometer").
      */
-    static QString explain_comp(int kind);
+    static std::string explain_comp(int kind);
 
     //=========================================================================================================
     /**

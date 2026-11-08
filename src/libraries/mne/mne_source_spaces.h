@@ -29,6 +29,7 @@
 #include "mne_global.h"
 #include "mne_hemisphere.h"
 
+#include <string_view>
 #include <fiff/fiff_coord_trans.h>
 #include <fiff/fiff_stream.h>
 #include <utils/error.h>
@@ -287,7 +288,7 @@ public:
      *
      * @return Reference to the source space for the given hemisphere.
      */
-    MNESourceSpace& operator[](QString idt);
+    MNESourceSpace& operator[](std::string_view idt);
 
     //=========================================================================================================
     /**
@@ -297,7 +298,7 @@ public:
      *
      * @return Const reference to the source space for the given hemisphere.
      */
-    const MNESourceSpace& operator[](QString idt) const;
+    const MNESourceSpace& operator[](std::string_view idt) const;
 
     //=========================================================================================================
     /**

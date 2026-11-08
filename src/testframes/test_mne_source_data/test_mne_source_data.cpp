@@ -245,11 +245,11 @@ private slots:
     void bem_idName()
     {
         // Exercise static id_name method
-        QString brain = MNEBemSurface::id_name(FIFFV_BEM_SURF_ID_BRAIN);
+        QString brain = QString::fromStdString(MNEBemSurface::id_name(FIFFV_BEM_SURF_ID_BRAIN));
         QVERIFY(!brain.isEmpty());
-        QString skull = MNEBemSurface::id_name(FIFFV_BEM_SURF_ID_SKULL);
+        QString skull = QString::fromStdString(MNEBemSurface::id_name(FIFFV_BEM_SURF_ID_SKULL));
         QVERIFY(!skull.isEmpty());
-        QString scalp = MNEBemSurface::id_name(FIFFV_BEM_SURF_ID_HEAD);
+        QString scalp = QString::fromStdString(MNEBemSurface::id_name(FIFFV_BEM_SURF_ID_HEAD));
         QVERIFY(!scalp.isEmpty());
     }
 

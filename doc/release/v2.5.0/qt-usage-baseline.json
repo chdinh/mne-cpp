@@ -30,7 +30,7 @@
       "decoding",
       "math"
     ],
-    "tokens": 18134,
+    "tokens": 17877,
     "gui_outside_design": []
   },
   "libraries": {
@@ -212,20 +212,20 @@
       ]
     },
     "dsp": {
-      "tokens": 632,
+      "tokens": 575,
       "by_category": {
-        "containers": 90,
-        "files": 33,
+        "containers": 79,
+        "files": 29,
         "global": 140,
-        "logging": 89,
+        "logging": 88,
         "objects_signals": 84,
         "other": 3,
         "regex": 3,
         "smart_pointers": 31,
-        "strings": 138,
+        "strings": 97,
         "threads": 21
       },
-      "public_header_includes": 32,
+      "public_header_includes": 29,
       "q_object": 12,
       "files": 94,
       "modules": [
@@ -280,7 +280,7 @@
       ]
     },
     "fwd": {
-      "tokens": 322,
+      "tokens": 321,
       "by_category": {
         "files": 25,
         "global": 5,
@@ -289,7 +289,7 @@
         "other": 1,
         "regex": 1,
         "smart_pointers": 9,
-        "strings": 86,
+        "strings": 85,
         "threads": 4
       },
       "public_header_includes": 12,
@@ -313,7 +313,7 @@
       ]
     },
     "inv": {
-      "tokens": 811,
+      "tokens": 812,
       "by_category": {
         "containers": 88,
         "files": 35,
@@ -323,7 +323,7 @@
         "objects_signals": 7,
         "regex": 1,
         "smart_pointers": 48,
-        "strings": 181,
+        "strings": 182,
         "threads": 2
       },
       "public_header_includes": 48,
@@ -397,17 +397,17 @@
       ]
     },
     "mne": {
-      "tokens": 1507,
+      "tokens": 1307,
       "by_category": {
-        "containers": 17,
-        "files": 93,
-        "global": 372,
+        "containers": 7,
+        "files": 88,
+        "global": 357,
         "logging": 569,
         "objects_signals": 4,
         "other": 23,
         "regex": 2,
         "smart_pointers": 87,
-        "strings": 330,
+        "strings": 160,
         "threads": 10
       },
       "public_header_includes": 81,

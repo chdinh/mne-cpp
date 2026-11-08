@@ -129,7 +129,7 @@ MNECovMatrix::~MNECovMatrix()
 
 //=============================================================================================================
 
-std::unique_ptr<MNECovMatrix> MNECovMatrix::read(const QString& name, int kind)
+std::unique_ptr<MNECovMatrix> MNECovMatrix::read(const std::filesystem::path& name, int kind)
 {
     QFile file(name);
     FiffStream stream(&file);
@@ -164,7 +164,7 @@ std::unique_ptr<MNECovMatrix> MNECovMatrix::read(const QString& name, int kind)
     nodes = stream.dirtree()->dir_tree_find(FIFFB_MNE_COV);
 
     if (nodes.size() == 0) {
-        qWarning("No covariance matrix available in %s", name.toUtf8().data());
+        qWarning("No covariance matrix available in %s", UTILSLIB::utf8FromPath(name).c_str());
         stream.close();
         return nullptr;
     }
@@ -181,7 +181,7 @@ std::unique_ptr<MNECovMatrix> MNECovMatrix::read(const QString& name, int kind)
         }
     }
     if (!covnode || covnode->empty()) {
-        qWarning("Desired covariance matrix not found from %s", name.toUtf8().data());
+        qWarning("Desired covariance matrix not found from %s", UTILSLIB::utf8FromPath(name).c_str());
         stream.close();
         return nullptr;
     }

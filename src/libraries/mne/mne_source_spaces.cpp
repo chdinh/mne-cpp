@@ -566,7 +566,7 @@ const MNESourceSpace& MNESourceSpaces::operator[](qint32 idx) const
 
 //=============================================================================================================
 
-MNESourceSpace& MNESourceSpaces::operator[](QString idt)
+MNESourceSpace& MNESourceSpaces::operator[](std::string_view idt)
 {
     if (idt.compare("lh") == 0)
         return *m_sourceSpaces[0];
@@ -580,7 +580,7 @@ MNESourceSpace& MNESourceSpaces::operator[](QString idt)
 
 //=============================================================================================================
 
-const MNESourceSpace& MNESourceSpaces::operator[](QString idt) const
+const MNESourceSpace& MNESourceSpaces::operator[](std::string_view idt) const
 {
     if (idt.compare("lh") == 0)
         return *m_sourceSpaces[0];

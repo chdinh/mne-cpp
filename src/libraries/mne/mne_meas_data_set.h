@@ -28,6 +28,7 @@
 // EIGEN INCLUDES
 //=============================================================================================================
 
+#include <string>
 #include <Eigen/Core>
 
 //=============================================================================================================
@@ -116,7 +117,7 @@ public:
                                         float tmin, float sfreq, bool use_abs, float* value);
 
 public:
-    QString comment;            /**< Comment / description associated with this data set. */
+    std::string comment;        /**< Comment / description associated with this data set. */
     Eigen::MatrixXf data;       /**< Measured data matrix [np x nchan] (time-major layout). */
     Eigen::MatrixXf data_proj;  /**< Data after SSP projection (kept separately for some programs). */
     Eigen::MatrixXf data_filt;  /**< Optionally filtered copy of the data. */

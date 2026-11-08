@@ -290,7 +290,7 @@ FwdBemModel::UPtr FwdBemModel::fwd_bem_load_surfaces(const QString& name, const 
 
     for (k = 0; k < nkind; k++) {
         float cond = -1.0f;
-        auto s = MNESurface::read_bem_surface(name, kinds[k], true, cond);
+        auto s = MNESurface::read_bem_surface(name.toStdU16String(), kinds[k], true, cond);
         if (!s)
             return nullptr;
         if (cond < 0.0) {
@@ -493,7 +493,7 @@ std::unique_ptr<MNESourceSpace> FwdBemModel::make_guesses(MNESurface* guess_surf
 
         bemname = bemFile.fileName();
 
-        sphere_owner = MNESurface::read_bem_surface(bemname, 9003, false);
+        sphere_owner = MNESurface::read_bem_surface(bemname.toStdU16String(), 9003, false);
         if (!sphere_owner)
             return res;
 

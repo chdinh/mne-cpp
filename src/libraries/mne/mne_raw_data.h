@@ -26,6 +26,7 @@
 
 #include "mne_global.h"
 
+#include <filesystem>
 #include <string>
 
 #include <fiff/fiff_dir_node.h>
@@ -221,7 +222,7 @@ public:
      *
      * @return A new raw data object, or NULL on failure. Caller takes ownership.
      */
-    static MNERawData* open_file_comp(const QString& name, int omit_skip, int allow_maxshield, const MNEFilterDef& filter, int comp_set);
+    static MNERawData* open_file_comp(const std::filesystem::path& name, int omit_skip, int allow_maxshield, const MNEFilterDef& filter, int comp_set);
 
     /**
      * Open a raw FIFF file using the file's native compensation grade.
@@ -234,7 +235,7 @@ public:
      *
      * @return A new raw data object, or NULL on failure. Caller takes ownership.
      */
-    static MNERawData* open_file(const QString& name, int omit_skip, int allow_maxshield, const MNEFilterDef& filter);
+    static MNERawData* open_file(const std::filesystem::path& name, int omit_skip, int allow_maxshield, const MNEFilterDef& filter);
 
     //=========================================================================================================
     /**
@@ -250,7 +251,7 @@ public:
     int attachDerivations(const MNEDerivSet& derivations, bool keepPrevious = false);
 
 public:
-    QString filename; /**< Path to the raw FIFF file. */
+    std::string filename; /**< Path to the raw FIFF file. */
     //  FIFFLIB::fiffFile       file;
     std::unique_ptr<QFile> file;                     /**< Owned QFile backing the FIFF stream. */
     std::unique_ptr<FIFFLIB::FiffStream> stream;     /**< Open FIFF stream for reading. */
@@ -276,7 +277,7 @@ public:
     std::unique_ptr<FilterData> filter_data;         /**< Pre-computed frequency-domain filter state. */
     std::unique_ptr<MNEEventList> event_list;        /**< Trigger event list. */
     unsigned int max_event;                          /**< Maximum event number in use. */
-    QString dig_trigger;                             /**< Name of the digital trigger channel. */
+    std::string dig_trigger;                         /**< Name of the digital trigger channel. */
     unsigned int dig_trigger_mask;                   /**< Bit mask applied to digital trigger channel. */
     Eigen::VectorXf offsets;                         /**< DC offset corrections for display. */
     std::unique_ptr<RingBuffer> ring;                /**< Ring buffer for raw data. */

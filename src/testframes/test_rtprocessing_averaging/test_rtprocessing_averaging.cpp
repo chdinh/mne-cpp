@@ -5,6 +5,7 @@
 #include <QtTest/QtTest>
 #include <utils/string_utils.h>
 #include <Eigen/Dense>
+#include <format>
 #include <algorithm>
 #include <cmath>
 
@@ -717,9 +718,9 @@ private slots:
         const std::vector<int> codes = uniqueEventCodes(events, 4);
         QVERIFY(codes.size() >= 2);
 
-        QStringList comments;
+        UTILSLIB::StringList comments;
         for (int code : codes) {
-            comments.append(QStringLiteral("event_%1").arg(code));
+            comments.push_back(std::format("event_{}", code));
         }
 
         const FiffEvokedSet evokedSet = MNEEpochDataList::averageCategories(raw,

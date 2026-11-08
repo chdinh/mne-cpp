@@ -162,7 +162,7 @@ int main(int argc, char* argv[])
     // Read source space
     //
     std::vector<std::unique_ptr<MNESourceSpace>> spaces;
-    if (MNESourceSpace::read_source_spaces(srcFile, spaces) != FIFF_OK || spaces.empty()) {
+    if (MNESourceSpace::read_source_spaces(srcFile.toStdU16String(), spaces) != FIFF_OK || spaces.empty()) {
         qCritical("Failed to read source space from: %s", srcFile.toUtf8().constData());
         return 1;
     }

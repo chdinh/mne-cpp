@@ -51,6 +51,23 @@ using namespace RTPROCESSINGLIB;
 using namespace Eigen;
 
 //=============================================================================================================
+// STATIC HELPERS
+//=============================================================================================================
+
+namespace
+{
+
+std::map<std::string, double> toStdThresholds(const QMap<QString, double>& thresholds)
+{
+    std::map<std::string, double> result;
+    for (auto it = thresholds.cbegin(); it != thresholds.cend(); ++it)
+        result.emplace(it.key().toStdString(), it.value());
+    return result;
+}
+
+} // namespace
+
+//=============================================================================================================
 // DEFINE MEMBER METHODS
 //=============================================================================================================
 
@@ -260,7 +277,7 @@ void Averaging::initPluginControlWidgets()
         m_pRtAve->setBaselineFrom(iBaselineFromSamples, pAveragingSettingsView->getBaselineFromSeconds());
         m_pRtAve->setBaselineTo(iBaselineToSamples, pAveragingSettingsView->getBaselineToSeconds());
         m_pRtAve->setBaselineActive(pAveragingSettingsView->getDoBaselineCorrection());
-        m_pRtAve->setArtifactReduction(pArtifactSettingsView->getThresholdMap());
+        m_pRtAve->setArtifactReduction(toStdThresholds(pArtifactSettingsView->getThresholdMap()));
 
         m_bPluginControlWidgetsInit = true;
     }
@@ -332,7 +349,7 @@ void Averaging::onChangeArtifactThreshold(const QMap<QString, double>& mapThresh
     QMutexLocker locker(&m_qMutex);
 
     if (m_pRtAve) {
-        m_pRtAve->setArtifactReduction(mapThresholds);
+        m_pRtAve->setArtifactReduction(toStdThresholds(mapThresholds));
     }
 }
 

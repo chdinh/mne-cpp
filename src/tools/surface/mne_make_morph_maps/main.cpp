@@ -106,17 +106,17 @@ int main(int argc, char* argv[])
         }
         MNEMorphMap fromTo = MNEMorphMap::compute(fromSphere.rr(), fromSphere.tris(), toSphere.rr());
         fromTo.hemi = hemi;
-        fromTo.from_subj = fromSubject;
-        fromTo.to_subj = toSubject;
+        fromTo.from_subj = fromSubject.toStdString();
+        fromTo.to_subj = toSubject.toStdString();
         MNEMorphMap toFrom = MNEMorphMap::compute(toSphere.rr(), toSphere.tris(), fromSphere.rr());
         toFrom.hemi = hemi;
-        toFrom.from_subj = toSubject;
-        toFrom.to_subj = fromSubject;
+        toFrom.from_subj = toSubject.toStdString();
+        toFrom.to_subj = fromSubject.toStdString();
         qInfo("%s: %d -> %d and %d -> %d vertices", qPrintable(name), fromTo.map->cols(), fromTo.map->rows(), toFrom.map->cols(), toFrom.map->rows());
         maps.push_back(std::move(fromTo));
         maps.push_back(std::move(toFrom));
     }
-    if (!MNEMorphMap::write(outFile, {&maps[0], &maps[2], &maps[1], &maps[3]})) {
+    if (!MNEMorphMap::write(outFile.toStdU16String(), {&maps[0], &maps[2], &maps[1], &maps[3]})) {
         qCritical("Cannot write %s", qPrintable(outFile));
         return 1;
     }

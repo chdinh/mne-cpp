@@ -34,6 +34,7 @@
 
 #include "mne_global.h"
 
+#include <string>
 #include <vector>
 #include "mne_source_spaces.h"
 #include "mne_forward_solution.h"
@@ -98,7 +99,7 @@ struct RegionMT
     qint32 nClusters;             /**< Number of clusters for this region. */
     Eigen::VectorXi idcs;         /**< Source-space indices for this region. */
     qint32 iLabelIdxIn;           /**< Label index passed through to the output. */
-    QString sDistMeasure;         /**< Distance metric: "cityblock" or "sqeuclidean". */
+    std::string sDistMeasure;     /**< Distance metric: "cityblock" or "sqeuclidean". */
 
     /**
      * @brief Run KMeans clustering on this region.
@@ -106,12 +107,10 @@ struct RegionMT
      */
     RegionMTOut cluster() const
     {
-        const QString distMeasure = sDistMeasure.isEmpty()
-            ? QStringLiteral("cityblock")
-            : sDistMeasure;
+        const std::string distMeasure = sDistMeasure.empty() ? std::string("cityblock") : sDistMeasure;
 
         RegionMTOut out;
-        UTILSLIB::KMeans kMeans(distMeasure.toStdString(), "sample", 5);
+        UTILSLIB::KMeans kMeans(distMeasure, "sample", 5);
         kMeans.calculate(matRoiMT, nClusters,
                          out.roiIdx, out.ctrs, out.sumd, out.D);
         out.iLabelIdxOut = iLabelIdxIn;
@@ -190,7 +189,7 @@ public:
      * @return true on success.
      */
     bool assemble_kernel(const FSLIB::FsLabel& label,
-                         const QString& method,
+                         const std::string& method,
                          bool pick_normal,
                          Eigen::MatrixXd& K,
                          Eigen::SparseMatrix<double>& noise_norm,
@@ -223,7 +222,7 @@ public:
     Eigen::MatrixXd cluster_kernel(const FSLIB::FsAnnotationSet& annotationSet,
                                    qint32 clusterSize,
                                    Eigen::MatrixXd& D,
-                                   const QString& method = QStringLiteral("cityblock")) const;
+                                   const std::string& method = "cityblock") const;
 
     //=========================================================================================================
     /**

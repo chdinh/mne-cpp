@@ -119,7 +119,7 @@ void TestMneSourceSpaceOpsPython::initTestCase()
     m_bemPath = base + "/sample-5120-bem.fif";
     QVERIFY2(QFile::exists(m_srcPath) && QFile::exists(m_bemPath), "test data missing");
     QVERIFY(m_dir.isValid());
-    QCOMPARE(MNESourceSpace::read_source_spaces(m_srcPath, m_spaces), 0);
+    QCOMPARE(MNESourceSpace::read_source_spaces(m_srcPath.toStdU16String(), m_spaces), 0);
     QCOMPARE(static_cast<int>(m_spaces.size()), 2);
 }
 
@@ -199,7 +199,7 @@ void TestMneSourceSpaceOpsPython::volumeGrid()
     QFETCH(int, vertnoSum);
     QFETCH(double, rrUsedSum);
 
-    std::unique_ptr<MNESurface> surf = MNESurface::read_bem_surface(m_bemPath, FIFFV_BEM_SURF_ID_BRAIN, true);
+    std::unique_ptr<MNESurface> surf = MNESurface::read_bem_surface(m_bemPath.toStdU16String(), FIFFV_BEM_SURF_ID_BRAIN, true);
     QVERIFY(surf);
     QCOMPARE(surf->np, 2562);
 
@@ -235,7 +235,7 @@ void TestMneSourceSpaceOpsPython::writeRoundTrip()
     }
 
     std::vector<std::unique_ptr<MNESourceSpace>> back;
-    QCOMPARE(MNESourceSpace::read_source_spaces(path, back), 0);
+    QCOMPARE(MNESourceSpace::read_source_spaces(path.toStdU16String(), back), 0);
     QCOMPARE(static_cast<int>(back.size()), 2);
     for (int h = 0; h < 2; ++h) {
         const MNESourceSpace& a = *m_spaces[h];
@@ -260,7 +260,7 @@ void TestMneSourceSpaceOpsPython::writeRoundTrip()
         stream->end_file();
     }
     std::vector<std::unique_ptr<MNESourceSpace>> sel;
-    QCOMPARE(MNESourceSpace::read_source_spaces(selPath, sel), 0);
+    QCOMPARE(MNESourceSpace::read_source_spaces(selPath.toStdU16String(), sel), 0);
     QCOMPARE(static_cast<int>(sel.size()), 1);
     QCOMPARE(sel[0]->np, m_spaces[0]->nuse);
     // Like MNE-C, the point list carries no selection, so a surface space reads back with none in use.
@@ -277,7 +277,7 @@ void TestMneSourceSpaceOpsPython::volumeNeighborsRoundTrip()
     // sqrt(3) grid apart. 28158 pairs, neighbour vertex numbers summing to 69766539.
     // mne-python's own neighbor_vert keeps one entry per used point: its mask
     // (_source_space.py, "removes = ...") tests flat array positions against vertno.
-    std::unique_ptr<MNESurface> surf = MNESurface::read_bem_surface(m_bemPath, FIFFV_BEM_SURF_ID_BRAIN, true);
+    std::unique_ptr<MNESurface> surf = MNESurface::read_bem_surface(m_bemPath.toStdU16String(), FIFFV_BEM_SURF_ID_BRAIN, true);
     QVERIFY(surf);
     std::unique_ptr<MNESourceSpace> vol(MNESourceSpace::make_volume_source_space(*surf, 0.01f, 0.0f, 0.005f));
     QVERIFY(vol);
@@ -313,7 +313,7 @@ void TestMneSourceSpaceOpsPython::volumeNeighborsRoundTrip()
     }
 
     std::vector<std::unique_ptr<MNESourceSpace>> back;
-    QCOMPARE(MNESourceSpace::read_source_spaces(path, back), 0);
+    QCOMPARE(MNESourceSpace::read_source_spaces(path.toStdU16String(), back), 0);
     QCOMPARE(static_cast<int>(back.size()), 1);
     const MNESourceSpace& b = *back[0];
     QCOMPARE(b.type, static_cast<int>(FIFFV_MNE_SPACE_VOLUME));
@@ -329,7 +329,7 @@ void TestMneSourceSpaceOpsPython::volumeNeighborsRoundTrip()
     // The selected-only file renumbers neighbours to positions among the used points
     // and, carrying no selection, reads back with every point in use.
     std::vector<std::unique_ptr<MNESourceSpace>> sel;
-    QCOMPARE(MNESourceSpace::read_source_spaces(selPath, sel), 0);
+    QCOMPARE(MNESourceSpace::read_source_spaces(selPath.toStdU16String(), sel), 0);
     QCOMPARE(sel[0]->np, 1306);
     QCOMPARE(sel[0]->nuse, 1306);
     qint64 selSum = 0;
@@ -395,7 +395,7 @@ void TestMneSourceSpaceOpsPython::gradeToVertices_matchesPython()
     // A surface without trailing tags ends cleanly; reaching EOF must not be reported as an error.
     s_criticals = 0;
     const QtMessageHandler previous = qInstallMessageHandler(countCriticals);
-    const std::vector<VectorXi> v = MNESourceSpace::gradeToVertices(subjectsDir, "large", 2);
+    const std::vector<VectorXi> v = MNESourceSpace::gradeToVertices(subjectsDir.toStdU16String(), "large", 2);
     qInstallMessageHandler(previous);
     QCOMPARE(s_criticals, 0);
     QCOMPARE(v.size(), 2);
@@ -404,7 +404,7 @@ void TestMneSourceSpaceOpsPython::gradeToVertices_matchesPython()
 
     // mne raises for grades that map two ico vertices onto one surface vertex (162 vertices, grade 2).
     QTest::ignoreMessage(QtWarningMsg, QRegularExpression("Cannot use icosahedral grade 2"));
-    QVERIFY(MNESourceSpace::gradeToVertices(subjectsDir, "small", 2).empty());
+    QVERIFY(MNESourceSpace::gradeToVertices(subjectsDir.toStdU16String(), "small", 2).empty());
 }
 
 //=============================================================================================================
@@ -414,7 +414,7 @@ void TestMneSourceSpaceOpsPython::readsPythonVolumeSpace()
     // data/sample-vol25-src.fif from make_volume_src_fixture.py: mne-python's 25 mm volume grid
     // with neighbourhoods, voxel / MRI transforms and the parent-MRI block (MRI shrunk to 32^3).
     std::vector<std::unique_ptr<MNESourceSpace>> spaces;
-    QCOMPARE(MNESourceSpace::read_source_spaces(QStringLiteral(MNE_SOURCE_SPACE_DATA_DIR "/sample-vol25-src.fif"), spaces), 0);
+    QCOMPARE(MNESourceSpace::read_source_spaces(QStringLiteral(MNE_SOURCE_SPACE_DATA_DIR "/sample-vol25-src.fif").toStdU16String(), spaces), 0);
     QCOMPARE(static_cast<int>(spaces.size()), 1);
     const MNESourceSpace& v = *spaces[0];
     QCOMPARE(v.type, static_cast<int>(FIFFV_MNE_SPACE_VOLUME));
@@ -476,7 +476,7 @@ void TestMneSourceSpaceOpsPython::readsPythonVolumeSpace()
         stream->end_file();
     }
     std::vector<std::unique_ptr<MNESourceSpace>> back;
-    QCOMPARE(MNESourceSpace::read_source_spaces(path, back), 0);
+    QCOMPARE(MNESourceSpace::read_source_spaces(path.toStdU16String(), back), 0);
     const MNESourceSpace& b = *back[0];
     QCOMPARE(b.vertno, v.vertno);
     QCOMPARE(b.nneighbor_vert, v.nneighbor_vert);
@@ -545,7 +545,7 @@ void TestMneSourceSpaceOpsPython::morphMap_matchesPython()
         QVERIFY(FsSurface::read(subjects + "/small/surf" + name, small, false));
         QVERIFY(FsSurface::read(subjects + "/large/surf" + name, large, false));
         for (const auto& [from, to, fromSurf, toSurf] : {std::tuple{"small", "large", &small, &large}, std::tuple{"large", "small", &large, &small}}) {
-            const auto python = MNEMorphMap::read(file, from, to, hemi);
+            const auto python = MNEMorphMap::read(file.toStdU16String(), from, to, hemi);
             QVERIFY(python);
             const MNEMorphMap ours = MNEMorphMap::compute(fromSurf->rr(), fromSurf->tris(), toSurf->rr());
             QCOMPARE(ours.map->rows(), python->map->rows());
@@ -560,15 +560,15 @@ void TestMneSourceSpaceOpsPython::morphMap_matchesPython()
     }
 
     // Round trip through our writer.
-    MNEMorphMap left = *MNEMorphMap::read(file, "small", "large", 0);
+    MNEMorphMap left = *MNEMorphMap::read(file.toStdU16String(), "small", "large", 0);
     left.from_subj = "a";
     left.to_subj = "b";
     QTemporaryDir dir;
-    QVERIFY(MNEMorphMap::write(dir.filePath("a-b-morph.fif"), {&left}));
-    const auto back = MNEMorphMap::read(dir.filePath("a-b-morph.fif"), "a", "b", 0);
+    QVERIFY(MNEMorphMap::write(dir.filePath("a-b-morph.fif").toStdU16String(), {&left}));
+    const auto back = MNEMorphMap::read(dir.filePath("a-b-morph.fif").toStdU16String(), "a", "b", 0);
     QVERIFY(back);
     QCOMPARE((back->toEigen() - left.toEigen()).norm(), 0.0);
-    QVERIFY(!MNEMorphMap::read(dir.filePath("a-b-morph.fif"), "a", "b", 1));
+    QVERIFY(!MNEMorphMap::read(dir.filePath("a-b-morph.fif").toStdU16String(), "a", "b", 1));
 }
 
 //=============================================================================================================

@@ -60,7 +60,7 @@ void MNEClusterInfo::clear()
 
 //=============================================================================================================
 
-void MNEClusterInfo::write(QString p_sFileName) const
+void MNEClusterInfo::write(const std::filesystem::path& p_sFileName) const
 {
     QFile file(p_sFileName);
     if (!file.open(QIODevice::WriteOnly | QIODevice::Text)) {
@@ -71,7 +71,7 @@ void MNEClusterInfo::write(QString p_sFileName) const
     out << "MNE Cluster Info\n";
 
     for (qint32 i = 0; i < std::ssize(clusterLabelIds); ++i) {
-        out << "\nLabel : " << clusterLabelNames[i] << "\n";
+        out << "\nLabel : " << clusterLabelNames[i].c_str() << "\n";
         out << "FsLabel ID : " << clusterLabelIds[i] << "\n";
         out << "Centroid Vertno : " << centroidVertno[i] << "\n";
         out << "Centroid rr : " << centroidSource_rr[i](0) << ", " << centroidSource_rr[i](1) << ", " << centroidSource_rr[i](2) << "\n";

@@ -29,6 +29,8 @@
 
 #include "mne_global.h"
 
+#include <filesystem>
+#include <string>
 #include <vector>
 
 //=============================================================================================================
@@ -100,7 +102,7 @@ public:
      *
      * @param[in] p_sFileName    FileName to write to.
      */
-    void write(QString p_sFileName) const;
+    void write(const std::filesystem::path& p_sFileName) const;
 
     /**
      * Overloaded == operator to compare an object to this instance.
@@ -113,7 +115,7 @@ public:
     friend bool operator==(const MNEClusterInfo& a, const MNEClusterInfo& b);
 
 public:
-    std::vector<QString> clusterLabelNames;         /**< FsLabel name of the cluster. Entries can be non unique, since some FsLabel consist of more than one cluster.*/
+    std::vector<std::string> clusterLabelNames;     /**< FsLabel name of the cluster. Entries can be non unique, since some FsLabel consist of more than one cluster.*/
     std::vector<qint32> clusterLabelIds;            /**< Id (FsLabel/ROI id) of the cluster. Entries can be non unique, since some FsLabel/ROI consist of more than one cluster.*/
     std::vector<qint32> centroidVertno;             /**< Id (FsLabel/ROI id) of the centroid. */
     std::vector<Eigen::Vector3f> centroidSource_rr; /**< Centroid location. */

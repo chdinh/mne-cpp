@@ -25,11 +25,13 @@
 // QT INCLUDES
 //=============================================================================================================
 
-#include <QFile>
-#include <QTextStream>
 #include <QDebug>
 
 #include <cmath>
+#include <format>
+#include <fstream>
+#include <string_view>
+#include <unordered_map>
 
 //=============================================================================================================
 // USED NAMESPACES
@@ -46,50 +48,39 @@ using namespace MNELIB;
 /**
  * @brief Extract the shaft prefix from a channel name.
  *
- * Collects all leading alphabetic characters and apostrophes before the first digit.
+ * Collects all leading characters before the first digit.
  * E.g. "LH1" → "LH", "RA12" → "RA", "A'1" → "A'".
  */
-static QString extractShaftPrefix(const QString& name)
+static std::string_view extractShaftPrefix(std::string_view name)
 {
-    QString prefix;
-    for (int i = 0; i < name.size(); ++i) {
-        QChar ch = name[i];
-        if (ch.isDigit()) {
-            break;
-        }
-        prefix.append(ch);
-    }
-    return prefix;
+    const std::size_t digit = name.find_first_of("0123456789");
+    return name.substr(0, digit);
 }
 
 //=============================================================================================================
 // DEFINE MEMBER METHODS
 //=============================================================================================================
 
-std::vector<DerivationRule> ChannelDerivation::buildBipolar(const QStringList& channelNames)
+std::vector<DerivationRule> ChannelDerivation::buildBipolar(const StringList& channelNames)
 {
-    // Group channels by shaft prefix, maintaining original order within each group
-    QMap<QString, QStringList> groups;
-    QStringList groupOrder;
-
-    for (const QString& name : channelNames) {
-        QString prefix = extractShaftPrefix(name);
-        if (!groups.contains(prefix)) {
-            groupOrder.append(prefix);
+    // Group channels by shaft prefix, keeping the first-seen group order and the channel order within groups
+    std::vector<std::vector<const std::string*>> groups;
+    std::unordered_map<std::string_view, std::size_t> groupIndex;
+    for (const std::string& name : channelNames) {
+        const auto [it, inserted] = groupIndex.try_emplace(extractShaftPrefix(name), groups.size());
+        if (inserted) {
+            groups.emplace_back();
         }
-        groups[prefix].append(name);
+        groups[it->second].push_back(&name);
     }
 
     // Build bipolar pairs within each group
     std::vector<DerivationRule> rules;
-    for (const QString& prefix : groupOrder) {
-        const QStringList& group = groups[prefix];
-        for (int i = 0; i < group.size() - 1; ++i) {
-            DerivationRule rule;
-            rule.outputName = group[i] + "-" + group[i + 1];
-            rule.inputWeights[group[i]] = 1.0;
-            rule.inputWeights[group[i + 1]] = -1.0;
-            rules.push_back(rule);
+    for (const auto& group : groups) {
+        for (std::size_t i = 0; i + 1 < group.size(); ++i) {
+            const std::string& a = *group[i];
+            const std::string& b = *group[i + 1];
+            rules.push_back({std::format("{}-{}", a, b), {{a, 1.0}, {b, -1.0}}});
         }
     }
 
@@ -98,27 +89,26 @@ std::vector<DerivationRule> ChannelDerivation::buildBipolar(const QStringList& c
 
 //=============================================================================================================
 
-std::vector<DerivationRule> ChannelDerivation::buildCommonAverage(const QStringList& channelNames)
+std::vector<DerivationRule> ChannelDerivation::buildCommonAverage(const StringList& channelNames)
 {
-    const int N = channelNames.size();
-    if (N == 0) {
+    if (channelNames.empty()) {
         return {};
     }
 
-    const double invN = 1.0 / static_cast<double>(N);
+    const double invN = 1.0 / static_cast<double>(channelNames.size());
+
+    std::map<std::string, double> average;
+    for (const std::string& ch : channelNames) {
+        average.emplace(ch, -invN);
+    }
 
     std::vector<DerivationRule> rules;
-    rules.reserve(N);
-
-    for (const QString& target : channelNames) {
-        DerivationRule rule;
-        rule.outputName = target;
-        for (const QString& ch : channelNames) {
-            rule.inputWeights[ch] = -invN;
-        }
+    rules.reserve(channelNames.size());
+    for (const std::string& target : channelNames) {
+        DerivationRule rule{target, average};
         // Override target channel: weight = 1.0 - 1/N
         rule.inputWeights[target] = 1.0 - invN;
-        rules.push_back(rule);
+        rules.push_back(std::move(rule));
     }
 
     return rules;
@@ -126,73 +116,71 @@ std::vector<DerivationRule> ChannelDerivation::buildCommonAverage(const QStringL
 
 //=============================================================================================================
 
-std::pair<MatrixXd, QStringList> ChannelDerivation::apply(
+std::pair<MatrixXd, StringList> ChannelDerivation::apply(
     const MatrixXd& matData,
-    const QStringList& channelNames,
+    const StringList& channelNames,
     const std::vector<DerivationRule>& rules)
 {
     // Build channel name → row index lookup
-    QMap<QString, int> chIndex;
-    for (int i = 0; i < channelNames.size(); ++i) {
-        chIndex[channelNames[i]] = i;
+    std::unordered_map<std::string_view, Eigen::Index> chIndex;
+    chIndex.reserve(channelNames.size());
+    for (std::size_t i = 0; i < channelNames.size(); ++i) {
+        chIndex.emplace(channelNames[i], static_cast<Eigen::Index>(i));
     }
 
-    const Eigen::Index nTimes = matData.cols();
-    MatrixXd matResult = MatrixXd::Zero(rules.size(), nTimes);
-    QStringList outputNames;
+    MatrixXd matResult = MatrixXd::Zero(static_cast<Eigen::Index>(rules.size()), matData.cols());
+    StringList outputNames;
     outputNames.reserve(rules.size());
 
-    for (int r = 0; r < std::ssize(rules); ++r) {
+    for (std::size_t r = 0; r < rules.size(); ++r) {
         const DerivationRule& rule = rules[r];
-        outputNames.append(rule.outputName);
+        outputNames.push_back(rule.outputName);
 
-        for (auto it = rule.inputWeights.constBegin(); it != rule.inputWeights.constEnd(); ++it) {
-            auto idxIt = chIndex.constFind(it.key());
-            if (idxIt == chIndex.constEnd()) {
-                qWarning() << "ChannelDerivation::apply - channel not found:" << it.key()
-                           << "in rule:" << rule.outputName;
+        for (const auto& [input, weight] : rule.inputWeights) {
+            const auto idxIt = chIndex.find(input);
+            if (idxIt == chIndex.end()) {
+                qWarning("ChannelDerivation::apply - channel not found: %s in rule: %s", input.c_str(), rule.outputName.c_str());
                 continue;
             }
-            matResult.row(r) += it.value() * matData.row(idxIt.value());
+            matResult.row(static_cast<Eigen::Index>(r)) += weight * matData.row(idxIt->second);
         }
     }
 
-    return std::make_pair(matResult, outputNames);
+    return {std::move(matResult), std::move(outputNames)};
 }
 
 //=============================================================================================================
 
-std::vector<DerivationRule> ChannelDerivation::readDefinitionFile(const QString& path)
+std::vector<DerivationRule> ChannelDerivation::readDefinitionFile(const std::filesystem::path& path)
 {
     const std::optional<MNEDerivSet> set = MNEDerivSet::readText(path);
     if (!set) {
         return {};
     }
     std::vector<DerivationRule> rules;
-    for (const MNEDerivSet::Definition& definition : set->definitions()) {
-        rules.push_back({definition.first, definition.second});
+    for (MNEDerivSet::Definition& definition : set->definitions()) {
+        rules.push_back({std::move(definition.first), std::move(definition.second)});
     }
     return rules;
 }
 
 //=============================================================================================================
 
-bool ChannelDerivation::writeDefinitionFile(const QString& path, const std::vector<DerivationRule>& rules)
+bool ChannelDerivation::writeDefinitionFile(const std::filesystem::path& path, const std::vector<DerivationRule>& rules)
 {
-    QFile file(path);
-    if (!file.open(QIODevice::WriteOnly | QIODevice::Text)) {
-        qWarning() << "ChannelDerivation::writeDefinitionFile - cannot open:" << path;
+    std::ofstream out(path);
+    if (!out) {
+        qWarning("ChannelDerivation::writeDefinitionFile - cannot open: %s", utf8FromPath(path).c_str());
         return false;
     }
     // MNE-C mne_make_derivations syntax; names are quoted because they may contain spaces.
-    QTextStream out(&file);
     out << "# Channel derivations: \"name\" = weight * \"input\" + ...\n";
     for (const DerivationRule& rule : rules) {
         out << '"' << rule.outputName << "\" =";
-        for (auto it = rule.inputWeights.constBegin(); it != rule.inputWeights.constEnd(); ++it) {
-            out << ' ' << (it.value() < 0.0 ? '-' : '+') << ' ' << QString::number(std::fabs(it.value()), 'g', 17) << " * \"" << it.key() << '"';
+        for (const auto& [input, weight] : rule.inputWeights) {
+            out << std::format(" {} {:.17g} * \"{}\"", weight < 0.0 ? '-' : '+', std::fabs(weight), input);
         }
         out << '\n';
     }
-    return true;
+    return static_cast<bool>(out);
 }

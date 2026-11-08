@@ -26,6 +26,7 @@
 
 #include "mne_global.h"
 
+#include <filesystem>
 #include <string>
 #include <vector>
 
@@ -211,7 +212,7 @@ public:
      *
      * @return The covariance matrix, or nullptr on failure.
      */
-    static std::unique_ptr<MNECovMatrix> read(const QString& name, int kind);
+    static std::unique_ptr<MNECovMatrix> read(const std::filesystem::path& name, int kind);
 
     //=========================================================================================================
     /**

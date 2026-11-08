@@ -127,7 +127,7 @@ private slots:
     {
         MNERawInfo info;
         // nchan may be uninitialized in default constructor; just verify object is constructible
-        QVERIFY(info.filename.isEmpty());
+        QVERIFY(info.filename.empty());
     }
 
     void testMneRawInfoLoad()
@@ -136,7 +136,7 @@ private slots:
             QSKIP("Raw file not found");
 
         std::unique_ptr<MNERawInfo> info;
-        int rc = MNERawInfo::load(m_sRawFile, 0, info);
+        int rc = MNERawInfo::load(m_sRawFile.toStdU16String(), 0, info);
         if (rc == 0 && info) {
             QVERIFY(info->nchan > 0);
             QVERIFY(info->sfreq > 0);

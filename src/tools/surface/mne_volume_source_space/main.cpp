@@ -120,7 +120,7 @@ int main(int argc, char* argv[])
 
     const MNEBemSurface& innerSurf = bem[innerIdx];
     qInfo("Using surface: %s (%d vertices, %d triangles)",
-          qPrintable(MNEBemSurface::id_name(innerSurf.id)),
+          MNEBemSurface::id_name(innerSurf.id).c_str(),
           innerSurf.np, innerSurf.ntri);
 
     // Create MNESurface from BEM surface for the library function

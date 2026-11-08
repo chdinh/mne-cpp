@@ -46,7 +46,9 @@
 #include <QStringList>
 #include <QSharedPointer>
 
+#include <filesystem>
 #include <memory>
+#include <vector>
 
 //=============================================================================================================
 // DEFINE NAMESPACE FWDLIB
@@ -108,7 +110,7 @@ public:
     float mindist;   /**< Minimum allowed distance of the sources from the inner skull surface. */
     int coord_frame; /**< Can be changed with the --mricoord option. */
     bool do_all;
-    QStringList labels; /**< Compute the solution only for these labels. */
+    std::vector<std::filesystem::path> labels; /**< Compute the solution only for these labels. */
     int nlabel;
     int ncluster; /**< Number of sources desired in clustered solution. */
 

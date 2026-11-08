@@ -318,8 +318,8 @@ std::shared_ptr<ComputeFwdSettings> TestFwdPython::settings(bool fixedOri, bool 
     s->mindist = 5.0f / 1000.0f;
     s->solname = m_dir.filePath(fixedOri ? "fixed-fwd.fif" : "free-fwd.fif");
     // The second name has no hemisphere tag and is skipped with a warning, as in MNE-C.
-    s->labels = {m_labelPath, m_dir.filePath("unassigned.label")};
-    s->nlabel = s->labels.size();
+    s->labels = {m_labelPath.toStdU16String(), m_dir.filePath("unassigned.label").toStdU16String()};
+    s->nlabel = static_cast<int>(s->labels.size());
     s->pFiffInfo = QSharedPointer<FiffInfo>::create(m_raw.info);
     s->checkIntegrity();
     return s;

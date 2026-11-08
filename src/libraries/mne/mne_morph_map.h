@@ -26,6 +26,8 @@
 
 #include "mne_global.h"
 
+#include <filesystem>
+#include <string>
 #include <vector>
 #include "fiff/fiff_sparse_matrix.h"
 
@@ -118,7 +120,7 @@ public:
      *
      * @return The map, or no value if the file has no such map.
      */
-    static std::optional<MNEMorphMap> read(const QString& path, const QString& fromSubj, const QString& toSubj, int hemi);
+    static std::optional<MNEMorphMap> read(const std::filesystem::path& path, const std::string& fromSubj, const std::string& toSubj, int hemi);
 
     //=========================================================================================================
     /**
@@ -129,7 +131,7 @@ public:
      *
      * @return True if the file was written.
      */
-    static bool write(const QString& path, const std::vector<const MNEMorphMap*>& maps);
+    static bool write(const std::filesystem::path& path, const std::vector<const MNEMorphMap*>& maps);
 
     //=========================================================================================================
     /**
@@ -143,8 +145,8 @@ public:
     std::unique_ptr<FIFFLIB::FiffSparseMatrix> map; /**< Destination x source interpolation weights. */
     Eigen::VectorXi best;                           /**< Nearest source vertex of every destination vertex (computed maps only). */
     int hemi = -1;                                  /**< 0 for the left, 1 for the right hemisphere, -1 if unknown. */
-    QString from_subj;                              /**< Source subject. */
-    QString to_subj;                                /**< Destination subject. */
+    std::string from_subj;                          /**< Source subject. */
+    std::string to_subj;                            /**< Destination subject. */
 };
 
 //=============================================================================================================

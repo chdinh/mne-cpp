@@ -112,7 +112,7 @@ void MNEMeasData::adjust_baselines(float bmin, float bmax)
                 bdata(s, c) -= ave;
         }
         qInfo("\t%s : using baseline %7.1f ... %7.1f ms\n",
-              current->comment.toUtf8().constData() ? current->comment.toUtf8().constData() : "unknown",
+              current->comment.c_str() ? current->comment.c_str() : "unknown",
               1000 * (tmin + b1 / sfreq),
               1000 * (tmin + b2 / sfreq));
     }
@@ -120,7 +120,7 @@ void MNEMeasData::adjust_baselines(float bmin, float bmax)
 
 //=============================================================================================================
 
-bool MNEMeasData::read_evoked_set(const QString& name,
+bool MNEMeasData::read_evoked_set(const std::filesystem::path& name,
                                   int set,
                                   MNEInverseOperator* op,
                                   MNENamedMatrix* fwd,
@@ -136,7 +136,7 @@ bool MNEMeasData::read_evoked_set(const QString& name,
        * Read evoked data via FiffEvoked (no baseline correction, no projection
        * — MNEMeasData handles projections separately via MNEProjOp).
        */
-    auto read = FiffEvoked::read(name.toStdU16String(), set - 1, {}, false);
+    auto read = FiffEvoked::read(name, set - 1, {}, false);
     if (!read) {
         qCritical("%s", read.error().what());
         return false;
@@ -297,23 +297,23 @@ bool MNEMeasData::read_evoked_set(const QString& name,
         if (op) {         /* Attach the projection operator and CTF compensation info to the data, too */
             target.proj = MNEProjOp::read(name);
             if (target.proj && target.proj->nitems > 0) {
-                qInfo("\tLoaded projection from %s:\n", name.toUtf8().data());
+                qInfo("\tLoaded projection from %s:\n", UTILSLIB::utf8FromPath(name).c_str());
                 QTextStream errStream(stderr);
-                target.proj->report(errStream, QStringLiteral("\t\t"));
+                target.proj->report(errStream, QStringLiteral("\t\t").toStdString());
             }
         } else {
             target.proj = MNEProjOp::read(name);
             if (target.proj && target.proj->nitems > 0) {
-                qInfo("\tLoaded projection from %s:\n", name.toUtf8().data());
+                qInfo("\tLoaded projection from %s:\n", UTILSLIB::utf8FromPath(name).c_str());
                 QTextStream errStream(stderr);
-                target.proj->report(errStream, QStringLiteral("\t\t"));
+                target.proj->report(errStream, QStringLiteral("\t\t").toStdString());
             }
             target.comp = MNECTFCompDataSet::read(name);
             if (!target.comp) {
                 return false;
             }
             if (target.comp->ncomp > 0)
-                qInfo("\tRead %d compensation data sets from %s\n", target.comp->ncomp, name.toUtf8().data());
+                qInfo("\tRead %d compensation data sets from %s\n", target.comp->ncomp, UTILSLIB::utf8FromPath(name).c_str());
         }
         /*
          * Bad channels — already read by FiffEvoked via FiffStream::read_meas_info()
@@ -331,7 +331,7 @@ bool MNEMeasData::read_evoked_set(const QString& name,
                     }
                 }
             }
-            qInfo("\t%d bad channels read from %s%s", target.nbad, name.toUtf8().data(), target.nbad > 0 ? ":\n" : "\n");
+            qInfo("\t%d bad channels read from %s%s", target.nbad, UTILSLIB::utf8FromPath(name).c_str(), target.nbad > 0 ? ":\n" : "\n");
             if (target.nbad > 0) {
                 qInfo("\t\t");
                 for (k = 0; k < target.nbad; k++)
@@ -350,7 +350,7 @@ bool MNEMeasData::read_evoked_set(const QString& name,
     dataset->nave = nave;
     dataset->kind = aspect_kind;
     dataset->data = Eigen::MatrixXf::Zero(np, nchan);
-    dataset->comment = QString::fromStdString(evoked.comment);
+    dataset->comment = evoked.comment;
     dataset->baselines = Eigen::VectorXf::Zero(nchan);
     /*
        * Pick data from all channels
@@ -370,18 +370,18 @@ bool MNEMeasData::read_evoked_set(const QString& name,
         for (p = 0; p < np; p++) /* Copy the data and correct for the possible non-unit calibration */
             dataset->stim14[p] = data(stim14, p + n1) / chs[stim14].cal;
     }
-    const QString comment = dataset->comment.isEmpty() ? QStringLiteral("unknown") : dataset->comment;
+    const std::string comment = dataset->comment.empty() ? std::string("unknown") : dataset->comment;
     target.sets.push_back(std::move(dataset));
     target.nset++;
     if (fresh)
         target.current = target.sets.front().get();
-    qInfo("\t%s dataset %s from %s", fresh ? "Loaded" : "Added", qPrintable(comment), qPrintable(name));
+    qInfo("\t%s dataset %s from %s", fresh ? "Loaded" : "Added", comment.c_str(), UTILSLIB::utf8FromPath(name).c_str());
     return true;
 }
 
 //=============================================================================================================
 
-std::unique_ptr<MNEMeasData> MNEMeasData::mne_read_meas_data(const QString& name,
+std::unique_ptr<MNEMeasData> MNEMeasData::mne_read_meas_data(const std::filesystem::path& name,
                                                              int set,
                                                              MNEInverseOperator* op,
                                                              MNENamedMatrix* fwd,
@@ -396,7 +396,7 @@ std::unique_ptr<MNEMeasData> MNEMeasData::mne_read_meas_data(const QString& name
 
 //=============================================================================================================
 
-bool MNEMeasData::mne_read_meas_data_add(const QString& name,
+bool MNEMeasData::mne_read_meas_data_add(const std::filesystem::path& name,
                                          int set,
                                          MNEInverseOperator* op,
                                          MNENamedMatrix* fwd,

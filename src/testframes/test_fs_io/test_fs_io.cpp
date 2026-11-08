@@ -277,7 +277,7 @@ private slots:
             QCOMPARE(s.tris(), expected);
 
             // MNE-C's surface reader, used by the source-space and display code, reads the same geometry
-            const std::unique_ptr<MNELIB::MNESourceSpace> mneSurf = MNELIB::MNESourceSpace::load_surface(file.fileName(), QString());
+            const std::unique_ptr<MNELIB::MNESourceSpace> mneSurf = MNELIB::MNESourceSpace::load_surface(file.fileName().toStdU16String(), QString().toStdU16String());
             QVERIFY(mneSurf);
             QVERIFY(mneSurf->rr.isApprox(s.rr(), 1e-6f));
             QCOMPARE(Eigen::MatrixX3i(mneSurf->itris), expected);
@@ -300,7 +300,7 @@ private slots:
         for (int i = 0; i < 5; ++i) {
             QVERIFY(std::fabs(values(i) - expectedCurv[i]) < 1e-6f);
         }
-        const std::unique_ptr<MNELIB::MNESourceSpace> withCurv = MNELIB::MNESourceSpace::load_surface(tmpDir.filePath("lh.newquad"), curvFile.fileName());
+        const std::unique_ptr<MNELIB::MNESourceSpace> withCurv = MNELIB::MNESourceSpace::load_surface(tmpDir.filePath("lh.newquad").toStdU16String(), curvFile.fileName().toStdU16String());
         QVERIFY(withCurv);
         QVERIFY(withCurv->curv.isApprox(values, 1e-6f));
 

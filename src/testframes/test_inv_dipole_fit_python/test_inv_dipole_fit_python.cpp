@@ -351,7 +351,7 @@ void TestInvDipoleFitPython::bemForwardMatches()
 
     // print_fields lists the prediction in fT for MEG and in uV for EEG, after the same projection
     if (dipole == 0) {
-        std::unique_ptr<MNEMeasData> ave(MNEMeasData::mne_read_meas_data(m_sampleAve, 1, nullptr, nullptr, fitData->ch_names,
+        std::unique_ptr<MNEMeasData> ave(MNEMeasData::mne_read_meas_data(m_sampleAve.toStdU16String(), 1, nullptr, nullptr, fitData->ch_names,
                                                                          fitData->nmeg + fitData->neeg));
         QVERIFY(ave);
         QString text;
@@ -681,7 +681,7 @@ void TestInvDipoleFitPython::fitsOneTimePoint()
 void TestInvDipoleFitPython::printsFields()
 {
     // Sample 0 of the synthetic data is exactly the field of truth dipole 1.
-    std::unique_ptr<MNEMeasData> data(MNEMeasData::mne_read_meas_data(m_synthAve, 1, nullptr, nullptr, m_fitData->ch_names,
+    std::unique_ptr<MNEMeasData> data(MNEMeasData::mne_read_meas_data(m_synthAve.toStdU16String(), 1, nullptr, nullptr, m_fitData->ch_names,
                                                                       m_fitData->nmeg + m_fitData->neeg));
     QVERIFY(data);
     QString text;
@@ -703,7 +703,7 @@ void TestInvDipoleFitPython::printsFields()
     QVERIFY(!InvDipoleFitData::print_fields(truthPos(0), truthMoment(0), 10.0f, 0.0f, *m_fitData, *data, out));
 
     // Data read for a different channel set cannot be compared channel by channel
-    std::unique_ptr<MNEMeasData> fewer(MNEMeasData::mne_read_meas_data(m_synthAve, 1, nullptr, nullptr, m_fitData->ch_names, 10));
+    std::unique_ptr<MNEMeasData> fewer(MNEMeasData::mne_read_meas_data(m_synthAve.toStdU16String(), 1, nullptr, nullptr, m_fitData->ch_names, 10));
     QVERIFY(fewer);
     const QString before = text;
     QTest::ignoreMessage(QtWarningMsg, QRegularExpression("do not hold the 305 fit channels"));

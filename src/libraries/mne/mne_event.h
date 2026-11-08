@@ -24,6 +24,7 @@
 
 #include "mne_global.h"
 
+#include <string>
 #include <QString>
 
 //=============================================================================================================
@@ -50,7 +51,7 @@ public:
     unsigned int to = 0;       /**< Trigger value after the transition. */
     bool show = false;         /**< Display flag (application-defined). */
     bool created_here = false; /**< True if the event was added by the program rather than read. */
-    QString comment;           /**< Free-text event comment. */
+    std::string comment;       /**< Free-text event comment. */
 
     friend bool operator==(const MNEEvent& a, const MNEEvent& b)
     {

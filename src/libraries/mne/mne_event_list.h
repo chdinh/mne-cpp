@@ -26,6 +26,7 @@
 #include "mne_global.h"
 #include "mne_event.h"
 
+#include <filesystem>
 #include <QString>
 
 #include <optional>
@@ -58,7 +59,7 @@ public:
      *
      * @return The events with their comments, or no value if the file has no event block.
      */
-    static std::optional<MNEEventList> readFif(const QString& path, int offset = 0);
+    static std::optional<MNEEventList> readFif(const std::filesystem::path& path, int offset = 0);
 
     //=========================================================================================================
     /**
@@ -77,7 +78,7 @@ public:
      *
      * @return The events, or no value if the file cannot be read or holds no events.
      */
-    static std::optional<MNEEventList> readText(const QString& path, int offset, int oldOffset, float sfreq);
+    static std::optional<MNEEventList> readText(const std::filesystem::path& path, int offset, int oldOffset, float sfreq);
 
     //=========================================================================================================
     /**
@@ -88,7 +89,7 @@ public:
      *
      * @return True if the file was written.
      */
-    bool writeFif(const QString& path, int offset = 0) const;
+    bool writeFif(const std::filesystem::path& path, int offset = 0) const;
 
     //=========================================================================================================
     /**

@@ -401,8 +401,8 @@ QSharedPointer<FIFFLIB::FiffEvokedSet> Averaging::averageCalculation(const FIFFL
                                                                      UTILSLIB::FilterKernel filterKernel,
                                                                      FIFFLIB::FiffInfo fiffInfo)
 {
-    QMap<QString, double> mapReject;
-    mapReject.insert("eog", 300e-06);
+    std::map<std::string, double> mapReject;
+    mapReject.emplace("eog", 300e-06);
 
     if (matEvents.rows() < 2) {
         return nullptr;

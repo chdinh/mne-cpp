@@ -297,7 +297,7 @@ void TestMneLibrary::sourceSpace_readFromFile()
         QSKIP("Source space file not found");
 
     std::vector<std::unique_ptr<MNESourceSpace>> spaces;
-    int res = MNESourceSpace::read_source_spaces(path, spaces);
+    int res = MNESourceSpace::read_source_spaces(path.toStdU16String(), spaces);
     Q_UNUSED(res);
     QVERIFY(spaces.size() >= 1);
 
@@ -403,9 +403,9 @@ void TestMneLibrary::sourceSpaces_clearAndAccess()
 
     MNESourceSpace& lh = srcSpaces[0];
     QVERIFY(lh.np > 0);
-    MNESourceSpace& lhByName = srcSpaces[QString("lh")];
+    MNESourceSpace& lhByName = srcSpaces["lh"];
     Q_UNUSED(lhByName);
-    MNESourceSpace& rhByName = srcSpaces[QString("rh")];
+    MNESourceSpace& rhByName = srcSpaces["rh"];
     Q_UNUSED(rhByName);
 
     MNEHemisphere* hemi0 = srcSpaces.hemisphereAt(0);
@@ -607,12 +607,12 @@ void TestMneLibrary::ctfComp_staticHelpers()
         Q_UNUSED(k);
     }
 
-    QString desc = MNECTFCompDataSet::explain_comp(101);
-    QVERIFY(!desc.isEmpty());
+    std::string desc = MNECTFCompDataSet::explain_comp(101);
+    QVERIFY(!desc.empty());
     desc = MNECTFCompDataSet::explain_comp(201);
-    QVERIFY(!desc.isEmpty());
+    QVERIFY(!desc.empty());
     desc = MNECTFCompDataSet::explain_comp(301);
-    QVERIFY(!desc.isEmpty());
+    QVERIFY(!desc.empty());
     MNECTFCompDataSet::explain_comp(0);
     MNECTFCompDataSet::explain_comp(999);
 
@@ -639,7 +639,7 @@ void TestMneLibrary::ctfComp_readFromRawFile()
 {
     if (!hasData())
         QSKIP("No test data");
-    auto compSet = MNECTFCompDataSet::read(rawPath());
+    auto compSet = MNECTFCompDataSet::read(rawPath().toStdU16String());
     QVERIFY(compSet != nullptr);
 }
 
@@ -659,7 +659,7 @@ void TestMneLibrary::ctfComp_makeComp()
 {
     if (!hasData())
         QSKIP("No test data");
-    auto compSet = MNECTFCompDataSet::read(rawPath());
+    auto compSet = MNECTFCompDataSet::read(rawPath().toStdU16String());
     if (!compSet)
         QSKIP("No compensation data read");
 
@@ -680,7 +680,7 @@ void TestMneLibrary::ctfComp_makeComp()
 void TestMneLibrary::ctfComp_explainAndMap()
 {
     for (int kind = 0; kind <= 4; kind++) {
-        QString explanation = MNECTFCompDataSet::explain_comp(kind);
+        QString explanation = QString::fromStdString(MNECTFCompDataSet::explain_comp(kind));
         QVERIFY(!explanation.isEmpty());
     }
     MNECTFCompDataSet::map_comp_kind(0);
@@ -807,7 +807,7 @@ void TestMneLibrary::surfOrVol_realBemMethods()
 {
     if (!hasData())
         QSKIP("No test data");
-    auto surf = MNESurface::read_bem_surface2(bemPath(), -1, 1);
+    auto surf = MNESurface::read_bem_surface2(bemPath().toStdU16String(), -1, 1);
     QVERIFY(surf != nullptr);
 
     float cm[3];
@@ -987,7 +987,7 @@ void TestMneLibrary::displaySurf_alignment()
 {
     if (!hasData())
         QSKIP("No test data");
-    auto surf = MNESurface::read_bem_surface2(bemPath(), -1, 1);
+    auto surf = MNESurface::read_bem_surface2(bemPath().toStdU16String(), -1, 1);
     QVERIFY(surf != nullptr);
 
     auto dispSurf = std::make_unique<MNEMshDisplaySurface>();
@@ -1107,7 +1107,7 @@ void TestMneLibrary::forwardSolution_clusterInfo()
 
     // The centroid line holds the centroid, and the centroid list lands next to the file.
     QTemporaryDir dir;
-    ci.write(dir.filePath("clusters.txt"));
+    ci.write(dir.filePath("clusters.txt").toStdU16String());
     QFile text(dir.filePath("clusters.txt"));
     QVERIFY(text.open(QIODevice::ReadOnly | QIODevice::Text));
     QVERIFY(QString(text.readAll()).contains("Centroid rr : 0.5, 0.25, 0.125\n"));
@@ -1410,7 +1410,7 @@ void TestMneLibrary::epochData_readEpochs()
         events(i, 2) = 1;
     }
 
-    QMap<QString, double> reject;
+    std::map<std::string, double> reject;
     MNEEpochDataList epochList = MNEEpochDataList::readEpochs(raw, events, -0.1f, 0.3f, 1, reject);
     // mne.Epochs(tmin=-0.1, tmax=0.3, baseline=None, proj=False): 5 x 376 x 121, both ends rounded
     QCOMPARE(epochList.size(), 5);
@@ -1432,7 +1432,7 @@ void TestMneLibrary::volumeSourceSpace_create()
 {
     if (!hasData())
         QSKIP("No test data");
-    auto surf = MNESurface::read_bem_surface2(bemPath(), -1, 1);
+    auto surf = MNESurface::read_bem_surface2(bemPath().toStdU16String(), -1, 1);
     QVERIFY(surf != nullptr);
 
     auto vol = MNESourceSpace::make_volume_source_space(*surf, 0.020f, 0.0f, 0.005f);
@@ -1537,23 +1537,23 @@ void TestMneLibrary::eventList_text()
     QVERIFY(current.open(QIODevice::WriteOnly | QIODevice::Text));
     current.write("# events\n 1000   3.330 0 0\n 1300   4.329 0 1   left ear\n 1310   4.363 1 0\n   -1   5.000 0 2\n");
     current.close();
-    const auto list = MNEEventList::readText(current.fileName(), 1000, 0, 300.0f);
+    const auto list = MNEEventList::readText(current.fileName().toStdU16String(), 1000, 0, 300.0f);
     QVERIFY(list);
     QCOMPARE(list->nevent(), 3);
     QCOMPARE(list->events[0], (MNEEvent{300, 0, 1, false, false, "left ear"}));
     QCOMPARE(list->events[1].sample, 310);
-    QVERIFY(list->events[1].comment.isEmpty());
+    QVERIFY(list->events[1].comment.empty());
     QCOMPARE(list->events[2].sample, 500); // from the time: 5 s * 300 Hz - 1000
 
     QFile old(dir.filePath("old.eve"));
     QVERIFY(old.open(QIODevice::WriteOnly | QIODevice::Text));
     old.write(" 300 1.0 0 1\n 400 1.3 0 2\n");
     old.close();
-    const auto oldList = MNEEventList::readText(old.fileName(), 1000, 950, 300.0f);
+    const auto oldList = MNEEventList::readText(old.fileName().toStdU16String(), 1000, 950, 300.0f);
     QVERIFY(oldList);
     QCOMPARE(oldList->toMatrix(), (Eigen::MatrixXi(2, 3) << 250, 0, 1, 350, 0, 2).finished());
 
-    QVERIFY(!MNEEventList::readText(dir.filePath("missing.eve"), 0, 0, 300.0f));
+    QVERIFY(!MNEEventList::readText(dir.filePath("missing.eve").toStdU16String(), 0, 0, 300.0f));
 }
 
 void TestMneLibrary::eventList_fifRoundTrip()
@@ -1563,9 +1563,9 @@ void TestMneLibrary::eventList_fifRoundTrip()
     MNEEventList list = MNEEventList::fromMatrix((Eigen::MatrixXi(4, 3) << 14385, 0, 1, 13988, 0, 2, 14172, 0, 3, 14180, 3, 0).finished());
     list.events[0].comment = "first left";
     list.events[2].comment = "réponse";
-    QVERIFY(list.writeFif(dir.filePath("t-eve.fif"), 12900));
+    QVERIFY(list.writeFif(dir.filePath("t-eve.fif").toStdU16String(), 12900));
 
-    const auto back = MNEEventList::readFif(dir.filePath("t-eve.fif"), 12900);
+    const auto back = MNEEventList::readFif(dir.filePath("t-eve.fif").toStdU16String(), 12900);
     QVERIFY(back);
     QCOMPARE(back->events, list.events);
 
@@ -1583,7 +1583,7 @@ void TestMneLibrary::eventList_fifRoundTrip()
     sorted.append(*back);
     QCOMPARE(sorted.nevent(), 8);
 
-    QVERIFY(!MNEEventList::readFif(dir.filePath("missing.fif")));
+    QVERIFY(!MNEEventList::readFif(dir.filePath("missing.fif").toStdU16String()));
 }
 
 //=============================================================================================================
@@ -1658,7 +1658,7 @@ void TestMneLibrary::bemSurface_readSingleLayer()
     if (!hasData())
         QSKIP("No test data");
     float sigma = 0.0f;
-    auto surf = MNESurface::read_bem_surface(bemPath(), -1, true, sigma);
+    auto surf = MNESurface::read_bem_surface(bemPath().toStdU16String(), -1, true, sigma);
     QVERIFY(surf != nullptr);
     QVERIFY(surf->np > 0);
     QVERIFY(surf->ntri > 0);
@@ -1676,7 +1676,7 @@ void TestMneLibrary::bemSurface_readThreeLayer()
         QSKIP("Three-layer BEM file not available");
     }
     float sigma = 0.0f;
-    auto surf = MNESurface::read_bem_surface(bem3File, 1, true, sigma);
+    auto surf = MNESurface::read_bem_surface(bem3File.toStdU16String(), 1, true, sigma);
     QVERIFY(surf != nullptr);
     QVERIFY(surf->np > 0);
     qDebug() << "Three-layer BEM brain:" << surf->np << "verts";
@@ -1686,7 +1686,7 @@ void TestMneLibrary::bemSurface_sumSolids()
 {
     if (!hasData())
         QSKIP("No test data");
-    auto surf = MNESurface::read_bem_surface(bemPath(), -1, true);
+    auto surf = MNESurface::read_bem_surface(bemPath().toStdU16String(), -1, true);
     QVERIFY(surf != nullptr);
     Vector3f inside(surf->cm[0], surf->cm[1], surf->cm[2]);
     double total = surf->sum_solids(inside);
@@ -1698,7 +1698,7 @@ void TestMneLibrary::bemSurface_triangleCoords()
 {
     if (!hasData())
         QSKIP("No test data");
-    auto surf = MNESurface::read_bem_surface(bemPath(), -1, true);
+    auto surf = MNESurface::read_bem_surface(bemPath().toStdU16String(), -1, true);
     QVERIFY(surf != nullptr && surf->ntri > 0);
     int v0 = surf->itris(0, 0);
     Vector3f r(surf->rr(v0, 0), surf->rr(v0, 1), surf->rr(v0, 2));
@@ -1711,7 +1711,7 @@ void TestMneLibrary::bemSurface_nearestTrianglePoint()
 {
     if (!hasData())
         QSKIP("No test data");
-    auto surf = MNESurface::read_bem_surface(bemPath(), -1, true);
+    auto surf = MNESurface::read_bem_surface(bemPath().toStdU16String(), -1, true);
     QVERIFY(surf != nullptr);
     int v0 = surf->itris(0, 0);
     Vector3f r(surf->rr(v0, 0) + 0.001f, surf->rr(v0, 1), surf->rr(v0, 2));
@@ -1725,7 +1725,7 @@ void TestMneLibrary::bemSurface_projectToTriangle()
 {
     if (!hasData())
         QSKIP("No test data");
-    auto surf = MNESurface::read_bem_surface(bemPath(), -1, true);
+    auto surf = MNESurface::read_bem_surface(bemPath().toStdU16String(), -1, true);
     QVERIFY(surf != nullptr);
     Vector3f projected = surf->project_to_triangle(0, 0.3f, 0.3f);
     QVERIFY(std::isfinite(projected(0)));
@@ -1735,7 +1735,7 @@ void TestMneLibrary::bemSurface_projectToSurface()
 {
     if (!hasData())
         QSKIP("No test data");
-    auto surf = MNESurface::read_bem_surface(bemPath(), -1, true);
+    auto surf = MNESurface::read_bem_surface(bemPath().toStdU16String(), -1, true);
     QVERIFY(surf != nullptr);
     Vector3f r(surf->cm[0] + 0.01f, surf->cm[1], surf->cm[2]);
     float dist = 0.0f;
@@ -1748,7 +1748,7 @@ void TestMneLibrary::bemSurface_geometryInfo()
 {
     if (!hasData())
         QSKIP("No test data");
-    auto surf = MNESurface::read_bem_surface(bemPath(), -1, true);
+    auto surf = MNESurface::read_bem_surface(bemPath().toStdU16String(), -1, true);
     QVERIFY(surf != nullptr);
     QVERIFY(surf->ntri > 0 && surf->np > 0);
     QVERIFY(surf->tris.size() == static_cast<size_t>(surf->ntri));

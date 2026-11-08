@@ -98,7 +98,7 @@ MNEProjOp* MNEProjOp::combine(MNEProjOp* from)
 
 //=============================================================================================================
 
-void MNEProjOp::add_item_active(const MNENamedMatrix* vecs, int kind, const QString& desc, bool is_active)
+void MNEProjOp::add_item_active(const MNENamedMatrix* vecs, int kind, const std::string& desc, bool is_active)
 /*
  * Add a new item to an existing projection operator
  */
@@ -127,7 +127,7 @@ void MNEProjOp::add_item_active(const MNENamedMatrix* vecs, int kind, const QStr
             new_item.has_eeg = false;
         }
     }
-    if (!desc.isEmpty())
+    if (!desc.empty())
         new_item.desc = desc;
     new_item.kind = kind;
     new_item.nvec = new_item.vecs->nrow;
@@ -140,7 +140,7 @@ void MNEProjOp::add_item_active(const MNENamedMatrix* vecs, int kind, const QStr
 
 //=============================================================================================================
 
-void MNEProjOp::add_item(const MNENamedMatrix* vecs, int kind, const QString& desc)
+void MNEProjOp::add_item(const MNENamedMatrix* vecs, int kind, const std::string& desc)
 {
     add_item_active(vecs, kind, desc, true);
 }
@@ -387,7 +387,7 @@ std::unique_ptr<MNEProjOp> MNEProjOp::read_from_node(FiffStream& stream, const F
         */
         StringList emptyList;
         auto item = MNENamedMatrix::build(item_nvec, item_nchan, emptyList, item_names, item_vectors);
-        op->add_item_active(item.get(), item_kind, item_desc, item_active);
+        op->add_item_active(item.get(), item_kind, item_desc.toStdString(), item_active);
         op->items[op->nitems - 1].active_file = item_active;
     }
 
@@ -396,7 +396,7 @@ std::unique_ptr<MNEProjOp> MNEProjOp::read_from_node(FiffStream& stream, const F
 
 //=============================================================================================================
 
-std::unique_ptr<MNEProjOp> MNEProjOp::read(const QString& name)
+std::unique_ptr<MNEProjOp> MNEProjOp::read(const std::filesystem::path& name)
 {
     QFile file(name);
     FiffStream stream(&file);
@@ -414,7 +414,7 @@ std::unique_ptr<MNEProjOp> MNEProjOp::read(const QString& name)
 
 //=============================================================================================================
 
-void MNEProjOp::report_data(QTextStream& out, const QString& tag, bool list_data, const StringList& exclude)
+void MNEProjOp::report_data(QTextStream& out, const std::string& tag, bool list_data, const StringList& exclude)
 /*
      * Output info about the projection operator
      */
@@ -430,15 +430,15 @@ void MNEProjOp::report_data(QTextStream& out, const QString& tag, bool list_data
 
     for (int k = 0; k < nitems; k++) {
         const auto& it = items[k];
-        if (list_data && !tag.isEmpty())
-            out << tag << "\n";
-        if (!tag.isEmpty())
-            out << tag;
-        out << "# " << (k + 1) << " : " << it.desc << " : " << it.nvec << " vecs : " << it.vecs->ncol << " chs "
+        if (list_data && !tag.empty())
+            out << tag.c_str() << "\n";
+        if (!tag.empty())
+            out << tag.c_str();
+        out << "# " << (k + 1) << " : " << it.desc.c_str() << " : " << it.nvec << " vecs : " << it.vecs->ncol << " chs "
             << (it.has_meg ? "MEG" : "EEG") << " "
             << (it.active ? "active" : "idle") << "\n";
-        if (list_data && !tag.isEmpty())
-            out << tag << "\n";
+        if (list_data && !tag.empty())
+            out << tag.c_str() << "\n";
         if (list_data) {
             vecs = items[k].vecs.get();
 
@@ -453,8 +453,8 @@ void MNEProjOp::report_data(QTextStream& out, const QString& tag, bool list_data
                         << (found ? 0.0 : vecs->data(p, q)) << qSetFieldWidth(0) << " ";
                     out << (q < vecs->ncol - 1 ? " " : "\n");
                 }
-            if (list_data && !tag.isEmpty())
-                out << tag << "\n";
+            if (list_data && !tag.empty())
+                out << tag.c_str() << "\n";
         }
     }
     return;
@@ -462,7 +462,7 @@ void MNEProjOp::report_data(QTextStream& out, const QString& tag, bool list_data
 
 //=============================================================================================================
 
-void MNEProjOp::report(QTextStream& out, const QString& tag)
+void MNEProjOp::report(QTextStream& out, const std::string& tag)
 {
     report_data(out, tag, false, StringList());
 }
@@ -683,7 +683,7 @@ int MNEProjOp::project_dvector(Eigen::Ref<Eigen::VectorXd> vec, bool do_compleme
 
 //=============================================================================================================
 
-bool MNEProjOp::makeProjection(const std::vector<QString>& projnames,
+bool MNEProjOp::makeProjection(const std::vector<std::filesystem::path>& projnames,
                                const std::vector<FiffChInfo>& chs,
                                int nch,
                                std::unique_ptr<MNEProjOp>& result)
@@ -703,16 +703,16 @@ bool MNEProjOp::makeProjection(const std::vector<QString>& projnames,
     for (const auto& projname : projnames) {
         std::unique_ptr<MNEProjOp> one(MNEProjOp::read(projname));
         if (!one) {
-            qCritical("Failed to read projection from %s.", projname.toUtf8().data());
+            qCritical("Failed to read projection from %s.", UTILSLIB::utf8FromPath(projname).c_str());
             return false;
         }
         if (one->nitems == 0) {
-            qInfo("No linear projection information in %s.", projname.toUtf8().data());
+            qInfo("No linear projection information in %s.", UTILSLIB::utf8FromPath(projname).c_str());
         } else {
-            qInfo("Loaded projection from %s:", projname.toUtf8().data());
+            qInfo("Loaded projection from %s:", UTILSLIB::utf8FromPath(projname).c_str());
             {
                 QTextStream errStream(stderr);
-                one->report(errStream, QStringLiteral("\t"));
+                one->report(errStream, QStringLiteral("\t").toStdString());
             }
             if (!all)
                 all = std::make_unique<MNEProjOp>();
@@ -735,7 +735,7 @@ bool MNEProjOp::makeProjection(const std::vector<QString>& projnames,
                 qInfo("Average EEG reference projection added:");
                 {
                     QTextStream errStream(stderr);
-                    one->report(errStream, QStringLiteral("\t"));
+                    one->report(errStream, QStringLiteral("\t").toStdString());
                 }
                 if (!all)
                     all = std::make_unique<MNEProjOp>();

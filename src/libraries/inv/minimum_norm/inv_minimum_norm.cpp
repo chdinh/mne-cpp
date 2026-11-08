@@ -195,7 +195,7 @@ void InvMinimumNorm::doInverseSetup(qint32 nave, bool pick_normal)
     }
 
     qInfo("Computing inverse...");
-    inv.assemble_kernel(label, m_sMethod, pick_normal, K, noise_norm, vertno);
+    inv.assemble_kernel(label, m_sMethod.toStdString(), pick_normal, K, noise_norm, vertno);
 
     qInfo().noquote().nospace() << "K " << K.rows() << " x " << K.cols();
 

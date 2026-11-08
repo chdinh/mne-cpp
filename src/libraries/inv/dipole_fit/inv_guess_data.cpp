@@ -67,7 +67,7 @@ InvGuessData::InvGuessData(const QString& guessname, const QString& guess_surfna
          * Read the guesses and transform to the appropriate coordinate frame
          */
         std::vector<std::unique_ptr<MNESourceSpace>> sp;
-        if (MNESourceSpace::read_source_spaces(guessname, sp) == FIFF_FAIL)
+        if (MNESourceSpace::read_source_spaces(guessname.toStdU16String(), sp) == FIFF_FAIL)
             return;
         if (static_cast<int>(sp.size()) != 1) {
             qCritical("Incorrect number of source spaces in guess file");
@@ -88,7 +88,7 @@ InvGuessData::InvGuessData(const QString& guessname, const QString& guess_surfna
                 return;
         } else if (!guess_surfname.isEmpty()) {
             qInfo("Reading inner skull surface from %s...\n", guess_surfname.toUtf8().data());
-            inner_skull_owned = MNESurface::read_bem_surface(guess_surfname, FIFFV_BEM_SURF_ID_BRAIN, true);
+            inner_skull_owned = MNESurface::read_bem_surface(guess_surfname.toStdU16String(), FIFFV_BEM_SURF_ID_BRAIN, true);
             if (!inner_skull_owned)
                 return;
             inner_skull = inner_skull_owned.get();

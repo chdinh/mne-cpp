@@ -59,7 +59,7 @@ private slots:
     {
         MNEProjItem item;
         QCOMPARE(item.nvec, 0);
-        QVERIFY(item.desc.isEmpty());
+        QVERIFY(item.desc.empty());
         QCOMPARE(item.kind, 0);
         // active is a bool defaulting to true; the previous `>= 0` check was
         // always satisfied and asserted nothing.
@@ -394,20 +394,20 @@ private slots:
     void testCtfCompExplain()
     {
         // CTF compensation kind constants
-        QString none = MNECTFCompDataSet::explain_comp(0);
+        QString none = QString::fromStdString(MNECTFCompDataSet::explain_comp(0));
         QVERIFY(!none.isEmpty());
 
-        QString first = MNECTFCompDataSet::explain_comp(1);
+        QString first = QString::fromStdString(MNECTFCompDataSet::explain_comp(1));
         QVERIFY(!first.isEmpty());
 
-        QString second = MNECTFCompDataSet::explain_comp(2);
+        QString second = QString::fromStdString(MNECTFCompDataSet::explain_comp(2));
         QVERIFY(!second.isEmpty());
 
-        QString third = MNECTFCompDataSet::explain_comp(3);
+        QString third = QString::fromStdString(MNECTFCompDataSet::explain_comp(3));
         QVERIFY(!third.isEmpty());
 
         // Unknown kind
-        QString unknown = MNECTFCompDataSet::explain_comp(99);
+        QString unknown = QString::fromStdString(MNECTFCompDataSet::explain_comp(99));
         QVERIFY(!unknown.isEmpty());
     }
 

@@ -528,9 +528,9 @@ FiffEvoked RTPROCESSINGLIB::computeFilteredAverage(const FiffRawData& raw,
                                                    bool bApplyBaseline,
                                                    float fTBaselineFromS,
                                                    float fTBaselineToS,
-                                                   const QMap<QString, double>& mapReject,
+                                                   const std::map<std::string, double>& mapReject,
                                                    const FilterKernel& filterKernel,
-                                                   const QStringList& lExcludeChs,
+                                                   const StringList& lExcludeChs,
                                                    const RowVectorXi& picks)
 {
     MNEEpochDataList lstEpochDataList;
@@ -620,7 +620,7 @@ FiffEvoked RTPROCESSINGLIB::computeFilteredAverage(const FiffRawData& raw,
         lstEpochDataList.applyBaselineCorrection(baselinePair);
     }
 
-    if (!mapReject.isEmpty()) {
+    if (!mapReject.empty()) {
         lstEpochDataList.dropRejected();
     }
 

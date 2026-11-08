@@ -29,13 +29,16 @@
 //=============================================================================================================
 
 #include <QFile>
-#include <QTextStream>
 
 //=============================================================================================================
 // STL INCLUDES
 //=============================================================================================================
 
+#include <algorithm>
+#include <cctype>
 #include <cmath>
+#include <fstream>
+#include <optional>
 
 //=============================================================================================================
 // USED NAMESPACES
@@ -59,32 +62,34 @@ constexpr double kZero = 1e-6;
  * Splits MNE-C derivation text into tokens: white space separates, a token starting with a
  * double quote runs to the next double quote, and a line starting with # is skipped.
  */
-QStringList tokenize(QTextStream& in)
+StringList tokenize(std::istream& in)
 {
-    QStringList tokens;
-    while (!in.atEnd()) {
-        const QString line = in.readLine();
-        if (line.trimmed().startsWith('#')) {
+    StringList tokens;
+    const auto isSpace = [](char c) {
+        return std::isspace(static_cast<unsigned char>(c)) != 0;
+    };
+    std::string line;
+    while (std::getline(in, line)) {
+        if (UTILSLIB::trimmed(line).starts_with('#')) {
             continue;
         }
-        int k = 0;
+        std::size_t k = 0;
         while (k < line.size()) {
-            if (line[k].isSpace()) {
+            if (isSpace(line[k])) {
                 ++k;
                 continue;
             }
-            int end = k + 1;
             if (line[k] == '"') {
-                end = line.indexOf('"', k + 1);
-                end = end < 0 ? line.size() : end;
-                tokens << line.mid(k + 1, end - k - 1);
+                const std::size_t end = std::min(line.find('"', k + 1), line.size());
+                tokens.emplace_back(line, k + 1, end - k - 1);
                 k = end + 1;
                 continue;
             }
-            while (end < line.size() && !line[end].isSpace()) {
+            std::size_t end = k + 1;
+            while (end < line.size() && !isSpace(line[end])) {
                 ++end;
             }
-            tokens << line.mid(k, end - k);
+            tokens.emplace_back(line, k, end - k);
             k = end;
         }
     }
@@ -93,7 +98,7 @@ QStringList tokenize(QTextStream& in)
 
 //=============================================================================================================
 
-std::unique_ptr<MNEDeriv> makeDeriv(const std::vector<MNEDerivSet::Definition>& definitions, const QString& filename, const QString& shortname)
+std::unique_ptr<MNEDeriv> makeDeriv(const std::vector<MNEDerivSet::Definition>& definitions, std::string filename, std::string shortname)
 {
     StringList inputs;
     StringList outputs;
@@ -101,28 +106,28 @@ std::unique_ptr<MNEDeriv> makeDeriv(const std::vector<MNEDerivSet::Definition>& 
     for (const MNEDerivSet::Definition& definition : definitions) {
         std::vector<std::pair<int, double>> row;
         for (auto it = definition.second.cbegin(); it != definition.second.cend(); ++it) {
-            if (std::fabs(it.value()) <= kZero) {
+            if (std::fabs(it->second) <= kZero) {
                 continue;
             }
-            if (!UTILSLIB::contains(inputs, it.key().toStdString())) {
-                inputs.push_back(it.key().toStdString());
+            if (!UTILSLIB::contains(inputs, it->first)) {
+                inputs.push_back(it->first);
             }
-            row.push_back({static_cast<int>(UTILSLIB::indexOf(inputs, it.key().toStdString())), it.value()});
+            row.push_back({static_cast<int>(UTILSLIB::indexOf(inputs, it->first)), it->second});
         }
         if (row.empty()) {
-            qInfo("MNEDerivSet - Empty derivation \"%s\" omitted", qPrintable(definition.first));
+            qInfo("MNEDerivSet - Empty derivation \"%s\" omitted", definition.first.c_str());
             continue;
         }
         for (const auto& [column, weight] : row) {
             triplets.emplace_back(static_cast<int>(outputs.size()), column, static_cast<float>(weight));
         }
-        outputs.push_back(definition.first.toStdString());
+        outputs.push_back(definition.first);
     }
     Eigen::SparseMatrix<float> data(outputs.size(), inputs.size());
     data.setFromTriplets(triplets.begin(), triplets.end());
     auto deriv = std::make_unique<MNEDeriv>();
-    deriv->filename = filename;
-    deriv->shortname = shortname;
+    deriv->filename = std::move(filename);
+    deriv->shortname = std::move(shortname);
     deriv->deriv_data = std::make_unique<MNESparseNamedMatrix>();
     deriv->deriv_data->nrow = static_cast<int>(outputs.size());
     deriv->deriv_data->ncol = static_cast<int>(inputs.size());
@@ -138,7 +143,7 @@ std::unique_ptr<MNEDeriv> makeDeriv(const std::vector<MNEDerivSet::Definition>& 
 // DEFINE MEMBER METHODS
 //=============================================================================================================
 
-std::optional<MNEDerivSet> MNEDerivSet::read(const QString& path)
+std::optional<MNEDerivSet> MNEDerivSet::read(const std::filesystem::path& path)
 {
     QFile file(path);
     FiffStream stream(&file);
@@ -150,7 +155,7 @@ std::optional<MNEDerivSet> MNEDerivSet::read(const QString& path)
         for (const FiffDirNode::SPtr& matrix : block->dir_tree_find(FIFFB_MNE_NAMED_MATRIX)) {
             auto data = MNESparseNamedMatrix::read(stream, matrix, FIFF_MNE_DERIVATION_DATA);
             if (!data) {
-                qWarning("MNEDerivSet::read - Bad derivation data in %s", qPrintable(path));
+                qWarning("MNEDerivSet::read - Bad derivation data in %s", UTILSLIB::utf8FromPath(path).c_str());
                 return std::nullopt;
             }
             auto deriv = std::make_unique<MNEDeriv>();
@@ -164,15 +169,14 @@ std::optional<MNEDerivSet> MNEDerivSet::read(const QString& path)
 
 //=============================================================================================================
 
-std::optional<MNEDerivSet> MNEDerivSet::readText(const QString& path)
+std::optional<MNEDerivSet> MNEDerivSet::readText(const std::filesystem::path& path)
 {
-    QFile file(path);
-    if (!file.open(QIODevice::ReadOnly | QIODevice::Text)) {
-        qWarning("MNEDerivSet::readText - Cannot open %s", qPrintable(path));
+    std::ifstream file(path);
+    if (!file) {
+        qWarning("MNEDerivSet::readText - Cannot open %s", UTILSLIB::utf8FromPath(path).c_str());
         return std::nullopt;
     }
-    QTextStream in(&file);
-    const QStringList tokens = tokenize(in);
+    const StringList tokens = tokenize(file);
 
     // A channel token right after another channel token (or first) names a new derivation;
     // otherwise it is an input whose weight comes from the preceding =, +, - or number.
@@ -189,9 +193,10 @@ std::optional<MNEDerivSet> MNEDerivSet::readText(const QString& path)
     Kind prev = Kind::Channel;
     bool havePrev = false;
     double number = 0.0;
-    for (const QString& token : tokens) {
-        bool isNumber = false;
-        const double value = token.toDouble(&isNumber);
+    for (const std::string& token : tokens) {
+        const std::optional<double> parsed = UTILSLIB::toDouble(token);
+        const bool isNumber = parsed.has_value();
+        const double value = parsed.value_or(0.0);
         const Kind kind = token == "=" ? Kind::Equal : token == "+" ? Kind::Plus
             : token == "-"                                          ? Kind::Minus
             : token == "*"                                          ? Kind::Mult
@@ -203,15 +208,15 @@ std::optional<MNEDerivSet> MNEDerivSet::readText(const QString& path)
         if (kind == Kind::Channel && (!havePrev || prev == Kind::Channel)) {
             definitions.push_back({token, {}});
         } else if (kind == Kind::Equal) {
-            if (definitions.empty() || !definitions.back().second.isEmpty()) {
-                qWarning("MNEDerivSet::readText - Misplaced equal sign in %s", qPrintable(path));
+            if (definitions.empty() || !definitions.back().second.empty()) {
+                qWarning("MNEDerivSet::readText - Misplaced equal sign in %s", UTILSLIB::utf8FromPath(path).c_str());
                 return std::nullopt;
             }
         } else if (kind == Kind::Channel) {
             const double weight = prev == Kind::Minus ? -1.0 : prev == Kind::Number ? number
                                                                                     : 1.0;
             if (definitions.empty()) {
-                qWarning("MNEDerivSet::readText - Misplaced channel name in %s", qPrintable(path));
+                qWarning("MNEDerivSet::readText - Misplaced channel name in %s", UTILSLIB::utf8FromPath(path).c_str());
                 return std::nullopt;
             }
             definitions.back().second[token] += weight;
@@ -222,11 +227,11 @@ std::optional<MNEDerivSet> MNEDerivSet::readText(const QString& path)
         havePrev = true;
     }
     if (definitions.empty()) {
-        qWarning("MNEDerivSet::readText - No derivations in %s", qPrintable(path));
+        qWarning("MNEDerivSet::readText - No derivations in %s", UTILSLIB::utf8FromPath(path).c_str());
         return std::nullopt;
     }
     MNEDerivSet set;
-    set.derivs.push_back(makeDeriv(definitions, path, QString()));
+    set.derivs.push_back(makeDeriv(definitions, UTILSLIB::utf8FromPath(path), {}));
     if (set.derivs.front()->deriv_data->nrow == 0) {
         return std::nullopt;
     }
@@ -235,16 +240,16 @@ std::optional<MNEDerivSet> MNEDerivSet::readText(const QString& path)
 
 //=============================================================================================================
 
-MNEDerivSet MNEDerivSet::fromDefinitions(const std::vector<Definition>& definitions, const QString& name)
+MNEDerivSet MNEDerivSet::fromDefinitions(const std::vector<Definition>& definitions, const std::string& name)
 {
     MNEDerivSet set;
-    set.derivs.push_back(makeDeriv(definitions, QString(), name));
+    set.derivs.push_back(makeDeriv(definitions, {}, name));
     return set;
 }
 
 //=============================================================================================================
 
-bool MNEDerivSet::write(const QString& path) const
+bool MNEDerivSet::write(const std::filesystem::path& path) const
 {
     if (derivs.empty()) {
         qWarning("MNEDerivSet::write - No derivations to write");
@@ -273,11 +278,11 @@ std::vector<MNEDerivSet::Definition> MNEDerivSet::definitions() const
         const MNESparseNamedMatrix& m = *deriv->deriv_data;
         const Eigen::SparseMatrix<float, Eigen::RowMajor> rows = m.data->eigen();
         for (int j = 0; j < m.nrow; ++j) {
-            Definition definition{QString::fromStdString(m.rowlist[j]), {}};
+            Definition definition{m.rowlist[j], {}};
             for (Eigen::SparseMatrix<float, Eigen::RowMajor>::InnerIterator it(rows, j); it; ++it) {
-                definition.second.insert(QString::fromStdString(m.collist[static_cast<std::size_t>(it.col())]), it.value());
+                definition.second.emplace(m.collist[static_cast<std::size_t>(it.col())], it.value());
             }
-            result.push_back(definition);
+            result.push_back(std::move(definition));
         }
     }
     return result;
@@ -303,17 +308,17 @@ std::unique_ptr<MNEDeriv> MNEDerivSet::match(const StringList& chNames) const
         ++ntot;
         bool available = true;
         for (auto it = definition.second.cbegin(); it != definition.second.cend() && available; ++it) {
-            available = std::fabs(it.value()) <= kZero || UTILSLIB::contains(chNames, it.key().toStdString());
+            available = std::fabs(it->second) <= kZero || UTILSLIB::contains(chNames, it->first);
         }
         if (!available) {
             continue;
         }
         for (auto it = definition.second.cbegin(); it != definition.second.cend(); ++it) {
-            if (std::fabs(it.value()) > kZero) {
-                triplets.emplace_back(static_cast<int>(outputs.size()), static_cast<int>(UTILSLIB::indexOf(chNames, it.key().toStdString())), static_cast<float>(it.value()));
+            if (std::fabs(it->second) > kZero) {
+                triplets.emplace_back(static_cast<int>(outputs.size()), static_cast<int>(UTILSLIB::indexOf(chNames, it->first)), static_cast<float>(it->second));
             }
         }
-        outputs.push_back(definition.first.toStdString());
+        outputs.push_back(definition.first);
     }
     if (outputs.empty()) {
         return nullptr;
@@ -323,7 +328,7 @@ std::unique_ptr<MNEDeriv> MNEDerivSet::match(const StringList& chNames) const
     data.setFromTriplets(triplets.begin(), triplets.end());
 
     auto matched = std::make_unique<MNEDeriv>();
-    matched->shortname = QStringLiteral("Matched derivations");
+    matched->shortname = "Matched derivations";
     // in_use counts, per recorded channel, the derived channels it enters (MNE-C convention).
     matched->in_use = Eigen::VectorXi::Zero(chNames.size());
     for (int k = 0; k < data.outerSize(); ++k) {

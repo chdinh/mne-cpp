@@ -114,7 +114,7 @@ MatrixXd readFiff(int fileGrade, int destGrade = -1)
  */
 MatrixXd readMne(int fileGrade, int destGrade)
 {
-    std::unique_ptr<MNERawData> raw(MNERawData::open_file_comp(fixture(fileGrade), false, false, MNEFilterDef(), destGrade));
+    std::unique_ptr<MNERawData> raw(MNERawData::open_file_comp(fixture(fileGrade).toStdU16String(), false, false, MNEFilterDef(), destGrade));
     if (!raw)
         return MatrixXd();
     Matrix<float, Dynamic, Dynamic, RowMajor> values(raw->info->nchan, kNSamp);
@@ -192,7 +192,7 @@ void TestMneCtfCompPython::readsCompensationData()
     QVERIFY((raw.info.dev_ctf_t.trans - devCtf).cwiseAbs().maxCoeff() < 1e-6f);
     QVERIFY((raw.info.dev_ctf_t.trans * raw.info.dev_ctf_t.invtrans - Matrix4f::Identity()).cwiseAbs().maxCoeff() < 1e-5f);
 
-    auto set = MNECTFCompDataSet::read(fixture(3));
+    auto set = MNECTFCompDataSet::read(fixture(3).toStdU16String());
     QVERIFY(set);
     QCOMPARE(set->ncomp, 5);
     QCOMPARE(set->nch, kNChan);
@@ -336,7 +336,7 @@ void TestMneCtfCompPython::mneRawDataChangesGrade()
 void TestMneCtfCompPython::mneRawDataRejectsMissingGrade()
 {
     // The fixture carries grades 1, 2, 3 and two 4D-style kinds, but no 101 (4D comp 1).
-    std::unique_ptr<MNERawData> raw(MNERawData::open_file_comp(fixture(3), false, false, MNEFilterDef(), 101));
+    std::unique_ptr<MNERawData> raw(MNERawData::open_file_comp(fixture(3).toStdU16String(), false, false, MNEFilterDef(), 101));
     QVERIFY(!raw);
 }
 

@@ -106,7 +106,7 @@ void TestMneSourceSpacePython::initTestCase()
         QSKIP("Source space test data not found");
     }
 
-    const int res = MNESourceSpace::read_source_spaces(srcPath(), m_spaces);
+    const int res = MNESourceSpace::read_source_spaces(srcPath().toStdU16String(), m_spaces);
     QVERIFY2(res != FIFF_FAIL, "read_source_spaces reported failure");
 
     // mne-python reports two hemispheres for this file. Getting a different

@@ -34,6 +34,9 @@
 #include "../dsp_global.h"
 
 #include <fiff/fiff_evoked_set.h>
+
+#include <map>
+#include <string>
 #include <fiff/fiff_info.h>
 
 //=============================================================================================================
@@ -148,7 +151,7 @@ public:
      *
      * @param[in] mapThresholds       The new map including the current thresholds for the channels.
      */
-    void setArtifactReduction(const QMap<QString, double>& mapThresholds);
+    void setArtifactReduction(const std::map<std::string, double>& mapThresholds);
 
     //=========================================================================================================
     /**
@@ -253,7 +256,7 @@ protected:
     FIFFLIB::FiffInfo::SPtr m_pFiffInfo;    /**< Holds the fiff measurement information. */
     FIFFLIB::FiffEvokedSet m_stimEvokedSet; /**< Holds the evoked information. */
 
-    QMap<QString, double> m_mapThresholds;             /**< Holds the current thresholds for artifact rejection. */
+    std::map<std::string, double> m_mapThresholds;     /**< Holds the current thresholds for artifact rejection. */
     QMap<double, QList<Eigen::MatrixXd>> m_mapStimAve; /**< the current stimulus average buffer. Holds m_iNumAverages vectors. */
     Eigen::MatrixXd m_matPreHistory;                   /**< The last m_iPreStimSamples samples before the current block. */
     QMap<double, Eigen::MatrixXd> m_mapDataPre;        /**< The matrix holding pre stim data. */
@@ -393,7 +396,7 @@ public:
      *
      * @param[in] mapThresholds       The new map including the current thresholds for the channels.
      */
-    void setArtifactReduction(const QMap<QString, double>& mapThresholds);
+    void setArtifactReduction(const std::map<std::string, double>& mapThresholds);
 
     //=========================================================================================================
     /**
@@ -452,7 +455,7 @@ signals:
     void averagePostStimChanged(qint32 samples,
                                 qint32 secs);
     void averageTriggerChIdxChanged(qint32 idx);
-    void averageArtifactReductionChanged(const QMap<QString, double>& mapThresholds);
+    void averageArtifactReductionChanged(const std::map<std::string, double>& mapThresholds);
     void averageBaselineActiveChanged(bool activate);
     void averageBaselineFromChanged(int fromSamp,
                                     int fromMSec);

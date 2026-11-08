@@ -158,7 +158,7 @@ private slots:
             QSKIP("Test data not available");
         }
 
-        auto cm = MNECovMatrix::read(covFile, FIFFV_MNE_NOISE_COV);
+        auto cm = MNECovMatrix::read(covFile.toStdU16String(), FIFFV_MNE_NOISE_COV);
         QVERIFY(cm != nullptr);
         QVERIFY(cm->ncov > 0);
         QVERIFY(static_cast<int>(cm->names.size()) == cm->ncov);

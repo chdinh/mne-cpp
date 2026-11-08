@@ -388,13 +388,13 @@ void TestMneLabelPython::assembleKernel_label()
     MatrixXd kFull;
     SparseMatrix<double> nnFull;
     std::vector<VectorXi> vFull;
-    QVERIFY(prepared.assemble_kernel(FsLabel(), method, false, kFull, nnFull, vFull));
+    QVERIFY(prepared.assemble_kernel(FsLabel(), method.toStdString(), false, kFull, nnFull, vFull));
 
     const FsLabel l = label(name);
     MatrixXd kLabel;
     SparseMatrix<double> nnLabel;
     std::vector<VectorXi> vLabel;
-    QVERIFY(prepared.assemble_kernel(l, method, false, kLabel, nnLabel, vLabel));
+    QVERIFY(prepared.assemble_kernel(l, method.toStdString(), false, kLabel, nnLabel, vLabel));
 
     // The label kernel is the label's rows of the full kernel, the same rows
     // mne-python's _assemble_kernel selects with src_sel. It is computed by a

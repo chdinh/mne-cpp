@@ -202,8 +202,9 @@ int main(int argc, char* argv[])
 
     // Source space filtering
     if (parser.isSet(labelOpt)) {
-        settings->labels = parser.values(labelOpt);
-        settings->nlabel = settings->labels.size();
+        for (const QString& label : parser.values(labelOpt))
+            settings->labels.emplace_back(label.toStdU16String());
+        settings->nlabel = static_cast<int>(settings->labels.size());
     }
     if (parser.isSet(mindistOpt)) {
         bool ok;

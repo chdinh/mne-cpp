@@ -148,8 +148,8 @@ int main(int argc, char* argv[])
     events = FiffEvents::read(t_sEventName.toStdU16String()).value().events;
 
     // Read the epochs and reject epochs with EOG higher than 300e-06
-    QMap<QString, double> mapReject;
-    mapReject.insert("eog", 300e-06);
+    std::map<std::string, double> mapReject;
+    mapReject.emplace("eog", 300e-06);
 
     FiffEvoked evoked = MNEEpochDataList::computeAverage(raw,
                                                          events,
@@ -160,7 +160,7 @@ int main(int argc, char* argv[])
                                                          fTMin,
                                                          0.0f,
                                                          mapReject,
-                                                         QStringList(),
+                                                         {},
                                                          picks);
 
     qInfo().noquote() << QString("Averaged %1 epochs of event %2 over %3 channels and %4 samples.")

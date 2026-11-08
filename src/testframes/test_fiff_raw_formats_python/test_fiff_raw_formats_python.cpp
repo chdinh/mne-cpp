@@ -258,7 +258,7 @@ void TestFiffRawFormatsPython::readsLeadingSkip()
 
     // MNE-C either counts the skip into first_samp or, with omit_skip, starts at zero.
     for (bool omit : {false, true}) {
-        std::unique_ptr<MNERawData> mne(MNERawData::open_file(fixture("skip_start"), omit, false, MNEFilterDef()));
+        std::unique_ptr<MNERawData> mne(MNERawData::open_file(fixture("skip_start").toStdU16String(), omit, false, MNEFilterDef()));
         QVERIFY(mne);
         QCOMPARE(mne->first_samp, omit ? 0 : 70);
         QCOMPARE(mne->omit_samp, omit ? 70 : 0);
@@ -277,7 +277,7 @@ void TestFiffRawFormatsPython::projectsAcrossSkip()
 {
     // raw_skip_raw.fif: EEG 001 = s, EEG 002 = -s (x 1e-6, s from 0), samples 70-89 skipped.
     // The average reference over the two EEG channels leaves them unchanged (their mean is 0).
-    std::unique_ptr<MNERawData> mne(MNERawData::open_file(fixture("skip"), false, false, MNEFilterDef()));
+    std::unique_ptr<MNERawData> mne(MNERawData::open_file(fixture("skip").toStdU16String(), false, false, MNEFilterDef()));
     QVERIFY(mne);
     mne->proj = MNEProjOp::create_average_eeg_ref(mne->info->chInfo, mne->info->nchan);
     QVERIFY(mne->proj);
@@ -321,10 +321,10 @@ void TestFiffRawFormatsPython::readsSssInfo()
     QCOMPARE(sss->out_nuse, 15);
 
     // MNERawData keeps it; a file without SSS information has none.
-    std::unique_ptr<MNERawData> mne(MNERawData::open_file(fixture("sss"), false, false, MNEFilterDef()));
+    std::unique_ptr<MNERawData> mne(MNERawData::open_file(fixture("sss").toStdU16String(), false, false, MNEFilterDef()));
     QVERIFY(mne && mne->sss);
     QCOMPARE(mne->sss->in_nuse, 70);
-    std::unique_ptr<MNERawData> plain(MNERawData::open_file(fixture("single"), false, false, MNEFilterDef()));
+    std::unique_ptr<MNERawData> plain(MNERawData::open_file(fixture("single").toStdU16String(), false, false, MNEFilterDef()));
     QVERIFY(plain && !plain->sss);
 }
 
@@ -345,7 +345,7 @@ void TestFiffRawFormatsPython::mneRawDataMatches()
     MatrixXd ref, times;
     QVERIFY(raw.read_raw_segment(ref, times));
 
-    std::unique_ptr<MNERawData> mne(MNERawData::open_file(fixture(fmt), false, false, MNEFilterDef()));
+    std::unique_ptr<MNERawData> mne(MNERawData::open_file(fixture(fmt).toStdU16String(), false, false, MNEFilterDef()));
     QVERIFY(mne);
     QCOMPARE(mne->first_samp, raw.first_samp);
     const int nchan = mne->info->nchan;
@@ -370,7 +370,7 @@ void TestFiffRawFormatsPython::mneRawDataNormalisesChannels()
     MatrixXd ref, times;
     QVERIFY(raw.read_raw_segment(ref, times));
 
-    std::unique_ptr<MNERawData> mne(MNERawData::open_file(fixture("unit_mul"), false, false, MNEFilterDef()));
+    std::unique_ptr<MNERawData> mne(MNERawData::open_file(fixture("unit_mul").toStdU16String(), false, false, MNEFilterDef()));
     QVERIFY(mne);
     QCOMPARE(mne->info->chInfo[1].unit_mul, 0);
     QCOMPARE(mne->info->chInfo[2].range, 1.0f);
@@ -387,7 +387,7 @@ void TestFiffRawFormatsPython::mneRawDataNormalisesChannels()
 void TestFiffRawFormatsPython::measDataKeepsTrigger()
 {
     // data/trigger-ave.fif (make_trigger_evoked_fixture.py): STI 014 with cal 2 next to two EEG channels.
-    std::unique_ptr<MNEMeasData> meas(MNEMeasData::mne_read_meas_data(QStringLiteral(MNE_RAW_FORMATS_DATA_DIR "/trigger-ave.fif"), 1, nullptr, nullptr, {}, 0));
+    std::unique_ptr<MNEMeasData> meas(MNEMeasData::mne_read_meas_data(QStringLiteral(MNE_RAW_FORMATS_DATA_DIR "/trigger-ave.fif").toStdU16String(), 1, nullptr, nullptr, {}, 0));
     QVERIFY(meas);
     QCOMPARE(meas->nchan, 2);
     QCOMPARE(meas->sets.size(), std::size_t(1));

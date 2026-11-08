@@ -60,7 +60,7 @@ static constexpr float SEG_LEN = 10.0f;
 static std::unique_ptr<MNEChSelection> mne_ch_selection_these(const QString& selname, const StringList& names, int nch)
 {
     auto sel = std::make_unique<MNEChSelection>();
-    sel->name = selname;
+    sel->name = selname.toStdString();
     sel->ndef = nch;
     sel->kind = MNE_CH_SELECTION_USER;
 
@@ -158,7 +158,7 @@ static int mne_ch_selection_assign_chs(MNEChSelection* sel,
             nch++;
     }
     if (sel->nderiv > 0)
-        qInfo("Selection \"%s\" has %d matched derived channels.", sel->name.toUtf8().constData(), sel->nderiv);
+        qInfo("Selection \"%s\" has %d matched derived channels.", sel->name.c_str(), sel->nderiv);
     return nch;
 }
 
@@ -216,7 +216,7 @@ InvEcdSet InvDipoleFit::calculateFit() const
 
     if (settings->is_raw) {
         qInfo("\n---- Opening a raw data file...\n");
-        raw.reset(MNERawData::open_file(settings->measname, true, false, settings->filter));
+        raw.reset(MNERawData::open_file(settings->measname.toStdU16String(), true, false, settings->filter));
         if (!raw)
             return set;
         /*
@@ -246,7 +246,7 @@ InvEcdSet InvDipoleFit::calculateFit() const
               settings->measname.toUtf8().constData(), fit_data->nmeg, fit_data->neeg);
     } else {
         qInfo("\n---- Reading data...\n");
-        data = MNEMeasData::mne_read_meas_data(settings->measname,
+        data = MNEMeasData::mne_read_meas_data(settings->measname.toStdU16String(),
                                                settings->setno,
                                                nullptr,
                                                nullptr,

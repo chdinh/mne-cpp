@@ -129,18 +129,18 @@ std::unique_ptr<MNEMshDisplaySurfaceSet> MNEMshDisplaySurfaceSet::load(const QSt
     QString pathRhCurv = QString("%1/%2/surf/%3.%4").arg(subjects_dir).arg(subject_id).arg("rh").arg("curv");
 
     qInfo("Loading surface %s ...\n", pathLh.toUtf8().constData());
-    auto left = MNESourceSpace::load_surface(pathLh, pathLhCurv);
+    auto left = MNESourceSpace::load_surface(pathLh.toStdU16String(), pathLhCurv.toStdU16String());
     if (!left) {
-        left = MNESourceSpace::load_surface(pathLh, QString());
+        left = MNESourceSpace::load_surface(pathLh.toStdU16String(), QString().toStdU16String());
         if (!left)
             return nullptr;
         left->add_uniform_curv();
     }
 
     qInfo("Loading surface %s ...\n", pathRh.toUtf8().constData());
-    auto right = MNESourceSpace::load_surface(pathRh, pathRhCurv);
+    auto right = MNESourceSpace::load_surface(pathRh.toStdU16String(), pathRhCurv.toStdU16String());
     if (!right) {
-        right = MNESourceSpace::load_surface(pathRh, QString());
+        right = MNESourceSpace::load_surface(pathRh.toStdU16String(), QString().toStdU16String());
         if (!right)
             return nullptr;
         right->add_uniform_curv();
@@ -195,7 +195,7 @@ int MNEMshDisplaySurfaceSet::add_bem_surface(const QString& filepath,
     qInfo("Loading BEM surface %s (id = %d) from %s ...\n",
           bemname.toUtf8().constData(), kind, filepath.toUtf8().constData());
 
-    std::unique_ptr<MNESurface> surf(MNESurface::read_bem_surface2(filepath, kind, full_geom));
+    std::unique_ptr<MNESurface> surf(MNESurface::read_bem_surface2(filepath.toStdU16String(), kind, full_geom));
     if (!surf)
         return -1;
 

@@ -82,7 +82,7 @@ MNEInverseOperator::MNEInverseOperator(const FiffInfo& info,
 //=============================================================================================================
 
 bool MNEInverseOperator::assemble_kernel(const FsLabel& label,
-                                         const QString& method,
+                                         const std::string& method,
                                          bool pick_normal,
                                          MatrixXd& K,
                                          SparseMatrix<double>& noise_norm,
@@ -90,7 +90,7 @@ bool MNEInverseOperator::assemble_kernel(const FsLabel& label,
 {
     MatrixXd t_eigen_leads = eigen_leads->data;
     MatrixXd t_source_cov = source_cov->data;
-    if (method.compare(QLatin1String("MNE")) != 0)
+    if (method != "MNE")
         noise_norm = noisenorm;
 
     vertno = src.get_vertno();
@@ -102,7 +102,7 @@ bool MNEInverseOperator::assemble_kernel(const FsLabel& label,
         VectorXi src_sel;
         vertno = src.label_src_vertno_sel(label, src_sel);
 
-        if (method.compare(QLatin1String("MNE")) != 0 && noise_norm.rows() > 0) {
+        if (method != "MNE" && noise_norm.rows() > 0) {
             // noisenorm is diagonal, one entry per source.
             tripletList.clear();
             tripletList.reserve(src_sel.size());
@@ -195,7 +195,7 @@ bool MNEInverseOperator::assemble_kernel(const FsLabel& label,
         K = t_sourceCov * t_eigen_leads * trans;
     }
 
-    if (method.compare(QLatin1String("MNE")) == 0)
+    if (method == "MNE")
         noise_norm = SparseMatrix<double>();
 
     //store assembled kernel
@@ -246,9 +246,9 @@ bool MNEInverseOperator::check_ch_names(const FiffInfo& measInfo) const
 
 //=============================================================================================================
 
-MatrixXd MNEInverseOperator::cluster_kernel(const FsAnnotationSet& p_AnnotationSet, qint32 p_iClusterSize, MatrixXd& p_D, const QString& p_sMethod) const
+MatrixXd MNEInverseOperator::cluster_kernel(const FsAnnotationSet& p_AnnotationSet, qint32 p_iClusterSize, MatrixXd& p_D, const std::string& p_sMethod) const
 {
-    qInfo("Cluster kernel using %s.\n", p_sMethod.toUtf8().constData());
+    qInfo("Cluster kernel using %s.\n", p_sMethod.c_str());
 
     MatrixXd p_outMT = m_K.transpose();
 

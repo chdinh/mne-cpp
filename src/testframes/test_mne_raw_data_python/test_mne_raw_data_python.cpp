@@ -127,7 +127,7 @@ void TestMneRawDataPython::initTestCase()
 {
     m_rawPath = QCoreApplication::applicationDirPath() + "/../resources/data/mne-cpp-test-data/MEG/sample/sample_audvis_trunc_raw.fif";
     QVERIFY2(QFile::exists(m_rawPath), "test data missing");
-    m_raw.reset(MNERawData::open_file(m_rawPath, false, false, MNEFilterDef()));
+    m_raw.reset(MNERawData::open_file(m_rawPath.toStdU16String(), false, false, MNEFilterDef()));
     QVERIFY(m_raw);
 }
 
@@ -242,7 +242,7 @@ void TestMneRawDataPython::padsOutsideData()
 
     // Projected reads pad the same way
     std::unique_ptr<MNEProjOp> proj;
-    QVERIFY(MNEProjOp::makeProjection({m_rawPath}, m_raw->info->chInfo, m_raw->info->nchan, proj));
+    QVERIFY(MNEProjOp::makeProjection({m_rawPath.toStdU16String()}, m_raw->info->chInfo, m_raw->info->nchan, proj));
     QCOMPARE(proj->assign_channels(m_raw->ch_names, m_raw->info->nchan), 0);
     QCOMPARE(proj->make_proj(), 0);
     m_raw->proj = std::move(proj);
@@ -279,12 +279,12 @@ void TestMneRawDataPython::projectsSegment()
     QVERIFY(closeTo(plain.values.cast<double>().cwiseAbs().sum(), 1.8063671136130195e-07, 1e-5));
 
     // The file stores its projectors as inactive; makeProjection switches them on, as MNE-C does.
-    std::unique_ptr<MNEProjOp> idle = MNEProjOp::read(m_rawPath);
+    std::unique_ptr<MNEProjOp> idle = MNEProjOp::read(m_rawPath.toStdU16String());
     QVERIFY(idle);
     QCOMPARE(idle->nitems, 4);
     QCOMPARE(idle->items[0].active, false);
     std::unique_ptr<MNEProjOp> proj;
-    QVERIFY(MNEProjOp::makeProjection({m_rawPath}, m_raw->info->chInfo, m_raw->info->nchan, proj));
+    QVERIFY(MNEProjOp::makeProjection({m_rawPath.toStdU16String()}, m_raw->info->chInfo, m_raw->info->nchan, proj));
     QVERIFY(proj);
     QCOMPARE(proj->nitems, 4);
     QCOMPARE(proj->assign_channels(m_raw->ch_names, m_raw->info->nchan), 0);
@@ -321,7 +321,7 @@ void TestMneRawDataPython::projectsSegment()
     QVERIFY(std::fabs(proj->items[0].vecs->data(0, 0) - 1.0 / std::sqrt(static_cast<double>(eeg.size()))) < 1e-7);
     QString listing;
     QTextStream out(&listing);
-    proj->report_data(out, QStringLiteral("#"), true, {eeg[1].ch_name});
+    proj->report_data(out, QStringLiteral("#").toStdString(), true, {eeg[1].ch_name});
     QVERIFY2(listing.startsWith(QStringLiteral("#\n## 1 : Average EEG reference : 1 vecs : %1 chs EEG active\n#\n").arg(eeg.size())), qPrintable(listing));
     QVERIFY(listing.contains(QString::fromStdString(eeg[0].ch_name)));
     // The excluded channel's weight is listed as zero
@@ -329,15 +329,15 @@ void TestMneRawDataPython::projectsSegment()
     QVERIFY(MNEProjOp::makeProjection({}, meg, static_cast<int>(meg.size()), proj));
     QVERIFY(!proj);
     // Projectors that touch none of the channels are dropped, and an unreadable file fails
-    QVERIFY(MNEProjOp::makeProjection({m_rawPath}, stim, static_cast<int>(stim.size()), proj));
+    QVERIFY(MNEProjOp::makeProjection({m_rawPath.toStdU16String()}, stim, static_cast<int>(stim.size()), proj));
     QVERIFY(!proj);
-    QVERIFY(!MNEProjOp::makeProjection({m_rawPath + QStringLiteral(".missing")}, meg, static_cast<int>(meg.size()), proj));
+    QVERIFY(!MNEProjOp::makeProjection({(m_rawPath + QStringLiteral(".missing")).toStdU16String()}, meg, static_cast<int>(meg.size()), proj));
 
     // Bad channels are left out of the vectors before orthogonalisation (mne make_projector(projs, ch_names, bads)):
     // the average EEG reference then spans 59 channels, and with every EEG channel bad it disappears
     const auto projector = [&](const StringList& bads, int& nvec) {
         std::unique_ptr<MNEProjOp> op;
-        MNEProjOp::makeProjection({m_rawPath}, m_raw->info->chInfo, m_raw->info->nchan, op);
+        MNEProjOp::makeProjection({m_rawPath.toStdU16String()}, m_raw->info->chInfo, m_raw->info->nchan, op);
         op->assign_channels(m_raw->ch_names, m_raw->info->nchan);
         op->make_proj_bad(bads);
         nvec = op->nvec;
@@ -422,7 +422,7 @@ void TestMneRawDataPython::filtersSegments()
     filter.highpass = filter.eog_highpass = static_cast<float>(highpass);
     filter.lowpass = filter.eog_lowpass = 40.0f;
     filter.lowpass_width = filter.eog_lowpass_width = 5.0f;
-    std::unique_ptr<MNERawData> raw(MNERawData::open_file(m_rawPath, false, false, filter));
+    std::unique_ptr<MNERawData> raw(MNERawData::open_file(m_rawPath.toStdU16String(), false, false, filter));
     QVERIFY(raw);
 
     MNEChSelection sel = makeSelection();
@@ -443,7 +443,7 @@ void TestMneRawDataPython::filtersSegments()
     QCOMPARE(buf.values.row(4), plain.values.row(4));
 
     // Without a selection every channel is filtered, in file order; a fresh reader has no cached buffers.
-    std::unique_ptr<MNERawData> fresh(MNERawData::open_file(m_rawPath, false, false, filter));
+    std::unique_ptr<MNERawData> fresh(MNERawData::open_file(m_rawPath.toStdU16String(), false, false, filter));
     PickBuffer all(fresh->info->nchan, ns);
     QCOMPARE(fresh->pick_data_filt(nullptr, fresh->first_samp + offset, ns, all.rows.data()), 0);
     for (int c = 0; c < sel.nchan; ++c)
@@ -452,7 +452,7 @@ void TestMneRawDataPython::filtersSegments()
     // Switching to this filter from another one, after data was filtered with that, gives the same data
     MNEFilterDef other = filter;
     other.highpass = other.eog_highpass = static_cast<float>(1.0 - highpass);
-    std::unique_ptr<MNERawData> switched(MNERawData::open_file(m_rawPath, false, false, other));
+    std::unique_ptr<MNERawData> switched(MNERawData::open_file(m_rawPath.toStdU16String(), false, false, other));
     PickBuffer before(sel.nchan, ns);
     QCOMPARE(switched->pick_data_filt(&sel, switched->first_samp + offset, ns, before.rows.data()), 0);
     QVERIFY(before.values != buf.values);
@@ -467,7 +467,7 @@ void TestMneRawDataPython::filtersSegments()
 
 void TestMneRawDataPython::rejectsMissingFile()
 {
-    std::unique_ptr<MNERawData> missing(MNERawData::open_file(m_rawPath + ".missing", false, false, MNEFilterDef()));
+    std::unique_ptr<MNERawData> missing(MNERawData::open_file((m_rawPath + ".missing").toStdU16String(), false, false, MNEFilterDef()));
     QVERIFY(!missing);
 }
 
@@ -482,7 +482,7 @@ void TestMneRawDataPython::picksDerivedChannel()
     filter.taper_size = 2048;
     filter.lowpass = filter.eog_lowpass = 40.0f;
     filter.lowpass_width = filter.eog_lowpass_width = 5.0f;
-    std::unique_ptr<MNERawData> raw(MNERawData::open_file(m_rawPath, false, false, filter));
+    std::unique_ptr<MNERawData> raw(MNERawData::open_file(m_rawPath.toStdU16String(), false, false, filter));
     QVERIFY(raw);
     const int a = static_cast<int>(UTILSLIB::indexOf(raw->ch_names, "MEG0111"));
     const int b = static_cast<int>(UTILSLIB::indexOf(raw->ch_names, "MEG0121"));
@@ -514,7 +514,7 @@ void TestMneRawDataPython::picksDerivedChannel()
 
     // The projected path derives from projected inputs; the read starts before the data to cover the zero padding
     std::unique_ptr<MNEProjOp> proj;
-    QVERIFY(MNEProjOp::makeProjection({m_rawPath}, raw->info->chInfo, raw->info->nchan, proj));
+    QVERIFY(MNEProjOp::makeProjection({m_rawPath.toStdU16String()}, raw->info->chInfo, raw->info->nchan, proj));
     QCOMPARE(proj->assign_channels(raw->ch_names, raw->info->nchan), 0);
     QCOMPARE(proj->make_proj(), 0);
 
@@ -544,7 +544,7 @@ void TestMneRawDataPython::picksDerivedChannel()
     }
 
     // The derived channel alone: its inputs must still be filtered (a fresh reader has nothing cached).
-    std::unique_ptr<MNERawData> fresh(MNERawData::open_file(m_rawPath, false, false, filter));
+    std::unique_ptr<MNERawData> fresh(MNERawData::open_file(m_rawPath.toStdU16String(), false, false, filter));
     fresh->deriv_matched = std::move(raw->deriv_matched);
     MNEChSelection only = sel;
     only.nchan = 1;

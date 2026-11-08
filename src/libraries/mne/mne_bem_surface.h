@@ -32,6 +32,7 @@
 #include "mne_global.h"
 #include "mne_surface.h"
 
+#include <string>
 #include <fiff/fiff_types.h>
 
 //=============================================================================================================
@@ -151,7 +152,7 @@ public:
      *
      * @return Human readable form of the bem id.
      */
-    static QString id_name(int id);
+    static std::string id_name(int id);
 
     //=========================================================================================================
     /**

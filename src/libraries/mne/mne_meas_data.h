@@ -26,6 +26,7 @@
 
 #include "mne_global.h"
 
+#include <filesystem>
 #include <string>
 #include <fiff/fiff_types.h>
 
@@ -140,7 +141,7 @@ public:
      * @param[in,out] add_to Existing container to append to.
      * @return True if the data set was read and appended.
      */
-    static bool mne_read_meas_data_add(const QString& name,
+    static bool mne_read_meas_data_add(const std::filesystem::path& name,
                                        int set,
                                        MNEInverseOperator* op,
                                        MNENamedMatrix* fwd,
@@ -160,7 +161,7 @@ public:
      * @param[in] nnamesp   Number of entries in @p namesp.
      * @return The new container, or @c nullptr on failure.
      */
-    static std::unique_ptr<MNEMeasData> mne_read_meas_data(const QString& name,
+    static std::unique_ptr<MNEMeasData> mne_read_meas_data(const std::filesystem::path& name,
                                                            int set,
                                                            MNEInverseOperator* op,
                                                            MNENamedMatrix* fwd,
@@ -168,7 +169,7 @@ public:
                                                            int nnamesp);
 
 private:
-    static bool read_evoked_set(const QString& name,
+    static bool read_evoked_set(const std::filesystem::path& name,
                                 int set,
                                 MNEInverseOperator* op,
                                 MNENamedMatrix* fwd,
@@ -178,7 +179,7 @@ private:
                                 bool fresh);
 
 public:
-    QString filename;                                    /**< Path to the source FIFF file. */
+    std::string filename;                                /**< Path to the source FIFF file. */
     FIFFLIB::FiffId meas_id;                             /**< Measurement block ID from the FIFF file. */
     FIFFLIB::FiffTime meas_date;                         /**< Measurement date / time stamp. */
     std::vector<FIFFLIB::FiffChInfo> chs;                /**< Channel information list. */

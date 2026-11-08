@@ -25,6 +25,8 @@
 
 #include "mne_global.h"
 
+#include <filesystem>
+#include <string>
 #include <fiff/fiff_dir_node.h>
 #include <fiff/fiff_stream.h>
 
@@ -216,10 +218,10 @@ public:
      *
      * @return FIFF_OK on success, FIFF_FAIL on failure.
      */
-    static int load(const QString& name, int allow_maxshield, std::unique_ptr<MNERawInfo>& infop);
+    static int load(const std::filesystem::path& name, int allow_maxshield, std::unique_ptr<MNERawInfo>& infop);
 
 public:
-    QString filename;                               /**< The name of the file this comes from. */
+    std::string filename;                           /**< The name of the file this comes from. */
     std::unique_ptr<FIFFLIB::FiffId> id;            /**< Measurement id from the file. */
     int nchan;                                      /**< Number of channels. */
     std::vector<FIFFLIB::FiffChInfo> chInfo;        /**< Channel info data . */

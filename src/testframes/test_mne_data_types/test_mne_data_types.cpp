@@ -1136,7 +1136,7 @@ private slots:
         // Report to a string via QTextStream
         QString output;
         QTextStream stream(&output);
-        projOp.report(stream, QStringLiteral("test_proj"));
+        projOp.report(stream, QStringLiteral("test_proj").toStdString());
         QVERIFY(!output.isEmpty());
     }
 
@@ -1476,7 +1476,7 @@ private slots:
         MNEMeasDataSet ds;
         QCOMPARE(ds.np, 0);
         QCOMPARE(ds.nave, 1);
-        QVERIFY(ds.comment.isEmpty());
+        QVERIFY(ds.comment.empty());
     }
 
     void measDataSet_getValuesAtTime()

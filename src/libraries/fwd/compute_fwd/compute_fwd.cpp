@@ -166,7 +166,7 @@ void ComputeFwd::initFwd()
 
     // Read the source locations
     qInfo("Reading %s...", m_pSettings->srcname.toUtf8().constData());
-    if (MNESourceSpace::read_source_spaces(m_pSettings->srcname, m_spaces) != OK) {
+    if (MNESourceSpace::read_source_spaces(m_pSettings->srcname.toStdU16String(), m_spaces) != OK) {
         return;
     }
     for (k = 0, m_iNSource = 0; k < static_cast<int>(m_spaces.size()); k++) {
@@ -309,7 +309,7 @@ void ComputeFwd::initFwd()
 
         // Compensation data
 
-        m_compData = MNECTFCompDataSet::read(m_pSettings->measname);
+        m_compData = MNECTFCompDataSet::read(m_pSettings->measname.toStdU16String());
         if (!m_compData) {
             return;
         }
@@ -437,7 +437,7 @@ void ComputeFwd::initFwd()
             qInfo("Omitted source space points will be output to : %s", m_pSettings->mindistoutname.toUtf8().constData());
         }
         MNESourceSpace::filter_source_spaces(m_pSettings->mindist,
-                                             m_pSettings->bemname,
+                                             m_pSettings->bemname.toStdU16String(),
                                              m_mri_head_t,
                                              m_spaces,
                                              filteredStream.get(), m_pSettings->use_threads);
@@ -452,7 +452,7 @@ void ComputeFwd::populateMetadata(MNEForwardSolution& fwd)
     fwd.coord_frame = m_pSettings->coord_frame;
     fwd.source_ori = m_pSettings->fixed_ori ? FIFFV_MNE_FIXED_ORI : FIFFV_MNE_FREE_ORI;
     fwd.surf_ori = false;
-    fwd.mri_filename = m_pSettings->mriname;
+    fwd.mri_filename = m_pSettings->mriname.toStdString();
 
     int nmeg = m_megcoils ? m_megcoils->ncoil() : 0;
     int neeg = m_eegels ? m_eegels->ncoil() : 0;

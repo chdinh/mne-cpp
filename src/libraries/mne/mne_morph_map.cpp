@@ -276,7 +276,7 @@ MNEMorphMap MNEMorphMap::compute(const MatrixX3f& fromRr, const MatrixX3i& fromT
 
 //=============================================================================================================
 
-std::optional<MNEMorphMap> MNEMorphMap::read(const QString& path, const QString& fromSubj, const QString& toSubj, int hemi)
+std::optional<MNEMorphMap> MNEMorphMap::read(const std::filesystem::path& path, const std::string& fromSubj, const std::string& toSubj, int hemi)
 {
     QFile file(path);
     FiffStream stream(&file);
@@ -311,13 +311,13 @@ std::optional<MNEMorphMap> MNEMorphMap::read(const QString& path, const QString&
         return result;
     }
     qWarning("MNEMorphMap::read - %s hemisphere morph map from %s to %s not found in %s",
-             hemi == 0 ? "left" : "right", qPrintable(fromSubj), qPrintable(toSubj), qPrintable(path));
+             hemi == 0 ? "left" : "right", fromSubj.c_str(), toSubj.c_str(), UTILSLIB::utf8FromPath(path).c_str());
     return std::nullopt;
 }
 
 //=============================================================================================================
 
-bool MNEMorphMap::write(const QString& path, const std::vector<const MNEMorphMap*>& maps)
+bool MNEMorphMap::write(const std::filesystem::path& path, const std::vector<const MNEMorphMap*>& maps)
 {
     QFile file(path);
     auto stream = FiffStream::start_file(file);
@@ -330,8 +330,8 @@ bool MNEMorphMap::write(const QString& path, const std::vector<const MNEMorphMap
             return false;
         }
         stream->start_block(FIFFB_MNE_MORPH_MAP);
-        stream->write_string(FIFF_MNE_MORPH_MAP_FROM, morph->from_subj.toStdString());
-        stream->write_string(FIFF_MNE_MORPH_MAP_TO, morph->to_subj.toStdString());
+        stream->write_string(FIFF_MNE_MORPH_MAP_FROM, morph->from_subj);
+        stream->write_string(FIFF_MNE_MORPH_MAP_TO, morph->to_subj);
         stream->write_int(FIFF_MNE_HEMI, &kHemiKind[morph->hemi]);
         stream->write_float_sparse_rcs(FIFF_MNE_MORPH_MAP, morph->map->eigen());
         stream->end_block(FIFFB_MNE_MORPH_MAP);

@@ -149,7 +149,7 @@ int main(int argc, char* argv[])
         // Read label vertices
         //
         VectorXi labelVerts;
-        if (MNESourceSpace::read_label(labelFile, labelVerts) != 0) {
+        if (MNESourceSpace::read_label(labelFile.toStdU16String(), labelVerts) != 0) {
             qCritical("Failed to read label file %s.", labelFile.toUtf8().constData());
             return 1;
         }

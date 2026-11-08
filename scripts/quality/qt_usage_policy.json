@@ -110,8 +110,8 @@
       ]
     },
     "dsp": {
-      "tokens": 632,
-      "public_header_includes": 32,
+      "tokens": 575,
+      "public_header_includes": 29,
       "modules": [
         "Concurrent",
         "Core",
@@ -136,7 +136,7 @@
       ]
     },
     "fwd": {
-      "tokens": 322,
+      "tokens": 321,
       "public_header_includes": 12,
       "modules": [
         "Concurrent",
@@ -151,7 +151,7 @@
       ]
     },
     "inv": {
-      "tokens": 811,
+      "tokens": 812,
       "public_header_includes": 48,
       "modules": [
         "Concurrent",
@@ -186,7 +186,7 @@
       ]
     },
     "mne": {
-      "tokens": 1507,
+      "tokens": 1307,
       "public_header_includes": 81,
       "modules": [
         "Concurrent",

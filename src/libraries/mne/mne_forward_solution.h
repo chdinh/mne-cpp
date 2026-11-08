@@ -29,6 +29,7 @@
 
 #include "mne_global.h"
 
+#include <string>
 #include <vector>
 
 #include <mne/mne_source_spaces.h>
@@ -100,22 +101,18 @@ struct RegionData
 
     qint32 nClusters; /**< Number of clusters within this region. */
 
-    Eigen::VectorXi idcs; /**< Get source space indeces. */
-    qint32 iLabelIdxIn;   /**< FsLabel ID. */
-    QString sDistMeasure; /**< "cityblock" or "sqeuclidean". */
+    Eigen::VectorXi idcs;     /**< Get source space indeces. */
+    qint32 iLabelIdxIn;       /**< FsLabel ID. */
+    std::string sDistMeasure; /**< "cityblock" or "sqeuclidean". */
 
     RegionDataOut cluster() const
     {
-        QString t_sDistMeasure;
-        if (sDistMeasure.isEmpty())
-            t_sDistMeasure = QString("cityblock");
-        else
-            t_sDistMeasure = sDistMeasure;
+        const std::string t_sDistMeasure = sDistMeasure.empty() ? std::string("cityblock") : sDistMeasure;
 
         // Kmeans Reduction
         RegionDataOut p_RegionDataOut;
 
-        UTILSLIB::KMeans t_kMeans(t_sDistMeasure.toStdString(), "sample", 5);
+        UTILSLIB::KMeans t_kMeans(t_sDistMeasure, "sample", 5);
 
         if (bUseWhitened) {
             t_kMeans.calculate(this->matRoiGWhitened, this->nClusters, p_RegionDataOut.roiIdx, p_RegionDataOut.ctrs, p_RegionDataOut.sumd, p_RegionDataOut.D);
@@ -224,7 +221,7 @@ public:
                                                 Eigen::MatrixXd& p_D = defaultD,
                                                 const FIFFLIB::FiffCov& p_pNoise_cov = defaultCov,
                                                 const FIFFLIB::FiffInfo& p_pInfo = defaultInfo,
-                                                QString p_sMethod = "cityblock") const;
+                                                const std::string& p_sMethod = "cityblock") const;
 
     //=========================================================================================================
     /**
@@ -495,7 +492,7 @@ public:
     FIFFLIB::FiffNamedMatrix::SDPtr sol{new FIFFLIB::FiffNamedMatrix};      /**< Forward solution. */
     FIFFLIB::FiffNamedMatrix::SDPtr sol_grad{new FIFFLIB::FiffNamedMatrix}; /**< ToDo... */
     FIFFLIB::FiffCoordTrans mri_head_t;                                     /**< MRI head coordinate transformation. */
-    QString mri_filename;                                                   /**< MRI file name (parent provenance). */
+    std::string mri_filename;                                               /**< MRI file name (parent provenance). */
     FIFFLIB::FiffId mri_id;                                                 /**< MRI file ID (parent provenance). */
     MNELIB::MNESourceSpaces src;                                            /**< Geometric description of the source spaces (hemispheres). */
     Eigen::MatrixX3f source_rr;                                             /**< Source locations. */

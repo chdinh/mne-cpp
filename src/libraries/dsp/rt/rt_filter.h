@@ -37,6 +37,10 @@
 
 #include <fiff/fiff_info.h>
 #include <fiff/fiff_evoked.h>
+#include <utils/string_utils.h>
+
+#include <map>
+#include <string>
 
 //=============================================================================================================
 // QT INCLUDES
@@ -231,9 +235,9 @@ DSPSHARED_EXPORT FIFFLIB::FiffEvoked computeFilteredAverage(const FIFFLIB::FiffR
                                                             bool bApplyBaseline,
                                                             float fTBaselineFromS,
                                                             float fTBaselineToS,
-                                                            const QMap<QString, double>& mapReject,
+                                                            const std::map<std::string, double>& mapReject,
                                                             const UTILSLIB::FilterKernel& filterKernel,
-                                                            const QStringList& lExcludeChs = QStringList(),
+                                                            const UTILSLIB::StringList& lExcludeChs = {},
                                                             const Eigen::RowVectorXi& vecPicks = Eigen::RowVectorXi());
 
 //=============================================================================================================

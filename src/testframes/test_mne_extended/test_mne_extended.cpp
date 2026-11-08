@@ -318,7 +318,7 @@ private slots:
 
         // Data well within threshold (peak-to-peak = 0 since all values the same)
         MatrixXd dataOk = MatrixXd::Ones(1, 100) * 1e-13;
-        QMap<QString, double> mapReject;
+        std::map<std::string, double> mapReject;
         mapReject["mag"] = 5e-12;
 
         bool hasArtifact = MNEEpochDataList::checkForArtifact(dataOk, info, mapReject);
@@ -446,7 +446,7 @@ private slots:
         QTemporaryDir tmpDir;
         QVERIFY(tmpDir.isValid());
         QString filePath = tmpDir.path() + "/cluster_info.txt";
-        ci.write(filePath);
+        ci.write(filePath.toStdU16String());
 
         QFile f(filePath);
         QVERIFY(f.exists());

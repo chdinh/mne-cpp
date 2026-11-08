@@ -653,7 +653,7 @@ InvDipoleFitData* InvDipoleFitData::setup_dipole_fit_data(const QString& mriname
     /*
        * Compensation data
        */
-    comp_data = MNECTFCompDataSet::read(measname);
+    comp_data = MNECTFCompDataSet::read(measname.toStdU16String());
     if (!comp_data)
         return nullptr;
     if (comp_data->ncomp > 0) { /* Compensation channel information may be needed */
@@ -702,7 +702,11 @@ InvDipoleFitData* InvDipoleFitData::setup_dipole_fit_data(const QString& mriname
     /*
        * Projection data should go here
        */
-    if (!MNEProjOp::makeProjection(projnames,
+    std::vector<std::filesystem::path> projPaths;
+    projPaths.reserve(projnames.size());
+    for (const QString& projname : projnames)
+        projPaths.emplace_back(projname.toStdU16String());
+    if (!MNEProjOp::makeProjection(projPaths,
                                    res->chs,
                                    res->nmeg + res->neeg,
                                    res->proj))
@@ -711,7 +715,7 @@ InvDipoleFitData* InvDipoleFitData::setup_dipole_fit_data(const QString& mriname
         qInfo("Final projection operator is:");
         {
             QTextStream errStream(stderr);
-            res->proj->report(errStream, QStringLiteral("\t"));
+            res->proj->report(errStream, QStringLiteral("\t").toStdString());
         }
 
         if (res->proj->assign_channels(res->ch_names, res->nmeg + res->neeg) == FAIL)
@@ -725,7 +729,7 @@ InvDipoleFitData* InvDipoleFitData::setup_dipole_fit_data(const QString& mriname
         * Noise covariance
         */
     if (!noisename.isEmpty()) {
-        if ((cov = MNECovMatrix::read(noisename, FIFFV_MNE_SENSOR_COV)) == nullptr)
+        if ((cov = MNECovMatrix::read(noisename.toStdU16String(), FIFFV_MNE_SENSOR_COV)) == nullptr)
             return nullptr;
         qInfo("Read a %s noise-covariance matrix from %s",
               cov->cov_diag.size() > 0 ? "diagonal" : "full", noisename.toUtf8().data());
