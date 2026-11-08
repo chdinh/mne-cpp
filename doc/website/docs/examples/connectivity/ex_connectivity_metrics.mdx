@@ -74,18 +74,18 @@ The documented classes this example uses most:
 | [`Network`](../../api/connectivity/network.mdx) | Connectivity |
 | [`Coherence`](../../api/connectivity/coherence.mdx) | Connectivity |
 | [`AbstractMetric`](../../api/connectivity/abstract-metric.mdx) | Connectivity |
-| [`Connectivity`](../../api/connectivity/connectivity-class.mdx) | Connectivity |
 | [`FigureExporter`](../../api/disp/figure-exporter.mdx) | Visualization |
 | [`NetworkEdge`](../../api/connectivity/network-edge.mdx) | Connectivity |
 | [`NetworkNode`](../../api/connectivity/network-node.mdx) | Connectivity |
 | [`Coherency`](../../api/connectivity/coherency.mdx) | Connectivity |
+| [`GrangerCausality`](../../api/connectivity/granger-causality.mdx) | Connectivity |
 
 ## Used in the API reference
 
 - [AbstractMetric](../../api/connectivity/abstract-metric.mdx)
 - [Coherence](../../api/connectivity/coherence.mdx)
 - [Coherency](../../api/connectivity/coherency.mdx)
-- [Connectivity](../../api/connectivity/connectivity-class.mdx)
+- [ConnectivitySettings](../../api/connectivity/connectivity-settings.mdx)
 - [Correlation](../../api/connectivity/correlation.mdx)
 - [CrossCorrelation](../../api/connectivity/cross-correlation.mdx)
 - [DebiasedSquaredWeightedPhaseLagIndex](../../api/connectivity/debiased-squared-weighted-phase-lag-index.mdx)
@@ -130,7 +130,7 @@ The documented classes this example uses most:
 // INCLUDES
 //=============================================================================================================
 
-#include <connectivity/connectivity.h>
+#include <connectivity/compute_connectivity.h>
 #include <connectivity/connectivitysettings.h>
 #include <connectivity/metrics/abstractmetric.h>
 #include <connectivity/metrics/coherence.h>
@@ -283,13 +283,13 @@ int main(int argc, char* argv[])
 
     //! [connectivity_calculate]
     settings.setConnectivityMethods({"COH", "PLV", "WPLI"});
-    const QList<Network> networks = Connectivity::calculate(settings);
+    std::vector<Network> networks = compute_connectivity(settings);
     for (Network network : networks) {
         network.setFrequencyRange(8.0f, 12.0f); // average the per-bin weights over the alpha band
         std::println("{} 0-1: {:g}", network.getConnectivityMethod().toStdString(), edgeWeight(network, 0, 1));
     }
     //! [connectivity_calculate]
-    ok &= expect(networks.size() == 3, "Connectivity::calculate returns one network per method");
+    ok &= expect(networks.size() == 3, "compute_connectivity returns one network per method");
 
     //! [coherence_calculate]
     Network coherence = Coherence::calculate(settings);

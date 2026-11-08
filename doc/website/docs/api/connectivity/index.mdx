@@ -26,7 +26,7 @@ The library is organized into three groups of classes:
 
 ```mermaid
 flowchart LR
-    A[ConnectivitySettings] --> B[Connectivity::calculate]
+    A[ConnectivitySettings] --> B[compute_connectivity]
     B --> C1[Metric 1]
     B --> C2[Metric 2]
     C1 --> D[Network]
@@ -35,7 +35,7 @@ flowchart LR
 ```
 
 1. The user populates a `ConnectivitySettings` object with trial data, node positions, desired metrics, and sampling frequency.
-2. `Connectivity::calculate()` dispatches each requested metric to its dedicated class.
+2. `compute_connectivity()` dispatches each requested metric to its dedicated class.
 3. Results are returned as one `Network` per metric, containing `NetworkNode` and `NetworkEdge` objects.
 
 `NetworkEdge` instances are stored as smart pointers, which keeps memory usage manageable for large, fully connected graphs. `Network` also exposes functions for distance-matrix computation, basic graph measures, and weight-based thresholding.
@@ -72,7 +72,7 @@ for (MNEEpochData::SPtr pItem : data)
     settings.append(pItem->epoch);
 
 // Compute — returns one Network per metric
-QList<Network> networks = Connectivity::calculate(settings);
+std::vector<Network> networks = compute_connectivity(settings);
 ```
 
 Source-level connectivity works identically — pass source-localized signals instead of sensor-level data.
@@ -132,7 +132,7 @@ Every metric inherits from `AbstractMetric` and implements the same computation 
 
 | Function | Description |
 |---|---|
-| `Connectivity::calculate(settings)` | Dispatches computation: returns one `Network` per requested metric |
+| `compute_connectivity(settings)` | Dispatches computation: returns one `Network` per requested metric |
 
 ## Doxygen Reference
 

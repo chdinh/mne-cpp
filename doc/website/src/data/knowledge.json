@@ -2616,11 +2616,6 @@
       "tools": [],
       "api": [
         {
-          "name": "Connectivity",
-          "url": "/docs/api/connectivity/connectivity-class/",
-          "methods": []
-        },
-        {
           "name": "ConnectivitySettings",
           "url": "/docs/api/connectivity/connectivity-settings/",
           "methods": []

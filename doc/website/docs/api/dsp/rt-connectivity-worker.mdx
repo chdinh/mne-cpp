@@ -24,8 +24,8 @@ RtConnectivity rtConnectivity;
 MatrixXd online;
 bool connectivityDone = false;
 QObject::connect(&rtConnectivity, &RtConnectivity::newConnectivityResultAvailable,
-                 [&](const QList<Network>& networks, const ConnectivitySettings&) {
-                     online = networks.first().getFullConnectivityMatrix();
+                 [&](const std::vector<Network>& networks, const ConnectivitySettings&) {
+                     online = networks.front().getFullConnectivityMatrix();
                      connectivityDone = true;
                  });
 rtConnectivity.append(settings); // computed on the worker thread

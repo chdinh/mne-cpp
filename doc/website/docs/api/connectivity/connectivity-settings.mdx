@@ -23,6 +23,29 @@ Each call to `CONNECTIVITYLIB::ConnectivitySettings::append` "append" adds one t
 
 Aggregates trial data, spectral cache and node geometry shared by all ``CONNECTIVITYLIB`` metrics.
 
+```cpp title="src/examples/ex_connectivity_metrics/main.cpp"
+ConnectivitySettings settings;
+for (int i = 0; i < kTrials; ++i) {
+    settings.append(makeTrial(gen)); // channels x samples, one call per trial
+}
+settings.setSamplingFrequency(kSFreq);
+settings.setFFTSize(kSamples);
+settings.setWindowType("hanning");
+
+MatrixX3f positions(3, 3);
+positions << 0.0f, 0.0f, 0.0f, 0.05f, 0.0f, 0.0f, 0.0f, 0.05f, 0.0f;
+settings.setNodePositions(positions);
+```
+
+```cpp title="src/examples/ex_connectivity_metrics/main.cpp"
+settings.setConnectivityMethods({"COH", "PLV", "WPLI"});
+std::vector<Network> networks = compute_connectivity(settings);
+for (Network network : networks) {
+    network.setFrequencyRange(8.0f, 12.0f); // average the per-bin weights over the alpha band
+    std::println("{} 0-1: {:g}", network.getConnectivityMethod().toStdString(), edgeWeight(network, 0, 1));
+}
+```
+
 ---
 
 ## Public Methods
@@ -129,6 +152,12 @@ Constructs a [`ConnectivitySettings`](/docs/api/connectivity/connectivity-settin
 
 ---
 
+## Example
+
+- Start here: [ex_connectivity_metrics](../../examples/connectivity/ex_connectivity_metrics.mdx) — Connectivity metrics on synthetic data with a known coupling.
+- Full source: [`src/examples/ex_connectivity_metrics/main.cpp`](https://github.com/mne-tools/mne-cpp/tree/staging/src/examples/ex_connectivity_metrics/main.cpp)
+- Build target: `ex_connectivity_metrics` (runs under CTest)
+
 ## Used in examples
 
 ### [ex_connectivity](../../examples/connectivity/ex_connectivity.mdx)
@@ -138,7 +167,7 @@ Sensor- or source-level functional connectivity of averaged MEG/EEG data with a 
 ````cpp title="src/examples/ex_connectivity/connectivitysettingsmanager.h, line 97"
 ConnectivitySettings m_settings;
 RtConnectivity::SPtr m_pRtConnectivity;
-QList<Network> m_networkData;
+std::vector<Network> m_networkData;
 QMap<QString, Vector4i> mColor;
 ````
 
@@ -148,7 +177,7 @@ DSP real-time workers: averaging, covariance, noise spectrum, connectivity, HPI 
 
 ````cpp title="src/examples/ex_dsp_rt/main.cpp, line 242"
 // ---------------------------------------------------------------------------------------------------------
-// Connectivity: the same network as Connectivity::calculate, computed on a worker thread
+// Connectivity: the same network as compute_connectivity, computed on a worker thread
 ConnectivitySettings settings;
 for (int trial = 0; trial < 5; ++trial) {
     MatrixXd data(2, 256);
@@ -167,7 +196,7 @@ settings.setFFTSize(256);
 
 Compare connectivity metrics side by side on the same averaged sensor- or source-level data.
 
-````cpp title="src/examples/ex_connectivity_comparison/main.cpp, line 195"
+````cpp title="src/examples/ex_connectivity_comparison/main.cpp, line 196"
 ConnectivitySettings conSettings;
 ````
 

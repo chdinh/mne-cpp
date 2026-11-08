@@ -228,7 +228,7 @@ view->show();
 #include <connectivity/network/network.h>
 
 // After computing connectivity (see Connectivity library docs)
-QList<Network> networks = Connectivity::calculate(settings);
+std::vector<Network> networks = compute_connectivity(settings);
 model->addNetwork(networks.first(), "PLI");
 ```
 

@@ -36,7 +36,6 @@ const apiSidebar: SidebarsConfig['apiSidebar'] = [
         'api/fiff/fiff-coord-trans',
         'api/fiff/fiff-annotations',
         'api/fiff/fiff-annotation-event-utils',
-        'api/fiff/fiff-class',
         'api/fiff/fiff-ch-info',
         'api/fiff/fiff-ch-pos',
         'api/fiff/fiff-coord-trans-set',
@@ -310,7 +309,6 @@ const apiSidebar: SidebarsConfig['apiSidebar'] = [
       collapsed: true,
       link: {type: 'doc', id: 'api/connectivity/index'},
       items: [
-        'api/connectivity/connectivity-class',
         'api/connectivity/coherence',
         'api/connectivity/phase-locking-value',
         'api/connectivity/phase-lag-index',

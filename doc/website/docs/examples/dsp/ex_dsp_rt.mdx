@@ -179,7 +179,7 @@ The documented classes this example uses most:
 #include <dsp/rt/rt_inv_op.h>
 #include <dsp/rt/rt_noise.h>
 
-#include <connectivity/connectivity.h>
+#include <connectivity/compute_connectivity.h>
 #include <connectivity/connectivitysettings.h>
 #include <connectivity/network/network.h>
 #include <fiff/fiff_constants.h>
@@ -392,7 +392,7 @@ int main(int argc, char* argv[])
     rtNoise.wait(2000);
 
     // ---------------------------------------------------------------------------------------------------------
-    // Connectivity: the same network as Connectivity::calculate, computed on a worker thread
+    // Connectivity: the same network as compute_connectivity, computed on a worker thread
     ConnectivitySettings settings;
     for (int trial = 0; trial < 5; ++trial) {
         MatrixXd data(2, 256);
@@ -408,22 +408,22 @@ int main(int argc, char* argv[])
     settings.setWindowType("hanning");
     settings.setNodePositions(MatrixX3f::Identity(2, 3));
     settings.setConnectivityMethods({"COH"});
-    const MatrixXd offline = Connectivity::calculate(settings).first().getFullConnectivityMatrix();
+    const MatrixXd offline = compute_connectivity(settings).front().getFullConnectivityMatrix();
 
     //! [rt_connectivity_usage]
     RtConnectivity rtConnectivity;
     MatrixXd online;
     bool connectivityDone = false;
     QObject::connect(&rtConnectivity, &RtConnectivity::newConnectivityResultAvailable,
-                     [&](const QList<Network>& networks, const ConnectivitySettings&) {
-                         online = networks.first().getFullConnectivityMatrix();
+                     [&](const std::vector<Network>& networks, const ConnectivitySettings&) {
+                         online = networks.front().getFullConnectivityMatrix();
                          connectivityDone = true;
                      });
     rtConnectivity.append(settings); // computed on the worker thread
     //! [rt_connectivity_usage]
     const bool connectivityArrived = waitFor(connectivityDone, 10000);
     ok &= expect(connectivityArrived && online.isApprox(offline),
-                 std::format("RtConnectivity equals Connectivity::calculate (coherence {:.3f})", online.size() ? online(0, 1) : 0.0));
+                 std::format("RtConnectivity equals compute_connectivity (coherence {:.3f})", online.size() ? online(0, 1) : 0.0));
     rtConnectivity.stop();
 
     // ---------------------------------------------------------------------------------------------------------
