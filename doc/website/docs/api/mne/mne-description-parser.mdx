@@ -38,7 +38,7 @@ descFile.write("average {\n"
                "}\n");
 descFile.close();
 AverageDescription averaging;
-MNEDescriptionParser::parseAverageFile(aveDesc, averaging);
+MNEDescriptionParser::parseAverageFile(aveDesc.toStdU16String(), averaging);
 const AverageCategory& leftCategory = averaging.categories.front(); // name, events, tmin/tmax, baseline
 const RejectionParams& rejection = averaging.rej;                   // MNE-C defaults unless the file sets them (EEG 100 uV, ...)
 std::string log;
@@ -55,7 +55,7 @@ Parse an averaging description file.
 
 **Parameters:**
 
-- **fileName** : *const QString &*
+- **fileName** : *const std::filesystem::path &*
   Path to the .ave file.
 
 - **desc** : *[AverageDescription](/docs/api/fiff/average-description) &*
@@ -73,7 +73,7 @@ Parse a covariance description file.
 
 **Parameters:**
 
-- **fileName** : *const QString &*
+- **fileName** : *const std::filesystem::path &*
   Path to the .cov file.
 
 - **desc** : *[CovDescription](/docs/api/mne/cov-description) &*
@@ -102,7 +102,7 @@ MNE library: BEM surfaces, surface projection, ICP, source spaces and epochs.
                "}\n");
 descFile.close();
 AverageDescription averaging;
-MNEDescriptionParser::parseAverageFile(aveDesc, averaging);
+MNEDescriptionParser::parseAverageFile(aveDesc.toStdU16String(), averaging);
 const AverageCategory& leftCategory = averaging.categories.front(); // name, events, tmin/tmax, baseline
 const RejectionParams& rejection = averaging.rej;                   // MNE-C defaults unless the file sets them (EEG 100 uV, ...)
 std::string log;

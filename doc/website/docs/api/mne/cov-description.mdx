@@ -35,7 +35,7 @@ covDescFile.write("cov {\n"
                   "}\n");
 covDescFile.close();
 CovDescription covariance;
-MNEDescriptionParser::parseCovarianceFile(covDescPath, covariance);
+MNEDescriptionParser::parseCovarianceFile(covDescPath.toStdU16String(), covariance);
 covariance.rej.megGradReject = covariance.rej.megMagReject = covariance.rej.eogReject = 0.0f; // EEG limit only
 const CovDefinition& preStim = covariance.defs.front();
 const FiffCov noiseCov = FiffCov::compute_from_epochs(raw, events.events, {1, 2}, preStim.tmin, preStim.tmax, preStim.bmin, preStim.bmax, preStim.doBaseline,
@@ -61,7 +61,7 @@ MNE library: BEM surfaces, surface projection, ICP, source spaces and epochs.
                   "}\n");
 covDescFile.close();
 CovDescription covariance;
-MNEDescriptionParser::parseCovarianceFile(covDescPath, covariance);
+MNEDescriptionParser::parseCovarianceFile(covDescPath.toStdU16String(), covariance);
 covariance.rej.megGradReject = covariance.rej.megMagReject = covariance.rej.eogReject = 0.0f; // EEG limit only
 const CovDefinition& preStim = covariance.defs.front();
 const FiffCov noiseCov = FiffCov::compute_from_epochs(raw, events.events, {1, 2}, preStim.tmin, preStim.tmax, preStim.bmin, preStim.bmax, preStim.doBaseline,

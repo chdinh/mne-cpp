@@ -20,7 +20,7 @@ Implements MNE [SSS](/docs/api/dsp/sss) Data (Replaces *mneSssData,mneSssDataRec
 Container for Signal Space Separation ([SSS](/docs/api/dsp/sss)/Maxwell filtering) expansion coefficients and metadata.
 
 ```cpp title="src/examples/ex_mne_api/main.cpp"
-auto sss = MNESssData::read(sssPath); // the SSS block written by mne.preprocessing.maxwell_filter
+auto sss = MNESssData::read(sssPath.toStdU16String()); // the SSS block written by mne.preprocessing.maxwell_filter
 ```
 
 ---
@@ -73,7 +73,7 @@ Read [SSS](/docs/api/dsp/sss) data from anywhere in a file Refactored: mne_read 
 
 **Parameters:**
 
-- **name** : *const QString &*
+- **name** : *const std::filesystem::path &*
   Name of the file to read the SSS data from.
 
 **Returns:**
@@ -114,7 +114,7 @@ Read the [SSS](/docs/api/dsp/sss) data from the given node of an open fiff strea
 MNE library: BEM surfaces, surface projection, ICP, source spaces and epochs.
 
 ````cpp title="src/examples/ex_mne_api/main.cpp, line 436"
-auto sss = MNESssData::read(sssPath); // the SSS block written by mne.preprocessing.maxwell_filter
+auto sss = MNESssData::read(sssPath.toStdU16String()); // the SSS block written by mne.preprocessing.maxwell_filter
 // maxwell_filter(origin=(0, 0, 0.04), int_order=8, ext_order=3): head frame, 306 channels, 70 of 80 internal and 15 external components
 ok &= expect(sss && sss->job == FIFFV_SSS_JOB_FILTER && sss->coord_frame == FIFFV_COORD_HEAD && sss->nchan == 306 && sss->in_order == 8 && sss->out_order == 3 && sss->in_nuse == 70 && sss->out_nuse == 15 && std::fabs(sss->origin[2] - 0.04f) < 1e-7f,
              "MNESssData: Maxwell filter parameters like info['proc_history'] of the fixture");

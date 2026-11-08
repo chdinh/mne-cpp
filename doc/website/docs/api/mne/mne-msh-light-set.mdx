@@ -74,7 +74,7 @@ const double outside = skull->sum_solids(Vector3f(0.0f, 0.0f, 0.2f)) / (4.0 * M_
 
 // The same surface as an MNE-C viewer display surface
 MNEMshDisplaySurfaceSet display;
-display.add_bem_surface(bemPath, FIFFV_BEM_SURF_ID_BRAIN, "inner skull", 1, 1); // checks closure
+display.add_bem_surface(bemPath.toStdU16String(), FIFFV_BEM_SURF_ID_BRAIN, "inner skull", 1, 1); // checks closure
 const MNEMshDisplaySurface& shown = *display.surfs[0];
 ````
 

@@ -28,7 +28,7 @@ const double outside = skull->sum_solids(Vector3f(0.0f, 0.0f, 0.2f)) / (4.0 * M_
 
 // The same surface as an MNE-C viewer display surface
 MNEMshDisplaySurfaceSet display;
-display.add_bem_surface(bemPath, FIFFV_BEM_SURF_ID_BRAIN, "inner skull", 1, 1); // checks closure
+display.add_bem_surface(bemPath.toStdU16String(), FIFFV_BEM_SURF_ID_BRAIN, "inner skull", 1, 1); // checks closure
 const MNEMshDisplaySurface& shown = *display.surfs[0];
 ```
 
@@ -194,7 +194,7 @@ Compute and store the axis-aligned bounding box and field-of-view radius by iter
 
 **Parameters:**
 
-- **tag** : *const QString &*
+- **tag** : *const std::string &*
   FsSurface name tag (used for debug logging).
 
 ---
@@ -207,7 +207,7 @@ Inflated, sphere, and white surfaces use overlay mode; others use none.
 
 **Parameters:**
 
-- **name** : *const QString &*
+- **name** : *const std::string &*
   FsSurface type name.
 
 ---
@@ -234,7 +234,7 @@ MNE library: BEM surfaces, surface projection, ICP, source spaces and epochs.
 ````cpp title="src/examples/ex_mne_api/main.cpp, line 460"
 // The same surface as an MNE-C viewer display surface
 MNEMshDisplaySurfaceSet display;
-display.add_bem_surface(bemPath, FIFFV_BEM_SURF_ID_BRAIN, "inner skull", 1, 1); // checks closure
+display.add_bem_surface(bemPath.toStdU16String(), FIFFV_BEM_SURF_ID_BRAIN, "inner skull", 1, 1); // checks closure
 const MNEMshDisplaySurface& shown = *display.surfs[0];
 // mne.surface._get_solids (which returns the solid angle / 2): 0.5 at the centroid, 0 at (0, 0, 200) mm;
 // bounding box -66.7 ... 105.8 mm, centroid (0.67, -10.01, 44.26) mm
