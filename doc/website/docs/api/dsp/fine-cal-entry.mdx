@@ -54,7 +54,7 @@ calibration.addEntry(magnetometer);
 const QString calPath = dir.filePath("sss_cal.dat"); // the format of mne.preprocessing.write_fine_calibration
 const bool calWritten = calibration.write(calPath);
 const FineCalibration calBack = FineCalibration::read(calPath);
-ok &= expect(calWritten && calBack.size() == 1 && calBack.gainVector()(0) == 0.996645 && calBack.entries().first().position.isApprox(magnetometer.position),
+ok &= expect(calWritten && calBack.size() == 1 && calBack.gainVector()(0) == 0.996645 && calBack.entries().front().position.isApprox(magnetometer.position),
              "FineCalibration round-trips a magnetometer line");
 ````
 

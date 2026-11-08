@@ -143,11 +143,12 @@ bool expect(bool condition, std::string_view what)
     return condition;
 }
 
-QList<int> indices(const QList<QPair<int, double>>& peaks)
+std::vector<int> indices(const std::vector<std::pair<int, double>>& peaks)
 {
-    QList<int> out;
+    std::vector<int> out;
+    out.reserve(peaks.size());
     for (const auto& peak : peaks) {
-        out.append(peak.first);
+        out.push_back(peak.first);
     }
     return out;
 }
@@ -217,14 +218,14 @@ int main(int argc, char* argv[])
     PeakFinderParams params;
     params.dMinHeight = 0.5; // like scipy.signal.find_peaks(height=0.5, distance=30)
     params.iMinDistance = 30;
-    const QList<QPair<int, double>> peaks = peakFinder(wave, params); // (sample, value), sorted by sample
+    const std::vector<std::pair<int, double>> peaks = peakFinder(wave, params); // (sample, value), sorted by sample
     const VectorXd prominence = peakProminences(wave, {2, 9, 15});
     //! [peak_finder_usage]
     PeakFinderParams byProminence;
     byProminence.dProminence = 0.5;
     PeakFinderParams byDistance;
     byDistance.iMinDistance = 10;
-    ok &= expect(indices(peaks) == QList<int>({9, 51, 92, 128, 170}) && indices(peakFinder(wave, byProminence)) == QList<int>({9, 51, 92, 128, 170}) && indices(peakFinder(wave, byDistance)) == QList<int>({9, 22, 37, 51, 64, 79, 92, 114, 128, 141, 156, 170, 183, 198}) && (prominence - Vector3d(0.18086696, 1.298166714, 0.289199146)).cwiseAbs().maxCoeff() < 1e-8,
+    ok &= expect(indices(peaks) == std::vector<int>({9, 51, 92, 128, 170}) && indices(peakFinder(wave, byProminence)) == std::vector<int>({9, 51, 92, 128, 170}) && indices(peakFinder(wave, byDistance)) == std::vector<int>({9, 22, 37, 51, 64, 79, 92, 114, 128, 141, 156, 170, 183, 198}) && (prominence - Vector3d(0.18086696, 1.298166714, 0.289199146)).cwiseAbs().maxCoeff() < 1e-8,
                  "peakFinder (height, distance, prominence) and peakProminences match scipy");
 
     // a and b share a 1/128 envelope; c has its own 1/50 envelope

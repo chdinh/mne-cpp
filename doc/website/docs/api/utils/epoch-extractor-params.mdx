@@ -23,11 +23,11 @@ params.dTmin = -0.1;
 params.dTmax = 0.4;
 params.dBaseMin = -0.1;
 params.dBaseMax = 0.0;
-const QVector<MNEEpochData> epochs = EpochExtractor::extract(raw, events, kSFreq, params, codes);
-QVector<MNEEpochData> targets;
+const std::vector<MNEEpochData> epochs = EpochExtractor::extract(raw, events, kSFreq, params, codes);
+std::vector<MNEEpochData> targets;
 for (const MNEEpochData& epoch : epochs) {
     if (epoch.event == 1) {
-        targets.append(epoch);
+        targets.push_back(epoch);
     }
 }
 const MatrixXd evoked = EpochExtractor::average(EpochExtractor::rejectMarked(targets));

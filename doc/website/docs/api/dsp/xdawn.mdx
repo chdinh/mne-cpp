@@ -38,7 +38,7 @@ Uses non-rejected epochs only. The target signal covariance is estimated from th
 
 **Parameters:**
 
-- **epochs** : *const QVector&lt; [MNEEpochData](/docs/api/mne/mne-epoch-data) &gt; &*
+- **epochs** : *const std::vector&lt; [MNEEpochData](/docs/api/mne/mne-epoch-data) &gt; &*
   Input epochs.
 
 - **iTargetEvent** : *int*
@@ -103,7 +103,7 @@ Apply `denoise()` to all epochs in the vector, preserving metadata.
 
 **Parameters:**
 
-- **epochs** : *const QVector&lt; [MNEEpochData](/docs/api/mne/mne-epoch-data) &gt; &*
+- **epochs** : *std::vector&lt; [MNEEpochData](/docs/api/mne/mne-epoch-data) &gt;*
   Input epochs.
 
 - **result** : *const [XdawnResult](/docs/api/dsp/xdawn-result) &*
@@ -114,7 +114,7 @@ Apply `denoise()` to all epochs in the vector, preserving metadata.
 
 **Returns:**
 
-- *QVector&lt; [MNEEpochData](/docs/api/mne/mne-epoch-data) &gt;* — Copy of the input epochs with denoised epoch matrices.
+- *std::vector&lt; [MNEEpochData](/docs/api/mne/mne-epoch-data) &gt;* — Copy of the input epochs with denoised epoch matrices.
 
 ---
 

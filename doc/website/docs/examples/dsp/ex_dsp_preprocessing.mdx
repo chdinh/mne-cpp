@@ -227,12 +227,12 @@ int main(int argc, char* argv[])
             raw(c, t) = noise(gen) + 0.5; // DC offset that baseline correction must remove
         }
     }
-    QVector<int> events;
-    QVector<int> codes;
+    std::vector<int> events;
+    std::vector<int> codes;
     for (int k = 0; k < 40; ++k) {
         const int onset = 200 + k * 115;
-        events.append(onset);
-        codes.append(k % 2 == 0 ? 1 : 2);
+        events.push_back(onset);
+        codes.push_back(k % 2 == 0 ? 1 : 2);
         for (int t = 0; t < 50 && k % 2 == 0; ++t) {
             const double bump = std::sin(kPi * t / 50.0);
             raw(0, onset + 25 + t) += 2.0 * bump;
@@ -246,11 +246,11 @@ int main(int argc, char* argv[])
     params.dTmax = 0.4;
     params.dBaseMin = -0.1;
     params.dBaseMax = 0.0;
-    const QVector<MNEEpochData> epochs = EpochExtractor::extract(raw, events, kSFreq, params, codes);
-    QVector<MNEEpochData> targets;
+    const std::vector<MNEEpochData> epochs = EpochExtractor::extract(raw, events, kSFreq, params, codes);
+    std::vector<MNEEpochData> targets;
     for (const MNEEpochData& epoch : epochs) {
         if (epoch.event == 1) {
-            targets.append(epoch);
+            targets.push_back(epoch);
         }
     }
     const MatrixXd evoked = EpochExtractor::average(EpochExtractor::rejectMarked(targets));
@@ -269,8 +269,8 @@ int main(int argc, char* argv[])
 
     //! [channel_derivation_usage]
     const QStringList names = {"LH1", "LH2", "LH3", "RA1"};
-    const QVector<DerivationRule> bipolar = ChannelDerivation::buildBipolar(names); // LH1-LH2, LH2-LH3
-    const QVector<DerivationRule> average = ChannelDerivation::buildCommonAverage(names);
+    const std::vector<DerivationRule> bipolar = ChannelDerivation::buildBipolar(names); // LH1-LH2, LH2-LH3
+    const std::vector<DerivationRule> average = ChannelDerivation::buildCommonAverage(names);
     const auto [bipolarData, bipolarNames] = ChannelDerivation::apply(raw, names, bipolar);
     const auto [averageData, averageNames] = ChannelDerivation::apply(raw, names, average);
     //! [channel_derivation_usage]

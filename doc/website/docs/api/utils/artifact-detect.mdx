@@ -18,10 +18,10 @@ class UTILSLIB::ArtifactDetect
 ECG and EOG physiological artifact event detection.
 
 ```cpp title="src/examples/ex_dsp_artifacts/main.cpp"
-ArtifactDetect::EcgParams ecg;                                                  // mne find_ecg_events defaults: 5-35 Hz, automatic QRS threshold
-ArtifactDetect::EogParams eog;                                                  // mne find_eog_events defaults: 1-10 Hz, automatic peak threshold
-const QVector<int> beats = ArtifactDetect::detectEcg(data, info, kSFreq, ecg);  // R-peak samples on the ECG channel
-const QVector<int> blinks = ArtifactDetect::detectEog(data, info, kSFreq, eog); // blink peaks on the EOG channel
+ArtifactDetect::EcgParams ecg;                                                      // mne find_ecg_events defaults: 5-35 Hz, automatic QRS threshold
+ArtifactDetect::EogParams eog;                                                      // mne find_eog_events defaults: 1-10 Hz, automatic peak threshold
+const std::vector<int> beats = ArtifactDetect::detectEcg(data, info, kSFreq, ecg);  // R-peak samples on the ECG channel
+const std::vector<int> blinks = ArtifactDetect::detectEog(data, info, kSFreq, eog); // blink peaks on the EOG channel
 ```
 
 ---
@@ -50,7 +50,7 @@ Uses the first good channel with kind == FIFFV_ECG_CH; without one, the mean of 
 
 **Returns:**
 
-- *QVector&lt; int &gt;* — Sample indices (0-based) of detected R-peaks.
+- *std::vector&lt; int &gt;* — Sample indices (0-based) of detected R-peaks.
 
 ---
 
@@ -76,7 +76,7 @@ Of the good channels with kind == FIFFV_EOG_CH, the one with the most 2-45 Hz en
 
 **Returns:**
 
-- *QVector&lt; int &gt;* — Sample indices (0-based) of the detected EOG peaks.
+- *std::vector&lt; int &gt;* — Sample indices (0-based) of the detected EOG peaks.
 
 ---
 
@@ -149,14 +149,14 @@ SSP projectors for blink artifacts as mne.preprocessing.compute_proj_eog does (s
 Artifact detection and repair with the dsp library on a recording with planted defects.
 
 ````cpp title="src/examples/ex_dsp_artifacts/main.cpp, line 140"
-ArtifactDetect::EcgParams ecg;                                                  // mne find_ecg_events defaults: 5-35 Hz, automatic QRS threshold
-ArtifactDetect::EogParams eog;                                                  // mne find_eog_events defaults: 1-10 Hz, automatic peak threshold
-const QVector<int> beats = ArtifactDetect::detectEcg(data, info, kSFreq, ecg);  // R-peak samples on the ECG channel
-const QVector<int> blinks = ArtifactDetect::detectEog(data, info, kSFreq, eog); // blink peaks on the EOG channel
+ArtifactDetect::EcgParams ecg;                                                      // mne find_ecg_events defaults: 5-35 Hz, automatic QRS threshold
+ArtifactDetect::EogParams eog;                                                      // mne find_eog_events defaults: 1-10 Hz, automatic peak threshold
+const std::vector<int> beats = ArtifactDetect::detectEcg(data, info, kSFreq, ecg);  // R-peak samples on the ECG channel
+const std::vector<int> blinks = ArtifactDetect::detectEog(data, info, kSFreq, eog); // blink peaks on the EOG channel
 ok &= expect(beats.size() == 12 && std::abs(beats[0] - 100) <= 2 && std::abs(beats[1] - beats[0] - 200) <= 2,
-             std::format("ECG: {} beats, first at sample {} (12 beats every 200 samples from 100)", beats.size(), beats.value(0)));
+             std::format("ECG: {} beats, first at sample {} (12 beats every 200 samples from 100)", beats.size(), beats.empty() ? -1 : beats[0]));
 ok &= expect(blinks.size() == 3 && std::abs(blinks[1] - (1100 + 25)) <= 15,
-             std::format("EOG: {} blinks, second at sample {} (3 blinks around 325, 1125, 1925)", blinks.size(), blinks.value(1)));
+             std::format("EOG: {} blinks, second at sample {} (3 blinks around 325, 1125, 1925)", blinks.size(), blinks.size() > 1 ? blinks[1] : -1));
 ````
 
 ## Authors of this file

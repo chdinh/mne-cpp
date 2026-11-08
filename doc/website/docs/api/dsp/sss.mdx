@@ -118,7 +118,7 @@ DSP Maxwell filtering: SSS, bad-channel detection, movement compensation, fine c
 SSS::Params params; // internal order 8, external order 3
 params.origin = Vector3d(0.0, 0.0, 0.04);
 const SSS::Basis basis = SSS::computeBasis(info, params); // geometry only, reusable for every buffer
-const QVector<int>& meg = basis.megChannelIdx;
+const std::vector<int>& meg = basis.megChannelIdx;
 ````
 
 ## Authors of this file

@@ -172,10 +172,10 @@ bool expect(bool condition, std::string_view what)
 }
 
 /** Field component along each MEG coil normal: a magnetic dipole @p moment at @p pos plus a uniform field @p uniform. */
-VectorXd coilField(const FiffInfo& info, const QVector<int>& meg, const Vector3d& pos, const Vector3d& moment, const Vector3d& uniform)
+VectorXd coilField(const FiffInfo& info, const std::vector<int>& meg, const Vector3d& pos, const Vector3d& moment, const Vector3d& uniform)
 {
     VectorXd b(meg.size());
-    for (int k = 0; k < meg.size(); ++k) {
+    for (int k = 0; k < std::ssize(meg); ++k) {
         const FiffChInfo& ch = info.chs[meg[k]];
         const Vector3d r = ch.chpos.r0.cast<double>() - pos;
         const double d = r.norm();
@@ -215,14 +215,14 @@ int main(int argc, char* argv[])
     params.origin = Vector3d(0.0, 0.0, 0.04);
     const SSS::Basis basis = SSS::computeBasis(info, params); // geometry only, reusable for every buffer
     //! [sss_usage]
-    const QVector<int>& meg = basis.megChannelIdx;
+    const std::vector<int>& meg = basis.megChannelIdx;
 
     // Device-frame fields: a dipole 3 cm above the expansion origin, and a uniform field from far away
     const Vector3d inside = params.origin + Vector3d(0.01, -0.01, 0.03);
     const VectorXd brain = coilField(info, meg, inside, Vector3d(1e-9, 2e-9, 0.0), Vector3d::Zero());
     const VectorXd noise = coilField(info, meg, inside, Vector3d::Zero(), Vector3d(3e-9, -1e-9, 2e-9));
     MatrixXd data = MatrixXd::Zero(info.nchan, 2);
-    for (int k = 0; k < meg.size(); ++k) {
+    for (int k = 0; k < std::ssize(meg); ++k) {
         data(meg[k], 0) = brain(k);
         data(meg[k], 1) = noise(k);
     }
@@ -232,7 +232,7 @@ int main(int argc, char* argv[])
     //! [sss_apply]
     MatrixXd megIn(meg.size(), 2);
     MatrixXd megOut(meg.size(), 2);
-    for (int k = 0; k < meg.size(); ++k) {
+    for (int k = 0; k < std::ssize(meg); ++k) {
         megIn.row(k) = data.row(meg[k]);
         megOut.row(k) = cleaned.row(meg[k]);
     }
@@ -251,11 +251,11 @@ int main(int argc, char* argv[])
     //! [bad_channels_maxwell_usage]
     int worst = 0;
     bads.zScores.maxCoeff(&worst);
-    ok &= expect(worst == 40 && bads.badIndices.contains(meg[40]) && UTILSLIB::contains(bads.badChannels, info.ch_names[meg[40]]),
+    ok &= expect(worst == 40 && std::ranges::contains(bads.badIndices, meg[40]) && UTILSLIB::contains(bads.badChannels, info.ch_names[meg[40]]),
                  std::format("findBadChannelsMaxwell ranks {} worst (z = {:.0f}), flagged: {}", info.ch_names[meg[worst]], bads.zScores(worst), UTILSLIB::join(bads.badChannels, ", ")));
 
     //! [maxwell_movement_comp_usage]
-    QList<HeadPosEntry> headPos(1); // one position from t = 0: identity rotation, no translation
+    std::vector<HeadPosEntry> headPos(1); // one position from t = 0: identity rotation, no translation
     MaxwellMoveCompParams moveParams;
     moveParams.origin = params.origin;
     const MatrixXd compensated = MaxwellMovementComp::apply(data, info, headPos, 1.0, moveParams);
@@ -263,10 +263,10 @@ int main(int argc, char* argv[])
     QTemporaryDir dir;
     const QString posPath = dir.filePath("head.pos"); // same columns as mne.chpi.write_head_pos
     const bool posWritten = MaxwellMovementComp::writeHeadPos(posPath, headPos);
-    const QList<HeadPosEntry> posBack = MaxwellMovementComp::readHeadPos(posPath);
+    const std::vector<HeadPosEntry> posBack = MaxwellMovementComp::readHeadPos(posPath);
     //! [maxwell_movement_comp_usage]
     double moveError = 0.0;
-    for (int k = 0; k < meg.size(); ++k) {
+    for (int k = 0; k < std::ssize(meg); ++k) {
         moveError = std::max(moveError, (compensated.row(meg[k]) - cleaned.row(meg[k])).cwiseAbs().maxCoeff());
     }
     ok &= expect(posWritten && posBack.size() == 1 && moveError < 1e-3 * megIn.cwiseAbs().maxCoeff(),
@@ -283,7 +283,7 @@ int main(int argc, char* argv[])
     const bool calWritten = calibration.write(calPath);
     const FineCalibration calBack = FineCalibration::read(calPath);
     //! [fine_calibration_usage]
-    ok &= expect(calWritten && calBack.size() == 1 && calBack.gainVector()(0) == 0.996645 && calBack.entries().first().position.isApprox(magnetometer.position),
+    ok &= expect(calWritten && calBack.size() == 1 && calBack.gainVector()(0) == 0.996645 && calBack.entries().front().position.isApprox(magnetometer.position),
                  "FineCalibration round-trips a magnetometer line");
 
     //! [filter_chpi_usage]
@@ -292,7 +292,7 @@ int main(int argc, char* argv[])
     for (int t = 0; t < chpi.cols(); ++t) {
         chpi(meg[0], t) = std::sin(2.0 * kPi * 10.0 * t / sFreq) + std::sin(2.0 * kPi * 83.0 * t / sFreq);
     }
-    const QVector<double> coilFreqs{83.0};
+    const std::vector<double> coilFreqs{83.0};
     FilterChpiParams chpiParams; // +-2 Hz order-4 notches on the MEG channels only
     filterChpi(chpi, info, sFreq, coilFreqs, chpiParams);
     //! [filter_chpi_usage]

@@ -91,7 +91,7 @@ The excluded component(s) are zeroed in source space before back-projection.
 - **result** : *const [IcaResult](/docs/api/dsp/ica-result) &*
   Result from `ICA::run()` on matData (or a representative segment).
 
-- **excludedComponents** : *const QVector&lt; int &gt; &*
+- **excludedComponents** : *const std::vector&lt; int &gt; &*
   0-based indices of components to suppress (e.g. ECG, EOG artifacts).
 
 **Returns:**

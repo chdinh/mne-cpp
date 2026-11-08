@@ -21,8 +21,8 @@ Provides methods to build bipolar and common-average re-referencing schemes, app
 
 ```cpp title="src/examples/ex_dsp_preprocessing/main.cpp"
 const QStringList names = {"LH1", "LH2", "LH3", "RA1"};
-const QVector<DerivationRule> bipolar = ChannelDerivation::buildBipolar(names); // LH1-LH2, LH2-LH3
-const QVector<DerivationRule> average = ChannelDerivation::buildCommonAverage(names);
+const std::vector<DerivationRule> bipolar = ChannelDerivation::buildBipolar(names); // LH1-LH2, LH2-LH3
+const std::vector<DerivationRule> average = ChannelDerivation::buildCommonAverage(names);
 const auto [bipolarData, bipolarNames] = ChannelDerivation::apply(raw, names, bipolar);
 const auto [averageData, averageNames] = ChannelDerivation::apply(raw, names, average);
 ```
@@ -44,7 +44,7 @@ Channels are grouped by shaft prefix (all leading alphabetic characters and apos
 
 **Returns:**
 
-- *QVector&lt; [DerivationRule](/docs/api/utils/derivation-rule) &gt;* — Vector of [`DerivationRule`](/docs/api/utils/derivation-rule), e.g. LH1-LH2 (+1·LH1, −1·LH2), LH2-LH3, RA1-RA2.
+- *std::vector&lt; [DerivationRule](/docs/api/utils/derivation-rule) &gt;* — Vector of [`DerivationRule`](/docs/api/utils/derivation-rule), e.g. LH1-LH2 (+1·LH1, −1·LH2), LH2-LH3, RA1-RA2.
 
 ---
 
@@ -61,7 +61,7 @@ Each output channel equals the original channel minus the mean of all channels: 
 
 **Returns:**
 
-- *QVector&lt; [DerivationRule](/docs/api/utils/derivation-rule) &gt;* — Vector of [`DerivationRule`](/docs/api/utils/derivation-rule), one per input channel.
+- *std::vector&lt; [DerivationRule](/docs/api/utils/derivation-rule) &gt;* — Vector of [`DerivationRule`](/docs/api/utils/derivation-rule), one per input channel.
 
 ---
 
@@ -77,12 +77,12 @@ Apply derivation rules to a data matrix.
 - **channelNames** : *const QStringList &*
   Channel names corresponding to rows of matData.
 
-- **rules** : *const QVector&lt; [DerivationRule](/docs/api/utils/derivation-rule) &gt; &*
+- **rules** : *const std::vector&lt; [DerivationRule](/docs/api/utils/derivation-rule) &gt; &*
   Derivation rules to apply.
 
 **Returns:**
 
-- *QPair&lt; Eigen::MatrixXd, QStringList &gt;* — A pair of (derived data matrix, derived channel names). The output matrix has n_rules rows × n_times columns.
+- *std::pair&lt; Eigen::MatrixXd, QStringList &gt;* — A pair of (derived data matrix, derived channel names). The output matrix has n_rules rows × n_times columns.
 
 ---
 
@@ -103,7 +103,7 @@ Read derivation rules from an MNE-C derivation text file (`MNELIB::MNEDerivSet::
 
 **Returns:**
 
-- *QVector&lt; [DerivationRule](/docs/api/utils/derivation-rule) &gt;* — Vector of parsed [`DerivationRule`](/docs/api/utils/derivation-rule). Empty on error.
+- *std::vector&lt; [DerivationRule](/docs/api/utils/derivation-rule) &gt;* — Vector of parsed [`DerivationRule`](/docs/api/utils/derivation-rule). Empty on error.
 
 ---
 
@@ -116,7 +116,7 @@ Write derivation rules in MNE-C derivation text syntax, readable by readDefiniti
 - **path** : *const QString &*
   Path to the output file.
 
-- **rules** : *const QVector&lt; [DerivationRule](/docs/api/utils/derivation-rule) &gt; &*
+- **rules** : *const std::vector&lt; [DerivationRule](/docs/api/utils/derivation-rule) &gt; &*
   Derivation rules to write.
 
 **Returns:**

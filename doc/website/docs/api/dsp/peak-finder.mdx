@@ -35,7 +35,7 @@ The API mirrors `scipy.signal.find_peaks` closely so MEG/EEG analysis pipelines 
 PeakFinderParams params;
 params.dMinHeight = 0.5; // like scipy.signal.find_peaks(height=0.5, distance=30)
 params.iMinDistance = 30;
-const QList<QPair<int, double>> peaks = peakFinder(wave, params); // (sample, value), sorted by sample
+const std::vector<std::pair<int, double>> peaks = peakFinder(wave, params); // (sample, value), sorted by sample
 const VectorXd prominence = peakProminences(wave, {2, 9, 15});
 ```
 
@@ -46,7 +46,7 @@ const VectorXd prominence = peakProminences(wave, {2, 9, 15});
 ### peakFinder(data, params)
 
 ```cpp
-QList< QPair< int, double > > peakFinder(const Eigen::VectorXd & data, const [PeakFinderParams](/docs/api/dsp/peak-finder-params) & params);
+std::vector< std::pair< int, double > > peakFinder(const Eigen::VectorXd & data, const [PeakFinderParams](/docs/api/dsp/peak-finder-params) & params);
 ```
 
 Find peaks in a 1D signal.
@@ -63,14 +63,14 @@ A peak is a sample that is strictly greater than both its neighbours. Additional
 
 **Returns:**
 
-- *QList&lt; QPair&lt; int, double &gt; &gt;* — List of (peak_index, peak_value) pairs, sorted by index.
+- *std::vector&lt; std::pair&lt; int, double &gt; &gt;* — List of (peak_index, peak_value) pairs, sorted by index.
 
 ---
 
 ### peakProminences(data, peakIndices)
 
 ```cpp
-Eigen::VectorXd peakProminences(const Eigen::VectorXd & data, const QList< int > & peakIndices);
+Eigen::VectorXd peakProminences(const Eigen::VectorXd & data, const std::vector< int > & peakIndices);
 ```
 
 Compute prominence of each peak.
@@ -82,7 +82,7 @@ Prominence is the vertical distance from a peak to the highest valley on either 
 - **data** : *const Eigen::VectorXd &*
   1D signal.
 
-- **peakIndices** : *const QList&lt; int &gt; &*
+- **peakIndices** : *const std::vector&lt; int &gt; &*
   Indices of detected peaks.
 
 **Returns:**
@@ -94,7 +94,7 @@ Prominence is the vertical distance from a peak to the highest valley on either 
 ### peakFinderMne(data, thresh, extrema)
 
 ```cpp
-QList< QPair< int, double > > peakFinderMne(const Eigen::VectorXd & data, double thresh, int extrema);
+std::vector< std::pair< int, double > > peakFinderMne(const Eigen::VectorXd & data, double thresh, int extrema);
 ```
 
 Noise-tolerant extrema search of `mne.preprocessing.peak_finder`.
@@ -114,7 +114,7 @@ A peak must rise at least `thresh` above the minimum to its left and fall at lea
 
 **Returns:**
 
-- *QList&lt; QPair&lt; int, double &gt; &gt;* — List of (peak_index, peak_value) pairs, sorted by index.
+- *std::vector&lt; std::pair&lt; int, double &gt; &gt;* — List of (peak_index, peak_value) pairs, sorted by index.
 
 ---
 

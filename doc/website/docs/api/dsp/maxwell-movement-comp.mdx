@@ -22,7 +22,7 @@ class UTILSLIB::MaxwellMovementComp
 Maxwell movement compensation using [`SSS`](/docs/api/dsp/sss).
 
 ```cpp title="src/examples/ex_dsp_maxwell/main.cpp"
-QList<HeadPosEntry> headPos(1); // one position from t = 0: identity rotation, no translation
+std::vector<HeadPosEntry> headPos(1); // one position from t = 0: identity rotation, no translation
 MaxwellMoveCompParams moveParams;
 moveParams.origin = params.origin;
 const MatrixXd compensated = MaxwellMovementComp::apply(data, info, headPos, 1.0, moveParams);
@@ -30,7 +30,7 @@ const MatrixXd compensated = MaxwellMovementComp::apply(data, info, headPos, 1.0
 QTemporaryDir dir;
 const QString posPath = dir.filePath("head.pos"); // same columns as mne.chpi.write_head_pos
 const bool posWritten = MaxwellMovementComp::writeHeadPos(posPath, headPos);
-const QList<HeadPosEntry> posBack = MaxwellMovementComp::readHeadPos(posPath);
+const std::vector<HeadPosEntry> posBack = MaxwellMovementComp::readHeadPos(posPath);
 ```
 
 ---
@@ -55,7 +55,7 @@ Reconstructed at the reference head position.
 - **fiffInfo** : *const [FiffInfo](/docs/api/fiff/fiff-info) &*
   Measurement info (channel positions, etc.).
 
-- **headPos** : *const QList&lt; [HeadPosEntry](/docs/api/dsp/head-pos-entry) &gt; &*
+- **headPos** : *const std::vector&lt; [HeadPosEntry](/docs/api/dsp/head-pos-entry) &gt; &*
   Head positions over time (from cHPI).
 
 - **dSFreq** : *double*
@@ -83,7 +83,7 @@ File format: whitespace-separated columns per line: time q1 q2 q3 tx ty tz gof
 
 **Returns:**
 
-- *QList&lt; [HeadPosEntry](/docs/api/dsp/head-pos-entry) &gt;* — List of head position entries.
+- *std::vector&lt; [HeadPosEntry](/docs/api/dsp/head-pos-entry) &gt;* — List of head position entries.
 
 ---
 
@@ -96,7 +96,7 @@ Write head positions to a file.
 - **sPath** : *const QString &*
   Output file path.
 
-- **headPos** : *const QList&lt; [HeadPosEntry](/docs/api/dsp/head-pos-entry) &gt; &*
+- **headPos** : *const std::vector&lt; [HeadPosEntry](/docs/api/dsp/head-pos-entry) &gt; &*
   Head positions to write.
 
 **Returns:**
@@ -119,7 +119,7 @@ Write head positions to a file.
 DSP Maxwell filtering: SSS, bad-channel detection, movement compensation, fine calibration and cHPI removal.
 
 ````cpp title="src/examples/ex_dsp_maxwell/main.cpp, line 158"
-QList<HeadPosEntry> headPos(1); // one position from t = 0: identity rotation, no translation
+std::vector<HeadPosEntry> headPos(1); // one position from t = 0: identity rotation, no translation
 MaxwellMoveCompParams moveParams;
 moveParams.origin = params.origin;
 const MatrixXd compensated = MaxwellMovementComp::apply(data, info, headPos, 1.0, moveParams);

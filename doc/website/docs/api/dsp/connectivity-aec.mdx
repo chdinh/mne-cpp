@@ -112,7 +112,7 @@ Pearson correlation between two vectors.
 
 DSP library: Welch PSD, FIR filtering, peak finding, envelope correlation, SPHARA and simulation.
 
-````cpp title="src/examples/ex_dsp_analysis/main.cpp, line 162"
+````cpp title="src/examples/ex_dsp_analysis/main.cpp, line 163"
 const MatrixXd aec = ConnectivityAec::compute(envelopeSignals);                   // Pearson r of Hilbert envelopes
 const MatrixXd aecOrth = ConnectivityAec::computeOrthogonalized(envelopeSignals); // leakage-corrected
 // numpy corrcoef(|scipy.signal.hilbert(x)|): r(a,b) = 0.98006658, r(a,c) = -0.00701172; orthogonalized r(a,c) = 0.09799620

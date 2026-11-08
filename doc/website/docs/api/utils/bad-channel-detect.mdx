@@ -20,8 +20,8 @@ Automated detection of bad MEG/EEG channels using flat, variance, and correlatio
 ```cpp title="src/examples/ex_dsp_artifacts/main.cpp"
 BadChannelDetect::Params badParams;
 badParams.dFlatThreshold = 1e-9; // EEG in volts
-const QVector<int> flat = BadChannelDetect::detectFlat(data.topRows(kEeg), badParams.dFlatThreshold);
-const QVector<int> bad = BadChannelDetect::detect(data.topRows(kEeg), badParams);
+const std::vector<int> flat = BadChannelDetect::detectFlat(data.topRows(kEeg), badParams.dFlatThreshold);
+const std::vector<int> bad = BadChannelDetect::detect(data.topRows(kEeg), badParams);
 ```
 
 ---
@@ -44,7 +44,7 @@ The order of the returned indices is ascending and each index appears at most on
 
 **Returns:**
 
-- *QVector&lt; int &gt;* — Sorted list of bad channel row indices (0-based).
+- *std::vector&lt; int &gt;* — Sorted list of bad channel row indices (0-based).
 
 ---
 
@@ -64,7 +64,7 @@ A channel is flat if its peak-to-peak amplitude over the whole segment is &lt; `
 
 **Returns:**
 
-- *QVector&lt; int &gt;* — Row indices of flat channels.
+- *std::vector&lt; int &gt;* — Row indices of flat channels.
 
 ---
 
@@ -84,7 +84,7 @@ Computes the per-channel standard deviation, then flags any channel whose z-scor
 
 **Returns:**
 
-- *QVector&lt; int &gt;* — Row indices of high-variance channels.
+- *std::vector&lt; int &gt;* — Row indices of high-variance channels.
 
 ---
 
@@ -109,7 +109,7 @@ This detector is most useful for sensor arrays where physically close channels s
 
 **Returns:**
 
-- *QVector&lt; int &gt;* — Row indices of low-correlation channels.
+- *std::vector&lt; int &gt;* — Row indices of low-correlation channels.
 
 ---
 
@@ -128,9 +128,9 @@ Artifact detection and repair with the dsp library on a recording with planted d
 ````cpp title="src/examples/ex_dsp_artifacts/main.cpp, line 151"
 BadChannelDetect::Params badParams;
 badParams.dFlatThreshold = 1e-9; // EEG in volts
-const QVector<int> flat = BadChannelDetect::detectFlat(data.topRows(kEeg), badParams.dFlatThreshold);
-const QVector<int> bad = BadChannelDetect::detect(data.topRows(kEeg), badParams);
-ok &= expect(flat == QVector<int>({2}) && bad.contains(2) && bad.contains(5),
+const std::vector<int> flat = BadChannelDetect::detectFlat(data.topRows(kEeg), badParams.dFlatThreshold);
+const std::vector<int> bad = BadChannelDetect::detect(data.topRows(kEeg), badParams);
+ok &= expect(flat == std::vector<int>({2}) && std::ranges::contains(bad, 2) && std::ranges::contains(bad, 5),
              std::format("BadChannelDetect: flat {}, bad {} (flat 2, noisy 5)", flat.size() == 1 ? flat[0] : -1, bad.size()));
 ````
 

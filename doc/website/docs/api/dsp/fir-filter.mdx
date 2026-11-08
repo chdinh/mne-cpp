@@ -245,7 +245,7 @@ Band-pass every row like `mne.filter.filter_data`(x, sfreq, l_freq, h_freq, None
 
 DSP library: Welch PSD, FIR filtering, peak finding, envelope correlation, SPHARA and simulation.
 
-````cpp title="src/examples/ex_dsp_analysis/main.cpp, line 117"
+````cpp title="src/examples/ex_dsp_analysis/main.cpp, line 118"
 FilterKernel lowPass = FirFilter::design(256, FirFilter::LowPass, 20.0, 0.0, sFreq, 5.0); // order, type, cutoff(s), Hz, transition
 const RowVectorXd smooth = FirFilter::applyZeroPhase(tones, lowPass);
 const double kept = toneAmplitude(smooth.segment(250, 500), 10.0, sFreq);
