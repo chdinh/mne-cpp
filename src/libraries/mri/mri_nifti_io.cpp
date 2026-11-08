@@ -36,7 +36,7 @@
 
 #include <fiff/fiff_file.h>
 
-#include "detail/mri_file_bytes.h"
+#include <utils/byte_stream.h>
 
 #include <utils/endian.h>
 #include <utils/generics/log.h>
@@ -104,10 +104,9 @@ void readValues(const std::byte*& p, bool bigEndian, std::vector<Out>& out, std:
 
 bool MriNiftiIO::decompress(const std::string& gzFile, std::vector<std::byte>& rawData)
 {
-    std::string error;
-    std::optional<std::vector<std::byte>> bytes = detail::readFileBytes(gzFile, true, error);
+    auto bytes = UTILSLIB::read_file_bytes(UTILSLIB::pathFromUtf8(gzFile), UTILSLIB::Compression::Gzip);
     if (!bytes) {
-        Log::critical("MriNiftiIO::decompress - {}", error);
+        Log::critical("MriNiftiIO::decompress - {}", bytes.error().what());
         return false;
     }
     rawData = std::move(*bytes);
@@ -121,10 +120,9 @@ bool MriNiftiIO::read(const std::string& niiFile, MriVolData& volData, bool verb
     volData.fileName = niiFile;
 
     const bool compressed = UTILSLIB::toLower(niiFile).ends_with(".gz");
-    std::string error;
-    const std::optional<std::vector<std::byte>> content = detail::readFileBytes(niiFile, compressed, error);
+    const auto content = UTILSLIB::read_file_bytes(UTILSLIB::pathFromUtf8(niiFile), compressed ? UTILSLIB::Compression::Gzip : UTILSLIB::Compression::None);
     if (!content) {
-        Log::critical("MriNiftiIO::read - {}", error);
+        Log::critical("MriNiftiIO::read - {}", content.error().what());
         return false;
     }
     const std::vector<std::byte>& bytes = *content;

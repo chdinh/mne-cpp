@@ -4,7 +4,7 @@
   "policy": "scripts/quality/api_evidence_policy.json",
   "summary": {
     "exported_classes": 483,
-    "exported_free_functions": 161,
+    "exported_free_functions": 162,
     "registered_classes": 576,
     "exported_not_registered": 1,
     "registered_function_modules": 13,
@@ -951,6 +951,11 @@
       "name": "buildHashLong",
       "header": "sts/sts_global.h",
       "library": "sts"
+    },
+    {
+      "name": "read_file_bytes",
+      "header": "utils/byte_stream.h",
+      "library": "utils"
     },
     {
       "name": "trimmed",

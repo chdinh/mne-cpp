@@ -30,7 +30,7 @@
       "decoding",
       "math"
     ],
-    "tokens": 17679,
+    "tokens": 17509,
     "gui_outside_design": []
   },
   "libraries": {
@@ -259,18 +259,18 @@
       ]
     },
     "fs": {
-      "tokens": 639,
+      "tokens": 469,
       "by_category": {
-        "containers": 71,
-        "files": 24,
-        "global": 174,
-        "logging": 56,
+        "containers": 67,
+        "files": 21,
+        "global": 147,
+        "logging": 50,
         "objects_signals": 1,
         "regex": 3,
         "smart_pointers": 12,
-        "strings": 298
+        "strings": 168
       },
-      "public_header_includes": 22,
+      "public_header_includes": 18,
       "q_object": 0,
       "files": 18,
       "modules": [
@@ -427,10 +427,9 @@
       },
       "public_header_includes": 0,
       "q_object": 0,
-      "files": 17,
+      "files": 15,
       "modules": [
-        "Core",
-        "ZlibPrivate"
+        "Core"
       ]
     },
     "sts": {
@@ -462,7 +461,8 @@
       "q_object": 1,
       "files": 35,
       "modules": [
-        "Core"
+        "Core",
+        "ZlibPrivate"
       ]
     }
   }

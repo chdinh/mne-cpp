@@ -18,7 +18,7 @@
  * RAS millimetres.
  *
  * This class loads such a volume, inverts the @c vox2ras matrix to obtain
- * @c ras2vox, and exposes @c labelAtRas() / @c labelsForPositions() so any
+ * @c ras2vox, and exposes @c label_at_ras() / @c labels_for_positions() so any
  * point in scanner RAS (typically dipole positions, electrode locations or
  * sampled fibre tracks) can be tagged with the FreeSurfer region name it
  * falls into. Out-of-bounds or unlabeled voxels resolve to @c "Unknown",
@@ -41,13 +41,13 @@
 #include <Eigen/Core>
 
 //=============================================================================================================
-// QT INCLUDES
+// STL INCLUDES
 //=============================================================================================================
 
-#include <QString>
-#include <QStringList>
-#include <QMap>
-#include <QVector>
+#include <filesystem>
+#include <span>
+#include <string>
+#include <vector>
 
 //=============================================================================================================
 // DEFINE NAMESPACE FSLIB
@@ -62,8 +62,8 @@ namespace FSLIB
  *
  * Owns the parcellation voxel grid, its inverse RAS-to-voxel affine, and a
  * label-id → region-name map seeded from FreeSurferColorLUT. Designed for
- * cheap per-point queries: a @c labelAtRas() call is an affine
- * transform, three bound checks and an @c int → @c QString hash lookup.
+ * cheap per-point queries: a @c label_at_ras() call is an affine
+ * transform, three bound checks and an @c int → name hash lookup.
  *
  * @snippet ex_fs/main.cpp fs_atlas_lookup_usage
  */
@@ -72,66 +72,50 @@ class FSSHARED_EXPORT FsAtlasLookup
 public:
     //=========================================================================================================
     /**
-     * Constructs an empty atlas lookup.
-     */
-    FsAtlasLookup();
-
-    //=========================================================================================================
-    /**
-     * @brief Load a FreeSurfer MGH/MGZ volume parcellation.
-     * @param[in] sParcellationPath  Path to the volume file (e.g. aparc+aseg.mgz).
+     * @brief Load a FreeSurfer MGH or gzip-compressed MGZ volume parcellation.
+     * @param[in] parcellation  The volume file (e.g. aparc+aseg.mgz).
      * @return true if loaded successfully.
      */
-    bool load(const QString& sParcellationPath);
+    bool load(const std::filesystem::path& parcellation);
 
     //=========================================================================================================
     /**
      * @brief Look up the anatomical label at a RAS coordinate.
      * @param[in] ras  3D position in RAS space (in mm).
-     * @return Label string, or "Unknown" if out of bounds or unlabeled.
+     * @return Region name, or "Unknown" if out of bounds or unlabeled.
      */
-    QString labelAtRas(const Eigen::Vector3f& ras) const;
+    const std::string& label_at_ras(const Eigen::Vector3f& ras) const;
 
     //=========================================================================================================
     /**
      * @brief Look up labels for multiple RAS positions.
-     * @param[in] positions  List of 3D RAS positions.
-     * @return List of label strings (one per position).
+     * @param[in] positions  3D RAS positions.
+     * @return One region name per position.
      */
-    QStringList labelsForPositions(const QVector<Eigen::Vector3f>& positions) const;
+    std::vector<std::string> labels_for_positions(std::span<const Eigen::Vector3f> positions) const;
 
     //=========================================================================================================
     /**
      * @brief Check whether a parcellation volume has been loaded.
      * @return true if loaded.
      */
-    bool isLoaded() const;
+    bool is_loaded() const;
 
 private:
-    QVector<int> m_voxelData; /**< Flat voxel data (label indices). */
-    int m_dimX = 0;           /**< Volume dimension X. */
-    int m_dimY = 0;           /**< Volume dimension Y. */
-    int m_dimZ = 0;           /**< Volume dimension Z. */
-
-    Eigen::Matrix4f m_ras2vox; /**< RAS-to-voxel affine (inverse of vox2ras). */
-
-    QMap<int, QString> m_lookupTable; /**< Label index → region name. */
-
-    bool m_loaded = false;
-
-    //=========================================================================================================
-    /**
-     * @brief Initialize the FreeSurfer color lookup table.
-     */
-    void initLookupTable();
-
     //=========================================================================================================
     /**
      * @brief Convert a RAS coordinate to voxel indices.
      * @param[in] ras  3D RAS position.
      * @return Rounded voxel indices.
      */
-    Eigen::Vector3i rasToVoxel(const Eigen::Vector3f& ras) const;
+    Eigen::Vector3i ras_to_voxel(const Eigen::Vector3f& ras) const;
+
+    std::vector<int> m_voxelData;                            /**< Labels of the first frame, x fastest. */
+    int m_dimX = 0;                                          /**< Volume dimension X. */
+    int m_dimY = 0;                                          /**< Volume dimension Y. */
+    int m_dimZ = 0;                                          /**< Volume dimension Z. */
+    Eigen::Matrix4f m_ras2vox = Eigen::Matrix4f::Identity(); /**< RAS-to-voxel affine (inverse of vox2ras). */
+    bool m_loaded = false;                                   /**< Whether a volume was loaded. */
 };
 
 } // namespace FSLIB

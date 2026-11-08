@@ -33,6 +33,7 @@
 #include <cmath>
 #include <cstdint>
 #include <cstring>
+#include <fstream>
 #include <limits>
 #include <vector>
 
@@ -98,6 +99,7 @@ private slots:
     void fileStreamRoundTripAndModes();
     void fileStreamFailsOnMissingFile();
     void fileStreamCloseWritesAndEnds();
+    void readFileBytesPlainAndGzip();
     void benchmarkReadBigEndianFloats_data();
     void benchmarkReadBigEndianFloats();
 };
@@ -310,6 +312,37 @@ void TestUtilsByteStream::fileStreamCloseWritesAndEnds()
     MemoryByteStream memory;
     memory.close();
     QVERIFY(memory.reopen());
+}
+
+//=============================================================================================================
+
+void TestUtilsByteStream::readFileBytesPlainAndGzip()
+{
+    QTemporaryDir dir;
+    const auto write = [&dir](const char* name, std::initializer_list<unsigned char> bytes) {
+        const std::filesystem::path path = dir.filePath(QString::fromLatin1(name)).toStdString();
+        std::ofstream(path, std::ios::binary).write(reinterpret_cast<const char*>(std::data(bytes)), static_cast<std::streamsize>(bytes.size()));
+        return path;
+    };
+    // gzip -n of "hello"
+    const std::filesystem::path gz = write("hello.gz", {0x1f, 0x8b, 0x08, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x03, 0xcb, 0x48, 0xcd, 0xc9, 0xc9, 0x07, 0x00, 0x86, 0xa6, 0x10, 0x36, 0x05, 0x00, 0x00, 0x00});
+    const std::filesystem::path cut = write("cut.gz", {0x1f, 0x8b, 0x08, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x03, 0xcb, 0x48, 0xcd});
+    const std::filesystem::path plain = write("plain.bin", {'h', 'i'});
+    const std::filesystem::path empty = write("empty.bin", {});
+
+    const auto text = [](const std::vector<std::byte>& bytes) {
+        return std::string(reinterpret_cast<const char*>(bytes.data()), bytes.size());
+    };
+    QCOMPARE(text(read_file_bytes(gz, Compression::Gzip).value()), std::string("hello"));
+    QCOMPARE(text(read_file_bytes(plain).value()), std::string("hi"));
+    QVERIFY(read_file_bytes(empty).value().empty());
+
+    const auto truncated = read_file_bytes(cut, Compression::Gzip);
+    QVERIFY(!truncated && truncated.error().code == ErrorCode::Format);
+    const auto notGzip = read_file_bytes(plain, Compression::Gzip);
+    QVERIFY(!notGzip && notGzip.error().code == ErrorCode::Format);
+    const auto missing = read_file_bytes(dir.filePath(QStringLiteral("missing.bin")).toStdString());
+    QVERIFY(!missing && missing.error().code == ErrorCode::Io);
 }
 
 //=============================================================================================================

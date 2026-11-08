@@ -29,7 +29,7 @@
 
 #include "mri_mgh_io.h"
 
-#include "detail/mri_file_bytes.h"
+#include <utils/byte_stream.h>
 
 #include <fiff/fiff_coord_trans.h>
 #include <fiff/fiff_coord_trans_set.h>
@@ -104,10 +104,9 @@ bool MriMghIO::read(const std::string& mgzFile,
 
     // Step 1: Get raw (decompressed) bytes
     const bool isCompressed = UTILSLIB::toLower(mgzFile).ends_with(".mgz");
-    std::string error;
-    const std::optional<std::vector<std::byte>> fileData = detail::readFileBytes(mgzFile, isCompressed, error);
+    const auto fileData = UTILSLIB::read_file_bytes(UTILSLIB::pathFromUtf8(mgzFile), isCompressed ? UTILSLIB::Compression::Gzip : UTILSLIB::Compression::None);
     if (!fileData) {
-        Log::critical("MriMghIO::read - {}", error);
+        Log::critical("MriMghIO::read - {}", fileData.error().what());
         return false;
     }
 

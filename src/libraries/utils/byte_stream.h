@@ -18,6 +18,7 @@
 //=============================================================================================================
 
 #include "endian.h"
+#include "error.h"
 #include "utils_global.h"
 
 //=============================================================================================================
@@ -266,6 +267,26 @@ private:
     std::uint64_t m_size = 0;
     bool m_lastWrite = false;
 };
+
+//=============================================================================================================
+/** How the bytes of a file are stored. */
+enum class Compression
+{
+    None, ///< As they are.
+    Gzip  ///< Gzip-compressed, e.g. .mgz or .nii.gz.
+};
+
+//=============================================================================================================
+/**
+ * Reads a whole file, decompressing it if asked to.
+ *
+ * @param[in] path          The file.
+ * @param[in] compression   How the file is stored.
+ *
+ * @return The (decompressed) bytes; an Io error if the file cannot be read, a Format error if the gzip data is
+ *         damaged or cut short.
+ */
+UTILSSHARED_EXPORT Expected<std::vector<std::byte>> read_file_bytes(const std::filesystem::path& path, Compression compression = Compression::None);
 
 } // namespace UTILSLIB
 

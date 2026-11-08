@@ -31,6 +31,18 @@
 #include <QtTest>
 #include <QObject>
 #include <QDir>
+#include <QTemporaryDir>
+
+//=============================================================================================================
+// STL INCLUDES
+//=============================================================================================================
+
+#include <array>
+#include <bit>
+#include <cstdint>
+#include <fstream>
+#include <string>
+#include <vector>
 
 //=============================================================================================================
 // USED NAMESPACES
@@ -58,6 +70,7 @@ private slots:
     void testLoadAndLookup();
     void testOutsideBrainReturnsUnknown();
     void testBatchLookup();
+    void testSyntheticMghAndMgz();
 
     void cleanupTestCase();
 
@@ -96,7 +109,7 @@ void TestFsAtlasLookup::initTestCase()
 void TestFsAtlasLookup::testDefaultNotLoaded()
 {
     FsAtlasLookup lookup;
-    QVERIFY(!lookup.isLoaded());
+    QVERIFY(!lookup.is_loaded());
 }
 
 //=============================================================================================================
@@ -106,7 +119,7 @@ void TestFsAtlasLookup::testLoadNonexistent()
     FsAtlasLookup lookup;
     bool ok = lookup.load("/nonexistent/aparc+aseg.mgz");
     QVERIFY(!ok);
-    QVERIFY(!lookup.isLoaded());
+    QVERIFY(!lookup.is_loaded());
 }
 
 //=============================================================================================================
@@ -114,9 +127,7 @@ void TestFsAtlasLookup::testLoadNonexistent()
 void TestFsAtlasLookup::testBatchLookupEmpty()
 {
     FsAtlasLookup lookup;
-    QVector<Vector3f> positions;
-    QStringList labels = lookup.labelsForPositions(positions);
-    QVERIFY(labels.isEmpty());
+    QVERIFY(lookup.labels_for_positions({}).empty());
 }
 
 //=============================================================================================================
@@ -130,13 +141,13 @@ void TestFsAtlasLookup::testLoadAndLookup()
     }
 
     FsAtlasLookup lookup;
-    QVERIFY(lookup.load(m_parcPath));
-    QVERIFY(lookup.isLoaded());
+    QVERIFY(lookup.load(m_parcPath.toStdU16String()));
+    QVERIFY(lookup.is_loaded());
 
     // RAS coordinate near the brain center — should return a recognized label
     Vector3f center(0.0f, 0.0f, 0.0f);
-    QString label = lookup.labelAtRas(center);
-    QVERIFY2(!label.isEmpty(),
+    const std::string& label = lookup.label_at_ras(center);
+    QVERIFY2(!label.empty(),
              "Label at brain center should not be empty");
 }
 
@@ -150,14 +161,11 @@ void TestFsAtlasLookup::testOutsideBrainReturnsUnknown()
     }
 
     FsAtlasLookup lookup;
-    QVERIFY(lookup.load(m_parcPath));
+    QVERIFY(lookup.load(m_parcPath.toStdU16String()));
 
     // RAS coordinate far outside the brain
     Vector3f farAway(500.0f, 500.0f, 500.0f);
-    QString label = lookup.labelAtRas(farAway);
-    // Should return "Unknown" or empty — not crash
-    QVERIFY2(label.isEmpty() || label.toLower().contains("unknown") || label == "0",
-             qPrintable(QString("Far-away label should be Unknown, got '%1'").arg(label)));
+    QCOMPARE(lookup.label_at_ras(farAway), std::string("Unknown"));
 }
 
 //=============================================================================================================
@@ -170,20 +178,82 @@ void TestFsAtlasLookup::testBatchLookup()
     }
 
     FsAtlasLookup lookup;
-    QVERIFY(lookup.load(m_parcPath));
+    QVERIFY(lookup.load(m_parcPath.toStdU16String()));
 
-    QVector<Vector3f> positions;
-    positions << Vector3f(0.0f, 0.0f, 0.0f)        // center
-              << Vector3f(0.0f, -25.0f, -15.0f)    // near hippocampus
-              << Vector3f(500.0f, 500.0f, 500.0f); // outside
-
-    QStringList labels = lookup.labelsForPositions(positions);
-    QCOMPARE(labels.size(), 3);
-    // All entries should be non-empty (even "Unknown" for outside-brain)
-    for (int i = 0; i < labels.size(); ++i) {
-        QVERIFY2(!labels[i].isEmpty(),
-                 qPrintable(QString("Label[%1] should not be empty").arg(i)));
+    const std::vector<Vector3f> positions{Vector3f(0.0f, 0.0f, 0.0f),        // center
+                                          Vector3f(0.0f, -25.0f, -15.0f),    // near hippocampus
+                                          Vector3f(500.0f, 500.0f, 500.0f)}; // outside
+    const std::vector<std::string> labels = lookup.labels_for_positions(positions);
+    QCOMPARE(labels.size(), std::size_t{3});
+    // All entries are non-empty, "Unknown" outside the brain
+    for (const std::string& label : labels) {
+        QVERIFY(!label.empty());
     }
+}
+
+//=============================================================================================================
+
+void TestFsAtlasLookup::testSyntheticMghAndMgz()
+{
+    // A 4x4x4 uchar volume with 1 mm voxels centred on RAS 0: voxel (1, 2, 3) is Left-Hippocampus (17),
+    // voxel (3, 0, 0) a label the lookup table does not know
+    std::vector<unsigned char> mgh(284 + 64, 0);
+    const auto put32 = [&mgh](std::size_t at, std::uint32_t v) {
+        for (int k = 0; k < 4; ++k)
+            mgh[at + static_cast<std::size_t>(k)] = static_cast<unsigned char>(v >> (24 - 8 * k));
+    };
+    const auto putFloat = [&put32](std::size_t at, float v) {
+        put32(at, std::bit_cast<std::uint32_t>(v));
+    };
+    put32(0, 1);
+    put32(4, 4);
+    put32(8, 4);
+    put32(12, 4);
+    put32(16, 1);
+    mgh[29] = 1; // ras_good_flag
+    for (std::size_t axis = 0; axis < 3; ++axis) {
+        putFloat(30 + 4 * axis, 1.0f);
+        putFloat(42 + 12 * axis + 4 * axis, 1.0f);
+    }
+    mgh[284 + 1 + 4 * (2 + 4 * 3)] = 17;
+    mgh[284 + 3] = 250;
+
+    // The same bytes as gzip with one stored deflate block
+    std::vector<unsigned char> mgz{0x1f, 0x8b, 0x08, 0, 0, 0, 0, 0, 0, 0x03, 0x01};
+    const auto size = static_cast<std::uint16_t>(mgh.size());
+    mgz.insert(mgz.end(), {static_cast<unsigned char>(size), static_cast<unsigned char>(size >> 8), static_cast<unsigned char>(~size), static_cast<unsigned char>(~size >> 8)});
+    mgz.insert(mgz.end(), mgh.begin(), mgh.end());
+    std::uint32_t crc = 0xFFFFFFFFu;
+    for (const unsigned char byte : mgh) {
+        crc ^= byte;
+        for (int k = 0; k < 8; ++k)
+            crc = (crc >> 1) ^ (0xEDB88320u & (0u - (crc & 1u)));
+    }
+    crc = ~crc;
+    for (const std::uint32_t v : {crc, static_cast<std::uint32_t>(mgh.size())})
+        for (int k = 0; k < 4; ++k)
+            mgz.push_back(static_cast<unsigned char>(v >> (8 * k)));
+
+    QTemporaryDir dir;
+    for (const auto& [name, bytes] : {std::pair{"atlas.mgh", &mgh}, std::pair{"atlas.MGZ", &mgz}}) {
+        const std::filesystem::path path = dir.filePath(QString::fromLatin1(name)).toStdU16String();
+        std::ofstream(path, std::ios::binary).write(reinterpret_cast<const char*>(bytes->data()), static_cast<std::streamsize>(bytes->size()));
+
+        FsAtlasLookup lookup;
+        QVERIFY2(lookup.load(path), name);
+        QCOMPARE(lookup.label_at_ras(Vector3f(-1.0f, 0.0f, 1.0f)), std::string("Left-Hippocampus"));
+        QCOMPARE(lookup.label_at_ras(Vector3f(1.0f, -2.0f, -2.0f)), std::string("Unknown"));
+        QCOMPARE(lookup.label_at_ras(Vector3f(0.0f, 0.0f, 0.0f)), std::string("Unknown"));
+        QCOMPARE(lookup.label_at_ras(Vector3f(9.0f, 0.0f, 0.0f)), std::string("Unknown"));
+    }
+
+    // Cut voxel data is rejected
+    mgh.resize(300);
+    const std::filesystem::path cut = dir.filePath(QStringLiteral("cut.mgh")).toStdU16String();
+    std::ofstream(cut, std::ios::binary).write(reinterpret_cast<const char*>(mgh.data()), static_cast<std::streamsize>(mgh.size()));
+    FsAtlasLookup lookup;
+    QVERIFY(!lookup.load(cut));
+    QVERIFY(!lookup.is_loaded());
 }
 
 //=============================================================================================================

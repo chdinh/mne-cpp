@@ -31,7 +31,8 @@
 #include <fiff/fiff_constants.h>
 #include <fiff/fiff_file.h>
 
-#include "detail/mri_file_bytes.h"
+#include <utils/byte_stream.h>
+#include <utils/string_utils.h>
 
 #include <utils/generics/log.h>
 
@@ -83,8 +84,7 @@ bool MriCorIO::read(const std::string& dir,
         char name[16];
         std::snprintf(name, sizeof(name), "/COR-%03d", k + 1);
         const std::string fileName = dir + name;
-        std::string error;
-        const std::optional<std::vector<std::byte>> data = detail::readFileBytes(fileName, false, error);
+        const auto data = UTILSLIB::read_file_bytes(UTILSLIB::pathFromUtf8(fileName));
         if (!data) {
             UTILSLIB::Log::critical("MriCorIO::read - Could not open COR file {}", fileName);
             return false;

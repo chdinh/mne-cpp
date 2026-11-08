@@ -127,8 +127,8 @@
       ]
     },
     "fs": {
-      "tokens": 639,
-      "public_header_includes": 22,
+      "tokens": 469,
+      "public_header_includes": 18,
       "modules": [
         "Concurrent",
         "Core",
@@ -198,8 +198,7 @@
       "tokens": 2,
       "public_header_includes": 0,
       "modules": [
-        "Core",
-        "ZlibPrivate"
+        "Core"
       ]
     },
     "sts": {
@@ -213,7 +212,8 @@
       "tokens": 531,
       "public_header_includes": 40,
       "modules": [
-        "Core"
+        "Core",
+        "ZlibPrivate"
       ]
     }
   }

@@ -14,25 +14,9 @@ set(QT_REQUIRED_COMPONENTS Core)
 find_package(QT NAMES Qt6 Qt5 REQUIRED COMPONENTS ${QT_REQUIRED_COMPONENTS})
 find_package(Qt${QT_VERSION_MAJOR} REQUIRED COMPONENTS ${QT_REQUIRED_COMPONENTS})
 
-# Try system ZLIB first, fall back to Qt's bundled zlib
-find_package(ZLIB QUIET)
-if(ZLIB_FOUND)
-    set(ZLIB_TARGET ZLIB::ZLIB)
-    message(STATUS "mne_mri: Using system ZLIB")
-else()
-    find_package(Qt${QT_VERSION_MAJOR} QUIET COMPONENTS ZlibPrivate)
-    if(TARGET Qt${QT_VERSION_MAJOR}::ZlibPrivate)
-        set(ZLIB_TARGET Qt${QT_VERSION_MAJOR}::ZlibPrivate)
-        message(STATUS "mne_mri: Using Qt bundled ZLIB")
-    else()
-        message(FATAL_ERROR "Could not find ZLIB (neither system nor Qt bundled). "
-            "Please install zlib development packages.")
-    endif()
-endif()
 
 set(SOURCES
     mri_global.cpp
-    detail/mri_file_bytes.cpp
     mri_vol_data.cpp
     mri_mgh_io.cpp
     mri_nifti_io.cpp
@@ -42,7 +26,6 @@ set(SOURCES
 )
 
 set(PRIVATE_HEADERS
-    detail/mri_file_bytes.h
 )
 
 set(HEADERS
@@ -97,7 +80,6 @@ target_link_libraries(${PROJECT_NAME} PRIVATE
     ${QT_REQUIRED_COMPONENT_LIBS}
     ${MNE_LIBS_REQUIRED}
     Eigen3::Eigen
-    ${ZLIB_TARGET}
 )
 
 target_compile_definitions(${PROJECT_NAME} PRIVATE MNE_MRI_LIBRARY MNE_GIT_HASH_SHORT="${MNE_GIT_HASH_SHORT}" MNE_GIT_HASH_LONG="${MNE_GIT_HASH_LONG}")

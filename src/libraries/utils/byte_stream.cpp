@@ -15,6 +15,9 @@
 //=============================================================================================================
 
 #include "byte_stream.h"
+#include "string_utils.h"
+
+#include <zlib.h>
 
 //=============================================================================================================
 // STL INCLUDES
@@ -22,6 +25,8 @@
 
 #include <algorithm>
 #include <cstring>
+#include <format>
+#include <fstream>
 #include <system_error>
 #include <utility>
 
@@ -255,4 +260,64 @@ bool FileByteStream::reopen()
 bool FileByteStream::flush()
 {
     return m_file && std::fflush(m_file) == 0;
+}
+
+//=============================================================================================================
+
+Expected<std::vector<std::byte>> UTILSLIB::read_file_bytes(const std::filesystem::path& path, Compression compression)
+{
+    std::ifstream file(path, std::ios::binary | std::ios::ate);
+    if (!file) {
+        return std::unexpected(Error(ErrorCode::Io, std::format("cannot open {}", utf8FromPath(path))));
+    }
+    std::vector<std::byte> content(static_cast<std::size_t>(std::max<std::streamoff>(file.tellg(), 0)));
+    file.seekg(0);
+    if (!file.read(reinterpret_cast<char*>(content.data()), static_cast<std::streamsize>(content.size()))) {
+        return std::unexpected(Error(ErrorCode::Io, std::format("cannot read {}", utf8FromPath(path))));
+    }
+    if (compression == Compression::None) {
+        return content;
+    }
+
+    const auto damaged = [&path](int code) {
+        return std::unexpected(Error(ErrorCode::Format, std::format("cannot decompress {} (zlib error {})", utf8FromPath(path), code)));
+    };
+    z_stream strm = {};
+    // MAX_WBITS + 16 selects the gzip wrapper
+    if (inflateInit2(&strm, MAX_WBITS + 16) != Z_OK) {
+        return damaged(Z_MEM_ERROR);
+    }
+    strm.next_in = reinterpret_cast<Bytef*>(content.data());
+    strm.avail_in = static_cast<uInt>(content.size());
+
+    // Gzip stores the uncompressed size modulo 2^32 in its last four bytes; it is a good first guess
+    std::size_t guess = 256 * 1024;
+    if (content.size() >= 18) {
+        const auto* tail = reinterpret_cast<const unsigned char*>(content.data() + content.size() - 4);
+        const std::size_t isize = tail[0] | (tail[1] << 8) | (tail[2] << 16) | (std::size_t{tail[3]} << 24);
+        // Deflate expands at most 1032:1, which bounds what a damaged trailer can make us allocate
+        guess = std::clamp<std::size_t>(isize, guess, content.size() * 1032);
+    }
+    std::vector<std::byte> raw(guess);
+    std::size_t used = 0;
+    int ret = Z_OK;
+    do {
+        if (used == raw.size()) {
+            raw.resize(raw.size() * 2);
+        }
+        strm.next_out = reinterpret_cast<Bytef*>(raw.data() + used);
+        strm.avail_out = static_cast<uInt>(std::min<std::size_t>(raw.size() - used, 1u << 30));
+        const uInt before = strm.avail_out;
+        ret = inflate(&strm, Z_NO_FLUSH);
+        used += before - strm.avail_out;
+        // With all input consumed and output room left, a stream that has not ended is cut short
+        const bool truncated = ret != Z_STREAM_END && strm.avail_in == 0 && strm.avail_out > 0;
+        if (ret == Z_STREAM_ERROR || ret == Z_DATA_ERROR || ret == Z_MEM_ERROR || ret == Z_NEED_DICT || truncated) {
+            inflateEnd(&strm);
+            return damaged(truncated ? Z_BUF_ERROR : ret);
+        }
+    } while (ret != Z_STREAM_END);
+    inflateEnd(&strm);
+    raw.resize(used);
+    return raw;
 }
