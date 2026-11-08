@@ -611,7 +611,6 @@ int main(int argc, char* argv[])
     FsSurfaceSet tSurfSetInflated(sSubj, 2, "inflated", sSubjDir);
     FsAnnotationSet tAnnotSet(sSubj, 2, sAnnotType, sSubjDir);
 
-    QFile coordTransfile(QCoreApplication::applicationDirPath() + "/../resources/data/MNE-sample-data/MEG/sample/all-trans.fif");
 
     bool keep_comp = false;
     fiff_int_t dest_comp = 0;
@@ -705,8 +704,7 @@ int main(int argc, char* argv[])
         pConnectivitySettingsManager->m_settings.setNodePositions(raw.info, picks);
     } else {
         //Create source level data
-        QFile t_fileFwd(sFwd);
-        t_Fwd = MNEForwardSolution(t_fileFwd, false, true);
+        t_Fwd = MNEForwardSolution(sFwd.toStdU16String(), {.surf_ori = true});
 
         // Load data
         InvSourceEstimate sourceEstimate;

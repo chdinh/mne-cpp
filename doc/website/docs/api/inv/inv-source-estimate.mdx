@@ -30,8 +30,8 @@ Source-space inverse-solution container with dense grid plus optional focal-dipo
 ```cpp title="src/examples/ex_inv_api/main.cpp"
 FsLabel v1;
 FsLabel::read(data + "/subjects/sample/label/lh.V1.label", v1);
-QFile fwdFile(data + "/Result/ref-sample_audvis-meg-eeg-oct-6-fwd.fif");
-const MNEForwardSolution fwd = MNEForwardSolution(fwdFile).pick_regions({v1}); // 70 sources x 3 orientations
+const std::filesystem::path fwdPath = (data + "/Result/ref-sample_audvis-meg-eeg-oct-6-fwd.fif").toStdU16String();
+const MNEForwardSolution fwd = MNEForwardSolution(fwdPath).pick_regions({v1}); // 70 sources x 3 orientations
 const FiffCov noiseCov((data + "/MEG/sample/sample_audvis-cov.fif").toStdString());
 const FiffEvoked evoked((data + "/MEG/sample/sample_audvis-ave.fif").toStdU16String(), 0); // "Left Auditory"
 
@@ -314,7 +314,7 @@ for (qint32 i = 0; i < 100; ++i) {
 
 Average a raw recording and localize dipole pairs with Powell RAP-MUSIC on a parcellation-clustered forward solution.
 
-````cpp title="src/examples/ex_clustered_inverse_pwl_rap_music_raw/main.cpp, line 434"
+````cpp title="src/examples/ex_clustered_inverse_pwl_rap_music_raw/main.cpp, line 433"
 #ifdef BENCHMARK
     InvSourceEstimate sourceEstimate;
     QList<qint64> qVecElapsedTime;

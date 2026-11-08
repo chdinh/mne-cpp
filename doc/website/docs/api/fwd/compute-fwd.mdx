@@ -48,8 +48,8 @@ settings->solname = tmp.filePath("V1-fwd.fif");
 settings->pFiffInfo = QSharedPointer<FiffInfo>::create(raw.info);
 settings->checkIntegrity();
 auto fwd = std::make_shared<ComputeFwd>(settings)->calculateFwd();
-QFile solFile(settings->solname);
-fwd->write(solFile);
+const std::filesystem::path solPath = settings->solname.toStdU16String();
+const bool written = fwd->write(solPath).has_value();
 ```
 
 ---
@@ -114,13 +114,13 @@ Update the head position with a new device-to-head transform and recompute the M
 
 Forward library: coil definitions, BEM and sphere models, field maps and forward solutions.
 
-````cpp title="src/examples/ex_fwd_api/main.cpp, line 186"
+````cpp title="src/examples/ex_fwd_api/main.cpp, line 177"
 settings->solname = tmp.filePath("V1-fwd.fif");
 settings->pFiffInfo = QSharedPointer<FiffInfo>::create(raw.info);
 settings->checkIntegrity();
 auto fwd = std::make_shared<ComputeFwd>(settings)->calculateFwd();
-QFile solFile(settings->solname);
-fwd->write(solFile);
+const std::filesystem::path solPath = settings->solname.toStdU16String();
+const bool written = fwd->write(solPath).has_value();
 // mne _compute_forwards_meeg on the 78 V1 sources: |G| of source 0, x component, over 306 MEG channels
 ok &= expect(fwd && fwd->nsource == 78 && fwd->sol->data.rows() == 366 && near(fwd->sol->data.col(0).head(306).norm(), 1.2455023232288232e-3, 1e-4),
              "ComputeFwd: 78 V1 sources, 366 channels, sphere-model gain matches mne");
@@ -130,7 +130,7 @@ ok &= expect(fwd && fwd->nsource == 78 && fwd->sol->data.rows() == 366 && near(f
 
 Compute the MEG/EEG forward solution of the sample subject from its BEM, source space and head-MRI transform.
 
-````cpp title="src/examples/ex_compute_forward/main.cpp, line 114"
+````cpp title="src/examples/ex_compute_forward/main.cpp, line 112"
 timer0.start();
 std::shared_ptr<ComputeFwd> pFwdComputer = std::make_shared<ComputeFwd>(pSettings);
 fTime0 = timer0.elapsed();

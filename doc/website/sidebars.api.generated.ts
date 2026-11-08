@@ -154,7 +154,6 @@ const apiSidebar: SidebarsConfig['apiSidebar'] = [
         'api/fwd/fwd-bem-model',
         'api/fwd/fwd-eeg-sphere-model',
         'api/fwd/compute-fwd-settings',
-        'api/fwd/fwd-class',
         'api/fwd/fwd-bem-solution',
         'api/fwd/fwd-coil',
         'api/fwd/fwd-coil-set',

@@ -7,7 +7,7 @@ sidebar_position: 5
 
 # Class Members
 
-Index of 6697 public class members (functions, variables, typedefs, enums) across all documented classes.
+Index of 6699 public class members (functions, variables, typedefs, enums) across all documented classes.
 
 **Jump to:** [A](#a) · [B](#b) · [C](#c) · [D](#d) · [E](#e) · [F](#f) · [G](#g) · [H](#h) · [I](#i) · [J](#j) · [K](#k) · [L](#l) · [M](#m) · [N](#n) · [O](#o) · [P](#p) · [Q](#q) · [R](#r) · [S](#s) · [T](#t) · [U](#u) · [V](#v) · [W](#w) · [X](#x) · [Y](#y) · [Z](#z)
 
@@ -1664,6 +1664,8 @@ Index of 6697 public class members (functions, variables, typedefs, enums) acros
 - **ex** `[var]` in [FwdCoil](/docs/api/fwd/fwd-coil) — Coil coordinate system x unit vector.
 - **ex** `[var]` in [MNETriangle](/docs/api/mne/mne-triangle) — In-plane unit vector (ey x nn; used by BEM).
 - **exampleUri** `[var]` in [AcqSchemeInfo](/docs/api/acq/acq-scheme-info) — A URI that works out of the box, if any.
+- **exclude** `[var]` in `ReadOptions` — Drop these channels.
+- **exclude_bads** `[var]` in `ReadOptions` — Drop the channels marked bad in the file; mne.read_forward_solution keeps them.
 - **excludeComponents** `[fn]` in [ICA](/docs/api/dsp/ica) — Reconstruct sensor-space data after suppressing selected components.
 - **execMode** `[var]` in [MnaNode](/docs/api/mna/mna-node) — Execution mode.
 - **executable** `[var]` in [MnaOpSchema](/docs/api/mna/mna-op-schema) — For CLI ops: executable name (e.g. "recon-all").
@@ -1980,6 +1982,7 @@ Index of 6697 public class members (functions, variables, typedefs, enums) acros
 - **focalDipoles** `[var]` in [InvSourceEstimate](/docs/api/inv/inv-source-estimate) — Off-grid focal dipoles (ECD results).
 - **focusPoint** `[var]` in `OpticalCalibSample` — Stylus focus point in world frame (metres).
 - **focusPosition** `[fn]` in [VideoOverlay](/docs/api/disp3-d/video-overlay)
+- **force_fixed** `[var]` in `ReadOptions` — Convert a free-orientation solution to fixed orientations.
 - **format** `[var]` in [AcqStreamInfo](/docs/api/acq/acq-stream-info) — Native sample format stored in the ring.
 - **format** `[fn]` in [AcqViewBase](/docs/api/acq/acq-view-base)
 - **format** `[var]` in [MnaFileRef](/docs/api/mna/mna-file-ref) — File format: "fiff", "mgh", "stc", etc.
@@ -2668,6 +2671,7 @@ Index of 6697 public class members (functions, variables, typedefs, enums) acros
 - **in_nuse** `[var]` in [MNESssData](/docs/api/mne/mne-sss-data) — How many components included in the inside expansion.
 - **in_order** `[var]` in [MNESssData](/docs/api/mne/mne-sss-data) — Order of the inside expansion.
 - **in_use** `[var]` in [MNEDeriv](/docs/api/mne/mne-deriv) — Per-column count of non-zero elements in the derivation data.
+- **include** `[var]` in `ReadOptions` — Keep only these channels; empty keeps all.
 - **include_eeg** `[var]` in [ComputeFwdSettings](/docs/api/fwd/compute-fwd-settings)
 - **include_eeg** `[var]` in [InvDipoleFitSettings](/docs/api/inv/inv-dipole-fit-settings) — Use EEG?
 - **include_meg** `[var]` in [ComputeFwdSettings](/docs/api/fwd/compute-fwd-settings)
@@ -3486,9 +3490,8 @@ Index of 6697 public class members (functions, variables, typedefs, enums) acros
 - **MNEEpochDataList** `[fn]` in [MNEEpochDataList](/docs/api/mne/mne-epoch-data-list) — Default constructor.
 - **MNEFilterDef** `[fn]` in [MNEFilterDef](/docs/api/mne/mne-filter-def)
 - **MNEForwardSolution** `[fn]` in [MNEForwardSolution](/docs/api/mne/mne-forward-solution) — Default constructor.
-- **MNEForwardSolution** `[fn]` in [MNEForwardSolution](/docs/api/mne/mne-forward-solution) — Constructs a forward operator, by reading from a IO device.
-- **MNEForwardSolution** `[fn]` in [MNEForwardSolution](/docs/api/mne/mne-forward-solution) — Copy constructor.
-- **MNEForwardSolution** `[fn]` in [MNEForwardSolution](/docs/api/mne/mne-forward-solution) — Move constructs an [`MNEForwardSolution`](/docs/api/mne/mne-forward-solution).
+- **MNEForwardSolution** `[fn]` in [MNEForwardSolution](/docs/api/mne/mne-forward-solution) — Reads a forward solution file like `read()`; throws [`Error`](/docs/api/utils/error) if it cannot.
+- **MNEForwardSolution** `[fn]` in [MNEForwardSolution](/docs/api/mne/mne-forward-solution) — Reads a forward solution file like `read()`; throws [`Error`](/docs/api/utils/error) if it cannot.
 - **MNEHemisphere** `[fn]` in [MNEHemisphere](/docs/api/mne/mne-hemisphere) — Constructors the hemisphere source space.
 - **MNEHemisphere** `[fn]` in [MNEHemisphere](/docs/api/mne/mne-hemisphere) — Copy constructor.
 - **MNEInverseOperator** `[fn]` in [MNEInverseOperator](/docs/api/mne/mne-inverse-operator) — Constructs an empty inverse operator with invalid sentinel values.
@@ -3984,8 +3987,6 @@ Index of 6697 public class members (functions, variables, typedefs, enums) acros
 - **operator=** `[fn]` in [MNEDerivSet](/docs/api/mne/mne-deriv-set)
 - **operator=** `[fn]` in [MNEDerivSet](/docs/api/mne/mne-deriv-set) — Replaces the derivations by copies of those of another set.
 - **operator=** `[fn]` in [MNEEpochData](/docs/api/mne/mne-epoch-data) — Copy assignment.
-- **operator=** `[fn]` in [MNEForwardSolution](/docs/api/mne/mne-forward-solution) — Copy assignment operator.
-- **operator=** `[fn]` in [MNEForwardSolution](/docs/api/mne/mne-forward-solution) — Move assignment operator.
 - **operator=** `[fn]` in [MNEHemisphere](/docs/api/mne/mne-hemisphere) — Copy assignment operator.
 - **operator=** `[fn]` in [MNEMghTagGroup](/docs/api/mne/mne-mgh-tag-group)
 - **operator=** `[fn]` in [MNEMghTagGroup](/docs/api/mne/mne-mgh-tag-group)
@@ -4490,7 +4491,8 @@ Index of 6697 public class members (functions, variables, typedefs, enums) acros
 - **read** `[fn]` in [MNECovMatrix](/docs/api/mne/mne-cov-matrix) — Read a covariance matrix of the specified kind from a FIFF file.
 - **read** `[fn]` in [MNECTFCompDataSet](/docs/api/mne/mnectf-comp-data-set) — Read all CTF compensation data sets (matrices and channel info) from a FIFF file, calibrate them, and return a populated set.
 - **read** `[fn]` in [MNEDerivSet](/docs/api/mne/mne-deriv-set) — Reads every derivation stored in the `FIFFB_MNE_DERIVATIONS` blocks of a file (MNE-C `mne_read_deriv`).
-- **read** `[fn]` in [MNEForwardSolution](/docs/api/mne/mne-forward-solution)
+- **read** `[fn]` in [MNEForwardSolution](/docs/api/mne/mne-forward-solution) — Reads a forward solution file, as mne.read_forward_solution does.
+- **read** `[fn]` in [MNEForwardSolution](/docs/api/mne/mne-forward-solution) — Reads a forward solution file and prepares it as `options` ask, e.g.
 - **read** `[fn]` in [MNEInverseOperator](/docs/api/mne/mne-inverse-operator) — Reads an inverse operator file, as mne.minimum_norm.read_inverse_operator does.
 - **read** `[fn]` in [MNELayout](/docs/api/mne/mne-layout) — Reads an MNE-C .lout file.
 - **read** `[fn]` in [MNEMorphMap](/docs/api/mne/mne-morph-map) — Reads one map from a morph-map file (MNE-C `load_one_morph_map`).
@@ -4531,7 +4533,6 @@ Index of 6697 public class members (functions, variables, typedefs, enums) acros
 - **read_events_from_ascii** `[fn]` in [MNE](/docs/api/mne/mne-class) — read_events
 - **read_events_from_fif** `[fn]` in [MNE](/docs/api/mne/mne-class) — mne_read_events
 - **read_fif** `[fn]` in [FiffEvents](/docs/api/fiff/fiff-events) — Reads the event list of a FIFF file.
-- **read_forward_solution** `[fn]` in [Fwd](/docs/api/fwd/fwd-class) — mne_read_forward_solution
 - **read_from_node** `[fn]` in [FiffCoordTrans](/docs/api/fiff/fiff-coord-trans) — Reads a coordinate transform from a FIFF stream node.
 - **read_from_node** `[fn]` in [MNEProjOp](/docs/api/mne/mne-proj-op) — Read all linear projection items from a FIFF tree node.
 - **read_from_node** `[fn]` in [MNESssData](/docs/api/mne/mne-sss-data) — Read the SSS data from the given node of an open fiff stream Refactored: mne_read_from_node (mne_sss_data.c).
@@ -6022,6 +6023,7 @@ Index of 6697 public class members (functions, variables, typedefs, enums) acros
 - **surf_name** `[var]` in [FwdBemModel](/docs/api/fwd/fwd-bem-model) — File from which surfaces were loaded.
 - **surf_name** `[var]` in [MNEMshDisplaySurface](/docs/api/mne/mne-msh-display-surface) — Name of the surface (e.g., "inflated", "white").
 - **surf_ori** `[var]` in [MNEForwardSolution](/docs/api/mne/mne-forward-solution) — If surface oriented.
+- **surf_ori** `[var]` in `ReadOptions` — Use surface-based source coordinates.
 - **surf_RAS_RAS_t** `[var]` in [FiffCoordTransSet](/docs/api/fiff/fiff-coord-trans-set) — Transform from surface RAS to RAS (nonzero origin) coordinates.
 - **surf_tri** `[var]` in [MNESurfacePatch](/docs/api/mne/mne-surface-patch) — Map from complete-surface triangle index to patch triangle index (-1 if absent).
 - **surf_vert** `[var]` in [MNESurfacePatch](/docs/api/mne/mne-surface-patch) — Map from complete-surface vertex index to patch vertex index (-1 if absent).

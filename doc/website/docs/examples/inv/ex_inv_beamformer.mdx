@@ -252,8 +252,7 @@ int main(int argc, char* argv[])
     }
     FsLabel v1;
     FsLabel::read(data + "/subjects/sample/label/lh.V1.label", v1);
-    QFile fwdFile(data + "/Result/ref-sample_audvis-meg-eeg-oct-6-fwd.fif");
-    MNEForwardSolution fwd = MNEForwardSolution(fwdFile).pick_regions({v1}).pick_channels(good);
+    MNEForwardSolution fwd = MNEForwardSolution(QString(data + "/Result/ref-sample_audvis-meg-eeg-oct-6-fwd.fif").toStdU16String()).pick_regions({v1}).pick_channels(good);
     FiffEvoked evoked = sample.pick_channels(good);
     const FiffInfo info = evoked.info;
     const FiffCov noiseCov = FiffCov((data + "/MEG/sample/sample_audvis-cov.fif").toStdString()).pick_channels(good).prepare_noise_cov(info, good);

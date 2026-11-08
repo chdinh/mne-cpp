@@ -210,8 +210,6 @@ int main(int argc, char* argv[])
     // specify necessary information for forward computation
     std::shared_ptr<ComputeFwdSettings> pSettings = std::make_shared<ComputeFwdSettings>();
 
-    QFile t_fileBemName(QCoreApplication::applicationDirPath() + "/../resources/data/MNE-sample-data/subjects/sample/bem/sample-5120-5120-5120-bem.fif");
-    QFile t_fileSrcName(QCoreApplication::applicationDirPath() + "/../resources/data/MNE-sample-data/subjects/sample/bem/sample-oct-6-src.fif");
 
     pSettings->include_meg = true;
     pSettings->include_eeg = true;
@@ -247,14 +245,15 @@ int main(int argc, char* argv[])
 
     // store calculated forward solution
     timer2.start();
-    QFile fwdFile(pSettings->solname);
-    pFwdSolution->write(fwdFile);
+    if (auto written = pFwdSolution->write(pSettings->solname.toStdU16String()); !written) {
+        qCritical() << written.error().what();
+        return 1;
+    }
     fTime2 = timer2.elapsed();
 
     // read back to verify round-trip
     timer3.start();
-    QFile t_solution(pSettings->solname);
-    MNEForwardSolution::SPtr pFwdRead = MNEForwardSolution::SPtr(new MNEForwardSolution(t_solution));
+    auto pFwdRead = MNEForwardSolution::SPtr::create(pSettings->solname.toStdU16String());
     fTime3 = timer3.elapsed();
 
     // update head position and recompute

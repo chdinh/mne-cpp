@@ -100,8 +100,8 @@ settings->solname = tmp.filePath("V1-fwd.fif");
 settings->pFiffInfo = QSharedPointer<FiffInfo>::create(raw.info);
 settings->checkIntegrity();
 auto fwd = std::make_shared<ComputeFwd>(settings)->calculateFwd();
-QFile solFile(settings->solname);
-fwd->write(solFile);
+const std::filesystem::path solPath = settings->solname.toStdU16String();
+const bool written = fwd->write(solPath).has_value();
 ````
 
 From [ex_fwd_api](../../examples/fwd/ex_fwd_api.mdx).

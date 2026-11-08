@@ -337,7 +337,7 @@ Compares triplet second entry (column).
 
 Cluster the forward solution by cortical parcellation and compute an MNE, dSPM or sLORETA estimate of an evoked response.
 
-````cpp title="src/examples/ex_clustered_inverse_mne/main.cpp, line 225"
+````cpp title="src/examples/ex_clustered_inverse_mne/main.cpp, line 224"
 double t_dConditionNumber = Linalg::getConditionNumber(t_Fwd.sol->data, s);
 double t_dConditionNumberClustered = Linalg::getConditionNumber(t_clusteredFwd.sol->data, s);
 ````

@@ -354,8 +354,7 @@ int main(int argc, char* argv[])
         }
     } else {
         //Create source level data
-        QFile t_fileFwd(sFwd);
-        t_Fwd = MNEForwardSolution(t_fileFwd, false, true);
+        t_Fwd = MNEForwardSolution(sFwd.toStdU16String(), {.surf_ori = true});
 
         // Load data
         InvSourceEstimate sourceEstimate;

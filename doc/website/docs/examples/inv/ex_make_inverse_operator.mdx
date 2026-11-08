@@ -206,8 +206,6 @@ int main(int argc, char* argv[])
 
     parser.process(a);
 
-    QFile t_fileFwdMeeg(parser.value(fwdMEGOption));
-    QFile t_fileFwdEeg(parser.value(fwdEEGOption));
 
     double snr = parser.value(snrOption).toDouble();
     double lambda2 = 1.0 / pow(snr, 2);
@@ -216,7 +214,7 @@ int main(int argc, char* argv[])
     // Load data
     FiffEvoked evoked(parser.value(evokedFileOption).toStdU16String(), 0);
 
-    MNEForwardSolution t_forwardMeeg(t_fileFwdMeeg, false, true);
+    MNEForwardSolution t_forwardMeeg(parser.value(fwdMEGOption).toStdU16String(), {.surf_ori = true});
 
     FiffCov noise_cov(parser.value(covFileOption).toStdString());
 
@@ -226,7 +224,7 @@ int main(int argc, char* argv[])
     // Restrict forward solution as necessary for MEG
     MNEForwardSolution t_forwardMeg = t_forwardMeeg.pick_types(true, false);
     // Alternatively, you can just load a forward solution that is restricted
-    MNEForwardSolution t_forwardEeg(t_fileFwdEeg, false, true);
+    MNEForwardSolution t_forwardEeg(parser.value(fwdEEGOption).toStdU16String(), {.surf_ori = true});
 
     // make an M/EEG, MEG-only, and EEG-only inverse operators
     FiffInfo info = evoked.info;

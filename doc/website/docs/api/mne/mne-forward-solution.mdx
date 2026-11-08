@@ -28,8 +28,8 @@ In-memory representation of an `-fwd.fif` forward solution.
 ```cpp title="src/examples/ex_inv_api/main.cpp"
 FsLabel v1;
 FsLabel::read(data + "/subjects/sample/label/lh.V1.label", v1);
-QFile fwdFile(data + "/Result/ref-sample_audvis-meg-eeg-oct-6-fwd.fif");
-const MNEForwardSolution fwd = MNEForwardSolution(fwdFile).pick_regions({v1}); // 70 sources x 3 orientations
+const std::filesystem::path fwdPath = (data + "/Result/ref-sample_audvis-meg-eeg-oct-6-fwd.fif").toStdU16String();
+const MNEForwardSolution fwd = MNEForwardSolution(fwdPath).pick_regions({v1}); // 70 sources x 3 orientations
 const FiffCov noiseCov((data + "/MEG/sample/sample_audvis-cov.fif").toStdString());
 const FiffEvoked evoked((data + "/MEG/sample/sample_audvis-ave.fif").toStdU16String(), 0); // "Left Auditory"
 
@@ -49,89 +49,28 @@ Default constructor.
 
 ---
 
-### MNEForwardSolution(p_IODevice, force_fixed, surf_ori, include, exclude, bExcludeBads)
+### MNEForwardSolution(path)
 
-Constructs a forward operator, by reading from a IO device.
-
-**Parameters:**
-
-- **p_IODevice** : *QIODevice &*
-  IO device to read from the forward operator.
-
-- **force_fixed** : *bool*
-  Force fixed source orientation mode? (optional).
-
-- **surf_ori** : *bool*
-  Use surface based source coordinate system? (optional).
-
-- **include** : *const StringList &*
-  Include these channels (optional).
-
-- **exclude** : *const StringList &*
-  Exclude these channels (optional).
-
-- **bExcludeBads** : *bool*
-  Drop the channels marked bad in the file; mne.read_forward_solution keeps them.
-
----
-
-### MNEForwardSolution(p_MNEForwardSolution)
-
-Copy constructor.
+Reads a forward solution file like `read()`; throws [`Error`](/docs/api/utils/error) if it cannot.
 
 **Parameters:**
 
-- **p_MNEForwardSolution** : *const MNEForwardSolution &*
-  [`MNE`](/docs/api/mne/mne-class) forward solution.
+- **path** : *const std::filesystem::path &*
+  The -fwd.fif file.
 
 ---
 
-### operator=(other)
+### MNEForwardSolution(path, options)
 
-Copy assignment operator.
-
-Copies public data fields only (not computation state).
+Reads a forward solution file like `read()`; throws [`Error`](/docs/api/utils/error) if it cannot.
 
 **Parameters:**
 
-- **other** : *const [MNEForwardSolution](/docs/api/mne/mne-forward-solution) &*
-  [`MNE`](/docs/api/mne/mne-class) forward solution to copy from.
+- **path** : *const std::filesystem::path &*
+  The -fwd.fif file.
 
-**Returns:**
-
-- *[MNEForwardSolution](/docs/api/mne/mne-forward-solution) &* — Reference to this.
-
----
-
-### MNEForwardSolution(other)
-
-Move constructs an [`MNEForwardSolution`](/docs/api/mne/mne-forward-solution).
-
-**Parameters:**
-
-- **other** : *MNEForwardSolution &&*
-  Forward solution to move from; left in a valid but unspecified state.
-
----
-
-### operator=(other)
-
-Move assignment operator.
-
-**Parameters:**
-
-- **other** : *[MNEForwardSolution](/docs/api/mne/mne-forward-solution) &&*
-  Forward solution to move from; left in a valid but unspecified state.
-
-**Returns:**
-
-- *[MNEForwardSolution](/docs/api/mne/mne-forward-solution) &* — Reference to this object.
-
----
-
-### ~MNEForwardSolution()
-
-Destroys the [`MNEForwardSolution`](/docs/api/mne/mne-forward-solution).
+- **options** : *const ReadOptions &*
+  How to prepare the solution.
 
 ---
 
@@ -315,7 +254,7 @@ Prepare forward for assembling the inverse operator.
 
 ---
 
-### write(p_IODevice)
+### write(path)
 
 Write the forward solution to a FIFF file.
 
@@ -325,12 +264,12 @@ Splits the combined MEG/EEG forward matrix back into separate blocks for FIFF st
 
 **Parameters:**
 
-- **p_IODevice** : *QIODevice &*
-  The I/O device (e.g. QFile) to write to.
+- **path** : *const std::filesystem::path &*
+  The -fwd.fif file.
 
 **Returns:**
 
-- *bool* — True if succeeded, false otherwise.
+- *[Expected](/docs/api/utils/expected)&lt; void &gt;* — Nothing, or why the file cannot be written (Io).
 
 ---
 
@@ -421,34 +360,38 @@ ToDo move this to [FiffCov](/docs/api/fiff/fiff-cov)
 
 ---
 
-### read(p_IODevice, fwd, force_fixed, surf_ori, include, exclude, bExcludeBads)
+### read(path)
+
+Reads a forward solution file, as mne.read_forward_solution does.
 
 **Parameters:**
 
-- **p_IODevice** : *QIODevice &*
-  A fiff IO device like a fiff QFile or QTCPSocket.
-
-- **fwd** : *[MNEForwardSolution](/docs/api/mne/mne-forward-solution) &*
-  A forward solution from a fif file.
-
-- **force_fixed** : *bool*
-  Force fixed source orientation mode? (optional).
-
-- **surf_ori** : *bool*
-  Use surface based source coordinate system? (optional).
-
-- **include** : *const StringList &*
-  Include these channels (optional).
-
-- **exclude** : *const StringList &*
-  Exclude these channels (optional).
-
-- **bExcludeBads** : *bool*
-  Drop the channels marked bad in the file; mne.read_forward_solution keeps them.
+- **path** : *const std::filesystem::path &*
+  The -fwd.fif file.
 
 **Returns:**
 
-- *bool* — true if succeeded, false otherwise.
+- *[Expected](/docs/api/utils/expected)&lt; [MNEForwardSolution](/docs/api/mne/mne-forward-solution) &gt;* — The forward solution, or why the file cannot be read: Io if it cannot be opened, NotFound if it holds no forward solution, Format if a required part is missing or inconsistent.
+
+---
+
+### read(path, options)
+
+Reads a forward solution file and prepares it as `options` ask, e.g.
+
+``MNEForwardSolution::read`(path, {.`surf_ori` = true, .exclude_bads = true})`.
+
+**Parameters:**
+
+- **path** : *const std::filesystem::path &*
+  The -fwd.fif file.
+
+- **options** : *const ReadOptions &*
+  How to prepare the solution.
+
+**Returns:**
+
+- *[Expected](/docs/api/utils/expected)&lt; [MNEForwardSolution](/docs/api/mne/mne-forward-solution) &gt;* — The forward solution, or why the file cannot be read (see read(path)).
 
 ---
 
@@ -482,8 +425,8 @@ Inverse library: minimum-norm estimates, resolution matrices, label time courses
 ````cpp title="src/examples/ex_inv_api/main.cpp, line 113"
 FsLabel v1;
 FsLabel::read(data + "/subjects/sample/label/lh.V1.label", v1);
-QFile fwdFile(data + "/Result/ref-sample_audvis-meg-eeg-oct-6-fwd.fif");
-const MNEForwardSolution fwd = MNEForwardSolution(fwdFile).pick_regions({v1}); // 70 sources x 3 orientations
+const std::filesystem::path fwdPath = (data + "/Result/ref-sample_audvis-meg-eeg-oct-6-fwd.fif").toStdU16String();
+const MNEForwardSolution fwd = MNEForwardSolution(fwdPath).pick_regions({v1}); // 70 sources x 3 orientations
 const FiffCov noiseCov((data + "/MEG/sample/sample_audvis-cov.fif").toStdString());
 const FiffEvoked evoked((data + "/MEG/sample/sample_audvis-ave.fif").toStdU16String(), 0); // "Left Auditory"
 ````
@@ -506,7 +449,7 @@ MNEForwardSolution t_clusteredFwd;
 MNEForwardSolution t_Fwd;
 ````
 
-Also used in [ex_fwd_api](../../examples/fwd/ex_fwd_api.mdx), [ex_roi_clustered_inverse_pwl_rap_music](../../examples/inv/ex_roi_clustered_inverse_pwl_rap_music.mdx), [ex_clustered_inverse_mne_raw](../../examples/inv/ex_clustered_inverse_mne_raw.mdx), [ex_clustered_inverse_pwl_rap_music_raw](../../examples/inv/ex_clustered_inverse_pwl_rap_music_raw.mdx), [ex_clustered_inverse_rap_music_raw](../../examples/inv/ex_clustered_inverse_rap_music_raw.mdx), [ex_disp_3D](../../examples/disp3D/ex_disp_3D.mdx), [ex_histogram](../../examples/inv/ex_histogram.mdx), [ex_inverse_pwl_rap_music](../../examples/inv/ex_inverse_pwl_rap_music.mdx), [ex_inverse_rap_music](../../examples/inv/ex_inverse_rap_music.mdx), [ex_read_fwd](../../examples/fs/ex_read_fwd.mdx), [ex_st_clustered_inverse_pwl_rap_music](../../examples/inv/ex_st_clustered_inverse_pwl_rap_music.mdx), [ex_compute_forward](../../examples/fwd/ex_compute_forward.mdx), [ex_dsp_rt](../../examples/dsp/ex_dsp_rt.mdx), [ex_inv_beamformer](../../examples/inv/ex_inv_beamformer.mdx), [ex_inverse_cmne](../../examples/inv/ex_inverse_cmne.mdx), [ex_inverse_mne_raw](../../examples/inv/ex_inverse_mne_raw.mdx), [ex_read_fwd_disp_3D](../../examples/disp3D/ex_read_fwd_disp_3D.mdx).
+Also used in [ex_roi_clustered_inverse_pwl_rap_music](../../examples/inv/ex_roi_clustered_inverse_pwl_rap_music.mdx), [ex_clustered_inverse_mne_raw](../../examples/inv/ex_clustered_inverse_mne_raw.mdx), [ex_clustered_inverse_pwl_rap_music_raw](../../examples/inv/ex_clustered_inverse_pwl_rap_music_raw.mdx), [ex_clustered_inverse_rap_music_raw](../../examples/inv/ex_clustered_inverse_rap_music_raw.mdx), [ex_disp_3D](../../examples/disp3D/ex_disp_3D.mdx), [ex_histogram](../../examples/inv/ex_histogram.mdx), [ex_inverse_pwl_rap_music](../../examples/inv/ex_inverse_pwl_rap_music.mdx), [ex_inverse_rap_music](../../examples/inv/ex_inverse_rap_music.mdx), [ex_read_fwd](../../examples/fs/ex_read_fwd.mdx), [ex_st_clustered_inverse_pwl_rap_music](../../examples/inv/ex_st_clustered_inverse_pwl_rap_music.mdx), [ex_compute_forward](../../examples/fwd/ex_compute_forward.mdx), [ex_dsp_rt](../../examples/dsp/ex_dsp_rt.mdx), [ex_inv_beamformer](../../examples/inv/ex_inv_beamformer.mdx), [ex_inverse_cmne](../../examples/inv/ex_inverse_cmne.mdx), [ex_inverse_mne_raw](../../examples/inv/ex_inverse_mne_raw.mdx), [ex_read_fwd_disp_3D](../../examples/disp3D/ex_read_fwd_disp_3D.mdx).
 
 ## Authors of this file
 
