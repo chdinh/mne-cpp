@@ -24,8 +24,8 @@ Boundary element model: aggregates the inner-skull, outer-skull and scalp [`MNEB
 Aggregated boundary element model loaded from a `-bem.fif` file.
 
 ```cpp title="src/examples/ex_mne_api/main.cpp"
-QFile bemFile(data + "/subjects/sample/bem/sample-5120-bem.fif");
-MNEBem bem(bemFile); // one MNEBemSurface per BEM layer
+const QString bemPath = data + "/subjects/sample/bem/sample-5120-bem.fif";
+MNEBem bem(bemPath.toStdU16String()); // one MNEBemSurface per BEM layer
 const MNEBemSurface& innerSkull = bem[0];
 ```
 
@@ -35,101 +35,39 @@ const MNEBemSurface& innerSkull = bem[0];
 
 ### MNEBem()
 
-Default constructor.
+Constructs an empty model.
 
 ---
 
-### MNEBem(p_MNEBem)
+### MNEBem(path)
 
-Copy constructor.
+Reads a -bem.fif file like `read()`; throws [`Error`](/docs/api/utils/error) if it cannot.
 
 **Parameters:**
 
-- **p_MNEBem** : *const MNEBem &*
-  [`MNE`](/docs/api/mne/mne-class) BEM.
+- **path** : *const std::filesystem::path &*
+  The -bem.fif file.
 
 ---
 
-### operator=(p_MNEBem)
+### write(path)
 
-Copy assignment.
+Writes the model, as mne.write_bem_surfaces does.
 
 **Parameters:**
 
-- **p_MNEBem** : *const [MNEBem](/docs/api/mne/mne-bem) &*
-  [`MNE`](/docs/api/mne/mne-class) BEM.
+- **path** : *const std::filesystem::path &*
+  The -bem.fif file.
 
 **Returns:**
 
-- *[MNEBem](/docs/api/mne/mne-bem) &* — This BEM.
+- *[Expected](/docs/api/utils/expected)&lt; void &gt;* — Nothing, or why the file cannot be written (Io).
 
 ---
 
-### MNEBem(p_IODevice)
+### write_to_stream(stream)
 
-Default constructor.
-
-**Parameters:**
-
-- **p_IODevice** : *QIODevice &*
-  IO device (e.g. a FIFF file) to read the BEM surfaces from; throws std::runtime_error on failure.
-
----
-
-### ~MNEBem()
-
-Destroys the [`MNE`](/docs/api/mne/mne-class) Bem.
-
----
-
-### clear()
-
-Initializes [`MNE`](/docs/api/mne/mne-class) Bem.
-
----
-
-### isEmpty()
-
-True if [`MNE`](/docs/api/mne/mne-class) Bem is empty.
-
-**Returns:**
-
-- *bool* — true if [`MNE`](/docs/api/mne/mne-class) Bem is empty.
-
----
-
-### size()
-
-Returns the number of stored bem surfaces.
-
-**Returns:**
-
-- *qint32* — number of stored bem surfaces.
-
----
-
-### write(p_IODevice)
-
-[`MNE`](/docs/api/mne/mne-class) Toolbox function mne_write_bem_surfaces_block.
-
-Write the Bem to a FIF file
-
-**Parameters:**
-
-- **p_IODevice** : *QIODevice &*
-  IO device to write the bem to.
-
-**Returns:**
-
-- *bool* — false if the device cannot be opened for writing.
-
----
-
-### writeToStream(stream)
-
-[`MNE`](/docs/api/mne/mne-class) Toolbox function mne_write_bem_surfaces_block.
-
-Write the Bem to a FIF stream
+Writes the FIFFB_BEM block into an open FIFF stream (MNE-C mne_write_bem_surfaces_block).
 
 **Parameters:**
 
@@ -138,69 +76,106 @@ Write the Bem to a FIF stream
 
 ---
 
-### operator\[\](idx)
-
-Subscript operator [] to access bem_surface by index.
-
-**Parameters:**
-
-- **idx** : *qint32*
-  the surface index (0,1 or 2).
+### size()
 
 **Returns:**
 
-- *const [MNEBemSurface](/docs/api/mne/mne-bem-surface) &* — [`MNEBemSurface`](/docs/api/mne/mne-bem-surface) related to the parameter index.
+- *std::size_t* — The number of surfaces.
+
+---
+
+### empty()
+
+**Returns:**
+
+- *bool* — Whether the model holds no surface.
+
+---
+
+### clear()
+
+Removes all surfaces.
+
+---
+
+### push_back(surface)
+
+**Parameters:**
+
+- **surface** : *[MNEBemSurface](/docs/api/mne/mne-bem-surface)*
+  The surface to append.
 
 ---
 
 ### operator\[\](idx)
 
-Subscript operator [] to access bem_surface by index.
-
 **Parameters:**
 
-- **idx** : *qint32*
-  the surface index (0,1 or 2).
+- **idx** : *std::size_t*
+  The surface index.
 
 **Returns:**
 
-- *[MNEBemSurface](/docs/api/mne/mne-bem-surface) &* — [`MNEBemSurface`](/docs/api/mne/mne-bem-surface) related to the parameter index.
+- *const [MNEBemSurface](/docs/api/mne/mne-bem-surface) &* — The surface.
 
 ---
 
-### operator&lt;&lt;(surf)
-
-Subscript operator &lt;&lt; to add a new bem_surface.
+### operator\[\](idx)
 
 **Parameters:**
 
-- **surf** : *const [MNEBemSurface](/docs/api/mne/mne-bem-surface) &*
-  BemSurface to be added.
+- **idx** : *std::size_t*
+  The surface index.
 
 **Returns:**
 
-- *[MNEBem](/docs/api/mne/mne-bem) &* — [`MNEBem`](/docs/api/mne/mne-bem).
+- *[MNEBemSurface](/docs/api/mne/mne-bem-surface) &* — The surface.
 
 ---
 
-### operator&lt;&lt;(surf)
-
-Subscript operator &lt;&lt; to add a new bem_surface.
-
-**Parameters:**
-
-- **surf** : *const [MNEBemSurface](/docs/api/mne/mne-bem-surface) **
-  BemSurface to be added.
+### surfaces()
 
 **Returns:**
 
-- *[MNEBem](/docs/api/mne/mne-bem) &* — [`MNEBem`](/docs/api/mne/mne-bem).
+- *std::span&lt; const [MNEBemSurface](/docs/api/mne/mne-bem-surface) &gt;* — The surfaces.
+
+---
+
+### begin()
+
+**Returns:**
+
+- *iterator* — Iterator to the first surface.
+
+---
+
+### end()
+
+**Returns:**
+
+- *iterator* — Iterator past the last surface.
+
+---
+
+### begin()
+
+**Returns:**
+
+- *const_iterator* — Iterator to the first surface.
+
+---
+
+### end()
+
+**Returns:**
+
+- *const_iterator* — Iterator past the last surface.
 
 ---
 
 ### warp(sLm, dLm)
 
-[Warp](/docs/api/math/warp) the Bem.
+Warps every surface with the thin-plate spline that maps the source landmarks onto the destination ones.
 
 **Parameters:**
 
@@ -214,44 +189,61 @@ Subscript operator &lt;&lt; to add a new bem_surface.
 
 ### transform(trans)
 
-Transform the Bem.
+Applies a coordinate transformation to every surface.
 
 **Parameters:**
 
 - **trans** : *const [FiffCoordTrans](/docs/api/fiff/fiff-coord-trans) &*
-  The Transformation Matrix.
+  The transformation.
 
 ---
 
-### invtransform(trans)
+### inverse_transform(trans)
 
-Transform the Bem using the inverse.
+Applies the inverse of a coordinate transformation to every surface.
 
 **Parameters:**
 
 - **trans** : *const [FiffCoordTrans](/docs/api/fiff/fiff-coord-trans) &*
-  The Transformation Matrix.
+  The transformation.
 
 ---
 
 ## Static Methods
 
-### readFromStream(stream, add_geom, p_Bem)
+### read(path, patch_stats)
+
+Reads the BEM surfaces of a file, as mne.read_bem_surfaces does.
+
+**Parameters:**
+
+- **path** : *const std::filesystem::path &*
+  The -bem.fif file.
+
+- **patch_stats** : *bool*
+  Recompute the vertex normals from the triangles even where the file stores them.
+
+**Returns:**
+
+- *[Expected](/docs/api/utils/expected)&lt; [MNEBem](/docs/api/mne/mne-bem) &gt;* — The model, or why the file cannot be read: Io if it cannot be opened, NotFound if it holds no BEM surfaces, Format if a surface is incomplete or inconsistent.
+
+---
+
+### read(stream, patch_stats)
+
+Reads the BEM surfaces from an open FIFF stream.
 
 **Parameters:**
 
 - **stream** : *[FiffStream](/docs/api/fiff/fiff-stream) &*
-  The opened fif file.
+  The stream; opened here if it is not open yet.
 
-- **add_geom** : *bool*
-  Add geometry information to the Bem FsSurface.
-
-- **p_Bem** : *[MNEBem](/docs/api/mne/mne-bem) &*
-  The BEM that receives the surfaces read.
+- **patch_stats** : *bool*
+  Recompute the vertex normals from the triangles even where the file stores them.
 
 **Returns:**
 
-- *bool* — true if succeeded, false otherwise.
+- *[Expected](/docs/api/utils/expected)&lt; [MNEBem](/docs/api/mne/mne-bem) &gt;* — The model, or why the stream cannot be read (see read(path)).
 
 ---
 
@@ -269,8 +261,8 @@ Transform the Bem using the inverse.
 MNE library: BEM surfaces, surface projection, ICP, source spaces and epochs.
 
 ````cpp title="src/examples/ex_mne_api/main.cpp, line 149"
-QFile bemFile(data + "/subjects/sample/bem/sample-5120-bem.fif");
-MNEBem bem(bemFile); // one MNEBemSurface per BEM layer
+const QString bemPath = data + "/subjects/sample/bem/sample-5120-bem.fif";
+MNEBem bem(bemPath.toStdU16String()); // one MNEBemSurface per BEM layer
 const MNEBemSurface& innerSkull = bem[0];
 // mne.read_bem_surfaces: 1 surface, id 1 (inner skull), 2562 vertices, 5120 triangles
 ok &= expect(bem.size() == 1 && innerSkull.id == FIFFV_BEM_SURF_ID_BRAIN && innerSkull.np == 2562 && innerSkull.ntri == 5120 && (innerSkull.rr.row(0) - RowVector3f(0.0006128f, -0.007984f, 0.103732f)).norm() < 1e-6f && (innerSkull.nn.row(0) - RowVector3f(0.05623665f, -0.1050898f, 0.99287134f)).norm() < 1e-5f && MNEBemSurface::id_name(innerSkull.id) == "Brain",
@@ -283,8 +275,7 @@ Read a BEM model from FIFF, write it back and verify the round trip.
 
 ````cpp title="src/examples/ex_read_bem/main.cpp, line 76"
 // Read the BEM
-QFile t_fileBem(parser.value(bemFileInOption));
-MNEBem t_Bem(t_fileBem);
+MNEBem t_Bem(parser.value(bemFileInOption).toStdU16String());
 ````
 
 ### [ex_disp_3D](../../examples/disp3D/ex_disp_3D.mdx)
@@ -293,9 +284,8 @@ Compute a clustered MNE, dSPM or sLORETA estimate of the sample evoked response 
 
 ````cpp title="src/examples/ex_disp_3D/main.cpp, line 250"
 //Read and show BEM
-QFile t_fileBem(QCoreApplication::applicationDirPath() + "/../resources/data/MNE-sample-data/subjects/sample/bem/sample-5120-5120-5120-bem.fif");
-MNEBem t_Bem(t_fileBem);
-for (int i = 0; i < t_Bem.size(); ++i) {
+MNEBem t_Bem((QCoreApplication::applicationDirPath() + "/../resources/data/MNE-sample-data/subjects/sample/bem/sample-5120-5120-5120-bem.fif").toStdU16String());
+for (std::size_t i = 0; i < t_Bem.size(); ++i) {
     pModel->addBemSurface(parser.value(subjectOption), "BEM", t_Bem[i]);
 }
 ````

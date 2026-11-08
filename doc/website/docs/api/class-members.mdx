@@ -7,7 +7,7 @@ sidebar_position: 5
 
 # Class Members
 
-Index of 6699 public class members (functions, variables, typedefs, enums) across all documented classes.
+Index of 6704 public class members (functions, variables, typedefs, enums) across all documented classes.
 
 **Jump to:** [A](#a) · [B](#b) · [C](#c) · [D](#d) · [E](#e) · [F](#f) · [G](#g) · [H](#h) · [I](#i) · [J](#j) · [K](#k) · [L](#l) · [M](#m) · [N](#n) · [O](#o) · [P](#p) · [Q](#q) · [R](#r) · [S](#s) · [T](#t) · [U](#u) · [V](#v) · [W](#w) · [X](#x) · [Y](#y) · [Z](#z)
 
@@ -329,6 +329,8 @@ Index of 6699 public class members (functions, variables, typedefs, enums) acros
 - **begin** `[fn]` in [FiffAnnotations](/docs/api/fiff/fiff-annotations)
 - **begin** `[fn]` in [FiffDigPointSet](/docs/api/fiff/fiff-dig-point-set)
 - **begin** `[fn]` in [FiffDigPointSet](/docs/api/fiff/fiff-dig-point-set)
+- **begin** `[fn]` in [MNEBem](/docs/api/mne/mne-bem)
+- **begin** `[fn]` in [MNEBem](/docs/api/mne/mne-bem)
 - **beginFrame** `[fn]` in [BrainRenderer](/docs/api/disp3-d/brain-renderer) — Begin the first render pass of a frame.
 - **beginPreservingPass** `[fn]` in [BrainRenderer](/docs/api/disp3-d/brain-renderer) — Begin an additional render pass that preserves previous output.
 - **beginWrite** `[fn]` in [AcqWriter](/docs/api/acq/acq-writer) — Reserves the next `samples` samples, waiting up to `timeout` for the gating reader to free space (input streams without one never wait).
@@ -617,7 +619,7 @@ Index of 6699 public class members (functions, variables, typedefs, enums) acros
 - **clear** `[fn]` in [FsSurfaceSet](/docs/api/fs/fs-surface-set) — Initializes the [`FsAnnotationSet`](/docs/api/fs/fs-annotation-set).
 - **clear** `[fn]` in [InvSourceEstimate](/docs/api/inv/inv-source-estimate) — Resets to an empty estimate.
 - **clear** `[fn]` in [LogCapture](/docs/api/utils/log-capture) — Forgets the messages recorded so far.
-- **clear** `[fn]` in [MNEBem](/docs/api/mne/mne-bem) — Initializes [`MNE`](/docs/api/mne/mne-class) Bem.
+- **clear** `[fn]` in [MNEBem](/docs/api/mne/mne-bem) — Removes all surfaces.
 - **clear** `[fn]` in [MNEBemSurface](/docs/api/mne/mne-bem-surface) — Initializes the BEM surface.
 - **clear** `[fn]` in [MNEClusterInfo](/docs/api/mne/mne-cluster-info) — Initializes the cluster information.
 - **clear** `[fn]` in [MNEForwardSolution](/docs/api/mne/mne-forward-solution) — Initializes the [`MNE`](/docs/api/mne/mne-class) forward solution.
@@ -945,6 +947,7 @@ Index of 6699 public class members (functions, variables, typedefs, enums) acros
 - **ConnectivitySettingsView** `[fn]` in [ConnectivitySettingsView](/docs/api/disp/connectivity-settings-view) — Constructs a [`ConnectivitySettingsView`](/docs/api/disp/connectivity-settings-view) which is a child of parent.
 - **const_iterator** `[type]` in [FiffAnnotations](/docs/api/fiff/fiff-annotations) — Constant iterator.
 - **const_iterator** `[type]` in [FiffDigPointSet](/docs/api/fiff/fiff-dig-point-set) — Constant iterator.
+- **const_iterator** `[type]` in [MNEBem](/docs/api/mne/mne-bem) — Const surface iterator.
 - **ConstRowMajorMatrixMap** `[type]` in [MlTensor](/docs/api/ml/ml-tensor)
 - **ConstSPtr** `[type]` in [AbstractMetric](/docs/api/connectivity/abstract-metric) — Const shared pointer type for [`AbstractMetric`](/docs/api/connectivity/abstract-metric).
 - **ConstSPtr** `[type]` in [AbstractView](/docs/api/disp/abstract-view) — Const shared pointer type for [`AbstractView`](/docs/api/disp/abstract-view).
@@ -1576,6 +1579,7 @@ Index of 6699 public class members (functions, variables, typedefs, enums) acros
 - **empty** `[fn]` in [FiffAnnotations](/docs/api/fiff/fiff-annotations)
 - **empty** `[fn]` in [FiffDigPointSet](/docs/api/fiff/fiff-dig-point-set)
 - **empty** `[fn]` in [MlTensor](/docs/api/ml/ml-tensor)
+- **empty** `[fn]` in [MNEBem](/docs/api/mne/mne-bem)
 - **enable_all_sources** `[fn]` in [MNESourceSpace](/docs/api/mne/mne-source-space) — Enable all source points (set inuse to TRUE, nuse = np).
 - **enabled** `[var]` in [SubView](/docs/api/disp3-d/sub-view)
 - **end** `[var]` in [AcqSampleRange](/docs/api/acq/acq-sample-range) — One past the last sample; equals first for an empty range.
@@ -1583,6 +1587,8 @@ Index of 6699 public class members (functions, variables, typedefs, enums) acros
 - **end** `[fn]` in [FiffAnnotations](/docs/api/fiff/fiff-annotations)
 - **end** `[fn]` in [FiffDigPointSet](/docs/api/fiff/fiff-dig-point-set)
 - **end** `[fn]` in [FiffDigPointSet](/docs/api/fiff/fiff-dig-point-set)
+- **end** `[fn]` in [MNEBem](/docs/api/mne/mne-bem)
+- **end** `[fn]` in [MNEBem](/docs/api/mne/mne-bem)
 - **end_block** `[fn]` in [FiffStream](/docs/api/fiff/fiff-stream) — Writes a FIFF_BLOCK_END tag.
 - **end_file** `[fn]` in [FiffStream](/docs/api/fiff/fiff-stream) — Writes the closing tags to a fif file and closes the file.
 - **end_to_sample** `[fn]` in [FiffAnnotations](/docs/api/fiff/fiff-annotations)
@@ -2774,6 +2780,7 @@ Index of 6699 public class members (functions, variables, typedefs, enums) acros
 - **InvEcd** `[fn]` in [InvEcd](/docs/api/inv/inv-ecd) — Copy constructor.
 - **InvEcdSet** `[fn]` in [InvEcdSet](/docs/api/inv/inv-ecd-set) — Constructs a Electric Current Dipole Set object.
 - **InvEcdSet** `[fn]` in [InvEcdSet](/docs/api/inv/inv-ecd-set) — Copy constructor.
+- **inverse_transform** `[fn]` in [MNEBem](/docs/api/mne/mne-bem) — Applies the inverse of a coordinate transformation to every surface.
 - **inverseTransform** `[fn]` in [DecodingCsp](/docs/api/decoding/decoding-csp) — Project CSP power features back to sensor space.
 - **inversion** `[var]` in [InvBeamformer](/docs/api/inv/inv-beamformer) — Inversion method used.
 - **invert** `[var]` in [MNELayoutPort](/docs/api/mne/mne-layout-port) — Draw the signal upside down (negative height in the file).
@@ -2811,7 +2818,6 @@ Index of 6699 public class members (functions, variables, typedefs, enums) acros
 - **InvToken** `[fn]` in [InvToken](/docs/api/inv/inv-token)
 - **InvToken** `[fn]` in [InvToken](/docs/api/inv/inv-token)
 - **invtrans** `[var]` in [FiffCoordTrans](/docs/api/fiff/fiff-coord-trans) — The inverse transform.
-- **invtransform** `[fn]` in [MNEBem](/docs/api/mne/mne-bem) — Transform the Bem using the inverse.
 - **InvTrapMusic** `[fn]` in [InvTrapMusic](/docs/api/inv/inv-trap-music) — Construct TRAP-MUSIC scanner.
 - **InvVectorSourceEstimate** `[fn]` in [InvVectorSourceEstimate](/docs/api/inv/inv-vector-source-estimate)
 - **InvVectorSourceEstimate** `[fn]` in [InvVectorSourceEstimate](/docs/api/inv/inv-vector-source-estimate) — Construct from data and vertices.
@@ -2879,7 +2885,6 @@ Index of 6699 public class members (functions, variables, typedefs, enums) acros
 - **isEmpty** `[fn]` in [FsSurface](/docs/api/fs/fs-surface) — Returns whether [`FsSurface`](/docs/api/fs/fs-surface) is empty.
 - **isEmpty** `[fn]` in [FsSurfaceSet](/docs/api/fs/fs-surface-set) — True if [`FsSurfaceSet`](/docs/api/fs/fs-surface-set) is empty.
 - **isEmpty** `[fn]` in [IeegImplantation](/docs/api/ieeg/ieeg-implantation)
-- **isEmpty** `[fn]` in [MNEBem](/docs/api/mne/mne-bem) — True if [`MNE`](/docs/api/mne/mne-class) Bem is empty.
 - **isEmpty** `[fn]` in [MNEClusterInfo](/docs/api/mne/mne-cluster-info) — Returns true if [`MNE`](/docs/api/mne/mne-class) cluster information contains no data.
 - **isEmpty** `[fn]` in [MNEForwardSolution](/docs/api/mne/mne-forward-solution) — True if FIFF measurement file information is empty.
 - **isEmpty** `[fn]` in [MNESourceSpaces](/docs/api/mne/mne-source-spaces) — True if [`MNE`](/docs/api/mne/mne-class) Source Space is empty.
@@ -2971,6 +2976,7 @@ Index of 6699 public class members (functions, variables, typedefs, enums) acros
 - **iterate_alignment_once** `[fn]` in [MNEMshDisplaySurface](/docs/api/mne/mne-msh-display-surface) — Perform one iteration of ICP-like alignment.
 - **iterator** `[type]` in [FiffAnnotations](/docs/api/fiff/fiff-annotations) — Iterator.
 - **iterator** `[type]` in [FiffDigPointSet](/docs/api/fiff/fiff-dig-point-set) — Iterator.
+- **iterator** `[type]` in [MNEBem](/docs/api/mne/mne-bem) — Surface iterator.
 - **itris** `[var]` in [MNESurfaceOrVolume](/docs/api/mne/mne-surface-or-volume) — Triangle vertex indices (ntri x 3, row-major).
 
 ## J {#j}
@@ -3465,9 +3471,8 @@ Index of 6699 public class members (functions, variables, typedefs, enums) acros
 - **mne_read_meas_data** `[fn]` in [MNEMeasData](/docs/api/mne/mne-meas-data) — Read an evoked-response data set into a new container.
 - **mne_read_meas_data_add** `[fn]` in [MNEMeasData](/docs/api/mne/mne-meas-data) — Read an evoked-response data set and append it to an existing container.
 - **mne_read_meg_comp_eeg_ch_info** `[fn]` in [FiffInfoBase](/docs/api/fiff/fiff-info-base) — Read MEG, compensation, and EEG channel information from this measurement info.
-- **MNEBem** `[fn]` in [MNEBem](/docs/api/mne/mne-bem) — Default constructor.
-- **MNEBem** `[fn]` in [MNEBem](/docs/api/mne/mne-bem) — Copy constructor.
-- **MNEBem** `[fn]` in [MNEBem](/docs/api/mne/mne-bem) — Default constructor.
+- **MNEBem** `[fn]` in [MNEBem](/docs/api/mne/mne-bem) — Constructs an empty model.
+- **MNEBem** `[fn]` in [MNEBem](/docs/api/mne/mne-bem) — Reads a -bem.fif file like `read()`; throws [`Error`](/docs/api/utils/error) if it cannot.
 - **MNEBemSurface** `[fn]` in [MNEBemSurface](/docs/api/mne/mne-bem-surface) — Constructors the bem surface.
 - **MNEBemSurface** `[fn]` in [MNEBemSurface](/docs/api/mne/mne-bem-surface) — Copy constructor.
 - **MNEChSelection** `[fn]` in [MNEChSelection](/docs/api/mne/mne-ch-selection)
@@ -3936,8 +3941,6 @@ Index of 6699 public class members (functions, variables, typedefs, enums) acros
 - **operator-&gt;** `[fn]` in [AcqExpected](/docs/api/acq/acq-expected)
 - **operator-&gt;** `[fn]` in [AcqViewLease](/docs/api/acq/acq-view-lease)
 - **operator&lt;&lt;** `[fn]` in [InvEcdSet](/docs/api/inv/inv-ecd-set) — Subscript operator &lt;&lt; to add a new [`InvEcd`](/docs/api/inv/inv-ecd).
-- **operator&lt;&lt;** `[fn]` in [MNEBem](/docs/api/mne/mne-bem) — Subscript operator &lt;&lt; to add a new bem_surface.
-- **operator&lt;&lt;** `[fn]` in [MNEBem](/docs/api/mne/mne-bem) — Subscript operator &lt;&lt; to add a new bem_surface.
 - **operator=** `[fn]` in [AcqBackend](/docs/api/acq/acq-backend)
 - **operator=** `[fn]` in [AcqDevice](/docs/api/acq/acq-device)
 - **operator=** `[fn]` in [AcqDevice](/docs/api/acq/acq-device)
@@ -3982,7 +3985,6 @@ Index of 6699 public class members (functions, variables, typedefs, enums) acros
 - **operator=** `[fn]` in [InvGuessData](/docs/api/inv/inv-guess-data)
 - **operator=** `[fn]` in [InvHpiModelParameters](/docs/api/inv/inv-hpi-model-parameters)
 - **operator=** `[fn]` in [LogCapture](/docs/api/utils/log-capture)
-- **operator=** `[fn]` in [MNEBem](/docs/api/mne/mne-bem) — Copy assignment.
 - **operator=** `[fn]` in [MNEBemSurface](/docs/api/mne/mne-bem-surface) — Copy assignment.
 - **operator=** `[fn]` in [MNEDerivSet](/docs/api/mne/mne-deriv-set)
 - **operator=** `[fn]` in [MNEDerivSet](/docs/api/mne/mne-deriv-set) — Replaces the derivations by copies of those of another set.
@@ -4026,8 +4028,8 @@ Index of 6699 public class members (functions, variables, typedefs, enums) acros
 - **operator[]** `[fn]` in [FsSurfaceSet](/docs/api/fs/fs-surface-set) — Subscript operator [] to access surface by identifier.
 - **operator[]** `[fn]` in [InvEcdSet](/docs/api/inv/inv-ecd-set) — Subscript operator [] to access [`InvEcd`](/docs/api/inv/inv-ecd) by index.
 - **operator[]** `[fn]` in [InvEcdSet](/docs/api/inv/inv-ecd-set) — Subscript operator [] to access [`InvEcd`](/docs/api/inv/inv-ecd) by index.
-- **operator[]** `[fn]` in [MNEBem](/docs/api/mne/mne-bem) — Subscript operator [] to access bem_surface by index.
-- **operator[]** `[fn]` in [MNEBem](/docs/api/mne/mne-bem) — Subscript operator [] to access bem_surface by index.
+- **operator[]** `[fn]` in [MNEBem](/docs/api/mne/mne-bem)
+- **operator[]** `[fn]` in [MNEBem](/docs/api/mne/mne-bem)
 - **operator[]** `[fn]` in [MNESourceSpaces](/docs/api/mne/mne-source-spaces) — Subscript operator [] to access source spaces by index.
 - **operator[]** `[fn]` in [MNESourceSpaces](/docs/api/mne/mne-source-spaces) — Subscript operator [] to access source spaces by index.
 - **operator[]** `[fn]` in [MNESourceSpaces](/docs/api/mne/mne-source-spaces) — Subscript operator [] to access source spaces by hemisphere identifier.
@@ -4381,6 +4383,7 @@ Index of 6699 public class members (functions, variables, typedefs, enums) acros
 - **push** `[fn]` in [CircularBuffer](/docs/api/utils/circular-buffer) — Adds an element at the end of the buffer.
 - **push_back** `[fn]` in [FiffAnnotations](/docs/api/fiff/fiff-annotations) — Appends an annotation.
 - **push_back** `[fn]` in [FiffDigPointSet](/docs/api/fiff/fiff-dig-point-set) — Appends a point.
+- **push_back** `[fn]` in [MNEBem](/docs/api/mne/mne-bem)
 - **push_chunk** `[fn]` in [stream_outlet](/docs/api/lsl/stream_outlet) — Push a chunk of multichannel samples into the outlet.
 - **push_sample** `[fn]` in [stream_outlet](/docs/api/lsl/stream_outlet) — Push a single multichannel sample into the outlet.
 - **pushData** `[fn]` in [RtSensorStreamManager](/docs/api/disp3-d/rt-sensor-stream-manager) — Push a single measurement vector into the streaming queue.
@@ -4488,6 +4491,8 @@ Index of 6699 public class members (functions, variables, typedefs, enums) acros
 - **read** `[fn]` in [MemoryByteStream](/docs/api/utils/memory-byte-stream) — Reads up to `bytes` bytes at the current position and advances past them.
 - **read** `[fn]` in [MnaIO](/docs/api/mna/mna-io) — Read an MNA project from file.
 - **read** `[fn]` in [MnaProject](/docs/api/mna/mna-project) — Read an MNA project from file.
+- **read** `[fn]` in [MNEBem](/docs/api/mne/mne-bem) — Reads the BEM surfaces of a file, as mne.read_bem_surfaces does.
+- **read** `[fn]` in [MNEBem](/docs/api/mne/mne-bem) — Reads the BEM surfaces from an open FIFF stream.
 - **read** `[fn]` in [MNECovMatrix](/docs/api/mne/mne-cov-matrix) — Read a covariance matrix of the specified kind from a FIFF file.
 - **read** `[fn]` in [MNECTFCompDataSet](/docs/api/mne/mnectf-comp-data-set) — Read all CTF compensation data sets (matrices and channel info) from a FIFF file, calibrate them, and return a populated set.
 - **read** `[fn]` in [MNEDerivSet](/docs/api/mne/mne-deriv-set) — Reads every derivation stored in the `FIFFB_MNE_DERIVATIONS` blocks of a file (MNE-C `mne_read_deriv`).
@@ -4574,7 +4579,6 @@ Index of 6699 public class members (functions, variables, typedefs, enums) acros
 - **reader** `[var]` in [BidsRawData](/docs/api/bids/bids-raw-data) — The underlying format reader (keeps file open).
 - **readFif** `[fn]` in [MNEEventList](/docs/api/mne/mne-event-list) — Reads the event block of a FIFF file (MNE-C `mne_load_events_fiff`).
 - **readFilter** `[fn]` in [FilterIO](/docs/api/utils/filter-io) — Reads a given txt file and scans it for filter coefficients.
-- **readFromStream** `[fn]` in [MNEBem](/docs/api/mne/mne-bem)
 - **readFromStream** `[fn]` in [MNESourceSpaces](/docs/api/mne/mne-source-spaces)
 - **readHeadPos** `[fn]` in [MaxwellMovementComp](/docs/api/dsp/maxwell-movement-comp) — Read head positions from a file.
 - **readInfo** `[fn]` in [RtDataClient](/docs/api/com/rt-data-client) — Reads fiff measurement information of a data the connection.
@@ -5625,7 +5629,7 @@ Index of 6699 public class members (functions, variables, typedefs, enums) acros
 - **size** `[fn]` in [InvEcdSet](/docs/api/inv/inv-ecd-set) — Returns the number of stored ECDs.
 - **size** `[fn]` in [MemoryByteStream](/docs/api/utils/memory-byte-stream)
 - **size** `[fn]` in [MlTensor](/docs/api/ml/ml-tensor)
-- **size** `[fn]` in [MNEBem](/docs/api/mne/mne-bem) — Returns the number of stored bem surfaces.
+- **size** `[fn]` in [MNEBem](/docs/api/mne/mne-bem)
 - **size** `[var]` in [MNEFilterDef](/docs/api/mne/mne-filter-def) — Length in samples (must be a power of 2).
 - **size** `[fn]` in [MNESourceSpaces](/docs/api/mne/mne-source-spaces) — Returns the number of stored hemispheres 0, 1 or 2.
 - **sizeBytes** `[var]` in [MnaFileRef](/docs/api/mna/mna-file-ref) — File size in bytes.
@@ -6033,6 +6037,7 @@ Index of 6699 public class members (functions, variables, typedefs, enums) acros
 - **surfacePointClicked** `[signal]` in [BrainView](/docs/api/disp3-d/brain-view) — Emitted on left-click when the click hits a surface.
 - **surfacePointDoubleClicked** `[signal]` in [BrainView](/docs/api/disp3-d/brain-view) — Emitted on double-click when the click hits a surface.
 - **SurfaceRole** `[enum]` in [SurfaceTreeItem](/docs/api/disp3-d/surface-tree-item)
+- **surfaces** `[fn]` in [MNEBem](/docs/api/mne/mne-bem)
 - **SurfaceTreeItem** `[fn]` in [SurfaceTreeItem](/docs/api/disp3-d/surface-tree-item)
 - **surfaceType** `[var]` in [SubView](/docs/api/disp3-d/sub-view)
 - **surfs** `[var]` in [FwdBemModel](/docs/api/fwd/fwd-bem-model) — Interface surfaces, outermost first.
@@ -6252,7 +6257,7 @@ Index of 6699 public class members (functions, variables, typedefs, enums) acros
 - **transform** `[fn]` in [DecodingCsp](/docs/api/decoding/decoding-csp) — Transform epoch data using the fitted CSP filters.
 - **transform** `[fn]` in [DecodingSpoc](/docs/api/decoding/decoding-spoc) — Transform epoch data using the fitted SPoC filters.
 - **transform** `[fn]` in [DecodingSsd](/docs/api/decoding/decoding-ssd) — Apply spatial filters to data.
-- **transform** `[fn]` in [MNEBem](/docs/api/mne/mne-bem) — Transform the Bem.
+- **transform** `[fn]` in [MNEBem](/docs/api/mne/mne-bem) — Applies a coordinate transformation to every surface.
 - **transform_hemisphere_to** `[fn]` in [MNEHemisphere](/docs/api/mne/mne-hemisphere) — mne_transform_source_space_to
 - **transform_source_space** `[fn]` in [MNESourceSpace](/docs/api/mne/mne-source-space) — Transform this source space into another coordinate frame.
 - **transform_source_space_to** `[fn]` in [MNE](/docs/api/mne/mne-class) — mne_transform_source_space_to
@@ -6598,7 +6603,7 @@ Index of 6699 public class members (functions, variables, typedefs, enums) acros
 - **waitForSpace** `[fn]` in [AcqWriter](/docs/api/acq/acq-writer) — Waits until beginWrite(`samples`) would not wait.
 - **wallTimeMs** `[var]` in [MnaProvenance](/docs/api/mna/mna-provenance) — Wall-clock duration in milliseconds.
 - **warning** `[fn]` in [Log](/docs/api/utils/log) — As `debug()`, at warning level.
-- **warp** `[fn]` in [MNEBem](/docs/api/mne/mne-bem) — Warp the Bem.
+- **warp** `[fn]` in [MNEBem](/docs/api/mne/mne-bem) — Warps every surface with the thin-plate spline that maps the source landmarks onto the destination ones.
 - **WeightedPhaseLagIndex** `[fn]` in [WeightedPhaseLagIndex](/docs/api/connectivity/weighted-phase-lag-index) — Constructs a [`WeightedPhaseLagIndex`](/docs/api/connectivity/weighted-phase-lag-index) object.
 - **weightNorm** `[var]` in [InvBeamformer](/docs/api/inv/inv-beamformer) — Applied weight normalization.
 - **weights** `[fn]` in [IeegSurfaceMap](/docs/api/ieeg/ieeg-surface-map) — Compute the vertices x contacts weight matrix.
@@ -6644,7 +6649,7 @@ Index of 6699 public class members (functions, variables, typedefs, enums) acros
 - **write** `[fn]` in [MemoryByteStream](/docs/api/utils/memory-byte-stream) — Writes `bytes` bytes at the current position, overwriting or extending the stream.
 - **write** `[fn]` in [MnaIO](/docs/api/mna/mna-io) — Write an MNA project to file.
 - **write** `[fn]` in [MnaProject](/docs/api/mna/mna-project) — Write an MNA project to file.
-- **write** `[fn]` in [MNEBem](/docs/api/mne/mne-bem) — [`MNE`](/docs/api/mne/mne-class) Toolbox function mne_write_bem_surfaces_block.
+- **write** `[fn]` in [MNEBem](/docs/api/mne/mne-bem) — Writes the model, as mne.write_bem_surfaces does.
 - **write** `[fn]` in [MNEClusterInfo](/docs/api/mne/mne-cluster-info) — Writes the cluster info as text, and the centroid vertex numbers to `centroids_&lt;name&gt;` in the same directory.
 - **write** `[fn]` in [MNEDerivSet](/docs/api/mne/mne-deriv-set) — Writes the set as a `FIFFB_MNE_DERIVATIONS` block (MNE-C `mne_write_deriv_file`).
 - **write** `[fn]` in [MNEForwardSolution](/docs/api/mne/mne-forward-solution) — Write the forward solution to a FIFF file.
@@ -6698,7 +6703,9 @@ Index of 6699 public class members (functions, variables, typedefs, enums) acros
 - **write_tag** `[fn]` in [FiffStream](/docs/api/fiff/fiff-stream) — Writes one tag; its payload is taken in host byte order, as `read_tag()` returns it.
 - **write_to_stream** `[fn]` in [FiffCoordTrans](/docs/api/fiff/fiff-coord-trans) — Writes the transformation to a FIFF stream.
 - **write_to_stream** `[fn]` in [FiffDigPointSet](/docs/api/fiff/fiff-dig-point-set) — Writes the points as an isotrak block inside a measurement info block.
+- **write_to_stream** `[fn]` in [MNEBem](/docs/api/mne/mne-bem) — Writes the FIFFB_BEM block into an open FIFF stream (MNE-C mne_write_bem_surfaces_block).
 - **write_to_stream** `[fn]` in [MNEInverseOperator](/docs/api/mne/mne-inverse-operator) — Writes the inverse solution block into an open FIFF stream.
+- **write_to_stream** `[fn]` in [MNESurface](/docs/api/mne/mne-surface) — Writes the surface tags of a FIFFB_BEM_SURF block (MNE-C mne_write_bem_surfaces_block): conductivity if set, id, coordinate frame, vertices, triangles and normals.
 - **write_w** `[fn]` in [InvSourceEstimate](/docs/api/inv/inv-source-estimate) — Writes the first time point as a .w file, as mne.write_w does.
 - **writeBigEndian** `[fn]` in [ByteStream](/docs/api/utils/byte-stream) — Writes `count` values in big-endian byte order.
 - **writeBigEndian** `[fn]` in [ByteStream](/docs/api/utils/byte-stream)
@@ -6718,11 +6725,9 @@ Index of 6699 public class members (functions, variables, typedefs, enums) acros
 - **writer** `[fn]` in [AcqStream](/docs/api/acq/acq-stream) — Takes the writer of an output stream (control path).
 - **writerWaits** `[var]` in [AcqStreamStats](/docs/api/acq/acq-stream-stats) — Output: beginWrite() calls that had to wait for space.
 - **writeToStream** `[fn]` in [FiffInfo](/docs/api/fiff/fiff-info) — Writes the fiff information to a FIF stream.
-- **writeToStream** `[fn]` in [MNEBem](/docs/api/mne/mne-bem) — [`MNE`](/docs/api/mne/mne-class) Toolbox function mne_write_bem_surfaces_block.
 - **writeToStream** `[fn]` in [MNEHemisphere](/docs/api/mne/mne-hemisphere) — mne_python _write_one_source_space
 - **writeToStream** `[fn]` in [MNESourceSpace](/docs/api/mne/mne-source-space) — Write this source space to a FIFF stream.
 - **writeToStream** `[fn]` in [MNESourceSpaces](/docs/api/mne/mne-source-spaces)
-- **writeToStream** `[fn]` in [MNESurface](/docs/api/mne/mne-surface) — Writes the surface tags of a FIFFB_BEM_SURF block (MNE-C mne_write_bem_surfaces_block): conductivity if set, id, coordinate frame, vertices, triangles and normals.
 - **writeTsv** `[fn]` in [BidsChannel](/docs/api/bids/bids-channel) — Write a BIDS *_channels.tsv file.
 - **writeTsv** `[fn]` in [BidsElectrode](/docs/api/bids/bids-electrode) — Write a BIDS *_electrodes.tsv file.
 - **writeTsv** `[fn]` in [BidsEvent](/docs/api/bids/bids-event) — Write a BIDS *_events.tsv file.

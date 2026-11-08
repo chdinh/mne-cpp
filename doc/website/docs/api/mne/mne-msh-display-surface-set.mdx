@@ -23,14 +23,14 @@ The [`MNE`](/docs/api/mne/mne-class) Msh Display [FsSurface](/docs/api/fs/fs-sur
 
 ```cpp title="src/examples/ex_mne_api/main.cpp"
 // Total solid angle seen from a point: 4 pi inside a closed surface, 0 outside
-auto skull = MNESurface::read_bem_surface2(bemFile.fileName(), FIFFV_BEM_SURF_ID_BRAIN, true);
+auto skull = MNESurface::read_bem_surface2(bemPath, FIFFV_BEM_SURF_ID_BRAIN, true);
 skull->compute_surface_cm();
 const double inside = skull->sum_solids(Map<const Vector3f>(skull->cm)) / (4.0 * M_PI);
 const double outside = skull->sum_solids(Vector3f(0.0f, 0.0f, 0.2f)) / (4.0 * M_PI);
 
 // The same surface as an MNE-C viewer display surface
 MNEMshDisplaySurfaceSet display;
-display.add_bem_surface(bemFile.fileName(), FIFFV_BEM_SURF_ID_BRAIN, "inner skull", 1, 1); // checks closure
+display.add_bem_surface(bemPath, FIFFV_BEM_SURF_ID_BRAIN, "inner skull", 1, 1); // checks closure
 const MNEMshDisplaySurface& shown = *display.surfs[0];
 ```
 
@@ -188,7 +188,7 @@ MNE library: BEM surfaces, surface projection, ICP, source spaces and epochs.
 ````cpp title="src/examples/ex_mne_api/main.cpp, line 468"
 // The same surface as an MNE-C viewer display surface
 MNEMshDisplaySurfaceSet display;
-display.add_bem_surface(bemFile.fileName(), FIFFV_BEM_SURF_ID_BRAIN, "inner skull", 1, 1); // checks closure
+display.add_bem_surface(bemPath, FIFFV_BEM_SURF_ID_BRAIN, "inner skull", 1, 1); // checks closure
 const MNEMshDisplaySurface& shown = *display.surfs[0];
 // mne.surface._get_solids (which returns the solid angle / 2): 0.5 at the centroid, 0 at (0, 0, 200) mm;
 // bounding box -66.7 ... 105.8 mm, centroid (0.67, -10.01, 44.26) mm

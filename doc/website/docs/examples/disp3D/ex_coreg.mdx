@@ -158,7 +158,6 @@ int main(int argc, char* argv[])
     parser.process(a);
 
     // get cli parameters
-    QFile t_fileBem(parser.value(bemOption));
     QFile t_fileTrans(parser.value(transOption));
 
     bool bScale = false;
@@ -176,7 +175,7 @@ int main(int argc, char* argv[])
     const FiffCoordTrans transHeadMriRef(t_fileTrans.fileName().toStdU16String(), FIFFV_COORD_HEAD, FIFFV_COORD_MRI);
 
     // read Bem
-    MNEBem bemHead(t_fileBem);
+    MNEBem bemHead(parser.value(bemOption).toStdU16String());
     MNEBemSurface::SPtr bemSurface = MNEBemSurface::SPtr::create(bemHead[0]);
     MNEProjectToSurface::SPtr mneSurfacePoints = MNEProjectToSurface::SPtr::create(*bemSurface);
 
@@ -267,7 +266,7 @@ int main(int argc, char* argv[])
     pModel->addDigitizerData(digSetHsp.points());
 
     // Add BEM surfaces
-    for (int i = 0; i < bemHead.size(); ++i) {
+    for (std::size_t i = 0; i < bemHead.size(); ++i) {
         pModel->addBemSurface("Sample", "Head", bemHead[i]);
     }
 

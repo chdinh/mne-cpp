@@ -334,8 +334,8 @@ int main(int argc, char* argv[])
     bool ok = tmp.isValid();
 
     //! [mne_bem_usage]
-    QFile bemFile(data + "/subjects/sample/bem/sample-5120-bem.fif");
-    MNEBem bem(bemFile); // one MNEBemSurface per BEM layer
+    const QString bemPath = data + "/subjects/sample/bem/sample-5120-bem.fif";
+    MNEBem bem(bemPath.toStdU16String()); // one MNEBemSurface per BEM layer
     const MNEBemSurface& innerSkull = bem[0];
     //! [mne_bem_usage]
     // mne.read_bem_surfaces: 1 surface, id 1 (inner skull), 2562 vertices, 5120 triangles
@@ -648,14 +648,14 @@ int main(int argc, char* argv[])
 
     //! [mne_surface_usage]
     // Total solid angle seen from a point: 4 pi inside a closed surface, 0 outside
-    auto skull = MNESurface::read_bem_surface2(bemFile.fileName(), FIFFV_BEM_SURF_ID_BRAIN, true);
+    auto skull = MNESurface::read_bem_surface2(bemPath, FIFFV_BEM_SURF_ID_BRAIN, true);
     skull->compute_surface_cm();
     const double inside = skull->sum_solids(Map<const Vector3f>(skull->cm)) / (4.0 * M_PI);
     const double outside = skull->sum_solids(Vector3f(0.0f, 0.0f, 0.2f)) / (4.0 * M_PI);
 
     // The same surface as an MNE-C viewer display surface
     MNEMshDisplaySurfaceSet display;
-    display.add_bem_surface(bemFile.fileName(), FIFFV_BEM_SURF_ID_BRAIN, "inner skull", 1, 1); // checks closure
+    display.add_bem_surface(bemPath, FIFFV_BEM_SURF_ID_BRAIN, "inner skull", 1, 1); // checks closure
     const MNEMshDisplaySurface& shown = *display.surfs[0];
     //! [mne_surface_usage]
     // mne.surface._get_solids (which returns the solid angle / 2): 0.5 at the centroid, 0 at (0, 0, 200) mm;
