@@ -27,7 +27,7 @@ It is exercised by:
 
 ````cpp title="src/examples/ex_mne_api/main.cpp"
 // Peak-to-peak rejection like mne.Epochs(reject=...): flagged epochs stay in the list with bReject set
-const QMap<QString, double> reject{{"grad", 1.6e-14}, {"eeg", 1.6e-8}};
+const std::map<std::string, double> reject{{"grad", 1.6e-14}, {"eeg", 1.6e-8}};
 MNEEpochDataList checked = MNEEpochDataList::readEpochs(raw, events.events, -0.1f, 0.3f, 1, reject);
 QList<int> keptEpochs;
 for (int i = 0; i < std::ssize(checked); ++i) {

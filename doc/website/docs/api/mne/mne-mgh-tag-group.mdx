@@ -69,7 +69,7 @@ It is exercised by:
 
 ````cpp title="src/examples/ex_mne_api/main.cpp"
 // A FreeSurfer surface with its curvature and the volume geometry from the file footer
-const auto white = MNESourceSpace::load_surface(data + "/subjects/sample/surf/lh.white", data + "/subjects/sample/surf/lh.curv");
+const auto white = MNESourceSpace::load_surface((data + "/subjects/sample/surf/lh.white").toStdU16String(), (data + "/subjects/sample/surf/lh.curv").toStdU16String());
 const MNEVolGeom& geometry = *white->vol_geom; // sizes and centre converted to metres
 ````
 

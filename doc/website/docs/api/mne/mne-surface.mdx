@@ -21,7 +21,7 @@ Lightweight triangulated surface (vertices, triangles, normals).
 
 ```cpp title="src/examples/ex_mne_api/main.cpp"
 // Total solid angle seen from a point: 4 pi inside a closed surface, 0 outside
-auto skull = MNESurface::read_bem_surface2(bemPath, FIFFV_BEM_SURF_ID_BRAIN, true);
+auto skull = MNESurface::read_bem_surface2(bemPath.toStdU16String(), FIFFV_BEM_SURF_ID_BRAIN, true);
 skull->compute_surface_cm();
 const double inside = skull->sum_solids(Map<const Vector3f>(skull->cm)) / (4.0 * M_PI);
 const double outside = skull->sum_solids(Vector3f(0.0f, 0.0f, 0.2f)) / (4.0 * M_PI);
@@ -296,7 +296,7 @@ Read a BEM surface from a FIFF file (excess-neighbor checking enabled).
 
 **Parameters:**
 
-- **name** : *const QString &*
+- **name** : *const std::filesystem::path &*
   Path to the BEM FIFF file.
 
 - **which** : *int*
@@ -317,7 +317,7 @@ Read a BEM surface from a FIFF file (excess-neighbor checking enabled).
 
 **Parameters:**
 
-- **name** : *const QString &*
+- **name** : *const std::filesystem::path &*
   Path to the BEM FIFF file.
 
 - **which** : *int*
@@ -341,7 +341,7 @@ Read a BEM surface from a FIFF file (excess-neighbor checking disabled).
 
 **Parameters:**
 
-- **name** : *const QString &*
+- **name** : *const std::filesystem::path &*
   Path to the BEM FIFF file.
 
 - **which** : *int*
@@ -362,7 +362,7 @@ Read a BEM surface from a FIFF file.
 
 **Parameters:**
 
-- **name** : *const QString &*
+- **name** : *const std::filesystem::path &*
   Path to the BEM FIFF file.
 
 - **which** : *int*
@@ -398,7 +398,7 @@ MNE library: BEM surfaces, surface projection, ICP, source spaces and epochs.
 
 ````cpp title="src/examples/ex_mne_api/main.cpp, line 454"
 // Total solid angle seen from a point: 4 pi inside a closed surface, 0 outside
-auto skull = MNESurface::read_bem_surface2(bemPath, FIFFV_BEM_SURF_ID_BRAIN, true);
+auto skull = MNESurface::read_bem_surface2(bemPath.toStdU16String(), FIFFV_BEM_SURF_ID_BRAIN, true);
 skull->compute_surface_cm();
 const double inside = skull->sum_solids(Map<const Vector3f>(skull->cm)) / (4.0 * M_PI);
 const double outside = skull->sum_solids(Vector3f(0.0f, 0.0f, 0.2f)) / (4.0 * M_PI);

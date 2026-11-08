@@ -32,13 +32,13 @@ for (const std::string& name : ave.info.ch_names) {
 ave = ave.pick_channels(megNames);
 const int nMeg = static_cast<int>(megNames.size());
 std::unique_ptr<MNEProjOp> aveProj;
-MNEProjOp::makeProjection({aveFile.fileName()}, ave.info.chs, nMeg, aveProj);
+MNEProjOp::makeProjection({aveFile.fileName().toStdU16String()}, ave.info.chs, nMeg, aveProj);
 aveProj->assign_channels(megNames, nMeg);
 aveProj->make_proj();
 VectorXf x = ave.data.col(200).cast<float>(); // t = 133 ms
 aveProj->project_vector(x, true);
 
-auto noise = MNECovMatrix::read(data + "/MEG/sample/sample_audvis-cov.fif", FIFFV_MNE_NOISE_COV);
+auto noise = MNECovMatrix::read((data + "/MEG/sample/sample_audvis-cov.fif").toStdU16String(), FIFFV_MNE_NOISE_COV);
 const int ncovFile = noise->ncov;
 auto noiseMeg = noise->pick_chs_omit(megNames, nMeg, false, ave.info.chs);
 aveProj->apply_cov(noiseMeg.get());
@@ -347,7 +347,7 @@ Read a covariance matrix of the specified kind from a FIFF file.
 
 **Parameters:**
 
-- **name** : *const QString &*
+- **name** : *const std::filesystem::path &*
   Path to the FIFF file.
 
 - **kind** : *int*
@@ -391,7 +391,7 @@ Compute the linear index into a symmetric lower-triangular packed storage array 
 MNE library: BEM surfaces, surface projection, ICP, source spaces and epochs.
 
 ````cpp title="src/examples/ex_mne_api/main.cpp, line 329"
-auto noise = MNECovMatrix::read(data + "/MEG/sample/sample_audvis-cov.fif", FIFFV_MNE_NOISE_COV);
+auto noise = MNECovMatrix::read((data + "/MEG/sample/sample_audvis-cov.fif").toStdU16String(), FIFFV_MNE_NOISE_COV);
 const int ncovFile = noise->ncov;
 auto noiseMeg = noise->pick_chs_omit(megNames, nMeg, false, ave.info.chs);
 aveProj->apply_cov(noiseMeg.get());

@@ -33,7 +33,7 @@ FiffEvoked evoked = epochs.average(raw.info, raw.first_samp, raw.last_samp);
 
 ```cpp title="src/examples/ex_mne_api/main.cpp"
 // Peak-to-peak rejection like mne.Epochs(reject=...): flagged epochs stay in the list with bReject set
-const QMap<QString, double> reject{{"grad", 1.6e-14}, {"eeg", 1.6e-8}};
+const std::map<std::string, double> reject{{"grad", 1.6e-14}, {"eeg", 1.6e-8}};
 MNEEpochDataList checked = MNEEpochDataList::readEpochs(raw, events.events, -0.1f, 0.3f, 1, reject);
 QList<int> keptEpochs;
 for (int i = 0; i < std::ssize(checked); ++i) {
@@ -147,10 +147,10 @@ Read the epochs from a raw file based on provided events.
 - **event** : *qint32*
   The event kind.
 
-- **mapReject** : *const QMap&lt; QString, double &gt; &*
+- **mapReject** : *const std::map&lt; std::string, double &gt; &*
   Peak-to-peak rejection thresholds per channel type (e.g. "grad", "mag", "eeg").
 
-- **lExcludeChs** : *const QStringList &*
+- **lExcludeChs** : *const UTILSLIB::StringList &*
   List of channel names to exclude.
 
 - **picks** : *const Eigen::RowVectorXi &*
@@ -174,10 +174,10 @@ Checks the givven matrix for artifacts beyond a threshold value.
 - **pFiffInfo** : *const [FiffInfo](/docs/api/fiff/fiff-info) &*
   The fiff info.
 
-- **mapReject** : *const QMap&lt; QString, double &gt; &*
+- **mapReject** : *const std::map&lt; std::string, double &gt; &*
   The channel data types to scan for. EEG, MEG or EOG.
 
-- **lExcludeChs** : *const QStringList &*
+- **lExcludeChs** : *const UTILSLIB::StringList &*
   List of channel names to exclude.
 
 **Returns:**
@@ -203,7 +203,7 @@ Multi-category offline averaging. Reads epochs from raw data for multiple event 
 - **eventCodes** : *const std::vector&lt; int &gt; &*
   List of event codes, one per category.
 
-- **comments** : *const QStringList &*
+- **comments** : *const UTILSLIB::StringList &*
   List of category names/comments, one per category.
 
 - **tmin** : *float*
@@ -212,7 +212,7 @@ Multi-category offline averaging. Reads epochs from raw data for multiple event 
 - **tmax** : *float*
   End of epoch relative to event (seconds).
 
-- **mapReject** : *const QMap&lt; QString, double &gt; &*
+- **mapReject** : *const std::map&lt; std::string, double &gt; &*
   Rejection thresholds (key = channel type string, value = threshold).
 
 - **baseline** : *const std::pair&lt; float, float &gt; &*
@@ -257,10 +257,10 @@ Convenience function: reads epochs, optionally applies baseline correction and a
 - **fTBaselineToS** : *float*
   The end baseline correction time relative to the event in seconds.
 
-- **mapReject** : *const QMap&lt; QString, double &gt; &*
+- **mapReject** : *const std::map&lt; std::string, double &gt; &*
   The thresholds per channel type to reject epochs.
 
-- **lExcludeChs** : *const QStringList &*
+- **lExcludeChs** : *const UTILSLIB::StringList &*
   List of channel names to exclude.
 
 - **vecPicks** : *const Eigen::RowVectorXi &*
@@ -325,7 +325,7 @@ FiffEvoked evoked = MNEEpochDataList::computeAverage(raw,
                                                      fTMin,
                                                      0.0f,
                                                      mapReject,
-                                                     QStringList(),
+                                                     {},
                                                      picks);
 ````
 

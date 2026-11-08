@@ -30,8 +30,8 @@ smallToLarge.from_subj = "small";
 smallToLarge.to_subj = "large";
 smallToLarge.hemi = 0;
 const QString mapFile = tmp.filePath("small-large-morph.fif");
-MNEMorphMap::write(mapFile, {&smallToLarge});
-const auto reread = MNEMorphMap::read(mapFile, "small", "large", 0);
+MNEMorphMap::write(mapFile.toStdU16String(), {&smallToLarge});
+const auto reread = MNEMorphMap::read(mapFile.toStdU16String(), "small", "large", 0);
 const Eigen::SparseMatrix<double> weights = reread->toEigen(); // 642 x 162, feeds INVLIB::SourceMorph
 ```
 
@@ -107,13 +107,13 @@ Reads one map from a morph-map file (MNE-C `load_one_morph_map`).
 
 **Parameters:**
 
-- **path** : *const QString &*
+- **path** : *const std::filesystem::path &*
   A `-morph.fif` file.
 
-- **fromSubj** : *const QString &*
+- **fromSubj** : *const std::string &*
   Source subject.
 
-- **toSubj** : *const QString &*
+- **toSubj** : *const std::string &*
   Destination subject.
 
 - **hemi** : *int*
@@ -131,7 +131,7 @@ Writes maps as `FIFFB_MNE_MORPH_MAP` blocks (MNE-C `mne_save_morph_map_matrices`
 
 **Parameters:**
 
-- **path** : *const QString &*
+- **path** : *const std::filesystem::path &*
   The output file.
 
 - **maps** : *const std::vector&lt; const MNEMorphMap * &gt; &*
@@ -165,8 +165,8 @@ smallToLarge.from_subj = "small";
 smallToLarge.to_subj = "large";
 smallToLarge.hemi = 0;
 const QString mapFile = tmp.filePath("small-large-morph.fif");
-MNEMorphMap::write(mapFile, {&smallToLarge});
-const auto reread = MNEMorphMap::read(mapFile, "small", "large", 0);
+MNEMorphMap::write(mapFile.toStdU16String(), {&smallToLarge});
+const auto reread = MNEMorphMap::read(mapFile.toStdU16String(), "small", "large", 0);
 const Eigen::SparseMatrix<double> weights = reread->toEigen(); // 642 x 162, feeds INVLIB::SourceMorph
 // mne.read_morph_map("small", "large"): vertex 0 of "large" = 0.4372 * v0 + 0.3726 * v42 + 0.1902 * v51 of "small"
 ok &= expect(weights.rows() == 642 && weights.cols() == 162 && std::abs(weights.coeff(0, 0) - 0.43720984) < 1e-5 && std::abs(weights.coeff(0, 42) - 0.37262118) < 1e-5 && std::abs(weights.coeff(0, 51) - 0.19016896) < 1e-5,

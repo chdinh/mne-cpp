@@ -20,7 +20,7 @@ Channel derivation and re-referencing utilities.
 Provides methods to build bipolar and common-average re-referencing schemes, apply arbitrary linear derivation rules to data matrices, and read/write derivation definition files.
 
 ```cpp title="src/examples/ex_dsp_preprocessing/main.cpp"
-const QStringList names = {"LH1", "LH2", "LH3", "RA1"};
+const StringList names = {"LH1", "LH2", "LH3", "RA1"};
 const std::vector<DerivationRule> bipolar = ChannelDerivation::buildBipolar(names); // LH1-LH2, LH2-LH3
 const std::vector<DerivationRule> average = ChannelDerivation::buildCommonAverage(names);
 const auto [bipolarData, bipolarNames] = ChannelDerivation::apply(raw, names, bipolar);
@@ -39,7 +39,7 @@ Channels are grouped by shaft prefix (all leading alphabetic characters and apos
 
 **Parameters:**
 
-- **channelNames** : *const QStringList &*
+- **channelNames** : *const StringList &*
   List of channel names, e.g. \{"LH1","LH2","LH3","RA1","RA2"\}.
 
 **Returns:**
@@ -56,7 +56,7 @@ Each output channel equals the original channel minus the mean of all channels: 
 
 **Parameters:**
 
-- **channelNames** : *const QStringList &*
+- **channelNames** : *const StringList &*
   List of channel names.
 
 **Returns:**
@@ -74,7 +74,7 @@ Apply derivation rules to a data matrix.
 - **matData** : *const Eigen::MatrixXd &*
   Input data matrix (n_channels × n_times).
 
-- **channelNames** : *const QStringList &*
+- **channelNames** : *const StringList &*
   Channel names corresponding to rows of matData.
 
 - **rules** : *const std::vector&lt; [DerivationRule](/docs/api/utils/derivation-rule) &gt; &*
@@ -82,7 +82,7 @@ Apply derivation rules to a data matrix.
 
 **Returns:**
 
-- *std::pair&lt; Eigen::MatrixXd, QStringList &gt;* — A pair of (derived data matrix, derived channel names). The output matrix has n_rules rows × n_times columns.
+- *std::pair&lt; Eigen::MatrixXd, StringList &gt;* — A pair of (derived data matrix, derived channel names). The output matrix has n_rules rows × n_times columns.
 
 ---
 
@@ -98,7 +98,7 @@ Read derivation rules from an MNE-C derivation text file (`MNELIB::MNEDerivSet::
 
 **Parameters:**
 
-- **path** : *const QString &*
+- **path** : *const std::filesystem::path &*
   Path to the definition file.
 
 **Returns:**
@@ -113,7 +113,7 @@ Write derivation rules in MNE-C derivation text syntax, readable by readDefiniti
 
 **Parameters:**
 
-- **path** : *const QString &*
+- **path** : *const std::filesystem::path &*
   Path to the output file.
 
 - **rules** : *const std::vector&lt; [DerivationRule](/docs/api/utils/derivation-rule) &gt; &*

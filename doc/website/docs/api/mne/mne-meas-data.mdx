@@ -21,7 +21,7 @@ Replaces `*mneMeasData` / `mneMeasDataRec` from MNE-C ``mne_types.h``. Holds cha
 
 ```cpp title="src/examples/ex_mne_api/main.cpp"
 // MNE-C measurement container: data set 1 of the evoked file, MEG and EEG channels, time-major
-std::unique_ptr<MNEMeasData> meas(MNEMeasData::mne_read_meas_data(aveFile.fileName(), 1, nullptr, nullptr, {}, 0));
+std::unique_ptr<MNEMeasData> meas(MNEMeasData::mne_read_meas_data(aveFile.fileName().toStdU16String(), 1, nullptr, nullptr, {}, 0));
 const MNEMeasDataSet& left = *meas->current;
 const float meg0113 = left.data(180, 0); // t = 99.9 ms
 meas->adjust_baselines(-0.2f, 0.0f);
@@ -79,7 +79,7 @@ Refactored from `mne_read_meas_data_add` (mne_read_data.c).
 
 **Parameters:**
 
-- **name** : *const QString &*
+- **name** : *const std::filesystem::path &*
   Path to the FIFF measurement file.
 
 - **set** : *int*
@@ -112,7 +112,7 @@ Read an evoked-response data set into a new container.
 
 **Parameters:**
 
-- **name** : *const QString &*
+- **name** : *const std::filesystem::path &*
   Path to the FIFF measurement file.
 
 - **set** : *int*
@@ -151,7 +151,7 @@ MNE library: BEM surfaces, surface projection, ICP, source spaces and epochs.
 
 ````cpp title="src/examples/ex_mne_api/main.cpp, line 421"
 // MNE-C measurement container: data set 1 of the evoked file, MEG and EEG channels, time-major
-std::unique_ptr<MNEMeasData> meas(MNEMeasData::mne_read_meas_data(aveFile.fileName(), 1, nullptr, nullptr, {}, 0));
+std::unique_ptr<MNEMeasData> meas(MNEMeasData::mne_read_meas_data(aveFile.fileName().toStdU16String(), 1, nullptr, nullptr, {}, 0));
 const MNEMeasDataSet& left = *meas->current;
 const float meg0113 = left.data(180, 0); // t = 99.9 ms
 meas->adjust_baselines(-0.2f, 0.0f);

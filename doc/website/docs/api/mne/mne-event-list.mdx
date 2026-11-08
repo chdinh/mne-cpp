@@ -22,11 +22,11 @@ Ordered list of trigger events with comments.
 MNEEventList annotated = MNEEventList::fromMatrix(events.events).selectOnsets();
 annotated.sort();
 for (MNEEvent& event : annotated.events) {
-    event.comment = event.to == 1 ? "left auditory" : QString();
+    event.comment = (event.to == 1 ? "left auditory" : QString()).toStdString();
 }
 const QString commentedName = tmp.filePath("commented-eve.fif");
-annotated.writeFif(commentedName);
-const auto relative = MNEEventList::readFif(commentedName, raw.first_samp);
+annotated.writeFif(commentedName.toStdU16String());
+const auto relative = MNEEventList::readFif(commentedName.toStdU16String(), raw.first_samp);
 const MNEEventList leftAuditory = relative->selectOnsets(1);
 ```
 
@@ -40,7 +40,7 @@ Writes the list as an event block with comments, readable by `mne.read_events`.
 
 **Parameters:**
 
-- **path** : *const QString &*
+- **path** : *const std::filesystem::path &*
   The output file.
 
 - **offset** : *int*
@@ -122,7 +122,7 @@ Reads the event block of a FIFF file (MNE-C `mne_load_events_fiff`).
 
 **Parameters:**
 
-- **path** : *const QString &*
+- **path** : *const std::filesystem::path &*
   A `-eve.fif` file or a raw file carrying an event block.
 
 - **offset** : *int*
@@ -142,7 +142,7 @@ Each line holds sample, time, trigger value before and after, and an optional co
 
 **Parameters:**
 
-- **path** : *const QString &*
+- **path** : *const std::filesystem::path &*
   The text file.
 
 - **offset** : *int*
@@ -193,14 +193,14 @@ MNE library: BEM surfaces, surface projection, ICP, source spaces and epochs.
 MNEEventList annotated = MNEEventList::fromMatrix(events.events).selectOnsets();
 annotated.sort();
 for (MNEEvent& event : annotated.events) {
-    event.comment = event.to == 1 ? "left auditory" : QString();
+    event.comment = (event.to == 1 ? "left auditory" : QString()).toStdString();
 }
 const QString commentedName = tmp.filePath("commented-eve.fif");
-annotated.writeFif(commentedName);
-const auto relative = MNEEventList::readFif(commentedName, raw.first_samp);
+annotated.writeFif(commentedName.toStdU16String());
+const auto relative = MNEEventList::readFif(commentedName.toStdU16String(), raw.first_samp);
 const MNEEventList leftAuditory = relative->selectOnsets(1);
 // mne.find_events: 25 onsets, codes up to 32, 6 of code 1, the first at 14385 - 12900
-ok &= expect(annotated.nevent() == 25 && annotated.maxOnset() == 32 && leftAuditory.nevent() == 6 && leftAuditory.events[0].sample == 14385 - 12900 && leftAuditory.events[0].comment == "left auditory" && relative->events[0].comment.isEmpty(),
+ok &= expect(annotated.nevent() == 25 && annotated.maxOnset() == 32 && leftAuditory.nevent() == 6 && leftAuditory.events[0].sample == 14385 - 12900 && leftAuditory.events[0].comment == "left auditory" && relative->events[0].comment.empty(),
              "MNEEventList/MNEEvent: commented event file, onsets selected like mne.find_events");
 ````
 

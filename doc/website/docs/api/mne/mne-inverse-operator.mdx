@@ -108,7 +108,7 @@ Applies eigenfield/eigenlead decomposition, regularisation, whitening, projectio
 - **label** : *const [FsLabel](/docs/api/fs/fs-label) &*
   Cortical label restricting the source space (empty for all sources).
 
-- **method** : *const QString &*
+- **method** : *const std::string &*
   Inverse method: "MNE", "dSPM", or "sLORETA".
 
 - **pick_normal** : *bool*
@@ -161,7 +161,7 @@ Groups source-space points within each parcellation label using [KMeans](/docs/a
 - **D** : *Eigen::MatrixXd &*
   Cluster operator matrix (nSources x nClusters).
 
-- **method** : *const QString &*
+- **method** : *const std::string &*
   Distance metric: "cityblock" or "sqeuclidean".
 
 **Returns:**

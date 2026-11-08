@@ -25,16 +25,16 @@ This defines a source space
 
 ```cpp title="src/examples/ex_mne_api/main.cpp"
 // A FreeSurfer surface with its curvature and the volume geometry from the file footer
-const auto white = MNESourceSpace::load_surface(data + "/subjects/sample/surf/lh.white", data + "/subjects/sample/surf/lh.curv");
+const auto white = MNESourceSpace::load_surface((data + "/subjects/sample/surf/lh.white").toStdU16String(), (data + "/subjects/sample/surf/lh.curv").toStdU16String());
 const MNEVolGeom& geometry = *white->vol_geom; // sizes and centre converted to metres
 ```
 
 ```cpp title="src/examples/ex_mne_api/main.cpp"
 // Drop sources outside the inner skull or closer than 5 mm to it (mne make_forward_solution(mindist=5))
 std::vector<std::unique_ptr<MNESourceSpace>> spaces;
-MNESourceSpace::read_source_spaces(srcPath, spaces);
+MNESourceSpace::read_source_spaces(srcPath.toStdU16String(), spaces);
 const FiffCoordTrans mriHeadT((data + "/MEG/sample/all-trans.fif").toStdU16String(), FIFFV_COORD_MRI, FIFFV_COORD_HEAD);
-MNESourceSpace::filter_source_spaces(0.005f, data + "/subjects/sample/bem/sample-5120-bem.fif", mriHeadT, spaces, nullptr, true);
+MNESourceSpace::filter_source_spaces(0.005f, (data + "/subjects/sample/bem/sample-5120-bem.fif").toStdU16String(), mriHeadT, spaces, nullptr, true);
 ```
 
 ### Inheritance
@@ -187,10 +187,10 @@ Load a FreeSurfer surface from disk, adding full geometry information.
 
 **Parameters:**
 
-- **surf_file** : *const QString &*
+- **surf_file** : *const std::filesystem::path &*
   Path to the FreeSurfer surface file.
 
-- **curv_file** : *const QString &*
+- **curv_file** : *const std::filesystem::path &*
   Path to the curvature file (may be empty).
 
 **Returns:**
@@ -205,10 +205,10 @@ Load a FreeSurfer surface from disk, optionally adding geometry information.
 
 **Parameters:**
 
-- **surf_file** : *const QString &*
+- **surf_file** : *const std::filesystem::path &*
   Path to the FreeSurfer surface file.
 
-- **curv_file** : *const QString &*
+- **curv_file** : *const std::filesystem::path &*
   Path to the curvature file (may be empty).
 
 - **add_geometry** : *bool*
@@ -301,10 +301,10 @@ Vertices of a subject's surfaces nearest to an icosahedron of the given grade (m
 
 **Parameters:**
 
-- **subjectsDir** : *const QString &*
+- **subjectsDir** : *const std::filesystem::path &*
   The FreeSurfer subjects directory.
 
-- **subject** : *const QString &*
+- **subject** : *const std::string &*
   The subject.
 
 - **grade** : *int*
@@ -331,7 +331,7 @@ MNE library: BEM surfaces, surface projection, ICP, source spaces and epochs.
 
 ````cpp title="src/examples/ex_mne_api/main.cpp, line 210"
 // A FreeSurfer surface with its curvature and the volume geometry from the file footer
-const auto white = MNESourceSpace::load_surface(data + "/subjects/sample/surf/lh.white", data + "/subjects/sample/surf/lh.curv");
+const auto white = MNESourceSpace::load_surface((data + "/subjects/sample/surf/lh.white").toStdU16String(), (data + "/subjects/sample/surf/lh.curv").toStdU16String());
 const MNEVolGeom& geometry = *white->vol_geom; // sizes and centre converted to metres
 // nibabel.freesurfer.read_geometry(read_metadata=True): 155407 vertices, 310810 triangles, volume 256^3,
 // cras (-5.27361, 9.03909, -27.288) mm; read_morph_data(lh.curv).sum() = -5976.48

@@ -21,7 +21,7 @@ Stores all available compensation data sets read from a FIFF file together with 
 
 ```cpp title="src/examples/ex_mne_api/main.cpp"
 // Open a third-order gradiometer recording and read it uncompensated (grade 0)
-std::unique_ptr<MNERawData> ctfRaw(MNERawData::open_file_comp(ctfPath, false, false, MNEFilterDef(), 0));
+std::unique_ptr<MNERawData> ctfRaw(MNERawData::open_file_comp(ctfPath.toStdU16String(), false, false, MNEFilterDef(), 0));
 const MNECTFCompDataSet& comp = *ctfRaw->comp; // grades 1, 2, 3 and two 4D kinds
 const MNECTFCompData* third = nullptr;
 for (const auto& c : comp.comps) {
@@ -183,7 +183,7 @@ Read all CTF compensation data sets (matrices and channel info) from a FIFF file
 
 **Parameters:**
 
-- **name** : *const QString &*
+- **name** : *const std::filesystem::path &*
   Path to the FIFF file.
 
 **Returns:**
@@ -257,7 +257,7 @@ Return a human-readable description string for a compensation kind constant.
 
 **Returns:**
 
-- *QString* — A string describing the compensation (e.g. "third order gradiometer").
+- *std::string* — A string describing the compensation (e.g. "third order gradiometer").
 
 ---
 
@@ -276,7 +276,7 @@ MNE library: BEM surfaces, surface projection, ICP, source spaces and epochs.
 
 ````cpp title="src/examples/ex_mne_api/main.cpp, line 343"
 // Open a third-order gradiometer recording and read it uncompensated (grade 0)
-std::unique_ptr<MNERawData> ctfRaw(MNERawData::open_file_comp(ctfPath, false, false, MNEFilterDef(), 0));
+std::unique_ptr<MNERawData> ctfRaw(MNERawData::open_file_comp(ctfPath.toStdU16String(), false, false, MNEFilterDef(), 0));
 const MNECTFCompDataSet& comp = *ctfRaw->comp; // grades 1, 2, 3 and two 4D kinds
 const MNECTFCompData* third = nullptr;
 for (const auto& c : comp.comps) {

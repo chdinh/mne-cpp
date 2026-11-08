@@ -24,9 +24,9 @@ QFile montageFile(montage);
 ok &= montageFile.open(QIODevice::WriteOnly | QIODevice::Text);
 montageFile.write("\"EEG001-EEG002\" = \"EEG001\" - \"EEG002\"\n\"FRONT\" = 0.5 * \"EEG001\" + 0.5 * \"EEG002\" - \"EEG999\"\n");
 montageFile.close();
-const auto derivations = MNEDerivSet::readText(montage);
-derivations->write(tmp.filePath("montage-deriv.fif"));
-const auto fromFif = MNEDerivSet::read(tmp.filePath("montage-deriv.fif"));
+const auto derivations = MNEDerivSet::readText(montage.toStdU16String());
+derivations->write(tmp.filePath("montage-deriv.fif").toStdU16String());
+const auto fromFif = MNEDerivSet::read(tmp.filePath("montage-deriv.fif").toStdU16String());
 const int usable = mneRaw->attachDerivations(*fromFif); // FRONT needs EEG999 and is dropped
 MNEChSelection bipolar;
 bipolar.chspick = bipolar.chspick_nospace = {"EEG001-EEG002", "EEG001", "EEG002"};
@@ -90,7 +90,7 @@ Writes the set as a `FIFFB_MNE_DERIVATIONS` block (MNE-C `mne_write_deriv_file`)
 
 **Parameters:**
 
-- **path** : *const QString &*
+- **path** : *const std::filesystem::path &*
   The output file.
 
 **Returns:**
@@ -153,7 +153,7 @@ Reads every derivation stored in the `FIFFB_MNE_DERIVATIONS` blocks of a file (M
 
 **Parameters:**
 
-- **path** : *const QString &*
+- **path** : *const std::filesystem::path &*
   A derivation file written by `write()` or MNE-C `mne_make_derivations`.
 
 **Returns:**
@@ -170,7 +170,7 @@ Each derivation is `name` = followed by terms joined by + and -; a term is a cha
 
 **Parameters:**
 
-- **path** : *const QString &*
+- **path** : *const std::filesystem::path &*
   The text file.
 
 **Returns:**
@@ -188,7 +188,7 @@ Builds one derivation from definitions such as those of dsp::[ChannelDerivation]
 - **definitions** : *const std::vector&lt; Definition &gt; &*
   Derived channel names with the weights of their inputs.
 
-- **name** : *const QString &*
+- **name** : *const std::string &*
   Short name of the derivation.
 
 **Returns:**
@@ -214,9 +214,9 @@ MNE library: BEM surfaces, surface projection, ICP, source spaces and epochs.
 ok &= montageFile.open(QIODevice::WriteOnly | QIODevice::Text);
 montageFile.write("\"EEG001-EEG002\" = \"EEG001\" - \"EEG002\"\n\"FRONT\" = 0.5 * \"EEG001\" + 0.5 * \"EEG002\" - \"EEG999\"\n");
 montageFile.close();
-const auto derivations = MNEDerivSet::readText(montage);
-derivations->write(tmp.filePath("montage-deriv.fif"));
-const auto fromFif = MNEDerivSet::read(tmp.filePath("montage-deriv.fif"));
+const auto derivations = MNEDerivSet::readText(montage.toStdU16String());
+derivations->write(tmp.filePath("montage-deriv.fif").toStdU16String());
+const auto fromFif = MNEDerivSet::read(tmp.filePath("montage-deriv.fif").toStdU16String());
 const int usable = mneRaw->attachDerivations(*fromFif); // FRONT needs EEG999 and is dropped
 MNEChSelection bipolar;
 bipolar.chspick = bipolar.chspick_nospace = {"EEG001-EEG002", "EEG001", "EEG002"};

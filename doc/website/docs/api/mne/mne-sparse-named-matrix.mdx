@@ -24,9 +24,9 @@ QFile montageFile(montage);
 ok &= montageFile.open(QIODevice::WriteOnly | QIODevice::Text);
 montageFile.write("\"EEG001-EEG002\" = \"EEG001\" - \"EEG002\"\n\"FRONT\" = 0.5 * \"EEG001\" + 0.5 * \"EEG002\" - \"EEG999\"\n");
 montageFile.close();
-const auto derivations = MNEDerivSet::readText(montage);
-derivations->write(tmp.filePath("montage-deriv.fif"));
-const auto fromFif = MNEDerivSet::read(tmp.filePath("montage-deriv.fif"));
+const auto derivations = MNEDerivSet::readText(montage.toStdU16String());
+derivations->write(tmp.filePath("montage-deriv.fif").toStdU16String());
+const auto fromFif = MNEDerivSet::read(tmp.filePath("montage-deriv.fif").toStdU16String());
 const int usable = mneRaw->attachDerivations(*fromFif); // FRONT needs EEG999 and is dropped
 MNEChSelection bipolar;
 bipolar.chspick = bipolar.chspick_nospace = {"EEG001-EEG002", "EEG001", "EEG002"};

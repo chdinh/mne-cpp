@@ -294,10 +294,10 @@ int main(int argc, char* argv[])
     events = FiffEvents::read(sEve.toStdU16String()).value().events;
 
     // Read the epochs and reject bad epochs. Note, that SSPs are automatically applied to the data if activate_projections() was called beforehand.
-    QMap<QString, double> mapReject;
-    mapReject.insert("eog", 100e-06);
-    mapReject.insert("grad", 3000e-13);
-    mapReject.insert("mag", 3.5e-12);
+    std::map<std::string, double> mapReject;
+    mapReject.emplace("eog", 100e-06);
+    mapReject.emplace("grad", 3000e-13);
+    mapReject.emplace("mag", 3.5e-12);
 
     MNEEpochDataList data = MNEEpochDataList::readEpochs(raw,
                                                          events,

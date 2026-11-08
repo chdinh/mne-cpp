@@ -29,7 +29,7 @@ All factory methods return `std::unique_ptr<MNENamedMatrix>` for clear ownership
 
 ```cpp title="src/examples/ex_mne_api/main.cpp"
 // Open a third-order gradiometer recording and read it uncompensated (grade 0)
-std::unique_ptr<MNERawData> ctfRaw(MNERawData::open_file_comp(ctfPath, false, false, MNEFilterDef(), 0));
+std::unique_ptr<MNERawData> ctfRaw(MNERawData::open_file_comp(ctfPath.toStdU16String(), false, false, MNEFilterDef(), 0));
 const MNECTFCompDataSet& comp = *ctfRaw->comp; // grades 1, 2, 3 and two 4D kinds
 const MNECTFCompData* third = nullptr;
 for (const auto& c : comp.comps) {

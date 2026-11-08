@@ -395,7 +395,7 @@ int main(int argc, char* argv[])
 
     //! [mne_source_space_load_surface]
     // A FreeSurfer surface with its curvature and the volume geometry from the file footer
-    const auto white = MNESourceSpace::load_surface(data + "/subjects/sample/surf/lh.white", data + "/subjects/sample/surf/lh.curv");
+    const auto white = MNESourceSpace::load_surface((data + "/subjects/sample/surf/lh.white").toStdU16String(), (data + "/subjects/sample/surf/lh.curv").toStdU16String());
     const MNEVolGeom& geometry = *white->vol_geom; // sizes and centre converted to metres
     //! [mne_source_space_load_surface]
     // nibabel.freesurfer.read_geometry(read_metadata=True): 155407 vertices, 310810 triangles, volume 256^3,
@@ -406,9 +406,9 @@ int main(int argc, char* argv[])
     //! [mne_source_space_filter]
     // Drop sources outside the inner skull or closer than 5 mm to it (mne make_forward_solution(mindist=5))
     std::vector<std::unique_ptr<MNESourceSpace>> spaces;
-    MNESourceSpace::read_source_spaces(srcPath, spaces);
+    MNESourceSpace::read_source_spaces(srcPath.toStdU16String(), spaces);
     const FiffCoordTrans mriHeadT((data + "/MEG/sample/all-trans.fif").toStdU16String(), FIFFV_COORD_MRI, FIFFV_COORD_HEAD);
-    MNESourceSpace::filter_source_spaces(0.005f, data + "/subjects/sample/bem/sample-5120-bem.fif", mriHeadT, spaces, nullptr, true);
+    MNESourceSpace::filter_source_spaces(0.005f, (data + "/subjects/sample/bem/sample-5120-bem.fif").toStdU16String(), mriHeadT, spaces, nullptr, true);
     //! [mne_source_space_filter]
     // mne.source_space._source_space._filter_source_spaces(inner skull, limit=5.0): 3732 and 3766 sources left
     ok &= expect(spaces.size() == 2 && spaces[0]->nuse == 3732 && spaces[1]->nuse == 3766,
@@ -432,7 +432,7 @@ int main(int argc, char* argv[])
 
     //! [mne_epoch_rejection_usage]
     // Peak-to-peak rejection like mne.Epochs(reject=...): flagged epochs stay in the list with bReject set
-    const QMap<QString, double> reject{{"grad", 1.6e-14}, {"eeg", 1.6e-8}};
+    const std::map<std::string, double> reject{{"grad", 1.6e-14}, {"eeg", 1.6e-8}};
     MNEEpochDataList checked = MNEEpochDataList::readEpochs(raw, events.events, -0.1f, 0.3f, 1, reject);
     QList<int> keptEpochs;
     for (int i = 0; i < std::ssize(checked); ++i) {
@@ -454,7 +454,7 @@ int main(int argc, char* argv[])
     filter.taper_size = 2048;
     filter.lowpass = filter.eog_lowpass = 40.0f;
     filter.lowpass_width = filter.eog_lowpass_width = 5.0f;
-    std::unique_ptr<MNERawData> mneRaw(MNERawData::open_file(rawFile.fileName(), false, false, filter));
+    std::unique_ptr<MNERawData> mneRaw(MNERawData::open_file(rawFile.fileName().toStdU16String(), false, false, filter));
     const MNERawInfo& rawInfo = *mneRaw->info;
     const MNERawBufDef& firstBuffer = mneRaw->bufs.front();
 
@@ -477,7 +477,7 @@ int main(int argc, char* argv[])
 
     // The file stores its 4 SSP projectors as inactive; makeProjection switches them on
     std::unique_ptr<MNEProjOp> proj;
-    MNEProjOp::makeProjection({rawFile.fileName()}, rawInfo.chInfo, rawInfo.nchan, proj);
+    MNEProjOp::makeProjection({rawFile.fileName().toStdU16String()}, rawInfo.chInfo, rawInfo.nchan, proj);
     proj->assign_channels(mneRaw->ch_names, rawInfo.nchan);
     proj->make_proj();
     const MNEProjItem& firstItem = proj->items[0];
@@ -507,13 +507,13 @@ int main(int argc, char* argv[])
     ave = ave.pick_channels(megNames);
     const int nMeg = static_cast<int>(megNames.size());
     std::unique_ptr<MNEProjOp> aveProj;
-    MNEProjOp::makeProjection({aveFile.fileName()}, ave.info.chs, nMeg, aveProj);
+    MNEProjOp::makeProjection({aveFile.fileName().toStdU16String()}, ave.info.chs, nMeg, aveProj);
     aveProj->assign_channels(megNames, nMeg);
     aveProj->make_proj();
     VectorXf x = ave.data.col(200).cast<float>(); // t = 133 ms
     aveProj->project_vector(x, true);
 
-    auto noise = MNECovMatrix::read(data + "/MEG/sample/sample_audvis-cov.fif", FIFFV_MNE_NOISE_COV);
+    auto noise = MNECovMatrix::read((data + "/MEG/sample/sample_audvis-cov.fif").toStdU16String(), FIFFV_MNE_NOISE_COV);
     const int ncovFile = noise->ncov;
     auto noiseMeg = noise->pick_chs_omit(megNames, nMeg, false, ave.info.chs);
     aveProj->apply_cov(noiseMeg.get());
@@ -528,7 +528,7 @@ int main(int argc, char* argv[])
 
     //! [mne_ctf_comp_data_set_usage]
     // Open a third-order gradiometer recording and read it uncompensated (grade 0)
-    std::unique_ptr<MNERawData> ctfRaw(MNERawData::open_file_comp(ctfPath, false, false, MNEFilterDef(), 0));
+    std::unique_ptr<MNERawData> ctfRaw(MNERawData::open_file_comp(ctfPath.toStdU16String(), false, false, MNEFilterDef(), 0));
     const MNECTFCompDataSet& comp = *ctfRaw->comp; // grades 1, 2, 3 and two 4D kinds
     const MNECTFCompData* third = nullptr;
     for (const auto& c : comp.comps) {
@@ -606,7 +606,7 @@ int main(int argc, char* argv[])
 
     //! [mne_meas_data_usage]
     // MNE-C measurement container: data set 1 of the evoked file, MEG and EEG channels, time-major
-    std::unique_ptr<MNEMeasData> meas(MNEMeasData::mne_read_meas_data(aveFile.fileName(), 1, nullptr, nullptr, {}, 0));
+    std::unique_ptr<MNEMeasData> meas(MNEMeasData::mne_read_meas_data(aveFile.fileName().toStdU16String(), 1, nullptr, nullptr, {}, 0));
     const MNEMeasDataSet& left = *meas->current;
     const float meg0113 = left.data(180, 0); // t = 99.9 ms
     meas->adjust_baselines(-0.2f, 0.0f);
@@ -639,7 +639,7 @@ int main(int argc, char* argv[])
 
     //! [mne_surface_usage]
     // Total solid angle seen from a point: 4 pi inside a closed surface, 0 outside
-    auto skull = MNESurface::read_bem_surface2(bemPath, FIFFV_BEM_SURF_ID_BRAIN, true);
+    auto skull = MNESurface::read_bem_surface2(bemPath.toStdU16String(), FIFFV_BEM_SURF_ID_BRAIN, true);
     skull->compute_surface_cm();
     const double inside = skull->sum_solids(Map<const Vector3f>(skull->cm)) / (4.0 * M_PI);
     const double outside = skull->sum_solids(Vector3f(0.0f, 0.0f, 0.2f)) / (4.0 * M_PI);
@@ -661,15 +661,15 @@ int main(int argc, char* argv[])
     MNEEventList annotated = MNEEventList::fromMatrix(events.events).selectOnsets();
     annotated.sort();
     for (MNEEvent& event : annotated.events) {
-        event.comment = event.to == 1 ? "left auditory" : QString();
+        event.comment = (event.to == 1 ? "left auditory" : QString()).toStdString();
     }
     const QString commentedName = tmp.filePath("commented-eve.fif");
-    annotated.writeFif(commentedName);
-    const auto relative = MNEEventList::readFif(commentedName, raw.first_samp);
+    annotated.writeFif(commentedName.toStdU16String());
+    const auto relative = MNEEventList::readFif(commentedName.toStdU16String(), raw.first_samp);
     const MNEEventList leftAuditory = relative->selectOnsets(1);
     //! [mne_event_list_usage]
     // mne.find_events: 25 onsets, codes up to 32, 6 of code 1, the first at 14385 - 12900
-    ok &= expect(annotated.nevent() == 25 && annotated.maxOnset() == 32 && leftAuditory.nevent() == 6 && leftAuditory.events[0].sample == 14385 - 12900 && leftAuditory.events[0].comment == "left auditory" && relative->events[0].comment.isEmpty(),
+    ok &= expect(annotated.nevent() == 25 && annotated.maxOnset() == 32 && leftAuditory.nevent() == 6 && leftAuditory.events[0].sample == 14385 - 12900 && leftAuditory.events[0].comment == "left auditory" && relative->events[0].comment.empty(),
                  "MNEEventList/MNEEvent: commented event file, onsets selected like mne.find_events");
 
     //! [mne_deriv_set_usage]
@@ -679,9 +679,9 @@ int main(int argc, char* argv[])
     ok &= montageFile.open(QIODevice::WriteOnly | QIODevice::Text);
     montageFile.write("\"EEG001-EEG002\" = \"EEG001\" - \"EEG002\"\n\"FRONT\" = 0.5 * \"EEG001\" + 0.5 * \"EEG002\" - \"EEG999\"\n");
     montageFile.close();
-    const auto derivations = MNEDerivSet::readText(montage);
-    derivations->write(tmp.filePath("montage-deriv.fif"));
-    const auto fromFif = MNEDerivSet::read(tmp.filePath("montage-deriv.fif"));
+    const auto derivations = MNEDerivSet::readText(montage.toStdU16String());
+    derivations->write(tmp.filePath("montage-deriv.fif").toStdU16String());
+    const auto fromFif = MNEDerivSet::read(tmp.filePath("montage-deriv.fif").toStdU16String());
     const int usable = mneRaw->attachDerivations(*fromFif); // FRONT needs EEG999 and is dropped
     MNEChSelection bipolar;
     bipolar.chspick = bipolar.chspick_nospace = {"EEG001-EEG002", "EEG001", "EEG002"};
@@ -720,8 +720,8 @@ int main(int argc, char* argv[])
     smallToLarge.to_subj = "large";
     smallToLarge.hemi = 0;
     const QString mapFile = tmp.filePath("small-large-morph.fif");
-    MNEMorphMap::write(mapFile, {&smallToLarge});
-    const auto reread = MNEMorphMap::read(mapFile, "small", "large", 0);
+    MNEMorphMap::write(mapFile.toStdU16String(), {&smallToLarge});
+    const auto reread = MNEMorphMap::read(mapFile.toStdU16String(), "small", "large", 0);
     const Eigen::SparseMatrix<double> weights = reread->toEigen(); // 642 x 162, feeds INVLIB::SourceMorph
     //! [mne_morph_map_usage]
     // mne.read_morph_map("small", "large"): vertex 0 of "large" = 0.4372 * v0 + 0.3726 * v42 + 0.1902 * v51 of "small"

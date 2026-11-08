@@ -44,9 +44,9 @@ It is exercised by:
 ````cpp title="src/examples/ex_mne_api/main.cpp"
 // Drop sources outside the inner skull or closer than 5 mm to it (mne make_forward_solution(mindist=5))
 std::vector<std::unique_ptr<MNESourceSpace>> spaces;
-MNESourceSpace::read_source_spaces(srcPath, spaces);
+MNESourceSpace::read_source_spaces(srcPath.toStdU16String(), spaces);
 const FiffCoordTrans mriHeadT((data + "/MEG/sample/all-trans.fif").toStdU16String(), FIFFV_COORD_MRI, FIFFV_COORD_HEAD);
-MNESourceSpace::filter_source_spaces(0.005f, data + "/subjects/sample/bem/sample-5120-bem.fif", mriHeadT, spaces, nullptr, true);
+MNESourceSpace::filter_source_spaces(0.005f, (data + "/subjects/sample/bem/sample-5120-bem.fif").toStdU16String(), mriHeadT, spaces, nullptr, true);
 ````
 
 From [ex_mne_api](../../examples/fs/ex_mne_api.mdx).

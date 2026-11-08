@@ -27,7 +27,7 @@ filter.size = 4096;
 filter.taper_size = 2048;
 filter.lowpass = filter.eog_lowpass = 40.0f;
 filter.lowpass_width = filter.eog_lowpass_width = 5.0f;
-std::unique_ptr<MNERawData> mneRaw(MNERawData::open_file(rawFile.fileName(), false, false, filter));
+std::unique_ptr<MNERawData> mneRaw(MNERawData::open_file(rawFile.fileName().toStdU16String(), false, false, filter));
 const MNERawInfo& rawInfo = *mneRaw->info;
 const MNERawBufDef& firstBuffer = mneRaw->bufs.front();
 
@@ -50,7 +50,7 @@ const double eegFilt = segment(1, 0);
 
 // The file stores its 4 SSP projectors as inactive; makeProjection switches them on
 std::unique_ptr<MNEProjOp> proj;
-MNEProjOp::makeProjection({rawFile.fileName()}, rawInfo.chInfo, rawInfo.nchan, proj);
+MNEProjOp::makeProjection({rawFile.fileName().toStdU16String()}, rawInfo.chInfo, rawInfo.nchan, proj);
 proj->assign_channels(mneRaw->ch_names, rawInfo.nchan);
 proj->make_proj();
 const MNEProjItem& firstItem = proj->items[0];
@@ -90,7 +90,7 @@ MNE library: BEM surfaces, surface projection, ICP, source spaces and epochs.
 
 ````cpp title="src/examples/ex_mne_api/main.cpp, line 269"
 filter.lowpass_width = filter.eog_lowpass_width = 5.0f;
-std::unique_ptr<MNERawData> mneRaw(MNERawData::open_file(rawFile.fileName(), false, false, filter));
+std::unique_ptr<MNERawData> mneRaw(MNERawData::open_file(rawFile.fileName().toStdU16String(), false, false, filter));
 const MNERawInfo& rawInfo = *mneRaw->info;
 const MNERawBufDef& firstBuffer = mneRaw->bufs.front();
 ````

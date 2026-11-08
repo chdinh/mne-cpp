@@ -423,8 +423,8 @@ smallToLarge.from_subj = "small";
 smallToLarge.to_subj = "large";
 smallToLarge.hemi = 0;
 const QString mapFile = tmp.filePath("small-large-morph.fif");
-MNEMorphMap::write(mapFile, {&smallToLarge});
-const auto reread = MNEMorphMap::read(mapFile, "small", "large", 0);
+MNEMorphMap::write(mapFile.toStdU16String(), {&smallToLarge});
+const auto reread = MNEMorphMap::read(mapFile.toStdU16String(), "small", "large", 0);
 ````
 
 ### [ex_clustered_inverse_mne](../../examples/inv/ex_clustered_inverse_mne.mdx)
