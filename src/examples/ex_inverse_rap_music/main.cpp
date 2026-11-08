@@ -104,7 +104,6 @@ int main(int argc, char* argv[])
     parser.process(a);
 
     //Load data
-    QFile t_fileFwd(parser.value(fwdFileOption));
     QString subject(parser.value(subjectOption));
     QString subjectDir(parser.value(subjectDirectoryOption));
 
@@ -129,7 +128,7 @@ int main(int argc, char* argv[])
 
     std::cout << "evoked first " << evoked.first << "; last " << evoked.last << std::endl;
 
-    MNEForwardSolution t_Fwd(t_fileFwd);
+    MNEForwardSolution t_Fwd(parser.value(fwdFileOption).toStdU16String());
     if (t_Fwd.isEmpty())
         return 1;
 

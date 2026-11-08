@@ -87,8 +87,7 @@ int main(int argc, char* argv[])
     parser.process(a);
 
     //Load data
-    QFile t_File(parser.value(fwdFileOption));
-    MNEForwardSolution t_forwardSolution(t_File);
+    MNEForwardSolution t_forwardSolution(parser.value(fwdFileOption).toStdU16String());
 
     BrainView* pBrainView = new BrainView();
     BrainTreeModel* pModel = new BrainTreeModel();

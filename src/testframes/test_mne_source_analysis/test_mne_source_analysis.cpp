@@ -328,8 +328,7 @@ private slots:
         if (!QFile::exists(m_sFwdFile))
             QSKIP("Forward file not found");
 
-        QFile file(m_sFwdFile);
-        MNEForwardSolution fwd(file);
+        MNEForwardSolution fwd(m_sFwdFile.toStdU16String());
         QVERIFY(!fwd.isEmpty());
         QVERIFY(fwd.nsource > 0);
         QVERIFY(fwd.src.size() > 0);
@@ -340,8 +339,7 @@ private slots:
         if (!QFile::exists(m_sFwdFile))
             QSKIP("Forward file not found");
 
-        QFile file(m_sFwdFile);
-        MNEForwardSolution fwd(file);
+        MNEForwardSolution fwd(m_sFwdFile.toStdU16String());
 
         QVERIFY(!fwd.src.isEmpty());
         QCOMPARE(fwd.src.size(), 2);
@@ -357,8 +355,7 @@ private slots:
         if (!QFile::exists(m_sFwdFile))
             QSKIP("Forward file not found");
 
-        QFile file(m_sFwdFile);
-        MNEForwardSolution fwd(file);
+        MNEForwardSolution fwd(m_sFwdFile.toStdU16String());
 
         for (int i = 0; i < fwd.src.size(); ++i) {
             MNESourceSpace hemi = fwd.src[i];
@@ -374,8 +371,7 @@ private slots:
         if (!QFile::exists(m_sFwdFile) || !QFile::exists(m_sCovFile) || !QFile::exists(m_sRawFile))
             QSKIP("Data files not found");
 
-        QFile fwdFile(m_sFwdFile);
-        MNEForwardSolution fwd(fwdFile);
+        MNEForwardSolution fwd(m_sFwdFile.toStdU16String());
 
         FiffCov cov(m_sCovFile.toStdString());
 
@@ -392,8 +388,7 @@ private slots:
         if (!QFile::exists(m_sFwdFile) || !QFile::exists(m_sCovFile) || !QFile::exists(m_sRawFile))
             QSKIP("Data files not found");
 
-        QFile fwdFile(m_sFwdFile);
-        MNEForwardSolution fwd(fwdFile);
+        MNEForwardSolution fwd(m_sFwdFile.toStdU16String());
 
         FiffCov cov(m_sCovFile.toStdString());
 
@@ -418,8 +413,7 @@ private slots:
         if (!QFile::exists(m_sFwdFile) || !QFile::exists(m_sCovFile) || !QFile::exists(m_sRawFile))
             QSKIP("Data files not found");
 
-        QFile fwdFile(m_sFwdFile);
-        MNEForwardSolution fwd(fwdFile);
+        MNEForwardSolution fwd(m_sFwdFile.toStdU16String());
 
         FiffCov cov(m_sCovFile.toStdString());
 
@@ -445,8 +439,7 @@ private slots:
         QVERIFY(evokedSet.evoked.size() > 0);
 
         // Read forward
-        QFile fwdFile(m_sFwdFile);
-        MNEForwardSolution fwd(fwdFile);
+        MNEForwardSolution fwd(m_sFwdFile.toStdU16String());
 
         // Read cov
         FiffCov cov(m_sCovFile.toStdString());
@@ -484,8 +477,7 @@ private slots:
         if (!QFile::exists(m_sFwdFile) || !QFile::exists(m_sCovFile) || !QFile::exists(m_sRawFile))
             QSKIP("Data files not found");
 
-        QFile fwdFile(m_sFwdFile);
-        MNEForwardSolution fwd(fwdFile);
+        MNEForwardSolution fwd(m_sFwdFile.toStdU16String());
 
         FiffCov cov(m_sCovFile.toStdString());
 

@@ -89,8 +89,7 @@ void TestMneForwardSolution::computeForward()
 
     // Read reference forward solution
     QString fwdMEGEEGFileRef(QCoreApplication::applicationDirPath() + "/../resources/data/mne-cpp-test-data/Result/ref-sample_audvis-meg-eeg-oct-6-fwd.fif");
-    QFile fileFwdMEGEEGRef(fwdMEGEEGFileRef);
-    m_pFwdMEGEEGRef = QSharedPointer<MNEForwardSolution>::create(fileFwdMEGEEGRef);
+    m_pFwdMEGEEGRef = QSharedPointer<MNEForwardSolution>::create(fwdMEGEEGFileRef.toStdU16String());
 
     //Following is equivalent to:
     //mne_forward_solution
@@ -130,12 +129,10 @@ void TestMneForwardSolution::computeForward()
     // recalculate with same meg_head_t to check that we still get the same result
     pFwdComputer->updateHeadPos(pFiffInfo->dev_head_t, *pFwdSolution);
 
-    QFile fwdFile(pSettingsMEGEEG->solname);
-    pFwdSolution->write(fwdFile);
+    QVERIFY(pFwdSolution->write(pSettingsMEGEEG->solname.toStdU16String()));
 
     // Read newly created fwd
-    QFile fileFwdMEGEEGRead(pSettingsMEGEEG->solname);
-    m_pFwdMEGEEGRead = QSharedPointer<MNEForwardSolution>::create(fileFwdMEGEEGRead);
+    m_pFwdMEGEEGRead = QSharedPointer<MNEForwardSolution>::create(pSettingsMEGEEG->solname.toStdU16String());
 
     printf("<<<<<<<<<<<<<<<<<<<<<<<<< Compute/Write/Read MEG/EEG Forward Solution Finished <<<<<<<<<<<<<<<<<<<<<<<<<\n");
 

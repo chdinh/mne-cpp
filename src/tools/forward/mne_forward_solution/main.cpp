@@ -234,8 +234,7 @@ int main(int argc, char* argv[])
         return 1;
     }
 
-    QFile fwdFile(settings->solname);
-    if (!fwdSolution->write(fwdFile)) {
+    if (!fwdSolution->write(settings->solname.toStdU16String())) {
         qCritical("The forward solution could not be written to %s.", settings->solname.toUtf8().constData());
         return 1;
     }

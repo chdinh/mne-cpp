@@ -405,8 +405,9 @@ void RtFwd::run()
             // compute and store
             pFwdSolution.reset(pFwdComputer->calculateFwd().release());
 
-            QFile fwdFile(m_pFwdSettings->solname);
-            pFwdSolution->write(fwdFile);
+            if (auto written = pFwdSolution->write(m_pFwdSettings->solname.toStdU16String()); !written) {
+                qWarning() << written.error().what();
+            }
 
             // emit results to control widget
             emit fwdSolutionAvailable(pFwdSolution->source_ori,

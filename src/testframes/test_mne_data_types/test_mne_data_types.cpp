@@ -241,8 +241,7 @@ private slots:
         if (!QFile::exists(fwdPath)) {
             QSKIP("Forward solution file not found");
         }
-        QFile file(fwdPath);
-        MNEForwardSolution fwd(file);
+        MNEForwardSolution fwd(fwdPath.toStdU16String());
         if (fwd.isEmpty()) {
             QSKIP("Failed to read forward solution");
         }
@@ -458,8 +457,7 @@ private slots:
         QString fwdPath = QCoreApplication::applicationDirPath() + "/../resources/data/mne-cpp-test-data/Result/ref-sample_audvis-meg-eeg-oct-6-fwd.fif";
         if (!QFile::exists(fwdPath))
             QSKIP("Forward solution file not found");
-        QFile file(fwdPath);
-        MNEForwardSolution fwd(file);
+        MNEForwardSolution fwd(fwdPath.toStdU16String());
         if (fwd.isEmpty())
             QSKIP("Failed to read forward solution");
 
@@ -843,21 +841,14 @@ private slots:
         if (!QFile::exists(fwdPath))
             QSKIP("Forward solution file not found");
 
-        QFile fileIn(fwdPath);
-        MNEForwardSolution fwdOrig(fileIn);
+        MNEForwardSolution fwdOrig(fwdPath.toStdU16String());
         if (fwdOrig.isEmpty())
             QSKIP("Failed to read forward solution");
 
-        // Write to buffer
-        QBuffer buf;
-        buf.open(QIODevice::ReadWrite);
-        bool writeOk = fwdOrig.write(buf);
-        QVERIFY(writeOk);
-        QVERIFY(buf.size() > 0);
-
-        // Read back
-        buf.seek(0);
-        MNEForwardSolution fwdRead(buf);
+        QTemporaryDir dir;
+        const std::filesystem::path path = dir.filePath("round-trip-fwd.fif").toStdU16String();
+        QVERIFY(fwdOrig.write(path));
+        const MNEForwardSolution fwdRead(path);
         QVERIFY(!fwdRead.isEmpty());
         QCOMPARE(fwdRead.nchan, fwdOrig.nchan);
         QCOMPARE(fwdRead.nsource, fwdOrig.nsource);
@@ -869,8 +860,7 @@ private slots:
         if (!QFile::exists(fwdPath))
             QSKIP("Forward solution file not found");
 
-        QFile fileIn(fwdPath);
-        MNEForwardSolution fwd(fileIn);
+        MNEForwardSolution fwd(fwdPath.toStdU16String());
         if (fwd.isEmpty())
             QSKIP("Failed to read forward solution");
 
@@ -890,8 +880,7 @@ private slots:
         if (!QFile::exists(fwdPath))
             QSKIP("Forward solution file not found");
 
-        QFile fileIn(fwdPath);
-        MNEForwardSolution fwd(fileIn);
+        MNEForwardSolution fwd(fwdPath.toStdU16String());
         if (fwd.isEmpty())
             QSKIP("Failed to read forward solution");
 
@@ -1214,8 +1203,7 @@ private slots:
         if (!QFile::exists(fwdPath))
             QSKIP("Forward file not found");
 
-        QFile file(fwdPath);
-        MNEForwardSolution fwd(file);
+        MNEForwardSolution fwd(fwdPath.toStdU16String());
         QVERIFY(fwd.src.size() >= 2);
 
         // Write source spaces to buffer
@@ -1237,8 +1225,7 @@ private slots:
         if (!QFile::exists(fwdPath))
             QSKIP("Forward file not found");
 
-        QFile file(fwdPath);
-        MNEForwardSolution fwd(file);
+        MNEForwardSolution fwd(fwdPath.toStdU16String());
 
         QList<VectorXi> vertno = fwd.src.get_vertno();
         QCOMPARE(vertno.size(), fwd.src.size());
@@ -1255,8 +1242,7 @@ private slots:
         if (!QFile::exists(fwdPath))
             QSKIP("Forward file not found");
 
-        QFile file(fwdPath);
-        MNEForwardSolution fwd(file);
+        MNEForwardSolution fwd(fwdPath.toStdU16String());
         QVERIFY(fwd.src.size() >= 2);
 
         // find_source_space_hemi identifies hemisphere ID

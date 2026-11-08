@@ -112,7 +112,6 @@ int main(int argc, char* argv[])
     parser.process(a);
 
     //Load data
-    QFile t_fileFwd(parser.value(fwdOption));
 
     FsSurfaceSet t_surfSet(parser.value(subjectOption), parser.value(hemiOption).toInt(), parser.value(surfOption), parser.value(subjectPathOption));
     FsAnnotationSet t_annotationSet(parser.value(subjectOption), parser.value(hemiOption).toInt(), parser.value(annotOption), parser.value(subjectPathOption));
@@ -144,7 +143,7 @@ int main(int argc, char* argv[])
     //
     // Read raw data
     //
-    MNEForwardSolution t_Fwd(t_fileFwd);
+    MNEForwardSolution t_Fwd(parser.value(fwdOption).toStdU16String());
     if (t_Fwd.isEmpty())
         return 1;
 

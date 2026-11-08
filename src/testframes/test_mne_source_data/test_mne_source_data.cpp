@@ -271,7 +271,7 @@ private slots:
             QSKIP("Forward solution file not found");
 
         // Read forward solution
-        MNEForwardSolution fwd(file);
+        MNEForwardSolution fwd(path.toStdU16String());
         QVERIFY(!fwd.isEmpty());
         QVERIFY(fwd.sol != nullptr || true);
         QVERIFY(fwd.source_nn.rows() > 0);
@@ -289,7 +289,7 @@ private slots:
         if (!file.exists())
             QSKIP("Forward solution file not found");
 
-        MNEForwardSolution fwd(file);
+        MNEForwardSolution fwd(path.toStdU16String());
         if (!fwd.isEmpty()) {
             // Check embedded source space
             QVERIFY(fwd.src.size() > 0);
@@ -317,7 +317,7 @@ private slots:
         if (!file.exists())
             QSKIP("Forward solution file not found");
 
-        MNEForwardSolution fwd(file);
+        MNEForwardSolution fwd(path.toStdU16String());
         if (!fwd.isEmpty() && fwd.info.nchan > 0) {
             // Pick MEG channels only
             RowVectorXi megPicks = fwd.info.pick_types(true, false, false);
@@ -464,7 +464,7 @@ private slots:
         if (!file.exists())
             QSKIP("Forward solution file not found");
 
-        MNEForwardSolution fwd(file);
+        MNEForwardSolution fwd(path.toStdU16String());
         if (!fwd.isEmpty()) {
             double loose = 0.2;
             FiffCov orientPrior = fwd.compute_orient_prior(loose);

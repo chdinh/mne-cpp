@@ -173,7 +173,7 @@ private slots:
         if (!file.exists())
             QSKIP("Forward solution file not found");
 
-        MNEForwardSolution fwd(file);
+        MNEForwardSolution fwd(path.toStdU16String());
         QVERIFY(!fwd.isEmpty());
         QVERIFY(fwd.nchan > 0);
         QVERIFY(fwd.nsource > 0);
@@ -205,7 +205,7 @@ private slots:
         if (!file.exists())
             QSKIP("Forward solution not found");
 
-        MNEForwardSolution fwd(file);
+        MNEForwardSolution fwd(path.toStdU16String());
         if (fwd.isEmpty())
             QSKIP("Fwd load failed");
 
@@ -235,7 +235,7 @@ private slots:
         if (!file.exists())
             QSKIP("Forward solution not found");
 
-        MNEForwardSolution fwd(file);
+        MNEForwardSolution fwd(path.toStdU16String());
         if (fwd.isEmpty())
             QSKIP("Fwd load failed");
 
@@ -263,7 +263,7 @@ private slots:
         if (!file.exists())
             QSKIP("Forward solution not found");
 
-        MNEForwardSolution fwd(file);
+        MNEForwardSolution fwd(path.toStdU16String());
         if (fwd.isEmpty())
             QSKIP("Fwd load failed");
 
@@ -286,7 +286,7 @@ private slots:
         if (!fwdFile.exists() || !rawFile.exists())
             QSKIP("Files not found");
 
-        MNEForwardSolution fwd(fwdFile);
+        MNEForwardSolution fwd(fwdPath.toStdU16String());
         if (fwd.isEmpty())
             QSKIP("Fwd load failed");
 

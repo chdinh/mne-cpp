@@ -80,7 +80,7 @@ int main(int argc, char* argv[])
 
     //Load data
     QFile t_fileForwardSolution(parser.value(fwdFileOption));
-    MNEForwardSolution t_Fwd(t_fileForwardSolution);
+    MNEForwardSolution t_Fwd(parser.value(fwdFileOption).toStdU16String());
     if (t_Fwd.isEmpty()) {
         qWarning() << "Could not read the forward solution" << t_fileForwardSolution.fileName();
         return 1;

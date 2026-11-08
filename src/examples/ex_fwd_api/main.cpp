@@ -19,20 +19,11 @@
 // INCLUDES
 //=============================================================================================================
 
-#include <fwd/compute_fwd/compute_fwd.h>
-#include <utils/string_utils.h>
-#include <fwd/compute_fwd/compute_fwd_settings.h>
 #include <fwd/fwd.h>
-#include <fwd/fwd_bem_model.h>
-#include <fwd/fwd_bem_solution.h>
-#include <fwd/fwd_coil_set.h>
-#include <fwd/fwd_eeg_sphere_model.h>
-#include <fwd/fwd_eeg_sphere_model_set.h>
-#include <fwd/fwd_field_map.h>
+#include <utils/string_utils.h>
 #include <fiff/fiff_constants.h>
 #include <fiff/fiff_coord_trans.h>
 #include <fiff/fiff_raw_data.h>
-#include <mne/mne_forward_solution.h>
 
 //=============================================================================================================
 // QT INCLUDES
@@ -187,21 +178,19 @@ int main(int argc, char* argv[])
     settings->pFiffInfo = QSharedPointer<FiffInfo>::create(raw.info);
     settings->checkIntegrity();
     auto fwd = std::make_shared<ComputeFwd>(settings)->calculateFwd();
-    QFile solFile(settings->solname);
-    fwd->write(solFile);
+    const std::filesystem::path solPath = settings->solname.toStdU16String();
+    const bool written = fwd->write(solPath).has_value();
     //! [compute_fwd_usage]
     // mne _compute_forwards_meeg on the 78 V1 sources: |G| of source 0, x component, over 306 MEG channels
     ok &= expect(fwd && fwd->nsource == 78 && fwd->sol->data.rows() == 366 && near(fwd->sol->data.col(0).head(306).norm(), 1.2455023232288232e-3, 1e-4),
                  "ComputeFwd: 78 V1 sources, 366 channels, sphere-model gain matches mne");
 
     //! [fwd_read_usage]
-    MNEForwardSolution back;
-    Fwd::read_forward_solution(solFile, back); // all 366 rows, like mne.read_forward_solution
-    MNEForwardSolution good;
-    MNEForwardSolution::read(solFile, good, false, false, {}, {}, true); // without the channels marked bad
+    const MNEForwardSolution back(solPath);                         // all 366 rows, like mne.read_forward_solution
+    const MNEForwardSolution good(solPath, {.exclude_bads = true}); // without the channels marked bad
     //! [fwd_read_usage]
-    ok &= expect(back.nsource == 78 && back.nchan == 366 && good.nchan == 364 && (back.sol->data - fwd->sol->data).norm() <= 1e-6 * fwd->sol->data.norm(),
-                 "Fwd::read_forward_solution reads all 366 rows back; bExcludeBads drops the 2 bads");
+    ok &= expect(written && back.nsource == 78 && back.nchan == 366 && good.nchan == 364 && (back.sol->data - fwd->sol->data).norm() <= 1e-6 * fwd->sol->data.norm(),
+                 "MNEForwardSolution reads all 366 rows back; exclude_bads drops the 2 bads");
 
     std::println("{}", ok ? "All fwd checks passed." : "fwd checks FAILED.");
     return ok ? EXIT_SUCCESS : EXIT_FAILURE;

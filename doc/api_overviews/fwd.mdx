@@ -47,7 +47,6 @@ flowchart TD
 
 | Class | Description | MNE-Python | MNE-C |
 |---|---|---|---|
-| `Fwd` | Static wrapper for reading forward solutions from FIFF files | `mne.read_forward_solution()` | `mne_read_forward_solution` |
 | `ComputeFwd` | Main worker that orchestrates forward solution computation: initialises source space, BEM/sphere model, coils, and dispatches computation to threads | `mne.make_forward_solution()` | Forward solver kernel |
 | `ComputeFwdSettings` | Container for all forward computation parameters: source space path, BEM path, EEG model, coordinate frame | — | Configuration struct |
 
@@ -136,14 +135,11 @@ flowchart TD
 
 ```cpp
 #include <fwd/fwd.h>
-#include <fwd/compute_fwd/compute_fwd.h>
-#include <fwd/compute_fwd/compute_fwd_settings.h>
 
 using namespace FWDLIB;
 
 // Option A: Read an existing forward solution
-MNEForwardSolution fwd = Fwd::read_forward_solution(
-    "sample_audvis-meg-eeg-oct-6-fwd.fif");
+MNEForwardSolution fwd("sample_audvis-meg-eeg-oct-6-fwd.fif");
 
 // Option B: Compute from scratch
 ComputeFwdSettings settings;

@@ -403,13 +403,12 @@ int main(int argc, char* argv[])
     qInfo("========================================");
     qInfo("Reading forward solution from %s...", fwdName.toUtf8().constData());
 
-    QFile fwdFile(fwdName);
-    MNEForwardSolution forward(fwdFile, false, true);
-
-    if (forward.isEmpty()) {
-        qCritical() << "Error: Could not read forward solution from" << fwdName;
+    auto forwardRead = MNEForwardSolution::read(fwdName.toStdU16String(), {.surf_ori = true});
+    if (!forwardRead) {
+        qCritical("%s", forwardRead.error().what());
         return 1;
     }
+    MNEForwardSolution& forward = *forwardRead;
 
     qInfo("  Forward solution: %d sources, %d channels",
           forward.nsource, forward.nchan);

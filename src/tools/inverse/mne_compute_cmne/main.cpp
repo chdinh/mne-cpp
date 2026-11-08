@@ -136,12 +136,12 @@ static int doCompute(const QCommandLineParser& parser)
     // ── Read forward solution ──────────────────────────────────────────
     out << "Reading forward solution: " << fwdPath << "\n";
     out.flush();
-    QFile fwdFile(fwdPath);
-    MNEForwardSolution fwd(fwdFile, true, true); // force_fixed=true, surf_ori=true
-    if (fwd.isEmpty()) {
-        err << "Error: Failed to read forward solution from " << fwdPath << "\n";
+    auto fwdRead = MNEForwardSolution::read(fwdPath.toStdU16String(), {.force_fixed = true, .surf_ori = true});
+    if (!fwdRead) {
+        err << "Error: " << fwdRead.error().what() << "\n";
         return 1;
     }
+    const MNEForwardSolution& fwd = *fwdRead;
 
     const MatrixXd matGain = fwd.sol->data;
     const int nChannels = matGain.rows();

@@ -32,8 +32,8 @@ set(SOURCES
 )
 
 set(HEADERS
-    fwd_global.h
     fwd.h
+    fwd_global.h
     compute_fwd/compute_fwd.h
     compute_fwd/compute_fwd_settings.h
     fwd_bem_model.h

@@ -115,13 +115,12 @@ int main(int argc, char* argv[])
     // Load forward solution
     //
     qInfo("Reading forward solution from %s...", fwdFile.toUtf8().constData());
-    QFile fwdIO(fwdFile);
-    MNEForwardSolution fwd(fwdIO);
-
-    if (fwd.isEmpty()) {
-        qCritical("Failed to read forward solution from %s.", fwdFile.toUtf8().constData());
+    auto fwdRead = MNEForwardSolution::read(fwdFile.toStdU16String());
+    if (!fwdRead) {
+        qCritical("%s", fwdRead.error().what());
         return 1;
     }
+    MNEForwardSolution& fwd = *fwdRead;
 
     qInfo("Forward solution: %d channels x %d sources", fwd.nchan, fwd.nsource);
 

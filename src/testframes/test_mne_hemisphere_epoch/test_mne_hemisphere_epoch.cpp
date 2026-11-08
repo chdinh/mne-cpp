@@ -727,7 +727,7 @@ private slots:
         if (!file.exists())
             QSKIP("Forward solution not found");
 
-        MNEForwardSolution fwd(file);
+        MNEForwardSolution fwd(path.toStdU16String());
         QVERIFY(!fwd.isEmpty());
         QVERIFY(fwd.nchan > 0);
         QVERIFY(fwd.nsource > 0);
@@ -744,7 +744,7 @@ private slots:
         if (!file.exists())
             QSKIP("Forward solution not found");
 
-        MNEForwardSolution fwd(file);
+        MNEForwardSolution fwd(path.toStdU16String());
         if (!fwd.isEmpty() && fwd.info.nchan > 0) {
             RowVectorXi megIdx = fwd.info.pick_types(true, false, false);
             if (megIdx.size() > 0) {
@@ -766,7 +766,7 @@ private slots:
         if (!file.exists())
             QSKIP("Forward solution not found");
 
-        MNEForwardSolution fwd(file);
+        MNEForwardSolution fwd(path.toStdU16String());
         if (!fwd.isEmpty()) {
             FiffCov orientPrior = fwd.compute_orient_prior(0.2f);
             QVERIFY(orientPrior.data.rows() > 0);
@@ -956,7 +956,7 @@ private slots:
         if (!fwdFile.exists() || !covFile.exists() || !rawFile.exists())
             QSKIP("Required files not found");
 
-        MNEForwardSolution fwd(fwdFile);
+        MNEForwardSolution fwd(fwdPath.toStdU16String());
         FiffCov noiseCov(covPath.toStdString());
         FiffRawData raw(rawPath.toStdString());
 

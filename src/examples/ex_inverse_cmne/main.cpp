@@ -117,8 +117,7 @@ int main(int argc, char* argv[])
     QList<RowVector4i> colors;
     aparc.toLabels(FsSurfaceSet("sample", 2, "white", subjects), auditory, colors,
                    {"superiortemporal-lh", "transversetemporal-lh", "superiortemporal-rh", "transversetemporal-rh"});
-    QFile fwdFile(data + "/Result/ref-sample_audvis-meg-eeg-oct-6-fwd.fif");
-    const MNEForwardSolution fwd = MNEForwardSolution(fwdFile, true, true).pick_regions(auditory);
+    const MNEForwardSolution fwd = MNEForwardSolution((data + "/Result/ref-sample_audvis-meg-eeg-oct-6-fwd.fif").toStdU16String(), {.force_fixed = true, .surf_ori = true}).pick_regions(auditory);
     const FiffCov noiseCov = FiffCov((data + "/MEG/sample/sample_audvis-cov.fif").toStdString()).pick_channels(fwd.sol->row_names);
     const FiffEvoked evoked = FiffEvoked((data + "/MEG/sample/sample_audvis-ave.fif").toStdU16String(), 0).pick_channels(fwd.sol->row_names); // "Left Auditory"
     const QList<VectorXi> vertno = fwd.src.get_vertno();

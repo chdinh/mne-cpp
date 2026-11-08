@@ -111,7 +111,6 @@ int main(int argc, char* argv[])
     parser.process(app);
 
     //Parse inputs
-    QFile t_fileFwd(parser.value(sampleFwdFileOption));
 
     double snr = parser.value(snrOption).toDouble();
     QString method = parser.value(methodOption);
@@ -131,7 +130,7 @@ int main(int argc, char* argv[])
 
     std::cout << "evoked first " << evoked.first << "; last " << evoked.last << std::endl;
 
-    MNEForwardSolution t_Fwd(t_fileFwd);
+    MNEForwardSolution t_Fwd(parser.value(sampleFwdFileOption).toStdU16String());
     if (t_Fwd.isEmpty())
         return 1;
 

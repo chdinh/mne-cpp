@@ -805,13 +805,12 @@ int main(int argc, char* argv[])
     qInfo("========================================");
     qInfo("Reading inverse operator from %s...", invName.toUtf8().constData());
 
-    const std::filesystem::path invFile = invName.toStdU16String();
-    MNEInverseOperator invOp(invFile);
-
-    if (invOp.nsource <= 0) {
-        qCritical() << "Error: Could not read inverse operator from" << invName;
+    auto invOpRead = MNEInverseOperator::read(invName.toStdU16String());
+    if (!invOpRead) {
+        qCritical("%s", invOpRead.error().what());
         return 1;
     }
+    MNEInverseOperator& invOp = *invOpRead;
 
     qInfo("  Inverse operator: %d sources, %d channels",
           invOp.nsource, invOp.nchan);
@@ -840,13 +839,12 @@ int main(int argc, char* argv[])
               fwdName.toUtf8().constData());
         qInfo("  Source amplitude: %.1f nAm", fwdAmp * 1e9);
 
-        QFile fwdFile(fwdName);
-        MNEForwardSolution fwd(fwdFile);
-
-        if (!fwd.sol || fwd.sol->data.rows() == 0) {
-            qCritical() << "Error: Could not read forward solution from" << fwdName;
+        auto fwdRead = MNEForwardSolution::read(fwdName.toStdU16String());
+        if (!fwdRead) {
+            qCritical("%s", fwdRead.error().what());
             return 1;
         }
+        MNEForwardSolution& fwd = *fwdRead;
 
         MatrixXd pickedData(invOp.nchan, fwd.sol->data.cols());
         for (int channel = 0; channel < static_cast<int>(invOp.noise_cov->names.size()); ++channel) {
@@ -1273,11 +1271,9 @@ int main(int argc, char* argv[])
         // Read forward solution for prediction
         MNEForwardSolution predFwd;
         if (parser.isSet(predfwdOpt)) {
-            QFile fwdFile(parser.value(predfwdOpt));
-            predFwd = MNEForwardSolution(fwdFile, false, true);
+            predFwd = MNEForwardSolution(parser.value(predfwdOpt).toStdU16String(), {.surf_ori = true});
         } else if (useFwdAsData) {
-            QFile fwdFile(parser.value(fwdOpt));
-            predFwd = MNEForwardSolution(fwdFile, false, true);
+            predFwd = MNEForwardSolution(parser.value(fwdOpt).toStdU16String(), {.surf_ori = true});
         } else {
             qInfo("  NOTE: --pred requires a forward solution.");
             qInfo("         Use --predfwd to specify one, or use --fwd mode.");

@@ -3,25 +3,25 @@
   "generated_by": "scripts/quality/audit_api_evidence.py",
   "policy": "scripts/quality/api_evidence_policy.json",
   "summary": {
-    "exported_classes": 487,
+    "exported_classes": 486,
     "exported_free_functions": 160,
-    "registered_classes": 580,
+    "registered_classes": 579,
     "exported_not_registered": 1,
     "registered_function_modules": 13,
     "registered_header_only": 81,
     "registered_stale": 0,
     "registered_with_test": 224,
     "registered_test_unresolved": 0,
-    "registered_with_example": 419,
+    "registered_with_example": 418,
     "registered_example_not_built": 0,
     "registered_with_python_equiv": 96,
     "registered_without_api_page": 0,
-    "with_snippet": 454,
-    "public_api_units": 581,
-    "example_eligible": 419,
+    "with_snippet": 453,
+    "public_api_units": 580,
+    "example_eligible": 418,
     "example_exempt": 162,
-    "eligible_backed_by_registry_example": 418,
-    "eligible_used_by_some_example": 366,
+    "eligible_backed_by_registry_example": 417,
+    "eligible_used_by_some_example": 360,
     "examples_on_disk": 75,
     "examples_built": 75
   },
@@ -117,13 +117,13 @@
       "with_snippet": 8
     },
     "fwd": {
-      "public": 14,
-      "registered": 14,
+      "public": 13,
+      "registered": 13,
       "with_test": 3,
-      "eligible": 10,
-      "eligible_with_registry_example": 10,
-      "eligible_used_by_example": 8,
-      "with_snippet": 11
+      "eligible": 9,
+      "eligible_with_registry_example": 9,
+      "eligible_used_by_example": 2,
+      "with_snippet": 10
     },
     "ieeg": {
       "public": 6,
@@ -9343,8 +9343,7 @@
       "example": "ex_fwd_api",
       "example_state": "built",
       "including_examples": [
-        "ex_compute_forward",
-        "ex_fwd_api"
+        "ex_compute_forward"
       ],
       "snippets": [
         "ex_fwd_api/main.cpp#compute_fwd_usage"
@@ -9367,37 +9366,13 @@
       "example": null,
       "example_state": "none",
       "including_examples": [
-        "ex_compute_forward",
-        "ex_fwd_api"
+        "ex_compute_forward"
       ],
       "snippets": [],
       "api_page": "doc/website/docs/api/fwd/compute-fwd-settings.mdx",
       "python_equiv": null,
       "example_eligible": false,
       "exempt_reason": "name suffix 'Settings': Plain parameter record consumed by an algorithm class; shown inside that class's example."
-    },
-    {
-      "name": "Fwd",
-      "header": "fwd/fwd.h",
-      "library": "fwd",
-      "kind": "exported-class",
-      "exported": true,
-      "registered": true,
-      "registry_status": "documented",
-      "test": null,
-      "test_resolves": false,
-      "example": "ex_fwd_api",
-      "example_state": "built",
-      "including_examples": [
-        "ex_fwd_api"
-      ],
-      "snippets": [
-        "ex_fwd_api/main.cpp#fwd_read_usage"
-      ],
-      "api_page": "doc/website/docs/api/fwd/fwd-class.mdx",
-      "python_equiv": null,
-      "example_eligible": true,
-      "exempt_reason": null
     },
     {
       "name": "FwdBemModel",
@@ -9411,9 +9386,7 @@
       "test_resolves": true,
       "example": "ex_fwd_api",
       "example_state": "built",
-      "including_examples": [
-        "ex_fwd_api"
-      ],
+      "including_examples": [],
       "snippets": [
         "ex_fwd_api/main.cpp#fwd_bem_model_usage"
       ],
@@ -9434,9 +9407,7 @@
       "test_resolves": false,
       "example": "ex_fwd_api",
       "example_state": "built",
-      "including_examples": [
-        "ex_fwd_api"
-      ],
+      "including_examples": [],
       "snippets": [
         "ex_fwd_api/main.cpp#fwd_bem_model_usage"
       ],
@@ -9479,7 +9450,6 @@
       "example": "ex_fwd_api",
       "example_state": "built",
       "including_examples": [
-        "ex_fwd_api",
         "ex_hpiFit"
       ],
       "snippets": [
@@ -9542,9 +9512,7 @@
       "test_resolves": true,
       "example": "ex_fwd_api",
       "example_state": "built",
-      "including_examples": [
-        "ex_fwd_api"
-      ],
+      "including_examples": [],
       "snippets": [
         "ex_fwd_api/main.cpp#fwd_eeg_sphere_model_usage"
       ],
@@ -9565,9 +9533,7 @@
       "test_resolves": false,
       "example": null,
       "example_state": "none",
-      "including_examples": [
-        "ex_fwd_api"
-      ],
+      "including_examples": [],
       "snippets": [
         "ex_fwd_api/main.cpp#fwd_eeg_sphere_model_usage"
       ],
@@ -9588,9 +9554,7 @@
       "test_resolves": false,
       "example": "ex_fwd_api",
       "example_state": "built",
-      "including_examples": [
-        "ex_fwd_api"
-      ],
+      "including_examples": [],
       "snippets": [
         "ex_fwd_api/main.cpp#fwd_eeg_sphere_model_usage"
       ],
@@ -9611,9 +9575,7 @@
       "test_resolves": false,
       "example": "ex_fwd_api",
       "example_state": "built",
-      "including_examples": [
-        "ex_fwd_api"
-      ],
+      "including_examples": [],
       "snippets": [
         "ex_fwd_api/main.cpp#fwd_field_map_usage"
       ],
@@ -12494,7 +12456,6 @@
       "including_examples": [
         "ex_compute_forward",
         "ex_dsp_rt",
-        "ex_fwd_api",
         "ex_inv_api",
         "ex_inv_beamformer",
         "ex_inverse_cmne",
@@ -12524,7 +12485,6 @@
       "including_examples": [
         "ex_compute_forward",
         "ex_dsp_rt",
-        "ex_fwd_api",
         "ex_inv_api",
         "ex_inv_beamformer",
         "ex_inverse_cmne",
@@ -12554,7 +12514,6 @@
       "including_examples": [
         "ex_compute_forward",
         "ex_dsp_rt",
-        "ex_fwd_api",
         "ex_inv_api",
         "ex_inv_beamformer",
         "ex_inverse_cmne",

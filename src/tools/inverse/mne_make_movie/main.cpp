@@ -364,12 +364,12 @@ int main(int argc, char* argv[])
         double lambda2 = 1.0 / (snr * snr);
         QString method = parser.value(methodOpt);
 
-        const std::filesystem::path fInv = invFile.toStdU16String();
-        MNEInverseOperator invOp(fInv);
-        if (invOp.nsource <= 0) {
-            qCritical("Cannot read inverse operator: %s", qPrintable(invFile));
+        auto invOpRead = MNEInverseOperator::read(invFile.toStdU16String());
+        if (!invOpRead) {
+            qCritical("%s", invOpRead.error().what());
             return 1;
         }
+        MNEInverseOperator& invOp = *invOpRead;
 
         auto read = FiffEvokedSet::read(measFile.toStdU16String());
         if (!read) {

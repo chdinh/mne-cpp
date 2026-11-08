@@ -543,13 +543,12 @@ int main(int argc, char* argv[])
     //=========================================================================================================
 
     qInfo("\nReading the inverse operator...");
-    const std::filesystem::path invFile = invName.toStdU16String();
-    MNEInverseOperator inverseOperator(invFile);
-
-    if (inverseOperator.eigen_leads->data.size() == 0) {
-        qCritical("Error: Failed to read inverse operator from %s", invName.toUtf8().constData());
+    auto inverseOperatorRead = MNEInverseOperator::read(invName.toStdU16String());
+    if (!inverseOperatorRead) {
+        qCritical("%s", inverseOperatorRead.error().what());
         return 1;
     }
+    MNEInverseOperator& inverseOperator = *inverseOperatorRead;
     qInfo("  Inverse operator read successfully.");
     qInfo("  %d channels, %d sources", inverseOperator.nchan, inverseOperator.nsource);
 

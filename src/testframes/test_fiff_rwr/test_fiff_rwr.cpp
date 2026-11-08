@@ -556,7 +556,7 @@ void TestFiffRWR::writersStable_data()
     QTest::newRow("covariance") << "cov" << qulonglong(0xc41f39abd7c6cd27ULL) << qlonglong(545712) << false;
     QTest::newRow("transform") << "trans" << qulonglong(0x9199331869f76d3eULL) << qlonglong(212) << false;
     QTest::newRow("digitizer") << "dig" << qulonglong(0xc59bdb7c1024cdc8ULL) << qlonglong(5468) << false;
-    QTest::newRow("forward") << "fwd" << qulonglong(0x176c6bb765acd4afULL) << qlonglong(55417952) << true;
+    QTest::newRow("forward") << "fwd" << qulonglong(0x176c6bb765acd4afULL) << qlonglong(55425088) << true;
 }
 
 //=============================================================================================================
@@ -570,7 +570,6 @@ void TestFiffRWR::writersStable()
 
     // Pins the bytes each writer produces for a fixture, so moving the stream layer cannot change the files
     QByteArray bytes;
-    QBuffer out(&bytes);
     const QString meg = testDataDir() + "/MEG/sample/";
     if (writer == "raw") {
         const FiffRawData raw((meg + "sample_audvis_trunc_raw.fif").toStdString());
@@ -609,9 +608,12 @@ void TestFiffRWR::writersStable()
         QVERIFY(written.open(QIODevice::ReadOnly));
         bytes = written.readAll();
     } else if (writer == "fwd") {
-        QFile in(testDataDir() + "/Result/ref-sample_audvis-meg-eeg-oct-6-fwd.fif");
-        const MNELIB::MNEForwardSolution fwd(in);
-        QVERIFY(fwd.write(out));
+        const MNELIB::MNEForwardSolution fwd((testDataDir() + "/Result/ref-sample_audvis-meg-eeg-oct-6-fwd.fif").toStdU16String());
+        const QString path = m_tempDir.filePath("stable-fwd.fif");
+        QVERIFY(fwd.write(path.toStdU16String()));
+        QFile written(path);
+        QVERIFY(written.open(QIODevice::ReadOnly));
+        bytes = written.readAll();
     }
 
     const QByteArray stable = stableBytes(bytes);

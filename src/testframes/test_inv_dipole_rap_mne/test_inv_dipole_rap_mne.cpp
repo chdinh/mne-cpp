@@ -187,8 +187,7 @@ void TestInvDipoleRapMne::initTestCase()
     QString invPath = m_sMneSamplePath + "/MEG/sample/sample_audvis-meg-oct-6-meg-inv.fif";
     if (QFile::exists(invPath)) {
         m_bMneSampleAvailable = true;
-        const std::filesystem::path invFile = invPath.toStdU16String();
-        m_invOp = MNEInverseOperator(invFile);
+        m_invOp = MNEInverseOperator(invPath.toStdU16String());
         QVERIFY2(m_invOp.nsource > 0, "Failed to load inverse operator");
     } else {
         qDebug() << "MNE sample data not found at" << m_sMneSamplePath
@@ -198,8 +197,7 @@ void TestInvDipoleRapMne::initTestCase()
     // Load forward solution from submodule test data
     QVERIFY2(QFile::exists(fwdPath()),
              qPrintable(QString("Forward solution not found: %1").arg(fwdPath())));
-    QFile fwdFile(fwdPath());
-    m_fwd = MNEForwardSolution(fwdFile);
+    m_fwd = MNEForwardSolution(fwdPath().toStdU16String());
     QVERIFY2(!m_fwd.isEmpty(), "Failed to load forward solution");
 
     // Load noise covariance

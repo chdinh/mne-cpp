@@ -149,12 +149,12 @@ int main(int argc, char* argv[])
 
     // 3. Load forward solution
     qInfo("Loading forward solution: %s", qPrintable(fwdFile));
-    QFile fFwd(fwdFile);
-    MNEForwardSolution fwd;
-    if (!MNEForwardSolution::read(fFwd, fwd)) {
-        qCritical("Cannot read forward solution: %s", qPrintable(fwdFile));
+    auto fwdRead = MNEForwardSolution::read(fwdFile.toStdU16String());
+    if (!fwdRead) {
+        qCritical("%s", fwdRead.error().what());
         return 1;
     }
+    MNEForwardSolution& fwd = *fwdRead;
     qInfo("  %d sources, %d channels", fwd.nsource, fwd.nchan);
 
     // 4. Load or compute inverse operator

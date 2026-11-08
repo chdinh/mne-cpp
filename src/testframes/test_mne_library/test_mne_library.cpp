@@ -552,10 +552,8 @@ void TestMneLibrary::writersRefuseUnwritablePath()
     const QString path = dir.filePath(QStringLiteral("no/such/dir/out.fif"));
     QFile bem(path);
     QVERIFY(!MNEBem().write(bem));
-    const std::filesystem::path inv = path.toStdU16String();
-    QVERIFY(!MNEInverseOperator().write(inv));
-    QFile fwd(path);
-    QVERIFY(!MNEForwardSolution().write(fwd));
+    QVERIFY(!MNEInverseOperator().write(path.toStdU16String()));
+    QVERIFY(!MNEForwardSolution().write(path.toStdU16String()));
     QVERIFY(!QFileInfo::exists(path));
 }
 
@@ -721,8 +719,7 @@ void TestMneLibrary::inverseOp_readFromFile()
     if (!QFile::exists(fwdPath()))
         QSKIP("Forward file not found");
 
-    QFile fwdFile(fwdPath());
-    MNEForwardSolution fwd(fwdFile);
+    MNEForwardSolution fwd(fwdPath().toStdU16String());
     QVERIFY(!fwd.isEmpty());
 
     MNEInverseOperator invOp;
@@ -1098,8 +1095,7 @@ void TestMneLibrary::forwardSolution_pickTypes()
     if (!QFile::exists(fwdPath()))
         QSKIP("Forward file not found");
 
-    QFile fwdFile(fwdPath());
-    MNEForwardSolution fwd(fwdFile);
+    MNEForwardSolution fwd(fwdPath().toStdU16String());
     if (fwd.isEmpty())
         QSKIP("Could not read forward solution");
 
@@ -1146,8 +1142,7 @@ void TestMneLibrary::forwardSolution_reduceForward()
     if (!QFile::exists(fwdPath()))
         QSKIP("Forward file not found");
 
-    QFile fwdFile(fwdPath());
-    MNEForwardSolution fwd(fwdFile);
+    MNEForwardSolution fwd(fwdPath().toStdU16String());
     if (fwd.isEmpty())
         QSKIP("Could not read forward solution");
 
@@ -1163,8 +1158,7 @@ void TestMneLibrary::forwardSolution_orientPrior()
     if (!QFile::exists(fwdPath()))
         QSKIP("Forward file not found");
 
-    QFile fwdFile(fwdPath());
-    MNEForwardSolution fwd(fwdFile);
+    MNEForwardSolution fwd(fwdPath().toStdU16String());
     if (fwd.isEmpty())
         QSKIP("Could not read forward solution");
 
@@ -1194,8 +1188,7 @@ void TestMneLibrary::forwardSolution_prepareForward()
     if (!QFile::exists(fwdPath()) || !QFile::exists(rawPath()) || !QFile::exists(covPath()))
         QSKIP("Required files not found");
 
-    QFile fwdFile(fwdPath());
-    MNEForwardSolution fwd(fwdFile);
+    MNEForwardSolution fwd(fwdPath().toStdU16String());
     if (fwd.isEmpty())
         QSKIP("Could not read forward solution");
 
@@ -1221,8 +1214,7 @@ void TestMneLibrary::forwardSolution_toFixedOri()
     if (!QFile::exists(fwdPath()))
         QSKIP("Forward file not found");
 
-    QFile fwdFile(fwdPath());
-    MNEForwardSolution fwd(fwdFile);
+    MNEForwardSolution fwd(fwdPath().toStdU16String());
     if (fwd.isEmpty())
         QSKIP("Could not read forward solution");
 
@@ -1240,8 +1232,7 @@ void TestMneLibrary::forwardSolution_pickChannels()
     if (!QFile::exists(fwdPath()))
         QSKIP("Forward file not found");
 
-    QFile fwdFile(fwdPath());
-    MNEForwardSolution fwd(fwdFile);
+    MNEForwardSolution fwd(fwdPath().toStdU16String());
     if (fwd.isEmpty())
         QSKIP("Could not read forward solution");
 
@@ -1263,8 +1254,7 @@ void TestMneLibrary::forwardSolution_computeDepthPrior()
     if (!QFile::exists(fwdPath()) || !QFile::exists(rawPath()))
         QSKIP("Required files not found");
 
-    QFile fwdFile(fwdPath());
-    MNEForwardSolution fwd(fwdFile);
+    MNEForwardSolution fwd(fwdPath().toStdU16String());
     if (fwd.isEmpty())
         QSKIP("Could not read forward solution");
 
@@ -1285,8 +1275,7 @@ void TestMneLibrary::forwardSolution_pickRegions()
     if (!hasData())
         QSKIP("No test data");
 
-    QFile fwdFile(fwdPath());
-    MNEForwardSolution fwd(fwdFile);
+    MNEForwardSolution fwd(fwdPath().toStdU16String());
     QVERIFY(!fwd.isEmpty());
 
     MNEForwardSolution fwdMeg = fwd.pick_types(true, false);
@@ -1333,8 +1322,7 @@ void TestMneLibrary::namedMatrix_readFromStream()
     if (!QFile::exists(fwdPath()))
         QSKIP("Forward file not found");
 
-    QFile fwdFile(fwdPath());
-    MNEForwardSolution fwd(fwdFile);
+    MNEForwardSolution fwd(fwdPath().toStdU16String());
     if (fwd.isEmpty())
         QSKIP("Could not read forward solution");
 
@@ -1796,8 +1784,7 @@ void TestMneLibrary::forwardSolution_tripletSelection()
 {
     if (!hasData())
         QSKIP("No test data");
-    QFile fwdFile(fwdPath());
-    MNEForwardSolution fwd(fwdFile);
+    MNEForwardSolution fwd(fwdPath().toStdU16String());
     QVERIFY(!fwd.isEmpty());
     VectorXi sel(10);
     for (int i = 0; i < 10; ++i)
@@ -1812,8 +1799,7 @@ void TestMneLibrary::forwardSolution_readVerify()
 {
     if (!hasData())
         QSKIP("No test data");
-    QFile fwdFile(fwdPath());
-    MNEForwardSolution fwd(fwdFile);
+    MNEForwardSolution fwd(fwdPath().toStdU16String());
     QVERIFY(!fwd.isEmpty());
     QVERIFY(fwd.sol->nrow > 0);
     QVERIFY(fwd.sol->ncol > 0);
@@ -1845,10 +1831,7 @@ void TestMneLibrary::inverseOp_makeSmallChannelSet()
     FiffInfo info = raw.info;
 
     // Read forward solution
-    QFile fwdFile(fwdPath);
-    MNEForwardSolution fwd;
-    bool ok = MNEForwardSolution::read(fwdFile, fwd);
-    QVERIFY(ok);
+    const MNEForwardSolution fwd(fwdPath.toStdU16String());
     QVERIFY(!fwd.isEmpty());
 
     // Read noise covariance

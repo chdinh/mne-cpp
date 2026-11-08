@@ -112,8 +112,8 @@ int main(int argc, char* argv[])
     //! [inv_minimum_norm_usage]
     FsLabel v1;
     FsLabel::read(data + "/subjects/sample/label/lh.V1.label", v1);
-    QFile fwdFile(data + "/Result/ref-sample_audvis-meg-eeg-oct-6-fwd.fif");
-    const MNEForwardSolution fwd = MNEForwardSolution(fwdFile).pick_regions({v1}); // 70 sources x 3 orientations
+    const std::filesystem::path fwdPath = (data + "/Result/ref-sample_audvis-meg-eeg-oct-6-fwd.fif").toStdU16String();
+    const MNEForwardSolution fwd = MNEForwardSolution(fwdPath).pick_regions({v1}); // 70 sources x 3 orientations
     const FiffCov noiseCov((data + "/MEG/sample/sample_audvis-cov.fif").toStdString());
     const FiffEvoked evoked((data + "/MEG/sample/sample_audvis-ave.fif").toStdU16String(), 0); // "Left Auditory"
 
@@ -234,8 +234,7 @@ int main(int argc, char* argv[])
     //! [inv_sparse_usage]
     // Whitened data and a gain per nAm make the noise level 1, as mne.inverse_sparse.mixed_norm does.
     const auto [whitener, rank] = computeWhitener(*inverse.noise_cov); // rank 360: 364 channels minus 4 projectors
-    QFile fixedFile(fwdFile.fileName());
-    const MNEForwardSolution fixedFwd = MNEForwardSolution(fixedFile, true, true).pick_regions({v1}).pick_channels(inverse.noise_cov->names);
+    const MNEForwardSolution fixedFwd = MNEForwardSolution(fwdPath, {.force_fixed = true, .surf_ori = true}).pick_regions({v1}).pick_channels(inverse.noise_cov->names);
     const MatrixXd gain = whitener * fixedFwd.sol->data * 1e-9;
     const MatrixXd measured = whitener * evoked.pick_channels(inverse.noise_cov->names).data.middleCols(170, 40); // 83-148 ms
     const double alphaMax = (gain.transpose() * measured).rowwise().norm().maxCoeff();

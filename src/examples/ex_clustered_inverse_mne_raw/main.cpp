@@ -131,7 +131,7 @@ int main(int argc, char* argv[])
     parser.process(a);
 
     // Load files
-    QFile t_fileFwd(parser.value(fwdOption));
+    const std::filesystem::path t_fileFwd = parser.value(fwdOption).toStdU16String();
     QFile t_fileRaw(parser.value(inputOption));
     QString t_sEventName = parser.value(eventsFileOption);
 

@@ -122,12 +122,12 @@ int main(int argc, char* argv[])
     }
 
     // Load forward solution
-    QFile fFwd(fwdFile);
-    MNEForwardSolution fwd(fFwd);
-    if (fwd.sol->data.size() == 0) {
-        qCritical("Cannot read forward solution: %s", qPrintable(fwdFile));
+    auto fwdRead = MNEForwardSolution::read(fwdFile.toStdU16String());
+    if (!fwdRead) {
+        qCritical("%s", fwdRead.error().what());
         return 1;
     }
+    MNEForwardSolution& fwd = *fwdRead;
 
     int nChan = fwd.sol->data.rows();
     int nSrc = fwd.sol->data.cols();

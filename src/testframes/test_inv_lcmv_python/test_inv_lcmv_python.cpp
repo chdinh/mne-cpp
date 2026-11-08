@@ -135,7 +135,7 @@ void TestInvLcmvPython::initTestCase()
 
     // The forward names channels without the space ("MEG0113"); the evoked and
     // covariance files use "MEG 0113". Both list them in the same order.
-    MNEForwardSolution fullFwd(fwdFile);
+    MNEForwardSolution fullFwd((base + "/Result/ref-sample_audvis-meg-eeg-oct-6-fwd.fif").toStdU16String());
     StringList fwdGood;
     for (const std::string& name : fullFwd.sol->row_names) {
         if (name.starts_with("MEG") && name != "MEG2443")

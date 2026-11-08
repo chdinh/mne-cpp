@@ -144,13 +144,11 @@ void TestInvEloretaPython::initTestCase()
     m_info = evoked.info;
     m_evoked = evoked;
 
-    QFile freeFile(fwdPath);
-    const MNEForwardSolution freeFwd = MNEForwardSolution(freeFile).pick_regions({v1});
+    const MNEForwardSolution freeFwd = MNEForwardSolution(fwdPath.toStdU16String()).pick_regions({v1});
     m_freeFwd = freeFwd;
     m_loose = MNEInverseOperator::make_inverse_operator(evoked.info, freeFwd, cov, 0.2f, 0.8f, false, true);
 
-    QFile fixedFile(fwdPath);
-    const MNEForwardSolution fixedFwd = MNEForwardSolution(fixedFile, true).pick_regions({v1});
+    const MNEForwardSolution fixedFwd = MNEForwardSolution(fwdPath.toStdU16String(), {.force_fixed = true}).pick_regions({v1});
     QVERIFY(fixedFwd.isFixedOrient());
     m_fixed = MNEInverseOperator::make_inverse_operator(evoked.info, fixedFwd, cov, 0.0f, 0.8f, true, true);
 
@@ -225,8 +223,7 @@ void TestInvEloretaPython::makeInverse_matchesPython()
     QFETCH(bool, fixedFwd);
     QFETCH(bool, limitDepthChs);
 
-    QFile fwdFile(data("Result/ref-sample_audvis-meg-eeg-oct-6-fwd.fif"));
-    const MNEForwardSolution fwd = MNEForwardSolution(fwdFile, fixedFwd, surfOri).pick_regions({m_v1});
+    const MNEForwardSolution fwd = MNEForwardSolution(data("Result/ref-sample_audvis-meg-eeg-oct-6-fwd.fif").toStdU16String(), {.force_fixed = fixedFwd, .surf_ori = surfOri}).pick_regions({m_v1});
     FiffInfo info = m_info;
     if (channels == "mag+eeg")
         info = m_info.pick_info(m_info.pick_types("mag", true));

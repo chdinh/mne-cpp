@@ -127,84 +127,15 @@ bool check_matching_chnames_conventions(const StringList& chNamesA, const String
 // DEFINE MEMBER METHODS
 //=============================================================================================================
 
-MNEForwardSolution::MNEForwardSolution()
-: source_ori(-1)
-, surf_ori(false)
-, coord_frame(-1)
-, nsource(-1)
-, nchan(-1)
-, sol(new FiffNamedMatrix)
-, sol_grad(new FiffNamedMatrix)
-, source_rr(MatrixX3f::Zero(0, 3))
-, source_nn(MatrixX3f::Zero(0, 3))
+MNEForwardSolution::MNEForwardSolution(const std::filesystem::path& path)
+: MNEForwardSolution(read(path).value())
 {
 }
 
 //=============================================================================================================
 
-MNEForwardSolution::MNEForwardSolution(QIODevice& p_IODevice, bool force_fixed, bool surf_ori, const StringList& include, const StringList& exclude, bool bExcludeBads)
-: source_ori(-1)
-, surf_ori(surf_ori)
-, coord_frame(-1)
-, nsource(-1)
-, nchan(-1)
-, sol(new FiffNamedMatrix)
-, sol_grad(new FiffNamedMatrix)
-, source_rr(MatrixX3f::Zero(0, 3))
-, source_nn(MatrixX3f::Zero(0, 3))
-{
-    if (!read(p_IODevice, *this, force_fixed, surf_ori, include, exclude, bExcludeBads)) {
-        qWarning("\tForward solution not found.");
-        return;
-    }
-}
-
-//=============================================================================================================
-
-MNEForwardSolution::MNEForwardSolution(const MNEForwardSolution& p_MNEForwardSolution)
-: info(p_MNEForwardSolution.info)
-, source_ori(p_MNEForwardSolution.source_ori)
-, surf_ori(p_MNEForwardSolution.surf_ori)
-, coord_frame(p_MNEForwardSolution.coord_frame)
-, nsource(p_MNEForwardSolution.nsource)
-, nchan(p_MNEForwardSolution.nchan)
-, sol(p_MNEForwardSolution.sol)
-, sol_grad(p_MNEForwardSolution.sol_grad)
-, mri_head_t(p_MNEForwardSolution.mri_head_t)
-, mri_filename(p_MNEForwardSolution.mri_filename)
-, mri_id(p_MNEForwardSolution.mri_id)
-, src(p_MNEForwardSolution.src)
-, source_rr(p_MNEForwardSolution.source_rr)
-, source_nn(p_MNEForwardSolution.source_nn)
-{
-}
-
-//=============================================================================================================
-
-MNEForwardSolution& MNEForwardSolution::operator=(const MNEForwardSolution& other)
-{
-    if (this != &other) {
-        info = other.info;
-        source_ori = other.source_ori;
-        surf_ori = other.surf_ori;
-        coord_frame = other.coord_frame;
-        nsource = other.nsource;
-        nchan = other.nchan;
-        sol = other.sol;
-        sol_grad = other.sol_grad;
-        mri_head_t = other.mri_head_t;
-        mri_filename = other.mri_filename;
-        mri_id = other.mri_id;
-        src = other.src;
-        source_rr = other.source_rr;
-        source_nn = other.source_nn;
-    }
-    return *this;
-}
-
-//=============================================================================================================
-
-MNEForwardSolution::~MNEForwardSolution()
+MNEForwardSolution::MNEForwardSolution(const std::filesystem::path& path, const ReadOptions& options)
+: MNEForwardSolution(read(path, options).value())
 {
 }
 
@@ -230,7 +161,7 @@ void MNEForwardSolution::clear()
 
 //=============================================================================================================
 
-bool MNEForwardSolution::write(QIODevice& p_IODevice) const
+Expected<void> MNEForwardSolution::write(const std::filesystem::path& path) const
 {
     //
     //   Classify channels into MEG and EEG index sets
@@ -256,9 +187,10 @@ bool MNEForwardSolution::write(QIODevice& p_IODevice) const
     //
     //   Open the file, create the directory
     //
-    auto t_pStream = FiffStream::start_file(p_IODevice);
+    const std::string name = utf8FromPath(path);
+    auto t_pStream = FiffStream::start_file(path);
     if (!t_pStream) {
-        return false;
+        return fail(ErrorCode::Io, "cannot write {}", name);
     }
     t_pStream->start_block(FIFFB_MNE);
 
@@ -314,7 +246,7 @@ bool MNEForwardSolution::write(QIODevice& p_IODevice) const
     for (int k = 0; k < src.size(); ++k) {
         if (src[k].writeToStream(*t_pStream, false) == FIFF_FAIL) {
             t_pStream->close();
-            return false;
+            return fail(ErrorCode::Io, "cannot write the source spaces to {}", name);
         }
     }
 
@@ -401,8 +333,8 @@ bool MNEForwardSolution::write(QIODevice& p_IODevice) const
     //
     //   Update the directory
     //
-    if (auto* qf = dynamic_cast<QFile*>(&p_IODevice)) {
-        QFile fileIn(qf->fileName());
+    {
+        QFile fileIn(QString::fromStdU16String(path.u16string()));
         auto t_pStreamIn = FiffStream::open_update(fileIn);
         if (t_pStreamIn) {
             const auto& dir = t_pStreamIn->dir();
@@ -418,7 +350,7 @@ bool MNEForwardSolution::write(QIODevice& p_IODevice) const
         }
     }
 
-    return true;
+    return {};
 }
 
 //=============================================================================================================
@@ -1147,45 +1079,41 @@ void MNEForwardSolution::prepare_forward(const FiffInfo& p_info,
 
 //=============================================================================================================
 
-bool MNEForwardSolution::read(QIODevice& p_IODevice,
-                              MNEForwardSolution& fwd,
-                              bool force_fixed,
-                              bool surf_ori,
-                              const StringList& include,
-                              const StringList& exclude,
-                              bool bExcludeBads)
+Expected<MNEForwardSolution> MNEForwardSolution::read(const std::filesystem::path& path)
 {
-    FiffStream t_pStream(&p_IODevice);
+    return read(path, ReadOptions{});
+}
 
-    qInfo("Reading forward solution from %s...", t_pStream.streamName().toUtf8().constData());
-    if (!t_pStream.open())
-        return false;
+//=============================================================================================================
+
+Expected<MNEForwardSolution> MNEForwardSolution::read(const std::filesystem::path& path, const ReadOptions& options)
+{
+    auto opened = FiffStream::open(path);
+    if (!opened) {
+        return std::unexpected(opened.error());
+    }
+    FiffStream& t_pStream = *opened;
+    const std::string name = utf8FromPath(path);
+    qInfo("Reading forward solution from %s...", name.c_str());
     //
     //   Find all forward solutions
     //
     std::vector<FiffDirNode::SPtr> fwds = t_pStream.dirtree()->dir_tree_find(FIFFB_MNE_FORWARD_SOLUTION);
 
     if (fwds.size() == 0) {
-        t_pStream.close();
-        qWarning("No forward solutions in %s", t_pStream.streamName().toUtf8().constData());
-        return false;
+        return fail(ErrorCode::NotFound, "no forward solution in {}", name);
     }
     //
     //   Parent MRI data
     //
     std::vector<FiffDirNode::SPtr> parent_mri = t_pStream.dirtree()->dir_tree_find(FIFFB_MNE_PARENT_MRI_FILE);
     if (parent_mri.size() == 0) {
-        t_pStream.close();
-        qWarning("No parent MRI information in %s", t_pStream.streamName().toUtf8().constData());
-        return false;
+        return fail(ErrorCode::Format, "no parent MRI information in {}", name);
     }
 
     MNELIB::MNESourceSpaces t_SourceSpace;
     if (!MNELIB::MNESourceSpaces::readFromStream(t_pStream, true, t_SourceSpace)) {
-        t_pStream.close();
-        qWarning("Could not read the source spaces");
-        //ToDo error(me,'Could not read the source spaces (%s)',mne_omit_first_line(lasterr));
-        return false;
+        return fail(ErrorCode::Format, "cannot read the source spaces of {}", name);
     }
 
     for (qint32 k = 0; k < t_SourceSpace.size(); ++k)
@@ -1195,7 +1123,7 @@ bool MNEForwardSolution::read(QIODevice& p_IODevice,
     //   Bad channel list
     //
     StringList bads;
-    if (bExcludeBads) {
+    if (options.exclude_bads) {
         bads = t_pStream.read_bad_channels(t_pStream.dirtree());
         if (bads.size() > 0) {
             qInfo("\t%lld bad channels ( ", static_cast<long long>(bads.size()));
@@ -1213,9 +1141,7 @@ bool MNEForwardSolution::read(QIODevice& p_IODevice,
     FiffDirNode::SPtr eegnode;
     for (const auto& fwd : fwds) {
         if (t_pTag = fwd->find_tag(t_pStream, FIFF_MNE_INCLUDED_METHODS); !t_pTag) {
-            t_pStream.close();
-            qWarning("Methods not listed for one of the forward solutions");
-            return false;
+            return fail(ErrorCode::Format, "a forward solution in {} lists no methods", name);
         }
         if (*t_pTag->toInt() == FIFFV_MNE_MEG) {
             qInfo("MEG solution found");
@@ -1247,16 +1173,14 @@ bool MNEForwardSolution::read(QIODevice& p_IODevice,
     //
     //   Merge the MEG and EEG solutions together
     //
-    fwd.clear();
+    MNEForwardSolution fwd;
 
     if (!megfwd.isEmpty() && !eegfwd.isEmpty()) {
         if (megfwd.sol->data.cols() != eegfwd.sol->data.cols() ||
             megfwd.source_ori != eegfwd.source_ori ||
             megfwd.nsource != eegfwd.nsource ||
             megfwd.coord_frame != eegfwd.coord_frame) {
-            t_pStream.close();
-            qWarning("The MEG and EEG forward solutions do not match");
-            return false;
+            return fail(ErrorCode::Format, "the MEG and EEG forward solutions in {} do not match", name);
         }
 
         fwd = MNEForwardSolution(megfwd);
@@ -1287,18 +1211,14 @@ bool MNEForwardSolution::read(QIODevice& p_IODevice,
     //   Get the MRI <-> head coordinate transformation
     //
     if (t_pTag = parent_mri[0]->find_tag(t_pStream, FIFF_COORD_TRANS); !t_pTag) {
-        t_pStream.close();
-        qWarning("MRI/head coordinate transformation not found");
-        return false;
+        return fail(ErrorCode::Format, "no MRI/head coordinate transformation in {}", name);
     } else {
         fwd.mri_head_t = t_pTag->toCoordTrans();
 
         if (fwd.mri_head_t.from != FIFFV_COORD_MRI || fwd.mri_head_t.to != FIFFV_COORD_HEAD) {
             fwd.mri_head_t.invert_transform();
             if (fwd.mri_head_t.from != FIFFV_COORD_MRI || fwd.mri_head_t.to != FIFFV_COORD_HEAD) {
-                t_pStream.close();
-                qWarning("MRI/head coordinate transformation not found");
-                return false;
+                return fail(ErrorCode::Format, "no MRI/head coordinate transformation in {}", name);
             }
         }
     }
@@ -1315,8 +1235,7 @@ bool MNEForwardSolution::read(QIODevice& p_IODevice,
     //   if necessary
     //
     if (fwd.coord_frame != FIFFV_COORD_MRI && fwd.coord_frame != FIFFV_COORD_HEAD) {
-        qWarning("Only forward solutions computed in MRI or head coordinates are acceptable");
-        return false;
+        return fail(ErrorCode::Format, "{} holds a forward solution in coordinate frame {}; only MRI and head coordinates are supported", name, fwd.coord_frame);
     }
 
     //
@@ -1326,8 +1245,7 @@ bool MNEForwardSolution::read(QIODevice& p_IODevice,
         nuse += t_SourceSpace[k].nuse;
 
     if (nuse != fwd.nsource) {
-        qWarning("Source spaces do not match the forward solution.");
-        return false;
+        return fail(ErrorCode::Format, "the source spaces of {} do not match its forward solution", name);
     }
 
     qInfo("\tSource spaces transformed to the forward solution coordinate frame");
@@ -1335,7 +1253,7 @@ bool MNEForwardSolution::read(QIODevice& p_IODevice,
     //
     //   Handle the source locations and orientations
     //
-    if (fwd.isFixedOrient() || force_fixed == true) {
+    if (fwd.isFixedOrient() || options.force_fixed) {
         // Fixing a free solution uses the average patch normals when available (mne-python use_cps=True).
         const bool patchNormals = !fwd.isFixedOrient() && t_SourceSpace.hemisphereAt(0) && t_SourceSpace.hemisphereAt(0)->patch_inds.size() > 0;
         nuse = 0;
@@ -1379,7 +1297,7 @@ bool MNEForwardSolution::read(QIODevice& p_IODevice,
             }
             qInfo("[done]");
         }
-    } else if (surf_ori) {
+    } else if (options.surf_ori) {
         fwd.surf_ori = false;
         fwd.convert_to_surf_ori();
     } else {
@@ -1403,20 +1321,15 @@ bool MNEForwardSolution::read(QIODevice& p_IODevice,
     //
     //   Do the channel selection
     //
-    StringList exclude_bads = exclude;
+    StringList exclude_bads = options.exclude;
     if (bads.size() > 0) {
         for (qint32 k = 0; k < static_cast<int>(bads.size()); ++k)
             if (std::none_of(exclude_bads.begin(), exclude_bads.end(), [&](const std::string& e) { return UTILSLIB::equalsIgnoreCase(e, bads[k]); }))
                 exclude_bads.push_back(bads[k]);
     }
 
-    fwd.surf_ori = surf_ori;
-    fwd = fwd.pick_channels(include, exclude_bads);
-
-    //garbage collecting
-    t_pStream.close();
-
-    return true;
+    fwd.surf_ori = options.surf_ori;
+    return fwd.pick_channels(options.include, exclude_bads);
 }
 
 //=============================================================================================================

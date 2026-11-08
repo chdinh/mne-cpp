@@ -1418,19 +1418,12 @@ bool CorticalSurface::runComputeSourceEstimate(const QString& fwdPath,
                                                const QString& evokedPath,
                                                const ComputeSourceEstimateOptions& opts)
 {
-    QFile fwdFile(fwdPath);
-    if (!QFileInfo::exists(fwdPath)) {
-        qWarning() << "[CorticalSurface] Cannot open forward file" << fwdPath;
+    auto fwdRead = MNEForwardSolution::read(fwdPath.toStdU16String());
+    if (!fwdRead) {
+        qWarning() << "[CorticalSurface]" << fwdRead.error().what();
         return false;
     }
-    MNEForwardSolution fwd;
-    if (!MNEForwardSolution::read(fwdFile, fwd)) {
-        qWarning() << "[CorticalSurface] read forward failed";
-        return false;
-    }
-    if (fwdFile.isOpen()) {
-        fwdFile.close();
-    }
+    const MNEForwardSolution& fwd = *fwdRead;
 
     if (!QFileInfo::exists(covPath)) {
         qWarning() << "[CorticalSurface] Cannot open cov file" << covPath;

@@ -450,8 +450,7 @@ void TestMneInvCoverage::testForwardSolutionFromFile()
     QVERIFY2(QFile::exists(fwdPath()),
              qPrintable(QString("Forward solution not found: %1").arg(fwdPath())));
 
-    QFile file(fwdPath());
-    MNEForwardSolution fwd(file);
+    MNEForwardSolution fwd(fwdPath().toStdU16String());
     QVERIFY(fwd.sol != nullptr);
     QVERIFY(fwd.nsource > 0);
     QVERIFY(fwd.nchan > 0);
@@ -462,8 +461,7 @@ void TestMneInvCoverage::testForwardSolutionDimensions()
     QVERIFY2(QFile::exists(fwdPath()),
              qPrintable(QString("Forward solution not found: %1").arg(fwdPath())));
 
-    QFile file(fwdPath());
-    MNEForwardSolution fwd(file);
+    MNEForwardSolution fwd(fwdPath().toStdU16String());
 
     // sol should be nchan x (nsource * source_ori)
     QVERIFY(fwd.sol->data.rows() > 0);
@@ -476,8 +474,7 @@ void TestMneInvCoverage::testForwardSolutionPickChannelTypes()
     QVERIFY2(QFile::exists(fwdPath()),
              qPrintable(QString("Forward solution not found: %1").arg(fwdPath())));
 
-    QFile file(fwdPath());
-    MNEForwardSolution fwd(file);
+    MNEForwardSolution fwd(fwdPath().toStdU16String());
 
     // Pick MEG only
     FiffRawData raw(rawPath().toStdString());
@@ -536,8 +533,7 @@ void TestMneInvCoverage::testMinNormSetup()
              "Required test data files not found (fwd, cov, or ave)");
 
     // Load forward solution
-    QFile fwdFile(fwdPath());
-    MNEForwardSolution fwd(fwdFile);
+    MNEForwardSolution fwd(fwdPath().toStdU16String());
     QVERIFY2(fwd.sol != nullptr, "Could not load forward solution");
 
     // Load raw info
@@ -560,8 +556,7 @@ void TestMneInvCoverage::testMinNormCalculateInverse()
              "Required test data files not found (fwd, cov, or ave)");
 
     // Load data
-    QFile fwdFile(fwdPath());
-    MNEForwardSolution fwd(fwdFile);
+    MNEForwardSolution fwd(fwdPath().toStdU16String());
     QVERIFY2(fwd.sol != nullptr, "Could not load forward solution");
 
     FiffRawData raw(rawPath().toStdString());

@@ -148,7 +148,7 @@ void TestInvLoreta::initTestCase()
     QString fwdPath = m_sDataPath + "/Result/ref-sample_audvis-meg-eeg-oct-6-fwd.fif";
     QFile fwdFile(fwdPath);
     if (fwdFile.exists())
-        m_fwd = MNEForwardSolution(fwdFile);
+        m_fwd = MNEForwardSolution(fwdPath.toStdU16String());
 
     QString covPath = m_sDataPath + "/MEG/sample/sample_audvis-cov.fif";
     QFile covFile(covPath);

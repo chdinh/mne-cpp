@@ -64,8 +64,7 @@ private slots:
 
         m_bFwdLoaded = false;
         if (QFile::exists(m_sFwdFile)) {
-            QFile file(m_sFwdFile);
-            MNEForwardSolution fwd(file);
+            MNEForwardSolution fwd(m_sFwdFile.toStdU16String());
             if (!fwd.isEmpty()) {
                 m_fwd = fwd;
                 m_bFwdLoaded = true;
@@ -155,10 +154,9 @@ private slots:
 
         // A file with only an MEG or only an EEG solution, as mne.write_forward_solution writes it
         QTemporaryDir dir;
-        QFile file(dir.filePath("single-fwd.fif"));
-        QVERIFY(m_fwd.pick_types(meg, !meg).write(file));
-        file.close();
-        MNEForwardSolution read(file);
+        const std::filesystem::path path = dir.filePath("single-fwd.fif").toStdU16String();
+        QVERIFY(m_fwd.pick_types(meg, !meg).write(path));
+        MNEForwardSolution read(path);
         QVERIFY(!read.isEmpty());
         QCOMPARE(read.nchan, nchan);
         QCOMPARE(read.nsource, 7928);
@@ -166,8 +164,7 @@ private slots:
         QVERIFY(qAbs(read.sol->data.cwiseAbs().sum() - absSum) < 1e-5 * absSum);
 
         // Read with fixed orientation it keeps one column per source
-        file.close();
-        MNEForwardSolution fixed(file, true);
+        MNEForwardSolution fixed(path, {.force_fixed = true});
         QCOMPARE(fixed.nchan, nchan);
         QCOMPARE(fixed.sol->data.cols(), 7928);
     }
@@ -265,8 +262,7 @@ private slots:
             QSKIP("Forward solution not loaded");
 
         // mne.forward.compute_orient_prior on convert_forward_solution(surf_ori=True): tangential components get loose
-        QFile surfFile(m_sFwdFile);
-        MNEForwardSolution surfOri(surfFile, false, true);
+        MNEForwardSolution surfOri(m_sFwdFile.toStdU16String(), {.surf_ori = true});
         QVERIFY(surfOri.surf_ori);
         FiffCov prior = surfOri.compute_orient_prior(0.2f);
         QCOMPARE(prior.dim, 23784);
@@ -281,8 +277,7 @@ private slots:
         // mne raises for a Cartesian forward with loose < 1 and for loose != 0 with fixed orientation; MNE-CPP
         // falls back to free (loose 1) and to ones
         QCOMPARE(m_fwd.compute_orient_prior(0.2f).data.sum(), 23784.0);
-        QFile fixedFile(m_sFwdFile);
-        MNEForwardSolution fixedOri(fixedFile, true);
+        MNEForwardSolution fixedOri(m_sFwdFile.toStdU16String(), {.force_fixed = true});
         prior = fixedOri.compute_orient_prior(0.2f);
         QCOMPARE(prior.data.size(), Eigen::Index(7928));
         QCOMPARE(prior.data.sum(), 7928.0);
@@ -332,8 +327,7 @@ private slots:
         QFETCH(double, first);
         QFETCH(double, at300);
 
-        QFile file(m_sFwdFile);
-        const MNEForwardSolution fwd = fixed ? MNEForwardSolution(file, true) : m_fwd;
+        const MNEForwardSolution fwd = fixed ? MNEForwardSolution(m_sFwdFile.toStdU16String(), {.force_fixed = true}) : m_fwd;
         MatrixXd gain = fwd.sol->data;
         if (zeroSource) {
             gain.leftCols(fixed ? 1 : 3).setZero();
@@ -414,15 +408,10 @@ private slots:
             QSKIP("Forward solution not loaded");
 
         QString tmpFile = QDir::tempPath() + "/test_fwd_roundtrip.fif";
-        QFile outFile(tmpFile);
-        bool written = false;
-        if (outFile.open(QIODevice::WriteOnly)) {
-            written = m_fwd.write(outFile);
-            outFile.close();
-        }
+        const bool written = m_fwd.write(tmpFile.toStdU16String()).has_value();
+        QVERIFY(written);
         if (written) {
-            QFile reloadFile(tmpFile);
-            MNEForwardSolution reloaded(reloadFile);
+            MNEForwardSolution reloaded(tmpFile.toStdU16String());
             QVERIFY(!reloaded.isEmpty());
             QCOMPARE(reloaded.nsource, m_fwd.nsource);
             QCOMPARE(reloaded.nchan, m_fwd.nchan);

@@ -244,7 +244,7 @@ private slots:
         // Read forward solution
         QFile fwdFile(fwdPath);
         if (fwdFile.exists()) {
-            m_fwd = MNEForwardSolution(fwdFile);
+            m_fwd = MNEForwardSolution(fwdPath.toStdU16String());
         }
 
         // Read noise covariance

@@ -215,8 +215,7 @@ void TestMnaInversePipeline::registerRealOps()
                            QString fwdPath = attrs.value(QStringLiteral("fwd_path")).toString();
                            fwdPath.replace(QLatin1String("${TEST_DATA}"), dataPath);
 
-                           QFile fwdFile(fwdPath);
-                           auto fwd = QSharedPointer<MNEForwardSolution>::create(fwdFile);
+                           auto fwd = QSharedPointer<MNEForwardSolution>::create(fwdPath.toStdU16String());
 
                            return {{QStringLiteral("forward"), QVariant::fromValue(fwd)}};
                        });

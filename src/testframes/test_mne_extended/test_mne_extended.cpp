@@ -519,11 +519,7 @@ private slots:
             QSKIP("Forward solution file not available");
         }
 
-        QFile file(fwdFile);
-        MNEForwardSolution fwd;
-        bool ok = MNEForwardSolution::read(file, fwd);
-        QVERIFY(ok);
-        QVERIFY(!fwd.isEmpty());
+        QVERIFY(!MNEForwardSolution(fwdFile.toStdU16String()).isEmpty());
     }
 };
 

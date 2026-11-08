@@ -149,8 +149,7 @@ void TestFwdPython::initTestCase()
         }
     }
 
-    QFile refFile(refPath);
-    m_ref = MNEForwardSolution(refFile);
+    m_ref = MNEForwardSolution(refPath.toStdU16String());
     QVERIFY(!m_ref.isEmpty());
 
     // MNE-C assigns labels to a hemisphere by the "-lh.label" suffix.
@@ -376,15 +375,12 @@ void TestFwdPython::labelForward_free()
     // The file stores MEG and EEG as separate blocks; reading merges them again.
     const QString path = m_dir.filePath("grad-fwd.fif");
     {
-        QFile file(path);
-        QVERIFY(fwd->write(file));
+        QVERIFY(fwd->write(path.toStdU16String()));
     }
     const MatrixXd G = fwd->sol->data;
     const MatrixXd dG = fwd->sol_grad->data;
     {
-        QFile file(path);
-        MNEForwardSolution back;
-        QVERIFY(MNEForwardSolution::read(file, back, false, false, {}, {}, false));
+        const MNEForwardSolution back(path.toStdU16String());
         QCOMPARE(back.sol->row_names, fwd->sol->row_names);
         QCOMPARE(back.sol_grad->row_names, fwd->sol_grad->row_names);
         QVERIFY((back.sol->data - G).norm() <= 1e-6 * G.norm());
@@ -394,9 +390,7 @@ void TestFwdPython::labelForward_free()
 
     // Fixed orientation: G n and, per position derivative d, dG_d n (mne-python's kron(fix_rot, eye(3))).
     {
-        QFile file(path);
-        MNEForwardSolution fixed;
-        QVERIFY(MNEForwardSolution::read(file, fixed, true, false, {}, {}, false));
+        const MNEForwardSolution fixed(path.toStdU16String(), {.force_fixed = true});
         QCOMPARE(static_cast<int>(fixed.sol_grad->data.cols()), 3 * 70);
         for (int i = 0; i < 70; ++i) {
             const Vector3d n = fixed.source_nn.row(i).cast<double>().transpose();
@@ -427,8 +421,7 @@ void TestFwdPython::labelForward_fixed()
     // Reading with force_fixed must place right-hemisphere sources after the left ones:
     // mne.convert_forward_solution(ref, surf_ori=True, force_fixed=True), i.e. average patch normals
     {
-        QFile refFile(data("Result/ref-sample_audvis-meg-eeg-oct-6-fwd.fif"));
-        const MNEForwardSolution fixedRef(refFile, true);
+        const MNEForwardSolution fixedRef(data("Result/ref-sample_audvis-meg-eeg-oct-6-fwd.fif").toStdU16String(), {.force_fixed = true});
         QCOMPARE(static_cast<int>(fixedRef.source_rr.rows()), 7928);
         const Vector3f rr(0.009998258482913594f, -0.05067880820682111f, 0.09408170987849368f);
         const Vector3f nn(0.1567601637522126f, -0.29064558856484646f, 0.9439022157555165f);

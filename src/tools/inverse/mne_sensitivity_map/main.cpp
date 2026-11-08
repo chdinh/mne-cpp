@@ -90,12 +90,12 @@ int main(int argc, char* argv[])
     }
 
     // Load forward solution
-    QFile f(fwdFile);
-    MNEForwardSolution fwd(f);
-    if (fwd.sol->data.size() == 0) {
-        qCritical("Cannot read forward solution: %s", qPrintable(fwdFile));
+    auto fwdRead = MNEForwardSolution::read(fwdFile.toStdU16String());
+    if (!fwdRead) {
+        qCritical("%s", fwdRead.error().what());
         return 1;
     }
+    MNEForwardSolution& fwd = *fwdRead;
 
     MatrixXd G = fwd.sol->data;
     int nChan = G.rows();

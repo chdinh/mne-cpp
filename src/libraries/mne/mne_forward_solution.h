@@ -41,7 +41,10 @@
 #include <fiff/fiff_info_base.h>
 #include <fiff/fiff_cov.h>
 
+#include <utils/error.h>
+
 #include <math.h>
+#include <filesystem>
 #include <memory>
 
 //=============================================================================================================
@@ -161,72 +164,38 @@ public:
     typedef QSharedPointer<const MNEForwardSolution> ConstSPtr; /**< Const shared pointer type for MNEForwardSolution. */
     typedef std::unique_ptr<MNEForwardSolution> UPtr;           /**< Unique pointer type for MNEForwardSolution. */
 
+    /** How read() prepares the solution it reads. */
+    struct ReadOptions
+    {
+        bool force_fixed = false;  /**< Convert a free-orientation solution to fixed orientations. */
+        bool surf_ori = false;     /**< Use surface-based source coordinates. */
+        StringList include;        /**< Keep only these channels; empty keeps all. */
+        StringList exclude;        /**< Drop these channels. */
+        bool exclude_bads = false; /**< Drop the channels marked bad in the file; mne.read_forward_solution keeps them. */
+    };
+
     //=========================================================================================================
     /**
      * Default constructor.
      */
-    MNEForwardSolution();
+    MNEForwardSolution() = default;
 
     //=========================================================================================================
     /**
-     * Constructs a forward operator, by reading from a IO device.
+     * Reads a forward solution file like read(); throws UTILSLIB::Error if it cannot.
      *
-     * @param[in] p_IODevice     IO device to read from the forward operator.
-     * @param[in] force_fixed   Force fixed source orientation mode? (optional).
-     * @param[in] surf_ori      Use surface based source coordinate system? (optional).
-     * @param[in] include       Include these channels (optional).
-     * @param[in] exclude       Exclude these channels (optional).
-     * @param[in] bExcludeBads  Drop the channels marked bad in the file; mne.read_forward_solution keeps them.
-     *
+     * @param[in] path   The -fwd.fif file.
      */
-    MNEForwardSolution(QIODevice& p_IODevice,
-                       bool force_fixed = false,
-                       bool surf_ori = false,
-                       const StringList& include = {},
-                       const StringList& exclude = {},
-                       bool bExcludeBads = false);
+    explicit MNEForwardSolution(const std::filesystem::path& path);
 
     //=========================================================================================================
     /**
-     * Copy constructor.
+     * Reads a forward solution file like read(); throws UTILSLIB::Error if it cannot.
      *
-     * @param[in] p_MNEForwardSolution   MNE forward solution.
+     * @param[in] path      The -fwd.fif file.
+     * @param[in] options   How to prepare the solution.
      */
-    MNEForwardSolution(const MNEForwardSolution& p_MNEForwardSolution);
-
-    //=========================================================================================================
-    /**
-     * Copy assignment operator. Copies public data fields only (not computation state).
-     *
-     * @param[in] other   MNE forward solution to copy from.
-     *
-     * @return Reference to this.
-     */
-    MNEForwardSolution& operator=(const MNEForwardSolution& other);
-
-    //=========================================================================================================
-    /**
-     * Move constructs an MNEForwardSolution.
-     *
-     * @param[in, out] other   Forward solution to move from; left in a valid but unspecified state.
-     */
-    MNEForwardSolution(MNEForwardSolution&& other) = default;
-
-    //=========================================================================================================
-    /**
-     * Move assignment operator.
-     *
-     * @param[in, out] other   Forward solution to move from; left in a valid but unspecified state.
-     *
-     * @return Reference to this object.
-     */
-    MNEForwardSolution& operator=(MNEForwardSolution&& other) = default;
-
-    //=========================================================================================================
-    /**
-     * Destroys the MNEForwardSolution.
-     */
-    ~MNEForwardSolution();
+    MNEForwardSolution(const std::filesystem::path& path, const ReadOptions& options);
 
     //=========================================================================================================
     /**
@@ -393,27 +362,26 @@ public:
 
     //=========================================================================================================
     /**
-     * ### MNE toolbox root function ###: Definition of the mne_read_forward_solution function
+     * Reads a forward solution file, as mne.read_forward_solution does.
      *
-     * Reads a forward solution from a fif file
+     * @param[in] path   The -fwd.fif file.
      *
-     * @param[in] p_IODevice    A fiff IO device like a fiff QFile or QTCPSocket.
-     * @param[out] fwd          A forward solution from a fif file.
-     * @param[in] force_fixed   Force fixed source orientation mode? (optional).
-     * @param[in] surf_ori      Use surface based source coordinate system? (optional).
-     * @param[in] include       Include these channels (optional).
-     * @param[in] exclude       Exclude these channels (optional).
-     * @param[in] bExcludeBads  Drop the channels marked bad in the file; mne.read_forward_solution keeps them.
-     *
-     * @return true if succeeded, false otherwise.
+     * @return The forward solution, or why the file cannot be read: Io if it cannot be opened, NotFound if
+     *         it holds no forward solution, Format if a required part is missing or inconsistent.
      */
-    static bool read(QIODevice& p_IODevice,
-                     MNEForwardSolution& fwd,
-                     bool force_fixed = false,
-                     bool surf_ori = false,
-                     const StringList& include = {},
-                     const StringList& exclude = {},
-                     bool bExcludeBads = false);
+    [[nodiscard]] static UTILSLIB::Expected<MNEForwardSolution> read(const std::filesystem::path& path);
+
+    //=========================================================================================================
+    /**
+     * Reads a forward solution file and prepares it as @p options ask, e.g.
+     * `MNEForwardSolution::read(path, {.surf_ori = true, .exclude_bads = true})`.
+     *
+     * @param[in] path      The -fwd.fif file.
+     * @param[in] options   How to prepare the solution.
+     *
+     * @return The forward solution, or why the file cannot be read (see read(path)).
+     */
+    [[nodiscard]] static UTILSLIB::Expected<MNEForwardSolution> read(const std::filesystem::path& path, const ReadOptions& options);
 
     //=========================================================================================================
     /**
@@ -425,11 +393,11 @@ public:
      * for FIFF storage, writes source spaces, coordinate transforms, and
      * parent file provenance.
      *
-     * @param[in] p_IODevice   The I/O device (e.g. QFile) to write to.
+     * @param[in] path   The -fwd.fif file.
      *
-     * @return True if succeeded, false otherwise.
+     * @return Nothing, or why the file cannot be written (Io).
      */
-    bool write(QIODevice& p_IODevice) const;
+    [[nodiscard]] UTILSLIB::Expected<void> write(const std::filesystem::path& path) const;
 
     //=========================================================================================================
     /**
@@ -516,20 +484,20 @@ private:
                          MNEForwardSolution& one);
 
 public:
-    FIFFLIB::FiffInfoBase info;               /**< light weighted measurement info. */
-    FIFFLIB::fiff_int_t source_ori;           /**< Source orientation: fixed or free. */
-    bool surf_ori;                            /**< If surface oriented. */
-    FIFFLIB::fiff_int_t coord_frame;          /**< Coil coordinate system definition. */
-    FIFFLIB::fiff_int_t nsource;              /**< Number of source dipoles. */
-    FIFFLIB::fiff_int_t nchan;                /**< Number of channels. */
-    FIFFLIB::FiffNamedMatrix::SDPtr sol;      /**< Forward solution. */
-    FIFFLIB::FiffNamedMatrix::SDPtr sol_grad; /**< ToDo... */
-    FIFFLIB::FiffCoordTrans mri_head_t;       /**< MRI head coordinate transformation. */
-    QString mri_filename;                     /**< MRI file name (parent provenance). */
-    FIFFLIB::FiffId mri_id;                   /**< MRI file ID (parent provenance). */
-    MNELIB::MNESourceSpaces src;              /**< Geometric description of the source spaces (hemispheres). */
-    Eigen::MatrixX3f source_rr;               /**< Source locations. */
-    Eigen::MatrixX3f source_nn;               /**< Source normals (number depends on fixed or free orientation). */
+    FIFFLIB::FiffInfoBase info;                                             /**< light weighted measurement info. */
+    FIFFLIB::fiff_int_t source_ori = -1;                                    /**< Source orientation: fixed or free. */
+    bool surf_ori = false;                                                  /**< If surface oriented. */
+    FIFFLIB::fiff_int_t coord_frame = -1;                                   /**< Coil coordinate system definition. */
+    FIFFLIB::fiff_int_t nsource = -1;                                       /**< Number of source dipoles. */
+    FIFFLIB::fiff_int_t nchan = -1;                                         /**< Number of channels. */
+    FIFFLIB::FiffNamedMatrix::SDPtr sol{new FIFFLIB::FiffNamedMatrix};      /**< Forward solution. */
+    FIFFLIB::FiffNamedMatrix::SDPtr sol_grad{new FIFFLIB::FiffNamedMatrix}; /**< ToDo... */
+    FIFFLIB::FiffCoordTrans mri_head_t;                                     /**< MRI head coordinate transformation. */
+    QString mri_filename;                                                   /**< MRI file name (parent provenance). */
+    FIFFLIB::FiffId mri_id;                                                 /**< MRI file ID (parent provenance). */
+    MNELIB::MNESourceSpaces src;                                            /**< Geometric description of the source spaces (hemispheres). */
+    Eigen::MatrixX3f source_rr;                                             /**< Source locations. */
+    Eigen::MatrixX3f source_nn;                                             /**< Source normals (number depends on fixed or free orientation). */
 };
 
 //=============================================================================================================

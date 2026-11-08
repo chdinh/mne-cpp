@@ -421,7 +421,7 @@ private slots:
         if (!fwdFile.exists() || !covFile.exists() || !rawFile.exists())
             QSKIP("Required files not found");
 
-        MNEForwardSolution fwd(fwdFile);
+        MNEForwardSolution fwd(fwdPath.toStdU16String());
         FiffCov noiseCov(covFile.fileName().toStdString());
         FiffRawData raw(rawPath.toStdString());
 
@@ -454,7 +454,7 @@ private slots:
         if (!fwdFile.exists() || !covFile.exists() || !rawFile.exists() || !QFile::exists(evkPath))
             QSKIP("Required files not found");
 
-        MNEForwardSolution fwd(fwdFile);
+        MNEForwardSolution fwd(fwdPath.toStdU16String());
         FiffCov noiseCov(covFile.fileName().toStdString());
         FiffRawData raw(rawPath.toStdString());
 
@@ -497,7 +497,7 @@ private slots:
         if (!fwdFile.exists() || !covFile.exists() || !rawFile.exists() || !QFile::exists(evkPath))
             QSKIP("Required files not found");
 
-        MNEForwardSolution fwd(fwdFile);
+        MNEForwardSolution fwd(fwdPath.toStdU16String());
         FiffCov noiseCov(covFile.fileName().toStdString());
         FiffRawData raw(rawPath.toStdString());
 
@@ -539,7 +539,7 @@ private slots:
         if (!fwdFile.exists() || !covFile.exists() || !rawFile.exists() || !QFile::exists(evkPath))
             QSKIP("Required files not found");
 
-        MNEForwardSolution fwd(fwdFile);
+        MNEForwardSolution fwd(fwdPath.toStdU16String());
         FiffCov noiseCov(covFile.fileName().toStdString());
         FiffRawData raw(rawPath.toStdString());
 
@@ -580,7 +580,7 @@ private slots:
         if (!fwdFile.exists() || !covFile.exists() || !rawFile.exists())
             QSKIP("Required files not found");
 
-        MNEForwardSolution fwd(fwdFile);
+        MNEForwardSolution fwd(fwdPath.toStdU16String());
         FiffCov noiseCov(covFile.fileName().toStdString());
         FiffRawData raw(rawPath.toStdString());
 
@@ -596,8 +596,7 @@ private slots:
         QVERIFY(invOp.write(tmpPath.toStdU16String()));
         QVERIFY(QFile::exists(tmpPath));
 
-        const std::filesystem::path inFile = tmpPath.toStdU16String();
-        MNELIB::MNEInverseOperator invOp2(inFile);
+        MNELIB::MNEInverseOperator invOp2(tmpPath.toStdU16String());
         QVERIFY(invOp2.nchan > 0);
         QCOMPARE(invOp2.nsource, invOp.nsource);
         QCOMPARE(invOp2.nchan, invOp.nchan);
@@ -616,7 +615,7 @@ private slots:
         if (!fwdFile.exists())
             QSKIP("Forward solution not found");
 
-        MNEForwardSolution fwd(fwdFile);
+        MNEForwardSolution fwd(fwdPath.toStdU16String());
         if (fwd.isEmpty())
             QSKIP("Fwd load failed");
 

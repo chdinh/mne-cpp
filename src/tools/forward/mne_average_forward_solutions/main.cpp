@@ -136,12 +136,12 @@ int main(int argc, char* argv[])
     // Load first forward solution as template
     qInfo("Loading %lld forward solutions...", static_cast<long long>(fwdFiles.size()));
 
-    QFile f0(fwdFiles[0]);
-    MNEForwardSolution fwd0(f0);
-    if (fwd0.sol->data.size() == 0) {
-        qCritical("Cannot read forward solution: %s", qPrintable(fwdFiles[0]));
+    auto fwd0Read = MNEForwardSolution::read(fwdFiles[0].toStdU16String());
+    if (!fwd0Read) {
+        qCritical("%s", fwd0Read.error().what());
         return 1;
     }
+    MNEForwardSolution& fwd0 = *fwd0Read;
     qInfo("  [1] %s: %d channels x %d sources (weight=%.4f)",
           qPrintable(fwdFiles[0]), static_cast<int>(fwd0.sol->data.rows()), static_cast<int>(fwd0.sol->data.cols()), weights[0]);
 
@@ -152,12 +152,12 @@ int main(int argc, char* argv[])
     MatrixXd avgSol = weights[0] * fwd0.sol->data;
 
     for (int i = 1; i < fwdFiles.size(); ++i) {
-        QFile fi(fwdFiles[i]);
-        MNEForwardSolution fwdi(fi);
-        if (fwdi.sol->data.size() == 0) {
-            qCritical("Cannot read forward solution: %s", qPrintable(fwdFiles[i]));
+        auto fwdiRead = MNEForwardSolution::read(fwdFiles[i].toStdU16String());
+        if (!fwdiRead) {
+            qCritical("%s", fwdiRead.error().what());
             return 1;
         }
+        MNEForwardSolution& fwdi = *fwdiRead;
 
         if (fwdi.sol->data.rows() != nChan || fwdi.sol->data.cols() != nSrc) {
             qCritical("Forward solution dimension mismatch in %s: %dx%d vs %dx%d",
@@ -178,8 +178,10 @@ int main(int argc, char* argv[])
     // Write averaged forward solution
     fwd0.sol->data = avgSol;
 
-    QFile outF(outFile);
-    fwd0.write(outF);
+    if (auto written = fwd0.write(outFile.toStdU16String()); !written) {
+        qCritical("%s", written.error().what());
+        return 1;
+    }
 
     qInfo("Written averaged forward solution to: %s", qPrintable(outFile));
     return 0;

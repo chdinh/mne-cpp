@@ -137,8 +137,7 @@ void TestMneLabelPython::initTestCase()
     if (!QFile::exists(fwdPath)) {
         QSKIP("Forward solution not found");
     }
-    QFile fwdFile(fwdPath);
-    m_fwd = MNEForwardSolution(fwdFile);
+    m_fwd = MNEForwardSolution(fwdPath.toStdU16String());
     QVERIFY(!m_fwd.isEmpty());
     QVERIFY(!m_fwd.isFixedOrient());
     QCOMPARE(m_fwd.src[0].nuse, 3956);

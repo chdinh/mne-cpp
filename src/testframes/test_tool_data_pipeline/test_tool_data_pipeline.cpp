@@ -582,16 +582,14 @@ private slots:
         const QString firstPath = m_tempDir.filePath("average-first.stc");
         const QString secondPath = m_tempDir.filePath("average-second.stc");
         {
-            const std::filesystem::path firstFile = firstPath.toStdU16String();
             INVLIB::InvSourceEstimate first(Eigen::MatrixXd::Constant(3, 4, 2.0),
                                             vertices, 0.0f, 0.001f);
-            QVERIFY(first.write(firstFile));
+            QVERIFY(first.write(firstPath.toStdU16String()));
         }
         {
-            const std::filesystem::path secondFile = secondPath.toStdU16String();
             INVLIB::InvSourceEstimate second(Eigen::MatrixXd::Constant(3, 4, 8.0),
                                              vertices, 0.0f, 0.001f);
-            QVERIFY(second.write(secondFile));
+            QVERIFY(second.write(secondPath.toStdU16String()));
         }
 
         const QString descriptionPath = m_tempDir.filePath("average-description.txt");
@@ -1665,8 +1663,7 @@ private slots:
         cmne = std::move(*cmneRead);
         QVERIFY(QFile::exists(outPrefix + "-cmne-rh.stc"));
 
-        QFile fwdIn(fwdFile);
-        const QList<Eigen::VectorXi> vertno = MNELIB::MNEForwardSolution(fwdIn).src.get_vertno();
+        const QList<Eigen::VectorXi> vertno = MNELIB::MNEForwardSolution(fwdFile.toStdU16String()).src.get_vertno();
         QVERIFY(dspm.vertices == vertno[0]);
         QVERIFY(dspmRh.vertices == vertno[1]);
         QCOMPARE(dspm.data.rows() + dspmRh.data.rows(), 7928);
