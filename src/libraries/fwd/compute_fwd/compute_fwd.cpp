@@ -111,21 +111,20 @@ void ComputeFwd::initFwd()
     m_bemModel.reset();
 
     // Report the setup
-    qInfo("Source space                 : %s", m_pSettings->srcname.c_str());
+    UTILSLIB::Log::info("Source space                 : {}", m_pSettings->srcname);
     if (!(m_pSettings->transname.empty()) || !(m_pSettings->mriname.empty())) {
-        qInfo("MRI -> head transform source : %s", !(m_pSettings->mriname.empty()) ? m_pSettings->mriname.c_str() : m_pSettings->transname.c_str());
+        UTILSLIB::Log::info("MRI -> head transform source : {}", m_pSettings->mriname.empty() ? m_pSettings->transname : m_pSettings->mriname);
     } else {
-        qInfo("MRI and head coordinates are assumed to be identical.");
+        UTILSLIB::Log::info("MRI and head coordinates are assumed to be identical.");
     }
-    qInfo("Measurement data             : %s", m_pSettings->measname.c_str());
+    UTILSLIB::Log::info("Measurement data             : {}", m_pSettings->measname);
     if (!m_pSettings->bemname.empty()) {
-        qInfo("BEM model                    : %s", m_pSettings->bemname.c_str());
+        UTILSLIB::Log::info("BEM model                    : {}", m_pSettings->bemname);
     } else {
-        qInfo("Sphere model                 : origin at (% 7.2f % 7.2f % 7.2f) mm",
-              1000.0f * m_pSettings->r0[X], 1000.0f * m_pSettings->r0[Y], 1000.0f * m_pSettings->r0[Z]);
+        UTILSLIB::Log::info("Sphere model                 : origin at ({: 7.2f} {: 7.2f} {: 7.2f}) mm", 1000.0f * m_pSettings->r0[X], 1000.0f * m_pSettings->r0[Y], 1000.0f * m_pSettings->r0[Z]);
         if (m_pSettings->include_eeg) {
             if (m_pSettings->eeg_model_file.empty()) {
-                qWarning("EEG model file not specified; using default.");
+                UTILSLIB::Log::warning("EEG model file not specified; using default.");
             }
             m_eegModels = FwdEegSphereModelSet::fwd_load_eeg_sphere_models(m_pSettings->eeg_model_file, std::move(m_eegModels));
             m_eegModels->fwd_list_eeg_sphere_models();
@@ -142,30 +141,29 @@ void ComputeFwd::initFwd()
                 return;
             }
 
-            qInfo("Using EEG sphere model \"%s\" with scalp radius %7.1f mm",
-                  m_pSettings->eeg_model_name.c_str(), 1000 * m_pSettings->eeg_sphere_rad);
-            qInfo("%s the electrode locations to scalp", m_pSettings->scale_eeg_pos ? "Scale" : "Do not scale");
+            UTILSLIB::Log::info("Using EEG sphere model \"{}\" with scalp radius {:7.1f} mm", m_pSettings->eeg_model_name, 1000 * m_pSettings->eeg_sphere_rad);
+            UTILSLIB::Log::info("{} the electrode locations to scalp", m_pSettings->scale_eeg_pos ? "Scale" : "Do not scale");
 
             m_eegModel->scale_pos = m_pSettings->scale_eeg_pos;
             m_eegModel->r0 = m_pSettings->r0;
         }
     }
-    qInfo("%s field computations", m_pSettings->accurate ? "Accurate" : "Standard");
-    qInfo("Do computations in %s coordinates.", std::string(FiffCoordTrans::frame_name(m_pSettings->coord_frame)).c_str());
-    qInfo("%s source orientations", m_pSettings->fixed_ori ? "Fixed" : "Free");
+    UTILSLIB::Log::info("{} field computations", m_pSettings->accurate ? "Accurate" : "Standard");
+    UTILSLIB::Log::info("Do computations in {} coordinates.", std::string(FiffCoordTrans::frame_name(m_pSettings->coord_frame)));
+    UTILSLIB::Log::info("{} source orientations", m_pSettings->fixed_ori ? "Fixed" : "Free");
     if (m_pSettings->compute_grad) {
-        qInfo("Compute derivatives with respect to source location coordinates");
+        UTILSLIB::Log::info("Compute derivatives with respect to source location coordinates");
     }
-    qInfo("Destination for the solution : %s", m_pSettings->solname.c_str());
+    UTILSLIB::Log::info("Destination for the solution : {}", m_pSettings->solname);
     if (m_pSettings->do_all) {
-        qInfo("Calculate solution for all source locations.");
+        UTILSLIB::Log::info("Calculate solution for all source locations.");
     }
     if (m_pSettings->nlabel > 0) {
-        qInfo("Source space will be restricted to sources in %d labels", m_pSettings->nlabel);
+        UTILSLIB::Log::info("Source space will be restricted to sources in {} labels", m_pSettings->nlabel);
     }
 
     // Read the source locations
-    qInfo("Reading %s...", m_pSettings->srcname.c_str());
+    UTILSLIB::Log::info("Reading {}...", m_pSettings->srcname);
     if (MNESourceSpace::read_source_spaces(UTILSLIB::pathFromUtf8(m_pSettings->srcname), m_spaces) != OK) {
         return;
     }
@@ -176,10 +174,10 @@ void ComputeFwd::initFwd()
         m_iNSource += m_spaces[k]->nuse;
     }
     if (m_iNSource == 0) {
-        qCritical("No sources are active in these source spaces. --all option should be used.");
+        UTILSLIB::Log::critical("No sources are active in these source spaces. --all option should be used.");
         return;
     }
-    qInfo("Read %d source spaces a total of %d active source locations", static_cast<int>(m_spaces.size()), m_iNSource);
+    UTILSLIB::Log::info("Read {} source spaces a total of {} active source locations", static_cast<int>(m_spaces.size()), m_iNSource);
     if (MNESourceSpace::restrict_sources_to_labels(m_spaces, m_pSettings->labels, m_pSettings->nlabel) == FAIL) {
         return;
     }
@@ -195,7 +193,7 @@ void ComputeFwd::initFwd()
         auto mriStream = FiffStream::open(UTILSLIB::pathFromUtf8(m_pSettings->mriname));
         m_mri_id = mriStream ? mriStream->id() : FiffId();
         if (m_mri_id.empty()) {
-            qCritical("Couldn't read MRI file id (How come?)");
+            UTILSLIB::Log::critical("Couldn't read MRI file id (How come?)");
             return;
         }
     } else if (!m_pSettings->transname.empty()) {
@@ -215,13 +213,13 @@ void ComputeFwd::initFwd()
     if (!m_pSettings->pFiffInfo) {
         auto pStream = FiffStream::open(UTILSLIB::pathFromUtf8(m_pSettings->measname));
         if (!pStream) {
-            qCritical("%s", pStream.error().what());
+            UTILSLIB::Log::critical("{}", pStream.error().what());
             return;
         }
         FIFFLIB::FiffDirNode::SPtr DirNode;
         FIFFLIB::FiffInfo fiffInfo;
         if (!pStream->read_meas_info(pStream->dirtree(), fiffInfo, DirNode)) {
-            qCritical() << "Could not find the channel information.";
+            UTILSLIB::Log::critical("Could not find the channel information.");
             return;
         }
         m_pInfoBase = QSharedPointer<FIFFLIB::FiffInfo>(new FiffInfo(fiffInfo));
@@ -229,7 +227,7 @@ void ComputeFwd::initFwd()
         m_pInfoBase = m_pSettings->pFiffInfo;
     }
     if (!m_pInfoBase) {
-        qCritical("ComputeFwd::initFwd(): no FiffInfo");
+        UTILSLIB::Log::critical("ComputeFwd::initFwd(): no FiffInfo");
         return;
     }
     m_pInfoBase->mne_read_meg_comp_eeg_ch_info(m_listMegChs,
@@ -244,23 +242,23 @@ void ComputeFwd::initFwd()
         m_meg_head_t = m_pSettings->meg_head_t;
     }
     if (m_meg_head_t.empty()) {
-        qCritical("MEG -> head coordinate transformation not found.");
+        UTILSLIB::Log::critical("MEG -> head coordinate transformation not found.");
         return;
     }
 
     m_iNChan = iNMeg + iNEeg;
 
     if (iNMeg > 0) {
-        qInfo("Read %3d MEG channels from %s", iNMeg, m_pSettings->measname.c_str());
+        UTILSLIB::Log::info("Read {:3} MEG channels from {}", iNMeg, m_pSettings->measname);
     }
     if (iNComp > 0) {
-        qInfo("Read %3d MEG compensation channels from %s", iNComp, m_pSettings->measname.c_str());
+        UTILSLIB::Log::info("Read {:3} MEG compensation channels from {}", iNComp, m_pSettings->measname);
     }
     if (iNEeg > 0) {
-        qInfo("Read %3d EEG channels from %s", iNEeg, m_pSettings->measname.c_str());
+        UTILSLIB::Log::info("Read {:3} EEG channels from {}", iNEeg, m_pSettings->measname);
     }
     if (!m_pSettings->include_meg) {
-        qInfo("MEG not requested. MEG channels omitted.");
+        UTILSLIB::Log::info("MEG not requested. MEG channels omitted.");
         m_listMegChs.clear();
         m_listCompChs.clear();
         iNMeg = 0;
@@ -268,7 +266,7 @@ void ComputeFwd::initFwd()
     } else
         m_meg_head_t.print();
     if (!m_pSettings->include_eeg) {
-        qInfo("EEG not requested. EEG channels omitted.");
+        UTILSLIB::Log::info("EEG not requested. EEG channels omitted.");
         m_listEegChs.clear();
         iNEeg = 0;
     } else {
@@ -299,7 +297,7 @@ void ComputeFwd::initFwd()
             return;
         }
         if (m_compData->ncomp > 0) {
-            qInfo("%d compensation data sets in %s", m_compData->ncomp, m_pSettings->measname.c_str());
+            UTILSLIB::Log::info("{} compensation data sets in {}", m_compData->ncomp, m_pSettings->measname);
         } else {
             m_listCompChs.clear();
             iNComp = 0;
@@ -336,7 +334,7 @@ void ComputeFwd::initFwd()
             return;
         }
 
-        qInfo("MRI coordinate coil definitions created.");
+        UTILSLIB::Log::info("MRI coordinate coil definitions created.");
     } else {
         m_megcoils = m_templates->create_meg_coils(m_listMegChs,
                                                    iNMeg,
@@ -359,7 +357,7 @@ void ComputeFwd::initFwd()
         if (!m_eegels) {
             return;
         }
-        qInfo("Head coordinate coil definitions created.");
+        UTILSLIB::Log::info("Head coordinate coil definitions created.");
     }
 
     // Transform the source spaces into the appropriate coordinates
@@ -368,7 +366,7 @@ void ComputeFwd::initFwd()
             return;
         }
     }
-    qInfo("Source spaces are now in %s coordinates.", std::string(FiffCoordTrans::frame_name(m_pSettings->coord_frame)).c_str());
+    UTILSLIB::Log::info("Source spaces are now in {} coordinates.", std::string(FiffCoordTrans::frame_name(m_pSettings->coord_frame)));
 
     // Prepare the BEM model if necessary
 
@@ -376,36 +374,36 @@ void ComputeFwd::initFwd()
         QString bemsolname = QString::fromStdU16String(FwdBemModel::fwd_bem_make_bem_sol_name(m_pSettings->bemname).u16string());
         m_pSettings->bemname = bemsolname.toStdString();
 
-        qInfo("Setting up the BEM model using %s...", m_pSettings->bemname.c_str());
-        qInfo("Loading surfaces...");
+        UTILSLIB::Log::info("Setting up the BEM model using {}...", m_pSettings->bemname);
+        UTILSLIB::Log::info("Loading surfaces...");
         m_bemModel = FwdBemModel::fwd_bem_load_three_layer_surfaces(m_pSettings->bemname);
 
         if (m_bemModel) {
-            qInfo("Three-layer model surfaces loaded.");
+            UTILSLIB::Log::info("Three-layer model surfaces loaded.");
         } else {
             m_bemModel = FwdBemModel::fwd_bem_load_homog_surface(m_pSettings->bemname);
             if (!m_bemModel) {
                 return;
             }
-            qInfo("Homogeneous model surface loaded.");
+            UTILSLIB::Log::info("Homogeneous model surface loaded.");
         }
         if (iNEeg > 0 && m_bemModel->nsurf == 1) {
-            qCritical("Cannot use a homogeneous model in EEG calculations.");
+            UTILSLIB::Log::critical("Cannot use a homogeneous model in EEG calculations.");
             return;
         }
-        qInfo("Loading the solution matrix...");
+        UTILSLIB::Log::info("Loading the solution matrix...");
         if (m_bemModel->fwd_bem_load_recompute_solution(m_pSettings->bemname.c_str(), FWD_BEM_UNKNOWN, false) == FAIL) {
             return;
         }
         if (m_pSettings->coord_frame == FIFFV_COORD_HEAD) {
-            qInfo("Employing the head->MRI coordinate transform with the BEM model.");
+            UTILSLIB::Log::info("Employing the head->MRI coordinate transform with the BEM model.");
             if (m_bemModel->fwd_bem_set_head_mri_t(m_mri_head_t) == FAIL) {
                 return;
             }
         }
-        qInfo("BEM model %s is now set up", m_bemModel->sol_name.c_str());
+        UTILSLIB::Log::info("BEM model {} is now set up", m_bemModel->sol_name);
     } else {
-        qInfo("Using the sphere model.");
+        UTILSLIB::Log::info("Using the sphere model.");
         m_bemModel = std::make_unique<FwdBemModel>(); // no surfaces selects the sphere branch
     }
 
@@ -415,11 +413,11 @@ void ComputeFwd::initFwd()
         if (!m_pSettings->mindistoutname.empty()) {
             filteredFile.setFileName(QString::fromStdString(m_pSettings->mindistoutname));
             if (!filteredFile.open(QIODevice::WriteOnly | QIODevice::Text)) {
-                qCritical() << m_pSettings->mindistoutname;
+                UTILSLIB::Log::critical("{}", m_pSettings->mindistoutname);
                 return;
             }
             filteredStream = std::make_unique<QTextStream>(&filteredFile);
-            qInfo("Omitted source space points will be output to : %s", m_pSettings->mindistoutname.c_str());
+            UTILSLIB::Log::info("Omitted source space points will be output to : {}", m_pSettings->mindistoutname);
         }
         MNESourceSpace::filter_source_spaces(m_pSettings->mindist,
                                              UTILSLIB::pathFromUtf8(m_pSettings->bemname),
@@ -507,7 +505,7 @@ void ComputeFwd::populateMetadata(MNEForwardSolution& fwd)
 std::unique_ptr<MNEForwardSolution> ComputeFwd::calculateFwd()
 {
     if (!m_bInitialized) {
-        qCritical("ComputeFwd::calculateFwd - the forward computation could not be set up.");
+        UTILSLIB::Log::critical("ComputeFwd::calculateFwd - the forward computation could not be set up.");
         return nullptr;
     }
     auto fwdSolution = std::make_unique<MNEForwardSolution>();
@@ -563,7 +561,7 @@ std::unique_ptr<MNEForwardSolution> ComputeFwd::calculateFwd()
     // Assemble combined sol
     if (iNMeg > 0 && iNEeg > 0) {
         if (m_meg_forward->data.cols() != m_eeg_forward->data.cols()) {
-            qWarning() << "The MEG and EEG forward solutions do not match";
+            UTILSLIB::Log::warning("The MEG and EEG forward solutions do not match");
             return nullptr;
         }
         fwdSolution->sol->clear();
@@ -584,7 +582,7 @@ std::unique_ptr<MNEForwardSolution> ComputeFwd::calculateFwd()
     if (m_pSettings->compute_grad) {
         if (iNMeg > 0 && iNEeg > 0) {
             if (m_meg_forward_grad->data.cols() != m_eeg_forward_grad->data.cols()) {
-                qWarning() << "The MEG and EEG forward solutions do not match";
+                UTILSLIB::Log::warning("The MEG and EEG forward solutions do not match");
                 return nullptr;
             }
             fwdSolution->sol_grad->clear();

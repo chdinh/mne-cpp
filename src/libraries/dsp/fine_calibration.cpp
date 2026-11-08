@@ -15,6 +15,7 @@
 //=============================================================================================================
 
 #include "fine_calibration.h"
+#include <utils/logger/log.h>
 
 //=============================================================================================================
 // QT INCLUDES
@@ -22,7 +23,6 @@
 
 #include <QFile>
 #include <QTextStream>
-#include <QDebug>
 #include <QRegularExpression>
 
 //=============================================================================================================
@@ -42,7 +42,7 @@ FineCalibration FineCalibration::read(const QString& sPath)
 
     QFile file(sPath);
     if (!file.open(QIODevice::ReadOnly | QIODevice::Text)) {
-        qWarning() << "[FineCalibration::read] Cannot open file:" << sPath;
+        Log::warning("[FineCalibration::read] Cannot open file: {}", sPath.toStdString());
         return cal;
     }
 
@@ -55,7 +55,7 @@ FineCalibration FineCalibration::read(const QString& sPath)
 
         const QStringList parts = line.split(QRegularExpression("\\s+"), Qt::SkipEmptyParts);
         if (parts.size() != 14 && parts.size() != 16) {
-            qWarning() << "[FineCalibration::read] Skipping malformed line:" << line;
+            Log::warning("[FineCalibration::read] Skipping malformed line: {}", line.toStdString());
             continue;
         }
 
@@ -67,7 +67,7 @@ FineCalibration FineCalibration::read(const QString& sPath)
             values(k - 1) = parts[k].toDouble(&ok);
         }
         if (!ok) {
-            qWarning() << "[FineCalibration::read] Skipping malformed line:" << line;
+            Log::warning("[FineCalibration::read] Skipping malformed line: {}", line.toStdString());
             continue;
         }
         entry.position = values.head<3>();
@@ -87,7 +87,7 @@ bool FineCalibration::write(const QString& sPath) const
 {
     QFile file(sPath);
     if (!file.open(QIODevice::WriteOnly | QIODevice::Text)) {
-        qWarning() << "[FineCalibration::write] Cannot open file for writing:" << sPath;
+        Log::warning("[FineCalibration::write] Cannot open file for writing: {}", sPath.toStdString());
         return false;
     }
 

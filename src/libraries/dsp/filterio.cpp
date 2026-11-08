@@ -15,6 +15,7 @@
 //=============================================================================================================
 
 #include "filterio.h"
+#include <utils/logger/log.h>
 
 #include <vector>
 
@@ -23,7 +24,6 @@
 //=============================================================================================================
 
 #include <QFile>
-#include <QDebug>
 #include <QStringList>
 #include <QRegularExpression>
 
@@ -52,7 +52,7 @@ bool FilterIO::readFilter(QString path, FilterKernel& filter)
 
     QFile file(path);
     if (!file.open(QIODevice::ReadOnly | QIODevice::Text)) {
-        qDebug() << "Error opening filter txt file for reading";
+        Log::debug("Error opening filter txt file for reading");
         return false;
     }
 
@@ -137,7 +137,7 @@ bool FilterIO::writeFilter(const QString& path, const FilterKernel& filter)
     if (!path.isEmpty()) {
         QFile file(path);
         if (!file.open(QIODevice::WriteOnly | QIODevice::Text)) {
-            qDebug() << "Error opening filter txt file for writing";
+            Log::debug("Error opening filter txt file for writing");
             return false;
         }
 
@@ -162,7 +162,7 @@ bool FilterIO::writeFilter(const QString& path, const FilterKernel& filter)
         return true;
     }
 
-    qDebug() << "Error Filter File path is empty";
+    Log::debug("Error Filter File path is empty");
 
     return false;
 }

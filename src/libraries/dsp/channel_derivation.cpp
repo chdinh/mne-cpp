@@ -15,6 +15,7 @@
 //=============================================================================================================
 
 #include "channel_derivation.h"
+#include <utils/logger/log.h>
 
 #include <vector>
 #include <utility>
@@ -25,7 +26,6 @@
 // QT INCLUDES
 //=============================================================================================================
 
-#include <QDebug>
 
 #include <cmath>
 #include <format>
@@ -139,7 +139,7 @@ std::pair<MatrixXd, StringList> ChannelDerivation::apply(
         for (const auto& [input, weight] : rule.inputWeights) {
             const auto idxIt = chIndex.find(input);
             if (idxIt == chIndex.end()) {
-                qWarning("ChannelDerivation::apply - channel not found: %s in rule: %s", input.c_str(), rule.outputName.c_str());
+                Log::warning("ChannelDerivation::apply - channel not found: {} in rule: {}", input, rule.outputName);
                 continue;
             }
             matResult.row(static_cast<Eigen::Index>(r)) += weight * matData.row(idxIt->second);
@@ -170,7 +170,7 @@ bool ChannelDerivation::writeDefinitionFile(const std::filesystem::path& path, c
 {
     std::ofstream out(path);
     if (!out) {
-        qWarning("ChannelDerivation::writeDefinitionFile - cannot open: %s", utf8FromPath(path).c_str());
+        Log::warning("ChannelDerivation::writeDefinitionFile - cannot open: {}", utf8FromPath(path));
         return false;
     }
     // MNE-C mne_make_derivations syntax; names are quoted because they may contain spaces.

@@ -15,6 +15,7 @@
 //=============================================================================================================
 
 #include "fs_surface.h"
+#include <utils/logger/log.h>
 #include <fiff/fiff_byte_swap.h>
 
 #include <iostream>
@@ -96,7 +97,7 @@ void FsSurface::clear()
 
 MatrixX3f FsSurface::compute_normals(const MatrixX3f& rr, const MatrixX3i& tris)
 {
-    qInfo("\tcomputing normals\n");
+    Log::info("\tcomputing normals\n");
     // first, compute triangle normals
     MatrixX3f r1(tris.rows(), 3);
     MatrixX3f r2(tris.rows(), 3);
@@ -262,10 +263,10 @@ bool FsSurface::read(const std::filesystem::path& p_sFile, FsSurface& p_Surface,
     if (!name.starts_with("lh.") && !name.starts_with("rh."))
         return false;
 
-    qInfo("Reading surface...\n");
+    Log::info("Reading surface...\n");
     auto geometry = read_geometry(p_sFile);
     if (!geometry) {
-        qWarning("\t%s", geometry.error().what());
+        Log::warning("\t{}", geometry.error().what());
         return false;
     }
 
@@ -279,11 +280,11 @@ bool FsSurface::read(const std::filesystem::path& p_sFile, FsSurface& p_Surface,
 
     //Load curvature
     if (p_bLoadCurvature) {
-        qInfo("\t");
+        Log::info("\t");
         p_Surface.m_vecCurv = FsSurface::read_curv(p_sFile.parent_path() / (p_Surface.m_iHemi == 0 ? "lh.curv" : "rh.curv"));
     }
 
-    qInfo("\tRead a surface with %d vertices from %s\n[done]\n", static_cast<int>(p_Surface.m_matRR.rows()), file.c_str());
+    Log::info("\tRead a surface with {} vertices from {}\n[done]\n", static_cast<int>(p_Surface.m_matRR.rows()), file);
 
     return true;
 }
@@ -294,10 +295,10 @@ VectorXf FsSurface::read_curv(const std::filesystem::path& p_sFileName)
 {
     VectorXf curv;
 
-    qInfo("Reading curvature...");
+    Log::info("Reading curvature...");
     auto bytes = read_file_bytes(p_sFileName);
     if (!bytes) {
-        qWarning("\tError: Couldn't open the curvature file");
+        Log::warning("\tError: Couldn't open the curvature file");
         return curv;
     }
     MemoryByteStream stream(std::move(*bytes));
@@ -312,7 +313,7 @@ VectorXf FsSurface::read_curv(const std::filesystem::path& p_sFileName)
         stream.readBigEndian(fnum);
         stream.readBigEndian(valsPerVertex);
         if (vnum < 0 || static_cast<std::uint64_t>(vnum) * 4 > stream.size() - stream.pos()) {
-            qWarning("\tError: Truncated curvature file");
+            Log::warning("\tError: Truncated curvature file");
             return VectorXf();
         }
         curv.resize(vnum);
@@ -320,7 +321,7 @@ VectorXf FsSurface::read_curv(const std::filesystem::path& p_sFileName)
     } else {
         FsSurface::fread3(stream); // number of faces
         if (vnum < 0 || static_cast<std::uint64_t>(vnum) * 2 > stream.size() - stream.pos()) {
-            qWarning("\tError: Truncated curvature file");
+            Log::warning("\tError: Truncated curvature file");
             return VectorXf();
         }
         std::vector<qint16> values(static_cast<std::size_t>(vnum));
@@ -330,7 +331,7 @@ VectorXf FsSurface::read_curv(const std::filesystem::path& p_sFileName)
             curv(i) = static_cast<float>(values[static_cast<std::size_t>(i)]) / 100;
     }
 
-    qInfo("[done]\n");
+    Log::info("[done]\n");
 
     return curv;
 }

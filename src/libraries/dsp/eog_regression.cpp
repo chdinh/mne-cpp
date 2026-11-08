@@ -15,6 +15,7 @@
 //=============================================================================================================
 
 #include "eog_regression.h"
+#include <utils/logger/log.h>
 
 #include <vector>
 #include <utils/string_utils.h>
@@ -22,12 +23,6 @@
 #include <fiff/fiff_info.h>
 #include <fiff/fiff_ch_info.h>
 #include <fiff/fiff_constants.h>
-
-//=============================================================================================================
-// QT INCLUDES
-//=============================================================================================================
-
-#include <QDebug>
 
 //=============================================================================================================
 // EIGEN INCLUDES
@@ -83,11 +78,11 @@ void EogRegression::fit(const MatrixXd& data,
             if (idx >= 0)
                 m_vecEogIndices.push_back(idx);
             else
-                qWarning() << "[EogRegression::fit] EOG channel not found:" << name;
+                Log::warning("[EogRegression::fit] EOG channel not found: {}", name);
         }
     }
     if (m_vecEogIndices.empty()) {
-        qWarning() << "[EogRegression::fit] No EOG channels found. Data will not be modified.";
+        Log::warning("[EogRegression::fit] No EOG channels found. Data will not be modified.");
         return;
     }
 
@@ -110,7 +105,7 @@ void EogRegression::apply(MatrixXd& data,
     Q_UNUSED(info)
 
     if (!m_bFitted) {
-        qWarning() << "[EogRegression::apply] Not fitted yet. Call fit() first.";
+        Log::warning("[EogRegression::apply] Not fitted yet. Call fit() first.");
         return;
     }
     const MatrixXd E = demeanedRows(data, m_vecEogIndices);

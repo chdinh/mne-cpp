@@ -18,6 +18,7 @@
 //=============================================================================================================
 
 #include "fwd_coil_set.h"
+#include <utils/logger/log.h>
 
 #include <vector>
 #include "fwd_coil.h"
@@ -29,7 +30,6 @@
 // QT INCLUDES
 //=============================================================================================================
 
-#include <QDebug>
 #include <QLocale>
 #include <utils/string_utils.h>
 
@@ -70,20 +70,20 @@ static std::string readWord(std::istream& in)
 FwdCoil* FwdCoilSet::fwd_add_coil_to_set(int type, int coil_class, int acc, int np, float size, float base, const std::string& desc)
 {
     if (np <= 0) {
-        qWarning("Number of integration points should be positive (type = %d acc = %d)", type, acc);
+        UTILSLIB::Log::warning("Number of integration points should be positive (type = {} acc = {})", type, acc);
         return nullptr;
     }
     if (!(acc == FWD_COIL_ACCURACY_POINT ||
           acc == FWD_COIL_ACCURACY_NORMAL ||
           acc == FWD_COIL_ACCURACY_ACCURATE)) {
-        qWarning("Illegal accuracy (type = %d acc = %d)", type, acc);
+        UTILSLIB::Log::warning("Illegal accuracy (type = {} acc = {})", type, acc);
         return nullptr;
     }
     if (!(coil_class == FWD_COILC_MAG ||
           coil_class == FWD_COILC_AXIAL_GRAD ||
           coil_class == FWD_COILC_PLANAR_GRAD ||
           coil_class == FWD_COILC_AXIAL_GRAD2)) {
-        qWarning("Illegal coil class (type = %d acc = %d class = %d)", type, acc, coil_class);
+        UTILSLIB::Log::warning("Illegal coil class (type = {} acc = {} class = {})", type, acc, coil_class);
         return nullptr;
     }
 
@@ -121,7 +121,7 @@ FwdCoilSet::~FwdCoilSet()
 FwdCoil::UPtr FwdCoilSet::create_meg_coil(const FiffChInfo& ch, int acc, const FiffCoordTrans& t)
 {
     if (ch.kind != FIFFV_MEG_CH && ch.kind != FIFFV_REF_MEG_CH) {
-        qWarning() << ch.ch_name << "is not a MEG channel. Cannot create a coil definition.";
+        UTILSLIB::Log::warning("{} is not a MEG channel. Cannot create a coil definition.", ch.ch_name);
         return nullptr;
     }
     /*
@@ -135,7 +135,7 @@ FwdCoil::UPtr FwdCoilSet::create_meg_coil(const FiffChInfo& ch, int acc, const F
         }
     }
     if (!def) {
-        qWarning("Desired coil definition not found (type = %d acc = %d)", ch.chpos.coil_type, acc);
+        UTILSLIB::Log::warning("Desired coil definition not found (type = {} acc = {})", ch.chpos.coil_type, acc);
         return nullptr;
     }
     /*
@@ -221,7 +221,7 @@ FwdCoilSet::UPtr FwdCoilSet::read_coil_defs(const std::filesystem::path& name)
 {
     std::ifstream file(name);
     if (!file) {
-        qWarning("FwdCoilSet::read_coil_defs - Cannot open %s", UTILSLIB::utf8FromPath(name).c_str());
+        UTILSLIB::Log::warning("FwdCoilSet::read_coil_defs - Cannot open {}", UTILSLIB::utf8FromPath(name));
         return nullptr;
     }
 
@@ -247,13 +247,13 @@ FwdCoilSet::UPtr FwdCoilSet::read_coil_defs(const std::filesystem::path& name)
         float size, base;
 
         if (!(in >> type >> acc >> np >> size >> base)) {
-            qWarning("FwdCoilSet::read_coil_defs - Error reading coil header");
+            UTILSLIB::Log::warning("FwdCoilSet::read_coil_defs - Error reading coil header");
             return nullptr;
         }
 
         const std::string desc = readWord(in);
         if (desc.empty()) {
-            qWarning("FwdCoilSet::read_coil_defs - Missing coil description");
+            UTILSLIB::Log::warning("FwdCoilSet::read_coil_defs - Missing coil description");
             return nullptr;
         }
 
@@ -266,24 +266,24 @@ FwdCoilSet::UPtr FwdCoilSet::read_coil_defs(const std::filesystem::path& name)
              * Read and verify data for each integration point
              */
             if (!(in >> def->w[p] >> def->rmag(p, 0) >> def->rmag(p, 1) >> def->rmag(p, 2) >> def->cosmag(p, 0) >> def->cosmag(p, 1) >> def->cosmag(p, 2))) {
-                qWarning("FwdCoilSet::read_coil_defs - Error reading integration point %d", p);
+                UTILSLIB::Log::warning("FwdCoilSet::read_coil_defs - Error reading integration point {}", p);
                 return nullptr;
             }
 
             if (def->pos(p).norm() > BIG) {
-                qWarning("Unreasonable integration point: %f %f %f mm (coil type = %d acc = %d)", 1000 * def->rmag(p, 0), 1000 * def->rmag(p, 1), 1000 * def->rmag(p, 2), def->type, def->accuracy);
+                UTILSLIB::Log::warning("Unreasonable integration point: {:f} {:f} {:f} mm (coil type = {} acc = {})", 1000 * def->rmag(p, 0), 1000 * def->rmag(p, 1), 1000 * def->rmag(p, 2), def->type, def->accuracy);
                 return nullptr;
             }
             float cosmagNorm = def->dir(p).norm();
             if (cosmagNorm <= 0) {
-                qWarning("Unreasonable normal: %f %f %f (coil type = %d acc = %d)", def->cosmag(p, 0), def->cosmag(p, 1), def->cosmag(p, 2), def->type, def->accuracy);
+                UTILSLIB::Log::warning("Unreasonable normal: {:f} {:f} {:f} (coil type = {} acc = {})", def->cosmag(p, 0), def->cosmag(p, 1), def->cosmag(p, 2), def->type, def->accuracy);
                 return nullptr;
             }
             def->cosmag.row(p).normalize();
         }
     }
 
-    qInfo("%d coil definitions read", res->ncoil());
+    UTILSLIB::Log::info("{} coil definitions read", res->ncoil());
     return res;
 }
 
@@ -295,7 +295,7 @@ FwdCoilSet::UPtr FwdCoilSet::dup_coil_set(const FiffCoordTrans& t) const
 
     if (!t.empty()) {
         if (this->coord_frame != t.from) {
-            qWarning("Coordinate frame of the transformation does not match the coil set in fwd_dup_coil_set");
+            UTILSLIB::Log::warning("Coordinate frame of the transformation does not match the coil set in fwd_dup_coil_set");
             return nullptr;
         }
     }

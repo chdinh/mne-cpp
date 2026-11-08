@@ -15,17 +15,12 @@
 //=============================================================================================================
 
 #include "rt_filter.h"
+#include <utils/logger/log.h>
 
 #include <fiff/fiff_raw_data.h>
 #include <fiff/fiff_file.h>
 #include <mne/mne_epoch_data.h>
 #include <mne/mne_epoch_data_list.h>
-
-//=============================================================================================================
-// QT INCLUDES
-//=============================================================================================================
-
-#include <QDebug>
 
 //=============================================================================================================
 // EIGEN INCLUDES
@@ -116,7 +111,7 @@ bool RTPROCESSINGLIB::filterFile(QIODevice& pIODevice,
         residual = (to - from) % iSize;
 
         if ((iSize < iOrder)) {
-            qInfo() << "[Filter::filterData] Sliced data block size is too small. Filtering whole block at once.";
+            Log::info("[Filter::filterData] Sliced data block size is too small. Filtering whole block at once.");
             iSize = to - from;
             break;
         }
@@ -139,11 +134,11 @@ bool RTPROCESSINGLIB::filterFile(QIODevice& pIODevice,
         }
 
         if (!pFiffRawData->read_raw_segment(matData, times, mult, first, last, sel)) {
-            qWarning("[Filter::filterData] Error during read_raw_segment\n");
+            Log::warning("[Filter::filterData] Error during read_raw_segment\n");
             return false;
         }
 
-        qInfo() << "Filtering and writing block" << first << "to" << last;
+        Log::info("Filtering and writing block {} to {}", first, last);
 
         if (first_buffer) {
             if (first > 0) {
@@ -190,7 +185,7 @@ MatrixXd RTPROCESSINGLIB::filterData(const MatrixXd& matData,
 {
     // Check for size of data
     if (matData.cols() < iOrder) {
-        qWarning() << "[Filter::filterData] Filter length/order is bigger than data length. Returning.";
+        Log::warning("[Filter::filterData] Filter length/order is bigger than data length. Returning.");
         return matData;
     }
 
@@ -228,7 +223,7 @@ MatrixXd RTPROCESSINGLIB::filterData(const MatrixXd& matData,
 
     // Check for size of data
     if (matData.cols() < iOrder) {
-        qWarning() << "[Filter::filterData] Filter length/order is bigger than data length. Returning.";
+        Log::warning("[Filter::filterData] Filter length/order is bigger than data length. Returning.");
         return matData;
     }
 
@@ -302,7 +297,7 @@ MatrixXd RTPROCESSINGLIB::filterDataBlock(const MatrixXd& matData,
 
     // Check for size of data
     if (matData.cols() < iOrder) {
-        qWarning() << "[Filter::filterDataBlock] Filter length/order is bigger than data length. Returning.";
+        Log::warning("[Filter::filterDataBlock] Filter length/order is bigger than data length. Returning.");
         return matData;
     }
 
@@ -381,7 +376,7 @@ MatrixXd FilterOverlapAdd::calculate(const MatrixXd& matData,
 {
     // Check for size of data
     if (matData.cols() < iOrder) {
-        qWarning() << "[Filter::filterData] Filter length/order is bigger than data length. Returning.";
+        Log::warning("[Filter::filterData] Filter length/order is bigger than data length. Returning.");
         return matData;
     }
 
@@ -421,7 +416,7 @@ MatrixXd FilterOverlapAdd::calculate(const MatrixXd& matData,
 
     // Check for size of data
     if (matData.cols() < iOrder) {
-        qWarning() << "[Filter::filterData] Filter length/order is bigger than data length. Returning.";
+        Log::warning("[Filter::filterData] Filter length/order is bigger than data length. Returning.");
         return matData;
     }
 
@@ -547,7 +542,7 @@ FiffEvoked RTPROCESSINGLIB::computeFilteredAverage(const FiffRawData& raw,
     }
     selected.conservativeResize(1, count);
     if (count > 0) {
-        qInfo("[RTPROCESSINGLIB::computeFilteredAverage] %d matching events found", count);
+        Log::info("[RTPROCESSINGLIB::computeFilteredAverage] {} matching events found", count);
     }
 
     // If picks are empty, pick all
@@ -609,11 +604,11 @@ FiffEvoked RTPROCESSINGLIB::computeFilteredAverage(const FiffRawData& raw,
                 lstEpochDataList.append(MNEEpochData::SPtr(epoch.release()));
             }
         } else {
-            qWarning("[MNEEpochDataList::readEpochs] Can't read the event data segments.");
+            Log::warning("[MNEEpochDataList::readEpochs] Can't read the event data segments.");
         }
     }
 
-    qInfo().noquote() << "[MNEEpochDataList::readEpochs] Read a total of" << lstEpochDataList.size() << "epochs of type" << eventType << "and marked" << dropCount << "for rejection.";
+    Log::info("[MNEEpochDataList::readEpochs] Read a total of {} epochs of type {} and marked {} for rejection.", lstEpochDataList.size(), eventType, dropCount);
 
     if (bApplyBaseline) {
         QPair<float, float> baselinePair(fTBaselineFromS, fTBaselineToS);

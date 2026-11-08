@@ -15,6 +15,7 @@
 //=============================================================================================================
 
 #include "rt_averaging.h"
+#include <utils/logger/log.h>
 
 #include <format>
 
@@ -29,10 +30,6 @@
 //=============================================================================================================
 
 #include <QDebug>
-
-//=============================================================================================================
-// EIGEN INCLUDES
-//=============================================================================================================
 
 //=============================================================================================================
 // USED NAMESPACES
@@ -75,7 +72,7 @@ RtAveragingWorker::RtAveragingWorker(quint32 numAverages,
     m_iNewPostStimSamples = m_iPostStimSamples;
 
     if (m_iNumAverages <= 0) {
-        qDebug() << "RtAveragingWorker::RtAveragingWorker - Number of averages <= 0. Setting to 1 as default.";
+        Log::debug("RtAveragingWorker::RtAveragingWorker - Number of averages <= 0. Setting to 1 as default.");
         m_iNumAverages = 1;
     }
 }
@@ -100,7 +97,7 @@ void RtAveragingWorker::doWork(const MatrixXd& rawSegment)
 void RtAveragingWorker::setAverageNumber(qint32 numAve)
 {
     if (numAve <= 0) {
-        qDebug() << "[RtAveragingWorker::setAverageNumber] Number of averages <= 0 are not allowed. Returning.";
+        Log::debug("[RtAveragingWorker::setAverageNumber] Number of averages <= 0 are not allowed. Returning.");
         return;
     }
 
@@ -326,7 +323,7 @@ void RtAveragingWorker::fillBackBuffer(const MatrixXd& data, double dTriggerType
 void RtAveragingWorker::mergeData(double dTriggerType)
 {
     if (m_mapDataPre[dTriggerType].rows() != m_mapDataPost[dTriggerType].rows()) {
-        qDebug() << "[RtAveragingWorker::mergeData] Rows of m_mapDataPre (" << m_mapDataPre[dTriggerType].rows() << ") and m_mapDataPost (" << m_mapDataPost[dTriggerType].rows() << ") are not the same. Returning.";
+        Log::debug("[RtAveragingWorker::mergeData] Rows of m_mapDataPre ( {} ) and m_mapDataPost ( {} ) are not the same. Returning.", m_mapDataPre[dTriggerType].rows(), m_mapDataPost[dTriggerType].rows());
         return;
     }
 
@@ -362,7 +359,7 @@ void RtAveragingWorker::mergeData(double dTriggerType)
 void RtAveragingWorker::generateEvoked(double dTriggerType)
 {
     if (m_mapStimAve[dTriggerType].isEmpty()) {
-        qDebug() << "[RtAveragingWorker::generateEvoked] m_mapStimAve is empty for type" << dTriggerType << "Returning.";
+        Log::debug("[RtAveragingWorker::generateEvoked] m_mapStimAve is empty for type {} Returning.", dTriggerType);
         return;
     }
 

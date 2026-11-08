@@ -15,6 +15,7 @@
 //=============================================================================================================
 
 #include "xdawn.h"
+#include <utils/logger/log.h>
 
 #include <vector>
 
@@ -28,7 +29,6 @@
 // QT INCLUDES
 //=============================================================================================================
 
-#include <QDebug>
 #include <QHash>
 
 //=============================================================================================================
@@ -78,7 +78,7 @@ XdawnResult Xdawn::fit(const std::vector<MNEEpochData>& epochs,
     result.iTargetEvent = iTargetEvent;
 
     if (epochs.empty()) {
-        qWarning() << "Xdawn::fit: empty epoch list.";
+        Log::warning("Xdawn::fit: empty epoch list.");
         return result;
     }
 
@@ -91,20 +91,20 @@ XdawnResult Xdawn::fit(const std::vector<MNEEpochData>& epochs,
     }
 
     if (goodIdx.empty()) {
-        qWarning() << "Xdawn::fit: no non-rejected epochs available.";
+        Log::warning("Xdawn::fit: no non-rejected epochs available.");
         return result;
     }
 
     const int nCh = static_cast<int>(epochs[goodIdx[0]].epoch.rows());
     const int nSamp = static_cast<int>(epochs[goodIdx[0]].epoch.cols());
     if (nCh == 0 || nSamp == 0) {
-        qWarning() << "Xdawn::fit: epoch matrices are empty.";
+        Log::warning("Xdawn::fit: epoch matrices are empty.");
         return result;
     }
 
     for (int idx : goodIdx) {
         if (epochs[idx].epoch.rows() != nCh || epochs[idx].epoch.cols() != nSamp) {
-            qWarning() << "Xdawn::fit: epoch dimension mismatch.";
+            Log::warning("Xdawn::fit: epoch dimension mismatch.");
             return result;
         }
     }
@@ -133,7 +133,7 @@ XdawnResult Xdawn::fit(const std::vector<MNEEpochData>& epochs,
     }
 
     if (nTarget == 0) {
-        qWarning() << "Xdawn::fit: no target epochs found for event" << iTargetEvent;
+        Log::warning("Xdawn::fit: no target epochs found for event {}", iTargetEvent);
         return result;
     }
 
@@ -160,7 +160,7 @@ XdawnResult Xdawn::fit(const std::vector<MNEEpochData>& epochs,
     }
 
     if (nNoiseSamples <= 0 || nDataSamples <= 0) {
-        qWarning() << "Xdawn::fit: failed to accumulate covariance samples.";
+        Log::warning("Xdawn::fit: failed to accumulate covariance samples.");
         return result;
     }
 
@@ -175,7 +175,7 @@ XdawnResult Xdawn::fit(const std::vector<MNEEpochData>& epochs,
 
     SelfAdjointEigenSolver<MatrixXd> noiseEig(regNoiseCov);
     if (noiseEig.info() != Success) {
-        qWarning() << "Xdawn::fit: noise covariance eigendecomposition failed.";
+        Log::warning("Xdawn::fit: noise covariance eigendecomposition failed.");
         return result;
     }
 
@@ -186,7 +186,7 @@ XdawnResult Xdawn::fit(const std::vector<MNEEpochData>& epochs,
     MatrixXd whitenedSignal = invSqrtNoise * result.matSignalCov * invSqrtNoise;
     SelfAdjointEigenSolver<MatrixXd> signalEig(whitenedSignal);
     if (signalEig.info() != Success) {
-        qWarning() << "Xdawn::fit: signal covariance eigendecomposition failed.";
+        Log::warning("Xdawn::fit: signal covariance eigendecomposition failed.");
         return result;
     }
 
@@ -220,7 +220,7 @@ MatrixXd Xdawn::apply(const MatrixXd& matEpoch, const XdawnResult& result)
     }
 
     if (matEpoch.rows() != result.matFilters.rows()) {
-        qWarning() << "Xdawn::apply: channel count mismatch.";
+        Log::warning("Xdawn::apply: channel count mismatch.");
         return {};
     }
 
@@ -236,7 +236,7 @@ MatrixXd Xdawn::denoise(const MatrixXd& matEpoch, const XdawnResult& result, int
     }
 
     if (matEpoch.rows() != result.matFilters.rows()) {
-        qWarning() << "Xdawn::denoise: channel count mismatch.";
+        Log::warning("Xdawn::denoise: channel count mismatch.");
         return {};
     }
 

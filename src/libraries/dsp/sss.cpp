@@ -15,6 +15,7 @@
 //=============================================================================================================
 
 #include "sss.h"
+#include <utils/logger/log.h>
 
 //=============================================================================================================
 // FIFF INCLUDES
@@ -29,12 +30,6 @@
 
 #include <Eigen/Dense>
 #include <Eigen/SVD>
-
-//=============================================================================================================
-// QT INCLUDES
-//=============================================================================================================
-
-#include <QDebug>
 
 //=============================================================================================================
 // C++ INCLUDES
@@ -266,7 +261,7 @@ SSS::Basis SSS::computeBasis(const FiffInfo& fiffInfo, const Params& params)
 
     const int nMeg = static_cast<int>(basis.megChannelIdx.size());
     if (nMeg == 0) {
-        qWarning() << "SSS::computeBasis: no MEG channels found in FiffInfo.";
+        Log::warning("SSS::computeBasis: no MEG channels found in FiffInfo.");
         return basis;
     }
 

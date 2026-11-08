@@ -17,15 +17,10 @@
 //=============================================================================================================
 
 #include "fwd_coil.h"
+#include <utils/logger/log.h>
 #include <fiff/fiff_ch_info.h>
 #include <stdio.h>
 #include <algorithm>
-
-//=============================================================================================================
-// QT INCLUDES
-//=============================================================================================================
-
-#include <QDebug>
 
 //=============================================================================================================
 // USED NAMESPACES
@@ -102,11 +97,11 @@ FwdCoil::~FwdCoil()
 FwdCoil::UPtr FwdCoil::create_eeg_el(const FiffChInfo& ch, const FiffCoordTrans& t)
 {
     if (ch.kind != FIFFV_EEG_CH) {
-        qWarning() << ch.ch_name << "is not an EEG channel. Cannot create an electrode definition.";
+        UTILSLIB::Log::warning("{} is not an EEG channel. Cannot create an electrode definition.", ch.ch_name);
         return nullptr;
     }
     if (!t.empty() && t.from != FIFFV_COORD_HEAD) {
-        qWarning("Inappropriate coordinate transformation in fwd_create_eeg_el");
+        UTILSLIB::Log::warning("Inappropriate coordinate transformation in fwd_create_eeg_el");
         return nullptr;
     }
 

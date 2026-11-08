@@ -15,19 +15,10 @@
 //=============================================================================================================
 
 #include "rt_connectivity.h"
+#include <utils/logger/log.h>
 
 #include <connectivity/connectivitysettings.h>
 #include <connectivity/compute_connectivity.h>
-
-//=============================================================================================================
-// EIGEN INCLUDES
-//=============================================================================================================
-
-//=============================================================================================================
-// QT INCLUDES
-//=============================================================================================================
-
-#include <QDebug>
 
 //=============================================================================================================
 // USED NAMESPACES
@@ -47,7 +38,7 @@ void RtConnectivityWorker::doWork(const std::shared_ptr<ConnectivitySettings>& c
     }
 
     if (connectivitySettings->getConnectivityMethods().empty()) {
-        qDebug() << "RtConnectivityWorker::doWork() - Network methods are empty";
+        UTILSLIB::Log::debug("RtConnectivityWorker::doWork() - Network methods are empty");
         return;
     }
 

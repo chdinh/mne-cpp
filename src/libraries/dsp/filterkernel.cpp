@@ -15,6 +15,7 @@
 //=============================================================================================================
 
 #include "filterkernel.h"
+#include <utils/logger/log.h>
 
 #include <vector>
 
@@ -24,12 +25,6 @@
 #include "cosinefilter.h"
 
 #include <algorithm>
-
-//=============================================================================================================
-// QT INCLUDES
-//=============================================================================================================
-
-#include <QDebug>
 
 //=============================================================================================================
 // EIGEN INCLUDES
@@ -112,7 +107,7 @@ FilterKernel::FilterKernel(const QString& sFilterName,
 , m_sFilterShortDescription()
 {
     if (iOrder < 9) {
-        qWarning() << "[FilterKernel::FilterKernel] Less than 9 taps were provided. Setting number of taps to 9.";
+        Log::warning("[FilterKernel::FilterKernel] Less than 9 taps were provided. Setting number of taps to 9.");
     }
 
     designFilter();
@@ -356,7 +351,7 @@ bool FilterKernel::fftTransformCoeffs(int iFftLength)
 #endif
 
     if (m_vecCoeff.cols() > iFftLength) {
-        qWarning().noquote().nospace() << "[FilterKernel::fftTransformCoeffs] The number of filter taps is bigger than the FFT length.";
+        Log::warning("[FilterKernel::fftTransformCoeffs] The number of filter taps is bigger than the FFT length.");
         return false;
     }
 

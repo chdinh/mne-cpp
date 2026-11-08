@@ -15,6 +15,7 @@
 //=============================================================================================================
 
 #include "artifact_detect.h"
+#include <utils/logger/log.h>
 #include "firfilter.h"
 #include "peak_finder.h"
 
@@ -31,12 +32,6 @@
 //=============================================================================================================
 
 #include <Eigen/Core>
-
-//=============================================================================================================
-// QT INCLUDES
-//=============================================================================================================
-
-#include <QDebug>
 
 //=============================================================================================================
 // C++ INCLUDES
@@ -78,7 +73,7 @@ std::vector<FiffProj> exgProjectors(const MatrixXd& data, const FiffInfo& info, 
 {
     std::vector<FiffProj> projs = info.projs;
     if (events.empty()) {
-        qWarning() << "[ArtifactDetect] No" << mode << "events found";
+        Log::warning("[ArtifactDetect] No {} events found", mode.toStdString());
         return projs;
     }
 
@@ -135,7 +130,7 @@ std::vector<FiffProj> exgProjectors(const MatrixXd& data, const FiffInfo& info, 
         }
     }
     if (nave == 0) {
-        qWarning() << "[ArtifactDetect] No good" << mode << "epochs found";
+        Log::warning("[ArtifactDetect] No good {} epochs found", mode.toStdString());
         return projs;
     }
 
@@ -165,7 +160,7 @@ std::vector<int> ArtifactDetect::qrsDetector(const RowVectorXd& filtered, double
     const RowVectorXd ecgAbs = filtered.tail(std::max<Index>(filtered.size() - nStart, 0)).cwiseAbs();
     const int nPoints = static_cast<int>(ecgAbs.size());
     if (nPoints < 3 * init || init < 1) {
-        qWarning() << "ArtifactDetect::detectEcg: need at least 3 s of data after tstart.";
+        Log::warning("ArtifactDetect::detectEcg: need at least 3 s of data after tstart.");
         return {};
     }
     const double initMax = (ecgAbs.segment(0, init).maxCoeff() + ecgAbs.segment(init, init).maxCoeff() + ecgAbs.segment(2 * init, init).maxCoeff()) / 3.0;
@@ -262,7 +257,7 @@ std::vector<int> ArtifactDetect::detectEcg(const MatrixXd& matData,
             (fiffInfo.chs[i].unit == FIFF_UNIT_T ? mags : grads).push_back(i);
         const std::vector<int>& meg = mags.empty() ? grads : mags;
         if (meg.empty()) {
-            qWarning() << "ArtifactDetect::detectEcg: no ECG channel and no MEG channels to synthesise one from.";
+            Log::warning("ArtifactDetect::detectEcg: no ECG channel and no MEG channels to synthesise one from.");
             return {};
         }
         ecg = RowVectorXd::Zero(matData.cols());
@@ -285,7 +280,7 @@ std::vector<int> ArtifactDetect::detectEog(const MatrixXd& matData,
     // Adapted from mne.preprocessing._find_eog_events (MNE-Python, BSD-3-Clause).
     const std::vector<int> eogIdx = goodChannelsOfKind(fiffInfo, FIFFV_EOG_CH);
     if (eogIdx.empty() || matData.cols() == 0) {
-        qWarning() << "ArtifactDetect::detectEog: No EOG channel found.";
+        Log::warning("ArtifactDetect::detectEog: No EOG channel found.");
         return {};
     }
 

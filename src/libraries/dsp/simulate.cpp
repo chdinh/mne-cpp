@@ -15,6 +15,7 @@
 //=============================================================================================================
 
 #include "simulate.h"
+#include <utils/logger/log.h>
 
 #include <vector>
 
@@ -24,12 +25,6 @@
 #include <fiff/fiff_info.h>
 #include <fiff/fiff_cov.h>
 #include <mne/mne_forward_solution.h>
-
-//=============================================================================================================
-// QT INCLUDES
-//=============================================================================================================
-
-#include <QDebug>
 
 //=============================================================================================================
 // EIGEN INCLUDES
@@ -69,7 +64,7 @@ InvSourceEstimate UTILSLIB::simulateStc(
     const int nTimes = static_cast<int>(params.duration * params.sfreq);
 
     if (nTimes <= 0 || nAll <= 0) {
-        qWarning() << "[simulateStc] Invalid parameters.";
+        Log::warning("[simulateStc] Invalid parameters.");
         return InvSourceEstimate();
     }
 
@@ -85,7 +80,7 @@ InvSourceEstimate UTILSLIB::simulateStc(
             }
         }
         if (!found) {
-            qWarning() << "[simulateStc] Active vertex" << activeVertices(a) << "not in allVertices.";
+            Log::warning("[simulateStc] Active vertex {} not in allVertices.", activeVertices(a));
             return InvSourceEstimate();
         }
     }
@@ -125,7 +120,7 @@ InvSourceEstimate UTILSLIB::simulateStcFromWaveforms(
     const int nTimes = static_cast<int>(waveforms.cols());
 
     if (waveforms.rows() != nActive) {
-        qWarning() << "[simulateStcFromWaveforms] waveforms.rows() != activeVertices.size()";
+        Log::warning("[simulateStcFromWaveforms] waveforms.rows() != activeVertices.size()");
         return InvSourceEstimate();
     }
 
@@ -168,7 +163,7 @@ FiffEvoked UTILSLIB::simulateEvoked(
         // MEG and EEG decomposed separately), so the noise has no MEG-EEG covariance; divided by sqrt(nave).
         const FiffCov prepared = noiseCov.prepare_noise_cov(evoked.info, evoked.info.ch_names);
         if (prepared.eig.size() != nChan) {
-            qWarning() << "[simulateEvoked] Noise covariance does not cover the forward channels.";
+            Log::warning("[simulateEvoked] Noise covariance does not cover the forward channels.");
             return evoked;
         }
         const MatrixXd sqrtCov = prepared.eigvec.transpose() * prepared.eig.cwiseMax(0.0).cwiseSqrt().asDiagonal();

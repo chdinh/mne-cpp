@@ -15,6 +15,7 @@
 //=============================================================================================================
 
 #include "fs_atlas_lookup.h"
+#include <utils/logger/log.h>
 
 //=============================================================================================================
 // INCLUDES
@@ -26,7 +27,6 @@
 
 #include <Eigen/LU>
 
-#include <QDebug>
 
 #include <cmath>
 #include <cstring>
@@ -198,7 +198,7 @@ bool FsAtlasLookup::load(const std::filesystem::path& parcellation)
     const bool gzip = UTILSLIB::toLower(UTILSLIB::utf8FromPath(parcellation.extension())) == ".mgz";
     const auto bytes = UTILSLIB::read_file_bytes(parcellation, gzip ? UTILSLIB::Compression::Gzip : UTILSLIB::Compression::None);
     if (!bytes) {
-        qWarning() << "[FsAtlasLookup::load]" << bytes.error().what();
+        UTILSLIB::Log::warning("[FsAtlasLookup::load] {}", bytes.error().what());
         return false;
     }
 
@@ -206,12 +206,12 @@ bool FsAtlasLookup::load(const std::filesystem::path& parcellation)
     // (int16), voxel sizes, x/y/z direction cosines and centre RAS (float32); the voxels start at byte 284.
     constexpr std::size_t kHeaderSize = 284;
     if (bytes->size() < kHeaderSize) {
-        qWarning() << "[FsAtlasLookup::load] File too small:" << UTILSLIB::utf8FromPath(parcellation).c_str();
+        UTILSLIB::Log::warning("[FsAtlasLookup::load] File too small: {}", UTILSLIB::utf8FromPath(parcellation));
         return false;
     }
     const std::byte* raw = bytes->data();
     if (readBigEndian<std::int32_t>(raw) != 1) {
-        qWarning() << "[FsAtlasLookup::load] Unsupported MGH version:" << readBigEndian<std::int32_t>(raw);
+        UTILSLIB::Log::warning("[FsAtlasLookup::load] Unsupported MGH version: {}", readBigEndian<std::int32_t>(raw));
         return false;
     }
     m_dimX = readBigEndian<std::int32_t>(raw + 4);
@@ -219,7 +219,7 @@ bool FsAtlasLookup::load(const std::filesystem::path& parcellation)
     m_dimZ = readBigEndian<std::int32_t>(raw + 12);
     const std::int32_t type = readBigEndian<std::int32_t>(raw + 20);
     if (m_dimX <= 0 || m_dimY <= 0 || m_dimZ <= 0 || readBigEndian<std::int32_t>(raw + 16) <= 0) {
-        qWarning() << "[FsAtlasLookup::load] Invalid dimensions:" << m_dimX << m_dimY << m_dimZ;
+        UTILSLIB::Log::warning("[FsAtlasLookup::load] Invalid dimensions: {} {} {}", m_dimX, m_dimY, m_dimZ);
         return false;
     }
 
@@ -247,11 +247,11 @@ bool FsAtlasLookup::load(const std::filesystem::path& parcellation)
         : (type == 1 || type == 3)                      ? 4
                                                         : 0;
     if (width == 0) {
-        qWarning() << "[FsAtlasLookup::load] Unsupported MGH data type:" << type;
+        UTILSLIB::Log::warning("[FsAtlasLookup::load] Unsupported MGH data type: {}", type);
         return false;
     }
     if ((bytes->size() - kHeaderSize) / width < nVoxels) {
-        qWarning() << "[FsAtlasLookup::load] Truncated voxel data in" << UTILSLIB::utf8FromPath(parcellation).c_str();
+        UTILSLIB::Log::warning("[FsAtlasLookup::load] Truncated voxel data in {}", UTILSLIB::utf8FromPath(parcellation));
         return false;
     }
     const std::byte* voxels = raw + kHeaderSize;

@@ -15,6 +15,7 @@
 //=============================================================================================================
 
 #include "epoch_extractor.h"
+#include <utils/logger/log.h>
 
 #include <vector>
 
@@ -23,12 +24,6 @@
 //=============================================================================================================
 
 #include <Eigen/Core>
-
-//=============================================================================================================
-// QT INCLUDES
-//=============================================================================================================
-
-#include <QDebug>
 
 //=============================================================================================================
 // C++ INCLUDES
@@ -74,7 +69,7 @@ std::vector<MNEEpochData> EpochExtractor::extract(const MatrixXd& matData,
     if (matData.size() == 0 || eventSamples.empty())
         return epochs;
     if (dSFreq <= 0.0) {
-        qWarning() << "EpochExtractor::extract: invalid sampling frequency.";
+        Log::warning("EpochExtractor::extract: invalid sampling frequency.");
         return epochs;
     }
 
@@ -87,7 +82,7 @@ std::vector<MNEEpochData> EpochExtractor::extract(const MatrixXd& matData,
     const int epochLen = iOffset1 - iOffset0 + 1;
 
     if (epochLen <= 0) {
-        qWarning() << "EpochExtractor::extract: tmax must be > tmin.";
+        Log::warning("EpochExtractor::extract: tmax must be > tmin.");
         return epochs;
     }
 
@@ -150,7 +145,7 @@ MatrixXd EpochExtractor::average(const std::vector<MNEEpochData>& epochs)
             result = ep.epoch;
         } else {
             if (ep.epoch.rows() != result.rows() || ep.epoch.cols() != result.cols()) {
-                qWarning() << "EpochExtractor::average: epoch dimension mismatch, skipping.";
+                Log::warning("EpochExtractor::average: epoch dimension mismatch, skipping.");
                 continue;
             }
             result += ep.epoch;

@@ -15,14 +15,9 @@
 //=============================================================================================================
 
 #include "iirfilter.h"
+#include <utils/logger/log.h>
 
 #include <vector>
-
-//=============================================================================================================
-// QT INCLUDES
-//=============================================================================================================
-
-#include <QDebug>
 
 //=============================================================================================================
 // C++ INCLUDES
@@ -160,7 +155,7 @@ std::vector<IirBiquad> IirFilter::designButterworth(int iOrder,
                                                     double dSFreq)
 {
     if (iOrder < 1) {
-        qWarning() << "IirFilter::designButterworth: order must be >= 1, got" << iOrder;
+        Log::warning("IirFilter::designButterworth: order must be >= 1, got {}", iOrder);
         return {};
     }
 

@@ -15,6 +15,7 @@
 //=============================================================================================================
 
 #include "ica.h"
+#include <utils/logger/log.h>
 
 #include <vector>
 
@@ -23,12 +24,6 @@
 //=============================================================================================================
 
 #include <Eigen/Dense>
-
-//=============================================================================================================
-// QT INCLUDES
-//=============================================================================================================
-
-#include <QDebug>
 
 //=============================================================================================================
 // C++ INCLUDES
@@ -159,7 +154,7 @@ IcaResult ICA::run(const MatrixXd& matData,
 
         if (!compConverged) {
             bConverged = false;
-            qWarning() << "ICA::run: component" << i << "did not converge within" << maxIter << "iterations.";
+            Log::warning("ICA::run: component {} did not converge within {} iterations.", i, maxIter);
         }
 
         W_ica.row(i) = w.transpose();

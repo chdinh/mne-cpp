@@ -15,9 +15,9 @@
 //=============================================================================================================
 
 #include "fs_annotationset.h"
+#include <utils/logger/log.h>
 #include "fs_surfaceset.h"
 
-#include <QDebug>
 
 //=============================================================================================================
 // USED NAMESPACES
@@ -73,12 +73,12 @@ FsAnnotationSet::FsAnnotationSet(const FsAnnotation& p_LHAnnotation, const FsAnn
     if (p_LHAnnotation.hemi() == 0)
         m_annots.insert_or_assign(0, p_LHAnnotation);
     else
-        qWarning("Left hemisphere id is not 0. LH annotation not assigned!");
+        UTILSLIB::Log::warning("Left hemisphere id is not 0. LH annotation not assigned!");
 
     if (p_RHAnnotation.hemi() == 1)
         m_annots.insert_or_assign(1, p_RHAnnotation);
     else
-        qWarning("Right hemisphere id is not 1. RH annotation not assigned!");
+        UTILSLIB::Log::warning("Right hemisphere id is not 1. RH annotation not assigned!");
 }
 
 //=============================================================================================================
@@ -148,7 +148,7 @@ namespace
 int hemiIndex(qint32 idx)
 {
     if (idx != 0 && idx != 1) {
-        qWarning("Warning: Index is not '0' or '1'! Returning '0'.");
+        UTILSLIB::Log::warning("Warning: Index is not '0' or '1'! Returning '0'.");
         return 0;
     }
     return idx;
@@ -159,7 +159,7 @@ int hemiIndex(std::string_view idt)
     if (idt == "rh")
         return 1;
     if (idt != "lh")
-        qWarning("Warning: Identifier is not 'lh' or 'rh'! Returning 'lh'.");
+        UTILSLIB::Log::warning("Warning: Identifier is not 'lh' or 'rh'! Returning 'lh'.");
     return 0;
 }
 

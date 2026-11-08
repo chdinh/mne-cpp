@@ -15,6 +15,7 @@
 //=============================================================================================================
 
 #include "bridged_electrodes.h"
+#include <utils/logger/log.h>
 
 #include <vector>
 #include <utility>
@@ -22,12 +23,6 @@
 #include <fiff/fiff_info.h>
 #include <fiff/fiff_ch_info.h>
 #include <fiff/fiff_constants.h>
-
-//=============================================================================================================
-// QT INCLUDES
-//=============================================================================================================
-
-#include <QDebug>
 
 //=============================================================================================================
 // STL INCLUDES
@@ -60,7 +55,7 @@ MatrixXd UTILSLIB::computeElectricalDistance(const MatrixXd& data,
 
     const int nEeg = static_cast<int>(eegIdx.size());
     if (nEeg < 2) {
-        qWarning() << "[computeElectricalDistance] Need at least 2 EEG channels, found" << nEeg;
+        Log::warning("[computeElectricalDistance] Need at least 2 EEG channels, found {}", nEeg);
         return MatrixXd::Zero(nEeg, nEeg);
     }
 

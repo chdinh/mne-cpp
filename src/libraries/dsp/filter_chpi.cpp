@@ -15,18 +15,13 @@
 //=============================================================================================================
 
 #include "filter_chpi.h"
+#include <utils/logger/log.h>
 
 #include <vector>
 #include "iirfilter.h"
 
 #include <fiff/fiff_info.h>
 #include <fiff/fiff_constants.h>
-
-//=============================================================================================================
-// QT INCLUDES
-//=============================================================================================================
-
-#include <QDebug>
 
 //=============================================================================================================
 // USED NAMESPACES
@@ -69,7 +64,7 @@ void UTILSLIB::filterChpi(MatrixXd& data,
     }
 
     if (sfreq <= 0.0) {
-        qWarning() << "filterChpi: Invalid sampling frequency" << sfreq << "Hz. Skipping.";
+        Log::warning("filterChpi: Invalid sampling frequency {} Hz. Skipping.", sfreq);
         return;
     }
 
@@ -81,13 +76,11 @@ void UTILSLIB::filterChpi(MatrixXd& data,
         const double fLow = freq - params.dNotchWidth;
         const double fHigh = freq + params.dNotchWidth;
         if (freq <= 0.0 || fHigh >= dNyquist) {
-            qWarning() << "filterChpi: Skipping invalid cHPI frequency" << freq
-                       << "Hz (Nyquist =" << dNyquist << "Hz).";
+            Log::warning("filterChpi: Skipping invalid cHPI frequency {} Hz (Nyquist = {} Hz).", freq, dNyquist);
             continue;
         }
         if (fLow <= 0.0) {
-            qWarning() << "filterChpi: Skipping cHPI frequency" << freq
-                       << "Hz (notch lower edge <= 0 Hz).";
+            Log::warning("filterChpi: Skipping cHPI frequency {} Hz (notch lower edge <= 0 Hz).", freq);
             continue;
         }
         validFreqs.push_back(freq);
@@ -101,7 +94,7 @@ void UTILSLIB::filterChpi(MatrixXd& data,
         // Filter only MEG channels
         const std::vector<int> megIdx = megChannelIndices(info);
         if (megIdx.empty()) {
-            qWarning() << "filterChpi: No MEG channels found in FiffInfo. Nothing to filter.";
+            Log::warning("filterChpi: No MEG channels found in FiffInfo. Nothing to filter.");
             return;
         }
 
@@ -158,6 +151,5 @@ void UTILSLIB::filterChpi(MatrixXd& data,
     Q_UNUSED(sfreq)
     Q_UNUSED(params)
 
-    qWarning() << "filterChpi: Automatic cHPI frequency extraction from FiffInfo is not yet "
-                  "implemented. Please provide frequencies explicitly via the hpiFreqs parameter.";
+    Log::warning("filterChpi: Automatic cHPI frequency extraction from FiffInfo is not yet implemented. Please provide frequencies explicitly via the hpiFreqs parameter.");
 }

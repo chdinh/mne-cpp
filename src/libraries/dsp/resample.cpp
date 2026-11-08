@@ -15,18 +15,13 @@
 //=============================================================================================================
 
 #include "resample.h"
+#include <utils/logger/log.h>
 
 //=============================================================================================================
 // EIGEN INCLUDES
 //=============================================================================================================
 
 #include <Eigen/Core>
-
-//=============================================================================================================
-// QT INCLUDES
-//=============================================================================================================
-
-#include <QDebug>
 
 //=============================================================================================================
 // C++ INCLUDES
@@ -145,11 +140,11 @@ RowVectorXd Resample::resample(const RowVectorXd& vecData,
                                int iNZeros)
 {
     if (vecData.size() == 0) {
-        qWarning() << "Resample::resample: empty input.";
+        Log::warning("Resample::resample: empty input.");
         return vecData;
     }
     if (dNewSFreq <= 0.0 || dOldSFreq <= 0.0) {
-        qWarning() << "Resample::resample: sampling frequencies must be positive.";
+        Log::warning("Resample::resample: sampling frequencies must be positive.");
         return vecData;
     }
 

@@ -15,6 +15,7 @@
 //=============================================================================================================
 
 #include "surface_laplacian.h"
+#include <utils/logger/log.h>
 
 #include <math/sphere.h>
 
@@ -30,12 +31,6 @@
 //=============================================================================================================
 
 #include <cmath>
-
-//=============================================================================================================
-// QT INCLUDES
-//=============================================================================================================
-
-#include <QDebug>
 
 //=============================================================================================================
 // USED NAMESPACES
@@ -142,7 +137,7 @@ MatrixXd SurfaceLaplacian::computeTransform(const MatrixX3d& matPositions,
 {
     const int nCh = static_cast<int>(matPositions.rows());
     if (nCh < 2) {
-        qWarning() << "[SurfaceLaplacian::computeTransform] Need at least 2 channels.";
+        Log::warning("[SurfaceLaplacian::computeTransform] Need at least 2 channels.");
         return MatrixXd();
     }
 
@@ -220,8 +215,7 @@ SurfaceLaplacianResult SurfaceLaplacian::compute(const MatrixXd& matData,
     SurfaceLaplacianResult result;
 
     if (matData.rows() != matPositions.rows()) {
-        qWarning() << "[SurfaceLaplacian::compute] Data rows" << matData.rows()
-                   << "!= position rows" << matPositions.rows();
+        Log::warning("[SurfaceLaplacian::compute] Data rows {} != position rows {}", matData.rows(), matPositions.rows());
         return result;
     }
 

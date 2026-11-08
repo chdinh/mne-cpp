@@ -15,12 +15,7 @@
 //=============================================================================================================
 
 #include "sphara.h"
-
-//=============================================================================================================
-// QT INCLUDES
-//=============================================================================================================
-
-#include <QDebug>
+#include <utils/logger/log.h>
 
 //=============================================================================================================
 // USED NAMESPACES
@@ -42,7 +37,7 @@ MatrixXd UTILSLIB::makeSpharaProjector(const MatrixXd& matBaseFct,
     MatrixXd matSpharaOperator = MatrixXd::Identity(iOperatorDim, iOperatorDim);
 
     if (matBaseFct.size() == 0) {
-        qWarning() << "[UTILSLIB::makeSpharaProjector] Basis function matrix was empty. Returning identity matrix instead.";
+        Log::warning("[UTILSLIB::makeSpharaProjector] Basis function matrix was empty. Returning identity matrix instead.");
         return matSpharaOperator;
     }
 
@@ -60,7 +55,7 @@ MatrixXd UTILSLIB::makeSpharaProjector(const MatrixXd& matBaseFct,
                 if ((r < vecIndices.rows() || c < vecIndices.rows()) && (rowIndex < matSpharaMultGrad.rows() || colIndex < matSpharaMultGrad.cols())) {
                     matSpharaOperator(vecIndices(r), vecIndices(c)) = matSpharaMultGrad(rowIndex, colIndex);
                 } else {
-                    qWarning() << "UTILSLIB::makeSpharaProjector - Index is out of range. Returning identity matrix.";
+                    Log::warning("UTILSLIB::makeSpharaProjector - Index is out of range. Returning identity matrix.");
                     //matSpharaOperator.setZero();
                     matSpharaOperator = MatrixXd::Identity(iOperatorDim, iOperatorDim);
                     return matSpharaOperator;

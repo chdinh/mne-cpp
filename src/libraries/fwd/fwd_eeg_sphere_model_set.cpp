@@ -18,6 +18,7 @@
 //=============================================================================================================
 
 #include "fwd_eeg_sphere_model_set.h"
+#include <utils/logger/log.h>
 
 //=============================================================================================================
 // QT INCLUDES
@@ -25,7 +26,6 @@
 
 #include <utils/string_utils.h>
 
-#include <QDebug>
 
 #include <format>
 #include <fstream>
@@ -133,17 +133,17 @@ FwdEegSphereModel::UPtr FwdEegSphereModelSet::fwd_select_eeg_sphere_model(std::s
     const std::string_view name = p_sName.empty() ? std::string_view("Default") : p_sName;
 
     if (this->nmodel() == 0) {
-        qWarning("No EEG sphere model definitions available");
+        UTILSLIB::Log::warning("No EEG sphere model definitions available");
         return nullptr;
     }
 
     for (int k = 0; k < this->nmodel(); k++) {
         if (this->models[k]->name == name) {
-            qInfo("Selected model: %s", this->models[k]->name.c_str());
+            UTILSLIB::Log::info("Selected model: {}", this->models[k]->name);
             return std::make_unique<FwdEegSphereModel>(*(this->models[k]));
         }
     }
-    qWarning("EEG sphere model %s not found.", std::string(name).c_str());
+    UTILSLIB::Log::warning("EEG sphere model {} not found.", std::string(name));
     return nullptr;
 }
 
@@ -153,12 +153,12 @@ void FwdEegSphereModelSet::fwd_list_eeg_sphere_models()
 {
     if (this->nmodel() <= 0)
         return;
-    qInfo("Available EEG sphere models:");
+    UTILSLIB::Log::info("Available EEG sphere models:");
     for (int k = 0; k < this->nmodel(); k++) {
         FwdEegSphereModel* this_model = this->models[k].get();
         std::string line = std::format("\t{} : {}", this_model->name, this_model->nlayer());
         for (int p = 0; p < this_model->nlayer(); p++)
             std::format_to(std::back_inserter(line), " : {:7.3f} : {:7.3f}", this_model->layers[p].rel_rad, this_model->layers[p].sigma);
-        qInfo("%s", line.c_str());
+        UTILSLIB::Log::info("{}", line);
     }
 }

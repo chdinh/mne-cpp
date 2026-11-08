@@ -15,6 +15,7 @@
 //=============================================================================================================
 
 #include "annotate_artifact.h"
+#include <utils/logger/log.h>
 
 #include <vector>
 #include <utility>
@@ -23,12 +24,6 @@
 
 #include <fiff/fiff_info.h>
 #include <fiff/fiff_constants.h>
-
-//=============================================================================================================
-// QT INCLUDES
-//=============================================================================================================
-
-#include <QDebug>
 
 //=============================================================================================================
 // STL INCLUDES
@@ -133,7 +128,7 @@ FiffAnnotations UTILSLIB::annotateMusclZscore(
     if (picks.size() == 0)
         picks = info.pick_types(false, true, false);
     if (picks.size() == 0) {
-        qWarning("annotateMusclZscore: no MEG or EEG channels found");
+        Log::warning("annotateMusclZscore: no MEG or EEG channels found");
         return annot;
     }
     MatrixXd sub(picks.size(), nTimes);

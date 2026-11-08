@@ -20,6 +20,7 @@
 //=============================================================================================================
 
 #include "math/simplex_algorithm.h"
+#include <utils/logger/log.h>
 
 #include "fwd_eeg_sphere_model.h"
 #include "fwd_eeg_sphere_model_set.h"
@@ -131,8 +132,7 @@ FwdEegSphereModel::UPtr FwdEegSphereModel::setup_eeg_sphere_model(const std::fil
         return nullptr;
     }
 
-    qInfo("Using EEG sphere model \"%s\" with scalp radius %7.1f mm",
-          eeg_model->name.c_str(), 1000 * eeg_sphere_rad);
+    Log::info("Using EEG sphere model \"{}\" with scalp radius {:7.1f} mm", eeg_model->name, 1000 * eeg_sphere_rad);
     return eeg_model;
 }
 
@@ -398,7 +398,7 @@ int FwdEegSphereModel::fwd_eeg_multi_spherepot(const Eigen::Vector3f& rd_in, con
         if (m->scale_pos) {
             pos_len = m->layers[m->nlayer() - 1].rad / pos.norm();
 #ifdef DEBUG
-            qInfo("%10.4f %10.4f %10.4f %10.4f", pos_len, 1000 * pos[0], 1000 * pos[1], 1000 * pos[2]);
+            Log::info("{:10.4f} {:10.4f} {:10.4f} {:10.4f}", pos_len, 1000 * pos[0], 1000 * pos[1], 1000 * pos[2]);
 #endif
             pos *= pos_len;
         }
@@ -795,14 +795,14 @@ bool FwdEegSphereModel::fwd_setup_eeg_sphere_model(float rad, bool fit_berg_sche
 
     if (fit_berg_scherg) {
         if (this->fwd_eeg_fit_berg_scherg(nTerms, nFit, rv)) {
-            qInfo("Equiv. model fitting -> RV = %g %%", 100 * rv);
+            Log::info("Equiv. model fitting -> RV = {:g} %", 100 * rv);
             for (int k = 0; k < nFit; k++)
-                qInfo("mu%d = %g\tlambda%d = %g", k + 1, this->mu[k], k + 1, this->layers[this->nlayer() - 1].sigma * this->lambda[k]);
+                Log::info("mu{} = {:g}\tlambda{} = {:g}", k + 1, this->mu[k], k + 1, this->layers[this->nlayer() - 1].sigma * this->lambda[k]);
         } else
             return false;
     }
 
-    qInfo("Defined EEG sphere model with rad = %7.2f mm", 1000.0 * rad);
+    Log::info("Defined EEG sphere model with rad = {:7.2f} mm", 1000.0 * rad);
     return true;
 }
 
@@ -874,8 +874,8 @@ static bool report_fit([[maybe_unused]] int loop,
 {
 #ifdef LOG_FIT
     for (int k = 0; k < fitpar.size(); k++)
-        qInfo("%g ", mu[k]);
-    qInfo("%g", Smin);
+        Log::info("{:g} ", mu[k]);
+    Log::info("{:g}", Smin);
 #endif
     return true;
 }
@@ -1018,7 +1018,7 @@ bool FwdEegSphereModel::fwd_eeg_fit_berg_scherg(int nTerms, /* Number of terms t
     const auto u = new_fit_user(nFit, nTerms);
 
     if (nFit < 2) {
-        qWarning("fwd_fit_berg_scherg does not work with less than two equivalent sources.");
+        Log::warning("fwd_fit_berg_scherg does not work with less than two equivalent sources.");
         return false;
     }
 
@@ -1100,7 +1100,7 @@ bool FwdEegSphereModel::fwd_eeg_fit_berg_scherg(int nTerms, /* Number of terms t
 
         sort_parameters(muFit, lambdaFit, nFit);
 #ifdef LOG_FIT
-        qInfo("RV = %g %%", 100 * rv);
+        Log::info("RV = {:g} %", 100 * rv);
 #endif
         this->mu.resize(nFit);
         this->lambda.resize(nFit);
@@ -1112,7 +1112,7 @@ bool FwdEegSphereModel::fwd_eeg_fit_berg_scherg(int nTerms, /* Number of terms t
          */
             this->lambda[k] = lambdaFit[k] / this->layers[this->nlayer() - 1].sigma;
 #ifdef LOG_FIT
-            qInfo("lambdaFit%d = %g\tmu%d = %g", k + 1, lambdaFit[k], k + 1, muFit[k]);
+            Log::info("lambdaFit{} = {:g}\tmu{} = {:g}", k + 1, lambdaFit[k], k + 1, muFit[k]);
 #endif
         }
     }

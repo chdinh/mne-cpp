@@ -15,13 +15,8 @@
 //=============================================================================================================
 
 #include "bad_channels_maxwell.h"
+#include <utils/logger/log.h>
 #include "sss.h"
-
-//=============================================================================================================
-// QT INCLUDES
-//=============================================================================================================
-
-#include <QDebug>
 
 //=============================================================================================================
 // EIGEN INCLUDES
@@ -65,7 +60,7 @@ BadChannelsMaxwellResult UTILSLIB::findBadChannelsMaxwell(
     SSS::Basis basis = SSS::computeBasis(info, sssParams);
 
     if (basis.megChannelIdx.empty()) {
-        qWarning() << "[findBadChannelsMaxwell] No MEG channels found.";
+        Log::warning("[findBadChannelsMaxwell] No MEG channels found.");
         return result;
     }
 
@@ -136,8 +131,7 @@ BadChannelsMaxwellResult UTILSLIB::findBadChannelsMaxwell(
         }
     }
 
-    qInfo("[findBadChannelsMaxwell] Detected %lld bad channel(s) out of %d MEG channels.",
-          static_cast<long long>(result.badChannels.size()), nMeg);
+    Log::info("[findBadChannelsMaxwell] Detected {} bad channel(s) out of {} MEG channels.", static_cast<long long>(result.badChannels.size()), nMeg);
 
     return result;
 }

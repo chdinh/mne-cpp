@@ -15,6 +15,7 @@
 //=============================================================================================================
 
 #include "fs_annotation.h"
+#include <utils/logger/log.h>
 #include "fs_label.h"
 #include "fs_surface.h"
 
@@ -116,10 +117,10 @@ bool FsAnnotation::read(const std::filesystem::path& p_sFileName, FsAnnotation& 
 {
     p_Annotation.clear();
 
-    qInfo("Reading annotation...\n");
+    UTILSLIB::Log::info("Reading annotation...\n");
     auto bytes = UTILSLIB::read_file_bytes(p_sFileName);
     if (!bytes) {
-        qWarning("\tError: Couldn't open the file");
+        UTILSLIB::Log::warning("\tError: Couldn't open the file");
         return false;
     }
     UTILSLIB::MemoryByteStream stream(std::move(*bytes));
@@ -147,7 +148,7 @@ bool FsAnnotation::read(const std::filesystem::path& p_sFileName, FsAnnotation& 
 
     const qint32 numEl = readInt();
     if (numEl < 0 || static_cast<std::uint64_t>(numEl) * 8 > stream.size() - stream.pos()) {
-        qWarning("\tError: Truncated annotation file");
+        UTILSLIB::Log::warning("\tError: Truncated annotation file");
         return false;
     }
     // Vertex number and label id interleaved
@@ -165,7 +166,7 @@ bool FsAnnotation::read(const std::filesystem::path& p_sFileName, FsAnnotation& 
         ct.clear();
         qint32 numEntries = readInt();
         if (numEntries > 0) {
-            qInfo("\tReading from Original Version\n");
+            UTILSLIB::Log::info("\tReading from Original Version\n");
             ct.numEntries = numEntries;
             ct.orig_tab = readString();
             ct.struct_names.assign(static_cast<std::size_t>(numEntries), std::string());
@@ -177,13 +178,13 @@ bool FsAnnotation::read(const std::filesystem::path& p_sFileName, FsAnnotation& 
         } else {
             const qint32 version = -numEntries;
             if (version != 2)
-                qWarning("\tError! Does not handle version %d", version);
+                UTILSLIB::Log::warning("\tError! Does not handle version {}", version);
             else
-                qInfo("\tReading from version %d\n", version);
+                UTILSLIB::Log::info("\tReading from version {}\n", version);
 
             numEntries = readInt();
             if (numEntries < 0) {
-                qWarning("\tError: Invalid colortable size %d", numEntries);
+                UTILSLIB::Log::warning("\tError: Invalid colortable size {}", numEntries);
                 return false;
             }
             ct.numEntries = numEntries;
@@ -195,26 +196,26 @@ bool FsAnnotation::read(const std::filesystem::path& p_sFileName, FsAnnotation& 
             for (qint32 i = 0; i < numEntriesToRead; ++i) {
                 const qint32 structure = readInt();
                 if (structure < 0 || structure >= numEntries) {
-                    qWarning("\tError! Read entry, index %d", structure);
+                    UTILSLIB::Log::warning("\tError! Read entry, index {}", structure);
                     return false;
                 }
                 std::string& name = ct.struct_names[static_cast<std::size_t>(structure)];
                 if (!name.empty())
-                    qWarning("Error! Duplicate Structure %d", structure);
+                    UTILSLIB::Log::warning("Error! Duplicate Structure {}", structure);
                 name = readString();
                 readColor(ct, structure);
             }
         }
-        qInfo("\tcolortable with %d entries read\n\t(originally %s)\n", ct.numEntries, ct.orig_tab.c_str());
+        UTILSLIB::Log::info("\tcolortable with {} entries read\n\t(originally {})\n", ct.numEntries, ct.orig_tab);
     } else {
-        qWarning("\tError! No colortable stored");
+        UTILSLIB::Log::warning("\tError! No colortable stored");
     }
 
     p_Annotation.m_sFileName = UTILSLIB::utf8FromPath(p_sFileName.filename());
     p_Annotation.m_sFilePath = UTILSLIB::utf8FromPath(p_sFileName);
     p_Annotation.m_iHemi = p_Annotation.m_sFileName.starts_with("lh.") ? 0 : 1;
 
-    qInfo("[done]\n");
+    UTILSLIB::Log::info("[done]\n");
 
     return true;
 }
@@ -227,16 +228,16 @@ bool FsAnnotation::toLabels(const FsSurface& p_surf,
                             const UTILSLIB::StringList& lLabelPicks) const
 {
     if (this->m_iHemi != p_surf.hemi()) {
-        qWarning("FsAnnotation and surface hemisphere (annot = %d; surf = %d) do not match!\n", this->m_iHemi, p_surf.hemi());
+        UTILSLIB::Log::warning("FsAnnotation and surface hemisphere (annot = {}; surf = {}) do not match!\n", this->m_iHemi, p_surf.hemi());
         return false;
     }
 
     if (m_LabelIds.size() == 0) {
-        qWarning("FsAnnotation doesn't' contain data!\n");
+        UTILSLIB::Log::warning("FsAnnotation doesn't' contain data!\n");
         return false;
     }
 
-    qInfo("Converting labels from annotation...");
+    UTILSLIB::Log::info("Converting labels from annotation...");
 
     //n_read = 0
     //labels = list()
@@ -340,7 +341,7 @@ bool FsAnnotation::toLabels(const FsSurface& p_surf,
     std::ranges::move(labels, p_qListLabels.begin() + static_cast<std::ptrdiff_t>(firstNew));
     std::ranges::copy(rgbas, p_qListLabelRGBAs.begin() + static_cast<std::ptrdiff_t>(firstNew));
 
-    qInfo("[done]\n");
+    UTILSLIB::Log::info("[done]\n");
 
     return true;
 }

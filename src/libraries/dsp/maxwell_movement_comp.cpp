@@ -15,6 +15,7 @@
 //=============================================================================================================
 
 #include "maxwell_movement_comp.h"
+#include <utils/logger/log.h>
 
 #include <vector>
 
@@ -24,7 +25,6 @@
 
 #include <QFile>
 #include <QTextStream>
-#include <QDebug>
 #include <QRegularExpression>
 
 //=============================================================================================================
@@ -93,7 +93,7 @@ MatrixXd MaxwellMovementComp::apply(const MatrixXd& matData,
                                     const MaxwellMoveCompParams& params)
 {
     if (headPos.empty()) {
-        qWarning() << "[MaxwellMovementComp::apply] No head positions provided.";
+        Log::warning("[MaxwellMovementComp::apply] No head positions provided.");
         return matData;
     }
 
@@ -181,7 +181,7 @@ std::vector<HeadPosEntry> MaxwellMovementComp::readHeadPos(const QString& sPath)
 
     QFile file(sPath);
     if (!file.open(QIODevice::ReadOnly | QIODevice::Text)) {
-        qWarning() << "[MaxwellMovementComp::readHeadPos] Cannot open file:" << sPath;
+        Log::warning("[MaxwellMovementComp::readHeadPos] Cannot open file: {}", sPath.toStdString());
         return positions;
     }
 
@@ -246,7 +246,7 @@ bool MaxwellMovementComp::writeHeadPos(const QString& sPath,
 {
     QFile file(sPath);
     if (!file.open(QIODevice::WriteOnly | QIODevice::Text)) {
-        qWarning() << "[MaxwellMovementComp::writeHeadPos] Cannot open file:" << sPath;
+        Log::warning("[MaxwellMovementComp::writeHeadPos] Cannot open file: {}", sPath.toStdString());
         return false;
     }
 

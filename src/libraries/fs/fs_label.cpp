@@ -15,6 +15,7 @@
 //=============================================================================================================
 
 #include "fs_label.h"
+#include <utils/logger/log.h>
 #include "fs_surface.h"
 
 //=============================================================================================================
@@ -23,7 +24,6 @@
 
 #include <utils/string_utils.h>
 
-#include <QDebug>
 
 #include <fstream>
 #include <sstream>
@@ -127,14 +127,14 @@ bool FsLabel::read(const std::filesystem::path& p_sFileName, FsLabel& p_Label)
 
     const std::string fileName = UTILSLIB::utf8FromPath(p_sFileName.filename());
     if (!fileName.ends_with(".label")) {
-        qWarning("Given file (%s) is not a .label file!\n", UTILSLIB::utf8FromPath(p_sFileName).c_str());
+        UTILSLIB::Log::warning("Given file ({}) is not a .label file!\n", UTILSLIB::utf8FromPath(p_sFileName));
         return false;
     }
 
-    qInfo("Reading label...");
+    UTILSLIB::Log::info("Reading label...");
     std::ifstream file(p_sFileName);
     if (!file) {
-        qWarning("\tError: Couldn't open the label file\n");
+        UTILSLIB::Log::warning("\tError: Couldn't open the label file\n");
         return false;
     }
 
@@ -167,7 +167,7 @@ bool FsLabel::read(const std::filesystem::path& p_sFileName, FsLabel& p_Label)
     else if (fileName.size() > 3 + 6 && (fileName.starts_with("lh.") || fileName.starts_with("rh.")))
         p_Label.name = fileName.substr(3, fileName.size() - 3 - 6);
 
-    qInfo("[done]\n");
+    UTILSLIB::Log::info("[done]\n");
 
     return true;
 }

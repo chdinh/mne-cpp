@@ -15,6 +15,7 @@
 //=============================================================================================================
 
 #include "eeg_reference.h"
+#include <utils/logger/log.h>
 
 #include <vector>
 #include <utils/string_utils.h>
@@ -27,7 +28,6 @@
 // QT INCLUDES
 //=============================================================================================================
 
-#include <QDebug>
 #include <QSet>
 
 //=============================================================================================================
@@ -84,7 +84,7 @@ void UTILSLIB::setEegReference(MatrixXd& data,
 
     if (projection) {
         if (!useAverage) {
-            qWarning("setEegReference: projection is only supported for the average reference.");
+            Log::warning("setEegReference: projection is only supported for the average reference.");
             return;
         }
         for (const FiffProj& proj : std::as_const(info.projs)) {
@@ -95,7 +95,7 @@ void UTILSLIB::setEegReference(MatrixXd& data,
         for (int idx : findGoodEegIndices(info))
             names.push_back(info.ch_names[idx]);
         if (names.empty()) {
-            qWarning("setEegReference: no good EEG channels for an average reference projector.");
+            Log::warning("setEegReference: no good EEG channels for an average reference projector.");
             return;
         }
         FiffNamedMatrix vec(1, static_cast<int>(names.size()), StringList(), names,
@@ -105,8 +105,7 @@ void UTILSLIB::setEegReference(MatrixXd& data,
     }
 
     if (data.rows() != info.nchan) {
-        qWarning("setEegReference: data row count (%lld) does not match info.nchan (%d).",
-                 static_cast<long long>(data.rows()), info.nchan);
+        Log::warning("setEegReference: data row count ({}) does not match info.nchan ({}).", static_cast<long long>(data.rows()), info.nchan);
         return;
     }
 
@@ -117,7 +116,7 @@ void UTILSLIB::setEegReference(MatrixXd& data,
     // As mne.set_eeg_reference, bad EEG channels are neither reference nor re-referenced
     const std::vector<int> goodEegIdx = findGoodEegIndices(info);
     if (findAllEegIndices(info).empty()) {
-        qWarning("setEegReference: no EEG channels found in info.");
+        Log::warning("setEegReference: no EEG channels found in info.");
         return;
     }
 
@@ -127,7 +126,7 @@ void UTILSLIB::setEegReference(MatrixXd& data,
     if (useAverage) {
         // Average reference: mean of all good EEG channels
         if (goodEegIdx.empty()) {
-            qWarning("setEegReference: all EEG channels are marked as bad.");
+            Log::warning("setEegReference: all EEG channels are marked as bad.");
             return;
         }
         refSignal = RowVectorXd::Zero(data.cols());
@@ -141,7 +140,7 @@ void UTILSLIB::setEegReference(MatrixXd& data,
         for (const std::string& name : refChannels) {
             int idx = UTILSLIB::indexOf(info.ch_names, name);
             if (idx < 0) {
-                qWarning("setEegReference: reference channel '%s' not found.", name.c_str());
+                Log::warning("setEegReference: reference channel '{}' not found.", name);
                 return;
             }
             refIdx.push_back(idx);
@@ -216,9 +215,7 @@ void UTILSLIB::setBipolarReference(MatrixXd& data,
                                    bool dropOriginals)
 {
     if (anodes.size() != cathodes.size()) {
-        qWarning("setBipolarReference: anodes and cathodes must have the same length "
-                 "(%lld vs %lld).",
-                 static_cast<long long>(anodes.size()), static_cast<long long>(cathodes.size()));
+        Log::warning("setBipolarReference: anodes and cathodes must have the same length ({} vs {}).", static_cast<long long>(anodes.size()), static_cast<long long>(cathodes.size()));
         return;
     }
 
@@ -227,8 +224,7 @@ void UTILSLIB::setBipolarReference(MatrixXd& data,
     }
 
     if (data.rows() != info.nchan) {
-        qWarning("setBipolarReference: data row count (%lld) does not match info.nchan (%d).",
-                 static_cast<long long>(data.rows()), info.nchan);
+        Log::warning("setBipolarReference: data row count ({}) does not match info.nchan ({}).", static_cast<long long>(data.rows()), info.nchan);
         return;
     }
 
@@ -240,12 +236,12 @@ void UTILSLIB::setBipolarReference(MatrixXd& data,
     for (int i = 0; i < nPairs; ++i) {
         anodeIdx[i] = UTILSLIB::indexOf(info.ch_names, anodes[i]);
         if (anodeIdx[i] < 0) {
-            qWarning("setBipolarReference: anode channel '%s' not found.", anodes[i].c_str());
+            Log::warning("setBipolarReference: anode channel '{}' not found.", anodes[i]);
             return;
         }
         cathodeIdx[i] = UTILSLIB::indexOf(info.ch_names, cathodes[i]);
         if (cathodeIdx[i] < 0) {
-            qWarning("setBipolarReference: cathode channel '%s' not found.", cathodes[i].c_str());
+            Log::warning("setBipolarReference: cathode channel '{}' not found.", cathodes[i]);
             return;
         }
     }

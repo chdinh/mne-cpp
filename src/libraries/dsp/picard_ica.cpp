@@ -15,18 +15,13 @@
 //=============================================================================================================
 
 #include "picard_ica.h"
+#include <utils/logger/log.h>
 
 //=============================================================================================================
 // EIGEN INCLUDES
 //=============================================================================================================
 
 #include <Eigen/Dense>
-
-//=============================================================================================================
-// QT INCLUDES
-//=============================================================================================================
-
-#include <QDebug>
 
 //=============================================================================================================
 // STD INCLUDES
@@ -85,7 +80,7 @@ IcaResult PicardIca::run(const MatrixXd& matData,
         nComponents = nCh;
 
     if (nCh < 2 || nSamples < 2) {
-        qWarning() << "[PicardIca::run] Insufficient data dimensions.";
+        Log::warning("[PicardIca::run] Insufficient data dimensions.");
         return result;
     }
 
@@ -97,7 +92,7 @@ IcaResult PicardIca::run(const MatrixXd& matData,
     MatrixXd cov = (X * X.transpose()) / static_cast<double>(nSamples - 1);
     SelfAdjointEigenSolver<MatrixXd> eig(cov);
     if (eig.info() != Success) {
-        qWarning() << "[PicardIca::run] Eigendecomposition failed.";
+        Log::warning("[PicardIca::run] Eigendecomposition failed.");
         return result;
     }
 
