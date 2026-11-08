@@ -46,7 +46,6 @@
 // QT INCLUDES
 //=============================================================================================================
 
-#include <QSharedPointer>
 
 //=============================================================================================================
 // EIGEN INCLUDES
@@ -91,9 +90,6 @@ class ConnectivitySettings;
 class CONNECTIVITYSHARED_EXPORT PartialDirectedCoherence : public AbstractMetric
 {
 public:
-    typedef QSharedPointer<PartialDirectedCoherence> SPtr;            /**< Shared pointer type for PartialDirectedCoherence. */
-    typedef QSharedPointer<const PartialDirectedCoherence> ConstSPtr; /**< Const shared pointer type for PartialDirectedCoherence. */
-
     //=========================================================================================================
     /**
      * Constructs a PartialDirectedCoherence object.

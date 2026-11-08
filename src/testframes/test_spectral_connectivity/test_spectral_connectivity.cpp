@@ -80,7 +80,7 @@ private slots:
 
 private:
     void compareConnectivity();
-    QList<MatrixXd> readConnectivityData();
+    std::vector<MatrixXd> readConnectivityData();
     double dEpsilon;
     double m_dConnectivityOutput;
     double m_dRefConnectivityOutput;
@@ -103,7 +103,7 @@ void TestSpectralConnectivity::initTestCase()
     // Load and Setup Testing Data
     //*********************************************************************************************************
 
-    QList<MatrixXd> matDataList = readConnectivityData();
+    std::vector<MatrixXd> matDataList = readConnectivityData();
     m_connectivitySettings.setFFTSize(matDataList.at(0).cols());
     m_connectivitySettings.setWindowType("hanning");
     m_connectivitySettings.append(matDataList);
@@ -336,16 +336,17 @@ void TestSpectralConnectivity::spectralConnectivityXCOR()
 
 //=============================================================================================================
 
-QList<MatrixXd> TestSpectralConnectivity::readConnectivityData()
+std::vector<MatrixXd> TestSpectralConnectivity::readConnectivityData()
 {
     MatrixXd inputTrials;
     QString dataFileName(QCoreApplication::applicationDirPath() + "/../resources/data/mne-cpp-test-data/MEG/sample/data_spectral_connectivity.txt");
     IOUtils::read_eigen_matrix(inputTrials, dataFileName);
     int iNTrials = inputTrials.rows() / 2;
 
-    QList<MatrixXd> matDataList;
+    std::vector<MatrixXd> matDataList;
+    matDataList.reserve(iNTrials);
     for (int i = 0; i < iNTrials; ++i) {
-        matDataList.append(inputTrials.middleRows(i * 2, 2));
+        matDataList.push_back(inputTrials.middleRows(i * 2, 2));
     }
 
     return matDataList;

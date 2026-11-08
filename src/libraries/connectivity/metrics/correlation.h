@@ -48,7 +48,6 @@
 // QT INCLUDES
 //=============================================================================================================
 
-#include <QSharedPointer>
 
 //=============================================================================================================
 // EIGEN INCLUDES
@@ -91,9 +90,6 @@ class Network;
 class CONNECTIVITYSHARED_EXPORT Correlation : public AbstractMetric
 {
 public:
-    typedef QSharedPointer<Correlation> SPtr;            /**< Shared pointer type for Correlation. */
-    typedef QSharedPointer<const Correlation> ConstSPtr; /**< Const shared pointer type for Correlation. */
-
     //=========================================================================================================
     /**
      * Constructs a Correlation object.

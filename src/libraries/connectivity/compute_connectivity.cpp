@@ -28,6 +28,8 @@
 
 #include "compute_connectivity.h"
 
+#include <algorithm>
+
 #include "connectivitysettings.h"
 #include "network/network.h"
 #include "metrics/correlation.h"
@@ -84,11 +86,11 @@ std::vector<Network> CONNECTIVITYLIB::compute_connectivity(ConnectivitySettings&
         {"PDC", &PartialDirectedCoherence::calculate},
     };
 
-    const QStringList& requested = settings.getConnectivityMethods();
+    const std::vector<std::string>& requested = settings.getConnectivityMethods();
     std::vector<Network> networks;
-    networks.reserve(static_cast<std::size_t>(requested.size()));
+    networks.reserve(requested.size());
     for (const auto& [name, method] : methods) {
-        if (requested.contains(QLatin1String(name.data(), static_cast<qsizetype>(name.size())))) {
+        if (std::ranges::find(requested, name) != requested.end()) {
             networks.push_back(method(settings));
         }
     }

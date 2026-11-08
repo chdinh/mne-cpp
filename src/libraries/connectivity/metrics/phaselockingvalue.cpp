@@ -18,6 +18,9 @@
 //=============================================================================================================
 
 #include "phaselockingvalue.h"
+
+#include <vector>
+#include <utility>
 #include "../network/networknode.h"
 #include "../network/networkedge.h"
 #include "../network/network.h"
@@ -91,7 +94,7 @@ Network PhaseLockingValue::calculate(ConnectivitySettings& connectivitySettings)
     int iNfft = connectivitySettings.getFFTSize();
 
     // Generate tapers
-    QPair<MatrixXd, VectorXd> tapers = Spectral::generateTapers(iSignalLength, connectivitySettings.getWindowType().toStdString());
+    std::pair<MatrixXd, VectorXd> tapers = Spectral::generateTapers(iSignalLength, connectivitySettings.getWindowType());
 
     // Initialize
     int iNFreqs = int(floor(iNfft / 2.0)) + 1;
@@ -151,15 +154,15 @@ Network PhaseLockingValue::calculate(ConnectivitySettings& connectivitySettings)
 //=============================================================================================================
 
 void PhaseLockingValue::compute(ConnectivitySettings::IntermediateTrialData& inputData,
-                                QVector<QPair<int, Eigen::MatrixXcd>>& vecPairCsdSum,
-                                QVector<QPair<int, MatrixXcd>>& vecPairCsdNormalizedSum,
+                                std::vector<std::pair<int, Eigen::MatrixXcd>>& vecPairCsdSum,
+                                std::vector<std::pair<int, MatrixXcd>>& vecPairCsdNormalizedSum,
                                 QMutex& mutex,
                                 int iNRows,
                                 int iNFreqs,
                                 int iNfft,
-                                const QPair<MatrixXd, VectorXd>& tapers)
+                                const std::pair<MatrixXd, VectorXd>& tapers)
 {
-    if (inputData.vecPairCsdNormalized.size() == iNRows) {
+    if (std::ssize(inputData.vecPairCsdNormalized) == iNRows) {
         //qDebug() << "PhaseLockingValue::compute - vecPairCsdNormalized was already computed for this trial.";
         return;
     }
@@ -168,7 +171,7 @@ void PhaseLockingValue::compute(ConnectivitySettings::IntermediateTrialData& inp
 
     // Calculate tapered spectra if not available already
     // This code was copied and changed modified Utils/Spectra since we do not want to call the function due to time loss.
-    if (inputData.vecTapSpectra.isEmpty()) {
+    if (inputData.vecTapSpectra.empty()) {
         RowVectorXd vecInputFFT, rowData;
         RowVectorXcd vecTmpFreq;
 
@@ -197,12 +200,12 @@ void PhaseLockingValue::compute(ConnectivitySettings::IntermediateTrialData& inp
                 matTapSpectrum.row(j) = vecTmpFreq * tapers.second(j);
             }
 
-            inputData.vecTapSpectra.append(matTapSpectrum);
+            inputData.vecTapSpectra.push_back(matTapSpectrum);
         }
     }
 
     // Compute CSD
-    if (inputData.vecPairCsd.isEmpty()) {
+    if (inputData.vecPairCsd.empty()) {
         MatrixXcd matCsd = MatrixXcd(iNRows, m_iNumberBinAmount);
 
         bool bNfftEven = false;
@@ -227,17 +230,17 @@ void PhaseLockingValue::compute(ConnectivitySettings::IntermediateTrialData& inp
                 }
             }
 
-            inputData.vecPairCsd.append(QPair<int, MatrixXcd>(i, matCsd));
-            inputData.vecPairCsdNormalized.append(QPair<int, MatrixXcd>(i, matCsd.cwiseQuotient(matCsd.cwiseAbs())));
+            inputData.vecPairCsd.push_back(std::pair<int, MatrixXcd>(i, matCsd));
+            inputData.vecPairCsdNormalized.push_back(std::pair<int, MatrixXcd>(i, matCsd.cwiseQuotient(matCsd.cwiseAbs())));
         }
 
         mutex.lock();
 
-        if (vecPairCsdSum.isEmpty()) {
+        if (vecPairCsdSum.empty()) {
             vecPairCsdSum = inputData.vecPairCsd;
             vecPairCsdNormalizedSum = inputData.vecPairCsdNormalized;
         } else {
-            for (int j = 0; j < vecPairCsdSum.size(); ++j) {
+            for (int j = 0; j < std::ssize(vecPairCsdSum); ++j) {
                 vecPairCsdSum[j].second += inputData.vecPairCsd.at(j).second;
                 vecPairCsdNormalizedSum[j].second += inputData.vecPairCsdNormalized.at(j).second;
             }
@@ -245,17 +248,17 @@ void PhaseLockingValue::compute(ConnectivitySettings::IntermediateTrialData& inp
 
         mutex.unlock();
     } else {
-        if (inputData.vecPairCsdNormalized.isEmpty()) {
+        if (inputData.vecPairCsdNormalized.empty()) {
             for (i = 0; i < iNRows; ++i) {
-                inputData.vecPairCsdNormalized.append(QPair<int, MatrixXcd>(i, inputData.vecPairCsd.at(i).second.cwiseQuotient(inputData.vecPairCsd.at(i).second.cwiseAbs())));
+                inputData.vecPairCsdNormalized.push_back(std::pair<int, MatrixXcd>(i, inputData.vecPairCsd.at(i).second.cwiseQuotient(inputData.vecPairCsd.at(i).second.cwiseAbs())));
             }
 
             mutex.lock();
 
-            if (vecPairCsdNormalizedSum.isEmpty()) {
+            if (vecPairCsdNormalizedSum.empty()) {
                 vecPairCsdNormalizedSum = inputData.vecPairCsdNormalized;
             } else {
-                for (int j = 0; j < vecPairCsdNormalizedSum.size(); ++j) {
+                for (int j = 0; j < std::ssize(vecPairCsdNormalizedSum); ++j) {
                     vecPairCsdNormalizedSum[j].second += inputData.vecPairCsdNormalized.at(j).second;
                 }
             }

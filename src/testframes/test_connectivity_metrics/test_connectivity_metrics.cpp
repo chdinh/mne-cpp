@@ -46,9 +46,9 @@ private slots:
     void testConnectivitySettingsAppendList()
     {
         ConnectivitySettings settings;
-        QList<MatrixXd> trials;
-        trials.append(MatrixXd::Random(4, 100));
-        trials.append(MatrixXd::Random(4, 100));
+        std::vector<MatrixXd> trials;
+        trials.push_back(MatrixXd::Random(4, 100));
+        trials.push_back(MatrixXd::Random(4, 100));
         settings.append(trials);
         QCOMPARE(settings.size(), 2);
     }
@@ -77,17 +77,15 @@ private slots:
     {
         ConnectivitySettings settings;
         settings.setWindowType("hanning");
-        QCOMPARE(settings.getWindowType(), QString("hanning"));
+        QCOMPARE(settings.getWindowType(), std::string("hanning"));
     }
 
     void testConnectivitySettingsMethods()
     {
         ConnectivitySettings settings;
-        QStringList methods;
-        methods << "COR" << "XCOR";
-        settings.setConnectivityMethods(methods);
-        QCOMPARE(settings.getConnectivityMethods().size(), 2);
-        QCOMPARE(settings.getConnectivityMethods().at(0), QString("COR"));
+        settings.setConnectivityMethods({"COR", "XCOR"});
+        QCOMPARE(settings.getConnectivityMethods().size(), std::size_t(2));
+        QCOMPARE(settings.getConnectivityMethods().at(0), std::string("COR"));
     }
 
     void testConnectivitySettingsNodePositions()
@@ -154,11 +152,11 @@ private slots:
             t.matData = MatrixXd::Zero(2, 4);
             t.matPsd = MatrixXd::Constant(2, 3, v);
             for (int i = 0; i < 2; ++i) {
-                t.vecPairCsd.append({i, MatrixXcd::Constant(2, 3, v)});
-                t.vecPairCsdNormalized.append({i, MatrixXcd::Constant(2, 3, v)});
-                t.vecPairCsdImagSign.append({i, MatrixXd::Constant(2, 3, v)});
-                t.vecPairCsdImagAbs.append({i, MatrixXd::Constant(2, 3, v)});
-                t.vecPairCsdImagSqrd.append({i, MatrixXd::Constant(2, 3, v)});
+                t.vecPairCsd.push_back({i, MatrixXcd::Constant(2, 3, v)});
+                t.vecPairCsdNormalized.push_back({i, MatrixXcd::Constant(2, 3, v)});
+                t.vecPairCsdImagSign.push_back({i, MatrixXd::Constant(2, 3, v)});
+                t.vecPairCsdImagAbs.push_back({i, MatrixXd::Constant(2, 3, v)});
+                t.vecPairCsdImagSqrd.push_back({i, MatrixXd::Constant(2, 3, v)});
             }
             return t;
         };
@@ -172,7 +170,7 @@ private slots:
         sum.vecPairCsdNormalizedSum = total.vecPairCsdNormalized;
         sum.vecPairCsdImagSignSum = total.vecPairCsdImagSign;
         sum.vecPairCsdImagAbsSum = total.vecPairCsdImagAbs;
-        sum.vecPairCsdImagSqrdSum = total.vecPairCsdImagSqrd.mid(0, 1);
+        sum.vecPairCsdImagSqrdSum = {total.vecPairCsdImagSqrd.front()};
         sums.removeFirst(1);
         sums.removeLast(1);
         QCOMPARE(sums.size(), 1);
@@ -213,8 +211,8 @@ private slots:
         // Too few samples for the order leaves no model, whose transfer function is the identity
         model.fit(data.leftCols(3), 5);
         QCOMPARE(model.order(), 0);
-        QVERIFY(model.coefficients().isEmpty());
-        const QVector<MatrixXcd> h = model.transferFunction(Vector2d(0.1, 0.2));
+        QVERIFY(model.coefficients().empty());
+        const std::vector<MatrixXcd> h = model.transferFunction(Vector2d(0.1, 0.2));
         QCOMPARE(h.size(), 2);
         QVERIFY(h[1].isIdentity());
 
@@ -235,9 +233,7 @@ private slots:
         settings.setFFTSize(256);
         settings.setWindowType("hanning");
 
-        QStringList methods;
-        methods << "COR";
-        settings.setConnectivityMethods(methods);
+        settings.setConnectivityMethods({"COR"});
 
         MatrixX3f nodePos(4, 3);
         nodePos << 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 1;
@@ -271,9 +267,7 @@ private slots:
         settings.setFFTSize(256);
         settings.setWindowType("hanning");
 
-        QStringList methods;
-        methods << "XCOR";
-        settings.setConnectivityMethods(methods);
+        settings.setConnectivityMethods({"XCOR"});
 
         MatrixX3f nodePos(4, 3);
         nodePos << 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 1;
@@ -291,9 +285,7 @@ private slots:
         settings.setFFTSize(128);
         settings.setWindowType("hanning");
 
-        QStringList methods;
-        methods << "COH";
-        settings.setConnectivityMethods(methods);
+        settings.setConnectivityMethods({"COH"});
 
         MatrixX3f nodePos(4, 3);
         nodePos << 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 1;
@@ -311,9 +303,7 @@ private slots:
         settings.setFFTSize(128);
         settings.setWindowType("hanning");
 
-        QStringList methods;
-        methods << "IMAGCOH";
-        settings.setConnectivityMethods(methods);
+        settings.setConnectivityMethods({"IMAGCOH"});
 
         MatrixX3f nodePos(4, 3);
         nodePos << 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 1;
@@ -331,9 +321,7 @@ private slots:
         settings.setFFTSize(128);
         settings.setWindowType("hanning");
 
-        QStringList methods;
-        methods << "PLI";
-        settings.setConnectivityMethods(methods);
+        settings.setConnectivityMethods({"PLI"});
 
         MatrixX3f nodePos(4, 3);
         nodePos << 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 1;
@@ -351,9 +339,7 @@ private slots:
         settings.setFFTSize(128);
         settings.setWindowType("hanning");
 
-        QStringList methods;
-        methods << "PLV";
-        settings.setConnectivityMethods(methods);
+        settings.setConnectivityMethods({"PLV"});
 
         MatrixX3f nodePos(4, 3);
         nodePos << 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 1;
@@ -371,9 +357,7 @@ private slots:
         settings.setFFTSize(128);
         settings.setWindowType("hanning");
 
-        QStringList methods;
-        methods << "WPLI";
-        settings.setConnectivityMethods(methods);
+        settings.setConnectivityMethods({"WPLI"});
 
         MatrixX3f nodePos(4, 3);
         nodePos << 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 1;
@@ -391,9 +375,7 @@ private slots:
         settings.setFFTSize(128);
         settings.setWindowType("hanning");
 
-        QStringList methods;
-        methods << "USPLI";
-        settings.setConnectivityMethods(methods);
+        settings.setConnectivityMethods({"USPLI"});
 
         MatrixX3f nodePos(4, 3);
         nodePos << 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 1;
@@ -411,9 +393,7 @@ private slots:
         settings.setFFTSize(128);
         settings.setWindowType("hanning");
 
-        QStringList methods;
-        methods << "DSWPLI";
-        settings.setConnectivityMethods(methods);
+        settings.setConnectivityMethods({"DSWPLI"});
 
         MatrixX3f nodePos(4, 3);
         nodePos << 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 1;
@@ -431,9 +411,7 @@ private slots:
         settings.setFFTSize(128);
         settings.setWindowType("hanning");
 
-        QStringList methods;
-        methods << "COR" << "COH" << "PLI";
-        settings.setConnectivityMethods(methods);
+        settings.setConnectivityMethods({"COR", "COH", "PLI"});
 
         MatrixX3f nodePos(4, 3);
         nodePos << 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 1;
@@ -452,7 +430,7 @@ private slots:
         std::mt19937 rng(seed);
         std::normal_distribution<double> noise(0.0, 0.1);
         std::uniform_real_distribution<double> phase(0.0, 2.0 * M_PI);
-        QList<MatrixXd> trials;
+        std::vector<MatrixXd> trials;
         for (int t = 0; t < 20; ++t) {
             const double phi = phase(rng);
             MatrixXd trial(3, 200);
@@ -462,9 +440,9 @@ private slots:
                 trial(1, k) = std::sin(w + phi - M_PI / 2.0) + noise(rng);
                 trial(2, k) = noise(rng);
             }
-            trials << trial;
+            trials.push_back(trial);
         }
-        const auto settingsFor = [sfreq](const QList<MatrixXd>& data) {
+        const auto settingsFor = [sfreq](std::span<const MatrixXd> data) {
             ConnectivitySettings settings;
             settings.setSamplingFrequency(static_cast<int>(sfreq));
             settings.setFFTSize(256);
@@ -483,9 +461,9 @@ private slots:
 
         // In storage mode the per-trial spectra are kept, so adding a trial gives what computing all at once gives
         AbstractMetric::m_bStorageModeIsActive = true;
-        ConnectivitySettings growing = settingsFor(trials.mid(0, 19));
+        ConnectivitySettings growing = settingsFor(std::span(trials).first(19));
         DebiasedSquaredWeightedPhaseLagIndex::calculate(growing);
-        growing.append(trials.last());
+        growing.append(trials.back());
         const MatrixXd accumulated = DebiasedSquaredWeightedPhaseLagIndex::calculate(growing).connectivity_matrix();
 
         AbstractMetric::m_bStorageModeIsActive = storage;

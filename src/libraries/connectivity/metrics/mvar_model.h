@@ -43,11 +43,12 @@
 
 #include "../connectivity_global.h"
 
+#include <vector>
+
 //=============================================================================================================
 // QT INCLUDES
 //=============================================================================================================
 
-#include <QVector>
 
 //=============================================================================================================
 // EIGEN INCLUDES
@@ -116,7 +117,7 @@ public:
      *
      * @since 2.2.0
      */
-    QVector<Eigen::MatrixXd> coefficients() const;
+    std::vector<Eigen::MatrixXd> coefficients() const;
 
     //=========================================================================================================
     /**
@@ -150,7 +151,7 @@ public:
      *
      * @since 2.2.0
      */
-    QVector<Eigen::MatrixXcd> transferFunction(const Eigen::VectorXd& freqs) const;
+    std::vector<Eigen::MatrixXcd> transferFunction(const Eigen::VectorXd& freqs) const;
 
     //=========================================================================================================
     /**
@@ -162,7 +163,7 @@ public:
      *
      * @since 2.2.0
      */
-    QVector<Eigen::MatrixXcd> spectralMatrix(const Eigen::VectorXd& freqs) const;
+    std::vector<Eigen::MatrixXcd> spectralMatrix(const Eigen::VectorXd& freqs) const;
 
 private:
     //=========================================================================================================
@@ -185,10 +186,10 @@ private:
      */
     int selectOrderBIC(const Eigen::MatrixXd& data, int maxOrder = 20) const;
 
-    QVector<Eigen::MatrixXd> m_coeffs; /**< Coefficient matrices A_1..A_p. */
-    Eigen::MatrixXd m_noiseCov;        /**< Noise covariance matrix. */
-    int m_order = 0;                   /**< Model order. */
-    int m_nChannels = 0;               /**< Number of channels. */
+    std::vector<Eigen::MatrixXd> m_coeffs; /**< Coefficient matrices A_1..A_p. */
+    Eigen::MatrixXd m_noiseCov;            /**< Noise covariance matrix. */
+    int m_order = 0;                       /**< Model order. */
+    int m_nChannels = 0;                   /**< Number of channels. */
 };
 
 //=============================================================================================================

@@ -37,13 +37,17 @@
 
 #include "connectivity_global.h"
 
+#include <vector>
+#include <memory>
+#include <span>
+#include <string>
+#include <utility>
+
 //=============================================================================================================
 // QT INCLUDES
 //=============================================================================================================
 
-#include <QSharedPointer>
-#include <QStringList>
-#include <QVector>
+#include <QMetaType>
 
 //=============================================================================================================
 // EIGEN INCLUDES
@@ -104,9 +108,6 @@ namespace CONNECTIVITYLIB
 class CONNECTIVITYSHARED_EXPORT ConnectivitySettings
 {
 public:
-    typedef QSharedPointer<ConnectivitySettings> SPtr;            /**< Shared pointer type for ConnectivitySettings. */
-    typedef QSharedPointer<const ConnectivitySettings> ConstSPtr; /**< Const shared pointer type for ConnectivitySettings. */
-
     /**
      * @brief Per-trial intermediate frequency-domain data used during connectivity computation
      */
@@ -114,12 +115,12 @@ public:
     {
         Eigen::MatrixXd matData;
         Eigen::MatrixXd matPsd;
-        QVector<Eigen::MatrixXcd> vecTapSpectra;
-        QVector<QPair<int, Eigen::MatrixXcd>> vecPairCsd;
-        QVector<QPair<int, Eigen::MatrixXcd>> vecPairCsdNormalized;
-        QVector<QPair<int, Eigen::MatrixXd>> vecPairCsdImagSign;
-        QVector<QPair<int, Eigen::MatrixXd>> vecPairCsdImagAbs;
-        QVector<QPair<int, Eigen::MatrixXd>> vecPairCsdImagSqrd;
+        std::vector<Eigen::MatrixXcd> vecTapSpectra;
+        std::vector<std::pair<int, Eigen::MatrixXcd>> vecPairCsd;
+        std::vector<std::pair<int, Eigen::MatrixXcd>> vecPairCsdNormalized;
+        std::vector<std::pair<int, Eigen::MatrixXd>> vecPairCsdImagSign;
+        std::vector<std::pair<int, Eigen::MatrixXd>> vecPairCsdImagAbs;
+        std::vector<std::pair<int, Eigen::MatrixXd>> vecPairCsdImagSqrd;
     };
 
     /**
@@ -128,11 +129,11 @@ public:
     struct IntermediateSumData
     {
         Eigen::MatrixXd matPsdSum;
-        QVector<QPair<int, Eigen::MatrixXcd>> vecPairCsdSum;
-        QVector<QPair<int, Eigen::MatrixXcd>> vecPairCsdNormalizedSum;
-        QVector<QPair<int, Eigen::MatrixXd>> vecPairCsdImagSignSum;
-        QVector<QPair<int, Eigen::MatrixXd>> vecPairCsdImagAbsSum;
-        QVector<QPair<int, Eigen::MatrixXd>> vecPairCsdImagSqrdSum;
+        std::vector<std::pair<int, Eigen::MatrixXcd>> vecPairCsdSum;
+        std::vector<std::pair<int, Eigen::MatrixXcd>> vecPairCsdNormalizedSum;
+        std::vector<std::pair<int, Eigen::MatrixXd>> vecPairCsdImagSignSum;
+        std::vector<std::pair<int, Eigen::MatrixXd>> vecPairCsdImagAbsSum;
+        std::vector<std::pair<int, Eigen::MatrixXd>> vecPairCsdImagSqrdSum;
     };
 
     //=========================================================================================================
@@ -145,7 +146,7 @@ public:
 
     void clearIntermediateData();
 
-    void append(const QList<Eigen::MatrixXd>& matInputData);
+    void append(std::span<const Eigen::MatrixXd> matInputData);
 
     void append(const Eigen::MatrixXd& matInputData);
 
@@ -161,9 +162,9 @@ public:
 
     void removeLast(int iAmount = 1);
 
-    void setConnectivityMethods(const QStringList& sConnectivityMethods);
+    void setConnectivityMethods(std::vector<std::string> sConnectivityMethods);
 
-    const QStringList& getConnectivityMethods() const;
+    const std::vector<std::string>& getConnectivityMethods() const;
 
     void setSamplingFrequency(int iSFreq);
 
@@ -173,9 +174,9 @@ public:
 
     int getFFTSize() const;
 
-    void setWindowType(const QString& sWindowType);
+    void setWindowType(std::string sWindowType);
 
-    const QString& getWindowType() const;
+    const std::string& getWindowType() const;
 
     void setNodePositions(const FIFFLIB::FiffInfo& fiffInfo,
                           const Eigen::RowVectorXi& picks);
@@ -187,13 +188,13 @@ public:
 
     const Eigen::MatrixX3f& getNodePositions() const;
 
-    QList<IntermediateTrialData>& getTrialData();
+    std::vector<IntermediateTrialData>& getTrialData();
 
     IntermediateSumData& getIntermediateSumData();
 
 protected:
-    QStringList m_sConnectivityMethods; /**< The connectivity methods. */
-    QString m_sWindowType;              /**< The window type used to compute tapered spectra. */
+    std::vector<std::string> m_sConnectivityMethods; /**< The connectivity methods. */
+    std::string m_sWindowType;                       /**< The window type used to compute tapered spectra. */
 
     float m_fSFreq;          /**< The sampling frequency. */
     int m_iNfft;             /**< The FFT length. Also includes the negativ frequencies. Gets recalculated if the sFreq or spectrum resolution change. */
@@ -201,8 +202,8 @@ protected:
 
     Eigen::MatrixX3f m_matNodePositions; /**< The node position in 3D space. */
 
-    IntermediateSumData m_intermediateSumData; /**< The intermediate sum data holds data calculated over all trials as a whole. */
-    QList<IntermediateTrialData> m_trialData;  /**< The trial data holds the actual and intermediate data calcualted for each trial. */
+    IntermediateSumData m_intermediateSumData;      /**< The intermediate sum data holds data calculated over all trials as a whole. */
+    std::vector<IntermediateTrialData> m_trialData; /**< The trial data holds the actual and intermediate data calcualted for each trial. */
 };
 
 //=============================================================================================================
@@ -213,6 +214,7 @@ protected:
 #ifndef metatype_connectivitysettings
 #define metatype_connectivitysettings
 Q_DECLARE_METATYPE(CONNECTIVITYLIB::ConnectivitySettings)
+Q_DECLARE_METATYPE(std::shared_ptr<CONNECTIVITYLIB::ConnectivitySettings>)
 #endif
 
 #endif // CONNECTIVITYSETTINGS_H

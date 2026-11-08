@@ -18,6 +18,9 @@
 //=============================================================================================================
 
 #include "unbiasedsquaredphaselagindex.h"
+
+#include <vector>
+#include <utility>
 #include "../network/networknode.h"
 #include "../network/networkedge.h"
 #include "../network/network.h"
@@ -91,7 +94,7 @@ Network UnbiasedSquaredPhaseLagIndex::calculate(ConnectivitySettings& connectivi
     int iNfft = connectivitySettings.getFFTSize();
 
     // Generate tapers
-    QPair<MatrixXd, VectorXd> tapers = Spectral::generateTapers(iSignalLength, connectivitySettings.getWindowType().toStdString());
+    std::pair<MatrixXd, VectorXd> tapers = Spectral::generateTapers(iSignalLength, connectivitySettings.getWindowType());
 
     // Initialize
     int iNRows = connectivitySettings.at(0).matData.rows();
@@ -152,15 +155,15 @@ Network UnbiasedSquaredPhaseLagIndex::calculate(ConnectivitySettings& connectivi
 //=============================================================================================================
 
 void UnbiasedSquaredPhaseLagIndex::compute(ConnectivitySettings::IntermediateTrialData& inputData,
-                                           QVector<QPair<int, MatrixXcd>>& vecPairCsdSum,
-                                           QVector<QPair<int, MatrixXd>>& vecPairCsdImagSignSum,
+                                           std::vector<std::pair<int, MatrixXcd>>& vecPairCsdSum,
+                                           std::vector<std::pair<int, MatrixXd>>& vecPairCsdImagSignSum,
                                            QMutex& mutex,
                                            int iNRows,
                                            int iNFreqs,
                                            int iNfft,
-                                           const QPair<MatrixXd, VectorXd>& tapers)
+                                           const std::pair<MatrixXd, VectorXd>& tapers)
 {
-    if (inputData.vecPairCsdImagSign.size() == iNRows) {
+    if (std::ssize(inputData.vecPairCsdImagSign) == iNRows) {
         //qDebug() << "UnbiasedSquaredPhaseLagIndex::compute - vecPairCsdImagSign was already computed for this trial.";
         return;
     }
@@ -169,7 +172,7 @@ void UnbiasedSquaredPhaseLagIndex::compute(ConnectivitySettings::IntermediateTri
 
     // Calculate tapered spectra if not available already
     // This code was copied and changed modified Utils/Spectra since we do not want to call the function due to time loss.
-    if (inputData.vecTapSpectra.size() != iNRows) {
+    if (std::ssize(inputData.vecTapSpectra) != iNRows) {
         inputData.vecTapSpectra.clear();
 
         RowVectorXd vecInputFFT, rowData;
@@ -200,12 +203,12 @@ void UnbiasedSquaredPhaseLagIndex::compute(ConnectivitySettings::IntermediateTri
                 matTapSpectrum.row(j) = vecTmpFreq * tapers.second(j);
             }
 
-            inputData.vecTapSpectra.append(matTapSpectrum);
+            inputData.vecTapSpectra.push_back(matTapSpectrum);
         }
     }
 
     // Compute CSD
-    if (inputData.vecPairCsd.isEmpty()) {
+    if (inputData.vecPairCsd.empty()) {
         double denomCSD = sqrt(tapers.second.cwiseAbs2().sum()) * sqrt(tapers.second.cwiseAbs2().sum()) / 2.0;
 
         bool bNfftEven = false;
@@ -230,17 +233,17 @@ void UnbiasedSquaredPhaseLagIndex::compute(ConnectivitySettings::IntermediateTri
                 }
             }
 
-            inputData.vecPairCsd.append(QPair<int, MatrixXcd>(i, matCsd));
-            inputData.vecPairCsdImagSign.append(QPair<int, MatrixXd>(i, matCsd.imag().cwiseSign()));
+            inputData.vecPairCsd.push_back(std::pair<int, MatrixXcd>(i, matCsd));
+            inputData.vecPairCsdImagSign.push_back(std::pair<int, MatrixXd>(i, matCsd.imag().cwiseSign()));
         }
 
         mutex.lock();
 
-        if (vecPairCsdSum.isEmpty()) {
+        if (vecPairCsdSum.empty()) {
             vecPairCsdSum = inputData.vecPairCsd;
             vecPairCsdImagSignSum = inputData.vecPairCsdImagSign;
         } else {
-            for (int j = 0; j < vecPairCsdSum.size(); ++j) {
+            for (int j = 0; j < std::ssize(vecPairCsdSum); ++j) {
                 vecPairCsdSum[j].second += inputData.vecPairCsd.at(j).second;
                 vecPairCsdImagSignSum[j].second += inputData.vecPairCsdImagSign.at(j).second;
             }
@@ -248,17 +251,17 @@ void UnbiasedSquaredPhaseLagIndex::compute(ConnectivitySettings::IntermediateTri
 
         mutex.unlock();
     } else {
-        if (inputData.vecPairCsdImagSign.isEmpty()) {
-            for (i = 0; i < inputData.vecPairCsd.size(); ++i) {
-                inputData.vecPairCsdImagSign.append(QPair<int, MatrixXd>(i, inputData.vecPairCsd.at(i).second.imag().cwiseSign()));
+        if (inputData.vecPairCsdImagSign.empty()) {
+            for (i = 0; i < std::ssize(inputData.vecPairCsd); ++i) {
+                inputData.vecPairCsdImagSign.push_back(std::pair<int, MatrixXd>(i, inputData.vecPairCsd.at(i).second.imag().cwiseSign()));
             }
 
             mutex.lock();
 
-            if (vecPairCsdImagSignSum.isEmpty()) {
+            if (vecPairCsdImagSignSum.empty()) {
                 vecPairCsdImagSignSum = inputData.vecPairCsdImagSign;
             } else {
-                for (int j = 0; j < vecPairCsdImagSignSum.size(); ++j) {
+                for (int j = 0; j < std::ssize(vecPairCsdImagSignSum); ++j) {
                     vecPairCsdImagSignSum[j].second += inputData.vecPairCsdImagSign.at(j).second;
                 }
             }
@@ -285,7 +288,7 @@ void UnbiasedSquaredPhaseLagIndex::computeUSPLI(ConnectivitySettings& connectivi
     int j;
     double dNTrials = double(connectivitySettings.size() - 1.0);
 
-    for (int i = 0; i < connectivitySettings.getIntermediateSumData().vecPairCsdImagSignSum.size(); ++i) {
+    for (int i = 0; i < std::ssize(connectivitySettings.getIntermediateSumData().vecPairCsdImagSignSum); ++i) {
         matNom = connectivitySettings.getIntermediateSumData().vecPairCsdImagSignSum.at(i).second.cwiseAbs() / connectivitySettings.size();
         matNom = (connectivitySettings.size() * matNom.array().square() - 1.0) / dNTrials;
 

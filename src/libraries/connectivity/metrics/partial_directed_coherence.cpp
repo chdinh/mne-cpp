@@ -15,6 +15,8 @@
 //=============================================================================================================
 
 #include "partial_directed_coherence.h"
+
+#include <vector>
 #include "mvar_model.h"
 #include "../network/networknode.h"
 #include "../network/networkedge.h"
@@ -89,7 +91,7 @@ Network PartialDirectedCoherence::calculate(ConnectivitySettings& connectivitySe
 
     // Compute A(f) = I - sum_{k=1}^{p} A_k * exp(-2*pi*i*f*k) at normalized frequencies
     VectorXd vecFreqs = VectorXd::LinSpaced(iNFreqs, 0.0, 0.5);
-    QVector<MatrixXd> coeffs = model.coefficients();
+    std::vector<MatrixXd> coeffs = model.coefficients();
     int p = model.order();
 
     const MatrixXcd matI = MatrixXcd::Identity(nCh, nCh);

@@ -45,7 +45,6 @@
 // QT INCLUDES
 //=============================================================================================================
 
-#include <QSharedPointer>
 
 //=============================================================================================================
 // EIGEN INCLUDES
@@ -90,9 +89,6 @@ class ConnectivitySettings;
 class CONNECTIVITYSHARED_EXPORT DirectedTransferFunction : public AbstractMetric
 {
 public:
-    typedef QSharedPointer<DirectedTransferFunction> SPtr;            /**< Shared pointer type for DirectedTransferFunction. */
-    typedef QSharedPointer<const DirectedTransferFunction> ConstSPtr; /**< Const shared pointer type for DirectedTransferFunction. */
-
     //=========================================================================================================
     /**
      * Constructs a DirectedTransferFunction object.

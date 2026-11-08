@@ -337,6 +337,10 @@ void TestInvRtLibrary::rtConnectivity_lifecycle()
     running.append(settings);
     QVERIFY(spy.wait(10000));
     running.stop();
+    // The worker computes on its own snapshot and hands it back with the trials
+    const auto returned = spy.first().at(1).value<std::shared_ptr<ConnectivitySettings>>();
+    QVERIFY(returned && returned.get() != &settings);
+    QCOMPARE(returned->size(), 2);
 }
 
 //=============================================================================================================

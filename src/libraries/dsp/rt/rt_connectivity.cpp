@@ -40,22 +40,20 @@ using namespace CONNECTIVITYLIB;
 // DEFINE MEMBER METHODS RtConnectivityWorker
 //=============================================================================================================
 
-void RtConnectivityWorker::doWork(const ConnectivitySettings& connectivitySettings)
+void RtConnectivityWorker::doWork(const std::shared_ptr<ConnectivitySettings>& connectivitySettings)
 {
     if (this->thread()->isInterruptionRequested()) {
         return;
     }
 
-    if (connectivitySettings.getConnectivityMethods().isEmpty()) {
+    if (connectivitySettings->getConnectivityMethods().empty()) {
         qDebug() << "RtConnectivityWorker::doWork() - Network methods are empty";
         return;
     }
 
-    ConnectivitySettings connectivitySettingsTemp = connectivitySettings;
+    const std::vector<Network> finalNetworks = compute_connectivity(*connectivitySettings);
 
-    std::vector<Network> finalNetworks = compute_connectivity(connectivitySettingsTemp);
-
-    emit resultReady(finalNetworks, connectivitySettingsTemp);
+    emit resultReady(finalNetworks, connectivitySettings);
 }
 
 //=============================================================================================================
@@ -89,9 +87,9 @@ RtConnectivity::~RtConnectivity()
 
 //=============================================================================================================
 
-void RtConnectivity::append(const ConnectivitySettings& connectivitySettings)
+void RtConnectivity::append(ConnectivitySettings connectivitySettings)
 {
-    emit operate(connectivitySettings);
+    emit operate(std::make_shared<ConnectivitySettings>(std::move(connectivitySettings)));
 }
 
 //=============================================================================================================

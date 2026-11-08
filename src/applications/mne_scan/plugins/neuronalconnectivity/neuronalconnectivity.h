@@ -173,10 +173,11 @@ protected:
     /**
      * Slot called when a new real-time connectivity estimate is available.
      *
-     * @param[in] connectivityResult        The new connectivity estimate.
+     * @param[in] connectivityResults     The new connectivity estimates.
+     * @param[in] connectivitySettings    The settings they were computed from, taken over by this plugin.
      */
     void onNewConnectivityResultAvailable(const std::vector<CONNECTIVITYLIB::Network>& connectivityResults,
-                                          const CONNECTIVITYLIB::ConnectivitySettings& connectivitySettings);
+                                          const std::shared_ptr<CONNECTIVITYLIB::ConnectivitySettings>& connectivitySettings);
 
     //=========================================================================================================
     /**
@@ -227,8 +228,8 @@ private:
     float m_fFreqBandHigh;       /**< The higher frequency band to average the connectivity weights to. */
     qint32 m_iBlockSize;         /**< The block size of teh last received data block. In frequency bins. */
 
-    QString m_sAvrType;                 /**< The average type. */
-    QStringList m_sConnectivityMethods; /**< The connectivity metric to use. */
+    QString m_sAvrType;                              /**< The average type. */
+    std::vector<std::string> m_sConnectivityMethods; /**< The connectivity metric to use. */
 
     QMutex m_mutex; /**< The mutex to guarantee thread safety. */
 

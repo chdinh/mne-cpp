@@ -16,6 +16,8 @@
 
 #include "mvar_model.h"
 
+#include <vector>
+
 //=============================================================================================================
 // QT INCLUDES
 //=============================================================================================================
@@ -57,7 +59,7 @@ void MvarModel::fit(const MatrixXd& data, int p)
 
 //=============================================================================================================
 
-QVector<MatrixXd> MvarModel::coefficients() const
+std::vector<MatrixXd> MvarModel::coefficients() const
 {
     return m_coeffs;
 }
@@ -78,9 +80,9 @@ int MvarModel::order() const
 
 //=============================================================================================================
 
-QVector<MatrixXcd> MvarModel::transferFunction(const VectorXd& freqs) const
+std::vector<MatrixXcd> MvarModel::transferFunction(const VectorXd& freqs) const
 {
-    QVector<MatrixXcd> vecH;
+    std::vector<MatrixXcd> vecH;
     vecH.reserve(static_cast<int>(freqs.size()));
 
     const int nCh = m_nChannels;
@@ -96,7 +98,7 @@ QVector<MatrixXcd> MvarModel::transferFunction(const VectorXd& freqs) const
             matA -= m_coeffs[k].cast<std::complex<double>>() * expVal;
         }
 
-        vecH.append(matA.inverse());
+        vecH.push_back(matA.inverse());
     }
 
     return vecH;
@@ -104,16 +106,16 @@ QVector<MatrixXcd> MvarModel::transferFunction(const VectorXd& freqs) const
 
 //=============================================================================================================
 
-QVector<MatrixXcd> MvarModel::spectralMatrix(const VectorXd& freqs) const
+std::vector<MatrixXcd> MvarModel::spectralMatrix(const VectorXd& freqs) const
 {
-    QVector<MatrixXcd> vecH = transferFunction(freqs);
-    QVector<MatrixXcd> vecS;
+    std::vector<MatrixXcd> vecH = transferFunction(freqs);
+    std::vector<MatrixXcd> vecS;
     vecS.reserve(vecH.size());
 
     const MatrixXcd matSigma = m_noiseCov.cast<std::complex<double>>();
 
-    for (int fi = 0; fi < vecH.size(); ++fi) {
-        vecS.append(vecH[fi] * matSigma * vecH[fi].adjoint());
+    for (int fi = 0; fi < std::ssize(vecH); ++fi) {
+        vecS.push_back(vecH[fi] * matSigma * vecH[fi].adjoint());
     }
 
     return vecS;
@@ -166,7 +168,7 @@ void MvarModel::fitLevinsonDurbin(const MatrixXd& data, int p)
     m_coeffs.clear();
     m_coeffs.reserve(p);
     for (int k = 0; k < p; ++k) {
-        m_coeffs.append(matA.middleCols(k * nCh, nCh));
+        m_coeffs.push_back(matA.middleCols(k * nCh, nCh));
     }
 
     // Compute noise covariance from residuals

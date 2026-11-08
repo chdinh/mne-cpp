@@ -30,7 +30,7 @@
       "decoding",
       "math"
     ],
-    "tokens": 18996,
+    "tokens": 18814,
     "gui_outside_design": []
   },
   "libraries": {
@@ -130,17 +130,14 @@
       ]
     },
     "connectivity": {
-      "tokens": 274,
+      "tokens": 92,
       "by_category": {
-        "containers": 140,
-        "global": 8,
+        "global": 7,
         "logging": 31,
-        "objects_signals": 3,
-        "smart_pointers": 30,
-        "strings": 12,
+        "objects_signals": 4,
         "threads": 50
       },
-      "public_header_includes": 28,
+      "public_header_includes": 10,
       "q_object": 0,
       "files": 42,
       "modules": [

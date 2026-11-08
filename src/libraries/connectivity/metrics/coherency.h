@@ -44,6 +44,9 @@
 
 #include "../connectivity_global.h"
 
+#include <vector>
+#include <utility>
+
 #include "abstractmetric.h"
 #include "../connectivitysettings.h"
 
@@ -51,7 +54,6 @@
 // QT INCLUDES
 //=============================================================================================================
 
-#include <QSharedPointer>
 #include <QMutex>
 
 //=============================================================================================================
@@ -96,9 +98,6 @@ class Network;
 class CONNECTIVITYSHARED_EXPORT Coherency : public AbstractMetric
 {
 public:
-    typedef QSharedPointer<Coherency> SPtr;            /**< Shared pointer type for Coherency. */
-    typedef QSharedPointer<const Coherency> ConstSPtr; /**< Const shared pointer type for Coherency. */
-
     //=========================================================================================================
     /**
      * Constructs a Coherency object.
@@ -141,12 +140,12 @@ private:
      */
     static void compute(ConnectivitySettings::IntermediateTrialData& inputData,
                         Eigen::MatrixXd& matPsdSum,
-                        QVector<QPair<int, Eigen::MatrixXcd>>& vecPairCsdSum,
+                        std::vector<std::pair<int, Eigen::MatrixXcd>>& vecPairCsdSum,
                         QMutex& mutex,
                         int iNRows,
                         int iNFreqs,
                         int iNfft,
-                        const QPair<Eigen::MatrixXd, Eigen::VectorXd>& tapers);
+                        const std::pair<Eigen::MatrixXd, Eigen::VectorXd>& tapers);
 
     //=========================================================================================================
     /**
@@ -154,11 +153,11 @@ private:
      */
     static void computePSDCSDAbs(QMutex& mutex,
                                  Network& finalNetwork,
-                                 const QPair<int, Eigen::MatrixXcd>& pairInput,
+                                 const std::pair<int, Eigen::MatrixXcd>& pairInput,
                                  const Eigen::MatrixXd& matPsdSum);
     static void computePSDCSDImag(QMutex& mutex,
                                   Network& finalNetwork,
-                                  const QPair<int, Eigen::MatrixXcd>& pairInput,
+                                  const std::pair<int, Eigen::MatrixXcd>& pairInput,
                                   const Eigen::MatrixXd& matPsdSum);
 };
 

@@ -15,6 +15,8 @@
 //=============================================================================================================
 
 #include "directed_transfer_function.h"
+
+#include <vector>
 #include "mvar_model.h"
 #include "../network/networknode.h"
 #include "../network/networkedge.h"
@@ -89,7 +91,7 @@ Network DirectedTransferFunction::calculate(ConnectivitySettings& connectivitySe
 
     // Compute transfer function at normalized frequencies
     VectorXd vecFreqs = VectorXd::LinSpaced(iNFreqs, 0.0, 0.5);
-    QVector<MatrixXcd> vecH = model.transferFunction(vecFreqs);
+    std::vector<MatrixXcd> vecH = model.transferFunction(vecFreqs);
 
     // Compute DTF: DTF_{ij}(f) = |H_{ij}(f)|^2 / sum_k |H_{ik}(f)|^2
     // (normalized per row i)

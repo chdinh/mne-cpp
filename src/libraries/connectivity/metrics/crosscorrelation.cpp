@@ -17,6 +17,8 @@
 //=============================================================================================================
 
 #include "crosscorrelation.h"
+
+#include <utility>
 #include "../network/networknode.h"
 #include "../network/networkedge.h"
 #include "../network/network.h"
@@ -89,7 +91,7 @@ Network CrossCorrelation::calculate(ConnectivitySettings& connectivitySettings)
     int iSignalLength = connectivitySettings.at(0).matData.cols();
     int iNfft = connectivitySettings.getFFTSize();
 
-    QPair<MatrixXd, VectorXd> tapers = Spectral::generateTapers(iSignalLength, connectivitySettings.getWindowType().toStdString());
+    std::pair<MatrixXd, VectorXd> tapers = Spectral::generateTapers(iSignalLength, connectivitySettings.getWindowType());
 
     // Compute the cross correlation in parallel
     QMutex mutex;
@@ -140,7 +142,7 @@ void CrossCorrelation::compute(ConnectivitySettings::IntermediateTrialData& inpu
                                MatrixXd& matDist,
                                QMutex& mutex,
                                int iNfft,
-                               const QPair<MatrixXd, VectorXd>& tapers)
+                               const std::pair<MatrixXd, VectorXd>& tapers)
 {
     //    QElapsedTimer timer;
     //    qint64 iTime = 0;
@@ -158,7 +160,7 @@ void CrossCorrelation::compute(ConnectivitySettings::IntermediateTrialData& inpu
 
     // Calculate tapered spectra if not available already
     // This code was copied and changed modified Utils/Spectra since we do not want to call the function due to time loss.
-    if (inputData.vecTapSpectra.isEmpty()) {
+    if (inputData.vecTapSpectra.empty()) {
         int iNFreqs = int(floor(iNfft / 2.0)) + 1;
         MatrixXcd matTapSpectrum(tapers.first.rows(), iNFreqs);
 
@@ -182,7 +184,7 @@ void CrossCorrelation::compute(ConnectivitySettings::IntermediateTrialData& inpu
                 matTapSpectrum.row(j) = vecResultFreq * tapers.second(j);
             }
 
-            inputData.vecTapSpectra.append(matTapSpectrum);
+            inputData.vecTapSpectra.push_back(matTapSpectrum);
         }
     }
 
@@ -197,10 +199,10 @@ void CrossCorrelation::compute(ConnectivitySettings::IntermediateTrialData& inpu
     int idx = 0;
     double denom = tapers.second.sum();
 
-    for (i = 0; i < inputData.vecTapSpectra.size(); ++i) {
+    for (i = 0; i < std::ssize(inputData.vecTapSpectra); ++i) {
         vecResultFreq = inputData.vecTapSpectra.at(i).colwise().sum() / denom;
 
-        for (j = i; j < inputData.vecTapSpectra.size(); ++j) {
+        for (j = i; j < std::ssize(inputData.vecTapSpectra); ++j) {
             vecResultXCor = vecResultFreq.cwiseProduct(inputData.vecTapSpectra.at(j).colwise().sum() / denom);
 
             fft.inv(vecInputFFT, vecResultXCor, iNfft);

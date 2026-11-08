@@ -96,7 +96,8 @@ public:
 
     ConnectivitySettings m_settings;
     RtConnectivity::SPtr m_pRtConnectivity;
-    std::vector<Network> m_networkData;
+    std::vector<Network> m_rawNetworkData; /**< Results as computed. */
+    std::vector<Network> m_networkData;    /**< Results averaged over the selected band and normalized. */
     std::map<std::string, Eigen::Vector4i> mColor;
 
     float m_fFreqBandLow;
@@ -120,13 +121,13 @@ public:
 
     void onConnectivityMetricChanged(const QString& sMetric)
     {
-        if (m_settings.getConnectivityMethods().contains(sMetric)) {
+        if (std::ranges::contains(m_settings.getConnectivityMethods(), sMetric.toStdString())) {
             return;
         }
 
         m_pRtConnectivity->restart();
 
-        m_settings.setConnectivityMethods(QStringList() << sMetric);
+        m_settings.setConnectivityMethods({sMetric.toStdString()});
 
         m_pRtConnectivity->append(m_settings);
     }
@@ -184,16 +185,22 @@ public:
         m_fFreqBandLow = fFreqLow;
         m_fFreqBandHigh = fFreqHigh;
 
-        onNewConnectivityResultAvailable(m_networkData, m_settings);
+        updateNetworks();
     }
 
     void onNewConnectivityResultAvailable(const std::vector<Network>& connectivityResults,
-                                          const ConnectivitySettings& connectivitySettings)
+                                          const std::shared_ptr<ConnectivitySettings>& connectivitySettings)
     {
-        m_settings = connectivitySettings;
-        m_networkData = connectivityResults;
+        m_settings = std::move(*connectivitySettings);
+        m_rawNetworkData = connectivityResults;
+        updateNetworks();
+    }
 
-        for (int i = 0; i < std::ssize(connectivityResults); ++i) {
+    void updateNetworks()
+    {
+        m_networkData = m_rawNetworkData;
+
+        for (int i = 0; i < std::ssize(m_networkData); ++i) {
             m_networkData[i].set_frequency_range(m_fFreqBandLow, m_fFreqBandHigh);
             m_networkData[i].normalize();
 
@@ -204,12 +211,8 @@ public:
             m_networkData[i].set_visualization_info(std::move(visInfo));
         }
 
-        if (!m_networkData.empty()) {
-            for (int i = 0; i < std::ssize(m_networkData); ++i) {
-                emit newConnectivityResultAvailable("sample",
-                                                    "1",
-                                                    m_networkData.at(i));
-            }
+        for (const Network& network : m_networkData) {
+            emit newConnectivityResultAvailable("sample", "1", network);
         }
     }
 
@@ -249,7 +252,7 @@ public:
                 m_pEpochSignalCoursePlot->show();
             }
 
-            if (iRowNumber < m_settings.at(iTrialNumber).vecTapSpectra.size()) {
+            if (iRowNumber < std::ssize(m_settings.at(iTrialNumber).vecTapSpectra)) {
                 Eigen::RowVectorXd plotVec = m_settings.at(iTrialNumber).vecTapSpectra.at(iRowNumber).cwiseAbs().row(0);
                 Eigen::Map<Eigen::VectorXd> v1(plotVec.data(), plotVec.size());
                 Eigen::VectorXd temp = v1;

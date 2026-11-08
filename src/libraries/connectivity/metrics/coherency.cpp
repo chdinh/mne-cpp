@@ -18,6 +18,9 @@
 //=============================================================================================================
 
 #include "coherency.h"
+
+#include <vector>
+#include <utility>
 #include "../network/networknode.h"
 #include "../network/networkedge.h"
 #include "../network/network.h"
@@ -79,7 +82,7 @@ void Coherency::calculateAbs(Network& finalNetwork,
     int iNfft = connectivitySettings.getFFTSize();
 
     // Generate tapers
-    QPair<MatrixXd, VectorXd> tapers = Spectral::generateTapers(iSignalLength, connectivitySettings.getWindowType().toStdString());
+    std::pair<MatrixXd, VectorXd> tapers = Spectral::generateTapers(iSignalLength, connectivitySettings.getWindowType());
 
     // Initialize vecPsdAvg and vecCsdAvg
     int iNRows = connectivitySettings.at(0).matData.rows();
@@ -112,7 +115,7 @@ void Coherency::calculateAbs(Network& finalNetwork,
     //    timer.restart();
 
     // Compute CSD/sqrt(PSD_X * PSD_Y)
-    std::function<void(QPair<int, MatrixXcd>&)> computePSDCSDLambda = [&](QPair<int, MatrixXcd>& pairInput) {
+    std::function<void(std::pair<int, MatrixXcd>&)> computePSDCSDLambda = [&](std::pair<int, MatrixXcd>& pairInput) {
         computePSDCSDAbs(mutex,
                          finalNetwork,
                          pairInput,
@@ -150,7 +153,7 @@ void Coherency::calculateImag(Network& finalNetwork,
     int iNfft = connectivitySettings.getFFTSize();
 
     // Generate tapers
-    QPair<MatrixXd, VectorXd> tapers = Spectral::generateTapers(iSignalLength, connectivitySettings.getWindowType().toStdString());
+    std::pair<MatrixXd, VectorXd> tapers = Spectral::generateTapers(iSignalLength, connectivitySettings.getWindowType());
 
     // Initialize vecPsdAvg and vecCsdAvg
     int iNRows = connectivitySettings.at(0).matData.rows();
@@ -183,7 +186,7 @@ void Coherency::calculateImag(Network& finalNetwork,
     //    timer.restart();
 
     // Compute CSD/sqrt(PSD_X * PSD_Y)
-    std::function<void(QPair<int, MatrixXcd>&)> computePSDCSDLambda = [&](QPair<int, MatrixXcd>& pairInput) {
+    std::function<void(std::pair<int, MatrixXcd>&)> computePSDCSDLambda = [&](std::pair<int, MatrixXcd>& pairInput) {
         computePSDCSDImag(mutex,
                           finalNetwork,
                           pairInput,
@@ -203,18 +206,18 @@ void Coherency::calculateImag(Network& finalNetwork,
 
 void Coherency::compute(ConnectivitySettings::IntermediateTrialData& inputData,
                         MatrixXd& matPsdSum,
-                        QVector<QPair<int, MatrixXcd>>& vecPairCsdSum,
+                        std::vector<std::pair<int, MatrixXcd>>& vecPairCsdSum,
                         QMutex& mutex,
                         int iNRows,
                         int iNFreqs,
                         int iNfft,
-                        const QPair<MatrixXd, VectorXd>& tapers)
+                        const std::pair<MatrixXd, VectorXd>& tapers)
 {
     //    QElapsedTimer timer;
     //    qint64 iTime = 0;
     //    timer.start();
 
-    if (inputData.vecPairCsd.size() == iNRows) {
+    if (std::ssize(inputData.vecPairCsd) == iNRows) {
         //qDebug() << "Coherency::compute - vecPairCsd were already computed for this trial.";
         return;
     }
@@ -247,7 +250,7 @@ void Coherency::compute(ConnectivitySettings::IntermediateTrialData& inputData,
         rowData.array() = inputData.matData.row(i).array() - inputData.matData.row(i).mean();
 
         // Calculate tapered spectra if not available already
-        if (inputData.vecTapSpectra.size() != iNRows) {
+        if (std::ssize(inputData.vecTapSpectra) != iNRows) {
             for (j = 0; j < tapers.first.rows(); j++) {
                 // Zero padd if necessary. The zero padding in Eigen's FFT is only working for column vectors.
                 if (rowData.cols() < iNfft) {
@@ -263,7 +266,7 @@ void Coherency::compute(ConnectivitySettings::IntermediateTrialData& inputData,
                 matTapSpectrum.row(j) = vecTmpFreq * tapers.second(j);
             }
 
-            inputData.vecTapSpectra.append(matTapSpectrum);
+            inputData.vecTapSpectra.push_back(matTapSpectrum);
         }
 
         // Compute PSD (average over tapers if necessary).
@@ -294,7 +297,7 @@ void Coherency::compute(ConnectivitySettings::IntermediateTrialData& inputData,
     //    timer.restart();
 
     // Compute CSD
-    if (inputData.vecPairCsd.size() != iNRows) {
+    if (std::ssize(inputData.vecPairCsd) != iNRows) {
         inputData.vecPairCsd.clear();
 
         //MatrixXcd matCsd = MatrixXcd(iNRows, iNFreqs);
@@ -317,15 +320,15 @@ void Coherency::compute(ConnectivitySettings::IntermediateTrialData& inputData,
                 }
             }
 
-            inputData.vecPairCsd.append(QPair<int, MatrixXcd>(i, matCsd));
+            inputData.vecPairCsd.push_back(std::pair<int, MatrixXcd>(i, matCsd));
         }
 
         mutex.lock();
 
-        if (vecPairCsdSum.isEmpty()) {
+        if (vecPairCsdSum.empty()) {
             vecPairCsdSum = inputData.vecPairCsd;
         } else {
-            for (j = 0; j < vecPairCsdSum.size(); ++j) {
+            for (j = 0; j < std::ssize(vecPairCsdSum); ++j) {
                 vecPairCsdSum[j].second += inputData.vecPairCsd.at(j).second;
             }
         }
@@ -352,7 +355,7 @@ void Coherency::compute(ConnectivitySettings::IntermediateTrialData& inputData,
 
 void Coherency::computePSDCSDAbs(QMutex& mutex,
                                  Network& finalNetwork,
-                                 const QPair<int, MatrixXcd>& pairInput,
+                                 const std::pair<int, MatrixXcd>& pairInput,
                                  const MatrixXd& matPsdSum)
 {
     MatrixXd matPSDtmp(matPsdSum.rows(), matPsdSum.cols());
@@ -381,7 +384,7 @@ void Coherency::computePSDCSDAbs(QMutex& mutex,
 
 void Coherency::computePSDCSDImag(QMutex& mutex,
                                   Network& finalNetwork,
-                                  const QPair<int, MatrixXcd>& pairInput,
+                                  const std::pair<int, MatrixXcd>& pairInput,
                                   const MatrixXd& matPsdSum)
 {
     MatrixXd matPSDtmp(matPsdSum.rows(), matPsdSum.cols());

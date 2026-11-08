@@ -40,6 +40,8 @@
 
 #include "../connectivity_global.h"
 
+#include <utility>
+
 #include "abstractmetric.h"
 #include "../connectivitysettings.h"
 
@@ -47,7 +49,6 @@
 // QT INCLUDES
 //=============================================================================================================
 
-#include <QSharedPointer>
 #include <QMutex>
 
 //=============================================================================================================
@@ -91,9 +92,6 @@ class Network;
 class CONNECTIVITYSHARED_EXPORT CrossCorrelation : public AbstractMetric
 {
 public:
-    typedef QSharedPointer<CrossCorrelation> SPtr;            /**< Shared pointer type for CrossCorrelation. */
-    typedef QSharedPointer<const CrossCorrelation> ConstSPtr; /**< Const shared pointer type for CrossCorrelation. */
-
     //=========================================================================================================
     /**
      * Constructs a CrossCorrelation object.
@@ -125,7 +123,7 @@ protected:
                         Eigen::MatrixXd& matDist,
                         QMutex& mutex,
                         int iNfft,
-                        const QPair<Eigen::MatrixXd, Eigen::VectorXd>& tapers);
+                        const std::pair<Eigen::MatrixXd, Eigen::VectorXd>& tapers);
 };
 
 //=============================================================================================================

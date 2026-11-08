@@ -31,7 +31,10 @@
 //=============================================================================================================
 
 #include "../dsp_global.h"
+#include <connectivity/connectivitysettings.h>
 #include <connectivity/network/network.h>
+
+#include <memory>
 
 //=============================================================================================================
 // EIGEN INCLUDES
@@ -51,11 +54,6 @@
 namespace FIFFLIB
 {
 class FiffInfo;
-}
-
-namespace CONNECTIVITYLIB
-{
-class ConnectivitySettings;
 }
 
 //=============================================================================================================
@@ -86,12 +84,12 @@ public:
     /**
      * Perform actual connectivity estimation.
      *
-     * @param[in] connectivitySettings           The connectivity settings to be used during connectivity estimation.
+     * @param[in] connectivitySettings    The trials to estimate from; their spectra are cached in place.
      */
-    void doWork(const CONNECTIVITYLIB::ConnectivitySettings& connectivitySettings);
+    void doWork(const std::shared_ptr<CONNECTIVITYLIB::ConnectivitySettings>& connectivitySettings);
 
 signals:
-    void resultReady(const std::vector<CONNECTIVITYLIB::Network>& connectivityResults, const CONNECTIVITYLIB::ConnectivitySettings& connectivitySettings);
+    void resultReady(const std::vector<CONNECTIVITYLIB::Network>& connectivityResults, const std::shared_ptr<CONNECTIVITYLIB::ConnectivitySettings>& connectivitySettings);
 };
 
 //=============================================================================================================
@@ -128,9 +126,12 @@ public:
     /**
      * Slot to receive incoming data.
      *
+     * Queues a connectivity estimate on the worker thread. The worker computes on its own
+     * snapshot, so the caller may keep changing its settings; move them in to avoid the copy.
+     *
      * @param[in] connectivitySettings  Data to estimate the connectivity from.
      */
-    void append(const CONNECTIVITYLIB::ConnectivitySettings& connectivitySettings);
+    void append(CONNECTIVITYLIB::ConnectivitySettings connectivitySettings);
 
     //=========================================================================================================
     /**
@@ -148,9 +149,14 @@ protected:
     QThread m_workerThread; /**< The worker thread. */
 
 signals:
-    void newConnectivityResultAvailable(const std::vector<CONNECTIVITYLIB::Network>& connectivityResults, const CONNECTIVITYLIB::ConnectivitySettings& connectivitySettings);
+    /**
+     * Emitted with the estimates and the settings they were computed from, including the
+     * spectra cached during the computation. The worker no longer uses the settings, so a
+     * receiver may move from them instead of copying.
+     */
+    void newConnectivityResultAvailable(const std::vector<CONNECTIVITYLIB::Network>& connectivityResults, const std::shared_ptr<CONNECTIVITYLIB::ConnectivitySettings>& connectivitySettings);
 
-    void operate(const CONNECTIVITYLIB::ConnectivitySettings& connectivitySettings);
+    void operate(const std::shared_ptr<CONNECTIVITYLIB::ConnectivitySettings>& connectivitySettings);
 };
 
 //=============================================================================================================

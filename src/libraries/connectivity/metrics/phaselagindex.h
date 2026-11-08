@@ -46,6 +46,9 @@
 
 #include "../connectivity_global.h"
 
+#include <vector>
+#include <utility>
+
 #include "abstractmetric.h"
 #include "../connectivitysettings.h"
 
@@ -53,7 +56,6 @@
 // QT INCLUDES
 //=============================================================================================================
 
-#include <QSharedPointer>
 #include <QMutex>
 
 //=============================================================================================================
@@ -97,9 +99,6 @@ class Network;
 class CONNECTIVITYSHARED_EXPORT PhaseLagIndex : public AbstractMetric
 {
 public:
-    typedef QSharedPointer<PhaseLagIndex> SPtr;            /**< Shared pointer type for PhaseLagIndex. */
-    typedef QSharedPointer<const PhaseLagIndex> ConstSPtr; /**< Const shared pointer type for PhaseLagIndex. */
-
     //=========================================================================================================
     /**
      * Constructs a PhaseLagIndex object.
@@ -131,13 +130,13 @@ protected:
      * @param[in] tapers                 The taper information.
      */
     static void compute(ConnectivitySettings::IntermediateTrialData& inputData,
-                        QVector<QPair<int, Eigen::MatrixXcd>>& vecPairCsdSum,
-                        QVector<QPair<int, Eigen::MatrixXd>>& vecPairCsdImagSignSum,
+                        std::vector<std::pair<int, Eigen::MatrixXcd>>& vecPairCsdSum,
+                        std::vector<std::pair<int, Eigen::MatrixXd>>& vecPairCsdImagSignSum,
                         QMutex& mutex,
                         int iNRows,
                         int iNFreqs,
                         int iNfft,
-                        const QPair<Eigen::MatrixXd, Eigen::VectorXd>& tapers);
+                        const std::pair<Eigen::MatrixXd, Eigen::VectorXd>& tapers);
 
     //=========================================================================================================
     /**

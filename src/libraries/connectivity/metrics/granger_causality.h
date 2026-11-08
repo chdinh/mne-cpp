@@ -50,7 +50,6 @@
 // QT INCLUDES
 //=============================================================================================================
 
-#include <QSharedPointer>
 
 //=============================================================================================================
 // EIGEN INCLUDES
@@ -97,9 +96,6 @@ class ConnectivitySettings;
 class CONNECTIVITYSHARED_EXPORT GrangerCausality : public AbstractMetric
 {
 public:
-    typedef QSharedPointer<GrangerCausality> SPtr;            /**< Shared pointer type for GrangerCausality. */
-    typedef QSharedPointer<const GrangerCausality> ConstSPtr; /**< Const shared pointer type for GrangerCausality. */
-
     //=========================================================================================================
     /**
      * Constructs a GrangerCausality object.

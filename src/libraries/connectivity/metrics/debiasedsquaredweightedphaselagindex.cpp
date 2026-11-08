@@ -18,6 +18,9 @@
 //=============================================================================================================
 
 #include "debiasedsquaredweightedphaselagindex.h"
+
+#include <vector>
+#include <utility>
 #include "../network/networknode.h"
 #include "../network/networkedge.h"
 #include "../network/network.h"
@@ -91,7 +94,7 @@ Network DebiasedSquaredWeightedPhaseLagIndex::calculate(ConnectivitySettings& co
     int iNfft = connectivitySettings.getFFTSize();
 
     // Generate tapers
-    QPair<MatrixXd, VectorXd> tapers = Spectral::generateTapers(iSignalLength, connectivitySettings.getWindowType().toStdString());
+    std::pair<MatrixXd, VectorXd> tapers = Spectral::generateTapers(iSignalLength, connectivitySettings.getWindowType());
 
     // Initialize
     int iNRows = connectivitySettings.at(0).matData.rows();
@@ -153,18 +156,18 @@ Network DebiasedSquaredWeightedPhaseLagIndex::calculate(ConnectivitySettings& co
 //=============================================================================================================
 
 void DebiasedSquaredWeightedPhaseLagIndex::compute(ConnectivitySettings::IntermediateTrialData& inputData,
-                                                   QVector<QPair<int, MatrixXcd>>& vecPairCsdSum,
-                                                   QVector<QPair<int, MatrixXd>>& vecPairCsdImagAbsSum,
-                                                   QVector<QPair<int, MatrixXd>>& vecPairCsdImagSqrdSum,
+                                                   std::vector<std::pair<int, MatrixXcd>>& vecPairCsdSum,
+                                                   std::vector<std::pair<int, MatrixXd>>& vecPairCsdImagAbsSum,
+                                                   std::vector<std::pair<int, MatrixXd>>& vecPairCsdImagSqrdSum,
                                                    QMutex& mutex,
                                                    int iNRows,
                                                    int iNFreqs,
                                                    int iNfft,
-                                                   const QPair<MatrixXd, VectorXd>& tapers)
+                                                   const std::pair<MatrixXd, VectorXd>& tapers)
 {
-    if (inputData.vecPairCsd.size() == iNRows &&
-        inputData.vecPairCsdImagSqrd.size() == iNRows &&
-        inputData.vecPairCsdImagAbs.size() == iNRows) {
+    if (std::ssize(inputData.vecPairCsd) == iNRows &&
+        std::ssize(inputData.vecPairCsdImagSqrd) == iNRows &&
+        std::ssize(inputData.vecPairCsdImagAbs) == iNRows) {
         //qDebug() << "DebiasedSquaredWeightedPhaseLagIndex::compute - vecPairCsd, vecPairCsdImagSqrd and vecPairCsdImagAbs were already computed for this trial.";
         return;
     }
@@ -173,7 +176,7 @@ void DebiasedSquaredWeightedPhaseLagIndex::compute(ConnectivitySettings::Interme
 
     // Calculate tapered spectra if not available already
     // This code was copied and changed modified Utils/Spectra since we do not want to call the function due to time loss.
-    if (inputData.vecTapSpectra.isEmpty()) {
+    if (inputData.vecTapSpectra.empty()) {
         RowVectorXd vecInputFFT, rowData;
         RowVectorXcd vecTmpFreq;
 
@@ -202,12 +205,12 @@ void DebiasedSquaredWeightedPhaseLagIndex::compute(ConnectivitySettings::Interme
                 matTapSpectrum.row(j) = vecTmpFreq * tapers.second(j);
             }
 
-            inputData.vecTapSpectra.append(matTapSpectrum);
+            inputData.vecTapSpectra.push_back(matTapSpectrum);
         }
     }
 
     // Compute CSD
-    if (inputData.vecPairCsd.isEmpty()) {
+    if (inputData.vecPairCsd.empty()) {
         MatrixXcd matCsd(iNRows, m_iNumberBinAmount);
 
         bool bNfftEven = false;
@@ -232,19 +235,19 @@ void DebiasedSquaredWeightedPhaseLagIndex::compute(ConnectivitySettings::Interme
                 }
             }
 
-            inputData.vecPairCsd.append(QPair<int, MatrixXcd>(i, matCsd));
-            inputData.vecPairCsdImagSqrd.append(QPair<int, MatrixXd>(i, matCsd.imag().array().square()));
-            inputData.vecPairCsdImagAbs.append(QPair<int, MatrixXd>(i, matCsd.imag().cwiseAbs()));
+            inputData.vecPairCsd.push_back(std::pair<int, MatrixXcd>(i, matCsd));
+            inputData.vecPairCsdImagSqrd.push_back(std::pair<int, MatrixXd>(i, matCsd.imag().array().square()));
+            inputData.vecPairCsdImagAbs.push_back(std::pair<int, MatrixXd>(i, matCsd.imag().cwiseAbs()));
         }
 
         mutex.lock();
 
-        if (vecPairCsdSum.isEmpty()) {
+        if (vecPairCsdSum.empty()) {
             vecPairCsdSum = inputData.vecPairCsd;
             vecPairCsdImagSqrdSum = inputData.vecPairCsdImagSqrd;
             vecPairCsdImagAbsSum = inputData.vecPairCsdImagAbs;
         } else {
-            for (int j = 0; j < vecPairCsdSum.size(); ++j) {
+            for (int j = 0; j < std::ssize(vecPairCsdSum); ++j) {
                 vecPairCsdSum[j].second += inputData.vecPairCsd.at(j).second;
                 vecPairCsdImagSqrdSum[j].second += inputData.vecPairCsdImagSqrd.at(j).second;
                 vecPairCsdImagAbsSum[j].second += inputData.vecPairCsdImagAbs.at(j).second;
@@ -253,17 +256,17 @@ void DebiasedSquaredWeightedPhaseLagIndex::compute(ConnectivitySettings::Interme
 
         mutex.unlock();
     } else {
-        if (inputData.vecPairCsdImagSqrd.isEmpty()) {
-            for (i = 0; i < inputData.vecPairCsd.size(); ++i) {
-                inputData.vecPairCsdImagSqrd.append(QPair<int, MatrixXd>(i, inputData.vecPairCsd.at(i).second.imag().array().square()));
+        if (inputData.vecPairCsdImagSqrd.empty()) {
+            for (i = 0; i < std::ssize(inputData.vecPairCsd); ++i) {
+                inputData.vecPairCsdImagSqrd.push_back(std::pair<int, MatrixXd>(i, inputData.vecPairCsd.at(i).second.imag().array().square()));
             }
 
             mutex.lock();
 
-            if (vecPairCsdImagSqrdSum.isEmpty()) {
+            if (vecPairCsdImagSqrdSum.empty()) {
                 vecPairCsdImagSqrdSum = inputData.vecPairCsdImagSqrd;
             } else {
-                for (int j = 0; j < vecPairCsdSum.size(); ++j) {
+                for (int j = 0; j < std::ssize(vecPairCsdSum); ++j) {
                     vecPairCsdImagSqrdSum[j].second += inputData.vecPairCsdImagSqrd.at(j).second;
                 }
             }
@@ -271,17 +274,17 @@ void DebiasedSquaredWeightedPhaseLagIndex::compute(ConnectivitySettings::Interme
             mutex.unlock();
         }
 
-        if (inputData.vecPairCsdImagAbs.isEmpty()) {
-            for (i = 0; i < inputData.vecPairCsd.size(); ++i) {
-                inputData.vecPairCsdImagAbs.append(QPair<int, MatrixXd>(i, inputData.vecPairCsd.at(i).second.imag().cwiseAbs()));
+        if (inputData.vecPairCsdImagAbs.empty()) {
+            for (i = 0; i < std::ssize(inputData.vecPairCsd); ++i) {
+                inputData.vecPairCsdImagAbs.push_back(std::pair<int, MatrixXd>(i, inputData.vecPairCsd.at(i).second.imag().cwiseAbs()));
             }
 
             mutex.lock();
 
-            if (vecPairCsdImagAbsSum.isEmpty()) {
+            if (vecPairCsdImagAbsSum.empty()) {
                 vecPairCsdImagAbsSum = inputData.vecPairCsdImagAbs;
             } else {
-                for (int j = 0; j < vecPairCsdSum.size(); ++j) {
+                for (int j = 0; j < std::ssize(vecPairCsdSum); ++j) {
                     vecPairCsdImagAbsSum[j].second += inputData.vecPairCsdImagAbs.at(j).second;
                 }
             }

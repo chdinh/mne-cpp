@@ -526,9 +526,9 @@ void NeuronalConnectivity::run()
 //=============================================================================================================
 
 void NeuronalConnectivity::onNewConnectivityResultAvailable(const std::vector<Network>& connectivityResults,
-                                                            const ConnectivitySettings& connectivitySettings)
+                                                            const std::shared_ptr<ConnectivitySettings>& connectivitySettings)
 {
-    m_connectivitySettings = connectivitySettings;
+    m_connectivitySettings = std::move(*connectivitySettings);
     m_connectivitySettings.setConnectivityMethods(m_sConnectivityMethods);
 
     for (int i = 0; i < std::ssize(connectivityResults); ++i) {
@@ -540,11 +540,11 @@ void NeuronalConnectivity::onNewConnectivityResultAvailable(const std::vector<Ne
 
 void NeuronalConnectivity::onMetricChanged(const QString& sMetric)
 {
-    if (m_sConnectivityMethods.contains(sMetric)) {
+    if (std::ranges::contains(m_sConnectivityMethods, sMetric.toStdString())) {
         return;
     }
 
-    m_sConnectivityMethods = QStringList() << sMetric;
+    m_sConnectivityMethods = {sMetric.toStdString()};
     m_connectivitySettings.setConnectivityMethods(m_sConnectivityMethods);
     if (m_pRtConnectivity && this->isRunning()) {
         m_pRtConnectivity->restart();
@@ -563,9 +563,9 @@ void NeuronalConnectivity::onNumberTrialsChanged(int iNumberTrials)
 
 void NeuronalConnectivity::onWindowTypeChanged(const QString& windowType)
 {
-    if (m_connectivitySettings.getWindowType() != windowType) {
+    if (m_connectivitySettings.getWindowType() != windowType.toStdString()) {
         m_connectivitySettings.clearIntermediateData();
-        m_connectivitySettings.setWindowType(windowType);
+        m_connectivitySettings.setWindowType(windowType.toStdString());
     }
 }
 

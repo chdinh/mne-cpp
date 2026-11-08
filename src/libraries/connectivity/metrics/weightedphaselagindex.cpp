@@ -18,6 +18,9 @@
 //=============================================================================================================
 
 #include "weightedphaselagindex.h"
+
+#include <vector>
+#include <utility>
 #include "../network/networknode.h"
 #include "../network/networkedge.h"
 #include "../network/network.h"
@@ -92,7 +95,7 @@ Network WeightedPhaseLagIndex::calculate(ConnectivitySettings& connectivitySetti
     int iNfft = connectivitySettings.getFFTSize();
 
     // Generate tapers
-    QPair<MatrixXd, VectorXd> tapers = Spectral::generateTapers(iSignalLength, connectivitySettings.getWindowType().toStdString());
+    std::pair<MatrixXd, VectorXd> tapers = Spectral::generateTapers(iSignalLength, connectivitySettings.getWindowType());
 
     // Initialize
     int iNRows = connectivitySettings.at(0).matData.rows();
@@ -153,20 +156,20 @@ Network WeightedPhaseLagIndex::calculate(ConnectivitySettings& connectivitySetti
 //=============================================================================================================
 
 void WeightedPhaseLagIndex::compute(ConnectivitySettings::IntermediateTrialData& inputData,
-                                    QVector<QPair<int, MatrixXcd>>& vecPairCsdSum,
-                                    QVector<QPair<int, MatrixXd>>& vecPairCsdImagAbsSum,
+                                    std::vector<std::pair<int, MatrixXcd>>& vecPairCsdSum,
+                                    std::vector<std::pair<int, MatrixXd>>& vecPairCsdImagAbsSum,
                                     QMutex& mutex,
                                     int iNRows,
                                     int iNFreqs,
                                     int iNfft,
-                                    const QPair<MatrixXd, VectorXd>& tapers)
+                                    const std::pair<MatrixXd, VectorXd>& tapers)
 {
     //    QElapsedTimer timer;
     //    qint64 iTime = 0;
     //    timer.start();
 
-    if (inputData.vecPairCsd.size() == iNRows &&
-        inputData.vecPairCsdImagAbs.size() == iNRows) {
+    if (std::ssize(inputData.vecPairCsd) == iNRows &&
+        std::ssize(inputData.vecPairCsdImagAbs) == iNRows) {
         //qDebug() << "WeightedPhaseLagIndex::compute - vecPairCsd and vecPairCsdImagAbs were already computed for this trial.";
         return;
     }
@@ -175,7 +178,7 @@ void WeightedPhaseLagIndex::compute(ConnectivitySettings::IntermediateTrialData&
 
     // Calculate tapered spectra if not available already
     // This code was copied and changed modified Utils/Spectra since we do not want to call the function due to time loss.
-    if (inputData.vecTapSpectra.size() != iNRows) {
+    if (std::ssize(inputData.vecTapSpectra) != iNRows) {
         inputData.vecTapSpectra.clear();
 
         RowVectorXd vecInputFFT, rowData;
@@ -206,7 +209,7 @@ void WeightedPhaseLagIndex::compute(ConnectivitySettings::IntermediateTrialData&
                 matTapSpectrum.row(j) = vecTmpFreq * tapers.second(j);
             }
 
-            inputData.vecTapSpectra.append(matTapSpectrum);
+            inputData.vecTapSpectra.push_back(matTapSpectrum);
         }
 
         //        iTime = timer.elapsed();
@@ -215,7 +218,7 @@ void WeightedPhaseLagIndex::compute(ConnectivitySettings::IntermediateTrialData&
     }
 
     // Compute CSD
-    if (inputData.vecPairCsd.isEmpty()) {
+    if (inputData.vecPairCsd.empty()) {
         double denomCSD = sqrt(tapers.second.cwiseAbs2().sum()) * sqrt(tapers.second.cwiseAbs2().sum()) / 2.0;
         bool bNfftEven = false;
         if (iNfft % 2 == 0) {
@@ -239,8 +242,8 @@ void WeightedPhaseLagIndex::compute(ConnectivitySettings::IntermediateTrialData&
                 }
             }
 
-            inputData.vecPairCsd.append(QPair<int, MatrixXcd>(i, matCsd));
-            inputData.vecPairCsdImagAbs.append(QPair<int, MatrixXd>(i, matCsd.imag().cwiseAbs()));
+            inputData.vecPairCsd.push_back(std::pair<int, MatrixXcd>(i, matCsd));
+            inputData.vecPairCsdImagAbs.push_back(std::pair<int, MatrixXd>(i, matCsd.imag().cwiseAbs()));
         }
 
         //        iTime = timer.elapsed();
@@ -249,11 +252,11 @@ void WeightedPhaseLagIndex::compute(ConnectivitySettings::IntermediateTrialData&
 
         mutex.lock();
 
-        if (vecPairCsdSum.isEmpty()) {
+        if (vecPairCsdSum.empty()) {
             vecPairCsdSum = inputData.vecPairCsd;
             vecPairCsdImagAbsSum = inputData.vecPairCsdImagAbs;
         } else {
-            for (int j = 0; j < vecPairCsdSum.size(); ++j) {
+            for (int j = 0; j < std::ssize(vecPairCsdSum); ++j) {
                 vecPairCsdSum[j].second += inputData.vecPairCsd.at(j).second;
                 vecPairCsdImagAbsSum[j].second += inputData.vecPairCsdImagAbs.at(j).second;
             }
@@ -265,18 +268,18 @@ void WeightedPhaseLagIndex::compute(ConnectivitySettings::IntermediateTrialData&
         //        qWarning() << "WeightedPhaseLagIndex::compute timer - Add CSD to sum:" << iTime;
         //        timer.restart();
     } else {
-        if (inputData.vecPairCsdImagAbs.isEmpty()) {
+        if (inputData.vecPairCsdImagAbs.empty()) {
             inputData.vecPairCsdImagAbs.clear();
-            for (i = 0; i < inputData.vecPairCsd.size(); ++i) {
-                inputData.vecPairCsdImagAbs.append(QPair<int, MatrixXd>(i, inputData.vecPairCsd.at(i).second.imag().cwiseAbs()));
+            for (i = 0; i < std::ssize(inputData.vecPairCsd); ++i) {
+                inputData.vecPairCsdImagAbs.push_back(std::pair<int, MatrixXd>(i, inputData.vecPairCsd.at(i).second.imag().cwiseAbs()));
             }
 
             mutex.lock();
 
-            if (vecPairCsdImagAbsSum.isEmpty()) {
+            if (vecPairCsdImagAbsSum.empty()) {
                 vecPairCsdImagAbsSum = inputData.vecPairCsdImagAbs;
             } else {
-                for (int j = 0; j < vecPairCsdImagAbsSum.size(); ++j) {
+                for (int j = 0; j < std::ssize(vecPairCsdImagAbsSum); ++j) {
                     vecPairCsdImagAbsSum[j].second += inputData.vecPairCsdImagAbs.at(j).second;
                 }
             }
@@ -303,7 +306,7 @@ void WeightedPhaseLagIndex::computeWPLI(ConnectivitySettings& connectivitySettin
     MatrixXd matWeight;
     int j;
 
-    for (int i = 0; i < connectivitySettings.getIntermediateSumData().vecPairCsdSum.size(); ++i) {
+    for (int i = 0; i < std::ssize(connectivitySettings.getIntermediateSumData().vecPairCsdSum); ++i) {
         matDenom = connectivitySettings.getIntermediateSumData().vecPairCsdImagAbsSum.at(i).second;
         matDenom = (matDenom.array() == 0.).select(INFINITY, matDenom);
 

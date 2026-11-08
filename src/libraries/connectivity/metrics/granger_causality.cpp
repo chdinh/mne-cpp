@@ -15,6 +15,8 @@
 //=============================================================================================================
 
 #include "granger_causality.h"
+
+#include <vector>
 #include "mvar_model.h"
 #include "../network/networknode.h"
 #include "../network/networkedge.h"
@@ -89,8 +91,8 @@ Network GrangerCausality::calculate(ConnectivitySettings& connectivitySettings)
 
     // Compute transfer function and spectral matrix at normalized frequencies
     VectorXd vecFreqs = VectorXd::LinSpaced(iNFreqs, 0.0, 0.5);
-    QVector<MatrixXcd> vecH = model.transferFunction(vecFreqs);
-    QVector<MatrixXcd> vecS = model.spectralMatrix(vecFreqs);
+    std::vector<MatrixXcd> vecH = model.transferFunction(vecFreqs);
+    std::vector<MatrixXcd> vecS = model.spectralMatrix(vecFreqs);
     MatrixXd matSigma = model.noiseCov();
 
     // Compute spectral Granger causality for each directed pair

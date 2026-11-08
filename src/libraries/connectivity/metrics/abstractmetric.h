@@ -40,8 +40,6 @@
 // QT INCLUDES
 //=============================================================================================================
 
-#include <QSharedPointer>
-#include <QVector>
 
 //=============================================================================================================
 // EIGEN INCLUDES
@@ -85,9 +83,6 @@ class Network;
 class CONNECTIVITYSHARED_EXPORT AbstractMetric
 {
 public:
-    typedef QSharedPointer<AbstractMetric> SPtr;            /**< Shared pointer type for AbstractMetric. */
-    typedef QSharedPointer<const AbstractMetric> ConstSPtr; /**< Const shared pointer type for AbstractMetric. */
-
     //=========================================================================================================
     /**
      * Constructs a AbstractMetric object.

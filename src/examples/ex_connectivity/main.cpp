@@ -354,7 +354,7 @@ int main(int argc, char* argv[])
     pConnectivitySettingsManager->epochs = data;
 
     //Do connectivity estimation and visualize results
-    pConnectivitySettingsManager->m_settings.setConnectivityMethods(QStringList() << sConnectivityMethod);
+    pConnectivitySettingsManager->m_settings.setConnectivityMethods({sConnectivityMethod.toStdString()});
     pConnectivitySettingsManager->m_settings.setSamplingFrequency(raw.info.sfreq);
     pConnectivitySettingsManager->m_settings.setWindowType("hanning");
 

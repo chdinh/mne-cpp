@@ -51,7 +51,6 @@
 // QT INCLUDES
 //=============================================================================================================
 
-#include <QSharedPointer>
 
 //=============================================================================================================
 // EIGEN INCLUDES
@@ -95,9 +94,6 @@ class Network;
 class CONNECTIVITYSHARED_EXPORT ImagCoherence : public AbstractMetric
 {
 public:
-    typedef QSharedPointer<ImagCoherence> SPtr;            /**< Shared pointer type for ImagCoherence. */
-    typedef QSharedPointer<const ImagCoherence> ConstSPtr; /**< Const shared pointer type for ImagCoherence. */
-
     //=========================================================================================================
     /**
      * Constructs a ImagCoherence object.

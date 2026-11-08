@@ -44,6 +44,9 @@
 
 #include "../connectivity_global.h"
 
+#include <vector>
+#include <utility>
+
 #include "abstractmetric.h"
 #include "../connectivitysettings.h"
 
@@ -51,7 +54,6 @@
 // QT INCLUDES
 //=============================================================================================================
 
-#include <QSharedPointer>
 #include <QMutex>
 
 //=============================================================================================================
@@ -96,9 +98,6 @@ class Network;
 class CONNECTIVITYSHARED_EXPORT DebiasedSquaredWeightedPhaseLagIndex : public AbstractMetric
 {
 public:
-    typedef QSharedPointer<DebiasedSquaredWeightedPhaseLagIndex> SPtr;            /**< Shared pointer type for DebiasedSquaredWeightedPhaseLagIndex. */
-    typedef QSharedPointer<const DebiasedSquaredWeightedPhaseLagIndex> ConstSPtr; /**< Const shared pointer type for DebiasedSquaredWeightedPhaseLagIndex. */
-
     //=========================================================================================================
     /**
      * Constructs a DebiasedSquaredWeightedPhaseLagIndex object.
@@ -131,14 +130,14 @@ protected:
      * @param[in] tapers                 The taper information.
      */
     static void compute(ConnectivitySettings::IntermediateTrialData& inputData,
-                        QVector<QPair<int, Eigen::MatrixXcd>>& vecPairCsdSum,
-                        QVector<QPair<int, Eigen::MatrixXd>>& vecPairCsdImagAbsSum,
-                        QVector<QPair<int, Eigen::MatrixXd>>& vecPairCsdImagSqrdSum,
+                        std::vector<std::pair<int, Eigen::MatrixXcd>>& vecPairCsdSum,
+                        std::vector<std::pair<int, Eigen::MatrixXd>>& vecPairCsdImagAbsSum,
+                        std::vector<std::pair<int, Eigen::MatrixXd>>& vecPairCsdImagSqrdSum,
                         QMutex& mutex,
                         int iNRows,
                         int iNFreqs,
                         int iNfft,
-                        const QPair<Eigen::MatrixXd, Eigen::VectorXd>& tapers);
+                        const std::pair<Eigen::MatrixXd, Eigen::VectorXd>& tapers);
 
     //=========================================================================================================
     /**

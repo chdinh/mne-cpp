@@ -24,6 +24,9 @@
 
 #include "connectivitysettings.h"
 
+#include <vector>
+#include <utility>
+
 #include <mne/mne_forward_solution.h>
 #include <fs/fs_surfaceset.h>
 #include <fiff/fiff_info.h>
@@ -55,11 +58,11 @@ namespace
 
 // Each pair of a trial is taken out of the matching running sum, as long as both have the same length
 template<typename T>
-void subtractPairs(QVector<QPair<int, T>>& sums, const QVector<QPair<int, T>>& trial, int rows)
+void subtractPairs(std::vector<std::pair<int, T>>& sums, const std::vector<std::pair<int, T>>& trial, int rows)
 {
     if (sums.size() != trial.size())
         return;
-    for (int i = 0; i < rows && i < sums.size(); ++i)
+    for (int i = 0; i < rows && i < std::ssize(sums); ++i)
         sums[i].second -= trial.at(i).second;
 }
 
@@ -109,7 +112,7 @@ void ConnectivitySettings::clearAllData()
 
 void ConnectivitySettings::clearIntermediateData()
 {
-    for (int i = 0; i < m_trialData.size(); ++i) {
+    for (int i = 0; i < std::ssize(m_trialData); ++i) {
         m_trialData[i].matPsd.resize(0, 0);
         m_trialData[i].vecPairCsd.clear();
         m_trialData[i].vecTapSpectra.clear();
@@ -129,10 +132,11 @@ void ConnectivitySettings::clearIntermediateData()
 
 //*******************************************************************************************************
 
-void ConnectivitySettings::append(const QList<MatrixXd>& matInputData)
+void ConnectivitySettings::append(std::span<const MatrixXd> matInputData)
 {
-    for (int i = 0; i < matInputData.size(); ++i) {
-        this->append(matInputData.at(i));
+    m_trialData.reserve(m_trialData.size() + matInputData.size());
+    for (const MatrixXd& trial : matInputData) {
+        append(trial);
     }
 }
 
@@ -143,14 +147,14 @@ void ConnectivitySettings::append(const MatrixXd& matInputData)
     ConnectivitySettings::IntermediateTrialData tempData;
     tempData.matData = matInputData;
 
-    m_trialData.append(tempData);
+    m_trialData.push_back(tempData);
 }
 
 //*******************************************************************************************************
 
 void ConnectivitySettings::append(const ConnectivitySettings::IntermediateTrialData& inputData)
 {
-    m_trialData.append(inputData);
+    m_trialData.push_back(inputData);
 }
 
 //*******************************************************************************************************
@@ -164,66 +168,66 @@ const ConnectivitySettings::IntermediateTrialData& ConnectivitySettings::at(int 
 
 int ConnectivitySettings::size() const
 {
-    return m_trialData.size();
+    return static_cast<int>(m_trialData.size());
 }
 
 //*******************************************************************************************************
 
 bool ConnectivitySettings::empty() const
 {
-    return m_trialData.isEmpty();
+    return m_trialData.empty();
 }
 
 //*******************************************************************************************************
 
 void ConnectivitySettings::removeFirst(int iAmount)
 {
-    if (m_trialData.isEmpty()) {
+    if (m_trialData.empty()) {
         qDebug() << "ConnectivitySettings::removeFirst - No elements to delete. Returning.";
         return;
     }
 
-    if (m_trialData.size() < iAmount) {
+    if (std::ssize(m_trialData) < iAmount) {
         qDebug() << "ConnectivitySettings::removeFirst - Not enough elements stored in list in order to delete them. Returning.";
         return;
     }
 
     for (int j = 0; j < iAmount; ++j) {
-        subtractFromSums(m_intermediateSumData, m_trialData.first());
-        m_trialData.removeFirst();
+        subtractFromSums(m_intermediateSumData, m_trialData[j]);
     }
+    m_trialData.erase(m_trialData.begin(), m_trialData.begin() + iAmount);
 }
 
 //*******************************************************************************************************
 
 void ConnectivitySettings::removeLast(int iAmount)
 {
-    if (m_trialData.isEmpty()) {
+    if (m_trialData.empty()) {
         qDebug() << "ConnectivitySettings::removeLast - No elements to delete. Returning.";
         return;
     }
 
-    if (m_trialData.size() < iAmount) {
+    if (std::ssize(m_trialData) < iAmount) {
         qDebug() << "ConnectivitySettings::removeLast - Not enough elements stored in list in order to delete them. Returning.";
         return;
     }
 
     for (int j = 0; j < iAmount; ++j) {
-        subtractFromSums(m_intermediateSumData, m_trialData.last());
-        m_trialData.removeLast();
+        subtractFromSums(m_intermediateSumData, m_trialData.back());
+        m_trialData.pop_back();
     }
 }
 
 //*******************************************************************************************************
 
-void ConnectivitySettings::setConnectivityMethods(const QStringList& sConnectivityMethods)
+void ConnectivitySettings::setConnectivityMethods(std::vector<std::string> sConnectivityMethods)
 {
-    m_sConnectivityMethods = sConnectivityMethods;
+    m_sConnectivityMethods = std::move(sConnectivityMethods);
 }
 
 //*******************************************************************************************************
 
-const QStringList& ConnectivitySettings::getConnectivityMethods() const
+const std::vector<std::string>& ConnectivitySettings::getConnectivityMethods() const
 {
     return m_sConnectivityMethods;
 }
@@ -275,17 +279,17 @@ int ConnectivitySettings::getFFTSize() const
 
 //*******************************************************************************************************
 
-void ConnectivitySettings::setWindowType(const QString& sWindowType)
+void ConnectivitySettings::setWindowType(std::string sWindowType)
 {
     // Clear all intermediate data since this will have an effect on the frequency calculation
     clearIntermediateData();
 
-    m_sWindowType = sWindowType;
+    m_sWindowType = std::move(sWindowType);
 }
 
 //*******************************************************************************************************
 
-const QString& ConnectivitySettings::getWindowType() const
+const std::string& ConnectivitySettings::getWindowType() const
 {
     return m_sWindowType;
 }
@@ -356,7 +360,7 @@ const MatrixX3f& ConnectivitySettings::getNodePositions() const
 
 //*******************************************************************************************************
 
-QList<ConnectivitySettings::IntermediateTrialData>& ConnectivitySettings::getTrialData()
+std::vector<ConnectivitySettings::IntermediateTrialData>& ConnectivitySettings::getTrialData()
 {
     return m_trialData;
 }
