@@ -398,6 +398,29 @@ ok &= expect(evoked.nave == 6 && near(evoked.data.topRows(306).norm(), 6.0801191
              "MNEEpochDataList::average matches mne Epochs.average");
 ````
 
+### [ex_clustered_inverse_mne_raw](../../examples/inv/ex_clustered_inverse_mne_raw.mdx)
+
+Average a raw recording and compute an MNE, dSPM or sLORETA estimate with a parcellation-clustered forward solution.
+
+````cpp title="src/examples/ex_clustered_inverse_mne_raw/main.cpp, line 215"
+    events = FiffEvents::read_fif(t_sEventName.toStdU16String()).value().events;
+    printf("Events read from %s\n", t_sEventName.toUtf8().constData());
+} else {
+    //
+    //   Binary file
+    //
+    p = t_fileRaw.fileName().indexOf(".fif");
+    if (p > 0) {
+        if (auto read = FiffEvents::read_fif(t_sEventName.toStdU16String())) {
+            events = std::move(read->events);
+        } else {
+            printf("Error while read events.\n");
+            return 0;
+        }
+````
+
+Also used in [ex_clustered_inverse_pwl_rap_music_raw](../../examples/inv/ex_clustered_inverse_pwl_rap_music_raw.mdx), [ex_clustered_inverse_rap_music_raw](../../examples/inv/ex_clustered_inverse_rap_music_raw.mdx), [ex_inverse_mne_raw](../../examples/inv/ex_inverse_mne_raw.mdx), [ex_averaging](../../examples/mne/ex_averaging.mdx), [ex_connectivity](../../examples/connectivity/ex_connectivity.mdx), [ex_connectivity_comparison](../../examples/connectivity/ex_connectivity_comparison.mdx), [ex_read_epochs](../../examples/mne/ex_read_epochs.mdx).
+
 ## Authors of this file
 
 - Christoph Dinh &lt;christoph.dinh@mne-cpp.org&gt;

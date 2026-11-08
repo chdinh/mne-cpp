@@ -231,17 +231,17 @@ ok &= expect(pca.desc == "PCA-v1" && !pca.active && pca.data->nrow == 1 && pca.d
 
 MNE library: BEM surfaces, surface projection, ICP, source spaces and epochs.
 
-````cpp title="src/examples/ex_mne_api/main.cpp, line 445"
-MNE::write_events_to_fif(eveName, events.events);
-MatrixXi eventsBack;
-MNE::read_events(eveName, rawFile.fileName().toStdString(), eventsBack);
+````cpp title="src/examples/ex_mne_api/main.cpp, line 442"
+const std::filesystem::path eveName = tmp.filePath("audvis-eve.fif").toStdU16String();
+const bool eventsWritten = events.write_fif(eveName).has_value();
+const MatrixXi eventsBack = FiffEvents::read(eveName).value().events;
 QList<FiffProj> projs = raw.info.projs; // stored inactive in the raw file
 FiffProj::activate_projs(projs);
 MatrixXd ssp; // like mne._fiff.proj.make_projector(info['projs'], ch_names, bads)
-const int nProj = MNE::make_projector(projs, raw.info.ch_names, ssp, raw.info.bads);
+const int nProj = FiffProj::make_projector(projs, raw.info.ch_names, ssp, raw.info.bads);
 // mne.find_events: 25 events, first at sample 13988 with code 2; make_projector: 4 vectors, trace 372 of 376
-ok &= expect(eventsBack.rows() == 25 && eventsBack(0, 0) == 13988 && eventsBack(0, 2) == 2 && nProj == 4 && near(ssp.trace(), 372.0, 1e-9) && near(ssp.norm(), 19.28730152198591, 1e-9),
-             "MNE: event file round trip and SSP projector like mne.find_events / make_projector");
+ok &= expect(eventsWritten && eventsBack.rows() == 25 && eventsBack(0, 0) == 13988 && eventsBack(0, 2) == 2 && nProj == 4 && near(ssp.trace(), 372.0, 1e-9) && near(ssp.norm(), 19.28730152198591, 1e-9),
+             "FiffEvents/FiffProj: event file round trip and SSP projector like mne.find_events / make_projector");
 ````
 
 ### [ex_dsp_rt](../../examples/dsp/ex_dsp_rt.mdx)

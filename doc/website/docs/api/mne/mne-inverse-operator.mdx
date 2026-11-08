@@ -118,7 +118,7 @@ Applies eigenfield/eigenlead decomposition, regularisation, whitening, projectio
   Assembled kernel matrix (nSources x nChannels).
 
 - **noise_norm** : *Eigen::SparseMatrix&lt; double &gt; &*
-  Diagonal noise-normalisation matrix (empty for [`MNE`](/docs/api/mne/mne-class)).
+  Diagonal noise-normalisation matrix (empty for MNE).
 
 - **vertno** : *QList&lt; Eigen::VectorXi &gt; &*
   Vertex numbers per hemisphere.
@@ -351,7 +351,7 @@ rtInvOp.stop();
 
 Average a raw recording and compute an MNE, dSPM or sLORETA estimate with a parcellation-clustered forward solution.
 
-````cpp title="src/examples/ex_clustered_inverse_mne_raw/main.cpp, line 448"
+````cpp title="src/examples/ex_clustered_inverse_mne_raw/main.cpp, line 409"
 MNEInverseOperator inverse_operator(info, t_clusteredFwd, noise_cov, 0.2f, 0.8f);
 ````
 

@@ -15,7 +15,7 @@ sidebar_position: 53
 class MNELIB::MNESurface
 ```
 
-Implements the [`MNE`](/docs/api/mne/mne-class) [FsSurface](/docs/api/fs/fs-surface) (Replaces typedef mneSurfaceOrVolume mneSurface; struct of MNE-C `mne_types.h`).
+Implements the MNE [FsSurface](/docs/api/fs/fs-surface) (Replaces typedef mneSurfaceOrVolume mneSurface; struct of MNE-C `mne_types.h`).
 
 Lightweight triangulated surface (vertices, triangles, normals).
 
@@ -50,13 +50,13 @@ classDiagram
 
 ### MNESurface()
 
-Constructs the [`MNE`](/docs/api/mne/mne-class) [FsSurface](/docs/api/fs/fs-surface).
+Constructs the MNE [FsSurface](/docs/api/fs/fs-surface).
 
 ---
 
 ### ~MNESurface()
 
-Destroys the [`MNE`](/docs/api/mne/mne-class) [FsSurface](/docs/api/fs/fs-surface).
+Destroys the MNE [FsSurface](/docs/api/fs/fs-surface).
 
 ---
 
@@ -396,7 +396,7 @@ Read a BEM surface from a FIFF file.
 
 MNE library: BEM surfaces, surface projection, ICP, source spaces and epochs.
 
-````cpp title="src/examples/ex_mne_api/main.cpp, line 458"
+````cpp title="src/examples/ex_mne_api/main.cpp, line 454"
 // Total solid angle seen from a point: 4 pi inside a closed surface, 0 outside
 auto skull = MNESurface::read_bem_surface2(bemPath, FIFFV_BEM_SURF_ID_BRAIN, true);
 skull->compute_surface_cm();

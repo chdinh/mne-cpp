@@ -15,7 +15,7 @@ sidebar_position: 52
 class MNELIB::MNESssData
 ```
 
-Implements [`MNE`](/docs/api/mne/mne-class) [SSS](/docs/api/dsp/sss) Data (Replaces *mneSssData,mneSssDataRec struct of MNE-C `mne_types.h`).
+Implements MNE [SSS](/docs/api/dsp/sss) Data (Replaces *mneSssData,mneSssDataRec struct of MNE-C `mne_types.h`).
 
 Container for Signal Space Separation ([SSS](/docs/api/dsp/sss)/Maxwell filtering) expansion coefficients and metadata.
 
@@ -29,7 +29,7 @@ auto sss = MNESssData::read(sssPath); // the SSS block written by mne.preprocess
 
 ### MNESssData()
 
-Constructs the [`MNE`](/docs/api/mne/mne-class) [SSS](/docs/api/dsp/sss) Data.
+Constructs the MNE [SSS](/docs/api/dsp/sss) Data.
 
 ---
 
@@ -42,13 +42,13 @@ Refactored: mne_dup_sss_data (mne_sss_data.c)
 **Parameters:**
 
 - **p_MneSssData** : *const MNESssData &*
-  [`MNE`](/docs/api/mne/mne-class) SSS Data which should be copied.
+  MNE SSS Data which should be copied.
 
 ---
 
 ### ~MNESssData()
 
-Destroys the [`MNE`](/docs/api/mne/mne-class) [SSS](/docs/api/dsp/sss) Data description.
+Destroys the MNE [SSS](/docs/api/dsp/sss) Data description.
 
 ---
 

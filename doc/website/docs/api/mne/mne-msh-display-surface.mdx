@@ -17,7 +17,7 @@ class MNELIB::MNEMshDisplaySurface
 
 Replaces *mshDisplaySurface, mshDisplaySurfaceRec struct (analyze_types.c).
 
-The [`MNE`](/docs/api/mne/mne-class) Msh Display [FsSurface](/docs/api/fs/fs-surface) class holds information about a surface to be rendered.
+The MNE Msh Display [FsSurface](/docs/api/fs/fs-surface) class holds information about a surface to be rendered.
 
 ```cpp title="src/examples/ex_mne_api/main.cpp"
 // Total solid angle seen from a point: 4 pi inside a closed surface, 0 outside
@@ -231,7 +231,7 @@ Allocate and fill per-vertex color arrays using positive/negative curvature colo
 
 MNE library: BEM surfaces, surface projection, ICP, source spaces and epochs.
 
-````cpp title="src/examples/ex_mne_api/main.cpp, line 464"
+````cpp title="src/examples/ex_mne_api/main.cpp, line 460"
 // The same surface as an MNE-C viewer display surface
 MNEMshDisplaySurfaceSet display;
 display.add_bem_surface(bemPath, FIFFV_BEM_SURF_ID_BRAIN, "inner skull", 1, 1); // checks closure

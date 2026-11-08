@@ -252,6 +252,31 @@ Ported from save.c (MNE-C).
 
 ---
 
+### activate_projections()
+
+Activates the SSP projectors of the measurement info and builds the operator `read()` applies, as mne.io.Raw.apply_proj prepares it.
+
+**Returns:**
+
+- *int* — The rank of the operator; 0 when there are no projectors or none applies to these channels.
+
+---
+
+### apply_gradient_compensation(grade)
+
+Sets up the CTF/4D compensator that `read()` applies to bring the data to another gradient compensation grade, as mne.io.Raw.apply_gradient_compensation does.
+
+**Parameters:**
+
+- **grade** : *int*
+  The compensation grade wanted (0 for none).
+
+**Returns:**
+
+- *[Expected](/docs/api/utils/expected)&lt; void &gt;* — Nothing, or why the compensator cannot be made (Format).
+
+---
+
 ## Static Methods
 
 ### read(path, allow_maxshield)

@@ -81,7 +81,6 @@ const apiSidebar: SidebarsConfig['apiSidebar'] = [
         'api/mne/mne-bem',
         'api/mne/mne-icp',
         'api/mne/filter-thread-arg',
-        'api/mne/mne-class',
         'api/mne/mne-bem-surface',
         'api/mne/mnectf-comp-data',
         'api/mne/mnectf-comp-data-set',

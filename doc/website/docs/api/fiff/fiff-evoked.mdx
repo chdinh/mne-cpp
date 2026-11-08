@@ -296,7 +296,7 @@ void saveButterfly(const FiffEvoked& evoked, int kind, int unit, double scale, c
 
 Average a raw recording and localize dipole pairs with Powell RAP-MUSIC on a parcellation-clustered forward solution.
 
-````cpp title="src/examples/ex_clustered_inverse_pwl_rap_music_raw/main.cpp, line 415"
+````cpp title="src/examples/ex_clustered_inverse_pwl_rap_music_raw/main.cpp, line 378"
 FiffEvoked evoked = data.average(raw.info, tmin * raw.info.sfreq, floor(tmax * raw.info.sfreq + 0.5), vecSel);
 ````
 
@@ -304,7 +304,7 @@ FiffEvoked evoked = data.average(raw.info, tmin * raw.info.sfreq, floor(tmax * r
 
 Average a raw recording and localize dipole pairs with RAP-MUSIC on a parcellation-clustered forward solution.
 
-````cpp title="src/examples/ex_clustered_inverse_rap_music_raw/main.cpp, line 410"
+````cpp title="src/examples/ex_clustered_inverse_rap_music_raw/main.cpp, line 373"
 FiffEvoked evoked = data.average(raw.info, tmin * raw.info.sfreq, floor(tmax * raw.info.sfreq + 0.5), vecSel);
 ````
 

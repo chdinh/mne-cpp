@@ -17,7 +17,7 @@ class FWDLIB::FwdFieldMap
 
 Computes the per-vertex sensor-to-surface mapping matrix used to render a continuous scalp/cortex field that exactly reproduces the recorded MEG/EEG values.
 
-Uses Legendre-series lead-field dot products evaluated on a sphere fitted to the head together with an SVD-based pseudo-inverse with eigenvalue truncation — the classic [MNE](/docs/api/mne/mne-class) field-interpolation recipe.
+Uses Legendre-series lead-field dot products evaluated on a sphere fitted to the head together with an SVD-based pseudo-inverse with eigenvalue truncation — the classic MNE field-interpolation recipe.
 
 Ported from MNE-Python (BSD-3-Clause): `_do_self_dots`, `_do_surface_dots`, `_fast_sphere_dot_r0` (`_lead_dots.py`); `_compute_mapping_matrix`, `_pinv_trunc` (`_field_interpolation.py`).
 

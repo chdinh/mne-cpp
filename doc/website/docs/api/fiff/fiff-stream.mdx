@@ -394,9 +394,9 @@ Writes a FIFFB_DEVICE block; nothing for an empty `device`.
 
 Attach environment metadata (working directory, command line) to this stream.
 
-Formerly mne_attach_env (SVN [MNE](/docs/api/mne/mne-class)).
+Formerly mne_attach_env (SVN MNE).
 
-The stream must already be opened for update (via open_update). Finds the first known top-level block ([MNE](/docs/api/mne/mne-class), MEAS, MRI, or BEM) and inserts a FIFFB_MNE_ENV block with working directory and command-line string.
+The stream must already be opened for update (via open_update). Finds the first known top-level block (MNE, MEAS, MRI, or BEM) and inserts a FIFFB_MNE_ENV block with working directory and command-line string.
 
 **Parameters:**
 
@@ -644,7 +644,7 @@ Writes one tag; its payload is taken in host byte order, as `read_tag()` returns
 
 ### write_ch_info(ch)
 
-Writes a channel information record to a fif file The type, cal, unit, and pos members are explained in Table 9.5 of the [MNE](/docs/api/mne/mne-class) manual.
+Writes a channel information record to a fif file The type, cal, unit, and pos members are explained in Table 9.5 of the MNE manual.
 
 **Parameters:**
 

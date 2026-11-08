@@ -46,7 +46,7 @@ Copy constructor.
 **Parameters:**
 
 - **p_MNEEpochData** : *const MNEEpochData &*
-  [`MNE`](/docs/api/mne/mne-class) epoch data.
+  MNE epoch data.
 
 ---
 
@@ -69,7 +69,7 @@ Every member has value semantics, so the compiler-generated member-wise assignme
 
 ### ~MNEEpochData()
 
-Destroys the [`MNE`](/docs/api/mne/mne-class) epoch data.
+Destroys the MNE epoch data.
 
 ---
 
@@ -123,7 +123,7 @@ Returns whether this epoch should be excluded from averaging.
 
 Average a raw recording and compute an MNE, dSPM or sLORETA estimate with a parcellation-clustered forward solution.
 
-````cpp title="src/examples/ex_clustered_inverse_mne_raw/main.cpp, line 336"
+````cpp title="src/examples/ex_clustered_inverse_mne_raw/main.cpp, line 297"
 MNEEpochData* epoch = NULL;
 ````
 
@@ -131,7 +131,7 @@ MNEEpochData* epoch = NULL;
 
 Average a raw recording and localize dipole pairs with Powell RAP-MUSIC on a parcellation-clustered forward solution.
 
-````cpp title="src/examples/ex_clustered_inverse_pwl_rap_music_raw/main.cpp, line 345"
+````cpp title="src/examples/ex_clustered_inverse_pwl_rap_music_raw/main.cpp, line 308"
 MNEEpochData* epoch = NULL;
 ````
 
@@ -139,7 +139,7 @@ MNEEpochData* epoch = NULL;
 
 Average a raw recording and localize dipole pairs with RAP-MUSIC on a parcellation-clustered forward solution.
 
-````cpp title="src/examples/ex_clustered_inverse_rap_music_raw/main.cpp, line 342"
+````cpp title="src/examples/ex_clustered_inverse_rap_music_raw/main.cpp, line 305"
 MNEEpochData* epoch = NULL;
 ````
 

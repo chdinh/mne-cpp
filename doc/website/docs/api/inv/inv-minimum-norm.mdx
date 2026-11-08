@@ -116,7 +116,7 @@ Computes a L2-norm inverse solution Actual code using these principles might be 
 
 ### mneData(p_fiffEvoked, snr)
 
-Sets the inverse up for the evoked data and computes their [MNE](/docs/api/mne/mne-class) data: eigenfield projections, SNR and lambda2 per time point and the predicted data (MNE-C `mne_analyze`; see `MNELIB::MNEMneData::compute`).
+Sets the inverse up for the evoked data and computes their MNE data: eigenfield projections, SNR and lambda2 per time point and the predicted data (MNE-C `mne_analyze`; see `MNELIB::MNEMneData::compute`).
 
 **Parameters:**
 
@@ -178,7 +178,7 @@ Get the prepared inverse operator.
 
 ### setMethod(method)
 
-Set minimum norm algorithm method ("[MNE](/docs/api/mne/mne-class)" | "dSPM" | "sLORETA" | "eLORETA").
+Set minimum norm algorithm method ("MNE" | "dSPM" | "sLORETA" | "eLORETA").
 
 **Parameters:**
 
@@ -189,7 +189,7 @@ Set minimum norm algorithm method ("[MNE](/docs/api/mne/mne-class)" | "dSPM" | "
 
 ### setMethod(dSPM, sLORETA, eLoreta)
 
-Set minimum norm algorithm method ("[MNE](/docs/api/mne/mne-class)" | "dSPM" | "sLORETA" | "eLORETA").
+Set minimum norm algorithm method ("MNE" | "dSPM" | "sLORETA" | "eLORETA").
 
 **Parameters:**
 
@@ -279,7 +279,7 @@ InvSourceEstimate sourceEstimate_meeg = minimumNorm_meeg.calculateInverse(evoked
 
 Sensor- or source-level functional connectivity of averaged MEG/EEG data with a selectable metric, shown as a 3D network.
 
-````cpp title="src/examples/ex_connectivity/main.cpp, line 314"
+````cpp title="src/examples/ex_connectivity/main.cpp, line 312"
 // Compute inverse solution
 InvMinimumNorm minimumNorm(inverse_operator, lambda2, method);
 minimumNorm.doInverseSetup(1, true);

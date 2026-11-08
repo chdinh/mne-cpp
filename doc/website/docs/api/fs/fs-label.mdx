@@ -19,7 +19,7 @@ sidebar_position: 3
 class FSLIB::FsLabel
 ```
 
-A FreeSurfer/[MNE](/docs/api/mne/mne-class) surface label: per-vertex indices, Tk-RAS positions and scalar values for one hemisphere.
+A FreeSurfer/MNE surface label: per-vertex indices, Tk-RAS positions and scalar values for one hemisphere.
 
 Wraps the parsed contents of a .label file or an in-memory label constructed programmatically (e.g. by thresholding a source estimate via `FsLabelUtils::stcToLabel`). Vertex indices reference the matching [`FsSurface`](/docs/api/fs/fs-surface) for the same subject and hemisphere; positions are the Tk-surface RAS coordinates copied from that surface; values are the per-vertex scalar payload (statistic, time, weight). Hemisphere is encoded with the FreeSurfer convention \{0 = lh, 1 = rh\}.
 
