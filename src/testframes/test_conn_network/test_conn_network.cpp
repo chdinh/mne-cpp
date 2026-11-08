@@ -15,8 +15,8 @@
 //=============================================================================================================
 
 #include <connectivity/network/network.h>
-#include <connectivity/network/networknode.h>
-#include <connectivity/network/networkedge.h>
+
+#include <stdexcept>
 
 //=============================================================================================================
 // QT INCLUDES
@@ -37,8 +37,9 @@
 using namespace CONNECTIVITYLIB;
 using namespace Eigen;
 
-using IntPair = QPair<int, int>;
-using FloatPair = QPair<float, float>;
+using IntPair = std::pair<int, int>;
+using DoublePair = std::pair<double, double>;
+using FloatPair = std::pair<float, float>;
 
 //=============================================================================================================
 // TEST CLASS
@@ -59,775 +60,409 @@ private:
      *   |         |
      *   2 --0.6-- 3
      */
-    Network buildDiamond()
+    static Network buildDiamond()
     {
         Network net("TestCorrelation", 0.0);
 
-        auto n0 = QSharedPointer<NetworkNode>::create(0, RowVectorXf::Zero(3));
-        auto n1 = QSharedPointer<NetworkNode>::create(1, (RowVectorXf(3) << 1, 0, 0).finished());
-        auto n2 = QSharedPointer<NetworkNode>::create(2, (RowVectorXf(3) << 0, 1, 0).finished());
-        auto n3 = QSharedPointer<NetworkNode>::create(3, (RowVectorXf(3) << 1, 1, 0).finished());
+        net.add_node(Vector3f(0, 0, 0));
+        net.add_node(Vector3f(1, 0, 0));
+        net.add_node(Vector3f(0, 1, 0));
+        net.add_node(Vector3f(1, 1, 0));
 
-        net.append(n0);
-        net.append(n1);
-        net.append(n2);
-        net.append(n3);
+        net.add_edge(NetworkEdge(1, 3, MatrixXd::Constant(1, 1, 0.3)));
+        net.add_edge(NetworkEdge(0, 2, MatrixXd::Constant(1, 1, 0.5)));
+        net.add_edge(NetworkEdge(2, 3, MatrixXd::Constant(1, 1, 0.6)));
+        net.add_edge(NetworkEdge(0, 1, MatrixXd::Constant(1, 1, 0.8)));
 
-        MatrixXd w08(1, 1);
-        w08(0, 0) = 0.8;
-        MatrixXd w05(1, 1);
-        w05(0, 0) = 0.5;
-        MatrixXd w03(1, 1);
-        w03(0, 0) = 0.3;
-        MatrixXd w06(1, 1);
-        w06(0, 0) = 0.6;
+        return net;
+    }
 
-        auto e13 = QSharedPointer<NetworkEdge>::create(1, 3, w03);
-        auto e02 = QSharedPointer<NetworkEdge>::create(0, 2, w05);
-        auto e23 = QSharedPointer<NetworkEdge>::create(2, 3, w06);
-        auto e01 = QSharedPointer<NetworkEdge>::create(0, 1, w08);
-
-        net.append(e13);
-        net.append(e02);
-        net.append(e23);
-        net.append(e01);
-
-        // Register edges on nodes so node-level degree/strength methods work
-        n0->append(e02);
-        n0->append(e01);
-        n1->append(e13);
-        n1->append(e01);
-        n2->append(e02);
-        n2->append(e23);
-        n3->append(e13);
-        n3->append(e23);
-
+    static Network twoNodes()
+    {
+        Network net("Test", 0.0);
+        net.add_node(Vector3f::Zero());
+        net.add_node(Vector3f::Zero());
         return net;
     }
 
 private slots:
 
     //=========================================================================================================
-    // NetworkNode tests
+    // NetworkNode
     //=========================================================================================================
 
-    void testNodeConstruction()
+    void testNode()
     {
-        RowVectorXf pos(3);
-        pos << 1.0f, 2.0f, 3.0f;
-        auto node = QSharedPointer<NetworkNode>::create(42, pos);
+        NetworkNode node(Vector3f(1.0f, 2.0f, 3.0f));
+        QCOMPARE(node.position()(0), 1.0f);
+        QCOMPARE(node.position()(2), 3.0f);
+        QVERIFY(node.edges().empty());
 
-        QCOMPARE(node->getId(), static_cast<qint16>(42));
-        QCOMPARE(node->getVert().size(), 3);
-        QCOMPARE(node->getVert()(0), 1.0f);
+        QVERIFY(!node.hub());
+        node.set_hub(true);
+        QVERIFY(node.hub());
+    }
+
+    void testNodeEdgeIndices()
+    {
+        const Network net = buildDiamond();
+        // Node 3 is the end of edge 0 (1->3) and edge 2 (2->3)
+        QCOMPARE(net.nodes()[3].edges(), std::vector<int>({0, 2}));
+        QCOMPARE(net.nodes()[0].edges(), std::vector<int>({1, 3}));
     }
 
     //=========================================================================================================
-    // NetworkEdge tests
+    // NetworkEdge
     //=========================================================================================================
 
     void testEdgeConstruction()
     {
-        MatrixXd w(1, 1);
-        w(0, 0) = 0.75;
-        auto edge = QSharedPointer<NetworkEdge>::create(0, 1, w, true);
+        NetworkEdge edge(0, 1, MatrixXd::Constant(1, 1, 0.75));
+        QCOMPARE(edge.source(), 0);
+        QCOMPARE(edge.target(), 1);
+        QVERIFY(edge.active());
+        QCOMPARE(edge.weight(), 0.75);
 
-        QCOMPARE(edge->getStartNodeID(), 0);
-        QCOMPARE(edge->getEndNodeID(), 1);
-        QVERIFY(edge->isActive());
+        edge.set_active(false);
+        QVERIFY(!edge.active());
+        edge.set_weight(0.99);
+        QCOMPARE(edge.weight(), 0.99);
     }
 
-    void testEdgeActiveToggle()
+    void testEdgeAveragesAllWeights()
     {
-        MatrixXd w(1, 1);
-        w(0, 0) = 0.5;
-        auto edge = QSharedPointer<NetworkEdge>::create(0, 1, w, true);
-
-        QVERIFY(edge->isActive());
-        edge->setActive(false);
-        QVERIFY(!edge->isActive());
+        const NetworkEdge edge(2, 5, (MatrixXd(1, 3) << 0.1, 0.5, 0.9).finished());
+        QVERIFY(qAbs(edge.weight() - 0.5) < 1e-12);
     }
 
-    void testEdgeWeight()
+    void testEdgeFrequencyBins()
     {
-        MatrixXd w(1, 3);
-        w << 0.1, 0.5, 0.9;
-        auto edge = QSharedPointer<NetworkEdge>::create(2, 5, w);
+        NetworkEdge edge(0, 1, (MatrixXd(4, 1) << 0.1, 0.2, 0.3, 0.4).finished());
 
-        // Average across all bins
-        double avg = edge->getWeight();
-        double expected = (0.1 + 0.5 + 0.9) / 3.0;
-        QVERIFY(qAbs(avg - expected) < 1e-10);
+        QCOMPARE(edge.frequency_bins(), IntPair(-1, -1));
+        QVERIFY(qAbs(edge.weight() - 0.25) < 1e-12);
+
+        edge.set_frequency_bins({0, 1});
+        QCOMPARE(edge.frequency_bins(), IntPair(0, 1));
+        QVERIFY(qAbs(edge.weight() - 0.15) < 1e-12);
+
+        // A window reaching past the last bin is clipped
+        edge.set_frequency_bins({2, 10});
+        QVERIFY(qAbs(edge.weight() - 0.35) < 1e-12);
+
+        // An invalid window keeps the previous weight
+        edge.set_frequency_bins({3, 1});
+        QVERIFY(qAbs(edge.weight() - 0.35) < 1e-12);
+    }
+
+    void testEdgeWeights()
+    {
+        const NetworkEdge edge(0, 1, (MatrixXd(2, 2) << 0.1, 0.2, 0.3, 0.4).finished());
+        QCOMPARE(edge.weights().rows(), Index(2));
+        QCOMPARE(edge.weights().cols(), Index(2));
+        QCOMPARE(edge.weights()(0, 0), 0.1);
+    }
+
+    void testEdgeZeroMatrix()
+    {
+        const NetworkEdge edge(0, 1, MatrixXd(0, 0));
+        QCOMPARE(edge.weights().size(), Index(1));
+        QCOMPARE(edge.weight(), 0.0);
     }
 
     //=========================================================================================================
-    // Network construction tests
+    // Network construction
     //=========================================================================================================
 
     void testEmptyNetwork()
     {
         Network net;
         QVERIFY(net.empty());
-        QCOMPARE(net.getConnectivityMethod(), QString("Unknown"));
+        QCOMPARE(net.method(), std::string("Unknown"));
+        QCOMPARE(net.weight_range(), DoublePair(0.0, 0.0));
+        QCOMPARE(net.degree_range(), IntPair(0, 0));
+
+        net.set_method("WPLI");
+        QCOMPARE(net.method(), std::string("WPLI"));
     }
 
     void testNetworkMethod()
     {
-        Network net("PLI", 0.5);
-        QCOMPARE(net.getConnectivityMethod(), QString("PLI"));
-        QCOMPARE(net.getThreshold(), 0.5);
+        const Network net("PLI", 0.5);
+        QCOMPARE(net.method(), std::string("PLI"));
+        QCOMPARE(net.threshold(), 0.5);
     }
 
-    void testAppendNodesAndEdges()
+    void testAddNodesAndEdges()
     {
-        Network net = buildDiamond();
+        const Network net = buildDiamond();
         QVERIFY(!net.empty());
-        QCOMPARE(net.getNodes().size(), 4);
-        QCOMPARE(net.getFullEdges().size(), 4);
+        QCOMPARE(net.nodes().size(), std::size_t(4));
+        QCOMPARE(net.edges().size(), std::size_t(4));
+        QCOMPARE(net.edge_count(), std::size_t(4));
+        QCOMPARE(net.edges()[0].source(), 1);
+        QCOMPARE(net.edges()[0].target(), 3);
+    }
+
+    void testAddEdgeRejectsSelfLoopsAndInvalidNodes()
+    {
+        Network net = twoNodes();
+        net.add_edge(NetworkEdge(1, 1, MatrixXd::Constant(1, 1, 0.9)));
+        QVERIFY(net.empty());
+
+        QVERIFY_THROWS_EXCEPTION(std::out_of_range, net.add_edge(NetworkEdge(0, 5, MatrixXd::Constant(1, 1, 0.7))));
+        QVERIFY_THROWS_EXCEPTION(std::out_of_range, net.add_edge(NetworkEdge(-1, 0, MatrixXd::Constant(1, 1, 0.7))));
+        QVERIFY(net.empty());
+        QVERIFY(net.nodes()[0].edges().empty());
+    }
+
+    void testAddEdgeAppliesThreshold()
+    {
+        Network net("Test", 0.5);
+        net.add_node(Vector3f::Zero());
+        net.add_node(Vector3f::Zero());
+        net.add_node(Vector3f::Zero());
+        net.add_edge(NetworkEdge(0, 1, MatrixXd::Constant(1, 1, 0.2)));
+        net.add_edge(NetworkEdge(1, 2, MatrixXd::Constant(1, 1, -0.7)));
+
+        QVERIFY(!net.edges()[0].active());
+        QVERIFY(net.edges()[1].active());
+        QCOMPARE(net.edge_count(EdgeSet::thresholded), std::size_t(1));
+    }
+
+    void testCopiesAreIndependent()
+    {
+        const Network original = buildDiamond();
+        Network copy = original;
+        copy.set_threshold(0.7);
+        copy.normalize();
+
+        QVERIFY(original.edges()[1].active());
+        QCOMPARE(original.edges()[3].weight(), 0.8);
+        QCOMPARE(copy.edges()[3].weight(), 1.0);
+        QVERIFY(!copy.edges()[1].active());
     }
 
     //=========================================================================================================
-    // Connectivity matrix tests
+    // Connectivity matrix
     //=========================================================================================================
 
-    void testFullConnectivityMatrix()
+    void testConnectivityMatrix()
     {
-        Network net = buildDiamond();
-        MatrixXd C = net.getFullConnectivityMatrix(true);
+        const Network net = buildDiamond();
+        const MatrixXd C = net.connectivity_matrix();
 
-        QCOMPARE(C.rows(), 4);
-        QCOMPARE(C.cols(), 4);
+        QCOMPARE(C.rows(), Index(4));
+        QCOMPARE(C.diagonal().cwiseAbs().sum(), 0.0);
+        QCOMPARE(C(0, 1), 0.8);
+        QCOMPARE(C(1, 0), 0.8);
 
-        // Diagonal should be zero
-        for (int i = 0; i < 4; ++i)
-            QCOMPARE(C(i, i), 0.0);
-
-        // Edge 0→1 has weight 0.8
-        QVERIFY(qAbs(C(0, 1) - 0.8) < 1e-10);
-
-        // Mirrored: C(1,0) should also be 0.8
-        QVERIFY(qAbs(C(1, 0) - 0.8) < 1e-10);
-    }
-
-    //=========================================================================================================
-    // Threshold tests
-    //=========================================================================================================
-
-    void testThresholding()
-    {
-        Network net = buildDiamond();
-        net.setThreshold(0.4);
-
-        // Edges with weight >= 0.4: 0.8, 0.5, 0.6 → 3 edges active
-        const auto& tEdges = net.getThresholdedEdges();
-        int activeCount = 0;
-        for (const auto& e : tEdges)
-            if (e->isActive())
-                ++activeCount;
-        QCOMPARE(activeCount, 3);
-    }
-
-    void testThresholdHighCutsAll()
-    {
-        Network net = buildDiamond();
-        net.setThreshold(0.9);
-
-        const auto& tEdges = net.getThresholdedEdges();
-        int activeCount = 0;
-        for (const auto& e : tEdges)
-            if (e->isActive())
-                ++activeCount;
-        QCOMPARE(activeCount, 0);
-    }
-
-    //=========================================================================================================
-    // Min/max tests
-    //=========================================================================================================
-
-    void testMinMaxWeights()
-    {
-        Network net = buildDiamond();
-        auto minmax = net.getMinMaxFullWeights();
-
-        QVERIFY(qAbs(minmax.first - 0.3) < 1e-10);
-        QVERIFY(qAbs(minmax.second - 0.8) < 1e-10);
-    }
-
-    //=========================================================================================================
-    // Frequency range tests
-    //=========================================================================================================
-
-    void testFrequencyRange()
-    {
-        Network net;
-        // All prerequisites must be set before setFrequencyRange will accept values
-        net.setSamplingFrequency(1000.0f);
-        net.setFFTSize(128);
-        net.setUsedFreqBins(64);
-        net.setFrequencyRange(8.0f, 13.0f);
-        auto range = net.getFrequencyRange();
-        QCOMPARE(range.first, 8.0f);
-        QCOMPARE(range.second, 13.0f);
-    }
-
-    //=========================================================================================================
-    // Sampling frequency tests
-    //=========================================================================================================
-
-    void testSamplingFrequency()
-    {
-        Network net;
-        net.setSamplingFrequency(1000.0f);
-        QCOMPARE(net.getSamplingFrequency(), 1000.0f);
-    }
-
-    //=========================================================================================================
-    // Normalization tests
-    //=========================================================================================================
-
-    void testNormalize()
-    {
-        Network net = buildDiamond();
-        net.normalize();
-
-        auto minmax = net.getMinMaxFullWeights();
-        // After normalization, max should be 1.0
-        QVERIFY(qAbs(minmax.second - 1.0) < 1e-10);
-        // Min should be 0.3/0.8
-        QVERIFY(qAbs(minmax.first - 0.3 / 0.8) < 1e-6);
-    }
-
-    //=========================================================================================================
-    // VisualizationInfo tests
-    //=========================================================================================================
-
-    void testVisualizationInfo()
-    {
-        Network net;
-        VisualizationInfo vi;
-        vi.sMethod = "Color";
-        vi.sColormap = "Hot";
-        net.setVisualizationInfo(vi);
-
-        auto result = net.getVisualizationInfo();
-        QCOMPARE(result.sMethod, QString("Color"));
-        QCOMPARE(result.sColormap, QString("Hot"));
-    }
-
-    //=========================================================================================================
-    // Node degree/strength tests (exercises networknode.cpp uncovered methods)
-    //=========================================================================================================
-
-    void testNodeFullDegree()
-    {
-        Network net = buildDiamond();
-        // Node 0 is connected to edges 0→2 and 0→1 = 2 edges
-        auto n0 = net.getNodeAt(0);
-        QCOMPARE(n0->getFullDegree(), static_cast<qint16>(2));
-    }
-
-    void testNodeThresholdedDegree()
-    {
-        Network net = buildDiamond();
-        net.setThreshold(0.4);
-        // Node 0: edges 0→2 (w=0.5, active) and 0→1 (w=0.8, active) → 2 thresholded
-        auto n0 = net.getNodeAt(0);
-        QCOMPARE(n0->getThresholdedDegree(), static_cast<qint16>(2));
-        // Node 3: edges 1→3 (w=0.3, inactive) and 2→3 (w=0.6, active) → 1 thresholded
-        auto n3 = net.getNodeAt(3);
-        QCOMPARE(n3->getThresholdedDegree(), static_cast<qint16>(1));
-    }
-
-    void testNodeFullIndegree()
-    {
-        Network net = buildDiamond();
-        // Node 1: edge 0→1 has endNodeID=1, so indegree=1
-        auto n1 = net.getNodeAt(1);
-        QCOMPARE(n1->getFullIndegree(), static_cast<qint16>(1));
-    }
-
-    void testNodeThresholdedIndegree()
-    {
-        Network net = buildDiamond();
-        net.setThreshold(0.4);
-        // Node 3: edge 1→3 (w=0.3, inactive), edge 2→3 (w=0.6, active)
-        auto n3 = net.getNodeAt(3);
-        QCOMPARE(n3->getThresholdedIndegree(), static_cast<qint16>(1));
-    }
-
-    void testNodeFullOutdegree()
-    {
-        Network net = buildDiamond();
-        // Node 0: edges 0→2 and 0→1 have startNodeID=0 → outdegree=2
-        auto n0 = net.getNodeAt(0);
-        QCOMPARE(n0->getFullOutdegree(), static_cast<qint16>(2));
-    }
-
-    void testNodeThresholdedOutdegree()
-    {
-        Network net = buildDiamond();
-        net.setThreshold(0.4);
-        // Node 1: edge 1→3 (w=0.3, inactive) → thresholded outdegree=0
-        auto n1 = net.getNodeAt(1);
-        QCOMPARE(n1->getThresholdedOutdegree(), static_cast<qint16>(0));
-    }
-
-    void testNodeFullStrength()
-    {
-        Network net = buildDiamond();
-        // Node 0: edges 0→2 (w=0.5) and 0→1 (w=0.8) → strength=1.3
-        auto n0 = net.getNodeAt(0);
-        QVERIFY(qAbs(n0->getFullStrength() - 1.3) < 1e-10);
-    }
-
-    void testNodeThresholdedStrength()
-    {
-        Network net = buildDiamond();
-        net.setThreshold(0.4);
-        // Node 0: both edges active (0.5 + 0.8 = 1.3)
-        auto n0 = net.getNodeAt(0);
-        QVERIFY(qAbs(n0->getThresholdedStrength() - 1.3) < 1e-10);
-    }
-
-    void testNodeFullInstrength()
-    {
-        Network net = buildDiamond();
-        // Node 1: only edge 0→1 (w=0.8) has endNodeID=1
-        auto n1 = net.getNodeAt(1);
-        QVERIFY(qAbs(n1->getFullInstrength() - 0.8) < 1e-10);
-    }
-
-    void testNodeThresholdedInstrength()
-    {
-        Network net = buildDiamond();
-        net.setThreshold(0.4);
-        // Node 3: edge 1→3 (w=0.3, inactive), edge 2→3 (w=0.6, active)
-        auto n3 = net.getNodeAt(3);
-        QVERIFY(qAbs(n3->getThresholdedInstrength() - 0.6) < 1e-10);
-    }
-
-    void testNodeFullOutstrength()
-    {
-        Network net = buildDiamond();
-        // Node 0: edges 0→2 (w=0.5) and 0→1 (w=0.8) have startNodeID=0
-        auto n0 = net.getNodeAt(0);
-        QVERIFY(qAbs(n0->getFullOutstrength() - 1.3) < 1e-10);
-    }
-
-    void testNodeThresholdedOutstrength()
-    {
-        Network net = buildDiamond();
-        net.setThreshold(0.4);
-        // Node 1: edge 1→3 (w=0.3, inactive) → thresholded outstrength=0.0
-        auto n1 = net.getNodeAt(1);
-        QVERIFY(qAbs(n1->getThresholdedOutstrength()) < 1e-10);
-    }
-
-    void testNodeHubStatus()
-    {
-        RowVectorXf pos = RowVectorXf::Zero(3);
-        auto node = QSharedPointer<NetworkNode>::create(0, pos);
-        QVERIFY(!node->getHubStatus());
-        node->setHubStatus(true);
-        QVERIFY(node->getHubStatus());
-    }
-
-    void testNodeAppendSelfLoop()
-    {
-        RowVectorXf pos = RowVectorXf::Zero(3);
-        auto node = QSharedPointer<NetworkNode>::create(5, pos);
-
-        // Self-loop edge (startID == endID) should be rejected by append
-        MatrixXd w(1, 1);
-        w(0, 0) = 1.0;
-        auto selfEdge = QSharedPointer<NetworkEdge>::create(5, 5, w);
-        node->append(selfEdge);
-        QCOMPARE(node->getFullDegree(), static_cast<qint16>(0));
-    }
-
-    void testNodeFullEdgesIn()
-    {
-        Network net = buildDiamond();
-        // Node 3 has incoming edges: 1→3, 2→3
-        auto n3 = net.getNodeAt(3);
-        auto inEdges = n3->getFullEdgesIn();
-        QCOMPARE(inEdges.size(), 2);
-    }
-
-    void testNodeFullEdgesOut()
-    {
-        Network net = buildDiamond();
-        // Node 0 has outgoing edges: 0→2, 0→1
-        auto n0 = net.getNodeAt(0);
-        auto outEdges = n0->getFullEdgesOut();
-        QCOMPARE(outEdges.size(), 2);
-    }
-
-    void testNodeThresholdedEdgesIn()
-    {
-        Network net = buildDiamond();
-        net.setThreshold(0.4);
-        // Node 3: edge 1→3 inactive, edge 2→3 active → 1 thresholded incoming
-        auto n3 = net.getNodeAt(3);
-        auto tInEdges = n3->getThresholdedEdgesIn();
-        QCOMPARE(tInEdges.size(), 1);
-    }
-
-    void testNodeThresholdedEdgesOut()
-    {
-        Network net = buildDiamond();
-        net.setThreshold(0.4);
-        // Node 0: both edges active (0.5 and 0.8 >= 0.4) → 2 thresholded outgoing
-        auto n0 = net.getNodeAt(0);
-        auto tOutEdges = n0->getThresholdedEdgesOut();
-        QCOMPARE(tOutEdges.size(), 2);
-    }
-
-    //=========================================================================================================
-    // Edge frequency bin tests (exercises networkedge.cpp uncovered methods)
-    //=========================================================================================================
-
-    void testEdgeFrequencyBins()
-    {
-        MatrixXd w(4, 1);
-        w << 0.1, 0.2, 0.3, 0.4;
-        auto edge = QSharedPointer<NetworkEdge>::create(0, 1, w);
-
-        // Default bins: (-1,-1) → average all
-        auto bins = edge->getFrequencyBins();
-        QCOMPARE(bins.first, -1);
-        QCOMPARE(bins.second, -1);
-        double expected = (0.1 + 0.2 + 0.3 + 0.4) / 4.0;
-        QVERIFY(qAbs(edge->getWeight() - expected) < 1e-10);
-
-        // Set frequency bins to average rows 1-2 (0.2, 0.3)
-        edge->setFrequencyBins(IntPair(1, 2));
-        auto bins2 = edge->getFrequencyBins();
-        QCOMPARE(bins2.first, 1);
-        QCOMPARE(bins2.second, 2);
-        double expected2 = (0.2 + 0.3) / 2.0;
-        QVERIFY(qAbs(edge->getWeight() - expected2) < 1e-10);
-    }
-
-    void testEdgeMatrixWeight()
-    {
-        MatrixXd w(2, 2);
-        w << 0.1, 0.2, 0.3, 0.4;
-        auto edge = QSharedPointer<NetworkEdge>::create(0, 1, w);
-
-        MatrixXd mw = edge->getMatrixWeight();
-        QCOMPARE(mw.rows(), static_cast<Eigen::Index>(2));
-        QCOMPARE(mw.cols(), static_cast<Eigen::Index>(2));
-        QVERIFY(qAbs(mw(0, 0) - 0.1) < 1e-10);
-    }
-
-    void testEdgeSetWeight()
-    {
-        MatrixXd w(1, 1);
-        w(0, 0) = 0.5;
-        auto edge = QSharedPointer<NetworkEdge>::create(0, 1, w);
-        edge->setWeight(0.99);
-        QVERIFY(qAbs(edge->getWeight() - 0.99) < 1e-10);
-    }
-
-    void testEdgeZeroMatrix()
-    {
-        // Empty matrix should be converted to 1x1 zero matrix
-        MatrixXd w(0, 0);
-        auto edge = QSharedPointer<NetworkEdge>::create(0, 1, w);
-        QCOMPARE(edge->getWeight(), 0.0);
-    }
-
-    //=========================================================================================================
-    // Network distribution/degree tests (exercises network.cpp uncovered methods)
-    //=========================================================================================================
-
-    void testFullDistribution()
-    {
-        Network net = buildDiamond();
-        qint16 dist = net.getFullDistribution();
-        // Each node's degree: n0=2, n1=2, n2=2, n3=2 → total=8
-        QCOMPARE(dist, static_cast<qint16>(8));
-    }
-
-    void testThresholdedDistribution()
-    {
-        Network net = buildDiamond();
-        net.setThreshold(0.4);
-        qint16 dist = net.getThresholdedDistribution();
-        // Active edges: 0→2 (0.5), 2→3 (0.6), 0→1 (0.8). Nodes involved:
-        // n0: 2 active, n1: 1 active, n2: 2 active, n3: 1 active → 6
-        QCOMPARE(dist, static_cast<qint16>(6));
+        const MatrixXd upper = net.connectivity_matrix(EdgeSet::full, false);
+        QCOMPARE(upper(1, 0), 0.0);
+        QCOMPARE(upper(0, 1), 0.8);
     }
 
     void testThresholdedConnectivityMatrix()
     {
         Network net = buildDiamond();
-        net.setThreshold(0.4);
-        MatrixXd C = net.getThresholdedConnectivityMatrix(true);
+        net.set_threshold(0.4);
 
-        QCOMPARE(C.rows(), 4);
-        QCOMPARE(C.cols(), 4);
-        // Edge 1→3 (w=0.3) should be inactive → 0
+        const MatrixXd C = net.connectivity_matrix(EdgeSet::thresholded);
         QCOMPARE(C(1, 3), 0.0);
-        // Edge 0→1 (w=0.8) should be active
-        QVERIFY(qAbs(C(0, 1) - 0.8) < 1e-10);
+        QCOMPARE(C(3, 1), 0.0);
+        QCOMPARE(C(0, 1), 0.8);
+
+        const MatrixXd upper = net.connectivity_matrix(EdgeSet::thresholded, false);
+        QCOMPARE(upper(1, 0), 0.0);
+        QCOMPARE(upper(0, 1), 0.8);
     }
 
-    void testThresholdedConnectivityMatrixNoMirror()
+    //=========================================================================================================
+    // Threshold
+    //=========================================================================================================
+
+    void testThresholding()
     {
         Network net = buildDiamond();
-        net.setThreshold(0.4);
-        MatrixXd C = net.getThresholdedConnectivityMatrix(false);
+        net.set_threshold(0.4);
+        QCOMPARE(net.threshold(), 0.4);
+        QCOMPARE(net.edge_count(EdgeSet::thresholded), std::size_t(3));
+        QVERIFY(!net.edges()[0].active());
 
-        // Without mirroring, lower triangle should be 0
-        QCOMPARE(C(1, 0), 0.0);
-        // Upper triangle edge 0→1 should have weight
-        QVERIFY(qAbs(C(0, 1) - 0.8) < 1e-10);
+        net.set_threshold(0.9);
+        QCOMPARE(net.edge_count(EdgeSet::thresholded), std::size_t(0));
     }
 
-    void testGetEdgeAt()
+    //=========================================================================================================
+    // Degree and strength
+    //=========================================================================================================
+
+    void testDegree()
     {
         Network net = buildDiamond();
-        auto edge = net.getEdgeAt(0);
-        QVERIFY(edge);
-        // First edge added was 1→3 with w=0.3
-        QCOMPARE(edge->getStartNodeID(), 1);
-        QCOMPARE(edge->getEndNodeID(), 3);
+        QCOMPARE(net.degree(0), 2);
+        QCOMPARE(net.degree(1, EdgeSet::full, Direction::in), 1);
+        QCOMPARE(net.degree(0, EdgeSet::full, Direction::out), 2);
+        QCOMPARE(net.degree(3, EdgeSet::full, Direction::in), 2);
+
+        net.set_threshold(0.4);
+        QCOMPARE(net.degree(0, EdgeSet::thresholded), 2);
+        QCOMPARE(net.degree(3, EdgeSet::thresholded), 1);
+        QCOMPARE(net.degree(3, EdgeSet::thresholded, Direction::in), 1);
+        QCOMPARE(net.degree(1, EdgeSet::thresholded, Direction::out), 0);
     }
 
-    void testGetNodeAt()
+    void testStrength()
     {
         Network net = buildDiamond();
-        auto node = net.getNodeAt(2);
-        QCOMPARE(node->getId(), static_cast<qint16>(2));
+        QVERIFY(qAbs(net.strength(0) - 1.3) < 1e-12);
+        QVERIFY(qAbs(net.strength(1, EdgeSet::full, Direction::in) - 0.8) < 1e-12);
+        QVERIFY(qAbs(net.strength(0, EdgeSet::full, Direction::out) - 1.3) < 1e-12);
+
+        net.set_threshold(0.4);
+        QVERIFY(qAbs(net.strength(0, EdgeSet::thresholded) - 1.3) < 1e-12);
+        QVERIFY(qAbs(net.strength(3, EdgeSet::thresholded, Direction::in) - 0.6) < 1e-12);
+        QCOMPARE(net.strength(1, EdgeSet::thresholded, Direction::out), 0.0);
     }
 
-    void testSetConnectivityMethod()
+    void testMixedDirections()
     {
-        Network net;
-        net.setConnectivityMethod("WPLI");
-        QCOMPARE(net.getConnectivityMethod(), QString("WPLI"));
-    }
-
-    void testMinMaxThresholdedWeights()
-    {
-        Network net = buildDiamond();
-        net.setThreshold(0.4);
-        auto mm = net.getMinMaxThresholdedWeights();
-        // setThreshold sets min = threshold, max = fullMax
-        QVERIFY(qAbs(mm.first - 0.4) < 1e-10);
-        QVERIFY(qAbs(mm.second - 0.8) < 1e-10);
-    }
-
-    void testMinMaxFullDegrees()
-    {
-        Network net = buildDiamond();
-        auto mm = net.getMinMaxFullDegrees();
-        // All nodes have degree 2
-        QCOMPARE(mm.first, 2);
-        QCOMPARE(mm.second, 2);
-    }
-
-    void testMinMaxThresholdedDegrees()
-    {
-        Network net = buildDiamond();
-        net.setThreshold(0.4);
-        auto mm = net.getMinMaxThresholdedDegrees();
-        // n0=2, n1=1, n2=2, n3=1 → min=1, max=2
-        QCOMPARE(mm.first, 1);
-        QCOMPARE(mm.second, 2);
-    }
-
-    void testMinMaxFullIndegrees()
-    {
-        Network net = buildDiamond();
-        auto mm = net.getMinMaxFullIndegrees();
-        // n0 indegree=0, n1=1, n2=1, n3=2 → min=0, max=2
-        QCOMPARE(mm.first, 0);
-        QCOMPARE(mm.second, 2);
-    }
-
-    void testMinMaxThresholdedIndegrees()
-    {
-        Network net = buildDiamond();
-        net.setThreshold(0.4);
-        auto mm = net.getMinMaxThresholdedIndegrees();
-        // n0=0, n1=1 (0→1 active), n2=1 (0→2 active), n3=1 (2→3 active) → min=0, max=1
-        QCOMPARE(mm.first, 0);
-        QCOMPARE(mm.second, 1);
-    }
-
-    void testMinMaxFullOutdegrees()
-    {
-        Network net = buildDiamond();
-        auto mm = net.getMinMaxFullOutdegrees();
-        // n0=2, n1=1, n2=1, n3=0 → min=0, max=2
-        QCOMPARE(mm.first, 0);
-        QCOMPARE(mm.second, 2);
-    }
-
-    void testMinMaxThresholdedOutdegrees()
-    {
-        Network net = buildDiamond();
-        net.setThreshold(0.4);
-        auto mm = net.getMinMaxThresholdedOutdegrees();
-        // n0=2, n1=0 (edge 1→3 inactive), n2=1, n3=0 → min=0, max=2
-        QCOMPARE(mm.first, 0);
-        QCOMPARE(mm.second, 2);
-    }
-
-    void testFFTSize()
-    {
-        Network net;
-        net.setFFTSize(256);
-        QCOMPARE(net.getFFTSize(), 256);
-    }
-
-    void testUsedFreqBins()
-    {
-        Network net;
-        net.setUsedFreqBins(64);
-        QCOMPARE(net.getUsedFreqBins(), 64);
-    }
-
-    void testFullConnectivityMatrixNoMirror()
-    {
-        Network net = buildDiamond();
-        MatrixXd C = net.getFullConnectivityMatrix(false);
-        // Without mirroring, lower triangle should be 0
-        QCOMPARE(C(1, 0), 0.0);
-        QVERIFY(qAbs(C(0, 1) - 0.8) < 1e-10);
-    }
-
-    void testMinMaxDegreesSingleNode()
-    {
-        Network net("Test", 0.0);
-        auto n0 = QSharedPointer<NetworkNode>::create(0, RowVectorXf::Zero(3));
-        net.append(n0);
-
-        const QList<QPair<QPair<int, int>, double>> spec = {{{0, 1}, 0.9}, {{0, 2}, 0.2}, {{3, 0}, 0.5}};
-        for (const auto& s : spec) {
-            auto e = QSharedPointer<NetworkEdge>::create(s.first.first, s.first.second, MatrixXd::Constant(1, 1, s.second));
-            net.append(e);
-            n0->append(e);
+        Network net("Test", 1.0);
+        for (int i = 0; i < 5; ++i) {
+            net.add_node(Vector3f::Zero());
         }
-        net.setThreshold(0.4);
+        net.add_edge(NetworkEdge(0, 1, MatrixXd::Constant(1, 1, 0.5)));
+        net.add_edge(NetworkEdge(0, 2, MatrixXd::Constant(1, 1, 0.25)));
+        net.add_edge(NetworkEdge(3, 0, MatrixXd::Constant(1, 1, 2.0)));
+        net.add_edge(NetworkEdge(4, 0, MatrixXd::Constant(1, 1, 1.5)));
+        net.add_edge(NetworkEdge(3, 4, MatrixXd::Constant(1, 1, 8.0)));
 
-        QCOMPARE(net.getMinMaxFullDegrees(), IntPair(3, 3));
-        QCOMPARE(net.getMinMaxThresholdedDegrees(), IntPair(2, 2));
-        QCOMPARE(net.getMinMaxFullIndegrees(), IntPair(1, 1));
-        QCOMPARE(net.getMinMaxThresholdedIndegrees(), IntPair(1, 1));
-        QCOMPARE(net.getMinMaxFullOutdegrees(), IntPair(2, 2));
-        QCOMPARE(net.getMinMaxThresholdedOutdegrees(), IntPair(1, 1));
+        QCOMPARE(net.degree(0), 4);
+        QCOMPARE(net.degree(0, EdgeSet::thresholded), 2);
+        QCOMPARE(net.degree(0, EdgeSet::full, Direction::in), 2);
+        QCOMPARE(net.degree(0, EdgeSet::thresholded, Direction::in), 2);
+        QCOMPARE(net.degree(0, EdgeSet::full, Direction::out), 2);
+        QCOMPARE(net.degree(0, EdgeSet::thresholded, Direction::out), 0);
+
+        QCOMPARE(net.strength(0), 4.25);
+        QCOMPARE(net.strength(0, EdgeSet::thresholded), 3.5);
+        QCOMPARE(net.strength(0, EdgeSet::full, Direction::in), 3.5);
+        QCOMPARE(net.strength(0, EdgeSet::full, Direction::out), 0.75);
     }
 
-    void testMinMaxWeightsDescendingInsertion()
+    void testTotalDegree()
     {
-        Network net("Test", 0.0);
-        for (double w : {0.8, 0.5, 0.3}) {
-            net.append(QSharedPointer<NetworkEdge>::create(0, 1, MatrixXd::Constant(1, 1, w)));
-        }
-        QCOMPARE(net.getMinMaxFullWeights().first, 0.3);
-        QCOMPARE(net.getMinMaxFullWeights().second, 0.8);
+        Network net = buildDiamond();
+        QCOMPARE(net.total_degree(), 8);
+        net.set_threshold(0.4);
+        QCOMPARE(net.total_degree(EdgeSet::thresholded), 6);
     }
 
-    void testFrequencyRangeGuardsAndRecompute()
+    void testDegreeRanges()
     {
-        Network net("Test", 0.0);
-        net.append(QSharedPointer<NetworkNode>::create(0, RowVectorXf::Zero(3)));
-        net.append(QSharedPointer<NetworkNode>::create(1, RowVectorXf::Zero(3)));
-        net.append(QSharedPointer<NetworkEdge>::create(0, 1, (MatrixXd(4, 1) << 0.125, 0.125, 0.875, 0.875).finished()));
-        net.append(QSharedPointer<NetworkEdge>::create(1, 0, (MatrixXd(4, 1) << 1.0, 1.0, -0.25, -0.25).finished()));
+        Network net = buildDiamond();
+        QCOMPARE(net.degree_range(), IntPair(2, 2));
+        QCOMPARE(net.degree_range(EdgeSet::full, Direction::in), IntPair(0, 2));
+        QCOMPARE(net.degree_range(EdgeSet::full, Direction::out), IntPair(0, 2));
+
+        net.set_threshold(0.4);
+        QCOMPARE(net.degree_range(EdgeSet::thresholded), IntPair(1, 2));
+        QCOMPARE(net.degree_range(EdgeSet::thresholded, Direction::in), IntPair(0, 1));
+        QCOMPARE(net.degree_range(EdgeSet::thresholded, Direction::out), IntPair(0, 2));
+    }
+
+    //=========================================================================================================
+    // Weight ranges, frequency range, normalization
+    //=========================================================================================================
+
+    void testWeightRanges()
+    {
+        Network net = buildDiamond();
+        QCOMPARE(net.weight_range(), DoublePair(0.3, 0.8));
+
+        net.set_threshold(0.4);
+        QCOMPARE(net.weight_range(EdgeSet::thresholded), DoublePair(0.4, 0.8));
+    }
+
+    void testWeightRangeUsesMagnitudes()
+    {
+        Network net = twoNodes();
+        net.add_edge(NetworkEdge(0, 1, MatrixXd::Constant(1, 1, -0.9)));
+        net.add_edge(NetworkEdge(1, 0, MatrixXd::Constant(1, 1, 0.2)));
+        QCOMPARE(net.weight_range(), DoublePair(0.2, 0.9));
+    }
+
+    void testFrequencyRange()
+    {
+        Network net = twoNodes();
+        net.add_edge(NetworkEdge(0, 1, (MatrixXd(4, 1) << 0.125, 0.125, 0.875, 0.875).finished()));
+        net.add_edge(NetworkEdge(1, 0, (MatrixXd(4, 1) << 1.0, 1.0, -0.25, -0.25).finished()));
 
         const FloatPair unset(0.0f, 0.0f);
-        net.setFrequencyRange(3.0f, 1.0f);
-        QCOMPARE(net.getFrequencyRange(), unset);
-        net.setFrequencyRange(1.0f, 3.0f);
-        QCOMPARE(net.getFrequencyRange(), unset);
+        net.set_frequency_range(3.0f, 1.0f);
+        QCOMPARE(net.frequency_range(), unset);
+        net.set_frequency_range(1.0f, 3.0f);
+        QCOMPARE(net.frequency_range(), unset);
 
-        net.setSamplingFrequency(8.0f);
-        net.setFFTSize(4);
-        net.setFrequencyRange(1.0f, 5.0f);
-        QCOMPARE(net.getFrequencyRange(), unset);
-        net.setFrequencyRange(1.0f, 3.0f);
-        QCOMPARE(net.getFrequencyRange(), unset);
+        net.set_sampling_frequency(8.0f);
+        QCOMPARE(net.sampling_frequency(), 8.0f);
+        net.set_fft_size(4);
+        QCOMPARE(net.fft_size(), 4);
+        net.set_frequency_range(1.0f, 5.0f);
+        QCOMPARE(net.frequency_range(), unset);
+        net.set_frequency_range(1.0f, 3.0f);
+        QCOMPARE(net.frequency_range(), unset);
 
         // Scale factor fft/(sfreq/2) = 1, so 2..3 Hz maps to bins 2..3.
-        net.setUsedFreqBins(4);
-        net.setFrequencyRange(2.0f, 3.0f);
-        QCOMPARE(net.getFrequencyRange(), FloatPair(2.0f, 3.0f));
-        QCOMPARE(net.getEdgeAt(0)->getWeight(), 0.875);
-        QCOMPARE(net.getEdgeAt(1)->getWeight(), -0.25);
-        QCOMPARE(net.getMinMaxFullWeights().first, 0.25);
-        QCOMPARE(net.getMinMaxFullWeights().second, 0.875);
+        net.set_used_freq_bins(4);
+        QCOMPARE(net.used_freq_bins(), 4);
+        net.set_frequency_range(2.0f, 3.0f);
+        QCOMPARE(net.frequency_range(), FloatPair(2.0f, 3.0f));
+        QCOMPARE(net.edges()[0].weight(), 0.875);
+        QCOMPARE(net.edges()[1].weight(), -0.25);
+        QCOMPARE(net.weight_range(), DoublePair(0.25, 0.875));
     }
 
-    void testNormalizeZeroMaxIsNoOp()
+    void testNormalize()
     {
-        Network net("Test", 0.0);
-        net.append(QSharedPointer<NetworkEdge>::create(0, 1, MatrixXd::Constant(1, 1, -0.5)));
+        Network net = buildDiamond();
+        net.set_threshold(0.4);
         net.normalize();
-        QCOMPARE(net.getEdgeAt(0)->getWeight(), -0.5);
-        QCOMPARE(net.getMinMaxFullWeights().second, 0.0);
+
+        QCOMPARE(net.weight_range().second, 1.0);
+        QVERIFY(qAbs(net.weight_range().first - 0.3 / 0.8) < 1e-12);
+        QVERIFY(qAbs(net.threshold() - 0.5) < 1e-12);
+        QCOMPARE(net.edge_count(EdgeSet::thresholded), std::size_t(3));
     }
 
-    void testOutOfRangeEdgesAndSelfLoops()
+    void testNormalizeNegativeWeights()
     {
-        Network net("Test", 0.0);
-        net.append(QSharedPointer<NetworkEdge>::create(0, 1, MatrixXd::Constant(1, 1, 0.5)));
-        QVERIFY(net.empty());
-
-        net.append(QSharedPointer<NetworkNode>::create(0, RowVectorXf::Zero(3)));
-        net.append(QSharedPointer<NetworkNode>::create(1, RowVectorXf::Zero(3)));
-        net.append(QSharedPointer<NetworkEdge>::create(1, 1, MatrixXd::Constant(1, 1, 0.9)));
-        net.append(QSharedPointer<NetworkEdge>::create(0, 5, MatrixXd::Constant(1, 1, 0.7)));
-        net.append(QSharedPointer<NetworkEdge>::create(5, 0, MatrixXd::Constant(1, 1, -0.6)));
-        QVERIFY(!net.empty());
-        QCOMPARE(net.getFullEdges().size(), 3);
-
-        MatrixXd full = net.getFullConnectivityMatrix(true);
-        QCOMPARE(full.rows(), 2);
-        QCOMPARE(full(0, 1), 0.5);
-        QCOMPARE(full(1, 0), 0.5);
-        QCOMPARE(full.sum(), 1.0);
-
-        net.setThreshold(0.55);
-        QCOMPARE(net.getThresholdedEdges().size(), 2);
-        QVERIFY(!net.getEdgeAt(0)->isActive());
-        QVERIFY(net.getEdgeAt(2)->isActive());
-        QCOMPARE(net.getThresholdedConnectivityMatrix(true).sum(), 0.0);
+        Network net = twoNodes();
+        net.add_edge(NetworkEdge(0, 1, MatrixXd::Constant(1, 1, -0.5)));
+        net.normalize();
+        QCOMPARE(net.edges()[0].weight(), -1.0);
     }
 
-    void testNodeMixedEdgeQueries()
+    void testNormalizeAllZeroIsNoOp()
     {
-        auto node = QSharedPointer<NetworkNode>::create(0, RowVectorXf::Zero(3));
-        node->append(QSharedPointer<NetworkEdge>::create(0, 1, MatrixXd::Constant(1, 1, 0.5), true));
-        node->append(QSharedPointer<NetworkEdge>::create(0, 2, MatrixXd::Constant(1, 1, 0.25), false));
-        node->append(QSharedPointer<NetworkEdge>::create(3, 0, MatrixXd::Constant(1, 1, 2.0), true));
-        node->append(QSharedPointer<NetworkEdge>::create(4, 0, MatrixXd::Constant(1, 1, 1.0), false));
-        node->append(QSharedPointer<NetworkEdge>::create(5, 6, MatrixXd::Constant(1, 1, 8.0), true));
+        Network net = twoNodes();
+        net.add_edge(NetworkEdge(0, 1, MatrixXd::Constant(1, 1, 0.0)));
+        net.normalize();
+        QCOMPARE(net.edges()[0].weight(), 0.0);
+    }
 
-        QCOMPARE(node->getFullEdges().size(), 5);
-        QCOMPARE(node->getThresholdedEdges().size(), 3);
-        QCOMPARE(node->getFullEdgesIn().size(), 2);
-        QCOMPARE(node->getThresholdedEdgesIn().size(), 1);
-        QCOMPARE(node->getFullEdgesOut().size(), 2);
-        QCOMPARE(node->getThresholdedEdgesOut().size(), 1);
+    //=========================================================================================================
+    // VisualizationInfo
+    //=========================================================================================================
 
-        QCOMPARE(node->getFullDegree(), qint16(5));
-        QCOMPARE(node->getThresholdedDegree(), qint16(3));
-        QCOMPARE(node->getFullIndegree(), qint16(2));
-        QCOMPARE(node->getThresholdedIndegree(), qint16(1));
-        QCOMPARE(node->getFullOutdegree(), qint16(2));
-        QCOMPARE(node->getThresholdedOutdegree(), qint16(1));
+    void testVisualizationInfo()
+    {
+        Network net;
+        QCOMPARE(net.visualization_info().coloring, VisualizationInfo::Coloring::colormap);
 
-        QCOMPARE(node->getFullStrength(), 11.75);
-        QCOMPARE(node->getThresholdedStrength(), 10.5);
-        QCOMPARE(node->getFullInstrength(), 3.0);
-        QCOMPARE(node->getThresholdedInstrength(), 2.0);
-        QCOMPARE(node->getFullOutstrength(), 0.75);
-        QCOMPARE(node->getThresholdedOutstrength(), 0.5);
+        net.set_visualization_info({.coloring = VisualizationInfo::Coloring::fixed, .colormap = "Hot"});
+        QCOMPARE(net.visualization_info().coloring, VisualizationInfo::Coloring::fixed);
+        QCOMPARE(net.visualization_info().colormap, std::string("Hot"));
     }
 };
 

@@ -508,7 +508,7 @@ void NeuronalConnectivity::run()
                 if (!network.empty()) {
                     //qDebug()<<"NeuronalConnectivity::run - Total time"<<m_timer.elapsed();
                     m_mutex.lock();
-                    network.setFrequencyRange(m_fFreqBandLow, m_fFreqBandHigh);
+                    network.set_frequency_range(m_fFreqBandLow, m_fFreqBandHigh);
                     m_mutex.unlock();
                     network.normalize();
 
@@ -591,7 +591,7 @@ void NeuronalConnectivity::onFrequencyBandChanged(float fFreqLow, float fFreqHig
 
     QMutexLocker locker(&m_mutex);
     if (!m_currentConnectivityResult.empty()) {
-        m_currentConnectivityResult.setFrequencyRange(m_fFreqBandLow, m_fFreqBandHigh);
+        m_currentConnectivityResult.set_frequency_range(m_fFreqBandLow, m_fFreqBandHigh);
         //m_currentConnectivityResult.normalize();
         m_pCircularBuffer->push(m_currentConnectivityResult);
     }

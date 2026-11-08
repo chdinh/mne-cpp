@@ -365,20 +365,15 @@ void Coherency::computePSDCSDAbs(QMutex& mutex,
     // Average. Note that the number of trials cancel each other out.
     MatrixXcd matCohy = pairInput.second.cwiseQuotient(matPSDtmp.cwiseSqrt());
 
-    QSharedPointer<NetworkEdge> pEdge;
     MatrixXd matWeight;
     int j;
     int i = pairInput.first;
 
     for (j = i; j < matCohy.rows(); ++j) {
         matWeight = matCohy.row(j).cwiseAbs().transpose();
-        pEdge = QSharedPointer<NetworkEdge>(new NetworkEdge(i, j, matWeight));
-
-        mutex.lock();
-        finalNetwork.getNodeAt(i)->append(pEdge);
-        finalNetwork.getNodeAt(j)->append(pEdge);
-        finalNetwork.append(pEdge);
-        mutex.unlock();
+        NetworkEdge edge(i, j, std::move(matWeight));
+        const QMutexLocker locker(&mutex);
+        finalNetwork.add_edge(std::move(edge));
     }
 }
 
@@ -398,19 +393,14 @@ void Coherency::computePSDCSDImag(QMutex& mutex,
 
     MatrixXcd matCohy = pairInput.second.cwiseQuotient(matPSDtmp.cwiseSqrt());
 
-    QSharedPointer<NetworkEdge> pEdge;
     MatrixXd matWeight;
     int j;
     int i = pairInput.first;
 
     for (j = i; j < matCohy.rows(); ++j) {
         matWeight = matCohy.row(j).imag().transpose();
-        pEdge = QSharedPointer<NetworkEdge>(new NetworkEdge(i, j, matWeight));
-
-        mutex.lock();
-        finalNetwork.getNodeAt(i)->append(pEdge);
-        finalNetwork.getNodeAt(j)->append(pEdge);
-        finalNetwork.append(pEdge);
-        mutex.unlock();
+        NetworkEdge edge(i, j, std::move(matWeight));
+        const QMutexLocker locker(&mutex);
+        finalNetwork.add_edge(std::move(edge));
     }
 }

@@ -21,7 +21,7 @@
     "example_eligible": 415,
     "example_exempt": 162,
     "eligible_backed_by_registry_example": 414,
-    "eligible_used_by_some_example": 357,
+    "eligible_used_by_some_example": 355,
     "examples_on_disk": 75,
     "examples_built": 75
   },
@@ -59,7 +59,7 @@
       "with_test": 6,
       "eligible": 19,
       "eligible_with_registry_example": 19,
-      "eligible_used_by_example": 19,
+      "eligible_used_by_example": 17,
       "with_snippet": 20
     },
     "decoding": {
@@ -3307,11 +3307,7 @@
       "test_resolves": false,
       "example": "ex_connectivity_metrics",
       "example_state": "built",
-      "including_examples": [
-        "ex_connectivity",
-        "ex_connectivity_metrics",
-        "ex_disp3d_scene"
-      ],
+      "including_examples": [],
       "snippets": [
         "ex_connectivity_metrics/main.cpp#network_build"
       ],
@@ -3332,11 +3328,7 @@
       "test_resolves": false,
       "example": "ex_connectivity_metrics",
       "example_state": "built",
-      "including_examples": [
-        "ex_connectivity",
-        "ex_connectivity_metrics",
-        "ex_disp3d_scene"
-      ],
+      "including_examples": [],
       "snippets": [
         "ex_connectivity_metrics/main.cpp#network_build"
       ],

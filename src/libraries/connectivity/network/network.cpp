@@ -10,7 +10,7 @@
  *           Christoph Dinh <christoph.dinh@mne-cpp.org>
  * @since    0.1.0
  * @date     August 2016
- * @brief    Implementation of @ref CONNECTIVITYLIB::Network - graph container for one connectivity result, including thresholding, distance-table computation and full / thresholded adjacency-matrix extraction.
+ * @brief    Implementation of @ref CONNECTIVITYLIB::Network - graph container for one connectivity result, including thresholding, frequency-band averaging and adjacency-matrix extraction.
  */
 
 //=============================================================================================================
@@ -19,23 +19,16 @@
 
 #include "network.h"
 
-#include "networkedge.h"
-#include "networknode.h"
-
-#include <math/spectral.h>
-
+#include <algorithm>
+#include <cmath>
 #include <limits>
+#include <stdexcept>
 
 //=============================================================================================================
 // QT INCLUDES
 //=============================================================================================================
 
 #include <QDebug>
-#include <QList>
-
-//=============================================================================================================
-// EIGEN INCLUDES
-//=============================================================================================================
 
 //=============================================================================================================
 // USED NAMESPACES
@@ -43,30 +36,19 @@
 
 using namespace CONNECTIVITYLIB;
 using namespace Eigen;
-using namespace UTILSLIB;
-
-//=============================================================================================================
-// DEFINE GLOBAL METHODS
-//=============================================================================================================
 
 //=============================================================================================================
 // DEFINE MEMBER METHODS
 //=============================================================================================================
 
-Network::Network(const QString& sConnectivityMethod,
-                 double dThreshold)
-: m_sConnectivityMethod(sConnectivityMethod)
-, m_minMaxFullWeights(QPair<double, double>(std::numeric_limits<double>::max(), 0.0))
-, m_minMaxThresholdedWeights(QPair<double, double>(std::numeric_limits<double>::max(), 0.0))
-, m_dThreshold(dThreshold)
-, m_fSFreq(0.0f)
-, m_iNumberFreqBins(0)
-, m_iFFTSize(128)
+Network::Network(std::string method, double threshold)
+: m_method(std::move(method))
+, m_weight_range(std::numeric_limits<double>::max(), 0.0)
+, m_threshold(threshold)
 {
     // Registered once for queued signal/slot connections, not on every construction
     static const bool registered = [] {
         qRegisterMetaType<CONNECTIVITYLIB::Network>("CONNECTIVITYLIB::Network");
-        qRegisterMetaType<CONNECTIVITYLIB::Network::SPtr>("CONNECTIVITYLIB::Network::SPtr");
         qRegisterMetaType<std::vector<CONNECTIVITYLIB::Network>>("std::vector<CONNECTIVITYLIB::Network>");
         return true;
     }();
@@ -75,448 +57,214 @@ Network::Network(const QString& sConnectivityMethod,
 
 //=============================================================================================================
 
-MatrixXd Network::getFullConnectivityMatrix(bool bGetMirroredVersion) const
+void Network::reserve(std::size_t nodes, std::size_t edges)
 {
-    MatrixXd matDist(m_lNodes.size(), m_lNodes.size());
-    matDist.setZero();
+    m_nodes.reserve(nodes);
+    m_edges.reserve(edges);
+}
 
-    for (int i = 0; i < m_lFullEdges.size(); ++i) {
-        int row = m_lFullEdges.at(i)->getStartNodeID();
-        int col = m_lFullEdges.at(i)->getEndNodeID();
+//=============================================================================================================
 
-        if (row < matDist.rows() && col < matDist.cols()) {
-            matDist(row, col) = m_lFullEdges.at(i)->getWeight();
+int Network::add_node(const Vector3f& position)
+{
+    m_nodes.emplace_back(position);
+    return static_cast<int>(m_nodes.size()) - 1;
+}
 
-            if (bGetMirroredVersion) {
-                matDist(col, row) = m_lFullEdges.at(i)->getWeight();
-            }
+//=============================================================================================================
+
+void Network::add_edge(NetworkEdge edge)
+{
+    if (edge.source() == edge.target()) {
+        return;
+    }
+    const auto n = static_cast<int>(m_nodes.size());
+    if (edge.source() < 0 || edge.source() >= n || edge.target() < 0 || edge.target() >= n) {
+        throw std::out_of_range("Network::add_edge - node index out of range");
+    }
+
+    const double magnitude = std::fabs(edge.weight());
+    m_weight_range.first = std::min(m_weight_range.first, magnitude);
+    m_weight_range.second = std::max(m_weight_range.second, magnitude);
+
+    const bool active = magnitude >= m_threshold;
+    edge.set_active(active);
+    m_active += active ? 1 : 0;
+
+    const int index = static_cast<int>(m_edges.size());
+    m_nodes[edge.source()].m_edges.push_back(index);
+    m_nodes[edge.target()].m_edges.push_back(index);
+    m_edges.push_back(std::move(edge));
+}
+
+//=============================================================================================================
+
+std::size_t Network::edge_count(EdgeSet set) const noexcept
+{
+    return set == EdgeSet::full ? m_edges.size() : m_active;
+}
+
+//=============================================================================================================
+
+MatrixXd Network::connectivity_matrix(EdgeSet set, bool mirrored) const
+{
+    const auto n = static_cast<Index>(m_nodes.size());
+    MatrixXd matrix = MatrixXd::Zero(n, n);
+
+    for (const NetworkEdge& edge : m_edges) {
+        if (set == EdgeSet::thresholded && !edge.active()) {
+            continue;
+        }
+        matrix(edge.source(), edge.target()) = edge.weight();
+        if (mirrored) {
+            matrix(edge.target(), edge.source()) = edge.weight();
         }
     }
 
-    //IOUtils::write_eigen_matrix(matDist,"eigen.txt");
-    return matDist;
+    return matrix;
 }
 
 //=============================================================================================================
 
-MatrixXd Network::getThresholdedConnectivityMatrix(bool bGetMirroredVersion) const
+bool Network::counts(const NetworkEdge& edge, int node, EdgeSet set, Direction direction) const noexcept
 {
-    MatrixXd matDist(m_lNodes.size(), m_lNodes.size());
-    matDist.setZero();
+    if (set == EdgeSet::thresholded && !edge.active()) {
+        return false;
+    }
+    switch (direction) {
+        case Direction::in:
+            return edge.target() == node;
+        case Direction::out:
+            return edge.source() == node;
+        case Direction::both:
+            break;
+    }
+    return true;
+}
 
-    for (int i = 0; i < m_lThresholdedEdges.size(); ++i) {
-        int row = m_lThresholdedEdges.at(i)->getStartNodeID();
-        int col = m_lThresholdedEdges.at(i)->getEndNodeID();
+//=============================================================================================================
 
-        if (row < matDist.rows() && col < matDist.cols()) {
-            matDist(row, col) = m_lThresholdedEdges.at(i)->getWeight();
+int Network::degree(int node, EdgeSet set, Direction direction) const
+{
+    const std::vector<int>& incident = m_nodes[node].m_edges;
+    if (set == EdgeSet::full && direction == Direction::both) {
+        return static_cast<int>(incident.size());
+    }
+    return static_cast<int>(std::ranges::count_if(incident, [&](int e) { return counts(m_edges[e], node, set, direction); }));
+}
 
-            if (bGetMirroredVersion) {
-                matDist(col, row) = m_lThresholdedEdges.at(i)->getWeight();
-            }
+//=============================================================================================================
+
+double Network::strength(int node, EdgeSet set, Direction direction) const
+{
+    double sum = 0.0;
+    for (int e : m_nodes[node].m_edges) {
+        if (counts(m_edges[e], node, set, direction)) {
+            sum += m_edges[e].weight();
         }
     }
-
-    //IOUtils::write_eigen_matrix(matDist,"eigen.txt");
-    return matDist;
+    return sum;
 }
 
 //=============================================================================================================
 
-const QList<NetworkEdge::SPtr>& Network::getFullEdges() const
+std::pair<int, int> Network::degree_range(EdgeSet set, Direction direction) const
 {
-    return m_lFullEdges;
-}
-
-//=============================================================================================================
-
-const QList<NetworkEdge::SPtr>& Network::getThresholdedEdges() const
-{
-    return m_lThresholdedEdges;
-}
-
-//=============================================================================================================
-
-const QList<NetworkNode::SPtr>& Network::getNodes() const
-{
-    return m_lNodes;
-}
-
-//=============================================================================================================
-
-NetworkNode::SPtr Network::getNodeAt(int i)
-{
-    return m_lNodes.at(i);
-}
-
-//=============================================================================================================
-
-NetworkEdge::SPtr Network::getEdgeAt(int i)
-{
-    return m_lFullEdges.at(i);
-}
-
-//=============================================================================================================
-
-qint16 Network::getFullDistribution() const
-{
-    qint16 distribution = 0;
-
-    for (int i = 0; i < m_lNodes.size(); ++i) {
-        distribution += m_lNodes.at(i)->getFullDegree();
+    if (m_nodes.empty()) {
+        return {0, 0};
     }
-
-    return distribution;
-}
-
-//=============================================================================================================
-
-qint16 Network::getThresholdedDistribution() const
-{
-    qint16 distribution = 0;
-
-    for (int i = 0; i < m_lNodes.size(); ++i) {
-        distribution += m_lNodes.at(i)->getThresholdedDegree();
+    std::pair<int, int> range(std::numeric_limits<int>::max(), 0);
+    for (int i = 0; i < static_cast<int>(m_nodes.size()); ++i) {
+        const int d = degree(i, set, direction);
+        range.first = std::min(range.first, d);
+        range.second = std::max(range.second, d);
     }
-
-    return distribution;
+    return range;
 }
 
 //=============================================================================================================
 
-void Network::setConnectivityMethod(const QString& sConnectivityMethod)
+int Network::total_degree(EdgeSet set) const
 {
-    m_sConnectivityMethod = sConnectivityMethod;
+    return 2 * static_cast<int>(edge_count(set));
 }
 
 //=============================================================================================================
 
-QString Network::getConnectivityMethod() const
+std::pair<double, double> Network::weight_range(EdgeSet set) const noexcept
 {
-    return m_sConnectivityMethod;
-}
-
-//=============================================================================================================
-
-QPair<double, double> Network::getMinMaxFullWeights() const
-{
-    return m_minMaxFullWeights;
-}
-
-//=============================================================================================================
-
-QPair<double, double> Network::getMinMaxThresholdedWeights() const
-{
-    return m_minMaxThresholdedWeights;
-}
-
-//=============================================================================================================
-
-QPair<int, int> Network::getMinMaxFullDegrees() const
-{
-    int maxDegree = 0;
-    int minDegree = 1000000;
-
-    for (int i = 0; i < m_lNodes.size(); ++i) {
-        if (m_lNodes.at(i)->getFullDegree() > maxDegree) {
-            maxDegree = m_lNodes.at(i)->getFullDegree();
-        }
-        if (m_lNodes.at(i)->getFullDegree() < minDegree) {
-            minDegree = m_lNodes.at(i)->getFullDegree();
-        }
+    if (m_edges.empty()) {
+        return {0.0, 0.0};
     }
-
-    return QPair<int, int>(minDegree, maxDegree);
-}
-
-//=============================================================================================================
-
-QPair<int, int> Network::getMinMaxThresholdedDegrees() const
-{
-    int maxDegree = 0;
-    int minDegree = 1000000;
-
-    for (int i = 0; i < m_lNodes.size(); ++i) {
-        if (m_lNodes.at(i)->getThresholdedDegree() > maxDegree) {
-            maxDegree = m_lNodes.at(i)->getThresholdedDegree();
-        }
-        if (m_lNodes.at(i)->getThresholdedDegree() < minDegree) {
-            minDegree = m_lNodes.at(i)->getThresholdedDegree();
-        }
+    if (set == EdgeSet::thresholded) {
+        return {m_threshold, m_weight_range.second};
     }
-
-    return QPair<int, int>(minDegree, maxDegree);
+    return m_weight_range;
 }
 
 //=============================================================================================================
 
-QPair<int, int> Network::getMinMaxFullIndegrees() const
+void Network::set_threshold(double threshold)
 {
-    int maxDegree = 0;
-    int minDegree = 1000000;
+    m_threshold = threshold;
+    m_active = 0;
 
-    for (int i = 0; i < m_lNodes.size(); ++i) {
-        if (m_lNodes.at(i)->getFullIndegree() > maxDegree) {
-            maxDegree = m_lNodes.at(i)->getFullIndegree();
-        }
-        if (m_lNodes.at(i)->getFullIndegree() < minDegree) {
-            minDegree = m_lNodes.at(i)->getFullIndegree();
-        }
+    for (NetworkEdge& edge : m_edges) {
+        const bool active = std::fabs(edge.weight()) >= m_threshold;
+        edge.set_active(active);
+        m_active += active ? 1 : 0;
     }
-
-    return QPair<int, int>(minDegree, maxDegree);
 }
 
 //=============================================================================================================
 
-QPair<int, int> Network::getMinMaxThresholdedIndegrees() const
+void Network::set_frequency_range(float lower, float upper)
 {
-    int maxDegree = 0;
-    int minDegree = 1000000;
-
-    for (int i = 0; i < m_lNodes.size(); ++i) {
-        if (m_lNodes.at(i)->getThresholdedIndegree() > maxDegree) {
-            maxDegree = m_lNodes.at(i)->getThresholdedIndegree();
-        }
-        if (m_lNodes.at(i)->getThresholdedIndegree() < minDegree) {
-            minDegree = m_lNodes.at(i)->getThresholdedIndegree();
-        }
+    if (lower > upper) {
+        qWarning() << "Network::set_frequency_range - Lower frequency is above the upper frequency. Weights are not recalculated.";
+        return;
     }
-
-    return QPair<int, int>(minDegree, maxDegree);
-}
-
-//=============================================================================================================
-
-QPair<int, int> Network::getMinMaxFullOutdegrees() const
-{
-    int maxDegree = 0;
-    int minDegree = 1000000;
-
-    for (int i = 0; i < m_lNodes.size(); ++i) {
-        if (m_lNodes.at(i)->getFullOutdegree() > maxDegree) {
-            maxDegree = m_lNodes.at(i)->getFullOutdegree();
-        }
-        if (m_lNodes.at(i)->getFullOutdegree() < minDegree) {
-            minDegree = m_lNodes.at(i)->getFullOutdegree();
-        }
+    if (m_sfreq <= 0.0f) {
+        qWarning() << "Network::set_frequency_range - Sampling frequency has not been set.";
+        return;
     }
-
-    return QPair<int, int>(minDegree, maxDegree);
-}
-
-//=============================================================================================================
-
-QPair<int, int> Network::getMinMaxThresholdedOutdegrees() const
-{
-    int maxDegree = 0;
-    int minDegree = 1000000;
-
-    for (int i = 0; i < m_lNodes.size(); ++i) {
-        if (m_lNodes.at(i)->getThresholdedOutdegree() > maxDegree) {
-            maxDegree = m_lNodes.at(i)->getThresholdedOutdegree();
-        }
-        if (m_lNodes.at(i)->getThresholdedOutdegree() < minDegree) {
-            minDegree = m_lNodes.at(i)->getThresholdedOutdegree();
-        }
+    if (upper > m_sfreq / 2.0f) {
+        qWarning() << "Network::set_frequency_range - Upper frequency is above the Nyquist frequency.";
+        return;
     }
-
-    return QPair<int, int>(minDegree, maxDegree);
-}
-
-//=============================================================================================================
-
-void Network::setThreshold(double dThreshold)
-{
-    m_dThreshold = dThreshold;
-    m_lThresholdedEdges.clear();
-
-    for (int i = 0; i < m_lFullEdges.size(); ++i) {
-        if (fabs(m_lFullEdges.at(i)->getWeight()) >= m_dThreshold) {
-            m_lFullEdges.at(i)->setActive(true);
-            m_lThresholdedEdges.append(m_lFullEdges.at(i));
-        } else {
-            m_lFullEdges.at(i)->setActive(false);
-        }
-    }
-
-    m_minMaxThresholdedWeights.first = m_dThreshold;
-    m_minMaxThresholdedWeights.second = m_minMaxFullWeights.second;
-}
-
-//=============================================================================================================
-
-double Network::getThreshold()
-{
-    return m_dThreshold;
-}
-
-//=============================================================================================================
-
-void Network::setFrequencyRange(float fLowerFreq, float fUpperFreq)
-{
-    if (fLowerFreq > fUpperFreq) {
-        qDebug() << "Network::setFrequencyRange - Upper and lower frequency are out of range from each other. Weights will not be recalculated. Returning.";
+    if (m_used_freq_bins <= 0) {
+        qWarning() << "Network::set_frequency_range - Number of frequency bins has not been set.";
         return;
     }
 
-    if (m_fSFreq <= 0.0f) {
-        qDebug() << "Network::setFrequencyRange - Sampling frequency has not been set. Returning.";
-        return;
+    const double scale = m_fft_size / (m_sfreq / 2.0);
+    const std::pair<int, int> bins(static_cast<int>(lower * scale), static_cast<int>(upper * scale));
+
+    m_frequency_range = {lower, upper};
+    m_weight_range = {std::numeric_limits<double>::max(), 0.0};
+
+    for (NetworkEdge& edge : m_edges) {
+        edge.set_frequency_bins(bins);
+        const double magnitude = std::fabs(edge.weight());
+        m_weight_range.first = std::min(m_weight_range.first, magnitude);
+        m_weight_range.second = std::max(m_weight_range.second, magnitude);
     }
-
-    if (fUpperFreq > m_fSFreq / 2.0f) {
-        qDebug() << "Network::setFrequencyRange - Upper frequency is bigger than nyquist frequency. Returning.";
-        return;
-    }
-
-    if (m_iNumberFreqBins <= 0) {
-        qDebug() << "Network::setFrequencyRange - Number of samples has not been set. Returning.";
-        return;
-    }
-
-    double dScaleFactor = m_iFFTSize / (m_fSFreq / 2);
-
-    m_minMaxFrequency.first = fLowerFreq;
-    m_minMaxFrequency.second = fUpperFreq;
-
-    int iLowerBin = fLowerFreq * dScaleFactor;
-    int iUpperBin = fUpperFreq * dScaleFactor;
-
-    // Update the min max values
-    m_minMaxFullWeights = QPair<double, double>(std::numeric_limits<double>::max(), 0.0);
-
-    for (int i = 0; i < m_lFullEdges.size(); ++i) {
-        m_lFullEdges.at(i)->setFrequencyBins(QPair<int, int>(iLowerBin, iUpperBin));
-
-        if (fabs(m_lFullEdges.at(i)->getWeight()) < m_minMaxFullWeights.first) {
-            m_minMaxFullWeights.first = fabs(m_lFullEdges.at(i)->getWeight());
-        }
-        if (fabs(m_lFullEdges.at(i)->getWeight()) > m_minMaxFullWeights.second) {
-            m_minMaxFullWeights.second = fabs(m_lFullEdges.at(i)->getWeight());
-        }
-    }
-}
-
-//=============================================================================================================
-
-const QPair<float, float>& Network::getFrequencyRange() const
-{
-    return m_minMaxFrequency;
-}
-
-//=============================================================================================================
-
-void Network::append(NetworkEdge::SPtr newEdge)
-{
-    if (newEdge->getEndNodeID() != newEdge->getStartNodeID()) {
-        double dEdgeWeight = newEdge->getWeight();
-        if (dEdgeWeight < m_minMaxFullWeights.first) {
-            m_minMaxFullWeights.first = dEdgeWeight;
-        }
-        if (dEdgeWeight >= m_minMaxFullWeights.second) {
-            m_minMaxFullWeights.second = dEdgeWeight;
-        }
-
-        m_lFullEdges << newEdge;
-
-        if (fabs(newEdge->getWeight()) >= m_dThreshold) {
-            m_lThresholdedEdges << newEdge;
-        }
-    }
-}
-
-//=============================================================================================================
-
-void Network::append(NetworkNode::SPtr newNode)
-{
-    m_lNodes << newNode;
-}
-
-//=============================================================================================================
-
-bool Network::empty() const
-{
-    if (m_lFullEdges.isEmpty() || m_lNodes.isEmpty()) {
-        return true;
-    }
-
-    return false;
 }
 
 //=============================================================================================================
 
 void Network::normalize()
 {
-    // Normalize full network
-    if (m_minMaxFullWeights.second == 0.0) {
-        qDebug() << "Network::normalize() - Max weight is 0. Returning.";
+    const double max = m_weight_range.second;
+    if (max == 0.0) {
+        qWarning() << "Network::normalize - All weights are 0; nothing to normalize.";
         return;
     }
 
-    for (int i = 0; i < m_lFullEdges.size(); ++i) {
-        m_lFullEdges.at(i)->setWeight(m_lFullEdges.at(i)->getWeight() / m_minMaxFullWeights.second);
+    for (NetworkEdge& edge : m_edges) {
+        edge.set_weight(edge.weight() / max);
     }
 
-    m_minMaxFullWeights.first = m_minMaxFullWeights.first / m_minMaxFullWeights.second;
-    m_minMaxFullWeights.second = 1.0;
-
-    m_minMaxThresholdedWeights.first = m_minMaxThresholdedWeights.first / m_minMaxThresholdedWeights.second;
-    m_minMaxThresholdedWeights.second = 1.0;
-}
-
-//=============================================================================================================
-
-VisualizationInfo Network::getVisualizationInfo() const
-{
-    return m_visualizationInfo;
-}
-
-//=============================================================================================================
-
-void Network::setVisualizationInfo(const VisualizationInfo& visualizationInfo)
-{
-    m_visualizationInfo = visualizationInfo;
-}
-
-//=============================================================================================================
-
-float Network::getSamplingFrequency() const
-{
-    return m_fSFreq;
-}
-
-//=============================================================================================================
-
-void Network::setSamplingFrequency(float fSFreq)
-{
-    m_fSFreq = fSFreq;
-}
-
-//=============================================================================================================
-
-int Network::getUsedFreqBins() const
-{
-    return m_iNumberFreqBins;
-}
-
-//=============================================================================================================
-
-void Network::setUsedFreqBins(int iNumberFreqBins)
-{
-    m_iNumberFreqBins = iNumberFreqBins;
-}
-
-//=============================================================================================================
-
-void Network::setFFTSize(int iFFTSize)
-{
-    m_iFFTSize = iFFTSize;
-}
-
-//=============================================================================================================
-
-int Network::getFFTSize()
-{
-    return m_iFFTSize;
+    m_weight_range = {m_weight_range.first / max, 1.0};
+    m_threshold /= max;
 }

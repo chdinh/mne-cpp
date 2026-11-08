@@ -63,7 +63,7 @@ Network DirectedTransferFunction::calculate(ConnectivitySettings& connectivitySe
         return finalNetwork;
     }
 
-    finalNetwork.setSamplingFrequency(connectivitySettings.getSamplingFrequency());
+    finalNetwork.set_sampling_frequency(connectivitySettings.getSamplingFrequency());
 
     // Average trial data for MVAR fitting
     const int nTrials = connectivitySettings.size();
@@ -77,20 +77,11 @@ Network DirectedTransferFunction::calculate(ConnectivitySettings& connectivitySe
     const int iNfft = connectivitySettings.getFFTSize();
     const int iNFreqs = static_cast<int>(std::floor(iNfft / 2.0)) + 1;
 
-    finalNetwork.setFFTSize(iNFreqs);
-    finalNetwork.setUsedFreqBins(iNFreqs);
+    finalNetwork.set_fft_size(iNFreqs);
+    finalNetwork.set_used_freq_bins(iNFreqs);
 
     // Create nodes
-    RowVectorXf rowVert = RowVectorXf::Zero(3);
-    for (int i = 0; i < nCh; ++i) {
-        rowVert = RowVectorXf::Zero(3);
-        if (connectivitySettings.getNodePositions().rows() != 0 && i < connectivitySettings.getNodePositions().rows()) {
-            rowVert(0) = connectivitySettings.getNodePositions().row(i)(0);
-            rowVert(1) = connectivitySettings.getNodePositions().row(i)(1);
-            rowVert(2) = connectivitySettings.getNodePositions().row(i)(2);
-        }
-        finalNetwork.append(NetworkNode::SPtr(new NetworkNode(i, rowVert)));
-    }
+    add_nodes(finalNetwork, nCh, connectivitySettings.getNodePositions());
 
     // Fit MVAR model
     MvarModel model;
@@ -120,12 +111,7 @@ Network DirectedTransferFunction::calculate(ConnectivitySettings& connectivitySe
                 }
             }
 
-            QSharedPointer<NetworkEdge> pEdge =
-                QSharedPointer<NetworkEdge>(new NetworkEdge(j, i, matWeight));
-
-            finalNetwork.getNodeAt(j)->append(pEdge);
-            finalNetwork.getNodeAt(i)->append(pEdge);
-            finalNetwork.append(pEdge);
+            finalNetwork.add_edge(NetworkEdge(j, i, std::move(matWeight)));
         }
     }
 

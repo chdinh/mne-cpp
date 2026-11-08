@@ -48,7 +48,7 @@ namespace INVLIB
  * For frequency-resolved connectivity, add one entry per band to the parent's connectivity vector.
  *
  * This struct is intentionally lightweight and self-contained — it does not depend on the
- * connectivity library.  Application code can populate it from Network::getFullConnectivityMatrix().
+ * connectivity library.  Application code can populate it from Network::connectivity_matrix().
  *
  * @brief Pairwise source connectivity matrix with measure, directionality, and frequency/time metadata.
  *

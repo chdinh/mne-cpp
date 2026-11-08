@@ -33,7 +33,6 @@ set(SOURCES
     metrics/directed_transfer_function.cpp
     metrics/partial_directed_coherence.cpp
     network/network.cpp
-    network/networknode.cpp
     network/networkedge.cpp
     connectivitysettings.cpp
     compute_connectivity.cpp

@@ -146,8 +146,8 @@ void RealTime3DWidget::update(SCMEASLIB::Measurement::SPtr pMeasurement)
             m_iNumberBadChannels = pRTCE->getFiffInfo() ? static_cast<int>(pRTCE->getFiffInfo()->bads.size()) : 0;
         } else {
             // Update existing connectivity data - replace with new network
-            QPair<float, float> freqs = pRTCE->getValue()->getFrequencyRange();
-            QString sItemName = QString("%1_%2_%3").arg(pRTCE->getValue()->getConnectivityMethod(), QString::number(freqs.first), QString::number(freqs.second));
+            const auto [lower, upper] = pRTCE->getValue()->frequency_range();
+            QString sItemName = QString("%1_%2_%3").arg(QString::fromStdString(pRTCE->getValue()->method()), QString::number(lower), QString::number(upper));
             m_pRtConnectivityItem->setText(sItemName);
 
             if (pRTCE->getSensorSurface() && pRTCE->getFiffInfo()) {

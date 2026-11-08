@@ -219,7 +219,7 @@ NetworkTreeItem* BrainTreeModel::addNetwork(const CONNECTIVITYLIB::Network& netw
 {
     QString displayName = name;
     if (displayName.isEmpty()) {
-        displayName = network.getConnectivityMethod();
+        displayName = QString::fromStdString(network.method());
         if (displayName.isEmpty())
             displayName = "Network";
     }
@@ -231,10 +231,6 @@ NetworkTreeItem* BrainTreeModel::addNetwork(const CONNECTIVITYLIB::Network& netw
     item->setCheckState(Qt::Checked);
 
     this->appendRow(item);
-
-    qDebug() << "BrainTreeModel: Added network" << displayName
-             << "with" << network.getNodes().size() << "nodes and"
-             << network.getFullEdges().size() << "edges";
 
     return item;
 }

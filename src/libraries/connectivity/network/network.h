@@ -15,20 +15,16 @@
  * @ref CONNECTIVITYLIB::Network is the common output type returned by every estimator in
  * @c CONNECTIVITYLIB. Each @ref CONNECTIVITYLIB::NetworkNode carries a 3D position (sensor coordinate
  * for sensor-space metrics, source vertex for source-space metrics) and
- * the list of edges incident to it, and each @ref CONNECTIVITYLIB::NetworkEdge stores the
+ * the indices of its incident edges, and each @ref CONNECTIVITYLIB::NetworkEdge stores the
  * full per-frequency weight matrix together with the scalar band-averaged
- * weight used for thresholding and display. The same container is reused
+ * weight used for thresholding and display. The same container is used
  * for symmetric metrics (coherence, PLV, PLI/wPLI/dwPLI, imaginary
  * coherence, correlation, cross-correlation) and for the directed metrics
  * (Granger Causality, DTF, PDC); directionality is encoded by treating
  * @c (i, j) and @c (j, i) as distinct edges.
  *
- * The container also offers the bookkeeping operations needed by every
- * downstream visualisation and statistical layer: distance-based and
- * threshold-based edge selection, full vs. mirrored adjacency-matrix
- * extraction, and a @ref CONNECTIVITYLIB::VisualizationInfo block carrying the colour-map
- * choice that disp3D and the @c connectivity-estimator plugin honour when
- * rendering the graph in 3D.
+ * Nodes and edges are stored contiguously by value, so a Network is a
+ * regular value type: copies are deep and independent.
  */
 
 #ifndef NETWORK_H
@@ -39,15 +35,18 @@
 //=============================================================================================================
 
 #include "../connectivity_global.h"
+#include "networkedge.h"
+#include "networknode.h"
+
+#include <string>
+#include <utility>
+#include <vector>
 
 //=============================================================================================================
 // QT INCLUDES
 //=============================================================================================================
 
-#include <vector>
-
-#include <QSharedPointer>
-#include <QList>
+#include <QMetaType>
 
 //=============================================================================================================
 // EIGEN INCLUDES
@@ -56,46 +55,56 @@
 #include <Eigen/Core>
 
 //=============================================================================================================
-// FORWARD DECLARATIONS
-//=============================================================================================================
-
-//=============================================================================================================
 // DEFINE NAMESPACE CONNECTIVITYLIB
 //=============================================================================================================
 
 namespace CONNECTIVITYLIB
 {
 
-//=============================================================================================================
-// CONNECTIVITYLIB FORWARD DECLARATIONS
-//=============================================================================================================
-
-class NetworkEdge;
-class NetworkNode;
-
 /**
- * @brief Per-network rendering hints: colour-map name or fixed RGBA for nodes and edges.
+ * @brief Per-network rendering hints: colour map or fixed RGBA for nodes and edges.
  *
  * @snippet ex_connectivity_metrics/main.cpp network_threshold
  */
 struct VisualizationInfo
 {
-    QString sMethod = "Map";                                    /**< The color method: Map (uses sColormap parameter) or Color (uses colNodes and colEdges).*/
-    QString sColormap = "Viridis";                              /**< The colormap.*/
-    Eigen::Vector4i colNodes = Eigen::Vector4i(255, 0, 0, 255); /**< The node color.*/
-    Eigen::Vector4i colEdges = Eigen::Vector4i(255, 0, 0, 255); /**< The edge color.*/
+    /** How nodes and edges are coloured. */
+    enum class Coloring
+    {
+        colormap, /**< Map node degree / edge weight through @ref colormap. */
+        fixed     /**< Use @ref node_color and @ref edge_color. */
+    };
+
+    Coloring coloring = Coloring::colormap;                       /**< The colouring mode. */
+    std::string colormap = "Viridis";                             /**< Colour map name used by Coloring::colormap. */
+    Eigen::Vector4i node_color = Eigen::Vector4i(255, 0, 0, 255); /**< RGBA node colour used by Coloring::fixed. */
+    Eigen::Vector4i edge_color = Eigen::Vector4i(255, 0, 0, 255); /**< RGBA edge colour used by Coloring::fixed. */
+};
+
+/** Selects all edges or only those passing the threshold. */
+enum class EdgeSet
+{
+    full,       /**< All edges. */
+    thresholded /**< Only active edges, i.e. |weight| >= threshold. */
+};
+
+/** Selects which incident edges of a node count. */
+enum class Direction
+{
+    both, /**< Edges starting or ending at the node. */
+    in,   /**< Edges ending at the node. */
+    out   /**< Edges starting at the node. */
 };
 
 //=============================================================================================================
 /**
  * Graph container for one functional-connectivity result.
  *
- * Holds the @ref NetworkNode list (channel / source positions) and the
- * @ref NetworkEdge list (per-frequency weight matrices + scalar band-
- * averaged weights). Provides full and thresholded views of both edges
- * and the corresponding adjacency matrix, the metric name ("COH", "PLI",
- * "GC", ...) and threshold currently in effect, and the @ref VisualizationInfo
- * block read by the disp3D rendering layer.
+ * Holds the nodes (channel / source positions) and the edges (per-frequency
+ * weight matrices + scalar band-averaged weights), the metric name ("COH",
+ * "PLI", "GC", ...), the threshold that marks edges active, and the
+ * @ref VisualizationInfo read by the disp3D rendering layer. Edges are
+ * read-only once added so that the cached weight ranges stay consistent.
  *
  * @brief Graph container for one connectivity metric; nodes + weighted edges + threshold/visualisation state.
  *
@@ -103,354 +112,304 @@ struct VisualizationInfo
  *
  * @snippet ex_connectivity_metrics/main.cpp network_threshold
  */
-
 class CONNECTIVITYSHARED_EXPORT Network
 {
 public:
-    typedef QSharedPointer<Network> SPtr;            /**< Shared pointer type for Network. */
-    typedef QSharedPointer<const Network> ConstSPtr; /**< Const shared pointer type for Network. */
-
     //=========================================================================================================
     /**
-     * Constructs a Network object.
+     * Constructs an empty network.
      *
-     * @param[in] sConnectivityMethod    The connectivity measure method used to create the data of this network structure.
-     * @param[in] dThreshold             The threshold of the network. Default is 0.0.
+     * @param[in] method       Name of the connectivity metric that produced the network.
+     * @param[in] threshold    Edges with |weight| >= threshold are active.
      */
-    explicit Network(const QString& sConnectivityMethod = "Unknown",
-                     double dThreshold = 0.0);
+    explicit Network(std::string method = "Unknown", double threshold = 0.0);
 
     //=========================================================================================================
     /**
-     * Returns the full connectivity matrix for this network structure.
+     * Reserves storage for the expected number of nodes and edges.
      *
-     * @param[in] bGetMirroredVersion    Flag whether to return the mirrored version of the connectivity matrix, if the network.
-     *                                   is a non-directional one. Otherwise returns zeros for the lower part of the matrix.
-     *                                   Default is set to true.
-     *
-     * @return    The full connectivity matrix generated from the current network information.
+     * @param[in] nodes    Expected node count.
+     * @param[in] edges    Expected edge count.
      */
-    Eigen::MatrixXd getFullConnectivityMatrix(bool bGetMirroredVersion = true) const;
+    void reserve(std::size_t nodes, std::size_t edges);
 
     //=========================================================================================================
     /**
-     * Returns the thresholded connectivity matrix for this network structure.
+     * Adds a node.
      *
-     * @param[in] bGetMirroredVersion    Flag whether to return the mirrored version of the connectivity matrix, if the network.
-     *                                   is a non-directional one. Otherwise returns zeros for the lower part of the matrix.
-     *                                   Default is set to true.
+     * @param[in] position    The 3D position of the node.
      *
-     * @return    The thresholded connectivity matrix generated from the current network information.
+     * @return The index of the new node.
      */
-    Eigen::MatrixXd getThresholdedConnectivityMatrix(bool bGetMirroredVersion = true) const;
+    int add_node(const Eigen::Vector3f& position);
 
     //=========================================================================================================
     /**
-     * Returns the full and non thresholded edges.
+     * Adds an edge between two existing nodes and registers it with both. Self-loops are
+     * ignored. The edge becomes active if |weight| >= @ref threshold.
      *
-     * @return Returns the network edges.
+     * @param[in] edge    The edge; throws std::out_of_range unless source and target are valid node indices.
      */
-    const QList<QSharedPointer<NetworkEdge>>& getFullEdges() const;
+    void add_edge(NetworkEdge edge);
 
     //=========================================================================================================
     /**
-     * Returns the thresholded edges.
-     *
-     * @return Returns the network edges.
+     * @return All nodes; a node's index is its position in this vector.
      */
-    const QList<QSharedPointer<NetworkEdge>>& getThresholdedEdges() const;
+    const std::vector<NetworkNode>& nodes() const noexcept
+    {
+        return m_nodes;
+    }
 
     //=========================================================================================================
     /**
-     * Returns the nodes.
-     *
-     * @return Returns the network nodes.
+     * @return All edges, active or not.
      */
-    const QList<QSharedPointer<NetworkNode>>& getNodes() const;
+    const std::vector<NetworkEdge>& edges() const noexcept
+    {
+        return m_edges;
+    }
 
     //=========================================================================================================
     /**
-     * Returns the edge at a specific position.
+     * @param[in] set    Which edges count.
      *
-     * @param[in] i      The index to look up the edge. i must be a valid index position in the network list (i.e., 0 <= i < size()).
-     *
-     * @return Returns the network edge.
+     * @return The number of edges in @p set.
      */
-    QSharedPointer<NetworkEdge> getEdgeAt(int i);
+    std::size_t edge_count(EdgeSet set = EdgeSet::full) const noexcept;
 
     //=========================================================================================================
     /**
-     * Returns the node at a specific position.
-     *
-     * @param[in] i      The index to look up the node. i must be a valid index position in the network list (i.e., 0 <= i < size()).
-     *
-     * @return Returns the network node.
+     * @return Whether the network has no nodes or no edges.
      */
-    QSharedPointer<NetworkNode> getNodeAt(int i);
+    bool empty() const noexcept
+    {
+        return m_nodes.empty() || m_edges.empty();
+    }
 
     //=========================================================================================================
     /**
-     * Returns network distribution, also known as network degree, corresponding to the full network.
+     * Returns the node-by-node adjacency matrix of edge weights.
      *
-     * @return   The network distribution calculated as degrees of all nodes together.
-     */
-    qint16 getFullDistribution() const;
-
-    //=========================================================================================================
-    /**
-     * Returns network distribution, also known as network degree, corresponding to the thresholded network.
+     * @param[in] set         Which edges to include.
+     * @param[in] mirrored    Whether to also fill (target, source); otherwise only (source, target) is set.
      *
-     * @return   The network distribution calculated as degrees of all nodes together.
+     * @return The adjacency matrix.
      */
-    qint16 getThresholdedDistribution() const;
+    Eigen::MatrixXd connectivity_matrix(EdgeSet set = EdgeSet::full, bool mirrored = true) const;
 
     //=========================================================================================================
     /**
-     * Sets the connectivity measure method used to create the data of this network structure.
+     * Returns the number of edges incident to a node.
      *
-     * @param[in] sConnectivityMethod    The connectivity measure method used to create the data of this network structure.
-     */
-    void setConnectivityMethod(const QString& sConnectivityMethod);
-
-    //=========================================================================================================
-    /**
-     * Returns the connectivity measure method used to create the data of this network structure.
+     * @param[in] node         The node index.
+     * @param[in] set          Which edges count.
+     * @param[in] direction    Which incident edges count.
      *
-     * @return   The connectivity measure method used to create the data of this network structure.
+     * @return The degree.
      */
-    QString getConnectivityMethod() const;
+    int degree(int node, EdgeSet set = EdgeSet::full, Direction direction = Direction::both) const;
 
     //=========================================================================================================
     /**
-     * Returns the minimum and maximum weight strength of the entire network.
+     * Returns the summed weight of the edges incident to a node.
      *
-     * @return   The minimum and maximum weight strength of the entire network.
-     */
-    QPair<double, double> getMinMaxFullWeights() const;
-
-    //=========================================================================================================
-    /**
-     * Returns the minimum and maximum weight strength of the thresholded network.
+     * @param[in] node         The node index.
+     * @param[in] set          Which edges count.
+     * @param[in] direction    Which incident edges count.
      *
-     * @return   The minimum and maximum weight strength of the entire network.
+     * @return The strength.
      */
-    QPair<double, double> getMinMaxThresholdedWeights() const;
+    double strength(int node, EdgeSet set = EdgeSet::full, Direction direction = Direction::both) const;
 
     //=========================================================================================================
     /**
-     * Returns the minimum and maximum degree (in and out) corresponding to the full network.
+     * Returns the smallest and largest node degree.
      *
-     * @return   The minimum and maximum degree of the entire network.
-     */
-    QPair<int, int> getMinMaxFullDegrees() const;
-
-    //=========================================================================================================
-    /**
-     * Returns the minimum and maximum degree (in and out) corresponding to the thresholded network.
+     * @param[in] set          Which edges count.
+     * @param[in] direction    Which incident edges count.
      *
-     * @return   The minimum and maximum degree of the entire network.
+     * @return {min, max}; {0, 0} for a network without nodes.
      */
-    QPair<int, int> getMinMaxThresholdedDegrees() const;
+    std::pair<int, int> degree_range(EdgeSet set = EdgeSet::full, Direction direction = Direction::both) const;
 
     //=========================================================================================================
     /**
-     * Returns the minimum and maximum indegree corresponding to the full network.
+     * Returns the sum of all node degrees, i.e. twice the number of edges in @p set.
      *
-     * @return   The minimum and maximum indegree of the entire network.
-     */
-    QPair<int, int> getMinMaxFullIndegrees() const;
-
-    //=========================================================================================================
-    /**
-     * Returns the minimum and maximum indegree corresponding to the thresholded network.
+     * @param[in] set    Which edges count.
      *
-     * @return   The minimum and maximum indegree of the entire network.
+     * @return The total degree.
      */
-    QPair<int, int> getMinMaxThresholdedIndegrees() const;
+    int total_degree(EdgeSet set = EdgeSet::full) const;
 
     //=========================================================================================================
     /**
-     * Returns the minimum and maximum outdegree corresponding to the full network.
+     * Returns the range of edge weight magnitudes |weight|. For the full set this is the
+     * smallest and largest magnitude; for the thresholded set it is {threshold, largest}.
      *
-     * @return   The minimum and maximum outdegree of the entire network.
-     */
-    QPair<int, int> getMinMaxFullOutdegrees() const;
-
-    //=========================================================================================================
-    /**
-     * Returns the minimum and maximum outdegree corresponding to the thresholded network.
+     * @param[in] set    Which edges count.
      *
-     * @return   The minimum and maximum outdegree of the entire network.
+     * @return {min, max}; {0, 0} for a network without edges.
      */
-    QPair<int, int> getMinMaxThresholdedOutdegrees() const;
+    std::pair<double, double> weight_range(EdgeSet set = EdgeSet::full) const noexcept;
 
     //=========================================================================================================
     /**
-     * Sets the threshold of the network and updates the resulting active edges.
+     * @return The name of the connectivity metric that produced the network.
+     */
+    const std::string& method() const noexcept
+    {
+        return m_method;
+    }
+
+    //=========================================================================================================
+    /**
+     * @param[in] method    The name of the connectivity metric.
+     */
+    void set_method(std::string method)
+    {
+        m_method = std::move(method);
+    }
+
+    //=========================================================================================================
+    /**
+     * @return The threshold that marks edges active.
+     */
+    double threshold() const noexcept
+    {
+        return m_threshold;
+    }
+
+    //=========================================================================================================
+    /**
+     * Sets the threshold and marks every edge with |weight| >= threshold active.
      *
-     * @param[in] dThreshold        The new threshold.
+     * @param[in] threshold    The new threshold.
      */
-    void setThreshold(double dThreshold = 0.0);
+    void set_threshold(double threshold = 0.0);
 
     //=========================================================================================================
     /**
-     * Returns the current threshold of the network.
+     * @return The frequency range in Hz the edge weights are averaged over.
+     */
+    std::pair<float, float> frequency_range() const noexcept
+    {
+        return m_frequency_range;
+    }
+
+    //=========================================================================================================
+    /**
+     * Averages every edge weight over a new frequency range and updates the weight range.
+     * Requires @ref sampling_frequency and @ref used_freq_bins to be set; invalid ranges are
+     * ignored with a warning.
      *
-     * @return The current threshold.
+     * @param[in] lower    Lower edge in Hz.
+     * @param[in] upper    Upper edge in Hz, at most the Nyquist frequency.
      */
-    double getThreshold();
+    void set_frequency_range(float lower, float upper);
 
     //=========================================================================================================
     /**
-     * Sets the frequency range to average from/to.
-     *
-     * @param[in] fLowerFreq        The new lower frequency edge to average from.
-     * @param[in] fUpperFreq        The new upper frequency edge to average to.
-     */
-    void setFrequencyRange(float fLowerFreq, float fUpperFreq);
-
-    //=========================================================================================================
-    /**
-     * Returns the current frequency edge to average from/to.
-     *
-     * @return The current upper/lower frequency edge to average from/to.
-     */
-    const QPair<float, float>& getFrequencyRange() const;
-
-    //=========================================================================================================
-    /**
-     * Appends a network edge to this network node.
-     *
-     * @param[in] newEdge    The new edge item.
-     */
-    void append(QSharedPointer<NetworkEdge> newEdge);
-
-    //=========================================================================================================
-    /**
-     * Appends a network edge to this network node.
-     *
-     * @param[in] newNode    The new node item as a reference.
-     */
-    void append(QSharedPointer<NetworkNode> newNode);
-
-    //=========================================================================================================
-    /**
-     * Returns whether the Network is empty by checking the number of nodes and edges.
-     *
-     * @return   The flag identifying whether the Network is empty.
-     */
-    bool empty() const;
-
-    //=========================================================================================================
-    /**
-     * Normalize the network.
+     * Divides every edge weight and the threshold by the largest magnitude, so that weights
+     * lie in [-1, 1] and the same edges stay active.
      */
     void normalize();
 
     //=========================================================================================================
     /**
-     * Get the current visualization info.
-     *
-     * @return The current visualization info.
+     * @return The rendering hints.
      */
-    VisualizationInfo getVisualizationInfo() const;
+    const VisualizationInfo& visualization_info() const noexcept
+    {
+        return m_visualization_info;
+    }
 
     //=========================================================================================================
     /**
-     * Set the current visualization info.
-     *
-     * @param[in] visualizationInfo        The new visualization info.
+     * @param[in] info    The new rendering hints.
      */
-    void setVisualizationInfo(const VisualizationInfo& visualizationInfo);
+    void set_visualization_info(VisualizationInfo info)
+    {
+        m_visualization_info = std::move(info);
+    }
 
     //=========================================================================================================
     /**
-     * Get the currently set sampling frequency.
-     *
-     * @return The currently set sampling frequency.
+     * @return The sampling frequency of the data the network was computed from.
      */
-    float getSamplingFrequency() const;
+    float sampling_frequency() const noexcept
+    {
+        return m_sfreq;
+    }
 
     //=========================================================================================================
     /**
-     * Set the new sampling frequency.
-     *
-     * @param[in] fSFreq        The new sampling frequency.
+     * @param[in] sfreq    The sampling frequency.
      */
-    void setSamplingFrequency(float fSFreq);
+    void set_sampling_frequency(float sfreq) noexcept
+    {
+        m_sfreq = sfreq;
+    }
 
     //=========================================================================================================
     /**
-     * Get the currently set number of frequency bins.
-     *
-     * @return The currently set number of samples.
+     * @return The number of frequency bins stored per edge.
      */
-    int getUsedFreqBins() const;
+    int used_freq_bins() const noexcept
+    {
+        return m_used_freq_bins;
+    }
 
     //=========================================================================================================
     /**
-     * Set the new number of used frequency bins.
-     *
-     * @param[in] iNumberFreqBins        The new number of used frequency bins.
+     * @param[in] bins    The number of frequency bins stored per edge.
      */
-    void setUsedFreqBins(int iNumberFreqBins);
+    void set_used_freq_bins(int bins) noexcept
+    {
+        m_used_freq_bins = bins;
+    }
 
     //=========================================================================================================
     /**
-     * Set the new FFT size.
-     *
-     * @param[in] iFFTSize        The used FFT size (number of total frequency bins for a half spectrum - only positive frequencies).
+     * @return The FFT size (number of bins of the positive half spectrum).
      */
-    void setFFTSize(int iFFTSize);
+    int fft_size() const noexcept
+    {
+        return m_fft_size;
+    }
 
     //=========================================================================================================
     /**
-     * Returns the current FFT size.
-     *
-     * @return   The used FFT size (number of total frequency bins for a half spectrum - only positive frequencies).
+     * @param[in] fft_size    The FFT size (number of bins of the positive half spectrum).
      */
-    int getFFTSize();
+    void set_fft_size(int fft_size) noexcept
+    {
+        m_fft_size = fft_size;
+    }
 
-protected:
-    QList<QSharedPointer<NetworkEdge>> m_lFullEdges;        /**< List with all edges of the network.*/
-    QList<QSharedPointer<NetworkEdge>> m_lThresholdedEdges; /**< List with all the active (thresholded) edges of the network.*/
+private:
+    bool counts(const NetworkEdge& edge, int node, EdgeSet set, Direction direction) const noexcept;
 
-    QList<QSharedPointer<NetworkNode>> m_lNodes; /**< List with all nodes of the network.*/
+    std::vector<NetworkNode> m_nodes; /**< All nodes. */
+    std::vector<NetworkEdge> m_edges; /**< All edges. */
 
-    Eigen::MatrixXd m_matDistMatrix; /**< The distance matrix.*/
+    std::string m_method;                      /**< Name of the producing connectivity metric. */
+    std::pair<double, double> m_weight_range;  /**< Smallest and largest |weight|. */
+    std::pair<float, float> m_frequency_range; /**< Frequency range in Hz the weights are averaged over. */
 
-    QString m_sConnectivityMethod; /**< The connectivity measure method used to create the data of this network structure.*/
+    double m_threshold;       /**< Edges with |weight| >= threshold are active. */
+    float m_sfreq = 0.0f;     /**< Sampling frequency of the source data. */
+    int m_used_freq_bins = 0; /**< Number of frequency bins stored per edge. */
+    int m_fft_size = 128;     /**< FFT size (positive half spectrum). */
+    std::size_t m_active = 0; /**< Number of active edges. */
 
-    QPair<double, double> m_minMaxFullWeights;        /**< The minimum and maximum weight strength of the entire network.*/
-    QPair<double, double> m_minMaxThresholdedWeights; /**< The minimum and maximum weight strength of the active edges.*/
-    QPair<float, float> m_minMaxFrequency;            /**< The minimum and maximum frequency bins to average from/to.*/
-
-    double m_dThreshold;   /**< The current value which was used to threshold the edge weigths.*/
-    float m_fSFreq;        /**< The sampling frequency used to collect the data which this network is based on.*/
-    int m_iNumberFreqBins; /**< The number of used frequency bins.*/
-    int m_iFFTSize;        /**< The used FFT size (number of total frequency bins for a half spectrum - only positive frequencies).*/
-
-    VisualizationInfo m_visualizationInfo; /**< The current visualization info used to plot the network later on.*/
+    VisualizationInfo m_visualization_info; /**< Rendering hints. */
 };
 
-//=============================================================================================================
-// INLINE DEFINITIONS
-//=============================================================================================================
 } // namespace CONNECTIVITYLIB
 
-#ifndef metatype_networks
-#define metatype_networks
 Q_DECLARE_METATYPE(CONNECTIVITYLIB::Network);
-#endif
-
-#ifndef metatype_networkslist
-#define metatype_networkslist
 Q_DECLARE_METATYPE(std::vector<CONNECTIVITYLIB::Network>);
-#endif
-
-#ifndef metatype_networkssptr
-#define metatype_networkssptr
-Q_DECLARE_METATYPE(CONNECTIVITYLIB::Network::SPtr);
-#endif
 
 #endif // NETWORK_H

@@ -64,6 +64,8 @@ namespace CONNECTIVITYLIB
 // CONNECTIVITYLIB FORWARD DECLARATIONS
 //=============================================================================================================
 
+class Network;
+
 //=============================================================================================================
 /**
  * Static base for every estimator in @c CONNECTIVITYLIB. Holds the two pieces of
@@ -97,6 +99,16 @@ public:
     static int m_iNumberBinAmount;
 
 protected:
+    //=========================================================================================================
+    /**
+     * Adds one node per channel to a network, at the given position or at the origin when
+     * fewer positions than channels are known.
+     *
+     * @param[in, out] network      The network to add the nodes to.
+     * @param[in] count             Number of channels.
+     * @param[in] positions         Channel positions, one row per channel; may be empty.
+     */
+    static void add_nodes(Network& network, int count, const Eigen::MatrixX3f& positions);
 };
 
 //=============================================================================================================

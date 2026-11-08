@@ -36,8 +36,6 @@
 #include <disp3D/view/multiviewlayout.h>
 
 #include <connectivity/network/network.h>
-#include <connectivity/network/networkedge.h>
-#include <connectivity/network/networknode.h>
 #include <inv/dipole_fit/inv_ecd_set.h>
 #include <inv/inv_source_estimate.h>
 
@@ -274,16 +272,10 @@ int main(int argc, char* argv[])
     //! [network_object_usage]
     Network graph("coherence");
     for (int i = 0; i < 3; ++i) {
-        graph.append(NetworkNode::SPtr(new NetworkNode(i, RowVectorXf::Constant(3, 0.01f * static_cast<float>(i)))));
+        graph.add_node(Vector3f::Constant(0.01f * static_cast<float>(i)));
     }
-    const QList<QPair<int, int>> links = {{0, 1}, {1, 2}};
-    const QList<double> strengths = {0.9, 0.3};
-    for (int k = 0; k < links.size(); ++k) {
-        NetworkEdge::SPtr edge(new NetworkEdge(links[k].first, links[k].second, MatrixXd::Constant(1, 1, strengths[k])));
-        graph.getNodeAt(links[k].first)->append(edge);
-        graph.getNodeAt(links[k].second)->append(edge);
-        graph.append(edge);
-    }
+    graph.add_edge(NetworkEdge(0, 1, MatrixXd::Constant(1, 1, 0.9)));
+    graph.add_edge(NetworkEdge(1, 2, MatrixXd::Constant(1, 1, 0.3)));
     NetworkObject networkGlyphs;
     networkGlyphs.load(graph, "Viridis"); // spheres for nodes, cylinders for edges
     const int edgesAll = networkGlyphs.edgeInstanceCount();

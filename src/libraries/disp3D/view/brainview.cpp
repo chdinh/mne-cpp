@@ -64,8 +64,6 @@
 #include <fiff/fiff_evoked_set.h>
 #include <fiff/fiff_constants.h>
 #include <connectivity/network/network.h>
-#include <connectivity/network/networknode.h>
-#include <connectivity/network/networkedge.h>
 
 using namespace FIFFLIB;
 
@@ -2728,7 +2726,7 @@ bool BrainView::loadDipoles(const QString& dipPath)
 
 bool BrainView::loadNetwork(const CONNECTIVITYLIB::Network& network, const QString& name)
 {
-    if (network.getNodes().isEmpty())
+    if (network.nodes().empty())
         return false;
 
     m_network = std::make_unique<NetworkObject>();

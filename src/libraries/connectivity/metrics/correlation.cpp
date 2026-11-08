@@ -69,23 +69,11 @@ Network Correlation::calculate(ConnectivitySettings& connectivitySettings)
         return finalNetwork;
     }
 
-    finalNetwork.setSamplingFrequency(connectivitySettings.getSamplingFrequency());
+    finalNetwork.set_sampling_frequency(connectivitySettings.getSamplingFrequency());
 
     //Create nodes
     int rows = connectivitySettings.at(0).matData.rows();
-    RowVectorXf rowVert = RowVectorXf::Zero(3);
-
-    for (int i = 0; i < rows; ++i) {
-        rowVert = RowVectorXf::Zero(3);
-
-        if (connectivitySettings.getNodePositions().rows() != 0 && i < connectivitySettings.getNodePositions().rows()) {
-            rowVert(0) = connectivitySettings.getNodePositions().row(i)(0);
-            rowVert(1) = connectivitySettings.getNodePositions().row(i)(1);
-            rowVert(2) = connectivitySettings.getNodePositions().row(i)(2);
-        }
-
-        finalNetwork.append(NetworkNode::SPtr(new NetworkNode(i, rowVert)));
-    }
+    add_nodes(finalNetwork, rows, connectivitySettings.getNodePositions());
 
     //    iTime = timer.elapsed();
     //    qWarning() << "Preparation" << iTime;
@@ -115,19 +103,11 @@ Network Correlation::calculate(ConnectivitySettings& connectivitySettings)
     //    timer.restart();
 
     //Add edges to network
-    MatrixXd matWeight(1, 1);
-    QSharedPointer<NetworkEdge> pEdge;
     int j;
 
     for (int i = 0; i < matDist.rows(); ++i) {
         for (j = i; j < matDist.cols(); ++j) {
-            matWeight << matDist(i, j);
-
-            pEdge = QSharedPointer<NetworkEdge>(new NetworkEdge(i, j, matWeight));
-
-            finalNetwork.getNodeAt(i)->append(pEdge);
-            finalNetwork.getNodeAt(j)->append(pEdge);
-            finalNetwork.append(pEdge);
+            finalNetwork.add_edge(NetworkEdge(i, j, MatrixXd::Constant(1, 1, matDist(i, j))));
         }
     }
 

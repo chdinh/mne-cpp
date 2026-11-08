@@ -118,7 +118,7 @@ void TestSpectralConnectivity::spectralConnectivityCoherence()
     //*********************************************************************************************************
 
     Network network = Coherence::calculate(m_connectivitySettings);
-    m_dConnectivityOutput = network.getFullConnectivityMatrix()(0, 1);
+    m_dConnectivityOutput = network.connectivity_matrix()(0, 1);
 
     //*********************************************************************************************************
     // Load MNE-PYTHON Results As Reference
@@ -144,7 +144,7 @@ void TestSpectralConnectivity::spectralConnectivityImagCoherence()
     //*********************************************************************************************************
 
     Network network = ImagCoherence::calculate(m_connectivitySettings);
-    m_dConnectivityOutput = network.getFullConnectivityMatrix()(0, 1);
+    m_dConnectivityOutput = network.connectivity_matrix()(0, 1);
 
     //*********************************************************************************************************
     // Load MNE-PYTHON Results As Reference
@@ -171,7 +171,7 @@ void TestSpectralConnectivity::spectralConnectivityPLV()
     //*********************************************************************************************************
 
     Network network = PhaseLockingValue::calculate(m_connectivitySettings);
-    m_dConnectivityOutput = network.getFullConnectivityMatrix()(0, 1);
+    m_dConnectivityOutput = network.connectivity_matrix()(0, 1);
 
     //*********************************************************************************************************
     // Load MNE-PYTHON Results As Reference
@@ -198,7 +198,7 @@ void TestSpectralConnectivity::spectralConnectivityPLI()
     //*********************************************************************************************************
 
     Network network = PhaseLagIndex::calculate(m_connectivitySettings);
-    m_dConnectivityOutput = network.getFullConnectivityMatrix()(0, 1);
+    m_dConnectivityOutput = network.connectivity_matrix()(0, 1);
 
     //*********************************************************************************************************
     // Load MNE-PYTHON Results As Reference
@@ -225,7 +225,7 @@ void TestSpectralConnectivity::spectralConnectivityPLI2()
     //*********************************************************************************************************
 
     Network network = UnbiasedSquaredPhaseLagIndex::calculate(m_connectivitySettings);
-    m_dConnectivityOutput = network.getFullConnectivityMatrix()(0, 1);
+    m_dConnectivityOutput = network.connectivity_matrix()(0, 1);
 
     //*********************************************************************************************************
     // Load MNE-PYTHON Results As Reference
@@ -252,7 +252,7 @@ void TestSpectralConnectivity::spectralConnectivityWPLI()
     //*********************************************************************************************************
 
     Network network = WeightedPhaseLagIndex::calculate(m_connectivitySettings);
-    m_dConnectivityOutput = network.getFullConnectivityMatrix()(0, 1);
+    m_dConnectivityOutput = network.connectivity_matrix()(0, 1);
 
     //*********************************************************************************************************
     // Load MNE-PYTHON Results As Reference
@@ -279,7 +279,7 @@ void TestSpectralConnectivity::spectralConnectivityWPLI2()
     //*********************************************************************************************************
 
     Network network = DebiasedSquaredWeightedPhaseLagIndex::calculate(m_connectivitySettings);
-    m_dConnectivityOutput = network.getFullConnectivityMatrix()(0, 1);
+    m_dConnectivityOutput = network.connectivity_matrix()(0, 1);
 
     //*********************************************************************************************************
     // Load MNE-PYTHON Results As Reference
@@ -307,8 +307,8 @@ void TestSpectralConnectivity::spectralConnectivityXCOR()
 
     QString outputResultFile("ref_spectral_connectivity_xcorr.txt");
     Network network = CrossCorrelation::calculate(m_connectivitySettings);
-    m_dConnectivityOutput = network.getFullConnectivityMatrix()(0, 1);
-    IOUtils::write_eigen_matrix(network.getFullConnectivityMatrix(), outputResultFile);
+    m_dConnectivityOutput = network.connectivity_matrix()(0, 1);
+    IOUtils::write_eigen_matrix(network.connectivity_matrix(), outputResultFile);
 
     //*********************************************************************************************************
     // Load Results As Reference

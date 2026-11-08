@@ -253,7 +253,7 @@ private slots:
             const VectorXd n = c.rowwise().norm();
             expected += (c * c.transpose()).cwiseQuotient(n * n.transpose()) / settings.size();
         }
-        const MatrixXd actual = networks.front().getFullConnectivityMatrix(false);
+        const MatrixXd actual = networks.front().connectivity_matrix(EdgeSet::full, false);
         for (int i = 0; i < 4; ++i) {
             for (int j = i + 1; j < 4; ++j) {
                 QVERIFY2(qAbs(actual(i, j) - expected(i, j)) < 1e-12,
@@ -479,14 +479,14 @@ private slots:
 
         AbstractMetric::m_bStorageModeIsActive = false;
         ConnectivitySettings all = settingsFor(trials);
-        const MatrixXd fresh = DebiasedSquaredWeightedPhaseLagIndex::calculate(all).getFullConnectivityMatrix();
+        const MatrixXd fresh = DebiasedSquaredWeightedPhaseLagIndex::calculate(all).connectivity_matrix();
 
         // In storage mode the per-trial spectra are kept, so adding a trial gives what computing all at once gives
         AbstractMetric::m_bStorageModeIsActive = true;
         ConnectivitySettings growing = settingsFor(trials.mid(0, 19));
         DebiasedSquaredWeightedPhaseLagIndex::calculate(growing);
         growing.append(trials.last());
-        const MatrixXd accumulated = DebiasedSquaredWeightedPhaseLagIndex::calculate(growing).getFullConnectivityMatrix();
+        const MatrixXd accumulated = DebiasedSquaredWeightedPhaseLagIndex::calculate(growing).connectivity_matrix();
 
         AbstractMetric::m_bStorageModeIsActive = storage;
         AbstractMetric::m_iNumberBinStart = start;

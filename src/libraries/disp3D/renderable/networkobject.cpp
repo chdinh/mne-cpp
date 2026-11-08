@@ -16,12 +16,9 @@
 
 #include "networkobject.h"
 
-#include <connectivity/network/networknode.h>
-#include <connectivity/network/networkedge.h>
 #include <disp/plots/helpers/colormap.h>
 
 #include <QQuaternion>
-#include <QDebug>
 #include <cmath>
 
 using namespace CONNECTIVITYLIB;
@@ -78,7 +75,7 @@ void NetworkObject::load(const Network& network, const QString& sColormap)
 
 void NetworkObject::setThreshold(double dThreshold)
 {
-    m_network.setThreshold(dThreshold);
+    m_network.set_threshold(dThreshold);
     buildNodeInstances();
     buildEdgeInstances();
 }
@@ -339,22 +336,23 @@ void NetworkObject::buildNodeInstances()
         return;
     }
 
-    const auto& nodes = m_network.getNodes();
-    qint16 iMaxDegree = m_network.getMinMaxThresholdedDegrees().second;
+    const auto& nodes = m_network.nodes();
+    int iMaxDegree = m_network.degree_range(EdgeSet::thresholded).second;
     if (iMaxDegree == 0)
         iMaxDegree = 1;
 
-    VisualizationInfo vizInfo = m_network.getVisualizationInfo();
+    const VisualizationInfo& vizInfo = m_network.visualization_info();
+    const QString colormap = vizInfo.colormap.empty() ? m_colormap : QString::fromStdString(vizInfo.colormap);
 
     std::vector<InstanceData> instances;
     instances.reserve(nodes.size());
 
-    for (int i = 0; i < nodes.size(); ++i) {
-        qint16 degree = nodes[i]->getThresholdedDegree();
+    for (int i = 0; i < static_cast<int>(nodes.size()); ++i) {
+        const int degree = m_network.degree(i, EdgeSet::thresholded);
         if (degree == 0)
             continue;
 
-        const RowVectorXf& vert = nodes[i]->getVert();
+        const Vector3f& vert = nodes[i].position();
         QVector3D pos(vert(0), vert(1), vert(2));
 
         // Scale: nodes with higher degree are larger
@@ -371,9 +369,9 @@ void NetworkObject::buildNodeInstances()
             inst.model[j] = mPtr[j];
 
         // Color: colormap-based or fixed
-        if (vizInfo.sMethod == "Map") {
+        if (vizInfo.coloring == VisualizationInfo::Coloring::colormap) {
             float normalized = static_cast<float>(degree) / static_cast<float>(iMaxDegree);
-            QRgb rgb = ColorMap::valueToColor(normalized, vizInfo.sColormap.isEmpty() ? m_colormap : vizInfo.sColormap);
+            QRgb rgb = ColorMap::valueToColor(normalized, colormap);
             QColor color(rgb);
             float alpha = std::pow(normalized, 4.0f); // Same as disp3D
             inst.color[0] = color.redF();
@@ -381,10 +379,10 @@ void NetworkObject::buildNodeInstances()
             inst.color[2] = color.blueF();
             inst.color[3] = alpha;
         } else {
-            inst.color[0] = vizInfo.colNodes[0] / 255.0f;
-            inst.color[1] = vizInfo.colNodes[1] / 255.0f;
-            inst.color[2] = vizInfo.colNodes[2] / 255.0f;
-            inst.color[3] = vizInfo.colNodes[3] / 255.0f;
+            inst.color[0] = vizInfo.node_color[0] / 255.0f;
+            inst.color[1] = vizInfo.node_color[1] / 255.0f;
+            inst.color[2] = vizInfo.node_color[2] / 255.0f;
+            inst.color[3] = vizInfo.node_color[3] / 255.0f;
         }
         inst.isSelected = 0.0f;
 
@@ -397,8 +395,6 @@ void NetworkObject::buildNodeInstances()
         memcpy(m_nodeInstanceData.data(), instances.data(), m_nodeInstanceData.size());
     }
     ++m_nodeInstanceGeneration;
-
-    qDebug() << "NetworkObject: Built" << m_nodeInstanceCount << "node instances";
 }
 
 //=============================================================================================================
@@ -411,33 +407,25 @@ void NetworkObject::buildEdgeInstances()
         return;
     }
 
-    const auto& edges = m_network.getThresholdedEdges();
-    const auto& nodes = m_network.getNodes();
+    const auto& nodes = m_network.nodes();
 
-    double dMaxWeight = m_network.getMinMaxThresholdedWeights().second;
-    double dMinWeight = m_network.getMinMaxThresholdedWeights().first;
+    const auto [dMinWeight, dMaxWeight] = m_network.weight_range(EdgeSet::thresholded);
     double dWeightRange = dMaxWeight - dMinWeight;
     if (dWeightRange == 0.0)
         dWeightRange = 1.0;
 
-    VisualizationInfo vizInfo = m_network.getVisualizationInfo();
+    const VisualizationInfo& vizInfo = m_network.visualization_info();
+    const QString colormap = vizInfo.colormap.empty() ? m_colormap : QString::fromStdString(vizInfo.colormap);
 
     std::vector<InstanceData> instances;
-    instances.reserve(edges.size());
+    instances.reserve(m_network.edge_count(EdgeSet::thresholded));
 
-    for (int i = 0; i < edges.size(); ++i) {
-        auto& edge = edges[i];
-        if (!edge->isActive())
+    for (const NetworkEdge& edge : m_network.edges()) {
+        if (!edge.active())
             continue;
 
-        int iStart = edge->getStartNodeID();
-        int iEnd = edge->getEndNodeID();
-
-        if (iStart < 0 || iStart >= nodes.size() || iEnd < 0 || iEnd >= nodes.size())
-            continue;
-
-        const RowVectorXf& vStart = nodes[iStart]->getVert();
-        const RowVectorXf& vEnd = nodes[iEnd]->getVert();
+        const Vector3f& vStart = nodes[edge.source()].position();
+        const Vector3f& vEnd = nodes[edge.target()].position();
 
         QVector3D startPos(vStart(0), vStart(1), vStart(2));
         QVector3D endPos(vEnd(0), vEnd(1), vEnd(2));
@@ -445,7 +433,7 @@ void NetworkObject::buildEdgeInstances()
         if (startPos == endPos)
             continue;
 
-        double dWeight = std::fabs(edge->getWeight());
+        double dWeight = std::fabs(edge.weight());
         if (dWeight == 0.0)
             continue;
 
@@ -470,9 +458,9 @@ void NetworkObject::buildEdgeInstances()
             inst.model[j] = mPtr[j];
 
         // Color
-        if (vizInfo.sMethod == "Map") {
+        if (vizInfo.coloring == VisualizationInfo::Coloring::colormap) {
             float normalized = (dMaxWeight != 0.0) ? static_cast<float>(std::fabs(dWeight / dMaxWeight)) : 0.0f;
-            QRgb rgb = ColorMap::valueToColor(normalized, vizInfo.sColormap.isEmpty() ? m_colormap : vizInfo.sColormap);
+            QRgb rgb = ColorMap::valueToColor(normalized, colormap);
             QColor color(rgb);
             float alpha = std::pow(normalized, 1.5f); // Same as disp3D
             inst.color[0] = color.redF();
@@ -480,10 +468,10 @@ void NetworkObject::buildEdgeInstances()
             inst.color[2] = color.blueF();
             inst.color[3] = alpha;
         } else {
-            inst.color[0] = vizInfo.colEdges[0] / 255.0f;
-            inst.color[1] = vizInfo.colEdges[1] / 255.0f;
-            inst.color[2] = vizInfo.colEdges[2] / 255.0f;
-            inst.color[3] = vizInfo.colEdges[3] / 255.0f;
+            inst.color[0] = vizInfo.edge_color[0] / 255.0f;
+            inst.color[1] = vizInfo.edge_color[1] / 255.0f;
+            inst.color[2] = vizInfo.edge_color[2] / 255.0f;
+            inst.color[3] = vizInfo.edge_color[3] / 255.0f;
         }
         inst.isSelected = 0.0f;
 
@@ -496,8 +484,6 @@ void NetworkObject::buildEdgeInstances()
         memcpy(m_edgeInstanceData.data(), instances.data(), m_edgeInstanceData.size());
     }
     ++m_edgeInstanceGeneration;
-
-    qDebug() << "NetworkObject: Built" << m_edgeInstanceCount << "edge instances";
 }
 
 //=============================================================================================================

@@ -67,8 +67,6 @@
 #include <inv/dipole_fit/inv_ecd_set.h>
 #include <inv/dipole_fit/inv_ecd.h>
 #include <connectivity/network/network.h>
-#include <connectivity/network/networknode.h>
-#include <connectivity/network/networkedge.h>
 #include <fs/fs_label.h>
 #include <fs/fs_surface.h>
 #include <mne/mne_bem.h>
@@ -427,16 +425,10 @@ void TestDisp3dBrainView::brainView_constructAndSetters()
     dipoles << ecd;
     const QString dipPath = dir.filePath(QStringLiteral("one.dip"));
     QVERIFY(dipoles.save_dipoles_dip(dipPath));
-    CONNECTIVITYLIB::Network network(QStringLiteral("Coherence"));
-    QList<CONNECTIVITYLIB::NetworkNode::SPtr> nodes;
-    for (int i = 0; i < 2; ++i) {
-        nodes.append(CONNECTIVITYLIB::NetworkNode::SPtr::create(static_cast<qint16>(i), Eigen::RowVectorXf::Constant(3, 0.01f * static_cast<float>(i))));
-        network.append(nodes.last());
-    }
-    auto edge = CONNECTIVITYLIB::NetworkEdge::SPtr::create(0, 1, Eigen::MatrixXd::Constant(1, 1, 0.5));
-    network.append(edge);
-    nodes[0]->append(edge);
-    nodes[1]->append(edge);
+    CONNECTIVITYLIB::Network network("Coherence");
+    network.add_node(Eigen::Vector3f::Zero());
+    network.add_node(Eigen::Vector3f::Constant(0.01f));
+    network.add_edge(CONNECTIVITYLIB::NetworkEdge(0, 1, Eigen::MatrixXd::Constant(1, 1, 0.5)));
     const QString avePath = dataDir + QStringLiteral("MEG/sample/sample_audvis-ave.fif");
     const QString fwdPath = dataDir + QStringLiteral("Result/ref-sample_audvis-meg-eeg-oct-6-fwd.fif");
     QVERIFY(!view.loadSensors(avePath));
@@ -1491,16 +1483,10 @@ void TestDisp3dBrainView::brainRenderer_nullRhi()
     ecds << ecd;
     DipoleObject dipoles;
     dipoles.load(ecds);
-    CONNECTIVITYLIB::Network network(QStringLiteral("Coherence"));
-    QList<CONNECTIVITYLIB::NetworkNode::SPtr> nodes;
-    for (int i = 0; i < 2; ++i) {
-        nodes.append(CONNECTIVITYLIB::NetworkNode::SPtr::create(static_cast<qint16>(i), Eigen::RowVectorXf::Constant(3, 0.02f * static_cast<float>(i))));
-        network.append(nodes.last());
-    }
-    auto edge = CONNECTIVITYLIB::NetworkEdge::SPtr::create(0, 1, Eigen::MatrixXd::Constant(1, 1, 0.5));
-    network.append(edge);
-    nodes[0]->append(edge);
-    nodes[1]->append(edge);
+    CONNECTIVITYLIB::Network network("Coherence");
+    network.add_node(Eigen::Vector3f::Zero());
+    network.add_node(Eigen::Vector3f::Constant(0.02f));
+    network.add_edge(CONNECTIVITYLIB::NetworkEdge(0, 1, Eigen::MatrixXd::Constant(1, 1, 0.5)));
     NetworkObject networkObject;
     networkObject.load(network, QStringLiteral("Jet"));
     networkObject.setThreshold(0.0);
@@ -2421,22 +2407,13 @@ void TestDisp3dBrainView::networkObject_thresholdAndInstances()
     QCOMPARE(obj.edgeInstanceCount(), 0);
 
     // Chain 0 -- 1 -- 2 -- 3 with weights 0.2, 0.5, 1.0 and an isolated node 4
-    CONNECTIVITYLIB::Network network(QStringLiteral("Coherence"));
-    QList<CONNECTIVITYLIB::NetworkNode::SPtr> nodes;
+    CONNECTIVITYLIB::Network network("Coherence");
     for (int i = 0; i < 5; ++i) {
-        Eigen::RowVectorXf vert(3);
-        vert << 0.01f * static_cast<float>(i), 0.0f, 0.05f;
-        nodes.append(CONNECTIVITYLIB::NetworkNode::SPtr::create(static_cast<qint16>(i), vert));
-        network.append(nodes.last());
+        network.add_node(Eigen::Vector3f(0.01f * static_cast<float>(i), 0.0f, 0.05f));
     }
     const double weights[] = {0.2, 0.5, 1.0};
     for (int i = 0; i < 3; ++i) {
-        Eigen::MatrixXd weight(1, 1);
-        weight(0, 0) = weights[i];
-        auto edge = CONNECTIVITYLIB::NetworkEdge::SPtr::create(i, i + 1, weight);
-        network.append(edge);
-        nodes[i]->append(edge);
-        nodes[i + 1]->append(edge);
+        network.add_edge(CONNECTIVITYLIB::NetworkEdge(i, i + 1, Eigen::MatrixXd::Constant(1, 1, weights[i])));
     }
 
     obj.load(network, QStringLiteral("Jet"));

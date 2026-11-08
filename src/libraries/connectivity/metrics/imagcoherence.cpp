@@ -70,7 +70,7 @@ Network ImagCoherence::calculate(ConnectivitySettings& connectivitySettings)
         connectivitySettings.clearIntermediateData();
     }
 
-    finalNetwork.setSamplingFrequency(connectivitySettings.getSamplingFrequency());
+    finalNetwork.set_sampling_frequency(connectivitySettings.getSamplingFrequency());
 
     // Check if start and bin amount need to be reset to full spectrum
     int iNfft = connectivitySettings.getFFTSize();
@@ -93,24 +93,12 @@ Network ImagCoherence::calculate(ConnectivitySettings& connectivitySettings)
     }
 
     // Pass information about the FFT length. Use iNFreqs because we only use the half spectrum
-    finalNetwork.setFFTSize(iNFreqs);
-    finalNetwork.setUsedFreqBins(AbstractMetric::m_iNumberBinAmount);
+    finalNetwork.set_fft_size(iNFreqs);
+    finalNetwork.set_used_freq_bins(AbstractMetric::m_iNumberBinAmount);
 
     //Create nodes
     int rows = connectivitySettings.at(0).matData.rows();
-    RowVectorXf rowVert = RowVectorXf::Zero(3);
-
-    for (int i = 0; i < rows; ++i) {
-        rowVert = RowVectorXf::Zero(3);
-
-        if (connectivitySettings.getNodePositions().rows() != 0 && i < connectivitySettings.getNodePositions().rows()) {
-            rowVert(0) = connectivitySettings.getNodePositions().row(i)(0);
-            rowVert(1) = connectivitySettings.getNodePositions().row(i)(1);
-            rowVert(2) = connectivitySettings.getNodePositions().row(i)(2);
-        }
-
-        finalNetwork.append(NetworkNode::SPtr(new NetworkNode(i, rowVert)));
-    }
+    add_nodes(finalNetwork, rows, connectivitySettings.getNodePositions());
 
     //Calculate all-to-all imaginary coherence matrix over epochs
     Coherency::calculateImag(finalNetwork,

@@ -49,7 +49,7 @@ RealTimeConnectivityEstimate::RealTimeConnectivityEstimate(QObject* parent)
 , m_pAnnotSet(FsAnnotationSet::SPtr(new FsAnnotationSet))
 , m_pSurfSet(FsSurfaceSet::SPtr(new FsSurfaceSet))
 , m_pFwdSolution(MNEForwardSolution::SPtr(new MNEForwardSolution))
-, m_pNetwork(Network::SPtr(new Network))
+, m_pNetwork(QSharedPointer<Network>::create())
 , m_bInitialized(false)
 {
 }

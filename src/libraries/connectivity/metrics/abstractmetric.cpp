@@ -18,6 +18,8 @@
 
 #include "abstractmetric.h"
 
+#include "../network/network.h"
+
 //=============================================================================================================
 // QT INCLUDES
 //=============================================================================================================
@@ -46,4 +48,14 @@ int AbstractMetric::m_iNumberBinAmount = -1;
 
 AbstractMetric::AbstractMetric()
 {
+}
+
+//=============================================================================================================
+
+void AbstractMetric::add_nodes(Network& network, int count, const Eigen::MatrixX3f& positions)
+{
+    network.reserve(static_cast<std::size_t>(count), static_cast<std::size_t>(count) * static_cast<std::size_t>(count));
+    for (int i = 0; i < count; ++i) {
+        network.add_node(i < positions.rows() ? Eigen::Vector3f(positions.row(i).transpose()) : Eigen::Vector3f::Zero());
+    }
 }

@@ -256,7 +256,7 @@ int main(int argc, char* argv[])
     settings.setWindowType("hanning");
     settings.setNodePositions(MatrixX3f::Identity(2, 3));
     settings.setConnectivityMethods({"COH"});
-    const MatrixXd offline = compute_connectivity(settings).front().getFullConnectivityMatrix();
+    const MatrixXd offline = compute_connectivity(settings).front().connectivity_matrix();
 
     //! [rt_connectivity_usage]
     RtConnectivity rtConnectivity;
@@ -264,7 +264,7 @@ int main(int argc, char* argv[])
     bool connectivityDone = false;
     QObject::connect(&rtConnectivity, &RtConnectivity::newConnectivityResultAvailable,
                      [&](const std::vector<Network>& networks, const ConnectivitySettings&) {
-                         online = networks.front().getFullConnectivityMatrix();
+                         online = networks.front().connectivity_matrix();
                          connectivityDone = true;
                      });
     rtConnectivity.append(settings); // computed on the worker thread

@@ -77,7 +77,7 @@ Network WeightedPhaseLagIndex::calculate(ConnectivitySettings& connectivitySetti
         connectivitySettings.clearIntermediateData();
     }
 
-    finalNetwork.setSamplingFrequency(connectivitySettings.getSamplingFrequency());
+    finalNetwork.set_sampling_frequency(connectivitySettings.getSamplingFrequency());
 
 #ifdef EIGEN_FFTW_DEFAULT
     fftw_make_planner_thread_safe();
@@ -85,19 +85,7 @@ Network WeightedPhaseLagIndex::calculate(ConnectivitySettings& connectivitySetti
 
     //Create nodes
     int rows = connectivitySettings.at(0).matData.rows();
-    RowVectorXf rowVert = RowVectorXf::Zero(3);
-
-    for (int i = 0; i < rows; ++i) {
-        rowVert = RowVectorXf::Zero(3);
-
-        if (connectivitySettings.getNodePositions().rows() != 0 && i < connectivitySettings.getNodePositions().rows()) {
-            rowVert(0) = connectivitySettings.getNodePositions().row(i)(0);
-            rowVert(1) = connectivitySettings.getNodePositions().row(i)(1);
-            rowVert(2) = connectivitySettings.getNodePositions().row(i)(2);
-        }
-
-        finalNetwork.append(NetworkNode::SPtr(new NetworkNode(i, rowVert)));
-    }
+    add_nodes(finalNetwork, rows, connectivitySettings.getNodePositions());
 
     // Check that iNfft >= signal length
     int iSignalLength = connectivitySettings.at(0).matData.cols();
@@ -122,8 +110,8 @@ Network WeightedPhaseLagIndex::calculate(ConnectivitySettings& connectivitySetti
     }
 
     // Pass information about the FFT length. Use iNFreqs because we only use the half spectrum
-    finalNetwork.setFFTSize(iNFreqs);
-    finalNetwork.setUsedFreqBins(AbstractMetric::m_iNumberBinAmount);
+    finalNetwork.set_fft_size(iNFreqs);
+    finalNetwork.set_used_freq_bins(AbstractMetric::m_iNumberBinAmount);
 
     QMutex mutex;
 
@@ -313,7 +301,6 @@ void WeightedPhaseLagIndex::computeWPLI(ConnectivitySettings& connectivitySettin
     // Compute final WPLI and create Network
     MatrixXd matDenom, matNom;
     MatrixXd matWeight;
-    QSharedPointer<NetworkEdge> pEdge;
     int j;
 
     for (int i = 0; i < connectivitySettings.getIntermediateSumData().vecPairCsdSum.size(); ++i) {
@@ -325,11 +312,7 @@ void WeightedPhaseLagIndex::computeWPLI(ConnectivitySettings& connectivitySettin
         for (j = i; j < matNom.rows(); ++j) {
             matWeight = matNom.row(j).transpose();
 
-            pEdge = QSharedPointer<NetworkEdge>(new NetworkEdge(i, j, matWeight));
-
-            finalNetwork.getNodeAt(i)->append(pEdge);
-            finalNetwork.getNodeAt(j)->append(pEdge);
-            finalNetwork.append(pEdge);
+            finalNetwork.add_edge(NetworkEdge(i, j, std::move(matWeight)));
         }
     }
 }

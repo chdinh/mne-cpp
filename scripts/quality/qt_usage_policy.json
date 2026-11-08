@@ -72,8 +72,8 @@
       ]
     },
     "connectivity": {
-      "tokens": 436,
-      "public_header_includes": 32,
+      "tokens": 274,
+      "public_header_includes": 28,
       "modules": [
         "Concurrent",
         "Core",

@@ -10,21 +10,14 @@
  *           Christoph Dinh <christoph.dinh@mne-cpp.org>
  * @since    0.1.0
  * @date     August 2016
- * @brief    Weighted edge between two @ref CONNECTIVITYLIB::NetworkNode instances; stores the full per-frequency weight matrix and the scalar band-averaged weight.
+ * @brief    Weighted edge between two nodes of a @ref CONNECTIVITYLIB::Network; stores the full per-frequency weight matrix and the scalar band-averaged weight.
  *
  * Every functional-connectivity estimator in @c CONNECTIVITYLIB produces one
  * @ref CONNECTIVITYLIB::NetworkEdge per ordered channel pair (or per unordered pair for
- * symmetric metrics) and attaches it to the @ref CONNECTIVITYLIB::Network. The edge owns
- * the full weight matrix returned by the metric - typically one row per
- * frequency bin and one or more columns per estimator-specific output -
- * and a configurable @c [iStartWeightBin, iEndWeightBin) reduction window
- * that defines the single scalar @c weight used by the visualisation
- * and thresholding paths.
- *
- * The active/inactive flag and the threshold-aware comparison operators
- * are read by @ref CONNECTIVITYLIB::Network::getThresholdedEdges "Network::getThresholdedEdges" so that GUI plugins can
- * toggle the displayed edge density without rebuilding the underlying
- * connectivity result.
+ * symmetric metrics) and adds it to the @ref CONNECTIVITYLIB::Network. The edge owns
+ * the full weight matrix returned by the metric - one row per frequency bin -
+ * and an inclusive @c [first, last] frequency-bin window that reduces the
+ * matrix to the single scalar @c weight used by thresholding and display.
  */
 
 #ifndef NETWORKEDGE_H
@@ -36,21 +29,13 @@
 
 #include "../connectivity_global.h"
 
-//=============================================================================================================
-// QT INCLUDES
-//=============================================================================================================
-
-#include <QSharedPointer>
+#include <utility>
 
 //=============================================================================================================
 // EIGEN INCLUDES
 //=============================================================================================================
 
 #include <Eigen/Core>
-
-//=============================================================================================================
-// FORWARD DECLARATIONS
-//=============================================================================================================
 
 //=============================================================================================================
 // DEFINE NAMESPACE CONNECTIVITYLIB
@@ -60,145 +45,129 @@ namespace CONNECTIVITYLIB
 {
 
 //=============================================================================================================
-// CONNECTIVITYLIB FORWARD DECLARATIONS
-//=============================================================================================================
-
-class NetworkNode;
-
-//=============================================================================================================
 /**
- * Directed weighted edge connecting two @ref NetworkNode instances.
+ * Directed weighted edge between the nodes with indices @ref source and
+ * @ref target. Holds the full per-frequency weight matrix delivered by the
+ * metric, the frequency-bin window that reduces it to the scalar
+ * @ref weight, and the active flag set by @ref Network::set_threshold.
+ * For symmetric metrics the direction is a storage convention only.
  *
- * Holds the start- and end-node IDs, the full per-frequency weight matrix
- * delivered by the metric, an active/inactive flag honoured by the
- * thresholded views on @ref Network, and the @c [iStartWeightBin,
- * iEndWeightBin) window that reduces the matrix to the scalar weight
- * used for thresholding and rendering. For symmetric metrics the
- * directionality is purely a storage convention.
+ * NetworkEdge is a plain value type: copies are independent.
  *
  * @brief Weighted, directional edge in a @ref Network; carries per-frequency weights plus a band-averaged scalar.
  *
  * @snippet ex_connectivity_metrics/main.cpp network_build
  */
-
 class CONNECTIVITYSHARED_EXPORT NetworkEdge
 {
 public:
-    typedef QSharedPointer<NetworkEdge> SPtr;            /**< Shared pointer type for NetworkEdge. */
-    typedef QSharedPointer<const NetworkEdge> ConstSPtr; /**< Const shared pointer type for NetworkEdge. */
-
     //=========================================================================================================
     /**
-     * Constructs a NetworkEdge object.
+     * Constructs an edge and computes its scalar weight.
      *
-     * @param[in] iStartNodeID      The start node id of the edge.
-     * @param[in] iEndNodeID        The end node id of the edge.
-     * @param[in] matWeight         The edge weight.
-     * @param[in] bIsActive         The active flag of this edge. Default is true.
-     * @param[in] iStartWeightBin   The bin index to start avergaing from. Default is -1 which means an average over all weights.
-     * @param[in] iEndWeightBin     The bin index to end avergaing to. Default is -1 which means an average over all weights.
+     * @param[in] source     Index of the start node.
+     * @param[in] target     Index of the end node.
+     * @param[in] weights    Per-frequency weights, one row per bin. An empty matrix becomes a 1x1 zero matrix.
+     * @param[in] bins       Inclusive frequency-bin window to average; {-1, -1} averages all weights.
      */
-    explicit NetworkEdge(int iStartNodeID,
-                         int iEndNodeID,
-                         const Eigen::MatrixXd& matWeight,
-                         bool bIsActive = true,
-                         int iStartWeightBin = -1,
-                         int iEndWeightBin = -1);
+    NetworkEdge(int source, int target, Eigen::MatrixXd weights, std::pair<int, int> bins = {-1, -1});
 
     //=========================================================================================================
     /**
-     * Returns the start node of this edge.
+     * @return Index of the start node.
+     */
+    int source() const noexcept
+    {
+        return m_source;
+    }
+
+    //=========================================================================================================
+    /**
+     * @return Index of the end node.
+     */
+    int target() const noexcept
+    {
+        return m_target;
+    }
+
+    //=========================================================================================================
+    /**
+     * @return Whether the edge passes the threshold of its network.
+     */
+    bool active() const noexcept
+    {
+        return m_active;
+    }
+
+    //=========================================================================================================
+    /**
+     * Sets the active flag.
      *
-     * @return The start node of the edge.
+     * @param[in] active    The new flag.
      */
-    int getStartNodeID();
+    void set_active(bool active) noexcept
+    {
+        m_active = active;
+    }
 
     //=========================================================================================================
     /**
-     * Returns the end node of this edge.
+     * @return The scalar weight averaged over the frequency-bin window.
+     */
+    double weight() const noexcept
+    {
+        return m_weight;
+    }
+
+    //=========================================================================================================
+    /**
+     * Overrides the scalar weight.
      *
-     * @return The end node of the edge.
+     * @param[in] weight    The new scalar weight.
      */
-    int getEndNodeID();
+    void set_weight(double weight) noexcept
+    {
+        m_weight = weight;
+    }
 
     //=========================================================================================================
     /**
-     * Sets the activity flag of this edge.
+     * @return The per-frequency weights, one row per bin.
+     */
+    const Eigen::MatrixXd& weights() const noexcept
+    {
+        return m_weights;
+    }
+
+    //=========================================================================================================
+    /**
+     * @return The inclusive frequency-bin window the scalar weight is averaged over; {-1, -1} means all bins.
+     */
+    std::pair<int, int> frequency_bins() const noexcept
+    {
+        return m_bins;
+    }
+
+    //=========================================================================================================
+    /**
+     * Sets the frequency-bin window and recomputes the scalar weight. Invalid windows
+     * (last before first, or indices below -1) are stored but leave the weight unchanged.
+     * A window reaching past the last bin is clipped.
      *
-     * @param[in] bActiveFlag        The new activity flag of this edge.
+     * @param[in] bins    The inclusive window; {-1, -1} averages all bins.
      */
-    void setActive(bool bActiveFlag);
+    void set_frequency_bins(std::pair<int, int> bins);
 
-    //=========================================================================================================
-    /**
-     * Returns the activity flag of this edge.
-     *
-     * @return The current activity flag of this edge.
-     */
-    bool isActive();
+private:
+    void average();
 
-    //=========================================================================================================
-    /**
-     * Returns the edge weight. The weights are averaged between the specified bin indeces and their corresponding tapers.
-     *
-     * @return    The current edge weight.
-     */
-    double getWeight() const;
-
-    //=========================================================================================================
-    /**
-     * Returns the edge weight non-averaged in form of a matrix.
-     *
-     * @return    The current edge weight matrix.
-     */
-    Eigen::MatrixXd getMatrixWeight() const;
-
-    //=========================================================================================================
-    /**
-     * Set the averaged edge weight.
-     *
-     * @param[in] dAveragedWeight        The new weight.
-     */
-    void setWeight(double dAveragedWeight);
-
-    //=========================================================================================================
-    /**
-     * Calculates the edge weight based on the currently set min/max frequency bins.
-     */
-    void calculateAveragedWeight();
-
-    //=========================================================================================================
-    /**
-     * Sets the frequency bins to average from/to.
-     *
-     * @param[in] minMaxFreqBins        The new lower/upper bin to average from/to.
-     */
-    void setFrequencyBins(const QPair<int, int>& minMaxFreqBins);
-
-    //=========================================================================================================
-    /**
-     * Returns the current frequency bins to average from/to.
-     *
-     * @return The current upper/lower bin to average from/to.
-     */
-    const QPair<int, int>& getFrequencyBins();
-
-protected:
-    int m_iStartNodeID; /**< The start node of the edge.*/
-    int m_iEndNodeID;   /**< The end node of the edge.*/
-
-    bool m_bIsActive; /**< The activity flag indicating whether this edge is part of a thresholded network.*/
-
-    QPair<int, int> m_iMinMaxFreqBins; /**< The lower/upper bin indeces to start avergaing from/to. Default is -1 which means an average over all weights.*/
-
-    Eigen::MatrixXd m_matWeight; /**< The weight matrix of the edge. E.g. rows could be different frequency bins/bands and columns could be different instances in time.*/
-
-    double m_dAveragedWeight; /**< The current averaged edge weight.*/
+    Eigen::MatrixXd m_weights;  /**< Per-frequency weights, one row per bin. */
+    std::pair<int, int> m_bins; /**< Inclusive frequency-bin window of the scalar weight. */
+    double m_weight = 0.0;      /**< Scalar weight averaged over m_bins. */
+    int m_source;               /**< Index of the start node. */
+    int m_target;               /**< Index of the end node. */
+    bool m_active = true;       /**< Whether the edge passes the network threshold. */
 };
-
-//=============================================================================================================
-// INLINE DEFINITIONS
-//=============================================================================================================
 
 } // namespace CONNECTIVITYLIB
 

@@ -26,6 +26,9 @@
 #include <connectivity/compute_connectivity.h>
 #include <connectivity/connectivitysettings.h>
 #include <connectivity/network/network.h>
+
+#include <map>
+#include <string>
 #include <connectivity/metrics/abstractmetric.h>
 
 #include <fiff/fiff_raw_data.h>
@@ -343,25 +346,25 @@ int main(int argc, char* argv[])
 
     std::vector<Network> lNetworks = compute_connectivity(conSettings);
 
-    QMap<QString, Vector4i> mColor;
-    mColor.insert("COR", Vector4i(90, 26, 100, 1));
-    mColor.insert("XCOR", Vector4i(255, 20, 80, 1));
-    mColor.insert("PLI", Vector4i(255, 255, 0, 1));
-    mColor.insert("COH", Vector4i(2, 89, 100, 1));
-    mColor.insert("IMAGCOH", Vector4i(50, 255, 48, 1));
-    mColor.insert("PLV", Vector4i(0, 255, 255, 1));
-    mColor.insert("WPLI", Vector4i(255, 0, 100, 1));
-    mColor.insert("USPLI", Vector4i(255, 89, 200, 1));
-    mColor.insert("DSWPLI", Vector4i(25, 10, 255, 1));
+    std::map<std::string, Vector4i> mColor;
+    mColor["COR"] = Vector4i(90, 26, 100, 255);
+    mColor["XCOR"] = Vector4i(255, 20, 80, 255);
+    mColor["PLI"] = Vector4i(255, 255, 0, 255);
+    mColor["COH"] = Vector4i(2, 89, 100, 255);
+    mColor["IMAGCOH"] = Vector4i(50, 255, 48, 255);
+    mColor["PLV"] = Vector4i(0, 255, 255, 255);
+    mColor["WPLI"] = Vector4i(255, 0, 100, 255);
+    mColor["USPLI"] = Vector4i(255, 89, 200, 255);
+    mColor["DSWPLI"] = Vector4i(25, 10, 255, 255);
 
     for (int j = 0; j < std::ssize(lNetworks); ++j) {
-        lNetworks[j].setFrequencyRange(dFreqMin, dFreqMax);
+        lNetworks[j].set_frequency_range(dFreqMin, dFreqMax);
         lNetworks[j].normalize();
-        VisualizationInfo visInfo = lNetworks.at(j).getVisualizationInfo();
-        visInfo.sMethod = "Color";
-        visInfo.colNodes = mColor[lNetworks[j].getConnectivityMethod()];
-        visInfo.colEdges = mColor[lNetworks[j].getConnectivityMethod()];
-        lNetworks[j].setVisualizationInfo(visInfo);
+        VisualizationInfo visInfo = lNetworks[j].visualization_info();
+        visInfo.coloring = VisualizationInfo::Coloring::fixed;
+        visInfo.node_color = mColor[lNetworks[j].method()];
+        visInfo.edge_color = visInfo.node_color;
+        lNetworks[j].set_visualization_info(std::move(visInfo));
     }
 
     // Create BrainView for visualization
@@ -371,7 +374,7 @@ int main(int argc, char* argv[])
 
     // Load all networks
     for (int j = 0; j < std::ssize(lNetworks); ++j) {
-        pBrainView->loadNetwork(lNetworks[j], lNetworks[j].getConnectivityMethod());
+        pBrainView->loadNetwork(lNetworks[j], QString::fromStdString(lNetworks[j].method()));
     }
     pBrainView->setNetworkThreshold(0.9);
 
