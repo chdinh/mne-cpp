@@ -71,9 +71,9 @@ struct MNESHARED_EXPORT CovDescription
     FIFFLIB::RejectionParams rej;    /**< Rejection limits. */
     bool removeSampleMean = true;    /**< Remove the mean at each sample. */
     bool fixSkew = false;            /**< Fix skew on trigger lines. */
-    QString filename;                /**< Output file. */
-    QString eventFile;               /**< Read events from here. */
-    QString logFile;                 /**< Save log here. */
+    std::string filename;            /**< Output file. */
+    std::string eventFile;           /**< Read events from here. */
+    std::string logFile;             /**< Save log here. */
 };
 
 //=============================================================================================================
@@ -104,25 +104,25 @@ struct MNESHARED_EXPORT FilterSettings
 struct MNESHARED_EXPORT ProcessingSettings
 {
     // Working directory
-    QString workingDir;
+    std::string workingDir;
 
     // Input
-    QStringList rawFiles;        /**< Raw data file(s). */
-    QStringList eventFiles;      /**< Event file(s) to read. */
-    int compensateTo = -1;       /**< Desired software gradient compensation (-1 = from file). */
-    bool allowMaxShield = false; /**< Allow unprocessed MaxShield data. */
+    UTILSLIB::StringList rawFiles;   /**< Raw data file(s). */
+    UTILSLIB::StringList eventFiles; /**< Event file(s) to read. */
+    int compensateTo = -1;           /**< Desired software gradient compensation (-1 = from file). */
+    bool allowMaxShield = false;     /**< Allow unprocessed MaxShield data. */
 
     // Filter
     FilterSettings filter;
 
     // Events output
-    QStringList eventsOutFiles;      /**< Save events to these files. */
-    bool saveAllEvents = false;      /**< Save all transitions (not just leading edge). */
-    QString digTrigger;              /**< Digital trigger channel name. */
-    unsigned int digTriggerMask = 0; /**< Mask for digital trigger channel. */
+    UTILSLIB::StringList eventsOutFiles; /**< Save events to these files. */
+    bool saveAllEvents = false;          /**< Save all transitions (not just leading edge). */
+    std::string digTrigger;              /**< Digital trigger channel name. */
+    unsigned int digTriggerMask = 0;     /**< Mask for digital trigger channel. */
 
     // Projection
-    QStringList projFiles;            /**< SSP data files. */
+    UTILSLIB::StringList projFiles;   /**< SSP data files. */
     int projOn = -1;                  /**< -1=unspecified, 0=off, 1=on. */
     bool makeProj = false;            /**< Create a new projection operator. */
     int projEvent = -1;               /**< Which event for projector creation. */
@@ -134,24 +134,24 @@ struct MNESHARED_EXPORT ProcessingSettings
     float projGradReject = 2000e-13f; /**< Gradiometer rejection for projection. */
     float projMagReject = 3e-12f;     /**< Magnetometer rejection for projection. */
     float projEegReject = 50e-6f;     /**< EEG rejection for projection. */
-    QString saveProjTag;              /**< Tag for projection output files. */
+    std::string saveProjTag;          /**< Tag for projection output files. */
     bool saveProjAugmented = false;   /**< Output in augmented format for graph. */
 
     // Save
-    QStringList saveFiles;        /**< Destination(s) for saving filtered raw data. */
-    bool omitSubjectInfo = false; /**< Omit subject info from output. */
-    int decimation = 1;           /**< Decimation factor. */
-    long splitSize = -1;          /**< Split output into chunks of this many bytes (-1=no split). */
+    UTILSLIB::StringList saveFiles; /**< Destination(s) for saving filtered raw data. */
+    bool omitSubjectInfo = false;   /**< Omit subject info from output. */
+    int decimation = 1;             /**< Decimation factor. */
+    long splitSize = -1;            /**< Split output into chunks of this many bytes (-1=no split). */
 
     // Averaging
-    QStringList aveFiles; /**< Averaging description file(s). */
-    QString saveAveTag;   /**< Tag for average output files. */
-    QString grandAveFile; /**< Grand average output file. */
+    UTILSLIB::StringList aveFiles; /**< Averaging description file(s). */
+    std::string saveAveTag;        /**< Tag for average output files. */
+    std::string grandAveFile;      /**< Grand average output file. */
 
     // Covariance
-    QStringList covFiles; /**< Covariance description file(s). */
-    QString saveCovTag;   /**< Tag for covariance output files. */
-    QString grandCovFile; /**< Grand covariance output file. */
+    UTILSLIB::StringList covFiles; /**< Covariance description file(s). */
+    std::string saveCovTag;        /**< Tag for covariance output files. */
+    std::string grandCovFile;      /**< Grand covariance output file. */
 
     // Misc
     bool saveHere = false; /**< Save auto-generated files in CWD instead of raw data dir. */

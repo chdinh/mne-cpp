@@ -482,7 +482,7 @@ void MNEMshDisplaySurface::scale(const Eigen::Vector3f& scales)
 
 //=============================================================================================================
 
-void MNEMshDisplaySurface::decide_surface_extent([[maybe_unused]] const QString& tag)
+void MNEMshDisplaySurface::decide_surface_extent([[maybe_unused]] const std::string& tag)
 {
     Eigen::Vector3f mn = rr.row(0).transpose();
     Eigen::Vector3f mx = mn;
@@ -509,9 +509,9 @@ void MNEMshDisplaySurface::decide_surface_extent([[maybe_unused]] const QString&
 
 //=============================================================================================================
 
-void MNEMshDisplaySurface::decide_curv_display(const QString& name)
+void MNEMshDisplaySurface::decide_curv_display(const std::string& name)
 {
-    if (name.startsWith("inflated") || name.startsWith("sphere") || name.startsWith("white"))
+    if (name.starts_with("inflated") || name.starts_with("sphere") || name.starts_with("white"))
         curvature_color_mode = SHOW_CURVATURE_OVERLAY;
     else
         curvature_color_mode = SHOW_CURVATURE_NONE;

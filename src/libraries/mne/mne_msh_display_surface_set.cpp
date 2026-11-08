@@ -118,29 +118,30 @@ MNEMshDisplaySurfaceSet::~MNEMshDisplaySurfaceSet() = default;
 
 //=============================================================================================================
 
-std::unique_ptr<MNEMshDisplaySurfaceSet> MNEMshDisplaySurfaceSet::load(const QString& subject_id, const QString& surf, const QString& subjects_dir)
+std::unique_ptr<MNEMshDisplaySurfaceSet> MNEMshDisplaySurfaceSet::load(const std::string& subject_id, const std::string& surf, const std::filesystem::path& subjects_dir)
 /*
       * Load new display surface data
       */
 {
-    QString pathLh = QString("%1/%2/surf/%3.%4").arg(subjects_dir).arg(subject_id).arg("lh").arg(surf);
-    QString pathLhCurv = QString("%1/%2/surf/%3.%4").arg(subjects_dir).arg(subject_id).arg("lh").arg("curv");
-    QString pathRh = QString("%1/%2/surf/%3.%4").arg(subjects_dir).arg(subject_id).arg("rh").arg(surf);
-    QString pathRhCurv = QString("%1/%2/surf/%3.%4").arg(subjects_dir).arg(subject_id).arg("rh").arg("curv");
+    const std::filesystem::path surfDir = subjects_dir / UTILSLIB::pathFromUtf8(subject_id) / "surf";
+    const std::filesystem::path pathLh = surfDir / UTILSLIB::pathFromUtf8("lh." + surf);
+    const std::filesystem::path pathLhCurv = surfDir / "lh.curv";
+    const std::filesystem::path pathRh = surfDir / UTILSLIB::pathFromUtf8("rh." + surf);
+    const std::filesystem::path pathRhCurv = surfDir / "rh.curv";
 
-    qInfo("Loading surface %s ...\n", pathLh.toUtf8().constData());
-    auto left = MNESourceSpace::load_surface(pathLh.toStdU16String(), pathLhCurv.toStdU16String());
+    qInfo("Loading surface %s ...\n", UTILSLIB::utf8FromPath(pathLh).c_str());
+    auto left = MNESourceSpace::load_surface(pathLh, pathLhCurv);
     if (!left) {
-        left = MNESourceSpace::load_surface(pathLh.toStdU16String(), QString().toStdU16String());
+        left = MNESourceSpace::load_surface(pathLh, {});
         if (!left)
             return nullptr;
         left->add_uniform_curv();
     }
 
-    qInfo("Loading surface %s ...\n", pathRh.toUtf8().constData());
-    auto right = MNESourceSpace::load_surface(pathRh.toStdU16String(), pathRhCurv.toStdU16String());
+    qInfo("Loading surface %s ...\n", UTILSLIB::utf8FromPath(pathRh).c_str());
+    auto right = MNESourceSpace::load_surface(pathRh, pathRhCurv);
     if (!right) {
-        right = MNESourceSpace::load_surface(pathRh.toStdU16String(), QString().toStdU16String());
+        right = MNESourceSpace::load_surface(pathRh, {});
         if (!right)
             return nullptr;
         right->add_uniform_curv();
@@ -186,16 +187,16 @@ std::unique_ptr<MNEMshDisplaySurfaceSet> MNEMshDisplaySurfaceSet::load(const QSt
 
 //=============================================================================================================
 
-int MNEMshDisplaySurfaceSet::add_bem_surface(const QString& filepath,
+int MNEMshDisplaySurfaceSet::add_bem_surface(const std::filesystem::path& filepath,
                                              int kind,
-                                             const QString& bemname,
+                                             const std::string& bemname,
                                              int full_geom,
                                              int check)
 {
     qInfo("Loading BEM surface %s (id = %d) from %s ...\n",
-          bemname.toUtf8().constData(), kind, filepath.toUtf8().constData());
+          bemname.c_str(), kind, UTILSLIB::utf8FromPath(filepath).c_str());
 
-    std::unique_ptr<MNESurface> surf(MNESurface::read_bem_surface2(filepath.toStdU16String(), kind, full_geom));
+    std::unique_ptr<MNESurface> surf(MNESurface::read_bem_surface2(filepath, kind, full_geom));
     if (!surf)
         return -1;
 
@@ -205,7 +206,7 @@ int MNEMshDisplaySurfaceSet::add_bem_surface(const QString& filepath,
         if (std::fabs(sum - 1.0) > 1e-4) {
             qCritical("%s surface is not closed "
                       "(sum of solid angles = %g * 4*PI).",
-                      bemname.toUtf8().constData(), sum);
+                      bemname.c_str(), sum);
             return -1;
         }
     }

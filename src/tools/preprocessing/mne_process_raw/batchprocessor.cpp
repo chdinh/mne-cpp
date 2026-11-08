@@ -31,12 +31,14 @@
 
 #include <mne/mne.h>
 
+#include <utils/string_utils.h>
+
 #include <QFile>
-#include <QFileInfo>
-#include <QDir>
-#include <QTextStream>
 
 #include <exception>
+#include <filesystem>
+#include <format>
+#include <fstream>
 #include <optional>
 
 //=============================================================================================================
@@ -47,63 +49,64 @@ using namespace MNEPROCESSRAWAPP;
 using namespace FIFFLIB;
 using namespace MNELIB;
 using namespace Eigen;
+using namespace UTILSLIB;
 
 //=============================================================================================================
 // DEFINE MEMBER METHODS
 //=============================================================================================================
 
-bool BatchProcessor::composeSaveNames(const QString& rawName,
-                                      const QString& tag,
+bool BatchProcessor::composeSaveNames(std::string_view rawName,
+                                      std::string_view tag,
                                       bool stripDir,
-                                      QString& saveName,
-                                      QString& logName)
+                                      std::string& saveName,
+                                      std::string& logName)
 {
-    if (tag.isEmpty() || rawName.isEmpty()) {
+    if (tag.empty() || rawName.empty()) {
         qWarning() << "[BatchProcessor::composeSaveNames] Tag or rawname missing.";
         return false;
     }
 
-    QString base = rawName;
+    const auto stripSuffix = [](std::string_view& name, std::string_view suffix) {
+        if (name.size() >= suffix.size() && equalsIgnoreCase(name.substr(name.size() - suffix.size()), suffix)) {
+            name.remove_suffix(suffix.size());
+            return true;
+        }
+        return false;
+    };
 
-    // Strip known suffixes
-    if (base.endsWith("_raw.fif", Qt::CaseInsensitive))
-        base.chop(8);
-    else if (base.endsWith(".fif", Qt::CaseInsensitive))
-        base.chop(4);
+    std::string_view base = rawName;
 
-    // Strip _sss suffix
-    if (base.endsWith("_sss", Qt::CaseInsensitive))
-        base.chop(4);
+    // Strip known suffixes, then _sss
+    if (!stripSuffix(base, "_raw.fif"))
+        stripSuffix(base, ".fif");
+    stripSuffix(base, "_sss");
 
     if (stripDir) {
-        QFileInfo fi(base);
-        base = fi.fileName();
+        const std::size_t slash = base.find_last_of('/');
+        if (slash != std::string_view::npos)
+            base.remove_prefix(slash + 1);
     }
 
-    saveName = base + tag + ".fif";
-    logName = base + tag + ".log";
+    saveName = std::format("{}{}.fif", base, tag);
+    logName = std::format("{}{}.log", base, tag);
 
     return true;
 }
 
 //=============================================================================================================
 
-bool BatchProcessor::writeLog(const QString& logFile, const QString& log)
+bool BatchProcessor::writeLog(const std::string& logFile, std::string_view log)
 {
-    if (logFile.isEmpty() || log.isEmpty())
+    if (logFile.empty() || log.empty())
         return true;
 
-    QFile file(logFile);
-    if (!file.open(QIODevice::WriteOnly | QIODevice::Text)) {
-        qWarning() << "[BatchProcessor::writeLog] Cannot open log file" << logFile;
+    std::ofstream out(pathFromUtf8(logFile));
+    if (!out || !(out << log)) {
+        qWarning() << "[BatchProcessor::writeLog] Cannot open log file" << logFile.c_str();
         return false;
     }
 
-    QTextStream out(&file);
-    out << log;
-    file.close();
-
-    qInfo() << "[BatchProcessor::writeLog] Log written to" << logFile;
+    qInfo() << "[BatchProcessor::writeLog] Log written to" << logFile.c_str();
     return true;
 }
 
@@ -111,7 +114,7 @@ bool BatchProcessor::writeLog(const QString& logFile, const QString& log)
 
 int BatchProcessor::run(const ProcessingSettings& settings)
 {
-    if (settings.rawFiles.isEmpty()) {
+    if (settings.rawFiles.empty()) {
         qCritical() << "Raw data file not specified.";
         return 1;
     }
@@ -119,31 +122,40 @@ int BatchProcessor::run(const ProcessingSettings& settings)
     qInfo() << "\n--- mne_process_raw batch processing ---\n";
 
     // Storage for grand average computation
-    QList<FiffEvokedSet> allAverages;
+    std::vector<FiffEvokedSet> allAverages;
     std::vector<FiffCov> allCovariances;
 
     // Process each raw file
-    for (int f = 0; f < settings.rawFiles.size(); ++f) {
-        const QString& rawName = settings.rawFiles[f];
+    // The f-th entry of a per-run list, or nothing
+    const auto perRun = [](const StringList& list, std::size_t f) {
+        return f < list.size() ? list[f] : std::string();
+    };
+    // The f-th entry of a per-run list, the last one for later runs
+    const auto perRunOrLast = [](const StringList& list, std::size_t f) {
+        return list.empty() ? std::string() : list[std::min(f, list.size() - 1)];
+    };
 
-        qInfo() << "\n--- Opening" << rawName << "---\n";
+    for (std::size_t f = 0; f < settings.rawFiles.size(); ++f) {
+        const std::string& rawName = settings.rawFiles[f];
+
+        qInfo() << "\n--- Opening" << rawName.c_str() << "---\n";
 
         // Open raw data file
         std::optional<FiffRawData> rawData;
         try {
-            rawData.emplace(rawName.toStdU16String());
+            rawData.emplace(pathFromUtf8(rawName));
         } catch (const std::exception& error) {
-            qCritical() << "Failed to open raw data file:" << rawName << error.what();
+            qCritical() << "Failed to open raw data file:" << rawName.c_str() << error.what();
             return 1;
         }
         FiffRawData& raw = *rawData;
 
         if (raw.info.nchan == 0) {
-            qCritical() << "Failed to open raw data file:" << rawName;
+            qCritical() << "Failed to open raw data file:" << rawName.c_str();
             return 1;
         }
 
-        qInfo() << "Opened:" << rawName
+        qInfo() << "Opened:" << rawName.c_str()
                 << "(" << raw.info.nchan << "channels,"
                 << "sfreq =" << raw.info.sfreq << "Hz )";
 
@@ -153,13 +165,11 @@ int BatchProcessor::run(const ProcessingSettings& settings)
         FiffEvents fiffEvents;
 
         // Try loading events from an event file first
-        QString eventInFile;
-        if (f < settings.eventFiles.size())
-            eventInFile = settings.eventFiles[f];
+        const std::string eventInFile = perRun(settings.eventFiles, f);
 
-        if (!eventInFile.isEmpty()) {
-            qInfo() << "Loading events from" << eventInFile;
-            if (auto read = FiffEvents::read(eventInFile.toStdU16String())) {
+        if (!eventInFile.empty()) {
+            qInfo() << "Loading events from" << eventInFile.c_str();
+            if (auto read = FiffEvents::read(pathFromUtf8(eventInFile))) {
                 fiffEvents = std::move(*read);
             } else {
                 qWarning() << read.error().what();
@@ -168,9 +178,9 @@ int BatchProcessor::run(const ProcessingSettings& settings)
 
         if (fiffEvents.empty()) {
             // Detect from trigger channel
-            qInfo() << "Detecting events from trigger channel" << settings.digTrigger;
+            qInfo() << "Detecting events from trigger channel" << settings.digTrigger.c_str();
             // As in MNE-C (mne_raw_scan_triggers), a mask of 0 means no masking.
-            if (auto found = FiffEvents::find_events(raw, settings.digTrigger.isEmpty() ? "STI 014" : settings.digTrigger.toStdString(), settings.digTriggerMask == 0 ? 0xFFFFFFFFu : settings.digTriggerMask)) {
+            if (auto found = FiffEvents::find_events(raw, settings.digTrigger.empty() ? std::string("STI 014") : settings.digTrigger, settings.digTriggerMask == 0 ? 0xFFFFFFFFu : settings.digTriggerMask)) {
                 fiffEvents = std::move(*found);
             } else {
                 qWarning() << found.error().what();
@@ -182,13 +192,11 @@ int BatchProcessor::run(const ProcessingSettings& settings)
         //---------------------------------------------------------------------
         // Step 2: Save events if requested
         //---------------------------------------------------------------------
-        QString eventOutFile;
-        if (f < settings.eventsOutFiles.size())
-            eventOutFile = settings.eventsOutFiles[f];
+        const std::string eventOutFile = perRun(settings.eventsOutFiles, f);
 
-        if (!eventOutFile.isEmpty()) {
-            qInfo() << "\n--- Saving events to" << eventOutFile << "---\n";
-            if (auto written = fiffEvents.write(eventOutFile.toStdU16String(), raw.info.sfreq); !written) {
+        if (!eventOutFile.empty()) {
+            qInfo() << "\n--- Saving events to" << eventOutFile.c_str() << "---\n";
+            if (auto written = fiffEvents.write(pathFromUtf8(eventOutFile), raw.info.sfreq); !written) {
                 qWarning() << written.error().what();
             }
         }
@@ -196,7 +204,7 @@ int BatchProcessor::run(const ProcessingSettings& settings)
         //---------------------------------------------------------------------
         // Step 3: Load/Create SSP projections
         //---------------------------------------------------------------------
-        if (!settings.projFiles.isEmpty() || settings.makeProj) {
+        if (!settings.projFiles.empty() || settings.makeProj) {
             if (settings.makeProj) {
                 qInfo() << "\n--- Creating new projection operator ---\n";
 
@@ -215,11 +223,11 @@ int BatchProcessor::run(const ProcessingSettings& settings)
                     raw.info.projs = newProjs;
 
                     // Save if requested
-                    if (!settings.saveProjTag.isEmpty()) {
-                        QString projSaveName, projLogName;
+                    if (!settings.saveProjTag.empty()) {
+                        std::string projSaveName, projLogName;
                         composeSaveNames(rawName, settings.saveProjTag, settings.saveHere,
                                          projSaveName, projLogName);
-                        QFile projOutFile(projSaveName);
+                        QFile projOutFile(QString::fromStdString(projSaveName));
                         auto pProjStream = FiffStream::start_file(projOutFile);
                         if (pProjStream) {
                             pProjStream->write_proj(newProjs);
@@ -230,8 +238,8 @@ int BatchProcessor::run(const ProcessingSettings& settings)
             } else {
                 // Load projections from files
                 std::vector<FiffProj> loadedProjs;
-                for (const QString& projFile : settings.projFiles) {
-                    QFile pFile(projFile);
+                for (const std::string& projFile : settings.projFiles) {
+                    QFile pFile(QString::fromStdString(projFile));
                     FiffStream pStream(&pFile);
                     if (pStream.open()) {
                         std::vector<FiffDirNode::SPtr> projNodes = pStream.dirtree()->dir_tree_find(FIFFB_PROJ);
@@ -268,13 +276,11 @@ int BatchProcessor::run(const ProcessingSettings& settings)
         //---------------------------------------------------------------------
         // Step 4: Save filtered/decimated raw data
         //---------------------------------------------------------------------
-        QString saveFile;
-        if (f < settings.saveFiles.size())
-            saveFile = settings.saveFiles[f];
+        const std::string saveFile = perRun(settings.saveFiles, f);
 
-        if (!saveFile.isEmpty()) {
-            qInfo() << "\n--- Saving data to" << saveFile << "(decim =" << settings.decimation << ") ---\n";
-            if (!raw.save(saveFile.toStdU16String(), RowVectorXi(), settings.decimation)) {
+        if (!saveFile.empty()) {
+            qInfo() << "\n--- Saving data to" << saveFile.c_str() << "(decim =" << settings.decimation << ") ---\n";
+            if (!raw.save(pathFromUtf8(saveFile), RowVectorXi(), settings.decimation)) {
                 qCritical() << "Failed to save raw data.";
                 return 1;
             }
@@ -283,18 +289,14 @@ int BatchProcessor::run(const ProcessingSettings& settings)
         //---------------------------------------------------------------------
         // Step 5: Compute averages
         //---------------------------------------------------------------------
-        QString aveDescFile;
-        if (f < settings.aveFiles.size())
-            aveDescFile = settings.aveFiles[f];
-        else if (!settings.aveFiles.isEmpty())
-            aveDescFile = settings.aveFiles.last();
+        const std::string aveDescFile = perRunOrLast(settings.aveFiles, f);
 
-        if (!aveDescFile.isEmpty()) {
-            qInfo() << "\n--- Averaging according to" << aveDescFile << "---\n";
+        if (!aveDescFile.empty()) {
+            qInfo() << "\n--- Averaging according to" << aveDescFile.c_str() << "---\n";
 
             AverageDescription aveDesc;
-            if (!MNEDescriptionParser::parseAverageFile(aveDescFile, aveDesc) || aveDesc.categories.empty()) {
-                qCritical() << "Failed to parse averaging description file:" << aveDescFile;
+            if (!MNEDescriptionParser::parseAverageFile(pathFromUtf8(aveDescFile), aveDesc) || aveDesc.categories.empty()) {
+                qCritical() << "Failed to parse averaging description file:" << aveDescFile.c_str();
                 return 1;
             }
 
@@ -308,46 +310,41 @@ int BatchProcessor::run(const ProcessingSettings& settings)
             }
 
             // Compose save name
-            QString aveSaveName, aveLogName;
-            if (!settings.saveAveTag.isEmpty()) {
+            std::string aveSaveName, aveLogName;
+            if (!settings.saveAveTag.empty()) {
                 composeSaveNames(rawName, settings.saveAveTag, settings.saveHere,
                                  aveSaveName, aveLogName);
             } else if (!aveDesc.filename.empty()) {
-                aveSaveName = QString::fromStdString(aveDesc.filename);
+                aveSaveName = aveDesc.filename;
             }
 
-            if (!aveSaveName.isEmpty()) {
-                if (const auto saved = evokedSet.save(aveSaveName.toStdU16String()); !saved) {
+            if (!aveSaveName.empty()) {
+                if (const auto saved = evokedSet.save(pathFromUtf8(aveSaveName)); !saved) {
                     qCritical("%s", saved.error().what());
                 }
             }
-            writeLog(aveLogName, QString::fromStdString(aveLog));
+            writeLog(aveLogName, aveLog);
 
-            allAverages.append(evokedSet);
+            allAverages.push_back(std::move(evokedSet));
         }
 
         //---------------------------------------------------------------------
         // Step 6: Compute covariance matrices
         //---------------------------------------------------------------------
-        QString covDescFile;
-        if (f < settings.covFiles.size())
-            covDescFile = settings.covFiles[f];
-        else if (!settings.covFiles.isEmpty())
-            covDescFile = settings.covFiles.last();
+        const std::string covDescFile = perRunOrLast(settings.covFiles, f);
 
-        if (!covDescFile.isEmpty()) {
-            qInfo() << "\n--- Computing covariance matrix according to" << covDescFile << "---\n";
+        if (!covDescFile.empty()) {
+            qInfo() << "\n--- Computing covariance matrix according to" << covDescFile.c_str() << "---\n";
 
             CovDescription covDesc;
-            if (!MNEDescriptionParser::parseCovarianceFile(covDescFile, covDesc) || covDesc.defs.empty()) {
-                qCritical() << "Failed to parse covariance description file:" << covDescFile;
+            if (!MNEDescriptionParser::parseCovarianceFile(pathFromUtf8(covDescFile), covDesc) || covDesc.defs.empty()) {
+                qCritical() << "Failed to parse covariance description file:" << covDescFile.c_str();
                 return 1;
             }
 
             // Compute covariance per definition, then combine
             std::vector<FiffCov> defCovs;
-            QString covLog;
-            covLog += QString("Computing covariance matrix\n");
+            std::string covLog = "Computing covariance matrix\n";
 
             for (int d = 0; d < std::ssize(covDesc.defs); ++d) {
                 const CovDefinition& def = covDesc.defs[d];
@@ -367,9 +364,7 @@ int BatchProcessor::run(const ProcessingSettings& settings)
 
                 if (defCov.dim > 0) {
                     defCovs.push_back(defCov);
-                    covLog += QString("  Definition %1: %2 degrees of freedom\n")
-                                  .arg(d + 1)
-                                  .arg(defCov.nfree);
+                    std::format_to(std::back_inserter(covLog), "  Definition {}: {} degrees of freedom\n", d + 1, defCov.nfree);
                 }
             }
 
@@ -383,22 +378,22 @@ int BatchProcessor::run(const ProcessingSettings& settings)
 
             if (cov.dim > 0) {
                 // Compose save name
-                QString covSaveName, covLogName;
-                if (!settings.saveCovTag.isEmpty()) {
+                std::string covSaveName, covLogName;
+                if (!settings.saveCovTag.empty()) {
                     composeSaveNames(rawName, settings.saveCovTag, settings.saveHere,
                                      covSaveName, covLogName);
-                } else if (!covDesc.filename.isEmpty()) {
+                } else if (!covDesc.filename.empty()) {
                     covSaveName = covDesc.filename;
                 }
 
-                if (!covSaveName.isEmpty()) {
-                    if (const auto saved = cov.save(covSaveName.toStdU16String()); !saved) {
+                if (!covSaveName.empty()) {
+                    if (const auto saved = cov.save(pathFromUtf8(covSaveName)); !saved) {
                         qCritical("%s", saved.error().what());
                     }
                 }
                 writeLog(covLogName, covLog);
 
-                allCovariances.push_back(cov);
+                allCovariances.push_back(std::move(cov));
             }
         }
     }
@@ -407,13 +402,13 @@ int BatchProcessor::run(const ProcessingSettings& settings)
     // Grand averages (if multiple raw files)
     //-------------------------------------------------------------------------
     if (settings.rawFiles.size() > 1) {
-        if (!settings.grandAveFile.isEmpty() && !allAverages.isEmpty()) {
+        if (!settings.grandAveFile.empty() && !allAverages.empty()) {
             qInfo() << "\n--- Computing grand average ---";
             // As in MNE-C (mne_browse_raw/grand_average.c), every run is weighted by its
             // nave and the category keeps its comment.
             FiffEvokedSet grandAvg;
-            grandAvg.info = allAverages.first().info;
-            for (int j = 0; j < std::ssize(allAverages.first().evoked); ++j) {
+            grandAvg.info = allAverages.front().info;
+            for (int j = 0; j < std::ssize(allAverages.front().evoked); ++j) {
                 std::vector<FiffEvoked> runs;
                 for (const FiffEvokedSet& run : allAverages) {
                     if (j < std::ssize(run.evoked)) {
@@ -429,17 +424,17 @@ int BatchProcessor::run(const ProcessingSettings& settings)
                 grandAvg.evoked.push_back(avg);
             }
             if (!grandAvg.evoked.empty()) {
-                if (const auto saved = grandAvg.save(settings.grandAveFile.toStdU16String()); !saved) {
+                if (const auto saved = grandAvg.save(pathFromUtf8(settings.grandAveFile)); !saved) {
                     qCritical("%s", saved.error().what());
                 }
             }
         }
 
-        if (!settings.grandCovFile.isEmpty() && !allCovariances.empty()) {
+        if (!settings.grandCovFile.empty() && !allCovariances.empty()) {
             qInfo() << "\n--- Computing grand average covariance ---";
             FiffCov grandCov = FiffCov::compute_grand_average(allCovariances);
             if (grandCov.dim > 0) {
-                if (const auto saved = grandCov.save(settings.grandCovFile.toStdU16String()); !saved) {
+                if (const auto saved = grandCov.save(pathFromUtf8(settings.grandCovFile)); !saved) {
                     qCritical("%s", saved.error().what());
                 }
             }

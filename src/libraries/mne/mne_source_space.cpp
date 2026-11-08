@@ -239,7 +239,7 @@ std::unique_ptr<MNEVolGeom> read_vol_geom(QFile& fp)
             counter++;
         } else if (param == "filename") {
             if (tok.size() > 2)
-                vg->filename = QString::fromUtf8(tok.at(2));
+                vg->filename = tok.at(2).toStdString();
             counter++;
         } else if (param == "volume") {
             if (tok.size() > 4) {
@@ -336,7 +336,7 @@ int read_tag_data(QFile& fp, int tag, long long nbytes, QByteArray& val, long lo
             std::memcpy(pod.z_ras, g->z_ras, 3 * sizeof(float));
             std::memcpy(pod.c_ras, g->c_ras, 3 * sizeof(float));
             val = QByteArray(reinterpret_cast<const char*>(&pod), sizeof(VolGeomPOD));
-            val.append(g->filename.toUtf8());
+            val.append(g->filename.data(), static_cast<qsizetype>(g->filename.size()));
             val.append('\0');
             nbytesp = val.size();
         } else if (tag == TAG_OLD_USEREALRAS || tag == TAG_USEREALRAS) {
@@ -765,8 +765,7 @@ std::optional<MNEVolGeom> get_volume_geom_from_tag(const MNEMghTagGroup* tagsp)
             std::memcpy(result.c_ras, pod.c_ras, 3 * sizeof(float));
 
             if (t->len > static_cast<long long>(sizeof(VolGeomPOD)))
-                result.filename = QString::fromUtf8(
-                    reinterpret_cast<const char*>(d + sizeof(VolGeomPOD)));
+                result.filename = reinterpret_cast<const char*>(d + sizeof(VolGeomPOD));
 
             return result;
         }
@@ -1736,7 +1735,7 @@ int MNESourceSpace::read_source_spaces(const std::filesystem::path& name, std::v
             new_space->id = *t_pTag->toInt();
         }
         if (t_pTag = node->find_tag(stream, FIFF_SUBJ_HIS_ID); t_pTag) {
-            new_space->subject = QString::fromStdString(t_pTag->toString());
+            new_space->subject = t_pTag->toString();
         }
         if (t_pTag = node->find_tag(stream, FIFF_MNE_SOURCE_SPACE_TYPE); t_pTag) {
             new_space->type = *t_pTag->toInt();
@@ -1911,14 +1910,14 @@ int MNESourceSpace::read_source_spaces(const std::filesystem::path& name, std::v
                 if (mris.size() == 0) { /* The old way */
                     new_space->MRI_surf_RAS_RAS_t = FiffCoordTrans::read_from_node(stream, node, FIFFV_MNE_COORD_SURFACE_RAS, FIFFV_MNE_COORD_RAS).value_or(FiffCoordTrans());
                     if (t_pTag = node->find_tag(stream, FIFF_MNE_SOURCE_SPACE_MRI_FILE); t_pTag) {
-                        new_space->MRI_volume = QString::fromStdString(t_pTag->toString());
+                        new_space->MRI_volume = t_pTag->toString();
                     }
                     if (t_pTag = node->find_tag(stream, FIFF_MNE_SOURCE_SPACE_INTERPOLATOR); t_pTag) {
                         new_space->interpolator = std::move(*FiffSparseMatrix::fiff_get_float_sparse_matrix(*t_pTag));
                     }
                 } else {
                     if (t_pTag = mris[0]->find_tag(stream, FIFF_MNE_FILE_NAME); t_pTag) {
-                        new_space->MRI_volume = QString::fromStdString(t_pTag->toString());
+                        new_space->MRI_volume = t_pTag->toString();
                     }
                     new_space->MRI_surf_RAS_RAS_t = FiffCoordTrans::read_from_node(stream, mris[0], FIFFV_MNE_COORD_SURFACE_RAS, FIFFV_MNE_COORD_RAS).value_or(FiffCoordTrans());
                     new_space->MRI_voxel_surf_RAS_t = FiffCoordTrans::read_from_node(stream, mris[0], FIFFV_MNE_COORD_MRI_VOXEL, FIFFV_MNE_COORD_SURFACE_RAS).value_or(FiffCoordTrans());
@@ -2165,13 +2164,13 @@ int MNESourceSpace::writeVolumeInfo(FiffStream& stream, bool selected_only) cons
             stream.write_coord_trans(*voxel_surf_RAS_t);
             stream.write_int(FIFF_MNE_SOURCE_SPACE_VOXEL_DIMS, vol_dims, 3);
         }
-        if (interpolator && !MRI_volume.isEmpty()) {
+        if (interpolator && !MRI_volume.empty()) {
             stream.start_block(FIFFB_MNE_PARENT_MRI_FILE);
             if (MRI_surf_RAS_RAS_t && !MRI_surf_RAS_RAS_t->empty())
                 stream.write_coord_trans(*MRI_surf_RAS_RAS_t);
             if (MRI_voxel_surf_RAS_t && !MRI_voxel_surf_RAS_t->empty())
                 stream.write_coord_trans(*MRI_voxel_surf_RAS_t);
-            stream.write_string(FIFF_MNE_FILE_NAME, MRI_volume.toStdString());
+            stream.write_string(FIFF_MNE_FILE_NAME, MRI_volume);
             if (interpolator)
                 stream.write_float_sparse_rcs(FIFF_MNE_SOURCE_SPACE_INTERPOLATOR, interpolator->eigen());
             if (MRI_vol_dims[0] > 0 && MRI_vol_dims[1] > 0 && MRI_vol_dims[2] > 0) {
@@ -2182,8 +2181,8 @@ int MNESourceSpace::writeVolumeInfo(FiffStream& stream, bool selected_only) cons
             stream.end_block(FIFFB_MNE_PARENT_MRI_FILE);
         }
     } else {
-        if (interpolator && !MRI_volume.isEmpty()) {
-            stream.write_string(FIFF_MNE_SOURCE_SPACE_MRI_FILE, MRI_volume.toStdString());
+        if (interpolator && !MRI_volume.empty()) {
+            stream.write_string(FIFF_MNE_SOURCE_SPACE_MRI_FILE, MRI_volume);
             qCritical("Cannot write the interpolator for selection yet");
             return FAIL;
         }
@@ -2208,9 +2207,8 @@ int MNESourceSpace::writeToStream(FiffStream& stream, bool selected_only) const
         stream.write_int(FIFF_MNE_SOURCE_SPACE_TYPE, &type);
     if (id != FIFFV_MNE_SURF_UNKNOWN)
         stream.write_int(FIFF_MNE_SOURCE_SPACE_ID, &id);
-    if (!subject.isEmpty() && subject.size() > 0) {
-        QString subj(subject);
-        stream.write_string(FIFF_SUBJ_HIS_ID, subj.toStdString());
+    if (!subject.empty()) {
+        stream.write_string(FIFF_SUBJ_HIS_ID, subject);
     }
 
     stream.write_int(FIFF_MNE_COORD_FRAME, &coord_frame);

@@ -26,13 +26,14 @@
 #include "mne_global.h"
 #include "mne_layout_port.h"
 
-#include <QMap>
 #include <QPointF>
 #include <QRectF>
-#include <QString>
-#include <QStringList>
 
+#include <filesystem>
+#include <map>
 #include <optional>
+#include <string>
+#include <string_view>
 #include <vector>
 
 #include <Eigen/Core>
@@ -61,7 +62,7 @@ public:
      *
      * @return The layout, or no value if the file cannot be read or a line is malformed.
      */
-    static std::optional<MNELayout> read(const QString& path);
+    static std::optional<MNELayout> read(const std::filesystem::path& path);
 
     //=========================================================================================================
     /**
@@ -69,7 +70,7 @@ public:
      *
      * @return Channel name -> viewport origin; a port listing several channels contributes each of them.
      */
-    QMap<QString, QPointF> channelPositions() const;
+    std::map<std::string, QPointF> channelPositions() const;
 
     //=========================================================================================================
     /**
@@ -79,7 +80,7 @@ public:
      *
      * @return The number of ports marked.
      */
-    int matchPorts(const QString& channel);
+    int matchPorts(std::string_view channel);
 
     //=========================================================================================================
     /**
@@ -89,11 +90,11 @@ public:
      *
      * @return The number of port/channel pairs found.
      */
-    int matchPorts(const QStringList& channels);
+    int matchPorts(const UTILSLIB::StringList& channels);
 
     //=========================================================================================================
     /**
-     * Returns which port shows which channel after matchPorts(const QStringList&).
+     * Returns which port shows which channel after matchPorts(const UTILSLIB::StringList&).
      *
      * @return Ports x channels, 1 where the port shows the channel.
      */
@@ -166,13 +167,13 @@ public:
         return m_visible;
     }
 
-    QString fileName;                 /**< File this layout was read from. */
+    std::string fileName;             /**< File this layout was read from. */
     std::vector<MNELayoutPort> ports; /**< Viewports in file order. */
 
 private:
     QRectF m_extent;           /**< Drawing area from the first line of the file. */
     QRectF m_visible;          /**< Currently shown area. */
-    Eigen::MatrixXi m_matches; /**< Ports x channels of the last matchPorts(const QStringList&). */
+    Eigen::MatrixXi m_matches; /**< Ports x channels of the last matchPorts(const UTILSLIB::StringList&). */
 };
 
 } // namespace MNELIB

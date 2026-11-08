@@ -470,9 +470,13 @@ void ChannelSelectionView::updateProcessingMode(ProcessingMode mode)
 bool ChannelSelectionView::loadLayout(QString path)
 {
     qDebug() << "loadLayout:" << path;
-    const std::optional<MNELIB::MNELayout> layout = MNELIB::MNELayout::read(path);
+    const std::optional<MNELIB::MNELayout> layout = MNELIB::MNELayout::read(path.toStdU16String());
     const bool state = layout.has_value();
-    m_layoutMap = state ? layout->channelPositions() : QMap<QString, QPointF>();
+    m_layoutMap.clear();
+    if (state) {
+        for (const auto& [name, position] : layout->channelPositions())
+            m_layoutMap.insert(QString::fromStdString(name), position);
+    }
 
     //if no layout for EEG is specified generate from digitizer points
     QList<QVector<float>> inputPoints;

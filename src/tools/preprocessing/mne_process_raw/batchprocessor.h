@@ -20,8 +20,8 @@
 
 #include <mne/mne_process_description.h>
 
-#include <QString>
-#include <QStringList>
+#include <string>
+#include <string_view>
 
 //=============================================================================================================
 // DEFINE NAMESPACE
@@ -61,16 +61,16 @@ public:
      * @param[out] logName  Composed log file name.
      * @return true on success.
      */
-    static bool composeSaveNames(const QString& rawName,
-                                 const QString& tag,
+    static bool composeSaveNames(std::string_view rawName,
+                                 std::string_view tag,
                                  bool stripDir,
-                                 QString& saveName,
-                                 QString& logName);
+                                 std::string& saveName,
+                                 std::string& logName);
 
     /**
      * Write a log string to a log file.
      */
-    static bool writeLog(const QString& logFile, const QString& log);
+    static bool writeLog(const std::string& logFile, std::string_view log);
 };
 
 } // namespace

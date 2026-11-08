@@ -335,7 +335,7 @@ void TestMneRawProjComp::sssData_copyConstruction()
 void TestMneRawProjComp::sssData_readFromRawFile()
 {
     // SSS data may or may not be present in the test file
-    auto sss = MNESssData::read(rawPath());
+    auto sss = MNESssData::read(rawPath().toStdU16String());
     // The test file is from Elekta Neuromag, should have SSS info
     // If NULL, that's also a valid result (no SSS data)
     if (sss) {
@@ -969,7 +969,7 @@ void TestMneRawProjComp::descParser_parseAverageFile()
     }
 
     AverageDescription desc;
-    bool ok = MNEDescriptionParser::parseAverageFile(aveFile, desc);
+    bool ok = MNEDescriptionParser::parseAverageFile(aveFile.toStdU16String(), desc);
     QVERIFY(ok);
     QCOMPARE(desc.categories.size(), 2);
     QCOMPARE(desc.categories[0].comment, QString("Auditory Left"));
@@ -1002,7 +1002,7 @@ void TestMneRawProjComp::descParser_parseCovarianceFile()
     }
 
     CovDescription desc;
-    bool ok = MNEDescriptionParser::parseCovarianceFile(covFile, desc);
+    bool ok = MNEDescriptionParser::parseCovarianceFile(covFile.toStdU16String(), desc);
     QVERIFY(ok);
     QVERIFY(desc.defs.size() >= 1);
 }

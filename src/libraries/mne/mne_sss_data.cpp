@@ -83,7 +83,7 @@ MNESssData::~MNESssData() = default;
 
 //=============================================================================================================
 
-std::unique_ptr<MNESssData> MNESssData::read(const QString& name)
+std::unique_ptr<MNESssData> MNESssData::read(const std::filesystem::path& name)
 {
     QFile file(name);
     FiffStream stream(&file);

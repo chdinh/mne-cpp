@@ -29,6 +29,7 @@
 // EIGEN INCLUDES
 //=============================================================================================================
 
+#include <string>
 #include <Eigen/Core>
 
 //=============================================================================================================
@@ -80,7 +81,7 @@ public:
     float xsize, ysize, zsize;          /**< Voxel size in each direction (m; the file stores mm). */
     float x_ras[3], y_ras[3], z_ras[3]; /**< Direction cosines of the three voxel axes in RAS coordinates. */
     float c_ras[3];                     /**< Center of the volume in RAS coordinates (m; the file stores mm). */
-    QString filename;                   /**< Path to the MRI data file this geometry was read from. */
+    std::string filename;               /**< Path to the MRI data file this geometry was read from. */
 
     // ### OLD STRUCT ###
     //typedef struct {

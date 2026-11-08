@@ -146,7 +146,7 @@ average {
 )");
 
     AverageDescription d;
-    QVERIFY(MNEDescriptionParser::parseAverageFile(path, d));
+    QVERIFY(MNEDescriptionParser::parseAverageFile(path.toStdU16String(), d));
 
     QCOMPARE(d.comment, QString("Audio visual"));
     QCOMPARE(d.filename, QString("out-ave.fif"));
@@ -217,7 +217,7 @@ void TestMneDescriptionParser::average_masks()
 })");
 
     AverageDescription d;
-    QVERIFY(MNEDescriptionParser::parseAverageFile(path, d));
+    QVERIFY(MNEDescriptionParser::parseAverageFile(path.toStdU16String(), d));
     const AverageCategory& c = d.categories[0];
     // A mask keeps the given trigger lines, i.e. ignores the complement.
     QCOMPARE(c.ignore, ~255u);
@@ -298,7 +298,7 @@ void TestMneDescriptionParser::average_rejected()
     QFETCH(QString, content);
 
     AverageDescription d;
-    QVERIFY(!MNEDescriptionParser::parseAverageFile(write(content), d));
+    QVERIFY(!MNEDescriptionParser::parseAverageFile(write(content).toStdU16String(), d));
 }
 
 //=============================================================================================================
@@ -335,7 +335,7 @@ void TestMneDescriptionParser::covariance_full()
 })");
 
     CovDescription d;
-    QVERIFY(MNEDescriptionParser::parseCovarianceFile(path, d));
+    QVERIFY(MNEDescriptionParser::parseCovarianceFile(path.toStdU16String(), d));
 
     QCOMPARE(d.filename, QString("audvis-cov.fif"));
     QCOMPARE(d.logFile, QString("audvis-cov.log"));
@@ -402,7 +402,7 @@ void TestMneDescriptionParser::covariance_rejected()
     QFETCH(QString, content);
 
     CovDescription d;
-    QVERIFY(!MNEDescriptionParser::parseCovarianceFile(write(content), d));
+    QVERIFY(!MNEDescriptionParser::parseCovarianceFile(write(content).toStdU16String(), d));
 }
 
 //=============================================================================================================

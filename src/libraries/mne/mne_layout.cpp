@@ -20,22 +20,24 @@
 // QT INCLUDES
 //=============================================================================================================
 
-#include <QFile>
-#include <QRegularExpression>
-#include <QTextStream>
 
 //=============================================================================================================
 // STL INCLUDES
 //=============================================================================================================
 
 #include <algorithm>
+#include <cctype>
 #include <cmath>
+#include <fstream>
+#include <ranges>
+#include <sstream>
 
 //=============================================================================================================
 // USED NAMESPACES
 //=============================================================================================================
 
 using namespace MNELIB;
+using namespace UTILSLIB;
 
 //=============================================================================================================
 // DEFINE STATIC METHODS
@@ -55,59 +57,62 @@ bool isInside(const MNELayoutPort& port, const QRectF& area)
 // DEFINE MEMBER METHODS
 //=============================================================================================================
 
-QString MNELayoutPort::cleanName(const QString& name)
+std::string MNELayoutPort::cleanName(std::string_view name)
 {
-    return name.section('-', 0, 0).remove(' ').toLower();
+    std::string clean;
+    clean.reserve(name.size());
+    for (const char c : name.substr(0, name.find('-'))) {
+        if (c != ' ') {
+            clean.push_back(static_cast<char>(std::tolower(static_cast<unsigned char>(c))));
+        }
+    }
+    return clean;
 }
 
 //=============================================================================================================
 
-bool MNELayoutPort::contains(const QString& channel) const
+bool MNELayoutPort::contains(std::string_view channel) const
 {
-    return names.contains(cleanName(channel));
+    return UTILSLIB::contains(names, cleanName(channel));
 }
 
 //=============================================================================================================
 
-std::optional<MNELayout> MNELayout::read(const QString& path)
+std::optional<MNELayout> MNELayout::read(const std::filesystem::path& path)
 {
-    QFile file(path);
-    if (!file.open(QIODevice::ReadOnly | QIODevice::Text)) {
-        qWarning("MNELayout::read - Cannot open %s", qPrintable(path));
+    std::ifstream file(path);
+    if (!file) {
+        qWarning("MNELayout::read - Cannot open %s", utf8FromPath(path).c_str());
         return std::nullopt;
     }
 
     MNELayout layout;
-    layout.fileName = path;
+    layout.fileName = utf8FromPath(path);
     bool haveExtent = false;
-    QTextStream in(&file);
-    static const QRegularExpression whitespace(QStringLiteral("\\s+"));
-    while (!in.atEnd()) {
-        const QString line = in.readLine().trimmed();
-        if (line.isEmpty() || line.startsWith('#')) {
+    std::string raw;
+    while (std::getline(file, raw)) {
+        const std::string line(trimmed(raw));
+        if (line.empty() || line.starts_with('#')) {
             continue;
         }
-        QStringList fields = line.split(whitespace);
+        std::istringstream fields(line);
         if (!haveExtent) {
-            bool ok[4];
-            const double v[4] = {fields.value(0).toDouble(&ok[0]), fields.value(1).toDouble(&ok[1]), fields.value(2).toDouble(&ok[2]), fields.value(3).toDouble(&ok[3])};
-            if (!(ok[0] && ok[1] && ok[2] && ok[3])) {
-                qWarning("MNELayout::read - Illegal extent in %s", qPrintable(path));
+            double v[4];
+            if (!(fields >> v[0] >> v[1] >> v[2] >> v[3])) {
+                qWarning("MNELayout::read - Illegal extent in %s", utf8FromPath(path).c_str());
                 return std::nullopt;
             }
             layout.m_extent = QRectF(QPointF(v[0], v[2]), QPointF(v[1], v[3]));
             haveExtent = true;
             continue;
         }
-        bool ok[5];
         MNELayoutPort port;
-        port.portno = fields.value(0).toInt(&ok[0]);
-        const double x0 = fields.value(1).toDouble(&ok[1]);
-        const double y0 = fields.value(2).toDouble(&ok[2]);
-        const double w = fields.value(3).toDouble(&ok[3]);
-        const double h = fields.value(4).toDouble(&ok[4]);
-        if (fields.size() < 5 || !(ok[0] && ok[1] && ok[2] && ok[3] && ok[4])) {
-            qWarning("MNELayout::read - Bad layout item in %s: %s", qPrintable(path), qPrintable(line));
+        double x0 = 0.0;
+        double y0 = 0.0;
+        double w = 0.0;
+        double h = 0.0;
+        if (!(fields >> port.portno >> x0 >> y0 >> w >> h)) {
+            qWarning("MNELayout::read - Bad layout item in %s: %s", utf8FromPath(path).c_str(), line.c_str());
             return std::nullopt;
         }
         port.xmin = static_cast<float>(x0);
@@ -116,14 +121,16 @@ std::optional<MNELayout> MNELayout::read(const QString& path)
         port.ymax = static_cast<float>(y0 + std::fabs(h));
         port.invert = h < 0;
         // The names are the rest of the line and may contain spaces ("MEG 0113:MEG 0112").
-        port.label = line.section(whitespace, 5).trimmed();
-        for (const QString& name : port.label.split(':', Qt::SkipEmptyParts)) {
-            port.names << MNELayoutPort::cleanName(name);
+        std::string rest;
+        std::getline(fields, rest);
+        port.label = trimmed(rest);
+        for (const std::string& name : split(port.label, ':', true)) {
+            port.names.push_back(MNELayoutPort::cleanName(name));
         }
-        layout.ports.push_back(port);
+        layout.ports.push_back(std::move(port));
     }
     if (!haveExtent) {
-        qWarning("MNELayout::read - No extent in %s", qPrintable(path));
+        qWarning("MNELayout::read - No extent in %s", utf8FromPath(path).c_str());
         return std::nullopt;
     }
     layout.m_visible = layout.m_extent;
@@ -132,12 +139,12 @@ std::optional<MNELayout> MNELayout::read(const QString& path)
 
 //=============================================================================================================
 
-QMap<QString, QPointF> MNELayout::channelPositions() const
+std::map<std::string, QPointF> MNELayout::channelPositions() const
 {
-    QMap<QString, QPointF> positions;
+    std::map<std::string, QPointF> positions;
     for (const MNELayoutPort& port : ports) {
-        for (const QString& name : port.label.split(':', Qt::SkipEmptyParts)) {
-            positions.insert(name.trimmed(), QPointF(port.xmin, port.ymin));
+        for (const std::string& name : split(port.label, ':', true)) {
+            positions.insert_or_assign(std::string(trimmed(name)), QPointF(port.xmin, port.ymin));
         }
     }
     return positions;
@@ -145,11 +152,11 @@ QMap<QString, QPointF> MNELayout::channelPositions() const
 
 //=============================================================================================================
 
-int MNELayout::matchPorts(const QString& channel)
+int MNELayout::matchPorts(std::string_view channel)
 {
     int nmatch = 0;
     for (MNELayoutPort& port : ports) {
-        port.matched = !channel.isEmpty() && port.contains(channel) && isVisible(port);
+        port.matched = !channel.empty() && port.contains(channel) && isVisible(port);
         nmatch += port.matched ? 1 : 0;
     }
     return nmatch;
@@ -157,9 +164,9 @@ int MNELayout::matchPorts(const QString& channel)
 
 //=============================================================================================================
 
-int MNELayout::matchPorts(const QStringList& channels)
+int MNELayout::matchPorts(const StringList& channels)
 {
-    m_matches = Eigen::MatrixXi::Zero(static_cast<Eigen::Index>(ports.size()), channels.size());
+    m_matches = Eigen::MatrixXi::Zero(static_cast<Eigen::Index>(ports.size()), static_cast<Eigen::Index>(channels.size()));
     int nmatch = 0;
     for (std::size_t p = 0; p < ports.size(); ++p) {
         MNELayoutPort& port = ports[p];
@@ -167,9 +174,9 @@ int MNELayout::matchPorts(const QStringList& channels)
         if (!isVisible(port)) {
             continue;
         }
-        for (int c = 0; c < channels.size(); ++c) {
+        for (std::size_t c = 0; c < channels.size(); ++c) {
             if (port.contains(channels[c])) {
-                m_matches(static_cast<Eigen::Index>(p), c) = 1;
+                m_matches(static_cast<Eigen::Index>(p), static_cast<Eigen::Index>(c)) = 1;
                 port.matched = true;
                 ++nmatch;
             }

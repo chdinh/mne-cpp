@@ -253,7 +253,7 @@ void RealTime3DWidget::alignFiducials(const QString& sFilePath)
 void RealTime3DWidget::alignFiducials(QSharedPointer<FIFFLIB::FiffDigitizerData> pDigData)
 {
     std::unique_ptr<MNEMshDisplaySurfaceSet> pMneMshDisplaySurfaceSet = std::make_unique<MNEMshDisplaySurfaceSet>();
-    pMneMshDisplaySurfaceSet->add_bem_surface(QCoreApplication::applicationDirPath() + "/../resources/general/hpiAlignment/fsaverage-head.fif",
+    pMneMshDisplaySurfaceSet->add_bem_surface((QCoreApplication::applicationDirPath() + "/../resources/general/hpiAlignment/fsaverage-head.fif").toStdU16String(),
                                               FIFFV_BEM_SURF_ID_HEAD,
                                               "head",
                                               1,

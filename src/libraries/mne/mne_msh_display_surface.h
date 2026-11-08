@@ -31,6 +31,7 @@
 // EIGEN INCLUDES
 //=============================================================================================================
 
+#include <string>
 #include <Eigen/Core>
 
 //=============================================================================================================
@@ -99,10 +100,10 @@ public:
     ~MNEMshDisplaySurface();
 
 public:
-    QString filename;                               /**< Path to the file this surface was loaded from. */
+    std::string filename;                           /**< Path to the file this surface was loaded from. */
     time_t time_loaded = 0;                         /**< Timestamp when the surface was loaded. */
-    QString subj;                                   /**< Subject name in SUBJECTS_DIR. */
-    QString surf_name;                              /**< Name of the surface (e.g., "inflated", "white"). */
+    std::string subj;                               /**< Subject name in SUBJECTS_DIR. */
+    std::string surf_name;                          /**< Name of the surface (e.g., "inflated", "white"). */
     Eigen::Vector3f eye{1.0f, 0.0f, 0.0f};          /**< Eye position for 3D viewing. */
     Eigen::Vector3f up{0.0f, 0.0f, 1.0f};           /**< Up vector for 3D viewing. */
     Eigen::Vector3f rot = Eigen::Vector3f::Zero();  /**< Rotation angles of the MRI (in radians). */
@@ -238,7 +239,7 @@ public:
      *
      * @param[in] tag  FsSurface name tag (used for debug logging).
      */
-    void decide_surface_extent(const QString& tag);
+    void decide_surface_extent(const std::string& tag);
 
     /**
      * Set the curvature display mode based on a surface type name.
@@ -246,7 +247,7 @@ public:
      *
      * @param[in] name  FsSurface type name.
      */
-    void decide_curv_display(const QString& name);
+    void decide_curv_display(const std::string& name);
 
     /**
      * Allocate and fill per-vertex color arrays using positive/negative

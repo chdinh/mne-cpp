@@ -903,7 +903,7 @@ void TestMneLibrary::displaySurf_alignFiducials()
 
     const QString dir = QCoreApplication::applicationDirPath() + "/../resources/general/hpiAlignment/";
     MNEMshDisplaySurfaceSet set;
-    QCOMPARE(set.add_bem_surface(dir + "fsaverage-head.fif", FIFFV_BEM_SURF_ID_HEAD, "head", 1, 1), 0);
+    QCOMPARE(set.add_bem_surface((dir + "fsaverage-head.fif").toStdU16String(), FIFFV_BEM_SURF_ID_HEAD, "head", 1, 1), 0);
     MNEMshDisplaySurface* surf = set.surfs[0].get();
     const MatrixX3f mriRr = surf->rr;
     FiffDigitizerData mriDig((dir + "fsaverage-fiducials.fif").toStdString());
@@ -1048,7 +1048,7 @@ void TestMneLibrary::displaySurfSet_load()
     if (!QFile::exists(subjectsDir + "/sample/surf/lh.white"))
         QSKIP("No FreeSurfer surfaces");
 
-    auto surfSet = MNEMshDisplaySurfaceSet::load(QString("sample"), QString("white"), subjectsDir);
+    auto surfSet = MNEMshDisplaySurfaceSet::load("sample", "white", subjectsDir.toStdU16String());
     if (surfSet) {
         QVERIFY(surfSet->nsurf > 0);
     }
@@ -1059,8 +1059,8 @@ void TestMneLibrary::displaySurfSet_addBem()
     if (!hasData())
         QSKIP("No test data");
     MNEMshDisplaySurfaceSet surfSet;
-    int result = surfSet.add_bem_surface(bemPath(), FIFFV_BEM_SURF_ID_BRAIN,
-                                         QString("innerskull"), 1, 0);
+    int result = surfSet.add_bem_surface(bemPath().toStdU16String(), FIFFV_BEM_SURF_ID_BRAIN,
+                                         QString("innerskull").toStdString(), 1, 0);
     QCOMPARE(result, 0);
     QCOMPARE(surfSet.surfs.size(), static_cast<size_t>(1));
 }
@@ -1467,17 +1467,17 @@ void TestMneLibrary::layout_read()
     QFETCH(QRectF, box);
     QFETCH(int, portno);
 
-    const auto layout = MNELayout::read(QCoreApplication::applicationDirPath() + "/../resources/general/2DLayouts/" + file + ".lout");
+    const auto layout = MNELayout::read((QCoreApplication::applicationDirPath() + "/../resources/general/2DLayouts/" + file + ".lout").toStdU16String());
     QVERIFY(layout);
     QCOMPARE(static_cast<int>(layout->ports.size()), nport);
     QVERIFY((layout->extent().topLeft() - extent.topLeft()).manhattanLength() < 1e-4 && (layout->extent().bottomRight() - extent.bottomRight()).manhattanLength() < 1e-4);
-    const auto it = std::find_if(layout->ports.cbegin(), layout->ports.cend(), [&channel](const MNELayoutPort& p) { return p.label == channel; });
+    const auto it = std::find_if(layout->ports.cbegin(), layout->ports.cend(), [&channel](const MNELayoutPort& p) { return p.label == channel.toStdString(); });
     QVERIFY(it != layout->ports.cend());
     QCOMPARE(it->portno, portno);
     QVERIFY((it->rect().topLeft() - box.topLeft()).manhattanLength() < 1e-4);
     QVERIFY(std::abs(it->rect().width() - box.width()) < 1e-5 && std::abs(it->rect().height() - box.height()) < 1e-5);
-    QCOMPARE(layout->channelPositions().size(), nport);
-    QVERIFY((layout->channelPositions().value(channel) - box.topLeft()).manhattanLength() < 1e-4);
+    QCOMPARE(static_cast<int>(layout->channelPositions().size()), nport);
+    QVERIFY((layout->channelPositions().at(channel.toStdString()) - box.topLeft()).manhattanLength() < 1e-4);
 
     QVERIFY(!MNELayout::read("/nonexistent.lout"));
 }
@@ -1490,20 +1490,20 @@ void TestMneLibrary::layout_matchAndConfine()
     QVERIFY(file.open(QIODevice::WriteOnly | QIODevice::Text));
     file.write("# test layout\n0 100 0 50\n\n1 10 10 10 5 MEG 0113\n2 30 10 10 5 MEG 0112:MEG 0111\n3 60 30 10 -5 MLC11-2622\n");
     file.close();
-    auto layout = MNELayout::read(file.fileName());
+    auto layout = MNELayout::read(file.fileName().toStdU16String());
     QVERIFY(layout);
     QCOMPARE(static_cast<int>(layout->ports.size()), 3);
     QVERIFY(layout->ports[2].invert);
     QCOMPARE(layout->ports[2].rect(), QRectF(60, 30, 10, 5));
-    QCOMPARE(layout->ports[1].names, QStringList({"meg0112", "meg0111"}));
-    QCOMPARE(layout->channelPositions().value("MEG 0111"), QPointF(30, 10));
+    QCOMPARE(layout->ports[1].names, (UTILSLIB::StringList{"meg0112", "meg0111"}));
+    QCOMPARE(layout->channelPositions().at("MEG 0111"), QPointF(30, 10));
 
     // Names match in any spelling; a CTF suffix after the dash is ignored.
     QCOMPARE(layout->matchPorts("meg0111"), 1);
     QVERIFY(layout->ports[1].matched && !layout->ports[0].matched);
     QCOMPARE(layout->matchPorts("MLC11"), 1);
     QCOMPARE(layout->matchPorts("MEG 011"), 0);
-    QCOMPARE(layout->matchPorts(QStringList({"MEG 0113", "MEG 0111", "EEG 001", "MEG 0112"})), 3);
+    QCOMPARE(layout->matchPorts({"MEG 0113", "MEG 0111", "EEG 001", "MEG 0112"}), 3);
     QCOMPARE(layout->matches().rows(), 3);
     QCOMPARE(layout->matches().cols(), 4);
     QVERIFY(layout->matches()(0, 0) == 1 && layout->matches()(1, 1) == 1 && layout->matches()(1, 3) == 1 && layout->matches().col(2).sum() == 0);

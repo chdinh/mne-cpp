@@ -95,64 +95,64 @@ void TestBatchProcessor::initTestCase()
 
 void TestBatchProcessor::testComposeSaveNamesBasic()
 {
-    QString saveName, logName;
+    std::string saveName, logName;
     bool ok = BatchProcessor::composeSaveNames(
         "/path/to/data.fif", "_processed", false, saveName, logName);
 
     QVERIFY(ok);
-    QVERIFY(saveName.endsWith("_processed.fif"));
-    QVERIFY(logName.endsWith("_processed.log"));
+    QVERIFY(saveName.ends_with("_processed.fif"));
+    QVERIFY(logName.ends_with("_processed.log"));
 }
 
 void TestBatchProcessor::testComposeSaveNamesStripRawSuffix()
 {
-    QString saveName, logName;
+    std::string saveName, logName;
     bool ok = BatchProcessor::composeSaveNames(
         "/path/to/data_raw.fif", "_ave", false, saveName, logName);
 
     QVERIFY(ok);
-    QCOMPARE(saveName, QString("/path/to/data_ave.fif"));
-    QCOMPARE(logName, QString("/path/to/data_ave.log"));
+    QCOMPARE(saveName, std::string("/path/to/data_ave.fif"));
+    QCOMPARE(logName, std::string("/path/to/data_ave.log"));
 }
 
 void TestBatchProcessor::testComposeSaveNamesStripFifSuffix()
 {
-    QString saveName, logName;
+    std::string saveName, logName;
     bool ok = BatchProcessor::composeSaveNames(
         "/path/to/sample.fif", "_cov", false, saveName, logName);
 
     QVERIFY(ok);
-    QCOMPARE(saveName, QString("/path/to/sample_cov.fif"));
-    QCOMPARE(logName, QString("/path/to/sample_cov.log"));
+    QCOMPARE(saveName, std::string("/path/to/sample_cov.fif"));
+    QCOMPARE(logName, std::string("/path/to/sample_cov.log"));
 }
 
 void TestBatchProcessor::testComposeSaveNamesStripSssSuffix()
 {
-    QString saveName, logName;
+    std::string saveName, logName;
     bool ok = BatchProcessor::composeSaveNames(
         "/path/to/data_sss_raw.fif", "_ave", false, saveName, logName);
 
     QVERIFY(ok);
     // Both _sss and _raw.fif should be stripped
-    QCOMPARE(saveName, QString("/path/to/data_ave.fif"));
-    QCOMPARE(logName, QString("/path/to/data_ave.log"));
+    QCOMPARE(saveName, std::string("/path/to/data_ave.fif"));
+    QCOMPARE(logName, std::string("/path/to/data_ave.log"));
 }
 
 void TestBatchProcessor::testComposeSaveNamesStripDir()
 {
-    QString saveName, logName;
+    std::string saveName, logName;
     bool ok = BatchProcessor::composeSaveNames(
         "/long/path/to/data_raw.fif", "_processed", true, saveName, logName);
 
     QVERIFY(ok);
     // Directory should be stripped
     QVERIFY(!saveName.contains("/long/path/"));
-    QCOMPARE(saveName, QString("data_processed.fif"));
+    QCOMPARE(saveName, std::string("data_processed.fif"));
 }
 
 void TestBatchProcessor::testComposeSaveNamesEmptyTag()
 {
-    QString saveName, logName;
+    std::string saveName, logName;
     bool ok = BatchProcessor::composeSaveNames(
         "/path/to/data.fif", "", false, saveName, logName);
 
@@ -161,7 +161,7 @@ void TestBatchProcessor::testComposeSaveNamesEmptyTag()
 
 void TestBatchProcessor::testComposeSaveNamesEmptyRawName()
 {
-    QString saveName, logName;
+    std::string saveName, logName;
     bool ok = BatchProcessor::composeSaveNames(
         "", "_tag", false, saveName, logName);
 
@@ -174,10 +174,10 @@ void TestBatchProcessor::testComposeSaveNamesEmptyRawName()
 
 void TestBatchProcessor::testWriteLogBasic()
 {
-    QString logPath = m_tempDir.path() + "/test_log.log";
-    QString logContent = "Test log content\nLine 2\n";
+    const QString logPath = m_tempDir.path() + "/test_log.log";
+    const std::string logContent = "Test log content\nLine 2\n";
 
-    bool ok = BatchProcessor::writeLog(logPath, logContent);
+    bool ok = BatchProcessor::writeLog(logPath.toStdString(), logContent);
     QVERIFY(ok);
 
     QFile logFile(logPath);
@@ -185,7 +185,7 @@ void TestBatchProcessor::testWriteLogBasic()
     QString readBack = logFile.readAll();
     logFile.close();
 
-    QCOMPARE(readBack, logContent);
+    QCOMPARE(readBack, QString::fromStdString(logContent));
 }
 
 void TestBatchProcessor::testWriteLogEmptyParams()
@@ -197,7 +197,7 @@ void TestBatchProcessor::testWriteLogEmptyParams()
 
 void TestBatchProcessor::testWriteLogOpenFailure()
 {
-    QVERIFY(!BatchProcessor::writeLog(m_tempDir.path(), "content"));
+    QVERIFY(!BatchProcessor::writeLog(m_tempDir.path().toStdString(), "content"));
 }
 
 //=============================================================================================================
@@ -221,7 +221,7 @@ void TestBatchProcessor::testRunInvalidRawFile()
     rawFile.close();
 
     ProcessingSettings settings;
-    settings.rawFiles << rawPath;
+    settings.rawFiles.push_back(rawPath.toStdString());
     QVERIFY(BatchProcessor::run(settings) != 0);
 }
 
@@ -232,7 +232,7 @@ void TestBatchProcessor::testRunWithSampleData()
         QSKIP("Sample raw data not available");
 
     ProcessingSettings settings;
-    settings.rawFiles << rawPath;
+    settings.rawFiles.push_back(rawPath.toStdString());
     // Default settings: no averaging, no covariance, just open and process
     int result = BatchProcessor::run(settings);
     QCOMPARE(result, 0);
@@ -247,8 +247,8 @@ void TestBatchProcessor::testRunSaveFilteredData()
     QString outPath = m_tempDir.path() + "/processed_raw.fif";
 
     ProcessingSettings settings;
-    settings.rawFiles << rawPath;
-    settings.saveFiles << outPath;
+    settings.rawFiles.push_back(rawPath.toStdString());
+    settings.saveFiles.push_back(outPath.toStdString());
     settings.decimation = 1;
 
     int result = BatchProcessor::run(settings);
@@ -267,8 +267,8 @@ void TestBatchProcessor::testRunInvalidAverageDescription()
         QSKIP("Sample raw data not available");
 
     ProcessingSettings settings;
-    settings.rawFiles << rawPath;
-    settings.aveFiles << m_tempDir.path() + "/missing-average-description.txt";
+    settings.rawFiles.push_back(rawPath.toStdString());
+    settings.aveFiles.push_back((m_tempDir.path() + "/missing-average-description.txt").toStdString());
 
     QVERIFY(BatchProcessor::run(settings) != 0);
 }
@@ -280,8 +280,8 @@ void TestBatchProcessor::testRunInvalidCovarianceDescription()
         QSKIP("Sample raw data not available");
 
     ProcessingSettings settings;
-    settings.rawFiles << rawPath;
-    settings.covFiles << m_tempDir.path() + "/missing-covariance-description.txt";
+    settings.rawFiles.push_back(rawPath.toStdString());
+    settings.covFiles.push_back((m_tempDir.path() + "/missing-covariance-description.txt").toStdString());
 
     QVERIFY(BatchProcessor::run(settings) != 0);
 }
@@ -294,11 +294,11 @@ void TestBatchProcessor::testRunDetectsEventsWithoutMask()
         QSKIP("Sample raw data not available");
 
     ProcessingSettings settings;
-    settings.rawFiles << rawPath;
-    settings.eventsOutFiles << m_tempDir.path() + "/detected-eve.fif";
+    settings.rawFiles.push_back(rawPath.toStdString());
+    settings.eventsOutFiles.push_back((m_tempDir.path() + "/detected-eve.fif").toStdString());
     QCOMPARE(BatchProcessor::run(settings), 0);
 
-    const FIFFLIB::FiffEvents events = FIFFLIB::FiffEvents::read_fif(settings.eventsOutFiles.first().toStdString()).value();
+    const FIFFLIB::FiffEvents events = FIFFLIB::FiffEvents::read_fif(settings.eventsOutFiles.front()).value();
     QVERIFY2(events.num_events() > 0, "No events detected on STI 014");
 }
 
@@ -319,16 +319,16 @@ void TestBatchProcessor::testRunGrandAverageWeightsByNave()
     }
 
     ProcessingSettings settings;
-    settings.rawFiles << rawPath << rawPath;
-    settings.aveFiles << aveDesc;
-    settings.grandAveFile = m_tempDir.path() + "/grand-ave.fif";
+    settings.rawFiles = {rawPath.toStdString(), rawPath.toStdString()};
+    settings.aveFiles.push_back(aveDesc.toStdString());
+    settings.grandAveFile = (m_tempDir.path() + "/grand-ave.fif").toStdString();
     QCOMPARE(BatchProcessor::run(settings), 0);
 
     const FIFFLIB::FiffRawData raw(rawPath.toStdString());
-    const FIFFLIB::FiffEvokedSet grand(settings.grandAveFile.toStdU16String());
+    const FIFFLIB::FiffEvokedSet grand(UTILSLIB::pathFromUtf8(settings.grandAveFile));
     QCOMPARE(grand.evoked.size(), 1);
     const FIFFLIB::FiffEvoked& g = grand.evoked.front();
-    QCOMPARE(g.comment, QString("Auditory Left"));
+    QCOMPARE(g.comment, std::string("Auditory Left"));
     QCOMPARE(g.info.nchan, raw.info.nchan);
     QVERIFY2(g.nave > 2 && g.nave % 2 == 0, qPrintable(QString("nave %1").arg(g.nave)));
 }

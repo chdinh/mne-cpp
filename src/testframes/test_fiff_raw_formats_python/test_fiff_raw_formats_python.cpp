@@ -308,7 +308,7 @@ void TestFiffRawFormatsPython::readsSssInfo()
     // data/raw_sss_raw.fif (make_sss_fixture.py) carries the SSS block of an mne-python maxwell_filter
     // run: job 2, head frame, origin (0, 0, 40) mm, 306 channels, orders 8 / 3, 70 of 80 internal
     // and all 15 external components in use.
-    auto sss = MNESssData::read(fixture("sss"));
+    auto sss = MNESssData::read(fixture("sss").toStdU16String());
     QVERIFY(sss);
     QCOMPARE(sss->job, FIFFV_SSS_JOB_FILTER);
     QCOMPARE(sss->coord_frame, FIFFV_COORD_HEAD);

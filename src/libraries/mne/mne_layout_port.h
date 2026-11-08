@@ -19,9 +19,12 @@
 
 #include "mne_global.h"
 
+#include <utils/string_utils.h>
+
 #include <QRectF>
-#include <QString>
-#include <QStringList>
+
+#include <string>
+#include <string_view>
 
 //=============================================================================================================
 // DEFINE NAMESPACE MNELIB
@@ -51,7 +54,7 @@ public:
      *
      * @return The name in lower case, without spaces and cut at the first dash.
      */
-    static QString cleanName(const QString& name);
+    static std::string cleanName(std::string_view name);
 
     //=========================================================================================================
     /**
@@ -61,7 +64,7 @@ public:
      *
      * @return True if the cleaned name equals one of the port's channel names.
      */
-    bool contains(const QString& channel) const;
+    bool contains(std::string_view channel) const;
 
     //=========================================================================================================
     /**
@@ -74,15 +77,15 @@ public:
         return QRectF(xmin, ymin, xmax - xmin, ymax - ymin);
     }
 
-    int portno = 0;       /**< Running number of this viewport. */
-    bool invert = false;  /**< Draw the signal upside down (negative height in the file). */
-    float xmin = 0;       /**< Viewport left bound. */
-    float xmax = 0;       /**< Viewport right bound. */
-    float ymin = 0;       /**< Viewport bottom bound. */
-    float ymax = 0;       /**< Viewport top bound. */
-    QString label;        /**< Channel names as written in the file (e.g. "MEG 0113"). */
-    QStringList names;    /**< Channel names in matching form (see cleanName()). */
-    bool matched = false; /**< Set by the last MNELayout::matchPorts call. */
+    int portno = 0;             /**< Running number of this viewport. */
+    bool invert = false;        /**< Draw the signal upside down (negative height in the file). */
+    float xmin = 0;             /**< Viewport left bound. */
+    float xmax = 0;             /**< Viewport right bound. */
+    float ymin = 0;             /**< Viewport bottom bound. */
+    float ymax = 0;             /**< Viewport top bound. */
+    std::string label;          /**< Channel names as written in the file (e.g. "MEG 0113"). */
+    UTILSLIB::StringList names; /**< Channel names in matching form (see cleanName()). */
+    bool matched = false;       /**< Set by the last MNELayout::matchPorts call. */
 };
 
 } // namespace MNELIB

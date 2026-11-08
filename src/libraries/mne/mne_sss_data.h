@@ -30,6 +30,7 @@
 // STL INCLUDES
 //=============================================================================================================
 
+#include <filesystem>
 #include <memory>
 
 //=============================================================================================================
@@ -107,7 +108,7 @@ public:
      *
      * @return   The read SSS data.
      */
-    static std::unique_ptr<MNESssData> read(const QString& name);
+    static std::unique_ptr<MNESssData> read(const std::filesystem::path& name);
 
     //=========================================================================================================
     /**

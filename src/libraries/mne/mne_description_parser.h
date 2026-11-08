@@ -57,7 +57,7 @@ public:
      * @param[out] desc     Parsed description.
      * @return true if successful, false on error.
      */
-    static bool parseAverageFile(const QString& fileName, FIFFLIB::AverageDescription& desc);
+    static bool parseAverageFile(const std::filesystem::path& fileName, FIFFLIB::AverageDescription& desc);
 
     /**
      * Parse a covariance description file.
@@ -66,35 +66,35 @@ public:
      * @param[out] desc     Parsed description.
      * @return true if successful, false on error.
      */
-    static bool parseCovarianceFile(const QString& fileName, CovDescription& desc);
+    static bool parseCovarianceFile(const std::filesystem::path& fileName, CovDescription& desc);
 
 private:
     /**
      * Skip comment lines (starting with '#') and whitespace.
      */
-    static void skipComments(QTextStream& in);
+    static void skipComments(std::istream& in);
 
     /**
      * Read the next whitespace-delimited word, handling quoted strings.
      * Returns empty string on EOF.
      */
-    static QString nextWord(QTextStream& in);
+    static std::string nextWord(std::istream& in);
 
     /**
      * Read and parse an integer value.
      */
-    static bool getInt(QTextStream& in, int& val);
+    static bool getInt(std::istream& in, int& val);
 
     /**
      * Read and parse a float value.
      */
-    static bool getFloat(QTextStream& in, float& val);
+    static bool getFloat(std::istream& in, float& val);
 
     /**
      * Parse rejection parameters common to both .ave and .cov files.
      * Returns true if the keyword was handled, false otherwise (unrecognized keyword).
      */
-    static bool parseRejectionParam(const QString& keyword, QTextStream& in,
+    static bool parseRejectionParam(std::string_view keyword, std::istream& in,
                                     FIFFLIB::RejectionParams& rej, bool& ok);
 };
 

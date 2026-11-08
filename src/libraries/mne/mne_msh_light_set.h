@@ -28,6 +28,7 @@
 // STL INCLUDES
 //=============================================================================================================
 
+#include <string>
 #include <memory>
 #include <vector>
 
@@ -91,7 +92,7 @@ public:
     ~MNEMshLightSet() = default;
 
 public:
-    QString name;                                     /**< Name of this light set. */
+    std::string name;                                 /**< Name of this light set. */
     std::vector<std::unique_ptr<MNEMshLight>> lights; /**< Owned light objects. */
 
     /**

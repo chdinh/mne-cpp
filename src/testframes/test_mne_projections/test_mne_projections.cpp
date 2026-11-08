@@ -499,7 +499,7 @@ private slots:
         f.close();
 
         AverageDescription desc;
-        bool ok = MNEDescriptionParser::parseAverageFile(aveFile, desc);
+        bool ok = MNEDescriptionParser::parseAverageFile(aveFile.toStdU16String(), desc);
         if (ok) {
             QVERIFY(desc.categories.size() > 0);
         } else {
@@ -532,7 +532,7 @@ private slots:
         f.close();
 
         CovDescription desc;
-        bool ok = MNEDescriptionParser::parseCovarianceFile(covFile, desc);
+        bool ok = MNEDescriptionParser::parseCovarianceFile(covFile.toStdU16String(), desc);
         if (ok) {
             QVERIFY(desc.defs.size() > 0);
         } else {

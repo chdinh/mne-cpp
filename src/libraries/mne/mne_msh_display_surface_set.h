@@ -29,6 +29,8 @@
 // EIGEN INCLUDES
 //=============================================================================================================
 
+#include <filesystem>
+#include <string>
 #include <Eigen/Core>
 
 #include <memory>
@@ -99,7 +101,7 @@ public:
      *
      * @return A new display surface set, or NULL on failure. Caller takes ownership.
      */
-    static std::unique_ptr<MNEMshDisplaySurfaceSet> load(const QString& subject_id, const QString& surf, const QString& subjects_dir);
+    static std::unique_ptr<MNEMshDisplaySurfaceSet> load(const std::string& subject_id, const std::string& surf, const std::filesystem::path& subjects_dir);
 
 
     /**
@@ -114,9 +116,9 @@ public:
      *
      * @return OK on success, FAIL on error.
      */
-    int add_bem_surface(const QString& filepath,
+    int add_bem_surface(const std::filesystem::path& filepath,
                         int kind,
-                        const QString& bemname,
+                        const std::string& bemname,
                         int full_geom,
                         int check);
 
@@ -175,8 +177,8 @@ public:
     void setup_lights(const MNEMshLightSet& set);
 
 public:
-    QString subj;                                             /**< The name of the subject. */
-    QString morph_subj;                                       /**< The subject we are morphing to. */
+    std::string subj;                                         /**< The name of the subject. */
+    std::string morph_subj;                                   /**< The subject we are morphing to. */
     std::vector<std::unique_ptr<MNEMshDisplaySurface>> surfs; /**< Array of display surfaces (owned). */
     std::vector<std::unique_ptr<MNESurfacePatch>> patches;    /**< Optional flat patches for display (owned). */
     std::vector<float> patch_rot;                             /**< Rotation angles for the (flat) patches. */

@@ -25,6 +25,7 @@
 //=============================================================================================================
 
 #include "mne_global.h"
+#include <string>
 #include <mne/mne_types.h>
 #include "mne_vol_geom.h"
 #include "mne_mgh_tag_group.h"
@@ -128,8 +129,8 @@ public:
 
     MNESurfaceOrVolume(const MNESurfaceOrVolume&) = default;
     MNESurfaceOrVolume& operator=(const MNESurfaceOrVolume&) = default;
-    MNESurfaceOrVolume(MNESurfaceOrVolume&&) = default;
-    MNESurfaceOrVolume& operator=(MNESurfaceOrVolume&&) = default;
+    MNESurfaceOrVolume(MNESurfaceOrVolume&&) noexcept = default;
+    MNESurfaceOrVolume& operator=(MNESurfaceOrVolume&&) noexcept = default;
 
     /**
      * Compute the solid angle subtended by a triangle as seen from a given point
@@ -247,10 +248,10 @@ public:
 
 
 public:
-    int type;        /**< Is this a volume or a surface. */
-    QString subject; /**< Name (id) of the subject. */
-    int id;          /**< FsSurface id. */
-    int coord_frame; /**< Which coordinate system the data are in now. */
+    int type;            /**< Is this a volume or a surface. */
+    std::string subject; /**< Name (id) of the subject. */
+    int id;              /**< FsSurface id. */
+    int coord_frame;     /**< Which coordinate system the data are in now. */
     /*
      * These relate to the FreeSurfer way
      */
@@ -334,7 +335,7 @@ public:
     int vol_dims[3];                                             /**< Dimensions of the volume grid (width x height x depth). Present only for complete rectangular grids including unused vertices. */
     float voxel_size[3];                                         /**< Voxel size in meters, derived from the voxel transform. */
     std::optional<FIFFLIB::FiffSparseMatrix> interpolator;       /**< Sparse matrix to interpolate from source space into an MRI volume. */
-    QString MRI_volume;                                          /**< Path to the MRI volume file the interpolator is based on. */
+    std::string MRI_volume;                                      /**< Path to the MRI volume file the interpolator is based on. */
     std::optional<FIFFLIB::FiffCoordTrans> MRI_voxel_surf_RAS_t; /**< Voxel-to-surface-RAS transform for the associated MRI volume. */
     std::optional<FIFFLIB::FiffCoordTrans> MRI_surf_RAS_RAS_t;   /**< Transform from surface RAS to scanner RAS in the associated MRI volume. */
     int MRI_vol_dims[3];                                         /**< Dimensions of the associated MRI volume (width x height x depth). */

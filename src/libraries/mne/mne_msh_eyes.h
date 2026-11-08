@@ -27,6 +27,7 @@
 // QT INCLUDES
 //=============================================================================================================
 
+#include <string>
 #include <QSharedPointer>
 #include <QString>
 
@@ -62,7 +63,7 @@ public:
     ~MNEMshEyes() = default;
 
 public:
-    QString name;           /**< Name of this viewpoint definition. */
+    std::string name;       /**< Name of this viewpoint definition. */
     float left[3] = {};     /**< Left hemisphere viewpoint (x, y, z). */
     float right[3] = {};    /**< Right hemisphere viewpoint (x, y, z). */
     float left_up[3] = {};  /**< Left hemisphere up-vector. */

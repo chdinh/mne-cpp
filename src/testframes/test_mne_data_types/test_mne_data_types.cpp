@@ -606,7 +606,7 @@ private slots:
             QSKIP("audvis.ave not found");
 
         AverageDescription desc;
-        bool ok = MNEDescriptionParser::parseAverageFile(avePath, desc);
+        bool ok = MNEDescriptionParser::parseAverageFile(avePath.toStdU16String(), desc);
         QVERIFY(ok);
 
         // audvis.ave has 4 categories: Left Auditory, Right Auditory, Left Visual, Right Visual
@@ -634,7 +634,7 @@ private slots:
             QSKIP("audvis.cov not found");
 
         CovDescription desc;
-        bool ok = MNEDescriptionParser::parseCovarianceFile(covPath, desc);
+        bool ok = MNEDescriptionParser::parseCovarianceFile(covPath.toStdU16String(), desc);
         QVERIFY(ok);
 
         // audvis.cov has def sections for each category
@@ -645,7 +645,7 @@ private slots:
         QVERIFY(desc.defs[0].tmin < 0.0f);
 
         // Check output filename was parsed
-        QVERIFY(!desc.filename.isEmpty());
+        QVERIFY(!desc.filename.empty());
 
         // Check rejection params
         QVERIFY(desc.rej.megGradReject > 0.0f);
@@ -661,7 +661,7 @@ private slots:
             QSKIP("ernoise.cov not found");
 
         CovDescription desc;
-        bool ok = MNEDescriptionParser::parseCovarianceFile(covPath, desc);
+        bool ok = MNEDescriptionParser::parseCovarianceFile(covPath.toStdU16String(), desc);
         QVERIFY(ok);
         QVERIFY(desc.defs.size() > 0);
     }

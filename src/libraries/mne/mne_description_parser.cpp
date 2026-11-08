@@ -20,9 +20,16 @@
 
 #include "mne_description_parser.h"
 
-#include <QFile>
+#include <utils/string_utils.h>
+
 #include <QDebug>
+
+#include <cctype>
 #include <cmath>
+#include <fstream>
+#include <limits>
+#include <optional>
+#include <string>
 
 //=============================================================================================================
 // USED NAMESPACES
@@ -34,16 +41,15 @@ using namespace MNELIB;
 // STATIC HELPERS
 //=============================================================================================================
 
-void MNEDescriptionParser::skipComments(QTextStream& in)
+void MNEDescriptionParser::skipComments(std::istream& in)
 {
-    while (!in.atEnd()) {
-        QChar c;
-        in >> c;
+    // A '#' at a word start comments out the rest of the line
+    for (int c = in.peek(); c != std::char_traits<char>::eof(); c = in.peek()) {
         if (c == '#') {
-            in.readLine(); // consume rest of comment line
+            in.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
+        } else if (std::isspace(c)) {
+            in.get();
         } else {
-            // push back by seeking
-            in.seek(in.pos() - 1);
             return;
         }
     }
@@ -51,130 +57,120 @@ void MNEDescriptionParser::skipComments(QTextStream& in)
 
 //=============================================================================================================
 
-QString MNEDescriptionParser::nextWord(QTextStream& in)
+std::string MNEDescriptionParser::nextWord(std::istream& in)
 {
     skipComments(in);
 
-    // Skip whitespace
-    while (!in.atEnd()) {
-        QChar c;
-        in >> c;
-        if (!c.isSpace()) {
-            // Check if quoted string
-            if (c == '"') {
-                QString word;
-                while (!in.atEnd()) {
-                    in >> c;
-                    if (c == '"')
-                        break;
-                    word.append(c);
-                }
-                return word;
-            }
-            // Regular word
-            QString word;
-            word.append(c);
-            while (!in.atEnd()) {
-                in >> c;
-                if (c.isSpace())
-                    break;
-                if (c == '#') {
-                    in.readLine();
-                    break;
-                }
-                word.append(c);
-            }
-            return word;
-        }
+    std::string word;
+    char c = 0;
+    if (!in.get(c)) {
+        return word; // EOF
     }
-    return QString(); // EOF
+    // Quoted string
+    if (c == '"') {
+        std::getline(in, word, '"');
+        return word;
+    }
+    // Regular word
+    word.push_back(c);
+    while (in.get(c)) {
+        if (std::isspace(static_cast<unsigned char>(c))) {
+            break;
+        }
+        if (c == '#') {
+            in.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
+            break;
+        }
+        word.push_back(c);
+    }
+    return word;
 }
 
 //=============================================================================================================
 
-bool MNEDescriptionParser::getInt(QTextStream& in, int& val)
+bool MNEDescriptionParser::getInt(std::istream& in, int& val)
 {
-    QString word = nextWord(in);
-    if (word.isEmpty()) {
+    const std::string word = nextWord(in);
+    if (word.empty()) {
         qWarning() << "MNEDescriptionParser: expected integer, got EOF";
         return false;
     }
-    bool ok;
-    val = word.toInt(&ok);
-    if (!ok) {
-        qWarning() << "MNEDescriptionParser: bad integer:" << word;
+    const std::optional<int> parsed = UTILSLIB::toInt(word);
+    if (!parsed) {
+        qWarning() << "MNEDescriptionParser: bad integer:" << word.c_str();
         return false;
     }
+    val = *parsed;
     return true;
 }
 
 //=============================================================================================================
 
-bool MNEDescriptionParser::getFloat(QTextStream& in, float& val)
+bool MNEDescriptionParser::getFloat(std::istream& in, float& val)
 {
-    QString word = nextWord(in);
-    if (word.isEmpty()) {
+    const std::string word = nextWord(in);
+    if (word.empty()) {
         qWarning() << "MNEDescriptionParser: expected float, got EOF";
         return false;
     }
-    bool ok;
-    val = word.toFloat(&ok);
-    if (!ok) {
-        qWarning() << "MNEDescriptionParser: bad float:" << word;
+    const std::optional<double> parsed = UTILSLIB::toDouble(word);
+    if (!parsed) {
+        qWarning() << "MNEDescriptionParser: bad float:" << word.c_str();
         return false;
     }
+    val = static_cast<float>(*parsed);
     return true;
 }
 
 //=============================================================================================================
 
-bool MNEDescriptionParser::parseRejectionParam(const QString& keyword, QTextStream& in,
+bool MNEDescriptionParser::parseRejectionParam(std::string_view keyword, std::istream& in,
                                                FIFFLIB::RejectionParams& rej, bool& ok)
 {
     ok = true;
     float fval;
 
-    if (keyword.compare("gradReject", Qt::CaseInsensitive) == 0) {
+    if (UTILSLIB::equalsIgnoreCase(keyword, "gradReject")) {
         ok = getFloat(in, fval);
         if (ok)
             rej.megGradReject = fval;
-    } else if (keyword.compare("magReject", Qt::CaseInsensitive) == 0) {
+    } else if (UTILSLIB::equalsIgnoreCase(keyword, "magReject")) {
         ok = getFloat(in, fval);
         if (ok)
             rej.megMagReject = fval;
-    } else if (keyword.compare("eegReject", Qt::CaseInsensitive) == 0) {
+    } else if (UTILSLIB::equalsIgnoreCase(keyword, "eegReject")) {
         ok = getFloat(in, fval);
         if (ok)
             rej.eegReject = fval;
-    } else if (keyword.compare("eogReject", Qt::CaseInsensitive) == 0) {
+    } else if (UTILSLIB::equalsIgnoreCase(keyword, "eogReject")) {
         ok = getFloat(in, fval);
         if (ok)
             rej.eogReject = fval;
-    } else if (keyword.compare("ecgReject", Qt::CaseInsensitive) == 0) {
+    } else if (UTILSLIB::equalsIgnoreCase(keyword, "ecgReject")) {
         ok = getFloat(in, fval);
         if (ok)
             rej.ecgReject = fval;
-    } else if (keyword.compare("gradFlat", Qt::CaseInsensitive) == 0) {
+    } else if (UTILSLIB::equalsIgnoreCase(keyword, "gradFlat")) {
         ok = getFloat(in, fval);
         if (ok)
             rej.megGradFlat = fval;
-    } else if (keyword.compare("magFlat", Qt::CaseInsensitive) == 0) {
+    } else if (UTILSLIB::equalsIgnoreCase(keyword, "magFlat")) {
         ok = getFloat(in, fval);
         if (ok)
             rej.megMagFlat = fval;
-    } else if (keyword.compare("eegFlat", Qt::CaseInsensitive) == 0) {
+    } else if (UTILSLIB::equalsIgnoreCase(keyword, "eegFlat")) {
         ok = getFloat(in, fval);
         if (ok)
             rej.eegFlat = fval;
-    } else if (keyword.compare("eogFlat", Qt::CaseInsensitive) == 0) {
+    } else if (UTILSLIB::equalsIgnoreCase(keyword, "eogFlat")) {
         ok = getFloat(in, fval);
         if (ok)
             rej.eogFlat = fval;
-    } else if (keyword.compare("ecgFlat", Qt::CaseInsensitive) == 0) {
+    } else if (UTILSLIB::equalsIgnoreCase(keyword, "ecgFlat")) {
         ok = getFloat(in, fval);
         if (ok)
             rej.ecgFlat = fval;
-    } else if (keyword.compare("stimIgnore", Qt::CaseInsensitive) == 0) {
+    } else if (UTILSLIB::equalsIgnoreCase(keyword, "stimIgnore")) {
         ok = getFloat(in, fval);
         if (ok)
             rej.stimIgnore = std::fabs(fval);
@@ -188,15 +184,14 @@ bool MNEDescriptionParser::parseRejectionParam(const QString& keyword, QTextStre
 // AVERAGE DESCRIPTION PARSER
 //=============================================================================================================
 
-bool MNEDescriptionParser::parseAverageFile(const QString& fileName, FIFFLIB::AverageDescription& desc)
+bool MNEDescriptionParser::parseAverageFile(const std::filesystem::path& fileName, FIFFLIB::AverageDescription& desc)
 {
-    QFile file(fileName);
-    if (!file.open(QIODevice::ReadOnly | QIODevice::Text)) {
-        qWarning() << "MNEDescriptionParser: cannot open" << fileName;
+    std::ifstream in(fileName);
+    if (!in) {
+        qWarning() << "MNEDescriptionParser: cannot open" << UTILSLIB::utf8FromPath(fileName).c_str();
         return false;
     }
 
-    QTextStream in(&file);
     desc = FIFFLIB::AverageDescription();
 
     bool expectBrace = false;
@@ -205,13 +200,13 @@ bool MNEDescriptionParser::parseAverageFile(const QString& fileName, FIFFLIB::Av
     bool inCategory = false;
     FIFFLIB::AverageCategory currentCat;
 
-    QString word;
-    while (!(word = nextWord(in)).isEmpty()) {
+    std::string word;
+    while (!(word = nextWord(in)).empty()) {
         if (expectBrace) {
             if (word == "{") {
                 expectBrace = false;
             } else {
-                qWarning() << "MNEDescriptionParser: expected '{', got" << word;
+                qWarning() << "MNEDescriptionParser: expected '{', got" << word.c_str();
                 return false;
             }
             continue;
@@ -260,7 +255,7 @@ bool MNEDescriptionParser::parseAverageFile(const QString& fileName, FIFFLIB::Av
         }
 
         // Top-level: "average" keyword
-        if (word.compare("average", Qt::CaseInsensitive) == 0) {
+        if (UTILSLIB::equalsIgnoreCase(word, "average")) {
             if (inAverage || inCategory) {
                 qWarning() << "MNEDescriptionParser: nested average";
                 return false;
@@ -271,8 +266,8 @@ bool MNEDescriptionParser::parseAverageFile(const QString& fileName, FIFFLIB::Av
         }
 
         // Category start
-        if (word.compare("category", Qt::CaseInsensitive) == 0 ||
-            word.compare("condition", Qt::CaseInsensitive) == 0) {
+        if (UTILSLIB::equalsIgnoreCase(word, "category") ||
+            UTILSLIB::equalsIgnoreCase(word, "condition")) {
             if (!inAverage || inCategory) {
                 qWarning() << "MNEDescriptionParser: misplaced category";
                 return false;
@@ -284,16 +279,16 @@ bool MNEDescriptionParser::parseAverageFile(const QString& fileName, FIFFLIB::Av
         }
 
         // "name" keyword
-        if (word.compare("name", Qt::CaseInsensitive) == 0) {
-            QString val = nextWord(in);
-            if (val.isEmpty()) {
+        if (UTILSLIB::equalsIgnoreCase(word, "name")) {
+            const std::string val = nextWord(in);
+            if (val.empty()) {
                 qWarning() << "MNEDescriptionParser: name requires a value";
                 return false;
             }
             if (inCategory)
-                currentCat.comment = val.toStdString();
+                currentCat.comment = val;
             else if (inAverage)
-                desc.comment = val.toStdString();
+                desc.comment = val;
             else {
                 qWarning() << "MNEDescriptionParser: misplaced name";
                 return false;
@@ -302,14 +297,14 @@ bool MNEDescriptionParser::parseAverageFile(const QString& fileName, FIFFLIB::Av
         }
 
         // "outfile" keyword
-        if (word.compare("outfile", Qt::CaseInsensitive) == 0) {
-            QString val = nextWord(in);
-            if (val.isEmpty()) {
+        if (UTILSLIB::equalsIgnoreCase(word, "outfile")) {
+            const std::string val = nextWord(in);
+            if (val.empty()) {
                 qWarning() << "MNEDescriptionParser: outfile requires a value";
                 return false;
             }
             if (inAverage && !inCategory)
-                desc.filename = val.toStdString();
+                desc.filename = val;
             else {
                 qWarning() << "MNEDescriptionParser: misplaced outfile";
                 return false;
@@ -318,14 +313,14 @@ bool MNEDescriptionParser::parseAverageFile(const QString& fileName, FIFFLIB::Av
         }
 
         // "eventfile" keyword
-        if (word.compare("eventfile", Qt::CaseInsensitive) == 0) {
-            QString val = nextWord(in);
-            if (val.isEmpty()) {
+        if (UTILSLIB::equalsIgnoreCase(word, "eventfile")) {
+            const std::string val = nextWord(in);
+            if (val.empty()) {
                 qWarning() << "MNEDescriptionParser: eventfile requires a value";
                 return false;
             }
             if (inAverage && !inCategory)
-                desc.eventFile = val.toStdString();
+                desc.eventFile = val;
             else {
                 qWarning() << "MNEDescriptionParser: misplaced eventfile";
                 return false;
@@ -334,14 +329,14 @@ bool MNEDescriptionParser::parseAverageFile(const QString& fileName, FIFFLIB::Av
         }
 
         // "logfile" keyword
-        if (word.compare("logfile", Qt::CaseInsensitive) == 0) {
-            QString val = nextWord(in);
-            if (val.isEmpty()) {
+        if (UTILSLIB::equalsIgnoreCase(word, "logfile")) {
+            const std::string val = nextWord(in);
+            if (val.empty()) {
                 qWarning() << "MNEDescriptionParser: logfile requires a value";
                 return false;
             }
             if (inAverage && !inCategory)
-                desc.logFile = val.toStdString();
+                desc.logFile = val;
             else {
                 qWarning() << "MNEDescriptionParser: misplaced logfile";
                 return false;
@@ -350,7 +345,7 @@ bool MNEDescriptionParser::parseAverageFile(const QString& fileName, FIFFLIB::Av
         }
 
         // "fixskew" keyword
-        if (word.compare("fixskew", Qt::CaseInsensitive) == 0) {
+        if (UTILSLIB::equalsIgnoreCase(word, "fixskew")) {
             if (inAverage && !inCategory)
                 desc.fixSkew = true;
             else {
@@ -361,7 +356,7 @@ bool MNEDescriptionParser::parseAverageFile(const QString& fileName, FIFFLIB::Av
         }
 
         // --- Category-level keywords ---
-        if (word.compare("tmin", Qt::CaseInsensitive) == 0) {
+        if (UTILSLIB::equalsIgnoreCase(word, "tmin")) {
             float fval;
             if (!getFloat(in, fval))
                 return false;
@@ -373,7 +368,7 @@ bool MNEDescriptionParser::parseAverageFile(const QString& fileName, FIFFLIB::Av
             }
             continue;
         }
-        if (word.compare("tmax", Qt::CaseInsensitive) == 0) {
+        if (UTILSLIB::equalsIgnoreCase(word, "tmax")) {
             float fval;
             if (!getFloat(in, fval))
                 return false;
@@ -385,8 +380,8 @@ bool MNEDescriptionParser::parseAverageFile(const QString& fileName, FIFFLIB::Av
             }
             continue;
         }
-        if (word.compare("basemin", Qt::CaseInsensitive) == 0 ||
-            word.compare("bmin", Qt::CaseInsensitive) == 0) {
+        if (UTILSLIB::equalsIgnoreCase(word, "basemin") ||
+            UTILSLIB::equalsIgnoreCase(word, "bmin")) {
             float fval;
             if (!getFloat(in, fval))
                 return false;
@@ -399,8 +394,8 @@ bool MNEDescriptionParser::parseAverageFile(const QString& fileName, FIFFLIB::Av
             }
             continue;
         }
-        if (word.compare("basemax", Qt::CaseInsensitive) == 0 ||
-            word.compare("bmax", Qt::CaseInsensitive) == 0) {
+        if (UTILSLIB::equalsIgnoreCase(word, "basemax") ||
+            UTILSLIB::equalsIgnoreCase(word, "bmax")) {
             float fval;
             if (!getFloat(in, fval))
                 return false;
@@ -413,7 +408,7 @@ bool MNEDescriptionParser::parseAverageFile(const QString& fileName, FIFFLIB::Av
             }
             continue;
         }
-        if (word.compare("event", Qt::CaseInsensitive) == 0) {
+        if (UTILSLIB::equalsIgnoreCase(word, "event")) {
             int ival;
             if (!getInt(in, ival))
                 return false;
@@ -429,7 +424,7 @@ bool MNEDescriptionParser::parseAverageFile(const QString& fileName, FIFFLIB::Av
             }
             continue;
         }
-        if (word.compare("nextevent", Qt::CaseInsensitive) == 0) {
+        if (UTILSLIB::equalsIgnoreCase(word, "nextevent")) {
             int ival;
             if (!getInt(in, ival))
                 return false;
@@ -445,7 +440,7 @@ bool MNEDescriptionParser::parseAverageFile(const QString& fileName, FIFFLIB::Av
             }
             continue;
         }
-        if (word.compare("prevevent", Qt::CaseInsensitive) == 0) {
+        if (UTILSLIB::equalsIgnoreCase(word, "prevevent")) {
             int ival;
             if (!getInt(in, ival))
                 return false;
@@ -461,7 +456,7 @@ bool MNEDescriptionParser::parseAverageFile(const QString& fileName, FIFFLIB::Av
             }
             continue;
         }
-        if (word.compare("ignore", Qt::CaseInsensitive) == 0) {
+        if (UTILSLIB::equalsIgnoreCase(word, "ignore")) {
             int ival;
             if (!getInt(in, ival))
                 return false;
@@ -477,7 +472,7 @@ bool MNEDescriptionParser::parseAverageFile(const QString& fileName, FIFFLIB::Av
             }
             continue;
         }
-        if (word.compare("prevignore", Qt::CaseInsensitive) == 0) {
+        if (UTILSLIB::equalsIgnoreCase(word, "prevignore")) {
             int ival;
             if (!getInt(in, ival))
                 return false;
@@ -493,7 +488,7 @@ bool MNEDescriptionParser::parseAverageFile(const QString& fileName, FIFFLIB::Av
             }
             continue;
         }
-        if (word.compare("nextignore", Qt::CaseInsensitive) == 0) {
+        if (UTILSLIB::equalsIgnoreCase(word, "nextignore")) {
             int ival;
             if (!getInt(in, ival))
                 return false;
@@ -509,7 +504,7 @@ bool MNEDescriptionParser::parseAverageFile(const QString& fileName, FIFFLIB::Av
             }
             continue;
         }
-        if (word.compare("mask", Qt::CaseInsensitive) == 0) {
+        if (UTILSLIB::equalsIgnoreCase(word, "mask")) {
             int ival;
             if (!getInt(in, ival))
                 return false;
@@ -526,7 +521,7 @@ bool MNEDescriptionParser::parseAverageFile(const QString& fileName, FIFFLIB::Av
             }
             continue;
         }
-        if (word.compare("prevmask", Qt::CaseInsensitive) == 0) {
+        if (UTILSLIB::equalsIgnoreCase(word, "prevmask")) {
             int ival;
             if (!getInt(in, ival))
                 return false;
@@ -543,7 +538,7 @@ bool MNEDescriptionParser::parseAverageFile(const QString& fileName, FIFFLIB::Av
             }
             continue;
         }
-        if (word.compare("nextmask", Qt::CaseInsensitive) == 0) {
+        if (UTILSLIB::equalsIgnoreCase(word, "nextmask")) {
             int ival;
             if (!getInt(in, ival))
                 return false;
@@ -560,7 +555,7 @@ bool MNEDescriptionParser::parseAverageFile(const QString& fileName, FIFFLIB::Av
             }
             continue;
         }
-        if (word.compare("delay", Qt::CaseInsensitive) == 0) {
+        if (UTILSLIB::equalsIgnoreCase(word, "delay")) {
             float fval;
             if (!getFloat(in, fval))
                 return false;
@@ -572,7 +567,7 @@ bool MNEDescriptionParser::parseAverageFile(const QString& fileName, FIFFLIB::Av
             }
             continue;
         }
-        if (word.compare("stderr", Qt::CaseInsensitive) == 0) {
+        if (UTILSLIB::equalsIgnoreCase(word, "stderr")) {
             if (inCategory)
                 currentCat.doStdErr = true;
             else {
@@ -581,7 +576,7 @@ bool MNEDescriptionParser::parseAverageFile(const QString& fileName, FIFFLIB::Av
             }
             continue;
         }
-        if (word.compare("abs", Qt::CaseInsensitive) == 0) {
+        if (UTILSLIB::equalsIgnoreCase(word, "abs")) {
             if (inCategory)
                 currentCat.doAbs = true;
             else {
@@ -590,7 +585,7 @@ bool MNEDescriptionParser::parseAverageFile(const QString& fileName, FIFFLIB::Av
             }
             continue;
         }
-        if (word.compare("color", Qt::CaseInsensitive) == 0) {
+        if (UTILSLIB::equalsIgnoreCase(word, "color")) {
             float r, g, b;
             if (!getFloat(in, r) || !getFloat(in, g) || !getFloat(in, b))
                 return false;
@@ -613,7 +608,7 @@ bool MNEDescriptionParser::parseAverageFile(const QString& fileName, FIFFLIB::Av
         bool parseOk;
         if (parseRejectionParam(word, in, desc.rej, parseOk)) {
             if (!(inAverage && !inCategory)) {
-                qWarning() << "MNEDescriptionParser: misplaced" << word;
+                qWarning() << "MNEDescriptionParser: misplaced" << word.c_str();
                 return false;
             }
             if (!parseOk)
@@ -621,11 +616,11 @@ bool MNEDescriptionParser::parseAverageFile(const QString& fileName, FIFFLIB::Av
             continue;
         }
 
-        qWarning() << "MNEDescriptionParser: unknown keyword" << word << "in" << fileName;
+        qWarning() << "MNEDescriptionParser: unknown keyword" << word.c_str() << "in" << UTILSLIB::utf8FromPath(fileName).c_str();
     }
 
     if (desc.categories.empty()) {
-        qWarning() << "MNEDescriptionParser: no categories found in" << fileName;
+        qWarning() << "MNEDescriptionParser: no categories found in" << UTILSLIB::utf8FromPath(fileName).c_str();
         return false;
     }
 
@@ -636,15 +631,14 @@ bool MNEDescriptionParser::parseAverageFile(const QString& fileName, FIFFLIB::Av
 // COVARIANCE DESCRIPTION PARSER
 //=============================================================================================================
 
-bool MNEDescriptionParser::parseCovarianceFile(const QString& fileName, CovDescription& desc)
+bool MNEDescriptionParser::parseCovarianceFile(const std::filesystem::path& fileName, CovDescription& desc)
 {
-    QFile file(fileName);
-    if (!file.open(QIODevice::ReadOnly | QIODevice::Text)) {
-        qWarning() << "MNEDescriptionParser: cannot open" << fileName;
+    std::ifstream in(fileName);
+    if (!in) {
+        qWarning() << "MNEDescriptionParser: cannot open" << UTILSLIB::utf8FromPath(fileName).c_str();
         return false;
     }
 
-    QTextStream in(&file);
     desc = CovDescription();
 
     bool expectBrace = false;
@@ -654,13 +648,13 @@ bool MNEDescriptionParser::parseCovarianceFile(const QString& fileName, CovDescr
     bool inDef = false;
     CovDefinition currentDef;
 
-    QString word;
-    while (!(word = nextWord(in)).isEmpty()) {
+    std::string word;
+    while (!(word = nextWord(in)).empty()) {
         if (expectBrace) {
             if (word == "{") {
                 expectBrace = false;
             } else {
-                qWarning() << "MNEDescriptionParser: expected '{', got" << word;
+                qWarning() << "MNEDescriptionParser: expected '{', got" << word.c_str();
                 return false;
             }
             continue;
@@ -693,7 +687,7 @@ bool MNEDescriptionParser::parseCovarianceFile(const QString& fileName, CovDescr
             continue;
         }
 
-        if (word.compare("cov", Qt::CaseInsensitive) == 0) {
+        if (UTILSLIB::equalsIgnoreCase(word, "cov")) {
             if (inCov || inDef) {
                 qWarning() << "MNEDescriptionParser: nested cov";
                 return false;
@@ -704,7 +698,7 @@ bool MNEDescriptionParser::parseCovarianceFile(const QString& fileName, CovDescr
             continue;
         }
 
-        if (word.compare("def", Qt::CaseInsensitive) == 0) {
+        if (UTILSLIB::equalsIgnoreCase(word, "def")) {
             if (!inCov || inDef) {
                 qWarning() << "MNEDescriptionParser: misplaced def";
                 return false;
@@ -716,9 +710,9 @@ bool MNEDescriptionParser::parseCovarianceFile(const QString& fileName, CovDescr
         }
 
         // Cov-level keywords
-        if (word.compare("outfile", Qt::CaseInsensitive) == 0) {
-            QString val = nextWord(in);
-            if (val.isEmpty()) {
+        if (UTILSLIB::equalsIgnoreCase(word, "outfile")) {
+            const std::string val = nextWord(in);
+            if (val.empty()) {
                 qWarning() << "MNEDescriptionParser: outfile requires a value";
                 return false;
             }
@@ -730,9 +724,9 @@ bool MNEDescriptionParser::parseCovarianceFile(const QString& fileName, CovDescr
             }
             continue;
         }
-        if (word.compare("eventfile", Qt::CaseInsensitive) == 0) {
-            QString val = nextWord(in);
-            if (val.isEmpty()) {
+        if (UTILSLIB::equalsIgnoreCase(word, "eventfile")) {
+            const std::string val = nextWord(in);
+            if (val.empty()) {
                 qWarning() << "MNEDescriptionParser: eventfile requires a value";
                 return false;
             }
@@ -744,9 +738,9 @@ bool MNEDescriptionParser::parseCovarianceFile(const QString& fileName, CovDescr
             }
             continue;
         }
-        if (word.compare("logfile", Qt::CaseInsensitive) == 0) {
-            QString val = nextWord(in);
-            if (val.isEmpty()) {
+        if (UTILSLIB::equalsIgnoreCase(word, "logfile")) {
+            const std::string val = nextWord(in);
+            if (val.empty()) {
                 qWarning() << "MNEDescriptionParser: logfile requires a value";
                 return false;
             }
@@ -758,7 +752,7 @@ bool MNEDescriptionParser::parseCovarianceFile(const QString& fileName, CovDescr
             }
             continue;
         }
-        if (word.compare("keepsamplemean", Qt::CaseInsensitive) == 0) {
+        if (UTILSLIB::equalsIgnoreCase(word, "keepsamplemean")) {
             if (inCov && !inDef)
                 desc.removeSampleMean = false;
             else {
@@ -767,7 +761,7 @@ bool MNEDescriptionParser::parseCovarianceFile(const QString& fileName, CovDescr
             }
             continue;
         }
-        if (word.compare("fixskew", Qt::CaseInsensitive) == 0) {
+        if (UTILSLIB::equalsIgnoreCase(word, "fixskew")) {
             if (inCov && !inDef)
                 desc.fixSkew = true;
             else {
@@ -778,7 +772,7 @@ bool MNEDescriptionParser::parseCovarianceFile(const QString& fileName, CovDescr
         }
 
         // Def-level keywords
-        if (word.compare("tmin", Qt::CaseInsensitive) == 0) {
+        if (UTILSLIB::equalsIgnoreCase(word, "tmin")) {
             float fval;
             if (!getFloat(in, fval))
                 return false;
@@ -790,7 +784,7 @@ bool MNEDescriptionParser::parseCovarianceFile(const QString& fileName, CovDescr
             }
             continue;
         }
-        if (word.compare("tmax", Qt::CaseInsensitive) == 0) {
+        if (UTILSLIB::equalsIgnoreCase(word, "tmax")) {
             float fval;
             if (!getFloat(in, fval))
                 return false;
@@ -802,8 +796,8 @@ bool MNEDescriptionParser::parseCovarianceFile(const QString& fileName, CovDescr
             }
             continue;
         }
-        if (word.compare("basemin", Qt::CaseInsensitive) == 0 ||
-            word.compare("bmin", Qt::CaseInsensitive) == 0) {
+        if (UTILSLIB::equalsIgnoreCase(word, "basemin") ||
+            UTILSLIB::equalsIgnoreCase(word, "bmin")) {
             float fval;
             if (!getFloat(in, fval))
                 return false;
@@ -816,8 +810,8 @@ bool MNEDescriptionParser::parseCovarianceFile(const QString& fileName, CovDescr
             }
             continue;
         }
-        if (word.compare("basemax", Qt::CaseInsensitive) == 0 ||
-            word.compare("bmax", Qt::CaseInsensitive) == 0) {
+        if (UTILSLIB::equalsIgnoreCase(word, "basemax") ||
+            UTILSLIB::equalsIgnoreCase(word, "bmax")) {
             float fval;
             if (!getFloat(in, fval))
                 return false;
@@ -830,7 +824,7 @@ bool MNEDescriptionParser::parseCovarianceFile(const QString& fileName, CovDescr
             }
             continue;
         }
-        if (word.compare("event", Qt::CaseInsensitive) == 0) {
+        if (UTILSLIB::equalsIgnoreCase(word, "event")) {
             int ival;
             if (!getInt(in, ival))
                 return false;
@@ -846,7 +840,7 @@ bool MNEDescriptionParser::parseCovarianceFile(const QString& fileName, CovDescr
             }
             continue;
         }
-        if (word.compare("ignore", Qt::CaseInsensitive) == 0) {
+        if (UTILSLIB::equalsIgnoreCase(word, "ignore")) {
             int ival;
             if (!getInt(in, ival))
                 return false;
@@ -862,7 +856,7 @@ bool MNEDescriptionParser::parseCovarianceFile(const QString& fileName, CovDescr
             }
             continue;
         }
-        if (word.compare("mask", Qt::CaseInsensitive) == 0) {
+        if (UTILSLIB::equalsIgnoreCase(word, "mask")) {
             int ival;
             if (!getInt(in, ival))
                 return false;
@@ -879,7 +873,7 @@ bool MNEDescriptionParser::parseCovarianceFile(const QString& fileName, CovDescr
             }
             continue;
         }
-        if (word.compare("delay", Qt::CaseInsensitive) == 0) {
+        if (UTILSLIB::equalsIgnoreCase(word, "delay")) {
             float fval;
             if (!getFloat(in, fval))
                 return false;
@@ -896,7 +890,7 @@ bool MNEDescriptionParser::parseCovarianceFile(const QString& fileName, CovDescr
         bool parseOk;
         if (parseRejectionParam(word, in, desc.rej, parseOk)) {
             if (!(inCov && !inDef)) {
-                qWarning() << "MNEDescriptionParser: misplaced" << word;
+                qWarning() << "MNEDescriptionParser: misplaced" << word.c_str();
                 return false;
             }
             if (!parseOk)
@@ -904,11 +898,11 @@ bool MNEDescriptionParser::parseCovarianceFile(const QString& fileName, CovDescr
             continue;
         }
 
-        qWarning() << "MNEDescriptionParser: unknown keyword" << word << "in" << fileName;
+        qWarning() << "MNEDescriptionParser: unknown keyword" << word.c_str() << "in" << UTILSLIB::utf8FromPath(fileName).c_str();
     }
 
     if (!seenCov) {
-        qWarning() << "MNEDescriptionParser: nothing useful read from" << fileName;
+        qWarning() << "MNEDescriptionParser: nothing useful read from" << UTILSLIB::utf8FromPath(fileName).c_str();
         return false;
     }
 

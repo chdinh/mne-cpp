@@ -58,6 +58,17 @@ using namespace UTILSLIB;
 /**
  * Prints a richly formatted, grouped help text to stdout.
  */
+static StringList toStringList(const QStringList& values)
+{
+    StringList list;
+    list.reserve(static_cast<std::size_t>(values.size()));
+    for (const QString& value : values)
+        list.push_back(value.toStdString());
+    return list;
+}
+
+//=============================================================================================================
+
 static void printHelp()
 {
     QTextStream out(stdout);
@@ -363,16 +374,15 @@ int main(int argc, char* argv[])
     ProcessingSettings settings;
 
     // Raw files
-    settings.rawFiles = parser.values(rawOpt);
+    settings.rawFiles = toStringList(parser.values(rawOpt));
 
     // Event files
-    settings.eventFiles = parser.values(eventsOpt);
-    settings.eventsOutFiles = parser.values(eventsOutOpt);
+    settings.eventFiles = toStringList(parser.values(eventsOpt));
+    settings.eventsOutFiles = toStringList(parser.values(eventsOutOpt));
 
     // Trigger settings
-    settings.digTrigger = parser.value(digTrigOpt);
-    // Replace underscores with spaces for MNE-C compatibility
-    settings.digTrigger.replace('_', ' ');
+    // Underscores stand for spaces, as in MNE-C
+    settings.digTrigger = parser.value(digTrigOpt).replace('_', ' ').toStdString();
 
     if (parser.isSet(digTrigMaskOpt)) {
         QString maskStr = parser.value(digTrigMaskOpt);
@@ -384,7 +394,7 @@ int main(int argc, char* argv[])
     }
 
     // Projection settings
-    settings.projFiles = parser.values(projOpt);
+    settings.projFiles = toStringList(parser.values(projOpt));
     if (parser.isSet(projOnOpt))
         settings.projOn = 1;
     else if (parser.isSet(projOffOpt))
@@ -400,8 +410,8 @@ int main(int argc, char* argv[])
     settings.projGradReject = parser.value(projGradRejOpt).toFloat() * 1e-13f;
     settings.projMagReject = parser.value(projMagRejOpt).toFloat() * 1e-15f;
     settings.projEegReject = parser.value(projEegRejOpt).toFloat() * 1e-6f;
-    settings.saveProjTag = parser.value(saveProjTagOpt);
-    if (!settings.saveProjTag.isEmpty())
+    settings.saveProjTag = parser.value(saveProjTagOpt).toStdString();
+    if (!settings.saveProjTag.empty())
         settings.makeProj = true;
 
     // Filter settings
@@ -417,20 +427,20 @@ int main(int argc, char* argv[])
     settings.filter.filterOn = !parser.isSet(filterOffOpt);
 
     // Save settings
-    settings.saveFiles = parser.values(saveOpt);
+    settings.saveFiles = toStringList(parser.values(saveOpt));
     settings.decimation = parser.value(decimOpt).toInt();
     if (parser.isSet(splitOpt))
         settings.splitSize = static_cast<qint64>(parser.value(splitOpt).toFloat() * 1024 * 1024);
 
     // Averaging settings
-    settings.aveFiles = parser.values(aveOpt);
-    settings.saveAveTag = parser.value(saveAveTagOpt);
-    settings.grandAveFile = parser.value(gaveOpt);
+    settings.aveFiles = toStringList(parser.values(aveOpt));
+    settings.saveAveTag = parser.value(saveAveTagOpt).toStdString();
+    settings.grandAveFile = parser.value(gaveOpt).toStdString();
 
     // Covariance settings
-    settings.covFiles = parser.values(covOpt);
-    settings.saveCovTag = parser.value(saveCovTagOpt);
-    settings.grandCovFile = parser.value(gcovOpt);
+    settings.covFiles = toStringList(parser.values(covOpt));
+    settings.saveCovTag = parser.value(saveCovTagOpt).toStdString();
+    settings.grandCovFile = parser.value(gcovOpt).toStdString();
 
     // Other settings
     settings.saveHere = parser.isSet(saveHereOpt);
@@ -438,7 +448,7 @@ int main(int argc, char* argv[])
     //=========================================================================
     // Validate required options
     //=========================================================================
-    if (settings.rawFiles.isEmpty()) {
+    if (settings.rawFiles.empty()) {
         qCritical() << "Error: At least one --raw file must be specified.";
         printHelp();
         return 1;

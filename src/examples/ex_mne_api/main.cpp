@@ -378,7 +378,7 @@ int main(int argc, char* argv[])
                    "}\n");
     descFile.close();
     AverageDescription averaging;
-    MNEDescriptionParser::parseAverageFile(aveDesc, averaging);
+    MNEDescriptionParser::parseAverageFile(aveDesc.toStdU16String(), averaging);
     const AverageCategory& leftCategory = averaging.categories.front(); // name, events, tmin/tmax, baseline
     const RejectionParams& rejection = averaging.rej;                   // MNE-C defaults unless the file sets them (EEG 100 uV, ...)
     std::string log;
@@ -405,7 +405,7 @@ int main(int argc, char* argv[])
                       "}\n");
     covDescFile.close();
     CovDescription covariance;
-    MNEDescriptionParser::parseCovarianceFile(covDescPath, covariance);
+    MNEDescriptionParser::parseCovarianceFile(covDescPath.toStdU16String(), covariance);
     covariance.rej.megGradReject = covariance.rej.megMagReject = covariance.rej.eogReject = 0.0f; // EEG limit only
     const CovDefinition& preStim = covariance.defs.front();
     const FiffCov noiseCov = FiffCov::compute_from_epochs(raw, events.events, {1, 2}, preStim.tmin, preStim.tmax, preStim.bmin, preStim.bmax, preStim.doBaseline,
@@ -433,7 +433,7 @@ int main(int argc, char* argv[])
                  "MNEMeasData/MNEMeasDataSet: evoked set, baseline and interpolated values match mne");
 
     //! [mne_sss_data_usage]
-    auto sss = MNESssData::read(sssPath); // the SSS block written by mne.preprocessing.maxwell_filter
+    auto sss = MNESssData::read(sssPath.toStdU16String()); // the SSS block written by mne.preprocessing.maxwell_filter
     //! [mne_sss_data_usage]
     // maxwell_filter(origin=(0, 0, 0.04), int_order=8, ext_order=3): head frame, 306 channels, 70 of 80 internal and 15 external components
     ok &= expect(sss && sss->job == FIFFV_SSS_JOB_FILTER && sss->coord_frame == FIFFV_COORD_HEAD && sss->nchan == 306 && sss->in_order == 8 && sss->out_order == 3 && sss->in_nuse == 70 && sss->out_nuse == 15 && std::fabs(sss->origin[2] - 0.04f) < 1e-7f,
@@ -459,7 +459,7 @@ int main(int argc, char* argv[])
 
     // The same surface as an MNE-C viewer display surface
     MNEMshDisplaySurfaceSet display;
-    display.add_bem_surface(bemPath, FIFFV_BEM_SURF_ID_BRAIN, "inner skull", 1, 1); // checks closure
+    display.add_bem_surface(bemPath.toStdU16String(), FIFFV_BEM_SURF_ID_BRAIN, "inner skull", 1, 1); // checks closure
     const MNEMshDisplaySurface& shown = *display.surfs[0];
     //! [mne_surface_usage]
     // mne.surface._get_solids (which returns the solid angle / 2): 0.5 at the centroid, 0 at (0, 0, 200) mm;
@@ -511,13 +511,13 @@ int main(int argc, char* argv[])
 
     //! [mne_layout_usage]
     // The Neuromag Vectorview layout: one viewport per channel
-    auto layout = MNELayout::read(layoutDir + "/Vectorview-all.lout");
-    const QMap<QString, QPointF> positions = layout->channelPositions();                     // lower-left corners, keyed "MEG 0113"
+    auto layout = MNELayout::read((layoutDir + "/Vectorview-all.lout").toStdU16String());
+    const std::map<std::string, QPointF> positions = layout->channelPositions();             // lower-left corners, keyed "MEG 0113"
     const int leftHalf = layout->confine(QRectF(QPointF(-85.0, -83.0), QPointF(0.0, 75.0))); // zoom to the left half
-    const int shownTriplet = layout->matchPorts(QStringList({"MEG0113", "MEG0112", "MEG0111"}));
+    const int shownTriplet = layout->matchPorts({"MEG0113", "MEG0112", "MEG0111"});
     //! [mne_layout_usage]
     // mne.channels.read_layout("Vectorview-all.lout", scale=False): 306 viewports in -85 ... 90 x -83 ... 75, MEG 0113 at (-73.4162, 33.4167); 138 boxes left of x = 0
-    ok &= expect(layout && layout->ports.size() == 306 && (positions.value("MEG 0113") - QPointF(-73.416206, 33.416687)).manhattanLength() < 1e-4 && leftHalf == 138 && shownTriplet == 3,
+    ok &= expect(layout && layout->ports.size() == 306 && (positions.at("MEG 0113") - QPointF(-73.416206, 33.416687)).manhattanLength() < 1e-4 && leftHalf == 138 && shownTriplet == 3,
                  "MNELayout/MNELayoutPort: Vectorview layout like mne.channels.read_layout, zoom and channel matching");
 
     //! [mne_morph_map_usage]

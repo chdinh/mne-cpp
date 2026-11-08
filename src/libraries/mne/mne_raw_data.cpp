@@ -31,7 +31,11 @@
 #include <Eigen/Core>
 #include <unsupported/Eigen/FFT>
 
+#include <algorithm>
 #include <complex>
+#include <iterator>
+#include <string>
+#include <string_view>
 
 // MSVC builds already define _USE_MATH_DEFINES globally (see src/CMakeLists.txt),
 // so define it here only for the toolchains that do not.
@@ -1270,10 +1274,16 @@ MNERawData* MNERawData::open_file_comp(const std::filesystem::path& name,
     if (MNERawInfo::load(name, allow_maxshield, info) == FAIL)
         return nullptr;
 
+    // FiffTag::toChInfo strips the spaces from channel names, so compare without them.
+    const auto withoutSpaces = [](std::string_view name) {
+        std::string result;
+        std::ranges::copy_if(name, std::back_inserter(result), [](char c) { return c != ' '; });
+        return result;
+    };
+    const std::string trigger = withoutSpaces(MNE_DEFAULT_TRIGGER_CH);
     for (k = 0; k < info->nchan; k++) {
         FiffChInfo& ch = info->chInfo[k];
-        // FiffTag::toChInfo strips the spaces from channel names.
-        if (QString::fromStdString(ch.ch_name).remove(' ') == QString(MNE_DEFAULT_TRIGGER_CH).remove(' ')) {
+        if (withoutSpaces(ch.ch_name) == trigger) {
             if (std::fabs(1.0 - ch.range) > 1e-5) {
                 ch.range = 1.0;
                 qInfo("%s range set to %f\n", MNE_DEFAULT_TRIGGER_CH, ch.range);
@@ -1341,7 +1351,7 @@ MNERawData* MNERawData::open_file_comp(const std::filesystem::path& name,
     /*
        * SSS data
        */
-    data->sss = MNESssData::read(QString::fromStdString(data->filename));
+    data->sss = MNESssData::read(name);
     if (data->sss && data->sss->job != FIFFV_SSS_JOB_NOTHING && data->sss->comp_info.size() > 0) {
         qInfo("SSS data read from %s :\n", data->filename.c_str());
         QTextStream errStream(stderr);
