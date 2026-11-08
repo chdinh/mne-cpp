@@ -20,7 +20,7 @@ FreeSurfer colour lookup table: region name + RGBA + packed label, indexed by en
 Backs the colour/structure mapping used by [`FsAnnotation`](/docs/api/fs/fs-annotation) and by any caller that needs to translate a packed .annot label into the matching anatomical name and RGBA colour. The container is a thin value object: rows of `table` align with `struct_names`, and the label column matches the per-vertex integer stored in .annot files so direct equality lookup is sufficient.
 
 ```cpp title="src/examples/ex_fs/main.cpp"
-FsAnnotation aparc("sample", 0, "aparc", subjectsDir);
+FsAnnotation aparc("sample", 0, "aparc", subjectsDir.toStdU16String());
 FsColortable& colors = aparc.getColortable();
 QList<FsLabel> regions;
 QList<RowVector4i> regionColors;
@@ -59,7 +59,7 @@ Names encoded in the colortable.
 
 **Returns:**
 
-- *QStringList* — ids.
+- *const UTILSLIB::StringList &* — ids.
 
 ---
 
@@ -87,7 +87,7 @@ RGBAs encoded in the colortable.
 FreeSurfer library: surfaces, curvature, parcellations, labels and an atlas volume.
 
 ````cpp title="src/examples/ex_fs/main.cpp, line 132"
-FsAnnotation aparc("sample", 0, "aparc", subjectsDir);
+FsAnnotation aparc("sample", 0, "aparc", subjectsDir.toStdU16String());
 FsColortable& colors = aparc.getColortable();
 QList<FsLabel> regions;
 QList<RowVector4i> regionColors;

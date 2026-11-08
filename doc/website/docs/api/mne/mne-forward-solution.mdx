@@ -27,7 +27,7 @@ In-memory representation of an `-fwd.fif` forward solution.
 
 ```cpp title="src/examples/ex_inv_api/main.cpp"
 FsLabel v1;
-FsLabel::read(data + "/subjects/sample/label/lh.V1.label", v1);
+FsLabel::read((data + "/subjects/sample/label/lh.V1.label").toStdU16String(), v1);
 const std::filesystem::path fwdPath = (data + "/Result/ref-sample_audvis-meg-eeg-oct-6-fwd.fif").toStdU16String();
 const MNEForwardSolution fwd = MNEForwardSolution(fwdPath).pick_regions({v1}); // 70 sources x 3 orientations
 const FiffCov noiseCov((data + "/MEG/sample/sample_audvis-cov.fif").toStdString());
@@ -424,7 +424,7 @@ Inverse library: minimum-norm estimates, resolution matrices, label time courses
 
 ````cpp title="src/examples/ex_inv_api/main.cpp, line 113"
 FsLabel v1;
-FsLabel::read(data + "/subjects/sample/label/lh.V1.label", v1);
+FsLabel::read((data + "/subjects/sample/label/lh.V1.label").toStdU16String(), v1);
 const std::filesystem::path fwdPath = (data + "/Result/ref-sample_audvis-meg-eeg-oct-6-fwd.fif").toStdU16String();
 const MNEForwardSolution fwd = MNEForwardSolution(fwdPath).pick_regions({v1}); // 70 sources x 3 orientations
 const FiffCov noiseCov((data + "/MEG/sample/sample_audvis-cov.fif").toStdString());

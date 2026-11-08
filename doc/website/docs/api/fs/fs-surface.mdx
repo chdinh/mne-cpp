@@ -24,8 +24,8 @@ In-memory FreeSurfer triangular cortical surface for one hemisphere.
 Owns the vertex coordinate matrix (n_vertices × 3, Tk-surface RAS mm), the triangle index matrix (n_faces × 3, zero-based into the vertex array) and the hemisphere id (0 = `lh`, 1 = `rh`). Construction is purely an I/O operation: each constructor either takes a direct path to a `lh.pial` / `rh.white` / `lh.inflated` style binary surface file, or the `subject_id` / `hemi` / `surf` shorthand resolved against `$SUBJECTS_DIR`. The instance is intended to be paired with an [`FsAnnotation`](/docs/api/fs/fs-annotation) or [`FsLabel`](/docs/api/fs/fs-label) sharing the same vertex indexing.
 
 ```cpp title="src/examples/ex_fs/main.cpp"
-FsSurface white("sample", 0, "white", subjectsDir); // lh = 0, rh = 1; curvature is loaded alongside
-const MatrixX3f& rr = white.rr();                   // vertices (metres)
+FsSurface white("sample", 0, "white", subjectsDir.toStdU16String()); // lh = 0, rh = 1; curvature is loaded alongside
+const MatrixX3f& rr = white.rr();                                    // vertices (metres)
 const MatrixX3i& tris = white.tris();
 const VectorXf& curv = white.curv();
 ```
@@ -46,7 +46,7 @@ Construts the surface by reading it of the given file.
 
 **Parameters:**
 
-- **p_sFile** : *const QString &*
+- **p_sFile** : *const std::filesystem::path &*
   [`FsSurface`](/docs/api/fs/fs-surface) file name with path.
 
 ---
@@ -57,16 +57,16 @@ Construts the surface by reading it of the given file.
 
 **Parameters:**
 
-- **subject_id** : *const QString &*
+- **subject_id** : *const std::string &*
   Name of subject.
 
 - **hemi** : *qint32*
   Which hemisphere to load \{0 -&gt; lh, 1 -&gt; rh\}.
 
-- **surf** : *const QString &*
+- **surf** : *const std::string &*
   Name of the surface to load (eg. inflated, orig ...).
 
-- **subjects_dir** : *const QString &*
+- **subjects_dir** : *const std::filesystem::path &*
   Subjects directory.
 
 ---
@@ -77,13 +77,13 @@ Construts the surface by reading it of the given file.
 
 **Parameters:**
 
-- **path** : *const QString &*
+- **path** : *const std::filesystem::path &*
   path to surface directory.
 
 - **hemi** : *qint32*
   Which hemisphere to load \{0 -&gt; lh, 1 -&gt; rh\}.
 
-- **surf** : *const QString &*
+- **surf** : *const std::string &*
   Name of the surface to load (eg. inflated, orig ...).
 
 ---
@@ -128,7 +128,7 @@ inflated, orig ...)
 
 **Returns:**
 
-- *QString* — the surface.
+- *const std::string &* — the surface.
 
 ---
 
@@ -198,7 +198,7 @@ path to surf directuryt
 
 **Returns:**
 
-- *QString* — the path to surf directory.
+- *const std::string &* — the path to surf directory.
 
 ---
 
@@ -208,7 +208,7 @@ surf file name
 
 **Returns:**
 
-- *QString* — the surf file name.
+- *const std::string &* — the surf file name.
 
 ---
 
@@ -222,16 +222,16 @@ Reads a FreeSurfer surface file
 
 **Parameters:**
 
-- **subject_id** : *const QString &*
+- **subject_id** : *const std::string &*
   Name of subject.
 
 - **hemi** : *qint32*
   Which hemisphere to load \{0 -&gt; lh, 1 -&gt; rh\}.
 
-- **surf** : *const QString &*
+- **surf** : *const std::string &*
   Name of the surface to load (eg. inflated, orig ...).
 
-- **subjects_dir** : *const QString &*
+- **subjects_dir** : *const std::filesystem::path &*
   Subjects directory.
 
 - **p_Surface** : *[FsSurface](/docs/api/fs/fs-surface) &*
@@ -254,13 +254,13 @@ Reads a FreeSurfer surface file
 
 **Parameters:**
 
-- **path** : *const QString &*
+- **path** : *const std::filesystem::path &*
   path to surface directory.
 
 - **hemi** : *qint32*
   Which hemisphere to load \{0 -&gt; lh, 1 -&gt; rh\}.
 
-- **surf** : *const QString &*
+- **surf** : *const std::string &*
   Name of the surface to load (eg. inflated, orig ...).
 
 - **p_Surface** : *[FsSurface](/docs/api/fs/fs-surface) &*
@@ -283,7 +283,7 @@ Reads a FreeSurfer surface file
 
 **Parameters:**
 
-- **p_sFileName** : *const QString &*
+- **p_sFileName** : *const std::filesystem::path &*
   The file to read.
 
 - **p_Surface** : *[FsSurface](/docs/api/fs/fs-surface) &*
@@ -298,13 +298,28 @@ Reads a FreeSurfer surface file
 
 ---
 
+### read_geometry(file)
+
+Reads the vertices and triangles of any FreeSurfer surface file (triangle or quad format), like nibabel.freesurfer.read_geometry but in meters; the file name need not name a hemisphere, so BEM surfaces such as inner_skull.surf can be read too.
+
+**Parameters:**
+
+- **file** : *const std::filesystem::path &*
+  The surface file.
+
+**Returns:**
+
+- *[Expected](/docs/api/utils/expected)&lt; Geometry &gt;* — The geometry; an Io error if the file cannot be read, a Format error if it is not a valid surface.
+
+---
+
 ### read_curv(p_sFileName)
 
 reads a binary curvature file into a vector
 
 **Parameters:**
 
-- **p_sFileName** : *const QString &*
+- **p_sFileName** : *const std::filesystem::path &*
   Path to the FreeSurfer curvature file (e.g. lh.curv).
 
 **Returns:**
@@ -333,26 +348,11 @@ Efficiently compute vertex normals for triangulated surface.
 
 ### fread3(stream)
 
-Reads a 3-byte integer out of a QDataStream (FreeSurfer format).
+Reads a big-endian 3-byte integer (FreeSurfer format).
 
 **Parameters:**
 
-- **stream** : *QDataStream &*
-  Stream to read from.
-
-**Returns:**
-
-- *qint32* — the read 3-byte integer.
-
----
-
-### fread3(stream)
-
-Reads a 3-byte integer out of a std::iostream (FreeSurfer format).
-
-**Parameters:**
-
-- **stream** : *std::iostream &*
+- **stream** : *[ByteStream](/docs/api/utils/byte-stream) &*
   Stream to read from.
 
 **Returns:**
@@ -363,29 +363,11 @@ Reads a 3-byte integer out of a std::iostream (FreeSurfer format).
 
 ### fread3_many(stream, count)
 
-Reads multiple 3-byte integers out of a QDataStream (FreeSurfer format).
+Reads multiple big-endian 3-byte integers (FreeSurfer format).
 
 **Parameters:**
 
-- **stream** : *QDataStream &*
-  Stream to read from.
-
-- **count** : *qint32*
-  Number of elements to read.
-
-**Returns:**
-
-- *Eigen::VectorXi* — the read 3-byte integers.
-
----
-
-### fread3_many(stream, count)
-
-Reads multiple 3-byte integers out of a std::iostream (FreeSurfer format).
-
-**Parameters:**
-
-- **stream** : *std::iostream &*
+- **stream** : *[ByteStream](/docs/api/utils/byte-stream) &*
   Stream to read from.
 
 - **count** : *qint32*
@@ -416,8 +398,8 @@ MNE library: BEM surfaces, surface projection, ICP, source spaces and epochs.
 const QString subjectsDir = QStringLiteral(MNE_MORPH_SUBJECTS_DIR);
 FsSurface smallSphere;
 FsSurface largeSphere;
-FsSurface::read(subjectsDir + "/small/surf/lh.sphere.reg", smallSphere, false);
-FsSurface::read(subjectsDir + "/large/surf/lh.sphere.reg", largeSphere, false);
+FsSurface::read((subjectsDir + "/small/surf/lh.sphere.reg").toStdU16String(), smallSphere, false);
+FsSurface::read((subjectsDir + "/large/surf/lh.sphere.reg").toStdU16String(), largeSphere, false);
 MNEMorphMap smallToLarge = MNEMorphMap::compute(smallSphere.rr(), smallSphere.tris(), largeSphere.rr());
 smallToLarge.from_subj = "small";
 smallToLarge.to_subj = "large";

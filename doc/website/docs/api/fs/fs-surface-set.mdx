@@ -20,7 +20,7 @@ Container holding the lh and/or rh [`FsSurface`](/docs/api/fs/fs-surface) for on
 The set is keyed on the hemisphere id (0 = lh, 1 = rh) so callers can do `set`[0] / `set`[1] or iterate over `set.data()`. All member surfaces are loaded with the same `surf` name (e.g. `pial`), so the set is homogeneous across hemispheres and stays aligned with a paired [`FsAnnotationSet`](/docs/api/fs/fs-annotation-set) sharing the same vertex indexing.
 
 ```cpp title="src/examples/ex_fs/main.cpp"
-FsSurfaceSet both("sample", 2, "white", subjectsDir); // 2 = both hemispheres
+FsSurfaceSet both("sample", 2, "white", subjectsDir.toStdU16String()); // 2 = both hemispheres
 ```
 
 ---
@@ -39,16 +39,16 @@ Construts the surface set by reading it of the given files.
 
 **Parameters:**
 
-- **subject_id** : *const QString &*
+- **subject_id** : *const std::string &*
   Name of subject.
 
 - **hemi** : *qint32*
   Which hemisphere to load \{0 -&gt; lh, 1 -&gt; rh, 2 -&gt; both\}.
 
-- **surf** : *const QString &*
+- **surf** : *const std::string &*
   Name of the surface to load (eg. inflated, orig ...).
 
-- **subjects_dir** : *const QString &*
+- **subjects_dir** : *const std::filesystem::path &*
   Subjects directory.
 
 ---
@@ -59,13 +59,13 @@ Construts the surface set by reading it of the given files.
 
 **Parameters:**
 
-- **path** : *const QString &*
+- **path** : *const std::filesystem::path &*
   path to surface directory.
 
 - **hemi** : *qint32*
   Which hemisphere to load \{0 -&gt; lh, 1 -&gt; rh, 2 -&gt; both\}.
 
-- **surf** : *const QString &*
+- **surf** : *const std::string &*
   Name of the surface to load (eg. inflated, orig ...).
 
 ---
@@ -90,10 +90,10 @@ Constructs an annotation set by reading from annotation files.
 
 **Parameters:**
 
-- **p_sLHFileName** : *const QString &*
+- **p_sLHFileName** : *const std::filesystem::path &*
   Left hemisphere annotation file.
 
-- **p_sRHFileName** : *const QString &*
+- **p_sRHFileName** : *const std::filesystem::path &*
   Right hemisphere annotation file.
 
 ---
@@ -149,7 +149,7 @@ inflated, orig ...)
 
 **Returns:**
 
-- *QString* — the loaded surfaces (eg. inflated, orig ...).
+- *std::string* — the loaded surfaces (eg. inflated, orig ...).
 
 ---
 
@@ -189,7 +189,7 @@ Subscript operator [] to access surface by identifier.
 
 **Parameters:**
 
-- **idt** : *QString*
+- **idt** : *std::string_view*
   the hemisphere identifier ("lh" or "rh").
 
 **Returns:**
@@ -204,7 +204,7 @@ Subscript operator [] to access surface by identifier.
 
 **Parameters:**
 
-- **idt** : *QString*
+- **idt** : *std::string_view*
   the hemisphere identifier ("lh" or "rh").
 
 **Returns:**
@@ -231,10 +231,10 @@ Reads different surface files and assembles them to a [`FsSurfaceSet`](/docs/api
 
 **Parameters:**
 
-- **p_sLHFileName** : *const QString &*
+- **p_sLHFileName** : *const std::filesystem::path &*
   Left hemisphere surface file.
 
-- **p_sRHFileName** : *const QString &*
+- **p_sRHFileName** : *const std::filesystem::path &*
   Right hemisphere surface file.
 
 - **p_SurfaceSet** : *[FsSurfaceSet](/docs/api/fs/fs-surface-set) &*
@@ -263,7 +263,7 @@ Load the pial, inflated, original and white FreeSurfer surfaces of a subject and
 //
 // pial
 //
-FsSurfaceSet tSurfSetPial(subject, hemi, "pial", subjectPath);
+FsSurfaceSet tSurfSetPial(subject.toStdString(), hemi, "pial", subjectPath.toStdU16String());
 ````
 
 ### [ex_fs](../../examples/fs/ex_fs.mdx)
@@ -271,7 +271,7 @@ FsSurfaceSet tSurfSetPial(subject, hemi, "pial", subjectPath);
 FreeSurfer library: surfaces, curvature, parcellations, labels and an atlas volume.
 
 ````cpp title="src/examples/ex_fs/main.cpp, line 127"
-FsSurfaceSet both("sample", 2, "white", subjectsDir); // 2 = both hemispheres
+FsSurfaceSet both("sample", 2, "white", subjectsDir.toStdU16String()); // 2 = both hemispheres
 ok &= expect(both.size() == 2 && both[0].rr().rows() == 155407, std::format("FsSurfaceSet holds {} hemispheres", both.size()));
 ````
 
@@ -280,8 +280,8 @@ ok &= expect(both.size() == 2 && both[0].rr().rows() == 155407, std::format("FsS
 Cluster the forward solution by cortical parcellation and compute an MNE, dSPM or sLORETA estimate of an evoked response.
 
 ````cpp title="src/examples/ex_clustered_inverse_mne/main.cpp, line 123"
-FsSurfaceSet t_surfSet(parser.value(subjectOption), parser.value(hemiOption).toInt(), parser.value(surfOption), parser.value(subjectPathOption));
-FsAnnotationSet t_annotationSet(parser.value(subjectOption), parser.value(hemiOption).toInt(), parser.value(annotOption), parser.value(subjectPathOption));
+FsSurfaceSet t_surfSet(parser.value(subjectOption).toStdString(), parser.value(hemiOption).toInt(), parser.value(surfOption).toStdString(), parser.value(subjectPathOption).toStdU16String());
+FsAnnotationSet t_annotationSet(parser.value(subjectOption).toStdString(), parser.value(hemiOption).toInt(), parser.value(annotOption).toStdString(), parser.value(subjectPathOption).toStdU16String());
 ````
 
 Also used in [ex_clustered_inverse_mne_raw](../../examples/inv/ex_clustered_inverse_mne_raw.mdx), [ex_clustered_inverse_pwl_rap_music_raw](../../examples/inv/ex_clustered_inverse_pwl_rap_music_raw.mdx), [ex_clustered_inverse_rap_music_raw](../../examples/inv/ex_clustered_inverse_rap_music_raw.mdx), [ex_connectivity](../../examples/connectivity/ex_connectivity.mdx), [ex_connectivity_comparison](../../examples/connectivity/ex_connectivity_comparison.mdx), [ex_disp_3D](../../examples/disp3D/ex_disp_3D.mdx), [ex_inverse_cmne](../../examples/inv/ex_inverse_cmne.mdx), [ex_inverse_mne_raw](../../examples/inv/ex_inverse_mne_raw.mdx), [ex_inverse_pwl_rap_music](../../examples/inv/ex_inverse_pwl_rap_music.mdx), [ex_inverse_rap_music](../../examples/inv/ex_inverse_rap_music.mdx), [ex_read_fwd_disp_3D](../../examples/disp3D/ex_read_fwd_disp_3D.mdx), [ex_roi_clustered_inverse_pwl_rap_music](../../examples/inv/ex_roi_clustered_inverse_pwl_rap_music.mdx), [ex_st_clustered_inverse_pwl_rap_music](../../examples/inv/ex_st_clustered_inverse_pwl_rap_music.mdx).

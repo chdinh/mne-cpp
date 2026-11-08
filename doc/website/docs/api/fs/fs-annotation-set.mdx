@@ -20,7 +20,7 @@ Container holding the lh and/or rh [`FsAnnotation`](/docs/api/fs/fs-annotation) 
 Keyed on hemisphere id (0 = lh, 1 = rh). When loaded from a single atlas name both hemispheres share the same colortable layout, so cross-hemisphere region lookup is consistent. The set is intended to be aligned one-to-one with an [`FsSurfaceSet`](/docs/api/fs/fs-surface-set) sharing the same subject and vertex count per hemisphere.
 
 ```cpp title="src/examples/ex_fs/main.cpp"
-FsAnnotationSet parcellation("sample", 2, "aparc", subjectsDir);
+FsAnnotationSet parcellation("sample", 2, "aparc", subjectsDir.toStdU16String());
 ```
 
 ---
@@ -39,16 +39,16 @@ Construts the surface set by reading it of the given files.
 
 **Parameters:**
 
-- **subject_id** : *const QString &*
+- **subject_id** : *const std::string &*
   Name of subject.
 
 - **hemi** : *qint32*
   Which hemisphere to load \{0 -&gt; lh, 1 -&gt; rh, 2 -&gt; both\}.
 
-- **atlas** : *const QString &*
+- **atlas** : *const std::string &*
   Name of the atlas to load (eg. aparc.a2009s, aparc, aparc.DKTatlas40, BA, BA.thresh, ...).
 
-- **subjects_dir** : *const QString &*
+- **subjects_dir** : *const std::filesystem::path &*
   Subjects directory.
 
 ---
@@ -59,13 +59,13 @@ Construts the surface set by reading it of the given files.
 
 **Parameters:**
 
-- **path** : *const QString &*
+- **path** : *const std::filesystem::path &*
   path to surface directory.
 
 - **hemi** : *qint32*
   Which hemisphere to load \{0 -&gt; lh, 1 -&gt; rh, 2 -&gt; both\}.
 
-- **atlas** : *const QString &*
+- **atlas** : *const std::string &*
   Name of the atlas to load (eg. aparc.a2009s, aparc, aparc.DKTatlas40, BA, BA.thresh, ...).
 
 ---
@@ -90,10 +90,10 @@ Constructs an annotation set by reading from annotation files.
 
 **Parameters:**
 
-- **p_sLHFileName** : *const QString &*
+- **p_sLHFileName** : *const std::filesystem::path &*
   Left hemisphere annotation file.
 
-- **p_sRHFileName** : *const QString &*
+- **p_sRHFileName** : *const std::filesystem::path &*
   Right hemisphere annotation file.
 
 ---
@@ -158,7 +158,7 @@ Converts annotation to a label list and colortable
 - **p_qListLabelRGBAs** : *QList&lt; Eigen::RowVector4i &gt; &*
   the converted label RGBAs are appended to a given list. Stored data are not affected.
 
-- **lLabelPicks** : *const QStringList &*
+- **lLabelPicks** : *const UTILSLIB::StringList &*
   the label names which should be picked.
 
 **Returns:**
@@ -203,7 +203,7 @@ Subscript operator [] to access annotation by identifier.
 
 **Parameters:**
 
-- **idt** : *QString*
+- **idt** : *std::string_view*
   the hemisphere identifier ("lh" or "rh").
 
 **Returns:**
@@ -218,7 +218,7 @@ Subscript operator [] to access annotation by identifier.
 
 **Parameters:**
 
-- **idt** : *QString*
+- **idt** : *std::string_view*
   the hemisphere identifier ("lh" or "rh").
 
 **Returns:**
@@ -245,10 +245,10 @@ Reads different annotation files and assembles them to a [`FsAnnotationSet`](/do
 
 **Parameters:**
 
-- **p_sLHFileName** : *const QString &*
+- **p_sLHFileName** : *const std::filesystem::path &*
   Left hemisphere annotation file.
 
-- **p_sRHFileName** : *const QString &*
+- **p_sRHFileName** : *const std::filesystem::path &*
   Right hemisphere annotation file.
 
 - **p_AnnotationSet** : *[FsAnnotationSet](/docs/api/fs/fs-annotation-set) &*
@@ -274,7 +274,7 @@ Reads different annotation files and assembles them to a [`FsAnnotationSet`](/do
 FreeSurfer library: surfaces, curvature, parcellations, labels and an atlas volume.
 
 ````cpp title="src/examples/ex_fs/main.cpp, line 149"
-FsAnnotationSet parcellation("sample", 2, "aparc", subjectsDir);
+FsAnnotationSet parcellation("sample", 2, "aparc", subjectsDir.toStdU16String());
 ok &= expect(parcellation.size() == 2, "FsAnnotationSet holds both hemispheres");
 ````
 
@@ -283,8 +283,8 @@ ok &= expect(parcellation.size() == 2, "FsAnnotationSet holds both hemispheres")
 Cluster the forward solution by cortical parcellation and compute an MNE, dSPM or sLORETA estimate of an evoked response.
 
 ````cpp title="src/examples/ex_clustered_inverse_mne/main.cpp, line 123"
-FsSurfaceSet t_surfSet(parser.value(subjectOption), parser.value(hemiOption).toInt(), parser.value(surfOption), parser.value(subjectPathOption));
-FsAnnotationSet t_annotationSet(parser.value(subjectOption), parser.value(hemiOption).toInt(), parser.value(annotOption), parser.value(subjectPathOption));
+FsSurfaceSet t_surfSet(parser.value(subjectOption).toStdString(), parser.value(hemiOption).toInt(), parser.value(surfOption).toStdString(), parser.value(subjectPathOption).toStdU16String());
+FsAnnotationSet t_annotationSet(parser.value(subjectOption).toStdString(), parser.value(hemiOption).toInt(), parser.value(annotOption).toStdString(), parser.value(subjectPathOption).toStdU16String());
 ````
 
 ### [ex_clustered_inverse_mne_raw](../../examples/inv/ex_clustered_inverse_mne_raw.mdx)
@@ -292,8 +292,8 @@ FsAnnotationSet t_annotationSet(parser.value(subjectOption), parser.value(hemiOp
 Average a raw recording and compute an MNE, dSPM or sLORETA estimate with a parcellation-clustered forward solution.
 
 ````cpp title="src/examples/ex_clustered_inverse_mne_raw/main.cpp, line 138"
-FsSurfaceSet t_surfSet(parser.value(subjectOption), parser.value(hemiOption).toInt(), parser.value(surfOption), parser.value(subjectPathOption));
-FsAnnotationSet t_annotationSet(parser.value(subjectOption), parser.value(hemiOption).toInt(), parser.value(annotOption), parser.value(subjectPathOption));
+FsSurfaceSet t_surfSet(parser.value(subjectOption).toStdString(), parser.value(hemiOption).toInt(), parser.value(surfOption).toStdString(), parser.value(subjectPathOption).toStdU16String());
+FsAnnotationSet t_annotationSet(parser.value(subjectOption).toStdString(), parser.value(hemiOption).toInt(), parser.value(annotOption).toStdString(), parser.value(subjectPathOption).toStdU16String());
 ````
 
 Also used in [ex_clustered_inverse_pwl_rap_music_raw](../../examples/inv/ex_clustered_inverse_pwl_rap_music_raw.mdx), [ex_clustered_inverse_rap_music_raw](../../examples/inv/ex_clustered_inverse_rap_music_raw.mdx), [ex_connectivity](../../examples/connectivity/ex_connectivity.mdx), [ex_connectivity_comparison](../../examples/connectivity/ex_connectivity_comparison.mdx), [ex_disp_3D](../../examples/disp3D/ex_disp_3D.mdx), [ex_histogram](../../examples/inv/ex_histogram.mdx), [ex_inv_api](../../examples/inv/ex_inv_api.mdx), [ex_inverse_cmne](../../examples/inv/ex_inverse_cmne.mdx), [ex_inverse_mne_raw](../../examples/inv/ex_inverse_mne_raw.mdx), [ex_inverse_pwl_rap_music](../../examples/inv/ex_inverse_pwl_rap_music.mdx), [ex_inverse_rap_music](../../examples/inv/ex_inverse_rap_music.mdx), [ex_read_fwd](../../examples/fs/ex_read_fwd.mdx), [ex_read_fwd_disp_3D](../../examples/disp3D/ex_read_fwd_disp_3D.mdx), [ex_roi_clustered_inverse_pwl_rap_music](../../examples/inv/ex_roi_clustered_inverse_pwl_rap_music.mdx), [ex_st_clustered_inverse_pwl_rap_music](../../examples/inv/ex_st_clustered_inverse_pwl_rap_music.mdx).

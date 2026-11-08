@@ -212,8 +212,8 @@ int main(int argc, char* argv[])
     }
 
     //Inits
-    FsSurfaceSet tSurfSet(parser.value(subjectOption), parser.value(hemiOption).toInt(), parser.value(surfOption), parser.value(subjectPathOption));
-    FsAnnotationSet tAnnotSet(parser.value(subjectOption), parser.value(hemiOption).toInt(), parser.value(annotOption), parser.value(subjectPathOption));
+    FsSurfaceSet tSurfSet(parser.value(subjectOption).toStdString(), parser.value(hemiOption).toInt(), parser.value(surfOption).toStdString(), parser.value(subjectPathOption).toStdU16String());
+    FsAnnotationSet tAnnotSet(parser.value(subjectOption).toStdString(), parser.value(hemiOption).toInt(), parser.value(annotOption).toStdString(), parser.value(subjectPathOption).toStdU16String());
 
     MNEForwardSolution t_Fwd(parser.value(fwdOption).toStdU16String());
     MNEForwardSolution t_clusteredFwd;
@@ -310,7 +310,7 @@ int main(int argc, char* argv[])
     for (auto it = tSurfSet.data().constBegin(); it != tSurfSet.data().constEnd(); ++it) {
         int hIdx = it.key();
         QString hemi = (it.value().hemi() == 0) ? "lh" : "rh";
-        QString surfType = it.value().surf().isEmpty() ? "inflated" : it.value().surf();
+        QString surfType = QString::fromStdString(it.value().surf().empty() ? "inflated" : it.value().surf());
         pModel->addSurface(parser.value(subjectOption), hemi, surfType, it.value());
         if (tAnnotSet.size() > hIdx)
             pModel->addAnnotation(parser.value(subjectOption), hemi, tAnnotSet[hIdx]);

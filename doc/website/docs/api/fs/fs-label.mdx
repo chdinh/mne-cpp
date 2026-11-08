@@ -25,7 +25,7 @@ Wraps the parsed contents of a .label file or an in-memory label constructed pro
 
 ```cpp title="src/examples/ex_fs/main.cpp"
 FsLabel v1;
-FsLabel::read(subjectsDir + "/sample/label/lh.V1.label", v1);
+FsLabel::read((subjectsDir + "/sample/label/lh.V1.label").toStdU16String(), v1);
 ```
 
 ---
@@ -56,7 +56,7 @@ Constructs a label.
 - **p_hemi** : *qint32*
   Hemisphere (lh = 0; rh = 1).
 
-- **p_name** : *const QString &*
+- **p_name** : *const std::string &*
   label names.
 
 - **p_id** : *qint32*
@@ -126,7 +126,7 @@ Reads a [`FsLabel`](/docs/api/fs/fs-label) from a FreeSurfer label file. This is
 
 **Parameters:**
 
-- **p_sFileName** : *const QString &*
+- **p_sFileName** : *const std::filesystem::path &*
   label file name.
 
 - **p_Label** : *[FsLabel](/docs/api/fs/fs-label) &*
@@ -152,7 +152,7 @@ Reads a [`FsLabel`](/docs/api/fs/fs-label) from a FreeSurfer label file. This is
 FreeSurfer library: surfaces, curvature, parcellations, labels and an atlas volume.
 
 ````cpp title="src/examples/ex_fs/main.cpp, line 132"
-FsAnnotation aparc("sample", 0, "aparc", subjectsDir);
+FsAnnotation aparc("sample", 0, "aparc", subjectsDir.toStdU16String());
 FsColortable& colors = aparc.getColortable();
 QList<FsLabel> regions;
 QList<RowVector4i> regionColors;
@@ -173,7 +173,7 @@ Inverse library: minimum-norm estimates, resolution matrices, label time courses
 
 ````cpp title="src/examples/ex_inv_api/main.cpp, line 113"
 FsLabel v1;
-FsLabel::read(data + "/subjects/sample/label/lh.V1.label", v1);
+FsLabel::read((data + "/subjects/sample/label/lh.V1.label").toStdU16String(), v1);
 const std::filesystem::path fwdPath = (data + "/Result/ref-sample_audvis-meg-eeg-oct-6-fwd.fif").toStdU16String();
 const MNEForwardSolution fwd = MNEForwardSolution(fwdPath).pick_regions({v1}); // 70 sources x 3 orientations
 const FiffCov noiseCov((data + "/MEG/sample/sample_audvis-cov.fif").toStdString());
@@ -186,7 +186,7 @@ Inverse library: LCMV and DICS beamformers and the RAP-MUSIC family of dipole sc
 
 ````cpp title="src/examples/ex_inv_beamformer/main.cpp, line 113"
 FsLabel v1;
-FsLabel::read(data + "/subjects/sample/label/lh.V1.label", v1);
+FsLabel::read((data + "/subjects/sample/label/lh.V1.label").toStdU16String(), v1);
 MNEForwardSolution fwd = MNEForwardSolution(QString(data + "/Result/ref-sample_audvis-meg-eeg-oct-6-fwd.fif").toStdU16String()).pick_regions({v1}).pick_channels(good);
 FiffEvoked evoked = sample.pick_channels(good);
 const FiffInfo info = evoked.info;

@@ -7,7 +7,7 @@ sidebar_position: 5
 
 # Class Members
 
-Index of 6609 public class members (functions, variables, typedefs, enums) across all documented classes.
+Index of 6610 public class members (functions, variables, typedefs, enums) across all documented classes.
 
 **Jump to:** [A](#a) · [B](#b) · [C](#c) · [D](#d) · [E](#e) · [F](#f) · [G](#g) · [H](#h) · [I](#i) · [J](#j) · [K](#k) · [L](#l) · [M](#m) · [N](#n) · [O](#o) · [P](#p) · [Q](#q) · [R](#r) · [S](#s) · [T](#t) · [U](#u) · [V](#v) · [W](#w) · [X](#x) · [Y](#y) · [Z](#z)
 
@@ -2012,10 +2012,8 @@ Index of 6609 public class members (functions, variables, typedefs, enums) acros
 - **frame_name** `[fn]` in [FiffCoordTrans](/docs/api/fiff/fiff-coord-trans) — Map coordinate frame integers to human-readable names.
 - **frameBytes** `[fn]` in [AcqStreamInfo](/docs/api/acq/acq-stream-info)
 - **frameGeneration** `[fn]` in [VideoOverlay](/docs/api/disp3-d/video-overlay) — Monotonic counter, incremented on every `setFrame()` call.
-- **fread3** `[fn]` in [FsSurface](/docs/api/fs/fs-surface) — Reads a 3-byte integer out of a QDataStream (FreeSurfer format).
-- **fread3** `[fn]` in [FsSurface](/docs/api/fs/fs-surface) — Reads a 3-byte integer out of a std::iostream (FreeSurfer format).
-- **fread3_many** `[fn]` in [FsSurface](/docs/api/fs/fs-surface) — Reads multiple 3-byte integers out of a QDataStream (FreeSurfer format).
-- **fread3_many** `[fn]` in [FsSurface](/docs/api/fs/fs-surface) — Reads multiple 3-byte integers out of a std::iostream (FreeSurfer format).
+- **fread3** `[fn]` in [FsSurface](/docs/api/fs/fs-surface) — Reads a big-endian 3-byte integer (FreeSurfer format).
+- **fread3_many** `[fn]` in [FsSurface](/docs/api/fs/fs-surface) — Reads multiple big-endian 3-byte integers (FreeSurfer format).
 - **free_proj** `[fn]` in [MNEProjOp](/docs/api/mne/mne-proj-op) — Release the compiled projector data.
 - **freeSurferDir** `[var]` in [MnaSubject](/docs/api/mna/mna-subject) — Relative path to FreeSurfer SUBJECTS_DIR.
 - **freqAxis** `[fn]` in [WelchPsd](/docs/api/dsp/welch-psd) — Build the frequency axis for a given FFT length and sampling frequency.
@@ -4468,6 +4466,7 @@ Index of 6609 public class members (functions, variables, typedefs, enums) acros
 - **read_from_node** `[fn]` in [FiffCoordTrans](/docs/api/fiff/fiff-coord-trans) — Reads a coordinate transform from a FIFF stream node.
 - **read_from_node** `[fn]` in [MNEProjOp](/docs/api/mne/mne-proj-op) — Read all linear projection items from a FIFF tree node.
 - **read_from_node** `[fn]` in [MNESssData](/docs/api/mne/mne-sss-data) — Read the SSS data from the given node of an open fiff stream Refactored: mne_read_from_node (mne_sss_data.c).
+- **read_geometry** `[fn]` in [FsSurface](/docs/api/fs/fs-surface) — Reads the vertices and triangles of any FreeSurfer surface file (triangle or quad format), like nibabel.freesurfer.read_geometry but in meters; the file name need not name a hemisphere, so BEM surfaces such as inner_skull.surf can be read too.
 - **read_json** `[fn]` in [FiffAnnotations](/docs/api/fiff/fiff-annotations) — Reads annotations from a JSON file (\{"annotations": [\{"onset", "duration", "description", "channel_names", "comment", "extras"\}, ...]\}).
 - **read_label** `[fn]` in [MNESourceSpace](/docs/api/mne/mne-source-space)
 - **read_localite** `[fn]` in [FiffDigMontage](/docs/api/fiff/fiff-dig-montage) — Reads a Localite .csv file ("#,name,x,y,z" in millimetres after a header row), as mne.channels.read_dig_localite does.
@@ -4697,6 +4696,7 @@ Index of 6609 public class members (functions, variables, typedefs, enums) acros
 - **rowStride** `[var]` in [AcqMatrixRef](/docs/api/acq/acq-matrix-ref) — Elements between consecutive channels.
 - **rr** `[var]` in [FitUser](/docs/api/math/fit-user)
 - **rr** `[fn]` in [FsSurface](/docs/api/fs/fs-surface) — Coordinates of vertices (rr).
+- **rr** `[var]` in `Geometry` — Vertex positions in meters.
 - **rr** `[var]` in [InvGuessData](/docs/api/inv/inv-guess-data) — Guess dipole locations (nguess x 3, row-major).
 - **rr** `[var]` in [MNESurfaceOrVolume](/docs/api/mne/mne-surface-or-volume) — The vertex locations (np x 3, row-major).
 - **RtAveraging** `[fn]` in [RtAveraging](/docs/api/dsp/rt-averaging) — Creates the real-time averaging object.
@@ -6202,6 +6202,7 @@ Index of 6609 public class members (functions, variables, typedefs, enums) acros
 - **triggerTypeChanged** `[signal]` in [MinimumNormSettingsView](/docs/api/disp/minimum-norm-settings-view) — Emit signal whenever the trigger type changed.
 - **tripletSelection** `[fn]` in [MNEForwardSolution](/docs/api/mne/mne-forward-solution)
 - **tris** `[fn]` in [FsSurface](/docs/api/fs/fs-surface) — The triangle descriptions.
+- **tris** `[var]` in `Geometry` — Triangles, zero-based vertex indices.
 - **tris** `[var]` in [MNESurfaceOrVolume](/docs/api/mne/mne-surface-or-volume) — The full triangulation data (ntri elements).
 - **tstep** `[var]` in [InvDipoleFitSettings](/docs/api/inv/inv-dipole-fit-settings) — Step between fits (s).
 - **tstep** `[var]` in [InvSourceEstimate](/docs/api/inv/inv-source-estimate) — Time between samples in seconds; -1 for an empty estimate.

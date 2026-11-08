@@ -246,8 +246,8 @@ int main(int argc, char* argv[])
     bool ok = true;
 
     //! [fs_surface_read]
-    FsSurface white("sample", 0, "white", subjectsDir); // lh = 0, rh = 1; curvature is loaded alongside
-    const MatrixX3f& rr = white.rr();                   // vertices (metres)
+    FsSurface white("sample", 0, "white", subjectsDir.toStdU16String()); // lh = 0, rh = 1; curvature is loaded alongside
+    const MatrixX3f& rr = white.rr();                                    // vertices (metres)
     const MatrixX3i& tris = white.tris();
     const VectorXf& curv = white.curv();
     //! [fs_surface_read]
@@ -256,12 +256,12 @@ int main(int argc, char* argv[])
                  std::format("lh.white: {} vertices, {} triangles, first vertex and curvature = nibabel", rr.rows(), tris.rows()));
 
     //! [fs_surface_set_read]
-    FsSurfaceSet both("sample", 2, "white", subjectsDir); // 2 = both hemispheres
+    FsSurfaceSet both("sample", 2, "white", subjectsDir.toStdU16String()); // 2 = both hemispheres
     //! [fs_surface_set_read]
     ok &= expect(both.size() == 2 && both[0].rr().rows() == 155407, std::format("FsSurfaceSet holds {} hemispheres", both.size()));
 
     //! [fs_annotation_read]
-    FsAnnotation aparc("sample", 0, "aparc", subjectsDir);
+    FsAnnotation aparc("sample", 0, "aparc", subjectsDir.toStdU16String());
     FsColortable& colors = aparc.getColortable();
     QList<FsLabel> regions;
     QList<RowVector4i> regionColors;
@@ -278,13 +278,13 @@ int main(int argc, char* argv[])
                  std::format("aparc: {} colour-table entries, precentral {} vertices (9505)", colors.getNames().size(), precentral >= 0 ? regions[precentral].vertices.size() : -1));
 
     //! [fs_annotation_set_read]
-    FsAnnotationSet parcellation("sample", 2, "aparc", subjectsDir);
+    FsAnnotationSet parcellation("sample", 2, "aparc", subjectsDir.toStdU16String());
     //! [fs_annotation_set_read]
     ok &= expect(parcellation.size() == 2, "FsAnnotationSet holds both hemispheres");
 
     //! [fs_label_read]
     FsLabel v1;
-    FsLabel::read(subjectsDir + "/sample/label/lh.V1.label", v1);
+    FsLabel::read((subjectsDir + "/sample/label/lh.V1.label").toStdU16String(), v1);
     //! [fs_label_read]
     // File order (mne.read_label sorts): first vertex 1093 at (-15.435, -83.078, -1.042) mm
     ok &= expect(v1.vertices.size() == 5638 && v1.vertices(0) == 1093 && (v1.pos.row(0) - RowVector3f(-0.015435f, -0.083078f, -0.001042f)).norm() < 1e-6f,
@@ -292,7 +292,7 @@ int main(int argc, char* argv[])
 
     //! [fs_label_utils_usage]
     const FsLabel grown = FsLabelUtils::growLabel(v1, white, 1); // add the one-ring neighbours
-    const QList<FsLabel> parts = FsLabelUtils::splitLabel(v1, white);
+    const std::vector<FsLabel> parts = FsLabelUtils::splitLabel(v1, white);
     //! [fs_label_utils_usage]
     // Closed form on the mesh graph (scipy.sparse.csgraph): one ring adds 447 vertices; components of 5635, 2 and 1
     QList<int> sizes;

@@ -25,7 +25,7 @@ All operations take an [`FsSurface`](/docs/api/fs/fs-surface) as the topology so
 
 ```cpp title="src/examples/ex_fs/main.cpp"
 const FsLabel grown = FsLabelUtils::growLabel(v1, white, 1); // add the one-ring neighbours
-const QList<FsLabel> parts = FsLabelUtils::splitLabel(v1, white);
+const std::vector<FsLabel> parts = FsLabelUtils::splitLabel(v1, white);
 ```
 
 ---
@@ -66,7 +66,7 @@ Vertices within `extentMm` geodesic distance along the mesh edges are included, 
 - **surface** : *const [FsSurface](/docs/api/fs/fs-surface) &*
   Surface of the hemisphere.
 
-- **seeds** : *const QVector&lt; int &gt; &*
+- **seeds** : *std::span&lt; const int &gt;*
   Seed vertices.
 
 - **extentMm** : *double*
@@ -75,7 +75,7 @@ Vertices within `extentMm` geodesic distance along the mesh edges are included, 
 - **hemi** : *int*
   Hemisphere (0 = lh, 1 = rh).
 
-- **name** : *const QString &*
+- **name** : *const std::string &*
   Label name; "-lh" / "-rh" is appended unless present.
 
 **Returns:**
@@ -100,7 +100,7 @@ Like mne Label.split("contiguous"): the parts keep the label's positions and val
 
 **Returns:**
 
-- *QList&lt; [FsLabel](/docs/api/fs/fs-label) &gt;* — List of sub-labels (connected components).
+- *std::vector&lt; [FsLabel](/docs/api/fs/fs-label) &gt;* — List of sub-labels (connected components).
 
 ---
 
@@ -129,7 +129,7 @@ Vertices whose absolute value exceeds the threshold at any time point are groupe
 
 **Returns:**
 
-- *QList&lt; [FsLabel](/docs/api/fs/fs-label) &gt;* — List of labels (connected components above threshold).
+- *std::vector&lt; [FsLabel](/docs/api/fs/fs-label) &gt;* — List of labels (connected components above threshold).
 
 ---
 
@@ -141,7 +141,7 @@ Creates a matrix of ones for vertices inside the labels, zeros otherwise.
 
 **Parameters:**
 
-- **labels** : *const QList&lt; [FsLabel](/docs/api/fs/fs-label) &gt; &*
+- **labels** : *std::span&lt; const [FsLabel](/docs/api/fs/fs-label) &gt;*
   Labels to convert.
 
 - **stcVertices** : *const Eigen::VectorXi &*
@@ -170,7 +170,7 @@ Build adjacency list from surface triangle mesh.
 
 **Returns:**
 
-- *QList&lt; QSet&lt; int &gt; &gt;* — Adjacency list: for each vertex, the set of neighbor vertices.
+- *std::vector&lt; std::vector&lt; int &gt; &gt;* — Adjacency list: for each vertex, its neighbours in ascending order.
 
 ---
 
@@ -189,7 +189,7 @@ FreeSurfer library: surfaces, curvature, parcellations, labels and an atlas volu
 
 ````cpp title="src/examples/ex_fs/main.cpp, line 162"
 const FsLabel grown = FsLabelUtils::growLabel(v1, white, 1); // add the one-ring neighbours
-const QList<FsLabel> parts = FsLabelUtils::splitLabel(v1, white);
+const std::vector<FsLabel> parts = FsLabelUtils::splitLabel(v1, white);
 // Closed form on the mesh graph (scipy.sparse.csgraph): one ring adds 447 vertices; components of 5635, 2 and 1
 QList<int> sizes;
 for (const FsLabel& part : parts) {

@@ -713,8 +713,8 @@ int main(int argc, char* argv[])
     const QString subjectsDir = QStringLiteral(MNE_MORPH_SUBJECTS_DIR);
     FsSurface smallSphere;
     FsSurface largeSphere;
-    FsSurface::read(subjectsDir + "/small/surf/lh.sphere.reg", smallSphere, false);
-    FsSurface::read(subjectsDir + "/large/surf/lh.sphere.reg", largeSphere, false);
+    FsSurface::read((subjectsDir + "/small/surf/lh.sphere.reg").toStdU16String(), smallSphere, false);
+    FsSurface::read((subjectsDir + "/large/surf/lh.sphere.reg").toStdU16String(), largeSphere, false);
     MNEMorphMap smallToLarge = MNEMorphMap::compute(smallSphere.rr(), smallSphere.tris(), largeSphere.rr());
     smallToLarge.from_subj = "small";
     smallToLarge.to_subj = "large";

@@ -174,8 +174,8 @@ int main(int argc, char* argv[])
     QString subject(parser.value(subjectOption));
     QString subjectDir(parser.value(subjectDirectoryOption));
 
-    FsAnnotationSet t_annotationSet(subject, 2, parser.value(annotOption), subjectDir);
-    FsSurfaceSet t_surfSet(subject, 2, parser.value(surfOption), subjectDir);
+    FsAnnotationSet t_annotationSet(subject.toStdString(), 2, parser.value(annotOption).toStdString(), subjectDir.toStdU16String());
+    FsSurfaceSet t_surfSet(subject.toStdString(), 2, parser.value(surfOption).toStdString(), subjectDir.toStdU16String());
 
     QString t_sFileNameStc(parser.value(stcFileOption));
 
@@ -273,7 +273,7 @@ int main(int argc, char* argv[])
     for (auto it = t_surfSet.data().constBegin(); it != t_surfSet.data().constEnd(); ++it) {
         int hIdx = it.key();
         QString hemi = (it.value().hemi() == 0) ? "lh" : "rh";
-        QString surfType = it.value().surf().isEmpty() ? "inflated" : it.value().surf();
+        QString surfType = QString::fromStdString(it.value().surf().empty() ? "inflated" : it.value().surf());
         pModel->addSurface(parser.value(subjectOption), hemi, surfType, it.value());
         if (t_annotationSet.size() > hIdx)
             pModel->addAnnotation(parser.value(subjectOption), hemi, t_annotationSet[hIdx]);

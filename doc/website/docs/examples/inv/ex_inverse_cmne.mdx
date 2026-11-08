@@ -251,10 +251,10 @@ int main(int argc, char* argv[])
 
     // Fixed-orientation gain of the superior and transverse temporal sources of both hemispheres
     const QString subjects = data + "/subjects";
-    const FsAnnotationSet aparc("sample", 2, "aparc", subjects);
+    const FsAnnotationSet aparc("sample", 2, "aparc", subjects.toStdU16String());
     QList<FsLabel> auditory;
     QList<RowVector4i> colors;
-    aparc.toLabels(FsSurfaceSet("sample", 2, "white", subjects), auditory, colors,
+    aparc.toLabels(FsSurfaceSet("sample", 2, "white", subjects.toStdU16String()), auditory, colors,
                    {"superiortemporal-lh", "transversetemporal-lh", "superiortemporal-rh", "transversetemporal-rh"});
     const MNEForwardSolution fwd = MNEForwardSolution((data + "/Result/ref-sample_audvis-meg-eeg-oct-6-fwd.fif").toStdU16String(), {.force_fixed = true, .surf_ori = true}).pick_regions({auditory.begin(), auditory.end()});
     const FiffCov noiseCov = FiffCov((data + "/MEG/sample/sample_audvis-cov.fif").toStdString()).pick_channels(fwd.sol->row_names);

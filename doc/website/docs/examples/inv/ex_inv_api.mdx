@@ -271,7 +271,7 @@ int main(int argc, char* argv[])
 
     //! [inv_minimum_norm_usage]
     FsLabel v1;
-    FsLabel::read(data + "/subjects/sample/label/lh.V1.label", v1);
+    FsLabel::read((data + "/subjects/sample/label/lh.V1.label").toStdU16String(), v1);
     const std::filesystem::path fwdPath = (data + "/Result/ref-sample_audvis-meg-eeg-oct-6-fwd.fif").toStdU16String();
     const MNEForwardSolution fwd = MNEForwardSolution(fwdPath).pick_regions({v1}); // 70 sources x 3 orientations
     const FiffCov noiseCov((data + "/MEG/sample/sample_audvis-cov.fif").toStdString());
@@ -325,7 +325,7 @@ int main(int argc, char* argv[])
     //! [mne_cluster_info_usage]
     // Cluster the V1 sources within their aparc regions into groups of about 20 (k-means on the gain columns;
     // squared Euclidean distance makes each centroid the mean of its sources)
-    const FsAnnotationSet aparc(data + "/subjects/sample/label/lh.aparc.annot", data + "/subjects/sample/label/rh.aparc.annot");
+    const FsAnnotationSet aparc((data + "/subjects/sample/label/lh.aparc.annot").toStdU16String(), (data + "/subjects/sample/label/rh.aparc.annot").toStdU16String());
     MatrixXd clusterMean; // 3 x 70 sources -> 3 x nClusters, averaging per orientation
     const MNEForwardSolution clustered = fwd.cluster_forward_solution(aparc, 20, clusterMean, FiffCov(), FiffInfo(), "sqeuclidean");
     const MNEClusterInfo& clusters = clustered.src.hemisphereAt(0)->cluster_info;
