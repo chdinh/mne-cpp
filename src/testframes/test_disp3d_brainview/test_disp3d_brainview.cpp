@@ -524,7 +524,7 @@ void TestDisp3dBrainView::brainView_constructAndSetters()
 
     // The head <-> MRI transform is found wherever it sits in the file; a file without one is refused
     FIFFLIB::FiffCoordTransSet allTrans;
-    QVERIFY(allTrans.read(dataDir + QStringLiteral("MEG/sample/all-trans.fif")) > 0);
+    QVERIFY(allTrans.read((dataDir + QStringLiteral("MEG/sample/all-trans.fif")).toStdU16String()) > 0);
     const FIFFLIB::FiffCoordTrans devHead(FIFFV_COORD_DEVICE, FIFFV_COORD_HEAD, Eigen::Matrix3f::Identity(), Eigen::Vector3f(0.0f, 0.0f, 0.04f));
     const QString reordered = dir.filePath(QStringLiteral("mri-head-first-trans.fif"));
     const QString devOnly = dir.filePath(QStringLiteral("dev-head-trans.fif"));

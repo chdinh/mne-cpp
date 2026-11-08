@@ -25,6 +25,8 @@
 
 #include "fiff_evoked_set.h"
 
+#include <format>
+
 #include <utils/generics/log.h>
 #include <utils/string_utils.h>
 #include "fiff_events.h"
@@ -164,7 +166,7 @@ bool FiffEvokedSet::find_evoked(const FiffEvokedSet& p_FiffEvokedSet) const
         qInfo("\nFound %lld evoked response data sets in %s :\n", static_cast<long long>(p_FiffEvokedSet.evoked.size()), p_FiffEvokedSet.info.filename.c_str());
 
     for (qint32 i = 0; i < std::ssize(p_FiffEvokedSet.evoked); ++i) {
-        qInfo("%s (%s)\n", p_FiffEvokedSet.evoked.at(i).comment.toUtf8().constData(), p_FiffEvokedSet.evoked.at(i).aspectKindToString().toUtf8().constBegin());
+        qInfo("%s (%s)\n", p_FiffEvokedSet.evoked.at(i).comment.c_str(), p_FiffEvokedSet.evoked.at(i).aspectKindToString().c_str());
     }
 
     return true;
@@ -268,7 +270,7 @@ FiffEvokedSet FiffEvokedSet::computeGrandAverage(const std::vector<FiffEvokedSet
             continue;
         }
         avg.nave = static_cast<fiff_int_t>(evokedSets.size());
-        avg.comment = QString("Grand average (n = %1)").arg(avg.nave);
+        avg.comment = std::format("Grand average (n = {})", avg.nave);
         grandAvg.info = avg.info;
         grandAvg.evoked.push_back(avg);
     }
@@ -299,7 +301,7 @@ void FiffEvokedSet::subtractBaseline(Eigen::MatrixXd& epoch, int bminSamp, int b
 FiffEvokedSet FiffEvokedSet::computeAverages(const FiffRawData& raw,
                                              const AverageDescription& desc,
                                              const MatrixXi& events,
-                                             QString& log)
+                                             std::string& log)
 {
     FiffEvokedSet evokedSet;
     evokedSet.info = raw.info;
@@ -308,7 +310,7 @@ FiffEvokedSet FiffEvokedSet::computeAverages(const FiffRawData& raw,
     int nchan = raw.info.nchan;
 
     log.clear();
-    log += QString("Averaging: %1\n").arg(desc.comment);
+    log += std::format("Averaging: {}\n", desc.comment);
 
     // Process each category
     for (int j = 0; j < std::ssize(desc.categories); ++j) {
@@ -332,8 +334,8 @@ FiffEvokedSet FiffEvokedSet::computeAverages(const FiffRawData& raw,
         MatrixXd sumSqData = MatrixXd::Zero(nchan, ns);
         int nave = 0;
 
-        log += QString("\n  Category: %1\n").arg(cat.comment);
-        log += QString("    t = %1 ... %2 ms\n").arg(1000.0 * cat.tmin, 0, 'f', 1).arg(1000.0 * cat.tmax, 0, 'f', 1);
+        log += std::format("\n  Category: {}\n", cat.comment);
+        log += std::format("    t = {:.1f} ... {:.1f} ms\n", 1000.0 * cat.tmin, 1000.0 * cat.tmax);
 
         // Iterate over events
         for (int k = 0; k < events.rows(); ++k) {
@@ -352,20 +354,14 @@ FiffEvokedSet FiffEvokedSet::computeAverages(const FiffRawData& raw,
             MatrixXd epochData;
             MatrixXd epochTimes;
             if (!raw.read_raw_segment(epochData, epochTimes, epochStart, epochEnd)) {
-                log += QString("    Error reading epoch at sample %1\n").arg(evSample);
+                log += std::format("    Error reading epoch at sample {}\n", evSample);
                 continue;
             }
 
             // Artifact rejection
-            QString rejReason;
+            std::string rejReason;
             if (!checkArtifacts(epochData, raw.info, raw.info.bads, desc.rej, rejReason)) {
-                log += QString("    %1 %2 %3 %4 [%5] %6 [omit]\n")
-                           .arg(evSample, 7)
-                           .arg(static_cast<float>(evSample) / sfreq, -10, 'f', 3)
-                           .arg(events(k, 1), 3)
-                           .arg(events(k, 2), 3)
-                           .arg(cat.comment)
-                           .arg(rejReason);
+                log += std::format("    {:>7} {:<10.3f} {:>3} {:>3} [{}] {} [omit]\n", evSample, static_cast<float>(evSample) / sfreq, events(k, 1), events(k, 2), cat.comment, rejReason);
                 continue;
             }
 
@@ -386,12 +382,7 @@ FiffEvokedSet FiffEvokedSet::computeAverages(const FiffRawData& raw,
             }
             nave++;
 
-            log += QString("    %1 %2 %3 %4 [%5]\n")
-                       .arg(evSample, 7)
-                       .arg(static_cast<float>(evSample) / sfreq, -10, 'f', 3)
-                       .arg(events(k, 1), 3)
-                       .arg(events(k, 2), 3)
-                       .arg(cat.comment);
+            log += std::format("    {:>7} {:<10.3f} {:>3} {:>3} [{}]\n", evSample, static_cast<float>(evSample) / sfreq, events(k, 1), events(k, 2), cat.comment);
         }
 
         // Compute average
@@ -416,7 +407,7 @@ FiffEvokedSet FiffEvokedSet::computeAverages(const FiffRawData& raw,
         evoked.info = raw.info;
 
         evokedSet.evoked.push_back(evoked);
-        log += QString("    nave = %1\n").arg(nave);
+        log += std::format("    nave = {}\n", nave);
     }
 
     return evokedSet;
@@ -428,7 +419,7 @@ bool FiffEvokedSet::checkArtifacts(const MatrixXd& epoch,
                                    const FiffInfo& info,
                                    const StringList& bads,
                                    const RejectionParams& rej,
-                                   QString& reason)
+                                   std::string& reason)
 {
     for (int c = 0; c < epoch.rows(); ++c) {
         // Skip bad channels
@@ -446,73 +437,49 @@ bool FiffEvokedSet::checkArtifacts(const MatrixXd& epoch,
             if (chUnit == FIFF_UNIT_T) {
                 // Magnetometer
                 if (rej.megMagReject > 0 && pp > rej.megMagReject) {
-                    reason = QString("%1 : %2 fT > %3 fT")
-                                 .arg(info.ch_names[c])
-                                 .arg(pp * 1e15, 0, 'f', 1)
-                                 .arg(rej.megMagReject * 1e15, 0, 'f', 1);
+                    reason = std::format("{} : {:.1f} fT > {:.1f} fT", info.ch_names[c], pp * 1e15, rej.megMagReject * 1e15);
                     return false;
                 }
                 if (rej.megMagFlat > 0 && pp < rej.megMagFlat) {
-                    reason = QString("%1 : %2 fT < %3 fT (flat)")
-                                 .arg(info.ch_names[c])
-                                 .arg(pp * 1e15, 0, 'f', 1)
-                                 .arg(rej.megMagFlat * 1e15, 0, 'f', 1);
+                    reason = std::format("{} : {:.1f} fT < {:.1f} fT (flat)", info.ch_names[c], pp * 1e15, rej.megMagFlat * 1e15);
                     return false;
                 }
             } else {
                 // Gradiometer
                 if (rej.megGradReject > 0 && pp > rej.megGradReject) {
-                    reason = QString("%1 : %2 fT/cm > %3 fT/cm")
-                                 .arg(info.ch_names[c])
-                                 .arg(pp * 1e13, 0, 'f', 1)
-                                 .arg(rej.megGradReject * 1e13, 0, 'f', 1);
+                    reason = std::format("{} : {:.1f} fT/cm > {:.1f} fT/cm", info.ch_names[c], pp * 1e13, rej.megGradReject * 1e13);
                     return false;
                 }
                 if (rej.megGradFlat > 0 && pp < rej.megGradFlat) {
-                    reason = QString("%1 : %2 fT/cm < %3 fT/cm (flat)")
-                                 .arg(info.ch_names[c])
-                                 .arg(pp * 1e13, 0, 'f', 1)
-                                 .arg(rej.megGradFlat * 1e13, 0, 'f', 1);
+                    reason = std::format("{} : {:.1f} fT/cm < {:.1f} fT/cm (flat)", info.ch_names[c], pp * 1e13, rej.megGradFlat * 1e13);
                     return false;
                 }
             }
         } else if (chKind == FIFFV_EEG_CH) {
             if (rej.eegReject > 0 && pp > rej.eegReject) {
-                reason = QString("%1 : %2 uV > %3 uV")
-                             .arg(info.ch_names[c])
-                             .arg(pp * 1e6, 0, 'f', 1)
-                             .arg(rej.eegReject * 1e6, 0, 'f', 1);
+                reason = std::format("{} : {:.1f} uV > {:.1f} uV", info.ch_names[c], pp * 1e6, rej.eegReject * 1e6);
                 return false;
             }
             if (rej.eegFlat > 0 && pp < rej.eegFlat) {
-                reason = QString("%1 : %2 uV < %3 uV (flat)")
-                             .arg(info.ch_names[c])
-                             .arg(pp * 1e6, 0, 'f', 1)
-                             .arg(rej.eegFlat * 1e6, 0, 'f', 1);
+                reason = std::format("{} : {:.1f} uV < {:.1f} uV (flat)", info.ch_names[c], pp * 1e6, rej.eegFlat * 1e6);
                 return false;
             }
         } else if (chKind == FIFFV_EOG_CH) {
             if (rej.eogReject > 0 && pp > rej.eogReject) {
-                reason = QString("%1 : %2 uV > %3 uV (EOG)")
-                             .arg(info.ch_names[c])
-                             .arg(pp * 1e6, 0, 'f', 1)
-                             .arg(rej.eogReject * 1e6, 0, 'f', 1);
+                reason = std::format("{} : {:.1f} uV > {:.1f} uV (EOG)", info.ch_names[c], pp * 1e6, rej.eogReject * 1e6);
                 return false;
             }
             if (rej.eogFlat > 0 && pp < rej.eogFlat) {
-                reason = QString("%1 : EOG flat").arg(info.ch_names[c]);
+                reason = std::format("{} : EOG flat", info.ch_names[c]);
                 return false;
             }
         } else if (chKind == FIFFV_ECG_CH) {
             if (rej.ecgReject > 0 && pp > rej.ecgReject) {
-                reason = QString("%1 : %2 mV > %3 mV (ECG)")
-                             .arg(info.ch_names[c])
-                             .arg(pp * 1e3, 0, 'f', 2)
-                             .arg(rej.ecgReject * 1e3, 0, 'f', 2);
+                reason = std::format("{} : {:.2f} mV > {:.2f} mV (ECG)", info.ch_names[c], pp * 1e3, rej.ecgReject * 1e3);
                 return false;
             }
             if (rej.ecgFlat > 0 && pp < rej.ecgFlat) {
-                reason = QString("%1 : ECG flat").arg(info.ch_names[c]);
+                reason = std::format("{} : ECG flat", info.ch_names[c]);
                 return false;
             }
         }

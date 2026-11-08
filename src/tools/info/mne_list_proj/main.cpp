@@ -133,7 +133,7 @@ int main(int argc, char* argv[])
               qPrintable(projKindName(proj.kind)),
               nVec,
               proj.active ? "Yes" : "No",
-              qPrintable(proj.desc));
+              proj.desc.c_str());
     }
 
     return 0;

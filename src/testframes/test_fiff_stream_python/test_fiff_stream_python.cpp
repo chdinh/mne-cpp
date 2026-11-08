@@ -161,7 +161,7 @@ void TestFiffStreamPython::initTestCase()
             vec.col_names.push_back("MEG 0112");
             vec.col_names.push_back("MEG 0111");
             vec.data = RowVector3d(k == 0 ? 0.6 : 0.0, 0.8, k == 0 ? 0.0 : 0.6);
-            projs.push_back(FiffProj(FIFFV_PROJ_ITEM_FIELD, k == 0, QStringLiteral("PCA-%1").arg(k + 1), vec));
+            projs.push_back(FiffProj(FIFFV_PROJ_ITEM_FIELD, k == 0, std::format("PCA-{}", k + 1), vec));
         }
         w->write_proj(projs);
 
@@ -310,7 +310,7 @@ void TestFiffStreamPython::copiesProcessingHistory()
         w->write_int(FIFF_NCHAN, &nchan);
         w->end_file();
     }
-    QVERIFY(FiffStream::copyProcessingHistory(src, dst));
+    QVERIFY(FiffStream::copyProcessingHistory(src.toStdU16String(), dst.toStdU16String()));
 
     std::vector<FiffDirNode::SPtr> dstRuns;
     QVERIFY(historyOf(dst, dstRuns));
@@ -327,7 +327,7 @@ void TestFiffStreamPython::copiesProcessingHistory()
         QFile f(dst);
         return f.open(QIODevice::ReadOnly) ? f.readAll() : QByteArray();
     }();
-    QVERIFY(!FiffStream::copyProcessingHistory(m_dir.filePath("missing.fif"), dst));
+    QVERIFY(!FiffStream::copyProcessingHistory(m_dir.filePath("missing.fif").toStdU16String(), dst.toStdU16String()));
     const QString plain = m_dir.filePath("history-none.fif");
     {
         QFile out(plain);
@@ -337,8 +337,8 @@ void TestFiffStreamPython::copiesProcessingHistory()
         w->write_int(FIFF_NCHAN, &nchan);
         w->end_file();
     }
-    QVERIFY(!FiffStream::copyProcessingHistory(plain, dst));
-    QVERIFY(!FiffStream::copyProcessingHistory(src, m_dir.filePath("missing-dst.fif")));
+    QVERIFY(!FiffStream::copyProcessingHistory(plain.toStdU16String(), dst.toStdU16String()));
+    QVERIFY(!FiffStream::copyProcessingHistory(src.toStdU16String(), m_dir.filePath("missing-dst.fif").toStdU16String()));
     QVERIFY(!QFile::exists(m_dir.filePath("missing-dst.fif")));
     QFile after(dst);
     QVERIFY(after.open(QIODevice::ReadOnly));
@@ -364,7 +364,7 @@ void TestFiffStreamPython::attachesEnvironment()
         QFile f(path);
         auto u = FiffStream::open_update(f);
         QVERIFY(u);
-        QVERIFY(u->attach_env(QStringLiteral("/data/stüdy"), QStringLiteral("mne_process --raw a.fif")));
+        QVERIFY(u->attach_env(QStringLiteral("/data/stüdy").toStdString(), QStringLiteral("mne_process --raw a.fif").toStdString()));
         u->close();
     }
 

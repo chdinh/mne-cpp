@@ -218,7 +218,7 @@ FiffEvoked MNEEpochDataList::average(const FiffInfo& info,
         p_evoked.times[i] = static_cast<float>((firstSample + i) / info.sfreq);
     }
 
-    p_evoked.comment = QString::number(this->at(0)->event);
+    p_evoked.comment = std::to_string(this->at(0)->event);
 
     if (p_evoked.proj.rows() > 0) {
         matAverage = p_evoked.proj * matAverage;
@@ -421,7 +421,7 @@ FiffEvokedSet MNEEpochDataList::averageCategories(const FiffRawData& raw,
                                               defaultVectorXi,
                                               proj);
 
-        evoked.comment = comment;
+        evoked.comment = comment.toStdString();
         evoked.baseline = doBaseline ? baseline : std::pair<float, float>(0.0f, 0.0f);
         evokedSet.evoked.push_back(evoked);
     }

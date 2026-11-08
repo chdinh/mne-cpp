@@ -26,7 +26,7 @@
 
 #include <utils/error.h>
 
-#include <QStringList>
+#include <utils/string_utils.h>
 
 #include <filesystem>
 #include <string>
@@ -84,7 +84,7 @@ private:
     FiffStream m_stream;
     std::string m_file;
     std::vector<FiffDirNode::SPtr> m_sets;
-    QStringList m_comments;
+    UTILSLIB::StringList m_comments;
     std::vector<fiff_int_t> m_kinds;
 };
 

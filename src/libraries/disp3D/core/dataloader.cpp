@@ -377,8 +377,8 @@ QStringList DataLoader::probeEvokedSets(const QString& evokedPath)
         const auto& ev = evokedSet.evoked.at(i);
         QString label = QString("%1: %2 (%3, nave=%4)")
                             .arg(i)
-                            .arg(ev.comment.isEmpty() ? QStringLiteral("Set %1").arg(i) : ev.comment)
-                            .arg(ev.aspectKindToString())
+                            .arg(ev.comment.empty() ? QStringLiteral("Set %1").arg(i) : QString::fromStdString(ev.comment))
+                            .arg(QString::fromStdString(ev.aspectKindToString()))
                             .arg(ev.nave);
         result.append(label);
     }

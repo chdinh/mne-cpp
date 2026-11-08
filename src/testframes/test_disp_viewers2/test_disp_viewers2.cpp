@@ -1285,7 +1285,7 @@ void TestDispViewers2::averagingSettingsView_controlsAndSettings()
     FiffEvokedSet evokedSet;
     for (int i = 0; i < 12; ++i) {
         FiffEvoked evoked;
-        evoked.comment = QString::number(i + 1);
+        evoked.comment = QString::number(i + 1).toStdString();
         evoked.nave = 3 * i;
         evokedSet.evoked.push_back(evoked);
     }
@@ -1849,7 +1849,7 @@ void TestDispViewers2::butterflyView_drawsAveragesAcrossTheFullWidth()
     set->info = *createBrowserTestInfo();
     set->info.bads.clear();
     FiffEvoked evoked;
-    evoked.comment = QStringLiteral("aud");
+    evoked.comment = QStringLiteral("aud").toStdString();
     evoked.baseline = qMakePair(-0.1f, 0.0f);
     evoked.times = Eigen::RowVectorXf::LinSpaced(1200, -0.2f, 0.9992f);
     evoked.times(200) = 0.0f;
@@ -2164,7 +2164,7 @@ void TestDispViewers2::rtFiffRawViewModel_projectionWrapFilterAndRoles()
     Eigen::MatrixXd vec(1, 3);
     vec.setConstant(1.0 / std::sqrt(3.0));
     FiffNamedMatrix vectors(1, 3, {}, StringList(info->ch_names.begin() + 0, info->ch_names.begin() + 0 + 3), vec);
-    model.updateProjection({FiffProj(FIFFV_PROJ_ITEM_FIELD, true, QStringLiteral("common"), vectors)});
+    model.updateProjection({FiffProj(FIFFV_PROJ_ITEM_FIELD, true, "common", vectors)});
     model.updateCompensator(0);
 
     // 3 blocks of 40 into a 100-sample buffer: the third fills the last 20 columns and wraps to columns 0..19,
@@ -2262,7 +2262,7 @@ void TestDispViewers2::averageLayoutView_drawsEachChannelsAverage()
     auto set = QSharedPointer<FiffEvokedSet>::create();
     set->info = *createBrowserTestInfo();
     FiffEvoked evoked;
-    evoked.comment = QStringLiteral("aud");
+    evoked.comment = QStringLiteral("aud").toStdString();
     evoked.baseline = qMakePair(-0.05f, 0.0f);
     evoked.times = Eigen::RowVectorXf::LinSpaced(120, -0.06f, 0.059f);
     evoked.times(60) = 0.0f;
@@ -2372,7 +2372,7 @@ void TestDispViewers2::evokedSetModel_projectionRolesAndAverageMaps()
     set->info.bads.clear();
     for (const QString& comment : {QStringLiteral("aud"), QStringLiteral("vis")}) {
         FiffEvoked evoked;
-        evoked.comment = comment;
+        evoked.comment = comment.toStdString();
         evoked.baseline = qMakePair(-0.1f, 0.0f);
         evoked.times = Eigen::RowVectorXf::LinSpaced(30, -0.1f, 0.19f);
         evoked.times(10) = 0.0f;
@@ -2442,7 +2442,7 @@ void TestDispViewers2::evokedSetModel_projectionRolesAndAverageMaps()
     Eigen::MatrixXd vec(1, 3);
     vec.setConstant(1.0 / std::sqrt(3.0));
     FiffNamedMatrix vectors(1, 3, {}, StringList(set->info.ch_names.begin() + 0, set->info.ch_names.begin() + 0 + 3), vec);
-    model.updateProjection({FiffProj(FIFFV_PROJ_ITEM_FIELD, true, QStringLiteral("common"), vectors)});
+    model.updateProjection({FiffProj(FIFFV_PROJ_ITEM_FIELD, true, "common", vectors)});
     model.updateCompensator(0);
     model.setEvokedSet(set);
     rows = model.data(0, 1).value<QList<AvrTypeRowVector>>();

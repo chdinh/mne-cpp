@@ -233,7 +233,7 @@ int main(int argc, char* argv[])
 
         qInfo("  Mapped set %d/%lld (%s): %d sources, %lld time points",
               i + 1, static_cast<long long>(srcEvokedSet.evoked.size()),
-              qPrintable(srcEvoked.comment),
+              srcEvoked.comment.c_str(),
               static_cast<int>(sourceEst.rows()),
               static_cast<long long>(sourceEst.cols()));
     }

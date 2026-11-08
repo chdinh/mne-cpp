@@ -259,7 +259,7 @@ FiffEvoked INVLIB::applyForward(const MNEForwardSolution& fwd, const InvSourceEs
     evoked.first = static_cast<int>(std::lround(stc.tmin * info.sfreq));
     evoked.last = evoked.first + static_cast<int>(stc.data.cols()) - 1;
     evoked.nave = 1;
-    evoked.comment = QStringLiteral("Simulated");
+    evoked.comment = "Simulated";
     return evoked;
 }
 

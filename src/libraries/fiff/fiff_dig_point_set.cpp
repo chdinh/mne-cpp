@@ -92,7 +92,7 @@ UTILSLIB::Expected<FiffDigPointSet> FiffDigPointSet::read(FiffStream& stream)
 {
     const bool openHere = !stream.isOpen();
     if (openHere && !stream.open()) {
-        return UTILSLIB::fail(UTILSLIB::ErrorCode::Io, "cannot open {}", stream.streamName().toStdString());
+        return UTILSLIB::fail(UTILSLIB::ErrorCode::Io, "cannot open {}", stream.streamName());
     }
 
     FiffDigPointSet dig;

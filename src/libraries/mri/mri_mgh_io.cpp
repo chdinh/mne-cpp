@@ -379,7 +379,7 @@ bool MriMghIO::parseFooter(const std::vector<std::byte>& data,
             }
 
             FiffCoordTransSet talairach;
-            if (talairach.addTalairach(QString::fromStdString(xfmPath))) {
+            if (talairach.addTalairach(UTILSLIB::pathFromUtf8(xfmPath))) {
                 additionalTrans.push_back(talairach.RAS_MNI_tal_t);
                 additionalTrans.push_back(talairach.MNI_tal_tal_gtz_t);
                 additionalTrans.push_back(talairach.MNI_tal_tal_ltz_t);

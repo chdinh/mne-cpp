@@ -23,6 +23,9 @@
 
 #include "fiff_id.h"
 
+#include <format>
+#include <string>
+
 #include <vector>
 #include "fiff_file.h"
 
@@ -162,36 +165,19 @@ void FiffId::print() const
 
 //=============================================================================================================
 
-QString FiffId::toMachidString() const
+std::string FiffId::toMachidString() const
 {
-    QString strOut = QString("%1%2").arg(machid[0], 8, 16, QChar('0')).arg(machid[1], 8, 16, QChar('0'));
-
-    //    to do...
-    //    macid is 6 bytes of data->12 chars.
-    //    here macid is stored in two integers --> 8 bytes --> 16 chars.
-    //    some versions of sinuhe store the significant chars at the beginning of the 16 chars.
-    //    other versions sotre the at the end. I don't know on what it depends on.
-    //    clue 1: version 1.3 stores it at the beginning. (padding with 4 '0' chars at the end).
-    //    clue 2: version 1.2 stores it at the ending chars. (padding with 4 '0' chars at the beginning of the 16).
-    //    I've no idea if this behaviour is solid...
-    //    int thresholdMayorVersion(1);
-    //    int thresholdMinorVersion(2);
-
-    //    int thresholdVersionInt(static_cast<int>(thresholdMayorVersion*pow(2.,16))+thresholdMinorVersion);
-    //    if(version > thresholdVersionInt) //if this.version > 65538
-    //    {
-    //        strOut.chop(4);
-    //    } else
-    //    {
-    //        strOut.right(strOut.size()-4);
-    //    }
-
-    int step = 2;
-    for (int i = step; i < strOut.size(); i += step + 1) {
-        strOut.insert(i, QChar(':'));
+    // Two 32-bit words as 16 upper-case hex digits, colon after every pair: XX:XX:...:XX
+    const std::string hex = std::format("{:08X}{:08X}", static_cast<quint32>(machid[0]), static_cast<quint32>(machid[1]));
+    std::string out;
+    out.reserve(hex.size() * 3 / 2);
+    for (std::size_t i = 0; i < hex.size(); i += 2) {
+        if (i > 0) {
+            out += ':';
+        }
+        out.append(hex, i, 2);
     }
-
-    return strOut.toUpper();
+    return out;
 }
 
 //=============================================================================================================
@@ -204,7 +190,7 @@ FiffId& FiffId::getDefault()
 
 //=============================================================================================================
 
-QString FiffId::toString() const
+std::string FiffId::toString() const
 {
     time_t secs = time.secs;
 
@@ -224,10 +210,6 @@ QString FiffId::toString() const
         timebuf[0] = '\0';
     }
 
-    return QString("%1.%2 0x%3%4 %5")
-        .arg(version >> 16)
-        .arg(version & 0xFFFF)
-        .arg(machid[0], 0, 16)
-        .arg(machid[1], 0, 16)
-        .arg(QString::fromLatin1(timebuf));
+    return std::format("{}.{} 0x{:x}{:x} {}", version >> 16, version & 0xFFFF, static_cast<quint32>(machid[0]),
+                       static_cast<quint32>(machid[1]), timebuf);
 }

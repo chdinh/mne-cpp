@@ -240,7 +240,7 @@ void AveragingSettingsView::setDetectedEpochs(const FiffEvokedSet& evokedSet)
     for (int i = 0; i < std::ssize(evokedSet.evoked); i++) {
         if (i < 10) {
             // Show only a maximum of 10 average types
-            topLayout->addWidget(new QLabel(evokedSet.evoked.at(i).comment), i + 1, 0);
+            topLayout->addWidget(new QLabel(QString::fromStdString(evokedSet.evoked.at(i).comment)), i + 1, 0);
             topLayout->addWidget(new QLabel(QString::number(evokedSet.evoked.at(i).nave)), i + 1, 1);
         }
     }

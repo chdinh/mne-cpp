@@ -23,6 +23,7 @@
 
 #include "fiff_global.h"
 
+#include <string>
 #include <vector>
 #include "fiff_evoked.h"
 
@@ -119,7 +120,7 @@ public:
      */
     static FiffEvoked averageEpochs(const std::vector<FiffEpochData>& epochs,
                                     double dSFreq,
-                                    const QString& comment = "Average");
+                                    const std::string& comment = "Average");
 
     //=========================================================================================================
     /**

@@ -42,6 +42,7 @@
 // QT INCLUDES
 //=============================================================================================================
 
+#include <string>
 #include <QSharedPointer>
 #include <memory>
 
@@ -161,7 +162,7 @@ public:
      *
      * @return The machine ID formatted as a string.
      */
-    QString toMachidString() const;
+    std::string toMachidString() const;
 
     //=========================================================================================================
     /**
@@ -171,7 +172,7 @@ public:
      *
      * @return Formatted string describing the ID.
      */
-    QString toString() const;
+    std::string toString() const;
 
     /**
      * Compares two FiffId instances for equality.

@@ -146,9 +146,7 @@ int main(int argc, char* argv[])
         FiffProj proj;
         proj.kind = FIFFV_MNE_PROJ_ITEM_EEG_AVREF; // Generic projection
         proj.active = false;
-        proj.desc = QString("Cov eigenvector #%1 (eigenvalue=%2)")
-                        .arg(p + 1)
-                        .arg(eigenvalues(idx), 0, 'g', 6);
+        proj.desc = std::format("Cov eigenvector #{} (eigenvalue={:.6g})", p + 1, eigenvalues(idx));
 
         // Build the named matrix for this projector
         FiffNamedMatrix::SDPtr data = FiffNamedMatrix::SDPtr(new FiffNamedMatrix());

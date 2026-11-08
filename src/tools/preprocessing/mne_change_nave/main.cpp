@@ -110,7 +110,7 @@ int main(int argc, char* argv[])
     }
 
     qInfo("Changing nave for set %d (%s): %d -> %d",
-          setIdx, qPrintable(evokedSet.evoked[setIdx].comment),
+          setIdx, evokedSet.evoked[setIdx].comment.c_str(),
           evokedSet.evoked[setIdx].nave, newNave);
 
     evokedSet.evoked[setIdx].nave = newNave;

@@ -30,7 +30,7 @@
 #include <fiff/fiff_file.h>
 
 #include <Eigen/SVD>
-#include <QRegularExpression>
+#include <regex>
 #include <algorithm>
 #include <cmath>
 #include <vector>
@@ -525,8 +525,7 @@ std::unique_ptr<MatrixXf> FwdFieldMap::computeEegMapping(
     bool hasAvgRef = false;
     for (const auto& proj : info.projs) {
         if (proj.kind == FIFFV_PROJ_ITEM_EEG_AVREF ||
-            proj.desc.contains(QRegularExpression("^Average .* reference$",
-                                                  QRegularExpression::CaseInsensitiveOption))) {
+            std::regex_match(proj.desc, std::regex("Average .* reference", std::regex::icase))) {
             hasAvgRef = true;
             break;
         }

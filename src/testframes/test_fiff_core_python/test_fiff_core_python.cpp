@@ -40,6 +40,7 @@
 // INCLUDES
 //=============================================================================================================
 
+#include <format>
 #include <fiff/fiff_raw_data.h>
 #include <utils/string_utils.h>
 #include <fiff/fiff_evoked.h>
@@ -132,9 +133,9 @@ bool relClose(double actual, double expected, double tol)
     return std::fabs(actual - expected) <= tol * std::fabs(expected);
 }
 
-QString mismatch(const QString& what, double actual, double expected)
+QString mismatch(const std::string& what, double actual, double expected)
 {
-    return QString("%1 is %2, mne-python says %3").arg(what).arg(actual, 0, 'g', 17).arg(expected, 0, 'g', 17);
+    return QString::fromStdString(std::format("{} is {:.17g}, mne-python says {:.17g}", what, actual, expected));
 }
 
 FiffEvoked::Condition condition(const QVariant& setno)
@@ -333,7 +334,7 @@ void TestFiffCorePython::computeAverages_matchPython()
     QFETCH(double, eog);
 
     AverageCategory cat;
-    cat.comment = QString("code %1").arg(code);
+    cat.comment = QString("code %1").arg(code).toStdString();
     cat.events = {static_cast<unsigned int>(code)};
     cat.tmin = -0.1f;
     cat.tmax = 0.2f;
@@ -347,7 +348,7 @@ void TestFiffCorePython::computeAverages_matchPython()
     desc.categories.push_back(cat);
     desc.rej = noRejection();
 
-    QString log;
+    std::string log;
     const FiffEvokedSet set = FiffEvokedSet::computeAverages(*m_raw, desc, events(true), log);
     QCOMPARE(set.evoked.size(), 1);
     const FiffEvoked& e = set.evoked.front();
@@ -362,7 +363,7 @@ void TestFiffCorePython::computeAverages_matchPython()
 
     // The log once printed the literal text "%.1f" because printf
     // placeholders were handed to QString::arg.
-    QVERIFY2(log.contains("t = -100.0 ... 200.0 ms"), qPrintable(log.left(200)));
+    QVERIFY2(log.contains("t = -100.0 ... 200.0 ms"), log.substr(0, 200).c_str());
     QVERIFY(!log.contains("%."));
 
     // Both sides average the same float32 samples in double precision, so the
@@ -423,12 +424,16 @@ void TestFiffCorePython::computeAverages_rejection()
     desc.categories.push_back(cat);
     desc.rej = rej;
 
-    QString log;
+    std::string log;
     const FiffEvokedSet set = FiffEvokedSet::computeAverages(*m_raw, desc, events(false), log);
     const FiffEvoked& e = set.evoked.front();
 
     QCOMPARE(static_cast<int>(e.nave), nave);
-    QCOMPARE(static_cast<int>(log.count("[omit]")), 6 - nave);
+    int omitted = 0;
+    for (auto at = log.find("[omit]"); at != std::string::npos; at = log.find("[omit]", at + 1)) {
+        ++omitted;
+    }
+    QCOMPARE(omitted, 6 - nave);
     QVERIFY(!log.contains("%."));
 
     const double sum = absSum(e.data, e.info, ChType::Eeg);
@@ -449,7 +454,7 @@ void TestFiffCorePython::computeAverages_noMatchingEvents()
     AverageDescription desc;
     desc.categories.push_back(cat);
 
-    QString log;
+    std::string log;
     const FiffEvokedSet set = FiffEvokedSet::computeAverages(*m_raw, desc, events(false), log);
     QCOMPARE(set.evoked.size(), 1);
     QCOMPARE(static_cast<int>(set.evoked.front().nave), 0);
@@ -502,7 +507,7 @@ void TestFiffCorePython::checkArtifacts_reason()
     QVERIFY(fields.contains(field));
     *fields.value(field) = limit;
 
-    QString actual;
+    std::string actual;
     const bool clean = FiffEvokedSet::checkArtifacts(epoch, info, {}, rej, actual);
     QCOMPARE(clean, reason.isEmpty());
     QCOMPARE(actual, reason);
@@ -520,10 +525,10 @@ void TestFiffCorePython::checkArtifacts_skipsBadChannels()
     RejectionParams rej = noRejection();
     rej.eegReject = 1e-4f;
 
-    QString reason;
+    std::string reason;
     QVERIFY(FiffEvokedSet::checkArtifacts(epoch, info, {"EEG1"}, rej, reason));
     QVERIFY(!FiffEvokedSet::checkArtifacts(epoch, info, {}, rej, reason));
-    QVERIFY(reason.startsWith("EEG1 : "));
+    QVERIFY(reason.starts_with("EEG1 : "));
 }
 
 //=============================================================================================================
@@ -996,11 +1001,11 @@ void TestFiffCorePython::transSet_headToMniMatchesPython()
     // data/sample-talairach.xfm is the subject's mri/transforms/talairach.xfm.
     const QString corFile = QCoreApplication::applicationDirPath() + "/../resources/data/mne-cpp-test-data/subjects/sample/mri/brain-neuromag/sets/COR.fif";
     FiffCoordTransSet chain;
-    QCOMPARE(chain.read(corFile), 2); // head -> MRI (identity) and surface RAS -> RAS
+    QCOMPARE(chain.read(corFile.toStdU16String()), 2); // head -> MRI (identity) and surface RAS -> RAS
     QCOMPARE(chain.headToMni(MatrixX3f::Zero(1, 3)).rows(), 0);
-    QCOMPARE(chain.read(dataPath("all-trans.fif")), 1);
-    QVERIFY(chain.addTalairach(QStringLiteral(FIFF_CORE_DATA_DIR "/sample-talairach.xfm")));
-    QVERIFY(!chain.addTalairach(corFile));
+    QCOMPARE(chain.read(dataPath("all-trans.fif").toStdU16String()), 1);
+    QVERIFY(chain.addTalairach(QStringLiteral(FIFF_CORE_DATA_DIR "/sample-talairach.xfm").toStdU16String()));
+    QVERIFY(!chain.addTalairach(corFile.toStdU16String()));
 
     MatrixX3f head(3, 3);
     head << 0.0f, 0.0f, 0.0f, 0.03f, -0.02f, 0.12f, -0.04f, 0.01f, -0.03f;
@@ -1023,7 +1028,7 @@ void TestFiffCorePython::transSet_headToMniMatchesPython()
         stream->end_file();
     }
     FiffCoordTransSet reread;
-    QCOMPARE(reread.read(file), 6);
+    QCOMPARE(reread.read(file.toStdU16String()), 6);
     QVERIFY((reread.headToMni(head) - mni).cwiseAbs().maxCoeff() < 1e-6f);
 }
 
@@ -1205,9 +1210,9 @@ void TestFiffCorePython::channelTypes_matchPython()
     QCOMPARE(QList<int>(goodPicks.data(), goodPicks.data() + goodPicks.size()), data);
 
     // mne.pick_channels_regexp matches from the start of the name
-    QCOMPARE(FiffInfoBase::pick_channels_regexp(raw.info.ch_names, QStringLiteral("CH1[0-2]")), RowVectorXi::LinSpaced(3, 10, 12));
-    QCOMPARE(FiffInfoBase::pick_channels_regexp(raw.info.ch_names, QStringLiteral("H0")).size(), Index(0));
-    QCOMPARE(FiffInfoBase::pick_channels_regexp(m_raw->info.ch_names, QStringLiteral("MEG ?01[1-2]")), RowVectorXi::LinSpaced(6, 0, 5));
+    QCOMPARE(FiffInfoBase::pick_channels_regexp(raw.info.ch_names, QStringLiteral("CH1[0-2]").toStdString()), RowVectorXi::LinSpaced(3, 10, 12));
+    QCOMPARE(FiffInfoBase::pick_channels_regexp(raw.info.ch_names, QStringLiteral("H0").toStdString()).size(), Index(0));
+    QCOMPARE(FiffInfoBase::pick_channels_regexp(m_raw->info.ch_names, QStringLiteral("MEG ?01[1-2]").toStdString()), RowVectorXi::LinSpaced(6, 0, 5));
 }
 
 //=============================================================================================================

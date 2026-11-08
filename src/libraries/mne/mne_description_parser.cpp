@@ -226,7 +226,7 @@ bool MNEDescriptionParser::parseAverageFile(const QString& fileName, FIFFLIB::Av
             if (inCategory) {
                 currentCat.doBaseline = bminSet && bmaxSet;
                 // Validate category
-                if (currentCat.comment.isEmpty()) {
+                if (currentCat.comment.empty()) {
                     qWarning() << "MNEDescriptionParser: category name missing";
                     return false;
                 }
@@ -251,7 +251,7 @@ bool MNEDescriptionParser::parseAverageFile(const QString& fileName, FIFFLIB::Av
                 inCategory = false;
                 bminSet = bmaxSet = false;
             } else if (inAverage) {
-                if (desc.comment.isEmpty())
+                if (desc.comment.empty())
                     desc.comment = "Average";
                 inAverage = false;
                 break; // done
@@ -291,9 +291,9 @@ bool MNEDescriptionParser::parseAverageFile(const QString& fileName, FIFFLIB::Av
                 return false;
             }
             if (inCategory)
-                currentCat.comment = val;
+                currentCat.comment = val.toStdString();
             else if (inAverage)
-                desc.comment = val;
+                desc.comment = val.toStdString();
             else {
                 qWarning() << "MNEDescriptionParser: misplaced name";
                 return false;
@@ -309,7 +309,7 @@ bool MNEDescriptionParser::parseAverageFile(const QString& fileName, FIFFLIB::Av
                 return false;
             }
             if (inAverage && !inCategory)
-                desc.filename = val;
+                desc.filename = val.toStdString();
             else {
                 qWarning() << "MNEDescriptionParser: misplaced outfile";
                 return false;
@@ -325,7 +325,7 @@ bool MNEDescriptionParser::parseAverageFile(const QString& fileName, FIFFLIB::Av
                 return false;
             }
             if (inAverage && !inCategory)
-                desc.eventFile = val;
+                desc.eventFile = val.toStdString();
             else {
                 qWarning() << "MNEDescriptionParser: misplaced eventfile";
                 return false;
@@ -341,7 +341,7 @@ bool MNEDescriptionParser::parseAverageFile(const QString& fileName, FIFFLIB::Av
                 return false;
             }
             if (inAverage && !inCategory)
-                desc.logFile = val;
+                desc.logFile = val.toStdString();
             else {
                 qWarning() << "MNEDescriptionParser: misplaced logfile";
                 return false;

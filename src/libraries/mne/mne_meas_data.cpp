@@ -202,7 +202,7 @@ bool MNEMeasData::read_evoked_set(const QString& name,
     }
 
     if (!id.empty())
-        qInfo("\tMeasurement file id: %s\n", id.toString().toUtf8().constData());
+        qInfo("\tMeasurement file id: %s\n", id.toString().c_str());
 
     /*
        * Pick out the necessary channels
@@ -350,7 +350,7 @@ bool MNEMeasData::read_evoked_set(const QString& name,
     dataset->nave = nave;
     dataset->kind = aspect_kind;
     dataset->data = Eigen::MatrixXf::Zero(np, nchan);
-    dataset->comment = evoked.comment;
+    dataset->comment = QString::fromStdString(evoked.comment);
     dataset->baselines = Eigen::VectorXf::Zero(nchan);
     /*
        * Pick data from all channels

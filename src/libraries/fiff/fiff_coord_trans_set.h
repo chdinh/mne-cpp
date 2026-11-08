@@ -36,7 +36,7 @@
 //=============================================================================================================
 
 #include <QSharedPointer>
-#include <QString>
+#include <filesystem>
 
 #include <memory>
 
@@ -79,7 +79,7 @@ public:
      *
      * @return The transform in metres, or an empty transform if the file holds no linear transform.
      */
-    static FiffCoordTrans readMniTransform(const QString& path);
+    static FiffCoordTrans readMniTransform(const std::filesystem::path& path);
 
     //=========================================================================================================
     /**
@@ -90,7 +90,7 @@ public:
      *
      * @return True if the @c .xfm file could be read.
      */
-    bool addTalairach(const QString& xfmPath);
+    bool addTalairach(const std::filesystem::path& xfmPath);
 
     //=========================================================================================================
     /**
@@ -102,7 +102,7 @@ public:
      *
      * @return The number of transforms taken from the file, or -1 if the file cannot be opened.
      */
-    int read(const QString& path);
+    int read(const std::filesystem::path& path);
 
     //=========================================================================================================
     /**

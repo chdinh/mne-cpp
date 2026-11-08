@@ -128,13 +128,13 @@ int main(int argc, char* argv[])
             }
         }
         // FreeSurfer keeps the Talairach transform next to the volume (MNE-C mne_mri_get_mgh_xform_file_name).
-        if (!chain.addTalairach(mriDir + "/transforms/talairach.xfm")) {
+        if (!chain.addTalairach((mriDir + "/transforms/talairach.xfm").toStdU16String())) {
             qWarning("No Talairach transform found for %s", qPrintable(mghName));
         }
     }
     if (!mriName.isEmpty()) {
         FiffCoordTransSet fromFile;
-        if (fromFile.read(mriName) < 0 || fromFile.head_surf_RAS_t.empty()) {
+        if (fromFile.read(mriName.toStdU16String()) < 0 || fromFile.head_surf_RAS_t.empty()) {
             qCritical("No MRI->head transform in %s", qPrintable(mriName));
             return 1;
         }

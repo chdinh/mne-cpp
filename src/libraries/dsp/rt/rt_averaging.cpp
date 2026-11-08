@@ -16,6 +16,8 @@
 
 #include "rt_averaging.h"
 
+#include <format>
+
 #include <mne/mne_epoch_data_list.h>
 
 #include <utils/ioutils.h>
@@ -392,7 +394,7 @@ void RtAveragingWorker::generateEvoked(double dTriggerType)
             m_pFiffInfo->sfreq;
         evoked.first = -m_iPreStimSamples;
         evoked.last = m_iPostStimSamples - 1;
-        evoked.comment = QString::number(dTriggerType);
+        evoked.comment = std::format("{:g}", dTriggerType);
     }
 
     // Generate final evoked

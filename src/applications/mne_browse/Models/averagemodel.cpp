@@ -154,7 +154,7 @@ QVariant AverageModel::data(const QModelIndex& index, int role) const
 
     switch (role) {
         case AverageModelRoles::GetComment:
-            return QVariant(evoked.comment);
+            return QVariant(QString::fromStdString(evoked.comment));
         case AverageModelRoles::GetAspectKind:
             return QVariant(evoked.aspect_kind);
         case AverageModelRoles::GetFirstSample:

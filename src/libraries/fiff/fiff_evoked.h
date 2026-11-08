@@ -181,7 +181,7 @@ public:
      *
      * @return string formatted aspect_kind.
      */
-    inline QString aspectKindToString() const;
+    inline std::string aspectKindToString() const;
 
     //=========================================================================================================
     /**
@@ -274,7 +274,7 @@ public:
     fiff_int_t aspect_kind;           /**< Aspect identifier, either FIFFV_ASPECT_AVERAGE or FIFFV_ASPECT_STD_ERR. */
     fiff_int_t first;                 /**< First time sample. */
     fiff_int_t last;                  /**< Last time sample. */
-    QString comment;                  /**< Comment on dataset. Can be the condition. */
+    std::string comment;              /**< Comment on dataset. Can be the condition. */
     Eigen::RowVectorXf times;         /**< Vector of time instants in seconds. */
     Eigen::MatrixXd data;             /**< 2D array of shape [n_channels x n_times]; Evoked response. */
     Eigen::MatrixXd proj;             /**< SSP projection. */
@@ -292,14 +292,14 @@ inline const StringList& FiffEvoked::ch_names() const
 
 //=============================================================================================================
 
-inline QString FiffEvoked::aspectKindToString() const
+inline std::string FiffEvoked::aspectKindToString() const
 {
     if (aspect_kind == FIFFV_ASPECT_AVERAGE)
-        return QString("Average");
+        return "Average";
     else if (aspect_kind == FIFFV_ASPECT_STD_ERR)
-        return QString("Standard_error");
+        return "Standard_error";
     else
-        return QString("Unknown");
+        return "Unknown";
 }
 
 //=============================================================================================================

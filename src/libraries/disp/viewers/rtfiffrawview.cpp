@@ -266,7 +266,7 @@ void RtFiffRawView::updateCrosshair(const QPoint& position)
     }
 
     // "NA" for unitless channels, as MNE-Python labels them
-    const QString unit = FiffExplain::unit(m_pModel->getUnit(iRow));
+    const QString unit = QString::fromStdString(FiffExplain::unit(m_pModel->getUnit(iRow)));
     emit cursorDataChanged(static_cast<float>(iSample / static_cast<double>(m_fSamplingRate)),
                            static_cast<float>(m_pModel->getValueAtColumn(iRow, iColumn)),
                            m_pModel->data(m_pModel->index(iRow, 0)).toString(),

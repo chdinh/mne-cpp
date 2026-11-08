@@ -30,7 +30,7 @@
       "decoding",
       "math"
     ],
-    "tokens": 18297,
+    "tokens": 18134,
     "gui_outside_design": []
   },
   "libraries": {
@@ -106,7 +106,7 @@
       ]
     },
     "com": {
-      "tokens": 399,
+      "tokens": 397,
       "by_category": {
         "containers": 20,
         "files": 5,
@@ -116,7 +116,7 @@
         "network": 9,
         "objects_signals": 90,
         "smart_pointers": 8,
-        "strings": 146,
+        "strings": 144,
         "threads": 5,
         "time": 1
       },
@@ -155,7 +155,7 @@
       "modules": []
     },
     "disp": {
-      "tokens": 6250,
+      "tokens": 6261,
       "by_category": {
         "containers": 484,
         "files": 109,
@@ -167,7 +167,7 @@
         "other": 1504,
         "regex": 4,
         "smart_pointers": 219,
-        "strings": 1111,
+        "strings": 1122,
         "threads": 23,
         "time": 11
       },
@@ -183,7 +183,7 @@
       ]
     },
     "disp3D": {
-      "tokens": 2912,
+      "tokens": 2914,
       "by_category": {
         "containers": 274,
         "files": 45,
@@ -194,7 +194,7 @@
         "other": 228,
         "random": 3,
         "smart_pointers": 73,
-        "strings": 685,
+        "strings": 687,
         "threads": 74,
         "time": 17
       },
@@ -212,7 +212,7 @@
       ]
     },
     "dsp": {
-      "tokens": 634,
+      "tokens": 632,
       "by_category": {
         "containers": 90,
         "files": 33,
@@ -222,7 +222,7 @@
         "other": 3,
         "regex": 3,
         "smart_pointers": 31,
-        "strings": 140,
+        "strings": 138,
         "threads": 21
       },
       "public_header_includes": 32,
@@ -235,22 +235,22 @@
       ]
     },
     "fiff": {
-      "tokens": 1020,
+      "tokens": 852,
       "by_category": {
-        "containers": 9,
-        "files": 87,
-        "global": 404,
+        "containers": 3,
+        "files": 81,
+        "global": 403,
         "json": 37,
         "logging": 214,
         "network": 6,
         "objects_signals": 14,
         "other": 3,
-        "regex": 9,
+        "regex": 2,
         "smart_pointers": 22,
-        "strings": 214,
+        "strings": 66,
         "time": 1
       },
-      "public_header_includes": 61,
+      "public_header_includes": 58,
       "q_object": 1,
       "files": 71,
       "modules": [
@@ -280,14 +280,14 @@
       ]
     },
     "fwd": {
-      "tokens": 324,
+      "tokens": 322,
       "by_category": {
         "files": 25,
         "global": 5,
         "logging": 185,
         "objects_signals": 6,
         "other": 1,
-        "regex": 3,
+        "regex": 1,
         "smart_pointers": 9,
         "strings": 86,
         "threads": 4
@@ -313,7 +313,7 @@
       ]
     },
     "inv": {
-      "tokens": 812,
+      "tokens": 811,
       "by_category": {
         "containers": 88,
         "files": 35,
@@ -323,7 +323,7 @@
         "objects_signals": 7,
         "regex": 1,
         "smart_pointers": 48,
-        "strings": 182,
+        "strings": 181,
         "threads": 2
       },
       "public_header_includes": 48,
@@ -420,10 +420,10 @@
       ]
     },
     "mri": {
-      "tokens": 3,
+      "tokens": 2,
       "by_category": {
         "files": 1,
-        "strings": 2
+        "strings": 1
       },
       "public_header_includes": 0,
       "q_object": 0,

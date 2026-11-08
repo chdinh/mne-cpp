@@ -241,7 +241,7 @@ void TestComRtClient::testRtDataClientReadsWhatTheServerWrites()
         Eigen::MatrixXd vec(2, 3);
         vec << 0.6, 0.8, 0.0, 0.0, 0.6, -0.8;
         FiffNamedMatrix vectors(2, 3, {}, StringList(info.ch_names.begin() + 0, info.ch_names.begin() + 0 + 3), vec);
-        info.projs.push_back(FiffProj(FIFFV_PROJ_ITEM_FIELD, true, QStringLiteral("PCA-v1"), vectors));
+        info.projs.push_back(FiffProj(FIFFV_PROJ_ITEM_FIELD, true, "PCA-v1", vectors));
     }
     info.experimenter = "rt test";
     info.description = "wire round trip";

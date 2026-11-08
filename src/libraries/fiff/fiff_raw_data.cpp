@@ -83,7 +83,7 @@ UTILSLIB::Expected<FiffRawData> FiffRawData::read(std::unique_ptr<FiffStream> st
 {
     using UTILSLIB::ErrorCode;
     using UTILSLIB::fail;
-    const std::string name = stream->streamName().toStdString();
+    const std::string name = stream->streamName();
     if (!stream->open()) {
         return fail(ErrorCode::Io, "cannot open {}", name);
     }

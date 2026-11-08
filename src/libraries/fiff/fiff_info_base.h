@@ -172,7 +172,7 @@ public:
      *
      * @return The selector (row vector).
      */
-    static Eigen::RowVectorXi pick_channels_regexp(const StringList& ch_names, const QString& regexp);
+    static Eigen::RowVectorXi pick_channels_regexp(const StringList& ch_names, const std::string& regexp);
 
     //=========================================================================================================
     /**

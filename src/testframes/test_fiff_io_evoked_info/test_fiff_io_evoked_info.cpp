@@ -400,7 +400,7 @@ void TestFiffIoEvokedInfo::evokedSet_checkArtifacts()
     rej.megMagReject = 4e-12f;
     rej.eegReject = 150e-6f;
 
-    QString reason;
+    std::string reason;
     bool epochOk = FiffEvokedSet::checkArtifacts(epoch, info, {}, rej, reason);
     // Small values should not trigger artifact rejection (returns true = clean)
     QVERIFY(epochOk);

@@ -24,6 +24,10 @@
 
 #include "fiff_proj.h"
 
+#include <format>
+#include <map>
+#include <string>
+
 #include <algorithm>
 #include <iterator>
 
@@ -85,7 +89,7 @@ std::array<std::vector<int>, 3> pcaChannelGroups(const FiffInfo& info)
  * singular vectors, i.e. eigenvectors of the uncentred second moment, padded to all channels.
  */
 std::vector<FiffProj> pcaProjectors(const MatrixXd& data, const std::vector<int>& chIdx, const StringList& chNames,
-                                    int nVec, const QStringList& descs)
+                                    int nVec, const StringList& descs)
 {
     std::vector<FiffProj> projs;
     if (nVec <= 0 || chIdx.empty()) {
@@ -101,7 +105,7 @@ std::vector<FiffProj> pcaProjectors(const MatrixXd& data, const std::vector<int>
         FiffProj proj;
         proj.kind = FIFFV_PROJ_ITEM_FIELD;
         proj.active = false;
-        proj.desc = descs.value(v);
+        proj.desc = descs[static_cast<std::size_t>(v)];
         proj.data->nrow = 1;
         proj.data->ncol = static_cast<int>(chNames.size());
         proj.data->col_names = chNames;
@@ -140,10 +144,10 @@ FiffProj::FiffProj(const FiffProj& p_FiffProj)
 
 //=============================================================================================================
 
-FiffProj::FiffProj(fiff_int_t p_kind, bool p_active, QString p_desc, FiffNamedMatrix& p_data)
+FiffProj::FiffProj(fiff_int_t p_kind, bool p_active, std::string p_desc, FiffNamedMatrix& p_data)
 : kind(p_kind)
 , active(p_active)
-, desc(p_desc)
+, desc(std::move(p_desc))
 , data(FiffNamedMatrix::SDPtr(new FiffNamedMatrix(p_data)))
 {
 }
@@ -321,7 +325,7 @@ std::vector<FiffProj> FiffProj::compute_from_raw(const FiffRawData& raw,
                                                  int nGrad,
                                                  int nMag,
                                                  int nEeg,
-                                                 const QMap<QString, double>& mapReject)
+                                                 const std::map<std::string, double>& mapReject)
 {
     float sfreq = raw.info.sfreq;
     int nchan = raw.info.nchan;
@@ -337,9 +341,13 @@ std::vector<FiffProj> FiffProj::compute_from_raw(const FiffRawData& raw,
 
     // Collect matching epochs
     std::vector<MatrixXd> epochs;
-    double gradReject = mapReject.value("grad", 0.0);
-    double magReject = mapReject.value("mag", 0.0);
-    double eegReject = mapReject.value("eeg", 0.0);
+    const auto reject = [&mapReject](const char* type) {
+        const auto it = mapReject.find(type);
+        return it == mapReject.end() ? 0.0 : it->second;
+    };
+    double gradReject = reject("grad");
+    double magReject = reject("mag");
+    double eegReject = reject("eeg");
 
     for (int k = 0; k < events.rows(); ++k) {
         if (events(k, 1) != 0 || events(k, 2) != eventCode)
@@ -395,9 +403,9 @@ std::vector<FiffProj> FiffProj::compute_from_raw(const FiffRawData& raw,
     const char* kinds[3] = {"grad", "mag", "eeg"};
     std::vector<FiffProj> projs;
     for (int g = 0; g < 3; ++g) {
-        QStringList descs;
+        StringList descs;
         for (int v = 0; v < nVec[g]; ++v) {
-            descs << QString("PCA-%1-v%2").arg(kinds[g]).arg(v + 1);
+            descs.push_back(std::format("PCA-{}-v{}", kinds[g], v + 1));
         }
         std::ranges::move(pcaProjectors(data, groups[g], raw.info.ch_names, nVec[g], descs), std::back_inserter(projs));
     }
@@ -412,15 +420,15 @@ std::vector<FiffProj> FiffProj::compute_from_evoked(const FiffEvoked& evoked, in
     if (evoked.data.cols() == 0 || evoked.times.size() == 0) {
         return {};
     }
-    const QString prefix = QString("%1-%2").arg(evoked.times(0), 0, 'f', 3).arg(evoked.times(evoked.times.size() - 1), 0, 'f', 3);
+    const std::string prefix = std::format("{:.3f}-{:.3f}", evoked.times(0), evoked.times(evoked.times.size() - 1));
     const std::array<std::vector<int>, 3> groups = pcaChannelGroups(evoked.info);
     const int nVec[3] = {nGrad, nMag, nEeg};
     const char* kinds[3] = {"planar", "axial", "eeg"};
     std::vector<FiffProj> projs;
     for (int g = 0; g < 3; ++g) {
-        QStringList descs;
+        StringList descs;
         for (int v = 0; v < nVec[g]; ++v) {
-            descs << QString("%1-%2-PCA-%3").arg(kinds[g], prefix).arg(v + 1, 2, 10, QChar('0'));
+            descs.push_back(std::format("{}-{}-PCA-{:02}", kinds[g], prefix, v + 1));
         }
         std::ranges::move(pcaProjectors(evoked.data, groups[g], evoked.info.ch_names, nVec[g], descs), std::back_inserter(projs));
     }

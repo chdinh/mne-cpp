@@ -34,6 +34,8 @@
 
 #include "fiff_global.h"
 
+#include <string>
+#include <map>
 #include <vector>
 #include "fiff_types.h"
 #include "fiff_named_matrix.h"
@@ -121,7 +123,7 @@ public:
      */
     explicit FiffProj(fiff_int_t p_kind,
                       bool p_active,
-                      QString p_desc,
+                      std::string p_desc,
                       FiffNamedMatrix& p_data);
 
     //=========================================================================================================
@@ -187,7 +189,7 @@ public:
                                                   int nGrad,
                                                   int nMag,
                                                   int nEeg,
-                                                  const QMap<QString, double>& mapReject = QMap<QString, double>());
+                                                  const std::map<std::string, double>& mapReject = {});
 
     //=========================================================================================================
     /**
@@ -218,9 +220,9 @@ public:
     friend std::ostream& operator<<(std::ostream& out, const FIFFLIB::FiffProj& p_FiffProj);
 
 public:
-    fiff_int_t kind; /**< Fiff kind. */
-    bool active;     /**< If fiff projector active. */
-    QString desc;    /**< Projector description. */
+    fiff_int_t kind;  /**< Fiff kind. */
+    bool active;      /**< If fiff projector active. */
+    std::string desc; /**< Projector description. */
 
     FiffNamedMatrix::SDPtr data; /**< Projector data, rows are equal to the length of channels. */
 };
@@ -234,7 +236,7 @@ inline std::ostream& operator<<(std::ostream& out, const FIFFLIB::FiffProj& p_Fi
     out << "#### Fiff Projector ####\n";
     out << "\tKind: " << p_FiffProj.kind << std::endl;
     out << "\tactive: " << p_FiffProj.active << std::endl;
-    out << "\tdesc: " << p_FiffProj.desc.toUtf8().constData() << std::endl;
+    out << "\tdesc: " << p_FiffProj.desc.c_str() << std::endl;
     out << "\tdata:\n\t" << *p_FiffProj.data.data() << std::endl;
     return out;
 }

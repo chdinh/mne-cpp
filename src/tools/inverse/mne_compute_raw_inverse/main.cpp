@@ -815,7 +815,7 @@ int main(int argc, char* argv[])
         if (processAllSets) {
             qInfo("  Found %d evoked data set(s):", static_cast<int>(evokedSet.evoked.size()));
             for (int i = 0; i < std::ssize(evokedSet.evoked); ++i) {
-                qInfo("    [%d] %s", i, evokedSet.evoked[i].comment.toUtf8().constData());
+                qInfo("    [%d] %s", i, evokedSet.evoked[i].comment.c_str());
                 setsToProcess.append(i);
             }
         } else {
@@ -830,7 +830,7 @@ int main(int argc, char* argv[])
         // Process each selected evoked set
         for (int setIdx : setsToProcess) {
             const FiffEvoked& evoked = evokedSet.evoked[setIdx];
-            QString setComment = evoked.comment;
+            QString setComment = QString::fromStdString(evoked.comment);
             QString commentTag = sanitizeForFilename(setComment);
 
             qInfo("\n=== Evoked set %d: \"%s\" ===", setIdx, setComment.toUtf8().constData());

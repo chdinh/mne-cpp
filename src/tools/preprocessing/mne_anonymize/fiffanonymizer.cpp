@@ -267,7 +267,7 @@ void FiffAnonymizer::censorTag()
 
             m_pTag->resize(fiffIdSize * sizeof(FIFFLIB::fiff_int_t));
             memcpy(m_pTag->data(), reinterpret_cast<char*>(outData), fiffIdSize * sizeof(FIFFLIB::fiff_int_t));
-            printIfVerbose("MAC address in ID tag changed: " + inId.toMachidString() + " -> " + outId.toMachidString());
+            printIfVerbose(QString::fromStdString("MAC address in ID tag changed: " + inId.toMachidString() + " -> " + outId.toMachidString()));
             printIfVerbose("Measurement date in ID tag changed: " + inMeasDate.toString("dd.MM.yyyy hh:mm:ss.zzz t") + " -> " + outMeasDate.toString("dd.MM.yyyy hh:mm:ss.zzz t"));
             break;
         }
@@ -590,7 +590,7 @@ bool FiffAnonymizer::checkValidFiffFormatVersion()
         int inMinorVersion = (static_cast<uint32_t>(fileId.version) & 0x0000FFFF);
         double inVersion = inMayorVersion + inMinorVersion / 10.0;
         emit readingIdFileVersion(inVersion);
-        emit readingIdMac(fileId.toMachidString());
+        emit readingIdMac(QString::fromStdString(fileId.toMachidString()));
 
         if (inVersion > m_dMaxValidFiffVerion) {
             return false;

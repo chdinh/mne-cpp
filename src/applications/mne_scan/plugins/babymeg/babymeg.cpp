@@ -480,7 +480,7 @@ bool BabyMEG::readProjectors()
 
     // Open the file
     FiffStream t_pStream(&t_projFiffFile);
-    QString t_sFileName = t_pStream.streamName();
+    QString t_sFileName = QString::fromStdString(t_pStream.streamName());
 
     qInfo("[BabyMEG::readProjectors] Opening header data %s...", t_sFileName.toUtf8().constData());
 
@@ -515,7 +515,7 @@ bool BabyMEG::readCompensators()
 
     // Open the file
     FiffStream t_pStream(&t_compFiffFile);
-    QString t_sFileName = t_pStream.streamName();
+    QString t_sFileName = QString::fromStdString(t_pStream.streamName());
 
     qInfo("[BabyMEG::readCompensators] Opening compensator data %s...", t_sFileName.toUtf8().constData());
 

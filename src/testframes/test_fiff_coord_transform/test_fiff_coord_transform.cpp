@@ -272,7 +272,7 @@ private slots:
     {
         FiffEvoked ev;
         ev.aspect_kind = FIFFV_ASPECT_AVERAGE;
-        QString s = ev.aspectKindToString();
+        QString s = QString::fromStdString(ev.aspectKindToString());
         QVERIFY(!s.isEmpty());
     }
 

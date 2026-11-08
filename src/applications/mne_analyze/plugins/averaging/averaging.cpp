@@ -428,7 +428,7 @@ QSharedPointer<FIFFLIB::FiffEvokedSet> Averaging::averageCalculation(const FIFFL
                                                m_fBaselineFromS, m_fBaselineToS, mapReject);
         if (evoked.empty())
             continue;
-        evoked.comment = QString::number(eventCode);
+        evoked.comment = QString::number(eventCode).toStdString();
         if (m_bBaseline) {
             evoked.baseline.first = m_fBaselineFromS;
             evoked.baseline.second = m_fBaselineToS;

@@ -136,8 +136,8 @@ int main(int argc, char* argv[])
         const FiffEvoked& evoked = evokedSet.evoked[i];
 
         qInfo("--- Set %d ---", i + 1);
-        qInfo("  Comment    : %s", qPrintable(evoked.comment));
-        qInfo("  Type       : %s", qPrintable(evoked.aspectKindToString()));
+        qInfo("  Comment    : %s", evoked.comment.c_str());
+        qInfo("  Type       : %s", evoked.aspectKindToString().c_str());
         qInfo("  Nave       : %d", evoked.nave);
 
         float tmin = evoked.times.size() > 0 ? evoked.times(0) : 0.0f;

@@ -37,6 +37,8 @@
 
 #include <cmath>
 #include <format>
+#include <iterator>
+#include <string_view>
 //=============================================================================================================
 // USED NAMESPACES
 //=============================================================================================================
@@ -100,7 +102,7 @@ void FiffEvoked::clear()
     aspect_kind = -1;
     first = -1;
     last = -1;
-    comment = QString("");
+    comment.clear();
     times = RowVectorXf();
     data = MatrixXd();
     proj = MatrixXd();
@@ -180,7 +182,7 @@ Expected<FiffEvokedFile> FiffEvokedFile::open(const std::filesystem::path& path)
     if (!stream.read_meas_info(stream.dirtree(), file.info, meas)) {
         return fail(ErrorCode::Format, "No measurement info in {}", file.m_file);
     }
-    file.info.filename = stream.streamName().toStdString();
+    file.info.filename = stream.streamName();
     if (meas->dir_tree_find(FIFFB_PROCESSED_DATA).empty()) {
         return fail(ErrorCode::NotFound, "No processed data in {}", file.m_file);
     }
@@ -188,7 +190,7 @@ Expected<FiffEvokedFile> FiffEvokedFile::open(const std::filesystem::path& path)
     if (file.m_sets.empty()) {
         return fail(ErrorCode::NotFound, "No evoked data in {}", file.m_file);
     }
-    QString listing;
+    std::string listing;
     stream.get_evoked_entries(file.m_sets, file.m_comments, file.m_kinds, listing);
     return file;
 }
@@ -202,8 +204,8 @@ Expected<int> FiffEvokedFile::find(const FiffEvoked::Condition& condition, fiff_
             return *index;
         }
     } else {
-        const QString wanted = QString::fromStdString(std::get<std::string>(condition));
-        for (qsizetype i = 0; i < m_comments.size(); ++i) {
+        const std::string& wanted = std::get<std::string>(condition);
+        for (std::size_t i = 0; i < m_comments.size(); ++i) {
             if (m_comments[i] == wanted && m_kinds[i] == kind) {
                 return static_cast<int>(i);
             }
@@ -243,7 +245,7 @@ Expected<FiffEvoked> FiffEvokedFile::read(int set, const FiffEvoked::Baseline& b
     std::vector<FiffChInfo> chs;
     fiff_int_t tag_kind, pos, first = 0, last = 0;
     std::optional<FiffTag> t_pTag;
-    QString comment("");
+    std::string comment;
     qint32 k;
     for (k = 0; k < my_evoked->nent(); ++k) {
         tag_kind = my_evoked->dir[k].kind;
@@ -251,7 +253,7 @@ Expected<FiffEvoked> FiffEvokedFile::read(int set, const FiffEvoked::Baseline& b
         switch (tag_kind) {
             case FIFF_COMMENT:
                 t_pTag = m_stream.read_tag(pos);
-                comment = QString::fromStdString(t_pTag->toString());
+                comment = t_pTag->toString();
                 break;
             case FIFF_FIRST_SAMPLE:
                 t_pTag = m_stream.read_tag(pos);
@@ -275,8 +277,8 @@ Expected<FiffEvoked> FiffEvokedFile::read(int set, const FiffEvoked::Baseline& b
                 break;
         }
     }
-    if (comment.isEmpty())
-        comment = QString("No comment");
+    if (comment.empty())
+        comment = "No comment";
 
     //
     //   Local channel information?
@@ -296,7 +298,7 @@ Expected<FiffEvoked> FiffEvokedFile::read(int set, const FiffEvoked::Baseline& b
     }
     qint32 nsamp = last - first + 1;
     qInfo("\tFound the data of interest:\n");
-    qInfo("\t\tt = %10.2f ... %10.2f ms (%s)\n", 1000 * static_cast<float>(first) / info.sfreq, 1000 * static_cast<float>(last) / info.sfreq, comment.toUtf8().constData());
+    qInfo("\t\tt = %10.2f ... %10.2f ms (%s)\n", 1000 * static_cast<float>(first) / info.sfreq, 1000 * static_cast<float>(last) / info.sfreq, comment.c_str());
     if (info.comps.size() > 0)
         qInfo("\t\t%lld CTF compensation matrices available\n", static_cast<long long>(info.comps.size()));
 
@@ -313,7 +315,7 @@ Expected<FiffEvoked> FiffEvokedFile::read(int set, const FiffEvoked::Baseline& b
         switch (tag_kind) {
             case FIFF_COMMENT:
                 t_pTag = m_stream.read_tag(pos);
-                comment = QString::fromStdString(t_pTag->toString());
+                comment = t_pTag->toString();
                 break;
             case FIFF_ASPECT_KIND:
                 t_pTag = m_stream.read_tag(pos);
@@ -419,7 +421,7 @@ Expected<FiffEvoked> FiffEvokedFile::read(int set, const FiffEvoked::Baseline& b
     p_FiffEvoked.aspect_kind = aspect_kind;
     p_FiffEvoked.first = first;
     p_FiffEvoked.last = last;
-    p_FiffEvoked.comment = comment;
+    p_FiffEvoked.comment = std::move(comment);
     p_FiffEvoked.times = times;
     p_FiffEvoked.data = all_data;
 
@@ -524,7 +526,7 @@ FiffEvoked FiffEvoked::combine(const std::vector<FiffEvoked>& evokeds, const Vec
     FiffEvoked res(ref);
     res.data = MatrixXd::Zero(ref.data.rows(), ref.data.cols());
     double invNave = 0.0;
-    QString comment;
+    std::string comment;
     for (int i = 0; i < std::ssize(evokeds); ++i) {
         const FiffEvoked& e = evokeds[i];
         const double w = weights(i);
@@ -536,20 +538,19 @@ FiffEvoked FiffEvoked::combine(const std::vector<FiffEvoked>& evokeds, const Vec
             }
         }
 
-        const QString sign = w >= 0.0 ? QString() : QString("-");
-        const QString weight = qAbs(qAbs(w) - 1.0) <= 1e-8 + 1e-5 ? QString()
-                                                                  : QString::number(qAbs(w), 'f', 3);
-        const QString multiplier = weight.isEmpty() ? QString() : QString::fromUtf8(" × ");
-        const QString thisComment = e.comment.contains(" + ") ? QString("(%1)").arg(e.comment)
-            : e.comment.isEmpty()                             ? QString("unknown")
-                                                              : e.comment;
-        if (i == 0) {
-            comment += sign + weight + multiplier + thisComment;
+        const bool unitWeight = std::abs(std::abs(w) - 1.0) <= 1e-8 + 1e-5;
+        const std::string weight = unitWeight ? std::string() : std::format("{:.3f} \u00d7 ", std::abs(w));
+        const std::string_view sign = w >= 0.0 ? (i == 0 ? "" : " + ") : (i == 0 ? "-" : " - ");
+        if (e.comment.contains(" + ")) {
+            std::format_to(std::back_inserter(comment), "{}{}({})", sign, weight, e.comment);
         } else {
-            comment += QString(" %1 ").arg(sign.isEmpty() ? QString("+") : sign) + weight + multiplier + thisComment;
+            std::format_to(std::back_inserter(comment), "{}{}{}", sign, weight, e.comment.empty() ? std::string_view("unknown") : std::string_view(e.comment));
         }
     }
-    res.comment = comment.replace(" - - ", " + ");
+    for (std::size_t at = comment.find(" - - "); at != std::string::npos; at = comment.find(" - - ", at + 3)) {
+        comment.replace(at, 5, " + ");
+    }
+    res.comment = std::move(comment);
     res.nave = static_cast<fiff_int_t>(std::lround(1.0 / invNave));
     return res;
 }

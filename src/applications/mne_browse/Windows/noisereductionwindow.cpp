@@ -113,7 +113,7 @@ void NoiseReductionWindow::createProjectorGroup()
             qint32 i = 0;
 
             for (; i < std::ssize(m_pFiffInfo->projs); ++i) {
-                QCheckBox* checkBox = new QCheckBox(m_pFiffInfo->projs[i].desc);
+                QCheckBox* checkBox = new QCheckBox(QString::fromStdString(m_pFiffInfo->projs[i].desc));
                 checkBox->setChecked(m_pFiffInfo->projs[i].active);
 
                 if (m_pFiffInfo->projs[i].active == false)

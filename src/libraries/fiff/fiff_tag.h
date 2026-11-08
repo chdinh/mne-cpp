@@ -94,6 +94,7 @@
 // EIGEN INCLUDES
 //=============================================================================================================
 
+#include <string>
 #include <Eigen/Core>
 #include <Eigen/SparseCore>
 
@@ -251,7 +252,7 @@ public:
      *
      * @return the tag type information.
      */
-    QString getInfo() const;
+    std::string getInfo() const;
 
     //
     // Simple types

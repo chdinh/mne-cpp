@@ -141,9 +141,9 @@ Eigen::SparseMatrix<double> FiffTag::toSparseFloatMatrix() const
 
 //=============================================================================================================
 
-QString FiffTag::getInfo() const
+std::string FiffTag::getInfo() const
 {
-    QString t_qStringInfo;
+    std::string t_qStringInfo;
 
     if (this->isMatrix()) {
         switch (this->getType()) {

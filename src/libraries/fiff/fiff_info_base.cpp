@@ -29,7 +29,7 @@
 #include <utils/generics/log.h>
 #include <utils/string_utils.h>
 
-#include <QRegularExpression>
+#include <regex>
 
 #include <algorithm>
 #include <fstream>
@@ -173,13 +173,13 @@ RowVectorXi FiffInfoBase::pick_data_channels(const StringList& exclude) const
 
 //=============================================================================================================
 
-RowVectorXi FiffInfoBase::pick_channels_regexp(const StringList& ch_names, const QString& regexp)
+RowVectorXi FiffInfoBase::pick_channels_regexp(const StringList& ch_names, const std::string& regexp)
 {
-    const QRegularExpression re(QRegularExpression::anchoredPattern(regexp + QStringLiteral(".*")),
-                                QRegularExpression::DotMatchesEverythingOption);
+    // Like re.match in Python: anchored at the start only
+    const std::regex re(regexp);
     std::vector<int> sel;
     for (int k = 0; k < static_cast<int>(ch_names.size()); ++k) {
-        if (re.match(QString::fromStdString(ch_names[static_cast<std::size_t>(k)])).hasMatch())
+        if (std::regex_search(ch_names[static_cast<std::size_t>(k)], re, std::regex_constants::match_continuous))
             sel.push_back(k);
     }
     return Eigen::Map<const RowVectorXi>(sel.data(), static_cast<Eigen::Index>(sel.size()));

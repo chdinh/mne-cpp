@@ -29,6 +29,8 @@
 
 #include "fiff_stream.h"
 
+#include <format>
+
 #include <vector>
 #include "fiff_annotations.h"
 #include "fiff_annotations_json.h"
@@ -327,11 +329,11 @@ void FiffStream::skipRaw(fiff_long_t bytes)
 
 //=============================================================================================================
 
-QString FiffStream::streamName()
+std::string FiffStream::streamName()
 {
     if (QFile* t_pFile = qobject_cast<QFile*>(this->device()))
-        return t_pFile->fileName();
-    return m_name.empty() ? QString("TCPSocket") : QString::fromStdString(m_name);
+        return t_pFile->fileName().toStdString();
+    return m_name.empty() ? std::string("TCPSocket") : m_name;
 }
 
 //=============================================================================================================
@@ -400,7 +402,7 @@ void FiffStream::finish_writing_raw()
 
 //=============================================================================================================
 
-bool FiffStream::get_evoked_entries(const std::vector<FiffDirNode::SPtr>& evoked_node, QStringList& comments, std::vector<fiff_int_t>& aspect_kinds, QString& t)
+bool FiffStream::get_evoked_entries(const std::vector<FiffDirNode::SPtr>& evoked_node, StringList& comments, std::vector<fiff_int_t>& aspect_kinds, std::string& t)
 {
     comments.clear();
     aspect_kinds.clear();
@@ -411,7 +413,7 @@ bool FiffStream::get_evoked_entries(const std::vector<FiffDirNode::SPtr>& evoked
         for (const FiffDirEntry& entry : ev->dir) {
             if (entry.kind == FIFF_COMMENT) {
                 t_pTag = this->read_tag(entry.pos);
-                comments.append(QString::fromStdString(t_pTag->toString()));
+                comments.push_back(t_pTag->toString());
             }
         }
         const std::vector<FiffDirNode::SPtr> aspects = ev->dir_tree_find(FIFFB_ASPECT);
@@ -426,20 +428,20 @@ bool FiffStream::get_evoked_entries(const std::vector<FiffDirNode::SPtr>& evoked
         }
     }
 
-    if (comments.size() != std::ssize(aspect_kinds) || comments.size() == 0) {
+    if (comments.size() != aspect_kinds.size() || comments.empty()) {
         qWarning("Dataset names in FIF file could not be found.");
         return false;
     }
 
-    t = QString();
+    t.clear();
     for (k = 0; k < std::ssize(aspect_kinds); ++k) {
-        t += QString("%1 - \"%2\" (").arg(k).arg(comments[k]);
-        if (aspect_kinds[k] == FIFFV_ASPECT_AVERAGE)
-            t += QString("FIFFV_ASPECT_AVERAGE)\n");
-        else if (aspect_kinds[k] == FIFFV_ASPECT_STD_ERR)
-            t += QString("FIFFV_ASPECT_STD_ERR)\n");
+        t += std::format("{} - \"{}\" (", k, comments[static_cast<std::size_t>(k)]);
+        if (aspect_kinds[static_cast<std::size_t>(k)] == FIFFV_ASPECT_AVERAGE)
+            t += "FIFFV_ASPECT_AVERAGE)\n";
+        else if (aspect_kinds[static_cast<std::size_t>(k)] == FIFFV_ASPECT_STD_ERR)
+            t += "FIFFV_ASPECT_STD_ERR)\n";
         else
-            t += QString("unknown)\n");
+            t += "unknown)\n";
     }
 
     return true;
@@ -449,14 +451,14 @@ bool FiffStream::get_evoked_entries(const std::vector<FiffDirNode::SPtr>& evoked
 
 bool FiffStream::open(QIODevice::OpenModeFlag mode)
 {
-    QString t_sFileName = this->streamName();
+    const std::string t_sFileName = this->streamName();
     std::optional<FiffTag> t_pTag;
 
     /*
      * Try to open...
      */
     if (m_device ? !m_device->open(mode) : !reopen()) {
-        qCritical("Cannot open %s\n", t_sFileName.toUtf8().constData()); //consider throw
+        qCritical("Cannot open %s\n", t_sFileName.c_str()); //consider throw
         return false;
     }
 
@@ -483,7 +485,7 @@ bool FiffStream::open(QIODevice::OpenModeFlag mode)
     //
     //   Read or create the directory tree
     //
-    qInfo("Creating tag directory for %s...", t_sFileName.toUtf8().constData());
+    qInfo("Creating tag directory for %s...", t_sFileName.c_str());
     m_dir.clear();
     qint32 dirpos = *t_pTag->toInt();
     /*
@@ -759,7 +761,7 @@ fiff_long_t FiffStream::write_device_info(const FiffDeviceInfo& device)
 
 //=============================================================================================================
 
-bool FiffStream::attach_env(const QString& workingDir, const QString& command)
+bool FiffStream::attach_env(const std::string& workingDir, const std::string& command)
 {
     int insert_blocks[] = {FIFFB_MNE, FIFFB_MEAS, FIFFB_MRI, FIFFB_BEM, -1};
 
@@ -825,9 +827,9 @@ bool FiffStream::attach_env(const QString& workingDir, const QString& command)
     new_dir.push_back({FIFF_BLOCK_START, FIFFT_INT, 1 * 4, static_cast<fiff_int_t>(start_block(FIFFB_MNE_ENV))});
     new_dir.push_back({FIFF_BLOCK_ID, FIFFT_ID_STRUCT, 5 * 4, static_cast<fiff_int_t>(write_id(FIFF_BLOCK_ID, id))});
     new_dir.push_back({FIFF_MNE_ENV_WORKING_DIR, FIFFT_STRING, static_cast<fiff_int_t>(workingDir.size()),
-                       static_cast<fiff_int_t>(write_string(FIFF_MNE_ENV_WORKING_DIR, workingDir.toStdString()))});
+                       static_cast<fiff_int_t>(write_string(FIFF_MNE_ENV_WORKING_DIR, workingDir))});
     new_dir.push_back({FIFF_MNE_ENV_COMMAND_LINE, FIFFT_STRING, static_cast<fiff_int_t>(command.size()),
-                       static_cast<fiff_int_t>(write_string(FIFF_MNE_ENV_COMMAND_LINE, command.toStdString()))});
+                       static_cast<fiff_int_t>(write_string(FIFF_MNE_ENV_COMMAND_LINE, command))});
     new_dir.push_back({FIFF_BLOCK_END, FIFFT_INT, 1 * 4, static_cast<fiff_int_t>(end_block(FIFFB_MNE_ENV, next_tmp))});
     new_dir.insert(new_dir.end(), old_dir.begin() + where + 1, old_dir.end());
     /*
@@ -1130,7 +1132,7 @@ UTILSLIB::Expected<FiffDigitizerData> FiffStream::read_digitizer_data(const Fiff
             }
             const std::optional<FiffTag> tag = this->read_tag(entry.pos);
             if (!tag) {
-                return UTILSLIB::fail(UTILSLIB::ErrorCode::Format, "cannot read the digitizer tag at {} of {}", entry.pos, this->streamName().toStdString());
+                return UTILSLIB::fail(UTILSLIB::ErrorCode::Format, "cannot read the digitizer tag at {} of {}", entry.pos, this->streamName());
             }
             if (entry.kind == FIFF_DIG_POINT) {
                 dig.points.push_back(tag->toDigPoint());
@@ -1140,12 +1142,12 @@ UTILSLIB::Expected<FiffDigitizerData> FiffStream::read_digitizer_data(const Fiff
         }
     }
     if (dig.points.empty()) {
-        return UTILSLIB::fail(UTILSLIB::ErrorCode::NotFound, "no digitizer points in {}", this->streamName().toStdString());
+        return UTILSLIB::fail(UTILSLIB::ErrorCode::NotFound, "no digitizer points in {}", this->streamName());
     }
     for (FiffDigPoint& point : dig.points) {
         point.coord_frame = dig.coord_frame;
     }
-    dig.filename = this->streamName().toStdU16String();
+    dig.filename = UTILSLIB::pathFromUtf8(this->streamName());
     dig.active.assign(dig.points.size(), true);
     dig.discard.assign(dig.points.size(), false);
     return dig;
@@ -1713,13 +1715,13 @@ std::vector<FiffProj> FiffStream::read_proj(const FiffDirNode::SPtr& p_Node)
             nchan = global_nchan;
 
         t_pTag = t_pFiffDirTreeItem->find_tag(*this, FIFF_DESCRIPTION);
-        QString desc; // maybe, in some cases this has to be a struct.
+        std::string desc;
         if (t_pTag) {
-            desc = QString::fromStdString(t_pTag->toString());
+            desc = t_pTag->toString();
         } else {
             t_pTag = t_pFiffDirTreeItem->find_tag(*this, FIFF_NAME);
             if (t_pTag)
-                desc = QString::fromStdString(t_pTag->toString());
+                desc = t_pTag->toString();
             else {
                 qWarning("Projection item description missing\n");
                 return projdata;
@@ -1787,7 +1789,7 @@ std::vector<FiffProj> FiffStream::read_proj(const FiffDirNode::SPtr& p_Node)
         StringList defaultList;
         FiffNamedMatrix t_fiffNamedMatrix(nvec, nchan, defaultList, names, data);
 
-        FiffProj one(kind, active, desc, t_fiffNamedMatrix);
+        FiffProj one(kind, active, std::move(desc), t_fiffNamedMatrix);
         //
         projdata.push_back(one);
     }
@@ -1795,7 +1797,7 @@ std::vector<FiffProj> FiffStream::read_proj(const FiffDirNode::SPtr& p_Node)
     if (projdata.size() > 0) {
         qInfo("\tRead a total of %lld projection items:\n", static_cast<long long>(projdata.size()));
         for (qint32 k = 0; k < std::ssize(projdata); ++k) {
-            qInfo("\t\t%s (%d x %d) %s\n", projdata[k].desc.toUtf8().constData(), projdata[k].data->nrow, projdata[k].data->ncol, projdata[k].active ? "active" : "idle");
+            qInfo("\t\t%s (%d x %d) %s\n", projdata[k].desc.c_str(), projdata[k].data->nrow, projdata[k].data->ncol, projdata[k].active ? "active" : "idle");
         }
     }
 
@@ -1926,11 +1928,11 @@ fiff_long_t FiffStream::start_block(fiff_int_t kind)
 std::unique_ptr<FiffStream> FiffStream::start_file(QIODevice& p_IODevice)
 {
     auto p_pStream = std::make_unique<FiffStream>(&p_IODevice);
-    QString t_sFileName = p_pStream->streamName();
+    const std::string t_sFileName = p_pStream->streamName();
 
     if (!p_IODevice.isOpen()) {
         if (!p_pStream->device()->open(QIODevice::WriteOnly)) {
-            qWarning("Cannot write to %s\n", t_sFileName.toUtf8().constData()); //consider throw
+            qWarning("Cannot write to %s\n", t_sFileName.c_str()); //consider throw
             std::unique_ptr<FiffStream> p_pEmptyStream;
             return p_pEmptyStream;
         }
@@ -1954,7 +1956,7 @@ std::unique_ptr<FiffStream> FiffStream::start_file(QIODevice& p_IODevice)
 std::unique_ptr<FiffStream> FiffStream::open_update(QIODevice& p_IODevice)
 {
     auto t_pStream = std::make_unique<FiffStream>(&p_IODevice);
-    QString t_sFileName = t_pStream->streamName();
+    const std::string t_sFileName = t_pStream->streamName();
 
     /*
      * ReadWrite creates the file, so a path that is not there would be turned into
@@ -1963,7 +1965,7 @@ std::unique_ptr<FiffStream> FiffStream::open_update(QIODevice& p_IODevice)
      */
     QFile* t_pFile = qobject_cast<QFile*>(&p_IODevice);
     if (t_pFile != nullptr && !t_pFile->exists()) {
-        qCritical("Cannot open %s for update: no such file", t_sFileName.toUtf8().constData());
+        qCritical("Cannot open %s for update: no such file", t_sFileName.c_str());
         return std::unique_ptr<FiffStream>();
     }
 
@@ -1971,7 +1973,7 @@ std::unique_ptr<FiffStream> FiffStream::open_update(QIODevice& p_IODevice)
      * Try to open...
      */
     if (!t_pStream->open(QIODevice::ReadWrite)) {
-        qCritical("Cannot open %s\n", t_sFileName.toUtf8().constData()); //consider throw
+        qCritical("Cannot open %s\n", t_sFileName.c_str()); //consider throw
         return std::unique_ptr<FiffStream>();
     }
 
@@ -3065,7 +3067,7 @@ fiff_long_t FiffStream::write_proj(const std::vector<FiffProj>& projs)
 
     for (auto& proj : projs) {
         this->start_block(FIFFB_PROJ_ITEM);
-        this->write_string(FIFF_NAME, proj.desc.toStdString());
+        this->write_string(FIFF_NAME, proj.desc);
         this->write_int(FIFF_PROJ_ITEM_KIND, &proj.kind);
         if (proj.kind == FIFFV_PROJ_ITEM_FIELD) {
             float fValue = 0.0f;
@@ -3133,7 +3135,7 @@ fiff_long_t FiffStream::write_evoked_set(const FiffEvokedSet& p_FiffEvokedSet)
         this->start_block(FIFFB_PROCESSED_DATA);
         this->start_block(FIFFB_EVOKED);
 
-        this->write_string(FIFF_COMMENT, evoked.comment.toStdString());
+        this->write_string(FIFF_COMMENT, evoked.comment);
 
         int first = evoked.first;
         this->write_int(FIFF_FIRST_SAMPLE, &first);
@@ -3240,17 +3242,16 @@ fiff_long_t FiffStream::write_string(fiff_int_t kind,
 
 //=============================================================================================================
 
-void FiffStream::write_rt_command(fiff_int_t command, const QString& data)
+void FiffStream::write_rt_command(fiff_int_t command, const std::string& data)
 {
-    const QByteArray bytes = data.toUtf8();
-    const fiff_int_t datasize = static_cast<fiff_int_t>(bytes.size());
+    const fiff_int_t datasize = static_cast<fiff_int_t>(data.size());
     write(static_cast<qint32>(FIFF_MNE_RT_COMMAND));
     write(static_cast<qint32>(FIFFT_VOID));
     write(4 + static_cast<qint32>(datasize));
     write(static_cast<qint32>(FIFFV_NEXT_SEQ));
     write(command);
 
-    writeRaw(bytes.constData(), datasize);
+    writeRaw(data.data(), datasize);
 }
 
 //=============================================================================================================
@@ -3285,22 +3286,21 @@ std::vector<FiffDirEntry> FiffStream::make_dir(bool* ok)
 
 //=============================================================================================================
 
-bool FiffStream::copyProcessingHistory(const QString& fromPath, const QString& toPath)
+bool FiffStream::copyProcessingHistory(const std::filesystem::path& fromPath, const std::filesystem::path& toPath)
 {
-    // FiffStream::open() opens the device itself
-    QFile srcFile(fromPath);
-    FiffStream srcStream(&srcFile);
-    if (!srcStream.open()) {
+    auto opened = FiffStream::open(fromPath);
+    if (!opened) {
         qWarning("FiffStream::copyProcessingHistory - Cannot parse source FIFF file %s",
-                 fromPath.toUtf8().constData());
+                 fromPath.string().c_str());
         return false;
     }
+    FiffStream& srcStream = *opened;
 
     // Find the FIFFB_PROCESSING_HISTORY block in the directory tree
     std::vector<FiffDirNode::SPtr> histNodes = srcStream.dirtree()->dir_tree_find(FIFFB_PROCESSING_HISTORY);
     if (histNodes.empty()) {
         qWarning("FiffStream::copyProcessingHistory - No processing history block found in %s",
-                 fromPath.toUtf8().constData());
+                 fromPath.string().c_str());
         srcStream.close();
         return false;
     }
@@ -3330,11 +3330,11 @@ bool FiffStream::copyProcessingHistory(const QString& fromPath, const QString& t
     srcStream.close();
 
     // Open destination file for update
-    QFile dstFile(toPath);
+    QFile dstFile(QString::fromStdU16String(toPath.u16string()));
     auto dstStream = FiffStream::open_update(dstFile);
     if (!dstStream) {
         qWarning("FiffStream::copyProcessingHistory - Cannot open destination file %s for update",
-                 toPath.toUtf8().constData());
+                 toPath.string().c_str());
         return false;
     }
 

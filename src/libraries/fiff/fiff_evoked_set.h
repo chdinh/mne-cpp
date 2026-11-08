@@ -39,6 +39,7 @@
 #include "fiff_evoked.h"
 #include "fiff_global.h"
 
+#include <string>
 #include <Eigen/Core>
 
 //=============================================================================================================
@@ -109,7 +110,7 @@ struct FIFFSHARED_EXPORT RejectionParams
  */
 struct FIFFSHARED_EXPORT AverageCategory
 {
-    QString comment;                  /**< Description. */
+    std::string comment;              /**< Description. */
     std::vector<unsigned int> events; /**< The interesting events. */
     unsigned int nextEvent = 0;       /**< Require this event next. */
     unsigned int prevEvent = 0;       /**< Require this event just before. */
@@ -141,13 +142,13 @@ struct FIFFSHARED_EXPORT AverageCategory
  */
 struct FIFFSHARED_EXPORT AverageDescription
 {
-    QString comment;                         /**< Description. */
+    std::string comment;                     /**< Description. */
     std::vector<AverageCategory> categories; /**< The categories. */
     RejectionParams rej;                     /**< Rejection limits. */
     bool fixSkew = false;                    /**< Fix skew on trigger lines. */
-    QString filename;                        /**< Output file. */
-    QString eventFile;                       /**< Read events from here. */
-    QString logFile;                         /**< Save log here. */
+    std::string filename;                    /**< Output file. */
+    std::string eventFile;                   /**< Read events from here. */
+    std::string logFile;                     /**< Save log here. */
 };
 
 //=============================================================================================================
@@ -312,7 +313,7 @@ public:
     static FiffEvokedSet computeAverages(const FiffRawData& raw,
                                          const AverageDescription& desc,
                                          const Eigen::MatrixXi& events,
-                                         QString& log);
+                                         std::string& log);
 
     //=========================================================================================================
     /**
@@ -329,7 +330,7 @@ public:
                                const FiffInfo& info,
                                const StringList& bads,
                                const RejectionParams& rej,
-                               QString& reason);
+                               std::string& reason);
 
     /**
      * @brief Subtract baseline from each channel of an epoch.

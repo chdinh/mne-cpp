@@ -115,7 +115,7 @@ std::vector<FiffEpochData> FiffEpochs::concatenateEpochs(const std::vector<std::
 
 FiffEvoked FiffEpochs::averageEpochs(const std::vector<FiffEpochData>& epochs,
                                      double dSFreq,
-                                     const QString& comment)
+                                     const std::string& comment)
 {
     FiffEvoked evoked;
 

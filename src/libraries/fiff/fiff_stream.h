@@ -204,7 +204,7 @@ public:
      *
      * @return the name of the current stream.
      */
-    QString streamName();
+    std::string streamName();
 
     //=========================================================================================================
     /**
@@ -284,7 +284,7 @@ public:
      *
      * @return true if information is available, false otherwise.
      */
-    bool get_evoked_entries(const std::vector<FiffDirNode::SPtr>& evoked_node, QStringList& comments, std::vector<fiff_int_t>& aspect_kinds, QString& t);
+    bool get_evoked_entries(const std::vector<FiffDirNode::SPtr>& evoked_node, StringList& comments, std::vector<fiff_int_t>& aspect_kinds, std::string& t);
 
     //=========================================================================================================
     /**
@@ -394,7 +394,7 @@ public:
      * @param[in] command     The command-line string to record.
      * @return true on success, false on error.
      */
-    bool attach_env(const QString& workingDir, const QString& command);
+    bool attach_env(const std::string& workingDir, const std::string& command);
 
     //=========================================================================================================
     /**
@@ -952,7 +952,7 @@ public:
      * @param[in] command    The real time command.
      * @param[in] data       The string data to write.
      */
-    void write_rt_command(fiff_int_t command, const QString& data);
+    void write_rt_command(fiff_int_t command, const std::string& data);
 
     //=========================================================================================================
     /**
@@ -968,7 +968,7 @@ public:
      *
      * @since 2.2.0
      */
-    static bool copyProcessingHistory(const QString& fromPath, const QString& toPath);
+    static bool copyProcessingHistory(const std::filesystem::path& fromPath, const std::filesystem::path& toPath);
 
 private:
     /** Writes the file id, directory pointer and free list that open every FIFF file. */

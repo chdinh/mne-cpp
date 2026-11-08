@@ -3632,9 +3632,10 @@ bool MainWindow::refreshReviewedEvokedSet(const QString& statusMessage)
                                                        minSamp,
                                                        maxSamp,
                                                        selection);
-        evoked.comment = index < m_epochReviewComments.size()
-            ? m_epochReviewComments.at(index)
-            : QString::number(index < m_epochReviewEventCodes.size() ? m_epochReviewEventCodes.at(index) : index);
+        evoked.comment = (index < m_epochReviewComments.size()
+                              ? m_epochReviewComments.at(index)
+                              : QString::number(index < m_epochReviewEventCodes.size() ? m_epochReviewEventCodes.at(index) : index))
+                             .toStdString();
         evoked.baseline = m_epochReviewBaseline;
         evokedSet.evoked.push_back(evoked);
     }
@@ -3962,9 +3963,10 @@ void MainWindow::computeSourceEstimate()
             continue;
         }
 
-        const QString comment = evoked->comment.trimmed().isEmpty()
+        const QString trimmedComment = QString::fromStdString(evoked->comment).trimmed();
+        const QString comment = trimmedComment.isEmpty()
             ? QStringLiteral("set_%1").arg(row + 1)
-            : evoked->comment.trimmed();
+            : trimmedComment;
         selectedComments.append(comment);
     }
 
@@ -4029,9 +4031,10 @@ void MainWindow::computeSourceEstimate()
             continue;
         }
 
-        const QString comment = evoked->comment.trimmed().isEmpty()
+        const QString trimmedComment = QString::fromStdString(evoked->comment).trimmed();
+        const QString comment = trimmedComment.isEmpty()
             ? QStringLiteral("set_%1").arg(row + 1)
-            : evoked->comment.trimmed();
+            : trimmedComment;
 
         INVLIB::InvMinimumNorm minimumNorm(m_inverseOperator, lambda2, method);
         INVLIB::InvSourceEstimate sourceEstimate = minimumNorm.calculateInverse(*evoked, pickNormal);

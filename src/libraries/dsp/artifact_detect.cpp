@@ -146,7 +146,7 @@ std::vector<FiffProj> exgProjectors(const MatrixXd& data, const FiffInfo& info, 
     evoked.times = RowVectorXf::LinSpaced(last - first + 1, static_cast<float>(first / sf), static_cast<float>(last / sf));
     std::vector<FiffProj> exg = FiffProj::compute_from_evoked(evoked, p.nGrad, p.nMag, p.nEeg);
     for (FiffProj& proj : exg) {
-        proj.desc = mode + "-" + proj.desc;
+        proj.desc = mode.toStdString() + "-" + proj.desc;
     }
     std::ranges::move(exg, std::back_inserter(projs));
     return projs;

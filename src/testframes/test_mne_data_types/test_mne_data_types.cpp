@@ -613,7 +613,7 @@ private slots:
         QVERIFY(desc.categories.size() >= 4);
 
         // Check first category
-        QVERIFY(!desc.categories[0].comment.isEmpty());
+        QVERIFY(!desc.categories[0].comment.empty());
         QVERIFY(desc.categories[0].events.size() > 0);
         QVERIFY(desc.categories[0].tmin < 0.0f);
         QVERIFY(desc.categories[0].tmax > 0.0f);

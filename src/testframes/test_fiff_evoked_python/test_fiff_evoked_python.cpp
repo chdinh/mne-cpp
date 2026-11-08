@@ -243,7 +243,7 @@ void TestFiffEvokedPython::conditionOrder_matchesPython()
 
     QStringList actual;
     for (const FiffEvoked& e : m_set.evoked) {
-        actual << e.comment;
+        actual << QString::fromStdString(e.comment);
     }
 
     QCOMPARE(actual, expected);

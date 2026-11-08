@@ -86,9 +86,9 @@ bool FiffIO::setup_read(QIODevice& pIODevice,
 {
     //Open the file
     FiffStream p_pStream(&pIODevice);
-    QString t_sFileName = p_pStream.streamName();
+    const std::string t_sFileName = p_pStream.streamName();
 
-    qInfo("Opening fiff data %s...\n", t_sFileName.toUtf8().constData());
+    qInfo("Opening fiff data %s...\n", t_sFileName.c_str());
 
     if (!p_pStream.open())
         return false;

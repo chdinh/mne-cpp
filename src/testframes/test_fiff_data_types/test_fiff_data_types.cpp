@@ -456,7 +456,7 @@ private slots:
     {
         FiffProj proj;
         QVERIFY(proj.kind == 0 || proj.kind == -1 || true); // just test construction doesn't crash
-        QVERIFY(proj.desc.isEmpty());
+        QVERIFY(proj.desc.empty());
     }
 
     void proj_activateDeactivate()

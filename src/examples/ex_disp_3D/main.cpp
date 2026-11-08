@@ -172,7 +172,7 @@ int main(int argc, char* argv[])
         t_fileEvoked.close();
 
         std::cout << std::endl;
-        std::cout << "Evoked description: " << evoked.comment.toUtf8().constData() << std::endl;
+        std::cout << "Evoked description: " << evoked.comment.c_str() << std::endl;
 
         if (t_Fwd.empty())
             return 1;

@@ -259,7 +259,7 @@ private slots:
         // Check projs
         for (int i = 0; i < std::ssize(info.projs); ++i) {
             const FiffProj& proj = info.projs[i];
-            QVERIFY(!proj.desc.isEmpty() || true);
+            QVERIFY(!proj.desc.empty() || true);
             QVERIFY(proj.data != nullptr || proj.data == nullptr);
         }
 
@@ -337,7 +337,7 @@ private slots:
         // Check each evoked dataset
         for (int i = 0; i < std::ssize(evokedSet.evoked); ++i) {
             const FiffEvoked& ev = evokedSet.evoked[i];
-            QVERIFY(!ev.comment.isEmpty());
+            QVERIFY(!ev.comment.empty());
             QVERIFY(ev.nave > 0);
             QVERIFY(ev.data.rows() > 0);
             QVERIFY(ev.data.cols() > 0);

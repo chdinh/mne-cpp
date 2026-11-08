@@ -163,10 +163,10 @@ bool FiffDirNode::has_kind(fiff_int_t p_kind) const
 //=============================================================================================================
 
 // MNE-C fiff_explain / fiff_explain_block: names padded to a fixed column
-static QString explained(int kind, const QString& name, int width)
+static QString explained(int kind, const std::string& name, int width)
 {
-    return name.isEmpty() ? QStringLiteral("Cannot explain: %1").arg(kind)
-                          : QStringLiteral("%1 = %2").arg(kind).arg(name, -width);
+    return name.empty() ? QStringLiteral("Cannot explain: %1").arg(kind)
+                        : QStringLiteral("%1 = %2").arg(kind).arg(QString::fromStdString(name), -width);
 }
 
 //=============================================================================================================

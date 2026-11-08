@@ -100,7 +100,7 @@ void UTILSLIB::setEegReference(MatrixXd& data,
         }
         FiffNamedMatrix vec(1, static_cast<int>(names.size()), StringList(), names,
                             MatrixXd::Constant(1, names.size(), 1.0 / std::sqrt(static_cast<double>(names.size()))));
-        info.projs.push_back(FiffProj(FIFFV_PROJ_ITEM_EEG_AVREF, false, QStringLiteral("Average EEG reference"), vec));
+        info.projs.push_back(FiffProj(FIFFV_PROJ_ITEM_EEG_AVREF, false, "Average EEG reference", vec));
         return;
     }
 

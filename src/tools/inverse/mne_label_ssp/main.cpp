@@ -220,7 +220,7 @@ int main(int argc, char* argv[])
 
             FiffNamedMatrix namedMat(1, fwd.nchan, rowNames, chNames, projData);
             FiffProj proj(FIFFV_PROJ_ITEM_FIELD, false,
-                          QString("Label-SSP %1 #%2").arg(QFileInfo(labelFile).baseName()).arg(k + 1),
+                          QString("Label-SSP %1 #%2").arg(QFileInfo(labelFile).baseName()).arg(k + 1).toStdString(),
                           namedMat);
 
             projectors.push_back(proj);

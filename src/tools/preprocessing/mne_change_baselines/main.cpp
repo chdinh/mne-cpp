@@ -115,7 +115,7 @@ int main(int argc, char* argv[])
     QPair<float, float> baseline(bmin, bmax);
     for (int i = 0; i < std::ssize(evokedSet.evoked); ++i) {
         evokedSet.evoked[i].applyBaselineCorrection(baseline);
-        qInfo("  Set %d (%s): baseline corrected", i, qPrintable(evokedSet.evoked[i].comment));
+        qInfo("  Set %d (%s): baseline corrected", i, evokedSet.evoked[i].comment.c_str());
     }
 
     // Save

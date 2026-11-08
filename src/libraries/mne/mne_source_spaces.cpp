@@ -470,7 +470,7 @@ Expected<MNESourceSpaces> MNESourceSpaces::read(const std::filesystem::path& pat
 
 Expected<MNESourceSpaces> MNESourceSpaces::read(FiffStream& stream, bool add_geom)
 {
-    const std::string name = stream.streamName().toStdString();
+    const std::string name = stream.streamName();
     if (!stream.isOpen() && !stream.open()) {
         return fail(ErrorCode::Io, "cannot open {}", name);
     }

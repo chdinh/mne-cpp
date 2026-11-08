@@ -200,10 +200,8 @@ int BatchProcessor::run(const ProcessingSettings& settings)
             if (settings.makeProj) {
                 qInfo() << "\n--- Creating new projection operator ---\n";
 
-                QMap<QString, double> projReject;
-                projReject["grad"] = settings.projGradReject;
-                projReject["mag"] = settings.projMagReject;
-                projReject["eeg"] = settings.projEegReject;
+                const std::map<std::string, double> projReject{
+                    {"grad", settings.projGradReject}, {"mag", settings.projMagReject}, {"eeg", settings.projEegReject}};
 
                 std::vector<FiffProj> newProjs = FiffProj::compute_from_raw(
                     raw, fiffEvents.events,
@@ -300,7 +298,7 @@ int BatchProcessor::run(const ProcessingSettings& settings)
                 return 1;
             }
 
-            QString aveLog;
+            std::string aveLog;
             FiffEvokedSet evokedSet = FiffEvokedSet::computeAverages(raw, aveDesc, fiffEvents.events, aveLog);
 
             // Report results
@@ -314,8 +312,8 @@ int BatchProcessor::run(const ProcessingSettings& settings)
             if (!settings.saveAveTag.isEmpty()) {
                 composeSaveNames(rawName, settings.saveAveTag, settings.saveHere,
                                  aveSaveName, aveLogName);
-            } else if (!aveDesc.filename.isEmpty()) {
-                aveSaveName = aveDesc.filename;
+            } else if (!aveDesc.filename.empty()) {
+                aveSaveName = QString::fromStdString(aveDesc.filename);
             }
 
             if (!aveSaveName.isEmpty()) {
@@ -323,7 +321,7 @@ int BatchProcessor::run(const ProcessingSettings& settings)
                     qCritical("%s", saved.error().what());
                 }
             }
-            writeLog(aveLogName, aveLog);
+            writeLog(aveLogName, QString::fromStdString(aveLog));
 
             allAverages.append(evokedSet);
         }

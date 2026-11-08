@@ -903,7 +903,7 @@ int main(int argc, char* argv[])
 
         qInfo("  Evoked data: %d channels, %d time points",
               static_cast<int>(evoked.data.rows()), static_cast<int>(evoked.data.cols()));
-        qInfo("  Comment: %s", evoked.comment.toUtf8().constData());
+        qInfo("  Comment: %s", evoked.comment.c_str());
         qInfo("  Nave: %d", evoked.nave);
         qInfo("  Time range: %.1f - %.1f ms",
               evoked.times(0) * 1000.0f, evoked.times(evoked.times.size() - 1) * 1000.0f);

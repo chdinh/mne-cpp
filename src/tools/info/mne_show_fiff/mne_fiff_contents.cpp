@@ -52,9 +52,9 @@ using namespace FIFFLIB;
 
 constexpr auto LONG_LINE = 80;
 
-static QString explained(const QString& name)
+static QString explained(const std::string& name)
 {
-    return name.isEmpty() ? QStringLiteral("Not explained") : name;
+    return name.empty() ? QStringLiteral("Not explained") : QString::fromStdString(name);
 }
 
 
@@ -103,11 +103,13 @@ void MNEFiffContents::print_ch_info(QTextStream& out, const FiffTag& tag)
 {
     FiffChInfo info = tag.toChInfo();
     // FIFF_UNIT_NONE has an empty symbol; only units the table does not know are "N/A"
-    const QString text1 = info.unit == FIFF_UNIT_NONE || !FiffExplain::unit(info.unit).isEmpty() ? FiffExplain::unit(info.unit) : QStringLiteral("N/A");
-    const QString text2 = FiffExplain::unitMultiplier(info.unit_mul);
-    const QString text3 = FiffExplain::channelKind(info.kind).isEmpty() ? QStringLiteral("N/A") : FiffExplain::channelKind(info.kind);
+    const std::string unit = FiffExplain::unit(info.unit);
+    const std::string text1 = info.unit == FIFF_UNIT_NONE || !unit.empty() ? unit : std::string("N/A");
+    const std::string text2 = FiffExplain::unitMultiplier(info.unit_mul);
+    const std::string kind = FiffExplain::channelKind(info.kind);
+    const std::string text3 = kind.empty() ? std::string("N/A") : kind;
 
-    out << QString::asprintf("\t%3d \"%s\" (%s %3d) [%s%s]", info.scanNo, info.ch_name.c_str(), text3.toUtf8().constData(), info.logNo, text2.toUtf8().constData(), text1.toUtf8().constData());
+    out << QString::asprintf("\t%3d \"%s\" (%s %3d) [%s%s]", info.scanNo, info.ch_name.c_str(), text3.c_str(), info.logNo, text2.c_str(), text1.c_str());
     out << QString::asprintf("\trange %g cal %g", info.range, info.cal);
 }
 

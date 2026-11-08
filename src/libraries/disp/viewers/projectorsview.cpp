@@ -81,10 +81,10 @@ void ProjectorsView::setProjectors(const std::vector<FIFFLIB::FiffProj>& projs)
     m_pProjs = projs;
 
     for (int i = 0; i < std::ssize(m_pProjs); ++i) {
-        if (!m_mapProjActive.contains(m_pProjs.at(i).desc)) {
-            m_mapProjActive.insert(m_pProjs.at(i).desc, m_pProjs.at(i).active);
+        if (!m_mapProjActive.contains(QString::fromStdString(m_pProjs.at(i).desc))) {
+            m_mapProjActive.insert(QString::fromStdString(m_pProjs.at(i).desc), m_pProjs.at(i).active);
         } else {
-            m_pProjs[i].active = m_mapProjActive[m_pProjs.at(i).desc];
+            m_pProjs[i].active = m_mapProjActive[QString::fromStdString(m_pProjs.at(i).desc)];
         }
     }
 
@@ -109,7 +109,7 @@ void ProjectorsView::redrawGUI()
     qint32 i = 0;
 
     for (; i < std::ssize(m_pProjs); ++i) {
-        QCheckBox* checkBox = new QCheckBox(m_pProjs.at(i).desc);
+        QCheckBox* checkBox = new QCheckBox(QString::fromStdString(m_pProjs.at(i).desc));
 
         if (m_pProjs.at(i).active == false) {
             bAllActivated = false;
@@ -218,7 +218,7 @@ void ProjectorsView::onEnableDisableAllProj(bool status)
     //Set all projection activation states to status
     for (int i = 0; i < std::ssize(m_pProjs); ++i) {
         m_pProjs[i].active = status;
-        m_mapProjActive[m_pProjs.at(i).desc] = status;
+        m_mapProjActive[QString::fromStdString(m_pProjs.at(i).desc)] = status;
     }
 
     if (m_pEnableDisableProjectors) {
@@ -242,7 +242,7 @@ void ProjectorsView::onCheckProjStatusChanged()
         }
 
         m_pProjs[i].active = m_qListProjCheckBox.at(i)->isChecked();
-        m_mapProjActive[m_pProjs.at(i).desc] = m_qListProjCheckBox.at(i)->isChecked();
+        m_mapProjActive[QString::fromStdString(m_pProjs.at(i).desc)] = m_qListProjCheckBox.at(i)->isChecked();
     }
 
     if (m_pEnableDisableProjectors) {

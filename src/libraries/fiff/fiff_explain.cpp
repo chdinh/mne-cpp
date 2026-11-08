@@ -16,8 +16,10 @@
 
 #include "fiff_explain.h"
 
+#include <string>
+#include <unordered_map>
+
 #include <QFile>
-#include <QHash>
 #include <QRegularExpression>
 #include <QTextStream>
 
@@ -55,11 +57,11 @@ quint64 key(int exclass, int kind)
     return (static_cast<quint64>(static_cast<quint32>(exclass)) << 32) | static_cast<quint32>(kind);
 }
 
-const QHash<quint64, QString>& explanations()
+const std::unordered_map<quint64, std::string>& explanations()
 {
-    static const QHash<quint64, QString> table = [] {
+    static const std::unordered_map<quint64, std::string> table = [] {
         initFiffExplanationsResource();
-        QHash<quint64, QString> entries;
+        std::unordered_map<quint64, std::string> entries;
         QFile file(QStringLiteral(":/fiff/fiff_explanations.txt"));
         if (!file.open(QIODevice::ReadOnly | QIODevice::Text)) {
             qWarning("[FiffExplain] the built-in explanation table is missing");
@@ -71,8 +73,8 @@ const QHash<quint64, QString>& explanations()
         while (!in.atEnd()) {
             const QRegularExpressionMatch m = line.match(in.readLine());
             const quint64 k = m.hasMatch() ? key(m.captured(1).toInt(), m.captured(2).toInt()) : 0;
-            if (m.hasMatch() && !entries.contains(k)) {
-                entries.insert(k, m.captured(3).simplified());
+            if (m.hasMatch()) {
+                entries.try_emplace(k, m.captured(3).simplified().toStdString());
             }
         }
         return entries;
@@ -80,9 +82,11 @@ const QHash<quint64, QString>& explanations()
     return table;
 }
 
-QString lookup(int exclass, int kind)
+std::string lookup(int exclass, int kind)
 {
-    return explanations().value(key(exclass, kind));
+    const auto& table = explanations();
+    const auto it = table.find(key(exclass, kind));
+    return it == table.end() ? std::string() : it->second;
 }
 
 } // namespace
@@ -91,35 +95,35 @@ QString lookup(int exclass, int kind)
 // DEFINE MEMBER METHODS
 //=============================================================================================================
 
-QString FiffExplain::tag(int kind)
+std::string FiffExplain::tag(int kind)
 {
     return lookup(TagClass, kind);
 }
 
 //=============================================================================================================
 
-QString FiffExplain::block(int kind)
+std::string FiffExplain::block(int kind)
 {
     return lookup(BlockClass, kind);
 }
 
 //=============================================================================================================
 
-QString FiffExplain::unit(int unit)
+std::string FiffExplain::unit(int unit)
 {
     return lookup(UnitClass, unit);
 }
 
 //=============================================================================================================
 
-QString FiffExplain::unitMultiplier(int unitMul)
+std::string FiffExplain::unitMultiplier(int unitMul)
 {
     return lookup(UnitMultiplierClass, unitMul);
 }
 
 //=============================================================================================================
 
-QString FiffExplain::channelKind(int kind)
+std::string FiffExplain::channelKind(int kind)
 {
     return lookup(ChannelKindClass, kind);
 }

@@ -20,13 +20,18 @@
 #include "fiff_stream.h"
 #include "fiff_tag.h"
 
+#include <algorithm>
+#include <cctype>
+#include <fstream>
+#include <iterator>
+#include <regex>
+#include <sstream>
+#include <string>
+
 //=============================================================================================================
 // QT INCLUDES
 //=============================================================================================================
 
-#include <QFile>
-#include <QRegularExpression>
-#include <QTextStream>
 
 //=============================================================================================================
 // EIGEN INCLUDES
@@ -45,43 +50,44 @@ using namespace Eigen;
 // DEFINE MEMBER METHODS
 //=============================================================================================================
 
-FiffCoordTrans FiffCoordTransSet::readMniTransform(const QString& path)
+FiffCoordTrans FiffCoordTransSet::readMniTransform(const std::filesystem::path& path)
 {
-    QFile file(path);
-    if (!file.open(QIODevice::ReadOnly | QIODevice::Text)) {
+    std::ifstream file(path);
+    if (!file) {
         return FiffCoordTrans();
     }
     // "Transform_Type = Linear; Linear_Transform = <3 x 4 matrix, translation in mm> ;"
-    const QString text = QTextStream(&file).readAll();
-    static const QRegularExpression linear(QStringLiteral("Transform_Type\\s*=\\s*Linear\\s*;\\s*Linear_Transform\\s*=([^;]*);"),
-                                           QRegularExpression::CaseInsensitiveOption);
-    const QRegularExpressionMatch match = linear.match(text);
-    const QStringList values = match.captured(1).split(QRegularExpression(QStringLiteral("\\s+")), Qt::SkipEmptyParts);
-    if (!match.hasMatch() || values.size() != 12) {
+    std::string text{std::istreambuf_iterator<char>(file), std::istreambuf_iterator<char>()};
+    std::ranges::transform(text, text.begin(), [](unsigned char c) { return static_cast<char>(std::tolower(c)); });
+    static const std::regex linear(R"(transform_type\s*=\s*linear\s*;\s*linear_transform\s*=([^;]*);)");
+    std::smatch match;
+    if (!std::regex_search(text, match, linear)) {
+        return FiffCoordTrans();
+    }
+    std::istringstream values(match[1].str());
+    float value[12];
+    for (float& v : value) {
+        if (!(values >> v)) {
+            return FiffCoordTrans();
+        }
+    }
+    if (float extra; values >> extra) {
         return FiffCoordTrans();
     }
     Matrix3f rot;
     Vector3f move;
     for (int row = 0; row < 3; ++row) {
-        for (int col = 0; col < 4; ++col) {
-            bool ok = false;
-            const float value = values[4 * row + col].toFloat(&ok);
-            if (!ok) {
-                return FiffCoordTrans();
-            }
-            if (col < 3) {
-                rot(row, col) = value;
-            } else {
-                move[row] = value / 1000.0f;
-            }
+        for (int col = 0; col < 3; ++col) {
+            rot(row, col) = value[4 * row + col];
         }
+        move[row] = value[4 * row + 3] / 1000.0f;
     }
     return FiffCoordTrans(FIFFV_MNE_COORD_RAS, FIFFV_MNE_COORD_MNI_TAL, rot, move);
 }
 
 //=============================================================================================================
 
-bool FiffCoordTransSet::addTalairach(const QString& xfmPath)
+bool FiffCoordTransSet::addTalairach(const std::filesystem::path& xfmPath)
 {
     const FiffCoordTrans rasMni = readMniTransform(xfmPath);
     if (rasMni.empty()) {
@@ -100,13 +106,13 @@ bool FiffCoordTransSet::addTalairach(const QString& xfmPath)
 
 //=============================================================================================================
 
-int FiffCoordTransSet::read(const QString& path)
+int FiffCoordTransSet::read(const std::filesystem::path& path)
 {
-    QFile file(path);
-    FiffStream stream(&file);
-    if (!stream.open()) {
+    auto opened = FiffStream::open(path);
+    if (!opened) {
         return -1;
     }
+    FiffStream& stream = *opened;
     const struct
     {
         int from;

@@ -26,7 +26,7 @@
 
 #include "fiff_global.h"
 
-#include <QString>
+#include <string>
 
 //=============================================================================================================
 // DEFINE NAMESPACE FIFFLIB
@@ -52,7 +52,7 @@ public:
      * @param[in] kind   Tag kind.
      * @return The name, or an empty string.
      */
-    static QString tag(int kind);
+    static std::string tag(int kind);
 
     /**
      * Name of a block kind (FIFFB_*), e.g. "meas. info" for FIFFB_MEAS_INFO.
@@ -60,7 +60,7 @@ public:
      * @param[in] kind   Block kind.
      * @return The name, or an empty string.
      */
-    static QString block(int kind);
+    static std::string block(int kind);
 
     /**
      * SI symbol of a unit (FIFF_UNIT_*), e.g. "T/m" for FIFF_UNIT_T_M; FIFF_UNIT_NONE has an empty symbol.
@@ -68,7 +68,7 @@ public:
      * @param[in] unit   Unit.
      * @return The symbol, or an empty string.
      */
-    static QString unit(int unit);
+    static std::string unit(int unit);
 
     /**
      * SI prefix of a unit multiplier (FIFF_UNITM_*), e.g. "f" for FIFF_UNITM_F.
@@ -76,7 +76,7 @@ public:
      * @param[in] unitMul    Unit multiplier.
      * @return The prefix, or an empty string.
      */
-    static QString unitMultiplier(int unitMul);
+    static std::string unitMultiplier(int unitMul);
 
     /**
      * Name of a channel kind (FIFFV_*_CH), e.g. "EEG" for FIFFV_EEG_CH.
@@ -84,7 +84,7 @@ public:
      * @param[in] kind   Channel kind.
      * @return The name, or an empty string.
      */
-    static QString channelKind(int kind);
+    static std::string channelKind(int kind);
 };
 
 } // namespace FIFFLIB

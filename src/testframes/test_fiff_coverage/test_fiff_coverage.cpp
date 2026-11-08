@@ -153,9 +153,9 @@ void TestFiffCoverage::testGetEvokedEntries()
 
     // Find evoked nodes in the directory tree
     std::vector<FiffDirNode::SPtr> evoked_nodes = stream.dirtree()->dir_tree_find(FIFFB_EVOKED);
-    QStringList comments;
+    UTILSLIB::StringList comments;
     std::vector<fiff_int_t> aspect_kinds;
-    QString t;
+    std::string t;
     QVERIFY(stream.get_evoked_entries(evoked_nodes, comments, aspect_kinds, t));
 
     stream.close();
@@ -173,9 +173,9 @@ void TestFiffCoverage::testGetEvokedEntriesCount()
     QVERIFY(stream.open());
 
     std::vector<FiffDirNode::SPtr> evoked_nodes = stream.dirtree()->dir_tree_find(FIFFB_EVOKED);
-    QStringList comments;
+    UTILSLIB::StringList comments;
     std::vector<fiff_int_t> aspect_kinds;
-    QString t;
+    std::string t;
     QVERIFY(stream.get_evoked_entries(evoked_nodes, comments, aspect_kinds, t));
     stream.close();
 

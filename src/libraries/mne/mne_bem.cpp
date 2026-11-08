@@ -152,7 +152,7 @@ Expected<MNEBem> MNEBem::read(const std::filesystem::path& path, bool patch_stat
 
 Expected<MNEBem> MNEBem::read(FiffStream& stream, bool patch_stats)
 {
-    const std::string name = stream.streamName().toStdString();
+    const std::string name = stream.streamName();
     if (!stream.isOpen() && !stream.open()) {
         return fail(ErrorCode::Io, "cannot open {}", name);
     }

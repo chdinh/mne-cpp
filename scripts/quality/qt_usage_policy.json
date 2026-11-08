@@ -63,7 +63,7 @@
       ]
     },
     "com": {
-      "tokens": 399,
+      "tokens": 397,
       "public_header_includes": 30,
       "modules": [
         "Concurrent",
@@ -86,7 +86,7 @@
       "modules": []
     },
     "disp": {
-      "tokens": 6250,
+      "tokens": 6261,
       "public_header_includes": 124,
       "modules": [
         "Concurrent",
@@ -97,7 +97,7 @@
       ]
     },
     "disp3D": {
-      "tokens": 2912,
+      "tokens": 2914,
       "public_header_includes": 142,
       "modules": [
         "Concurrent",
@@ -110,7 +110,7 @@
       ]
     },
     "dsp": {
-      "tokens": 634,
+      "tokens": 632,
       "public_header_includes": 32,
       "modules": [
         "Concurrent",
@@ -119,8 +119,8 @@
       ]
     },
     "fiff": {
-      "tokens": 1020,
-      "public_header_includes": 61,
+      "tokens": 852,
+      "public_header_includes": 58,
       "modules": [
         "Core",
         "Network"
@@ -136,7 +136,7 @@
       ]
     },
     "fwd": {
-      "tokens": 324,
+      "tokens": 322,
       "public_header_includes": 12,
       "modules": [
         "Concurrent",
@@ -151,7 +151,7 @@
       ]
     },
     "inv": {
-      "tokens": 812,
+      "tokens": 811,
       "public_header_includes": 48,
       "modules": [
         "Concurrent",
@@ -195,7 +195,7 @@
       ]
     },
     "mri": {
-      "tokens": 3,
+      "tokens": 2,
       "public_header_includes": 0,
       "modules": [
         "Core",

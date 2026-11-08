@@ -82,7 +82,7 @@ qint32 RtDataClient::getClientId()
         FiffStream t_fiffStream(this);
 
         QString t_sCommand("");
-        t_fiffStream.write_rt_command(1, t_sCommand);
+        t_fiffStream.write_rt_command(1, t_sCommand.toStdString());
 
         this->waitForReadyRead(100);
         // ID is send as answer
@@ -175,7 +175,7 @@ FiffInfo::SPtr RtDataClient::readInfo()
                             case FIFF_NAME: // First proj -> Proj is created
                                 proj = FiffProj();
                                 p_pFiffInfo->projs.push_back(proj);
-                                p_pFiffInfo->projs[countProj].desc = QString::fromStdString(t_pTag->toString());
+                                p_pFiffInfo->projs[countProj].desc = t_pTag->toString();
                                 break;
                             case FIFF_PROJ_ITEM_KIND:
                                 p_pFiffInfo->projs[countProj].kind = *(t_pTag->toInt());
@@ -430,7 +430,7 @@ MetaData RtDataClient::readMetadata()
                             case FIFF_NAME: // First proj -> Proj is created
                                 proj = FiffProj();
                                 p_pFiffInfo->projs.push_back(proj);
-                                p_pFiffInfo->projs[countProj].desc = QString::fromStdString(t_pTag->toString());
+                                p_pFiffInfo->projs[countProj].desc = t_pTag->toString();
                                 break;
                             case FIFF_PROJ_ITEM_KIND:
                                 p_pFiffInfo->projs[countProj].kind = *(t_pTag->toInt());
@@ -629,6 +629,6 @@ void RtDataClient::readRawBuffer(qint32 p_nChannels,
 void RtDataClient::setClientAlias(const QString& p_sAlias)
 {
     FiffStream t_fiffStream(this);
-    t_fiffStream.write_rt_command(2, p_sAlias); //MNE_RT.MNE_RT_SET_CLIENT_ALIAS, alias);
+    t_fiffStream.write_rt_command(2, p_sAlias.toStdString()); //MNE_RT.MNE_RT_SET_CLIENT_ALIAS, alias);
     this->flush();
 }

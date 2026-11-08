@@ -517,7 +517,7 @@ FiffCov FiffCov::compute_from_epochs(const FiffRawData& raw,
         MatrixXd epochTimes;
         if (!raw.read_raw_segment(epochData, epochTimes, epochStart, epochEnd))
             continue;
-        QString reason;
+        std::string reason;
         if (rej && !FiffEvokedSet::checkArtifacts(epochData, raw.info, raw.info.bads, *rej, reason)) {
             qInfo().noquote() << "[FiffCov::compute_from_epochs] Rejected epoch at" << evSample << reason;
             continue;

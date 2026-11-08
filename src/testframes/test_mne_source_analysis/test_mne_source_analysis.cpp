@@ -103,7 +103,7 @@ private slots:
 
         QVERIFY(!evokedSet.evoked.empty());
         FiffEvoked& evoked = evokedSet.evoked[0];
-        QString kind = evoked.aspectKindToString();
+        QString kind = QString::fromStdString(evoked.aspectKindToString());
         QVERIFY(!kind.isEmpty());
         QVERIFY(!evoked.empty());
         QVERIFY(evoked.ch_names().size() > 0);

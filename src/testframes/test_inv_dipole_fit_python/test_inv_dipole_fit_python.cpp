@@ -121,7 +121,7 @@ bool writeSyntheticEvoked(const QString& sourceFile, const QString& outFile, con
     evoked.last = static_cast<fiff_int_t>(data.cols()) - 1;
     evoked.times = RowVectorXf::LinSpaced(data.cols(), 0.0f, static_cast<float>(data.cols() - 1) / sfreq);
     evoked.nave = 1;
-    evoked.comment = QStringLiteral("synthetic");
+    evoked.comment = QStringLiteral("synthetic").toStdString();
 
     FiffEvokedSet out;
     out.info = evoked.info;

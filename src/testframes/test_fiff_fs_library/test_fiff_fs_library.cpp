@@ -1455,7 +1455,7 @@ void TestFiffFsLibrary::fiff_microCoveragePush()
     auto dirEntries = constRef.dir();
     FiffEvoked evoked;
     evoked.aspect_kind = FIFFV_ASPECT_STD_ERR;
-    QString stdErrStr = evoked.aspectKindToString();
+    QString stdErrStr = QString::fromStdString(evoked.aspectKindToString());
     QVERIFY(stdErrStr.contains("Error", Qt::CaseInsensitive));
     evoked.aspect_kind = 999;
     evoked.aspectKindToString();
