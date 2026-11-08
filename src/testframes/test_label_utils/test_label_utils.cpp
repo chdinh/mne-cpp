@@ -244,8 +244,8 @@ void TestLabelUtils::testLabelsToStc()
     VectorXi stcVerts = VectorXi::LinSpaced(10, 0, 9);
     int nTimes = 5;
 
-    QList<FsLabel> labels;
-    labels.append(label);
+    std::vector<FsLabel> labels;
+    labels.push_back(label);
 
     MatrixXd mask = FsLabelUtils::labelsToStc(labels, stcVerts, nTimes);
     QCOMPARE(static_cast<int>(mask.rows()), 10);
@@ -266,7 +266,7 @@ void TestLabelUtils::testLabelsToStc()
 
 void TestLabelUtils::testLabelsToStcEmpty()
 {
-    QList<FsLabel> emptyLabels;
+    std::vector<FsLabel> emptyLabels;
     VectorXi stcVerts = VectorXi::LinSpaced(5, 0, 4);
 
     MatrixXd mask = FsLabelUtils::labelsToStc(emptyLabels, stcVerts, 10);
@@ -297,9 +297,9 @@ void TestLabelUtils::testRoundTrip()
     label2.name = "L2";
 
     VectorXi stcVerts = VectorXi::LinSpaced(10, 0, 9);
-    QList<FsLabel> labels;
-    labels.append(label1);
-    labels.append(label2);
+    std::vector<FsLabel> labels;
+    labels.push_back(label1);
+    labels.push_back(label2);
 
     MatrixXd mask = FsLabelUtils::labelsToStc(labels, stcVerts, 3);
 

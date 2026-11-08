@@ -214,11 +214,11 @@ private slots:
     {
         FsAnnotation a;
         FsSurface s;
-        QList<FsLabel> labels;
-        QList<RowVector4i> rgbas;
+        std::vector<FsLabel> labels;
+        std::vector<RowVector4i> rgbas;
 
         QVERIFY(!a.toLabels(s, labels, rgbas));
-        QVERIFY(labels.isEmpty());
+        QVERIFY(labels.empty());
     }
 
     //=========================================================================
@@ -260,8 +260,8 @@ private slots:
         FsSurface surf(surfFile.toStdU16String());
         FsAnnotation annot(annotFile.toStdU16String());
 
-        QList<FsLabel> labels;
-        QList<RowVector4i> rgbas;
+        std::vector<FsLabel> labels;
+        std::vector<RowVector4i> rgbas;
         bool ok = annot.toLabels(surf, labels, rgbas);
         QVERIFY(ok);
         QCOMPARE(labels.size(), rgbas.size());
@@ -269,19 +269,19 @@ private slots:
         // Reference values produced by mne.read_labels_from_annot("sample", "aparc", hemi="lh", surf_name="white"):
         // 34 labels sorted by name, values all 1, positions in metres
         QCOMPARE(labels.size(), 34);
-        QCOMPARE(labels.first().name, QStringLiteral("bankssts-lh"));
-        QCOMPARE(labels.first().vertices.size(), Eigen::Index(1604));
-        QCOMPARE(labels.first().vertices.head(3), Eigen::Vector3i(44200, 44201, 44210));
-        QVERIFY((labels.first().pos.row(0).cast<double>() - Eigen::RowVector3d(-0.04911366, -0.04209778, 0.02796338)).norm() < 1e-6);
-        QCOMPARE(rgbas.first(), RowVector4i(25, 100, 40, 0));
-        QCOMPARE(labels.last().name, QStringLiteral("transversetemporal-lh"));
-        QCOMPARE(labels.last().vertices.size(), Eigen::Index(770));
+        QCOMPARE(labels.front().name, QStringLiteral("bankssts-lh"));
+        QCOMPARE(labels.front().vertices.size(), Eigen::Index(1604));
+        QCOMPARE(labels.front().vertices.head(3), Eigen::Vector3i(44200, 44201, 44210));
+        QVERIFY((labels.front().pos.row(0).cast<double>() - Eigen::RowVector3d(-0.04911366, -0.04209778, 0.02796338)).norm() < 1e-6);
+        QCOMPARE(rgbas.front(), RowVector4i(25, 100, 40, 0));
+        QCOMPARE(labels.back().name, QStringLiteral("transversetemporal-lh"));
+        QCOMPARE(labels.back().vertices.size(), Eigen::Index(770));
         const auto st = std::find_if(labels.cbegin(), labels.cend(), [](const FsLabel& l) { return l.name == QStringLiteral("superiortemporal-lh"); });
         QVERIFY(st != labels.cend());
         QCOMPARE(st->vertices.size(), Eigen::Index(5433));
         QCOMPARE(st->vertices.cast<qint64>().sum(), qint64(511158088));
         QVERIFY(st->values.isOnes());
-        for (int k = 1; k < labels.size(); ++k) {
+        for (int k = 1; k < std::ssize(labels); ++k) {
             QVERIFY2(labels[k - 1].name < labels[k].name, labels[k].name.c_str());
         }
     }

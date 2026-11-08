@@ -78,12 +78,12 @@ FsSurfaceSet::FsSurfaceSet(const std::filesystem::path& path, qint32 hemi, const
 FsSurfaceSet::FsSurfaceSet(const FsSurface& p_LHSurface, const FsSurface& p_RHSurface)
 {
     if (p_LHSurface.hemi() == 0)
-        m_qMapSurfs.insert(0, p_LHSurface);
+        m_surfs.insert_or_assign(0, p_LHSurface);
     else
         qWarning("Left hemisphere id is not 0. LH surface not assigned!");
 
     if (p_RHSurface.hemi() == 1)
-        m_qMapSurfs.insert(1, p_RHSurface);
+        m_surfs.insert_or_assign(1, p_RHSurface);
     else
         qWarning("Right hemisphere id is not 1. RH surface not assigned!");
 
@@ -109,7 +109,7 @@ FsSurfaceSet::~FsSurfaceSet()
 
 void FsSurfaceSet::clear()
 {
-    m_qMapSurfs.clear();
+    m_surfs.clear();
 }
 
 //=============================================================================================================
@@ -119,10 +119,7 @@ void FsSurfaceSet::insert(const FsSurface& p_Surface)
     if (p_Surface.empty())
         return;
 
-    qint32 hemi = p_Surface.hemi();
-    m_qMapSurfs.remove(hemi);
-
-    m_qMapSurfs.insert(hemi, p_Surface);
+    m_surfs.insert_or_assign(p_Surface.hemi(), p_Surface);
 }
 
 //=============================================================================================================
@@ -134,10 +131,10 @@ bool FsSurfaceSet::read(const std::filesystem::path& p_sLHFileName, const std::f
     for (const std::filesystem::path* file : {&p_sLHFileName, &p_sRHFileName}) {
         FsSurface t_Surface;
         if (FsSurface::read(*file, t_Surface))
-            p_SurfaceSet.m_qMapSurfs.insert(t_Surface.hemi(), t_Surface);
+            p_SurfaceSet.m_surfs.insert_or_assign(t_Surface.hemi(), std::move(t_Surface));
     }
 
-    if (p_SurfaceSet.m_qMapSurfs.isEmpty())
+    if (p_SurfaceSet.m_surfs.empty())
         return false;
 
     p_SurfaceSet.calcOffset();
@@ -168,11 +165,11 @@ qint32 hemiIndex(std::string_view idt)
     return 0;
 }
 
-const FsSurface& surfaceOrEmpty(const QMap<qint32, FsSurface>& surfs, qint32 hemi)
+const FsSurface& surfaceOrEmpty(const std::map<int, FsSurface>& surfs, qint32 hemi)
 {
     static const FsSurface empty;
-    const auto it = surfs.constFind(hemi);
-    return it != surfs.constEnd() ? it.value() : empty;
+    const auto it = surfs.find(hemi);
+    return it != surfs.end() ? it->second : empty;
 }
 
 } // namespace
@@ -181,28 +178,28 @@ const FsSurface& surfaceOrEmpty(const QMap<qint32, FsSurface>& surfs, qint32 hem
 
 const FsSurface& FsSurfaceSet::operator[](qint32 idx) const
 {
-    return surfaceOrEmpty(m_qMapSurfs, hemiIndex(idx));
+    return surfaceOrEmpty(m_surfs, hemiIndex(idx));
 }
 
 //=============================================================================================================
 
 FsSurface& FsSurfaceSet::operator[](qint32 idx)
 {
-    return m_qMapSurfs[hemiIndex(idx)];
+    return m_surfs[hemiIndex(idx)];
 }
 
 //=============================================================================================================
 
 const FsSurface& FsSurfaceSet::operator[](std::string_view idt) const
 {
-    return surfaceOrEmpty(m_qMapSurfs, hemiIndex(idt));
+    return surfaceOrEmpty(m_surfs, hemiIndex(idt));
 }
 
 //=============================================================================================================
 
 FsSurface& FsSurfaceSet::operator[](std::string_view idt)
 {
-    return m_qMapSurfs[hemiIndex(idt)];
+    return m_surfs[hemiIndex(idt)];
 }
 
 //=============================================================================================================
@@ -212,12 +209,12 @@ void FsSurfaceSet::calcOffset()
     //
     // Correct inflated offset
     //
-    if (m_qMapSurfs.size() == 2 && m_qMapSurfs.begin().value().surf() == "inflated") {
-        float xOffset = m_qMapSurfs.find(0).value().rr().col(0).maxCoeff() - m_qMapSurfs.find(1).value().rr().col(0).minCoeff();
+    if (m_surfs.size() == 2 && m_surfs.begin()->second.surf() == "inflated") {
+        float xOffset = m_surfs.at(0).rr().col(0).maxCoeff() - m_surfs.at(1).rr().col(0).minCoeff();
         Vector3f vecLhOffset, vecRhOffset;
         vecLhOffset << (xOffset / 2.0f), 0, 0;
         vecRhOffset << (-xOffset / 2.0f), 0, 0;
-        m_qMapSurfs.find(0).value().offset() = vecLhOffset;
-        m_qMapSurfs.find(1).value().offset() = vecRhOffset;
+        m_surfs.at(0).offset() = vecLhOffset;
+        m_surfs.at(1).offset() = vecRhOffset;
     }
 }

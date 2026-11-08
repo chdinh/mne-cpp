@@ -42,7 +42,6 @@
 #include <filesystem>
 #include <string>
 #include <QSharedPointer>
-#include <QMap>
 
 //=============================================================================================================
 // EIGEN INCLUDES
@@ -169,14 +168,8 @@ public:
     Eigen::MatrixX3f pos;     /**< Locations in meters. */
     Eigen::VectorXd values;   /**< Values at the vertices. */
     qint32 hemi;              /**< Hemisphere (lh = 0; rh = 1). */
-                              //    qint32 hemi;                        /**< Hemisphere (lh = 0; rh = 1; both = 2). */ Don't mix both hemis - KISS principle
     std::string name;         /**< Name of the label. */
     qint32 label_id;          /**< FsLabel id (optional). */
-    //    Eigen::MatrixX3i tris;     /**< Tris for plotting (optional). */
-
-    //    QMap<qint32, VectorXi> vertices;    /**< Vertex indices (0 based). */
-    //    QMap<qint32, Eigen::MatrixX3d> pos;        /**< Locations in meters. */
-    //    QMap<qint32, VectorXd> values;      /**< Values at the vertices. */
 };
 
 //=============================================================================================================

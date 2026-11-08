@@ -48,11 +48,11 @@
 
 #include <utils/string_utils.h>
 
-#include <QList>
 #include <QSharedPointer>
 
 #include <filesystem>
 #include <string>
+#include <vector>
 
 //=============================================================================================================
 // EIGEN INCLUDES
@@ -256,8 +256,8 @@ public:
      * @return true if successful, false otherwise.
      */
     bool toLabels(const FsSurface& p_surf,
-                  QList<FsLabel>& p_qListLabels,
-                  QList<Eigen::RowVector4i>& p_qListLabelRGBAs,
+                  std::vector<FsLabel>& p_qListLabels,
+                  std::vector<Eigen::RowVector4i>& p_qListLabelRGBAs,
                   const UTILSLIB::StringList& lLabelPicks = {}) const;
 
     //=========================================================================================================

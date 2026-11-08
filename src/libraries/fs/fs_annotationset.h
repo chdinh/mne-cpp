@@ -39,10 +39,11 @@
 //=============================================================================================================
 
 #include <filesystem>
+#include <map>
+#include <vector>
 #include <string>
 #include <string_view>
 #include <QSharedPointer>
-#include <QMap>
 
 //=============================================================================================================
 // EIGEN INCLUDES
@@ -146,7 +147,7 @@ public:
      *
      * @return the annotation set map.
      */
-    inline QMap<qint32, FsAnnotation>& data();
+    inline std::map<int, FsAnnotation>& data();
 
     //=========================================================================================================
     /**
@@ -190,8 +191,8 @@ public:
      * @return true if successful, false otherwise.
      */
     bool toLabels(const FsSurfaceSet& p_surfSet,
-                  QList<FsLabel>& p_qListLabels,
-                  QList<Eigen::RowVector4i>& p_qListLabelRGBAs,
+                  std::vector<FsLabel>& p_qListLabels,
+                  std::vector<Eigen::RowVector4i>& p_qListLabelRGBAs,
                   const UTILSLIB::StringList& lLabelPicks = {}) const;
 
     //=========================================================================================================
@@ -212,7 +213,7 @@ public:
      *
      * @return FsAnnotation related to the parameter index.
      */
-    const FsAnnotation operator[](qint32 idx) const;
+    const FsAnnotation& operator[](qint32 idx) const;
 
     //=========================================================================================================
     /**
@@ -232,7 +233,7 @@ public:
      *
      * @return FsAnnotation related to the parameter identifier.
      */
-    const FsAnnotation operator[](std::string_view idt) const;
+    const FsAnnotation& operator[](std::string_view idt) const;
 
     //=========================================================================================================
     /**
@@ -243,30 +244,30 @@ public:
     inline qint32 size() const;
 
 private:
-    QMap<qint32, FsAnnotation> m_qMapAnnots; /**< Hemisphere annotations (lh = 0; rh = 1). */
+    std::map<int, FsAnnotation> m_annots; /**< Hemisphere annotations (lh = 0; rh = 1). */
 };
 
 //=============================================================================================================
 // INLINE DEFINITIONS
 //=============================================================================================================
 
-inline QMap<qint32, FsAnnotation>& FsAnnotationSet::data()
+inline std::map<int, FsAnnotation>& FsAnnotationSet::data()
 {
-    return m_qMapAnnots;
+    return m_annots;
 }
 
 //=============================================================================================================
 
 inline bool FsAnnotationSet::empty() const
 {
-    return m_qMapAnnots.isEmpty();
+    return m_annots.empty();
 }
 
 //=============================================================================================================
 
 inline qint32 FsAnnotationSet::size() const
 {
-    return m_qMapAnnots.size();
+    return static_cast<qint32>(m_annots.size());
 }
 } // NAMESPACE
 

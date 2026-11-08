@@ -1671,9 +1671,9 @@ FsLabel CorticalSurface::labelFromItem(QTreeWidgetItem* item)
 
 //=============================================================================================================
 
-QList<FsLabel> CorticalSurface::labels() const
+std::vector<FsLabel> CorticalSurface::labels() const
 {
-    QList<FsLabel> out;
+    std::vector<FsLabel> out;
     if (!m_pLabelTree) {
         return out;
     }
@@ -1683,7 +1683,7 @@ QList<FsLabel> CorticalSurface::labels() const
         for (int i = 0; i < root->childCount(); ++i) {
             FsLabel l = labelFromItem(root->child(i));
             if (!l.empty()) {
-                out.append(l);
+                out.push_back(l);
             }
         }
     }
@@ -1717,8 +1717,8 @@ int CorticalSurface::loadAnnot(const QString& path)
         qWarning() << "[CorticalSurface] loadAnnot: matching hemisphere surface not loaded";
         return 0;
     }
-    QList<FsLabel> labelList;
-    QList<Eigen::RowVector4i> rgbas;
+    std::vector<FsLabel> labelList;
+    std::vector<Eigen::RowVector4i> rgbas;
     if (!annot.toLabels(*surf, labelList, rgbas)) {
         return 0;
     }
@@ -1741,8 +1741,8 @@ bool CorticalSurface::extractLabelTimeCourse(const FsLabel& lbl, const QString& 
     if (lbl.empty() || m_stc.empty()) {
         return false;
     }
-    QList<FsLabel> single;
-    single.append(lbl);
+    std::vector<FsLabel> single;
+    single.push_back(lbl);
     Eigen::MatrixXd tc = InvLabelTimeCourse::extract(m_stc, single, mode, /*bAllowEmpty=*/true);
     if (tc.rows() == 0) {
         return false;
@@ -1909,9 +1909,9 @@ void CorticalSurface::onCreateLabelFromMarkedTriggered()
                                                          QStringLiteral("Label (*.label)"));
     if (outPath.isEmpty())
         return;
-    const QList<FsLabel> all = labels();
-    if (!all.isEmpty()) {
-        saveLabel(all.last(), outPath);
+    const std::vector<FsLabel> all = labels();
+    if (!all.empty()) {
+        saveLabel(all.back(), outPath);
     }
 }
 

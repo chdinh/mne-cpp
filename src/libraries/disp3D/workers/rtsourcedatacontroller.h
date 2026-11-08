@@ -295,7 +295,7 @@ public:
      * @param[in] vecVertNo     Source vertex numbers.
      */
     void setAnnotationInfoLeft(const Eigen::VectorXi& vecLabelIds,
-                               const QList<FSLIB::FsLabel>& lLabels,
+                               const std::vector<FSLIB::FsLabel>& lLabels,
                                const Eigen::VectorXi& vecVertNo);
 
     //=========================================================================================================
@@ -307,7 +307,7 @@ public:
      * @param[in] vecVertNo     Source vertex numbers.
      */
     void setAnnotationInfoRight(const Eigen::VectorXi& vecLabelIds,
-                                const QList<FSLIB::FsLabel>& lLabels,
+                                const std::vector<FSLIB::FsLabel>& lLabels,
                                 const Eigen::VectorXi& vecVertNo);
 
 signals:

@@ -97,11 +97,11 @@ int main(int argc, char* argv[])
     FsSurfaceSet t_surfSet(parser.value(subjectOption).toStdString(), parser.value(hemiOption).toInt(), parser.value(surfOption).toStdString(), parser.value(subjectPathOption).toStdU16String());
     FsAnnotationSet t_annotationSet(parser.value(subjectOption).toStdString(), parser.value(hemiOption).toInt(), parser.value(annotOption).toStdString(), parser.value(subjectPathOption).toStdU16String());
 
-    for (auto it = t_surfSet.data().constBegin(); it != t_surfSet.data().constEnd(); ++it) {
-        int hIdx = it.key();
-        QString hemi = (it.value().hemi() == 0) ? "lh" : "rh";
-        QString surfType = QString::fromStdString(it.value().surf().empty() ? "inflated" : it.value().surf());
-        pModel->addSurface(parser.value(subjectOption), hemi, surfType, it.value());
+    for (auto it = t_surfSet.data().cbegin(); it != t_surfSet.data().cend(); ++it) {
+        int hIdx = it->first;
+        QString hemi = (it->second.hemi() == 0) ? "lh" : "rh";
+        QString surfType = QString::fromStdString(it->second.surf().empty() ? "inflated" : it->second.surf());
+        pModel->addSurface(parser.value(subjectOption), hemi, surfType, it->second);
         if (t_annotationSet.size() > hIdx)
             pModel->addAnnotation(parser.value(subjectOption), hemi, t_annotationSet[hIdx]);
     }

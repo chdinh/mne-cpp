@@ -39,10 +39,10 @@
 //=============================================================================================================
 
 #include <filesystem>
+#include <map>
 #include <string>
 #include <string_view>
 #include <QSharedPointer>
-#include <QMap>
 
 //=============================================================================================================
 // DEFINE NAMESPACE FSLIB
@@ -136,7 +136,7 @@ public:
      *
      * @return the surface set map.
      */
-    inline QMap<qint32, FsSurface>& data();
+    inline std::map<int, FsSurface>& data();
 
     //=========================================================================================================
     /**
@@ -229,37 +229,37 @@ private:
      */
     void calcOffset();
 
-    QMap<qint32, FsSurface> m_qMapSurfs; /**< Hemisphere surfaces (lh = 0; rh = 1). */
+    std::map<int, FsSurface> m_surfs; /**< Hemisphere surfaces (lh = 0; rh = 1). */
 };
 
 //=============================================================================================================
 // INLINE DEFINITIONS
 //=============================================================================================================
 
-inline QMap<qint32, FsSurface>& FsSurfaceSet::data()
+inline std::map<int, FsSurface>& FsSurfaceSet::data()
 {
-    return m_qMapSurfs;
+    return m_surfs;
 }
 
 //=============================================================================================================
 
 inline bool FsSurfaceSet::empty() const
 {
-    return m_qMapSurfs.isEmpty();
+    return m_surfs.empty();
 }
 
 //=============================================================================================================
 
 inline std::string FsSurfaceSet::surf() const
 {
-    return m_qMapSurfs.isEmpty() ? std::string() : m_qMapSurfs.begin().value().surf();
+    return m_surfs.empty() ? std::string() : m_surfs.begin()->second.surf();
 }
 
 //=============================================================================================================
 
 inline qint32 FsSurfaceSet::size() const
 {
-    return m_qMapSurfs.size();
+    return static_cast<qint32>(m_surfs.size());
 }
 } // NAMESPACE
 

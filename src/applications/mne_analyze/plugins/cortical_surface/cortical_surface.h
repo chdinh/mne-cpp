@@ -363,7 +363,7 @@ public:
     QDockWidget* getLabelsDock();
 
     /** @return Snapshot of all labels currently loaded in the labels dock. */
-    QList<FSLIB::FsLabel> labels() const;
+    std::vector<FSLIB::FsLabel> labels() const;
 
     /**
      * Load a FreeSurfer `.label` file. The label is added to the labels

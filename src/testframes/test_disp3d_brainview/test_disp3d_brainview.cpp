@@ -2092,7 +2092,7 @@ void TestDisp3dBrainView::rtWorkers_extended()
         worker.setInterpolationInfoRight(emptyVerts, emptyNeighbors, emptyVtx);
 
         Eigen::VectorXi emptyLabelIds;
-        QList<FSLIB::FsLabel> emptyLabels;
+        std::vector<FSLIB::FsLabel> emptyLabels;
         worker.setAnnotationInfoLeft(emptyLabelIds, emptyLabels, emptyVtx);
         worker.setAnnotationInfoRight(emptyLabelIds, emptyLabels, emptyVtx);
     }

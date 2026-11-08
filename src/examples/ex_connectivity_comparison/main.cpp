@@ -412,11 +412,11 @@ int main(int argc, char* argv[])
         }
 
         // Add hemisphere surfaces
-        for (auto it = tSurfSetInflated.data().constBegin(); it != tSurfSetInflated.data().constEnd(); ++it) {
-            int hIdx = it.key();
-            QString hemi = (it.value().hemi() == 0) ? "lh" : "rh";
-            QString surfType = QString::fromStdString(it.value().surf().empty() ? "inflated" : it.value().surf());
-            pModel->addSurface("sample", hemi, surfType, it.value());
+        for (auto it = tSurfSetInflated.data().cbegin(); it != tSurfSetInflated.data().cend(); ++it) {
+            int hIdx = it->first;
+            QString hemi = (it->second.hemi() == 0) ? "lh" : "rh";
+            QString surfType = QString::fromStdString(it->second.surf().empty() ? "inflated" : it->second.surf());
+            pModel->addSurface("sample", hemi, surfType, it->second);
             if (tAnnotSet.size() > hIdx)
                 pModel->addAnnotation("sample", hemi, tAnnotSet[hIdx]);
         }

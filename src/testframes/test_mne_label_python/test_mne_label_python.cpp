@@ -87,7 +87,7 @@ private:
 
     MNEForwardSolution m_fwd;
     FsAnnotationSet m_annot;
-    QList<FsLabel> m_aparc;
+    std::vector<FsLabel> m_aparc;
     FsLabel m_v1;
 
 private slots:
@@ -147,7 +147,7 @@ void TestMneLabelPython::initTestCase()
 
     m_annot = FsAnnotationSet(dataPath("subjects/sample/label/lh.aparc.annot").toStdU16String(), dataPath("subjects/sample/label/rh.aparc.annot").toStdU16String());
     const FsSurfaceSet white(dataPath("subjects/sample/surf/lh.white").toStdU16String(), dataPath("subjects/sample/surf/rh.white").toStdU16String());
-    QList<RowVector4i> rgbas;
+    std::vector<RowVector4i> rgbas;
     QVERIFY(m_annot.toLabels(white, m_aparc, rgbas));
 }
 

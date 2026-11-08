@@ -164,7 +164,7 @@ public:
      * @param[in] vecVertNo     Source-space vertex numbers.
      */
     void setAnnotationInfoLeft(const Eigen::VectorXi& vecLabelIds,
-                               const QList<FSLIB::FsLabel>& lLabels,
+                               const std::vector<FSLIB::FsLabel>& lLabels,
                                const Eigen::VectorXi& vecVertNo);
 
     //=========================================================================================================
@@ -176,7 +176,7 @@ public:
      * @param[in] vecVertNo     Source-space vertex numbers.
      */
     void setAnnotationInfoRight(const Eigen::VectorXi& vecLabelIds,
-                                const QList<FSLIB::FsLabel>& lLabels,
+                                const std::vector<FSLIB::FsLabel>& lLabels,
                                 const Eigen::VectorXi& vecVertNo);
 
 public slots:
@@ -246,7 +246,7 @@ private:
      * @return FsAnnotation matrix (nVertices x nSources).
      */
     static QSharedPointer<Eigen::SparseMatrix<float>> computeAnnotationOperator(
-        const QList<FSLIB::FsLabel>& lLabels,
+        const std::vector<FSLIB::FsLabel>& lLabels,
         const QMap<qint32, qint32>& mapLabelIdSrc,
         const QList<int>& vertNos,
         int nVertices);
@@ -273,14 +273,14 @@ private:
     int m_iVisualizationType = InterpolationBased; /**< Current visualization type. */
 
     // LH annotation data
-    QList<FSLIB::FsLabel> m_lLabelsLh;          /**< LH FreeSurfer labels. */
+    std::vector<FSLIB::FsLabel> m_lLabelsLh;    /**< LH FreeSurfer labels. */
     QMap<qint32, qint32> m_mapLabelIdSourcesLh; /**< LH source vertex → label ID map. */
     QList<int> m_vertNosLh;                     /**< LH source vertex numbers. */
     int m_nAnnotationVerticesLh = 0;            /**< LH surface vertex count (size of the label-id vector). */
     bool m_bAnnotationLhInit = false;           /**< Whether LH annotation data is set. */
 
     // RH annotation data
-    QList<FSLIB::FsLabel> m_lLabelsRh;          /**< RH FreeSurfer labels. */
+    std::vector<FSLIB::FsLabel> m_lLabelsRh;    /**< RH FreeSurfer labels. */
     QMap<qint32, qint32> m_mapLabelIdSourcesRh; /**< RH source vertex → label ID map. */
     QList<int> m_vertNosRh;                     /**< RH source vertex numbers. */
     int m_nAnnotationVerticesRh = 0;            /**< RH surface vertex count (size of the label-id vector). */

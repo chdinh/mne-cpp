@@ -336,8 +336,8 @@ int main(int argc, char* argv[])
         pConnectivitySettingsManager->m_matEvokedSource = sourceEstimateEvoked.data;
 
         //Generate network nodes and define ROIs
-        /*QList<FsLabel> lLabels;
-        QList<RowVector4i> qListLabelRGBAs;
+        /*std::vector<FsLabel> lLabels;
+        std::vector<RowVector4i> qListLabelRGBAs;
         StringList lWantedLabels{"G_frontal_inf-Opercular_part-lh", "G_postcentral-lh", "G_precentral-lh", "G_subcentral-lh", "S_central-lh", "G_frontal_inf-Opercular_part-rh", "G_postcentral-rh", "G_precentral-rh", "G_subcentral-rh", "S_central-rh", "G_occipital_middle-lh", "G_occipital_middle-rh"};
 
         tAnnotSet.toLabels(tSurfSetInflated, lLabels, qListLabelRGBAs, lWantedLabels);
@@ -432,11 +432,11 @@ int main(int argc, char* argv[])
         }
 
         // Add hemisphere surfaces
-        for (auto it = tSurfSetInflated.data().constBegin(); it != tSurfSetInflated.data().constEnd(); ++it) {
-            int hIdx = it.key();
-            QString hemi = (it.value().hemi() == 0) ? "lh" : "rh";
-            QString surfType = QString::fromStdString(it.value().surf().empty() ? "inflated" : it.value().surf());
-            pModel->addSurface("sample", hemi, surfType, it.value());
+        for (auto it = tSurfSetInflated.data().cbegin(); it != tSurfSetInflated.data().cend(); ++it) {
+            int hIdx = it->first;
+            QString hemi = (it->second.hemi() == 0) ? "lh" : "rh";
+            QString surfType = QString::fromStdString(it->second.surf().empty() ? "inflated" : it->second.surf());
+            pModel->addSurface("sample", hemi, surfType, it->second);
             if (tAnnotSet.size() > hIdx)
                 pModel->addAnnotation("sample", hemi, tAnnotSet[hIdx]);
         }

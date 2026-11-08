@@ -101,8 +101,8 @@ static bool processHemisphere(const QString& subjectsDir, const QString& subject
     qInfo("Read annotation: %s", qPrintable(annotPath));
 
     // Convert to labels using the library method
-    QList<FsLabel> labels;
-    QList<Eigen::RowVector4i> labelRgbas;
+    std::vector<FsLabel> labels;
+    std::vector<Eigen::RowVector4i> labelRgbas;
     annot.toLabels(surface, labels, labelRgbas);
 
     qInfo("Found %lld labels in %s hemisphere",
@@ -111,7 +111,7 @@ static bool processHemisphere(const QString& subjectsDir, const QString& subject
 
     // Write each label to a file
     int written = 0;
-    for (int i = 0; i < labels.size(); i++) {
+    for (int i = 0; i < std::ssize(labels); i++) {
         const FsLabel& label = labels[i];
         QString labelName = QString::fromStdString(label.name);
         if (labelName.isEmpty())

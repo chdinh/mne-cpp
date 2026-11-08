@@ -222,8 +222,8 @@ bool FsAnnotation::read(const std::filesystem::path& p_sFileName, FsAnnotation& 
 //=============================================================================================================
 
 bool FsAnnotation::toLabels(const FsSurface& p_surf,
-                            QList<FsLabel>& p_qListLabels,
-                            QList<RowVector4i>& p_qListLabelRGBAs,
+                            std::vector<FsLabel>& p_qListLabels,
+                            std::vector<RowVector4i>& p_qListLabelRGBAs,
                             const UTILSLIB::StringList& lLabelPicks) const
 {
     if (this->m_iHemi != p_surf.hemi()) {
@@ -253,7 +253,7 @@ bool FsAnnotation::toLabels(const FsSurface& p_surf,
 
     //    std::cout << label_ids;
 
-    const qsizetype firstNew = p_qListLabels.size();
+    const std::size_t firstNew = p_qListLabels.size();
     qint32 label_id, count;
     RowVector4i label_rgba;
     VectorXi vertices;
@@ -287,14 +287,14 @@ bool FsAnnotation::toLabels(const FsSurface& p_surf,
         // put it all together
         if (lLabelPicks.empty()) {
             //t_tris
-            p_qListLabels.append(FsLabel(vertices, pos, values, this->m_iHemi, name, label_id));
+            p_qListLabels.emplace_back(vertices, pos, values, this->m_iHemi, name, label_id);
             // store the color
-            p_qListLabelRGBAs.append(label_rgba);
+            p_qListLabelRGBAs.push_back(label_rgba);
         } else if (UTILSLIB::contains(lLabelPicks, name)) {
             //t_tris
-            p_qListLabels.append(FsLabel(vertices, pos, values, this->m_iHemi, name, label_id));
+            p_qListLabels.emplace_back(vertices, pos, values, this->m_iHemi, name, label_id);
             // store the color
-            p_qListLabelRGBAs.append(label_rgba);
+            p_qListLabelRGBAs.push_back(label_rgba);
         }
     }
 
@@ -325,16 +325,20 @@ bool FsAnnotation::toLabels(const FsSurface& p_surf,
     //labels = list(labels)
     //label_colors = list(label_colors)
 
-    // mne.read_labels_from_annot sorts the labels by name
-    QList<qsizetype> order(p_qListLabels.size() - firstNew);
+    // mne.read_labels_from_annot sorts the labels by name; sort an index, then apply it by moving
+    std::vector<std::size_t> order(p_qListLabels.size() - firstNew);
     std::iota(order.begin(), order.end(), firstNew);
-    std::sort(order.begin(), order.end(), [&p_qListLabels](qsizetype a, qsizetype b) { return p_qListLabels[a].name < p_qListLabels[b].name; });
-    const QList<FsLabel> labels = p_qListLabels.mid(firstNew);
-    const QList<RowVector4i> rgbas = p_qListLabelRGBAs.mid(firstNew);
-    for (qsizetype k = 0; k < order.size(); ++k) {
-        p_qListLabels[firstNew + k] = labels[order[k] - firstNew];
-        p_qListLabelRGBAs[firstNew + k] = rgbas[order[k] - firstNew];
+    std::ranges::stable_sort(order, {}, [&p_qListLabels](std::size_t k) -> const std::string& { return p_qListLabels[k].name; });
+    std::vector<FsLabel> labels;
+    std::vector<RowVector4i> rgbas;
+    labels.reserve(order.size());
+    rgbas.reserve(order.size());
+    for (const std::size_t k : order) {
+        labels.push_back(std::move(p_qListLabels[k]));
+        rgbas.push_back(p_qListLabelRGBAs[k]);
     }
+    std::ranges::move(labels, p_qListLabels.begin() + static_cast<std::ptrdiff_t>(firstNew));
+    std::ranges::copy(rgbas, p_qListLabelRGBAs.begin() + static_cast<std::ptrdiff_t>(firstNew));
 
     qInfo("[done]\n");
 

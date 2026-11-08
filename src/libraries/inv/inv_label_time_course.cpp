@@ -78,17 +78,17 @@ VectorXd InvLabelTimeCourse::computeSignFlip(const MatrixXd& stcData)
 //=============================================================================================================
 
 MatrixXd InvLabelTimeCourse::extract(const InvSourceEstimate& stc,
-                                     const QList<FsLabel>& labels,
+                                     const std::vector<FsLabel>& labels,
                                      const QString& sMode,
                                      bool bAllowEmpty)
 {
-    if (stc.empty() || labels.isEmpty()) {
+    if (stc.empty() || labels.empty()) {
         qWarning() << "[InvLabelTimeCourse::extract] Empty stc or labels.";
         return MatrixXd();
     }
 
     const int nTimes = static_cast<int>(stc.data.cols());
-    const int nLabels = labels.size();
+    const int nLabels = static_cast<int>(labels.size());
 
     // Resolve "auto" mode
     QString mode = sMode;

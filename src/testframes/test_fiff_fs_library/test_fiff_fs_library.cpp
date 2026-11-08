@@ -831,14 +831,14 @@ void TestFiffFsLibrary::fs_annotationToLabels()
     FsSurface::read(surfLhPath().toStdU16String(), surf, false);
     QVERIFY(!surf.empty());
 
-    QList<FsLabel> labels;
-    QList<RowVector4i> rgbas;
+    std::vector<FsLabel> labels;
+    std::vector<RowVector4i> rgbas;
     bool ok = annot.toLabels(surf, labels, rgbas);
     QVERIFY(ok);
     QVERIFY(labels.size() > 0);
     QCOMPARE(labels.size(), rgbas.size());
 
-    for (int i = 0; i < labels.size(); i++)
+    for (int i = 0; i < std::ssize(labels); i++)
         QVERIFY(labels[i].vertices.size() > 0);
 }
 
@@ -1973,15 +1973,15 @@ void TestFiffFsLibrary::fs_annotationSet_readAndToLabels()
     QVERIFY(!sSet.empty());
 
     // Convert annotations to labels
-    QList<FsLabel> labels;
-    QList<Eigen::RowVector4i> labelRGBAs;
+    std::vector<FsLabel> labels;
+    std::vector<Eigen::RowVector4i> labelRGBAs;
     bool ok = aSet.toLabels(sSet, labels, labelRGBAs);
     QVERIFY(ok);
     QVERIFY(labels.size() > 0);
     QCOMPARE(labels.size(), labelRGBAs.size());
 
     // Each label should have vertices
-    for (int i = 0; i < labels.size(); ++i) {
+    for (int i = 0; i < std::ssize(labels); ++i) {
         QVERIFY(labels[i].vertices.size() > 0);
     }
 }

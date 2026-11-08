@@ -238,11 +238,11 @@ int main(int argc, char* argv[])
     pBrainView->setModel(pModel);
 
     //Add fressurfer surface set including both hemispheres
-    for (auto it = tSurfSet.data().constBegin(); it != tSurfSet.data().constEnd(); ++it) {
-        int hIdx = it.key();
-        QString hemi = (it.value().hemi() == 0) ? "lh" : "rh";
-        QString surfType = QString::fromStdString(it.value().surf().empty() ? "inflated" : it.value().surf());
-        pModel->addSurface(parser.value(subjectOption), hemi, surfType, it.value());
+    for (auto it = tSurfSet.data().cbegin(); it != tSurfSet.data().cend(); ++it) {
+        int hIdx = it->first;
+        QString hemi = (it->second.hemi() == 0) ? "lh" : "rh";
+        QString surfType = QString::fromStdString(it->second.surf().empty() ? "inflated" : it->second.surf());
+        pModel->addSurface(parser.value(subjectOption), hemi, surfType, it->second);
         if (tAnnotSet.size() > hIdx)
             pModel->addAnnotation(parser.value(subjectOption), hemi, tAnnotSet[hIdx]);
     }

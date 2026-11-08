@@ -79,7 +79,7 @@ public:
      * @return                     Matrix of shape (n_labels × n_times).
      */
     static Eigen::MatrixXd extract(const InvSourceEstimate& stc,
-                                   const QList<FSLIB::FsLabel>& labels,
+                                   const std::vector<FSLIB::FsLabel>& labels,
                                    const QString& sMode = "mean_flip",
                                    bool bAllowEmpty = false);
 

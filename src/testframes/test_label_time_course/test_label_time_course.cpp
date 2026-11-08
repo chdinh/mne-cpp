@@ -63,7 +63,7 @@ private slots:
 
 private:
     InvSourceEstimate m_stc;
-    QList<FsLabel> m_labels;
+    std::vector<FsLabel> m_labels;
     int m_nVerts;
     int m_nTimes;
 };
@@ -97,8 +97,8 @@ void TestLabelTimeCourse::initTestCase()
     label2.hemi = 0;
     label2.name = "label2";
 
-    m_labels.append(label1);
-    m_labels.append(label2);
+    m_labels.push_back(label1);
+    m_labels.push_back(label2);
 }
 
 //=============================================================================================================
@@ -177,8 +177,8 @@ void TestLabelTimeCourse::testAutoMode()
 
 void TestLabelTimeCourse::testOutputDimensions()
 {
-    QList<FsLabel> singleLabel;
-    singleLabel.append(m_labels[0]);
+    std::vector<FsLabel> singleLabel;
+    singleLabel.push_back(m_labels[0]);
 
     MatrixXd tc = InvLabelTimeCourse::extract(m_stc, singleLabel, "mean");
     QCOMPARE(static_cast<int>(tc.rows()), 1);
@@ -190,14 +190,14 @@ void TestLabelTimeCourse::testOutputDimensions()
 void TestLabelTimeCourse::testMultipleLabels()
 {
     // Add a third label
-    QList<FsLabel> labels = m_labels;
+    std::vector<FsLabel> labels = m_labels;
     FsLabel label3;
     label3.vertices = VectorXi::LinSpaced(3, 5, 7);
     label3.pos = MatrixX3f::Zero(3, 3);
     label3.values = VectorXd::Ones(3);
     label3.hemi = 0;
     label3.name = "label3";
-    labels.append(label3);
+    labels.push_back(label3);
 
     MatrixXd tc = InvLabelTimeCourse::extract(m_stc, labels, "mean");
     QCOMPARE(static_cast<int>(tc.rows()), 3);
@@ -215,8 +215,8 @@ void TestLabelTimeCourse::testEmptyLabel()
     emptyLabel.hemi = 0;
     emptyLabel.name = "empty";
 
-    QList<FsLabel> labels;
-    labels.append(emptyLabel);
+    std::vector<FsLabel> labels;
+    labels.push_back(emptyLabel);
 
     // Without allowEmpty, should skip the label → 0 rows
     MatrixXd tc = InvLabelTimeCourse::extract(m_stc, labels, "mean", false);
@@ -234,9 +234,9 @@ void TestLabelTimeCourse::testAllowEmpty()
     emptyLabel.hemi = 0;
     emptyLabel.name = "empty";
 
-    QList<FsLabel> labels;
-    labels.append(m_labels[0]);
-    labels.append(emptyLabel);
+    std::vector<FsLabel> labels;
+    labels.push_back(m_labels[0]);
+    labels.push_back(emptyLabel);
 
     MatrixXd tc = InvLabelTimeCourse::extract(m_stc, labels, "mean", true);
     QCOMPARE(static_cast<int>(tc.rows()), 2);

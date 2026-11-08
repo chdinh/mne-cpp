@@ -143,8 +143,8 @@ int main(int argc, char* argv[])
     if (t_Fwd.empty())
         return 1;
 
-    QList<FsLabel> t_qListLabels;
-    QList<RowVector4i> t_qListRGBAs;
+    std::vector<FsLabel> t_qListLabels;
+    std::vector<RowVector4i> t_qListRGBAs;
 
     //ToDo overload toLabels using instead of t_surfSet rr of MNESourceSpaces
     t_annotationSet.toLabels(t_surfSet, t_qListLabels, t_qListRGBAs);
@@ -342,11 +342,11 @@ int main(int argc, char* argv[])
     BrainTreeModel* pModel = new BrainTreeModel();
     pBrainView->setModel(pModel);
 
-    for (auto it = t_surfSet.data().constBegin(); it != t_surfSet.data().constEnd(); ++it) {
-        int hIdx = it.key();
-        QString hemi = (it.value().hemi() == 0) ? "lh" : "rh";
-        QString surfType = QString::fromStdString(it.value().surf().empty() ? "inflated" : it.value().surf());
-        pModel->addSurface(parser.value(subjectOption), hemi, surfType, it.value());
+    for (auto it = t_surfSet.data().cbegin(); it != t_surfSet.data().cend(); ++it) {
+        int hIdx = it->first;
+        QString hemi = (it->second.hemi() == 0) ? "lh" : "rh";
+        QString surfType = QString::fromStdString(it->second.surf().empty() ? "inflated" : it->second.surf());
+        pModel->addSurface(parser.value(subjectOption), hemi, surfType, it->second);
         if (t_annotationSet.size() > hIdx)
             pModel->addAnnotation(parser.value(subjectOption), hemi, t_annotationSet[hIdx]);
     }

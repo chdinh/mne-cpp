@@ -71,12 +71,12 @@ FsAnnotationSet::FsAnnotationSet(const std::filesystem::path& path, qint32 hemi,
 FsAnnotationSet::FsAnnotationSet(const FsAnnotation& p_LHAnnotation, const FsAnnotation& p_RHAnnotation)
 {
     if (p_LHAnnotation.hemi() == 0)
-        m_qMapAnnots.insert(0, p_LHAnnotation);
+        m_annots.insert_or_assign(0, p_LHAnnotation);
     else
         qWarning("Left hemisphere id is not 0. LH annotation not assigned!");
 
     if (p_RHAnnotation.hemi() == 1)
-        m_qMapAnnots.insert(1, p_RHAnnotation);
+        m_annots.insert_or_assign(1, p_RHAnnotation);
     else
         qWarning("Right hemisphere id is not 1. RH annotation not assigned!");
 }
@@ -94,7 +94,7 @@ FsAnnotationSet::FsAnnotationSet(const std::filesystem::path& p_sLHFileName, con
 
 void FsAnnotationSet::clear()
 {
-    m_qMapAnnots.clear();
+    m_annots.clear();
 }
 
 //=============================================================================================================
@@ -104,10 +104,7 @@ void FsAnnotationSet::insert(const FsAnnotation& p_Annotation)
     if (p_Annotation.empty())
         return;
 
-    qint32 hemi = p_Annotation.hemi();
-    m_qMapAnnots.remove(hemi);
-
-    m_qMapAnnots.insert(hemi, p_Annotation);
+    m_annots.insert_or_assign(p_Annotation.hemi(), p_Annotation);
 }
 
 //=============================================================================================================
@@ -119,10 +116,10 @@ bool FsAnnotationSet::read(const std::filesystem::path& p_sLHFileName, const std
     for (const std::filesystem::path* file : {&p_sLHFileName, &p_sRHFileName}) {
         FsAnnotation t_Annotation;
         if (FsAnnotation::read(*file, t_Annotation))
-            p_AnnotationSet.m_qMapAnnots.insert(t_Annotation.hemi(), t_Annotation);
+            p_AnnotationSet.m_annots.insert_or_assign(t_Annotation.hemi(), std::move(t_Annotation));
     }
 
-    if (p_AnnotationSet.m_qMapAnnots.isEmpty())
+    if (p_AnnotationSet.m_annots.empty())
         return false;
 
     return true;
@@ -131,13 +128,13 @@ bool FsAnnotationSet::read(const std::filesystem::path& p_sLHFileName, const std
 //=============================================================================================================
 
 bool FsAnnotationSet::toLabels(const FsSurfaceSet& p_surfSet,
-                               QList<FsLabel>& p_qListLabels,
-                               QList<RowVector4i>& p_qListLabelRGBAs,
+                               std::vector<FsLabel>& p_qListLabels,
+                               std::vector<RowVector4i>& p_qListLabelRGBAs,
                                const UTILSLIB::StringList& lLabelPicks) const
 {
-    if (!m_qMapAnnots[0].toLabels(p_surfSet[0], p_qListLabels, p_qListLabelRGBAs, lLabelPicks))
+    if (!(*this)[0].toLabels(p_surfSet[0], p_qListLabels, p_qListLabelRGBAs, lLabelPicks))
         return false;
-    else if (!m_qMapAnnots[1].toLabels(p_surfSet[1], p_qListLabels, p_qListLabelRGBAs, lLabelPicks))
+    else if (!(*this)[1].toLabels(p_surfSet[1], p_qListLabels, p_qListLabelRGBAs, lLabelPicks))
         return false;
 
     return true;
@@ -145,56 +142,60 @@ bool FsAnnotationSet::toLabels(const FsSurfaceSet& p_surfSet,
 
 //=============================================================================================================
 
+namespace
+{
+
+int hemiIndex(qint32 idx)
+{
+    if (idx != 0 && idx != 1) {
+        qWarning("Warning: Index is not '0' or '1'! Returning '0'.");
+        return 0;
+    }
+    return idx;
+}
+
+int hemiIndex(std::string_view idt)
+{
+    if (idt == "rh")
+        return 1;
+    if (idt != "lh")
+        qWarning("Warning: Identifier is not 'lh' or 'rh'! Returning 'lh'.");
+    return 0;
+}
+
+const FsAnnotation& annotationOrEmpty(const std::map<int, FsAnnotation>& annots, int hemi)
+{
+    static const FsAnnotation empty;
+    const auto it = annots.find(hemi);
+    return it != annots.end() ? it->second : empty;
+}
+
+} // namespace
+
+//=============================================================================================================
+
 FsAnnotation& FsAnnotationSet::operator[](qint32 idx)
 {
-    if (idx == 0)
-        return m_qMapAnnots[idx];
-    else if (idx == 1)
-        return m_qMapAnnots[idx];
-    else {
-        qWarning("Warning: Index is not '0' or '1'! Returning '0'.");
-        return m_qMapAnnots[0];
-    }
+    return m_annots[hemiIndex(idx)];
 }
 
 //=============================================================================================================
 
-const FsAnnotation FsAnnotationSet::operator[](qint32 idx) const
+const FsAnnotation& FsAnnotationSet::operator[](qint32 idx) const
 {
-    if (idx == 0)
-        return m_qMapAnnots[idx];
-    else if (idx == 1)
-        return m_qMapAnnots[idx];
-    else {
-        qWarning("Warning: Index is not '0' or '1'! Returning '0'.");
-        return m_qMapAnnots[0];
-    }
+    return annotationOrEmpty(m_annots, hemiIndex(idx));
 }
 
 //=============================================================================================================
 
 FsAnnotation& FsAnnotationSet::operator[](std::string_view idt)
 {
-    if (idt == "lh")
-        return m_qMapAnnots[0];
-    else if (idt == "rh")
-        return m_qMapAnnots[1];
-    else {
-        qWarning("Warning: Identifier is not 'lh' or 'rh'! Returning 'lh'.");
-        return m_qMapAnnots[0];
-    }
+    return m_annots[hemiIndex(idt)];
 }
 
 //=============================================================================================================
 
-const FsAnnotation FsAnnotationSet::operator[](std::string_view idt) const
+const FsAnnotation& FsAnnotationSet::operator[](std::string_view idt) const
 {
-    if (idt == "lh")
-        return m_qMapAnnots[0];
-    else if (idt == "rh")
-        return m_qMapAnnots[1];
-    else {
-        qWarning("Warning: Identifier is not 'lh' or 'rh'! Returning 'lh'.");
-        return m_qMapAnnots[0];
-    }
+    return annotationOrEmpty(m_annots, hemiIndex(idt));
 }

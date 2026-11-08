@@ -88,33 +88,7 @@ void FsLabel::clear()
 
 MatrixX3i FsLabel::selectTris(const FsSurface& p_Surface)
 {
-    //    //check whether there are data to create the tris
-    //    if(this->vertices.size() == 0)
-    //        return MatrixX3i(0,3);
-
-    //    MatrixX3i tris(p_Surface.tris().rows(),3);
-
-    //    QSet<int> verts;
-    //    verts.reserve(this->vertices.size());
-    //    for(qint32 i = 0; i < this->vertices.size(); ++i)
-    //        verts.insert(this->vertices[i]);
-
-    //    //
-    //    // Search for all the tris where is at least one corner part of the label
-    //    //
-    //    qint32 t_size = 0;
-    //    for(qint32 i = 0; i < p_Surface.tris().rows(); ++i)
-    //    {
-    //        if(verts.contains(p_Surface.tris()(i,0)) || verts.contains(p_Surface.tris()(i,1)) || verts.contains(p_Surface.tris()(i,2)))
-    //        {
-    //            tris.row(t_size) = p_Surface.tris().row(i);
-    //            ++t_size;
-    //        }
-    //    }
-
-    //    tris.conservativeResize(t_size, 3);
-
-    return this->selectTris(p_Surface.tris()); //tris;
+    return this->selectTris(p_Surface.tris());
 }
 
 //=============================================================================================================
