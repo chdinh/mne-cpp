@@ -415,7 +415,7 @@ int main(int argc, char* argv[])
     MatrixXd online;
     bool connectivityDone = false;
     QObject::connect(&rtConnectivity, &RtConnectivity::newConnectivityResultAvailable,
-                     [&](const std::vector<Network>& networks, const ConnectivitySettings&) {
+                     [&](const std::vector<Network>& networks, const std::shared_ptr<ConnectivitySettings>&) {
                          online = networks.front().connectivity_matrix();
                          connectivityDone = true;
                      });

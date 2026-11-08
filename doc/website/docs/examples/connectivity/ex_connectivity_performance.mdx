@@ -284,7 +284,7 @@ int main(int argc, char* argv[])
                     int iNFreqs = int(floor(iNfft / 2.0)) + 1;
                     qWarning() << "iNFreqs" << iNFreqs;
 
-                    connectivitySettings.setConnectivityMethods(QStringList() << sConnectivityMethodList.at(i));
+                    connectivitySettings.setConnectivityMethods({sConnectivityMethodList.at(i).toStdString()});
 
                     m_iCurrentIteration = 0;
                     for (int u = 0; u < iNumberRepeats; ++u) {

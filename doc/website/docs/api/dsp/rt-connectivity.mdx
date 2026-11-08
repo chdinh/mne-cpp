@@ -26,7 +26,7 @@ RtConnectivity rtConnectivity;
 MatrixXd online;
 bool connectivityDone = false;
 QObject::connect(&rtConnectivity, &RtConnectivity::newConnectivityResultAvailable,
-                 [&](const std::vector<Network>& networks, const ConnectivitySettings&) {
+                 [&](const std::vector<Network>& networks, const std::shared_ptr<ConnectivitySettings>&) {
                      online = networks.front().connectivity_matrix();
                      connectivityDone = true;
                  });
@@ -65,9 +65,11 @@ Destroys the real-time connectivity estimation object.
 
 Slot to receive incoming data.
 
+Queues a connectivity estimate on the worker thread. The worker computes on its own snapshot, so the caller may keep changing its settings; move them in to avoid the copy.
+
 **Parameters:**
 
-- **connectivitySettings** : *const [ConnectivitySettings](/docs/api/connectivity/connectivity-settings) &*
+- **connectivitySettings** : *[ConnectivitySettings](/docs/api/connectivity/connectivity-settings)*
   Data to estimate the connectivity from.
 
 ---
@@ -116,7 +118,7 @@ RtConnectivity rtConnectivity;
 MatrixXd online;
 bool connectivityDone = false;
 QObject::connect(&rtConnectivity, &RtConnectivity::newConnectivityResultAvailable,
-                 [&](const std::vector<Network>& networks, const ConnectivitySettings&) {
+                 [&](const std::vector<Network>& networks, const std::shared_ptr<ConnectivitySettings>&) {
                      online = networks.front().connectivity_matrix();
                      connectivityDone = true;
                  });

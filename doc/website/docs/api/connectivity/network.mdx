@@ -418,7 +418,8 @@ Sensor- or source-level functional connectivity of averaged MEG/EEG data with a 
 ````cpp title="src/examples/ex_connectivity/connectivitysettingsmanager.h, line 97"
 ConnectivitySettings m_settings;
 RtConnectivity::SPtr m_pRtConnectivity;
-std::vector<Network> m_networkData;
+std::vector<Network> m_rawNetworkData; /**< Results as computed. */
+std::vector<Network> m_networkData;    /**< Results averaged over the selected band and normalized. */
 std::map<std::string, Eigen::Vector4i> mColor;
 ````
 
