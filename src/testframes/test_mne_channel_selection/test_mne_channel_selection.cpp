@@ -166,7 +166,7 @@ private slots:
     void testCovDefinitionDefaults()
     {
         CovDefinition covDef;
-        QVERIFY(covDef.events.isEmpty());
+        QVERIFY(covDef.events.empty());
         QCOMPARE(covDef.ignore, 0u);
         QCOMPARE(covDef.delay, 0.0f);
         QVERIFY(qFuzzyCompare(covDef.tmin + 1.0f, -0.2f + 1.0f)); // Compare with offset to avoid near-zero issues
@@ -179,7 +179,9 @@ private slots:
     void testCovDefinitionAssignment()
     {
         CovDefinition covDef;
-        covDef.events << 1 << 2 << 3;
+        covDef.events.push_back(1);
+        covDef.events.push_back(2);
+        covDef.events.push_back(3);
         covDef.tmin = -0.1f;
         covDef.tmax = 0.5f;
         covDef.bmin = -0.1f;
@@ -194,7 +196,7 @@ private slots:
     void testCovDescriptionDefaults()
     {
         CovDescription covDesc;
-        QVERIFY(covDesc.defs.isEmpty());
+        QVERIFY(covDesc.defs.empty());
         QCOMPARE(covDesc.removeSampleMean, true);
         QCOMPARE(covDesc.fixSkew, false);
         QCOMPARE(covDesc.filename, QString());
@@ -209,7 +211,7 @@ private slots:
         covDesc.removeSampleMean = false;
 
         CovDefinition def1;
-        def1.events << 1;
+        def1.events.push_back(1);
         def1.tmin = -0.2f;
         def1.tmax = 0.5f;
         def1.doBaseline = true;
@@ -217,12 +219,13 @@ private slots:
         def1.bmax = 0.0f;
 
         CovDefinition def2;
-        def2.events << 2 << 3;
+        def2.events.push_back(2);
+        def2.events.push_back(3);
         def2.tmin = -0.1f;
         def2.tmax = 0.3f;
 
-        covDesc.defs.append(def1);
-        covDesc.defs.append(def2);
+        covDesc.defs.push_back(def1);
+        covDesc.defs.push_back(def2);
 
         QCOMPARE(covDesc.defs.size(), 2);
         QCOMPARE(covDesc.defs[0].events.size(), 1);

@@ -205,12 +205,14 @@ FIFFLIB::FiffCov computeCovarianceFromEpochLists(const QList<MNELIB::MNEEpochDat
                                                  const FIFFLIB::FiffInfo& info,
                                                  bool removeMean)
 {
-    QList<QList<Eigen::MatrixXd>> epochs;
+    std::vector<std::vector<Eigen::MatrixXd>> epochs;
+    epochs.reserve(static_cast<std::size_t>(epochLists.size()));
     for (const MNELIB::MNEEpochDataList& epochList : epochLists) {
-        QList<Eigen::MatrixXd>& codeEpochs = epochs.emplaceBack();
+        std::vector<Eigen::MatrixXd>& codeEpochs = epochs.emplace_back();
+        codeEpochs.reserve(static_cast<std::size_t>(epochList.size()));
         for (const auto& epoch : epochList) {
             if (!epoch.isNull() && epoch->epoch.size() > 0)
-                codeEpochs.append(epoch->epoch);
+                codeEpochs.push_back(epoch->epoch);
         }
     }
     return FIFFLIB::FiffCov::compute_from_epochs(epochs, info, removeMean);
@@ -1078,7 +1080,7 @@ bool MainWindow::ensureLegacyRawModelLoaded(const QString& featureName)
         return false;
     }
 
-    if (model->isFileLoaded() && model->fiffInfo() && !model->fiffInfo()->chs.isEmpty()) {
+    if (model->isFileLoaded() && model->fiffInfo() && !model->fiffInfo()->chs.empty()) {
         return true;
     }
 
@@ -3634,7 +3636,7 @@ bool MainWindow::refreshReviewedEvokedSet(const QString& statusMessage)
             ? m_epochReviewComments.at(index)
             : QString::number(index < m_epochReviewEventCodes.size() ? m_epochReviewEventCodes.at(index) : index);
         evoked.baseline = m_epochReviewBaseline;
-        evokedSet.evoked.append(evoked);
+        evokedSet.evoked.push_back(evoked);
     }
 
     if (m_qEvokedFile.isOpen()) {
@@ -3647,20 +3649,20 @@ bool MainWindow::refreshReviewedEvokedSet(const QString& statusMessage)
     setWindowStatus();
 
     if (!statusMessage.isEmpty()) {
-        const QString message = evokedSet.evoked.isEmpty()
+        const QString message = evokedSet.evoked.empty()
             ? QStringLiteral("All reviewed epochs are currently excluded.")
             : statusMessage;
         statusBar()->showMessage(message, 4000);
     }
 
-    if (!evokedSet.evoked.isEmpty()) {
+    if (!evokedSet.evoked.empty()) {
         if (!m_pAverageWindow->isVisible()) {
             m_pAverageWindow->show();
         }
         m_pAverageWindow->raise();
     }
 
-    return !evokedSet.evoked.isEmpty();
+    return !evokedSet.evoked.empty();
 }
 
 
@@ -4203,7 +4205,7 @@ void MainWindow::computeCovariance()
     } else {
         covariance = FIFFLIB::FiffCov::compute_from_epochs(raw,
                                                            events,
-                                                           selectedEventCodes,
+                                                           std::vector<int>(selectedEventCodes.begin(), selectedEventCodes.end()),
                                                            tmin,
                                                            tmax,
                                                            baselineFrom,

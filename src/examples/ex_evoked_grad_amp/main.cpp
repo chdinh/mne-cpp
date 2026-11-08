@@ -128,7 +128,7 @@ int main(int argc, char* argv[])
     }
     printf("...");
 
-    for (qint32 i = 0; i < p_FiffEvokedSet.evoked.size() - 1; ++i) {
+    for (qint32 i = 0; i < std::ssize(p_FiffEvokedSet.evoked) - 1; ++i) {
         if (b2 > b1) {
             b1 = (p_FiffEvokedSet.info.sfreq * bmin) - p_FiffEvokedSet.evoked[i].first;
             b2 = (p_FiffEvokedSet.info.sfreq * bmax) - p_FiffEvokedSet.evoked[i].last;

@@ -74,7 +74,7 @@ private slots:
 
 private:
     // declare your thresholds, variables and error values here
-    QList<FIFFLIB::FiffChInfo> m_lChannels;
+    std::vector<FIFFLIB::FiffChInfo> m_lChannels;
     QSharedPointer<FWDLIB::FwdCoilSet> m_pCoilDefinitions{nullptr};
 };
 
@@ -106,7 +106,7 @@ void TestSensorSet::initTestCase()
             pFiffInfo->chs[i].chpos.coil_type == FIFFV_COIL_VV_PLANAR_T3) {
             // Check if the sensor is bad, if not append to innerind
             if (!(UTILSLIB::contains(pFiffInfo->bads, pFiffInfo->ch_names.at(i)))) {
-                m_lChannels.append(pFiffInfo->chs[i]);
+                m_lChannels.push_back(pFiffInfo->chs[i]);
             }
         }
     }
@@ -265,7 +265,7 @@ void TestSensorSet::testSensorSetCreator_channelList_empty()
 {
     // act
     InvSensorSetCreator sensorSetCreator;
-    QList<FIFFLIB::FiffChInfo> lChannels;
+    std::vector<FIFFLIB::FiffChInfo> lChannels;
     Accuracy accuracy = Accuracy::medium;
 
     InvSensorSet sensorsActual = sensorSetCreator.updateSensorSet(lChannels, accuracy);
@@ -302,3 +302,5 @@ void TestSensorSet::cleanupTestCase()
 
 QTEST_GUILESS_MAIN(TestSensorSet)
 #include "test_sensorSet.moc"
+
+#include <vector>

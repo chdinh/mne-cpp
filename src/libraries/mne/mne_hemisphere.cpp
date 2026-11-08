@@ -290,7 +290,7 @@ bool MNEHemisphere::compute_patch_info()
 
         std::sort(t_vIndex.data(), t_vIndex.data() + t_vIndex.size());
 
-        pinfo.append(t_vIndex);
+        pinfo.push_back(t_vIndex);
     }
 
     // compute patch indices of the in-use source space vertices

@@ -166,7 +166,7 @@ FiffChInfo makeChannel(const QString& name, int kind, int unit)
     return ch;
 }
 
-FiffInfo makeInfo(const QList<FiffChInfo>& chs)
+FiffInfo makeInfo(const std::vector<FiffChInfo>& chs)
 {
     FiffInfo info;
     info.chs = chs;
@@ -344,13 +344,13 @@ void TestFiffCorePython::computeAverages_matchPython()
 
     AverageDescription desc;
     desc.comment = "oracle";
-    desc.categories << cat;
+    desc.categories.push_back(cat);
     desc.rej = noRejection();
 
     QString log;
     const FiffEvokedSet set = FiffEvokedSet::computeAverages(*m_raw, desc, events(true), log);
     QCOMPARE(set.evoked.size(), 1);
-    const FiffEvoked& e = set.evoked.first();
+    const FiffEvoked& e = set.evoked.front();
 
     // Six epochs: the two out-of-range events and the one with a non-zero
     // "from" value are dropped, exactly as mne-python drops them.
@@ -420,12 +420,12 @@ void TestFiffCorePython::computeAverages_rejection()
     cat.tmax = 0.2f;
 
     AverageDescription desc;
-    desc.categories << cat;
+    desc.categories.push_back(cat);
     desc.rej = rej;
 
     QString log;
     const FiffEvokedSet set = FiffEvokedSet::computeAverages(*m_raw, desc, events(false), log);
-    const FiffEvoked& e = set.evoked.first();
+    const FiffEvoked& e = set.evoked.front();
 
     QCOMPARE(static_cast<int>(e.nave), nave);
     QCOMPARE(static_cast<int>(log.count("[omit]")), 6 - nave);
@@ -447,13 +447,13 @@ void TestFiffCorePython::computeAverages_noMatchingEvents()
     cat.tmax = 0.2f;
 
     AverageDescription desc;
-    desc.categories << cat;
+    desc.categories.push_back(cat);
 
     QString log;
     const FiffEvokedSet set = FiffEvokedSet::computeAverages(*m_raw, desc, events(false), log);
     QCOMPARE(set.evoked.size(), 1);
-    QCOMPARE(static_cast<int>(set.evoked.first().nave), 0);
-    QCOMPARE(set.evoked.first().data.cwiseAbs().sum(), 0.0);
+    QCOMPARE(static_cast<int>(set.evoked.front().nave), 0);
+    QCOMPARE(set.evoked.front().data.cwiseAbs().sum(), 0.0);
     QVERIFY(log.contains("nave = 0"));
 }
 
@@ -530,7 +530,7 @@ void TestFiffCorePython::checkArtifacts_skipsBadChannels()
 
 void TestFiffCorePython::computeFromRaw_matchesPython()
 {
-    const QList<FiffProj> projs = FiffProj::compute_from_raw(*m_raw, events(true), 1, -0.1f, 0.2f, 2, 1, 1);
+    const std::vector<FiffProj> projs = FiffProj::compute_from_raw(*m_raw, events(true), 1, -0.1f, 0.2f, 2, 1, 1);
     QCOMPARE(projs.size(), 4);
 
     // mne.compute_proj_epochs(e, n_grad=2, n_mag=1, n_eeg=1): absolute sum of
@@ -586,10 +586,10 @@ void TestFiffCorePython::computeFromRaw_matchesPython()
 void TestFiffCorePython::computeFromRaw_withRejection()
 {
     // mne-python with reject=dict(eeg=1.6e-8) keeps four of the six epochs.
-    const QList<FiffProj> projs = FiffProj::compute_from_raw(*m_raw, events(false), 1, -0.1f, 0.2f, 0, 0, 1, {{"eeg", 1.6e-8}});
+    const std::vector<FiffProj> projs = FiffProj::compute_from_raw(*m_raw, events(false), 1, -0.1f, 0.2f, 0, 0, 1, {{"eeg", 1.6e-8}});
     QCOMPARE(projs.size(), 1);
 
-    const RowVectorXd v = projs.first().data->data.row(0);
+    const RowVectorXd v = projs.front().data->data.row(0);
     Index peakIdx = 0;
     const double peak = v.cwiseAbs().maxCoeff(&peakIdx);
     QCOMPARE(m_raw->info.ch_names.at(static_cast<int>(peakIdx)), QString("EEG008"));
@@ -602,13 +602,13 @@ void TestFiffCorePython::computeFromRaw_withRejection()
 void TestFiffCorePython::computeFromRaw_invalidInput()
 {
     // Reversed window.
-    QVERIFY(FiffProj::compute_from_raw(*m_raw, events(false), 1, 0.2f, -0.1f, 1, 1, 1).isEmpty());
+    QVERIFY(FiffProj::compute_from_raw(*m_raw, events(false), 1, 0.2f, -0.1f, 1, 1, 1).empty());
     // No epoch matches.
-    QVERIFY(FiffProj::compute_from_raw(*m_raw, events(false), 99, -0.1f, 0.2f, 1, 1, 1).isEmpty());
+    QVERIFY(FiffProj::compute_from_raw(*m_raw, events(false), 99, -0.1f, 0.2f, 1, 1, 1).empty());
     // Every epoch rejected.
-    QVERIFY(FiffProj::compute_from_raw(*m_raw, events(false), 1, -0.1f, 0.2f, 1, 1, 1, {{"mag", 1e-18}}).isEmpty());
+    QVERIFY(FiffProj::compute_from_raw(*m_raw, events(false), 1, -0.1f, 0.2f, 1, 1, 1, {{"mag", 1e-18}}).empty());
     // Nothing requested.
-    QVERIFY(FiffProj::compute_from_raw(*m_raw, events(false), 1, -0.1f, 0.2f, 0, 0, 0).isEmpty());
+    QVERIFY(FiffProj::compute_from_raw(*m_raw, events(false), 1, -0.1f, 0.2f, 0, 0, 0).empty());
 }
 
 //=============================================================================================================
@@ -619,7 +619,7 @@ void TestFiffCorePython::computeFromEvoked_matchesPython()
     // condition 0 of sample_audvis-ave.fif read with proj=False: peak channel, |peak| and |first
     // good channel of the type|; signs are arbitrary for an SVD.
     const FiffEvoked evoked(dataPath("sample_audvis-ave.fif").toStdU16String(), 0, {}, false);
-    const QList<FiffProj> projs = FiffProj::compute_from_evoked(evoked, 2, 1, 2);
+    const std::vector<FiffProj> projs = FiffProj::compute_from_evoked(evoked, 2, 1, 2);
     QCOMPARE(projs.size(), 5);
 
     struct Expected
@@ -686,8 +686,8 @@ void TestFiffCorePython::makeCompensator_matchesPython()
     QFETCH(QList<double>, expected);
 
     FiffInfo info = makeInfo({makeChannel("MEG1", FIFFV_MEG_CH, FIFF_UNIT_T), makeChannel("MEG2", FIFFV_MEG_CH, FIFF_UNIT_T), makeChannel("REF1", FIFFV_REF_MEG_CH, FIFF_UNIT_T), makeChannel("REF2", FIFFV_REF_MEG_CH, FIFF_UNIT_T)});
-    info.comps << makeComp(1, (MatrixXd(2, 2) << 0.1, 0.2, 0.3, 0.4).finished());
-    info.comps << makeComp(3, (MatrixXd(2, 2) << 0.5, -0.1, 0.2, 0.05).finished());
+    info.comps.push_back(makeComp(1, (MatrixXd(2, 2) << 0.1, 0.2, 0.3, 0.4).finished()));
+    info.comps.push_back(makeComp(3, (MatrixXd(2, 2) << 0.5, -0.1, 0.2, 0.05).finished()));
 
     FiffCtfComp comp;
     QVERIFY(info.make_compensator(from, to, comp, exclude));
@@ -706,9 +706,9 @@ void TestFiffCorePython::makeCompensator_matchesPython()
 
 void TestFiffCorePython::makeCompensator_errors()
 {
-    const QList<FiffChInfo> chs{makeChannel("MEG1", FIFFV_MEG_CH, FIFF_UNIT_T), makeChannel("MEG2", FIFFV_MEG_CH, FIFF_UNIT_T), makeChannel("REF1", FIFFV_REF_MEG_CH, FIFF_UNIT_T), makeChannel("REF2", FIFFV_REF_MEG_CH, FIFF_UNIT_T)};
+    const std::vector<FiffChInfo> chs{makeChannel("MEG1", FIFFV_MEG_CH, FIFF_UNIT_T), makeChannel("MEG2", FIFFV_MEG_CH, FIFF_UNIT_T), makeChannel("REF1", FIFFV_REF_MEG_CH, FIFF_UNIT_T), makeChannel("REF2", FIFFV_REF_MEG_CH, FIFF_UNIT_T)};
     FiffInfo info = makeInfo(chs);
-    info.comps << makeComp(1, MatrixXd::Ones(2, 2));
+    info.comps.push_back(makeComp(1, MatrixXd::Ones(2, 2)));
 
     FiffCtfComp comp;
     // Grade not present, on either side.
@@ -716,13 +716,15 @@ void TestFiffCorePython::makeCompensator_errors()
     QVERIFY(!info.make_compensator(2, 0, comp));
 
     // A compensation column naming a channel that is not in the data.
-    FiffInfo missing = makeInfo(chs.mid(0, 3));
-    missing.comps << makeComp(1, MatrixXd::Ones(2, 2));
+    FiffInfo missing = makeInfo({chs.begin(), chs.begin() + 3});
+    missing.comps.push_back(makeComp(1, MatrixXd::Ones(2, 2)));
     QVERIFY(!missing.make_compensator(0, 1, comp));
 
     // Two channels with the same name make the column ambiguous.
-    FiffInfo ambiguous = makeInfo(chs + QList<FiffChInfo>{makeChannel("REF1", FIFFV_REF_MEG_CH, FIFF_UNIT_T)});
-    ambiguous.comps << makeComp(1, MatrixXd::Ones(2, 2));
+    std::vector<FiffChInfo> duplicated = chs;
+    duplicated.push_back(makeChannel("REF1", FIFFV_REF_MEG_CH, FIFF_UNIT_T));
+    FiffInfo ambiguous = makeInfo(duplicated);
+    ambiguous.comps.push_back(makeComp(1, MatrixXd::Ones(2, 2)));
     QVERIFY(!ambiguous.make_compensator(0, 1, comp));
 
     // Excluding the reference channels from a reference-only info leaves nothing.
@@ -730,7 +732,7 @@ void TestFiffCorePython::makeCompensator_errors()
     FiffCtfComp refComp;
     refComp.kind = 1;
     refComp.data = FiffNamedMatrix::SDPtr(new FiffNamedMatrix(1, 2, {"REF1"}, {"REF2", "REF1"}, MatrixXd::Ones(1, 2)));
-    refsOnly.comps << refComp;
+    refsOnly.comps.push_back(refComp);
     QVERIFY(refsOnly.make_compensator(0, 1, comp, false));
     QVERIFY(!refsOnly.make_compensator(0, 1, comp, true));
 }
@@ -1182,14 +1184,14 @@ void TestFiffCorePython::channelTypes_matchPython()
     QCOMPARE(raw.info.chs[6].kind, FIFFV_ECOG_CH);
 
     // mne.channel_indices_by_type: every type with its channel indices, empty types included
-    const QMap<QString, QList<int>> byType = raw.info.channel_indices_by_type();
-    QCOMPARE(byType.value(QStringLiteral("seeg")), QList<int>{4});
-    QCOMPARE(byType.value(QStringLiteral("hbr")), QList<int>{29});
-    QVERIFY(byType.contains(QStringLiteral("mag")));
-    const QMap<QString, QList<int>> megOnly = raw.info.channel_indices_by_type({0, 1, 2});
-    QCOMPARE(megOnly.value(QStringLiteral("grad")), QList<int>{0});
-    QCOMPARE(megOnly.value(QStringLiteral("ref_meg")), QList<int>{2});
-    QVERIFY(megOnly.value(QStringLiteral("eeg")).isEmpty());
+    const auto byType = raw.info.channel_indices_by_type();
+    QCOMPARE(byType.at("seeg"), std::vector<int>{4});
+    QCOMPARE(byType.at("hbr"), std::vector<int>{29});
+    QVERIFY(byType.contains("mag"));
+    const auto megOnly = raw.info.channel_indices_by_type({0, 1, 2});
+    QCOMPARE(megOnly.at("grad"), std::vector<int>{0});
+    QCOMPARE(megOnly.at("ref_meg"), std::vector<int>{2});
+    QVERIFY(megOnly.at("eeg").empty());
 
     // mne _picks_to_idx(info, "data") (mne 1.14.dev; 1.11 cannot read the time-domain fNIRS kinds)
     QList<int> data{0, 1, 2, 3, 4, 5, 6};
@@ -1299,9 +1301,9 @@ void TestFiffCorePython::sparse_createAndConvert()
         return tag;
     };
     qint32 ndim = -1;
-    QVector<qint32> dims;
+    std::vector<qint32> dims;
     QVERIFY(denseTag(FIFFT_MATRIX_FLOAT, 6, {2, 3, 2}).getMatrixDimensions(ndim, dims));
-    QCOMPARE(dims, QVector<qint32>({2, 3}));
+    QCOMPARE(dims, std::vector<qint32>({2, 3}));
     QCOMPARE(denseTag(FIFFT_MATRIX_FLOAT, 6, {2, 3, 2}).toFloatMatrix().size(), Index(6));
     QCOMPARE(denseTag(FIFFT_MATRIX_FLOAT, 6, {20, 30, 2}).toFloatMatrix().size(), Index(0));
     QCOMPARE(denseTag(FIFFT_MATRIX_INT, 6, {-2, -3, 2}).toIntMatrix().size(), Index(0));
@@ -1317,3 +1319,5 @@ void TestFiffCorePython::sparse_createAndConvert()
 
 QTEST_GUILESS_MAIN(TestFiffCorePython)
 #include "test_fiff_core_python.moc"
+
+#include <vector>

@@ -150,7 +150,7 @@ RawModel::RawModel(QFile& qFile, QObject* parent)
 int RawModel::rowCount(const QModelIndex& /*parent*/) const
 {
     if (!m_chInfolist.empty())
-        return m_chInfolist.size();
+        return static_cast<int>(m_chInfolist.size());
     else
         return 0;
 }
@@ -477,7 +477,7 @@ void RawModel::loadFiffInfos()
 {
     //loads chinfos
     for (qint32 i = 0; i < m_pfiffIO->m_qlistRaw[0]->info.nchan; ++i)
-        m_chInfolist.append(m_pfiffIO->m_qlistRaw[0]->info.chs[i]);
+        m_chInfolist.push_back(m_pfiffIO->m_qlistRaw[0]->info.chs[i]);
 
     //loads fiffInfo
     m_pFiffInfo = FiffInfo::SPtr(new FiffInfo(m_pfiffIO->m_qlistRaw[0]->info));
@@ -699,13 +699,13 @@ void RawModel::applyOperator(QModelIndexList chlist, const QSharedPointer<MNEOpe
 
     //filter only channels which include chType in their names
     if (chType == "All") {
-        for (qint32 i = 0; i < m_chInfolist.size(); ++i) {
+        for (qint32 i = 0; i < std::ssize(m_chInfolist); ++i) {
             if (!(m_chInfolist.at(i).ch_name.find("STI") != std::string::npos) && !(m_chInfolist.at(i).ch_name.find("MISC") != std::string::npos) && !(m_chInfolist.at(i).ch_name.find("TRG") != std::string::npos))
                 if (!m_assignedOperators.values(i).contains(operatorPtr))
                     m_assignedOperators.insert(i, operatorPtr);
         }
     } else {
-        for (qint32 i = 0; i < m_chInfolist.size(); ++i) {
+        for (qint32 i = 0; i < std::ssize(m_chInfolist); ++i) {
             if (!(m_chInfolist.at(i).ch_name.find("STI") != std::string::npos) && !(m_chInfolist.at(i).ch_name.find("MISC") != std::string::npos) && !(m_chInfolist.at(i).ch_name.find("TRG") != std::string::npos) && (m_chInfolist.at(i).ch_name.find(chType.toStdString()) != std::string::npos))
                 if (!m_assignedOperators.values(i).contains(operatorPtr))
                     m_assignedOperators.insert(i, operatorPtr);
@@ -733,7 +733,7 @@ void RawModel::applyOperator(QModelIndexList chlist, const QSharedPointer<MNEOpe
 {
     //filter all when chlist is empty
     if (chlist.empty()) {
-        for (qint32 i = 0; i < m_chInfolist.size(); ++i) {
+        for (qint32 i = 0; i < std::ssize(m_chInfolist); ++i) {
             if (chlist.at(i).column() == 1)
                 if (!(m_chInfolist.at(i).ch_name.find("STI") != std::string::npos) && !(m_chInfolist.at(i).ch_name.find("MISC") != std::string::npos) && !(m_chInfolist.at(i).ch_name.find("TRG") != std::string::npos))
                     if (!m_assignedOperators.values(i).contains(operatorPtr))
@@ -824,7 +824,7 @@ void RawModel::updateOperators(QModelIndex chan)
 void RawModel::updateOperators(QModelIndexList chlist)
 {
     if (chlist.empty())
-        for (qint32 i = 0; i < m_chInfolist.size(); ++i)
+        for (qint32 i = 0; i < std::ssize(m_chInfolist); ++i)
             chlist.append(createIndex(static_cast<int>(i), 1));
 
     for (qint32 i = 0; i < chlist.size(); ++i) {
@@ -903,7 +903,7 @@ void RawModel::undoFilter(const QString& chType)
         undoFilter();
     else {
         //filter only channels which include chType in their names
-        for (qint32 i = 0; i < m_chInfolist.size(); ++i)
+        for (qint32 i = 0; i < std::ssize(m_chInfolist); ++i)
             if ((m_chInfolist.at(i).ch_name.find(chType.toStdString()) != std::string::npos))
                 m_assignedOperators.remove(i);
     }
@@ -928,14 +928,14 @@ void RawModel::updateProjections()
 {
     //  Update the SSP projector
     if (m_pFiffInfo) {
-        if (!m_bFileloaded || !m_pfiffIO || m_pfiffIO->m_qlistRaw.isEmpty()) {
+        if (!m_bFileloaded || !m_pfiffIO || m_pfiffIO->m_qlistRaw.empty()) {
             qInfo() << "RawModel::updateProjections skipped because raw data is not loaded yet.";
             return;
         }
 
         //If a minimum of one projector is active set m_bProjActivated to true so that this model applies the ssp to the incoming data
         bool bProjActivated = false;
-        for (qint32 i = 0; i < this->m_pFiffInfo->projs.size(); ++i) {
+        for (qint32 i = 0; i < std::ssize(this->m_pFiffInfo->projs); ++i) {
             if (this->m_pFiffInfo->projs[i].active) {
                 bProjActivated = true;
                 break;
@@ -995,7 +995,7 @@ void RawModel::updateCompensator(int to)
     //  Update the compensator
     //
     if (m_pFiffInfo) {
-        if (!m_bFileloaded || !m_pfiffIO || m_pfiffIO->m_qlistRaw.isEmpty()) {
+        if (!m_bFileloaded || !m_pfiffIO || m_pfiffIO->m_qlistRaw.empty()) {
             qInfo() << "RawModel::updateCompensator skipped because raw data is not loaded yet.";
             return;
         }

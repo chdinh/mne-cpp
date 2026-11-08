@@ -73,7 +73,7 @@ FiffInfo makeMegInfo(int nCh, double sfreq)
         ch.unit = 0;
         ch.unit_mul = 0;
         ch.ch_name = (QString("MEG%1").arg(i + 1, 3, 10, QLatin1Char('0'))).toStdString();
-        info.chs.append(ch);
+        info.chs.push_back(ch);
         info.ch_names.push_back(ch.ch_name);
     }
     Q_UNUSED(sfreq)
@@ -269,7 +269,7 @@ void TestDspAnnotateArtifact::testAmplitudeMatchesPython()
         FiffChInfo ch;
         ch.kind = k == 4 ? FIFFV_STIM_CH : FIFFV_EEG_CH;
         ch.ch_name = k == 4 ? "STI" : "EEG" + std::to_string(k + 1);
-        info.chs.append(ch);
+        info.chs.push_back(ch);
         info.ch_names.push_back(ch.ch_name);
     }
     info.nchan = 6;

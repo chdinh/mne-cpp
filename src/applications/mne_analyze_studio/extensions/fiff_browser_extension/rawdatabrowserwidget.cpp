@@ -437,7 +437,7 @@ bool RawDataBrowserWidget::eventFilter(QObject* watched, QEvent* event)
                 if (mouseEvent->position().x() < dataColumnX) {
                     // Click in label column — toggle bad channel
                     const QModelIndex idx = m_tableView->indexAt(mouseEvent->pos());
-                    if (idx.isValid() && !m_rawModel->channelInfoList().isEmpty()) {
+                    if (idx.isValid() && !m_rawModel->channelInfoList().empty()) {
                         const std::string& chName = m_rawModel->channelInfoList().at(idx.row()).ch_name;
                         const bool isBad = UTILSLIB::contains(m_rawModel->fiffInfo()->bads, chName);
                         QModelIndexList colOneList;

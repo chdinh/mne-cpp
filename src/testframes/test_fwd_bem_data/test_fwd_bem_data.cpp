@@ -474,7 +474,7 @@ private slots:
     {
         // No channels give an empty coil set, not a null one
         FwdCoilSet coilDefs;
-        auto coils = coilDefs.create_meg_coils(QList<FiffChInfo>(), 0, FWD_COIL_ACCURACY_NORMAL);
+        auto coils = coilDefs.create_meg_coils(std::vector<FiffChInfo>(), 0, FWD_COIL_ACCURACY_NORMAL);
         QVERIFY(coils);
         QCOMPARE(coils->ncoil(), 0);
     }
@@ -488,3 +488,5 @@ private slots:
 
 QTEST_GUILESS_MAIN(TestFwdBemData)
 #include "test_fwd_bem_data.moc"
+
+#include <vector>

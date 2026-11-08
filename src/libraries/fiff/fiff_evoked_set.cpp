@@ -120,9 +120,9 @@ FiffEvokedSet FiffEvokedSet::pick_channels(const StringList& include,
         res.info = this->info;
     }
 
-    QList<FiffEvoked>::ConstIterator ev;
-    for (ev = evoked.begin(); ev != evoked.end(); ++ev)
-        res.evoked.push_back(ev->pick_channels(include, exclude));
+    res.evoked.reserve(evoked.size());
+    for (const FiffEvoked& ev : evoked)
+        res.evoked.push_back(ev.pick_channels(include, exclude));
 
     return res;
 }
@@ -163,7 +163,7 @@ bool FiffEvokedSet::find_evoked(const FiffEvokedSet& p_FiffEvokedSet) const
     } else
         qInfo("\nFound %lld evoked response data sets in %s :\n", static_cast<long long>(p_FiffEvokedSet.evoked.size()), p_FiffEvokedSet.info.filename.c_str());
 
-    for (qint32 i = 0; i < p_FiffEvokedSet.evoked.size(); ++i) {
+    for (qint32 i = 0; i < std::ssize(p_FiffEvokedSet.evoked); ++i) {
         qInfo("%s (%s)\n", p_FiffEvokedSet.evoked.at(i).comment.toUtf8().constData(), p_FiffEvokedSet.evoked.at(i).aspectKindToString().toUtf8().constBegin());
     }
 
@@ -223,16 +223,16 @@ Expected<void> FiffEvokedSet::save(const std::filesystem::path& path) const
 
 //=============================================================================================================
 
-FiffEvokedSet FiffEvokedSet::computeGrandAverage(const QList<FiffEvokedSet>& evokedSets)
+FiffEvokedSet FiffEvokedSet::computeGrandAverage(const std::vector<FiffEvokedSet>& evokedSets)
 {
     FiffEvokedSet grandAvg;
 
-    if (evokedSets.isEmpty()) {
+    if (evokedSets.empty()) {
         qWarning() << "[FiffEvokedSet::computeGrandAverage] No evoked sets provided.";
         return grandAvg;
     }
 
-    int nCat = evokedSets.first().evoked.size();
+    int nCat = static_cast<int>(evokedSets.front().evoked.size());
     for (const FiffEvokedSet& eset : evokedSets) {
         nCat = qMin(nCat, static_cast<int>(eset.evoked.size()));
     }
@@ -248,7 +248,7 @@ FiffEvokedSet FiffEvokedSet::computeGrandAverage(const QList<FiffEvokedSet>& evo
             }
         }
         StringList common;
-        for (const std::string& name : evokedSets.first().evoked[j].info.ch_names) {
+        for (const std::string& name : evokedSets.front().evoked[j].info.ch_names) {
             bool inAll = !UTILSLIB::contains(bads, name);
             for (const FiffEvokedSet& eset : evokedSets) {
                 inAll = inAll && UTILSLIB::contains(eset.evoked[j].info.ch_names, name);
@@ -258,9 +258,10 @@ FiffEvokedSet FiffEvokedSet::computeGrandAverage(const QList<FiffEvokedSet>& evo
             }
         }
 
-        QList<FiffEvoked> picked;
+        std::vector<FiffEvoked> picked;
+        picked.reserve(evokedSets.size());
         for (const FiffEvokedSet& eset : evokedSets) {
-            picked.append(eset.evoked[j].pick_channels(common));
+            picked.push_back(eset.evoked[j].pick_channels(common));
         }
         FiffEvoked avg = FiffEvoked::combine(picked, FiffEvoked::CombineWeights::Equal);
         if (avg.empty()) {
@@ -269,7 +270,7 @@ FiffEvokedSet FiffEvokedSet::computeGrandAverage(const QList<FiffEvokedSet>& evo
         avg.nave = static_cast<fiff_int_t>(evokedSets.size());
         avg.comment = QString("Grand average (n = %1)").arg(avg.nave);
         grandAvg.info = avg.info;
-        grandAvg.evoked.append(avg);
+        grandAvg.evoked.push_back(avg);
     }
 
     return grandAvg;
@@ -310,7 +311,7 @@ FiffEvokedSet FiffEvokedSet::computeAverages(const FiffRawData& raw,
     log += QString("Averaging: %1\n").arg(desc.comment);
 
     // Process each category
-    for (int j = 0; j < desc.categories.size(); ++j) {
+    for (int j = 0; j < std::ssize(desc.categories); ++j) {
         const AverageCategory& cat = desc.categories[j];
 
         // Compute sample indices
@@ -414,7 +415,7 @@ FiffEvokedSet FiffEvokedSet::computeAverages(const FiffRawData& raw,
 
         evoked.info = raw.info;
 
-        evokedSet.evoked.append(evoked);
+        evokedSet.evoked.push_back(evoked);
         log += QString("    nave = %1\n").arg(nave);
     }
 

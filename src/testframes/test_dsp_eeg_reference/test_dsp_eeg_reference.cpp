@@ -88,7 +88,7 @@ private:
             ch.unit = 107; // FIFF_UNIT_V
             ch.unit_mul = 0;
             ch.coord_frame = 0;
-            info.chs.append(ch);
+            info.chs.push_back(ch);
             info.ch_names.push_back(names[i]);
         }
 
@@ -381,7 +381,7 @@ private slots:
             ch.scanNo = ch.logNo = i + 1;
             ch.kind = i < 4 ? FIFFV_EEG_CH : FIFFV_MEG_CH;
             ch.ch_name = chNames[i];
-            info.chs.append(ch);
+            info.chs.push_back(ch);
             info.ch_names.push_back(chNames[i]);
         }
         info.nchan = static_cast<int>(chNames.size());
@@ -426,7 +426,7 @@ private slots:
 
         QCOMPARE(data, orig);
         QCOMPARE(info.projs.size(), 1);
-        const FiffProj& proj = info.projs.first();
+        const FiffProj& proj = info.projs.front();
         QCOMPARE(proj.desc, QString("Average EEG reference"));
         QCOMPARE(proj.kind, static_cast<fiff_int_t>(FIFFV_PROJ_ITEM_EEG_AVREF));
         QVERIFY(!proj.active);

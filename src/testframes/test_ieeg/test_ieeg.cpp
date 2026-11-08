@@ -290,7 +290,7 @@ void TestIeeg::bipolarPairsFollowLeads()
         FiffChInfo ch;
         ch.ch_name = c.name;
         ch.kind = FIFFV_SEEG_CH;
-        info.chs.append(ch);
+        info.chs.push_back(ch);
         info.ch_names.push_back(c.name);
     }
     info.nchan = int(contacts.size());

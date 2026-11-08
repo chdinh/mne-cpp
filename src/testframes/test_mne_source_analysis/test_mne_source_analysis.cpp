@@ -101,7 +101,7 @@ private slots:
 
         FiffEvokedSet evokedSet(m_sEvokedFile.toStdU16String(), {}, {{-0.2f, 0.0f}});
 
-        QVERIFY(!evokedSet.evoked.isEmpty());
+        QVERIFY(!evokedSet.evoked.empty());
         FiffEvoked& evoked = evokedSet.evoked[0];
         QString kind = evoked.aspectKindToString();
         QVERIFY(!kind.isEmpty());
@@ -344,7 +344,7 @@ private slots:
         QVERIFY(!fwd.src.empty());
         QCOMPARE(fwd.src.size(), 2);
 
-        QList<Eigen::VectorXi> vertno = fwd.src.get_vertno();
+        std::vector<Eigen::VectorXi> vertno = fwd.src.get_vertno();
         QCOMPARE(vertno.size(), 2);
         QVERIFY(vertno[0].size() > 0);
         QVERIFY(vertno[1].size() > 0);

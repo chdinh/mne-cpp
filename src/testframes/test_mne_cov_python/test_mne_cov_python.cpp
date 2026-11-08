@@ -362,7 +362,7 @@ void TestMneCovPython::rejectsBadInput()
                                     FIFFV_MNE_NOISE_COV);
     QVERIFY(named);
     QVERIFY(named->classify_channels({}, 0) != 0);
-    QList<FiffChInfo> chs(3);
+    std::vector<FiffChInfo> chs(3);
     chs[0].ch_name = "E";
     chs[0].kind = FIFFV_EEG_CH;
     chs[1].ch_name = "M";
@@ -389,3 +389,5 @@ void TestMneCovPython::rejectsBadInput()
 
 QTEST_GUILESS_MAIN(TestMneCovPython)
 #include "test_mne_cov_python.moc"
+
+#include <vector>

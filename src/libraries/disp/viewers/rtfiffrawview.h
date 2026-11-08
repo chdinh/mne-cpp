@@ -28,6 +28,8 @@
 //=============================================================================================================
 
 #include "../disp_global.h"
+
+#include <vector>
 #include "abstractview.h"
 
 #include <fiff/fiff_proj.h>
@@ -283,7 +285,7 @@ public:
      *
      * @param[in] projs    The new projectors.
      */
-    void updateProjection(const QList<FIFFLIB::FiffProj>& projs);
+    void updateProjection(const std::vector<FIFFLIB::FiffProj>& projs);
 
     //=========================================================================================================
     /**

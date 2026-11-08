@@ -24,6 +24,8 @@
 //=============================================================================================================
 
 #include "mne_global.h"
+
+#include <vector>
 #include "mne_sparse_named_matrix.h"
 
 #include <fiff/fiff_types.h>
@@ -96,7 +98,7 @@ public:
      *
      * @return The number of valid derived channels.
      */
-    int validate(const QList<FIFFLIB::FiffChInfo>& chInfo);
+    int validate(const std::vector<FIFFLIB::FiffChInfo>& chInfo);
 
 public:
     QString filename;                                 /**< Source file name the derivation was loaded from. */
@@ -104,7 +106,7 @@ public:
     std::unique_ptr<MNESparseNamedMatrix> deriv_data; /**< The derivation data itself (sparse named matrix). */
     Eigen::VectorXi in_use;                           /**< Per-column count of non-zero elements in the derivation data. */
     Eigen::VectorXi valid;                            /**< Per-derivation validity flags considering input channel units. */
-    QList<FIFFLIB::FiffChInfo> chs;                   /**< First matching channel info for each derivation. */
+    std::vector<FIFFLIB::FiffChInfo> chs;             /**< First matching channel info for each derivation. */
 };
 
 //=============================================================================================================

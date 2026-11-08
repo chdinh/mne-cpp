@@ -21,6 +21,8 @@
 
 #include "averaging_global.h"
 
+#include <vector>
+
 #include <scShared/Plugins/abstractalgorithm.h>
 #include <utils/generics/circularbuffer.h>
 
@@ -220,7 +222,7 @@ private:
 
 signals:
     void stimChannelsChanged(const QMap<QString, int>& mapStimChsIndexNames);
-    void fiffChInfoChanged(const QList<FIFFLIB::FiffChInfo>& fiffChInfoList);
+    void fiffChInfoChanged(const std::vector<FIFFLIB::FiffChInfo>& fiffChInfoList);
     void evokedSetChanged(const FIFFLIB::FiffEvokedSet& evokedSet);
 };
 } // NAMESPACE

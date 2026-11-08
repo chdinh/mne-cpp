@@ -426,7 +426,7 @@ void TestMneBrowseData::testRawModelChannelInfo()
     model.loadFiffData(&file);
 
     const auto& chInfo = model.channelInfoList();
-    QVERIFY(!chInfo.isEmpty());
+    QVERIFY(!chInfo.empty());
     QCOMPARE(chInfo.size(), model.fiffInfo()->nchan);
 
     // Test channelUnit

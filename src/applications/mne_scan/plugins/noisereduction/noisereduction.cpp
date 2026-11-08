@@ -17,6 +17,8 @@
 //=============================================================================================================
 
 #include "noisereduction.h"
+
+#include <vector>
 #include <utils/string_utils.h>
 
 #include <disp/viewers/scalingview.h>
@@ -398,14 +400,14 @@ void NoiseReduction::run()
 
 //=============================================================================================================
 
-void NoiseReduction::updateProjection(const QList<FIFFLIB::FiffProj>& projs)
+void NoiseReduction::updateProjection(const std::vector<FIFFLIB::FiffProj>& projs)
 {
     //  Update the SSP projector
     if (m_pFiffInfo) {
         m_mutex.lock();
         //If a minimum of one projector is active set m_bProjActivated to true so that this model applies the ssp to the incoming data
         m_bProjActivated = false;
-        for (qint32 i = 0; i < projs.size(); ++i) {
+        for (qint32 i = 0; i < std::ssize(projs); ++i) {
             if (projs[i].active) {
                 m_bProjActivated = true;
                 break;
@@ -518,7 +520,7 @@ void NoiseReduction::setFilterChannelType(QString sType)
     //Create channel filter list independent from channelNames
     m_lFilterChannelList.resize(0);
 
-    for (int i = 0; i < m_pFiffInfo->chs.size(); ++i) {
+    for (int i = 0; i < std::ssize(m_pFiffInfo->chs); ++i) {
         if ((m_pFiffInfo->chs.at(i).kind == FIFFV_MEG_CH || m_pFiffInfo->chs.at(i).kind == FIFFV_EEG_CH ||
              m_pFiffInfo->chs.at(i).kind == FIFFV_EOG_CH || m_pFiffInfo->chs.at(i).kind == FIFFV_ECG_CH ||
              m_pFiffInfo->chs.at(i).kind == FIFFV_EMG_CH) /* && !m_pFiffInfo->bads.contains(m_pFiffInfo->chs.at(i).ch_name)*/) {
@@ -572,7 +574,7 @@ void NoiseReduction::initSphara()
     m_vecIndicesFirstVV.resize(0);
     m_vecIndicesSecondVV.resize(0);
 
-    for (int r = 0; r < m_pFiffInfo->chs.size(); ++r) {
+    for (int r = 0; r < std::ssize(m_pFiffInfo->chs); ++r) {
         //Find gardiometers
         if (m_pFiffInfo->chs.at(r).chpos.coil_type == 3012) {
             m_vecIndicesFirstVV.conservativeResize(m_vecIndicesFirstVV.rows() + 1);
@@ -588,7 +590,7 @@ void NoiseReduction::initSphara()
 
     //Generate indices used to create the SPHARA operators for babyMEG
     m_vecIndicesFirstBabyMEG.resize(0);
-    for (int r = 0; r < m_pFiffInfo->chs.size(); ++r) {
+    for (int r = 0; r < std::ssize(m_pFiffInfo->chs); ++r) {
         //Find inner layer
         if (m_pFiffInfo->chs.at(r).chpos.coil_type == 7002) {
             m_vecIndicesFirstBabyMEG.conservativeResize(m_vecIndicesFirstBabyMEG.rows() + 1);
@@ -604,7 +606,7 @@ void NoiseReduction::initSphara()
 
     //Generate indices used to create the SPHARA operators for EEG layouts
     m_vecIndicesFirstEEG.resize(0);
-    for (int r = 0; r < m_pFiffInfo->chs.size(); ++r) {
+    for (int r = 0; r < std::ssize(m_pFiffInfo->chs); ++r) {
         //Find EEG
         if (m_pFiffInfo->chs.at(r).kind == FIFFV_EEG_CH) {
             m_vecIndicesFirstEEG.conservativeResize(m_vecIndicesFirstEEG.rows() + 1);

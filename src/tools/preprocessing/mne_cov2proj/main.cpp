@@ -15,6 +15,8 @@
 //=============================================================================================================
 
 #include <fiff/fiff_cov.h>
+
+#include <vector>
 #include <fiff/fiff_info.h>
 #include <fiff/fiff_proj.h>
 #include <fiff/fiff_stream.h>
@@ -138,7 +140,7 @@ int main(int argc, char* argv[])
         nProj = nEig;
 
     // Eigenvectors are in ascending order; take from the end
-    QList<FiffProj> projs;
+    std::vector<FiffProj> projs;
     for (int p = 0; p < nProj; ++p) {
         int idx = nEig - 1 - p;
         FiffProj proj;
@@ -156,7 +158,7 @@ int main(int argc, char* argv[])
         data->data = eigenvectors.col(idx).transpose();
 
         proj.data = data;
-        projs.append(proj);
+        projs.push_back(proj);
 
         qInfo("  Projector %d: eigenvalue = %g", p + 1, eigenvalues(idx));
     }

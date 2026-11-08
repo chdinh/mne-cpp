@@ -19,6 +19,8 @@
 //=============================================================================================================
 
 #include "channelinfomodel.h"
+
+#include <vector>
 #include <utils/string_utils.h>
 #include "mneoperator.h"
 
@@ -74,8 +76,8 @@ ChannelInfoModel::ChannelInfoModel(QObject* parent)
 int ChannelInfoModel::rowCount(const QModelIndex& /*parent*/) const
 {
     //Return number of stored evoked sets
-    if (!m_pFiffInfo->chs.isEmpty())
-        return m_pFiffInfo->chs.size();
+    if (!m_pFiffInfo->chs.empty())
+        return static_cast<int>(m_pFiffInfo->chs.size());
     else
         return 0;
 }
@@ -103,7 +105,7 @@ QVariant ChannelInfoModel::headerData(int section, Qt::Orientation orientation, 
         case Qt::DisplayRole: {
             //Return the number and description/comment of the fiff evoked data in the set as vertical header
             if (orientation == Qt::Vertical)
-                if (section < m_pFiffInfo->chs.size())
+                if (section < std::ssize(m_pFiffInfo->chs))
                     return QString("Ch %1").arg(section);
 
             //Return the horizontal header
@@ -159,7 +161,7 @@ QVariant ChannelInfoModel::headerData(int section, Qt::Orientation orientation, 
 
 QVariant ChannelInfoModel::data(const QModelIndex& index, int role) const
 {
-    if (index.row() >= m_pFiffInfo->chs.size())
+    if (index.row() >= std::ssize(m_pFiffInfo->chs))
         return QVariant();
 
     if (index.isValid()) {
@@ -599,10 +601,10 @@ StringList ChannelInfoModel::getBadChannelList()
 void ChannelInfoModel::mapLayoutToChannels()
 {
     //Map channels to layout
-    QList<FiffChInfo> channelList = m_pFiffInfo->chs;
-    for (int i = 0; i < channelList.size(); i++) {
+    const std::vector<FiffChInfo>& channelList = m_pFiffInfo->chs;
+    for (int i = 0; i < std::ssize(channelList); i++) {
         //Get current channel information
-        FiffChInfo chInfo = channelList.at(i);
+        const FiffChInfo& chInfo = channelList[i];
         QString chName = QString::fromStdString(chInfo.ch_name);
         QRegularExpression regExpRemove;
 

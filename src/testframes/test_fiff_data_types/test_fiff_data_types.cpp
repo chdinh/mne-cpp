@@ -174,7 +174,7 @@ private slots:
     void evokedSet_defaultCtor()
     {
         FiffEvokedSet es;
-        QVERIFY(es.evoked.isEmpty());
+        QVERIFY(es.evoked.empty());
     }
 
     void evokedSet_subtractBaseline()
@@ -195,7 +195,7 @@ private slots:
             QSKIP("Sample evoked file not found");
         }
         FiffEvokedSet es(path.toStdU16String());
-        QVERIFY(!es.evoked.isEmpty());
+        QVERIFY(!es.evoked.empty());
         QVERIFY(es.info.nchan > 0);
     }
 
@@ -206,7 +206,7 @@ private slots:
             QSKIP("Sample evoked file not found");
         }
         FiffEvokedSet es(path.toStdU16String());
-        if (es.evoked.isEmpty())
+        if (es.evoked.empty())
             QSKIP("Failed to load evoked set");
 
         StringList include;
@@ -217,7 +217,7 @@ private slots:
 
         // Single evoked: picks rows by name; no selection or no match keeps everything; a name past the data
         // rows (info and data out of step) gives a zero row instead of reading past the data
-        FiffEvoked evoked = es.evoked.first();
+        FiffEvoked evoked = es.evoked.front();
         const FiffEvoked one = evoked.pick_channels({include[1]});
         QCOMPARE(one.data, evoked.data.row(1));
         QCOMPARE(evoked.pick_channels({}).data.rows(), evoked.data.rows());
@@ -478,8 +478,8 @@ private slots:
         proj.data = data;
 
         // Activate
-        QList<FiffProj> projs;
-        projs << proj;
+        std::vector<FiffProj> projs;
+        projs.push_back(proj);
         FiffProj::activate_projs(projs);
         QVERIFY(projs[0].active);
     }
@@ -498,3 +498,5 @@ private slots:
 
 QTEST_GUILESS_MAIN(TestFiffDataTypes)
 #include "test_fiff_data_types.moc"
+
+#include <vector>

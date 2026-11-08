@@ -163,15 +163,15 @@ private slots:
         FiffRawData raw(rawPath().toStdString());
 
         // Collect MEG channels
-        QList<FiffChInfo> megChs;
+        std::vector<FiffChInfo> megChs;
         for (int i = 0; i < raw.info.nchan; ++i) {
             if (raw.info.chs[i].kind == FIFFV_MEG_CH) {
-                megChs.append(raw.info.chs[i]);
+                megChs.push_back(raw.info.chs[i]);
             }
         }
 
         // Create coils using dev->head transform so coord_frame is set
-        auto coils = coilDefs->create_meg_coils(megChs, megChs.size(),
+        auto coils = coilDefs->create_meg_coils(megChs, static_cast<int>(megChs.size()),
                                                 FWD_COIL_ACCURACY_NORMAL,
                                                 raw.info.dev_head_t);
         QVERIFY(coils != nullptr);
@@ -197,15 +197,15 @@ private slots:
         FiffRawData raw(rawPath().toStdString());
 
         // Collect only EEG channels
-        QList<FiffChInfo> eegChs;
+        std::vector<FiffChInfo> eegChs;
         for (int i = 0; i < raw.info.nchan; ++i) {
             if (raw.info.chs[i].kind == FIFFV_EEG_CH) {
-                eegChs.append(raw.info.chs[i]);
+                eegChs.push_back(raw.info.chs[i]);
             }
         }
         QVERIFY(eegChs.size() > 0);
 
-        auto eegEls = FwdCoilSet::create_eeg_els(eegChs, eegChs.size());
+        auto eegEls = FwdCoilSet::create_eeg_els(eegChs, static_cast<int>(eegChs.size()));
         QVERIFY(eegEls != nullptr);
         QVERIFY(eegEls->ncoil() > 0);
 
@@ -229,12 +229,12 @@ private slots:
 
         auto coilDefs = FwdCoilSet::read_coil_defs(coilDefPath());
         FiffRawData raw(rawPath().toStdString());
-        QList<FiffChInfo> megChs;
+        std::vector<FiffChInfo> megChs;
         for (int i = 0; i < raw.info.nchan; ++i) {
             if (raw.info.chs[i].kind == FIFFV_MEG_CH)
-                megChs.append(raw.info.chs[i]);
+                megChs.push_back(raw.info.chs[i]);
         }
-        auto coils = coilDefs->create_meg_coils(megChs, megChs.size(), FWD_COIL_ACCURACY_NORMAL, raw.info.dev_head_t);
+        auto coils = coilDefs->create_meg_coils(megChs, static_cast<int>(megChs.size()), FWD_COIL_ACCURACY_NORMAL, raw.info.dev_head_t);
         FiffCoordTrans head_mri_t(transPath().toStdU16String(), FIFFV_COORD_MRI, FIFFV_COORD_HEAD);
         model->fwd_bem_set_head_mri_t(head_mri_t);
         model->fwd_bem_specify_coils(coils.get());
@@ -260,12 +260,12 @@ private slots:
 
         auto coilDefs = FwdCoilSet::read_coil_defs(coilDefPath());
         FiffRawData raw(rawPath().toStdString());
-        QList<FiffChInfo> megChs;
+        std::vector<FiffChInfo> megChs;
         for (int i = 0; i < raw.info.nchan; ++i) {
             if (raw.info.chs[i].kind == FIFFV_MEG_CH)
-                megChs.append(raw.info.chs[i]);
+                megChs.push_back(raw.info.chs[i]);
         }
-        auto coils = coilDefs->create_meg_coils(megChs, megChs.size(), FWD_COIL_ACCURACY_NORMAL, raw.info.dev_head_t);
+        auto coils = coilDefs->create_meg_coils(megChs, static_cast<int>(megChs.size()), FWD_COIL_ACCURACY_NORMAL, raw.info.dev_head_t);
         FiffCoordTrans head_mri_t(transPath().toStdU16String(), FIFFV_COORD_MRI, FIFFV_COORD_HEAD);
         model->fwd_bem_set_head_mri_t(head_mri_t);
         model->fwd_bem_specify_coils(coils.get());
@@ -287,12 +287,12 @@ private slots:
         model->fwd_bem_load_recompute_solution(bemSolPath(), FWD_BEM_CONSTANT_COLL, 0);
 
         FiffRawData raw(rawPath().toStdString());
-        QList<FiffChInfo> eegChs;
+        std::vector<FiffChInfo> eegChs;
         for (int i = 0; i < raw.info.nchan; ++i) {
             if (raw.info.chs[i].kind == FIFFV_EEG_CH)
-                eegChs.append(raw.info.chs[i]);
+                eegChs.push_back(raw.info.chs[i]);
         }
-        auto eegEls = FwdCoilSet::create_eeg_els(eegChs, eegChs.size());
+        auto eegEls = FwdCoilSet::create_eeg_els(eegChs, static_cast<int>(eegChs.size()));
         FiffCoordTrans head_mri_t(transPath().toStdU16String(), FIFFV_COORD_MRI, FIFFV_COORD_HEAD);
         model->fwd_bem_set_head_mri_t(head_mri_t);
         model->fwd_bem_specify_els(eegEls.get());
@@ -315,12 +315,12 @@ private slots:
         model->fwd_bem_load_recompute_solution(bemSolPath(), FWD_BEM_LINEAR_COLL, 0);
 
         FiffRawData raw(rawPath().toStdString());
-        QList<FiffChInfo> eegChs;
+        std::vector<FiffChInfo> eegChs;
         for (int i = 0; i < raw.info.nchan; ++i) {
             if (raw.info.chs[i].kind == FIFFV_EEG_CH)
-                eegChs.append(raw.info.chs[i]);
+                eegChs.push_back(raw.info.chs[i]);
         }
-        auto eegEls = FwdCoilSet::create_eeg_els(eegChs, eegChs.size());
+        auto eegEls = FwdCoilSet::create_eeg_els(eegChs, static_cast<int>(eegChs.size()));
         FiffCoordTrans head_mri_t(transPath().toStdU16String(), FIFFV_COORD_MRI, FIFFV_COORD_HEAD);
         model->fwd_bem_set_head_mri_t(head_mri_t);
         model->fwd_bem_specify_els(eegEls.get());
@@ -344,12 +344,12 @@ private slots:
 
         auto coilDefs = FwdCoilSet::read_coil_defs(coilDefPath());
         FiffRawData raw(rawPath().toStdString());
-        QList<FiffChInfo> megChs;
+        std::vector<FiffChInfo> megChs;
         for (int i = 0; i < raw.info.nchan; ++i) {
             if (raw.info.chs[i].kind == FIFFV_MEG_CH)
-                megChs.append(raw.info.chs[i]);
+                megChs.push_back(raw.info.chs[i]);
         }
-        auto coils = coilDefs->create_meg_coils(megChs, megChs.size(), FWD_COIL_ACCURACY_NORMAL, raw.info.dev_head_t);
+        auto coils = coilDefs->create_meg_coils(megChs, static_cast<int>(megChs.size()), FWD_COIL_ACCURACY_NORMAL, raw.info.dev_head_t);
         FiffCoordTrans head_mri_t(transPath().toStdU16String(), FIFFV_COORD_MRI, FIFFV_COORD_HEAD);
         model->fwd_bem_set_head_mri_t(head_mri_t);
         model->fwd_bem_specify_coils(coils.get());
@@ -376,12 +376,12 @@ private slots:
         model->fwd_bem_load_recompute_solution(bemSolPath(), FWD_BEM_CONSTANT_COLL, 0);
 
         FiffRawData raw(rawPath().toStdString());
-        QList<FiffChInfo> eegChs;
+        std::vector<FiffChInfo> eegChs;
         for (int i = 0; i < raw.info.nchan; ++i) {
             if (raw.info.chs[i].kind == FIFFV_EEG_CH)
-                eegChs.append(raw.info.chs[i]);
+                eegChs.push_back(raw.info.chs[i]);
         }
-        auto eegEls = FwdCoilSet::create_eeg_els(eegChs, eegChs.size());
+        auto eegEls = FwdCoilSet::create_eeg_els(eegChs, static_cast<int>(eegChs.size()));
         FiffCoordTrans head_mri_t(transPath().toStdU16String(), FIFFV_COORD_MRI, FIFFV_COORD_HEAD);
         model->fwd_bem_set_head_mri_t(head_mri_t);
         model->fwd_bem_specify_els(eegEls.get());
@@ -411,12 +411,12 @@ private slots:
 
         auto coilDefs = FwdCoilSet::read_coil_defs(coilDefPath());
         FiffRawData raw(rawPath().toStdString());
-        QList<FiffChInfo> megChs;
+        std::vector<FiffChInfo> megChs;
         for (int i = 0; i < raw.info.nchan; ++i) {
             if (raw.info.chs[i].kind == FIFFV_MEG_CH)
-                megChs.append(raw.info.chs[i]);
+                megChs.push_back(raw.info.chs[i]);
         }
-        auto coils = coilDefs->create_meg_coils(megChs, megChs.size(), FWD_COIL_ACCURACY_NORMAL, raw.info.dev_head_t);
+        auto coils = coilDefs->create_meg_coils(megChs, static_cast<int>(megChs.size()), FWD_COIL_ACCURACY_NORMAL, raw.info.dev_head_t);
         FiffCoordTrans head_mri_t(transPath().toStdU16String(), FIFFV_COORD_MRI, FIFFV_COORD_HEAD);
         model->fwd_bem_set_head_mri_t(head_mri_t);
         model->fwd_bem_specify_coils(coils.get());
@@ -438,12 +438,12 @@ private slots:
         model->fwd_bem_load_recompute_solution(bemSolPath(), FWD_BEM_LINEAR_COLL, 0);
 
         FiffRawData raw(rawPath().toStdString());
-        QList<FiffChInfo> eegChs;
+        std::vector<FiffChInfo> eegChs;
         for (int i = 0; i < raw.info.nchan; ++i) {
             if (raw.info.chs[i].kind == FIFFV_EEG_CH)
-                eegChs.append(raw.info.chs[i]);
+                eegChs.push_back(raw.info.chs[i]);
         }
-        auto eegEls = FwdCoilSet::create_eeg_els(eegChs, eegChs.size());
+        auto eegEls = FwdCoilSet::create_eeg_els(eegChs, static_cast<int>(eegChs.size()));
         FiffCoordTrans head_mri_t(transPath().toStdU16String(), FIFFV_COORD_MRI, FIFFV_COORD_HEAD);
         model->fwd_bem_set_head_mri_t(head_mri_t);
         model->fwd_bem_specify_els(eegEls.get());
@@ -465,12 +465,12 @@ private slots:
 
         auto coilDefs = FwdCoilSet::read_coil_defs(coilDefPath());
         FiffRawData raw(rawPath().toStdString());
-        QList<FiffChInfo> megChs;
+        std::vector<FiffChInfo> megChs;
         for (int i = 0; i < raw.info.nchan; ++i) {
             if (raw.info.chs[i].kind == FIFFV_MEG_CH)
-                megChs.append(raw.info.chs[i]);
+                megChs.push_back(raw.info.chs[i]);
         }
-        auto coils = coilDefs->create_meg_coils(megChs, megChs.size(), FWD_COIL_ACCURACY_NORMAL);
+        auto coils = coilDefs->create_meg_coils(megChs, static_cast<int>(megChs.size()), FWD_COIL_ACCURACY_NORMAL);
 
         Vector3f rd(0.0f, 0.02f, 0.06f);
         Vector3f Q(1e-8f, 0.0f, 0.0f);
@@ -489,12 +489,12 @@ private slots:
 
         auto coilDefs = FwdCoilSet::read_coil_defs(coilDefPath());
         FiffRawData raw(rawPath().toStdString());
-        QList<FiffChInfo> megChs;
+        std::vector<FiffChInfo> megChs;
         for (int i = 0; i < raw.info.nchan; ++i) {
             if (raw.info.chs[i].kind == FIFFV_MEG_CH)
-                megChs.append(raw.info.chs[i]);
+                megChs.push_back(raw.info.chs[i]);
         }
-        auto coils = coilDefs->create_meg_coils(megChs, megChs.size(), FWD_COIL_ACCURACY_NORMAL);
+        auto coils = coilDefs->create_meg_coils(megChs, static_cast<int>(megChs.size()), FWD_COIL_ACCURACY_NORMAL);
 
         Vector3f rd(0.0f, 0.02f, 0.06f);
         MatrixXf Bval = MatrixXf::Zero(3, coils->ncoil());
@@ -512,12 +512,12 @@ private slots:
 
         auto coilDefs = FwdCoilSet::read_coil_defs(coilDefPath());
         FiffRawData raw(rawPath().toStdString());
-        QList<FiffChInfo> megChs;
+        std::vector<FiffChInfo> megChs;
         for (int i = 0; i < raw.info.nchan; ++i) {
             if (raw.info.chs[i].kind == FIFFV_MEG_CH)
-                megChs.append(raw.info.chs[i]);
+                megChs.push_back(raw.info.chs[i]);
         }
-        auto coils = coilDefs->create_meg_coils(megChs, megChs.size(), FWD_COIL_ACCURACY_NORMAL);
+        auto coils = coilDefs->create_meg_coils(megChs, static_cast<int>(megChs.size()), FWD_COIL_ACCURACY_NORMAL);
 
         Vector3f rd(0.0f, 0.02f, 0.06f);
         Vector3f Q(1e-8f, 0.0f, 0.0f);
@@ -545,12 +545,12 @@ private slots:
 
         auto coilDefs = FwdCoilSet::read_coil_defs(coilDefPath());
         FiffRawData raw(rawPath().toStdString());
-        QList<FiffChInfo> megChs;
+        std::vector<FiffChInfo> megChs;
         for (int i = 0; i < raw.info.nchan; ++i) {
             if (raw.info.chs[i].kind == FIFFV_MEG_CH)
-                megChs.append(raw.info.chs[i]);
+                megChs.push_back(raw.info.chs[i]);
         }
-        auto coils = coilDefs->create_meg_coils(megChs, megChs.size(), FWD_COIL_ACCURACY_NORMAL);
+        auto coils = coilDefs->create_meg_coils(megChs, static_cast<int>(megChs.size()), FWD_COIL_ACCURACY_NORMAL);
 
         // Magnetic dipole at origin with z-directed moment
         Vector3f rm(0.0f, 0.0f, 0.0f);
@@ -568,12 +568,12 @@ private slots:
 
         auto coilDefs = FwdCoilSet::read_coil_defs(coilDefPath());
         FiffRawData raw(rawPath().toStdString());
-        QList<FiffChInfo> megChs;
+        std::vector<FiffChInfo> megChs;
         for (int i = 0; i < raw.info.nchan; ++i) {
             if (raw.info.chs[i].kind == FIFFV_MEG_CH)
-                megChs.append(raw.info.chs[i]);
+                megChs.push_back(raw.info.chs[i]);
         }
-        auto coils = coilDefs->create_meg_coils(megChs, megChs.size(), FWD_COIL_ACCURACY_NORMAL);
+        auto coils = coilDefs->create_meg_coils(megChs, static_cast<int>(megChs.size()), FWD_COIL_ACCURACY_NORMAL);
 
         Vector3f rm(0.0f, 0.0f, 0.0f);
         MatrixXf Bval = MatrixXf::Zero(3, coils->ncoil());
@@ -588,12 +588,12 @@ private slots:
         // A magnetic dipole has no electric potential: the magnetic dipole fit uses these functions as its EEG model.
         // The sphere-model fields likewise apply to MEG coils only.
         FiffRawData raw(rawPath().toStdString());
-        QList<FiffChInfo> eegChs;
+        std::vector<FiffChInfo> eegChs;
         for (int i = 0; i < raw.info.nchan; ++i) {
             if (raw.info.chs[i].kind == FIFFV_EEG_CH)
-                eegChs.append(raw.info.chs[i]);
+                eegChs.push_back(raw.info.chs[i]);
         }
-        auto els = FwdCoilSet::create_eeg_els(eegChs, eegChs.size());
+        auto els = FwdCoilSet::create_eeg_els(eegChs, static_cast<int>(eegChs.size()));
         QVERIFY(els && els->ncoil() > 0);
         const int n = els->ncoil();
         const Vector3f rd(0.0f, 0.02f, 0.06f);
@@ -727,3 +727,5 @@ private slots:
 
 QTEST_GUILESS_MAIN(TestFwdBemFieldComputation)
 #include "test_fwd_bem_field_computation.moc"
+
+#include <vector>

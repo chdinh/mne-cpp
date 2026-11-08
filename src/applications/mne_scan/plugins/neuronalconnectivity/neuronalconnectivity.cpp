@@ -369,7 +369,7 @@ void NeuronalConnectivity::updateRTEV(SCMEASLIB::Measurement::SPtr pMeasurement)
 
         //Fiff Information of the evoked
         if (!m_pFiffInfo && pFiffEvokedSet->evoked.size() > 0) {
-            for (int i = 0; i < pFiffEvokedSet->evoked.size(); ++i) {
+            for (int i = 0; i < std::ssize(pFiffEvokedSet->evoked); ++i) {
                 if (pFiffEvokedSet->evoked.at(i).comment == m_sAvrType) {
                     m_pFiffInfo = QSharedPointer<FiffInfo>(new FiffInfo(pFiffEvokedSet->info));
 
@@ -394,11 +394,11 @@ void NeuronalConnectivity::updateRTEV(SCMEASLIB::Measurement::SPtr pMeasurement)
         }
 
         if (m_pFiffInfo) {
-            if (!pFiffEvokedSet->evoked.isEmpty()) {
-                m_iBlockSize = pFiffEvokedSet->evoked.first().data.cols();
+            if (!pFiffEvokedSet->evoked.empty()) {
+                m_iBlockSize = pFiffEvokedSet->evoked.front().data.cols();
             }
 
-            for (int i = 0; i < pFiffEvokedSet->evoked.size(); ++i) {
+            for (int i = 0; i < std::ssize(pFiffEvokedSet->evoked); ++i) {
                 if (pFiffEvokedSet->evoked.at(i).comment == m_sAvrType) {
                     const MatrixXd& t_mat = pFiffEvokedSet->evoked.at(i).data;
 

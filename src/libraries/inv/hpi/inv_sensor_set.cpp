@@ -21,6 +21,8 @@
 //=============================================================================================================
 
 #include "inv_sensor_set.h"
+
+#include <vector>
 #include <iostream>
 #include <fwd/fwd_coil_set.h>
 #include <fiff/fiff_ch_info.h>
@@ -121,13 +123,13 @@ InvSensorSetCreator::InvSensorSetCreator()
 
 //=============================================================================================================
 
-InvSensorSet InvSensorSetCreator::updateSensorSet(const QList<FIFFLIB::FiffChInfo>& channelList,
+InvSensorSet InvSensorSetCreator::updateSensorSet(const std::vector<FIFFLIB::FiffChInfo>& channelList,
                                                   const Accuracy& accuracy)
 {
-    if (channelList.isEmpty()) {
+    if (channelList.empty()) {
         return InvSensorSet();
     } else {
-        auto pCoilMeg = FwdCoilSet::SPtr(m_pCoilDefinitions->create_meg_coils(channelList, channelList.size(), static_cast<int>(accuracy)).release());
+        auto pCoilMeg = FwdCoilSet::SPtr(m_pCoilDefinitions->create_meg_coils(channelList, static_cast<int>(channelList.size()), static_cast<int>(accuracy)).release());
         return InvSensorSet(pCoilMeg);
     }
 }

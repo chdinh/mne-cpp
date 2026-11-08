@@ -123,7 +123,7 @@ int main(int argc, char* argv[])
         return 1;
     }
     FiffEvokedSet& srcEvokedSet = *read;
-    if (srcEvokedSet.evoked.isEmpty()) {
+    if (srcEvokedSet.evoked.empty()) {
         qCritical("No evoked data sets found in: %s", qPrintable(fromFile));
         return 1;
     }
@@ -195,7 +195,7 @@ int main(int argc, char* argv[])
     FiffEvokedSet outEvokedSet;
     outEvokedSet.info = targetInfo;
 
-    for (int i = 0; i < srcEvokedSet.evoked.size(); ++i) {
+    for (int i = 0; i < std::ssize(srcEvokedSet.evoked); ++i) {
         const FiffEvoked& srcEvoked = srcEvokedSet.evoked[i];
 
         // Apply inverse: source estimate = inv_kernel * data
@@ -229,7 +229,7 @@ int main(int argc, char* argv[])
         outEvoked.times = srcEvoked.times;
         outEvoked.data = mappedData;
 
-        outEvokedSet.evoked.append(outEvoked);
+        outEvokedSet.evoked.push_back(outEvoked);
 
         qInfo("  Mapped set %d/%lld (%s): %d sources, %lld time points",
               i + 1, static_cast<long long>(srcEvokedSet.evoked.size()),

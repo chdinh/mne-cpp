@@ -97,7 +97,7 @@ int main(int argc, char* argv[])
     const MNESourceSpaces& srcSpaces = *read;
 
     //--- Collect in-use vertices from all hemispheres ---
-    QList<VectorXi> vertnoList = srcSpaces.get_vertno();
+    std::vector<VectorXi> vertnoList = srcSpaces.get_vertno();
     int totalVerts = 0;
     for (const auto& v : vertnoList)
         totalVerts += v.size();

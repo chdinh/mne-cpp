@@ -27,6 +27,8 @@
 //=============================================================================================================
 
 #include "../disp_global.h"
+
+#include <vector>
 #include "abstractview.h"
 
 //=============================================================================================================
@@ -101,7 +103,7 @@ public:
      *
      * @return The current compensators.
      */
-    QList<FIFFLIB::FiffCtfComp> getCompensators() const;
+    std::vector<FIFFLIB::FiffCtfComp> getCompensators() const;
 
     //=========================================================================================================
     /**
@@ -117,7 +119,7 @@ public:
      *
      * @param[in] comps    The new compensators.
      */
-    void setCompensators(const QList<FIFFLIB::FiffCtfComp>& comps);
+    void setCompensators(const std::vector<FIFFLIB::FiffCtfComp>& comps);
 
     //=========================================================================================================
     /**
@@ -168,7 +170,7 @@ protected:
 
     QList<QCheckBox*> m_qListCompCheckBox; /**< List of compensator CheckBox. */
 
-    QList<FIFFLIB::FiffCtfComp> m_pComps; /**< The current compensators. */
+    std::vector<FIFFLIB::FiffCtfComp> m_pComps; /**< The current compensators. */
 
     QString m_sSettingsPath; /**< The settings path to store the GUI settings to. */
 

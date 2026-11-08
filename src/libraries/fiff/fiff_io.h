@@ -33,6 +33,8 @@
 //=============================================================================================================
 
 #include "fiff_global.h"
+
+#include <vector>
 #include "fiff_info.h"
 #include "fiff_types.h"
 
@@ -109,7 +111,7 @@ public:
      *
      * @param[in] p_qlistIODevices    A QList of fiff IO devices like a fiff QFile or QTCPSocket.
      */
-    FiffIO(QList<QIODevice*>& p_qlistIODevices);
+    FiffIO(std::vector<QIODevice*>& p_qlistIODevices);
 
     //=========================================================================================================
     /**
@@ -151,7 +153,7 @@ public:
      *
      * @return true if all devices were read successfully, false otherwise.
      */
-    bool read(QList<QIODevice>& p_qlistIODevices);
+    bool read(std::vector<QIODevice>& p_qlistIODevices);
 
     //=========================================================================================================
     /**
@@ -215,9 +217,9 @@ public:
     }
 
 public:
-    QList<QSharedPointer<FiffRawData>> m_qlistRaw;   /**< List of raw data sets. */
-    QList<QSharedPointer<FiffEvoked>> m_qlistEvoked; /**< List of evoked data sets. */
-    //    QList<QSharedPointer<MNEForwardSolution> > m_qlistFwd;
+    std::vector<QSharedPointer<FiffRawData>> m_qlistRaw;   /**< List of raw data sets. */
+    std::vector<QSharedPointer<FiffEvoked>> m_qlistEvoked; /**< List of evoked data sets. */
+    //    std::vector<QSharedPointer<MNEForwardSolution> > m_qlistFwd;
     //FiffCov, MNEInverseOperator, FsAnnotationSet,
 };
 

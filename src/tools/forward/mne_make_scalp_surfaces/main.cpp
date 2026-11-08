@@ -142,13 +142,13 @@ int main(int argc, char* argv[])
     // Generate decimated surfaces
     for (int targetVerts : grades) {
         qInfo("Decimating to %d vertices...", targetVerts);
-        const QList<MNEBemSurface> surfaces =
+        const std::vector<MNEBemSurface> surfaces =
             MNEBemSurface::makeScalpSurfaces(skin, {targetVerts});
-        if (surfaces.isEmpty()) {
+        if (surfaces.empty()) {
             qCritical("Could not decimate scalp surface to %d vertices.", targetVerts);
             return 1;
         }
-        const MNEBemSurface& decimated = surfaces.constFirst();
+        const MNEBemSurface& decimated = surfaces.front();
 
         // Write as FIFF BEM surface
         QString outPath = QDir(outDir).filePath(

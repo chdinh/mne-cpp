@@ -384,17 +384,17 @@ void TestFieldMap::initTestCase()
     QVERIFY(templates != nullptr);
 
     // Classify channels (matching Python's pick_types)
-    QList<FiffChInfo> megChs, eegChs;
+    std::vector<FiffChInfo> megChs, eegChs;
     StringList megChNames, eegChNames;
-    for (int k = 0; k < m_evoked.info.chs.size(); ++k) {
+    for (int k = 0; k < std::ssize(m_evoked.info.chs); ++k) {
         const auto& ch = m_evoked.info.chs[k];
         if (UTILSLIB::contains(m_evoked.info.bads, ch.ch_name))
             continue;
         if (ch.kind == FIFFV_MEG_CH) {
-            megChs.append(ch);
+            megChs.push_back(ch);
             megChNames.push_back(ch.ch_name);
         } else if (ch.kind == FIFFV_EEG_CH) {
-            eegChs.append(ch);
+            eegChs.push_back(ch);
             eegChNames.push_back(ch.ch_name);
         }
     }
@@ -405,7 +405,7 @@ void TestFieldMap::initTestCase()
     // since MNE-Python _create_meg_coils with acc='normal' uses no transform)
     if (megChs.size() > 0) {
         m_megCoils = templates->create_meg_coils(
-            megChs, megChs.size(), FWD_COIL_ACCURACY_NORMAL, FiffCoordTrans());
+            megChs, static_cast<int>(megChs.size()), FWD_COIL_ACCURACY_NORMAL, FiffCoordTrans());
         m_hasMeg = (m_megCoils && m_megCoils->ncoil() > 0);
         qDebug() << "MEG coil set:" << (m_hasMeg ? m_megCoils->ncoil() : 0) << "coils";
     }
@@ -413,7 +413,7 @@ void TestFieldMap::initTestCase()
     // EEG electrodes (in head coords)
     if (eegChs.size() > 0) {
         m_eegCoils = FwdCoilSet::create_eeg_els(
-            eegChs, eegChs.size(), FiffCoordTrans());
+            eegChs, static_cast<int>(eegChs.size()), FiffCoordTrans());
         m_hasEeg = (m_eegCoils && m_eegCoils->ncoil() > 0);
         qDebug() << "EEG electrode set:" << (m_hasEeg ? m_eegCoils->ncoil() : 0) << "electrodes";
     }
@@ -713,7 +713,7 @@ void TestFieldMap::testMultiEvokedMegMapping()
         qDebug() << "  Python MEG mapped:" << pyMegMappedAll.rows() << "x" << pyMegMappedAll.cols();
 
         // Get the evoked data for this condition
-        QVERIFY2(ci < m_evokedSet.evoked.size(),
+        QVERIFY2(ci < std::ssize(m_evokedSet.evoked),
                  qPrintable(QString("Condition %1 out of range (%2 available)")
                                 .arg(ci)
                                 .arg(m_evokedSet.evoked.size())));
@@ -728,7 +728,7 @@ void TestFieldMap::testMultiEvokedMegMapping()
         for (const QString& chName : m_megChNames) {
             int idx = -1;
             QString pyNorm = chName.trimmed().remove(' ');
-            for (int k = 0; k < evoked.info.chs.size(); ++k) {
+            for (int k = 0; k < std::ssize(evoked.info.chs); ++k) {
                 QString cppNorm = QString::fromStdString(evoked.info.chs[k].ch_name).trimmed().remove(' ');
                 if (cppNorm == pyNorm) {
                     idx = k;
@@ -884,7 +884,7 @@ void TestFieldMap::testMultiEvokedEegMapping()
         for (const QString& chName : m_eegChNames) {
             int idx = -1;
             QString pyNorm = chName.trimmed().remove(' ');
-            for (int k = 0; k < evoked.info.chs.size(); ++k) {
+            for (int k = 0; k < std::ssize(evoked.info.chs); ++k) {
                 QString cppNorm = QString::fromStdString(evoked.info.chs[k].ch_name).trimmed().remove(' ');
                 if (cppNorm == pyNorm) {
                     idx = k;
@@ -1057,14 +1057,14 @@ void TestFieldMap::testHelmetFieldMap()
 
     // ── Compute C++ mapping with helmet surface + auto origin ──────────
     // Build MEG channel names matching C++ ordering
-    QList<FiffChInfo> megChs;
+    std::vector<FiffChInfo> megChs;
     StringList cppMegChNames;
-    for (int k = 0; k < m_evoked.info.chs.size(); ++k) {
+    for (int k = 0; k < std::ssize(m_evoked.info.chs); ++k) {
         const auto& ch = m_evoked.info.chs[k];
         if (UTILSLIB::contains(m_evoked.info.bads, ch.ch_name))
             continue;
         if (ch.kind == FIFFV_MEG_CH) {
-            megChs.append(ch);
+            megChs.push_back(ch);
             cppMegChNames.push_back(ch.ch_name);
         }
     }
@@ -1078,7 +1078,7 @@ void TestFieldMap::testHelmetFieldMap()
 
     auto helmetCoils =
         templates->create_meg_coils(
-            megChs, megChs.size(), FWD_COIL_ACCURACY_NORMAL, m_evoked.info.dev_head_t);
+            megChs, static_cast<int>(megChs.size()), FWD_COIL_ACCURACY_NORMAL, m_evoked.info.dev_head_t);
     QVERIFY(helmetCoils && helmetCoils->ncoil() > 0);
     qDebug() << "C++ MEG coils:" << helmetCoils->ncoil()
              << "(in head coordinates)";
@@ -1149,7 +1149,7 @@ void TestFieldMap::testHelmetFieldMap()
         for (const QString& pyName : helmetChNames) {
             int idx = -1;
             QString pyNorm = pyName.trimmed().remove(' ');
-            for (int k = 0; k < baselinedEvoked.info.chs.size(); ++k) {
+            for (int k = 0; k < std::ssize(baselinedEvoked.info.chs); ++k) {
                 QString cppNorm = QString::fromStdString(baselinedEvoked.info.chs[k].ch_name).trimmed().remove(' ');
                 if (cppNorm == pyNorm) {
                     idx = k;
@@ -1347,3 +1347,5 @@ void TestFieldMap::cleanupTestCase()
 
 QTEST_GUILESS_MAIN(TestFieldMap)
 #include "test_field_map.moc"
+
+#include <vector>

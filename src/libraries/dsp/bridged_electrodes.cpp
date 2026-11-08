@@ -52,7 +52,7 @@ MatrixXd UTILSLIB::computeElectricalDistance(const MatrixXd& data,
 {
     // Find EEG channel indices
     std::vector<int> eegIdx;
-    for (int i = 0; i < info.chs.size(); ++i) {
+    for (int i = 0; i < std::ssize(info.chs); ++i) {
         if (info.chs[i].kind == FIFFV_EEG_CH) {
             eegIdx.push_back(i);
         }
@@ -105,7 +105,7 @@ std::vector<std::pair<int, int>> UTILSLIB::computeBridgedElectrodes(
 {
     // Find EEG channel indices
     std::vector<int> eegIdx;
-    for (int i = 0; i < info.chs.size(); ++i) {
+    for (int i = 0; i < std::ssize(info.chs); ++i) {
         if (info.chs[i].kind == FIFFV_EEG_CH) {
             eegIdx.push_back(i);
         }

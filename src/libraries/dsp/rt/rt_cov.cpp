@@ -53,7 +53,7 @@ RtCov::RtCov(QSharedPointer<FIFFLIB::FiffInfo> pFiffInfo)
 FiffCov RtCov::estimateCovariance(const Eigen::MatrixXd& matData,
                                   int iNewMaxSamples)
 {
-    if (m_fiffInfo.chs.isEmpty()) {
+    if (m_fiffInfo.chs.empty()) {
         qWarning() << "[RtCov::estimateCovariance] FiffInfo was not set. Returning empty covariance estimation.";
         return FiffCov();
     }
@@ -61,7 +61,7 @@ FiffCov RtCov::estimateCovariance(const Eigen::MatrixXd& matData,
     // Compute picks once: select only MEG and EEG channels
     if (!m_bPicksReady) {
         m_picks.clear();
-        for (int i = 0; i < m_fiffInfo.chs.size(); i++) {
+        for (int i = 0; i < std::ssize(m_fiffInfo.chs); i++) {
             if (m_fiffInfo.chs.at(i).kind == FIFFV_MEG_CH ||
                 m_fiffInfo.chs.at(i).kind == FIFFV_EEG_CH) {
                 m_picks.append(i);

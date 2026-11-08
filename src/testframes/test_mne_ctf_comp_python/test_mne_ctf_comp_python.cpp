@@ -205,7 +205,7 @@ void TestMneCtfCompPython::readsCompensationData()
     VectorXf ones = VectorXf::Ones(kNChan);
     QCOMPARE(set->apply(true, ones), 0);
     QVERIFY(ones.isOnes());
-    QList<FiffChInfo> chs = set->chs;
+    std::vector<FiffChInfo> chs = set->chs;
     QCOMPARE(set->set_compensation(3, chs, set->nch, {}, 0), 0);
     QVERIFY(!set->current);
     // Grade 3 -> 1: one sample at a time and the whole block agree, reverting restores the data,
@@ -227,7 +227,7 @@ void TestMneCtfCompPython::readsCompensationData()
     QVERIFY(set->apply(true, shorter, block.col(0)) != 0);
     MatrixXf fewer = block.topRows(kNChan - 1);
     QVERIFY(set->apply_transpose(true, fewer) != 0);
-    QList<FiffChInfo> megOnly = chs.mid(0, kNMeg);
+    std::vector<FiffChInfo> megOnly(chs.begin(), chs.begin() + kNMeg);
     QVERIFY(set->set_compensation(1, megOnly, kNMeg, {}, 0) != 0);
 }
 
@@ -361,13 +361,13 @@ void TestMneCtfCompPython::evokedSetChangesGrade()
     FiffEvoked evoked;
     evoked.setInfo(raw.info);
     evoked.data = m_reference[from];
-    set.evoked.append(evoked);
+    set.evoked.push_back(evoked);
 
     QVERIFY(set.compensate_to(to));
     QCOMPARE(set.info.get_current_comp(), to);
-    QCOMPARE(set.evoked.first().info.get_current_comp(), to);
-    QVERIFY2(relError(set.evoked.first().data, m_reference[to], m_reference[from]) < 1e-4,
-             qPrintable(QString::number(relError(set.evoked.first().data, m_reference[to], m_reference[from]))));
+    QCOMPARE(set.evoked.front().info.get_current_comp(), to);
+    QVERIFY2(relError(set.evoked.front().data, m_reference[to], m_reference[from]) < 1e-4,
+             qPrintable(QString::number(relError(set.evoked.front().data, m_reference[to], m_reference[from]))));
 
     // Already at the requested grade: nothing to do
     QVERIFY(!set.compensate_to(to));

@@ -93,10 +93,10 @@ FiffInfo makeInfo()
         ch.ch_name = i < kEeg ? "EEG" + std::to_string(i) : (i == kEog ? "EOG" : "ECG");
         ch.range = ch.cal = 1.0f;
         ch.unit = FIFF_UNIT_V;
-        info.chs.append(ch);
+        info.chs.push_back(ch);
         info.ch_names.push_back(ch.ch_name);
     }
-    info.nchan = info.chs.size();
+    info.nchan = static_cast<int>(info.chs.size());
     return info;
 }
 

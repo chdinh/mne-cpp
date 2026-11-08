@@ -239,7 +239,7 @@ void FiffBlockReader::updateProjections()
 
     // Count active projectors for diagnostics
     int nActive = 0;
-    for (int i = 0; i < m_fiffInfo->projs.size(); ++i) {
+    for (int i = 0; i < std::ssize(m_fiffInfo->projs); ++i) {
         qWarning() << "[FiffBlockReader] proj" << i
                    << "desc=" << m_fiffInfo->projs[i].desc
                    << "active=" << m_fiffInfo->projs[i].active;

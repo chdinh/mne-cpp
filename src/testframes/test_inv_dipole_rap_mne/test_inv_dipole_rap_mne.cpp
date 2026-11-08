@@ -821,9 +821,9 @@ void TestInvDipoleRapMne::minimumNorm_calculateInverse()
              qPrintable(QString("Evoked data not found: %1").arg(avePath)));
 
     FiffEvokedSet evokedSet(avePath.toStdU16String());
-    QVERIFY2(!evokedSet.evoked.isEmpty(), "No evoked data loaded");
+    QVERIFY2(!evokedSet.evoked.empty(), "No evoked data loaded");
 
-    FiffEvoked evoked = evokedSet.evoked.first();
+    FiffEvoked evoked = evokedSet.evoked.front();
 
     InvMinimumNorm mn(m_invOp, 1.0f / 9.0f, QString("MNE"));
     InvSourceEstimate stc = mn.calculateInverse(evoked);
@@ -844,9 +844,9 @@ void TestInvDipoleRapMne::minimumNorm_dSPM()
              qPrintable(QString("Evoked data not found: %1").arg(avePath)));
 
     FiffEvokedSet evokedSet(avePath.toStdU16String());
-    QVERIFY2(!evokedSet.evoked.isEmpty(), "No evoked data loaded");
+    QVERIFY2(!evokedSet.evoked.empty(), "No evoked data loaded");
 
-    FiffEvoked evoked = evokedSet.evoked.first();
+    FiffEvoked evoked = evokedSet.evoked.front();
     InvMinimumNorm mn(m_invOp, 1.0f / 9.0f, true, false); // dSPM=true, sLORETA=false
     InvSourceEstimate stc = mn.calculateInverse(evoked);
 
@@ -864,9 +864,9 @@ void TestInvDipoleRapMne::minimumNorm_sLORETA()
              qPrintable(QString("Evoked data not found: %1").arg(avePath)));
 
     FiffEvokedSet evokedSet(avePath.toStdU16String());
-    QVERIFY2(!evokedSet.evoked.isEmpty(), "No evoked data loaded");
+    QVERIFY2(!evokedSet.evoked.empty(), "No evoked data loaded");
 
-    FiffEvoked evoked = evokedSet.evoked.first();
+    FiffEvoked evoked = evokedSet.evoked.front();
     InvMinimumNorm mn(m_invOp, 1.0f / 9.0f, false, true); // dSPM=false, sLORETA=true
     InvSourceEstimate stc = mn.calculateInverse(evoked);
 

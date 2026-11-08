@@ -461,7 +461,7 @@ int main(int argc, char* argv[])
         ch.scanNo = c + 1;
         ch.logNo = c + 1;
         mapCtfToFiff(info.sensors[c], ch);
-        fiffInfo.chs.append(ch);
+        fiffInfo.chs.push_back(ch);
         fiffInfo.ch_names.push_back(ch.ch_name);
     }
 

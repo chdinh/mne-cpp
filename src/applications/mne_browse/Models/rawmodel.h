@@ -29,6 +29,8 @@
 //=============================================================================================================
 
 #include "../Utils/types.h"
+
+#include <vector>
 #include "../Utils/filteroperator.h"
 #include "../Utils/rawsettings.h"
 #include "../Utils/datapackage.h"
@@ -199,7 +201,7 @@ public:
 
     //=========================================================================================================
     /** Returns the list of channel info objects for the loaded file. */
-    const QList<FiffChInfo>& channelInfoList() const
+    const std::vector<FiffChInfo>& channelInfoList() const
     {
         return m_chInfolist;
     }
@@ -278,7 +280,7 @@ private:
     QPair<MatrixXd, MatrixXd> readSegment(fiff_int_t from, fiff_int_t to);
 
     bool m_bFileloaded;                                     /**< True when a FIFF raw file is loaded. */
-    QList<FiffChInfo> m_chInfolist;                         /**< Cached channel metadata for the loaded raw file. */
+    std::vector<FiffChInfo> m_chInfolist;                   /**< Cached channel metadata for the loaded raw file. */
     FiffInfo::SPtr m_pFiffInfo;                             /**< Shared measurement info of the loaded raw file. */
     QSharedPointer<FIFFLIB::FiffIO> m_pfiffIO;              /**< Legacy FIFF I/O backend used by the table model path. */
     QSharedPointer<QIODevice> m_pSourceDevice;              /**< Persistent source device used by the legacy raw model. */
@@ -627,7 +629,7 @@ inline qint32 RawModel::absFiffCursor() const
 
 inline qint32 RawModel::channelUnit(int row) const
 {
-    if (!m_pfiffIO || m_pfiffIO->m_qlistRaw.isEmpty())
+    if (!m_pfiffIO || m_pfiffIO->m_qlistRaw.empty())
         return FIFF_UNIT_NONE;
     return m_pfiffIO->m_qlistRaw[0]->info.chs[row].unit;
 }

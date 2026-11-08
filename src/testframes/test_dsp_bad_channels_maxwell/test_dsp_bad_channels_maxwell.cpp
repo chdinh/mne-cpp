@@ -95,7 +95,7 @@ static FiffInfo createSyntheticMegInfo(int nChannels = 102)
         ch.range = 1.0;
         ch.cal = 1.0;
 
-        info.chs.append(ch);
+        info.chs.push_back(ch);
         info.ch_names.push_back(ch.ch_name);
     }
 

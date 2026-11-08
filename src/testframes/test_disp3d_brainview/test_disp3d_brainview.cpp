@@ -859,11 +859,11 @@ void TestDisp3dBrainView::rtSensorInterpolationMatWorker_basics()
     }
 
     // Same mapping as FwdFieldMap with the origin fitted to the head shape (MNE-Python's make_field_map origin="auto")
-    QList<FIFFLIB::FiffChInfo> eegChs;
+    std::vector<FIFFLIB::FiffChInfo> eegChs;
     for (int k : pick) {
-        eegChs.append(evoked.info.chs[k]);
+        eegChs.push_back(evoked.info.chs[k]);
     }
-    auto coils = FWDLIB::FwdCoilSet::create_eeg_els(eegChs, eegChs.size(), FIFFLIB::FiffCoordTrans());
+    auto coils = FWDLIB::FwdCoilSet::create_eeg_els(eegChs, static_cast<int>(eegChs.size()), FIFFLIB::FiffCoordTrans());
     const auto expected = FWDLIB::FwdFieldMap::computeEegMapping(*coils, scalp, SensorFieldMapper::fitSphereOrigin(evoked.info), 0.06f, 1e-3f);
     QVERIFY((*mapping - *expected).cwiseAbs().maxCoeff() <= 1e-5f * expected->cwiseAbs().maxCoeff());
 
@@ -2882,3 +2882,6 @@ void TestDisp3dBrainView::polylineObject_segments()
 
 QTEST_MAIN(TestDisp3dBrainView)
 #include "test_disp3d_brainview.moc"
+
+#include <vector>
+#include <utility>

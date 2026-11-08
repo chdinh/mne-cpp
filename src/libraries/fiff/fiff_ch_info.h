@@ -38,6 +38,8 @@
 //=============================================================================================================
 
 #include "fiff_global.h"
+
+#include <vector>
 #include "fiff_types.h"
 #include "fiff_ch_pos.h"
 
@@ -127,7 +129,7 @@ public:
      * @param[in] nch  The number of channels to check.
      * @return true if all EEG channels have valid locations, false otherwise.
      */
-    static bool checkEegLocations(const QList<FiffChInfo>& chs, int nch);
+    static bool checkEegLocations(const std::vector<FiffChInfo>& chs, int nch);
 
     //=========================================================================================================
     /**

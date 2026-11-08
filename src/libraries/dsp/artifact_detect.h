@@ -180,11 +180,11 @@ public:
      *
      * @return The projectors, or only the info projectors if no event or epoch survives.
      */
-    static QList<FIFFLIB::FiffProj> computeProjEcg(const Eigen::MatrixXd& matData,
-                                                   const FIFFLIB::FiffInfo& fiffInfo,
-                                                   double dSFreq,
-                                                   const ProjParams& proj = ProjParams::ecg(),
-                                                   const EcgParams& detect = EcgParams());
+    static std::vector<FIFFLIB::FiffProj> computeProjEcg(const Eigen::MatrixXd& matData,
+                                                         const FIFFLIB::FiffInfo& fiffInfo,
+                                                         double dSFreq,
+                                                         const ProjParams& proj = ProjParams::ecg(),
+                                                         const EcgParams& detect = EcgParams());
 
     //=========================================================================================================
     /**
@@ -198,11 +198,11 @@ public:
      *
      * @return The projectors, or only the info projectors if no event or epoch survives.
      */
-    static QList<FIFFLIB::FiffProj> computeProjEog(const Eigen::MatrixXd& matData,
-                                                   const FIFFLIB::FiffInfo& fiffInfo,
-                                                   double dSFreq,
-                                                   const ProjParams& proj = ProjParams::eog(),
-                                                   const EogParams& detect = EogParams());
+    static std::vector<FIFFLIB::FiffProj> computeProjEog(const Eigen::MatrixXd& matData,
+                                                         const FIFFLIB::FiffInfo& fiffInfo,
+                                                         double dSFreq,
+                                                         const ProjParams& proj = ProjParams::eog(),
+                                                         const EogParams& detect = EogParams());
 
 private:
     /** R-peak search of mne.preprocessing.qrs_detector on an already filtered ECG. */

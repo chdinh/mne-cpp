@@ -33,6 +33,8 @@
 //=============================================================================================================
 
 #include "fiff_global.h"
+
+#include <vector>
 #include "fiff_types.h"
 #include "fiff_named_matrix.h"
 
@@ -134,7 +136,7 @@ public:
      *
      * @param[in, out] p_qListFiffProj  activates projectors in place.
      */
-    static void activate_projs(QList<FiffProj>& p_qListFiffProj);
+    static void activate_projs(std::vector<FiffProj>& p_qListFiffProj);
 
     //=========================================================================================================
     /**
@@ -152,7 +154,7 @@ public:
      *
      * @return nproj - How many items in the projector.
      */
-    static fiff_int_t make_projector(const QList<FiffProj>& projs,
+    static fiff_int_t make_projector(const std::vector<FiffProj>& projs,
                                      const StringList& ch_names,
                                      Eigen::MatrixXd& proj,
                                      const StringList& bads = {},
@@ -177,15 +179,15 @@ public:
      *
      * @return List of FiffProj items, or empty list on failure.
      */
-    static QList<FiffProj> compute_from_raw(const FiffRawData& raw,
-                                            const Eigen::MatrixXi& events,
-                                            int eventCode,
-                                            float tmin,
-                                            float tmax,
-                                            int nGrad,
-                                            int nMag,
-                                            int nEeg,
-                                            const QMap<QString, double>& mapReject = QMap<QString, double>());
+    static std::vector<FiffProj> compute_from_raw(const FiffRawData& raw,
+                                                  const Eigen::MatrixXi& events,
+                                                  int eventCode,
+                                                  float tmin,
+                                                  float tmax,
+                                                  int nGrad,
+                                                  int nMag,
+                                                  int nEeg,
+                                                  const QMap<QString, double>& mapReject = QMap<QString, double>());
 
     //=========================================================================================================
     /**
@@ -202,7 +204,7 @@ public:
      *
      * @return List of FiffProj items (all channels as columns), or empty list for empty data.
      */
-    static QList<FiffProj> compute_from_evoked(const FiffEvoked& evoked, int nGrad = 2, int nMag = 2, int nEeg = 2);
+    static std::vector<FiffProj> compute_from_evoked(const FiffEvoked& evoked, int nGrad = 2, int nMag = 2, int nEeg = 2);
 
     //=========================================================================================================
     /**

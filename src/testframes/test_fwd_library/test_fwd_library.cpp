@@ -692,9 +692,10 @@ void TestFwdLibrary::coilSet_readDefs()
     // Electrodes are made from EEG channels only
     QVERIFY(!FwdCoilSet::create_eeg_els(raw.info.chs, raw.info.nchan));
     const RowVectorXi eegPicks = raw.info.pick_types(false, true, false);
-    QList<FiffChInfo> eegChs;
+    std::vector<FiffChInfo> eegChs;
+    eegChs.reserve(static_cast<std::size_t>(eegPicks.size()));
     for (int i = 0; i < eegPicks.size(); ++i)
-        eegChs << raw.info.chs[eegPicks(i)];
+        eegChs.push_back(raw.info.chs[eegPicks(i)]);
     auto eegEls = FwdCoilSet::create_eeg_els(eegChs, static_cast<int>(eegChs.size()));
     QVERIFY(eegEls);
     QCOMPARE(eegEls->ncoil(), static_cast<int>(eegChs.size()));
@@ -795,3 +796,5 @@ void TestFwdLibrary::fwd_globalBuildInfo()
 QTEST_GUILESS_MAIN(TestFwdLibrary)
 
 #include "test_fwd_library.moc"
+
+#include <vector>

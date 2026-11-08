@@ -154,7 +154,7 @@ public:
      * @return A new projection operator, or NULL if no EEG channels are found.
      *         Caller takes ownership.
      */
-    static std::unique_ptr<MNEProjOp> create_average_eeg_ref(const QList<FIFFLIB::FiffChInfo>& chs, int nch);
+    static std::unique_ptr<MNEProjOp> create_average_eeg_ref(const std::vector<FIFFLIB::FiffChInfo>& chs, int nch);
 
     /**
      * Count how many active projection vectors affect a given list of
@@ -178,7 +178,7 @@ public:
      *
      * @return Number of affecting projection vectors (0 if none or nch == 0).
      */
-    int affect_chs(const QList<FIFFLIB::FiffChInfo>& chs, int nChan);
+    int affect_chs(const std::vector<FIFFLIB::FiffChInfo>& chs, int nChan);
 
     /**
      * Apply the compiled projection operator to a data vector in-place.
@@ -235,8 +235,8 @@ public:
      *
      * @return true on success, false on read error.
      */
-    static bool makeProjection(const QList<QString>& projnames,
-                               const QList<FIFFLIB::FiffChInfo>& chs,
+    static bool makeProjection(const std::vector<QString>& projnames,
+                               const std::vector<FIFFLIB::FiffChInfo>& chs,
                                int nch,
                                std::unique_ptr<MNEProjOp>& result);
 
@@ -318,7 +318,7 @@ public:
     int apply_cov(MNECovMatrix* c);
 
 public:
-    QList<MNELIB::MNEProjItem> items;                                                /**< The projection items. */
+    std::vector<MNELIB::MNEProjItem> items;                                          /**< The projection items. */
     int nitems;                                                                      /**< Number of items. */
     StringList names;                                                                /**< Names of the channels in the final compiled projector. */
     int nch;                                                                         /**< Number of channels in the final projector. */

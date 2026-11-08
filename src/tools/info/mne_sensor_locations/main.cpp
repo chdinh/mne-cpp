@@ -129,7 +129,7 @@ int main(int argc, char* argv[])
     QTextStream out(&outputFile);
 
     int nWritten = 0;
-    for (int k = 0; k < info.chs.size(); ++k) {
+    for (int k = 0; k < std::ssize(info.chs); ++k) {
         const FiffChInfo& ch = info.chs[k];
 
         float x, y, z;

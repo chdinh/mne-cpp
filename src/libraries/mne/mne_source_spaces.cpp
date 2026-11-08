@@ -21,6 +21,8 @@
 //=============================================================================================================
 
 #include "mne_source_spaces.h"
+
+#include <vector>
 #include "mne_nearest.h"
 
 #include <math/linalg.h>
@@ -288,23 +290,25 @@ void MNESourceSpaces::append(const MNESourceSpace& space)
 
 //=============================================================================================================
 
-QList<VectorXi> MNESourceSpaces::get_vertno() const
+std::vector<VectorXi> MNESourceSpaces::get_vertno() const
 {
-    QList<VectorXi> p_vertices;
-    for (qint32 i = 0; i < static_cast<qint32>(m_sourceSpaces.size()); ++i)
-        p_vertices.push_back(m_sourceSpaces[i]->vertno);
+    std::vector<VectorXi> p_vertices;
+    p_vertices.reserve(m_sourceSpaces.size());
+    for (const auto& space : m_sourceSpaces)
+        p_vertices.push_back(space->vertno);
     return p_vertices;
 }
 
 //=============================================================================================================
 
-QList<VectorXi> MNESourceSpaces::label_src_vertno_sel(const FsLabel& p_label, VectorXi& src_sel) const
+std::vector<VectorXi> MNESourceSpaces::label_src_vertno_sel(const FsLabel& p_label, VectorXi& src_sel) const
 {
     //    if(src[0].['type'] != 'surf')
     //        return Exception('FsLabel are only supported with surface source spaces')
 
-    QList<VectorXi> vertno;
-    vertno << this->m_sourceSpaces[0]->vertno << this->m_sourceSpaces[1]->vertno;
+    std::vector<VectorXi> vertno;
+    vertno.push_back(this->m_sourceSpaces[0]->vertno);
+    vertno.push_back(this->m_sourceSpaces[1]->vertno);
 
     if (p_label.hemi == 0) //lh
     {
@@ -354,7 +358,7 @@ QList<VectorXi> MNESourceSpaces::label_src_vertno_sel(const FsLabel& p_label, Ve
 
 //=============================================================================================================
 
-MNESourceSpaces MNESourceSpaces::pick_regions(const QList<FsLabel>& p_qListLabels) const
+MNESourceSpaces MNESourceSpaces::pick_regions(const std::vector<FsLabel>& p_qListLabels) const
 {
     Q_UNUSED(p_qListLabels);
 

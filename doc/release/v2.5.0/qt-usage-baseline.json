@@ -30,7 +30,7 @@
       "decoding",
       "math"
     ],
-    "tokens": 18636,
+    "tokens": 18297,
     "gui_outside_design": []
   },
   "libraries": {
@@ -155,9 +155,9 @@
       "modules": []
     },
     "disp": {
-      "tokens": 6278,
+      "tokens": 6250,
       "by_category": {
-        "containers": 512,
+        "containers": 484,
         "files": 109,
         "global": 1256,
         "gui": 924,
@@ -183,9 +183,9 @@
       ]
     },
     "disp3D": {
-      "tokens": 2914,
+      "tokens": 2912,
       "by_category": {
-        "containers": 276,
+        "containers": 274,
         "files": 45,
         "global": 302,
         "gui": 962,
@@ -212,9 +212,9 @@
       ]
     },
     "dsp": {
-      "tokens": 644,
+      "tokens": 634,
       "by_category": {
-        "containers": 100,
+        "containers": 90,
         "files": 33,
         "global": 140,
         "logging": 89,
@@ -235,11 +235,11 @@
       ]
     },
     "fiff": {
-      "tokens": 1170,
+      "tokens": 1020,
       "by_category": {
-        "containers": 150,
+        "containers": 9,
         "files": 87,
-        "global": 408,
+        "global": 404,
         "json": 37,
         "logging": 214,
         "network": 6,
@@ -247,10 +247,10 @@
         "other": 3,
         "regex": 9,
         "smart_pointers": 22,
-        "strings": 219,
+        "strings": 214,
         "time": 1
       },
-      "public_header_includes": 75,
+      "public_header_includes": 61,
       "q_object": 1,
       "files": 71,
       "modules": [
@@ -280,9 +280,8 @@
       ]
     },
     "fwd": {
-      "tokens": 337,
+      "tokens": 324,
       "by_category": {
-        "containers": 13,
         "files": 25,
         "global": 5,
         "logging": 185,
@@ -314,9 +313,9 @@
       ]
     },
     "inv": {
-      "tokens": 826,
+      "tokens": 812,
       "by_category": {
-        "containers": 102,
+        "containers": 88,
         "files": 35,
         "global": 37,
         "json": 2,
@@ -398,11 +397,11 @@
       ]
     },
     "mne": {
-      "tokens": 1629,
+      "tokens": 1507,
       "by_category": {
-        "containers": 136,
+        "containers": 17,
         "files": 93,
-        "global": 375,
+        "global": 372,
         "logging": 569,
         "objects_signals": 4,
         "other": 23,
@@ -411,7 +410,7 @@
         "strings": 330,
         "threads": 10
       },
-      "public_header_includes": 94,
+      "public_header_includes": 81,
       "q_object": 0,
       "files": 113,
       "modules": [

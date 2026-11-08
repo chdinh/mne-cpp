@@ -23,6 +23,8 @@
 //=============================================================================================================
 
 #include "fiff_ch_info.h"
+
+#include <vector>
 #include "fiff_constants.h"
 
 //=============================================================================================================
@@ -78,7 +80,7 @@ FiffChInfo::~FiffChInfo()
 
 //=============================================================================================================
 
-bool FiffChInfo::checkEegLocations(const QList<FiffChInfo>& chs, int nch)
+bool FiffChInfo::checkEegLocations(const std::vector<FiffChInfo>& chs, int nch)
 {
     const float close = 0.02f;
     for (int k = 0; k < nch; k++) {

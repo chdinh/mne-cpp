@@ -327,7 +327,7 @@ void TestBatchProcessor::testRunGrandAverageWeightsByNave()
     const FIFFLIB::FiffRawData raw(rawPath.toStdString());
     const FIFFLIB::FiffEvokedSet grand(settings.grandAveFile.toStdU16String());
     QCOMPARE(grand.evoked.size(), 1);
-    const FIFFLIB::FiffEvoked& g = grand.evoked.first();
+    const FIFFLIB::FiffEvoked& g = grand.evoked.front();
     QCOMPARE(g.comment, QString("Auditory Left"));
     QCOMPARE(g.info.nchan, raw.info.nchan);
     QVERIFY2(g.nave > 2 && g.nave % 2 == 0, qPrintable(QString("nave %1").arg(g.nave)));

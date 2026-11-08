@@ -355,7 +355,7 @@ void ButterflySceneItem::paintAveragePaths(QPainter* painter)
     const QRectF pa = plotArea();
 
     //Create path for all channels
-    for (int i = 0; i < m_pFiffInfo->chs.size(); i++) {
+    for (int i = 0; i < std::ssize(m_pFiffInfo->chs); i++) {
         FiffChInfo fiffChInfoTemp = m_pFiffInfo->chs.at(i);
 
         if (UTILSLIB::contains(m_pFiffInfo->bads, fiffChInfoTemp.ch_name) == false) {
@@ -456,7 +456,7 @@ void ButterflySceneItem::paintGFP(QPainter* painter)
 
     // Collect channel indices matching this kind/unit
     QVector<int> chIndices;
-    int nChs = m_pFiffInfo->chs.size();
+    int nChs = static_cast<int>(m_pFiffInfo->chs.size());
     for (int i = 0; i < nChs; ++i) {
         const FiffChInfo& ch = m_pFiffInfo->chs[i];
         if (UTILSLIB::contains(m_pFiffInfo->bads, ch.ch_name))

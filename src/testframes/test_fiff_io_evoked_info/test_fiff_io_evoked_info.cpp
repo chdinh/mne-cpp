@@ -130,8 +130,8 @@ void TestFiffIoEvokedInfo::cleanupTestCase()
 void TestFiffIoEvokedInfo::fiffIO_defaultConstruction()
 {
     FiffIO fio;
-    QVERIFY(fio.m_qlistRaw.isEmpty());
-    QVERIFY(fio.m_qlistEvoked.isEmpty());
+    QVERIFY(fio.m_qlistRaw.empty());
+    QVERIFY(fio.m_qlistEvoked.empty());
 }
 
 void TestFiffIoEvokedInfo::fiffIO_readRawFile()
@@ -139,8 +139,8 @@ void TestFiffIoEvokedInfo::fiffIO_readRawFile()
     QFile file(rawPath());
 
     FiffIO fio(file);
-    QVERIFY(!fio.m_qlistRaw.isEmpty());
-    QVERIFY(fio.m_qlistRaw.first()->info.nchan > 0);
+    QVERIFY(!fio.m_qlistRaw.empty());
+    QVERIFY(fio.m_qlistRaw.front()->info.nchan > 0);
 }
 
 void TestFiffIoEvokedInfo::fiffIO_readAveFile()
@@ -158,7 +158,7 @@ void TestFiffIoEvokedInfo::fiffIO_writeRawRoundTrip()
     QFile fileIn(rawPath());
 
     FiffIO fioIn(fileIn);
-    QVERIFY(!fioIn.m_qlistRaw.isEmpty());
+    QVERIFY(!fioIn.m_qlistRaw.empty());
 
     // Write to temporary file
     QTemporaryDir tmpDir;
@@ -197,17 +197,17 @@ void TestFiffIoEvokedInfo::fiffIO_setupRead()
 void TestFiffIoEvokedInfo::evokedSet_defaultConstruction()
 {
     FiffEvokedSet set;
-    QVERIFY(set.evoked.isEmpty());
+    QVERIFY(set.evoked.empty());
 }
 
 void TestFiffIoEvokedInfo::evokedSet_readFromFile()
 {
     FiffEvokedSet set(avePath().toStdU16String());
-    QVERIFY(!set.evoked.isEmpty());
+    QVERIFY(!set.evoked.empty());
     QVERIFY(set.info.nchan > 0);
 
     // Verify evoked data dimensions
-    const FiffEvoked& ev = set.evoked.first();
+    const FiffEvoked& ev = set.evoked.front();
     QVERIFY(ev.data.rows() > 0);
     QVERIFY(ev.data.cols() > 0);
     QCOMPARE(ev.data.rows(), (Index)set.info.nchan);
@@ -216,7 +216,7 @@ void TestFiffIoEvokedInfo::evokedSet_readFromFile()
 void TestFiffIoEvokedInfo::evokedSet_pickChannels()
 {
     FiffEvokedSet set(avePath().toStdU16String());
-    QVERIFY2(!set.evoked.isEmpty(), "No evoked data loaded");
+    QVERIFY2(!set.evoked.empty(), "No evoked data loaded");
 
     // Pick first 10 channels by name
     StringList include;
@@ -225,7 +225,7 @@ void TestFiffIoEvokedInfo::evokedSet_pickChannels()
     }
 
     FiffEvokedSet pickedSet = set.pick_channels(include);
-    QVERIFY(!pickedSet.evoked.isEmpty());
+    QVERIFY(!pickedSet.evoked.empty());
     QCOMPARE(pickedSet.info.nchan, include.size());
 }
 
@@ -233,7 +233,7 @@ void TestFiffIoEvokedInfo::evokedSet_clear()
 {
     FiffEvokedSet set;
     set.clear();
-    QVERIFY(set.evoked.isEmpty());
+    QVERIFY(set.evoked.empty());
 }
 
 void TestFiffIoEvokedInfo::evokedSet_copyConstruction()
@@ -248,7 +248,7 @@ void TestFiffIoEvokedInfo::evokedSet_copyConstruction()
 void TestFiffIoEvokedInfo::evokedSet_saveAndReload()
 {
     FiffEvokedSet setOrig(avePath().toStdU16String());
-    QVERIFY2(!setOrig.evoked.isEmpty(), "No evoked data loaded");
+    QVERIFY2(!setOrig.evoked.empty(), "No evoked data loaded");
 
     // Save to temp file
     QTemporaryDir tmpDir;
@@ -263,7 +263,7 @@ void TestFiffIoEvokedInfo::evokedSet_saveAndReload()
 
     // Verify data matches (tolerance accounts for double→float→double roundtrip
     // plus SSP projector re-application during reload)
-    for (int i = 0; i < setOrig.evoked.size(); i++) {
+    for (int i = 0; i < std::ssize(setOrig.evoked); i++) {
         double norm = setOrig.evoked[i].data.norm();
         double diff = (setReload.evoked[i].data - setOrig.evoked[i].data).norm();
         double relDiff = (norm > 0) ? diff / norm : diff;
@@ -314,14 +314,14 @@ void TestFiffIoEvokedInfo::evokedSet_grandAverage()
     // sample_audvis-ave.fif read with proj=False.
     FiffEvokedSet set0;
     FiffEvokedSet set1;
-    set0.evoked.append(FiffEvoked(avePath().toStdU16String(), 0, {}, false));
-    set1.evoked.append(FiffEvoked(avePath().toStdU16String(), 1, {}, false));
-    set0.info = set0.evoked.first().info;
-    set1.info = set1.evoked.first().info;
+    set0.evoked.push_back(FiffEvoked(avePath().toStdU16String(), 0, {}, false));
+    set1.evoked.push_back(FiffEvoked(avePath().toStdU16String(), 1, {}, false));
+    set0.info = set0.evoked.front().info;
+    set1.info = set1.evoked.front().info;
 
     const FiffEvokedSet grandAvg = FiffEvokedSet::computeGrandAverage({set0, set1});
     QCOMPARE(grandAvg.evoked.size(), 1);
-    const FiffEvoked& g = grandAvg.evoked.first();
+    const FiffEvoked& g = grandAvg.evoked.front();
     QCOMPARE(g.nave, 2);
     QCOMPARE(g.comment, QString("Grand average (n = 2)"));
     QCOMPARE(g.info.nchan, 374);
@@ -390,7 +390,7 @@ void TestFiffIoEvokedInfo::evokedSet_checkArtifacts()
         ch.kind = FIFFV_MEG_CH;
         ch.chpos.coil_type = FIFFV_COIL_VV_MAG_W;
         ch.unit = FIFF_UNIT_T;
-        info.chs.append(ch);
+        info.chs.push_back(ch);
         info.ch_names.push_back(ch.ch_name);
     }
     info.nchan = nChan;
@@ -425,7 +425,7 @@ void TestFiffIoEvokedInfo::fiffInfo_defaultConstruction()
     FiffInfo info;
     QCOMPARE(info.nchan, -1);
     QCOMPARE(info.sfreq, -1.0f);
-    QVERIFY(info.chs.isEmpty());
+    QVERIFY(info.chs.empty());
 }
 
 void TestFiffIoEvokedInfo::fiffInfo_copyConstruction()
@@ -446,7 +446,7 @@ void TestFiffIoEvokedInfo::fiffInfo_clear()
 
     info.clear();
     QCOMPARE(info.nchan, -1);
-    QVERIFY(info.chs.isEmpty());
+    QVERIFY(info.chs.empty());
 }
 
 void TestFiffIoEvokedInfo::fiffInfo_pickInfo()
@@ -516,14 +516,14 @@ void TestFiffIoEvokedInfo::fiffInfo_writeToStream()
 
 void TestFiffIoEvokedInfo::fiffInfo_readMegEegChannels()
 {
-    QList<FiffChInfo> chsp;
+    std::vector<FiffChInfo> chsp;
     int nmeg = 0, neeg = 0;
 
     bool ok = FiffInfo::readMegEegChannels(rawPath().toStdString(), true, true, {},
                                            chsp, nmeg, neeg);
     QVERIFY(ok);
     QVERIFY(nmeg > 0); // Should find MEG channels
-    QVERIFY(chsp.size() == nmeg + neeg);
+    QVERIFY(std::ssize(chsp) == nmeg + neeg);
 }
 
 //=============================================================================================================
@@ -651,3 +651,5 @@ void TestFiffIoEvokedInfo::fileSharer_withDirectory()
 QTEST_GUILESS_MAIN(TestFiffIoEvokedInfo)
 
 #include "test_fiff_io_evoked_info.moc"
+
+#include <vector>

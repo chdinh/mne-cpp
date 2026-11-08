@@ -305,7 +305,7 @@ void TestFiffEvokedPython::readsAndSavesByPath()
     QVERIFY(m_set.save(out));
     const FiffEvokedSet back(out);
     QCOMPARE(back.evoked.size(), m_set.evoked.size());
-    for (qsizetype i = 0; i < back.evoked.size(); ++i) {
+    for (qsizetype i = 0; i < std::ssize(back.evoked); ++i) {
         QCOMPARE(back.evoked[i].comment, m_set.evoked[i].comment);
         QVERIFY(back.evoked[i].data.isApprox(m_set.evoked[i].data, 1e-6));
     }

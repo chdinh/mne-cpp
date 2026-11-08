@@ -24,6 +24,12 @@
 
 #include "fiff_cov.h"
 
+#include <algorithm>
+#include <iterator>
+
+#include <vector>
+#include <utility>
+
 #include <utils/generics/log.h>
 #include <utils/string_utils.h>
 #include "fiff_stream.h"
@@ -39,7 +45,6 @@
 // QT INCLUDES
 //=============================================================================================================
 
-#include <QPair>
 #include <QFile>
 
 //=============================================================================================================
@@ -313,7 +318,7 @@ FiffCov FiffCov::regularize(const FiffInfo& p_info, double p_fRegMag, double p_f
     }
 
     //Allways exclude all STI channels from covariance computation
-    for (int i = 0; i < p_info.chs.size(); i++) {
+    for (int i = 0; i < std::ssize(p_info.chs); i++) {
         if (p_info.chs[i].kind == FIFFV_STIM_CH) {
             p_exclude.push_back(p_info.chs[i].ch_name);
         }
@@ -355,22 +360,24 @@ FiffCov FiffCov::regularize(const FiffInfo& p_info, double p_fRegMag, double p_f
                  static_cast<long long>(C.rows()), idx_eeg.size() + idx_mag.size() + idx_grad.size());
     }
 
-    QList<FiffProj> t_listProjs;
+    std::vector<FiffProj> t_listProjs;
     if (p_bProj) {
-        t_listProjs = p_info.projs + cov_good.projs;
+        t_listProjs.reserve(p_info.projs.size() + cov_good.projs.size());
+        t_listProjs.insert(t_listProjs.end(), p_info.projs.begin(), p_info.projs.end());
+        t_listProjs.insert(t_listProjs.end(), cov_good.projs.begin(), cov_good.projs.end());
         FiffProj::activate_projs(t_listProjs);
     }
 
     //Build regularization MAP
-    QMap<QString, QPair<double, std::vector<qint32>>> regData;
-    regData.insert("EEG", QPair<double, std::vector<qint32>>(p_fRegEeg, idx_eeg));
-    regData.insert("MAG", QPair<double, std::vector<qint32>>(p_fRegMag, idx_mag));
-    regData.insert("GRAD", QPair<double, std::vector<qint32>>(p_fRegGrad, idx_grad));
+    QMap<QString, std::pair<double, std::vector<qint32>>> regData;
+    regData.insert("EEG", std::pair<double, std::vector<qint32>>(p_fRegEeg, idx_eeg));
+    regData.insert("MAG", std::pair<double, std::vector<qint32>>(p_fRegMag, idx_mag));
+    regData.insert("GRAD", std::pair<double, std::vector<qint32>>(p_fRegGrad, idx_grad));
 
     //
     //Regularize
     //
-    QMap<QString, QPair<double, std::vector<qint32>>>::Iterator it;
+    QMap<QString, std::pair<double, std::vector<qint32>>>::Iterator it;
     for (it = regData.begin(); it != regData.end(); ++it) {
         QString desc(it.key());
         double reg = it.value().first;
@@ -457,7 +464,7 @@ FiffCov& FiffCov::operator=(const FiffCov& rhs)
 
 FiffCov FiffCov::compute_from_epochs(const FiffRawData& raw,
                                      const MatrixXi& events,
-                                     const QList<int>& eventCodes,
+                                     const std::vector<int>& eventCodes,
                                      float tmin,
                                      float tmax,
                                      float bmin,
@@ -489,12 +496,13 @@ FiffCov FiffCov::compute_from_epochs(const FiffRawData& raw,
     }
 
     // The accepted epochs, grouped by event code
-    QList<QList<MatrixXd>> epochs(eventCodes.size());
+    std::vector<std::vector<MatrixXd>> epochs(eventCodes.size());
     for (int k = 0; k < events.rows(); ++k) {
         int evFrom = events(k, 1) & ~static_cast<int>(ignoreMask);
         int evTo = events(k, 2) & ~static_cast<int>(ignoreMask);
 
-        const int iCode = evFrom == 0 ? static_cast<int>(eventCodes.indexOf(evTo)) : -1;
+        const auto codeIt = std::ranges::find(eventCodes, evTo);
+        const int iCode = evFrom == 0 && codeIt != eventCodes.end() ? static_cast<int>(codeIt - eventCodes.begin()) : -1;
         if (iCode < 0)
             continue;
 
@@ -528,7 +536,7 @@ FiffCov FiffCov::compute_from_epochs(const FiffRawData& raw,
             }
         }
 
-        epochs[iCode].append(epochData);
+        epochs[iCode].push_back(epochData);
     }
 
     return compute_from_epochs(epochs, raw.info, removeMean);
@@ -536,7 +544,7 @@ FiffCov FiffCov::compute_from_epochs(const FiffRawData& raw,
 
 //=============================================================================================================
 
-FiffCov FiffCov::compute_from_epochs(const QList<QList<MatrixXd>>& epochs,
+FiffCov FiffCov::compute_from_epochs(const std::vector<std::vector<MatrixXd>>& epochs,
                                      const FiffInfo& info,
                                      bool removeMean)
 {
@@ -546,10 +554,10 @@ FiffCov FiffCov::compute_from_epochs(const QList<QList<MatrixXd>>& epochs,
     int totalSamples = 0;
     int nEpochs = 0;
     double norm = 0.0;
-    for (const QList<MatrixXd>& codeEpochs : epochs) {
-        if (codeEpochs.isEmpty())
+    for (const std::vector<MatrixXd>& codeEpochs : epochs) {
+        if (codeEpochs.empty())
             continue;
-        MatrixXd sum = MatrixXd::Zero(nchan, codeEpochs.first().cols());
+        MatrixXd sum = MatrixXd::Zero(nchan, codeEpochs.front().cols());
         for (const MatrixXd& epoch : codeEpochs) {
             covAccum += epoch * epoch.transpose();
             sum += epoch;
@@ -607,11 +615,11 @@ UTILSLIB::Expected<void> FiffCov::save(const std::filesystem::path& path) const
 
 //=============================================================================================================
 
-FiffCov FiffCov::compute_grand_average(const QList<FiffCov>& covs)
+FiffCov FiffCov::compute_grand_average(const std::vector<FiffCov>& covs)
 {
     FiffCov grandCov;
 
-    if (covs.isEmpty()) {
+    if (covs.empty()) {
         qWarning() << "[FiffCov::compute_grand_average] No covariance matrices provided.";
         return grandCov;
     }
@@ -620,7 +628,7 @@ FiffCov FiffCov::compute_grand_average(const QList<FiffCov>& covs)
     MatrixXd sumCov = grandCov.data * static_cast<double>(grandCov.nfree);
     int totalNfree = grandCov.nfree;
 
-    for (int k = 1; k < covs.size(); ++k) {
+    for (int k = 1; k < std::ssize(covs); ++k) {
         if (covs[k].dim != grandCov.dim) {
             qWarning() << "[FiffCov::compute_grand_average] Dimension mismatch.";
             return FiffCov();

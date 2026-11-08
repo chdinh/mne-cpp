@@ -45,7 +45,6 @@
 // QT INCLUDES
 //=============================================================================================================
 
-#include <QList>
 #include <vector>
 
 //=============================================================================================================
@@ -166,9 +165,9 @@ public:
      *
      * @since 2.2.0
      */
-    static QList<MNEBemSurface> makeScalpSurfaces(
+    static std::vector<MNEBemSurface> makeScalpSurfaces(
         const MNEBemSurface& outerSkin,
-        const QList<int>& targetVertices = {2562, 10242, 40962});
+        const std::vector<int>& targetVertices = {2562, 10242, 40962});
 
 public:
     Eigen::MatrixX3d tri_cent; /**< Triangle centers. */

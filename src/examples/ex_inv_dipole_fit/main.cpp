@@ -124,7 +124,7 @@ int main(int argc, char* argv[])
     evoked.nave = 1;
     FiffEvokedSet synthetic;
     synthetic.info = evoked.info;
-    synthetic.evoked.append(evoked);
+    synthetic.evoked.push_back(evoked);
     ok &= expect(synthetic.save(tmp.filePath("synthetic-ave.fif").toStdU16String()).has_value(), "FiffEvokedSet writes the synthetic field");
 
     //! [inv_dipole_fit_usage]

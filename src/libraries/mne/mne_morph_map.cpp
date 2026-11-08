@@ -317,7 +317,7 @@ std::optional<MNEMorphMap> MNEMorphMap::read(const QString& path, const QString&
 
 //=============================================================================================================
 
-bool MNEMorphMap::write(const QString& path, const QList<const MNEMorphMap*>& maps)
+bool MNEMorphMap::write(const QString& path, const std::vector<const MNEMorphMap*>& maps)
 {
     QFile file(path);
     auto stream = FiffStream::start_file(file);

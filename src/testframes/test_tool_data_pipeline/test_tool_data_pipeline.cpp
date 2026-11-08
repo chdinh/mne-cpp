@@ -486,7 +486,7 @@ private slots:
         QVERIFY(!outputRaw.info.empty());
         QCOMPARE(outputRaw.first_samp, firstSample);
         int stimIndex = -1;
-        for (int index = 0; index < outputRaw.info.chs.size(); ++index) {
+        for (int index = 0; index < std::ssize(outputRaw.info.chs); ++index) {
             if (outputRaw.info.chs[index].kind == FIFFV_STIM_CH) {
                 if ((outputRaw.info.chs[index].ch_name.find("014") != std::string::npos) || stimIndex < 0) {
                     stimIndex = index;
@@ -1576,8 +1576,8 @@ private slots:
 
         FIFFLIB::FiffEvokedSet sourceSet;
         sourceSet = FIFFLIB::FiffEvokedSet(evokedFile.toStdU16String());
-        QVERIFY(!sourceSet.evoked.isEmpty());
-        sourceSet.evoked = {sourceSet.evoked.first()};
+        QVERIFY(!sourceSet.evoked.empty());
+        sourceSet.evoked = {sourceSet.evoked.front()};
         const QString sourceEvokedFile = m_tempDir.filePath("single-condition-evoked.fif");
         QVERIFY(sourceSet.save(sourceEvokedFile.toStdU16String()));
 
@@ -1620,7 +1620,7 @@ private slots:
         QFile file(outFile);
         FIFFLIB::FiffStream stream(&file);
         QVERIFY(stream.open());
-        const QList<FIFFLIB::FiffProj> projectors = stream.read_proj(stream.dirtree());
+        const std::vector<FIFFLIB::FiffProj> projectors = stream.read_proj(stream.dirtree());
         stream.close();
         QCOMPARE(projectors.size(), 2);
         for (const FIFFLIB::FiffProj& projector : projectors) {
@@ -1663,7 +1663,7 @@ private slots:
         cmne = std::move(*cmneRead);
         QVERIFY(QFile::exists(outPrefix + "-cmne-rh.stc"));
 
-        const QList<Eigen::VectorXi> vertno = MNELIB::MNEForwardSolution(fwdFile.toStdU16String()).src.get_vertno();
+        const std::vector<Eigen::VectorXi> vertno = MNELIB::MNEForwardSolution(fwdFile.toStdU16String()).src.get_vertno();
         QVERIFY(dspm.vertices == vertno[0]);
         QVERIFY(dspmRh.vertices == vertno[1]);
         QCOMPARE(dspm.data.rows() + dspmRh.data.rows(), 7928);
@@ -2136,7 +2136,7 @@ private slots:
         const auto tag = bemNodes[0]->find_tag(stream, FIFF_BEM_POT_SOLUTION);
         QVERIFY(tag);
         qint32 ndim;
-        QVector<qint32> dims;
+        std::vector<qint32> dims;
         tag->getMatrixDimensions(ndim, dims);
         QCOMPARE(dims[0], bem[0].np);
         QCOMPARE(dims[1], bem[0].np);
@@ -2850,3 +2850,5 @@ private slots:
 
 QTEST_GUILESS_MAIN(TestToolDataPipeline)
 #include "test_tool_data_pipeline.moc"
+
+#include <vector>

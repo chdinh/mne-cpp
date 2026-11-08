@@ -25,6 +25,8 @@
 //=============================================================================================================
 
 #include "mne_global.h"
+
+#include <vector>
 #include "fiff/fiff_sparse_matrix.h"
 
 //=============================================================================================================
@@ -45,7 +47,6 @@
 // QT INCLUDES
 //=============================================================================================================
 
-#include <QList>
 #include <QSharedPointer>
 #include <QString>
 
@@ -128,7 +129,7 @@ public:
      *
      * @return True if the file was written.
      */
-    static bool write(const QString& path, const QList<const MNEMorphMap*>& maps);
+    static bool write(const QString& path, const std::vector<const MNEMorphMap*>& maps);
 
     //=========================================================================================================
     /**

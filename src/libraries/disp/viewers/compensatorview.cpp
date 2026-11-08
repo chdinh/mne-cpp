@@ -18,6 +18,8 @@
 
 #include "compensatorview.h"
 
+#include <vector>
+
 #include <fiff/fiff_ctf_comp.h>
 
 //=============================================================================================================
@@ -69,18 +71,18 @@ CompensatorView::~CompensatorView()
 
 //=============================================================================================================
 
-QList<FIFFLIB::FiffCtfComp> CompensatorView::getCompensators() const
+std::vector<FIFFLIB::FiffCtfComp> CompensatorView::getCompensators() const
 {
     return m_pComps;
 }
 
 //=============================================================================================================
 
-void CompensatorView::setCompensators(const QList<FIFFLIB::FiffCtfComp>& comps)
+void CompensatorView::setCompensators(const std::vector<FIFFLIB::FiffCtfComp>& comps)
 {
     m_pComps = comps;
 
-    for (int i = 0; i < m_pComps.size(); ++i) {
+    for (int i = 0; i < std::ssize(m_pComps); ++i) {
         if (!m_mapCompActive.contains(m_pComps.at(i).kind)) {
             m_mapCompActive.insert(m_pComps.at(i).kind, false);
         }
@@ -165,7 +167,7 @@ int CompensatorView::getLastTo() const
 
 void CompensatorView::redrawGUI()
 {
-    if (m_pComps.isEmpty()) {
+    if (m_pComps.empty()) {
         return;
     }
 
@@ -174,7 +176,7 @@ void CompensatorView::redrawGUI()
     // Compensation Selection
     QGridLayout* topLayout = new QGridLayout;
 
-    for (int i = 0; i < m_pComps.size(); ++i) {
+    for (int i = 0; i < std::ssize(m_pComps); ++i) {
         QString numStr;
         QCheckBox* checkBox = new QCheckBox(numStr.setNum(m_pComps[i].kind));
 

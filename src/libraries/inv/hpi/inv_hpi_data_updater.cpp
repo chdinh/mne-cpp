@@ -23,6 +23,8 @@
 //=============================================================================================================
 
 #include "inv_hpi_data_updater.h"
+
+#include <vector>
 #include <utils/string_utils.h>
 #include <fiff/fiff_ch_info.h>
 #include <fiff/fiff_info.h>
@@ -89,7 +91,7 @@ void InvHpiDataUpdater::updateChannels(FiffInfo::SPtr pFiffInfo)
 
             if (!(UTILSLIB::contains(pFiffInfo->bads, pFiffInfo->ch_names.at(i)))) {
                 m_vecInnerind.append(i);
-                m_lChannels.append(pFiffInfo->chs[i]);
+                m_lChannels.push_back(pFiffInfo->chs[i]);
             }
         }
     }
@@ -97,7 +99,7 @@ void InvHpiDataUpdater::updateChannels(FiffInfo::SPtr pFiffInfo)
 
 //=============================================================================================================
 
-void InvHpiDataUpdater::updateSensors(const QList<FIFFLIB::FiffChInfo>& lChannels)
+void InvHpiDataUpdater::updateSensors(const std::vector<FIFFLIB::FiffChInfo>& lChannels)
 {
     const Accuracy accuracy = Accuracy::high;
     m_sensors = m_sensorSetCreator.updateSensorSet(lChannels, accuracy);
@@ -133,7 +135,7 @@ void InvHpiDataUpdater::checkForUpdate(const FiffInfo::SPtr pFiffInfo)
 
 //=============================================================================================================
 
-bool InvHpiDataUpdater::checkIfChanged(const StringList& lBads, const QList<FIFFLIB::FiffChInfo>& lChannels)
+bool InvHpiDataUpdater::checkIfChanged(const StringList& lBads, const std::vector<FIFFLIB::FiffChInfo>& lChannels)
 {
     bool bUpdate = false;
     if (!(m_lBads == lBads) || !(m_lChannels == lChannels)) {

@@ -245,7 +245,7 @@ void MneBrowseRawDelegate::createPlotPath(const QModelIndex& index,
 
 double MneBrowseRawDelegate::scaleForChannel(const MNEBROWSE::RawModel* model, int row) const
 {
-    if (!model || row < 0 || row >= model->channelInfoList().size()) {
+    if (!model || row < 0 || row >= std::ssize(model->channelInfoList())) {
         return 1e-9;
     }
 
@@ -307,7 +307,7 @@ void MneBrowseRawDelegate::drawEvents([[maybe_unused]] const QModelIndex& index,
 
 QColor MneBrowseRawDelegate::colorForChannel(const MNEBROWSE::RawModel* model, int row) const
 {
-    if (!model || row < 0 || row >= model->channelInfoList().size()) {
+    if (!model || row < 0 || row >= std::ssize(model->channelInfoList())) {
         return m_colorMap.value(FIFFV_MISC_CH, Qt::darkGray);
     }
 

@@ -17,6 +17,8 @@
 //=============================================================================================================
 
 #include "evokedsetmodel.h"
+
+#include <vector>
 #include <utils/string_utils.h>
 
 #include <fiff/fiff_info.h>
@@ -300,7 +302,7 @@ void EvokedSetModel::updateData()
     m_matData.clear();
     m_lAvrTypes.clear();
 
-    for (int i = 0; i < m_pEvokedSet->evoked.size(); ++i) {
+    for (int i = 0; i < std::ssize(m_pEvokedSet->evoked); ++i) {
         bool doProj = m_bProjActivated && m_pEvokedSet->evoked.at(i).data.cols() > 0 && m_pEvokedSet->evoked.at(i).data.rows() == m_matProj.cols() ? true : false;
 
         bool doComp = m_bCompActivated && m_pEvokedSet->evoked.at(i).data.cols() > 0 && m_pEvokedSet->evoked.at(i).data.rows() == m_matComp.cols() ? true : false;
@@ -333,7 +335,7 @@ void EvokedSetModel::updateData()
     int iSizeAvrActivation = m_qMapAverageActivation->size();
     int iSizeAvrColor = m_qMapAverageColor->size();
 
-    for (int i = 0; i < m_pEvokedSet->evoked.size(); ++i) {
+    for (int i = 0; i < std::ssize(m_pEvokedSet->evoked); ++i) {
         slCurrentAvrComments << m_pEvokedSet->evoked.at(i).comment;
 
         if (!m_qMapAverageActivation->contains(m_pEvokedSet->evoked.at(i).comment)) {
@@ -525,8 +527,8 @@ qint32 EvokedSetModel::getNumPreStimSamples() const
         return iPreSamples;
     }
 
-    if (!m_pEvokedSet->evoked.isEmpty()) {
-        RowVectorXf times = m_pEvokedSet->evoked.first().times;
+    if (!m_pEvokedSet->evoked.empty()) {
+        RowVectorXf times = m_pEvokedSet->evoked.front().times;
 
         // Search for stim onset via times
         for (int i = 0; i < times.cols(); i++) {
@@ -630,7 +632,7 @@ void EvokedSetModel::resetSelection()
 
 //=============================================================================================================
 
-void EvokedSetModel::updateProjection(const QList<FiffProj>& projs)
+void EvokedSetModel::updateProjection(const std::vector<FiffProj>& projs)
 {
     if (!m_pEvokedSet) {
         return;
@@ -640,7 +642,7 @@ void EvokedSetModel::updateProjection(const QList<FiffProj>& projs)
     if (m_pEvokedSet->info.chs.size() > 0) {
         m_pEvokedSet->info.projs = projs;
         m_bProjActivated = false;
-        for (qint32 i = 0; i < projs.size(); ++i) {
+        for (qint32 i = 0; i < std::ssize(projs); ++i) {
             if (m_pEvokedSet->info.projs[i].active) {
                 m_bProjActivated = true;
             }

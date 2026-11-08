@@ -37,6 +37,8 @@
 //=============================================================================================================
 
 #include "fiff_global.h"
+
+#include <vector>
 #include "fiff_types.h"
 #include "fiff_ch_info.h"
 #include "fiff_named_matrix.h"
@@ -126,7 +128,7 @@ public:
      *
      * @return false if a row or column channel is missing from, or ambiguous in, chs.
      */
-    bool calibrate(const QList<FiffChInfo>& chs);
+    bool calibrate(const std::vector<FiffChInfo>& chs);
 
 public:
     fiff_int_t ctfkind;          /**< CTF kind. */

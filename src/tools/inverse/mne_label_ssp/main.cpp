@@ -15,6 +15,8 @@
 //=============================================================================================================
 
 #include <mne/mne_forward_solution.h>
+
+#include <vector>
 #include <mne/mne_source_space.h>
 
 #include <fiff/fiff_stream.h>
@@ -138,7 +140,7 @@ int main(int argc, char* argv[])
     //
     // Process each label
     //
-    QList<FiffProj> projectors;
+    std::vector<FiffProj> projectors;
 
     for (const QString& labelFile : labelFiles) {
         qInfo("Processing label: %s", labelFile.toUtf8().constData());
@@ -221,13 +223,13 @@ int main(int argc, char* argv[])
                           QString("Label-SSP %1 #%2").arg(QFileInfo(labelFile).baseName()).arg(k + 1),
                           namedMat);
 
-            projectors.append(proj);
+            projectors.push_back(proj);
         }
 
         qInfo("  Created %d projector(s) from %s", nUse, labelFile.toUtf8().constData());
     }
 
-    if (projectors.isEmpty()) {
+    if (projectors.empty()) {
         qCritical("No projectors were created.");
         return 1;
     }

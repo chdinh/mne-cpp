@@ -44,6 +44,7 @@
 
 #include <cmath>
 #include <algorithm>
+#include <iterator>
 #include <vector>
 
 //=============================================================================================================
@@ -72,10 +73,10 @@ std::vector<int> goodChannelsOfKind(const FiffInfo& info, int kind)
 }
 
 // Adapted from mne.preprocessing.ssp._compute_exg_proj (MNE-Python, BSD-3-Clause).
-QList<FiffProj> exgProjectors(const MatrixXd& data, const FiffInfo& info, double sf, const std::vector<int>& events,
-                              const ArtifactDetectProjParams& p, const QString& mode)
+std::vector<FiffProj> exgProjectors(const MatrixXd& data, const FiffInfo& info, double sf, const std::vector<int>& events,
+                                    const ArtifactDetectProjParams& p, const QString& mode)
 {
-    QList<FiffProj> projs = info.projs;
+    std::vector<FiffProj> projs = info.projs;
     if (events.empty()) {
         qWarning() << "[ArtifactDetect] No" << mode << "events found";
         return projs;
@@ -96,7 +97,7 @@ QList<FiffProj> exgProjectors(const MatrixXd& data, const FiffInfo& info, double
     const MatrixXd filtered = FirFilter::filterDataZeroDouble(picked, sf, p.dFilterLow, p.dFilterHigh, FirFilter::FirWindow::Hamming);
 
     // Epochs(proj=True) applies every info projector before rejection.
-    QList<FiffProj> active = info.projs;
+    std::vector<FiffProj> active = info.projs;
     for (FiffProj& proj : active) {
         proj.active = true;
     }
@@ -143,11 +144,12 @@ QList<FiffProj> exgProjectors(const MatrixXd& data, const FiffInfo& info, double
     evoked.nave = nave;
     evoked.data = sum / nave;
     evoked.times = RowVectorXf::LinSpaced(last - first + 1, static_cast<float>(first / sf), static_cast<float>(last / sf));
-    QList<FiffProj> exg = FiffProj::compute_from_evoked(evoked, p.nGrad, p.nMag, p.nEeg);
+    std::vector<FiffProj> exg = FiffProj::compute_from_evoked(evoked, p.nGrad, p.nMag, p.nEeg);
     for (FiffProj& proj : exg) {
         proj.desc = mode + "-" + proj.desc;
     }
-    return projs + exg;
+    std::ranges::move(exg, std::back_inserter(projs));
+    return projs;
 }
 
 } // namespace
@@ -309,16 +311,16 @@ std::vector<int> ArtifactDetect::detectEog(const MatrixXd& matData,
 
 //=============================================================================================================
 
-QList<FiffProj> ArtifactDetect::computeProjEcg(const MatrixXd& matData, const FiffInfo& fiffInfo, double dSFreq,
-                                               const ProjParams& proj, const EcgParams& detect)
+std::vector<FiffProj> ArtifactDetect::computeProjEcg(const MatrixXd& matData, const FiffInfo& fiffInfo, double dSFreq,
+                                                     const ProjParams& proj, const EcgParams& detect)
 {
     return exgProjectors(matData, fiffInfo, dSFreq, detectEcg(matData, fiffInfo, dSFreq, detect), proj, "ECG");
 }
 
 //=============================================================================================================
 
-QList<FiffProj> ArtifactDetect::computeProjEog(const MatrixXd& matData, const FiffInfo& fiffInfo, double dSFreq,
-                                               const ProjParams& proj, const EogParams& detect)
+std::vector<FiffProj> ArtifactDetect::computeProjEog(const MatrixXd& matData, const FiffInfo& fiffInfo, double dSFreq,
+                                                     const ProjParams& proj, const EogParams& detect)
 {
     return exgProjectors(matData, fiffInfo, dSFreq, detectEog(matData, fiffInfo, dSFreq, detect), proj, "EOG");
 }

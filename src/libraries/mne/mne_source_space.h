@@ -28,6 +28,8 @@
 //=============================================================================================================
 
 #include "mne_global.h"
+
+#include <vector>
 #include "mne_surface_or_volume.h"
 
 //=============================================================================================================
@@ -277,7 +279,7 @@ public:
      * @return Sorted vertex numbers for lh and rh, or an empty list if a sphere cannot be read or the grade
      *         maps two icosahedron vertices onto the same surface vertex.
      */
-    static QList<Eigen::VectorXi> gradeToVertices(const QString& subjectsDir, const QString& subject, int grade);
+    static std::vector<Eigen::VectorXi> gradeToVertices(const QString& subjectsDir, const QString& subject, int grade);
 
 private:
     /**

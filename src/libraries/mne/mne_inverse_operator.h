@@ -33,6 +33,8 @@
 //=============================================================================================================
 
 #include "mne_global.h"
+
+#include <vector>
 #include "mne_source_spaces.h"
 #include "mne_forward_solution.h"
 
@@ -53,7 +55,6 @@
 // QT INCLUDES
 //=============================================================================================================
 
-#include <QList>
 
 #include <filesystem>
 
@@ -193,7 +194,7 @@ public:
                          bool pick_normal,
                          Eigen::MatrixXd& K,
                          Eigen::SparseMatrix<double>& noise_norm,
-                         QList<Eigen::VectorXi>& vertno);
+                         std::vector<Eigen::VectorXi>& vertno);
 
     //=========================================================================================================
     /**
@@ -351,7 +352,7 @@ public:
     MNESourceSpaces src;                                                        /**< Source space (surfaces and/or volume). */
     FIFFLIB::FiffCoordTrans mri_head_t;                                         /**< MRI-to-head coordinate transformation. */
     FIFFLIB::fiff_int_t nave = -1;                                              /**< Number of averages (default 1). */
-    QList<FIFFLIB::FiffProj> projs;                                             /**< SSP projectors read from the file. */
+    std::vector<FIFFLIB::FiffProj> projs;                                       /**< SSP projectors read from the file. */
     Eigen::MatrixXd proj;                                                       /**< SSP projector matrix applied to data. */
     Eigen::MatrixXd whitener;                                                   /**< Whitening matrix (derived from noise covariance). */
     Eigen::VectorXd reginv;                                                     /**< Diagonal regularised inverse of the singular values. */

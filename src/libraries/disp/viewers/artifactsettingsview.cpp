@@ -18,6 +18,8 @@
 
 #include "artifactsettingsview.h"
 
+#include <vector>
+
 #include <fiff/fiff_ch_info.h>
 
 //=============================================================================================================
@@ -50,7 +52,7 @@ using namespace FIFFLIB;
 //=============================================================================================================
 
 ArtifactSettingsView::ArtifactSettingsView(const QString& sSettingsPath,
-                                           const QList<FiffChInfo>& fiffChInfoList,
+                                           const std::vector<FiffChInfo>& fiffChInfoList,
                                            QWidget* parent)
 : AbstractView(parent)
 , m_fiffChInfoList(fiffChInfoList)
@@ -75,7 +77,7 @@ ArtifactSettingsView::~ArtifactSettingsView()
 
 //=============================================================================================================
 
-void ArtifactSettingsView::setChInfo(const QList<FIFFLIB::FiffChInfo>& fiffChInfoList)
+void ArtifactSettingsView::setChInfo(const std::vector<FIFFLIB::FiffChInfo>& fiffChInfoList)
 {
     m_fiffChInfoList = fiffChInfoList;
 
@@ -227,11 +229,11 @@ void ArtifactSettingsView::redrawGUI()
     this->setLayout(pGroupBoxArtifactRejection);
 
     //Artifact rejection
-    if (!m_fiffChInfoList.isEmpty()) {
+    if (!m_fiffChInfoList.empty()) {
         QStringList channelTypes;
         int kind, unit;
 
-        for (int i = 0; i < m_fiffChInfoList.size(); ++i) {
+        for (int i = 0; i < std::ssize(m_fiffChInfoList); ++i) {
             kind = m_fiffChInfoList.at(i).kind;
             unit = m_fiffChInfoList.at(i).unit;
 

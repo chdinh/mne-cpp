@@ -99,7 +99,7 @@ FiffInfo eximiaInfo()
             ch.cal = static_cast<float>(kEegCal);
             ch.chpos.coil_type = FIFFV_COIL_EEG;
         }
-        info.chs.append(ch);
+        info.chs.push_back(ch);
         info.ch_names.push_back(ch.ch_name);
     }
     return info;

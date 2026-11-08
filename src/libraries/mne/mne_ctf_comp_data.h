@@ -25,6 +25,8 @@
 
 #include "mne_global.h"
 
+#include <vector>
+
 #include "mne_named_matrix.h"
 #include <fiff/fiff_sparse_matrix.h>
 
@@ -39,7 +41,6 @@
 //=============================================================================================================
 
 #include <QSharedPointer>
-#include <QList>
 
 //=============================================================================================================
 // DEFINE NAMESPACE MNELIB
@@ -98,7 +99,7 @@ public:
      *
      * @return OK on success, FAIL if a channel is not found.
      */
-    int calibrate(const QList<FIFFLIB::FiffChInfo>& chs,
+    int calibrate(const std::vector<FIFFLIB::FiffChInfo>& chs,
                   int nch,
                   bool do_it);
 

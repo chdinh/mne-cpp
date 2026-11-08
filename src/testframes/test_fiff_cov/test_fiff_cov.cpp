@@ -97,17 +97,17 @@ MatrixXi deriveStimEvents(const FiffRawData& raw)
     return events;
 }
 
-QList<int> uniqueEventCodes(const MatrixXi& events, int maxCodes = -1)
+std::vector<int> uniqueEventCodes(const MatrixXi& events, int maxCodes = -1)
 {
-    QList<int> codes;
+    std::vector<int> codes;
     for (int row = 0; row < events.rows(); ++row) {
         const int code = events(row, 2);
-        if (code == 0 || codes.contains(code)) {
+        if (code == 0 || std::ranges::contains(codes, code)) {
             continue;
         }
 
-        codes.append(code);
-        if (maxCodes > 0 && codes.size() >= maxCodes) {
+        codes.push_back(code);
+        if (maxCodes > 0 && std::ssize(codes) >= maxCodes) {
             break;
         }
     }
@@ -234,8 +234,8 @@ void TestFiffCov::computeFromEpochs_sampleRaw()
     const MatrixXi events = deriveStimEvents(raw);
     QVERIFY(events.rows() > 0);
 
-    const QList<int> codes = uniqueEventCodes(events, 4);
-    QVERIFY(!codes.isEmpty());
+    const std::vector<int> codes = uniqueEventCodes(events, 4);
+    QVERIFY(!codes.empty());
 
     const FiffCov cov = FiffCov::compute_from_epochs(raw,
                                                      events,
@@ -261,7 +261,7 @@ void TestFiffCov::computeFromEpochs_matchesPython_data()
     // mne.compute_covariance(mne.Epochs(raw, find_events(raw), event_id=codes, tmin, tmax, baseline, proj=False,
     // reject) with events shifted by round(delay * sfreq), keep_sample_mean=not removeMean, method="empirical",
     // rank="full") (mne 1.11.0). C[MEG0113], C[EEG001], C[MEG0113,EEG001].
-    QTest::addColumn<QList<int>>("codes");
+    QTest::addColumn<std::vector<int>>("codes");
     QTest::addColumn<float>("tmin");
     QTest::addColumn<float>("tmax");
     QTest::addColumn<bool>("baseline");
@@ -271,20 +271,20 @@ void TestFiffCov::computeFromEpochs_matchesPython_data()
     QTest::addColumn<int>("nfree");
     QTest::addColumn<Vector3d>("ref");
     QTest::addColumn<double>("eegReject");
-    QTest::newRow("baseline whole window") << QList<int>{1, 2} << -0.2f << 0.0f << true << 0.0f << true << 0.0f << 731
+    QTest::newRow("baseline whole window") << std::vector<int>{1, 2} << -0.2f << 0.0f << true << 0.0f << true << 0.0f << 731
                                            << Vector3d(2.6601752968048106e-30, 6.996080895615044e-17, 5.42158928127522e-24) << 0.0;
-    QTest::newRow("pre-stimulus baseline, mean kept") << QList<int>{3} << -0.1f << 0.1f << true << 0.0f << false << 0.0f << 365
+    QTest::newRow("pre-stimulus baseline, mean kept") << std::vector<int>{3} << -0.1f << 0.1f << true << 0.0f << false << 0.0f << 365
                                                       << Vector3d(1.4593490861834027e-30, 6.011250385749755e-18, 2.5599899614022574e-25) << 0.0;
-    QTest::newRow("no baseline, 50 ms delay") << QList<int>{1, 2, 3, 4} << -0.2f << 0.0f << false << 0.0f << true << 0.05f << 1402
+    QTest::newRow("no baseline, 50 ms delay") << std::vector<int>{1, 2, 3, 4} << -0.2f << 0.0f << false << 0.0f << true << 0.05f << 1402
                                               << Vector3d(2.9895179185798132e-30, 1.660296559341988e-16, 9.214041994032018e-24) << 0.0;
     // reject=dict(eeg=1.4230782369752743e-08), the median EEG peak-to-peak: 6 of 12 epochs kept
-    QTest::newRow("EEG rejection") << QList<int>{1, 2} << -0.2f << 0.0f << false << 0.0f << true << 0.0f << 365
+    QTest::newRow("EEG rejection") << std::vector<int>{1, 2} << -0.2f << 0.0f << false << 0.0f << true << 0.0f << 365
                                    << Vector3d(1.9540370059529494e-30, 8.784207369943824e-18, -2.2173673269083468e-25) << 1.4230782369752743e-08;
 }
 
 void TestFiffCov::computeFromEpochs_matchesPython()
 {
-    QFETCH(QList<int>, codes);
+    QFETCH(std::vector<int>, codes);
     QFETCH(float, tmin);
     QFETCH(float, tmax);
     QFETCH(bool, baseline);
@@ -327,8 +327,8 @@ void TestFiffCov::saveRoundTrip_computedCovariance()
     const MatrixXi events = deriveStimEvents(raw);
     QVERIFY(events.rows() > 0);
 
-    const QList<int> codes = uniqueEventCodes(events, 4);
-    QVERIFY(!codes.isEmpty());
+    const std::vector<int> codes = uniqueEventCodes(events, 4);
+    QVERIFY(!codes.empty());
 
     const FiffCov cov = FiffCov::compute_from_epochs(raw,
                                                      events,

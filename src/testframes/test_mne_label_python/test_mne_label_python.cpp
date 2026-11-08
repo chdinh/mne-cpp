@@ -183,7 +183,7 @@ void TestMneLabelPython::labelSourceSelection()
     QVERIFY2(!l.empty(), qPrintable(name));
 
     VectorXi sel;
-    const QList<VectorXi> vertno = m_fwd.src.label_src_vertno_sel(l, sel);
+    const std::vector<VectorXi> vertno = m_fwd.src.label_src_vertno_sel(l, sel);
 
     QCOMPARE(static_cast<int>(sel.size()), count);
     QCOMPARE(sel(0), first);
@@ -221,9 +221,9 @@ void TestMneLabelPython::pickRegions_matchesPython()
     QFETCH(QList<double>, firstRr);
     QFETCH(QList<double>, lastRr);
 
-    QList<FsLabel> picked;
+    std::vector<FsLabel> picked;
     for (const QString& name : labels) {
-        picked << label(name);
+        picked.push_back(label(name));
     }
 
     const MNEForwardSolution f = m_fwd.pick_regions(picked);
@@ -293,7 +293,7 @@ void TestMneLabelPython::clusterForward_invariants()
         const MNEClusterInfo& info = c.src.hemisphereAt(h)->cluster_info;
         nClusters += info.clusterVertnos.size();
         QCOMPARE(info.centroidVertno.size(), info.clusterVertnos.size());
-        for (int k = 0; k < info.clusterVertnos.size(); ++k) {
+        for (int k = 0; k < std::ssize(info.clusterVertnos); ++k) {
             nAssigned += static_cast<int>(info.clusterVertnos[k].size());
             // Every centroid is one of the region's own sources.
             QVERIFY((small.src[h].vertno.array() == info.centroidVertno[k]).any());
@@ -325,7 +325,7 @@ void TestMneLabelPython::clusterForward_invariants()
     QCOMPARE(static_cast<int>(surf.source_rr.rows()), nClusters);
     for (int h = 0, row = 0; h < 2; ++h) {
         const MNEClusterInfo& info = c.src.hemisphereAt(h)->cluster_info;
-        for (int k = 0; k < info.centroidVertno.size(); ++k, ++row) {
+        for (int k = 0; k < std::ssize(info.centroidVertno); ++k, ++row) {
             const int v = info.centroidVertno[k];
             QVERIFY((surf.source_rr.row(row) - small.src[h].rr.row(v)).norm() < 1e-6f);
             QVERIFY(std::abs(surf.source_nn.row(3 * row + 2).dot(small.src[h].nn.row(v)) - 1.0f) < 1e-4f);
@@ -387,13 +387,13 @@ void TestMneLabelPython::assembleKernel_label()
 
     MatrixXd kFull;
     SparseMatrix<double> nnFull;
-    QList<VectorXi> vFull;
+    std::vector<VectorXi> vFull;
     QVERIFY(prepared.assemble_kernel(FsLabel(), method, false, kFull, nnFull, vFull));
 
     const FsLabel l = label(name);
     MatrixXd kLabel;
     SparseMatrix<double> nnLabel;
-    QList<VectorXi> vLabel;
+    std::vector<VectorXi> vLabel;
     QVERIFY(prepared.assemble_kernel(l, method, false, kLabel, nnLabel, vLabel));
 
     // The label kernel is the label's rows of the full kernel, the same rows
@@ -465,7 +465,7 @@ void TestMneLabelPython::clusterKernel_invariants()
                                  .prepare_inverse_operator(evoked.nave, 1.0f / 9.0f, false);
     MatrixXd K;
     SparseMatrix<double> nn;
-    QList<VectorXi> v;
+    std::vector<VectorXi> v;
     QVERIFY(inv.assemble_kernel(FsLabel(), "MNE", false, K, nn, v));
 
     MatrixXd D;

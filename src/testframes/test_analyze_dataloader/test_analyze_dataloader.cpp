@@ -198,7 +198,7 @@ void TestAnalyzeDataLoader::savesTheSelectedAverage()
     const FIFFLIB::FiffEvokedSet expected(avePath.toStdU16String());
     const FIFFLIB::FiffEvokedSet saved(outPath.toStdU16String());
     QCOMPARE(saved.evoked.size(), expected.evoked.size());
-    for (int k = 0; k < expected.evoked.size(); ++k) {
+    for (int k = 0; k < std::ssize(expected.evoked); ++k) {
         QCOMPARE(saved.evoked[k].comment, expected.evoked[k].comment);
         QCOMPARE(saved.evoked[k].nave, expected.evoked[k].nave);
         QVERIFY(saved.evoked[k].data.isApprox(expected.evoked[k].data, 1e-6));

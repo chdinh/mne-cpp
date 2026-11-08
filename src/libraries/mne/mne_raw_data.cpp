@@ -20,6 +20,8 @@
 //=============================================================================================================
 
 #include "mne_raw_data.h"
+
+#include <vector>
 #include <utils/string_utils.h>
 
 #include <QFile>
@@ -359,13 +361,13 @@ std::unique_ptr<FilterData> mne_create_filter_response(const MNEFilterDef& filte
 
 int mne_read_raw_buffer_t( //fiffFile     in,        /* Input file */
     FiffStream& stream,
-    const FiffDirEntry& ent,               /* The directory entry to read */
-    RowMajorMatrixXf& data,                /* Matrix [npick x nsamp] to fill */
-    int nchan,                             /* Number of channels in the data */
-    int nsamp,                             /* Expected number of samples */
-    const QList<FIFFLIB::FiffChInfo>& chs, /* Channel info for ALL channels */
-    int* pickno,                           /* Which channels to pick */
-    int npick)                             /* How many */
+    const FiffDirEntry& ent,                     /* The directory entry to read */
+    RowMajorMatrixXf& data,                      /* Matrix [npick x nsamp] to fill */
+    int nchan,                                   /* Number of channels in the data */
+    int nsamp,                                   /* Expected number of samples */
+    const std::vector<FIFFLIB::FiffChInfo>& chs, /* Channel info for ALL channels */
+    int* pickno,                                 /* Which channels to pick */
+    int npick)                                   /* How many */
 
 {
     std::optional<FiffTag> t_pTag;
@@ -1333,7 +1335,7 @@ MNERawData* MNERawData::open_file_comp(const QString& name,
     } else if (data->comp->set_compensation(data->comp_now,
                                             data->info->chInfo,
                                             data->info->nchan,
-                                            QList<FIFFLIB::FiffChInfo>(),
+                                            std::vector<FIFFLIB::FiffChInfo>(),
                                             0) == FAIL)
         return nullptr;
     /*

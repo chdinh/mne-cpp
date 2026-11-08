@@ -231,7 +231,7 @@ private slots:
         settings.include_meg = true;
         QVERIFY(settings.checkIntegrity());
         QVERIFY(settings.checkIntegrity());
-        QCOMPARE(settings.projnames, QStringList{"data-ave.fif"});
+        QCOMPARE(settings.projnames, std::vector<QString>{"data-ave.fif"});
     }
 
     //=========================================================================
@@ -639,7 +639,7 @@ private slots:
         FiffEvokedSet evokedSet(path.toStdU16String());
         QVERIFY(evokedSet.evoked.size() > 0);
 
-        for (int i = 0; i < evokedSet.evoked.size(); ++i) {
+        for (int i = 0; i < std::ssize(evokedSet.evoked); ++i) {
             QVERIFY(evokedSet.evoked[i].data.rows() > 0);
             QVERIFY(evokedSet.evoked[i].data.cols() > 0);
         }

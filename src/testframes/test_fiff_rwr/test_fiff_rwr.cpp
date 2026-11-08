@@ -311,7 +311,7 @@ void TestFiffRWR::compareInfo()
     std::cout << "[2] Projection Check\n";
     QVERIFY(rawFirstInRaw.info.projs.size() == rawSecondInRaw.info.projs.size());
 
-    for (qint32 i = 0; i < rawFirstInRaw.info.projs.size(); ++i) {
+    for (qint32 i = 0; i < std::ssize(rawFirstInRaw.info.projs); ++i) {
         std::cout << "Projector " << i << std::endl;
         MatrixXd mTmp = rawFirstInRaw.info.projs[i].data->data - rawSecondInRaw.info.projs[i].data->data;
         QVERIFY(mTmp.sum() < dEpsilon);
@@ -321,7 +321,7 @@ void TestFiffRWR::compareInfo()
     std::cout << "[3] Compensator Check\n";
     QVERIFY(rawFirstInRaw.info.comps.size() == rawSecondInRaw.info.comps.size());
 
-    for (qint32 i = 0; i < rawFirstInRaw.info.comps.size(); ++i) {
+    for (qint32 i = 0; i < std::ssize(rawFirstInRaw.info.comps); ++i) {
         std::cout << "Compensator " << i << std::endl;
         MatrixXd mTmp = rawFirstInRaw.info.comps[i].data->data - rawSecondInRaw.info.comps[i].data->data;
         QVERIFY(mTmp.sum() < dEpsilon);

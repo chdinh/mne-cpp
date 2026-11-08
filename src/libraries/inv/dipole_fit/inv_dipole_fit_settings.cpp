@@ -213,8 +213,8 @@ bool InvDipoleFitSettings::checkIntegrity()
         return false;
     }
     // Calling this again (e.g. once per fit) must not add the data file's projections twice
-    if (!omit_data_proj && !projnames.contains(measname))
-        projnames.prepend(measname);
+    if (!omit_data_proj && !std::ranges::contains(projnames, measname))
+        projnames.insert(projnames.begin(), measname);
 
     if (!bemname.isEmpty())
         qInfo("BEM              : %s", bemname.toUtf8().data());
@@ -241,8 +241,8 @@ bool InvDipoleFitSettings::checkIntegrity()
     qInfo("Data             : %s", measname.toUtf8().data());
     if (projnames.size() > 0) {
         qInfo("SSP sources      :");
-        for (int k = 0; k < projnames.size(); k++)
-            qInfo("\t%s", projnames[k].toUtf8().data());
+        for (const QString& projname : projnames)
+            qInfo("\t%s", projname.toUtf8().data());
     }
     if (!badname.isEmpty())
         qInfo("Bad channels     : %s", badname.toUtf8().data());
@@ -545,7 +545,7 @@ bool InvDipoleFitSettings::check_args(int* argc, char** argv)
                 qCritical("--proj: argument required.");
                 return false;
             }
-            projnames.append(QString(argv[k + 1]));
+            projnames.emplace_back(argv[k + 1]);
         } else if (strcmp(argv[k], "--noproj") == 0) {
             found = 1;
             omit_data_proj = true;

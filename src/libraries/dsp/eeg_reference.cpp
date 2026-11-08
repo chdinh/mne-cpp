@@ -100,7 +100,7 @@ void UTILSLIB::setEegReference(MatrixXd& data,
         }
         FiffNamedMatrix vec(1, static_cast<int>(names.size()), StringList(), names,
                             MatrixXd::Constant(1, names.size(), 1.0 / std::sqrt(static_cast<double>(names.size()))));
-        info.projs.append(FiffProj(FIFFV_PROJ_ITEM_EEG_AVREF, false, QStringLiteral("Average EEG reference"), vec));
+        info.projs.push_back(FiffProj(FIFFV_PROJ_ITEM_EEG_AVREF, false, QStringLiteral("Average EEG reference"), vec));
         return;
     }
 
@@ -201,7 +201,7 @@ void UTILSLIB::addReferenceChannels(MatrixXd& data,
         ch.scanNo = info.nchan + n + 1;
         ch.logNo = ch.scanNo;
 
-        info.chs.append(ch);
+        info.chs.push_back(ch);
         info.ch_names.push_back(chNames[n]);
     }
     info.nchan += nNew;
@@ -264,7 +264,7 @@ void UTILSLIB::setBipolarReference(MatrixXd& data,
     }
 
     // Build bipolar channel info
-    QList<FiffChInfo> bipolarChs;
+    std::vector<FiffChInfo> bipolarChs;
     StringList bipolarNames;
     for (int i = 0; i < nPairs; ++i) {
         FiffChInfo ch = info.chs[anodeIdx[i]];
@@ -285,7 +285,7 @@ void UTILSLIB::setBipolarReference(MatrixXd& data,
 
         const int nKeep = static_cast<int>(keepIdx.size());
         MatrixXd newData(nKeep + nPairs, nTimes);
-        QList<FiffChInfo> newChs;
+        std::vector<FiffChInfo> newChs;
         StringList newNames;
 
         for (int i = 0; i < nKeep; ++i) {
@@ -318,7 +318,7 @@ void UTILSLIB::setBipolarReference(MatrixXd& data,
             bipolarChs[i].scanNo = info.nchan + i + 1;
         }
 
-        info.chs.append(bipolarChs);
+        info.chs.insert(info.chs.end(), bipolarChs.begin(), bipolarChs.end());
         info.ch_names.insert(info.ch_names.end(), bipolarNames.begin(), bipolarNames.end());
         info.nchan += nPairs;
         data = newData;

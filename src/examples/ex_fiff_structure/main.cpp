@@ -98,7 +98,7 @@ int main(int argc, char* argv[])
     MatrixXd times;
     ok &= raw.read_raw_segment(data, times); // all 6007 samples
     const double sfreq = raw.info.sfreq;
-    const QList<FiffEpochData> epochs = FiffEpochs::makeFixedLengthEpochs(data, sfreq, 2.0, 0.5); // 2 s, 0.5 s overlap
+    const std::vector<FiffEpochData> epochs = FiffEpochs::makeFixedLengthEpochs(data, sfreq, 2.0, 0.5); // 2 s, 0.5 s overlap
     const FiffEvoked average = FiffEpochs::averageEpochs(epochs, sfreq);
     //! [fiff_epochs_usage]
     // mne.make_fixed_length_epochs(raw, duration=2, overlap=0.5): 13 epochs of 601 samples, 450 samples apart

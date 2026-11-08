@@ -95,8 +95,8 @@ private:
     QTemporaryDir m_dir;
     QString m_labelPath;
     FiffRawData m_raw;
-    QList<FiffChInfo> m_meg;
-    QList<FiffChInfo> m_eeg;
+    std::vector<FiffChInfo> m_meg;
+    std::vector<FiffChInfo> m_eeg;
     MNEForwardSolution m_ref;
     VectorXi m_v1Sel;
 
@@ -143,9 +143,9 @@ void TestFwdPython::initTestCase()
     m_raw = FiffRawData(data("MEG/sample/sample_audvis_trunc_raw.fif").toStdString());
     for (const FiffChInfo& ch : m_raw.info.chs) {
         if (ch.kind == FIFFV_MEG_CH) {
-            m_meg << ch;
+            m_meg.push_back(ch);
         } else if (ch.kind == FIFFV_EEG_CH) {
-            m_eeg << ch;
+            m_eeg.push_back(ch);
         }
     }
 
@@ -205,7 +205,7 @@ void TestFwdPython::gradient_sphereMeg()
 {
     auto defs = FwdCoilSet::read_coil_defs(QCoreApplication::applicationDirPath() + "/../resources/general/coilDefinitions/coil_def.dat");
     QVERIFY(defs != nullptr);
-    auto coils = defs->create_meg_coils(m_meg, m_meg.size(), FWD_COIL_ACCURACY_ACCURATE, m_raw.info.dev_head_t);
+    auto coils = defs->create_meg_coils(m_meg, static_cast<int>(m_meg.size()), FWD_COIL_ACCURACY_ACCURATE, m_raw.info.dev_head_t);
     QVERIFY(coils != nullptr);
 
     float r0[3] = {0.0f, 0.0f, 0.04f};
@@ -238,7 +238,7 @@ void TestFwdPython::gradient_bemMeg()
     model->fwd_bem_set_head_mri_t(FiffCoordTrans(data("MEG/sample/all-trans.fif").toStdU16String(), FIFFV_COORD_MRI, FIFFV_COORD_HEAD));
 
     auto defs = FwdCoilSet::read_coil_defs(QCoreApplication::applicationDirPath() + "/../resources/general/coilDefinitions/coil_def.dat");
-    auto coils = defs->create_meg_coils(m_meg, m_meg.size(), FWD_COIL_ACCURACY_NORMAL, m_raw.info.dev_head_t);
+    auto coils = defs->create_meg_coils(m_meg, static_cast<int>(m_meg.size()), FWD_COIL_ACCURACY_NORMAL, m_raw.info.dev_head_t);
     QCOMPARE(model->fwd_bem_specify_coils(coils.get()), 0);
 
     FwdBemModel* m = model.get();
@@ -267,7 +267,7 @@ void TestFwdPython::gradient_bemEeg()
     QCOMPARE(model->bem_method, method);
     model->fwd_bem_set_head_mri_t(FiffCoordTrans(data("MEG/sample/all-trans.fif").toStdU16String(), FIFFV_COORD_MRI, FIFFV_COORD_HEAD));
 
-    auto els = FwdCoilSet::create_eeg_els(m_eeg, m_eeg.size());
+    auto els = FwdCoilSet::create_eeg_els(m_eeg, static_cast<int>(m_eeg.size()));
     QVERIFY(els != nullptr);
     QCOMPARE(model->fwd_bem_specify_els(els.get()), 0);
 
@@ -289,7 +289,7 @@ void TestFwdPython::gradient_sphereEeg()
     QVERIFY(model->fwd_setup_eeg_sphere_model(0.09f, true, 3));
     model->r0 = Vector3f(0.0f, 0.0f, 0.04f);
 
-    auto els = FwdCoilSet::create_eeg_els(m_eeg, m_eeg.size());
+    auto els = FwdCoilSet::create_eeg_els(m_eeg, static_cast<int>(m_eeg.size()));
     QVERIFY(els != nullptr);
 
     FwdEegSphereModel* m = model.get();
@@ -759,3 +759,5 @@ void TestFwdPython::ctfCompensatedForward()
 
 QTEST_GUILESS_MAIN(TestFwdPython)
 #include "test_fwd_python.moc"
+
+#include <vector>

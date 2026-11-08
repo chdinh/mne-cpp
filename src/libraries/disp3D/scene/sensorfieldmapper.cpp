@@ -15,6 +15,8 @@
 //=============================================================================================================
 
 #include "sensorfieldmapper.h"
+
+#include <vector>
 #include <utils/string_utils.h>
 #include "renderable/brainsurface.h"
 #include "core/rendertypes.h"
@@ -100,7 +102,7 @@ bool SensorFieldMapper::hasMappingFor(const FiffEvoked& newEvoked) const
         return false;
 
     // Same channel names in same order
-    for (int i = 0; i < m_evoked.info.chs.size(); ++i) {
+    for (int i = 0; i < std::ssize(m_evoked.info.chs); ++i) {
         if (m_evoked.info.chs[i].ch_name != newEvoked.info.chs[i].ch_name)
             return false;
     }
@@ -234,14 +236,14 @@ bool SensorFieldMapper::buildMapping(
     }
 
     // ── Classify channels ──────────────────────────────────────────────
-    QList<FiffChInfo> megChs, eegChs;
+    std::vector<FiffChInfo> megChs, eegChs;
     std::vector<std::string> megChNames, eegChNames;
 
     auto isBad = [this](const std::string& name) {
         return UTILSLIB::contains(m_evoked.info.bads, name);
     };
 
-    const int nChs = m_evoked.info.chs.size();
+    const int nChs = static_cast<int>(m_evoked.info.chs.size());
     m_megPick.resize(nChs); // upper bound
     m_eegPick.resize(nChs);
     int nMeg = 0, nEeg = 0;
@@ -260,14 +262,14 @@ bool SensorFieldMapper::buildMapping(
                 pos = headToMri.map(pos);
             m_megPick(nMeg++) = k;
             m_megPositions.push_back(Eigen::Vector3f(pos.x(), pos.y(), pos.z()));
-            megChs.append(ch);
+            megChs.push_back(ch);
             megChNames.push_back(ch.ch_name);
         } else if (ch.kind == FIFFV_EEG_CH) {
             if (applySensorTrans && !headToMriTrans.empty())
                 pos = headToMri.map(pos);
             m_eegPick(nEeg++) = k;
             m_eegPositions.push_back(Eigen::Vector3f(pos.x(), pos.y(), pos.z()));
-            eegChs.append(ch);
+            eegChs.push_back(ch);
             eegChNames.push_back(ch.ch_name);
         }
     }
@@ -294,7 +296,7 @@ bool SensorFieldMapper::buildMapping(
         : FiffCoordTrans();
 
     // ── MEG mapping ────────────────────────────────────────────────────
-    if (!m_megSurfaceKey.isEmpty() && surfaces.contains(m_megSurfaceKey) && !megChs.isEmpty()) {
+    if (!m_megSurfaceKey.isEmpty() && surfaces.contains(m_megSurfaceKey) && !megChs.empty()) {
         const BrainSurface& surf = *surfaces[m_megSurfaceKey];
         Eigen::MatrixX3f verts = surf.vertexPositions();
         Eigen::MatrixX3f norms = surf.vertexNormals();
@@ -336,7 +338,7 @@ bool SensorFieldMapper::buildMapping(
                     origin = applyTransform(origin, headMri);
 
                 auto coils = templates->create_meg_coils(
-                    megChs, megChs.size(), FWDLIB::FWD_COIL_ACCURACY_NORMAL, devToTarget);
+                    megChs, static_cast<int>(megChs.size()), FWDLIB::FWD_COIL_ACCURACY_NORMAL, devToTarget);
 
                 if (coils && coils->ncoil() > 0) {
                     m_megMapping = FWDLIB::FwdFieldMap::computeMegMapping(
@@ -351,7 +353,7 @@ bool SensorFieldMapper::buildMapping(
     }
 
     // ── EEG mapping ────────────────────────────────────────────────────
-    if (!m_eegSurfaceKey.isEmpty() && surfaces.contains(m_eegSurfaceKey) && !eegChs.isEmpty()) {
+    if (!m_eegSurfaceKey.isEmpty() && surfaces.contains(m_eegSurfaceKey) && !eegChs.empty()) {
         const BrainSurface& surf = *surfaces[m_eegSurfaceKey];
         Eigen::MatrixX3f verts = surf.vertexPositions();
 
@@ -362,7 +364,7 @@ bool SensorFieldMapper::buildMapping(
 
             auto eegCoils =
                 FWDLIB::FwdCoilSet::create_eeg_els(
-                    eegChs, eegChs.size(), headMri);
+                    eegChs, static_cast<int>(eegChs.size()), headMri);
 
             if (eegCoils && eegCoils->ncoil() > 0) {
                 m_eegMapping = FWDLIB::FwdFieldMap::computeEegMapping(

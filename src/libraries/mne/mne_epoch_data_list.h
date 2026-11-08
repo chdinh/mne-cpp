@@ -31,6 +31,9 @@
 #include <fiff/fiff_raw_data.h>
 
 #include "mne_global.h"
+
+#include <vector>
+#include <utility>
 #include "mne_epoch_data.h"
 
 //=============================================================================================================
@@ -134,7 +137,7 @@ public:
      *
      * @param[in] baseline     time definition of the baseline in seconds [from, to].
      */
-    void applyBaselineCorrection(const QPair<float, float>& baseline);
+    void applyBaselineCorrection(const std::pair<float, float>& baseline);
 
     //=========================================================================================================
     /**
@@ -188,12 +191,12 @@ public:
      */
     static FIFFLIB::FiffEvokedSet averageCategories(const FIFFLIB::FiffRawData& raw,
                                                     const Eigen::MatrixXi& events,
-                                                    const QList<int>& eventCodes,
+                                                    const std::vector<int>& eventCodes,
                                                     const QStringList& comments,
                                                     float tmin,
                                                     float tmax,
                                                     const QMap<QString, double>& mapReject = QMap<QString, double>(),
-                                                    const QPair<float, float>& baseline = QPair<float, float>(0.0f, 0.0f),
+                                                    const std::pair<float, float>& baseline = std::pair<float, float>(0.0f, 0.0f),
                                                     bool proj = false);
 
     //=========================================================================================================

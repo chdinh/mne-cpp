@@ -18,6 +18,8 @@
 
 #include "scalewindow.h"
 
+#include <vector>
+
 
 //*************************************************************************************************************
 //=============================================================================================================
@@ -118,8 +120,8 @@ void ScaleWindow::hideSpinBoxes(FiffInfo::SPtr& pCurrentFiffInfo)
     ui->m_label_STIM->hide();
 
     //Show only spin boxes and labels which type are present in the current loaded fiffinfo
-    QList<FiffChInfo> channelList = pCurrentFiffInfo->chs;
-    for (int i = 0; i < channelList.size(); i++) {
+    const std::vector<FiffChInfo>& channelList = pCurrentFiffInfo->chs;
+    for (int i = 0; i < std::ssize(channelList); i++) {
         switch (channelList.at(i).kind) {
             case FIFFV_MEG_CH: {
                 qint32 unit = channelList.at(i).unit;

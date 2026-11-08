@@ -22,6 +22,9 @@
 //=============================================================================================================
 
 #include "mne_epoch_data_list.h"
+
+#include <vector>
+#include <utility>
 #include <utils/string_utils.h>
 
 #include <fiff/fiff_evoked_set.h>
@@ -103,7 +106,7 @@ MNEEpochDataList MNEEpochDataList::readEpochs(const FiffRawData& raw,
     RowVectorXi picksNew = picks;
     if (picks.cols() <= 0) {
         picksNew.resize(raw.info.chs.size());
-        for (int i = 0; i < raw.info.chs.size(); ++i) {
+        for (int i = 0; i < std::ssize(raw.info.chs); ++i) {
             picksNew(i) = i;
         }
     }
@@ -229,7 +232,7 @@ FiffEvoked MNEEpochDataList::average(const FiffInfo& info,
 
 //=============================================================================================================
 
-void MNEEpochDataList::applyBaselineCorrection(const QPair<float, float>& baseline)
+void MNEEpochDataList::applyBaselineCorrection(const std::pair<float, float>& baseline)
 {
     // Run baseline correction
     QMutableListIterator<MNEEpochData::SPtr> i(*this);
@@ -272,12 +275,12 @@ bool MNEEpochDataList::checkForArtifact(const MatrixXd& data,
     bool bReject = false;
 
     //Prepare concurrent data handling
-    QList<ArtifactRejectionData> lchData;
+    std::vector<ArtifactRejectionData> lchData;
     if (mapReject.isEmpty()) {
         return bReject;
     }
 
-    for (int i = 0; i < pFiffInfo.chs.size(); ++i) {
+    for (int i = 0; i < std::ssize(pFiffInfo.chs); ++i) {
         const FiffChInfo& ch = pFiffInfo.chs.at(i);
         QString key;
         if (ch.kind == FIFFV_MEG_CH && ch.unit == FIFF_UNIT_T) {
@@ -297,10 +300,10 @@ bool MNEEpochDataList::checkForArtifact(const MatrixXd& data,
         tempData.data = data.row(i);
         tempData.dThreshold = mapReject.value(key);
         tempData.sChName = QString::fromStdString(ch.ch_name);
-        lchData.append(tempData);
+        lchData.push_back(tempData);
     }
 
-    if (lchData.isEmpty()) {
+    if (lchData.empty()) {
         qWarning() << "[MNEEpochDataList::checkForArtifact] No channels found to scan for artifacts. Do not reject. Returning.";
 
         return bReject;
@@ -312,7 +315,7 @@ bool MNEEpochDataList::checkForArtifact(const MatrixXd& data,
     QFuture<void> future = QtConcurrent::map(lchData, checkChThreshold);
     future.waitForFinished();
 
-    for (int i = 0; i < lchData.size(); ++i) {
+    for (int i = 0; i < std::ssize(lchData); ++i) {
         if (lchData.at(i).bRejected) {
             bReject = true;
             qInfo().noquote() << "[MNEEpochDataList::checkForArtifact] Reject trial because of channel" << lchData.at(i).sChName;
@@ -361,12 +364,12 @@ void MNEEpochDataList::checkChThreshold(ArtifactRejectionData& inputData)
 
 FiffEvokedSet MNEEpochDataList::averageCategories(const FiffRawData& raw,
                                                   const MatrixXi& events,
-                                                  const QList<int>& eventCodes,
+                                                  const std::vector<int>& eventCodes,
                                                   const QStringList& comments,
                                                   float tmin,
                                                   float tmax,
                                                   const QMap<QString, double>& mapReject,
-                                                  const QPair<float, float>& baseline,
+                                                  const std::pair<float, float>& baseline,
                                                   bool proj)
 {
     FiffEvokedSet evokedSet;
@@ -377,7 +380,7 @@ FiffEvokedSet MNEEpochDataList::averageCategories(const FiffRawData& raw,
     bool doBaseline = (baseline.first != baseline.second);
 
     // Process each category (event code)
-    for (int j = 0; j < eventCodes.size(); ++j) {
+    for (int j = 0; j < std::ssize(eventCodes); ++j) {
         int eventCode = eventCodes[j];
         QString comment = (j < comments.size()) ? comments[j]
                                                 : QString("cat_%1").arg(eventCode);
@@ -419,8 +422,8 @@ FiffEvokedSet MNEEpochDataList::averageCategories(const FiffRawData& raw,
                                               proj);
 
         evoked.comment = comment;
-        evoked.baseline = doBaseline ? baseline : QPair<float, float>(0.0f, 0.0f);
-        evokedSet.evoked.append(evoked);
+        evoked.baseline = doBaseline ? baseline : std::pair<float, float>(0.0f, 0.0f);
+        evokedSet.evoked.push_back(evoked);
     }
 
     return evokedSet;
@@ -450,7 +453,7 @@ FiffEvoked MNEEpochDataList::computeAverage(const FiffRawData& raw,
                                                                      picks);
 
     if (bApplyBaseline) {
-        QPair<float, float> baselinePair(fTBaselineFromS, fTBaselineToS);
+        std::pair<float, float> baselinePair(fTBaselineFromS, fTBaselineToS);
         lstEpochDataList.applyBaselineCorrection(baselinePair);
     }
 
@@ -465,7 +468,7 @@ FiffEvoked MNEEpochDataList::computeAverage(const FiffRawData& raw,
     FiffEvoked evoked = lstEpochDataList.average(raw.info,
                                                  first,
                                                  first + static_cast<fiff_int_t>(lstEpochDataList.first()->epoch.cols()) - 1);
-    evoked.baseline = bApplyBaseline ? QPair<float, float>(fTBaselineFromS, fTBaselineToS)
-                                     : QPair<float, float>(0.0f, 0.0f);
+    evoked.baseline = bApplyBaseline ? std::pair<float, float>(fTBaselineFromS, fTBaselineToS)
+                                     : std::pair<float, float>(0.0f, 0.0f);
     return evoked;
 }

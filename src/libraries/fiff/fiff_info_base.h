@@ -36,6 +36,8 @@
 //=============================================================================================================
 
 #include "fiff_global.h"
+
+#include <vector>
 #include "fiff_types.h"
 #include "fiff_id.h"
 #include "fiff_ch_info.h"
@@ -48,8 +50,8 @@
 // QT INCLUDES
 //=============================================================================================================
 
-#include <QList>
-#include <QMap>
+#include <map>
+#include <string>
 #include <QStringList>
 #include <QSharedPointer>
 #include <memory>
@@ -149,7 +151,7 @@ public:
      *
      * @return Every channel type mapped to the indices of its channels (empty lists for absent types).
      */
-    QMap<QString, QList<int>> channel_indices_by_type(const QList<int>& picks = {}) const;
+    std::map<std::string, std::vector<int>> channel_indices_by_type(const std::vector<int>& picks = {}) const;
 
     //=========================================================================================================
     /**
@@ -284,11 +286,11 @@ public:
      * @param[out] meg_head_t   Device-to-head coordinate transformation.
      * @param[out] idp          Measurement ID.
      */
-    void mne_read_meg_comp_eeg_ch_info(QList<FiffChInfo>& megp,
+    void mne_read_meg_comp_eeg_ch_info(std::vector<FiffChInfo>& megp,
                                        int& nmegp,
-                                       QList<FiffChInfo>& meg_compp,
+                                       std::vector<FiffChInfo>& meg_compp,
                                        int& nmeg_compp,
-                                       QList<FiffChInfo>& eegp,
+                                       std::vector<FiffChInfo>& eegp,
                                        int& neegp,
                                        FiffCoordTrans& meg_head_t,
                                        FiffId& idp) const;
@@ -311,15 +313,15 @@ public:
     static bool readBadChannelsFromFile(const std::string& name, StringList& listOut);
 
 public:
-    std::string filename;                  /**< Filename when the info is read of a fiff file. */
-    StringList bads;                       /**< List of bad channels. */
-    FiffId meas_id;                        /**< Measurement ID. */
-    fiff_int_t nchan;                      /**< Number of channels. */
-    QList<FiffChInfo> chs;                 /**< List of all channel info descriptors. */
-    StringList ch_names;                   /**< List of all channel names. */
-    FiffCoordTrans dev_head_t;             /**< Device to head coordinate transformation. */
-    FiffCoordTrans ctf_head_t;             /**< CTF to head coordinate transformation. */
-    QList<FiffCoordTrans> all_coord_trans; /**< All coordinate transformations stored in the file, in file order. */
+    std::string filename;                        /**< Filename when the info is read of a fiff file. */
+    StringList bads;                             /**< List of bad channels. */
+    FiffId meas_id;                              /**< Measurement ID. */
+    fiff_int_t nchan;                            /**< Number of channels. */
+    std::vector<FiffChInfo> chs;                 /**< List of all channel info descriptors. */
+    StringList ch_names;                         /**< List of all channel names. */
+    FiffCoordTrans dev_head_t;                   /**< Device to head coordinate transformation. */
+    FiffCoordTrans ctf_head_t;                   /**< CTF to head coordinate transformation. */
+    std::vector<FiffCoordTrans> all_coord_trans; /**< All coordinate transformations stored in the file, in file order. */
 };
 
 //=============================================================================================================

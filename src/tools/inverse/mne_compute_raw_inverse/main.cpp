@@ -766,7 +766,7 @@ int main(int argc, char* argv[])
         qInfo("  Picked %d channels from raw data", static_cast<int>(picks.size()));
 
         // Activate projectors
-        for (int k = 0; k < raw.info.projs.size(); ++k) {
+        for (int k = 0; k < std::ssize(raw.info.projs); ++k) {
             raw.info.projs[k].active = true;
         }
 
@@ -805,7 +805,7 @@ int main(int argc, char* argv[])
         }
         FiffEvokedSet& evokedSet = *read;
 
-        if (evokedSet.evoked.isEmpty()) {
+        if (evokedSet.evoked.empty()) {
             qCritical("Error: No evoked data sets found in %s", inName.toUtf8().constData());
             return 1;
         }
@@ -814,12 +814,12 @@ int main(int argc, char* argv[])
         QList<int> setsToProcess;
         if (processAllSets) {
             qInfo("  Found %d evoked data set(s):", static_cast<int>(evokedSet.evoked.size()));
-            for (int i = 0; i < evokedSet.evoked.size(); ++i) {
+            for (int i = 0; i < std::ssize(evokedSet.evoked); ++i) {
                 qInfo("    [%d] %s", i, evokedSet.evoked[i].comment.toUtf8().constData());
                 setsToProcess.append(i);
             }
         } else {
-            if (setNo < 0 || setNo >= evokedSet.evoked.size()) {
+            if (setNo < 0 || setNo >= std::ssize(evokedSet.evoked)) {
                 qCritical("Error: Set %d out of range (file has %d sets, 0-%d)",
                           setNo, static_cast<int>(evokedSet.evoked.size()), static_cast<int>(evokedSet.evoked.size()) - 1);
                 return 1;

@@ -41,14 +41,14 @@ static FiffInfo makeInfoWithEcgEog(int nMeg, bool hasEcg, bool hasEog)
         FiffChInfo ch;
         ch.kind = FIFFV_MEG_CH;
         ch.unit = 112; // Tesla
-        info.chs.append(ch);
+        info.chs.push_back(ch);
     }
 
     if (hasEcg) {
         FiffChInfo ch;
         ch.kind = FIFFV_ECG_CH;
         ch.ch_name = "ECG001";
-        info.chs.append(ch);
+        info.chs.push_back(ch);
         ++idx;
     }
 
@@ -56,7 +56,7 @@ static FiffInfo makeInfoWithEcgEog(int nMeg, bool hasEcg, bool hasEog)
         FiffChInfo ch;
         ch.kind = FIFFV_EOG_CH;
         ch.ch_name = "EOG001";
-        info.chs.append(ch);
+        info.chs.push_back(ch);
         ++idx;
     }
 
@@ -241,7 +241,7 @@ private slots:
             FiffChInfo ch;
             ch.kind = FIFFV_EOG_CH;
             ch.ch_name = (QString("EOG%1").arg(i + 1)).toStdString();
-            info.chs.append(ch);
+            info.chs.push_back(ch);
         }
         info.nchan = 2;
 
@@ -318,7 +318,7 @@ private slots:
             ch.kind = kinds[k];
             ch.unit = k < 3 ? FIFF_UNIT_T : FIFF_UNIT_V;
             ch.ch_name = names[k].toStdString();
-            info.chs.append(ch);
+            info.chs.push_back(ch);
             info.ch_names.push_back(names[k].toStdString());
         }
         info.nchan = 6;
@@ -335,7 +335,7 @@ private slots:
             FiffChInfo ch;
             ch.kind = ecg ? FIFFV_ECG_CH : FIFFV_EOG_CH;
             ch.ch_name = "ICA000";
-            srcInfo.chs.append(ch);
+            srcInfo.chs.push_back(ch);
             srcInfo.ch_names.push_back(ch.ch_name);
             srcInfo.nchan = 1;
             got = ecg ? ArtifactDetect::detectEcg(source, srcInfo, sf) : ArtifactDetect::detectEog(source, srcInfo, sf);
@@ -460,8 +460,8 @@ private slots:
         MatrixXd times;
         QVERIFY(raw.read_raw_segment(data, times));
 
-        const QList<FiffProj> projs = ecg ? ArtifactDetect::computeProjEcg(data, raw.info, raw.info.sfreq)
-                                          : ArtifactDetect::computeProjEog(data, raw.info, raw.info.sfreq);
+        const std::vector<FiffProj> projs = ecg ? ArtifactDetect::computeProjEcg(data, raw.info, raw.info.sfreq)
+                                                : ArtifactDetect::computeProjEog(data, raw.info, raw.info.sfreq);
         QCOMPARE(projs.size(), 10);
         for (int i = 0; i < 4; ++i) {
             QCOMPARE(projs[i].desc, raw.info.projs[i].desc);
@@ -493,3 +493,6 @@ private slots:
 
 QTEST_MAIN(TestDspArtifactDetect)
 #include "test_dsp_artifact_detect.moc"
+
+#include <vector>
+#include <utility>

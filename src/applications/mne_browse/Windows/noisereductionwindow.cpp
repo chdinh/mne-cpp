@@ -107,12 +107,12 @@ void NoiseReductionWindow::createProjectorGroup()
         // Projection Selection
         QGridLayout* topLayout = new QGridLayout;
 
-        if (!m_pFiffInfo->projs.isEmpty()) {
+        if (!m_pFiffInfo->projs.empty()) {
             bool bAllActivated = true;
 
             qint32 i = 0;
 
-            for (; i < m_pFiffInfo->projs.size(); ++i) {
+            for (; i < std::ssize(m_pFiffInfo->projs); ++i) {
                 QCheckBox* checkBox = new QCheckBox(m_pFiffInfo->projs[i].desc);
                 checkBox->setChecked(m_pFiffInfo->projs[i].active);
 
@@ -168,10 +168,10 @@ void NoiseReductionWindow::createCompensatorGroup()
         // Compensation Selection
         QGridLayout* topLayout = new QGridLayout;
 
-        if (!m_pFiffInfo->comps.isEmpty()) {
+        if (!m_pFiffInfo->comps.empty()) {
             qint32 i = 0;
 
-            for (; i < m_pFiffInfo->comps.size(); ++i) {
+            for (; i < std::ssize(m_pFiffInfo->comps); ++i) {
                 QString numStr;
                 QCheckBox* checkBox = new QCheckBox(numStr.setNum(m_pFiffInfo->comps[i].kind));
 
@@ -207,7 +207,7 @@ void NoiseReductionWindow::enableDisableAllProj(bool status)
         m_qListProjCheckBox.at(i)->setChecked(status);
 
     //Set all projection activation states to status
-    for (int i = 0; i < m_pFiffInfo->projs.size(); ++i)
+    for (int i = 0; i < std::ssize(m_pFiffInfo->projs); ++i)
         m_pFiffInfo->projs[i].active = status;
 
     m_enableDisableProjectors->setChecked(status);

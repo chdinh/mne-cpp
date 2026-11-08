@@ -21,6 +21,8 @@
 
 #include "noisereduction_global.h"
 
+#include <vector>
+
 #include <utils/generics/circularbuffer.h>
 
 #include <fiff/fiff_proj.h>
@@ -154,7 +156,7 @@ protected:
     /**
      * Update the SSP projection
      */
-    void updateProjection(const QList<FIFFLIB::FiffProj>& projs);
+    void updateProjection(const std::vector<FIFFLIB::FiffProj>& projs);
 
     //=========================================================================================================
     /**

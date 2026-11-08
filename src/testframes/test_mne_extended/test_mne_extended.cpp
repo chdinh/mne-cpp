@@ -312,7 +312,7 @@ private slots:
         ch.kind = FIFFV_MEG_CH;
         ch.chpos.coil_type = FIFFV_COIL_VV_MAG_T3;
         ch.unit = FIFF_UNIT_T;
-        info.chs.append(ch);
+        info.chs.push_back(ch);
         info.ch_names.push_back("MEG0001");
         info.nchan = 1;
 
@@ -345,7 +345,7 @@ private slots:
         ch.kind = FIFFV_MEG_CH;
         ch.chpos.coil_type = FIFFV_COIL_VV_MAG_T3;
         ch.unit = FIFF_UNIT_T;
-        info.chs.append(ch);
+        info.chs.push_back(ch);
         info.ch_names.push_back("MEG0001");
         info.nchan = 1;
         info.sfreq = 100.0;
@@ -381,19 +381,19 @@ private slots:
     void clusterInfo_addAndClear()
     {
         MNEClusterInfo ci;
-        ci.clusterLabelNames.append("label1");
-        ci.clusterLabelIds.append(1);
-        ci.centroidVertno.append(42);
-        ci.centroidSource_rr.append(Vector3f(0.1f, 0.2f, 0.3f));
+        ci.clusterLabelNames.push_back("label1");
+        ci.clusterLabelIds.push_back(1);
+        ci.centroidVertno.push_back(42);
+        ci.centroidSource_rr.push_back(Vector3f(0.1f, 0.2f, 0.3f));
         VectorXi verts(3);
         verts << 10, 20, 30;
-        ci.clusterVertnos.append(verts);
+        ci.clusterVertnos.push_back(verts);
         MatrixX3f rr(3, 3);
         rr.setRandom();
-        ci.clusterSource_rr.append(rr);
+        ci.clusterSource_rr.push_back(rr);
         VectorXd dist(3);
         dist << 0.01, 0.02, 0.03;
-        ci.clusterDistances.append(dist);
+        ci.clusterDistances.push_back(dist);
 
         QVERIFY(!ci.empty());
         QCOMPARE(ci.numClust(), 1);
@@ -408,19 +408,19 @@ private slots:
         MNEClusterInfo a, b;
 
         // Add matching data
-        a.clusterLabelNames.append("L1");
-        a.clusterLabelIds.append(1);
-        a.centroidVertno.append(10);
-        a.centroidSource_rr.append(Vector3f(1.0f, 2.0f, 3.0f));
+        a.clusterLabelNames.push_back("L1");
+        a.clusterLabelIds.push_back(1);
+        a.centroidVertno.push_back(10);
+        a.centroidSource_rr.push_back(Vector3f(1.0f, 2.0f, 3.0f));
         VectorXi verts(2);
         verts << 10, 20;
-        a.clusterVertnos.append(verts);
+        a.clusterVertnos.push_back(verts);
         MatrixX3f rr(2, 3);
         rr << 1, 2, 3, 4, 5, 6;
-        a.clusterSource_rr.append(rr);
+        a.clusterSource_rr.push_back(rr);
         VectorXd dist(2);
         dist << 0.1, 0.2;
-        a.clusterDistances.append(dist);
+        a.clusterDistances.push_back(dist);
 
         b = a;
         QVERIFY(a == b);
@@ -429,19 +429,19 @@ private slots:
     void clusterInfo_writeToFile()
     {
         MNEClusterInfo ci;
-        ci.clusterLabelNames.append("TestLabel");
-        ci.clusterLabelIds.append(42);
-        ci.centroidVertno.append(7);
-        ci.centroidSource_rr.append(Vector3f(0.01f, 0.02f, 0.03f));
+        ci.clusterLabelNames.push_back("TestLabel");
+        ci.clusterLabelIds.push_back(42);
+        ci.centroidVertno.push_back(7);
+        ci.centroidSource_rr.push_back(Vector3f(0.01f, 0.02f, 0.03f));
         VectorXi verts(2);
         verts << 7, 8;
-        ci.clusterVertnos.append(verts);
+        ci.clusterVertnos.push_back(verts);
         MatrixX3f rr(2, 3);
         rr << 0.01f, 0.02f, 0.03f, 0.04f, 0.05f, 0.06f;
-        ci.clusterSource_rr.append(rr);
+        ci.clusterSource_rr.push_back(rr);
         VectorXd dist(2);
         dist << 0.001, 0.002;
-        ci.clusterDistances.append(dist);
+        ci.clusterDistances.push_back(dist);
 
         QTemporaryDir tmpDir;
         QVERIFY(tmpDir.isValid());

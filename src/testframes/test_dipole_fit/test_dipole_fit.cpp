@@ -224,7 +224,7 @@ void TestDipoleFit::dipoleFitAdvanced()
 
     testFile.setFileName(QCoreApplication::applicationDirPath() + "/../resources/data/mne-cpp-test-data/MEG/sample/sample_audvis-ave.fif");
     QVERIFY(testFile.exists());
-    settings.projnames.append(testFile.fileName());
+    settings.projnames.push_back(testFile.fileName());
 
     settings.checkIntegrity();
 

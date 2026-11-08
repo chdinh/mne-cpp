@@ -27,6 +27,10 @@
 //=============================================================================================================
 
 #include <fiff/fiff.h>
+
+#include <vector>
+#include <algorithm>
+#include <iterator>
 #include <utils/string_utils.h>
 #include <fiff/fiff_cov.h>
 #include <fiff/fiff_info.h>
@@ -86,7 +90,7 @@ using namespace UTILSLIB;
  */
 static FiffInfo buildInfoFromForward(const MNEForwardSolution& forward,
                                      const FiffCov& noiseCov,
-                                     const QList<FiffProj>& extraProjs)
+                                     const std::vector<FiffProj>& extraProjs)
 {
     FiffInfo info;
 
@@ -103,17 +107,17 @@ static FiffInfo buildInfoFromForward(const MNEForwardSolution& forward,
     // Priority (matching SVN MNE-C):
     //   1. Projectors embedded in the noise covariance file
     //   2. Projectors from explicit --proj files (only if noise cov had none)
-    if (!noiseCov.projs.isEmpty()) {
+    if (!noiseCov.projs.empty()) {
         qInfo("  Using %lld SSP projectors from noise covariance file.",
-              noiseCov.projs.size());
+              static_cast<long long>(noiseCov.projs.size()));
         info.projs = noiseCov.projs;
         FiffProj::activate_projs(info.projs);
-        if (!extraProjs.isEmpty()) {
+        if (!extraProjs.empty()) {
             qInfo("  NOTE: Noise covariance already contains projectors; ignoring --proj files.");
         }
-    } else if (!extraProjs.isEmpty()) {
+    } else if (!extraProjs.empty()) {
         qInfo("  Using %lld SSP projectors from --proj files.",
-              extraProjs.size());
+              static_cast<long long>(extraProjs.size()));
         info.projs = extraProjs;
         FiffProj::activate_projs(info.projs);
     }
@@ -126,7 +130,7 @@ static FiffInfo buildInfoFromForward(const MNEForwardSolution& forward,
         if (info.chs[i].kind == FIFFV_EEG_CH)
             hasEeg = true;
     }
-    for (int i = 0; i < info.projs.size(); ++i) {
+    for (int i = 0; i < std::ssize(info.projs); ++i) {
         if (info.projs[i].kind == FIFFV_MNE_PROJ_ITEM_EEG_AVREF)
             hasEegAvRef = true;
     }
@@ -150,7 +154,7 @@ static FiffInfo buildInfoFromForward(const MNEForwardSolution& forward,
             eegAvRef.active = true;
             eegAvRef.desc = QString("Average EEG reference");
             eegAvRef.data = FiffNamedMatrix::SDPtr(new FiffNamedMatrix(projData));
-            info.projs.append(eegAvRef);
+            info.projs.push_back(eegAvRef);
         }
     }
 
@@ -160,9 +164,9 @@ static FiffInfo buildInfoFromForward(const MNEForwardSolution& forward,
 /**
  * Read SSP projectors from a FIFF file.
  */
-static QList<FiffProj> readProjFile(const QString& fileName)
+static std::vector<FiffProj> readProjFile(const QString& fileName)
 {
-    QList<FiffProj> projs;
+    std::vector<FiffProj> projs;
     QFile file(fileName);
     FiffStream stream(&file);
     if (!stream.open()) {
@@ -445,23 +449,23 @@ int main(int argc, char* argv[])
 
     qInfo("  Noise covariance: %d x %d",
           static_cast<int>(noiseCov.data.rows()), static_cast<int>(noiseCov.data.cols()));
-    if (!noiseCov.projs.isEmpty()) {
+    if (!noiseCov.projs.empty()) {
         qInfo("  Noise covariance contains %lld SSP projectors.",
-              noiseCov.projs.size());
+              static_cast<long long>(noiseCov.projs.size()));
     }
 
     //=========================================================================================================
     // Read optional SSP projection files
     //=========================================================================================================
 
-    QList<FiffProj> extraProjs;
+    std::vector<FiffProj> extraProjs;
     QStringList projFiles = parser.values(projOpt);
     for (const QString& projFileName : projFiles) {
         qInfo("Reading SSP projectors from %s...",
               projFileName.toUtf8().constData());
-        QList<FiffProj> fileProjs = readProjFile(projFileName);
+        std::vector<FiffProj> fileProjs = readProjFile(projFileName);
         qInfo("  Found %lld projectors.", static_cast<long long>(fileProjs.size()));
-        extraProjs.append(fileProjs);
+        std::ranges::move(fileProjs, std::back_inserter(extraProjs));
     }
 
     //=========================================================================================================
@@ -472,7 +476,7 @@ int main(int argc, char* argv[])
     qInfo("\nBuilding measurement info from forward solution...");
     FiffInfo info = buildInfoFromForward(forward, noiseCov, extraProjs);
     qInfo("  Info: %d channels, %lld projectors",
-          info.nchan, info.projs.size());
+          info.nchan, static_cast<long long>(info.projs.size()));
 
     //=========================================================================================================
     // Merge bad channels from --bad files

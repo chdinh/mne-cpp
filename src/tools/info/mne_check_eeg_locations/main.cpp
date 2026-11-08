@@ -82,7 +82,7 @@ int main(int argc, char* argv[])
     // Read measurement info
     FiffRawData raw(measName.toStdU16String());
 
-    if (raw.info.chs.isEmpty()) {
+    if (raw.info.chs.empty()) {
         qCritical("No channel information found in %s", qPrintable(measName));
         return 1;
     }

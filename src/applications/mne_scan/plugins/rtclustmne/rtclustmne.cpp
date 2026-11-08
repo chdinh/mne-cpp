@@ -223,7 +223,7 @@ bool RtClustMne::calcFiffInfo()
         m_pFiffInfoForward->ch_names.clear();
         int counter = 0;
 
-        for (qint32 x = 0; x < m_pFiffInfoForward->chs.size(); ++x) {
+        for (qint32 x = 0; x < std::ssize(m_pFiffInfoForward->chs); ++x) {
             if (forwardChannelsTypes.contains("MEG") && forwardChannelsTypes.contains("EEG"))
                 break;
 
@@ -236,7 +236,7 @@ bool RtClustMne::calcFiffInfo()
 
         //If only MEG channels are used
         if (forwardChannelsTypes.contains("MEG") && !forwardChannelsTypes.contains("EEG")) {
-            for (qint32 x = 0; x < m_pFiffInfoInput->chs.size(); ++x) {
+            for (qint32 x = 0; x < std::ssize(m_pFiffInfoInput->chs); ++x) {
                 if (m_pFiffInfoInput->chs[x].kind == FIFFV_MEG_CH) {
                     m_pFiffInfoForward->chs[counter].ch_name = m_pFiffInfoInput->chs[x].ch_name;
                     m_pFiffInfoForward->ch_names.push_back(m_pFiffInfoInput->chs[x].ch_name);
@@ -247,7 +247,7 @@ bool RtClustMne::calcFiffInfo()
 
         //If only EEG channels are used
         if (!forwardChannelsTypes.contains("MEG") && forwardChannelsTypes.contains("EEG")) {
-            for (qint32 x = 0; x < m_pFiffInfoInput->chs.size(); ++x) {
+            for (qint32 x = 0; x < std::ssize(m_pFiffInfoInput->chs); ++x) {
                 if (m_pFiffInfoInput->chs[x].kind == FIFFV_EEG_CH) {
                     m_pFiffInfoForward->chs[counter].ch_name = m_pFiffInfoInput->chs[x].ch_name;
                     m_pFiffInfoForward->ch_names.push_back(m_pFiffInfoInput->chs[x].ch_name);
@@ -259,7 +259,7 @@ bool RtClustMne::calcFiffInfo()
         //If both MEG and EEG channels are used
         if (forwardChannelsTypes.contains("MEG") && forwardChannelsTypes.contains("EEG")) {
             //qDebug()<<"RtClustMne::calcFiffInfo - MEG EEG fwd solution";
-            for (qint32 x = 0; x < m_pFiffInfoInput->chs.size(); ++x) {
+            for (qint32 x = 0; x < std::ssize(m_pFiffInfoInput->chs); ++x) {
                 if (m_pFiffInfoInput->chs[x].kind == FIFFV_MEG_CH || m_pFiffInfoInput->chs[x].kind == FIFFV_EEG_CH) {
                     m_pFiffInfoForward->chs[counter].ch_name = m_pFiffInfoInput->chs[x].ch_name;
                     m_pFiffInfoForward->ch_names.push_back(m_pFiffInfoInput->chs[x].ch_name);
@@ -466,7 +466,7 @@ void RtClustMne::updateRTE(SCMEASLIB::Measurement::SPtr pMeasurement)
             if (!m_pFiffInfoInput && pFiffEvokedSet->evoked.size() > 0) {
                 QMutexLocker locker(&m_qMutex);
 
-                for (int i = 0; i < pFiffEvokedSet->evoked.size(); ++i) {
+                for (int i = 0; i < std::ssize(pFiffEvokedSet->evoked); ++i) {
                     if (pFiffEvokedSet->evoked.at(i).comment == m_sAvrType) {
                         m_pFiffInfoInput = QSharedPointer<FiffInfo>(new FiffInfo(pFiffEvokedSet->evoked.at(i).info));
                         break;
@@ -481,7 +481,7 @@ void RtClustMne::updateRTE(SCMEASLIB::Measurement::SPtr pMeasurement)
             }
 
             if (this->isRunning()) {
-                for (int i = 0; i < pFiffEvokedSet->evoked.size(); ++i) {
+                for (int i = 0; i < std::ssize(pFiffEvokedSet->evoked); ++i) {
                     if (pFiffEvokedSet->evoked.at(i).comment == m_sAvrType) {
                         // Store current evoked as member so we can dispatch it if the time pick by the user changed
                         m_currentEvoked = pFiffEvokedSet->evoked.at(i).pick_channels(m_qListPickChannels);

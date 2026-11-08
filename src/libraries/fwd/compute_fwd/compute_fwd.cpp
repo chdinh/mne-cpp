@@ -15,6 +15,8 @@
 //=============================================================================================================
 
 #include "compute_fwd.h"
+
+#include <vector>
 #include <mne/mne_forward_solution.h>
 
 #include <fiff/fiff_stream.h>
@@ -83,9 +85,9 @@ void ComputeFwd::initFwd()
     m_mri_head_t = FiffCoordTrans();
     m_meg_head_t = FiffCoordTrans();
 
-    m_listMegChs = QList<FiffChInfo>();
-    m_listEegChs = QList<FiffChInfo>();
-    m_listCompChs = QList<FiffChInfo>();
+    m_listMegChs = std::vector<FiffChInfo>();
+    m_listEegChs = std::vector<FiffChInfo>();
+    m_listCompChs = std::vector<FiffChInfo>();
 
     int iNMeg = 0;
     int iNEeg = 0;
@@ -500,11 +502,11 @@ void ComputeFwd::populateMetadata(MNEForwardSolution& fwd)
     fwd.info.chs.clear();
     fwd.info.ch_names.clear();
     for (int i = 0; i < nmeg; ++i) {
-        fwd.info.chs.append(m_listMegChs[i]);
+        fwd.info.chs.push_back(m_listMegChs[i]);
         fwd.info.ch_names.push_back(m_listMegChs[i].ch_name);
     }
     for (int i = 0; i < neeg; ++i) {
-        fwd.info.chs.append(m_listEegChs[i]);
+        fwd.info.chs.push_back(m_listEegChs[i]);
         fwd.info.ch_names.push_back(m_listEegChs[i].ch_name);
     }
 

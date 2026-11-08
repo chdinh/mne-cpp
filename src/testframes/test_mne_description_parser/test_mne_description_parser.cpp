@@ -169,7 +169,7 @@ average {
     QCOMPARE(d.categories.size(), 3);
     const AverageCategory& a = d.categories[0];
     QCOMPARE(a.comment, QString("Left Auditory"));
-    QCOMPARE(a.events, (QVector<unsigned int>{1, 5}));
+    QCOMPARE(a.events, (std::vector<unsigned int>{1, 5}));
     QCOMPARE(a.tmin, -0.2f);
     QCOMPARE(a.tmax, 0.5f);
     QVERIFY(a.doBaseline);
@@ -192,7 +192,7 @@ average {
     QVERIFY(!b.doBaseline);
     QVERIFY(!b.doStdErr);
     QCOMPARE(b.ignore, 0u);
-    QCOMPARE(b.events, QVector<unsigned int>{2});
+    QCOMPARE(b.events, std::vector<unsigned int>{2});
     const AverageCategory& c = d.categories[2];
     QVERIFY(c.doBaseline);
     QCOMPARE(c.bmin, -0.1f);
@@ -346,7 +346,7 @@ void TestMneDescriptionParser::covariance_full()
     QCOMPARE(d.rej.eegReject, 80e-6f);
 
     QCOMPARE(d.defs.size(), 2);
-    QCOMPARE(d.defs[0].events, (QVector<unsigned int>{1, 2}));
+    QCOMPARE(d.defs[0].events, (std::vector<unsigned int>{1, 2}));
     QVERIFY(d.defs[0].doBaseline);
     QCOMPARE(d.defs[0].delay, 0.01f);
     QCOMPARE(d.defs[1].ignore, ~15u);

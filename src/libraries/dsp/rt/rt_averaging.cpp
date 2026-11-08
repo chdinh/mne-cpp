@@ -168,11 +168,11 @@ void RtAveragingWorker::setBaselineActive(bool activate)
     m_bDoBaselineCorrection = activate;
 
     if (!m_bDoBaselineCorrection) {
-        for (int i = 0; i < m_stimEvokedSet.evoked.size(); ++i) {
+        for (int i = 0; i < std::ssize(m_stimEvokedSet.evoked); ++i) {
             m_stimEvokedSet.evoked[i].baseline = std::make_pair(-1.0f, -1.0f);
         }
     } else {
-        for (int i = 0; i < m_stimEvokedSet.evoked.size(); ++i) {
+        for (int i = 0; i < std::ssize(m_stimEvokedSet.evoked); ++i) {
             m_stimEvokedSet.evoked[i].baseline = m_pairBaselineSec;
         }
     }
@@ -186,7 +186,7 @@ void RtAveragingWorker::setBaselineFrom(int fromSamp,
     m_pairBaselineSec.first = float(fromMSec) / 1000.0f;
     m_pairBaselineSamp.first = float(fromSamp);
 
-    for (int i = 0; i < m_stimEvokedSet.evoked.size(); ++i) {
+    for (int i = 0; i < std::ssize(m_stimEvokedSet.evoked); ++i) {
         m_stimEvokedSet.evoked[i].baseline.first = float(fromMSec) / 1000.0f;
     }
 }
@@ -199,7 +199,7 @@ void RtAveragingWorker::setBaselineTo(int toSamp,
     m_pairBaselineSec.second = float(toMSec) / 1000.0f;
     m_pairBaselineSamp.second = float(toSamp);
 
-    for (int i = 0; i < m_stimEvokedSet.evoked.size(); ++i) {
+    for (int i = 0; i < std::ssize(m_stimEvokedSet.evoked); ++i) {
         m_stimEvokedSet.evoked[i].baseline.second = float(toMSec) / 1000.0f;
     }
 }
@@ -375,7 +375,7 @@ void RtAveragingWorker::generateEvoked(double dTriggerType)
     evoked.setInfo(*m_pFiffInfo.data());
     int iEvokedIdx = -1;
 
-    for (int i = 0; i < m_stimEvokedSet.evoked.size(); ++i) {
+    for (int i = 0; i < std::ssize(m_stimEvokedSet.evoked); ++i) {
         if (m_stimEvokedSet.evoked.at(i).comment == QString::number(dTriggerType)) {
             evoked = m_stimEvokedSet.evoked.at(i);
             iEvokedIdx = i;
@@ -420,7 +420,7 @@ void RtAveragingWorker::generateEvoked(double dTriggerType)
         m_stimEvokedSet.evoked[iEvokedIdx] = evoked;
     } else {
         //Evoked data is not present yet
-        m_stimEvokedSet.evoked.append(evoked);
+        m_stimEvokedSet.evoked.push_back(evoked);
     }
 }
 

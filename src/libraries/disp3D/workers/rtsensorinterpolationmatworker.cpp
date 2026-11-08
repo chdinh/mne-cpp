@@ -15,6 +15,8 @@
 //=============================================================================================================
 
 #include "rtsensorinterpolationmatworker.h"
+
+#include <vector>
 #include <utils/string_utils.h>
 #include "../scene/sensorfieldmapper.h"
 #include <fwd/fwd_field_map.h>
@@ -195,10 +197,10 @@ void RtSensorInterpolationMatWorker::computeMapping()
     }
 
     // ── Classify channels ──────────────────────────────────────────────
-    QList<FiffChInfo> megChs, eegChs;
+    std::vector<FiffChInfo> megChs, eegChs;
     QVector<int> megPick, eegPick;
 
-    for (int k = 0; k < evoked.info.chs.size(); ++k) {
+    for (int k = 0; k < std::ssize(evoked.info.chs); ++k) {
         const auto& ch = evoked.info.chs[k];
         if (bads.contains(ch.ch_name) || UTILSLIB::contains(evoked.info.bads, ch.ch_name))
             continue;
@@ -211,12 +213,12 @@ void RtSensorInterpolationMatWorker::computeMapping()
             if (applySensorTrans && !headToMriTrans.empty())
                 pos = headToMri.map(pos);
             megPick.append(k);
-            megChs.append(ch);
+            megChs.push_back(ch);
         } else if (ch.kind == FIFFV_EEG_CH) {
             if (applySensorTrans && !headToMriTrans.empty())
                 pos = headToMri.map(pos);
             eegPick.append(k);
-            eegChs.append(ch);
+            eegChs.push_back(ch);
         }
     }
 
@@ -237,7 +239,7 @@ void RtSensorInterpolationMatWorker::computeMapping()
         : FiffCoordTrans();
 
     // ── MEG mapping ────────────────────────────────────────────────────
-    if (hasMegSurface && !megChs.isEmpty()) {
+    if (hasMegSurface && !megChs.empty()) {
         Eigen::MatrixX3f norms = megNorms;
 
         // Recompute normals if missing
@@ -270,7 +272,7 @@ void RtSensorInterpolationMatWorker::computeMapping()
                 }
 
                 auto coils = templates->create_meg_coils(
-                    megChs, megChs.size(), FWDLIB::FWD_COIL_ACCURACY_NORMAL, devToTarget);
+                    megChs, static_cast<int>(megChs.size()), FWDLIB::FWD_COIL_ACCURACY_NORMAL, devToTarget);
 
                 if (coils && coils->ncoil() > 0) {
                     auto mat = FWDLIB::FwdFieldMap::computeMegMapping(
@@ -288,7 +290,7 @@ void RtSensorInterpolationMatWorker::computeMapping()
     }
 
     // ── EEG mapping ────────────────────────────────────────────────────
-    if (hasEegSurface && !eegChs.isEmpty()) {
+    if (hasEegSurface && !eegChs.empty()) {
         if (eegVerts.rows() > 0) {
             Eigen::Vector3f origin = fittedOrigin;
             if (!headMri.empty())
@@ -296,7 +298,7 @@ void RtSensorInterpolationMatWorker::computeMapping()
 
             auto eegCoils =
                 FWDLIB::FwdCoilSet::create_eeg_els(
-                    eegChs, eegChs.size(), headMri);
+                    eegChs, static_cast<int>(eegChs.size()), headMri);
 
             if (eegCoils && eegCoils->ncoil() > 0) {
                 auto mat = FWDLIB::FwdFieldMap::computeEegMapping(

@@ -15,6 +15,8 @@
 //=============================================================================================================
 
 #include <fiff/fiff.h>
+
+#include <vector>
 #include <fiff/fiff_file.h>
 #include <utils/generics/mne_logger.h>
 
@@ -238,7 +240,7 @@ int main(int argc, char* argv[])
     // Create channel info
     //
     int nch = header.nChannels;
-    QList<FiffChInfo> chs;
+    std::vector<FiffChInfo> chs;
     for (int k = 0; k < nch; k++) {
         FiffChInfo ch;
         ch.scanNo = k + 1;
@@ -262,7 +264,7 @@ int main(int argc, char* argv[])
             ch.chpos.r0[2] = elpPositions(k, 2);
         }
 
-        chs.append(ch);
+        chs.push_back(ch);
     }
 
     //

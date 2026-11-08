@@ -238,7 +238,7 @@ void Hpi::initFiffInfo(QSharedPointer<FIFFLIB::FiffInfo> info)
     // Take the HPI coil excitation frequencies from the file when it provides
     // them, so the user does not have to type them in by hand. Frequencies the
     // user enters in the GUI still override these.
-    if (m_vCoilFreqs.isEmpty() && m_pFiffInfo && !m_pFiffInfo->hpi_coil_freqs.isEmpty()) {
+    if (m_vCoilFreqs.isEmpty() && m_pFiffInfo && !m_pFiffInfo->hpi_coil_freqs.empty()) {
         for (float fFreq : m_pFiffInfo->hpi_coil_freqs) {
             m_vCoilFreqs.append(static_cast<int>(qRound(fFreq)));
         }
@@ -377,7 +377,7 @@ void Hpi::updateProjections()
             FiffInfo infoTemp = *(m_pFiffInfo.data());
 
             //Turn on all SSP
-            for (int i = 0; i < infoTemp.projs.size(); ++i) {
+            for (int i = 0; i < std::ssize(infoTemp.projs); ++i) {
                 infoTemp.projs[i].active = true;
             }
 

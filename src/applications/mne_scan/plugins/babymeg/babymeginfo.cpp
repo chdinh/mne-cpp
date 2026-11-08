@@ -367,7 +367,7 @@ void BabyMEGInfo::MGH_LM_Parse_Para(QByteArray cmdstr)
         t_ch.coil_trans(3, 2) = 0.0;
         t_ch.coil_trans(3, 3) = 1.0;
 
-        m_FiffInfo.chs.append(t_ch);
+        m_FiffInfo.chs.push_back(t_ch);
         m_FiffInfo.ch_names.push_back(t_ch.ch_name);
     }
 

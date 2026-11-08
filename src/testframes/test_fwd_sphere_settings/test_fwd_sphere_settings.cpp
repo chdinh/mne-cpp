@@ -273,7 +273,7 @@ private slots:
 
     void fwdCoilSet_createEegEls()
     {
-        QList<FiffChInfo> chs;
+        std::vector<FiffChInfo> chs;
         for (int i = 0; i < 3; ++i) {
             FiffChInfo ch;
             ch.ch_name = (QString("EEG%1").arg(i + 1, 3, 10, QChar('0'))).toStdString();
@@ -282,7 +282,7 @@ private slots:
             ch.chpos.r0[1] = 0.0f;
             ch.chpos.r0[2] = 0.09f;
             ch.chpos.coil_type = FIFFV_COIL_EEG;
-            chs.append(ch);
+            chs.push_back(ch);
         }
 
         auto eeg = FwdCoilSet::create_eeg_els(chs, 3);
@@ -498,3 +498,5 @@ private slots:
 
 QTEST_GUILESS_MAIN(TestFwdSphereSettings)
 #include "test_fwd_sphere_settings.moc"
+
+#include <vector>

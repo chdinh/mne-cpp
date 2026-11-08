@@ -90,16 +90,16 @@ void TestStudioRawModel::loadAndInspect()
     QVERIFY(!model.data(QModelIndex(), Qt::DisplayRole).isValid());
     QVERIFY(!model.data(nameIndex, Qt::ToolTipRole).isValid());
     QCOMPARE(model.data(nameIndex, Qt::DisplayRole).toString(),
-             model.channelInfoList().constFirst().ch_name);
+             model.channelInfoList().front().ch_name);
     QVERIFY(model.data(dataIndex, Qt::DisplayRole).isValid());
     QCOMPARE(model.headerData(1, Qt::Horizontal, Qt::DisplayRole).toString(),
              QStringLiteral("data plot"));
     QCOMPARE(model.headerData(0, Qt::Vertical, Qt::DisplayRole).toString(),
-             model.channelInfoList().constFirst().ch_name);
+             model.channelInfoList().front().ch_name);
     QVERIFY(!model.headerData(0, Qt::Horizontal, Qt::ToolTipRole).isValid());
 
     QModelIndexList channels{dataIndex};
-    const QString channelName = QString::fromStdString(model.channelInfoList().constFirst().ch_name);
+    const QString channelName = QString::fromStdString(model.channelInfoList().front().ch_name);
     const bool initiallyBad = UTILSLIB::contains(model.fiffInfo()->bads, channelName.toStdString());
     model.markChBad(channels, !initiallyBad);
     QCOMPARE(UTILSLIB::contains(model.fiffInfo()->bads, channelName.toStdString()), !initiallyBad);

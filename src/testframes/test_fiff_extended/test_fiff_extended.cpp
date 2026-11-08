@@ -48,7 +48,7 @@ private:
             ch.unit = FIFF_UNIT_V;
             ch.cal = 1.0;
             ch.range = 1.0;
-            info.chs.append(ch);
+            info.chs.push_back(ch);
             info.ch_names.push_back(ch.ch_name);
         }
         info.nchan = nCh;
@@ -152,8 +152,9 @@ private slots:
         cov2.nfree = 100;
         cov2.data *= 2.0;
 
-        QList<FiffCov> covList;
-        covList << cov1 << cov2;
+        std::vector<FiffCov> covList;
+        covList.push_back(cov1);
+        covList.push_back(cov2);
 
         FiffCov avg = FiffCov::compute_grand_average(covList);
         QCOMPARE(avg.dim, 3);
@@ -329,8 +330,8 @@ private slots:
         // Our channels are EEG so this should work but have no effect
         info.set_current_comp(3);
         // Static version
-        QList<FiffChInfo> chs = info.chs;
-        QList<FiffChInfo> result = FiffInfo::set_current_comp(chs, 0);
+        std::vector<FiffChInfo> chs = info.chs;
+        std::vector<FiffChInfo> result = FiffInfo::set_current_comp(chs, 0);
         QCOMPARE(result.size(), 5);
     }
 
@@ -379,8 +380,8 @@ private slots:
         projData->data = MatrixXd::Ones(1, 3) / std::sqrt(3.0);
         proj.data = projData;
 
-        QList<FiffProj> projList;
-        projList << proj;
+        std::vector<FiffProj> projList;
+        projList.push_back(proj);
 
         FiffProj::activate_projs(projList);
         QVERIFY(projList[0].active);
@@ -404,8 +405,8 @@ private slots:
         projData->data = MatrixXd::Ones(1, 3) / std::sqrt(3.0);
         proj.data = projData;
 
-        QList<FiffProj> projList;
-        projList << proj;
+        std::vector<FiffProj> projList;
+        projList.push_back(proj);
 
         StringList chNames;
         chNames.push_back("EEG 001");
@@ -520,7 +521,7 @@ private slots:
         // Verify info was loaded correctly
         QVERIFY(raw.info.nchan > 0);
         QVERIFY(raw.info.sfreq > 0);
-        QVERIFY(!raw.info.chs.isEmpty());
+        QVERIFY(!raw.info.chs.empty());
     }
 
     // === FiffDigPointSet tests ===
@@ -540,3 +541,5 @@ private slots:
 
 QTEST_GUILESS_MAIN(TestFiffExtended)
 #include "test_fiff_extended.moc"
+
+#include <vector>

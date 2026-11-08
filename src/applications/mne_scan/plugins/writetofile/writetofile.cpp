@@ -396,7 +396,7 @@ void WriteToFile::toggleRecordingFile()
         }
 
         //Set all projectors to zero before writing to file because we always write the raw data
-        for (int i = 0; i < m_pFiffInfo->projs.size(); i++) {
+        for (int i = 0; i < std::ssize(m_pFiffInfo->projs); i++) {
             m_pFiffInfo->projs[i].active = false;
         }
 

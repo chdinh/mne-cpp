@@ -901,10 +901,10 @@ void TestBids::testWriteSidecarsPerDatatype()
         ch.ch_name = QString::fromLatin1(name).toStdString();
         ch.kind = kind;
         ch.unit = unit;
-        info.chs << ch;
+        info.chs.push_back(ch);
         info.ch_names.push_back(ch.ch_name);
     }
-    info.nchan = info.chs.size();
+    info.nchan = static_cast<int>(info.chs.size());
     data.raw.first_samp = 0;
     data.raw.last_samp = 2999;
     QTemporaryDir dir;
@@ -974,10 +974,10 @@ void TestBids::testWriteFromInfoAndReadRejects()
         ch.ch_name = name.toStdString();
         ch.kind = kind;
         ch.unit = FIFF_UNIT_V;
-        info.chs << ch;
+        info.chs.push_back(ch);
         info.ch_names.push_back(name.toStdString());
     }
-    info.nchan = info.chs.size();
+    info.nchan = static_cast<int>(info.chs.size());
     info.bads = {"EOG"};
     // E1 (1st electrode) from its digitizer point, G1 has a non-finite point and falls back to its position,
     // S1 and D1 have no position at all

@@ -46,7 +46,7 @@ using namespace Eigen;
 static std::vector<int> megChannelIndices(const FiffInfo& info)
 {
     std::vector<int> indices;
-    for (int i = 0; i < info.chs.size(); ++i) {
+    for (int i = 0; i < std::ssize(info.chs); ++i) {
         if (info.chs[i].kind == FIFFV_MEG_CH) {
             indices.push_back(i);
         }

@@ -241,7 +241,7 @@ void TestComRtClient::testRtDataClientReadsWhatTheServerWrites()
         Eigen::MatrixXd vec(2, 3);
         vec << 0.6, 0.8, 0.0, 0.0, 0.6, -0.8;
         FiffNamedMatrix vectors(2, 3, {}, StringList(info.ch_names.begin() + 0, info.ch_names.begin() + 0 + 3), vec);
-        info.projs.append(FiffProj(FIFFV_PROJ_ITEM_FIELD, true, QStringLiteral("PCA-v1"), vectors));
+        info.projs.push_back(FiffProj(FIFFV_PROJ_ITEM_FIELD, true, QStringLiteral("PCA-v1"), vectors));
     }
     info.experimenter = "rt test";
     info.description = "wire round trip";
@@ -297,7 +297,7 @@ void TestComRtClient::testRtDataClientReadsWhatTheServerWrites()
         QVERIFY(got->dev_head_t.trans == info.dev_head_t.trans);
         QCOMPARE(got->dig.size(), info.dig.size());
         QCOMPARE(got->projs.size(), info.projs.size());
-        for (int p = 0; p < info.projs.size(); ++p) {
+        for (int p = 0; p < std::ssize(info.projs); ++p) {
             QCOMPARE(got->projs[p].desc, info.projs[p].desc);
             QCOMPARE(got->projs[p].kind, info.projs[p].kind);
             QCOMPARE(got->projs[p].active, info.projs[p].active);
@@ -305,7 +305,7 @@ void TestComRtClient::testRtDataClientReadsWhatTheServerWrites()
             QVERIFY(got->projs[p].data->data.isApprox(info.projs[p].data->data, 1e-6));
         }
         QCOMPARE(got->comps.size(), info.comps.size());
-        for (int c = 0; c < info.comps.size(); ++c) {
+        for (int c = 0; c < std::ssize(info.comps); ++c) {
             QCOMPARE(got->comps[c].kind, info.comps[c].kind);
             QCOMPARE(got->comps[c].save_calibrated, info.comps[c].save_calibrated);
             QCOMPARE(got->comps[c].data->row_names, info.comps[c].data->row_names);

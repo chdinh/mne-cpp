@@ -140,7 +140,7 @@ private slots:
         if (rc == 0 && info) {
             QVERIFY(info->nchan > 0);
             QVERIFY(info->sfreq > 0);
-            QVERIFY(!info->chInfo.isEmpty());
+            QVERIFY(!info->chInfo.empty());
         } else {
             qWarning() << "MNERawInfo::load failed — code path exercised";
         }
@@ -186,7 +186,7 @@ private slots:
             std::unique_ptr<FiffId> id;
             int nchan = 0;
             float sfreq = 0, highpass = 0, lowpass = 0;
-            QList<FiffChInfo> chInfo;
+            std::vector<FiffChInfo> chInfo;
             FiffCoordTrans trans;
             FiffTime startTime;
 
@@ -377,3 +377,5 @@ private slots:
 
 QTEST_GUILESS_MAIN(TestMneIoCoverage)
 #include "test_mne_io_coverage.moc"
+
+#include <vector>

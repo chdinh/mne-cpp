@@ -257,15 +257,15 @@ void TestDispViewers::compensatorView_setAndGet()
     CompensatorView view("test_disp_viewers");
 
     // Empty list
-    view.setCompensators(QList<FiffCtfComp>());
-    QVERIFY(view.getCompensators().isEmpty());
+    view.setCompensators(std::vector<FiffCtfComp>());
+    QVERIFY(view.getCompensators().empty());
     QCOMPARE(view.getLastTo(), 0);
 
     // Non-empty list
     FiffCtfComp comp;
     comp.ctfkind = 101;
     comp.kind = FIFF_MNE_CTF_COMP_KIND;
-    view.setCompensators(QList<FiffCtfComp>() << comp);
+    view.setCompensators({comp});
 
     view.setGuiMode(AbstractView::GuiMode::Research);
     view.setProcessingMode(AbstractView::ProcessingMode::Offline);
@@ -283,17 +283,17 @@ void TestDispViewers::projectorsView_setAndGet()
     ProjectorsView view("test_disp_viewers");
 
     // Empty list
-    view.setProjectors(QList<FiffProj>());
-    QVERIFY(view.getProjectors().isEmpty());
+    view.setProjectors(std::vector<FiffProj>());
+    QVERIFY(view.getProjectors().empty());
 
     // Non-empty list
     FiffProj proj;
     proj.kind = FIFFV_PROJ_ITEM_EEG_AVREF;
     proj.active = false;
     proj.desc = "Test projector";
-    view.setProjectors(QList<FiffProj>() << proj);
+    view.setProjectors({proj});
     QCOMPARE(view.getProjectors().size(), 1);
-    QVERIFY(!view.getProjectors().first().active);
+    QVERIFY(!view.getProjectors().front().active);
 
     view.redrawGUI();
     view.setGuiMode(AbstractView::GuiMode::Clinical);
@@ -319,8 +319,9 @@ void TestDispViewers::modalitySelectionView_setAndGet()
     eegCh.ch_name = "EEG 001";
     eegCh.unit = FIFF_UNIT_V;
 
-    QList<FiffChInfo> chList;
-    chList << megCh << eegCh;
+    std::vector<FiffChInfo> chList;
+    chList.push_back(megCh);
+    chList.push_back(eegCh);
 
     ModalitySelectionView view(chList, "test_disp_viewers");
 
@@ -655,3 +656,5 @@ void TestDispViewers::multiView_addWidget()
 
 QTEST_MAIN(TestDispViewers)
 #include "test_disp_viewers.moc"
+
+#include <vector>

@@ -152,7 +152,7 @@ void TestFiffStreamPython::initTestCase()
         named.data << 0.5, -1.0, 2.0, 3.5, 0.0, -4.25;
         w->write_named_matrix(FIFF_MNE_CTF_COMP_DATA, named);
 
-        QList<FiffProj> projs;
+        std::vector<FiffProj> projs;
         for (int k = 0; k < 2; ++k) {
             FiffNamedMatrix vec;
             vec.nrow = 1;
@@ -161,7 +161,7 @@ void TestFiffStreamPython::initTestCase()
             vec.col_names.push_back("MEG 0112");
             vec.col_names.push_back("MEG 0111");
             vec.data = RowVector3d(k == 0 ? 0.6 : 0.0, 0.8, k == 0 ? 0.0 : 0.6);
-            projs.append(FiffProj(FIFFV_PROJ_ITEM_FIELD, k == 0, QStringLiteral("PCA-%1").arg(k + 1), vec));
+            projs.push_back(FiffProj(FIFFV_PROJ_ITEM_FIELD, k == 0, QStringLiteral("PCA-%1").arg(k + 1), vec));
         }
         w->write_proj(projs);
 
@@ -237,7 +237,7 @@ void TestFiffStreamPython::namedMatrix()
 
 void TestFiffStreamPython::projectors()
 {
-    const QList<FiffProj> back = m_stream->read_proj(m_stream->dirtree());
+    const std::vector<FiffProj> back = m_stream->read_proj(m_stream->dirtree());
     QCOMPARE(back.size(), 2);
     QCOMPARE(back[0].desc, QString("PCA-1"));
     QCOMPARE(back[1].desc, QString("PCA-2"));
@@ -518,14 +518,14 @@ void TestFiffStreamPython::readsTagTypes()
 
     // Dense matrices keep their trailing dimensions (ncol, nrow, ndim) in host order.
     qint32 ndim;
-    QVector<qint32> dims;
+    std::vector<qint32> dims;
     t = tag(907);
     QVERIFY(t->getMatrixDimensions(ndim, dims));
-    QCOMPARE(dims, QVector<qint32>({3, 2}));
+    QCOMPARE(dims, std::vector<qint32>({3, 2}));
     QCOMPARE(reinterpret_cast<const double*>(t->data())[5], 6.5);
     t = tag(908);
     QVERIFY(t->getMatrixDimensions(ndim, dims));
-    QCOMPARE(dims, QVector<qint32>({2, 1}));
+    QCOMPARE(dims, std::vector<qint32>({2, 1}));
     QCOMPARE(floats(*t)[3], -4.0f);
 
     MatrixXd expected(4, 4);
@@ -635,7 +635,7 @@ void TestFiffStreamPython::refusesUnwritablePath()
     FiffChInfo ch;
     ch.ch_name = "EEG001";
     ch.kind = FIFFV_EEG_CH;
-    info.chs << ch;
+    info.chs.push_back(ch);
     info.ch_names.push_back(ch.ch_name);
     info.nchan = 1;
     info.sfreq = 100.0f;
@@ -708,7 +708,7 @@ void TestFiffStreamPython::writesAnnotationsAndDevice()
     ch.unit = FIFF_UNIT_V;
     ch.cal = 1.0f;
     ch.range = 1.0f;
-    info.chs << ch;
+    info.chs.push_back(ch);
     info.ch_names.push_back(ch.ch_name);
     info.nchan = 1;
     info.sfreq = 100.0f;

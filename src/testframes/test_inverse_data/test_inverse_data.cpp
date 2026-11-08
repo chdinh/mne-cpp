@@ -724,7 +724,7 @@ private slots:
 
         qDebug() << "Number of evoked conditions:" << evokedSet.evoked.size();
 
-        for (int i = 0; i < evokedSet.evoked.size(); ++i) {
+        for (int i = 0; i < std::ssize(evokedSet.evoked); ++i) {
             FiffEvoked& evk = evokedSet.evoked[i];
             QVERIFY(evk.data.rows() > 0);
             QVERIFY(evk.data.cols() > 0);

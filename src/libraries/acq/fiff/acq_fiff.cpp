@@ -323,7 +323,7 @@ AcqExpected<FiffInfo> ACQLIB::toFiffInfo(const AcqStreamInfo& info)
             ch.cal = static_cast<float>(channel.scale * std::pow(10.0, channel.unitExponent));
             ch.range = 1.0f;
         }
-        fiff.chs.append(ch);
+        fiff.chs.push_back(ch);
         fiff.ch_names.push_back(ch.ch_name);
     }
     fiff.nchan = static_cast<fiff_int_t>(fiff.chs.size());

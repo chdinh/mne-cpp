@@ -86,7 +86,7 @@
       "modules": []
     },
     "disp": {
-      "tokens": 6278,
+      "tokens": 6250,
       "public_header_includes": 124,
       "modules": [
         "Concurrent",
@@ -97,7 +97,7 @@
       ]
     },
     "disp3D": {
-      "tokens": 2914,
+      "tokens": 2912,
       "public_header_includes": 142,
       "modules": [
         "Concurrent",
@@ -110,7 +110,7 @@
       ]
     },
     "dsp": {
-      "tokens": 644,
+      "tokens": 634,
       "public_header_includes": 32,
       "modules": [
         "Concurrent",
@@ -119,8 +119,8 @@
       ]
     },
     "fiff": {
-      "tokens": 1170,
-      "public_header_includes": 75,
+      "tokens": 1020,
+      "public_header_includes": 61,
       "modules": [
         "Core",
         "Network"
@@ -136,7 +136,7 @@
       ]
     },
     "fwd": {
-      "tokens": 337,
+      "tokens": 324,
       "public_header_includes": 12,
       "modules": [
         "Concurrent",
@@ -151,7 +151,7 @@
       ]
     },
     "inv": {
-      "tokens": 826,
+      "tokens": 812,
       "public_header_includes": 48,
       "modules": [
         "Concurrent",
@@ -186,8 +186,8 @@
       ]
     },
     "mne": {
-      "tokens": 1629,
-      "public_header_includes": 94,
+      "tokens": 1507,
+      "public_header_includes": 81,
       "modules": [
         "Concurrent",
         "Core",

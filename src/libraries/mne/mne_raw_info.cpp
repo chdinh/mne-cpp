@@ -20,6 +20,8 @@
 
 #include "mne_raw_info.h"
 
+#include <vector>
+
 #include <fiff/fiff_tag.h>
 
 #include <Eigen/Core>
@@ -120,7 +122,7 @@ int MNERawInfo::get_meas_info(FiffStream& stream,
                               float* sfreq,
                               float* highpass,
                               float* lowpass,
-                              QList<FiffChInfo>& chp,
+                              std::vector<FiffChInfo>& chp,
                               FiffCoordTrans& trans)
 {
     FiffTime dummy;
@@ -136,12 +138,12 @@ int MNERawInfo::get_meas_info(FiffStream& stream,
                               float* sfreq,
                               float* highpass,
                               float* lowpass,
-                              QList<FiffChInfo>& chp,
+                              std::vector<FiffChInfo>& chp,
                               FiffCoordTrans& trans,
                               FiffTime& start_time)
 {
     std::optional<FiffTag> t_pTag;
-    QList<FiffChInfo> ch;
+    std::vector<FiffChInfo> ch;
     FiffChInfo this_ch;
     FiffCoordTrans t;
     int j, k;
@@ -192,7 +194,7 @@ int MNERawInfo::get_meas_info(FiffStream& stream,
                 *nchan = *t_pTag->toInt();
 
                 for (j = 0; j < *nchan; j++) {
-                    ch.append(FiffChInfo());
+                    ch.push_back(FiffChInfo());
                     ch[j].scanNo = -1;
                 }
                 to_find = to_find + *nchan - 1;
@@ -307,7 +309,7 @@ int MNERawInfo::load(const QString& name, int allow_maxshield, std::unique_ptr<M
     FiffStream stream(&file);
 
     int res = FIFF_FAIL;
-    QList<FiffChInfo> chs;            /* Channel info */
+    std::vector<FiffChInfo> chs;      /* Channel info */
     FiffCoordTrans trans;             /* The coordinate transformation */
     std::unique_ptr<FiffId> id;       /* Measurement id */
     std::vector<FiffDirEntry> rawDir; /* Directory of raw data tags */

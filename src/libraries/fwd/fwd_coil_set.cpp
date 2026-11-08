@@ -18,6 +18,8 @@
 //=============================================================================================================
 
 #include "fwd_coil_set.h"
+
+#include <vector>
 #include "fwd_coil.h"
 #include "fwd_bem_solution.h"
 
@@ -189,7 +191,7 @@ FwdCoil::UPtr FwdCoilSet::create_meg_coil(const FiffChInfo& ch, int acc, const F
 
 //=============================================================================================================
 
-FwdCoilSet::UPtr FwdCoilSet::create_meg_coils(const QList<FIFFLIB::FiffChInfo>& chs,
+FwdCoilSet::UPtr FwdCoilSet::create_meg_coils(const std::vector<FIFFLIB::FiffChInfo>& chs,
                                               int nch,
                                               int acc,
                                               const FiffCoordTrans& t)
@@ -209,7 +211,7 @@ FwdCoilSet::UPtr FwdCoilSet::create_meg_coils(const QList<FIFFLIB::FiffChInfo>& 
 
 //=============================================================================================================
 
-FwdCoilSet::UPtr FwdCoilSet::create_eeg_els(const QList<FIFFLIB::FiffChInfo>& chs,
+FwdCoilSet::UPtr FwdCoilSet::create_eeg_els(const std::vector<FIFFLIB::FiffChInfo>& chs,
                                             int nch,
                                             const FiffCoordTrans& t)
 {

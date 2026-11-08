@@ -179,7 +179,7 @@ void Natus::setUpFiffInfo()
 
         QSLChNames.push_back(sChType.toStdString());
 
-        m_pFiffInfo->chs.append(fChInfo);
+        m_pFiffInfo->chs.push_back(fChInfo);
     }
 
     //Set channel names in fiff_info_base

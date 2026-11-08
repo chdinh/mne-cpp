@@ -57,7 +57,7 @@ private:
         info.nchan = nCh;
         for (int i = 0; i < nCh; ++i) {
             QString name = QString("MEG %1").arg(i, 4, 10, QChar('0'));
-            info.chs.append(makeCh(name, FIFFV_MEG_CH, FIFF_UNIT_T, FIFFV_COIL_VV_MAG_T3));
+            info.chs.push_back(makeCh(name, FIFFV_MEG_CH, FIFF_UNIT_T, FIFFV_COIL_VV_MAG_T3));
             info.ch_names.push_back(name.toStdString());
         }
         info.bads.clear();
@@ -265,8 +265,8 @@ private slots:
     {
         FiffProj proj;
         proj.active = false;
-        QList<FiffProj> projs;
-        projs << proj;
+        std::vector<FiffProj> projs;
+        projs.push_back(proj);
         FiffProj::activate_projs(projs);
         QCOMPARE(projs[0].active, true);
     }
@@ -283,8 +283,8 @@ private slots:
         data->row_names.push_back("PCA1");
 
         FiffProj proj(FIFFV_MNE_PROJ_ITEM_EEG_AVREF, true, "PCA", *data);
-        QList<FiffProj> projs;
-        projs << proj;
+        std::vector<FiffProj> projs;
+        projs.push_back(proj);
 
         StringList chNames;
         chNames.push_back("CH1");
@@ -395,8 +395,8 @@ private slots:
             QSKIP("No test data");
         FiffRawData raw((m_sDataPath + "/MEG/sample/sample_audvis_trunc_raw.fif").toStdString());
 
-        QList<FiffProj>& projs = raw.info.projs;
-        if (projs.isEmpty())
+        std::vector<FiffProj>& projs = raw.info.projs;
+        if (projs.empty())
             QSKIP("No projectors in file");
 
         qDebug() << "Found" << projs.size() << "projectors:";
@@ -548,7 +548,7 @@ private slots:
 
         // No HPI measurement block in this file, so the list stays empty
         // rather than being filled with garbage.
-        QVERIFY(raw.info.hpi_coil_freqs.isEmpty());
+        QVERIFY(raw.info.hpi_coil_freqs.empty());
     }
 
     void cleanupTestCase()
@@ -558,3 +558,5 @@ private slots:
 
 QTEST_GUILESS_MAIN(TestFiffInfo)
 #include "test_fiff_info.moc"
+
+#include <vector>

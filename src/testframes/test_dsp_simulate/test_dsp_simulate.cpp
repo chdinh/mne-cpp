@@ -210,7 +210,7 @@ private slots:
         for (int i = 0; i < nChan; ++i) {
             FiffChInfo ch;
             ch.ch_name = (QString("CH%1").arg(i)).toStdString();
-            info.chs.append(ch);
+            info.chs.push_back(ch);
             info.ch_names.push_back(ch.ch_name);
         }
 
@@ -246,7 +246,7 @@ private slots:
         for (int i = 0; i < nChan; ++i) {
             FiffChInfo ch;
             ch.ch_name = (QString("CH%1").arg(i)).toStdString();
-            info.chs.append(ch);
+            info.chs.push_back(ch);
             info.ch_names.push_back(ch.ch_name);
         }
 
@@ -284,7 +284,7 @@ private slots:
             FiffChInfo ch;
             ch.ch_name = (QString("CH%1").arg(i)).toStdString();
             ch.kind = FIFFV_EEG_CH;
-            info.chs.append(ch);
+            info.chs.push_back(ch);
             info.ch_names.push_back(ch.ch_name);
         }
 
@@ -327,7 +327,7 @@ private slots:
             ch.ch_name = names[i];
             ch.kind = i < 3 ? FIFFV_MEG_CH : FIFFV_EEG_CH;
             ch.unit = i < 3 ? FIFF_UNIT_T : FIFF_UNIT_V;
-            info.chs.append(ch);
+            info.chs.push_back(ch);
             info.ch_names.push_back(names[i]);
         }
         info.nchan = nChan;

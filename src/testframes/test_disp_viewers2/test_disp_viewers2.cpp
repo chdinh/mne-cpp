@@ -1287,7 +1287,7 @@ void TestDispViewers2::averagingSettingsView_controlsAndSettings()
         FiffEvoked evoked;
         evoked.comment = QString::number(i + 1);
         evoked.nave = 3 * i;
-        evokedSet.evoked.append(evoked);
+        evokedSet.evoked.push_back(evoked);
     }
     view.setDetectedEpochs(evokedSet);
     QVERIFY(!pTrials->isHidden());
@@ -1424,9 +1424,9 @@ void TestDispViewers2::artifactSettingsView_thresholds()
         ch.unit = unit;
         return ch;
     };
-    const QList<FiffChInfo> megEeg = {channel(FIFFV_MEG_CH, FIFF_UNIT_T_M), channel(FIFFV_MEG_CH, FIFF_UNIT_T),
-                                      channel(FIFFV_MEG_CH, FIFF_UNIT_T_M), channel(FIFFV_EEG_CH, FIFF_UNIT_V),
-                                      channel(FIFFV_STIM_CH, FIFF_UNIT_NONE)};
+    const std::vector<FiffChInfo> megEeg = {channel(FIFFV_MEG_CH, FIFF_UNIT_T_M), channel(FIFFV_MEG_CH, FIFF_UNIT_T),
+                                            channel(FIFFV_MEG_CH, FIFF_UNIT_T_M), channel(FIFFV_EEG_CH, FIFF_UNIT_V),
+                                            channel(FIFFV_STIM_CH, FIFF_UNIT_NONE)};
 
     ArtifactSettingsView view(QString{});
     view.show();
@@ -1855,7 +1855,7 @@ void TestDispViewers2::butterflyView_drawsAveragesAcrossTheFullWidth()
     evoked.times(200) = 0.0f;
     evoked.data = Eigen::MatrixXd::Zero(4, 1200);
     evoked.data.row(0).setConstant(5e-13);
-    set->evoked.append(evoked);
+    set->evoked.push_back(evoked);
 
     auto model = QSharedPointer<EvokedSetModel>::create();
     model->setEvokedSet(set);
@@ -2269,7 +2269,7 @@ void TestDispViewers2::averageLayoutView_drawsEachChannelsAverage()
     evoked.data = Eigen::MatrixXd::Zero(4, 120);
     evoked.data.row(0).tail(60).setConstant(8e-13);
     evoked.data.row(2).tail(60).setConstant(-8e-13);
-    set->evoked.append(evoked);
+    set->evoked.push_back(evoked);
     auto model = QSharedPointer<EvokedSetModel>::create();
     model->setEvokedSet(set);
     auto pInfo = QSharedPointer<FiffInfo>::create(set->info);
@@ -2384,7 +2384,7 @@ void TestDispViewers2::evokedSetModel_projectionRolesAndAverageMaps()
             evoked.data(2, s) = 3.0 - v;
             evoked.data(3, s) = s;
         }
-        set->evoked.append(evoked);
+        set->evoked.push_back(evoked);
     }
 
     EvokedSetModel model;
@@ -2455,7 +2455,8 @@ void TestDispViewers2::evokedSetModel_projectionRolesAndAverageMaps()
     model.toggleFreeze();
     QVERIFY(model.isFreezed());
     model.getAverageColor()->insert(QStringLiteral("vis"), Qt::cyan);
-    const FiffEvoked vis = set->evoked.takeLast();
+    const FiffEvoked vis = set->evoked.back();
+    set->evoked.pop_back();
     model.setEvokedSet(set);
     QCOMPARE(model.getNumAverages(), 1);
     const auto frozenRows = model.data(0, 1).value<QList<AvrTypeRowVector>>();
@@ -2468,7 +2469,7 @@ void TestDispViewers2::evokedSetModel_projectionRolesAndAverageMaps()
     QVERIFY(!model.getAverageColor()->contains(QStringLiteral("vis")));
     model.toggleFreeze();
     QCOMPARE(model.data(0, 1).value<QList<AvrTypeRowVector>>().size(), 1);
-    set->evoked.append(vis);
+    set->evoked.push_back(vis);
     model.setEvokedSet(set);
     QCOMPARE(model.getAverageColor()->value(QStringLiteral("vis")), QColor(Qt::cyan));
     QCOMPARE(model.getEvokedSet(), set);
@@ -2491,7 +2492,7 @@ void TestDispViewers2::channelInfoModel_columnsRolesAndLayoutMapping()
     eeg.ch_name = "EEG-007";
     eeg.kind = FIFFV_EEG_CH;
     eeg.unit = FIFF_UNIT_V;
-    info->chs.append(eeg);
+    info->chs.push_back(eeg);
     info->ch_names.push_back(eeg.ch_name);
     info->nchan = 5;
 
@@ -3482,7 +3483,7 @@ void TestDispViewers2::channelDataModel_bufferDetrendAndDecimation()
         ch.ch_name = (QStringLiteral("CH%1").arg(i)).toStdString();
         ch.kind = kinds[i].first;
         ch.unit = kinds[i].second;
-        info->chs.append(ch);
+        info->chs.push_back(ch);
         info->ch_names.push_back(ch.ch_name);
     }
     info->bads = {"CH2"};
@@ -5031,3 +5032,6 @@ void TestDispViewers2::rtFiffRawViewModel_extended()
 
 QTEST_MAIN(TestDispViewers2)
 #include "test_disp_viewers2.moc"
+
+#include <vector>
+#include <utility>

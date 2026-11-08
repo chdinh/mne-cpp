@@ -20,6 +20,8 @@
 //=============================================================================================================
 
 #include "ui_averagewindow.h"
+
+#include <vector>
 #include "../Utils/butterflyscene.h"
 #include "../Utils/types.h"
 #include "../Models/averagemodel.h"
@@ -321,10 +323,10 @@ private:
     AverageDelegate* m_pAverageDelegate; /**< The QItemDelegateaverage delegate being part of the model/view framework of Qt. */
     AverageScene* m_pAverageScene;       /**< The pointer to the average scene. */
 
-    ButterflyScene* m_pButterflyScene;                   /**< The pointer to the butterfly scene. */
-    FIFFLIB::FiffCov m_noiseCovariance;                  /**< Optional covariance used to whiten butterfly plots. */
-    WhiteningSettings m_whiteningSettings;               /**< Whitening controls shared with the covariance manager. */
-    QVector<FIFFLIB::FiffEvoked> m_layoutDisplayEvokeds; /**< Cached display evokeds so layout plots can reference transformed data. */
+    ButterflyScene* m_pButterflyScene;                       /**< The pointer to the butterfly scene. */
+    FIFFLIB::FiffCov m_noiseCovariance;                      /**< Optional covariance used to whiten butterfly plots. */
+    WhiteningSettings m_whiteningSettings;                   /**< Whitening controls shared with the covariance manager. */
+    std::vector<FIFFLIB::FiffEvoked> m_layoutDisplayEvokeds; /**< Cached display evokeds so layout plots can reference transformed data. */
 
 signals:
     //=========================================================================================================

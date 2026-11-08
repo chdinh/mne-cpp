@@ -191,7 +191,7 @@ std::unique_ptr<MNENamedMatrix> MNENamedMatrix::read(FiffStream& stream,
     int ncol = 0;
     int nrow = 0;
     qint32 ndim;
-    QVector<qint32> dims;
+    std::vector<qint32> dims;
     MatrixXf data;
     std::optional<FiffTag> t_pTag;
     bool dataFound = false;

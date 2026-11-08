@@ -256,7 +256,7 @@ QString SessionFilter::applyTo() const
 
 bool SessionFilter::appliesToChannel(const FiffInfo& info, int channelIndex) const
 {
-    if (channelIndex < 0 || channelIndex >= info.chs.size()) {
+    if (channelIndex < 0 || channelIndex >= std::ssize(info.chs)) {
         return false;
     }
 
@@ -387,7 +387,7 @@ MatrixXd SessionFilter::applyToMatrix(const MatrixXd& data,
             continue;
         }
 
-        if (row < info.chs.size() && info.chs.at(row).kind == FIFFV_STIM_CH) {
+        if (row < std::ssize(info.chs) && info.chs.at(row).kind == FIFFV_STIM_CH) {
             continue;
         }
 

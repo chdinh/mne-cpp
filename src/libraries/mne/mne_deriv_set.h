@@ -25,6 +25,8 @@
 //=============================================================================================================
 
 #include "mne_global.h"
+
+#include <utility>
 #include "mne_deriv.h"
 
 #include <fiff/fiff_ch_info.h>
@@ -33,7 +35,6 @@
 // QT INCLUDES
 //=============================================================================================================
 
-#include <QList>
 #include <QMap>
 #include <QString>
 #include <QStringList>
@@ -63,7 +64,7 @@ class MNESHARED_EXPORT MNEDerivSet
 {
 public:
     /** Derived channel name and the weight of every input channel. */
-    using Definition = QPair<QString, QMap<QString, double>>;
+    using Definition = std::pair<QString, QMap<QString, double>>;
 
     MNEDerivSet() = default;
     MNEDerivSet(MNEDerivSet&&) = default;
@@ -133,7 +134,7 @@ public:
      *
      * @return A set with one derivation; input channels appear in order of first use.
      */
-    static MNEDerivSet fromDefinitions(const QList<Definition>& definitions, const QString& name = QString());
+    static MNEDerivSet fromDefinitions(const std::vector<Definition>& definitions, const QString& name = QString());
 
     //=========================================================================================================
     /**
@@ -151,7 +152,7 @@ public:
      *
      * @return Derived channel names with the weights of their inputs.
      */
-    QList<Definition> definitions() const;
+    std::vector<Definition> definitions() const;
 
     //=========================================================================================================
     /**

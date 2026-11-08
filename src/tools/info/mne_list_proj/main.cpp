@@ -98,16 +98,16 @@ int main(int argc, char* argv[])
     // Read measurement info
     FiffRawData raw(measName.toStdU16String());
 
-    if (raw.info.chs.isEmpty()) {
+    if (raw.info.chs.empty()) {
         qCritical("No channel information found in %s", qPrintable(measName));
         return 1;
     }
 
     qInfo("Opened %s : %d channels", qPrintable(measName), raw.info.nchan);
 
-    const QList<FiffProj>& projs = raw.info.projs;
+    const std::vector<FiffProj>& projs = raw.info.projs;
 
-    if (projs.isEmpty()) {
+    if (projs.empty()) {
         qInfo("No SSP projectors found.");
         return 0;
     }
@@ -120,7 +120,7 @@ int main(int argc, char* argv[])
     qInfo("%-6s %-20s %-8s %-8s %s",
           "------", "--------------------", "--------", "--------", "--------------------");
 
-    for (int k = 0; k < projs.size(); ++k) {
+    for (int k = 0; k < std::ssize(projs); ++k) {
         const FiffProj& proj = projs[k];
 
         int nVec = 0;

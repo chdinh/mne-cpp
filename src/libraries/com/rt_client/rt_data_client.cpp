@@ -168,13 +168,13 @@ FiffInfo::SPtr RtDataClient::readInfo()
                 t_pTag = t_fiffStream.read_rt_tag();
                 if (t_pTag->kind == FIFF_BLOCK_START && *(t_pTag->toInt()) == FIFFB_PROJ_ITEM) {
                     FiffProj proj;
-                    qint32 countProj = p_pFiffInfo->projs.size();
+                    qint32 countProj = static_cast<int>(p_pFiffInfo->projs.size());
                     while (t_pTag->kind != FIFF_BLOCK_END || *(t_pTag->toInt()) != FIFFB_PROJ_ITEM) {
                         t_pTag = t_fiffStream.read_rt_tag();
                         switch (t_pTag->kind) {
                             case FIFF_NAME: // First proj -> Proj is created
                                 proj = FiffProj();
-                                p_pFiffInfo->projs.append(proj);
+                                p_pFiffInfo->projs.push_back(proj);
                                 p_pFiffInfo->projs[countProj].desc = QString::fromStdString(t_pTag->toString());
                                 break;
                             case FIFF_PROJ_ITEM_KIND:
@@ -202,7 +202,7 @@ FiffInfo::SPtr RtDataClient::readInfo()
             }
         }
         // Check consisty
-        for (qint32 i = 0; i < p_pFiffInfo->projs.size(); ++i) {
+        for (qint32 i = 0; i < std::ssize(p_pFiffInfo->projs); ++i) {
             if (p_pFiffInfo->projs[i].data->data.rows() != p_pFiffInfo->projs[i].data->nrow)
                 p_pFiffInfo->projs[i].data->data.transposeInPlace();
         }
@@ -215,13 +215,13 @@ FiffInfo::SPtr RtDataClient::readInfo()
                 t_pTag = t_fiffStream.read_rt_tag();
                 if (t_pTag->kind == FIFF_BLOCK_START && *(t_pTag->toInt()) == FIFFB_MNE_CTF_COMP_DATA) {
                     FiffCtfComp comp;
-                    qint32 countComp = p_pFiffInfo->comps.size();
+                    qint32 countComp = static_cast<int>(p_pFiffInfo->comps.size());
                     while (t_pTag->kind != FIFF_BLOCK_END || *(t_pTag->toInt()) != FIFFB_MNE_CTF_COMP_DATA) {
                         t_pTag = t_fiffStream.read_rt_tag();
                         switch (t_pTag->kind) {
                             case FIFF_MNE_CTF_COMP_KIND: //First comp -> create comp
                                 comp = FiffCtfComp();
-                                p_pFiffInfo->comps.append(comp);
+                                p_pFiffInfo->comps.push_back(comp);
                                 p_pFiffInfo->comps[countComp].ctfkind = *(t_pTag->toInt());
 
                                 if (p_pFiffInfo->comps[countComp].ctfkind == 1194410578) //hex2dec('47314252')
@@ -322,7 +322,7 @@ FiffInfo::SPtr RtDataClient::readInfo()
         }
 
         if (t_pTag->kind == FIFF_CH_INFO)
-            p_pFiffInfo->chs.append(t_pTag->toChInfo());
+            p_pFiffInfo->chs.push_back(t_pTag->toChInfo());
 
         // END MEAS
         if (t_pTag->kind == FIFF_BLOCK_END && *t_pTag->toInt() == FIFFB_MEAS_INFO) {
@@ -423,13 +423,13 @@ MetaData RtDataClient::readMetadata()
                 t_pTag = t_fiffStream.read_rt_tag();
                 if (t_pTag->kind == FIFF_BLOCK_START && *(t_pTag->toInt()) == FIFFB_PROJ_ITEM) {
                     FiffProj proj;
-                    qint32 countProj = p_pFiffInfo->projs.size();
+                    qint32 countProj = static_cast<int>(p_pFiffInfo->projs.size());
                     while (t_pTag->kind != FIFF_BLOCK_END || *(t_pTag->toInt()) != FIFFB_PROJ_ITEM) {
                         t_pTag = t_fiffStream.read_rt_tag();
                         switch (t_pTag->kind) {
                             case FIFF_NAME: // First proj -> Proj is created
                                 proj = FiffProj();
-                                p_pFiffInfo->projs.append(proj);
+                                p_pFiffInfo->projs.push_back(proj);
                                 p_pFiffInfo->projs[countProj].desc = QString::fromStdString(t_pTag->toString());
                                 break;
                             case FIFF_PROJ_ITEM_KIND:
@@ -457,7 +457,7 @@ MetaData RtDataClient::readMetadata()
             }
         }
         // Check consisty
-        for (qint32 i = 0; i < p_pFiffInfo->projs.size(); ++i) {
+        for (qint32 i = 0; i < std::ssize(p_pFiffInfo->projs); ++i) {
             if (p_pFiffInfo->projs[i].data->data.rows() != p_pFiffInfo->projs[i].data->nrow)
                 p_pFiffInfo->projs[i].data->data.transposeInPlace();
         }
@@ -470,13 +470,13 @@ MetaData RtDataClient::readMetadata()
                 t_pTag = t_fiffStream.read_rt_tag();
                 if (t_pTag->kind == FIFF_BLOCK_START && *(t_pTag->toInt()) == FIFFB_MNE_CTF_COMP_DATA) {
                     FiffCtfComp comp;
-                    qint32 countComp = p_pFiffInfo->comps.size();
+                    qint32 countComp = static_cast<int>(p_pFiffInfo->comps.size());
                     while (t_pTag->kind != FIFF_BLOCK_END || *(t_pTag->toInt()) != FIFFB_MNE_CTF_COMP_DATA) {
                         t_pTag = t_fiffStream.read_rt_tag();
                         switch (t_pTag->kind) {
                             case FIFF_MNE_CTF_COMP_KIND: //First comp -> create comp
                                 comp = FiffCtfComp();
-                                p_pFiffInfo->comps.append(comp);
+                                p_pFiffInfo->comps.push_back(comp);
                                 p_pFiffInfo->comps[countComp].ctfkind = *(t_pTag->toInt());
 
                                 if (p_pFiffInfo->comps[countComp].ctfkind == 1194410578) //hex2dec('47314252')
@@ -577,7 +577,7 @@ MetaData RtDataClient::readMetadata()
         }
 
         if (t_pTag->kind == FIFF_CH_INFO)
-            p_pFiffInfo->chs.append(t_pTag->toChInfo());
+            p_pFiffInfo->chs.push_back(t_pTag->toChInfo());
 
         // END MEAS
         if (t_pTag->kind == FIFF_BLOCK_END && *t_pTag->toInt() == FIFFB_MEAS_INFO) {

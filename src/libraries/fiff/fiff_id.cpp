@@ -22,6 +22,8 @@
 //=============================================================================================================
 
 #include "fiff_id.h"
+
+#include <vector>
 #include "fiff_file.h"
 
 #ifndef __EMSCRIPTEN__
@@ -113,15 +115,15 @@ void FiffId::clear()
 
 bool FiffId::get_machid(int* fixed_id)
 {
-    QList<QString> possibleHardwareAdresses;
+    QStringList possibleHardwareAdresses;
     fixed_id[0] = 0;
     fixed_id[1] = 0;
 
 #ifndef __EMSCRIPTEN__
-    QList<QNetworkInterface> ifaces = QNetworkInterface::allInterfaces();
+    const QList<QNetworkInterface> ifaces = QNetworkInterface::allInterfaces();
 
-    if (!ifaces.isEmpty()) {
-        for (int i = 0; i < ifaces.size(); ++i) {
+    if (!ifaces.empty()) {
+        for (int i = 0; i < std::ssize(ifaces); ++i) {
             unsigned int flags = ifaces[i].flags();
             bool isLoopback = static_cast<bool>(flags & QNetworkInterface::IsLoopBack);
             bool isP2P = static_cast<bool>(flags & QNetworkInterface::IsPointToPoint);

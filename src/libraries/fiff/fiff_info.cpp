@@ -24,6 +24,8 @@
 //=============================================================================================================
 
 #include "fiff_info.h"
+
+#include <vector>
 #include <utils/string_utils.h>
 #include "fiff_stream.h"
 #include "fiff_file.h"
@@ -221,7 +223,7 @@ bool FiffInfo::make_compensator(fiff_int_t kind, MatrixXd& this_comp) const //pr
     MatrixXd presel, postsel;
     qint32 k, col, c, ch = 0, row, row_ch = 0, channelAvailable;
 
-    for (k = 0; k < this->comps.size(); ++k) {
+    for (k = 0; k < std::ssize(this->comps); ++k) {
         if (this->comps[k].kind == kind) {
             this_data = this->comps[k].data;
 
@@ -290,7 +292,7 @@ FiffInfo FiffInfo::pick_info(const RowVectorXi& sel) const
     qint32 idx;
     for (qint32 i = 0; i < sel.size(); ++i) {
         idx = sel[i];
-        res.chs.append(this->chs[idx]);
+        res.chs.push_back(this->chs[idx]);
         res.ch_names.push_back(this->ch_names[idx]);
     }
     res.nchan = static_cast<int>(sel.size());
@@ -301,17 +303,17 @@ FiffInfo FiffInfo::pick_info(const RowVectorXi& sel) const
 
 //=============================================================================================================
 
-QList<FiffChInfo> FiffInfo::set_current_comp(QList<FiffChInfo>& listFiffChInfo, fiff_int_t value)
+std::vector<FiffChInfo> FiffInfo::set_current_comp(std::vector<FiffChInfo>& listFiffChInfo, fiff_int_t value)
 {
-    QList<FiffChInfo> newList;
+    std::vector<FiffChInfo> newList;
     qint32 k;
     fiff_int_t coil_type;
 
-    for (k = 0; k < listFiffChInfo.size(); ++k)
-        newList.append(listFiffChInfo[k]);
+    for (k = 0; k < std::ssize(listFiffChInfo); ++k)
+        newList.push_back(listFiffChInfo[k]);
 
     qint32 lower_half = 65535; // hex2dec('FFFF');
-    for (k = 0; k < listFiffChInfo.size(); ++k) {
+    for (k = 0; k < std::ssize(listFiffChInfo); ++k) {
         if (listFiffChInfo[k].kind == FIFFV_MEG_CH) {
             coil_type = listFiffChInfo[k].chpos.coil_type & lower_half;
             newList[k].chpos.coil_type = (coil_type | (value << 16));
@@ -326,7 +328,7 @@ bool FiffInfo::readMegEegChannels(const std::string& name,
                                   bool do_meg,
                                   bool do_eeg,
                                   const StringList& bads,
-                                  QList<FiffChInfo>& chsp,
+                                  std::vector<FiffChInfo>& chsp,
                                   int& nmegp,
                                   int& neegp)
 {
@@ -345,25 +347,25 @@ bool FiffInfo::readMegEegChannels(const std::string& name,
     }
     stream.close();
 
-    QList<FiffChInfo> meg;
-    QList<FiffChInfo> eeg;
+    std::vector<FiffChInfo> meg;
+    std::vector<FiffChInfo> eeg;
 
-    for (int k = 0; k < info.chs.size(); k++) {
+    for (int k = 0; k < std::ssize(info.chs); k++) {
         if (UTILSLIB::contains(bads, info.chs[k].ch_name))
             continue;
         if (do_meg && info.chs[k].kind == FIFFV_MEG_CH)
-            meg.append(info.chs[k]);
+            meg.push_back(info.chs[k]);
         else if (do_eeg && info.chs[k].isValidEeg())
-            eeg.append(info.chs[k]);
+            eeg.push_back(info.chs[k]);
     }
 
     chsp.clear();
     chsp.reserve(meg.size() + eeg.size());
-    chsp.append(meg);
-    chsp.append(eeg);
+    chsp.insert(chsp.end(), meg.begin(), meg.end());
+    chsp.insert(chsp.end(), eeg.begin(), eeg.end());
 
-    nmegp = meg.size();
-    neegp = eeg.size();
+    nmegp = static_cast<int>(meg.size());
+    neegp = static_cast<int>(eeg.size());
     return true;
 }
 
@@ -375,12 +377,9 @@ void FiffInfo::writeToStream(FiffStream& stream) const
     //   We will always write floats
     //
     fiff_int_t data_type = 4;
-    QList<FiffChInfo> chsToWrite;
+    std::vector<FiffChInfo> chsToWrite(this->chs.begin(), this->chs.begin() + this->nchan);
 
-    for (qint32 k = 0; k < this->nchan; ++k)
-        chsToWrite << this->chs[k];
-
-    fiff_int_t nchanToWrite = chsToWrite.size();
+    fiff_int_t nchanToWrite = static_cast<int>(chsToWrite.size());
 
     //
     // write the essentials
@@ -398,7 +397,7 @@ void FiffInfo::writeToStream(FiffStream& stream) const
     //
     //    Blocks from the original -> skip this
     //
-    //        QList<fiff_int_t> blocks;
+    //        std::vector<fiff_int_t> blocks;
     //        blocks << FIFFB_SUBJECT << FIFFB_HPI_MEAS << FIFFB_HPI_RESULT << FIFFB_ISOTRAK << FIFFB_PROCESSING_HISTORY;
     bool have_hpi_result = false;
     bool have_isotrak = false;

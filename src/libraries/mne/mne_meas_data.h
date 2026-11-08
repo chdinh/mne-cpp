@@ -181,7 +181,7 @@ public:
     QString filename;                                    /**< Path to the source FIFF file. */
     FIFFLIB::FiffId meas_id;                             /**< Measurement block ID from the FIFF file. */
     FIFFLIB::FiffTime meas_date;                         /**< Measurement date / time stamp. */
-    QList<FIFFLIB::FiffChInfo> chs;                      /**< Channel information list. */
+    std::vector<FIFFLIB::FiffChInfo> chs;                /**< Channel information list. */
     std::unique_ptr<FIFFLIB::FiffCoordTrans> meg_head_t; /**< MEG device ↔ head coordinate transform. */
     std::unique_ptr<FIFFLIB::FiffCoordTrans> mri_head_t; /**< MRI ↔ head coordinate transform. */
     float sfreq;                                         /**< Sampling frequency (Hz). */

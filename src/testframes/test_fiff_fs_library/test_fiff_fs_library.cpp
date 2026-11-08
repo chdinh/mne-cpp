@@ -378,8 +378,9 @@ void TestFiffFsLibrary::fiff_evokedSetGrandAverage()
 
     FiffEvokedSet set2(avePath().toStdString());
 
-    QList<FiffEvokedSet> sets;
-    sets << set1 << set2;
+    std::vector<FiffEvokedSet> sets;
+    sets.push_back(set1);
+    sets.push_back(set2);
 
     FiffEvokedSet grand = FiffEvokedSet::computeGrandAverage(sets);
     QVERIFY(grand.evoked.size() > 0);
@@ -398,10 +399,10 @@ void TestFiffFsLibrary::fiff_evokedSetCompensate()
     QVERIFY(evokedSet.evoked.size() > 0);
 
     // Neuromag data carry no CTF compensation: nothing to change, data untouched
-    const MatrixXd before = evokedSet.evoked.first().data;
+    const MatrixXd before = evokedSet.evoked.front().data;
     QVERIFY(!evokedSet.compensate_to(0));
     QVERIFY(!evokedSet.compensate_to(3));
-    QCOMPARE(evokedSet.evoked.first().data, before);
+    QCOMPARE(evokedSet.evoked.front().data, before);
 }
 
 //=============================================================================================================
@@ -936,9 +937,9 @@ void TestFiffFsLibrary::fiffCov_computeGrandAverage()
         QSKIP("No test data");
     FiffCov cov(covPath().toStdString());
     QVERIFY(!cov.empty());
-    QList<FiffCov> covList;
-    covList.append(cov);
-    covList.append(cov);
+    std::vector<FiffCov> covList;
+    covList.push_back(cov);
+    covList.push_back(cov);
     FiffCov grandAvg = FiffCov::compute_grand_average(covList);
     QVERIFY(!grandAvg.empty());
     QCOMPARE(grandAvg.dim, cov.dim);
@@ -1137,7 +1138,7 @@ void TestFiffFsLibrary::fiffInfo_writeAndRead()
     QVERIFY(info.nchan > 0);
     QVERIFY(info.sfreq > 0);
     QVERIFY(static_cast<int>(info.ch_names.size()) == info.nchan);
-    QVERIFY(info.chs.size() == info.nchan);
+    QVERIFY(std::ssize(info.chs) == info.nchan);
 }
 
 //=============================================================================================================
@@ -1294,7 +1295,7 @@ void TestFiffFsLibrary::fiffStream_writeProj()
     QBuffer buffer;
     buffer.open(QIODevice::ReadWrite);
     auto stream = FiffStream::start_file(buffer);
-    QList<FiffProj> projs;
+    std::vector<FiffProj> projs;
     FiffProj proj;
     proj.kind = 1;
     proj.active = true;
@@ -1308,7 +1309,7 @@ void TestFiffFsLibrary::fiffStream_writeProj()
     projData->col_names.push_back("CH3");
     projData->data = MatrixXd::Ones(1, 3) / std::sqrt(3.0);
     proj.data = projData;
-    projs.append(proj);
+    projs.push_back(proj);
     fiff_long_t pos = stream->write_proj(projs);
     QVERIFY(pos >= 0);
     stream->end_file();
@@ -2037,3 +2038,5 @@ void TestFiffFsLibrary::fs_surfaceSet_readAndIndex()
 QTEST_GUILESS_MAIN(TestFiffFsLibrary)
 
 #include "test_fiff_fs_library.moc"
+
+#include <vector>

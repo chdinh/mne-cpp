@@ -22,6 +22,8 @@
 
 #include "mne_forward_solution.h"
 
+#include <vector>
+
 #include <utils/string_utils.h>
 
 #include <fiff/fiff_coord_trans.h>
@@ -166,7 +168,7 @@ Expected<void> MNEForwardSolution::write(const std::filesystem::path& path) cons
     //   Classify channels into MEG and EEG index sets
     //
     std::vector<int> megIdx, eegIdx;
-    for (int k = 0; k < info.chs.size(); ++k) {
+    for (int k = 0; k < std::ssize(info.chs); ++k) {
         fiff_int_t kind = info.chs[k].kind;
         if (kind == FIFFV_MEG_CH || kind == FIFFV_REF_MEG_CH)
             megIdx.push_back(k);
@@ -224,12 +226,13 @@ Expected<void> MNEForwardSolution::write(const std::filesystem::path& path) cons
         t_pStream->write_int(FIFF_NCHAN, &totalChan);
 
         //  Write channel infos with sequential scanNo
-        QList<FiffChInfo> allChs;
+        std::vector<FiffChInfo> allChs;
+        allChs.reserve(static_cast<std::size_t>(nmeg) + static_cast<std::size_t>(neeg));
         for (int k = 0; k < nmeg; ++k)
-            allChs.append(info.chs[megIdx[k]]);
+            allChs.push_back(info.chs[megIdx[k]]);
         for (int k = 0; k < neeg; ++k)
-            allChs.append(info.chs[eegIdx[k]]);
-        for (int p = 0; p < allChs.size(); ++p) {
+            allChs.push_back(info.chs[eegIdx[k]]);
+        for (int p = 0; p < std::ssize(allChs); ++p) {
             allChs[p].scanNo = p + 1;
             t_pStream->write_ch_info(allChs[p]);
         }
@@ -569,11 +572,11 @@ MNEForwardSolution MNEForwardSolution::cluster_forward_solution(const FsAnnotati
                 for (qint32 k = 0; k < clusterVertnos.size(); ++k)
                     clusterVertnos(k) = this->src[h].vertno[clusterIdcs(k)];
 
-                p_fwdOut.src.hemisphereAt(h)->cluster_info.clusterVertnos.append(clusterVertnos);
-                p_fwdOut.src.hemisphereAt(h)->cluster_info.clusterSource_rr.append(clusterSource_rr);
-                p_fwdOut.src.hemisphereAt(h)->cluster_info.clusterDistances.append(clusterDistance);
-                p_fwdOut.src.hemisphereAt(h)->cluster_info.clusterLabelIds.append(label_ids[itOut->iLabelIdxOut]);
-                p_fwdOut.src.hemisphereAt(h)->cluster_info.clusterLabelNames.append(t_CurrentColorTable.getNames()[itOut->iLabelIdxOut]);
+                p_fwdOut.src.hemisphereAt(h)->cluster_info.clusterVertnos.push_back(clusterVertnos);
+                p_fwdOut.src.hemisphereAt(h)->cluster_info.clusterSource_rr.push_back(clusterSource_rr);
+                p_fwdOut.src.hemisphereAt(h)->cluster_info.clusterDistances.push_back(clusterDistance);
+                p_fwdOut.src.hemisphereAt(h)->cluster_info.clusterLabelIds.push_back(label_ids[itOut->iLabelIdxOut]);
+                p_fwdOut.src.hemisphereAt(h)->cluster_info.clusterLabelNames.push_back(t_CurrentColorTable.getNames()[itOut->iLabelIdxOut]);
             }
 
             //
@@ -600,8 +603,8 @@ MNEForwardSolution MNEForwardSolution::cluster_forward_solution(const FsAnnotati
                     // Take the closest coordinates
                     qint32 sel_idx = itIn->idcs[j_min];
 
-                    p_fwdOut.src.hemisphereAt(h)->cluster_info.centroidVertno.append(this->src[h].vertno[sel_idx]);
-                    p_fwdOut.src.hemisphereAt(h)->cluster_info.centroidSource_rr.append(this->src[h].rr.row(this->src[h].vertno[sel_idx]));
+                    p_fwdOut.src.hemisphereAt(h)->cluster_info.centroidVertno.push_back(this->src[h].vertno[sel_idx]);
+                    p_fwdOut.src.hemisphereAt(h)->cluster_info.centroidSource_rr.push_back(this->src[h].rr.row(this->src[h].vertno[sel_idx]));
                     // Option 2 label ID
                     p_fwdOut.src[h].vertno[count] = p_fwdOut.src.hemisphereAt(h)->cluster_info.clusterLabelIds[count];
 
@@ -635,12 +638,12 @@ MNEForwardSolution MNEForwardSolution::cluster_forward_solution(const FsAnnotati
     else
         p_D = MatrixXd::Zero(this->sol->data.cols(), totalNumOfClust * 3);
 
-    QList<VectorXi> t_vertnos = this->src.get_vertno();
+    std::vector<VectorXi> t_vertnos = this->src.get_vertno();
 
     qint32 currentCluster = 0;
     for (qint32 h = 0; h < 2; ++h) {
         int hemiOffset = h == 0 ? 0 : t_vertnos[0].size();
-        for (qint32 i = 0; i < p_fwdOut.src.hemisphereAt(h)->cluster_info.clusterVertnos.size(); ++i) {
+        for (qint32 i = 0; i < std::ssize(p_fwdOut.src.hemisphereAt(h)->cluster_info.clusterVertnos); ++i) {
             VectorXi idx_sel;
             Linalg::intersect(t_vertnos[h], p_fwdOut.src.hemisphereAt(h)->cluster_info.clusterVertnos[i], idx_sel);
 
@@ -899,22 +902,24 @@ MNEForwardSolution MNEForwardSolution::pick_channels(const StringList& include,
     fwd.sol->nrow = nuse;
 
     StringList ch_names;
+    ch_names.reserve(nuse);
     for (qint32 i = 0; i < sel.cols(); ++i)
         ch_names.push_back(fwd.sol->row_names[sel(i)]);
     fwd.nchan = nuse;
-    fwd.sol->row_names = ch_names;
 
-    QList<FiffChInfo> chs;
+    std::vector<FiffChInfo> chs;
+    chs.reserve(nuse);
     for (qint32 i = 0; i < sel.cols(); ++i)
-        chs.append(fwd.info.chs[sel(i)]);
-    fwd.info.chs = chs;
+        chs.push_back(fwd.info.chs[sel(i)]);
+    fwd.info.chs = std::move(chs);
     fwd.info.nchan = nuse;
 
     StringList bads;
-    for (qint32 i = 0; i < static_cast<int>(fwd.info.bads.size()); ++i)
-        if (UTILSLIB::contains(ch_names, fwd.info.bads[i]))
-            bads.push_back(fwd.info.bads[i]);
-    fwd.info.bads = bads;
+    for (const std::string& bad : fwd.info.bads)
+        if (UTILSLIB::contains(ch_names, bad))
+            bads.push_back(bad);
+    fwd.info.bads = std::move(bads);
+    fwd.sol->row_names = std::move(ch_names);
 
     if (!fwd.sol_grad->empty()) {
         newData.resize(nuse, fwd.sol_grad->data.cols());
@@ -933,7 +938,7 @@ MNEForwardSolution MNEForwardSolution::pick_channels(const StringList& include,
 
 //=============================================================================================================
 
-MNEForwardSolution MNEForwardSolution::pick_regions(const QList<FsLabel>& p_qListLabels) const
+MNEForwardSolution MNEForwardSolution::pick_regions(const std::vector<FsLabel>& p_qListLabels) const
 {
     VectorXi selVertices;
 
@@ -1002,11 +1007,11 @@ void MNEForwardSolution::prepare_forward(const FiffInfo& p_info,
                                          qint32& p_outNumNonZero) const
 {
     StringList fwd_ch_names, ch_names;
-    for (qint32 i = 0; i < this->info.chs.size(); ++i)
+    for (qint32 i = 0; i < std::ssize(this->info.chs); ++i)
         fwd_ch_names.push_back(this->info.chs[i].ch_name);
 
     ch_names.clear();
-    for (qint32 i = 0; i < p_info.chs.size(); ++i)
+    for (qint32 i = 0; i < std::ssize(p_info.chs); ++i)
         if (!UTILSLIB::contains(p_info.bads, p_info.chs[i].ch_name) && !UTILSLIB::contains(p_noise_cov.bads, p_info.chs[i].ch_name) && UTILSLIB::contains(p_noise_cov.names, p_info.chs[i].ch_name) && UTILSLIB::contains(fwd_ch_names, p_info.chs[i].ch_name))
             ch_names.push_back(p_info.chs[i].ch_name);
 
@@ -1416,7 +1421,7 @@ bool MNEForwardSolution::read_one(FiffStream& stream,
 void MNEForwardSolution::restrict_gain_matrix(MatrixXd& G, const FiffInfo& info)
 {
     // Figure out which ones have been used
-    if (info.chs.size() != G.rows()) {
+    if (std::ssize(info.chs) != G.rows()) {
         qWarning("Error G.rows() and length of info.chs do not match: %lld != %lld", static_cast<long long>(G.rows()), static_cast<long long>(info.chs.size()));
         return;
     }
@@ -1564,11 +1569,11 @@ bool MNEForwardSolution::isClustered() const
 
 //=============================================================================================================
 
-MatrixX3f MNEForwardSolution::getSourcePositionsByLabel(const QList<FsLabel>& lPickedLabels, const FsSurfaceSet& tSurfSetInflated)
+MatrixX3f MNEForwardSolution::getSourcePositionsByLabel(const std::vector<FsLabel>& lPickedLabels, const FsSurfaceSet& tSurfSetInflated)
 {
     MatrixX3f matSourceVertLeft, matSourceVertRight, matSourcePositions;
 
-    if (lPickedLabels.isEmpty()) {
+    if (lPickedLabels.empty()) {
         qWarning() << "MNEForwardSolution::getSourcePositionsByLabel - picked label list is empty. Returning.";
         return matSourcePositions;
     }
@@ -1580,7 +1585,7 @@ MatrixX3f MNEForwardSolution::getSourcePositionsByLabel(const QList<FsLabel>& lP
 
     if (isClustered()) {
         for (int j = 0; j < this->src[0].vertno.rows(); ++j) {
-            for (int k = 0; k < lPickedLabels.size(); k++) {
+            for (int k = 0; k < std::ssize(lPickedLabels); k++) {
                 if (this->src[0].vertno(j) == lPickedLabels.at(k).label_id) {
                     matSourceVertLeft.conservativeResize(matSourceVertLeft.rows() + 1, 3);
                     matSourceVertLeft.row(matSourceVertLeft.rows() - 1) = tSurfSetInflated[0].rr().row(this->src.hemisphereAt(0)->cluster_info.centroidVertno.at(j)) - tSurfSetInflated[0].offset().transpose();
@@ -1590,7 +1595,7 @@ MatrixX3f MNEForwardSolution::getSourcePositionsByLabel(const QList<FsLabel>& lP
         }
 
         for (int j = 0; j < this->src[1].vertno.rows(); ++j) {
-            for (int k = 0; k < lPickedLabels.size(); k++) {
+            for (int k = 0; k < std::ssize(lPickedLabels); k++) {
                 if (this->src[1].vertno(j) == lPickedLabels.at(k).label_id) {
                     matSourceVertRight.conservativeResize(matSourceVertRight.rows() + 1, 3);
                     matSourceVertRight.row(matSourceVertRight.rows() - 1) = tSurfSetInflated[1].rr().row(this->src.hemisphereAt(1)->cluster_info.centroidVertno.at(j)) - tSurfSetInflated[1].offset().transpose();
@@ -1600,7 +1605,7 @@ MatrixX3f MNEForwardSolution::getSourcePositionsByLabel(const QList<FsLabel>& lP
         }
     } else {
         for (int j = 0; j < this->src[0].vertno.rows(); ++j) {
-            for (int k = 0; k < lPickedLabels.size(); k++) {
+            for (int k = 0; k < std::ssize(lPickedLabels); k++) {
                 for (int l = 0; l < lPickedLabels.at(k).vertices.rows(); l++) {
                     if (this->src[0].vertno(j) == lPickedLabels.at(k).vertices(l) && lPickedLabels.at(k).hemi == 0) {
                         matSourceVertLeft.conservativeResize(matSourceVertLeft.rows() + 1, 3);
@@ -1612,7 +1617,7 @@ MatrixX3f MNEForwardSolution::getSourcePositionsByLabel(const QList<FsLabel>& lP
         }
 
         for (int j = 0; j < this->src[1].vertno.rows(); ++j) {
-            for (int k = 0; k < lPickedLabels.size(); k++) {
+            for (int k = 0; k < std::ssize(lPickedLabels); k++) {
                 for (int l = 0; l < lPickedLabels.at(k).vertices.rows(); l++) {
                     if (this->src[1].vertno(j) == lPickedLabels.at(k).vertices(l) && lPickedLabels.at(k).hemi == 1) {
                         matSourceVertRight.conservativeResize(matSourceVertRight.rows() + 1, 3);

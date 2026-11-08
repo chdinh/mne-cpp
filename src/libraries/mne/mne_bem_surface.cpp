@@ -25,6 +25,8 @@
 
 #include "mne_bem_surface.h"
 
+#include <vector>
+
 //=============================================================================================================
 // USED NAMESPACES
 //=============================================================================================================
@@ -266,11 +268,11 @@ static double edgeLenSq(const Eigen::MatrixX3d& rr, int v0, int v1)
 
 //=============================================================================================================
 
-QList<MNEBemSurface> MNEBemSurface::makeScalpSurfaces(
+std::vector<MNEBemSurface> MNEBemSurface::makeScalpSurfaces(
     const MNEBemSurface& outerSkin,
-    const QList<int>& targetVertices)
+    const std::vector<int>& targetVertices)
 {
-    QList<MNEBemSurface> results;
+    std::vector<MNEBemSurface> results;
 
     if (outerSkin.np <= 0 || outerSkin.ntri <= 0) {
         qWarning("MNEBemSurface::makeScalpSurfaces - Input surface is empty.");
@@ -280,7 +282,7 @@ QList<MNEBemSurface> MNEBemSurface::makeScalpSurfaces(
     for (int target : targetVertices) {
         if (target >= outerSkin.np) {
             // No decimation needed, just copy
-            results.append(MNEBemSurface(outerSkin));
+            results.push_back(MNEBemSurface(outerSkin));
             continue;
         }
 
@@ -415,7 +417,7 @@ QList<MNEBemSurface> MNEBemSurface::makeScalpSurfaces(
         // Recompute triangle data
         decimated.addTriangleData();
 
-        results.append(decimated);
+        results.push_back(decimated);
     }
 
     return results;

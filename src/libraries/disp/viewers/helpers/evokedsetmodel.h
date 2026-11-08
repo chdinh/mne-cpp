@@ -29,6 +29,8 @@
 
 #include "../../disp_global.h"
 
+#include <vector>
+
 #include <dsp/filterkernel.h>
 #include <fiff/fiff_types.h>
 
@@ -363,7 +365,7 @@ public:
      *
      * @param[in] projs  SSP projectors to store in the evoked set info and build the projection matrix from.
      */
-    void updateProjection(const QList<FIFFLIB::FiffProj>& projs);
+    void updateProjection(const std::vector<FIFFLIB::FiffProj>& projs);
 
     //=========================================================================================================
     /**

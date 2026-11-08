@@ -346,7 +346,7 @@ static bool writeLabelOutput(const FsLabel& label,
 static bool writeDipFile(const QString& fileName,
                          const MatrixXd& stcData,
                          const MNESourceSpaces& src,
-                         const QList<VectorXi>& vertno,
+                         const std::vector<VectorXi>& vertno,
                          int timeIdx,
                          double time_ms)
 {
@@ -364,7 +364,7 @@ static bool writeDipFile(const QString& fileName,
     out << "# vertex x(m) y(m) z(m) nx ny nz amplitude\n";
 
     int row = 0;
-    for (int h = 0; h < vertno.size() && h < src.size(); ++h) {
+    for (int h = 0; h < std::ssize(vertno) && h < std::ssize(src); ++h) {
         const auto& hemi = src[h];
         for (int v = 0; v < vertno[h].size(); ++v, ++row) {
             int vno = vertno[h](v);
@@ -1079,7 +1079,7 @@ int main(int argc, char* argv[])
     }
 
     // Split source estimate into hemispheres and write
-    QList<VectorXi> vertno = invOp.src.get_vertno();
+    std::vector<VectorXi> vertno = invOp.src.get_vertno();
 
     if (vertno.size() >= 2) {
         int nLh = vertno[0].size();

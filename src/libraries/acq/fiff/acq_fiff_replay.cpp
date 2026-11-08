@@ -191,7 +191,7 @@ AcqExpected<int> stimChannel(const FiffInfo& info, const std::string& name)
         }
     }
     for (int k = 0; k < info.nchan; ++k) {
-        if (info.chs[k].kind == FIFFV_STIM_CH) {
+        if (info.chs[static_cast<std::size_t>(k)].kind == FIFFV_STIM_CH) {
             return k;
         }
     }
@@ -397,8 +397,8 @@ private:
     /** Collects the trigger events of the whole file. */
     AcqError scanEvents(std::size_t channel)
     {
-        const double scale = static_cast<double>(m_raw.info.chs[static_cast<int>(channel)].range) *
-            static_cast<double>(m_raw.info.chs[static_cast<int>(channel)].cal);
+        const FiffChInfo& ch = m_raw.info.chs[channel];
+        const double scale = static_cast<double>(ch.range) * static_cast<double>(ch.cal);
         std::int64_t previous = 0;
         std::uint64_t sample = 0;
         for (std::size_t index = 0; index < m_starts.size(); ++index) {

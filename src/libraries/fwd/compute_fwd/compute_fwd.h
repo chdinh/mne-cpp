@@ -169,10 +169,10 @@ private:
     FwdBemModel::UPtr m_bemModel;                       /**< BEM model. */
     bool m_bInitialized = false;                        /**< Whether initFwd completed. */
 
-    QList<FIFFLIB::FiffChInfo> m_listMegChs;  /**< MEG channel information. */
-    QList<FIFFLIB::FiffChInfo> m_listEegChs;  /**< EEG channel information. */
-    QList<FIFFLIB::FiffChInfo> m_listCompChs; /**< Compensator channel list. */
-    int m_iNChan = 0;                         /**< Number of channels. */
+    std::vector<FIFFLIB::FiffChInfo> m_listMegChs;  /**< MEG channel information. */
+    std::vector<FIFFLIB::FiffChInfo> m_listEegChs;  /**< EEG channel information. */
+    std::vector<FIFFLIB::FiffChInfo> m_listCompChs; /**< Compensator channel list. */
+    int m_iNChan = 0;                               /**< Number of channels. */
 
     FIFFLIB::FiffId m_mri_id;             /**< MRI file ID. */
     FIFFLIB::FiffId m_meas_id;            /**< Measurement ID. */

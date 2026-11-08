@@ -51,7 +51,7 @@ static FiffInfo::SPtr createSyntheticFiffInfo(int nChannels, float sfreq)
         ch.cal = 1.0;
         ch.range = 1.0;
         ch.chpos.coil_type = FIFFV_COIL_VV_MAG_T3;
-        info->chs.append(ch);
+        info->chs.push_back(ch);
         info->ch_names.push_back(ch.ch_name);
     }
     // Add one STI channel as trigger
@@ -61,10 +61,10 @@ static FiffInfo::SPtr createSyntheticFiffInfo(int nChannels, float sfreq)
     sti.unit = FIFF_UNIT_NONE;
     sti.cal = 1.0;
     sti.range = 1.0;
-    info->chs.append(sti);
+    info->chs.push_back(sti);
     info->ch_names.push_back(sti.ch_name);
 
-    info->nchan = info->chs.size();
+    info->nchan = static_cast<int>(info->chs.size());
     return info;
 }
 
@@ -117,17 +117,17 @@ static MatrixXi deriveStimEvents(const FiffRawData& raw)
     return events;
 }
 
-static QList<int> uniqueEventCodes(const MatrixXi& events, int maxCodes = -1)
+static std::vector<int> uniqueEventCodes(const MatrixXi& events, int maxCodes = -1)
 {
-    QList<int> codes;
+    std::vector<int> codes;
     for (int row = 0; row < events.rows(); ++row) {
         const int code = events(row, 2);
-        if (code == 0 || codes.contains(code)) {
+        if (code == 0 || std::ranges::contains(codes, code)) {
             continue;
         }
 
-        codes.append(code);
-        if (maxCodes > 0 && codes.size() >= maxCodes) {
+        codes.push_back(code);
+        if (maxCodes > 0 && std::ssize(codes) >= maxCodes) {
             break;
         }
     }
@@ -191,7 +191,7 @@ private slots:
         }
 
         QCOMPARE(result.evoked.size(), 1);
-        const FiffEvoked& evoked = result.evoked.first();
+        const FiffEvoked& evoked = result.evoked.front();
         QCOMPARE(evoked.nave, 4);
         // Sample i is at (i - pre) / sfreq, like mne.Epochs times
         QCOMPARE(evoked.times.size(), 100);
@@ -223,7 +223,7 @@ private slots:
             avg.append(block);
         }
         QTRY_COMPARE_WITH_TIMEOUT(results.size(), 3, 5000);
-        const FiffEvoked& evoked = results.last().evoked.first();
+        const FiffEvoked& evoked = results.last().evoked.front();
         QCOMPARE(evoked.data.cols(), 50);
         QCOMPARE(evoked.nave, 2);
         QVERIFY(std::fabs(evoked.data(0, 20) - 2.5) < 1e-12);
@@ -235,8 +235,8 @@ private slots:
         block(1, 50) = 1.0;
         avg.append(block);
         QTRY_COMPARE_WITH_TIMEOUT(results.size(), 4, 5000);
-        QCOMPARE(results.last().evoked.first().nave, 1);
-        QVERIFY(std::fabs(results.last().evoked.first().data(0, 20) - 7.0) < 1e-12);
+        QCOMPARE(results.last().evoked.front().nave, 1);
+        QVERIFY(std::fabs(results.last().evoked.front().data(0, 20) - 7.0) < 1e-12);
         avg.stop();
     }
 
@@ -565,14 +565,14 @@ private slots:
         const MatrixXi events = deriveStimEvents(raw);
         QVERIFY(events.rows() > 0);
 
-        const QList<int> codes = uniqueEventCodes(events, 1);
-        QVERIFY(!codes.isEmpty());
+        const std::vector<int> codes = uniqueEventCodes(events, 1);
+        QVERIFY(!codes.empty());
 
         const FiffEvoked evoked = MNEEpochDataList::computeAverage(raw,
                                                                    events,
                                                                    -0.1f,
                                                                    0.3f,
-                                                                   codes.first(),
+                                                                   codes.front(),
                                                                    true,
                                                                    -0.1f,
                                                                    0.0f,
@@ -595,7 +595,7 @@ private slots:
         // Filtered epochs are the epochs of the filtered recording, sampled like mne.Epochs
         const RowVectorXi picks = RowVectorXi::LinSpaced(raw.info.nchan, 0, raw.info.nchan - 1);
         const FilterKernel kernel("data_bp", 2, 256, 10.0 / raw.info.sfreq, 30.0 / raw.info.sfreq, 1.0 / raw.info.sfreq, raw.info.sfreq, 0);
-        const FiffEvoked filtered = RTPROCESSINGLIB::computeFilteredAverage(raw, events, -0.1f, 0.3f, codes.first(), true, -0.1f, 0.0f, {}, kernel);
+        const FiffEvoked filtered = RTPROCESSINGLIB::computeFilteredAverage(raw, events, -0.1f, 0.3f, codes.front(), true, -0.1f, 0.0f, {}, kernel);
         MatrixXd all, allTimes;
         QVERIFY(raw.read_raw_segment(all, allTimes, raw.first_samp, raw.last_samp, picks));
         const MatrixXd allFiltered = RTPROCESSINGLIB::filterData(all, kernel);
@@ -604,7 +604,7 @@ private slots:
         int nave = 0;
         for (int e = 0; e < events.rows(); ++e) {
             const int start = events(e, 0) + from - raw.first_samp;
-            if (events(e, 1) != 0 || events(e, 2) != codes.first() || start < delay || start + (to - from) + delay > raw.last_samp - raw.first_samp)
+            if (events(e, 1) != 0 || events(e, 2) != codes.front() || start < delay || start + (to - from) + delay > raw.last_samp - raw.first_samp)
                 continue;
             MatrixXd epoch = allFiltered.middleCols(start, to - from + 1);
             epoch.colwise() -= epoch.leftCols(1 - from).rowwise().mean();
@@ -637,14 +637,14 @@ private slots:
         const MatrixXi events = deriveStimEvents(raw);
         QVERIFY(events.rows() > 0);
 
-        const QList<int> codes = uniqueEventCodes(events, 1);
-        QVERIFY(!codes.isEmpty());
+        const std::vector<int> codes = uniqueEventCodes(events, 1);
+        QVERIFY(!codes.empty());
 
         MNEEpochDataList unfilteredEpochs = MNEEpochDataList::readEpochs(raw,
                                                                          events,
                                                                          -0.1f,
                                                                          0.3f,
-                                                                         codes.first(),
+                                                                         codes.front(),
                                                                          {});
         QVERIFY(!unfilteredEpochs.isEmpty());
 
@@ -652,7 +652,7 @@ private slots:
                                                                        events,
                                                                        -0.1f,
                                                                        0.3f,
-                                                                       codes.first(),
+                                                                       codes.front(),
                                                                        {});
         QVERIFY(!filteredEpochs.isEmpty());
 
@@ -714,7 +714,7 @@ private slots:
         const MatrixXi events = deriveStimEvents(raw);
         QVERIFY(events.rows() > 0);
 
-        const QList<int> codes = uniqueEventCodes(events, 4);
+        const std::vector<int> codes = uniqueEventCodes(events, 4);
         QVERIFY(codes.size() >= 2);
 
         QStringList comments;
@@ -733,7 +733,7 @@ private slots:
                                                                             false);
 
         QCOMPARE(evokedSet.evoked.size(), codes.size());
-        for (int index = 0; index < evokedSet.evoked.size(); ++index) {
+        for (int index = 0; index < std::ssize(evokedSet.evoked); ++index) {
             QVERIFY(evokedSet.evoked.at(index).data.size() > 0);
             QCOMPARE(evokedSet.evoked.at(index).comment, comments.at(index));
             QVERIFY(evokedSet.evoked.at(index).nave > 0);
@@ -755,8 +755,8 @@ private slots:
         const MatrixXi events = deriveStimEvents(raw);
         QVERIFY(events.rows() > 0);
 
-        const QList<int> codes = uniqueEventCodes(events, 4);
-        QVERIFY(!codes.isEmpty());
+        const std::vector<int> codes = uniqueEventCodes(events, 4);
+        QVERIFY(!codes.empty());
 
         const FiffCov cov = FiffCov::compute_from_epochs(raw,
                                                          events,

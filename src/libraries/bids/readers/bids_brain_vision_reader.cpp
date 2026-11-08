@@ -409,7 +409,7 @@ FIFFLIB::FiffInfo BrainVisionReader::getInfo() const
 
     for (const auto& ch : m_vChannels) {
         FiffChInfo fiffCh = ch.toFiffChInfo();
-        info.chs.append(fiffCh);
+        info.chs.push_back(fiffCh);
         info.ch_names.push_back(fiffCh.ch_name);
     }
 
@@ -551,7 +551,7 @@ FiffRawData BrainVisionReader::toFiffRawData() const
     raw.last_samp = static_cast<int>(m_lSampleCount) - 1;
 
     RowVectorXd cals(raw.info.nchan);
-    for (int i = 0; i < raw.info.chs.size(); ++i) {
+    for (int i = 0; i < std::ssize(raw.info.chs); ++i) {
         cals[i] = static_cast<double>(raw.info.chs[i].cal);
     }
     raw.cals = cals;

@@ -36,11 +36,11 @@ QSharedPointer<FiffInfo> makeSyntheticInfo()
         ch.cal = 1.0f;
         ch.chpos.coil_type = FIFFV_COIL_EEG;
         ch.chpos.r0 << 0.01f * (i + 1), 0.0f, 0.02f;
-        info->chs.append(ch);
+        info->chs.push_back(ch);
         info->ch_names.push_back(ch.ch_name);
     }
 
-    info->nchan = info->chs.size();
+    info->nchan = static_cast<int>(info->chs.size());
     return info;
 }
 

@@ -126,23 +126,23 @@ public:
     float eeg_std;     /**< Standard deviation for EEG if noise covariance is not specified. */
     bool diagnoise;    /**< Use only the diagonals of the noise-covariance matrix. */
 
-    QString measname;            /**< Data file. */
-    bool is_raw;                 /**< Is this a raw data file. */
-    QString badname;             /**< Bad channel list file. */
-    bool include_meg;            /**< Use MEG? */
-    bool include_eeg;            /**< Use EEG? */
-    float tmin;                  /**< Fit start time (s). */
-    float tmax;                  /**< Fit end time (s). */
-    float tstep;                 /**< Step between fits (s). */
-    float integ;                 /**< Integration time for each fit (s). */
-    float bmin;                  /**< Baseline start time (s). */
-    float bmax;                  /**< Baseline end time (s). */
-    bool do_baseline;            /**< Are both baseline limits set? */
-    int setno;                   /**< Which data set. */
-    bool verbose;                /**< Verbose output. */
-    MNELIB::MNEFilterDef filter; /**< Data filter definition. */
-    QStringList projnames;       /**< Projection file names. */
-    bool omit_data_proj;         /**< Omit the projection in the data file. */
+    QString measname;               /**< Data file. */
+    bool is_raw;                    /**< Is this a raw data file. */
+    QString badname;                /**< Bad channel list file. */
+    bool include_meg;               /**< Use MEG? */
+    bool include_eeg;               /**< Use EEG? */
+    float tmin;                     /**< Fit start time (s). */
+    float tmax;                     /**< Fit end time (s). */
+    float tstep;                    /**< Step between fits (s). */
+    float integ;                    /**< Integration time for each fit (s). */
+    float bmin;                     /**< Baseline start time (s). */
+    float bmax;                     /**< Baseline end time (s). */
+    bool do_baseline;               /**< Are both baseline limits set? */
+    int setno;                      /**< Which data set. */
+    bool verbose;                   /**< Verbose output. */
+    MNELIB::MNEFilterDef filter;    /**< Data filter definition. */
+    std::vector<QString> projnames; /**< Projection file names. */
+    bool omit_data_proj;            /**< Omit the projection in the data file. */
 
     QString eeg_model_file; /**< File of EEG sphere model specifications. */
     QString eeg_model_name; /**< Name of the EEG model to use. */

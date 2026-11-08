@@ -19,6 +19,8 @@
 
 #include "projectorsview.h"
 
+#include <vector>
+
 //=============================================================================================================
 // QT INCLUDES
 //=============================================================================================================
@@ -67,18 +69,18 @@ ProjectorsView::~ProjectorsView()
 
 //=============================================================================================================
 
-QList<FIFFLIB::FiffProj> ProjectorsView::getProjectors() const
+std::vector<FIFFLIB::FiffProj> ProjectorsView::getProjectors() const
 {
     return m_pProjs;
 }
 
 //=============================================================================================================
 
-void ProjectorsView::setProjectors(const QList<FIFFLIB::FiffProj>& projs)
+void ProjectorsView::setProjectors(const std::vector<FIFFLIB::FiffProj>& projs)
 {
     m_pProjs = projs;
 
-    for (int i = 0; i < m_pProjs.size(); ++i) {
+    for (int i = 0; i < std::ssize(m_pProjs); ++i) {
         if (!m_mapProjActive.contains(m_pProjs.at(i).desc)) {
             m_mapProjActive.insert(m_pProjs.at(i).desc, m_pProjs.at(i).active);
         } else {
@@ -93,7 +95,7 @@ void ProjectorsView::setProjectors(const QList<FIFFLIB::FiffProj>& projs)
 
 void ProjectorsView::redrawGUI()
 {
-    if (m_pProjs.isEmpty()) {
+    if (m_pProjs.empty()) {
         return;
     }
 
@@ -106,7 +108,7 @@ void ProjectorsView::redrawGUI()
 
     qint32 i = 0;
 
-    for (; i < m_pProjs.size(); ++i) {
+    for (; i < std::ssize(m_pProjs); ++i) {
         QCheckBox* checkBox = new QCheckBox(m_pProjs.at(i).desc);
 
         if (m_pProjs.at(i).active == false) {
@@ -214,7 +216,7 @@ void ProjectorsView::onEnableDisableAllProj(bool status)
     }
 
     //Set all projection activation states to status
-    for (int i = 0; i < m_pProjs.size(); ++i) {
+    for (int i = 0; i < std::ssize(m_pProjs); ++i) {
         m_pProjs[i].active = status;
         m_mapProjActive[m_pProjs.at(i).desc] = status;
     }

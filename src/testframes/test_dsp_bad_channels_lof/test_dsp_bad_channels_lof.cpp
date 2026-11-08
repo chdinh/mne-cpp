@@ -74,7 +74,7 @@ private:
             ch.unit = 107;
             ch.unit_mul = 0;
             ch.coord_frame = 0;
-            info.chs.append(ch);
+            info.chs.push_back(ch);
             info.ch_names.push_back(ch.ch_name);
         }
 
@@ -205,7 +205,7 @@ private slots:
             ch.ch_name = (QString("MEG%1").arg(i + 1)).toStdString();
             ch.range = 1.0f;
             ch.cal = 1.0f;
-            info.chs.append(ch);
+            info.chs.push_back(ch);
             info.ch_names.push_back(ch.ch_name);
         }
         for (int i = 0; i < 3; ++i) {
@@ -216,7 +216,7 @@ private slots:
             ch.ch_name = (QString("EEG%1").arg(i + 1)).toStdString();
             ch.range = 1.0f;
             ch.cal = 1.0f;
-            info.chs.append(ch);
+            info.chs.push_back(ch);
             info.ch_names.push_back(ch.ch_name);
         }
 

@@ -234,7 +234,7 @@ bool MNEDescriptionParser::parseAverageFile(const QString& fileName, FIFFLIB::Av
                     qWarning() << "MNEDescriptionParser: illegal time range for" << currentCat.comment;
                     return false;
                 }
-                if (currentCat.events.isEmpty()) {
+                if (currentCat.events.empty()) {
                     qWarning() << "MNEDescriptionParser: no events for" << currentCat.comment;
                     return false;
                 }
@@ -246,7 +246,7 @@ bool MNEDescriptionParser::parseAverageFile(const QString& fileName, FIFFLIB::Av
                     currentCat.prevIgnore = currentCat.ignore;
                 if (!currentCat.nextIgnore)
                     currentCat.nextIgnore = currentCat.ignore;
-                desc.categories.append(currentCat);
+                desc.categories.push_back(currentCat);
                 currentCat = FIFFLIB::AverageCategory();
                 inCategory = false;
                 bminSet = bmaxSet = false;
@@ -422,7 +422,7 @@ bool MNEDescriptionParser::parseAverageFile(const QString& fileName, FIFFLIB::Av
                 return false;
             }
             if (inCategory)
-                currentCat.events.append(static_cast<unsigned int>(ival));
+                currentCat.events.push_back(static_cast<unsigned int>(ival));
             else {
                 qWarning() << "MNEDescriptionParser: misplaced event";
                 return false;
@@ -624,7 +624,7 @@ bool MNEDescriptionParser::parseAverageFile(const QString& fileName, FIFFLIB::Av
         qWarning() << "MNEDescriptionParser: unknown keyword" << word << "in" << fileName;
     }
 
-    if (desc.categories.isEmpty()) {
+    if (desc.categories.empty()) {
         qWarning() << "MNEDescriptionParser: no categories found in" << fileName;
         return false;
     }
@@ -682,7 +682,7 @@ bool MNEDescriptionParser::parseCovarianceFile(const QString& fileName, CovDescr
                     qWarning() << "MNEDescriptionParser: illegal baseline in def";
                     return false;
                 }
-                desc.defs.append(currentDef);
+                desc.defs.push_back(currentDef);
                 currentDef = CovDefinition();
                 inDef = false;
                 bminSet = bmaxSet = false;
@@ -839,7 +839,7 @@ bool MNEDescriptionParser::parseCovarianceFile(const QString& fileName, CovDescr
                 return false;
             }
             if (inDef)
-                currentDef.events.append(static_cast<unsigned int>(ival));
+                currentDef.events.push_back(static_cast<unsigned int>(ival));
             else {
                 qWarning() << "MNEDescriptionParser: misplaced event";
                 return false;

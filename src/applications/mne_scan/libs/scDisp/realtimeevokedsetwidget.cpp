@@ -162,9 +162,9 @@ void RealTimeEvokedSetWidget::update(SCMEASLIB::Measurement::SPtr pMeasurement)
 
         if (m_pRTESet->isInitialized()) {
             //Check if block size has changed, if yes update the filter
-            if (!m_pRTESet->getValue()->evoked.isEmpty()) {
-                if (m_iMaxFilterTapSize != m_pRTESet->getValue()->evoked.first().data.cols()) {
-                    m_iMaxFilterTapSize = m_pRTESet->getValue()->evoked.first().data.cols();
+            if (!m_pRTESet->getValue()->evoked.empty()) {
+                if (m_iMaxFilterTapSize != m_pRTESet->getValue()->evoked.front().data.cols()) {
+                    m_iMaxFilterTapSize = m_pRTESet->getValue()->evoked.front().data.cols();
 
                     emit windowSizeChanged(m_iMaxFilterTapSize);
                 }
@@ -186,8 +186,8 @@ void RealTimeEvokedSetWidget::initDisplayControllWidgets()
         QString t_sRTESName = m_pRTESet->getName();
 
         //Initialize leftover scalars to default values
-        if (!m_pRTESet->getValue()->evoked.isEmpty()) {
-            m_iMaxFilterTapSize = m_pRTESet->getValue()->evoked.first().data.cols();
+        if (!m_pRTESet->getValue()->evoked.empty()) {
+            m_iMaxFilterTapSize = m_pRTESet->getValue()->evoked.front().data.cols();
         } else {
             m_iMaxFilterTapSize = 0;
         }

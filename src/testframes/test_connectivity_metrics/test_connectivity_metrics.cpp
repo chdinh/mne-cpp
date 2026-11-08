@@ -103,7 +103,7 @@ private slots:
             FIFFLIB::FiffChInfo ch;
             ch.kind = kinds[k];
             ch.chpos.r0 = Vector3f(k + 1.0f, 2.0f * k, -1.0f);
-            info.chs << ch;
+            info.chs.push_back(ch);
         }
         settings.setNodePositions(info, RowVector3i(1, 0, 2));
         MatrixX3f expected(3, 3);

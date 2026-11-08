@@ -98,7 +98,7 @@ private slots:
     void sourceSpace_getVertno()
     {
         MNESourceSpaces ss;
-        QList<VectorXi> vertno = ss.get_vertno();
+        std::vector<VectorXi> vertno = ss.get_vertno();
         QCOMPARE(vertno.size(), 0);
     }
 
@@ -111,7 +111,7 @@ private slots:
 
         const MNESourceSpaces ss(srcPath.toStdU16String());
         QCOMPARE(ss.size(), 2);
-        QList<VectorXi> vertno = ss.get_vertno();
+        std::vector<VectorXi> vertno = ss.get_vertno();
         QCOMPARE(vertno.size(), 2);
         QVERIFY(vertno[0].size() > 0);
     }
@@ -265,7 +265,7 @@ private slots:
             ch.chpos.coil_type = FIFFV_COIL_VV_MAG_T3;
             ch.range = 1.0;
             ch.cal = 1.0;
-            info.chs.append(ch);
+            info.chs.push_back(ch);
             info.ch_names.push_back(ch.ch_name);
         }
         info.bads.clear();
@@ -340,7 +340,7 @@ private slots:
             QSKIP("Sample evoked file not found");
         }
         FiffEvokedSet es(avePath.toStdU16String());
-        if (es.evoked.isEmpty()) {
+        if (es.evoked.empty()) {
             QSKIP("Failed to read evoked set");
         }
 
@@ -363,8 +363,8 @@ private slots:
     void clusterInfo_basic()
     {
         MNEClusterInfo ci;
-        ci.clusterVertnos.append(VectorXi::LinSpaced(5, 0, 4));
-        ci.clusterVertnos.append(VectorXi::LinSpaced(3, 10, 12));
+        ci.clusterVertnos.push_back(VectorXi::LinSpaced(5, 0, 4));
+        ci.clusterVertnos.push_back(VectorXi::LinSpaced(3, 10, 12));
         QCOMPARE(ci.clusterVertnos.size(), 2);
 
         ci.clusterVertnos.clear();
@@ -486,7 +486,7 @@ private slots:
             ch.chpos.coil_type = FIFFV_COIL_VV_MAG_T3;
             ch.range = 1.0;
             ch.cal = 1.0;
-            info.chs.append(ch);
+            info.chs.push_back(ch);
             info.ch_names.push_back(ch.ch_name);
         }
 
@@ -976,7 +976,7 @@ private slots:
         // activate_projections activates the projectors and builds the operator
         QVERIFY(raw.activate_projections() > 0);
         QCOMPARE(raw.proj.rows(), static_cast<Eigen::Index>(raw.info.nchan));
-        for (int k = 0; k < raw.info.projs.size(); ++k) {
+        for (int k = 0; k < std::ssize(raw.info.projs); ++k) {
             QVERIFY(raw.info.projs[k].active);
         }
 
@@ -1214,9 +1214,9 @@ private slots:
 
         MNEForwardSolution fwd(fwdPath.toStdU16String());
 
-        QList<VectorXi> vertno = fwd.src.get_vertno();
+        std::vector<VectorXi> vertno = fwd.src.get_vertno();
         QCOMPARE(vertno.size(), fwd.src.size());
-        for (int i = 0; i < vertno.size(); ++i) {
+        for (int i = 0; i < std::ssize(vertno); ++i) {
             QVERIFY(vertno[i].size() > 0);
         }
     }
@@ -1338,9 +1338,9 @@ private slots:
         data.data = MatrixXd(1, 2);
         data.data << 1.0, 0.0;
 
-        QList<FiffProj> projs;
-        projs.append(FiffProj(FIFFV_PROJ_ITEM_FIELD, false, "P1", data));
-        projs.append(FiffProj(FIFFV_PROJ_ITEM_FIELD, false, "P2", data));
+        std::vector<FiffProj> projs;
+        projs.push_back(FiffProj(FIFFV_PROJ_ITEM_FIELD, false, "P1", data));
+        projs.push_back(FiffProj(FIFFV_PROJ_ITEM_FIELD, false, "P2", data));
 
         QVERIFY(!projs[0].active);
         QVERIFY(!projs[1].active);
@@ -1362,8 +1362,8 @@ private slots:
         data.data = MatrixXd(1, 3);
         data.data << 1.0, 0.0, 0.0;
 
-        QList<FiffProj> projs;
-        projs.append(FiffProj(FIFFV_PROJ_ITEM_FIELD, true, "TestProj", data));
+        std::vector<FiffProj> projs;
+        projs.push_back(FiffProj(FIFFV_PROJ_ITEM_FIELD, true, "TestProj", data));
 
         StringList ch_names{"ch1", "ch2", "ch3"};
         MatrixXd proj;
@@ -2135,3 +2135,5 @@ private slots:
 
 QTEST_GUILESS_MAIN(TestMneDataTypes)
 #include "test_mne_data_types.moc"
+
+#include <vector>

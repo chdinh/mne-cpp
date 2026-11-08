@@ -216,7 +216,7 @@ void FrequencySpectrumModel::selectRows(const QList<qint32>& selection)
 
     qint32 count = 0;
     for (qint32 i = 0; i < selection.size(); ++i) {
-        if (selection[i] < m_pFiffInfo->chs.size()) {
+        if (selection[i] < std::ssize(m_pFiffInfo->chs)) {
             m_qMapIdxRowSelection.insert(count, selection[i]);
             ++count;
         }
@@ -235,7 +235,7 @@ void FrequencySpectrumModel::resetSelection()
 
     m_qMapIdxRowSelection.clear();
 
-    for (qint32 i = 0; i < m_pFiffInfo->chs.size(); ++i)
+    for (qint32 i = 0; i < std::ssize(m_pFiffInfo->chs); ++i)
         m_qMapIdxRowSelection.insert(i, i);
 
     endResetModel();

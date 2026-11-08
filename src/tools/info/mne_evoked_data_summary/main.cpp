@@ -132,7 +132,7 @@ int main(int argc, char* argv[])
     qInfo("File: %s", qPrintable(measFile));
     qInfo("Number of evoked data sets: %lld\n", static_cast<long long>(evokedSet.evoked.size()));
 
-    for (int i = 0; i < evokedSet.evoked.size(); ++i) {
+    for (int i = 0; i < std::ssize(evokedSet.evoked); ++i) {
         const FiffEvoked& evoked = evokedSet.evoked[i];
 
         qInfo("--- Set %d ---", i + 1);
@@ -147,7 +147,7 @@ int main(int argc, char* argv[])
 
         // Count channel types
         QMap<QString, int> typeCounts;
-        for (int c = 0; c < evoked.info.chs.size(); ++c) {
+        for (int c = 0; c < std::ssize(evoked.info.chs); ++c) {
             const FiffChInfo& ch = evoked.info.chs[c];
             QString typeName = coilTypeName(ch.kind, ch.chpos.coil_type);
             typeCounts[typeName]++;

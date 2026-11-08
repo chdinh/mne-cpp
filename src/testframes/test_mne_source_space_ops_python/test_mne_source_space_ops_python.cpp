@@ -395,7 +395,7 @@ void TestMneSourceSpaceOpsPython::gradeToVertices_matchesPython()
     // A surface without trailing tags ends cleanly; reaching EOF must not be reported as an error.
     s_criticals = 0;
     const QtMessageHandler previous = qInstallMessageHandler(countCriticals);
-    const QList<VectorXi> v = MNESourceSpace::gradeToVertices(subjectsDir, "large", 2);
+    const std::vector<VectorXi> v = MNESourceSpace::gradeToVertices(subjectsDir, "large", 2);
     qInstallMessageHandler(previous);
     QCOMPARE(s_criticals, 0);
     QCOMPARE(v.size(), 2);
@@ -404,7 +404,7 @@ void TestMneSourceSpaceOpsPython::gradeToVertices_matchesPython()
 
     // mne raises for grades that map two ico vertices onto one surface vertex (162 vertices, grade 2).
     QTest::ignoreMessage(QtWarningMsg, QRegularExpression("Cannot use icosahedral grade 2"));
-    QVERIFY(MNESourceSpace::gradeToVertices(subjectsDir, "small", 2).isEmpty());
+    QVERIFY(MNESourceSpace::gradeToVertices(subjectsDir, "small", 2).empty());
 }
 
 //=============================================================================================================

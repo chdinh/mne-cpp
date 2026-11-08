@@ -21,6 +21,8 @@
 
 #include "mne_epoch_data.h"
 
+#include <utility>
+
 #include <cmath>
 
 #include <math/numerics.h>
@@ -68,7 +70,7 @@ MNEEpochData::~MNEEpochData()
 
 //=============================================================================================================
 
-void MNEEpochData::applyBaselineCorrection(const QPair<float, float>& baseline)
+void MNEEpochData::applyBaselineCorrection(const std::pair<float, float>& baseline)
 {
     // Times on whole sample offsets: an interpolated float grid puts the stimulus sample just after 0
     const Eigen::Index n = this->epoch.cols();

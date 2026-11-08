@@ -138,7 +138,7 @@ QSharedPointer<FIFFLIB::FiffEvokedSet> AveragingDataModel::getEvokedSet()
 
 bool AveragingDataModel::saveToFile(const QString& sPath)
 {
-    if (!m_pFiffEvokedSet || m_pFiffEvokedSet->evoked.isEmpty()) {
+    if (!m_pFiffEvokedSet || m_pFiffEvokedSet->evoked.empty()) {
         return false;
     }
 #ifdef WASMBUILD

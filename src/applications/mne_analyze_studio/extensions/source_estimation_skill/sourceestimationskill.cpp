@@ -171,7 +171,7 @@ QJsonObject SourceEstimationSkill::executeSkill(const WorkflowNode& nodeState)
 
     // Activate projectors so the recorded SSPs participate in the whitening
     // applied by the inverse operator.
-    for (int k = 0; k < raw.info.projs.size(); ++k) {
+    for (int k = 0; k < std::ssize(raw.info.projs); ++k) {
         raw.info.projs[k].active = true;
     }
 

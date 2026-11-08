@@ -52,9 +52,7 @@
 // QT INCLUDES
 //=============================================================================================================
 
-#include <QList>
 #include <QStringList>
-#include <QPair>
 #include <QVariant>
 
 #include <string>

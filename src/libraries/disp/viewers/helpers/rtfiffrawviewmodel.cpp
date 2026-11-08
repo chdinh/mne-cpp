@@ -18,6 +18,8 @@
 //=============================================================================================================
 
 #include "rtfiffrawviewmodel.h"
+
+#include <vector>
 #include <utils/string_utils.h>
 
 #include <fiff/fiff_types.h>
@@ -122,8 +124,8 @@ RtFiffRawViewModel::~RtFiffRawViewModel()
 //virtual functions
 int RtFiffRawViewModel::rowCount(const QModelIndex& /*parent*/) const
 {
-    if (!m_pFiffInfo->chs.isEmpty()) {
-        return m_pFiffInfo->chs.size();
+    if (!m_pFiffInfo->chs.empty()) {
+        return static_cast<int>(m_pFiffInfo->chs.size());
     } else {
         return 0;
     }
@@ -249,7 +251,7 @@ void RtFiffRawViewModel::initSphara()
     m_vecIndicesFirstVV.resize(0);
     m_vecIndicesSecondVV.resize(0);
 
-    for (int r = 0; r < m_pFiffInfo->chs.size(); ++r) {
+    for (int r = 0; r < std::ssize(m_pFiffInfo->chs); ++r) {
         //Find GRADIOMETERS
         if (m_pFiffInfo->chs.at(r).chpos.coil_type == 3012) {
             m_vecIndicesFirstVV.conservativeResize(m_vecIndicesFirstVV.rows() + 1);
@@ -265,7 +267,7 @@ void RtFiffRawViewModel::initSphara()
 
     //Generate indices used to create the SPHARA operators for babyMEG
     m_vecIndicesFirstBabyMEG.resize(0);
-    for (int r = 0; r < m_pFiffInfo->chs.size(); ++r) {
+    for (int r = 0; r < std::ssize(m_pFiffInfo->chs); ++r) {
         //Find INNER LAYER
         if (m_pFiffInfo->chs.at(r).chpos.coil_type == 7002) {
             m_vecIndicesFirstBabyMEG.conservativeResize(m_vecIndicesFirstBabyMEG.rows() + 1);
@@ -281,7 +283,7 @@ void RtFiffRawViewModel::initSphara()
 
     //Generate indices used to create the SPHARA operators for EEG layouts
     m_vecIndicesFirstEEG.resize(0);
-    for (int r = 0; r < m_pFiffInfo->chs.size(); ++r) {
+    for (int r = 0; r < std::ssize(m_pFiffInfo->chs); ++r) {
         //Find EEG
         if (m_pFiffInfo->chs.at(r).kind == FIFFV_EEG_CH) {
             m_vecIndicesFirstEEG.conservativeResize(m_vecIndicesFirstEEG.rows() + 1);
@@ -565,7 +567,7 @@ void RtFiffRawViewModel::selectRows(const QList<qint32>& selection)
 
     qint32 count = 0;
     for (qint32 i = 0; i < selection.size(); ++i) {
-        if (selection[i] < m_pFiffInfo->chs.size()) {
+        if (selection[i] < std::ssize(m_pFiffInfo->chs)) {
             m_qMapIdxRowSelection.insert(count, selection[i]);
             ++count;
         }
@@ -601,7 +603,7 @@ void RtFiffRawViewModel::resetSelection()
 
     m_qMapIdxRowSelection.clear();
 
-    for (qint32 i = 0; i < m_pFiffInfo->chs.size(); ++i) {
+    for (qint32 i = 0; i < std::ssize(m_pFiffInfo->chs); ++i) {
         m_qMapIdxRowSelection.insert(i, i);
     }
 
@@ -625,7 +627,7 @@ void RtFiffRawViewModel::toggleFreeze(const QModelIndex&)
 
     //Update data content
     QModelIndex topLeft = this->index(0, 1);
-    QModelIndex bottomRight = this->index(m_pFiffInfo->chs.size() - 1, 1);
+    QModelIndex bottomRight = this->index(static_cast<int>(m_pFiffInfo->chs.size()) - 1, 1);
     QVector<int> roles;
     roles << Qt::DisplayRole;
 
@@ -643,7 +645,7 @@ void RtFiffRawViewModel::setScaling(const QMap<qint32, float>& p_qMapChScaling)
 
 //=============================================================================================================
 
-void RtFiffRawViewModel::updateProjection(const QList<FIFFLIB::FiffProj>& projs)
+void RtFiffRawViewModel::updateProjection(const std::vector<FIFFLIB::FiffProj>& projs)
 {
     //  Update the SSP projector
     if (m_pFiffInfo) {
@@ -651,7 +653,7 @@ void RtFiffRawViewModel::updateProjection(const QList<FIFFLIB::FiffProj>& projs)
         m_bProjActivated = false;
         m_pFiffInfo->projs = projs;
 
-        for (qint32 i = 0; i < this->m_pFiffInfo->projs.size(); ++i) {
+        for (qint32 i = 0; i < std::ssize(this->m_pFiffInfo->projs); ++i) {
             if (this->m_pFiffInfo->projs[i].active) {
                 m_bProjActivated = true;
                 break;
@@ -797,7 +799,7 @@ void RtFiffRawViewModel::setFilterChannelType(const QString& channelType)
 
 void RtFiffRawViewModel::markChBad(QModelIndex ch, bool status)
 {
-    QList<FiffChInfo> chInfolist = m_pFiffInfo->chs;
+    const std::vector<FiffChInfo>& chInfolist = m_pFiffInfo->chs;
 
     if (status) {
         if (!UTILSLIB::contains(m_pFiffInfo->bads, chInfolist[ch.row()].ch_name))
@@ -831,7 +833,7 @@ void RtFiffRawViewModel::triggerInfoChanged(const QMap<double, QColor>& colorMap
         QList<QPair<int, double>> temp;
         m_qMapDetectedTrigger.clear();
 
-        for (int i = 0; i < m_pFiffInfo->chs.size(); ++i) {
+        for (int i = 0; i < std::ssize(m_pFiffInfo->chs); ++i) {
             if (m_pFiffInfo->chs[i].ch_name == m_sCurrentTriggerCh) {
                 m_iCurrentTriggerChIndex = i;
                 m_qMapDetectedTrigger.insert(i, temp);
@@ -865,7 +867,7 @@ void RtFiffRawViewModel::resetTriggerCounter()
 
 void RtFiffRawViewModel::markChBad(QModelIndexList chlist, bool status)
 {
-    QList<FiffChInfo> chInfolist = m_pFiffInfo->chs;
+    const std::vector<FiffChInfo>& chInfolist = m_pFiffInfo->chs;
 
     for (int i = 0; i < chlist.size(); ++i) {
         if (status) {

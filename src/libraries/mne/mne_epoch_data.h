@@ -30,6 +30,8 @@
 
 #include "mne_global.h"
 
+#include <utility>
+
 #include <fiff/fiff_types.h>
 
 //=============================================================================================================
@@ -104,7 +106,7 @@ public:
      *
      * @param[in] baseline     time definition of the baseline in seconds [from, to].
      */
-    void applyBaselineCorrection(const QPair<float, float>& baseline);
+    void applyBaselineCorrection(const std::pair<float, float>& baseline);
 
     //=========================================================================================================
     /**

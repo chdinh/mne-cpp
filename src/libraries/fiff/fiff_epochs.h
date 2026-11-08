@@ -22,6 +22,8 @@
 //=============================================================================================================
 
 #include "fiff_global.h"
+
+#include <vector>
 #include "fiff_evoked.h"
 
 //=============================================================================================================
@@ -34,8 +36,6 @@
 // QT INCLUDES
 //=============================================================================================================
 
-#include <QList>
-#include <QPair>
 
 //=============================================================================================================
 // DEFINE NAMESPACE FIFFLIB
@@ -88,11 +88,11 @@ public:
      *
      * @return List of epoch data structures.
      */
-    static QList<FiffEpochData> makeFixedLengthEpochs(const Eigen::MatrixXd& matData,
-                                                      double dSFreq,
-                                                      double dDuration,
-                                                      double dOverlap = 0.0,
-                                                      bool bDropLast = true);
+    static std::vector<FiffEpochData> makeFixedLengthEpochs(const Eigen::MatrixXd& matData,
+                                                            double dSFreq,
+                                                            double dDuration,
+                                                            double dOverlap = 0.0,
+                                                            bool bDropLast = true);
 
     //=========================================================================================================
     /**
@@ -102,7 +102,7 @@ public:
      *
      * @return Combined list of all epochs.
      */
-    static QList<FiffEpochData> concatenateEpochs(const QList<QList<FiffEpochData>>& epochSets);
+    static std::vector<FiffEpochData> concatenateEpochs(const std::vector<std::vector<FiffEpochData>>& epochSets);
 
     //=========================================================================================================
     /**
@@ -117,7 +117,7 @@ public:
      *
      * @return FiffEvoked with averaged data and metadata.
      */
-    static FiffEvoked averageEpochs(const QList<FiffEpochData>& epochs,
+    static FiffEvoked averageEpochs(const std::vector<FiffEpochData>& epochs,
                                     double dSFreq,
                                     const QString& comment = "Average");
 
@@ -132,7 +132,7 @@ public:
      *
      * @return List of data matrices (n_channels × n_times).
      */
-    static QList<Eigen::MatrixXd> toMatrixList(const QList<FiffEpochData>& epochs);
+    static std::vector<Eigen::MatrixXd> toMatrixList(const std::vector<FiffEpochData>& epochs);
 };
 
 } // namespace FIFFLIB

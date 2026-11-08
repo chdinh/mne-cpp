@@ -63,17 +63,17 @@ FiffInfo makeFiffInfo(int nMeg, int nEeg)
         FiffChInfo ch;
         ch.kind = FIFFV_MEG_CH;
         ch.ch_name = (QString("MEG%1").arg(i + 1, 4, 10, QChar('0'))).toStdString();
-        info.chs.append(ch);
+        info.chs.push_back(ch);
         info.ch_names.push_back(ch.ch_name);
     }
     for (int i = 0; i < nEeg; ++i) {
         FiffChInfo ch;
         ch.kind = FIFFV_EEG_CH;
         ch.ch_name = (QString("EEG%1").arg(i + 1, 4, 10, QChar('0'))).toStdString();
-        info.chs.append(ch);
+        info.chs.push_back(ch);
         info.ch_names.push_back(ch.ch_name);
     }
-    info.nchan = info.chs.size();
+    info.nchan = static_cast<int>(info.chs.size());
     return info;
 }
 

@@ -25,12 +25,12 @@
 
 #include "mne_global.h"
 
+#include <vector>
+
 #include <fiff/fiff_evoked_set.h>
 
 #include <QString>
 #include <QStringList>
-#include <QVector>
-#include <QList>
 
 //=============================================================================================================
 // DEFINE NAMESPACE MNELIB
@@ -48,14 +48,14 @@ namespace MNELIB
  */
 struct MNESHARED_EXPORT CovDefinition
 {
-    QVector<unsigned int> events; /**< The interesting events. */
-    unsigned int ignore = 0;      /**< Which trigger lines to ignore. */
-    float delay = 0.0f;           /**< Apply this delay to the stimulus time point. */
-    float tmin = -0.2f;           /**< Minimum time (s). */
-    float tmax = 0.0f;            /**< Maximum time (s). */
-    float bmin = 0.0f;            /**< Baseline min (s). */
-    float bmax = 0.0f;            /**< Baseline max (s). */
-    bool doBaseline = false;      /**< Should we baseline first? */
+    std::vector<unsigned int> events; /**< The interesting events. */
+    unsigned int ignore = 0;          /**< Which trigger lines to ignore. */
+    float delay = 0.0f;               /**< Apply this delay to the stimulus time point. */
+    float tmin = -0.2f;               /**< Minimum time (s). */
+    float tmax = 0.0f;                /**< Maximum time (s). */
+    float bmin = 0.0f;                /**< Baseline min (s). */
+    float bmax = 0.0f;                /**< Baseline max (s). */
+    bool doBaseline = false;          /**< Should we baseline first? */
 };
 
 //=============================================================================================================
@@ -67,13 +67,13 @@ struct MNESHARED_EXPORT CovDefinition
  */
 struct MNESHARED_EXPORT CovDescription
 {
-    QList<CovDefinition> defs;    /**< Definition sections. */
-    FIFFLIB::RejectionParams rej; /**< Rejection limits. */
-    bool removeSampleMean = true; /**< Remove the mean at each sample. */
-    bool fixSkew = false;         /**< Fix skew on trigger lines. */
-    QString filename;             /**< Output file. */
-    QString eventFile;            /**< Read events from here. */
-    QString logFile;              /**< Save log here. */
+    std::vector<CovDefinition> defs; /**< Definition sections. */
+    FIFFLIB::RejectionParams rej;    /**< Rejection limits. */
+    bool removeSampleMean = true;    /**< Remove the mean at each sample. */
+    bool fixSkew = false;            /**< Fix skew on trigger lines. */
+    QString filename;                /**< Output file. */
+    QString eventFile;               /**< Read events from here. */
+    QString logFile;                 /**< Save log here. */
 };
 
 //=============================================================================================================

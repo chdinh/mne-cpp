@@ -148,7 +148,7 @@ int main(int argc, char* argv[])
 
     // Find STI channel (prefer STI 014, fallback to first stim channel)
     int stiIdx = -1;
-    for (int i = 0; i < raw.info.chs.size(); ++i) {
+    for (int i = 0; i < std::ssize(raw.info.chs); ++i) {
         if ((raw.info.chs[i].ch_name.find("STI") != std::string::npos) ||
             raw.info.chs[i].kind == FIFFV_STIM_CH) {
             if ((raw.info.chs[i].ch_name.find("014") != std::string::npos) || stiIdx < 0) {

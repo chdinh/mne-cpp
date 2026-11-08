@@ -28,6 +28,8 @@
 //=============================================================================================================
 
 #include "../disp_global.h"
+
+#include <vector>
 #include "abstractview.h"
 
 #include <fiff/fiff_ch_info.h>
@@ -87,7 +89,7 @@ public:
     typedef QSharedPointer<ArtifactSettingsView> ConstSPtr; /**< Const shared pointer type for AveragingAdjustmentWidget. */
 
     explicit ArtifactSettingsView(const QString& sSettingsPath = "",
-                                  const QList<FIFFLIB::FiffChInfo>& fiffChInfoList = QList<FIFFLIB::FiffChInfo>(),
+                                  const std::vector<FIFFLIB::FiffChInfo>& fiffChInfoList = std::vector<FIFFLIB::FiffChInfo>(),
                                   QWidget* parent = nullptr);
 
     //=========================================================================================================
@@ -96,7 +98,7 @@ public:
      */
     ~ArtifactSettingsView();
 
-    void setChInfo(const QList<FIFFLIB::FiffChInfo>& fiffChInfoList);
+    void setChInfo(const std::vector<FIFFLIB::FiffChInfo>& fiffChInfoList);
 
     QMap<QString, double> getThresholdMap();
 
@@ -154,7 +156,7 @@ protected:
     QMap<QString, int> m_mapThresholdsSecond;
     QMap<QString, double> m_mapThresholds;
 
-    QList<FIFFLIB::FiffChInfo> m_fiffChInfoList;
+    std::vector<FIFFLIB::FiffChInfo> m_fiffChInfoList;
 
     bool m_bDoArtifactThresholdReduction = false;
 

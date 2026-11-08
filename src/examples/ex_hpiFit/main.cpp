@@ -164,7 +164,7 @@ int main(int argc, char* argv[])
     FiffInfo infoTemp = *(pFiffInfo.data());
 
     //Turn on all SSP
-    for (int i = 0; i < infoTemp.projs.size(); ++i) {
+    for (int i = 0; i < std::ssize(infoTemp.projs); ++i) {
         infoTemp.projs[i].active = true;
     }
 

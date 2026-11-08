@@ -30,6 +30,8 @@
 
 #include "../inv_global.h"
 
+#include <vector>
+
 #include <fiff/fiff_types.h>
 #include <fwd/fwd_types.h>
 #include <fwd/fwd_eeg_sphere_model.h>
@@ -289,7 +291,7 @@ public:
         float grad_reg,
         float eeg_reg,
         int diagnoise,
-        const QList<QString>& projnames,
+        const std::vector<QString>& projnames,
         int include_meg,
         int include_eeg);
 
@@ -379,7 +381,7 @@ public:
     std::unique_ptr<FIFFLIB::FiffCoordTrans> mri_head_t; /**< MRI <-> head coordinate transformation. */
     std::unique_ptr<FIFFLIB::FiffCoordTrans> meg_head_t; /**< MEG <-> head coordinate transformation. */
     int coord_frame;                                     /**< Common coordinate frame. */
-    QList<FIFFLIB::FiffChInfo> chs;                      /**< Channels. */
+    std::vector<FIFFLIB::FiffChInfo> chs;                /**< Channels. */
     int nmeg;                                            /**< How many MEG. */
     int neeg;                                            /**< How many EEG. */
     StringList ch_names;                                 /**< List of all channel names. */

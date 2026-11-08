@@ -153,7 +153,7 @@ int main(int argc, char* argv[])
     MNEInverseOperator prepared = inverse.prepare_inverse_operator(evoked.nave, lambda2, false, false);
     MatrixXd surfaceKernel;
     SparseMatrix<double> noNormals;
-    QList<VectorXi> kernelVertices;
+    std::vector<VectorXi> kernelVertices;
     prepared.assemble_kernel(FsLabel(), "MNE", false, surfaceKernel, noNormals, kernelVertices);
     prepared.getKernel() = surfaceKernel;
     const MatrixXd corticalMap = MNECorticalMap::makeCorticalMap(fwd, prepared, evoked.info);

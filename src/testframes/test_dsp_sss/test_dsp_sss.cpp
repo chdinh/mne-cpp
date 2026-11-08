@@ -165,7 +165,7 @@ private slots:
         FiffChInfo eeg;
         eeg.kind = FIFFV_EEG_CH;
         eeg.unit = 107;
-        info.chs.append(eeg);
+        info.chs.push_back(eeg);
         info.nchan = 103;
 
         SSS::Basis basis = SSS::computeBasis(info, SSS::Params());

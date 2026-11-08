@@ -1033,9 +1033,8 @@ struct AcqRecorder::Impl
         pack = physical ? Pack::Double : nativePack(info->format);
         packer = packFunction(info->format);
         if (physical) {
-            for (int c = 0; c < fiffInfo.chs.size(); ++c) {
-                const int exponent = info->channels[static_cast<std::size_t>(c)].unitExponent;
-                fiffInfo.chs[c].cal = static_cast<float>(std::pow(10.0, exponent));
+            for (std::size_t c = 0; c < fiffInfo.chs.size(); ++c) {
+                fiffInfo.chs[c].cal = static_cast<float>(std::pow(10.0, info->channels[c].unitExponent));
                 fiffInfo.chs[c].range = 1.0f;
                 fiffInfo.chs[c].unit_mul = FIFF_UNITM_NONE;
             }
@@ -1054,7 +1053,7 @@ struct AcqRecorder::Impl
             stim.logNo = stim.scanNo;
             stim.chpos.coil_type = FIFFV_COIL_NONE;
             stim.coord_frame = FIFFV_COORD_UNKNOWN;
-            fiffInfo.chs.append(stim);
+            fiffInfo.chs.push_back(stim);
             fiffInfo.ch_names.push_back(stim.ch_name);
             fiffInfo.nchan = static_cast<fiff_int_t>(fiffInfo.chs.size());
         }

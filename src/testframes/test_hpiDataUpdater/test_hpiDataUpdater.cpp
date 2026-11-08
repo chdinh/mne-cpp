@@ -81,8 +81,8 @@ private:
     QSharedPointer<FiffInfo> m_pFiffInfo;
     MatrixXd m_matData;
     MatrixXd m_matProjectors;
-    QList<FIFFLIB::FiffChInfo> m_lChannelsWithoutBads;
-    QList<FIFFLIB::FiffChInfo> m_lChannelsWithBads;
+    std::vector<FIFFLIB::FiffChInfo> m_lChannelsWithoutBads;
+    std::vector<FIFFLIB::FiffChInfo> m_lChannelsWithBads;
     QVector<int> m_vecInnerindWithBads;    /**< index of inner channels . */
     QVector<int> m_vecInnerindWithoutBads; /**< index of inner channels . */
 };
@@ -125,7 +125,7 @@ void TestHpiDataUpdater::initTestCase()
             m_pFiffInfo->chs[i].chpos.coil_type == FIFFV_COIL_VV_PLANAR_T3) {
             // Check if the sensor is bad, if not append to innerind
             if (!(UTILSLIB::contains(m_pFiffInfo->bads, m_pFiffInfo->ch_names.at(i)))) {
-                m_lChannelsWithoutBads.append(m_pFiffInfo->chs[i]);
+                m_lChannelsWithoutBads.push_back(m_pFiffInfo->chs[i]);
                 m_vecInnerindWithoutBads.append(i);
             }
         }
@@ -141,7 +141,7 @@ void TestHpiDataUpdater::initTestCase()
             m_pFiffInfo->chs[i].chpos.coil_type == FIFFV_COIL_VV_PLANAR_T3) {
             // Check if the sensor is bad, if not append to innerind
             if (!(UTILSLIB::contains(m_pFiffInfo->bads, m_pFiffInfo->ch_names.at(i)))) {
-                m_lChannelsWithBads.append(m_pFiffInfo->chs[i]);
+                m_lChannelsWithBads.push_back(m_pFiffInfo->chs[i]);
                 m_vecInnerindWithBads.append(i);
             }
         }
@@ -401,3 +401,5 @@ void TestHpiDataUpdater::cleanupTestCase()
 
 QTEST_GUILESS_MAIN(TestHpiDataUpdater)
 #include "test_hpiDataUpdater.moc"
+
+#include <vector>

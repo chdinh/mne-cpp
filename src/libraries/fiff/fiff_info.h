@@ -40,6 +40,8 @@
 
 #include "fiff_global.h"
 
+#include <vector>
+
 #include "fiff_info_base.h"
 
 #include "fiff_types.h"
@@ -54,7 +56,6 @@
 // QT INCLUDES
 //=============================================================================================================
 
-#include <QList>
 #include <QStringList>
 #include <QSharedPointer>
 #include <memory>
@@ -234,7 +235,7 @@ public:
      *
      * @return the current compensation.
      */
-    static QList<FiffChInfo> set_current_comp(QList<FiffChInfo>& listFiffChInfo, fiff_int_t value);
+    static std::vector<FiffChInfo> set_current_comp(std::vector<FiffChInfo>& listFiffChInfo, fiff_int_t value);
 
     //=========================================================================================================
     /**
@@ -257,7 +258,7 @@ public:
                                    bool do_meg,
                                    bool do_eeg,
                                    const StringList& bads,
-                                   QList<FiffChInfo>& chsp,
+                                   std::vector<FiffChInfo>& chsp,
                                    int& nmegp,
                                    int& neegp);
 
@@ -289,29 +290,29 @@ private:
      */
     bool make_compensator(fiff_int_t kind, Eigen::MatrixXd& this_comp) const;
 
-public:                          //Public because it's a mne struct
-    FiffId file_id;              /**< File ID. */
-    fiff_int_t meas_date[2];     /**< Measurement date. */
-    float sfreq;                 /**< Sample frequency. */
-    float linefreq;              /**< Power line frequency. */
-    float highpass;              /**< Highpass frequency. */
-    float lowpass;               /**< Lowpass frequency. */
-    int proj_id;                 /**< Project ID. */
-    std::string proj_name;       /**< Project name. */
-    std::string xplotter_layout; /**< xplotter layout tag. */
-    std::string experimenter;    /**< Experimenter name. */
-    std::string description;     /**< (Textual) Description of an object.*/
-    std::string utc_offset;      /**< UTC offset of related meas_date (sHH:MM).*/
-    fiff_int_t gantry_angle;     /**< Tilt angle of the dewar in degrees.*/
-    FiffCoordTrans dev_ctf_t;    /**< Device to CTF coordinate transformation. */
-    FiffDigPointSet dig;         /**< The digitization points. */
-    FiffCoordTrans dig_trans;    /**< Digitizer coordinate transformation. */
-    QList<FiffProj> projs;       /**< List of available SSP projectors. */
-    QList<FiffCtfComp> comps;    /**< List of available CTF software compensators. */
-    std::string acq_pars;        /**< Acquisition parameters. */
-    std::string acq_stim;        /**< Acquisition stimulus information. */
-    QList<float> hpi_coil_freqs; /**< Excitation frequencies of the HPI coils in Hz, in coil order. Empty when the file contains no HPI measurement block. */
-    FiffDeviceInfo device_info;  /**< Acquisition device; empty if unknown. */
+public:                                //Public because it's a mne struct
+    FiffId file_id;                    /**< File ID. */
+    fiff_int_t meas_date[2];           /**< Measurement date. */
+    float sfreq;                       /**< Sample frequency. */
+    float linefreq;                    /**< Power line frequency. */
+    float highpass;                    /**< Highpass frequency. */
+    float lowpass;                     /**< Lowpass frequency. */
+    int proj_id;                       /**< Project ID. */
+    std::string proj_name;             /**< Project name. */
+    std::string xplotter_layout;       /**< xplotter layout tag. */
+    std::string experimenter;          /**< Experimenter name. */
+    std::string description;           /**< (Textual) Description of an object.*/
+    std::string utc_offset;            /**< UTC offset of related meas_date (sHH:MM).*/
+    fiff_int_t gantry_angle;           /**< Tilt angle of the dewar in degrees.*/
+    FiffCoordTrans dev_ctf_t;          /**< Device to CTF coordinate transformation. */
+    FiffDigPointSet dig;               /**< The digitization points. */
+    FiffCoordTrans dig_trans;          /**< Digitizer coordinate transformation. */
+    std::vector<FiffProj> projs;       /**< List of available SSP projectors. */
+    std::vector<FiffCtfComp> comps;    /**< List of available CTF software compensators. */
+    std::string acq_pars;              /**< Acquisition parameters. */
+    std::string acq_stim;              /**< Acquisition stimulus information. */
+    std::vector<float> hpi_coil_freqs; /**< Excitation frequencies of the HPI coils in Hz, in coil order. Empty when the file contains no HPI measurement block. */
+    FiffDeviceInfo device_info;        /**< Acquisition device; empty if unknown. */
 };
 
 //=============================================================================================================

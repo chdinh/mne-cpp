@@ -124,7 +124,7 @@ void RealTimeEvokedSet::setValue(const FiffEvokedSet& v,
 
         //Take the first evoked iformation to calcualte the pre samples.
         //They all have the same pre sample size as of right now.
-        if (!m_pFiffEvokedSet->evoked.isEmpty()) {
+        if (!m_pFiffEvokedSet->evoked.empty()) {
             for (qint32 i = 0; i < m_pFiffEvokedSet->evoked.at(0).times.size(); ++i) {
                 if (m_pFiffEvokedSet->evoked.at(0).times[i] >= 0) {
                     break;

@@ -55,7 +55,7 @@ FiffInfo MaxwellMovementComp::transformFiffInfo(const FiffInfo& fiffInfo,
     Vector3d tRel = headPosRef.translation - rotRel * headPosCurrent.translation;
 
     // Apply transform to MEG channel positions
-    for (int i = 0; i < info.chs.size(); ++i) {
+    for (int i = 0; i < std::ssize(info.chs); ++i) {
         if (info.chs[i].kind == FIFFV_MEG_CH || info.chs[i].kind == FIFFV_REF_MEG_CH) {
             // Transform position
             Vector3f r0 = info.chs[i].chpos.r0;

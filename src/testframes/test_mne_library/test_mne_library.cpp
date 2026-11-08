@@ -387,9 +387,9 @@ void TestMneLibrary::sourceSpaces_getVertno()
     if (!readSourceSpaces(srcPath(), srcSpaces))
         QSKIP("Could not read source spaces");
 
-    QList<VectorXi> vertno = srcSpaces.get_vertno();
+    std::vector<VectorXi> vertno = srcSpaces.get_vertno();
     QCOMPARE(vertno.size(), srcSpaces.size());
-    for (int i = 0; i < vertno.size(); i++)
+    for (int i = 0; i < std::ssize(vertno); i++)
         QVERIFY(vertno[i].size() > 0);
 }
 
@@ -436,7 +436,7 @@ void TestMneLibrary::sourceSpaces_filterAndTransform()
 
     const MNESourceSpaces srcSpaces(srcPath().toStdU16String());
 
-    QList<VectorXi> vertno = srcSpaces.get_vertno();
+    std::vector<VectorXi> vertno = srcSpaces.get_vertno();
     QVERIFY(vertno.size() >= 2);
     QVERIFY(vertno[0].size() > 0);
 
@@ -458,7 +458,7 @@ void TestMneLibrary::sourceSpaces_readAddGeom()
     MNEHemisphere* hemi0 = srcSpaces.hemisphereAt(0);
     QVERIFY(hemi0 != nullptr);
 
-    QList<VectorXi> vertno = srcSpaces.get_vertno();
+    std::vector<VectorXi> vertno = srcSpaces.get_vertno();
     QVERIFY(vertno.size() >= 2);
     QVERIFY(lh.neighbor_vert.size() > 0 || lh.np > 0);
 }
@@ -616,21 +616,21 @@ void TestMneLibrary::ctfComp_staticHelpers()
     MNECTFCompDataSet::explain_comp(0);
     MNECTFCompDataSet::explain_comp(999);
 
-    QList<FiffChInfo> chs;
+    std::vector<FiffChInfo> chs;
     for (int i = 0; i < 5; i++) {
         FiffChInfo ch;
         ch.kind = FIFFV_MEG_CH;
         ch.chpos.coil_type = (2 << 16) | 3022;
-        chs.append(ch);
+        chs.push_back(ch);
     }
     int comp = MNECTFCompDataSet::get_comp(chs, 5);
     QCOMPARE(comp, 2);
 
-    QList<FiffChInfo> chs2;
+    std::vector<FiffChInfo> chs2;
     for (int i = 0; i < 3; i++) {
         FiffChInfo ch;
         ch.chpos.coil_type = 3022;
-        chs2.append(ch);
+        chs2.push_back(ch);
     }
     MNECTFCompDataSet::set_comp(chs2, 3, 1);
 }
@@ -665,14 +665,14 @@ void TestMneLibrary::ctfComp_makeComp()
 
     FiffRawData raw(rawPath().toStdString());
 
-    QList<FiffChInfo> compchs;
+    std::vector<FiffChInfo> compchs;
     for (const auto& ch : raw.info.chs) {
         if (ch.kind == FIFFV_REF_MEG_CH)
-            compchs.append(ch);
+            compchs.push_back(ch);
     }
 
     if (compchs.size() > 0) {
-        int res = compSet->make_comp(raw.info.chs, raw.info.nchan, compchs, compchs.size());
+        int res = compSet->make_comp(raw.info.chs, raw.info.nchan, compchs, static_cast<int>(compchs.size()));
         Q_UNUSED(res);
     }
 }
@@ -1095,15 +1095,15 @@ void TestMneLibrary::forwardSolution_pickTypes()
 void TestMneLibrary::forwardSolution_clusterInfo()
 {
     MNEClusterInfo ci;
-    ci.clusterLabelNames << "V1";
-    ci.clusterLabelIds << 7;
-    ci.centroidVertno << 42;
-    ci.centroidSource_rr << Vector3f(0.5f, 0.25f, 0.125f);
-    ci.clusterVertnos << VectorXi::LinSpaced(2, 41, 42);
+    ci.clusterLabelNames.push_back("V1");
+    ci.clusterLabelIds.push_back(7);
+    ci.centroidVertno.push_back(42);
+    ci.centroidSource_rr.push_back(Vector3f(0.5f, 0.25f, 0.125f));
+    ci.clusterVertnos.push_back(VectorXi::LinSpaced(2, 41, 42));
     MatrixX3f rr(2, 3);
     rr << 1.0f, 2.0f, 3.0f, 4.0f, 5.0f, 6.0f;
-    ci.clusterSource_rr << rr;
-    ci.clusterDistances << VectorXd::Zero(2);
+    ci.clusterSource_rr.push_back(rr);
+    ci.clusterDistances.push_back(VectorXd::Zero(2));
 
     // The centroid line holds the centroid, and the centroid list lands next to the file.
     QTemporaryDir dir;
@@ -1379,7 +1379,7 @@ void TestMneLibrary::epochData_average()
         FiffChInfo ch;
         ch.ch_name = (QString("CH%1").arg(i)).toStdString();
         ch.kind = FIFFV_MEG_CH;
-        pInfo->chs.append(ch);
+        pInfo->chs.push_back(ch);
         pInfo->ch_names.push_back(ch.ch_name);
     }
 
@@ -1858,3 +1858,5 @@ void TestMneLibrary::inverseOp_checkChNames()
 QTEST_GUILESS_MAIN(TestMneLibrary)
 
 #include "test_mne_library.moc"
+
+#include <vector>

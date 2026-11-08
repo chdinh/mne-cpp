@@ -154,7 +154,7 @@ void TestFiffCoverage::testGetEvokedEntries()
     // Find evoked nodes in the directory tree
     std::vector<FiffDirNode::SPtr> evoked_nodes = stream.dirtree()->dir_tree_find(FIFFB_EVOKED);
     QStringList comments;
-    QList<fiff_int_t> aspect_kinds;
+    std::vector<fiff_int_t> aspect_kinds;
     QString t;
     QVERIFY(stream.get_evoked_entries(evoked_nodes, comments, aspect_kinds, t));
 
@@ -174,7 +174,7 @@ void TestFiffCoverage::testGetEvokedEntriesCount()
 
     std::vector<FiffDirNode::SPtr> evoked_nodes = stream.dirtree()->dir_tree_find(FIFFB_EVOKED);
     QStringList comments;
-    QList<fiff_int_t> aspect_kinds;
+    std::vector<fiff_int_t> aspect_kinds;
     QString t;
     QVERIFY(stream.get_evoked_entries(evoked_nodes, comments, aspect_kinds, t));
     stream.close();
@@ -297,7 +297,7 @@ void TestFiffCoverage::testWriteReadEvokedSetPreserveData()
     FiffEvokedSet readSet(tmpPath.toStdU16String());
 
     // Check data dimensions match
-    for (int i = 0; i < qMin(origSet.evoked.size(), readSet.evoked.size()); i++) {
+    for (std::size_t i = 0; i < std::min(origSet.evoked.size(), readSet.evoked.size()); i++) {
         QCOMPARE(readSet.evoked[i].data.rows(), origSet.evoked[i].data.rows());
         QCOMPARE(readSet.evoked[i].data.cols(), origSet.evoked[i].data.cols());
     }
@@ -401,14 +401,14 @@ void TestFiffCoverage::testCtfCompRoundTrip()
     FiffStream stream(&rawFile);
     QVERIFY(stream.open());
 
-    QList<FiffCtfComp> comps;
+    std::vector<FiffCtfComp> comps;
     FiffInfo info;
     FiffDirNode::SPtr nodeInfo;
     stream.read_meas_info(stream.dirtree(), info, nodeInfo);
     comps = info.comps;
     stream.close();
 
-    if (comps.isEmpty()) {
+    if (comps.empty()) {
         // Create synthetic CTF comp data
         FiffCtfComp comp;
         comp.ctfkind = 101;
@@ -424,7 +424,7 @@ void TestFiffCoverage::testCtfCompRoundTrip()
         data->col_names.push_back("REF02");
         data->col_names.push_back("REF03");
         comp.data = FiffNamedMatrix::SDPtr(data);
-        comps.append(comp);
+        comps.push_back(comp);
     }
 
     // Write to temp file
@@ -445,19 +445,19 @@ void TestFiffCoverage::testCtfCompRoundTrip()
 
     // Read compensators are calibrated in memory and written back uncalibrated (mne _write_ctf_comp),
     // so a read-write-read round trip returns the same matrix
-    QList<FiffChInfo> chs;
+    std::vector<FiffChInfo> chs;
     for (const auto& [name, cal] : {std::pair{"MEG0111", 2.0f}, std::pair{"MEG0121", 4.0f}, std::pair{"REF01", 0.5f}, std::pair{"REF02", 8.0f}, std::pair{"REF03", 1.0f}}) {
         FiffChInfo ch;
         ch.ch_name = name;
         ch.range = 1.0f;
         ch.cal = cal;
-        chs << ch;
+        chs.push_back(ch);
     }
     FiffCtfComp raw;
     raw.ctfkind = 1194410578;
     raw.save_calibrated = false;
     raw.data = FiffNamedMatrix::SDPtr(new FiffNamedMatrix(2, 3, {"MEG0111", "MEG0121"}, {"REF01", "REF02", "REF03"}, MatrixXd::Constant(2, 3, 1.0)));
-    const auto writeComps = [](const QString& path, const QList<FiffCtfComp>& list) {
+    const auto writeComps = [](const QString& path, const std::vector<FiffCtfComp>& list) {
         QFile out(path);
         auto w = FiffStream::start_file(out);
         w->write_ctf_comp(list);
@@ -467,14 +467,14 @@ void TestFiffCoverage::testCtfCompRoundTrip()
     const auto readComps = [&chs](const QString& path) {
         QFile in(path);
         FiffStream r(&in);
-        QList<FiffCtfComp> read;
+        std::vector<FiffCtfComp> read;
         if (r.open())
             read = r.read_ctf_comp(r.dirtree(), chs);
         return read;
     };
     const QString firstPath = m_tmpDir.path() + "/ctf_comp_raw.fif";
     writeComps(firstPath, {raw});
-    const QList<FiffCtfComp> first = readComps(firstPath);
+    const std::vector<FiffCtfComp> first = readComps(firstPath);
     QCOMPARE(first.size(), 1);
     QCOMPARE(first[0].kind, 1);
     MatrixXd calibrated(2, 3);
@@ -482,7 +482,7 @@ void TestFiffCoverage::testCtfCompRoundTrip()
     QVERIFY(first[0].data->data.isApprox(calibrated));
     const QString secondPath = m_tmpDir.path() + "/ctf_comp_again.fif";
     writeComps(secondPath, first);
-    const QList<FiffCtfComp> second = readComps(secondPath);
+    const std::vector<FiffCtfComp> second = readComps(secondPath);
     QCOMPARE(second.size(), 1);
     QVERIFY2(second[0].data->data.isApprox(calibrated), qPrintable(QString::number(second[0].data->data(0, 0))));
 
@@ -492,7 +492,7 @@ void TestFiffCoverage::testCtfCompRoundTrip()
     unknown.data = FiffNamedMatrix::SDPtr(new FiffNamedMatrix(1, 1, {"MEG0111"}, {"REF99"}, MatrixXd::Ones(1, 1)));
     const QString brokenPath = m_tmpDir.path() + "/ctf_comp_unknown.fif";
     writeComps(brokenPath, {raw, unknown});
-    QVERIFY(readComps(brokenPath).isEmpty());
+    QVERIFY(readComps(brokenPath).empty());
 }
 
 //=============================================================================================================
@@ -624,3 +624,5 @@ void TestFiffCoverage::cleanupTestCase()
 
 QTEST_GUILESS_MAIN(TestFiffCoverage)
 #include "test_fiff_coverage.moc"
+
+#include <vector>

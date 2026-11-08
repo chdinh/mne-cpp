@@ -56,7 +56,7 @@ using namespace Eigen;
 
 static int findChannelByName(const FiffInfo& info, const QString& name)
 {
-    for (int i = 0; i < info.chs.size(); ++i) {
+    for (int i = 0; i < std::ssize(info.chs); ++i) {
         if (std::string(UTILSLIB::trimmed(info.chs[i].ch_name)) == name)
             return i;
     }

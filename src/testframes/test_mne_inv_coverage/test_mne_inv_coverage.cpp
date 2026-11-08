@@ -156,7 +156,8 @@ void TestMneInvCoverage::testCheckChNamesMatch()
     ch1.ch_name = "MEG0111";
     FiffChInfo ch2;
     ch2.ch_name = "MEG0121";
-    info.chs << ch1 << ch2;
+    info.chs.push_back(ch1);
+    info.chs.push_back(ch2);
     info.nchan = 2;
     info.ch_names.push_back("MEG0111");
     info.ch_names.push_back("MEG0121");
@@ -181,7 +182,7 @@ void TestMneInvCoverage::testCheckChNamesMismatch()
     FiffInfo info;
     FiffChInfo ch1;
     ch1.ch_name = "MEG0111";
-    info.chs << ch1;
+    info.chs.push_back(ch1);
     info.nchan = 1;
     info.ch_names.push_back("MEG0111");
 
@@ -536,7 +537,7 @@ void TestMneInvCoverage::testMinNormCalculateInverse()
 
     // Read evoked data
     FiffEvokedSet evokedSet(avePath().toStdU16String());
-    QVERIFY2(!evokedSet.evoked.isEmpty(), "No evoked data found in file");
+    QVERIFY2(!evokedSet.evoked.empty(), "No evoked data found in file");
 
     // Setup minimum norm and calculate inverse
     InvMinimumNorm invMNE(invOp, 1.0f / 9.0f, QString("dSPM"));

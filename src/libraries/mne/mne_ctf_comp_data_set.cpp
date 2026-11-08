@@ -20,6 +20,8 @@
 
 #include "mne_ctf_comp_data_set.h"
 
+#include <vector>
+
 #include <utils/string_utils.h>
 #include "mne_ctf_comp_data.h"
 
@@ -53,11 +55,11 @@ using namespace MNELIB;
 //============================= mne_read_forward_solution.c =============================
 
 int mne_read_meg_comp_eeg_ch_info_32(const QString& name,
-                                     QList<FIFFLIB::FiffChInfo>& megp, /* MEG channels */
+                                     std::vector<FIFFLIB::FiffChInfo>& megp, /* MEG channels */
                                      int* nmegp,
-                                     QList<FIFFLIB::FiffChInfo>& meg_compp,
+                                     std::vector<FIFFLIB::FiffChInfo>& meg_compp,
                                      int* nmeg_compp,
-                                     QList<FIFFLIB::FiffChInfo>& eegp, /* EEG channels */
+                                     std::vector<FIFFLIB::FiffChInfo>& eegp, /* EEG channels */
                                      int* neegp,
                                      FiffCoordTrans* meg_head_t)
 /*
@@ -68,13 +70,13 @@ int mne_read_meg_comp_eeg_ch_info_32(const QString& name,
     QFile file(name);
     FiffStream stream(&file);
 
-    QList<FIFFLIB::FiffChInfo> chs;
+    std::vector<FIFFLIB::FiffChInfo> chs;
     int nchan = 0;
-    QList<FIFFLIB::FiffChInfo> meg;
+    std::vector<FIFFLIB::FiffChInfo> meg;
     int nmeg = 0;
-    QList<FIFFLIB::FiffChInfo> meg_comp;
+    std::vector<FIFFLIB::FiffChInfo> meg_comp;
     int nmeg_comp = 0;
-    QList<FIFFLIB::FiffChInfo> eeg;
+    std::vector<FIFFLIB::FiffChInfo> eeg;
     int neeg = 0;
     std::vector<FiffDirNode::SPtr> nodes;
     FiffDirNode::SPtr info;
@@ -113,7 +115,7 @@ int mne_read_meg_comp_eeg_ch_info_32(const QString& name,
                 nchan = *t_pTag->toInt();
 
                 for (j = 0; j < nchan; j++) {
-                    chs.append(FiffChInfo());
+                    chs.push_back(FiffChInfo());
                     chs[j].scanNo = -1;
                 }
                 to_find = nchan;
@@ -168,13 +170,13 @@ int mne_read_meg_comp_eeg_ch_info_32(const QString& name,
    */
     for (k = 0; k < nchan; k++) {
         if (chs[k].kind == FIFFV_MEG_CH) {
-            meg.append(chs[k]);
+            meg.push_back(chs[k]);
             nmeg++;
         } else if (chs[k].kind == FIFFV_REF_MEG_CH) {
-            meg_comp.append(chs[k]);
+            meg_comp.push_back(chs[k]);
             nmeg_comp++;
         } else if (chs[k].kind == FIFFV_EEG_CH) {
-            eeg.append(chs[k]);
+            eeg.push_back(chs[k]);
             neeg++;
         }
     }
@@ -324,14 +326,14 @@ std::unique_ptr<MNECTFCompDataSet> MNECTFCompDataSet::read(const QString& name)
     int ncomp;
     int kind, k;
     std::optional<FiffTag> t_pTag;
-    QList<FiffChInfo> chs;
+    std::vector<FiffChInfo> chs;
     int nch = 0;
     int calibrated;
     /*
         * Read the channel information
         */
     {
-        QList<FiffChInfo> comp_chs, temp;
+        std::vector<FiffChInfo> comp_chs, temp;
         int ncompch = 0;
 
         if (mne_read_meg_comp_eeg_ch_info_32(name,
@@ -345,7 +347,7 @@ std::unique_ptr<MNECTFCompDataSet> MNECTFCompDataSet::read(const QString& name)
             return nullptr;
         if (ncompch > 0) {
             for (k = 0; k < ncompch; k++)
-                chs.append(comp_chs[k]);
+                chs.push_back(comp_chs[k]);
             nch = nch + ncompch;
         }
     }
@@ -422,9 +424,9 @@ std::unique_ptr<MNECTFCompDataSet> MNECTFCompDataSet::read(const QString& name)
 
 //=============================================================================================================
 
-int MNECTFCompDataSet::make_comp(const QList<FiffChInfo>& chList,
+int MNECTFCompDataSet::make_comp(const std::vector<FiffChInfo>& chList,
                                  int nChan,
-                                 QList<FiffChInfo> compchs,
+                                 std::vector<FiffChInfo> compchs,
                                  int nCompChan) /* How many of these */
 /*
      * Make compensation data to apply to a set of channels to yield (or uncompensated) compensated data
@@ -445,7 +447,7 @@ int MNECTFCompDataSet::make_comp(const QList<FiffChInfo>& chList,
 
     StringList emptyList;
 
-    if (compchs.isEmpty()) {
+    if (compchs.empty()) {
         compchs = chList;
         nCompChan = nChan;
     }
@@ -563,7 +565,7 @@ int MNECTFCompDataSet::make_comp(const QList<FiffChInfo>& chList,
 
 //=============================================================================================================
 
-int MNECTFCompDataSet::set_comp(QList<FIFFLIB::FiffChInfo>& chs,
+int MNECTFCompDataSet::set_comp(std::vector<FIFFLIB::FiffChInfo>& chs,
                                 int nch,
                                 int comp)
 /*
@@ -746,7 +748,7 @@ int MNECTFCompDataSet::apply_transpose(bool do_it, Eigen::MatrixXf& data)
 
 //=============================================================================================================
 
-int MNECTFCompDataSet::get_comp(const QList<FIFFLIB::FiffChInfo>& chs, int nch)
+int MNECTFCompDataSet::get_comp(const std::vector<FIFFLIB::FiffChInfo>& chs, int nch)
 {
     int res = MNE_CTFV_NOGRAD;
     int first_comp, comp;
@@ -808,9 +810,9 @@ QString MNECTFCompDataSet::explain_comp(int kind)
 //=============================================================================================================
 
 int MNECTFCompDataSet::set_compensation(int compensate_to,
-                                        QList<FiffChInfo>& chList,
+                                        std::vector<FiffChInfo>& chList,
                                         int nchan,
-                                        QList<FiffChInfo> comp_chs,
+                                        std::vector<FiffChInfo> comp_chs,
                                         int ncomp_chan) /* How many */
 /*
      * Make data which has the third-order gradient compensation applied
@@ -820,7 +822,7 @@ int MNECTFCompDataSet::set_compensation(int compensate_to,
     int have_comp_chs;
     int comp_was = MNE_CTFV_COMP_UNKNOWN;
 
-    if (comp_chs.isEmpty()) {
+    if (comp_chs.empty()) {
         comp_chs = chList;
         ncomp_chan = nchan;
     }

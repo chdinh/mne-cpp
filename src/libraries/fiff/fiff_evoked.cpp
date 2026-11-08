@@ -22,6 +22,9 @@
 
 #include "fiff_evoked.h"
 
+#include <vector>
+#include <utility>
+
 #include <utils/generics/log.h>
 #include <utils/string_utils.h>
 #include "fiff_stream.h"
@@ -51,7 +54,7 @@ FiffEvoked::FiffEvoked()
 , aspect_kind(-1)
 , first(-1)
 , last(-1)
-, baseline(qMakePair(-1.0f, -1.0f))
+, baseline(std::make_pair(-1.0f, -1.0f))
 {
 }
 
@@ -237,7 +240,7 @@ Expected<FiffEvoked> FiffEvokedFile::read(int set, const FiffEvoked::Baseline& b
     //
     fiff_int_t nchan = 0;
     float sfreq = -1.0f;
-    QList<FiffChInfo> chs;
+    std::vector<FiffChInfo> chs;
     fiff_int_t tag_kind, pos, first = 0, last = 0;
     std::optional<FiffTag> t_pTag;
     QString comment("");
@@ -268,7 +271,7 @@ Expected<FiffEvoked> FiffEvokedFile::read(int set, const FiffEvoked::Baseline& b
                 break;
             case FIFF_CH_INFO:
                 t_pTag = m_stream.read_tag(pos);
-                chs.append(t_pTag->toChInfo());
+                chs.push_back(t_pTag->toChInfo());
                 break;
         }
     }
@@ -282,7 +285,7 @@ Expected<FiffEvoked> FiffEvokedFile::read(int set, const FiffEvoked::Baseline& b
         if (chs.size() == 0) {
             return fail(ErrorCode::Format, "Local channel information missing in {}", file);
         }
-        if (chs.size() != nchan) {
+        if (std::ssize(chs) != nchan) {
             return fail(ErrorCode::Format, "{} channels but {} channel definitions in {}", nchan, chs.size(), file);
         }
         info.chs = chs;
@@ -302,7 +305,7 @@ Expected<FiffEvoked> FiffEvokedFile::read(int set, const FiffEvoked::Baseline& b
     //
     fiff_int_t aspect_kind = -1;
     fiff_int_t nave = -1;
-    QList<FiffTag> epoch;
+    std::vector<FiffTag> epoch;
     for (k = 0; k < my_aspect->nent(); ++k) {
         tag_kind = my_aspect->dir[k].kind;
         pos = my_aspect->dir[k].pos;
@@ -322,7 +325,7 @@ Expected<FiffEvoked> FiffEvokedFile::read(int set, const FiffEvoked::Baseline& b
                 break;
             case FIFF_EPOCH:
                 t_pTag = m_stream.read_tag(pos);
-                epoch.append(FiffTag(*t_pTag));
+                epoch.push_back(FiffTag(*t_pTag));
                 break;
         }
     }
@@ -330,7 +333,7 @@ Expected<FiffEvoked> FiffEvokedFile::read(int set, const FiffEvoked::Baseline& b
         nave = 1;
     qInfo("\t\tnave = %d - aspect type = %d\n", nave, aspect_kind);
 
-    qint32 nepoch = epoch.size();
+    qint32 nepoch = static_cast<int>(epoch.size());
     if (nepoch != 1 && nepoch != info.nchan) {
         return fail(ErrorCode::Format, "{} epoch tags for {} channels in {}", nepoch, info.nchan, file);
     }
@@ -421,7 +424,7 @@ Expected<FiffEvoked> FiffEvokedFile::read(int set, const FiffEvoked::Baseline& b
     p_FiffEvoked.data = all_data;
 
     if (baseline && baseline->first != baseline->second) {
-        QPair<float, float> window(baseline->first, baseline->second);
+        std::pair<float, float> window(baseline->first, baseline->second);
         p_FiffEvoked.applyBaselineCorrection(window);
     } else {
         qInfo("\tNo baseline correction applied\n");
@@ -488,14 +491,14 @@ FiffEvoked& FiffEvoked::operator+=(const MatrixXd& newData)
 
 //=============================================================================================================
 
-FiffEvoked FiffEvoked::combine(const QList<FiffEvoked>& evokeds, CombineWeights weights)
+FiffEvoked FiffEvoked::combine(const std::vector<FiffEvoked>& evokeds, CombineWeights weights)
 {
     VectorXd w(evokeds.size());
     double naveSum = 0.0;
     for (const FiffEvoked& e : evokeds) {
         naveSum += e.nave;
     }
-    for (int i = 0; i < evokeds.size(); ++i) {
+    for (int i = 0; i < std::ssize(evokeds); ++i) {
         w(i) = weights == CombineWeights::Nave ? evokeds[i].nave / naveSum
                                                : 1.0 / static_cast<double>(evokeds.size());
     }
@@ -504,13 +507,13 @@ FiffEvoked FiffEvoked::combine(const QList<FiffEvoked>& evokeds, CombineWeights 
 
 //=============================================================================================================
 
-FiffEvoked FiffEvoked::combine(const QList<FiffEvoked>& evokeds, const VectorXd& weights)
+FiffEvoked FiffEvoked::combine(const std::vector<FiffEvoked>& evokeds, const VectorXd& weights)
 {
-    if (evokeds.isEmpty() || weights.size() != evokeds.size()) {
+    if (evokeds.empty() || weights.size() != std::ssize(evokeds)) {
         qWarning() << "[FiffEvoked::combine] weights must be the same size as the evoked list.";
         return FiffEvoked();
     }
-    const FiffEvoked& ref = evokeds.first();
+    const FiffEvoked& ref = evokeds.front();
     for (const FiffEvoked& e : evokeds) {
         if (e.info.ch_names != ref.info.ch_names || e.times.size() != ref.times.size() || (e.times - ref.times).cwiseAbs().maxCoeff() > 1e-6f) {
             qWarning() << "[FiffEvoked::combine] All evoked data must have the same channels and times.";
@@ -522,7 +525,7 @@ FiffEvoked FiffEvoked::combine(const QList<FiffEvoked>& evokeds, const VectorXd&
     res.data = MatrixXd::Zero(ref.data.rows(), ref.data.cols());
     double invNave = 0.0;
     QString comment;
-    for (int i = 0; i < evokeds.size(); ++i) {
+    for (int i = 0; i < std::ssize(evokeds); ++i) {
         const FiffEvoked& e = evokeds[i];
         const double w = weights(i);
         res.data += w * e.data;
@@ -553,7 +556,7 @@ FiffEvoked FiffEvoked::combine(const QList<FiffEvoked>& evokeds, const VectorXd&
 
 //=============================================================================================================
 
-void FiffEvoked::applyBaselineCorrection(QPair<float, float>& p_baseline)
+void FiffEvoked::applyBaselineCorrection(std::pair<float, float>& p_baseline)
 {
     // Skip baseline correction if sentinel value (-1, -1) or equal bounds are passed
     if (p_baseline.first == p_baseline.second) {

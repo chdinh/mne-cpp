@@ -449,7 +449,7 @@ void TestMneRawProjComp::derivSet_textFifAndValidation()
     const auto set = MNEDerivSet::readText(text.fileName());
     QVERIFY(set);
     QCOMPARE(set->count(), 3);
-    const QList<MNEDerivSet::Definition> defs = set->definitions();
+    const std::vector<MNEDerivSet::Definition> defs = set->definitions();
     QCOMPARE(defs[0].first, QString("EEG 001-EEG 002"));
     QCOMPARE(defs[0].second, (QMap<QString, double>{{"EEG 001", 1.0}, {"EEG 002", -1.0}}));
     QCOMPARE(defs[1].second.value("EEG 003"), -0.5);
@@ -468,13 +468,13 @@ void TestMneRawProjComp::derivSet_textFifAndValidation()
     QCOMPARE(back->definitions()[3].second, (QMap<QString, double>{{"EOG061", 1.0}}));
 
     // Validation: inputs must exist and share kind and unit.
-    QList<FiffChInfo> chs;
+    std::vector<FiffChInfo> chs;
     for (const auto& [name, kind] : QList<QPair<QString, int>>{{"EEG001", FIFFV_EEG_CH}, {"EEG002", FIFFV_EEG_CH}, {"EOG061", FIFFV_EOG_CH}}) {
         FiffChInfo ch;
         ch.ch_name = name.toStdString();
         ch.kind = kind;
         ch.unit = FIFF_UNIT_V;
-        chs << ch;
+        chs.push_back(ch);
     }
     MNEDeriv first = *back->derivs[0];
     QCOMPARE(first.validate(chs), 1);
@@ -720,7 +720,7 @@ void TestMneRawProjComp::rawInfo_loadFromFile()
     QVERIFY(info != nullptr);
     QVERIFY(info->nchan > 0);
     QVERIFY(info->sfreq > 0);
-    QVERIFY(!info->chInfo.isEmpty());
+    QVERIFY(!info->chInfo.empty());
     QCOMPARE(info->chInfo.size(), info->nchan);
     QVERIFY(!info->rawDir.empty());
 }
@@ -761,7 +761,7 @@ void TestMneRawProjComp::rawInfo_getMeasInfo()
     std::unique_ptr<FiffId> id;
     int nchan = 0;
     float sfreq = 0, highpass = 0, lowpass = 0;
-    QList<FiffChInfo> chp;
+    std::vector<FiffChInfo> chp;
     FiffCoordTrans trans;
     FiffTime start_time;
 
@@ -1139,3 +1139,6 @@ void TestMneRawProjComp::measData_adjustBaselines()
 QTEST_GUILESS_MAIN(TestMneRawProjComp)
 
 #include "test_mne_raw_proj_comp.moc"
+
+#include <vector>
+#include <utility>

@@ -25,6 +25,8 @@
 #include <fwd/fwd_types.h>
 
 #include "inv_dipole_fit_data.h"
+
+#include <vector>
 #include "inv_guess_data.h"
 #include <mne/mne_meas_data.h>
 #include <mne/mne_meas_data_set.h>
@@ -492,7 +494,7 @@ InvDipoleFitData* InvDipoleFitData::setup_dipole_fit_data(const QString& mriname
                                                           float grad_reg,
                                                           float eeg_reg,
                                                           int diagnoise,
-                                                          const QList<QString>& projnames,
+                                                          const std::vector<QString>& projnames,
                                                           int include_meg,
                                                           int include_eeg)
 {
@@ -631,7 +633,7 @@ InvDipoleFitData* InvDipoleFitData::setup_dipole_fit_data(const QString& mriname
                                                      *res->meg_head_t);
         if (!res->meg_coils)
             return nullptr;
-        res->eeg_els = FwdCoilSet::create_eeg_els(res->chs.mid(res->nmeg),
+        res->eeg_els = FwdCoilSet::create_eeg_els({res->chs.begin() + res->nmeg, res->chs.end()},
                                                   res->neeg);
         if (!res->eeg_els)
             return nullptr;
@@ -655,7 +657,7 @@ InvDipoleFitData* InvDipoleFitData::setup_dipole_fit_data(const QString& mriname
     if (!comp_data)
         return nullptr;
     if (comp_data->ncomp > 0) { /* Compensation channel information may be needed */
-        QList<FiffChInfo> comp_chs;
+        std::vector<FiffChInfo> comp_chs;
         int ncomp = 0;
 
         qInfo("%d compensation data sets in %s", comp_data->ncomp, measname.toUtf8().data());
@@ -671,9 +673,9 @@ InvDipoleFitData* InvDipoleFitData::setup_dipole_fit_data(const QString& mriname
                 return nullptr;
             }
             compStream.close();
-            for (int k = 0; k < compInfo.chs.size(); k++) {
+            for (int k = 0; k < std::ssize(compInfo.chs); k++) {
                 if (compInfo.chs[k].kind == FIFFV_REF_MEG_CH) {
-                    comp_chs.append(compInfo.chs[k]);
+                    comp_chs.push_back(compInfo.chs[k]);
                     ncomp++;
                 }
             }

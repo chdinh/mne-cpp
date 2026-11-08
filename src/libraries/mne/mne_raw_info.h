@@ -46,7 +46,6 @@
 //=============================================================================================================
 
 #include <QSharedPointer>
-#include <QList>
 
 //=============================================================================================================
 // FORWARD DECLARATIONS
@@ -171,7 +170,7 @@ public:
                              float* sfreq,
                              float* highpass,
                              float* lowpass,
-                             QList<FIFFLIB::FiffChInfo>& chp,
+                             std::vector<FIFFLIB::FiffChInfo>& chp,
                              FIFFLIB::FiffCoordTrans& trans,
                              FIFFLIB::FiffTime& start_time);
 
@@ -198,7 +197,7 @@ public:
                              float* sfreq,
                              float* highpass,
                              float* lowpass,
-                             QList<FIFFLIB::FiffChInfo>& chp,
+                             std::vector<FIFFLIB::FiffChInfo>& chp,
                              FIFFLIB::FiffCoordTrans& trans);
 
     /**
@@ -223,7 +222,7 @@ public:
     QString filename;                               /**< The name of the file this comes from. */
     std::unique_ptr<FIFFLIB::FiffId> id;            /**< Measurement id from the file. */
     int nchan;                                      /**< Number of channels. */
-    QList<FIFFLIB::FiffChInfo> chInfo;              /**< Channel info data . */
+    std::vector<FIFFLIB::FiffChInfo> chInfo;        /**< Channel info data . */
     int coord_frame;                                /**< Which coordinate frame are the
                                          * positions defined in?
                                          */

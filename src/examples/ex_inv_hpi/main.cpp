@@ -20,6 +20,8 @@
 //=============================================================================================================
 
 #include <inv/hpi/inv_hpi_data_updater.h>
+
+#include <vector>
 #include <inv/hpi/inv_hpi_fit.h>
 #include <inv/hpi/inv_hpi_fit_data.h>
 #include <inv/hpi/inv_hpi_model_parameters.h>
@@ -94,10 +96,10 @@ int main(int argc, char* argv[])
 
     //! [inv_sensor_set_usage]
     InvSensorSetCreator creator; // reads resources/general/coilDefinitions/coil_def.dat
-    QList<FiffChInfo> megChannels;
+    std::vector<FiffChInfo> megChannels;
     for (const FiffChInfo& ch : info->chs) {
         if (ch.kind == FIFFV_MEG_CH)
-            megChannels << ch;
+            megChannels.push_back(ch);
     }
     const InvSensorSet sensors = creator.updateSensorSet(megChannels, Accuracy::high); // integration points per coil
     //! [inv_sensor_set_usage]

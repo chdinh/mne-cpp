@@ -27,6 +27,8 @@
 //=============================================================================================================
 
 #include "../disp_global.h"
+
+#include <vector>
 #include "abstractview.h"
 
 #include <fiff/fiff_ch_info.h>
@@ -83,7 +85,7 @@ public:
      * @param[in] parent        parent of widget.
      * @param[in] f Qt window flags passed to the QWidget constructor.
      */
-    ModalitySelectionView(const QList<FIFFLIB::FiffChInfo>& lChannelList,
+    ModalitySelectionView(const std::vector<FIFFLIB::FiffChInfo>& lChannelList,
                           const QString& sSettingsPath = "",
                           QWidget* parent = 0,
                           Qt::WindowFlags f = Qt::Widget);

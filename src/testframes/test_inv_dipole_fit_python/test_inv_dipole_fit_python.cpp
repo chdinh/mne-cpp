@@ -107,7 +107,7 @@ Vector3f truthMoment(int k)
 bool writeSyntheticEvoked(const QString& sourceFile, const QString& outFile, const StringList& chNames, const MatrixXd& data)
 {
     FiffEvokedSet source(sourceFile.toStdU16String());
-    if (source.evoked.isEmpty())
+    if (source.evoked.empty())
         return false;
 
     FiffEvoked evoked = source.evoked[0].pick_channels(chNames);
@@ -125,7 +125,7 @@ bool writeSyntheticEvoked(const QString& sourceFile, const QString& outFile, con
 
     FiffEvokedSet out;
     out.info = evoked.info;
-    out.evoked.append(evoked);
+    out.evoked.push_back(evoked);
     return out.save(outFile.toStdU16String()).has_value();
 }
 
@@ -211,7 +211,7 @@ void TestInvDipoleFitPython::initTestCase()
     QVERIFY(m_dir.isValid());
 
     // Fields of the true dipoles, from the very forward model the fit uses.
-    QStringList projnames{m_sampleAve};
+    std::vector<QString> projnames{m_sampleAve};
     Vector3f r0(0.0f, 0.0f, 0.04f);
     std::unique_ptr<InvDipoleFitData> fwdData(InvDipoleFitData::setup_dipole_fit_data(
         QString(), m_sampleAve, QString(), &r0, nullptr, false, QString(), QString(),
@@ -327,7 +327,7 @@ void TestInvDipoleFitPython::bemForwardMatches()
     QFETCH(double, eegNorm);
 
     const QString data = QCoreApplication::applicationDirPath() + "/../resources/data/mne-cpp-test-data/";
-    QStringList projnames{m_sampleAve};
+    std::vector<QString> projnames{m_sampleAve};
     FwdEegSphereModel::UPtr eegModel = FwdEegSphereModel::setup_eeg_sphere_model(QString(), QString(), 0.09f);
     QVERIFY(eegModel);
     // MEG and EEG through the BEM, with only the diagonal of the noise covariance.
@@ -436,7 +436,7 @@ void TestInvDipoleFitPython::readsNoiseCov()
     QFETCH(float, reg);
 
     const QString cov = QCoreApplication::applicationDirPath() + "/../resources/data/mne-cpp-test-data/MEG/sample/sample_audvis-cov.fif";
-    QStringList projnames{m_sampleAve};
+    std::vector<QString> projnames{m_sampleAve};
     Vector3f r0(0.0f, 0.0f, 0.04f);
     std::unique_ptr<InvDipoleFitData> fitData(InvDipoleFitData::setup_dipole_fit_data(
         QString(), m_sampleAve, QString(), &r0, nullptr, false, QString(), cov,
@@ -624,7 +624,7 @@ void TestInvDipoleFitPython::sphereGuessGrid()
 void TestInvDipoleFitPython::fitsMagneticDipole()
 {
     // The field of a magnetic dipole (e.g. a marker coil), fitted with magnetic dipoles (mne_dipole_fit --mag)
-    QStringList projnames{m_sampleAve};
+    std::vector<QString> projnames{m_sampleAve};
     Vector3f r0(0.0f, 0.0f, 0.04f);
     std::unique_ptr<InvDipoleFitData> fwdData(InvDipoleFitData::setup_dipole_fit_data(
         QString(), m_sampleAve, QString(), &r0, nullptr, false, QString(), QString(),
@@ -719,7 +719,7 @@ void TestInvDipoleFitPython::guessesFromFile()
     const QString data = QCoreApplication::applicationDirPath() + "/../resources/data/mne-cpp-test-data/";
     const QString guessFile = QStringLiteral(MNE_VOL_SRC_DATA_DIR "/sample-vol25-src.fif");
     QVERIFY(QFile::exists(guessFile));
-    QStringList projnames{m_sampleAve};
+    std::vector<QString> projnames{m_sampleAve};
     Vector3f r0(0.0f, 0.0f, 0.04f);
     std::unique_ptr<InvDipoleFitData> fitData(InvDipoleFitData::setup_dipole_fit_data(
         data + "MEG/sample/all-trans.fif", m_sampleAve, QString(), &r0, nullptr, false, QString(), QString(),
@@ -789,7 +789,7 @@ void TestInvDipoleFitPython::commandLine()
     QCOMPARE(s.filter.size, 4096);
     QCOMPARE(s.filter.lowpass, 30.0f);
     QCOMPARE(s.setno, 2);
-    QVERIFY(s.projnames.isEmpty());
+    QVERIFY(s.projnames.empty());
 
     // Invalid values stop parsing and leave the default in place.
     QByteArrayList bad{"mne_dipole_fit", "--grid", "-3"};
@@ -825,7 +825,7 @@ void TestInvDipoleFitPython::commandLine()
     QCOMPARE(m.eeg_model_file, QString("m.txt"));
     QCOMPARE(m.eeg_model_name, QString("Three"));
     // checkIntegrity puts the measurement file first unless --noproj.
-    QCOMPARE(m.projnames, QStringList({"r_raw.fif", "p.fif"}));
+    QCOMPARE(m.projnames, (std::vector<QString>{"r_raw.fif", "p.fif"}));
     QCOMPARE(m.badname, QString("bad.txt"));
     QCOMPARE(m.noisename, QString("n-cov.fif"));
     QCOMPARE(m.eeg_reg, 0.3f);
@@ -926,7 +926,7 @@ void TestInvDipoleFitPython::selectsNoiseCov()
         names.push_back(QStringLiteral("MEG%1").arg(k, 4, 10, QChar(u'0')).toStdString());
         FiffChInfo ch;
         ch.ch_name = names.back();
-        meas.chs << ch;
+        meas.chs.push_back(ch);
     }
     meas.nchan = kN;
     meas.sets.push_back(std::make_unique<MNEMeasDataSet>());
@@ -1005,7 +1005,7 @@ void TestInvDipoleFitPython::rejectsMissingInput()
     noOutput.guess_mindist = 0.0f;
     noOutput.tmin = 0.0f;
     noOutput.checkIntegrity();
-    QCOMPARE(noOutput.projnames, QStringList{m_synthAve});
+    QCOMPARE(noOutput.projnames, std::vector<QString>{m_synthAve});
     InvDipoleFit noOutputFit(&noOutput);
     const InvEcdSet set = noOutputFit.calculateFit();
     QCOMPARE(set.size(), m_fit.size());

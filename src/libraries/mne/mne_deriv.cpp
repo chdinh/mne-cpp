@@ -15,6 +15,8 @@
 //=============================================================================================================
 
 #include "mne_deriv.h"
+
+#include <vector>
 #include <utils/string_utils.h>
 
 //=============================================================================================================
@@ -57,15 +59,15 @@ MNEDeriv::~MNEDeriv() = default;
 
 //=============================================================================================================
 
-int MNEDeriv::validate(const QList<FiffChInfo>& chInfo)
+int MNEDeriv::validate(const std::vector<FiffChInfo>& chInfo)
 {
     const int nrow = deriv_data ? deriv_data->nrow : 0;
     valid = Eigen::VectorXi::Zero(nrow);
     chs.clear();
     for (int j = 0; j < nrow; ++j) {
-        chs.append(FiffChInfo());
+        chs.push_back(FiffChInfo());
     }
-    if (chInfo.isEmpty() || nrow == 0) {
+    if (chInfo.empty() || nrow == 0) {
         return 0;
     }
     StringList names;

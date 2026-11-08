@@ -920,8 +920,8 @@ private slots:
             QSKIP("Raw file not found");
 
         FiffRawData raw((m_sDataPath + "/MEG/sample/sample_audvis_trunc_raw.fif").toStdString());
-        QList<FiffProj>& projs = raw.info.projs;
-        if (projs.isEmpty())
+        std::vector<FiffProj>& projs = raw.info.projs;
+        if (projs.empty())
             QSKIP("No projectors in raw");
 
         // Activate all projectors
@@ -975,3 +975,5 @@ private slots:
 
 QTEST_GUILESS_MAIN(TestMneHemisphereEpoch)
 #include "test_mne_hemisphere_epoch.moc"
+
+#include <vector>

@@ -28,6 +28,8 @@
 //=============================================================================================================
 
 #include "../disp_global.h"
+
+#include <vector>
 #include "abstractview.h"
 #include <fiff/fiff_proj.h>
 
@@ -98,7 +100,7 @@ public:
      *
      * @return The current projectors.
      */
-    QList<FIFFLIB::FiffProj> getProjectors() const;
+    std::vector<FIFFLIB::FiffProj> getProjectors() const;
 
     //=========================================================================================================
     /**
@@ -106,7 +108,7 @@ public:
      *
      * @param[in] projs    The new projectors.
      */
-    void setProjectors(const QList<FIFFLIB::FiffProj>& projs);
+    void setProjectors(const std::vector<FIFFLIB::FiffProj>& projs);
 
     //=========================================================================================================
     /**
@@ -166,7 +168,7 @@ protected:
     QList<QCheckBox*> m_qListProjCheckBox; /**< List of projection CheckBox. */
     QCheckBox* m_pEnableDisableProjectors; /**< Holds the enable disable all check box. */
 
-    QList<FIFFLIB::FiffProj> m_pProjs; /**< The current projectors. */
+    std::vector<FIFFLIB::FiffProj> m_pProjs; /**< The current projectors. */
 
     QString m_sSettingsPath; /**< The settings path to store the GUI settings to. */
 
@@ -177,7 +179,7 @@ signals:
     /**
      * Emit this signal whenever the user changes the projections.
      */
-    void projSelectionChanged(const QList<FIFFLIB::FiffProj>& projs);
+    void projSelectionChanged(const std::vector<FIFFLIB::FiffProj>& projs);
 };
 } // NAMESPACE
 

@@ -19,6 +19,8 @@
 //=============================================================================================================
 
 #include "babymeg.h"
+
+#include <vector>
 #include <utils/string_utils.h>
 #include "FormFiles/babymegsetupwidget.h"
 #include "FormFiles/babymegsquidcontroldgl.h"
@@ -486,10 +488,10 @@ bool BabyMEG::readProjectors()
         return false;
     }
 
-    QList<FiffProj> q_ListProj = t_pStream.read_proj(t_pStream.dirtree());
+    std::vector<FiffProj> q_ListProj = t_pStream.read_proj(t_pStream.dirtree());
 
     //Set all projectors to zero
-    for (int i = 0; i < q_ListProj.size(); i++)
+    for (int i = 0; i < std::ssize(q_ListProj); i++)
         q_ListProj[i].active = false;
 
     if (q_ListProj.size() == 0) {
@@ -521,7 +523,7 @@ bool BabyMEG::readCompensators()
         return false;
     }
 
-    QList<FiffCtfComp> q_ListComp = t_pStream.read_ctf_comp(t_pStream.dirtree(), m_pFiffInfo->chs);
+    std::vector<FiffCtfComp> q_ListComp = t_pStream.read_ctf_comp(t_pStream.dirtree(), m_pFiffInfo->chs);
 
     if (q_ListComp.size() == 0) {
         qInfo("[BabyMEG::readCompensators] Could not find compensators");

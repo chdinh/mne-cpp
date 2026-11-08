@@ -103,7 +103,7 @@ int main(int argc, char* argv[])
     }
     FiffEvokedSet& evokedSet = *read;
 
-    if (setIdx < 0 || setIdx >= evokedSet.evoked.size()) {
+    if (setIdx < 0 || setIdx >= std::ssize(evokedSet.evoked)) {
         qCritical("Set index %d out of range (0..%lld).", setIdx,
                   static_cast<long long>(evokedSet.evoked.size() - 1));
         return 1;

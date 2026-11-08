@@ -30,6 +30,8 @@
 
 #include "../inv_global.h"
 
+#include <vector>
+
 //=============================================================================================================
 // QT INCLUDES
 //=============================================================================================================
@@ -269,7 +271,7 @@ public:
      *
      * @return Sensor set built from the MEG coil definitions, or an empty set if channelList is empty or holds a channel without a MEG coil.
      */
-    InvSensorSet updateSensorSet(const QList<FIFFLIB::FiffChInfo>& channelList,
+    InvSensorSet updateSensorSet(const std::vector<FIFFLIB::FiffChInfo>& channelList,
                                  const Accuracy& accuracy);
 
 private:

@@ -21,6 +21,8 @@
 
 #include "fiff_ctf_comp.h"
 
+#include <vector>
+
 //=============================================================================================================
 // USED NAMESPACES
 //=============================================================================================================
@@ -75,10 +77,10 @@ void FiffCtfComp::clear()
 namespace
 {
 
-int uniqueChannel(const QList<FiffChInfo>& chs, const std::string& name)
+int uniqueChannel(const std::vector<FiffChInfo>& chs, const std::string& name)
 {
     int found = -1;
-    for (int i = 0; i < chs.size(); ++i) {
+    for (int i = 0; i < std::ssize(chs); ++i) {
         if (chs[i].ch_name == name) {
             if (found >= 0) {
                 qWarning("Ambiguous channel %s", name.c_str());
@@ -94,7 +96,7 @@ int uniqueChannel(const QList<FiffChInfo>& chs, const std::string& name)
 
 } // namespace
 
-bool FiffCtfComp::calibrate(const QList<FiffChInfo>& chs)
+bool FiffCtfComp::calibrate(const std::vector<FiffChInfo>& chs)
 {
     rowcals = MatrixXd::Ones(data->data.rows(), 1);
     colcals = MatrixXd::Ones(data->data.cols(), 1);

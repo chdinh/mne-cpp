@@ -577,7 +577,7 @@ FIFFLIB::FiffInfo FtConnector::infoFromSimpleHeader()
         channel.unit_mul = FIFF_UNITM_NONE;
         channel.chpos.coil_type = FIFFV_COIL_NONE;
 
-        defaultInfo.chs.append(channel);
+        defaultInfo.chs.push_back(channel);
 
         defaultInfo.ch_names.push_back("Ch. " + std::to_string(i));
     }

@@ -46,7 +46,6 @@
 // QT INCLUDES
 //=============================================================================================================
 
-#include <QList>
 #include <vector>
 
 //=============================================================================================================
@@ -203,8 +202,8 @@ public:
     // nearest / nearest_dist removed: now use inherited vector<MNENearest> nearest
     //   + nearestVertIdx() / nearestDistVec() accessors
     // dist removed: now use inherited FiffSparseMatrix dist + toEigenSparse() / fromEigenSparse()
-    QList<Eigen::VectorXi> pinfo; /**< Patch information (using option -cps during mne_setup_source_space). */
-    Eigen::VectorXi patch_inds;   /**< List of neighboring vertices in the high resolution triangulation. */
+    std::vector<Eigen::VectorXi> pinfo; /**< Patch information (using option -cps during mne_setup_source_space). */
+    Eigen::VectorXi patch_inds;         /**< List of neighboring vertices in the high resolution triangulation. */
 
     // --- MNEHemisphere-specific fields ---
     Eigen::MatrixX3d tri_cent;     /**< Triangle centers. */
@@ -231,7 +230,7 @@ inline bool MNEHemisphere::isClustered() const
 inline bool operator==(const MNEHemisphere& a, const MNEHemisphere& b)
 {
     if (a.pinfo.size() == b.pinfo.size()) {
-        for (int i = 0; i < a.pinfo.size(); ++i) {
+        for (int i = 0; i < std::ssize(a.pinfo); ++i) {
             if (!a.pinfo.at(i).isApprox(b.pinfo.at(i))) {
                 return false;
             }

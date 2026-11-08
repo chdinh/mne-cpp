@@ -245,7 +245,7 @@ private slots:
         FiffInfo& info = raw.info;
         QVERIFY(info.sfreq > 0);
         QVERIFY(info.nchan > 0);
-        QVERIFY(info.chs.size() == info.nchan);
+        QVERIFY(std::ssize(info.chs) == info.nchan);
         QVERIFY(static_cast<int>(info.ch_names.size()) == info.nchan);
 
         // Check channel info details
@@ -257,7 +257,7 @@ private slots:
         }
 
         // Check projs
-        for (int i = 0; i < info.projs.size(); ++i) {
+        for (int i = 0; i < std::ssize(info.projs); ++i) {
             const FiffProj& proj = info.projs[i];
             QVERIFY(!proj.desc.isEmpty() || true);
             QVERIFY(proj.data != nullptr || proj.data == nullptr);
@@ -335,7 +335,7 @@ private slots:
         QVERIFY(evokedSet.evoked.size() > 0);
 
         // Check each evoked dataset
-        for (int i = 0; i < evokedSet.evoked.size(); ++i) {
+        for (int i = 0; i < std::ssize(evokedSet.evoked); ++i) {
             const FiffEvoked& ev = evokedSet.evoked[i];
             QVERIFY(!ev.comment.isEmpty());
             QVERIFY(ev.nave > 0);
@@ -362,7 +362,7 @@ private slots:
         QCOMPARE(picked.info.nchan, (int)picks.size());
 
         // Each evoked should have reduced channels
-        for (int i = 0; i < picked.evoked.size(); ++i) {
+        for (int i = 0; i < std::ssize(picked.evoked); ++i) {
             QCOMPARE(picked.evoked[i].data.rows(), (Index)picks.size());
         }
     }

@@ -73,7 +73,7 @@ void EogRegression::fit(const MatrixXd& data,
     m_bFitted = false;
 
     if (eogChannels.empty()) {
-        for (int i = 0; i < info.chs.size(); ++i) {
+        for (int i = 0; i < std::ssize(info.chs); ++i) {
             if (info.chs[i].kind == FIFFV_EOG_CH && !UTILSLIB::contains(info.bads, info.ch_names[i]))
                 m_vecEogIndices.push_back(i);
         }

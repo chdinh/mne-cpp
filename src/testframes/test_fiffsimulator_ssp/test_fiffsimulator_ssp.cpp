@@ -83,7 +83,7 @@ void TestFiffSimulatorSsp::sspAndBadsRoundTripThroughFiffWrite()
     FiffRawData srcRaw = std::move(*srcRead);
 
     const FiffInfo srcInfo = srcRaw.info;
-    QVERIFY2(!srcInfo.projs.isEmpty(),
+    QVERIFY2(!srcInfo.projs.empty(),
              "Sample data has no SSP projectors; cannot exercise round-trip.");
 
     // Inject a couple of bad channels for the round-trip (sample data may have
@@ -132,7 +132,7 @@ void TestFiffSimulatorSsp::sspAndBadsRoundTripThroughFiffWrite()
 
     // (b) Projector list — count, then per-projector kind/active/desc/matrix shape + data.
     QCOMPARE(outInfo.projs.size(), infoForWrite.projs.size());
-    for (int i = 0; i < outInfo.projs.size(); ++i) {
+    for (int i = 0; i < std::ssize(outInfo.projs); ++i) {
         const FiffProj& a = infoForWrite.projs.at(i);
         const FiffProj& b = outInfo.projs.at(i);
         QCOMPARE(b.kind, a.kind);

@@ -16,6 +16,8 @@
 
 #include "mne_event_list.h"
 
+#include <vector>
+
 #include <fiff/fiff_constants.h>
 #include <fiff/fiff_dir_node.h>
 #include <fiff/fiff_stream.h>
@@ -73,7 +75,7 @@ std::optional<MNEEventList> MNEEventList::readFif(const QString& path, int offse
     // The comments are one NUL-separated string, one entry per event.
     if (const auto commentTag = blocks.front()->find_tag(stream, FIFF_MNE_EVENT_COMMENTS)) {
         const QList<QByteArray> comments = commentTag->split('\0');
-        for (int k = 0; k < nevent && k < comments.size(); ++k) {
+        for (int k = 0; k < nevent && k < std::ssize(comments); ++k) {
             list.events[k].comment = QString::fromLatin1(comments[k]);
         }
     }

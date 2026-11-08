@@ -105,9 +105,7 @@
 #include <QByteArray>
 
 #include <optional>
-#include <QList>
 #include <QSharedPointer>
-#include <QVector>
 
 //=============================================================================================================
 // STL INCLUDES
@@ -237,7 +235,7 @@ public:
      *
      * @return true if dimensions are available.
      */
-    bool getMatrixDimensions(qint32& p_ndim, QVector<qint32>& p_Dims) const;
+    bool getMatrixDimensions(qint32& p_ndim, std::vector<qint32>& p_Dims) const;
 
     //=========================================================================================================
     /**
@@ -858,7 +856,7 @@ inline Eigen::MatrixXi FiffTag::toIntMatrix() const
         return Eigen::MatrixXi();
 
     qint32 ndim;
-    QVector<qint32> dims;
+    std::vector<qint32> dims;
     this->getMatrixDimensions(ndim, dims);
 
     if (ndim != 2) {
@@ -885,7 +883,7 @@ inline Eigen::MatrixXf FiffTag::toFloatMatrix() const
     }
 
     qint32 ndim;
-    QVector<qint32> dims;
+    std::vector<qint32> dims;
     this->getMatrixDimensions(ndim, dims);
 
     if (ndim != 2) {

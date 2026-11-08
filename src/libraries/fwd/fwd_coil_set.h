@@ -112,7 +112,7 @@ public:
      *
      * @return   The created meg coil set.
      */
-    FwdCoilSet::UPtr create_meg_coils(const QList<FIFFLIB::FiffChInfo>& chs,
+    FwdCoilSet::UPtr create_meg_coils(const std::vector<FIFFLIB::FiffChInfo>& chs,
                                       int nch,
                                       int acc,
                                       const FIFFLIB::FiffCoordTrans& t = FIFFLIB::FiffCoordTrans());
@@ -128,7 +128,7 @@ public:
      *
      * @return   The created meg coil set.
      */
-    static FwdCoilSet::UPtr create_eeg_els(const QList<FIFFLIB::FiffChInfo>& chs,
+    static FwdCoilSet::UPtr create_eeg_els(const std::vector<FIFFLIB::FiffChInfo>& chs,
                                            int nch,
                                            const FIFFLIB::FiffCoordTrans& t = FIFFLIB::FiffCoordTrans());
 

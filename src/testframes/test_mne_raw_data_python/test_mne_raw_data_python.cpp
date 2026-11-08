@@ -307,11 +307,11 @@ void TestMneRawDataPython::projectsSegment()
     m_raw->proj.reset();
 
     // Without projection files EEG channels still get MNE-C's average reference; MEG alone needs nothing
-    QList<FiffChInfo> eeg, meg, stim;
+    std::vector<FiffChInfo> eeg, meg, stim;
     for (const FiffChInfo& ch : std::as_const(m_raw->info->chInfo)) {
         (ch.kind == FIFFV_EEG_CH ? eeg : ch.kind == FIFFV_MEG_CH ? meg
                                                                  : stim)
-            .append(ch);
+            .push_back(ch);
     }
     QVERIFY(MNEProjOp::makeProjection({}, eeg, static_cast<int>(eeg.size()), proj));
     QVERIFY(proj);

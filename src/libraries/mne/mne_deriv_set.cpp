@@ -15,6 +15,9 @@
 //=============================================================================================================
 
 #include "mne_deriv_set.h"
+
+#include <vector>
+#include <utility>
 #include <utils/string_utils.h>
 
 #include <fiff/fiff_constants.h>
@@ -90,13 +93,13 @@ QStringList tokenize(QTextStream& in)
 
 //=============================================================================================================
 
-std::unique_ptr<MNEDeriv> makeDeriv(const QList<MNEDerivSet::Definition>& definitions, const QString& filename, const QString& shortname)
+std::unique_ptr<MNEDeriv> makeDeriv(const std::vector<MNEDerivSet::Definition>& definitions, const QString& filename, const QString& shortname)
 {
     StringList inputs;
     StringList outputs;
     std::vector<Eigen::Triplet<float>> triplets;
     for (const MNEDerivSet::Definition& definition : definitions) {
-        QList<QPair<int, double>> row;
+        std::vector<std::pair<int, double>> row;
         for (auto it = definition.second.cbegin(); it != definition.second.cend(); ++it) {
             if (std::fabs(it.value()) <= kZero) {
                 continue;
@@ -104,9 +107,9 @@ std::unique_ptr<MNEDeriv> makeDeriv(const QList<MNEDerivSet::Definition>& defini
             if (!UTILSLIB::contains(inputs, it.key().toStdString())) {
                 inputs.push_back(it.key().toStdString());
             }
-            row.append({static_cast<int>(UTILSLIB::indexOf(inputs, it.key().toStdString())), it.value()});
+            row.push_back({static_cast<int>(UTILSLIB::indexOf(inputs, it.key().toStdString())), it.value()});
         }
-        if (row.isEmpty()) {
+        if (row.empty()) {
             qInfo("MNEDerivSet - Empty derivation \"%s\" omitted", qPrintable(definition.first));
             continue;
         }
@@ -182,7 +185,7 @@ std::optional<MNEDerivSet> MNEDerivSet::readText(const QString& path)
         Mult,
         Number
     };
-    QList<Definition> definitions;
+    std::vector<Definition> definitions;
     Kind prev = Kind::Channel;
     bool havePrev = false;
     double number = 0.0;
@@ -198,27 +201,27 @@ std::optional<MNEDerivSet> MNEDerivSet::readText(const QString& path)
             continue;
         }
         if (kind == Kind::Channel && (!havePrev || prev == Kind::Channel)) {
-            definitions.append({token, {}});
+            definitions.push_back({token, {}});
         } else if (kind == Kind::Equal) {
-            if (definitions.isEmpty() || !definitions.last().second.isEmpty()) {
+            if (definitions.empty() || !definitions.back().second.isEmpty()) {
                 qWarning("MNEDerivSet::readText - Misplaced equal sign in %s", qPrintable(path));
                 return std::nullopt;
             }
         } else if (kind == Kind::Channel) {
             const double weight = prev == Kind::Minus ? -1.0 : prev == Kind::Number ? number
                                                                                     : 1.0;
-            if (definitions.isEmpty()) {
+            if (definitions.empty()) {
                 qWarning("MNEDerivSet::readText - Misplaced channel name in %s", qPrintable(path));
                 return std::nullopt;
             }
-            definitions.last().second[token] += weight;
+            definitions.back().second[token] += weight;
         } else if (kind == Kind::Number) {
             number = prev == Kind::Minus ? -value : value;
         }
         prev = kind;
         havePrev = true;
     }
-    if (definitions.isEmpty()) {
+    if (definitions.empty()) {
         qWarning("MNEDerivSet::readText - No derivations in %s", qPrintable(path));
         return std::nullopt;
     }
@@ -232,7 +235,7 @@ std::optional<MNEDerivSet> MNEDerivSet::readText(const QString& path)
 
 //=============================================================================================================
 
-MNEDerivSet MNEDerivSet::fromDefinitions(const QList<Definition>& definitions, const QString& name)
+MNEDerivSet MNEDerivSet::fromDefinitions(const std::vector<Definition>& definitions, const QString& name)
 {
     MNEDerivSet set;
     set.derivs.push_back(makeDeriv(definitions, QString(), name));
@@ -263,9 +266,9 @@ bool MNEDerivSet::write(const QString& path) const
 
 //=============================================================================================================
 
-QList<MNEDerivSet::Definition> MNEDerivSet::definitions() const
+std::vector<MNEDerivSet::Definition> MNEDerivSet::definitions() const
 {
-    QList<Definition> result;
+    std::vector<Definition> result;
     for (const auto& deriv : derivs) {
         const MNESparseNamedMatrix& m = *deriv->deriv_data;
         const Eigen::SparseMatrix<float, Eigen::RowMajor> rows = m.data->eigen();
@@ -274,7 +277,7 @@ QList<MNEDerivSet::Definition> MNEDerivSet::definitions() const
             for (Eigen::SparseMatrix<float, Eigen::RowMajor>::InnerIterator it(rows, j); it; ++it) {
                 definition.second.insert(QString::fromStdString(m.collist[static_cast<std::size_t>(it.col())]), it.value());
             }
-            result.append(definition);
+            result.push_back(definition);
         }
     }
     return result;

@@ -203,7 +203,7 @@ void TestDispViewers3::construct_artifactSettingsView()
     // An empty channel list is the interesting case: it is what the view gets
     // before any data is loaded, and it is where an unguarded index would fault.
     ArtifactSettingsView* pView = new ArtifactSettingsView(settingsPath(),
-                                                           QList<FIFFLIB::FiffChInfo>(),
+                                                           std::vector<FIFFLIB::FiffChInfo>(),
                                                            m_pHolder.data());
     QVERIFY(pView != nullptr);
 
@@ -295,7 +295,7 @@ std::unique_ptr<ChannelDataModel> labelTestModel()
         ch.ch_name = names[i];
         ch.kind = kinds[i].first;
         ch.unit = kinds[i].second;
-        info->chs.append(ch);
+        info->chs.push_back(ch);
     }
     info->ch_names = names;
     info->nchan = static_cast<int>(names.size());
@@ -459,3 +459,6 @@ void TestDispViewers3::cleanupTestCase()
 
 QTEST_MAIN(TestDispViewers3)
 #include "test_disp_viewers3.moc"
+
+#include <vector>
+#include <utility>

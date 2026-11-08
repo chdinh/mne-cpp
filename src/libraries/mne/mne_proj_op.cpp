@@ -103,7 +103,7 @@ void MNEProjOp::add_item_active(const MNENamedMatrix* vecs, int kind, const QStr
  * Add a new item to an existing projection operator
  */
 {
-    items.append(MNEProjItem());
+    items.push_back(MNEProjItem());
     auto& new_item = items.back();
 
     new_item.active = is_active;
@@ -164,7 +164,7 @@ std::unique_ptr<MNEProjOp> MNEProjOp::dup() const
 
 //=============================================================================================================
 
-std::unique_ptr<MNEProjOp> MNEProjOp::create_average_eeg_ref(const QList<FiffChInfo>& chs, int nch)
+std::unique_ptr<MNEProjOp> MNEProjOp::create_average_eeg_ref(const std::vector<FiffChInfo>& chs, int nch)
 /*
      * Make the projection operator for average electrode reference
      */
@@ -212,7 +212,7 @@ int MNEProjOp::affect(const StringList& list, int nlist)
 
 //=============================================================================================================
 
-int MNEProjOp::affect_chs(const QList<FiffChInfo>& chs, int nChan)
+int MNEProjOp::affect_chs(const std::vector<FiffChInfo>& chs, int nChan)
 {
     if (nChan == 0)
         return false;
@@ -683,8 +683,8 @@ int MNEProjOp::project_dvector(Eigen::Ref<Eigen::VectorXd> vec, bool do_compleme
 
 //=============================================================================================================
 
-bool MNEProjOp::makeProjection(const QList<QString>& projnames,
-                               const QList<FiffChInfo>& chs,
+bool MNEProjOp::makeProjection(const std::vector<QString>& projnames,
+                               const std::vector<FiffChInfo>& chs,
                                int nch,
                                std::unique_ptr<MNEProjOp>& result)
 {

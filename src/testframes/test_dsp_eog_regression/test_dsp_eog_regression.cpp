@@ -86,7 +86,7 @@ private:
             ch.unit = kinds[i] == FIFFV_MEG_CH ? FIFF_UNIT_T : FIFF_UNIT_V;
             ch.unit_mul = 0;
             ch.coord_frame = 0;
-            info.chs.append(ch);
+            info.chs.push_back(ch);
             info.ch_names.push_back(names[i].toStdString());
         }
 
@@ -177,7 +177,7 @@ private slots:
             FiffChInfo ch;
             ch.kind = kinds[i];
             ch.ch_name = names[i];
-            info.chs.append(ch);
+            info.chs.push_back(ch);
         }
         info.ch_names = names;
         info.nchan = 6;
@@ -360,7 +360,7 @@ private slots:
             ch.unit = 107;
             ch.unit_mul = 0;
             ch.coord_frame = 0;
-            info.chs.append(ch);
+            info.chs.push_back(ch);
             info.ch_names.push_back(names[i].toStdString());
         }
 

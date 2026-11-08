@@ -19,6 +19,8 @@
 //=============================================================================================================
 
 #include "mne_cov_matrix.h"
+
+#include <vector>
 #include "mne_sss_data.h"
 #include "mne_proj_item.h"
 #include "mne_proj_op.h"
@@ -594,12 +596,12 @@ int MNECovMatrix::lt_packed_index(int j, int k)
 
 //=============================================================================================================
 
-int MNECovMatrix::classify_channels(const QList<FiffChInfo>& chs, int nchan)
+int MNECovMatrix::classify_channels(const std::vector<FiffChInfo>& chs, int nchan)
 {
     int k, p;
     FiffChInfo ch;
 
-    if (chs.isEmpty()) {
+    if (chs.empty()) {
         qCritical("Channel information not available in classify_channels");
         return FAIL;
     }
@@ -713,7 +715,7 @@ void MNECovMatrix::revert_to_diag()
 std::unique_ptr<MNECovMatrix> MNECovMatrix::pick_chs_omit(const StringList& new_names,
                                                           int new_ncov,
                                                           int omit_meg_eeg,
-                                                          const QList<FiffChInfo>& chs) const
+                                                          const std::vector<FiffChInfo>& chs) const
 {
     int j, k;
     Eigen::VectorXd cov_local;
@@ -746,7 +748,7 @@ std::unique_ptr<MNECovMatrix> MNECovMatrix::pick_chs_omit(const StringList& new_
     Eigen::VectorXi isMegVec;
     if (omit_meg_eeg) {
         isMegVec.resize(new_ncov);
-        if (!chs.isEmpty()) {
+        if (!chs.empty()) {
             for (j = 0; j < new_ncov; j++)
                 if (chs[j].kind == FIFFV_MEG_CH)
                     isMegVec[j] = true;

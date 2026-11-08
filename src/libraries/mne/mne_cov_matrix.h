@@ -286,7 +286,7 @@ public:
      *
      * @return OK on success, FAIL if channel information is not available.
      */
-    int classify_channels(const QList<FIFFLIB::FiffChInfo>& chs, int nchan);
+    int classify_channels(const std::vector<FIFFLIB::FiffChInfo>& chs, int nchan);
 
     //=========================================================================================================
     /**
@@ -332,7 +332,7 @@ public:
     std::unique_ptr<MNECovMatrix> pick_chs_omit(const StringList& new_names,
                                                 int new_ncov,
                                                 int omit_meg_eeg,
-                                                const QList<FIFFLIB::FiffChInfo>& chs) const;
+                                                const std::vector<FIFFLIB::FiffChInfo>& chs) const;
 
     int kind;                                                                    /**< Covariance kind: sensor or source. */
     int ncov;                                                                    /**< Dimension (number of channels). */

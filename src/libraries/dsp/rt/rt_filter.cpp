@@ -554,7 +554,7 @@ FiffEvoked RTPROCESSINGLIB::computeFilteredAverage(const FiffRawData& raw,
     RowVectorXi picksNew = picks;
     if (picks.cols() <= 0) {
         picksNew.resize(raw.info.chs.size());
-        for (int i = 0; i < raw.info.chs.size(); ++i) {
+        for (int i = 0; i < std::ssize(raw.info.chs); ++i) {
             picksNew(i) = i;
         }
     }

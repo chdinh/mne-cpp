@@ -716,7 +716,7 @@ void TestStsCluster::testTrisAdjacencyMatchesMne()
         FIFFLIB::FiffChInfo ch;
         ch.ch_name = QString("EEG%1").arg(static_cast<int>(x)).toStdString();
         ch.chpos.r0 = Eigen::Vector3f(x, 0.0f, 0.0f);
-        info.chs.append(ch);
+        info.chs.push_back(ch);
     }
     QCOMPARE(upperEdges(StatsAdjacency::fromChannelPositions(info)).join(' '), QStringLiteral("0-1 0-2 0-3 1-2 1-3 2-3"));
     // An even number of picks takes the mean of the middle two: median(1, 1, 1, 8) = 1

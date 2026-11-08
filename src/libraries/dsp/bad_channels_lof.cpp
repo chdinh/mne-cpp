@@ -75,7 +75,7 @@ UTILSLIB::StringList UTILSLIB::findBadChannelsLof(const MatrixXd& data,
 {
     // Select channel indices based on type filter
     std::vector<int> chIdx;
-    for (int i = 0; i < info.chs.size(); ++i) {
+    for (int i = 0; i < std::ssize(info.chs); ++i) {
         if (params.bMegOnly && info.chs[i].kind != FIFFV_MEG_CH)
             continue;
         if (params.bEegOnly && info.chs[i].kind != FIFFV_EEG_CH)

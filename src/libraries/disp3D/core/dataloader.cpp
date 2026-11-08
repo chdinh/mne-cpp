@@ -373,7 +373,7 @@ QStringList DataLoader::probeEvokedSets(const QString& evokedPath)
         return result;
     }
     const FiffEvokedSet& evokedSet = *read;
-    for (int i = 0; i < evokedSet.evoked.size(); ++i) {
+    for (int i = 0; i < std::ssize(evokedSet.evoked); ++i) {
         const auto& ev = evokedSet.evoked.at(i);
         QString label = QString("%1: %2 (%3, nave=%4)")
                             .arg(i)

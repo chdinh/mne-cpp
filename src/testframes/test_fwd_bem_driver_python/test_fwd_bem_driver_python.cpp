@@ -137,7 +137,7 @@ void TestFwdBemDriverPython::initTestCase()
     QCOMPARE(m_model->bem_method, static_cast<int>(FWD_BEM_LINEAR_COLL));
     QCOMPARE(m_model->fwd_bem_set_head_mri_t(FiffCoordTrans::identity(FIFFV_COORD_HEAD, FIFFV_COORD_MRI)), 0);
 
-    QList<FiffChInfo> meg, eeg;
+    std::vector<FiffChInfo> meg, eeg;
     for (int k = 0; k < kNMeg; ++k) {
         FiffChInfo ch;
         ch.ch_name = (QStringLiteral("MEG%1").arg(k)).toStdString();
@@ -149,7 +149,7 @@ void TestFwdBemDriverPython::initTestCase()
         ch.chpos.ex = ref.cross(ez).normalized();
         ch.chpos.ey = ez.cross(ch.chpos.ex);
         ch.chpos.ez = ez;
-        meg << ch;
+        meg.push_back(ch);
     }
     for (int k = 0; k < kNEeg; ++k) {
         FiffChInfo ch;
@@ -157,7 +157,7 @@ void TestFwdBemDriverPython::initTestCase()
         ch.kind = FIFFV_EEG_CH;
         ch.chpos.coil_type = FIFFV_COIL_EEG;
         ch.chpos.r0 = geo.row(2 * kNMeg + k).cast<float>().transpose();
-        eeg << ch;
+        eeg.push_back(ch);
     }
     auto defs = FwdCoilSet::read_coil_defs(QCoreApplication::applicationDirPath() + "/../resources/general/coilDefinitions/coil_def.dat");
     QVERIFY(defs != nullptr);

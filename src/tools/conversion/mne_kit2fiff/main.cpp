@@ -495,7 +495,7 @@ int main(int argc, char* argv[])
         ch.chpos.ez(1) = static_cast<float>(info.sensors[c].coil.orientation(1));
         ch.chpos.ez(2) = static_cast<float>(info.sensors[c].coil.orientation(2));
 
-        fiffInfo.chs.append(ch);
+        fiffInfo.chs.push_back(ch);
         fiffInfo.ch_names.push_back(ch.ch_name);
     }
 

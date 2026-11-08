@@ -17,6 +17,11 @@
 
 #include "batchprocessor.h"
 
+#include <algorithm>
+#include <iterator>
+
+#include <vector>
+
 #include <mne/mne_description_parser.h>
 
 #include <fiff/fiff_raw_data.h>
@@ -115,7 +120,7 @@ int BatchProcessor::run(const ProcessingSettings& settings)
 
     // Storage for grand average computation
     QList<FiffEvokedSet> allAverages;
-    QList<FiffCov> allCovariances;
+    std::vector<FiffCov> allCovariances;
 
     // Process each raw file
     for (int f = 0; f < settings.rawFiles.size(); ++f) {
@@ -200,14 +205,14 @@ int BatchProcessor::run(const ProcessingSettings& settings)
                 projReject["mag"] = settings.projMagReject;
                 projReject["eeg"] = settings.projEegReject;
 
-                QList<FiffProj> newProjs = FiffProj::compute_from_raw(
+                std::vector<FiffProj> newProjs = FiffProj::compute_from_raw(
                     raw, fiffEvents.events,
                     settings.projEvent,
                     settings.projTmin, settings.projTmax,
                     settings.projNGrad, settings.projNMag, settings.projNEeg,
                     projReject);
 
-                if (!newProjs.isEmpty()) {
+                if (!newProjs.empty()) {
                     // Replace projections in the raw info
                     raw.info.projs = newProjs;
 
@@ -226,20 +231,20 @@ int BatchProcessor::run(const ProcessingSettings& settings)
                 }
             } else {
                 // Load projections from files
-                QList<FiffProj> loadedProjs;
+                std::vector<FiffProj> loadedProjs;
                 for (const QString& projFile : settings.projFiles) {
                     QFile pFile(projFile);
                     FiffStream pStream(&pFile);
                     if (pStream.open()) {
                         std::vector<FiffDirNode::SPtr> projNodes = pStream.dirtree()->dir_tree_find(FIFFB_PROJ);
                         if (!projNodes.empty()) {
-                            QList<FiffProj> fileProjs = pStream.read_proj(projNodes[0]);
-                            loadedProjs.append(fileProjs);
+                            std::vector<FiffProj> fileProjs = pStream.read_proj(projNodes[0]);
+                            std::ranges::move(fileProjs, std::back_inserter(loadedProjs));
                         }
                         pStream.close();
                     }
                 }
-                if (!loadedProjs.isEmpty()) {
+                if (!loadedProjs.empty()) {
                     raw.info.projs = loadedProjs;
                 }
             }
@@ -253,7 +258,7 @@ int BatchProcessor::run(const ProcessingSettings& settings)
             }
 
             // Report projection status
-            if (!raw.info.projs.isEmpty()) {
+            if (!raw.info.projs.empty()) {
                 qInfo() << "\n--- Projection status ---";
                 for (const auto& proj : raw.info.projs) {
                     qInfo() << "  " << proj.desc
@@ -290,7 +295,7 @@ int BatchProcessor::run(const ProcessingSettings& settings)
             qInfo() << "\n--- Averaging according to" << aveDescFile << "---\n";
 
             AverageDescription aveDesc;
-            if (!MNEDescriptionParser::parseAverageFile(aveDescFile, aveDesc) || aveDesc.categories.isEmpty()) {
+            if (!MNEDescriptionParser::parseAverageFile(aveDescFile, aveDesc) || aveDesc.categories.empty()) {
                 qCritical() << "Failed to parse averaging description file:" << aveDescFile;
                 return 1;
             }
@@ -299,7 +304,7 @@ int BatchProcessor::run(const ProcessingSettings& settings)
             FiffEvokedSet evokedSet = FiffEvokedSet::computeAverages(raw, aveDesc, fiffEvents.events, aveLog);
 
             // Report results
-            for (int j = 0; j < evokedSet.evoked.size(); ++j) {
+            for (int j = 0; j < std::ssize(evokedSet.evoked); ++j) {
                 qInfo() << "  " << evokedSet.evoked[j].comment
                         << ":" << evokedSet.evoked[j].nave << "averages";
             }
@@ -336,23 +341,21 @@ int BatchProcessor::run(const ProcessingSettings& settings)
             qInfo() << "\n--- Computing covariance matrix according to" << covDescFile << "---\n";
 
             CovDescription covDesc;
-            if (!MNEDescriptionParser::parseCovarianceFile(covDescFile, covDesc) || covDesc.defs.isEmpty()) {
+            if (!MNEDescriptionParser::parseCovarianceFile(covDescFile, covDesc) || covDesc.defs.empty()) {
                 qCritical() << "Failed to parse covariance description file:" << covDescFile;
                 return 1;
             }
 
             // Compute covariance per definition, then combine
-            QList<FiffCov> defCovs;
+            std::vector<FiffCov> defCovs;
             QString covLog;
             covLog += QString("Computing covariance matrix\n");
 
-            for (int d = 0; d < covDesc.defs.size(); ++d) {
+            for (int d = 0; d < std::ssize(covDesc.defs); ++d) {
                 const CovDefinition& def = covDesc.defs[d];
 
                 // Convert event codes from unsigned to int
-                QList<int> eventCodes;
-                for (int ec = 0; ec < def.events.size(); ++ec)
-                    eventCodes.append(static_cast<int>(def.events[ec]));
+                const std::vector<int> eventCodes(def.events.begin(), def.events.end());
 
                 FiffCov defCov = FiffCov::compute_from_epochs(
                     raw, fiffEvents.events, eventCodes,
@@ -365,7 +368,7 @@ int BatchProcessor::run(const ProcessingSettings& settings)
                     &covDesc.rej);
 
                 if (defCov.dim > 0) {
-                    defCovs.append(defCov);
+                    defCovs.push_back(defCov);
                     covLog += QString("  Definition %1: %2 degrees of freedom\n")
                                   .arg(d + 1)
                                   .arg(defCov.nfree);
@@ -397,7 +400,7 @@ int BatchProcessor::run(const ProcessingSettings& settings)
                 }
                 writeLog(covLogName, covLog);
 
-                allCovariances.append(cov);
+                allCovariances.push_back(cov);
             }
         }
     }
@@ -412,29 +415,29 @@ int BatchProcessor::run(const ProcessingSettings& settings)
             // nave and the category keeps its comment.
             FiffEvokedSet grandAvg;
             grandAvg.info = allAverages.first().info;
-            for (int j = 0; j < allAverages.first().evoked.size(); ++j) {
-                QList<FiffEvoked> runs;
+            for (int j = 0; j < std::ssize(allAverages.first().evoked); ++j) {
+                std::vector<FiffEvoked> runs;
                 for (const FiffEvokedSet& run : allAverages) {
-                    if (j < run.evoked.size()) {
-                        runs.append(run.evoked[j]);
+                    if (j < std::ssize(run.evoked)) {
+                        runs.push_back(run.evoked[j]);
                     }
                 }
                 FiffEvoked avg = FiffEvoked::combine(runs, FiffEvoked::CombineWeights::Nave);
                 if (avg.empty()) {
-                    qCritical() << "Grand average: incompatible data sets for" << runs.first().comment;
+                    qCritical() << "Grand average: incompatible data sets for" << runs.front().comment;
                     return 1;
                 }
-                avg.comment = runs.first().comment;
-                grandAvg.evoked.append(avg);
+                avg.comment = runs.front().comment;
+                grandAvg.evoked.push_back(avg);
             }
-            if (!grandAvg.evoked.isEmpty()) {
+            if (!grandAvg.evoked.empty()) {
                 if (const auto saved = grandAvg.save(settings.grandAveFile.toStdU16String()); !saved) {
                     qCritical("%s", saved.error().what());
                 }
             }
         }
 
-        if (!settings.grandCovFile.isEmpty() && !allCovariances.isEmpty()) {
+        if (!settings.grandCovFile.isEmpty() && !allCovariances.empty()) {
             qInfo() << "\n--- Computing grand average covariance ---";
             FiffCov grandCov = FiffCov::compute_grand_average(allCovariances);
             if (grandCov.dim > 0) {

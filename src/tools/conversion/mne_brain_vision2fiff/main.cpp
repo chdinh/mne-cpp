@@ -428,7 +428,7 @@ int main(int argc, char* argv[])
 
         ch.cal = 1.0;
         ch.range = 1.0;
-        info.chs.append(ch);
+        info.chs.push_back(ch);
         info.ch_names.push_back(ch.ch_name);
     }
 

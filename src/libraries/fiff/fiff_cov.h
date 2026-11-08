@@ -33,6 +33,8 @@
 //=============================================================================================================
 
 #include "fiff_global.h"
+
+#include <vector>
 #include "fiff_proj.h"
 #include "fiff_types.h"
 #include "fiff_info.h"
@@ -209,7 +211,7 @@ public:
      */
     static FiffCov compute_from_epochs(const FiffRawData& raw,
                                        const Eigen::MatrixXi& events,
-                                       const QList<int>& eventCodes,
+                                       const std::vector<int>& eventCodes,
                                        float tmin,
                                        float tmax,
                                        float bmin = 0.0f,
@@ -230,7 +232,7 @@ public:
      *
      * @return The computed noise covariance matrix, or empty FiffCov on failure.
      */
-    static FiffCov compute_from_epochs(const QList<QList<Eigen::MatrixXd>>& epochs,
+    static FiffCov compute_from_epochs(const std::vector<std::vector<Eigen::MatrixXd>>& epochs,
                                        const FiffInfo& info,
                                        bool removeMean = true);
 
@@ -252,7 +254,7 @@ public:
      * @param[in] covs      List of covariance matrices to combine.
      * @return The grand-average covariance matrix, or empty FiffCov if covs is empty.
      */
-    static FiffCov compute_grand_average(const QList<FiffCov>& covs);
+    static FiffCov compute_grand_average(const std::vector<FiffCov>& covs);
 
     //=========================================================================================================
     /**
@@ -276,17 +278,17 @@ public:
     friend std::ostream& operator<<(std::ostream& out, const FIFFLIB::FiffCov& p_FiffCov);
 
 public:
-    fiff_int_t kind;         /**< Covariance kind -> fiff_constants.h. */
-    Eigen::VectorXi chClass; /**< Channel classification vector. */
-    bool diag;               /**< If the covariance is stored in a diagonal order. */
-    fiff_int_t dim;          /**< Dimension of the covariance (dim x dim). */
-    StringList names;        /**< Channel names. */
-    Eigen::MatrixXd data;    /**< Covariance data. */
-    QList<FiffProj> projs;   /**< List of available ssp projectors. */
-    StringList bads;         /**< List of bad channels. */
-    fiff_int_t nfree;        /**< Number of degrees of freedom. */
-    Eigen::VectorXd eig;     /**< Vector of eigenvalues. */
-    Eigen::MatrixXd eigvec;  /**< Matrix of eigenvectors (each row represents an eigenvector). */
+    fiff_int_t kind;             /**< Covariance kind -> fiff_constants.h. */
+    Eigen::VectorXi chClass;     /**< Channel classification vector. */
+    bool diag;                   /**< If the covariance is stored in a diagonal order. */
+    fiff_int_t dim;              /**< Dimension of the covariance (dim x dim). */
+    StringList names;            /**< Channel names. */
+    Eigen::MatrixXd data;        /**< Covariance data. */
+    std::vector<FiffProj> projs; /**< List of available ssp projectors. */
+    StringList bads;             /**< List of bad channels. */
+    fiff_int_t nfree;            /**< Number of degrees of freedom. */
+    Eigen::VectorXd eig;         /**< Vector of eigenvalues. */
+    Eigen::MatrixXd eigvec;      /**< Matrix of eigenvectors (each row represents an eigenvector). */
 };
 
 //=============================================================================================================
@@ -344,7 +346,7 @@ inline std::ostream& operator<<(std::ostream& out, const FIFFLIB::FiffCov& p_Fif
     }
     //Projectors
     out << "\tprojectors " << p_FiffCov.projs.size() << ":\n";
-    for (qint32 i = 0; i < p_FiffCov.projs.size(); ++i)
+    for (qint32 i = 0; i < std::ssize(p_FiffCov.projs); ++i)
         out << "\t" << p_FiffCov.projs[i];
 
     //Bads

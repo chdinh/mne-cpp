@@ -18,13 +18,14 @@
 //=============================================================================================================
 
 #include "fiff_dir_node.h"
+
+#include <vector>
 #include "fiff_evoked.h"
 #include "fiff_info.h"
 #include "fiff_stream.h"
 
 #include <utils/error.h>
 
-#include <QList>
 #include <QStringList>
 
 #include <filesystem>
@@ -84,7 +85,7 @@ private:
     std::string m_file;
     std::vector<FiffDirNode::SPtr> m_sets;
     QStringList m_comments;
-    QList<fiff_int_t> m_kinds;
+    std::vector<fiff_int_t> m_kinds;
 };
 
 } // namespace FIFFLIB

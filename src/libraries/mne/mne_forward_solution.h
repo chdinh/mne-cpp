@@ -29,6 +29,8 @@
 
 #include "mne_global.h"
 
+#include <vector>
+
 #include <mne/mne_source_spaces.h>
 
 #include <math/kmeans.h>
@@ -303,7 +305,7 @@ public:
      *
      * @return the reduced forward solution.
      */
-    MNEForwardSolution pick_regions(const QList<FSLIB::FsLabel>& p_qListLabels) const;
+    MNEForwardSolution pick_regions(const std::vector<FSLIB::FsLabel>& p_qListLabels) const;
 
     //=========================================================================================================
     /**
@@ -463,7 +465,7 @@ public:
      *
      * @return the source position in 3D space.
      */
-    Eigen::MatrixX3f getSourcePositionsByLabel(const QList<FSLIB::FsLabel>& lPickedLabels,
+    Eigen::MatrixX3f getSourcePositionsByLabel(const std::vector<FSLIB::FsLabel>& lPickedLabels,
                                                const FSLIB::FsSurfaceSet& tSurfSetInflated);
 
 private:

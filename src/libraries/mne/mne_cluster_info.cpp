@@ -70,7 +70,7 @@ void MNEClusterInfo::write(QString p_sFileName) const
     QTextStream out(&file);
     out << "MNE Cluster Info\n";
 
-    for (qint32 i = 0; i < clusterLabelIds.size(); ++i) {
+    for (qint32 i = 0; i < std::ssize(clusterLabelIds); ++i) {
         out << "\nLabel : " << clusterLabelNames[i] << "\n";
         out << "FsLabel ID : " << clusterLabelIds[i] << "\n";
         out << "Centroid Vertno : " << centroidVertno[i] << "\n";
@@ -98,7 +98,7 @@ void MNEClusterInfo::write(QString p_sFileName) const
     if (file_centroids.open(QIODevice::WriteOnly | QIODevice::Text)) {
         QTextStream out_centroids(&file_centroids);
 
-        for (qint32 i = 0; i < clusterLabelIds.size(); ++i)
+        for (qint32 i = 0; i < std::ssize(clusterLabelIds); ++i)
             out_centroids << centroidVertno[i] << ", ";
 
         // optional, as QFile destructor will already do it:

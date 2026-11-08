@@ -375,7 +375,7 @@ void LSLAdapter::prepareFiffInfo(const LSLLIB::stream_info& stream)
 
             QSLChNames.push_back(sChType.toStdString());
 
-            m_pFiffInfo->chs.append(fChInfo);
+            m_pFiffInfo->chs.push_back(fChInfo);
         }
 
         // set channel names in fiff_info_base

@@ -75,7 +75,7 @@ QString covarianceSummary(const FIFFLIB::FiffCov& covariance,
     if (fiffInfo) {
         for (const std::string& channelName : covariance.names) {
             const int channelIndex = UTILSLIB::indexOf(fiffInfo->ch_names, channelName);
-            if (channelIndex < 0 || channelIndex >= fiffInfo->chs.size()) {
+            if (channelIndex < 0 || channelIndex >= std::ssize(fiffInfo->chs)) {
                 ++otherCount;
                 continue;
             }
@@ -345,7 +345,7 @@ void CovarianceWindow::updateHeatmap()
 
         if (m_pFiffInfo) {
             const int chIdx = UTILSLIB::indexOf(m_pFiffInfo->ch_names, m_covariance.names[i]);
-            if (chIdx < 0 || chIdx >= m_pFiffInfo->chs.size())
+            if (chIdx < 0 || chIdx >= std::ssize(m_pFiffInfo->chs))
                 continue;
 
             const auto& chInfo = m_pFiffInfo->chs.at(chIdx);

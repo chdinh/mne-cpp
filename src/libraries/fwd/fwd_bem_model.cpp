@@ -419,7 +419,7 @@ int FwdBemModel::fwd_bem_load_solution(const QString& name, int bemMethod)
             return FAIL;
         }
         qint32 ndim;
-        QVector<qint32> dims;
+        std::vector<qint32> dims;
         t_pTag->getMatrixDimensions(ndim, dims);
 
         if (ndim != 2) {

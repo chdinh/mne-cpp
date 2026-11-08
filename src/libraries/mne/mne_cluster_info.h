@@ -29,6 +29,8 @@
 
 #include "mne_global.h"
 
+#include <vector>
+
 //=============================================================================================================
 // EIGEN INCLUDES
 //=============================================================================================================
@@ -40,7 +42,6 @@
 //=============================================================================================================
 
 #include <QSharedPointer>
-#include <QList>
 
 //=============================================================================================================
 // DEFINE NAMESPACE MNELIB
@@ -112,13 +113,13 @@ public:
     friend bool operator==(const MNEClusterInfo& a, const MNEClusterInfo& b);
 
 public:
-    QList<QString> clusterLabelNames;         /**< FsLabel name of the cluster. Entries can be non unique, since some FsLabel consist of more than one cluster.*/
-    QList<qint32> clusterLabelIds;            /**< Id (FsLabel/ROI id) of the cluster. Entries can be non unique, since some FsLabel/ROI consist of more than one cluster.*/
-    QList<qint32> centroidVertno;             /**< Id (FsLabel/ROI id) of the centroid. */
-    QList<Eigen::Vector3f> centroidSource_rr; /**< Centroid location. */
-    QList<Eigen::VectorXi> clusterVertnos;    /**< Vertnos which belong to corresponding cluster. */
-    QList<Eigen::MatrixX3f> clusterSource_rr; /**< Cluster source locations. */
-    QList<Eigen::VectorXd> clusterDistances;  /**< Distances to clusters centroid. */
+    std::vector<QString> clusterLabelNames;         /**< FsLabel name of the cluster. Entries can be non unique, since some FsLabel consist of more than one cluster.*/
+    std::vector<qint32> clusterLabelIds;            /**< Id (FsLabel/ROI id) of the cluster. Entries can be non unique, since some FsLabel/ROI consist of more than one cluster.*/
+    std::vector<qint32> centroidVertno;             /**< Id (FsLabel/ROI id) of the centroid. */
+    std::vector<Eigen::Vector3f> centroidSource_rr; /**< Centroid location. */
+    std::vector<Eigen::VectorXi> clusterVertnos;    /**< Vertnos which belong to corresponding cluster. */
+    std::vector<Eigen::MatrixX3f> clusterSource_rr; /**< Cluster source locations. */
+    std::vector<Eigen::VectorXd> clusterDistances;  /**< Distances to clusters centroid. */
 };
 
 //=============================================================================================================
@@ -134,7 +135,7 @@ inline bool MNEClusterInfo::empty() const
 
 inline qint32 MNEClusterInfo::numClust() const
 {
-    return this->clusterVertnos.size();
+    return static_cast<int>(this->clusterVertnos.size());
 }
 
 //=============================================================================================================
@@ -142,7 +143,7 @@ inline qint32 MNEClusterInfo::numClust() const
 inline bool operator==(const MNEClusterInfo& a, const MNEClusterInfo& b)
 {
     if (a.centroidSource_rr.size() == b.centroidSource_rr.size()) {
-        for (int i = 0; i < a.centroidSource_rr.size(); ++i) {
+        for (int i = 0; i < std::ssize(a.centroidSource_rr); ++i) {
             if (!a.centroidSource_rr.at(i).isApprox(b.centroidSource_rr.at(i), 0.0001f)) {
                 return false;
             }
@@ -152,7 +153,7 @@ inline bool operator==(const MNEClusterInfo& a, const MNEClusterInfo& b)
     }
 
     if (a.clusterVertnos.size() == b.clusterVertnos.size()) {
-        for (int i = 0; i < a.clusterVertnos.size(); ++i) {
+        for (int i = 0; i < std::ssize(a.clusterVertnos); ++i) {
             if (!a.clusterVertnos.at(i).isApprox(b.clusterVertnos.at(i))) {
                 return false;
             }
@@ -162,7 +163,7 @@ inline bool operator==(const MNEClusterInfo& a, const MNEClusterInfo& b)
     }
 
     if (a.clusterSource_rr.size() == b.clusterSource_rr.size()) {
-        for (int i = 0; i < a.clusterSource_rr.size(); ++i) {
+        for (int i = 0; i < std::ssize(a.clusterSource_rr); ++i) {
             if (!a.clusterSource_rr.at(i).isApprox(b.clusterSource_rr.at(i), 0.0001f)) {
                 return false;
             }
@@ -172,7 +173,7 @@ inline bool operator==(const MNEClusterInfo& a, const MNEClusterInfo& b)
     }
 
     if (a.clusterDistances.size() == b.clusterDistances.size()) {
-        for (int i = 0; i < a.clusterDistances.size(); ++i) {
+        for (int i = 0; i < std::ssize(a.clusterDistances); ++i) {
             if (!a.clusterDistances.at(i).isApprox(b.clusterDistances.at(i))) {
                 return false;
             }

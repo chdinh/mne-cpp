@@ -20,6 +20,8 @@
 //=============================================================================================================
 
 #include <fwd/fwd.h>
+
+#include <vector>
 #include <utils/string_utils.h>
 #include <fiff/fiff_constants.h>
 #include <fiff/fiff_coord_trans.h>
@@ -92,17 +94,17 @@ int main(int argc, char* argv[])
 
     QFile rawFile(data + "/MEG/sample/sample_audvis_trunc_raw.fif");
     const FiffRawData raw((data + "/MEG/sample/sample_audvis_trunc_raw.fif").toStdString());
-    QList<FiffChInfo> meg;
-    QList<FiffChInfo> goodMeg;
-    QList<FiffChInfo> eeg;
+    std::vector<FiffChInfo> meg;
+    std::vector<FiffChInfo> goodMeg;
+    std::vector<FiffChInfo> eeg;
     for (const FiffChInfo& ch : raw.info.chs) {
         if (ch.kind == FIFFV_MEG_CH) {
-            meg << ch;
+            meg.push_back(ch);
             if (!UTILSLIB::contains(raw.info.bads, ch.ch_name)) {
-                goodMeg << ch;
+                goodMeg.push_back(ch);
             }
         } else if (ch.kind == FIFFV_EEG_CH) {
-            eeg << ch;
+            eeg.push_back(ch);
         }
     }
 
@@ -112,7 +114,7 @@ int main(int argc, char* argv[])
 
     //! [fwd_coil_set_usage]
     auto templates = FwdCoilSet::read_coil_defs(coilDefs); // integration points per coil type
-    auto coils = templates->create_meg_coils(meg, meg.size(), FWD_COIL_ACCURACY_ACCURATE, raw.info.dev_head_t);
+    auto coils = templates->create_meg_coils(meg, static_cast<int>(meg.size()), FWD_COIL_ACCURACY_ACCURATE, raw.info.dev_head_t);
     const FwdCoil& first = *coils->coils[0]; // MEG 0113 in head coordinates
     //! [fwd_coil_set_usage]
     // mne _create_meg_coils(accurate): 3012 planar gradiometer, 8 points, r0 (-106.15, 29.14, -14.73) mm
@@ -137,7 +139,7 @@ int main(int argc, char* argv[])
     // Scalp radius 90 mm; 3 Berg-Scherg dipoles approximate the layered potentials
     sphere->fwd_setup_eeg_sphere_model(0.09f, true, 3);
     sphere->r0 = Vector3f(0.0f, 0.0f, 0.04f);
-    auto els = FwdCoilSet::create_eeg_els(eeg, eeg.size());
+    auto els = FwdCoilSet::create_eeg_els(eeg, static_cast<int>(eeg.size()));
     VectorXf V(els->ncoil());
     FwdEegSphereModel::fwd_eeg_spherepot_coil(rd, Q, *els, V, sphere.get()); // V per A m
     //! [fwd_eeg_sphere_model_usage]
@@ -146,7 +148,7 @@ int main(int argc, char* argv[])
                  "FwdEegSphereModel/FwdEegSphereModelSet/FwdEegSphereLayer: 4-layer sphere potentials match mne");
 
     //! [fwd_field_map_usage]
-    auto normalCoils = templates->create_meg_coils(goodMeg, goodMeg.size(), FWD_COIL_ACCURACY_NORMAL, raw.info.dev_head_t);
+    auto normalCoils = templates->create_meg_coils(goodMeg, static_cast<int>(goodMeg.size()), FWD_COIL_ACCURACY_NORMAL, raw.info.dev_head_t);
     const Vector3f origin(0.0f, 0.0f, 0.04f);
     MatrixX3f surfRr(3, 3);
     surfRr << 0.0f, 0.0f, 0.12f, 0.08f, 0.0f, 0.08f, 0.0f, -0.09f, 0.07f;

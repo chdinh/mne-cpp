@@ -40,13 +40,11 @@
 #include "fiff_global.h"
 
 #include <Eigen/Core>
-#include <QVector>
 
 //=============================================================================================================
 // QT INCLUDES
 //=============================================================================================================
 
-#include <QList>
 #include <QSharedPointer>
 #include <QStringList>
 
@@ -111,22 +109,22 @@ struct FIFFSHARED_EXPORT RejectionParams
  */
 struct FIFFSHARED_EXPORT AverageCategory
 {
-    QString comment;              /**< Description. */
-    QVector<unsigned int> events; /**< The interesting events. */
-    unsigned int nextEvent = 0;   /**< Require this event next. */
-    unsigned int prevEvent = 0;   /**< Require this event just before. */
-    unsigned int ignore = 0;      /**< Which trigger lines to ignore. */
-    unsigned int prevIgnore = 0;  /**< Ignore mask for previous event. */
-    unsigned int nextIgnore = 0;  /**< Ignore mask for next event. */
-    float delay = 0.0f;           /**< Stimulus delay (s). */
-    float tmin = -0.2f;           /**< Minimum time (s). */
-    float tmax = 0.5f;            /**< Maximum time (s). */
-    float bmin = 0.0f;            /**< Baseline min (s). */
-    float bmax = 0.0f;            /**< Baseline max (s). */
-    bool doBaseline = false;      /**< Should we baseline? */
-    bool doStdErr = false;        /**< Compute std error of mean? */
-    bool doAbs = false;           /**< Compute absolute values? */
-    float color[3] = {0, 0, 0};   /**< Display color (unused in batch). */
+    QString comment;                  /**< Description. */
+    std::vector<unsigned int> events; /**< The interesting events. */
+    unsigned int nextEvent = 0;       /**< Require this event next. */
+    unsigned int prevEvent = 0;       /**< Require this event just before. */
+    unsigned int ignore = 0;          /**< Which trigger lines to ignore. */
+    unsigned int prevIgnore = 0;      /**< Ignore mask for previous event. */
+    unsigned int nextIgnore = 0;      /**< Ignore mask for next event. */
+    float delay = 0.0f;               /**< Stimulus delay (s). */
+    float tmin = -0.2f;               /**< Minimum time (s). */
+    float tmax = 0.5f;                /**< Maximum time (s). */
+    float bmin = 0.0f;                /**< Baseline min (s). */
+    float bmax = 0.0f;                /**< Baseline max (s). */
+    bool doBaseline = false;          /**< Should we baseline? */
+    bool doStdErr = false;            /**< Compute std error of mean? */
+    bool doAbs = false;               /**< Compute absolute values? */
+    float color[3] = {0, 0, 0};       /**< Display color (unused in batch). */
 };
 
 //=============================================================================================================
@@ -143,13 +141,13 @@ struct FIFFSHARED_EXPORT AverageCategory
  */
 struct FIFFSHARED_EXPORT AverageDescription
 {
-    QString comment;                   /**< Description. */
-    QList<AverageCategory> categories; /**< The categories. */
-    RejectionParams rej;               /**< Rejection limits. */
-    bool fixSkew = false;              /**< Fix skew on trigger lines. */
-    QString filename;                  /**< Output file. */
-    QString eventFile;                 /**< Read events from here. */
-    QString logFile;                   /**< Save log here. */
+    QString comment;                         /**< Description. */
+    std::vector<AverageCategory> categories; /**< The categories. */
+    RejectionParams rej;                     /**< Rejection limits. */
+    bool fixSkew = false;                    /**< Fix skew on trigger lines. */
+    QString filename;                        /**< Output file. */
+    QString eventFile;                       /**< Read events from here. */
+    QString logFile;                         /**< Save log here. */
 };
 
 //=============================================================================================================
@@ -296,7 +294,7 @@ public:
      * @param[in] evokedSets    List of evoked data sets to combine.
      * @return The grand-average evoked set, or an empty set if input is empty.
      */
-    static FiffEvokedSet computeGrandAverage(const QList<FiffEvokedSet>& evokedSets);
+    static FiffEvokedSet computeGrandAverage(const std::vector<FiffEvokedSet>& evokedSets);
 
     //=========================================================================================================
     /**
@@ -346,8 +344,8 @@ public:
     static void subtractBaseline(Eigen::MatrixXd& epoch, int bminSamp, int bmaxSamp);
 
 public:
-    FiffInfo info;            /**< FIFF measurement information. */
-    QList<FiffEvoked> evoked; /**< List of Fiff Evoked Data. */
+    FiffInfo info;                  /**< FIFF measurement information. */
+    std::vector<FiffEvoked> evoked; /**< List of Fiff Evoked Data. */
 };
 } // NAMESPACE
 

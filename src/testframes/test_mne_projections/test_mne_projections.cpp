@@ -134,7 +134,7 @@ private slots:
 
         op.add_item(&nm, 1, "Test SSP vector");
         QCOMPARE(op.nitems, 1);
-        QVERIFY(!op.items.isEmpty());
+        QVERIFY(!op.items.empty());
         QCOMPARE(op.items[0].desc, QString("Test SSP vector"));
     }
 
@@ -336,16 +336,16 @@ private slots:
     void testProjOpCreateAverageEegRef()
     {
         // Create mock EEG channel info
-        QList<FiffChInfo> chs;
+        std::vector<FiffChInfo> chs;
         for (int i = 0; i < 5; ++i) {
             FiffChInfo ch;
             ch.ch_name = (QString("EEG%1").arg(i + 1, 3, 10, QChar('0'))).toStdString();
             ch.kind = FIFFV_EEG_CH;
             ch.chpos.coil_type = FIFFV_COIL_EEG;
-            chs.append(ch);
+            chs.push_back(ch);
         }
 
-        auto projOp = MNEProjOp::create_average_eeg_ref(chs, chs.size());
+        auto projOp = MNEProjOp::create_average_eeg_ref(chs, static_cast<int>(chs.size()));
         QVERIFY(projOp != nullptr);
         QVERIFY(projOp->nitems > 0);
     }
@@ -358,7 +358,7 @@ private slots:
         FiffRawData raw(m_sRawFile.toStdString());
 
         // The raw file should have projection operators
-        int nProj = raw.info.projs.size();
+        int nProj = static_cast<int>(raw.info.projs.size());
         QVERIFY(nProj >= 0); // Even 0 is valid; exercises the code path
     }
 
@@ -427,29 +427,29 @@ private slots:
     void testCtfCompGetComp()
     {
         // Create mock channel list with no compensation
-        QList<FiffChInfo> chs;
+        std::vector<FiffChInfo> chs;
         for (int i = 0; i < 3; ++i) {
             FiffChInfo ch;
             ch.ch_name = ((QString("MEG%1").arg(i + 1, 4, 10, QChar('0'))).toStdString());
             ch.kind = FIFFV_MEG_CH;
-            chs.append(ch);
+            chs.push_back(ch);
         }
 
-        int comp = MNECTFCompDataSet::get_comp(chs, chs.size());
+        int comp = MNECTFCompDataSet::get_comp(chs, static_cast<int>(chs.size()));
         QVERIFY(comp >= 0);
     }
 
     void testCtfCompSetComp()
     {
-        QList<FiffChInfo> chs;
+        std::vector<FiffChInfo> chs;
         for (int i = 0; i < 3; ++i) {
             FiffChInfo ch;
             ch.ch_name = ((QString("MEG%1").arg(i + 1, 4, 10, QChar('0'))).toStdString());
             ch.kind = FIFFV_MEG_CH;
-            chs.append(ch);
+            chs.push_back(ch);
         }
 
-        int rc = MNECTFCompDataSet::set_comp(chs, chs.size(), 0);
+        int rc = MNECTFCompDataSet::set_comp(chs, static_cast<int>(chs.size()), 0);
         QVERIFY(rc >= 0);
     }
 
@@ -554,3 +554,5 @@ private slots:
 
 QTEST_GUILESS_MAIN(TestMneProjections)
 #include "test_mne_projections.moc"
+
+#include <vector>

@@ -105,7 +105,7 @@ void applyChannelsTsv(FiffInfo& info, const QList<BidsChannel>& channels)
 
     info.bads.clear();
 
-    for (int i = 0; i < info.chs.size(); ++i) {
+    for (int i = 0; i < std::ssize(info.chs); ++i) {
         FiffChInfo& fiffCh = info.chs[i];
         auto it = channelMap.find(fiffCh.ch_name);
         if (it == channelMap.end())
@@ -280,7 +280,7 @@ QList<BidsChannel> buildChannelRecords(const FiffInfo& info)
     QMap<int, QString> kindMap = fiffKindToBidsType();
 
 
-    for (int i = 0; i < info.chs.size(); ++i) {
+    for (int i = 0; i < std::ssize(info.chs); ++i) {
         const FiffChInfo& ch = info.chs[i];
 
         BidsChannel rec;
@@ -316,7 +316,7 @@ QList<BidsElectrode> buildElectrodeRecords(const FiffInfo& info)
 
     int digIdx = 0;
 
-    for (int i = 0; i < info.chs.size(); ++i) {
+    for (int i = 0; i < std::ssize(info.chs); ++i) {
         const FiffChInfo& ch = info.chs[i];
 
         if (ch.kind == FIFFV_STIM_CH)

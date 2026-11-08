@@ -25,6 +25,8 @@
 //=============================================================================================================
 
 #include "fiff_io.h"
+
+#include <vector>
 #include "fiff_evoked_set.h"
 #include "fiff_stream.h"
 
@@ -70,7 +72,7 @@ FiffIO::FiffIO(QIODevice& pIODevice)
 
 //=============================================================================================================
 
-FiffIO::FiffIO(QList<QIODevice*>& p_qlistIODevices)
+FiffIO::FiffIO(std::vector<QIODevice*>& p_qlistIODevices)
 {
     for (auto* device : p_qlistIODevices)
         read(*device);
@@ -139,7 +141,7 @@ bool FiffIO::read(QIODevice& pIODevice)
             pIODevice.close();
 
             //append to corresponding member qlist
-            m_qlistRaw.append(p_fiffRawData);
+            m_qlistRaw.push_back(p_fiffRawData);
 
             qInfo("Finished reading raw data!\n");
         } catch (const std::exception& e) {
@@ -156,7 +158,7 @@ bool FiffIO::read(QIODevice& pIODevice)
         } else {
             if (auto set = FiffEvokedSet::read(file->fileName().toStdU16String())) {
                 for (const FiffEvoked& evoked : set->evoked) {
-                    m_qlistEvoked.append(QSharedPointer<FiffEvoked>::create(evoked));
+                    m_qlistEvoked.push_back(QSharedPointer<FiffEvoked>::create(evoked));
                 }
             } else {
                 qWarning() << "[FiffIO::read]" << set.error().what();
@@ -210,7 +212,7 @@ bool FiffIO::write(QFile& p_QFile,
             QString t_nameoftype = "raw";
 
             if (idx == -1) {
-                for (qint32 i = 0; i < m_qlistRaw.size(); ++i) {
+                for (qint32 i = 0; i < std::ssize(m_qlistRaw); ++i) {
                     QString t_fname;
                     //insert
                     qint32 p = p_QFile.fileName().indexOf(".fif");

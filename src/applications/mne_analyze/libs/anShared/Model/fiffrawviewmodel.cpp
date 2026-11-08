@@ -141,7 +141,7 @@ bool FiffRawViewModel::initFiffData(QIODevice& p_IODevice)
 
     // load channel infos
     for (qint32 i = 0; i < m_pFiffIO->m_qlistRaw[0]->info.nchan; ++i) {
-        m_ChannelInfoList.append(m_pFiffIO->m_qlistRaw[0]->info.chs[i]);
+        m_ChannelInfoList.push_back(m_pFiffIO->m_qlistRaw[0]->info.chs[i]);
     }
 
     // load FiffInfo
@@ -228,7 +228,7 @@ QVariant FiffRawViewModel::data(const QModelIndex& index,
 
 bool FiffRawViewModel::saveToFile(const QString& sPath)
 {
-    if (!m_pFiffIO || m_pFiffIO->m_qlistRaw.isEmpty()) {
+    if (!m_pFiffIO || m_pFiffIO->m_qlistRaw.empty()) {
         return false;
     }
 #ifdef WASMBUILD
@@ -302,10 +302,7 @@ QModelIndex FiffRawViewModel::parent(const QModelIndex& index) const
 int FiffRawViewModel::rowCount(const QModelIndex& parent) const
 {
     Q_UNUSED(parent);
-    if (m_ChannelInfoList.empty() == false)
-        return m_ChannelInfoList.size();
-
-    return 0;
+    return static_cast<int>(m_ChannelInfoList.size());
 }
 
 //=============================================================================================================
@@ -507,7 +504,7 @@ void FiffRawViewModel::setFilterChannelType(const QString& channelType)
     //Create channel filter list independent from channelNames
     m_lFilterChannelList.resize(0);
 
-    for (int i = 0; i < m_pFiffInfo->chs.size(); ++i) {
+    for (int i = 0; i < std::ssize(m_pFiffInfo->chs); ++i) {
         if ((m_pFiffInfo->chs.at(i).kind == FIFFV_MEG_CH || m_pFiffInfo->chs.at(i).kind == FIFFV_EEG_CH ||
              m_pFiffInfo->chs.at(i).kind == FIFFV_EOG_CH || m_pFiffInfo->chs.at(i).kind == FIFFV_ECG_CH ||
              m_pFiffInfo->chs.at(i).kind == FIFFV_EMG_CH) /* && !m_pFiffInfo->bads.contains(m_pFiffInfo->chs.at(i).ch_name)*/) {

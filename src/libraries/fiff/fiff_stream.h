@@ -64,7 +64,6 @@
 
 #include <QByteArray>
 #include <QIODevice>
-#include <QList>
 #include <QSharedPointer>
 #include <QString>
 #include <QStringList>
@@ -285,7 +284,7 @@ public:
      *
      * @return true if information is available, false otherwise.
      */
-    bool get_evoked_entries(const std::vector<FiffDirNode::SPtr>& evoked_node, QStringList& comments, QList<fiff_int_t>& aspect_kinds, QString& t);
+    bool get_evoked_entries(const std::vector<FiffDirNode::SPtr>& evoked_node, QStringList& comments, std::vector<fiff_int_t>& aspect_kinds, QString& t);
 
     //=========================================================================================================
     /**
@@ -423,7 +422,7 @@ public:
      * @return the CTF software compensation data, or none if a compensator is incomplete or names a
      *         channel that is missing from, or ambiguous in, p_Chs.
      */
-    QList<FiffCtfComp> read_ctf_comp(const FiffDirNode::SPtr& p_Node, const QList<FiffChInfo>& p_Chs);
+    std::vector<FiffCtfComp> read_ctf_comp(const FiffDirNode::SPtr& p_Node, const std::vector<FiffChInfo>& p_Chs);
 
     //=========================================================================================================
     /**
@@ -486,7 +485,7 @@ public:
      *
      * @return a list of SSP projectors.
      */
-    QList<FiffProj> read_proj(const FiffDirNode::SPtr& p_Node);
+    std::vector<FiffProj> read_proj(const FiffDirNode::SPtr& p_Node);
 
     //=========================================================================================================
     /**
@@ -696,7 +695,7 @@ public:
      *
      * @return the position where the ctf compensators struct was written to.
      */
-    fiff_long_t write_ctf_comp(const QList<FiffCtfComp>& comps);
+    fiff_long_t write_ctf_comp(const std::vector<FiffCtfComp>& comps);
 
     //=========================================================================================================
     /**
@@ -894,7 +893,7 @@ public:
      *
      * @return the position where the projector struct was written to.
      */
-    fiff_long_t write_proj(const QList<FiffProj>& projs);
+    fiff_long_t write_proj(const std::vector<FiffProj>& projs);
 
     //=========================================================================================================
     /**

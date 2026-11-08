@@ -46,7 +46,6 @@
 //=============================================================================================================
 
 #include <QSharedPointer>
-#include <QList>
 
 //=============================================================================================================
 // DEFINE NAMESPACE MNELIB
@@ -122,9 +121,9 @@ public:
      *
      * @return OK on success, FAIL on error.
      */
-    int make_comp(const QList<FIFFLIB::FiffChInfo>& chList,
+    int make_comp(const std::vector<FIFFLIB::FiffChInfo>& chList,
                   int nChan,
-                  QList<FIFFLIB::FiffChInfo> compchs,
+                  std::vector<FIFFLIB::FiffChInfo> compchs,
                   int nCompChan);
 
     //=========================================================================================================
@@ -138,7 +137,7 @@ public:
      *
      * @return Number of channels modified.
      */
-    static int set_comp(QList<FIFFLIB::FiffChInfo>& chs,
+    static int set_comp(std::vector<FIFFLIB::FiffChInfo>& chs,
                         int nch,
                         int comp);
 
@@ -192,7 +191,7 @@ public:
      * @return The uniform compensation grade, or FAIL if channels have
      *         inconsistent compensation.
      */
-    static int get_comp(const QList<FIFFLIB::FiffChInfo>& chs, int nch);
+    static int get_comp(const std::vector<FIFFLIB::FiffChInfo>& chs, int nch);
 
     //=========================================================================================================
     /**
@@ -229,15 +228,15 @@ public:
      * @return OK on success, FAIL on error.
      */
     int set_compensation(int compensate_to,
-                         QList<FIFFLIB::FiffChInfo>& chList,
+                         std::vector<FIFFLIB::FiffChInfo>& chList,
                          int nchan,
-                         QList<FIFFLIB::FiffChInfo> comp_chs,
+                         std::vector<FIFFLIB::FiffChInfo> comp_chs,
                          int ncomp_chan);
 
 public:
     std::vector<std::unique_ptr<MNECTFCompData>> comps; /**< All available compensation data sets. */
     int ncomp;                                          /**< Number of compensation data sets. */
-    QList<FIFFLIB::FiffChInfo> chs;                     /**< Channel information associated with compensation. */
+    std::vector<FIFFLIB::FiffChInfo> chs;               /**< Channel information associated with compensation. */
     int nch;                                            /**< Number of channels. */
     std::unique_ptr<MNECTFCompData> undo;               /**< Compensation data to undo the current state. */
     std::unique_ptr<MNECTFCompData> current;            /**< Compiled compensation operator for the current target grade. */

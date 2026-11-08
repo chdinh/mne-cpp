@@ -19,6 +19,8 @@
 
 #include "fwd_comp_data.h"
 
+#include <vector>
+
 #include <mne/mne_ctf_comp_data_set.h>
 #include <fiff/fiff_types.h>
 
@@ -95,8 +97,8 @@ int FwdCompData::fwd_make_ctf_comp_coils(MNECTFCompDataSet* set,
                                          FwdCoilSet* coils,
                                          FwdCoilSet* comp_coils)
 {
-    QList<FiffChInfo> chs;
-    QList<FiffChInfo> compchs;
+    std::vector<FiffChInfo> chs;
+    std::vector<FiffChInfo> compchs;
     int nchan = 0;
     int ncomp = 0;
     int k, res;
@@ -109,7 +111,7 @@ int FwdCompData::fwd_make_ctf_comp_coils(MNECTFCompDataSet* set,
     }
 
     for (k = 0; k < coils->ncoil(); k++) {
-        chs.append(FiffChInfo());
+        chs.push_back(FiffChInfo());
         FwdCoil* coil = coils->coils[k].get();
         chs[k].ch_name = coil->chname.toStdString();
         chs[k].chpos.coil_type = coil->type;
@@ -118,7 +120,7 @@ int FwdCompData::fwd_make_ctf_comp_coils(MNECTFCompDataSet* set,
     nchan = coils->ncoil();
     if (comp_coils && comp_coils->ncoil() > 0) {
         for (k = 0; k < comp_coils->ncoil(); k++) {
-            compchs.append(FiffChInfo());
+            compchs.push_back(FiffChInfo());
             FwdCoil* coil = comp_coils->coils[k].get();
             compchs[k].ch_name = coil->chname.toStdString();
             compchs[k].chpos.coil_type = coil->type;

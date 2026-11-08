@@ -293,7 +293,7 @@ void TestMneScanPlugins::averagesTheStimulusEvents()
     auto evoked = received.last().dynamicCast<RealTimeEvokedSet>();
     QVERIFY(evoked);
     const FiffEvokedSet& set = *evoked->getValue();
-    QVERIFY(!set.evoked.isEmpty());
+    QVERIFY(!set.evoked.empty());
 
     // Defaults: STI014, -100..400 ms around each trigger
     const int pre = static_cast<int>(0.1f * m_info->sfreq);

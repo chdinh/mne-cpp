@@ -19,6 +19,8 @@
 //=============================================================================================================
 
 #include "fiff_epochs.h"
+
+#include <vector>
 #include "fiff_evoked.h"
 
 //=============================================================================================================
@@ -44,13 +46,13 @@ using namespace Eigen;
 // DEFINE MEMBER METHODS
 //=============================================================================================================
 
-QList<FiffEpochData> FiffEpochs::makeFixedLengthEpochs(const MatrixXd& matData,
-                                                       double dSFreq,
-                                                       double dDuration,
-                                                       double dOverlap,
-                                                       bool bDropLast)
+std::vector<FiffEpochData> FiffEpochs::makeFixedLengthEpochs(const MatrixXd& matData,
+                                                             double dSFreq,
+                                                             double dDuration,
+                                                             double dOverlap,
+                                                             bool bDropLast)
 {
-    QList<FiffEpochData> epochs;
+    std::vector<FiffEpochData> epochs;
 
     if (matData.size() == 0 || dSFreq <= 0.0 || dDuration <= 0.0) {
         qWarning() << "[FiffEpochs::makeFixedLengthEpochs] Invalid input parameters.";
@@ -76,7 +78,7 @@ QList<FiffEpochData> FiffEpochs::makeFixedLengthEpochs(const MatrixXd& matData,
         epoch.data = matData.block(0, start, nCh, epochSamples);
         epoch.tmin = static_cast<double>(start) / dSFreq;
         epoch.tmax = static_cast<double>(start + epochSamples - 1) / dSFreq;
-        epochs.append(epoch);
+        epochs.push_back(epoch);
         start += stepSamples;
     }
 
@@ -87,7 +89,7 @@ QList<FiffEpochData> FiffEpochs::makeFixedLengthEpochs(const MatrixXd& matData,
         epoch.data = matData.block(0, start, nCh, remaining);
         epoch.tmin = static_cast<double>(start) / dSFreq;
         epoch.tmax = static_cast<double>(nTimes - 1) / dSFreq;
-        epochs.append(epoch);
+        epochs.push_back(epoch);
     }
 
     return epochs;
@@ -95,32 +97,36 @@ QList<FiffEpochData> FiffEpochs::makeFixedLengthEpochs(const MatrixXd& matData,
 
 //=============================================================================================================
 
-QList<FiffEpochData> FiffEpochs::concatenateEpochs(const QList<QList<FiffEpochData>>& epochSets)
+std::vector<FiffEpochData> FiffEpochs::concatenateEpochs(const std::vector<std::vector<FiffEpochData>>& epochSets)
 {
-    QList<FiffEpochData> result;
+    std::vector<FiffEpochData> result;
+    std::size_t total = 0;
+    for (const auto& epochSet : epochSets)
+        total += epochSet.size();
+    result.reserve(total);
 
     for (const auto& epochSet : epochSets)
-        result.append(epochSet);
+        result.insert(result.end(), epochSet.begin(), epochSet.end());
 
     return result;
 }
 
 //=============================================================================================================
 
-FiffEvoked FiffEpochs::averageEpochs(const QList<FiffEpochData>& epochs,
+FiffEvoked FiffEpochs::averageEpochs(const std::vector<FiffEpochData>& epochs,
                                      double dSFreq,
                                      const QString& comment)
 {
     FiffEvoked evoked;
 
-    if (epochs.isEmpty()) {
+    if (epochs.empty()) {
         qWarning() << "[FiffEpochs::averageEpochs] Empty epoch list.";
         return evoked;
     }
 
     const int nCh = static_cast<int>(epochs[0].data.rows());
     const int nTimes = static_cast<int>(epochs[0].data.cols());
-    const int nEpochs = epochs.size();
+    const int nEpochs = static_cast<int>(epochs.size());
 
     MatrixXd avg = MatrixXd::Zero(nCh, nTimes);
 
@@ -155,13 +161,13 @@ FiffEvoked FiffEpochs::averageEpochs(const QList<FiffEpochData>& epochs,
 
 //=============================================================================================================
 
-QList<MatrixXd> FiffEpochs::toMatrixList(const QList<FiffEpochData>& epochs)
+std::vector<MatrixXd> FiffEpochs::toMatrixList(const std::vector<FiffEpochData>& epochs)
 {
-    QList<MatrixXd> result;
+    std::vector<MatrixXd> result;
     result.reserve(epochs.size());
 
     for (const auto& epoch : epochs)
-        result.append(epoch.data);
+        result.push_back(epoch.data);
 
     return result;
 }

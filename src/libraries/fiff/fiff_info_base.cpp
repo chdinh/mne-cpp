@@ -22,6 +22,8 @@
 
 #include "fiff_info_base.h"
 
+#include <vector>
+
 #include <iostream>
 
 #include <utils/generics/log.h>
@@ -136,20 +138,20 @@ bool FiffInfoBase::isBad(std::string_view name) const
 
 //=============================================================================================================
 
-QMap<QString, QList<int>> FiffInfoBase::channel_indices_by_type(const QList<int>& picks) const
+std::map<std::string, std::vector<int>> FiffInfoBase::channel_indices_by_type(const std::vector<int>& picks) const
 {
-    QMap<QString, QList<int>> byType;
+    std::map<std::string, std::vector<int>> byType;
     for (const char* type : {"grad", "mag", "ref_meg", "eeg", "csd", "seeg", "dbs", "ecog", "eog", "emg", "ecg", "resp", "bio",
                              "misc", "stim", "exci", "syst", "ias", "gof", "dipole", "chpi", "temperature", "gsr", "hbo", "hbr",
                              "fnirs_cw_amplitude", "fnirs_fd_ac_amplitude", "fnirs_fd_phase", "fnirs_od",
                              "fnirs_td_gated_amplitude", "fnirs_td_moments_intensity", "fnirs_td_moments_mean",
                              "fnirs_td_moments_variance", "eyegaze", "pupil"}) {
-        byType.insert(QString::fromLatin1(type), {});
+        byType.try_emplace(type);
     }
-    const qsizetype count = picks.isEmpty() ? chs.size() : picks.size();
-    for (qsizetype k = 0; k < count; ++k) {
-        const int idx = picks.isEmpty() ? static_cast<int>(k) : picks[k];
-        byType[QString::fromStdString(channel_type(idx))].append(idx);
+    const std::size_t count = picks.empty() ? chs.size() : picks.size();
+    for (std::size_t k = 0; k < count; ++k) {
+        const int idx = picks.empty() ? static_cast<int>(k) : picks[k];
+        byType[channel_type(idx)].push_back(idx);
     }
     return byType;
 }
@@ -160,7 +162,7 @@ RowVectorXi FiffInfoBase::pick_data_channels(const StringList& exclude) const
 {
     static const std::vector<std::string_view> dataTypes{"mag", "grad", "ref_meg", "eeg", "csd", "seeg", "ecog", "dbs", "hbo", "hbr"};
     std::vector<int> picks;
-    for (int i = 0; i < chs.size(); ++i) {
+    for (int i = 0; i < std::ssize(chs); ++i) {
         const std::string type = channelTypeName(chs[i]);
         const bool isData = std::find(dataTypes.begin(), dataTypes.end(), type) != dataTypes.end() || type.starts_with("fnirs_");
         if (isData && std::find(exclude.begin(), exclude.end(), chs[i].ch_name) == exclude.end())
@@ -175,12 +177,12 @@ RowVectorXi FiffInfoBase::pick_channels_regexp(const StringList& ch_names, const
 {
     const QRegularExpression re(QRegularExpression::anchoredPattern(regexp + QStringLiteral(".*")),
                                 QRegularExpression::DotMatchesEverythingOption);
-    QList<int> sel;
+    std::vector<int> sel;
     for (int k = 0; k < static_cast<int>(ch_names.size()); ++k) {
         if (re.match(QString::fromStdString(ch_names[static_cast<std::size_t>(k)])).hasMatch())
-            sel.append(k);
+            sel.push_back(k);
     }
-    return Eigen::Map<const RowVectorXi>(sel.constData(), sel.size());
+    return Eigen::Map<const RowVectorXi>(sel.data(), static_cast<Eigen::Index>(sel.size()));
 }
 
 //=============================================================================================================
@@ -287,7 +289,7 @@ FiffInfoBase FiffInfoBase::pick_info(const RowVectorXi* sel) const
     qint32 idx;
     for (qint32 i = 0; i < sel->size(); ++i) {
         idx = (*sel)(0, i);
-        res.chs.append(this->chs[idx]);
+        res.chs.push_back(this->chs[idx]);
         res.ch_names.push_back(this->ch_names[static_cast<std::size_t>(idx)]);
     }
     res.nchan = sel->size();
@@ -297,24 +299,24 @@ FiffInfoBase FiffInfoBase::pick_info(const RowVectorXi* sel) const
 }
 //=============================================================================================================
 
-void FiffInfoBase::mne_read_meg_comp_eeg_ch_info(QList<FiffChInfo>& megp,
+void FiffInfoBase::mne_read_meg_comp_eeg_ch_info(std::vector<FiffChInfo>& megp,
                                                  int& nmegp,
-                                                 QList<FiffChInfo>& meg_compp,
+                                                 std::vector<FiffChInfo>& meg_compp,
                                                  int& nmeg_compp,
-                                                 QList<FiffChInfo>& eegp,
+                                                 std::vector<FiffChInfo>& eegp,
                                                  int& neegp,
                                                  FiffCoordTrans& meg_head_t,
                                                  FiffId& idp) const
 {
     for (int k = 0; k < nchan; k++) {
         if (chs[k].kind == FIFFV_MEG_CH) {
-            megp.append(chs[k]);
+            megp.push_back(chs[k]);
             nmegp++;
         } else if (chs[k].kind == FIFFV_REF_MEG_CH) {
-            meg_compp.append(chs[k]);
+            meg_compp.push_back(chs[k]);
             nmeg_compp++;
         } else if (chs[k].kind == FIFFV_EEG_CH) {
-            eegp.append(chs[k]);
+            eegp.push_back(chs[k]);
             neegp++;
         }
     }

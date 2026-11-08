@@ -103,11 +103,11 @@ SparseMatrix<int> StatsAdjacency::fromChannelPositions(const FiffInfo& info, con
     // Gather channel indices and 3D positions
     std::vector<int> chIdx;
     if (picks.empty()) {
-        for (int i = 0; i < info.chs.size(); ++i) {
+        for (int i = 0; i < std::ssize(info.chs); ++i) {
             chIdx.push_back(i);
         }
     } else {
-        for (int i = 0; i < info.chs.size(); ++i) {
+        for (int i = 0; i < std::ssize(info.chs); ++i) {
             if (std::find(picks.begin(), picks.end(), info.chs[i].ch_name) != picks.end()) {
                 chIdx.push_back(i);
             }

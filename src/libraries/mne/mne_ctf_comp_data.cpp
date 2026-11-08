@@ -18,6 +18,8 @@
 //=============================================================================================================
 
 #include "mne_ctf_comp_data.h"
+
+#include <vector>
 #include "mne_types.h"
 
 #include <fiff/fiff_constants.h>
@@ -76,7 +78,7 @@ MNECTFCompData::~MNECTFCompData()
 
 //=============================================================================================================
 
-int MNECTFCompData::calibrate(const QList<FIFFLIB::FiffChInfo>& chs, int nch, bool do_it)
+int MNECTFCompData::calibrate(const std::vector<FIFFLIB::FiffChInfo>& chs, int nch, bool do_it)
 {
     Eigen::VectorXf col_cals(this->data->ncol);
     Eigen::VectorXf row_cals(this->data->nrow);

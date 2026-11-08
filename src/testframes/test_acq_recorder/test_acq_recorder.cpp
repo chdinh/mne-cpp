@@ -519,7 +519,7 @@ void TestAcqRecorder::convertsFiffInfo()
         ch.chpos.coil_type = k == 0 ? 3012 : 1;
         ch.chpos.r0 = Eigen::Vector3f(0.01f * static_cast<float>(k), 0.02f, 0.03f);
         ch.coord_frame = FIFFV_COORD_DEVICE;
-        fiff.chs << ch;
+        fiff.chs.push_back(ch);
         fiff.ch_names.push_back(ch.ch_name);
     }
     fiff.nchan = 5;
@@ -542,7 +542,7 @@ void TestAcqRecorder::convertsFiffInfo()
     QCOMPARE(back->experimenter, fiff.experimenter);
     QCOMPARE(back->meas_date[0], fiff.meas_date[0]);
     QCOMPARE(back->bads, fiff.bads);
-    for (int k = 0; k < 5; ++k) {
+    for (std::size_t k = 0; k < 5; ++k) {
         QCOMPARE(back->chs[k].ch_name, fiff.chs[k].ch_name);
         QCOMPARE(back->chs[k].kind, fiff.chs[k].kind);
         QCOMPARE(back->chs[k].logNo, fiff.chs[k].logNo);

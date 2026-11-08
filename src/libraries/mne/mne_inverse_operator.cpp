@@ -25,6 +25,8 @@
 //=============================================================================================================
 
 #include "mne_inverse_operator.h"
+
+#include <vector>
 #include <utils/string_utils.h>
 #include <fs/fs_label.h>
 #include <math/linalg.h>
@@ -84,7 +86,7 @@ bool MNEInverseOperator::assemble_kernel(const FsLabel& label,
                                          bool pick_normal,
                                          MatrixXd& K,
                                          SparseMatrix<double>& noise_norm,
-                                         QList<VectorXi>& vertno)
+                                         std::vector<VectorXi>& vertno)
 {
     MatrixXd t_eigen_leads = eigen_leads->data;
     MatrixXd t_source_cov = source_cov->data;
@@ -250,10 +252,10 @@ MatrixXd MNEInverseOperator::cluster_kernel(const FsAnnotationSet& p_AnnotationS
 
     MatrixXd p_outMT = m_K.transpose();
 
-    QList<MNEClusterInfo> t_qListMNEClusterInfo;
+    std::vector<MNEClusterInfo> t_qListMNEClusterInfo;
     MNEClusterInfo t_MNEClusterInfo;
-    t_qListMNEClusterInfo.append(t_MNEClusterInfo);
-    t_qListMNEClusterInfo.append(t_MNEClusterInfo);
+    t_qListMNEClusterInfo.push_back(t_MNEClusterInfo);
+    t_qListMNEClusterInfo.push_back(t_MNEClusterInfo);
 
     //
     // Check consistency
@@ -292,7 +294,7 @@ MatrixXd MNEInverseOperator::cluster_kernel(const FsAnnotationSet& p_AnnotationS
             vertno_labeled[i] = p_AnnotationSet[h].getLabelIds()[this->src[h].vertno[i]];
 
         //Qt Concurrent List
-        QList<RegionMT> m_qListRegionMTIn;
+        std::vector<RegionMT> m_qListRegionMTIn;
 
         //
         // Generate cluster input data
@@ -346,7 +348,7 @@ MatrixXd MNEInverseOperator::cluster_kernel(const FsAnnotationSet& p_AnnotationS
 
                     t_sensMT.sDistMeasure = p_sMethod;
 
-                    m_qListRegionMTIn.append(t_sensMT);
+                    m_qListRegionMTIn.push_back(t_sensMT);
 
                     qInfo("[added]\n");
                 } else {
@@ -370,7 +372,7 @@ MatrixXd MNEInverseOperator::cluster_kernel(const FsAnnotationSet& p_AnnotationS
 
         qint32 nClusters;
         qint32 nSens;
-        QList<RegionMT>::const_iterator itIn;
+        std::vector<RegionMT>::const_iterator itIn;
         itIn = m_qListRegionMTIn.begin();
         QFuture<RegionMTOut>::const_iterator itOut;
         for (itOut = res.constBegin(); itOut != res.constEnd(); ++itOut) {
@@ -406,7 +408,7 @@ MatrixXd MNEInverseOperator::cluster_kernel(const FsAnnotationSet& p_AnnotationS
                 for (qint32 k = 0; k < clusterVertnos.size(); ++k)
                     clusterVertnos(k) = this->src[h].vertno[clusterIdcs(k)];
 
-                t_qListMNEClusterInfo[h].clusterVertnos.append(clusterVertnos);
+                t_qListMNEClusterInfo[h].clusterVertnos.push_back(clusterVertnos);
             }
 
             //
@@ -435,12 +437,12 @@ MatrixXd MNEInverseOperator::cluster_kernel(const FsAnnotationSet& p_AnnotationS
     else
         p_D = MatrixXd::Zero(p_outMT.cols(), totalNumOfClust * 3);
 
-    QList<VectorXi> t_vertnos = src.get_vertno();
+    std::vector<VectorXi> t_vertnos = src.get_vertno();
 
     qint32 currentCluster = 0;
     for (qint32 h = 0; h < 2; ++h) {
         int hemiOffset = h == 0 ? 0 : t_vertnos[0].size();
-        for (qint32 i = 0; i < t_qListMNEClusterInfo[h].clusterVertnos.size(); ++i) {
+        for (qint32 i = 0; i < std::ssize(t_qListMNEClusterInfo[h].clusterVertnos); ++i) {
             VectorXi idx_sel;
             Linalg::intersect(t_vertnos[h], t_qListMNEClusterInfo[h].clusterVertnos[i], idx_sel);
 
@@ -655,7 +657,7 @@ MNEInverseOperator MNEInverseOperator::make_inverse_operator(const FiffInfo& inf
 
     RowVectorXd ch_idx(info.chs.size());
     qint32 count = 0;
-    for (qint32 i = 0; i < info.chs.size(); ++i) {
+    for (qint32 i = 0; i < std::ssize(info.chs); ++i) {
         if (UTILSLIB::contains(gain_info.ch_names, info.chs[i].ch_name)) {
             ch_idx[count] = i;
             ++count;

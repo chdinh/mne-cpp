@@ -408,7 +408,7 @@ void TestInvRtLibrary::rtAveraging_moreWorkerOps()
         } else {
             ch.kind = FIFFV_MEG_CH;
         }
-        pInfo->chs.append(ch);
+        pInfo->chs.push_back(ch);
         pInfo->ch_names.push_back(ch.ch_name);
     }
 
@@ -446,7 +446,7 @@ void TestInvRtLibrary::rtNoise_hanningWindow()
         FiffChInfo ch;
         ch.ch_name = (QString("MEG%1").arg(i)).toStdString();
         ch.kind = FIFFV_MEG_CH;
-        pInfo->chs.append(ch);
+        pInfo->chs.push_back(ch);
         pInfo->ch_names.push_back(ch.ch_name);
     }
 
@@ -484,7 +484,7 @@ void TestInvRtLibrary::rtNoise_lifecycle()
         FiffChInfo ch;
         ch.ch_name = (QString("CH%1").arg(i)).toStdString();
         ch.kind = FIFFV_MEG_CH;
-        pInfo->chs.append(ch);
+        pInfo->chs.push_back(ch);
         pInfo->ch_names.push_back(ch.ch_name);
     }
 
@@ -534,9 +534,10 @@ void TestInvRtLibrary::hpiFit_constructWithSensorSet()
     // Only MEG channels have coils: a list with EEG/stim channels gives no sensor set
     QCOMPARE(creator.updateSensorSet(raw.info.chs, Accuracy::medium).ncoils(), 0);
     RowVectorXi megPicks = raw.info.pick_types(true, false, false);
-    QList<FiffChInfo> megChs;
+    std::vector<FiffChInfo> megChs;
+    megChs.reserve(static_cast<std::size_t>(megPicks.size()));
     for (int i = 0; i < megPicks.size(); ++i)
-        megChs << raw.info.chs[megPicks(i)];
+        megChs.push_back(raw.info.chs[megPicks(i)]);
     const InvSensorSet sensorSet = creator.updateSensorSet(megChs, Accuracy::medium);
     QCOMPARE(sensorSet.ncoils(), static_cast<int>(megPicks.size()));
     QVERIFY(sensorSet.np() > 0);
@@ -564,9 +565,10 @@ void TestInvRtLibrary::hpiFit_fitWithSyntheticData()
         QSKIP("No test data");
     FiffRawData raw(rawPath().toStdString());
     RowVectorXi megPicks = raw.info.pick_types(true, false, false);
-    QList<FiffChInfo> megChs;
+    std::vector<FiffChInfo> megChs;
+    megChs.reserve(static_cast<std::size_t>(megPicks.size()));
     for (int i = 0; i < megPicks.size(); ++i)
-        megChs << raw.info.chs[megPicks(i)];
+        megChs.push_back(raw.info.chs[megPicks(i)]);
     InvSensorSetCreator creator;
     InvSensorSet sensorSet = creator.updateSensorSet(megChs, Accuracy::medium);
     InvHpiFit hpiFit(sensorSet);
@@ -773,7 +775,8 @@ void TestInvRtLibrary::rtAveragingWorker_doWork()
     chTrig.kind = FIFFV_STIM_CH;
     chTrig.range = 1.0;
     chTrig.cal = 1.0;
-    pInfo->chs << chData << chTrig;
+    pInfo->chs.push_back(chData);
+    pInfo->chs.push_back(chTrig);
     pInfo->nchan = 2;
     pInfo->ch_names.push_back("MEG0111");
     pInfo->ch_names.push_back("STI014");
@@ -791,7 +794,7 @@ void TestInvRtLibrary::rtAveragingWorker_doWork()
     }
     // Three epochs, two averaged: the epoch of the stationary sine is samples 50..199 of any block
     QCOMPARE(results.size(), 3);
-    const FiffEvoked& evoked = results.last().evoked.first();
+    const FiffEvoked& evoked = results.last().evoked.front();
     QCOMPARE(evoked.nave, 2);
     for (int k = 0; k < 150; ++k)
         QVERIFY(std::fabs(evoked.data(0, k) - std::sin(2.0 * M_PI * 10.0 * (50 + k) / 1000.0)) < 1e-12);
@@ -830,3 +833,5 @@ void TestInvRtLibrary::filterData_paramOverload()
 QTEST_GUILESS_MAIN(TestInvRtLibrary)
 
 #include "test_inv_rt_library.moc"
+
+#include <vector>

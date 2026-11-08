@@ -23,6 +23,8 @@
 //=============================================================================================================
 
 #include "fiff_tag.h"
+
+#include <vector>
 #include "fiff_byte_swap.h"
 #include "fiff_sparse_matrix.h"
 
@@ -74,7 +76,7 @@ bool FiffTag::isMatrix() const
 
 //=============================================================================================================
 
-bool FiffTag::getMatrixDimensions(qint32& p_ndim, QVector<qint32>& p_Dims) const
+bool FiffTag::getMatrixDimensions(qint32& p_ndim, std::vector<qint32>& p_Dims) const
 {
     p_Dims.clear();
     p_ndim = 0;
@@ -98,12 +100,12 @@ bool FiffTag::getMatrixDimensions(qint32& p_ndim, QVector<qint32>& p_Dims) const
     if (ndim <= 0 || ndim > FIFFC_MATRIX_MAX_DIM || nTrailer > nInts)
         return false;
 
-    QVector<qint32> dims;
+    std::vector<qint32> dims;
     qint64 nValues = 1;
     for (qsizetype i = nInts - nTrailer; i < nInts - 1; ++i) {
         if (t_pInt32[i] < 0)
             return false;
-        dims.append(t_pInt32[i]);
+        dims.push_back(t_pInt32[i]);
         nValues = std::min<qint64>(nValues * t_pInt32[i], this->size()); // capped: enough to compare, no overflow
     }
     if (!sparse) {

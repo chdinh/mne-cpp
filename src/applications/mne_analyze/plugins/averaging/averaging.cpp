@@ -386,7 +386,7 @@ void Averaging::computeAverage()
     triggerLoadingStart("Calculating average...");
 
     m_Future = QtConcurrent::run([&, this] {
-        return this->averageCalculation(*this->m_pFiffRawModel->getFiffIO()->m_qlistRaw.first().data(),
+        return this->averageCalculation(*this->m_pFiffRawModel->getFiffIO()->m_qlistRaw.front().data(),
                                         m_pFiffRawModel->getEventModel()->getEventMatrix(),
                                         m_filterKernel,
                                         *m_pFiffRawModel->getFiffInfo());
@@ -433,10 +433,10 @@ QSharedPointer<FIFFLIB::FiffEvokedSet> Averaging::averageCalculation(const FIFFL
             evoked.baseline.first = m_fBaselineFromS;
             evoked.baseline.second = m_fBaselineToS;
         }
-        pFiffEvokedSet->evoked.append(evoked);
+        pFiffEvokedSet->evoked.push_back(evoked);
     }
 
-    if (pFiffEvokedSet->evoked.isEmpty())
+    if (pFiffEvokedSet->evoked.empty())
         return nullptr;
     return pFiffEvokedSet;
 }

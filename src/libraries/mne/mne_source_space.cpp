@@ -22,6 +22,9 @@
 //=============================================================================================================
 
 #include "mne_source_space.h"
+
+#include <vector>
+#include <utility>
 #include "mne_nearest.h"
 #include "mne_patch_info.h"
 #include "mne_mgh_tag_group.h"
@@ -225,10 +228,10 @@ std::unique_ptr<MNEVolGeom> read_vol_geom(QFile& fp)
             break;
 
         const QList<QByteArray> tok = lineData.simplified().split(' ');
-        if (tok.isEmpty() || tok.first().isEmpty())
+        if (tok.empty() || tok.front().isEmpty())
             break;
 
-        const QByteArray& param = tok.first();
+        const QByteArray& param = tok.front();
         if (param == "valid") {
             if (tok.size() > 2)
                 vg->valid = tok.at(2).toInt();
@@ -1640,7 +1643,7 @@ int MNESourceSpace::filter_source_spaces(float limit, const QString& bemfile, co
         /*
         * Calculate all (both) source spaces simultaneously
         */
-        QList<FilterThreadArg*> args;
+        std::vector<FilterThreadArg*> args;
 
         std::vector<std::unique_ptr<FilterThreadArg>> arg_owners;
         for (k = 0; k < nspace; k++) {
@@ -1650,7 +1653,7 @@ int MNESourceSpace::filter_source_spaces(float limit, const QString& bemfile, co
             a_ptr->surf = surf;
             a_ptr->limit = limit;
             a_ptr->filtered = filtered;
-            args.append(a_ptr.get());
+            args.push_back(a_ptr.get());
             arg_owners.push_back(std::move(a_ptr));
         }
         /*
@@ -2348,9 +2351,9 @@ static Eigen::MatrixX3f generateIcoVertices(int grade)
 
 //=============================================================================================================
 
-QList<Eigen::VectorXi> MNESourceSpace::gradeToVertices(const QString& subjectsDir, const QString& subject, int grade)
+std::vector<Eigen::VectorXi> MNESourceSpace::gradeToVertices(const QString& subjectsDir, const QString& subject, int grade)
 {
-    QList<Eigen::VectorXi> vertices;
+    std::vector<Eigen::VectorXi> vertices;
     const int nIco = 10 * (1 << (2 * grade)) + 2;
     for (const char* hemi : {"lh", "rh"}) {
         const QString path = QString("%1/%2/surf/%3.sphere.reg").arg(subjectsDir, subject, hemi);
@@ -2368,7 +2371,7 @@ QList<Eigen::VectorXi> MNESourceSpace::gradeToVertices(const QString& subjectsDi
                        << subject << "(repeated vertices); use a lower grade.";
             return {};
         }
-        vertices.append(down.vertno);
+        vertices.push_back(down.vertno);
     }
     return vertices;
 }

@@ -216,7 +216,7 @@ void AveragingSettingsView::redrawGUI()
 
 void AveragingSettingsView::setDetectedEpochs(const FiffEvokedSet& evokedSet)
 {
-    if (evokedSet.evoked.isEmpty()) {
+    if (evokedSet.evoked.empty()) {
         m_pUi->m_groupBox_detectedTrials->hide();
         return;
     } else {
@@ -237,7 +237,7 @@ void AveragingSettingsView::setDetectedEpochs(const FiffEvokedSet& evokedSet)
     topLayout->addWidget(new QLabel("Type"), 0, 0);
     topLayout->addWidget(new QLabel("#"), 0, 1);
 
-    for (int i = 0; i < evokedSet.evoked.size(); i++) {
+    for (int i = 0; i < std::ssize(evokedSet.evoked); i++) {
         if (i < 10) {
             // Show only a maximum of 10 average types
             topLayout->addWidget(new QLabel(evokedSet.evoked.at(i).comment), i + 1, 0);

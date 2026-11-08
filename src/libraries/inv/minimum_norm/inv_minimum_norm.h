@@ -234,7 +234,7 @@ private:
     bool inverseSetup;                      /**< Inverse Setup Calculated. */
     MNELIB::MNEInverseOperator inv;         /**< The setup inverse operator. */
     Eigen::SparseMatrix<double> noise_norm; /**< The noise normalization. */
-    QList<Eigen::VectorXi> vertno;          /**< The vertices numbers. */
+    std::vector<Eigen::VectorXi> vertno;    /**< The vertices numbers. */
     FSLIB::FsLabel label;                   /**< The corresponding labels. */
     Eigen::MatrixXd K;                      /**< Imaging kernel. */
 };

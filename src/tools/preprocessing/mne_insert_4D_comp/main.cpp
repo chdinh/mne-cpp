@@ -15,6 +15,8 @@
 //=============================================================================================================
 
 #include <fiff/fiff.h>
+
+#include <vector>
 #include <fiff/fiff_file.h>
 #include <utils/generics/mne_logger.h>
 #include <utils/string_utils.h>
@@ -253,7 +255,7 @@ int main(int argc, char* argv[])
     //
     // Create reference channel info
     //
-    QList<FiffChInfo> refChs;
+    std::vector<FiffChInfo> refChs;
     for (int k = 0; k < nRefCh; k++) {
         FiffChInfo ch;
         ch.scanNo = raw.info.nchan + k + 1;
@@ -265,7 +267,7 @@ int main(int argc, char* argv[])
         ch.unit = FIFF_UNIT_T;
         ch.unit_mul = FIFF_UNITM_NONE;
         ch.ch_name = QString("REF%1").arg(k + 1, 3, 10, QChar('0')).toStdString();
-        refChs.append(ch);
+        refChs.push_back(ch);
     }
 
     //

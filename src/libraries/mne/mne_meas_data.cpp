@@ -154,7 +154,7 @@ bool MNEMeasData::read_evoked_set(const QString& name,
     const float lowpass = evoked.info.lowpass;
     const int nave = evoked.nave;
     const int aspect_kind = evoked.aspect_kind;
-    const QList<FiffChInfo>& chs = evoked.info.chs;
+    const std::vector<FiffChInfo>& chs = evoked.info.chs;
     const FiffId& id = evoked.info.meas_id;
     const MatrixXf data = evoked.data.cast<float>(); /* nchan × nsamp, already calibrated */
     const FiffCoordTrans& devHeadT = evoked.info.dev_head_t;
@@ -288,7 +288,7 @@ bool MNEMeasData::read_evoked_set(const QString& name,
          * Channel list
          */
         for (k = 0; k < nchan; k++) {
-            target.chs.append(FiffChInfo());
+            target.chs.push_back(FiffChInfo());
             target.chs[k] = chs[sel[k]];
         }
 

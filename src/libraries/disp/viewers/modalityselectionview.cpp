@@ -18,6 +18,8 @@
 
 #include "modalityselectionview.h"
 
+#include <vector>
+
 //=============================================================================================================
 // QT INCLUDES
 //=============================================================================================================
@@ -42,7 +44,7 @@ using namespace DISPLIB;
 // DEFINE MEMBER METHODS
 //=============================================================================================================
 
-ModalitySelectionView::ModalitySelectionView(const QList<FIFFLIB::FiffChInfo>& lChannelList,
+ModalitySelectionView::ModalitySelectionView(const std::vector<FIFFLIB::FiffChInfo>& lChannelList,
                                              const QString& sSettingsPath,
                                              QWidget* parent,
                                              Qt::WindowFlags f)
@@ -54,7 +56,7 @@ ModalitySelectionView::ModalitySelectionView(const QList<FIFFLIB::FiffChInfo>& l
     this->setMaximumWidth(330);
 
     // Specify which channel types are needed
-    for (int i = 0; i < lChannelList.size(); ++i) {
+    for (int i = 0; i < std::ssize(lChannelList); ++i) {
         if (lChannelList.at(i).unit == FIFF_UNIT_T && !m_lChannelTypeList.contains("MAG")) {
             m_lChannelTypeList << "MAG";
         }

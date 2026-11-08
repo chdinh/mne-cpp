@@ -23,6 +23,8 @@
 //=============================================================================================================
 
 #include "../anshared_global.h"
+
+#include <vector>
 #include "../Utils/types.h"
 #include "abstractmodel.h"
 
@@ -620,9 +622,9 @@ private:
     UTILSLIB::FilterKernel m_filterKernel;                         /**< List of currently active filters. */
 
     // fiff stuff
-    QSharedPointer<FIFFLIB::FiffIO> m_pFiffIO;     /**< Fiff IO. */
-    QSharedPointer<FIFFLIB::FiffInfo> m_pFiffInfo; /**< Fiff info of whole fiff file. */
-    QList<FIFFLIB::FiffChInfo> m_ChannelInfoList;  /**< List of FiffChInfo objects that holds the corresponding channels information. */
+    QSharedPointer<FIFFLIB::FiffIO> m_pFiffIO;          /**< Fiff IO. */
+    QSharedPointer<FIFFLIB::FiffInfo> m_pFiffInfo;      /**< Fiff info of whole fiff file. */
+    std::vector<FIFFLIB::FiffChInfo> m_ChannelInfoList; /**< List of FiffChInfo objects that holds the corresponding channels information. */
 
     QMap<qint32, float> m_qMapChScaling; /**< Channel scaling map. */
 

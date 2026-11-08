@@ -27,6 +27,8 @@
 //=============================================================================================================
 
 #include "../inv_global.h"
+
+#include <vector>
 #include "inv_sensor_set.h"
 #include <fiff/fiff_dig_point_set.h>
 #include <fiff/fiff_dig_point.h>
@@ -114,7 +116,7 @@ public:
      *
      * @return Const reference to the channel list with bad channels excluded.
      */
-    inline const QList<FIFFLIB::FiffChInfo>& getChannels();
+    inline const std::vector<FIFFLIB::FiffChInfo>& getChannels();
     inline const Eigen::MatrixXd& getProjectors();
     inline const Eigen::MatrixXd& getHpiDigitizer();
     inline const Eigen::MatrixXd& getData();
@@ -155,7 +157,7 @@ private:
      * @param[in] lChannels       The channel list to update the sensors with.
      *
      */
-    void updateSensors(const QList<FIFFLIB::FiffChInfo>& lChannels);
+    void updateSensors(const std::vector<FIFFLIB::FiffChInfo>& lChannels);
 
     //=========================================================================================================
     /**
@@ -166,7 +168,7 @@ private:
      *
      * @return true if changed
      */
-    bool checkIfChanged(const StringList& lBads, const QList<FIFFLIB::FiffChInfo>& lChannels);
+    bool checkIfChanged(const StringList& lBads, const std::vector<FIFFLIB::FiffChInfo>& lChannels);
 
     //=========================================================================================================
     /**
@@ -186,22 +188,22 @@ private:
      */
     void prepareProjectors(const Eigen::MatrixXd& matProjectors);
 
-    QList<FIFFLIB::FiffChInfo> m_lChannels; /**< Channellist with bads excluded. */
-    QVector<int> m_vecInnerind;             /**< index of inner channels . */
-    StringList m_lBads;                     /**< contains bad channels . */
-    Eigen::MatrixXd m_matHpiDigitizer;      /**< The coordinates of the digitized HPI coils in head space*/
-    Eigen::MatrixXd m_matProjectors;        /**< The projectors ready to use*/
-    Eigen::MatrixXd m_matInnerdata;         /**< The data ready to use*/
-    Eigen::MatrixXd m_matDataProjected;     /**< The data with projectros applied*/
-    InvSensorSetCreator m_sensorSetCreator; /**< ThesensorSetCreator to create a sensorset*/
-    InvSensorSet m_sensors;                 /**< The most recent InvSensorSet*/
+    std::vector<FIFFLIB::FiffChInfo> m_lChannels; /**< Channellist with bads excluded. */
+    QVector<int> m_vecInnerind;                   /**< index of inner channels . */
+    StringList m_lBads;                           /**< contains bad channels . */
+    Eigen::MatrixXd m_matHpiDigitizer;            /**< The coordinates of the digitized HPI coils in head space*/
+    Eigen::MatrixXd m_matProjectors;              /**< The projectors ready to use*/
+    Eigen::MatrixXd m_matInnerdata;               /**< The data ready to use*/
+    Eigen::MatrixXd m_matDataProjected;           /**< The data with projectros applied*/
+    InvSensorSetCreator m_sensorSetCreator;       /**< ThesensorSetCreator to create a sensorset*/
+    InvSensorSet m_sensors;                       /**< The most recent InvSensorSet*/
 };
 
 //=============================================================================================================
 // INLINE DEFINITIONS
 //=============================================================================================================
 
-inline const QList<FIFFLIB::FiffChInfo>& InvHpiDataUpdater::getChannels()
+inline const std::vector<FIFFLIB::FiffChInfo>& InvHpiDataUpdater::getChannels()
 {
     return m_lChannels;
 }

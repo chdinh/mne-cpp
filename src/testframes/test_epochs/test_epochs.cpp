@@ -113,14 +113,14 @@ void TestEpochs::testFixedLengthMatchesMnePython()
     MatrixXd x(2, n);
     x.row(0) = RowVectorXd::LinSpaced(n, 0.0, n - 1.0);
     x.row(1) = -x.row(0);
-    const QList<FiffEpochData> epochs = FiffEpochs::makeFixedLengthEpochs(x, sfreq, duration, overlap);
+    const std::vector<FiffEpochData> epochs = FiffEpochs::makeFixedLengthEpochs(x, sfreq, duration, overlap);
     QCOMPARE(epochs.size(), starts.size());
-    for (int e = 0; e < epochs.size(); ++e) {
+    for (int e = 0; e < std::ssize(epochs); ++e) {
         QCOMPARE(epochs[e].data.cols(), Eigen::Index(samples));
         QCOMPARE(epochs[e].data(0, 0), double(starts[e]));
         QCOMPARE(epochs[e].data(1, samples - 1), -double(starts[e] + samples - 1));
     }
-    const QList<FiffEpochData> both = FiffEpochs::concatenateEpochs({epochs, epochs});
+    const std::vector<FiffEpochData> both = FiffEpochs::concatenateEpochs({epochs, epochs});
     QCOMPARE(both.size(), 2 * starts.size());
     QCOMPARE(both[starts.size()].data, epochs[0].data);
 }
@@ -178,7 +178,7 @@ void TestEpochs::testFixedLengthKeepLast()
     QCOMPARE(epochsKeep.size(), 4); // 3 full + 1 partial
 
     // Last epoch should be shorter (100 samples = 1 second)
-    QCOMPARE(static_cast<int>(epochsKeep.last().data.cols()), 100);
+    QCOMPARE(static_cast<int>(epochsKeep.back().data.cols()), 100);
 }
 
 //=============================================================================================================
@@ -188,9 +188,9 @@ void TestEpochs::testConcatenate()
     auto set1 = FiffEpochs::makeFixedLengthEpochs(m_data, m_sFreq, 2.0);
     auto set2 = FiffEpochs::makeFixedLengthEpochs(m_data, m_sFreq, 5.0);
 
-    QList<QList<FiffEpochData>> sets;
-    sets.append(set1);
-    sets.append(set2);
+    std::vector<std::vector<FiffEpochData>> sets;
+    sets.push_back(set1);
+    sets.push_back(set2);
 
     auto combined = FiffEpochs::concatenateEpochs(sets);
     QCOMPARE(combined.size(), set1.size() + set2.size());
@@ -226,7 +226,7 @@ void TestEpochs::testToMatrixList()
     auto matrices = FiffEpochs::toMatrixList(epochs);
 
     QCOMPARE(matrices.size(), epochs.size());
-    for (int i = 0; i < matrices.size(); ++i) {
+    for (int i = 0; i < std::ssize(matrices); ++i) {
         QCOMPARE(matrices[i].rows(), epochs[i].data.rows());
         QCOMPARE(matrices[i].cols(), epochs[i].data.cols());
     }
@@ -254,7 +254,7 @@ void TestEpochs::testEmptyInput()
 {
     MatrixXd empty;
     auto epochs = FiffEpochs::makeFixedLengthEpochs(empty, m_sFreq, 2.0);
-    QVERIFY(epochs.isEmpty());
+    QVERIFY(epochs.empty());
 }
 
 //=============================================================================================================
@@ -263,15 +263,15 @@ void TestEpochs::testInvalidParams()
 {
     // Zero duration
     auto e1 = FiffEpochs::makeFixedLengthEpochs(m_data, m_sFreq, 0.0);
-    QVERIFY(e1.isEmpty());
+    QVERIFY(e1.empty());
 
     // Negative sFreq
     auto e2 = FiffEpochs::makeFixedLengthEpochs(m_data, -1.0, 2.0);
-    QVERIFY(e2.isEmpty());
+    QVERIFY(e2.empty());
 
     // Overlap >= duration
     auto e3 = FiffEpochs::makeFixedLengthEpochs(m_data, m_sFreq, 2.0, 3.0);
-    QVERIFY(e3.isEmpty());
+    QVERIFY(e3.empty());
 }
 
 //=============================================================================================================

@@ -784,7 +784,7 @@ void EventModel::updateSelectedGroups(const QList<QModelIndex>& indexList)
 void EventModel::getEventsFromNewData()
 {
     auto info = m_pFiffModel->getFiffInfo();
-    auto raw = m_pFiffModel->getFiffIO()->m_qlistRaw.first().data();
+    auto raw = m_pFiffModel->getFiffIO()->m_qlistRaw.front().data();
 
     auto previousLastSample = m_pFiffModel->getPreviousLastSample();
 
@@ -792,7 +792,7 @@ void EventModel::getEventsFromNewData()
 
     std::list<int> stimChannelIndexList;
 
-    for (int i = 0; i < info->chs.size(); i++) {
+    for (int i = 0; i < std::ssize(info->chs); i++) {
         if (info->chs[i].kind == FIFFV_STIM_CH) {
             stimChannelIndexList.push_back(i);
         }

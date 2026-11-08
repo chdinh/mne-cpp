@@ -19,6 +19,8 @@
 
 #include "rtfiffrawview.h"
 
+#include <vector>
+
 #include "helpers/rtfiffrawviewdelegate.h"
 #include "helpers/rtfiffrawviewmodel.h"
 
@@ -481,7 +483,7 @@ void RtFiffRawView::takeScreenshot(const QString& fileName)
 
 //=============================================================================================================
 
-void RtFiffRawView::updateProjection(const QList<FIFFLIB::FiffProj>& projs)
+void RtFiffRawView::updateProjection(const std::vector<FIFFLIB::FiffProj>& projs)
 {
     m_pModel->updateProjection(projs);
 }
@@ -706,7 +708,7 @@ void RtFiffRawView::hideSelection()
 
 void RtFiffRawView::resetSelection()
 {
-    for (qint32 i = 0; i < m_pFiffInfo->chs.size(); ++i) {
+    for (qint32 i = 0; i < std::ssize(m_pFiffInfo->chs); ++i) {
         if (m_qListBadChannels.contains(i)) {
             if (!m_bHideBadChannels) {
                 m_pTableView->showRow(i);

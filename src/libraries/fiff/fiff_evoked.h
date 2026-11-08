@@ -35,6 +35,8 @@
 //=============================================================================================================
 
 #include "fiff_global.h"
+
+#include <vector>
 #include "fiff_info.h"
 #include "fiff_types.h"
 #include "fiff_file.h"
@@ -52,7 +54,6 @@
 //=============================================================================================================
 
 #include <QString>
-#include <QPair>
 #include <QSharedPointer>
 
 #include <filesystem>
@@ -246,7 +247,7 @@ public:
      *
      * @return The combined evoked data, or an empty FiffEvoked if the inputs are inconsistent.
      */
-    static FiffEvoked combine(const QList<FiffEvoked>& evokeds, const Eigen::VectorXd& weights);
+    static FiffEvoked combine(const std::vector<FiffEvoked>& evokeds, const Eigen::VectorXd& weights);
 
     //=========================================================================================================
     /**
@@ -257,7 +258,7 @@ public:
      *
      * @return The combined evoked data, or an empty FiffEvoked if the inputs are inconsistent.
      */
-    static FiffEvoked combine(const QList<FiffEvoked>& evokeds, CombineWeights weights);
+    static FiffEvoked combine(const std::vector<FiffEvoked>& evokeds, CombineWeights weights);
 
     //=========================================================================================================
     /**
@@ -265,19 +266,19 @@ public:
      *
      * @param[in] p_baseline     time definition of the baseline in seconds [from, to].
      */
-    void applyBaselineCorrection(QPair<float, float>& p_baseline);
+    void applyBaselineCorrection(std::pair<float, float>& p_baseline);
 
 public:
-    FiffInfo info;                /**< Measurement info. */
-    fiff_int_t nave;              /**< Number of averaged epochs. */
-    fiff_int_t aspect_kind;       /**< Aspect identifier, either FIFFV_ASPECT_AVERAGE or FIFFV_ASPECT_STD_ERR. */
-    fiff_int_t first;             /**< First time sample. */
-    fiff_int_t last;              /**< Last time sample. */
-    QString comment;              /**< Comment on dataset. Can be the condition. */
-    Eigen::RowVectorXf times;     /**< Vector of time instants in seconds. */
-    Eigen::MatrixXd data;         /**< 2D array of shape [n_channels x n_times]; Evoked response. */
-    Eigen::MatrixXd proj;         /**< SSP projection. */
-    QPair<float, float> baseline; /**< Baseline information in seconds form where the seconds are seen relative to the trigger, meaning they can also be negative [from to]*/
+    FiffInfo info;                    /**< Measurement info. */
+    fiff_int_t nave;                  /**< Number of averaged epochs. */
+    fiff_int_t aspect_kind;           /**< Aspect identifier, either FIFFV_ASPECT_AVERAGE or FIFFV_ASPECT_STD_ERR. */
+    fiff_int_t first;                 /**< First time sample. */
+    fiff_int_t last;                  /**< Last time sample. */
+    QString comment;                  /**< Comment on dataset. Can be the condition. */
+    Eigen::RowVectorXf times;         /**< Vector of time instants in seconds. */
+    Eigen::MatrixXd data;             /**< 2D array of shape [n_channels x n_times]; Evoked response. */
+    Eigen::MatrixXd proj;             /**< SSP projection. */
+    std::pair<float, float> baseline; /**< Baseline information in seconds form where the seconds are seen relative to the trigger, meaning they can also be negative [from to]*/
 };
 
 //=============================================================================================================

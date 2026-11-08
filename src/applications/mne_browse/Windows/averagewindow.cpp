@@ -674,7 +674,7 @@ void AverageWindow::refreshPlots()
         const FIFFLIB::FiffEvoked* sourceEvoked = m_pAverageModel->getEvoked(index.row());
 
         if (!sourceEvoked) {
-            m_layoutDisplayEvokeds.append(FIFFLIB::FiffEvoked());
+            m_layoutDisplayEvokeds.push_back(FIFFLIB::FiffEvoked());
             continue;
         }
 
@@ -683,7 +683,7 @@ void AverageWindow::refreshPlots()
             whitenButterflyEvoked(displayEvoked, m_noiseCovariance, m_whiteningSettings);
         }
 
-        m_layoutDisplayEvokeds.append(displayEvoked);
+        m_layoutDisplayEvokeds.push_back(displayEvoked);
     }
 
     // Auto-populate layout scene if empty but evoked data is available
@@ -702,7 +702,7 @@ void AverageWindow::refreshPlots()
 
         //Do for all selected evoked sets
         for (int u = 0; u < selectedRows.size(); ++u) {
-            if (u >= m_layoutDisplayEvokeds.size()) {
+            if (u >= std::ssize(m_layoutDisplayEvokeds)) {
                 continue;
             }
 
@@ -737,14 +737,14 @@ void AverageWindow::refreshPlots()
     }
 
     // Auto-scale: compute optimal scale from data on first load
-    if (!m_bAutoScaled && !m_layoutDisplayEvokeds.isEmpty()) {
+    if (!m_bAutoScaled && !m_layoutDisplayEvokeds.empty()) {
         double maxGrad = 0, maxMag = 0, maxEEG = 0;
 
         for (const auto& evoked : m_layoutDisplayEvokeds) {
             if (evoked.empty() || evoked.data.rows() == 0)
                 continue;
             const auto& info = evoked.info;
-            for (int ch = 0; ch < info.chs.size() && ch < evoked.data.rows(); ++ch) {
+            for (int ch = 0; ch < std::ssize(info.chs) && ch < evoked.data.rows(); ++ch) {
                 if (UTILSLIB::contains(info.bads, info.chs[ch].ch_name))
                     continue;
                 double maxVal = evoked.data.row(ch).cwiseAbs().maxCoeff();
@@ -830,7 +830,7 @@ void AverageWindow::refreshPlots()
         // Collect max amplitudes for butterfly auto-scale
         if (!m_bButterflyAutoScaled) {
             const auto& info = displayEvoked.info;
-            for (int ch = 0; ch < info.chs.size() && ch < displayEvoked.data.rows(); ++ch) {
+            for (int ch = 0; ch < std::ssize(info.chs) && ch < displayEvoked.data.rows(); ++ch) {
                 if (UTILSLIB::contains(info.bads, info.chs[ch].ch_name))
                     continue;
                 double maxVal = displayEvoked.data.row(ch).cwiseAbs().maxCoeff();
@@ -933,7 +933,7 @@ bool AverageWindow::populateLayoutFromEvoked(const QModelIndexList& selectedRows
 
     SelectionItem selItem;
     const FIFFLIB::FiffInfo& info = firstEvoked->info;
-    for (int ch = 0; ch < info.chs.size(); ++ch) {
+    for (int ch = 0; ch < std::ssize(info.chs); ++ch) {
         const FIFFLIB::FiffChInfo& chInfo = info.chs[ch];
 
         if (!showAll) {

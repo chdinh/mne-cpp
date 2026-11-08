@@ -244,7 +244,7 @@ static int doCompute(const QCommandLineParser& parser)
     }
 
     // Propagate the source space and timing
-    const QList<VectorXi> vertno = fwd.src.get_vertno();
+    const std::vector<VectorXi> vertno = fwd.src.get_vertno();
     VectorXi vertices(nSources);
     vertices << vertno[0], vertno[1];
     for (InvSourceEstimate* stc : {&result.stcDspm, &result.stcCmne}) {
