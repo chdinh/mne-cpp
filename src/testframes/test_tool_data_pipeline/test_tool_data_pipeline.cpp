@@ -2096,8 +2096,7 @@ private slots:
             {512, 1020},
             {5120, 5120}};
         for (const auto& [grade, expectedTriangles] : expectedMeshes) {
-            QFile outputFile(QDir(outputDir).filePath(QString("scalp-%1.fif").arg(grade)));
-            MNELIB::MNEBem bem(outputFile);
+            const MNELIB::MNEBem bem(QDir(outputDir).filePath(QString("scalp-%1.fif").arg(grade)).toStdU16String());
             QCOMPARE(bem.size(), 1);
             const int expectedVertices = grade == 5120 ? 2562 : grade;
             QCOMPARE(bem[0].np, expectedVertices);
@@ -2124,8 +2123,7 @@ private slots:
         QVERIFY(QFile::exists(outPath));
 
         // Like an MNE-C -sol.fif: the surfaces and the linear potential solution (one row per vertex)
-        QFile surfFile(outPath);
-        MNELIB::MNEBem bem(surfFile);
+        MNELIB::MNEBem bem(outPath.toStdU16String());
         QCOMPARE(bem.size(), 1);
         QFile solFile(outPath);
         FIFFLIB::FiffStream stream(&solFile);

@@ -420,7 +420,7 @@ void CoRegistration::onStoreTrans(const QString& sFilePath)
 
 void CoRegistration::onFitFiducials()
 {
-    if (m_digSetHead.empty() || m_digFidMri.empty() || m_pBem->isEmpty()) {
+    if (m_digSetHead.empty() || m_digFidMri.empty() || m_pBem->empty()) {
         qWarning() << "[CoRegistration::onFitFiducials] Make sure to load all the necessary data.";
         return;
     }
@@ -502,7 +502,7 @@ void CoRegistration::triggerLoadingEnd(QString sMessage)
 
 void CoRegistration::onFitICP()
 {
-    if (m_digSetHead.empty() || m_digFidMri.empty() || m_pBem->isEmpty()) {
+    if (m_digSetHead.empty() || m_digFidMri.empty() || m_pBem->empty()) {
         qWarning() << "[CoRegistration::onFitICP] Make sure to load all the necessary data.";
         return;
     }

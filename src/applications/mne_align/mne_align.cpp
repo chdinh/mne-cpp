@@ -335,7 +335,7 @@ void MneAlign::onWizardBemPathChanged(const QString& path)
         return;
     }
 
-    auto bem = std::make_shared<MNELIB::MNEBem>(file);
+    auto bem = std::make_shared<MNELIB::MNEBem>(path.toStdU16String());
     if (m_pView3d)
         m_pView3d->setBem(bem);
     if (m_pStatusBem) {
@@ -513,7 +513,7 @@ void MneAlign::onIcpFit()
     if (!m_pPoints || !m_pView3d)
         return;
     auto bem = m_pView3d->bem();
-    if (!bem || bem->isEmpty()) {
+    if (!bem || bem->empty()) {
         QMessageBox::warning(this, windowTitle(), QStringLiteral("No BEM surface loaded."));
         return;
     }

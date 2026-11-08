@@ -650,7 +650,7 @@ private slots:
         if (!file.exists())
             QSKIP("BEM file not found");
 
-        MNEBem bem(file);
+        MNEBem bem(path.toStdU16String());
         QVERIFY(bem.size() > 0);
         MNEBemSurface& surf = bem[0];
         QVERIFY(surf.np > 0);
@@ -668,7 +668,7 @@ private slots:
         if (!file.exists())
             QSKIP("3-layer BEM not found");
 
-        MNEBem bem(file);
+        MNEBem bem(path.toStdU16String());
         QCOMPARE(bem.size(), 3);
         for (int i = 0; i < 3; ++i) {
             QVERIFY(bem[i].np > 0);
@@ -685,7 +685,7 @@ private slots:
         if (!file.exists())
             QSKIP("BEM file not found");
 
-        MNEBem bem(file);
+        MNEBem bem(path.toStdU16String());
         if (bem.size() > 0) {
             MNEBemSurface& surf = bem[0];
             bool ok = surf.addTriangleData();
@@ -705,7 +705,7 @@ private slots:
         if (!file.exists())
             QSKIP("BEM file not found");
 
-        MNEBem bem(file);
+        MNEBem bem(path.toStdU16String());
         if (bem.size() > 0) {
             MNEBemSurface& surf = bem[0];
             surf.addTriangleData();

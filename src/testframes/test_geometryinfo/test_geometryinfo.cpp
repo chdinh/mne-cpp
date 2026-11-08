@@ -87,8 +87,7 @@ TestGeometryInfo::TestGeometryInfo()
 void TestGeometryInfo::initTestCase()
 {
     //acquire real surface data
-    QFile t_filesensorSurfaceVV(QCoreApplication::applicationDirPath() + "/../resources/data/mne-cpp-test-data/subjects/sample/bem/sample-5120-bem.fif");
-    MNEBem t_sensorSurfaceVV(t_filesensorSurfaceVV);
+    MNEBem t_sensorSurfaceVV((QCoreApplication::applicationDirPath() + "/../resources/data/mne-cpp-test-data/subjects/sample/bem/sample-5120-bem.fif").toStdU16String());
     realSurface = t_sensorSurfaceVV[0];
 
     // generate small test mesh with 100 vertices:

@@ -103,8 +103,7 @@ int main(int argc, char* argv[])
     float mindist = mindistMm / 1000.0f;
 
     // Read BEM file - find innermost surface
-    QFile fBem(bemFile);
-    MNEBem bem(fBem);
+    MNEBem bem(bemFile.toStdU16String());
     if (bem.size() == 0) {
         qCritical("Cannot read BEM from: %s", qPrintable(bemFile));
         return 1;
@@ -112,7 +111,7 @@ int main(int argc, char* argv[])
 
     // Find inner skull surface (smallest = innermost)
     int innerIdx = 0;
-    for (int i = 1; i < bem.size(); ++i) {
+    for (int i = 1; i < std::ssize(bem); ++i) {
         if (bem[i].id == FIFFV_BEM_SURF_ID_BRAIN) {
             innerIdx = i;
             break;

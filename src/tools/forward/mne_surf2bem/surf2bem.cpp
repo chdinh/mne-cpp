@@ -167,12 +167,16 @@ int Surf2Bem::run()
             if (inputs[k].sigma > 0.0f) {
                 surfs[k].sigma = inputs[k].sigma;
             }
-            bem << surfs[k];
+            bem.push_back(surfs[k]);
         }
 
-        QFile file(m_settings.outputFile());
 
-        bem.write(file);
+        if (auto written = bem.write(m_settings.outputFile().toStdU16String()); !written) {
+            qCritical() << written.error().what();
+
+
+            return 1;
+        }
 
         qInfo("%s written.", qPrintable(m_settings.outputFile()));
     } else {

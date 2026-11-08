@@ -79,15 +79,14 @@ void BemDataModel::initBemData(QIODevice& qIODevice)
 {
     // build Bem
     FIFFLIB::FiffStream stream(&qIODevice);
-    MNEBem bem;
-    const bool read = MNEBem::readFromStream(stream, true, bem);
+    auto bem = MNEBem::read(stream);
     qIODevice.close();
-    if (!read || bem.isEmpty()) {
-        qWarning() << "[BemDataModel::initBemData] File does not contain any Bem data";
+    if (!bem) {
+        qWarning() << "[BemDataModel::initBemData]" << bem.error().what();
         return;
     }
 
-    *m_pBem = bem;
+    *m_pBem = std::move(*bem);
     emit newBemAvailable(m_pBem);
     m_bIsInit = true;
 }

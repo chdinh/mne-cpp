@@ -90,7 +90,7 @@ public:
      *
      * @param[in] stream  The stream to write to; the caller opens and closes the block.
      */
-    void writeToStream(FIFFLIB::FiffStream& stream);
+    void write_to_stream(FIFFLIB::FiffStream& stream) const;
 
     //=========================================================================================================
     // FsSurface geometry const methods

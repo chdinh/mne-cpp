@@ -74,8 +74,7 @@ int main(int argc, char* argv[])
     parser.process(app);
 
     // Read the BEM
-    QFile t_fileBem(parser.value(bemFileInOption));
-    MNEBem t_Bem(t_fileBem);
+    MNEBem t_Bem(parser.value(bemFileInOption).toStdU16String());
 
     if (t_Bem.size() > 0) {
         qDebug() << "Loaded BEM";
@@ -85,11 +84,12 @@ int main(int argc, char* argv[])
     }
 
     // Write the BEM
-    QFile t_fileBemTest(parser.value(bemFileOutOption));
-    t_Bem.write(t_fileBemTest);
-    t_fileBemTest.close();
+    if (auto written = t_Bem.write(parser.value(bemFileOutOption).toStdU16String()); !written) {
+        qCritical() << written.error().what();
+        return 1;
+    }
 
-    MNEBem t_BemTest(t_fileBemTest);
+    MNEBem t_BemTest(parser.value(bemFileOutOption).toStdU16String());
 
     if (t_BemTest.size() > 0) {
         qDebug() << "Loaded written BEM";

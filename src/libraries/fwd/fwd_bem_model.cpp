@@ -1157,7 +1157,7 @@ int FwdBemModel::fwd_bem_save_model(const QString& name) const
     for (int k = 0; k < nsurf; ++k) {
         surfs[k]->sigma = sigma[k];
         stream->start_block(FIFFB_BEM_SURF);
-        surfs[k]->writeToStream(*stream);
+        surfs[k]->write_to_stream(*stream);
         stream->end_block(FIFFB_BEM_SURF);
     }
     if (solution.size() > 0) {

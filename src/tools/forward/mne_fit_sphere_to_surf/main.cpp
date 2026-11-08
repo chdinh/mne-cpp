@@ -93,18 +93,10 @@ int main(int argc, char* argv[])
     bool loaded = false;
 
     // Attempt FIFF BEM
-    {
-        QFile bemFile(surfName);
-        FiffStream stream(&bemFile);
-        if (stream.open()) {
-            MNEBem bem;
-            if (MNEBem::readFromStream(stream, true, bem) && bem.size() > 0) {
-                vertices = bem[0].rr;
-                qInfo("Read FIFF BEM surface: %d vertices", static_cast<int>(vertices.rows()));
-                loaded = true;
-            }
-            stream.close();
-        }
+    if (auto bem = MNEBem::read(surfName.toStdU16String())) {
+        vertices = (*bem)[0].rr;
+        qInfo("Read FIFF BEM surface: %d vertices", static_cast<int>(vertices.rows()));
+        loaded = true;
     }
 
     // Attempt FreeSurfer surface

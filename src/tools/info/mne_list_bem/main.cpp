@@ -134,23 +134,16 @@ int main(int argc, char* argv[])
         qInfo("output the vertex coordinates only.");
 
     // Read BEM surfaces
-    QFile bemFile(bemName);
-    FiffStream stream(&bemFile);
-    if (!stream.open()) {
-        qCritical("Cannot open BEM file: %s", qPrintable(bemName));
+    auto read = MNEBem::read(bemName.toStdU16String());
+    if (!read) {
+        qCritical("%s", read.error().what());
         return 1;
     }
-
-    MNEBem bem;
-    if (!MNEBem::readFromStream(stream, true, bem)) {
-        qCritical("Cannot read BEM surfaces from: %s", qPrintable(bemName));
-        return 1;
-    }
-    stream.close();
+    const MNEBem& bem = *read;
 
     // Find the requested surface
     int surfIdx = -1;
-    for (int i = 0; i < bem.size(); i++) {
+    for (int i = 0; i < std::ssize(bem); i++) {
         if (bem[i].id == surfId) {
             surfIdx = i;
             break;

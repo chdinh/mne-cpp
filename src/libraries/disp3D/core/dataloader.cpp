@@ -198,8 +198,7 @@ DataLoader::SensorLoadResult DataLoader::loadSensors(const QString& fifPath,
             }
 
             if (QFile::exists(helmetPath)) {
-                QFile helmetFile(helmetPath);
-                MNEBem helmetBem(helmetFile);
+                MNEBem helmetBem(helmetPath.toStdU16String());
                 if (helmetBem.size() > 0) {
                     MNEBemSurface helmetSurf = helmetBem[0];
                     if (helmetSurf.nn.rows() != helmetSurf.rr.rows()) {
@@ -264,8 +263,7 @@ std::shared_ptr<BrainSurface> DataLoader::loadHelmetSurface(
         return nullptr;
     }
 
-    QFile helmetFile(helmetFilePath);
-    MNEBem helmetBem(helmetFile);
+    MNEBem helmetBem(helmetFilePath.toStdU16String());
     if (helmetBem.size() == 0) {
         qWarning() << "DataLoader::loadHelmetSurface: no BEM surfaces in" << helmetFilePath;
         return nullptr;

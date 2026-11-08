@@ -131,7 +131,7 @@ private slots:
     void bem_defaultCtor()
     {
         MNEBem bem;
-        QVERIFY(bem.isEmpty());
+        QVERIFY(bem.empty());
         QCOMPARE(bem.size(), 0);
     }
 
@@ -139,7 +139,7 @@ private slots:
     {
         MNEBem bem;
         MNEBem copy(bem);
-        QVERIFY(copy.isEmpty());
+        QVERIFY(copy.empty());
     }
 
     void bem_addSurface()
@@ -152,9 +152,9 @@ private slots:
         surf.rr = MatrixX3f::Random(100, 3);
         surf.itris = MatrixX3i::Zero(50, 3);
         surf.nn = MatrixX3f::Random(100, 3);
-        bem << surf;
+        bem.push_back(surf);
         QCOMPARE(bem.size(), 1);
-        QVERIFY(!bem.isEmpty());
+        QVERIFY(!bem.empty());
     }
 
     void bem_clear()
@@ -162,9 +162,9 @@ private slots:
         MNEBem bem;
         MNEBemSurface surf;
         surf.id = 1;
-        bem << surf;
+        bem.push_back(surf);
         bem.clear();
-        QVERIFY(bem.isEmpty());
+        QVERIFY(bem.empty());
     }
 
     void bem_readFromFile()
@@ -173,9 +173,8 @@ private slots:
         if (!QFile::exists(bemPath)) {
             QSKIP("BEM file not found");
         }
-        QFile file(bemPath);
-        MNEBem bem(file);
-        QVERIFY(!bem.isEmpty());
+        MNEBem bem(bemPath.toStdU16String());
+        QVERIFY(!bem.empty());
         QVERIFY(bem.size() > 0);
     }
 
@@ -194,7 +193,7 @@ private slots:
         surf.nn = MatrixX3f::Zero(3, 3);
         surf.itris.resize(1, 3);
         surf.itris << 0, 1, 2;
-        bem << surf;
+        bem.push_back(surf);
 
         FiffCoordTrans trans;
         trans.from = FIFFV_COORD_MRI;
@@ -206,7 +205,7 @@ private slots:
         bem.transform(trans);
         QVERIFY(qAbs(bem[0].rr(0, 0) - 1.1f) < 0.01f);
 
-        bem.invtransform(trans);
+        bem.inverse_transform(trans);
         QVERIFY(qAbs(bem[0].rr(0, 0) - 1.0f) < 0.01f);
     }
 
@@ -224,12 +223,12 @@ private slots:
         surf.nn << 1.0f, 0.0f, 0.0f, 0.0f, 1.0f, 0.0f, 0.0f, 0.0f, 1.0f;
         surf.itris.resize(1, 3);
         surf.itris << 0, 1, 2;
-        bem << surf;
+        bem.push_back(surf);
 
-        QBuffer buf;
-        buf.open(QIODevice::ReadWrite);
-        bem.write(buf);
-        QVERIFY(buf.size() > 0);
+        QTemporaryDir dir;
+        const std::filesystem::path path = dir.filePath("bem.fif").toStdU16String();
+        QVERIFY(bem.write(path));
+        QCOMPARE(MNEBem(path).size(), 1);
     }
 
     //=========================================================================

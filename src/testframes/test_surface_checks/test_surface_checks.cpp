@@ -200,18 +200,10 @@ void TestSurfaceChecks::testIsCompleteWithRealBemData()
     if (!QFile::exists(bemPath))
         QSKIP("BEM test data not available");
 
-    QFile file(bemPath);
-
-    FIFFLIB::FiffStream stream(&file);
-    if (!stream.open())
-        QSKIP("Cannot open FiffStream");
-
-    MNELIB::MNEBem bem;
-    if (!MNELIB::MNEBem::readFromStream(stream, true, bem))
-        QSKIP("Cannot read BEM surfaces");
+    const MNELIB::MNEBem bem(bemPath.toStdU16String());
 
     QVERIFY(bem.size() > 0);
-    for (int i = 0; i < bem.size(); ++i) {
+    for (std::size_t i = 0; i < bem.size(); ++i) {
         QVERIFY(SurfaceChecks::isCompleteSurface(bem[i]));
     }
 }

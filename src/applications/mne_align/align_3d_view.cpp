@@ -325,7 +325,7 @@ void Align3DView::rebuildBemSurfaces()
         return;
     }
 
-    for (int i = 0; i < m_pBem->size(); ++i) {
+    for (std::size_t i = 0; i < m_pBem->size(); ++i) {
         QString name;
         switch ((*m_pBem)[i].id) {
             case FIFFV_BEM_SURF_ID_HEAD:

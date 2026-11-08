@@ -351,8 +351,7 @@ void TestMneSurf2Bem::testSingleSurfConversion()
              "Output FIFF file too small — conversion may have failed");
 
     // Read back with MNEBem and validate
-    QFile fiffFile(outputFif);
-    MNEBem bem(fiffFile);
+    MNEBem bem(outputFif.toStdU16String());
     if (bem.size() > 0) {
         QVERIFY2(bem.size() == 1,
                  "Should contain exactly 1 BEM surface");
@@ -422,13 +421,12 @@ void TestMneSurf2Bem::testMultiSurfConversion()
              "Multi-surface FIFF file too small");
 
     // Read back with MNEBem
-    QFile fiffFile(outputFif);
-    MNEBem bem(fiffFile);
+    MNEBem bem(outputFif.toStdU16String());
     if (bem.size() > 0) {
         QVERIFY2(bem.size() == 3,
                  "Should contain exactly 3 BEM surfaces");
         // Verify each surface has vertices and triangles
-        for (int k = 0; k < bem.size(); ++k) {
+        for (std::size_t k = 0; k < bem.size(); ++k) {
             QVERIFY2(bem[k].np > 0,
                      qPrintable(QString("FsSurface %1 should have vertices").arg(k)));
             QVERIFY2(bem[k].ntri > 0,
@@ -492,8 +490,7 @@ void TestMneSurf2Bem::testSurfConversionWithCheck()
              "Output FIFF file should exist after checked conversion");
 
     // Read back
-    QFile fiffFile(outputFif);
-    MNEBem bem(fiffFile);
+    MNEBem bem(outputFif.toStdU16String());
     if (bem.size() > 0) {
         QCOMPARE(bem.size(), 3);
     }

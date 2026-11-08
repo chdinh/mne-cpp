@@ -518,10 +518,7 @@ void TestMneSourceSpaceOpsPython::bemNormals_matchPython()
     QFETCH(double, absSum);
     QFETCH(Vector3d, normal17);
 
-    QFile file(QStringLiteral(MNE_SOURCE_SPACE_DATA_DIR "/ico2-bem.fif"));
-    FiffStream stream(&file);
-    MNEBem bem;
-    QVERIFY(MNEBem::readFromStream(stream, addGeom, bem));
+    const MNEBem bem = MNEBem::read(MNE_SOURCE_SPACE_DATA_DIR "/ico2-bem.fif", addGeom).value();
     QCOMPARE(bem.size(), 2);
 
     // mne.read_bem_surfaces(patch_stats=addGeom): normals from the triangles when

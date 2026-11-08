@@ -244,17 +244,17 @@ int SetupForwardModel::run()
 
     MNEBem bem;
     if (m_settings.homogeneous()) {
-        bem << innerSkull;
+        bem.push_back(innerSkull);
     } else {
         // Order: head (4), skull (3), brain (1) — standard BEM nesting
-        bem << outerSkin;
-        bem << outerSkull;
-        bem << innerSkull;
+        bem.push_back(outerSkin);
+        bem.push_back(outerSkull);
+        bem.push_back(innerSkull);
     }
 
-    {
-        QFile file(modelFile);
-        bem.write(file);
+    if (auto written = bem.write(modelFile.toStdU16String()); !written) {
+        qCritical() << written.error().what();
+        return 1;
     }
     qInfo("BEM geometry file written to %s\n", qPrintable(modelFile));
 

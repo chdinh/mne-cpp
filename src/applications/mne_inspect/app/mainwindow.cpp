@@ -2307,16 +2307,15 @@ void MainWindow::loadHemisphere(const QString& subjectPath, const QString& subje
 
 void MainWindow::loadBem(const QString& subjectName, const QString& bemPath)
 {
-    QFile bemFile(bemPath);
-    if (bemFile.exists()) {
-        MNEBem bem;
-        FIFFLIB::FiffStream stream(&bemFile);
-        if (!MNEBem::readFromStream(stream, true, bem)) {
-            qWarning() << "No BEM surfaces found in" << bemPath;
+    if (QFile::exists(bemPath)) {
+        auto read = MNEBem::read(bemPath.toStdU16String());
+        if (!read) {
+            qWarning() << read.error().what();
             return;
         }
+        const MNEBem& bem = *read;
         trackLoadedFile(bemPath, static_cast<int>(MnaFileRole::Bem));
-        for (int i = 0; i < bem.size(); ++i) {
+        for (std::size_t i = 0; i < bem.size(); ++i) {
             QString name;
             switch (bem[i].id) {
                 case 4:

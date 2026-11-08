@@ -248,9 +248,8 @@ int main(int argc, char* argv[])
     }
 
     //Read and show BEM
-    QFile t_fileBem(QCoreApplication::applicationDirPath() + "/../resources/data/MNE-sample-data/subjects/sample/bem/sample-5120-5120-5120-bem.fif");
-    MNEBem t_Bem(t_fileBem);
-    for (int i = 0; i < t_Bem.size(); ++i) {
+    MNEBem t_Bem((QCoreApplication::applicationDirPath() + "/../resources/data/MNE-sample-data/subjects/sample/bem/sample-5120-5120-5120-bem.fif").toStdU16String());
+    for (std::size_t i = 0; i < t_Bem.size(); ++i) {
         pModel->addBemSurface(parser.value(subjectOption), "BEM", t_Bem[i]);
     }
 

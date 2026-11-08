@@ -123,9 +123,8 @@ int main(int argc, char* argv[])
 
         // Load brain surface if available
         if (!settings.bemname.isEmpty()) {
-            QFile bemFile(settings.bemname);
-            MNEBem bem(bemFile);
-            for (int i = 0; i < bem.size(); ++i) {
+            MNEBem bem(settings.bemname.toStdU16String());
+            for (std::size_t i = 0; i < bem.size(); ++i) {
                 pModel->addBemSurface("Subject", "BEM", bem[i]);
             }
         }

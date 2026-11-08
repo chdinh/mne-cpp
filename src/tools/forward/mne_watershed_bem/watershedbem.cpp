@@ -390,16 +390,12 @@ bool WatershedBem::createBemFif(const QString& surfFile, const QString& fifFile)
     // Create BEM and write to FIFF file
     //
     MNEBem bem;
-    bem << bemSurface;
+    bem.push_back(bemSurface);
 
-    QFile file(fifFile);
-    if (!file.open(QIODevice::WriteOnly)) {
-        qCritical() << "Could not open file for writing:" << fifFile;
+    if (auto written = bem.write(fifFile.toStdU16String()); !written) {
+        qCritical() << written.error().what();
         return false;
     }
-
-    bem.write(file);
-    file.close();
 
     return true;
 }

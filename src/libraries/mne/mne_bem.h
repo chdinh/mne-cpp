@@ -32,29 +32,20 @@
 #include "mne_global.h"
 #include "mne_bem_surface.h"
 
-#include <fiff/fiff_types.h>
-#include <fiff/fiff_dir_node.h>
-#include <fiff/fiff.h>
+#include <fiff/fiff_coord_trans.h>
+#include <fiff/fiff_stream.h>
 
-#include <algorithm>
+#include <utils/error.h>
+
+#include <filesystem>
+#include <span>
 #include <vector>
 
 //=============================================================================================================
 // QT INCLUDES
 //=============================================================================================================
 
-#include <QList>
-#include <QIODevice>
 #include <QSharedPointer>
-
-//=============================================================================================================
-// FORWARD DECLARATIONS
-//=============================================================================================================
-
-namespace FSLIB
-{
-class FsLabel;
-}
 
 //=============================================================================================================
 // DEFINE NAMESPACE MNELIB
@@ -62,10 +53,6 @@ class FsLabel;
 
 namespace MNELIB
 {
-
-//=============================================================================================================
-// MNELIB FORWARD DECLARATIONS
-//=============================================================================================================
 
 //=============================================================================================================
 /**
@@ -79,148 +66,142 @@ namespace MNELIB
 class MNESHARED_EXPORT MNEBem
 {
 public:
-    typedef QSharedPointer<MNEBem> SPtr;            /**< Shared pointer type for MNEBem. */
-    typedef QSharedPointer<const MNEBem> ConstSPtr; /**< Const shared pointer type for MNEBem. */
+    using SPtr = QSharedPointer<MNEBem>;                               /**< Shared pointer type for MNEBem. */
+    using ConstSPtr = QSharedPointer<const MNEBem>;                    /**< Const shared pointer type for MNEBem. */
+    using iterator = std::vector<MNEBemSurface>::iterator;             /**< Surface iterator. */
+    using const_iterator = std::vector<MNEBemSurface>::const_iterator; /**< Const surface iterator. */
+
+    /** Constructs an empty model. */
+    MNEBem() = default;
 
     //=========================================================================================================
     /**
-     * Default constructor
+     * Reads a -bem.fif file like read(); throws UTILSLIB::Error if it cannot.
+     *
+     * @param[in] path   The -bem.fif file.
      */
-    MNEBem();
+    explicit MNEBem(const std::filesystem::path& path);
 
     //=========================================================================================================
     /**
-     * Copy constructor.
+     * Reads the BEM surfaces of a file, as mne.read_bem_surfaces does.
      *
-     * @param[in] p_MNEBem   MNE BEM.
+     * @param[in] path          The -bem.fif file.
+     * @param[in] patch_stats   Recompute the vertex normals from the triangles even where the file stores them.
+     *
+     * @return The model, or why the file cannot be read: Io if it cannot be opened, NotFound if it holds no
+     *         BEM surfaces, Format if a surface is incomplete or inconsistent.
      */
-    MNEBem(const MNEBem& p_MNEBem) = default;
+    [[nodiscard]] static UTILSLIB::Expected<MNEBem> read(const std::filesystem::path& path, bool patch_stats = true);
 
     //=========================================================================================================
     /**
-     * Copy assignment.
+     * Reads the BEM surfaces from an open FIFF stream.
      *
-     * @param[in] p_MNEBem   MNE BEM.
+     * @param[in] stream        The stream; opened here if it is not open yet.
+     * @param[in] patch_stats   Recompute the vertex normals from the triangles even where the file stores them.
      *
-     * @return This BEM.
+     * @return The model, or why the stream cannot be read (see read(path)).
      */
-    MNEBem& operator=(const MNEBem& p_MNEBem) = default;
+    [[nodiscard]] static UTILSLIB::Expected<MNEBem> read(FIFFLIB::FiffStream& stream, bool patch_stats = true);
 
     //=========================================================================================================
     /**
-     * Default constructor
+     * Writes the model, as mne.write_bem_surfaces does.
      *
-     * @param[in] p_IODevice   IO device (e.g. a FIFF file) to read the BEM surfaces from; throws std::runtime_error on failure.
+     * @param[in] path   The -bem.fif file.
+     *
+     * @return Nothing, or why the file cannot be written (Io).
      */
-    MNEBem(QIODevice& p_IODevice);
+    [[nodiscard]] UTILSLIB::Expected<void> write(const std::filesystem::path& path) const;
 
     //=========================================================================================================
     /**
-     * Destroys the MNE Bem
-     */
-    ~MNEBem();
-
-    //=========================================================================================================
-    /**
-     * Initializes MNE Bem
-     */
-    void clear();
-
-    //=========================================================================================================
-    /**
-     * True if MNE Bem is empty.
-     *
-     * @return true if MNE Bem is empty.
-     */
-    inline bool isEmpty() const;
-
-    //=========================================================================================================
-    /**
-     * ### MNE toolbox root function ###: Definition of the mne_read_bem_surface function
-     *
-     * Reads Bem surface from a fif file
-     *
-     * @param[in, out] stream     The opened fif file.
-     * @param[in] add_geom          Add geometry information to the Bem FsSurface.
-     * @param[in, out] p_Bem The BEM that receives the surfaces read.
-     *
-     * @return true if succeeded, false otherwise.
-     */
-    static bool readFromStream(FIFFLIB::FiffStream& stream, bool add_geom, MNEBem& p_Bem);
-
-    //=========================================================================================================
-    /**
-     * Returns the number of stored bem surfaces
-     *
-     * @return number of stored bem surfaces.
-     */
-    inline qint32 size() const;
-
-    //=========================================================================================================
-    /**
-     * MNE Toolbox function mne_write_bem_surfaces_block
-     *
-     * Write the Bem to a FIF file
-     *
-     * @param[in] p_IODevice   IO device to write the bem to.
-     *
-     * @return false if the device cannot be opened for writing.
-     */
-    bool write(QIODevice& p_IODevice);
-
-    //=========================================================================================================
-    /**
-     * MNE Toolbox function mne_write_bem_surfaces_block
-     *
-     * Write the Bem to a FIF stream
+     * Writes the FIFFB_BEM block into an open FIFF stream (MNE-C mne_write_bem_surfaces_block).
      *
      * @param[in] stream  The stream to write to.
      */
-    void writeToStream(FIFFLIB::FiffStream& stream);
+    void write_to_stream(FIFFLIB::FiffStream& stream) const;
 
-    //=========================================================================================================
+    /** @return The number of surfaces. */
+    std::size_t size() const noexcept
+    {
+        return m_surfaces.size();
+    }
+
+    /** @return Whether the model holds no surface. */
+    bool empty() const noexcept
+    {
+        return m_surfaces.empty();
+    }
+
+    /** Removes all surfaces. */
+    void clear() noexcept
+    {
+        m_surfaces.clear();
+    }
+
     /**
-     * Subscript operator [] to access bem_surface by index
-     *
-     * @param[in] idx    the surface index (0,1 or 2).
-     *
-     * @return MNEBemSurface related to the parameter index.
+     * @param[in] surface   The surface to append.
      */
-    const MNEBemSurface& operator[](qint32 idx) const;
+    void push_back(MNEBemSurface surface)
+    {
+        m_surfaces.push_back(std::move(surface));
+    }
 
-    //=========================================================================================================
     /**
-     * Subscript operator [] to access bem_surface by index
+     * @param[in] idx   The surface index.
      *
-     * @param[in] idx    the surface index (0,1 or 2).
-     *
-     * @return MNEBemSurface related to the parameter index.
+     * @return The surface.
      */
-    MNEBemSurface& operator[](qint32 idx);
+    const MNEBemSurface& operator[](std::size_t idx) const
+    {
+        return m_surfaces[idx];
+    }
 
-    //=========================================================================================================
     /**
-     * Subscript operator << to add a new bem_surface
+     * @param[in] idx   The surface index.
      *
-     * @param[in] surf   BemSurface to be added.
-     *
-     * @return MNEBem.
+     * @return The surface.
      */
-    MNEBem& operator<<(const MNEBemSurface& surf);
+    MNEBemSurface& operator[](std::size_t idx)
+    {
+        return m_surfaces[idx];
+    }
+
+    /** @return The surfaces. */
+    std::span<const MNEBemSurface> surfaces() const noexcept
+    {
+        return m_surfaces;
+    }
+
+    /** @return Iterator to the first surface. */
+    iterator begin() noexcept
+    {
+        return m_surfaces.begin();
+    }
+
+    /** @return Iterator past the last surface. */
+    iterator end() noexcept
+    {
+        return m_surfaces.end();
+    }
+
+    /** @return Iterator to the first surface. */
+    const_iterator begin() const noexcept
+    {
+        return m_surfaces.begin();
+    }
+
+    /** @return Iterator past the last surface. */
+    const_iterator end() const noexcept
+    {
+        return m_surfaces.end();
+    }
 
     //=========================================================================================================
     /**
-     * Subscript operator << to add a new bem_surface
-     *
-     * @param[in] surf   BemSurface to be added.
-     *
-     * @return MNEBem.
-     */
-    MNEBem& operator<<(const MNEBemSurface* surf);
-
-    //=========================================================================================================
-    /**
-     * Warp the Bem
+     * Warps every surface with the thin-plate spline that maps the source landmarks onto the destination ones.
      *
      * @param[in] sLm       3D Landmarks of the source geometry.
      * @param[in] dLm       3D Landmarks of the destination geometry.
@@ -229,53 +210,24 @@ public:
 
     //=========================================================================================================
     /**
-     * Transform the Bem
+     * Applies a coordinate transformation to every surface.
      *
-     * @param[in] trans     The Transformation Matrix.
+     * @param[in] trans     The transformation.
      */
     void transform(const FIFFLIB::FiffCoordTrans& trans);
 
     //=========================================================================================================
     /**
-     * Transform the Bem using the inverse
+     * Applies the inverse of a coordinate transformation to every surface.
      *
-     * @param[in] trans     The Transformation Matrix.
+     * @param[in] trans     The transformation.
      */
-    void invtransform(const FIFFLIB::FiffCoordTrans& trans);
-
-protected:
-    //=========================================================================================================
-    /**
-     * Definition of the read_bem_surface function in e.g. mne_read_bem_surface.m
-     * Reads a single bem surface
-     *
-     * @param[in] stream         The opened fif file.
-     * @param[in] p_Tree            Search for the bem surface here.
-     * @param[in, out] p_BemSurface     The read BemSurface.
-     *
-     * @return true if succeeded, false otherwise.
-     */
-    static bool readBemSurface(FIFFLIB::FiffStream& stream, const FIFFLIB::FiffDirNode::SPtr& p_Tree, MNEBemSurface& p_BemSurface);
+    void inverse_transform(const FIFFLIB::FiffCoordTrans& trans);
 
 private:
-    QList<MNEBemSurface> m_qListBemSurface; /**< List of the BEM Surfaces. */
+    std::vector<MNEBemSurface> m_surfaces; /**< The BEM surfaces, innermost first as in the file. */
 };
 
-//=============================================================================================================
-// INLINE DEFINITIONS
-//=============================================================================================================
-
-inline bool MNEBem::isEmpty() const
-{
-    return m_qListBemSurface.size() == 0;
-}
-
-//=============================================================================================================
-
-inline qint32 MNEBem::size() const
-{
-    return m_qListBemSurface.size();
-}
 } // NAMESPACE
 
 #ifndef metatype_bem

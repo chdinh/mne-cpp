@@ -214,12 +214,7 @@ void TestMneInvCoverage::testReadBemFromFile()
     QVERIFY2(QFile::exists(bemPath()),
              qPrintable(QString("BEM test data not found: %1").arg(bemPath())));
 
-    MNEBem bem;
-    QFile file(bemPath());
-    FiffStream stream(&file);
-    QVERIFY(stream.open());
-    QVERIFY(MNEBem::readFromStream(stream, true, bem));
-    stream.close();
+    const MNEBem bem(bemPath().toStdU16String());
 
     QVERIFY(bem.size() > 0);
 }
@@ -229,12 +224,7 @@ void TestMneInvCoverage::testBemSurfaceProperties()
     QVERIFY2(QFile::exists(bemPath()),
              qPrintable(QString("BEM test data not found: %1").arg(bemPath())));
 
-    MNEBem bem;
-    QFile file(bemPath());
-    FiffStream stream(&file);
-    QVERIFY(stream.open());
-    QVERIFY(MNEBem::readFromStream(stream, true, bem));
-    stream.close();
+    const MNEBem bem(bemPath().toStdU16String());
 
     const MNEBemSurface& surf = bem[0];
     QVERIFY(surf.np > 0);
@@ -250,12 +240,7 @@ void TestMneInvCoverage::testBemSurfaceNormals()
     QVERIFY2(QFile::exists(bemPath()),
              qPrintable(QString("BEM test data not found: %1").arg(bemPath())));
 
-    MNEBem bem;
-    QFile file(bemPath());
-    FiffStream stream(&file);
-    QVERIFY(stream.open());
-    QVERIFY(MNEBem::readFromStream(stream, true, bem));
-    stream.close();
+    const MNEBem bem(bemPath().toStdU16String());
 
     const MNEBemSurface& surf = bem[0];
     // Normals should be present and unit length
@@ -311,23 +296,20 @@ void TestMneInvCoverage::testReadBemRejectsDamagedSurfaces()
         MNEBemSurface bad = good;
         damage(bad);
         MNEBem source;
-        source << good << bad;
-        QBuffer buffer;
-        buffer.open(QIODevice::ReadWrite);
-        if (!source.write(buffer))
-            return -1;
-        buffer.close();
-        FiffStream stream(&buffer);
-        if (!stream.open())
-            return -1;
-        MNEBem bem;
-        const bool ok = MNEBem::readFromStream(stream, true, bem);
-        return ok ? static_cast<int>(bem.size()) : -static_cast<int>(bem.size()) - 2;
+        source.push_back(good);
+        source.push_back(bad);
+        QTemporaryDir dir;
+        const std::filesystem::path path = dir.filePath("bem.fif").toStdU16String();
+        if (!source.write(path))
+            return std::optional<UTILSLIB::ErrorCode>(UTILSLIB::ErrorCode::Io);
+        auto bem = MNEBem::read(path);
+        return bem ? (bem->size() == 2 ? std::optional<UTILSLIB::ErrorCode>() : std::optional(UTILSLIB::ErrorCode::NotFound)) : std::optional(bem.error().code);
     };
-    QCOMPARE(damaged([](MNEBemSurface&) {}), 2);
-    QCOMPARE(damaged([](MNEBemSurface& s) { s.np = 4; }), -2);
-    QCOMPARE(damaged([](MNEBemSurface& s) { s.ntri = 2; }), -2);
-    QCOMPARE(damaged([](MNEBemSurface& s) { s.nn = Eigen::MatrixX3f::Zero(2, 3); }), -2);
+    QCOMPARE(damaged([](MNEBemSurface&) {}), std::nullopt);
+    QCOMPARE(damaged([](MNEBemSurface& s) { s.np = 4; }), UTILSLIB::ErrorCode::Format);
+    QCOMPARE(damaged([](MNEBemSurface& s) { s.ntri = 2; }), UTILSLIB::ErrorCode::Format);
+    QCOMPARE(damaged([](MNEBemSurface& s) { s.nn = Eigen::MatrixX3f::Zero(2, 3); }), UTILSLIB::ErrorCode::Format);
+    QCOMPARE(MNEBem::read(std::filesystem::path("no-such-bem.fif")).error().code, UTILSLIB::ErrorCode::Io);
 }
 
 //=============================================================================================================

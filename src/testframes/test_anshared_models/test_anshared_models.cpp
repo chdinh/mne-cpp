@@ -281,7 +281,7 @@ void TestAnSharedModels::construct_remainingModels()
     {
         BemDataModel model(rawPath());
         QVERIFY(!model.isInit());
-        QVERIFY(model.getBem()->isEmpty());
+        QVERIFY(model.getBem()->empty());
     }
     {
         BemDataModel model(QCoreApplication::applicationDirPath() + "/../resources/data/mne-cpp-test-data/subjects/sample/bem/sample-1280-1280-1280-bem.fif");

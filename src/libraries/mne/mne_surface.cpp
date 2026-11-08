@@ -522,13 +522,12 @@ std::unique_ptr<MNESurface> MNESurface::read_bem_surface(const QString& name, in
 
 //=============================================================================================================
 
-void MNESurface::writeToStream(FiffStream& stream)
+void MNESurface::write_to_stream(FiffStream& stream) const
 {
-    if (this->id <= 0)
-        this->id = FIFFV_MNE_SURF_UNKNOWN;
+    const fiff_int_t surfaceId = this->id > 0 ? this->id : FIFFV_MNE_SURF_UNKNOWN;
     if (this->sigma > 0.0)
         stream.write_float(FIFF_BEM_SIGMA, &this->sigma);
-    stream.write_int(FIFF_BEM_SURF_ID, &this->id);
+    stream.write_int(FIFF_BEM_SURF_ID, &surfaceId);
     stream.write_int(FIFF_MNE_COORD_FRAME, &this->coord_frame);
     stream.write_int(FIFF_BEM_SURF_NNODE, &this->np);
     stream.write_int(FIFF_BEM_SURF_NTRI, &this->ntri);

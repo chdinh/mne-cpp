@@ -221,12 +221,14 @@ int main(int argc, char* argv[])
               i + 1, qPrintable(MNEBemSurface::id_name(surfId)),
               1000.0f * radius, sigma, surf.np);
 
-        bem << surf;
+        bem.push_back(surf);
     }
 
     // Write BEM
-    QFile file(outFile);
-    bem.write(file);
+    if (auto written = bem.write(outFile.toStdU16String()); !written) {
+        qCritical() << written.error().what();
+        return 1;
+    }
     qInfo("Written spherical BEM model to: %s", qPrintable(outFile));
 
     return 0;

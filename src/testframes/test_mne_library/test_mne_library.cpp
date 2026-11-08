@@ -550,8 +550,7 @@ void TestMneLibrary::writersRefuseUnwritablePath()
 {
     QTemporaryDir dir;
     const QString path = dir.filePath(QStringLiteral("no/such/dir/out.fif"));
-    QFile bem(path);
-    QVERIFY(!MNEBem().write(bem));
+    QVERIFY(!MNEBem().write(path.toStdU16String()));
     QVERIFY(!MNEInverseOperator().write(path.toStdU16String()));
     QVERIFY(!MNEForwardSolution().write(path.toStdU16String()));
     QVERIFY(!QFileInfo::exists(path));
@@ -562,23 +561,23 @@ void TestMneLibrary::writersRefuseUnwritablePath()
 void TestMneLibrary::bem_constructAndOperators()
 {
     MNEBem bem;
-    QVERIFY(bem.isEmpty());
+    QVERIFY(bem.empty());
 
     MNEBemSurface surf1;
     surf1.id = 1;
-    bem << surf1;
+    bem.push_back(surf1);
     QCOMPARE(bem.size(), 1);
 
     MNEBemSurface surf2;
     surf2.id = 2;
-    bem << &surf2;
+    bem.push_back(surf2);
     QCOMPARE(bem.size(), 2);
 
     MNEBem bem2(bem);
     QCOMPARE(bem2.size(), 2);
 
     bem.clear();
-    QVERIFY(bem.isEmpty());
+    QVERIFY(bem.empty());
 }
 
 void TestMneLibrary::bem_readFromFile()
@@ -589,10 +588,8 @@ void TestMneLibrary::bem_readFromFile()
     if (!QFile::exists(path))
         QSKIP("BEM file not found");
 
-    QFile bemFile(path);
-    MNEBem bem(bemFile);
-    QVERIFY(!bem.isEmpty());
-    QVERIFY(bem.size() >= 1);
+    MNEBem bem(path.toStdU16String());
+    QVERIFY(!bem.empty());
 }
 
 void TestMneLibrary::bem_transformOps()
@@ -603,7 +600,7 @@ void TestMneLibrary::bem_transformOps()
     surf.np = 3;
     surf.rr = MatrixXf::Identity(3, 3);
     surf.nn = MatrixXf::Identity(3, 3);
-    bem << surf;
+    bem.push_back(surf);
 
     FiffCoordTrans trans;
     trans.from = FIFFV_COORD_MRI;
@@ -612,7 +609,7 @@ void TestMneLibrary::bem_transformOps()
     trans.invtrans = Matrix4f::Identity();
 
     bem.transform(trans);
-    bem.invtransform(trans);
+    bem.inverse_transform(trans);
 }
 
 //=============================================================================================================
@@ -1660,8 +1657,7 @@ void TestMneLibrary::misc_bemRead()
 {
     if (!hasData())
         QSKIP("No test data");
-    QFile bemFile(bemPath());
-    MNEBem bem(bemFile);
+    MNEBem bem(bemPath().toStdU16String());
     QVERIFY(bem.size() > 0);
     QVERIFY(bem[0].np > 0);
     QVERIFY(bem[0].ntri > 0);

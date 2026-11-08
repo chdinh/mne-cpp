@@ -2635,8 +2635,7 @@ void TestDisp3dBrainView::brainView_clearRemovesObjectsAndRows()
             model.addSurface(QStringLiteral("sample"), hemi, QStringLiteral("white"),
                              FSLIB::FsSurface(dataDir + QStringLiteral("subjects/sample/surf/%1.white").arg(hemi)));
         }
-        QFile bemFile(dataDir + QStringLiteral("subjects/sample/bem/sample-5120-bem.fif"));
-        MNELIB::MNEBem bem(bemFile);
+        MNELIB::MNEBem bem((dataDir + QStringLiteral("subjects/sample/bem/sample-5120-bem.fif")).toStdU16String());
         QVERIFY(bem.size() > 0);
         model.addBemSurface(QStringLiteral("sample"), QStringLiteral("inner_skull"), bem[0]);
         QVERIFY(view.loadSensors(dataDir + QStringLiteral("MEG/sample/sample_audvis-ave.fif")));

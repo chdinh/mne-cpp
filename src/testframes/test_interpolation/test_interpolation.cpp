@@ -89,8 +89,7 @@ void TestInterpolation::initTestCase()
 {
     qInstallMessageHandler(UTILSLIB::MNELogger::customLogWriter);
     //acquire real data
-    QFile t_filesensorSurfaceVV(QCoreApplication::applicationDirPath() + "/../resources/data/mne-cpp-test-data/subjects/sample/bem/sample-5120-bem.fif");
-    MNEBem t_sensorSurfaceVV(t_filesensorSurfaceVV);
+    MNEBem t_sensorSurfaceVV((QCoreApplication::applicationDirPath() + "/../resources/data/mne-cpp-test-data/subjects/sample/bem/sample-5120-bem.fif").toStdU16String());
     realSurface = t_sensorSurfaceVV[0];
     fiff_int_t setno = 0;
     QPair<float, float> baseline(-1.0f, -1.0f);

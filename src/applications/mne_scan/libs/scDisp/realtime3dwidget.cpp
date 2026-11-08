@@ -193,9 +193,8 @@ void RealTime3DWidget::update(SCMEASLIB::Measurement::SPtr pMeasurement)
             // supported by disp3D's addSensors API. Sensor surfaces skipped.
 
             // Add average head surface
-            QFile t_fileHeadAvr(QCoreApplication::applicationDirPath() + "/../resources/general/hpiAlignment/fsaverage-head.fif");
-            MNEBem t_BemHeadAvr(t_fileHeadAvr);
-            if (!t_BemHeadAvr.isEmpty()) {
+            MNEBem t_BemHeadAvr((QCoreApplication::applicationDirPath() + "/../resources/general/hpiAlignment/fsaverage-head.fif").toStdU16String());
+            if (!t_BemHeadAvr.empty()) {
                 m_pBemHeadAvr = m_pData3DModel->addBemSurface("Subject", "Average head", t_BemHeadAvr[0]);
             }
         }

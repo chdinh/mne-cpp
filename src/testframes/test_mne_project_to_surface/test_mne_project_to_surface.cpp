@@ -79,10 +79,9 @@ TestMNEProjectToSurface::TestMNEProjectToSurface()
 
 void TestMNEProjectToSurface::initTestCase()
 {
-    QFile t_fileBem(QCoreApplication::applicationDirPath() + "/../resources/data/mne-cpp-test-data/subjects/sample/bem/sample-1280-1280-1280-bem.fif");
     QString sRef(QCoreApplication::applicationDirPath() + "/../resources/data/mne-cpp-test-data/Result/mne_project_to_surface.txt");
 
-    MNEBem bemHead(t_fileBem);
+    MNEBem bemHead((QCoreApplication::applicationDirPath() + "/../resources/data/mne-cpp-test-data/subjects/sample/bem/sample-1280-1280-1280-bem.fif").toStdU16String());
     MNEBemSurface::SPtr bemSurface = MNEBemSurface::SPtr::create(bemHead[0]);
     MNEProjectToSurface::SPtr mneSurfacePoints = MNEProjectToSurface::SPtr::create(*bemSurface);
 

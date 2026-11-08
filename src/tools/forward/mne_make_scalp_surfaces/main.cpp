@@ -32,6 +32,9 @@
 #include <QDir>
 #include <QDebug>
 
+#include <algorithm>
+#include <iterator>
+
 //=============================================================================================================
 // EIGEN INCLUDES
 //=============================================================================================================
@@ -112,31 +115,22 @@ int main(int argc, char* argv[])
     }
 
     // Read BEM
-    QFile file(bemFile);
-    MNEBem bem(file);
+    MNEBem bem(bemFile.toStdU16String());
     if (bem.size() == 0) {
         qCritical("Cannot read BEM from: %s", qPrintable(bemFile));
         return 1;
     }
 
-    qInfo("Read BEM with %d surface(s) from %s", bem.size(), qPrintable(bemFile));
+    qInfo("Read BEM with %zu surface(s) from %s", bem.size(), qPrintable(bemFile));
 
     // Find outer skin surface (typically the last/outermost surface, or id == FIFFV_BEM_SURF_ID_HEAD)
-    int skinIdx = -1;
-    for (int i = 0; i < bem.size(); ++i) {
-        if (bem[i].id == FIFFV_BEM_SURF_ID_HEAD) {
-            skinIdx = i;
-            break;
-        }
+    auto head = std::ranges::find(bem, FIFFV_BEM_SURF_ID_HEAD, &MNEBemSurface::id);
+    if (head == bem.end()) {
+        head = std::prev(bem.end());
+        qInfo("No explicit outer skin surface found, using the outermost surface.");
     }
-    // Fallback: use the last surface (outermost)
-    if (skinIdx < 0) {
-        skinIdx = bem.size() - 1;
-        qInfo("No explicit outer skin surface found, using surface %d.", skinIdx);
-    }
-
-    const MNEBemSurface& skin = bem[skinIdx];
-    qInfo("Using surface %d: %d vertices, %d triangles", skinIdx, skin.np, skin.ntri);
+    const MNEBemSurface& skin = *head;
+    qInfo("Using surface %td: %d vertices, %d triangles", head - bem.begin(), skin.np, skin.ntri);
 
     // Create output directory
     QDir dir;
@@ -161,10 +155,12 @@ int main(int argc, char* argv[])
             QString("scalp-%1.fif").arg(targetVerts));
 
         MNEBem outBem;
-        outBem << decimated;
+        outBem.push_back(decimated);
 
-        QFile outFile(outPath);
-        outBem.write(outFile);
+        if (auto written = outBem.write(outPath.toStdU16String()); !written) {
+            qCritical("%s", written.error().what());
+            return 1;
+        }
 
         qInfo("  Written %d vertices, %d triangles to %s",
               decimated.np, decimated.ntri, qPrintable(outPath));

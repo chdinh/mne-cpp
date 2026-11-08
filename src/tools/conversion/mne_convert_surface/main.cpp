@@ -217,22 +217,15 @@ static bool writeSmfFile(const QString& filename, const MatrixX3f& rr, const Mat
 
 static bool readFifSurface(const QString& filename, MatrixX3f& rr, MatrixX3i& tris)
 {
-    MNEBem bem;
-    QFile file(filename);
-    FiffStream stream(&file);
-    if (!stream.open()) {
-        qCritical() << "Cannot open FIF file:" << filename;
+    auto read = MNEBem::read(filename.toStdU16String());
+    if (!read) {
+        qCritical() << read.error().what();
         return false;
     }
-    if (!MNEBem::readFromStream(stream, true, bem) || bem.size() == 0) {
-        qCritical() << "No BEM surfaces found in:" << filename;
-        stream.close();
-        return false;
-    }
+    const MNEBem& bem = *read;
     // Take the first surface
     rr = bem[0].rr;
     tris = bem[0].itris;
-    stream.close();
     return true;
 }
 

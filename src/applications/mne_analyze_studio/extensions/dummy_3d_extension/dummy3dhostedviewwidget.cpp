@@ -54,7 +54,7 @@ QStringList jsonArrayToStringList(const QJsonArray& values)
     return result;
 }
 
-QString bemSurfaceName(const MNELIB::MNEBemSurface& bemSurface, int index)
+QString bemSurfaceName(const MNELIB::MNEBemSurface& bemSurface, std::size_t index)
 {
     switch (bemSurface.id) {
         case 4:
@@ -350,25 +350,17 @@ bool Dummy3DHostedViewWidget::loadSurfaceFile(const QString& filePath, QString* 
 
 bool Dummy3DHostedViewWidget::loadBemFile(const QString& filePath, QString* errorMessage)
 {
-    QFile file(filePath);
-    if (!file.exists()) {
+    auto read = MNELIB::MNEBem::read(filePath.toStdU16String());
+    if (!read) {
         if (errorMessage) {
-            *errorMessage = QString("BEM file not found: %1").arg(filePath);
+            *errorMessage = QString("Failed to load BEM surface set %1: %2").arg(filePath, QString::fromStdString(read.error().what()));
         }
         return false;
     }
-
-    FIFFLIB::FiffStream stream(&file);
-    MNELIB::MNEBem bem;
-    if (!MNELIB::MNEBem::readFromStream(stream, true, bem) || bem.isEmpty()) {
-        if (errorMessage) {
-            *errorMessage = QString("Failed to load BEM surface set %1.").arg(filePath);
-        }
-        return false;
-    }
+    const MNELIB::MNEBem& bem = *read;
 
     const QString subjectName = inferSubjectName(filePath);
-    for (int i = 0; i < bem.size(); ++i) {
+    for (std::size_t i = 0; i < bem.size(); ++i) {
         m_model->addBemSurface(subjectName, bemSurfaceName(bem[i], i), bem[i]);
     }
 

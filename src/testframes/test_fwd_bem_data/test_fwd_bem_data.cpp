@@ -343,7 +343,7 @@ private slots:
         if (!file.exists())
             QSKIP("BEM file not found");
 
-        MNEBem bem(file);
+        MNEBem bem(path.toStdU16String());
         QVERIFY(bem.size() > 0);
 
         MNEBemSurface& surf = bem[0];

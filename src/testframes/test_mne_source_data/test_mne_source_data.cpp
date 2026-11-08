@@ -172,7 +172,7 @@ private slots:
         if (!file.exists())
             QSKIP("BEM file not found");
 
-        MNEBem bem(file);
+        MNEBem bem(path.toStdU16String());
         QVERIFY(bem.size() > 0);
 
         // Check first surface
@@ -193,11 +193,11 @@ private slots:
         if (!file.exists())
             QSKIP("3-layer BEM file not found");
 
-        MNEBem bem(file);
+        MNEBem bem(path.toStdU16String());
         QCOMPARE(bem.size(), 3);
 
         // Each layer should have geometry
-        for (int i = 0; i < bem.size(); ++i) {
+        for (std::size_t i = 0; i < bem.size(); ++i) {
             QVERIFY(bem[i].np > 0);
             QVERIFY(bem[i].ntri > 0);
             QVERIFY(bem[i].id > 0);
@@ -214,7 +214,7 @@ private slots:
         if (!file.exists())
             QSKIP("BEM file not found");
 
-        MNEBem bem(file);
+        MNEBem bem(path.toStdU16String());
         if (bem.size() > 0) {
             MNEBemSurface& surf = bem[0];
             // Try adding triangle data (normals, centroids, areas)
@@ -236,7 +236,7 @@ private slots:
         if (!file.exists())
             QSKIP("BEM file not found");
 
-        MNEBem bem(file);
+        MNEBem bem(path.toStdU16String());
         if (bem.size() > 0) {
             MNEBemSurface& surf = bem[0];
             surf.addTriangleData();

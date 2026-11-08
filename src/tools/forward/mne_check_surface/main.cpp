@@ -231,14 +231,13 @@ int main(int argc, char* argv[])
 
     if (!bemFile.isEmpty()) {
         // Read BEM from FIFF
-        QFile file(bemFile);
-        MNEBem bem(file);
+        MNEBem bem(bemFile.toStdU16String());
         if (bem.size() == 0) {
             qCritical("Cannot read BEM from: %s", qPrintable(bemFile));
             return 1;
         }
-        qInfo("Read %d surfaces from %s\n", bem.size(), qPrintable(bemFile));
-        for (int i = 0; i < bem.size(); ++i)
+        qInfo("Read %zu surfaces from %s\n", bem.size(), qPrintable(bemFile));
+        for (int i = 0; i < std::ssize(bem); ++i)
             surfs.append(bem[i]);
     } else {
         // Read single FreeSurfer surface
