@@ -9,6 +9,7 @@
 #include <Eigen/Dense>
 #include <Eigen/SparseCore>
 
+#include <math/linalg.h>
 #include <mne/mne_source_spaces.h>
 #include <mne/mne_hemisphere.h>
 #include <mne/mne_bem.h>
@@ -972,12 +973,16 @@ private slots:
         FiffRawData raw(rawPath.toStdString());
         QVERIFY(raw.info.ch_names.size() > 0);
 
-        // setup_compensators activates projs and sets up CTF compensation
-        MNE::setup_compensators(raw, 0, true);
-        // After setup, all projectors should be active
+        // activate_projections activates the projectors and builds the operator
+        QVERIFY(raw.activate_projections() > 0);
+        QCOMPARE(raw.proj.rows(), static_cast<Eigen::Index>(raw.info.nchan));
         for (int k = 0; k < raw.info.projs.size(); ++k) {
             QVERIFY(raw.info.projs[k].active);
         }
+
+        // Neuromag data has no CTF compensation: grade 0 is a no-op, another grade cannot be made
+        QVERIFY(raw.apply_gradient_compensation(0));
+        QCOMPARE(raw.apply_gradient_compensation(1).error().code, UTILSLIB::ErrorCode::Format);
     }
 
     void mne_combineXyz()
@@ -986,7 +991,7 @@ private slots:
         // It computes x^2 + y^2 + z^2 for each triplet (NOT sqrt)
         VectorXd vec(6);
         vec << 1.0, 2.0, 3.0, 4.0, 5.0, 6.0;
-        VectorXd result = MNE::combine_xyz(vec);
+        VectorXd result = UTILSLIB::Linalg::combine_xyz(vec);
         QCOMPARE(result.size(), static_cast<Eigen::Index>(2));
         double exp0 = 1.0 + 4.0 + 9.0;    // 14
         double exp1 = 16.0 + 25.0 + 36.0; // 77
@@ -1000,7 +1005,7 @@ private slots:
         MatrixXd A(2, 4);
         A << 1, 2, 5, 6,
             3, 4, 7, 8;
-        SparseMatrix<double> S = MNE::make_block_diag(A, 2);
+        SparseMatrix<double> S = UTILSLIB::Linalg::make_block_diag(A, 2);
         // A has 4 cols with block size 2 → 2 blocks, each 2x2
         // Result should be 4x4 sparse block diagonal
         QCOMPARE(S.rows(), static_cast<Eigen::Index>(4));

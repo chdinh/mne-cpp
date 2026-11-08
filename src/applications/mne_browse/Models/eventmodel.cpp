@@ -17,6 +17,8 @@
 //=============================================================================================================
 
 #include "eventmodel.h"
+
+#include <fiff/fiff_events.h>
 #include <utils/string_utils.h>
 #include <QFileInfo>
 
@@ -334,12 +336,11 @@ bool EventModel::loadEventData(QFile& qFile)
     // Read events
     MatrixXi events;
 
-    QFileInfo fileInfo(qFile);
-    bool readSuccess = false;
-    if (fileInfo.suffix() == "eve") {
-        readSuccess = MNE::read_events_from_ascii(qFile.fileName().toStdU16String(), events);
-    } else {
-        readSuccess = MNE::read_events_from_fif(qFile.fileName().toStdU16String(), events);
+    const std::filesystem::path path = qFile.fileName().toStdU16String();
+    auto read = QFileInfo(qFile).suffix() == "eve" ? FiffEvents::read_ascii(path) : FiffEvents::read_fif(path);
+    const bool readSuccess = read.has_value();
+    if (readSuccess) {
+        events = std::move(read->events);
     }
 
     if (!readSuccess) {
@@ -370,13 +371,9 @@ bool EventModel::saveEventData(QFile& qFile)
         events(i, 2) = m_dataTypes[i];
     }
 
-    QFileInfo fileInfo(qFile);
-    bool writeSuccess = false;
-    if (fileInfo.suffix() == "eve") {
-        writeSuccess = MNE::write_events_to_ascii(qFile.fileName().toStdU16String(), events);
-    } else {
-        writeSuccess = MNE::write_events_to_fif(qFile.fileName().toStdU16String(), events);
-    }
+    const std::filesystem::path path = qFile.fileName().toStdU16String();
+    const FiffEvents eventSet(events);
+    const bool writeSuccess = (QFileInfo(qFile).suffix() == "eve" ? eventSet.write_ascii(path) : eventSet.write_fif(path)).has_value();
     qFile.close();
 
     if (!writeSuccess) {

@@ -16,7 +16,6 @@ find_package(QT NAMES Qt6 Qt5 REQUIRED COMPONENTS ${QT_REQUIRED_COMPONENTS})
 find_package(Qt${QT_VERSION_MAJOR} REQUIRED COMPONENTS ${QT_REQUIRED_COMPONENTS})
 
 set(SOURCES
-    mne.cpp
     mne_global.cpp
     mne_source_spaces.cpp
     mne_hemisphere.cpp

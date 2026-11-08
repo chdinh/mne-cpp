@@ -200,7 +200,7 @@ int BatchProcessor::run(const ProcessingSettings& settings)
                 projReject["mag"] = settings.projMagReject;
                 projReject["eeg"] = settings.projEegReject;
 
-                QList<FiffProj> newProjs = MNE::compute_proj(
+                QList<FiffProj> newProjs = FiffProj::compute_from_raw(
                     raw, fiffEvents.events,
                     settings.projEvent,
                     settings.projTmin, settings.projTmax,
@@ -271,7 +271,7 @@ int BatchProcessor::run(const ProcessingSettings& settings)
 
         if (!saveFile.isEmpty()) {
             qInfo() << "\n--- Saving data to" << saveFile << "(decim =" << settings.decimation << ") ---\n";
-            if (!MNE::save_raw(raw, saveFile.toStdU16String(), RowVectorXi(), settings.decimation)) {
+            if (!raw.save(saveFile.toStdU16String(), RowVectorXi(), settings.decimation)) {
                 qCritical() << "Failed to save raw data.";
                 return 1;
             }

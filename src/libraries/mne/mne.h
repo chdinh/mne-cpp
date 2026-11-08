@@ -12,520 +12,78 @@
  *           Juan GPC <jgarciaprieto@mgh.harvard.edu>
  * @since    0.1.0
  * @date     August 2012
- * @brief    Static MNE facade providing matlab-toolbox-compatible high-level helpers across MNELIB.
+ * @brief    Umbrella include header that exposes the full MNELIB public surface in a single include.
  *
- * @ref MNELIB::MNE is a thin collection of @c static utilities that mirror
- * the function surface of the Python/Matlab MNE toolbox so existing
- * tutorials and scripts translate one-to-one. It exposes wrappers around
- * I/O for source spaces (@ref MNELIB::MNESourceSpace), BEM models (@ref MNELIB::MNEBem),
- * hemispheres (@ref MNELIB::MNEHemisphere) and epoch lists
- * (@ref MNELIB::MNEEpochDataList), plus algorithmic helpers for projection
- * application, label-based clustering of forward solutions and SSP/CTF
- * manipulation. The class never holds state; it only forwards to the
- * underlying domain objects.
+ * MNELIB holds the MNE data model shared by forward and inverse modelling: source spaces and hemispheres,
+ * BEM surfaces, forward solutions, inverse operators, measurement and covariance data, epochs, events,
+ * projections, morph maps and the viewer surface types.
  */
 
 #ifndef MNE_H
 #define MNE_H
 
 //=============================================================================================================
-// INCLUDES
+// MNE LIBRARY HEADERS
 //=============================================================================================================
 
 #include "mne_global.h"
-
-#include "mne_hemisphere.h"
 #include "mne_source_spaces.h"
+#include "mne_hemisphere.h"
+#include "mne_epoch_data.h"
+#include "mne_epoch_data_list.h"
+#include "mne_cluster_info.h"
 #include "mne_bem.h"
 #include "mne_bem_surface.h"
-#include "mne_epoch_data_list.h"
-
-#include <fiff/fiff_constants.h>
-#include <fiff/fiff_cov.h>
-#include <fiff/fiff_proj.h>
-#include <fiff/fiff_events.h>
-#include <utils/string_utils.h>
-#include <fiff/fiff_evoked_set.h>
-#include <fiff/fiff_raw_data.h>
-
-#include <math/linalg.h>
-
-//=============================================================================================================
-// QT INCLUDES
-//=============================================================================================================
-
-#include <QMap>
-#include <QList>
-
-//=============================================================================================================
-// DEFINE NAMESPACE MNELIB
-//=============================================================================================================
-
-namespace MNELIB
-{
-
-//=============================================================================================================
-// FORWARD DECLARATIONS
-//=============================================================================================================
-
-//=============================================================================================================
-/**
- * DECLARE MNE WRAPPER CLASS
- * @brief The MNE class provides wrapper functions to stay consistent with mne matlab toolbox.
- *
- * @snippet ex_mne_api/main.cpp mne_facade_usage
- */
-
-class MNESHARED_EXPORT MNE
-{
-public:
-    //=========================================================================================================
-    /**
-     * dtor
-     */
-    virtual ~MNE()
-    {
-    }
-
-    //=========================================================================================================
-    /**
-     * mne_combine_xyz
-     *
-     * ### MNE toolbox root function ###
-     *
-     * Wrapper for the Linalg::combine_xyz static function
-     *
-     * Compute the three Cartesian components of a vector together
-     *
-     * @param[in] vec    Input row vector [ x1 y1 z1 ... x_n y_n z_n ].
-     *
-     * @return Output vector [x1^2+y1^2+z1^2 ... x_n^2+y_n^2+z_n^2 ].
-     */
-    inline static Eigen::VectorXd combine_xyz(const Eigen::VectorXd& vec)
-    {
-        return UTILSLIB::Linalg::combine_xyz(vec);
-    }
-
-    //=========================================================================================================
-    /**
-     * mne_get_current_comp
-     *
-     * ### MNE toolbox root function ###
-     *
-     * Wrapper for the FiffInfo get_current_comp member function
-     *
-     * Get the current compensation in effect in the data
-     *
-     * @param[in] info   Fiff measurement info.
-     *
-     * @return the current compensation.
-     */
-    static inline qint32 get_current_comp(FIFFLIB::FiffInfo* info)
-    {
-        return info->get_current_comp();
-    }
-
-    //=========================================================================================================
-    /**
-     * mne_block_diag - encoding part
-     *
-     * ### MNE toolbox root function ###
-     *
-     * Wrapper for the Linalg::make_block_diag static function
-     *
-     * Make a sparse block diagonal matrix
-     *
-     * Returns a sparse block diagonal, diagonalized from the elements in "A". "A" is ma x na, comprising
-     * bdn=(na/"n") blocks of submatrices. Each submatrix is ma x "n", and these submatrices are placed down
-     * the diagonal of the matrix.
-     *
-     * @param[in, out] A Matrix which should be diagonlized.
-     * @param[in, out] n Columns of the submatrices.
-     *
-     * @return A sparse block diagonal, diagonalized from the elements in "A".
-     */
-    static inline Eigen::SparseMatrix<double> make_block_diag(const Eigen::MatrixXd& A, qint32 n)
-    {
-        return UTILSLIB::Linalg::make_block_diag(A, n);
-    }
-
-    //=========================================================================================================
-    /**
-     * mne_make_compensator
-     *
-     * ### MNE toolbox root function ###
-     *
-     * Wrapper for the FiffInfo make_compensator member function
-     *
-     * Create a compensation matrix to bring the data from one compensation state to another
-     *
-     * @param[in] info               measurement info as returned by the fif reading routines.
-     * @param[in] from               compensation in the input data.
-     * @param[in] to                 desired compensation in the output.
-     * @param[out] ctf_comp          Compensation Matrix.
-     * @param[in] exclude_comp_chs   exclude compensation channels from the output (optional).
-     *
-     * @return true if succeeded, false otherwise.
-     */
-    inline static bool make_compensator(const FIFFLIB::FiffInfo& info,
-                                        FIFFLIB::fiff_int_t from,
-                                        FIFFLIB::fiff_int_t to,
-                                        FIFFLIB::FiffCtfComp& ctf_comp,
-                                        bool exclude_comp_chs = false)
-    {
-        return info.make_compensator(from, to, ctf_comp, exclude_comp_chs);
-    }
-
-    //=========================================================================================================
-    /**
-     * make_projector
-     *
-     * ### MNE toolbox root function ###
-     *
-     * Wrapper for the FiffInfo::make_projector static function
-     * There exists also a member function which should be preferred:
-     * make_projector(MatrixXd& proj, Eigen::MatrixXd& U = defaultUMatrix)
-     *
-     * Make an SSP operator
-     *
-     * @param[in] projs      A set of projection vectors.
-     * @param[in] ch_names   A cell array of channel names.
-     * @param[out] proj      The projection operator to apply to the data.
-     * @param[in] bads       Bad channels to exclude.
-     * @param[out] U         The orthogonal basis of the projection vectors (optional).
-     *
-     * @return nproj - How many items in the projector.
-     */
-    inline static FIFFLIB::fiff_int_t make_projector(const QList<FIFFLIB::FiffProj>& projs,
-                                                     const StringList& ch_names,
-                                                     Eigen::MatrixXd& proj,
-                                                     const StringList& bads = {},
-                                                     Eigen::MatrixXd& U = FIFFLIB::defaultMatrixXd)
-    {
-        return FIFFLIB::FiffProj::make_projector(projs,
-                                                 ch_names,
-                                                 proj,
-                                                 bads,
-                                                 U);
-    }
-
-    //=========================================================================================================
-    /**
-     * mne_make_projector_info
-     *
-     * ### MNE toolbox root function ###
-     *
-     * Wrapper for the FiffInfo make_projector_info(MatrixXd& proj) member function
-     *
-     * Make a SSP operator using the meas info
-     *
-     * @param[in] info       Fiff measurement info.
-     * @param[out] proj      The projection operator to apply to the data.
-     *
-     * @return nproj - How many items in the projector.
-     */
-    static inline qint32 make_projector(FIFFLIB::FiffInfo& info,
-                                        Eigen::MatrixXd& proj)
-    {
-        return info.make_projector(proj);
-    }
-
-    inline static bool read_events(const std::filesystem::path& t_sEventName,
-                                   const std::filesystem::path& t_fileRawName,
-                                   Eigen::MatrixXi& events)
-    {
-        std::filesystem::path path = t_sEventName;
-        if (path.empty()) {
-            // The events of "<name>.fif" are in "<name>-eve.fif"
-            std::string name = UTILSLIB::utf8FromPath(t_fileRawName);
-            const std::size_t fif = name.find(".fif");
-            if (fif == std::string::npos || fif == 0)
-                return false;
-            path = UTILSLIB::pathFromUtf8(name.replace(fif, 4, "-eve.fif"));
-        }
-        auto read = FIFFLIB::FiffEvents::read(path);
-        if (!read)
-            return false;
-        events = std::move(read->events);
-        return true;
-    }
-
-    //=========================================================================================================
-    /**
-     * mne_read_events
-     *
-     * Read an event list from a fif file
-     *
-     * @param[in] path         The FIFF file.
-     * @param[in, out] eventlist    The read eventlist m x 3; with m events; colum: 1 - position in samples, 3 - eventcode.
-     *
-     * @return true if succeeded, false otherwise.
-     */
-    inline static bool read_events_from_fif(const std::filesystem::path& path,
-                                            Eigen::MatrixXi& eventlist)
-    {
-        auto read = FIFFLIB::FiffEvents::read_fif(path);
-        if (!read)
-            return false;
-        eventlist = std::move(read->events);
-        return true;
-    }
-
-    //=========================================================================================================
-    /**
-     * read_events
-     *
-     * Read a list of events from an eve file
-     *
-     * @param[in] path         The text file.
-     * @param[in, out] eventlist   List of events.
-     *
-     * @return true if succeeded, false otherwise.
-     */
-    inline static bool read_events_from_ascii(const std::filesystem::path& path,
-                                              Eigen::MatrixXi& eventlist)
-    {
-        auto read = FIFFLIB::FiffEvents::read_ascii(path);
-        if (!read)
-            return false;
-        eventlist = std::move(read->events);
-        return true;
-    }
-
-    //=========================================================================================================
-    /**
-     * write_events_to_fif
-     *
-     * Write an event list to a FIFF file.
-     *
-     * @param[in] path         The FIFF file to write.
-     * @param[in] eventlist    The event list (nEvents x 3): [sample, before, after].
-     *
-     * @return true if succeeded, false otherwise.
-     */
-    inline static bool write_events_to_fif(const std::filesystem::path& path,
-                                           const Eigen::MatrixXi& eventlist)
-    {
-        return FIFFLIB::FiffEvents(eventlist).write_fif(path).has_value();
-    }
-
-    //=========================================================================================================
-    /**
-     * write_events_to_ascii
-     *
-     * Write an event list to a text file (MNE-C compatible format).
-     *
-     * @param[in] path         The text file to write.
-     * @param[in] eventlist    The event list (nEvents x 3): [sample, before, after].
-     * @param[in] sfreq        Sampling frequency for time column computation.
-     *
-     * @return true if succeeded, false otherwise.
-     */
-    inline static bool write_events_to_ascii(const std::filesystem::path& path,
-                                             const Eigen::MatrixXi& eventlist,
-                                             float sfreq = 0.0f)
-    {
-        return FIFFLIB::FiffEvents(eventlist).write_ascii(path, sfreq).has_value();
-    }
-
-    //=========================================================================================================
-    /**
-     * compute_epoch_covariance
-     *
-     * ### MNE toolbox root function ###
-     *
-     * Wrapper for the FiffCov::compute_from_epochs static function
-     *
-     * Compute a noise covariance matrix from raw data based on event-locked epochs.
-     * Ported from compute_cov.c (MNE-C).
-     *
-     * @param[in] raw           The raw data.
-     * @param[in] events        Event matrix (nEvents x 3): [sample, before, after].
-     * @param[in] eventCodes    Which event codes to include.
-     * @param[in] tmin          Start of time window relative to event (seconds).
-     * @param[in] tmax          End of time window relative to event (seconds).
-     * @param[in] bmin          Baseline start (seconds, relative to event). Only used if doBaseline is true.
-     * @param[in] bmax          Baseline end (seconds, relative to event). Only used if doBaseline is true.
-     * @param[in] doBaseline    Whether to apply baseline correction before covariance computation.
-     * @param[in] removeMean    Whether to remove sample mean from the covariance estimate.
-     *
-     * @return The computed noise covariance matrix, or empty FiffCov on failure.
-     */
-    inline static FIFFLIB::FiffCov compute_epoch_covariance(const FIFFLIB::FiffRawData& raw,
-                                                            const Eigen::MatrixXi& events,
-                                                            const QList<int>& eventCodes,
-                                                            float tmin,
-                                                            float tmax,
-                                                            float bmin = 0.0f,
-                                                            float bmax = 0.0f,
-                                                            bool doBaseline = false,
-                                                            bool removeMean = true)
-    {
-        return FIFFLIB::FiffCov::compute_from_epochs(raw, events, eventCodes, tmin, tmax, bmin, bmax, doBaseline, removeMean);
-    }
-
-    //=========================================================================================================
-    /**
-     * compute_proj
-     *
-     * ### MNE toolbox root function ###
-     *
-     * Create SSP (Signal-Space Projection) operators from raw data via SVD.
-     * Ported from make_ssp.c (MNE-C).
-     *
-     * @param[in] raw           The raw data.
-     * @param[in] events        Event matrix (nEvents x 3).
-     * @param[in] eventCode     Which event code to select epochs for.
-     * @param[in] tmin          Start of epoch relative to event (seconds).
-     * @param[in] tmax          End of epoch relative to event (seconds).
-     * @param[in] nGrad         Number of gradiometer projection vectors.
-     * @param[in] nMag          Number of magnetometer projection vectors.
-     * @param[in] nEeg          Number of EEG projection vectors.
-     * @param[in] mapReject     Rejection thresholds (key = channel type string, value = threshold).
-     *
-     * @return List of FiffProj items, or empty list on failure.
-     */
-    inline static QList<FIFFLIB::FiffProj> compute_proj(const FIFFLIB::FiffRawData& raw,
-                                                        const Eigen::MatrixXi& events,
-                                                        int eventCode,
-                                                        float tmin,
-                                                        float tmax,
-                                                        int nGrad,
-                                                        int nMag,
-                                                        int nEeg,
-                                                        const QMap<QString, double>& mapReject = QMap<QString, double>())
-    {
-        return FIFFLIB::FiffProj::compute_from_raw(raw, events, eventCode, tmin, tmax, nGrad, nMag, nEeg, mapReject);
-    }
-
-    //=========================================================================================================
-    /**
-     * save_raw
-     *
-     * ### MNE toolbox root function ###
-     *
-     * Wrapper for the FiffRawData::save member function
-     *
-     * Save raw data to a FIFF file, optionally with decimation and channel picking.
-     * Ported from save.c (MNE-C).
-     *
-     * @param[in] raw       The raw data to save.
-     * @param[in] path      The file to write.
-     * @param[in] picks     Channel indices to include (empty = all channels).
-     * @param[in] decim     Decimation factor (1 = no decimation).
-     * @param[in] from      First sample to save (-1 = from start of raw data).
-     * @param[in] to        Last sample to save (-1 = to end of raw data).
-     *
-     * @return true on success.
-     */
-    inline static bool save_raw(const FIFFLIB::FiffRawData& raw,
-                                const std::filesystem::path& path,
-                                const Eigen::RowVectorXi& picks = Eigen::RowVectorXi(),
-                                int decim = 1,
-                                int from = -1,
-                                int to = -1)
-    {
-        return raw.save(path, picks, decim, from, to);
-    }
-
-    static void setup_compensators(FIFFLIB::FiffRawData& raw,
-                                   FIFFLIB::fiff_int_t dest_comp,
-                                   bool keep_comp);
-
-    //=========================================================================================================
-    /**
-     * mne_read_cov
-     *
-     * ### MNE toolbox root function ###
-     *
-     * Wrapper for the FiffStream read_cov member function
-     *
-     * Reads a covariance matrix from a fiff file
-     *
-     * @param[in] stream     an open fiff file.
-     * @param[in] p_Node        look for the matrix in here.
-     * @param[in] cov_kind      what kind of a covariance matrix do we want?.
-     * @param[in, out] p_covData    the read covariance matrix.
-     *
-     * @return true if succeeded, false otherwise.
-     */
-    inline static bool read_cov(FIFFLIB::FiffStream& stream,
-                                const FIFFLIB::FiffDirNode::SPtr& p_Node,
-                                FIFFLIB::fiff_int_t cov_kind,
-                                FIFFLIB::FiffCov& p_covData)
-    {
-        return stream.read_cov(p_Node,
-                               cov_kind,
-                               p_covData);
-    }
-
-    //ToDo FiffChInfoList Class
-    //=========================================================================================================
-    /**
-     * mne_set_current_comp
-     *
-     * ### MNE toolbox root function ###
-     *
-     * Wrapper for the FiffInfo::set_current_comp static function
-     * Consider taking the member function of a FiffInfo set_current_comp(fiff_int_t value),
-     * when compensation should be applied to the channels of FiffInfo
-     *
-     * Set the current compensation value in the channel info structures
-     *
-     * @param[in] chs    fiff channel info list.
-     * @param[in] value  compensation value.
-     *
-     * @return the current compensation.
-     */
-    static QList<FIFFLIB::FiffChInfo> set_current_comp(QList<FIFFLIB::FiffChInfo>& chs,
-                                                       FIFFLIB::fiff_int_t value)
-    {
-        return FIFFLIB::FiffInfo::set_current_comp(chs,
-                                                   value);
-    }
-
-    //=========================================================================================================
-    /**
-     * mne_transform_source_space_to
-     *
-     * ### MNE toolbox root function ###
-     *
-     * Wrapper for the MNESourceSpaces transform_source_space_to member function
-     *
-     * Transforms source space data to the desired coordinate system
-     *
-     * @param[in, out] p_pMNESourceSpaces the source space which is should be transformed.
-     * @param[in] dest destination check code.
-     * @param[in] trans transformation information.
-     *
-     * @return true if succeeded, false otherwise.
-     */
-    static inline bool transform_source_space_to(MNESourceSpaces& p_pMNESourceSpaces,
-                                                 FIFFLIB::fiff_int_t dest,
-                                                 FIFFLIB::FiffCoordTrans& trans)
-    {
-        return p_pMNESourceSpaces.transform_source_space_to(dest,
-                                                            trans);
-    }
-
-    //=========================================================================================================
-    /**
-     * mne_transpose_named_matrix
-     *
-     * ### MNE toolbox root function ###
-     *
-     * Wrapper for the FiffNamedMatrix transpose_named_matrix member  function
-     *
-     * Transpose a named matrix (FiffNamedMatrix)
-     *
-     * @param[in, out] mat FiffNamedMatrix which shoul be transposed.
-     *
-     */
-    static inline void transpose_named_matrix(FIFFLIB::FiffNamedMatrix& mat)
-    {
-        mat.transpose_named_matrix();
-    }
-};
-} // NAMESPACE
+#include "mne_project_to_surface.h"
+#include "mne_icp.h"
+#include "mne_cov_matrix.h"
+#include "mne_ctf_comp_data.h"
+#include "mne_ctf_comp_data_set.h"
+#include "mne_deriv.h"
+#include "mne_deriv_set.h"
+#include "mne_mne_data.h"
+#include "mne_named_matrix.h"
+#include "mne_named_vector.h"
+#include "mne_sparse_named_matrix.h"
+#include "mne_layout_port.h"
+#include "mne_layout.h"
+#include "mne_ch_selection.h"
+#include "mne_event.h"
+#include "mne_event_list.h"
+#include "mne_filter_def.h"
+#include "mne_proj_item.h"
+#include "mne_proj_op.h"
+#include "mne_raw_buf_def.h"
+#include "mne_raw_data.h"
+#include "mne_raw_info.h"
+#include "mne_sss_data.h"
+#include "mne_triangle.h"
+#include "mne_types.h"
+#include "mne_vol_geom.h"
+#include "mne_nearest.h"
+#include "mne_patch_info.h"
+#include "mne_source_space.h"
+#include "mne_surface.h"
+#include "mne_surface_or_volume.h"
+#include "filter_thread_arg.h"
+#include "mne_msh_display_surface.h"
+#include "mne_msh_display_surface_set.h"
+#include "mne_msh_picked.h"
+#include "mne_morph_map.h"
+#include "mne_msh_color_scale_def.h"
+#include "mne_proj_data.h"
+#include "mne_msh_light.h"
+#include "mne_msh_light_set.h"
+#include "mne_surface_patch.h"
+#include "mne_msh_eyes.h"
+#include "mne_mgh_tag.h"
+#include "mne_mgh_tag_group.h"
+#include "mne_process_description.h"
+#include "mne_description_parser.h"
+#include "mne_forward_solution.h"
+#include "mne_inverse_operator.h"
+#include "mne_cortical_map.h"
+#include "mne_meas_data.h"
+#include "mne_meas_data_set.h"
 
 #endif // MNE_H

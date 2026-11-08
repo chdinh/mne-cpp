@@ -439,20 +439,16 @@ int main(int argc, char* argv[])
     ok &= expect(sss && sss->job == FIFFV_SSS_JOB_FILTER && sss->coord_frame == FIFFV_COORD_HEAD && sss->nchan == 306 && sss->in_order == 8 && sss->out_order == 3 && sss->in_nuse == 70 && sss->out_nuse == 15 && std::fabs(sss->origin[2] - 0.04f) < 1e-7f,
                  "MNESssData: Maxwell filter parameters like info['proc_history'] of the fixture");
 
-    //! [mne_facade_usage]
-    // The MNE facade mirrors the MNE-Matlab/Python toolbox functions
-    const std::string eveName = tmp.filePath("audvis-eve.fif").toStdString();
-    MNE::write_events_to_fif(eveName, events.events);
-    MatrixXi eventsBack;
-    MNE::read_events(eveName, rawFile.fileName().toStdString(), eventsBack);
+    const std::filesystem::path eveName = tmp.filePath("audvis-eve.fif").toStdU16String();
+    const bool eventsWritten = events.write_fif(eveName).has_value();
+    const MatrixXi eventsBack = FiffEvents::read(eveName).value().events;
     QList<FiffProj> projs = raw.info.projs; // stored inactive in the raw file
     FiffProj::activate_projs(projs);
     MatrixXd ssp; // like mne._fiff.proj.make_projector(info['projs'], ch_names, bads)
-    const int nProj = MNE::make_projector(projs, raw.info.ch_names, ssp, raw.info.bads);
-    //! [mne_facade_usage]
+    const int nProj = FiffProj::make_projector(projs, raw.info.ch_names, ssp, raw.info.bads);
     // mne.find_events: 25 events, first at sample 13988 with code 2; make_projector: 4 vectors, trace 372 of 376
-    ok &= expect(eventsBack.rows() == 25 && eventsBack(0, 0) == 13988 && eventsBack(0, 2) == 2 && nProj == 4 && near(ssp.trace(), 372.0, 1e-9) && near(ssp.norm(), 19.28730152198591, 1e-9),
-                 "MNE: event file round trip and SSP projector like mne.find_events / make_projector");
+    ok &= expect(eventsWritten && eventsBack.rows() == 25 && eventsBack(0, 0) == 13988 && eventsBack(0, 2) == 2 && nProj == 4 && near(ssp.trace(), 372.0, 1e-9) && near(ssp.norm(), 19.28730152198591, 1e-9),
+                 "FiffEvents/FiffProj: event file round trip and SSP projector like mne.find_events / make_projector");
 
     //! [mne_surface_usage]
     // Total solid angle seen from a point: 4 pi inside a closed surface, 0 outside

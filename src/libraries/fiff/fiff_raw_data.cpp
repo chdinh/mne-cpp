@@ -237,7 +237,7 @@ bool FiffRawData::read_raw_segment(MatrixXd& data,
     bool projAvailable = true;
 
     if (this->proj.size() == 0) {
-        //qDebug() << "FiffRawData::read_raw_segment - No projectors setup. Consider calling MNE::setup_compensators.";
+        //qDebug() << "FiffRawData::read_raw_segment - No projectors setup. Consider calling FiffRawData::activate_projections.";
         projAvailable = false;
     }
 
@@ -536,7 +536,7 @@ bool FiffRawData::read_raw_segment(MatrixXd& data,
     bool projAvailable = true;
 
     if (this->proj.size() == 0) {
-        //qInfo() << "FiffRawData::read_raw_segment - No projectors setup. Consider calling MNE::setup_compensators.";
+        //qInfo() << "FiffRawData::read_raw_segment - No projectors setup. Consider calling FiffRawData::activate_projections.";
         projAvailable = false;
     }
 
@@ -846,6 +846,34 @@ bool FiffRawData::read_raw_segment_times(MatrixXd& data,
     //   Read it
     //
     return this->read_raw_segment(data, times, static_cast<qint32>(from), static_cast<qint32>(to), sel);
+}
+
+//=============================================================================================================
+
+int FiffRawData::activate_projections()
+{
+    if (info.projs.empty()) {
+        return 0;
+    }
+    for (FiffProj& projection : info.projs) {
+        projection.active = true;
+    }
+    return info.make_projector(proj);
+}
+
+//=============================================================================================================
+
+UTILSLIB::Expected<void> FiffRawData::apply_gradient_compensation(int grade)
+{
+    const int current = info.get_current_comp();
+    if (current == grade) {
+        return {};
+    }
+    if (!info.make_compensator(current, grade, comp)) {
+        return UTILSLIB::fail(UTILSLIB::ErrorCode::Format, "cannot compensate from grade {} to grade {}", current, grade);
+    }
+    info.set_current_comp(grade);
+    return {};
 }
 
 //=============================================================================================================

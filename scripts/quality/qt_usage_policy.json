@@ -186,8 +186,8 @@
       ]
     },
     "mne": {
-      "tokens": 1650,
-      "public_header_includes": 96,
+      "tokens": 1629,
+      "public_header_includes": 94,
       "modules": [
         "Concurrent",
         "Core",

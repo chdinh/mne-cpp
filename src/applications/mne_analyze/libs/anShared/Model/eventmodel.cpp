@@ -19,6 +19,8 @@
 //=============================================================================================================
 
 #include "eventmodel.h"
+
+#include <fiff/fiff_events.h>
 #include "fiffrawviewmodel.h"
 #include <mne/mne.h>
 #include <iomanip>
@@ -588,9 +590,13 @@ void EventModel::initFromFile(const QString& sFilePath)
     Eigen::MatrixXi eventList;
 
     if (fileInfo.exists() && (fileInfo.completeSuffix() == "eve")) {
-        MNELIB::MNE::read_events_from_ascii(sFilePath.toStdU16String(), eventList);
+        if (auto read = FIFFLIB::FiffEvents::read_ascii(sFilePath.toStdU16String())) {
+            eventList = std::move(read->events);
+        }
     } else if (fileInfo.exists() && (fileInfo.completeSuffix() == "fif")) {
-        MNELIB::MNE::read_events_from_fif(sFilePath.toStdU16String(), eventList);
+        if (auto read = FIFFLIB::FiffEvents::read_fif(sFilePath.toStdU16String())) {
+            eventList = std::move(read->events);
+        }
     } else {
         return;
     }

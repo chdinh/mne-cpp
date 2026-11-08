@@ -212,53 +212,12 @@ int main(int argc, char* argv[])
     for (k = 0; k < picks.cols(); ++k)
         ch_names.push_back(raw.info.ch_names[picks(0, k)]);
 
-    //
-    //   Set up projection
-    //
-    if (raw.info.projs.size() == 0)
-        printf("No projector specified for these data\n");
-    else {
-        //
-        //   Activate the projection items
-        //
-        for (k = 0; k < raw.info.projs.size(); ++k)
-            raw.info.projs[k].active = true;
-
-        printf("%lld projection items activated\n",
-               static_cast<long long>(raw.info.projs.size()));
-        //
-        //   Create the projector
-        //
-        //        fiff_int_t nproj = MNE::make_projector_info(raw.info, raw.proj); Using the member function instead
-        fiff_int_t nproj = raw.info.make_projector(raw.proj);
-
-        if (nproj == 0) {
-            printf("The projection vectors do not apply to these channels\n");
-        } else {
-            printf("Created an SSP operator (subspace dimension = %d)\n", nproj);
-        }
-    }
-
-    //
-    //   Set up the CTF compensator
-    //
-    //    qint32 current_comp = MNE::get_current_comp(raw.info);
-    qint32 current_comp = raw.info.get_current_comp();
-    if (current_comp > 0)
-        printf("Current compensation grade : %d\n", current_comp);
-
-    if (keep_comp)
-        dest_comp = current_comp;
-
-    if (current_comp != dest_comp) {
-        qDebug() << "This part needs to be debugged";
-        if (MNE::make_compensator(raw.info, current_comp, dest_comp, raw.comp)) {
-            //            raw.info.chs = MNE::set_current_comp(raw.info.chs,dest_comp);
-            raw.info.set_current_comp(dest_comp);
-            printf("Appropriate compensator added to change to grade %d.\n", dest_comp);
-        } else {
-            printf("Could not make the compensator\n");
-            return 0;
+    // SSP operator and CTF compensation, both applied by read_raw_segment
+    raw.activate_projections();
+    if (!keep_comp) {
+        if (auto compensated = raw.apply_gradient_compensation(dest_comp); !compensated) {
+            printf("%s\n", compensated.error().what());
+            return 1;
         }
     }
     //
@@ -275,7 +234,7 @@ int main(int argc, char* argv[])
         }
         //        events = mne_read_events(t_sEventName);
 
-        MNE::read_events_from_fif(t_sEventName.toStdString(), events);
+        events = FiffEvents::read_fif(t_sEventName.toStdU16String()).value().events;
         printf("Events read from %s\n", t_sEventName.toUtf8().constData());
     } else {
         //
@@ -283,7 +242,9 @@ int main(int argc, char* argv[])
         //
         p = t_fileRaw.fileName().indexOf(".fif");
         if (p > 0) {
-            if (!MNE::read_events_from_fif(t_sEventName.toStdString(), events)) {
+            if (auto read = FiffEvents::read_fif(t_sEventName.toStdU16String())) {
+                events = std::move(read->events);
+            } else {
                 printf("Error while read events.\n");
                 return 0;
             }

@@ -118,7 +118,9 @@ int main(int argc, char* argv[])
 
     // Setup for reading the raw data
     FiffRawData raw(t_fileRawName.toStdString());
-    MNE::setup_compensators(raw, dest_comp, keep_comp);
+    raw.activate_projections();
+    if (!keep_comp)
+        raw.apply_gradient_compensation(dest_comp).value();
 
     RowVectorXi picks;
     if (pick_all) {
@@ -143,9 +145,7 @@ int main(int argc, char* argv[])
 
     // Read the events
     MatrixXi events;
-    MNE::read_events(t_sEventName.toStdString(),
-                     t_fileRawName.toStdString(),
-                     events);
+    events = FiffEvents::read(t_sEventName.toStdU16String()).value().events;
 
     // Read the epochs and reject epochs with EOG higher than 300e-06
     QMap<QString, double> mapReject;

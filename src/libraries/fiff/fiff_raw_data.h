@@ -230,6 +230,26 @@ public:
               int from = -1,
               int to = -1) const;
 
+    //=========================================================================================================
+    /**
+     * Activates the SSP projectors of the measurement info and builds the operator read() applies, as
+     * mne.io.Raw.apply_proj prepares it.
+     *
+     * @return The rank of the operator; 0 when there are no projectors or none applies to these channels.
+     */
+    int activate_projections();
+
+    //=========================================================================================================
+    /**
+     * Sets up the CTF/4D compensator that read() applies to bring the data to another gradient compensation
+     * grade, as mne.io.Raw.apply_gradient_compensation does.
+     *
+     * @param[in] grade   The compensation grade wanted (0 for none).
+     *
+     * @return Nothing, or why the compensator cannot be made (Format).
+     */
+    [[nodiscard]] UTILSLIB::Expected<void> apply_gradient_compensation(int grade);
+
 public:
     std::unique_ptr<FiffStream> file; /**< replaces fid. */
     FiffInfo info;                    /**< Fiff measurement information. */

@@ -30,7 +30,7 @@
       "decoding",
       "math"
     ],
-    "tokens": 19196,
+    "tokens": 19175,
     "gui_outside_design": []
   },
   "libraries": {
@@ -403,22 +403,22 @@
       ]
     },
     "mne": {
-      "tokens": 1650,
+      "tokens": 1629,
       "by_category": {
-        "containers": 143,
+        "containers": 136,
         "files": 93,
-        "global": 380,
-        "logging": 576,
+        "global": 375,
+        "logging": 569,
         "objects_signals": 4,
         "other": 23,
         "regex": 2,
         "smart_pointers": 87,
-        "strings": 332,
+        "strings": 330,
         "threads": 10
       },
-      "public_header_includes": 96,
+      "public_header_includes": 94,
       "q_object": 0,
-      "files": 114,
+      "files": 113,
       "modules": [
         "Concurrent",
         "Core",

@@ -15,7 +15,7 @@
  * apply_gradient_compensation(0 | 1) results. Each test opens one file,
  * switches it to another grade in MNE-CPP and compares the data with the
  * file mne-python wrote at that grade. Both MNE-CPP paths are covered:
- * FiffRawData + MNE::setup_compensators (mne-python's make_compensator) and
+ * FiffRawData::apply_gradient_compensation (mne-python's make_compensator) and
  * MNERawData::open_file_comp (MNECTFCompDataSet, MNE-C's mne_ctf_comp.c).
  *
  * Errors are relative to the larger channel peak of input and output: going
@@ -98,8 +98,10 @@ double relError(const MatrixXd& actual, const MatrixXd& expected, const MatrixXd
 MatrixXd readFiff(int fileGrade, int destGrade = -1)
 {
     FiffRawData raw(fixture(fileGrade).toStdString());
-    if (destGrade >= 0)
-        MNE::setup_compensators(raw, destGrade, false);
+    if (destGrade >= 0) {
+        raw.activate_projections();
+        raw.apply_gradient_compensation(destGrade).value();
+    }
     MatrixXd data, times;
     if (!raw.read_raw_segment(data, times))
         return MatrixXd();
@@ -271,7 +273,8 @@ void TestMneCtfCompPython::fiffRawDataPicksCompensated()
     QFETCH(bool, returnMult);
 
     FiffRawData raw(fixture(3).toStdString());
-    MNE::setup_compensators(raw, 0, false);
+    raw.activate_projections();
+    raw.apply_gradient_compensation(0).value();
     // Expected: mne-python's grade-0 data, projected away from the mean MEG signal if asked.
     MatrixXd expected = m_reference[0];
     if (withProj) {

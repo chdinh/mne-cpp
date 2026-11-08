@@ -201,16 +201,14 @@ int main(int argc, char* argv[])
     //raw.info.bads << "MEG2412" << "MEG2413";
 
     // Setup compensators and projectors so they get applied while reading
-    MNE::setup_compensators(raw,
-                            dest_comp,
-                            keep_comp);
+    raw.activate_projections();
+    if (!keep_comp)
+        raw.apply_gradient_compensation(dest_comp).value();
 
     // Read the events
-    MNE::read_events(sEve.toStdString(),
-                     sRaw.toStdString(),
-                     events);
+    events = FiffEvents::read(sEve.toStdU16String()).value().events;
 
-    // Read the epochs and reject bad epochs. Note, that SSPs are automatically applied to the data if MNE::setup_compensators was called beforehand.
+    // Read the epochs and reject bad epochs. Note, that SSPs are automatically applied to the data if activate_projections() was called beforehand.
     QMap<QString, double> mapReject;
     mapReject.insert("eog", 100e-06);
     mapReject.insert("grad", 3000e-13);

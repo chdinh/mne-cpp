@@ -154,7 +154,7 @@ void TestFiffRawFormatsPython::readsFormat()
     QCOMPARE(timeData, selData);
 
     // SSP as mne-python's apply_proj() (PCA-v1..3 and the average EEG reference).
-    MNE::setup_compensators(raw, 0, true);
+    raw.activate_projections();
     QVERIFY(raw.proj.size() > 0);
     MatrixXd proj, projTimes;
     QVERIFY(raw.read_raw_segment(proj, projTimes));
