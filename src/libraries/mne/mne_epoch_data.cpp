@@ -20,6 +20,7 @@
 //=============================================================================================================
 
 #include "mne_epoch_data.h"
+#include <utils/logger/log.h>
 
 #include <utility>
 
@@ -87,7 +88,7 @@ void MNEEpochData::applyBaselineCorrection(const std::pair<float, float>& baseli
 void MNEEpochData::pick_channels(const RowVectorXi& sel)
 {
     if (sel.cols() == 0) {
-        qWarning("MNEEpochData::pick_channels - Warning : No channels were provided.\n");
+        Log::warning("MNEEpochData::pick_channels - Warning : No channels were provided.\n");
         return;
     }
 
@@ -102,7 +103,7 @@ void MNEEpochData::pick_channels(const RowVectorXi& sel)
         if (sel(l) <= epoch.rows()) {
             selBlock.row(l) = epoch.row(sel(0, l));
         } else {
-            qWarning("FiffEvoked::pick_channels - Warning : Selected channel index out of bound.\n");
+            Log::warning("FiffEvoked::pick_channels - Warning : Selected channel index out of bound.\n");
         }
     }
 

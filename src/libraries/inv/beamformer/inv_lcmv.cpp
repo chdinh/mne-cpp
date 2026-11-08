@@ -22,6 +22,7 @@
 //=============================================================================================================
 
 #include "inv_lcmv.h"
+#include <utils/logger/log.h>
 #include <utils/string_utils.h>
 #include "inv_beamformer_compute.h"
 
@@ -31,7 +32,6 @@
 #include <fiff/fiff_info.h>
 #include <math/linalg.h>
 
-#include <QDebug>
 
 //=============================================================================================================
 // EIGEN INCLUDES
@@ -70,7 +70,7 @@ InvBeamformer InvLCMV::makeLCMV([[maybe_unused]] const FiffInfo& info,
     // Extract leadfield G from forward solution
     // -----------------------------------------------------------------------
     if (!forward.sol || forward.sol->data.size() == 0) {
-        qWarning("InvLCMV::makeLCMV - Forward solution has no gain matrix!");
+        Log::warning("InvLCMV::makeLCMV - Forward solution has no gain matrix!");
         return result;
     }
 
@@ -79,8 +79,7 @@ InvBeamformer InvLCMV::makeLCMV([[maybe_unused]] const FiffInfo& info,
     const int nOrient = (forward.source_ori == FIFFV_MNE_FREE_ORI) ? 3 : 1;
     const int nSources = static_cast<int>(G.cols()) / nOrient;
 
-    qInfo("InvLCMV::makeLCMV - Leadfield: %d channels x %d sources (n_orient=%d)",
-          nChannels, nSources, nOrient);
+    Log::info("InvLCMV::makeLCMV - Leadfield: {} channels x {} sources (n_orient={})", nChannels, nSources, nOrient);
 
     // -----------------------------------------------------------------------
     // Build whitening matrix from noise covariance
@@ -121,9 +120,7 @@ InvBeamformer InvLCMV::makeLCMV([[maybe_unused]] const FiffInfo& info,
 
     MatrixXd CmData = dataCov.data;
     if (CmData.rows() != nChannels || CmData.cols() != nChannels) {
-        qWarning("InvLCMV::makeLCMV - Data covariance dimension (%d x %d) "
-                 "does not match leadfield channels (%d)!",
-                 static_cast<int>(CmData.rows()), static_cast<int>(CmData.cols()), nChannels);
+        Log::warning("InvLCMV::makeLCMV - Data covariance dimension ({} x {}) does not match leadfield channels ({})!", CmData.rows(), CmData.cols(), nChannels);
         return result;
     }
 
@@ -155,7 +152,7 @@ InvBeamformer InvLCMV::makeLCMV([[maybe_unused]] const FiffInfo& info,
         nn, W, mpOri);
 
     if (!ok) {
-        qWarning("InvLCMV::makeLCMV - Beamformer computation failed!");
+        Log::warning("InvLCMV::makeLCMV - Beamformer computation failed!");
         return result;
     }
 
@@ -191,8 +188,7 @@ InvBeamformer InvLCMV::makeLCMV([[maybe_unused]] const FiffInfo& info,
     }
     result.vertices = verts;
 
-    qInfo("InvLCMV::makeLCMV - Done. Filter: %d x %d (sources=%d, orient=%d)",
-          static_cast<int>(W.rows()), static_cast<int>(W.cols()), nSources, result.nOrient());
+    Log::info("InvLCMV::makeLCMV - Done. Filter: {} x {} (sources={}, orient={})", W.rows(), W.cols(), nSources, result.nOrient());
 
     return result;
 }
@@ -223,7 +219,7 @@ MatrixXd InvLCMV::applyFilter(const MatrixXd& data, const InvBeamformer& filters
 InvSourceEstimate InvLCMV::applyLCMV(const FiffEvoked& evoked, const InvBeamformer& filters)
 {
     if (!filters.isValid() || filters.kind != "LCMV") {
-        qWarning("InvLCMV::applyLCMV - Invalid or non-LCMV filters!");
+        Log::warning("InvLCMV::applyLCMV - Invalid or non-LCMV filters!");
         return InvSourceEstimate();
     }
 
@@ -236,8 +232,7 @@ InvSourceEstimate InvLCMV::applyLCMV(const FiffEvoked& evoked, const InvBeamform
         for (int i = 0; i < nFilterCh; ++i) {
             int idx = UTILSLIB::indexOf(evoked.info.ch_names, filters.chNames[i]);
             if (idx < 0) {
-                qWarning("InvLCMV::applyLCMV - Channel %s not found in evoked!",
-                         filters.chNames[i].c_str());
+                Log::warning("InvLCMV::applyLCMV - Channel {} not found in evoked!", filters.chNames[i]);
                 return InvSourceEstimate();
             }
             data.row(i) = evoked.data.row(idx);
@@ -281,7 +276,7 @@ InvSourceEstimate InvLCMV::applyLCMVRaw(const MatrixXd& data,
                                         const InvBeamformer& filters)
 {
     if (!filters.isValid() || filters.kind != "LCMV") {
-        qWarning("InvLCMV::applyLCMVRaw - Invalid or non-LCMV filters!");
+        Log::warning("InvLCMV::applyLCMVRaw - Invalid or non-LCMV filters!");
         return InvSourceEstimate();
     }
 
@@ -313,7 +308,7 @@ InvSourceEstimate InvLCMV::applyLCMVCov(const FiffCov& dataCov,
                                         const InvBeamformer& filters)
 {
     if (!filters.isValid() || filters.kind != "LCMV") {
-        qWarning("InvLCMV::applyLCMVCov - Invalid or non-LCMV filters!");
+        Log::warning("InvLCMV::applyLCMVCov - Invalid or non-LCMV filters!");
         return InvSourceEstimate();
     }
 
@@ -348,18 +343,18 @@ QList<InvSourceEstimate> InvLCMV::applyLCMVEpochs(const QList<MatrixXd>& epochs,
     QList<InvSourceEstimate> results;
 
     if (epochs.isEmpty()) {
-        qWarning("InvLCMV::applyLCMVEpochs - No epochs provided.");
+        Log::warning("InvLCMV::applyLCMVEpochs - No epochs provided.");
         return results;
     }
     if (!filters.isValid() || filters.kind != "LCMV") {
-        qWarning("InvLCMV::applyLCMVEpochs - Invalid or non-LCMV filters!");
+        Log::warning("InvLCMV::applyLCMVEpochs - Invalid or non-LCMV filters!");
         return results;
     }
 
     for (int i = 0; i < epochs.size(); ++i) {
         InvSourceEstimate stc = applyLCMVRaw(epochs[i], tmin, tstep, filters);
         if (stc.empty()) {
-            qWarning("InvLCMV::applyLCMVEpochs - Epoch %d produced empty source estimate.", i);
+            Log::warning("InvLCMV::applyLCMVEpochs - Epoch {} produced empty source estimate.", i);
         }
         results.append(stc);
     }
@@ -380,7 +375,7 @@ MatrixXd InvLCMV::makeLCMVResolutionMatrix(
     InvBeamformer filters = makeLCMV(info, forward, dataCov, reg, noiseCov);
 
     if (!filters.isValid() || filters.weights.empty()) {
-        qWarning("InvLCMV::makeLCMVResolutionMatrix - Could not compute LCMV filter.");
+        Log::warning("InvLCMV::makeLCMVResolutionMatrix - Could not compute LCMV filter.");
         return MatrixXd();
     }
 
@@ -399,8 +394,7 @@ MatrixXd InvLCMV::makeLCMVResolutionMatrix(
     // Resolution matrix: R = W @ G_whitened
     MatrixXd R = filters.weights[0] * Gw;
 
-    qInfo("InvLCMV::makeLCMVResolutionMatrix - Resolution matrix: %d x %d",
-          static_cast<int>(R.rows()), static_cast<int>(R.cols()));
+    Log::info("InvLCMV::makeLCMVResolutionMatrix - Resolution matrix: {} x {}", R.rows(), R.cols());
 
     return R;
 }

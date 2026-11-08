@@ -18,6 +18,7 @@
 //=============================================================================================================
 
 #include "mne_ctf_comp_data.h"
+#include <utils/logger/log.h>
 
 #include <vector>
 #include "mne_types.h"
@@ -26,7 +27,6 @@
 #include <fiff/fiff_tag.h>
 
 #include <QFile>
-#include <QDebug>
 
 #include <Eigen/Core>
 
@@ -98,7 +98,7 @@ int MNECTFCompData::calibrate(const std::vector<FIFFLIB::FiffChInfo>& chs, int n
                 break;
             }
         if (!found) {
-            qCritical("Channel %s not found. Cannot calibrate the compensation matrix.", name.toUtf8().constData());
+            UTILSLIB::Log::critical("Channel {} not found. Cannot calibrate the compensation matrix.", name.toStdString());
             return FAIL;
         }
     }
@@ -112,7 +112,7 @@ int MNECTFCompData::calibrate(const std::vector<FIFFLIB::FiffChInfo>& chs, int n
                 break;
             }
         if (!found) {
-            qCritical("Channel %s not found. Cannot calibrate the compensation matrix.", name.toUtf8().constData());
+            UTILSLIB::Log::critical("Channel {} not found. Cannot calibrate the compensation matrix.", name.toStdString());
             return FAIL;
         }
     }

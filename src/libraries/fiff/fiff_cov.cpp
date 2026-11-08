@@ -23,6 +23,7 @@
 //=============================================================================================================
 
 #include "fiff_cov.h"
+#include <utils/logger/log.h>
 
 #include <algorithm>
 #include <iterator>
@@ -52,7 +53,6 @@
 //=============================================================================================================
 
 #include <Eigen/SVD>
-#include <QDebug>
 
 #include <stdexcept>
 //=============================================================================================================
@@ -194,7 +194,7 @@ FiffCov FiffCov::prepare_noise_cov(const FiffInfo& p_Info, const StringList& p_C
             for (qint32 j = 0; j < count; ++j)
                 C(i, j) = p_NoiseCov.data(C_ch_idx(i), C_ch_idx(j));
     else {
-        qWarning("Warning in FiffCov::prepare_noise_cov: This has to be debugged - not done before!");
+        Log::warning("Warning in FiffCov::prepare_noise_cov: This has to be debugged - not done before!");
         C = MatrixXd::Zero(count, count);
         for (qint32 i = 0; i < count; ++i)
             C.diagonal()[i] = p_NoiseCov.data(C_ch_idx(i), 0);
@@ -205,10 +205,10 @@ FiffCov FiffCov::prepare_noise_cov(const FiffInfo& p_Info, const StringList& p_C
 
     //Create the projection operator
     if (ncomp > 0 && proj.rows() == count) {
-        qInfo("Created an SSP operator (subspace dimension = %d)\n", ncomp);
+        Log::info("Created an SSP operator (subspace dimension = {})\n", ncomp);
         C = proj * (C * proj.transpose());
     } else {
-        qWarning("Warning in FiffCov::prepare_noise_cov: No projections applied since no projectors specified or projector dimensions do not match!");
+        Log::warning("Warning in FiffCov::prepare_noise_cov: No projections applied since no projectors specified or projector dimensions do not match!");
     }
 
     RowVectorXi pick_meg = p_Info.pick_types(true, false, false, {}, p_Info.bads);
@@ -292,8 +292,7 @@ FiffCov FiffCov::prepare_noise_cov(const FiffInfo& p_Info, const StringList& p_C
     }
 
     if (C_meg_idx.size() + C_eeg_idx.size() != n_chan) {
-        qWarning("FiffCov::prepare_noise_cov: %lld MEG + %lld EEG channels != %d total (unclassified channels present)",
-                 (long long)C_meg_idx.size(), (long long)C_eeg_idx.size(), n_chan);
+        Log::warning("FiffCov::prepare_noise_cov: {} MEG + {} EEG channels != {} total (unclassified channels present)", (long long)C_meg_idx.size(), (long long)C_eeg_idx.size(), n_chan);
     }
 
     p_NoiseCov.data = C;
@@ -356,8 +355,7 @@ FiffCov FiffCov::regularize(const FiffInfo& p_info, double p_fRegMag, double p_f
 
     //Check dimension consistency (channels not classified as EEG/MAG/GRAD, e.g. EOG/MISC, are expected)
     if (static_cast<unsigned>(C.rows()) != idx_eeg.size() + idx_mag.size() + idx_grad.size()) {
-        qWarning("FiffCov::regularize: %lld channels in cov but only %zu classified as EEG/MAG/GRAD (others will not be regularized)",
-                 static_cast<long long>(C.rows()), idx_eeg.size() + idx_mag.size() + idx_grad.size());
+        Log::warning("FiffCov::regularize: {} channels in cov but only {} classified as EEG/MAG/GRAD (others will not be regularized)", C.rows(), idx_eeg.size() + idx_mag.size() + idx_grad.size());
     }
 
     std::vector<FiffProj> t_listProjs;
@@ -384,9 +382,9 @@ FiffCov FiffCov::regularize(const FiffInfo& p_info, double p_fRegMag, double p_f
         std::vector<qint32> idx = it.value().second;
 
         if (idx.size() == 0 || reg == 0.0)
-            qInfo("\tNothing to regularize within %s data.\n", desc.toUtf8().constData());
+            Log::info("\tNothing to regularize within {} data.\n", desc.toStdString());
         else {
-            qInfo("\tRegularize %s: %f\n", desc.toUtf8().constData(), reg);
+            Log::info("\tRegularize {}: {:f}\n", desc.toStdString(), reg);
             MatrixXd this_C(idx.size(), idx.size());
             for (quint32 i = 0; i < idx.size(); ++i)
                 for (quint32 j = 0; j < idx.size(); ++j)
@@ -414,7 +412,7 @@ FiffCov FiffCov::regularize(const FiffInfo& p_info, double p_fRegMag, double p_f
                 U = t_U.block(0, 0, t_U.rows(), t_U.cols() - ncomp);
 
                 if (ncomp > 0) {
-                    qInfo("\tCreated an SSP operator for %s (dimension = %d).\n", desc.toUtf8().constData(), ncomp);
+                    Log::info("\tCreated an SSP operator for {} (dimension = {}).\n", desc.toStdString(), ncomp);
                     this_C = U.transpose() * (this_C * U);
                 }
             }
@@ -485,7 +483,7 @@ FiffCov FiffCov::compute_from_epochs(const FiffRawData& raw,
     int delaySamp = static_cast<int>(std::round(delay * sfreq));
 
     if (ns <= 0) {
-        qWarning() << "[FiffCov::compute_from_epochs] Invalid time window.";
+        Log::warning("[FiffCov::compute_from_epochs] Invalid time window.");
         return cov;
     }
 
@@ -519,7 +517,7 @@ FiffCov FiffCov::compute_from_epochs(const FiffRawData& raw,
             continue;
         std::string reason;
         if (rej && !FiffEvokedSet::checkArtifacts(epochData, raw.info, raw.info.bads, *rej, reason)) {
-            qInfo().noquote() << "[FiffCov::compute_from_epochs] Rejected epoch at" << evSample << reason;
+            Log::info("[FiffCov::compute_from_epochs] Rejected epoch at {} {}", evSample, reason);
             continue;
         }
 
@@ -572,11 +570,11 @@ FiffCov FiffCov::compute_from_epochs(const std::vector<std::vector<MatrixXd>>& e
     }
 
     if (totalSamples < 2) {
-        qWarning() << "[FiffCov::compute_from_epochs] Not enough data.";
+        Log::warning("[FiffCov::compute_from_epochs] Not enough data.");
         return cov;
     }
     if (removeMean && norm <= 0.0) {
-        qWarning() << "[FiffCov::compute_from_epochs] Removing the sample mean needs two epochs of one event code.";
+        Log::warning("[FiffCov::compute_from_epochs] Removing the sample mean needs two epochs of one event code.");
         return cov;
     }
     cov.data = covAccum / (removeMean ? norm : static_cast<double>(totalSamples - 1));
@@ -588,8 +586,7 @@ FiffCov FiffCov::compute_from_epochs(const std::vector<std::vector<MatrixXd>>& e
     cov.bads = info.bads;
     cov.projs = info.projs;
 
-    qInfo() << "[FiffCov::compute_from_epochs] Computed:" << nchan << "channels,"
-            << nEpochs << "epochs," << totalSamples << "total samples.";
+    Log::info("[FiffCov::compute_from_epochs] Computed: {} channels, {} epochs, {} total samples.", nchan, nEpochs, totalSamples);
 
     return cov;
 }
@@ -620,7 +617,7 @@ FiffCov FiffCov::compute_grand_average(const std::vector<FiffCov>& covs)
     FiffCov grandCov;
 
     if (covs.empty()) {
-        qWarning() << "[FiffCov::compute_grand_average] No covariance matrices provided.";
+        Log::warning("[FiffCov::compute_grand_average] No covariance matrices provided.");
         return grandCov;
     }
 
@@ -630,7 +627,7 @@ FiffCov FiffCov::compute_grand_average(const std::vector<FiffCov>& covs)
 
     for (int k = 1; k < std::ssize(covs); ++k) {
         if (covs[k].dim != grandCov.dim) {
-            qWarning() << "[FiffCov::compute_grand_average] Dimension mismatch.";
+            Log::warning("[FiffCov::compute_grand_average] Dimension mismatch.");
             return FiffCov();
         }
         sumCov += covs[k].data * static_cast<double>(covs[k].nfree);

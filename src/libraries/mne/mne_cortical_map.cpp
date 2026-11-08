@@ -18,6 +18,7 @@
 //=============================================================================================================
 
 #include "mne_cortical_map.h"
+#include <utils/logger/log.h>
 #include <utils/string_utils.h>
 #include "mne_forward_solution.h"
 #include "mne_inverse_operator.h"
@@ -29,7 +30,6 @@
 // QT INCLUDES
 //=============================================================================================================
 
-#include <QDebug>
 
 //=============================================================================================================
 // USED NAMESPACES
@@ -53,13 +53,12 @@ MatrixXd MNECorticalMap::makeCorticalMap(
     // Get the inverse kernel (nSources x nChannels)
     const MatrixXd& kernel = const_cast<MNEInverseOperator&>(inv).getKernel();
     if (kernel.rows() == 0 || kernel.cols() == 0) {
-        qWarning("MNECorticalMap::makeCorticalMap - Inverse kernel is empty. "
-                 "Make sure the inverse operator has been prepared (assemble_kernel).");
+        UTILSLIB::Log::warning("MNECorticalMap::makeCorticalMap - Inverse kernel is empty. Make sure the inverse operator has been prepared (assemble_kernel).");
         return MatrixXd();
     }
 
     if (!fwd.sol || fwd.sol->data.rows() == 0) {
-        qWarning("MNECorticalMap::makeCorticalMap - Forward solution is empty.");
+        UTILSLIB::Log::warning("MNECorticalMap::makeCorticalMap - Forward solution is empty.");
         return MatrixXd();
     }
     // A loose inverse kernel is in surface coordinates; rotate a Cartesian free forward to match
@@ -78,8 +77,7 @@ MatrixXd MNECorticalMap::makeCorticalMap(
         for (int c = 0; c < static_cast<int>(invChannels.size()); ++c) {
             const int row = static_cast<int>(UTILSLIB::indexOf(matched.sol->row_names, invChannels[c]));
             if (row < 0) {
-                qWarning("MNECorticalMap::makeCorticalMap - Channel %s is not in the forward solution.",
-                         invChannels[c].c_str());
+                UTILSLIB::Log::warning("MNECorticalMap::makeCorticalMap - Channel {} is not in the forward solution.", invChannels[c]);
                 return MatrixXd();
             }
             picked.row(c) = gain.row(row);
@@ -89,12 +87,7 @@ MatrixXd MNECorticalMap::makeCorticalMap(
 
     // Verify dimension compatibility
     if (kernel.cols() != gain.rows()) {
-        qWarning("MNECorticalMap::makeCorticalMap - Dimension mismatch: "
-                 "kernel is %lld x %lld, gain is %lld x %lld",
-                 static_cast<long long>(kernel.rows()),
-                 static_cast<long long>(kernel.cols()),
-                 static_cast<long long>(gain.rows()),
-                 static_cast<long long>(gain.cols()));
+        UTILSLIB::Log::warning("MNECorticalMap::makeCorticalMap - Dimension mismatch: kernel is {} x {}, gain is {} x {}", kernel.rows(), kernel.cols(), gain.rows(), gain.cols());
         return MatrixXd();
     }
 

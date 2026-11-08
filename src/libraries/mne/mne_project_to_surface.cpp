@@ -25,6 +25,7 @@
 //=============================================================================================================
 
 #include "mne_project_to_surface.h"
+#include <utils/logger/log.h>
 
 //=============================================================================================================
 // INCLUDES
@@ -107,7 +108,7 @@ bool MNEProjectToSurface::find_closest_on_surface(const MatrixXf& r, const int n
     rTri.resize(np, 3);
 
     if (this->r1.isZero(0)) {
-        qDebug() << "No surface loaded to make the projection./n";
+        UTILSLIB::Log::debug("No surface loaded to make the projection./n");
         return false;
     }
     int bestTri = -1;
@@ -119,7 +120,7 @@ bool MNEProjectToSurface::find_closest_on_surface(const MatrixXf& r, const int n
          * For now it's OK to go through all triangles.
          */
         if (!this->project_to_surface(r.row(k).transpose(), rTriK, bestTri, bestDist)) {
-            qDebug() << "The projection of point number " << k << " didn't work./n";
+            UTILSLIB::Log::debug("The projection of point number {} didn't work./n", k);
             return false;
         }
         rTri.row(k) = rTriK.transpose();
@@ -138,7 +139,7 @@ bool MNEProjectToSurface::project_to_surface(const Vector3f& r, Vector3f& rTri, 
     bestTri = -1;
     for (int tri = 0; tri < a.size(); ++tri) {
         if (!this->nearest_triangle_point(r, tri, p0, q0, dist0)) {
-            qDebug() << "The projection on triangle " << tri << " didn't work./n";
+            UTILSLIB::Log::debug("The projection on triangle {} didn't work./n", tri);
             return false;
         }
 
@@ -152,13 +153,13 @@ bool MNEProjectToSurface::project_to_surface(const Vector3f& r, Vector3f& rTri, 
 
     if (bestTri >= 0) {
         if (!this->project_to_triangle(rTri, p, q, bestTri)) {
-            qDebug() << "The coordinate transform to cartesian system didn't work./n";
+            UTILSLIB::Log::debug("The coordinate transform to cartesian system didn't work./n");
             return false;
         }
         return true;
     }
 
-    qDebug() << "No best Triangle found./n";
+    UTILSLIB::Log::debug("No best Triangle found./n");
     return false;
 }
 

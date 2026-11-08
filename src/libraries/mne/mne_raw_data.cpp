@@ -20,12 +20,12 @@
 //=============================================================================================================
 
 #include "mne_raw_data.h"
+#include <utils/logger/log.h>
 
 #include <vector>
 #include <utils/string_utils.h>
 
 #include <QFile>
-#include <QDebug>
 #include <QTextStream>
 
 #include <Eigen/Core>
@@ -202,7 +202,7 @@ int mne_apply_filter(const MNEFilterDef& filter, FilterData* d, float* data, int
     float* freq_resp;
 
     if (ns != filter.size + 2 * filter.taper_size) {
-        qCritical("Incorrect data length in apply_filter");
+        UTILSLIB::Log::critical("Incorrect data length in apply_filter");
         return FAIL;
     }
     /*
@@ -309,14 +309,7 @@ std::unique_ptr<FilterData> mne_create_filter_response(const MNEFilterDef& filte
             highpass_widths = 3; /* Minimal */
 
         if (filter.filter_on) {
-            qInfo("filter : %7.3f ... %6.1f Hz   bins : %d ... %d of %d hpw : %d lpw : %d\n",
-                  highpass,
-                  lowpass,
-                  highpasss,
-                  lowpasss,
-                  resp_size,
-                  highpass_widths,
-                  lowpass_widths);
+            UTILSLIB::Log::info("filter : {:7.3f} ... {:6.1f} Hz   bins : {} ... {} of {} hpw : {} lpw : {}\n", highpass, lowpass, highpasss, lowpasss, resp_size, highpass_widths, lowpass_widths);
         }
         if (highpasss > highpass_widths + 1) {
             w = highpass_widths;
@@ -352,11 +345,11 @@ std::unique_ptr<FilterData> mne_create_filter_response(const MNEFilterDef& filte
         }
         if (filter.filter_on) {
             if (*highpass_effective)
-                qInfo("Highpass filter will work as specified.\n");
+                UTILSLIB::Log::info("Highpass filter will work as specified.\n");
             else
-                qWarning("NOTE: Highpass filter omitted due to a too low corner frequency.\n");
+                UTILSLIB::Log::warning("NOTE: Highpass filter omitted due to a too low corner frequency.\n");
         } else
-            qWarning("NOTE: Filter is presently switched off.\n");
+            UTILSLIB::Log::warning("NOTE: Filter is presently switched off.\n");
     }
     return filter_data;
 }
@@ -402,7 +395,7 @@ int mne_read_raw_buffer_t( //fiffFile     in,        /* Input file */
 
     if (ent.type == FIFFT_FLOAT) {
         if (static_cast<int>(t_pTag->size() / (sizeof(fiff_float_t) * nchan)) != nsamp) {
-            qCritical("Incorrect number of samples in buffer.");
+            UTILSLIB::Log::critical("Incorrect number of samples in buffer.");
             return FAIL;
         }
         this_samplef = t_pTag->toFloat();
@@ -412,7 +405,7 @@ int mne_read_raw_buffer_t( //fiffFile     in,        /* Input file */
         }
     } else if (ent.type == FIFFT_SHORT || ent.type == FIFFT_DAU_PACK16) {
         if (static_cast<int>(t_pTag->size() / (sizeof(fiff_short_t) * nchan)) != nsamp) {
-            qCritical("Incorrect number of samples in buffer.");
+            UTILSLIB::Log::critical("Incorrect number of samples in buffer.");
             return FAIL;
         }
         this_samples = reinterpret_cast<fiff_short_t*>(t_pTag->data());
@@ -422,7 +415,7 @@ int mne_read_raw_buffer_t( //fiffFile     in,        /* Input file */
         }
     } else if (ent.type == FIFFT_INT) {
         if (static_cast<int>(t_pTag->size() / (sizeof(fiff_int_t) * nchan)) != nsamp) {
-            qCritical("Incorrect number of samples in buffer.");
+            UTILSLIB::Log::critical("Incorrect number of samples in buffer.");
             return FAIL;
         }
         this_sample = t_pTag->toInt();
@@ -432,7 +425,7 @@ int mne_read_raw_buffer_t( //fiffFile     in,        /* Input file */
         }
     } else if (ent.type == FIFFT_DOUBLE) {
         if (static_cast<int>(t_pTag->size() / (sizeof(double) * nchan)) != nsamp) {
-            qCritical("Incorrect number of samples in buffer.");
+            UTILSLIB::Log::critical("Incorrect number of samples in buffer.");
             return FAIL;
         }
         const double* this_sampled = t_pTag->toDouble();
@@ -441,7 +434,7 @@ int mne_read_raw_buffer_t( //fiffFile     in,        /* Input file */
                 data(c, s) = static_cast<float>(mult[c] * this_sampled[pickno[c]]);
         }
     } else {
-        qCritical("We are not prepared to handle raw data type: %d", ent.type);
+        UTILSLIB::Log::critical("We are not prepared to handle raw data type: {}", ent.type);
         return FAIL;
     }
     return OK;
@@ -618,7 +611,7 @@ void MNERawData::setup_filter_bufs()
          firstsamp = firstsamp + filter->size)
         nfilt_buf++;
 #ifdef DEBUG
-    qInfo("%d filter buffers needed\n", nfilt_buf);
+    UTILSLIB::Log::info("{} filter buffers needed\n", nfilt_buf);
 #endif
     this->filt_bufs.resize(nfilt_buf);
     for (k = 0, firstsamp = this->first_samp - filter->taper_size; k < nfilt_buf; k++,
@@ -667,7 +660,7 @@ int MNERawData::load_one_buffer(MNERawBufDef* buf)
      */
 {
     if (buf->ent.kind == FIFF_DATA_SKIP) {
-        qCritical("Cannot load a skip");
+        UTILSLIB::Log::critical("Cannot load a skip");
         return FAIL;
     }
     if (buf->vals.size() == 0) { /* The data space may have been reused */
@@ -678,7 +671,7 @@ int MNERawData::load_one_buffer(MNERawBufDef* buf)
         return OK;
 
 #ifdef DEBUG
-    qDebug("Read buffer %d .. %d\n", buf->firsts, buf->lasts);
+    UTILSLIB::Log::debug("Read buffer {} .. {}\n", buf->firsts, buf->lasts);
 #endif
 
     if (mne_read_raw_buffer_t(*stream,
@@ -953,7 +946,7 @@ int MNERawData::pick_data_proj(MNEChSelection* sel, int firsts, int ns, float** 
                     for (c = 0; c < info->nchan; c++)
                         pvalues[c] = (*values)(c, p);
                     if (proj->project_vector(pvalues, true) != OK)
-                        qWarning() << "Error";
+                        UTILSLIB::Log::warning("Error");
                     if (sel) {
                         if (sel->nderiv > 0 && deriv_matched) {
                             if (mne_sparse_vec_mult2(deriv_matched->deriv_data->data.get(), pvalues.data(), deriv_pvalues_vec.data()) == FAIL)
@@ -1037,8 +1030,7 @@ int MNERawData::load_one_filt_buf(MNERawBufDef* buf)
 
 #ifdef DEBUG
     if (res == OK)
-        qDebug("Loaded filtered buffer %d...%d %d %d last = %d\n",
-               buf->firsts, buf->lasts, buf->lasts - buf->firsts + 1, buf->ns, first_samp + nsamp);
+        UTILSLIB::Log::debug("Loaded filtered buffer {}...{} {} {} last = {}\n", buf->firsts, buf->lasts, buf->lasts - buf->firsts + 1, buf->ns, first_samp + nsamp);
 #endif
     buf->valid = res == OK;
     return res;
@@ -1101,7 +1093,7 @@ int MNERawData::pick_data_filt(MNEChSelection* sel, int firsts, int ns, float** 
     }
     for (; k < static_cast<int>(filt_bufs.size()) && this_buf->firsts <= lasts; k++, this_buf++) {
 #ifdef DEBUG
-        qDebug("this_buf (%d): %d..%d\n", k, this_buf->firsts, this_buf->lasts);
+        UTILSLIB::Log::debug("this_buf ({}): {}..{}\n", k, this_buf->firsts, this_buf->lasts);
 #endif
         /*
          * Load the buffer first and apply projection
@@ -1201,8 +1193,8 @@ int MNERawData::pick_data_filt(MNEChSelection* sel, int firsts, int ns, float** 
             s2 = ns;
         }
 #ifdef DEBUG
-        qDebug("buf  : %d..%d %d\n", bs1, bs2, bs2 - bs1);
-        qDebug("dest : %d..%d %d\n", s1, s2, s2 - s1);
+        UTILSLIB::Log::debug("buf  : {}..{} {}\n", bs1, bs2, bs2 - bs1);
+        UTILSLIB::Log::debug("dest : {}..{} {}\n", s1, s2, s2 - s1);
 #endif
         /*
          * Then pick data from all relevant channels
@@ -1286,7 +1278,7 @@ MNERawData* MNERawData::open_file_comp(const std::filesystem::path& name,
         if (withoutSpaces(ch.ch_name) == trigger) {
             if (std::fabs(1.0 - ch.range) > 1e-5) {
                 ch.range = 1.0;
-                qInfo("%s range set to %f\n", MNE_DEFAULT_TRIGGER_CH, ch.range);
+                UTILSLIB::Log::info("{} range set to {:f}\n", MNE_DEFAULT_TRIGGER_CH, ch.range);
             }
         }
         /*
@@ -1294,7 +1286,7 @@ MNERawData* MNERawData::open_file_comp(const std::filesystem::path& name,
          */
         if (ch.unit_mul != 0) {
             ch.cal = pow(10.0, static_cast<double>(ch.unit_mul)) * ch.cal;
-            qInfo("Ch %s unit multiplier %d -> 0\n", ch.ch_name.c_str(), ch.unit_mul);
+            UTILSLIB::Log::info("Ch {} unit multiplier {} -> 0\n", ch.ch_name, ch.unit_mul);
             ch.unit_mul = 0;
         }
     }
@@ -1315,7 +1307,7 @@ MNERawData* MNERawData::open_file_comp(const std::filesystem::path& name,
     for (int i = 0; i < data->info->nchan; i++)
         data->ch_names.push_back(data->info->chInfo[i].ch_name);
     if (static_cast<int>(data->ch_names.size()) != data->info->nchan) {
-        qCritical("Channel names were not translated correctly into a name list");
+        UTILSLIB::Log::critical("Channel names were not translated correctly into a name list");
         return nullptr;
     }
     /*
@@ -1324,14 +1316,14 @@ MNERawData* MNERawData::open_file_comp(const std::filesystem::path& name,
     data->comp = MNECTFCompDataSet::read(data->filename);
     if (data->comp) {
         if (data->comp->ncomp > 0)
-            qInfo("Read %d compensation data sets from %s\n", data->comp->ncomp, data->filename.c_str());
+            UTILSLIB::Log::info("Read {} compensation data sets from {}\n", data->comp->ncomp, data->filename);
         else
-            qInfo("No compensation data in %s\n", data->filename.c_str());
+            UTILSLIB::Log::info("No compensation data in {}\n", data->filename);
     } else
-        qWarning() << "err_print_error()";
+        UTILSLIB::Log::warning("err_print_error()");
     if ((data->comp_file = MNECTFCompDataSet::get_comp(data->info->chInfo, data->info->nchan)) == FAIL)
         return nullptr;
-    qInfo("Compensation in file : %s\n", MNECTFCompDataSet::explain_comp(MNECTFCompDataSet::map_comp_kind(data->comp_file)).c_str());
+    UTILSLIB::Log::info("Compensation in file : {}\n", MNECTFCompDataSet::explain_comp(MNECTFCompDataSet::map_comp_kind(data->comp_file)));
     if (comp_set < 0)
         data->comp_now = data->comp_file;
     else
@@ -1339,7 +1331,7 @@ MNERawData* MNERawData::open_file_comp(const std::filesystem::path& name,
 
     if (!data->comp) {
         if (data->comp_now != MNE_CTFV_NOGRAD) {
-            qCritical("Cannot do compensation because compensation data are missing");
+            UTILSLIB::Log::critical("Cannot do compensation because compensation data are missing");
             return nullptr;
         }
     } else if (data->comp->set_compensation(data->comp_now,
@@ -1353,11 +1345,11 @@ MNERawData* MNERawData::open_file_comp(const std::filesystem::path& name,
        */
     data->sss = MNESssData::read(name);
     if (data->sss && data->sss->job != FIFFV_SSS_JOB_NOTHING && data->sss->comp_info.size() > 0) {
-        qInfo("SSS data read from %s :\n", data->filename.c_str());
+        UTILSLIB::Log::info("SSS data read from {} :\n", data->filename);
         QTextStream errStream(stderr);
         data->sss->print(errStream);
     } else {
-        qInfo("No SSS data in %s\n", data->filename.c_str());
+        UTILSLIB::Log::info("No SSS data in {}\n", data->filename);
         data->sss.reset();
     }
     /*
@@ -1384,7 +1376,7 @@ MNERawData* MNERawData::open_file_comp(const std::filesystem::path& name,
         if (t_pTag = data->stream->read_tag(dir0[current_dir0].pos); !t_pTag)
             return nullptr;
         nsamp_skip = data->info->buf_size * (*t_pTag->toInt());
-        qInfo("Data skip of %d samples in the beginning\n", nsamp_skip);
+        UTILSLIB::Log::info("Data skip of {} samples in the beginning\n", nsamp_skip);
         current_dir0++;
         ndir--;
         if (dir0[current_dir0].kind == FIFF_FIRST_SAMPLE) {
@@ -1408,7 +1400,7 @@ MNERawData* MNERawData::open_file_comp(const std::filesystem::path& name,
         data->first_samp = 0;
     }
 #ifdef DEBUG
-    qInfo("data->first_samp = %d\n", data->first_samp);
+    UTILSLIB::Log::info("data->first_samp = {}\n", data->first_samp);
 #endif
     /*
        * Figure out the buffers
@@ -1444,7 +1436,7 @@ MNERawData* MNERawData::open_file_comp(const std::filesystem::path& name,
             else if (dir.type == FIFFT_DOUBLE)
                 data->bufs[k].ns = dir.size / (data->info->nchan * sizeof(double));
             else {
-                qCritical("We are not prepared to handle raw data type: %d", dir.type);
+                UTILSLIB::Log::critical("We are not prepared to handle raw data type: {}", dir.type);
                 return nullptr;
             }
         } else if (dir.kind == FIFF_DATA_SKIP) {
@@ -1477,11 +1469,11 @@ MNERawData* MNERawData::open_file_comp(const std::filesystem::path& name,
                     }
                 }
             }
-            qInfo("%d bad channels read from %s%s", data->nbad, UTILSLIB::utf8FromPath(name).c_str(), data->nbad > 0 ? ":\n" : "\n");
+            UTILSLIB::Log::info("{} bad channels read from {}{}", data->nbad, UTILSLIB::utf8FromPath(name), data->nbad > 0 ? ":\n" : "\n");
             if (data->nbad > 0) {
-                qInfo("\t");
+                UTILSLIB::Log::info("\t");
                 for (k = 0; k < data->nbad; k++)
-                    qInfo("%s%c", data->badlist[k].c_str(), k < data->nbad - 1 ? ' ' : '\n');
+                    UTILSLIB::Log::info("{}{:c}", data->badlist[k], k < data->nbad - 1 ? ' ' : '\n');
             }
         }
     }
@@ -1508,13 +1500,13 @@ MNERawData* MNERawData::open_file_comp(const std::filesystem::path& name,
         data->first_sample_val.resize(data->info->nchan);
         for (k = 0; k < data->info->nchan; k++)
             data->first_sample_val[k] = vals[k][0];
-        qInfo("Initial dc offsets determined\n");
+        UTILSLIB::Log::info("Initial dc offsets determined\n");
     }
-    qInfo("Raw data file %s:\n", UTILSLIB::utf8FromPath(name).c_str());
-    qInfo("\tnchan  = %d\n", data->info->nchan);
-    qInfo("\tnsamp  = %d\n", data->nsamp);
-    qInfo("\tsfreq  = %-8.3f Hz\n", data->info->sfreq);
-    qInfo("\tlength = %-8.3f sec\n", data->nsamp / data->info->sfreq);
+    UTILSLIB::Log::info("Raw data file {}:\n", UTILSLIB::utf8FromPath(name));
+    UTILSLIB::Log::info("\tnchan  = {}\n", data->info->nchan);
+    UTILSLIB::Log::info("\tnsamp  = {}\n", data->nsamp);
+    UTILSLIB::Log::info("\tsfreq  = {:<8.3f} Hz\n", data->info->sfreq);
+    UTILSLIB::Log::info("\tlength = {:<8.3f} sec\n", data->nsamp / data->info->sfreq);
 
     return data.release();
 }
@@ -1539,10 +1531,10 @@ int MNERawData::attachDerivations(const MNEDerivSet& derivations, bool keepPrevi
     deriv->append(derivations);
     deriv_matched = deriv->match(ch_names);
     if (!deriv_matched) {
-        qInfo("No derivations are valid for these raw data.");
+        UTILSLIB::Log::info("No derivations are valid for these raw data.");
         return 0;
     }
     const int nvalid = deriv_matched->validate(info->chInfo);
-    qInfo("%d of %d of the matched derivations are valid for these raw data.", nvalid, deriv_matched->deriv_data->nrow);
+    UTILSLIB::Log::info("{} of {} of the matched derivations are valid for these raw data.", nvalid, deriv_matched->deriv_data->nrow);
     return nvalid;
 }

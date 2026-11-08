@@ -19,6 +19,7 @@
 //=============================================================================================================
 
 #include "inv_ecd.h"
+#include <utils/logger/log.h>
 
 //=============================================================================================================
 // USED NAMESPACES
@@ -70,14 +71,15 @@ void InvEcd::print() const
     if (!this->valid)
         return;
 
-    qInfo("%6.1f %7.2f %7.2f %7.2f %6.2f %6.2f %6.2f %6.2f %6.2f %6.2f %d",
-          1000 * this->time,  /* Time */
-          1000 * this->rd[0], /* Dipole location */
-          1000 * this->rd[1],
-          1000 * this->rd[2],
-          1e9 * this->Q.norm(), /* Dipole moment */
-          1e9 * this->Q[0], 1e9 * this->Q[1], 1e9 * this->Q[2],
-          this->khi2 / this->nfree, /* This is the reduced khi^2 value */
-          100 * this->good,         /* Goodness of fit */
-          this->neval);             /* Number of function evaluations required */
+    // Time, location, moment magnitude and components, reduced khi^2, goodness of fit, function evaluations
+    UTILSLIB::Log::info("{:6.1f} {:7.2f} {:7.2f} {:7.2f} {:6.2f} {:6.2f} {:6.2f} {:6.2f} {:6.2f} {:6.2f} {}",
+                        1000 * this->time,
+                        1000 * this->rd[0],
+                        1000 * this->rd[1],
+                        1000 * this->rd[2],
+                        1e9 * this->Q.norm(),
+                        1e9 * this->Q[0], 1e9 * this->Q[1], 1e9 * this->Q[2],
+                        this->khi2 / this->nfree,
+                        100 * this->good,
+                        this->neval);
 }

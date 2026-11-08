@@ -109,7 +109,6 @@ public:
 
     friend bool operator==(const FilterParameter& in1, const FilterParameter& in2)
     {
-        //qDebug() << in1.getName() << in2.getName();
         return (in1.getName() == in2.getName());
     }
 

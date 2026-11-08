@@ -24,6 +24,7 @@
 //=============================================================================================================
 
 #include "fiff_info.h"
+#include <utils/logger/log.h>
 
 #include <vector>
 #include <utils/string_utils.h>
@@ -31,7 +32,6 @@
 #include "fiff_file.h"
 
 #include <utils/ioutils.h>
-#include <QDebug>
 
 #include <Eigen/LU>
 
@@ -139,7 +139,7 @@ qint32 FiffInfo::get_current_comp()
             if (first_comp < 0)
                 first_comp = comp;
             else if (comp != first_comp)
-                qWarning("Compensation is not set equally on all MEG channels");
+                Log::warning("Compensation is not set equally on all MEG channels");
         }
     }
     return comp;
@@ -164,8 +164,8 @@ bool FiffInfo::make_compensator(fiff_int_t from, fiff_int_t to, FiffCtfComp& ctf
         C1 = MatrixXd::Zero(this->nchan, this->nchan);
     else {
         if (!this->make_compensator(from, C1)) {
-            qWarning("Cannot create compensator C1\n");
-            qWarning("Desired compensation matrix (kind = %d) not found\n", from);
+            Log::warning("Cannot create compensator C1\n");
+            Log::warning("Desired compensation matrix (kind = {}) not found\n", from);
             return false;
         }
     }
@@ -174,8 +174,8 @@ bool FiffInfo::make_compensator(fiff_int_t from, fiff_int_t to, FiffCtfComp& ctf
         C2 = MatrixXd::Zero(this->nchan, this->nchan);
     else {
         if (!this->make_compensator(to, C2)) {
-            qWarning("Cannot create compensator C2\n");
-            qWarning("Desired compensation matrix (kind = %d) not found\n", to);
+            Log::warning("Cannot create compensator C2\n");
+            Log::warning("Desired compensation matrix (kind = {}) not found\n", to);
             return false;
         }
     }
@@ -199,7 +199,7 @@ bool FiffInfo::make_compensator(fiff_int_t from, fiff_int_t to, FiffCtfComp& ctf
             }
         }
         if (npick == 0) {
-            qWarning("Nothing remains after excluding the compensation channels\n");
+            Log::warning("Nothing remains after excluding the compensation channels\n");
             return false;
         }
 
@@ -241,10 +241,10 @@ bool FiffInfo::make_compensator(fiff_int_t kind, MatrixXd& this_comp) const //pr
                     }
                 }
                 if (channelAvailable == 0) {
-                    qWarning("Channel %s is not available in data\n", this_data->col_names.at(col).c_str());
+                    Log::warning("Channel {} is not available in data\n", this_data->col_names.at(col));
                     return false;
                 } else if (channelAvailable > 1) {
-                    qWarning("Ambiguous channel %s", this_data->col_names.at(col).c_str());
+                    Log::warning("Ambiguous channel {}", this_data->col_names.at(col));
                     return false;
                 }
                 presel(col, ch) = 1.0;
@@ -263,7 +263,7 @@ bool FiffInfo::make_compensator(fiff_int_t kind, MatrixXd& this_comp) const //pr
                     }
                 }
                 if (channelAvailable > 1) {
-                    qWarning("Ambiguous channel %s", this->ch_names.at(c).c_str());
+                    Log::warning("Ambiguous channel {}", this->ch_names.at(c));
                     return false;
                 } else if (channelAvailable == 1) {
                     postsel(c, row_ch) = 1.0;
@@ -341,7 +341,7 @@ bool FiffInfo::readMegEegChannels(const std::string& name,
     FiffInfo info;
     FiffDirNode::SPtr infoNode;
     if (!stream.read_meas_info(stream.dirtree(), info, infoNode)) {
-        qCritical("%s : could not read measurement info", name.c_str());
+        Log::critical("{} : could not read measurement info", name);
         stream.close();
         return false;
     }
@@ -492,12 +492,12 @@ void FiffInfo::writeToStream(FiffStream& stream) const
 
 void FiffInfo::print() const
 {
-    qInfo().noquote().nospace() << "Sample frequency: " << sfreq;
-    qInfo().noquote().nospace() << "LineFreq: " << linefreq << " | Highpass: " << highpass << " | Lowpass: " << lowpass;
-    qInfo().noquote().nospace() << "Number of digitizer points: " << dig.size();
+    Log::info("Sample frequency: {}", sfreq);
+    Log::info("LineFreq: {} | Highpass: {} | Lowpass: {}", linefreq, highpass, lowpass);
+    Log::info("Number of digitizer points: {}", dig.size());
     for (auto& point : dig) {
         if (point.kind == FIFFV_POINT_HPI) {
-            qInfo().noquote().nospace() << "HPI Point " << point.ident << " - " << point.r[0] << ", " << point.r[1] << ", " << point.r[2];
+            Log::info("HPI Point {} - {}, {}, {}", point.ident, point.r[0], point.r[1], point.r[2]);
         }
     }
 }

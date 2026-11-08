@@ -21,6 +21,7 @@
 //=============================================================================================================
 
 #include "mne_source_spaces.h"
+#include <utils/logger/log.h>
 
 #include <vector>
 #include "mne_nearest.h"
@@ -62,13 +63,11 @@ Expected<MNEHemisphere> read_source_space(FiffStream& stream, const FiffDirNode:
     else
         p_Hemisphere.id = *t_pTag->toInt();
 
-    //        qDebug() << "Read SourceSpace ID; type:" << t_pTag->getType() << "value:" << *t_pTag->toInt();
 
     //=====================================================================
     if (t_pTag = p_Tree->find_tag(stream, FIFF_MNE_SOURCE_SPACE_NPOINTS); !t_pTag) {
         return fail(ErrorCode::Format, "a source space in {} has no vertex count", name);
     }
-    //        qDebug() << "Number of vertice; type:" << t_pTag->getType() << "value:" << *t_pTag->toInt();
     p_Hemisphere.np = *t_pTag->toInt();
 
     //=====================================================================
@@ -80,14 +79,12 @@ Expected<MNEHemisphere> read_source_space(FiffStream& stream, const FiffDirNode:
     } else {
         p_Hemisphere.ntri = *t_pTag->toInt();
     }
-    //        qDebug() << "Number of Tris; type:" << t_pTag->getType() << "value:" << *t_pTag->toInt();
 
     //=====================================================================
     if (t_pTag = p_Tree->find_tag(stream, FIFF_MNE_COORD_FRAME); !t_pTag) {
         return fail(ErrorCode::Format, "a source space in {} has no coordinate frame", name);
     }
     p_Hemisphere.coord_frame = *t_pTag->toInt();
-    //        qDebug() << "Coord Frame; type:" << t_pTag->getType() << "value:" << *t_pTag->toInt();
 
     //=====================================================================
     //
@@ -99,12 +96,10 @@ Expected<MNEHemisphere> read_source_space(FiffStream& stream, const FiffDirNode:
 
     p_Hemisphere.rr = t_pTag->toFloatMatrix().transpose();
     qint32 rows_rr = p_Hemisphere.rr.rows();
-    //        qDebug() << "last element rr: " << p_Hemisphere.rr(rows_rr-1, 0) << p_Hemisphere.rr(rows_rr-1, 1) << p_Hemisphere.rr(rows_rr-1, 2);
 
     if (rows_rr != p_Hemisphere.np) {
         return fail(ErrorCode::Format, "a source space in {} has a vertex count that does not match its vertices", name);
     }
-    //        qDebug() << "Source Space Points; type:" << t_pTag->getType();
 
     //=====================================================================
     if (t_pTag = p_Tree->find_tag(stream, FIFF_MNE_SOURCE_SPACE_NORMALS); !t_pTag) {
@@ -117,7 +112,6 @@ Expected<MNEHemisphere> read_source_space(FiffStream& stream, const FiffDirNode:
     if (rows_nn != p_Hemisphere.np) {
         return fail(ErrorCode::Format, "a source space in {} has a normal count that does not match its vertices", name);
     }
-    //        qDebug() << "Source Space Normals; type:" << t_pTag->getType();
 
     //=====================================================================
     if (p_Hemisphere.ntri > 0) {
@@ -138,7 +132,6 @@ Expected<MNEHemisphere> read_source_space(FiffStream& stream, const FiffDirNode:
     } else {
         p_Hemisphere.itris.resize(0, 3);
     }
-    //        qDebug() << "Triangles; type:" << t_pTag->getType() << "rows:" << p_Hemisphere.itris.rows() << "cols:" << p_Hemisphere.itris.cols();
 
     //
     //   Which vertices are active
@@ -167,7 +160,6 @@ Expected<MNEHemisphere> read_source_space(FiffStream& stream, const FiffDirNode:
             }
         }
     }
-    //        qDebug() << "Vertices; type:" << t_pTag->getType() << "nuse:" << p_Hemisphere.nuse;
 
     //
     //   Use triangulation
@@ -185,7 +177,6 @@ Expected<MNEHemisphere> read_source_space(FiffStream& stream, const FiffDirNode:
         p_Hemisphere.use_itris = t_pTag2->toIntMatrix().transpose();
         p_Hemisphere.use_itris.array() -= 1; //0 based indizes
     }
-    //        qDebug() << "triangulation; type:" << t_pTag2->getType() << "use_itris:" << p_Hemisphere.use_itris.rows()<< "x" << p_Hemisphere.use_itris.cols();
 
     //
     //   Patch-related information
@@ -203,7 +194,7 @@ Expected<MNEHemisphere> read_source_space(FiffStream& stream, const FiffDirNode:
 
     //    patch_info(p_Hemisphere.nearest, p_Hemisphere.pinfo);
     if (p_Hemisphere.compute_patch_info())
-        qInfo("\tPatch information added...");
+        Log::info("\tPatch information added...");
     //
     // Distances
     //
@@ -343,7 +334,7 @@ std::vector<VectorXi> MNESourceSpaces::label_src_vertno_sel(const FsLabel& p_lab
     //        vertno[0] = vertno_sel_rh;
     //    }
     else {
-        qWarning("Unknown hemisphere type\n");
+        Log::warning("Unknown hemisphere type\n");
         vertno[0] = VectorXi::Zero(0);
         vertno[1] = VectorXi::Zero(0);
     }
@@ -486,7 +477,7 @@ Expected<MNESourceSpaces> MNESourceSpaces::read(FiffStream& stream, bool add_geo
         }
         spaces.m_sourceSpaces.push_back(std::make_shared<MNEHemisphere>(std::move(*hemisphere)));
     }
-    qInfo("\t%zu source spaces read", nodes.size());
+    Log::info("\t{} source spaces read", nodes.size());
     return spaces;
 }
 
@@ -511,7 +502,7 @@ bool MNESourceSpaces::transform_source_space_to(fiff_int_t dest, FiffCoordTrans&
         auto* hemi = dynamic_cast<MNEHemisphere*>(m_sourceSpaces[k].get());
         if (hemi) {
             if (!hemi->transform_hemisphere_to(dest, trans)) {
-                qWarning("Could not transform source space.");
+                Log::warning("Could not transform source space.");
                 return false;
             }
         }
@@ -524,15 +515,15 @@ bool MNESourceSpaces::transform_source_space_to(fiff_int_t dest, FiffCoordTrans&
 void MNESourceSpaces::write_to_stream(FiffStream& stream) const
 {
     for (size_t h = 0; h < m_sourceSpaces.size(); ++h) {
-        qInfo("\tWrite a source space... ");
+        Log::info("\tWrite a source space... ");
         stream.start_block(FIFFB_MNE_SOURCE_SPACE);
         const auto* hemi = dynamic_cast<const MNEHemisphere*>(m_sourceSpaces[h].get());
         if (hemi)
             hemi->writeToStream(stream);
         stream.end_block(FIFFB_MNE_SOURCE_SPACE);
-        qInfo("[done]\n");
+        Log::info("[done]\n");
     }
-    qInfo("\t%zu source spaces written\n", m_sourceSpaces.size());
+    Log::info("\t{} source spaces written\n", m_sourceSpaces.size());
 }
 
 //=============================================================================================================
@@ -542,7 +533,7 @@ MNESourceSpace& MNESourceSpaces::operator[](qint32 idx)
     if (static_cast<qint32>(m_sourceSpaces.size()) > idx)
         return *m_sourceSpaces[idx];
     else {
-        qWarning("Warning: Index out of bound! Returning last element.");
+        Log::warning("Warning: Index out of bound! Returning last element.");
         return *m_sourceSpaces.back();
     }
 }
@@ -554,7 +545,7 @@ const MNESourceSpace& MNESourceSpaces::operator[](qint32 idx) const
     if (static_cast<qint32>(m_sourceSpaces.size()) > idx)
         return *m_sourceSpaces[idx];
     else {
-        qWarning("Warning: Index out of bound! Returning last element.");
+        Log::warning("Warning: Index out of bound! Returning last element.");
         return *m_sourceSpaces.back();
     }
 }
@@ -568,7 +559,7 @@ MNESourceSpace& MNESourceSpaces::operator[](std::string_view idt)
     else if (idt.compare("rh") == 0)
         return *m_sourceSpaces[1];
     else {
-        qWarning("Warning: Identifier is not 'lh' or 'rh'! Returning 'lh'.");
+        Log::warning("Warning: Identifier is not 'lh' or 'rh'! Returning 'lh'.");
         return *m_sourceSpaces[0];
     }
 }
@@ -582,7 +573,7 @@ const MNESourceSpace& MNESourceSpaces::operator[](std::string_view idt) const
     else if (idt.compare("rh") == 0)
         return *m_sourceSpaces[1];
     else {
-        qWarning("Warning: Identifier is not 'lh' or 'rh'! Returning 'lh'.");
+        Log::warning("Warning: Identifier is not 'lh' or 'rh'! Returning 'lh'.");
         return *m_sourceSpaces[0];
     }
 }

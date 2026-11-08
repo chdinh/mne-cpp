@@ -23,6 +23,7 @@
 //=============================================================================================================
 
 #include "inv_hpi_fit.h"
+#include <utils/logger/log.h>
 #include "inv_hpi_fit_data.h"
 #include "inv_sensor_set.h"
 #include "inv_hpi_data_updater.h"
@@ -114,16 +115,16 @@ void InvHpiFit::fit(const MatrixXd& matProjectedData,
                     HpiFitResult& hpiFitResult)
 {
     if (matProjectedData.rows() != matProjectors.rows()) {
-        qWarning("InvHpiFit::fit - Projector and data dimensions do not match. Returning.");
+        UTILSLIB::Log::warning("InvHpiFit::fit - Projector and data dimensions do not match. Returning.");
         return;
     } else if (hpiModelParameters.iNHpiCoils() != matCoilsHead.rows()) {
-        qWarning("InvHpiFit::fit - Number of coils and hpi digitizers do not match. Returning.");
+        UTILSLIB::Log::warning("InvHpiFit::fit - Number of coils and hpi digitizers do not match. Returning.");
         return;
     } else if (matProjectedData.rows() == 0 || matProjectors.rows() == 0) {
-        qWarning("InvHpiFit::fit - No data or Projectors passed. Returning.");
+        UTILSLIB::Log::warning("InvHpiFit::fit - No data or Projectors passed. Returning.");
         return;
     } else if (m_sensors.ncoils() != matProjectedData.rows()) {
-        qWarning("InvHpiFit::fit - Number of channels in sensors and data do not match. Returning.");
+        UTILSLIB::Log::warning("InvHpiFit::fit - Number of channels in sensors and data do not match. Returning.");
         return;
     }
 
@@ -558,10 +559,10 @@ bool InvHpiFit::compareTransformation(const MatrixX4f& mDevHeadT,
 
     // compare to thresholds and update
     if (fMove > fThreshTrans) {
-        qInfo() << "Large movement: " << fMove * 1000 << "mm";
+        UTILSLIB::Log::info("Large movement: {} mm", fMove * 1000);
         bState = true;
     } else if (fAngle > fThreshRot) {
-        qInfo() << "Large rotation: " << fAngle << "degree";
+        UTILSLIB::Log::info("Large rotation: {} degree", fAngle);
         bState = true;
     } else {
         bState = false;

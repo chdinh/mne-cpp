@@ -80,7 +80,6 @@ MatrixXd Spectrogram::makeSpectrogram(VectorXd signal, qint32 windowSize = 0)
                                                               reduce);
     resultMat.waitForFinished();
 
-    //qDebug() << "Spectrogram::make_spectrogram - timer.elapsed()" << timer.elapsed();
     return resultMat.result();
 }
 

@@ -15,6 +15,7 @@
 //=============================================================================================================
 
 #include "mne_sparse_named_matrix.h"
+#include <utils/logger/log.h>
 
 #include <fiff/fiff_constants.h>
 #include <fiff/fiff_tag.h>
@@ -62,24 +63,24 @@ std::unique_ptr<MNESparseNamedMatrix> MNESparseNamedMatrix::read(FiffStream& str
     matrix->nrow = data->rows();
     matrix->ncol = data->cols();
     if (const auto nrow = block->find_tag(stream, FIFF_MNE_NROW); nrow && *nrow->toInt() != matrix->nrow) {
-        qCritical("MNESparseNamedMatrix::read - FIFF_MNE_NROW conflicts with the matrix data.");
+        UTILSLIB::Log::critical("MNESparseNamedMatrix::read - FIFF_MNE_NROW conflicts with the matrix data.");
         return nullptr;
     }
     if (const auto ncol = block->find_tag(stream, FIFF_MNE_NCOL); ncol && *ncol->toInt() != matrix->ncol) {
-        qCritical("MNESparseNamedMatrix::read - FIFF_MNE_NCOL conflicts with the matrix data.");
+        UTILSLIB::Log::critical("MNESparseNamedMatrix::read - FIFF_MNE_NCOL conflicts with the matrix data.");
         return nullptr;
     }
     if (tag = block->find_tag(stream, FIFF_MNE_ROW_NAMES); tag) {
         matrix->rowlist = FiffStream::split_name_list(tag->toString());
         if (static_cast<int>(matrix->rowlist.size()) != matrix->nrow) {
-            qCritical("MNESparseNamedMatrix::read - Incorrect number of entries in the row name list.");
+            UTILSLIB::Log::critical("MNESparseNamedMatrix::read - Incorrect number of entries in the row name list.");
             return nullptr;
         }
     }
     if (tag = block->find_tag(stream, FIFF_MNE_COL_NAMES); tag) {
         matrix->collist = FiffStream::split_name_list(tag->toString());
         if (static_cast<int>(matrix->collist.size()) != matrix->ncol) {
-            qCritical("MNESparseNamedMatrix::read - Incorrect number of entries in the column name list.");
+            UTILSLIB::Log::critical("MNESparseNamedMatrix::read - Incorrect number of entries in the column name list.");
             return nullptr;
         }
     }

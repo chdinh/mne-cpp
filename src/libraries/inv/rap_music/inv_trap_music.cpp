@@ -22,6 +22,7 @@
 //=============================================================================================================
 
 #include "inv_trap_music.h"
+#include <utils/logger/log.h>
 
 //=============================================================================================================
 // EIGEN INCLUDES
@@ -34,7 +35,6 @@
 // QT INCLUDES
 //=============================================================================================================
 
-#include <QDebug>
 
 //=============================================================================================================
 // STD INCLUDES
@@ -72,7 +72,7 @@ QList<TrapMusicDipole> InvTrapMusic::compute(const MatrixXd& matLeadField,
     const int nSrc = static_cast<int>(matSourcePos.rows());
 
     if (nCh == 0 || matData.rows() != nCh || matLeadField.cols() != static_cast<Eigen::Index>(nSrc) * iNOrient) {
-        qWarning() << "[InvTrapMusic::compute] Dimension mismatch.";
+        UTILSLIB::Log::warning("[InvTrapMusic::compute] Dimension mismatch.");
         return dipoles;
     }
 

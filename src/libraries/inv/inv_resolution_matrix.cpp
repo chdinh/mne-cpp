@@ -21,12 +21,12 @@
 //=============================================================================================================
 
 #include "inv_resolution_matrix.h"
+#include <utils/logger/log.h>
 
 //=============================================================================================================
 // QT INCLUDES
 //=============================================================================================================
 
-#include <QDebug>
 
 //=============================================================================================================
 // USED NAMESPACES
@@ -43,9 +43,7 @@ MatrixXd InvResolutionMatrix::compute(const MatrixXd& matInverseKernel,
                                       const MatrixXd& matLeadField)
 {
     if (matInverseKernel.cols() != matLeadField.rows()) {
-        qWarning() << "[InvResolutionMatrix::compute] Dimension mismatch:"
-                   << "inverse kernel cols" << matInverseKernel.cols()
-                   << "!= lead field rows" << matLeadField.rows();
+        UTILSLIB::Log::warning("[InvResolutionMatrix::compute] Dimension mismatch: inverse kernel cols {} != lead field rows {}", matInverseKernel.cols(), matLeadField.rows());
         return MatrixXd();
     }
 
@@ -57,7 +55,7 @@ MatrixXd InvResolutionMatrix::compute(const MatrixXd& matInverseKernel,
 VectorXd InvResolutionMatrix::getPsf(const MatrixXd& matResolution, int iSourceIdx)
 {
     if (iSourceIdx < 0 || iSourceIdx >= matResolution.cols()) {
-        qWarning() << "[InvResolutionMatrix::getPsf] Index out of range:" << iSourceIdx;
+        UTILSLIB::Log::warning("[InvResolutionMatrix::getPsf] Index out of range: {}", iSourceIdx);
         return VectorXd();
     }
 
@@ -69,7 +67,7 @@ VectorXd InvResolutionMatrix::getPsf(const MatrixXd& matResolution, int iSourceI
 VectorXd InvResolutionMatrix::getCtf(const MatrixXd& matResolution, int iSourceIdx)
 {
     if (iSourceIdx < 0 || iSourceIdx >= matResolution.rows()) {
-        qWarning() << "[InvResolutionMatrix::getCtf] Index out of range:" << iSourceIdx;
+        UTILSLIB::Log::warning("[InvResolutionMatrix::getCtf] Index out of range: {}", iSourceIdx);
         return VectorXd();
     }
 

@@ -24,6 +24,7 @@
 //=============================================================================================================
 
 #include "fiff_raw_data.h"
+#include <utils/logger/log.h>
 #include "fiff_events.h"
 #include "fiff_tag.h"
 #include "fiff_stream.h"
@@ -200,8 +201,7 @@ UTILSLIB::Expected<FiffRawData> FiffRawData::read(std::unique_ptr<FiffStream> st
     data.file = std::move(stream);
     data.file->close();
 
-    qInfo("\tRange : %d ... %d  =  %9.3f ... %9.3f secs", data.first_samp, data.last_samp,
-          static_cast<double>(data.first_samp) / data.info.sfreq, static_cast<double>(data.last_samp) / data.info.sfreq);
+    UTILSLIB::Log::info("\tRange : {} ... {}  =  {:9.3f} ... {:9.3f} secs", data.first_samp, data.last_samp, static_cast<double>(data.first_samp) / data.info.sfreq, static_cast<double>(data.last_samp) / data.info.sfreq);
     return data;
 }
 
@@ -237,7 +237,6 @@ bool FiffRawData::read_raw_segment(MatrixXd& data,
     bool projAvailable = true;
 
     if (this->proj.size() == 0) {
-        //qDebug() << "FiffRawData::read_raw_segment - No projectors setup. Consider calling FiffRawData::activate_projections.";
         projAvailable = false;
     }
 
@@ -254,7 +253,7 @@ bool FiffRawData::read_raw_segment(MatrixXd& data,
         to = this->last_samp;
     //
     if (from > to) {
-        qWarning("No data in this range %d ... %d  =  %9.3f ... %9.3f secs...", from, to, (static_cast<float>(from)) / this->info.sfreq, (static_cast<float>(to)) / this->info.sfreq);
+        UTILSLIB::Log::warning("No data in this range {} ... {}  =  {:9.3f} ... {:9.3f} secs...", from, to, (static_cast<float>(from)) / this->info.sfreq, (static_cast<float>(to)) / this->info.sfreq);
         return false;
     }
     //
@@ -339,7 +338,7 @@ bool FiffRawData::read_raw_segment(MatrixXd& data,
     FiffStream& fid = *this->file;
     const bool open_here = !fid.isOpen();
     if (open_here && !fid.reopen()) {
-        qWarning("Cannot open file %s", this->info.filename.c_str());
+        UTILSLIB::Log::warning("Cannot open file {}", this->info.filename);
         return false;
     }
 
@@ -356,7 +355,7 @@ bool FiffRawData::read_raw_segment(MatrixXd& data,
                 //  Take the easy route: skip is translated to zeros
                 //
                 if (do_debug)
-                    qDebug("S");
+                    UTILSLIB::Log::debug("S");
                 if (sel.cols() <= 0)
                     one.resize(nchan, thisRawDir.nsamp);
                 else
@@ -382,7 +381,7 @@ bool FiffRawData::read_raw_segment(MatrixXd& data,
                         else if (t_pTag->type == FIFFT_DOUBLE)
                             one = cal * Map<const MatrixXd>(t_pTag->toDouble(), nchan, thisRawDir.nsamp);
                         else {
-                            qWarning("Data Storage Format not known yet [1]!! Type: %d\n", t_pTag->type);
+                            UTILSLIB::Log::warning("Data Storage Format not known yet [1]!! Type: {}\n", t_pTag->type);
                             if (open_here)
                                 this->file->close();
                             return false;
@@ -417,7 +416,7 @@ bool FiffRawData::read_raw_segment(MatrixXd& data,
                             for (r = 0; r < sel.size(); ++r)
                                 newData.block(r, 0, 1, thisRawDir.nsamp) = tmp_data.block(sel[r], 0, 1, thisRawDir.nsamp);
                         } else {
-                            qWarning("Data Storage Format not known yet [2]!! Type: %d\n", t_pTag->type);
+                            UTILSLIB::Log::warning("Data Storage Format not known yet [2]!! Type: {}\n", t_pTag->type);
                             if (open_here)
                                 this->file->close();
                             return false;
@@ -437,7 +436,7 @@ bool FiffRawData::read_raw_segment(MatrixXd& data,
                     else if (t_pTag->type == FIFFT_DOUBLE)
                         one = mult * Map<const MatrixXd>(t_pTag->toDouble(), nchan, thisRawDir.nsamp);
                     else {
-                        qWarning("Data Storage Format not known yet [3]!! Type: %d\n", t_pTag->type);
+                        UTILSLIB::Log::warning("Data Storage Format not known yet [3]!! Type: {}\n", t_pTag->type);
                         if (open_here)
                             this->file->close();
                         return false;
@@ -454,24 +453,23 @@ bool FiffRawData::read_raw_segment(MatrixXd& data,
                 first_pick = 0; //1;
                 last_pick = thisRawDir.nsamp - 1;
                 if (do_debug)
-                    qDebug("W");
+                    UTILSLIB::Log::debug("W");
             } else if (from > thisRawDir.first) {
                 first_pick = from - thisRawDir.first; // + 1;
                 if (to < thisRawDir.last) {
                     //
                     //  Something from the middle
                     //
-                    //                    qDebug() << "This needs to be debugged!";
                     last_pick = thisRawDir.nsamp + to - thisRawDir.last - 1; //is this alright?
                     if (do_debug)
-                        qDebug("M");
+                        UTILSLIB::Log::debug("M");
                 } else {
                     //
                     //  From the middle to the end
                     //
                     last_pick = thisRawDir.nsamp - 1;
                     if (do_debug)
-                        qDebug("E");
+                        UTILSLIB::Log::debug("E");
                 }
             } else {
                 //
@@ -480,7 +478,7 @@ bool FiffRawData::read_raw_segment(MatrixXd& data,
                 first_pick = 0;                    //1;
                 last_pick = to - thisRawDir.first; // + 1;
                 if (do_debug)
-                    qDebug("B");
+                    UTILSLIB::Log::debug("B");
             }
             //
             //  Now we are ready to pick
@@ -488,9 +486,9 @@ bool FiffRawData::read_raw_segment(MatrixXd& data,
             picksamp = last_pick - first_pick + 1;
 
             if (do_debug) {
-                qDebug() << "first_pick: " << first_pick;
-                qDebug() << "last_pick: " << last_pick;
-                qDebug() << "picksamp: " << picksamp;
+                UTILSLIB::Log::debug("first_pick: {}", first_pick);
+                UTILSLIB::Log::debug("last_pick: {}", last_pick);
+                UTILSLIB::Log::debug("picksamp: {}", picksamp);
             }
 
             if (picksamp > 0) {
@@ -506,7 +504,6 @@ bool FiffRawData::read_raw_segment(MatrixXd& data,
         //  Done?
         //
         if (thisRawDir.last >= to) {
-            //qInfo(" [done]");
             break;
         }
     }
@@ -536,7 +533,6 @@ bool FiffRawData::read_raw_segment(MatrixXd& data,
     bool projAvailable = true;
 
     if (this->proj.size() == 0) {
-        //qInfo() << "FiffRawData::read_raw_segment - No projectors setup. Consider calling FiffRawData::activate_projections.";
         projAvailable = false;
     }
 
@@ -553,7 +549,7 @@ bool FiffRawData::read_raw_segment(MatrixXd& data,
         to = this->last_samp;
     //
     if (from > to) {
-        qWarning("No data in this range");
+        UTILSLIB::Log::warning("No data in this range");
         return false;
     }
     //
@@ -640,7 +636,7 @@ bool FiffRawData::read_raw_segment(MatrixXd& data,
     FiffStream& fid = *this->file;
     const bool open_here = !fid.isOpen();
     if (open_here && !fid.reopen()) {
-        qWarning("Cannot open file %s", this->info.filename.c_str());
+        UTILSLIB::Log::warning("Cannot open file {}", this->info.filename);
         return false;
     }
 
@@ -656,7 +652,7 @@ bool FiffRawData::read_raw_segment(MatrixXd& data,
                 //  Take the easy route: skip is translated to zeros
                 //
                 if (do_debug)
-                    qDebug("S");
+                    UTILSLIB::Log::debug("S");
                 if (sel.cols() <= 0)
                     one.resize(nchan, thisRawDir.nsamp);
                 else
@@ -683,7 +679,7 @@ bool FiffRawData::read_raw_segment(MatrixXd& data,
                         else if (t_pTag->type == FIFFT_DOUBLE)
                             one = cal * Map<const MatrixXd>(t_pTag->toDouble(), nchan, thisRawDir.nsamp);
                         else {
-                            qWarning("Data Storage Format not known yet [1]!! Type: %d\n", t_pTag->type);
+                            UTILSLIB::Log::warning("Data Storage Format not known yet [1]!! Type: {}\n", t_pTag->type);
                             if (open_here)
                                 this->file->close();
                             return false;
@@ -718,7 +714,7 @@ bool FiffRawData::read_raw_segment(MatrixXd& data,
                             for (r = 0; r < sel.size(); ++r)
                                 newData.block(r, 0, 1, thisRawDir.nsamp) = tmp_data.block(sel[r], 0, 1, thisRawDir.nsamp);
                         } else {
-                            qWarning("Data Storage Format not known yet [2]!! Type: %d\n", t_pTag->type);
+                            UTILSLIB::Log::warning("Data Storage Format not known yet [2]!! Type: {}\n", t_pTag->type);
                             if (open_here)
                                 this->file->close();
                             return false;
@@ -738,7 +734,7 @@ bool FiffRawData::read_raw_segment(MatrixXd& data,
                     else if (t_pTag->type == FIFFT_DOUBLE)
                         one = mult * Map<const MatrixXd>(t_pTag->toDouble(), nchan, thisRawDir.nsamp);
                     else {
-                        qWarning("Data Storage Format not known yet [3]!! Type: %d\n", t_pTag->type);
+                        UTILSLIB::Log::warning("Data Storage Format not known yet [3]!! Type: {}\n", t_pTag->type);
                         if (open_here)
                             this->file->close();
                         return false;
@@ -755,24 +751,23 @@ bool FiffRawData::read_raw_segment(MatrixXd& data,
                 first_pick = 0; //1;
                 last_pick = thisRawDir.nsamp - 1;
                 if (do_debug)
-                    qDebug("W");
+                    UTILSLIB::Log::debug("W");
             } else if (from > thisRawDir.first) {
                 first_pick = from - thisRawDir.first; // + 1;
                 if (to < thisRawDir.last) {
                     //
                     //  Something from the middle
                     //
-                    //                    qDebug() << "This needs to be debugged!";
                     last_pick = thisRawDir.nsamp + to - thisRawDir.last - 1; //is this alright?
                     if (do_debug)
-                        qDebug("M");
+                        UTILSLIB::Log::debug("M");
                 } else {
                     //
                     //  From the middle to the end
                     //
                     last_pick = thisRawDir.nsamp - 1;
                     if (do_debug)
-                        qDebug("E");
+                        UTILSLIB::Log::debug("E");
                 }
             } else {
                 //
@@ -781,7 +776,7 @@ bool FiffRawData::read_raw_segment(MatrixXd& data,
                 first_pick = 0;                    //1;
                 last_pick = to - thisRawDir.first; // + 1;
                 if (do_debug)
-                    qDebug("B");
+                    UTILSLIB::Log::debug("B");
             }
             //
             //  Now we are ready to pick
@@ -789,9 +784,9 @@ bool FiffRawData::read_raw_segment(MatrixXd& data,
             picksamp = last_pick - first_pick + 1;
 
             if (do_debug) {
-                qDebug() << "first_pick: " << first_pick;
-                qDebug() << "last_pick: " << last_pick;
-                qDebug() << "picksamp: " << picksamp;
+                UTILSLIB::Log::debug("first_pick: {}", first_pick);
+                UTILSLIB::Log::debug("last_pick: {}", last_pick);
+                UTILSLIB::Log::debug("picksamp: {}", picksamp);
             }
 
             if (picksamp > 0) {
@@ -807,7 +802,6 @@ bool FiffRawData::read_raw_segment(MatrixXd& data,
         //  Done?
         //
         if (thisRawDir.last >= to) {
-            //qInfo(" [done]");
             break;
         }
     }
@@ -891,7 +885,7 @@ bool FiffRawData::save(const std::filesystem::path& path,
     int lastSamp = (to >= 0) ? to : last_samp;
 
     if (firstSamp > lastSamp) {
-        qWarning() << "[FiffRawData::save] Invalid sample range.";
+        UTILSLIB::Log::warning("[FiffRawData::save] Invalid sample range.");
         return false;
     }
 
@@ -907,7 +901,7 @@ bool FiffRawData::save(const std::filesystem::path& path,
     RowVectorXd calsOut;
     auto pStream = FiffStream::start_writing_raw(path, outInfo, calsOut, picks);
     if (!pStream) {
-        qWarning() << "[FiffRawData::save] Cannot start writing raw file.";
+        UTILSLIB::Log::warning("[FiffRawData::save] Cannot start writing raw file.");
         return false;
     }
 
@@ -925,7 +919,7 @@ bool FiffRawData::save(const std::filesystem::path& path,
         MatrixXd segData;
         MatrixXd segTimes;
         if (!read_raw_segment(segData, segTimes, samp, samp + nsamp - 1, picks)) {
-            qWarning() << "[FiffRawData::save] Error reading data at sample" << samp;
+            UTILSLIB::Log::warning("[FiffRawData::save] Error reading data at sample {}", samp);
             pStream->finish_writing_raw();
             return false;
         }
@@ -945,7 +939,6 @@ bool FiffRawData::save(const std::filesystem::path& path,
 
     pStream->finish_writing_raw();
 
-    qInfo() << "[FiffRawData::save] Saved raw data from sample" << firstSamp
-            << "to" << lastSamp << "(decim=" << decim << ")";
+    UTILSLIB::Log::info("[FiffRawData::save] Saved raw data from sample {} to {} (decim= {} )", firstSamp, lastSamp, decim);
     return true;
 }

@@ -18,10 +18,10 @@
 //=============================================================================================================
 
 #include "fiff_digitizer_data.h"
+#include <utils/logger/log.h>
 #include "fiff_coord_trans.h"
 #include "fiff_stream.h"
 #include "fiff_dig_point.h"
-#include <QDebug>
 
 //=============================================================================================================
 // USED NAMESPACES
@@ -53,24 +53,24 @@ UTILSLIB::Expected<FiffDigitizerData> FiffDigitizerData::read(const std::filesys
 
 void FiffDigitizerData::print() const
 {
-    qInfo().noquote().nospace() << "Number of digitizer points: " << points.size();
+    UTILSLIB::Log::info("Number of digitizer points: {}", points.size());
 
     switch (coord_frame) {
         case FIFFV_COORD_MRI:
-            qInfo().noquote().nospace() << "Coord. Frame: FIFFV_COORD_MRI";
+            UTILSLIB::Log::info("Coord. Frame: FIFFV_COORD_MRI");
             break;
         case FIFFV_COORD_HEAD:
-            qInfo().noquote().nospace() << "Coord. Frame: FIFFV_COORD_HEAD";
+            UTILSLIB::Log::info("Coord. Frame: FIFFV_COORD_HEAD");
             break;
     }
 
     for (auto& point : points) {
         if (point.kind == FIFFV_POINT_HPI) {
-            qInfo().noquote().nospace() << "HPI Point " << point.ident << " - " << point.r[0] << ", " << point.r[1] << ", " << point.r[2];
+            UTILSLIB::Log::info("HPI Point {} - {}, {}, {}", point.ident, point.r[0], point.r[1], point.r[2]);
         }
     }
 
-    qInfo().noquote().nospace() << "Number of MRI fiducials: " << nfids();
+    UTILSLIB::Log::info("Number of MRI fiducials: {}", nfids());
 }
 
 //=============================================================================================================

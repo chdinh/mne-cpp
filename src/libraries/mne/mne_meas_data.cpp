@@ -18,6 +18,7 @@
 //=============================================================================================================
 
 #include "mne_meas_data.h"
+#include <utils/logger/log.h>
 #include <utils/string_utils.h>
 #include "mne_meas_data_set.h"
 #include "mne_inverse_operator.h"
@@ -33,7 +34,6 @@
 
 #include <QFile>
 #include <QTextStream>
-#include <QDebug>
 
 //=============================================================================================================
 // USED NAMESPACES
@@ -111,10 +111,7 @@ void MNEMeasData::adjust_baselines(float bmin, float bmax)
             for (int s = 0; s < current->np; s++)
                 bdata(s, c) -= ave;
         }
-        qInfo("\t%s : using baseline %7.1f ... %7.1f ms\n",
-              current->comment.c_str() ? current->comment.c_str() : "unknown",
-              1000 * (tmin + b1 / sfreq),
-              1000 * (tmin + b2 / sfreq));
+        UTILSLIB::Log::info("\t{} : using baseline {:7.1f} ... {:7.1f} ms\n", current->comment.c_str() ? current->comment.c_str() : "unknown", 1000 * (tmin + b1 / sfreq), 1000 * (tmin + b2 / sfreq));
     }
 }
 
@@ -138,7 +135,7 @@ bool MNEMeasData::read_evoked_set(const std::filesystem::path& name,
        */
     auto read = FiffEvoked::read(name, set - 1, {}, false);
     if (!read) {
-        qCritical("%s", read.error().what());
+        UTILSLIB::Log::critical("{}", read.error().what());
         return false;
     }
     const FiffEvoked& evoked = *read;
@@ -202,7 +199,7 @@ bool MNEMeasData::read_evoked_set(const std::filesystem::path& name,
     }
 
     if (!id.empty())
-        qInfo("\tMeasurement file id: %s\n", id.toString().c_str());
+        UTILSLIB::Log::info("\tMeasurement file id: {}\n", id.toString());
 
     /*
        * Pick out the necessary channels
@@ -222,9 +219,7 @@ bool MNEMeasData::read_evoked_set(const std::filesystem::path& name,
         }
         for (k = 0; k < nchan; k++)
             if (sel[k] == -1) {
-                qCritical("All channels needed were not in the MEG/EEG data file "
-                          "(first missing: %s).",
-                          names[k].c_str());
+                UTILSLIB::Log::critical("All channels needed were not in the MEG/EEG data file (first missing: {}).", names[k]);
                 return false;
             }
     } else { /* Load all channels */
@@ -248,7 +243,7 @@ bool MNEMeasData::read_evoked_set(const std::filesystem::path& name,
     np = n2 - n1;
     tmin = dtmin;
     tmax = dtmin + (np - 1) / sfreq;
-    qInfo("\tData time range: %8.1f ... %8.1f ms\n", 1000 * tmin, 1000 * tmax);
+    UTILSLIB::Log::info("\tData time range: {:8.1f} ... {:8.1f} ms\n", 1000 * tmin, 1000 * tmax);
     /*
        * Just put it together
        */
@@ -278,11 +273,11 @@ bool MNEMeasData::read_evoked_set(const std::filesystem::path& name,
 
         if (!devHeadT.empty()) {
             target.meg_head_t = std::make_unique<FiffCoordTrans>(devHeadT);
-            qInfo("\tUsing MEG <-> head transform from the present data set\n");
+            UTILSLIB::Log::info("\tUsing MEG <-> head transform from the present data set\n");
         }
         if (op != nullptr && !op->mri_head_t.empty()) { /* Copy if available */
             target.mri_head_t = std::make_unique<FiffCoordTrans>(op->mri_head_t);
-            qInfo("\tPicked MRI <-> head transform from the inverse operator\n");
+            UTILSLIB::Log::info("\tPicked MRI <-> head transform from the inverse operator\n");
         }
         /*
          * Channel list
@@ -297,14 +292,14 @@ bool MNEMeasData::read_evoked_set(const std::filesystem::path& name,
         if (op) {         /* Attach the projection operator and CTF compensation info to the data, too */
             target.proj = MNEProjOp::read(name);
             if (target.proj && target.proj->nitems > 0) {
-                qInfo("\tLoaded projection from %s:\n", UTILSLIB::utf8FromPath(name).c_str());
+                UTILSLIB::Log::info("\tLoaded projection from {}:\n", UTILSLIB::utf8FromPath(name));
                 QTextStream errStream(stderr);
                 target.proj->report(errStream, QStringLiteral("\t\t").toStdString());
             }
         } else {
             target.proj = MNEProjOp::read(name);
             if (target.proj && target.proj->nitems > 0) {
-                qInfo("\tLoaded projection from %s:\n", UTILSLIB::utf8FromPath(name).c_str());
+                UTILSLIB::Log::info("\tLoaded projection from {}:\n", UTILSLIB::utf8FromPath(name));
                 QTextStream errStream(stderr);
                 target.proj->report(errStream, QStringLiteral("\t\t").toStdString());
             }
@@ -313,7 +308,7 @@ bool MNEMeasData::read_evoked_set(const std::filesystem::path& name,
                 return false;
             }
             if (target.comp->ncomp > 0)
-                qInfo("\tRead %d compensation data sets from %s\n", target.comp->ncomp, UTILSLIB::utf8FromPath(name).c_str());
+                UTILSLIB::Log::info("\tRead {} compensation data sets from {}\n", target.comp->ncomp, UTILSLIB::utf8FromPath(name));
         }
         /*
          * Bad channels — already read by FiffEvoked via FiffStream::read_meas_info()
@@ -331,11 +326,11 @@ bool MNEMeasData::read_evoked_set(const std::filesystem::path& name,
                     }
                 }
             }
-            qInfo("\t%d bad channels read from %s%s", target.nbad, UTILSLIB::utf8FromPath(name).c_str(), target.nbad > 0 ? ":\n" : "\n");
+            UTILSLIB::Log::info("\t{} bad channels read from {}{}", target.nbad, UTILSLIB::utf8FromPath(name), target.nbad > 0 ? ":\n" : "\n");
             if (target.nbad > 0) {
-                qInfo("\t\t");
+                UTILSLIB::Log::info("\t\t");
                 for (k = 0; k < target.nbad; k++)
-                    qInfo("%s%c", target.badlist[k].c_str(), k < target.nbad - 1 ? ' ' : '\n');
+                    UTILSLIB::Log::info("{}{:c}", target.badlist[k], k < target.nbad - 1 ? ' ' : '\n');
             }
         }
     }
@@ -375,7 +370,7 @@ bool MNEMeasData::read_evoked_set(const std::filesystem::path& name,
     target.nset++;
     if (fresh)
         target.current = target.sets.front().get();
-    qInfo("\t%s dataset %s from %s", fresh ? "Loaded" : "Added", comment.c_str(), UTILSLIB::utf8FromPath(name).c_str());
+    UTILSLIB::Log::info("\t{} dataset {} from {}", fresh ? "Loaded" : "Added", comment, UTILSLIB::utf8FromPath(name));
     return true;
 }
 

@@ -19,6 +19,7 @@
 //=============================================================================================================
 
 #include "mne_raw_info.h"
+#include <utils/logger/log.h>
 
 #include <vector>
 
@@ -29,7 +30,6 @@
 #include <algorithm>
 
 #include <QFile>
-#include <QDebug>
 
 //=============================================================================================================
 // USED NAMESPACES
@@ -161,12 +161,12 @@ int MNERawInfo::get_meas_info(FiffStream& stream,
         * Find desired parents
         */
     if (meas = find_meas(node); !meas) {
-        qCritical("Meas. block not found!");
+        UTILSLIB::Log::critical("Meas. block not found!");
         return (-1);
     }
 
     if (meas_info = find_meas_info(node); !meas_info) {
-        qCritical("Meas. info not found!");
+        UTILSLIB::Log::critical("Meas. info not found!");
         return (-1);
     }
     /*
@@ -227,7 +227,7 @@ int MNERawInfo::get_meas_info(FiffStream& stream,
 
                 this_ch = t_pTag->toChInfo();
                 if (this_ch.scanNo <= 0 || this_ch.scanNo > *nchan) {
-                    qCritical("FIFF_CH_INFO : scan # out of range!");
+                    UTILSLIB::Log::critical("FIFF_CH_INFO : scan # out of range!");
                     return (-1);
                 } else
                     ch[this_ch.scanNo - 1] = this_ch;
@@ -285,7 +285,7 @@ int MNERawInfo::get_meas_info(FiffStream& stream,
         }
     }
     if (to_find != 0) {
-        qCritical("Not all essential tags were found!");
+        UTILSLIB::Log::critical("Not all essential tags were found!");
         return (-1);
     }
     chp = ch;
@@ -334,13 +334,13 @@ int MNERawInfo::load(const std::filesystem::path& name, int allow_maxshield, std
         if (allow_maxshield) {
             raw = find_maxshield(stream.dirtree());
             if (raw->empty()) {
-                qCritical("No raw data in this file.");
+                UTILSLIB::Log::critical("No raw data in this file.");
                 stream.close();
                 return FIFF_FAIL;
             }
             maxshield_data = true;
         } else {
-            qCritical("No raw data in this file.");
+            UTILSLIB::Log::critical("No raw data in this file.");
             stream.close();
             return FIFF_FAIL;
         }
@@ -397,7 +397,7 @@ int MNERawInfo::load(const std::filesystem::path& name, int allow_maxshield, std
             else if (raw->dir[k].type == FIFFT_DOUBLE)
                 info->buf_size = raw->dir[k].size / (nchan * sizeof(double));
             else {
-                qCritical("We are not prepared to handle raw data type: %d", raw->dir[k].type);
+                UTILSLIB::Log::critical("We are not prepared to handle raw data type: {}", raw->dir[k].type);
                 stream.close();
                 return FIFF_FAIL;
             }
@@ -405,7 +405,7 @@ int MNERawInfo::load(const std::filesystem::path& name, int allow_maxshield, std
         }
     }
     if (info->buf_size <= 0) {
-        qCritical("No raw data buffers available.");
+        UTILSLIB::Log::critical("No raw data buffers available.");
         stream.close();
         return FIFF_FAIL;
     }

@@ -22,6 +22,7 @@
 //=============================================================================================================
 
 #include "inv_minimum_norm.h"
+#include <utils/logger/log.h>
 
 #include <inv/inv_source_estimate.h>
 #include <fiff/fiff_evoked.h>
@@ -39,7 +40,6 @@
 #include <Eigen/Dense>
 #include <Eigen/Eigenvalues>
 #include <Eigen/SVD>
-#include <QDebug>
 
 //=============================================================================================================
 // USED NAMESPACES
@@ -91,7 +91,7 @@ InvSourceEstimate InvMinimumNorm::calculateInverse(const FiffEvoked& p_fiffEvoke
     qint32 nave = p_fiffEvoked.nave;
 
     if (!m_inverseOperator.check_ch_names(p_fiffEvoked.info)) {
-        qWarning("Channel name check failed.");
+        Log::warning("Channel name check failed.");
         return InvSourceEstimate();
     }
 
@@ -102,7 +102,7 @@ InvSourceEstimate InvMinimumNorm::calculateInverse(const FiffEvoked& p_fiffEvoke
     //
     FiffEvoked t_fiffEvoked = p_fiffEvoked.pick_channels(inv.noise_cov->names);
 
-    qInfo("Picked %d channels from the data", t_fiffEvoked.info.nchan);
+    Log::info("Picked {} channels from the data", t_fiffEvoked.info.nchan);
 
     //Results
     float tmin = p_fiffEvoked.times[0];
@@ -116,19 +116,19 @@ InvSourceEstimate InvMinimumNorm::calculateInverse(const FiffEvoked& p_fiffEvoke
 InvSourceEstimate InvMinimumNorm::calculateInverse(const MatrixXd& data, float tmin, float tstep, bool pick_normal) const
 {
     if (!inverseSetup) {
-        qWarning("InvMinimumNorm::calculateInverse - Inverse not setup -> call doInverseSetup first!");
+        Log::warning("InvMinimumNorm::calculateInverse - Inverse not setup -> call doInverseSetup first!");
         return InvSourceEstimate();
     }
 
     if (K.cols() != data.rows()) {
-        qWarning() << "InvMinimumNorm::calculateInverse - Dimension mismatch between K.cols() and data.rows() -" << K.cols() << "and" << data.rows();
+        Log::warning("InvMinimumNorm::calculateInverse - Dimension mismatch between K.cols() and data.rows() - {} and {}", K.cols(), data.rows());
         return InvSourceEstimate();
     }
 
     MatrixXd sol = K * data; //apply imaging kernel
 
     if (inv.source_ori == FIFFV_MNE_FREE_ORI && pick_normal == false) {
-        qInfo("combining the current components...");
+        Log::info("combining the current components...");
 
         MatrixXd sol1(sol.rows() / 3, sol.cols());
         for (qint32 i = 0; i < sol.cols(); ++i) {
@@ -140,16 +140,16 @@ InvSourceEstimate InvMinimumNorm::calculateInverse(const MatrixXd& data, float t
     }
 
     if (m_bdSPM) {
-        qInfo("(dSPM)...");
+        Log::info("(dSPM)...");
         sol = inv.noisenorm * sol;
     } else if (m_bsLORETA) {
-        qInfo("(sLORETA)...");
+        Log::info("(sLORETA)...");
         sol = inv.noisenorm * sol;
     } else if (m_beLoreta) {
-        qInfo("(eLORETA)...");
+        Log::info("(eLORETA)...");
         sol = inv.noisenorm * sol;
     }
-    qInfo("[done]");
+    Log::info("[done]");
 
     //Results
     VectorXi p_vecVertices(inv.src[0].vertno.size() + inv.src[1].vertno.size());
@@ -173,7 +173,7 @@ InvSourceEstimate InvMinimumNorm::calculateInverse(const MatrixXd& data, float t
 MNEMneData InvMinimumNorm::mneData(const FiffEvoked& p_fiffEvoked, double snr)
 {
     if (!m_inverseOperator.check_ch_names(p_fiffEvoked.info)) {
-        qWarning("Channel name check failed.");
+        Log::warning("Channel name check failed.");
         return MNEMneData();
     }
     doInverseSetup(p_fiffEvoked.nave, false);
@@ -194,10 +194,10 @@ void InvMinimumNorm::doInverseSetup(qint32 nave, bool pick_normal)
         computeELoreta();
     }
 
-    qInfo("Computing inverse...");
+    Log::info("Computing inverse...");
     inv.assemble_kernel(label, m_sMethod.toStdString(), pick_normal, K, noise_norm, vertno);
 
-    qInfo().noquote().nospace() << "K " << K.rows() << " x " << K.cols();
+    Log::info("K {} x {}", K.rows(), K.cols());
 
     inverseSetup = true;
 }
@@ -229,12 +229,12 @@ void InvMinimumNorm::setMethod(QString method)
     else if (method.compare("eLORETA") == 0)
         setMethod(false, false, true);
     else {
-        qWarning("Method not recognized!");
+        Log::warning("Method not recognized!");
         method = "dSPM";
         setMethod(true, false);
     }
 
-    qInfo("\tSet minimum norm method to %s.", method.toUtf8().constData());
+    Log::info("\tSet minimum norm method to {}.", method.toStdString());
 }
 
 //=============================================================================================================
@@ -243,7 +243,7 @@ void InvMinimumNorm::setMethod(bool dSPM, bool sLORETA, bool eLoreta)
 {
     int nActive = (dSPM ? 1 : 0) + (sLORETA ? 1 : 0) + (eLoreta ? 1 : 0);
     if (nActive > 1) {
-        qWarning("Only one method can be active at a time! - Activating dSPM");
+        Log::warning("Only one method can be active at a time! - Activating dSPM");
         dSPM = true;
         sLORETA = false;
         eLoreta = false;
@@ -292,12 +292,12 @@ void InvMinimumNorm::computeELoreta()
     // Adapted from MNE-Python: mne.minimum_norm._eloreta._compute_eloreta()
     //
 
-    qInfo("Computing eLORETA source weights...");
+    Log::info("Computing eLORETA source weights...");
 
     // Reassemble the whitened gain matrix G = eigen_fields^T * diag(sing) * eigen_leads^T,
     // with eigen_fields (n_comp, n_channels) and eigen_leads (n_sources*n_orient, n_comp).
     if (!inv.eigen_fields || !inv.eigen_leads) {
-        qWarning("InvMinimumNorm::computeELoreta - Inverse operator missing eigen structures!");
+        Log::warning("InvMinimumNorm::computeELoreta - Inverse operator missing eigen structures!");
         return;
     }
 
@@ -312,7 +312,7 @@ void InvMinimumNorm::computeELoreta()
     const int nOrient = static_cast<int>(G.cols()) / nSrc;
 
     if (nOrient != 1 && nOrient != 3) {
-        qWarning("InvMinimumNorm::computeELoreta - Unexpected n_orient: %d", nOrient);
+        Log::warning("InvMinimumNorm::computeELoreta - Unexpected n_orient: {}", nOrient);
         return;
     }
 
@@ -380,8 +380,7 @@ void InvMinimumNorm::computeELoreta()
         }
     }
 
-    qInfo("    Fitting up to %d iterations (n_orient=%d, force_equal=%s)...",
-          m_iELoretaMaxIter, nOrient, m_bELoretaForceEqual ? "true" : "false");
+    Log::info("    Fitting up to {} iterations (n_orient={}, force_equal={})...", m_iELoretaMaxIter, nOrient, m_bELoretaForceEqual ? "true" : "false");
 
     // Lambda for computing G * R * G^T and normalizing
     auto computeGRGt = [&]() -> MatrixXd {
@@ -537,11 +536,11 @@ void InvMinimumNorm::computeELoreta()
         double delta = (deltaDen > 1e-30) ? deltaNum / deltaDen : 0.0;
 
         if (delta < m_dELoretaEps) {
-            qInfo("    eLORETA converged on iteration %d (delta=%.2e < eps=%.2e)", kk + 1, delta, m_dELoretaEps);
+            Log::info("    eLORETA converged on iteration {} (delta={:.2e} < eps={:.2e})", kk + 1, delta, m_dELoretaEps);
             break;
         }
         if (kk == m_iELoretaMaxIter - 1) {
-            qWarning("    eLORETA weight fitting did not converge after %d iterations (delta=%.2e)", m_iELoretaMaxIter, delta);
+            Log::warning("    eLORETA weight fitting did not converge after {} iterations (delta={:.2e})", m_iELoretaMaxIter, delta);
         }
     }
 
@@ -621,5 +620,5 @@ void InvMinimumNorm::computeELoreta()
     }
     inv.reginv = reginv;
 
-    qInfo("    eLORETA inverse operator updated. [done]");
+    Log::info("    eLORETA inverse operator updated. [done]");
 }

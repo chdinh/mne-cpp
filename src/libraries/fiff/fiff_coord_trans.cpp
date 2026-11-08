@@ -23,6 +23,7 @@
 //=============================================================================================================
 
 #include "fiff_coord_trans.h"
+#include <utils/logger/log.h>
 
 #include "fiff_stream.h"
 #include "fiff_tag.h"
@@ -44,7 +45,6 @@
 //=============================================================================================================
 
 #include <Eigen/Dense>
-#include <QDebug>
 
 //=============================================================================================================
 // STL INCLUDES
@@ -443,7 +443,7 @@ FiffCoordTrans FiffCoordTrans::combine(int from, int to, const FiffCoordTrans& t
     }
 
     if (!found || a.from != b.to) {
-        qCritical("Cannot combine coordinate transforms");
+        UTILSLIB::Log::critical("Cannot combine coordinate transforms");
         return FiffCoordTrans();
     }
 
@@ -611,8 +611,7 @@ FiffCoordTrans FiffCoordTrans::procrustes_align(int from_frame,
         Eigen::Vector3f rr = R * fromPts.row(p).transpose() + moveVec;
         float diff = (toPts.row(p).transpose() - rr).norm();
         if (diff > max_diff) {
-            qWarning("Too large difference in matching : %7.1f > %7.1f mm",
-                     1000.0f * diff, 1000.0f * max_diff);
+            UTILSLIB::Log::warning("Too large difference in matching : {:7.1f} > {:7.1f} mm", 1000.0f * diff, 1000.0f * max_diff);
             return FiffCoordTrans();
         }
     }

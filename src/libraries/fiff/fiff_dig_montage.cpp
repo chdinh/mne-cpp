@@ -15,6 +15,7 @@
 //=============================================================================================================
 
 #include "fiff_dig_montage.h"
+#include <utils/logger/log.h>
 
 #include "fiff_constants.h"
 #include "fiff_dig_point.h"
@@ -164,7 +165,7 @@ struct Montage
     void addElectrode(std::string name, const Vector3d& r)
     {
         if (const auto it = std::ranges::find(chNames, name); it != chNames.end()) {
-            qWarning("[FiffDigMontage] duplicate electrode %s - the last position is used", name.c_str());
+            UTILSLIB::Log::warning("[FiffDigMontage] duplicate electrode {} - the last position is used", name);
             chPos[static_cast<std::size_t>(it - chNames.begin())] = r;
             return;
         }
@@ -408,7 +409,7 @@ Expected<FiffDigMontage> FiffDigMontage::read_egi(const std::filesystem::path& p
                     montage.rpa = r;
                 break;
             default:
-                qWarning("[FiffDigMontage::read_egi] skipping sensor %d of unknown type", *number);
+                UTILSLIB::Log::warning("[FiffDigMontage::read_egi] skipping sensor {} of unknown type", *number);
         }
     }
     if (!montage.nasion || !montage.lpa || !montage.rpa)

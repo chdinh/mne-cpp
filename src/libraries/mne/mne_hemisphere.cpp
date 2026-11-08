@@ -22,6 +22,7 @@
 //=============================================================================================================
 
 #include "mne_hemisphere.h"
+#include <utils/logger/log.h>
 #include "mne_nearest.h"
 
 #include <math/linalg.h>
@@ -160,7 +161,7 @@ bool MNEHemisphere::complete_source_space_info()
     //
     //   Main triangulation
     //
-    qInfo("\tCompleting triangulation info...");
+    Log::info("\tCompleting triangulation info...");
     tri_cent = MatrixX3d::Zero(ntri, 3);
     tri_nn = MatrixX3d::Zero(ntri, 3);
     tri_area = VectorXd::Zero(ntri);
@@ -197,12 +198,12 @@ bool MNEHemisphere::complete_source_space_info()
         tri_area(i) = size / 2.0f;
         tri_nn.row(i) /= size;
     }
-    qInfo("[done]\n");
+    Log::info("[done]\n");
 
     //
     //   Selected triangles
     //
-    qInfo("\tCompleting selection triangulation info...");
+    Log::info("\tCompleting selection triangulation info...");
     if (nuse_tri > 0) {
         use_tri_cent = MatrixX3d::Zero(nuse_tri, 3);
         use_tri_nn = MatrixX3d::Zero(nuse_tri, 3);
@@ -236,11 +237,11 @@ bool MNEHemisphere::complete_source_space_info()
             use_tri_area(i) = size / 2.0f;
         }
     }
-    qInfo("[done]\n");
+    Log::info("[done]\n");
 
-    qInfo("\tCompleting triangle and vertex neighboring info...");
+    Log::info("\tCompleting triangle and vertex neighboring info...");
     add_geometry_info();
-    qInfo("[done]\n");
+    Log::info("[done]\n");
 
     return true;
 }
@@ -255,7 +256,7 @@ bool MNEHemisphere::compute_patch_info()
         return false;
     }
 
-    qInfo("\tComputing patch statistics...");
+    Log::info("\tComputing patch statistics...");
 
     std::vector<std::pair<int, int>> t_vIndn;
 
@@ -416,7 +417,7 @@ bool MNEHemisphere::transform_hemisphere_to(fiff_int_t dest, const FiffCoordTran
     if (trans.to == this->coord_frame && trans.from == dest)
         trans.invert_transform();
     else if (trans.from != this->coord_frame || trans.to != dest) {
-        qWarning("Cannot transform the source space using this coordinate transformation"); //Consider throw
+        Log::warning("Cannot transform the source space using this coordinate transformation"); //Consider throw
         return false;
     }
 
@@ -441,7 +442,7 @@ void MNEHemisphere::writeToStream(FiffStream& stream) const
     if (this->type == 1 || this->type == 2)
         stream.write_int(FIFF_MNE_SOURCE_SPACE_TYPE, &this->type);
     else
-        qWarning("Unknown source space type (%d)", this->type);
+        Log::warning("Unknown source space type ({})", this->type);
     stream.write_int(FIFF_MNE_SOURCE_SPACE_ID, &this->id);
 
     //    data = this.get('subject_his_id', None)
@@ -451,7 +452,7 @@ void MNEHemisphere::writeToStream(FiffStream& stream) const
 
     if (this->type == 2) //2 = Vol
     {
-        qDebug() << "ToDo: Write Volume not implemented yet!!!!!!!!";
+        Log::debug("ToDo: Write Volume not implemented yet!!!!!!!!");
         //        stream.write_int(FIFF_MNE_SOURCE_SPACE_VOXEL_DIMS, this->shape)
         //        stream.write_coord_trans(this->src_mri_t);
 

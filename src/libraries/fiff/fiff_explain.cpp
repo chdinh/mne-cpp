@@ -15,6 +15,7 @@
 //=============================================================================================================
 
 #include "fiff_explain.h"
+#include <utils/logger/log.h>
 
 #include <string>
 #include <unordered_map>
@@ -64,7 +65,7 @@ const std::unordered_map<quint64, std::string>& explanations()
         std::unordered_map<quint64, std::string> entries;
         QFile file(QStringLiteral(":/fiff/fiff_explanations.txt"));
         if (!file.open(QIODevice::ReadOnly | QIODevice::Text)) {
-            qWarning("[FiffExplain] the built-in explanation table is missing");
+            UTILSLIB::Log::warning("[FiffExplain] the built-in explanation table is missing");
             return entries;
         }
         // <class> <kind> "<text>"; the first entry of a duplicated class/kind wins, inner spaces collapse as in MNE-C

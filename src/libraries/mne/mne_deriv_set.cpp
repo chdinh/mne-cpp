@@ -15,6 +15,7 @@
 //=============================================================================================================
 
 #include "mne_deriv_set.h"
+#include <utils/logger/log.h>
 
 #include <vector>
 #include <utility>
@@ -115,7 +116,7 @@ std::unique_ptr<MNEDeriv> makeDeriv(const std::vector<MNEDerivSet::Definition>& 
             row.push_back({static_cast<int>(UTILSLIB::indexOf(inputs, it->first)), it->second});
         }
         if (row.empty()) {
-            qInfo("MNEDerivSet - Empty derivation \"%s\" omitted", definition.first.c_str());
+            UTILSLIB::Log::info("MNEDerivSet - Empty derivation \"{}\" omitted", definition.first);
             continue;
         }
         for (const auto& [column, weight] : row) {
@@ -155,7 +156,7 @@ std::optional<MNEDerivSet> MNEDerivSet::read(const std::filesystem::path& path)
         for (const FiffDirNode::SPtr& matrix : block->dir_tree_find(FIFFB_MNE_NAMED_MATRIX)) {
             auto data = MNESparseNamedMatrix::read(stream, matrix, FIFF_MNE_DERIVATION_DATA);
             if (!data) {
-                qWarning("MNEDerivSet::read - Bad derivation data in %s", UTILSLIB::utf8FromPath(path).c_str());
+                UTILSLIB::Log::warning("MNEDerivSet::read - Bad derivation data in {}", UTILSLIB::utf8FromPath(path));
                 return std::nullopt;
             }
             auto deriv = std::make_unique<MNEDeriv>();
@@ -173,7 +174,7 @@ std::optional<MNEDerivSet> MNEDerivSet::readText(const std::filesystem::path& pa
 {
     std::ifstream file(path);
     if (!file) {
-        qWarning("MNEDerivSet::readText - Cannot open %s", UTILSLIB::utf8FromPath(path).c_str());
+        UTILSLIB::Log::warning("MNEDerivSet::readText - Cannot open {}", UTILSLIB::utf8FromPath(path));
         return std::nullopt;
     }
     const StringList tokens = tokenize(file);
@@ -209,14 +210,14 @@ std::optional<MNEDerivSet> MNEDerivSet::readText(const std::filesystem::path& pa
             definitions.push_back({token, {}});
         } else if (kind == Kind::Equal) {
             if (definitions.empty() || !definitions.back().second.empty()) {
-                qWarning("MNEDerivSet::readText - Misplaced equal sign in %s", UTILSLIB::utf8FromPath(path).c_str());
+                UTILSLIB::Log::warning("MNEDerivSet::readText - Misplaced equal sign in {}", UTILSLIB::utf8FromPath(path));
                 return std::nullopt;
             }
         } else if (kind == Kind::Channel) {
             const double weight = prev == Kind::Minus ? -1.0 : prev == Kind::Number ? number
                                                                                     : 1.0;
             if (definitions.empty()) {
-                qWarning("MNEDerivSet::readText - Misplaced channel name in %s", UTILSLIB::utf8FromPath(path).c_str());
+                UTILSLIB::Log::warning("MNEDerivSet::readText - Misplaced channel name in {}", UTILSLIB::utf8FromPath(path));
                 return std::nullopt;
             }
             definitions.back().second[token] += weight;
@@ -227,7 +228,7 @@ std::optional<MNEDerivSet> MNEDerivSet::readText(const std::filesystem::path& pa
         havePrev = true;
     }
     if (definitions.empty()) {
-        qWarning("MNEDerivSet::readText - No derivations in %s", UTILSLIB::utf8FromPath(path).c_str());
+        UTILSLIB::Log::warning("MNEDerivSet::readText - No derivations in {}", UTILSLIB::utf8FromPath(path));
         return std::nullopt;
     }
     MNEDerivSet set;
@@ -252,7 +253,7 @@ MNEDerivSet MNEDerivSet::fromDefinitions(const std::vector<Definition>& definiti
 bool MNEDerivSet::write(const std::filesystem::path& path) const
 {
     if (derivs.empty()) {
-        qWarning("MNEDerivSet::write - No derivations to write");
+        UTILSLIB::Log::warning("MNEDerivSet::write - No derivations to write");
         return false;
     }
     QFile file(path);
@@ -323,7 +324,7 @@ std::unique_ptr<MNEDeriv> MNEDerivSet::match(const StringList& chNames) const
     if (outputs.empty()) {
         return nullptr;
     }
-    qInfo("MNEDerivSet::match - %lld of %d derivations were matched.", static_cast<long long>(outputs.size()), ntot);
+    UTILSLIB::Log::info("MNEDerivSet::match - {} of {} derivations were matched.", outputs.size(), ntot);
     Eigen::SparseMatrix<float> data(outputs.size(), chNames.size());
     data.setFromTriplets(triplets.begin(), triplets.end());
 

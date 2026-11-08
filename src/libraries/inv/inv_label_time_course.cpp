@@ -23,6 +23,7 @@
 //=============================================================================================================
 
 #include "inv_label_time_course.h"
+#include <utils/logger/log.h>
 
 //=============================================================================================================
 // EIGEN INCLUDES
@@ -42,7 +43,6 @@
 // QT INCLUDES
 //=============================================================================================================
 
-#include <QDebug>
 #include <QMap>
 
 //=============================================================================================================
@@ -83,7 +83,7 @@ MatrixXd InvLabelTimeCourse::extract(const InvSourceEstimate& stc,
                                      bool bAllowEmpty)
 {
     if (stc.empty() || labels.empty()) {
-        qWarning() << "[InvLabelTimeCourse::extract] Empty stc or labels.";
+        UTILSLIB::Log::warning("[InvLabelTimeCourse::extract] Empty stc or labels.");
         return MatrixXd();
     }
 
@@ -178,8 +178,7 @@ MatrixXd InvLabelTimeCourse::extract(const InvSourceEstimate& stc,
                 result(oi, t) = maxVal;
             }
         } else {
-            qWarning() << "[InvLabelTimeCourse::extract] Unknown mode:" << mode
-                       << "— using mean.";
+            UTILSLIB::Log::warning("[InvLabelTimeCourse::extract] Unknown mode: {} — using mean.", mode.toStdString());
             result.row(oi) = labelData.colwise().mean();
         }
     }

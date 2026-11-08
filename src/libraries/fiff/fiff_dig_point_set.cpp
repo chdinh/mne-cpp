@@ -23,6 +23,7 @@
 //=============================================================================================================
 
 #include "fiff_dig_point_set.h"
+#include <utils/logger/log.h>
 
 //=============================================================================================================
 // INCLUDES
@@ -32,7 +33,6 @@
 #include "fiff_dir_node.h"
 #include "fiff_tag.h"
 #include "fiff_types.h"
-#include <QDebug>
 
 #include <utils/string_utils.h>
 
@@ -191,7 +191,7 @@ bool FiffDigPointSet::transform_to_head()
         }
     }
     if (!fid[0] || !fid[1] || !fid[2] || fid[0]->coord_frame != fid[1]->coord_frame || fid[0]->coord_frame != fid[2]->coord_frame) {
-        qWarning() << "[FiffDigPointSet::transform_to_head] LPA, nasion and RPA in one frame are required.";
+        UTILSLIB::Log::warning("[FiffDigPointSet::transform_to_head] LPA, nasion and RPA in one frame are required.");
         return false;
     }
     const int frame = fid[0]->coord_frame;

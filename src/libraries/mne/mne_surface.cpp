@@ -22,6 +22,7 @@
 //=============================================================================================================
 
 #include "mne_surface.h"
+#include <utils/logger/log.h>
 #include "mne_source_space.h"
 #include "mne_triangle.h"
 #include "mne_proj_data.h"
@@ -30,7 +31,6 @@
 #include <fiff/fiff_coord_trans.h>
 
 #include <QFile>
-#include <QDebug>
 
 // MSVC builds already define _USE_MATH_DEFINES globally (see src/CMakeLists.txt),
 // so define it here only for the toolchains that do not.
@@ -272,7 +272,7 @@ void MNESurface::find_closest_on_surface_approx(const PointsT& r, int np_points,
     auto p = std::make_unique<MNEProjData>(this);
     int k;
 
-    qInfo("%s for %d points %d steps...", nearest_tri[0] < 0 ? "Closest" : "Approx closest", np_points, nstep);
+    UTILSLIB::Log::info("{} for {} points {} steps...", nearest_tri[0] < 0 ? "Closest" : "Approx closest", np_points, nstep);
 
     for (k = 0; k < np_points; k++) {
         Eigen::Vector3f pt = Eigen::Map<const Eigen::Vector3f>(r.row(k).data());
@@ -284,7 +284,7 @@ void MNESurface::find_closest_on_surface_approx(const PointsT& r, int np_points,
         }
     }
 
-    qInfo("[done]\n");
+    UTILSLIB::Log::info("[done]\n");
 }
 
 //=============================================================================================================
@@ -415,7 +415,7 @@ std::unique_ptr<MNESurface> MNESurface::read_bem_surface(const std::filesystem::
     }
     surfs = stream.dirtree()->dir_tree_find(FIFFB_BEM_SURF);
     if (surfs.size() == 0) {
-        qCritical("No BEM surfaces found in %s", UTILSLIB::utf8FromPath(name).c_str());
+        UTILSLIB::Log::critical("No BEM surfaces found in {}", UTILSLIB::utf8FromPath(name));
         stream.close();
         return nullptr;
     }
@@ -429,7 +429,7 @@ std::unique_ptr<MNESurface> MNESurface::read_bem_surface(const std::filesystem::
             }
         }
         if (id != which) {
-            qCritical("Desired surface not found in %s", UTILSLIB::utf8FromPath(name).c_str());
+            UTILSLIB::Log::critical("Desired surface not found in {}", UTILSLIB::utf8FromPath(name));
             stream.close();
             return nullptr;
         }

@@ -15,6 +15,7 @@
 //=============================================================================================================
 
 #include "mne_event_list.h"
+#include <utils/logger/log.h>
 
 #include <vector>
 
@@ -59,7 +60,7 @@ std::optional<MNEEventList> MNEEventList::readFif(const std::filesystem::path& p
     const std::vector<FiffDirNode::SPtr> blocks = stream.dirtree()->dir_tree_find(FIFFB_MNE_EVENTS);
     const auto tag = blocks.empty() ? std::nullopt : blocks.front()->find_tag(stream, FIFF_MNE_EVENT_LIST);
     if (!tag) {
-        qWarning("MNEEventList::readFif - No event data in %s", UTILSLIB::utf8FromPath(path).c_str());
+        UTILSLIB::Log::warning("MNEEventList::readFif - No event data in {}", UTILSLIB::utf8FromPath(path));
         return std::nullopt;
     }
     // Written as signed or unsigned integers; both have the same bit pattern.
@@ -88,7 +89,7 @@ std::optional<MNEEventList> MNEEventList::readText(const std::filesystem::path& 
 {
     QFile file(path);
     if (!file.open(QIODevice::ReadOnly | QIODevice::Text)) {
-        qWarning("MNEEventList::readText - Cannot open %s", UTILSLIB::utf8FromPath(path).c_str());
+        UTILSLIB::Log::warning("MNEEventList::readText - Cannot open {}", UTILSLIB::utf8FromPath(path));
         return std::nullopt;
     }
     static const QRegularExpression whitespace(QStringLiteral("\\s+"));
@@ -116,7 +117,7 @@ std::optional<MNEEventList> MNEEventList::readText(const std::filesystem::path& 
             first = false;
             if (from == 0 && to == 0) {
                 if (offset != sample) {
-                    qWarning("MNEEventList::readText - First sample of the data (%d) and of %s (%d) differ", offset, UTILSLIB::utf8FromPath(path).c_str(), sample);
+                    UTILSLIB::Log::warning("MNEEventList::readText - First sample of the data ({}) and of {} ({}) differ", offset, UTILSLIB::utf8FromPath(path), sample);
                 }
                 continue;
             }
@@ -130,7 +131,7 @@ std::optional<MNEEventList> MNEEventList::readText(const std::filesystem::path& 
         list.events.push_back(event);
     }
     if (list.events.empty()) {
-        qWarning("MNEEventList::readText - No events read from %s", UTILSLIB::utf8FromPath(path).c_str());
+        UTILSLIB::Log::warning("MNEEventList::readText - No events read from {}", UTILSLIB::utf8FromPath(path));
         return std::nullopt;
     }
     return list;

@@ -19,6 +19,7 @@
 //=============================================================================================================
 
 #include "mne_msh_display_surface_set.h"
+#include <utils/logger/log.h>
 
 #include "mne_msh_display_surface.h"
 #include "mne_surface.h"
@@ -39,7 +40,6 @@
 //=============================================================================================================
 
 #include <qmath.h>
-#include <QDebug>
 
 //=============================================================================================================
 // CONSTANTS
@@ -129,7 +129,7 @@ std::unique_ptr<MNEMshDisplaySurfaceSet> MNEMshDisplaySurfaceSet::load(const std
     const std::filesystem::path pathRh = surfDir / UTILSLIB::pathFromUtf8("rh." + surf);
     const std::filesystem::path pathRhCurv = surfDir / "rh.curv";
 
-    qInfo("Loading surface %s ...\n", UTILSLIB::utf8FromPath(pathLh).c_str());
+    UTILSLIB::Log::info("Loading surface {} ...\n", UTILSLIB::utf8FromPath(pathLh));
     auto left = MNESourceSpace::load_surface(pathLh, pathLhCurv);
     if (!left) {
         left = MNESourceSpace::load_surface(pathLh, {});
@@ -138,7 +138,7 @@ std::unique_ptr<MNEMshDisplaySurfaceSet> MNEMshDisplaySurfaceSet::load(const std
         left->add_uniform_curv();
     }
 
-    qInfo("Loading surface %s ...\n", UTILSLIB::utf8FromPath(pathRh).c_str());
+    UTILSLIB::Log::info("Loading surface {} ...\n", UTILSLIB::utf8FromPath(pathRh));
     auto right = MNESourceSpace::load_surface(pathRh, pathRhCurv);
     if (!right) {
         right = MNESourceSpace::load_surface(pathRh, {});
@@ -193,8 +193,7 @@ int MNEMshDisplaySurfaceSet::add_bem_surface(const std::filesystem::path& filepa
                                              int full_geom,
                                              int check)
 {
-    qInfo("Loading BEM surface %s (id = %d) from %s ...\n",
-          bemname.c_str(), kind, UTILSLIB::utf8FromPath(filepath).c_str());
+    UTILSLIB::Log::info("Loading BEM surface {} (id = {}) from {} ...\n", bemname, kind, UTILSLIB::utf8FromPath(filepath));
 
     std::unique_ptr<MNESurface> surf(MNESurface::read_bem_surface2(filepath, kind, full_geom));
     if (!surf)
@@ -204,9 +203,7 @@ int MNEMshDisplaySurfaceSet::add_bem_surface(const std::filesystem::path& filepa
         surf->compute_surface_cm();
         double sum = surf->sum_solids(Eigen::Map<const Eigen::Vector3f>(surf->cm)) / (4 * M_PI);
         if (std::fabs(sum - 1.0) > 1e-4) {
-            qCritical("%s surface is not closed "
-                      "(sum of solid angles = %g * 4*PI).",
-                      bemname.c_str(), sum);
+            UTILSLIB::Log::critical("{} surface is not closed (sum of solid angles = {:g} * 4*PI).", bemname, sum);
             return -1;
         }
     }

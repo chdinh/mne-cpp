@@ -19,6 +19,7 @@
 //=============================================================================================================
 
 #include "mne_cov_matrix.h"
+#include <utils/logger/log.h>
 
 #include <vector>
 #include "mne_sss_data.h"
@@ -34,7 +35,6 @@
 #include <fiff/fiff_tag.h>
 
 #include <QFile>
-#include <QDebug>
 #include <QStringList>
 
 //=============================================================================================================
@@ -164,7 +164,7 @@ std::unique_ptr<MNECovMatrix> MNECovMatrix::read(const std::filesystem::path& na
     nodes = stream.dirtree()->dir_tree_find(FIFFB_MNE_COV);
 
     if (nodes.size() == 0) {
-        qWarning("No covariance matrix available in %s", UTILSLIB::utf8FromPath(name).c_str());
+        UTILSLIB::Log::warning("No covariance matrix available in {}", UTILSLIB::utf8FromPath(name));
         stream.close();
         return nullptr;
     }
@@ -181,7 +181,7 @@ std::unique_ptr<MNECovMatrix> MNECovMatrix::read(const std::filesystem::path& na
         }
     }
     if (!covnode || covnode->empty()) {
-        qWarning("Desired covariance matrix not found from %s", UTILSLIB::utf8FromPath(name).c_str());
+        UTILSLIB::Log::warning("Desired covariance matrix not found from {}", UTILSLIB::utf8FromPath(name));
         stream.close();
         return nullptr;
     }
@@ -201,7 +201,7 @@ std::unique_ptr<MNECovMatrix> MNECovMatrix::read(const std::filesystem::path& na
         names = FiffStream::split_name_list(t_pTag->toString());
         nnames = static_cast<int>(names.size());
         if (nnames != ncov) {
-            qCritical("Incorrect number of channel names for a covariance matrix");
+            UTILSLIB::Log::critical("Incorrect number of channel names for a covariance matrix");
             stream.close();
             return nullptr;
         }
@@ -220,7 +220,7 @@ std::unique_ptr<MNECovMatrix> MNECovMatrix::read(const std::filesystem::path& na
                  * Check for all-zero data
                  */
                 if (cov_diag.sum() == 0.0) {
-                    qCritical("Sum of covariance matrix elements is zero!");
+                    UTILSLIB::Log::critical("Sum of covariance matrix elements is zero!");
                     stream.close();
                     return nullptr;
                 }
@@ -230,7 +230,7 @@ std::unique_ptr<MNECovMatrix> MNECovMatrix::read(const std::filesystem::path& na
                 for (p = 0; p < ncov; p++)
                     cov_diag[p] = f[p];
             } else {
-                qWarning("Illegal data type for covariance matrix");
+                UTILSLIB::Log::warning("Illegal data type for covariance matrix");
                 stream.close();
                 return nullptr;
             }
@@ -243,7 +243,7 @@ std::unique_ptr<MNECovMatrix> MNECovMatrix::read(const std::filesystem::path& na
             for (p = 0; p < nn; p++)
                 cov[p] = d[p];
             if (cov.sum() == 0.0) {
-                qCritical("Sum of covariance matrix elements is zero!");
+                UTILSLIB::Log::critical("Sum of covariance matrix elements is zero!");
                 stream.close();
                 return nullptr;
             }
@@ -303,7 +303,7 @@ std::unique_ptr<MNECovMatrix> MNECovMatrix::read(const std::filesystem::path& na
     else if (cov_diag.size() > 0)
         res = create_diag(kind, ncov, names, cov_diag);
     else {
-        qCritical("MNECovMatrix::read : covariance matrix data is not defined.");
+        UTILSLIB::Log::critical("MNECovMatrix::read : covariance matrix data is not defined.");
         stream.close();
         return nullptr;
     }
@@ -373,7 +373,7 @@ int MNECovMatrix::add_inv()
     int k;
 
     if (src.size() == 0) {
-        qCritical("Covariance matrix is not diagonal or not decomposed.");
+        UTILSLIB::Log::critical("Covariance matrix is not diagonal or not decomposed.");
         return FAIL;
     }
     inv_lambda.resize(ncov);
@@ -403,7 +403,7 @@ int MNECovMatrix::condition(float rank_threshold, int use_rank)
     if (cov_diag.size() > 0)
         return OK;
     if (ch_class.size() == 0) {
-        qCritical("Channels not classified. Rank cannot be determined.");
+        UTILSLIB::Log::critical("Channels not classified. Rank cannot be determined.");
         return FAIL;
     }
     magscale = gradscale = eegscale = 0.0;
@@ -425,7 +425,7 @@ int MNECovMatrix::condition(float rank_threshold, int use_rank)
         QStringList classes;
         for (k = 0; k < ncov; k++)
             classes << QString::number(ch_class[k]);
-        qDebug("%s", qPrintable(classes.join(' ')));
+        UTILSLIB::Log::debug("{}", classes.join(' ').toStdString());
     }
 #endif
     if (nmag > 0)
@@ -435,9 +435,9 @@ int MNECovMatrix::condition(float rank_threshold, int use_rank)
     if (neeg > 0)
         eegscale = eegscale > 0.0 ? sqrt(neeg / eegscale) : 0.0;
 #ifdef DEBUG
-    qInfo("%d %g", nmag, magscale);
-    qInfo("%d %g", ngrad, gradscale);
-    qInfo("%d %g", neeg, eegscale);
+    UTILSLIB::Log::info("{} {:g}", nmag, magscale);
+    UTILSLIB::Log::info("{} {:g}", ngrad, gradscale);
+    UTILSLIB::Log::info("{} {:g}", neeg, eegscale);
 #endif
     scale_vec.resize(ncov);
     for (k = 0; k < ncov; k++) {
@@ -461,7 +461,7 @@ int MNECovMatrix::condition(float rank_threshold, int use_rank)
         QStringList ratios;
         for (k = 0; k < ncov; k++)
             ratios << QString::number(lambda_local[k] / lambda_local[ncov - 1]);
-        qDebug("%s", qPrintable(ratios.join(' ')));
+        UTILSLIB::Log::debug("{}", ratios.join(' ').toStdString());
 #endif
         nok = 0;
         for (k = ncov - 1; k >= 0; k--) {
@@ -470,10 +470,10 @@ int MNECovMatrix::condition(float rank_threshold, int use_rank)
             else
                 break;
         }
-        qInfo("\n\tEstimated covariance matrix rank = %d (%g)\n", nok, lambda_local[ncov - nok] / lambda_local[ncov - 1]);
+        UTILSLIB::Log::info("\n\tEstimated covariance matrix rank = {} ({:g})\n", nok, lambda_local[ncov - nok] / lambda_local[ncov - 1]);
         if (use_rank > 0 && use_rank < nok) {
             nok = use_rank;
-            qInfo("\tUser-selected covariance matrix rank = %d (%g)\n", nok, lambda_local[ncov - nok] / lambda_local[ncov - 1]);
+            UTILSLIB::Log::info("\tUser-selected covariance matrix rank = {} ({:g})\n", nok, lambda_local[ncov - nok] / lambda_local[ncov - 1]);
         }
         /*
          * Put it back together
@@ -490,10 +490,10 @@ int MNECovMatrix::condition(float rank_threshold, int use_rank)
         }
         MatrixXd data2 = data1.transpose() * data1;
 #ifdef DEBUG
-        qInfo(">>>\n");
+        UTILSLIB::Log::info(">>>\n");
         for (j = 0; j < ncov; j++)
             mne_print_dvector(stdout, nullptr, data2.row(j).data(), ncov);
-        qInfo(">>>\n");
+        UTILSLIB::Log::info(">>>\n");
 #endif
         /*
          * Scale back
@@ -526,7 +526,7 @@ int MNECovMatrix::decompose_eigen_small(float p_small, int use_rank)
     if (cov_diag.size() > 0)
         return add_inv();
     if (lambda.size() > 0 && eigen.size() > 0) {
-        qInfo("\n\tEigenvalue decomposition had been precomputed.\n");
+        UTILSLIB::Log::info("\n\tEigenvalue decomposition had been precomputed.\n");
         nzero = 0;
         for (k = 0; k < ncov; k++, nzero++)
             if (lambda[k] > 0)
@@ -569,7 +569,7 @@ int MNECovMatrix::decompose_eigen_small(float p_small, int use_rank)
                 else
                     neeg++;
             }
-            qInfo("\t%d MEG and %d EEG-like channels remain in the whitened data\n", nmeg, neeg);
+            UTILSLIB::Log::info("\t{} MEG and {} EEG-like channels remain in the whitened data\n", nmeg, neeg);
         }
     }
     return add_inv();
@@ -602,7 +602,7 @@ int MNECovMatrix::classify_channels(const std::vector<FiffChInfo>& chs, int ncha
     FiffChInfo ch;
 
     if (chs.empty()) {
-        qCritical("Channel information not available in classify_channels");
+        UTILSLIB::Log::critical("Channel information not available in classify_channels");
         return FAIL;
     }
     ch_class.resize(ncov);
@@ -630,7 +630,7 @@ int MNECovMatrix::classify_channels(const std::vector<FiffChInfo>& chs, int ncha
 int MNECovMatrix::whiten_vector(Eigen::Ref<Eigen::VectorXf> data, Eigen::Ref<Eigen::VectorXf> whitened_data, int nchan) const
 {
     if (ncov != nchan) {
-        qWarning("Incompatible covariance matrix. Cannot whiten the data.");
+        UTILSLIB::Log::warning("Incompatible covariance matrix. Cannot whiten the data.");
         return FAIL;
     }
     const double* inv = inv_lambda.data();
@@ -670,16 +670,16 @@ void MNECovMatrix::regularize(const Eigen::Vector3f& regs)
             nn[ch_class[j]]++;
         }
     }
-    qInfo("Average noise-covariance matrix diagonals:");
+    UTILSLIB::Log::info("Average noise-covariance matrix diagonals:");
     for (j = 0; j < nkind; j++) {
         if (nn[j] > 0) {
             sums[j] = sums[j] / nn[j];
             if (j == MNE_COV_CH_MEG_MAG)
-                qInfo("\tMagnetometers       : %-7.2f fT    reg = %-6.2f", 1e15 * std::sqrt(static_cast<double>(sums[j])), regs[j]);
+                UTILSLIB::Log::info("\tMagnetometers       : {:<7.2f} fT    reg = {:<6.2f}", 1e15 * std::sqrt(static_cast<double>(sums[j])), regs[j]);
             else if (j == MNE_COV_CH_MEG_GRAD)
-                qInfo("\tPlanar gradiometers : %-7.2f fT/cm reg = %-6.2f", 1e13 * std::sqrt(static_cast<double>(sums[j])), regs[j]);
+                UTILSLIB::Log::info("\tPlanar gradiometers : {:<7.2f} fT/cm reg = {:<6.2f}", 1e13 * std::sqrt(static_cast<double>(sums[j])), regs[j]);
             else
-                qInfo("\tEEG                 : %-7.2f uV    reg = %-6.2f", 1e6 * std::sqrt(static_cast<double>(sums[j])), regs[j]);
+                UTILSLIB::Log::info("\tEEG                 : {:<7.2f} uV    reg = {:<6.2f}", 1e6 * std::sqrt(static_cast<double>(sums[j])), regs[j]);
             sums[j] = regs[j] * sums[j];
         }
     }
@@ -687,7 +687,7 @@ void MNECovMatrix::regularize(const Eigen::Vector3f& regs)
         if (ch_class[j] >= 0)
             cov[lt_packed_index(j, j)] += sums[ch_class[j]];
 
-    qInfo("Noise-covariance regularized as requested.");
+    UTILSLIB::Log::info("Noise-covariance regularized as requested.");
 }
 
 //=============================================================================================================
@@ -725,11 +725,11 @@ std::unique_ptr<MNECovMatrix> MNECovMatrix::pick_chs_omit(const StringList& new_
     std::unique_ptr<MNECovMatrix> res;
 
     if (new_ncov == 0) {
-        qCritical("No channels specified for picking in pick_chs_omit");
+        UTILSLIB::Log::critical("No channels specified for picking in pick_chs_omit");
         return nullptr;
     }
     if (names.empty()) {
-        qCritical("No names in covariance matrix. Cannot do picking.");
+        UTILSLIB::Log::critical("No names in covariance matrix. Cannot do picking.");
         return nullptr;
     }
     Eigen::VectorXi pickVec = Eigen::VectorXi::Constant(new_ncov, -1);
@@ -741,7 +741,7 @@ std::unique_ptr<MNECovMatrix> MNECovMatrix::pick_chs_omit(const StringList& new_
             }
     for (j = 0; j < new_ncov; j++) {
         if (pickVec[j] < 0) {
-            qWarning("All desired channels not found in the covariance matrix (at least missing %s).", new_names[j].c_str());
+            UTILSLIB::Log::warning("All desired channels not found in the covariance matrix (at least missing {}).", new_names[j]);
             return nullptr;
         }
     }
@@ -776,11 +776,11 @@ std::unique_ptr<MNECovMatrix> MNECovMatrix::pick_chs_omit(const StringList& new_
                 from = lt_packed_index(pickVec[j], pickVec[k]);
                 to = lt_packed_index(j, k);
                 if (to < 0 || to > new_ncov * (new_ncov + 1) / 2 - 1) {
-                    qCritical("Wrong destination index in pick_chs_omit : %d %d %d", j, k, to);
+                    UTILSLIB::Log::critical("Wrong destination index in pick_chs_omit : {} {} {}", j, k, to);
                     return nullptr;
                 }
                 if (from < 0 || from > ncov * (ncov + 1) / 2 - 1) {
-                    qCritical("Wrong source index in pick_chs_omit : %d %d %d", pickVec[j], pickVec[k], from);
+                    UTILSLIB::Log::critical("Wrong source index in pick_chs_omit : {} {} {}", pickVec[j], pickVec[k], from);
                     return nullptr;
                 }
                 cov_local[to] = cov[from];

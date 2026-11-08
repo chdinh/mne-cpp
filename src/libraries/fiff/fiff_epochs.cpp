@@ -19,6 +19,7 @@
 //=============================================================================================================
 
 #include "fiff_epochs.h"
+#include <utils/logger/log.h>
 
 #include <vector>
 #include "fiff_evoked.h"
@@ -27,7 +28,6 @@
 // QT INCLUDES
 //=============================================================================================================
 
-#include <QDebug>
 
 //=============================================================================================================
 // STD INCLUDES
@@ -55,12 +55,12 @@ std::vector<FiffEpochData> FiffEpochs::makeFixedLengthEpochs(const MatrixXd& mat
     std::vector<FiffEpochData> epochs;
 
     if (matData.size() == 0 || dSFreq <= 0.0 || dDuration <= 0.0) {
-        qWarning() << "[FiffEpochs::makeFixedLengthEpochs] Invalid input parameters.";
+        UTILSLIB::Log::warning("[FiffEpochs::makeFixedLengthEpochs] Invalid input parameters.");
         return epochs;
     }
 
     if (dOverlap >= dDuration) {
-        qWarning() << "[FiffEpochs::makeFixedLengthEpochs] Overlap must be less than duration.";
+        UTILSLIB::Log::warning("[FiffEpochs::makeFixedLengthEpochs] Overlap must be less than duration.");
         return epochs;
     }
 
@@ -120,7 +120,7 @@ FiffEvoked FiffEpochs::averageEpochs(const std::vector<FiffEpochData>& epochs,
     FiffEvoked evoked;
 
     if (epochs.empty()) {
-        qWarning() << "[FiffEpochs::averageEpochs] Empty epoch list.";
+        UTILSLIB::Log::warning("[FiffEpochs::averageEpochs] Empty epoch list.");
         return evoked;
     }
 
@@ -132,7 +132,7 @@ FiffEvoked FiffEpochs::averageEpochs(const std::vector<FiffEpochData>& epochs,
 
     for (const auto& epoch : epochs) {
         if (epoch.data.rows() != nCh || epoch.data.cols() != nTimes) {
-            qWarning() << "[FiffEpochs::averageEpochs] Inconsistent epoch dimensions; skipping.";
+            UTILSLIB::Log::warning("[FiffEpochs::averageEpochs] Inconsistent epoch dimensions; skipping.");
             continue;
         }
         avg += epoch.data;

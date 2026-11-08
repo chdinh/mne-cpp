@@ -15,6 +15,7 @@
 //=============================================================================================================
 
 #include "mne_layout.h"
+#include <utils/logger/log.h>
 
 //=============================================================================================================
 // STL INCLUDES
@@ -77,7 +78,7 @@ std::optional<MNELayout> MNELayout::read(const std::filesystem::path& path)
 {
     std::ifstream file(path);
     if (!file) {
-        qWarning("MNELayout::read - Cannot open %s", utf8FromPath(path).c_str());
+        Log::warning("MNELayout::read - Cannot open {}", utf8FromPath(path));
         return std::nullopt;
     }
 
@@ -94,7 +95,7 @@ std::optional<MNELayout> MNELayout::read(const std::filesystem::path& path)
         if (!haveExtent) {
             double v[4];
             if (!(fields >> v[0] >> v[1] >> v[2] >> v[3])) {
-                qWarning("MNELayout::read - Illegal extent in %s", utf8FromPath(path).c_str());
+                Log::warning("MNELayout::read - Illegal extent in {}", utf8FromPath(path));
                 return std::nullopt;
             }
             layout.m_extent = QRectF(QPointF(v[0], v[2]), QPointF(v[1], v[3]));
@@ -107,7 +108,7 @@ std::optional<MNELayout> MNELayout::read(const std::filesystem::path& path)
         double w = 0.0;
         double h = 0.0;
         if (!(fields >> port.portno >> x0 >> y0 >> w >> h)) {
-            qWarning("MNELayout::read - Bad layout item in %s: %s", utf8FromPath(path).c_str(), line.c_str());
+            Log::warning("MNELayout::read - Bad layout item in {}: {}", utf8FromPath(path), line);
             return std::nullopt;
         }
         port.xmin = static_cast<float>(x0);
@@ -125,7 +126,7 @@ std::optional<MNELayout> MNELayout::read(const std::filesystem::path& path)
         layout.ports.push_back(std::move(port));
     }
     if (!haveExtent) {
-        qWarning("MNELayout::read - No extent in %s", utf8FromPath(path).c_str());
+        Log::warning("MNELayout::read - No extent in {}", utf8FromPath(path));
         return std::nullopt;
     }
     layout.m_visible = layout.m_extent;

@@ -22,6 +22,7 @@
 //=============================================================================================================
 
 #include "mne_epoch_data_list.h"
+#include <utils/logger/log.h>
 
 #include <vector>
 #include <utility>
@@ -97,9 +98,9 @@ MNEEpochDataList MNEEpochDataList::readEpochs(const FiffRawData& raw,
     }
     selected.conservativeResize(1, count);
     if (count > 0) {
-        qInfo("[MNEEpochDataList::readEpochs] %d matching events found", count);
+        Log::info("[MNEEpochDataList::readEpochs] {} matching events found", count);
     } else {
-        qWarning("[MNEEpochDataList::readEpochs] No desired events found.");
+        Log::warning("[MNEEpochDataList::readEpochs] No desired events found.");
         return MNEEpochDataList();
     }
 
@@ -158,11 +159,11 @@ MNEEpochDataList MNEEpochDataList::readEpochs(const FiffRawData& raw,
                 data.append(MNEEpochData::SPtr(epoch.release())); //List takes ownwership of the pointer - no delete need
             }
         } else {
-            qWarning("[MNEEpochDataList::readEpochs] Can't read the event data segments.");
+            Log::warning("[MNEEpochDataList::readEpochs] Can't read the event data segments.");
         }
     }
 
-    qInfo().noquote() << "[MNEEpochDataList::readEpochs] Read a total of" << data.size() << "epochs of type" << event << "and marked" << dropCount << "for rejection.";
+    Log::info("[MNEEpochDataList::readEpochs] Read a total of {} epochs of type {} and marked {} for rejection.", data.size(), event, dropCount);
 
     return data;
 }
@@ -177,7 +178,7 @@ FiffEvoked MNEEpochDataList::average(const FiffInfo& info,
 {
     FiffEvoked p_evoked;
 
-    qInfo("[MNEEpochDataList::average] Calculate evoked. ");
+    Log::info("[MNEEpochDataList::average] Calculate evoked. ");
 
     MatrixXd matAverage;
 
@@ -203,7 +204,7 @@ FiffEvoked MNEEpochDataList::average(const FiffInfo& info,
     }
     matAverage.array() /= p_evoked.nave;
 
-    qInfo("[MNEEpochDataList::average] %d averages used [done]", p_evoked.nave);
+    Log::info("[MNEEpochDataList::average] {} averages used [done]", p_evoked.nave);
 
     p_evoked.setInfo(info, proj);
 
@@ -223,7 +224,7 @@ FiffEvoked MNEEpochDataList::average(const FiffInfo& info,
 
     if (p_evoked.proj.rows() > 0) {
         matAverage = p_evoked.proj * matAverage;
-        qInfo("[MNEEpochDataList::average] SSP projectors applied to the evoked data");
+        Log::info("[MNEEpochDataList::average] SSP projectors applied to the evoked data");
     }
 
     p_evoked.data = matAverage;
@@ -271,8 +272,6 @@ bool MNEEpochDataList::checkForArtifact(const MatrixXd& data,
                                         const std::map<std::string, double>& mapReject,
                                         const StringList& lExcludeChs)
 {
-    //qDebug() << "MNEEpochDataList::checkForArtifact - Doing artifact reduction for" << mapReject;
-
     bool bReject = false;
 
     //Prepare concurrent data handling
@@ -306,12 +305,11 @@ bool MNEEpochDataList::checkForArtifact(const MatrixXd& data,
     }
 
     if (lchData.empty()) {
-        qWarning() << "[MNEEpochDataList::checkForArtifact] No channels found to scan for artifacts. Do not reject. Returning.";
+        Log::warning("[MNEEpochDataList::checkForArtifact] No channels found to scan for artifacts. Do not reject. Returning.");
 
         return bReject;
     }
 
-    //qDebug() << "MNEEpochDataList::checkForArtifact - lchData.size()" << lchData.size();
 
     //Start the concurrent processing
     QFuture<void> future = QtConcurrent::map(lchData, checkChThreshold);
@@ -320,7 +318,7 @@ bool MNEEpochDataList::checkForArtifact(const MatrixXd& data,
     for (int i = 0; i < std::ssize(lchData); ++i) {
         if (lchData.at(i).bRejected) {
             bReject = true;
-            qInfo().noquote() << "[MNEEpochDataList::checkForArtifact] Reject trial because of channel" << lchData.at(i).sChName.c_str();
+            Log::info("[MNEEpochDataList::checkForArtifact] Reject trial because of channel {}", lchData.at(i).sChName);
             break;
         }
     }
@@ -349,10 +347,6 @@ void MNEEpochDataList::checkChThreshold(ArtifactRejectionData& inputData)
         inputData.bRejected = false;
     }
 
-    //    qDebug() << "MNEEpochDataList::checkChThreshold - min" << min;
-    //    qDebug() << "MNEEpochDataList::checkChThreshold - max" << max;
-    //    qDebug() << "MNEEpochDataList::checkChThreshold - pp" << pp;
-    //    qDebug() << "MNEEpochDataList::checkChThreshold - inputData.dThreshold" << inputData.dThreshold;
 
     //    //If absolute vaue of min or max if bigger than threshold -> reject
     //    if((std::fabs(min) > inputData.dThreshold) || (std::fabs(max) > inputData.dThreshold)) {
@@ -394,8 +388,7 @@ FiffEvokedSet MNEEpochDataList::averageCategories(const FiffRawData& raw,
                                                                   mapReject);
 
         if (epochList.isEmpty()) {
-            qWarning() << "[MNEEpochDataList::averageCategories] No epochs found for event"
-                       << eventCode << "- skipping category.";
+            Log::warning("[MNEEpochDataList::averageCategories] No epochs found for event {} - skipping category.", eventCode);
             continue;
         }
 
@@ -408,8 +401,7 @@ FiffEvokedSet MNEEpochDataList::averageCategories(const FiffRawData& raw,
         epochList.dropRejected();
 
         if (epochList.isEmpty()) {
-            qWarning() << "[MNEEpochDataList::averageCategories] All epochs rejected for event"
-                       << eventCode << "- skipping category.";
+            Log::warning("[MNEEpochDataList::averageCategories] All epochs rejected for event {} - skipping category.", eventCode);
             continue;
         }
 

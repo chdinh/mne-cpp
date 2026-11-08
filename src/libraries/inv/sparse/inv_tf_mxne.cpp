@@ -23,6 +23,7 @@
 //=============================================================================================================
 
 #include "inv_tf_mxne.h"
+#include <utils/logger/log.h>
 
 #include <Eigen/SVD>
 
@@ -32,7 +33,6 @@
 // QT INCLUDES
 //=============================================================================================================
 
-#include <QDebug>
 #include <QtMath>
 
 //=============================================================================================================
@@ -114,8 +114,7 @@ InvTfMxneResult InvTfMxne::compute(const MatrixXd& matGain,
     const int nAtoms = 2 * params.iNFreqs;
 
     if (matData.rows() != nChannels) {
-        qWarning() << "[InvTfMxne::compute] Dimension mismatch: data rows" << matData.rows()
-                   << "!= gain rows" << nChannels;
+        UTILSLIB::Log::warning("[InvTfMxne::compute] Dimension mismatch: data rows {} != gain rows {}", matData.rows(), nChannels);
         return result;
     }
 

@@ -20,6 +20,7 @@
 //=============================================================================================================
 
 #include "fiff_ctf_comp.h"
+#include <utils/logger/log.h>
 
 #include <vector>
 
@@ -83,14 +84,14 @@ int uniqueChannel(const std::vector<FiffChInfo>& chs, const std::string& name)
     for (int i = 0; i < std::ssize(chs); ++i) {
         if (chs[i].ch_name == name) {
             if (found >= 0) {
-                qWarning("Ambiguous channel %s", name.c_str());
+                UTILSLIB::Log::warning("Ambiguous channel {}", name);
                 return -1;
             }
             found = i;
         }
     }
     if (found < 0)
-        qWarning("Channel %s is not available in data", name.c_str());
+        UTILSLIB::Log::warning("Channel {} is not available in data", name);
     return found;
 }
 

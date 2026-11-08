@@ -136,7 +136,6 @@ FiffCov RtCov::estimateCovariance(const Eigen::MatrixXd& matData,
 
         //            std::cout << "Noise Covariance:\n" << noise_covariance.block(0,0,10,10) << std::endl;
 
-        //            qInfo("%d raw buffer (%d x %d) generated\r", count, tmp.rows(), tmp.cols());
 
         m_lData.clear();
         m_iSamples = 0;

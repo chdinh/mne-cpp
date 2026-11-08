@@ -24,6 +24,7 @@
 //=============================================================================================================
 
 #include "fiff_evoked_set.h"
+#include <utils/logger/log.h>
 
 #include <format>
 
@@ -53,7 +54,6 @@
 //=============================================================================================================
 
 #include <QFile>
-#include <QDebug>
 
 //=============================================================================================================
 // USED NAMESPACES
@@ -136,13 +136,13 @@ bool FiffEvokedSet::compensate_to(fiff_int_t to)
     const qint32 now = info.get_current_comp();
 
     if (now == to) {
-        qInfo("Data is already compensated as desired.\n");
+        Log::info("Data is already compensated as desired.\n");
         return false;
     }
 
     FiffCtfComp ctf_comp;
     if (!info.make_compensator(now, to, ctf_comp)) {
-        qWarning("[FiffEvokedSet::compensate_to] Cannot change compensation from grade %d to %d.", now, to);
+        Log::warning("[FiffEvokedSet::compensate_to] Cannot change compensation from grade {} to {}.", now, to);
         return false;
     }
 
@@ -160,13 +160,13 @@ bool FiffEvokedSet::compensate_to(fiff_int_t to)
 bool FiffEvokedSet::find_evoked(const FiffEvokedSet& p_FiffEvokedSet) const
 {
     if (!p_FiffEvokedSet.evoked.size()) {
-        qWarning("No evoked response data sets in %s\n", p_FiffEvokedSet.info.filename.c_str());
+        Log::warning("No evoked response data sets in {}\n", p_FiffEvokedSet.info.filename);
         return false;
     } else
-        qInfo("\nFound %lld evoked response data sets in %s :\n", static_cast<long long>(p_FiffEvokedSet.evoked.size()), p_FiffEvokedSet.info.filename.c_str());
+        Log::info("\nFound {} evoked response data sets in {} :\n", p_FiffEvokedSet.evoked.size(), p_FiffEvokedSet.info.filename);
 
     for (qint32 i = 0; i < std::ssize(p_FiffEvokedSet.evoked); ++i) {
-        qInfo("%s (%s)\n", p_FiffEvokedSet.evoked.at(i).comment.c_str(), p_FiffEvokedSet.evoked.at(i).aspectKindToString().c_str());
+        Log::info("{} ({})\n", p_FiffEvokedSet.evoked.at(i).comment, p_FiffEvokedSet.evoked.at(i).aspectKindToString());
     }
 
     return true;
@@ -230,7 +230,7 @@ FiffEvokedSet FiffEvokedSet::computeGrandAverage(const std::vector<FiffEvokedSet
     FiffEvokedSet grandAvg;
 
     if (evokedSets.empty()) {
-        qWarning() << "[FiffEvokedSet::computeGrandAverage] No evoked sets provided.";
+        Log::warning("[FiffEvokedSet::computeGrandAverage] No evoked sets provided.");
         return grandAvg;
     }
 

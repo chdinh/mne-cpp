@@ -19,6 +19,7 @@
 //=============================================================================================================
 
 #include <fiff/fiff_constants.h>
+#include <utils/logger/log.h>
 #include <utils/string_utils.h>
 #include <fiff/fiff_tag.h>
 
@@ -177,7 +178,7 @@ std::unique_ptr<MNEProjOp> MNEProjOp::create_average_eeg_ref(const std::vector<F
         if (chs.at(k).kind == FIFFV_EEG_CH)
             eegcount++;
     if (eegcount == 0) {
-        qCritical("No EEG channels specified for average reference.");
+        UTILSLIB::Log::critical("No EEG channels specified for average reference.");
         return nullptr;
     }
 
@@ -235,7 +236,7 @@ int MNEProjOp::project_vector(Eigen::Ref<Eigen::VectorXf> vec, bool do_complemen
         return OK;
 
     if (nch != static_cast<int>(vec.size())) {
-        qCritical("Data vector size does not match projection operator");
+        UTILSLIB::Log::critical("Data vector size does not match projection operator");
         return FAIL;
     }
 
@@ -335,7 +336,7 @@ std::unique_ptr<MNEProjOp> MNEProjOp::read_from_node(FiffStream& stream, const F
             item_nchan = *t_pTag->toInt();
         }
         if (item_nchan <= 0) {
-            qCritical("Number of channels incorrectly specified for one of the projection items.");
+            UTILSLIB::Log::critical("Number of channels incorrectly specified for one of the projection items.");
             return nullptr;
         }
         /*
@@ -348,7 +349,7 @@ std::unique_ptr<MNEProjOp> MNEProjOp::read_from_node(FiffStream& stream, const F
         item_names = FiffStream::split_name_list(t_pTag->toString());
 
         if (static_cast<int>(item_names.size()) != item_nchan) {
-            qCritical("Channel name list incorrectly specified for proj item # %d", k + 1);
+            UTILSLIB::Log::critical("Channel name list incorrectly specified for proj item # {}", k + 1);
             item_names.clear();
             return nullptr;
         }
@@ -587,7 +588,7 @@ int MNEProjOp::make_proj_bad(const StringList& bad)
         nvec_eeg = 0;
     }
     if (nvec_meg + nvec_eeg == 0) {
-        qWarning("No projection remains after excluding bad channels. Omitting projection.");
+        UTILSLIB::Log::warning("No projection remains after excluding bad channels. Omitting projection.");
         return OK;
     }
     /*
@@ -662,7 +663,7 @@ int MNEProjOp::project_dvector(Eigen::Ref<Eigen::VectorXd> vec, bool do_compleme
         return OK;
 
     if (nch != static_cast<int>(vec.size())) {
-        qCritical("Data vector size does not match projection operator");
+        UTILSLIB::Log::critical("Data vector size does not match projection operator");
         return FAIL;
     }
 
@@ -703,13 +704,13 @@ bool MNEProjOp::makeProjection(const std::vector<std::filesystem::path>& projnam
     for (const auto& projname : projnames) {
         std::unique_ptr<MNEProjOp> one(MNEProjOp::read(projname));
         if (!one) {
-            qCritical("Failed to read projection from %s.", UTILSLIB::utf8FromPath(projname).c_str());
+            UTILSLIB::Log::critical("Failed to read projection from {}.", UTILSLIB::utf8FromPath(projname));
             return false;
         }
         if (one->nitems == 0) {
-            qInfo("No linear projection information in %s.", UTILSLIB::utf8FromPath(projname).c_str());
+            UTILSLIB::Log::info("No linear projection information in {}.", UTILSLIB::utf8FromPath(projname));
         } else {
-            qInfo("Loaded projection from %s:", UTILSLIB::utf8FromPath(projname).c_str());
+            UTILSLIB::Log::info("Loaded projection from {}:", UTILSLIB::utf8FromPath(projname));
             {
                 QTextStream errStream(stderr);
                 one->report(errStream, QStringLiteral("\t").toStdString());
@@ -732,7 +733,7 @@ bool MNEProjOp::makeProjection(const std::vector<std::filesystem::path>& projnam
         if (!found) {
             std::unique_ptr<MNEProjOp> one(MNEProjOp::create_average_eeg_ref(chs, nch));
             if (one) {
-                qInfo("Average EEG reference projection added:");
+                UTILSLIB::Log::info("Average EEG reference projection added:");
                 {
                     QTextStream errStream(stderr);
                     one->report(errStream, QStringLiteral("\t").toStdString());
@@ -744,7 +745,7 @@ bool MNEProjOp::makeProjection(const std::vector<std::filesystem::path>& projnam
         }
     }
     if (all && all->affect_chs(chs, nch) == 0) {
-        qInfo("Projection will not have any effect on selected channels. Projection omitted.");
+        UTILSLIB::Log::info("Projection will not have any effect on selected channels. Projection omitted.");
         all.reset();
     }
     result = std::move(all);
@@ -764,7 +765,7 @@ int MNEProjOp::apply_cov(MNECovMatrix* c)
         return OK;
 
     if (nch != c->ncov || names != c->names) {
-        qCritical("Incompatible data in apply_cov");
+        UTILSLIB::Log::critical("Incompatible data in apply_cov");
         return FAIL;
     }
 

@@ -21,6 +21,7 @@
 //=============================================================================================================
 
 #include "mne_forward_solution.h"
+#include <utils/logger/log.h>
 
 #include <vector>
 
@@ -70,10 +71,10 @@ bool check_matching_chnames_conventions(const StringList& chNamesA, const String
     bool bMatching = false;
 
     if (chNamesA.empty()) {
-        qWarning("Warning in check_matching_chnames_conventions - chNamesA list is empty. Nothing to compare");
+        Log::warning("Warning in check_matching_chnames_conventions - chNamesA list is empty. Nothing to compare");
     }
     if (chNamesB.empty()) {
-        qWarning("Warning in check_matching_chnames_conventions - chNamesB list is empty. Nothing to compare");
+        Log::warning("Warning in check_matching_chnames_conventions - chNamesB list is empty. Nothing to compare");
     }
 
     for (const std::string& name : chNamesA) {
@@ -364,17 +365,17 @@ MNEForwardSolution MNEForwardSolution::cluster_forward_solution(const FsAnnotati
                                                                 const FiffInfo& p_pInfo,
                                                                 const std::string& p_sMethod) const
 {
-    qInfo("Cluster forward solution using %s.", p_sMethod.c_str());
+    Log::info("Cluster forward solution using {}.", p_sMethod);
 
     MNEForwardSolution p_fwdOut = MNEForwardSolution(*this);
 
     //Check if cov naming conventions are matching
     if (!check_matching_chnames_conventions(p_pNoise_cov.names, p_pInfo.ch_names) && !p_pNoise_cov.names.empty() && !p_pInfo.ch_names.empty()) {
         if (check_matching_chnames_conventions(p_pNoise_cov.names, p_pInfo.ch_names, true)) {
-            qWarning("MNEForwardSolution::cluster_forward_solution - Cov names do match with info channel names but have a different naming convention.");
+            Log::warning("MNEForwardSolution::cluster_forward_solution - Cov names do match with info channel names but have a different naming convention.");
             //return p_fwdOut;
         } else {
-            qWarning("MNEForwardSolution::cluster_forward_solution - Cov channel names do not match with info channel names.");
+            Log::warning("MNEForwardSolution::cluster_forward_solution - Cov channel names do not match with info channel names.");
             //return p_fwdOut;
         }
     }
@@ -383,7 +384,7 @@ MNEForwardSolution MNEForwardSolution::cluster_forward_solution(const FsAnnotati
     // Check consisty
     //
     if (this->isFixedOrient()) {
-        qWarning("Error: Fixed orientation not implemented yet!");
+        Log::warning("Error: Fixed orientation not implemented yet!");
         return p_fwdOut;
     }
 
@@ -399,7 +400,7 @@ MNEForwardSolution MNEForwardSolution::cluster_forward_solution(const FsAnnotati
         qint32 p_outNumNonZero;
         //do whitening with noise cov
         this->prepare_forward(p_pInfo, p_pNoise_cov, false, p_outFwdInfo, t_G_Whitened, p_outNoiseCov, p_outWhitener, p_outNumNonZero);
-        qInfo("\tWhitening the forward solution.");
+        Log::info("\tWhitening the forward solution.");
 
         t_G_Whitened = p_outWhitener * t_G_Whitened;
         t_bUseWhitened = true;
@@ -423,11 +424,11 @@ MNEForwardSolution MNEForwardSolution::cluster_forward_solution(const FsAnnotati
                 offset += this->src[j].nuse;
 
         if (h == 0)
-            qInfo("Cluster Left Hemisphere");
+            Log::info("Cluster Left Hemisphere");
         else
-            qInfo("Cluster Right Hemisphere");
+            Log::info("Cluster Right Hemisphere");
 
-        const FsAnnotation annotation = p_AnnotationSet[h];
+        const FsAnnotation& annotation = p_AnnotationSet[h];
         FsColortable t_CurrentColorTable = annotation.getColortable();
         VectorXi label_ids = t_CurrentColorTable.getLabelIds();
 
@@ -446,7 +447,7 @@ MNEForwardSolution MNEForwardSolution::cluster_forward_solution(const FsAnnotati
         for (qint32 i = 0; i < label_ids.rows(); ++i) {
             if (label_ids[i] != 0) {
                 const std::string& curr_name = t_CurrentColorTable.struct_names[static_cast<std::size_t>(i)]; //obj.label2AtlasName(label(i));
-                qInfo("\tCluster %d / %ld %s...", i + 1, label_ids.rows(), curr_name.c_str());
+                Log::info("\tCluster {} / {} {}...", i + 1, label_ids.rows(), curr_name);
 
                 //
                 // Get source space indeces
@@ -485,7 +486,7 @@ MNEForwardSolution MNEForwardSolution::cluster_forward_solution(const FsAnnotati
 
                     t_sensG.matRoiGOrig = t_G;
 
-                    qInfo("%d Cluster(s)...", t_sensG.nClusters);
+                    Log::info("{} Cluster(s)...", t_sensG.nClusters);
 
                     // Reshape Input data -> sources rows; sensors columns
                     t_sensG.matRoiG = MatrixXd(t_G.cols() / 3, 3 * nSens);
@@ -509,9 +510,9 @@ MNEForwardSolution MNEForwardSolution::cluster_forward_solution(const FsAnnotati
 
                     regionDataIn.push_back(std::move(t_sensG));
 
-                    qInfo("[added]");
+                    Log::info("[added]");
                 } else {
-                    qWarning("failed! FsLabel contains no sources.");
+                    Log::warning("failed! FsLabel contains no sources.");
                 }
             }
         }
@@ -519,7 +520,7 @@ MNEForwardSolution MNEForwardSolution::cluster_forward_solution(const FsAnnotati
         //
         // Calculate clusters
         //
-        qInfo("Clustering...");
+        Log::info("Clustering...");
         QFuture<RegionDataOut> res;
         res = QtConcurrent::mapped(regionDataIn, &RegionData::cluster);
         res.waitForFinished();
@@ -623,7 +624,7 @@ MNEForwardSolution MNEForwardSolution::cluster_forward_solution(const FsAnnotati
         // Patches belong to the original sources; a cluster's normal is that of its centroid
         p_fwdOut.src.hemisphereAt(h)->patch_inds = VectorXi();
 
-        qInfo("[done]");
+        Log::info("[done]");
     }
 
     //
@@ -738,7 +739,7 @@ MNEForwardSolution MNEForwardSolution::reduce_forward_solution(qint32 p_iNumDipo
 
 FiffCov MNEForwardSolution::compute_depth_prior(const MatrixXd& Gain, const FiffInfo& gain_info, bool is_fixed_ori, double exp, double limit, const MatrixXd& patch_areas, bool limit_depth_chs)
 {
-    qInfo("\tCreating the depth weighting matrix...");
+    Log::info("\tCreating the depth weighting matrix...");
 
     MatrixXd G(Gain);
     // If possible, pick best depth-weighting channels
@@ -765,7 +766,7 @@ FiffCov MNEForwardSolution::compute_depth_prior(const MatrixXd& Gain, const Fiff
 
     if (patch_areas.size() > 0) {
         d.array() /= patch_areas.reshaped().array().square();
-        qInfo("\tPatch areas taken into account in the depth weighting");
+        Log::info("\tPatch areas taken into account in the depth weighting");
     }
 
     qint32 n_limit;
@@ -798,9 +799,9 @@ FiffCov MNEForwardSolution::compute_depth_prior(const MatrixXd& Gain, const Fiff
         }
     }
 
-    qInfo("\tlimit = %d/%ld = %f", n_limit + 1, d.size(), sqrt(limit / ws[0]));
+    Log::info("\tlimit = {}/{} = {:f}", n_limit + 1, d.size(), sqrt(limit / ws[0]));
     double scale = 1.0 / limit;
-    qInfo("\tscale = %g exp = %g", scale, exp);
+    Log::info("\tscale = {:g} exp = {:g}", scale, exp);
 
     VectorXd t_w = w.array() / limit;
     for (qint32 i = 0; i < t_w.size(); ++i)
@@ -840,27 +841,27 @@ FiffCov MNEForwardSolution::compute_orient_prior(float loose)
 
     if (0 <= loose && loose <= 1) {
         if (loose < 1 && !this->surf_ori) {
-            qWarning("\tForward operator is not oriented in surface coordinates. loose parameter should be None not %f.", loose);
+            Log::warning("\tForward operator is not oriented in surface coordinates. loose parameter should be None not {:f}.", loose);
             loose = 1;
-            qInfo("\tSetting loose to %f.", loose);
+            Log::info("\tSetting loose to {:f}.", loose);
         }
 
         if (is_fixed_ori) {
-            qInfo("\tIgnoring loose parameter with forward operator with fixed orientation.");
+            Log::info("\tIgnoring loose parameter with forward operator with fixed orientation.");
             loose = 0.0;
         }
     } else {
         if (loose < 0 || loose > 1) {
-            qWarning("Warning: Loose value should be in interval [0,1] not %f.\n", loose);
+            Log::warning("Warning: Loose value should be in interval [0,1] not {:f}.\n", loose);
             loose = loose > 1 ? 1 : 0;
-            qInfo("Setting loose to %f.", loose);
+            Log::info("Setting loose to {:f}.", loose);
         }
     }
 
     FiffCov orient_prior;
     orient_prior.data = VectorXd::Ones(n_sources);
     if (!is_fixed_ori && (0 <= loose && loose <= 1)) {
-        qInfo("\tApplying loose dipole orientations. Loose value of %f.", loose);
+        Log::info("\tApplying loose dipole orientations. Loose value of {:f}.", loose);
         for (qint32 i = 0; i < n_sources; i += 3)
             orient_prior.data.block(i, 0, 2, 1).array() *= loose;
 
@@ -888,10 +889,10 @@ MNEForwardSolution MNEForwardSolution::pick_channels(const StringList& include,
     quint32 nuse = sel.size();
 
     if (nuse == 0) {
-        qInfo("Nothing remains after picking. Returning original forward solution.");
+        Log::info("Nothing remains after picking. Returning original forward solution.");
         return fwd;
     }
-    qInfo("\t%d out of %d channels remain after picking", nuse, fwd.nchan);
+    Log::info("\t{} out of {} channels remain after picking", nuse, fwd.nchan);
 
     //   Pick the correct rows of the forward operator
     MatrixXd newData(nuse, fwd.sol->data.cols());
@@ -1016,7 +1017,7 @@ void MNEForwardSolution::prepare_forward(const FiffInfo& p_info,
             ch_names.push_back(p_info.chs[i].ch_name);
 
     qint32 n_chan = static_cast<int>(ch_names.size());
-    qInfo("Computing inverse operator with %d channels.", n_chan);
+    Log::info("Computing inverse operator with {} channels.", n_chan);
 
     //
     //   Handle noise cov
@@ -1041,9 +1042,9 @@ void MNEForwardSolution::prepare_forward(const FiffInfo& p_info,
             p_outWhitener = MatrixXd(p_outNumNonZero, n_chan);
             for (qint32 i = 0; i < p_outNumNonZero; ++i)
                 p_outWhitener.row(i) = p_outNoiseCov.eigvec.row(t_vecNonZero[i]) / sqrt(p_outNoiseCov.eig(t_vecNonZero[i]));
-            qInfo("\tReducing data rank to %d.", p_outNumNonZero);
+            Log::info("\tReducing data rank to {}.", p_outNumNonZero);
         } else {
-            qInfo("Creating non pca whitener.");
+            Log::info("Creating non pca whitener.");
             p_outWhitener = MatrixXd::Zero(n_chan, n_chan);
             for (qint32 i = 0; i < p_outNumNonZero; ++i)
                 p_outWhitener(t_vecNonZero[i], t_vecNonZero[i]) = 1.0 / sqrt(p_outNoiseCov.eig(t_vecNonZero[i]));
@@ -1078,7 +1079,7 @@ void MNEForwardSolution::prepare_forward(const FiffInfo& p_info,
 
     p_outFwdInfo = p_info.pick_info(info_idx);
 
-    qInfo("\tTotal rank is %d", p_outNumNonZero);
+    Log::info("\tTotal rank is {}", p_outNumNonZero);
 }
 
 //=============================================================================================================
@@ -1098,7 +1099,7 @@ Expected<MNEForwardSolution> MNEForwardSolution::read(const std::filesystem::pat
     }
     FiffStream& t_pStream = *opened;
     const std::string name = utf8FromPath(path);
-    qInfo("Reading forward solution from %s...", name.c_str());
+    Log::info("Reading forward solution from {}...", name);
     //
     //   Find all forward solutions
     //
@@ -1131,10 +1132,10 @@ Expected<MNEForwardSolution> MNEForwardSolution::read(const std::filesystem::pat
     if (options.exclude_bads) {
         bads = t_pStream.read_bad_channels(t_pStream.dirtree());
         if (bads.size() > 0) {
-            qInfo("\t%lld bad channels ( ", static_cast<long long>(bads.size()));
+            Log::info("\t{} bad channels ( ", bads.size());
             for (qint32 i = 0; i < static_cast<int>(bads.size()); ++i)
-                qInfo("\"%s\" ", bads[i].c_str());
-            qInfo(") read");
+                Log::info("\"{}\" ", bads[i]);
+            Log::info(") read");
         }
     }
 
@@ -1149,10 +1150,10 @@ Expected<MNEForwardSolution> MNEForwardSolution::read(const std::filesystem::pat
             return fail(ErrorCode::Format, "a forward solution in {} lists no methods", name);
         }
         if (*t_pTag->toInt() == FIFFV_MNE_MEG) {
-            qInfo("MEG solution found");
+            Log::info("MEG solution found");
             megnode = fwd;
         } else if (*t_pTag->toInt() == FIFFV_MNE_EEG) {
-            qInfo("EEG solution found");
+            Log::info("EEG solution found");
             eegnode = fwd;
         }
     }
@@ -1164,7 +1165,7 @@ Expected<MNEForwardSolution> MNEForwardSolution::read(const std::filesystem::pat
             ori = QString("fixed");
         else
             ori = QString("free");
-        qInfo("\tRead MEG forward solution (%d sources, %d channels, %s orientations)", megfwd.nsource, megfwd.nchan, ori.toUtf8().constData());
+        Log::info("\tRead MEG forward solution ({} sources, {} channels, {} orientations)", megfwd.nsource, megfwd.nchan, ori.toStdString());
     }
     MNEForwardSolution eegfwd;
     if (read_one(t_pStream, eegnode, eegfwd)) {
@@ -1172,7 +1173,7 @@ Expected<MNEForwardSolution> MNEForwardSolution::read(const std::filesystem::pat
             ori = QString("fixed");
         else
             ori = QString("free");
-        qInfo("\tRead EEG forward solution (%d sources, %d channels, %s orientations)", eegfwd.nsource, eegfwd.nchan, ori.toUtf8().constData());
+        Log::info("\tRead EEG forward solution ({} sources, {} channels, {} orientations)", eegfwd.nsource, eegfwd.nchan, ori.toStdString());
     }
 
     //
@@ -1206,7 +1207,7 @@ Expected<MNEForwardSolution> MNEForwardSolution::read(const std::filesystem::pat
             fwd.sol_grad->row_names.insert(fwd.sol_grad->row_names.end(), eegfwd.sol_grad->row_names.begin(), eegfwd.sol_grad->row_names.end());
         }
         fwd.nchan = megfwd.nchan + eegfwd.nchan;
-        qInfo("\tMEG and EEG forward solutions combined");
+        Log::info("\tMEG and EEG forward solutions combined");
     } else if (!megfwd.empty())
         fwd = std::move(megfwd); //not copied for the sake of speed
     else
@@ -1253,7 +1254,7 @@ Expected<MNEForwardSolution> MNEForwardSolution::read(const std::filesystem::pat
         return fail(ErrorCode::Format, "the source spaces of {} do not match its forward solution", name);
     }
 
-    qInfo("\tSource spaces transformed to the forward solution coordinate frame");
+    Log::info("\tSource spaces transformed to the forward solution coordinate frame");
     fwd.src = t_SourceSpace; //not new MNESourceSpaces(t_SourceSpace); for sake of speed
     //
     //   Handle the source locations and orientations
@@ -1283,7 +1284,7 @@ Expected<MNEForwardSolution> MNEForwardSolution::read(const std::filesystem::pat
         //   Modify the forward solution for fixed source orientations
         //
         if (fwd.source_ori != FIFFV_MNE_FIXED_ORI) {
-            qInfo("\tChanging to fixed-orientation forward solution...");
+            Log::info("\tChanging to fixed-orientation forward solution...");
 
             MatrixXd tmp = fwd.source_nn.transpose().cast<double>();
             SparseMatrix<double> fix_rot = Linalg::make_block_diag(tmp, 1);
@@ -1300,13 +1301,13 @@ Expected<MNEForwardSolution> MNEForwardSolution::read(const std::filesystem::pat
                 fwd.sol_grad->data *= t_matKron;
                 fwd.sol_grad->ncol = 3 * fwd.nsource;
             }
-            qInfo("[done]");
+            Log::info("[done]");
         }
     } else if (options.surf_ori) {
         fwd.surf_ori = false;
         fwd.convert_to_surf_ori();
     } else {
-        qInfo("\tCartesian source orientations...");
+        Log::info("\tCartesian source orientations...");
         nuse = 0;
         fwd.source_rr = MatrixXf::Zero(fwd.nsource, 3);
         for (qint32 k = 0; k < t_SourceSpace.size(); ++k) {
@@ -1320,7 +1321,7 @@ Expected<MNEForwardSolution> MNEForwardSolution::read(const std::filesystem::pat
         Matrix3f t_eye = Matrix3f::Identity();
         fwd.source_nn = kroneckerProduct(t_ones, t_eye);
 
-        qInfo("[done]");
+        Log::info("[done]");
     }
 
     //
@@ -1354,7 +1355,7 @@ bool MNEForwardSolution::read_one(FiffStream& stream,
 
     if (t_pTag = p_Node->find_tag(stream, FIFF_MNE_SOURCE_ORIENTATION); !t_pTag) {
         stream.close();
-        qWarning("Source orientation tag not found.");
+        Log::warning("Source orientation tag not found.");
         return false;
     }
 
@@ -1362,7 +1363,7 @@ bool MNEForwardSolution::read_one(FiffStream& stream,
 
     if (t_pTag = p_Node->find_tag(stream, FIFF_MNE_COORD_FRAME); !t_pTag) {
         stream.close();
-        qWarning("Coordinate frame tag not found.");
+        Log::warning("Coordinate frame tag not found.");
         return false;
     }
 
@@ -1370,7 +1371,7 @@ bool MNEForwardSolution::read_one(FiffStream& stream,
 
     if (t_pTag = p_Node->find_tag(stream, FIFF_MNE_SOURCE_SPACE_NPOINTS); !t_pTag) {
         stream.close();
-        qWarning("Number of sources not found.");
+        Log::warning("Number of sources not found.");
         return false;
     }
 
@@ -1378,7 +1379,7 @@ bool MNEForwardSolution::read_one(FiffStream& stream,
 
     if (t_pTag = p_Node->find_tag(stream, FIFF_NCHAN); !t_pTag) {
         stream.close();
-        qWarning("Number of channels not found.");
+        Log::warning("Number of channels not found.");
         return false;
     }
 
@@ -1388,7 +1389,7 @@ bool MNEForwardSolution::read_one(FiffStream& stream,
         one.sol->transpose_named_matrix();
     else {
         stream.close();
-        qWarning("Forward solution data not found.");
+        Log::warning("Forward solution data not found.");
         //error(me,'Forward solution data not found (%s)',mne_omit_first_line(lasterr));
         return false;
     }
@@ -1401,7 +1402,7 @@ bool MNEForwardSolution::read_one(FiffStream& stream,
     if (one.sol->data.rows() != one.nchan ||
         (one.sol->data.cols() != one.nsource && one.sol->data.cols() != 3 * one.nsource)) {
         stream.close();
-        qWarning("Forward solution matrix has wrong dimensions.");
+        Log::warning("Forward solution matrix has wrong dimensions.");
         //error(me,'Forward solution matrix has wrong dimensions');
         return false;
     }
@@ -1409,7 +1410,7 @@ bool MNEForwardSolution::read_one(FiffStream& stream,
         if (one.sol_grad->data.rows() != one.nchan ||
             (one.sol_grad->data.cols() != 3 * one.nsource && one.sol_grad->data.cols() != 3 * 3 * one.nsource)) {
             stream.close();
-            qWarning("Forward solution gradient matrix has wrong dimensions.");
+            Log::warning("Forward solution gradient matrix has wrong dimensions.");
             //error(me,'Forward solution gradient matrix has wrong dimensions');
         }
     }
@@ -1422,7 +1423,7 @@ void MNEForwardSolution::restrict_gain_matrix(MatrixXd& G, const FiffInfo& info)
 {
     // Figure out which ones have been used
     if (std::ssize(info.chs) != G.rows()) {
-        qWarning("Error G.rows() and length of info.chs do not match: %lld != %lld", static_cast<long long>(G.rows()), static_cast<long long>(info.chs.size()));
+        Log::warning("Error G.rows() and length of info.chs do not match: {} != {}", G.rows(), info.chs.size());
         return;
     }
 
@@ -1431,23 +1432,23 @@ void MNEForwardSolution::restrict_gain_matrix(MatrixXd& G, const FiffInfo& info)
         for (qint32 i = 0; i < sel.size(); ++i)
             G.row(i) = G.row(sel[i]);
         G.conservativeResize(sel.size(), G.cols());
-        qInfo("\t%ld planar channels", sel.size());
+        Log::info("\t{} planar channels", sel.size());
     } else {
         sel = info.pick_types(std::string("mag"));
         if (sel.size() > 0) {
             for (qint32 i = 0; i < sel.size(); ++i)
                 G.row(i) = G.row(sel[i]);
             G.conservativeResize(sel.size(), G.cols());
-            qInfo("\t%ld magnetometer or axial gradiometer channels", sel.size());
+            Log::info("\t{} magnetometer or axial gradiometer channels", sel.size());
         } else {
             sel = info.pick_types(false, true);
             if (sel.size() > 0) {
                 for (qint32 i = 0; i < sel.size(); ++i)
                     G.row(i) = G.row(sel[i]);
                 G.conservativeResize(sel.size(), G.cols());
-                qInfo("\t%ld EEG channels", sel.size());
+                Log::info("\t{} EEG channels", sel.size());
             } else
-                qWarning("Could not find MEG or EEG channels");
+                Log::warning("Could not find MEG or EEG channels");
         }
     }
 }
@@ -1462,13 +1463,13 @@ void MNEForwardSolution::convert_to_surf_ori()
     //
     //   Rotate the local source coordinate systems
     //
-    qInfo("\tConverting to surface-based source orientations...");
+    Log::info("\tConverting to surface-based source orientations...");
 
     bool use_ave_nn = false;
     auto* hemi0 = src.hemisphereAt(0);
     if (hemi0 && hemi0->patch_inds.size() > 0) {
         use_ave_nn = true;
-        qInfo("\tAverage patch normals will be employed in the rotation to the local surface coordinates...");
+        Log::info("\tAverage patch normals will be employed in the rotation to the local surface coordinates...");
     }
 
     qint32 pp = 0;
@@ -1533,7 +1534,7 @@ void MNEForwardSolution::convert_to_surf_ori()
         this->sol_grad->data *= t_matKron;
     }
     this->surf_ori = true;
-    qInfo("[done]");
+    Log::info("[done]");
 }
 
 //=============================================================================================================
@@ -1541,7 +1542,7 @@ void MNEForwardSolution::convert_to_surf_ori()
 void MNEForwardSolution::to_fixed_ori()
 {
     if (!this->surf_ori || this->isFixedOrient()) {
-        qWarning("Cannot convert to fixed orientation: requires surface-oriented, free-orientation forward solution");
+        Log::warning("Cannot convert to fixed orientation: requires surface-oriented, free-orientation forward solution");
         return;
     }
     qint32 count = 0;
@@ -1556,7 +1557,7 @@ void MNEForwardSolution::to_fixed_ori()
         this->source_nn.conservativeResize(count, Eigen::NoChange);
     this->sol->ncol = this->sol->ncol / 3;
     this->source_ori = FIFFV_MNE_FIXED_ORI;
-    qInfo("\tConverted the forward solution into the fixed-orientation mode.");
+    Log::info("\tConverted the forward solution into the fixed-orientation mode.");
 }
 
 //=============================================================================================================
@@ -1574,12 +1575,12 @@ MatrixX3f MNEForwardSolution::getSourcePositionsByLabel(const std::vector<FsLabe
     MatrixX3f matSourceVertLeft, matSourceVertRight, matSourcePositions;
 
     if (lPickedLabels.empty()) {
-        qWarning() << "MNEForwardSolution::getSourcePositionsByLabel - picked label list is empty. Returning.";
+        Log::warning("MNEForwardSolution::getSourcePositionsByLabel - picked label list is empty. Returning.");
         return matSourcePositions;
     }
 
     if (tSurfSetInflated.empty()) {
-        qWarning() << "MNEForwardSolution::getSourcePositionsByLabel - tSurfSetInflated is empty. Returning.";
+        Log::warning("MNEForwardSolution::getSourcePositionsByLabel - tSurfSetInflated is empty. Returning.");
         return matSourcePositions;
     }
 

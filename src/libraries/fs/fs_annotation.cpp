@@ -250,7 +250,6 @@ bool FsAnnotation::toLabels(const FsSurface& p_surf,
     // load the vertex positions from surface
     MatrixX3f vert_pos = p_surf.rr();
 
-    //    qDebug() << label_rgbas.rows() << label_ids.size() << label_names.size();
 
     //    std::cout << label_ids;
 

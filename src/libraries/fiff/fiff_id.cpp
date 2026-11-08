@@ -22,6 +22,7 @@
 //=============================================================================================================
 
 #include "fiff_id.h"
+#include <utils/logger/log.h>
 
 #include <format>
 #include <string>
@@ -35,7 +36,6 @@
 #include <QDateTime>
 
 #include <ctime>
-#include <QDebug>
 
 //=============================================================================================================
 // USED NAMESPACES
@@ -159,7 +159,7 @@ bool FiffId::get_machid(int* fixed_id)
 void FiffId::print() const
 {
     if (!empty()) {
-        qInfo("\t%d.%d 0x%x%x %d %d\n", this->version >> 16, this->version & 0xFFFF, this->machid[0], this->machid[1], this->time.secs, this->time.usecs);
+        UTILSLIB::Log::info("\t{}.{} 0x{:x}{:x} {} {}\n", this->version >> 16, this->version & 0xFFFF, this->machid[0], this->machid[1], this->time.secs, this->time.usecs);
     }
 }
 

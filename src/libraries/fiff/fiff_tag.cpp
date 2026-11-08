@@ -23,6 +23,7 @@
 //=============================================================================================================
 
 #include "fiff_tag.h"
+#include <utils/logger/log.h>
 
 #include <vector>
 #include "fiff_byte_swap.h"
@@ -36,7 +37,6 @@
 //=============================================================================================================
 
 #include <QTcpSocket>
-#include <QDebug>
 
 //=============================================================================================================
 // USED NAMESPACES
@@ -93,7 +93,7 @@ bool FiffTag::getMatrixDimensions(qint32& p_ndim, std::vector<qint32>& p_Dims) c
     const int coding = fiff_type_matrix_coding(this->type);
     const bool sparse = coding == FIFFTS_MC_CCS || coding == FIFFTS_MC_RCS;
     if (coding != FIFFTS_MC_DENSE && !sparse) {
-        qWarning("Cannot handle other than dense or sparse matrices yet.");
+        UTILSLIB::Log::warning("Cannot handle other than dense or sparse matrices yet.");
         return false;
     }
     const qint32 nTrailer = ndim + (sparse ? 2 : 1);
@@ -713,4 +713,75 @@ fiff_int_t FiffTag::fiff_type_base(fiff_int_t type)
 fiff_int_t FiffTag::fiff_type_matrix_coding(fiff_int_t type)
 {
     return type & FIFFTS_MC_MASK;
+}
+
+//=============================================================================================================
+
+const qint32* FiffTag::toInt() const
+{
+    if (this->isMatrix() || this->getType() != FIFFT_INT) {
+        UTILSLIB::Log::warning("Expected an integer tag : {} (found data type {} instead)\n", this->kind, this->getType());
+        return nullptr;
+    } else
+        return reinterpret_cast<const qint32*>(this->data());
+}
+
+//=============================================================================================================
+
+const qint32* FiffTag::toJulian() const
+{
+    if (this->isMatrix() || this->getType() != FIFFT_JULIAN) {
+        UTILSLIB::Log::warning("Expected a julian tag : {} (found data type {} instead)\n", this->kind, this->getType());
+        return nullptr;
+    } else
+        return reinterpret_cast<const qint32*>(this->data());
+}
+
+//=============================================================================================================
+
+Eigen::MatrixXi FiffTag::toIntMatrix() const
+{
+    if (!this->isMatrix() || this->getType() != FIFFT_INT || this->data() == nullptr)
+        return Eigen::MatrixXi();
+
+    qint32 ndim;
+    std::vector<qint32> dims;
+    this->getMatrixDimensions(ndim, dims);
+
+    if (ndim != 2) {
+        UTILSLIB::Log::warning("Only two-dimensional matrices are supported at this time");
+        return Eigen::MatrixXi();
+    }
+
+    // Use copy constructor instead --> slower performance but higher memory management reliability
+    Eigen::MatrixXi p_Matrix(Eigen::Map<const Eigen::MatrixXi>(reinterpret_cast<const int*>(this->data()), dims[0], dims[1]));
+
+    return p_Matrix;
+}
+
+//=============================================================================================================
+
+Eigen::MatrixXf FiffTag::toFloatMatrix() const
+{
+    if (!this->isMatrix() || this->getType() != FIFFT_FLOAT || this->data() == nullptr)
+        return Eigen::MatrixXf(); //NULL;
+
+    if (fiff_type_matrix_coding(this->type) != FIFFTS_MC_DENSE) {
+        UTILSLIB::Log::warning("Error in FiffTag::toFloatMatrix(): Matrix is not dense!");
+        return Eigen::MatrixXf();
+    }
+
+    qint32 ndim;
+    std::vector<qint32> dims;
+    this->getMatrixDimensions(ndim, dims);
+
+    if (ndim != 2) {
+        UTILSLIB::Log::warning("Only two-dimensional matrices are supported at this time");
+        return Eigen::MatrixXf();
+    }
+
+    // Use copy constructor instead --> slower performance but higher memory management reliability
+    Eigen::MatrixXf p_Matrix(Eigen::Map<const Eigen::MatrixXf>(reinterpret_cast<const float*>(this->data()), dims[0], dims[1]));
+
+    return p_Matrix;
 }

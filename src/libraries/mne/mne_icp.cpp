@@ -19,6 +19,7 @@
 //=============================================================================================================
 
 #include "mne_icp.h"
+#include <utils/logger/log.h>
 #include <iostream>
 
 #include "fiff/fiff_coord_trans.h"
@@ -29,7 +30,6 @@
 //=============================================================================================================
 
 #include <QSharedPointer>
-#include <QDebug>
 
 //=============================================================================================================
 // EIGEN INCLUDES
@@ -67,7 +67,7 @@ bool MNELIB::performIcp(const MNEProjectToSurface::SPtr mneSurfacePoints,
  */
 {
     if (matPointCloud.rows() == 0) {
-        qWarning() << "[MNELIB::icp] Passed point cloud is empty.";
+        UTILSLIB::Log::warning("[MNELIB::icp] Passed point cloud is empty.");
         return false;
     }
 
@@ -93,13 +93,13 @@ bool MNELIB::performIcp(const MNEProjectToSurface::SPtr mneSurfacePoints,
     for (int iIter = 0; iIter < iMaxIter; ++iIter) {
         // Step a: compute the closest point on the surface; eq 29
         if (!mneSurfacePoints->find_closest_on_surface(matPk, iNP, matYk, vecNearest, vecDist)) {
-            qWarning() << "[MNELIB::icp] find_closest_on_surface was not successful.";
+            UTILSLIB::Log::warning("[MNELIB::icp] find_closest_on_surface was not successful.");
             return false;
         }
 
         // Step b: compute the registration; eq 30
         if (!fitMatchedPoints(matP0, matYk, matTrans, fScale, bScale, vecWeights)) {
-            qWarning() << "[MNELIB::icp] point cloud registration not successful";
+            UTILSLIB::Log::warning("[MNELIB::icp] point cloud registration not successful");
         }
 
         // Step c: apply registration
@@ -113,15 +113,15 @@ bool MNELIB::performIcp(const MNEProjectToSurface::SPtr mneSurfacePoints,
 
         if (std::sqrt(std::fabs(fMSE - fMSEPrev)) < fTol) {
             transFromTo = transICP;
-            qInfo() << "[MNELIB::icp] ICP was successful and converged after " << iIter + 1 << " iterations with RMSE dist: " << fRMSE * 1000 << " mm.";
+            UTILSLIB::Log::info("[MNELIB::icp] ICP was successful and converged after {} iterations with RMSE dist: {} mm.", iIter + 1, fRMSE * 1000);
             return true;
         }
         fMSEPrev = fMSE;
-        qInfo() << "[MNELIB::icp] ICP iteration " << iIter + 1 << " with RMSE: " << fRMSE * 1000 << " mm.";
+        UTILSLIB::Log::info("[MNELIB::icp] ICP iteration {} with RMSE: {} mm.", iIter + 1, fRMSE * 1000);
     }
     transFromTo = transICP;
 
-    qWarning() << "[MNELIB::icp] Maximum number of " << iMaxIter << " iterations exceeded with RMSE: " << fRMSE * 1000 << " mm.";
+    UTILSLIB::Log::warning("[MNELIB::icp] Maximum number of {} iterations exceeded with RMSE: {} mm.", iMaxIter, fRMSE * 1000);
     return true;
 }
 
@@ -160,7 +160,7 @@ bool MNELIB::fitMatchedPoints(const MatrixXf& matSrcPoint,
 
     // test size of point clouds
     if (matSrcPoint.size() != matDstPoint.size()) {
-        qWarning() << "[MNELIB::fitMatchedPoints] Point clouds do not match.";
+        UTILSLIB::Log::warning("[MNELIB::fitMatchedPoints] Point clouds do not match.");
         return false;
     }
 
@@ -256,7 +256,7 @@ bool MNELIB::discard3DPointOutliers(const QSharedPointer<MNELIB::MNEProjectToSur
     // discard outliers if necessary
     if (fMaxDist > 0.0) {
         if (!mneSurfacePoints->find_closest_on_surface(matP, iNP, matYk, vecNearest, vecDist)) {
-            qWarning() << "[MNELIB::icp] find_closest_on_surface was not successful.";
+            UTILSLIB::Log::warning("[MNELIB::icp] find_closest_on_surface was not successful.");
             return false;
         }
 
@@ -271,7 +271,7 @@ bool MNELIB::discard3DPointOutliers(const QSharedPointer<MNELIB::MNEProjectToSur
             }
         }
     }
-    qInfo() << "[MNELIB::discardOutliers] " << iDiscarded << "digitizers discarded.";
+    UTILSLIB::Log::info("[MNELIB::discardOutliers] {} digitizers discarded.", iDiscarded);
     return true;
 }
 

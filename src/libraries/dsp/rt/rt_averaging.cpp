@@ -212,7 +212,6 @@ void RtAveragingWorker::doAveraging(const MatrixXd& rawSegment)
         if (!m_mapFillingBackBuffer.contains(lDetectedTriggers.at(i).second)) {
             double dTriggerType = lDetectedTriggers.at(i).second;
 
-            //qDebug()<<"Adding dTriggerType"<<dTriggerType;
 
             m_mapFillingBackBuffer[dTriggerType] = false;
             m_mapMatDataPostIdx[dTriggerType] = 0;
@@ -298,9 +297,6 @@ void RtAveragingWorker::emitEvoked(double dTriggerType, QStringList& lResponsibl
     if (m_stimEvokedSet.evoked.size() > 0) {
         emit resultReady(m_stimEvokedSet, lResponsibleTriggerTypes);
     }
-
-    //    qDebug()<<"RtAveragingWorker::emitEvoked() - dTriggerType:" << dTriggerType;
-    //    qDebug()<<"RtAveragingWorker::emitEvoked() - m_mapStimAve[dTriggerType].size():" << m_mapStimAve[dTriggerType].size();
 }
 
 //=============================================================================================================

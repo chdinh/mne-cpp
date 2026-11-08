@@ -23,6 +23,7 @@
 //=============================================================================================================
 
 #include <fwd/fwd_types.h>
+#include <utils/logger/log.h>
 
 #include "inv_dipole_fit_data.h"
 
@@ -52,7 +53,6 @@
 #include <QFile>
 #include <QTextStream>
 #include <QCoreApplication>
-#include <QDebug>
 
 #include <cmath>
 
@@ -107,29 +107,29 @@ int InvDipoleFitData::setup_forward_model(InvDipoleFitData* d, MNECTFCompDataSet
         QString bemsolname = QString::fromStdU16String(FwdBemModel::fwd_bem_make_bem_sol_name(d->bemname.toStdU16String()).u16string());
         d->bemname = bemsolname;
 
-        qInfo("\nSetting up the BEM model using %s...", d->bemname.toUtf8().constData());
-        qInfo("\nLoading surfaces...");
+        UTILSLIB::Log::info("\nSetting up the BEM model using {}...", d->bemname.toStdString());
+        UTILSLIB::Log::info("\nLoading surfaces...");
         d->bem_model = FwdBemModel::fwd_bem_load_three_layer_surfaces(d->bemname.toStdU16String());
         if (d->bem_model) {
-            qInfo("Three-layer model surfaces loaded.");
+            UTILSLIB::Log::info("Three-layer model surfaces loaded.");
         } else {
             d->bem_model = FwdBemModel::fwd_bem_load_homog_surface(d->bemname.toStdU16String());
             if (!d->bem_model)
                 return FAIL;
-            qInfo("Homogeneous model surface loaded.");
+            UTILSLIB::Log::info("Homogeneous model surface loaded.");
         }
         if (d->neeg > 0 && d->bem_model->nsurf == 1) {
-            qCritical("Cannot use a homogeneous model in EEG calculations.");
+            UTILSLIB::Log::critical("Cannot use a homogeneous model in EEG calculations.");
             return FAIL;
         }
-        qInfo("\nLoading the solution matrix...");
+        UTILSLIB::Log::info("\nLoading the solution matrix...");
         if (d->bem_model->fwd_bem_load_recompute_solution(d->bemname.toStdU16String(), FWD_BEM_UNKNOWN, false) == FAIL)
             return FAIL;
-        qInfo("Employing the head->MRI coordinate transform with the BEM model.");
+        UTILSLIB::Log::info("Employing the head->MRI coordinate transform with the BEM model.");
         Q_ASSERT(d->mri_head_t);
         if (d->bem_model->fwd_bem_set_head_mri_t(*d->mri_head_t) == FAIL)
             return FAIL;
-        qInfo("BEM model %s is now set up", d->bem_model->sol_name.c_str());
+        UTILSLIB::Log::info("BEM model {} is now set up", d->bem_model->sol_name);
         /*
          * Find the best-fitting sphere
          */
@@ -147,8 +147,7 @@ int InvDipoleFitData::setup_forward_model(InvDipoleFitData* d, MNECTFCompDataSet
             d->r0 = r0_vec.head<3>();
 
             FiffCoordTrans::apply_trans(d->r0.data(), *d->mri_head_t, true);
-            qInfo("Fitted sphere model origin : %6.1f %6.1f %6.1f mm rad = %6.1f mm.",
-                  1000 * d->r0[0], 1000 * d->r0[1], 1000 * d->r0[2], 1000 * R);
+            UTILSLIB::Log::info("Fitted sphere model origin : {:6.1f} {:6.1f} {:6.1f} mm rad = {:6.1f} mm.", 1000 * d->r0[0], 1000 * d->r0[1], 1000 * d->r0[2], 1000 * R);
         }
         d->bem_funcs = std::make_unique<dipoleFitFuncsRec>();
         f = d->bem_funcs.get();
@@ -161,14 +160,14 @@ int InvDipoleFitData::setup_forward_model(InvDipoleFitData* d, MNECTFCompDataSet
                                                         FwdBemModel::fwd_bem_field, nullptr, nullptr, d->bem_model.get());
             if (!comp)
                 return FAIL;
-            qInfo("Compensation setup done.");
+            UTILSLIB::Log::info("Compensation setup done.");
 
-            qInfo("MEG solution matrix...");
+            UTILSLIB::Log::info("MEG solution matrix...");
             if (d->bem_model->fwd_bem_specify_coils(d->meg_coils.get()) == FAIL)
                 return FAIL;
             if (d->bem_model->fwd_bem_specify_coils(comp->comp_coils.get()) == FAIL)
                 return FAIL;
-            qInfo("[done]");
+            UTILSLIB::Log::info("[done]");
 
             f->meg_field = FwdCompData::fwd_comp_field;
             f->meg_vec_field = nullptr;
@@ -176,17 +175,17 @@ int InvDipoleFitData::setup_forward_model(InvDipoleFitData* d, MNECTFCompDataSet
             f->meg_comp = std::move(comp);
         }
         if (d->neeg > 0) {
-            qInfo("\tEEG solution matrix...");
+            UTILSLIB::Log::info("\tEEG solution matrix...");
             if (d->bem_model->fwd_bem_specify_els(d->eeg_els.get()) == FAIL)
                 return FAIL;
-            qInfo("[done]");
+            UTILSLIB::Log::info("[done]");
             f->eeg_pot = FwdBemModel::fwd_bem_pot_els;
             f->eeg_vec_pot = nullptr;
             f->eeg_client = d->bem_model.get();
         }
     }
     if (d->neeg > 0 && !d->eeg_model) {
-        qCritical("EEG sphere model not defined.");
+        UTILSLIB::Log::critical("EEG sphere model not defined.");
         return FAIL;
     }
     d->sphere_funcs = std::make_unique<dipoleFitFuncsRec>();
@@ -214,8 +213,7 @@ int InvDipoleFitData::setup_forward_model(InvDipoleFitData* d, MNECTFCompDataSet
         f->meg_client = comp.get();
         f->meg_comp = std::move(comp);
     }
-    qInfo("Sphere model origin : %6.1f %6.1f %6.1f mm.",
-          1000 * d->r0[0], 1000 * d->r0[1], 1000 * d->r0[2]);
+    UTILSLIB::Log::info("Sphere model origin : {:6.1f} {:6.1f} {:6.1f} mm.", 1000 * d->r0[0], 1000 * d->r0[1], 1000 * d->r0[2]);
     /*
        * Finally add the magnetic dipole fitting functions (for special purposes)
        */
@@ -260,9 +258,7 @@ std::unique_ptr<MNECovMatrix> InvDipoleFitData::ad_hoc_noise(FwdCoilSet* meg, Fw
     StringList names, ch_names;
     int k, n;
 
-    qInfo("Using standard noise values "
-          "(MEG grad : %6.1f fT/cm MEG mag : %6.1f fT EEG : %6.1f uV)\n",
-          1e13 * grad_std, 1e15 * mag_std, 1e6 * eeg_std);
+    UTILSLIB::Log::info("Using standard noise values (MEG grad : {:6.1f} fT/cm MEG mag : {:6.1f} fT EEG : {:6.1f} uV)\n", 1e13 * grad_std, 1e15 * mag_std, 1e6 * eeg_std);
 
     nchan = 0;
     if (meg)
@@ -309,7 +305,7 @@ int InvDipoleFitData::scale_noise_cov(InvDipoleFitData* f, int nave)
         return OK;
 
     if (f->noise->cov.size() > 0) {
-        qInfo("Decomposing the sensor noise covariance matrix...");
+        UTILSLIB::Log::info("Decomposing the sensor noise covariance matrix...");
         if (f->noise->decompose_eigen() == FAIL)
             return FAIL;
 
@@ -325,11 +321,11 @@ int InvDipoleFitData::scale_noise_cov(InvDipoleFitData* f, int nave)
     } else {
         for (k = 0; k < f->noise->ncov; k++)
             f->noise->cov_diag[k] = nave_ratio * f->noise->cov_diag[k];
-        qInfo("Decomposition not needed for a diagonal noise covariance matrix.");
+        UTILSLIB::Log::info("Decomposition not needed for a diagonal noise covariance matrix.");
         if (f->noise->add_inv() == FAIL)
             return FAIL;
     }
-    qInfo("Effective nave is now %d", nave);
+    UTILSLIB::Log::info("Effective nave is now {}", nave);
     f->nave = nave;
     return OK;
 }
@@ -350,7 +346,7 @@ int InvDipoleFitData::scale_dipole_fit_noise_cov(InvDipoleFitData* f, int nave)
         /*
          * Do the decomposition and check that the matrix is positive definite
          */
-        qInfo("Decomposing the noise covariance...");
+        UTILSLIB::Log::info("Decomposing the noise covariance...");
         if (f->noise->cov.size() > 0) {
             if (f->noise->decompose_eigen() == FAIL)
                 return FAIL;
@@ -371,11 +367,11 @@ int InvDipoleFitData::scale_dipole_fit_noise_cov(InvDipoleFitData* f, int nave)
     } else {
         for (k = 0; k < f->noise->ncov; k++)
             f->noise->cov_diag[k] = nave_ratio * f->noise->cov_diag[k];
-        qInfo("Decomposition not needed for a diagonal noise covariance matrix.");
+        UTILSLIB::Log::info("Decomposition not needed for a diagonal noise covariance matrix.");
         if (f->noise->add_inv() == FAIL)
             return FAIL;
     }
-    qInfo("Effective nave is now %d", nave);
+    UTILSLIB::Log::info("Effective nave is now {}", nave);
     f->nave = nave;
     return OK;
 }
@@ -445,11 +441,11 @@ int InvDipoleFitData::select_dipole_fit_noise_cov(InvDipoleFitData* f,
         }
         f->noise.reset();
         if (nmeg > 0 && nmeg - nomit_meg > 0 && nmeg - nomit_meg < min_nchan) {
-            qCritical("Too few MEG channels remaining");
+            UTILSLIB::Log::critical("Too few MEG channels remaining");
             return FAIL;
         }
         if (neeg > 0 && neeg - nomit_eeg > 0 && neeg - nomit_eeg < min_nchan) {
-            qCritical("Too few EEG channels remaining");
+            UTILSLIB::Log::critical("Too few EEG channels remaining");
             return FAIL;
         }
         f->noise = f->noise_orig->dup();
@@ -520,7 +516,7 @@ InvDipoleFitData* InvDipoleFitData::setup_dipole_fit_data(const QString& mriname
         }
         res->mri_head_t = std::make_unique<FiffCoordTrans>(*mriHead);
     } else if (!bemname.isEmpty()) {
-        qWarning("Source of MRI / head transform required for the BEM model is missing");
+        UTILSLIB::Log::warning("Source of MRI / head transform required for the BEM model is missing");
         return nullptr;
     } else {
         float move[] = {0.0, 0.0, 0.0};
@@ -550,7 +546,7 @@ InvDipoleFitData* InvDipoleFitData::setup_dipole_fit_data(const QString& mriname
         if (!FiffInfoBase::readBadChannelsFromFile(badname.toStdString(), badlist))
             return nullptr;
         nbad = static_cast<int>(badlist.size());
-        qInfo("%d bad channels read from %s.", nbad, badname.toUtf8().data());
+        UTILSLIB::Log::info("{} bad channels read from {}.", nbad, badname.toStdString());
     }
     {
         QFile measFile(measname);
@@ -569,9 +565,9 @@ InvDipoleFitData* InvDipoleFitData::setup_dipole_fit_data(const QString& mriname
             nbad++;
         }
         file_bads.clear();
-        qInfo("%d bad channels read from the data file.", file_nbad);
+        UTILSLIB::Log::info("{} bad channels read from the data file.", file_nbad);
     }
-    qInfo("%d bad channels total.", nbad);
+    UTILSLIB::Log::info("{} bad channels total.", nbad);
     /*
        * Read the channel information
        */
@@ -585,9 +581,9 @@ InvDipoleFitData* InvDipoleFitData::setup_dipole_fit_data(const QString& mriname
         return nullptr;
 
     if (res->nmeg > 0)
-        qInfo("Will use %3d MEG channels from %s", res->nmeg, measname.toUtf8().data());
+        UTILSLIB::Log::info("Will use {:3} MEG channels from {}", res->nmeg, measname.toStdString());
     if (res->neeg > 0)
-        qInfo("Will use %3d EEG channels from %s", res->neeg, measname.toUtf8().data());
+        UTILSLIB::Log::info("Will use {:3} EEG channels from {}", res->neeg, measname.toStdString());
     {
         int nch_total = res->nmeg + res->neeg;
         res->ch_names.clear();
@@ -637,9 +633,9 @@ InvDipoleFitData* InvDipoleFitData::setup_dipole_fit_data(const QString& mriname
                                                   res->neeg);
         if (!res->eeg_els)
             return nullptr;
-        qInfo("Head coordinate coil definitions created.");
+        UTILSLIB::Log::info("Head coordinate coil definitions created.");
     } else {
-        qWarning("Cannot handle computations in %s coordinates", std::string(FiffCoordTrans::frame_name(coord_frame)).c_str());
+        UTILSLIB::Log::warning("Cannot handle computations in {} coordinates", std::string(FiffCoordTrans::frame_name(coord_frame)));
         return nullptr;
     }
     /*
@@ -660,7 +656,7 @@ InvDipoleFitData* InvDipoleFitData::setup_dipole_fit_data(const QString& mriname
         std::vector<FiffChInfo> comp_chs;
         int ncomp = 0;
 
-        qInfo("%d compensation data sets in %s", comp_data->ncomp, measname.toUtf8().data());
+        UTILSLIB::Log::info("{} compensation data sets in {}", comp_data->ncomp, measname.toStdString());
         {
             QFile compFile(measname);
             FiffStream compStream(&compFile);
@@ -688,7 +684,7 @@ InvDipoleFitData* InvDipoleFitData::setup_dipole_fit_data(const QString& mriname
             if (!comp_coils) {
                 return nullptr;
             }
-            qInfo("%d compensation channels in %s", comp_coils->ncoil(), measname.toUtf8().data());
+            UTILSLIB::Log::info("{} compensation channels in {}", comp_coils->ncoil(), measname.toStdString());
         }
     } else { /* Get rid of the empty data set */
         comp_data.reset();
@@ -712,7 +708,7 @@ InvDipoleFitData* InvDipoleFitData::setup_dipole_fit_data(const QString& mriname
                                    res->proj))
         return nullptr;
     if (res->proj && res->proj->nitems > 0) {
-        qInfo("Final projection operator is:");
+        UTILSLIB::Log::info("Final projection operator is:");
         {
             QTextStream errStream(stderr);
             res->proj->report(errStream, QStringLiteral("\t").toStdString());
@@ -723,7 +719,7 @@ InvDipoleFitData* InvDipoleFitData::setup_dipole_fit_data(const QString& mriname
         if (res->proj->make_proj() == FAIL)
             return nullptr;
     } else
-        qInfo("No projection will be applied to the data.");
+        UTILSLIB::Log::info("No projection will be applied to the data.");
 
     /*
         * Noise covariance
@@ -731,8 +727,7 @@ InvDipoleFitData* InvDipoleFitData::setup_dipole_fit_data(const QString& mriname
     if (!noisename.isEmpty()) {
         if ((cov = MNECovMatrix::read(noisename.toStdU16String(), FIFFV_MNE_SENSOR_COV)) == nullptr)
             return nullptr;
-        qInfo("Read a %s noise-covariance matrix from %s",
-              cov->cov_diag.size() > 0 ? "diagonal" : "full", noisename.toUtf8().data());
+        UTILSLIB::Log::info("Read a {} noise-covariance matrix from {}", cov->cov_diag.size() > 0 ? "diagonal" : "full", noisename.toStdString());
     } else {
         if ((cov = ad_hoc_noise(res->meg_coils.get(), res->eeg_els.get(), grad_std, mag_std, eeg_std)) == nullptr)
             return nullptr;
@@ -745,7 +740,7 @@ InvDipoleFitData* InvDipoleFitData::setup_dipole_fit_data(const QString& mriname
         return nullptr;
     }
 
-    qInfo("Picked appropriate channels from the noise-covariance matrix.");
+    UTILSLIB::Log::info("Picked appropriate channels from the noise-covariance matrix.");
     cov.reset();
 
     /*
@@ -754,7 +749,7 @@ InvDipoleFitData* InvDipoleFitData::setup_dipole_fit_data(const QString& mriname
     if (res->proj && res->proj->nitems > 0 && res->proj->nvec > 0) {
         if (res->proj->apply_cov(res->noise.get()) == FAIL)
             return nullptr;
-        qInfo("Projection applied to the covariance matrix.");
+        UTILSLIB::Log::info("Projection applied to the covariance matrix.");
     }
 
     /*
@@ -762,7 +757,7 @@ InvDipoleFitData* InvDipoleFitData::setup_dipole_fit_data(const QString& mriname
        */
     if (diagnoise) {
         res->noise->revert_to_diag();
-        qInfo("Using only the main diagonal of the noise-covariance matrix.");
+        UTILSLIB::Log::info("Using only the main diagonal of the noise-covariance matrix.");
     }
 
     /*
@@ -796,23 +791,23 @@ InvDipoleFitData* InvDipoleFitData::setup_dipole_fit_data(const QString& mriname
         if (do_it > 0)
             res->noise->regularize(regs);
         else
-            qInfo("No regularization applied to the noise-covariance matrix");
+            UTILSLIB::Log::info("No regularization applied to the noise-covariance matrix");
     }
 
     /*
        * Do the decomposition and check that the matrix is positive definite
        */
-    qInfo("Decomposing the noise covariance...");
+    UTILSLIB::Log::info("Decomposing the noise covariance...");
     if (res->noise->cov.size() > 0) {
         if (res->noise->decompose_eigen() == FAIL)
             return nullptr;
-        qInfo("Eigenvalue decomposition done.");
+        UTILSLIB::Log::info("Eigenvalue decomposition done.");
         for (int k = 0; k < res->noise->ncov; k++) {
             if (res->noise->lambda[k] < 0.0)
                 res->noise->lambda[k] = 0.0;
         }
     } else {
-        qInfo("Decomposition not needed for a diagonal covariance matrix.");
+        UTILSLIB::Log::info("Decomposition not needed for a diagonal covariance matrix.");
         if (res->noise->add_inv() == FAIL)
             return nullptr;
     }
@@ -833,12 +828,12 @@ bool InvDipoleFitData::print_fields(const Eigen::Vector3f& rd,
 {
     const int nch = fit.nmeg + fit.neeg;
     if (data.nchan != nch || !data.current) {
-        qWarning("print_fields: the data do not hold the %d fit channels", nch);
+        UTILSLIB::Log::warning("print_fields: the data do not hold the {} fit channels", nch);
         return false;
     }
     Eigen::VectorXf measured(nch);
     if (data.current->getValuesAtTime(time, integ, nch, false, measured.data()) == FAIL) {
-        qWarning("Cannot pick time: %7.1f ms", 1000 * time);
+        UTILSLIB::Log::warning("Cannot pick time: {:7.1f} ms", 1000 * time);
         return false;
     }
     if (fit.proj && fit.proj->project_vector(measured, true) == FAIL)
@@ -978,7 +973,7 @@ static float fit_eval(const VectorXf& rd, const void* user)
     fwd = fuser->fwd.get();
     ncomp = fwd->sing[2] / fwd->sing[0] > fuser->limit ? 3 : 2;
     if (fuser->report_dim)
-        qInfo("ncomp = %d", ncomp);
+        UTILSLIB::Log::info("ncomp = {}", ncomp);
 
     Eigen::Map<const VectorXf> Bmap(fuser->B, fwd->nch);
     for (c = 0, Bm2 = 0.0; c < ncomp; c++) {
@@ -1022,7 +1017,7 @@ static int find_best_guess(const Eigen::Ref<const Eigen::VectorXf>& B,
         }
     }
     if (best < 0) {
-        qWarning("No reasonable initial guess found.");
+        UTILSLIB::Log::warning("No reasonable initial guess found.");
         return FAIL;
     }
     bestp = best;
@@ -1065,8 +1060,7 @@ static bool dipole_report_func(int loop,
                                double fval_hi,
                                double par_diff)
 {
-    qInfo("loop %d rd %7.2f %7.2f %7.2f fval %g %g par diff %g",
-          loop, 1000 * fitpar[0], 1000 * fitpar[1], 1000 * fitpar[2], fval_lo, fval_hi, 1000 * par_diff);
+    UTILSLIB::Log::info("loop {} rd {:7.2f} {:7.2f} {:7.2f} fval {:g} {:g} par diff {:g}", loop, 1000 * fitpar[0], 1000 * fitpar[1], 1000 * fitpar[2], fval_lo, fval_hi, 1000 * par_diff);
 
     return true;
 }
@@ -1205,8 +1199,7 @@ bool InvDipoleFitData::fit_one(InvDipoleFitData* fit,
                 return false;
             } else {
                 float rv = 2.0f * (vals.maxCoeff() - vals.minCoeff()) / (vals.maxCoeff() + vals.minCoeff());
-                qWarning("Warning (t = %8.1f ms) : g = %6.1f %% final val = %7.3f rtol = %f",
-                         1000 * time, 100 * (1 - vals[0] / user.B2), vals[0], rv);
+                UTILSLIB::Log::warning("Warning (t = {:8.1f} ms) : g = {:6.1f} % final val = {:7.3f} rtol = {:f}", 1000 * time, 100 * (1 - vals[0] / user.B2), vals[0], rv);
                 fit_fail = true;
             }
         }

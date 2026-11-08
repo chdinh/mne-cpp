@@ -19,10 +19,10 @@
 //=============================================================================================================
 
 #include "mne_description_parser.h"
+#include <utils/logger/log.h>
 
 #include <utils/string_utils.h>
 
-#include <QDebug>
 
 #include <cctype>
 #include <cmath>
@@ -92,12 +92,12 @@ bool MNEDescriptionParser::getInt(std::istream& in, int& val)
 {
     const std::string word = nextWord(in);
     if (word.empty()) {
-        qWarning() << "MNEDescriptionParser: expected integer, got EOF";
+        UTILSLIB::Log::warning("MNEDescriptionParser: expected integer, got EOF");
         return false;
     }
     const std::optional<int> parsed = UTILSLIB::toInt(word);
     if (!parsed) {
-        qWarning() << "MNEDescriptionParser: bad integer:" << word.c_str();
+        UTILSLIB::Log::warning("MNEDescriptionParser: bad integer: {}", word);
         return false;
     }
     val = *parsed;
@@ -110,12 +110,12 @@ bool MNEDescriptionParser::getFloat(std::istream& in, float& val)
 {
     const std::string word = nextWord(in);
     if (word.empty()) {
-        qWarning() << "MNEDescriptionParser: expected float, got EOF";
+        UTILSLIB::Log::warning("MNEDescriptionParser: expected float, got EOF");
         return false;
     }
     const std::optional<double> parsed = UTILSLIB::toDouble(word);
     if (!parsed) {
-        qWarning() << "MNEDescriptionParser: bad float:" << word.c_str();
+        UTILSLIB::Log::warning("MNEDescriptionParser: bad float: {}", word);
         return false;
     }
     val = static_cast<float>(*parsed);
@@ -188,7 +188,7 @@ bool MNEDescriptionParser::parseAverageFile(const std::filesystem::path& fileNam
 {
     std::ifstream in(fileName);
     if (!in) {
-        qWarning() << "MNEDescriptionParser: cannot open" << UTILSLIB::utf8FromPath(fileName).c_str();
+        UTILSLIB::Log::warning("MNEDescriptionParser: cannot open {}", UTILSLIB::utf8FromPath(fileName));
         return false;
     }
 
@@ -206,14 +206,14 @@ bool MNEDescriptionParser::parseAverageFile(const std::filesystem::path& fileNam
             if (word == "{") {
                 expectBrace = false;
             } else {
-                qWarning() << "MNEDescriptionParser: expected '{', got" << word.c_str();
+                UTILSLIB::Log::warning("MNEDescriptionParser: expected '{{', got {}", word);
                 return false;
             }
             continue;
         }
 
         if (word == "{") {
-            qWarning() << "MNEDescriptionParser: unexpected '{'";
+            UTILSLIB::Log::warning("MNEDescriptionParser: unexpected '{{'");
             return false;
         }
 
@@ -222,19 +222,19 @@ bool MNEDescriptionParser::parseAverageFile(const std::filesystem::path& fileNam
                 currentCat.doBaseline = bminSet && bmaxSet;
                 // Validate category
                 if (currentCat.comment.empty()) {
-                    qWarning() << "MNEDescriptionParser: category name missing";
+                    UTILSLIB::Log::warning("MNEDescriptionParser: category name missing");
                     return false;
                 }
                 if (currentCat.tmin >= currentCat.tmax) {
-                    qWarning() << "MNEDescriptionParser: illegal time range for" << currentCat.comment;
+                    UTILSLIB::Log::warning("MNEDescriptionParser: illegal time range for {}", currentCat.comment);
                     return false;
                 }
                 if (currentCat.events.empty()) {
-                    qWarning() << "MNEDescriptionParser: no events for" << currentCat.comment;
+                    UTILSLIB::Log::warning("MNEDescriptionParser: no events for {}", currentCat.comment);
                     return false;
                 }
                 if (currentCat.doBaseline && currentCat.bmin > currentCat.bmax) {
-                    qWarning() << "MNEDescriptionParser: illegal baseline for" << currentCat.comment;
+                    UTILSLIB::Log::warning("MNEDescriptionParser: illegal baseline for {}", currentCat.comment);
                     return false;
                 }
                 if (!currentCat.prevIgnore)
@@ -257,7 +257,7 @@ bool MNEDescriptionParser::parseAverageFile(const std::filesystem::path& fileNam
         // Top-level: "average" keyword
         if (UTILSLIB::equalsIgnoreCase(word, "average")) {
             if (inAverage || inCategory) {
-                qWarning() << "MNEDescriptionParser: nested average";
+                UTILSLIB::Log::warning("MNEDescriptionParser: nested average");
                 return false;
             }
             inAverage = true;
@@ -269,7 +269,7 @@ bool MNEDescriptionParser::parseAverageFile(const std::filesystem::path& fileNam
         if (UTILSLIB::equalsIgnoreCase(word, "category") ||
             UTILSLIB::equalsIgnoreCase(word, "condition")) {
             if (!inAverage || inCategory) {
-                qWarning() << "MNEDescriptionParser: misplaced category";
+                UTILSLIB::Log::warning("MNEDescriptionParser: misplaced category");
                 return false;
             }
             inCategory = true;
@@ -282,7 +282,7 @@ bool MNEDescriptionParser::parseAverageFile(const std::filesystem::path& fileNam
         if (UTILSLIB::equalsIgnoreCase(word, "name")) {
             const std::string val = nextWord(in);
             if (val.empty()) {
-                qWarning() << "MNEDescriptionParser: name requires a value";
+                UTILSLIB::Log::warning("MNEDescriptionParser: name requires a value");
                 return false;
             }
             if (inCategory)
@@ -290,7 +290,7 @@ bool MNEDescriptionParser::parseAverageFile(const std::filesystem::path& fileNam
             else if (inAverage)
                 desc.comment = val;
             else {
-                qWarning() << "MNEDescriptionParser: misplaced name";
+                UTILSLIB::Log::warning("MNEDescriptionParser: misplaced name");
                 return false;
             }
             continue;
@@ -300,13 +300,13 @@ bool MNEDescriptionParser::parseAverageFile(const std::filesystem::path& fileNam
         if (UTILSLIB::equalsIgnoreCase(word, "outfile")) {
             const std::string val = nextWord(in);
             if (val.empty()) {
-                qWarning() << "MNEDescriptionParser: outfile requires a value";
+                UTILSLIB::Log::warning("MNEDescriptionParser: outfile requires a value");
                 return false;
             }
             if (inAverage && !inCategory)
                 desc.filename = val;
             else {
-                qWarning() << "MNEDescriptionParser: misplaced outfile";
+                UTILSLIB::Log::warning("MNEDescriptionParser: misplaced outfile");
                 return false;
             }
             continue;
@@ -316,13 +316,13 @@ bool MNEDescriptionParser::parseAverageFile(const std::filesystem::path& fileNam
         if (UTILSLIB::equalsIgnoreCase(word, "eventfile")) {
             const std::string val = nextWord(in);
             if (val.empty()) {
-                qWarning() << "MNEDescriptionParser: eventfile requires a value";
+                UTILSLIB::Log::warning("MNEDescriptionParser: eventfile requires a value");
                 return false;
             }
             if (inAverage && !inCategory)
                 desc.eventFile = val;
             else {
-                qWarning() << "MNEDescriptionParser: misplaced eventfile";
+                UTILSLIB::Log::warning("MNEDescriptionParser: misplaced eventfile");
                 return false;
             }
             continue;
@@ -332,13 +332,13 @@ bool MNEDescriptionParser::parseAverageFile(const std::filesystem::path& fileNam
         if (UTILSLIB::equalsIgnoreCase(word, "logfile")) {
             const std::string val = nextWord(in);
             if (val.empty()) {
-                qWarning() << "MNEDescriptionParser: logfile requires a value";
+                UTILSLIB::Log::warning("MNEDescriptionParser: logfile requires a value");
                 return false;
             }
             if (inAverage && !inCategory)
                 desc.logFile = val;
             else {
-                qWarning() << "MNEDescriptionParser: misplaced logfile";
+                UTILSLIB::Log::warning("MNEDescriptionParser: misplaced logfile");
                 return false;
             }
             continue;
@@ -349,7 +349,7 @@ bool MNEDescriptionParser::parseAverageFile(const std::filesystem::path& fileNam
             if (inAverage && !inCategory)
                 desc.fixSkew = true;
             else {
-                qWarning() << "MNEDescriptionParser: misplaced fixskew";
+                UTILSLIB::Log::warning("MNEDescriptionParser: misplaced fixskew");
                 return false;
             }
             continue;
@@ -363,7 +363,7 @@ bool MNEDescriptionParser::parseAverageFile(const std::filesystem::path& fileNam
             if (inCategory)
                 currentCat.tmin = fval;
             else {
-                qWarning() << "MNEDescriptionParser: misplaced tmin";
+                UTILSLIB::Log::warning("MNEDescriptionParser: misplaced tmin");
                 return false;
             }
             continue;
@@ -375,7 +375,7 @@ bool MNEDescriptionParser::parseAverageFile(const std::filesystem::path& fileNam
             if (inCategory)
                 currentCat.tmax = fval;
             else {
-                qWarning() << "MNEDescriptionParser: misplaced tmax";
+                UTILSLIB::Log::warning("MNEDescriptionParser: misplaced tmax");
                 return false;
             }
             continue;
@@ -389,7 +389,7 @@ bool MNEDescriptionParser::parseAverageFile(const std::filesystem::path& fileNam
                 currentCat.bmin = fval;
                 bminSet = true;
             } else {
-                qWarning() << "MNEDescriptionParser: misplaced basemin";
+                UTILSLIB::Log::warning("MNEDescriptionParser: misplaced basemin");
                 return false;
             }
             continue;
@@ -403,7 +403,7 @@ bool MNEDescriptionParser::parseAverageFile(const std::filesystem::path& fileNam
                 currentCat.bmax = fval;
                 bmaxSet = true;
             } else {
-                qWarning() << "MNEDescriptionParser: misplaced basemax";
+                UTILSLIB::Log::warning("MNEDescriptionParser: misplaced basemax");
                 return false;
             }
             continue;
@@ -413,13 +413,13 @@ bool MNEDescriptionParser::parseAverageFile(const std::filesystem::path& fileNam
             if (!getInt(in, ival))
                 return false;
             if (ival <= 0) {
-                qWarning() << "MNEDescriptionParser: event numbers must be positive";
+                UTILSLIB::Log::warning("MNEDescriptionParser: event numbers must be positive");
                 return false;
             }
             if (inCategory)
                 currentCat.events.push_back(static_cast<unsigned int>(ival));
             else {
-                qWarning() << "MNEDescriptionParser: misplaced event";
+                UTILSLIB::Log::warning("MNEDescriptionParser: misplaced event");
                 return false;
             }
             continue;
@@ -429,13 +429,13 @@ bool MNEDescriptionParser::parseAverageFile(const std::filesystem::path& fileNam
             if (!getInt(in, ival))
                 return false;
             if (ival <= 0) {
-                qWarning() << "MNEDescriptionParser: nextevent must be positive";
+                UTILSLIB::Log::warning("MNEDescriptionParser: nextevent must be positive");
                 return false;
             }
             if (inCategory)
                 currentCat.nextEvent = static_cast<unsigned int>(ival);
             else {
-                qWarning() << "MNEDescriptionParser: misplaced nextevent";
+                UTILSLIB::Log::warning("MNEDescriptionParser: misplaced nextevent");
                 return false;
             }
             continue;
@@ -445,13 +445,13 @@ bool MNEDescriptionParser::parseAverageFile(const std::filesystem::path& fileNam
             if (!getInt(in, ival))
                 return false;
             if (ival <= 0) {
-                qWarning() << "MNEDescriptionParser: prevevent must be positive";
+                UTILSLIB::Log::warning("MNEDescriptionParser: prevevent must be positive");
                 return false;
             }
             if (inCategory)
                 currentCat.prevEvent = static_cast<unsigned int>(ival);
             else {
-                qWarning() << "MNEDescriptionParser: misplaced prevevent";
+                UTILSLIB::Log::warning("MNEDescriptionParser: misplaced prevevent");
                 return false;
             }
             continue;
@@ -461,13 +461,13 @@ bool MNEDescriptionParser::parseAverageFile(const std::filesystem::path& fileNam
             if (!getInt(in, ival))
                 return false;
             if (ival < 0) {
-                qWarning() << "MNEDescriptionParser: ignore numbers must be positive or zero";
+                UTILSLIB::Log::warning("MNEDescriptionParser: ignore numbers must be positive or zero");
                 return false;
             }
             if (inCategory)
                 currentCat.ignore = static_cast<unsigned int>(ival);
             else {
-                qWarning() << "MNEDescriptionParser: misplaced ignore";
+                UTILSLIB::Log::warning("MNEDescriptionParser: misplaced ignore");
                 return false;
             }
             continue;
@@ -477,13 +477,13 @@ bool MNEDescriptionParser::parseAverageFile(const std::filesystem::path& fileNam
             if (!getInt(in, ival))
                 return false;
             if (ival < 0) {
-                qWarning() << "MNEDescriptionParser: ignore numbers must be positive or zero";
+                UTILSLIB::Log::warning("MNEDescriptionParser: ignore numbers must be positive or zero");
                 return false;
             }
             if (inCategory)
                 currentCat.prevIgnore = static_cast<unsigned int>(ival);
             else {
-                qWarning() << "MNEDescriptionParser: misplaced prevignore";
+                UTILSLIB::Log::warning("MNEDescriptionParser: misplaced prevignore");
                 return false;
             }
             continue;
@@ -493,13 +493,13 @@ bool MNEDescriptionParser::parseAverageFile(const std::filesystem::path& fileNam
             if (!getInt(in, ival))
                 return false;
             if (ival < 0) {
-                qWarning() << "MNEDescriptionParser: ignore numbers must be positive or zero";
+                UTILSLIB::Log::warning("MNEDescriptionParser: ignore numbers must be positive or zero");
                 return false;
             }
             if (inCategory)
                 currentCat.nextIgnore = static_cast<unsigned int>(ival);
             else {
-                qWarning() << "MNEDescriptionParser: misplaced nextignore";
+                UTILSLIB::Log::warning("MNEDescriptionParser: misplaced nextignore");
                 return false;
             }
             continue;
@@ -509,14 +509,14 @@ bool MNEDescriptionParser::parseAverageFile(const std::filesystem::path& fileNam
             if (!getInt(in, ival))
                 return false;
             if (ival <= 0) {
-                qWarning() << "MNEDescriptionParser: mask must be positive";
+                UTILSLIB::Log::warning("MNEDescriptionParser: mask must be positive");
                 return false;
             }
             if (inCategory) {
                 currentCat.ignore = static_cast<unsigned int>(ival);
                 currentCat.ignore = ~currentCat.ignore;
             } else {
-                qWarning() << "MNEDescriptionParser: misplaced mask";
+                UTILSLIB::Log::warning("MNEDescriptionParser: misplaced mask");
                 return false;
             }
             continue;
@@ -526,14 +526,14 @@ bool MNEDescriptionParser::parseAverageFile(const std::filesystem::path& fileNam
             if (!getInt(in, ival))
                 return false;
             if (ival <= 0) {
-                qWarning() << "MNEDescriptionParser: mask numbers must be positive";
+                UTILSLIB::Log::warning("MNEDescriptionParser: mask numbers must be positive");
                 return false;
             }
             if (inCategory) {
                 currentCat.prevIgnore = static_cast<unsigned int>(ival);
                 currentCat.prevIgnore = ~currentCat.prevIgnore;
             } else {
-                qWarning() << "MNEDescriptionParser: misplaced prevmask";
+                UTILSLIB::Log::warning("MNEDescriptionParser: misplaced prevmask");
                 return false;
             }
             continue;
@@ -543,14 +543,14 @@ bool MNEDescriptionParser::parseAverageFile(const std::filesystem::path& fileNam
             if (!getInt(in, ival))
                 return false;
             if (ival <= 0) {
-                qWarning() << "MNEDescriptionParser: mask numbers must be positive";
+                UTILSLIB::Log::warning("MNEDescriptionParser: mask numbers must be positive");
                 return false;
             }
             if (inCategory) {
                 currentCat.nextIgnore = static_cast<unsigned int>(ival);
                 currentCat.nextIgnore = ~currentCat.nextIgnore;
             } else {
-                qWarning() << "MNEDescriptionParser: misplaced nextmask";
+                UTILSLIB::Log::warning("MNEDescriptionParser: misplaced nextmask");
                 return false;
             }
             continue;
@@ -562,7 +562,7 @@ bool MNEDescriptionParser::parseAverageFile(const std::filesystem::path& fileNam
             if (inCategory)
                 currentCat.delay = fval;
             else {
-                qWarning() << "MNEDescriptionParser: misplaced delay";
+                UTILSLIB::Log::warning("MNEDescriptionParser: misplaced delay");
                 return false;
             }
             continue;
@@ -571,7 +571,7 @@ bool MNEDescriptionParser::parseAverageFile(const std::filesystem::path& fileNam
             if (inCategory)
                 currentCat.doStdErr = true;
             else {
-                qWarning() << "MNEDescriptionParser: misplaced stderr";
+                UTILSLIB::Log::warning("MNEDescriptionParser: misplaced stderr");
                 return false;
             }
             continue;
@@ -580,7 +580,7 @@ bool MNEDescriptionParser::parseAverageFile(const std::filesystem::path& fileNam
             if (inCategory)
                 currentCat.doAbs = true;
             else {
-                qWarning() << "MNEDescriptionParser: misplaced abs";
+                UTILSLIB::Log::warning("MNEDescriptionParser: misplaced abs");
                 return false;
             }
             continue;
@@ -590,7 +590,7 @@ bool MNEDescriptionParser::parseAverageFile(const std::filesystem::path& fileNam
             if (!getFloat(in, r) || !getFloat(in, g) || !getFloat(in, b))
                 return false;
             if (r < 0.0f || r > 1.0f || g < 0.0f || g > 1.0f || b < 0.0f || b > 1.0f) {
-                qWarning() << "MNEDescriptionParser: color components must be within 0 ... 1";
+                UTILSLIB::Log::warning("MNEDescriptionParser: color components must be within 0 ... 1");
                 return false;
             }
             if (inCategory) {
@@ -598,7 +598,7 @@ bool MNEDescriptionParser::parseAverageFile(const std::filesystem::path& fileNam
                 currentCat.color[1] = g;
                 currentCat.color[2] = b;
             } else {
-                qWarning() << "MNEDescriptionParser: misplaced color";
+                UTILSLIB::Log::warning("MNEDescriptionParser: misplaced color");
                 return false;
             }
             continue;
@@ -608,7 +608,7 @@ bool MNEDescriptionParser::parseAverageFile(const std::filesystem::path& fileNam
         bool parseOk;
         if (parseRejectionParam(word, in, desc.rej, parseOk)) {
             if (!(inAverage && !inCategory)) {
-                qWarning() << "MNEDescriptionParser: misplaced" << word.c_str();
+                UTILSLIB::Log::warning("MNEDescriptionParser: misplaced {}", word);
                 return false;
             }
             if (!parseOk)
@@ -616,11 +616,11 @@ bool MNEDescriptionParser::parseAverageFile(const std::filesystem::path& fileNam
             continue;
         }
 
-        qWarning() << "MNEDescriptionParser: unknown keyword" << word.c_str() << "in" << UTILSLIB::utf8FromPath(fileName).c_str();
+        UTILSLIB::Log::warning("MNEDescriptionParser: unknown keyword {} in {}", word, UTILSLIB::utf8FromPath(fileName));
     }
 
     if (desc.categories.empty()) {
-        qWarning() << "MNEDescriptionParser: no categories found in" << UTILSLIB::utf8FromPath(fileName).c_str();
+        UTILSLIB::Log::warning("MNEDescriptionParser: no categories found in {}", UTILSLIB::utf8FromPath(fileName));
         return false;
     }
 
@@ -635,7 +635,7 @@ bool MNEDescriptionParser::parseCovarianceFile(const std::filesystem::path& file
 {
     std::ifstream in(fileName);
     if (!in) {
-        qWarning() << "MNEDescriptionParser: cannot open" << UTILSLIB::utf8FromPath(fileName).c_str();
+        UTILSLIB::Log::warning("MNEDescriptionParser: cannot open {}", UTILSLIB::utf8FromPath(fileName));
         return false;
     }
 
@@ -654,14 +654,14 @@ bool MNEDescriptionParser::parseCovarianceFile(const std::filesystem::path& file
             if (word == "{") {
                 expectBrace = false;
             } else {
-                qWarning() << "MNEDescriptionParser: expected '{', got" << word.c_str();
+                UTILSLIB::Log::warning("MNEDescriptionParser: expected '{{', got {}", word);
                 return false;
             }
             continue;
         }
 
         if (word == "{") {
-            qWarning() << "MNEDescriptionParser: unexpected '{'";
+            UTILSLIB::Log::warning("MNEDescriptionParser: unexpected '{{'");
             return false;
         }
 
@@ -669,11 +669,11 @@ bool MNEDescriptionParser::parseCovarianceFile(const std::filesystem::path& file
             if (inDef) {
                 currentDef.doBaseline = bminSet && bmaxSet;
                 if (currentDef.tmin >= currentDef.tmax) {
-                    qWarning() << "MNEDescriptionParser: illegal time range in def";
+                    UTILSLIB::Log::warning("MNEDescriptionParser: illegal time range in def");
                     return false;
                 }
                 if (currentDef.doBaseline && currentDef.bmin > currentDef.bmax) {
-                    qWarning() << "MNEDescriptionParser: illegal baseline in def";
+                    UTILSLIB::Log::warning("MNEDescriptionParser: illegal baseline in def");
                     return false;
                 }
                 desc.defs.push_back(currentDef);
@@ -689,7 +689,7 @@ bool MNEDescriptionParser::parseCovarianceFile(const std::filesystem::path& file
 
         if (UTILSLIB::equalsIgnoreCase(word, "cov")) {
             if (inCov || inDef) {
-                qWarning() << "MNEDescriptionParser: nested cov";
+                UTILSLIB::Log::warning("MNEDescriptionParser: nested cov");
                 return false;
             }
             inCov = true;
@@ -700,7 +700,7 @@ bool MNEDescriptionParser::parseCovarianceFile(const std::filesystem::path& file
 
         if (UTILSLIB::equalsIgnoreCase(word, "def")) {
             if (!inCov || inDef) {
-                qWarning() << "MNEDescriptionParser: misplaced def";
+                UTILSLIB::Log::warning("MNEDescriptionParser: misplaced def");
                 return false;
             }
             inDef = true;
@@ -713,13 +713,13 @@ bool MNEDescriptionParser::parseCovarianceFile(const std::filesystem::path& file
         if (UTILSLIB::equalsIgnoreCase(word, "outfile")) {
             const std::string val = nextWord(in);
             if (val.empty()) {
-                qWarning() << "MNEDescriptionParser: outfile requires a value";
+                UTILSLIB::Log::warning("MNEDescriptionParser: outfile requires a value");
                 return false;
             }
             if (inCov && !inDef)
                 desc.filename = val;
             else {
-                qWarning() << "MNEDescriptionParser: misplaced outfile";
+                UTILSLIB::Log::warning("MNEDescriptionParser: misplaced outfile");
                 return false;
             }
             continue;
@@ -727,13 +727,13 @@ bool MNEDescriptionParser::parseCovarianceFile(const std::filesystem::path& file
         if (UTILSLIB::equalsIgnoreCase(word, "eventfile")) {
             const std::string val = nextWord(in);
             if (val.empty()) {
-                qWarning() << "MNEDescriptionParser: eventfile requires a value";
+                UTILSLIB::Log::warning("MNEDescriptionParser: eventfile requires a value");
                 return false;
             }
             if (inCov && !inDef)
                 desc.eventFile = val;
             else {
-                qWarning() << "MNEDescriptionParser: misplaced eventfile";
+                UTILSLIB::Log::warning("MNEDescriptionParser: misplaced eventfile");
                 return false;
             }
             continue;
@@ -741,13 +741,13 @@ bool MNEDescriptionParser::parseCovarianceFile(const std::filesystem::path& file
         if (UTILSLIB::equalsIgnoreCase(word, "logfile")) {
             const std::string val = nextWord(in);
             if (val.empty()) {
-                qWarning() << "MNEDescriptionParser: logfile requires a value";
+                UTILSLIB::Log::warning("MNEDescriptionParser: logfile requires a value");
                 return false;
             }
             if (inCov && !inDef)
                 desc.logFile = val;
             else {
-                qWarning() << "MNEDescriptionParser: misplaced logfile";
+                UTILSLIB::Log::warning("MNEDescriptionParser: misplaced logfile");
                 return false;
             }
             continue;
@@ -756,7 +756,7 @@ bool MNEDescriptionParser::parseCovarianceFile(const std::filesystem::path& file
             if (inCov && !inDef)
                 desc.removeSampleMean = false;
             else {
-                qWarning() << "MNEDescriptionParser: misplaced keepsamplemean";
+                UTILSLIB::Log::warning("MNEDescriptionParser: misplaced keepsamplemean");
                 return false;
             }
             continue;
@@ -765,7 +765,7 @@ bool MNEDescriptionParser::parseCovarianceFile(const std::filesystem::path& file
             if (inCov && !inDef)
                 desc.fixSkew = true;
             else {
-                qWarning() << "MNEDescriptionParser: misplaced fixskew";
+                UTILSLIB::Log::warning("MNEDescriptionParser: misplaced fixskew");
                 return false;
             }
             continue;
@@ -779,7 +779,7 @@ bool MNEDescriptionParser::parseCovarianceFile(const std::filesystem::path& file
             if (inDef)
                 currentDef.tmin = fval;
             else {
-                qWarning() << "MNEDescriptionParser: misplaced tmin";
+                UTILSLIB::Log::warning("MNEDescriptionParser: misplaced tmin");
                 return false;
             }
             continue;
@@ -791,7 +791,7 @@ bool MNEDescriptionParser::parseCovarianceFile(const std::filesystem::path& file
             if (inDef)
                 currentDef.tmax = fval;
             else {
-                qWarning() << "MNEDescriptionParser: misplaced tmax";
+                UTILSLIB::Log::warning("MNEDescriptionParser: misplaced tmax");
                 return false;
             }
             continue;
@@ -805,7 +805,7 @@ bool MNEDescriptionParser::parseCovarianceFile(const std::filesystem::path& file
                 currentDef.bmin = fval;
                 bminSet = true;
             } else {
-                qWarning() << "MNEDescriptionParser: misplaced basemin";
+                UTILSLIB::Log::warning("MNEDescriptionParser: misplaced basemin");
                 return false;
             }
             continue;
@@ -819,7 +819,7 @@ bool MNEDescriptionParser::parseCovarianceFile(const std::filesystem::path& file
                 currentDef.bmax = fval;
                 bmaxSet = true;
             } else {
-                qWarning() << "MNEDescriptionParser: misplaced basemax";
+                UTILSLIB::Log::warning("MNEDescriptionParser: misplaced basemax");
                 return false;
             }
             continue;
@@ -829,13 +829,13 @@ bool MNEDescriptionParser::parseCovarianceFile(const std::filesystem::path& file
             if (!getInt(in, ival))
                 return false;
             if (ival <= 0) {
-                qWarning() << "MNEDescriptionParser: event must be positive";
+                UTILSLIB::Log::warning("MNEDescriptionParser: event must be positive");
                 return false;
             }
             if (inDef)
                 currentDef.events.push_back(static_cast<unsigned int>(ival));
             else {
-                qWarning() << "MNEDescriptionParser: misplaced event";
+                UTILSLIB::Log::warning("MNEDescriptionParser: misplaced event");
                 return false;
             }
             continue;
@@ -845,13 +845,13 @@ bool MNEDescriptionParser::parseCovarianceFile(const std::filesystem::path& file
             if (!getInt(in, ival))
                 return false;
             if (ival < 0) {
-                qWarning() << "MNEDescriptionParser: ignore numbers must be positive or zero";
+                UTILSLIB::Log::warning("MNEDescriptionParser: ignore numbers must be positive or zero");
                 return false;
             }
             if (inDef)
                 currentDef.ignore = static_cast<unsigned int>(ival);
             else {
-                qWarning() << "MNEDescriptionParser: misplaced ignore";
+                UTILSLIB::Log::warning("MNEDescriptionParser: misplaced ignore");
                 return false;
             }
             continue;
@@ -861,14 +861,14 @@ bool MNEDescriptionParser::parseCovarianceFile(const std::filesystem::path& file
             if (!getInt(in, ival))
                 return false;
             if (ival <= 0) {
-                qWarning() << "MNEDescriptionParser: mask numbers must be positive";
+                UTILSLIB::Log::warning("MNEDescriptionParser: mask numbers must be positive");
                 return false;
             }
             if (inDef) {
                 currentDef.ignore = static_cast<unsigned int>(ival);
                 currentDef.ignore = ~currentDef.ignore;
             } else {
-                qWarning() << "MNEDescriptionParser: misplaced mask";
+                UTILSLIB::Log::warning("MNEDescriptionParser: misplaced mask");
                 return false;
             }
             continue;
@@ -880,7 +880,7 @@ bool MNEDescriptionParser::parseCovarianceFile(const std::filesystem::path& file
             if (inDef)
                 currentDef.delay = fval;
             else {
-                qWarning() << "MNEDescriptionParser: misplaced delay";
+                UTILSLIB::Log::warning("MNEDescriptionParser: misplaced delay");
                 return false;
             }
             continue;
@@ -890,7 +890,7 @@ bool MNEDescriptionParser::parseCovarianceFile(const std::filesystem::path& file
         bool parseOk;
         if (parseRejectionParam(word, in, desc.rej, parseOk)) {
             if (!(inCov && !inDef)) {
-                qWarning() << "MNEDescriptionParser: misplaced" << word.c_str();
+                UTILSLIB::Log::warning("MNEDescriptionParser: misplaced {}", word);
                 return false;
             }
             if (!parseOk)
@@ -898,11 +898,11 @@ bool MNEDescriptionParser::parseCovarianceFile(const std::filesystem::path& file
             continue;
         }
 
-        qWarning() << "MNEDescriptionParser: unknown keyword" << word.c_str() << "in" << UTILSLIB::utf8FromPath(fileName).c_str();
+        UTILSLIB::Log::warning("MNEDescriptionParser: unknown keyword {} in {}", word, UTILSLIB::utf8FromPath(fileName));
     }
 
     if (!seenCov) {
-        qWarning() << "MNEDescriptionParser: nothing useful read from" << UTILSLIB::utf8FromPath(fileName).c_str();
+        UTILSLIB::Log::warning("MNEDescriptionParser: nothing useful read from {}", UTILSLIB::utf8FromPath(fileName));
         return false;
     }
 

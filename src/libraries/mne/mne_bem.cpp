@@ -25,6 +25,7 @@
 //=============================================================================================================
 
 #include "mne_bem.h"
+#include <utils/logger/log.h>
 
 #include <math/warp.h>
 #include <utils/string_utils.h>
@@ -172,7 +173,7 @@ Expected<MNEBem> MNEBem::read(FiffStream& stream, bool patch_stats)
         }
         bem.m_surfaces.push_back(std::move(*surface));
     }
-    qInfo("\t%zu BEM surfaces read", bem.size());
+    Log::info("\t{} BEM surfaces read", bem.size());
     return bem;
 }
 

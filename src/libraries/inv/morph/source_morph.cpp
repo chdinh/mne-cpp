@@ -23,12 +23,12 @@
 //=============================================================================================================
 
 #include "source_morph.h"
+#include <utils/logger/log.h>
 
 //=============================================================================================================
 // QT INCLUDES
 //=============================================================================================================
 
-#include <QDebug>
 
 //=============================================================================================================
 // USED NAMESPACES
@@ -46,14 +46,12 @@ void SourceMorph::compute(const VectorXi& verticesFrom,
                           const SparseMatrix<double>& morphMap)
 {
     if (verticesFrom.size() == 0 || verticesTo.size() == 0) {
-        qWarning() << "[SourceMorph::compute] Empty vertex vectors.";
+        UTILSLIB::Log::warning("[SourceMorph::compute] Empty vertex vectors.");
         return;
     }
 
     if (morphMap.rows() != verticesTo.size() || morphMap.cols() != verticesFrom.size()) {
-        qWarning() << "[SourceMorph::compute] Morph map dimensions mismatch:"
-                   << morphMap.rows() << "x" << morphMap.cols()
-                   << "but expected" << verticesTo.size() << "x" << verticesFrom.size();
+        UTILSLIB::Log::warning("[SourceMorph::compute] Morph map dimensions mismatch: {} x {} but expected {} x {}", morphMap.rows(), morphMap.cols(), verticesTo.size(), verticesFrom.size());
         return;
     }
 
@@ -68,18 +66,17 @@ void SourceMorph::compute(const VectorXi& verticesFrom,
 InvSourceEstimate SourceMorph::apply(const InvSourceEstimate& stcFrom) const
 {
     if (!m_bComputed) {
-        qWarning() << "[SourceMorph::apply] Morph not computed. Call compute() first.";
+        UTILSLIB::Log::warning("[SourceMorph::apply] Morph not computed. Call compute() first.");
         return InvSourceEstimate();
     }
 
     if (stcFrom.empty()) {
-        qWarning() << "[SourceMorph::apply] Source estimate is empty.";
+        UTILSLIB::Log::warning("[SourceMorph::apply] Source estimate is empty.");
         return InvSourceEstimate();
     }
 
     if (stcFrom.data.rows() != m_morphMatrix.cols()) {
-        qWarning() << "[SourceMorph::apply] Source estimate rows" << stcFrom.data.rows()
-                   << "!= morph matrix cols" << m_morphMatrix.cols();
+        UTILSLIB::Log::warning("[SourceMorph::apply] Source estimate rows {} != morph matrix cols {}", stcFrom.data.rows(), m_morphMatrix.cols());
         return InvSourceEstimate();
     }
 

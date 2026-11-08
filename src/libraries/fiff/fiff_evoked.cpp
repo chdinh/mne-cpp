@@ -21,6 +21,7 @@
 //=============================================================================================================
 
 #include "fiff_evoked.h"
+#include <utils/logger/log.h>
 
 #include <vector>
 #include <utility>
@@ -33,7 +34,6 @@
 #include "fiff_evoked_file.h"
 
 #include <math/numerics.h>
-#include <QDebug>
 
 #include <cmath>
 #include <format>
@@ -118,7 +118,7 @@ FiffEvoked FiffEvoked::pick_channels(const StringList& include,
 
     RowVectorXi sel = FiffInfo::pick_channels(this->info.ch_names, include, exclude);
     if (sel.cols() == 0) {
-        qWarning("Warning : No channels match the selection.\n");
+        Log::warning("Warning : No channels match the selection.\n");
         return FiffEvoked(*this);
     }
 
@@ -135,7 +135,7 @@ FiffEvoked FiffEvoked::pick_channels(const StringList& include,
         if (sel(0, l) < res.data.rows()) {
             selBlock.block(l, 0, 1, selBlock.cols()) = res.data.block(sel(0, l), 0, 1, selBlock.cols());
         } else {
-            qWarning("FiffEvoked::pick_channels - Warning : Selected channel index out of bound.\n");
+            Log::warning("FiffEvoked::pick_channels - Warning : Selected channel index out of bound.\n");
         }
     }
     res.data.resize(sel.cols(), res.data.cols());
@@ -173,7 +173,7 @@ Expected<FiffEvokedFile> FiffEvokedFile::open(const std::filesystem::path& path)
     }
     FiffEvokedFile file(std::move(*opened), utf8FromPath(path));
     FiffStream& stream = file.m_stream;
-    qInfo("Reading %s ...\n", file.m_file.c_str());
+    Log::info("Reading {} ...\n", file.m_file);
 
     FiffDirNode::SPtr meas;
     if (stream.dirtree()->dir_tree_find(FIFFB_MEAS).empty()) {
@@ -233,7 +233,7 @@ Expected<FiffEvoked> FiffEvokedFile::read(int set, const FiffEvoked::Baseline& b
     }
 
     if (aspects.size() > 1)
-        qInfo("\tMultiple (%lld) aspects found. Taking first one.\n", static_cast<long long>(aspects.size()));
+        Log::info("\tMultiple ({}) aspects found. Taking first one.\n", aspects.size());
 
     FiffDirNode::SPtr my_aspect = aspects[0];
 
@@ -292,15 +292,15 @@ Expected<FiffEvoked> FiffEvokedFile::read(int set, const FiffEvoked::Baseline& b
         }
         info.chs = chs;
         info.nchan = nchan;
-        qInfo("\tFound channel information in evoked data. nchan = %d\n", nchan);
+        Log::info("\tFound channel information in evoked data. nchan = {}\n", nchan);
         if (sfreq > 0.0f)
             info.sfreq = sfreq;
     }
     qint32 nsamp = last - first + 1;
-    qInfo("\tFound the data of interest:\n");
-    qInfo("\t\tt = %10.2f ... %10.2f ms (%s)\n", 1000 * static_cast<float>(first) / info.sfreq, 1000 * static_cast<float>(last) / info.sfreq, comment.c_str());
+    Log::info("\tFound the data of interest:\n");
+    Log::info("\t\tt = {:10.2f} ... {:10.2f} ms ({})\n", 1000 * static_cast<float>(first) / info.sfreq, 1000 * static_cast<float>(last) / info.sfreq, comment);
     if (info.comps.size() > 0)
-        qInfo("\t\t%lld CTF compensation matrices available\n", static_cast<long long>(info.comps.size()));
+        Log::info("\t\t{} CTF compensation matrices available\n", info.comps.size());
 
     //
     // Read the data in the aspect block
@@ -333,7 +333,7 @@ Expected<FiffEvoked> FiffEvokedFile::read(int set, const FiffEvoked::Baseline& b
     }
     if (nave == -1)
         nave = 1;
-    qInfo("\t\tnave = %d - aspect type = %d\n", nave, aspect_kind);
+    Log::info("\t\tnave = {} - aspect type = {}\n", nave, aspect_kind);
 
     qint32 nepoch = static_cast<int>(epoch.size());
     if (nepoch != 1 && nepoch != info.nchan) {
@@ -371,8 +371,8 @@ Expected<FiffEvoked> FiffEvokedFile::read(int set, const FiffEvoked::Baseline& b
     //
     //   Calibrate
     //
-    qInfo("\n\tPreprocessing...\n");
-    qInfo("\t%d channels remain after picking\n", info.nchan);
+    Log::info("\n\tPreprocessing...\n");
+    Log::info("\t{} channels remain after picking\n", info.nchan);
 
     using T = Eigen::Triplet<double>;
     std::vector<T> tripletList;
@@ -392,17 +392,17 @@ Expected<FiffEvoked> FiffEvokedFile::read(int set, const FiffEvoked::Baseline& b
     // Set up projection
     //
     if (info.projs.size() == 0 || !proj) {
-        qInfo("\tNo projector specified for these data.\n");
+        Log::info("\tNo projector specified for these data.\n");
         p_FiffEvoked.proj = MatrixXd();
     } else {
         //   Create the projector
         MatrixXd projection;
         qint32 nproj = info.make_projector(projection);
         if (nproj == 0) {
-            qWarning("\tThe projection vectors do not apply to these channels\n");
+            Log::warning("\tThe projection vectors do not apply to these channels\n");
             p_FiffEvoked.proj = MatrixXd();
         } else {
-            qInfo("\tCreated an SSP operator (subspace dimension = %d)\n", nproj);
+            Log::info("\tCreated an SSP operator (subspace dimension = {})\n", nproj);
             p_FiffEvoked.proj = projection;
         }
 
@@ -412,7 +412,7 @@ Expected<FiffEvoked> FiffEvokedFile::read(int set, const FiffEvoked::Baseline& b
 
     if (p_FiffEvoked.proj.rows() > 0) {
         all_data = p_FiffEvoked.proj * all_data;
-        qInfo("\tSSP projectors applied to the evoked data\n");
+        Log::info("\tSSP projectors applied to the evoked data\n");
     }
 
     // Put it all together
@@ -429,7 +429,7 @@ Expected<FiffEvoked> FiffEvokedFile::read(int set, const FiffEvoked::Baseline& b
         std::pair<float, float> window(baseline->first, baseline->second);
         p_FiffEvoked.applyBaselineCorrection(window);
     } else {
-        qInfo("\tNo baseline correction applied\n");
+        Log::info("\tNo baseline correction applied\n");
     }
 
     return p_FiffEvoked;
@@ -445,17 +445,17 @@ void FiffEvoked::setInfo(const FiffInfo& p_info,
     // Set up projection
     //
     if (info.projs.size() == 0 || !applyProj) {
-        qInfo("\tNo projector specified for these data.\n");
+        Log::info("\tNo projector specified for these data.\n");
         this->proj = MatrixXd();
     } else {
         //   Create the projector
         MatrixXd projection;
         qint32 nproj = info.make_projector(projection);
         if (nproj == 0) {
-            qWarning("\tThe projection vectors do not apply to these channels\n");
+            Log::warning("\tThe projection vectors do not apply to these channels\n");
             this->proj = MatrixXd();
         } else {
-            qInfo("\tCreated an SSP operator (subspace dimension = %d)\n", nproj);
+            Log::info("\tCreated an SSP operator (subspace dimension = {})\n", nproj);
             this->proj = projection;
         }
 
@@ -512,13 +512,13 @@ FiffEvoked FiffEvoked::combine(const std::vector<FiffEvoked>& evokeds, CombineWe
 FiffEvoked FiffEvoked::combine(const std::vector<FiffEvoked>& evokeds, const VectorXd& weights)
 {
     if (evokeds.empty() || weights.size() != std::ssize(evokeds)) {
-        qWarning() << "[FiffEvoked::combine] weights must be the same size as the evoked list.";
+        Log::warning("[FiffEvoked::combine] weights must be the same size as the evoked list.");
         return FiffEvoked();
     }
     const FiffEvoked& ref = evokeds.front();
     for (const FiffEvoked& e : evokeds) {
         if (e.info.ch_names != ref.info.ch_names || e.times.size() != ref.times.size() || (e.times - ref.times).cwiseAbs().maxCoeff() > 1e-6f) {
-            qWarning() << "[FiffEvoked::combine] All evoked data must have the same channels and times.";
+            Log::warning("[FiffEvoked::combine] All evoked data must have the same channels and times.");
             return FiffEvoked();
         }
     }
@@ -561,12 +561,12 @@ void FiffEvoked::applyBaselineCorrection(std::pair<float, float>& p_baseline)
 {
     // Skip baseline correction if sentinel value (-1, -1) or equal bounds are passed
     if (p_baseline.first == p_baseline.second) {
-        qInfo("\tNo baseline correction applied\n");
+        Log::info("\tNo baseline correction applied\n");
         return;
     }
 
     // Run baseline correction
-    qInfo("Applying baseline correction ... (mode: mean)\n");
+    Log::info("Applying baseline correction ... (mode: mean)\n");
     this->data = Numerics::rescale(this->data, this->times, p_baseline, "mean");
     this->baseline = p_baseline;
 }

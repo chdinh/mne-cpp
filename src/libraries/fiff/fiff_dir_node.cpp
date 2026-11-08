@@ -24,10 +24,10 @@
 //=============================================================================================================
 
 #include "fiff_dir_node.h"
+#include <utils/logger/log.h>
 #include "fiff_stream.h"
 #include "fiff_tag.h"
 #include "fiff_explain.h"
-#include <QDebug>
 //#include "fiff_ctf_comp.h"
 //#include "fiff_proj.h"
 //#include "fiff_info.h"
@@ -85,7 +85,7 @@ bool FiffDirNode::copy_tree(FiffStream& source, const FiffId& in_id, std::span<c
             //
             if (!source.device()->seek(p_Nodes[k]->dir[p].pos)) //fseek(fidin, nodes(k).dir(p).pos, 'bof') == -1
             {
-                qWarning("Could not seek to the tag\n");
+                UTILSLIB::Log::warning("Could not seek to the tag\n");
                 return false;
             }
 

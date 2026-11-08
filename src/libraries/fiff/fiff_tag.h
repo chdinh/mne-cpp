@@ -102,7 +102,6 @@
 // QT INCLUDES
 //=============================================================================================================
 
-#include <QDebug>
 #include <QByteArray>
 
 #include <optional>
@@ -300,7 +299,7 @@ public:
      *
      * @return type cast of the tag data pointer.
      */
-    inline const qint32* toInt() const;
+    const qint32* toInt() const;
 
     //=========================================================================================================
     /**
@@ -309,7 +308,7 @@ public:
     *
     * @return type cast of the tag data pointer.
     */
-    inline const qint32* toJulian() const;
+    const qint32* toJulian() const;
 
     //=========================================================================================================
     /**
@@ -404,7 +403,7 @@ public:
      *
      * @return Integer matrix.
      */
-    inline Eigen::MatrixXi toIntMatrix() const;
+    Eigen::MatrixXi toIntMatrix() const;
 
     //=========================================================================================================
     /**
@@ -414,7 +413,7 @@ public:
      *
      * @return the parsed float matrix.
      */
-    inline Eigen::MatrixXf toFloatMatrix() const;
+    Eigen::MatrixXf toFloatMatrix() const;
 
     //=========================================================================================================
     /**
@@ -587,28 +586,6 @@ inline const quint32* FiffTag::toUnsignedInt() const
         return nullptr;
     else
         return reinterpret_cast<const quint32*>(this->data());
-}
-
-//=============================================================================================================
-
-inline const qint32* FiffTag::toInt() const
-{
-    if (this->isMatrix() || this->getType() != FIFFT_INT) {
-        qWarning("Expected an integer tag : %d (found data type %d instead)\n", this->kind, this->getType());
-        return nullptr;
-    } else
-        return reinterpret_cast<const qint32*>(this->data());
-}
-
-//=============================================================================================================
-
-inline const qint32* FiffTag::toJulian() const
-{
-    if (this->isMatrix() || this->getType() != FIFFT_JULIAN) {
-        qWarning("Expected a julian tag : %d (found data type %d instead)\n", this->kind, this->getType());
-        return nullptr;
-    } else
-        return reinterpret_cast<const qint32*>(this->data());
 }
 
 //=============================================================================================================
@@ -848,55 +825,6 @@ inline std::vector<FiffDirEntry> FiffTag::toDirEntry() const
 //=============================================================================================================
 // MATRIX
 //=============================================================================================================
-
-//=============================================================================================================
-
-inline Eigen::MatrixXi FiffTag::toIntMatrix() const
-{
-    if (!this->isMatrix() || this->getType() != FIFFT_INT || this->data() == nullptr)
-        return Eigen::MatrixXi();
-
-    qint32 ndim;
-    std::vector<qint32> dims;
-    this->getMatrixDimensions(ndim, dims);
-
-    if (ndim != 2) {
-        qWarning("Only two-dimensional matrices are supported at this time");
-        return Eigen::MatrixXi();
-    }
-
-    // Use copy constructor instead --> slower performance but higher memory management reliability
-    Eigen::MatrixXi p_Matrix(Eigen::Map<const Eigen::MatrixXi>(reinterpret_cast<const int*>(this->data()), dims[0], dims[1]));
-
-    return p_Matrix;
-}
-
-//=============================================================================================================
-
-inline Eigen::MatrixXf FiffTag::toFloatMatrix() const
-{
-    if (!this->isMatrix() || this->getType() != FIFFT_FLOAT || this->data() == nullptr)
-        return Eigen::MatrixXf(); //NULL;
-
-    if (fiff_type_matrix_coding(this->type) != FIFFTS_MC_DENSE) {
-        qWarning("Error in FiffTag::toFloatMatrix(): Matrix is not dense!");
-        return Eigen::MatrixXf();
-    }
-
-    qint32 ndim;
-    std::vector<qint32> dims;
-    this->getMatrixDimensions(ndim, dims);
-
-    if (ndim != 2) {
-        qWarning("Only two-dimensional matrices are supported at this time");
-        return Eigen::MatrixXf();
-    }
-
-    // Use copy constructor instead --> slower performance but higher memory management reliability
-    Eigen::MatrixXf p_Matrix(Eigen::Map<const Eigen::MatrixXf>(reinterpret_cast<const float*>(this->data()), dims[0], dims[1]));
-
-    return p_Matrix;
-}
 
 } // NAMESPACE
 

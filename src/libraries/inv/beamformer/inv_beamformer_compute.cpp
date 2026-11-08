@@ -24,8 +24,8 @@
 //=============================================================================================================
 
 #include "inv_beamformer_compute.h"
+#include <utils/logger/log.h>
 
-#include <QDebug>
 
 //=============================================================================================================
 // EIGEN INCLUDES
@@ -98,7 +98,7 @@ void InvBeamformerCompute::regPinv(const MatrixXd& C,
     }
 
     if (rankOut == 0) {
-        qWarning("InvBeamformerCompute::regPinv - Covariance matrix has zero rank!");
+        UTILSLIB::Log::warning("InvBeamformerCompute::regPinv - Covariance matrix has zero rank!");
         CInv = MatrixXd::Zero(n, n);
         loadingFactor = 0.0;
         return;
@@ -183,11 +183,11 @@ bool InvBeamformerCompute::computeBeamformer(const MatrixXd& G,
     const int nSources = nDipoles / nOrient;
 
     if (nSources * nOrient != nDipoles) {
-        qWarning("InvBeamformerCompute::computeBeamformer - G.cols() not divisible by nOrient!");
+        UTILSLIB::Log::warning("InvBeamformerCompute::computeBeamformer - G.cols() not divisible by nOrient!");
         return false;
     }
     if (Cm.rows() != nChannels || Cm.cols() != nChannels) {
-        qWarning("InvBeamformerCompute::computeBeamformer - Cm dimension mismatch with leadfield!");
+        UTILSLIB::Log::warning("InvBeamformerCompute::computeBeamformer - Cm dimension mismatch with leadfield!");
         return false;
     }
 

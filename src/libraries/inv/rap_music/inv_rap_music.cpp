@@ -22,6 +22,7 @@
 //=============================================================================================================
 
 #include "inv_rap_music.h"
+#include <utils/logger/log.h>
 
 #include <math/numerics.h>
 #include <fiff/fiff_evoked.h>
@@ -88,16 +89,16 @@ bool InvRapMusic::init(MNEForwardSolution& p_pFwd, bool p_bSparsed, int p_iN, do
 {
 //Get available thread number
 #ifdef _OPENMP
-    qDebug() << "OpenMP enabled";
+    Log::debug("OpenMP enabled");
     m_iMaxNumThreads = omp_get_max_threads();
 #else
-    qDebug() << "OpenMP disabled (to enable it: VS2010->Project Properties->C/C++->Language, then modify OpenMP Support)";
+    Log::debug("OpenMP disabled (to enable it: VS2010->Project Properties->C/C++->Language, then modify OpenMP Support)");
     m_iMaxNumThreads = 1;
 #endif
-    qDebug() << "Available Threats: " << m_iMaxNumThreads;
+    Log::debug("Available Threats: {}", m_iMaxNumThreads);
 
     //Initialize RAP MUSIC
-    qDebug() << "##### Initialization RAP MUSIC started ######\n\n";
+    Log::debug("##### Initialization RAP MUSIC started ######\n\n");
 
     m_iN = p_iN;
     m_dThreshold = p_dThr;
@@ -107,7 +108,6 @@ bool InvRapMusic::init(MNEForwardSolution& p_pFwd, bool p_bSparsed, int p_iN, do
     //    {
     //        if ( p_pMatGrid->rows() != p_pMatLeadField->cols() / 3 )
     //        {
-    //            qDebug() << "Grid does not fit to given Lead Field!\n";
     //            return false;
     //        }
     //    }
@@ -116,7 +116,7 @@ bool InvRapMusic::init(MNEForwardSolution& p_pFwd, bool p_bSparsed, int p_iN, do
 
     //Lead Field check
     if (p_pFwd.sol->data.cols() % 3 != 0) {
-        qDebug() << "Gain matrix is not associated with a 3D grid!\n";
+        Log::debug("Gain matrix is not associated with a 3D grid!\n");
         return false;
     }
 
@@ -133,7 +133,7 @@ bool InvRapMusic::init(MNEForwardSolution& p_pFwd, bool p_bSparsed, int p_iN, do
 
     //##### Calc lead field combination #####
 
-    qDebug() << "Calculate gain matrix combinations. \n";
+    Log::debug("Calculate gain matrix combinations. \n");
 
     m_iNumLeadFieldCombinations = Numerics::nchoose2(m_iNumGridPoints + 1);
 
@@ -141,21 +141,21 @@ bool InvRapMusic::init(MNEForwardSolution& p_pFwd, bool p_bSparsed, int p_iN, do
 
     calcPairCombinations(m_iNumGridPoints, m_iNumLeadFieldCombinations, m_ppPairIdxCombinations);
 
-    qDebug() << "Gain matrix combinations calculated. \n\n";
+    Log::debug("Gain matrix combinations calculated. \n\n");
 
     //##### Calc lead field combination end #####
 
-    qDebug() << "Number of grid points: " << m_iNumGridPoints << "\n\n";
+    Log::debug("Number of grid points: {}\n\n", m_iNumGridPoints);
 
-    qDebug() << "Number of combinated points: " << m_iNumLeadFieldCombinations << "\n\n";
+    Log::debug("Number of combinated points: {}\n\n", m_iNumLeadFieldCombinations);
 
-    qDebug() << "Number of sources to find: " << m_iN << "\n\n";
+    Log::debug("Number of sources to find: {}\n\n", m_iN);
 
-    qDebug() << "Threshold: " << m_dThreshold << "\n\n";
+    Log::debug("Threshold: {}\n\n", m_dThreshold);
 
     //Init end
 
-    qDebug() << "##### Initialization RAP MUSIC completed ######\n\n\n";
+    Log::debug("##### Initialization RAP MUSIC completed ######\n\n\n");
 
     Q_UNUSED(p_bSparsed);
 
@@ -187,11 +187,10 @@ InvSourceEstimate InvRapMusic::calculateInverse(const FiffEvoked& p_fiffEvoked, 
     InvSourceEstimate p_sourceEstimate;
 
     if (p_fiffEvoked.data.rows() != m_iNumChannels) {
-        qDebug() << "Number of FiffEvoked channels (" << p_fiffEvoked.data.rows() << ") doesn't match the number of channels (" << m_iNumChannels << ") of the forward solution.";
+        Log::debug("Number of FiffEvoked channels ( {} ) doesn't match the number of channels ( {} ) of the forward solution.", p_fiffEvoked.data.rows(), m_iNumChannels);
         return p_sourceEstimate;
     }
     //    else
-    //        qDebug() << "Number of FiffEvoked channels (" << p_fiffEvoked.data.rows() << ") matchs the number of channels (" << m_iNumChannels << ") of the forward solution.";
 
     //
     // Rap MUSIC Source estimate
@@ -303,11 +302,10 @@ InvSourceEstimate InvRapMusic::calculateInverse(const MatrixXd& data, float tmin
     InvSourceEstimate p_sourceEstimate;
 
     if (data.rows() != m_iNumChannels) {
-        qDebug() << "Number of FiffEvoked channels (" << data.rows() << ") doesn't match the number of channels (" << m_iNumChannels << ") of the forward solution.";
+        Log::debug("Number of FiffEvoked channels ( {} ) doesn't match the number of channels ( {} ) of the forward solution.", data.rows(), m_iNumChannels);
         return p_sourceEstimate;
     }
     //    else
-    //        qDebug() << "Number of FiffEvoked channels (" << data.rows() << ") matchs the number of channels (" << m_iNumChannels << ") of the forward solution.";
 
     //
     // Rap MUSIC Source estimate
@@ -383,10 +381,9 @@ InvSourceEstimate InvRapMusic::calculateInverse(const MatrixXd& p_matMeasurement
     int t_iMaxSearch = m_iN < t_r ? m_iN : t_r; //The smallest of Rank and Iterations
 
     if (t_r < m_iN) {
-        qDebug() << "Warning: Rank " << t_r << " of the measurement data is smaller than the " << m_iN;
-        qDebug() << " sources to find.";
-        qDebug() << "         Searching now for " << t_iMaxSearch << " correlated sources.";
-        qDebug();
+        Log::debug("Warning: Rank {} of the measurement data is smaller than the {}", t_r, m_iN);
+        Log::debug(" sources to find.");
+        Log::debug("         Searching now for {} correlated sources.", t_iMaxSearch);
     }
 
     //Create Orthogonal Projector
@@ -414,7 +411,7 @@ InvSourceEstimate InvRapMusic::calculateInverse(const MatrixXd& p_matMeasurement
     //    }
     p_RapDipoles.clear();
 
-    qDebug() << "##### Calculation of RAP MUSIC started ######\n\n";
+    Log::debug("##### Calculation of RAP MUSIC started ######\n\n");
 
     MatrixXT t_matProj_Phi_s(t_matOrthProj.rows(), t_matPhi_s.cols());
     //new Version: Calculate projection before
@@ -483,7 +480,7 @@ InvSourceEstimate InvRapMusic::calculateInverse(const MatrixXd& p_matMeasurement
         end_subcorr = clock();
 
         float t_fSubcorrElapsedTime = (static_cast<float>(end_subcorr - start_subcorr) / static_cast<float>(CLOCKS_PER_SEC)) * 1000.0f;
-        qDebug() << "Time Elapsed: " << t_fSubcorrElapsedTime << " ms";
+        Log::debug("Time Elapsed: {} ms", t_fSubcorrElapsedTime);
 
         //Find the maximum of correlation - can't put this in the for loop because it's running in different threads.
         double t_val_roh_k;
@@ -497,8 +494,7 @@ InvSourceEstimate InvRapMusic::calculateInverse(const MatrixXd& p_matMeasurement
         int t_iIdx2 = m_ppPairIdxCombinations[t_iMaxIdx].x2;
 
         // (Idx+1) because of MATLAB positions -> starting with 1 not with 0
-        qDebug() << "Iteration: " << r + 1 << " of " << t_iMaxSearch
-                 << "; Correlation: " << t_val_roh_k << "; Position (Idx+1): " << t_iIdx1 + 1 << " - " << t_iIdx2 + 1 << "\n\n";
+        Log::debug("Iteration: {} of {} ; Correlation: {} ; Position (Idx+1): {} - {}\n\n", r + 1, t_iMaxSearch, t_val_roh_k, t_iIdx1 + 1, t_iIdx2 + 1);
 
         //Calculations with the max correlated dipole pair G_k_1 -> ToDo Obsolet when taking direkt Projected Lead Field
         MatrixX6T t_matG_k_1(m_ForwardSolution.sol->data.rows(), 6);
@@ -519,8 +515,8 @@ InvSourceEstimate InvRapMusic::calculateInverse(const MatrixXd& p_matMeasurement
 
         //Stop Searching when Correlation is smaller then the Threshold
         if (t_val_roh_k < m_dThreshold) {
-            qDebug() << "Searching stopped, last correlation " << t_val_roh_k;
-            qDebug() << " is smaller then the given threshold " << m_dThreshold;
+            Log::debug("Searching stopped, last correlation {}", t_val_roh_k);
+            Log::debug(" is smaller then the given threshold {}", m_dThreshold);
             break;
         }
 
@@ -534,12 +530,12 @@ InvSourceEstimate InvRapMusic::calculateInverse(const MatrixXd& p_matMeasurement
         //ToDo
     }
 
-    qDebug() << "##### Calculation of RAP MUSIC completed ######";
+    Log::debug("##### Calculation of RAP MUSIC completed ######");
 
     end = clock();
 
     float t_fElapsedTime = (static_cast<float>(end - start) / static_cast<float>(CLOCKS_PER_SEC)) * 1000.0f;
-    qDebug() << "Total Time Elapsed: " << t_fElapsedTime << " ms";
+    Log::debug("Total Time Elapsed: {} ms", t_fElapsedTime);
 
     return p_SourceEstimate;
 }

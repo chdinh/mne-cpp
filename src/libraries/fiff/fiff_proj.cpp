@@ -23,6 +23,7 @@
 //=============================================================================================================
 
 #include "fiff_proj.h"
+#include <utils/logger/log.h>
 
 #include <format>
 #include <map>
@@ -48,7 +49,6 @@
 //=============================================================================================================
 
 #include <Eigen/SVD>
-#include <QDebug>
 
 #include <array>
 #include <stdexcept>
@@ -166,7 +166,7 @@ void FiffProj::activate_projs(std::vector<FiffProj>& p_qListFiffProj)
     for (FiffProj& proj : p_qListFiffProj)
         proj.active = true;
 
-    qInfo("\t%lld projection items activated.\n", static_cast<long long>(p_qListFiffProj.size()));
+    Log::info("\t{} projection items activated.\n", p_qListFiffProj.size());
 }
 
 //=============================================================================================================
@@ -200,12 +200,12 @@ fiff_int_t FiffProj::make_projector(const std::vector<FiffProj>& projs, const St
     }
 
     if (nproj == 0) {
-        qWarning("FiffProj::make_projector - No projectors nproj=0\n");
+        Log::warning("FiffProj::make_projector - No projectors nproj=0\n");
         return 0;
     }
 
     if (nvec <= 0) {
-        qWarning("FiffProj::make_projector - No rows in projector matrices found nvec<=0\n");
+        Log::warning("FiffProj::make_projector - No rows in projector matrices found nvec<=0\n");
         return 0;
     }
 
@@ -228,7 +228,7 @@ fiff_int_t FiffProj::make_projector(const std::vector<FiffProj>& projs, const St
 
             const std::set<std::string> unique(one.data->col_names.begin(), one.data->col_names.end());
             if (one.data->col_names.size() != unique.size()) {
-                qWarning("Channel name list in projection item %d contains duplicate items", k);
+                Log::warning("Channel name list in projection item {} contains duplicate items", k);
                 return 0;
             }
 
@@ -335,7 +335,7 @@ std::vector<FiffProj> FiffProj::compute_from_raw(const FiffRawData& raw,
     int ns = maxSamp - minSamp + 1;
 
     if (ns <= 0) {
-        qWarning() << "[FiffProj::compute_from_raw] Invalid time window.";
+        Log::warning("[FiffProj::compute_from_raw] Invalid time window.");
         return {};
     }
 
@@ -386,11 +386,11 @@ std::vector<FiffProj> FiffProj::compute_from_raw(const FiffRawData& raw,
     }
 
     if (epochs.empty()) {
-        qWarning() << "[FiffProj::compute_from_raw] No valid epochs found for event" << eventCode;
+        Log::warning("[FiffProj::compute_from_raw] No valid epochs found for event {}", eventCode);
         return {};
     }
 
-    qInfo() << "[FiffProj::compute_from_raw]" << epochs.size() << "epochs collected for event" << eventCode;
+    Log::info("[FiffProj::compute_from_raw] {} epochs collected for event {}", epochs.size(), eventCode);
 
     // SVD of the uncentred data (MNE-C compute_cov_raw_epoch with remove_sample_mean = FALSE,
     // mne.compute_proj_epochs); removing the mean first yields a different subspace.

@@ -19,11 +19,11 @@
 //=============================================================================================================
 
 #include "fiff_sparse_matrix.h"
+#include <utils/logger/log.h>
 #include <fiff/fiff_file.h>
 #include <fiff/fiff_types.h>
 
 #include <vector>
-#include <QDebug>
 
 //=============================================================================================================
 // USED NAMESPACES
@@ -67,15 +67,15 @@ std::vector<int> fiff_get_matrix_dims(const FiffTag& tag)
    * Initial checks
    */
     if (tag.data() == nullptr) {
-        qCritical("fiff_get_matrix_dims: no data available!");
+        UTILSLIB::Log::critical("fiff_get_matrix_dims: no data available!");
         return {};
     }
     if (fiff_type_fundamental(tag.type) != FIFFTS_FS_MATRIX) {
-        qCritical("fiff_get_matrix_dims: tag does not contain a matrix!");
+        UTILSLIB::Log::critical("fiff_get_matrix_dims: tag does not contain a matrix!");
         return {};
     }
     if (tsize < sizeof(fiff_int_t)) {
-        qCritical("fiff_get_matrix_dims: too small matrix data!");
+        UTILSLIB::Log::critical("fiff_get_matrix_dims: too small matrix data!");
         return {};
     }
     /*
@@ -83,12 +83,12 @@ std::vector<int> fiff_get_matrix_dims(const FiffTag& tag)
    */
     ndim = *((fiff_int_t*)((fiff_byte_t*)(tag.data()) + tag.size() - sizeof(fiff_int_t)));
     if (ndim <= 0 || ndim > FIFFC_MATRIX_MAX_DIM) {
-        qCritical("fiff_get_matrix_dims: unreasonable # of dimensions!");
+        UTILSLIB::Log::critical("fiff_get_matrix_dims: unreasonable # of dimensions!");
         return {};
     }
     if (fiff_type_matrix_coding(tag.type) == FIFFTS_MC_DENSE) {
         if (tsize < (ndim + 1) * sizeof(fiff_int_t)) {
-            qCritical("fiff_get_matrix_dims: too small matrix data!");
+            UTILSLIB::Log::critical("fiff_get_matrix_dims: too small matrix data!");
             return {};
         }
         std::vector<int> res(ndim + 1);
@@ -100,7 +100,7 @@ std::vector<int> fiff_get_matrix_dims(const FiffTag& tag)
     } else if (fiff_type_matrix_coding(tag.type) == FIFFTS_MC_CCS ||
                fiff_type_matrix_coding(tag.type) == FIFFTS_MC_RCS) {
         if (tsize < (ndim + 2) * sizeof(fiff_int_t)) {
-            qCritical("fiff_get_matrix_sparse_dims: too small matrix data!");
+            UTILSLIB::Log::critical("fiff_get_matrix_sparse_dims: too small matrix data!");
             return {};
         }
         std::vector<int> res(ndim + 2);
@@ -111,7 +111,7 @@ std::vector<int> fiff_get_matrix_dims(const FiffTag& tag)
         res[ndim + 1] = dims[-1];
         return res;
     } else {
-        qCritical("fiff_get_matrix_dims: unknown matrix coding.");
+        UTILSLIB::Log::critical("fiff_get_matrix_dims: unknown matrix coding.");
         return {};
     }
 }
@@ -152,7 +152,7 @@ FiffSparseMatrix::UPtr FiffSparseMatrix::fiff_get_float_sparse_matrix(const Fiff
         fiff_type_base(tag.type) != FIFFT_FLOAT ||
         (fiff_type_matrix_coding(tag.type) != FIFFTS_MC_CCS &&
          fiff_type_matrix_coding(tag.type) != FIFFTS_MC_RCS)) {
-        qWarning("[FiffSparseMatrix::fiff_get_float_sparse_matrix] wrong data type!");
+        UTILSLIB::Log::warning("[FiffSparseMatrix::fiff_get_float_sparse_matrix] wrong data type!");
         return nullptr;
     }
 
@@ -161,7 +161,7 @@ FiffSparseMatrix::UPtr FiffSparseMatrix::fiff_get_float_sparse_matrix(const Fiff
         return nullptr;
 
     if (dims[0] != 2) {
-        qWarning("[FiffSparseMatrix::fiff_get_float_sparse_matrix] wrong # of dimensions!");
+        UTILSLIB::Log::warning("[FiffSparseMatrix::fiff_get_float_sparse_matrix] wrong # of dimensions!");
         return nullptr;
     }
 
@@ -177,11 +177,11 @@ FiffSparseMatrix::UPtr FiffSparseMatrix::fiff_get_float_sparse_matrix(const Fiff
         correct_size = nz * (sizeof(fiff_float_t) + sizeof(fiff_int_t)) +
             (m + 1 + dims[0] + 2) * (sizeof(fiff_int_t));
     else {
-        qWarning("[FiffSparseMatrix::fiff_get_float_sparse_matrix] Incomprehensible sparse matrix coding");
+        UTILSLIB::Log::warning("[FiffSparseMatrix::fiff_get_float_sparse_matrix] Incomprehensible sparse matrix coding");
         return nullptr;
     }
     if (tag.size() != correct_size) {
-        qWarning("[FiffSparseMatrix::fiff_get_float_sparse_matrix] wrong data size!");
+        UTILSLIB::Log::warning("[FiffSparseMatrix::fiff_get_float_sparse_matrix] wrong data size!");
         return nullptr;
     }
     /*
@@ -201,7 +201,7 @@ FiffSparseMatrix::UPtr FiffSparseMatrix::fiff_get_float_sparse_matrix(const Fiff
     for (int j = 0; valid && j < nz; ++j)
         valid = src_inds[j] >= 0 && src_inds[j] < nInner;
     if (!valid) {
-        qWarning("[FiffSparseMatrix::fiff_get_float_sparse_matrix] index or pointer outside the matrix!");
+        UTILSLIB::Log::warning("[FiffSparseMatrix::fiff_get_float_sparse_matrix] index or pointer outside the matrix!");
         return nullptr;
     }
 
@@ -241,7 +241,7 @@ FiffSparseMatrix::UPtr FiffSparseMatrix::create_sparse_rcs(int nrow, int ncol, i
         totalNz = totalNz + nnz[j];
 
     if (totalNz <= 0) {
-        qWarning("[FiffSparseMatrix::create_sparse_rcs] No nonzero elements specified.");
+        UTILSLIB::Log::warning("[FiffSparseMatrix::create_sparse_rcs] No nonzero elements specified.");
         return nullptr;
     }
 
@@ -253,7 +253,7 @@ FiffSparseMatrix::UPtr FiffSparseMatrix::create_sparse_rcs(int nrow, int ncol, i
         for (k = 0; k < nnz[j]; k++) {
             int col = colindex[j][k];
             if (col < 0 || col >= ncol) {
-                qWarning("[FiffSparseMatrix::create_sparse_rcs] Column index out of range");
+                UTILSLIB::Log::warning("[FiffSparseMatrix::create_sparse_rcs] Column index out of range");
                 return nullptr;
             }
             float val = vals ? vals[j][k] : 0.0f;
@@ -279,7 +279,7 @@ FiffSparseMatrix::UPtr FiffSparseMatrix::mne_add_upper_triangle_rcs()
     int nCols = cols();
 
     if (nRows != nCols) {
-        qWarning("[FiffSparseMatrix::mne_add_upper_triangle_rcs] input must be square");
+        UTILSLIB::Log::warning("[FiffSparseMatrix::mne_add_upper_triangle_rcs] input must be square");
         return nullptr;
     }
 
@@ -336,7 +336,7 @@ FiffSparseMatrix::UPtr FiffSparseMatrix::pickLowerTriangleRcs() const
     int nCols = cols();
 
     if (nRows != nCols) {
-        qWarning("[FiffSparseMatrix::pickLowerTriangleRcs] input must be square");
+        UTILSLIB::Log::warning("[FiffSparseMatrix::pickLowerTriangleRcs] input must be square");
         return nullptr;
     }
 

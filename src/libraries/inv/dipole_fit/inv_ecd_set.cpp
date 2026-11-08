@@ -20,6 +20,7 @@
 //=============================================================================================================
 
 #include "inv_ecd_set.h"
+#include <utils/logger/log.h>
 #include <fiff/fiff_byte_swap.h>
 #include <fiff/fiff_types.h>
 
@@ -28,12 +29,10 @@
 // QT INCLUDES
 //=============================================================================================================
 
-#include <QDebug>
 #include <QFile>
 #include <QTextStream>
 #include <QString>
 #include <QRegularExpression>
-#include <QDebug>
 
 //=============================================================================================================
 // USED NAMESPACES
@@ -137,9 +136,9 @@ InvEcdSet InvEcdSet::read_dipoles_dip(const QString& fileName)
         }
         inputFile.close();
 
-        qInfo("Read %d dipoles in dip format from %s\n", set.size(), fileName.toUtf8().data());
+        UTILSLIB::Log::info("Read {} dipoles in dip format from {}\n", set.size(), fileName.toStdString());
     } else {
-        qCritical("Not able to read from: %s\n", fileName.toUtf8().data());
+        UTILSLIB::Log::critical("Not able to read from: {}\n", fileName.toStdString());
     }
 
     return set;
@@ -162,7 +161,7 @@ bool InvEcdSet::save_dipoles_bdip(const QString& fileName)
         return true;
 
     if (!out.open(QIODevice::WriteOnly)) {
-        qInfo("%s", fileName.toUtf8().constData());
+        UTILSLIB::Log::info("{}", fileName.toStdString());
         return false;
     }
 
@@ -180,7 +179,7 @@ bool InvEcdSet::save_dipoles_bdip(const QString& fileName)
             one_out.errors_computed = FIFFLIB::swap_int(0);
             one_out.khi2 = FIFFLIB::swap_float(one.khi2);
             if (out.write(reinterpret_cast<const char*>(&one_out), sizeof(bdipEcdRec)) != sizeof(bdipEcdRec)) {
-                qCritical("Failed to write a dipole");
+                UTILSLIB::Log::critical("Failed to write a dipole");
                 out.close();
                 QFile::remove(fileName);
                 return false;
@@ -189,11 +188,11 @@ bool InvEcdSet::save_dipoles_bdip(const QString& fileName)
         }
     }
     if (!out.flush()) {
-        qInfo("%s", fileName.toUtf8().constData());
+        UTILSLIB::Log::info("{}", fileName.toStdString());
         return false;
     }
     out.close();
-    qInfo("Save %d dipoles in bdip format to %s\n", nsave, fileName.toUtf8().data());
+    UTILSLIB::Log::info("Save {} dipoles in bdip format to {}\n", nsave, fileName.toStdString());
     return true;
 }
 
@@ -208,7 +207,7 @@ bool InvEcdSet::save_dipoles_dip(const QString& fileName) const
     if (fileName.isEmpty() || this->size() == 0)
         return true;
     if (!out.open(QIODevice::WriteOnly | QIODevice::Text)) {
-        qInfo("%s", fileName.toUtf8().constData());
+        UTILSLIB::Log::info("{}", fileName.toStdString());
         return false;
     }
     //
@@ -232,11 +231,11 @@ bool InvEcdSet::save_dipoles_dip(const QString& fileName) const
     stream << QString::asprintf("## Name \"%s dipoles\" Style \"Dipoles\"\n", "ALL");
     stream.flush();
     if (!out.flush()) {
-        qInfo("%s", fileName.toUtf8().constData());
+        UTILSLIB::Log::info("{}", fileName.toStdString());
         return false;
     }
     out.close();
-    qInfo("Save %d dipoles in dip format to %s\n", nsave, fileName.toUtf8().data());
+    UTILSLIB::Log::info("Save {} dipoles in dip format to {}\n", nsave, fileName.toStdString());
     return true;
 }
 
@@ -245,7 +244,7 @@ bool InvEcdSet::save_dipoles_dip(const QString& fileName) const
 const InvEcd& InvEcdSet::operator[](int idx) const
 {
     if (idx >= m_qListDips.length()) {
-        qWarning("Warning: Required InvEcd doesn't exist! Returning InvEcd '0'.");
+        UTILSLIB::Log::warning("Warning: Required InvEcd doesn't exist! Returning InvEcd '0'.");
         idx = 0;
     }
     return m_qListDips[idx];
@@ -256,7 +255,7 @@ const InvEcd& InvEcdSet::operator[](int idx) const
 InvEcd& InvEcdSet::operator[](int idx)
 {
     if (idx >= m_qListDips.length()) {
-        qWarning("Warning: Required InvEcd doesn't exist! Returning InvEcd '0'.");
+        UTILSLIB::Log::warning("Warning: Required InvEcd doesn't exist! Returning InvEcd '0'.");
         idx = 0;
     }
     return m_qListDips[idx];

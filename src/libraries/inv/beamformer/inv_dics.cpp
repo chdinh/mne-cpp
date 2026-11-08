@@ -23,13 +23,13 @@
 //=============================================================================================================
 
 #include "inv_dics.h"
+#include <utils/logger/log.h>
 #include "inv_beamformer_compute.h"
 
 #include <mne/mne_forward_solution.h>
 #include <fiff/fiff_cov.h>
 #include <fiff/fiff_info.h>
 
-#include <QDebug>
 
 //=============================================================================================================
 // EIGEN INCLUDES
@@ -67,11 +67,11 @@ InvBeamformer InvDICS::makeDICS([[maybe_unused]] const FiffInfo& info,
 
     const int nFreqs = static_cast<int>(csdMatrices.size());
     if (nFreqs == 0) {
-        qWarning("InvDICS::makeDICS - No CSD matrices provided!");
+        UTILSLIB::Log::warning("InvDICS::makeDICS - No CSD matrices provided!");
         return result;
     }
     if (frequencies.size() != nFreqs) {
-        qWarning("InvDICS::makeDICS - Frequency vector size mismatch with CSD count!");
+        UTILSLIB::Log::warning("InvDICS::makeDICS - Frequency vector size mismatch with CSD count!");
         return result;
     }
 
@@ -79,7 +79,7 @@ InvBeamformer InvDICS::makeDICS([[maybe_unused]] const FiffInfo& info,
     // Extract leadfield
     // -----------------------------------------------------------------------
     if (!forward.sol || forward.sol->data.size() == 0) {
-        qWarning("InvDICS::makeDICS - Forward solution has no gain matrix!");
+        UTILSLIB::Log::warning("InvDICS::makeDICS - Forward solution has no gain matrix!");
         return result;
     }
 
@@ -88,8 +88,7 @@ InvBeamformer InvDICS::makeDICS([[maybe_unused]] const FiffInfo& info,
     const int nOrient = (forward.source_ori == FIFFV_MNE_FREE_ORI) ? 3 : 1;
     const int nSources = static_cast<int>(G.cols()) / nOrient;
 
-    qInfo("InvDICS::makeDICS - Leadfield: %d channels x %d sources (n_orient=%d), %d frequencies",
-          nChannels, nSources, nOrient, nFreqs);
+    UTILSLIB::Log::info("InvDICS::makeDICS - Leadfield: {} channels x {} sources (n_orient={}), {} frequencies", nChannels, nSources, nOrient, nFreqs);
 
     // -----------------------------------------------------------------------
     // Whitening matrix
@@ -130,7 +129,7 @@ InvBeamformer InvDICS::makeDICS([[maybe_unused]] const FiffInfo& info,
         MatrixXd Cm = csdMatrices[fi];
 
         if (Cm.rows() != nChannels || Cm.cols() != nChannels) {
-            qWarning("InvDICS::makeDICS - CSD[%d] dimension mismatch!", fi);
+            UTILSLIB::Log::warning("InvDICS::makeDICS - CSD[{}] dimension mismatch!", fi);
             return InvBeamformer();
         }
 
@@ -155,8 +154,7 @@ InvBeamformer InvDICS::makeDICS([[maybe_unused]] const FiffInfo& info,
             nn, W, mpOri);
 
         if (!ok) {
-            qWarning("InvDICS::makeDICS - Filter computation failed at frequency %d (%.1f Hz)!",
-                     fi, frequencies(fi));
+            UTILSLIB::Log::warning("InvDICS::makeDICS - Filter computation failed at frequency {} ({:.1f} Hz)!", fi, frequencies(fi));
             return InvBeamformer();
         }
 
@@ -198,7 +196,7 @@ InvBeamformer InvDICS::makeDICS([[maybe_unused]] const FiffInfo& info,
     }
     result.vertices = verts;
 
-    qInfo("InvDICS::makeDICS - Done. %d frequency filters computed.", nFreqs);
+    UTILSLIB::Log::info("InvDICS::makeDICS - Done. {} frequency filters computed.", nFreqs);
 
     return result;
 }
@@ -210,7 +208,7 @@ InvSourceEstimate InvDICS::applyDICSCsd(const std::vector<MatrixXd>& csdMatrices
                                         const InvBeamformer& filters)
 {
     if (!filters.isValid() || filters.kind != "DICS") {
-        qWarning("InvDICS::applyDICSCsd - Invalid or non-DICS filters!");
+        UTILSLIB::Log::warning("InvDICS::applyDICSCsd - Invalid or non-DICS filters!");
         return InvSourceEstimate();
     }
 
@@ -218,8 +216,7 @@ InvSourceEstimate InvDICS::applyDICSCsd(const std::vector<MatrixXd>& csdMatrices
     const int nFilterFreqs = filters.nFreqs();
 
     if (nFreqs != nFilterFreqs) {
-        qWarning("InvDICS::applyDICSCsd - CSD count (%d) does not match filter count (%d)!",
-                 nFreqs, nFilterFreqs);
+        UTILSLIB::Log::warning("InvDICS::applyDICSCsd - CSD count ({}) does not match filter count ({})!", nFreqs, nFilterFreqs);
         return InvSourceEstimate();
     }
 
@@ -266,12 +263,11 @@ InvSourceEstimate InvDICS::applyDICS(const MatrixXd& data,
                                      int freqIdx)
 {
     if (!filters.isValid() || filters.kind != "DICS") {
-        qWarning("InvDICS::applyDICS - Invalid or non-DICS filters!");
+        UTILSLIB::Log::warning("InvDICS::applyDICS - Invalid or non-DICS filters!");
         return InvSourceEstimate();
     }
     if (freqIdx < 0 || freqIdx >= filters.nFreqs()) {
-        qWarning("InvDICS::applyDICS - freqIdx %d out of range (0..%d)!",
-                 freqIdx, filters.nFreqs() - 1);
+        UTILSLIB::Log::warning("InvDICS::applyDICS - freqIdx {} out of range (0..{})!", freqIdx, filters.nFreqs() - 1);
         return InvSourceEstimate();
     }
 
@@ -318,18 +314,18 @@ QList<InvSourceEstimate> InvDICS::applyDICSEpochs(const QList<MatrixXd>& epochs,
     QList<InvSourceEstimate> results;
 
     if (epochs.isEmpty()) {
-        qWarning("InvDICS::applyDICSEpochs - No epochs provided.");
+        UTILSLIB::Log::warning("InvDICS::applyDICSEpochs - No epochs provided.");
         return results;
     }
     if (!filters.isValid() || filters.kind != "DICS") {
-        qWarning("InvDICS::applyDICSEpochs - Invalid or non-DICS filters!");
+        UTILSLIB::Log::warning("InvDICS::applyDICSEpochs - Invalid or non-DICS filters!");
         return results;
     }
 
     for (int i = 0; i < epochs.size(); ++i) {
         InvSourceEstimate stc = applyDICS(epochs[i], tmin, tstep, filters, freqIdx);
         if (stc.empty()) {
-            qWarning("InvDICS::applyDICSEpochs - Epoch %d produced empty source estimate.", i);
+            UTILSLIB::Log::warning("InvDICS::applyDICSEpochs - Epoch {} produced empty source estimate.", i);
         }
         results.append(stc);
     }

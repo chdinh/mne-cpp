@@ -18,13 +18,13 @@
 //=============================================================================================================
 
 #include "fiff_file_sharer.h"
+#include <utils/logger/log.h>
 
 //=============================================================================================================
 // QT INCLUDES
 //=============================================================================================================
 
 #include <QDir>
-#include <QDebug>
 
 //=============================================================================================================
 // USED NAMESPACES
@@ -91,7 +91,7 @@ void FiffFileSharer::initWatcher()
         connect(&m_fileWatcher, &QFileSystemWatcher::directoryChanged,
                 this, &FiffFileSharer::onDirectoryChanged, Qt::UniqueConnection);
     } else {
-        qWarning() << "[FiffFileSharer::initWatcher] Unable to initilaize shared directory";
+        UTILSLIB::Log::warning("[FiffFileSharer::initWatcher] Unable to initilaize shared directory");
     }
 }
 

@@ -15,6 +15,7 @@
 //=============================================================================================================
 
 #include "mne_morph_map.h"
+#include <utils/logger/log.h>
 
 #include <fiff/fiff_constants.h>
 #include <fiff/fiff_dir_node.h>
@@ -310,8 +311,7 @@ std::optional<MNEMorphMap> MNEMorphMap::read(const std::filesystem::path& path, 
         result.to_subj = toSubj;
         return result;
     }
-    qWarning("MNEMorphMap::read - %s hemisphere morph map from %s to %s not found in %s",
-             hemi == 0 ? "left" : "right", fromSubj.c_str(), toSubj.c_str(), UTILSLIB::utf8FromPath(path).c_str());
+    UTILSLIB::Log::warning("MNEMorphMap::read - {} hemisphere morph map from {} to {} not found in {}", hemi == 0 ? "left" : "right", fromSubj, toSubj, UTILSLIB::utf8FromPath(path));
     return std::nullopt;
 }
 
@@ -326,7 +326,7 @@ bool MNEMorphMap::write(const std::filesystem::path& path, const std::vector<con
     }
     for (const MNEMorphMap* morph : maps) {
         if (!morph || !morph->map || morph->hemi < 0 || morph->hemi > 1) {
-            qWarning("MNEMorphMap::write - Incomplete morph map");
+            UTILSLIB::Log::warning("MNEMorphMap::write - Incomplete morph map");
             return false;
         }
         stream->start_block(FIFFB_MNE_MORPH_MAP);
