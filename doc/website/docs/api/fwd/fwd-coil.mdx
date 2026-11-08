@@ -20,7 +20,7 @@ Implements [`FwdCoil`](/docs/api/fwd/fwd-coil) (replaces `fwdCoil` / `fwdCoilRec
 Single MEG sensor coil or EEG electrode — stores the coil-local frame and the (r_mag, cos_mag, w) integration-point triples that approximate the Biot-Savart surface integral over the coil area.
 
 ```cpp title="src/examples/ex_fwd_api/main.cpp"
-auto templates = FwdCoilSet::read_coil_defs(coilDefs); // integration points per coil type
+auto templates = FwdCoilSet::read_coil_defs(coilDefs.toStdU16String()); // integration points per coil type
 auto coils = templates->create_meg_coils(meg, static_cast<int>(meg.size()), FWD_COIL_ACCURACY_ACCURATE, raw.info.dev_head_t);
 const FwdCoil& first = *coils->coils[0]; // MEG 0113 in head coordinates
 ```
@@ -163,7 +163,7 @@ Transform coordinate frame if so desired.
 Forward library: coil definitions, BEM and sphere models, field maps and forward solutions.
 
 ````cpp title="src/examples/ex_fwd_api/main.cpp, line 116"
-auto templates = FwdCoilSet::read_coil_defs(coilDefs); // integration points per coil type
+auto templates = FwdCoilSet::read_coil_defs(coilDefs.toStdU16String()); // integration points per coil type
 auto coils = templates->create_meg_coils(meg, static_cast<int>(meg.size()), FWD_COIL_ACCURACY_ACCURATE, raw.info.dev_head_t);
 const FwdCoil& first = *coils->coils[0]; // MEG 0113 in head coordinates
 // mne _create_meg_coils(accurate): 3012 planar gradiometer, 8 points, r0 (-106.15, 29.14, -14.73) mm

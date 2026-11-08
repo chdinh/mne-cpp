@@ -68,7 +68,7 @@ Find a model with a given name and return a duplicate Refactored from: fwd_eeg_s
 
 **Parameters:**
 
-- **p_sName** : *const QString &*
+- **p_sName** : *std::string_view*
   Name of the model to find.
 
 **Returns:**
@@ -136,7 +136,7 @@ Load all models available in the specified file Refactored from: fwd_eeg_sphere_
 
 **Parameters:**
 
-- **p_sFileName** : *const QString &*
+- **p_sFileName** : *const std::filesystem::path &*
   file name to load models from.
 
 - **now** : *UPtr*

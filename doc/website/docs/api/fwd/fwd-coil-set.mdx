@@ -22,7 +22,7 @@ Implements [`FwdCoilSet`](/docs/api/fwd/fwd-coil-set) (replaces `fwdCoilSet` / `
 Container of [`FwdCoil`](/docs/api/fwd/fwd-coil) instances acting both as the in-memory image of the `coil_def.dat` template database and as a per-channel sensor array in a chosen coordinate frame (device / head / MRI).
 
 ```cpp title="src/examples/ex_fwd_api/main.cpp"
-auto templates = FwdCoilSet::read_coil_defs(coilDefs); // integration points per coil type
+auto templates = FwdCoilSet::read_coil_defs(coilDefs.toStdU16String()); // integration points per coil type
 auto coils = templates->create_meg_coils(meg, static_cast<int>(meg.size()), FWD_COIL_ACCURACY_ACCURATE, raw.info.dev_head_t);
 const FwdCoil& first = *coils->coils[0]; // MEG 0113 in head coordinates
 ```
@@ -202,7 +202,7 @@ Read a coil definitions from file.
 
 **Parameters:**
 
-- **name** : *const QString &*
+- **name** : *const std::filesystem::path &*
   File name to read from.
 
 **Returns:**
@@ -225,7 +225,7 @@ Read a coil definitions from file.
 Forward library: coil definitions, BEM and sphere models, field maps and forward solutions.
 
 ````cpp title="src/examples/ex_fwd_api/main.cpp, line 116"
-auto templates = FwdCoilSet::read_coil_defs(coilDefs); // integration points per coil type
+auto templates = FwdCoilSet::read_coil_defs(coilDefs.toStdU16String()); // integration points per coil type
 auto coils = templates->create_meg_coils(meg, static_cast<int>(meg.size()), FWD_COIL_ACCURACY_ACCURATE, raw.info.dev_head_t);
 const FwdCoil& first = *coils->coils[0]; // MEG 0113 in head coordinates
 // mne _create_meg_coils(accurate): 3012 planar gradiometer, 8 points, r0 (-106.15, 29.14, -14.73) mm

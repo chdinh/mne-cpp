@@ -20,8 +20,8 @@ Implements a Forward BEM Solution (replaces `fwdBemSolution` / `fwdBemSolutionRe
 Channel-specific projection that contracts a BEM node-potential vector down to one entry per MEG coil or EEG electrode — i.e. the Geselowitz surface-integral weights cached as a dense `ncoil` × `np` matrix.
 
 ```cpp title="src/examples/ex_fwd_api/main.cpp"
-auto bem = FwdBemModel::fwd_bem_load_homog_surface(data + "/subjects/sample/bem/sample-5120-bem.fif");
-bem->fwd_bem_load_recompute_solution(data + "/subjects/sample/bem/sample-5120-bem-sol.fif", FWD_BEM_LINEAR_COLL, 0);
+auto bem = FwdBemModel::fwd_bem_load_homog_surface((data + "/subjects/sample/bem/sample-5120-bem.fif").toStdU16String());
+bem->fwd_bem_load_recompute_solution((data + "/subjects/sample/bem/sample-5120-bem-sol.fif").toStdU16String(), FWD_BEM_LINEAR_COLL, 0);
 bem->fwd_bem_set_head_mri_t(FiffCoordTrans((data + "/MEG/sample/all-trans.fif").toStdU16String(), FIFFV_COORD_MRI, FIFFV_COORD_HEAD));
 bem->fwd_bem_specify_coils(coils.get()); // stores a FwdBemSolution per coil set in coils->user_data
 VectorXf B(coils->ncoil());
@@ -58,8 +58,8 @@ Destroys the Forward BEM Solution.
 Forward library: coil definitions, BEM and sphere models, field maps and forward solutions.
 
 ````cpp title="src/examples/ex_fwd_api/main.cpp, line 125"
-auto bem = FwdBemModel::fwd_bem_load_homog_surface(data + "/subjects/sample/bem/sample-5120-bem.fif");
-bem->fwd_bem_load_recompute_solution(data + "/subjects/sample/bem/sample-5120-bem-sol.fif", FWD_BEM_LINEAR_COLL, 0);
+auto bem = FwdBemModel::fwd_bem_load_homog_surface((data + "/subjects/sample/bem/sample-5120-bem.fif").toStdU16String());
+bem->fwd_bem_load_recompute_solution((data + "/subjects/sample/bem/sample-5120-bem-sol.fif").toStdU16String(), FWD_BEM_LINEAR_COLL, 0);
 bem->fwd_bem_set_head_mri_t(FiffCoordTrans((data + "/MEG/sample/all-trans.fif").toStdU16String(), FIFFV_COORD_MRI, FIFFV_COORD_HEAD));
 bem->fwd_bem_specify_coils(coils.get()); // stores a FwdBemSolution per coil set in coils->user_data
 VectorXf B(coils->ncoil());

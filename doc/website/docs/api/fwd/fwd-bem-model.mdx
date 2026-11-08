@@ -28,8 +28,8 @@ Holds the BEM model surfaces, conductivity parameters and the pre-inverted poten
 Refactored from the MNE-C `fwdBemModel` / `fwdBemModelRec` struct (``fwd_types.h``). Raw C-style arrays were replaced with Eigen types; surface ownership is managed through `std::unique_ptr`.
 
 ```cpp title="src/examples/ex_fwd_api/main.cpp"
-auto bem = FwdBemModel::fwd_bem_load_homog_surface(data + "/subjects/sample/bem/sample-5120-bem.fif");
-bem->fwd_bem_load_recompute_solution(data + "/subjects/sample/bem/sample-5120-bem-sol.fif", FWD_BEM_LINEAR_COLL, 0);
+auto bem = FwdBemModel::fwd_bem_load_homog_surface((data + "/subjects/sample/bem/sample-5120-bem.fif").toStdU16String());
+bem->fwd_bem_load_recompute_solution((data + "/subjects/sample/bem/sample-5120-bem-sol.fif").toStdU16String(), FWD_BEM_LINEAR_COLL, 0);
 bem->fwd_bem_set_head_mri_t(FiffCoordTrans((data + "/MEG/sample/all-trans.fif").toStdU16String(), FIFFV_COORD_MRI, FIFFV_COORD_HEAD));
 bem->fwd_bem_specify_coils(coils.get()); // stores a FwdBemSolution per coil set in coils->user_data
 VectorXf B(coils->ncoil());
@@ -87,7 +87,7 @@ Reads the solution matrix from disk and stores it in this model. The solution mu
 
 **Parameters:**
 
-- **name** : *const QString &*
+- **name** : *const std::filesystem::path &*
   Path to the solution FIFF file.
 
 - **bemMethod** : *int*
@@ -157,7 +157,7 @@ Attempts to read the pre-computed solution; if it is missing or force_recompute 
 
 **Parameters:**
 
-- **name** : *const QString &*
+- **name** : *const std::filesystem::path &*
   Path to the BEM model file.
 
 - **bemMethod** : *int*
@@ -180,7 +180,7 @@ The file holds a FIFFB_BEM block that fwd_bem_load_surfaces / fwd_bem_load_recom
 
 **Parameters:**
 
-- **name** : *const QString &*
+- **name** : *const std::filesystem::path &*
   Output file.
 
 **Returns:**
@@ -538,12 +538,12 @@ Build a standard BEM solution file name from a model name.
 
 **Parameters:**
 
-- **name** : *const QString &*
+- **name** : *const std::filesystem::path &*
   Base BEM file name.
 
 **Returns:**
 
-- *QString* — The derived solution file name.
+- *std::filesystem::path* — The derived solution file name.
 
 ---
 
@@ -558,7 +558,7 @@ Return a human-readable label for a BEM surface kind.
 
 **Returns:**
 
-- *const QString &* — Reference to a static string label.
+- *const std::string &* — Reference to a static string label.
 
 ---
 
@@ -573,7 +573,7 @@ Return a human-readable label for a BEM method.
 
 **Returns:**
 
-- *const QString &* — Reference to a static string label.
+- *const std::string &* — Reference to a static string label.
 
 ---
 
@@ -607,7 +607,7 @@ Load BEM surfaces of specified kinds from a FIFF file.
 
 **Parameters:**
 
-- **name** : *const QString &*
+- **name** : *const std::filesystem::path &*
   Path to the BEM FIFF file.
 
 - **kinds** : *const std::vector&lt; int &gt; &*
@@ -627,7 +627,7 @@ Convenience wrapper that loads only the inner skull surface.
 
 **Parameters:**
 
-- **name** : *const QString &*
+- **name** : *const std::filesystem::path &*
   Path to the BEM FIFF file.
 
 **Returns:**
@@ -642,7 +642,7 @@ Load a three-layer BEM model (scalp, outer skull, inner skull) from a FIFF file.
 
 **Parameters:**
 
-- **name** : *const QString &*
+- **name** : *const std::filesystem::path &*
   Path to the BEM FIFF file.
 
 **Returns:**
@@ -1447,8 +1447,8 @@ Returns one row per cardinal dipole direction (x, y, z).
 Forward library: coil definitions, BEM and sphere models, field maps and forward solutions.
 
 ````cpp title="src/examples/ex_fwd_api/main.cpp, line 125"
-auto bem = FwdBemModel::fwd_bem_load_homog_surface(data + "/subjects/sample/bem/sample-5120-bem.fif");
-bem->fwd_bem_load_recompute_solution(data + "/subjects/sample/bem/sample-5120-bem-sol.fif", FWD_BEM_LINEAR_COLL, 0);
+auto bem = FwdBemModel::fwd_bem_load_homog_surface((data + "/subjects/sample/bem/sample-5120-bem.fif").toStdU16String());
+bem->fwd_bem_load_recompute_solution((data + "/subjects/sample/bem/sample-5120-bem-sol.fif").toStdU16String(), FWD_BEM_LINEAR_COLL, 0);
 bem->fwd_bem_set_head_mri_t(FiffCoordTrans((data + "/MEG/sample/all-trans.fif").toStdU16String(), FIFFV_COORD_MRI, FIFFV_COORD_HEAD));
 bem->fwd_bem_specify_coils(coils.get()); // stores a FwdBemSolution per coil set in coils->user_data
 VectorXf B(coils->ncoil());

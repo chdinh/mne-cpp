@@ -136,7 +136,7 @@ Sorts layers by radius and scales radii relative to the outermost layer.
 
 **Parameters:**
 
-- **name** : *const QString &*
+- **name** : *const std::string &*
   Textual identifier for the model.
 
 - **nlayer** : *int*
@@ -160,10 +160,10 @@ Set up the desired sphere model for EEG.
 
 **Parameters:**
 
-- **eeg_model_file** : *const QString &*
+- **eeg_model_file** : *const std::filesystem::path &*
   Contains the model specifications.
 
-- **eeg_model_name** : *QString*
+- **eeg_model_name** : *std::string*
   Name of the model to use.
 
 - **eeg_sphere_rad** : *float*
