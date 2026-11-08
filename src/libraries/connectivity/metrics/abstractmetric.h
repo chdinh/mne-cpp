@@ -14,7 +14,7 @@
  * Every metric in @c CONNECTIVITYLIB (Coherence, Imaginary Coherence, PLI, wPLI,
  * dwPLI, USPLI, PLV, cross-correlation, Granger Causality, DTF, PDC) reads
  * the same global control flags from @ref CONNECTIVITYLIB::AbstractMetric so that the
- * dispatcher in @ref CONNECTIVITYLIB::Connectivity can decide once - before any FFT runs -
+ * dispatcher in @ref CONNECTIVITYLIB::compute_connectivity can decide once - before any FFT runs -
  * whether intermediate per-trial spectra should be cached for reuse
  * (storage mode) and which frequency-bin window the metrics should
  * average over.
@@ -67,7 +67,7 @@ namespace CONNECTIVITYLIB
 //=============================================================================================================
 /**
  * Static base for every estimator in @c CONNECTIVITYLIB. Holds the two pieces of
- * global state that the dispatcher (@ref Connectivity::calculate) must set
+ * global state that the dispatcher (@ref compute_connectivity) must set
  * before any metric runs:
  *  - @c CONNECTIVITYLIB::AbstractMetric::m_bStorageModeIsActive "m_bStorageModeIsActive" enables caching of per-trial tapered
  *    spectra and CSDs in @ref ConnectivitySettings::IntermediateTrialData,

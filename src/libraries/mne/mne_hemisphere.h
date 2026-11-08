@@ -34,7 +34,6 @@
 #include "mne_cluster_info.h"
 
 #include <fiff/fiff_types.h>
-#include <fiff/fiff.h>
 
 //=============================================================================================================
 // EIGEN INCLUDES

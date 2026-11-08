@@ -19,9 +19,6 @@
 //=============================================================================================================
 
 #include <connectivity/connectivity.h>
-#include <connectivity/connectivitysettings.h>
-#include <connectivity/network/network.h>
-#include <connectivity/metrics/abstractmetric.h>
 
 #include <fiff/fiff_raw_data.h>
 
@@ -163,8 +160,6 @@ int main(int argc, char* argv[])
     }
 
     //Perform connectivity performance tests
-    Connectivity connectivityObj;
-
     ConnectivitySettings connectivitySettings;
     connectivitySettings.setSamplingFrequency(raw.info.sfreq);
     connectivitySettings.setWindowType("hanning");
@@ -250,7 +245,7 @@ int main(int argc, char* argv[])
                         qWarning() << "iteration" << m_iCurrentIteration;
 
                         //Do connectivity estimation
-                        connectivityObj.calculate(connectivitySettings);
+                        compute_connectivity(connectivitySettings);
 
                         printf("Iteration %d: Calculating %s for %d trials, %d channels, %d samples\n", m_iCurrentIteration, sConnectivityMethodList.at(i).toLatin1().data(), connectivitySettings.size(), lNumberChannels.at(k), lNumberSamples.at(j));
 

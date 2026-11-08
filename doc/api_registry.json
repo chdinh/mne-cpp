@@ -2606,29 +2606,6 @@
       "equivalence": "equivalent"
     },
     {
-      "name": "Connectivity",
-      "module": "connectivity",
-      "header": "connectivity/connectivity.h",
-      "origin": "mne-python",
-      "mne_c_tool": null,
-      "mne_python": "mne_connectivity.spectral_connectivity_epochs",
-      "sklearn": null,
-      "test": "test_connectivity_metrics",
-      "example": "ex_connectivity_metrics",
-      "example_snippet": [
-        "ex_connectivity_metrics/main.cpp#connectivity_settings_setup",
-        "ex_connectivity_metrics/main.cpp#connectivity_calculate"
-      ],
-      "example_mode": "run",
-      "status": "done",
-      "skigen_candidate": false,
-      "documented": true,
-      "sidebar_position": 1,
-      "guide": null,
-      "python_equiv": "mne_connectivity.spectral_connectivity_epochs",
-      "python_url": null
-    },
-    {
       "name": "Coherence",
       "module": "connectivity",
       "header": "connectivity/metrics/coherence.h",
@@ -3475,17 +3452,22 @@
       "header": "connectivity/connectivitysettings.h",
       "origin": "mne-python",
       "mne_c_tool": null,
-      "mne_python": null,
+      "mne_python": "mne_connectivity.spectral_connectivity_epochs",
       "sklearn": null,
       "test": null,
-      "example": null,
+      "example": "ex_connectivity_metrics",
       "status": "documented",
       "skigen_candidate": false,
       "documented": true,
       "sidebar_position": 10,
       "guide": null,
       "python_equiv": null,
-      "python_url": null
+      "python_url": null,
+      "example_snippet": [
+        "ex_connectivity_metrics/main.cpp#connectivity_settings_setup",
+        "ex_connectivity_metrics/main.cpp#connectivity_calculate"
+      ],
+      "example_mode": "run"
     },
     {
       "name": "Correlation",
@@ -5450,31 +5432,6 @@
       "required_data": [
         "mne-cpp-test-data"
       ]
-    },
-    {
-      "name": "Fiff",
-      "module": "fiff",
-      "header": "fiff/fiff.h",
-      "origin": "mne-c",
-      "mne_c_tool": null,
-      "mne_python": null,
-      "sklearn": null,
-      "test": null,
-      "example": "ex_fiff_api",
-      "example_snippet": [
-        "ex_fiff_api/main.cpp#fiff_facade_usage"
-      ],
-      "example_mode": "run",
-      "required_data": [
-        "mne-cpp-test-data"
-      ],
-      "status": "documented",
-      "skigen_candidate": false,
-      "documented": true,
-      "sidebar_position": 11,
-      "guide": null,
-      "python_equiv": null,
-      "python_url": null
     },
     {
       "name": "FiffChInfo",
@@ -16387,7 +16344,6 @@
         ],
         "tools": [],
         "classes": [
-          "Connectivity",
           "ConnectivitySettings",
           "Coherence",
           "PhaseLagIndex"

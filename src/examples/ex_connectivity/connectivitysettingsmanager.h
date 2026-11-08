@@ -96,7 +96,7 @@ public:
 
     ConnectivitySettings m_settings;
     RtConnectivity::SPtr m_pRtConnectivity;
-    QList<Network> m_networkData;
+    std::vector<Network> m_networkData;
     QMap<QString, Vector4i> mColor;
 
     float m_fFreqBandLow;
@@ -187,13 +187,13 @@ public:
         onNewConnectivityResultAvailable(m_networkData, m_settings);
     }
 
-    void onNewConnectivityResultAvailable(const QList<Network>& connectivityResults,
+    void onNewConnectivityResultAvailable(const std::vector<Network>& connectivityResults,
                                           const ConnectivitySettings& connectivitySettings)
     {
         m_settings = connectivitySettings;
         m_networkData = connectivityResults;
 
-        for (int i = 0; i < connectivityResults.size(); ++i) {
+        for (int i = 0; i < std::ssize(connectivityResults); ++i) {
             m_networkData[i].setFrequencyRange(m_fFreqBandLow, m_fFreqBandHigh);
             m_networkData[i].normalize();
 
@@ -233,8 +233,8 @@ public:
             //            }
         }
 
-        if (!m_networkData.isEmpty()) {
-            for (int i = 0; i < m_networkData.size(); ++i) {
+        if (!m_networkData.empty()) {
+            for (int i = 0; i < std::ssize(m_networkData); ++i) {
                 emit newConnectivityResultAvailable("sample",
                                                     "1",
                                                     m_networkData.at(i));

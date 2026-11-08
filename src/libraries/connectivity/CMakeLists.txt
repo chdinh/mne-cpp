@@ -36,7 +36,7 @@ set(SOURCES
     network/networknode.cpp
     network/networkedge.cpp
     connectivitysettings.cpp
-    connectivity.cpp
+    compute_connectivity.cpp
 )
 
 set(HEADERS
@@ -61,6 +61,7 @@ set(HEADERS
     network/networkedge.h
     connectivitysettings.h
     connectivity.h
+    compute_connectivity.h
 )
 
 set(FILE_TO_UPDATE connectivity_global.cpp)

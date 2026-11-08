@@ -19,13 +19,13 @@
 #include "model/items/sensortreeitem.h"
 #include "renderable/brainsurface.h"
 
+#include <fiff/fiff_evoked_set.h>
 #include <QFile>
 #include <QFileInfo>
 #include <QDebug>
 #include <QCoreApplication>
 
 #include <Eigen/Dense>
-#include <fiff/fiff.h>
 #include <fiff/fiff_constants.h>
 #include <fiff/fiff_stream.h>
 #include <fiff/fiff_dig_point_set.h>

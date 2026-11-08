@@ -30,7 +30,7 @@
       "decoding",
       "math"
     ],
-    "tokens": 19175,
+    "tokens": 19158,
     "gui_outside_design": []
   },
   "libraries": {
@@ -130,20 +130,19 @@
       ]
     },
     "connectivity": {
-      "tokens": 447,
+      "tokens": 436,
       "by_category": {
-        "containers": 211,
-        "global": 36,
-        "logging": 34,
-        "objects_signals": 5,
-        "smart_pointers": 92,
-        "strings": 20,
-        "threads": 48,
-        "time": 1
+        "containers": 204,
+        "global": 37,
+        "logging": 32,
+        "objects_signals": 4,
+        "smart_pointers": 90,
+        "strings": 21,
+        "threads": 48
       },
-      "public_header_includes": 33,
+      "public_header_includes": 32,
       "q_object": 0,
-      "files": 42,
+      "files": 43,
       "modules": [
         "Concurrent",
         "Core",
@@ -216,9 +215,9 @@
       ]
     },
     "dsp": {
-      "tokens": 826,
+      "tokens": 822,
       "by_category": {
-        "containers": 279,
+        "containers": 276,
         "files": 33,
         "global": 147,
         "logging": 89,
@@ -227,8 +226,7 @@
         "regex": 3,
         "smart_pointers": 31,
         "strings": 135,
-        "threads": 21,
-        "time": 1
+        "threads": 21
       },
       "public_header_includes": 54,
       "q_object": 12,
@@ -240,10 +238,10 @@
       ]
     },
     "fiff": {
-      "tokens": 1172,
+      "tokens": 1170,
       "by_category": {
         "containers": 150,
-        "files": 89,
+        "files": 87,
         "global": 408,
         "json": 37,
         "logging": 214,
@@ -255,9 +253,9 @@
         "strings": 219,
         "time": 1
       },
-      "public_header_includes": 78,
+      "public_header_includes": 75,
       "q_object": 1,
-      "files": 72,
+      "files": 71,
       "modules": [
         "Core",
         "Network"

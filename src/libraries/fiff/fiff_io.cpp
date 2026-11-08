@@ -25,7 +25,6 @@
 //=============================================================================================================
 
 #include "fiff_io.h"
-#include "fiff.h"
 #include "fiff_evoked_set.h"
 #include "fiff_stream.h"
 

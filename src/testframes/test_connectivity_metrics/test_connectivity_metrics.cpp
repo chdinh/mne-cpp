@@ -4,7 +4,7 @@
 
 #include <QtTest/QtTest>
 #include <Eigen/Dense>
-#include <connectivity/connectivity.h>
+#include <connectivity/compute_connectivity.h>
 #include <connectivity/connectivitysettings.h>
 #include <fiff/fiff_constants.h>
 #include <fiff/fiff_info.h>
@@ -243,7 +243,7 @@ private slots:
         nodePos << 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 1;
         settings.setNodePositions(nodePos);
 
-        QList<Network> networks = Connectivity::calculate(settings);
+        std::vector<Network> networks = compute_connectivity(settings);
         QCOMPARE(networks.size(), 1);
 
         // Trial-averaged Pearson r, as numpy.corrcoef per trial then mean
@@ -253,7 +253,7 @@ private slots:
             const VectorXd n = c.rowwise().norm();
             expected += (c * c.transpose()).cwiseQuotient(n * n.transpose()) / settings.size();
         }
-        const MatrixXd actual = networks.first().getFullConnectivityMatrix(false);
+        const MatrixXd actual = networks.front().getFullConnectivityMatrix(false);
         for (int i = 0; i < 4; ++i) {
             for (int j = i + 1; j < 4; ++j) {
                 QVERIFY2(qAbs(actual(i, j) - expected(i, j)) < 1e-12,
@@ -279,7 +279,7 @@ private slots:
         nodePos << 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 1;
         settings.setNodePositions(nodePos);
 
-        QList<Network> networks = Connectivity::calculate(settings);
+        std::vector<Network> networks = compute_connectivity(settings);
         QCOMPARE(networks.size(), 1);
     }
 
@@ -299,7 +299,7 @@ private slots:
         nodePos << 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 1;
         settings.setNodePositions(nodePos);
 
-        QList<Network> networks = Connectivity::calculate(settings);
+        std::vector<Network> networks = compute_connectivity(settings);
         QCOMPARE(networks.size(), 1);
     }
 
@@ -319,7 +319,7 @@ private slots:
         nodePos << 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 1;
         settings.setNodePositions(nodePos);
 
-        QList<Network> networks = Connectivity::calculate(settings);
+        std::vector<Network> networks = compute_connectivity(settings);
         QCOMPARE(networks.size(), 1);
     }
 
@@ -339,7 +339,7 @@ private slots:
         nodePos << 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 1;
         settings.setNodePositions(nodePos);
 
-        QList<Network> networks = Connectivity::calculate(settings);
+        std::vector<Network> networks = compute_connectivity(settings);
         QCOMPARE(networks.size(), 1);
     }
 
@@ -359,7 +359,7 @@ private slots:
         nodePos << 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 1;
         settings.setNodePositions(nodePos);
 
-        QList<Network> networks = Connectivity::calculate(settings);
+        std::vector<Network> networks = compute_connectivity(settings);
         QCOMPARE(networks.size(), 1);
     }
 
@@ -379,7 +379,7 @@ private slots:
         nodePos << 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 1;
         settings.setNodePositions(nodePos);
 
-        QList<Network> networks = Connectivity::calculate(settings);
+        std::vector<Network> networks = compute_connectivity(settings);
         QCOMPARE(networks.size(), 1);
     }
 
@@ -399,7 +399,7 @@ private slots:
         nodePos << 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 1;
         settings.setNodePositions(nodePos);
 
-        QList<Network> networks = Connectivity::calculate(settings);
+        std::vector<Network> networks = compute_connectivity(settings);
         QCOMPARE(networks.size(), 1);
     }
 
@@ -419,7 +419,7 @@ private slots:
         nodePos << 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 1;
         settings.setNodePositions(nodePos);
 
-        QList<Network> networks = Connectivity::calculate(settings);
+        std::vector<Network> networks = compute_connectivity(settings);
         QCOMPARE(networks.size(), 1);
     }
 
@@ -439,7 +439,7 @@ private slots:
         nodePos << 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 1;
         settings.setNodePositions(nodePos);
 
-        QList<Network> networks = Connectivity::calculate(settings);
+        std::vector<Network> networks = compute_connectivity(settings);
         QCOMPARE(networks.size(), 3);
     }
 

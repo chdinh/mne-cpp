@@ -24,7 +24,6 @@
 
 #include <utils/string_utils.h>
 
-#include <fiff/fiff.h>
 #include <fiff/fiff_coord_trans.h>
 
 //=============================================================================================================

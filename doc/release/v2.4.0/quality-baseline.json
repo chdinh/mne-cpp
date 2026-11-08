@@ -157,12 +157,12 @@
       }
     },
     "G3_api_documentation": {
-      "public_api_units": 579,
+      "public_api_units": 577,
       "exported_not_registered": 1,
-      "example_eligible": 417,
+      "example_eligible": 415,
       "eligible_backed_percent": 99.76,
-      "snippets": 452,
-      "registered_test_percent": 38.75
+      "snippets": 451,
+      "registered_test_percent": 38.72
     },
     "G4_screenshots": {
       "referenced_images": 19,
@@ -198,8 +198,8 @@
       "claims_by_evidence": {
         "cross-validated-static": 174,
         "cross-validated-live": 0,
-        "tested": 185,
-        "unverified": 0
+        "tested": 184,
+        "unverified": 1
       },
       "claims_by_status": {
         "equivalent": 139,

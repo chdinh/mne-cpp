@@ -43,6 +43,7 @@
 
 #include <utils/ioutils.h>
 #include <utils/generics/mne_logger.h>
+#include <fiff/fiff_events.h>
 
 #include <disp/viewers/connectivitysettingsview.h>
 #include <disp/viewers/minimumnormsettingsview.h>

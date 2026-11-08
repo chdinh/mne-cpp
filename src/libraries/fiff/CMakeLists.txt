@@ -16,7 +16,6 @@ find_package(QT NAMES Qt6 Qt5 REQUIRED COMPONENTS ${QT_REQUIRED_COMPONENTS})
 find_package(Qt${QT_VERSION_MAJOR} REQUIRED COMPONENTS ${QT_REQUIRED_COMPONENTS})
 
 set(SOURCES
-    fiff.cpp
     fiff_global.cpp
     fiff_tag.cpp
     fiff_coord_trans.cpp

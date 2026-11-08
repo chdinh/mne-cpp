@@ -63,10 +63,14 @@ Network::Network(const QString& sConnectivityMethod,
 , m_iNumberFreqBins(0)
 , m_iFFTSize(128)
 {
-    qRegisterMetaType<CONNECTIVITYLIB::Network>("CONNECTIVITYLIB::Network");
-    qRegisterMetaType<CONNECTIVITYLIB::Network::SPtr>("CONNECTIVITYLIB::Network::SPtr");
-    qRegisterMetaType<QList<CONNECTIVITYLIB::Network>>("QList<CONNECTIVITYLIB::Network>");
-    qRegisterMetaType<QList<CONNECTIVITYLIB::Network::SPtr>>("QList<CONNECTIVITYLIB::Network::SPtr>");
+    // Registered once for queued signal/slot connections, not on every construction
+    static const bool registered = [] {
+        qRegisterMetaType<CONNECTIVITYLIB::Network>("CONNECTIVITYLIB::Network");
+        qRegisterMetaType<CONNECTIVITYLIB::Network::SPtr>("CONNECTIVITYLIB::Network::SPtr");
+        qRegisterMetaType<std::vector<CONNECTIVITYLIB::Network>>("std::vector<CONNECTIVITYLIB::Network>");
+        return true;
+    }();
+    Q_UNUSED(registered)
 }
 
 //=============================================================================================================

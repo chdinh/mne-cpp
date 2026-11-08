@@ -17,7 +17,7 @@
 #include "rt_connectivity.h"
 
 #include <connectivity/connectivitysettings.h>
-#include <connectivity/connectivity.h>
+#include <connectivity/compute_connectivity.h>
 
 //=============================================================================================================
 // EIGEN INCLUDES
@@ -27,7 +27,6 @@
 // QT INCLUDES
 //=============================================================================================================
 
-#include <QElapsedTimer>
 #include <QDebug>
 
 //=============================================================================================================
@@ -54,22 +53,7 @@ void RtConnectivityWorker::doWork(const ConnectivitySettings& connectivitySettin
 
     ConnectivitySettings connectivitySettingsTemp = connectivitySettings;
 
-    QElapsedTimer time;
-    time.start();
-
-    QList<Network> finalNetworks = Connectivity::calculate(connectivitySettingsTemp);
-
-    //    iTime = time.elapsed();
-
-    //    qDebug()<<"----------------------------------------";
-    //    qDebug()<<"----------------------------------------";
-    //    qDebug()<<"------RtConnectivityWorker::doWork()";
-    //    qDebug()<<"------Method:"<<connectivitySettings.getConnectivityMethods().first();
-    //    qDebug()<<"------Data dim:"<<connectivitySettings.at(0).matData.rows() << "x" << connectivitySettings.at(0).matData.cols();
-    //    qDebug()<<"------Number trials:"<< connectivitySettings.size();
-    //    qDebug()<<"------Total time:"<<iTime << "ms";
-    //    qDebug()<<"----------------------------------------";
-    //    qDebug()<<"----------------------------------------";
+    std::vector<Network> finalNetworks = compute_connectivity(connectivitySettingsTemp);
 
     emit resultReady(finalNetworks, connectivitySettingsTemp);
 }

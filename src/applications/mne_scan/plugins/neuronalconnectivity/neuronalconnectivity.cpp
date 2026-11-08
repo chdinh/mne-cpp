@@ -525,13 +525,13 @@ void NeuronalConnectivity::run()
 
 //=============================================================================================================
 
-void NeuronalConnectivity::onNewConnectivityResultAvailable(const QList<Network>& connectivityResults,
+void NeuronalConnectivity::onNewConnectivityResultAvailable(const std::vector<Network>& connectivityResults,
                                                             const ConnectivitySettings& connectivitySettings)
 {
     m_connectivitySettings = connectivitySettings;
     m_connectivitySettings.setConnectivityMethods(m_sConnectivityMethods);
 
-    for (int i = 0; i < connectivityResults.size(); ++i) {
+    for (int i = 0; i < std::ssize(connectivityResults); ++i) {
         m_pCircularBuffer->push(connectivityResults.at(i));
     }
 }

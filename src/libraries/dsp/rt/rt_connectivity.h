@@ -91,7 +91,7 @@ public:
     void doWork(const CONNECTIVITYLIB::ConnectivitySettings& connectivitySettings);
 
 signals:
-    void resultReady(const QList<CONNECTIVITYLIB::Network>& connectivityResults, const CONNECTIVITYLIB::ConnectivitySettings& connectivitySettings);
+    void resultReady(const std::vector<CONNECTIVITYLIB::Network>& connectivityResults, const CONNECTIVITYLIB::ConnectivitySettings& connectivitySettings);
 };
 
 //=============================================================================================================
@@ -148,7 +148,7 @@ protected:
     QThread m_workerThread; /**< The worker thread. */
 
 signals:
-    void newConnectivityResultAvailable(const QList<CONNECTIVITYLIB::Network>& connectivityResults, const CONNECTIVITYLIB::ConnectivitySettings& connectivitySettings);
+    void newConnectivityResultAvailable(const std::vector<CONNECTIVITYLIB::Network>& connectivityResults, const CONNECTIVITYLIB::ConnectivitySettings& connectivitySettings);
 
     void operate(const CONNECTIVITYLIB::ConnectivitySettings& connectivitySettings);
 };

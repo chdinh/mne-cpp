@@ -72,8 +72,8 @@
       ]
     },
     "connectivity": {
-      "tokens": 447,
-      "public_header_includes": 33,
+      "tokens": 436,
+      "public_header_includes": 32,
       "modules": [
         "Concurrent",
         "Core",
@@ -110,7 +110,7 @@
       ]
     },
     "dsp": {
-      "tokens": 826,
+      "tokens": 822,
       "public_header_includes": 54,
       "modules": [
         "Concurrent",
@@ -119,8 +119,8 @@
       ]
     },
     "fiff": {
-      "tokens": 1172,
-      "public_header_includes": 78,
+      "tokens": 1170,
+      "public_header_includes": 75,
       "modules": [
         "Core",
         "Network"

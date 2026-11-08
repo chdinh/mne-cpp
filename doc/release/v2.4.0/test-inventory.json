@@ -1503,7 +1503,6 @@
       },
       "registry_classes": [
         "Coherence",
-        "Connectivity",
         "PhaseLagIndex",
         "PhaseLockingValue"
       ]

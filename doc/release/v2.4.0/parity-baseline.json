@@ -29,8 +29,8 @@
     "by_evidence": {
       "cross-validated-static": 174,
       "cross-validated-live": 0,
-      "tested": 185,
-      "unverified": 0
+      "tested": 184,
+      "unverified": 1
     },
     "by_claim": {
       "equivalent": 139,
@@ -43,8 +43,8 @@
       "classes": {
         "cross-validated-static": 32,
         "cross-validated-live": 0,
-        "tested": 64,
-        "unverified": 0
+        "tested": 63,
+        "unverified": 1
       },
       "parity": {
         "cross-validated-static": 142,
@@ -744,15 +744,6 @@
     },
     {
       "source": "classes",
-      "mne_cpp": "Connectivity",
-      "python": "mne_connectivity.spectral_connectivity_epochs",
-      "claimed": "implemented",
-      "equivalence": null,
-      "test": "test_connectivity_metrics",
-      "evidence": "tested"
-    },
-    {
-      "source": "classes",
       "mne_cpp": "Coherence",
       "python": "mne_connectivity.spectral_connectivity_epochs (method='coh')",
       "claimed": "implemented",
@@ -971,6 +962,15 @@
       "equivalence": null,
       "test": "test_report",
       "evidence": "tested"
+    },
+    {
+      "source": "classes",
+      "mne_cpp": "ConnectivitySettings",
+      "python": "mne_connectivity.spectral_connectivity_epochs",
+      "claimed": "implemented",
+      "equivalence": null,
+      "test": null,
+      "evidence": "unverified"
     },
     {
       "source": "classes",

@@ -16,7 +16,7 @@
  * derived per-trial cross-spectral data (DPSS tapered FFTs, CSDs and the
  * imaginary-part variants needed by PLI / wPLI / dwPLI), and the
  * accumulated cross-trial sums used to normalise the final estimates.
- * Holding all of this in one object lets the dispatcher in @ref CONNECTIVITYLIB::Connectivity
+ * Holding all of this in one object lets the dispatcher in @ref CONNECTIVITYLIB::compute_connectivity
  * compute several metrics in one pass without re-tapering and re-FFT'ing
  * the same trials: the @ref CONNECTIVITYLIB::ConnectivitySettings::IntermediateTrialData fields are filled lazily
  * by the first metric that needs them and reused by everyone else.
@@ -96,6 +96,10 @@ namespace CONNECTIVITYLIB
  * (source space) and are propagated into the resulting @ref Network nodes.
  *
  * @brief Aggregates trial data, spectral cache and node geometry shared by all @c CONNECTIVITYLIB metrics.
+ *
+ * @snippet ex_connectivity_metrics/main.cpp connectivity_settings_setup
+ *
+ * @snippet ex_connectivity_metrics/main.cpp connectivity_calculate
  */
 class CONNECTIVITYSHARED_EXPORT ConnectivitySettings
 {

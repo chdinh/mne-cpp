@@ -19,7 +19,7 @@
 // INCLUDES
 //=============================================================================================================
 
-#include <connectivity/connectivity.h>
+#include <connectivity/compute_connectivity.h>
 #include <connectivity/connectivitysettings.h>
 #include <connectivity/metrics/abstractmetric.h>
 #include <connectivity/metrics/coherence.h>
@@ -172,13 +172,13 @@ int main(int argc, char* argv[])
 
     //! [connectivity_calculate]
     settings.setConnectivityMethods({"COH", "PLV", "WPLI"});
-    const QList<Network> networks = Connectivity::calculate(settings);
+    std::vector<Network> networks = compute_connectivity(settings);
     for (Network network : networks) {
         network.setFrequencyRange(8.0f, 12.0f); // average the per-bin weights over the alpha band
         std::println("{} 0-1: {:g}", network.getConnectivityMethod().toStdString(), edgeWeight(network, 0, 1));
     }
     //! [connectivity_calculate]
-    ok &= expect(networks.size() == 3, "Connectivity::calculate returns one network per method");
+    ok &= expect(networks.size() == 3, "compute_connectivity returns one network per method");
 
     //! [coherence_calculate]
     Network coherence = Coherence::calculate(settings);

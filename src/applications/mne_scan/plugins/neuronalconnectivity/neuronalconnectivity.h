@@ -175,7 +175,7 @@ protected:
      *
      * @param[in] connectivityResult        The new connectivity estimate.
      */
-    void onNewConnectivityResultAvailable(const QList<CONNECTIVITYLIB::Network>& connectivityResults,
+    void onNewConnectivityResultAvailable(const std::vector<CONNECTIVITYLIB::Network>& connectivityResults,
                                           const CONNECTIVITYLIB::ConnectivitySettings& connectivitySettings);
 
     //=========================================================================================================

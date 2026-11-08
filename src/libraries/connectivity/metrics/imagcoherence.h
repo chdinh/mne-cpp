@@ -86,7 +86,7 @@ class Network;
  * returned edge weights reflect interactions with non-zero conduction
  * delay only. The cross-spectral accumulation is delegated to
  * @ref Coherency::calculateImag; this class is the public entry point used
- * by the dispatcher in @ref Connectivity.
+ * by the dispatcher in @ref CONNECTIVITYLIB::compute_connectivity.
  *
  * @brief Imaginary-coherence estimator (Nolte et al. 2004); rejects zero-lag volume-conduction mixing.
  *

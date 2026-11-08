@@ -272,15 +272,9 @@ int main(int argc, char* argv[])
     //! [fiff_sparse_matrix_usage]
     ok &= expect(backToEigen.coeff(2, 3) == -1.5 && backToEigen.nonZeros() == 2, "FiffSparseMatrix round-trips an Eigen sparse matrix");
 
-    //! [fiff_facade_usage]
-    QFile facadeFile(dir + "/sample_audvis_trunc_raw.fif");
-    std::unique_ptr<FiffStream> facadeStream;
-    const bool facadeOpened = Fiff::open(facadeFile, facadeStream); // static wrappers around FiffStream
-    FiffDirNode::SPtr facadeRoot = facadeStream->dirtree();
-    const StringList facadeBads = facadeStream->read_bad_channels(facadeRoot);
-    facadeStream->close();
-    //! [fiff_facade_usage]
-    ok &= expect(facadeOpened && facadeBads == info.bads, "Fiff::open and FiffStream::read_bad_channels find the same 2 bads as FiffInfo");
+    auto badsStream = FiffStream::open((dir + "/sample_audvis_trunc_raw.fif").toStdU16String());
+    const StringList facadeBads = badsStream ? badsStream->read_bad_channels(badsStream->dirtree()) : StringList();
+    ok &= expect(facadeBads == info.bads, "FiffStream::read_bad_channels finds the same 2 bads as FiffInfo");
 
     //! [fiff_io_usage]
     QFile ioFile(dir + "/sample_audvis-ave.fif");

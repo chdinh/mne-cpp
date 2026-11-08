@@ -31,8 +31,8 @@ Equivalence claims without static cross-validation: none
 |---|---:|---:|---:|
 | cross-validated-static | 32 | 142 | 174 |
 | cross-validated-live | 0 | 0 | 0 |
-| tested | 64 | 121 | 185 |
-| unverified | 0 | 0 | 0 |
+| tested | 63 | 121 | 184 |
+| unverified | 1 | 0 | 1 |
 | **all claims** | 96 | 263 | 359 |
 
 `cross-validated-live` tests call whatever `mne` is installed, so they are neither pinned nor deterministic.

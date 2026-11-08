@@ -24,11 +24,11 @@
 #include "helpers/channelinfomodel.h"
 #include "helpers/selectionscene.h"
 
+#include <fiff/fiff_constants.h>
 #include <mne/mne_layout.h>
 #include <utils/selectionio.h>
 #include <utils/layoutmaker.h>
 
-#include <fiff/fiff.h>
 
 //=============================================================================================================
 // STL INCLUDES

@@ -204,7 +204,6 @@ int main(int argc, char* argv[])
         bool want_eeg = false;
         bool want_stim = false;
 
-        //        picks = Fiff::pick_types(raw.info, want_meg, want_eeg, want_stim, include, raw.info.bads);
         picks = raw.info.pick_types(want_meg, want_eeg, want_stim, include, raw.info.bads); //prefer member function
     }
 

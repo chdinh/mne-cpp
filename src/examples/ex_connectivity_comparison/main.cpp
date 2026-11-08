@@ -23,7 +23,7 @@
 #include <disp3D/model/braintreemodel.h>
 #include <disp3D/model/items/networktreeitem.h>
 
-#include <connectivity/connectivity.h>
+#include <connectivity/compute_connectivity.h>
 #include <connectivity/connectivitysettings.h>
 #include <connectivity/network/network.h>
 #include <connectivity/metrics/abstractmetric.h>
@@ -42,6 +42,7 @@
 
 #include <utils/ioutils.h>
 #include <utils/generics/mne_logger.h>
+#include <fiff/fiff_events.h>
 
 #include <disp/viewers/connectivitysettingsview.h>
 
@@ -340,7 +341,7 @@ int main(int argc, char* argv[])
     conSettings.setSamplingFrequency(raw.info.sfreq);
     conSettings.setWindowType("hanning");
 
-    QList<Network> lNetworks = Connectivity::calculate(conSettings);
+    std::vector<Network> lNetworks = compute_connectivity(conSettings);
 
     QMap<QString, Vector4i> mColor;
     mColor.insert("COR", Vector4i(90, 26, 100, 1));
@@ -353,7 +354,7 @@ int main(int argc, char* argv[])
     mColor.insert("USPLI", Vector4i(255, 89, 200, 1));
     mColor.insert("DSWPLI", Vector4i(25, 10, 255, 1));
 
-    for (int j = 0; j < lNetworks.size(); ++j) {
+    for (int j = 0; j < std::ssize(lNetworks); ++j) {
         lNetworks[j].setFrequencyRange(dFreqMin, dFreqMax);
         lNetworks[j].normalize();
         VisualizationInfo visInfo = lNetworks.at(j).getVisualizationInfo();
@@ -369,7 +370,7 @@ int main(int argc, char* argv[])
     pBrainView->setModel(pModel);
 
     // Load all networks
-    for (int j = 0; j < lNetworks.size(); ++j) {
+    for (int j = 0; j < std::ssize(lNetworks); ++j) {
         pBrainView->loadNetwork(lNetworks[j], lNetworks[j].getConnectivityMethod());
     }
     pBrainView->setNetworkThreshold(0.9);

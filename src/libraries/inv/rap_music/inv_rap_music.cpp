@@ -24,6 +24,7 @@
 #include "inv_rap_music.h"
 
 #include <math/numerics.h>
+#include <fiff/fiff_evoked.h>
 
 #include <QDebug>
 
