@@ -15,277 +15,68 @@ sidebar_position: 18
 class CONNECTIVITYLIB::NetworkNode
 ```
 
-Node of a [`Network`](/docs/api/connectivity/network).
+Node of a [`Network`](/docs/api/connectivity/network): a 3D position (sensor coordinate or source vertex), a hub flag, and the indices into `Network::edges` of every edge that starts or ends at this node.
 
-Stores a unique ID, a 3D anatomical position (sensor coordinate or source vertex) and the lists of incident edges partitioned by direction (in / out) and by threshold state (full / thresholded), so that graph-theoretic measures can be read off without rescanning the global edge list.
+Degree and strength are computed by `Network::degree` and `Network::strength`.
 
-[Graph](/docs/api/disp/graph) node carrying a 3D position and its incident in/out, full/thresholded edge lists.
+[Graph](/docs/api/disp/graph) node carrying a 3D position and the indices of its incident edges.
 
 ```cpp title="src/examples/ex_connectivity_metrics/main.cpp"
 Network network("manual");
 for (int i = 0; i < 3; ++i) {
-    network.append(NetworkNode::SPtr(new NetworkNode(i, positions.row(i))));
+    network.add_node(positions.row(i).transpose());
 }
-const QList<QPair<int, int>> pairs = {{0, 1}, {1, 2}};
-const QList<double> weights = {0.9, 0.2};
-for (int k = 0; k < pairs.size(); ++k) {
-    MatrixXd perBin = MatrixXd::Constant(1, 1, weights[k]);
-    NetworkEdge::SPtr edge(new NetworkEdge(pairs[k].first, pairs[k].second, perBin));
-    network.getNodeAt(pairs[k].first)->append(edge);
-    network.getNodeAt(pairs[k].second)->append(edge);
-    network.append(edge);
-}
+network.add_edge(NetworkEdge(0, 1, MatrixXd::Constant(1, 1, 0.9))); // one weight per frequency bin
+network.add_edge(NetworkEdge(1, 2, MatrixXd::Constant(1, 1, 0.2)));
 ```
 
 ---
 
 ## Public Methods
 
-### NetworkNode(iId, vecVert)
+### NetworkNode(position)
 
-Constructs a [`NetworkNode`](/docs/api/connectivity/network-node) object.
+Constructs a node without edges.
 
 **Parameters:**
 
-- **iId** : *qint16*
-  The node's ID.
-
-- **vecVert** : *const Eigen::RowVectorXf &*
-  The node's 3D position.
+- **position** : *const Eigen::Vector3f &*
+  The 3D position of the node.
 
 ---
 
-### getFullEdges()
-
-Returns the ingoing edges corresponding to the full network.
+### position()
 
 **Returns:**
 
-- *const QList&lt; QSharedPointer&lt;[NetworkEdge](/docs/api/connectivity/network-edge)&gt; &gt; &* — Returns the list with all ingoing edges.
+- *const Eigen::Vector3f &* — The 3D position of the node.
 
 ---
 
-### getThresholdedEdges()
-
-Returns all edges corresponding to the thresholded network.
+### edges()
 
 **Returns:**
 
-- *QList&lt; QSharedPointer&lt;[NetworkEdge](/docs/api/connectivity/network-edge)&gt; &gt;* — Returns the list with all ingoing edges.
+- *const std::vector&lt; int &gt; &* — Indices into `Network::edges` of the edges starting or ending at this node.
 
 ---
 
-### getFullEdgesIn()
-
-Returns the ingoing edges corresponding to the full network.
+### hub()
 
 **Returns:**
 
-- *QList&lt; QSharedPointer&lt;[NetworkEdge](/docs/api/connectivity/network-edge)&gt; &gt;* — Returns the list with all ingoing edges.
+- *bool* — Whether the node is marked as a hub.
 
 ---
 
-### getThresholdedEdgesIn()
+### set_hub(hub)
 
-Returns the ingoing edges corresponding to the thresholded network.
-
-**Returns:**
-
-- *QList&lt; QSharedPointer&lt;[NetworkEdge](/docs/api/connectivity/network-edge)&gt; &gt;* — Returns the list with all ingoing edges.
-
----
-
-### getFullEdgesOut()
-
-Returns the outgoing edges corresponding to the full network.
-
-**Returns:**
-
-- *QList&lt; QSharedPointer&lt;[NetworkEdge](/docs/api/connectivity/network-edge)&gt; &gt;* — Returns the list with all outgoing edges.
-
----
-
-### getThresholdedEdgesOut()
-
-Returns the outgoing edges corresponding to the thresholded network.
-
-**Returns:**
-
-- *QList&lt; QSharedPointer&lt;[NetworkEdge](/docs/api/connectivity/network-edge)&gt; &gt;* — Returns the list with all outgoing edges.
-
----
-
-### getVert()
-
-Returns the vertex (position) of the node.
-
-**Returns:**
-
-- *const Eigen::RowVectorXf &* — Returns the 3D position of the node.
-
----
-
-### getId()
-
-Returns the node id.
-
-**Returns:**
-
-- *qint16* — Returns the node id.
-
----
-
-### getFullDegree()
-
-Returns node degree corresponding to the full network.
-
-**Returns:**
-
-- *qint16* — The node degree calculated as the number of edges connected to a node (undirected gaph).
-
----
-
-### getThresholdedDegree()
-
-Returns node degree corresponding to the thresholded network.
-
-**Returns:**
-
-- *qint16* — The node degree calculated as the number of edges connected to a node (undirected gaph).
-
----
-
-### getFullIndegree()
-
-Returns node indegree corresponding to the full network.
-
-**Returns:**
-
-- *qint16* — The node degree calculated as the number of incoming edges (only in directed graphs).
-
----
-
-### getThresholdedIndegree()
-
-Returns node indegree corresponding to the thresholded network.
-
-**Returns:**
-
-- *qint16* — The node degree calculated as the number of incoming edges (only in directed graphs).
-
----
-
-### getFullOutdegree()
-
-Returns node outdegree corresponding to the full network.
-
-**Returns:**
-
-- *qint16* — The node degree calculated as the number of outgoing edges (only in directed graphs).
-
----
-
-### getThresholdedOutdegree()
-
-Returns node outdegree corresponding to the thresholded network.
-
-**Returns:**
-
-- *qint16* — The node degree calculated as the number of outgoing edges (only in directed graphs).
-
----
-
-### getFullStrength()
-
-Returns node strength corresponding to the full network.
-
-**Returns:**
-
-- *double* — The node strength calculated as the sum of all weights of all edges of a node.
-
----
-
-### getThresholdedStrength()
-
-Returns node strength corresponding to the thresholded network.
-
-**Returns:**
-
-- *double* — The node strength calculated as the sum of all weights of all edges of a node.
-
----
-
-### getFullInstrength()
-
-Returns node strength of all ingoing edges corresponding to the full network.
-
-**Returns:**
-
-- *double* — The node strength calculated as the sum of all weights of all ingoing edges of a node.
-
----
-
-### getThresholdedInstrength()
-
-Returns node strength of all ingoing edges corresponding to the thresholded network.
-
-**Returns:**
-
-- *double* — The node strength calculated as the sum of all weights of all ingoing edges of a node.
-
----
-
-### getFullOutstrength()
-
-Returns node strength of all outgoing edges corresponding to the full network.
-
-**Returns:**
-
-- *double* — The node strength calculated as the sum of all weights of all outgoing edges of a node.
-
----
-
-### getThresholdedOutstrength()
-
-Returns node strength of all outgoing edges corresponding to the thresholded network.
-
-**Returns:**
-
-- *double* — The node strength calculated as the sum of all weights of all outgoing edges of a node.
-
----
-
-### setHubStatus(bIsHub)
-
-Sets the hub status of this node.
+Marks the node as hub or not.
 
 **Parameters:**
 
-- **bIsHub** : *bool*
-  New hub status for this node.
-
----
-
-### getHubStatus()
-
-Returns flag describing whether this node is a hub or not.
-
-**Returns:**
-
-- *bool* — Whether this node is a hub or not.
-
----
-
-### append(newEdge)
-
-Appends a network edge to this network node.
-
-Automatically decides whether to add to the in or out edges.
-
-**Parameters:**
-
-- **newEdge** : *QSharedPointer&lt;[NetworkEdge](/docs/api/connectivity/network-edge)&gt;*
-  The new edge item.
+- **hub** : *bool*
+  The new flag.
 
 ---
 
@@ -294,41 +85,6 @@ Automatically decides whether to add to the in or out edges.
 - Start here: [ex_connectivity_metrics](../../examples/connectivity/ex_connectivity_metrics.mdx) — Connectivity metrics on synthetic data with a known coupling.
 - Full source: [`src/examples/ex_connectivity_metrics/main.cpp`](https://github.com/mne-tools/mne-cpp/tree/staging/src/examples/ex_connectivity_metrics/main.cpp)
 - Build target: `ex_connectivity_metrics` (runs under CTest)
-
-## Used in examples
-
-### [ex_connectivity_metrics](../../examples/connectivity/ex_connectivity_metrics.mdx)
-
-Connectivity metrics on synthetic data with a known coupling.
-
-````cpp title="src/examples/ex_connectivity_metrics/main.cpp, line 206"
-    coherency.append(NetworkNode::SPtr(new NetworkNode(i, positions.row(i))));
-}
-Coherency::calculateAbs(coherency, settings);
-coherency.setFrequencyRange(8.0f, 12.0f);
-ok &= expect(std::fabs(edgeWeight(coherency, 0, 1) - coh01) < 1e-9, "Coherency::calculateAbs equals Coherence");
-````
-
-### [ex_disp3d_scene](../../examples/disp3D/ex_disp3d_scene.mdx)
-
-Disp3D scene data: sensor-to-surface interpolation, electrodes, MRI slices, video overlay and layers.
-
-````cpp title="src/examples/ex_disp3d_scene/main.cpp, line 277"
-    graph.append(NetworkNode::SPtr(new NetworkNode(i, RowVectorXf::Constant(3, 0.01f * static_cast<float>(i)))));
-}
-const QList<QPair<int, int>> links = {{0, 1}, {1, 2}};
-const QList<double> strengths = {0.9, 0.3};
-for (int k = 0; k < links.size(); ++k) {
-    NetworkEdge::SPtr edge(new NetworkEdge(links[k].first, links[k].second, MatrixXd::Constant(1, 1, strengths[k])));
-    graph.getNodeAt(links[k].first)->append(edge);
-    graph.getNodeAt(links[k].second)->append(edge);
-    graph.append(edge);
-}
-NetworkObject networkGlyphs;
-networkGlyphs.load(graph, "Viridis"); // spheres for nodes, cylinders for edges
-const int edgesAll = networkGlyphs.edgeInstanceCount();
-networkGlyphs.setThreshold(0.5); // keep only the strong 0-1 link
-````
 
 ## Authors of this file
 

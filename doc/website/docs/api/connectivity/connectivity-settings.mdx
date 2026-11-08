@@ -41,8 +41,8 @@ settings.setNodePositions(positions);
 settings.setConnectivityMethods({"COH", "PLV", "WPLI"});
 std::vector<Network> networks = compute_connectivity(settings);
 for (Network network : networks) {
-    network.setFrequencyRange(8.0f, 12.0f); // average the per-bin weights over the alpha band
-    std::println("{} 0-1: {:g}", network.getConnectivityMethod().toStdString(), edgeWeight(network, 0, 1));
+    network.set_frequency_range(8.0f, 12.0f); // average the per-bin weights over the alpha band
+    std::println("{} 0-1: {:g}", network.method(), edgeWeight(network, 0, 1));
 }
 ```
 
@@ -168,7 +168,7 @@ Sensor- or source-level functional connectivity of averaged MEG/EEG data with a 
 ConnectivitySettings m_settings;
 RtConnectivity::SPtr m_pRtConnectivity;
 std::vector<Network> m_networkData;
-QMap<QString, Vector4i> mColor;
+std::map<std::string, Eigen::Vector4i> mColor;
 ````
 
 ### [ex_dsp_rt](../../examples/dsp/ex_dsp_rt.mdx)
@@ -196,7 +196,7 @@ settings.setFFTSize(256);
 
 Compare connectivity metrics side by side on the same averaged sensor- or source-level data.
 
-````cpp title="src/examples/ex_connectivity_comparison/main.cpp, line 196"
+````cpp title="src/examples/ex_connectivity_comparison/main.cpp, line 199"
 ConnectivitySettings conSettings;
 ````
 

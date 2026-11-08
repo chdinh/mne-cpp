@@ -73,12 +73,12 @@ The documented classes this example uses most:
 |---|---|
 | [`Network`](../../api/connectivity/network.mdx) | Connectivity |
 | [`Coherence`](../../api/connectivity/coherence.mdx) | Connectivity |
+| [`NetworkEdge`](../../api/connectivity/network-edge.mdx) | Connectivity |
 | [`AbstractMetric`](../../api/connectivity/abstract-metric.mdx) | Connectivity |
 | [`FigureExporter`](../../api/disp/figure-exporter.mdx) | Visualization |
-| [`NetworkEdge`](../../api/connectivity/network-edge.mdx) | Connectivity |
-| [`NetworkNode`](../../api/connectivity/network-node.mdx) | Connectivity |
 | [`Coherency`](../../api/connectivity/coherency.mdx) | Connectivity |
 | [`GrangerCausality`](../../api/connectivity/granger-causality.mdx) | Connectivity |
+| [`LinePlot`](../../api/disp/line-plot.mdx) | Visualization |
 
 ## Used in the API reference
 
@@ -148,8 +148,6 @@ The documented classes this example uses most:
 #include <connectivity/metrics/unbiasedsquaredphaselagindex.h>
 #include <connectivity/metrics/weightedphaselagindex.h>
 #include <connectivity/network/network.h>
-#include <connectivity/network/networkedge.h>
-#include <connectivity/network/networknode.h>
 
 #include <disp/plots/helpers/figureexporter.h>
 #include <disp/plots/imagesc.h>
@@ -231,9 +229,9 @@ MatrixXd makeTrial(std::mt19937& gen)
  */
 double edgeWeight(const Network& network, int start, int end)
 {
-    for (const NetworkEdge::SPtr& edge : network.getFullEdges()) {
-        if (edge->getStartNodeID() == start && edge->getEndNodeID() == end) {
-            return edge->getWeight();
+    for (const NetworkEdge& edge : network.edges()) {
+        if (edge.source() == start && edge.target() == end) {
+            return edge.weight();
         }
     }
     return -1.0;
@@ -285,15 +283,15 @@ int main(int argc, char* argv[])
     settings.setConnectivityMethods({"COH", "PLV", "WPLI"});
     std::vector<Network> networks = compute_connectivity(settings);
     for (Network network : networks) {
-        network.setFrequencyRange(8.0f, 12.0f); // average the per-bin weights over the alpha band
-        std::println("{} 0-1: {:g}", network.getConnectivityMethod().toStdString(), edgeWeight(network, 0, 1));
+        network.set_frequency_range(8.0f, 12.0f); // average the per-bin weights over the alpha band
+        std::println("{} 0-1: {:g}", network.method(), edgeWeight(network, 0, 1));
     }
     //! [connectivity_calculate]
     ok &= expect(networks.size() == 3, "compute_connectivity returns one network per method");
 
     //! [coherence_calculate]
     Network coherence = Coherence::calculate(settings);
-    coherence.setFrequencyRange(8.0f, 12.0f);
+    coherence.set_frequency_range(8.0f, 12.0f);
     const double coh01 = edgeWeight(coherence, 0, 1);
     const double coh02 = edgeWeight(coherence, 0, 2);
     //! [coherence_calculate]
@@ -301,7 +299,7 @@ int main(int argc, char* argv[])
 
     //! [imag_coherence_calculate]
     Network imagCoherence = ImagCoherence::calculate(settings);
-    imagCoherence.setFrequencyRange(8.0f, 12.0f);
+    imagCoherence.set_frequency_range(8.0f, 12.0f);
     const double icoh01 = std::fabs(edgeWeight(imagCoherence, 0, 1));
     //! [imag_coherence_calculate]
     ok &= expect(icoh01 > 0.2, std::format("|ImCOH| 0-1 {:g} > 0.2 (12 ms lag)", icoh01));
@@ -310,42 +308,42 @@ int main(int argc, char* argv[])
     // Coherency fills a network whose nodes already exist; the metric classes above wrap this.
     settings.clearIntermediateData();
     Network coherency("COHY");
-    coherency.setSamplingFrequency(kSFreq);
-    coherency.setFFTSize(kSamples / 2 + 1);
-    coherency.setUsedFreqBins(kSamples / 2 + 1);
+    coherency.set_sampling_frequency(kSFreq);
+    coherency.set_fft_size(kSamples / 2 + 1);
+    coherency.set_used_freq_bins(kSamples / 2 + 1);
     for (int i = 0; i < 3; ++i) {
-        coherency.append(NetworkNode::SPtr(new NetworkNode(i, positions.row(i))));
+        coherency.add_node(positions.row(i).transpose());
     }
     Coherency::calculateAbs(coherency, settings);
-    coherency.setFrequencyRange(8.0f, 12.0f);
+    coherency.set_frequency_range(8.0f, 12.0f);
     //! [coherency_calculate_abs]
     ok &= expect(std::fabs(edgeWeight(coherency, 0, 1) - coh01) < 1e-9, "Coherency::calculateAbs equals Coherence");
 
     //! [phase_lag_index_calculate]
     Network pli = PhaseLagIndex::calculate(settings);
-    pli.setFrequencyRange(8.0f, 12.0f);
+    pli.set_frequency_range(8.0f, 12.0f);
     //! [phase_lag_index_calculate]
     //! [weighted_phase_lag_index_calculate]
     Network wpli = WeightedPhaseLagIndex::calculate(settings);
-    wpli.setFrequencyRange(8.0f, 12.0f);
+    wpli.set_frequency_range(8.0f, 12.0f);
     //! [weighted_phase_lag_index_calculate]
     //! [unbiased_squared_phase_lag_index_calculate]
     Network uspli = UnbiasedSquaredPhaseLagIndex::calculate(settings);
-    uspli.setFrequencyRange(8.0f, 12.0f);
+    uspli.set_frequency_range(8.0f, 12.0f);
     //! [unbiased_squared_phase_lag_index_calculate]
     //! [debiased_squared_weighted_phase_lag_index_calculate]
     Network dswpli = DebiasedSquaredWeightedPhaseLagIndex::calculate(settings);
-    dswpli.setFrequencyRange(8.0f, 12.0f);
+    dswpli.set_frequency_range(8.0f, 12.0f);
     //! [debiased_squared_weighted_phase_lag_index_calculate]
     //! [phase_locking_value_calculate]
     Network plv = PhaseLockingValue::calculate(settings);
-    plv.setFrequencyRange(8.0f, 12.0f);
+    plv.set_frequency_range(8.0f, 12.0f);
     //! [phase_locking_value_calculate]
     for (const Network* network : {&pli, &wpli, &uspli, &dswpli, &plv}) {
         const double w01 = edgeWeight(*network, 0, 1);
         const double w02 = edgeWeight(*network, 0, 2);
         ok &= expect(w01 > w02 + 0.3,
-                     std::format("{} 0-1 {:g} > 0-2 {:g} + 0.3", network->getConnectivityMethod().toStdString(), w01, w02));
+                     std::format("{} 0-1 {:g} > 0-2 {:g} + 0.3", network->method(), w01, w02));
     }
 
     //! [correlation_calculate]
@@ -390,38 +388,31 @@ int main(int argc, char* argv[])
         const double forward = edgeWeight(*network, 0, 1);
         const double backward = edgeWeight(*network, 1, 0);
         ok &= expect(forward > 2.0 * backward,
-                     std::format("{} 0->1 {:g} > 2 x 1->0 {:g}", network->getConnectivityMethod().toStdString(), forward, backward));
+                     std::format("{} 0->1 {:g} > 2 x 1->0 {:g}", network->method(), forward, backward));
     }
 
     //! [network_build]
     Network network("manual");
     for (int i = 0; i < 3; ++i) {
-        network.append(NetworkNode::SPtr(new NetworkNode(i, positions.row(i))));
+        network.add_node(positions.row(i).transpose());
     }
-    const QList<QPair<int, int>> pairs = {{0, 1}, {1, 2}};
-    const QList<double> weights = {0.9, 0.2};
-    for (int k = 0; k < pairs.size(); ++k) {
-        MatrixXd perBin = MatrixXd::Constant(1, 1, weights[k]);
-        NetworkEdge::SPtr edge(new NetworkEdge(pairs[k].first, pairs[k].second, perBin));
-        network.getNodeAt(pairs[k].first)->append(edge);
-        network.getNodeAt(pairs[k].second)->append(edge);
-        network.append(edge);
-    }
+    network.add_edge(NetworkEdge(0, 1, MatrixXd::Constant(1, 1, 0.9))); // one weight per frequency bin
+    network.add_edge(NetworkEdge(1, 2, MatrixXd::Constant(1, 1, 0.2)));
     //! [network_build]
 
     //! [network_threshold]
-    network.setThreshold(0.5);
-    const MatrixXd adjacency = network.getFullConnectivityMatrix(); // symmetric by default
-    const int strongEdges = network.getThresholdedEdges().size();
-    const NetworkNode::SPtr hub = network.getNodeAt(1);
-    VisualizationInfo look; // how disp3D colours the network: a colormap or fixed node/edge colours
-    look.sMethod = "Color";
-    look.colEdges = Eigen::Vector4i(0, 0, 255, 255);
-    network.setVisualizationInfo(look);
+    network.set_threshold(0.5);
+    const MatrixXd adjacency = network.connectivity_matrix(); // symmetric by default
+    const std::size_t strongEdges = network.edge_count(EdgeSet::thresholded);
+    const int hubDegree = network.degree(1);
+    const int hubStrongDegree = network.degree(1, EdgeSet::thresholded);
+    const double hubStrength = network.strength(1);
+    network.set_visualization_info({.coloring = VisualizationInfo::Coloring::fixed, // how disp3D colours the network
+                                    .edge_color = Eigen::Vector4i(0, 0, 255, 255)});
     //! [network_threshold]
-    ok &= expect(adjacency(1, 0) == 0.9 && adjacency(2, 1) == 0.2 && strongEdges == 1 && network.getVisualizationInfo().colEdges(2) == 255,
+    ok &= expect(adjacency(1, 0) == 0.9 && adjacency(2, 1) == 0.2 && strongEdges == 1 && network.visualization_info().edge_color(2) == 255,
                  "manual network: mirrored adjacency, one edge above 0.5");
-    ok &= expect(hub->getFullDegree() == 2 && hub->getThresholdedDegree() == 1 && std::fabs(hub->getFullStrength() - 1.1) < 1e-12,
+    ok &= expect(hubDegree == 2 && hubStrongDegree == 1 && std::fabs(hubStrength - 1.1) < 1e-12,
                  "node 1: degree 2, thresholded degree 1, strength 1.1");
 
     // The first trial: channel 1 follows channel 0, channel 2 is unrelated noise
@@ -444,9 +435,9 @@ int main(int argc, char* argv[])
 
     // Per-bin coherence of the coupled and the uncoupled pair
     const auto spectrum = [](const Network& net, int start, int end) {
-        for (const NetworkEdge::SPtr& edge : net.getFullEdges()) {
-            if (edge->getStartNodeID() == start && edge->getEndNodeID() == end) {
-                const VectorXd w = edge->getMatrixWeight().col(0);
+        for (const NetworkEdge& edge : net.edges()) {
+            if (edge.source() == start && edge.target() == end) {
+                const VectorXd w = edge.weights().col(0);
                 return QVector<double>(w.data(), w.data() + w.size());
             }
         }

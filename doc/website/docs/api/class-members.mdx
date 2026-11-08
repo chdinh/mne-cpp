@@ -7,7 +7,7 @@ sidebar_position: 5
 
 # Class Members
 
-Index of 6670 public class members (functions, variables, typedefs, enums) across all documented classes.
+Index of 6638 public class members (functions, variables, typedefs, enums) across all documented classes.
 
 **Jump to:** [A](#a) · [B](#b) · [C](#c) · [D](#d) · [E](#e) · [F](#f) · [G](#g) · [H](#h) · [I](#i) · [J](#j) · [K](#k) · [L](#l) · [M](#m) · [N](#n) · [O](#o) · [P](#p) · [Q](#q) · [R](#r) · [S](#s) · [T](#t) · [U](#u) · [V](#v) · [W](#w) · [X](#x) · [Y](#y) · [Z](#z)
 
@@ -65,6 +65,7 @@ Index of 6670 public class members (functions, variables, typedefs, enums) acros
 - **active** `[var]` in [FiffProj](/docs/api/fiff/fiff-proj) — If fiff projector active.
 - **active** `[var]` in [MNEMshDisplaySurfaceSet](/docs/api/mne/mne-msh-display-surface-set) — Boolean array indicating which surfaces are currently active.
 - **active** `[var]` in [MNEProjItem](/docs/api/mne/mne-proj-item) — Whether this item is currently active.
+- **active** `[fn]` in [NetworkEdge](/docs/api/connectivity/network-edge)
 - **active_file** `[var]` in [MNEProjItem](/docs/api/mne/mne-proj-item) — Whether this item was active when loaded from file.
 - **activeReaders** `[var]` in [AcqStreamStats](/docs/api/acq/acq-stream-stats) — Readers attached right now.
 - **activeSurfaceForTarget** `[slot]` in [BrainView](/docs/api/disp3-d/brain-view) — Get configured surface type for a target view.
@@ -74,6 +75,7 @@ Index of 6670 public class members (functions, variables, typedefs, enums) acros
 - **actualValue** `[var]` in [MnaVerificationResult](/docs/api/mna/mna-verification-result) — The evaluated expression result.
 - **ad_hoc_noise** `[fn]` in [InvDipoleFitData](/docs/api/inv/inv-dipole-fit-data) — Create an ad-hoc diagonal noise-covariance matrix.
 - **add_bem_surface** `[fn]` in [MNEMshDisplaySurfaceSet](/docs/api/mne/mne-msh-display-surface-set) — Read a BEM surface from a FIFF file, optionally validate that it is topologically closed (via solid-angle check), and add it to this set.
+- **add_edge** `[fn]` in [Network](/docs/api/connectivity/network) — Adds an edge between two existing nodes and registers it with both.
 - **add_filter_response** `[fn]` in [MNERawData](/docs/api/mne/mne-raw-data) — Create a frequency-domain filter response from the current filter definition and sampling frequency, replacing any existing response.
 - **add_geometry_info** `[fn]` in [MNEBemSurface](/docs/api/mne/mne-bem-surface) — Add vertex normals and neighbourhood information.
 - **add_geometry_info** `[fn]` in [MNEHemisphere](/docs/api/mne/mne-hemisphere) — Add vertex normals and neighbourhood information to this hemisphere.
@@ -84,6 +86,7 @@ Index of 6670 public class members (functions, variables, typedefs, enums) acros
 - **add_inverse** `[fn]` in [FiffCoordTrans](/docs/api/fiff/fiff-coord-trans)
 - **add_item** `[fn]` in [MNEProjOp](/docs/api/mne/mne-proj-op) — Add a projection item that is active by default.
 - **add_item_active** `[fn]` in [MNEProjOp](/docs/api/mne/mne-proj-op) — Add a projection item with an explicit active/inactive state.
+- **add_node** `[fn]` in [Network](/docs/api/connectivity/network) — Adds a node.
 - **add_patch_stats** `[fn]` in [MNESourceSpace](/docs/api/mne/mne-source-space) — Compute patch statistics (areas, normals, deviations).
 - **add_replace_surface** `[fn]` in [MNEMshDisplaySurfaceSet](/docs/api/mne/mne-msh-display-surface-set) — Add a new surface to the set, or replace an existing surface with the same ID if `replace` is true.
 - **add_triangle_data** `[fn]` in [MNESurfaceOrVolume](/docs/api/mne/mne-surface-or-volume) — Populate the [`MNETriangle`](/docs/api/mne/mne-triangle) structures for both the full and in-use triangulations by computing edge vectors, normals, and areas.
@@ -179,9 +182,6 @@ Index of 6670 public class members (functions, variables, typedefs, enums) acros
 - **append** `[fn]` in [MNEDerivSet](/docs/api/mne/mne-deriv-set) — Appends copies of the derivations of another set (MNE-C `mne_merge_deriv_sets`).
 - **append** `[fn]` in [MNEEventList](/docs/api/mne/mne-event-list) — Appends the events of another list (MNE-C `mne_add_to_event_list`).
 - **append** `[fn]` in [MNESourceSpaces](/docs/api/mne/mne-source-spaces) — Appends a deep copy of the given source space.
-- **append** `[fn]` in [Network](/docs/api/connectivity/network) — Appends a network edge to this network node.
-- **append** `[fn]` in [Network](/docs/api/connectivity/network) — Appends a network edge to this network node.
-- **append** `[fn]` in [NetworkNode](/docs/api/connectivity/network-node) — Appends a network edge to this network node.
 - **append** `[fn]` in [RtAveraging](/docs/api/dsp/rt-averaging) — Slot to receive incoming data.
 - **append** `[fn]` in [RtConnectivity](/docs/api/dsp/rt-connectivity) — Slot to receive incoming data.
 - **append** `[fn]` in [RtHpi](/docs/api/dsp/rt-hpi) — Slot to receive incoming data.
@@ -464,7 +464,6 @@ Index of 6670 public class members (functions, variables, typedefs, enums) acros
 - **calculate_vertex_distances** `[fn]` in [MNESurfaceOrVolume](/docs/api/mne/mne-surface-or-volume) — Compute the Euclidean distances from each vertex to its topological neighbors and store them in the vert_dist array.
 - **calculateAbs** `[fn]` in [Coherency](/docs/api/connectivity/coherency) — Calculates the absolute value of coherency of the rows of the data matrix.
 - **calculateAverage** `[signal]` in [AveragingSettingsView](/docs/api/disp/averaging-settings-view)
-- **calculateAveragedWeight** `[fn]` in [NetworkEdge](/docs/api/connectivity/network-edge) — Calculates the edge weight based on the currently set min/max frequency bins.
 - **calculateFFTFreqs** `[fn]` in [Spectral](/docs/api/utils/spectral) — Calculates the FFT frequencies.
 - **calculateFit** `[fn]` in [InvDipoleFit](/docs/api/inv/inv-dipole-fit) — Execute the dipole fit using the stored settings.
 - **calculateFwd** `[fn]` in [ComputeFwd](/docs/api/fwd/compute-fwd) — Perform the forward calculation.
@@ -757,10 +756,8 @@ Index of 6670 public class members (functions, variables, typedefs, enums) acros
 - **coilType** `[var]` in `AcqFiffChannel` — FIFFV_COIL_*.
 - **col_names** `[var]` in [FiffNamedMatrix](/docs/api/fiff/fiff-named-matrix) — Column names.
 - **colcals** `[var]` in [FiffCtfComp](/docs/api/fiff/fiff-ctf-comp) — Column calibrations.
-- **colEdges** `[var]` in [VisualizationInfo](/docs/api/connectivity/visualization-info) — The edge color.
 - **collist** `[var]` in [MNENamedMatrix](/docs/api/mne/mne-named-matrix) — Name list for the columns (may be empty if unnamed).
 - **collist** `[var]` in [MNESparseNamedMatrix](/docs/api/mne/mne-sparse-named-matrix) — Name list for the columns.
-- **colNodes** `[var]` in [VisualizationInfo](/docs/api/connectivity/visualization-info) — The node color.
 - **color** `[fn]` in [AbstractTreeItem](/docs/api/disp3-d/abstract-tree-item)
 - **color** `[var]` in `AnnotationSpan` — Fill / border colour for the highlighted span.
 - **color** `[var]` in [AverageCategory](/docs/api/fiff/average-category) — Display color (unused in batch).
@@ -776,8 +773,11 @@ Index of 6670 public class members (functions, variables, typedefs, enums) acros
 - **color** `[var]` in [TimeRulerEventMark](/docs/api/disp/time-ruler-event-mark) — Display colour.
 - **color** `[var]` in [TimeRulerReferenceMark](/docs/api/disp/time-ruler-reference-mark) — Display colour.
 - **color_scale** `[var]` in [MNEMshDisplaySurface](/docs/api/mne/mne-msh-display-surface) — Color scale used to compute vertex colors.
+- **Coloring** `[enum]` in [VisualizationInfo](/docs/api/connectivity/visualization-info) — How nodes and edges are coloured.
+- **coloring** `[var]` in [VisualizationInfo](/docs/api/connectivity/visualization-info) — The colouring mode.
 - **colormap** `[fn]` in [SensorFieldMapper](/docs/api/disp3-d/sensor-field-mapper)
 - **colormap** `[fn]` in [SourceEstimateOverlay](/docs/api/disp3-d/source-estimate-overlay) — Get the current colormap name.
+- **colormap** `[var]` in [VisualizationInfo](/docs/api/connectivity/visualization-info) — Colour map name used by `Coloring::colormap`.
 - **ColorMap** `[fn]` in [ColorMap](/docs/api/disp/color-map) — Default constructor.
 - **colorsAvailable** `[signal]` in [RtSensorStreamManager](/docs/api/disp3-d/rt-sensor-stream-manager) — Emitted when the streaming pipeline produces a new set of per-vertex colours for a sensor surface.
 - **colorsRef** `[fn]` in [BrainSurface](/docs/api/disp3-d/brain-surface)
@@ -939,6 +939,7 @@ Index of 6670 public class members (functions, variables, typedefs, enums) acros
 - **connection** `[fn]` in [PolhemusCoregistration](/docs/api/acq/polhemus-coregistration)
 - **connectionChanged** `[signal]` in [RtClient](/docs/api/com/rt-client) — Emitted when connection status changed.
 - **connectivity** `[var]` in [InvSourceEstimate](/docs/api/inv/inv-source-estimate) — Pairwise connectivity between sources (one per metric / frequency band).
+- **connectivity_matrix** `[fn]` in [Network](/docs/api/connectivity/network) — Returns the node-by-node adjacency matrix of edge weights.
 - **connectivityMetricChanged** `[signal]` in [ConnectivitySettingsView](/docs/api/disp/connectivity-settings-view) — Emit signal whenever the connectivity metric changed.
 - **ConnectivitySettings** `[fn]` in [ConnectivitySettings](/docs/api/connectivity/connectivity-settings) — Constructs a [`ConnectivitySettings`](/docs/api/connectivity/connectivity-settings) object.
 - **ConnectivitySettingsView** `[fn]` in [ConnectivitySettingsView](/docs/api/disp/connectivity-settings-view) — Constructs a [`ConnectivitySettingsView`](/docs/api/disp/connectivity-settings-view) which is a child of parent.
@@ -1070,9 +1071,6 @@ Index of 6670 public class members (functions, variables, typedefs, enums) acros
 - **ConstSPtr** `[type]` in [ModalitySelectionView](/docs/api/disp/modality-selection-view) — Const shared pointer type for [`ModalitySelectionView`](/docs/api/disp/modality-selection-view).
 - **ConstSPtr** `[type]` in [MultiView](/docs/api/disp/multi-view) — Const shared pointer type for [`MultiView`](/docs/api/disp/multi-view).
 - **ConstSPtr** `[type]` in [MultiViewWindow](/docs/api/disp/multi-view-window) — Const shared pointer type for [`MultiViewWindow`](/docs/api/disp/multi-view-window).
-- **ConstSPtr** `[type]` in [Network](/docs/api/connectivity/network) — Const shared pointer type for [`Network`](/docs/api/connectivity/network).
-- **ConstSPtr** `[type]` in [NetworkEdge](/docs/api/connectivity/network-edge) — Const shared pointer type for [`NetworkEdge`](/docs/api/connectivity/network-edge).
-- **ConstSPtr** `[type]` in [NetworkNode](/docs/api/connectivity/network-node) — Const shared pointer type for [`NetworkNode`](/docs/api/connectivity/network-node).
 - **ConstSPtr** `[type]` in [PartialDirectedCoherence](/docs/api/connectivity/partial-directed-coherence) — Const shared pointer type for [`PartialDirectedCoherence`](/docs/api/connectivity/partial-directed-coherence).
 - **ConstSPtr** `[type]` in [PhaseLagIndex](/docs/api/connectivity/phase-lag-index) — Const shared pointer type for [`PhaseLagIndex`](/docs/api/connectivity/phase-lag-index).
 - **ConstSPtr** `[type]` in [PhaseLockingValue](/docs/api/connectivity/phase-locking-value) — Const shared pointer type for [`PhaseLockingValue`](/docs/api/connectivity/phase-locking-value).
@@ -1297,6 +1295,8 @@ Index of 6670 public class members (functions, variables, typedefs, enums) acros
 - **Definition** `[type]` in [MNEDerivSet](/docs/api/mne/mne-deriv-set) — Derived channel name and the weight of every input channel.
 - **definitions** `[fn]` in [MNEDerivSet](/docs/api/mne/mne-deriv-set) — Returns every derivation of the set as definitions, in file order.
 - **defs** `[var]` in [CovDescription](/docs/api/mne/cov-description) — Definition sections.
+- **degree** `[fn]` in [Network](/docs/api/connectivity/network) — Returns the number of edges incident to a node.
+- **degree_range** `[fn]` in [Network](/docs/api/connectivity/network) — Returns the smallest and largest node degree.
 - **degreesOfFreedom** `[var]` in [StatsTtestResult](/docs/api/sts/stats-ttest-result) — Degrees of freedom.
 - **delay** `[var]` in [AverageCategory](/docs/api/fiff/average-category) — Stimulus delay (s).
 - **delay** `[var]` in [CovDefinition](/docs/api/mne/cov-definition) — Apply this delay to the stimulus time point.
@@ -1528,8 +1528,12 @@ Index of 6670 public class members (functions, variables, typedefs, enums) acros
 - **EcgParams** `[type]` in [ArtifactDetect](/docs/api/utils/artifact-detect) — Convenience alias so callers can still write `ArtifactDetect::EcgParams`.
 - **ecgReject** `[var]` in [RejectionParams](/docs/api/fiff/rejection-params) — ECG rejection (V).
 - **EDFReader** `[fn]` in [EDFReader](/docs/api/bids/edf-reader) — [`EDFReader`](/docs/api/bids/edf-reader) Default constructor.
+- **edge_color** `[var]` in [VisualizationInfo](/docs/api/connectivity/visualization-info) — RGBA edge colour used by `Coloring::fixed`.
+- **edge_count** `[fn]` in [Network](/docs/api/connectivity/network)
 - **edgeInstanceCount** `[fn]` in [NetworkObject](/docs/api/disp3-d/network-object)
 - **edgeRenderKey** `[fn]` in [NetworkObject](/docs/api/disp3-d/network-object)
+- **edges** `[fn]` in [Network](/docs/api/connectivity/network)
+- **edges** `[fn]` in [NetworkNode](/docs/api/connectivity/network-node)
 - **edgeStreams** `[fn]` in [NetworkObject](/docs/api/disp3-d/network-object)
 - **eeg_client** `[var]` in [dipoleFitFuncsRec](/docs/api/inv/dipole-fit-funcs-rec) — Client data for EEG field computations (not owned).
 - **eeg_els** `[var]` in [InvDipoleFitData](/docs/api/inv/inv-dipole-fit-data) — EEG electrode definitions.
@@ -1598,7 +1602,7 @@ Index of 6670 public class members (functions, variables, typedefs, enums) acros
 - **empty** `[fn]` in [MNEClusterInfo](/docs/api/mne/mne-cluster-info) — Returns true if MNE cluster information contains no data.
 - **empty** `[fn]` in [MNEForwardSolution](/docs/api/mne/mne-forward-solution) — True if FIFF measurement file information is empty.
 - **empty** `[fn]` in [MNESourceSpaces](/docs/api/mne/mne-source-spaces) — True if MNE Source Space is empty.
-- **empty** `[fn]` in [Network](/docs/api/connectivity/network) — Returns whether the [`Network`](/docs/api/connectivity/network) is empty by checking the number of nodes and edges.
+- **empty** `[fn]` in [Network](/docs/api/connectivity/network)
 - **enable_all_sources** `[fn]` in [MNESourceSpace](/docs/api/mne/mne-source-space) — Enable all source points (set inuse to TRUE, nuse = np).
 - **enabled** `[var]` in [SubView](/docs/api/disp3-d/sub-view)
 - **end** `[var]` in [AcqSampleRange](/docs/api/acq/acq-sample-range) — One past the last sample; equals first for an empty range.
@@ -1754,6 +1758,7 @@ Index of 6670 public class members (functions, variables, typedefs, enums) acros
 - **fCdf** `[fn]` in [StatsFtest](/docs/api/sts/stats-ftest) — Compute the CDF of the F-distribution using the regularized incomplete beta function.
 - **fdr** `[fn]` in [StatsMcCorrection](/docs/api/sts/stats-mc-correction) — False Discovery Rate correction as mne.stats.fdr_correction.
 - **FdrMethod** `[enum]` in [StatsMcCorrection](/docs/api/sts/stats-mc-correction) — Dependence assumed by the FDR correction (mne's method "indep" / "negcorr").
+- **fft_size** `[fn]` in [Network](/docs/api/connectivity/network)
 - **fHeadMovementAngle** `[var]` in [HpiFitResult](/docs/api/inv/hpi-fit-result)
 - **fHeadMovementDistance** `[var]` in [HpiFitResult](/docs/api/inv/hpi-fit-result)
 - **fidFileChanged** `[signal]` in [CoregSettingsView](/docs/api/disp/coreg-settings-view) — Emit this signal whenever new fiducials were loaded.
@@ -2030,6 +2035,8 @@ Index of 6670 public class members (functions, variables, typedefs, enums) acros
 - **freqBandChanged** `[signal]` in [ConnectivitySettingsView](/docs/api/disp/connectivity-settings-view) — Emit signal whenever the frequency band changed.
 - **frequencies** `[var]` in [InvBeamformer](/docs/api/inv/inv-beamformer) — Center frequencies for DICS (Hz).
 - **frequency** `[var]` in [EDFChannelInfo](/docs/api/bids/edf-channel-info)
+- **frequency_bins** `[fn]` in [NetworkEdge](/docs/api/connectivity/network-edge)
+- **frequency_range** `[fn]` in [Network](/docs/api/connectivity/network)
 - **FrequencySpectrumDelegate** `[fn]` in [FrequencySpectrumDelegate](/docs/api/disp/frequency-spectrum-delegate) — Creates a new abstract item delegate with the given parent.
 - **FrequencySpectrumModel** `[fn]` in [FrequencySpectrumModel](/docs/api/disp/frequency-spectrum-model) — Constructs an real-time multi sample array table model for the given parent.
 - **from** `[var]` in [FiffCoordTrans](/docs/api/fiff/fiff-coord-trans) — Source coordinate system.
@@ -2264,7 +2271,6 @@ Index of 6670 public class members (functions, variables, typedefs, enums) acros
 - **getConditionNumber** `[fn]` in [Linalg](/docs/api/math/linalg) — Returns the condition number of a given matrix.
 - **getConditionSlope** `[fn]` in [Linalg](/docs/api/math/linalg) — Returns the condition slope of a given matrix.
 - **getConnectionStatus** `[fn]` in [RtClient](/docs/api/com/rt-client) — Rt Server status, returns true when rt server is started.
-- **getConnectivityMethod** `[fn]` in [Network](/docs/api/connectivity/network) — Returns the connectivity measure method used to create the data of this network structure.
 - **getConnectivityMethods** `[fn]` in [ConnectivitySettings](/docs/api/connectivity/connectivity-settings)
 - **getConnectivityMetric** `[fn]` in [ConnectivitySettingsView](/docs/api/disp/connectivity-settings-view) — Get the current connectivity metric.
 - **getControlWidget** `[fn]` in [ChannelSelectionView](/docs/api/disp/channel-selection-view) — Returns pointer to the portion of the channel view with the controls.
@@ -2293,16 +2299,13 @@ Index of 6670 public class members (functions, variables, typedefs, enums) acros
 - **getDistanceTimeSpacer** `[fn]` in [RtFiffRawView](/docs/api/disp/rt-fiff-raw-view) — Returns teh current distance between time spacers.
 - **getDoArtifactThresholdRejection** `[fn]` in [ArtifactSettingsView](/docs/api/disp/artifact-settings-view)
 - **getDoBaselineCorrection** `[fn]` in [AveragingSettingsView](/docs/api/disp/averaging-settings-view)
-- **getEdgeAt** `[fn]` in [Network](/docs/api/connectivity/network) — Returns the edge at a specific position.
 - **getElectrodeNames** `[fn]` in [StandardMontage](/docs/api/utils/standard-montage) — Get electrode names for a standard montage.
-- **getEndNodeID** `[fn]` in [NetworkEdge](/docs/api/connectivity/network-edge) — Returns the end node of this edge.
 - **getEventsToDisplay** `[fn]` in [RtFiffRawViewModel](/docs/api/disp/rt-fiff-raw-view-model) — Returns event sample positions between two samples.
 - **getEvokedSet** `[fn]` in [EvokedSetModel](/docs/api/disp/evoked-set-model)
 - **getEvokedSetModel** `[fn]` in [AverageLayoutView](/docs/api/disp/average-layout-view) — Returns the currently set [`EvokedSetModel`](/docs/api/disp/evoked-set-model).
 - **getEvokedSetModel** `[fn]` in [ButterflyView](/docs/api/disp/butterfly-view) — Returns the currently set [`EvokedSetModel`](/docs/api/disp/evoked-set-model).
 - **getFftCoefficients** `[fn]` in [FilterKernel](/docs/api/dsp/filter-kernel)
 - **getFFTSize** `[fn]` in [ConnectivitySettings](/docs/api/connectivity/connectivity-settings)
-- **getFFTSize** `[fn]` in [Network](/docs/api/connectivity/network) — Returns the current FFT size.
 - **getFiffInfo** `[fn]` in [RtClient](/docs/api/com/rt-client) — Request Fiff Info.
 - **getFilterActive** `[fn]` in [FilterSettingsView](/docs/api/disp/filter-settings-view) — Returns true if the filters a set as active.
 - **getFilterOrder** `[fn]` in [FilterKernel](/docs/api/dsp/filter-kernel)
@@ -2318,25 +2321,9 @@ Index of 6670 public class members (functions, variables, typedefs, enums) acros
 - **getFrequency** `[fn]` in [AbstractFormatReader](/docs/api/bids/abstract-format-reader) — Return the sampling frequency in Hz.
 - **getFrequency** `[fn]` in [BrainVisionReader](/docs/api/bids/brain-vision-reader) — Return the sampling frequency in Hz.
 - **getFrequency** `[fn]` in [EDFReader](/docs/api/bids/edf-reader) — Return the sampling frequency in Hz.
-- **getFrequencyBins** `[fn]` in [NetworkEdge](/docs/api/connectivity/network-edge) — Returns the current frequency bins to average from/to.
-- **getFrequencyRange** `[fn]` in [Network](/docs/api/connectivity/network) — Returns the current frequency edge to average from/to.
 - **getFrom** `[fn]` in [FilterDesignView](/docs/api/disp/filter-design-view) — Get filter 'From' value.
-- **getFullConnectivityMatrix** `[fn]` in [Network](/docs/api/connectivity/network) — Returns the full connectivity matrix for this network structure.
-- **getFullDegree** `[fn]` in [NetworkNode](/docs/api/connectivity/network-node) — Returns node degree corresponding to the full network.
-- **getFullDistribution** `[fn]` in [Network](/docs/api/connectivity/network) — Returns network distribution, also known as network degree, corresponding to the full network.
-- **getFullEdges** `[fn]` in [Network](/docs/api/connectivity/network) — Returns the full and non thresholded edges.
-- **getFullEdges** `[fn]` in [NetworkNode](/docs/api/connectivity/network-node) — Returns the ingoing edges corresponding to the full network.
-- **getFullEdgesIn** `[fn]` in [NetworkNode](/docs/api/connectivity/network-node) — Returns the ingoing edges corresponding to the full network.
-- **getFullEdgesOut** `[fn]` in [NetworkNode](/docs/api/connectivity/network-node) — Returns the outgoing edges corresponding to the full network.
-- **getFullIndegree** `[fn]` in [NetworkNode](/docs/api/connectivity/network-node) — Returns node indegree corresponding to the full network.
-- **getFullInstrength** `[fn]` in [NetworkNode](/docs/api/connectivity/network-node) — Returns node strength of all ingoing edges corresponding to the full network.
-- **getFullOutdegree** `[fn]` in [NetworkNode](/docs/api/connectivity/network-node) — Returns node outdegree corresponding to the full network.
-- **getFullOutstrength** `[fn]` in [NetworkNode](/docs/api/connectivity/network-node) — Returns node strength of all outgoing edges corresponding to the full network.
-- **getFullStrength** `[fn]` in [NetworkNode](/docs/api/connectivity/network-node) — Returns node strength corresponding to the full network.
 - **getHighpassFreq** `[fn]` in [FilterKernel](/docs/api/dsp/filter-kernel)
 - **getHpiDigitizer** `[fn]` in [InvHpiDataUpdater](/docs/api/inv/inv-hpi-data-updater)
-- **getHubStatus** `[fn]` in [NetworkNode](/docs/api/connectivity/network-node) — Returns flag describing whether this node is a hub or not.
-- **getId** `[fn]` in [NetworkNode](/docs/api/connectivity/network-node) — Returns the node id.
 - **getIdxSelMap** `[fn]` in [EvokedSetModel](/docs/api/disp/evoked-set-model) — Returns a map which conatins the channel idx and its corresponding selection status.
 - **getIdxSelMap** `[fn]` in [FrequencySpectrumModel](/docs/api/disp/frequency-spectrum-model) — Returns a map which conatins the channel idx and its corresponding selection status.
 - **getIdxSelMap** `[fn]` in [RtFiffRawViewModel](/docs/api/disp/rt-fiff-raw-view-model) — Returns a map which conatins the channel idx and its corresponding selection status.
@@ -2371,19 +2358,10 @@ Index of 6670 public class members (functions, variables, typedefs, enums) acros
 - **getMarkers** `[fn]` in [BrainVisionReader](/docs/api/bids/brain-vision-reader) — Return all parsed markers from the .vmrk file.
 - **getMatrixCoding** `[fn]` in [FiffTag](/docs/api/fiff/fiff-tag) — Provides information about matrix coding.
 - **getMatrixDimensions** `[fn]` in [FiffTag](/docs/api/fiff/fiff-tag) — Returns matrix dimensions Refactors: fiff_get_matrix_dims (fiff_matrix.c).
-- **getMatrixWeight** `[fn]` in [NetworkEdge](/docs/api/connectivity/network-edge) — Returns the edge weight non-averaged in form of a matrix.
 - **getMaxIter** `[fn]` in [CoregSettingsView](/docs/api/disp/coreg-settings-view) — Get the maximum number of icp iterations.
 - **getMaxSamples** `[fn]` in [RtFiffRawViewModel](/docs/api/disp/rt-fiff-raw-view-model) — Returns the maximal number of samples of the downsampled data to display.
 - **getMaxValueFromRawViewModel** `[fn]` in [RtFiffRawViewModel](/docs/api/disp/rt-fiff-raw-view-model) — Get maximum range of respective channel type.
 - **getMeasurementChannelInfos** `[fn]` in [EDFReader](/docs/api/bids/edf-reader) — Return measurement channel infos only.
-- **getMinMaxFullDegrees** `[fn]` in [Network](/docs/api/connectivity/network) — Returns the minimum and maximum degree (in and out) corresponding to the full network.
-- **getMinMaxFullIndegrees** `[fn]` in [Network](/docs/api/connectivity/network) — Returns the minimum and maximum indegree corresponding to the full network.
-- **getMinMaxFullOutdegrees** `[fn]` in [Network](/docs/api/connectivity/network) — Returns the minimum and maximum outdegree corresponding to the full network.
-- **getMinMaxFullWeights** `[fn]` in [Network](/docs/api/connectivity/network) — Returns the minimum and maximum weight strength of the entire network.
-- **getMinMaxThresholdedDegrees** `[fn]` in [Network](/docs/api/connectivity/network) — Returns the minimum and maximum degree (in and out) corresponding to the thresholded network.
-- **getMinMaxThresholdedIndegrees** `[fn]` in [Network](/docs/api/connectivity/network) — Returns the minimum and maximum indegree corresponding to the thresholded network.
-- **getMinMaxThresholdedOutdegrees** `[fn]` in [Network](/docs/api/connectivity/network) — Returns the minimum and maximum outdegree corresponding to the thresholded network.
-- **getMinMaxThresholdedWeights** `[fn]` in [Network](/docs/api/connectivity/network) — Returns the minimum and maximum weight strength of the thresholded network.
 - **getModalityMap** `[fn]` in [ButterflyView](/docs/api/disp/butterfly-view) — Get the activation of the already created modality check boxes.
 - **getModalityMap** `[fn]` in [ModalitySelectionView](/docs/api/disp/modality-selection-view) — Get the activation of the already created modality check boxes.
 - **getModelCheckpoint** `[fn]` in [MinimumNormSettingsView](/docs/api/disp/minimum-norm-settings-view) — Returns the current model checkpoint path.
@@ -2394,9 +2372,7 @@ Index of 6670 public class members (functions, variables, typedefs, enums) acros
 - **getName** `[fn]` in [InvPwlRapMusic](/docs/api/inv/inv-pwl-rap-music)
 - **getName** `[fn]` in [InvRapMusic](/docs/api/inv/inv-rap-music)
 - **getNames** `[fn]` in [FsColortable](/docs/api/fs/fs-colortable) — Names encoded in the colortable.
-- **getNodeAt** `[fn]` in [Network](/docs/api/connectivity/network) — Returns the node at a specific position.
 - **getNodePositions** `[fn]` in [ConnectivitySettings](/docs/api/connectivity/connectivity-settings)
-- **getNodes** `[fn]` in [Network](/docs/api/connectivity/network) — Returns the nodes.
 - **getNumAverages** `[fn]` in [AveragingSettingsView](/docs/api/disp/averaging-settings-view)
 - **getNumAverages** `[fn]` in [EvokedSetModel](/docs/api/disp/evoked-set-model) — Returns the current number of stored averages.
 - **getNumberOfTimeSpacers** `[fn]` in [EvokedSetModel](/docs/api/disp/evoked-set-model) — Returns the current number for the time spacers.
@@ -2427,7 +2403,6 @@ Index of 6670 public class members (functions, variables, typedefs, enums) acros
 - **getSamplingFrequency** `[fn]` in [ConnectivitySettings](/docs/api/connectivity/connectivity-settings)
 - **getSamplingFrequency** `[fn]` in [EvokedSetModel](/docs/api/disp/evoked-set-model) — Returns the current sampling frequency.
 - **getSamplingFrequency** `[fn]` in [FilterKernel](/docs/api/dsp/filter-kernel)
-- **getSamplingFrequency** `[fn]` in [Network](/docs/api/connectivity/network) — Get the currently set sampling frequency.
 - **getScaleMap** `[fn]` in [ScalingView](/docs/api/disp/scaling-view) — Get the current scaling map.
 - **getScaling** `[fn]` in [RtFiffRawViewModel](/docs/api/disp/rt-fiff-raw-view-model) — Returns current scaling.
 - **getScalingMap** `[fn]` in [RtFiffRawView](/docs/api/disp/rt-fiff-raw-view) — Get the current scaling map.
@@ -2444,22 +2419,8 @@ Index of 6670 public class members (functions, variables, typedefs, enums) acros
 - **getSourceSpace** `[fn]` in [InvMinimumNorm](/docs/api/inv/inv-minimum-norm) — Get the source space corresponding to this inverse operator.
 - **getSourceSpace** `[fn]` in [InvRapMusic](/docs/api/inv/inv-rap-music)
 - **getSspStatusChanged** `[fn]` in [HpiSettingsView](/docs/api/disp/hpi-settings-view) — Get the SSP checked status.
-- **getStartNodeID** `[fn]` in [NetworkEdge](/docs/api/connectivity/network-edge) — Returns the start node of this edge.
 - **getStimChannelIdx** `[fn]` in [AveragingSettingsView](/docs/api/disp/averaging-settings-view)
-- **getThreshold** `[fn]` in [Network](/docs/api/connectivity/network) — Returns the current threshold of the network.
 - **getThreshold** `[fn]` in [Spline](/docs/api/disp/spline) — getThreshold retrieves the current threshold values
-- **getThresholdedConnectivityMatrix** `[fn]` in [Network](/docs/api/connectivity/network) — Returns the thresholded connectivity matrix for this network structure.
-- **getThresholdedDegree** `[fn]` in [NetworkNode](/docs/api/connectivity/network-node) — Returns node degree corresponding to the thresholded network.
-- **getThresholdedDistribution** `[fn]` in [Network](/docs/api/connectivity/network) — Returns network distribution, also known as network degree, corresponding to the thresholded network.
-- **getThresholdedEdges** `[fn]` in [Network](/docs/api/connectivity/network) — Returns the thresholded edges.
-- **getThresholdedEdges** `[fn]` in [NetworkNode](/docs/api/connectivity/network-node) — Returns all edges corresponding to the thresholded network.
-- **getThresholdedEdgesIn** `[fn]` in [NetworkNode](/docs/api/connectivity/network-node) — Returns the ingoing edges corresponding to the thresholded network.
-- **getThresholdedEdgesOut** `[fn]` in [NetworkNode](/docs/api/connectivity/network-node) — Returns the outgoing edges corresponding to the thresholded network.
-- **getThresholdedIndegree** `[fn]` in [NetworkNode](/docs/api/connectivity/network-node) — Returns node indegree corresponding to the thresholded network.
-- **getThresholdedInstrength** `[fn]` in [NetworkNode](/docs/api/connectivity/network-node) — Returns node strength of all ingoing edges corresponding to the thresholded network.
-- **getThresholdedOutdegree** `[fn]` in [NetworkNode](/docs/api/connectivity/network-node) — Returns node outdegree corresponding to the thresholded network.
-- **getThresholdedOutstrength** `[fn]` in [NetworkNode](/docs/api/connectivity/network-node) — Returns node strength of all outgoing edges corresponding to the thresholded network.
-- **getThresholdedStrength** `[fn]` in [NetworkNode](/docs/api/connectivity/network-node) — Returns node strength corresponding to the thresholded network.
 - **getThresholdMap** `[fn]` in [ArtifactSettingsView](/docs/api/disp/artifact-settings-view)
 - **getTo** `[fn]` in [FilterDesignView](/docs/api/disp/filter-design-view) — Get filter 'To' value.
 - **getTransParams** `[fn]` in [CoregSettingsView](/docs/api/disp/coreg-settings-view) — Get the parameters for the new transformation to build from the adjustment values.
@@ -2475,16 +2436,12 @@ Index of 6670 public class members (functions, variables, typedefs, enums) acros
 - **getUpperBound** `[fn]` in [SpectrumSettingsView](/docs/api/disp/spectrum-settings-view) — Returns the upper bound.
 - **getUpperFreq** `[fn]` in [ConnectivitySettingsView](/docs/api/disp/connectivity-settings-view) — Get the current upper frequency range.
 - **getUpperFrqBound** `[fn]` in [FrequencySpectrumModel](/docs/api/disp/frequency-spectrum-model) — Returns the upper frequency boundary.
-- **getUsedFreqBins** `[fn]` in [Network](/docs/api/connectivity/network) — Get the currently set number of frequency bins.
 - **getValueAtColumn** `[fn]` in [RtFiffRawViewModel](/docs/api/disp/rt-fiff-raw-view-model) — Returns the displayed value of a row at a buffer column, i.e.
 - **getValuesAtTime** `[fn]` in [MNEMeasDataSet](/docs/api/mne/mne-meas-data-set) — Pick signal values at a specified time point using linear interpolation.
 - **getValuesFromChannelData** `[fn]` in [MNEMeasDataSet](/docs/api/mne/mne-meas-data-set) — Pick signal values at a specified time point using linear interpolation (channel-major layout).
-- **getVert** `[fn]` in [NetworkNode](/docs/api/connectivity/network-node) — Returns the vertex (position) of the node.
 - **getVertices** `[fn]` in [FsAnnotation](/docs/api/fs/fs-annotation) — Returns the vertix indeces.
 - **getVertices** `[fn]` in [FsAnnotation](/docs/api/fs/fs-annotation) — Returns the vertix indeces.
 - **getViewWidget** `[fn]` in [ChannelSelectionView](/docs/api/disp/channel-selection-view) — Returns pointer to the portion of the channel view with the graphics view.
-- **getVisualizationInfo** `[fn]` in [Network](/docs/api/connectivity/network) — Get the current visualization info.
-- **getWeight** `[fn]` in [NetworkEdge](/docs/api/connectivity/network-edge) — Returns the edge weight.
 - **getWeightEEG** `[fn]` in [CoregSettingsView](/docs/api/disp/coreg-settings-view)
 - **getWeightHPI** `[fn]` in [CoregSettingsView](/docs/api/disp/coreg-settings-view)
 - **getWeightHSP** `[fn]` in [CoregSettingsView](/docs/api/disp/coreg-settings-view)
@@ -2636,6 +2593,7 @@ Index of 6670 public class members (functions, variables, typedefs, enums) acros
 - **hpiFreqs** `[var]` in [HpiFitResult](/docs/api/inv/hpi-fit-result)
 - **HpiSettingsView** `[fn]` in [HpiSettingsView](/docs/api/disp/hpi-settings-view) — Constructs a [`HpiSettingsView`](/docs/api/disp/hpi-settings-view) object.
 - **htmlContent** `[var]` in [ReportSection](/docs/api/utils/report-section)
+- **hub** `[fn]` in [NetworkNode](/docs/api/connectivity/network-node)
 - **hugePages** `[var]` in [AcqStreamOptions](/docs/api/acq/acq-stream-options) — 2 MiB pages (Linux transparent huge pages); best effort, reported in stats.
 - **hugePages** `[var]` in [AcqStreamStats](/docs/api/acq/acq-stream-stats) — Whether the ring is backed by huge pages.
 
@@ -2867,7 +2825,6 @@ Index of 6670 public class members (functions, variables, typedefs, enums) acros
 - **is_raw** `[var]` in [InvDipoleFitSettings](/docs/api/inv/inv-dipole-fit-settings) — Is this a raw data file.
 - **is_skip** `[var]` in [MNERawBufDef](/docs/api/mne/mne-raw-buf-def) — True if this buffer represents a data skip.
 - **isActive** `[fn]` in [CommandManager](/docs/api/com/command-manager) — Returns if [`CommandManager`](/docs/api/com/command-manager) is active.
-- **isActive** `[fn]` in [NetworkEdge](/docs/api/connectivity/network-edge) — Returns the activity flag of this edge.
 - **iSampleFreq** `[fn]` in [InvHpiModelParameters](/docs/api/inv/inv-hpi-model-parameters)
 - **isAvailable** `[fn]` in [PythonTestHelper](/docs/api/utils/python-test-helper) — Check if Python is available and MNE-Python is importable.
 - **isBad** `[fn]` in [FiffInfoBase](/docs/api/fiff/fiff-info-base)
@@ -3422,6 +3379,7 @@ Index of 6670 public class members (functions, variables, typedefs, enums) acros
 - **MetaData** `[fn]` in [MetaData](/docs/api/com/meta-data)
 - **method** `[var]` in [InvCMNESettings](/docs/api/inv/inv-cmne-settings) — 0=MNE, 1=dSPM (default), 2=sLORETA.
 - **method** `[var]` in [InvSourceEstimate](/docs/api/inv/inv-source-estimate) — The inverse method that produced this estimate.
+- **method** `[fn]` in [Network](/docs/api/connectivity/network)
 - **methodChanged** `[signal]` in [MinimumNormSettingsView](/docs/api/disp/minimum-norm-settings-view) — Emit signal whenever the method changed.
 - **methods** `[var]` in [MNEInverseOperator](/docs/api/mne/mne-inverse-operator) — Modality flag: FIFFV_MNE_MEG, _EEG, or _MEG_EEG.
 - **mgh_tags** `[var]` in [MNESurfaceOrVolume](/docs/api/mne/mne-surface-or-volume) — Tags listed in the file.
@@ -3688,10 +3646,10 @@ Index of 6670 public class members (functions, variables, typedefs, enums) acros
 - **neighbor_vert** `[var]` in [MNESurfaceOrVolume](/docs/api/mne/mne-surface-or-volume) — Vertices neighboring each vertex (np entries, variable length).
 - **nent** `[fn]` in [FiffDirNode](/docs/api/fiff/fiff-dir-node) — Returns the number of entries in this node.
 - **nent** `[fn]` in [FiffStream](/docs/api/fiff/fiff-stream) — How many entries?
-- **Network** `[fn]` in [Network](/docs/api/connectivity/network) — Constructs a [`Network`](/docs/api/connectivity/network) object.
+- **Network** `[fn]` in [Network](/docs/api/connectivity/network) — Constructs an empty network.
 - **network** `[var]` in [ViewVisibilityProfile](/docs/api/disp3-d/view-visibility-profile)
-- **NetworkEdge** `[fn]` in [NetworkEdge](/docs/api/connectivity/network-edge) — Constructs a [`NetworkEdge`](/docs/api/connectivity/network-edge) object.
-- **NetworkNode** `[fn]` in [NetworkNode](/docs/api/connectivity/network-node) — Constructs a [`NetworkNode`](/docs/api/connectivity/network-node) object.
+- **NetworkEdge** `[fn]` in [NetworkEdge](/docs/api/connectivity/network-edge) — Constructs an edge and computes its scalar weight.
+- **NetworkNode** `[fn]` in [NetworkNode](/docs/api/connectivity/network-node) — Constructs a node without edges.
 - **NetworkObject** `[fn]` in [NetworkObject](/docs/api/disp3-d/network-object) — Default constructor.
 - **NetworkTreeItem** `[fn]` in [NetworkTreeItem](/docs/api/disp3-d/network-tree-item) — Constructs a [`NetworkTreeItem`](/docs/api/disp3-d/network-tree-item).
 - **neval** `[var]` in [InvEcd](/docs/api/inv/inv-ecd) — Number of function evaluations required for this fit.
@@ -3767,10 +3725,12 @@ Index of 6670 public class members (functions, variables, typedefs, enums) acros
 - **nneighbor_vert** `[var]` in [MNESurfaceOrVolume](/docs/api/mne/mne-surface-or-volume) — Number of vertices neighboring each vertex (np elements).
 - **node** `[fn]` in [MnaGraph](/docs/api/mna/mna-graph)
 - **node** `[fn]` in [MnaGraph](/docs/api/mna/mna-graph)
+- **node_color** `[var]` in [VisualizationInfo](/docs/api/connectivity/visualization-info) — RGBA node colour used by `Coloring::fixed`.
 - **nodeInstanceCount** `[fn]` in [NetworkObject](/docs/api/disp3-d/network-object)
 - **nodeRenderKey** `[fn]` in [NetworkObject](/docs/api/disp3-d/network-object)
 - **nodes** `[fn]` in [MnaGraph](/docs/api/mna/mna-graph)
 - **nodes** `[fn]` in [MnaGraph](/docs/api/mna/mna-graph)
+- **nodes** `[fn]` in [Network](/docs/api/connectivity/network)
 - **nodeStreams** `[fn]` in [NetworkObject](/docs/api/disp3-d/network-object)
 - **noise** `[var]` in [InvDipoleFitData](/docs/api/inv/inv-dipole-fit-data) — Noise covariance matrix (weighted to take the selection into account).
 - **noise_cov** `[var]` in [MNEInverseOperator](/docs/api/mne/mne-inverse-operator) — Noise covariance matrix.
@@ -3784,7 +3744,7 @@ Index of 6670 public class members (functions, variables, typedefs, enums) acros
 - **nOrient** `[fn]` in [InvBeamformer](/docs/api/inv/inv-beamformer) — Returns the number of orientations per source (1 or 3).
 - **norm** `[var]` in [VertexData](/docs/api/disp3-d/vertex-data)
 - **normal** `[fn]` in [MNESurfaceOrVolume](/docs/api/mne/mne-surface-or-volume) — Return a read-only map to the k-th vertex normal (3 contiguous floats).
-- **normalize** `[fn]` in [Network](/docs/api/connectivity/network) — Normalize the network.
+- **normalize** `[fn]` in [Network](/docs/api/connectivity/network) — Divides every edge weight and the threshold by the largest magnitude, so that weights lie in [-1, 1] and the same edges stay active.
 - **NormalsT** `[type]` in [MNESurfaceOrVolume](/docs/api/mne/mne-surface-or-volume) — Type abbreviation for np x 3 normal data.
 - **notch** `[var]` in [BidsChannel](/docs/api/bids/bids-channel) — Notch filter frequency in Hz (OPTIONAL).
 - **notify** `[fn]` in [Subject](/docs/api/utils/subject) — Notifies all attached servers by calling there update method.
@@ -4254,6 +4214,7 @@ Index of 6670 public class members (functions, variables, typedefs, enums) acros
 - **position** `[var]` in [IeegContact](/docs/api/ieeg/ieeg-contact) — Position in metres, in the frame of the implantation.
 - **position** `[var]` in [InvFocalDipole](/docs/api/inv/inv-focal-dipole) — Dipole position (m) in head coordinates.
 - **position** `[var]` in [LiveMarker](/docs/api/disp3-d/live-marker)
+- **position** `[fn]` in [NetworkNode](/docs/api/connectivity/network-node)
 - **position** `[fn]` in [SensorTreeItem](/docs/api/disp3-d/sensor-tree-item)
 - **position** `[var]` in `StationSample`
 - **position** `[var]` in [TrapMusicDipole](/docs/api/inv/trap-music-dipole) — 3D position (meters).
@@ -4666,6 +4627,7 @@ Index of 6670 public class members (functions, variables, typedefs, enums) acros
 - **resample** `[fn]` in [Resample](/docs/api/dsp/resample) — [`Resample`](/docs/api/dsp/resample) a single-channel row vector from `dOldSFreq` to `dNewSFreq`.
 - **resampleMatrix** `[fn]` in [Resample](/docs/api/dsp/resample) — [`Resample`](/docs/api/dsp/resample) every row of a data matrix.
 - **rescale** `[fn]` in [Numerics](/docs/api/utils/numerics) — Rescale (baseline correct) data.
+- **reserve** `[fn]` in [Network](/docs/api/connectivity/network) — Reserves storage for the expected number of nodes and edges.
 - **reset** `[fn]` in [FastrakParser](/docs/api/acq/fastrak-parser) — Reset accumulated buffer state.
 - **reset** `[fn]` in [FilterOverlapAdd](/docs/api/dsp/filter-overlap-add) — Reset the stored overlap matrices.
 - **reset** `[fn]` in [IirStreamFilter](/docs/api/dsp/iir-stream-filter) — Returns every channel to rest (zero state), as before the first block.
@@ -4823,6 +4785,7 @@ Index of 6670 public class members (functions, variables, typedefs, enums) acros
 - **sampleStride** `[var]` in [AcqPart](/docs/api/acq/acq-part) — Bytes between consecutive samples of one channel.
 - **sampleToViewportX** `[fn]` in [ChannelDataView](/docs/api/disp/channel-data-view) — Maps an absolute sample index to an x coordinate inside the signal viewport.
 - **sampleValueAt** `[fn]` in [ChannelDataModel](/docs/api/disp/channel-data-model) — Return the raw sample value at a specific absolute sample index for the given channel.
+- **sampling_frequency** `[fn]` in [Network](/docs/api/connectivity/network)
 - **samplingFreq** `[var]` in [BidsChannel](/docs/api/bids/bids-channel) — Sampling frequency in Hz (OPTIONAL).
 - **save** `[fn]` in [FiffCov](/docs/api/fiff/fiff-cov) — Writes the covariance to a new FIFF file, like mne.Covariance.save.
 - **save** `[fn]` in [FiffEvokedSet](/docs/api/fiff/fiff-evoked-set) — Writes the evoked data sets to a FIFF file, like mne.write_evokeds.
@@ -4922,7 +4885,6 @@ Index of 6670 public class members (functions, variables, typedefs, enums) acros
 - **scheme** `[var]` in [AcqUri](/docs/api/acq/acq-uri) — Lower-case scheme without "://".
 - **schemes** `[fn]` in [AcqDeviceRegistry](/docs/api/acq/acq-device-registry)
 - **sChName** `[var]` in [ArtifactRejectionData](/docs/api/mne/artifact-rejection-data) — Channel name.
-- **sColormap** `[var]` in [VisualizationInfo](/docs/api/connectivity/visualization-info) — The colormap.
 - **script** `[var]` in [MnaNode](/docs/api/mna/mna-node) — Inline source code, interpreter, language.
 - **script** `[var]` in [MnaVerificationCheck](/docs/api/mna/mna-verification-check) — Optional script for complex checks (exit code 0 = pass).
 - **scrollBy** `[fn]` in [ChannelRhiView](/docs/api/disp/channel-rhi-view) — Smoothly scroll by a number of samples.
@@ -5004,14 +4966,24 @@ Index of 6670 public class members (functions, variables, typedefs, enums) acros
 - **session** `[fn]` in [BIDSPath](/docs/api/bids/bids-path) — Session label (without "ses-").
 - **sessions** `[var]` in [MnaSubject](/docs/api/mna/mna-subject) — Sessions for this subject.
 - **set** `[var]` in [FwdCompData](/docs/api/fwd/fwd-comp-data) — The compensation data set.
+- **set_active** `[fn]` in [NetworkEdge](/docs/api/connectivity/network-edge) — Sets the active flag.
 - **set_comp** `[fn]` in [MNECTFCompDataSet](/docs/api/mne/mnectf-comp-data-set) — Write the compensation grade into the upper 16 bits of coil_type for all MEG channels in the list.
 - **set_compensation** `[fn]` in [MNECTFCompDataSet](/docs/api/mne/mnectf-comp-data-set) — Configure the full compensation pipeline: determine current compensation, build undo and target operators, and update channel coil types accordingly.
 - **set_current_comp** `[fn]` in [FiffInfo](/docs/api/fiff/fiff-info) — Set the current compensation value in the channel info structures.
 - **set_current_comp** `[fn]` in [FiffInfo](/docs/api/fiff/fiff-info) — mne_set_current_comp
+- **set_fft_size** `[fn]` in [Network](/docs/api/connectivity/network)
+- **set_frequency_bins** `[fn]` in [NetworkEdge](/docs/api/connectivity/network-edge) — Sets the frequency-bin window and recomputes the scalar weight.
+- **set_frequency_range** `[fn]` in [Network](/docs/api/connectivity/network) — Averages every edge weight over a new frequency range and updates the weight range.
+- **set_hub** `[fn]` in [NetworkNode](/docs/api/connectivity/network-node) — Marks the node as hub or not.
+- **set_method** `[fn]` in [Network](/docs/api/connectivity/network)
+- **set_sampling_frequency** `[fn]` in [Network](/docs/api/connectivity/network)
 - **set_sink** `[fn]` in [Log](/docs/api/utils/log) — Replaces the sink.
+- **set_threshold** `[fn]` in [Network](/docs/api/connectivity/network) — Sets the threshold and marks every edge with \|weight\| &gt;= threshold active.
+- **set_used_freq_bins** `[fn]` in [Network](/docs/api/connectivity/network)
+- **set_visualization_info** `[fn]` in [Network](/docs/api/connectivity/network)
+- **set_weight** `[fn]` in [NetworkEdge](/docs/api/connectivity/network-edge) — Overrides the scalar weight.
 - **setAcquisition** `[fn]` in [BIDSPath](/docs/api/bids/bids-path) — Set the acquisition label.
 - **setActivationPerAverage** `[fn]` in [AverageScene](/docs/api/disp/average-scene) — Set the activation per average map information.
-- **setActive** `[fn]` in [NetworkEdge](/docs/api/connectivity/network-edge) — Sets the activity flag of this edge.
 - **setActiveSurface** `[slot]` in [BrainView](/docs/api/disp3-d/brain-view) — Set the active surface type to search for (e.g.
 - **setAlpha** `[fn]` in [AbstractTreeItem](/docs/api/disp3-d/abstract-tree-item)
 - **setAnnotationData** `[fn]` in [SurfaceTreeItem](/docs/api/disp3-d/surface-tree-item)
@@ -5108,7 +5080,6 @@ Index of 6670 public class members (functions, variables, typedefs, enums) acros
 - **setCompensators** `[fn]` in [CompensatorView](/docs/api/disp/compensator-view) — Set the current compensators.
 - **setConfig** `[fn]` in [PythonRunner](/docs/api/utils/python-runner) — Set the configuration.
 - **setConnection** `[fn]` in [PolhemusCoregistration](/docs/api/acq/polhemus-coregistration)
-- **setConnectivityMethod** `[fn]` in [Network](/docs/api/connectivity/network) — Sets the connectivity measure method used to create the data of this network structure.
 - **setConnectivityMethods** `[fn]` in [ConnectivitySettings](/docs/api/connectivity/connectivity-settings)
 - **setContactValues** `[fn]` in [ElectrodeObject](/docs/api/disp3-d/electrode-object) — Colour contacts by value through a colormap spanning [min(0, smallest), largest].
 - **setCrosshairEnabled** `[fn]` in [ChannelDataView](/docs/api/disp/channel-data-view) — Enable or disable the crosshair cursor with coordinate readout.
@@ -5170,7 +5141,6 @@ Index of 6670 public class members (functions, variables, typedefs, enums) acros
 - **setExtent** `[fn]` in [ImageSc](/docs/api/disp/image-sc) — Labels the axes in data units instead of column and row indices, as matplotlib's `imshow`(extent=...).
 - **setFftCoefficients** `[fn]` in [FilterKernel](/docs/api/dsp/filter-kernel)
 - **setFFTSize** `[fn]` in [ConnectivitySettings](/docs/api/connectivity/connectivity-settings)
-- **setFFTSize** `[fn]` in [Network](/docs/api/connectivity/network) — Set the new FFT size.
 - **setFiducials** `[fn]` in [CoregSettingsView](/docs/api/disp/coreg-settings-view) — Set the position of the fiducials.
 - **setFiffInfo** `[fn]` in [AverageLayoutView](/docs/api/disp/average-layout-view) — Stores FiffInfo to local variable to be used for getting channel info.
 - **setFiffInfo** `[fn]` in [ChannelInfoModel](/docs/api/disp/channel-info-model) — Updates the fiff info.
@@ -5194,8 +5164,6 @@ Index of 6670 public class members (functions, variables, typedefs, enums) acros
 - **setFocusPosition** `[fn]` in [VideoOverlay](/docs/api/disp3-d/video-overlay)
 - **setFrame** `[fn]` in [VideoOverlay](/docs/api/disp3-d/video-overlay) — Push a new video frame; bumps the generation counter so the GPU re-uploads.
 - **setFrequencyBand** `[fn]` in [ConnectivitySettingsView](/docs/api/disp/connectivity-settings-view) — Sets the frequency band.
-- **setFrequencyBins** `[fn]` in [NetworkEdge](/docs/api/connectivity/network-edge) — Sets the frequency bins to average from/to.
-- **setFrequencyRange** `[fn]` in [Network](/docs/api/connectivity/network) — Sets the frequency range to average from/to.
 - **setFrom** `[fn]` in [FilterDesignView](/docs/api/disp/filter-design-view) — Sets filter 'From' value.
 - **setFrozen** `[fn]` in [ChannelRhiView](/docs/api/disp/channel-rhi-view) — Freeze or unfreeze drag-panning (mouse drag and inertia).
 - **setFwdSolution** `[fn]` in [RtInvOp](/docs/api/dsp/rt-inv-op) — Slot to receive incoming forward solution.
@@ -5212,7 +5180,6 @@ Index of 6670 public class members (functions, variables, typedefs, enums) acros
 - **setHorizontal** `[fn]` in [ProgressView](/docs/api/disp/progress-view) — Sets message to appear next to loading bar.
 - **setHoveredContact** `[fn]` in [ElectrodeObject](/docs/api/disp3-d/electrode-object) — Highlight one contact while the pointer is over it, without changing the selection.
 - **setHpiDigitizer** `[fn]` in [RtHpi](/docs/api/dsp/rt-hpi) — Set the new projection matrix.
-- **setHubStatus** `[fn]` in [NetworkNode](/docs/api/connectivity/network-node) — Sets the hub status of this node.
 - **setImplantation** `[fn]` in [ElectrodeObject](/docs/api/disp3-d/electrode-object) — Draw an implantation.
 - **setInfo** `[fn]` in [FiffEvoked](/docs/api/fiff/fiff-evoked) — Set a new fiff measurement info.
 - **setInfo** `[fn]` in [FrequencySpectrumModel](/docs/api/disp/frequency-spectrum-model) — Sets corresponding fiff info.
@@ -5349,7 +5316,6 @@ Index of 6670 public class members (functions, variables, typedefs, enums) acros
 - **setSamplesPerPixel** `[slot]` in [TimeRulerWidget](/docs/api/disp/time-ruler-widget) — Update the horizontal zoom and trigger a repaint.
 - **setSamplingFrequency** `[fn]` in [ConnectivitySettings](/docs/api/connectivity/connectivity-settings)
 - **setSamplingFrequency** `[fn]` in [FilterKernel](/docs/api/dsp/filter-kernel)
-- **setSamplingFrequency** `[fn]` in [Network](/docs/api/connectivity/network) — Set the new sampling frequency.
 - **setSamplingInfo** `[fn]` in [RtFiffRawViewModel](/docs/api/disp/rt-fiff-raw-view-model) — Sets the sampling information and calculates the resulting downsampling factor between actual sps and desired sps.
 - **setSamplingRate** `[fn]` in [FilterDesignView](/docs/api/disp/filter-design-view) — Sets the new samplingRate.
 - **setSamplingRate** `[fn]` in [FilterSettingsView](/docs/api/disp/filter-settings-view) — Sets the sampling frequency and setups this view accrodingly.
@@ -5435,7 +5401,6 @@ Index of 6670 public class members (functions, variables, typedefs, enums) acros
 - **setSurfaceData** `[fn]` in [SurfaceTreeItem](/docs/api/disp3-d/surface-tree-item)
 - **setTask** `[fn]` in [BIDSPath](/docs/api/bids/bids-path) — Set the task label.
 - **setTextStyleSheet** `[fn]` in [ProgressView](/docs/api/disp/progress-view) — Sets stylesheet parameters for the QLabels that display loading message.
-- **setThreshold** `[fn]` in [Network](/docs/api/connectivity/network) — Sets the threshold of the network and updates the resulting active edges.
 - **setThreshold** `[fn]` in [NetworkObject](/docs/api/disp3-d/network-object) — Update the threshold and regenerate visible edges/nodes.
 - **setThreshold** `[fn]` in [Spline](/docs/api/disp/spline) — setThreshold takes in QVector3D value and creates the corresponding lines in the histogram
 - **setThresholdMap** `[fn]` in [ArtifactSettingsView](/docs/api/disp/artifact-settings-view)
@@ -5481,7 +5446,6 @@ Index of 6670 public class members (functions, variables, typedefs, enums) acros
 - **setUpHint** `[fn]` in [VideoOverlay](/docs/api/disp3-d/video-overlay)
 - **setUpperItemIndex** `[fn]` in [RtFiffRawViewDelegate](/docs/api/disp/rt-fiff-raw-view-delegate) — Set the new upper item index color.
 - **setUseDefaultColor** `[fn]` in [BrainSurface](/docs/api/disp3-d/brain-surface) — Set/Get whether to use the default surface color.
-- **setUsedFreqBins** `[fn]` in [Network](/docs/api/connectivity/network) — Set the new number of used frequency bins.
 - **setValid** `[fn]` in [BidsRawData](/docs/api/bids/bids-raw-data) — Marks the data as valid or invalid.
 - **setValue** `[slot]` in [ScaleControl](/docs/api/disp/scale-control) — Set the value of the control.
 - **setVertical** `[fn]` in [ProgressView](/docs/api/disp/progress-view) — Sets message to appear under the loading bar.
@@ -5509,12 +5473,10 @@ Index of 6670 public class members (functions, variables, typedefs, enums) acros
 - **setVisibleSampleRange** `[fn]` in [ChannelLabelPanel](/docs/api/disp/channel-label-panel) — Update the visible sample window used for the per-channel RMS level bar.
 - **setVisiblityHideOpacityClose** `[fn]` in [QuickControlView](/docs/api/disp/quick-control-view) — Sets the visibility of the hide/show and close button.
 - **setVisualizationEditTarget** `[slot]` in [BrainView](/docs/api/disp3-d/brain-view) — Select which view's visualization settings are edited by UI controls.
-- **setVisualizationInfo** `[fn]` in [Network](/docs/api/connectivity/network) — Set the current visualization info.
 - **setVisualizationMode** `[fn]` in [BrainSurface](/docs/api/disp3-d/brain-surface) — Set the visualization mode (FsSurface, FsAnnotation, Scientific).
 - **setVisualizationMode** `[slot]` in [BrainView](/docs/api/disp3-d/brain-view) — Set the overlay mode (FsSurface, FsAnnotation, Scientific).
 - **setVisualizationType** `[fn]` in [RtSourceDataController](/docs/api/disp3-d/rt-source-data-controller) — Set the visualization type (interpolation-based or annotation-based).
 - **setVisualizationType** `[fn]` in [RtSourceInterpolationMatWorker](/docs/api/disp3-d/rt-source-interpolation-mat-worker) — Set the visualization type.
-- **setWeight** `[fn]` in [NetworkEdge](/docs/api/connectivity/network-edge) — Set the averaged edge weight.
 - **setWheelScrollsChannels** `[fn]` in [ChannelRhiView](/docs/api/disp/channel-rhi-view) — Control what the vertical mouse wheel scrolls.
 - **setWidgetList** `[fn]` in [FiffRawViewSettings](/docs/api/disp/fiff-raw-view-settings) — Init the view.
 - **setWindowLevel** `[fn]` in [SliceObject](/docs/api/disp3-d/slice-object) — Intensity windowing parameters for the fragment shader.
@@ -5625,7 +5587,6 @@ Index of 6670 public class members (functions, variables, typedefs, enums) acros
 - **sliceToRas** `[var]` in [MriSliceImage](/docs/api/mri/mri-slice-image) — 4x4 transform placing the slice in RAS space.
 - **sliceToWorld** `[fn]` in [SliceObject](/docs/api/disp3-d/slice-object)
 - **slotRect** `[fn]` in [MultiViewLayout](/docs/api/disp3-d/multi-view-layout) — Compute the pixel rectangle for a layout slot.
-- **sMethod** `[var]` in [VisualizationInfo](/docs/api/connectivity/visualization-info) — The color method: Map (uses sColormap parameter) or Color (uses colNodes and colEdges).
 - **SNR** `[var]` in [MNEMneData](/docs/api/mne/mne-mne-data) — Estimated power SNR as a function of time.
 - **softwareVersions** `[var]` in [BidsRawData](/docs/api/bids/bids-raw-data) — Recording software versions (RECOMMENDED).
 - **sol** `[var]` in [MNEForwardSolution](/docs/api/mne/mne-forward-solution) — Forward solution.
@@ -5642,6 +5603,7 @@ Index of 6670 public class members (functions, variables, typedefs, enums) acros
 - **sortChannelsByType** `[fn]` in [ChannelDataView](/docs/api/disp/channel-data-view)
 - **sortrows** `[fn]` in [Linalg](/docs/api/math/linalg) — Sort rows in ascending order.
 - **source** `[var]` in [AcqClockModel](/docs/api/acq/acq-clock-model) — Origin of the anchor.
+- **source** `[fn]` in [NetworkEdge](/docs/api/connectivity/network-edge)
 - **source_cov** `[var]` in [MNEInverseOperator](/docs/api/mne/mne-inverse-operator) — Source covariance matrix (depth + orientation weighting).
 - **source_mult** `[var]` in [FwdBemModel](/docs/api/fwd/fwd-bem-model) — Infinite-medium potential multipliers (length nsurf).
 - **source_nn** `[var]` in [MNEForwardSolution](/docs/api/mne/mne-forward-solution) — Source normals (number depends on fixed or free orientation).
@@ -5827,9 +5789,6 @@ Index of 6670 public class members (functions, variables, typedefs, enums) acros
 - **SPtr** `[type]` in [ModalitySelectionView](/docs/api/disp/modality-selection-view) — Shared pointer type for [`ModalitySelectionView`](/docs/api/disp/modality-selection-view).
 - **SPtr** `[type]` in [MultiView](/docs/api/disp/multi-view) — Shared pointer type for [`MultiView`](/docs/api/disp/multi-view).
 - **SPtr** `[type]` in [MultiViewWindow](/docs/api/disp/multi-view-window) — Shared pointer type for [`MultiViewWindow`](/docs/api/disp/multi-view-window).
-- **SPtr** `[type]` in [Network](/docs/api/connectivity/network) — Shared pointer type for [`Network`](/docs/api/connectivity/network).
-- **SPtr** `[type]` in [NetworkEdge](/docs/api/connectivity/network-edge) — Shared pointer type for [`NetworkEdge`](/docs/api/connectivity/network-edge).
-- **SPtr** `[type]` in [NetworkNode](/docs/api/connectivity/network-node) — Shared pointer type for [`NetworkNode`](/docs/api/connectivity/network-node).
 - **SPtr** `[type]` in [PartialDirectedCoherence](/docs/api/connectivity/partial-directed-coherence) — Shared pointer type for [`PartialDirectedCoherence`](/docs/api/connectivity/partial-directed-coherence).
 - **SPtr** `[type]` in [PhaseLagIndex](/docs/api/connectivity/phase-lag-index) — Shared pointer type for [`PhaseLagIndex`](/docs/api/connectivity/phase-lag-index).
 - **SPtr** `[type]` in [PhaseLockingValue](/docs/api/connectivity/phase-locking-value) — Shared pointer type for [`PhaseLockingValue`](/docs/api/connectivity/phase-locking-value).
@@ -5969,6 +5928,7 @@ Index of 6670 public class members (functions, variables, typedefs, enums) acros
 - **streams** `[var]` in [AcqDeviceStats](/docs/api/acq/acq-device-stats) — One entry per stream.
 - **streams** `[fn]` in [DipoleObject](/docs/api/disp3-d/dipole-object)
 - **streams** `[fn]` in [PolylineObject](/docs/api/disp3-d/polyline-object)
+- **strength** `[fn]` in [Network](/docs/api/connectivity/network) — Returns the summed weight of the edges incident to a node.
 - **struct_names** `[var]` in [FsColortable](/docs/api/fs/fs-colortable) — Anatomical ROI description.
 - **style** `[var]` in `Series` — Line style.
 - **StyleMode** `[enum]` in [AbstractView](/docs/api/disp/abstract-view)
@@ -6033,6 +5993,7 @@ Index of 6670 public class members (functions, variables, typedefs, enums) acros
 - **taper_size** `[var]` in [MNEFilterDef](/docs/api/mne/mne-filter-def) — How long a taper in the beginning and end.
 - **taperSize** `[var]` in [FilterSettings](/docs/api/mne/filter-settings) — Taper size.
 - **target** `[var]` in [AcqUri](/docs/api/acq/acq-uri) — Everything between "://" and "?".
+- **target** `[fn]` in [NetworkEdge](/docs/api/connectivity/network-edge)
 - **targetPath** `[var]` in [MnaParamBinding](/docs/api/mna/mna-param-binding) — Parameter to control: "nodeId/attrKey".
 - **targetSample** `[var]` in [AcqSyncMarker](/docs/api/acq/acq-sync-marker) — Sample of the edge in the target stream.
 - **task** `[var]` in [AcqBidsPath](/docs/api/acq/acq-bids-path) — Task label without "task-".
@@ -6056,6 +6017,7 @@ Index of 6670 public class members (functions, variables, typedefs, enums) acros
 - **threadCount** `[fn]` in [ThreadPool](/docs/api/utils/thread-pool)
 - **ThreadPool** `[fn]` in [ThreadPool](/docs/api/utils/thread-pool) — Starts the workers.
 - **ThreadPool** `[fn]` in [ThreadPool](/docs/api/utils/thread-pool)
+- **threshold** `[fn]` in [Network](/docs/api/connectivity/network)
 - **thresholdMax** `[fn]` in [SourceEstimateOverlay](/docs/api/disp3-d/source-estimate-overlay)
 - **thresholdMid** `[fn]` in [SourceEstimateOverlay](/docs/api/disp3-d/source-estimate-overlay)
 - **thresholdMin** `[fn]` in [SourceEstimateOverlay](/docs/api/disp3-d/source-estimate-overlay) — Get the current threshold values.
@@ -6196,6 +6158,7 @@ Index of 6670 public class members (functions, variables, typedefs, enums) acros
 - **toStringList** `[fn]` in [Command](/docs/api/com/command) — Creates a StringList with three items.
 - **toStringReadySend** `[fn]` in [Command](/docs/api/com/command) — Creates a string JSON formatted ready send command.
 - **tot_area** `[var]` in [MNESurfaceOrVolume](/docs/api/mne/mne-surface-or-volume) — Total area of the surface, computed from the triangles (m^2).
+- **total_degree** `[fn]` in [Network](/docs/api/connectivity/network) — Returns the sum of all node degrees, i.e.
 - **totalContactCount** `[fn]` in [ElectrodeObject](/docs/api/disp3-d/electrode-object)
 - **totalLogicalChannels** `[fn]` in [ChannelRhiView](/docs/api/disp/channel-rhi-view) — Total number of logical channels available for scrolling (respects active filter).
 - **totalPointCount** `[fn]` in [DigitizerSetTreeItem](/docs/api/disp3-d/digitizer-set-tree-item) — Returns the total number of digitizer points across all categories.
@@ -6412,6 +6375,7 @@ Index of 6670 public class members (functions, variables, typedefs, enums) acros
 - **use_tri_nn** `[var]` in [MNEHemisphere](/docs/api/mne/mne-hemisphere) — Triangle normals of used triangles.
 - **use_tris** `[var]` in [MNESurfaceOrVolume](/docs/api/mne/mne-surface-or-volume) — Triangulation data for the in-use vertices.
 - **usecs** `[var]` in [FiffTime](/docs/api/fiff/fiff-time) — Fraction of seconds in microseconds.
+- **used_freq_bins** `[fn]` in [Network](/docs/api/connectivity/network)
 - **user** `[var]` in [InvDipoleFitData](/docs/api/inv/inv-dipole-fit-data) — Non-owning pointer to dipole fit workspace (set during fit_one).
 - **user_data** `[var]` in [FwdCoilSet](/docs/api/fwd/fwd-coil-set) — Coil-specific BEM solution.
 - **user_data** `[var]` in [MNEMshDisplaySurface](/docs/api/mne/mne-msh-display-surface) — Arbitrary user-defined data pointer.
@@ -6541,6 +6505,7 @@ Index of 6670 public class members (functions, variables, typedefs, enums) acros
 - **visibleFirstSample** `[fn]` in [ChannelRhiView](/docs/api/disp/channel-rhi-view) — Returns the absolute sample index currently shown at x = 0 (left edge).
 - **visibleSampleCount** `[fn]` in [ChannelDataView](/docs/api/disp/channel-data-view)
 - **visibleSampleCount** `[fn]` in [ChannelRhiView](/docs/api/disp/channel-rhi-view) — Returns the number of samples currently visible.
+- **visualization_info** `[fn]` in [Network](/docs/api/connectivity/network)
 - **visualizationEditTarget** `[slot]` in [BrainView](/docs/api/disp3-d/brain-view) — Get current visualization edit target.
 - **visualizationEditTargetChanged** `[signal]` in [BrainView](/docs/api/disp3-d/brain-view) — Emitted when the active visualization edit target changes.
 - **VisualizationType** `[enum]` in [RtSourceInterpolationMatWorker](/docs/api/disp3-d/rt-source-interpolation-mat-worker) — Visualization type enum — selects which matrix the worker emits.
@@ -6571,10 +6536,13 @@ Index of 6670 public class members (functions, variables, typedefs, enums) acros
 - **wallTimeMs** `[var]` in [MnaProvenance](/docs/api/mna/mna-provenance) — Wall-clock duration in milliseconds.
 - **warning** `[fn]` in [Log](/docs/api/utils/log) — As `debug()`, at warning level.
 - **warp** `[fn]` in [MNEBem](/docs/api/mne/mne-bem) — Warps every surface with the thin-plate spline that maps the source landmarks onto the destination ones.
+- **weight** `[fn]` in [NetworkEdge](/docs/api/connectivity/network-edge)
+- **weight_range** `[fn]` in [Network](/docs/api/connectivity/network) — Returns the range of edge weight magnitudes \|weight\|.
 - **WeightedPhaseLagIndex** `[fn]` in [WeightedPhaseLagIndex](/docs/api/connectivity/weighted-phase-lag-index) — Constructs a [`WeightedPhaseLagIndex`](/docs/api/connectivity/weighted-phase-lag-index) object.
 - **weightNorm** `[var]` in [InvBeamformer](/docs/api/inv/inv-beamformer) — Applied weight normalization.
 - **weights** `[fn]` in [IeegSurfaceMap](/docs/api/ieeg/ieeg-surface-map) — Compute the vertices x contacts weight matrix.
 - **weights** `[var]` in [InvBeamformer](/docs/api/inv/inv-beamformer) — Filter weights, size 1 for LCMV, n_freqs for DICS.
+- **weights** `[fn]` in [NetworkEdge](/docs/api/connectivity/network-edge)
 - **wheelScrollsChannels** `[fn]` in [ChannelRhiView](/docs/api/disp/channel-rhi-view)
 - **whiten_vector** `[fn]` in [MNECovMatrix](/docs/api/mne/mne-cov-matrix) — Apply whitening to a data vector using the inverse square-root eigenvalues stored in this covariance matrix.
 - **whitener** `[var]` in [InvBeamformer](/docs/api/inv/inv-beamformer) — Whitening matrix (n_channels, n_channels).

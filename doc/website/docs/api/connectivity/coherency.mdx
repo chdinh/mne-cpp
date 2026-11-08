@@ -25,14 +25,14 @@ Complex coherency core; produces magnitude-squared and imaginary-part reductions
 // Coherency fills a network whose nodes already exist; the metric classes above wrap this.
 settings.clearIntermediateData();
 Network coherency("COHY");
-coherency.setSamplingFrequency(kSFreq);
-coherency.setFFTSize(kSamples / 2 + 1);
-coherency.setUsedFreqBins(kSamples / 2 + 1);
+coherency.set_sampling_frequency(kSFreq);
+coherency.set_fft_size(kSamples / 2 + 1);
+coherency.set_used_freq_bins(kSamples / 2 + 1);
 for (int i = 0; i < 3; ++i) {
-    coherency.append(NetworkNode::SPtr(new NetworkNode(i, positions.row(i))));
+    coherency.add_node(positions.row(i).transpose());
 }
 Coherency::calculateAbs(coherency, settings);
-coherency.setFrequencyRange(8.0f, 12.0f);
+coherency.set_frequency_range(8.0f, 12.0f);
 ```
 
 ### Inheritance
@@ -95,9 +95,9 @@ Calculates the imaginary part of coherency of the rows of the data matrix.
 
 Connectivity metrics on synthetic data with a known coupling.
 
-````cpp title="src/examples/ex_connectivity_metrics/main.cpp, line 208"
+````cpp title="src/examples/ex_connectivity_metrics/main.cpp, line 206"
 Coherency::calculateAbs(coherency, settings);
-coherency.setFrequencyRange(8.0f, 12.0f);
+coherency.set_frequency_range(8.0f, 12.0f);
 ok &= expect(std::fabs(edgeWeight(coherency, 0, 1) - coh01) < 1e-9, "Coherency::calculateAbs equals Coherence");
 ````
 

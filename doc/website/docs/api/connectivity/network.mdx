@@ -17,430 +17,370 @@ class CONNECTIVITYLIB::Network
 
 [Graph](/docs/api/disp/graph) container for one functional-connectivity result.
 
-Holds the [`NetworkNode`](/docs/api/connectivity/network-node) list (channel / source positions) and the [`NetworkEdge`](/docs/api/connectivity/network-edge) list (per-frequency weight matrices + scalar band- averaged weights). Provides full and thresholded views of both edges and the corresponding adjacency matrix, the metric name ("COH", "PLI", "GC", ...) and threshold currently in effect, and the [`VisualizationInfo`](/docs/api/connectivity/visualization-info) block read by the disp3D rendering layer.
+Holds the nodes (channel / source positions) and the edges (per-frequency weight matrices + scalar band-averaged weights), the metric name ("COH", "PLI", "GC", ...), the threshold that marks edges active, and the [`VisualizationInfo`](/docs/api/connectivity/visualization-info) read by the disp3D rendering layer. Edges are read-only once added so that the cached weight ranges stay consistent.
 
 [Graph](/docs/api/disp/graph) container for one connectivity metric; nodes + weighted edges + threshold/visualisation state.
 
 ```cpp title="src/examples/ex_connectivity_metrics/main.cpp"
 Network network("manual");
 for (int i = 0; i < 3; ++i) {
-    network.append(NetworkNode::SPtr(new NetworkNode(i, positions.row(i))));
+    network.add_node(positions.row(i).transpose());
 }
-const QList<QPair<int, int>> pairs = {{0, 1}, {1, 2}};
-const QList<double> weights = {0.9, 0.2};
-for (int k = 0; k < pairs.size(); ++k) {
-    MatrixXd perBin = MatrixXd::Constant(1, 1, weights[k]);
-    NetworkEdge::SPtr edge(new NetworkEdge(pairs[k].first, pairs[k].second, perBin));
-    network.getNodeAt(pairs[k].first)->append(edge);
-    network.getNodeAt(pairs[k].second)->append(edge);
-    network.append(edge);
-}
+network.add_edge(NetworkEdge(0, 1, MatrixXd::Constant(1, 1, 0.9))); // one weight per frequency bin
+network.add_edge(NetworkEdge(1, 2, MatrixXd::Constant(1, 1, 0.2)));
 ```
 
 ```cpp title="src/examples/ex_connectivity_metrics/main.cpp"
-network.setThreshold(0.5);
-const MatrixXd adjacency = network.getFullConnectivityMatrix(); // symmetric by default
-const int strongEdges = network.getThresholdedEdges().size();
-const NetworkNode::SPtr hub = network.getNodeAt(1);
-VisualizationInfo look; // how disp3D colours the network: a colormap or fixed node/edge colours
-look.sMethod = "Color";
-look.colEdges = Eigen::Vector4i(0, 0, 255, 255);
-network.setVisualizationInfo(look);
+network.set_threshold(0.5);
+const MatrixXd adjacency = network.connectivity_matrix(); // symmetric by default
+const std::size_t strongEdges = network.edge_count(EdgeSet::thresholded);
+const int hubDegree = network.degree(1);
+const int hubStrongDegree = network.degree(1, EdgeSet::thresholded);
+const double hubStrength = network.strength(1);
+network.set_visualization_info({.coloring = VisualizationInfo::Coloring::fixed, // how disp3D colours the network
+                                .edge_color = Eigen::Vector4i(0, 0, 255, 255)});
 ```
 
 ---
 
 ## Public Methods
 
-### Network(sConnectivityMethod, dThreshold)
+### Network(method, threshold)
 
-Constructs a [`Network`](/docs/api/connectivity/network) object.
-
-**Parameters:**
-
-- **sConnectivityMethod** : *const QString &*
-  The connectivity measure method used to create the data of this network structure.
-
-- **dThreshold** : *double*
-  The threshold of the network. Default is 0.0.
-
----
-
-### getFullConnectivityMatrix(bGetMirroredVersion)
-
-Returns the full connectivity matrix for this network structure.
+Constructs an empty network.
 
 **Parameters:**
 
-- **bGetMirroredVersion** : *bool*
-  Flag whether to return the mirrored version of the connectivity matrix, if the network. is a non-directional one. Otherwise returns zeros for the lower part of the matrix. Default is set to true.
+- **method** : *std::string*
+  Name of the connectivity metric that produced the network.
 
-**Returns:**
-
-- *Eigen::MatrixXd* — The full connectivity matrix generated from the current network information.
+- **threshold** : *double*
+  Edges with |weight| &gt;= threshold are active.
 
 ---
 
-### getThresholdedConnectivityMatrix(bGetMirroredVersion)
+### reserve(nodes, edges)
 
-Returns the thresholded connectivity matrix for this network structure.
+Reserves storage for the expected number of nodes and edges.
 
 **Parameters:**
 
-- **bGetMirroredVersion** : *bool*
-  Flag whether to return the mirrored version of the connectivity matrix, if the network. is a non-directional one. Otherwise returns zeros for the lower part of the matrix. Default is set to true.
+- **nodes** : *std::size_t*
+  Expected node count.
 
-**Returns:**
-
-- *Eigen::MatrixXd* — The thresholded connectivity matrix generated from the current network information.
-
----
-
-### getFullEdges()
-
-Returns the full and non thresholded edges.
-
-**Returns:**
-
-- *const QList&lt; QSharedPointer&lt;[NetworkEdge](/docs/api/connectivity/network-edge)&gt; &gt; &* — Returns the network edges.
+- **edges** : *std::size_t*
+  Expected edge count.
 
 ---
 
-### getThresholdedEdges()
+### add_node(position)
 
-Returns the thresholded edges.
-
-**Returns:**
-
-- *const QList&lt; QSharedPointer&lt;[NetworkEdge](/docs/api/connectivity/network-edge)&gt; &gt; &* — Returns the network edges.
-
----
-
-### getNodes()
-
-Returns the nodes.
-
-**Returns:**
-
-- *const QList&lt; QSharedPointer&lt;[NetworkNode](/docs/api/connectivity/network-node)&gt; &gt; &* — Returns the network nodes.
-
----
-
-### getEdgeAt(i)
-
-Returns the edge at a specific position.
+Adds a node.
 
 **Parameters:**
 
-- **i** : *int*
-  The index to look up the edge. i must be a valid index position in the network list (i.e., 0 &lt;= i &lt; size()).
+- **position** : *const Eigen::Vector3f &*
+  The 3D position of the node.
 
 **Returns:**
 
-- *QSharedPointer&lt;[NetworkEdge](/docs/api/connectivity/network-edge)&gt;* — Returns the network edge.
+- *int* — The index of the new node.
 
 ---
 
-### getNodeAt(i)
+### add_edge(edge)
 
-Returns the node at a specific position.
+Adds an edge between two existing nodes and registers it with both.
+
+Self-loops are ignored. The edge becomes active if |weight| &gt;= `threshold`.
 
 **Parameters:**
 
-- **i** : *int*
-  The index to look up the node. i must be a valid index position in the network list (i.e., 0 &lt;= i &lt; size()).
-
-**Returns:**
-
-- *QSharedPointer&lt;[NetworkNode](/docs/api/connectivity/network-node)&gt;* — Returns the network node.
+- **edge** : *[NetworkEdge](/docs/api/connectivity/network-edge)*
+  The edge; throws std::out_of_range unless source and target are valid node indices.
 
 ---
 
-### getFullDistribution()
-
-Returns network distribution, also known as network degree, corresponding to the full network.
+### nodes()
 
 **Returns:**
 
-- *qint16* — The network distribution calculated as degrees of all nodes together.
+- *const std::vector&lt; [NetworkNode](/docs/api/connectivity/network-node) &gt; &* — All nodes; a node's index is its position in this vector.
 
 ---
 
-### getThresholdedDistribution()
-
-Returns network distribution, also known as network degree, corresponding to the thresholded network.
+### edges()
 
 **Returns:**
 
-- *qint16* — The network distribution calculated as degrees of all nodes together.
+- *const std::vector&lt; [NetworkEdge](/docs/api/connectivity/network-edge) &gt; &* — All edges, active or not.
 
 ---
 
-### setConnectivityMethod(sConnectivityMethod)
-
-Sets the connectivity measure method used to create the data of this network structure.
+### edge_count(set)
 
 **Parameters:**
 
-- **sConnectivityMethod** : *const QString &*
-  The connectivity measure method used to create the data of this network structure.
-
----
-
-### getConnectivityMethod()
-
-Returns the connectivity measure method used to create the data of this network structure.
+- **set** : *EdgeSet*
+  Which edges count.
 
 **Returns:**
 
-- *QString* — The connectivity measure method used to create the data of this network structure.
-
----
-
-### getMinMaxFullWeights()
-
-Returns the minimum and maximum weight strength of the entire network.
-
-**Returns:**
-
-- *QPair&lt; double, double &gt;* — The minimum and maximum weight strength of the entire network.
-
----
-
-### getMinMaxThresholdedWeights()
-
-Returns the minimum and maximum weight strength of the thresholded network.
-
-**Returns:**
-
-- *QPair&lt; double, double &gt;* — The minimum and maximum weight strength of the entire network.
-
----
-
-### getMinMaxFullDegrees()
-
-Returns the minimum and maximum degree (in and out) corresponding to the full network.
-
-**Returns:**
-
-- *QPair&lt; int, int &gt;* — The minimum and maximum degree of the entire network.
-
----
-
-### getMinMaxThresholdedDegrees()
-
-Returns the minimum and maximum degree (in and out) corresponding to the thresholded network.
-
-**Returns:**
-
-- *QPair&lt; int, int &gt;* — The minimum and maximum degree of the entire network.
-
----
-
-### getMinMaxFullIndegrees()
-
-Returns the minimum and maximum indegree corresponding to the full network.
-
-**Returns:**
-
-- *QPair&lt; int, int &gt;* — The minimum and maximum indegree of the entire network.
-
----
-
-### getMinMaxThresholdedIndegrees()
-
-Returns the minimum and maximum indegree corresponding to the thresholded network.
-
-**Returns:**
-
-- *QPair&lt; int, int &gt;* — The minimum and maximum indegree of the entire network.
-
----
-
-### getMinMaxFullOutdegrees()
-
-Returns the minimum and maximum outdegree corresponding to the full network.
-
-**Returns:**
-
-- *QPair&lt; int, int &gt;* — The minimum and maximum outdegree of the entire network.
-
----
-
-### getMinMaxThresholdedOutdegrees()
-
-Returns the minimum and maximum outdegree corresponding to the thresholded network.
-
-**Returns:**
-
-- *QPair&lt; int, int &gt;* — The minimum and maximum outdegree of the entire network.
-
----
-
-### setThreshold(dThreshold)
-
-Sets the threshold of the network and updates the resulting active edges.
-
-**Parameters:**
-
-- **dThreshold** : *double*
-  The new threshold.
-
----
-
-### getThreshold()
-
-Returns the current threshold of the network.
-
-**Returns:**
-
-- *double* — The current threshold.
-
----
-
-### setFrequencyRange(fLowerFreq, fUpperFreq)
-
-Sets the frequency range to average from/to.
-
-**Parameters:**
-
-- **fLowerFreq** : *float*
-  The new lower frequency edge to average from.
-
-- **fUpperFreq** : *float*
-  The new upper frequency edge to average to.
-
----
-
-### getFrequencyRange()
-
-Returns the current frequency edge to average from/to.
-
-**Returns:**
-
-- *const QPair&lt; float, float &gt; &* — The current upper/lower frequency edge to average from/to.
-
----
-
-### append(newEdge)
-
-Appends a network edge to this network node.
-
-**Parameters:**
-
-- **newEdge** : *QSharedPointer&lt;[NetworkEdge](/docs/api/connectivity/network-edge)&gt;*
-  The new edge item.
-
----
-
-### append(newNode)
-
-Appends a network edge to this network node.
-
-**Parameters:**
-
-- **newNode** : *QSharedPointer&lt;[NetworkNode](/docs/api/connectivity/network-node)&gt;*
-  The new node item as a reference.
+- *std::size_t* — The number of edges in `set`.
 
 ---
 
 ### empty()
 
-Returns whether the [`Network`](/docs/api/connectivity/network) is empty by checking the number of nodes and edges.
+**Returns:**
+
+- *bool* — Whether the network has no nodes or no edges.
+
+---
+
+### connectivity_matrix(set, mirrored)
+
+Returns the node-by-node adjacency matrix of edge weights.
+
+**Parameters:**
+
+- **set** : *EdgeSet*
+  Which edges to include.
+
+- **mirrored** : *bool*
+  Whether to also fill (target, source); otherwise only (source, target) is set.
 
 **Returns:**
 
-- *bool* — The flag identifying whether the [`Network`](/docs/api/connectivity/network) is empty.
+- *Eigen::MatrixXd* — The adjacency matrix.
+
+---
+
+### degree(node, set, direction)
+
+Returns the number of edges incident to a node.
+
+**Parameters:**
+
+- **node** : *int*
+  The node index.
+
+- **set** : *EdgeSet*
+  Which edges count.
+
+- **direction** : *Direction*
+  Which incident edges count.
+
+**Returns:**
+
+- *int* — The degree.
+
+---
+
+### strength(node, set, direction)
+
+Returns the summed weight of the edges incident to a node.
+
+**Parameters:**
+
+- **node** : *int*
+  The node index.
+
+- **set** : *EdgeSet*
+  Which edges count.
+
+- **direction** : *Direction*
+  Which incident edges count.
+
+**Returns:**
+
+- *double* — The strength.
+
+---
+
+### degree_range(set, direction)
+
+Returns the smallest and largest node degree.
+
+**Parameters:**
+
+- **set** : *EdgeSet*
+  Which edges count.
+
+- **direction** : *Direction*
+  Which incident edges count.
+
+**Returns:**
+
+- *std::pair&lt; int, int &gt;* — \{min, max\}; \{0, 0\} for a network without nodes.
+
+---
+
+### total_degree(set)
+
+Returns the sum of all node degrees, i.e.
+
+twice the number of edges in `set`.
+
+**Parameters:**
+
+- **set** : *EdgeSet*
+  Which edges count.
+
+**Returns:**
+
+- *int* — The total degree.
+
+---
+
+### weight_range(set)
+
+Returns the range of edge weight magnitudes |weight|.
+
+For the full set this is the smallest and largest magnitude; for the thresholded set it is \{threshold, largest\}.
+
+**Parameters:**
+
+- **set** : *EdgeSet*
+  Which edges count.
+
+**Returns:**
+
+- *std::pair&lt; double, double &gt;* — \{min, max\}; \{0, 0\} for a network without edges.
+
+---
+
+### method()
+
+**Returns:**
+
+- *const std::string &* — The name of the connectivity metric that produced the network.
+
+---
+
+### set_method(method)
+
+**Parameters:**
+
+- **method** : *std::string*
+  The name of the connectivity metric.
+
+---
+
+### threshold()
+
+**Returns:**
+
+- *double* — The threshold that marks edges active.
+
+---
+
+### set_threshold(threshold)
+
+Sets the threshold and marks every edge with |weight| &gt;= threshold active.
+
+**Parameters:**
+
+- **threshold** : *double*
+  The new threshold.
+
+---
+
+### frequency_range()
+
+**Returns:**
+
+- *std::pair&lt; float, float &gt;* — The frequency range in Hz the edge weights are averaged over.
+
+---
+
+### set_frequency_range(lower, upper)
+
+Averages every edge weight over a new frequency range and updates the weight range.
+
+Requires `sampling_frequency` and `used_freq_bins` to be set; invalid ranges are ignored with a warning.
+
+**Parameters:**
+
+- **lower** : *float*
+  Lower edge in Hz.
+
+- **upper** : *float*
+  Upper edge in Hz, at most the Nyquist frequency.
 
 ---
 
 ### normalize()
 
-Normalize the network.
+Divides every edge weight and the threshold by the largest magnitude, so that weights lie in [-1, 1] and the same edges stay active.
 
 ---
 
-### getVisualizationInfo()
-
-Get the current visualization info.
+### visualization_info()
 
 **Returns:**
 
-- *[VisualizationInfo](/docs/api/connectivity/visualization-info)* — The current visualization info.
+- *const [VisualizationInfo](/docs/api/connectivity/visualization-info) &* — The rendering hints.
 
 ---
 
-### setVisualizationInfo(visualizationInfo)
-
-Set the current visualization info.
+### set_visualization_info(info)
 
 **Parameters:**
 
-- **visualizationInfo** : *const [VisualizationInfo](/docs/api/connectivity/visualization-info) &*
-  The new visualization info.
+- **info** : *[VisualizationInfo](/docs/api/connectivity/visualization-info)*
+  The new rendering hints.
 
 ---
 
-### getSamplingFrequency()
-
-Get the currently set sampling frequency.
+### sampling_frequency()
 
 **Returns:**
 
-- *float* — The currently set sampling frequency.
+- *float* — The sampling frequency of the data the network was computed from.
 
 ---
 
-### setSamplingFrequency(fSFreq)
-
-Set the new sampling frequency.
+### set_sampling_frequency(sfreq)
 
 **Parameters:**
 
-- **fSFreq** : *float*
-  The new sampling frequency.
+- **sfreq** : *float*
+  The sampling frequency.
 
 ---
 
-### getUsedFreqBins()
-
-Get the currently set number of frequency bins.
+### used_freq_bins()
 
 **Returns:**
 
-- *int* — The currently set number of samples.
+- *int* — The number of frequency bins stored per edge.
 
 ---
 
-### setUsedFreqBins(iNumberFreqBins)
-
-Set the new number of used frequency bins.
+### set_used_freq_bins(bins)
 
 **Parameters:**
 
-- **iNumberFreqBins** : *int*
-  The new number of used frequency bins.
+- **bins** : *int*
+  The number of frequency bins stored per edge.
 
 ---
 
-### setFFTSize(iFFTSize)
-
-Set the new FFT size.
-
-**Parameters:**
-
-- **iFFTSize** : *int*
-  The used FFT size (number of total frequency bins for a half spectrum - only positive frequencies).
-
----
-
-### getFFTSize()
-
-Returns the current FFT size.
+### fft_size()
 
 **Returns:**
 
-- *int* — The used FFT size (number of total frequency bins for a half spectrum - only positive frequencies).
+- *int* — The FFT size (number of bins of the positive half spectrum).
+
+---
+
+### set_fft_size(fft_size)
+
+**Parameters:**
+
+- **fft_size** : *int*
+  The FFT size (number of bins of the positive half spectrum).
 
 ---
 
@@ -456,15 +396,15 @@ Returns the current FFT size.
 
 Connectivity metrics on synthetic data with a known coupling.
 
-````cpp title="src/examples/ex_connectivity_metrics/main.cpp, line 118"
+````cpp title="src/examples/ex_connectivity_metrics/main.cpp, line 116"
 /**
  * Band-averaged weight of the edge start -> end, or -1 if the network has no such edge.
  */
 double edgeWeight(const Network& network, int start, int end)
 {
-    for (const NetworkEdge::SPtr& edge : network.getFullEdges()) {
-        if (edge->getStartNodeID() == start && edge->getEndNodeID() == end) {
-            return edge->getWeight();
+    for (const NetworkEdge& edge : network.edges()) {
+        if (edge.source() == start && edge.target() == end) {
+            return edge.weight();
         }
     }
     return -1.0;
@@ -479,14 +419,14 @@ Sensor- or source-level functional connectivity of averaged MEG/EEG data with a 
 ConnectivitySettings m_settings;
 RtConnectivity::SPtr m_pRtConnectivity;
 std::vector<Network> m_networkData;
-QMap<QString, Vector4i> mColor;
+std::map<std::string, Eigen::Vector4i> mColor;
 ````
 
 ### [ex_connectivity_comparison](../../examples/connectivity/ex_connectivity_comparison.mdx)
 
 Compare connectivity metrics side by side on the same averaged sensor- or source-level data.
 
-````cpp title="src/examples/ex_connectivity_comparison/main.cpp, line 344"
+````cpp title="src/examples/ex_connectivity_comparison/main.cpp, line 347"
 std::vector<Network> lNetworks = compute_connectivity(conSettings);
 ````
 

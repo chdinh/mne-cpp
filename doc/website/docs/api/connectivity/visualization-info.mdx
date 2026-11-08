@@ -15,17 +15,17 @@ sidebar_position: 21
 struct CONNECTIVITYLIB::VisualizationInfo
 ```
 
-Per-network rendering hints: colour-map name or fixed RGBA for nodes and edges.
+Per-network rendering hints: colour map or fixed RGBA for nodes and edges.
 
 ```cpp title="src/examples/ex_connectivity_metrics/main.cpp"
-network.setThreshold(0.5);
-const MatrixXd adjacency = network.getFullConnectivityMatrix(); // symmetric by default
-const int strongEdges = network.getThresholdedEdges().size();
-const NetworkNode::SPtr hub = network.getNodeAt(1);
-VisualizationInfo look; // how disp3D colours the network: a colormap or fixed node/edge colours
-look.sMethod = "Color";
-look.colEdges = Eigen::Vector4i(0, 0, 255, 255);
-network.setVisualizationInfo(look);
+network.set_threshold(0.5);
+const MatrixXd adjacency = network.connectivity_matrix(); // symmetric by default
+const std::size_t strongEdges = network.edge_count(EdgeSet::thresholded);
+const int hubDegree = network.degree(1);
+const int hubStrongDegree = network.degree(1, EdgeSet::thresholded);
+const double hubStrength = network.strength(1);
+network.set_visualization_info({.coloring = VisualizationInfo::Coloring::fixed, // how disp3D colours the network
+                                .edge_color = Eigen::Vector4i(0, 0, 255, 255)});
 ```
 
 ---
@@ -43,25 +43,26 @@ network.setVisualizationInfo(look);
 Sensor- or source-level functional connectivity of averaged MEG/EEG data with a selectable metric, shown as a 3D network.
 
 ````cpp title="src/examples/ex_connectivity/connectivitysettingsmanager.h, line 200"
-VisualizationInfo visInfo = m_networkData[i].getVisualizationInfo();
-visInfo.sMethod = "Color";
-visInfo.colNodes = mColor[m_networkData[i].getConnectivityMethod()];
-visInfo.colEdges = mColor[m_networkData[i].getConnectivityMethod()];
-m_networkData[i].setVisualizationInfo(visInfo);
+    VisualizationInfo visInfo = m_networkData[i].visualization_info();
+    visInfo.coloring = VisualizationInfo::Coloring::fixed;
+    visInfo.node_color = mColor[m_networkData[i].method()];
+    visInfo.edge_color = visInfo.node_color;
+    m_networkData[i].set_visualization_info(std::move(visInfo));
+}
 ````
 
 ### [ex_connectivity_comparison](../../examples/connectivity/ex_connectivity_comparison.mdx)
 
 Compare connectivity metrics side by side on the same averaged sensor- or source-level data.
 
-````cpp title="src/examples/ex_connectivity_comparison/main.cpp, line 358"
-    lNetworks[j].setFrequencyRange(dFreqMin, dFreqMax);
+````cpp title="src/examples/ex_connectivity_comparison/main.cpp, line 361"
+    lNetworks[j].set_frequency_range(dFreqMin, dFreqMax);
     lNetworks[j].normalize();
-    VisualizationInfo visInfo = lNetworks.at(j).getVisualizationInfo();
-    visInfo.sMethod = "Color";
-    visInfo.colNodes = mColor[lNetworks[j].getConnectivityMethod()];
-    visInfo.colEdges = mColor[lNetworks[j].getConnectivityMethod()];
-    lNetworks[j].setVisualizationInfo(visInfo);
+    VisualizationInfo visInfo = lNetworks[j].visualization_info();
+    visInfo.coloring = VisualizationInfo::Coloring::fixed;
+    visInfo.node_color = mColor[lNetworks[j].method()];
+    visInfo.edge_color = visInfo.node_color;
+    lNetworks[j].set_visualization_info(std::move(visInfo));
 }
 ````
 
@@ -69,17 +70,15 @@ Compare connectivity metrics side by side on the same averaged sensor- or source
 
 Connectivity metrics on synthetic data with a known coupling.
 
-````cpp title="src/examples/ex_connectivity_metrics/main.cpp, line 303"
-const MatrixXd adjacency = network.getFullConnectivityMatrix(); // symmetric by default
-const int strongEdges = network.getThresholdedEdges().size();
-const NetworkNode::SPtr hub = network.getNodeAt(1);
-VisualizationInfo look; // how disp3D colours the network: a colormap or fixed node/edge colours
-look.sMethod = "Color";
-look.colEdges = Eigen::Vector4i(0, 0, 255, 255);
-network.setVisualizationInfo(look);
-ok &= expect(adjacency(1, 0) == 0.9 && adjacency(2, 1) == 0.2 && strongEdges == 1 && network.getVisualizationInfo().colEdges(2) == 255,
+````cpp title="src/examples/ex_connectivity_metrics/main.cpp, line 296"
+const int hubDegree = network.degree(1);
+const int hubStrongDegree = network.degree(1, EdgeSet::thresholded);
+const double hubStrength = network.strength(1);
+network.set_visualization_info({.coloring = VisualizationInfo::Coloring::fixed, // how disp3D colours the network
+                                .edge_color = Eigen::Vector4i(0, 0, 255, 255)});
+ok &= expect(adjacency(1, 0) == 0.9 && adjacency(2, 1) == 0.2 && strongEdges == 1 && network.visualization_info().edge_color(2) == 255,
              "manual network: mirrored adjacency, one edge above 0.5");
-ok &= expect(hub->getFullDegree() == 2 && hub->getThresholdedDegree() == 1 && std::fabs(hub->getFullStrength() - 1.1) < 1e-12,
+ok &= expect(hubDegree == 2 && hubStrongDegree == 1 && std::fabs(hubStrength - 1.1) < 1e-12,
              "node 1: degree 2, thresholded degree 1, strength 1.1");
 ````
 

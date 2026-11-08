@@ -27,7 +27,7 @@ MatrixXd online;
 bool connectivityDone = false;
 QObject::connect(&rtConnectivity, &RtConnectivity::newConnectivityResultAvailable,
                  [&](const std::vector<Network>& networks, const ConnectivitySettings&) {
-                     online = networks.front().getFullConnectivityMatrix();
+                     online = networks.front().connectivity_matrix();
                      connectivityDone = true;
                  });
 rtConnectivity.append(settings); // computed on the worker thread
@@ -117,7 +117,7 @@ MatrixXd online;
 bool connectivityDone = false;
 QObject::connect(&rtConnectivity, &RtConnectivity::newConnectivityResultAvailable,
                  [&](const std::vector<Network>& networks, const ConnectivitySettings&) {
-                     online = networks.front().getFullConnectivityMatrix();
+                     online = networks.front().connectivity_matrix();
                      connectivityDone = true;
                  });
 rtConnectivity.append(settings); // computed on the worker thread

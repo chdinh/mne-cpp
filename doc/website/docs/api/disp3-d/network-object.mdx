@@ -22,16 +22,10 @@ Renderable connectivity network visualization.
 ```cpp title="src/examples/ex_disp3d_scene/main.cpp"
 Network graph("coherence");
 for (int i = 0; i < 3; ++i) {
-    graph.append(NetworkNode::SPtr(new NetworkNode(i, RowVectorXf::Constant(3, 0.01f * static_cast<float>(i)))));
+    graph.add_node(Vector3f::Constant(0.01f * static_cast<float>(i)));
 }
-const QList<QPair<int, int>> links = {{0, 1}, {1, 2}};
-const QList<double> strengths = {0.9, 0.3};
-for (int k = 0; k < links.size(); ++k) {
-    NetworkEdge::SPtr edge(new NetworkEdge(links[k].first, links[k].second, MatrixXd::Constant(1, 1, strengths[k])));
-    graph.getNodeAt(links[k].first)->append(edge);
-    graph.getNodeAt(links[k].second)->append(edge);
-    graph.append(edge);
-}
+graph.add_edge(NetworkEdge(0, 1, MatrixXd::Constant(1, 1, 0.9)));
+graph.add_edge(NetworkEdge(1, 2, MatrixXd::Constant(1, 1, 0.3)));
 NetworkObject networkGlyphs;
 networkGlyphs.load(graph, "Viridis"); // spheres for nodes, cylinders for edges
 const int edgesAll = networkGlyphs.edgeInstanceCount();
@@ -158,7 +152,9 @@ Set the colormap used for edge/node coloring.
 
 Disp3D scene data: sensor-to-surface interpolation, electrodes, MRI slices, video overlay and layers.
 
-````cpp title="src/examples/ex_disp3d_scene/main.cpp, line 287"
+````cpp title="src/examples/ex_disp3d_scene/main.cpp, line 277"
+graph.add_edge(NetworkEdge(0, 1, MatrixXd::Constant(1, 1, 0.9)));
+graph.add_edge(NetworkEdge(1, 2, MatrixXd::Constant(1, 1, 0.3)));
 NetworkObject networkGlyphs;
 networkGlyphs.load(graph, "Viridis"); // spheres for nodes, cylinders for edges
 const int edgesAll = networkGlyphs.edgeInstanceCount();
