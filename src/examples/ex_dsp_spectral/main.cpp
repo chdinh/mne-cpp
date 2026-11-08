@@ -101,7 +101,7 @@ double frequencyOfMax(const RowVectorXd& values, const RowVectorXd& freqs)
 
 //=============================================================================================================
 
-double gainAt(const QVector<IirBiquad>& sos, double freq)
+double gainAt(const std::vector<IirBiquad>& sos, double freq)
 {
     const std::complex<double> z = std::polar(1.0, -2.0 * kPi * freq / kSFreq); // z^-1
     std::complex<double> h(1.0, 0.0);
@@ -196,7 +196,7 @@ int main(int argc, char* argv[])
                  std::format("resampled to 100 Hz: 20 Hz kept, 55 Hz removed (max error {:g})", resampleErr));
 
     //! [iir_filter_usage]
-    const QVector<IirBiquad> sos = IirFilter::designButterworth(4, IirFilter::LowPass, 30.0, 0.0, kSFreq);
+    const std::vector<IirBiquad> sos = IirFilter::designButterworth(4, IirFilter::LowPass, 30.0, 0.0, kSFreq);
     const RowVectorXd lowPassed = IirFilter::applyZeroPhase(signal, sos); // forward-backward, no phase shift
     //! [iir_filter_usage]
     // scipy.signal.butter(4, 30, 'low', fs=200, output='sos') and sosfreqz: |H| = 0.99996, 0.70711, 0.01878
@@ -223,10 +223,10 @@ int main(int argc, char* argv[])
 
     VectorXd trace(10);
     trace << 0, 1, 0, 3, 0, 2, 0, 5, 1, 0;
-    const QList<QPair<int, double>> allPeaks = peakFinder(trace);
+    const std::vector<std::pair<int, double>> allPeaks = peakFinder(trace);
     PeakFinderParams params;
     params.dProminence = 2.5;
-    const QList<QPair<int, double>> strongPeaks = peakFinder(trace, params);
+    const std::vector<std::pair<int, double>> strongPeaks = peakFinder(trace, params);
     const VectorXd prominences = peakProminences(trace, {1, 3, 5, 7});
     // scipy.signal.find_peaks / peak_prominences
     ok &= expect(allPeaks.size() == 4 && allPeaks[3].first == 7 && strongPeaks.size() == 2 && strongPeaks[0].first == 3 && maxError(prominences, {1.0, 3.0, 2.0, 5.0}) == 0.0,

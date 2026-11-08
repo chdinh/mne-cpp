@@ -27,6 +27,8 @@
 
 #include "dsp_global.h"
 
+#include <vector>
+
 #include <mne/mne_epoch_data.h>
 
 //=============================================================================================================
@@ -39,7 +41,6 @@
 // QT INCLUDES
 //=============================================================================================================
 
-#include <QVector>
 
 //=============================================================================================================
 // DEFINE NAMESPACE UTILSLIB
@@ -97,11 +98,11 @@ public:
      * @return Vector of MNEEpochData (one per valid event).  Rejected epochs are included with
      *         MNEEpochData::bReject == true so callers can choose whether to exclude them.
      */
-    static QVector<MNELIB::MNEEpochData> extract(const Eigen::MatrixXd& matData,
-                                                 const QVector<int>& eventSamples,
-                                                 double dSFreq,
-                                                 const Params& params = Params(),
-                                                 const QVector<int>& eventCodes = QVector<int>());
+    static std::vector<MNELIB::MNEEpochData> extract(const Eigen::MatrixXd& matData,
+                                                     const std::vector<int>& eventSamples,
+                                                     double dSFreq,
+                                                     const Params& params = Params(),
+                                                     const std::vector<int>& eventCodes = std::vector<int>());
 
     //=========================================================================================================
     /**
@@ -111,7 +112,7 @@ public:
      *
      * @return Mean data matrix (n_channels × n_epoch_samples), or empty matrix if no good epochs.
      */
-    static Eigen::MatrixXd average(const QVector<MNELIB::MNEEpochData>& epochs);
+    static Eigen::MatrixXd average(const std::vector<MNELIB::MNEEpochData>& epochs);
 
     //=========================================================================================================
     /**
@@ -121,7 +122,7 @@ public:
      *
      * @return Subset of epochs with bReject == false.
      */
-    static QVector<MNELIB::MNEEpochData> rejectMarked(const QVector<MNELIB::MNEEpochData>& epochs);
+    static std::vector<MNELIB::MNEEpochData> rejectMarked(const std::vector<MNELIB::MNEEpochData>& epochs);
 
 private:
     //=========================================================================================================

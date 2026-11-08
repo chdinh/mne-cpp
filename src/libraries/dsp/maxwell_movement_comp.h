@@ -25,6 +25,8 @@
 //=============================================================================================================
 
 #include "dsp_global.h"
+
+#include <vector>
 #include "sss.h"
 
 #include <fiff/fiff_info.h>
@@ -40,7 +42,6 @@
 // QT INCLUDES
 //=============================================================================================================
 
-#include <QList>
 
 //=============================================================================================================
 // DEFINE NAMESPACE UTILSLIB
@@ -105,7 +106,7 @@ public:
      */
     static Eigen::MatrixXd apply(const Eigen::MatrixXd& matData,
                                  const FIFFLIB::FiffInfo& fiffInfo,
-                                 const QList<HeadPosEntry>& headPos,
+                                 const std::vector<HeadPosEntry>& headPos,
                                  double dSFreq,
                                  const MaxwellMoveCompParams& params = MaxwellMoveCompParams());
 
@@ -120,7 +121,7 @@ public:
      *
      * @return List of head position entries.
      */
-    static QList<HeadPosEntry> readHeadPos(const QString& sPath);
+    static std::vector<HeadPosEntry> readHeadPos(const QString& sPath);
 
     //=========================================================================================================
     /**
@@ -132,7 +133,7 @@ public:
      * @return true if successful.
      */
     static bool writeHeadPos(const QString& sPath,
-                             const QList<HeadPosEntry>& headPos);
+                             const std::vector<HeadPosEntry>& headPos);
 
 private:
     /**

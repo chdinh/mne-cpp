@@ -16,6 +16,8 @@
 
 #include "epoch_extractor.h"
 
+#include <vector>
+
 //=============================================================================================================
 // EIGEN INCLUDES
 //=============================================================================================================
@@ -61,15 +63,15 @@ void EpochExtractor::applyBaseline(MatrixXd& matEpoch, int iBase0, int iBase1)
 // PUBLIC
 //=============================================================================================================
 
-QVector<MNEEpochData> EpochExtractor::extract(const MatrixXd& matData,
-                                              const QVector<int>& eventSamples,
-                                              double dSFreq,
-                                              const Params& params,
-                                              const QVector<int>& eventCodes)
+std::vector<MNEEpochData> EpochExtractor::extract(const MatrixXd& matData,
+                                                  const std::vector<int>& eventSamples,
+                                                  double dSFreq,
+                                                  const Params& params,
+                                                  const std::vector<int>& eventCodes)
 {
-    QVector<MNEEpochData> epochs;
+    std::vector<MNEEpochData> epochs;
 
-    if (matData.size() == 0 || eventSamples.isEmpty())
+    if (matData.size() == 0 || eventSamples.empty())
         return epochs;
     if (dSFreq <= 0.0) {
         qWarning() << "EpochExtractor::extract: invalid sampling frequency.";
@@ -95,7 +97,7 @@ QVector<MNEEpochData> EpochExtractor::extract(const MatrixXd& matData,
 
     const bool bHaveCodes = (eventCodes.size() == eventSamples.size());
 
-    for (int ev = 0; ev < eventSamples.size(); ++ev) {
+    for (int ev = 0; ev < std::ssize(eventSamples); ++ev) {
         const int evSamp = eventSamples[ev];
         const int s0 = evSamp + iOffset0;
         const int s1 = evSamp + iOffset1;
@@ -128,7 +130,7 @@ QVector<MNEEpochData> EpochExtractor::extract(const MatrixXd& matData,
             }
         }
 
-        epochs.append(epoch);
+        epochs.push_back(epoch);
     }
 
     return epochs;
@@ -136,7 +138,7 @@ QVector<MNEEpochData> EpochExtractor::extract(const MatrixXd& matData,
 
 //=============================================================================================================
 
-MatrixXd EpochExtractor::average(const QVector<MNEEpochData>& epochs)
+MatrixXd EpochExtractor::average(const std::vector<MNEEpochData>& epochs)
 {
     MatrixXd result;
     int nGood = 0;
@@ -163,13 +165,13 @@ MatrixXd EpochExtractor::average(const QVector<MNEEpochData>& epochs)
 
 //=============================================================================================================
 
-QVector<MNEEpochData> EpochExtractor::rejectMarked(const QVector<MNEEpochData>& epochs)
+std::vector<MNEEpochData> EpochExtractor::rejectMarked(const std::vector<MNEEpochData>& epochs)
 {
-    QVector<MNEEpochData> good;
+    std::vector<MNEEpochData> good;
     good.reserve(epochs.size());
     for (const MNEEpochData& ep : epochs) {
         if (!ep.bReject)
-            good.append(ep);
+            good.push_back(ep);
     }
     return good;
 }

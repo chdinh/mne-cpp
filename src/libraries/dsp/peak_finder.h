@@ -36,6 +36,9 @@
 
 #include "dsp_global.h"
 
+#include <vector>
+#include <utility>
+
 //=============================================================================================================
 // EIGEN INCLUDES
 //=============================================================================================================
@@ -46,8 +49,6 @@
 // QT INCLUDES
 //=============================================================================================================
 
-#include <QList>
-#include <QPair>
 
 #include <limits>
 
@@ -83,8 +84,8 @@ struct DSPSHARED_EXPORT PeakFinderParams
  *
  * @return List of (peak_index, peak_value) pairs, sorted by index.
  */
-DSPSHARED_EXPORT QList<QPair<int, double>> peakFinder(const Eigen::VectorXd& data,
-                                                      const PeakFinderParams& params = PeakFinderParams());
+DSPSHARED_EXPORT std::vector<std::pair<int, double>> peakFinder(const Eigen::VectorXd& data,
+                                                                const PeakFinderParams& params = PeakFinderParams());
 
 //=============================================================================================================
 /**
@@ -99,7 +100,7 @@ DSPSHARED_EXPORT QList<QPair<int, double>> peakFinder(const Eigen::VectorXd& dat
  * @return Prominence value for each peak.
  */
 DSPSHARED_EXPORT Eigen::VectorXd peakProminences(const Eigen::VectorXd& data,
-                                                 const QList<int>& peakIndices);
+                                                 const std::vector<int>& peakIndices);
 
 /**
  * @brief Noise-tolerant extrema search of @c mne.preprocessing.peak_finder.
@@ -113,9 +114,9 @@ DSPSHARED_EXPORT Eigen::VectorXd peakProminences(const Eigen::VectorXd& data,
  *
  * @return List of (peak_index, peak_value) pairs, sorted by index.
  */
-DSPSHARED_EXPORT QList<QPair<int, double>> peakFinderMne(const Eigen::VectorXd& data,
-                                                         double thresh = std::numeric_limits<double>::quiet_NaN(),
-                                                         int extrema = 1);
+DSPSHARED_EXPORT std::vector<std::pair<int, double>> peakFinderMne(const Eigen::VectorXd& data,
+                                                                   double thresh = std::numeric_limits<double>::quiet_NaN(),
+                                                                   int extrema = 1);
 
 } // namespace UTILSLIB
 

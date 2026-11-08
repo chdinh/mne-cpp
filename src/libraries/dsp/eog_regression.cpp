@@ -15,6 +15,8 @@
 //=============================================================================================================
 
 #include "eog_regression.h"
+
+#include <vector>
 #include <utils/string_utils.h>
 
 #include <fiff/fiff_info.h>
@@ -48,10 +50,10 @@ using namespace Eigen;
 namespace
 {
 
-MatrixXd demeanedRows(const MatrixXd& data, const QVector<int>& rows)
+MatrixXd demeanedRows(const MatrixXd& data, const std::vector<int>& rows)
 {
     MatrixXd out(rows.size(), data.cols());
-    for (int i = 0; i < rows.size(); ++i)
+    for (int i = 0; i < std::ssize(rows); ++i)
         out.row(i) = data.row(rows[i]).array() - data.row(rows[i]).mean();
     return out;
 }
@@ -73,25 +75,25 @@ void EogRegression::fit(const MatrixXd& data,
     if (eogChannels.empty()) {
         for (int i = 0; i < info.chs.size(); ++i) {
             if (info.chs[i].kind == FIFFV_EOG_CH && !UTILSLIB::contains(info.bads, info.ch_names[i]))
-                m_vecEogIndices.append(i);
+                m_vecEogIndices.push_back(i);
         }
     } else {
         for (const std::string& name : eogChannels) {
             const int idx = static_cast<int>(UTILSLIB::indexOf(info.ch_names, name));
             if (idx >= 0)
-                m_vecEogIndices.append(idx);
+                m_vecEogIndices.push_back(idx);
             else
                 qWarning() << "[EogRegression::fit] EOG channel not found:" << name;
         }
     }
-    if (m_vecEogIndices.isEmpty()) {
+    if (m_vecEogIndices.empty()) {
         qWarning() << "[EogRegression::fit] No EOG channels found. Data will not be modified.";
         return;
     }
 
     // mne's default picks: the good data channels
     for (const int i : info.pick_data_channels(info.bads))
-        m_vecTargetIndices.append(i);
+        m_vecTargetIndices.push_back(i);
 
     // Least squares on the time-demeaned signals, as mne.preprocessing.EOGRegression
     const MatrixXd E = demeanedRows(data, m_vecEogIndices);
@@ -112,7 +114,7 @@ void EogRegression::apply(MatrixXd& data,
         return;
     }
     const MatrixXd E = demeanedRows(data, m_vecEogIndices);
-    for (int i = 0; i < m_vecTargetIndices.size(); ++i)
+    for (int i = 0; i < std::ssize(m_vecTargetIndices); ++i)
         data.row(m_vecTargetIndices[i]) -= m_matBeta.row(i) * E;
 }
 

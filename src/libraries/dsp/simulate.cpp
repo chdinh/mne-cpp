@@ -16,6 +16,8 @@
 
 #include "simulate.h"
 
+#include <vector>
+
 #include <inv/inv_source_estimate.h>
 #include <inv/inv_convenience.h>
 #include <fiff/fiff_evoked.h>
@@ -72,12 +74,12 @@ InvSourceEstimate UTILSLIB::simulateStc(
     }
 
     // Build mapping: active vertex -> row in allVertices
-    QList<int> activeRows;
+    std::vector<int> activeRows;
     for (int a = 0; a < nActive; ++a) {
         bool found = false;
         for (int v = 0; v < nAll; ++v) {
             if (allVertices(v) == activeVertices(a)) {
-                activeRows.append(v);
+                activeRows.push_back(v);
                 found = true;
                 break;
             }

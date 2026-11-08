@@ -16,6 +16,8 @@
 
 #include "xdawn.h"
 
+#include <vector>
+
 //=============================================================================================================
 // EIGEN INCLUDES
 //=============================================================================================================
@@ -67,7 +69,7 @@ MatrixXd computePatterns(const MatrixXd& filters, const MatrixXd& dataCov)
 // MEMBER DEFINITIONS
 //=============================================================================================================
 
-XdawnResult Xdawn::fit(const QVector<MNEEpochData>& epochs,
+XdawnResult Xdawn::fit(const std::vector<MNEEpochData>& epochs,
                        int iTargetEvent,
                        int nComponents,
                        double dReg)
@@ -75,20 +77,20 @@ XdawnResult Xdawn::fit(const QVector<MNEEpochData>& epochs,
     XdawnResult result;
     result.iTargetEvent = iTargetEvent;
 
-    if (epochs.isEmpty()) {
+    if (epochs.empty()) {
         qWarning() << "Xdawn::fit: empty epoch list.";
         return result;
     }
 
-    QVector<int> goodIdx;
+    std::vector<int> goodIdx;
     goodIdx.reserve(epochs.size());
-    for (int i = 0; i < epochs.size(); ++i) {
+    for (int i = 0; i < std::ssize(epochs); ++i) {
         if (!epochs[i].bReject) {
-            goodIdx.append(i);
+            goodIdx.push_back(i);
         }
     }
 
-    if (goodIdx.isEmpty()) {
+    if (goodIdx.empty()) {
         qWarning() << "Xdawn::fit: no non-rejected epochs available.";
         return result;
     }
@@ -250,13 +252,12 @@ MatrixXd Xdawn::denoise(const MatrixXd& matEpoch, const XdawnResult& result, int
 
 //=============================================================================================================
 
-QVector<MNEEpochData> Xdawn::denoiseEpochs(const QVector<MNEEpochData>& epochs,
-                                           const XdawnResult& result,
-                                           int nComponents)
+std::vector<MNEEpochData> Xdawn::denoiseEpochs(std::vector<MNEEpochData> epochs,
+                                               const XdawnResult& result,
+                                               int nComponents)
 {
-    QVector<MNEEpochData> out = epochs;
-    for (int i = 0; i < out.size(); ++i) {
-        out[i].epoch = denoise(out[i].epoch, result, nComponents);
+    for (MNEEpochData& epoch : epochs) {
+        epoch.epoch = denoise(epoch.epoch, result, nComponents);
     }
-    return out;
+    return epochs;
 }

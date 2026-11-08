@@ -142,11 +142,11 @@ MorletTfrResult MorletTfr::compute(const RowVectorXd& vecData,
 
 //=============================================================================================================
 
-QVector<MorletTfrResult> MorletTfr::computeMultiChannel(const MatrixXd& matData,
-                                                        double dSFreq,
-                                                        const RowVectorXd& vecFreqs,
-                                                        double dNCycles,
-                                                        const RowVectorXi& vecPicks)
+std::vector<MorletTfrResult> MorletTfr::computeMultiChannel(const MatrixXd& matData,
+                                                            double dSFreq,
+                                                            const RowVectorXd& vecFreqs,
+                                                            double dNCycles,
+                                                            const RowVectorXi& vecPicks)
 {
     std::vector<int> picks;
     if (vecPicks.size() > 0) {
@@ -159,9 +159,9 @@ QVector<MorletTfrResult> MorletTfr::computeMultiChannel(const MatrixXd& matData,
             picks.push_back(i);
     }
 
-    QVector<MorletTfrResult> results;
+    std::vector<MorletTfrResult> results;
     results.reserve(static_cast<int>(picks.size()));
     for (int ch : picks)
-        results.append(compute(matData.row(ch), dSFreq, vecFreqs, dNCycles));
+        results.push_back(compute(matData.row(ch), dSFreq, vecFreqs, dNCycles));
     return results;
 }

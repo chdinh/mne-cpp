@@ -34,6 +34,9 @@
 
 #include "dsp_global.h"
 
+#include <vector>
+#include <utility>
+
 //=============================================================================================================
 // EIGEN INCLUDES
 //=============================================================================================================
@@ -44,8 +47,6 @@
 // QT INCLUDES
 //=============================================================================================================
 
-#include <QPair>
-#include <QList>
 
 //=============================================================================================================
 // FORWARD DECLARATIONS
@@ -106,7 +107,7 @@ DSPSHARED_EXPORT Eigen::MatrixXd computeElectricalDistance(const Eigen::MatrixXd
  * @return List of bridged electrode pairs as (channel_index_1, channel_index_2)
  *         using indices into info.chs.
  */
-DSPSHARED_EXPORT QList<QPair<int, int>> computeBridgedElectrodes(
+DSPSHARED_EXPORT std::vector<std::pair<int, int>> computeBridgedElectrodes(
     const Eigen::MatrixXd& data,
     const FIFFLIB::FiffInfo& info,
     const BridgedElectrodeParams& params = BridgedElectrodeParams());

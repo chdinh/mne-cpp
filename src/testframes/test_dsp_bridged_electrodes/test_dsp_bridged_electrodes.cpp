@@ -113,7 +113,7 @@ private slots:
         auto bridged = computeBridgedElectrodes(data, info);
 
         // Should detect at least one bridge
-        QVERIFY2(!bridged.isEmpty(), "Should detect bridged electrodes");
+        QVERIFY2(!bridged.empty(), "Should detect bridged electrodes");
 
         // Check that the bridged pair includes our known bridge
         bool found = false;
@@ -136,7 +136,7 @@ private slots:
         params.dElectricalDistanceThreshold = 0.1; // Strict threshold
 
         auto bridged = computeBridgedElectrodes(data, info, params);
-        QVERIFY2(bridged.isEmpty(), "Clean data should have no bridges");
+        QVERIFY2(bridged.empty(), "Clean data should have no bridges");
     }
 
     void testElectricalDistanceMatrix()
@@ -213,7 +213,7 @@ private slots:
 
         MatrixXd data = MatrixXd::Random(3, 100);
         auto bridged = computeBridgedElectrodes(data, info);
-        QVERIFY(bridged.isEmpty());
+        QVERIFY(bridged.empty());
     }
 
     void testSingleEegChannel()
@@ -221,7 +221,7 @@ private slots:
         FiffInfo info = makeTestInfo(1);
         MatrixXd data = MatrixXd::Random(1, 100);
         auto bridged = computeBridgedElectrodes(data, info);
-        QVERIFY(bridged.isEmpty());
+        QVERIFY(bridged.empty());
     }
 
     void cleanupTestCase()

@@ -16,6 +16,8 @@
 
 #include "peak_finder.h"
 
+#include <utility>
+
 //=============================================================================================================
 // STL INCLUDES
 //=============================================================================================================
@@ -36,12 +38,12 @@ using namespace Eigen;
 // DEFINE FUNCTIONS
 //=============================================================================================================
 
-VectorXd UTILSLIB::peakProminences(const VectorXd& data, const QList<int>& peakIndices)
+VectorXd UTILSLIB::peakProminences(const VectorXd& data, const std::vector<int>& peakIndices)
 {
     const int n = static_cast<int>(data.size());
     VectorXd proms(peakIndices.size());
 
-    for (int p = 0; p < peakIndices.size(); ++p) {
+    for (int p = 0; p < std::ssize(peakIndices); ++p) {
         int idx = peakIndices[p];
         double peakVal = data(idx);
 
@@ -71,52 +73,52 @@ VectorXd UTILSLIB::peakProminences(const VectorXd& data, const QList<int>& peakI
 
 //=============================================================================================================
 
-QList<QPair<int, double>> UTILSLIB::peakFinder(const VectorXd& data,
-                                               const PeakFinderParams& params)
+std::vector<std::pair<int, double>> UTILSLIB::peakFinder(const VectorXd& data,
+                                                         const PeakFinderParams& params)
 {
     const int n = static_cast<int>(data.size());
-    QList<QPair<int, double>> peaks;
+    std::vector<std::pair<int, double>> peaks;
 
     if (n < 3) {
         return peaks;
     }
 
     // Step 1: Find all local maxima (strictly greater than both neighbours)
-    QList<int> peakIdx;
+    std::vector<int> peakIdx;
     for (int i = 1; i < n - 1; ++i) {
         if (data(i) > data(i - 1) && data(i) > data(i + 1)) {
             if (data(i) >= params.dMinHeight) {
-                peakIdx.append(i);
+                peakIdx.push_back(i);
             }
         }
     }
 
     // Step 2: Filter by prominence
-    if (params.dProminence > 0.0 && !peakIdx.isEmpty()) {
+    if (params.dProminence > 0.0 && !peakIdx.empty()) {
         VectorXd proms = peakProminences(data, peakIdx);
-        QList<int> filtered;
-        for (int i = 0; i < peakIdx.size(); ++i) {
+        std::vector<int> filtered;
+        for (int i = 0; i < std::ssize(peakIdx); ++i) {
             if (proms(i) >= params.dProminence) {
-                filtered.append(peakIdx[i]);
+                filtered.push_back(peakIdx[i]);
             }
         }
         peakIdx = filtered;
     }
 
     // Step 3: Filter by minimum distance (keep highest peaks)
-    if (params.iMinDistance > 1 && !peakIdx.isEmpty()) {
+    if (params.iMinDistance > 1 && !peakIdx.empty()) {
         // Sort peaks by height descending
         std::vector<int> sortedIdx(peakIdx.begin(), peakIdx.end());
         std::sort(sortedIdx.begin(), sortedIdx.end(),
                   [&data](int a, int b) { return data(a) > data(b); });
 
-        QList<int> kept;
+        std::vector<int> kept;
         std::vector<bool> suppressed(static_cast<size_t>(n), false);
 
         for (int idx : sortedIdx) {
             if (suppressed[static_cast<size_t>(idx)])
                 continue;
-            kept.append(idx);
+            kept.push_back(idx);
 
             // Suppress nearby peaks
             int lo = std::max(0, idx - params.iMinDistance);
@@ -135,7 +137,7 @@ QList<QPair<int, double>> UTILSLIB::peakFinder(const VectorXd& data,
 
     // Build output
     for (int idx : peakIdx) {
-        peaks.append(qMakePair(idx, data(idx)));
+        peaks.push_back(std::make_pair(idx, data(idx)));
     }
 
     return peaks;
@@ -143,10 +145,10 @@ QList<QPair<int, double>> UTILSLIB::peakFinder(const VectorXd& data,
 
 //=============================================================================================================
 
-QList<QPair<int, double>> UTILSLIB::peakFinderMne(const VectorXd& data, double thresh, int extrema)
+std::vector<std::pair<int, double>> UTILSLIB::peakFinderMne(const VectorXd& data, double thresh, int extrema)
 {
     // Adapted from mne.preprocessing.peak_finder (MNE-Python, BSD-3-Clause).
-    QList<QPair<int, double>> result;
+    std::vector<std::pair<int, double>> result;
     const Index s = data.size();
     if (s == 0)
         return result;
@@ -231,11 +233,11 @@ QList<QPair<int, double>> UTILSLIB::peakFinderMne(const VectorXd& data, double t
             peakMags.push_back(tempMag);
         }
         for (std::size_t k = 0; k < peakInds.size(); ++k)
-            result.append(qMakePair(static_cast<int>(ind[peakInds[k]]), extrema < 0 ? -peakMags[k] : peakMags[k]));
+            result.push_back(std::make_pair(static_cast<int>(ind[peakInds[k]]), extrema < 0 ? -peakMags[k] : peakMags[k]));
     } else {
         const auto best = std::max_element(x.begin(), x.end());
         if (*best > minMag + thresh)
-            result.append(qMakePair(static_cast<int>(ind[best - x.begin()]), extrema < 0 ? -*best : *best));
+            result.push_back(std::make_pair(static_cast<int>(ind[best - x.begin()]), extrema < 0 ? -*best : *best));
     }
     return result;
 }

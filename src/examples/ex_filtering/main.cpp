@@ -88,13 +88,13 @@ int main(int argc, char* argv[])
     printf("Filtering...");
     if (RTPROCESSINGLIB::filterFile(fileOut,
                                     pRaw,
-                                    FilterKernel::m_filterTypes.indexOf(FilterParameter("BPF")),
+                                    FilterKernel::filterTypeIndex("BPF"),
                                     10,
                                     10,
                                     0.1,
                                     pRaw->info.sfreq,
                                     1024,
-                                    UTILSLIB::FilterKernel::m_designMethods.indexOf(FilterParameter("Cosine")),
+                                    UTILSLIB::FilterKernel::designMethodIndex("Cosine"),
                                     picks)) {
         printf("[done]\n");
     } else {

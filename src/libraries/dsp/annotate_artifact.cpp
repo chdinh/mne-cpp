@@ -15,6 +15,9 @@
 //=============================================================================================================
 
 #include "annotate_artifact.h"
+
+#include <vector>
+#include <utility>
 #include "connectivity_aec.h"
 #include "firfilter.h"
 
@@ -53,9 +56,9 @@ namespace
 /**
  * @brief Collect contiguous runs of true values into (start, end) pairs (inclusive).
  */
-QVector<QPair<int, int>> findContiguousSegments(const VectorXi& mask)
+std::vector<std::pair<int, int>> findContiguousSegments(const VectorXi& mask)
 {
-    QVector<QPair<int, int>> segs;
+    std::vector<std::pair<int, int>> segs;
     const int n = static_cast<int>(mask.size());
     int i = 0;
     while (i < n) {
@@ -63,7 +66,7 @@ QVector<QPair<int, int>> findContiguousSegments(const VectorXi& mask)
             int start = i;
             while (i < n && mask(i))
                 ++i;
-            segs.append({start, i - 1});
+            segs.push_back({start, i - 1});
         } else {
             ++i;
         }
@@ -75,14 +78,14 @@ QVector<QPair<int, int>> findContiguousSegments(const VectorXi& mask)
 /**
  * @brief Remove segments shorter than minSamples.
  */
-void removeShortSegments(QVector<QPair<int, int>>& segs, int minSamples)
+void removeShortSegments(std::vector<std::pair<int, int>>& segs, int minSamples)
 {
     if (minSamples <= 1)
         return;
-    QVector<QPair<int, int>> filtered;
+    std::vector<std::pair<int, int>> filtered;
     for (const auto& seg : segs) {
         if (seg.second - seg.first + 1 >= minSamples)
-            filtered.append(seg);
+            filtered.push_back(seg);
     }
     segs = filtered;
 }
@@ -198,7 +201,7 @@ FiffAnnotations UTILSLIB::annotateAmplitude(
                 continue;
             const VectorXi mask = isPeak ? (diff >= *threshold).cast<int>().matrix().eval() : (diff <= *threshold).cast<int>().matrix().eval();
             // Runs shorter than the minimum duration do not count
-            QVector<QPair<int, int>> segs = findContiguousSegments(mask);
+            std::vector<std::pair<int, int>> segs = findContiguousSegments(mask);
             removeShortSegments(segs, minSamples);
             int count = 0;
             for (const auto& seg : segs)

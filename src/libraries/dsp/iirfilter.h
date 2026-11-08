@@ -38,6 +38,8 @@
 
 #include "dsp_global.h"
 
+#include <vector>
+
 //=============================================================================================================
 // EIGEN INCLUDES
 //=============================================================================================================
@@ -115,11 +117,11 @@ public:
      *
      * @return QVector of IirBiquad sections (multiply their transfer functions to get H(z)).
      */
-    static QVector<IirBiquad> designButterworth(int iOrder,
-                                                FilterType type,
-                                                double dCutoffLow,
-                                                double dCutoffHigh,
-                                                double dSFreq);
+    static std::vector<IirBiquad> designButterworth(int iOrder,
+                                                    FilterType type,
+                                                    double dCutoffLow,
+                                                    double dCutoffHigh,
+                                                    double dSFreq);
 
     //=========================================================================================================
     /**
@@ -131,7 +133,7 @@ public:
      * @return Filtered row vector (same length as vecData).
      */
     static Eigen::RowVectorXd applySos(const Eigen::RowVectorXd& vecData,
-                                       const QVector<IirBiquad>& sos);
+                                       const std::vector<IirBiquad>& sos);
 
     //=========================================================================================================
     /**
@@ -144,7 +146,7 @@ public:
      * @return Zero-phase filtered row vector (same length as vecData).
      */
     static Eigen::RowVectorXd applyZeroPhase(const Eigen::RowVectorXd& vecData,
-                                             const QVector<IirBiquad>& sos);
+                                             const std::vector<IirBiquad>& sos);
 
     //=========================================================================================================
     /**
@@ -156,7 +158,7 @@ public:
      * @return Filtered matrix (n_channels x n_samples).
      */
     static Eigen::MatrixXd applyZeroPhaseMatrix(const Eigen::MatrixXd& matData,
-                                                const QVector<IirBiquad>& sos);
+                                                const std::vector<IirBiquad>& sos);
 
     //=========================================================================================================
     /**
@@ -182,7 +184,7 @@ private:
      * @param[in] n  Filter order.
      * @return       Vector of n complex poles.
      */
-    static QVector<std::complex<double>> butterworthPrototypePoles(int n);
+    static std::vector<std::complex<double>> butterworthPrototypePoles(int n);
 
     //=========================================================================================================
     /**
@@ -231,7 +233,7 @@ public:
      * @param[in] sos        Second-order sections, e.g. from IirFilter::designButterworth(); empty passes data through.
      * @param[in] channels   Rows of every block.
      */
-    IirStreamFilter(const QVector<IirBiquad>& sos, int channels);
+    IirStreamFilter(const std::vector<IirBiquad>& sos, int channels);
 
     /**
      * Filters @p block (channels x samples) in place, continuing from the previous block.
@@ -249,7 +251,7 @@ public:
     int channels() const;
 
 private:
-    QVector<IirBiquad> m_sos;
+    std::vector<IirBiquad> m_sos;
     Eigen::MatrixXd m_state; /**< channels x (2 * sections): s1, s2 of each section. */
 };
 

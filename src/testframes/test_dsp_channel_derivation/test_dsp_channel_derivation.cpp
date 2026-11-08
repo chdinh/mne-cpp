@@ -86,7 +86,7 @@ void TestDspChannelDerivation::initTestCase()
 void TestDspChannelDerivation::testBuildBipolar()
 {
     QStringList channels = {"EEG01", "EEG02", "EEG03", "EEG04"};
-    QVector<DerivationRule> rules = ChannelDerivation::buildBipolar(channels);
+    std::vector<DerivationRule> rules = ChannelDerivation::buildBipolar(channels);
 
     // Bipolar: n-1 pairs
     QCOMPARE(rules.size(), 3);
@@ -117,7 +117,7 @@ void TestDspChannelDerivation::testBipolarApply()
         data(2, s) = 6.0;
     }
 
-    QVector<DerivationRule> rules = ChannelDerivation::buildBipolar(channels);
+    std::vector<DerivationRule> rules = ChannelDerivation::buildBipolar(channels);
     auto [derived, names] = ChannelDerivation::apply(data, channels, rules);
 
     QCOMPARE(derived.rows(), 2); // 2 bipolar pairs
@@ -134,7 +134,7 @@ void TestDspChannelDerivation::testBipolarApply()
 void TestDspChannelDerivation::testBipolarNaming()
 {
     QStringList channels = {"Fp1", "Fp2", "F3"};
-    QVector<DerivationRule> rules = ChannelDerivation::buildBipolar(channels);
+    std::vector<DerivationRule> rules = ChannelDerivation::buildBipolar(channels);
 
     // Output names should reflect the bipolar pair
     for (const DerivationRule& rule : rules) {
@@ -147,7 +147,7 @@ void TestDspChannelDerivation::testBipolarNaming()
 void TestDspChannelDerivation::testBuildCommonAverage()
 {
     QStringList channels = {"C1", "C2", "C3", "C4"};
-    QVector<DerivationRule> rules = ChannelDerivation::buildCommonAverage(channels);
+    std::vector<DerivationRule> rules = ChannelDerivation::buildCommonAverage(channels);
 
     // CAR: one rule per channel
     QCOMPARE(rules.size(), 4);
@@ -172,7 +172,7 @@ void TestDspChannelDerivation::testCommonAverageApply()
         data(2, s) = 3.0;
     }
 
-    QVector<DerivationRule> rules = ChannelDerivation::buildCommonAverage(channels);
+    std::vector<DerivationRule> rules = ChannelDerivation::buildCommonAverage(channels);
     auto [derived, names] = ChannelDerivation::apply(data, channels, rules);
 
     QCOMPARE(derived.rows(), 3);
@@ -188,7 +188,7 @@ void TestDspChannelDerivation::testCommonAverageZeroMean()
 
     MatrixXd data = MatrixXd::Random(4, nSamples);
 
-    QVector<DerivationRule> rules = ChannelDerivation::buildCommonAverage(channels);
+    std::vector<DerivationRule> rules = ChannelDerivation::buildCommonAverage(channels);
     auto [derived, names] = ChannelDerivation::apply(data, channels, rules);
 
     // After CAR, the mean across channels at each time point should be ~0
@@ -219,8 +219,8 @@ void TestDspChannelDerivation::testApplyCustomRules()
     rule.inputWeights.insert("B", 0.5);
     rule.inputWeights.insert("C", -1.0);
 
-    QVector<DerivationRule> rules;
-    rules.append(rule);
+    std::vector<DerivationRule> rules;
+    rules.push_back(rule);
 
     auto [derived, names] = ChannelDerivation::apply(data, channels, rules);
 
@@ -245,7 +245,7 @@ void TestDspChannelDerivation::testApplyOutputDimensions()
     r2.inputWeights.insert("C2", 1.0);
     r2.inputWeights.insert("C3", -1.0);
 
-    QVector<DerivationRule> rules = {r1, r2};
+    std::vector<DerivationRule> rules = {r1, r2};
     auto [derived, names] = ChannelDerivation::apply(data, channels, rules);
 
     QCOMPARE(derived.rows(), 2);
@@ -269,12 +269,12 @@ void TestDspChannelDerivation::testWriteReadDefinitionFile()
     r2.inputWeights.insert("EEG02", 1.0);
     r2.inputWeights.insert("EEG03", -1.0);
 
-    QVector<DerivationRule> rules = {r1, r2};
+    std::vector<DerivationRule> rules = {r1, r2};
 
     QString path = m_tempDir.filePath("derivations.json");
     QVERIFY(ChannelDerivation::writeDefinitionFile(path, rules));
 
-    QVector<DerivationRule> loaded = ChannelDerivation::readDefinitionFile(path);
+    std::vector<DerivationRule> loaded = ChannelDerivation::readDefinitionFile(path);
     QCOMPARE(loaded.size(), 2);
     QCOMPARE(loaded[0].outputName, QString("Bipolar1"));
     QCOMPARE(loaded[1].outputName, QString("Bipolar2"));

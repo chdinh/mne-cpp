@@ -105,7 +105,7 @@ private slots:
         auto peaks = peakFinder(data, params);
 
         // Check minimum distance between peaks
-        for (int i = 1; i < peaks.size(); ++i) {
+        for (int i = 1; i < std::ssize(peaks); ++i) {
             int dist = peaks[i].first - peaks[i - 1].first;
             QVERIFY2(dist >= 5,
                      qPrintable(QString("Distance=%1 < minDistance=5").arg(dist)));
@@ -141,14 +141,14 @@ private slots:
         VectorXd data(2);
         data << 1, 0;
         auto peaks = peakFinder(data);
-        QVERIFY(peaks.isEmpty());
+        QVERIFY(peaks.empty());
     }
 
     void testFlatSignal()
     {
         VectorXd data = VectorXd::Constant(100, 5.0);
         auto peaks = peakFinder(data);
-        QVERIFY(peaks.isEmpty());
+        QVERIFY(peaks.empty());
     }
 
     void testSinglePeak()
@@ -166,7 +166,7 @@ private slots:
         VectorXd data(9);
         data << 0, 3, 0, 1, 0, 5, 0, 2, 0;
 
-        QList<int> peakIdx = {1, 3, 5, 7};
+        std::vector<int> peakIdx = {1, 3, 5, 7};
         VectorXd proms = peakProminences(data, peakIdx);
 
         QCOMPARE(proms.size(), static_cast<Eigen::Index>(4));
@@ -184,7 +184,7 @@ private slots:
         }
 
         auto peaks = peakFinder(data);
-        for (int i = 1; i < peaks.size(); ++i) {
+        for (int i = 1; i < std::ssize(peaks); ++i) {
             QVERIFY(peaks[i].first > peaks[i - 1].first);
         }
     }

@@ -90,7 +90,7 @@ void TestDspEpochExtractor::extract_basicDimensions()
     // Raw data: 3 seconds
     MatrixXd raw = MatrixXd::Random(nCh, static_cast<int>(3.0 * sFreq));
 
-    QVector<int> events = {500, 1000, 1500, 2000}; // 4 events
+    std::vector<int> events = {500, 1000, 1500, 2000}; // 4 events
 
     EpochExtractor::Params p;
     p.dTmin = -0.2;
@@ -125,7 +125,7 @@ void TestDspEpochExtractor::extract_dataValues_matchRaw()
     p.bApplyBaseline = false;
     p.dThreshold = 0.0;
 
-    QVector<int> events = {500};
+    std::vector<int> events = {500};
     auto epochs = EpochExtractor::extract(raw, events, sFreq, p);
     QCOMPARE(epochs.size(), 1);
 
@@ -151,7 +151,7 @@ void TestDspEpochExtractor::extract_outOfBounds_skipped()
     // event at 100: s0 = 100-500 = -400 → out of bounds (skipped)
     // event at 1000: s0=500, s1=1500 → valid
     // event at 1900: s1 = 1900+500 = 2400 >= 2000 → out of bounds (skipped)
-    QVector<int> events = {100, 1000, 1900};
+    std::vector<int> events = {100, 1000, 1900};
     auto epochs = EpochExtractor::extract(raw, events, sFreq, p);
     QCOMPARE(epochs.size(), 1);
 }
@@ -169,7 +169,7 @@ void TestDspEpochExtractor::extract_baselineCorrection_zerosMean()
     for (int ch = 0; ch < nCh; ++ch)
         raw.row(ch) = MatrixXd::Constant(1, nSamp, static_cast<double>(ch + 1));
 
-    QVector<int> events = {2000};
+    std::vector<int> events = {2000};
     EpochExtractor::Params p;
     p.dTmin = -0.5;
     p.dTmax = 0.5;
@@ -200,7 +200,7 @@ void TestDspEpochExtractor::extract_rejection_marksHighAmplitude()
     // Insert a large spike in channel 0, in the epoch window
     raw(0, 2100) = 1.0; // 1 V spike
 
-    QVector<int> events = {2000};
+    std::vector<int> events = {2000};
     EpochExtractor::Params p;
     p.dTmin = -0.5;
     p.dTmax = 0.5;
@@ -223,7 +223,7 @@ void TestDspEpochExtractor::extract_rejection_keepsgoodEpochs()
     // Small amplitude data — well within threshold
     MatrixXd raw = MatrixXd::Constant(nCh, nSamp, 1e-7);
 
-    QVector<int> events = {2000};
+    std::vector<int> events = {2000};
     EpochExtractor::Params p;
     p.dTmin = -0.5;
     p.dTmax = 0.5;
@@ -242,8 +242,8 @@ void TestDspEpochExtractor::extract_eventCodes_stored()
     const double sFreq = 1000.0;
     MatrixXd raw = MatrixXd::Zero(2, 5000);
 
-    QVector<int> events = {1000, 2000, 3000};
-    QVector<int> codes = {1, 2, 3};
+    std::vector<int> events = {1000, 2000, 3000};
+    std::vector<int> codes = {1, 2, 3};
 
     EpochExtractor::Params p;
     p.dTmin = -0.1;
@@ -266,7 +266,7 @@ void TestDspEpochExtractor::rejectMarked_returnsGoodOnly()
     bad1.bReject = true;
     good2.bReject = false;
 
-    QVector<MNEEpochData> all = {good1, bad1, good2};
+    std::vector<MNEEpochData> all = {good1, bad1, good2};
     auto clean = EpochExtractor::rejectMarked(all);
 
     QCOMPARE(clean.size(), 2);
@@ -311,9 +311,9 @@ void TestDspEpochExtractor::average_allRejected_returnsEmpty()
 void TestDspEpochExtractor::extract_emptyInput_returnsEmpty()
 {
     MatrixXd raw;
-    QVector<int> events = {100};
+    std::vector<int> events = {100};
     auto epochs = EpochExtractor::extract(raw, events, 1000.0);
-    QVERIFY(epochs.isEmpty());
+    QVERIFY(epochs.empty());
 }
 
 //=============================================================================================================

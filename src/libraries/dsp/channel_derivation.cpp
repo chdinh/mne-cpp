@@ -16,6 +16,9 @@
 
 #include "channel_derivation.h"
 
+#include <vector>
+#include <utility>
+
 #include <mne/mne_deriv_set.h>
 
 //=============================================================================================================
@@ -63,7 +66,7 @@ static QString extractShaftPrefix(const QString& name)
 // DEFINE MEMBER METHODS
 //=============================================================================================================
 
-QVector<DerivationRule> ChannelDerivation::buildBipolar(const QStringList& channelNames)
+std::vector<DerivationRule> ChannelDerivation::buildBipolar(const QStringList& channelNames)
 {
     // Group channels by shaft prefix, maintaining original order within each group
     QMap<QString, QStringList> groups;
@@ -78,7 +81,7 @@ QVector<DerivationRule> ChannelDerivation::buildBipolar(const QStringList& chann
     }
 
     // Build bipolar pairs within each group
-    QVector<DerivationRule> rules;
+    std::vector<DerivationRule> rules;
     for (const QString& prefix : groupOrder) {
         const QStringList& group = groups[prefix];
         for (int i = 0; i < group.size() - 1; ++i) {
@@ -86,7 +89,7 @@ QVector<DerivationRule> ChannelDerivation::buildBipolar(const QStringList& chann
             rule.outputName = group[i] + "-" + group[i + 1];
             rule.inputWeights[group[i]] = 1.0;
             rule.inputWeights[group[i + 1]] = -1.0;
-            rules.append(rule);
+            rules.push_back(rule);
         }
     }
 
@@ -95,7 +98,7 @@ QVector<DerivationRule> ChannelDerivation::buildBipolar(const QStringList& chann
 
 //=============================================================================================================
 
-QVector<DerivationRule> ChannelDerivation::buildCommonAverage(const QStringList& channelNames)
+std::vector<DerivationRule> ChannelDerivation::buildCommonAverage(const QStringList& channelNames)
 {
     const int N = channelNames.size();
     if (N == 0) {
@@ -104,7 +107,7 @@ QVector<DerivationRule> ChannelDerivation::buildCommonAverage(const QStringList&
 
     const double invN = 1.0 / static_cast<double>(N);
 
-    QVector<DerivationRule> rules;
+    std::vector<DerivationRule> rules;
     rules.reserve(N);
 
     for (const QString& target : channelNames) {
@@ -115,7 +118,7 @@ QVector<DerivationRule> ChannelDerivation::buildCommonAverage(const QStringList&
         }
         // Override target channel: weight = 1.0 - 1/N
         rule.inputWeights[target] = 1.0 - invN;
-        rules.append(rule);
+        rules.push_back(rule);
     }
 
     return rules;
@@ -123,10 +126,10 @@ QVector<DerivationRule> ChannelDerivation::buildCommonAverage(const QStringList&
 
 //=============================================================================================================
 
-QPair<MatrixXd, QStringList> ChannelDerivation::apply(
+std::pair<MatrixXd, QStringList> ChannelDerivation::apply(
     const MatrixXd& matData,
     const QStringList& channelNames,
-    const QVector<DerivationRule>& rules)
+    const std::vector<DerivationRule>& rules)
 {
     // Build channel name → row index lookup
     QMap<QString, int> chIndex;
@@ -139,7 +142,7 @@ QPair<MatrixXd, QStringList> ChannelDerivation::apply(
     QStringList outputNames;
     outputNames.reserve(rules.size());
 
-    for (int r = 0; r < rules.size(); ++r) {
+    for (int r = 0; r < std::ssize(rules); ++r) {
         const DerivationRule& rule = rules[r];
         outputNames.append(rule.outputName);
 
@@ -154,27 +157,27 @@ QPair<MatrixXd, QStringList> ChannelDerivation::apply(
         }
     }
 
-    return qMakePair(matResult, outputNames);
+    return std::make_pair(matResult, outputNames);
 }
 
 //=============================================================================================================
 
-QVector<DerivationRule> ChannelDerivation::readDefinitionFile(const QString& path)
+std::vector<DerivationRule> ChannelDerivation::readDefinitionFile(const QString& path)
 {
     const std::optional<MNEDerivSet> set = MNEDerivSet::readText(path);
     if (!set) {
         return {};
     }
-    QVector<DerivationRule> rules;
+    std::vector<DerivationRule> rules;
     for (const MNEDerivSet::Definition& definition : set->definitions()) {
-        rules.append({definition.first, definition.second});
+        rules.push_back({definition.first, definition.second});
     }
     return rules;
 }
 
 //=============================================================================================================
 
-bool ChannelDerivation::writeDefinitionFile(const QString& path, const QVector<DerivationRule>& rules)
+bool ChannelDerivation::writeDefinitionFile(const QString& path, const std::vector<DerivationRule>& rules)
 {
     QFile file(path);
     if (!file.open(QIODevice::WriteOnly | QIODevice::Text)) {

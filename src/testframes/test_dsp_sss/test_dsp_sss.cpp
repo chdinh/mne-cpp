@@ -132,7 +132,7 @@ private slots:
             ch.kind = FIFFV_EEG_CH;
 
         SSS::Basis basis = SSS::computeBasis(info, SSS::Params());
-        QVERIFY(basis.megChannelIdx.isEmpty());
+        QVERIFY(basis.megChannelIdx.empty());
         QVERIFY(basis.matProjIn.size() == 0);
     }
 

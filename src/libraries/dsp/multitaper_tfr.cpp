@@ -128,7 +128,7 @@ MultitaperTfrResult MultitaperTfr::compute(const MatrixXd& matData,
             ++stepIdx;
         }
 
-        result.tfrData.append(tfr);
+        result.tfrData.push_back(tfr);
     }
 
     return result;
@@ -152,7 +152,7 @@ MultitaperTfrResult MultitaperTfr::computeArray(const MatrixXd& matData,
     result.vecFreqs = vecFreqs;
     result.vecTimes = RowVectorXd::LinSpaced(nTimes, 0.0, (nTimes - 1) / sfreq);
     for (int ch = 0; ch < nChannels; ++ch)
-        result.tfrData.append(MatrixXd::Zero(nFreqs, nTimes));
+        result.tfrData.push_back(MatrixXd::Zero(nFreqs, nTimes));
 
     for (int fi = 0; fi < nFreqs; ++fi) {
         const double f = vecFreqs[fi];

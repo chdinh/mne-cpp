@@ -16,6 +16,8 @@
 
 #include "ica.h"
 
+#include <vector>
+
 //=============================================================================================================
 // EIGEN INCLUDES
 //=============================================================================================================
@@ -201,9 +203,9 @@ MatrixXd ICA::applyUnmixing(const MatrixXd& matData, const IcaResult& result)
 
 MatrixXd ICA::excludeComponents(const MatrixXd& matData,
                                 const IcaResult& result,
-                                const QVector<int>& excludedComponents)
+                                const std::vector<int>& excludedComponents)
 {
-    if (excludedComponents.isEmpty()) {
+    if (excludedComponents.empty()) {
         return matData;
     }
 
@@ -217,7 +219,7 @@ MatrixXd ICA::excludeComponents(const MatrixXd& matData,
     MatrixXd matCentered = matData.colwise() - result.vecMean;
 
     // Build partial mixing and partial sources for only the excluded components
-    const int nExcl = excludedComponents.size();
+    const int nExcl = static_cast<int>(excludedComponents.size());
     const int nCh = static_cast<int>(result.matMixing.rows());
     const int nSamps = static_cast<int>(matCentered.cols());
 

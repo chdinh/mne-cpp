@@ -34,7 +34,6 @@
 
 #include <string>
 #include <vector>
-#include <QVector>
 
 //=============================================================================================================
 // FORWARD DECLARATIONS
@@ -132,10 +131,10 @@ public:
     }
 
 private:
-    Eigen::MatrixXd m_matBeta;       /**< Regression coefficients (n_targets x n_eog). */
-    QVector<int> m_vecEogIndices;    /**< Indices of EOG channels in the data matrix. */
-    QVector<int> m_vecTargetIndices; /**< Indices of the regressed data channels. */
-    bool m_bFitted = false;          /**< Whether fit() has been called. */
+    Eigen::MatrixXd m_matBeta;           /**< Regression coefficients (n_targets x n_eog). */
+    std::vector<int> m_vecEogIndices;    /**< Indices of EOG channels in the data matrix. */
+    std::vector<int> m_vecTargetIndices; /**< Indices of the regressed data channels. */
+    bool m_bFitted = false;              /**< Whether fit() has been called. */
 };
 
 } // namespace UTILSLIB

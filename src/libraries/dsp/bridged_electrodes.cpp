@@ -16,6 +16,9 @@
 
 #include "bridged_electrodes.h"
 
+#include <vector>
+#include <utility>
+
 #include <fiff/fiff_info.h>
 #include <fiff/fiff_ch_info.h>
 #include <fiff/fiff_constants.h>
@@ -48,14 +51,14 @@ MatrixXd UTILSLIB::computeElectricalDistance(const MatrixXd& data,
                                              const FiffInfo& info)
 {
     // Find EEG channel indices
-    QList<int> eegIdx;
+    std::vector<int> eegIdx;
     for (int i = 0; i < info.chs.size(); ++i) {
         if (info.chs[i].kind == FIFFV_EEG_CH) {
-            eegIdx.append(i);
+            eegIdx.push_back(i);
         }
     }
 
-    const int nEeg = eegIdx.size();
+    const int nEeg = static_cast<int>(eegIdx.size());
     if (nEeg < 2) {
         qWarning() << "[computeElectricalDistance] Need at least 2 EEG channels, found" << nEeg;
         return MatrixXd::Zero(nEeg, nEeg);
@@ -95,21 +98,21 @@ MatrixXd UTILSLIB::computeElectricalDistance(const MatrixXd& data,
 
 //=============================================================================================================
 
-QList<QPair<int, int>> UTILSLIB::computeBridgedElectrodes(
+std::vector<std::pair<int, int>> UTILSLIB::computeBridgedElectrodes(
     const MatrixXd& data,
     const FiffInfo& info,
     const BridgedElectrodeParams& params)
 {
     // Find EEG channel indices
-    QList<int> eegIdx;
+    std::vector<int> eegIdx;
     for (int i = 0; i < info.chs.size(); ++i) {
         if (info.chs[i].kind == FIFFV_EEG_CH) {
-            eegIdx.append(i);
+            eegIdx.push_back(i);
         }
     }
 
-    const int nEeg = eegIdx.size();
-    QList<QPair<int, int>> bridged;
+    const int nEeg = static_cast<int>(eegIdx.size());
+    std::vector<std::pair<int, int>> bridged;
 
     if (nEeg < 2) {
         return bridged;
@@ -121,7 +124,7 @@ QList<QPair<int, int>> UTILSLIB::computeBridgedElectrodes(
     for (int i = 0; i < nEeg; ++i) {
         for (int j = i + 1; j < nEeg; ++j) {
             if (edist(i, j) < params.dElectricalDistanceThreshold) {
-                bridged.append(qMakePair(eegIdx[i], eegIdx[j]));
+                bridged.push_back(std::make_pair(eegIdx[i], eegIdx[j]));
             }
         }
     }

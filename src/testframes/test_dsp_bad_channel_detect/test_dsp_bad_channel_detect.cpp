@@ -96,8 +96,8 @@ void TestDspBadChannelDetect::detectFlat_identifiesZeroChannel()
     data.row(2).setZero();
 
     auto bad = BadChannelDetect::detectFlat(data, 1e-10);
-    QVERIFY(bad.contains(2));
-    QVERIFY(!bad.contains(0));
+    QVERIFY(std::ranges::contains(bad, 2));
+    QVERIFY(!std::ranges::contains(bad, 0));
 }
 
 //=============================================================================================================
@@ -110,7 +110,7 @@ void TestDspBadChannelDetect::detectFlat_identifiesSubThresholdChannel()
     data.row(1) = RowVectorXd::Constant(nSamp, 0.0) + RowVectorXd::LinSpaced(nSamp, 0.0, 1e-15);
 
     auto bad = BadChannelDetect::detectFlat(data, 1e-13);
-    QVERIFY(bad.contains(1));
+    QVERIFY(std::ranges::contains(bad, 1));
 }
 
 //=============================================================================================================
@@ -121,7 +121,7 @@ void TestDspBadChannelDetect::detectFlat_leavesNormalChannelUnflagged()
     MatrixXd data = makeSineMatrix(nCh, nSamp, 1000.0, 20.0);
 
     auto bad = BadChannelDetect::detectFlat(data, 1e-13);
-    QVERIFY(bad.isEmpty());
+    QVERIFY(bad.empty());
 }
 
 //=============================================================================================================
@@ -151,7 +151,7 @@ void TestDspBadChannelDetect::detectHighVariance_identifiesNoisyChannel()
         data(5, t) = 1e-9 * std::sin(2.0 * M_PI * 50.0 * t / 1000.0 + 0.7);
 
     auto bad = BadChannelDetect::detectHighVariance(data, 4.0);
-    QVERIFY(bad.contains(5));
+    QVERIFY(std::ranges::contains(bad, 5));
 }
 
 //=============================================================================================================
@@ -163,7 +163,7 @@ void TestDspBadChannelDetect::detectHighVariance_leavesNormalChannelsUnflagged()
     MatrixXd data = makeSineMatrix(nCh, nSamp, 1000.0, 10.0);
 
     auto bad = BadChannelDetect::detectHighVariance(data, 4.0);
-    QVERIFY(bad.isEmpty());
+    QVERIFY(bad.empty());
 }
 
 //=============================================================================================================
@@ -172,7 +172,7 @@ void TestDspBadChannelDetect::detectHighVariance_tooFewChannels_returnsEmpty()
 {
     MatrixXd data = MatrixXd::Random(2, 500);
     auto bad = BadChannelDetect::detectHighVariance(data, 4.0);
-    QVERIFY(bad.isEmpty());
+    QVERIFY(bad.empty());
 }
 
 //=============================================================================================================
@@ -191,7 +191,7 @@ void TestDspBadChannelDetect::detectLowCorrelation_identifiesUncorrelatedChannel
         data(4, t) = static_cast<double>(rand()) / RAND_MAX - 0.5;
 
     auto bad = BadChannelDetect::detectLowCorrelation(data, 0.4, 3);
-    QVERIFY(bad.contains(4));
+    QVERIFY(std::ranges::contains(bad, 4));
 }
 
 //=============================================================================================================
@@ -202,7 +202,7 @@ void TestDspBadChannelDetect::detectLowCorrelation_correlatedChannels_unflagged(
     MatrixXd data = makeSineMatrix(nCh, nSamp, 1000.0, 10.0);
 
     auto bad = BadChannelDetect::detectLowCorrelation(data, 0.4, 3);
-    QVERIFY(bad.isEmpty());
+    QVERIFY(bad.empty());
 }
 
 //=============================================================================================================
@@ -211,7 +211,7 @@ void TestDspBadChannelDetect::detectLowCorrelation_singleChannel_returnsEmpty()
 {
     MatrixXd data = MatrixXd::Random(1, 500);
     auto bad = BadChannelDetect::detectLowCorrelation(data, 0.4, 3);
-    QVERIFY(bad.isEmpty());
+    QVERIFY(bad.empty());
 }
 
 //=============================================================================================================
@@ -238,11 +238,11 @@ void TestDspBadChannelDetect::detect_unionOfAllThree()
     auto bad = BadChannelDetect::detect(data, p);
 
     // Both flagged channels must appear exactly once
-    QVERIFY(bad.contains(0));
-    QVERIFY(bad.contains(6));
+    QVERIFY(std::ranges::contains(bad, 0));
+    QVERIFY(std::ranges::contains(bad, 6));
 
     // No duplicates
-    QVector<int> sorted = bad;
+    std::vector<int> sorted = bad;
     std::sort(sorted.begin(), sorted.end());
     auto it = std::unique(sorted.begin(), sorted.end());
     QCOMPARE(it, sorted.end());
@@ -262,7 +262,7 @@ void TestDspBadChannelDetect::detect_noDefaults_clean_returnsEmpty()
     p.dCorrThresh = 0.4;
 
     auto bad = BadChannelDetect::detect(data, p);
-    QVERIFY(bad.isEmpty());
+    QVERIFY(bad.empty());
 }
 
 //=============================================================================================================

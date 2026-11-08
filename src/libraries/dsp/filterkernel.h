@@ -42,6 +42,8 @@
 //=============================================================================================================
 
 #include "dsp_global.h"
+
+#include <vector>
 //#include "filter.h"
 
 //=============================================================================================================
@@ -56,7 +58,6 @@
 
 #include <QString>
 #include <QMetaType>
-#include <QVector>
 #include <QDebug>
 
 //=============================================================================================================
@@ -230,8 +231,24 @@ public:
 
     QString getShortDescription() const;
 
-    static QVector<FilterParameter> m_designMethods; /**< Vector of possible filter design methods. */
-    static QVector<FilterParameter> m_filterTypes;   /**< Vector of possible filter design types. */
+    //=========================================================================================================
+    /**
+     * @param[in] sName    A design method name, e.g. "Cosine".
+     *
+     * @return The index of the method in m_designMethods, or -1 if there is none of that name.
+     */
+    static int designMethodIndex(const QString& sName);
+
+    //=========================================================================================================
+    /**
+     * @param[in] sName    A filter type name, e.g. "BPF".
+     *
+     * @return The index of the type in m_filterTypes, or -1 if there is none of that name.
+     */
+    static int filterTypeIndex(const QString& sName);
+
+    static const std::vector<FilterParameter> m_designMethods; /**< Vector of possible filter design methods. */
+    static const std::vector<FilterParameter> m_filterTypes;   /**< Vector of possible filter design types. */
 
 private:
     //=========================================================================================================

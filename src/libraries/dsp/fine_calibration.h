@@ -23,6 +23,8 @@
 
 #include "dsp_global.h"
 
+#include <vector>
+
 //=============================================================================================================
 // EIGEN INCLUDES
 //=============================================================================================================
@@ -34,7 +36,6 @@
 //=============================================================================================================
 
 #include <QString>
-#include <QList>
 
 //=============================================================================================================
 // DEFINE NAMESPACE UTILSLIB
@@ -101,7 +102,7 @@ public:
      *
      * @return Const reference to the list of per-channel calibration entries.
      */
-    const QList<FineCalEntry>& entries() const
+    const std::vector<FineCalEntry>& entries() const
     {
         return m_entries;
     }
@@ -114,7 +115,7 @@ public:
      */
     int size() const
     {
-        return m_entries.size();
+        return static_cast<int>(m_entries.size());
     }
 
     //=========================================================================================================
@@ -125,7 +126,7 @@ public:
      */
     bool empty() const
     {
-        return m_entries.isEmpty();
+        return m_entries.empty();
     }
 
     //=========================================================================================================
@@ -147,7 +148,7 @@ public:
      */
     void addEntry(const FineCalEntry& entry)
     {
-        m_entries.append(entry);
+        m_entries.push_back(entry);
     }
 
     //=========================================================================================================
@@ -169,7 +170,7 @@ public:
     Eigen::MatrixXd imbalanceMatrix() const;
 
 private:
-    QList<FineCalEntry> m_entries;
+    std::vector<FineCalEntry> m_entries;
 };
 
 } // namespace UTILSLIB

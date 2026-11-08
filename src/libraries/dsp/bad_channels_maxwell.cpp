@@ -64,12 +64,12 @@ BadChannelsMaxwellResult UTILSLIB::findBadChannelsMaxwell(
 
     SSS::Basis basis = SSS::computeBasis(info, sssParams);
 
-    if (basis.megChannelIdx.isEmpty()) {
+    if (basis.megChannelIdx.empty()) {
         qWarning() << "[findBadChannelsMaxwell] No MEG channels found.";
         return result;
     }
 
-    const int nMeg = basis.megChannelIdx.size();
+    const int nMeg = static_cast<int>(basis.megChannelIdx.size());
 
     // Extract MEG data
     int nTimes = static_cast<int>(matData.cols());
@@ -129,7 +129,7 @@ BadChannelsMaxwellResult UTILSLIB::findBadChannelsMaxwell(
     for (int i = 0; i < nMeg; ++i) {
         if (result.zScores(i) > params.dZThreshold) {
             int origIdx = basis.megChannelIdx[i];
-            result.badIndices.append(origIdx);
+            result.badIndices.push_back(origIdx);
             if (origIdx < static_cast<int>(info.ch_names.size())) {
                 result.badChannels.push_back(info.ch_names[origIdx]);
             }

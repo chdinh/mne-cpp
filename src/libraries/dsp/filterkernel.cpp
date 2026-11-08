@@ -16,6 +16,8 @@
 
 #include "filterkernel.h"
 
+#include <vector>
+
 #include <math/numerics.h>
 
 #include "parksmcclellan.h"
@@ -50,16 +52,24 @@ using namespace Eigen;
 // INIT STATIC MEMBERS
 //=============================================================================================================
 
-QVector<UTILSLIB::FilterParameter> FilterKernel::m_designMethods({
-    FilterParameter(QString("Cosine"), QString("A cosine filter")),
-    FilterParameter(QString("Tschebyscheff"), QString("A tschebyscheff filter"))
-    //    FilterParameter(QString("External"), QString("An external filter"))
-});
-QVector<UTILSLIB::FilterParameter> FilterKernel::m_filterTypes({FilterParameter(QString("LPF"), QString("An LPF filter")),
-                                                                FilterParameter(QString("HPF"), QString("An HPF filter")),
-                                                                FilterParameter(QString("BPF"), QString("A BPF filter")),
-                                                                FilterParameter(QString("NOTCH"), QString("A NOTCH filter")),
-                                                                FilterParameter(QString("UNKNOWN"), QString("An UNKNOWN filter"))});
+const std::vector<UTILSLIB::FilterParameter> FilterKernel::m_designMethods({FilterParameter(QString("Cosine"), QString("A cosine filter")),
+                                                                            FilterParameter(QString("Tschebyscheff"), QString("A tschebyscheff filter"))});
+const std::vector<UTILSLIB::FilterParameter> FilterKernel::m_filterTypes({FilterParameter(QString("LPF"), QString("An LPF filter")),
+                                                                          FilterParameter(QString("HPF"), QString("An HPF filter")),
+                                                                          FilterParameter(QString("BPF"), QString("A BPF filter")),
+                                                                          FilterParameter(QString("NOTCH"), QString("A NOTCH filter")),
+                                                                          FilterParameter(QString("UNKNOWN"), QString("An UNKNOWN filter"))});
+
+namespace
+{
+
+int indexOfName(const std::vector<FilterParameter>& table, const QString& sName)
+{
+    const auto it = std::ranges::find(table, sName, &FilterParameter::getName);
+    return it == table.end() ? -1 : static_cast<int>(it - table.begin());
+}
+
+} // namespace
 
 //=============================================================================================================
 // DEFINE MEMBER METHODS
@@ -73,8 +83,8 @@ FilterKernel::FilterKernel()
 , m_dLowpassFreq(40)
 , m_dHighpassFreq(4)
 , m_iFilterOrder(80)
-, m_iDesignMethod(m_designMethods.indexOf(FilterParameter("Cosine")))
-, m_iFilterType(m_filterTypes.indexOf(FilterParameter("BPF")))
+, m_iDesignMethod(designMethodIndex("Cosine"))
+, m_iFilterType(filterTypeIndex("BPF"))
 , m_sFilterName("Unknown")
 , m_sFilterShortDescription("")
 {
@@ -529,14 +539,14 @@ UTILSLIB::FilterParameter FilterKernel::getFilterType() const
 
 void FilterKernel::setDesignMethod(int iDesignMethod)
 {
-    m_iDesignMethod = (iDesignMethod >= 0 && iDesignMethod < m_designMethods.size()) ? iDesignMethod : 0;
+    m_iDesignMethod = (iDesignMethod >= 0 && iDesignMethod < std::ssize(m_designMethods)) ? iDesignMethod : 0;
 }
 
 //=============================================================================================================
 
 void FilterKernel::setFilterType(int iFilterType)
 {
-    m_iFilterType = (iFilterType >= 0 && iFilterType < m_filterTypes.size()) ? iFilterType : 0;
+    m_iFilterType = (iFilterType >= 0 && iFilterType < std::ssize(m_filterTypes)) ? iFilterType : 0;
 }
 
 //=============================================================================================================
@@ -570,3 +580,17 @@ QString FilterParameter::getName() const
 }
 
 //=============================================================================================================
+
+//=============================================================================================================
+
+int FilterKernel::designMethodIndex(const QString& sName)
+{
+    return indexOfName(m_designMethods, sName);
+}
+
+//=============================================================================================================
+
+int FilterKernel::filterTypeIndex(const QString& sName)
+{
+    return indexOfName(m_filterTypes, sName);
+}

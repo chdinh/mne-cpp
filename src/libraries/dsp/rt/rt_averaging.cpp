@@ -62,7 +62,7 @@ RtAveragingWorker::RtAveragingWorker(quint32 numAverages,
 , m_fTriggerThreshold(0.5f)
 , m_bActivateThreshold(false)
 , m_bDoBaselineCorrection(false)
-, m_pairBaselineSec(qMakePair(float(iBaselineFromMSecs) / 1000.0f, float(iBaselineToMSecs) / 1000.0f))
+, m_pairBaselineSec(std::make_pair(float(iBaselineFromMSecs) / 1000.0f, float(iBaselineToMSecs) / 1000.0f))
 , m_pFiffInfo(pFiffInfo)
 {
     m_mapThresholds["eog"] = 300e-6;
@@ -169,7 +169,7 @@ void RtAveragingWorker::setBaselineActive(bool activate)
 
     if (!m_bDoBaselineCorrection) {
         for (int i = 0; i < m_stimEvokedSet.evoked.size(); ++i) {
-            m_stimEvokedSet.evoked[i].baseline = qMakePair(-1.0f, -1.0f);
+            m_stimEvokedSet.evoked[i].baseline = std::make_pair(-1.0f, -1.0f);
         }
     } else {
         for (int i = 0; i < m_stimEvokedSet.evoked.size(); ++i) {

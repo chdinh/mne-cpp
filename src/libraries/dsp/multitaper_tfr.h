@@ -34,6 +34,8 @@
 
 #include "dsp_global.h"
 
+#include <vector>
+
 //=============================================================================================================
 // EIGEN INCLUDES
 //=============================================================================================================
@@ -44,7 +46,6 @@
 // QT INCLUDES
 //=============================================================================================================
 
-#include <QVector>
 
 //=============================================================================================================
 // DEFINE NAMESPACE UTILSLIB
@@ -61,9 +62,9 @@ namespace UTILSLIB
  */
 struct DSPSHARED_EXPORT MultitaperTfrResult
 {
-    QVector<Eigen::MatrixXd> tfrData; ///< One matrix per channel, each: n_freqs × n_times
-    Eigen::RowVectorXd vecFreqs;      ///< Frequency axis in Hz
-    Eigen::RowVectorXd vecTimes;      ///< Time axis in seconds (window centres)
+    std::vector<Eigen::MatrixXd> tfrData; ///< One matrix per channel, each: n_freqs × n_times
+    Eigen::RowVectorXd vecFreqs;          ///< Frequency axis in Hz
+    Eigen::RowVectorXd vecTimes;          ///< Time axis in seconds (window centres)
 };
 
 //=============================================================================================================

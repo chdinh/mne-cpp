@@ -15,6 +15,8 @@
 //=============================================================================================================
 
 #include "filter_chpi.h"
+
+#include <vector>
 #include "iirfilter.h"
 
 #include <fiff/fiff_info.h>
@@ -41,12 +43,12 @@ using namespace Eigen;
 /**
  * @brief Collect indices of MEG channels from info.
  */
-static QVector<int> megChannelIndices(const FiffInfo& info)
+static std::vector<int> megChannelIndices(const FiffInfo& info)
 {
-    QVector<int> indices;
+    std::vector<int> indices;
     for (int i = 0; i < info.chs.size(); ++i) {
         if (info.chs[i].kind == FIFFV_MEG_CH) {
-            indices.append(i);
+            indices.push_back(i);
         }
     }
     return indices;
@@ -59,10 +61,10 @@ static QVector<int> megChannelIndices(const FiffInfo& info)
 void UTILSLIB::filterChpi(MatrixXd& data,
                           const FiffInfo& info,
                           double sfreq,
-                          const QVector<double>& hpiFreqs,
+                          const std::vector<double>& hpiFreqs,
                           const FilterChpiParams& params)
 {
-    if (hpiFreqs.isEmpty()) {
+    if (hpiFreqs.empty()) {
         return;
     }
 
@@ -74,7 +76,7 @@ void UTILSLIB::filterChpi(MatrixXd& data,
     const double dNyquist = sfreq / 2.0;
 
     // Collect valid frequencies
-    QVector<double> validFreqs;
+    std::vector<double> validFreqs;
     for (const double freq : hpiFreqs) {
         const double fLow = freq - params.dNotchWidth;
         const double fHigh = freq + params.dNotchWidth;
@@ -88,24 +90,24 @@ void UTILSLIB::filterChpi(MatrixXd& data,
                        << "Hz (notch lower edge <= 0 Hz).";
             continue;
         }
-        validFreqs.append(freq);
+        validFreqs.push_back(freq);
     }
 
-    if (validFreqs.isEmpty()) {
+    if (validFreqs.empty()) {
         return;
     }
 
     if (params.bMegOnly) {
         // Filter only MEG channels
-        const QVector<int> megIdx = megChannelIndices(info);
-        if (megIdx.isEmpty()) {
+        const std::vector<int> megIdx = megChannelIndices(info);
+        if (megIdx.empty()) {
             qWarning() << "filterChpi: No MEG channels found in FiffInfo. Nothing to filter.";
             return;
         }
 
         // Extract MEG submatrix
         MatrixXd megData(megIdx.size(), data.cols());
-        for (int i = 0; i < megIdx.size(); ++i) {
+        for (int i = 0; i < std::ssize(megIdx); ++i) {
             megData.row(i) = data.row(megIdx[i]);
         }
 
@@ -114,14 +116,14 @@ void UTILSLIB::filterChpi(MatrixXd& data,
             const double fLow = freq - params.dNotchWidth;
             const double fHigh = freq + params.dNotchWidth;
 
-            QVector<IirBiquad> sos = IirFilter::designButterworth(
+            std::vector<IirBiquad> sos = IirFilter::designButterworth(
                 params.iFilterOrder, IirFilter::BandStop, fLow, fHigh, sfreq);
 
             megData = IirFilter::applyZeroPhaseMatrix(megData, sos);
         }
 
         // Write back
-        for (int i = 0; i < megIdx.size(); ++i) {
+        for (int i = 0; i < std::ssize(megIdx); ++i) {
             data.row(megIdx[i]) = megData.row(i);
         }
     } else {
@@ -130,7 +132,7 @@ void UTILSLIB::filterChpi(MatrixXd& data,
             const double fLow = freq - params.dNotchWidth;
             const double fHigh = freq + params.dNotchWidth;
 
-            QVector<IirBiquad> sos = IirFilter::designButterworth(
+            std::vector<IirBiquad> sos = IirFilter::designButterworth(
                 params.iFilterOrder, IirFilter::BandStop, fLow, fHigh, sfreq);
 
             data = IirFilter::applyZeroPhaseMatrix(data, sos);

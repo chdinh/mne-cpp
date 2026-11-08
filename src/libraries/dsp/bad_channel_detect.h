@@ -35,6 +35,8 @@
 
 #include "dsp_global.h"
 
+#include <vector>
+
 //=============================================================================================================
 // EIGEN INCLUDES
 //=============================================================================================================
@@ -45,7 +47,6 @@
 // QT INCLUDES
 //=============================================================================================================
 
-#include <QVector>
 
 //=============================================================================================================
 // DEFINE NAMESPACE UTILSLIB
@@ -95,8 +96,8 @@ public:
      *
      * @return Sorted list of bad channel row indices (0-based).
      */
-    static QVector<int> detect(const Eigen::MatrixXd& matData,
-                               const Params& params = Params());
+    static std::vector<int> detect(const Eigen::MatrixXd& matData,
+                                   const Params& params = Params());
 
     //=========================================================================================================
     /**
@@ -109,8 +110,8 @@ public:
      *
      * @return Row indices of flat channels.
      */
-    static QVector<int> detectFlat(const Eigen::MatrixXd& matData,
-                                   double dThreshold = 1e-13);
+    static std::vector<int> detectFlat(const Eigen::MatrixXd& matData,
+                                       double dThreshold = 1e-13);
 
     //=========================================================================================================
     /**
@@ -125,8 +126,8 @@ public:
      *
      * @return Row indices of high-variance channels.
      */
-    static QVector<int> detectHighVariance(const Eigen::MatrixXd& matData,
-                                           double dZThresh = 4.0);
+    static std::vector<int> detectHighVariance(const Eigen::MatrixXd& matData,
+                                               double dZThresh = 4.0);
 
     //=========================================================================================================
     /**
@@ -146,9 +147,9 @@ public:
      *
      * @return Row indices of low-correlation channels.
      */
-    static QVector<int> detectLowCorrelation(const Eigen::MatrixXd& matData,
-                                             double dCorrThresh = 0.4,
-                                             int iNeighbours = 5);
+    static std::vector<int> detectLowCorrelation(const Eigen::MatrixXd& matData,
+                                                 double dCorrThresh = 0.4,
+                                                 int iNeighbours = 5);
 
 private:
     //=========================================================================================================
@@ -162,7 +163,7 @@ private:
     /**
      * Compute the median of a vector of doubles.
      */
-    static double median(QVector<double> values);
+    static double median(std::vector<double> values);
 };
 
 } // namespace UTILSLIB

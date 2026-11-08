@@ -61,34 +61,34 @@ using namespace Eigen;
 namespace
 {
 
-QVector<int> goodChannelsOfKind(const FiffInfo& info, int kind)
+std::vector<int> goodChannelsOfKind(const FiffInfo& info, int kind)
 {
-    QVector<int> idx;
+    std::vector<int> idx;
     for (int i = 0; i < info.nchan; ++i) {
         if (info.chs[i].kind == kind && !info.isBad(info.chs[i].ch_name))
-            idx.append(i);
+            idx.push_back(i);
     }
     return idx;
 }
 
 // Adapted from mne.preprocessing.ssp._compute_exg_proj (MNE-Python, BSD-3-Clause).
-QList<FiffProj> exgProjectors(const MatrixXd& data, const FiffInfo& info, double sf, const QVector<int>& events,
+QList<FiffProj> exgProjectors(const MatrixXd& data, const FiffInfo& info, double sf, const std::vector<int>& events,
                               const ArtifactDetectProjParams& p, const QString& mode)
 {
     QList<FiffProj> projs = info.projs;
-    if (events.isEmpty()) {
+    if (events.empty()) {
         qWarning() << "[ArtifactDetect] No" << mode << "events found";
         return projs;
     }
 
-    QVector<int> picks;
+    std::vector<int> picks;
     for (int kind : {FIFFV_MEG_CH, FIFFV_EEG_CH, FIFFV_EOG_CH, FIFFV_ECG_CH}) {
-        picks += goodChannelsOfKind(info, kind);
+        std::ranges::copy(goodChannelsOfKind(info, kind), std::back_inserter(picks));
     }
-    std::sort(picks.begin(), picks.end());
+    std::ranges::sort(picks);
     RowVectorXi sel(picks.size());
     MatrixXd picked(picks.size(), data.cols());
-    for (int c = 0; c < picks.size(); ++c) {
+    for (int c = 0; c < std::ssize(picks); ++c) {
         sel(c) = picks[c];
         picked.row(c) = data.row(picks[c]);
     }
@@ -103,8 +103,8 @@ QList<FiffProj> exgProjectors(const MatrixXd& data, const FiffInfo& info, double
     MatrixXd projector;
     FiffProj::make_projector(active, pickedInfo.ch_names, projector, pickedInfo.bads);
 
-    QVector<double> limits(picks.size(), 0.0);
-    for (int c = 0; c < picks.size(); ++c) {
+    std::vector<double> limits(picks.size(), 0.0);
+    for (int c = 0; c < std::ssize(picks); ++c) {
         const FiffChInfo& ch = pickedInfo.chs[c];
         if (ch.kind == FIFFV_MEG_CH) {
             limits[c] = ch.unit == FIFF_UNIT_T ? p.dMagReject : p.dGradReject;
@@ -125,7 +125,7 @@ QList<FiffProj> exgProjectors(const MatrixXd& data, const FiffInfo& info, double
         }
         const MatrixXd epoch = projector * filtered.middleCols(ev + first, last - first + 1);
         bool good = true;
-        for (int c = 0; c < picks.size() && good; ++c) {
+        for (int c = 0; c < std::ssize(picks) && good; ++c) {
             good = limits[c] <= 0.0 || epoch.row(c).maxCoeff() - epoch.row(c).minCoeff() <= limits[c];
         }
         if (good) {
@@ -154,7 +154,7 @@ QList<FiffProj> exgProjectors(const MatrixXd& data, const FiffInfo& info, double
 
 //=============================================================================================================
 
-QVector<int> ArtifactDetect::qrsDetector(const RowVectorXd& filtered, double dSFreq, double dThreshold, double dTStart)
+std::vector<int> ArtifactDetect::qrsDetector(const RowVectorXd& filtered, double dSFreq, double dThreshold, double dTStart)
 {
     // Adapted from mne.preprocessing.qrs_detector (MNE-Python, BSD-3-Clause), filtering done by the caller.
     const int winSize = static_cast<int>(std::nearbyint(60.0 * dSFreq / 120.0));
@@ -176,17 +176,17 @@ QVector<int> ArtifactDetect::qrsDetector(const RowVectorXd& filtered, double dSF
         threshRuns.push_back(dThreshold);
     }
 
-    QVector<QVector<int>> cleanEvents;
+    std::vector<std::vector<int>> cleanEvents;
     for (double threshValue : threshRuns) {
         const double thresh1 = initMax * threshValue;
-        QVector<int> times;
+        std::vector<int> times;
         std::vector<double> rms;
         for (int ii = 0; ii < nPoints - winSize;) {
             const auto window = ecgAbs.segment(ii, winSize);
             if (window(0) > thresh1) {
                 Index maxTime = 0;
                 window.maxCoeff(&maxTime);
-                times.append(ii + static_cast<int>(maxTime));
+                times.push_back(ii + static_cast<int>(maxTime));
                 rms.push_back(std::sqrt(window.squaredNorm() / winSize));
                 ii += winSize;
             } else {
@@ -204,21 +204,21 @@ QVector<int> ArtifactDetect::qrsDetector(const RowVectorXd& filtered, double dSF
         for (double r : rms)
             var += (r - mean) * (r - mean);
         const double rmsThresh = mean + std::sqrt(var / static_cast<double>(rms.size())) * 2.5;
-        QVector<int> events;
-        for (int k = 0; k < times.size(); ++k) {
+        std::vector<int> events;
+        for (int k = 0; k < std::ssize(times); ++k) {
             if (rms[static_cast<std::size_t>(k)] < rmsThresh)
-                events.append(times[k] + nStart);
+                events.push_back(times[k] + nStart);
         }
-        if (!events.isEmpty())
-            cleanEvents.append(events);
+        if (!events.empty())
+            cleanEvents.push_back(events);
     }
-    if (cleanEvents.isEmpty())
+    if (cleanEvents.empty())
         return {};
 
     // Pick the threshold whose heart rate is closest to the median plausible (40-160 bpm) one, else 80 bpm
     std::vector<double> rates;
     std::vector<double> plausible;
-    for (const QVector<int>& events : std::as_const(cleanEvents)) {
+    for (const std::vector<int>& events : std::as_const(cleanEvents)) {
         rates.push_back(60.0 * events.size() / (filtered.size() / dSFreq));
         if (rates.back() >= 40.0 && rates.back() <= 160.0)
             plausible.push_back(rates.back());
@@ -241,25 +241,25 @@ QVector<int> ArtifactDetect::qrsDetector(const RowVectorXd& filtered, double dSF
 // PUBLIC DEFINITIONS
 //=============================================================================================================
 
-QVector<int> ArtifactDetect::detectEcg(const MatrixXd& matData,
-                                       const FiffInfo& fiffInfo,
-                                       double dSFreq,
-                                       const EcgParams& params)
+std::vector<int> ArtifactDetect::detectEcg(const MatrixXd& matData,
+                                           const FiffInfo& fiffInfo,
+                                           double dSFreq,
+                                           const EcgParams& params)
 {
     // Adapted from mne.preprocessing.find_ecg_events / _make_ecg (MNE-Python, BSD-3-Clause).
     if (matData.cols() == 0)
         return {};
 
     RowVectorXd ecg;
-    const QVector<int> ecgIdx = goodChannelsOfKind(fiffInfo, FIFFV_ECG_CH);
-    if (!ecgIdx.isEmpty()) {
-        ecg = matData.row(ecgIdx.first());
+    const std::vector<int> ecgIdx = goodChannelsOfKind(fiffInfo, FIFFV_ECG_CH);
+    if (!ecgIdx.empty()) {
+        ecg = matData.row(ecgIdx.front());
     } else {
-        QVector<int> mags, grads;
+        std::vector<int> mags, grads;
         for (int i : goodChannelsOfKind(fiffInfo, FIFFV_MEG_CH))
-            (fiffInfo.chs[i].unit == FIFF_UNIT_T ? mags : grads).append(i);
-        const QVector<int>& meg = mags.isEmpty() ? grads : mags;
-        if (meg.isEmpty()) {
+            (fiffInfo.chs[i].unit == FIFF_UNIT_T ? mags : grads).push_back(i);
+        const std::vector<int>& meg = mags.empty() ? grads : mags;
+        if (meg.empty()) {
             qWarning() << "ArtifactDetect::detectEcg: no ECG channel and no MEG channels to synthesise one from.";
             return {};
         }
@@ -275,21 +275,21 @@ QVector<int> ArtifactDetect::detectEcg(const MatrixXd& matData,
 
 //=============================================================================================================
 
-QVector<int> ArtifactDetect::detectEog(const MatrixXd& matData,
-                                       const FiffInfo& fiffInfo,
-                                       double dSFreq,
-                                       const EogParams& params)
+std::vector<int> ArtifactDetect::detectEog(const MatrixXd& matData,
+                                           const FiffInfo& fiffInfo,
+                                           double dSFreq,
+                                           const EogParams& params)
 {
     // Adapted from mne.preprocessing._find_eog_events (MNE-Python, BSD-3-Clause).
-    const QVector<int> eogIdx = goodChannelsOfKind(fiffInfo, FIFFV_EOG_CH);
-    if (eogIdx.isEmpty() || matData.cols() == 0) {
+    const std::vector<int> eogIdx = goodChannelsOfKind(fiffInfo, FIFFV_EOG_CH);
+    if (eogIdx.empty() || matData.cols() == 0) {
         qWarning() << "ArtifactDetect::detectEog: No EOG channel found.";
         return {};
     }
 
     // The channel with the most 2-45 Hz energy
     MatrixXd eog(eogIdx.size(), matData.cols());
-    for (int k = 0; k < eogIdx.size(); ++k)
+    for (int k = 0; k < std::ssize(eogIdx); ++k)
         eog.row(k) = matData.row(eogIdx[k]);
     const MatrixXd broad = FirFilter::filterDataZeroDouble(eog, dSFreq, 2.0, std::min(45.0, dSFreq / 2.0 - 0.75));
     Index best = 0;
@@ -300,10 +300,10 @@ QVector<int> ArtifactDetect::detectEog(const MatrixXd& matData,
     const int extrema = std::abs(filtered.maxCoeff() - mean) > std::abs(filtered.minCoeff() - mean) ? 1 : -1;
     const int nStart = static_cast<int>(dSFreq * params.dTStart);
 
-    QVector<int> events;
+    std::vector<int> events;
     const VectorXd tail = filtered.tail(std::max<Index>(filtered.size() - nStart, 0)).transpose();
     for (const auto& peak : peakFinderMne(tail, params.dThreshold, extrema))
-        events.append(peak.first + nStart);
+        events.push_back(peak.first + nStart);
     return events;
 }
 

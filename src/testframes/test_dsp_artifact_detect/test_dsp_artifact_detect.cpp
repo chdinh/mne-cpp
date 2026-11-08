@@ -139,10 +139,10 @@ private slots:
         MatrixXd data(1, nSamp);
         data.row(0) = makeSyntheticEcg(nSamp, fs, bpm, 1.0, 0.02);
 
-        QVector<int> peaks = ArtifactDetect::detectEcg(data, info, fs);
+        std::vector<int> peaks = ArtifactDetect::detectEcg(data, info, fs);
 
         // Allow ±2 peaks tolerance
-        QVERIFY2(std::abs(peaks.size() - expectedPeaks) <= 2,
+        QVERIFY2(std::abs(std::ssize(peaks) - expectedPeaks) <= 2,
                  qPrintable(QString("Expected ~%1 peaks, got %2").arg(expectedPeaks).arg(peaks.size())));
     }
 
@@ -157,10 +157,10 @@ private slots:
         MatrixXd data(1, nSamp);
         data.row(0) = makeSyntheticEcg(nSamp, fs, bpm, 1.0, 0.01);
 
-        QVector<int> peaks = ArtifactDetect::detectEcg(data, info, fs);
+        std::vector<int> peaks = ArtifactDetect::detectEcg(data, info, fs);
         QVERIFY2(peaks.size() >= 2, "Need at least 2 peaks to check spacing");
 
-        for (int i = 1; i < peaks.size(); ++i) {
+        for (int i = 1; i < std::ssize(peaks); ++i) {
             int spacing = peaks[i] - peaks[i - 1];
             // Spacing should be roughly 1000 ± 200 samples
             QVERIFY2(spacing > 700 && spacing < 1300,
@@ -184,7 +184,7 @@ private slots:
         }
 
         // Should not crash and should detect some peaks
-        QVector<int> peaks = ArtifactDetect::detectEcg(data, info, fs);
+        std::vector<int> peaks = ArtifactDetect::detectEcg(data, info, fs);
         QVERIFY2(peaks.size() > 0, "Expected some ECG peaks from MEG fallback");
     }
 
@@ -193,8 +193,8 @@ private slots:
         FiffInfo info;
         info.nchan = 0;
         MatrixXd data;
-        QVector<int> peaks = ArtifactDetect::detectEcg(data, info, 1000.0);
-        QVERIFY(peaks.isEmpty());
+        std::vector<int> peaks = ArtifactDetect::detectEcg(data, info, 1000.0);
+        QVERIFY(peaks.empty());
     }
 
     //=========================================================================
@@ -214,9 +214,9 @@ private slots:
 
         ArtifactDetect::EogParams params;
         params.dThreshold = 100e-6;
-        QVector<int> events = ArtifactDetect::detectEog(data, info, fs, params);
+        std::vector<int> events = ArtifactDetect::detectEog(data, info, fs, params);
 
-        QVERIFY2(std::abs(events.size() - expectedBlinks) <= 1,
+        QVERIFY2(std::abs(std::ssize(events) - expectedBlinks) <= 1,
                  qPrintable(QString("Expected ~%1 blinks, got %2")
                                 .arg(expectedBlinks)
                                 .arg(events.size())));
@@ -226,8 +226,8 @@ private slots:
     {
         FiffInfo info = makeInfoWithEcgEog(5, /*hasEcg=*/true, /*hasEog=*/false);
         MatrixXd data = MatrixXd::Random(6, 2000);
-        QVector<int> events = ArtifactDetect::detectEog(data, info, 1000.0);
-        QVERIFY(events.isEmpty());
+        std::vector<int> events = ArtifactDetect::detectEog(data, info, 1000.0);
+        QVERIFY(events.empty());
     }
 
     void eog_multipleChannels_usesLargestAmplitude()
@@ -251,7 +251,7 @@ private slots:
         // Channel 1: tiny signal
         data.row(1) = RowVectorXd::Constant(nSamp, 1e-9);
 
-        QVector<int> events = ArtifactDetect::detectEog(data, info, fs);
+        std::vector<int> events = ArtifactDetect::detectEog(data, info, fs);
 
         // Must detect events from the large channel
         QVERIFY2(events.size() >= 1, "Should detect blinks from the high-amplitude EOG channel");
@@ -273,23 +273,23 @@ private slots:
     void eventsMatchMnePython_data()
     {
         QTest::addColumn<QString>("call");
-        QTest::addColumn<QVector<int>>("expected");
-        const QVector<int> beats{78, 285, 492, 700, 907, 1115, 1323, 1530, 1738, 1945, 2152, 2360, 2568, 2775};
+        QTest::addColumn<std::vector<int>>("expected");
+        const std::vector<int> beats{78, 285, 492, 700, 907, 1115, 1323, 1530, 1738, 1945, 2152, 2360, 2568, 2775};
         QTest::newRow("find_ecg_events") << "ecg" << beats;
         QTest::newRow("find_ecg_events, no ECG channel") << "ecg-mag" << beats;
-        QTest::newRow("find_ecg_events(qrs_threshold=0.6, tstart=1)") << "ecg-0.6-t1" << beats.mid(1);
-        QTest::newRow("find_eog_events") << "eog" << QVector<int>{214, 425, 632, 1300, 1508, 2475, 2683};
+        QTest::newRow("find_ecg_events(qrs_threshold=0.6, tstart=1)") << "ecg-0.6-t1" << std::vector<int>(beats.begin() + 1, beats.end());
+        QTest::newRow("find_eog_events") << "eog" << std::vector<int>{214, 425, 632, 1300, 1508, 2475, 2683};
         // mne.preprocessing.ica_find_ecg_events(raw, 3 * ecg / ecg.std()) and
         // ica_find_eog_events(raw, eog2 / eog2.std()): the same detectors run on a single
         // ICA source time course.
         QTest::newRow("ica_find_ecg_events") << "ica-ecg" << beats;
-        QTest::newRow("ica_find_eog_events") << "ica-eog" << QVector<int>{209, 426, 625, 1299, 2291, 2473, 2960};
+        QTest::newRow("ica_find_eog_events") << "ica-eog" << std::vector<int>{209, 426, 625, 1299, 2291, 2473, 2960};
     }
 
     void eventsMatchMnePython()
     {
         QFETCH(QString, call);
-        QFETCH(QVector<int>, expected);
+        QFETCH(std::vector<int>, expected);
 
         const double sf = 250.0;
         const int n = 3000;
@@ -323,7 +323,7 @@ private slots:
         }
         info.nchan = 6;
 
-        QVector<int> got;
+        std::vector<int> got;
         if (call.startsWith("ica-")) {
             // One ICA source, unit-free, carried as the only ECG / EOG channel.
             const bool ecg = call == "ica-ecg";
@@ -364,24 +364,24 @@ private slots:
     void createEpochsMatchesMnePython_data()
     {
         QTest::addColumn<bool>("ecg");
-        QTest::addColumn<QVector<int>>("events");
+        QTest::addColumn<std::vector<int>>("events");
         QTest::addColumn<double>("first");
         QTest::addColumn<double>("last");
         QTest::addColumn<double>("norm");
         QTest::newRow("create_ecg_epochs")
             << true
-            << QVector<int>{241, 565, 876, 1173, 1464, 1754, 2060, 2379, 2697, 2976,
-                            3237, 3531, 3845, 4162, 4465, 4745, 5033, 5333, 5644}
+            << std::vector<int>{241, 565, 876, 1173, 1464, 1754, 2060, 2379, 2697, 2976,
+                                3237, 3531, 3845, 4162, 4465, 4745, 5033, 5333, 5644}
             << -4.216080203896694e-15 << -3.9512457299874155e-09 << 5.1752236221310362e-12;
         QTest::newRow("create_eog_epochs")
-            << false << QVector<int>{150, 693, 1101, 4341}
+            << false << std::vector<int>{150, 693, 1101, 4341}
             << -7.8953024303960885e-16 << -4.1027486890738421e-09 << 2.3859462017389855e-12;
     }
 
     void createEpochsMatchesMnePython()
     {
         QFETCH(bool, ecg);
-        QFETCH(QVector<int>, events);
+        QFETCH(std::vector<int>, events);
         QFETCH(double, first);
         QFETCH(double, last);
         QFETCH(double, norm);
@@ -392,7 +392,7 @@ private slots:
         QVERIFY(raw.read_raw_segment(data, times));
         const double sf = raw.info.sfreq;
 
-        QVector<int> found;
+        std::vector<int> found;
         if (ecg) {
             ArtifactDetect::EcgParams params;
             params.dFilterLow = 8.0;
@@ -407,15 +407,15 @@ private slots:
         params.dTmin = -0.5;
         params.dTmax = 0.5;
         params.bApplyBaseline = false;
-        const QVector<MNELIB::MNEEpochData> epochs = EpochExtractor::extract(data, found, sf, params);
+        const std::vector<MNELIB::MNEEpochData> epochs = EpochExtractor::extract(data, found, sf, params);
         QCOMPARE(epochs.size(), events.size());
-        QCOMPARE(epochs.first().epoch.cols(), 301);
+        QCOMPARE(epochs.front().epoch.cols(), 301);
         double sumSq = 0.0;
         for (const MNELIB::MNEEpochData& e : epochs) {
             sumSq += e.epoch.topRows(306).squaredNorm();
         }
-        QVERIFY(qAbs(epochs.first().epoch(0, 0) / first - 1.0) < 1e-5);
-        QVERIFY(qAbs(epochs.last().epoch(315, 10) / last - 1.0) < 1e-5);
+        QVERIFY(qAbs(epochs.front().epoch(0, 0) / first - 1.0) < 1e-5);
+        QVERIFY(qAbs(epochs.back().epoch(315, 10) / last - 1.0) < 1e-5);
         QVERIFY(qAbs(std::sqrt(sumSq) / norm - 1.0) < 1e-5);
     }
 
@@ -429,22 +429,22 @@ private slots:
         QTest::addColumn<bool>("ecg");
         QTest::addColumn<QStringList>("descs");
         QTest::addColumn<QStringList>("peakNames");
-        QTest::addColumn<QVector<double>>("peaks");
-        QTest::addColumn<QVector<double>>("firsts");
+        QTest::addColumn<std::vector<double>>("peaks");
+        QTest::addColumn<std::vector<double>>("firsts");
         QTest::newRow("compute_proj_ecg")
             << true
             << QStringList{"ECG-planar--0.200-0.400-PCA-01", "ECG-planar--0.200-0.400-PCA-02", "ECG-axial--0.200-0.400-PCA-01",
                            "ECG-axial--0.200-0.400-PCA-02", "ECG-eeg--0.200-0.400-PCA-01", "ECG-eeg--0.200-0.400-PCA-02"}
             << QStringList{"MEG1543", "MEG2633", "MEG1421", "MEG0141", "EEG060", "EEG059"}
-            << QVector<double>{0.282213853228, 0.269008958671, 0.231366001317, 0.294255338038, 0.369071434733, 0.398007900296}
-            << QVector<double>{0.205034308579, 0.031577771758, 0.209726161362, 0.233790624710, 0.170489633875, 0.112625917097};
+            << std::vector<double>{0.282213853228, 0.269008958671, 0.231366001317, 0.294255338038, 0.369071434733, 0.398007900296}
+            << std::vector<double>{0.205034308579, 0.031577771758, 0.209726161362, 0.233790624710, 0.170489633875, 0.112625917097};
         QTest::newRow("compute_proj_eog")
             << false
             << QStringList{"EOG-planar--0.200-0.200-PCA-01", "EOG-planar--0.200-0.200-PCA-02", "EOG-axial--0.200-0.200-PCA-01",
                            "EOG-axial--0.200-0.200-PCA-02", "EOG-eeg--0.200-0.200-PCA-01", "EOG-eeg--0.200-0.200-PCA-02"}
             << QStringList{"MEG1213", "MEG1343", "MEG1411", "MEG0131", "EEG003", "EEG008"}
-            << QVector<double>{0.251003998071, 0.253609714403, 0.445297024774, 0.221558125316, 0.407336078089, 0.316956161377}
-            << QVector<double>{0.057684354300, 0.064471629014, 0.134466543273, 0.147941636199, 0.365897453455, 0.034841135380};
+            << std::vector<double>{0.251003998071, 0.253609714403, 0.445297024774, 0.221558125316, 0.407336078089, 0.316956161377}
+            << std::vector<double>{0.057684354300, 0.064471629014, 0.134466543273, 0.147941636199, 0.365897453455, 0.034841135380};
     }
 
     void computeProjMatchesMnePython()
@@ -452,8 +452,8 @@ private slots:
         QFETCH(bool, ecg);
         QFETCH(QStringList, descs);
         QFETCH(QStringList, peakNames);
-        QFETCH(QVector<double>, peaks);
-        QFETCH(QVector<double>, firsts);
+        QFETCH(std::vector<double>, peaks);
+        QFETCH(std::vector<double>, firsts);
 
         const FiffRawData raw((QCoreApplication::applicationDirPath() + "/../resources/data/mne-cpp-test-data/MEG/sample/sample_audvis_trunc_raw.fif").toStdString());
         MatrixXd data;
@@ -484,10 +484,10 @@ private slots:
     void peakFinderMatchesMnePython()
     {
         const VectorXd x = (VectorXd(14) << 0, 1, 3, 2, 2, 5, 1, 0, 4, 4, 1, 0, 2.5, 0.0).finished();
-        const QList<QPair<int, double>> maxima = peakFinderMne(x);
-        QCOMPARE(maxima, (QList<QPair<int, double>>{{5, 5.0}, {8, 4.0}, {12, 2.5}}));
-        const QList<QPair<int, double>> minima = peakFinderMne(x, 1.5, -1);
-        QCOMPARE(minima, (QList<QPair<int, double>>{{0, 0.0}, {7, 0.0}, {11, 0.0}, {13, 0.0}}));
+        const std::vector<std::pair<int, double>> maxima = peakFinderMne(x);
+        QCOMPARE(maxima, (std::vector<std::pair<int, double>>{{5, 5.0}, {8, 4.0}, {12, 2.5}}));
+        const std::vector<std::pair<int, double>> minima = peakFinderMne(x, 1.5, -1);
+        QCOMPARE(minima, (std::vector<std::pair<int, double>>{{0, 0.0}, {7, 0.0}, {11, 0.0}, {13, 0.0}}));
     }
 };
 

@@ -260,11 +260,11 @@ SSS::Basis SSS::computeBasis(const FiffInfo& fiffInfo, const Params& params)
     for (int i = 0; i < fiffInfo.nchan; ++i) {
         int kind = fiffInfo.chs[i].kind;
         if (kind == FIFFV_MEG_CH || kind == FIFFV_REF_MEG_CH) {
-            basis.megChannelIdx.append(i);
+            basis.megChannelIdx.push_back(i);
         }
     }
 
-    const int nMeg = basis.megChannelIdx.size();
+    const int nMeg = static_cast<int>(basis.megChannelIdx.size());
     if (nMeg == 0) {
         qWarning() << "SSS::computeBasis: no MEG channels found in FiffInfo.";
         return basis;
@@ -361,11 +361,11 @@ SSS::Basis SSS::computeBasis(const FiffInfo& fiffInfo, const Params& params)
 
 MatrixXd SSS::apply(const MatrixXd& matData, const Basis& basis)
 {
-    if (basis.megChannelIdx.isEmpty()) {
+    if (basis.megChannelIdx.empty()) {
         return matData;
     }
 
-    const int nMeg = basis.megChannelIdx.size();
+    const int nMeg = static_cast<int>(basis.megChannelIdx.size());
     MatrixXd matOut = matData;
 
     // Extract MEG rows
@@ -392,11 +392,11 @@ MatrixXd SSS::applyTemporal(const MatrixXd& matData,
                             int iBufferLength,
                             double dCorrLimit)
 {
-    if (basis.megChannelIdx.isEmpty()) {
+    if (basis.megChannelIdx.empty()) {
         return matData;
     }
 
-    const int nMeg = basis.megChannelIdx.size();
+    const int nMeg = static_cast<int>(basis.megChannelIdx.size());
     const int nSamp = static_cast<int>(matData.cols());
     const int bufLen = std::min(iBufferLength, nSamp);
 

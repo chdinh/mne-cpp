@@ -16,6 +16,8 @@
 
 #include "filterio.h"
 
+#include <vector>
+
 //=============================================================================================================
 // QT INCLUDES
 //=============================================================================================================
@@ -56,7 +58,7 @@ bool FilterIO::readFilter(QString path, FilterKernel& filter)
 
     //Start reading from file
     QTextStream in(&file);
-    QVector<double> coefficientsTemp;
+    std::vector<double> coefficientsTemp;
 
     while (!in.atEnd()) {
         QString line = in.readLine();
@@ -87,7 +89,7 @@ bool FilterIO::readFilter(QString path, FilterKernel& filter)
 
             //Read the filter type
             if (line.contains("type") && fields.size() == 2)
-                filter.setFilterType(FilterKernel::m_filterTypes.indexOf(FilterParameter(fields.at(1))));
+                filter.setFilterType(FilterKernel::filterTypeIndex(fields.at(1)));
 
             //Read the filter LPFreq
             if (line.contains("LPFreq") && fields.size() == 2)
@@ -103,7 +105,7 @@ bool FilterIO::readFilter(QString path, FilterKernel& filter)
 
             //Read the filter DesignMethod
             if (line.contains("DesignMethod") && fields.size() == 2)
-                filter.setDesignMethod(FilterKernel::m_designMethods.indexOf(FilterParameter(fields.at(1))));
+                filter.setDesignMethod(FilterKernel::designMethodIndex(fields.at(1)));
 
             if (line.contains("ParksWidth") && fields.size() == 2)
                 filter.setParksWidth(fields.at(1).toDouble());
@@ -112,8 +114,8 @@ bool FilterIO::readFilter(QString path, FilterKernel& filter)
             coefficientsTemp.push_back(fields.join("").toDouble());
     }
     // Check if reading was successful and correct
-    if (filter.getFilterOrder() != coefficientsTemp.size()) {
-        filter.setFilterOrder(coefficientsTemp.size());
+    if (filter.getFilterOrder() != std::ssize(coefficientsTemp)) {
+        filter.setFilterOrder(static_cast<int>(coefficientsTemp.size()));
     }
 
     RowVectorXd vecCoeff = RowVectorXd::Zero(coefficientsTemp.size());

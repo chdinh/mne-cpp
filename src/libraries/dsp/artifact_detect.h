@@ -26,6 +26,8 @@
 
 #include "dsp_global.h"
 
+#include <vector>
+
 #include <fiff/fiff_info.h>
 #include <fiff/fiff_proj.h>
 
@@ -39,7 +41,6 @@
 // QT INCLUDES
 //=============================================================================================================
 
-#include <QVector>
 
 //=============================================================================================================
 // DEFINE NAMESPACE UTILSLIB
@@ -139,10 +140,10 @@ public:
      *
      * @return              Sample indices (0-based) of detected R-peaks.
      */
-    static QVector<int> detectEcg(const Eigen::MatrixXd& matData,
-                                  const FIFFLIB::FiffInfo& fiffInfo,
-                                  double dSFreq,
-                                  const EcgParams& params = EcgParams());
+    static std::vector<int> detectEcg(const Eigen::MatrixXd& matData,
+                                      const FIFFLIB::FiffInfo& fiffInfo,
+                                      double dSFreq,
+                                      const EcgParams& params = EcgParams());
 
     //=========================================================================================================
     /**
@@ -158,10 +159,10 @@ public:
      *
      * @return              Sample indices (0-based) of the detected EOG peaks.
      */
-    static QVector<int> detectEog(const Eigen::MatrixXd& matData,
-                                  const FIFFLIB::FiffInfo& fiffInfo,
-                                  double dSFreq,
-                                  const EogParams& params = EogParams());
+    static std::vector<int> detectEog(const Eigen::MatrixXd& matData,
+                                      const FIFFLIB::FiffInfo& fiffInfo,
+                                      double dSFreq,
+                                      const EogParams& params = EogParams());
 
     using ProjParams = ArtifactDetectProjParams; /**< Convenience alias. */
 
@@ -205,7 +206,7 @@ public:
 
 private:
     /** R-peak search of mne.preprocessing.qrs_detector on an already filtered ECG. */
-    static QVector<int> qrsDetector(const Eigen::RowVectorXd& filtered, double dSFreq, double dThreshold, double dTStart);
+    static std::vector<int> qrsDetector(const Eigen::RowVectorXd& filtered, double dSFreq, double dThreshold, double dTStart);
 };
 
 } // namespace UTILSLIB

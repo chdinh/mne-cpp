@@ -129,7 +129,7 @@ bool FineCalibration::findEntry(int chNumber, FineCalEntry& entry) const
 VectorXd FineCalibration::gainVector() const
 {
     VectorXd gains = VectorXd::Ones(m_entries.size());
-    for (int i = 0; i < m_entries.size(); ++i) {
+    for (int i = 0; i < std::ssize(m_entries); ++i) {
         if (m_entries[i].chNumber % 10 == 1) {
             gains(i) = m_entries[i].imbalance(0);
         }
@@ -142,7 +142,7 @@ VectorXd FineCalibration::gainVector() const
 MatrixXd FineCalibration::imbalanceMatrix() const
 {
     MatrixXd imb = MatrixXd::Zero(m_entries.size(), 3);
-    for (int i = 0; i < m_entries.size(); ++i) {
+    for (int i = 0; i < std::ssize(m_entries); ++i) {
         if (m_entries[i].chNumber % 10 != 1) {
             imb.row(i).head(m_entries[i].imbalance.size()) = m_entries[i].imbalance.transpose();
         }

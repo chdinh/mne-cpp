@@ -31,15 +31,16 @@
 
 #include "dsp_global.h"
 
+#include <vector>
+#include <utility>
+
 //=============================================================================================================
 // QT INCLUDES
 //=============================================================================================================
 
 #include <QMap>
-#include <QPair>
 #include <QString>
 #include <QStringList>
-#include <QVector>
 
 //=============================================================================================================
 // EIGEN INCLUDES
@@ -90,7 +91,7 @@ public:
      *
      * @return Vector of DerivationRule, e.g. LH1-LH2 (+1·LH1, −1·LH2), LH2-LH3, RA1-RA2.
      */
-    static QVector<DerivationRule> buildBipolar(const QStringList& channelNames);
+    static std::vector<DerivationRule> buildBipolar(const QStringList& channelNames);
 
     /**
      * @brief Build common-average reference derivation rules.
@@ -102,7 +103,7 @@ public:
      *
      * @return Vector of DerivationRule, one per input channel.
      */
-    static QVector<DerivationRule> buildCommonAverage(const QStringList& channelNames);
+    static std::vector<DerivationRule> buildCommonAverage(const QStringList& channelNames);
 
     /**
      * @brief Apply derivation rules to a data matrix.
@@ -114,10 +115,10 @@ public:
      * @return A pair of (derived data matrix, derived channel names).
      *         The output matrix has n_rules rows × n_times columns.
      */
-    static QPair<Eigen::MatrixXd, QStringList> apply(
+    static std::pair<Eigen::MatrixXd, QStringList> apply(
         const Eigen::MatrixXd& matData,
         const QStringList& channelNames,
-        const QVector<DerivationRule>& rules);
+        const std::vector<DerivationRule>& rules);
 
     /**
      * @brief Read derivation rules from an MNE-C derivation text file (MNELIB::MNEDerivSet::readText).
@@ -132,7 +133,7 @@ public:
      *
      * @return Vector of parsed DerivationRule. Empty on error.
      */
-    static QVector<DerivationRule> readDefinitionFile(const QString& path);
+    static std::vector<DerivationRule> readDefinitionFile(const QString& path);
 
     /**
      * @brief Write derivation rules in MNE-C derivation text syntax, readable by readDefinitionFile and mne_make_derivations.
@@ -142,7 +143,7 @@ public:
      *
      * @return True if the file was written successfully.
      */
-    static bool writeDefinitionFile(const QString& path, const QVector<DerivationRule>& rules);
+    static bool writeDefinitionFile(const QString& path, const std::vector<DerivationRule>& rules);
 };
 
 } // namespace UTILSLIB

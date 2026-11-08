@@ -16,6 +16,8 @@
 
 #include "spectrogram.h"
 
+#include <vector>
+
 //=============================================================================================================
 // EIGEN INCLUDES
 //=============================================================================================================
@@ -51,7 +53,7 @@ MatrixXd Spectrogram::makeSpectrogram(VectorXd signal, qint32 windowSize = 0)
     //timer.start();
 
     signal.array() -= signal.mean();
-    QList<SpectogramInputData> lData;
+    std::vector<SpectogramInputData> lData;
     int iThreadSize = QThread::idealThreadCount() * 2;
     int iStepsSize = signal.rows() / iThreadSize;
     int iResidual = signal.rows() % iThreadSize;
@@ -66,12 +68,12 @@ MatrixXd Spectrogram::makeSpectrogram(VectorXd signal, qint32 windowSize = 0)
     for (int i = 0; i < iThreadSize; ++i) {
         dataTemp.iRangeLow = i * iStepsSize;
         dataTemp.iRangeHigh = i * iStepsSize + iStepsSize;
-        lData.append(dataTemp);
+        lData.push_back(dataTemp);
     }
 
     dataTemp.iRangeLow = iThreadSize * iStepsSize;
     dataTemp.iRangeHigh = iThreadSize * iStepsSize + iResidual;
-    lData.append(dataTemp);
+    lData.push_back(dataTemp);
 
     QFuture<MatrixXd> resultMat = QtConcurrent::mappedReduced(lData,
                                                               compute,

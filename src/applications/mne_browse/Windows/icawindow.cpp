@@ -208,13 +208,13 @@ void IcaWindow::onApply()
     if (!m_bHasResult || m_rawData.rows() == 0)
         return;
 
-    QVector<int> excluded;
+    std::vector<int> excluded;
     for (int i = 0; i < m_componentCheckboxes.size(); ++i) {
         if (m_componentCheckboxes[i]->isChecked())
-            excluded.append(i);
+            excluded.push_back(i);
     }
 
-    if (excluded.isEmpty()) {
+    if (excluded.empty()) {
         m_pStatusLabel->setText(tr("No components selected for exclusion."));
         return;
     }

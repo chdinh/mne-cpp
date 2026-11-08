@@ -27,7 +27,7 @@ namespace
 
 struct SyntheticXdawnData
 {
-    QVector<MNEEpochData> epochs;
+    std::vector<MNEEpochData> epochs;
     MatrixXd targetTemplate;
 };
 
@@ -72,7 +72,7 @@ SyntheticXdawnData makeSyntheticEpochs()
             ep.epoch += out.targetTemplate;
         }
 
-        out.epochs.append(ep);
+        out.epochs.push_back(ep);
     }
 
     return out;
@@ -124,7 +124,7 @@ private slots:
     {
         SyntheticXdawnData synth = makeSyntheticEpochs();
         XdawnResult res = Xdawn::fit(synth.epochs, 1, 4);
-        MatrixXd comp = Xdawn::apply(synth.epochs.first().epoch, res);
+        MatrixXd comp = Xdawn::apply(synth.epochs.front().epoch, res);
 
         QCOMPARE(comp.rows(), 4);
         QCOMPARE(comp.cols(), 160);
@@ -170,18 +170,18 @@ private slots:
 
         // No epochs, only rejected ones, empty or mismatched epochs are refused too
         QVERIFY(!Xdawn::fit({}, 1, 2).bValid);
-        QVector<MNEEpochData> rejected = synth.epochs;
+        std::vector<MNEEpochData> rejected = synth.epochs;
         for (MNEEpochData& ep : rejected)
             ep.bReject = true;
         QVERIFY(!Xdawn::fit(rejected, 1, 2).bValid);
-        QVector<MNEEpochData> empty(1);
+        std::vector<MNEEpochData> empty(1);
         QVERIFY(!Xdawn::fit(empty, 0, 2).bValid);
-        QVector<MNEEpochData> mismatched = synth.epochs;
-        mismatched.last().epoch.conservativeResize(mismatched.last().epoch.rows() - 1, Eigen::NoChange);
+        std::vector<MNEEpochData> mismatched = synth.epochs;
+        mismatched.back().epoch.conservativeResize(mismatched.back().epoch.rows() - 1, Eigen::NoChange);
         QVERIFY(!Xdawn::fit(mismatched, 1, 2).bValid);
 
         // An invalid result passes epochs through denoising and yields no components
-        const MatrixXd& epoch = synth.epochs.first().epoch;
+        const MatrixXd& epoch = synth.epochs.front().epoch;
         QCOMPARE(Xdawn::denoise(epoch, res), epoch);
         QCOMPARE(Xdawn::apply(epoch, res).size(), Index(0));
 
@@ -192,7 +192,7 @@ private slots:
         QCOMPARE(Xdawn::apply(fewer, fitted).size(), Index(0));
         QCOMPARE(Xdawn::denoise(fewer, fitted).size(), Index(0));
         QCOMPARE(Xdawn::denoise(epoch, fitted, 0), Xdawn::denoise(epoch, fitted, 99));
-        QCOMPARE(Xdawn::denoiseEpochs(synth.epochs, fitted, 1).first().epoch, Xdawn::denoise(epoch, fitted, 1));
+        QCOMPARE(Xdawn::denoiseEpochs(synth.epochs, fitted, 1).front().epoch, Xdawn::denoise(epoch, fitted, 1));
     }
 };
 

@@ -204,7 +204,7 @@ private slots:
 
     void emptySos_returnsInput()
     {
-        QVector<IirBiquad> empty;
+        std::vector<IirBiquad> empty;
         RowVectorXd data = RowVectorXd::Random(128);
         RowVectorXd out = IirFilter::applyZeroPhase(data, empty);
         QCOMPARE((out - data).cwiseAbs().maxCoeff(), 0.0);
@@ -213,7 +213,7 @@ private slots:
     void invalidOrder_returnsEmptySos()
     {
         auto sos = IirFilter::designButterworth(0, IirFilter::LowPass, 40.0, 0.0, 1000.0);
-        QVERIFY(sos.isEmpty());
+        QVERIFY(sos.empty());
     }
 
     //=========================================================================

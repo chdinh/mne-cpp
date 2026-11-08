@@ -16,6 +16,8 @@
 
 #include "bad_channels_lof.h"
 
+#include <vector>
+
 #include <fiff/fiff_info.h>
 #include <fiff/fiff_ch_info.h>
 #include <fiff/fiff_constants.h>
@@ -72,7 +74,7 @@ UTILSLIB::StringList UTILSLIB::findBadChannelsLof(const MatrixXd& data,
                                                   const LofBadChannelParams& params)
 {
     // Select channel indices based on type filter
-    QList<int> chIdx;
+    std::vector<int> chIdx;
     for (int i = 0; i < info.chs.size(); ++i) {
         if (params.bMegOnly && info.chs[i].kind != FIFFV_MEG_CH)
             continue;
@@ -82,10 +84,10 @@ UTILSLIB::StringList UTILSLIB::findBadChannelsLof(const MatrixXd& data,
             if (info.chs[i].kind != FIFFV_MEG_CH && info.chs[i].kind != FIFFV_EEG_CH)
                 continue;
         }
-        chIdx.append(i);
+        chIdx.push_back(i);
     }
 
-    const int nCh = chIdx.size();
+    const int nCh = static_cast<int>(chIdx.size());
     if (nCh < 3) {
         return StringList();
     }

@@ -25,6 +25,8 @@
 
 #include "dsp_global.h"
 
+#include <vector>
+
 //=============================================================================================================
 // EIGEN INCLUDES
 //=============================================================================================================
@@ -35,7 +37,6 @@
 // QT INCLUDES
 //=============================================================================================================
 
-#include <QVector>
 
 //=============================================================================================================
 // FORWARD DECLARATIONS
@@ -83,7 +84,7 @@ struct DSPSHARED_EXPORT FilterChpiParams
 DSPSHARED_EXPORT void filterChpi(Eigen::MatrixXd& data,
                                  const FIFFLIB::FiffInfo& info,
                                  double sfreq,
-                                 const QVector<double>& hpiFreqs,
+                                 const std::vector<double>& hpiFreqs,
                                  const FilterChpiParams& params = FilterChpiParams());
 
 //=============================================================================================================

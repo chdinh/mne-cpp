@@ -147,7 +147,7 @@ void TestDspFilterChpi::testNotchRemovesFrequency()
 
     const double powerBefore = powerAtFreq(data.row(0), 143.0, sfreq);
 
-    QVector<double> hpiFreqs = {143.0};
+    std::vector<double> hpiFreqs = {143.0};
     filterChpi(data, info, sfreq, hpiFreqs);
 
     const double powerAfter = powerAtFreq(data.row(0), 143.0, sfreq);
@@ -175,7 +175,7 @@ void TestDspFilterChpi::testMultipleFrequencies()
     const double pow143Before = powerAtFreq(data.row(0), 143.0, sfreq);
     const double pow203Before = powerAtFreq(data.row(0), 203.0, sfreq);
 
-    QVector<double> hpiFreqs = {83.0, 143.0, 203.0};
+    std::vector<double> hpiFreqs = {83.0, 143.0, 203.0};
     filterChpi(data, info, sfreq, hpiFreqs);
 
     const double pow83After = powerAtFreq(data.row(0), 83.0, sfreq);
@@ -202,7 +202,7 @@ void TestDspFilterChpi::testLowFrequencyPreserved()
 
     const double powerBefore = powerAtFreq(data.row(0), 10.0, sfreq);
 
-    QVector<double> hpiFreqs = {143.0};
+    std::vector<double> hpiFreqs = {143.0};
     filterChpi(data, info, sfreq, hpiFreqs);
 
     const double powerAfter = powerAtFreq(data.row(0), 10.0, sfreq);
@@ -229,7 +229,7 @@ void TestDspFilterChpi::testMegOnlyFiltered()
 
     MatrixXd dataCopy = data;
 
-    QVector<double> hpiFreqs = {143.0};
+    std::vector<double> hpiFreqs = {143.0};
     filterChpi(data, info, sfreq, hpiFreqs);
 
     // MEG channels should be filtered (different from original)
@@ -260,7 +260,7 @@ void TestDspFilterChpi::testAllChannelsFiltered()
     FilterChpiParams params;
     params.bMegOnly = false;
 
-    QVector<double> hpiFreqs = {143.0};
+    std::vector<double> hpiFreqs = {143.0};
     filterChpi(data, info, sfreq, hpiFreqs, params);
 
     // All channels should be filtered
@@ -284,7 +284,7 @@ void TestDspFilterChpi::testEmptyFrequencyList()
 
     MatrixXd dataCopy = data;
 
-    QVector<double> hpiFreqs;
+    std::vector<double> hpiFreqs;
     filterChpi(data, info, sfreq, hpiFreqs);
 
     QVERIFY(data.isApprox(dataCopy, 1e-15));
@@ -305,7 +305,7 @@ void TestDspFilterChpi::testInvalidFrequency()
     MatrixXd dataCopy = data;
 
     // 600 Hz > Nyquist (500 Hz) → should be skipped
-    QVector<double> hpiFreqs = {600.0};
+    std::vector<double> hpiFreqs = {600.0};
     filterChpi(data, info, sfreq, hpiFreqs);
 
     QVERIFY(data.isApprox(dataCopy, 1e-15));
@@ -350,7 +350,7 @@ void TestDspFilterChpi::testNotchWidth()
     // Narrow notch: width=2 Hz (default)
     FilterChpiParams paramsNarrow;
     paramsNarrow.dNotchWidth = 2.0;
-    QVector<double> hpiFreqs = {143.0};
+    std::vector<double> hpiFreqs = {143.0};
     filterChpi(dataNarrow, info, sfreq, hpiFreqs, paramsNarrow);
 
     // Wide notch: width=5 Hz

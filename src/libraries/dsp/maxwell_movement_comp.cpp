@@ -16,6 +16,8 @@
 
 #include "maxwell_movement_comp.h"
 
+#include <vector>
+
 //=============================================================================================================
 // QT INCLUDES
 //=============================================================================================================
@@ -86,11 +88,11 @@ FiffInfo MaxwellMovementComp::transformFiffInfo(const FiffInfo& fiffInfo,
 
 MatrixXd MaxwellMovementComp::apply(const MatrixXd& matData,
                                     const FiffInfo& fiffInfo,
-                                    const QList<HeadPosEntry>& headPos,
+                                    const std::vector<HeadPosEntry>& headPos,
                                     double dSFreq,
                                     const MaxwellMoveCompParams& params)
 {
-    if (headPos.isEmpty()) {
+    if (headPos.empty()) {
         qWarning() << "[MaxwellMovementComp::apply] No head positions provided.";
         return matData;
     }
@@ -99,7 +101,7 @@ MatrixXd MaxwellMovementComp::apply(const MatrixXd& matData,
 
     // Determine reference head position
     HeadPosEntry refPos;
-    if (params.iRefIdx >= 0 && params.iRefIdx < headPos.size()) {
+    if (params.iRefIdx >= 0 && params.iRefIdx < std::ssize(headPos)) {
         refPos = headPos[params.iRefIdx];
     } else {
         // Mean position
@@ -124,11 +126,11 @@ MatrixXd MaxwellMovementComp::apply(const MatrixXd& matData,
     MatrixXd result = matData;
 
     // Process each time segment
-    for (int iSeg = 0; iSeg < headPos.size(); ++iSeg) {
+    for (int iSeg = 0; iSeg < std::ssize(headPos); ++iSeg) {
         // Determine sample range for this segment
         int iStart = static_cast<int>(headPos[iSeg].dTime * dSFreq);
         int iEnd;
-        if (iSeg + 1 < headPos.size()) {
+        if (iSeg + 1 < std::ssize(headPos)) {
             iEnd = static_cast<int>(headPos[iSeg + 1].dTime * dSFreq);
         } else {
             iEnd = nSamples;
@@ -153,7 +155,7 @@ MatrixXd MaxwellMovementComp::apply(const MatrixXd& matData,
         // Project into multipole space using current-position basis
         // multipoles = pinv_current * data_meg
         MatrixXd megData(basisCurrent.megChannelIdx.size(), nSegSamples);
-        for (int ch = 0; ch < basisCurrent.megChannelIdx.size(); ++ch) {
+        for (int ch = 0; ch < std::ssize(basisCurrent.megChannelIdx); ++ch) {
             megData.row(ch) = segData.row(basisCurrent.megChannelIdx[ch]);
         }
 
@@ -163,7 +165,7 @@ MatrixXd MaxwellMovementComp::apply(const MatrixXd& matData,
         MatrixXd reconstructed = basisRef.matSin * multipoles.topRows(basisRef.iNin);
 
         // Place reconstructed data back
-        for (int ch = 0; ch < basisRef.megChannelIdx.size(); ++ch) {
+        for (int ch = 0; ch < std::ssize(basisRef.megChannelIdx); ++ch) {
             result.row(basisRef.megChannelIdx[ch]).segment(iStart, nSegSamples) = reconstructed.row(ch);
         }
     }
@@ -173,9 +175,9 @@ MatrixXd MaxwellMovementComp::apply(const MatrixXd& matData,
 
 //=============================================================================================================
 
-QList<HeadPosEntry> MaxwellMovementComp::readHeadPos(const QString& sPath)
+std::vector<HeadPosEntry> MaxwellMovementComp::readHeadPos(const QString& sPath)
 {
-    QList<HeadPosEntry> positions;
+    std::vector<HeadPosEntry> positions;
 
     QFile file(sPath);
     if (!file.open(QIODevice::ReadOnly | QIODevice::Text)) {
@@ -230,7 +232,7 @@ QList<HeadPosEntry> MaxwellMovementComp::readHeadPos(const QString& sPath)
         entry.rotation = Quaterniond(q0, q1, q2, q3);
         entry.translation = Vector3d(tx, ty, tz);
 
-        positions.append(entry);
+        positions.push_back(entry);
     }
 
     file.close();
@@ -240,7 +242,7 @@ QList<HeadPosEntry> MaxwellMovementComp::readHeadPos(const QString& sPath)
 //=============================================================================================================
 
 bool MaxwellMovementComp::writeHeadPos(const QString& sPath,
-                                       const QList<HeadPosEntry>& headPos)
+                                       const std::vector<HeadPosEntry>& headPos)
 {
     QFile file(sPath);
     if (!file.open(QIODevice::WriteOnly | QIODevice::Text)) {

@@ -206,7 +206,7 @@ void TestPicardIca::testExcludeViaICA()
     IcaResult result = PicardIca::run(m_mixedData, 3);
 
     // Exclude component 0 using ICA's excludeComponents
-    QVector<int> exclude = {0};
+    std::vector<int> exclude = {0};
     MatrixXd cleaned = ICA::excludeComponents(m_mixedData, result, exclude);
 
     QCOMPARE(static_cast<int>(cleaned.rows()), m_nCh);

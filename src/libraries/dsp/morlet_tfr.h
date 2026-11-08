@@ -35,6 +35,8 @@
 
 #include "dsp_global.h"
 
+#include <vector>
+
 //=============================================================================================================
 // EIGEN INCLUDES
 //=============================================================================================================
@@ -45,7 +47,6 @@
 // QT INCLUDES
 //=============================================================================================================
 
-#include <QVector>
 
 //=============================================================================================================
 // DEFINE NAMESPACE UTILSLIB
@@ -106,7 +107,7 @@ public:
      * @param[in] vecPicks  Channel row indices; empty = all channels.
      * @return              One MorletTfrResult per selected channel.
      */
-    static QVector<MorletTfrResult> computeMultiChannel(
+    static std::vector<MorletTfrResult> computeMultiChannel(
         const Eigen::MatrixXd& matData,
         double dSFreq,
         const Eigen::RowVectorXd& vecFreqs,

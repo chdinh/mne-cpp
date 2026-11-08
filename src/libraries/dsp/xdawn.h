@@ -24,6 +24,8 @@
 
 #include "dsp_global.h"
 
+#include <vector>
+
 #include <mne/mne_epoch_data.h>
 
 //=============================================================================================================
@@ -36,7 +38,6 @@
 // QT INCLUDES
 //=============================================================================================================
 
-#include <QVector>
 
 //=============================================================================================================
 // DEFINE NAMESPACE UTILSLIB
@@ -86,7 +87,7 @@ public:
      *
      * @return XdawnResult containing filters, patterns, and covariances.
      */
-    static XdawnResult fit(const QVector<MNELIB::MNEEpochData>& epochs,
+    static XdawnResult fit(const std::vector<MNELIB::MNEEpochData>& epochs,
                            int iTargetEvent = 1,
                            int nComponents = 2,
                            double dReg = 1e-6);
@@ -129,9 +130,9 @@ public:
      *
      * @return Copy of the input epochs with denoised epoch matrices.
      */
-    static QVector<MNELIB::MNEEpochData> denoiseEpochs(const QVector<MNELIB::MNEEpochData>& epochs,
-                                                       const XdawnResult& result,
-                                                       int nComponents = -1);
+    static std::vector<MNELIB::MNEEpochData> denoiseEpochs(std::vector<MNELIB::MNEEpochData> epochs,
+                                                           const XdawnResult& result,
+                                                           int nComponents = -1);
 };
 
 } // namespace UTILSLIB

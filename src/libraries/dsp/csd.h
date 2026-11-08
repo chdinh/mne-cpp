@@ -33,6 +33,8 @@
 
 #include "dsp_global.h"
 
+#include <vector>
+
 //=============================================================================================================
 // EIGEN INCLUDES
 //=============================================================================================================
@@ -44,7 +46,6 @@
 // QT INCLUDES
 //=============================================================================================================
 
-#include <QVector>
 
 //=============================================================================================================
 // DEFINE NAMESPACE UTILSLIB
@@ -61,9 +62,9 @@ namespace UTILSLIB
  */
 struct DSPSHARED_EXPORT CsdResult
 {
-    Eigen::MatrixXcd matCsd;             ///< n_channels × n_channels mean CSD across selected frequencies
-    QVector<Eigen::MatrixXcd> csdByFreq; ///< One n_ch × n_ch CSD matrix per selected frequency bin
-    Eigen::RowVectorXd vecFreqs;         ///< Frequency axis (Hz) for csdByFreq entries
+    Eigen::MatrixXcd matCsd;                 ///< n_channels × n_channels mean CSD across selected frequencies
+    std::vector<Eigen::MatrixXcd> csdByFreq; ///< One n_ch × n_ch CSD matrix per selected frequency bin
+    Eigen::RowVectorXd vecFreqs;             ///< Frequency axis (Hz) for csdByFreq entries
 };
 
 //=============================================================================================================

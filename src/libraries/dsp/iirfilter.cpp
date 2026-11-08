@@ -16,6 +16,8 @@
 
 #include "iirfilter.h"
 
+#include <vector>
+
 //=============================================================================================================
 // QT INCLUDES
 //=============================================================================================================
@@ -54,7 +56,7 @@ namespace
 /**
  * @brief Evaluate the magnitude of H(z) at z = e^{j*w}, where w is in rad/sample.
  */
-double evalMagnitude(const QVector<IirBiquad>& sos, double omega)
+double evalMagnitude(const std::vector<IirBiquad>& sos, double omega)
 {
     std::complex<double> z(std::cos(omega), std::sin(omega));
     std::complex<double> H(1.0, 0.0);
@@ -75,16 +77,16 @@ double evalMagnitude(const QVector<IirBiquad>& sos, double omega)
 // MEMBER DEFINITIONS
 //=============================================================================================================
 
-QVector<std::complex<double>> IirFilter::butterworthPrototypePoles(int n)
+std::vector<std::complex<double>> IirFilter::butterworthPrototypePoles(int n)
 {
     // Butterworth analogue LP prototype poles (normalised cutoff = 1 rad/s):
     // p_k = exp( j * PI * (2k - 1 + n) / (2n) )  for k = 1 .. n
     // All poles lie on the unit circle in the left half-plane.
-    QVector<std::complex<double>> poles;
+    std::vector<std::complex<double>> poles;
     poles.reserve(n);
     for (int k = 1; k <= n; ++k) {
         double angle = PI * static_cast<double>(2 * k - 1 + n) / static_cast<double>(2 * n);
-        poles.append(std::complex<double>(std::cos(angle), std::sin(angle)));
+        poles.push_back(std::complex<double>(std::cos(angle), std::sin(angle)));
     }
     return poles;
 }
@@ -151,11 +153,11 @@ IirBiquad IirFilter::realPoleToDigitalSection(double dPoleReal, double dC, doubl
 
 //=============================================================================================================
 
-QVector<IirBiquad> IirFilter::designButterworth(int iOrder,
-                                                FilterType type,
-                                                double dCutoffLow,
-                                                double dCutoffHigh,
-                                                double dSFreq)
+std::vector<IirBiquad> IirFilter::designButterworth(int iOrder,
+                                                    FilterType type,
+                                                    double dCutoffLow,
+                                                    double dCutoffHigh,
+                                                    double dSFreq)
 {
     if (iOrder < 1) {
         qWarning() << "IirFilter::designButterworth: order must be >= 1, got" << iOrder;
@@ -171,9 +173,9 @@ QVector<IirBiquad> IirFilter::designButterworth(int iOrder,
         : 0.0;
 
     // Butterworth normalised LP prototype poles
-    QVector<std::complex<double>> protoPoles = butterworthPrototypePoles(iOrder);
+    std::vector<std::complex<double>> protoPoles = butterworthPrototypePoles(iOrder);
 
-    QVector<IirBiquad> sos;
+    std::vector<IirBiquad> sos;
 
     if (type == LowPass || type == HighPass) {
         // ---- LP / HP -------------------------------------------------------
@@ -210,7 +212,7 @@ QVector<IirBiquad> IirFilter::designButterworth(int iOrder,
                 bq.b0 *= gain;
                 bq.b1 *= gain;
 
-                sos.append(bq);
+                sos.push_back(bq);
             } else {
                 // Complex conjugate pair
                 std::complex<double> analogPole;
@@ -236,7 +238,7 @@ QVector<IirBiquad> IirFilter::designButterworth(int iOrder,
                         bq.b1 *= scale;
                         bq.b2 *= scale;
                     }
-                    sos.append(bq);
+                    sos.push_back(bq);
                 } else {
                     // HP biquad: analogue section H(s) = s^2 / (s^2 - 2*Re(p)*s + |p|^2)
                     // b2_a=1, b1_a=0, b0_a=0; a2_a=1, a1_a=-2*Re(p), a0_a=|p|^2
@@ -262,7 +264,7 @@ QVector<IirBiquad> IirFilter::designButterworth(int iOrder,
                         bq.b1 *= scale;
                         bq.b2 *= scale;
                     }
-                    sos.append(bq);
+                    sos.push_back(bq);
                 }
             }
         }
@@ -316,7 +318,7 @@ QVector<IirBiquad> IirFilter::designButterworth(int iOrder,
                     bq.b2 = -dBw * dC / d0;
                     bq.a1 = 2.0 * (omega0sq - dC * dC) / d0;
                     bq.a2 = (dC * dC - 2.0 * alpha * dC + omega0sq) / d0;
-                    sos.append(bq);
+                    sos.push_back(bq);
                 } else {
                     // BS analogue biquad numerator: s^2 + Omega0^2  (zeros at ±j*Omega0)
                     // b2_a=1, b1_a=0, b0_a=Omega0^2
@@ -335,7 +337,7 @@ QVector<IirBiquad> IirFilter::designButterworth(int iOrder,
                     bq.b2 = (dC * dC + dOmega0sq) / d0;
                     bq.a1 = 2.0 * (omega0sq - dC * dC) / d0;
                     bq.a2 = (dC * dC - 2.0 * alpha * dC + omega0sq) / d0;
-                    sos.append(bq);
+                    sos.push_back(bq);
                 }
             }
         }
@@ -364,9 +366,9 @@ QVector<IirBiquad> IirFilter::designButterworth(int iOrder,
 
 //=============================================================================================================
 
-RowVectorXd IirFilter::applySos(const RowVectorXd& vecData, const QVector<IirBiquad>& sos)
+RowVectorXd IirFilter::applySos(const RowVectorXd& vecData, const std::vector<IirBiquad>& sos)
 {
-    if (sos.isEmpty() || vecData.size() == 0) {
+    if (sos.empty() || vecData.size() == 0) {
         return vecData;
     }
 
@@ -402,7 +404,7 @@ void IirFilter::runSection(const IirBiquad& bq, double* data, Index samples, Ind
 // DEFINE MEMBER METHODS IirStreamFilter
 //=============================================================================================================
 
-IirStreamFilter::IirStreamFilter(const QVector<IirBiquad>& sos, int channels)
+IirStreamFilter::IirStreamFilter(const std::vector<IirBiquad>& sos, int channels)
 : m_sos(sos)
 , m_state(MatrixXd::Zero(std::max(channels, 0), 2 * sos.size()))
 {
@@ -417,7 +419,7 @@ bool IirStreamFilter::process(Ref<MatrixXd> block)
         return true;
     }
     for (Index c = 0; c < block.rows(); ++c) {
-        for (Index k = 0; k < m_sos.size(); ++k) {
+        for (Index k = 0; k < std::ssize(m_sos); ++k) {
             IirFilter::runSection(m_sos[static_cast<int>(k)], &block(c, 0), block.cols(), block.outerStride(),
                                   m_state(c, 2 * k), m_state(c, 2 * k + 1));
         }
@@ -437,9 +439,9 @@ int IirStreamFilter::channels() const
 
 //=============================================================================================================
 
-RowVectorXd IirFilter::applyZeroPhase(const RowVectorXd& vecData, const QVector<IirBiquad>& sos)
+RowVectorXd IirFilter::applyZeroPhase(const RowVectorXd& vecData, const std::vector<IirBiquad>& sos)
 {
-    if (sos.isEmpty() || vecData.size() == 0) {
+    if (sos.empty() || vecData.size() == 0) {
         return vecData;
     }
 
@@ -458,9 +460,9 @@ RowVectorXd IirFilter::applyZeroPhase(const RowVectorXd& vecData, const QVector<
 
 //=============================================================================================================
 
-MatrixXd IirFilter::applyZeroPhaseMatrix(const MatrixXd& matData, const QVector<IirBiquad>& sos)
+MatrixXd IirFilter::applyZeroPhaseMatrix(const MatrixXd& matData, const std::vector<IirBiquad>& sos)
 {
-    if (sos.isEmpty() || matData.size() == 0) {
+    if (sos.empty() || matData.size() == 0) {
         return matData;
     }
 

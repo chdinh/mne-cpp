@@ -29,14 +29,14 @@ class TestMaxwellMovementComp : public QObject
 private slots:
     void testHeadPosWriteAndRead()
     {
-        QList<HeadPosEntry> positions;
+        std::vector<HeadPosEntry> positions;
         for (int i = 0; i < 5; ++i) {
             HeadPosEntry entry;
             entry.dTime = 0.1 * i;
             entry.translation = Vector3d(0.001 * i, 0.002, 0.003);
             entry.rotation = Quaterniond(AngleAxisd(0.01 * i, Vector3d::UnitZ()));
             entry.dGof = 0.95 + 0.01 * i;
-            positions.append(entry);
+            positions.push_back(entry);
         }
 
         QTemporaryFile tmpFile;
@@ -47,7 +47,7 @@ private slots:
 
         QVERIFY(MaxwellMovementComp::writeHeadPos(path, positions));
 
-        QList<HeadPosEntry> loaded = MaxwellMovementComp::readHeadPos(path);
+        std::vector<HeadPosEntry> loaded = MaxwellMovementComp::readHeadPos(path);
         QCOMPARE(loaded.size(), 5);
 
         // Check first entry
@@ -57,8 +57,8 @@ private slots:
 
     void testReadNonexistent()
     {
-        QList<HeadPosEntry> pos = MaxwellMovementComp::readHeadPos("/nonexistent/path.pos");
-        QVERIFY(pos.isEmpty());
+        std::vector<HeadPosEntry> pos = MaxwellMovementComp::readHeadPos("/nonexistent/path.pos");
+        QVERIFY(pos.empty());
     }
 
     void testHeadPosRoundTrip()
@@ -69,8 +69,8 @@ private slots:
         entry.rotation = Quaterniond(AngleAxisd(0.1, Vector3d::UnitX()));
         entry.dGof = 0.99;
 
-        QList<HeadPosEntry> positions;
-        positions.append(entry);
+        std::vector<HeadPosEntry> positions;
+        positions.push_back(entry);
 
         QTemporaryFile tmpFile;
         tmpFile.setAutoRemove(true);
@@ -79,7 +79,7 @@ private slots:
         tmpFile.close();
 
         MaxwellMovementComp::writeHeadPos(path, positions);
-        QList<HeadPosEntry> loaded = MaxwellMovementComp::readHeadPos(path);
+        std::vector<HeadPosEntry> loaded = MaxwellMovementComp::readHeadPos(path);
 
         QCOMPARE(loaded.size(), 1);
         QVERIFY(std::abs(loaded[0].dTime - 1.5) < 1e-5);
@@ -95,13 +95,13 @@ private slots:
         tmpFile.write("# empty\n");
         tmpFile.close();
 
-        QList<HeadPosEntry> pos = MaxwellMovementComp::readHeadPos(tmpFile.fileName());
-        QVERIFY(pos.isEmpty());
+        std::vector<HeadPosEntry> pos = MaxwellMovementComp::readHeadPos(tmpFile.fileName());
+        QVERIFY(pos.empty());
     }
 
     void testWriteFailsOnBadPath()
     {
-        QList<HeadPosEntry> pos;
+        std::vector<HeadPosEntry> pos;
         QVERIFY(!MaxwellMovementComp::writeHeadPos("/nonexistent/dir/file.pos", pos));
     }
 

@@ -15,6 +15,8 @@
 //=============================================================================================================
 
 #include "eeg_reference.h"
+
+#include <vector>
 #include <utils/string_utils.h>
 
 #include <fiff/fiff_info.h>
@@ -43,12 +45,12 @@ using namespace Eigen;
 /**
  * @brief Collect indices of EEG channels that are not in the bads list.
  */
-static QVector<int> findGoodEegIndices(const FiffInfo& info)
+static std::vector<int> findGoodEegIndices(const FiffInfo& info)
 {
-    QVector<int> indices;
+    std::vector<int> indices;
     for (int i = 0; i < info.nchan; ++i) {
         if (info.chs[i].kind == FIFFV_EEG_CH && !info.isBad(info.ch_names[i])) {
-            indices.append(i);
+            indices.push_back(i);
         }
     }
     return indices;
@@ -58,12 +60,12 @@ static QVector<int> findGoodEegIndices(const FiffInfo& info)
 /**
  * @brief Collect indices of all EEG channels (including bads).
  */
-static QVector<int> findAllEegIndices(const FiffInfo& info)
+static std::vector<int> findAllEegIndices(const FiffInfo& info)
 {
-    QVector<int> indices;
+    std::vector<int> indices;
     for (int i = 0; i < info.nchan; ++i) {
         if (info.chs[i].kind == FIFFV_EEG_CH) {
-            indices.append(i);
+            indices.push_back(i);
         }
     }
     return indices;
@@ -113,8 +115,8 @@ void UTILSLIB::setEegReference(MatrixXd& data,
     }
 
     // As mne.set_eeg_reference, bad EEG channels are neither reference nor re-referenced
-    const QVector<int> goodEegIdx = findGoodEegIndices(info);
-    if (findAllEegIndices(info).isEmpty()) {
+    const std::vector<int> goodEegIdx = findGoodEegIndices(info);
+    if (findAllEegIndices(info).empty()) {
         qWarning("setEegReference: no EEG channels found in info.");
         return;
     }
@@ -124,7 +126,7 @@ void UTILSLIB::setEegReference(MatrixXd& data,
 
     if (useAverage) {
         // Average reference: mean of all good EEG channels
-        if (goodEegIdx.isEmpty()) {
+        if (goodEegIdx.empty()) {
             qWarning("setEegReference: all EEG channels are marked as bad.");
             return;
         }
@@ -135,14 +137,14 @@ void UTILSLIB::setEegReference(MatrixXd& data,
         refSignal /= static_cast<double>(goodEegIdx.size());
     } else {
         // Specific channel(s): mean of named channels
-        QVector<int> refIdx;
+        std::vector<int> refIdx;
         for (const std::string& name : refChannels) {
             int idx = UTILSLIB::indexOf(info.ch_names, name);
             if (idx < 0) {
                 qWarning("setEegReference: reference channel '%s' not found.", name.c_str());
                 return;
             }
-            refIdx.append(idx);
+            refIdx.push_back(idx);
         }
         refSignal = RowVectorXd::Zero(data.cols());
         for (int idx : refIdx) {
@@ -234,7 +236,7 @@ void UTILSLIB::setBipolarReference(MatrixXd& data,
     const Eigen::Index nTimes = data.cols();
 
     // Resolve anode and cathode indices
-    QVector<int> anodeIdx(nPairs), cathodeIdx(nPairs);
+    std::vector<int> anodeIdx(nPairs), cathodeIdx(nPairs);
     for (int i = 0; i < nPairs; ++i) {
         anodeIdx[i] = UTILSLIB::indexOf(info.ch_names, anodes[i]);
         if (anodeIdx[i] < 0) {
@@ -268,37 +270,37 @@ void UTILSLIB::setBipolarReference(MatrixXd& data,
         FiffChInfo ch = info.chs[anodeIdx[i]];
         ch.ch_name = (anodes[i] + "-" + cathodes[i]);
         ch.logNo = i + 1;
-        bipolarChs.append(ch);
+        bipolarChs.push_back(ch);
         bipolarNames.push_back(ch.ch_name);
     }
 
     if (dropOriginals) {
         // Keep only non-bipolar-original rows + append bipolar rows
-        QVector<int> keepIdx;
+        std::vector<int> keepIdx;
         for (int i = 0; i < static_cast<int>(data.rows()); ++i) {
             if (!bipolarOriginals.contains(i)) {
-                keepIdx.append(i);
+                keepIdx.push_back(i);
             }
         }
 
-        const int nKeep = keepIdx.size();
+        const int nKeep = static_cast<int>(keepIdx.size());
         MatrixXd newData(nKeep + nPairs, nTimes);
         QList<FiffChInfo> newChs;
         StringList newNames;
 
         for (int i = 0; i < nKeep; ++i) {
             newData.row(i) = data.row(keepIdx[i]);
-            newChs.append(info.chs[keepIdx[i]]);
+            newChs.push_back(info.chs[keepIdx[i]]);
             newNames.push_back(info.ch_names[keepIdx[i]]);
         }
         for (int i = 0; i < nPairs; ++i) {
             newData.row(nKeep + i) = bipolarData.row(i);
-            newChs.append(bipolarChs[i]);
+            newChs.push_back(bipolarChs[i]);
             newNames.push_back(bipolarNames[i]);
         }
 
         // Update scan numbers
-        for (int i = 0; i < newChs.size(); ++i) {
+        for (int i = 0; i < std::ssize(newChs); ++i) {
             newChs[i].scanNo = i + 1;
         }
 

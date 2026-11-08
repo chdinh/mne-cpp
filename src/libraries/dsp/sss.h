@@ -54,6 +54,8 @@
 
 #include "dsp_global.h"
 
+#include <vector>
+
 #include <fiff/fiff_info.h>
 
 //=============================================================================================================
@@ -66,7 +68,6 @@
 // QT INCLUDES
 //=============================================================================================================
 
-#include <QVector>
 
 //=============================================================================================================
 // DEFINE NAMESPACE UTILSLIB
@@ -112,15 +113,15 @@ public:
      */
     struct Basis
     {
-        Eigen::MatrixXd matSin;     /**< Internal basis S_in   (n_meg × N_in). */
-        Eigen::MatrixXd matSout;    /**< External basis S_out  (n_meg × N_out). */
-        Eigen::MatrixXd matProjIn;  /**< Internal-space projector P_in = S_in · pinv(S)[:N_in,:] (n_meg × n_meg). */
-        Eigen::MatrixXd matPinvAll; /**< Pseudoinverse of [S_in | S_out], shape (N_in+N_out) × n_meg. */
-        QVector<int> megChannelIdx; /**< Original channel indices in FiffInfo for the MEG rows. */
-        int iOrderIn = 8;           /**< Internal order used. */
-        int iOrderOut = 3;          /**< External order used. */
-        int iNin = 0;               /**< N_in  = iOrderIn*(iOrderIn+2). */
-        int iNout = 0;              /**< N_out = iOrderOut*(iOrderOut+2). */
+        Eigen::MatrixXd matSin;         /**< Internal basis S_in   (n_meg × N_in). */
+        Eigen::MatrixXd matSout;        /**< External basis S_out  (n_meg × N_out). */
+        Eigen::MatrixXd matProjIn;      /**< Internal-space projector P_in = S_in · pinv(S)[:N_in,:] (n_meg × n_meg). */
+        Eigen::MatrixXd matPinvAll;     /**< Pseudoinverse of [S_in | S_out], shape (N_in+N_out) × n_meg. */
+        std::vector<int> megChannelIdx; /**< Original channel indices in FiffInfo for the MEG rows. */
+        int iOrderIn = 8;               /**< Internal order used. */
+        int iOrderOut = 3;              /**< External order used. */
+        int iNin = 0;                   /**< N_in  = iOrderIn*(iOrderIn+2). */
+        int iNout = 0;                  /**< N_out = iOrderOut*(iOrderOut+2). */
     };
 
     //=========================================================================================================

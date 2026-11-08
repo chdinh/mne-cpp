@@ -130,7 +130,7 @@ int nextPowerOfTwo(int value)
     return power;
 }
 
-std::complex<double> evalIirResponse(const QVector<IirBiquad>& sos, double omega)
+std::complex<double> evalIirResponse(const std::vector<IirBiquad>& sos, double omega)
 {
     std::complex<double> z(std::cos(omega), std::sin(omega));
     std::complex<double> response(1.0, 0.0);
@@ -302,7 +302,7 @@ FilterKernel SessionFilter::createFirKernel() const
 
 //=============================================================================================================
 
-QVector<IirBiquad> SessionFilter::createIirSections() const
+std::vector<IirBiquad> SessionFilter::createIirSections() const
 {
     IirFilter::FilterType type = IirFilter::BandPass;
     switch (m_filterType) {
@@ -493,7 +493,7 @@ QString SessionFilter::coefficientExportText() const
     }
 
     stream << "# section b0 b1 b2 a1 a2\n";
-    for (int section = 0; section < m_iirSections.size(); ++section) {
+    for (int section = 0; section < std::ssize(m_iirSections); ++section) {
         const IirBiquad& biquad = m_iirSections.at(section);
         stream << section << ' '
                << biquad.b0 << ' '
