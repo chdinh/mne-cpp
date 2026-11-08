@@ -273,7 +273,7 @@ Reads different annotation files and assembles them to a [`FsAnnotationSet`](/do
 
 FreeSurfer library: surfaces, curvature, parcellations, labels and an atlas volume.
 
-````cpp title="src/examples/ex_fs/main.cpp, line 148"
+````cpp title="src/examples/ex_fs/main.cpp, line 149"
 FsAnnotationSet parcellation("sample", 2, "aparc", subjectsDir);
 ok &= expect(parcellation.size() == 2, "FsAnnotationSet holds both hemispheres");
 ````

@@ -918,7 +918,8 @@
       "url": "/docs/examples/fs/ex_fs/",
       "library": "fs",
       "libraries": [
-        "fs"
+        "fs",
+        "utils"
       ],
       "tasks": [
         "anatomy",

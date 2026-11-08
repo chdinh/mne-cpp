@@ -187,7 +187,7 @@ Build adjacency list from surface triangle mesh.
 
 FreeSurfer library: surfaces, curvature, parcellations, labels and an atlas volume.
 
-````cpp title="src/examples/ex_fs/main.cpp, line 161"
+````cpp title="src/examples/ex_fs/main.cpp, line 162"
 const FsLabel grown = FsLabelUtils::growLabel(v1, white, 1); // add the one-ring neighbours
 const QList<FsLabel> parts = FsLabelUtils::splitLabel(v1, white);
 // Closed form on the mesh graph (scipy.sparse.csgraph): one ring adds 447 vertices; components of 5635, 2 and 1

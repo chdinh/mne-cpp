@@ -17,35 +17,30 @@ class FSLIB::FsAtlasLookup
 
 RAS-point → anatomical-region resolver backed by a FreeSurfer volumetric parcellation.
 
-Owns the parcellation voxel grid, its inverse RAS-to-voxel affine, and a label-id → region-name map seeded from FreeSurferColorLUT. Designed for cheap per-point queries: a ``labelAtRas()`` call is an affine transform, three bound checks and an `int` → `QString` hash lookup.
+Owns the parcellation voxel grid, its inverse RAS-to-voxel affine, and a label-id → region-name map seeded from FreeSurferColorLUT. Designed for cheap per-point queries: a ``label_at_ras()`` call is an affine transform, three bound checks and an `int` → name hash lookup.
 
 ```cpp title="src/examples/ex_fs/main.cpp"
 QTemporaryDir dir;
 const QString atlasPath = dir.filePath("atlas.mgh"); // normally aparc+aseg.mgz
 writeAtlas(atlasPath);
 FsAtlasLookup atlas;
-atlas.load(atlasPath);
-const QStringList regionsAt = atlas.labelsForPositions({Vector3f(-4.0f, -4.0f, -4.0f), Vector3f(2.0f, 0.0f, -2.0f), Vector3f(0.0f, 0.0f, 0.0f)});
+atlas.load(atlasPath.toStdU16String());
+const std::vector<Vector3f> points{Vector3f(-4.0f, -4.0f, -4.0f), Vector3f(2.0f, 0.0f, -2.0f), Vector3f(0.0f, 0.0f, 0.0f)};
+const std::vector<std::string> regionsAt = atlas.labels_for_positions(points);
 ```
 
 ---
 
 ## Public Methods
 
-### FsAtlasLookup()
+### load(parcellation)
 
-Constructs an empty atlas lookup.
-
----
-
-### load(sParcellationPath)
-
-Load a FreeSurfer MGH/MGZ volume parcellation.
+Load a FreeSurfer MGH or gzip-compressed MGZ volume parcellation.
 
 **Parameters:**
 
-- **sParcellationPath** : *const QString &*
-  Path to the volume file (e.g. aparc+aseg.mgz).
+- **parcellation** : *const std::filesystem::path &*
+  The volume file (e.g. aparc+aseg.mgz).
 
 **Returns:**
 
@@ -53,7 +48,7 @@ Load a FreeSurfer MGH/MGZ volume parcellation.
 
 ---
 
-### labelAtRas(ras)
+### label_at_ras(ras)
 
 Look up the anatomical label at a RAS coordinate.
 
@@ -64,26 +59,26 @@ Look up the anatomical label at a RAS coordinate.
 
 **Returns:**
 
-- *QString* — Label string, or "Unknown" if out of bounds or unlabeled.
+- *const std::string &* — Region name, or "Unknown" if out of bounds or unlabeled.
 
 ---
 
-### labelsForPositions(positions)
+### labels_for_positions(positions)
 
 Look up labels for multiple RAS positions.
 
 **Parameters:**
 
-- **positions** : *const QVector&lt; Eigen::Vector3f &gt; &*
-  List of 3D RAS positions.
+- **positions** : *std::span&lt; const Eigen::Vector3f &gt;*
+  3D RAS positions.
 
 **Returns:**
 
-- *QStringList* — List of label strings (one per position).
+- *std::vector&lt; std::string &gt;* — One region name per position.
 
 ---
 
-### isLoaded()
+### is_loaded()
 
 Check whether a parcellation volume has been loaded.
 
@@ -106,16 +101,17 @@ Check whether a parcellation volume has been loaded.
 
 FreeSurfer library: surfaces, curvature, parcellations, labels and an atlas volume.
 
-````cpp title="src/examples/ex_fs/main.cpp, line 174"
+````cpp title="src/examples/ex_fs/main.cpp, line 175"
 QTemporaryDir dir;
 const QString atlasPath = dir.filePath("atlas.mgh"); // normally aparc+aseg.mgz
 writeAtlas(atlasPath);
 FsAtlasLookup atlas;
-atlas.load(atlasPath);
-const QStringList regionsAt = atlas.labelsForPositions({Vector3f(-4.0f, -4.0f, -4.0f), Vector3f(2.0f, 0.0f, -2.0f), Vector3f(0.0f, 0.0f, 0.0f)});
+atlas.load(atlasPath.toStdU16String());
+const std::vector<Vector3f> points{Vector3f(-4.0f, -4.0f, -4.0f), Vector3f(2.0f, 0.0f, -2.0f), Vector3f(0.0f, 0.0f, 0.0f)};
+const std::vector<std::string> regionsAt = atlas.labels_for_positions(points);
 // nibabel: inv(affine) maps (-4,-4,-4) to voxel (0,0,0) and (2,0,-2) to voxel (3,2,1)
-ok &= expect(atlas.isLoaded() && regionsAt == QStringList({"Left-Hippocampus", "Right-Hippocampus", "Unknown"}),
-             std::format("atlas lookup: {}", regionsAt.join(", ").toStdString()));
+ok &= expect(atlas.is_loaded() && regionsAt == std::vector<std::string>{"Left-Hippocampus", "Right-Hippocampus", "Unknown"},
+             std::format("atlas lookup: {}", UTILSLIB::join(regionsAt, ", ")));
 ````
 
 ## Authors of this file

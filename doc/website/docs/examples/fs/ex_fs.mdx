@@ -12,7 +12,7 @@ FreeSurfer library: surfaces, curvature, parcellations, labels and an atlas volu
 
 <ExampleFacts name="ex_fs" />
 
-**Libraries:** [FreeSurfer](../../api/fs/index.mdx)
+**Libraries:** [FreeSurfer](../../api/fs/index.mdx), [Utilities](../../api/utils/index.mdx)
 
 ## What it demonstrates
 
@@ -159,6 +159,7 @@ The documented classes this example uses most:
 #include <fs/fs_label_utils.h>
 #include <fs/fs_surface.h>
 #include <fs/fs_surfaceset.h>
+#include <utils/string_utils.h>
 
 //=============================================================================================================
 // QT INCLUDES
@@ -307,12 +308,13 @@ int main(int argc, char* argv[])
     const QString atlasPath = dir.filePath("atlas.mgh"); // normally aparc+aseg.mgz
     writeAtlas(atlasPath);
     FsAtlasLookup atlas;
-    atlas.load(atlasPath);
-    const QStringList regionsAt = atlas.labelsForPositions({Vector3f(-4.0f, -4.0f, -4.0f), Vector3f(2.0f, 0.0f, -2.0f), Vector3f(0.0f, 0.0f, 0.0f)});
+    atlas.load(atlasPath.toStdU16String());
+    const std::vector<Vector3f> points{Vector3f(-4.0f, -4.0f, -4.0f), Vector3f(2.0f, 0.0f, -2.0f), Vector3f(0.0f, 0.0f, 0.0f)};
+    const std::vector<std::string> regionsAt = atlas.labels_for_positions(points);
     //! [fs_atlas_lookup_usage]
     // nibabel: inv(affine) maps (-4,-4,-4) to voxel (0,0,0) and (2,0,-2) to voxel (3,2,1)
-    ok &= expect(atlas.isLoaded() && regionsAt == QStringList({"Left-Hippocampus", "Right-Hippocampus", "Unknown"}),
-                 std::format("atlas lookup: {}", regionsAt.join(", ").toStdString()));
+    ok &= expect(atlas.is_loaded() && regionsAt == std::vector<std::string>{"Left-Hippocampus", "Right-Hippocampus", "Unknown"},
+                 std::format("atlas lookup: {}", UTILSLIB::join(regionsAt, ", ")));
 
     std::println("{}", ok ? "All fs checks passed." : "fs checks FAILED.");
     return ok ? EXIT_SUCCESS : EXIT_FAILURE;
