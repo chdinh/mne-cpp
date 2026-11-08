@@ -20,12 +20,8 @@ Container pairing the left and right cortical source spaces (and optional discre
 List of [`MNESourceSpace`](/docs/api/mne/mne-source-space) objects forming a subject source space.
 
 ```cpp title="src/examples/ex_mne_api/main.cpp"
-QFile srcFile(data + "/subjects/sample/bem/sample-oct-6-src.fif");
-FiffStream stream(&srcFile);
-MNESourceSpaces src;
-stream.open();
-MNESourceSpaces::readFromStream(stream, true, src); // add_geom: normals, triangle data and patches
-stream.close();
+const QString srcPath = data + "/subjects/sample/bem/sample-oct-6-src.fif";
+const MNESourceSpaces src(srcPath.toStdU16String()); // with normals, triangle data and patches
 const auto& lh = dynamic_cast<const MNEHemisphere&>(src[0]);
 QList<VectorXi> vertno = src.get_vertno(); // used vertices per hemisphere
 ```
@@ -53,9 +49,7 @@ Copy constructor.
 
 ### operator=(other)
 
-Copy assignment.
-
-Every member has value semantics, so the compiler-generated member-wise assignment is correct. It is declared explicitly because declaring a copy constructor and/or a destructor deprecates the implicitly generated one.
+Copy assignment; like the copy constructor it copies the source spaces, it does not share them.
 
 **Parameters:**
 
@@ -74,13 +68,65 @@ Destroys the [`MNE`](/docs/api/mne/mne-class) forward solution.
 
 ---
 
+### MNESourceSpaces(other)
+
+Move constructor.
+
+**Parameters:**
+
+- **other** : *MNESourceSpaces &&*
+  Source spaces to move from; left empty.
+
+---
+
+### operator=(other)
+
+Move assignment.
+
+**Parameters:**
+
+- **other** : *[MNESourceSpaces](/docs/api/mne/mne-source-spaces) &&*
+  Source spaces to move from; left empty.
+
+**Returns:**
+
+- *[MNESourceSpaces](/docs/api/mne/mne-source-spaces) &* — reference to this object.
+
+---
+
+### MNESourceSpaces(path)
+
+Reads a source space file like `read()`; throws [`Error`](/docs/api/utils/error) if it cannot.
+
+**Parameters:**
+
+- **path** : *const std::filesystem::path &*
+  The -src.fif file (or any FIFF file holding source spaces).
+
+---
+
+### write(path)
+
+Writes the source spaces, as mne.write_source_spaces does.
+
+**Parameters:**
+
+- **path** : *const std::filesystem::path &*
+  The -src.fif file.
+
+**Returns:**
+
+- *[Expected](/docs/api/utils/expected)&lt; void &gt;* — Nothing, or why the file cannot be written (Io).
+
+---
+
 ### clear()
 
 Initializes [`MNE`](/docs/api/mne/mne-class) source space.
 
 ---
 
-### isEmpty()
+### empty()
 
 True if [`MNE`](/docs/api/mne/mne-class) Source Space is empty.
 
@@ -159,7 +205,9 @@ Returns the number of stored hemispheres 0, 1 or 2.
 
 ---
 
-### writeToStream(stream)
+### write_to_stream(stream)
+
+Writes the source space blocks into an open FIFF stream (mne write_source_spaces_to_fid).
 
 **Parameters:**
 
@@ -301,48 +349,39 @@ Access the underlying shared_ptr at the given index (const).
 
 ## Static Methods
 
-### find_source_space_hemi(p_SourceSpace)
+### read(path, add_geom)
+
+Reads the source spaces of a file, as mne.read_source_spaces does.
 
 **Parameters:**
 
-- **p_SourceSpace** : *[MNESourceSpace](/docs/api/mne/mne-source-space) &*
-  the hemisphere to investigate.
+- **path** : *const std::filesystem::path &*
+  The -src.fif file (or any FIFF file holding source spaces).
+
+- **add_geom** : *bool*
+  Complete the geometry: triangle normals, areas and centroids, and vertex normals.
 
 **Returns:**
 
-- *qint32* — the deduced hemisphere id.
+- *[Expected](/docs/api/utils/expected)&lt; [MNESourceSpaces](/docs/api/mne/mne-source-spaces) &gt;* — The source spaces, or why the file cannot be read: Io if it cannot be opened, NotFound if it holds no source space, Format if a source space is incomplete or inconsistent.
 
 ---
 
-### patch_info(p_Hemisphere)
+### read(stream, add_geom)
 
-**Parameters:**
-
-- **p_Hemisphere** : *[MNEHemisphere](/docs/api/mne/mne-hemisphere) &*
-  The source space.
-
-**Returns:**
-
-- *bool* — true if succeeded, false otherwise.
-
----
-
-### readFromStream(stream, add_geom, p_SourceSpace)
+Reads the source spaces from an open FIFF stream.
 
 **Parameters:**
 
 - **stream** : *[FiffStream](/docs/api/fiff/fiff-stream) &*
-  The opened fif file.
+  The stream; opened here if it is not open yet.
 
 - **add_geom** : *bool*
-  Add geometry information to the source spaces.
-
-- **p_SourceSpace** : *[MNESourceSpaces](/docs/api/mne/mne-source-spaces) &*
-  The read source spaces.
+  Complete the geometry: triangle normals, areas and centroids, and vertex normals.
 
 **Returns:**
 
-- *bool* — true if succeeded, false otherwise.
+- *[Expected](/docs/api/utils/expected)&lt; [MNESourceSpaces](/docs/api/mne/mne-source-spaces) &gt;* — The source spaces, or why the stream cannot be read (see read(path)).
 
 ---
 
@@ -360,12 +399,8 @@ Access the underlying shared_ptr at the given index (const).
 MNE library: BEM surfaces, surface projection, ICP, source spaces and epochs.
 
 ````cpp title="src/examples/ex_mne_api/main.cpp, line 200"
-QFile srcFile(data + "/subjects/sample/bem/sample-oct-6-src.fif");
-FiffStream stream(&srcFile);
-MNESourceSpaces src;
-stream.open();
-MNESourceSpaces::readFromStream(stream, true, src); // add_geom: normals, triangle data and patches
-stream.close();
+const QString srcPath = data + "/subjects/sample/bem/sample-oct-6-src.fif";
+const MNESourceSpaces src(srcPath.toStdU16String()); // with normals, triangle data and patches
 const auto& lh = dynamic_cast<const MNEHemisphere&>(src[0]);
 QList<VectorXi> vertno = src.get_vertno(); // used vertices per hemisphere
 // mne.read_source_spaces: lh 155407 vertices, 4098 in use (8192 used triangles), vertno 14, 54, 59; rh 156866 / 4098

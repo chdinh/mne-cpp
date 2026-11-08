@@ -20,12 +20,8 @@ Hemisphere source space geometry information.
 Hemisphere provides geometry information
 
 ```cpp title="src/examples/ex_mne_api/main.cpp"
-QFile srcFile(data + "/subjects/sample/bem/sample-oct-6-src.fif");
-FiffStream stream(&srcFile);
-MNESourceSpaces src;
-stream.open();
-MNESourceSpaces::readFromStream(stream, true, src); // add_geom: normals, triangle data and patches
-stream.close();
+const QString srcPath = data + "/subjects/sample/bem/sample-oct-6-src.fif";
+const MNESourceSpaces src(srcPath.toStdU16String()); // with normals, triangle data and patches
 const auto& lh = dynamic_cast<const MNEHemisphere&>(src[0]);
 QList<VectorXi> vertno = src.get_vertno(); // used vertices per hemisphere
 ```
@@ -180,10 +176,9 @@ Copy assignment operator.
 
 MNE library: BEM surfaces, surface projection, ICP, source spaces and epochs.
 
-````cpp title="src/examples/ex_mne_api/main.cpp, line 203"
-stream.open();
-MNESourceSpaces::readFromStream(stream, true, src); // add_geom: normals, triangle data and patches
-stream.close();
+````cpp title="src/examples/ex_mne_api/main.cpp, line 200"
+const QString srcPath = data + "/subjects/sample/bem/sample-oct-6-src.fif";
+const MNESourceSpaces src(srcPath.toStdU16String()); // with normals, triangle data and patches
 const auto& lh = dynamic_cast<const MNEHemisphere&>(src[0]);
 QList<VectorXi> vertno = src.get_vertno(); // used vertices per hemisphere
 // mne.read_source_spaces: lh 155407 vertices, 4098 in use (8192 used triangles), vertno 14, 54, 59; rh 156866 / 4098

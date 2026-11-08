@@ -278,7 +278,7 @@ int main(int argc, char* argv[])
     std::cout << "evoked first " << evoked.first << "; last " << evoked.last << std::endl;
 
     MNEForwardSolution t_Fwd(parser.value(sampleFwdFileOption).toStdU16String());
-    if (t_Fwd.isEmpty())
+    if (t_Fwd.empty())
         return 1;
 
     FsAnnotationSet t_annotationSet("sample", 2, "aparc.a2009s", QCoreApplication::applicationDirPath() + "/../resources/data/MNE-sample-data/subjects");

@@ -27,7 +27,7 @@ CMNE inverse solver
 ```cpp title="src/examples/ex_inverse_cmne/main.cpp"
 const MatrixXd sourceCov = MatrixXd::Identity(fwd.nsource, fwd.nsource);
 InvCMNEResult cmne = InvCMNE::compute(evoked.data, fwd.sol->data, noiseCov.data, sourceCov, settings);
-if (cmne.stcCmne.is_empty()) {
+if (cmne.stcCmne.empty()) {
     std::println(stderr, "The CMNE model does not fit {} sources.", fwd.nsource);
     return EXIT_FAILURE;
 }
@@ -205,7 +205,7 @@ Contextual minimum-norm estimate (CMNE) of the auditory evoked response in both 
 ````cpp title="src/examples/ex_inverse_cmne/main.cpp, line 137"
 const MatrixXd sourceCov = MatrixXd::Identity(fwd.nsource, fwd.nsource);
 InvCMNEResult cmne = InvCMNE::compute(evoked.data, fwd.sol->data, noiseCov.data, sourceCov, settings);
-if (cmne.stcCmne.is_empty()) {
+if (cmne.stcCmne.empty()) {
     std::println(stderr, "The CMNE model does not fit {} sources.", fwd.nsource);
     return EXIT_FAILURE;
 }

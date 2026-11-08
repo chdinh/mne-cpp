@@ -385,12 +385,8 @@ int main(int argc, char* argv[])
                  "fitMatchedPoints/discard3DPointOutliers/performIcp recover the known head-to-MRI transform");
 
     //! [mne_source_spaces_usage]
-    QFile srcFile(data + "/subjects/sample/bem/sample-oct-6-src.fif");
-    FiffStream stream(&srcFile);
-    MNESourceSpaces src;
-    stream.open();
-    MNESourceSpaces::readFromStream(stream, true, src); // add_geom: normals, triangle data and patches
-    stream.close();
+    const QString srcPath = data + "/subjects/sample/bem/sample-oct-6-src.fif";
+    const MNESourceSpaces src(srcPath.toStdU16String()); // with normals, triangle data and patches
     const auto& lh = dynamic_cast<const MNEHemisphere&>(src[0]);
     QList<VectorXi> vertno = src.get_vertno(); // used vertices per hemisphere
     //! [mne_source_spaces_usage]
@@ -411,7 +407,7 @@ int main(int argc, char* argv[])
     //! [mne_source_space_filter]
     // Drop sources outside the inner skull or closer than 5 mm to it (mne make_forward_solution(mindist=5))
     std::vector<std::unique_ptr<MNESourceSpace>> spaces;
-    MNESourceSpace::read_source_spaces(srcFile.fileName(), spaces);
+    MNESourceSpace::read_source_spaces(srcPath, spaces);
     const FiffCoordTrans mriHeadT((data + "/MEG/sample/all-trans.fif").toStdU16String(), FIFFV_COORD_MRI, FIFFV_COORD_HEAD);
     MNESourceSpace::filter_source_spaces(0.005f, data + "/subjects/sample/bem/sample-5120-bem.fif", mriHeadT, spaces, nullptr, true);
     //! [mne_source_space_filter]

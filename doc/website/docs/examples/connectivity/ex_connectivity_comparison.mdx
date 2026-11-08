@@ -394,7 +394,7 @@ int main(int argc, char* argv[])
                                                           1.0 / raw.info.sfreq,
                                                           true);
 
-            if (sourceEstimate.is_empty()) {
+            if (sourceEstimate.empty()) {
                 printf("Source estimate is empty");
             } else {
                 matDataList << sourceEstimate.data;

@@ -1576,10 +1576,34 @@ Index of 6704 public class members (functions, variables, typedefs, enums) acros
 - **emitChanged** `[fn]` in [AcquiredPoints](/docs/api/acq/acquired-points)
 - **empty** `[fn]` in [AcqBlockView](/docs/api/acq/acq-block-view)
 - **empty** `[fn]` in [AcqSpanPair](/docs/api/acq/acq-span-pair)
+- **empty** `[fn]` in [ConnectivitySettings](/docs/api/connectivity/connectivity-settings)
 - **empty** `[fn]` in [FiffAnnotations](/docs/api/fiff/fiff-annotations)
+- **empty** `[fn]` in [FiffCoordTrans](/docs/api/fiff/fiff-coord-trans) — Returns true if coordinate transform contains no data.
+- **empty** `[fn]` in [FiffCov](/docs/api/fiff/fiff-cov) — True if FIFF covariance is empty.
+- **empty** `[fn]` in [FiffDeviceInfo](/docs/api/fiff/fiff-device-info)
 - **empty** `[fn]` in [FiffDigPointSet](/docs/api/fiff/fiff-dig-point-set)
+- **empty** `[fn]` in [FiffDirNode](/docs/api/fiff/fiff-dir-node) — Returns true if directory tree structure contains no data.
+- **empty** `[fn]` in [FiffEvents](/docs/api/fiff/fiff-events)
+- **empty** `[fn]` in [FiffEvoked](/docs/api/fiff/fiff-evoked) — Returns whether [`FiffEvoked`](/docs/api/fiff/fiff-evoked) is empty.
+- **empty** `[fn]` in [FiffId](/docs/api/fiff/fiff-id) — True if FIFF id is empty.
+- **empty** `[fn]` in [FiffInfoBase](/docs/api/fiff/fiff-info-base) — True if FIFF measurement file information is empty.
+- **empty** `[fn]` in [FiffNamedMatrix](/docs/api/fiff/fiff-named-matrix) — Returns true if named matrix contains no data.
+- **empty** `[fn]` in [FiffRawData](/docs/api/fiff/fiff-raw-data)
+- **empty** `[fn]` in [FiffSparseMatrix](/docs/api/fiff/fiff-sparse-matrix) — Check whether this sparse matrix is empty (no non-zero elements).
+- **empty** `[fn]` in [FineCalibration](/docs/api/dsp/fine-calibration) — Check if empty.
+- **empty** `[fn]` in [FsAnnotation](/docs/api/fs/fs-annotation) — Returns whether [`FsAnnotation`](/docs/api/fs/fs-annotation) is empty.
+- **empty** `[fn]` in [FsAnnotationSet](/docs/api/fs/fs-annotation-set) — True if [`FsAnnotationSet`](/docs/api/fs/fs-annotation-set) is empty.
+- **empty** `[fn]` in [FsLabel](/docs/api/fs/fs-label) — True if [`FsLabel`](/docs/api/fs/fs-label) is empty.
+- **empty** `[fn]` in [FsSurface](/docs/api/fs/fs-surface) — Returns whether [`FsSurface`](/docs/api/fs/fs-surface) is empty.
+- **empty** `[fn]` in [FsSurfaceSet](/docs/api/fs/fs-surface-set) — True if [`FsSurfaceSet`](/docs/api/fs/fs-surface-set) is empty.
+- **empty** `[fn]` in [IeegImplantation](/docs/api/ieeg/ieeg-implantation)
+- **empty** `[fn]` in [InvSourceEstimate](/docs/api/inv/inv-source-estimate)
 - **empty** `[fn]` in [MlTensor](/docs/api/ml/ml-tensor)
 - **empty** `[fn]` in [MNEBem](/docs/api/mne/mne-bem)
+- **empty** `[fn]` in [MNEClusterInfo](/docs/api/mne/mne-cluster-info) — Returns true if [`MNE`](/docs/api/mne/mne-class) cluster information contains no data.
+- **empty** `[fn]` in [MNEForwardSolution](/docs/api/mne/mne-forward-solution) — True if FIFF measurement file information is empty.
+- **empty** `[fn]` in [MNESourceSpaces](/docs/api/mne/mne-source-spaces) — True if [`MNE`](/docs/api/mne/mne-class) Source Space is empty.
+- **empty** `[fn]` in [Network](/docs/api/connectivity/network) — Returns whether the [`Network`](/docs/api/connectivity/network) is empty by checking the number of nodes and edges.
 - **enable_all_sources** `[fn]` in [MNESourceSpace](/docs/api/mne/mne-source-space) — Enable all source points (set inuse to TRUE, nuse = np).
 - **enabled** `[var]` in [SubView](/docs/api/disp3-d/sub-view)
 - **end** `[var]` in [AcqSampleRange](/docs/api/acq/acq-sample-range) — One past the last sample; equals first for an empty range.
@@ -1895,9 +1919,7 @@ Index of 6704 public class members (functions, variables, typedefs, enums) acros
 - **find_meas** `[fn]` in [MNERawInfo](/docs/api/mne/mne-raw-info) — Finds the nearest FIFFB_MEAS parent node in the FIFF directory tree.
 - **find_meas_info** `[fn]` in [MNERawInfo](/docs/api/mne/mne-raw-info) — Finds the FIFFB_MEAS_INFO child node within the nearest FIFFB_MEAS block.
 - **find_raw** `[fn]` in [MNERawInfo](/docs/api/mne/mne-raw-info) — Finds the raw data block in the FIFF directory tree.
-- **find_source_space_hemi** `[fn]` in [MNE](/docs/api/mne/mne-class) — mne_find_source_space_hemi
 - **find_source_space_hemi** `[fn]` in [MNESourceSpace](/docs/api/mne/mne-source-space) — Returns the hemisphere id (FIFFV_MNE_SURF_LEFT_HEMI or FIFFV_MNE_SURF_RIGHT_HEMI) for this source space, based on the average x-coordinate of all vertices.
-- **find_source_space_hemi** `[fn]` in [MNESourceSpaces](/docs/api/mne/mne-source-spaces)
 - **find_stim_steps** `[fn]` in [FiffEvents](/docs/api/fiff/fiff-events) — Find the samples where all stimulus channels change at once, like mne.find_stim_steps.
 - **find_tag** `[fn]` in [FiffDirNode](/docs/api/fiff/fiff-dir-node) — Reads the first tag of a kind among the tags of this block.
 - **findArtifactComponents** `[fn]` in [MlIcaLabel](/docs/api/decoding/ml-ica-label) — Extract indices of artifact components (EOG, ECG, muscle).
@@ -2845,13 +2867,6 @@ Index of 6704 public class members (functions, variables, typedefs, enums) acros
 - **is_diag** `[fn]` in [MNECovMatrix](/docs/api/mne/mne-cov-matrix) — Check whether this covariance matrix is stored in diagonal form.
 - **is_eeg_electrode** `[fn]` in [FwdCoil](/docs/api/fwd/fwd-coil) — Checks if this is an EEG electrode.
 - **is_eeg_electrode_type** `[fn]` in [FwdCoilSet](/docs/api/fwd/fwd-coil-set) — Checks if a set of templates contains an EEG electrode of a specified type.
-- **is_empty** `[fn]` in [FiffCoordTrans](/docs/api/fiff/fiff-coord-trans) — Returns true if coordinate transform contains no data.
-- **is_empty** `[fn]` in [FiffCov](/docs/api/fiff/fiff-cov) — True if FIFF covariance is empty.
-- **is_empty** `[fn]` in [FiffDirNode](/docs/api/fiff/fiff-dir-node) — Returns true if directory tree structure contains no data.
-- **is_empty** `[fn]` in [FiffEvents](/docs/api/fiff/fiff-events)
-- **is_empty** `[fn]` in [FiffRawData](/docs/api/fiff/fiff-raw-data)
-- **is_empty** `[fn]` in [FiffSparseMatrix](/docs/api/fiff/fiff-sparse-matrix) — Check whether this sparse matrix is empty (no non-zero elements).
-- **is_empty** `[fn]` in [InvSourceEstimate](/docs/api/inv/inv-source-estimate)
 - **is_left_hemi** `[fn]` in [MNESourceSpace](/docs/api/mne/mne-source-space) — Determine whether this source space is on the left hemisphere based on the average x-coordinate of all vertices.
 - **is_magnetometer_coil** `[fn]` in [FwdCoil](/docs/api/fwd/fwd-coil) — Checks if this is an magnetometer.
 - **is_magnetometer_coil_type** `[fn]` in [FwdCoilSet](/docs/api/fwd/fwd-coil-set) — Checks if a set of templates contains a magnetometer of a specified type.
@@ -2872,23 +2887,6 @@ Index of 6704 public class members (functions, variables, typedefs, enums) acros
 - **isConnected** `[fn]` in [PolhemusConnection](/docs/api/acq/polhemus-connection)
 - **isDepthEnabled** `[fn]` in [VideoOverlay](/docs/api/disp3-d/video-overlay)
 - **isDipole** `[var]` in [RayHit](/docs/api/disp3-d/ray-hit) — True if a dipole was hit.
-- **isEmpty** `[fn]` in [ConnectivitySettings](/docs/api/connectivity/connectivity-settings)
-- **isEmpty** `[fn]` in [FiffDeviceInfo](/docs/api/fiff/fiff-device-info)
-- **isEmpty** `[fn]` in [FiffEvoked](/docs/api/fiff/fiff-evoked) — Returns whether [`FiffEvoked`](/docs/api/fiff/fiff-evoked) is empty.
-- **isEmpty** `[fn]` in [FiffId](/docs/api/fiff/fiff-id) — True if FIFF id is empty.
-- **isEmpty** `[fn]` in [FiffInfoBase](/docs/api/fiff/fiff-info-base) — True if FIFF measurement file information is empty.
-- **isEmpty** `[fn]` in [FiffNamedMatrix](/docs/api/fiff/fiff-named-matrix) — Returns true if named matrix contains no data.
-- **isEmpty** `[fn]` in [FineCalibration](/docs/api/dsp/fine-calibration) — Check if empty.
-- **isEmpty** `[fn]` in [FsAnnotation](/docs/api/fs/fs-annotation) — Returns whether [`FsAnnotation`](/docs/api/fs/fs-annotation) is empty.
-- **isEmpty** `[fn]` in [FsAnnotationSet](/docs/api/fs/fs-annotation-set) — True if [`FsAnnotationSet`](/docs/api/fs/fs-annotation-set) is empty.
-- **isEmpty** `[fn]` in [FsLabel](/docs/api/fs/fs-label) — True if [`FsLabel`](/docs/api/fs/fs-label) is empty.
-- **isEmpty** `[fn]` in [FsSurface](/docs/api/fs/fs-surface) — Returns whether [`FsSurface`](/docs/api/fs/fs-surface) is empty.
-- **isEmpty** `[fn]` in [FsSurfaceSet](/docs/api/fs/fs-surface-set) — True if [`FsSurfaceSet`](/docs/api/fs/fs-surface-set) is empty.
-- **isEmpty** `[fn]` in [IeegImplantation](/docs/api/ieeg/ieeg-implantation)
-- **isEmpty** `[fn]` in [MNEClusterInfo](/docs/api/mne/mne-cluster-info) — Returns true if [`MNE`](/docs/api/mne/mne-class) cluster information contains no data.
-- **isEmpty** `[fn]` in [MNEForwardSolution](/docs/api/mne/mne-forward-solution) — True if FIFF measurement file information is empty.
-- **isEmpty** `[fn]` in [MNESourceSpaces](/docs/api/mne/mne-source-spaces) — True if [`MNE`](/docs/api/mne/mne-class) Source Space is empty.
-- **isEmpty** `[fn]` in [Network](/docs/api/connectivity/network) — Returns whether the [`Network`](/docs/api/connectivity/network) is empty by checking the number of nodes and edges.
 - **isEnabled** `[fn]` in [VideoOverlay](/docs/api/disp3-d/video-overlay)
 - **isFitted** `[fn]` in [DecodingCsp](/docs/api/decoding/decoding-csp)
 - **isFitted** `[fn]` in [DecodingSpoc](/docs/api/decoding/decoding-spoc)
@@ -3544,6 +3542,8 @@ Index of 6704 public class members (functions, variables, typedefs, enums) acros
 - **MNESourceSpace** `[fn]` in [MNESourceSpace](/docs/api/mne/mne-source-space) — Constructs the [`MNE`](/docs/api/mne/mne-class) Source Space.
 - **MNESourceSpaces** `[fn]` in [MNESourceSpaces](/docs/api/mne/mne-source-spaces) — Default constructor.
 - **MNESourceSpaces** `[fn]` in [MNESourceSpaces](/docs/api/mne/mne-source-spaces) — Copy constructor.
+- **MNESourceSpaces** `[fn]` in [MNESourceSpaces](/docs/api/mne/mne-source-spaces) — Move constructor.
+- **MNESourceSpaces** `[fn]` in [MNESourceSpaces](/docs/api/mne/mne-source-spaces) — Reads a source space file like `read()`; throws [`Error`](/docs/api/utils/error) if it cannot.
 - **MNESparseNamedMatrix** `[fn]` in [MNESparseNamedMatrix](/docs/api/mne/mne-sparse-named-matrix)
 - **MNESssData** `[fn]` in [MNESssData](/docs/api/mne/mne-sss-data) — Constructs the [`MNE`](/docs/api/mne/mne-class) SSS Data.
 - **MNESssData** `[fn]` in [MNESssData](/docs/api/mne/mne-sss-data) — Copy constructor.
@@ -3997,7 +3997,8 @@ Index of 6704 public class members (functions, variables, typedefs, enums) acros
 - **operator=** `[fn]` in [MNEMshLightSet](/docs/api/mne/mne-msh-light-set)
 - **operator=** `[fn]` in [MNEProjItem](/docs/api/mne/mne-proj-item) — Copy assignment operator.
 - **operator=** `[fn]` in [MNEProjItem](/docs/api/mne/mne-proj-item) — Move assignment operator (defaulted).
-- **operator=** `[fn]` in [MNESourceSpaces](/docs/api/mne/mne-source-spaces) — Copy assignment.
+- **operator=** `[fn]` in [MNESourceSpaces](/docs/api/mne/mne-source-spaces) — Copy assignment; like the copy constructor it copies the source spaces, it does not share them.
+- **operator=** `[fn]` in [MNESourceSpaces](/docs/api/mne/mne-source-spaces) — Move assignment.
 - **operator=** `[fn]` in [MNESurfaceOrVolume](/docs/api/mne/mne-surface-or-volume)
 - **operator=** `[fn]` in [MNESurfaceOrVolume](/docs/api/mne/mne-surface-or-volume)
 - **operator=** `[fn]` in [RawCommand](/docs/api/com/raw-command) — Assignment Operator.
@@ -4127,8 +4128,6 @@ Index of 6704 public class members (functions, variables, typedefs, enums) acros
 - **passed** `[var]` in [MnaVerificationResult](/docs/api/mna/mna-verification-result) — true if the expression evaluated to true
 - **patch** `[var]` in [MNENearest](/docs/api/mne/mne-nearest) — Non-owning pointer to the patch this vertex belongs to.
 - **patch_inds** `[var]` in [MNEHemisphere](/docs/api/mne/mne-hemisphere) — List of neighboring vertices in the high resolution triangulation.
-- **patch_info** `[fn]` in [MNE](/docs/api/mne/mne-class) — mne_patch_info
-- **patch_info** `[fn]` in [MNESourceSpaces](/docs/api/mne/mne-source-spaces)
 - **patch_rot** `[var]` in [MNEMshDisplaySurfaceSet](/docs/api/mne/mne-msh-display-surface-set) — Rotation angles for the (flat) patches.
 - **patches** `[var]` in [MNEMshDisplaySurfaceSet](/docs/api/mne/mne-msh-display-surface-set) — Optional flat patches for display (owned).
 - **patches** `[var]` in [MNESurfaceOrVolume](/docs/api/mne/mne-surface-or-volume) — Patch information for each in-use vertex (nuse elements).
@@ -4503,6 +4502,8 @@ Index of 6704 public class members (functions, variables, typedefs, enums) acros
 - **read** `[fn]` in [MNEMorphMap](/docs/api/mne/mne-morph-map) — Reads one map from a morph-map file (MNE-C `load_one_morph_map`).
 - **read** `[fn]` in [MNENamedMatrix](/docs/api/mne/mne-named-matrix) — Factory: read a named matrix from a FIFF file.
 - **read** `[fn]` in [MNEProjOp](/docs/api/mne/mne-proj-op) — Read a projection operator from a FIFF file by path.
+- **read** `[fn]` in [MNESourceSpaces](/docs/api/mne/mne-source-spaces) — Reads the source spaces of a file, as mne.read_source_spaces does.
+- **read** `[fn]` in [MNESourceSpaces](/docs/api/mne/mne-source-spaces) — Reads the source spaces from an open FIFF stream.
 - **read** `[fn]` in [MNESparseNamedMatrix](/docs/api/mne/mne-sparse-named-matrix) — Reads a sparse named matrix (MNE-C `mne_read_sparse_named_matrix`).
 - **read** `[fn]` in [MNESssData](/docs/api/mne/mne-sss-data) — Read SSS data from anywhere in a file Refactored: mne_read (mne_sss_data.c).
 - **read** `[fn]` in [MriCorIO](/docs/api/mri/mri-cor-io) — Reads COR slice files from a directory.
@@ -4557,7 +4558,6 @@ Index of 6704 public class members (functions, variables, typedefs, enums) acros
 - **read_raw_segment** `[fn]` in [FiffRawData](/docs/api/fiff/fiff-raw-data) — Read a specific raw data segment.
 - **read_raw_segment_times** `[fn]` in [FiffRawData](/docs/api/fiff/fiff-raw-data) — Read a specific raw data segment.
 - **read_rt_tag** `[fn]` in [FiffStream](/docs/api/fiff/fiff-stream) — Reads the next tag of a real-time stream, waiting until it has arrived.
-- **read_source_spaces** `[fn]` in [MNE](/docs/api/mne/mne-class) — mne_read_source_spaces
 - **read_source_spaces** `[fn]` in [MNESourceSpace](/docs/api/mne/mne-source-space)
 - **read_tag** `[fn]` in [FiffStream](/docs/api/fiff/fiff-stream) — Reads one tag, with its payload in host byte order.
 - **read_tag_data** `[fn]` in [FiffStream](/docs/api/fiff/fiff-stream) — Reads the payload of a tag whose header `read_tag_info()` has read.
@@ -4579,7 +4579,6 @@ Index of 6704 public class members (functions, variables, typedefs, enums) acros
 - **reader** `[var]` in [BidsRawData](/docs/api/bids/bids-raw-data) — The underlying format reader (keeps file open).
 - **readFif** `[fn]` in [MNEEventList](/docs/api/mne/mne-event-list) — Reads the event block of a FIFF file (MNE-C `mne_load_events_fiff`).
 - **readFilter** `[fn]` in [FilterIO](/docs/api/utils/filter-io) — Reads a given txt file and scans it for filter coefficients.
-- **readFromStream** `[fn]` in [MNESourceSpaces](/docs/api/mne/mne-source-spaces)
 - **readHeadPos** `[fn]` in [MaxwellMovementComp](/docs/api/dsp/maxwell-movement-comp) — Read head positions from a file.
 - **readInfo** `[fn]` in [RtDataClient](/docs/api/com/rt-data-client) — Reads fiff measurement information of a data the connection.
 - **readJson** `[fn]` in [BidsCoordinateSystem](/docs/api/bids/bids-coordinate-system) — Read a BIDS *_coordsystem.json file.
@@ -6655,6 +6654,7 @@ Index of 6704 public class members (functions, variables, typedefs, enums) acros
 - **write** `[fn]` in [MNEForwardSolution](/docs/api/mne/mne-forward-solution) — Write the forward solution to a FIFF file.
 - **write** `[fn]` in [MNEInverseOperator](/docs/api/mne/mne-inverse-operator) — Writes the inverse operator, as mne.minimum_norm.write_inverse_operator does.
 - **write** `[fn]` in [MNEMorphMap](/docs/api/mne/mne-morph-map) — Writes maps as `FIFFB_MNE_MORPH_MAP` blocks (MNE-C `mne_save_morph_map_matrices`).
+- **write** `[fn]` in [MNESourceSpaces](/docs/api/mne/mne-source-spaces) — Writes the source spaces, as mne.write_source_spaces does.
 - **write** `[fn]` in [MNESparseNamedMatrix](/docs/api/mne/mne-sparse-named-matrix) — Writes the matrix as a `FIFFB_MNE_NAMED_MATRIX` block (MNE-C `mne_write_sparse_named_matrix`).
 - **write** `[fn]` in [MriCorFifIO](/docs/api/mri/mri-cor-fif-io) — Writes COR.fif file from slice data.
 - **write_annotations** `[fn]` in [FiffStream](/docs/api/fiff/fiff-stream) — Writes `annotations` as an MNE-Python annotations block (FIFFB_MNE_ANNOTATIONS): onsets and ends as float, descriptions as a colon-separated list, channel names and extras as JSON.
@@ -6705,6 +6705,7 @@ Index of 6704 public class members (functions, variables, typedefs, enums) acros
 - **write_to_stream** `[fn]` in [FiffDigPointSet](/docs/api/fiff/fiff-dig-point-set) — Writes the points as an isotrak block inside a measurement info block.
 - **write_to_stream** `[fn]` in [MNEBem](/docs/api/mne/mne-bem) — Writes the FIFFB_BEM block into an open FIFF stream (MNE-C mne_write_bem_surfaces_block).
 - **write_to_stream** `[fn]` in [MNEInverseOperator](/docs/api/mne/mne-inverse-operator) — Writes the inverse solution block into an open FIFF stream.
+- **write_to_stream** `[fn]` in [MNESourceSpaces](/docs/api/mne/mne-source-spaces) — Writes the source space blocks into an open FIFF stream (mne write_source_spaces_to_fid).
 - **write_to_stream** `[fn]` in [MNESurface](/docs/api/mne/mne-surface) — Writes the surface tags of a FIFFB_BEM_SURF block (MNE-C mne_write_bem_surfaces_block): conductivity if set, id, coordinate frame, vertices, triangles and normals.
 - **write_w** `[fn]` in [InvSourceEstimate](/docs/api/inv/inv-source-estimate) — Writes the first time point as a .w file, as mne.write_w does.
 - **writeBigEndian** `[fn]` in [ByteStream](/docs/api/utils/byte-stream) — Writes `count` values in big-endian byte order.
@@ -6727,7 +6728,6 @@ Index of 6704 public class members (functions, variables, typedefs, enums) acros
 - **writeToStream** `[fn]` in [FiffInfo](/docs/api/fiff/fiff-info) — Writes the fiff information to a FIF stream.
 - **writeToStream** `[fn]` in [MNEHemisphere](/docs/api/mne/mne-hemisphere) — mne_python _write_one_source_space
 - **writeToStream** `[fn]` in [MNESourceSpace](/docs/api/mne/mne-source-space) — Write this source space to a FIFF stream.
-- **writeToStream** `[fn]` in [MNESourceSpaces](/docs/api/mne/mne-source-spaces)
 - **writeTsv** `[fn]` in [BidsChannel](/docs/api/bids/bids-channel) — Write a BIDS *_channels.tsv file.
 - **writeTsv** `[fn]` in [BidsElectrode](/docs/api/bids/bids-electrode) — Write a BIDS *_electrodes.tsv file.
 - **writeTsv** `[fn]` in [BidsEvent](/docs/api/bids/bids-event) — Write a BIDS *_events.tsv file.

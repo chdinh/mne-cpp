@@ -32,7 +32,7 @@ const MNEVolGeom& geometry = *white->vol_geom; // sizes and centre converted to 
 ```cpp title="src/examples/ex_mne_api/main.cpp"
 // Drop sources outside the inner skull or closer than 5 mm to it (mne make_forward_solution(mindist=5))
 std::vector<std::unique_ptr<MNESourceSpace>> spaces;
-MNESourceSpace::read_source_spaces(srcFile.fileName(), spaces);
+MNESourceSpace::read_source_spaces(srcPath, spaces);
 const FiffCoordTrans mriHeadT((data + "/MEG/sample/all-trans.fif").toStdU16String(), FIFFV_COORD_MRI, FIFFV_COORD_HEAD);
 MNESourceSpace::filter_source_spaces(0.005f, data + "/subjects/sample/bem/sample-5120-bem.fif", mriHeadT, spaces, nullptr, true);
 ```
@@ -329,7 +329,7 @@ Vertices of a subject's surfaces nearest to an icosahedron of the given grade (m
 
 MNE library: BEM surfaces, surface projection, ICP, source spaces and epochs.
 
-````cpp title="src/examples/ex_mne_api/main.cpp, line 214"
+````cpp title="src/examples/ex_mne_api/main.cpp, line 210"
 // A FreeSurfer surface with its curvature and the volume geometry from the file footer
 const auto white = MNESourceSpace::load_surface(data + "/subjects/sample/surf/lh.white", data + "/subjects/sample/surf/lh.curv");
 const MNEVolGeom& geometry = *white->vol_geom; // sizes and centre converted to metres

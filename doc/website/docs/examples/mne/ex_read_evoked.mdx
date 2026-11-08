@@ -212,7 +212,7 @@ int main(int argc, char* argv[])
     FiffCoordTrans meg_trans;
 
     if (use_ctf_head) {
-        if (p_FiffEvoked.info.ctf_head_t.is_empty())
+        if (p_FiffEvoked.info.ctf_head_t.empty())
             std::cout << "\nNo CTF head transformation available" << std::endl;
         else {
             meg_trans = p_FiffEvoked.info.dev_ctf_t;

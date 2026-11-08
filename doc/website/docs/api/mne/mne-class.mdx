@@ -58,21 +58,6 @@ mne_combine_xyz
 
 ---
 
-### find_source_space_hemi(p_Hemisphere)
-
-mne_find_source_space_hemi
-
-**Parameters:**
-
-- **p_Hemisphere** : *[MNEHemisphere](/docs/api/mne/mne-hemisphere) &*
-  The hemisphere to investigate.
-
-**Returns:**
-
-- *qint32* — the deduced hemisphere id.
-
----
-
 ### get_current_comp(info)
 
 mne_get_current_comp
@@ -175,21 +160,6 @@ mne_make_projector_info
 **Returns:**
 
 - *qint32* — nproj - How many items in the projector.
-
----
-
-### patch_info(p_Hemisphere)
-
-mne_patch_info
-
-**Parameters:**
-
-- **p_Hemisphere** : *[MNEHemisphere](/docs/api/mne/mne-hemisphere) &*
-  The source space.
-
-**Returns:**
-
-- *bool* — true if succeeded, false otherwise.
 
 ---
 
@@ -409,27 +379,6 @@ mne_read_cov
 
 - **p_covData** : *[FiffCov](/docs/api/fiff/fiff-cov) &*
   the read covariance matrix.
-
-**Returns:**
-
-- *bool* — true if succeeded, false otherwise.
-
----
-
-### read_source_spaces(stream, add_geom, p_SourceSpace)
-
-mne_read_source_spaces
-
-**Parameters:**
-
-- **stream** : *[FiffStream](/docs/api/fiff/fiff-stream) &*
-  The open fiff file.
-
-- **add_geom** : *bool*
-  Add geometry information to the source spaces.
-
-- **p_SourceSpace** : *[MNESourceSpaces](/docs/api/mne/mne-source-spaces) &*
-  The read source spaces.
 
 **Returns:**
 

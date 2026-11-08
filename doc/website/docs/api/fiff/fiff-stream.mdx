@@ -1317,7 +1317,7 @@ const std::vector<FiffDirNode::SPtr> measNodes = stream.dirtree()->dir_tree_find
 const std::optional<FiffTag> nchan = measNodes.front()->find_tag(stream, FIFF_NCHAN); // raw tag access
 const FiffId fileId = stream.id();
 stream.close();
-ok &= expect(opened && measNodes.size() == 1 && nchan && *nchan->toInt() == 376 && !fileId.isEmpty() && fileId.version > 0,
+ok &= expect(opened && measNodes.size() == 1 && nchan && *nchan->toInt() == 376 && !fileId.empty() && fileId.version > 0,
              "FiffStream/FiffDirNode/FiffTag/FiffId: the FIFF_NCHAN tag of the measurement block reads 376");
 ````
 
@@ -1346,7 +1346,7 @@ ok &= expect(directory.size() == 641 && directory.back().kind == -1 && created.s
              "FiffDirEntry/FiffTime: the 640 tags of mne fiff_open plus the end entry; the file id was written at 1411146352 s");
 ````
 
-Also used in [ex_mne_api](../../examples/fs/ex_mne_api.mdx), [ex_read_write_raw](../../examples/fiff/ex_read_write_raw.mdx).
+Also used in [ex_read_write_raw](../../examples/fiff/ex_read_write_raw.mdx).
 
 ## Authors of this file
 
