@@ -68,7 +68,7 @@ public:
 
     //=========================================================================================================
     /**
-     * Hands @p message to the current sink.
+     * Hands @p message to the current sink, unless @p level is below level().
      *
      * @param[in] level     Severity.
      * @param[in] message   UTF-8 text.
@@ -84,7 +84,9 @@ public:
     template<class... Args>
     static void debug(std::format_string<Args...> format, Args&&... args)
     {
-        write(Level::Debug, std::format(format, std::forward<Args>(args)...));
+        if (enabled(Level::Debug)) {
+            write(Level::Debug, std::format(format, std::forward<Args>(args)...));
+        }
     }
 
     /**
@@ -96,7 +98,9 @@ public:
     template<class... Args>
     static void info(std::format_string<Args...> format, Args&&... args)
     {
-        write(Level::Info, std::format(format, std::forward<Args>(args)...));
+        if (enabled(Level::Info)) {
+            write(Level::Info, std::format(format, std::forward<Args>(args)...));
+        }
     }
 
     /**
@@ -108,7 +112,9 @@ public:
     template<class... Args>
     static void warning(std::format_string<Args...> format, Args&&... args)
     {
-        write(Level::Warning, std::format(format, std::forward<Args>(args)...));
+        if (enabled(Level::Warning)) {
+            write(Level::Warning, std::format(format, std::forward<Args>(args)...));
+        }
     }
 
     /**
@@ -120,10 +126,27 @@ public:
     template<class... Args>
     static void critical(std::format_string<Args...> format, Args&&... args)
     {
-        write(Level::Critical, std::format(format, std::forward<Args>(args)...));
+        if (enabled(Level::Critical)) {
+            write(Level::Critical, std::format(format, std::forward<Args>(args)...));
+        }
     }
 
     //=========================================================================================================
+    /**
+     * Sets the lowest level that is written; messages below it are dropped before they are formatted.
+     *
+     * @param[in] level   The new threshold; Debug, the default, writes everything.
+     *
+     * @return The threshold before.
+     */
+    static Level set_level(Level level) noexcept;
+
+    /** @return The lowest level that is written. */
+    static Level level() noexcept;
+
+    /** @return Whether messages of @p level are written. */
+    static bool enabled(Level level) noexcept;
+
     /**
      * Replaces the sink.
      *

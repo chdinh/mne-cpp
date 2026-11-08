@@ -28,6 +28,7 @@
 //=============================================================================================================
 
 #include <algorithm>
+#include <atomic>
 #include <mutex>
 #include <utility>
 
@@ -49,6 +50,8 @@ struct SinkSlot
     std::mutex mutex;
     std::shared_ptr<const Log::Sink> sink;
 };
+
+std::atomic<Log::Level> g_level{Log::Level::Debug};
 
 SinkSlot& sinkSlot()
 {
@@ -91,6 +94,9 @@ struct LogCapture::State
 
 void Log::write(Level level, std::string_view message)
 {
+    if (!enabled(level)) {
+        return;
+    }
     std::shared_ptr<const Sink> sink;
     {
         std::lock_guard<std::mutex> lock(sinkSlot().mutex);
@@ -102,6 +108,27 @@ void Log::write(Level level, std::string_view message)
     } else {
         forwardToQt(level, message);
     }
+}
+
+//=============================================================================================================
+
+Log::Level Log::set_level(Level level) noexcept
+{
+    return g_level.exchange(level, std::memory_order_relaxed);
+}
+
+//=============================================================================================================
+
+Log::Level Log::level() noexcept
+{
+    return g_level.load(std::memory_order_relaxed);
+}
+
+//=============================================================================================================
+
+bool Log::enabled(Level level) noexcept
+{
+    return level >= g_level.load(std::memory_order_relaxed);
 }
 
 //=============================================================================================================

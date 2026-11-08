@@ -82,6 +82,7 @@ private slots:
     void testLogCaptureNestsAndRestores();
     void testLogCustomSink();
     void testLogCaptureFromManyThreads();
+    void testLogLevelSkipsFormatting();
     void cleanupTestCase();
 
 private:
@@ -294,6 +295,50 @@ void TestUtilsLogger::testLogCaptureFromManyThreads()
     }
     QCOMPARE(capture.count(Log::Level::Warning), kThreads * kMessages);
     QCOMPARE(capture.count(Log::Level::Warning, "thread 3"), kMessages);
+}
+
+//=============================================================================================================
+
+namespace
+{
+// Counts how often it is formatted
+struct Probe
+{
+    int* formatted;
+};
+} // namespace
+
+template<>
+struct std::formatter<Probe> : std::formatter<int>
+{
+    auto format(const Probe& probe, std::format_context& ctx) const
+    {
+        return std::formatter<int>::format(++*probe.formatted, ctx);
+    }
+};
+
+void TestUtilsLogger::testLogLevelSkipsFormatting()
+{
+    QCOMPARE(Log::level(), Log::Level::Debug);
+    LogCapture capture;
+    int formatted = 0;
+
+    const Log::Level previous = Log::set_level(Log::Level::Warning);
+    QCOMPARE(previous, Log::Level::Debug);
+    QVERIFY(!Log::enabled(Log::Level::Info));
+    QVERIFY(Log::enabled(Log::Level::Critical));
+    Log::debug("{}", Probe{&formatted});
+    Log::info("{}", Probe{&formatted});
+    Log::write(Log::Level::Info, "dropped too");
+    Log::warning("{}", Probe{&formatted});
+    QCOMPARE(formatted, 1);
+    QCOMPARE(static_cast<int>(capture.entries().size()), 1);
+    QCOMPARE(capture.count(Log::Level::Warning, "1"), 1);
+
+    Log::set_level(previous);
+    Log::debug("{}", Probe{&formatted});
+    QCOMPARE(formatted, 2);
+    QCOMPARE(static_cast<int>(capture.entries().size()), 2);
 }
 
 //=============================================================================================================
