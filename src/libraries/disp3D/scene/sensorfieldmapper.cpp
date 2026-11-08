@@ -319,7 +319,7 @@ bool SensorFieldMapper::buildMapping(
         if (verts.rows() > 0 && norms.rows() == verts.rows()) {
             const QString coilPath = QCoreApplication::applicationDirPath() + "/../resources/general/coilDefinitions/coil_def.dat";
             auto templates =
-                FWDLIB::FwdCoilSet::read_coil_defs(coilPath);
+                FWDLIB::FwdCoilSet::read_coil_defs(coilPath.toStdU16String());
 
             if (templates) {
                 FiffCoordTrans devToTarget;

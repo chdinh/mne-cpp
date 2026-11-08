@@ -36,6 +36,8 @@
 
 #include "fwd_global.h"
 #include "fwd_coil.h"
+#include <filesystem>
+#include <string>
 #include <fiff/fiff_types.h>
 
 //=============================================================================================================
@@ -140,7 +142,7 @@ public:
      *
      * @return   The read meg coil set.
      */
-    static FwdCoilSet::UPtr read_coil_defs(const QString& name);
+    static FwdCoilSet::UPtr read_coil_defs(const std::filesystem::path& name);
 
     //=========================================================================================================
     /**
@@ -207,7 +209,7 @@ private:
      *
      * @return Non-owning pointer to the newly created coil, or nullptr on error.
      */
-    FwdCoil* fwd_add_coil_to_set(int type, int coil_class, int acc, int np, float size, float base, const QString& desc);
+    FwdCoil* fwd_add_coil_to_set(int type, int coil_class, int acc, int np, float size, float base, const std::string& desc);
 
 public:
     std::vector<FwdCoil::UPtr> coils;          /**< The coil or electrode positions. */

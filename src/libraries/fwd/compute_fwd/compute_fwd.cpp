@@ -111,27 +111,27 @@ void ComputeFwd::initFwd()
     m_bemModel.reset();
 
     // Report the setup
-    qInfo("Source space                 : %s", m_pSettings->srcname.toUtf8().constData());
-    if (!(m_pSettings->transname.isEmpty()) || !(m_pSettings->mriname.isEmpty())) {
-        qInfo("MRI -> head transform source : %s", !(m_pSettings->mriname.isEmpty()) ? m_pSettings->mriname.toUtf8().constData() : m_pSettings->transname.toUtf8().constData());
+    qInfo("Source space                 : %s", m_pSettings->srcname.c_str());
+    if (!(m_pSettings->transname.empty()) || !(m_pSettings->mriname.empty())) {
+        qInfo("MRI -> head transform source : %s", !(m_pSettings->mriname.empty()) ? m_pSettings->mriname.c_str() : m_pSettings->transname.c_str());
     } else {
         qInfo("MRI and head coordinates are assumed to be identical.");
     }
-    qInfo("Measurement data             : %s", m_pSettings->measname.toUtf8().constData());
-    if (!m_pSettings->bemname.isEmpty()) {
-        qInfo("BEM model                    : %s", m_pSettings->bemname.toUtf8().constData());
+    qInfo("Measurement data             : %s", m_pSettings->measname.c_str());
+    if (!m_pSettings->bemname.empty()) {
+        qInfo("BEM model                    : %s", m_pSettings->bemname.c_str());
     } else {
         qInfo("Sphere model                 : origin at (% 7.2f % 7.2f % 7.2f) mm",
               1000.0f * m_pSettings->r0[X], 1000.0f * m_pSettings->r0[Y], 1000.0f * m_pSettings->r0[Z]);
         if (m_pSettings->include_eeg) {
-            if (m_pSettings->eeg_model_file.isEmpty()) {
+            if (m_pSettings->eeg_model_file.empty()) {
                 qWarning("EEG model file not specified; using default.");
             }
             m_eegModels = FwdEegSphereModelSet::fwd_load_eeg_sphere_models(m_pSettings->eeg_model_file, std::move(m_eegModels));
             m_eegModels->fwd_list_eeg_sphere_models();
 
-            if (m_pSettings->eeg_model_name.isEmpty()) {
-                m_pSettings->eeg_model_name = QString("Default");
+            if (m_pSettings->eeg_model_name.empty()) {
+                m_pSettings->eeg_model_name = QString("Default").toStdString();
             }
             m_eegModel = m_eegModels->fwd_select_eeg_sphere_model(m_pSettings->eeg_model_name);
             if (!m_eegModel) {
@@ -143,7 +143,7 @@ void ComputeFwd::initFwd()
             }
 
             qInfo("Using EEG sphere model \"%s\" with scalp radius %7.1f mm",
-                  m_pSettings->eeg_model_name.toUtf8().constData(), 1000 * m_pSettings->eeg_sphere_rad);
+                  m_pSettings->eeg_model_name.c_str(), 1000 * m_pSettings->eeg_sphere_rad);
             qInfo("%s the electrode locations to scalp", m_pSettings->scale_eeg_pos ? "Scale" : "Do not scale");
 
             m_eegModel->scale_pos = m_pSettings->scale_eeg_pos;
@@ -156,7 +156,7 @@ void ComputeFwd::initFwd()
     if (m_pSettings->compute_grad) {
         qInfo("Compute derivatives with respect to source location coordinates");
     }
-    qInfo("Destination for the solution : %s", m_pSettings->solname.toUtf8().constData());
+    qInfo("Destination for the solution : %s", m_pSettings->solname.c_str());
     if (m_pSettings->do_all) {
         qInfo("Calculate solution for all source locations.");
     }
@@ -165,8 +165,8 @@ void ComputeFwd::initFwd()
     }
 
     // Read the source locations
-    qInfo("Reading %s...", m_pSettings->srcname.toUtf8().constData());
-    if (MNESourceSpace::read_source_spaces(m_pSettings->srcname.toStdU16String(), m_spaces) != OK) {
+    qInfo("Reading %s...", m_pSettings->srcname.c_str());
+    if (MNESourceSpace::read_source_spaces(UTILSLIB::pathFromUtf8(m_pSettings->srcname), m_spaces) != OK) {
         return;
     }
     for (k = 0, m_iNSource = 0; k < static_cast<int>(m_spaces.size()); k++) {
@@ -185,33 +185,21 @@ void ComputeFwd::initFwd()
     }
 
     // Read the MRI -> head coordinate transformation
-    if (!m_pSettings->mriname.isEmpty()) {
-        const auto mriHead = FiffCoordTrans::read(m_pSettings->mriname.toStdU16String(), FIFFV_COORD_MRI, FIFFV_COORD_HEAD);
+    if (!m_pSettings->mriname.empty()) {
+        const auto mriHead = FiffCoordTrans::read(UTILSLIB::pathFromUtf8(m_pSettings->mriname), FIFFV_COORD_MRI, FIFFV_COORD_HEAD);
         if (!mriHead) {
             UTILSLIB::Log::critical("{}", mriHead.error().what());
             return;
         }
         m_mri_head_t = *mriHead;
-        {
-            QFile mriFile(m_pSettings->mriname);
-            FiffStream mriStream(&mriFile);
-            if (mriStream.open()) {
-                m_mri_id.version = mriStream.id().version;
-                m_mri_id.machid[0] = mriStream.id().machid[0];
-                m_mri_id.machid[1] = mriStream.id().machid[1];
-                m_mri_id.time = mriStream.id().time;
-                mriStream.close();
-            } else {
-                mriStream.close();
-                m_mri_id = FiffId();
-            }
-        }
+        auto mriStream = FiffStream::open(UTILSLIB::pathFromUtf8(m_pSettings->mriname));
+        m_mri_id = mriStream ? mriStream->id() : FiffId();
         if (m_mri_id.empty()) {
             qCritical("Couldn't read MRI file id (How come?)");
             return;
         }
-    } else if (!m_pSettings->transname.isEmpty()) {
-        const auto headMri = FiffCoordTrans::read_ascii(m_pSettings->transname.toStdU16String(), FIFFV_COORD_HEAD, FIFFV_COORD_MRI);
+    } else if (!m_pSettings->transname.empty()) {
+        const auto headMri = FiffCoordTrans::read_ascii(UTILSLIB::pathFromUtf8(m_pSettings->transname), FIFFV_COORD_HEAD, FIFFV_COORD_MRI);
         if (!headMri) {
             UTILSLIB::Log::critical("{}", headMri.error().what());
             return;
@@ -225,20 +213,17 @@ void ComputeFwd::initFwd()
     // Read the channel information and the MEG device -> head coordinate transformation
 
     if (!m_pSettings->pFiffInfo) {
-        QFile measname(m_pSettings->measname);
-        FIFFLIB::FiffDirNode::SPtr DirNode;
-        FiffStream pStream(&measname);
-        FIFFLIB::FiffInfo fiffInfo;
-        if (!pStream.open()) {
-            qCritical() << "Could not open Stream.";
+        auto pStream = FiffStream::open(UTILSLIB::pathFromUtf8(m_pSettings->measname));
+        if (!pStream) {
+            qCritical("%s", pStream.error().what());
             return;
         }
-
-        if (!pStream.read_meas_info(pStream.dirtree(), fiffInfo, DirNode)) {
+        FIFFLIB::FiffDirNode::SPtr DirNode;
+        FIFFLIB::FiffInfo fiffInfo;
+        if (!pStream->read_meas_info(pStream->dirtree(), fiffInfo, DirNode)) {
             qCritical() << "Could not find the channel information.";
             return;
         }
-        pStream.close();
         m_pInfoBase = QSharedPointer<FIFFLIB::FiffInfo>(new FiffInfo(fiffInfo));
     } else {
         m_pInfoBase = m_pSettings->pFiffInfo;
@@ -266,13 +251,13 @@ void ComputeFwd::initFwd()
     m_iNChan = iNMeg + iNEeg;
 
     if (iNMeg > 0) {
-        qInfo("Read %3d MEG channels from %s", iNMeg, m_pSettings->measname.toUtf8().constData());
+        qInfo("Read %3d MEG channels from %s", iNMeg, m_pSettings->measname.c_str());
     }
     if (iNComp > 0) {
-        qInfo("Read %3d MEG compensation channels from %s", iNComp, m_pSettings->measname.toUtf8().constData());
+        qInfo("Read %3d MEG compensation channels from %s", iNComp, m_pSettings->measname.c_str());
     }
     if (iNEeg > 0) {
-        qInfo("Read %3d EEG channels from %s", iNEeg, m_pSettings->measname.toUtf8().constData());
+        qInfo("Read %3d EEG channels from %s", iNEeg, m_pSettings->measname.c_str());
     }
     if (!m_pSettings->include_meg) {
         qInfo("MEG not requested. MEG channels omitted.");
@@ -295,9 +280,9 @@ void ComputeFwd::initFwd()
     // Create coil descriptions with transformation to head or MRI frame
 
     if (m_pSettings->include_meg) {
-        m_qPath = QString(QCoreApplication::applicationDirPath() + "/../resources/general/coilDefinitions/coil_def.dat");
+        m_qPath = QString(QCoreApplication::applicationDirPath() + "/../resources/general/coilDefinitions/coil_def.dat").toStdString();
         if (!QCoreApplication::startingUp()) {
-            m_qPath = QCoreApplication::applicationDirPath() + QString("/../resources/general/coilDefinitions/coil_def.dat");
+            m_qPath = (QCoreApplication::applicationDirPath() + QString("/../resources/general/coilDefinitions/coil_def.dat")).toStdString();
         } else if (!QFile::exists(m_qPath)) {
             m_qPath = "../resources/general/coilDefinitions/coil_def.dat";
         }
@@ -309,12 +294,12 @@ void ComputeFwd::initFwd()
 
         // Compensation data
 
-        m_compData = MNECTFCompDataSet::read(m_pSettings->measname.toStdU16String());
+        m_compData = MNECTFCompDataSet::read(UTILSLIB::pathFromUtf8(m_pSettings->measname));
         if (!m_compData) {
             return;
         }
         if (m_compData->ncomp > 0) {
-            qInfo("%d compensation data sets in %s", m_compData->ncomp, m_pSettings->measname.toUtf8().constData());
+            qInfo("%d compensation data sets in %s", m_compData->ncomp, m_pSettings->measname.c_str());
         } else {
             m_listCompChs.clear();
             iNComp = 0;
@@ -387,11 +372,11 @@ void ComputeFwd::initFwd()
 
     // Prepare the BEM model if necessary
 
-    if (!m_pSettings->bemname.isEmpty()) {
-        QString bemsolname = FwdBemModel::fwd_bem_make_bem_sol_name(m_pSettings->bemname);
-        m_pSettings->bemname = bemsolname;
+    if (!m_pSettings->bemname.empty()) {
+        QString bemsolname = QString::fromStdU16String(FwdBemModel::fwd_bem_make_bem_sol_name(m_pSettings->bemname).u16string());
+        m_pSettings->bemname = bemsolname.toStdString();
 
-        qInfo("Setting up the BEM model using %s...", m_pSettings->bemname.toUtf8().constData());
+        qInfo("Setting up the BEM model using %s...", m_pSettings->bemname.c_str());
         qInfo("Loading surfaces...");
         m_bemModel = FwdBemModel::fwd_bem_load_three_layer_surfaces(m_pSettings->bemname);
 
@@ -409,7 +394,7 @@ void ComputeFwd::initFwd()
             return;
         }
         qInfo("Loading the solution matrix...");
-        if (m_bemModel->fwd_bem_load_recompute_solution(m_pSettings->bemname.toUtf8().data(), FWD_BEM_UNKNOWN, false) == FAIL) {
+        if (m_bemModel->fwd_bem_load_recompute_solution(m_pSettings->bemname.c_str(), FWD_BEM_UNKNOWN, false) == FAIL) {
             return;
         }
         if (m_pSettings->coord_frame == FIFFV_COORD_HEAD) {
@@ -418,7 +403,7 @@ void ComputeFwd::initFwd()
                 return;
             }
         }
-        qInfo("BEM model %s is now set up", m_bemModel->sol_name.toUtf8().constData());
+        qInfo("BEM model %s is now set up", m_bemModel->sol_name.c_str());
     } else {
         qInfo("Using the sphere model.");
         m_bemModel = std::make_unique<FwdBemModel>(); // no surfaces selects the sphere branch
@@ -427,17 +412,17 @@ void ComputeFwd::initFwd()
     // Try to circumvent numerical problems by excluding points too close or outside the inner skull surface
 
     if (m_pSettings->filter_spaces) {
-        if (!m_pSettings->mindistoutname.isEmpty()) {
-            filteredFile.setFileName(m_pSettings->mindistoutname);
+        if (!m_pSettings->mindistoutname.empty()) {
+            filteredFile.setFileName(QString::fromStdString(m_pSettings->mindistoutname));
             if (!filteredFile.open(QIODevice::WriteOnly | QIODevice::Text)) {
                 qCritical() << m_pSettings->mindistoutname;
                 return;
             }
             filteredStream = std::make_unique<QTextStream>(&filteredFile);
-            qInfo("Omitted source space points will be output to : %s", m_pSettings->mindistoutname.toUtf8().constData());
+            qInfo("Omitted source space points will be output to : %s", m_pSettings->mindistoutname.c_str());
         }
         MNESourceSpace::filter_source_spaces(m_pSettings->mindist,
-                                             m_pSettings->bemname.toStdU16String(),
+                                             UTILSLIB::pathFromUtf8(m_pSettings->bemname),
                                              m_mri_head_t,
                                              m_spaces,
                                              filteredStream.get(), m_pSettings->use_threads);
@@ -452,7 +437,7 @@ void ComputeFwd::populateMetadata(MNEForwardSolution& fwd)
     fwd.coord_frame = m_pSettings->coord_frame;
     fwd.source_ori = m_pSettings->fixed_ori ? FIFFV_MNE_FIXED_ORI : FIFFV_MNE_FREE_ORI;
     fwd.surf_ori = false;
-    fwd.mri_filename = m_pSettings->mriname.toStdString();
+    fwd.mri_filename = m_pSettings->mriname;
 
     int nmeg = m_megcoils ? m_megcoils->ncoil() : 0;
     int neeg = m_eegels ? m_eegels->ncoil() : 0;
@@ -494,7 +479,7 @@ void ComputeFwd::populateMetadata(MNEForwardSolution& fwd)
     }
 
     // Measurement provenance
-    fwd.info.filename = m_pSettings->measname.toStdString();
+    fwd.info.filename = m_pSettings->measname;
     fwd.info.meas_id = m_meas_id;
     fwd.info.dev_head_t = m_meg_head_t;
     fwd.info.nchan = fwd.nchan;
@@ -511,13 +496,9 @@ void ComputeFwd::populateMetadata(MNEForwardSolution& fwd)
     }
 
     // Bad channels
-    if (!m_pSettings->measname.isEmpty()) {
-        QFile fileBad(m_pSettings->measname);
-        FiffStream t_pStreamBads(&fileBad);
-        if (t_pStreamBads.open()) {
-            fwd.info.bads = t_pStreamBads.read_bad_channels(t_pStreamBads.dirtree());
-            t_pStreamBads.close();
-        }
+    if (!m_pSettings->measname.empty()) {
+        if (auto badStream = FiffStream::open(UTILSLIB::pathFromUtf8(m_pSettings->measname)))
+            fwd.info.bads = badStream->read_bad_channels(badStream->dirtree());
     }
 }
 

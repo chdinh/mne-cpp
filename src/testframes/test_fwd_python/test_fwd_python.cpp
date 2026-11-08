@@ -203,7 +203,7 @@ void TestFwdPython::checkGradient(const FieldFunc& field, const GradFunc& grad, 
 
 void TestFwdPython::gradient_sphereMeg()
 {
-    auto defs = FwdCoilSet::read_coil_defs(QCoreApplication::applicationDirPath() + "/../resources/general/coilDefinitions/coil_def.dat");
+    auto defs = FwdCoilSet::read_coil_defs((QCoreApplication::applicationDirPath() + "/../resources/general/coilDefinitions/coil_def.dat").toStdU16String());
     QVERIFY(defs != nullptr);
     auto coils = defs->create_meg_coils(m_meg, static_cast<int>(m_meg.size()), FWD_COIL_ACCURACY_ACCURATE, m_raw.info.dev_head_t);
     QVERIFY(coils != nullptr);
@@ -231,13 +231,13 @@ void TestFwdPython::gradient_bemMeg()
 {
     QFETCH(int, method);
 
-    auto model = FwdBemModel::fwd_bem_load_homog_surface(data("subjects/sample/bem/sample-5120-bem.fif"));
+    auto model = FwdBemModel::fwd_bem_load_homog_surface(data("subjects/sample/bem/sample-5120-bem.fif").toStdU16String());
     QVERIFY(model != nullptr);
-    QCOMPARE(model->fwd_bem_load_recompute_solution(data("subjects/sample/bem/sample-5120-bem-sol.fif"), method, 0), 0);
+    QCOMPARE(model->fwd_bem_load_recompute_solution(data("subjects/sample/bem/sample-5120-bem-sol.fif").toStdU16String(), method, 0), 0);
     QCOMPARE(model->bem_method, method);
     model->fwd_bem_set_head_mri_t(FiffCoordTrans(data("MEG/sample/all-trans.fif").toStdU16String(), FIFFV_COORD_MRI, FIFFV_COORD_HEAD));
 
-    auto defs = FwdCoilSet::read_coil_defs(QCoreApplication::applicationDirPath() + "/../resources/general/coilDefinitions/coil_def.dat");
+    auto defs = FwdCoilSet::read_coil_defs((QCoreApplication::applicationDirPath() + "/../resources/general/coilDefinitions/coil_def.dat").toStdU16String());
     auto coils = defs->create_meg_coils(m_meg, static_cast<int>(m_meg.size()), FWD_COIL_ACCURACY_NORMAL, m_raw.info.dev_head_t);
     QCOMPARE(model->fwd_bem_specify_coils(coils.get()), 0);
 
@@ -261,9 +261,9 @@ void TestFwdPython::gradient_bemEeg()
 {
     QFETCH(int, method);
 
-    auto model = FwdBemModel::fwd_bem_load_three_layer_surfaces(data("subjects/sample/bem/sample-1280-1280-1280-bem.fif"));
+    auto model = FwdBemModel::fwd_bem_load_three_layer_surfaces(data("subjects/sample/bem/sample-1280-1280-1280-bem.fif").toStdU16String());
     QVERIFY(model != nullptr);
-    QCOMPARE(model->fwd_bem_load_recompute_solution(data("subjects/sample/bem/sample-1280-1280-1280-bem-sol.fif"), method, 0), 0);
+    QCOMPARE(model->fwd_bem_load_recompute_solution(data("subjects/sample/bem/sample-1280-1280-1280-bem-sol.fif").toStdU16String(), method, 0), 0);
     QCOMPARE(model->bem_method, method);
     model->fwd_bem_set_head_mri_t(FiffCoordTrans(data("MEG/sample/all-trans.fif").toStdU16String(), FIFFV_COORD_MRI, FIFFV_COORD_HEAD));
 
@@ -310,13 +310,13 @@ std::shared_ptr<ComputeFwdSettings> TestFwdPython::settings(bool fixedOri, bool 
     s->accurate = true;
     s->fixed_ori = fixedOri;
     s->compute_grad = grad;
-    s->srcname = data("subjects/sample/bem/sample-oct-6-src.fif");
-    s->measname = data("MEG/sample/sample_audvis_trunc_raw.fif");
-    s->mriname = data("MEG/sample/all-trans.fif");
+    s->srcname = data("subjects/sample/bem/sample-oct-6-src.fif").toStdString();
+    s->measname = data("MEG/sample/sample_audvis_trunc_raw.fif").toStdString();
+    s->mriname = data("MEG/sample/all-trans.fif").toStdString();
     s->transname.clear();
-    s->bemname = data("subjects/sample/bem/sample-1280-1280-1280-bem.fif");
+    s->bemname = data("subjects/sample/bem/sample-1280-1280-1280-bem.fif").toStdString();
     s->mindist = 5.0f / 1000.0f;
-    s->solname = m_dir.filePath(fixedOri ? "fixed-fwd.fif" : "free-fwd.fif");
+    s->solname = m_dir.filePath(fixedOri ? "fixed-fwd.fif" : "free-fwd.fif").toStdString();
     // The second name has no hemisphere tag and is skipped with a warning, as in MNE-C.
     s->labels = {m_labelPath.toStdU16String(), m_dir.filePath("unassigned.label").toStdU16String()};
     s->nlabel = static_cast<int>(s->labels.size());
@@ -365,7 +365,7 @@ void TestFwdPython::labelForward_free()
     {
         auto single = settings(false, true);
         single->use_threads = false;
-        single->solname = m_dir.filePath("free-single-fwd.fif");
+        single->solname = m_dir.filePath("free-single-fwd.fif").toStdString();
         auto unthreaded = std::make_shared<ComputeFwd>(single)->calculateFwd();
         QVERIFY(unthreaded != nullptr);
         QCOMPARE(unthreaded->sol->data, fwd->sol->data);
@@ -486,9 +486,9 @@ void TestFwdPython::labelForward_variants()
         }
         file.close();
         s->mriname.clear();
-        s->transname = file.fileName();
+        s->transname = file.fileName().toStdString();
         s->pFiffInfo.reset();
-        s->mindistoutname = m_dir.filePath("omitted.txt");
+        s->mindistoutname = m_dir.filePath("omitted.txt").toStdString();
     }
 
     ComputeFwd computer(s);
@@ -497,7 +497,7 @@ void TestFwdPython::labelForward_variants()
     QCOMPARE(fwd->nsource, 70);
     QCOMPARE(fwd->coord_frame, mriFrame ? FIFFV_COORD_MRI : FIFFV_COORD_HEAD);
     if (asciiTrans) {
-        QVERIFY(QFile::exists(s->mindistoutname));
+        QVERIFY(std::filesystem::exists(s->mindistoutname));
     }
 
     // The reference is in head coordinates: q_head = R q_mri, so G_mri = G_head R.
@@ -524,7 +524,7 @@ void TestFwdPython::labelForward_variants()
     if (fixedOri) {
         // Position derivatives of the normal dipole: dG_d n from the free solution (mne-python kron(fix_rot, eye(3)))
         auto free = settings(false, true);
-        free->solname = m_dir.filePath("free-for-fixed-fwd.fif");
+        free->solname = m_dir.filePath("free-for-fixed-fwd.fif").toStdString();
         auto freeFwd = std::make_shared<ComputeFwd>(free)->calculateFwd();
         QVERIFY(freeFwd != nullptr);
         const MatrixXd& dG = freeFwd->sol_grad->data;
@@ -577,7 +577,7 @@ void TestFwdPython::sphereForward()
     s->filter_spaces = false;
     s->r0 = Vector3f(0.0f, 0.0f, 0.04f);
     s->eeg_sphere_rad = 0.09f;
-    s->solname = m_dir.filePath("sphere-fwd.fif");
+    s->solname = m_dir.filePath("sphere-fwd.fif").toStdString();
     auto fwd = std::make_shared<ComputeFwd>(s)->calculateFwd();
     QVERIFY(fwd != nullptr);
     QCOMPARE(fwd->nsource, 78);
@@ -611,7 +611,7 @@ void TestFwdPython::sphereForward_modelFile()
                    "NameOnly\n");
     }
 
-    std::unique_ptr<FwdEegSphereModelSet> set(FwdEegSphereModelSet::fwd_load_eeg_sphere_models(path, nullptr));
+    std::unique_ptr<FwdEegSphereModelSet> set(FwdEegSphereModelSet::fwd_load_eeg_sphere_models(path.toStdU16String(), nullptr));
     QVERIFY(set != nullptr);
     QCOMPARE(set->nmodel(), 2);
     set->fwd_list_eeg_sphere_models();
@@ -622,11 +622,11 @@ void TestFwdPython::sphereForward_modelFile()
     QCOMPARE(three->layers[1].sigma, 0.0042f);
     QVERIFY(set->fwd_select_eeg_sphere_model("Broken") == nullptr);
     QVERIFY(set->fwd_select_eeg_sphere_model("Missing") == nullptr);
-    std::unique_ptr<FwdEegSphereModel> fallback(set->fwd_select_eeg_sphere_model(QString()));
+    std::unique_ptr<FwdEegSphereModel> fallback(set->fwd_select_eeg_sphere_model({}));
     QVERIFY(fallback != nullptr);
     QCOMPARE(fallback->name, QString("Default"));
 
-    std::unique_ptr<FwdEegSphereModelSet> onlyDefault(FwdEegSphereModelSet::fwd_load_eeg_sphere_models(m_dir.filePath("none.dat"), nullptr));
+    std::unique_ptr<FwdEegSphereModelSet> onlyDefault(FwdEegSphereModelSet::fwd_load_eeg_sphere_models(m_dir.filePath("none.dat").toStdU16String(), nullptr));
     QCOMPARE(onlyDefault->nmodel(), 1);
     QVERIFY(FwdEegSphereModelSet().fwd_select_eeg_sphere_model("Default") == nullptr);
 
@@ -639,7 +639,7 @@ void TestFwdPython::sphereForward_modelFile()
     s->filter_spaces = false;
     s->r0 = Vector3f(0.0f, 0.0f, 0.04f);
     s->eeg_sphere_rad = 0.09f;
-    s->eeg_model_file = path;
+    s->eeg_model_file = path.toStdString();
     s->eeg_model_name = "Three";
     auto fwd = std::make_shared<ComputeFwd>(s)->calculateFwd();
     QVERIFY(fwd != nullptr);
@@ -687,8 +687,8 @@ void TestFwdPython::ctfCompensatedForward()
     s->include_meg = true;
     s->include_eeg = false;
     s->compute_grad = true;
-    s->srcname = QStringLiteral(MNE_FWD_DATA_DIR "/two-dipole-src.fif");
-    s->measname = QStringLiteral(MNE_CTF_COMP_DATA_DIR "/ctf_grade%1_raw.fif").arg(grade);
+    s->srcname = QStringLiteral(MNE_FWD_DATA_DIR "/two-dipole-src.fif").toStdString();
+    s->measname = QStringLiteral(MNE_CTF_COMP_DATA_DIR "/ctf_grade%1_raw.fif").arg(grade).toStdString();
     s->mriname.clear();
     s->transname.clear();
     s->mri_head_ident = true;
@@ -697,7 +697,7 @@ void TestFwdPython::ctfCompensatedForward()
     s->mindist = 0.0f;
     s->filter_spaces = false;
     s->do_all = true;
-    s->solname = m_dir.filePath("ctf-fwd.fif");
+    s->solname = m_dir.filePath("ctf-fwd.fif").toStdString();
     s->checkIntegrity();
     auto fwd = std::make_shared<ComputeFwd>(s)->calculateFwd();
     QVERIFY(fwd != nullptr);
@@ -741,7 +741,7 @@ void TestFwdPython::ctfCompensatedForward()
     }
     // Like MNE-C, the surfaces are read from the -sol name; a file without a solution has it recomputed.
     QTemporaryDir bemDir;
-    s->bemname = bemDir.filePath("one-layer-bem.fif");
+    s->bemname = bemDir.filePath("one-layer-bem.fif").toStdString();
     QTest::ignoreMessage(QtCriticalMsg, QRegularExpression("Cannot open .*one-layer-bem-sol.fif"));
     QTest::ignoreMessage(QtCriticalMsg, QRegularExpression("Cannot open .*one-layer-bem-sol.fif"));
     QTest::ignoreMessage(QtCriticalMsg, "ComputeFwd::calculateFwd - the forward computation could not be set up.");

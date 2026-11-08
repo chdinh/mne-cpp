@@ -104,16 +104,16 @@ int InvDipoleFitData::setup_forward_model(InvDipoleFitData* d, MNECTFCompDataSet
         /*
          * Set up the boundary-element model
          */
-        QString bemsolname = FwdBemModel::fwd_bem_make_bem_sol_name(d->bemname);
+        QString bemsolname = QString::fromStdU16String(FwdBemModel::fwd_bem_make_bem_sol_name(d->bemname.toStdU16String()).u16string());
         d->bemname = bemsolname;
 
         qInfo("\nSetting up the BEM model using %s...", d->bemname.toUtf8().constData());
         qInfo("\nLoading surfaces...");
-        d->bem_model = FwdBemModel::fwd_bem_load_three_layer_surfaces(d->bemname);
+        d->bem_model = FwdBemModel::fwd_bem_load_three_layer_surfaces(d->bemname.toStdU16String());
         if (d->bem_model) {
             qInfo("Three-layer model surfaces loaded.");
         } else {
-            d->bem_model = FwdBemModel::fwd_bem_load_homog_surface(d->bemname);
+            d->bem_model = FwdBemModel::fwd_bem_load_homog_surface(d->bemname.toStdU16String());
             if (!d->bem_model)
                 return FAIL;
             qInfo("Homogeneous model surface loaded.");
@@ -123,13 +123,13 @@ int InvDipoleFitData::setup_forward_model(InvDipoleFitData* d, MNECTFCompDataSet
             return FAIL;
         }
         qInfo("\nLoading the solution matrix...");
-        if (d->bem_model->fwd_bem_load_recompute_solution(d->bemname, FWD_BEM_UNKNOWN, false) == FAIL)
+        if (d->bem_model->fwd_bem_load_recompute_solution(d->bemname.toStdU16String(), FWD_BEM_UNKNOWN, false) == FAIL)
             return FAIL;
         qInfo("Employing the head->MRI coordinate transform with the BEM model.");
         Q_ASSERT(d->mri_head_t);
         if (d->bem_model->fwd_bem_set_head_mri_t(*d->mri_head_t) == FAIL)
             return FAIL;
-        qInfo("BEM model %s is now set up", d->bem_model->sol_name.toUtf8().constData());
+        qInfo("BEM model %s is now set up", d->bem_model->sol_name.c_str());
         /*
          * Find the best-fitting sphere
          */
@@ -285,13 +285,13 @@ std::unique_ptr<MNECovMatrix> InvDipoleFitData::ad_hoc_noise(FwdCoilSet* meg, Fw
 #endif
             } else
                 stds[n] = static_cast<double>(grad_std) * grad_std;
-            ch_names.push_back(meg->coils[k]->chname.toStdString());
+            ch_names.push_back(meg->coils[k]->chname);
         }
     }
     if (eeg) {
         for (k = 0; k < eeg->ncoil(); k++, n++) {
             stds[n] = static_cast<double>(eeg_std) * eeg_std;
-            ch_names.push_back(eeg->coils[k]->chname.toStdString());
+            ch_names.push_back(eeg->coils[k]->chname);
         }
     }
     names = ch_names;

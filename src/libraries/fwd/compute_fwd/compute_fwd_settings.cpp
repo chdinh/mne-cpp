@@ -64,21 +64,21 @@ ComputeFwdSettings::~ComputeFwdSettings()
  */
 bool ComputeFwdSettings::checkIntegrity() const
 {
-    if (srcname.isEmpty()) {
+    if (srcname.empty()) {
         qCritical("Source space name is missing. Use the --src option to specify it.");
         return false;
     }
     if (!mri_head_ident) {
-        if (mriname.isEmpty() && transname.isEmpty()) {
+        if (mriname.empty() && transname.empty()) {
             qCritical("MRI <-> head coordinate transformation is missing. Use the --mri or --trans option to specify it.");
             return false;
         }
     }
-    if (measname.isEmpty()) {
+    if (measname.empty()) {
         qCritical("Source of coil and electrode locations is missing. Use the --meas option to specify it.");
         return false;
     }
-    if (solname.isEmpty()) {
+    if (solname.empty()) {
         qCritical("Solution name is missing. Use the --fwd option to specify it.");
         return false;
     }

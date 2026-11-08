@@ -38,6 +38,7 @@
 
 #include "fwd_global.h"
 
+#include <string>
 #include <fiff/fiff_coord_trans.h>
 
 //=============================================================================================================
@@ -161,9 +162,9 @@ public:
     bool is_eeg_electrode() const;
 
 public:
-    QString chname;                                                  /**< Name of this channel. */
+    std::string chname;                                              /**< Name of this channel. */
     int coord_frame;                                                 /**< Which coordinate frame are we in? */
-    QString desc;                                                    /**< Description for this type of a coil. */
+    std::string desc;                                                /**< Description for this type of a coil. */
     int coil_class;                                                  /**< Coil class. */
     int type;                                                        /**< Coil type. */
     int accuracy;                                                    /**< Accuracy. */

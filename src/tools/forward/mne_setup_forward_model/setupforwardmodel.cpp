@@ -623,9 +623,9 @@ bool SetupForwardModel::prepareBemSolution(const QString& bemFile,
     std::unique_ptr<FwdBemModel> bemModel;
 
     if (m_settings.homogeneous()) {
-        bemModel = FwdBemModel::fwd_bem_load_homog_surface(const_cast<QString&>(bemFile));
+        bemModel = FwdBemModel::fwd_bem_load_homog_surface(const_cast<QString&>(bemFile).toStdU16String());
     } else {
-        bemModel = FwdBemModel::fwd_bem_load_three_layer_surfaces(const_cast<QString&>(bemFile));
+        bemModel = FwdBemModel::fwd_bem_load_three_layer_surfaces(const_cast<QString&>(bemFile).toStdU16String());
     }
 
     if (!bemModel) {
@@ -644,7 +644,7 @@ bool SetupForwardModel::prepareBemSolution(const QString& bemFile,
     qInfo("Solution computed.");
 
     qInfo("Saving...");
-    if (bemModel->fwd_bem_save_model(solFile) != 0) {
+    if (bemModel->fwd_bem_save_model(solFile.toStdU16String()) != 0) {
         qCritical() << "Could not write" << solFile;
         return false;
     }

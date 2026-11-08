@@ -51,7 +51,7 @@ private slots:
     void sphereModel_defaultCtor()
     {
         FwdEegSphereModel model;
-        QVERIFY(model.name.isEmpty());
+        QVERIFY(model.name.empty());
         QCOMPARE(model.nlayer(), 0);
         QCOMPARE(model.nterms, 0);
         QCOMPARE(model.nfit, 0);
@@ -274,8 +274,8 @@ private slots:
     void computeFwdSettings_defaultCtor()
     {
         ComputeFwdSettings settings;
-        QVERIFY(settings.srcname.isEmpty());
-        QVERIFY(settings.measname.isEmpty());
+        QVERIFY(settings.srcname.empty());
+        QVERIFY(settings.measname.empty());
         QVERIFY(!settings.accurate);
         QVERIFY(!settings.fixed_ori);
         QVERIFY(!settings.include_meg);

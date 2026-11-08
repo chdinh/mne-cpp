@@ -46,6 +46,8 @@
 #include "fwd_global.h"
 #include "fwd_coil_set.h"
 
+#include <filesystem>
+#include <string>
 #include <fiff/fiff_coord_trans.h>
 #include <fiff/fiff_dir_node.h>
 #include <fiff/fiff_tag.h>
@@ -64,7 +66,6 @@
 // QT INCLUDES
 //=============================================================================================================
 
-#include <QString>
 
 //=============================================================================================================
 // BEM METHOD CONSTANTS
@@ -170,7 +171,7 @@ public:
      * @param[in] name  Base BEM file name.
      * @return The derived solution file name.
      */
-    static QString fwd_bem_make_bem_sol_name(const QString& name);
+    static std::filesystem::path fwd_bem_make_bem_sol_name(const std::filesystem::path& name);
 
     //============================= fwd_bem_model.c =============================
 
@@ -180,7 +181,7 @@ public:
      * @param[in] kind  FIFF surface ID (e.g. FIFFV_BEM_SURF_ID_BRAIN).
      * @return Reference to a static string label.
      */
-    static const QString& fwd_bem_explain_surface(int kind);
+    static const std::string& fwd_bem_explain_surface(int kind);
 
     /**
      * @brief Return a human-readable label for a BEM method.
@@ -188,7 +189,7 @@ public:
      * @param[in] method  BEM method constant (FWD_BEM_CONSTANT_COLL / FWD_BEM_LINEAR_COLL).
      * @return Reference to a static string label.
      */
-    static const QString& fwd_bem_explain_method(int method);
+    static const std::string& fwd_bem_explain_method(int method);
 
     /**
      * @brief Read an integer tag from a FIFF node.
@@ -217,7 +218,7 @@ public:
      * @param[in] kinds  FsSurface IDs to load (e.g. FIFFV_BEM_SURF_ID_BRAIN).
      * @return BEM model containing the requested surfaces, or nullptr on failure.
      */
-    static FwdBemModel::UPtr fwd_bem_load_surfaces(const QString& name,
+    static FwdBemModel::UPtr fwd_bem_load_surfaces(const std::filesystem::path& name,
                                                    const std::vector<int>& kinds);
 
     //=========================================================================================================
@@ -229,7 +230,7 @@ public:
      * @param[in] name  Path to the BEM FIFF file.
      * @return BEM model, or nullptr on failure.
      */
-    static FwdBemModel::UPtr fwd_bem_load_homog_surface(const QString& name);
+    static FwdBemModel::UPtr fwd_bem_load_homog_surface(const std::filesystem::path& name);
 
     //=========================================================================================================
     /**
@@ -238,7 +239,7 @@ public:
      * @param[in] name  Path to the BEM FIFF file.
      * @return BEM model, or nullptr on failure.
      */
-    static FwdBemModel::UPtr fwd_bem_load_three_layer_surfaces(const QString& name);
+    static FwdBemModel::UPtr fwd_bem_load_three_layer_surfaces(const std::filesystem::path& name);
 
     //=========================================================================================================
     /**
@@ -251,7 +252,7 @@ public:
      * @param[in] bemMethod  Required BEM method (FWD_BEM_CONSTANT_COLL or FWD_BEM_LINEAR_COLL).
      * @return true if loaded, false if not found, FAIL on error.
      */
-    int fwd_bem_load_solution(const QString& name, int bemMethod);
+    int fwd_bem_load_solution(const std::filesystem::path& name, int bemMethod);
 
     //=========================================================================================================
     /**
@@ -448,7 +449,7 @@ public:
      * @param[in] force_recompute  If non-zero, always recompute the solution.
      * @return OK on success, FAIL on error.
      */
-    int fwd_bem_load_recompute_solution(const QString& name,
+    int fwd_bem_load_recompute_solution(const std::filesystem::path& name,
                                         int bemMethod,
                                         int force_recompute);
 
@@ -462,7 +463,7 @@ public:
      * @param[in] name   Output file.
      * @return OK on success, FAIL if there is no model or the file cannot be written.
      */
-    int fwd_bem_save_model(const QString& name) const;
+    int fwd_bem_save_model(const std::filesystem::path& name) const;
 
     //============================= fwd_bem_pot.c =============================
 
@@ -1046,7 +1047,7 @@ public:
                                         void* client);
 
 public:
-    QString surf_name; /**< File from which surfaces were loaded. */
+    std::string surf_name; /**< File from which surfaces were loaded. */
 
     std::vector<std::shared_ptr<MNELIB::MNESurface>> surfs; /**< Interface surfaces, outermost first. */
 
@@ -1059,8 +1060,8 @@ public:
     Eigen::VectorXf source_mult; /**< Infinite-medium potential multipliers (length nsurf). */
     Eigen::VectorXf field_mult;  /**< Magnetic-field multipliers (length nsurf). */
 
-    int bem_method;   /**< Approximation method (FWD_BEM_CONSTANT_COLL or FWD_BEM_LINEAR_COLL). */
-    QString sol_name; /**< File from which the solution was loaded. */
+    int bem_method;       /**< Approximation method (FWD_BEM_CONSTANT_COLL or FWD_BEM_LINEAR_COLL). */
+    std::string sol_name; /**< File from which the solution was loaded. */
 
     Eigen::MatrixXf solution; /**< Potential solution matrix (nsol x nsol). */
     Eigen::VectorXf v0;       /**< Workspace for infinite-medium potentials (length nsol). */

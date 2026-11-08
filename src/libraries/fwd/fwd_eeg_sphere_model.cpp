@@ -71,7 +71,7 @@ FwdEegSphereModel::FwdEegSphereModel(const FwdEegSphereModel& p_FwdEegSphereMode
 
 //=============================================================================================================
 
-FwdEegSphereModel::UPtr FwdEegSphereModel::fwd_create_eeg_sphere_model(const QString& name,
+FwdEegSphereModel::UPtr FwdEegSphereModel::fwd_create_eeg_sphere_model(const std::string& name,
                                                                        int nlayer,
                                                                        const VectorXf& rads,
                                                                        const VectorXf& sigmas)
@@ -114,10 +114,10 @@ FwdEegSphereModel::~FwdEegSphereModel()
 
 //=============================================================================================================
 
-FwdEegSphereModel::UPtr FwdEegSphereModel::setup_eeg_sphere_model(const QString& eeg_model_file, QString eeg_model_name, float eeg_sphere_rad)
+FwdEegSphereModel::UPtr FwdEegSphereModel::setup_eeg_sphere_model(const std::filesystem::path& eeg_model_file, std::string eeg_model_name, float eeg_sphere_rad)
 {
-    if (eeg_model_name.isEmpty())
-        eeg_model_name = QString("Default");
+    if (eeg_model_name.empty())
+        eeg_model_name = "Default";
 
     FwdEegSphereModelSet::UPtr eeg_models = FwdEegSphereModelSet::fwd_load_eeg_sphere_models(eeg_model_file, nullptr);
     eeg_models->fwd_list_eeg_sphere_models();
@@ -132,7 +132,7 @@ FwdEegSphereModel::UPtr FwdEegSphereModel::setup_eeg_sphere_model(const QString&
     }
 
     qInfo("Using EEG sphere model \"%s\" with scalp radius %7.1f mm",
-          eeg_model->name.toUtf8().constData(), 1000 * eeg_sphere_rad);
+          eeg_model->name.c_str(), 1000 * eeg_sphere_rad);
     return eeg_model;
 }
 

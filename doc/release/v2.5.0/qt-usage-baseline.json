@@ -30,7 +30,7 @@
       "decoding",
       "math"
     ],
-    "tokens": 17192,
+    "tokens": 17100,
     "gui_outside_design": []
   },
   "libraries": {
@@ -276,19 +276,17 @@
       ]
     },
     "fwd": {
-      "tokens": 321,
+      "tokens": 228,
       "by_category": {
-        "files": 25,
-        "global": 5,
+        "files": 9,
+        "global": 4,
         "logging": 185,
         "objects_signals": 6,
-        "other": 1,
-        "regex": 1,
         "smart_pointers": 9,
-        "strings": 85,
+        "strings": 11,
         "threads": 4
       },
-      "public_header_includes": 12,
+      "public_header_includes": 7,
       "q_object": 0,
       "files": 28,
       "modules": [
@@ -309,7 +307,7 @@
       ]
     },
     "inv": {
-      "tokens": 810,
+      "tokens": 811,
       "by_category": {
         "containers": 86,
         "files": 35,
@@ -319,7 +317,7 @@
         "objects_signals": 7,
         "regex": 1,
         "smart_pointers": 48,
-        "strings": 182,
+        "strings": 183,
         "threads": 2
       },
       "public_header_includes": 48,

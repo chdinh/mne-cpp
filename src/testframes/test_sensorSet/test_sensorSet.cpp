@@ -91,7 +91,7 @@ void TestSensorSet::initTestCase()
     qInstallMessageHandler(MNELogger::customLogWriter);
 
     QString qPath = QString(QCoreApplication::applicationDirPath() + "/../resources/general/coilDefinitions/coil_def.dat");
-    m_pCoilDefinitions = FwdCoilSet::SPtr(FwdCoilSet::read_coil_defs(qPath).release());
+    m_pCoilDefinitions = FwdCoilSet::SPtr(FwdCoilSet::read_coil_defs(qPath.toStdU16String()).release());
 
     // Setup for reading the raw data
     FiffRawData raw = FiffRawData((QCoreApplication::applicationDirPath() + "/../resources/data/mne-cpp-test-data/MEG/sample/test_hpiFit_raw.fif").toStdString());

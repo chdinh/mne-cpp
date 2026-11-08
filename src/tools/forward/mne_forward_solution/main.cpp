@@ -121,15 +121,15 @@ int main(int argc, char* argv[])
     std::shared_ptr<ComputeFwdSettings> settings = std::make_shared<ComputeFwdSettings>();
 
     // Build the command string for FIFF stamping
-    settings->command = QCoreApplication::arguments().join(" ");
+    settings->command = QCoreApplication::arguments().join(" ").toStdString();
 
     // Source & sensor files
     if (parser.isSet(srcOpt))
-        settings->srcname = parser.value(srcOpt);
+        settings->srcname = parser.value(srcOpt).toStdString();
     if (parser.isSet(measOpt))
-        settings->measname = parser.value(measOpt);
+        settings->measname = parser.value(measOpt).toStdString();
     if (parser.isSet(fwdOpt))
-        settings->solname = parser.value(fwdOpt);
+        settings->solname = parser.value(fwdOpt).toStdString();
 
     // Transform options (--mri and --trans are mutually exclusive with --notrans)
     if (parser.isSet(notransOpt)) {
@@ -138,17 +138,17 @@ int main(int argc, char* argv[])
         settings->transname.clear();
     } else if (parser.isSet(mriOpt)) {
         settings->mri_head_ident = false;
-        settings->mriname = parser.value(mriOpt);
+        settings->mriname = parser.value(mriOpt).toStdString();
         settings->transname.clear();
     } else if (parser.isSet(transOpt)) {
         settings->mri_head_ident = false;
-        settings->transname = parser.value(transOpt);
+        settings->transname = parser.value(transOpt).toStdString();
         settings->mriname.clear();
     }
 
     // BEM model
     if (parser.isSet(bemOpt))
-        settings->bemname = parser.value(bemOpt);
+        settings->bemname = parser.value(bemOpt).toStdString();
 
     // Sphere model origin (x:y:z in mm, converted to meters)
     if (parser.isSet(originOpt)) {
@@ -171,9 +171,9 @@ int main(int argc, char* argv[])
     if (parser.isSet(eegscalpOpt))
         settings->scale_eeg_pos = true;
     if (parser.isSet(eegmodelsOpt))
-        settings->eeg_model_file = parser.value(eegmodelsOpt);
+        settings->eeg_model_file = parser.value(eegmodelsOpt).toStdString();
     if (parser.isSet(eegmodelOpt))
-        settings->eeg_model_name = parser.value(eegmodelOpt);
+        settings->eeg_model_name = parser.value(eegmodelOpt).toStdString();
     if (parser.isSet(eegradOpt)) {
         bool ok;
         float rad = parser.value(eegradOpt).toFloat(&ok);
@@ -216,7 +216,7 @@ int main(int argc, char* argv[])
         settings->mindist = (dist <= 0.0f) ? 0.0f : dist / 1000.0f;
     }
     if (parser.isSet(mindistoutOpt))
-        settings->mindistoutname = parser.value(mindistoutOpt);
+        settings->mindistoutname = parser.value(mindistoutOpt).toStdString();
     if (parser.isSet(includeallOpt))
         settings->filter_spaces = false;
 
@@ -235,8 +235,8 @@ int main(int argc, char* argv[])
         return 1;
     }
 
-    if (!fwdSolution->write(settings->solname.toStdU16String())) {
-        qCritical("The forward solution could not be written to %s.", settings->solname.toUtf8().constData());
+    if (!fwdSolution->write(UTILSLIB::pathFromUtf8(settings->solname))) {
+        qCritical("The forward solution could not be written to %s.", settings->solname.c_str());
         return 1;
     }
 

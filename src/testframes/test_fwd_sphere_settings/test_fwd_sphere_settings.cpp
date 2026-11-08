@@ -310,23 +310,23 @@ private slots:
 
     void fwdBem_explainSurface()
     {
-        const QString& brain = FwdBemModel::fwd_bem_explain_surface(FIFFV_BEM_SURF_ID_BRAIN);
+        const QString& brain = QString::fromStdString(FwdBemModel::fwd_bem_explain_surface(FIFFV_BEM_SURF_ID_BRAIN));
         QVERIFY(!brain.isEmpty());
-        const QString& head = FwdBemModel::fwd_bem_explain_surface(FIFFV_BEM_SURF_ID_HEAD);
+        const QString& head = QString::fromStdString(FwdBemModel::fwd_bem_explain_surface(FIFFV_BEM_SURF_ID_HEAD));
         QVERIFY(!head.isEmpty());
     }
 
     void fwdBem_explainMethod()
     {
-        const QString& constant = FwdBemModel::fwd_bem_explain_method(FWD_BEM_CONSTANT_COLL);
+        const QString& constant = QString::fromStdString(FwdBemModel::fwd_bem_explain_method(FWD_BEM_CONSTANT_COLL));
         QVERIFY(!constant.isEmpty());
-        const QString& linear = FwdBemModel::fwd_bem_explain_method(FWD_BEM_LINEAR_COLL);
+        const QString& linear = QString::fromStdString(FwdBemModel::fwd_bem_explain_method(FWD_BEM_LINEAR_COLL));
         QVERIFY(!linear.isEmpty());
     }
 
     void fwdBem_makeSolName()
     {
-        QString sol = FwdBemModel::fwd_bem_make_bem_sol_name("/path/to/model-bem.fif");
+        QString sol = QString::fromStdU16String(FwdBemModel::fwd_bem_make_bem_sol_name("/path/to/model-bem.fif").u16string());
         QVERIFY(sol.contains("sol"));
     }
 

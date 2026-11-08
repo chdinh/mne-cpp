@@ -89,17 +89,17 @@ int main(int argc, char* argv[])
     pSettings->include_meg = true;
     pSettings->include_eeg = true;
     pSettings->accurate = true;
-    pSettings->srcname = QCoreApplication::applicationDirPath() + "/../resources/data/MNE-sample-data/subjects/sample/bem/sample-oct-6-src.fif";
-    pSettings->measname = QCoreApplication::applicationDirPath() + "/../resources/data/mne-cpp-test-data/MEG/sample/sample_audvis_trunc_raw.fif";
-    pSettings->mriname = QCoreApplication::applicationDirPath() + "/../resources/data/mne-cpp-test-data/MEG/sample/all-trans.fif";
+    pSettings->srcname = (QCoreApplication::applicationDirPath() + "/../resources/data/MNE-sample-data/subjects/sample/bem/sample-oct-6-src.fif").toStdString();
+    pSettings->measname = (QCoreApplication::applicationDirPath() + "/../resources/data/mne-cpp-test-data/MEG/sample/sample_audvis_trunc_raw.fif").toStdString();
+    pSettings->mriname = (QCoreApplication::applicationDirPath() + "/../resources/data/mne-cpp-test-data/MEG/sample/all-trans.fif").toStdString();
     pSettings->transname.clear();
-    pSettings->bemname = QCoreApplication::applicationDirPath() + "/../resources/data/MNE-sample-data/subjects/sample/bem/sample-5120-5120-5120-bem.fif";
+    pSettings->bemname = (QCoreApplication::applicationDirPath() + "/../resources/data/MNE-sample-data/subjects/sample/bem/sample-5120-5120-5120-bem.fif").toStdString();
     pSettings->mindist = 5.0f / 1000.0f;
-    pSettings->solname = QCoreApplication::applicationDirPath() + "/../resources/data/mne-cpp-test-data/Result/sample_audvis-meg-eeg-oct-6-fwd.fif";
+    pSettings->solname = (QCoreApplication::applicationDirPath() + "/../resources/data/mne-cpp-test-data/Result/sample_audvis-meg-eeg-oct-6-fwd.fif").toStdString();
 
     // bring in dev_head transformation and FiffInfo
     // Init data loading and writing
-    FiffRawData raw(pSettings->measname.toStdString());
+    FiffRawData raw(pSettings->measname);
     QSharedPointer<FiffInfo> pFiffInfo = QSharedPointer<FiffInfo>::create(raw.info);
 
     FiffCoordTrans meg_head_t = pFiffInfo->dev_head_t;
@@ -120,7 +120,7 @@ int main(int argc, char* argv[])
 
     // store calculated forward solution
     timer2.start();
-    if (auto written = pFwdSolution->write(pSettings->solname.toStdU16String()); !written) {
+    if (auto written = pFwdSolution->write(UTILSLIB::pathFromUtf8(pSettings->solname)); !written) {
         qCritical() << written.error().what();
         return 1;
     }
@@ -128,7 +128,7 @@ int main(int argc, char* argv[])
 
     // read back to verify round-trip
     timer3.start();
-    auto pFwdRead = MNEForwardSolution::SPtr::create(pSettings->solname.toStdU16String());
+    auto pFwdRead = MNEForwardSolution::SPtr::create(UTILSLIB::pathFromUtf8(pSettings->solname));
     fTime3 = timer3.elapsed();
 
     // update head position and recompute

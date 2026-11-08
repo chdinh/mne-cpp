@@ -91,20 +91,20 @@ int main(int argc, char* argv[])
 
     // Derive solution filename  if not specified
     if (solFile.isEmpty())
-        solFile = FwdBemModel::fwd_bem_make_bem_sol_name(bemFile);
+        solFile = QString::fromStdU16String(FwdBemModel::fwd_bem_make_bem_sol_name(bemFile.toStdU16String()).u16string());
 
     qInfo("BEM model file:    %s", qPrintable(bemFile));
     qInfo("BEM solution file: %s", qPrintable(solFile));
     qInfo("BEM method:        %s",
-          qPrintable(FwdBemModel::fwd_bem_explain_method(bemMethod)));
+          FwdBemModel::fwd_bem_explain_method(bemMethod).c_str());
 
     // Determine how many layers we have
     // Try three-layer first, fall back to single-layer
     FwdBemModel::UPtr bemModel;
-    bemModel = FwdBemModel::fwd_bem_load_three_layer_surfaces(bemFile);
+    bemModel = FwdBemModel::fwd_bem_load_three_layer_surfaces(bemFile.toStdU16String());
     if (!bemModel) {
         qInfo("Not a three-layer model, trying single-layer (homogeneous)...");
-        bemModel = FwdBemModel::fwd_bem_load_homog_surface(bemFile);
+        bemModel = FwdBemModel::fwd_bem_load_homog_surface(bemFile.toStdU16String());
     }
 
     if (!bemModel) {
@@ -116,7 +116,7 @@ int main(int argc, char* argv[])
     for (int k = 0; k < bemModel->nsurf; ++k) {
         qInfo("  Surface %d: %s  (%d vertices, %d triangles)",
               k + 1,
-              qPrintable(FwdBemModel::fwd_bem_explain_surface(bemModel->surfs[k]->id)),
+              FwdBemModel::fwd_bem_explain_surface(bemModel->surfs[k]->id).c_str(),
               bemModel->surfs[k]->np,
               bemModel->surfs[k]->ntri);
     }
@@ -132,7 +132,7 @@ int main(int argc, char* argv[])
     // Save the solution
     qInfo("Writing solution to: %s", qPrintable(solFile));
 
-    if (bemModel->fwd_bem_save_model(solFile) != 0) {
+    if (bemModel->fwd_bem_save_model(solFile.toStdU16String()) != 0) {
         qCritical("Cannot write output file: %s", qPrintable(solFile));
         return 1;
     }

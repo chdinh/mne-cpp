@@ -131,9 +131,9 @@ void TestFwdBemDriverPython::initTestCase()
     QCOMPARE(geo.rows(), 2 * kNMeg + kNEeg + kNSrc);
     m_srcRr = geo.bottomRows(kNSrc).cast<float>();
 
-    m_model = FwdBemModel::fwd_bem_load_three_layer_surfaces(dir + "/sphere3-bem-sol.fif");
+    m_model = FwdBemModel::fwd_bem_load_three_layer_surfaces((dir + "/sphere3-bem-sol.fif").toStdU16String());
     QVERIFY(m_model != nullptr);
-    QCOMPARE(m_model->fwd_bem_load_recompute_solution(dir + "/sphere3-bem-sol.fif", FWD_BEM_UNKNOWN, 0), 0);
+    QCOMPARE(m_model->fwd_bem_load_recompute_solution((dir + "/sphere3-bem-sol.fif").toStdU16String(), FWD_BEM_UNKNOWN, 0), 0);
     QCOMPARE(m_model->bem_method, static_cast<int>(FWD_BEM_LINEAR_COLL));
     QCOMPARE(m_model->fwd_bem_set_head_mri_t(FiffCoordTrans::identity(FIFFV_COORD_HEAD, FIFFV_COORD_MRI)), 0);
 
@@ -159,7 +159,7 @@ void TestFwdBemDriverPython::initTestCase()
         ch.chpos.r0 = geo.row(2 * kNMeg + k).cast<float>().transpose();
         eeg.push_back(ch);
     }
-    auto defs = FwdCoilSet::read_coil_defs(QCoreApplication::applicationDirPath() + "/../resources/general/coilDefinitions/coil_def.dat");
+    auto defs = FwdCoilSet::read_coil_defs((QCoreApplication::applicationDirPath() + "/../resources/general/coilDefinitions/coil_def.dat").toStdU16String());
     QVERIFY(defs != nullptr);
     m_meg = defs->create_meg_coils(meg, kNMeg, FWD_COIL_ACCURACY_ACCURATE, FiffCoordTrans::identity(FIFFV_COORD_DEVICE, FIFFV_COORD_HEAD));
     m_eeg = FwdCoilSet::create_eeg_els(eeg, kNEeg);
@@ -282,8 +282,8 @@ void TestFwdBemDriverPython::saveModel()
     // The model read from mne.write_bem_solution's file is saved and read back unchanged
     QTemporaryDir dir;
     const QString linear = dir.filePath(QStringLiteral("linear-bem-sol.fif"));
-    QCOMPARE(m_model->fwd_bem_save_model(linear), 0);
-    auto back = FwdBemModel::fwd_bem_load_three_layer_surfaces(linear);
+    QCOMPARE(m_model->fwd_bem_save_model(linear.toStdU16String()), 0);
+    auto back = FwdBemModel::fwd_bem_load_three_layer_surfaces(linear.toStdU16String());
     QVERIFY(back != nullptr);
     QCOMPARE(back->sigma, m_model->sigma);
     for (int k = 0; k < m_model->nsurf; ++k) {
@@ -291,7 +291,7 @@ void TestFwdBemDriverPython::saveModel()
         QCOMPARE(back->surfs[k]->rr, m_model->surfs[k]->rr);
         QCOMPARE(back->surfs[k]->itris, m_model->surfs[k]->itris);
     }
-    QCOMPARE(back->fwd_bem_load_recompute_solution(linear, FWD_BEM_LINEAR_COLL, 0), 0);
+    QCOMPARE(back->fwd_bem_load_recompute_solution(linear.toStdU16String(), FWD_BEM_LINEAR_COLL, 0), 0);
     QCOMPARE(back->sol_name, linear);
     QCOMPARE(back->solution, m_model->solution);
 
@@ -299,22 +299,22 @@ void TestFwdBemDriverPython::saveModel()
     QCOMPARE(back->fwd_bem_compute_solution(FWD_BEM_CONSTANT_COLL), 0);
     const MatrixXf constantSolution = back->solution;
     const QString constant = dir.filePath(QStringLiteral("constant-bem-sol.fif"));
-    QCOMPARE(back->fwd_bem_save_model(constant), 0);
-    auto reread = FwdBemModel::fwd_bem_load_three_layer_surfaces(constant);
+    QCOMPARE(back->fwd_bem_save_model(constant.toStdU16String()), 0);
+    auto reread = FwdBemModel::fwd_bem_load_three_layer_surfaces(constant.toStdU16String());
     QVERIFY(reread != nullptr);
-    QCOMPARE(reread->fwd_bem_load_recompute_solution(constant, FWD_BEM_UNKNOWN, 0), 0);
+    QCOMPARE(reread->fwd_bem_load_recompute_solution(constant.toStdU16String(), FWD_BEM_UNKNOWN, 0), 0);
     QCOMPARE(reread->bem_method, static_cast<int>(FWD_BEM_CONSTANT_COLL));
     QCOMPARE(reread->sol_name, constant);
     QCOMPARE(reread->solution, constantSolution);
     QTest::ignoreMessage(QtWarningMsg, QRegularExpression("Approximation method in file"));
-    QCOMPARE(reread->fwd_bem_load_recompute_solution(constant, FWD_BEM_LINEAR_COLL, 0), 0);
-    QVERIFY(reread->sol_name.isEmpty());
+    QCOMPARE(reread->fwd_bem_load_recompute_solution(constant.toStdU16String(), FWD_BEM_LINEAR_COLL, 0), 0);
+    QVERIFY(reread->sol_name.empty());
     // The recomputed linear solution matches mne.make_bem_solution's
     const float relDiff = (reread->solution - m_model->solution).norm() / m_model->solution.norm();
     QVERIFY2(relDiff < 1e-5f, qPrintable(QString::number(relDiff)));
 
     QTest::ignoreMessage(QtWarningMsg, QRegularExpression("No model to save"));
-    QCOMPARE(FwdBemModel().fwd_bem_save_model(dir.filePath(QStringLiteral("empty.fif"))), -1);
+    QCOMPARE(FwdBemModel().fwd_bem_save_model(dir.filePath(QStringLiteral("empty.fif")).toStdU16String()), -1);
 }
 
 //=============================================================================================================

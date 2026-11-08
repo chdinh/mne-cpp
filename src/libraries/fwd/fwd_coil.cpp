@@ -68,9 +68,9 @@ FwdCoil::FwdCoil(int p_np)
 
 FwdCoil::FwdCoil(const FwdCoil& p_FwdCoil)
 {
-    if (!p_FwdCoil.chname.isEmpty())
+    if (!p_FwdCoil.chname.empty())
         this->chname = p_FwdCoil.chname;
-    if (!p_FwdCoil.desc.isEmpty())
+    if (!p_FwdCoil.desc.empty())
         this->desc = p_FwdCoil.desc;
     this->coil_class = p_FwdCoil.coil_class;
     this->accuracy = p_FwdCoil.accuracy;
@@ -116,7 +116,7 @@ FwdCoil::UPtr FwdCoil::create_eeg_el(const FiffChInfo& ch, const FiffCoordTrans&
     else
         res = std::make_unique<FwdCoil>(2); /* Reference electrode present */
 
-    res->chname = QString::fromStdString(ch.ch_name);
+    res->chname = ch.ch_name;
     res->desc = "EEG electrode";
     res->coil_class = FWD_COILC_EEG;
     res->accuracy = FWD_COIL_ACCURACY_NORMAL;

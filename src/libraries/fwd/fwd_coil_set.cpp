@@ -30,9 +30,13 @@
 //=============================================================================================================
 
 #include <QDebug>
-#include <QFile>
 #include <QLocale>
-#include <QTextStream>
+#include <utils/string_utils.h>
+
+#include <fstream>
+#include <locale>
+#include <sstream>
+#include <string>
 
 //=============================================================================================================
 // USED NAMESPACES
@@ -48,39 +52,22 @@ constexpr float BIG = 0.5f;
 }
 
 /**
- * Read a possibly-quoted word from a QTextStream (comments already stripped).
+ * Read a possibly-quoted word (comments already stripped).
  */
-static QString readWord(QTextStream& in)
+static std::string readWord(std::istream& in)
 {
-    in.skipWhiteSpace();
-    if (in.atEnd())
-        return QString();
-
-    QChar ch;
-    in >> ch;
-
-    if (ch == '"') {
-        QString word;
-        while (!in.atEnd()) {
-            in >> ch;
-            if (ch == '"')
-                break;
-            word += ch;
-        }
-        return word;
-    }
-
-    QString word(ch);
-    while (!in.atEnd()) {
-        in >> ch;
-        if (ch.isSpace())
-            break;
-        word += ch;
+    std::string word;
+    in >> std::ws;
+    if (in.peek() == '"') {
+        in.get();
+        std::getline(in, word, '"');
+    } else {
+        in >> word;
     }
     return word;
 }
 
-FwdCoil* FwdCoilSet::fwd_add_coil_to_set(int type, int coil_class, int acc, int np, float size, float base, const QString& desc)
+FwdCoil* FwdCoilSet::fwd_add_coil_to_set(int type, int coil_class, int acc, int np, float size, float base, const std::string& desc)
 {
     if (np <= 0) {
         qWarning("Number of integration points should be positive (type = %d acc = %d)", type, acc);
@@ -109,7 +96,7 @@ FwdCoil* FwdCoilSet::fwd_add_coil_to_set(int type, int coil_class, int acc, int 
     def->np = np;
     def->size = size;
     def->base = base;
-    if (!desc.isEmpty())
+    if (!desc.empty())
         def->desc = desc;
     return def;
 }
@@ -156,8 +143,8 @@ FwdCoil::UPtr FwdCoilSet::create_meg_coil(const FiffChInfo& ch, int acc, const F
      */
     auto res = std::make_unique<FwdCoil>(def->np);
 
-    res->chname = QString::fromStdString(ch.ch_name);
-    if (!def->desc.isEmpty())
+    res->chname = ch.ch_name;
+    if (!def->desc.empty())
         res->desc = def->desc;
     res->coil_class = def->coil_class;
     res->accuracy = def->accuracy;
@@ -230,52 +217,42 @@ FwdCoilSet::UPtr FwdCoilSet::create_eeg_els(const std::vector<FIFFLIB::FiffChInf
 
 //=============================================================================================================
 
-FwdCoilSet::UPtr FwdCoilSet::read_coil_defs(const QString& name)
+FwdCoilSet::UPtr FwdCoilSet::read_coil_defs(const std::filesystem::path& name)
 {
-    QFile file(name);
-    if (!file.open(QIODevice::ReadOnly | QIODevice::Text)) {
-        qWarning() << "FwdCoilSet::read_coil_defs - Cannot open" << name;
+    std::ifstream file(name);
+    if (!file) {
+        qWarning("FwdCoilSet::read_coil_defs - Cannot open %s", UTILSLIB::utf8FromPath(name).c_str());
         return nullptr;
     }
 
     // Read file content, stripping comments
-    QString content;
-    {
-        QTextStream fileIn(&file);
-        while (!fileIn.atEnd()) {
-            QString line = fileIn.readLine();
-            int idx = line.indexOf('#');
-            if (idx >= 0)
-                line.truncate(idx);
-            content += line + '\n';
-        }
+    std::string content;
+    for (std::string line; std::getline(file, line);) {
+        content.append(line, 0, line.find('#'));
+        content.push_back('\n');
     }
-    file.close();
-
-    QTextStream in(&content);
-    in.setLocale(QLocale::c());
+    std::istringstream in(content);
+    in.imbue(std::locale::classic());
 
     auto res = std::make_unique<FwdCoilSet>();
-    while (!in.atEnd()) {
+    while (in >> std::ws, !in.eof()) {
         /*
          * Read basic info
          */
         int coil_class;
-        in >> coil_class;
-        if (in.status() != QTextStream::Ok)
+        if (!(in >> coil_class))
             break;
 
         int type, acc, np;
         float size, base;
 
-        in >> type >> acc >> np >> size >> base;
-        if (in.status() != QTextStream::Ok) {
+        if (!(in >> type >> acc >> np >> size >> base)) {
             qWarning("FwdCoilSet::read_coil_defs - Error reading coil header");
             return nullptr;
         }
 
-        QString desc = readWord(in);
-        if (desc.isEmpty()) {
+        const std::string desc = readWord(in);
+        if (desc.empty()) {
             qWarning("FwdCoilSet::read_coil_defs - Missing coil description");
             return nullptr;
         }
@@ -288,8 +265,7 @@ FwdCoilSet::UPtr FwdCoilSet::read_coil_defs(const QString& name)
             /*
              * Read and verify data for each integration point
              */
-            in >> def->w[p] >> def->rmag(p, 0) >> def->rmag(p, 1) >> def->rmag(p, 2) >> def->cosmag(p, 0) >> def->cosmag(p, 1) >> def->cosmag(p, 2);
-            if (in.status() != QTextStream::Ok) {
+            if (!(in >> def->w[p] >> def->rmag(p, 0) >> def->rmag(p, 1) >> def->rmag(p, 2) >> def->cosmag(p, 0) >> def->cosmag(p, 1) >> def->cosmag(p, 2))) {
                 qWarning("FwdCoilSet::read_coil_defs - Error reading integration point %d", p);
                 return nullptr;
             }

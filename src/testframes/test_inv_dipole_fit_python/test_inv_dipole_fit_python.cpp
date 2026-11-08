@@ -328,7 +328,7 @@ void TestInvDipoleFitPython::bemForwardMatches()
 
     const QString data = QCoreApplication::applicationDirPath() + "/../resources/data/mne-cpp-test-data/";
     std::vector<QString> projnames{m_sampleAve};
-    FwdEegSphereModel::UPtr eegModel = FwdEegSphereModel::setup_eeg_sphere_model(QString(), QString(), 0.09f);
+    FwdEegSphereModel::UPtr eegModel = FwdEegSphereModel::setup_eeg_sphere_model(QString().toStdU16String(), QString().toStdString(), 0.09f);
     QVERIFY(eegModel);
     // MEG and EEG through the BEM, with only the diagonal of the noise covariance.
     std::unique_ptr<InvDipoleFitData> fitData(InvDipoleFitData::setup_dipole_fit_data(
@@ -375,7 +375,7 @@ void TestInvDipoleFitPython::bemForwardMatches()
     QTest::ignoreMessage(QtCriticalMsg, "Cannot use a homogeneous model in EEG calculations.");
     QVERIFY(!InvDipoleFitData::setup_dipole_fit_data(
         data + "MEG/sample/all-trans.fif", m_sampleAve, data + "subjects/sample/bem/sample-5120-bem.fif",
-        nullptr, FwdEegSphereModel::setup_eeg_sphere_model(QString(), QString(), 0.09f).release(), false, QString(), QString(),
+        nullptr, FwdEegSphereModel::setup_eeg_sphere_model(QString().toStdU16String(), QString().toStdString(), 0.09f).release(), false, QString(), QString(),
         5e-13f, 20e-15f, 0.2e-6f, 0.1f, 0.1f, 0.1f, false, projnames, false, true));
 }
 

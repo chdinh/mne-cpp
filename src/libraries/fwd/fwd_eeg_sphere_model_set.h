@@ -38,8 +38,9 @@
 // QT INCLUDES
 //=============================================================================================================
 
-#include <QString>
 
+#include <filesystem>
+#include <string_view>
 #include <memory>
 #include <vector>
 
@@ -125,7 +126,7 @@ public:
      *
      * @return The loaded model set (now + loaded models).
      */
-    static UPtr fwd_load_eeg_sphere_models(const QString& p_sFileName, UPtr now);
+    static UPtr fwd_load_eeg_sphere_models(const std::filesystem::path& p_sFileName, UPtr now);
 
     //=========================================================================================================
     /**
@@ -136,7 +137,7 @@ public:
      *
      * @return A duplicat of the found model.
      */
-    FwdEegSphereModel::UPtr fwd_select_eeg_sphere_model(const QString& p_sName) const;
+    FwdEegSphereModel::UPtr fwd_select_eeg_sphere_model(std::string_view p_sName) const;
 
     //=========================================================================================================
     /**

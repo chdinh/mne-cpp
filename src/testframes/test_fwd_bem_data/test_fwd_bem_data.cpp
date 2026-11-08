@@ -86,7 +86,7 @@ private slots:
         if (!QFile::exists(path))
             QSKIP("BEM file not found");
 
-        auto model = FwdBemModel::fwd_bem_load_homog_surface(path);
+        auto model = FwdBemModel::fwd_bem_load_homog_surface(path.toStdU16String());
         QVERIFY(model != nullptr);
 
         QVERIFY(model->nsurf > 0);
@@ -111,7 +111,7 @@ private slots:
         if (!QFile::exists(path))
             QSKIP("3-layer BEM file not found");
 
-        auto model = FwdBemModel::fwd_bem_load_three_layer_surfaces(path);
+        auto model = FwdBemModel::fwd_bem_load_three_layer_surfaces(path.toStdU16String());
         QVERIFY(model != nullptr);
         QCOMPARE(model->nsurf, 3);
 
@@ -133,7 +133,7 @@ private slots:
         if (!QFile::exists(path))
             QSKIP("BEM file not found");
 
-        auto model = FwdBemModel::fwd_bem_load_surfaces(path, {FIFFV_BEM_SURF_ID_BRAIN});
+        auto model = FwdBemModel::fwd_bem_load_surfaces(path.toStdU16String(), {FIFFV_BEM_SURF_ID_BRAIN});
         QVERIFY(model != nullptr);
         QVERIFY(model->nsurf > 0);
     }
@@ -151,11 +151,11 @@ private slots:
         if (!QFile::exists(bemPath) || !QFile::exists(solPath))
             QSKIP("BEM files not found");
 
-        auto model = FwdBemModel::fwd_bem_load_homog_surface(bemPath);
+        auto model = FwdBemModel::fwd_bem_load_homog_surface(bemPath.toStdU16String());
         QVERIFY(model != nullptr);
 
         int result = model->fwd_bem_load_recompute_solution(
-            solPath, FWD_BEM_LINEAR_COLL, 0);
+            solPath.toStdU16String(), FWD_BEM_LINEAR_COLL, 0);
 
         QVERIFY(result == 0 || result == 1); // 0=ok, 1=recomputed
     }
@@ -451,17 +451,17 @@ private slots:
             QSKIP("No test data");
 
         ComputeFwdSettings settings;
-        settings.measname = m_sDataPath + "/MEG/sample/sample_audvis_trunc_raw.fif";
-        settings.srcname = m_sDataPath + "/subjects/sample/bem/sample-oct-6-src.fif";
-        settings.bemname = m_sDataPath + "/subjects/sample/bem/sample-5120-bem.fif";
-        settings.transname = m_sDataPath + "/MEG/sample/all-trans.fif";
+        settings.measname = (m_sDataPath + "/MEG/sample/sample_audvis_trunc_raw.fif").toStdString();
+        settings.srcname = (m_sDataPath + "/subjects/sample/bem/sample-oct-6-src.fif").toStdString();
+        settings.bemname = (m_sDataPath + "/subjects/sample/bem/sample-5120-bem.fif").toStdString();
+        settings.transname = (m_sDataPath + "/MEG/sample/all-trans.fif").toStdString();
         settings.include_meg = true;
         settings.include_eeg = false;
         settings.accurate = false;
 
-        QVERIFY(QFile::exists(settings.measname));
-        QVERIFY(QFile::exists(settings.srcname));
-        QVERIFY(QFile::exists(settings.bemname));
+        QVERIFY(std::filesystem::exists(settings.measname));
+        QVERIFY(std::filesystem::exists(settings.srcname));
+        QVERIFY(std::filesystem::exists(settings.bemname));
 
         settings.solname = "fwd.fif";
         QVERIFY(settings.checkIntegrity());

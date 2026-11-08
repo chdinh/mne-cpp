@@ -122,7 +122,7 @@ int main(int argc, char* argv[])
 
     qInfo("Reading coil definitions from: %s", qPrintable(coildefName));
 
-    FwdCoilSet::UPtr coilSet = FwdCoilSet::read_coil_defs(coildefName);
+    FwdCoilSet::UPtr coilSet = FwdCoilSet::read_coil_defs(coildefName.toStdU16String());
     if (!coilSet) {
         qCritical("Cannot read coil definitions from: %s", qPrintable(coildefName));
         return 1;
@@ -145,7 +145,7 @@ int main(int argc, char* argv[])
               qPrintable(accuracyName(coil.accuracy)),
               coil.np,
               coil.size,
-              qPrintable(coil.desc));
+              coil.desc.c_str());
     }
 
     return 0;

@@ -113,7 +113,7 @@ int main(int argc, char* argv[])
     const Vector3f Q = Vector3f(0.3f, -0.4f, 0.866f).normalized();
 
     //! [fwd_coil_set_usage]
-    auto templates = FwdCoilSet::read_coil_defs(coilDefs); // integration points per coil type
+    auto templates = FwdCoilSet::read_coil_defs(coilDefs.toStdU16String()); // integration points per coil type
     auto coils = templates->create_meg_coils(meg, static_cast<int>(meg.size()), FWD_COIL_ACCURACY_ACCURATE, raw.info.dev_head_t);
     const FwdCoil& first = *coils->coils[0]; // MEG 0113 in head coordinates
     //! [fwd_coil_set_usage]
@@ -122,8 +122,8 @@ int main(int argc, char* argv[])
                  "FwdCoilSet/FwdCoil: 306 accurate MEG coils, MEG0113 a planar gradiometer with 8 points");
 
     //! [fwd_bem_model_usage]
-    auto bem = FwdBemModel::fwd_bem_load_homog_surface(data + "/subjects/sample/bem/sample-5120-bem.fif");
-    bem->fwd_bem_load_recompute_solution(data + "/subjects/sample/bem/sample-5120-bem-sol.fif", FWD_BEM_LINEAR_COLL, 0);
+    auto bem = FwdBemModel::fwd_bem_load_homog_surface((data + "/subjects/sample/bem/sample-5120-bem.fif").toStdU16String());
+    bem->fwd_bem_load_recompute_solution((data + "/subjects/sample/bem/sample-5120-bem-sol.fif").toStdU16String(), FWD_BEM_LINEAR_COLL, 0);
     bem->fwd_bem_set_head_mri_t(FiffCoordTrans((data + "/MEG/sample/all-trans.fif").toStdU16String(), FIFFV_COORD_MRI, FIFFV_COORD_HEAD));
     bem->fwd_bem_specify_coils(coils.get()); // stores a FwdBemSolution per coil set in coils->user_data
     VectorXf B(coils->ncoil());
@@ -167,20 +167,20 @@ int main(int argc, char* argv[])
     settings->include_meg = true;
     settings->include_eeg = true;
     settings->accurate = true;
-    settings->srcname = data + "/subjects/sample/bem/sample-oct-6-src.fif";
-    settings->measname = rawFile.fileName();
-    settings->mriname = data + "/MEG/sample/all-trans.fif";
+    settings->srcname = (data + "/subjects/sample/bem/sample-oct-6-src.fif").toStdString();
+    settings->measname = rawFile.fileName().toStdString();
+    settings->mriname = (data + "/MEG/sample/all-trans.fif").toStdString();
     settings->r0 = origin;
     settings->eeg_sphere_rad = 0.09f;
     settings->mindist = 0.0f;
     settings->filter_spaces = false;
     settings->labels = {label.toStdU16String()};
     settings->nlabel = 1;
-    settings->solname = tmp.filePath("V1-fwd.fif");
+    settings->solname = tmp.filePath("V1-fwd.fif").toStdString();
     settings->pFiffInfo = QSharedPointer<FiffInfo>::create(raw.info);
     settings->checkIntegrity();
     auto fwd = std::make_shared<ComputeFwd>(settings)->calculateFwd();
-    const std::filesystem::path solPath = settings->solname.toStdU16String();
+    const std::filesystem::path solPath = UTILSLIB::pathFromUtf8(settings->solname);
     const bool written = fwd->write(solPath).has_value();
     //! [compute_fwd_usage]
     // mne _compute_forwards_meeg on the 78 V1 sources: |G| of source 0, x component, over 306 MEG channels

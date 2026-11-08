@@ -152,7 +152,7 @@ void TestFwdLibrary::bemModel_constructDestroy()
 void TestFwdLibrary::bemModel_stringHelpers()
 {
     // Static string method on FwdBemModel
-    QString solName = FwdBemModel::fwd_bem_make_bem_sol_name(QString("test_subject"));
+    QString solName = QString::fromStdU16String(FwdBemModel::fwd_bem_make_bem_sol_name(QString("test_subject").toStdU16String()).u16string());
     QVERIFY(!solName.isEmpty());
 }
 
@@ -184,7 +184,7 @@ void TestFwdLibrary::bemModel_loadFromFile()
         QSKIP("BEM file not found");
 
     int kind = FIFFV_BEM_SURF_ID_BRAIN;
-    auto model = FwdBemModel::fwd_bem_load_surfaces(bemPath(), {kind});
+    auto model = FwdBemModel::fwd_bem_load_surfaces(bemPath().toStdU16String(), {kind});
     if (model) {
         QVERIFY(model->nsurf > 0);
         MNESurface* surf = model->fwd_bem_find_surface(FIFFV_BEM_SURF_ID_BRAIN);
@@ -195,7 +195,7 @@ void TestFwdLibrary::bemModel_loadFromFile()
     QString bem3Path = m_sDataPath + "/subjects/sample/bem/sample-1280-1280-1280-bem.fif";
     if (QFile::exists(bem3Path)) {
         int kinds[3] = {FIFFV_BEM_SURF_ID_BRAIN, FIFFV_BEM_SURF_ID_SKULL, FIFFV_BEM_SURF_ID_HEAD};
-        auto model3 = FwdBemModel::fwd_bem_load_surfaces(bem3Path, {kinds[0], kinds[1], kinds[2]});
+        auto model3 = FwdBemModel::fwd_bem_load_surfaces(bem3Path.toStdU16String(), {kinds[0], kinds[1], kinds[2]});
         if (model3) {
             QVERIFY(model3->nsurf == 3);
         }
@@ -209,7 +209,7 @@ void TestFwdLibrary::bemModel_loadHomogSurface()
     if (!QFile::exists(bemPath()))
         QSKIP("BEM file not found");
 
-    auto model = FwdBemModel::fwd_bem_load_homog_surface(bemPath());
+    auto model = FwdBemModel::fwd_bem_load_homog_surface(bemPath().toStdU16String());
     QVERIFY(model != nullptr);
     QVERIFY(model->surfs.size() > 0);
     QVERIFY(model->surfs[0]->np > 0);
@@ -223,7 +223,7 @@ void TestFwdLibrary::bemModel_loadThreeLayerSurfaces()
     if (!QFile::exists(bem3Path))
         QSKIP("3-layer BEM not found");
 
-    auto model3 = FwdBemModel::fwd_bem_load_three_layer_surfaces(bem3Path);
+    auto model3 = FwdBemModel::fwd_bem_load_three_layer_surfaces(bem3Path.toStdU16String());
     QVERIFY(model3 != nullptr);
     QVERIFY(model3->surfs.size() == 3);
     for (int s = 0; s < static_cast<int>(model3->surfs.size()); s++) {
@@ -240,7 +240,7 @@ void TestFwdLibrary::bemModel_loadSolutionFile()
     if (!QFile::exists(bemSolPath))
         QSKIP("BEM solution file not found");
 
-    auto model = FwdBemModel::fwd_bem_load_homog_surface(bemSolPath);
+    auto model = FwdBemModel::fwd_bem_load_homog_surface(bemSolPath.toStdU16String());
     QVERIFY(model != nullptr);
     QVERIFY(model->surfs.size() > 0);
     QVERIFY(model->surfs[0]->np > 0);
@@ -257,7 +257,7 @@ void TestFwdLibrary::bemModel_setHeadMriT()
     if (!QFile::exists(bemPath()))
         QSKIP("BEM file not found");
 
-    auto model = FwdBemModel::fwd_bem_load_homog_surface(bemPath());
+    auto model = FwdBemModel::fwd_bem_load_homog_surface(bemPath().toStdU16String());
     QVERIFY(model != nullptr);
 
     FiffCoordTrans t;
@@ -306,7 +306,7 @@ void TestFwdLibrary::bemModel_constantCollocation()
 {
     if (!hasData())
         QSKIP("No test data");
-    auto model = FwdBemModel::fwd_bem_load_homog_surface(bemPath());
+    auto model = FwdBemModel::fwd_bem_load_homog_surface(bemPath().toStdU16String());
     QVERIFY(model != nullptr);
     QVERIFY(model->surfs.size() > 0);
     QVERIFY(model->surfs[0]->np > 0);
@@ -320,7 +320,7 @@ void TestFwdLibrary::bemModel_accessors()
 {
     if (!hasData())
         QSKIP("No test data");
-    auto model = FwdBemModel::fwd_bem_load_homog_surface(bemPath());
+    auto model = FwdBemModel::fwd_bem_load_homog_surface(bemPath().toStdU16String());
     QVERIFY(model != nullptr);
 
     QVERIFY(model->surfs.size() > 0);
@@ -335,7 +335,7 @@ void TestFwdLibrary::bemModel_accessors()
     // Load 3-layer for more coverage
     QString bem3Path = m_sDataPath + "/subjects/sample/bem/sample-1280-1280-1280-bem.fif";
     if (QFile::exists(bem3Path)) {
-        auto model3 = FwdBemModel::fwd_bem_load_three_layer_surfaces(bem3Path);
+        auto model3 = FwdBemModel::fwd_bem_load_three_layer_surfaces(bem3Path.toStdU16String());
         if (model3) {
             QVERIFY(model3->surfs.size() == 3);
             QVERIFY(model3->head_mri_t.from != 0 || model3->head_mri_t.to != 0);
@@ -351,14 +351,14 @@ void TestFwdLibrary::bemModel_solvedPotentials()
     if (!QFile::exists(bemSolPath))
         QSKIP("BEM solution file not found");
 
-    auto model = FwdBemModel::fwd_bem_load_homog_surface(bemSolPath);
+    auto model = FwdBemModel::fwd_bem_load_homog_surface(bemSolPath.toStdU16String());
     QVERIFY(model != nullptr);
     QVERIFY(model->surfs.size() > 0);
 
     // Also load 3-layer BEM solution
     QString bem3SolPath = m_sDataPath + "/subjects/sample/bem/sample-1280-1280-1280-bem-sol.fif";
     if (QFile::exists(bem3SolPath)) {
-        auto model3 = FwdBemModel::fwd_bem_load_three_layer_surfaces(bem3SolPath);
+        auto model3 = FwdBemModel::fwd_bem_load_three_layer_surfaces(bem3SolPath.toStdU16String());
         if (model3) {
             QVERIFY(model3->surfs.size() == 3);
         }
@@ -373,7 +373,7 @@ void TestFwdLibrary::bemModel_fieldIntegrals()
     if (!QFile::exists(bem3Path))
         QSKIP("3-layer BEM not found");
 
-    auto model3 = FwdBemModel::fwd_bem_load_three_layer_surfaces(bem3Path);
+    auto model3 = FwdBemModel::fwd_bem_load_three_layer_surfaces(bem3Path.toStdU16String());
     QVERIFY(model3 != nullptr);
     QVERIFY(model3->surfs.size() == 3);
     for (int s = 0; s < static_cast<int>(model3->surfs.size()); s++) {
@@ -386,7 +386,7 @@ void TestFwdLibrary::bemModel_findSurface()
 {
     if (!hasData())
         QSKIP("No test data");
-    auto model = FwdBemModel::fwd_bem_load_homog_surface(bemPath());
+    auto model = FwdBemModel::fwd_bem_load_homog_surface(bemPath().toStdU16String());
     QVERIFY(model != nullptr);
     MNESurface* surf = model->fwd_bem_find_surface(FIFFV_BEM_SURF_ID_BRAIN);
     QVERIFY(surf != nullptr);
@@ -471,7 +471,7 @@ void TestFwdLibrary::bemModel_linearCollocation()
 {
     if (!hasData())
         QSKIP("No test data");
-    auto model = FwdBemModel::fwd_bem_load_homog_surface(bemPath());
+    auto model = FwdBemModel::fwd_bem_load_homog_surface(bemPath().toStdU16String());
     QVERIFY(model != nullptr);
     QVERIFY(model->surfs.size() > 0);
     QVERIFY(model->surfs[0]->np > 0);
@@ -486,7 +486,7 @@ void TestFwdLibrary::bemModel_linearCollocation()
 void TestFwdLibrary::settings_defaultCtor()
 {
     ComputeFwdSettings settings;
-    QVERIFY(settings.srcname.isEmpty());
+    QVERIFY(settings.srcname.empty());
     QVERIFY(settings.filter_spaces);
     QVERIFY(!settings.accurate);
     QVERIFY(!settings.fixed_ori);
@@ -504,9 +504,9 @@ void TestFwdLibrary::settings_cliParsing()
         settings.include_eeg = true;
         settings.accurate = true;
         settings.fixed_ori = true;
-        settings.srcname = QString("test_src.fif");
-        settings.measname = QString("test_meas.fif");
-        settings.solname = QString("test_fwd.fif");
+        settings.srcname = QString("test_src.fif").toStdString();
+        settings.measname = QString("test_meas.fif").toStdString();
+        settings.solname = QString("test_fwd.fif").toStdString();
         settings.do_all = true;
         settings.compute_grad = true;
         QVERIFY(settings.include_meg);
@@ -523,14 +523,14 @@ void TestFwdLibrary::settings_cliParsing()
     // mriname
     {
         ComputeFwdSettings settings;
-        settings.mriname = QString("mri.fif");
+        settings.mriname = QString("mri.fif").toStdString();
         QCOMPARE(settings.mriname, QString("mri.fif"));
     }
 
     // transname
     {
         ComputeFwdSettings settings;
-        settings.transname = QString("trans.fif");
+        settings.transname = QString("trans.fif").toStdString();
         QCOMPARE(settings.transname, QString("trans.fif"));
     }
 }
@@ -539,9 +539,9 @@ void TestFwdLibrary::settings_buildCommandLine()
 {
     ComputeFwdSettings settings;
     settings.include_meg = true;
-    settings.srcname = QString("s.fif");
-    settings.measname = QString("m.fif");
-    settings.solname = QString("f.fif");
+    settings.srcname = QString("s.fif").toStdString();
+    settings.measname = QString("m.fif").toStdString();
+    settings.solname = QString("f.fif").toStdString();
     settings.mri_head_ident = true;
     QVERIFY(settings.mri_head_ident);
 }
@@ -573,7 +573,7 @@ void TestFwdLibrary::eegSphere_selectModel()
 void TestFwdLibrary::eegSphere_getCoeff()
 {
     auto model = FwdEegSphereModel::setup_eeg_sphere_model(
-        QString(), QString("Default"), 0.09f);
+        QString().toStdU16String(), QString("Default").toStdString(), 0.09f);
     if (!model)
         QSKIP("Could not setup EEG sphere model");
 
@@ -609,7 +609,7 @@ void TestFwdLibrary::eegSphere_calcPotComponents()
 void TestFwdLibrary::eegSphere_multiSpherepot()
 {
     auto model = FwdEegSphereModel::setup_eeg_sphere_model(
-        QString(), QString("Default"), 0.09f);
+        QString().toStdU16String(), QString("Default").toStdString(), 0.09f);
     if (!model)
         QSKIP("Could not setup EEG sphere model");
 
@@ -637,7 +637,7 @@ void TestFwdLibrary::eegSphere_multiSpherepot()
 void TestFwdLibrary::eegSphere_spherepotVec()
 {
     auto model = FwdEegSphereModel::setup_eeg_sphere_model(
-        QString(), QString("Default"), 0.09f);
+        QString().toStdU16String(), QString("Default").toStdString(), 0.09f);
     QVERIFY(model != nullptr);
 
     Eigen::Vector3f rd(0.0f, 0.0f, 0.05f);
@@ -664,11 +664,11 @@ void TestFwdLibrary::eegSphere_spherepotVec()
 void TestFwdLibrary::eegSphere_modelSet()
 {
     auto m1 = FwdEegSphereModel::setup_eeg_sphere_model(
-        QString(), QString("Default"), 0.09f);
+        QString().toStdU16String(), QString("Default").toStdString(), 0.09f);
     QVERIFY(m1 != nullptr);
 
     auto m2 = FwdEegSphereModel::setup_eeg_sphere_model(
-        QString(), QString("Default"), 0.08f);
+        QString().toStdU16String(), QString("Default").toStdString(), 0.08f);
     QVERIFY(m2 != nullptr);
 
     FwdEegSphereModelSet modelSet;
@@ -708,10 +708,10 @@ void TestFwdLibrary::settings_checkIntegrity()
     if (!hasData())
         QSKIP("No test data");
     ComputeFwdSettings settings;
-    settings.srcname = m_sDataPath + "/subjects/sample/bem/sample-oct-6-src.fif";
-    settings.measname = rawPath();
-    settings.bemname = bemPath();
-    settings.mriname = m_sDataPath + "/MEG/sample/all-trans.fif";
+    settings.srcname = (m_sDataPath + "/subjects/sample/bem/sample-oct-6-src.fif").toStdString();
+    settings.measname = rawPath().toStdString();
+    settings.bemname = bemPath().toStdString();
+    settings.mriname = (m_sDataPath + "/MEG/sample/all-trans.fif").toStdString();
     settings.include_meg = true;
     settings.include_eeg = false;
     settings.accurate = false;

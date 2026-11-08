@@ -80,13 +80,13 @@ namespace FWDLIB
 struct SurfExpl
 {
     int kind;
-    const QString name;
+    const std::string name;
 };
 
 struct MethodExpl
 {
     int method;
-    const QString name;
+    const std::string name;
 };
 
 } // namespace FWDLIB
@@ -100,17 +100,9 @@ static FWDLIB::MethodExpl method_expl[] = {{FWDLIB::FWD_BEM_CONSTANT_COLL, "cons
                                            {FWDLIB::FWD_BEM_LINEAR_COLL, "linear collocation"},
                                            {-1, "unknown"}};
 
-static QString strip_from(const QString& s, const QString& suffix)
+static std::string_view strip_from(std::string_view s, std::string_view suffix)
 {
-    QString res;
-
-    if (s.endsWith(suffix)) {
-        res = s;
-        res.chop(suffix.size());
-    } else
-        res = s;
-
-    return res;
+    return s.ends_with(suffix) ? s.substr(0, s.size() - suffix.size()) : s;
 }
 
 
@@ -200,23 +192,18 @@ void FwdBemModel::fwd_bem_free_solution()
 
 //=============================================================================================================
 
-QString FwdBemModel::fwd_bem_make_bem_sol_name(const QString& name)
+std::filesystem::path FwdBemModel::fwd_bem_make_bem_sol_name(const std::filesystem::path& name)
 /*
      * Make a standard BEM solution file name
      */
 {
-    QString s1, s2;
-
-    s1 = strip_from(name, ".fif");
-    s2 = strip_from(s1, "-sol");
-    s1 = strip_from(s2, "-bem");
-    s2 = QString("%1%2").arg(s1).arg(BEM_SOL_SUFFIX);
-    return s2;
+    const std::string file = UTILSLIB::utf8FromPath(name);
+    return UTILSLIB::pathFromUtf8(std::string(strip_from(strip_from(strip_from(file, ".fif"), "-sol"), "-bem")) + BEM_SOL_SUFFIX);
 }
 
 //=============================================================================================================
 
-const QString& FwdBemModel::fwd_bem_explain_surface(int kind)
+const std::string& FwdBemModel::fwd_bem_explain_surface(int kind)
 {
     int k;
 
@@ -229,7 +216,7 @@ const QString& FwdBemModel::fwd_bem_explain_surface(int kind)
 
 //=============================================================================================================
 
-const QString& FwdBemModel::fwd_bem_explain_method(int method)
+const std::string& FwdBemModel::fwd_bem_explain_method(int method)
 
 {
     int k;
@@ -267,13 +254,13 @@ MNESurface* FwdBemModel::fwd_bem_find_surface(int kind)
     for (int k = 0; k < this->nsurf; k++)
         if (this->surfs[k]->id == kind)
             return this->surfs[k].get();
-    qWarning("Desired surface (%d = %s) not found.", kind, fwd_bem_explain_surface(kind).toUtf8().constData());
+    qWarning("Desired surface (%d = %s) not found.", kind, fwd_bem_explain_surface(kind).c_str());
     return nullptr;
 }
 
 //=============================================================================================================
 
-FwdBemModel::UPtr FwdBemModel::fwd_bem_load_surfaces(const QString& name, const std::vector<int>& kinds)
+FwdBemModel::UPtr FwdBemModel::fwd_bem_load_surfaces(const std::filesystem::path& name, const std::vector<int>& kinds)
 /*
  * Load a set of surfaces
  */
@@ -290,15 +277,15 @@ FwdBemModel::UPtr FwdBemModel::fwd_bem_load_surfaces(const QString& name, const 
 
     for (k = 0; k < nkind; k++) {
         float cond = -1.0f;
-        auto s = MNESurface::read_bem_surface(name.toStdU16String(), kinds[k], true, cond);
+        auto s = MNESurface::read_bem_surface(name, kinds[k], true, cond);
         if (!s)
             return nullptr;
         if (cond < 0.0) {
-            qCritical("No conductivity available for surface %s", fwd_bem_explain_surface(kinds[k]).toUtf8().constData());
+            qCritical("No conductivity available for surface %s", fwd_bem_explain_surface(kinds[k]).c_str());
             return nullptr;
         }
         if (s->coord_frame != FIFFV_COORD_MRI) {
-            qCritical("FsSurface %s not specified in MRI coordinates.", fwd_bem_explain_surface(kinds[k]).toUtf8().constData());
+            qCritical("FsSurface %s not specified in MRI coordinates.", fwd_bem_explain_surface(kinds[k]).c_str());
             return nullptr;
         }
         sigma_tmp[k] = cond;
@@ -339,7 +326,7 @@ FwdBemModel::UPtr FwdBemModel::fwd_bem_load_surfaces(const QString& name, const 
 
 //=============================================================================================================
 
-FwdBemModel::UPtr FwdBemModel::fwd_bem_load_homog_surface(const QString& name)
+FwdBemModel::UPtr FwdBemModel::fwd_bem_load_homog_surface(const std::filesystem::path& name)
 /*
  * Load surfaces for the homogeneous model
  */
@@ -349,7 +336,7 @@ FwdBemModel::UPtr FwdBemModel::fwd_bem_load_homog_surface(const QString& name)
 
 //=============================================================================================================
 
-FwdBemModel::UPtr FwdBemModel::fwd_bem_load_three_layer_surfaces(const QString& name)
+FwdBemModel::UPtr FwdBemModel::fwd_bem_load_three_layer_surfaces(const std::filesystem::path& name)
 /*
  * Load surfaces for three-layer model
  */
@@ -359,7 +346,7 @@ FwdBemModel::UPtr FwdBemModel::fwd_bem_load_three_layer_surfaces(const QString& 
 
 //=============================================================================================================
 
-int FwdBemModel::fwd_bem_load_solution(const QString& name, int bemMethod)
+int FwdBemModel::fwd_bem_load_solution(const std::filesystem::path& name, int bemMethod)
 /*
      * Load the potential solution matrix and attach it to the model
      */
@@ -384,7 +371,7 @@ int FwdBemModel::fwd_bem_load_solution(const QString& name, int bemMethod)
         std::vector<FiffDirNode::SPtr> nodes = stream.dirtree()->dir_tree_find(FIFFB_BEM);
 
         if (nodes.size() == 0) {
-            qWarning("No BEM data in %s", name.toUtf8().constData());
+            qWarning("No BEM data in %s", UTILSLIB::utf8FromPath(name).c_str());
             stream.close();
             return NOT_FOUND;
         }
@@ -506,7 +493,7 @@ std::unique_ptr<MNESourceSpace> FwdBemModel::make_guesses(MNESurface* guess_surf
         guess_surf = sphere_owner.get();
     } else {
         qInfo("Guess surface (%d = %s) is in %s coordinates",
-              guess_surf->id, FwdBemModel::fwd_bem_explain_surface(guess_surf->id).toUtf8().constData(),
+              guess_surf->id, FwdBemModel::fwd_bem_explain_surface(guess_surf->id).c_str(),
               mne_coord_frame_name_40(guess_surf->coord_frame).toUtf8().constData());
     }
     qInfo("Filtering (grid = %6.f mm)...", 1000 * grid);
@@ -719,8 +706,8 @@ Eigen::MatrixXf FwdBemModel::fwd_bem_lin_pot_coeff(const std::vector<MNESurface*
             ntri = surf2->ntri;
 
             qInfo("\t\t%s (%d) -> %s (%d) ... ",
-                  fwd_bem_explain_surface(surf1->id).toUtf8().constData(), np1,
-                  fwd_bem_explain_surface(surf2->id).toUtf8().constData(), np2);
+                  fwd_bem_explain_surface(surf1->id).c_str(), np1,
+                  fwd_bem_explain_surface(surf2->id).c_str(), np2);
 
             for (j = 0; j < np1; j++) {
                 for (k = 0; k < np2; k++)
@@ -993,7 +980,7 @@ Eigen::MatrixXf FwdBemModel::fwd_bem_solid_angles(const std::vector<MNESurface*>
         for (q = 0, koff = 0; q < static_cast<int>(surfs.size()); q++, koff = koff + ntri2) {
             surf2 = surfs[q];
             ntri2 = surf2->ntri;
-            qInfo("\t\t%s (%d) -> %s (%d) ... ", fwd_bem_explain_surface(surf1->id).toUtf8().constData(), ntri1, fwd_bem_explain_surface(surf2->id).toUtf8().constData(), ntri2);
+            qInfo("\t\t%s (%d) -> %s (%d) ... ", fwd_bem_explain_surface(surf1->id).c_str(), ntri1, fwd_bem_explain_surface(surf2->id).c_str(), ntri2);
             for (j = 0; j < ntri1; j++)
                 for (k = 0, tri = surf2->tris.data(); k < ntri2; k++, tri++) {
                     if (p == q && j == k)
@@ -1109,7 +1096,7 @@ int FwdBemModel::fwd_bem_compute_solution(int bemMethod)
 
 //=============================================================================================================
 
-int FwdBemModel::fwd_bem_load_recompute_solution(const QString& name, int bemMethod, int force_recompute)
+int FwdBemModel::fwd_bem_load_recompute_solution(const std::filesystem::path& name, int bemMethod, int force_recompute)
 /*
  * Load or recompute the potential solution matrix
  */
@@ -1120,7 +1107,7 @@ int FwdBemModel::fwd_bem_load_recompute_solution(const QString& name, int bemMet
         fwd_bem_free_solution();
         solres = fwd_bem_load_solution(name, bemMethod);
         if (solres == LOADED) {
-            qInfo("\nLoaded %s BEM solution from %s", fwd_bem_explain_method(this->bem_method).toUtf8().constData(), name.toUtf8().constData());
+            qInfo("\nLoaded %s BEM solution from %s", fwd_bem_explain_method(this->bem_method).c_str(), UTILSLIB::utf8FromPath(name).c_str());
             return OK;
         } else if (solres == FAIL)
             return FAIL;
@@ -1136,7 +1123,7 @@ int FwdBemModel::fwd_bem_load_recompute_solution(const QString& name, int bemMet
 
 //=============================================================================================================
 
-int FwdBemModel::fwd_bem_save_model(const QString& name) const
+int FwdBemModel::fwd_bem_save_model(const std::filesystem::path& name) const
 {
     if (nsurf == 0) {
         qWarning("[FwdBemModel::fwd_bem_save_model] No model to save");
@@ -2769,7 +2756,7 @@ int FwdBemModel::compute_forward_meg(std::vector<std::unique_ptr<MNESourceSpace>
     {
         StringList orig_names;
         for (k = 0; k < nmeg; k++)
-            orig_names.push_back(coils->coils[k]->chname.toStdString());
+            orig_names.push_back(coils->coils[k]->chname);
         names = orig_names;
     }
     one_arg.reset();
@@ -2963,7 +2950,7 @@ int FwdBemModel::compute_forward_eeg(std::vector<std::unique_ptr<MNESourceSpace>
     {
         StringList orig_names;
         for (k = 0; k < neeg; k++)
-            orig_names.push_back(els->coils[k]->chname.toStdString());
+            orig_names.push_back(els->coils[k]->chname);
         names = orig_names;
     }
     one_arg.reset();

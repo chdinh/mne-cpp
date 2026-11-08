@@ -23,10 +23,13 @@
 // QT INCLUDES
 //=============================================================================================================
 
-#include <QString>
-#include <QFile>
-#include <QRegularExpression>
-#include <QTextStream>
+#include <utils/string_utils.h>
+
+#include <QDebug>
+
+#include <format>
+#include <fstream>
+#include <string>
 
 #include <Eigen/Core>
 
@@ -78,48 +81,43 @@ FwdEegSphereModelSet::UPtr FwdEegSphereModelSet::fwd_add_default_eeg_sphere_mode
 
 //=============================================================================================================
 //fwd_eeg_sphere_models.c
-FwdEegSphereModelSet::UPtr FwdEegSphereModelSet::fwd_load_eeg_sphere_models(const QString& filename, UPtr now)
+FwdEegSphereModelSet::UPtr FwdEegSphereModelSet::fwd_load_eeg_sphere_models(const std::filesystem::path& filename, UPtr now)
 {
     if (!now)
         now = fwd_add_default_eeg_sphere_model(nullptr);
 
-    if (filename.isEmpty())
+    if (filename.empty())
         return now;
 
-    QFile file(filename);
-    if (!file.open(QIODevice::ReadOnly | QIODevice::Text))
+    std::ifstream file(filename);
+    if (!file)
         return now;
 
-    QTextStream in(&file);
-    QString name;
+    // One model per line: name : rad1 : sigma1 : rad2 : sigma2 ...
     VectorXf rads;
     VectorXf sigmas;
-    int nlayer = 0;
-
-    while (!in.atEnd()) {
-        QString line = in.readLine().trimmed();
-        if (line.isEmpty() || line.startsWith('#'))
+    for (std::string raw; std::getline(file, raw);) {
+        const std::string_view line = UTILSLIB::trimmed(raw);
+        if (line.empty() || line.starts_with('#'))
             continue;
 
-        QStringList parts = line.split(QRegularExpression("[:\\n\\r]"), Qt::SkipEmptyParts);
-        if (parts.isEmpty())
+        const UTILSLIB::StringList parts = UTILSLIB::split(line, ':', true);
+        if (parts.empty())
             continue;
 
-        name = parts[0].trimmed();
-        nlayer = 0;
-
-        for (int i = 1; i + 1 < parts.size(); i += 2) {
-            bool okRad = false, okSig = false;
-            float r = parts[i].trimmed().toFloat(&okRad);
-            float s = parts[i + 1].trimmed().toFloat(&okSig);
-            if (!okRad || !okSig) {
+        const std::string name(UTILSLIB::trimmed(parts[0]));
+        int nlayer = 0;
+        for (std::size_t i = 1; i + 1 < parts.size(); i += 2) {
+            const std::optional<double> r = UTILSLIB::toDouble(parts[i]);
+            const std::optional<double> sg = UTILSLIB::toDouble(parts[i + 1]);
+            if (!r || !sg) {
                 nlayer = 0;
                 break;
             }
             rads.conservativeResize(nlayer + 1);
             sigmas.conservativeResize(nlayer + 1);
-            rads[nlayer] = r;
-            sigmas[nlayer] = s;
+            rads[nlayer] = static_cast<float>(*r);
+            sigmas[nlayer] = static_cast<float>(*sg);
             nlayer++;
         }
         if (nlayer > 0)
@@ -130,12 +128,9 @@ FwdEegSphereModelSet::UPtr FwdEegSphereModelSet::fwd_load_eeg_sphere_models(cons
 
 //=============================================================================================================
 //fwd_eeg_sphere_models.c
-FwdEegSphereModel::UPtr FwdEegSphereModelSet::fwd_select_eeg_sphere_model(const QString& p_sName) const
+FwdEegSphereModel::UPtr FwdEegSphereModelSet::fwd_select_eeg_sphere_model(std::string_view p_sName) const
 {
-    QString name("Default");
-
-    if (!p_sName.isEmpty())
-        name = p_sName;
+    const std::string_view name = p_sName.empty() ? std::string_view("Default") : p_sName;
 
     if (this->nmodel() == 0) {
         qWarning("No EEG sphere model definitions available");
@@ -143,12 +138,12 @@ FwdEegSphereModel::UPtr FwdEegSphereModelSet::fwd_select_eeg_sphere_model(const 
     }
 
     for (int k = 0; k < this->nmodel(); k++) {
-        if (this->models[k]->name.compare(name) == 0) {
-            qInfo("Selected model: %s", this->models[k]->name.toUtf8().constData());
+        if (this->models[k]->name == name) {
+            qInfo("Selected model: %s", this->models[k]->name.c_str());
             return std::make_unique<FwdEegSphereModel>(*(this->models[k]));
         }
     }
-    qWarning("EEG sphere model %s not found.", name.toUtf8().constData());
+    qWarning("EEG sphere model %s not found.", std::string(name).c_str());
     return nullptr;
 }
 
@@ -161,9 +156,9 @@ void FwdEegSphereModelSet::fwd_list_eeg_sphere_models()
     qInfo("Available EEG sphere models:");
     for (int k = 0; k < this->nmodel(); k++) {
         FwdEegSphereModel* this_model = this->models[k].get();
-        QString line = QString("\t%1 : %2").arg(this_model->name).arg(this_model->nlayer());
+        std::string line = std::format("\t{} : {}", this_model->name, this_model->nlayer());
         for (int p = 0; p < this_model->nlayer(); p++)
-            line += QString(" : %1 : %2").arg(this_model->layers[p].rel_rad, 7, 'f', 3).arg(this_model->layers[p].sigma, 7, 'f', 3);
-        qInfo("%s", line.toUtf8().constData());
+            std::format_to(std::back_inserter(line), " : {:7.3f} : {:7.3f}", this_model->layers[p].rel_rad, this_model->layers[p].sigma);
+        qInfo("%s", line.c_str());
     }
 }

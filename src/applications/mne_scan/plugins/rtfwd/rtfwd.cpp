@@ -79,11 +79,11 @@ RtFwd::RtFwd()
 , m_bDoFwdComputation(false)
 {
     // set init values
-    m_pFwdSettings->solname = QCoreApplication::applicationDirPath() + "/../resources/data/MNE-sample-data/your-solution-fwd.fif";
-    m_pFwdSettings->mriname = QCoreApplication::applicationDirPath() + "/../resources/data/MNE-sample-data/MEG/sample/all-trans.fif";
-    m_pFwdSettings->bemname = QCoreApplication::applicationDirPath() + "/../resources/data/MNE-sample-data/subjects/sample/bem/sample-5120-5120-5120-bem.fif";
-    m_pFwdSettings->srcname = QCoreApplication::applicationDirPath() + "/../resources/data/MNE-sample-data/subjects/sample/bem/sample-oct-6-src.fif";
-    m_pFwdSettings->measname = QCoreApplication::applicationDirPath() + "/../resources/data/MNE-sample-data/MEG/sample/sample_audvis_raw.fif";
+    m_pFwdSettings->solname = (QCoreApplication::applicationDirPath() + "/../resources/data/MNE-sample-data/your-solution-fwd.fif").toStdString();
+    m_pFwdSettings->mriname = (QCoreApplication::applicationDirPath() + "/../resources/data/MNE-sample-data/MEG/sample/all-trans.fif").toStdString();
+    m_pFwdSettings->bemname = (QCoreApplication::applicationDirPath() + "/../resources/data/MNE-sample-data/subjects/sample/bem/sample-5120-5120-5120-bem.fif").toStdString();
+    m_pFwdSettings->srcname = (QCoreApplication::applicationDirPath() + "/../resources/data/MNE-sample-data/subjects/sample/bem/sample-oct-6-src.fif").toStdString();
+    m_pFwdSettings->measname = (QCoreApplication::applicationDirPath() + "/../resources/data/MNE-sample-data/MEG/sample/sample_audvis_raw.fif").toStdString();
     m_pFwdSettings->transname.clear();
     m_pFwdSettings->eeg_model_name = "Default";
     m_pFwdSettings->include_meg = true;
@@ -150,17 +150,17 @@ void RtFwd::unload()
 bool RtFwd::start()
 {
     // Maybe we can move all of this to the run() method?
-    const std::pair<QString, QString> inputs[] = {
-        {m_pFwdSettings->bemname, "The bem model cannot be opend. Chosse another file."},
-        {m_pFwdSettings->srcname, "The source space cannot be opend. Chosse another file."},
-        {m_pFwdSettings->mriname, "The mri - head transformation cannot be opend. Chosse another file."},
-        {m_pFwdSettings->measname, "The meaurement file cannot be opend. Chosse another file."},
+    const std::pair<const std::string*, const char*> inputs[] = {
+        {&m_pFwdSettings->bemname, "The bem model cannot be opend. Chosse another file."},
+        {&m_pFwdSettings->srcname, "The source space cannot be opend. Chosse another file."},
+        {&m_pFwdSettings->mriname, "The mri - head transformation cannot be opend. Chosse another file."},
+        {&m_pFwdSettings->measname, "The meaurement file cannot be opend. Chosse another file."},
     };
     for (const auto& [path, message] : inputs) {
-        if (!FiffStream::open(path.toStdU16String())) {
+        if (!FiffStream::open(UTILSLIB::pathFromUtf8(*path))) {
             QMessageBox msgBox;
             msgBox.setText(message);
-            msgBox.setInformativeText(path);
+            msgBox.setInformativeText(QString::fromStdString(*path));
             msgBox.setStandardButtons(QMessageBox::Ok);
             msgBox.setWindowFlags(Qt::WindowStaysOnTopHint);
             msgBox.exec();
@@ -405,7 +405,7 @@ void RtFwd::run()
             // compute and store
             pFwdSolution.reset(pFwdComputer->calculateFwd().release());
 
-            if (auto written = pFwdSolution->write(m_pFwdSettings->solname.toStdU16String()); !written) {
+            if (auto written = pFwdSolution->write(UTILSLIB::pathFromUtf8(m_pFwdSettings->solname)); !written) {
                 qWarning() << written.error().what();
             }
 
@@ -500,13 +500,13 @@ QString RtFwd::getBuildInfo()
 QVariantMap RtFwd::getAttributes() const
 {
     QVariantMap attrs;
-    attrs[QStringLiteral("solname")] = m_pFwdSettings->solname;
-    attrs[QStringLiteral("mriname")] = m_pFwdSettings->mriname;
-    attrs[QStringLiteral("bemname")] = m_pFwdSettings->bemname;
-    attrs[QStringLiteral("srcname")] = m_pFwdSettings->srcname;
-    attrs[QStringLiteral("measname")] = m_pFwdSettings->measname;
-    attrs[QStringLiteral("transname")] = m_pFwdSettings->transname;
-    attrs[QStringLiteral("eeg_model_name")] = m_pFwdSettings->eeg_model_name;
+    attrs[QStringLiteral("solname")] = QString::fromStdString(m_pFwdSettings->solname);
+    attrs[QStringLiteral("mriname")] = QString::fromStdString(m_pFwdSettings->mriname);
+    attrs[QStringLiteral("bemname")] = QString::fromStdString(m_pFwdSettings->bemname);
+    attrs[QStringLiteral("srcname")] = QString::fromStdString(m_pFwdSettings->srcname);
+    attrs[QStringLiteral("measname")] = QString::fromStdString(m_pFwdSettings->measname);
+    attrs[QStringLiteral("transname")] = QString::fromStdString(m_pFwdSettings->transname);
+    attrs[QStringLiteral("eeg_model_name")] = QString::fromStdString(m_pFwdSettings->eeg_model_name);
     attrs[QStringLiteral("include_meg")] = m_pFwdSettings->include_meg;
     attrs[QStringLiteral("include_eeg")] = m_pFwdSettings->include_eeg;
     attrs[QStringLiteral("accurate")] = m_pFwdSettings->accurate;
@@ -523,19 +523,19 @@ QVariantMap RtFwd::getAttributes() const
 void RtFwd::setAttributes(const QVariantMap& attributes)
 {
     if (attributes.contains(QStringLiteral("solname")))
-        m_pFwdSettings->solname = attributes[QStringLiteral("solname")].toString();
+        m_pFwdSettings->solname = attributes[QStringLiteral("solname")].toString().toStdString();
     if (attributes.contains(QStringLiteral("mriname")))
-        m_pFwdSettings->mriname = attributes[QStringLiteral("mriname")].toString();
+        m_pFwdSettings->mriname = attributes[QStringLiteral("mriname")].toString().toStdString();
     if (attributes.contains(QStringLiteral("bemname")))
-        m_pFwdSettings->bemname = attributes[QStringLiteral("bemname")].toString();
+        m_pFwdSettings->bemname = attributes[QStringLiteral("bemname")].toString().toStdString();
     if (attributes.contains(QStringLiteral("srcname")))
-        m_pFwdSettings->srcname = attributes[QStringLiteral("srcname")].toString();
+        m_pFwdSettings->srcname = attributes[QStringLiteral("srcname")].toString().toStdString();
     if (attributes.contains(QStringLiteral("measname")))
-        m_pFwdSettings->measname = attributes[QStringLiteral("measname")].toString();
+        m_pFwdSettings->measname = attributes[QStringLiteral("measname")].toString().toStdString();
     if (attributes.contains(QStringLiteral("transname")))
-        m_pFwdSettings->transname = attributes[QStringLiteral("transname")].toString();
+        m_pFwdSettings->transname = attributes[QStringLiteral("transname")].toString().toStdString();
     if (attributes.contains(QStringLiteral("eeg_model_name")))
-        m_pFwdSettings->eeg_model_name = attributes[QStringLiteral("eeg_model_name")].toString();
+        m_pFwdSettings->eeg_model_name = attributes[QStringLiteral("eeg_model_name")].toString().toStdString();
     if (attributes.contains(QStringLiteral("include_meg")))
         m_pFwdSettings->include_meg = attributes[QStringLiteral("include_meg")].toBool();
     if (attributes.contains(QStringLiteral("include_eeg")))

@@ -37,6 +37,7 @@
 #include "../fwd_global.h"
 #include "compute_fwd_settings.h"
 
+#include <filesystem>
 #include <fiff/fiff_coord_trans.h>
 #include <fiff/fiff_types.h>
 #include <fiff/fiff_info_base.h>
@@ -61,7 +62,6 @@
 
 #include <QSharedDataPointer>
 #include <QSharedPointer>
-#include <QString>
 
 //=============================================================================================================
 // FORWARD DECLARATIONS
@@ -187,7 +187,7 @@ private:
     QSharedDataPointer<FIFFLIB::FiffNamedMatrix> m_eeg_forward;      /**< EEG forward matrix. */
     QSharedDataPointer<FIFFLIB::FiffNamedMatrix> m_eeg_forward_grad; /**< EEG gradient forward matrix. */
 
-    QString m_qPath; /**< Coil definition file path. */
+    std::filesystem::path m_qPath; /**< Coil definition file path. */
 };
 
 //=============================================================================================================

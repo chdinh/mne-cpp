@@ -37,19 +37,19 @@ private slots:
     void bemModel_makeSolName()
     {
         QString bemName = "/path/to/sample-5120-bem.fif";
-        QString solName = FwdBemModel::fwd_bem_make_bem_sol_name(bemName);
+        QString solName = QString::fromStdU16String(FwdBemModel::fwd_bem_make_bem_sol_name(bemName.toStdU16String()).u16string());
         QVERIFY(solName.contains("sol"));
     }
 
     void bemModel_explainSurface()
     {
-        const QString& brain = FwdBemModel::fwd_bem_explain_surface(FIFFV_BEM_SURF_ID_BRAIN);
+        const QString& brain = QString::fromStdString(FwdBemModel::fwd_bem_explain_surface(FIFFV_BEM_SURF_ID_BRAIN));
         QVERIFY(!brain.isEmpty());
 
-        const QString& skull = FwdBemModel::fwd_bem_explain_surface(FIFFV_BEM_SURF_ID_SKULL);
+        const QString& skull = QString::fromStdString(FwdBemModel::fwd_bem_explain_surface(FIFFV_BEM_SURF_ID_SKULL));
         QVERIFY(!skull.isEmpty());
 
-        const QString& head = FwdBemModel::fwd_bem_explain_surface(FIFFV_BEM_SURF_ID_HEAD);
+        const QString& head = QString::fromStdString(FwdBemModel::fwd_bem_explain_surface(FIFFV_BEM_SURF_ID_HEAD));
         QVERIFY(!head.isEmpty());
     }
 
@@ -201,7 +201,7 @@ private slots:
     {
         ComputeFwdSettings settings;
         // Just verify construction doesn't crash
-        QVERIFY(settings.measname.isEmpty() || true);
+        QVERIFY(settings.measname.empty() || true);
     }
 
     void computeFwdSettings_members()
@@ -236,7 +236,7 @@ private slots:
             QSKIP("Coil definition file not found");
         }
 
-        auto coilSet = FwdCoilSet::read_coil_defs(coilDefPath);
+        auto coilSet = FwdCoilSet::read_coil_defs(coilDefPath.toStdU16String());
         QVERIFY(coilSet != nullptr);
         QVERIFY(coilSet->ncoil() > 0);
     }
@@ -252,11 +252,11 @@ private slots:
             QSKIP("BEM file not found");
         }
 
-        auto model = FwdBemModel::fwd_bem_load_homog_surface(bemPath);
+        auto model = FwdBemModel::fwd_bem_load_homog_surface(bemPath.toStdU16String());
         if (model) {
             QVERIFY(model->nsol > 0 || model->nsurf > 0);
             if (QFile::exists(solPath)) {
-                model->fwd_bem_load_solution(solPath, FWD_BEM_UNKNOWN);
+                model->fwd_bem_load_solution(solPath.toStdU16String(), FWD_BEM_UNKNOWN);
             }
         }
     }

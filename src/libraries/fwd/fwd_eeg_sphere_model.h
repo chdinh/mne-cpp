@@ -49,6 +49,8 @@
 // EIGEN INCLUDES
 //=============================================================================================================
 
+#include <filesystem>
+#include <string>
 #include <Eigen/Core>
 
 //=============================================================================================================
@@ -129,7 +131,7 @@ public:
      *
      * @return Pointer to the newly created sphere model.
      */
-    static FwdEegSphereModel::UPtr fwd_create_eeg_sphere_model(const QString& name,
+    static FwdEegSphereModel::UPtr fwd_create_eeg_sphere_model(const std::string& name,
                                                                int nlayer,
                                                                const Eigen::VectorXf& rads,
                                                                const Eigen::VectorXf& sigmas);
@@ -150,7 +152,7 @@ public:
      *
      * @return the setup eeg sphere model.
      */
-    static FwdEegSphereModel::UPtr setup_eeg_sphere_model(const QString& eeg_model_file, QString eeg_model_name, float eeg_sphere_rad);
+    static FwdEegSphereModel::UPtr setup_eeg_sphere_model(const std::filesystem::path& eeg_model_file, std::string eeg_model_name, float eeg_sphere_rad);
 
     //=========================================================================================================
     /**
@@ -437,7 +439,7 @@ public:
     }
 
 public:
-    QString name;                          /**< Textual identifier. */
+    std::string name;                      /**< Textual identifier. */
     std::vector<FwdEegSphereLayer> layers; /**< An array of layers. */
     Eigen::Vector3f r0;                    /**< The origin. */
 

@@ -380,7 +380,7 @@ void TestFieldMap::initTestCase()
 
     // ── Build coil sets ────────────────────────────────────────────────
     auto templates =
-        FwdCoilSet::read_coil_defs(m_coilDefPath);
+        FwdCoilSet::read_coil_defs(m_coilDefPath.toStdU16String());
     QVERIFY(templates != nullptr);
 
     // Classify channels (matching Python's pick_types)
@@ -1073,7 +1073,7 @@ void TestFieldMap::testHelmetFieldMap()
     // The Python reference now creates coils in head coords using dev_head_t,
     // so the C++ side must do the same.
     auto templates =
-        FwdCoilSet::read_coil_defs(m_coilDefPath);
+        FwdCoilSet::read_coil_defs(m_coilDefPath.toStdU16String());
     QVERIFY(templates != nullptr);
 
     auto helmetCoils =

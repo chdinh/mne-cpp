@@ -29,6 +29,7 @@
 //=============================================================================================================
 
 #include "../fwd_global.h"
+#include <string>
 #include <fiff/fiff_constants.h>
 #include <fiff/fiff_info.h>
 #include <fiff/fiff_coord_trans.h>
@@ -42,8 +43,6 @@
 // QT INCLUDES
 //=============================================================================================================
 
-#include <QString>
-#include <QStringList>
 #include <QSharedPointer>
 
 #include <filesystem>
@@ -91,35 +90,35 @@ public:
     bool checkIntegrity() const;
 
 public:
-    QString srcname;        /**< Source space. */
-    QString measname;       /**< Measurement file. */
-    QString mriname;        /**< MRI file for head <-> MRI transformation. */
-    QString transname;      /**< head2mri transformation file. */
-    bool mri_head_ident;    /**< Are the head and MRI coordinates the same? */
-    QString bemname;        /**< BEM model file. */
-    QString solname;        /**< Solution file. */
-    QString mindistoutname; /**< Output file for omitted source space points. */
-    bool filter_spaces;     /**< Filter the source space points. */
-    Eigen::Vector3f r0;     /**< Sphere model origin . */
-    bool accurate;          /**< Use accurate calculations. */
-    bool fixed_ori;         /**< Fixed-orientation dipoles? */
+    std::string srcname;        /**< Source space. */
+    std::string measname;       /**< Measurement file. */
+    std::string mriname;        /**< MRI file for head <-> MRI transformation. */
+    std::string transname;      /**< head2mri transformation file. */
+    bool mri_head_ident;        /**< Are the head and MRI coordinates the same? */
+    std::string bemname;        /**< BEM model file. */
+    std::string solname;        /**< Solution file. */
+    std::string mindistoutname; /**< Output file for omitted source space points. */
+    bool filter_spaces;         /**< Filter the source space points. */
+    Eigen::Vector3f r0;         /**< Sphere model origin . */
+    bool accurate;              /**< Use accurate calculations. */
+    bool fixed_ori;             /**< Fixed-orientation dipoles? */
     bool include_meg;
     bool include_eeg;
     bool compute_grad;
-    QString command; /**< Saves the recognized command line for future use. */
-    float mindist;   /**< Minimum allowed distance of the sources from the inner skull surface. */
-    int coord_frame; /**< Can be changed with the --mricoord option. */
+    std::string command; /**< Saves the recognized command line for future use. */
+    float mindist;       /**< Minimum allowed distance of the sources from the inner skull surface. */
+    int coord_frame;     /**< Can be changed with the --mricoord option. */
     bool do_all;
     std::vector<std::filesystem::path> labels; /**< Compute the solution only for these labels. */
     int nlabel;
     int ncluster; /**< Number of sources desired in clustered solution. */
 
-    QString eeg_model_file; /**< File of EEG sphere model specifications. */
-    QString eeg_model_name; /**< Name of the EEG model to use. */
-    float eeg_sphere_rad;   /**< Scalp radius to use in EEG sphere model. */
-    bool scale_eeg_pos;     /**< Scale the electrode locations to scalp in the sphere model. */
-    bool use_equiv_eeg;     /**< Use the equivalent source approach for the EEG sphere model. */
-    bool use_threads;       /**< Parallelize? */
+    std::string eeg_model_file; /**< File of EEG sphere model specifications. */
+    std::string eeg_model_name; /**< Name of the EEG model to use. */
+    float eeg_sphere_rad;       /**< Scalp radius to use in EEG sphere model. */
+    bool scale_eeg_pos;         /**< Scale the electrode locations to scalp in the sphere model. */
+    bool use_equiv_eeg;         /**< Use the equivalent source approach for the EEG sphere model. */
+    bool use_threads;           /**< Parallelize? */
 
     QSharedPointer<FIFFLIB::FiffInfo> pFiffInfo; /**< The FiffInfo file from the measurement.*/
     FIFFLIB::FiffCoordTrans meg_head_t;          /**< The meg <-> head transformation.*/

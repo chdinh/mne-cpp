@@ -123,7 +123,7 @@ private slots:
     {
         // Test computing a linear collocation BEM solution from loaded surfaces
 
-        auto model = FwdBemModel::fwd_bem_load_homog_surface(bemPath());
+        auto model = FwdBemModel::fwd_bem_load_homog_surface(bemPath().toStdU16String());
         QVERIFY(model != nullptr);
         QVERIFY(model->nsurf == 1);
 
@@ -138,7 +138,7 @@ private slots:
     void testBemComputeSolution_constant()
     {
         // Test computing a constant collocation BEM solution.
-        auto model = FwdBemModel::fwd_bem_load_homog_surface(bemPath());
+        auto model = FwdBemModel::fwd_bem_load_homog_surface(bemPath().toStdU16String());
         QVERIFY(model != nullptr);
 
         int result = model->fwd_bem_compute_solution(FWD_BEM_CONSTANT_COLL);
@@ -152,12 +152,12 @@ private slots:
     {
         // Test specifying MEG coils for BEM forward computation
 
-        auto model = FwdBemModel::fwd_bem_load_homog_surface(bemPath());
+        auto model = FwdBemModel::fwd_bem_load_homog_surface(bemPath().toStdU16String());
         QVERIFY(model != nullptr);
-        model->fwd_bem_load_recompute_solution(bemSolPath(), FWD_BEM_LINEAR_COLL, 0);
+        model->fwd_bem_load_recompute_solution(bemSolPath().toStdU16String(), FWD_BEM_LINEAR_COLL, 0);
 
         // Load coil definitions and create MEG coils from raw data
-        auto coilDefs = FwdCoilSet::read_coil_defs(coilDefPath());
+        auto coilDefs = FwdCoilSet::read_coil_defs(coilDefPath().toStdU16String());
         QVERIFY(coilDefs != nullptr);
 
         FiffRawData raw(rawPath().toStdString());
@@ -190,9 +190,9 @@ private slots:
     {
         // Test specifying EEG electrodes for BEM forward computation
 
-        auto model = FwdBemModel::fwd_bem_load_homog_surface(bemPath());
+        auto model = FwdBemModel::fwd_bem_load_homog_surface(bemPath().toStdU16String());
         QVERIFY(model != nullptr);
-        model->fwd_bem_load_recompute_solution(bemSolPath(), FWD_BEM_LINEAR_COLL, 0);
+        model->fwd_bem_load_recompute_solution(bemSolPath().toStdU16String(), FWD_BEM_LINEAR_COLL, 0);
 
         FiffRawData raw(rawPath().toStdString());
 
@@ -223,11 +223,11 @@ private slots:
     void testBemFieldCalc()
     {
         // Test constant-collocation BEM field calculation for a single dipole.
-        auto model = FwdBemModel::fwd_bem_load_homog_surface(bemPath());
+        auto model = FwdBemModel::fwd_bem_load_homog_surface(bemPath().toStdU16String());
         QVERIFY(model != nullptr);
-        model->fwd_bem_load_recompute_solution(bemSolPath(), FWD_BEM_CONSTANT_COLL, 0);
+        model->fwd_bem_load_recompute_solution(bemSolPath().toStdU16String(), FWD_BEM_CONSTANT_COLL, 0);
 
-        auto coilDefs = FwdCoilSet::read_coil_defs(coilDefPath());
+        auto coilDefs = FwdCoilSet::read_coil_defs(coilDefPath().toStdU16String());
         FiffRawData raw(rawPath().toStdString());
         std::vector<FiffChInfo> megChs;
         for (int i = 0; i < raw.info.nchan; ++i) {
@@ -254,11 +254,11 @@ private slots:
     {
         // Test linear-collocation BEM field calculation
 
-        auto model = FwdBemModel::fwd_bem_load_homog_surface(bemPath());
+        auto model = FwdBemModel::fwd_bem_load_homog_surface(bemPath().toStdU16String());
         QVERIFY(model != nullptr);
-        model->fwd_bem_load_recompute_solution(bemSolPath(), FWD_BEM_LINEAR_COLL, 0);
+        model->fwd_bem_load_recompute_solution(bemSolPath().toStdU16String(), FWD_BEM_LINEAR_COLL, 0);
 
-        auto coilDefs = FwdCoilSet::read_coil_defs(coilDefPath());
+        auto coilDefs = FwdCoilSet::read_coil_defs(coilDefPath().toStdU16String());
         FiffRawData raw(rawPath().toStdString());
         std::vector<FiffChInfo> megChs;
         for (int i = 0; i < raw.info.nchan; ++i) {
@@ -282,9 +282,9 @@ private slots:
     void testBemPotCalc()
     {
         // Test constant-collocation BEM potential calculation for EEG electrodes.
-        auto model = FwdBemModel::fwd_bem_load_homog_surface(bemPath());
+        auto model = FwdBemModel::fwd_bem_load_homog_surface(bemPath().toStdU16String());
         QVERIFY(model != nullptr);
-        model->fwd_bem_load_recompute_solution(bemSolPath(), FWD_BEM_CONSTANT_COLL, 0);
+        model->fwd_bem_load_recompute_solution(bemSolPath().toStdU16String(), FWD_BEM_CONSTANT_COLL, 0);
 
         FiffRawData raw(rawPath().toStdString());
         std::vector<FiffChInfo> eegChs;
@@ -310,9 +310,9 @@ private slots:
     {
         // Test linear-collocation BEM potential calculation
 
-        auto model = FwdBemModel::fwd_bem_load_homog_surface(bemPath());
+        auto model = FwdBemModel::fwd_bem_load_homog_surface(bemPath().toStdU16String());
         QVERIFY(model != nullptr);
-        model->fwd_bem_load_recompute_solution(bemSolPath(), FWD_BEM_LINEAR_COLL, 0);
+        model->fwd_bem_load_recompute_solution(bemSolPath().toStdU16String(), FWD_BEM_LINEAR_COLL, 0);
 
         FiffRawData raw(rawPath().toStdString());
         std::vector<FiffChInfo> eegChs;
@@ -339,10 +339,10 @@ private slots:
     void testBemFieldGradCalc()
     {
         // Test gradient of BEM MEG field with respect to dipole position.
-        auto model = FwdBemModel::fwd_bem_load_homog_surface(bemPath());
-        model->fwd_bem_load_recompute_solution(bemSolPath(), FWD_BEM_CONSTANT_COLL, 0);
+        auto model = FwdBemModel::fwd_bem_load_homog_surface(bemPath().toStdU16String());
+        model->fwd_bem_load_recompute_solution(bemSolPath().toStdU16String(), FWD_BEM_CONSTANT_COLL, 0);
 
-        auto coilDefs = FwdCoilSet::read_coil_defs(coilDefPath());
+        auto coilDefs = FwdCoilSet::read_coil_defs(coilDefPath().toStdU16String());
         FiffRawData raw(rawPath().toStdString());
         std::vector<FiffChInfo> megChs;
         for (int i = 0; i < raw.info.nchan; ++i) {
@@ -372,8 +372,8 @@ private slots:
     void testBemPotGradCalc()
     {
         // Test gradient of BEM EEG potential.
-        auto model = FwdBemModel::fwd_bem_load_homog_surface(bemPath());
-        model->fwd_bem_load_recompute_solution(bemSolPath(), FWD_BEM_CONSTANT_COLL, 0);
+        auto model = FwdBemModel::fwd_bem_load_homog_surface(bemPath().toStdU16String());
+        model->fwd_bem_load_recompute_solution(bemSolPath().toStdU16String(), FWD_BEM_CONSTANT_COLL, 0);
 
         FiffRawData raw(rawPath().toStdString());
         std::vector<FiffChInfo> eegChs;
@@ -406,10 +406,10 @@ private slots:
     {
         // Test the static callback interface used during forward computation
 
-        auto model = FwdBemModel::fwd_bem_load_homog_surface(bemPath());
-        model->fwd_bem_load_recompute_solution(bemSolPath(), FWD_BEM_LINEAR_COLL, 0);
+        auto model = FwdBemModel::fwd_bem_load_homog_surface(bemPath().toStdU16String());
+        model->fwd_bem_load_recompute_solution(bemSolPath().toStdU16String(), FWD_BEM_LINEAR_COLL, 0);
 
-        auto coilDefs = FwdCoilSet::read_coil_defs(coilDefPath());
+        auto coilDefs = FwdCoilSet::read_coil_defs(coilDefPath().toStdU16String());
         FiffRawData raw(rawPath().toStdString());
         std::vector<FiffChInfo> megChs;
         for (int i = 0; i < raw.info.nchan; ++i) {
@@ -434,8 +434,8 @@ private slots:
     {
         // Test the static EEG potential callback
 
-        auto model = FwdBemModel::fwd_bem_load_homog_surface(bemPath());
-        model->fwd_bem_load_recompute_solution(bemSolPath(), FWD_BEM_LINEAR_COLL, 0);
+        auto model = FwdBemModel::fwd_bem_load_homog_surface(bemPath().toStdU16String());
+        model->fwd_bem_load_recompute_solution(bemSolPath().toStdU16String(), FWD_BEM_LINEAR_COLL, 0);
 
         FiffRawData raw(rawPath().toStdString());
         std::vector<FiffChInfo> eegChs;
@@ -463,7 +463,7 @@ private slots:
     {
         // Test spherical head model MEG field computation
 
-        auto coilDefs = FwdCoilSet::read_coil_defs(coilDefPath());
+        auto coilDefs = FwdCoilSet::read_coil_defs(coilDefPath().toStdU16String());
         FiffRawData raw(rawPath().toStdString());
         std::vector<FiffChInfo> megChs;
         for (int i = 0; i < raw.info.nchan; ++i) {
@@ -487,7 +487,7 @@ private slots:
     {
         // Test vectorized sphere field computation (3 dipole orientations)
 
-        auto coilDefs = FwdCoilSet::read_coil_defs(coilDefPath());
+        auto coilDefs = FwdCoilSet::read_coil_defs(coilDefPath().toStdU16String());
         FiffRawData raw(rawPath().toStdString());
         std::vector<FiffChInfo> megChs;
         for (int i = 0; i < raw.info.nchan; ++i) {
@@ -510,7 +510,7 @@ private slots:
     {
         // Test sphere field with spatial gradients
 
-        auto coilDefs = FwdCoilSet::read_coil_defs(coilDefPath());
+        auto coilDefs = FwdCoilSet::read_coil_defs(coilDefPath().toStdU16String());
         FiffRawData raw(rawPath().toStdString());
         std::vector<FiffChInfo> megChs;
         for (int i = 0; i < raw.info.nchan; ++i) {
@@ -543,7 +543,7 @@ private slots:
     {
         // Test magnetic dipole field computation (used for MEG sensor modeling)
 
-        auto coilDefs = FwdCoilSet::read_coil_defs(coilDefPath());
+        auto coilDefs = FwdCoilSet::read_coil_defs(coilDefPath().toStdU16String());
         FiffRawData raw(rawPath().toStdString());
         std::vector<FiffChInfo> megChs;
         for (int i = 0; i < raw.info.nchan; ++i) {
@@ -566,7 +566,7 @@ private slots:
     {
         // Test vectorized magnetic dipole field (3 orientations simultaneously)
 
-        auto coilDefs = FwdCoilSet::read_coil_defs(coilDefPath());
+        auto coilDefs = FwdCoilSet::read_coil_defs(coilDefPath().toStdU16String());
         FiffRawData raw(rawPath().toStdString());
         std::vector<FiffChInfo> megChs;
         for (int i = 0; i < raw.info.nchan; ++i) {
@@ -688,16 +688,16 @@ private slots:
         pSettings->include_meg = true;
         pSettings->include_eeg = true;
         pSettings->accurate = true;
-        pSettings->srcname = srcPath();
-        pSettings->measname = rawPath();
-        pSettings->mriname = transPath();
+        pSettings->srcname = srcPath().toStdString();
+        pSettings->measname = rawPath().toStdString();
+        pSettings->mriname = transPath().toStdString();
         pSettings->transname.clear();
-        pSettings->bemname = bem3Path();
+        pSettings->bemname = bem3Path().toStdString();
         pSettings->mindist = 5.0f / 1000.0f;
 
         // Use a temporary output file
         QString tmpDir = QDir::tempPath();
-        pSettings->solname = tmpDir + "/test_fwd_coverage_output.fif";
+        pSettings->solname = (tmpDir + "/test_fwd_coverage_output.fif").toStdString();
 
         FiffRawData raw(rawPath().toStdString());
         pSettings->pFiffInfo = QSharedPointer<FiffInfo>::create(raw.info);
@@ -717,7 +717,7 @@ private slots:
         QVERIFY(updated);
 
         // Clean up temp file
-        QFile::remove(pSettings->solname);
+        std::filesystem::remove(pSettings->solname);
     }
 };
 

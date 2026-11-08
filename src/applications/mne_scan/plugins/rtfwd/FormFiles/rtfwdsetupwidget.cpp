@@ -46,14 +46,14 @@ RtFwdSetupWidget::RtFwdSetupWidget(RtFwd* toolbox, QWidget* parent)
     m_ui.setupUi(this);
 
     // init line edits
-    m_ui.m_qLineEdit_SolName->setText(m_pRtFwd->m_pFwdSettings->solname);
-    m_ui.m_qLineEdit_MeasName->setText(m_pRtFwd->m_pFwdSettings->measname);
-    m_ui.m_qLineEdit_BemName->setText(m_pRtFwd->m_pFwdSettings->bemname);
-    m_ui.m_qLineEdit_SourceName->setText(m_pRtFwd->m_pFwdSettings->srcname);
-    m_ui.m_qLineEdit_MriName->setText(m_pRtFwd->m_pFwdSettings->mriname);
-    m_ui.m_qLineEdit_MinDistName->setText(m_pRtFwd->m_pFwdSettings->mindistoutname);
-    m_ui.m_qLineEdit_EEGModelFile->setText(m_pRtFwd->m_pFwdSettings->eeg_model_file);
-    m_ui.m_qLineEdit_EEGModelName->setText(m_pRtFwd->m_pFwdSettings->eeg_model_name);
+    m_ui.m_qLineEdit_SolName->setText(QString::fromStdString(m_pRtFwd->m_pFwdSettings->solname));
+    m_ui.m_qLineEdit_MeasName->setText(QString::fromStdString(m_pRtFwd->m_pFwdSettings->measname));
+    m_ui.m_qLineEdit_BemName->setText(QString::fromStdString(m_pRtFwd->m_pFwdSettings->bemname));
+    m_ui.m_qLineEdit_SourceName->setText(QString::fromStdString(m_pRtFwd->m_pFwdSettings->srcname));
+    m_ui.m_qLineEdit_MriName->setText(QString::fromStdString(m_pRtFwd->m_pFwdSettings->mriname));
+    m_ui.m_qLineEdit_MinDistName->setText(QString::fromStdString(m_pRtFwd->m_pFwdSettings->mindistoutname));
+    m_ui.m_qLineEdit_EEGModelFile->setText(QString::fromStdString(m_pRtFwd->m_pFwdSettings->eeg_model_file));
+    m_ui.m_qLineEdit_EEGModelName->setText(QString::fromStdString(m_pRtFwd->m_pFwdSettings->eeg_model_name));
 
     // init checkboxes
     m_ui.m_check_bDoAll->setChecked(m_pRtFwd->m_pFwdSettings->do_all);
@@ -136,7 +136,7 @@ void RtFwdSetupWidget::onSolNameChanged()
 
     // check for file endings
     if (t_sFileName.contains("-fwd.fif")) {
-        m_pRtFwd->m_pFwdSettings->solname = t_sFileName;
+        m_pRtFwd->m_pFwdSettings->solname = t_sFileName.toStdString();
     } else {
         qWarning() << "rtFwdSetup: make sure to name solution file correctly: -fwd.fif";
     }
@@ -155,7 +155,7 @@ void RtFwdSetupWidget::showMeasFileDialog()
 
     QFile t_fSource(t_sFileName);
     if (t_fSource.open(QIODevice::ReadOnly)) {
-        m_pRtFwd->m_pFwdSettings->measname = t_sFileName;
+        m_pRtFwd->m_pFwdSettings->measname = t_sFileName.toStdString();
         m_ui.m_qLineEdit_MeasName->setText(t_sFileName);
     } else {
         qWarning() << "rtFwdSetup: Measurement file cannot be opened";
@@ -174,7 +174,7 @@ void RtFwdSetupWidget::showSourceFileDialog()
 
     QFile t_fSource(t_sFileName);
     if (t_fSource.open(QIODevice::ReadOnly)) {
-        m_pRtFwd->m_pFwdSettings->srcname = t_sFileName;
+        m_pRtFwd->m_pFwdSettings->srcname = t_sFileName.toStdString();
         m_ui.m_qLineEdit_SourceName->setText(t_sFileName);
     } else {
         qWarning() << "rtFwdSetup: Source file cannot be opened";
@@ -193,7 +193,7 @@ void RtFwdSetupWidget::showBemFileDialog()
 
     QFile t_fBem(t_sFileName);
     if (t_fBem.open(QIODevice::ReadOnly)) {
-        m_pRtFwd->m_pFwdSettings->bemname = t_sFileName;
+        m_pRtFwd->m_pFwdSettings->bemname = t_sFileName.toStdString();
         m_ui.m_qLineEdit_BemName->setText(t_sFileName);
     } else {
         qWarning() << "rtFwdSetup: Bem file cannot be opened";
@@ -212,7 +212,7 @@ void RtFwdSetupWidget::showMriFileDialog()
 
     QFile t_fMri(t_sFileName);
     if (t_fMri.open(QIODevice::ReadOnly)) {
-        m_pRtFwd->m_pFwdSettings->mriname = t_sFileName;
+        m_pRtFwd->m_pFwdSettings->mriname = t_sFileName.toStdString();
         m_ui.m_qLineEdit_MriName->setText(t_sFileName);
     } else {
         qWarning() << "rtFwdSetup: Mri-Head transformation cannot be opened";
@@ -231,7 +231,7 @@ void RtFwdSetupWidget::showEEGModelFileDialog()
 
     QFile t_fEegModel(t_sFileName);
     if (t_fEegModel.open(QIODevice::ReadOnly)) {
-        m_pRtFwd->m_pFwdSettings->eeg_model_file = t_sFileName;
+        m_pRtFwd->m_pFwdSettings->eeg_model_file = t_sFileName.toStdString();
         m_ui.m_qLineEdit_EEGModelFile->setText(t_sFileName);
     } else {
         qWarning() << "rtFwdSetup: Eeg model file cannot be opened";
@@ -243,7 +243,7 @@ void RtFwdSetupWidget::showEEGModelFileDialog()
 
 void RtFwdSetupWidget::onEEGModelNameChanged()
 {
-    m_pRtFwd->m_pFwdSettings->eeg_model_name = m_ui.m_qLineEdit_EEGModelName->text();
+    m_pRtFwd->m_pFwdSettings->eeg_model_name = m_ui.m_qLineEdit_EEGModelName->text().toStdString();
 }
 
 //=============================================================================================================
@@ -263,7 +263,7 @@ void RtFwdSetupWidget::showMinDistDirDialog()
 void RtFwdSetupWidget::onMinDistNameChanged()
 {
     QString t_sFileName = m_ui.m_qLineEdit_MinDistName->text();
-    m_pRtFwd->m_pFwdSettings->mindistoutname = t_sFileName;
+    m_pRtFwd->m_pFwdSettings->mindistoutname = t_sFileName.toStdString();
 }
 
 //=============================================================================================================

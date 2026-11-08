@@ -179,7 +179,7 @@ InvEcdSet InvDipoleFit::calculateFit() const
     qInfo("---- Setting up...\n");
     std::unique_ptr<FwdEegSphereModel> eeg_model;
     if (settings->include_eeg) {
-        eeg_model = FwdEegSphereModel::setup_eeg_sphere_model(settings->eeg_model_file, settings->eeg_model_name, settings->eeg_sphere_rad);
+        eeg_model = FwdEegSphereModel::setup_eeg_sphere_model(settings->eeg_model_file.toStdU16String(), settings->eeg_model_name.toStdString(), settings->eeg_sphere_rad);
         if (!eeg_model)
             return set;
     }
