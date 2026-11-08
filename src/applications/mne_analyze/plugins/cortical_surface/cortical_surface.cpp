@@ -529,7 +529,7 @@ bool CorticalSurface::loadSurfaces(const QString& subjectsDir,
             return;
         }
         auto pSurf = QSharedPointer<FsSurface>::create();
-        if (!FsSurface::read(path, *pSurf, /*loadCurvature*/ true)) {
+        if (!FsSurface::read(path.toStdU16String(), *pSurf, /*loadCurvature*/ true)) {
             slot.reset();
             qWarning() << "[CorticalSurface] FsSurface::read failed for" << path;
             return;
@@ -1645,7 +1645,7 @@ QTreeWidgetItem* CorticalSurface::addLabelItem(const FsLabel& label)
     buildLabelsDock();
     QTreeWidgetItem* root = (label.hemi == 1) ? m_pLabelRootRh : m_pLabelRootLh;
     auto* item = new QTreeWidgetItem(root,
-                                     {label.name.isEmpty() ? QStringLiteral("(unnamed)") : label.name,
+                                     {label.name.empty() ? QStringLiteral("(unnamed)") : QString::fromStdString(label.name),
                                       QString::number(label.vertices.size())});
     item->setFlags(item->flags() | Qt::ItemIsUserCheckable);
     item->setCheckState(0, Qt::Checked);
@@ -1695,7 +1695,7 @@ QList<FsLabel> CorticalSurface::labels() const
 int CorticalSurface::loadLabel(const QString& path)
 {
     FsLabel l;
-    if (!FsLabel::read(path, l) || l.empty()) {
+    if (!FsLabel::read(path.toStdU16String(), l) || l.empty()) {
         return 0;
     }
     addLabelItem(l);
@@ -1708,7 +1708,7 @@ int CorticalSurface::loadLabel(const QString& path)
 int CorticalSurface::loadAnnot(const QString& path)
 {
     FsAnnotation annot;
-    if (!FsAnnotation::read(path, annot)) {
+    if (!FsAnnotation::read(path.toStdU16String(), annot)) {
         return 0;
     }
     int hemi = path.contains(QStringLiteral("/rh.")) ? 1 : 0;
@@ -1768,7 +1768,7 @@ bool CorticalSurface::writeLabelFile(const FsLabel& label, const QString& path)
     }
     QTextStream ts(&out);
     const int n = static_cast<int>(label.vertices.size());
-    ts << "#" << (label.comment.isEmpty() ? label.name : label.comment) << '\n';
+    ts << "#" << (label.comment.empty() ? label.name : label.comment).c_str() << '\n';
     ts << n << '\n';
     for (int i = 0; i < n; ++i) {
         const int v = label.vertices[i];
@@ -1887,20 +1887,20 @@ void CorticalSurface::onCreateLabelFromMarkedTriggered()
                 pos.row(i).setZero();
             }
         }
-        seed = FsLabel(v, pos, vals, hemi, name);
+        seed = FsLabel(v, pos, vals, hemi, name.toStdString());
         return seed;
     };
 
     if (!lhVerts.isEmpty() && m_pSurfaceLh) {
         FsLabel seed = buildSeed(lhVerts, 0, m_pSurfaceLh);
         FsLabel grown = (nSteps > 0) ? FsLabelUtils::growLabel(seed, *m_pSurfaceLh, nSteps) : seed;
-        grown.name = name;
+        grown.name = name.toStdString();
         addLabelItem(grown);
     }
     if (!rhVerts.isEmpty() && m_pSurfaceRh) {
         FsLabel seed = buildSeed(rhVerts, 1, m_pSurfaceRh);
         FsLabel grown = (nSteps > 0) ? FsLabelUtils::growLabel(seed, *m_pSurfaceRh, nSteps) : seed;
-        grown.name = name;
+        grown.name = name.toStdString();
         addLabelItem(grown);
     }
 

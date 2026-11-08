@@ -23,9 +23,9 @@
 // QT INCLUDES
 //=============================================================================================================
 
-#include <QFile>
-#include <QDataStream>
-#include <QTextStream>
+#include <utils/string_utils.h>
+
+#include <format>
 
 //=============================================================================================================
 // USED NAMESPACES
@@ -33,27 +33,22 @@
 
 using namespace FSLIB;
 using namespace Eigen;
+using namespace UTILSLIB;
 
 //=============================================================================================================
 // DEFINE MEMBER METHODS
 //=============================================================================================================
 
 FsSurface::FsSurface()
-: m_sFilePath("")
-, m_sFileName("")
-, m_iHemi(-1)
-, m_sSurf("")
+: m_iHemi(-1)
 , m_vecOffset(Vector3f::Zero(3))
 {
 }
 
 //=============================================================================================================
 
-FsSurface::FsSurface(const QString& p_sFile)
-: m_sFilePath("")
-, m_sFileName("")
-, m_iHemi(-1)
-, m_sSurf("")
+FsSurface::FsSurface(const std::filesystem::path& p_sFile)
+: m_iHemi(-1)
 , m_vecOffset(Vector3f::Zero(3))
 {
     FsSurface::read(p_sFile, *this);
@@ -61,11 +56,8 @@ FsSurface::FsSurface(const QString& p_sFile)
 
 //=============================================================================================================
 
-FsSurface::FsSurface(const QString& subject_id, qint32 hemi, const QString& surf, const QString& subjects_dir)
-: m_sFilePath("")
-, m_sFileName("")
-, m_iHemi(-1)
-, m_sSurf("")
+FsSurface::FsSurface(const std::string& subject_id, qint32 hemi, const std::string& surf, const std::filesystem::path& subjects_dir)
+: m_iHemi(-1)
 , m_vecOffset(Vector3f::Zero(3))
 {
     FsSurface::read(subject_id, hemi, surf, subjects_dir, *this);
@@ -73,11 +65,8 @@ FsSurface::FsSurface(const QString& subject_id, qint32 hemi, const QString& surf
 
 //=============================================================================================================
 
-FsSurface::FsSurface(const QString& path, qint32 hemi, const QString& surf)
-: m_sFilePath("")
-, m_sFileName("")
-, m_iHemi(-1)
-, m_sSurf("")
+FsSurface::FsSurface(const std::filesystem::path& path, qint32 hemi, const std::string& surf)
+: m_iHemi(-1)
 , m_vecOffset(Vector3f::Zero(3))
 {
     FsSurface::read(path, hemi, surf, *this);
@@ -156,260 +145,190 @@ MatrixX3f FsSurface::compute_normals(const MatrixX3f& rr, const MatrixX3i& tris)
 
 //=============================================================================================================
 
-bool FsSurface::read(const QString& subject_id, qint32 hemi, const QString& surf, const QString& subjects_dir, FsSurface& p_Surface, bool p_bLoadCurvature)
+bool FsSurface::read(const std::string& subject_id, qint32 hemi, const std::string& surf, const std::filesystem::path& subjects_dir, FsSurface& p_Surface, bool p_bLoadCurvature)
 {
     if (hemi != 0 && hemi != 1)
         return false;
 
-    QString p_sFile = QString("%1/%2/surf/%3.%4").arg(subjects_dir).arg(subject_id).arg(hemi == 0 ? "lh" : "rh").arg(surf);
-
-    return read(p_sFile, p_Surface, p_bLoadCurvature);
+    return read(subjects_dir / pathFromUtf8(subject_id) / "surf", hemi, surf, p_Surface, p_bLoadCurvature);
 }
 
 //=============================================================================================================
 
-bool FsSurface::read(const QString& path, qint32 hemi, const QString& surf, FsSurface& p_Surface, bool p_bLoadCurvature)
+bool FsSurface::read(const std::filesystem::path& path, qint32 hemi, const std::string& surf, FsSurface& p_Surface, bool p_bLoadCurvature)
 {
     if (hemi != 0 && hemi != 1)
         return false;
 
-    QString p_sFile = QString("%1/%2.%3").arg(path).arg(hemi == 0 ? "lh" : "rh").arg(surf);
-
-    return read(p_sFile, p_Surface, p_bLoadCurvature);
+    return read(path / pathFromUtf8(std::format("{}.{}", hemi == 0 ? "lh" : "rh", surf)), p_Surface, p_bLoadCurvature);
 }
 
 //=============================================================================================================
 
-bool FsSurface::read(const QString& p_sFile, FsSurface& p_Surface, bool p_bLoadCurvature)
+Expected<FsSurface::Geometry> FsSurface::read_geometry(const std::filesystem::path& file)
 {
-    p_Surface.clear();
+    auto bytes = read_file_bytes(file);
+    if (!bytes)
+        return std::unexpected(bytes.error());
+    MemoryByteStream stream(std::move(*bytes));
+    const auto remaining = [&stream]() {
+        return static_cast<qint64>(stream.size() - stream.pos());
+    };
+    const auto invalid = [&file](std::string_view what) {
+        return std::unexpected(Error(ErrorCode::Format, std::format("{} surface file {}", what, utf8FromPath(file))));
+    };
 
-    QFile t_File(p_sFile);
-
-    if (!t_File.open(QIODevice::ReadOnly)) {
-        qWarning("\tError: Couldn't open the surface file");
-        return false;
-    }
-
-    qInfo("Reading surface...\n");
-
-    //Strip file name and path
-    qint32 t_NameIdx = 0;
-    if (p_sFile.contains("lh."))
-        t_NameIdx = p_sFile.indexOf("lh.");
-    else if (p_sFile.contains("rh."))
-        t_NameIdx = p_sFile.indexOf("rh.");
-    else
-        return false;
-
-    p_Surface.m_sFilePath = p_sFile.mid(0, t_NameIdx);
-    p_Surface.m_sFileName = p_sFile.mid(t_NameIdx, p_sFile.size() - t_NameIdx);
-
-    QDataStream t_DataStream(&t_File);
-    t_DataStream.setByteOrder(QDataStream::BigEndian);
-
-    //
     //   Magic numbers to identify QUAD and TRIANGLE files
-    //
-    //   QUAD_FILE_MAGIC_NUMBER =  (-1 & 0x00ffffff) ;
-    //   NEW_QUAD_FILE_MAGIC_NUMBER =  (-3 & 0x00ffffff) ;
-    //
-    qint32 NEW_QUAD_FILE_MAGIC_NUMBER = 16777213;
-    qint32 TRIANGLE_FILE_MAGIC_NUMBER = 16777214;
-    qint32 QUAD_FILE_MAGIC_NUMBER = 16777215;
+    constexpr qint32 NEW_QUAD_FILE_MAGIC_NUMBER = 16777213;
+    constexpr qint32 TRIANGLE_FILE_MAGIC_NUMBER = 16777214;
+    constexpr qint32 QUAD_FILE_MAGIC_NUMBER = 16777215;
 
-    qint32 magic = FsSurface::fread3(t_DataStream);
-
+    const qint32 magic = FsSurface::fread3(stream);
     qint32 nvert = 0;
-    qint32 nquad = 0;
-    qint32 nface = 0;
     MatrixXf verts;
     MatrixXi faces;
 
     if (magic == QUAD_FILE_MAGIC_NUMBER || magic == NEW_QUAD_FILE_MAGIC_NUMBER) {
-        nvert = FsSurface::fread3(t_DataStream);
-        nquad = FsSurface::fread3(t_DataStream);
+        nvert = FsSurface::fread3(stream);
+        const qint32 nquad = FsSurface::fread3(stream);
         // New-format curvature files start with the same magic number
-        if (nvert <= 0 || qint64(nvert) * (magic == QUAD_FILE_MAGIC_NUMBER ? 6 : 12) + qint64(nquad) * 12 > t_File.bytesAvailable()) {
-            qWarning("Invalid or truncated surface file %s", p_sFile.toUtf8().constData());
-            return false;
-        }
-        if (magic == QUAD_FILE_MAGIC_NUMBER)
-            qInfo("\t%s is a quad file (nvert = %d nquad = %d)\n", p_sFile.toUtf8().constData(), nvert, nquad);
-        else
-            qInfo("\t%s is a new quad file (nvert = %d nquad = %d)\n", p_sFile.toUtf8().constData(), nvert, nquad);
+        if (nvert <= 0 || qint64(nvert) * (magic == QUAD_FILE_MAGIC_NUMBER ? 6 : 12) + qint64(nquad) * 12 > remaining())
+            return invalid("Invalid or truncated");
 
-        // vertices, one column per vertex like the triangle branch (transposed below)
+        // vertices, one column per vertex
         verts.resize(3, nvert);
         if (magic == QUAD_FILE_MAGIC_NUMBER) {
-            qint16 iVal;
-            for (qint32 i = 0; i < nvert; ++i) {
-                for (qint32 j = 0; j < 3; ++j) {
-                    t_DataStream >> iVal;
-                    verts(j, i) = static_cast<float>(iVal) / 100;
-                }
-            }
+            std::vector<qint16> coords(3 * static_cast<std::size_t>(nvert));
+            stream.readBigEndian(coords.data(), coords.size());
+            for (std::size_t i = 0; i < coords.size(); ++i)
+                verts.data()[i] = static_cast<float>(coords[i]) / 100;
         } else {
-            t_DataStream.readRawData(reinterpret_cast<char*>(verts.data()), nvert * 3 * sizeof(float));
-            for (qint32 i = 0; i < nvert; ++i)
-                for (qint32 j = 0; j < 3; ++j)
-                    FIFFLIB::swap_floatp(&verts(j, i));
+            stream.readBigEndian(verts.data(), 3 * static_cast<std::size_t>(nvert));
         }
 
-        MatrixXi quads = FsSurface::fread3_many(t_DataStream, nquad * 4);
-        MatrixXi quads_new(4, nquad);
-        qint32 count = 0;
-        for (qint32 j = 0; j < quads.cols(); ++j) {
-            for (qint32 i = 0; i < quads.rows(); ++i) {
-                quads_new(i, j) = quads(count, 0);
-                ++count;
-            }
-        }
-        quads = quads_new.transpose();
-        //
-        //  Face splitting follows
-        //
-        faces = MatrixXi::Zero(2 * nquad, 3);
+        //  Each quad is split into two triangles
+        const VectorXi quadIdx = FsSurface::fread3_many(stream, nquad * 4);
+        faces.resize(2 * nquad, 3);
         for (qint32 k = 0; k < nquad; ++k) {
-            RowVectorXi quad = quads.row(k);
+            const int* quad = quadIdx.data() + 4 * k;
             if ((quad[0] % 2) == 0) {
-                faces(nface, 0) = quad[0];
-                faces(nface, 1) = quad[1];
-                faces(nface, 2) = quad[3];
-                ++nface;
-
-                faces(nface, 0) = quad[2];
-                faces(nface, 1) = quad[3];
-                faces(nface, 2) = quad[1];
-                ++nface;
+                faces.row(2 * k) << quad[0], quad[1], quad[3];
+                faces.row(2 * k + 1) << quad[2], quad[3], quad[1];
             } else {
-                faces(nface, 0) = quad(0);
-                faces(nface, 1) = quad(1);
-                faces(nface, 2) = quad(2);
-                ++nface;
-
-                faces(nface, 0) = quad(0);
-                faces(nface, 1) = quad(2);
-                faces(nface, 2) = quad(3);
-                ++nface;
+                faces.row(2 * k) << quad[0], quad[1], quad[2];
+                faces.row(2 * k + 1) << quad[0], quad[2], quad[3];
             }
         }
     } else if (magic == TRIANGLE_FILE_MAGIC_NUMBER) {
-        QString s = t_File.readLine();
-        t_File.readLine();
-
-        t_DataStream >> nvert;
-        t_DataStream >> nface;
-
-        if (nvert <= 0 || nface < 0 || (qint64(nvert) + nface) * 12 > t_File.bytesAvailable()) {
-            qWarning("Invalid or truncated surface file %s", p_sFile.toUtf8().constData());
-            return false;
+        // Two text lines: creator and an empty line
+        for (int newlines = 0; newlines < 2 && !stream.atEnd();) {
+            char c = 0;
+            stream.read(&c, 1);
+            newlines += c == '\n' ? 1 : 0;
         }
-        qInfo("\t%s is a triangle file (nvert = %d ntri = %d)\n", p_sFile.toUtf8().constData(), nvert, nface);
-        qInfo("\t%s", s.toUtf8().constData());
+        qint32 nface = 0;
+        stream.readBigEndian(nvert);
+        stream.readBigEndian(nface);
+        if (nvert <= 0 || nface < 0 || (qint64(nvert) + nface) * 12 > remaining())
+            return invalid("Invalid or truncated");
 
-        //vertices
         verts.resize(3, nvert);
-        t_DataStream.readRawData(reinterpret_cast<char*>(verts.data()), nvert * 3 * sizeof(float));
-        for (qint32 i = 0; i < 3; ++i)
-            for (qint32 j = 0; j < nvert; ++j)
-                FIFFLIB::swap_floatp(&verts(i, j));
+        stream.readBigEndian(verts.data(), 3 * static_cast<std::size_t>(nvert));
 
-        //faces
-        faces.resize(nface, 3);
-        qint32 iVal;
-        for (qint32 i = 0; i < nface; ++i) {
-            for (qint32 j = 0; j < 3; ++j) {
-                t_DataStream >> iVal;
-                faces(i, j) = iVal;
-            }
-        }
+        Matrix<int, Dynamic, Dynamic, RowMajor> rowFaces(nface, 3);
+        stream.readBigEndian(rowFaces.data(), 3 * static_cast<std::size_t>(nface));
+        faces = rowFaces;
     } else {
-        qWarning("Bad magic number (%d) in surface file %s", magic, p_sFile.toUtf8().constData());
+        return invalid(std::format("Bad magic number ({}) in", magic));
+    }
+    if (faces.size() > 0 && (faces.minCoeff() < 0 || faces.maxCoeff() >= nvert))
+        return invalid("Invalid or truncated");
+
+    Geometry geometry;
+    geometry.rr = verts.transpose() * 0.001f;
+    geometry.tris = faces;
+    return geometry;
+}
+
+//=============================================================================================================
+
+bool FsSurface::read(const std::filesystem::path& p_sFile, FsSurface& p_Surface, bool p_bLoadCurvature)
+{
+    p_Surface.clear();
+
+    // The name is <hemi>.<surf>, e.g. lh.white
+    const std::string file = utf8FromPath(p_sFile);
+    const std::string name = utf8FromPath(p_sFile.filename());
+    if (!name.starts_with("lh.") && !name.starts_with("rh."))
+        return false;
+
+    qInfo("Reading surface...\n");
+    auto geometry = read_geometry(p_sFile);
+    if (!geometry) {
+        qWarning("\t%s", geometry.error().what());
         return false;
     }
-    if (faces.size() > 0 && (faces.minCoeff() < 0 || faces.maxCoeff() >= nvert)) {
-        qWarning("Invalid or truncated surface file %s", p_sFile.toUtf8().constData());
-        return false;
-    }
 
-    verts.transposeInPlace();
-    verts.array() *= 0.001f;
-
-    p_Surface.m_matRR = verts.block(0, 0, verts.rows(), 3);
-    p_Surface.m_matTris = faces.block(0, 0, faces.rows(), 3);
-
-    //-> not needed since qglbuilder is doing that for us
+    p_Surface.m_iHemi = name.starts_with("lh.") ? 0 : 1;
+    p_Surface.m_matRR = std::move(geometry->rr);
+    p_Surface.m_matTris = std::move(geometry->tris);
     p_Surface.m_matNN = compute_normals(p_Surface.m_matRR, p_Surface.m_matTris);
-
-    // hemi info
-    if (t_File.fileName().contains("lh."))
-        p_Surface.m_iHemi = 0;
-    else if (t_File.fileName().contains("rh."))
-        p_Surface.m_iHemi = 1;
-    else {
-        p_Surface.m_iHemi = -1;
-        return false;
-    }
-
-    //Loaded surface
-    p_Surface.m_sSurf = t_File.fileName().mid((t_NameIdx + 3), t_File.fileName().size() - (t_NameIdx + 3));
+    p_Surface.m_sFilePath = file.substr(0, file.size() - name.size());
+    p_Surface.m_sFileName = name;
+    p_Surface.m_sSurf = name.substr(3);
 
     //Load curvature
     if (p_bLoadCurvature) {
-        QString t_sCurvatureFile = QString("%1%2.curv").arg(p_Surface.m_sFilePath).arg(p_Surface.m_iHemi == 0 ? "lh" : "rh");
         qInfo("\t");
-        p_Surface.m_vecCurv = FsSurface::read_curv(t_sCurvatureFile);
+        p_Surface.m_vecCurv = FsSurface::read_curv(p_sFile.parent_path() / (p_Surface.m_iHemi == 0 ? "lh.curv" : "rh.curv"));
     }
 
-    t_File.close();
-    qInfo("\tRead a surface with %d vertices from %s\n[done]\n", nvert, p_sFile.toUtf8().constData());
+    qInfo("\tRead a surface with %d vertices from %s\n[done]\n", static_cast<int>(p_Surface.m_matRR.rows()), file.c_str());
 
     return true;
 }
 
 //=============================================================================================================
 
-VectorXf FsSurface::read_curv(const QString& p_sFileName)
+VectorXf FsSurface::read_curv(const std::filesystem::path& p_sFileName)
 {
     VectorXf curv;
 
     qInfo("Reading curvature...");
-    QFile t_File(p_sFileName);
-
-    if (!t_File.open(QIODevice::ReadOnly)) {
+    auto bytes = read_file_bytes(p_sFileName);
+    if (!bytes) {
         qWarning("\tError: Couldn't open the curvature file");
         return curv;
     }
+    MemoryByteStream stream(std::move(*bytes));
 
-    QDataStream t_DataStream(&t_File);
-    t_DataStream.setByteOrder(QDataStream::BigEndian);
-
-    qint32 vnum = FsSurface::fread3(t_DataStream);
-    qint32 NEW_VERSION_MAGIC_NUMBER = 16777215;
+    qint32 vnum = FsSurface::fread3(stream);
+    constexpr qint32 NEW_VERSION_MAGIC_NUMBER = 16777215;
 
     if (vnum == NEW_VERSION_MAGIC_NUMBER) {
-        qint32 fnum, vals_per_vertex;
-        t_DataStream >> vnum;
-
-        t_DataStream >> fnum;
-        t_DataStream >> vals_per_vertex;
-
-        curv.resize(vnum, 1);
-        t_DataStream.readRawData(reinterpret_cast<char*>(curv.data()), vnum * sizeof(float));
-        for (qint32 i = 0; i < vnum; ++i)
-            FIFFLIB::swap_floatp(&curv(i));
-    } else {
-        qint32 fnum = FsSurface::fread3(t_DataStream);
-        Q_UNUSED(fnum)
-        qint16 iVal;
-        curv.resize(vnum, 1);
-        for (qint32 i = 0; i < vnum; ++i) {
-            t_DataStream >> iVal;
-            curv(i) = static_cast<float>(iVal) / 100;
+        qint32 fnum = 0;
+        qint32 valsPerVertex = 0;
+        stream.readBigEndian(vnum);
+        stream.readBigEndian(fnum);
+        stream.readBigEndian(valsPerVertex);
+        if (vnum < 0 || static_cast<std::uint64_t>(vnum) * 4 > stream.size() - stream.pos()) {
+            qWarning("\tError: Truncated curvature file");
+            return VectorXf();
         }
+        curv.resize(vnum);
+        stream.readBigEndian(curv.data(), static_cast<std::size_t>(vnum));
+    } else {
+        FsSurface::fread3(stream); // number of faces
+        if (vnum < 0 || static_cast<std::uint64_t>(vnum) * 2 > stream.size() - stream.pos()) {
+            qWarning("\tError: Truncated curvature file");
+            return VectorXf();
+        }
+        std::vector<qint16> values(static_cast<std::size_t>(vnum));
+        stream.readBigEndian(values.data(), values.size());
+        curv.resize(vnum);
+        for (qint32 i = 0; i < vnum; ++i)
+            curv(i) = static_cast<float>(values[static_cast<std::size_t>(i)]) / 100;
     }
-    t_File.close();
 
     qInfo("[done]\n");
 
@@ -418,35 +337,16 @@ VectorXf FsSurface::read_curv(const QString& p_sFileName)
 
 //=============================================================================================================
 
-qint32 FsSurface::fread3(QDataStream& stream)
+qint32 FsSurface::fread3(ByteStream& stream)
 {
-    char bytes[3];
-    stream.readRawData(bytes, 3);
-    return (static_cast<unsigned char>(bytes[0]) << 16) + (static_cast<unsigned char>(bytes[1]) << 8) + static_cast<unsigned char>(bytes[2]);
-}
-
-//=============================================================================================================
-
-qint32 FsSurface::fread3(std::iostream& stream)
-{
-    char bytes[3];
+    unsigned char bytes[3] = {};
     stream.read(bytes, 3);
-    return (static_cast<unsigned char>(bytes[0]) << 16) + (static_cast<unsigned char>(bytes[1]) << 8) + static_cast<unsigned char>(bytes[2]);
+    return (bytes[0] << 16) | (bytes[1] << 8) | bytes[2];
 }
 
 //=============================================================================================================
 
-VectorXi FsSurface::fread3_many(QDataStream& stream, qint32 count)
-{
-    VectorXi res(count);
-    for (qint32 i = 0; i < count; ++i)
-        res[i] = FsSurface::fread3(stream);
-    return res;
-}
-
-//=============================================================================================================
-
-VectorXi FsSurface::fread3_many(std::iostream& stream, qint32 count)
+VectorXi FsSurface::fread3_many(ByteStream& stream, qint32 count)
 {
     VectorXi res(count);
     for (qint32 i = 0; i < count; ++i)

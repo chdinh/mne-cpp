@@ -374,7 +374,7 @@ void TestDisp3dBrainSurface::testHighlightTouchesNoStream()
     annotation.getLabelIds() = (Eigen::VectorXi(4) << idA, idA, idB, idB).finished();
     FSLIB::FsColortable& ct = annotation.getColortable();
     ct.numEntries = 2;
-    ct.struct_names = {QStringLiteral("a"), QStringLiteral("b")};
+    ct.struct_names = {"a", "b"};
     ct.table = (Eigen::MatrixXi(2, 5) << 200, 0, 0, 0, idA, 0, 100, 0, 0, idB).finished();
     surf.addAnnotation(annotation);
     QCOMPARE(surf.getAnnotationLabelId(3), idB);

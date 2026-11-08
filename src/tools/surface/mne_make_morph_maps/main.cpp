@@ -99,8 +99,8 @@ int main(int argc, char* argv[])
         const QString name = QString(hemi == 0 ? "lh" : "rh") + ".sphere.reg";
         FsSurface fromSphere;
         FsSurface toSphere;
-        if (!FsSurface::read(QString("%1/%2/surf/%3").arg(subjectsDir, fromSubject, name), fromSphere, false) ||
-            !FsSurface::read(QString("%1/%2/surf/%3").arg(subjectsDir, toSubject, name), toSphere, false)) {
+        if (!FsSurface::read(QString("%1/%2/surf/%3").arg(subjectsDir, fromSubject, name).toStdU16String(), fromSphere, false) ||
+            !FsSurface::read(QString("%1/%2/surf/%3").arg(subjectsDir, toSubject, name).toStdU16String(), toSphere, false)) {
             qCritical("Cannot read the %s surfaces.", qPrintable(name));
             return 1;
         }

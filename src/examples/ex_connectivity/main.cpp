@@ -187,8 +187,8 @@ int main(int argc, char* argv[])
     MNEForwardSolution t_clusteredFwd;
     MNEForwardSolution t_Fwd;
 
-    FsSurfaceSet tSurfSetInflated(sSubj, 2, "inflated", sSubjDir);
-    FsAnnotationSet tAnnotSet(sSubj, 2, sAnnotType, sSubjDir);
+    FsSurfaceSet tSurfSetInflated(sSubj.toStdString(), 2, "inflated", sSubjDir.toStdU16String());
+    FsAnnotationSet tAnnotSet(sSubj.toStdString(), 2, sAnnotType.toStdString(), sSubjDir.toStdU16String());
 
 
     bool keep_comp = false;
@@ -435,7 +435,7 @@ int main(int argc, char* argv[])
         for (auto it = tSurfSetInflated.data().constBegin(); it != tSurfSetInflated.data().constEnd(); ++it) {
             int hIdx = it.key();
             QString hemi = (it.value().hemi() == 0) ? "lh" : "rh";
-            QString surfType = it.value().surf().isEmpty() ? "inflated" : it.value().surf();
+            QString surfType = QString::fromStdString(it.value().surf().empty() ? "inflated" : it.value().surf());
             pModel->addSurface("sample", hemi, surfType, it.value());
             if (tAnnotSet.size() > hIdx)
                 pModel->addAnnotation("sample", hemi, tAnnotSet[hIdx]);

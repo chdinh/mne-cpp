@@ -401,7 +401,7 @@ int main(int argc, char* argv[])
             break;
         case FORMAT_FREESURFER: {
             FsSurface surface;
-            ok = FsSurface::read(inputFile, surface);
+            ok = FsSurface::read(inputFile.toStdU16String(), surface);
             if (ok) {
                 rr = surface.rr();
                 tris = surface.tris();

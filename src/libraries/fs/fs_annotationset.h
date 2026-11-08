@@ -38,7 +38,9 @@
 // QT INCLUDES
 //=============================================================================================================
 
-#include <QString>
+#include <filesystem>
+#include <string>
+#include <string_view>
 #include <QSharedPointer>
 #include <QMap>
 
@@ -94,7 +96,7 @@ public:
      * @param[in] atlas              Name of the atlas to load (eg. aparc.a2009s, aparc, aparc.DKTatlas40, BA, BA.thresh, ...).
      * @param[in] subjects_dir       Subjects directory.
      */
-    explicit FsAnnotationSet(const QString& subject_id, qint32 hemi, const QString& atlas, const QString& subjects_dir);
+    explicit FsAnnotationSet(const std::string& subject_id, qint32 hemi, const std::string& atlas, const std::filesystem::path& subjects_dir);
 
     //=========================================================================================================
     /**
@@ -104,7 +106,7 @@ public:
      * @param[in] hemi               Which hemisphere to load {0 -> lh, 1 -> rh, 2 -> both}.
      * @param[in] atlas              Name of the atlas to load (eg. aparc.a2009s, aparc, aparc.DKTatlas40, BA, BA.thresh, ...).
      */
-    explicit FsAnnotationSet(const QString& path, qint32 hemi, const QString& atlas);
+    explicit FsAnnotationSet(const std::filesystem::path& path, qint32 hemi, const std::string& atlas);
 
     //=========================================================================================================
     /**
@@ -122,7 +124,7 @@ public:
      * @param[in] p_sLHFileName  Left hemisphere annotation file.
      * @param[in] p_sRHFileName  Right hemisphere annotation file.
      */
-    explicit FsAnnotationSet(const QString& p_sLHFileName, const QString& p_sRHFileName);
+    explicit FsAnnotationSet(const std::filesystem::path& p_sLHFileName, const std::filesystem::path& p_sRHFileName);
 
     //=========================================================================================================
     /**
@@ -172,7 +174,7 @@ public:
      *
      * @return true if succesfull, false otherwise.
      */
-    static bool read(const QString& p_sLHFileName, const QString& p_sRHFileName, FsAnnotationSet& p_AnnotationSet);
+    static bool read(const std::filesystem::path& p_sLHFileName, const std::filesystem::path& p_sRHFileName, FsAnnotationSet& p_AnnotationSet);
 
     //=========================================================================================================
     /**
@@ -190,7 +192,7 @@ public:
     bool toLabels(const FsSurfaceSet& p_surfSet,
                   QList<FsLabel>& p_qListLabels,
                   QList<Eigen::RowVector4i>& p_qListLabelRGBAs,
-                  const QStringList& lLabelPicks = QStringList()) const;
+                  const UTILSLIB::StringList& lLabelPicks = {}) const;
 
     //=========================================================================================================
     /**
@@ -220,7 +222,7 @@ public:
      *
      * @return FsAnnotation related to the parameter identifier.
      */
-    FsAnnotation& operator[](QString idt);
+    FsAnnotation& operator[](std::string_view idt);
 
     //=========================================================================================================
     /**
@@ -230,7 +232,7 @@ public:
      *
      * @return FsAnnotation related to the parameter identifier.
      */
-    const FsAnnotation operator[](QString idt) const;
+    const FsAnnotation operator[](std::string_view idt) const;
 
     //=========================================================================================================
     /**

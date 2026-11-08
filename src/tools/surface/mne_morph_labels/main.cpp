@@ -145,15 +145,15 @@ int main(int argc, char* argv[])
     QString dstWhitePath = QString("%1/%2/surf/%3.white").arg(subjectsDir, toSubject, hemi);
 
     FsSurface srcSphere, dstSphere, dstWhite;
-    if (!FsSurface::read(srcSpherePath, srcSphere)) {
+    if (!FsSurface::read(srcSpherePath.toStdU16String(), srcSphere)) {
         qCritical("Cannot read source sphere: %s", qPrintable(srcSpherePath));
         return 1;
     }
-    if (!FsSurface::read(dstSpherePath, dstSphere)) {
+    if (!FsSurface::read(dstSpherePath.toStdU16String(), dstSphere)) {
         qCritical("Cannot read dest sphere: %s", qPrintable(dstSpherePath));
         return 1;
     }
-    if (!FsSurface::read(dstWhitePath, dstWhite)) {
+    if (!FsSurface::read(dstWhitePath.toStdU16String(), dstWhite)) {
         qCritical("Cannot read dest white surface: %s", qPrintable(dstWhitePath));
         return 1;
     }
@@ -167,7 +167,7 @@ int main(int argc, char* argv[])
 
     // Read input label
     FsLabel label;
-    if (!FsLabel::read(labelFile, label)) {
+    if (!FsLabel::read(labelFile.toStdU16String(), label)) {
         qCritical("Cannot read label: %s", qPrintable(labelFile));
         return 1;
     }

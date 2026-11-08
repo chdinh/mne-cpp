@@ -17,7 +17,6 @@
 #include "fs_annotationset.h"
 #include "fs_surfaceset.h"
 
-#include <QFile>
 #include <QDebug>
 
 //=============================================================================================================
@@ -37,7 +36,7 @@ FsAnnotationSet::FsAnnotationSet()
 
 //=============================================================================================================
 
-FsAnnotationSet::FsAnnotationSet(const QString& subject_id, qint32 hemi, const QString& atlas, const QString& subjects_dir)
+FsAnnotationSet::FsAnnotationSet(const std::string& subject_id, qint32 hemi, const std::string& atlas, const std::filesystem::path& subjects_dir)
 {
     FsAnnotation t_Annotation;
     if (hemi == 0 || hemi == 1) {
@@ -53,7 +52,7 @@ FsAnnotationSet::FsAnnotationSet(const QString& subject_id, qint32 hemi, const Q
 
 //=============================================================================================================
 
-FsAnnotationSet::FsAnnotationSet(const QString& path, qint32 hemi, const QString& atlas)
+FsAnnotationSet::FsAnnotationSet(const std::filesystem::path& path, qint32 hemi, const std::string& atlas)
 {
     FsAnnotation t_Annotation;
     if (hemi == 0 || hemi == 1) {
@@ -84,7 +83,7 @@ FsAnnotationSet::FsAnnotationSet(const FsAnnotation& p_LHAnnotation, const FsAnn
 
 //=============================================================================================================
 
-FsAnnotationSet::FsAnnotationSet(const QString& p_sLHFileName, const QString& p_sRHFileName)
+FsAnnotationSet::FsAnnotationSet(const std::filesystem::path& p_sLHFileName, const std::filesystem::path& p_sRHFileName)
 {
     FsAnnotationSet t_AnnotationSet;
     if (FsAnnotationSet::read(p_sLHFileName, p_sRHFileName, t_AnnotationSet))
@@ -113,23 +112,14 @@ void FsAnnotationSet::insert(const FsAnnotation& p_Annotation)
 
 //=============================================================================================================
 
-bool FsAnnotationSet::read(const QString& p_sLHFileName, const QString& p_sRHFileName, FsAnnotationSet& p_AnnotationSet)
+bool FsAnnotationSet::read(const std::filesystem::path& p_sLHFileName, const std::filesystem::path& p_sRHFileName, FsAnnotationSet& p_AnnotationSet)
 {
     p_AnnotationSet.clear();
 
-    QStringList t_qListFileName;
-    t_qListFileName << p_sLHFileName << p_sRHFileName;
-
-    for (qint32 i = 0; i < t_qListFileName.size(); ++i) {
+    for (const std::filesystem::path* file : {&p_sLHFileName, &p_sRHFileName}) {
         FsAnnotation t_Annotation;
-        if (FsAnnotation::read(t_qListFileName[i], t_Annotation)) {
-            if (t_qListFileName[i].contains("lh."))
-                p_AnnotationSet.m_qMapAnnots.insert(0, t_Annotation);
-            else if (t_qListFileName[i].contains("rh."))
-                p_AnnotationSet.m_qMapAnnots.insert(1, t_Annotation);
-            else
-                return false;
-        }
+        if (FsAnnotation::read(*file, t_Annotation))
+            p_AnnotationSet.m_qMapAnnots.insert(t_Annotation.hemi(), t_Annotation);
     }
 
     if (p_AnnotationSet.m_qMapAnnots.isEmpty())
@@ -143,7 +133,7 @@ bool FsAnnotationSet::read(const QString& p_sLHFileName, const QString& p_sRHFil
 bool FsAnnotationSet::toLabels(const FsSurfaceSet& p_surfSet,
                                QList<FsLabel>& p_qListLabels,
                                QList<RowVector4i>& p_qListLabelRGBAs,
-                               const QStringList& lLabelPicks) const
+                               const UTILSLIB::StringList& lLabelPicks) const
 {
     if (!m_qMapAnnots[0].toLabels(p_surfSet[0], p_qListLabels, p_qListLabelRGBAs, lLabelPicks))
         return false;
@@ -183,11 +173,11 @@ const FsAnnotation FsAnnotationSet::operator[](qint32 idx) const
 
 //=============================================================================================================
 
-FsAnnotation& FsAnnotationSet::operator[](QString idt)
+FsAnnotation& FsAnnotationSet::operator[](std::string_view idt)
 {
-    if (idt.compare("lh") == 0)
+    if (idt == "lh")
         return m_qMapAnnots[0];
-    else if (idt.compare("rh") == 0)
+    else if (idt == "rh")
         return m_qMapAnnots[1];
     else {
         qWarning("Warning: Identifier is not 'lh' or 'rh'! Returning 'lh'.");
@@ -197,11 +187,11 @@ FsAnnotation& FsAnnotationSet::operator[](QString idt)
 
 //=============================================================================================================
 
-const FsAnnotation FsAnnotationSet::operator[](QString idt) const
+const FsAnnotation FsAnnotationSet::operator[](std::string_view idt) const
 {
-    if (idt.compare("lh") == 0)
+    if (idt == "lh")
         return m_qMapAnnots[0];
-    else if (idt.compare("rh") == 0)
+    else if (idt == "rh")
         return m_qMapAnnots[1];
     else {
         qWarning("Warning: Identifier is not 'lh' or 'rh'! Returning 'lh'.");

@@ -38,6 +38,9 @@
 // QT INCLUDES
 //=============================================================================================================
 
+#include <filesystem>
+#include <string>
+#include <string_view>
 #include <QSharedPointer>
 #include <QMap>
 
@@ -85,7 +88,7 @@ public:
      * @param[in] surf               Name of the surface to load (eg. inflated, orig ...).
      * @param[in] subjects_dir       Subjects directory.
      */
-    explicit FsSurfaceSet(const QString& subject_id, qint32 hemi, const QString& surf, const QString& subjects_dir);
+    explicit FsSurfaceSet(const std::string& subject_id, qint32 hemi, const std::string& surf, const std::filesystem::path& subjects_dir);
 
     //=========================================================================================================
     /**
@@ -95,7 +98,7 @@ public:
      * @param[in] hemi               Which hemisphere to load {0 -> lh, 1 -> rh, 2 -> both}.
      * @param[in] surf               Name of the surface to load (eg. inflated, orig ...).
      */
-    explicit FsSurfaceSet(const QString& path, qint32 hemi, const QString& surf);
+    explicit FsSurfaceSet(const std::filesystem::path& path, qint32 hemi, const std::string& surf);
 
     //=========================================================================================================
     /**
@@ -113,7 +116,7 @@ public:
      * @param[in] p_sLHFileName  Left hemisphere annotation file.
      * @param[in] p_sRHFileName  Right hemisphere annotation file.
      */
-    explicit FsSurfaceSet(const QString& p_sLHFileName, const QString& p_sRHFileName);
+    explicit FsSurfaceSet(const std::filesystem::path& p_sLHFileName, const std::filesystem::path& p_sRHFileName);
 
     //=========================================================================================================
     /**
@@ -161,7 +164,7 @@ public:
      *
      * @return true if succesfull, false otherwise.
      */
-    static bool read(const QString& p_sLHFileName, const QString& p_sRHFileName, FsSurfaceSet& p_SurfaceSet);
+    static bool read(const std::filesystem::path& p_sLHFileName, const std::filesystem::path& p_sRHFileName, FsSurfaceSet& p_SurfaceSet);
 
     //=========================================================================================================
     /**
@@ -169,7 +172,7 @@ public:
      *
      * @return the loaded surfaces (eg. inflated, orig ...).
      */
-    inline QString surf() const;
+    inline std::string surf() const;
 
     //=========================================================================================================
     /**
@@ -199,7 +202,7 @@ public:
      *
      * @return FsSurface related to the parameter identifier.
      */
-    const FsSurface& operator[](QString idt) const;
+    const FsSurface& operator[](std::string_view idt) const;
 
     //=========================================================================================================
     /**
@@ -209,7 +212,7 @@ public:
      *
      * @return FsSurface related to the parameter identifier.
      */
-    FsSurface& operator[](QString idt);
+    FsSurface& operator[](std::string_view idt);
 
     //=========================================================================================================
     /**
@@ -247,12 +250,9 @@ inline bool FsSurfaceSet::empty() const
 
 //=============================================================================================================
 
-inline QString FsSurfaceSet::surf() const
+inline std::string FsSurfaceSet::surf() const
 {
-    if (m_qMapSurfs.size() > 0)
-        return m_qMapSurfs.begin().value().surf();
-    else
-        return QString("");
+    return m_qMapSurfs.isEmpty() ? std::string() : m_qMapSurfs.begin().value().surf();
 }
 
 //=============================================================================================================

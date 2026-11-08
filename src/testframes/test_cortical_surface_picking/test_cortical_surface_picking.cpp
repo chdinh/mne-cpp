@@ -138,7 +138,7 @@ void TestCorticalSurfacePicking::testPickOnRealSurface()
     // positions to aim the pick at (RayPicker would emit an intersection
     // point near a real triangle).
     FsSurface ref;
-    QVERIFY(FsSurface::read(subjectsDir + "/sample/surf/lh.inflated", ref, false));
+    QVERIFY(FsSurface::read((subjectsDir + "/sample/surf/lh.inflated").toStdU16String(), ref, false));
     QVERIFY(ref.rr().rows() > 0);
     const int targetVertex = ref.rr().rows() / 2;
     const QVector3D worldHit(ref.rr()(targetVertex, 0),

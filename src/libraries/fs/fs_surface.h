@@ -50,13 +50,15 @@
 //=============================================================================================================
 
 #include <QSharedPointer>
-#include <QDataStream>
 
 //=============================================================================================================
 // STL INCLUDES
 //=============================================================================================================
 
-#include <iostream>
+#include <utils/byte_stream.h>
+
+#include <filesystem>
+#include <string>
 
 //=============================================================================================================
 // EIGEN INCLUDES
@@ -108,7 +110,7 @@ public:
      *
      * @param[in] p_sFile    FsSurface file name with path.
      */
-    explicit FsSurface(const QString& p_sFile);
+    explicit FsSurface(const std::filesystem::path& p_sFile);
 
     //=========================================================================================================
     /**
@@ -119,7 +121,7 @@ public:
      * @param[in] surf               Name of the surface to load (eg. inflated, orig ...).
      * @param[in] subjects_dir       Subjects directory.
      */
-    explicit FsSurface(const QString& subject_id, qint32 hemi, const QString& surf, const QString& subjects_dir);
+    explicit FsSurface(const std::string& subject_id, qint32 hemi, const std::string& surf, const std::filesystem::path& subjects_dir);
 
     //=========================================================================================================
     /**
@@ -129,7 +131,7 @@ public:
      * @param[in] hemi               Which hemisphere to load {0 -> lh, 1 -> rh}.
      * @param[in] surf               Name of the surface to load (eg. inflated, orig ...).
      */
-    explicit FsSurface(const QString& path, qint32 hemi, const QString& surf);
+    explicit FsSurface(const std::filesystem::path& path, qint32 hemi, const std::string& surf);
 
     //=========================================================================================================
     /**
@@ -165,7 +167,7 @@ public:
      *
      * @return the surface.
      */
-    inline QString surf() const;
+    inline const std::string& surf() const;
 
     //=========================================================================================================
     /**
@@ -182,7 +184,7 @@ public:
      *
      * @return true if read sucessful, false otherwise.
      */
-    static bool read(const QString& subject_id, qint32 hemi, const QString& surf, const QString& subjects_dir, FsSurface& p_Surface, bool p_bLoadCurvature = true);
+    static bool read(const std::string& subject_id, qint32 hemi, const std::string& surf, const std::filesystem::path& subjects_dir, FsSurface& p_Surface, bool p_bLoadCurvature = true);
 
     //=========================================================================================================
     /**
@@ -198,7 +200,7 @@ public:
      *
      * @return true if read sucessful, false otherwise.
      */
-    static bool read(const QString& path, qint32 hemi, const QString& surf, FsSurface& p_Surface, bool p_bLoadCurvature = true);
+    static bool read(const std::filesystem::path& path, qint32 hemi, const std::string& surf, FsSurface& p_Surface, bool p_bLoadCurvature = true);
 
     //=========================================================================================================
     /**
@@ -212,7 +214,26 @@ public:
      *
      * @return true if read sucessful, false otherwise.
      */
-    static bool read(const QString& p_sFileName, FsSurface& p_Surface, bool p_bLoadCurvature = true);
+    static bool read(const std::filesystem::path& p_sFileName, FsSurface& p_Surface, bool p_bLoadCurvature = true);
+
+    /** Vertices and triangles of a FreeSurfer surface file. */
+    struct Geometry
+    {
+        Eigen::MatrixX3f rr;   /**< Vertex positions in meters. */
+        Eigen::MatrixX3i tris; /**< Triangles, zero-based vertex indices. */
+    };
+
+    //=========================================================================================================
+    /**
+     * Reads the vertices and triangles of any FreeSurfer surface file (triangle or quad format), like
+     * nibabel.freesurfer.read_geometry but in meters; the file name need not name a hemisphere, so BEM
+     * surfaces such as inner_skull.surf can be read too.
+     *
+     * @param[in] file   The surface file.
+     *
+     * @return The geometry; an Io error if the file cannot be read, a Format error if it is not a valid surface.
+     */
+    static UTILSLIB::Expected<Geometry> read_geometry(const std::filesystem::path& file);
 
     //=========================================================================================================
     /**
@@ -222,7 +243,7 @@ public:
      *
      * @return the read curvature.
      */
-    static Eigen::VectorXf read_curv(const QString& p_sFileName);
+    static Eigen::VectorXf read_curv(const std::filesystem::path& p_sFileName);
 
     //=========================================================================================================
     /**
@@ -289,7 +310,7 @@ public:
      *
      * @return the path to surf directory.
      */
-    inline QString filePath() const;
+    inline const std::string& filePath() const;
 
     //=========================================================================================================
     /**
@@ -297,51 +318,32 @@ public:
      *
      * @return the surf file name.
      */
-    inline QString fileName() const;
+    inline const std::string& fileName() const;
 
     //=========================================================================================================
     /**
-     * Reads a 3-byte integer out of a QDataStream (FreeSurfer format).
+     * Reads a big-endian 3-byte integer (FreeSurfer format).
      *
      * @param[in] stream  Stream to read from.
      * @return the read 3-byte integer.
      */
-    static qint32 fread3(QDataStream& stream);
+    static qint32 fread3(UTILSLIB::ByteStream& stream);
 
     //=========================================================================================================
     /**
-     * Reads a 3-byte integer out of a std::iostream (FreeSurfer format).
-     *
-     * @param[in] stream  Stream to read from.
-     * @return the read 3-byte integer.
-     */
-    static qint32 fread3(std::iostream& stream);
-
-    //=========================================================================================================
-    /**
-     * Reads multiple 3-byte integers out of a QDataStream (FreeSurfer format).
+     * Reads multiple big-endian 3-byte integers (FreeSurfer format).
      *
      * @param[in] stream  Stream to read from.
      * @param[in] count   Number of elements to read.
      * @return the read 3-byte integers.
      */
-    static Eigen::VectorXi fread3_many(QDataStream& stream, qint32 count);
-
-    //=========================================================================================================
-    /**
-     * Reads multiple 3-byte integers out of a std::iostream (FreeSurfer format).
-     *
-     * @param[in] stream  Stream to read from.
-     * @param[in] count   Number of elements to read.
-     * @return the read 3-byte integers.
-     */
-    static Eigen::VectorXi fread3_many(std::iostream& stream, qint32 count);
+    static Eigen::VectorXi fread3_many(UTILSLIB::ByteStream& stream, qint32 count);
 
 private:
-    QString m_sFilePath;        /**< Path to surf directory. */
-    QString m_sFileName;        /**< FsSurface file name. */
+    std::string m_sFilePath;    /**< Path to surf directory. */
+    std::string m_sFileName;    /**< FsSurface file name. */
     qint32 m_iHemi;             /**< Hemisphere (lh = 0; rh = 1). */
-    QString m_sSurf;            /**< Loaded surface (eg. inflated, orig ...). */
+    std::string m_sSurf;        /**< Loaded surface (eg. inflated, orig ...). */
     Eigen::MatrixX3f m_matRR;   /**< alias verts. Vertex coordinates in meters. */
     Eigen::MatrixX3i m_matTris; /**< alias faces. The triangle descriptions. */
     Eigen::MatrixX3f m_matNN;   /**< Normalized surface normals for each vertex. -> not needed since qglbuilder is doing that for us. */
@@ -368,7 +370,7 @@ inline bool FsSurface::empty() const
 
 //=============================================================================================================
 
-inline QString FsSurface::surf() const
+inline const std::string& FsSurface::surf() const
 {
     return m_sSurf;
 }
@@ -417,14 +419,14 @@ inline Eigen::Vector3f& FsSurface::offset()
 
 //=============================================================================================================
 
-inline QString FsSurface::filePath() const
+inline const std::string& FsSurface::filePath() const
 {
     return m_sFilePath;
 }
 
 //=============================================================================================================
 
-inline QString FsSurface::fileName() const
+inline const std::string& FsSurface::fileName() const
 {
     return m_sFileName;
 }

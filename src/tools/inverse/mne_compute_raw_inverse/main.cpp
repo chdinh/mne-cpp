@@ -183,7 +183,7 @@ static InvSourceEstimate processLabel(const QString& labelFile,
 {
     // Read the label
     FsLabel label;
-    if (!FsLabel::read(labelFile, label)) {
+    if (!FsLabel::read(labelFile.toStdU16String(), label)) {
         qWarning() << "Failed to read label file:" << labelFile;
         return InvSourceEstimate();
     }
@@ -270,7 +270,7 @@ static InvSourceEstimate processLabelDir(const QString& labelDir,
     int validLabels = 0;
     for (int i = 0; i < labelFiles.size(); ++i) {
         FsLabel label;
-        if (!FsLabel::read(labelFiles[i], label)) {
+        if (!FsLabel::read(labelFiles[i].toStdU16String(), label)) {
             qWarning() << "  Skipping unreadable label:" << labelFiles[i];
             continue;
         }

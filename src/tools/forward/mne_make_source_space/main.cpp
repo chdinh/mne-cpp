@@ -519,7 +519,7 @@ int main(int argc, char* argv[])
         qInfo("Reading surface from %s...", surfPath.toUtf8().constData());
 
         FsSurface surf;
-        if (!FsSurface::read(surfPath, surf)) {
+        if (!FsSurface::read(surfPath.toStdU16String(), surf)) {
             qCritical() << "Error: Could not read surface" << surfPath;
             return 1;
         }

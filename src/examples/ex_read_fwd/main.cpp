@@ -96,7 +96,7 @@ int main(int argc, char* argv[])
     }
 
     // === Option to cluster forward solution ===
-    FsAnnotationSet t_annotationSet(parser.value(subjectOption), parser.value(hemiOption).toInt(), parser.value(annotOption), parser.value(subjectPathOption));
+    FsAnnotationSet t_annotationSet(parser.value(subjectOption).toStdString(), parser.value(hemiOption).toInt(), parser.value(annotOption).toStdString(), parser.value(subjectPathOption).toStdU16String());
 
     //
     // Cluster forward solution;

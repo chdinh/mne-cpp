@@ -542,8 +542,8 @@ void TestMneSourceSpaceOpsPython::morphMap_matchesPython()
         const QString name = QString(hemi == 0 ? "/lh" : "/rh") + ".sphere.reg";
         FsSurface small;
         FsSurface large;
-        QVERIFY(FsSurface::read(subjects + "/small/surf" + name, small, false));
-        QVERIFY(FsSurface::read(subjects + "/large/surf" + name, large, false));
+        QVERIFY(FsSurface::read((subjects + "/small/surf" + name).toStdU16String(), small, false));
+        QVERIFY(FsSurface::read((subjects + "/large/surf" + name).toStdU16String(), large, false));
         for (const auto& [from, to, fromSurf, toSurf] : {std::tuple{"small", "large", &small, &large}, std::tuple{"large", "small", &large, &small}}) {
             const auto python = MNEMorphMap::read(file.toStdU16String(), from, to, hemi);
             QVERIFY(python);

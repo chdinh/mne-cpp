@@ -36,7 +36,6 @@
 // QT INCLUDES
 //=============================================================================================================
 
-#include <QDataStream>
 #include <QDir>
 #include <QFile>
 #include <QFileInfo>
@@ -192,82 +191,20 @@ bool Surf2Bem::readFreeSurferSurface(const SurfaceInput& input, MNEBemSurface& b
 {
     //
     // Read FreeSurfer binary surface directly.
-    //
-    // We cannot use FSLIB::FsSurface::read() because it requires the filename
-    // to contain "lh." or "rh." (hemisphere prefix). BEM surface files like
-    // inner_skull.surf do not have this prefix.
-    //
-    // Magic numbers:
-    //   TRIANGLE_FILE_MAGIC_NUMBER = 0xFFFFFE = 16777214
-    //   QUAD_FILE_MAGIC_NUMBER     = 0xFFFFFF = 16777215
-    //   NEW_QUAD_FILE_MAGIC_NUMBER = 0xFFFFFD = 16777213
-    //
-    QFile file(input.fileName);
-    if (!file.open(QIODevice::ReadOnly)) {
-        qCritical("Could not open surface file: %s", qPrintable(input.fileName));
+    // BEM surface names such as inner_skull.surf name no hemisphere, which FsSurface::read() requires
+    auto geometry = FsSurface::read_geometry(input.fileName.toStdU16String());
+    if (!geometry) {
+        qCritical("%s", geometry.error().what());
         fflush(stderr);
         return false;
     }
+    qInfo("%s: %d vertices and %d triangles", qPrintable(input.fileName), static_cast<int>(geometry->rr.rows()), static_cast<int>(geometry->tris.rows()));
 
-    QDataStream stream(&file);
-    stream.setByteOrder(QDataStream::BigEndian);
-
-    const qint32 TRIANGLE_FILE_MAGIC = 16777214;
-
-    qint32 magic = FSLIB::FsSurface::fread3(stream);
-
-    qint32 nvert = 0;
-    qint32 nface = 0;
-    MatrixXf verts;
-    MatrixXi faces;
-
-    if (magic == TRIANGLE_FILE_MAGIC) {
-        // Skip the two comment lines (terminated by \n)
-        file.readLine();
-        file.readLine();
-
-        stream >> nvert;
-        stream >> nface;
-
-        qInfo("%s: triangle file with %d vertices and %d triangles",
-              qPrintable(input.fileName), nvert, nface);
-        fflush(stderr);
-
-        // Read vertices (stored as 3 x nvert, column-major float32 big-endian)
-        verts.resize(3, nvert);
-        stream.readRawData(reinterpret_cast<char*>(verts.data()), nvert * 3 * sizeof(float));
-        for (qint32 i = 0; i < 3; ++i)
-            for (qint32 j = 0; j < nvert; ++j)
-                FIFFLIB::swap_floatp(&verts(i, j));
-
-        // Read faces (nface x 3, int32)
-        faces.resize(nface, 3);
-        for (qint32 i = 0; i < nface; ++i) {
-            for (qint32 j = 0; j < 3; ++j) {
-                stream >> faces(i, j);
-            }
-        }
-    } else {
-        qInfo("Unsupported surface file format (magic = %d) in %s", magic, qPrintable(input.fileName));
-        qInfo("Only FreeSurfer triangle format (0xFFFFFE) is supported for BEM surfaces.");
-        fflush(stderr);
-        return false;
-    }
-
-    file.close();
-
-    //
-    // Populate BEM surface
-    // Vertices are in mm in the file, convert to meters (matching FSLIB::FsSurface behavior)
-    //
-    verts.transposeInPlace(); // now nvert x 3
-    verts.array() *= 0.001f;
-
-    bemSurf.np = nvert;
-    bemSurf.ntri = nface;
+    bemSurf.np = static_cast<int>(geometry->rr.rows());
+    bemSurf.ntri = static_cast<int>(geometry->tris.rows());
     bemSurf.coord_frame = FIFFV_COORD_MRI;
-    bemSurf.rr = verts.block(0, 0, nvert, 3);
-    bemSurf.itris = faces.block(0, 0, nface, 3);
+    bemSurf.rr = geometry->rr;
+    bemSurf.itris = geometry->tris;
 
     // Compute vertex normals
     bemSurf.nn = FsSurface::compute_normals(Eigen::MatrixX3f(bemSurf.rr), Eigen::MatrixX3i(bemSurf.itris));

@@ -157,7 +157,7 @@ void TestFwdPython::initTestCase()
     QVERIFY(QFile::copy(data("subjects/sample/label/lh.V1.label"), m_labelPath));
 
     FsLabel v1;
-    QVERIFY(FsLabel::read(m_labelPath, v1));
+    QVERIFY(FsLabel::read(m_labelPath.toStdU16String(), v1));
     m_ref.src.label_src_vertno_sel(v1, m_v1Sel);
     QCOMPARE(static_cast<int>(m_v1Sel.size()), 70);
 }

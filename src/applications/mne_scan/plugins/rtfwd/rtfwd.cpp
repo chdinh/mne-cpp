@@ -119,7 +119,7 @@ QSharedPointer<AbstractPlugin> RtFwd::clone() const
 void RtFwd::init()
 {
     // Inits
-    m_pAnnotationSet = FsAnnotationSet::SPtr(new FsAnnotationSet(m_sAtlasDir + "/lh.aparc.a2009s.annot", m_sAtlasDir + "/rh.aparc.a2009s.annot"));
+    m_pAnnotationSet = FsAnnotationSet::SPtr(new FsAnnotationSet((m_sAtlasDir + "/lh.aparc.a2009s.annot").toStdU16String(), (m_sAtlasDir + "/rh.aparc.a2009s.annot").toStdU16String()));
 
     // Input
     m_pHpiInput = PluginInputData<RealTimeHpiResult>::create(this, "rtFwd RTHR In", "rtFwd real time HPI result input data");

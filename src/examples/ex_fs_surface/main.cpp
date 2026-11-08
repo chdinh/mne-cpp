@@ -81,7 +81,7 @@ int main(int argc, char* argv[])
     //
     // pial
     //
-    FsSurfaceSet tSurfSetPial(subject, hemi, "pial", subjectPath);
+    FsSurfaceSet tSurfSetPial(subject.toStdString(), hemi, "pial", subjectPath.toStdU16String());
 
     BrainView* pBrainView = new BrainView();
     BrainTreeModel* pModel = new BrainTreeModel();
@@ -95,7 +95,7 @@ int main(int argc, char* argv[])
     //
     // inflated
     //
-    FsSurfaceSet tSurfSetInflated(subject, hemi, "inflated", subjectPath);
+    FsSurfaceSet tSurfSetInflated(subject.toStdString(), hemi, "inflated", subjectPath.toStdU16String());
     for (auto it = tSurfSetInflated.data().constBegin(); it != tSurfSetInflated.data().constEnd(); ++it) {
         QString sHemi = (it.value().hemi() == 0) ? "lh" : "rh";
         pModel->addSurface(subject, sHemi, "inflated", it.value());
@@ -104,7 +104,7 @@ int main(int argc, char* argv[])
     //
     // orig
     //
-    FsSurfaceSet tSurfSetOrig(subject, hemi, "orig", subjectPath);
+    FsSurfaceSet tSurfSetOrig(subject.toStdString(), hemi, "orig", subjectPath.toStdU16String());
     for (auto it = tSurfSetOrig.data().constBegin(); it != tSurfSetOrig.data().constEnd(); ++it) {
         QString sHemi = (it.value().hemi() == 0) ? "lh" : "rh";
         pModel->addSurface(subject, sHemi, "orig", it.value());
@@ -113,7 +113,7 @@ int main(int argc, char* argv[])
     //
     // white
     //
-    FsSurfaceSet tSurfSetWhite(subject, hemi, "white", subjectPath);
+    FsSurfaceSet tSurfSetWhite(subject.toStdString(), hemi, "white", subjectPath.toStdU16String());
     for (auto it = tSurfSetWhite.data().constBegin(); it != tSurfSetWhite.data().constEnd(); ++it) {
         QString sHemi = (it.value().hemi() == 0) ? "lh" : "rh";
         pModel->addSurface(subject, sHemi, "white", it.value());

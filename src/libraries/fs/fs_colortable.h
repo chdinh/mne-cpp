@@ -40,9 +40,11 @@
 // QT INCLUDES
 //=============================================================================================================
 
-#include <QString>
-#include <QStringList>
+#include <utils/string_utils.h>
+
 #include <QSharedPointer>
+
+#include <string>
 
 //=============================================================================================================
 // EIGEN INCLUDES
@@ -102,7 +104,7 @@ public:
      *
      * @return ids.
      */
-    inline QStringList getNames() const;
+    inline const UTILSLIB::StringList& getNames() const;
 
     //=========================================================================================================
     /**
@@ -113,10 +115,10 @@ public:
     inline Eigen::MatrixX4i getRGBAs() const;
 
 public:
-    QString orig_tab;         /**< FsColortable raw data. */
-    qint32 numEntries;        /**< Number of entries. */
-    QStringList struct_names; /**< Anatomical ROI description. */
-    Eigen::MatrixXi table;    /**< labels and corresponing colorcode. */
+    std::string orig_tab;              /**< FsColortable raw data. */
+    qint32 numEntries;                 /**< Number of entries. */
+    UTILSLIB::StringList struct_names; /**< Anatomical ROI description. */
+    Eigen::MatrixXi table;             /**< labels and corresponing colorcode. */
 };
 
 //=============================================================================================================
@@ -134,7 +136,7 @@ inline Eigen::VectorXi FsColortable::getLabelIds() const
 
 //=============================================================================================================
 
-inline QStringList FsColortable::getNames() const
+inline const UTILSLIB::StringList& FsColortable::getNames() const
 {
     return struct_names;
 }

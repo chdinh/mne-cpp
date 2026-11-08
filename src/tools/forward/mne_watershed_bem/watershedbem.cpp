@@ -330,7 +330,7 @@ bool WatershedBem::convertSurfaces(const QString& wsDir, const QString& mgzFile)
 
         // Read surface to verify it is valid
         FsSurface surf;
-        FsSurface::read(surfPath, surf, false);
+        FsSurface::read(surfPath.toStdU16String(), surf, false);
         if (surf.rr().rows() == 0) {
             qWarning() << "FsSurface" << surfPath << "has no vertices.";
         } else if (m_settings.verbose()) {
@@ -357,7 +357,7 @@ bool WatershedBem::createBemFif(const QString& surfFile, const QString& fifFile)
 
     // Read the FreeSurfer outer skin surface
     FsSurface fsSurface;
-    FsSurface::read(surfFile, fsSurface, false);
+    FsSurface::read(surfFile.toStdU16String(), fsSurface, false);
 
     if (fsSurface.rr().rows() == 0 || fsSurface.tris().rows() == 0) {
         qCritical() << "Failed to read surface from" << surfFile;

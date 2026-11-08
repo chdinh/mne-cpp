@@ -149,7 +149,7 @@ int main(int argc, char* argv[])
     if (t_Fwd.empty())
         return 1;
 
-    FsAnnotationSet t_annotationSet("sample", 2, "aparc.a2009s", QCoreApplication::applicationDirPath() + "/../resources/data/MNE-sample-data/subjects");
+    FsAnnotationSet t_annotationSet("sample", 2, "aparc.a2009s", (QCoreApplication::applicationDirPath() + "/../resources/data/MNE-sample-data/subjects").toStdU16String());
 
     FiffCov noise_cov(parser.value(sampleCovFileOption).toStdString());
 

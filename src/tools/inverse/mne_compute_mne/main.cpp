@@ -257,7 +257,7 @@ static bool writeLabelOutput(const FsLabel& label,
 
     if (srcIdx.isEmpty()) {
         qInfo("  WARNING: No vertices found in label %s for this hemisphere.",
-              label.name.toUtf8().constData());
+              label.name.c_str());
         return false;
     }
 
@@ -1125,12 +1125,12 @@ int main(int argc, char* argv[])
 
             for (const QString& labelFile : labelFiles) {
                 FsLabel label;
-                if (!FsLabel::read(labelFile, label)) {
+                if (!FsLabel::read(labelFile.toStdU16String(), label)) {
                     qWarning() << "  WARNING: Could not read label" << labelFile;
                     continue;
                 }
                 qInfo("  FsLabel: %s (%d vertices, hemi=%d)",
-                      label.name.toUtf8().constData(),
+                      label.name.c_str(),
                       static_cast<int>(label.vertices.size()), label.hemi);
 
                 // Determine hemisphere and write

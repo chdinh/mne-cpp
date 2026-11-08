@@ -204,9 +204,9 @@ void TestFS::testSurfaceDefaultCtor()
     QCOMPARE(s.tris().rows(), 0);
     QCOMPARE(s.nn().rows(), 0);
     QCOMPARE(s.curv().size(), 0);
-    QVERIFY(s.filePath().isEmpty());
-    QVERIFY(s.fileName().isEmpty());
-    QVERIFY(s.surf().isEmpty());
+    QVERIFY(s.filePath().empty());
+    QVERIFY(s.fileName().empty());
+    QVERIFY(s.surf().empty());
 }
 
 //=============================================================================================================
@@ -465,7 +465,7 @@ void TestFS::testLabelReadFromFile()
     QString labelFile = createTempLabelFile(tmpDir, "lh");
 
     FsLabel l;
-    bool ok = FsLabel::read(labelFile, l);
+    bool ok = FsLabel::read(labelFile.toStdU16String(), l);
 
     QVERIFY(ok);
     QVERIFY(!l.empty());
@@ -508,7 +508,7 @@ void TestFS::testLabelReadNonLabelFile()
     f.close();
 
     FsLabel l;
-    bool ok = FsLabel::read(badFile, l);
+    bool ok = FsLabel::read(badFile.toStdU16String(), l);
     QVERIFY(!ok);
     QVERIFY(l.empty());
 }
@@ -531,7 +531,7 @@ void TestFS::testColortableDefaultCtor()
 {
     FsColortable ct;
     QCOMPARE(ct.numEntries, 0);
-    QVERIFY(ct.struct_names.isEmpty());
+    QVERIFY(ct.struct_names.empty());
     QCOMPARE(ct.table.rows(), 0);
 }
 
@@ -541,14 +541,14 @@ void TestFS::testColortableClear()
 {
     FsColortable ct;
     ct.numEntries = 3;
-    ct.struct_names << "A" << "B" << "C";
+    ct.struct_names = {"A", "B", "C"};
     ct.table.resize(3, 5);
     ct.table.setZero();
 
     ct.clear();
 
     QCOMPARE(ct.numEntries, 0);
-    QVERIFY(ct.struct_names.isEmpty());
+    QVERIFY(ct.struct_names.empty());
     QCOMPARE(ct.table.rows(), 0);
 }
 
@@ -558,7 +558,7 @@ void TestFS::testColortableAccessors()
 {
     FsColortable ct;
     ct.numEntries = 2;
-    ct.struct_names << "RegionA" << "RegionB";
+    ct.struct_names = {"RegionA", "RegionB"};
 
     // Table: R, G, B, A, Id
     ct.table.resize(2, 5);
@@ -572,7 +572,7 @@ void TestFS::testColortableAccessors()
     QCOMPARE(ids(1), 1002);
 
     // getNames
-    QStringList names = ct.getNames();
+    const UTILSLIB::StringList& names = ct.getNames();
     QCOMPARE(names.size(), 2);
     QCOMPARE(names[0], QString("RegionA"));
     QCOMPARE(names[1], QString("RegionB"));
@@ -598,8 +598,8 @@ void TestFS::testAnnotationDefaultCtor()
     FsAnnotation a;
     QVERIFY(a.empty());
     QCOMPARE(a.hemi(), -1);
-    QVERIFY(a.filePath().isEmpty());
-    QVERIFY(a.fileName().isEmpty());
+    QVERIFY(a.filePath().empty());
+    QVERIFY(a.fileName().empty());
 }
 
 //=============================================================================================================

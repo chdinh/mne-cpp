@@ -21,14 +21,13 @@
 // QT INCLUDES
 //=============================================================================================================
 
-#include <QFile>
-#include <QTextStream>
-#include <QStringList>
-#include <QSet>
-#include <QRegularExpression>
-//#include <QDebug>
+#include <utils/string_utils.h>
 
-#include <iostream>
+#include <QDebug>
+
+#include <fstream>
+#include <sstream>
+#include <unordered_set>
 #include <vector>
 
 //=============================================================================================================
@@ -54,7 +53,7 @@ FsLabel::FsLabel(const VectorXi& p_vertices,
                  const MatrixX3f& p_pos,
                  const VectorXd& p_values,
                  qint32 p_hemi,
-                 const QString& p_name,
+                 const std::string& p_name,
                  qint32 p_id)
 : vertices(p_vertices)
 , pos(p_pos)
@@ -75,9 +74,9 @@ FsLabel::~FsLabel()
 
 void FsLabel::clear()
 {
-    comment = QString("");
+    comment.clear();
     hemi = -1;
-    name = QString("");
+    name.clear();
     vertices = VectorXi();
     pos = MatrixX3f(0, 3);
     values = VectorXd();
@@ -128,10 +127,7 @@ MatrixX3i FsLabel::selectTris(const MatrixX3i& p_matTris)
 
     MatrixX3i tris(p_matTris.rows(), 3);
 
-    QSet<int> verts;
-    verts.reserve(this->vertices.size());
-    for (qint32 i = 0; i < this->vertices.size(); ++i)
-        verts.insert(this->vertices[i]);
+    const std::unordered_set<int> verts(this->vertices.data(), this->vertices.data() + this->vertices.size());
 
     //
     // Search for all the tris where is at least one corner part of the label
@@ -151,77 +147,53 @@ MatrixX3i FsLabel::selectTris(const MatrixX3i& p_matTris)
 
 //=============================================================================================================
 
-bool FsLabel::read(const QString& p_sFileName, FsLabel& p_Label)
+bool FsLabel::read(const std::filesystem::path& p_sFileName, FsLabel& p_Label)
 {
     p_Label.clear();
 
-    if (p_sFileName.mid(p_sFileName.size() - 6, 6).compare(".label") != 0) {
-        qWarning("Given file (%s) is not a .label file!\n", p_sFileName.toUtf8().constData());
+    const std::string fileName = UTILSLIB::utf8FromPath(p_sFileName.filename());
+    if (!fileName.ends_with(".label")) {
+        qWarning("Given file (%s) is not a .label file!\n", UTILSLIB::utf8FromPath(p_sFileName).c_str());
         return false;
     }
 
     qInfo("Reading label...");
-    QFile t_File(p_sFileName);
-
-    if (!t_File.open(QIODevice::ReadOnly | QIODevice::Text)) {
+    std::ifstream file(p_sFileName);
+    if (!file) {
         qWarning("\tError: Couldn't open the label file\n");
         return false;
     }
 
-    QTextStream t_TextStream(&t_File);
+    std::string comment;
+    std::string line;
+    std::getline(file, comment);
+    std::getline(file, line);
+    const int nv = UTILSLIB::toInt(line).value_or(0);
 
-    QString comment = t_TextStream.readLine();
-    qint32 nv = t_TextStream.readLine().toInt();
-
-    MatrixXd data(nv, 5);
-
-    QStringList list;
-    qint32 count;
-    bool isNumber;
-    double value;
-    for (qint32 i = 0; i < nv; ++i) {
-        count = 0;
-
-#if QT_VERSION < QT_VERSION_CHECK(6, 0, 0)
-        auto skip = QString::SkipEmptyParts;
-#else
-        auto skip = Qt::SkipEmptyParts;
-#endif
-
-        list = t_TextStream.readLine().split(QRegularExpression("\\s+"), skip);
-
-        for (qint32 j = 0; j < list.size(); ++j) {
-            value = list[j].toDouble(&isNumber);
-            if (isNumber) {
-                data(i, count) = value;
-                ++count;
-            }
+    // One row per vertex: vertex number, x, y, z (mm) and value
+    MatrixXd data = MatrixXd::Zero(nv, 5);
+    for (qint32 i = 0; i < nv && std::getline(file, line); ++i) {
+        std::istringstream fields(line);
+        for (qint32 j = 0; j < 5 && fields >> data(i, j); ++j) {
         }
     }
 
-    p_Label.comment = comment.mid(1, comment.size() - 1);
-    if (t_File.fileName().contains("lh."))
-        p_Label.hemi = 0;
-    else
-        p_Label.hemi = 1;
+    p_Label.comment = comment.empty() ? comment : comment.substr(1);
+    // As mne.read_label
+    p_Label.hemi = fileName.ends_with("lh.label") || fileName.starts_with("lh.") ? 0 : 1;
+    p_Label.vertices = data.col(0).cast<int>();
+    p_Label.pos = data.middleCols(1, 3).cast<float>().array() * 1e-3f;
+    p_Label.values = data.col(4);
 
-    //This structure is not need since we don't mix both hemis
-    //    p_Label.vertices.insert(p_Label.hemi, data.cast<int>().block(0,0,data.rows(),1));
-    //    p_Label.pos.insert(p_Label.hemi, data.cast<float>().block(0,1,data.rows(),3).array() * 1e-3);
-    //    p_Label.values.insert(p_Label.hemi, data.block(0,4,data.rows(),1));
-    p_Label.vertices = data.cast<int>().block(0, 0, data.rows(), 1);
-    p_Label.pos = data.cast<float>().block(0, 1, data.rows(), 3).array() * 1e-3f;
-    p_Label.values = data.block(0, 4, data.rows(), 1);
-
-    if (t_File.fileName().contains("lh.label")) {
-        QStringList tmpList = t_File.fileName().split("lh.")[0].split(QRegularExpression("\\W+"));
-        p_Label.name = tmpList[tmpList.size() - 1];
-    } else if (t_File.fileName().contains("lh."))
-        p_Label.name = t_File.fileName().split("lh.")[1].split(QRegularExpression("\\W+"))[0];
+    // <name>-lh.label or lh.<name>.label
+    if (const std::size_t at = fileName.find("-lh.label"); at != std::string::npos)
+        p_Label.name = fileName.substr(0, at);
+    else if (const std::size_t rh = fileName.find("-rh.label"); rh != std::string::npos)
+        p_Label.name = fileName.substr(0, rh);
+    else if (fileName.size() > 3 + 6 && (fileName.starts_with("lh.") || fileName.starts_with("rh.")))
+        p_Label.name = fileName.substr(3, fileName.size() - 3 - 6);
 
     qInfo("[done]\n");
-
-    t_File.close();
 
     return true;
 }

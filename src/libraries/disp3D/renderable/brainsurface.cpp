@@ -208,7 +208,7 @@ Eigen::MatrixX3f BrainSurface::vertexNormals() const
 bool BrainSurface::loadAnnotation(const QString& path)
 {
     FSLIB::FsAnnotation annotation;
-    if (!FSLIB::FsAnnotation::read(path, annotation)) {
+    if (!FSLIB::FsAnnotation::read(path.toStdU16String(), annotation)) {
         qWarning() << "BrainSurface: Failed to load annotation from" << path;
         return false;
     }
@@ -751,7 +751,7 @@ QString BrainSurface::getAnnotationLabel(int vertexIdx) const
     const FSLIB::FsColortable& ct = m_annotation.getColortable();
     for (int i = 0; i < ct.numEntries; ++i) {
         if (ct.table(i, 4) == labelId) {
-            QString name = ct.struct_names[i];
+            QString name = QString::fromStdString(ct.struct_names[static_cast<std::size_t>(i)]);
             // Remove null characters and trailing whitespace that might cause "strange signs"
             while (!name.isEmpty() && (name.endsWith('\0') || name.endsWith(' '))) {
                 name.chop(1);

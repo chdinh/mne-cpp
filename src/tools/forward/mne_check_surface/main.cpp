@@ -242,7 +242,7 @@ int main(int argc, char* argv[])
     } else {
         // Read single FreeSurfer surface
         FsSurface surface;
-        if (!FsSurface::read(surfFile, surface)) {
+        if (!FsSurface::read(surfFile.toStdU16String(), surface)) {
             qCritical("Cannot read surface: %s", qPrintable(surfFile));
             return 1;
         }

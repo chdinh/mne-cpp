@@ -143,10 +143,10 @@ void TestMneLabelPython::initTestCase()
     QCOMPARE(m_fwd.src[0].nuse, 3956);
     QCOMPARE(m_fwd.src[1].nuse, 3972);
 
-    QVERIFY(FsLabel::read(dataPath("subjects/sample/label/lh.V1.label"), m_v1));
+    QVERIFY(FsLabel::read(dataPath("subjects/sample/label/lh.V1.label").toStdU16String(), m_v1));
 
-    m_annot = FsAnnotationSet(dataPath("subjects/sample/label/lh.aparc.annot"), dataPath("subjects/sample/label/rh.aparc.annot"));
-    const FsSurfaceSet white(dataPath("subjects/sample/surf/lh.white"), dataPath("subjects/sample/surf/rh.white"));
+    m_annot = FsAnnotationSet(dataPath("subjects/sample/label/lh.aparc.annot").toStdU16String(), dataPath("subjects/sample/label/rh.aparc.annot").toStdU16String());
+    const FsSurfaceSet white(dataPath("subjects/sample/surf/lh.white").toStdU16String(), dataPath("subjects/sample/surf/rh.white").toStdU16String());
     QList<RowVector4i> rgbas;
     QVERIFY(m_annot.toLabels(white, m_aparc, rgbas));
 }
@@ -263,7 +263,7 @@ void TestMneLabelPython::pickRegions_matchesPython()
 
 void TestMneLabelPython::sourcePositionsByLabel()
 {
-    const FsSurfaceSet white(dataPath("subjects/sample/surf/lh.white"), dataPath("subjects/sample/surf/rh.white"));
+    const FsSurfaceSet white(dataPath("subjects/sample/surf/lh.white").toStdU16String(), dataPath("subjects/sample/surf/rh.white").toStdU16String());
 
     QVERIFY(m_fwd.getSourcePositionsByLabel({}, white).rows() == 0);
     QVERIFY(m_fwd.getSourcePositionsByLabel({m_v1}, FsSurfaceSet()).rows() == 0);

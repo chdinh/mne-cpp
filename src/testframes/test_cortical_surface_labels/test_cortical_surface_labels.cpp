@@ -41,7 +41,7 @@ FsLabel makeLabel(int hemi)
         0.002f, 0.0f, 0.0f,
         0.003f, 0.0f, 0.0f;
     Eigen::VectorXd vals = Eigen::VectorXd::Ones(3);
-    return FsLabel(v, pos, vals, hemi, QStringLiteral("test-roi"));
+    return FsLabel(v, pos, vals, hemi, QStringLiteral("test-roi").toStdString());
 }
 
 InvSourceEstimate makeStcCovering(const Eigen::VectorXi& verts, int nTimes)
@@ -85,7 +85,7 @@ void TestCorticalSurfaceLabels::testSaveAndReloadLabel()
     QVERIFY(QFile::exists(outPath));
 
     FsLabel reloaded;
-    QVERIFY(FsLabel::read(outPath, reloaded));
+    QVERIFY(FsLabel::read(outPath.toStdU16String(), reloaded));
     QCOMPARE(static_cast<int>(reloaded.vertices.size()), 3);
     QCOMPARE(reloaded.vertices[0], 0);
     QCOMPARE(reloaded.vertices[1], 1);

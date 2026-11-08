@@ -39,16 +39,17 @@
 // EIGEN INCLUDES
 //=============================================================================================================
 
+#include <string>
 #include <Eigen/Core>
 #include <Eigen/SparseCore>
 
 //=============================================================================================================
-// QT INCLUDES
+// STL INCLUDES
 //=============================================================================================================
 
-#include <QList>
-#include <QSet>
-#include <QVector>
+#include <span>
+#include <string>
+#include <vector>
 
 //=============================================================================================================
 // DEFINE NAMESPACE FSLIB
@@ -104,10 +105,10 @@ public:
      * @return The grown label, vertices ascending.
      */
     static FsLabel growCircularLabel(const FsSurface& surface,
-                                     const QVector<int>& seeds,
+                                     std::span<const int> seeds,
                                      double extentMm,
                                      int hemi,
-                                     const QString& name);
+                                     const std::string& name);
 
     //=========================================================================================================
     /**
@@ -121,8 +122,8 @@ public:
      *
      * @return List of sub-labels (connected components).
      */
-    static QList<FsLabel> splitLabel(const FsLabel& label,
-                                     const FsSurface& surface);
+    static std::vector<FsLabel> splitLabel(const FsLabel& label,
+                                           const FsSurface& surface);
 
     //=========================================================================================================
     /**
@@ -139,11 +140,11 @@ public:
      *
      * @return List of labels (connected components above threshold).
      */
-    static QList<FsLabel> stcToLabel(const Eigen::MatrixXd& stcData,
-                                     const Eigen::VectorXi& vertices,
-                                     const FsSurface& surface,
-                                     double dThreshold = 0.0,
-                                     int iHemi = 0);
+    static std::vector<FsLabel> stcToLabel(const Eigen::MatrixXd& stcData,
+                                           const Eigen::VectorXi& vertices,
+                                           const FsSurface& surface,
+                                           double dThreshold = 0.0,
+                                           int iHemi = 0);
 
     //=========================================================================================================
     /**
@@ -157,7 +158,7 @@ public:
      *
      * @return Binary mask (n_vertices × n_times).
      */
-    static Eigen::MatrixXd labelsToStc(const QList<FsLabel>& labels,
+    static Eigen::MatrixXd labelsToStc(std::span<const FsLabel> labels,
                                        const Eigen::VectorXi& stcVertices,
                                        int nTimes);
 
@@ -168,10 +169,10 @@ public:
      * @param[in] tris   Triangle matrix (n_tris × 3).
      * @param[in] nVerts Total number of vertices.
      *
-     * @return Adjacency list: for each vertex, the set of neighbor vertices.
+     * @return Adjacency list: for each vertex, its neighbours in ascending order.
      */
-    static QList<QSet<int>> buildAdjacency(const Eigen::MatrixX3i& tris,
-                                           int nVerts);
+    static std::vector<std::vector<int>> buildAdjacency(const Eigen::MatrixX3i& tris,
+                                                        int nVerts);
 };
 
 } // namespace FSLIB

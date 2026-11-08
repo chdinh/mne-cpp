@@ -30,7 +30,7 @@
       "decoding",
       "math"
     ],
-    "tokens": 17509,
+    "tokens": 17238,
     "gui_outside_design": []
   },
   "libraries": {
@@ -183,7 +183,7 @@
       ]
     },
     "disp3D": {
-      "tokens": 2914,
+      "tokens": 2915,
       "by_category": {
         "containers": 274,
         "files": 45,
@@ -194,7 +194,7 @@
         "other": 228,
         "random": 3,
         "smart_pointers": 73,
-        "strings": 687,
+        "strings": 688,
         "threads": 74,
         "time": 17
       },
@@ -259,18 +259,15 @@
       ]
     },
     "fs": {
-      "tokens": 469,
+      "tokens": 199,
       "by_category": {
-        "containers": 67,
-        "files": 21,
-        "global": 147,
-        "logging": 50,
+        "containers": 18,
+        "global": 122,
+        "logging": 46,
         "objects_signals": 1,
-        "regex": 3,
-        "smart_pointers": 12,
-        "strings": 168
+        "smart_pointers": 12
       },
-      "public_header_includes": 18,
+      "public_header_includes": 11,
       "q_object": 0,
       "files": 18,
       "modules": [
@@ -397,7 +394,7 @@
       ]
     },
     "mne": {
-      "tokens": 1111,
+      "tokens": 1109,
       "by_category": {
         "containers": 4,
         "files": 66,
@@ -407,7 +404,7 @@
         "other": 23,
         "regex": 1,
         "smart_pointers": 87,
-        "strings": 51,
+        "strings": 49,
         "threads": 10
       },
       "public_header_includes": 76,

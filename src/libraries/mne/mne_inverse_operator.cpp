@@ -301,8 +301,8 @@ MatrixXd MNEInverseOperator::cluster_kernel(const FsAnnotationSet& p_AnnotationS
         //
         for (qint32 i = 0; i < label_ids.rows(); ++i) {
             if (label_ids[i] != 0) {
-                QString curr_name = t_CurrentColorTable.struct_names[i]; //obj.label2AtlasName(label(i));
-                qInfo("\tCluster %d / %ld %s...", i + 1, label_ids.rows(), curr_name.toUtf8().constData());
+                const std::string& curr_name = t_CurrentColorTable.struct_names[static_cast<std::size_t>(i)]; //obj.label2AtlasName(label(i));
+                qInfo("\tCluster %d / %ld %s...", i + 1, label_ids.rows(), curr_name.c_str());
 
                 //
                 // Get source space indeces

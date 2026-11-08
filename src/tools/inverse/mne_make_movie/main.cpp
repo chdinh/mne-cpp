@@ -438,7 +438,7 @@ int main(int argc, char* argv[])
         QString labelOutFile = parser.value(labelOutOpt);
 
         FsLabel label;
-        if (!FsLabel::read(labelFile, label)) {
+        if (!FsLabel::read(labelFile.toStdU16String(), label)) {
             qCritical("Cannot read label: %s", qPrintable(labelFile));
             return 1;
         }
@@ -497,7 +497,7 @@ int main(int argc, char* argv[])
     auto renderHemi = [&](const QString& hemi) {
         QString surfPath = subjectsDir + "/" + subject + "/surf/" + hemi + "." + surfName;
         FsSurface surf;
-        if (!FsSurface::read(surfPath, surf)) {
+        if (!FsSurface::read(surfPath.toStdU16String(), surf)) {
             qCritical("Cannot read surface: %s", qPrintable(surfPath));
             return;
         }

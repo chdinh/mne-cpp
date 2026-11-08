@@ -95,19 +95,19 @@ void TestLabelUtils::testBuildAdjacency()
     QCOMPARE(adj.size(), 4);
 
     // Vertex 0 connects to 1 and 2
-    QVERIFY(adj[0].contains(1));
-    QVERIFY(adj[0].contains(2));
-    QVERIFY(!adj[0].contains(3));
+    QVERIFY(std::ranges::contains(adj[0], 1));
+    QVERIFY(std::ranges::contains(adj[0], 2));
+    QVERIFY(!std::ranges::contains(adj[0], 3));
 
     // Vertex 1 connects to 0, 2, 3
-    QVERIFY(adj[1].contains(0));
-    QVERIFY(adj[1].contains(2));
-    QVERIFY(adj[1].contains(3));
+    QVERIFY(std::ranges::contains(adj[1], 0));
+    QVERIFY(std::ranges::contains(adj[1], 2));
+    QVERIFY(std::ranges::contains(adj[1], 3));
 
     // Vertex 3 connects to 1 and 2 only
-    QVERIFY(adj[3].contains(1));
-    QVERIFY(adj[3].contains(2));
-    QVERIFY(!adj[3].contains(0));
+    QVERIFY(std::ranges::contains(adj[3], 1));
+    QVERIFY(std::ranges::contains(adj[3], 2));
+    QVERIFY(!std::ranges::contains(adj[3], 0));
 }
 
 //=============================================================================================================
@@ -182,7 +182,7 @@ void TestLabelUtils::testSplitLabelSingle()
     label.name = "test";
 
     FsSurface emptySurf;
-    QList<FsLabel> parts = FsLabelUtils::splitLabel(label, emptySurf);
+    std::vector<FsLabel> parts = FsLabelUtils::splitLabel(label, emptySurf);
 
     // With empty surface (no adjacency), each vertex becomes its own component
     // since there are no edges connecting them
@@ -196,8 +196,8 @@ void TestLabelUtils::testSplitLabelTwo()
     // Empty label → no components
     FsLabel emptyLabel;
     FsSurface emptySurf;
-    QList<FsLabel> parts = FsLabelUtils::splitLabel(emptyLabel, emptySurf);
-    QVERIFY(parts.isEmpty());
+    std::vector<FsLabel> parts = FsLabelUtils::splitLabel(emptyLabel, emptySurf);
+    QVERIFY(parts.empty());
 }
 
 //=============================================================================================================
@@ -209,10 +209,10 @@ void TestLabelUtils::testStcToLabelBasic()
     VectorXi vertices = VectorXi::LinSpaced(5, 0, 4);
 
     FsSurface emptySurf;
-    QList<FsLabel> labels = FsLabelUtils::stcToLabel(stcData, vertices, emptySurf, 0.0, 0);
+    std::vector<FsLabel> labels = FsLabelUtils::stcToLabel(stcData, vertices, emptySurf, 0.0, 0);
 
     // Empty surface → returns empty
-    QVERIFY(labels.isEmpty());
+    QVERIFY(labels.empty());
 }
 
 //=============================================================================================================
@@ -224,8 +224,8 @@ void TestLabelUtils::testStcToLabelThreshold()
     VectorXi emptyVerts;
     FsSurface emptySurf;
 
-    QList<FsLabel> labels = FsLabelUtils::stcToLabel(emptyData, emptyVerts, emptySurf);
-    QVERIFY(labels.isEmpty());
+    std::vector<FsLabel> labels = FsLabelUtils::stcToLabel(emptyData, emptyVerts, emptySurf);
+    QVERIFY(labels.empty());
 }
 
 //=============================================================================================================

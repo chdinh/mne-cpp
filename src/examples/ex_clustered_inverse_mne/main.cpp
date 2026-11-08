@@ -120,8 +120,8 @@ int main(int argc, char* argv[])
 
     double lambda2 = 1.0 / pow(snr, 2);
 
-    FsSurfaceSet t_surfSet(parser.value(subjectOption), parser.value(hemiOption).toInt(), parser.value(surfOption), parser.value(subjectPathOption));
-    FsAnnotationSet t_annotationSet(parser.value(subjectOption), parser.value(hemiOption).toInt(), parser.value(annotOption), parser.value(subjectPathOption));
+    FsSurfaceSet t_surfSet(parser.value(subjectOption).toStdString(), parser.value(hemiOption).toInt(), parser.value(surfOption).toStdString(), parser.value(subjectPathOption).toStdU16String());
+    FsAnnotationSet t_annotationSet(parser.value(subjectOption).toStdString(), parser.value(hemiOption).toInt(), parser.value(annotOption).toStdString(), parser.value(subjectPathOption).toStdU16String());
 
     qDebug() << "Start calculation with: SNR" << snr << "; Lambda" << lambda2 << "; Method" << method << "; stc:" << t_sFileNameStc;
 
@@ -293,7 +293,7 @@ int main(int argc, char* argv[])
     for (auto it = t_surfSet.data().constBegin(); it != t_surfSet.data().constEnd(); ++it) {
         int hIdx = it.key();
         QString hemi = (it.value().hemi() == 0) ? "lh" : "rh";
-        QString surfType = it.value().surf().isEmpty() ? "inflated" : it.value().surf();
+        QString surfType = QString::fromStdString(it.value().surf().empty() ? "inflated" : it.value().surf());
         pModel->addSurface(parser.value(subjectOption), hemi, surfType, it.value());
         if (t_annotationSet.size() > hIdx)
             pModel->addAnnotation(parser.value(subjectOption), hemi, t_annotationSet[hIdx]);

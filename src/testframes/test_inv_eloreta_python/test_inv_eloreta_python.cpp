@@ -134,7 +134,7 @@ void TestInvEloretaPython::initTestCase()
     }
 
     FsLabel v1;
-    QVERIFY(FsLabel::read(data("subjects/sample/label/lh.V1.label"), v1));
+    QVERIFY(FsLabel::read(data("subjects/sample/label/lh.V1.label").toStdU16String(), v1));
     m_v1 = v1;
 
     const FiffCov cov(data("MEG/sample/sample_audvis-cov.fif").toStdString());

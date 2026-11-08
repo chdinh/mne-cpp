@@ -78,7 +78,7 @@ FwdSettingsView::FwdSettingsView(const QString& sSettingsPath,
     QString t_sAtlasDir = QCoreApplication::applicationDirPath() + "/../resources/data/MNE-sample-data/subjects/sample/label";
     m_pUi->m_qLineEdit_AtlasDirName->setText(t_sAtlasDir);
 
-    FsAnnotationSet::SPtr t_pAnnotationSet = FsAnnotationSet::SPtr(new FsAnnotationSet(t_sAtlasDir + "/lh.aparc.a2009s.annot", t_sAtlasDir + "/rh.aparc.a2009s.annot"));
+    FsAnnotationSet::SPtr t_pAnnotationSet = FsAnnotationSet::SPtr(new FsAnnotationSet((t_sAtlasDir + "/lh.aparc.a2009s.annot").toStdU16String(), (t_sAtlasDir + "/rh.aparc.a2009s.annot").toStdU16String()));
 
     // No atlasDirChanged() here: nothing can be connected to it during construction
     if (!t_pAnnotationSet->empty() && t_pAnnotationSet->size() == 2) {
@@ -277,7 +277,7 @@ void FwdSettingsView::showAtlasDirDialog()
 
     m_pUi->m_qLineEdit_AtlasDirName->setText(t_sAtlasDir);
 
-    FsAnnotationSet::SPtr t_pAnnotationSet = FsAnnotationSet::SPtr(new FsAnnotationSet(t_sAtlasDir + "/lh.aparc.a2009s.annot", t_sAtlasDir + "/rh.aparc.a2009s.annot"));
+    FsAnnotationSet::SPtr t_pAnnotationSet = FsAnnotationSet::SPtr(new FsAnnotationSet((t_sAtlasDir + "/lh.aparc.a2009s.annot").toStdU16String(), (t_sAtlasDir + "/rh.aparc.a2009s.annot").toStdU16String()));
 
     if (!t_pAnnotationSet->empty() && t_pAnnotationSet->size() == 2) {
         emit atlasDirChanged(t_sAtlasDir, t_pAnnotationSet);

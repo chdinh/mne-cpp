@@ -17,19 +17,15 @@
 #include "fs_label_utils.h"
 
 //=============================================================================================================
-// QT INCLUDES
-//=============================================================================================================
-
-#include <QDebug>
-#include <QHash>
-#include <QQueue>
-
-//=============================================================================================================
 // STD INCLUDES
 //=============================================================================================================
 
 #include <algorithm>
 #include <cmath>
+#include <format>
+#include <limits>
+#include <numeric>
+#include <unordered_map>
 
 //=============================================================================================================
 // USED NAMESPACES
@@ -39,28 +35,47 @@ using namespace FSLIB;
 using namespace Eigen;
 
 //=============================================================================================================
+// DEFINE STATIC METHODS
+//=============================================================================================================
+
+namespace
+{
+
+FsLabel makeLabel(const std::vector<int>& verts, int hemi, std::string name)
+{
+    FsLabel label;
+    label.hemi = hemi;
+    label.name = std::move(name);
+    const auto n = static_cast<Index>(verts.size());
+    label.vertices = Map<const VectorXi>(verts.data(), n);
+    label.pos = MatrixX3f::Zero(n, 3);
+    label.values = VectorXd::Ones(n);
+    return label;
+}
+
+} // namespace
+
+//=============================================================================================================
 // DEFINE MEMBER METHODS
 //=============================================================================================================
 
-QList<QSet<int>> FsLabelUtils::buildAdjacency(const MatrixX3i& tris, int nVerts)
+std::vector<std::vector<int>> FsLabelUtils::buildAdjacency(const MatrixX3i& tris, int nVerts)
 {
-    QList<QSet<int>> adj(nVerts);
-
-    for (int t = 0; t < tris.rows(); ++t) {
-        int v0 = tris(t, 0);
-        int v1 = tris(t, 1);
-        int v2 = tris(t, 2);
-
-        if (v0 >= 0 && v0 < nVerts && v1 >= 0 && v1 < nVerts && v2 >= 0 && v2 < nVerts) {
-            adj[v0].insert(v1);
-            adj[v0].insert(v2);
-            adj[v1].insert(v0);
-            adj[v1].insert(v2);
-            adj[v2].insert(v0);
-            adj[v2].insert(v1);
+    std::vector<std::vector<int>> adj(static_cast<std::size_t>(std::max(nVerts, 0)));
+    for (Index t = 0; t < tris.rows(); ++t) {
+        const int v[3] = {tris(t, 0), tris(t, 1), tris(t, 2)};
+        if (std::ranges::all_of(v, [nVerts](int x) { return x >= 0 && x < nVerts; })) {
+            for (int a = 0; a < 3; ++a) {
+                auto& neighbours = adj[static_cast<std::size_t>(v[a])];
+                neighbours.push_back(v[(a + 1) % 3]);
+                neighbours.push_back(v[(a + 2) % 3]);
+            }
         }
     }
-
+    for (auto& neighbours : adj) {
+        std::ranges::sort(neighbours);
+        neighbours.erase(std::unique(neighbours.begin(), neighbours.end()), neighbours.end());
+    }
     return adj;
 }
 
@@ -74,184 +89,153 @@ FsLabel FsLabelUtils::growLabel(const FsLabel& label,
         return label;
 
     const int nVerts = static_cast<int>(surface.rr().rows());
-    QList<QSet<int>> adj = buildAdjacency(surface.tris(), nVerts);
+    const auto adj = buildAdjacency(surface.tris(), nVerts);
 
-    // Start with seed vertices
-    QSet<int> current;
-    for (int i = 0; i < label.vertices.size(); ++i)
-        current.insert(label.vertices[i]);
-
-    QSet<int> allVerts = current;
-
-    // BFS expansion
-    for (int step = 0; step < nSteps; ++step) {
-        QSet<int> frontier;
-        for (int v : current) {
-            if (v >= 0 && v < nVerts) {
-                for (int neighbor : adj[v]) {
-                    if (!allVerts.contains(neighbor))
-                        frontier.insert(neighbor);
+    // Breadth-first by rings; out-of-range seed vertices are kept but not expanded
+    std::vector<char> inLabel(static_cast<std::size_t>(nVerts), 0);
+    std::vector<int> all(label.vertices.data(), label.vertices.data() + label.vertices.size());
+    std::vector<int> current;
+    for (const int v : all) {
+        if (v >= 0 && v < nVerts && !inLabel[static_cast<std::size_t>(v)]) {
+            inLabel[static_cast<std::size_t>(v)] = 1;
+            current.push_back(v);
+        }
+    }
+    for (int step = 0; step < nSteps && !current.empty(); ++step) {
+        std::vector<int> frontier;
+        for (const int v : current) {
+            for (const int neighbour : adj[static_cast<std::size_t>(v)]) {
+                if (!inLabel[static_cast<std::size_t>(neighbour)]) {
+                    inLabel[static_cast<std::size_t>(neighbour)] = 1;
+                    frontier.push_back(neighbour);
                 }
             }
         }
-        allVerts.unite(frontier);
-        current = frontier;
-
-        if (frontier.isEmpty())
-            break;
+        all.insert(all.end(), frontier.begin(), frontier.end());
+        current = std::move(frontier);
     }
+    std::ranges::sort(all);
+    all.erase(std::unique(all.begin(), all.end()), all.end());
 
-    // Build result label
-    QList<int> sortedVerts(allVerts.begin(), allVerts.end());
-    std::sort(sortedVerts.begin(), sortedVerts.end());
-
-    FsLabel result;
-    result.hemi = label.hemi;
-    result.name = label.name + "_grown";
-    result.vertices.resize(sortedVerts.size());
-    result.pos.resize(sortedVerts.size(), 3);
-    result.values = VectorXd::Ones(sortedVerts.size());
-
-    for (int i = 0; i < sortedVerts.size(); ++i) {
-        result.vertices[i] = sortedVerts[i];
-        if (sortedVerts[i] < nVerts)
-            result.pos.row(i) = surface.rr().row(sortedVerts[i]);
+    FsLabel result = makeLabel(all, label.hemi, label.name + "_grown");
+    for (Index i = 0; i < result.vertices.size(); ++i) {
+        if (result.vertices[i] >= 0 && result.vertices[i] < nVerts)
+            result.pos.row(i) = surface.rr().row(result.vertices[i]);
     }
-
     return result;
 }
 
 //=============================================================================================================
 
 FsLabel FsLabelUtils::growCircularLabel(const FsSurface& surface,
-                                        const QVector<int>& seeds,
+                                        std::span<const int> seeds,
                                         double extentMm,
                                         int hemi,
-                                        const QString& name)
+                                        const std::string& name)
 {
     // Adapted from mne.label._verts_within_dist / _grow_labels (MNE-Python, BSD-3-Clause).
     const MatrixX3f& rr = surface.rr();
     const int nVerts = static_cast<int>(rr.rows());
+    const auto adj = buildAdjacency(surface.tris(), nVerts);
 
-    // Neighbours in ascending order (the CSR order of mne.surface.mesh_dist) with edge lengths in mm
-    const QList<QSet<int>> adjacency = buildAdjacency(surface.tris(), nVerts);
-    QVector<QVector<QPair<int, double>>> graph(nVerts);
-    for (int v = 0; v < nVerts; ++v) {
-        QList<int> neighbours(adjacency[v].begin(), adjacency[v].end());
-        std::sort(neighbours.begin(), neighbours.end());
-        for (int n : neighbours)
-            graph[v].append({n, 1000.0 * (rr.row(n) - rr.row(v)).cast<double>().norm()});
+    // NaN marks a vertex not reached yet; neighbours are visited in ascending order, as in mne's CSR graph
+    std::vector<double> dist(static_cast<std::size_t>(std::max(nVerts, 0)), std::numeric_limits<double>::quiet_NaN());
+    std::vector<int> reached;
+    std::vector<int> addedLast;
+    for (const int seed : seeds) {
+        if (seed >= 0 && seed < nVerts && std::isnan(dist[static_cast<std::size_t>(seed)])) {
+            dist[static_cast<std::size_t>(seed)] = 0.0;
+            addedLast.push_back(seed);
+        }
     }
-
-    QHash<int, double> distMap;
-    QVector<int> addedLast;
-    for (int seed : seeds) {
-        if (seed < 0 || seed >= nVerts)
-            continue;
-        distMap.insert(seed, 0.0);
-        addedLast.append(seed);
-    }
-    while (!addedLast.isEmpty()) {
-        QVector<int> added;
-        for (int i : std::as_const(addedLast)) {
-            const double vDist = distMap.value(i);
-            for (const auto& [j, d] : std::as_const(graph[i])) {
-                const double nDist = vDist + d;
-                const auto it = distMap.find(j);
-                if (it != distMap.end()) {
-                    if (nDist < it.value())
-                        it.value() = nDist;
+    reached = addedLast;
+    while (!addedLast.empty()) {
+        std::vector<int> added;
+        for (const int i : addedLast) {
+            const double vDist = dist[static_cast<std::size_t>(i)];
+            for (const int j : adj[static_cast<std::size_t>(i)]) {
+                const double nDist = vDist + 1000.0 * (rr.row(j) - rr.row(i)).cast<double>().norm();
+                double& known = dist[static_cast<std::size_t>(j)];
+                if (!std::isnan(known)) {
+                    known = std::min(known, nDist);
                 } else if (nDist <= extentMm) {
-                    distMap.insert(j, nDist);
-                    added.append(j);
+                    known = nDist;
+                    added.push_back(j);
                 }
             }
         }
-        addedLast = added;
+        reached.insert(reached.end(), added.begin(), added.end());
+        addedLast = std::move(added);
     }
+    std::ranges::sort(reached);
 
-    QList<int> verts = distMap.keys();
-    std::sort(verts.begin(), verts.end());
-    FsLabel label;
-    label.hemi = hemi;
-    const QString suffix = hemi == 0 ? QStringLiteral("lh") : QStringLiteral("rh");
-    label.name = name.endsWith(suffix) ? name : name + "-" + suffix;
-    label.vertices.resize(verts.size());
-    label.pos.resize(verts.size(), 3);
-    label.values.resize(verts.size());
-    for (int k = 0; k < verts.size(); ++k) {
-        label.vertices[k] = verts[k];
-        label.pos.row(k) = rr.row(verts[k]);
-        label.values[k] = std::trunc(distMap.value(verts[k]));
+    const char* suffix = hemi == 0 ? "lh" : "rh";
+    FsLabel label = makeLabel(reached, hemi, name.ends_with(suffix) ? name : std::format("{}-{}", name, suffix));
+    for (Index k = 0; k < label.vertices.size(); ++k) {
+        label.pos.row(k) = rr.row(label.vertices[k]);
+        label.values[k] = std::trunc(dist[static_cast<std::size_t>(label.vertices[k])]);
     }
     return label;
 }
 
 //=============================================================================================================
 
-QList<FsLabel> FsLabelUtils::splitLabel(const FsLabel& label,
-                                        const FsSurface& surface)
+std::vector<FsLabel> FsLabelUtils::splitLabel(const FsLabel& label,
+                                              const FsSurface& surface)
 {
-    QList<FsLabel> components;
-
+    std::vector<FsLabel> components;
     if (label.empty())
         return components;
 
     // Label row of each vertex: the parts keep the label's positions and values
-    QHash<int, int> rowOf;
-    for (int i = 0; i < label.vertices.size(); ++i)
-        rowOf.insert(label.vertices[i], i);
+    std::unordered_map<int, Index> rowOf;
+    rowOf.reserve(static_cast<std::size_t>(label.vertices.size()));
+    for (Index i = 0; i < label.vertices.size(); ++i)
+        rowOf.insert_or_assign(label.vertices[i], i);
 
     // Connected components over the surface edges; without a surface every vertex stands alone
     const int nVerts = surface.empty() ? 0 : static_cast<int>(surface.rr().rows());
-    const QList<QSet<int>> adj = surface.empty() ? QList<QSet<int>>() : buildAdjacency(surface.tris(), nVerts);
-    QSet<int> visited;
-    QList<QList<int>> parts;
-    for (int i = 0; i < label.vertices.size(); ++i) {
+    const auto adj = surface.empty() ? std::vector<std::vector<int>>() : buildAdjacency(surface.tris(), nVerts);
+    std::vector<char> visited(static_cast<std::size_t>(label.vertices.size()), 0);
+    std::vector<std::vector<int>> parts;
+    for (Index i = 0; i < label.vertices.size(); ++i) {
         const int seed = label.vertices[i];
-        if (visited.contains(seed))
+        char& seen = visited[static_cast<std::size_t>(rowOf[seed])];
+        if (seen)
             continue;
-        QQueue<int> queue;
-        queue.enqueue(seed);
-        visited.insert(seed);
-        QList<int> part;
-        while (!queue.isEmpty()) {
-            const int v = queue.dequeue();
-            part.append(v);
-            if (v >= 0 && v < nVerts) {
-                for (int neighbor : adj[v]) {
-                    if (rowOf.contains(neighbor) && !visited.contains(neighbor)) {
-                        visited.insert(neighbor);
-                        queue.enqueue(neighbor);
-                    }
+        seen = 1;
+        std::vector<int> part{seed};
+        for (std::size_t head = 0; head < part.size(); ++head) {
+            const int v = part[head];
+            if (v < 0 || v >= nVerts)
+                continue;
+            for (const int neighbour : adj[static_cast<std::size_t>(v)]) {
+                const auto it = rowOf.find(neighbour);
+                if (it != rowOf.end() && !visited[static_cast<std::size_t>(it->second)]) {
+                    visited[static_cast<std::size_t>(it->second)] = 1;
+                    part.push_back(neighbour);
                 }
             }
         }
-        std::sort(part.begin(), part.end());
-        parts.append(part);
+        std::ranges::sort(part);
+        parts.push_back(std::move(part));
     }
 
     // As mne Label.split("contiguous"): largest part first, named <name>_div<i>[-lh|-rh]
-    std::stable_sort(parts.begin(), parts.end(), [](const QList<int>& a, const QList<int>& b) { return a.size() > b.size(); });
-    const bool hemiSuffix = label.name.endsWith(QStringLiteral("lh")) || label.name.endsWith(QStringLiteral("rh"));
-    const QString base = hemiSuffix ? label.name.left(label.name.size() - 3) : label.name;
-    const QString ext = hemiSuffix ? label.name.right(3) : QString();
+    std::ranges::stable_sort(parts, std::ranges::greater{}, &std::vector<int>::size);
+    const bool hemiSuffix = label.name.ends_with("lh") || label.name.ends_with("rh");
+    const std::string_view base = std::string_view(label.name).substr(0, hemiSuffix ? label.name.size() - 3 : label.name.size());
+    const std::string_view ext = hemiSuffix ? std::string_view(label.name).substr(label.name.size() - 3) : std::string_view();
 
-    for (int p = 0; p < parts.size(); ++p) {
-        const QList<int>& part = parts[p];
-        FsLabel comp;
-        comp.hemi = label.hemi;
-        comp.name = QStringLiteral("%1_div%2%3").arg(base).arg(p + 1).arg(ext);
-        comp.vertices.resize(part.size());
-        comp.pos.resize(part.size(), 3);
-        comp.values.resize(part.size());
-        for (int j = 0; j < part.size(); ++j) {
-            const int row = rowOf.value(part[j]);
-            comp.vertices[j] = part[j];
+    components.reserve(parts.size());
+    for (std::size_t p = 0; p < parts.size(); ++p) {
+        FsLabel comp = makeLabel(parts[p], label.hemi, std::format("{}_div{}{}", base, p + 1, ext));
+        for (Index j = 0; j < comp.vertices.size(); ++j) {
+            const Index row = rowOf[comp.vertices[j]];
             comp.pos.row(j) = label.pos.row(row);
             comp.values[j] = row < label.values.size() ? label.values[row] : 1.0;
         }
-        components.append(comp);
+        components.push_back(std::move(comp));
     }
 
     return components;
@@ -259,82 +243,63 @@ QList<FsLabel> FsLabelUtils::splitLabel(const FsLabel& label,
 
 //=============================================================================================================
 
-QList<FsLabel> FsLabelUtils::stcToLabel(const MatrixXd& stcData,
-                                        const VectorXi& vertices,
-                                        const FsSurface& surface,
-                                        double dThreshold,
-                                        int iHemi)
+std::vector<FsLabel> FsLabelUtils::stcToLabel(const MatrixXd& stcData,
+                                              const VectorXi& vertices,
+                                              const FsSurface& surface,
+                                              double dThreshold,
+                                              int iHemi)
 {
-    QList<FsLabel> labels;
-
     if (stcData.size() == 0 || vertices.size() == 0 || surface.empty())
-        return labels;
+        return {};
 
-    // Find vertices above threshold (max absolute value across time)
-    VectorXd maxAbs = stcData.cwiseAbs().rowwise().maxCoeff();
-
-    QSet<int> aboveThresh;
-    for (int i = 0; i < vertices.size(); ++i) {
+    // Vertices whose maximum absolute value over time exceeds the threshold, with their first STC row
+    const VectorXd maxAbs = stcData.cwiseAbs().rowwise().maxCoeff();
+    std::unordered_map<int, Index> firstRow;
+    for (Index i = 0; i < vertices.size(); ++i) {
         if (maxAbs[i] > dThreshold)
-            aboveThresh.insert(vertices[i]);
+            firstRow.try_emplace(vertices[i], i);
     }
+    if (firstRow.empty())
+        return {};
 
-    if (aboveThresh.isEmpty())
-        return labels;
-
-    // Build a label from above-threshold vertices and split into components
-    FsLabel fullLabel;
-    fullLabel.hemi = iHemi;
-    fullLabel.name = "stc_label";
-
-    QList<int> sortedVerts(aboveThresh.begin(), aboveThresh.end());
-    std::sort(sortedVerts.begin(), sortedVerts.end());
+    std::vector<int> sortedVerts;
+    sortedVerts.reserve(firstRow.size());
+    for (const auto& entry : firstRow)
+        sortedVerts.push_back(entry.first);
+    std::ranges::sort(sortedVerts);
 
     const int nSurfVerts = static_cast<int>(surface.rr().rows());
-    fullLabel.vertices.resize(sortedVerts.size());
-    fullLabel.pos.resize(sortedVerts.size(), 3);
-    fullLabel.values.resize(sortedVerts.size());
-
-    for (int i = 0; i < sortedVerts.size(); ++i) {
-        fullLabel.vertices[i] = sortedVerts[i];
-        if (sortedVerts[i] < nSurfVerts)
-            fullLabel.pos.row(i) = surface.rr().row(sortedVerts[i]);
-
-        // Find the vertex's row in the STC
-        for (int j = 0; j < vertices.size(); ++j) {
-            if (vertices[j] == sortedVerts[i]) {
-                fullLabel.values[i] = maxAbs[j];
-                break;
-            }
-        }
+    FsLabel fullLabel = makeLabel(sortedVerts, iHemi, "stc_label");
+    for (Index i = 0; i < fullLabel.vertices.size(); ++i) {
+        const int v = fullLabel.vertices[i];
+        if (v >= 0 && v < nSurfVerts)
+            fullLabel.pos.row(i) = surface.rr().row(v);
+        fullLabel.values[i] = maxAbs[firstRow[v]];
     }
 
     // Split into connected components
-    labels = splitLabel(fullLabel, surface);
-
-    return labels;
+    return splitLabel(fullLabel, surface);
 }
 
 //=============================================================================================================
 
-MatrixXd FsLabelUtils::labelsToStc(const QList<FsLabel>& labels,
+MatrixXd FsLabelUtils::labelsToStc(std::span<const FsLabel> labels,
                                    const VectorXi& stcVertices,
                                    int nTimes)
 {
-    const int nVerts = static_cast<int>(stcVertices.size());
+    const Index nVerts = stcVertices.size();
     MatrixXd mask = MatrixXd::Zero(nVerts, nTimes);
 
-    // Build vertex-to-row map
-    QMap<int, int> vertToRow;
-    for (int i = 0; i < nVerts; ++i)
-        vertToRow.insert(stcVertices[i], i);
+    std::unordered_map<int, Index> vertToRow;
+    vertToRow.reserve(static_cast<std::size_t>(nVerts));
+    for (Index i = 0; i < nVerts; ++i)
+        vertToRow.insert_or_assign(stcVertices[i], i);
 
-    for (const auto& label : labels) {
-        for (int i = 0; i < label.vertices.size(); ++i) {
-            auto it = vertToRow.find(label.vertices[i]);
-            if (it != vertToRow.end()) {
-                mask.row(it.value()).setOnes();
-            }
+    for (const FsLabel& label : labels) {
+        for (Index i = 0; i < label.vertices.size(); ++i) {
+            const auto it = vertToRow.find(label.vertices[i]);
+            if (it != vertToRow.end())
+                mask.row(it->second).setOnes();
         }
     }
 

@@ -134,7 +134,7 @@ void RealTime3DWidget::update(SCMEASLIB::Measurement::SPtr pMeasurement)
                 for (int i = 0; i < pRTCE->getSurfSet()->size(); ++i) {
                     const FSLIB::FsSurface& surf = (*pRTCE->getSurfSet())[i];
                     QString hemi = (surf.hemi() == 0) ? "lh" : "rh";
-                    QString surfType = surf.surf().isEmpty() ? "inflated" : surf.surf();
+                    QString surfType = QString::fromStdString(surf.surf().empty() ? "inflated" : surf.surf());
                     m_pData3DModel->addSurface("Subject", hemi, surfType, surf);
                     m_pData3DModel->addAnnotation("Subject", hemi, (*pRTCE->getAnnotSet())[i]);
                 }
@@ -168,7 +168,7 @@ void RealTime3DWidget::update(SCMEASLIB::Measurement::SPtr pMeasurement)
                 for (int i = 0; i < pRTSE->getSurfSet()->size(); ++i) {
                     const FSLIB::FsSurface& surf = (*pRTSE->getSurfSet())[i];
                     QString hemi = (surf.hemi() == 0) ? "lh" : "rh";
-                    QString surfType = surf.surf().isEmpty() ? "inflated" : surf.surf();
+                    QString surfType = QString::fromStdString(surf.surf().empty() ? "inflated" : surf.surf());
                     m_pData3DModel->addSurface("Subject", hemi, surfType, surf);
                     m_pData3DModel->addAnnotation("Subject", hemi, (*pRTSE->getAnnotSet())[i]);
                 }

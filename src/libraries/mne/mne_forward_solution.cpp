@@ -445,8 +445,8 @@ MNEForwardSolution MNEForwardSolution::cluster_forward_solution(const FsAnnotati
         //
         for (qint32 i = 0; i < label_ids.rows(); ++i) {
             if (label_ids[i] != 0) {
-                QString curr_name = t_CurrentColorTable.struct_names[i]; //obj.label2AtlasName(label(i));
-                qInfo("\tCluster %d / %ld %s...", i + 1, label_ids.rows(), curr_name.toUtf8().constData());
+                const std::string& curr_name = t_CurrentColorTable.struct_names[static_cast<std::size_t>(i)]; //obj.label2AtlasName(label(i));
+                qInfo("\tCluster %d / %ld %s...", i + 1, label_ids.rows(), curr_name.c_str());
 
                 //
                 // Get source space indeces
@@ -576,7 +576,7 @@ MNEForwardSolution MNEForwardSolution::cluster_forward_solution(const FsAnnotati
                 p_fwdOut.src.hemisphereAt(h)->cluster_info.clusterSource_rr.push_back(clusterSource_rr);
                 p_fwdOut.src.hemisphereAt(h)->cluster_info.clusterDistances.push_back(clusterDistance);
                 p_fwdOut.src.hemisphereAt(h)->cluster_info.clusterLabelIds.push_back(label_ids[itOut->iLabelIdxOut]);
-                p_fwdOut.src.hemisphereAt(h)->cluster_info.clusterLabelNames.push_back(t_CurrentColorTable.getNames()[itOut->iLabelIdxOut].toStdString());
+                p_fwdOut.src.hemisphereAt(h)->cluster_info.clusterLabelNames.push_back(t_CurrentColorTable.getNames()[itOut->iLabelIdxOut]);
             }
 
             //

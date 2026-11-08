@@ -556,7 +556,7 @@ private slots:
         QString lhLabel = labelPath2 + "/subjects/sample/label/lh.BA1.label";
         if (QFile::exists(lhLabel)) {
             FsLabel label;
-            FsLabel::read(lhLabel, label);
+            FsLabel::read(lhLabel.toStdU16String(), label);
             QVERIFY(label.vertices.size() > 0);
             QVERIFY(label.hemi == 0); // left hemisphere
         }
@@ -586,7 +586,7 @@ private slots:
         if (!QFile::exists(annotPath))
             QSKIP("Annotation file not found");
         FsAnnotation annot;
-        FsAnnotation::read(annotPath, annot);
+        FsAnnotation::read(annotPath.toStdU16String(), annot);
         QVERIFY(!annot.empty());
     }
 

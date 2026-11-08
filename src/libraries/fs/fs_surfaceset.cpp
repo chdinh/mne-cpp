@@ -20,7 +20,7 @@
 // QT INCLUDES
 //=============================================================================================================
 
-#include <QStringList>
+#include <utils/string_utils.h>
 
 //=============================================================================================================
 // USED NAMESPACES
@@ -39,7 +39,7 @@ FsSurfaceSet::FsSurfaceSet()
 
 //=============================================================================================================
 
-FsSurfaceSet::FsSurfaceSet(const QString& subject_id, qint32 hemi, const QString& surf, const QString& subjects_dir)
+FsSurfaceSet::FsSurfaceSet(const std::string& subject_id, qint32 hemi, const std::string& surf, const std::filesystem::path& subjects_dir)
 {
     FsSurface t_Surface;
     if (hemi == 0 || hemi == 1) {
@@ -57,7 +57,7 @@ FsSurfaceSet::FsSurfaceSet(const QString& subject_id, qint32 hemi, const QString
 
 //=============================================================================================================
 
-FsSurfaceSet::FsSurfaceSet(const QString& path, qint32 hemi, const QString& surf)
+FsSurfaceSet::FsSurfaceSet(const std::filesystem::path& path, qint32 hemi, const std::string& surf)
 {
     FsSurface t_Surface;
     if (hemi == 0 || hemi == 1) {
@@ -92,7 +92,7 @@ FsSurfaceSet::FsSurfaceSet(const FsSurface& p_LHSurface, const FsSurface& p_RHSu
 
 //=============================================================================================================
 
-FsSurfaceSet::FsSurfaceSet(const QString& p_sLHFileName, const QString& p_sRHFileName)
+FsSurfaceSet::FsSurfaceSet(const std::filesystem::path& p_sLHFileName, const std::filesystem::path& p_sRHFileName)
 {
     FsSurfaceSet t_SurfaceSet;
     if (FsSurfaceSet::read(p_sLHFileName, p_sRHFileName, t_SurfaceSet))
@@ -127,23 +127,14 @@ void FsSurfaceSet::insert(const FsSurface& p_Surface)
 
 //=============================================================================================================
 
-bool FsSurfaceSet::read(const QString& p_sLHFileName, const QString& p_sRHFileName, FsSurfaceSet& p_SurfaceSet)
+bool FsSurfaceSet::read(const std::filesystem::path& p_sLHFileName, const std::filesystem::path& p_sRHFileName, FsSurfaceSet& p_SurfaceSet)
 {
     p_SurfaceSet.clear();
 
-    QStringList t_qListFileName;
-    t_qListFileName << p_sLHFileName << p_sRHFileName;
-
-    for (qint32 i = 0; i < t_qListFileName.size(); ++i) {
+    for (const std::filesystem::path* file : {&p_sLHFileName, &p_sRHFileName}) {
         FsSurface t_Surface;
-        if (FsSurface::read(t_qListFileName[i], t_Surface)) {
-            if (t_qListFileName[i].contains("lh."))
-                p_SurfaceSet.m_qMapSurfs.insert(0, t_Surface);
-            else if (t_qListFileName[i].contains("rh."))
-                p_SurfaceSet.m_qMapSurfs.insert(1, t_Surface);
-            else
-                return false;
-        }
+        if (FsSurface::read(*file, t_Surface))
+            p_SurfaceSet.m_qMapSurfs.insert(t_Surface.hemi(), t_Surface);
     }
 
     if (p_SurfaceSet.m_qMapSurfs.isEmpty())
@@ -168,11 +159,11 @@ qint32 hemiIndex(qint32 idx)
     return idx;
 }
 
-qint32 hemiIndex(const QString& idt)
+qint32 hemiIndex(std::string_view idt)
 {
-    if (idt == QLatin1String("rh"))
+    if (idt == "rh")
         return 1;
-    if (idt != QLatin1String("lh"))
+    if (idt != "lh")
         qWarning("Warning: Identifier is not 'lh' or 'rh'! Returning 'lh'.");
     return 0;
 }
@@ -202,14 +193,14 @@ FsSurface& FsSurfaceSet::operator[](qint32 idx)
 
 //=============================================================================================================
 
-const FsSurface& FsSurfaceSet::operator[](QString idt) const
+const FsSurface& FsSurfaceSet::operator[](std::string_view idt) const
 {
     return surfaceOrEmpty(m_qMapSurfs, hemiIndex(idt));
 }
 
 //=============================================================================================================
 
-FsSurface& FsSurfaceSet::operator[](QString idt)
+FsSurface& FsSurfaceSet::operator[](std::string_view idt)
 {
     return m_qMapSurfs[hemiIndex(idt)];
 }
@@ -221,7 +212,7 @@ void FsSurfaceSet::calcOffset()
     //
     // Correct inflated offset
     //
-    if (m_qMapSurfs.size() == 2 && QString::compare(m_qMapSurfs.begin().value().surf(), "inflated") == 0) {
+    if (m_qMapSurfs.size() == 2 && m_qMapSurfs.begin().value().surf() == "inflated") {
         float xOffset = m_qMapSurfs.find(0).value().rr().col(0).maxCoeff() - m_qMapSurfs.find(1).value().rr().col(0).minCoeff();
         Vector3f vecLhOffset, vecRhOffset;
         vecLhOffset << (xOffset / 2.0f), 0, 0;

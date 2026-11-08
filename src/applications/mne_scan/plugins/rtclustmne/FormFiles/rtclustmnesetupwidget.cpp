@@ -92,7 +92,7 @@ void RtClustMneSetupWidget::showAtlasDirDialog()
 
     ui.m_qLineEdit_AtlasDirName->setText(m_pMNE->m_sAtlasDir);
 
-    FsAnnotationSet::SPtr t_pAnnotationSet = FsAnnotationSet::SPtr(new FsAnnotationSet(t_sAtlasDir + "/lh.aparc.a2009s.annot", t_sAtlasDir + "/rh.aparc.a2009s.annot"));
+    FsAnnotationSet::SPtr t_pAnnotationSet = FsAnnotationSet::SPtr(new FsAnnotationSet((t_sAtlasDir + "/lh.aparc.a2009s.annot").toStdU16String(), (t_sAtlasDir + "/rh.aparc.a2009s.annot").toStdU16String()));
 
     if (!t_pAnnotationSet->empty() && t_pAnnotationSet->size() == 2) {
         m_pMNE->m_pAnnotationSet = t_pAnnotationSet;
@@ -116,7 +116,7 @@ void RtClustMneSetupWidget::showSurfaceDirDialog()
                                                               QString(),
                                                               QFileDialog::ShowDirsOnly | QFileDialog::DontResolveSymlinks);
 
-    FsSurfaceSet::SPtr t_pSurfaceSet = FsSurfaceSet::SPtr(new FsSurfaceSet(t_sSurfaceDir + "/lh.orig", t_sSurfaceDir + "/rh.orig"));
+    FsSurfaceSet::SPtr t_pSurfaceSet = FsSurfaceSet::SPtr(new FsSurfaceSet((t_sSurfaceDir + "/lh.orig").toStdU16String(), (t_sSurfaceDir + "/rh.orig").toStdU16String()));
 
     ui.m_qLineEdit_SurfaceDirName->setText(t_sSurfaceDir);
 

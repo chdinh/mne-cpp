@@ -135,7 +135,7 @@ private slots:
     void surface_filePath()
     {
         FsSurface s;
-        QVERIFY(s.filePath().isEmpty());
+        QVERIFY(s.filePath().empty());
     }
 
     //=========================================================================

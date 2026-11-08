@@ -484,64 +484,20 @@ bool SetupForwardModel::readAsciiTriFile(const QString& fileName, int id, float 
 bool SetupForwardModel::readFreeSurferSurf(const QString& fileName, int id, float sigma,
                                            float shift, MNEBemSurface& surf) const
 {
-    //
-    // Read FreeSurfer binary surface file directly
-    //
-    QFile file(fileName);
-    if (!file.open(QIODevice::ReadOnly)) {
-        qCritical() << "Could not open surface file:" << fileName;
+    auto geometry = FsSurface::read_geometry(fileName.toStdU16String());
+    if (!geometry) {
+        qCritical() << geometry.error().what();
         return false;
     }
-
-    QDataStream stream(&file);
-    stream.setByteOrder(QDataStream::BigEndian);
-
-    const qint32 TRIANGLE_FILE_MAGIC = 16777214;
-
-    qint32 magic = FSLIB::FsSurface::fread3(stream);
-
-    if (magic != TRIANGLE_FILE_MAGIC) {
-        qCritical() << "Unsupported surface file format (magic =" << magic << ") in" << fileName;
-        return false;
-    }
-
-    // Skip two comment lines
-    file.readLine();
-    file.readLine();
-
-    qint32 nvert = 0, nface = 0;
-    stream >> nvert;
-    stream >> nface;
-
-    // Read vertices (stored as 3 x nvert, column-major float32 big-endian)
-    MatrixXf verts(3, nvert);
-    stream.readRawData(reinterpret_cast<char*>(verts.data()), nvert * 3 * sizeof(float));
-    for (qint32 i = 0; i < 3; ++i)
-        for (qint32 j = 0; j < nvert; ++j)
-            FIFFLIB::swap_floatp(&verts(i, j));
-
-    // Read faces (nface x 3, int32)
-    MatrixX3i faces(nface, 3);
-    for (qint32 i = 0; i < nface; ++i) {
-        for (qint32 j = 0; j < 3; ++j) {
-            stream >> faces(i, j);
-        }
-    }
-
-    file.close();
-
-    // Vertices: transpose to nvert x 3 and convert from mm to meters
-    verts.transposeInPlace();
-    verts.array() *= 0.001f;
 
     //
     // Populate BEM surface
     //
-    surf.np = nvert;
-    surf.ntri = nface;
+    surf.np = static_cast<int>(geometry->rr.rows());
+    surf.ntri = static_cast<int>(geometry->tris.rows());
     surf.coord_frame = FIFFV_COORD_MRI;
-    surf.rr = verts.block(0, 0, nvert, 3);
-    surf.itris = faces;
+    surf.rr = geometry->rr;
+    surf.itris = geometry->tris;
     surf.id = id;
     surf.sigma = sigma;
 

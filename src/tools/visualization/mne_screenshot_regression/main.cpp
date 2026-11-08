@@ -100,14 +100,14 @@ int main(int argc, char* argv[])
     for (const QString& hemi : hemis) {
         const int hemiIdx = (hemi == "lh") ? 0 : 1;
         FsSurface surf;
-        if (FsSurface::read(subject, hemiIdx, "white", subjectsDir, surf)) {
+        if (FsSurface::read(subject.toStdString(), hemiIdx, "white", subjectsDir.toStdU16String(), surf)) {
             model.addSurface(subject, hemi, "white", surf);
             anyLoaded = true;
         }
 
         FsAnnotation annot;
         const QString annotPath = QDir(subjectsDir).filePath(subject + "/label/" + hemi + ".aparc.annot");
-        if (QFile::exists(annotPath) && FsAnnotation::read(annotPath, annot)) {
+        if (QFile::exists(annotPath) && FsAnnotation::read(annotPath.toStdU16String(), annot)) {
             model.addAnnotation(subject, hemi, annot);
         }
     }

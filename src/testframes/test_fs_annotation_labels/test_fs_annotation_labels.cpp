@@ -230,7 +230,7 @@ private slots:
         if (!QFileInfo::exists(testData)) {
             QSKIP("Test data not available");
         }
-        FsSurface s(testData);
+        FsSurface s(testData.toStdU16String());
         QVERIFY(!s.empty());
         QVERIFY(s.rr().rows() > 0);
         QVERIFY(s.tris().rows() > 0);
@@ -242,7 +242,7 @@ private slots:
         if (!QFileInfo::exists(testData)) {
             QSKIP("Test data not available");
         }
-        FsAnnotation a(testData);
+        FsAnnotation a(testData.toStdU16String());
         QVERIFY(!a.empty());
     }
 
@@ -257,8 +257,8 @@ private slots:
             QSKIP("Test data not available");
         }
 
-        FsSurface surf(surfFile);
-        FsAnnotation annot(annotFile);
+        FsSurface surf(surfFile.toStdU16String());
+        FsAnnotation annot(annotFile.toStdU16String());
 
         QList<FsLabel> labels;
         QList<RowVector4i> rgbas;
@@ -282,7 +282,7 @@ private slots:
         QCOMPARE(st->vertices.cast<qint64>().sum(), qint64(511158088));
         QVERIFY(st->values.isOnes());
         for (int k = 1; k < labels.size(); ++k) {
-            QVERIFY2(labels[k - 1].name < labels[k].name, qPrintable(labels[k].name));
+            QVERIFY2(labels[k - 1].name < labels[k].name, labels[k].name.c_str());
         }
     }
 
@@ -292,7 +292,7 @@ private slots:
     void labelUtils_splitContiguous()
     {
         const QString surfFile = QCoreApplication::applicationDirPath() + "/../resources/data/mne-cpp-test-data/subjects/sample/surf/lh.white";
-        FsSurface surf(surfFile);
+        FsSurface surf(surfFile.toStdU16String());
         QVERIFY(!surf.empty());
         // First rings around vertices 10 and 50000 plus the lone vertex 100000
         const QList<QList<int>> parts{{48768, 48782, 48794, 49980, 50000, 50001, 50018, 51392, 51393, 51412},
@@ -311,10 +311,10 @@ private slots:
             values[k] = 1.0 + 0.001 * all[k];
             pos.row(k) = surf.rr().row(all[k]) * 2.0f; // not the surface positions: they must be kept
         }
-        const FsLabel label(vertices, pos, values, 0, QStringLiteral("V1-lh"));
+        const FsLabel label(vertices, pos, values, 0, "V1-lh");
 
         // mne: components by descending size, named <name>_div<i>-lh, vertices sorted, values and pos kept
-        const QList<FsLabel> split = FsLabelUtils::splitLabel(label, surf);
+        const std::vector<FsLabel> split = FsLabelUtils::splitLabel(label, surf);
         QCOMPARE(split.size(), 3);
         for (int k = 0; k < 3; ++k) {
             QCOMPARE(split[k].name, QStringLiteral("V1_div%1-lh").arg(k + 1));
@@ -356,7 +356,7 @@ private slots:
         QFETCH(QVector<int>, tail);
         QFETCH(double, valueSum);
 
-        const FsSurface surf(QCoreApplication::applicationDirPath() + "/../resources/data/mne-cpp-test-data/subjects/sample/surf/lh.white");
+        const FsSurface surf((QCoreApplication::applicationDirPath() + "/../resources/data/mne-cpp-test-data/subjects/sample/surf/lh.white").toStdU16String());
         QVERIFY(!surf.empty());
         const FsLabel label = FsLabelUtils::growCircularLabel(surf, seeds, extent, 0, "seed");
         QCOMPARE(static_cast<int>(label.vertices.size()), count);

@@ -1208,7 +1208,7 @@ void MainWindow::setupConnections()
         else if (fileName.contains("orig"))
             type = "orig";
 
-        FsSurface surf(path);
+        FsSurface surf(path.toStdU16String());
         if (!surf.empty()) {
             m_model->addSurface("User", hemi, type, surf);
             m_surfGroup->setEnabled(true);
@@ -1220,7 +1220,7 @@ void MainWindow::setupConnections()
         QString otherHemi = (hemi == "lh") ? "rh" : "lh";
         QString otherPath = QFileInfo(path).absolutePath() + "/" + otherHemi + "." + type;
         if (QFile::exists(otherPath)) {
-            FsSurface otherSurf(otherPath);
+            FsSurface otherSurf(otherPath.toStdU16String());
             if (!otherSurf.empty()) {
                 m_model->addSurface("User", otherHemi, type, otherSurf);
                 trackLoadedFile(otherPath, static_cast<int>(MnaFileRole::Surface));
@@ -1257,7 +1257,7 @@ void MainWindow::setupConnections()
         QString fileName = QFileInfo(path).fileName();
         QString hemi = fileName.contains("lh.") ? "lh" : (fileName.contains("rh.") ? "rh" : "lh");
 
-        FsAnnotation annot(path);
+        FsAnnotation annot(path.toStdU16String());
         if (!annot.empty()) {
             m_model->addAnnotation("User", hemi, annot);
             trackLoadedFile(path, static_cast<int>(MnaFileRole::Annotation));
@@ -1268,7 +1268,7 @@ void MainWindow::setupConnections()
         QString otherHemi = (hemi == "lh") ? "rh" : "lh";
         QString otherPath = QFileInfo(path).absolutePath() + "/" + fileName.replace(hemi + ".", otherHemi + ".");
         if (QFile::exists(otherPath)) {
-            FsAnnotation otherAnnot(otherPath);
+            FsAnnotation otherAnnot(otherPath.toStdU16String());
             if (!otherAnnot.empty()) {
                 m_model->addAnnotation("User", otherHemi, otherAnnot);
                 trackLoadedFile(otherPath, static_cast<int>(MnaFileRole::Annotation));
@@ -2099,14 +2099,14 @@ void MainWindow::loadInitialData(const QString& subjectPath,
         }
 
         if (!lhAnnotPath.isEmpty() && QFile::exists(lhAnnotPath)) {
-            FsAnnotation annot(lhAnnotPath);
+            FsAnnotation annot(lhAnnotPath.toStdU16String());
             if (!annot.empty()) {
                 m_model->addAnnotation(subjectName, "lh", annot);
                 qInfo() << "Added atlas annotation for lh";
             }
         }
         if (!rhAnnotPath.isEmpty() && QFile::exists(rhAnnotPath)) {
-            FsAnnotation annot(rhAnnotPath);
+            FsAnnotation annot(rhAnnotPath.toStdU16String());
             if (!annot.empty()) {
                 m_model->addAnnotation(subjectName, "rh", annot);
                 qInfo() << "Added atlas annotation for rh";
@@ -2282,7 +2282,7 @@ void MainWindow::loadHemisphere(const QString& subjectPath, const QString& subje
         if (!QFile::exists(surfPath)) {
             continue;
         }
-        FsSurface surf(surfPath);
+        FsSurface surf(surfPath.toStdU16String());
         if (!surf.empty()) {
             m_model->addSurface(subjectName, hemi, type, surf);
             m_surfGroup->setEnabled(true);
@@ -2294,7 +2294,7 @@ void MainWindow::loadHemisphere(const QString& subjectPath, const QString& subje
     // Load Atlas (FsAnnotation)
     QString annotPath = subjectPath + "/" + subjectName + "/label/" + hemi + ".aparc.annot";
     if (QFile::exists(annotPath)) {
-        FsAnnotation annot(annotPath);
+        FsAnnotation annot(annotPath.toStdU16String());
         if (!annot.empty()) {
             m_model->addAnnotation(subjectName, hemi, annot);
             trackLoadedFile(annotPath, static_cast<int>(MnaFileRole::Annotation));
@@ -2607,7 +2607,7 @@ void MainWindow::importMnaProject(const QString& path)
                                 type = "white";
                             else if (fn.contains("orig"))
                                 type = "orig";
-                            FsSurface surf(filePath);
+                            FsSurface surf(filePath.toStdU16String());
                             if (!surf.empty()) {
                                 m_model->addSurface(subj.id, hemi, type, surf);
                                 m_surfGroup->setEnabled(true);
@@ -2618,7 +2618,7 @@ void MainWindow::importMnaProject(const QString& path)
                         case MnaFileRole::Annotation: {
                             QString fn = QFileInfo(filePath).fileName();
                             QString hemi = fn.contains("lh.") ? "lh" : (fn.contains("rh.") ? "rh" : "lh");
-                            FsAnnotation annot(filePath);
+                            FsAnnotation annot(filePath.toStdU16String());
                             if (!annot.empty()) {
                                 m_model->addAnnotation(subj.id, hemi, annot);
                                 qInfo() << "Imported annotation:" << fn;

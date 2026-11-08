@@ -580,12 +580,12 @@ void TestComputeRawInverse::testLabelRestrictedInverse()
 
     // Read label
     FsLabel label;
-    if (!FsLabel::read(labelFile, label)) {
+    if (!FsLabel::read(labelFile.toStdU16String(), label)) {
         QSKIP("Failed to read label file");
         return;
     }
 
-    printf("  FsLabel: %s (%ld vertices)\n", label.name.toUtf8().constData(), (long)label.vertices.rows());
+    printf("  FsLabel: %s (%ld vertices)\n", label.name.c_str(), (long)label.vertices.rows());
     QVERIFY2(label.vertices.rows() > 0, "FsLabel has no vertices");
 
     // Read evoked

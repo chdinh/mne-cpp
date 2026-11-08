@@ -2610,7 +2610,7 @@ void TestDisp3dBrainView::brainView_clearRemovesObjectsAndRows()
     const auto loadAll = [&] {
         for (const QString& hemi : {QStringLiteral("lh"), QStringLiteral("rh")}) {
             model.addSurface(QStringLiteral("sample"), hemi, QStringLiteral("white"),
-                             FSLIB::FsSurface(dataDir + QStringLiteral("subjects/sample/surf/%1.white").arg(hemi)));
+                             FSLIB::FsSurface((dataDir + QStringLiteral("subjects/sample/surf/%1.white").arg(hemi)).toStdU16String()));
         }
         MNELIB::MNEBem bem((dataDir + QStringLiteral("subjects/sample/bem/sample-5120-bem.fif")).toStdU16String());
         QVERIFY(bem.size() > 0);
@@ -2660,7 +2660,7 @@ void TestDisp3dBrainView::brainView_clickVersusDrag()
     view.resetAllSubViewState();
     view.resetMultiViewLayout();
     view.setViewCount(4);
-    const FSLIB::FsSurface lh(dataDir + QStringLiteral("subjects/sample/surf/lh.white"));
+    const FSLIB::FsSurface lh((dataDir + QStringLiteral("subjects/sample/surf/lh.white")).toStdU16String());
     SurfaceTreeItem* lhItem = model.addSurface(QStringLiteral("sample"), QStringLiteral("lh"), QStringLiteral("white"), lh);
     // Aim the view centre at the hemisphere, not at the gap between hemispheres
     const Eigen::Vector3f centroid = lh.rr().colwise().mean();

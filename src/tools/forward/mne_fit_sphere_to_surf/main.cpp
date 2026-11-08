@@ -102,7 +102,7 @@ int main(int argc, char* argv[])
     // Attempt FreeSurfer surface
     if (!loaded) {
         FsSurface surf;
-        if (FsSurface::read(surfName, surf, false)) {
+        if (FsSurface::read(surfName.toStdU16String(), surf, false)) {
             vertices = surf.rr();
             qInfo("Read FreeSurfer surface: %d vertices", static_cast<int>(vertices.rows()));
             loaded = true;

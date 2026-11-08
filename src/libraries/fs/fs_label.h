@@ -39,6 +39,8 @@
 // QT INCLUDES
 //=============================================================================================================
 
+#include <filesystem>
+#include <string>
 #include <QSharedPointer>
 #include <QMap>
 
@@ -103,7 +105,7 @@ public:
     FsLabel(const Eigen::VectorXi& p_vertices,
             const Eigen::MatrixX3f& p_pos,
             const Eigen::VectorXd& p_values,
-            qint32 p_hemi, const QString& p_name,
+            qint32 p_hemi, const std::string& p_name,
             qint32 p_id = -1);
 
     //=========================================================================================================
@@ -159,16 +161,16 @@ public:
      *
      * @return true if successful, false otherwise.
      */
-    static bool read(const QString& p_sFileName, FsLabel& p_Label);
+    static bool read(const std::filesystem::path& p_sFileName, FsLabel& p_Label);
 
 public:
-    QString comment;          /**< Comment from the first line of the label file. */
+    std::string comment;      /**< Comment from the first line of the label file. */
     Eigen::VectorXi vertices; /**< Vertex indices (0 based). */
     Eigen::MatrixX3f pos;     /**< Locations in meters. */
     Eigen::VectorXd values;   /**< Values at the vertices. */
     qint32 hemi;              /**< Hemisphere (lh = 0; rh = 1). */
                               //    qint32 hemi;                        /**< Hemisphere (lh = 0; rh = 1; both = 2). */ Don't mix both hemis - KISS principle
-    QString name;             /**< Name of the label. */
+    std::string name;         /**< Name of the label. */
     qint32 label_id;          /**< FsLabel id (optional). */
     //    Eigen::MatrixX3i tris;     /**< Tris for plotting (optional). */
 

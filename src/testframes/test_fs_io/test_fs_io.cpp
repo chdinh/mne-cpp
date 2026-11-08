@@ -223,7 +223,7 @@ private slots:
         QVERIFY(QFile::exists(filePath));
 
         FsSurface s;
-        QVERIFY(FsSurface::read(filePath, s, false));
+        QVERIFY(FsSurface::read(filePath.toStdU16String(), s, false));
         QVERIFY(!s.empty());
         QCOMPARE(s.rr().rows(), (Eigen::Index)4);
         QCOMPARE(s.tris().rows(), (Eigen::Index)2);
@@ -265,7 +265,7 @@ private slots:
             file.close();
 
             FsSurface s;
-            QVERIFY(FsSurface::read(file.fileName(), s, false));
+            QVERIFY(FsSurface::read(file.fileName().toStdU16String(), s, false));
             QCOMPARE(s.rr().rows(), Eigen::Index(5));
             for (int i = 0; i < 5; ++i) {
                 for (int j = 0; j < 3; ++j) {
@@ -294,7 +294,7 @@ private slots:
         QVERIFY(curvFile.open(QIODevice::WriteOnly));
         curvFile.write(curv);
         curvFile.close();
-        const VectorXf values = FsSurface::read_curv(curvFile.fileName());
+        const VectorXf values = FsSurface::read_curv(curvFile.fileName().toStdU16String());
         QCOMPARE(values.size(), Eigen::Index(5));
         const float expectedCurv[] = {0.25f, -1.5f, 3.0f, 0.0f, -0.01f};
         for (int i = 0; i < 5; ++i) {
@@ -326,7 +326,7 @@ private slots:
             file.close();
             QTest::ignoreMessage(QtWarningMsg, QRegularExpression(QStringLiteral("Invalid or truncated surface file")));
             FsSurface notASurface;
-            QVERIFY(!FsSurface::read(file.fileName(), notASurface, false));
+            QVERIFY(!FsSurface::read(file.fileName().toStdU16String(), notASurface, false));
         }
     }
 

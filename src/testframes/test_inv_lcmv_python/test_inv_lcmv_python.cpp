@@ -359,7 +359,7 @@ void TestInvLcmvPython::dicsPowerMatches()
 void TestInvLcmvPython::resolutionMatrixMatches()
 {
     FsLabel v1;
-    QVERIFY(FsLabel::read(QCoreApplication::applicationDirPath() + "/../resources/data/mne-cpp-test-data/subjects/sample/label/lh.V1.label", v1));
+    QVERIFY(FsLabel::read((QCoreApplication::applicationDirPath() + "/../resources/data/mne-cpp-test-data/subjects/sample/label/lh.V1.label").toStdU16String(), v1));
     const MNEForwardSolution fwd = m_fwd.pick_regions({v1});
     QCOMPARE(static_cast<int>(fwd.nsource), 70);
 

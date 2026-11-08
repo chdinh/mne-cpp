@@ -28,9 +28,9 @@
 #include <algorithm>
 #include <numeric>
 
-#include <QFile>
-#include <QDataStream>
-#include <QFileInfo>
+#include <utils/byte_stream.h>
+
+#include <format>
 
 //=============================================================================================================
 // USED NAMESPACES
@@ -50,17 +50,15 @@ FsAnnotation::FsAnnotation()
 
 //=============================================================================================================
 
-FsAnnotation::FsAnnotation(const QString& p_sFileName)
-: m_sFileName(p_sFileName)
+FsAnnotation::FsAnnotation(const std::filesystem::path& p_sFileName)
+: m_iHemi(-1)
 {
-    FsAnnotation t_Annotation;
-    FsAnnotation::read(m_sFileName, t_Annotation);
-    *this = t_Annotation;
+    FsAnnotation::read(p_sFileName, *this);
 }
 
 //=============================================================================================================
 
-FsAnnotation::FsAnnotation(const QString& subject_id, qint32 hemi, const QString& atlas, const QString& subjects_dir)
+FsAnnotation::FsAnnotation(const std::string& subject_id, qint32 hemi, const std::string& atlas, const std::filesystem::path& subjects_dir)
 : m_iHemi(-1)
 {
     FsAnnotation::read(subject_id, hemi, atlas, subjects_dir, *this);
@@ -68,7 +66,7 @@ FsAnnotation::FsAnnotation(const QString& subject_id, qint32 hemi, const QString
 
 //=============================================================================================================
 
-FsAnnotation::FsAnnotation(const QString& path, qint32 hemi, const QString& atlas)
+FsAnnotation::FsAnnotation(const std::filesystem::path& path, qint32 hemi, const std::string& atlas)
 : m_iHemi(-1)
 {
     FsAnnotation::read(path, hemi, atlas, *this);
@@ -84,7 +82,9 @@ FsAnnotation::~FsAnnotation()
 
 void FsAnnotation::clear()
 {
-    m_sFileName = QString("");
+    m_sFileName.clear();
+    m_sFilePath.clear();
+    m_iHemi = -1;
     m_Vertices = VectorXi::Zero(0);
     m_LabelIds = VectorXi::Zero(0);
     m_Colortable.clear();
@@ -92,168 +92,129 @@ void FsAnnotation::clear()
 
 //=============================================================================================================
 
-bool FsAnnotation::read(const QString& subject_id, qint32 hemi, const QString& atlas, const QString& subjects_dir, FsAnnotation& p_Annotation)
+bool FsAnnotation::read(const std::string& subject_id, qint32 hemi, const std::string& atlas, const std::filesystem::path& subjects_dir, FsAnnotation& p_Annotation)
 {
     if (hemi != 0 && hemi != 1)
         return false;
 
-    QString p_sFile = QString("%1/%2/label/%3.%4.annot").arg(subjects_dir).arg(subject_id).arg(hemi == 0 ? "lh" : "rh").arg(atlas);
-
-    return read(p_sFile, p_Annotation);
+    return read(subjects_dir / UTILSLIB::pathFromUtf8(subject_id) / "label", hemi, atlas, p_Annotation);
 }
 
 //=============================================================================================================
 
-bool FsAnnotation::read(const QString& path, qint32 hemi, const QString& atlas, FsAnnotation& p_Annotation)
+bool FsAnnotation::read(const std::filesystem::path& path, qint32 hemi, const std::string& atlas, FsAnnotation& p_Annotation)
 {
     if (hemi != 0 && hemi != 1)
         return false;
 
-    QString p_sFile = QString("%1/%2.%3.annot").arg(path).arg(hemi == 0 ? "lh" : "rh").arg(atlas);
-
-    return read(p_sFile, p_Annotation);
+    return read(path / UTILSLIB::pathFromUtf8(std::format("{}.{}.annot", hemi == 0 ? "lh" : "rh", atlas)), p_Annotation);
 }
 
 //=============================================================================================================
 
-bool FsAnnotation::read(const QString& p_sFileName, FsAnnotation& p_Annotation)
+bool FsAnnotation::read(const std::filesystem::path& p_sFileName, FsAnnotation& p_Annotation)
 {
     p_Annotation.clear();
 
     qInfo("Reading annotation...\n");
-    QFile t_File(p_sFileName);
-    QFileInfo fileInfo(t_File.fileName());
-
-    p_Annotation.m_sFileName = fileInfo.fileName();
-    p_Annotation.m_sFilePath = fileInfo.filePath();
-
-    if (!t_File.open(QIODevice::ReadOnly)) {
+    auto bytes = UTILSLIB::read_file_bytes(p_sFileName);
+    if (!bytes) {
         qWarning("\tError: Couldn't open the file");
         return false;
     }
+    UTILSLIB::MemoryByteStream stream(std::move(*bytes));
+    const auto readInt = [&stream]() {
+        qint32 value = 0;
+        stream.readBigEndian(value);
+        return value;
+    };
+    // A length-prefixed string; FreeSurfer counts the terminating NUL
+    const auto readString = [&stream, &readInt]() {
+        const qint32 len = readInt();
+        std::string text(static_cast<std::size_t>(std::clamp<qint64>(len, 0, static_cast<qint64>(stream.size() - stream.pos()))), '\0');
+        stream.read(text.data(), text.size());
+        if (!text.empty() && text.back() == '\0')
+            text.pop_back();
+        return text;
+    };
+    const auto readColor = [&stream](FsColortable& ct, qint32 row) {
+        qint32 rgba[4] = {};
+        stream.readBigEndian(rgba, 4);
+        for (qint32 j = 0; j < 4; ++j)
+            ct.table(row, j) = rgba[j];
+        ct.table(row, 4) = rgba[0] + rgba[1] * 256 + rgba[2] * 65536 + rgba[3] * 16777216;
+    };
 
-    QDataStream t_Stream(&t_File);
-    t_Stream.setByteOrder(QDataStream::BigEndian);
-
-    qint32 numEl;
-    t_Stream >> numEl;
-
-    p_Annotation.m_Vertices = VectorXi(numEl);
-    p_Annotation.m_LabelIds = VectorXi(numEl);
-
+    const qint32 numEl = readInt();
+    if (numEl < 0 || static_cast<std::uint64_t>(numEl) * 8 > stream.size() - stream.pos()) {
+        qWarning("\tError: Truncated annotation file");
+        return false;
+    }
+    // Vertex number and label id interleaved
+    std::vector<qint32> pairs(2 * static_cast<std::size_t>(numEl));
+    stream.readBigEndian(pairs.data(), pairs.size());
+    p_Annotation.m_Vertices.resize(numEl);
+    p_Annotation.m_LabelIds.resize(numEl);
     for (qint32 i = 0; i < numEl; ++i) {
-        t_Stream >> p_Annotation.m_Vertices[i];
-        t_Stream >> p_Annotation.m_LabelIds[i];
+        p_Annotation.m_Vertices[i] = pairs[2 * static_cast<std::size_t>(i)];
+        p_Annotation.m_LabelIds[i] = pairs[2 * static_cast<std::size_t>(i) + 1];
     }
 
-    qint32 hasColortable;
-    t_Stream >> hasColortable;
-    if (hasColortable) {
-        p_Annotation.m_Colortable.clear();
-
-        //Read colortable
-        qint32 numEntries;
-        t_Stream >> numEntries;
-        qint32 len;
+    FsColortable& ct = p_Annotation.m_Colortable;
+    if (readInt()) {
+        ct.clear();
+        qint32 numEntries = readInt();
         if (numEntries > 0) {
             qInfo("\tReading from Original Version\n");
-            p_Annotation.m_Colortable.numEntries = numEntries;
-            t_Stream >> len;
-            QByteArray tmp;
-            tmp.resize(len);
-            t_Stream.readRawData(tmp.data(), len);
-            // FreeSurfer includes null terminator in stored length – strip it
-            if (tmp.endsWith('\0'))
-                tmp.chop(1);
-            p_Annotation.m_Colortable.orig_tab = tmp;
-
-            for (qint32 i = 0; i < numEntries; ++i)
-                p_Annotation.m_Colortable.struct_names.append("");
-
-            p_Annotation.m_Colortable.table = MatrixXi(numEntries, 5);
-
+            ct.numEntries = numEntries;
+            ct.orig_tab = readString();
+            ct.struct_names.assign(static_cast<std::size_t>(numEntries), std::string());
+            ct.table = MatrixXi(numEntries, 5);
             for (qint32 i = 0; i < numEntries; ++i) {
-                t_Stream >> len;
-                tmp.resize(len);
-                t_Stream.readRawData(tmp.data(), len);
-                if (tmp.endsWith('\0'))
-                    tmp.chop(1);
-
-                p_Annotation.m_Colortable.struct_names[i] = tmp;
-
-                for (qint32 j = 0; j < 4; ++j)
-                    t_Stream >> p_Annotation.m_Colortable.table(i, j);
-
-                p_Annotation.m_Colortable.table(i, 4) = p_Annotation.m_Colortable.table(i, 0) + p_Annotation.m_Colortable.table(i, 1) * 256 //(2^8)
-                    + p_Annotation.m_Colortable.table(i, 2) * 65536                                                                         //(2^16)
-                    + p_Annotation.m_Colortable.table(i, 3) * 16777216;                                                                     //(2^24);
+                ct.struct_names[static_cast<std::size_t>(i)] = readString();
+                readColor(ct, i);
             }
         } else {
-            qint32 version = -numEntries;
+            const qint32 version = -numEntries;
             if (version != 2)
                 qWarning("\tError! Does not handle version %d", version);
             else
                 qInfo("\tReading from version %d\n", version);
 
-            t_Stream >> numEntries;
-            p_Annotation.m_Colortable.numEntries = numEntries;
+            numEntries = readInt();
+            if (numEntries < 0) {
+                qWarning("\tError: Invalid colortable size %d", numEntries);
+                return false;
+            }
+            ct.numEntries = numEntries;
+            ct.orig_tab = readString();
+            ct.struct_names.assign(static_cast<std::size_t>(numEntries), std::string());
+            ct.table = MatrixXi(numEntries, 5);
 
-            t_Stream >> len;
-            QByteArray tmp;
-            tmp.resize(len);
-            t_Stream.readRawData(tmp.data(), len);
-            // FreeSurfer includes null terminator in stored length – strip it
-            if (tmp.endsWith('\0'))
-                tmp.chop(1);
-            p_Annotation.m_Colortable.orig_tab = tmp;
-
-            for (qint32 i = 0; i < numEntries; ++i)
-                p_Annotation.m_Colortable.struct_names.append("");
-
-            p_Annotation.m_Colortable.table = MatrixXi(numEntries, 5);
-
-            qint32 numEntriesToRead;
-            t_Stream >> numEntriesToRead;
-
-            qint32 structure;
+            const qint32 numEntriesToRead = readInt();
             for (qint32 i = 0; i < numEntriesToRead; ++i) {
-                t_Stream >> structure;
-                if (structure < 0)
+                const qint32 structure = readInt();
+                if (structure < 0 || structure >= numEntries) {
                     qWarning("\tError! Read entry, index %d", structure);
-
-                if (!p_Annotation.m_Colortable.struct_names[structure].isEmpty())
+                    return false;
+                }
+                std::string& name = ct.struct_names[static_cast<std::size_t>(structure)];
+                if (!name.empty())
                     qWarning("Error! Duplicate Structure %d", structure);
-
-                t_Stream >> len;
-                tmp.resize(len);
-                t_Stream.readRawData(tmp.data(), len);
-                if (tmp.endsWith('\0'))
-                    tmp.chop(1);
-
-                p_Annotation.m_Colortable.struct_names[structure] = tmp;
-
-                for (qint32 j = 0; j < 4; ++j)
-                    t_Stream >> p_Annotation.m_Colortable.table(structure, j);
-
-                p_Annotation.m_Colortable.table(structure, 4) = p_Annotation.m_Colortable.table(structure, 0) + p_Annotation.m_Colortable.table(structure, 1) * 256 //(2^8)
-                    + p_Annotation.m_Colortable.table(structure, 2) * 65536                                                                                         //(2^16)
-                    + p_Annotation.m_Colortable.table(structure, 3) * 16777216;                                                                                     //(2^24);
+                name = readString();
+                readColor(ct, structure);
             }
         }
-        qInfo("\tcolortable with %d entries read\n\t(originally %s)\n", p_Annotation.m_Colortable.numEntries, p_Annotation.m_Colortable.orig_tab.toUtf8().constData());
+        qInfo("\tcolortable with %d entries read\n\t(originally %s)\n", ct.numEntries, ct.orig_tab.c_str());
     } else {
         qWarning("\tError! No colortable stored");
     }
 
-    // hemi info
-    if (t_File.fileName().contains("lh."))
-        p_Annotation.m_iHemi = 0;
-    else
-        p_Annotation.m_iHemi = 1;
+    p_Annotation.m_sFileName = UTILSLIB::utf8FromPath(p_sFileName.filename());
+    p_Annotation.m_sFilePath = UTILSLIB::utf8FromPath(p_sFileName);
+    p_Annotation.m_iHemi = p_Annotation.m_sFileName.starts_with("lh.") ? 0 : 1;
 
     qInfo("[done]\n");
-
-    t_File.close();
 
     return true;
 }
@@ -263,7 +224,7 @@ bool FsAnnotation::read(const QString& p_sFileName, FsAnnotation& p_Annotation)
 bool FsAnnotation::toLabels(const FsSurface& p_surf,
                             QList<FsLabel>& p_qListLabels,
                             QList<RowVector4i>& p_qListLabelRGBAs,
-                            const QStringList& lLabelPicks) const
+                            const UTILSLIB::StringList& lLabelPicks) const
 {
     if (this->m_iHemi != p_surf.hemi()) {
         qWarning("FsAnnotation and surface hemisphere (annot = %d; surf = %d) do not match!\n", this->m_iHemi, p_surf.hemi());
@@ -282,7 +243,7 @@ bool FsAnnotation::toLabels(const FsSurface& p_surf,
     //label_colors = list()
 
     VectorXi label_ids = m_Colortable.getLabelIds();
-    QStringList label_names = m_Colortable.getNames();
+    const UTILSLIB::StringList& label_names = m_Colortable.getNames();
     MatrixX4i label_rgbas = m_Colortable.getRGBAs();
 
     // load the vertex positions from surface
@@ -298,7 +259,7 @@ bool FsAnnotation::toLabels(const FsSurface& p_surf,
     VectorXi vertices;
     VectorXd values;
     MatrixX3f pos;
-    QString name;
+    std::string name;
     for (qint32 i = 0; i < label_rgbas.rows(); ++i) {
         label_id = label_ids[i];
         label_rgba = label_rgbas.row(i);
@@ -321,15 +282,15 @@ bool FsAnnotation::toLabels(const FsSurface& p_surf,
             pos.row(j) = vert_pos.row(vertices[j]);
 
         values = VectorXd::Ones(count);
-        name = QString("%1-%2").arg(label_names[i]).arg(this->m_iHemi == 0 ? "lh" : "rh");
+        name = std::format("{}-{}", label_names[static_cast<std::size_t>(i)], this->m_iHemi == 0 ? "lh" : "rh");
 
         // put it all together
-        if (lLabelPicks.isEmpty()) {
+        if (lLabelPicks.empty()) {
             //t_tris
             p_qListLabels.append(FsLabel(vertices, pos, values, this->m_iHemi, name, label_id));
             // store the color
             p_qListLabelRGBAs.append(label_rgba);
-        } else if (lLabelPicks.indexOf(name) != -1) {
+        } else if (UTILSLIB::contains(lLabelPicks, name)) {
             //t_tris
             p_qListLabels.append(FsLabel(vertices, pos, values, this->m_iHemi, name, label_id));
             // store the color

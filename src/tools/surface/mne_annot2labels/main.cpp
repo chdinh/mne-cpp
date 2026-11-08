@@ -83,7 +83,7 @@ static bool processHemisphere(const QString& subjectsDir, const QString& subject
     // Read surface for vertex coordinates
     QString surfPath = QString("%1/%2/surf/%3.%4").arg(subjectsDir, subject, hemi, surfName);
     FsSurface surface;
-    if (!FsSurface::read(surfPath, surface)) {
+    if (!FsSurface::read(surfPath.toStdU16String(), surface)) {
         qCritical("Cannot read surface: %s", qPrintable(surfPath));
         return false;
     }
@@ -94,7 +94,7 @@ static bool processHemisphere(const QString& subjectsDir, const QString& subject
     // Read annotation
     QString annotPath = QString("%1/%2/label/%3.%4.annot").arg(subjectsDir, subject, hemi, annotName);
     FsAnnotation annot;
-    if (!FsAnnotation::read(annotPath, annot)) {
+    if (!FsAnnotation::read(annotPath.toStdU16String(), annot)) {
         qCritical("Cannot read annotation: %s", qPrintable(annotPath));
         return false;
     }
@@ -113,7 +113,7 @@ static bool processHemisphere(const QString& subjectsDir, const QString& subject
     int written = 0;
     for (int i = 0; i < labels.size(); i++) {
         const FsLabel& label = labels[i];
-        QString labelName = label.name;
+        QString labelName = QString::fromStdString(label.name);
         if (labelName.isEmpty())
             labelName = QString("label_%1").arg(i);
 
