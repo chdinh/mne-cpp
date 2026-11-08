@@ -152,7 +152,7 @@ static int doCompute(const QCommandLineParser& parser)
     out << "Reading noise covariance: " << covPath << "\n";
     out.flush();
     FiffCov noiseCov(covPath.toStdU16String());
-    if (noiseCov.is_empty()) {
+    if (noiseCov.empty()) {
         err << "Error: Failed to read noise covariance from " << covPath << "\n";
         return 1;
     }
@@ -165,7 +165,7 @@ static int doCompute(const QCommandLineParser& parser)
     out << "Reading evoked data: " << evokedPath << " (set " << setno << ")\n";
     out.flush();
     FiffEvoked evoked(evokedPath.toStdU16String(), setno);
-    if (evoked.isEmpty()) {
+    if (evoked.empty()) {
         err << "Error: Failed to read evoked data from " << evokedPath << "\n";
         return 1;
     }
@@ -238,7 +238,7 @@ static int doCompute(const QCommandLineParser& parser)
 
     InvCMNEResult result = InvCMNE::compute(
         matEvoked, matGain, matNoiseCovPicked, matSrcCov, settings);
-    if (result.stcCmne.is_empty()) {
+    if (result.stcCmne.empty()) {
         err << "Error: the model cannot be applied to these data (see warnings above).\n";
         return 1;
     }

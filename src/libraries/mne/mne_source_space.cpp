@@ -1416,7 +1416,7 @@ std::unique_ptr<MNESourceSpace> MNESourceSpace::make_volume_source_space(const M
         int depth = (maxn[2] - minn[2] + 1);
 
         sp->voxel_surf_RAS_t = make_voxel_ras_trans(r0, x_ras, y_ras, z_ras, voxel_size);
-        if (!sp->voxel_surf_RAS_t || sp->voxel_surf_RAS_t->is_empty())
+        if (!sp->voxel_surf_RAS_t || sp->voxel_surf_RAS_t->empty())
             return nullptr;
 
         sp->vol_dims[0] = width;
@@ -1443,7 +1443,7 @@ int MNESourceSpace::filter_source_spaces(const MNESurface& surf, float limit, co
     double tot_angle;
     int nspace = static_cast<int>(spaces.size());
 
-    if (spaces[0]->coord_frame == FIFFV_COORD_HEAD && mri_head_t.is_empty()) {
+    if (spaces[0]->coord_frame == FIFFV_COORD_HEAD && mri_head_t.empty()) {
         qCritical("Source spaces are in head coordinates and no coordinate transform was provided!");
         return FAIL;
     }
@@ -1959,7 +1959,7 @@ int MNESourceSpace::transform_source_spaces_to(int coord_frame, const FiffCoordT
     for (k = 0; k < nspace; k++) {
         s = spaces[k].get();
         if (s->coord_frame != coord_frame) {
-            if (!t.is_empty()) {
+            if (!t.empty()) {
                 if (s->coord_frame == t.from && t.to == coord_frame) {
                     if (s->transform_source_space(t) != OK)
                         return FAIL;
@@ -2157,15 +2157,15 @@ int MNESourceSpace::writeVolumeInfo(FiffStream& stream, bool selected_only) cons
     stream.write_int(FIFF_MNE_SOURCE_SPACE_NEIGHBORS, neighbors.data(), ntot);
 
     if (!selected_only) {
-        if (voxel_surf_RAS_t && !voxel_surf_RAS_t->is_empty()) {
+        if (voxel_surf_RAS_t && !voxel_surf_RAS_t->empty()) {
             stream.write_coord_trans(*voxel_surf_RAS_t);
             stream.write_int(FIFF_MNE_SOURCE_SPACE_VOXEL_DIMS, vol_dims, 3);
         }
         if (interpolator && !MRI_volume.isEmpty()) {
             stream.start_block(FIFFB_MNE_PARENT_MRI_FILE);
-            if (MRI_surf_RAS_RAS_t && !MRI_surf_RAS_RAS_t->is_empty())
+            if (MRI_surf_RAS_RAS_t && !MRI_surf_RAS_RAS_t->empty())
                 stream.write_coord_trans(*MRI_surf_RAS_RAS_t);
-            if (MRI_voxel_surf_RAS_t && !MRI_voxel_surf_RAS_t->is_empty())
+            if (MRI_voxel_surf_RAS_t && !MRI_voxel_surf_RAS_t->empty())
                 stream.write_coord_trans(*MRI_voxel_surf_RAS_t);
             stream.write_string(FIFF_MNE_FILE_NAME, MRI_volume.toStdString());
             if (interpolator)
@@ -2273,7 +2273,7 @@ int MNESourceSpace::writeToStream(FiffStream& stream, bool selected_only) const
             stream.write_float(FIFF_MNE_SOURCE_SPACE_NEAREST_DIST, nearest_dist_v.data(), np);
         }
 
-        if (!dist.is_empty()) {
+        if (!dist.empty()) {
             auto m = dist.pickLowerTriangleRcs();
             if (!m)
                 return FIFF_FAIL;

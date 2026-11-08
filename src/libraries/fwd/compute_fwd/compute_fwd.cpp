@@ -204,7 +204,7 @@ void ComputeFwd::initFwd()
                 m_mri_id = FiffId();
             }
         }
-        if (m_mri_id.isEmpty()) {
+        if (m_mri_id.empty()) {
             qCritical("Couldn't read MRI file id (How come?)");
             return;
         }
@@ -253,10 +253,10 @@ void ComputeFwd::initFwd()
                                                iNEeg,
                                                m_meg_head_t,
                                                m_meas_id);
-    if (!m_pSettings->meg_head_t.is_empty()) {
+    if (!m_pSettings->meg_head_t.empty()) {
         m_meg_head_t = m_pSettings->meg_head_t;
     }
-    if (m_meg_head_t.is_empty()) {
+    if (m_meg_head_t.empty()) {
         qCritical("MEG -> head coordinate transformation not found.");
         return;
     }
@@ -323,7 +323,7 @@ void ComputeFwd::initFwd()
     if (m_pSettings->coord_frame == FIFFV_COORD_MRI) {
         FiffCoordTrans head_mri_t = m_mri_head_t.inverted();
         FiffCoordTrans meg_mri_t = FiffCoordTrans::combine(FIFFV_COORD_DEVICE, FIFFV_COORD_MRI, m_meg_head_t, head_mri_t);
-        if (meg_mri_t.is_empty()) {
+        if (meg_mri_t.empty()) {
             return;
         }
         m_megcoils = m_templates->create_meg_coils(m_listMegChs,
@@ -643,7 +643,7 @@ bool ComputeFwd::updateHeadPos(const FiffCoordTrans& transDevHead, MNEForwardSol
     if (m_pSettings->coord_frame == FIFFV_COORD_MRI) {
         FiffCoordTrans head_mri_t = m_mri_head_t.inverted();
         FiffCoordTrans meg_mri_t = FiffCoordTrans::combine(FIFFV_COORD_DEVICE, FIFFV_COORD_MRI, transDevHead, head_mri_t);
-        if (meg_mri_t.is_empty()) {
+        if (meg_mri_t.empty()) {
             return false;
         }
         m_megcoils = m_templates->create_meg_coils(m_listMegChs,

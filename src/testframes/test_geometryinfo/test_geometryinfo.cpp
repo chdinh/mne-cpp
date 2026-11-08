@@ -128,7 +128,7 @@ void TestGeometryInfo::testBadChannelFiltering()
 {
     //acquire real sensor positions
     FiffEvoked evoked((QCoreApplication::applicationDirPath() + "/../resources/data/mne-cpp-test-data/MEG/sample/sample_audvis-ave.fif").toStdU16String(), 0);
-    if (evoked.isEmpty()) {
+    if (evoked.empty()) {
         return;
     }
     // Build sensor position matrix

@@ -102,7 +102,7 @@ void FsAnnotationSet::clear()
 
 void FsAnnotationSet::insert(const FsAnnotation& p_Annotation)
 {
-    if (p_Annotation.isEmpty())
+    if (p_Annotation.empty())
         return;
 
     qint32 hemi = p_Annotation.hemi();

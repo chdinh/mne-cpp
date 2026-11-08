@@ -275,20 +275,20 @@ std::unique_ptr<MNEProjOp> MNEProjOp::read_from_node(FiffStream& stream, const F
     int item_active;
     std::optional<FiffTag> t_pTag;
 
-    if (!start || start->is_empty())
+    if (!start || start->empty())
         start_node = stream.dirtree();
     else
         start_node = start;
 
     auto op = std::make_unique<MNEProjOp>();
     proj = start_node->dir_tree_find(FIFFB_PROJ);
-    if (proj.size() == 0 || proj[0]->is_empty()) /* The caller must recognize an empty projection */
+    if (proj.size() == 0 || proj[0]->empty()) /* The caller must recognize an empty projection */
         return op;
     /*
         * Only the first projection block is recognized
         */
     items = proj[0]->dir_tree_find(FIFFB_PROJ_ITEM);
-    if (items.size() == 0 || items[0]->is_empty()) /* The caller must recognize an empty projection */
+    if (items.size() == 0 || items[0]->empty()) /* The caller must recognize an empty projection */
         return op;
     /*
         * Get a common number of channels

@@ -431,7 +431,7 @@ void Network::append(NetworkNode::SPtr newNode)
 
 //=============================================================================================================
 
-bool Network::isEmpty() const
+bool Network::empty() const
 {
     if (m_lFullEdges.isEmpty() || m_lNodes.isEmpty()) {
         return true;

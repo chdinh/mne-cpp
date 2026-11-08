@@ -218,7 +218,7 @@ void TestInvRapMusicTruth::rejectsInvalidInput()
     MNEForwardSolution fwd = makeForward(G);
     InvRapMusic rap(fwd, false, 2, 0.5);
     QVERIFY_THROWS_EXCEPTION(std::invalid_argument, rap.calculateInverse(MatrixXd::Zero(kChannels - 1, kSamples), found));
-    QVERIFY(rap.calculateInverse(MatrixXd::Zero(kChannels - 1, kSamples), 0.0f, 0.001f).is_empty());
+    QVERIFY(rap.calculateInverse(MatrixXd::Zero(kChannels - 1, kSamples), 0.0f, 0.001f).empty());
 
     // A leadfield whose columns are not a multiple of three has no dipole grid.
     MNEForwardSolution bad = makeForward(G.leftCols(3 * kSources - 1));
@@ -281,7 +281,7 @@ void TestInvRapMusicTruth::evokedEstimate()
     QVERIFY(tracked.data(4, kSamples - 1) > 0.0 && tracked.data(2, kSamples - 1) == 0.0);
 
     evoked.data.conservativeResize(kChannels - 1, NoChange);
-    QVERIFY(rap.calculateInverse(evoked).is_empty());
+    QVERIFY(rap.calculateInverse(evoked).empty());
 }
 
 //=============================================================================================================

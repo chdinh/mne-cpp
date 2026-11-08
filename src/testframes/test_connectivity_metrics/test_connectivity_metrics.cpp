@@ -29,7 +29,7 @@ private slots:
     void testConnectivitySettingsCtor()
     {
         ConnectivitySettings settings;
-        QVERIFY(settings.isEmpty());
+        QVERIFY(settings.empty());
         QCOMPARE(settings.size(), 0);
     }
 
@@ -40,7 +40,7 @@ private slots:
         MatrixXd trial = MatrixXd::Random(4, 100);
         settings.append(trial);
         QCOMPARE(settings.size(), 1);
-        QVERIFY(!settings.isEmpty());
+        QVERIFY(!settings.empty());
     }
 
     void testConnectivitySettingsAppendList()
@@ -190,7 +190,7 @@ private slots:
         sums.clearAllData();
         sums.removeFirst(1);
         sums.removeLast(1);
-        QVERIFY(sums.isEmpty());
+        QVERIFY(sums.empty());
     }
 
     void testMvarModel()

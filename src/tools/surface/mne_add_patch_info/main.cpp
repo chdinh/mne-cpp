@@ -173,18 +173,12 @@ int main(int argc, char* argv[])
     }
 
     // Read source space
-    QFile file(srcFile);
-    FiffStream stream(&file);
-    if (!stream.open()) {
-        qCritical("Cannot open source space file: %s", qPrintable(srcFile));
+    auto read = MNESourceSpaces::read(srcFile.toStdU16String());
+    if (!read) {
+        qCritical("%s", read.error().what());
         return 1;
     }
-    MNESourceSpaces src;
-    if (!MNESourceSpaces::readFromStream(stream, true, src) || src.size() == 0) {
-        qCritical("Cannot read source space: %s", qPrintable(srcFile));
-        return 1;
-    }
-    stream.close();
+    MNESourceSpaces& src = *read;
 
     qInfo("Read source space: %d hemispheres", static_cast<int>(src.size()));
 
@@ -255,7 +249,7 @@ int main(int argc, char* argv[])
         qCritical("Cannot open output file: %s", qPrintable(outFile));
         return 1;
     }
-    src.writeToStream(*outStream);
+    src.write_to_stream(*outStream);
     outStream->end_file();
 
     qInfo("Done.");

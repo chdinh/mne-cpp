@@ -60,7 +60,7 @@ private slots:
             2.0, 4.0;
 
         FiffCov result = cov.estimateCovariance(block, 3);
-        QVERIFY(result.is_empty());
+        QVERIFY(result.empty());
     }
 
     void computesExpectedRegularizedCovariance()
@@ -72,7 +72,7 @@ private slots:
             2.0, 4.0, 6.0;
 
         FiffCov result = cov.estimateCovariance(block, 3);
-        QVERIFY(!result.is_empty());
+        QVERIFY(!result.empty());
 
         QCOMPARE(result.dim, 2);
         QCOMPARE(result.nfree, 3);
@@ -94,12 +94,12 @@ private slots:
         MatrixXd first(2, 3);
         first << 1.0, 2.0, 3.0,
             3.0, 2.0, 1.0;
-        QVERIFY(!cov.estimateCovariance(first, 3).is_empty());
+        QVERIFY(!cov.estimateCovariance(first, 3).empty());
 
         MatrixXd second(2, 1);
         second << 10.0,
             20.0;
-        QVERIFY(cov.estimateCovariance(second, 2).is_empty());
+        QVERIFY(cov.estimateCovariance(second, 2).empty());
     }
 };
 

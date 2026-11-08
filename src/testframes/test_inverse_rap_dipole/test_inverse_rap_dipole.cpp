@@ -425,7 +425,7 @@ private slots:
         FiffCov noiseCov(covFile.fileName().toStdString());
         FiffRawData raw(rawPath.toStdString());
 
-        if (fwd.isEmpty() || noiseCov.is_empty())
+        if (fwd.empty() || noiseCov.empty())
             QSKIP("Data load failed");
 
         MNELIB::MNEInverseOperator invOp = MNELIB::MNEInverseOperator::make_inverse_operator(
@@ -474,7 +474,7 @@ private slots:
         mn.doInverseSetup(evoked.nave, false);
         InvSourceEstimate stc = mn.calculateInverse(picked.data, tmin, tstep, false);
 
-        QVERIFY(!stc.is_empty());
+        QVERIFY(!stc.empty());
         QCOMPARE((int)stc.data.rows(), invOp.nsource);
         QVERIFY(stc.data.allFinite());
         QVERIFY(stc.data.minCoeff() >= 0.0);
@@ -517,7 +517,7 @@ private slots:
         mn.doInverseSetup(evoked.nave, false);
         InvSourceEstimate stc = mn.calculateInverse(picked.data, tmin, tstep, false);
 
-        QVERIFY(!stc.is_empty());
+        QVERIFY(!stc.empty());
         QCOMPARE((int)stc.data.rows(), invOp.nsource);
         QVERIFY(stc.data.allFinite());
     }
@@ -559,7 +559,7 @@ private slots:
         mn.doInverseSetup(evoked.nave, false);
         InvSourceEstimate stc = mn.calculateInverse(picked.data, tmin, tstep, false);
 
-        QVERIFY(!stc.is_empty());
+        QVERIFY(!stc.empty());
         QCOMPARE((int)stc.data.rows(), invOp.nsource);
         QVERIFY(stc.data.allFinite());
     }
@@ -616,7 +616,7 @@ private slots:
             QSKIP("Forward solution not found");
 
         MNEForwardSolution fwd(fwdPath.toStdU16String());
-        if (fwd.isEmpty())
+        if (fwd.empty())
             QSKIP("Fwd load failed");
 
         InvRapMusic rap;

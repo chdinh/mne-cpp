@@ -96,7 +96,7 @@ bool MNEInverseOperator::assemble_kernel(const FsLabel& label,
     typedef Eigen::Triplet<double> T;
     std::vector<T> tripletList;
 
-    if (!label.isEmpty()) {
+    if (!label.empty()) {
         VectorXi src_sel;
         vertno = src.label_src_vertno_sel(label, src_sel);
 
@@ -977,9 +977,11 @@ Expected<MNEInverseOperator> MNEInverseOperator::read(const std::filesystem::pat
     //
     //   Read the source spaces
     //
-    if (!MNESourceSpaces::readFromStream(t_pStream, false, inv.src)) {
-        return fail(ErrorCode::Format, "cannot read the source spaces of {}", name);
+    auto sourceSpaces = MNESourceSpaces::read(t_pStream, false);
+    if (!sourceSpaces) {
+        return std::unexpected(sourceSpaces.error());
     }
+    inv.src = std::move(*sourceSpaces);
     for (qint32 k = 0; k < inv.src.size(); ++k)
         inv.src[k].id = inv.src[k].find_source_space_hemi();
     //
@@ -1091,11 +1093,11 @@ void MNEInverseOperator::write_to_stream(FiffStream& stream) const
     //   write the various priors
     //
     qInfo("\tWriting orientation priors.\n");
-    if (this->orient_prior && !this->orient_prior->is_empty())
+    if (this->orient_prior && !this->orient_prior->empty())
         stream.write_cov(*this->orient_prior.data());
-    if (this->depth_prior && !this->depth_prior->is_empty())
+    if (this->depth_prior && !this->depth_prior->empty())
         stream.write_cov(*this->depth_prior.data());
-    if (this->fmri_prior && !this->fmri_prior->is_empty())
+    if (this->fmri_prior && !this->fmri_prior->empty())
         stream.write_cov(*this->fmri_prior.data());
 
     //
@@ -1114,8 +1116,8 @@ void MNEInverseOperator::write_to_stream(FiffStream& stream) const
     //
     //   Write the source spaces
     //
-    if (!src.isEmpty())
-        this->src.writeToStream(stream);
+    if (!src.empty())
+        this->src.write_to_stream(stream);
 
     //
     //  We also need the SSP operator

@@ -162,7 +162,7 @@ void TestInvLoreta::initTestCase()
         m_info = raw.info;
     }
 
-    m_bDataLoaded = !m_fwd.isEmpty() && !m_noiseCov.is_empty() && m_info.nchan > 0;
+    m_bDataLoaded = !m_fwd.empty() && !m_noiseCov.empty() && m_info.nchan > 0;
 
     if (m_bDataLoaded) {
         m_invOp = MNEInverseOperator::make_inverse_operator(
@@ -230,7 +230,7 @@ void TestInvLoreta::eloreta_fromEvoked()
     InvSourceEstimate stc = mn.calculateInverse(
         pickedEvoked.data, tmin, tstep, false);
 
-    QVERIFY(!stc.is_empty());
+    QVERIFY(!stc.empty());
     QCOMPARE((int)stc.data.rows(), m_invOp.nsource);
     QVERIFY(stc.data.allFinite());
 
@@ -269,7 +269,7 @@ void TestInvLoreta::eloreta_forceEqual()
     InvSourceEstimate stc = mn.calculateInverse(
         pickedEvoked.data, tmin, tstep, false);
 
-    QVERIFY(!stc.is_empty());
+    QVERIFY(!stc.empty());
     QVERIFY(stc.data.allFinite());
 }
 
@@ -305,7 +305,7 @@ void TestInvLoreta::eloreta_vs_dSPM()
     InvSourceEstimate stcEloreta = mnEloreta.calculateInverse(
         pickedEvoked.data, tmin, tstep, false);
 
-    if (stcDspm.is_empty() || stcEloreta.is_empty())
+    if (stcDspm.empty() || stcEloreta.empty())
         QSKIP("Could not compute both STCs");
 
     QCOMPARE(stcDspm.data.rows(), stcEloreta.data.rows());

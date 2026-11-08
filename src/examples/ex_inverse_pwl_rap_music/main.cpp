@@ -129,7 +129,7 @@ int main(int argc, char* argv[])
     std::cout << "evoked first " << evoked.first << "; last " << evoked.last << std::endl;
 
     MNEForwardSolution t_Fwd(parser.value(fwdFileOption).toStdU16String());
-    if (t_Fwd.isEmpty())
+    if (t_Fwd.empty())
         return 1;
 
     StringList ch_sel_names = t_Fwd.info.ch_names;
@@ -165,7 +165,7 @@ int main(int argc, char* argv[])
 
     std::cout << "source estimated" << std::endl;
 
-    if (sourceEstimate.is_empty())
+    if (sourceEstimate.empty())
         return 1;
 
     // Write source estimate to temp files for visualization

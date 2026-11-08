@@ -240,7 +240,7 @@ QJsonObject SourceEstimationSkill::executeSkill(const WorkflowNode& nodeState)
 
     InvSourceEstimate stc = mnNorm.calculateInverse(data, tminSample, tstep);
 
-    if (stc.is_empty()) {
+    if (stc.empty()) {
         return QJsonObject{
             {"status", "error"},
             {"message", QString("Source estimation node `%1`: inverse calculation returned an empty estimate.").arg(nodeState.uid)}};

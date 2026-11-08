@@ -70,7 +70,7 @@ private slots:
     void sourceSpace_defaultCtor()
     {
         MNESourceSpaces ss;
-        QVERIFY(ss.isEmpty());
+        QVERIFY(ss.empty());
         QCOMPARE(ss.size(), 0);
     }
 
@@ -78,14 +78,14 @@ private slots:
     {
         MNESourceSpaces ss;
         MNESourceSpaces copy(ss);
-        QVERIFY(copy.isEmpty());
+        QVERIFY(copy.empty());
     }
 
     void sourceSpace_clear()
     {
         MNESourceSpaces ss;
         ss.clear();
-        QVERIFY(ss.isEmpty());
+        QVERIFY(ss.empty());
     }
 
     void sourceSpace_equality()
@@ -107,22 +107,12 @@ private slots:
         if (!QFile::exists(srcPath)) {
             QSKIP("Source space file not found");
         }
-        QFile file(srcPath);
-        FiffStream stream(&file);
-        if (!stream.open()) {
-            QSKIP("Failed to open source space file");
-        }
 
-        MNESourceSpaces ss;
-        bool ok = MNESourceSpaces::readFromStream(stream, true, ss);
-        stream.close();
-        if (ok) {
-            QVERIFY(!ss.isEmpty());
-            QCOMPARE(ss.size(), 2);
-            QList<VectorXi> vertno = ss.get_vertno();
-            QCOMPARE(vertno.size(), 2);
-            QVERIFY(vertno[0].size() > 0);
-        }
+        const MNESourceSpaces ss(srcPath.toStdU16String());
+        QCOMPARE(ss.size(), 2);
+        QList<VectorXi> vertno = ss.get_vertno();
+        QCOMPARE(vertno.size(), 2);
+        QVERIFY(vertno[0].size() > 0);
     }
 
     //=========================================================================
@@ -241,11 +231,11 @@ private slots:
             QSKIP("Forward solution file not found");
         }
         MNEForwardSolution fwd(fwdPath.toStdU16String());
-        if (fwd.isEmpty()) {
+        if (fwd.empty()) {
             QSKIP("Failed to read forward solution");
         }
 
-        QVERIFY(!fwd.isEmpty());
+        QVERIFY(!fwd.empty());
         QVERIFY(!fwd.isFixedOrient());
         QVERIFY(fwd.sol->data.rows() > 0);
 
@@ -312,7 +302,7 @@ private slots:
     void sourceEstimate_defaultCtor()
     {
         InvSourceEstimate stc;
-        QVERIFY(stc.is_empty());
+        QVERIFY(stc.empty());
     }
 
     void sourceEstimate_paramCtor()
@@ -325,7 +315,7 @@ private slots:
         float tstep = 0.001f;
 
         InvSourceEstimate stc(data, vertices, tmin, tstep);
-        QVERIFY(!stc.is_empty());
+        QVERIFY(!stc.empty());
         QCOMPARE(stc.data.rows(), 100);
         QCOMPARE(stc.data.cols(), 10);
     }
@@ -392,7 +382,7 @@ private slots:
         InvSourceEstimate stc(data, vertices, 0.0f, 0.001f);
 
         InvSourceEstimate copy(stc);
-        QVERIFY(!copy.is_empty());
+        QVERIFY(!copy.empty());
         QCOMPARE(copy.data.rows(), 50);
         QCOMPARE(copy.data.cols(), 5);
     }
@@ -416,7 +406,7 @@ private slots:
         for (int i = 0; i < 10; ++i)
             vertices(i) = i;
         InvSourceEstimate stc(data, vertices, 0.0f, 0.001f);
-        QVERIFY(!stc.is_empty());
+        QVERIFY(!stc.empty());
 
         stc.clear();
         // After clear, data is reset to empty matrix
@@ -432,15 +422,8 @@ private slots:
         QString srcPath = QCoreApplication::applicationDirPath() + "/../resources/data/mne-cpp-test-data/subjects/sample/bem/sample-oct-6-src.fif";
         if (!QFile::exists(srcPath))
             QSKIP("Source space file not found");
-        QFile file(srcPath);
-        FiffStream stream(&file);
-        if (!stream.open())
-            QSKIP("Failed to open source space file");
-        MNESourceSpaces ss;
-        bool ok = MNESourceSpaces::readFromStream(stream, true, ss);
-        stream.close();
-        if (!ok || ss.isEmpty())
-            QSKIP("Failed to read source spaces");
+        MNESourceSpaces ss(srcPath.toStdU16String());
+        QVERIFY(!ss.empty());
 
         // Test hemisphere IDs
         for (int i = 0; i < ss.size(); ++i) {
@@ -457,7 +440,7 @@ private slots:
         if (!QFile::exists(fwdPath))
             QSKIP("Forward solution file not found");
         MNEForwardSolution fwd(fwdPath.toStdU16String());
-        if (fwd.isEmpty())
+        if (fwd.empty())
             QSKIP("Failed to read forward solution");
 
         // Test pick_types for EEG only
@@ -593,7 +576,7 @@ private slots:
     void fsAnnotation_defaultCtor()
     {
         FsAnnotation annot;
-        QVERIFY(annot.isEmpty());
+        QVERIFY(annot.empty());
     }
 
     void fsAnnotation_readFromFile()
@@ -603,13 +586,13 @@ private slots:
             QSKIP("Annotation file not found");
         FsAnnotation annot;
         FsAnnotation::read(annotPath, annot);
-        QVERIFY(!annot.isEmpty());
+        QVERIFY(!annot.empty());
     }
 
     void fsAnnotationSet_defaultCtor()
     {
         FsAnnotationSet aset;
-        QVERIFY(aset.isEmpty());
+        QVERIFY(aset.empty());
     }
 
     //=========================================================================
@@ -808,7 +791,7 @@ private slots:
     void sourceSpaces_appendAndAccess()
     {
         MNESourceSpaces ss;
-        QVERIFY(ss.isEmpty());
+        QVERIFY(ss.empty());
 
         MNESourceSpace lh(5);
         lh.id = FIFFV_MNE_SURF_LEFT_HEMI;
@@ -825,7 +808,7 @@ private slots:
         ss.append(lh);
         ss.append(rh);
         QCOMPARE(ss.size(), 2);
-        QVERIFY(!ss.isEmpty());
+        QVERIFY(!ss.empty());
 
         QCOMPARE(ss[0].id, FIFFV_MNE_SURF_LEFT_HEMI);
         QCOMPARE(ss[1].id, FIFFV_MNE_SURF_RIGHT_HEMI);
@@ -841,14 +824,14 @@ private slots:
             QSKIP("Forward solution file not found");
 
         MNEForwardSolution fwdOrig(fwdPath.toStdU16String());
-        if (fwdOrig.isEmpty())
+        if (fwdOrig.empty())
             QSKIP("Failed to read forward solution");
 
         QTemporaryDir dir;
         const std::filesystem::path path = dir.filePath("round-trip-fwd.fif").toStdU16String();
         QVERIFY(fwdOrig.write(path));
         const MNEForwardSolution fwdRead(path);
-        QVERIFY(!fwdRead.isEmpty());
+        QVERIFY(!fwdRead.empty());
         QCOMPARE(fwdRead.nchan, fwdOrig.nchan);
         QCOMPARE(fwdRead.nsource, fwdOrig.nsource);
     }
@@ -860,7 +843,7 @@ private slots:
             QSKIP("Forward solution file not found");
 
         MNEForwardSolution fwd(fwdPath.toStdU16String());
-        if (fwd.isEmpty())
+        if (fwd.empty())
             QSKIP("Failed to read forward solution");
 
         QVERIFY(!fwd.isFixedOrient());
@@ -880,7 +863,7 @@ private slots:
             QSKIP("Forward solution file not found");
 
         MNEForwardSolution fwd(fwdPath.toStdU16String());
-        if (fwd.isEmpty())
+        if (fwd.empty())
             QSKIP("Failed to read forward solution");
 
         FiffCov orientPrior = fwd.compute_orient_prior(0.2f);
@@ -1205,15 +1188,15 @@ private slots:
         MNEForwardSolution fwd(fwdPath.toStdU16String());
         QVERIFY(fwd.src.size() >= 2);
 
-        // Write source spaces to buffer
-        QBuffer buf;
-        buf.open(QIODevice::ReadWrite);
-        {
-            auto stream = FiffStream::start_file(buf);
-            fwd.src.writeToStream(*stream);
-            stream->end_file();
-        }
-        QVERIFY(buf.size() > 0);
+        // mne.write_source_spaces round trip
+        QTemporaryDir dir;
+        const std::filesystem::path path = dir.filePath("round-trip-src.fif").toStdU16String();
+        QVERIFY(fwd.src.write(path));
+        const MNESourceSpaces back = MNESourceSpaces::read(path, false).value();
+        QCOMPARE(back.size(), fwd.src.size());
+        QCOMPARE(back[0].nuse, fwd.src[0].nuse);
+        QCOMPARE(back.get_vertno()[1], fwd.src.get_vertno()[1]);
+        QCOMPARE(MNESourceSpaces::read(path.parent_path() / "missing-src.fif").error().code, UTILSLIB::ErrorCode::Io);
     }
 
     void sourceSpaces_getVertno()
@@ -1245,7 +1228,7 @@ private slots:
         QVERIFY(fwd.src.size() >= 2);
 
         // find_source_space_hemi identifies hemisphere ID
-        qint32 hemi = MNESourceSpaces::find_source_space_hemi(fwd.src[0]);
+        qint32 hemi = fwd.src[0].find_source_space_hemi();
         QVERIFY(hemi == FIFFV_MNE_SURF_LEFT_HEMI || hemi == FIFFV_MNE_SURF_RIGHT_HEMI);
     }
 
@@ -1568,7 +1551,7 @@ private slots:
     void fiffEvents_emptyConstruction()
     {
         FiffEvents ev;
-        QVERIFY(ev.is_empty());
+        QVERIFY(ev.empty());
         QCOMPARE(ev.num_events(), 0);
     }
 
@@ -1582,7 +1565,7 @@ private slots:
 
         FiffEvents evWrite;
         evWrite.events = evMat;
-        QVERIFY(!evWrite.is_empty());
+        QVERIFY(!evWrite.empty());
         QCOMPARE(evWrite.num_events(), 3);
 
         QTemporaryDir dir;

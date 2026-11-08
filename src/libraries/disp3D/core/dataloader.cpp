@@ -62,7 +62,7 @@ DataLoader::SensorLoadResult DataLoader::loadSensors(const QString& fifPath,
         FiffDirNode::SPtr tree = stream.dirtree();
         FiffDirNode::SPtr nodeInfo;
         if (stream.read_meas_info(tree, info, nodeInfo)) {
-            result.hasInfo = !info.isEmpty();
+            result.hasInfo = !info.empty();
         }
     }
 
@@ -72,7 +72,7 @@ DataLoader::SensorLoadResult DataLoader::loadSensors(const QString& fifPath,
         // Prepare Device->Head transformation
         QMatrix4x4 devHeadQTrans;
         bool hasDevHead = false;
-        if (!info.dev_head_t.is_empty() &&
+        if (!info.dev_head_t.empty() &&
             info.dev_head_t.from == FIFFV_COORD_DEVICE &&
             info.dev_head_t.to == FIFFV_COORD_HEAD &&
             !info.dev_head_t.trans.isIdentity()) {
@@ -318,30 +318,12 @@ InvEcdSet DataLoader::loadDipoles(const QString& dipPath)
 
 MNESourceSpaces DataLoader::loadSourceSpace(const QString& fwdPath)
 {
-    QFile file(fwdPath);
-    if (!file.exists()) {
-        qWarning() << "DataLoader: Source space file not found:" << fwdPath;
+    auto srcSpace = MNESourceSpaces::read(fwdPath.toStdU16String());
+    if (!srcSpace) {
+        qWarning() << "DataLoader:" << srcSpace.error().what();
         return {};
     }
-
-    MNESourceSpaces srcSpace;
-    FiffStream stream(&file);
-    if (!stream.open()) {
-        qWarning() << "DataLoader: Failed to open FIF stream for source space";
-        return {};
-    }
-
-    if (!MNESourceSpaces::readFromStream(stream, true, srcSpace)) {
-        qWarning() << "DataLoader: Failed to read source space from" << fwdPath;
-        return {};
-    }
-
-    if (srcSpace.isEmpty()) {
-        qWarning() << "DataLoader: Source space is empty";
-        return {};
-    }
-
-    return srcSpace;
+    return std::move(*srcSpace);
 }
 
 //=============================================================================================================
@@ -370,7 +352,7 @@ FiffEvoked DataLoader::loadEvoked(const QString& evokedPath, int aveIndex)
     }
 
     FiffEvoked evoked(evokedPath.toStdU16String(), aveIndex);
-    if (evoked.isEmpty()) {
+    if (evoked.empty()) {
         qWarning() << "DataLoader: Failed to read evoked data from" << evokedPath;
     }
     return evoked;

@@ -174,7 +174,7 @@ int main(int argc, char* argv[])
         std::cout << std::endl;
         std::cout << "Evoked description: " << evoked.comment.toUtf8().constData() << std::endl;
 
-        if (t_Fwd.isEmpty())
+        if (t_Fwd.empty())
             return 1;
 
         FiffCov noise_cov(parser.value(covFileOption).toStdString());
@@ -210,7 +210,7 @@ int main(int argc, char* argv[])
         InvMinimumNorm minimumNorm(inverse_operator, lambda2, method);
         sourceEstimate = minimumNorm.calculateInverse(evoked);
 
-        if (sourceEstimate.is_empty())
+        if (sourceEstimate.empty())
             return 1;
 
         // View activation time-series

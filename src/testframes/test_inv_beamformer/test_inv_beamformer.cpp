@@ -219,7 +219,7 @@ void TestInvBeamformer::initTestCase()
         FiffRawData raw(rawPath.toStdString());
         m_info = raw.info;
     }
-    m_bDataLoaded = !m_fwd.isEmpty() && !m_noiseCov.is_empty() && m_info.nchan > 0;
+    m_bDataLoaded = !m_fwd.empty() && !m_noiseCov.empty() && m_info.nchan > 0;
 }
 
 //=============================================================================================================
@@ -404,7 +404,7 @@ void TestInvBeamformer::lcmv_makeAndApply()
              << "channels=" << filters.nChannels()
              << "orient=" << filters.nOrient();
     InvSourceEstimate stc = InvLCMV::applyLCMV(evoked, filters);
-    QVERIFY(!stc.is_empty());
+    QVERIFY(!stc.empty());
     QVERIFY(stc.data.rows() > 0);
     QVERIFY(stc.data.allFinite());
     qDebug() << "LCMV STC: sources=" << stc.data.rows()
@@ -439,7 +439,7 @@ void TestInvBeamformer::lcmv_applyLCMVCov()
     if (!filters.isValid())
         QSKIP("Failed to compute LCMV filters");
     InvSourceEstimate stcPower = InvLCMV::applyLCMVCov(m_noiseCov, filters);
-    QVERIFY(!stcPower.is_empty());
+    QVERIFY(!stcPower.empty());
     QVERIFY(stcPower.data.rows() > 0);
     QVERIFY(stcPower.data.allFinite());
     for (int i = 0; i < stcPower.data.rows(); ++i)
@@ -472,7 +472,7 @@ void TestInvBeamformer::dics_makeAndApplyCsd()
              << "channels=" << filters.nChannels()
              << "n_freqs=" << filters.nFreqs();
     InvSourceEstimate stcPower = InvDICS::applyDICSCsd(csdMatrices, frequencies, filters);
-    QVERIFY(!stcPower.is_empty());
+    QVERIFY(!stcPower.empty());
     QVERIFY(stcPower.data.rows() > 0);
     QVERIFY(stcPower.data.allFinite());
     qDebug() << "DICS power map: sources=" << stcPower.data.rows()
@@ -500,7 +500,7 @@ void TestInvBeamformer::dics_multiFreq()
     QVERIFY(filters.nFreqs() == 2);
     QVERIFY(filters.weights.size() == 2);
     InvSourceEstimate stcPower = InvDICS::applyDICSCsd(csdMatrices, frequencies, filters);
-    QVERIFY(!stcPower.is_empty());
+    QVERIFY(!stcPower.empty());
     QVERIFY(stcPower.data.rows() > 0);
     QVERIFY(stcPower.data.cols() == 2);
     QVERIFY(stcPower.data.allFinite());

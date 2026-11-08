@@ -34,7 +34,7 @@ private slots:
     void events_defaultCtor()
     {
         FiffEvents ev;
-        QVERIFY(ev.is_empty());
+        QVERIFY(ev.empty());
         QCOMPARE(ev.num_events(), 0);
     }
 
@@ -365,7 +365,7 @@ private slots:
         FiffCoordTrans t = FiffCoordTrans::procrustes_align(
             FIFFV_COORD_HEAD, FIFFV_COORD_DEVICE,
             fromPts, toPts, w, 0.01f);
-        QVERIFY(!t.is_empty());
+        QVERIFY(!t.empty());
         QCOMPARE(t.from, (int)FIFFV_COORD_HEAD);
         QCOMPARE(t.to, (int)FIFFV_COORD_DEVICE);
         // The translation should be approximately (0.1, 0, 0)
@@ -382,7 +382,7 @@ private slots:
         FiffCoordTrans t = FiffCoordTrans::procrustes_align(
             FIFFV_COORD_HEAD, FIFFV_COORD_MRI,
             fromPts, toPts, Eigen::VectorXf(), 0.01f);
-        QVERIFY(!t.is_empty());
+        QVERIFY(!t.empty());
         // Identity-like — rotation should be close to identity
         QVERIFY(qAbs(t.trans(0, 0) - 1.0f) < 0.01f);
     }

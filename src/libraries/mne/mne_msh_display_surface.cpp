@@ -271,7 +271,7 @@ void MNEMshDisplaySurface::calculate_digitizer_distances(FIFFLIB::FiffDigitizerD
     int k, nactive;
     FiffDigPoint point;
     Q_ASSERT(dig.head_mri_t);
-    const FiffCoordTrans& t = (dig.head_mri_t_adj && !dig.head_mri_t_adj->is_empty()) ? *dig.head_mri_t_adj : *dig.head_mri_t;
+    const FiffCoordTrans& t = (dig.head_mri_t_adj && !dig.head_mri_t_adj->empty()) ? *dig.head_mri_t_adj : *dig.head_mri_t;
     int nstep = 4;
 
     if (dig.dist_valid)
@@ -429,7 +429,7 @@ int MNEMshDisplaySurface::iterate_alignment_once(FIFFLIB::FiffDigitizerData& dig
                                               rr_mri.topRows(nactive),
                                               w.head(nactive),
                                               max_diff))
-            .is_empty())
+            .empty())
         return FAIL;
 
     if (dig.head_mri_t_adj)

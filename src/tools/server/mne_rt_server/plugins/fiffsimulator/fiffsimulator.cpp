@@ -281,7 +281,7 @@ void FiffSimulator::init()
 bool FiffSimulator::start()
 {
     this->init();
-    if (m_RawInfo.is_empty() && !readRawInfo()) {
+    if (m_RawInfo.empty() && !readRawInfo()) {
         return false;
     }
     registerFiffScheme();
@@ -323,10 +323,10 @@ bool FiffSimulator::stop()
 
 void FiffSimulator::info(qint32 ID)
 {
-    if (m_RawInfo.is_empty())
+    if (m_RawInfo.empty())
         readRawInfo();
 
-    if (!m_RawInfo.is_empty())
+    if (!m_RawInfo.empty())
         emit remitMeasInfo(ID, m_RawInfo.info);
 }
 
@@ -334,7 +334,7 @@ void FiffSimulator::info(qint32 ID)
 
 bool FiffSimulator::readRawInfo()
 {
-    if (m_RawInfo.is_empty()) {
+    if (m_RawInfo.empty()) {
         QMutexLocker locker(&mutex);
 
         auto raw = FiffRawData::read(m_sResourceDataPath.toStdU16String());

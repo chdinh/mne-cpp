@@ -143,7 +143,7 @@ public:
      *
      * @return true if FIFF covariance is empty.
      */
-    inline bool is_empty() const;
+    inline bool empty() const;
 
     //=========================================================================================================
     /**
@@ -293,7 +293,7 @@ public:
 // INLINE DEFINITIONS
 //=============================================================================================================
 
-inline bool FiffCov::is_empty() const
+inline bool FiffCov::empty() const
 {
     return this->dim <= -1;
 }

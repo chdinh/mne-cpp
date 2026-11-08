@@ -374,7 +374,7 @@ private slots:
     void clusterInfo_defaultAndEmpty()
     {
         MNEClusterInfo ci;
-        QVERIFY(ci.isEmpty());
+        QVERIFY(ci.empty());
         QCOMPARE(ci.numClust(), 0);
     }
 
@@ -395,11 +395,11 @@ private slots:
         dist << 0.01, 0.02, 0.03;
         ci.clusterDistances.append(dist);
 
-        QVERIFY(!ci.isEmpty());
+        QVERIFY(!ci.empty());
         QCOMPARE(ci.numClust(), 1);
 
         ci.clear();
-        QVERIFY(ci.isEmpty());
+        QVERIFY(ci.empty());
         QCOMPARE(ci.numClust(), 0);
     }
 
@@ -459,21 +459,21 @@ private slots:
     void sourceSpace_defaultCtor()
     {
         MNESourceSpaces ss;
-        QVERIFY(ss.isEmpty());
+        QVERIFY(ss.empty());
     }
 
     void sourceSpace_copyCtor()
     {
         MNESourceSpaces ss;
         MNESourceSpaces copy(ss);
-        QVERIFY(copy.isEmpty());
+        QVERIFY(copy.empty());
     }
 
     void sourceSpace_clear()
     {
         MNESourceSpaces ss;
         ss.clear();
-        QVERIFY(ss.isEmpty());
+        QVERIFY(ss.empty());
     }
 
     //=========================================================================
@@ -482,7 +482,7 @@ private slots:
     void forwardSolution_defaultCtor()
     {
         MNEForwardSolution fwd;
-        QVERIFY(fwd.isEmpty());
+        QVERIFY(fwd.empty());
         // Note: isClustered() crashes on empty forward solution (accesses empty source space)
     }
 
@@ -490,7 +490,7 @@ private slots:
     {
         MNEForwardSolution fwd;
         fwd.clear();
-        QVERIFY(fwd.isEmpty());
+        QVERIFY(fwd.empty());
     }
 
     void forwardSolution_tripletSelection()
@@ -519,7 +519,7 @@ private slots:
             QSKIP("Forward solution file not available");
         }
 
-        QVERIFY(!MNEForwardSolution(fwdFile.toStdU16String()).isEmpty());
+        QVERIFY(!MNEForwardSolution(fwdFile.toStdU16String()).empty());
     }
 };
 

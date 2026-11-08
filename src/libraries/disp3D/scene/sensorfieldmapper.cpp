@@ -53,7 +53,7 @@ namespace
 Eigen::Vector3f applyTransform(const Eigen::Vector3f& point,
                                const FiffCoordTrans& trans)
 {
-    if (trans.is_empty())
+    if (trans.empty())
         return point;
     float r[3] = {point.x(), point.y(), point.z()};
     FiffCoordTrans::apply_trans(r, trans, FIFFV_MOVE);
@@ -185,7 +185,7 @@ bool SensorFieldMapper::buildMapping(
     const FiffCoordTrans& headToMriTrans,
     bool applySensorTrans)
 {
-    if (!m_loaded || m_evoked.isEmpty())
+    if (!m_loaded || m_evoked.empty())
         return false;
 
     // ── Reset state ────────────────────────────────────────────────────
@@ -216,7 +216,7 @@ bool SensorFieldMapper::buildMapping(
     // ── Build coordinate transforms ────────────────────────────────────
     bool hasDevHead = false;
     QMatrix4x4 devHeadQt;
-    if (!m_evoked.info.dev_head_t.is_empty() &&
+    if (!m_evoked.info.dev_head_t.empty() &&
         m_evoked.info.dev_head_t.from == FIFFV_COORD_DEVICE &&
         m_evoked.info.dev_head_t.to == FIFFV_COORD_HEAD &&
         !m_evoked.info.dev_head_t.trans.isIdentity()) {
@@ -227,7 +227,7 @@ bool SensorFieldMapper::buildMapping(
     }
 
     QMatrix4x4 headToMri;
-    if (applySensorTrans && !headToMriTrans.is_empty()) {
+    if (applySensorTrans && !headToMriTrans.empty()) {
         for (int r = 0; r < 4; ++r)
             for (int c = 0; c < 4; ++c)
                 headToMri(r, c) = headToMriTrans.trans(r, c);
@@ -256,14 +256,14 @@ bool SensorFieldMapper::buildMapping(
         if (ch.kind == FIFFV_MEG_CH) {
             if (hasDevHead)
                 pos = devHeadQt.map(pos);
-            if (applySensorTrans && !headToMriTrans.is_empty())
+            if (applySensorTrans && !headToMriTrans.empty())
                 pos = headToMri.map(pos);
             m_megPick(nMeg++) = k;
             m_megPositions.push_back(Eigen::Vector3f(pos.x(), pos.y(), pos.z()));
             megChs.append(ch);
             megChNames.push_back(ch.ch_name);
         } else if (ch.kind == FIFFV_EEG_CH) {
-            if (applySensorTrans && !headToMriTrans.is_empty())
+            if (applySensorTrans && !headToMriTrans.empty())
                 pos = headToMri.map(pos);
             m_eegPick(nEeg++) = k;
             m_eegPositions.push_back(Eigen::Vector3f(pos.x(), pos.y(), pos.z()));
@@ -284,10 +284,10 @@ bool SensorFieldMapper::buildMapping(
     // make_field_map with origin='auto').
     const Eigen::Vector3f fittedOrigin = fitSphereOrigin(m_evoked.info);
 
-    FiffCoordTrans headMri = (applySensorTrans && !headToMriTrans.is_empty())
+    FiffCoordTrans headMri = (applySensorTrans && !headToMriTrans.empty())
         ? headToMriTrans
         : FiffCoordTrans();
-    FiffCoordTrans devHead = (!m_evoked.info.dev_head_t.is_empty() &&
+    FiffCoordTrans devHead = (!m_evoked.info.dev_head_t.empty() &&
                               m_evoked.info.dev_head_t.from == FIFFV_COORD_DEVICE &&
                               m_evoked.info.dev_head_t.to == FIFFV_COORD_HEAD)
         ? m_evoked.info.dev_head_t
@@ -321,18 +321,18 @@ bool SensorFieldMapper::buildMapping(
 
             if (templates) {
                 FiffCoordTrans devToTarget;
-                if (m_megOnHead && !headMri.is_empty()) {
-                    if (!devHead.is_empty()) {
+                if (m_megOnHead && !headMri.empty()) {
+                    if (!devHead.empty()) {
                         devToTarget = FiffCoordTrans::combine(
                             FIFFV_COORD_DEVICE, FIFFV_COORD_MRI,
                             devHead, headMri);
                     }
-                } else if (!devHead.is_empty()) {
+                } else if (!devHead.empty()) {
                     devToTarget = devHead;
                 }
 
                 Eigen::Vector3f origin = fittedOrigin;
-                if (m_megOnHead && !headMri.is_empty())
+                if (m_megOnHead && !headMri.empty())
                     origin = applyTransform(origin, headMri);
 
                 auto coils = templates->create_meg_coils(
@@ -357,7 +357,7 @@ bool SensorFieldMapper::buildMapping(
 
         if (verts.rows() > 0) {
             Eigen::Vector3f origin = fittedOrigin;
-            if (!headMri.is_empty())
+            if (!headMri.empty())
                 origin = applyTransform(origin, headMri);
 
             auto eegCoils =
@@ -464,7 +464,7 @@ void SensorFieldMapper::computeNormRange()
     m_megVmax = 0.0f;
     m_eegVmax = 0.0f;
 
-    if (!m_loaded || m_evoked.isEmpty())
+    if (!m_loaded || m_evoked.empty())
         return;
 
     const int nTimes = static_cast<int>(m_evoked.data.cols());
@@ -529,7 +529,7 @@ void SensorFieldMapper::apply(
     const SubView& singleView,
     const QVector<SubView>& subViews)
 {
-    if (!m_loaded || m_evoked.isEmpty())
+    if (!m_loaded || m_evoked.empty())
         return;
 
     // ── Lambda that maps one modality onto its target surface ───────────

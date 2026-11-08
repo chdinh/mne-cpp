@@ -150,7 +150,7 @@ void TestFwdPython::initTestCase()
     }
 
     m_ref = MNEForwardSolution(refPath.toStdU16String());
-    QVERIFY(!m_ref.isEmpty());
+    QVERIFY(!m_ref.empty());
 
     // MNE-C assigns labels to a hemisphere by the "-lh.label" suffix.
     m_labelPath = m_dir.filePath("V1-lh.label");

@@ -393,7 +393,7 @@ void TestMnaInversePipeline::testExecuteRealPipeline()
         QVERIFY2(v.isValid(), "load_cov::noise_cov not in results");
         auto cov = v.value<QSharedPointer<FiffCov>>();
         QVERIFY2(!cov.isNull(), "FiffCov is null");
-        QVERIFY2(!cov->is_empty(), "Noise covariance is empty");
+        QVERIFY2(!cov->empty(), "Noise covariance is empty");
         QVERIFY2(cov->data.rows() > 0, "Covariance matrix has 0 rows");
         QCOMPARE(cov->data.rows(), cov->data.cols()); // must be square
         QVERIFY(cov->names.size() > 0);
@@ -409,7 +409,7 @@ void TestMnaInversePipeline::testExecuteRealPipeline()
         QVERIFY2(v.isValid(), "load_fwd::forward not in results");
         auto fwd = v.value<QSharedPointer<MNEForwardSolution>>();
         QVERIFY2(!fwd.isNull(), "MNEForwardSolution is null");
-        QVERIFY2(!fwd->isEmpty(), "Forward solution is empty");
+        QVERIFY2(!fwd->empty(), "Forward solution is empty");
         QVERIFY2(fwd->nsource > 0,
                  qPrintable(QString("nsource = %1, expected > 0").arg(fwd->nsource)));
         QVERIFY(fwd->sol->data.rows() > 0);
@@ -445,7 +445,7 @@ void TestMnaInversePipeline::testExecuteRealPipeline()
         QVERIFY2(v.isValid(), "apply_dspm::source_estimate not in results");
         auto stc = v.value<QSharedPointer<InvSourceEstimate>>();
         QVERIFY2(!stc.isNull(), "InvSourceEstimate is null");
-        QVERIFY2(!stc->is_empty(), "Source estimate is empty");
+        QVERIFY2(!stc->empty(), "Source estimate is empty");
 
         // Dimensions: nsources x ntimes
         QCOMPARE((int)stc->data.rows(), expectedNsource);

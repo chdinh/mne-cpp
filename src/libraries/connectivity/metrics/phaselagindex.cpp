@@ -67,7 +67,7 @@ Network PhaseLagIndex::calculate(ConnectivitySettings& connectivitySettings)
 
     Network finalNetwork("PLI");
 
-    if (connectivitySettings.isEmpty()) {
+    if (connectivitySettings.empty()) {
         qDebug() << "PhaseLagIndex::calculate - Input data is empty";
         return finalNetwork;
     }

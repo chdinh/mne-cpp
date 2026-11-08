@@ -165,7 +165,7 @@ void TestLabelUtils::testGrowLabelEmpty()
     FsSurface emptySurf;
 
     FsLabel result = FsLabelUtils::growLabel(emptyLabel, emptySurf, 1);
-    QVERIFY(result.isEmpty());
+    QVERIFY(result.empty());
 }
 
 //=============================================================================================================

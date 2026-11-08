@@ -6753,7 +6753,7 @@
         "test-data"
       ],
       "gui": false,
-      "qskip_sites": 31,
+      "qskip_sites": 28,
       "spawns_processes": false,
       "ci_excluded_on": [],
       "ci": {
@@ -7177,7 +7177,7 @@
         "test-data"
       ],
       "gui": false,
-      "qskip_sites": 75,
+      "qskip_sites": 74,
       "spawns_processes": false,
       "ci_excluded_on": [],
       "ci": {

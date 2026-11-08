@@ -505,7 +505,7 @@ void NeuronalConnectivity::run()
         if ((skip_count % m_iDownSample) == 0) {
             if (m_pCircularBuffer->pop(network)) {
                 //Send the data to the connected plugins and the online display
-                if (!network.isEmpty()) {
+                if (!network.empty()) {
                     //qDebug()<<"NeuronalConnectivity::run - Total time"<<m_timer.elapsed();
                     m_mutex.lock();
                     network.setFrequencyRange(m_fFreqBandLow, m_fFreqBandHigh);
@@ -590,7 +590,7 @@ void NeuronalConnectivity::onFrequencyBandChanged(float fFreqLow, float fFreqHig
     m_mutex.unlock();
 
     QMutexLocker locker(&m_mutex);
-    if (!m_currentConnectivityResult.isEmpty()) {
+    if (!m_currentConnectivityResult.empty()) {
         m_currentConnectivityResult.setFrequencyRange(m_fFreqBandLow, m_fFreqBandHigh);
         //m_currentConnectivityResult.normalize();
         m_pCircularBuffer->push(m_currentConnectivityResult);

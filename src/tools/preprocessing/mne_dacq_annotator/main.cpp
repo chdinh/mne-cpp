@@ -169,7 +169,7 @@ int main(int argc, char* argv[])
 
     if (!measFile.isEmpty()) {
         FiffRawData rawData(measFile.toStdU16String());
-        if (rawData.info.isEmpty()) {
+        if (rawData.info.empty()) {
             qCritical("Cannot read measurement info from: %s", qPrintable(measFile));
             return 1;
         }

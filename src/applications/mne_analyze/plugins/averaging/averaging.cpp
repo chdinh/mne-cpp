@@ -426,7 +426,7 @@ QSharedPointer<FIFFLIB::FiffEvokedSet> Averaging::averageCalculation(const FIFFL
                                                       m_fBaselineFromS, m_fBaselineToS, mapReject, filterKernel)
             : MNEEpochDataList::computeAverage(FiffRaw, matEvents, m_fPreStim, m_fPostStim, eventCode, m_bBaseline,
                                                m_fBaselineFromS, m_fBaselineToS, mapReject);
-        if (evoked.isEmpty())
+        if (evoked.empty())
             continue;
         evoked.comment = QString::number(eventCode);
         if (m_bBaseline) {

@@ -167,7 +167,7 @@ private slots:
     void testEmptyNetwork()
     {
         Network net;
-        QVERIFY(net.isEmpty());
+        QVERIFY(net.empty());
         QCOMPARE(net.getConnectivityMethod(), QString("Unknown"));
     }
 
@@ -181,7 +181,7 @@ private slots:
     void testAppendNodesAndEdges()
     {
         Network net = buildDiamond();
-        QVERIFY(!net.isEmpty());
+        QVERIFY(!net.empty());
         QCOMPARE(net.getNodes().size(), 4);
         QCOMPARE(net.getFullEdges().size(), 4);
     }
@@ -776,14 +776,14 @@ private slots:
     {
         Network net("Test", 0.0);
         net.append(QSharedPointer<NetworkEdge>::create(0, 1, MatrixXd::Constant(1, 1, 0.5)));
-        QVERIFY(net.isEmpty());
+        QVERIFY(net.empty());
 
         net.append(QSharedPointer<NetworkNode>::create(0, RowVectorXf::Zero(3)));
         net.append(QSharedPointer<NetworkNode>::create(1, RowVectorXf::Zero(3)));
         net.append(QSharedPointer<NetworkEdge>::create(1, 1, MatrixXd::Constant(1, 1, 0.9)));
         net.append(QSharedPointer<NetworkEdge>::create(0, 5, MatrixXd::Constant(1, 1, 0.7)));
         net.append(QSharedPointer<NetworkEdge>::create(5, 0, MatrixXd::Constant(1, 1, -0.6)));
-        QVERIFY(!net.isEmpty());
+        QVERIFY(!net.empty());
         QCOMPARE(net.getFullEdges().size(), 3);
 
         MatrixXd full = net.getFullConnectivityMatrix(true);

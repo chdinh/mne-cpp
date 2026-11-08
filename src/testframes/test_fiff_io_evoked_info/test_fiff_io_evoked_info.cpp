@@ -372,7 +372,7 @@ void TestFiffIoEvokedInfo::evoked_combineMatchesMnePython()
     }
 
     // Mismatched weights are rejected.
-    QVERIFY(FiffEvoked::combine({e0, e1}, VectorXd::Ones(3)).isEmpty());
+    QVERIFY(FiffEvoked::combine({e0, e1}, VectorXd::Ones(3)).empty());
 }
 
 void TestFiffIoEvokedInfo::evokedSet_checkArtifacts()

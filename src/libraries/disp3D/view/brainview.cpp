@@ -320,7 +320,7 @@ void BrainView::onRowsInserted(const QModelIndex& parent, int first, int last)
             m_surfaces[key] = brainSurf;
 
             // Check for annotations
-            if (!surfItem->annotationData().isEmpty()) {
+            if (!surfItem->annotationData().empty()) {
                 brainSurf->addAnnotation(surfItem->annotationData());
             }
 
@@ -503,7 +503,7 @@ void BrainView::onDataChanged(const QModelIndex& topLeft, const QModelIndex& bot
                 }
                 if (roles.contains(SurfaceTreeItem::AnnotationDataRole)) {
                     SurfaceTreeItem* sItem = static_cast<SurfaceTreeItem*>(absItem);
-                    if (!sItem->annotationData().isEmpty()) {
+                    if (!sItem->annotationData().empty()) {
                         surf->addAnnotation(sItem->annotationData());
                     }
                 }
@@ -2350,7 +2350,7 @@ void BrainView::onRealtimeColorsAvailable(const QVector<uint32_t>& colorsLh,
 bool BrainView::loadSensorField(const QString& evokedPath, int aveIndex)
 {
     auto evoked = DataLoader::loadEvoked(evokedPath, aveIndex);
-    if (evoked.isEmpty())
+    if (evoked.empty())
         return false;
 
     // Preserve the current time point when switching between evoked sets
@@ -2391,7 +2391,7 @@ QStringList BrainView::probeEvokedSets(const QString& evokedPath)
 
 void BrainView::setSensorFieldTimePoint(int index)
 {
-    if (!m_fieldMapper.isLoaded() || m_fieldMapper.evoked().isEmpty()) {
+    if (!m_fieldMapper.isLoaded() || m_fieldMapper.evoked().empty()) {
         return;
     }
 
@@ -2788,7 +2788,7 @@ bool BrainView::loadSourceSpace(const QString& fwdPath)
         return false;
 
     auto srcSpace = DataLoader::loadSourceSpace(fwdPath);
-    if (srcSpace.isEmpty())
+    if (srcSpace.empty())
         return false;
     m_model->addSourceSpace(srcSpace);
     return true;
@@ -2829,7 +2829,7 @@ QMatrix4x4 BrainView::itemTransform(const QStandardItem* item) const
     // Sensors, digitizer points and dipoles are in head coordinates
     const int type = absItem->type();
     const bool inHead = type == AbstractTreeItem::itemTypeId(AbstractTreeItem::SensorItem) || type == AbstractTreeItem::itemTypeId(AbstractTreeItem::DigitizerItem) || type == AbstractTreeItem::itemTypeId(AbstractTreeItem::DipoleItem);
-    if (inHead && m_applySensorTrans && !m_headToMriTrans.is_empty())
+    if (inHead && m_applySensorTrans && !m_headToMriTrans.empty())
         trans = SURFACEKEYS::toQMatrix4x4(m_headToMriTrans.trans) * trans;
     return trans;
 }
@@ -2839,7 +2839,7 @@ QMatrix4x4 BrainView::itemTransform(const QStandardItem* item) const
 void BrainView::refreshSensorTransforms()
 {
     QMatrix4x4 qmat;
-    if (m_applySensorTrans && !m_headToMriTrans.is_empty()) {
+    if (m_applySensorTrans && !m_headToMriTrans.empty()) {
         qmat = SURFACEKEYS::toQMatrix4x4(m_headToMriTrans.trans);
     }
 

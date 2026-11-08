@@ -261,7 +261,7 @@ int main(int argc, char* argv[])
     // Read measurement info for channel names
     //=========================================================================
     FiffRawData raw(measFile.toStdU16String());
-    if (raw.info.isEmpty()) {
+    if (raw.info.empty()) {
         qCritical("Cannot read measurement info from: %s", qPrintable(measFile));
         return 1;
     }

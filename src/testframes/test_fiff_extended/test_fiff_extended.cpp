@@ -85,7 +85,7 @@ private slots:
     void testFiffCovDefaultCtor()
     {
         FiffCov cov;
-        QVERIFY(cov.is_empty());
+        QVERIFY(cov.empty());
     }
 
     void testFiffCovCopyCtor()
@@ -109,7 +109,7 @@ private slots:
     {
         FiffCov cov = createSyntheticCov(5);
         cov.clear();
-        QVERIFY(cov.is_empty());
+        QVERIFY(cov.empty());
     }
 
     void testFiffCovPickChannels()
@@ -178,7 +178,7 @@ private slots:
             QSKIP("Sample covariance file not found");
         }
         FiffCov cov(covPath.toStdString());
-        QVERIFY(!cov.is_empty());
+        QVERIFY(!cov.empty());
         QVERIFY(cov.dim > 0);
         QVERIFY(cov.names.size() > 0);
     }
@@ -219,7 +219,7 @@ private slots:
                 chNames.push_back(raw.info.ch_names[picks(i)]);
         }
         FiffCov prepared = cov.prepare_noise_cov(raw.info, chNames);
-        QVERIFY(!prepared.is_empty());
+        QVERIFY(!prepared.empty());
     }
 
     // === FiffEvents tests ===

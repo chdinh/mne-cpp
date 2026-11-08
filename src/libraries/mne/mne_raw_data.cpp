@@ -453,7 +453,7 @@ int mne_read_bad_channel_list_from_node(FiffStream& stream,
     std::optional<FiffTag> t_pTag;
     QString names;
 
-    if (pNode->is_empty())
+    if (pNode->empty())
         node = stream.dirtree();
     else
         node = pNode;

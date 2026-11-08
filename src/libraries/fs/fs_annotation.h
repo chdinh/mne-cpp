@@ -140,7 +140,7 @@ public:
      *
      * @return true if is empty, false otherwise.
      */
-    inline bool isEmpty() const;
+    inline bool empty() const;
 
     //=========================================================================================================
     /**
@@ -293,7 +293,7 @@ inline qint32 FsAnnotation::hemi() const
 
 //=============================================================================================================
 
-inline bool FsAnnotation::isEmpty() const
+inline bool FsAnnotation::empty() const
 {
     return m_iHemi == -1;
 }

@@ -46,7 +46,7 @@ bool InvSourceEstimateIO::writeCsv(const InvSourceEstimate& stc,
                                    const QString& sPath,
                                    char cDelim)
 {
-    if (stc.is_empty()) {
+    if (stc.empty()) {
         qWarning() << "[InvSourceEstimateIO::writeCsv] Source estimate is empty.";
         return false;
     }
@@ -156,7 +156,7 @@ InvSourceEstimate InvSourceEstimateIO::readCsv(const QString& sPath,
 bool InvSourceEstimateIO::writeMatrix(const InvSourceEstimate& stc,
                                       const QString& sPath)
 {
-    if (stc.is_empty()) {
+    if (stc.empty()) {
         qWarning() << "[InvSourceEstimateIO::writeMatrix] Source estimate is empty.";
         return false;
     }

@@ -206,7 +206,7 @@ void TestAnalyzeCoregistration::icpUsesTheSettingsAtClickTime()
     };
 
     const FiffCoordTrans clicked = fit({});
-    QVERIFY(!clicked.is_empty());
+    QVERIFY(!clicked.empty());
     // ICP moves the fiducial fit onto the head shape
     const FiffCoordTrans fiducialFit(sampleFile("MEG/sample/all-trans.fif").toStdU16String(), FIFFV_COORD_HEAD, FIFFV_COORD_MRI);
     QVERIFY((clicked.trans - fiducialFit.trans).cwiseAbs().maxCoeff() > 1e-4f);
@@ -214,7 +214,7 @@ void TestAnalyzeCoregistration::icpUsesTheSettingsAtClickTime()
     const FiffCoordTrans changed = fit([](CoregSettingsView* view) {
         view->findChild<QCheckBox*>(QStringLiteral("m_qCheckBox_HSP"))->setChecked(false);
     });
-    QVERIFY(!changed.is_empty());
+    QVERIFY(!changed.empty());
     QVERIFY2((changed.trans - clicked.trans).cwiseAbs().maxCoeff() < 1e-6f,
              qPrintable(QStringLiteral("max deviation %1").arg((changed.trans - clicked.trans).cwiseAbs().maxCoeff())));
 }

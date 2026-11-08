@@ -501,7 +501,7 @@ void MNEHemisphere::writeToStream(FiffStream& stream) const
     }
 
     //   Distances
-    if (!this->dist.is_empty()) {
+    if (!this->dist.empty()) {
         // Extract upper triangular portion from the dist matrix
         const Eigen::SparseMatrix<float>& eigenDist = this->dist.eigen();
         typedef Eigen::Triplet<float> T;

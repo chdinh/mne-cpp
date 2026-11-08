@@ -67,7 +67,7 @@ Network DebiasedSquaredWeightedPhaseLagIndex::calculate(ConnectivitySettings& co
 
     Network finalNetwork("DSWPLI");
 
-    if (connectivitySettings.isEmpty()) {
+    if (connectivitySettings.empty()) {
         qDebug() << "DebiasedSquaredWeightedPhaseLagIndex::calculate - Input data is empty";
         return finalNetwork;
     }

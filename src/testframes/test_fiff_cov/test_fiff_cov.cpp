@@ -247,7 +247,7 @@ void TestFiffCov::computeFromEpochs_sampleRaw()
                                                      true,
                                                      true);
 
-    QVERIFY(!cov.is_empty());
+    QVERIFY(!cov.empty());
     QCOMPARE(cov.dim, raw.info.nchan);
     QCOMPARE(cov.data.rows(), static_cast<Index>(raw.info.nchan));
     QCOMPARE(cov.data.cols(), static_cast<Index>(raw.info.nchan));
@@ -339,7 +339,7 @@ void TestFiffCov::saveRoundTrip_computedCovariance()
                                                      0.0f,
                                                      true,
                                                      true);
-    QVERIFY(!cov.is_empty());
+    QVERIFY(!cov.empty());
 
     QTemporaryDir tempDir;
     QVERIFY(tempDir.isValid());
@@ -349,7 +349,7 @@ void TestFiffCov::saveRoundTrip_computedCovariance()
 
     const auto roundTrip = FiffCov::read(outPath);
     QVERIFY(roundTrip);
-    QVERIFY(!roundTrip->is_empty());
+    QVERIFY(!roundTrip->empty());
     QCOMPARE(roundTrip->dim, cov.dim);
     QCOMPARE(roundTrip->names, cov.names);
     QVERIFY(roundTrip->data.isApprox(cov.data, 1e-9));

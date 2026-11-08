@@ -52,7 +52,7 @@ bool RtSensorStreamManager::startStreaming(const QString& modality,
     }
 
     // Require loaded evoked data and a built mapping matrix
-    if (!fieldMapper.isLoaded() || fieldMapper.evoked().isEmpty()) {
+    if (!fieldMapper.isLoaded() || fieldMapper.evoked().empty()) {
         qWarning() << "RtSensorStreamManager: Cannot start sensor streaming — no evoked data loaded";
         return false;
     }

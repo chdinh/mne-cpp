@@ -67,7 +67,7 @@ Network UnbiasedSquaredPhaseLagIndex::calculate(ConnectivitySettings& connectivi
 
     Network finalNetwork("USPLI");
 
-    if (connectivitySettings.isEmpty()) {
+    if (connectivitySettings.empty()) {
         qDebug() << "UnbiasedSquaredPhaseLagIndex::calculate - Input data is empty";
         return finalNetwork;
     }

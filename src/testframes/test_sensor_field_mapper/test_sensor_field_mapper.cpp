@@ -191,7 +191,7 @@ void TestSensorFieldMapper::sphereFit()
 void TestSensorFieldMapper::fieldMapsMatchPython()
 {
     const FiffEvoked evoked((QCoreApplication::applicationDirPath() + QStringLiteral("/../resources/data/mne-cpp-test-data/MEG/sample/sample_audvis-ave.fif")).toStdU16String(), 0);
-    QVERIFY(!evoked.isEmpty());
+    QVERIFY(!evoked.empty());
 
     // Six scalp points in head coordinates as the "bem_head" surface
     MatrixX3f rr(6, 3);

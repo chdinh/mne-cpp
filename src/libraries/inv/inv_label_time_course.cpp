@@ -82,7 +82,7 @@ MatrixXd InvLabelTimeCourse::extract(const InvSourceEstimate& stc,
                                      const QString& sMode,
                                      bool bAllowEmpty)
 {
-    if (stc.is_empty() || labels.isEmpty()) {
+    if (stc.empty() || labels.isEmpty()) {
         qWarning() << "[InvLabelTimeCourse::extract] Empty stc or labels.";
         return MatrixXd();
     }

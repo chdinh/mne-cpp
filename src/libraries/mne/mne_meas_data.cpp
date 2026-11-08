@@ -201,7 +201,7 @@ bool MNEMeasData::read_evoked_set(const QString& name,
             nchan = 0;
     }
 
-    if (!id.isEmpty())
+    if (!id.empty())
         qInfo("\tMeasurement file id: %s\n", id.toString().toUtf8().constData());
 
     /*
@@ -264,7 +264,7 @@ bool MNEMeasData::read_evoked_set(const QString& name,
             md.usecs = evoked.info.meas_date[1];
             if (md.secs != 0)
                 target.meas_date = md;
-            else if (!target.meas_id.isEmpty())
+            else if (!target.meas_id.empty())
                 target.meas_date = target.meas_id.time;
             else {
                 target.meas_date.secs = 0;
@@ -276,11 +276,11 @@ bool MNEMeasData::read_evoked_set(const QString& name,
         target.nchan = nchan;
         target.sfreq = sfreq;
 
-        if (!devHeadT.is_empty()) {
+        if (!devHeadT.empty()) {
             target.meg_head_t = std::make_unique<FiffCoordTrans>(devHeadT);
             qInfo("\tUsing MEG <-> head transform from the present data set\n");
         }
-        if (op != nullptr && !op->mri_head_t.is_empty()) { /* Copy if available */
+        if (op != nullptr && !op->mri_head_t.empty()) { /* Copy if available */
             target.mri_head_t = std::make_unique<FiffCoordTrans>(op->mri_head_t);
             qInfo("\tPicked MRI <-> head transform from the inverse operator\n");
         }

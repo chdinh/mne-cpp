@@ -47,7 +47,7 @@ namespace
 Eigen::Vector3f applyTransform(const Eigen::Vector3f& point,
                                const FiffCoordTrans& trans)
 {
-    if (trans.is_empty())
+    if (trans.empty())
         return point;
     float r[3] = {point.x(), point.y(), point.z()};
     FiffCoordTrans::apply_trans(r, trans, FIFFV_MOVE);
@@ -181,7 +181,7 @@ void RtSensorInterpolationMatWorker::computeMapping()
     // ── Build coordinate transforms ────────────────────────────────────
     bool hasDevHead = false;
     QMatrix4x4 devHeadQt;
-    if (!evoked.info.dev_head_t.is_empty() &&
+    if (!evoked.info.dev_head_t.empty() &&
         evoked.info.dev_head_t.from == FIFFV_COORD_DEVICE &&
         evoked.info.dev_head_t.to == FIFFV_COORD_HEAD &&
         !evoked.info.dev_head_t.trans.isIdentity()) {
@@ -190,7 +190,7 @@ void RtSensorInterpolationMatWorker::computeMapping()
     }
 
     QMatrix4x4 headToMri;
-    if (applySensorTrans && !headToMriTrans.is_empty()) {
+    if (applySensorTrans && !headToMriTrans.empty()) {
         headToMri = toQMatrix4x4(headToMriTrans.trans);
     }
 
@@ -208,12 +208,12 @@ void RtSensorInterpolationMatWorker::computeMapping()
         if (ch.kind == FIFFV_MEG_CH) {
             if (hasDevHead)
                 pos = devHeadQt.map(pos);
-            if (applySensorTrans && !headToMriTrans.is_empty())
+            if (applySensorTrans && !headToMriTrans.empty())
                 pos = headToMri.map(pos);
             megPick.append(k);
             megChs.append(ch);
         } else if (ch.kind == FIFFV_EEG_CH) {
-            if (applySensorTrans && !headToMriTrans.is_empty())
+            if (applySensorTrans && !headToMriTrans.empty())
                 pos = headToMri.map(pos);
             eegPick.append(k);
             eegChs.append(ch);
@@ -227,10 +227,10 @@ void RtSensorInterpolationMatWorker::computeMapping()
     // origin="auto" of MNE-Python's make_field_map, as in SensorFieldMapper::buildMapping()
     const Eigen::Vector3f fittedOrigin = SensorFieldMapper::fitSphereOrigin(evoked.info);
 
-    FiffCoordTrans headMri = (applySensorTrans && !headToMriTrans.is_empty())
+    FiffCoordTrans headMri = (applySensorTrans && !headToMriTrans.empty())
         ? headToMriTrans
         : FiffCoordTrans();
-    FiffCoordTrans devHead = (!evoked.info.dev_head_t.is_empty() &&
+    FiffCoordTrans devHead = (!evoked.info.dev_head_t.empty() &&
                               evoked.info.dev_head_t.from == FIFFV_COORD_DEVICE &&
                               evoked.info.dev_head_t.to == FIFFV_COORD_HEAD)
         ? evoked.info.dev_head_t
@@ -254,18 +254,18 @@ void RtSensorInterpolationMatWorker::computeMapping()
 
             if (templates) {
                 FiffCoordTrans devToTarget;
-                if (megOnHead && !headMri.is_empty()) {
-                    if (!devHead.is_empty()) {
+                if (megOnHead && !headMri.empty()) {
+                    if (!devHead.empty()) {
                         devToTarget = FiffCoordTrans::combine(
                             FIFFV_COORD_DEVICE, FIFFV_COORD_MRI,
                             devHead, headMri);
                     }
-                } else if (!devHead.is_empty()) {
+                } else if (!devHead.empty()) {
                     devToTarget = devHead;
                 }
 
                 Eigen::Vector3f origin = fittedOrigin;
-                if (megOnHead && !headMri.is_empty()) {
+                if (megOnHead && !headMri.empty()) {
                     origin = applyTransform(origin, headMri);
                 }
 
@@ -291,7 +291,7 @@ void RtSensorInterpolationMatWorker::computeMapping()
     if (hasEegSurface && !eegChs.isEmpty()) {
         if (eegVerts.rows() > 0) {
             Eigen::Vector3f origin = fittedOrigin;
-            if (!headMri.is_empty())
+            if (!headMri.empty())
                 origin = applyTransform(origin, headMri);
 
             auto eegCoils =

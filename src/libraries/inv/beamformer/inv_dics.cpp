@@ -328,7 +328,7 @@ QList<InvSourceEstimate> InvDICS::applyDICSEpochs(const QList<MatrixXd>& epochs,
 
     for (int i = 0; i < epochs.size(); ++i) {
         InvSourceEstimate stc = applyDICS(epochs[i], tmin, tstep, filters, freqIdx);
-        if (stc.is_empty()) {
+        if (stc.empty()) {
             qWarning("InvDICS::applyDICSEpochs - Epoch %d produced empty source estimate.", i);
         }
         results.append(stc);

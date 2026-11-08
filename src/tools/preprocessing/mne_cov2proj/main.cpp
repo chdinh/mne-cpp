@@ -105,7 +105,7 @@ int main(int argc, char* argv[])
                   qPrintable(covFile), error.what());
         return 1;
     }
-    if (cov.is_empty()) {
+    if (cov.empty()) {
         qCritical("Cannot read covariance from: %s", qPrintable(covFile));
         return 1;
     }

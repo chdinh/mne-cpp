@@ -96,7 +96,7 @@ int main(int argc, char* argv[])
 
     // Open input file
     FiffRawData raw(inFile.toStdU16String());
-    if (raw.info.isEmpty()) {
+    if (raw.info.empty()) {
         qCritical("Cannot read raw data from: %s", qPrintable(inFile));
         return 1;
     }

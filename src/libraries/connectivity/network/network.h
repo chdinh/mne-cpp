@@ -337,7 +337,7 @@ public:
      *
      * @return   The flag identifying whether the Network is empty.
      */
-    bool isEmpty() const;
+    bool empty() const;
 
     //=========================================================================================================
     /**

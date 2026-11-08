@@ -173,7 +173,7 @@ public:
     }
 
     /** @return Whether there is no event. */
-    bool is_empty() const
+    bool empty() const
     {
         return events.rows() == 0;
     }

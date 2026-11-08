@@ -421,7 +421,7 @@ int main(int argc, char* argv[])
         qInfo("Restricting forward solution to %s channels...",
               useMeg ? "MEG" : "EEG");
         forward = forward.pick_types(useMeg, useEeg);
-        if (forward.isEmpty()) {
+        if (forward.empty()) {
             qCritical() << "Error: No channels remaining after channel type restriction.";
             return 1;
         }

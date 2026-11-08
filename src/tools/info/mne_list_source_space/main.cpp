@@ -142,19 +142,12 @@ int main(int argc, char* argv[])
     }
 
     // Read source spaces
-    QFile srcFile(srcName);
-    FiffStream stream(&srcFile);
-    if (!stream.open()) {
-        qCritical("Cannot open source space file: %s", qPrintable(srcName));
+    auto read = MNESourceSpaces::read(srcName.toStdU16String());
+    if (!read) {
+        qCritical("%s", read.error().what());
         return 1;
     }
-
-    MNESourceSpaces sourceSpaces;
-    if (!MNESourceSpaces::readFromStream(stream, true, sourceSpaces)) {
-        qCritical("Cannot read source spaces from file.");
-        return 1;
-    }
-    stream.close();
+    const MNESourceSpaces& sourceSpaces = *read;
 
     if (sourceSpaces.size() == 0) {
         qCritical("No source spaces found in file.");

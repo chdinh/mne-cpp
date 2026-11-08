@@ -79,7 +79,7 @@ UTILSLIB::Expected<FiffCoordTrans> find_transform(FiffStream& stream, const std:
         if (!tag)
             continue;
         FiffCoordTrans t = FiffCoordTrans::from_tag(*tag);
-        if (t.is_empty())
+        if (t.empty())
             continue;
         if (t.from == from && t.to == to)
             return t;

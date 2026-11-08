@@ -124,7 +124,7 @@ public:
      *
      * @return true if FsLabel is empty, false otherwise.
      */
-    inline bool isEmpty() const;
+    inline bool empty() const;
 
     //=========================================================================================================
     /**
@@ -181,7 +181,7 @@ public:
 // INLINE DEFINITIONS
 //=============================================================================================================
 
-inline bool FsLabel::isEmpty() const
+inline bool FsLabel::empty() const
 {
     return this->hemi == -1;
 }

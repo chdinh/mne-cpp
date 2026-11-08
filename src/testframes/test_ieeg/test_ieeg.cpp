@@ -118,7 +118,7 @@ void TestIeeg::readsBidsUnitsAndDeclarations()
 
     // Only contacts without coordinates: nothing to place
     writeFile(tsv, "name\tx\ty\tz\nA1\tn/a\tn/a\tn/a\nA2\t1\tn/a\t0\n");
-    QVERIFY(IeegImplantation::readBids(tsv.toStdString(), &error).isEmpty());
+    QVERIFY(IeegImplantation::readBids(tsv.toStdString(), &error).empty());
     QVERIFY2(error.find("no contacts") != std::string::npos, error.c_str());
 }
 
@@ -210,12 +210,12 @@ void TestIeeg::readsBidsElectrodes()
 
     // Units are unknown without a coordsystem sidecar, so the file is refused
     std::string error;
-    QVERIFY(IeegImplantation::readBids(tsv.toStdString(), &error).isEmpty());
+    QVERIFY(IeegImplantation::readBids(tsv.toStdString(), &error).empty());
     QVERIFY2(error.find("_coordsystem.json") != std::string::npos, error.c_str());
 
     writeFile(dir.filePath(QStringLiteral("sub-01_ses-01_coordsystem.json")),
               R"({"iEEGCoordinateSystem": "ACPC", "iEEGCoordinateUnits": "furlong"})");
-    QVERIFY(IeegImplantation::readBids(tsv.toStdString(), &error).isEmpty());
+    QVERIFY(IeegImplantation::readBids(tsv.toStdString(), &error).empty());
     QVERIFY2(error.find("furlong") != std::string::npos, error.c_str());
 
     writeFile(dir.filePath(QStringLiteral("sub-01_ses-01_coordsystem.json")),

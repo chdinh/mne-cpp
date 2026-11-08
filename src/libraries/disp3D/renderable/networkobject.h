@@ -141,7 +141,7 @@ public:
 
     bool hasData() const
     {
-        return !m_network.isEmpty();
+        return !m_network.empty();
     }
 
 private:

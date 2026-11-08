@@ -155,7 +155,7 @@ void RtClustMne::init()
         m_pRTSEOutput->measurementData()->setSurfSet(m_pSurfaceSet);
     }
 
-    if (!m_mriHeadTrans.is_empty()) {
+    if (!m_mriHeadTrans.empty()) {
         m_pRTSEOutput->measurementData()->setMriHeadTrans(m_mriHeadTrans);
     }
 }
@@ -641,7 +641,7 @@ void RtClustMne::run()
                                                                     tstep,
                                                                     true);
 
-                    if (!sourceEstimate.is_empty()) {
+                    if (!sourceEstimate.empty()) {
                         if (iTimePointSps < sourceEstimate.data.cols() && iTimePointSps >= 0) {
                             sourceEstimate = sourceEstimate.reduce(iTimePointSps, 1);
                             m_pRTSEOutput->measurementData()->setValue(sourceEstimate);
@@ -662,7 +662,7 @@ void RtClustMne::run()
                     if (((skip_count % iDownSample) == 0)) {
                         sourceEstimate = computeCmneInverse(evoked, lambda2, sModelCheckpoint);
 
-                        if (!sourceEstimate.is_empty()) {
+                        if (!sourceEstimate.empty()) {
                             if (iTimePointSps < sourceEstimate.data.cols() && iTimePointSps >= 0) {
                                 sourceEstimate = sourceEstimate.reduce(iTimePointSps, 1);
                             }
@@ -676,7 +676,7 @@ void RtClustMne::run()
                     if (((skip_count % iDownSample) == 0)) {
                         sourceEstimate = pMinimumNorm->calculateInverse(evoked);
 
-                        if (!sourceEstimate.is_empty()) {
+                        if (!sourceEstimate.empty()) {
                             if (iTimePointSps < sourceEstimate.data.cols() && iTimePointSps >= 0) {
                                 sourceEstimate = sourceEstimate.reduce(iTimePointSps, 1);
                                 m_pRTSEOutput->measurementData()->setValue(sourceEstimate);

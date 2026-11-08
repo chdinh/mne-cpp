@@ -178,7 +178,7 @@ std::unique_ptr<MNECovMatrix> MNECovMatrix::read(const QString& name, int kind)
             break;
         }
     }
-    if (!covnode || covnode->is_empty()) {
+    if (!covnode || covnode->empty()) {
         qWarning("Desired covariance matrix not found from %s", name.toUtf8().data());
         stream.close();
         return nullptr;

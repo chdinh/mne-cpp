@@ -73,7 +73,7 @@ private slots:
         QVERIFY(InvSourceEstimateIO::writeCsv(stc, path));
 
         auto loaded = InvSourceEstimateIO::readCsv(path);
-        QVERIFY(!loaded.is_empty());
+        QVERIFY(!loaded.empty());
         QCOMPARE(loaded.data.rows(), stc.data.rows());
         QCOMPARE(loaded.data.cols(), stc.data.cols());
 
@@ -99,7 +99,7 @@ private slots:
         QVERIFY(InvSourceEstimateIO::writeCsv(stc, path, '\t'));
 
         auto loaded = InvSourceEstimateIO::readCsv(path, '\t');
-        QVERIFY(!loaded.is_empty());
+        QVERIFY(!loaded.empty());
         QCOMPARE(loaded.data.rows(), static_cast<Index>(2));
         QCOMPARE(loaded.data.cols(), static_cast<Index>(4));
     }
@@ -140,7 +140,7 @@ private slots:
     void testReadNonexistent()
     {
         auto stc = InvSourceEstimateIO::readCsv("/nonexistent/path.csv");
-        QVERIFY(stc.is_empty());
+        QVERIFY(stc.empty());
     }
 
     void testCsvPreservesTimingInfo()

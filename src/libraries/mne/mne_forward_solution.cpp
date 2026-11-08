@@ -202,7 +202,7 @@ Expected<void> MNEForwardSolution::write(const std::filesystem::path& path) cons
 
         if (!mri_filename.isEmpty())
             t_pStream->write_string(FIFF_MNE_FILE_NAME, mri_filename.toStdString());
-        if (!mri_id.isEmpty())
+        if (!mri_id.empty())
             t_pStream->write_id(FIFF_PARENT_FILE_ID, mri_id);
         t_pStream->write_coord_trans(mri_head_t);
 
@@ -217,7 +217,7 @@ Expected<void> MNEForwardSolution::write(const std::filesystem::path& path) cons
 
         if (!info.filename.empty())
             t_pStream->write_string(FIFF_MNE_FILE_NAME, info.filename);
-        if (!info.meas_id.isEmpty())
+        if (!info.meas_id.empty())
             t_pStream->write_id(FIFF_PARENT_BLOCK_ID, info.meas_id);
         t_pStream->write_coord_trans(info.dev_head_t);
 
@@ -292,7 +292,7 @@ Expected<void> MNEForwardSolution::write(const std::filesystem::path& path) cons
         megSol.transpose_named_matrix();
         t_pStream->write_named_matrix(FIFF_MNE_FORWARD_SOLUTION, megSol);
 
-        if (!sol_grad->isEmpty()) {
+        if (!sol_grad->empty()) {
             FiffNamedMatrix megGrad = extractRows(*sol_grad, megIdx);
             megGrad.transpose_named_matrix();
             t_pStream->write_named_matrix(FIFF_MNE_FORWARD_SOLUTION_GRAD, megGrad);
@@ -317,7 +317,7 @@ Expected<void> MNEForwardSolution::write(const std::filesystem::path& path) cons
         eegSol.transpose_named_matrix();
         t_pStream->write_named_matrix(FIFF_MNE_FORWARD_SOLUTION, eegSol);
 
-        if (!sol_grad->isEmpty()) {
+        if (!sol_grad->empty()) {
             FiffNamedMatrix eegGrad = extractRows(*sol_grad, eegIdx);
             eegGrad.transpose_named_matrix();
             t_pStream->write_named_matrix(FIFF_MNE_FORWARD_SOLUTION_GRAD, eegGrad);
@@ -390,7 +390,7 @@ MNEForwardSolution MNEForwardSolution::cluster_forward_solution(const FsAnnotati
     //
     //Whiten gain matrix before clustering -> cause diffenerent units Magnetometer, Gradiometer and EEG
     //
-    if (!p_pNoise_cov.is_empty() && !p_pInfo.isEmpty()) {
+    if (!p_pNoise_cov.empty() && !p_pInfo.empty()) {
         FiffInfo p_outFwdInfo;
         FiffCov p_outNoiseCov;
         MatrixXd p_outWhitener;
@@ -917,7 +917,7 @@ MNEForwardSolution MNEForwardSolution::pick_channels(const StringList& include,
             bads.push_back(fwd.info.bads[i]);
     fwd.info.bads = bads;
 
-    if (!fwd.sol_grad->isEmpty()) {
+    if (!fwd.sol_grad->empty()) {
         newData.resize(nuse, fwd.sol_grad->data.cols());
         for (quint32 i = 0; i < nuse; ++i)
             newData.row(i) = fwd.sol_grad->data.row(sel[i]);
@@ -1111,10 +1111,11 @@ Expected<MNEForwardSolution> MNEForwardSolution::read(const std::filesystem::pat
         return fail(ErrorCode::Format, "no parent MRI information in {}", name);
     }
 
-    MNELIB::MNESourceSpaces t_SourceSpace;
-    if (!MNELIB::MNESourceSpaces::readFromStream(t_pStream, true, t_SourceSpace)) {
-        return fail(ErrorCode::Format, "cannot read the source spaces of {}", name);
+    auto sourceSpaces = MNESourceSpaces::read(t_pStream);
+    if (!sourceSpaces) {
+        return std::unexpected(sourceSpaces.error());
     }
+    MNESourceSpaces& t_SourceSpace = *sourceSpaces;
 
     for (qint32 k = 0; k < t_SourceSpace.size(); ++k)
         t_SourceSpace[k].id = t_SourceSpace[k].find_source_space_hemi();
@@ -1175,7 +1176,7 @@ Expected<MNEForwardSolution> MNEForwardSolution::read(const std::filesystem::pat
     //
     MNEForwardSolution fwd;
 
-    if (!megfwd.isEmpty() && !eegfwd.isEmpty()) {
+    if (!megfwd.empty() && !eegfwd.empty()) {
         if (megfwd.sol->data.cols() != eegfwd.sol->data.cols() ||
             megfwd.source_ori != eegfwd.source_ori ||
             megfwd.nsource != eegfwd.nsource ||
@@ -1191,7 +1192,7 @@ Expected<MNEForwardSolution> MNEForwardSolution::read(const std::filesystem::pat
         fwd.sol->nrow = megfwd.sol->nrow + eegfwd.sol->nrow;
         fwd.sol->row_names.insert(fwd.sol->row_names.end(), eegfwd.sol->row_names.begin(), eegfwd.sol->row_names.end());
 
-        if (!fwd.sol_grad->isEmpty()) {
+        if (!fwd.sol_grad->empty()) {
             fwd.sol_grad->data.resize(megfwd.sol_grad->data.rows() + eegfwd.sol_grad->data.rows(), megfwd.sol_grad->data.cols());
 
             fwd.sol_grad->data.block(0, 0, megfwd.sol_grad->data.rows(), megfwd.sol_grad->data.cols()) = megfwd.sol_grad->data;
@@ -1202,7 +1203,7 @@ Expected<MNEForwardSolution> MNEForwardSolution::read(const std::filesystem::pat
         }
         fwd.nchan = megfwd.nchan + eegfwd.nchan;
         qInfo("\tMEG and EEG forward solutions combined");
-    } else if (!megfwd.isEmpty())
+    } else if (!megfwd.empty())
         fwd = std::move(megfwd); //not copied for the sake of speed
     else
         fwd = std::move(eegfwd); //not copied for the sake of speed
@@ -1286,7 +1287,7 @@ Expected<MNEForwardSolution> MNEForwardSolution::read(const std::filesystem::pat
             fwd.sol->ncol = fwd.nsource;
             fwd.source_ori = FIFFV_MNE_FIXED_ORI;
 
-            if (!fwd.sol_grad->isEmpty()) {
+            if (!fwd.sol_grad->empty()) {
                 SparseMatrix<double> t_matKron;
                 SparseMatrix<double> t_eye(3, 3);
                 for (qint32 i = 0; i < 3; ++i)
@@ -1400,7 +1401,7 @@ bool MNEForwardSolution::read_one(FiffStream& stream,
         //error(me,'Forward solution matrix has wrong dimensions');
         return false;
     }
-    if (!one.sol_grad->isEmpty()) {
+    if (!one.sol_grad->empty()) {
         if (one.sol_grad->data.rows() != one.nchan ||
             (one.sol_grad->data.cols() != 3 * one.nsource && one.sol_grad->data.cols() != 3 * 3 * one.nsource)) {
             stream.close();
@@ -1519,7 +1520,7 @@ void MNEForwardSolution::convert_to_surf_ori()
 
     this->sol->data *= surf_rot;
 
-    if (!this->sol_grad->isEmpty()) {
+    if (!this->sol_grad->empty()) {
         SparseMatrix<double> t_matKron;
         SparseMatrix<double> t_eye(3, 3);
         for (qint32 i = 0; i < 3; ++i)
@@ -1573,7 +1574,7 @@ MatrixX3f MNEForwardSolution::getSourcePositionsByLabel(const QList<FsLabel>& lP
         return matSourcePositions;
     }
 
-    if (tSurfSetInflated.isEmpty()) {
+    if (tSurfSetInflated.empty()) {
         qWarning() << "MNEForwardSolution::getSourcePositionsByLabel - tSurfSetInflated is empty. Returning.";
         return matSourcePositions;
     }

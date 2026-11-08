@@ -81,7 +81,7 @@ private slots:
 
         InvSourceEstimate stc = simulateStc(activeVerts, allVerts, params);
 
-        QVERIFY(!stc.is_empty());
+        QVERIFY(!stc.empty());
         QCOMPARE(stc.data.rows(), static_cast<Eigen::Index>(20));
         QCOMPARE(stc.data.cols(), static_cast<Eigen::Index>(500));
         QCOMPARE(stc.vertices.size(), static_cast<Eigen::Index>(20));
@@ -102,7 +102,7 @@ private slots:
 
         InvSourceEstimate stc = simulateStc(activeVerts, allVerts, params);
 
-        QVERIFY(!stc.is_empty());
+        QVERIFY(!stc.empty());
 
         // Active vertices should have non-zero data
         QVERIFY(stc.data.row(3).norm() > 0.0);
@@ -141,7 +141,7 @@ private slots:
         activeVerts << 999; // not in allVerts
 
         InvSourceEstimate stc = simulateStc(activeVerts, allVerts);
-        QVERIFY(stc.is_empty());
+        QVERIFY(stc.empty());
     }
 
     //--- simulateStcFromWaveforms tests ---
@@ -160,7 +160,7 @@ private slots:
 
         InvSourceEstimate stc = simulateStcFromWaveforms(waveforms, activeVerts, allVerts, 0.0f, 0.001f);
 
-        QVERIFY(!stc.is_empty());
+        QVERIFY(!stc.empty());
         QCOMPARE(stc.data.rows(), static_cast<Eigen::Index>(5));
         QCOMPARE(stc.data.cols(), static_cast<Eigen::Index>(100));
 
@@ -180,7 +180,7 @@ private slots:
         MatrixXd waveforms(3, 10); // 3 rows but only 2 active verts
 
         InvSourceEstimate stc = simulateStcFromWaveforms(waveforms, activeVerts, allVerts);
-        QVERIFY(stc.is_empty());
+        QVERIFY(stc.empty());
     }
 
     //--- simulateEvoked tests ---

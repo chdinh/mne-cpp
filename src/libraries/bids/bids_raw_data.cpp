@@ -844,7 +844,7 @@ BIDSPath BidsRawData::write(const BIDSPath& bidsPath,
         qWarning() << "[BidsRawData::write] BIDSPath datatype is not set";
         return result;
     }
-    if (raw.info.isEmpty()) {
+    if (raw.info.empty()) {
         qWarning() << "[BidsRawData::write] FiffRawData info is empty";
         return result;
     }

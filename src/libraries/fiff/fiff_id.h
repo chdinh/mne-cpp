@@ -145,7 +145,7 @@ public:
      *
      * @return true if FIFF id is empty.
      */
-    inline bool isEmpty() const;
+    inline bool empty() const;
 
     //=========================================================================================================
     /**
@@ -193,7 +193,7 @@ public:
 // INLINE DEFINITIONS
 //=============================================================================================================
 
-inline bool FiffId::isEmpty() const
+inline bool FiffId::empty() const
 {
     return this->version <= 0;
 }

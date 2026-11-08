@@ -198,13 +198,13 @@ void TestInvDipoleRapMne::initTestCase()
     QVERIFY2(QFile::exists(fwdPath()),
              qPrintable(QString("Forward solution not found: %1").arg(fwdPath())));
     m_fwd = MNEForwardSolution(fwdPath().toStdU16String());
-    QVERIFY2(!m_fwd.isEmpty(), "Failed to load forward solution");
+    QVERIFY2(!m_fwd.empty(), "Failed to load forward solution");
 
     // Load noise covariance
     QVERIFY2(QFile::exists(covPath()),
              qPrintable(QString("Noise covariance not found: %1").arg(covPath())));
     m_noiseCov = FiffCov(covPath().toStdString());
-    QVERIFY2(!m_noiseCov.is_empty(), "Failed to load noise covariance");
+    QVERIFY2(!m_noiseCov.empty(), "Failed to load noise covariance");
 
     // Load measurement info
     FiffRawData raw(rawPath().toStdString());
@@ -232,7 +232,7 @@ void TestInvDipoleRapMne::sourceEstimate_gridData()
     QCOMPARE(stc.data.cols(), (Index)5);
     QCOMPARE(stc.vertices.size(), (Index)10);
     QCOMPARE(stc.samples(), 5);
-    QVERIFY(!stc.is_empty());
+    QVERIFY(!stc.empty());
 }
 
 void TestInvDipoleRapMne::sourceEstimate_couplings()
@@ -727,7 +727,7 @@ void TestInvDipoleRapMne::rapMusic_initAndCalculate()
 {
     // Pick only MEG channels for forward solution
     MNEForwardSolution fwdMeg = m_fwd.pick_types(true, false);
-    QVERIFY2(!fwdMeg.isEmpty(), "Could not pick MEG from forward");
+    QVERIFY2(!fwdMeg.empty(), "Could not pick MEG from forward");
 
     // Truncate to a small subset of sources so RAP MUSIC completes in
     // reasonable time under code-coverage instrumentation.
@@ -746,7 +746,7 @@ void TestInvDipoleRapMne::rapMusic_initAndCalculate()
 
     InvSourceEstimate stc = rap.calculateInverse(measurement, 0.0f, 0.001f);
     // RAP-MUSIC should produce some output (may be empty with random data)
-    QVERIFY(stc.is_empty() || stc.data.rows() > 0);
+    QVERIFY(stc.empty() || stc.data.rows() > 0);
 }
 
 void TestInvDipoleRapMne::rapMusic_getName()
@@ -828,7 +828,7 @@ void TestInvDipoleRapMne::minimumNorm_calculateInverse()
     InvMinimumNorm mn(m_invOp, 1.0f / 9.0f, QString("MNE"));
     InvSourceEstimate stc = mn.calculateInverse(evoked);
 
-    QVERIFY(!stc.is_empty());
+    QVERIFY(!stc.empty());
     QVERIFY(stc.data.rows() > 0);
     QVERIFY(stc.data.cols() > 0);
     QVERIFY(stc.data.allFinite());
@@ -850,7 +850,7 @@ void TestInvDipoleRapMne::minimumNorm_dSPM()
     InvMinimumNorm mn(m_invOp, 1.0f / 9.0f, true, false); // dSPM=true, sLORETA=false
     InvSourceEstimate stc = mn.calculateInverse(evoked);
 
-    QVERIFY(!stc.is_empty());
+    QVERIFY(!stc.empty());
     QVERIFY(stc.data.allFinite());
 }
 
@@ -870,7 +870,7 @@ void TestInvDipoleRapMne::minimumNorm_sLORETA()
     InvMinimumNorm mn(m_invOp, 1.0f / 9.0f, false, true); // dSPM=false, sLORETA=true
     InvSourceEstimate stc = mn.calculateInverse(evoked);
 
-    QVERIFY(!stc.is_empty());
+    QVERIFY(!stc.empty());
     QVERIFY(stc.data.allFinite());
 }
 
@@ -914,12 +914,12 @@ void TestInvDipoleRapMne::sourceEstimate_assignment()
         vertices(i) = i;
 
     InvSourceEstimate stc(data, vertices, 0.0f, 0.001f);
-    QVERIFY(!stc.is_empty());
+    QVERIFY(!stc.empty());
 
     // Assignment operator
     InvSourceEstimate stc2;
     stc2 = stc;
-    QVERIFY(!stc2.is_empty());
+    QVERIFY(!stc2.empty());
     QCOMPARE(stc2.data.rows(), 20);
     QCOMPARE(stc2.data.cols(), 5);
     QCOMPARE(stc2.samples(), 5);

@@ -175,7 +175,7 @@ void FiffDirNode::print(QTextStream& out, int indent) const
 {
     const QString pad(indent, QLatin1Char(' '));
     out << pad << explained(type, FiffExplain::block(type), 14) << " { ";
-    if (!id.isEmpty()) {
+    if (!id.empty()) {
         out << QString::asprintf("\t%d.%d 0x%x%x %d %d ", id.version >> 16, id.version & 0xFFFF, id.machid[0], id.machid[1], id.time.secs, id.time.usecs);
     }
     out << '\n';

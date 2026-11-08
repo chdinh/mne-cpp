@@ -134,7 +134,7 @@ int main(int argc, char* argv[])
     }
     if (!mriName.isEmpty()) {
         FiffCoordTransSet fromFile;
-        if (fromFile.read(mriName) < 0 || fromFile.head_surf_RAS_t.is_empty()) {
+        if (fromFile.read(mriName) < 0 || fromFile.head_surf_RAS_t.empty()) {
             qCritical("No MRI->head transform in %s", qPrintable(mriName));
             return 1;
         }
@@ -144,11 +144,11 @@ int main(int argc, char* argv[])
         }
     }
 
-    if (!devHeadT.is_empty()) {
+    if (!devHeadT.empty()) {
         printTransform(devHeadT);
     }
     for (const FiffCoordTrans* t : {&chain.head_surf_RAS_t, &chain.surf_RAS_RAS_t, &chain.RAS_MNI_tal_t, &chain.MNI_tal_tal_gtz_t, &chain.MNI_tal_tal_ltz_t}) {
-        if (!t->is_empty()) {
+        if (!t->empty()) {
             printTransform(*t);
         }
     }
@@ -160,7 +160,7 @@ int main(int argc, char* argv[])
             qCritical("Cannot open output file: %s", qPrintable(outName));
             return 1;
         }
-        if (!devHeadT.is_empty()) {
+        if (!devHeadT.empty()) {
             outStream->write_coord_trans(devHeadT);
         }
         chain.write(*outStream);

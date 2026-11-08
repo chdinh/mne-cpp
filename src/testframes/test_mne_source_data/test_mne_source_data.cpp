@@ -85,10 +85,7 @@ private slots:
         if (!file.exists())
             QSKIP("Source space file not found");
 
-        MNESourceSpaces srcSpace;
-        FiffStream srcStream(&file);
-        srcStream.open();
-        QVERIFY(MNESourceSpaces::readFromStream(srcStream, false, srcSpace));
+        const MNESourceSpaces srcSpace = MNESourceSpaces::read(path.toStdU16String(), false).value();
 
         QVERIFY(srcSpace.size() > 0);
 
@@ -114,10 +111,7 @@ private slots:
         if (!file.exists())
             QSKIP("Source space file not found");
 
-        MNESourceSpaces srcSpace;
-        FiffStream srcStream2(&file);
-        srcStream2.open();
-        MNESourceSpaces::readFromStream(srcStream2, false, srcSpace);
+        const MNESourceSpaces srcSpace = MNESourceSpaces::read(path.toStdU16String(), false).value();
 
         // Left hemisphere
         auto& lh = srcSpace[0];
@@ -132,7 +126,7 @@ private slots:
         QVERIFY(rh.id == FIFFV_MNE_SURF_RIGHT_HEMI);
 
         // Check that isClustered returns consistent result
-        QVERIFY(!srcSpace.isEmpty());
+        QVERIFY(!srcSpace.empty());
     }
 
     void sourceSpace_copyAndCompare()
@@ -145,18 +139,20 @@ private slots:
         if (!file.exists())
             QSKIP("Source space file not found");
 
-        MNESourceSpaces srcSpace;
-        FiffStream srcStream3(&file);
-        srcStream3.open();
-        MNESourceSpaces::readFromStream(srcStream3, false, srcSpace);
+        const MNESourceSpaces srcSpace = MNESourceSpaces::read(path.toStdU16String(), false).value();
 
         // Copy
-        MNESourceSpaces copy(srcSpace);
+        MNESourceSpaces copy;
+        copy = srcSpace;
         QCOMPARE(copy.size(), srcSpace.size());
         for (int h = 0; h < srcSpace.size(); ++h) {
             QCOMPARE(copy[h].np, srcSpace[h].np);
             QCOMPARE(copy[h].nuse, srcSpace[h].nuse);
         }
+
+        // Assignment copies the source spaces, it does not share them
+        copy[0].np = 0;
+        QVERIFY(srcSpace[0].np > 0);
     }
 
     //=========================================================================
@@ -272,7 +268,7 @@ private slots:
 
         // Read forward solution
         MNEForwardSolution fwd(path.toStdU16String());
-        QVERIFY(!fwd.isEmpty());
+        QVERIFY(!fwd.empty());
         QVERIFY(fwd.sol != nullptr || true);
         QVERIFY(fwd.source_nn.rows() > 0);
         QVERIFY(fwd.nchan > 0);
@@ -290,7 +286,7 @@ private slots:
             QSKIP("Forward solution file not found");
 
         MNEForwardSolution fwd(path.toStdU16String());
-        if (!fwd.isEmpty()) {
+        if (!fwd.empty()) {
             // Check embedded source space
             QVERIFY(fwd.src.size() > 0);
             for (int h = 0; h < fwd.src.size(); ++h) {
@@ -318,7 +314,7 @@ private slots:
             QSKIP("Forward solution file not found");
 
         MNEForwardSolution fwd(path.toStdU16String());
-        if (!fwd.isEmpty() && fwd.info.nchan > 0) {
+        if (!fwd.empty() && fwd.info.nchan > 0) {
             // Pick MEG channels only
             RowVectorXi megPicks = fwd.info.pick_types(true, false, false);
             if (megPicks.size() > 0) {
@@ -412,10 +408,7 @@ private slots:
         if (!file.exists())
             QSKIP("Source space file not found");
 
-        MNESourceSpaces srcSpace;
-        FiffStream srcStream4(&file);
-        srcStream4.open();
-        MNESourceSpaces::readFromStream(srcStream4, false, srcSpace);
+        const MNESourceSpaces srcSpace = MNESourceSpaces::read(path.toStdU16String(), false).value();
 
         int totalVerts = 0;
         VectorXi allVertno(0);
@@ -433,7 +426,7 @@ private slots:
         float tstep = 0.001f;
 
         InvSourceEstimate stc(data, allVertno, tmin, tstep);
-        QVERIFY(!stc.is_empty());
+        QVERIFY(!stc.empty());
         QCOMPARE(stc.samples(), nTimes);
         QCOMPARE(stc.data.rows(), (Index)totalVerts);
     }
@@ -465,7 +458,7 @@ private slots:
             QSKIP("Forward solution file not found");
 
         MNEForwardSolution fwd(path.toStdU16String());
-        if (!fwd.isEmpty()) {
+        if (!fwd.empty()) {
             double loose = 0.2;
             FiffCov orientPrior = fwd.compute_orient_prior(loose);
             QVERIFY(orientPrior.data.rows() > 0);

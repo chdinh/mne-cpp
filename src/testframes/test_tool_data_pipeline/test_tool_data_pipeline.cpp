@@ -294,7 +294,7 @@ private slots:
             QSKIP("Raw data not available");
 
         FIFFLIB::FiffRawData sourceRaw(rawFile.toStdString());
-        QVERIFY(!sourceRaw.info.isEmpty());
+        QVERIFY(!sourceRaw.info.empty());
         Eigen::MatrixXd sourceData;
         Eigen::MatrixXd sourceTimes;
         QVERIFY(sourceRaw.read_raw_segment(sourceData, sourceTimes,
@@ -315,7 +315,7 @@ private slots:
         QVERIFY2(m_lastExitCode == 0, qPrintable(output));
 
         FIFFLIB::FiffRawData mergedRaw(outFile.toStdString());
-        QVERIFY(!mergedRaw.info.isEmpty());
+        QVERIFY(!mergedRaw.info.empty());
         QCOMPARE(mergedRaw.info.nchan, sourceRaw.info.nchan + 2);
         QCOMPARE(mergedRaw.first_samp, sourceRaw.first_samp);
         QCOMPARE(mergedRaw.info.chs[sourceRaw.info.nchan].ch_name, QString("REF001"));
@@ -462,7 +462,7 @@ private slots:
             QSKIP("Raw data not available");
 
         FIFFLIB::FiffRawData inputRaw(rawFile.toStdString());
-        QVERIFY(!inputRaw.info.isEmpty());
+        QVERIFY(!inputRaw.info.empty());
         const int firstSample = inputRaw.first_samp;
 
         const QString triggerFile = m_tempDir.filePath("triggers.txt");
@@ -483,7 +483,7 @@ private slots:
         QVERIFY(QFileInfo(outFile).size() > 0);
 
         FIFFLIB::FiffRawData outputRaw(outFile.toStdString());
-        QVERIFY(!outputRaw.info.isEmpty());
+        QVERIFY(!outputRaw.info.empty());
         QCOMPARE(outputRaw.first_samp, firstSample);
         int stimIndex = -1;
         for (int index = 0; index < outputRaw.info.chs.size(); ++index) {
@@ -515,7 +515,7 @@ private slots:
             QSKIP("Raw data not available");
 
         FIFFLIB::FiffRawData inputRaw(rawFile.toStdString());
-        QVERIFY(!inputRaw.info.isEmpty());
+        QVERIFY(!inputRaw.info.empty());
 
         const QString outFile = m_tempDir.filePath("raw-fixed-stim14.fif");
         const QString output = runTool("mne_fix_stim14", {"--raw", rawFile, "--out", outFile}, 120000);
@@ -2749,7 +2749,7 @@ private slots:
             QSKIP("Raw data not available");
 
         const FIFFLIB::FiffRawData raw(rawFile.toStdString());
-        QVERIFY(!raw.info.isEmpty());
+        QVERIFY(!raw.info.empty());
         int megCount = 0;
         int eegCount = 0;
         for (const FIFFLIB::FiffChInfo& channel : raw.info.chs) {

@@ -108,7 +108,7 @@ void SourceEstimateOverlay::applyToSurface(BrainSurface* surface, int timeIndex)
         return; // No data for this hemisphere
     }
 
-    if (stc->is_empty())
+    if (stc->empty())
         return;
 
     // Clamp time index
@@ -314,7 +314,7 @@ void SourceEstimateOverlay::computeInterpolationMatrix(BrainSurface* surface, in
         return;
     }
 
-    if (stc->is_empty())
+    if (stc->empty())
         return;
 
     qDebug() << "SourceEstimateOverlay: Computing interpolation matrix for hemi" << hemi;

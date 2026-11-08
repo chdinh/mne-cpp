@@ -161,7 +161,7 @@ int BatchProcessor::run(const ProcessingSettings& settings)
             }
         }
 
-        if (fiffEvents.is_empty()) {
+        if (fiffEvents.empty()) {
             // Detect from trigger channel
             qInfo() << "Detecting events from trigger channel" << settings.digTrigger;
             // As in MNE-C (mne_raw_scan_triggers), a mask of 0 means no masking.
@@ -420,7 +420,7 @@ int BatchProcessor::run(const ProcessingSettings& settings)
                     }
                 }
                 FiffEvoked avg = FiffEvoked::combine(runs, FiffEvoked::CombineWeights::Nave);
-                if (avg.isEmpty()) {
+                if (avg.empty()) {
                     qCritical() << "Grand average: incompatible data sets for" << runs.first().comment;
                     return 1;
                 }

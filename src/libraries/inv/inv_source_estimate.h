@@ -168,7 +168,7 @@ public:
     InvSourceEstimate reduce(int start, int n) const;
 
     /** @return Whether the estimate holds no time axis. */
-    bool is_empty() const
+    bool empty() const
     {
         return tstep == -1;
     }

@@ -206,7 +206,7 @@ private slots:
     void testSourceEstimateDefault()
     {
         InvSourceEstimate stc;
-        QVERIFY(stc.is_empty());
+        QVERIFY(stc.empty());
     }
 
     void testSourceEstimateFromData()
@@ -217,7 +217,7 @@ private slots:
         Eigen::VectorXi vertices = Eigen::VectorXi::LinSpaced(nSources, 0, nSources - 1);
 
         InvSourceEstimate stc(sol, vertices, 0.0f, 0.001f);
-        QVERIFY(!stc.is_empty());
+        QVERIFY(!stc.empty());
         QCOMPARE(stc.data.rows(), nSources);
         QCOMPARE(stc.data.cols(), nTimes);
     }
@@ -334,7 +334,7 @@ private slots:
         InvSourceEstimate reconstructed = INVLIB::fromTokens(tokens);
 
         // Verify basic properties match
-        QVERIFY(!reconstructed.is_empty());
+        QVERIFY(!reconstructed.empty());
         QCOMPARE(reconstructed.data.rows(), stc.data.rows());
         QCOMPARE(reconstructed.data.cols(), stc.data.cols());
     }
@@ -348,7 +348,7 @@ private slots:
 
         InvSourceEstimate stc(sol, vertices, 0.0f, 0.001f);
         InvSourceEstimate copy(stc);
-        QVERIFY(!copy.is_empty());
+        QVERIFY(!copy.empty());
         QCOMPARE(copy.data.rows(), nSources);
         QCOMPARE(copy.data.cols(), nTimes);
     }
@@ -361,7 +361,7 @@ private slots:
         Eigen::VectorXi vertices = Eigen::VectorXi::LinSpaced(nSources, 0, nSources - 1);
 
         InvSourceEstimate stc(sol, vertices, 0.0f, 0.001f);
-        QVERIFY(!stc.is_empty());
+        QVERIFY(!stc.empty());
 
         stc.clear();
         // clear() sets tstep=0, but isEmpty() checks tstep==-1

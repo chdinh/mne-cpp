@@ -656,7 +656,7 @@ bool CorticalSurface::loadSourceEstimate(const QString& path)
         qWarning() << "[CorticalSurface]" << stc.error().what();
         return false;
     }
-    if (stc->is_empty() || stc->data.rows() == 0) {
+    if (stc->empty() || stc->data.rows() == 0) {
         qWarning() << "[CorticalSurface] STC produced an empty estimate:" << path;
         return false;
     }
@@ -987,7 +987,7 @@ void CorticalSurface::refreshOverlayLayer()
         return;
     }
     const QString layerId = QStringLiteral("stc_overlay");
-    if (m_stc.is_empty() || m_stc.data.size() == 0) {
+    if (m_stc.empty() || m_stc.data.size() == 0) {
         m_pScene->removeLayer(layerId);
         return;
     }
@@ -1202,7 +1202,7 @@ QVector<CorticalPickedVertex> CorticalSurface::pickedVertices() const
 
 int CorticalSurface::findStcRowFor(int hemi, int vertex) const
 {
-    if (m_stc.is_empty() || m_stc.vertices.size() == 0) {
+    if (m_stc.empty() || m_stc.vertices.size() == 0) {
         return -1;
     }
     // Convention used across mne-cpp / mne-python single-VectorXi stacking:
@@ -1464,17 +1464,17 @@ bool CorticalSurface::runComputeSourceEstimate(const QString& fwdPath,
             mnEst.setELoretaOptions();
         }
         stc = mnEst.calculateInverse(evoked);
-        ok = !stc.is_empty();
+        ok = !stc.empty();
     } else if (m == QStringLiteral("MxNE")) {
         const Eigen::MatrixXd& gain = fwd.sol->data;
         InvMxneResult res = InvMxne::compute(gain, evoked.data, opts.alpha);
         stc = res.stc;
-        ok = !stc.is_empty();
+        ok = !stc.empty();
     } else if (m == QStringLiteral("Gamma-MAP")) {
         const Eigen::MatrixXd& gain = fwd.sol->data;
         InvGammaMapResult res = InvGammaMap::compute(gain, evoked.data, noiseCov.data);
         stc = res.stc;
-        ok = !stc.is_empty();
+        ok = !stc.empty();
     } else if (m == QStringLiteral("CMNE")) {
         InvCMNESettings settings;
         settings.onnxModelPath = opts.onnxPath;
@@ -1483,7 +1483,7 @@ bool CorticalSurface::runComputeSourceEstimate(const QString& fwdPath,
         const Eigen::MatrixXd srcCov = Eigen::MatrixXd::Identity(gain.cols(), gain.cols());
         InvCMNEResult res = InvCMNE::compute(evoked.data, gain, noiseCov.data, srcCov, settings);
         stc = res.stcCmne;
-        ok = !stc.is_empty();
+        ok = !stc.empty();
     } else {
         qWarning() << "[CorticalSurface] Unknown inverse method" << m;
     }
@@ -1682,7 +1682,7 @@ QList<FsLabel> CorticalSurface::labels() const
             continue;
         for (int i = 0; i < root->childCount(); ++i) {
             FsLabel l = labelFromItem(root->child(i));
-            if (!l.isEmpty()) {
+            if (!l.empty()) {
                 out.append(l);
             }
         }
@@ -1695,7 +1695,7 @@ QList<FsLabel> CorticalSurface::labels() const
 int CorticalSurface::loadLabel(const QString& path)
 {
     FsLabel l;
-    if (!FsLabel::read(path, l) || l.isEmpty()) {
+    if (!FsLabel::read(path, l) || l.empty()) {
         return 0;
     }
     addLabelItem(l);
@@ -1738,7 +1738,7 @@ int CorticalSurface::loadAnnot(const QString& path)
 
 bool CorticalSurface::extractLabelTimeCourse(const FsLabel& lbl, const QString& mode)
 {
-    if (lbl.isEmpty() || m_stc.is_empty()) {
+    if (lbl.empty() || m_stc.empty()) {
         return false;
     }
     QList<FsLabel> single;
@@ -1825,7 +1825,7 @@ void CorticalSurface::onSaveLabelTriggered()
         return;
     QTreeWidgetItem* item = m_pLabelTree->currentItem();
     FsLabel l = labelFromItem(item);
-    if (l.isEmpty()) {
+    if (l.empty()) {
         QMessageBox::information(nullptr, getName(),
                                  QStringLiteral("Select a label to save."));
         return;
@@ -1932,7 +1932,7 @@ void CorticalSurface::onLabelTreeContextMenu(const QPoint& pos)
     if (!item)
         return;
     const FsLabel lbl = labelFromItem(item);
-    if (lbl.isEmpty())
+    if (lbl.empty())
         return;
 
     QMenu menu;

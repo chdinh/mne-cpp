@@ -68,7 +68,7 @@ Network WeightedPhaseLagIndex::calculate(ConnectivitySettings& connectivitySetti
 
     Network finalNetwork("WPLI");
 
-    if (connectivitySettings.isEmpty()) {
+    if (connectivitySettings.empty()) {
         qWarning() << "WeightedPhaseLagIndex::calculate - Input data is empty";
         return finalNetwork;
     }

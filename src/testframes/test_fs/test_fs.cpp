@@ -198,7 +198,7 @@ QString TestFS::createTempLabelFile(const QTemporaryDir& dir, const QString& pre
 void TestFS::testSurfaceDefaultCtor()
 {
     FsSurface s;
-    QVERIFY(s.isEmpty());
+    QVERIFY(s.empty());
     QCOMPARE(s.hemi(), -1);
     QCOMPARE(s.rr().rows(), 0);
     QCOMPARE(s.tris().rows(), 0);
@@ -216,7 +216,7 @@ void TestFS::testSurfaceClear()
     // Start with default, clear should be safe
     FsSurface s;
     s.clear();
-    QVERIFY(s.isEmpty());
+    QVERIFY(s.empty());
     QCOMPARE(s.rr().rows(), 0);
 }
 
@@ -307,7 +307,7 @@ void TestFS::testSurfaceReadNonExistent()
     FsSurface s;
     bool ok = FsSurface::read("/nonexistent/path/lh.white", s);
     QVERIFY(!ok);
-    QVERIFY(s.isEmpty());
+    QVERIFY(s.empty());
 }
 
 //=============================================================================================================
@@ -317,7 +317,7 @@ void TestFS::testSurfaceReadNonExistent()
 void TestFS::testSurfaceSetDefaultCtor()
 {
     FsSurfaceSet ss;
-    QVERIFY(ss.isEmpty());
+    QVERIFY(ss.empty());
     QCOMPARE(ss.size(), 0);
 }
 
@@ -343,7 +343,7 @@ void TestFS::testSurfaceSetSize()
     QCOMPARE(ss.size(), 0);
 
     // Verify the size API works on empty sets
-    QVERIFY(ss.isEmpty());
+    QVERIFY(ss.empty());
 }
 
 //=============================================================================================================
@@ -353,7 +353,7 @@ void TestFS::testSurfaceSetSize()
 void TestFS::testLabelDefaultCtor()
 {
     FsLabel l;
-    QVERIFY(l.isEmpty());
+    QVERIFY(l.empty());
     QCOMPARE(l.hemi, -1);
     QCOMPARE(l.label_id, -1);
     QCOMPARE(l.vertices.size(), 0);
@@ -378,7 +378,7 @@ void TestFS::testLabelFullCtor()
 
     FsLabel l(verts, pos, vals, 0, "test_label", 42);
 
-    QVERIFY(!l.isEmpty());
+    QVERIFY(!l.empty());
     QCOMPARE(l.hemi, 0);
     QCOMPARE(l.name, QString("test_label"));
     QCOMPARE(l.label_id, 42);
@@ -400,10 +400,10 @@ void TestFS::testLabelClear()
     vals << 1.0, 0.0;
 
     FsLabel l(verts, pos, vals, 1, "to_clear", 10);
-    QVERIFY(!l.isEmpty());
+    QVERIFY(!l.empty());
 
     l.clear();
-    QVERIFY(l.isEmpty());
+    QVERIFY(l.empty());
     QCOMPARE(l.hemi, -1);
     QCOMPARE(l.label_id, -1);
     QCOMPARE(l.vertices.size(), 0);
@@ -468,7 +468,7 @@ void TestFS::testLabelReadFromFile()
     bool ok = FsLabel::read(labelFile, l);
 
     QVERIFY(ok);
-    QVERIFY(!l.isEmpty());
+    QVERIFY(!l.empty());
     QCOMPARE(l.hemi, 0); // "lh" -> left hemisphere
     QCOMPARE(l.vertices.size(), 3);
     QCOMPARE(l.pos.rows(), 3);
@@ -510,7 +510,7 @@ void TestFS::testLabelReadNonLabelFile()
     FsLabel l;
     bool ok = FsLabel::read(badFile, l);
     QVERIFY(!ok);
-    QVERIFY(l.isEmpty());
+    QVERIFY(l.empty());
 }
 
 //=============================================================================================================
@@ -520,7 +520,7 @@ void TestFS::testLabelReadNonExistentFile()
     FsLabel l;
     bool ok = FsLabel::read("/nonexistent/path/lh.test.label", l);
     QVERIFY(!ok);
-    QVERIFY(l.isEmpty());
+    QVERIFY(l.empty());
 }
 
 //=============================================================================================================
@@ -596,7 +596,7 @@ void TestFS::testColortableAccessors()
 void TestFS::testAnnotationDefaultCtor()
 {
     FsAnnotation a;
-    QVERIFY(a.isEmpty());
+    QVERIFY(a.empty());
     QCOMPARE(a.hemi(), -1);
     QVERIFY(a.filePath().isEmpty());
     QVERIFY(a.fileName().isEmpty());
@@ -609,7 +609,7 @@ void TestFS::testAnnotationReadNonExistent()
     FsAnnotation a;
     bool ok = FsAnnotation::read("/nonexistent/path/lh.aparc.annot", a);
     QVERIFY(!ok);
-    QVERIFY(a.isEmpty());
+    QVERIFY(a.empty());
 }
 
 //=============================================================================================================
@@ -619,7 +619,7 @@ void TestFS::testAnnotationReadNonExistent()
 void TestFS::testAnnotationSetDefaultCtor()
 {
     FsAnnotationSet as;
-    QVERIFY(as.isEmpty());
+    QVERIFY(as.empty());
     QCOMPARE(as.size(), 0);
 }
 

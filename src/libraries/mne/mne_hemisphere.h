@@ -224,7 +224,7 @@ public:
 
 inline bool MNEHemisphere::isClustered() const
 {
-    return !cluster_info.isEmpty();
+    return !cluster_info.empty();
 }
 
 //=============================================================================================================

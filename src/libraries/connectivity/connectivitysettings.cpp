@@ -169,7 +169,7 @@ int ConnectivitySettings::size() const
 
 //*******************************************************************************************************
 
-bool ConnectivitySettings::isEmpty() const
+bool ConnectivitySettings::empty() const
 {
     return m_trialData.isEmpty();
 }

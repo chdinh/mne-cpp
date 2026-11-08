@@ -768,7 +768,7 @@ private slots:
                                                          true,
                                                          true);
 
-        QVERIFY(!cov.is_empty());
+        QVERIFY(!cov.empty());
         QCOMPARE(cov.dim, raw.info.nchan);
         QCOMPARE(cov.data.rows(), static_cast<Index>(raw.info.nchan));
         QCOMPARE(cov.data.cols(), static_cast<Index>(raw.info.nchan));

@@ -179,7 +179,7 @@ private slots:
 
         // Load head->MRI transform and pass it to the model
         FiffCoordTrans head_mri_t(transPath().toStdU16String(), FIFFV_COORD_MRI, FIFFV_COORD_HEAD);
-        QVERIFY(!head_mri_t.is_empty());
+        QVERIFY(!head_mri_t.empty());
         model->fwd_bem_set_head_mri_t(head_mri_t);
 
         int result = model->fwd_bem_specify_coils(coils.get());
@@ -211,7 +211,7 @@ private slots:
 
         // Load head->MRI transform
         FiffCoordTrans head_mri_t(transPath().toStdU16String(), FIFFV_COORD_MRI, FIFFV_COORD_HEAD);
-        QVERIFY(!head_mri_t.is_empty());
+        QVERIFY(!head_mri_t.empty());
         model->fwd_bem_set_head_mri_t(head_mri_t);
 
         int result = model->fwd_bem_specify_els(eegEls.get());

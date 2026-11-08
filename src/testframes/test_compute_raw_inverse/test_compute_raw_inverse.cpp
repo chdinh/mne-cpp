@@ -213,7 +213,7 @@ void TestComputeRawInverse::testInverseDSPM()
     m_stcDSPM = minimumNorm.calculateInverse(pickedEvoked.data, tmin, tstep, false);
 
     // Verify result is not empty
-    QVERIFY2(!m_stcDSPM.is_empty(), "dSPM inverse returned empty result");
+    QVERIFY2(!m_stcDSPM.empty(), "dSPM inverse returned empty result");
 
     // Verify dimensions
     QVERIFY2(m_stcDSPM.data.rows() > 0, "No source vertices in result");
@@ -286,7 +286,7 @@ void TestComputeRawInverse::testInverseSLORETA()
     minimumNorm.doInverseSetup(evoked.nave, false);
     InvSourceEstimate stc = minimumNorm.calculateInverse(pickedEvoked.data, tmin, tstep, false);
 
-    QVERIFY2(!stc.is_empty(), "sLORETA inverse returned empty result");
+    QVERIFY2(!stc.empty(), "sLORETA inverse returned empty result");
     QCOMPARE((int)stc.data.rows(), m_invOp.nsource);
     QVERIFY2(stc.data.allFinite(), "sLORETA data contains NaN or Inf");
 
@@ -320,7 +320,7 @@ void TestComputeRawInverse::testInverseMNE()
     minimumNorm.doInverseSetup(evoked.nave, false);
     InvSourceEstimate stc = minimumNorm.calculateInverse(pickedEvoked.data, tmin, tstep, false);
 
-    QVERIFY2(!stc.is_empty(), "MNE inverse returned empty result");
+    QVERIFY2(!stc.empty(), "MNE inverse returned empty result");
     QCOMPARE((int)stc.data.rows(), m_invOp.nsource);
     QVERIFY2(stc.data.allFinite(), "MNE data contains NaN or Inf");
 
@@ -454,7 +454,7 @@ void TestComputeRawInverse::testBaselineAppliedWhenRequested()
     minimumNorm.doInverseSetup(evoked.nave, false);
     InvSourceEstimate stc = minimumNorm.calculateInverse(pickedEvoked.data, tmin, tstep, false);
 
-    QVERIFY2(!stc.is_empty(), "Inverse with baseline failed");
+    QVERIFY2(!stc.empty(), "Inverse with baseline failed");
     QVERIFY2(stc.data.allFinite(), "Inverse with baseline contains NaN/Inf");
 
     printf("<<<<<<<<<<<<<<<<<<<<<<<<< Test Baseline Applied Finished <<<<<<<<<<<<<<<<<<<<<<<<<\n");
@@ -466,7 +466,7 @@ void TestComputeRawInverse::testStcWriteReadRoundtrip()
 {
     if (!m_bDataAvailable)
         QSKIP("No test data");
-    if (m_stcDSPM.is_empty())
+    if (m_stcDSPM.empty())
         QSKIP("dSPM result not available (testInverseDSPM must run first)");
 
     printf(">>>>>>>>>>>>>>>>>>>>>>>>> Test STC Write/Read Roundtrip >>>>>>>>>>>>>>>>>>>>>>>>>\n");
@@ -496,7 +496,7 @@ void TestComputeRawInverse::testStcWriteReadRoundtrip()
     }
 
     // Compare metadata
-    QVERIFY2(!stcRead.is_empty(), "Read-back STC is empty");
+    QVERIFY2(!stcRead.empty(), "Read-back STC is empty");
 
     // tmin comparison (float precision)
     float tminDiff = std::abs(m_stcDSPM.tmin - stcRead.tmin);
@@ -598,7 +598,7 @@ void TestComputeRawInverse::testLabelRestrictedInverse()
     InvMinimumNorm minimumNorm(m_invOp, s_fLambda2, QString("dSPM"));
     minimumNorm.doInverseSetup(evoked.nave, false);
     InvSourceEstimate stcFull = minimumNorm.calculateInverse(pickedEvoked.data, tmin, tstep, false);
-    QVERIFY2(!stcFull.is_empty(), "Full inverse failed");
+    QVERIFY2(!stcFull.empty(), "Full inverse failed");
 
     // Extract label subset using indices_by_label
     VectorXi labelIndices = stcFull.indices_by_label(std::span(&label, 1), false);
@@ -632,7 +632,7 @@ void TestComputeRawInverse::testStcMatchesMnePython()
 {
     if (!m_bDataAvailable)
         QSKIP("No test data");
-    if (m_stcDSPM.is_empty())
+    if (m_stcDSPM.empty())
         QSKIP("dSPM result not available (testInverseDSPM must run first)");
 
     printf(">>>>>>>>>>>>>>>>>>>>>>>>> Test STC Matches MNE-Python >>>>>>>>>>>>>>>>>>>>>>>>>\n");

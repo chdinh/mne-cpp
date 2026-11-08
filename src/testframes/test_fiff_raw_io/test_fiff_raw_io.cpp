@@ -749,7 +749,7 @@ private slots:
 
         // Persistent QFile — mirrors the fixed application code
         FiffRawData raw((m_sDataPath + "/MEG/sample/sample_audvis_trunc_raw.fif").toStdString());
-        QVERIFY(!raw.is_empty());
+        QVERIFY(!raw.empty());
 
         // Read a 1-second segment
         MatrixXd data, times;
@@ -776,7 +776,7 @@ private slots:
         // Borrow a valid measurement info from the real test file so the
         // written file has a well-formed meas-info block ...
         FiffRawData src((m_sDataPath + "/MEG/sample/sample_audvis_trunc_raw.fif").toStdString());
-        QVERIFY(!src.is_empty());
+        QVERIFY(!src.empty());
 
         // ... then write a raw file that opens a FIFFB_RAW_DATA block but never
         // writes a single data buffer, leaving that block's directory empty.

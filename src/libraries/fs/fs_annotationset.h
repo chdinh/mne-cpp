@@ -152,7 +152,7 @@ public:
      *
      * @return true if FsAnnotationSet is empty.
      */
-    inline bool isEmpty() const;
+    inline bool empty() const;
 
     //=========================================================================================================
     /**
@@ -255,7 +255,7 @@ inline QMap<qint32, FsAnnotation>& FsAnnotationSet::data()
 
 //=============================================================================================================
 
-inline bool FsAnnotationSet::isEmpty() const
+inline bool FsAnnotationSet::empty() const
 {
     return m_qMapAnnots.isEmpty();
 }

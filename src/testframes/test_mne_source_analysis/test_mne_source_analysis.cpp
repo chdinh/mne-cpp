@@ -72,7 +72,7 @@ private slots:
 
         FiffEvokedSet evokedSet(m_sEvokedFile.toStdU16String(), {}, {{-0.2f, 0.0f}});
 
-        QVERIFY(!evokedSet.info.isEmpty());
+        QVERIFY(!evokedSet.info.empty());
         QVERIFY(evokedSet.evoked.size() > 0);
         QVERIFY(evokedSet.info.nchan > 0);
     }
@@ -105,7 +105,7 @@ private slots:
         FiffEvoked& evoked = evokedSet.evoked[0];
         QString kind = evoked.aspectKindToString();
         QVERIFY(!kind.isEmpty());
-        QVERIFY(!evoked.isEmpty());
+        QVERIFY(!evoked.empty());
         QVERIFY(evoked.ch_names().size() > 0);
     }
 
@@ -257,7 +257,7 @@ private slots:
             QSKIP("Cov file not found");
 
         FiffCov cov(m_sCovFile.toStdString());
-        QVERIFY(!cov.is_empty());
+        QVERIFY(!cov.empty());
         QVERIFY(cov.names.size() > 0);
     }
 
@@ -329,7 +329,7 @@ private slots:
             QSKIP("Forward file not found");
 
         MNEForwardSolution fwd(m_sFwdFile.toStdU16String());
-        QVERIFY(!fwd.isEmpty());
+        QVERIFY(!fwd.empty());
         QVERIFY(fwd.nsource > 0);
         QVERIFY(fwd.src.size() > 0);
     }
@@ -341,7 +341,7 @@ private slots:
 
         MNEForwardSolution fwd(m_sFwdFile.toStdU16String());
 
-        QVERIFY(!fwd.src.isEmpty());
+        QVERIFY(!fwd.src.empty());
         QCOMPARE(fwd.src.size(), 2);
 
         QList<Eigen::VectorXi> vertno = fwd.src.get_vertno();
@@ -359,7 +359,7 @@ private slots:
 
         for (int i = 0; i < fwd.src.size(); ++i) {
             MNESourceSpace hemi = fwd.src[i];
-            qint32 hemiId = MNESourceSpaces::find_source_space_hemi(hemi);
+            qint32 hemiId = hemi.find_source_space_hemi();
             QVERIFY(hemiId != 0);
         }
     }

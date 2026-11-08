@@ -144,7 +144,7 @@ int main(int argc, char* argv[])
     // Read raw data
     //
     MNEForwardSolution t_Fwd(parser.value(fwdOption).toStdU16String());
-    if (t_Fwd.isEmpty())
+    if (t_Fwd.empty())
         return 1;
 
     //
@@ -316,7 +316,7 @@ int main(int argc, char* argv[])
             first = false;
     }
 
-    if (sourceEstimate.is_empty())
+    if (sourceEstimate.empty())
         return 1;
 
     //Source Estimate end

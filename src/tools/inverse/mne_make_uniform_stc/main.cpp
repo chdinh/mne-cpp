@@ -89,19 +89,12 @@ int main(int argc, char* argv[])
     }
 
     //--- Read source space ---
-    QFile srcFile(parser.value(srcOpt));
-    FiffStream pStream(&srcFile);
-    if (!pStream.open()) {
-        qCritical() << "Failed to open FIFF stream from:" << parser.value(srcOpt);
+    auto read = MNESourceSpaces::read(parser.value(srcOpt).toStdU16String());
+    if (!read) {
+        qCritical() << read.error().what();
         return 1;
     }
-
-    MNESourceSpaces srcSpaces;
-    if (!MNESourceSpaces::readFromStream(pStream, true, srcSpaces)) {
-        qCritical() << "Failed to read source spaces from:" << parser.value(srcOpt);
-        return 1;
-    }
-    pStream.close();
+    const MNESourceSpaces& srcSpaces = *read;
 
     //--- Collect in-use vertices from all hemispheres ---
     QList<VectorXi> vertnoList = srcSpaces.get_vertno();

@@ -448,7 +448,7 @@ int main(int argc, char* argv[])
     // Load data
     //
     MNEForwardSolution t_Fwd(t_fileFwd);
-    if (t_Fwd.isEmpty())
+    if (t_Fwd.empty())
         return 1;
 
     FiffCov noise_cov(parser.value(covFileOption).toStdString());
@@ -480,7 +480,7 @@ int main(int argc, char* argv[])
 
     InvSourceEstimate sourceEstimate = minimumNorm.calculateInverse(evoked);
 
-    if (sourceEstimate.is_empty())
+    if (sourceEstimate.empty())
         return 1;
 
     // View activation time-series

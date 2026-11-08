@@ -325,7 +325,7 @@ void CoRegistration::onDigitizersChanged(const QString& sFilePath)
     m_pCommu->publishEvent(EVENT_TYPE::NEW_DIGITIZER_ADDED, data);
 
     // set transformation if not empty
-    if (!m_transHeadMri.is_empty()) {
+    if (!m_transHeadMri.empty()) {
         QVariant transData = QVariant::fromValue(m_transHeadMri);
         m_pCommu->publishEvent(EVENT_TYPE::NEW_TRANS_AVAILABE, transData);
     }
@@ -408,7 +408,7 @@ void CoRegistration::onLoadTrans(const QString& sFilePath)
 
 void CoRegistration::onStoreTrans(const QString& sFilePath)
 {
-    if (!m_transHeadMri.is_empty()) {
+    if (!m_transHeadMri.empty()) {
         if (const auto written = m_transHeadMri.write(sFilePath.toStdU16String()); !written) {
             qWarning("[CoRegistration::onStoreTrans] %s", written.error().what());
         }

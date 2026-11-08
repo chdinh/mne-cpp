@@ -91,7 +91,7 @@ void TestElectrodeObject::testEmptyConstruction()
 {
     ElectrodeObject obj;
     QCOMPARE(obj.totalContactCount(), 0);
-    QVERIFY(obj.implantation().isEmpty());
+    QVERIFY(obj.implantation().empty());
     QVERIFY(obj.selectedContact().isEmpty());
     QCOMPARE(obj.contactStreams().instanceCount, 0);
 }

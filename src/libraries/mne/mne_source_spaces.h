@@ -29,13 +29,13 @@
 #include "mne_global.h"
 #include "mne_hemisphere.h"
 
-#include <fiff/fiff_types.h>
-#include <fiff/fiff_dir_node.h>
-#include <fiff/fiff.h>
+#include <fiff/fiff_coord_trans.h>
+#include <fiff/fiff_stream.h>
+#include <utils/error.h>
 
-#include <algorithm>
-#include <vector>
+#include <filesystem>
 #include <memory>
+#include <vector>
 
 //=============================================================================================================
 // EIGEN INCLUDES
@@ -100,22 +100,78 @@ public:
 
     //=========================================================================================================
     /**
-     * Copy assignment. Every member has value semantics, so the
-     * compiler-generated member-wise assignment is correct. It is declared
-     * explicitly because declaring a copy constructor and/or a destructor
-     * deprecates the implicitly generated one.
+     * Copy assignment; like the copy constructor it copies the source spaces, it does not share them.
      *
      * @param[in] other   Object to assign from.
      *
      * @return reference to this object.
      */
-    MNESourceSpaces& operator=(const MNESourceSpaces& other) = default;
+    MNESourceSpaces& operator=(const MNESourceSpaces& other);
 
     //=========================================================================================================
     /**
      * Destroys the MNE forward solution
      */
     ~MNESourceSpaces();
+
+    //=========================================================================================================
+    /**
+     * Move constructor.
+     *
+     * @param[in, out] other   Source spaces to move from; left empty.
+     */
+    MNESourceSpaces(MNESourceSpaces&& other) noexcept = default;
+
+    //=========================================================================================================
+    /**
+     * Move assignment.
+     *
+     * @param[in, out] other   Source spaces to move from; left empty.
+     *
+     * @return reference to this object.
+     */
+    MNESourceSpaces& operator=(MNESourceSpaces&& other) noexcept = default;
+
+    //=========================================================================================================
+    /**
+     * Reads a source space file like read(); throws UTILSLIB::Error if it cannot.
+     *
+     * @param[in] path   The -src.fif file (or any FIFF file holding source spaces).
+     */
+    explicit MNESourceSpaces(const std::filesystem::path& path);
+
+    //=========================================================================================================
+    /**
+     * Reads the source spaces of a file, as mne.read_source_spaces does.
+     *
+     * @param[in] path       The -src.fif file (or any FIFF file holding source spaces).
+     * @param[in] add_geom   Complete the geometry: triangle normals, areas and centroids, and vertex normals.
+     *
+     * @return The source spaces, or why the file cannot be read: Io if it cannot be opened, NotFound if it holds
+     *         no source space, Format if a source space is incomplete or inconsistent.
+     */
+    [[nodiscard]] static UTILSLIB::Expected<MNESourceSpaces> read(const std::filesystem::path& path, bool add_geom = true);
+
+    //=========================================================================================================
+    /**
+     * Reads the source spaces from an open FIFF stream.
+     *
+     * @param[in] stream     The stream; opened here if it is not open yet.
+     * @param[in] add_geom   Complete the geometry: triangle normals, areas and centroids, and vertex normals.
+     *
+     * @return The source spaces, or why the stream cannot be read (see read(path)).
+     */
+    [[nodiscard]] static UTILSLIB::Expected<MNESourceSpaces> read(FIFFLIB::FiffStream& stream, bool add_geom = true);
+
+    //=========================================================================================================
+    /**
+     * Writes the source spaces, as mne.write_source_spaces does.
+     *
+     * @param[in] path   The -src.fif file.
+     *
+     * @return Nothing, or why the file cannot be written (Io).
+     */
+    [[nodiscard]] UTILSLIB::Expected<void> write(const std::filesystem::path& path) const;
 
     //=========================================================================================================
     /**
@@ -129,19 +185,7 @@ public:
      *
      * @return true if MNE Source Space is empty.
      */
-    inline bool isEmpty() const;
-
-    //=========================================================================================================
-    /**
-     * ### MNE toolbox root function ###: Definition of the mne_find_source_space_hemi function
-     *
-     * Returns the hemisphere id ( FIFFV_MNE_SURF_LEFT_HEMI or FIFFV_MNE_SURF_RIGHT_HEMI) for a source space.
-     *
-     * @param[in] p_SourceSpace the hemisphere to investigate.
-     *
-     * @return the deduced hemisphere id.
-     */
-    static qint32 find_source_space_hemi(MNESourceSpace& p_SourceSpace);
+    inline bool empty() const;
 
     //=========================================================================================================
     /**
@@ -165,19 +209,6 @@ public:
 
     //=========================================================================================================
     /**
-     * ### MNE toolbox root function ###: Definition of the mne_patch_info function
-     *
-     * Generate the patch information from the 'nearest' vector in a source space. For vertex in the source
-     * space it provides the list of neighboring vertices in the high resolution triangulation.
-     *
-     * @param[in, out] p_Hemisphere  The source space.
-     *
-     * @return true if succeeded, false otherwise.
-     */
-    static bool patch_info(MNEHemisphere& p_Hemisphere); //VectorXi& nearest, QList<VectorXi>& pinfo);@param[in] nearest   The nearest vector of the source space.@param[in, out] pinfo    The requested patch information.
-
-    //=========================================================================================================
-    /**
      * Reduces a source space to selected regions
      *
      * @param[in] p_qListLabels  ROIs.
@@ -185,22 +216,6 @@ public:
      * @return the reduced source space.
      */
     MNESourceSpaces pick_regions(const QList<FSLIB::FsLabel>& p_qListLabels) const;
-
-    //=========================================================================================================
-    /**
-     * ### MNE toolbox root function ###: Definition of the mne_read_source_spaces function
-     *
-     * Reads source spaces from a fif file
-     *
-     * @param[in, out] stream         The opened fif file.
-     * @param[in] add_geom          Add geometry information to the source spaces.
-     * @param[in, out] p_SourceSpace    The read source spaces.
-     *
-     * @return true if succeeded, false otherwise.
-     */
-    static bool readFromStream(FIFFLIB::FiffStream& stream,
-                               bool add_geom,
-                               MNESourceSpaces& p_SourceSpace);
 
     //=========================================================================================================
     /**
@@ -230,13 +245,11 @@ public:
 
     //=========================================================================================================
     /**
-     * ### MNE toolbox root function ###: Definition of the write_source_spaces_to_fid function
-     *
-     * Write the source spaces to a FIF stream
+     * Writes the source space blocks into an open FIFF stream (mne write_source_spaces_to_fid).
      *
      * @param[in] stream  The stream to write to.
      */
-    void writeToStream(FIFFLIB::FiffStream& stream) const;
+    void write_to_stream(FIFFLIB::FiffStream& stream) const;
 
     //=========================================================================================================
     /**
@@ -337,35 +350,6 @@ public:
     friend bool operator==(const MNESourceSpaces& a, const MNESourceSpaces& b);
 
 private:
-    //=========================================================================================================
-    /**
-     * Definition of the complete_source_space_info function in e.g. mne_read_source_spaces.m, mne_read_bem_surfaces.m
-     *
-     * Completes triangulation info
-     *
-     * @param[in, out] p_Hemisphere   Hemisphere to be completed.
-     *
-     * @return true if succeeded, false otherwise.
-     */
-    static bool complete_source_space_info(MNEHemisphere& p_Hemisphere);
-
-    //=========================================================================================================
-    /**
-     * Definition of the read_source_space function in e.g. mne_read_source_spaces.m, mne_read_bem_surfaces.m
-     *
-     * Reads a single source space (hemisphere)
-     *
-     * @param[in] stream         The opened fif file.
-     * @param[in] p_Tree            Search for the source space here.
-     * @param[in, out] p_Hemisphere    The read source space (hemisphere).
-     *
-     * @return true if succeeded, false otherwise.
-     */
-    static bool read_source_space(FIFFLIB::FiffStream& stream,
-                                  const FIFFLIB::FiffDirNode::SPtr& p_Tree,
-                                  MNEHemisphere& p_Hemisphere);
-
-private:
     std::vector<std::shared_ptr<MNESourceSpace>> m_sourceSpaces; /**< Source spaces (typically hemispheres). */
 };
 
@@ -373,7 +357,7 @@ private:
 // INLINE DEFINITIONS
 //=============================================================================================================
 
-inline bool MNESourceSpaces::isEmpty() const
+inline bool MNESourceSpaces::empty() const
 {
     return m_sourceSpaces.empty();
 }

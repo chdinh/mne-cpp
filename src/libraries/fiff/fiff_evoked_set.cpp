@@ -263,7 +263,7 @@ FiffEvokedSet FiffEvokedSet::computeGrandAverage(const QList<FiffEvokedSet>& evo
             picked.append(eset.evoked[j].pick_channels(common));
         }
         FiffEvoked avg = FiffEvoked::combine(picked, FiffEvoked::CombineWeights::Equal);
-        if (avg.isEmpty()) {
+        if (avg.empty()) {
             continue;
         }
         avg.nave = static_cast<fiff_int_t>(evokedSets.size());

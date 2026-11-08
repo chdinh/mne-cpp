@@ -139,7 +139,7 @@ QList<InvSourceEstimate> INVLIB::applyInverseEpochs(
 
     for (int i = 0; i < epochs.size(); ++i) {
         InvSourceEstimate stc = mn.calculateInverse(epochs[i], tmin, tstep, pickNormal);
-        if (stc.is_empty()) {
+        if (stc.empty()) {
             qWarning() << "[applyInverseEpochs] Epoch" << i << "produced empty source estimate.";
         }
         results.append(stc);
@@ -196,7 +196,7 @@ InvSourceEstimate INVLIB::applyInverseRaw(
 FiffEvoked INVLIB::applyForward(const MNEForwardSolution& fwd, const InvSourceEstimate& stc, const FiffInfo& info)
 {
     // Adapted from mne.forward.forward.apply_forward / _apply_forward (MNE-Python, BSD-3-Clause).
-    if (!fwd.sol || fwd.sol->data.size() == 0 || stc.is_empty()) {
+    if (!fwd.sol || fwd.sol->data.size() == 0 || stc.empty()) {
         qWarning() << "[applyForward] Empty forward solution or source estimate.";
         return FiffEvoked();
     }
@@ -390,7 +390,7 @@ QPair<MatrixXd, VectorXd> INVLIB::computeSourcePsd(
     float fmax,
     int nFft)
 {
-    if (stc.is_empty()) {
+    if (stc.empty()) {
         qWarning() << "[computeSourcePsd] Empty source estimate.";
         return QPair<MatrixXd, VectorXd>();
     }
@@ -454,7 +454,7 @@ QMap<QString, VectorXd> INVLIB::computeSourceBandPower(
 {
     QMap<QString, VectorXd> result;
 
-    if (stc.is_empty() || bands.isEmpty()) {
+    if (stc.empty() || bands.isEmpty()) {
         return result;
     }
 

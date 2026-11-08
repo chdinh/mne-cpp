@@ -271,7 +271,7 @@ bool ElectrodesPlugin::loadBids(const QString& path, const QString& t1Path)
     std::string error;
     IEEGLIB::IeegImplantation implantation = IEEGLIB::IeegImplantation::readBids(path.toStdString(), &error);
     m_lastError = QString::fromStdString(error);
-    if (implantation.isEmpty()) {
+    if (implantation.empty()) {
         qWarning() << "ElectrodesPlugin::loadBids:" << m_lastError;
         return false;
     }

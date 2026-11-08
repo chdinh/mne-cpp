@@ -65,7 +65,7 @@ private slots:
         m_bFwdLoaded = false;
         if (QFile::exists(m_sFwdFile)) {
             MNEForwardSolution fwd(m_sFwdFile.toStdU16String());
-            if (!fwd.isEmpty()) {
+            if (!fwd.empty()) {
                 m_fwd = fwd;
                 m_bFwdLoaded = true;
             }
@@ -86,7 +86,7 @@ private slots:
         }
 
         MNEForwardSolution picked = m_fwd.pick_channels(include);
-        QVERIFY(!picked.isEmpty());
+        QVERIFY(!picked.empty());
         // pick_channels should reduce channel count
         QVERIFY(picked.nchan > 0);
         QVERIFY(picked.nchan <= m_fwd.nchan);
@@ -105,7 +105,7 @@ private slots:
 
         StringList emptyInclude;
         MNEForwardSolution picked = m_fwd.pick_channels(emptyInclude, exclude);
-        QVERIFY(!picked.isEmpty());
+        QVERIFY(!picked.empty());
         QVERIFY(picked.nchan < m_fwd.nchan);
     }
 
@@ -117,7 +117,7 @@ private slots:
             QSKIP("Forward solution not loaded");
 
         MNEForwardSolution megFwd = m_fwd.pick_types(true, false);
-        QVERIFY(!megFwd.isEmpty());
+        QVERIFY(!megFwd.empty());
         QVERIFY(megFwd.nchan > 0);
         QVERIFY(megFwd.nchan <= m_fwd.nchan);
     }
@@ -129,7 +129,7 @@ private slots:
 
         MNEForwardSolution eegFwd = m_fwd.pick_types(false, true);
         // EEG channels may or may not be present
-        if (!eegFwd.isEmpty()) {
+        if (!eegFwd.empty()) {
             QVERIFY(eegFwd.nchan > 0);
         }
     }
@@ -157,7 +157,7 @@ private slots:
         const std::filesystem::path path = dir.filePath("single-fwd.fif").toStdU16String();
         QVERIFY(m_fwd.pick_types(meg, !meg).write(path));
         MNEForwardSolution read(path);
-        QVERIFY(!read.isEmpty());
+        QVERIFY(!read.empty());
         QCOMPARE(read.nchan, nchan);
         QCOMPARE(read.nsource, 7928);
         QCOMPARE(read.sol->data.cols(), 3 * 7928);
@@ -412,7 +412,7 @@ private slots:
         QVERIFY(written);
         if (written) {
             MNEForwardSolution reloaded(tmpFile.toStdU16String());
-            QVERIFY(!reloaded.isEmpty());
+            QVERIFY(!reloaded.empty());
             QCOMPARE(reloaded.nsource, m_fwd.nsource);
             QCOMPARE(reloaded.nchan, m_fwd.nchan);
             QFile::remove(tmpFile);

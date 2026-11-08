@@ -242,7 +242,7 @@ public:
      *
      * @return true if the matrix has no data.
      */
-    inline bool is_empty() const;
+    inline bool empty() const;
 
     /**
      * Convert to Eigen::SparseMatrix<double> (cast from float).
@@ -281,7 +281,7 @@ private:
 // INLINE DEFINITIONS
 //=============================================================================================================
 
-inline bool FiffSparseMatrix::is_empty() const
+inline bool FiffSparseMatrix::empty() const
 {
     return m_eigen.nonZeros() <= 0;
 }

@@ -333,7 +333,7 @@ void NetworkObject::createEdgeGeometry()
 
 void NetworkObject::buildNodeInstances()
 {
-    if (m_network.isEmpty()) {
+    if (m_network.empty()) {
         m_nodeInstanceCount = 0;
         ++m_nodeInstanceGeneration;
         return;
@@ -405,7 +405,7 @@ void NetworkObject::buildNodeInstances()
 
 void NetworkObject::buildEdgeInstances()
 {
-    if (m_network.isEmpty()) {
+    if (m_network.empty()) {
         m_edgeInstanceCount = 0;
         ++m_edgeInstanceGeneration;
         return;

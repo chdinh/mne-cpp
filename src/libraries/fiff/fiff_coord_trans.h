@@ -185,7 +185,7 @@ public:
      *
      * @return true if coordinate transform is empty.
      */
-    inline bool is_empty() const
+    inline bool empty() const
     {
         return this->from < 0;
     }

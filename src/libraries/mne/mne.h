@@ -108,25 +108,6 @@ public:
 
     //=========================================================================================================
     /**
-     * mne_find_source_space_hemi
-     *
-     * ### MNE toolbox root function ###
-     *
-     * Wrapper for the MNESourceSpaces::find_source_space_hemi static function
-     *
-     * Returns the hemisphere id (FIFFV_MNE_SURF_LEFT_HEMI or FIFFV_MNE_SURF_RIGHT_HEMI) for a source space.
-     *
-     * @param[in] p_Hemisphere   The hemisphere to investigate.
-     *
-     * @return the deduced hemisphere id.
-     */
-    inline static qint32 find_source_space_hemi(MNEHemisphere& p_Hemisphere)
-    {
-        return p_Hemisphere.find_source_space_hemi();
-    }
-
-    //=========================================================================================================
-    /**
      * mne_get_current_comp
      *
      * ### MNE toolbox root function ###
@@ -247,23 +228,6 @@ public:
                                         Eigen::MatrixXd& proj)
     {
         return info.make_projector(proj);
-    }
-
-    //=========================================================================================================
-    /**
-     * mne_patch_info
-     *
-     * ### MNE toolbox root function ###
-     *
-     * Wrapper for the MNESourceSpaces::patch_info static function
-     *
-     * @param[in, out] p_Hemisphere  The source space.
-     *
-     * @return true if succeeded, false otherwise.
-     */
-    static bool patch_info(MNEHemisphere& p_Hemisphere)
-    {
-        return p_Hemisphere.compute_patch_info();
     }
 
     inline static bool read_events(const std::filesystem::path& t_sEventName,
@@ -493,31 +457,6 @@ public:
         return stream.read_cov(p_Node,
                                cov_kind,
                                p_covData);
-    }
-
-    //=========================================================================================================
-    /**
-     * mne_read_source_spaces
-     *
-     * ### MNE toolbox root function ###
-     *
-     * Wrapper for the MNESourceSpaces::readFromStream static function
-     *
-     * Reads source spaces from a fif file
-     *
-     * @param[in] stream         The open fiff file.
-     * @param[in] add_geom          Add geometry information to the source spaces.
-     * @param[in, out] p_SourceSpace    The read source spaces.
-     *
-     * @return true if succeeded, false otherwise.
-     */
-    static bool read_source_spaces(FIFFLIB::FiffStream& stream,
-                                   bool add_geom,
-                                   MNESourceSpaces& p_SourceSpace)
-    {
-        return MNESourceSpaces::readFromStream(stream,
-                                               add_geom,
-                                               p_SourceSpace);
     }
 
     //ToDo FiffChInfoList Class

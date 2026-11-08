@@ -1003,7 +1003,7 @@ int main(int argc, char* argv[])
 
     InvSourceEstimate stc = minimumNorm.calculateInverse(data, tmin, tstep, pickNormal);
 
-    if (stc.is_empty()) {
+    if (stc.empty()) {
         qCritical() << "Error: Inverse computation returned empty result.";
         return 1;
     }

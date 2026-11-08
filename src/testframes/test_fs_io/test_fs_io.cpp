@@ -123,7 +123,7 @@ private slots:
     void surface_defaultCtor()
     {
         FsSurface s;
-        QVERIFY(s.isEmpty());
+        QVERIFY(s.empty());
         QCOMPARE(s.hemi(), -1);
     }
 
@@ -131,7 +131,7 @@ private slots:
     {
         FsSurface s;
         s.clear();
-        QVERIFY(s.isEmpty());
+        QVERIFY(s.empty());
     }
 
     //=========================================================================
@@ -201,7 +201,7 @@ private slots:
         FsSurface s;
         bool ok = FsSurface::read("/nonexistent/path/lh.white", s);
         QVERIFY(!ok);
-        QVERIFY(s.isEmpty());
+        QVERIFY(s.empty());
     }
 
     void surface_readFromSyntheticFile()
@@ -224,7 +224,7 @@ private slots:
 
         FsSurface s;
         QVERIFY(FsSurface::read(filePath, s, false));
-        QVERIFY(!s.isEmpty());
+        QVERIFY(!s.empty());
         QCOMPARE(s.rr().rows(), (Eigen::Index)4);
         QCOMPARE(s.tris().rows(), (Eigen::Index)2);
     }
@@ -336,7 +336,7 @@ private slots:
     void annotation_defaultCtor()
     {
         FsAnnotation a;
-        QVERIFY(a.isEmpty());
+        QVERIFY(a.empty());
         QCOMPARE(a.hemi(), -1);
     }
 
@@ -344,7 +344,7 @@ private slots:
     {
         FsAnnotation a;
         a.clear();
-        QVERIFY(a.isEmpty());
+        QVERIFY(a.empty());
     }
 
     //=========================================================================
@@ -385,7 +385,7 @@ private slots:
     void label_defaultCtor()
     {
         FsLabel l;
-        QVERIFY(l.isEmpty());
+        QVERIFY(l.empty());
         QCOMPARE(l.hemi, -1);
     }
 
@@ -401,7 +401,7 @@ private slots:
         vals << 1.0, 2.0, 3.0;
 
         FsLabel l(verts, pos, vals, 0, "TestLabel", 42);
-        QVERIFY(!l.isEmpty());
+        QVERIFY(!l.empty());
         QCOMPARE(l.hemi, 0);
         QCOMPARE(l.name, QString("TestLabel"));
         QCOMPARE(l.label_id, 42);
@@ -418,9 +418,9 @@ private slots:
         vals << 1, 2;
 
         FsLabel l(verts, pos, vals, 1, "L", 1);
-        QVERIFY(!l.isEmpty());
+        QVERIFY(!l.empty());
         l.clear();
-        QVERIFY(l.isEmpty());
+        QVERIFY(l.empty());
     }
 
     void label_readNonExistentFile()
@@ -459,14 +459,14 @@ private slots:
     void surfaceSet_defaultCtor()
     {
         FsSurfaceSet ss;
-        QVERIFY(ss.isEmpty());
+        QVERIFY(ss.empty());
     }
 
     void surfaceSet_clear()
     {
         FsSurfaceSet ss;
         ss.clear();
-        QVERIFY(ss.isEmpty());
+        QVERIFY(ss.empty());
     }
 
     void surfaceSet_insertAndAccess()
@@ -492,14 +492,14 @@ private slots:
     void annotationSet_defaultCtor()
     {
         FsAnnotationSet as;
-        QVERIFY(as.isEmpty());
+        QVERIFY(as.empty());
     }
 
     void annotationSet_clear()
     {
         FsAnnotationSet as;
         as.clear();
-        QVERIFY(as.isEmpty());
+        QVERIFY(as.empty());
     }
 
     void annotationSet_insertAndAccess()

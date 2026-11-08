@@ -311,7 +311,7 @@ void TestInvLcmvPython::timeCoursesMatch()
     QTest::ignoreMessage(QtWarningMsg, "InvLCMV::applyLCMVEpochs - Invalid or non-LCMV filters!");
     QVERIFY(InvLCMV::applyLCMVEpochs({m_evoked.data}, 0.0f, tstep, dics).isEmpty());
     QTest::ignoreMessage(QtWarningMsg, "InvDICS::applyDICS - freqIdx 1 out of range (0..0)!");
-    QVERIFY(InvDICS::applyDICS(m_evoked.data, 0.0f, tstep, dics, 1).is_empty());
+    QVERIFY(InvDICS::applyDICS(m_evoked.data, 0.0f, tstep, dics, 1).empty());
 }
 
 //=============================================================================================================

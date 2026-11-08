@@ -140,7 +140,7 @@ int main(int argc, char* argv[])
 
     // Load raw file for channel info
     FiffRawData raw(rawFile.toStdU16String());
-    if (raw.info.isEmpty()) {
+    if (raw.info.empty()) {
         qCritical("Cannot read raw: %s", qPrintable(rawFile));
         return 1;
     }
@@ -166,7 +166,7 @@ int main(int argc, char* argv[])
     // Add noise if covariance provided
     if (!covFile.isEmpty()) {
         FiffCov cov(covFile.toStdU16String());
-        if (!cov.is_empty() && cov.dim == nChan) {
+        if (!cov.empty() && cov.dim == nChan) {
             // Cholesky decomposition for correlated noise
             LLT<MatrixXd> llt(cov.data);
             MatrixXd L = llt.matrixL();

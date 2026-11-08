@@ -28,13 +28,13 @@ private slots:
     void coordTrans_defaultCtor()
     {
         FiffCoordTrans t;
-        QVERIFY(t.is_empty());
+        QVERIFY(t.empty());
     }
 
     void coordTrans_identity()
     {
         FiffCoordTrans t = FiffCoordTrans::identity(FIFFV_COORD_HEAD, FIFFV_COORD_MRI);
-        QVERIFY(!t.is_empty());
+        QVERIFY(!t.empty());
         QCOMPARE(t.from, (int)FIFFV_COORD_HEAD);
         QCOMPARE(t.to, (int)FIFFV_COORD_MRI);
         QVERIFY(t.trans.isApprox(Matrix4f::Identity()));
@@ -175,9 +175,9 @@ private slots:
     void coordTrans_clear()
     {
         FiffCoordTrans t = FiffCoordTrans::identity(FIFFV_COORD_HEAD, FIFFV_COORD_MRI);
-        QVERIFY(!t.is_empty());
+        QVERIFY(!t.empty());
         t.clear();
-        QVERIFY(t.is_empty());
+        QVERIFY(t.empty());
     }
 
     //=========================================================================
@@ -195,7 +195,7 @@ private slots:
 
         QCOMPARE(t.from, (int)FIFFV_COORD_HEAD);
         QCOMPARE(t.to, (int)FIFFV_COORD_MRI);
-        QVERIFY(!t.is_empty());
+        QVERIFY(!t.empty());
     }
 
     //=========================================================================
@@ -242,7 +242,7 @@ private slots:
     void namedMatrix_defaultCtor()
     {
         FiffNamedMatrix nm;
-        QVERIFY(nm.isEmpty());
+        QVERIFY(nm.empty());
     }
 
     void namedMatrix_transpose()

@@ -121,7 +121,7 @@ private slots:
     void surface_defaultCtor()
     {
         FsSurface s;
-        QVERIFY(s.isEmpty());
+        QVERIFY(s.empty());
         QCOMPARE(s.hemi(), -1);
     }
 
@@ -144,7 +144,7 @@ private slots:
     void surfaceSet_defaultCtor()
     {
         FsSurfaceSet ss;
-        QVERIFY(ss.isEmpty());
+        QVERIFY(ss.empty());
         QCOMPARE(ss.size(), 0);
     }
 
@@ -167,7 +167,7 @@ private slots:
     {
         FsSurfaceSet ss;
         ss.clear();
-        QVERIFY(ss.isEmpty());
+        QVERIFY(ss.empty());
     }
 
     //=========================================================================
@@ -176,7 +176,7 @@ private slots:
     void annotation_defaultCtor()
     {
         FsAnnotation a;
-        QVERIFY(a.isEmpty());
+        QVERIFY(a.empty());
         QCOMPARE(a.hemi(), -1);
     }
 
@@ -184,7 +184,7 @@ private slots:
     {
         FsAnnotation a;
         a.clear();
-        QVERIFY(a.isEmpty());
+        QVERIFY(a.empty());
     }
 
     void annotation_getters()
@@ -202,7 +202,7 @@ private slots:
     void annotationSet_defaultCtor()
     {
         FsAnnotationSet as;
-        QVERIFY(as.isEmpty());
+        QVERIFY(as.empty());
         QCOMPARE(as.size(), 0);
     }
 
@@ -217,7 +217,7 @@ private slots:
     {
         FsAnnotationSet as;
         as.clear();
-        QVERIFY(as.isEmpty());
+        QVERIFY(as.empty());
     }
 
     void annotationSet_insert()
@@ -241,11 +241,11 @@ private slots:
         vals.setOnes();
 
         FsLabel l(verts, pos, vals, 0, "TestLabel", 1);
-        QVERIFY(!l.isEmpty());
+        QVERIFY(!l.empty());
         QCOMPARE(l.vertices.size(), (Eigen::Index)5);
 
         l.clear();
-        QVERIFY(l.isEmpty());
+        QVERIFY(l.empty());
     }
 
     //=========================================================================

@@ -130,7 +130,7 @@ bool whitenButterflyEvoked(FIFFLIB::FiffEvoked& evoked,
                            const FIFFLIB::FiffCov& covariance,
                            const WhiteningSettings& settings)
 {
-    if (covariance.is_empty() || evoked.isEmpty() || evoked.data.rows() == 0) {
+    if (covariance.empty() || evoked.empty() || evoked.data.rows() == 0) {
         return false;
     }
 
@@ -144,7 +144,7 @@ bool whitenButterflyEvoked(FIFFLIB::FiffEvoked& evoked,
     const FIFFLIB::FiffCov preparedCov =
         regularizedCov.prepare_noise_cov(evoked.info, evoked.info.ch_names);
 
-    if (preparedCov.is_empty() || preparedCov.dim != evoked.data.rows()) {
+    if (preparedCov.empty() || preparedCov.dim != evoked.data.rows()) {
         return false;
     }
 
@@ -338,7 +338,7 @@ WhiteningSettings AverageWindow::whiteningSettings() const
 
 void AverageWindow::setButterflyWhiteningEnabled(bool enabled)
 {
-    if (enabled && m_noiseCovariance.is_empty()) {
+    if (enabled && m_noiseCovariance.empty()) {
         return;
     }
 
@@ -708,7 +708,7 @@ void AverageWindow::refreshPlots()
 
             const QModelIndex index = selectedRows.at(u);
             const FIFFLIB::FiffEvoked& displayEvoked = m_layoutDisplayEvokeds.at(u);
-            if (displayEvoked.isEmpty() || displayEvoked.data.rows() == 0) {
+            if (displayEvoked.empty() || displayEvoked.data.rows() == 0) {
                 continue;
             }
 
@@ -741,7 +741,7 @@ void AverageWindow::refreshPlots()
         double maxGrad = 0, maxMag = 0, maxEEG = 0;
 
         for (const auto& evoked : m_layoutDisplayEvokeds) {
-            if (evoked.isEmpty() || evoked.data.rows() == 0)
+            if (evoked.empty() || evoked.data.rows() == 0)
                 continue;
             const auto& info = evoked.info;
             for (int ch = 0; ch < info.chs.size() && ch < evoked.data.rows(); ++ch) {
@@ -911,7 +911,7 @@ bool AverageWindow::populateLayoutFromEvoked(const QModelIndexList& selectedRows
     const FIFFLIB::FiffEvoked* firstEvoked = nullptr;
     for (int i = 0; i < selectedRows.size(); ++i) {
         firstEvoked = m_pAverageModel->getEvoked(selectedRows.at(i).row());
-        if (firstEvoked && !firstEvoked->isEmpty())
+        if (firstEvoked && !firstEvoked->empty())
             break;
     }
     if (!firstEvoked)

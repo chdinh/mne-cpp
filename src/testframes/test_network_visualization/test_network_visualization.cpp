@@ -236,7 +236,7 @@ void TestNetworkVisualization::testNetworkConstruction()
 
     Network net = buildTestNetwork(numNodes);
 
-    QVERIFY(!net.isEmpty());
+    QVERIFY(!net.empty());
     QCOMPARE(net.getNodes().size(), numNodes);
     QCOMPARE(net.getFullConnectivityMatrix(false).rows(), numNodes);
     QCOMPARE(net.getFullConnectivityMatrix(false).cols(), numNodes);
@@ -515,7 +515,7 @@ void TestNetworkVisualization::testLinearNetworkEdgeIds()
 void TestNetworkVisualization::testEmptyNetwork()
 {
     Network net;
-    QVERIFY(net.isEmpty());
+    QVERIFY(net.empty());
     QCOMPARE(net.getNodes().size(), 0);
 }
 
@@ -530,7 +530,7 @@ void TestNetworkVisualization::testSingleNode()
 
     // Network::isEmpty() requires BOTH nodes and edges to be non-empty;
     // a single node with no edges is considered "empty" by the library.
-    QVERIFY(net.isEmpty());
+    QVERIFY(net.empty());
     QCOMPARE(net.getNodes().size(), 1);
 
     // Single node has no edges, so degree = 0

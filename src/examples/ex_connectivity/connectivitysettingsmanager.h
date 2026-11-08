@@ -176,7 +176,7 @@ public:
 
     void onFreqBandChanged(float fFreqLow, float fFreqHigh)
     {
-        if (m_settings.isEmpty()) {
+        if (m_settings.empty()) {
             return;
         }
 

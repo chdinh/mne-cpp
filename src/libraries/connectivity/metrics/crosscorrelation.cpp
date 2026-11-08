@@ -70,7 +70,7 @@ Network CrossCorrelation::calculate(ConnectivitySettings& connectivitySettings)
 
     Network finalNetwork("XCOR");
 
-    if (connectivitySettings.isEmpty()) {
+    if (connectivitySettings.empty()) {
         qDebug() << "CrossCorrelation::calculate - Input data is empty";
         return finalNetwork;
     }

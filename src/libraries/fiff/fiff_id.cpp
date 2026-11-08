@@ -153,7 +153,7 @@ bool FiffId::get_machid(int* fixed_id)
 
 void FiffId::print() const
 {
-    if (!isEmpty()) {
+    if (!empty()) {
         qInfo("\t%d.%d 0x%x%x %d %d\n", this->version >> 16, this->version & 0xFFFF, this->machid[0], this->machid[1], this->time.secs, this->time.usecs);
     }
 }

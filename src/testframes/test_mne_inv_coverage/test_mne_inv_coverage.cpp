@@ -321,13 +321,8 @@ void TestMneInvCoverage::testSourceSpaceFromFile()
     QVERIFY2(QFile::exists(srcPath()),
              qPrintable(QString("Source space not found: %1").arg(srcPath())));
 
-    QFile file(srcPath());
-    FiffStream stream(&file);
-    QVERIFY(stream.open());
 
-    MNESourceSpaces srcSpaces;
-    QVERIFY(MNESourceSpaces::readFromStream(stream, true, srcSpaces));
-    stream.close();
+    const MNESourceSpaces srcSpaces = MNESourceSpaces::read(srcPath().toStdU16String()).value();
 
     QVERIFY(srcSpaces.size() >= 2); // left + right hemispheres
 }
@@ -337,13 +332,8 @@ void TestMneInvCoverage::testSourceSpaceVertexCount()
     QVERIFY2(QFile::exists(srcPath()),
              qPrintable(QString("Source space not found: %1").arg(srcPath())));
 
-    QFile file(srcPath());
-    FiffStream stream(&file);
-    QVERIFY(stream.open());
 
-    MNESourceSpaces srcSpaces;
-    QVERIFY(MNESourceSpaces::readFromStream(stream, true, srcSpaces));
-    stream.close();
+    const MNESourceSpaces srcSpaces = MNESourceSpaces::read(srcPath().toStdU16String()).value();
 
     for (int i = 0; i < srcSpaces.size(); i++) {
         const MNESourceSpace& sp = srcSpaces[i];
@@ -359,13 +349,8 @@ void TestMneInvCoverage::testSourceSpaceHemispheres()
     QVERIFY2(QFile::exists(srcPath()),
              qPrintable(QString("Source space not found: %1").arg(srcPath())));
 
-    QFile file(srcPath());
-    FiffStream stream(&file);
-    QVERIFY(stream.open());
 
-    MNESourceSpaces srcSpaces;
-    QVERIFY(MNESourceSpaces::readFromStream(stream, true, srcSpaces));
-    stream.close();
+    const MNESourceSpaces srcSpaces = MNESourceSpaces::read(srcPath().toStdU16String()).value();
 
     if (srcSpaces.size() >= 2) {
         // Check hemisphere labels

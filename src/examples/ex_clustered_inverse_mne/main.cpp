@@ -131,7 +131,7 @@ int main(int argc, char* argv[])
     std::cout << "evoked first " << evoked.first << "; last " << evoked.last << std::endl;
 
     MNEForwardSolution t_Fwd(parser.value(sampleFwdFileOption).toStdU16String());
-    if (t_Fwd.isEmpty())
+    if (t_Fwd.empty())
         return 1;
 
     FiffCov noise_cov(parser.value(sampleCovFileOption).toStdString());
@@ -169,7 +169,7 @@ int main(int argc, char* argv[])
     InvMinimumNorm minimumNorm(inverse_operator, lambda2, method);
     InvSourceEstimate sourceEstimate = minimumNorm.calculateInverse(evoked);
 
-    if (sourceEstimate.is_empty())
+    if (sourceEstimate.empty())
         return 1;
 
     // View activation time-series

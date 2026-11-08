@@ -67,7 +67,7 @@ Network PhaseLockingValue::calculate(ConnectivitySettings& connectivitySettings)
 
     Network finalNetwork("PLV");
 
-    if (connectivitySettings.isEmpty()) {
+    if (connectivitySettings.empty()) {
         qDebug() << "PhaseLockingValue::calculate - Input data is empty";
         return finalNetwork;
     }

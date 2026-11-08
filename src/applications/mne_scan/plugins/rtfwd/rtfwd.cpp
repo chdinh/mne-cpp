@@ -316,7 +316,7 @@ void RtFwd::onRecompStatusChanged(bool bDoRecomputation)
 
 void RtFwd::onClusteringStatusChanged(bool bDoClustering)
 {
-    if (m_pAnnotationSet->isEmpty()) {
+    if (m_pAnnotationSet->empty()) {
         QMessageBox msgBox;
         msgBox.setText("Please load an annotation set befor clustering.");
         msgBox.exec();

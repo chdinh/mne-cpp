@@ -968,7 +968,7 @@ void TestFiffCorePython::combine_orientations()
     QVERIFY((res.apply_trans(p) - viaHead).cwiseAbs().maxCoeff() < 1e-6f);
 
     // Frames that cannot be chained.
-    QVERIFY(FiffCoordTrans::combine(FIFFV_COORD_DEVICE, FIFFV_MNE_COORD_MNI_TAL, t1, t2).is_empty());
+    QVERIFY(FiffCoordTrans::combine(FIFFV_COORD_DEVICE, FIFFV_MNE_COORD_MNI_TAL, t1, t2).empty());
 }
 
 //=============================================================================================================
@@ -1126,7 +1126,7 @@ void TestFiffCorePython::eventUtilities_matchPython()
     second.events = rows({{105, 0, 7}, {130, 7, 0}});
     QCOMPARE(FiffEvents::concatenate({ev, second}, {5, 100}, {99, 199}).events,
              rows({{10, 0, 1}, {20, 1, 0}, {35, 0, 2}, {40, 2, 3}, {52, 3, 0}, {60, 0, 1}, {75, 0, 4}, {80, 4, 0}, {105, 0, 7}, {130, 7, 0}}));
-    QVERIFY(FiffEvents::concatenate({ev, second}, {5}, {99, 199}).is_empty());
+    QVERIFY(FiffEvents::concatenate({ev, second}, {5}, {99, 199}).empty());
 
     MatrixXi stim(1, 16);
     stim << 0, 0, 1, 1, 1, 3, 3, 0, 0, 2, 2, 2, 0, 0, 0, 5;
@@ -1155,7 +1155,7 @@ void TestFiffCorePython::eventUtilities_matchPython()
     QCOMPARE(fixed.num_events(), 6);
     QCOMPARE(fixed.events.topRows(2), rows({{0, 0, 1}, {991, 0, 1}}));
     QCOMPARE(fixed.events.bottomRows(1), rows({{4955, 0, 1}}));
-    QVERIFY(FiffEvents::make_fixed_length(*m_raw, 1, 0.0, -1.0, 1.0, true, 1.0).is_empty());
+    QVERIFY(FiffEvents::make_fixed_length(*m_raw, 1, 0.0, -1.0, 1.0, true, 1.0).empty());
 }
 
 //=============================================================================================================
@@ -1258,8 +1258,8 @@ void TestFiffCorePython::sparse_createAndConvert()
     s.insert(0, 1) = 7.0f;
     QCOMPARE(MatrixXf(FiffSparseMatrix::fromEigenSparse(s).eigen())(0, 1), 7.0f);
 
-    QVERIFY(FiffSparseMatrix::fromEigenSparse(SparseMatrix<double>(4, 4)).is_empty());
-    QVERIFY(FiffSparseMatrix::fromEigenSparse(SparseMatrix<float>(4, 4)).is_empty());
+    QVERIFY(FiffSparseMatrix::fromEigenSparse(SparseMatrix<double>(4, 4)).empty());
+    QVERIFY(FiffSparseMatrix::fromEigenSparse(SparseMatrix<float>(4, 4)).empty());
 
     // From a tag (values, indices, pointers, then nz, rows, cols, ndim): the same matrix in row and
     // column storage; a tag of another type or size, or with indices or pointers outside the matrix

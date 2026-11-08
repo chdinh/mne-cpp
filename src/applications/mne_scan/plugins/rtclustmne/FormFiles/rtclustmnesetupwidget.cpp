@@ -56,13 +56,13 @@ RtClustMneSetupWidget::RtClustMneSetupWidget(RtClustMne* toolbox, QWidget* paren
     ui.setupUi(this);
 
     ui.m_qLineEdit_AtlasDirName->setText(m_pMNE->m_sAtlasDir);
-    if (m_pMNE->m_pAnnotationSet->isEmpty())
+    if (m_pMNE->m_pAnnotationSet->empty())
         ui.m_qLabel_atlasStat->setText("not loaded");
     else
         ui.m_qLabel_atlasStat->setText("loaded");
 
     ui.m_qLineEdit_SurfaceDirName->setText(m_pMNE->m_sSurfaceDir);
-    if (m_pMNE->m_pSurfaceSet->isEmpty())
+    if (m_pMNE->m_pSurfaceSet->empty())
         ui.m_qLabel_surfaceStat->setText("not loaded");
     else
         ui.m_qLabel_surfaceStat->setText("loaded");
@@ -94,7 +94,7 @@ void RtClustMneSetupWidget::showAtlasDirDialog()
 
     FsAnnotationSet::SPtr t_pAnnotationSet = FsAnnotationSet::SPtr(new FsAnnotationSet(t_sAtlasDir + "/lh.aparc.a2009s.annot", t_sAtlasDir + "/rh.aparc.a2009s.annot"));
 
-    if (!t_pAnnotationSet->isEmpty() && t_pAnnotationSet->size() == 2) {
+    if (!t_pAnnotationSet->empty() && t_pAnnotationSet->size() == 2) {
         m_pMNE->m_pAnnotationSet = t_pAnnotationSet;
 
         m_pMNE->m_sAtlasDir = t_sAtlasDir;
@@ -120,7 +120,7 @@ void RtClustMneSetupWidget::showSurfaceDirDialog()
 
     ui.m_qLineEdit_SurfaceDirName->setText(t_sSurfaceDir);
 
-    if (!t_pSurfaceSet->isEmpty() && t_pSurfaceSet->size() == 2) {
+    if (!t_pSurfaceSet->empty() && t_pSurfaceSet->size() == 2) {
         m_pMNE->m_pSurfaceSet = t_pSurfaceSet;
 
         m_pMNE->m_sSurfaceDir = t_sSurfaceDir;

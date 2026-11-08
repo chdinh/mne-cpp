@@ -226,7 +226,7 @@ private slots:
     void sourceEstimate_defaultCtor()
     {
         InvSourceEstimate se;
-        QVERIFY(se.is_empty());
+        QVERIFY(se.empty());
         QCOMPARE(se.samples(), 0);
     }
 
@@ -238,7 +238,7 @@ private slots:
             verts(i) = i;
 
         InvSourceEstimate se(data, verts, 0.0f, 0.001f);
-        QVERIFY(!se.is_empty());
+        QVERIFY(!se.empty());
         QCOMPARE(se.samples(), 5);
         QCOMPARE(se.data.rows(), (Eigen::Index)10);
     }
@@ -251,7 +251,7 @@ private slots:
         InvSourceEstimate se(data, verts, 0.1f, 0.002f);
 
         InvSourceEstimate copy(se);
-        QVERIFY(!copy.is_empty());
+        QVERIFY(!copy.empty());
         QCOMPARE(copy.samples(), 3);
         QVERIFY(copy.data.isApprox(se.data));
     }
@@ -275,7 +275,7 @@ private slots:
         VectorXi verts(5);
         verts << 0, 1, 2, 3, 4;
         InvSourceEstimate se(data, verts, 0.0f, 0.001f);
-        QVERIFY(!se.is_empty());
+        QVERIFY(!se.empty());
         se.clear();
         // After clear, check data is zeroed or empty
         QCOMPARE(se.data.rows(), (Eigen::Index)0);
@@ -290,7 +290,7 @@ private slots:
 
         InvSourceEstimate se2;
         se2 = se;
-        QVERIFY(!se2.is_empty());
+        QVERIFY(!se2.empty());
         QCOMPARE(se2.samples(), 3);
     }
 
@@ -300,15 +300,16 @@ private slots:
     void sourceSpace_defaultCtor()
     {
         MNESourceSpaces ss;
-        QVERIFY(ss.isEmpty());
+        QVERIFY(ss.empty());
         QCOMPARE(ss.size(), 0);
     }
 
     void sourceSpace_copyCtor()
     {
         MNESourceSpaces ss;
-        MNESourceSpaces ss2(ss);
-        QVERIFY(ss2.isEmpty());
+        MNESourceSpaces ss2;
+        ss2 = ss;
+        QVERIFY(ss2.empty());
     }
 
     //=========================================================================
@@ -317,7 +318,7 @@ private slots:
     void fwdSol_defaultCtor()
     {
         MNEForwardSolution fwd;
-        QVERIFY(fwd.isEmpty());
+        QVERIFY(fwd.empty());
         QVERIFY(!fwd.isFixedOrient());
     }
 
@@ -343,9 +344,9 @@ private slots:
     void fwdSol_isEmpty()
     {
         MNEForwardSolution fwd;
-        QVERIFY(fwd.isEmpty());
+        QVERIFY(fwd.empty());
         fwd.nchan = 5;
-        QVERIFY(!fwd.isEmpty());
+        QVERIFY(!fwd.empty());
     }
 
     void fwdSol_clear()
@@ -353,7 +354,7 @@ private slots:
         MNEForwardSolution fwd;
         fwd.nchan = 10;
         fwd.clear();
-        QVERIFY(fwd.isEmpty());
+        QVERIFY(fwd.empty());
     }
 
     //=========================================================================
@@ -597,10 +598,7 @@ private slots:
         if (!file.exists())
             QSKIP("Source space file not found");
 
-        MNESourceSpaces srcSpace;
-        FiffStream srcStream(&file);
-        srcStream.open();
-        QVERIFY(MNESourceSpaces::readFromStream(srcStream, false, srcSpace));
+        const MNESourceSpaces srcSpace = MNESourceSpaces::read(path.toStdU16String(), false).value();
 
         for (int h = 0; h < srcSpace.size(); ++h) {
             auto& hemi = srcSpace[h];
@@ -623,10 +621,7 @@ private slots:
         if (!file.exists())
             QSKIP("Source space file not found");
 
-        MNESourceSpaces srcSpace;
-        FiffStream srcStream2(&file);
-        srcStream2.open();
-        MNESourceSpaces::readFromStream(srcStream2, false, srcSpace);
+        const MNESourceSpaces srcSpace = MNESourceSpaces::read(path.toStdU16String(), false).value();
         QVERIFY(srcSpace[0].id == FIFFV_MNE_SURF_LEFT_HEMI);
         // Right hemisphere
         QVERIFY(srcSpace[1].id == FIFFV_MNE_SURF_RIGHT_HEMI);
@@ -636,6 +631,10 @@ private slots:
         QCOMPARE(copy.size(), srcSpace.size());
         QCOMPARE(copy[0].np, srcSpace[0].np);
         QCOMPARE(copy[1].nuse, srcSpace[1].nuse);
+
+        // The copy owns its source spaces
+        copy[1].nuse = 0;
+        QVERIFY(srcSpace[1].nuse > 0);
     }
 
     //=========================================================================
@@ -728,7 +727,7 @@ private slots:
             QSKIP("Forward solution not found");
 
         MNEForwardSolution fwd(path.toStdU16String());
-        QVERIFY(!fwd.isEmpty());
+        QVERIFY(!fwd.empty());
         QVERIFY(fwd.nchan > 0);
         QVERIFY(fwd.nsource > 0);
         QVERIFY(fwd.source_nn.rows() > 0);
@@ -745,7 +744,7 @@ private slots:
             QSKIP("Forward solution not found");
 
         MNEForwardSolution fwd(path.toStdU16String());
-        if (!fwd.isEmpty() && fwd.info.nchan > 0) {
+        if (!fwd.empty() && fwd.info.nchan > 0) {
             RowVectorXi megIdx = fwd.info.pick_types(true, false, false);
             if (megIdx.size() > 0) {
                 StringList megNames;
@@ -767,7 +766,7 @@ private slots:
             QSKIP("Forward solution not found");
 
         MNEForwardSolution fwd(path.toStdU16String());
-        if (!fwd.isEmpty()) {
+        if (!fwd.empty()) {
             FiffCov orientPrior = fwd.compute_orient_prior(0.2f);
             QVERIFY(orientPrior.data.rows() > 0);
         }
@@ -883,7 +882,7 @@ private slots:
             QSKIP("Covariance file not found");
 
         FiffCov cov(path.toStdString());
-        QVERIFY(!cov.is_empty());
+        QVERIFY(!cov.empty());
         QVERIFY(cov.data.rows() > 0);
         QCOMPARE(cov.data.rows(), cov.data.cols());
         QVERIFY(cov.names.size() > 0);
@@ -899,7 +898,7 @@ private slots:
             QSKIP("Covariance file not found");
 
         FiffCov cov(path.toStdString());
-        if (cov.is_empty())
+        if (cov.empty())
             QSKIP("Failed to read cov");
 
         int nPick = std::min(30, static_cast<int>(cov.names.size()));
@@ -960,7 +959,7 @@ private slots:
         FiffCov noiseCov(covPath.toStdString());
         FiffRawData raw(rawPath.toStdString());
 
-        if (fwd.isEmpty() || noiseCov.is_empty())
+        if (fwd.empty() || noiseCov.empty())
             QSKIP("Failed to load");
 
         MNEInverseOperator invOp = MNEInverseOperator::make_inverse_operator(

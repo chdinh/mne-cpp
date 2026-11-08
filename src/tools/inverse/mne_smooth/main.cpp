@@ -165,17 +165,12 @@ int main(int argc, char* argv[])
         qInfo("Read surface: %d vertices, %d triangles", nVert, static_cast<int>(tris.rows()));
     } else {
         // Read source space
-        QFile file(srcFile);
-        if (!file.open(QIODevice::ReadOnly)) {
-            qCritical("Cannot open source space file: %s", qPrintable(srcFile));
+        auto read = MNESourceSpaces::read(srcFile.toStdU16String());
+        if (!read) {
+            qCritical("%s", read.error().what());
             return 1;
         }
-        FiffStream stream(&file);
-        MNESourceSpaces srcSpaces;
-        if (!MNESourceSpaces::readFromStream(stream, true, srcSpaces) || srcSpaces.size() == 0) {
-            qCritical("Cannot read source space: %s", qPrintable(srcFile));
-            return 1;
-        }
+        const MNESourceSpaces& srcSpaces = *read;
         // Use first hemisphere's triangulation
         tris = srcSpaces[0].itris;
         nVert = srcSpaces[0].np;

@@ -260,7 +260,7 @@ private slots:
             m_info = raw.info;
         }
 
-        m_bDataLoaded = !m_fwd.isEmpty() && !m_noiseCov.is_empty() && m_info.nchan > 0;
+        m_bDataLoaded = !m_fwd.empty() && !m_noiseCov.empty() && m_info.nchan > 0;
 
         // Pre-compute the standard inverse operator (most tests share it)
         if (m_bDataLoaded) {
@@ -436,7 +436,7 @@ private slots:
         InvSourceEstimate stc = mn.calculateInverse(
             pickedEvoked.data, tmin, tstep, false);
 
-        QVERIFY(!stc.is_empty());
+        QVERIFY(!stc.empty());
         QCOMPARE((int)stc.data.rows(), invOp.nsource);
         QVERIFY(stc.data.allFinite());
         QVERIFY(stc.data.minCoeff() >= 0.0); // dSPM is non-negative
@@ -472,7 +472,7 @@ private slots:
         InvSourceEstimate stc = mn.calculateInverse(
             pickedEvoked.data, tmin, tstep, false);
 
-        QVERIFY(!stc.is_empty());
+        QVERIFY(!stc.empty());
         QCOMPARE((int)stc.data.rows(), invOp.nsource);
         QVERIFY(stc.data.allFinite());
     }
@@ -507,7 +507,7 @@ private slots:
         InvSourceEstimate stc = mn.calculateInverse(
             pickedEvoked.data, tmin, tstep, false);
 
-        QVERIFY(!stc.is_empty());
+        QVERIFY(!stc.empty());
         QCOMPARE((int)stc.data.rows(), invOp.nsource);
         QVERIFY(stc.data.allFinite());
     }
@@ -570,7 +570,7 @@ private slots:
         InvSourceEstimate stc = mn.calculateInverse(
             pickedEvoked.data, tmin, tstep, false);
 
-        if (stc.is_empty())
+        if (stc.empty())
             QSKIP("Failed to compute STC");
 
         QTemporaryDir tmpDir;
@@ -750,7 +750,7 @@ private slots:
             QSKIP("Covariance file not found");
 
         FiffCov cov(path.toStdString());
-        QVERIFY(!cov.is_empty());
+        QVERIFY(!cov.empty());
         QVERIFY(cov.data.rows() > 0);
         QCOMPARE(cov.data.rows(), cov.data.cols()); // Should be square
         QVERIFY(cov.names.size() > 0);
@@ -771,7 +771,7 @@ private slots:
 
         QString path = m_sDataPath + "/MEG/sample/sample_audvis-cov.fif";
         FiffCov cov(path.toStdString());
-        if (cov.is_empty())
+        if (cov.empty())
             QSKIP("Failed to read covariance");
 
         // Pick first 50 channels

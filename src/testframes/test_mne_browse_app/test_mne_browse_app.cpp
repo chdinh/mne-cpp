@@ -337,7 +337,7 @@ void TestMneBrowseApp::computesAndSavesCovarianceLikePython()
     // Reference values produced by mne.compute_covariance(mne.Epochs(raw, find_events(raw, "STI 014"), all codes,
     // -0.2, 0.0, baseline=None, proj=False), keep_sample_mean=False, method="empirical", rank="full") (mne 1.11.0)
     const FIFFLIB::FiffCov cov(covPath.toStdString());
-    QVERIFY(!cov.is_empty());
+    QVERIFY(!cov.empty());
     QCOMPARE(cov.nfree, 1524);
     const int meg = static_cast<int>(UTILSLIB::indexOf(cov.names, "MEG1332"));
     const int eeg = static_cast<int>(UTILSLIB::indexOf(cov.names, "EEG021"));

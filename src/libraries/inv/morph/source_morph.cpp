@@ -72,7 +72,7 @@ InvSourceEstimate SourceMorph::apply(const InvSourceEstimate& stcFrom) const
         return InvSourceEstimate();
     }
 
-    if (stcFrom.is_empty()) {
+    if (stcFrom.empty()) {
         qWarning() << "[SourceMorph::apply] Source estimate is empty.";
         return InvSourceEstimate();
     }

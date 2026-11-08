@@ -151,7 +151,7 @@ public:
 
     int size() const;
 
-    bool isEmpty() const;
+    bool empty() const;
 
     void removeFirst(int iAmount = 1);
 

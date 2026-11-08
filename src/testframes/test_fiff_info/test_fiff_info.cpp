@@ -78,7 +78,7 @@ private slots:
     void infoBase_defaultCtor()
     {
         FiffInfoBase info;
-        QVERIFY(info.isEmpty());
+        QVERIFY(info.empty());
     }
 
     void infoBase_copyCtor()
@@ -93,7 +93,7 @@ private slots:
     {
         FiffInfoBase info = makeSyntheticInfoBase(4);
         info.clear();
-        QVERIFY(info.isEmpty());
+        QVERIFY(info.empty());
     }
 
     void info_clearThroughBase()
@@ -106,7 +106,7 @@ private slots:
         FiffInfoBase& base = info;
         base.clear();
         QCOMPARE(info.sfreq, -1.0f);
-        QVERIFY(info.device_info.isEmpty());
+        QVERIFY(info.device_info.empty());
         QVERIFY(info.acq_pars.empty());
     }
 
@@ -435,7 +435,7 @@ private slots:
             QSKIP("Covariance file not found");
 
         FiffCov cov(path.toStdString());
-        QVERIFY(!cov.is_empty());
+        QVERIFY(!cov.empty());
         QVERIFY(cov.data.rows() > 0);
         QCOMPARE(cov.data.rows(), cov.data.cols());
         QVERIFY(cov.names.size() > 0);

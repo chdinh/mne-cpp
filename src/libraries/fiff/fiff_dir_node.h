@@ -117,7 +117,7 @@ public:
      *
      * @return true if directory tree structure is empty.
      */
-    bool is_empty() const
+    bool empty() const
     {
         return this->type < 0;
     }

@@ -70,7 +70,7 @@ FsLabel FsLabelUtils::growLabel(const FsLabel& label,
                                 const FsSurface& surface,
                                 int nSteps)
 {
-    if (label.isEmpty() || surface.isEmpty() || nSteps <= 0)
+    if (label.empty() || surface.empty() || nSteps <= 0)
         return label;
 
     const int nVerts = static_cast<int>(surface.rr().rows());
@@ -194,7 +194,7 @@ QList<FsLabel> FsLabelUtils::splitLabel(const FsLabel& label,
 {
     QList<FsLabel> components;
 
-    if (label.isEmpty())
+    if (label.empty())
         return components;
 
     // Label row of each vertex: the parts keep the label's positions and values
@@ -203,8 +203,8 @@ QList<FsLabel> FsLabelUtils::splitLabel(const FsLabel& label,
         rowOf.insert(label.vertices[i], i);
 
     // Connected components over the surface edges; without a surface every vertex stands alone
-    const int nVerts = surface.isEmpty() ? 0 : static_cast<int>(surface.rr().rows());
-    const QList<QSet<int>> adj = surface.isEmpty() ? QList<QSet<int>>() : buildAdjacency(surface.tris(), nVerts);
+    const int nVerts = surface.empty() ? 0 : static_cast<int>(surface.rr().rows());
+    const QList<QSet<int>> adj = surface.empty() ? QList<QSet<int>>() : buildAdjacency(surface.tris(), nVerts);
     QSet<int> visited;
     QList<QList<int>> parts;
     for (int i = 0; i < label.vertices.size(); ++i) {
@@ -267,7 +267,7 @@ QList<FsLabel> FsLabelUtils::stcToLabel(const MatrixXd& stcData,
 {
     QList<FsLabel> labels;
 
-    if (stcData.size() == 0 || vertices.size() == 0 || surface.isEmpty())
+    if (stcData.size() == 0 || vertices.size() == 0 || surface.empty())
         return labels;
 
     // Find vertices above threshold (max absolute value across time)

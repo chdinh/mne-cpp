@@ -849,7 +849,7 @@ void TestDisp3dBrainView::rtSensorInterpolationMatWorker_basics()
 
     // EEG of the sample data onto a small scalp patch: one mapping row per vertex, one column per picked EEG channel
     const FIFFLIB::FiffEvoked evoked((QCoreApplication::applicationDirPath() + QStringLiteral("/../resources/data/mne-cpp-test-data/MEG/sample/sample_audvis-ave.fif")).toStdU16String(), 0);
-    QVERIFY(!evoked.isEmpty());
+    QVERIFY(!evoked.empty());
     Eigen::MatrixX3f scalp(6, 3);
     scalp << 0.09f, 0.0f, 0.04f, -0.09f, 0.0f, 0.04f, 0.0f, 0.09f, 0.04f, 0.0f, -0.09f, 0.04f, 0.0f, 0.0f, 0.13f, 0.05f, 0.05f, 0.1f;
     worker.setEvoked(evoked);

@@ -146,9 +146,9 @@ public:
     void clear();
 
     /** @return Whether there is no recording. */
-    bool is_empty() const
+    bool empty() const
     {
-        return first_samp == -1 && info.isEmpty();
+        return first_samp == -1 && info.empty();
     }
 
     //=========================================================================================================

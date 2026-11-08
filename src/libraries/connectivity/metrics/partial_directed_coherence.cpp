@@ -58,7 +58,7 @@ Network PartialDirectedCoherence::calculate(ConnectivitySettings& connectivitySe
 {
     Network finalNetwork("PDC");
 
-    if (connectivitySettings.isEmpty()) {
+    if (connectivitySettings.empty()) {
         qDebug() << "PartialDirectedCoherence::calculate - Input data is empty";
         return finalNetwork;
     }

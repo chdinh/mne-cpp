@@ -58,7 +58,7 @@ Network GrangerCausality::calculate(ConnectivitySettings& connectivitySettings)
 {
     Network finalNetwork("GC");
 
-    if (connectivitySettings.isEmpty()) {
+    if (connectivitySettings.empty()) {
         qDebug() << "GrangerCausality::calculate - Input data is empty";
         return finalNetwork;
     }

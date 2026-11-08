@@ -147,7 +147,7 @@ public:
     }
 
     /** @return True without contacts. */
-    bool isEmpty() const
+    bool empty() const
     {
         return m_contacts.empty();
     }

@@ -170,7 +170,7 @@ int MNERawInfo::get_meas_info(FiffStream& stream,
     /*
        * Is there a block id is in the FIFFB_MEAS node?
        */
-    if (!meas->id.isEmpty()) {
+    if (!meas->id.empty()) {
         id = std::make_unique<FiffId>();
         id->version = meas->id.version;
         id->machid[0] = meas->id.machid[0];
@@ -261,7 +261,7 @@ int MNERawInfo::get_meas_info(FiffStream& stream,
         */
     hpi = meas_info->dir_tree_find(FIFFB_HPI_RESULT);
 
-    if (hpi.size() > 0 && trans.is_empty())
+    if (hpi.size() > 0 && trans.empty())
         for (k = 0; k < hpi[0]->nent(); k++)
             if (hpi[0]->dir[k].kind == FIFF_COORD_TRANS) {
                 if (t_pTag = stream.read_tag(hpi[0]->dir[k].pos); !t_pTag)
@@ -328,10 +328,10 @@ int MNERawInfo::load(const QString& name, int allow_maxshield, std::unique_ptr<M
         return FIFF_FAIL;
     }
     raw = find_raw(stream.dirtree());
-    if (raw->is_empty()) {
+    if (raw->empty()) {
         if (allow_maxshield) {
             raw = find_maxshield(stream.dirtree());
-            if (raw->is_empty()) {
+            if (raw->empty()) {
                 qCritical("No raw data in this file.");
                 stream.close();
                 return FIFF_FAIL;

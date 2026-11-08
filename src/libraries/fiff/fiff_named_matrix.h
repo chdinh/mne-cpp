@@ -126,7 +126,7 @@ public:
      *
      * @return true if named matrix is empty.
      */
-    inline bool isEmpty() const;
+    inline bool empty() const;
 
     //ToDo return the transposed matrix instead of applying it to its members
     //=========================================================================================================
@@ -191,7 +191,7 @@ public:
 //    return *this;
 //}
 
-inline bool FiffNamedMatrix::isEmpty() const
+inline bool FiffNamedMatrix::empty() const
 {
     return !(this->data.size() > 0);
 }

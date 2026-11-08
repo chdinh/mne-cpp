@@ -63,7 +63,7 @@ QString covarianceSummary(const FIFFLIB::FiffCov& covariance,
                           const QString& sourceDescription,
                           const FIFFLIB::FiffInfo::SPtr& fiffInfo)
 {
-    if (covariance.is_empty()) {
+    if (covariance.empty()) {
         return QStringLiteral("No covariance is currently loaded.\n\nCompute or load a covariance matrix to inspect it here and drive whitening from this manager.");
     }
 
@@ -326,7 +326,7 @@ void CovarianceWindow::updateHeatmap()
     if (!m_pHeatmapLabel)
         return;
 
-    if (m_covariance.is_empty() || m_covariance.dim <= 0) {
+    if (m_covariance.empty() || m_covariance.dim <= 0) {
         m_pHeatmapLabel->setPixmap(QPixmap());
         m_pHeatmapLabel->setText(QStringLiteral("No covariance loaded."));
         return;
@@ -450,7 +450,7 @@ void CovarianceWindow::updateHeatmap()
 
 void CovarianceWindow::updateToggleState()
 {
-    const bool hasCovariance = !m_covariance.is_empty();
+    const bool hasCovariance = !m_covariance.empty();
     m_pWhitenButterflyCheckBox->setEnabled(hasCovariance);
     m_pWhitenLayoutCheckBox->setEnabled(hasCovariance);
 }

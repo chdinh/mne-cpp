@@ -27,7 +27,7 @@ private slots:
     void label_defaultCtor()
     {
         FsLabel l;
-        QVERIFY(l.isEmpty());
+        QVERIFY(l.empty());
         QCOMPARE(l.hemi, -1);
     }
 
@@ -40,7 +40,7 @@ private slots:
         VectorXd vals = VectorXd::Ones(3);
 
         FsLabel l(verts, pos, vals, 0, "test-lh", 42);
-        QVERIFY(!l.isEmpty());
+        QVERIFY(!l.empty());
         QCOMPARE(l.hemi, 0);
         QCOMPARE(l.name, QString("test-lh"));
         QCOMPARE(l.label_id, 42);
@@ -56,9 +56,9 @@ private slots:
         VectorXd vals = VectorXd::Ones(2);
 
         FsLabel l(verts, pos, vals, 0, "test", 1);
-        QVERIFY(!l.isEmpty());
+        QVERIFY(!l.empty());
         l.clear();
-        QVERIFY(l.isEmpty());
+        QVERIFY(l.empty());
     }
 
     void label_selectTrisMatrix()
@@ -87,7 +87,7 @@ private slots:
     void surface_defaultCtor()
     {
         FsSurface s;
-        QVERIFY(s.isEmpty());
+        QVERIFY(s.empty());
         QCOMPARE(s.hemi(), -1);
     }
 
@@ -137,7 +137,7 @@ private slots:
     void surfaceSet_defaultCtor()
     {
         FsSurfaceSet ss;
-        QVERIFY(ss.isEmpty());
+        QVERIFY(ss.empty());
         QCOMPARE(ss.size(), 0);
     }
 
@@ -157,7 +157,7 @@ private slots:
     void annotation_defaultCtor()
     {
         FsAnnotation a;
-        QVERIFY(a.isEmpty());
+        QVERIFY(a.empty());
         QCOMPARE(a.hemi(), -1);
     }
 
@@ -177,7 +177,7 @@ private slots:
     void annotationSet_defaultCtor()
     {
         FsAnnotationSet as;
-        QVERIFY(as.isEmpty());
+        QVERIFY(as.empty());
         QCOMPARE(as.size(), 0);
     }
 
@@ -231,7 +231,7 @@ private slots:
             QSKIP("Test data not available");
         }
         FsSurface s(testData);
-        QVERIFY(!s.isEmpty());
+        QVERIFY(!s.empty());
         QVERIFY(s.rr().rows() > 0);
         QVERIFY(s.tris().rows() > 0);
     }
@@ -243,7 +243,7 @@ private slots:
             QSKIP("Test data not available");
         }
         FsAnnotation a(testData);
-        QVERIFY(!a.isEmpty());
+        QVERIFY(!a.empty());
     }
 
     //=========================================================================
@@ -293,7 +293,7 @@ private slots:
     {
         const QString surfFile = QCoreApplication::applicationDirPath() + "/../resources/data/mne-cpp-test-data/subjects/sample/surf/lh.white";
         FsSurface surf(surfFile);
-        QVERIFY(!surf.isEmpty());
+        QVERIFY(!surf.empty());
         // First rings around vertices 10 and 50000 plus the lone vertex 100000
         const QList<QList<int>> parts{{48768, 48782, 48794, 49980, 50000, 50001, 50018, 51392, 51393, 51412},
                                       {6, 7, 10, 11, 14, 15, 143, 150},
@@ -357,7 +357,7 @@ private slots:
         QFETCH(double, valueSum);
 
         const FsSurface surf(QCoreApplication::applicationDirPath() + "/../resources/data/mne-cpp-test-data/subjects/sample/surf/lh.white");
-        QVERIFY(!surf.isEmpty());
+        QVERIFY(!surf.empty());
         const FsLabel label = FsLabelUtils::growCircularLabel(surf, seeds, extent, 0, "seed");
         QCOMPARE(static_cast<int>(label.vertices.size()), count);
         for (int i = 0; i < head.size(); ++i)

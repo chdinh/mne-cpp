@@ -123,7 +123,7 @@ public:
      *
      * @return True if no calibration entries are stored.
      */
-    bool isEmpty() const
+    bool empty() const
     {
         return m_entries.isEmpty();
     }

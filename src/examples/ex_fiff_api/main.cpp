@@ -231,7 +231,7 @@ int main(int argc, char* argv[])
     const FiffId fileId = stream.id();
     stream.close();
     //! [fiff_stream_usage]
-    ok &= expect(opened && measNodes.size() == 1 && nchan && *nchan->toInt() == 376 && !fileId.isEmpty() && fileId.version > 0,
+    ok &= expect(opened && measNodes.size() == 1 && nchan && *nchan->toInt() == 376 && !fileId.empty() && fileId.version > 0,
                  "FiffStream/FiffDirNode/FiffTag/FiffId: the FIFF_NCHAN tag of the measurement block reads 376");
 
     //! [fiff_explain_usage]

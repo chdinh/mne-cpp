@@ -91,8 +91,8 @@ private slots:
         QVERIFY(tmpFile.open());
         tmpFile.write("# comment only\n\n");
         tmpFile.close();
-        QVERIFY(FineCalibration::read(tmpFile.fileName()).isEmpty());
-        QVERIFY(FineCalibration::read("/nonexistent/path/file.dat").isEmpty());
+        QVERIFY(FineCalibration::read(tmpFile.fileName()).empty());
+        QVERIFY(FineCalibration::read("/nonexistent/path/file.dat").empty());
     }
 };
 

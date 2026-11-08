@@ -64,7 +64,7 @@ Network Correlation::calculate(ConnectivitySettings& connectivitySettings)
 
     Network finalNetwork("COR");
 
-    if (connectivitySettings.isEmpty()) {
+    if (connectivitySettings.empty()) {
         qDebug() << "Correlation::calculate - Input data is empty";
         return finalNetwork;
     }

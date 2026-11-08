@@ -578,7 +578,7 @@ FiffDirNode::SPtr FiffStream::make_subtree(const std::vector<FiffDirEntry>& dent
             * block id, or file id. Let the block id
             * take precedence over parent block id and file id
             */
-            if (((dentry[current].kind == FIFF_PARENT_BLOCK_ID || dentry[current].kind == FIFF_FILE_ID) && node->id.isEmpty()) || dentry[current].kind == FIFF_BLOCK_ID) {
+            if (((dentry[current].kind == FIFF_PARENT_BLOCK_ID || dentry[current].kind == FIFF_FILE_ID) && node->id.empty()) || dentry[current].kind == FIFF_BLOCK_ID) {
                 if (t_pTag = this->read_tag(dentry[current].pos); !t_pTag)
                     return defaultNode;
                 node->id = t_pTag->toFiffID();
@@ -738,7 +738,7 @@ fiff_long_t FiffStream::write_annotations(const FiffAnnotations& annotations, co
 
 fiff_long_t FiffStream::write_device_info(const FiffDeviceInfo& device)
 {
-    if (device.isEmpty()) {
+    if (device.empty()) {
         return -1;
     }
     const fiff_long_t pos = start_block(FIFFB_DEVICE);
@@ -1373,7 +1373,7 @@ bool FiffStream::read_meas_info(const FiffDirNode::SPtr& p_Node, FiffInfo& info,
         return false;
     }
 
-    if (dev_head_t.is_empty() || ctf_head_t.is_empty()) {
+    if (dev_head_t.empty() || ctf_head_t.empty()) {
         std::vector<FiffDirNode::SPtr> hpi_result = meas_info[0]->dir_tree_find(FIFFB_HPI_RESULT);
         if (hpi_result.size() == 1) {
             for (qint32 k = 0; k < hpi_result[0]->nent(); ++k) {
@@ -1421,7 +1421,7 @@ bool FiffStream::read_meas_info(const FiffDirNode::SPtr& p_Node, FiffInfo& info,
     for (FiffDigPoint& point : dig)
         point.coord_frame = coord_frame;
 
-    if (!dig_trans.is_empty()) //if exist('dig_trans','var')
+    if (!dig_trans.empty()) //if exist('dig_trans','var')
         if (dig_trans.from != coord_frame && dig_trans.to != coord_frame)
             dig_trans.clear();
 
@@ -1536,7 +1536,7 @@ bool FiffStream::read_meas_info(const FiffDirNode::SPtr& p_Node, FiffInfo& info,
     info.dev_head_t = dev_head_t;
     info.ctf_head_t = ctf_head_t;
     info.all_coord_trans = all_coord_trans;
-    if (!info.dev_head_t.is_empty() && !info.ctf_head_t.is_empty())
+    if (!info.dev_head_t.empty() && !info.ctf_head_t.empty())
         info.dev_ctf_t = FiffCoordTrans(FIFFV_COORD_DEVICE, FIFFV_MNE_COORD_CTF_HEAD, ctf_head_t.invtrans * dev_head_t.trans);
     else
         info.dev_ctf_t.clear();
@@ -1545,7 +1545,7 @@ bool FiffStream::read_meas_info(const FiffDirNode::SPtr& p_Node, FiffInfo& info,
     //   All kinds of auxliary stuff
     //
     info.dig = std::move(dig);
-    if (!dig_trans.is_empty())
+    if (!dig_trans.empty())
         info.dig_trans = dig_trans;
 
     info.experimenter = experimenter;
@@ -2137,10 +2137,10 @@ std::unique_ptr<FiffStream> FiffStream::start_writing_raw(std::unique_ptr<FiffSt
     //    Coordinate transformations if the HPI result block was not there
     //
     if (!have_hpi_result) {
-        if (!info.dev_head_t.is_empty())
+        if (!info.dev_head_t.empty())
             t_pStream->write_coord_trans(info.dev_head_t);
 
-        if (!info.ctf_head_t.is_empty())
+        if (!info.ctf_head_t.empty())
             t_pStream->write_coord_trans(info.ctf_head_t);
     }
     //
@@ -2877,7 +2877,7 @@ fiff_long_t FiffStream::write_id(fiff_int_t kind, const FiffId& id)
 
     FiffId t_id = id;
 
-    if (t_id.isEmpty()) {
+    if (t_id.empty()) {
         //
         // Create a new one
         //
@@ -2919,7 +2919,7 @@ fiff_long_t FiffStream::write_info_base(const FiffInfoBase& p_FiffInfoBase)
     //
     this->start_block(FIFFB_MNE_PARENT_MEAS_FILE);
     this->write_string(FIFF_MNE_FILE_NAME, p_FiffInfoBase.filename);
-    if (!p_FiffInfoBase.meas_id.isEmpty())
+    if (!p_FiffInfoBase.meas_id.empty())
         this->write_id(FIFF_PARENT_BLOCK_ID, p_FiffInfoBase.meas_id);
 
     //
@@ -2952,9 +2952,9 @@ fiff_long_t FiffStream::write_info_base(const FiffInfoBase& p_FiffInfoBase)
     //    Coordinate transformations if the HPI result block was not there
     //
     if (!have_hpi_result) {
-        if (!p_FiffInfoBase.dev_head_t.is_empty())
+        if (!p_FiffInfoBase.dev_head_t.empty())
             this->write_coord_trans(p_FiffInfoBase.dev_head_t);
-        if (!p_FiffInfoBase.ctf_head_t.is_empty())
+        if (!p_FiffInfoBase.ctf_head_t.empty())
             this->write_coord_trans(p_FiffInfoBase.ctf_head_t);
     }
 
@@ -3116,7 +3116,7 @@ fiff_long_t FiffStream::write_evoked_set(const FiffEvokedSet& p_FiffEvokedSet)
         this->write_ch_info(ch);
     }
 
-    if (!p_FiffEvokedSet.info.dev_head_t.is_empty())
+    if (!p_FiffEvokedSet.info.dev_head_t.empty())
         this->write_coord_trans(p_FiffEvokedSet.info.dev_head_t);
 
     if (!p_FiffEvokedSet.info.projs.isEmpty())

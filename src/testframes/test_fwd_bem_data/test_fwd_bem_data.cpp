@@ -174,7 +174,7 @@ private slots:
             QSKIP("Forward solution file not found");
 
         MNEForwardSolution fwd(path.toStdU16String());
-        QVERIFY(!fwd.isEmpty());
+        QVERIFY(!fwd.empty());
         QVERIFY(fwd.nchan > 0);
         QVERIFY(fwd.nsource > 0);
         QVERIFY(fwd.sol != nullptr);
@@ -206,7 +206,7 @@ private slots:
             QSKIP("Forward solution not found");
 
         MNEForwardSolution fwd(path.toStdU16String());
-        if (fwd.isEmpty())
+        if (fwd.empty())
             QSKIP("Fwd load failed");
 
         // Pick MEG channels
@@ -236,7 +236,7 @@ private slots:
             QSKIP("Forward solution not found");
 
         MNEForwardSolution fwd(path.toStdU16String());
-        if (fwd.isEmpty())
+        if (fwd.empty())
             QSKIP("Fwd load failed");
 
         RowVectorXi eegIdx = fwd.info.pick_types(false, true, false);
@@ -264,7 +264,7 @@ private slots:
             QSKIP("Forward solution not found");
 
         MNEForwardSolution fwd(path.toStdU16String());
-        if (fwd.isEmpty())
+        if (fwd.empty())
             QSKIP("Fwd load failed");
 
         FiffCov orientPrior = fwd.compute_orient_prior(0.2f);
@@ -287,7 +287,7 @@ private slots:
             QSKIP("Files not found");
 
         MNEForwardSolution fwd(fwdPath.toStdU16String());
-        if (fwd.isEmpty())
+        if (fwd.empty())
             QSKIP("Fwd load failed");
 
         FiffRawData raw(rawPath.toStdString());
@@ -312,10 +312,7 @@ private slots:
         if (!file.exists())
             QSKIP("Source space not found");
 
-        MNESourceSpaces srcSpace;
-        FiffStream srcStream(&file);
-        srcStream.open();
-        QVERIFY(MNESourceSpaces::readFromStream(srcStream, false, srcSpace));
+        const MNESourceSpaces srcSpace = MNESourceSpaces::read(path.toStdU16String(), false).value();
         QCOMPARE(srcSpace.size(), 2);
 
         // Check vertices consistency

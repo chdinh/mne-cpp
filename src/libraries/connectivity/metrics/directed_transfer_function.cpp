@@ -58,7 +58,7 @@ Network DirectedTransferFunction::calculate(ConnectivitySettings& connectivitySe
 {
     Network finalNetwork("DTF");
 
-    if (connectivitySettings.isEmpty()) {
+    if (connectivitySettings.empty()) {
         qDebug() << "DirectedTransferFunction::calculate - Input data is empty";
         return finalNetwork;
     }

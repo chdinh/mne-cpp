@@ -351,7 +351,7 @@ int main(int argc, char* argv[])
                   static_cast<int>(stcRH.data.rows()), static_cast<int>(stcRH.data.cols()));
         }
 
-        if (stcLH.is_empty() && stcRH.is_empty()) {
+        if (stcLH.empty() && stcRH.empty()) {
             qCritical("No STC data loaded from prefix: %s", qPrintable(stcPrefix));
             return 1;
         }
@@ -389,7 +389,7 @@ int main(int argc, char* argv[])
 
         InvMinimumNorm minimumNorm(invOp, lambda2, method);
         stcLH = minimumNorm.calculateInverse(evoked);
-        if (stcLH.is_empty()) {
+        if (stcLH.empty()) {
             qCritical("Inverse computation failed.");
             return 1;
         }
@@ -407,7 +407,7 @@ int main(int argc, char* argv[])
     }
 
     // Use the non-empty STC for time parameters
-    const InvSourceEstimate& refStc = stcLH.is_empty() ? stcRH : stcLH;
+    const InvSourceEstimate& refStc = stcLH.empty() ? stcRH : stcLH;
 
     //=========================================================================
     // Time windowing
@@ -507,7 +507,7 @@ int main(int argc, char* argv[])
 
         // Select the appropriate STC for this hemisphere
         const InvSourceEstimate& hemiStc = (hemi == "lh") ? stcLH : stcRH;
-        if (hemiStc.is_empty()) {
+        if (hemiStc.empty()) {
             qInfo("No STC data for %s hemisphere, skipping.", qPrintable(hemi));
             return;
         }

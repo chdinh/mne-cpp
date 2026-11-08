@@ -136,7 +136,7 @@ int main(int argc, char* argv[])
     //! [inv_cmne_usage]
     const MatrixXd sourceCov = MatrixXd::Identity(fwd.nsource, fwd.nsource);
     InvCMNEResult cmne = InvCMNE::compute(evoked.data, fwd.sol->data, noiseCov.data, sourceCov, settings);
-    if (cmne.stcCmne.is_empty()) {
+    if (cmne.stcCmne.empty()) {
         std::println(stderr, "The CMNE model does not fit {} sources.", fwd.nsource);
         return EXIT_FAILURE;
     }

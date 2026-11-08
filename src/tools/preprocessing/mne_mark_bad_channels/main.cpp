@@ -129,7 +129,7 @@ int main(int argc, char* argv[])
         qCritical("Cannot read FIFF file %s: %s", qPrintable(fifName), error.what());
         return 1;
     }
-    if (raw.info.isEmpty()) {
+    if (raw.info.empty()) {
         qCritical("Cannot read FIFF file: %s", qPrintable(fifName));
         return 1;
     }

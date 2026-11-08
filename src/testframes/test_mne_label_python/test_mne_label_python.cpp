@@ -138,7 +138,7 @@ void TestMneLabelPython::initTestCase()
         QSKIP("Forward solution not found");
     }
     m_fwd = MNEForwardSolution(fwdPath.toStdU16String());
-    QVERIFY(!m_fwd.isEmpty());
+    QVERIFY(!m_fwd.empty());
     QVERIFY(!m_fwd.isFixedOrient());
     QCOMPARE(m_fwd.src[0].nuse, 3956);
     QCOMPARE(m_fwd.src[1].nuse, 3972);
@@ -180,7 +180,7 @@ void TestMneLabelPython::labelSourceSelection()
     QFETCH(int, firstVertno);
 
     const FsLabel l = label(name);
-    QVERIFY2(!l.isEmpty(), qPrintable(name));
+    QVERIFY2(!l.empty(), qPrintable(name));
 
     VectorXi sel;
     const QList<VectorXi> vertno = m_fwd.src.label_src_vertno_sel(l, sel);

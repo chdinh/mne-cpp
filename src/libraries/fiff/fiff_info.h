@@ -86,7 +86,7 @@ struct FiffDeviceInfo
     std::string site;   /**< Site of the device. */
 
     /** @return true when no field is set; then no FIFFB_DEVICE block is written. */
-    bool isEmpty() const
+    bool empty() const
     {
         return type.empty() && model.empty() && serial.empty() && site.empty();
     }

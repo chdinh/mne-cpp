@@ -317,7 +317,7 @@ private slots:
 
         auto srcSpace = DataLoader::loadSourceSpace(fwdFile);
         // Should have loaded something if file exists
-        QVERIFY(!srcSpace.isEmpty());
+        QVERIFY(!srcSpace.empty());
     }
 
     void dataLoader_loadDipolesNonExistent()

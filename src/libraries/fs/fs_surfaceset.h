@@ -141,7 +141,7 @@ public:
      *
      * @return true if FsSurfaceSet is empty.
      */
-    inline bool isEmpty() const;
+    inline bool empty() const;
 
     //=========================================================================================================
     /**
@@ -240,7 +240,7 @@ inline QMap<qint32, FsSurface>& FsSurfaceSet::data()
 
 //=============================================================================================================
 
-inline bool FsSurfaceSet::isEmpty() const
+inline bool FsSurfaceSet::empty() const
 {
     return m_qMapSurfs.isEmpty();
 }

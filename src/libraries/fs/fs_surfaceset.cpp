@@ -116,7 +116,7 @@ void FsSurfaceSet::clear()
 
 void FsSurfaceSet::insert(const FsSurface& p_Surface)
 {
-    if (p_Surface.isEmpty())
+    if (p_Surface.empty())
         return;
 
     qint32 hemi = p_Surface.hemi();

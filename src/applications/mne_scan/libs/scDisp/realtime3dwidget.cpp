@@ -121,7 +121,7 @@ void RealTime3DWidget::update(SCMEASLIB::Measurement::SPtr pMeasurement)
     }
 
     if (RealTimeConnectivityEstimate::SPtr pRTCE = qSharedPointerDynamicCast<RealTimeConnectivityEstimate>(pMeasurement)) {
-        if (pRTCE->getValue().data()->isEmpty()) {
+        if (pRTCE->getValue().data()->empty()) {
             return;
         }
 

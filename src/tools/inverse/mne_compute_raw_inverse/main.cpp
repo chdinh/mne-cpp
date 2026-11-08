@@ -207,7 +207,7 @@ static InvSourceEstimate processLabel(const QString& labelFile,
     // Compute inverse for all data
     InvSourceEstimate stc = minimumNorm.calculateInverse(data, tmin, tstep, pickNormal);
 
-    if (stc.is_empty()) {
+    if (stc.empty()) {
         qWarning() << "Inverse computation returned empty result for label:" << labelFile;
         return InvSourceEstimate();
     }
@@ -257,7 +257,7 @@ static InvSourceEstimate processLabelDir(const QString& labelDir,
     minimumNorm.doInverseSetup(1, true);
 
     InvSourceEstimate fullStc = minimumNorm.calculateInverse(data, tmin, tstep, true);
-    if (fullStc.is_empty()) {
+    if (fullStc.empty()) {
         qWarning() << "Full inverse computation returned empty result.";
         return InvSourceEstimate();
     }
@@ -573,7 +573,7 @@ int main(int argc, char* argv[])
                                                     inputData, tmin, tstep,
                                                     lambda2, method, labelNames);
 
-            if (stc.is_empty()) {
+            if (stc.empty()) {
                 qCritical("Error: FsLabel directory processing failed.");
                 return 1;
             }
@@ -616,7 +616,7 @@ int main(int argc, char* argv[])
                                                      inputData, tmin, tstep,
                                                      lambda2, method, pickNormal);
 
-                if (stc.is_empty()) {
+                if (stc.empty()) {
                     qWarning("Warning: Skipping label %s (no result).", labelFile.toUtf8().constData());
                     continue;
                 }
@@ -659,7 +659,7 @@ int main(int argc, char* argv[])
 
             InvSourceEstimate stc = minimumNorm.calculateInverse(inputData, tmin, tstep, pickNormal);
 
-            if (stc.is_empty()) {
+            if (stc.empty()) {
                 qCritical("Error: Full source space inverse computation failed.");
                 return 1;
             }

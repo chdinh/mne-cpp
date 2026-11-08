@@ -157,7 +157,7 @@ public:
      *
      * @return true if is empty, false otherwise.
      */
-    inline bool isEmpty() const;
+    inline bool empty() const;
 
     //=========================================================================================================
     /**
@@ -361,7 +361,7 @@ inline qint32 FsSurface::hemi() const
 
 //=============================================================================================================
 
-inline bool FsSurface::isEmpty() const
+inline bool FsSurface::empty() const
 {
     return m_iHemi == -1;
 }

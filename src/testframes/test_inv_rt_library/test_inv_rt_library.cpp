@@ -263,7 +263,7 @@ void TestInvRtLibrary::rapMusic_mathHelpers()
         QSKIP("Forward file not found");
 
     MNEForwardSolution fwd(fwdPath().toStdU16String());
-    if (fwd.isEmpty())
+    if (fwd.empty())
         QSKIP("Could not read forward");
 
     InvRapMusic rap;

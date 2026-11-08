@@ -82,7 +82,7 @@ public:
      *
      * @return true if MNE cluster information is empty.
      */
-    inline bool isEmpty() const;
+    inline bool empty() const;
 
     //=========================================================================================================
     /**
@@ -125,7 +125,7 @@ public:
 // INLINE DEFINITIONS
 //=============================================================================================================
 
-inline bool MNEClusterInfo::isEmpty() const
+inline bool MNEClusterInfo::empty() const
 {
     return !(this->clusterVertnos.size() > 0);
 }

@@ -328,7 +328,7 @@ bool Dummy3DHostedViewWidget::loadFileInternal(const QString& filePath,
 bool Dummy3DHostedViewWidget::loadSurfaceFile(const QString& filePath, QString* errorMessage)
 {
     FSLIB::FsSurface surface(filePath);
-    if (surface.isEmpty()) {
+    if (surface.empty()) {
         if (errorMessage) {
             *errorMessage = QString("Failed to load FreeSurfer surface %1.").arg(filePath);
         }

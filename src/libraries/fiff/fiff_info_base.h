@@ -178,7 +178,7 @@ public:
      *
      * @return true if FIFF measurement file information is empty.
      */
-    inline bool isEmpty() const;
+    inline bool empty() const;
 
     //=========================================================================================================
     /**
@@ -326,7 +326,7 @@ public:
 // INLINE DEFINITIONS
 //=============================================================================================================
 
-inline bool FiffInfoBase::isEmpty() const
+inline bool FiffInfoBase::empty() const
 {
     return this->nchan <= 0;
 }

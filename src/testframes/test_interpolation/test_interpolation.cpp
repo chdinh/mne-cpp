@@ -94,7 +94,7 @@ void TestInterpolation::initTestCase()
     fiff_int_t setno = 0;
     QPair<float, float> baseline(-1.0f, -1.0f);
     evoked = FiffEvoked((QCoreApplication::applicationDirPath() + "/../resources/data/mne-cpp-test-data/MEG/sample/sample_audvis-ave.fif").toStdU16String(), setno, baseline);
-    if (evoked.isEmpty()) {
+    if (evoked.empty()) {
         return;
     }
     // Build sensor position matrix

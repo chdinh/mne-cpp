@@ -75,7 +75,7 @@ private slots:
         // Should find some active sources
         QVERIFY(!result.activeVertices.isEmpty());
         QVERIFY(result.nIterations > 0);
-        QVERIFY(!result.stc.is_empty());
+        QVERIFY(!result.stc.empty());
     }
 
     void testReachesTheMinimum()
@@ -124,7 +124,7 @@ private slots:
         MatrixXd G = MatrixXd::Random(5, 10);
         MatrixXd M = MatrixXd::Random(7, 20); // 7 != 5
         InvTfMxneResult result = InvTfMxne::compute(G, M);
-        QVERIFY(result.stc.is_empty());
+        QVERIFY(result.stc.empty());
     }
 
     void testHighRegularizationYieldsZero()
@@ -156,7 +156,7 @@ private slots:
 
         InvTfMxneResult result = InvTfMxne::compute(G, M, params);
 
-        if (!result.stc.is_empty()) {
+        if (!result.stc.empty()) {
             QVERIFY(result.stc.method == InvEstimateMethod::MixedNorm);
         }
     }

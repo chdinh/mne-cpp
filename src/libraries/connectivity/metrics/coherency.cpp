@@ -66,7 +66,7 @@ void Coherency::calculateAbs(Network& finalNetwork,
     //    qint64 iTime = 0;
     //    timer.start();
 
-    if (connectivitySettings.isEmpty()) {
+    if (connectivitySettings.empty()) {
         qDebug() << "Coherency::calculateReal - Input data is empty";
         return;
     }
@@ -137,7 +137,7 @@ void Coherency::calculateImag(Network& finalNetwork,
     //    qint64 iTime = 0;
     //    timer.start();
 
-    if (connectivitySettings.isEmpty()) {
+    if (connectivitySettings.empty()) {
         qDebug() << "Coherency::calculateImag - Input data is empty";
         return;
     }
