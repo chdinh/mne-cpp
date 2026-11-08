@@ -568,7 +568,7 @@ int main(int argc, char* argv[])
     MNEDescriptionParser::parseAverageFile(aveDesc, averaging);
     const AverageCategory& leftCategory = averaging.categories.front(); // name, events, tmin/tmax, baseline
     const RejectionParams& rejection = averaging.rej;                   // MNE-C defaults unless the file sets them (EEG 100 uV, ...)
-    QString log;
+    std::string log;
     const FiffEvokedSet averages = FiffEvokedSet::computeAverages(raw, averaging, events.events, log);
     //! [mne_description_parser_usage]
     // mne.Epochs(event_id=1, tmin=-0.1, tmax=0.3, baseline=(-0.1, 0)).average(): 6 epochs, |MEG| 2.01258e-13, EEG 001 at 0 s 7.77233e-10

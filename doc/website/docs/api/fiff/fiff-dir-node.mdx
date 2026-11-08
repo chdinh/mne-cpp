@@ -38,8 +38,8 @@ QString tree;
 QTextStream treeOut(&tree);
 transStream.dirtree()->print(treeOut);
 transStream.close();
-const QString transformTag = FiffExplain::tag(FIFF_COORD_TRANS);                                              // "transform"
-const QString gradiometerUnit = FiffExplain::unitMultiplier(FIFF_UNITM_F) + FiffExplain::unit(FIFF_UNIT_T_M); // "fT/m"
+const std::string transformTag = FiffExplain::tag(FIFF_COORD_TRANS);                                              // "transform"
+const std::string gradiometerUnit = FiffExplain::unitMultiplier(FIFF_UNITM_F) + FiffExplain::unit(FIFF_UNIT_T_M); // "fT/m"
 ```
 
 ### Inheritance

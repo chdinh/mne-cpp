@@ -236,7 +236,7 @@ int main(int argc, char* argv[])
     //N.B. If a nonstandard (in MNE sense) coil def file is used, do
     //ToDo: MATLAB root fct mne_load_coil_def, mne_add_coil_defs needs to be implemented
 
-    std::cout << "Condition '" << p_FiffEvoked.comment.toStdString() << "': " << p_FiffEvoked.nave << " epochs, "
+    std::cout << "Condition '" << p_FiffEvoked.comment << "': " << p_FiffEvoked.nave << " epochs, "
               << p_FiffEvoked.info.nchan << " channels, " << p_FiffEvoked.times.size() << " samples from "
               << p_FiffEvoked.times(0) << " s to " << p_FiffEvoked.times(p_FiffEvoked.times.size() - 1) << " s" << std::endl;
 

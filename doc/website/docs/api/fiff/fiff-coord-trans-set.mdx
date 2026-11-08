@@ -22,9 +22,9 @@ Head -&gt; surface RAS (the FreeSurfer MRI frame) comes from the coregistration,
 ```cpp title="src/examples/ex_fiff_api/main.cpp"
 // Head -> MRI -> RAS -> MNI Talairach -> Talairach, as mne_analyze reports a picked location
 FiffCoordTransSet chain;
-chain.read(dir + "/../../subjects/sample/mri/brain-neuromag/sets/COR.fif"); // surface RAS -> RAS of the MRI set
-chain.read(dir + "/all-trans.fif");                                         // the coregistration, head -> MRI
-chain.addTalairach(QStringLiteral(MNE_TALAIRACH_XFM));                      // the subject's mri/transforms/talairach.xfm
+chain.read((dir + "/../../subjects/sample/mri/brain-neuromag/sets/COR.fif").toStdString()); // surface RAS -> RAS of the MRI set
+chain.read((dir + "/all-trans.fif").toStdString());                                         // the coregistration, head -> MRI
+chain.addTalairach(MNE_TALAIRACH_XFM);                                                      // the subject's mri/transforms/talairach.xfm
 MatrixX3f headPoints(1, 3);
 headPoints << 0.03f, -0.02f, 0.12f;
 const MatrixX3f mni = chain.headToMni(headPoints);
@@ -41,7 +41,7 @@ Sets the RAS -&gt; MNI transform from a .xfm file and the two MNI -&gt; FreeSurf
 
 **Parameters:**
 
-- **xfmPath** : *const QString &*
+- **xfmPath** : *const std::filesystem::path &*
   Path to the `talairach.xfm` file.
 
 **Returns:**
@@ -58,7 +58,7 @@ Transforms already in the set are replaced, so read the MRI set first and the co
 
 **Parameters:**
 
-- **path** : *const QString &*
+- **path** : *const std::filesystem::path &*
   FIFF file path.
 
 **Returns:**
@@ -116,7 +116,7 @@ Reads the scanner RAS -&gt; MNI Talairach transform of a FreeSurfer/MNI .xfm fil
 
 **Parameters:**
 
-- **path** : *const QString &*
+- **path** : *const std::filesystem::path &*
   Path to the .xfm file, usually `mri/transforms/talairach.xfm` in the subject directory.
 
 **Returns:**
@@ -141,9 +141,9 @@ FIFF library: measurement info, channels, digitizer, transforms, projectors, cov
 ````cpp title="src/examples/ex_fiff_api/main.cpp, line 164"
 // Head -> MRI -> RAS -> MNI Talairach -> Talairach, as mne_analyze reports a picked location
 FiffCoordTransSet chain;
-chain.read(dir + "/../../subjects/sample/mri/brain-neuromag/sets/COR.fif"); // surface RAS -> RAS of the MRI set
-chain.read(dir + "/all-trans.fif");                                         // the coregistration, head -> MRI
-chain.addTalairach(QStringLiteral(MNE_TALAIRACH_XFM));                      // the subject's mri/transforms/talairach.xfm
+chain.read((dir + "/../../subjects/sample/mri/brain-neuromag/sets/COR.fif").toStdString()); // surface RAS -> RAS of the MRI set
+chain.read((dir + "/all-trans.fif").toStdString());                                         // the coregistration, head -> MRI
+chain.addTalairach(MNE_TALAIRACH_XFM);                                                      // the subject's mri/transforms/talairach.xfm
 MatrixX3f headPoints(1, 3);
 headPoints << 0.03f, -0.02f, 0.12f;
 const MatrixX3f mni = chain.headToMni(headPoints);

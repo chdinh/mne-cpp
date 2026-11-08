@@ -153,7 +153,7 @@ Get the stream name.
 
 **Returns:**
 
-- *QString* — the name of the current stream.
+- *std::string* — the name of the current stream.
 
 ---
 
@@ -246,13 +246,13 @@ Helper to get all evoked entries.
 - **evoked_node** : *const std::vector&lt; [FiffDirNode](/docs/api/fiff/fiff-dir-node)::SPtr &gt; &*
   evoked tree nodes.
 
-- **comments** : *QStringList &*
+- **comments** : *StringList &*
   found comments.
 
 - **aspect_kinds** : *std::vector&lt; fiff_int_t &gt; &*
   found aspect_kinds.
 
-- **t** : *QString &*
+- **t** : *std::string &*
   text formatted found information.
 
 **Returns:**
@@ -400,10 +400,10 @@ The stream must already be opened for update (via open_update). Finds the first 
 
 **Parameters:**
 
-- **workingDir** : *const QString &*
+- **workingDir** : *const std::string &*
   The working directory to record.
 
-- **command** : *const QString &*
+- **command** : *const std::string &*
   The command-line string to record.
 
 **Returns:**
@@ -1110,7 +1110,7 @@ Writes a real-time command.
 - **command** : *fiff_int_t*
   The real time command.
 
-- **data** : *const QString &*
+- **data** : *const std::string &*
   The string data to write.
 
 ---
@@ -1284,10 +1284,10 @@ Opens the source file, locates the FIFFB_PROCESSING_HISTORY block, reads all tag
 
 **Parameters:**
 
-- **fromPath** : *const QString &*
+- **fromPath** : *const std::filesystem::path &*
   Path to the source FIFF file.
 
-- **toPath** : *const QString &*
+- **toPath** : *const std::filesystem::path &*
   Path to the destination FIFF file.
 
 **Returns:**

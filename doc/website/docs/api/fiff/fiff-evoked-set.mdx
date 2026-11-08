@@ -225,7 +225,7 @@ For each category in the description, matching events are epoched from the raw d
 - **events** : *const Eigen::MatrixXi &*
   Event matrix (nEvents x 3): [sample, from, to].
 
-- **log** : *QString &*
+- **log** : *std::string &*
   Processing log output.
 
 **Returns:**
@@ -252,7 +252,7 @@ Check whether an epoch passes artifact rejection criteria.
 - **rej** : *const [RejectionParams](/docs/api/fiff/rejection-params) &*
   Rejection parameters.
 
-- **reason** : *QString &*
+- **reason** : *std::string &*
   Rejection reason string (set only when rejected).
 
 **Returns:**

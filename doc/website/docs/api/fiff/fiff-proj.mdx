@@ -81,7 +81,7 @@ Constructor.
 - **p_active** : *bool*
   Whether the projector is already applied to the data.
 
-- **p_desc** : *QString*
+- **p_desc** : *std::string*
   Human-readable description of the projector.
 
 - **p_data** : *[FiffNamedMatrix](/docs/api/fiff/fiff-named-matrix) &*
@@ -171,7 +171,7 @@ Create SSP (Signal-Space Projection) operators from raw data via SVD. Ported fro
 - **nEeg** : *int*
   Number of EEG projection vectors.
 
-- **mapReject** : *const QMap&lt; QString, double &gt; &*
+- **mapReject** : *const std::map&lt; std::string, double &gt; &*
   Rejection thresholds (key = channel type string, value = threshold).
 
 **Returns:**

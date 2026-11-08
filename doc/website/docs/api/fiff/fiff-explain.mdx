@@ -28,8 +28,8 @@ QString tree;
 QTextStream treeOut(&tree);
 transStream.dirtree()->print(treeOut);
 transStream.close();
-const QString transformTag = FiffExplain::tag(FIFF_COORD_TRANS);                                              // "transform"
-const QString gradiometerUnit = FiffExplain::unitMultiplier(FIFF_UNITM_F) + FiffExplain::unit(FIFF_UNIT_T_M); // "fT/m"
+const std::string transformTag = FiffExplain::tag(FIFF_COORD_TRANS);                                              // "transform"
+const std::string gradiometerUnit = FiffExplain::unitMultiplier(FIFF_UNITM_F) + FiffExplain::unit(FIFF_UNIT_T_M); // "fT/m"
 ```
 
 ---
@@ -49,7 +49,7 @@ Name of a tag kind (FIFF_*), e.g.
 
 **Returns:**
 
-- *QString* — The name, or an empty string.
+- *std::string* — The name, or an empty string.
 
 ---
 
@@ -66,7 +66,7 @@ Name of a block kind (FIFFB_*), e.g.
 
 **Returns:**
 
-- *QString* — The name, or an empty string.
+- *std::string* — The name, or an empty string.
 
 ---
 
@@ -83,7 +83,7 @@ SI symbol of a unit (FIFF_UNIT_*), e.g.
 
 **Returns:**
 
-- *QString* — The symbol, or an empty string.
+- *std::string* — The symbol, or an empty string.
 
 ---
 
@@ -100,7 +100,7 @@ SI prefix of a unit multiplier (FIFF_UNITM_*), e.g.
 
 **Returns:**
 
-- *QString* — The prefix, or an empty string.
+- *std::string* — The prefix, or an empty string.
 
 ---
 
@@ -117,7 +117,7 @@ Name of a channel kind (FIFFV_*_CH), e.g.
 
 **Returns:**
 
-- *QString* — The name, or an empty string.
+- *std::string* — The name, or an empty string.
 
 ---
 
@@ -138,8 +138,8 @@ FIFF library: measurement info, channels, digitizer, transforms, projectors, cov
 QTextStream treeOut(&tree);
 transStream.dirtree()->print(treeOut);
 transStream.close();
-const QString transformTag = FiffExplain::tag(FIFF_COORD_TRANS);                                              // "transform"
-const QString gradiometerUnit = FiffExplain::unitMultiplier(FIFF_UNITM_F) + FiffExplain::unit(FIFF_UNIT_T_M); // "fT/m"
+const std::string transformTag = FiffExplain::tag(FIFF_COORD_TRANS);                                              // "transform"
+const std::string gradiometerUnit = FiffExplain::unitMultiplier(FIFF_UNITM_F) + FiffExplain::unit(FIFF_UNIT_T_M); // "fT/m"
 // mne.io.show_fiff(all-trans.fif): FIFFB_ROOT holding file ID (printed as the block id), dir pointer, free list,
 // 2 transforms and a NOP
 const QStringList treeLines = tree.split(QLatin1Char('\n'), Qt::SkipEmptyParts);

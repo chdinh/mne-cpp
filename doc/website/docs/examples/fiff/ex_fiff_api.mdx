@@ -319,9 +319,9 @@ int main(int argc, char* argv[])
     //! [fiff_coord_trans_set_usage]
     // Head -> MRI -> RAS -> MNI Talairach -> Talairach, as mne_analyze reports a picked location
     FiffCoordTransSet chain;
-    chain.read(dir + "/../../subjects/sample/mri/brain-neuromag/sets/COR.fif"); // surface RAS -> RAS of the MRI set
-    chain.read(dir + "/all-trans.fif");                                         // the coregistration, head -> MRI
-    chain.addTalairach(QStringLiteral(MNE_TALAIRACH_XFM));                      // the subject's mri/transforms/talairach.xfm
+    chain.read((dir + "/../../subjects/sample/mri/brain-neuromag/sets/COR.fif").toStdString()); // surface RAS -> RAS of the MRI set
+    chain.read((dir + "/all-trans.fif").toStdString());                                         // the coregistration, head -> MRI
+    chain.addTalairach(MNE_TALAIRACH_XFM);                                                      // the subject's mri/transforms/talairach.xfm
     MatrixX3f headPoints(1, 3);
     headPoints << 0.03f, -0.02f, 0.12f;
     const MatrixX3f mni = chain.headToMni(headPoints);
@@ -399,8 +399,8 @@ int main(int argc, char* argv[])
     QTextStream treeOut(&tree);
     transStream.dirtree()->print(treeOut);
     transStream.close();
-    const QString transformTag = FiffExplain::tag(FIFF_COORD_TRANS);                                              // "transform"
-    const QString gradiometerUnit = FiffExplain::unitMultiplier(FIFF_UNITM_F) + FiffExplain::unit(FIFF_UNIT_T_M); // "fT/m"
+    const std::string transformTag = FiffExplain::tag(FIFF_COORD_TRANS);                                              // "transform"
+    const std::string gradiometerUnit = FiffExplain::unitMultiplier(FIFF_UNITM_F) + FiffExplain::unit(FIFF_UNIT_T_M); // "fT/m"
     //! [fiff_explain_usage]
     // mne.io.show_fiff(all-trans.fif): FIFFB_ROOT holding file ID (printed as the block id), dir pointer, free list,
     // 2 transforms and a NOP
