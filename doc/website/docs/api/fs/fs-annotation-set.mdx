@@ -116,7 +116,7 @@ Returns The [`FsAnnotation`](/docs/api/fs/fs-annotation) set map.
 
 **Returns:**
 
-- *QMap&lt; qint32, [FsAnnotation](/docs/api/fs/fs-annotation) &gt; &* — the annotation set map.
+- *std::map&lt; int, [FsAnnotation](/docs/api/fs/fs-annotation) &gt; &* — the annotation set map.
 
 ---
 
@@ -152,10 +152,10 @@ Converts annotation to a label list and colortable
 - **p_surfSet** : *const [FsSurfaceSet](/docs/api/fs/fs-surface-set) &*
   the [`FsSurfaceSet`](/docs/api/fs/fs-surface-set) to read the vertex positions from.
 
-- **p_qListLabels** : *QList&lt; [FsLabel](/docs/api/fs/fs-label) &gt; &*
+- **p_qListLabels** : *std::vector&lt; [FsLabel](/docs/api/fs/fs-label) &gt; &*
   the converted labels are appended to a given list. Stored data are not affected.
 
-- **p_qListLabelRGBAs** : *QList&lt; Eigen::RowVector4i &gt; &*
+- **p_qListLabelRGBAs** : *std::vector&lt; Eigen::RowVector4i &gt; &*
   the converted label RGBAs are appended to a given list. Stored data are not affected.
 
 - **lLabelPicks** : *const UTILSLIB::StringList &*
@@ -193,7 +193,7 @@ Subscript operator [] to access annotation by index.
 
 **Returns:**
 
-- *const [FsAnnotation](/docs/api/fs/fs-annotation)* — [`FsAnnotation`](/docs/api/fs/fs-annotation) related to the parameter index.
+- *const [FsAnnotation](/docs/api/fs/fs-annotation) &* — [`FsAnnotation`](/docs/api/fs/fs-annotation) related to the parameter index.
 
 ---
 
@@ -223,7 +223,7 @@ Subscript operator [] to access annotation by identifier.
 
 **Returns:**
 
-- *const [FsAnnotation](/docs/api/fs/fs-annotation)* — [`FsAnnotation`](/docs/api/fs/fs-annotation) related to the parameter identifier.
+- *const [FsAnnotation](/docs/api/fs/fs-annotation) &* — [`FsAnnotation`](/docs/api/fs/fs-annotation) related to the parameter identifier.
 
 ---
 

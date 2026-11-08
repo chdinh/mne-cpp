@@ -140,36 +140,36 @@ int main(int argc, char* argv[])
     BrainTreeModel* pModel = new BrainTreeModel();
     pBrainView->setModel(pModel);
 
-    for (auto it = tSurfSetPial.data().constBegin(); it != tSurfSetPial.data().constEnd(); ++it) {
-        QString sHemi = (it.value().hemi() == 0) ? "lh" : "rh";
-        pModel->addSurface(subject, sHemi, "pial", it.value());
+    for (auto it = tSurfSetPial.data().cbegin(); it != tSurfSetPial.data().cend(); ++it) {
+        QString sHemi = (it->second.hemi() == 0) ? "lh" : "rh";
+        pModel->addSurface(subject, sHemi, "pial", it->second);
     }
 
     //
     // inflated
     //
     FsSurfaceSet tSurfSetInflated(subject.toStdString(), hemi, "inflated", subjectPath.toStdU16String());
-    for (auto it = tSurfSetInflated.data().constBegin(); it != tSurfSetInflated.data().constEnd(); ++it) {
-        QString sHemi = (it.value().hemi() == 0) ? "lh" : "rh";
-        pModel->addSurface(subject, sHemi, "inflated", it.value());
+    for (auto it = tSurfSetInflated.data().cbegin(); it != tSurfSetInflated.data().cend(); ++it) {
+        QString sHemi = (it->second.hemi() == 0) ? "lh" : "rh";
+        pModel->addSurface(subject, sHemi, "inflated", it->second);
     }
 
     //
     // orig
     //
     FsSurfaceSet tSurfSetOrig(subject.toStdString(), hemi, "orig", subjectPath.toStdU16String());
-    for (auto it = tSurfSetOrig.data().constBegin(); it != tSurfSetOrig.data().constEnd(); ++it) {
-        QString sHemi = (it.value().hemi() == 0) ? "lh" : "rh";
-        pModel->addSurface(subject, sHemi, "orig", it.value());
+    for (auto it = tSurfSetOrig.data().cbegin(); it != tSurfSetOrig.data().cend(); ++it) {
+        QString sHemi = (it->second.hemi() == 0) ? "lh" : "rh";
+        pModel->addSurface(subject, sHemi, "orig", it->second);
     }
 
     //
     // white
     //
     FsSurfaceSet tSurfSetWhite(subject.toStdString(), hemi, "white", subjectPath.toStdU16String());
-    for (auto it = tSurfSetWhite.data().constBegin(); it != tSurfSetWhite.data().constEnd(); ++it) {
-        QString sHemi = (it.value().hemi() == 0) ? "lh" : "rh";
-        pModel->addSurface(subject, sHemi, "white", it.value());
+    for (auto it = tSurfSetWhite.data().cbegin(); it != tSurfSetWhite.data().cend(); ++it) {
+        QString sHemi = (it->second.hemi() == 0) ? "lh" : "rh";
+        pModel->addSurface(subject, sHemi, "white", it->second);
     }
 
     pBrainView->show();

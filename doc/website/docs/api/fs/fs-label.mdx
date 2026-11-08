@@ -154,11 +154,11 @@ FreeSurfer library: surfaces, curvature, parcellations, labels and an atlas volu
 ````cpp title="src/examples/ex_fs/main.cpp, line 132"
 FsAnnotation aparc("sample", 0, "aparc", subjectsDir.toStdU16String());
 FsColortable& colors = aparc.getColortable();
-QList<FsLabel> regions;
-QList<RowVector4i> regionColors;
+std::vector<FsLabel> regions;
+std::vector<RowVector4i> regionColors;
 aparc.toLabels(white, regions, regionColors);
 int precentral = -1;
-for (int i = 0; i < regions.size(); ++i) {
+for (int i = 0; i < std::ssize(regions); ++i) {
     if (regions[i].name == "precentral-lh") {
         precentral = i;
     }
