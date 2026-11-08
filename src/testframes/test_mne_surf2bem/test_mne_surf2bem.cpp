@@ -23,7 +23,7 @@
 // INCLUDES
 //=============================================================================================================
 
-#include <utils/generics/mne_logger.h>
+#include <utils/logger/log.h>
 #include <mne/mne_bem.h>
 #include <mne/mne_bem_surface.h>
 
@@ -188,7 +188,7 @@ void TestMneSurf2Bem::setupProcess(QProcess& proc)
 
 void TestMneSurf2Bem::initTestCase()
 {
-    qInstallMessageHandler(MNELogger::customLogWriter);
+    UTILSLIB::Log::install_qt_message_handler();
 
     QVERIFY(m_tempDir.isValid());
 

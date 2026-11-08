@@ -30,7 +30,7 @@
 #include <disp3D/model/braintreemodel.h>
 
 #include <math/linalg.h>
-#include <utils/generics/mne_logger.h>
+#include <utils/logger/log.h>
 
 #include <iostream>
 
@@ -74,7 +74,7 @@ int main(int argc, char* argv[])
 #ifdef STATICBUILD
 // Q_INIT_RESOURCE(mne_disp3d);
 #endif
-    qInstallMessageHandler(MNELogger::customLogWriter);
+    UTILSLIB::Log::install_qt_message_handler();
     QApplication app(argc, argv);
 
     // Command Line Parser

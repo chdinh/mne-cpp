@@ -19,7 +19,7 @@
 #include <iostream>
 #include <vector>
 
-#include <utils/generics/mne_logger.h>
+#include <utils/logger/log.h>
 
 #include "mne_rt_server.h"
 
@@ -59,7 +59,7 @@ Q_IMPORT_PLUGIN(FiffSimulator)
  */
 int main(int argc, char* argv[])
 {
-    qInstallMessageHandler(UTILSLIB::MNELogger::customLogWriter);
+    UTILSLIB::Log::install_qt_message_handler();
     QCoreApplication app(argc, argv);
 
     // Command Line Parser

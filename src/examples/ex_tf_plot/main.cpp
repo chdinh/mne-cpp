@@ -19,7 +19,7 @@
 #include <fiff/fiff.h>
 
 #include <dsp/spectrogram.h>
-#include <utils/generics/mne_logger.h>
+#include <utils/logger/log.h>
 
 #include <disp/plots/tfplot.h>
 #include <disp/plots/helpers/figureexporter.h>
@@ -56,7 +56,7 @@ using namespace Eigen;
  */
 int main(int argc, char* argv[])
 {
-    qInstallMessageHandler(MNELogger::customLogWriter);
+    UTILSLIB::Log::install_qt_message_handler();
     QApplication a(argc, argv);
 
     // Command Line Parser

@@ -1,18 +1,24 @@
 //=============================================================================================================
 /**
  * SPDX-License-Identifier: BSD-3-Clause
- * Copyright (c) 2026 MNE-CPP Authors
+ * Copyright (c) 2019-2026 MNE-CPP Authors
  *
  * @file     log.h
- * @author   Christoph Dinh <christoph.dinh@mne-cpp.org>
- * @since    2.5.0
- * @date     November 2026
- * @brief    Library logging facade with a replaceable sink and a capture sink for tests.
+ * @author   Mainak Jas <mainakjas@gmail.com>;
+ *           Ruben Doerfel <doerfelruben@aol.com>;
+ *           Lorenz Esch <lorenz.esch@tu-ilmenau.de>;
+ *           Juan GPC <jgarciaprieto@mgh.harvard.edu>;
+ *           Gabriel Motta <gabrielbenmotta@gmail.com>;
+ *           Johannes Vorwerk <johannes.vorwerk@umit.at>;
+ *           Christoph Dinh <christoph.dinh@mne-cpp.org>
+ * @since    0.1.0
+ * @date     July 2019
+ * @brief    Logging: a std::format facade with a replaceable sink, the console and file writer, and a capture sink for tests.
  *
- * Libraries report through @ref UTILSLIB::Log instead of @c qWarning and friends, so the
- * interface is standard C++ only; messages are formatted as by std::format. By default every message is forwarded to Qt's message
- * handler, where applications format it (for example with @ref UTILSLIB::MNELogger).
- * @ref UTILSLIB::LogCapture swallows and records messages for the lifetime of a scope.
+ * Libraries report through @ref UTILSLIB::Log, whose interface is standard C++ only. By default every
+ * message is forwarded to Qt's message handler, so Qt widgets and QtTest see it too; applications install
+ * @ref UTILSLIB::Log::install_qt_message_handler to print it, results to stdout and diagnostics to stderr,
+ * optionally mirrored to a log file. @ref UTILSLIB::LogCapture records messages for the lifetime of a scope.
  */
 
 #ifndef UTILS_LOG_H
@@ -28,6 +34,7 @@
 // STL INCLUDES
 //=============================================================================================================
 
+#include <filesystem>
 #include <format>
 #include <functional>
 #include <memory>
@@ -48,6 +55,8 @@ namespace UTILSLIB
  * @brief Writes library messages to the current sink; thread-safe.
  *
  * @snippet ex_utils/main.cpp log_usage
+ *
+ * @snippet ex_utils/main.cpp log_file_usage
  */
 class UTILSSHARED_EXPORT Log
 {
@@ -135,7 +144,7 @@ public:
     /**
      * Sets the lowest level that is written; messages below it are dropped before they are formatted.
      *
-     * @param[in] level   The new threshold; Debug, the default, writes everything.
+     * @param[in] level   The new threshold; the default is the MNE_LOG_LEVEL build option.
      *
      * @return The threshold before.
      */
@@ -144,7 +153,11 @@ public:
     /** @return The lowest level that is written. */
     static Level level() noexcept;
 
-    /** @return Whether messages of @p level are written. */
+    /**
+     * @param[in] level   The severity to check.
+     *
+     * @return Whether messages of @p level are written.
+     */
     static bool enabled(Level level) noexcept;
 
     /**
@@ -155,13 +168,35 @@ public:
      * @return The sink that was installed before, empty if messages were forwarded to Qt.
      */
     static Sink set_sink(Sink sink);
+
+    //=========================================================================================================
+    /**
+     * Installs the Qt message handler that prints every Qt message, and so every forwarded Log message,
+     * at or above level(): results to stdout, diagnostics to stderr, with coloured level tags when
+     * built with MNE_LOG_MODE=FORMATTED.
+     */
+    static void install_qt_message_handler();
+
+    /**
+     * Additionally writes every message printed by install_qt_message_handler() to a log file, appended,
+     * one timestamped and level-tagged line per message.
+     *
+     * @param[in] path   The log file; an empty path stops file logging.
+     *
+     * @return Whether the file could be opened for writing.
+     */
+    static bool set_file(const std::filesystem::path& path);
+
+    /** @return The log file, empty if file logging is off. */
+    static std::filesystem::path file();
 };
 
 //=============================================================================================================
 /**
  * @brief Records every message instead of passing it on, while it exists; replaces @c QTest::ignoreMessage.
  *
- * The sink installed before is restored on destruction, so captures nest when destroyed in reverse order.
+ * Records every level; the sink and level before are restored on destruction, so captures nest when
+ * destroyed in reverse order.
  *
  * @snippet ex_utils/main.cpp log_capture_usage
  */
@@ -200,6 +235,7 @@ private:
     struct State;
     std::shared_ptr<State> m_state;
     Log::Sink m_previous;
+    Log::Level m_previousLevel;
 };
 
 } // namespace UTILSLIB

@@ -19,7 +19,7 @@
 #include <fiff/fiff_dir_entry.h>
 #include <fiff/fiff_ch_info.h>
 
-#include <utils/generics/mne_logger.h>
+#include <utils/logger/log.h>
 
 //=============================================================================================================
 // QT INCLUDES
@@ -118,7 +118,7 @@ static int processFile(const QString& name, bool doMagnes, QString& summary)
 
 int main(int argc, char* argv[])
 {
-    qInstallMessageHandler(MNELogger::customLogWriter);
+    UTILSLIB::Log::install_qt_message_handler();
     QCoreApplication app(argc, argv);
     QCoreApplication::setApplicationName("mne_fix_mag_coil_types");
     QCoreApplication::setApplicationVersion(PROGRAM_VERSION);

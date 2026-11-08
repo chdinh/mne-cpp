@@ -16,7 +16,7 @@
 
 #include <fs/fs_surface.h>
 #include <fs/fs_label.h>
-#include <utils/generics/mne_logger.h>
+#include <utils/logger/log.h>
 
 //=============================================================================================================
 // QT INCLUDES
@@ -80,7 +80,7 @@ static VectorXi buildNearestMap(const MatrixX3f& srcSphere, const MatrixX3f& dst
 
 int main(int argc, char* argv[])
 {
-    qInstallMessageHandler(MNELogger::customLogWriter);
+    UTILSLIB::Log::install_qt_message_handler();
     QCoreApplication app(argc, argv);
     QCoreApplication::setApplicationName("mne_morph_labels");
     QCoreApplication::setApplicationVersion(PROGRAM_VERSION);

@@ -23,7 +23,7 @@
 #include <fiff/fiff_raw_data.h>
 #include <fiff/fiff_stream.h>
 
-#include <utils/generics/mne_logger.h>
+#include <utils/logger/log.h>
 #include <utils/string_utils.h>
 
 //=============================================================================================================
@@ -56,7 +56,7 @@ using namespace Eigen;
 
 int main(int argc, char* argv[])
 {
-    qInstallMessageHandler(MNELogger::customLogWriter);
+    UTILSLIB::Log::install_qt_message_handler();
     QCoreApplication a(argc, argv);
     QCoreApplication::setApplicationName("mne_edf2fiff");
     QCoreApplication::setApplicationVersion(PROGRAM_VERSION);

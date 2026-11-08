@@ -17,7 +17,7 @@
 // INCLUDES
 //=============================================================================================================
 
-#include <utils/generics/mne_logger.h>
+#include <utils/logger/log.h>
 
 #include <fwd/compute_fwd/compute_fwd_settings.h>
 #include <fwd/compute_fwd/compute_fwd.h>
@@ -77,7 +77,7 @@ TestMneForwardSolution::TestMneForwardSolution()
 
 void TestMneForwardSolution::initTestCase()
 {
-    qInstallMessageHandler(UTILSLIB::MNELogger::customLogWriter);
+    UTILSLIB::Log::install_qt_message_handler();
 }
 
 //=============================================================================================================

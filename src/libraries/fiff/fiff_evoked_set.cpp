@@ -27,7 +27,7 @@
 
 #include <format>
 
-#include <utils/generics/log.h>
+#include <utils/logger/log.h>
 #include <utils/string_utils.h>
 #include "fiff_events.h"
 #include "fiff_raw_data.h"

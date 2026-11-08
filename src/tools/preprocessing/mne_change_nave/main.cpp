@@ -17,7 +17,7 @@
 #include <fiff/fiff_evoked_set.h>
 #include <fiff/fiff_evoked.h>
 #include <utils/string_utils.h>
-#include <utils/generics/mne_logger.h>
+#include <utils/logger/log.h>
 
 //=============================================================================================================
 // QT INCLUDES
@@ -52,7 +52,7 @@ using namespace UTILSLIB;
 
 int main(int argc, char* argv[])
 {
-    qInstallMessageHandler(MNELogger::customLogWriter);
+    UTILSLIB::Log::install_qt_message_handler();
     QCoreApplication app(argc, argv);
     QCoreApplication::setApplicationName("mne_change_nave");
     QCoreApplication::setApplicationVersion(PROGRAM_VERSION);

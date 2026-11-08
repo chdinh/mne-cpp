@@ -19,7 +19,7 @@
 #include <fiff/fiff_stream.h>
 #include <fiff/fiff_constants.h>
 #include <fs/fs_surface.h>
-#include <utils/generics/mne_logger.h>
+#include <utils/logger/log.h>
 
 //=============================================================================================================
 // QT INCLUDES
@@ -104,7 +104,7 @@ static SparseMatrix<double> buildSmoothingOperator(const MatrixX3i& tris, int nV
 
 int main(int argc, char* argv[])
 {
-    qInstallMessageHandler(MNELogger::customLogWriter);
+    UTILSLIB::Log::install_qt_message_handler();
     QCoreApplication app(argc, argv);
     QCoreApplication::setApplicationName("mne_smooth");
     QCoreApplication::setApplicationVersion(PROGRAM_VERSION);

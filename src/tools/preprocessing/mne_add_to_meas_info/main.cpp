@@ -20,7 +20,7 @@
 
 #include <vector>
 
-#include <utils/generics/mne_logger.h>
+#include <utils/logger/log.h>
 
 //=============================================================================================================
 // QT INCLUDES
@@ -49,7 +49,7 @@ using namespace UTILSLIB;
 
 int main(int argc, char* argv[])
 {
-    qInstallMessageHandler(MNELogger::customLogWriter);
+    UTILSLIB::Log::install_qt_message_handler();
     QCoreApplication app(argc, argv);
     QCoreApplication::setApplicationName("mne_add_to_meas_info");
     QCoreApplication::setApplicationVersion(PROGRAM_VERSION);

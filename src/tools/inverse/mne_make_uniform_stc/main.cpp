@@ -17,7 +17,7 @@
 #include <inv/inv_source_estimate.h>
 #include <mne/mne_source_spaces.h>
 #include <fiff/fiff_stream.h>
-#include <utils/generics/mne_logger.h>
+#include <utils/logger/log.h>
 
 //=============================================================================================================
 // QT INCLUDES
@@ -55,7 +55,7 @@ using namespace Eigen;
 
 int main(int argc, char* argv[])
 {
-    qInstallMessageHandler(MNELogger::customLogWriter);
+    UTILSLIB::Log::install_qt_message_handler();
     QCoreApplication app(argc, argv);
     QCoreApplication::setApplicationName("mne_make_uniform_stc");
     QCoreApplication::setApplicationVersion(PROGRAM_VERSION);

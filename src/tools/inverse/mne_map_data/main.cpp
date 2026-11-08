@@ -30,7 +30,7 @@
 #include <mne/mne_forward_solution.h>
 #include <mne/mne_inverse_operator.h>
 
-#include <utils/generics/mne_logger.h>
+#include <utils/logger/log.h>
 #include <utils/string_utils.h>
 
 //=============================================================================================================
@@ -68,7 +68,7 @@ using namespace Eigen;
 
 int main(int argc, char* argv[])
 {
-    qInstallMessageHandler(MNELogger::customLogWriter);
+    UTILSLIB::Log::install_qt_message_handler();
     QCoreApplication app(argc, argv);
     QCoreApplication::setApplicationName("mne_map_data");
     QCoreApplication::setApplicationVersion(PROGRAM_VERSION);

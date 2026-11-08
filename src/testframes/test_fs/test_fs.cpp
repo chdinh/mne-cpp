@@ -17,7 +17,7 @@
 // INCLUDES
 //=============================================================================================================
 
-#include <utils/generics/mne_logger.h>
+#include <utils/logger/log.h>
 #include <fs/fs_surface.h>
 #include <fs/fs_surfaceset.h>
 #include <fs/fs_annotation.h>
@@ -124,7 +124,7 @@ TestFS::TestFS()
 
 void TestFS::initTestCase()
 {
-    qInstallMessageHandler(UTILSLIB::MNELogger::customLogWriter);
+    UTILSLIB::Log::install_qt_message_handler();
     qInfo() << "TestFS: Starting FreeSurfer library unit tests";
 }
 

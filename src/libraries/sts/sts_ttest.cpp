@@ -28,7 +28,7 @@
 
 #include "sts_ttest.h"
 
-#include <utils/generics/log.h>
+#include <utils/logger/log.h>
 
 #include <cmath>
 #include <algorithm>

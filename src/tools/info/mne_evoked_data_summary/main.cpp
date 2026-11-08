@@ -20,7 +20,7 @@
 #include <fiff/fiff_constants.h>
 #include <utils/string_utils.h>
 
-#include <utils/generics/mne_logger.h>
+#include <utils/logger/log.h>
 
 //=============================================================================================================
 // QT INCLUDES
@@ -97,7 +97,7 @@ static QString coilTypeName(fiff_int_t kind, fiff_int_t coilType)
 
 int main(int argc, char* argv[])
 {
-    qInstallMessageHandler(MNELogger::customLogWriter);
+    UTILSLIB::Log::install_qt_message_handler();
     QCoreApplication app(argc, argv);
     QCoreApplication::setApplicationName("mne_evoked_data_summary");
     QCoreApplication::setApplicationVersion(PROGRAM_VERSION);

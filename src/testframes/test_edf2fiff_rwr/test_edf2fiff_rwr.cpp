@@ -22,7 +22,7 @@
 #include <fiff/fiff_constants.h>
 #include <fiff/fiff_raw_data.h>
 
-#include <utils/generics/mne_logger.h>
+#include <utils/logger/log.h>
 
 //=============================================================================================================
 // QT INCLUDES
@@ -65,7 +65,7 @@ private:
 
 void TestEDF2FIFFRWR::initTestCase()
 {
-    qInstallMessageHandler(UTILSLIB::MNELogger::customLogWriter);
+    UTILSLIB::Log::install_qt_message_handler();
     const QString appDir = QCoreApplication::applicationDirPath();
     m_sEdf = appDir + "/../resources/data/mne-cpp-test-data/EEG/test_reduced.edf";
     QVERIFY(QFileInfo::exists(m_sEdf));

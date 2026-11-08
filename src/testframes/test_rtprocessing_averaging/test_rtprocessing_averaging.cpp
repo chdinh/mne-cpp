@@ -9,7 +9,7 @@
 #include <algorithm>
 #include <cmath>
 
-#include <utils/generics/mne_logger.h>
+#include <utils/logger/log.h>
 
 #include <dsp/rt/rt_averaging.h>
 #include <dsp/rt/rt_noise.h>
@@ -167,7 +167,7 @@ private:
 private slots:
     void initTestCase()
     {
-        qInstallMessageHandler(MNELogger::customLogWriter);
+        UTILSLIB::Log::install_qt_message_handler();
         QString base = QCoreApplication::applicationDirPath() + "/../resources/data/mne-cpp-test-data";
         if (QFile::exists(base + "/MEG/sample/sample_audvis_trunc_raw.fif"))
             m_sDataPath = base;

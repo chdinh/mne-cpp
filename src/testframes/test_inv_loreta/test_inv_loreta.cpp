@@ -16,7 +16,7 @@
 // INCLUDES
 //=============================================================================================================
 
-#include <utils/generics/mne_logger.h>
+#include <utils/logger/log.h>
 
 #include <fiff/fiff.h>
 #include <fiff/fiff_raw_data.h>
@@ -135,7 +135,7 @@ private slots:
 
 void TestInvLoreta::initTestCase()
 {
-    qInstallMessageHandler(MNELogger::customLogWriter);
+    UTILSLIB::Log::install_qt_message_handler();
     m_bDataLoaded = false;
 
     QString base = QCoreApplication::applicationDirPath() + "/../resources/data/mne-cpp-test-data";

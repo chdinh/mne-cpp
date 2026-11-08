@@ -18,7 +18,7 @@
 
 #include <vector>
 #include <fiff/fiff_file.h>
-#include <utils/generics/mne_logger.h>
+#include <utils/logger/log.h>
 
 //=============================================================================================================
 // QT INCLUDES
@@ -167,7 +167,7 @@ static bool readCalibration(const QString& filename, VectorXf& cals)
 
 int main(int argc, char* argv[])
 {
-    qInstallMessageHandler(MNELogger::customLogWriter);
+    UTILSLIB::Log::install_qt_message_handler();
     QCoreApplication app(argc, argv);
     QCoreApplication::setApplicationName("mne_tufts2fiff");
     QCoreApplication::setApplicationVersion(PROGRAM_VERSION);

@@ -19,7 +19,7 @@
 #include <inv/dipole_fit/inv_dipole_fit_settings.h>
 #include <inv/dipole_fit/inv_dipole_fit.h>
 
-#include <utils/generics/mne_logger.h>
+#include <utils/logger/log.h>
 
 #include <mne/mne_bem.h>
 
@@ -85,7 +85,7 @@ int main(int argc, char* argv[])
             break;
         }
     }
-    qInstallMessageHandler(MNELogger::customLogWriter);
+    UTILSLIB::Log::install_qt_message_handler();
     std::unique_ptr<QCoreApplication> app;
     if (guiRequested) {
         app = std::make_unique<QApplication>(argc, argv);

@@ -23,7 +23,7 @@
 #include <fs/fs_annotation.h>
 #include <disp3D/view/brainview.h>
 #include <disp3D/model/braintreemodel.h>
-#include <utils/generics/mne_logger.h>
+#include <utils/logger/log.h>
 
 #include <cmath>
 
@@ -58,7 +58,7 @@ static double imageRmse(const QImage& a, const QImage& b)
 
 int main(int argc, char* argv[])
 {
-    qInstallMessageHandler(MNELogger::customLogWriter);
+    UTILSLIB::Log::install_qt_message_handler();
     QApplication app(argc, argv);
     app.setApplicationName("mne_screenshot_regression");
 

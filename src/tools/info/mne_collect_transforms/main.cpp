@@ -22,7 +22,7 @@
 #include <mri/mri_mgh_io.h>
 #include <mri/mri_vol_data.h>
 
-#include <utils/generics/mne_logger.h>
+#include <utils/logger/log.h>
 
 //=============================================================================================================
 // QT INCLUDES
@@ -74,7 +74,7 @@ static void printTransform(const FiffCoordTrans& t)
 
 int main(int argc, char* argv[])
 {
-    qInstallMessageHandler(MNELogger::customLogWriter);
+    UTILSLIB::Log::install_qt_message_handler();
     QCoreApplication app(argc, argv);
     QCoreApplication::setApplicationName("mne_collect_transforms");
     QCoreApplication::setApplicationVersion(PROGRAM_VERSION);

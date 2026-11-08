@@ -39,7 +39,7 @@
 #include <utils/byte_stream.h>
 
 #include <utils/endian.h>
-#include <utils/generics/log.h>
+#include <utils/logger/log.h>
 #include <utils/string_utils.h>
 
 //=============================================================================================================

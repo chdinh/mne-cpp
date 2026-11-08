@@ -30,7 +30,7 @@
       "decoding",
       "math"
     ],
-    "tokens": 17100,
+    "tokens": 16765,
     "gui_outside_design": []
   },
   "libraries": {
@@ -212,12 +212,11 @@
       ]
     },
     "dsp": {
-      "tokens": 575,
+      "tokens": 487,
       "by_category": {
         "containers": 79,
         "files": 29,
         "global": 140,
-        "logging": 88,
         "objects_signals": 84,
         "other": 3,
         "regex": 3,
@@ -259,10 +258,9 @@
       ]
     },
     "fs": {
-      "tokens": 168,
+      "tokens": 124,
       "by_category": {
         "global": 111,
-        "logging": 44,
         "objects_signals": 1,
         "smart_pointers": 12
       },
@@ -276,11 +274,10 @@
       ]
     },
     "fwd": {
-      "tokens": 228,
+      "tokens": 43,
       "by_category": {
         "files": 9,
         "global": 4,
-        "logging": 185,
         "objects_signals": 6,
         "smart_pointers": 9,
         "strings": 11,
@@ -437,23 +434,23 @@
       ]
     },
     "utils": {
-      "tokens": 531,
+      "tokens": 513,
       "by_category": {
         "containers": 55,
-        "files": 80,
+        "files": 71,
         "global": 16,
         "logging": 62,
         "objects_signals": 15,
         "other": 2,
         "regex": 10,
         "smart_pointers": 12,
-        "strings": 267,
+        "strings": 259,
         "threads": 9,
-        "time": 3
+        "time": 2
       },
-      "public_header_includes": 40,
+      "public_header_includes": 38,
       "q_object": 1,
-      "files": 35,
+      "files": 33,
       "modules": [
         "Core",
         "ZlibPrivate"

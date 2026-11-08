@@ -22,7 +22,7 @@
 #include <inv/inv_source_estimate.h>
 #include <fs/fs_surface.h>
 #include <fs/fs_label.h>
-#include <utils/generics/mne_logger.h>
+#include <utils/logger/log.h>
 #include <utils/string_utils.h>
 
 //=============================================================================================================
@@ -219,7 +219,7 @@ static QImage renderFrame(const FsSurface& surf,
 
 int main(int argc, char* argv[])
 {
-    qInstallMessageHandler(MNELogger::customLogWriter);
+    UTILSLIB::Log::install_qt_message_handler();
     QGuiApplication app(argc, argv);
     QCoreApplication::setApplicationName("mne_make_movie");
     QCoreApplication::setApplicationVersion(PROGRAM_VERSION);

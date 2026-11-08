@@ -23,7 +23,7 @@
 //=============================================================================================================
 
 #include <inv/inv_source_estimate.h>
-#include <utils/generics/mne_logger.h>
+#include <utils/logger/log.h>
 
 //=============================================================================================================
 // QT INCLUDES
@@ -286,7 +286,7 @@ bool TestMneComputeRawInverse::readStc(const QString& path, InvSourceEstimate& s
 
 void TestMneComputeRawInverse::initTestCase()
 {
-    qInstallMessageHandler(MNELogger::customLogWriter);
+    UTILSLIB::Log::install_qt_message_handler();
 
     printf(">>>>>>>>>>>>>>>>>>>>>>>>> mne_compute_raw_inverse Integration Test Init >>>>>>>>>>>>>>>>>>>>>>>>>\n");
 

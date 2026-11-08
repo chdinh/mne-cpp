@@ -16,7 +16,7 @@
 // INCLUDES
 //=============================================================================================================
 
-#include <utils/generics/mne_logger.h>
+#include <utils/logger/log.h>
 #include <inv/hpi/inv_signal_model.h>
 #include <iostream>
 #include <utils/ioutils.h>

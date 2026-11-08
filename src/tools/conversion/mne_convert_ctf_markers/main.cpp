@@ -14,7 +14,7 @@
 // INCLUDES
 //=============================================================================================================
 
-#include <utils/generics/mne_logger.h>
+#include <utils/logger/log.h>
 
 //=============================================================================================================
 // QT INCLUDES
@@ -161,7 +161,7 @@ static QList<CtfMarker> parseCtfMarkers(const QString& filename)
 
 int main(int argc, char* argv[])
 {
-    qInstallMessageHandler(MNELogger::customLogWriter);
+    UTILSLIB::Log::install_qt_message_handler();
     QCoreApplication app(argc, argv);
     QCoreApplication::setApplicationName("mne_convert_ctf_markers");
     QCoreApplication::setApplicationVersion(PROGRAM_VERSION);

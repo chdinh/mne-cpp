@@ -37,7 +37,7 @@
 
 #include <inv/minimum_norm/inv_minimum_norm.h>
 
-#include <utils/generics/mne_logger.h>
+#include <utils/logger/log.h>
 
 //=============================================================================================================
 // QT INCLUDES
@@ -86,7 +86,7 @@ int main(int argc, char* argv[])
 // Q_INIT_RESOURCE(mne_disp3d);
 #endif
 
-    qInstallMessageHandler(MNELogger::customLogWriter);
+    UTILSLIB::Log::install_qt_message_handler();
     QApplication a(argc, argv);
     QCoreApplication::setOrganizationName(QStringLiteral("MNE-CPP"));
     QCoreApplication::setOrganizationDomain(QStringLiteral("mne-cpp.org"));

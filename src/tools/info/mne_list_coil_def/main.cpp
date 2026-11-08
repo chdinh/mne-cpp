@@ -17,7 +17,7 @@
 #include <fwd/fwd_coil_set.h>
 #include <fwd/fwd_coil.h>
 
-#include <utils/generics/mne_logger.h>
+#include <utils/logger/log.h>
 
 //=============================================================================================================
 // QT INCLUDES
@@ -82,7 +82,7 @@ static QString accuracyName(int acc)
 
 int main(int argc, char* argv[])
 {
-    qInstallMessageHandler(MNELogger::customLogWriter);
+    UTILSLIB::Log::install_qt_message_handler();
     QCoreApplication app(argc, argv);
     QCoreApplication::setApplicationName("mne_list_coil_def");
     QCoreApplication::setApplicationVersion(PROGRAM_VERSION);

@@ -21,7 +21,7 @@
 
 #include <Eigen/Dense>
 
-#include <utils/generics/mne_logger.h>
+#include <utils/logger/log.h>
 
 #include <fiff/fiff.h>
 #include <fiff/fiff_stream.h>
@@ -112,7 +112,7 @@ private slots:
 
 void TestFiffIoEvokedInfo::initTestCase()
 {
-    qInstallMessageHandler(MNELogger::customLogWriter);
+    UTILSLIB::Log::install_qt_message_handler();
 
     m_sTestDataPath = QCoreApplication::applicationDirPath() + "/../resources/data/mne-cpp-test-data";
     QVERIFY2(QFile::exists(rawPath()),

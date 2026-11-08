@@ -16,7 +16,7 @@
 // INCLUDES
 //=============================================================================================================
 
-#include <utils/generics/mne_logger.h>
+#include <utils/logger/log.h>
 #include <mne/mne_project_to_surface.h>
 #include <mne/mne_bem.h>
 #include <mne/mne_bem_surface.h>

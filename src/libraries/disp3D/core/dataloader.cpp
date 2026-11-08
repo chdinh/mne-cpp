@@ -30,7 +30,7 @@
 #include <fiff/fiff_stream.h>
 #include <fiff/fiff_dig_point_set.h>
 #include <mne/mne_bem.h>
-#include <utils/generics/log.h>
+#include <utils/logger/log.h>
 #include <utils/string_utils.h>
 #include <fs/fs_surface.h>
 

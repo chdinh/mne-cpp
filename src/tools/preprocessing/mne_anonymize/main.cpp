@@ -21,7 +21,7 @@
 
 #include "mne_anonymize.h"
 #include "apphandler.h"
-#include <utils/generics/mne_logger.h>
+#include <utils/logger/log.h>
 
 //=============================================================================================================
 // EIGEN INCLUDES
@@ -62,7 +62,7 @@ class SettingsControllerCl;
  */
 int main(int argc, char* argv[])
 {
-    qInstallMessageHandler(UTILSLIB::MNELogger::customLogWriter);
+    UTILSLIB::Log::install_qt_message_handler();
 
     MNEANONYMIZE::AppHandler handler;
     const auto qtApp = handler.createApplication(argc, argv);

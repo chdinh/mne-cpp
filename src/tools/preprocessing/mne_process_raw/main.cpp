@@ -30,7 +30,7 @@
 #include "batchprocessor.h"
 
 #include <mne/mne_process_description.h>
-#include <utils/generics/mne_logger.h>
+#include <utils/logger/log.h>
 
 #include <QCoreApplication>
 #include <QCommandLineParser>
@@ -185,7 +185,7 @@ static void printHelp()
  */
 int main(int argc, char* argv[])
 {
-    qInstallMessageHandler(MNELogger::customLogWriter);
+    UTILSLIB::Log::install_qt_message_handler();
     QCoreApplication app(argc, argv);
     QCoreApplication::setApplicationName("mne_process_raw");
     QCoreApplication::setApplicationVersion(PROGRAM_VERSION);

@@ -32,7 +32,7 @@
 #include <disp/plots/helpers/figureexporter.h>
 #include <disp/plots/imagesc.h>
 
-#include <utils/generics/mne_logger.h>
+#include <utils/logger/log.h>
 
 //=============================================================================================================
 // QT INCLUDES
@@ -67,7 +67,7 @@ using namespace Eigen;
  */
 int main(int argc, char* argv[])
 {
-    qInstallMessageHandler(MNELogger::customLogWriter);
+    UTILSLIB::Log::install_qt_message_handler();
     QApplication a(argc, argv);
 
     // Command Line Parser

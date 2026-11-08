@@ -7,15 +7,14 @@
  * @author   Christoph Dinh <christoph.dinh@mne-cpp.org>
  * @since    0.1.0
  * @date     July, 2026
- * @brief    Tests the file logging of MNELogger and the Log facade with its capture sink.
+ * @brief    Tests the console and file writer of Log and its facade with the capture sink.
  */
 
 //=============================================================================================================
 // INCLUDES
 //=============================================================================================================
 
-#include <utils/generics/log.h>
-#include <utils/generics/mne_logger.h>
+#include <utils/logger/log.h>
 #include <utils/string_utils.h>
 
 //=============================================================================================================
@@ -62,7 +61,7 @@ void recordQtMessage(QtMsgType type, const QMessageLogContext&, const QString& m
 /**
  * DECLARE CLASS TestUtilsLogger
  *
- * @brief The TestUtilsLogger class provides tests for MNELogger file output.
+ * @brief The TestUtilsLogger class provides tests for Log.
  *
  */
 class TestUtilsLogger : public QObject
@@ -116,15 +115,17 @@ QString TestUtilsLogger::readLog() const
 void TestUtilsLogger::initTestCase()
 {
     QFile::remove(m_sLogFile);
-    qInstallMessageHandler(MNELogger::customLogWriter);
+    Log::install_qt_message_handler();
+    // The default follows the MNE_LOG_LEVEL build option; these tests need every level.
+    Log::set_level(Log::Level::Debug);
 }
 
 //=============================================================================================================
 
 void TestUtilsLogger::testWritesMessagesToFile()
 {
-    QVERIFY(MNELogger::setLogFile(m_sLogFile));
-    QCOMPARE(MNELogger::logFile(), m_sLogFile);
+    QVERIFY(Log::set_file(m_sLogFile.toStdString()));
+    QCOMPARE(QString::fromStdString(Log::file().string()), m_sLogFile);
 
     qWarning("test-logger-warning");
     qCritical("test-logger-critical");
@@ -144,8 +145,8 @@ void TestUtilsLogger::testWritesMessagesToFile()
 
 void TestUtilsLogger::testDisablingStopsFileOutput()
 {
-    QVERIFY(MNELogger::setLogFile(QString()));
-    QVERIFY(MNELogger::logFile().isEmpty());
+    QVERIFY(Log::set_file({}));
+    QVERIFY(Log::file().empty());
 
     qWarning("test-logger-must-not-appear");
 
@@ -319,8 +320,8 @@ struct std::formatter<Probe> : std::formatter<int>
 
 void TestUtilsLogger::testLogLevelSkipsFormatting()
 {
-    QCOMPARE(Log::level(), Log::Level::Debug);
     LogCapture capture;
+    QCOMPARE(Log::level(), Log::Level::Debug);
     int formatted = 0;
 
     const Log::Level previous = Log::set_level(Log::Level::Warning);
@@ -345,7 +346,7 @@ void TestUtilsLogger::testLogLevelSkipsFormatting()
 
 void TestUtilsLogger::cleanupTestCase()
 {
-    MNELogger::setLogFile(QString());
+    Log::set_file({});
     qInstallMessageHandler(nullptr);
     QFile::remove(m_sLogFile);
 }

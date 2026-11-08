@@ -19,7 +19,7 @@
 #include <fiff/fiff_stream.h>
 #include <fiff/fiff_coord_trans.h>
 #include <fiff/fiff_types.h>
-#include <utils/generics/mne_logger.h>
+#include <utils/logger/log.h>
 
 //=============================================================================================================
 // QT INCLUDES
@@ -90,7 +90,7 @@ static const char* spaceTypeName(int type)
 
 int main(int argc, char* argv[])
 {
-    qInstallMessageHandler(MNELogger::customLogWriter);
+    UTILSLIB::Log::install_qt_message_handler();
     QCoreApplication app(argc, argv);
     QCoreApplication::setApplicationName("mne_list_source_space");
     QCoreApplication::setApplicationVersion(PROGRAM_VERSION);

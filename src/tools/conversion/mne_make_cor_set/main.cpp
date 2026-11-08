@@ -16,7 +16,7 @@
 
 #include <fiff/fiff.h>
 #include <fiff/fiff_file.h>
-#include <utils/generics/mne_logger.h>
+#include <utils/logger/log.h>
 
 //=============================================================================================================
 // QT INCLUDES
@@ -161,7 +161,7 @@ static bool writeMriDescription(const QString& filename,
 
 int main(int argc, char* argv[])
 {
-    qInstallMessageHandler(MNELogger::customLogWriter);
+    UTILSLIB::Log::install_qt_message_handler();
     QCoreApplication app(argc, argv);
     QCoreApplication::setApplicationName("mne_make_cor_set");
     QCoreApplication::setApplicationVersion(PROGRAM_VERSION);

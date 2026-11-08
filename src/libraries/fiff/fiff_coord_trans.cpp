@@ -28,7 +28,7 @@
 #include "fiff_tag.h"
 #include "fiff_dir_node.h"
 
-#include <utils/generics/log.h>
+#include <utils/logger/log.h>
 #include <utils/string_utils.h>
 
 

@@ -16,7 +16,7 @@
 // INCLUDES
 //=============================================================================================================
 
-#include <utils/generics/mne_logger.h>
+#include <utils/logger/log.h>
 #include <fiff/fiff_constants.h>
 #include <fiff/fiff_coord_trans.h>
 #include <fiff/fiff_dig_point.h>
@@ -82,7 +82,7 @@ TestFiffCoordTrans::TestFiffCoordTrans()
 
 void TestFiffCoordTrans::initTestCase()
 {
-    qInstallMessageHandler(UTILSLIB::MNELogger::customLogWriter);
+    UTILSLIB::Log::install_qt_message_handler();
 
     QVERIFY(m_tempDir.isValid());
     const std::string testPath = m_tempDir.filePath("test-trans.fif").toStdString();

@@ -35,7 +35,7 @@
 #include <fiff/fiff_file.h>
 #include <fiff/fiff_constants.h>
 
-#include <utils/generics/log.h>
+#include <utils/logger/log.h>
 
 //=============================================================================================================
 // QT INCLUDES

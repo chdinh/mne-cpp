@@ -24,7 +24,7 @@
 #include <fiff/fiff_named_matrix.h>
 #include <fiff/fiff_types.h>
 
-#include <utils/generics/mne_logger.h>
+#include <utils/logger/log.h>
 
 //=============================================================================================================
 // EIGEN INCLUDES
@@ -62,7 +62,7 @@ using namespace Eigen;
 
 int main(int argc, char* argv[])
 {
-    qInstallMessageHandler(MNELogger::customLogWriter);
+    UTILSLIB::Log::install_qt_message_handler();
     QCoreApplication app(argc, argv);
     QCoreApplication::setApplicationName("mne_label_ssp");
     QCoreApplication::setApplicationVersion(PROGRAM_VERSION);

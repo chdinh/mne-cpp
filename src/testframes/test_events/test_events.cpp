@@ -15,7 +15,7 @@
 // INCLUDES
 //=============================================================================================================
 
-#include <utils/generics/mne_logger.h>
+#include <utils/logger/log.h>
 #include <events/eventmanager.h>
 
 //=============================================================================================================
@@ -114,7 +114,7 @@ TestEvents::TestEvents()
 
 void TestEvents::initTestCase()
 {
-    qInstallMessageHandler(UTILSLIB::MNELogger::customLogWriter);
+    UTILSLIB::Log::install_qt_message_handler();
     qInfo() << "TestEvents: Starting EventManager unit tests";
 }
 

@@ -16,7 +16,7 @@
 // INCLUDES
 //=============================================================================================================
 
-#include <utils/generics/mne_logger.h>
+#include <utils/logger/log.h>
 
 #include <fiff/fiff.h>
 #include <fiff/fiff_dig_point_set.h>
@@ -148,7 +148,7 @@ TestFiffRWR::TestFiffRWR()
 
 void TestFiffRWR::initTestCase()
 {
-    qInstallMessageHandler(UTILSLIB::MNELogger::customLogWriter);
+    UTILSLIB::Log::install_qt_message_handler();
     qDebug() << "dEpsilon" << dEpsilon;
 
     QVERIFY(m_tempDir.isValid());

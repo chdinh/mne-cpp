@@ -18,7 +18,7 @@
 
 #include <vector>
 #include <fiff/fiff_file.h>
-#include <utils/generics/mne_logger.h>
+#include <utils/logger/log.h>
 #include <utils/string_utils.h>
 
 //=============================================================================================================
@@ -179,7 +179,7 @@ static bool readRefData(const QString& filename, MatrixXf& refData, int& nChanne
 
 int main(int argc, char* argv[])
 {
-    qInstallMessageHandler(MNELogger::customLogWriter);
+    UTILSLIB::Log::install_qt_message_handler();
     QCoreApplication app(argc, argv);
     QCoreApplication::setApplicationName("mne_insert_4D_comp");
     QCoreApplication::setApplicationVersion(PROGRAM_VERSION);

@@ -16,7 +16,7 @@
 // INCLUDES
 //=============================================================================================================
 
-#include <utils/generics/mne_logger.h>
+#include <utils/logger/log.h>
 
 #include <fiff/fiff.h>
 #include <fiff/fiff_evoked.h>
@@ -161,7 +161,7 @@ QString TestComputeRawInverse::findDataPath()
 
 void TestComputeRawInverse::initTestCase()
 {
-    qInstallMessageHandler(MNELogger::customLogWriter);
+    UTILSLIB::Log::install_qt_message_handler();
 
     printf(">>>>>>>>>>>>>>>>>>>>>>>>> Compute Raw Inverse Test Init >>>>>>>>>>>>>>>>>>>>>>>>>\n");
 

@@ -25,7 +25,7 @@
 // INCLUDES
 //=============================================================================================================
 
-#include <utils/generics/mne_logger.h>
+#include <utils/logger/log.h>
 
 //=============================================================================================================
 // QT INCLUDES
@@ -102,7 +102,7 @@ TestToolExitCodes::TestToolExitCodes()
 
 void TestToolExitCodes::initTestCase()
 {
-    qInstallMessageHandler(MNELogger::customLogWriter);
+    UTILSLIB::Log::install_qt_message_handler();
 
     // Scoped to a directory that is created and removed per run. Some tools open
     // their input read-write and so leave an empty file behind on failure, which

@@ -53,8 +53,8 @@ option(USE_ONNXRUNTIME "Enable ONNX Runtime backend for the ml library" ON)
 # (they are compiled through their own targets/flags).
 option(MNE_WARNINGS_AS_ERRORS "Treat compiler warnings as errors on MNE-CPP sources" OFF)
 
-set(MNE_LOG_LEVEL "INFO" CACHE STRING "Minimum log level: DEBUG, INFO, WARN, CRIT, FATAL")
-set_property(CACHE MNE_LOG_LEVEL PROPERTY STRINGS DEBUG INFO WARN CRIT FATAL)
+set(MNE_LOG_LEVEL "INFO" CACHE STRING "Default minimum log level: DEBUG, INFO, WARN, CRIT")
+set_property(CACHE MNE_LOG_LEVEL PROPERTY STRINGS DEBUG INFO WARN CRIT)
 
 set(MNE_LOG_MODE "PLAIN" CACHE STRING "Log output mode: PLAIN (raw text), FORMATTED (colored level prefixes)")
 set_property(CACHE MNE_LOG_MODE PROPERTY STRINGS PLAIN FORMATTED)
@@ -90,7 +90,7 @@ if(NO_IPC)
 endif()
 
 # Map MNE_LOG_LEVEL string to numeric compile definition
-# 0=DEBUG, 1=INFO, 2=WARN, 3=CRIT, 4=FATAL
+# 0=DEBUG, 1=INFO, 2=WARN, 3=CRIT, the values of UTILSLIB::Log::Level
 if(MNE_LOG_LEVEL STREQUAL "DEBUG")
     add_compile_definitions(MNE_LOG_LEVEL=0)
 elseif(MNE_LOG_LEVEL STREQUAL "INFO")
@@ -99,8 +99,6 @@ elseif(MNE_LOG_LEVEL STREQUAL "WARN")
     add_compile_definitions(MNE_LOG_LEVEL=2)
 elseif(MNE_LOG_LEVEL STREQUAL "CRIT")
     add_compile_definitions(MNE_LOG_LEVEL=3)
-elseif(MNE_LOG_LEVEL STREQUAL "FATAL")
-    add_compile_definitions(MNE_LOG_LEVEL=4)
 else()
     message(WARNING "Unknown MNE_LOG_LEVEL '${MNE_LOG_LEVEL}', defaulting to INFO")
     add_compile_definitions(MNE_LOG_LEVEL=1)

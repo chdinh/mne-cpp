@@ -34,7 +34,7 @@
 #include <utils/byte_stream.h>
 #include <utils/string_utils.h>
 
-#include <utils/generics/log.h>
+#include <utils/logger/log.h>
 
 //=============================================================================================================
 // STL INCLUDES

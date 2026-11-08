@@ -22,7 +22,7 @@
 #include <fiff/fiff_info.h>
 #include <fiff/fiff_ch_info.h>
 #include <fiff/fiff_types.h>
-#include <utils/generics/mne_logger.h>
+#include <utils/logger/log.h>
 #include <utils/string_utils.h>
 
 //=============================================================================================================
@@ -368,7 +368,7 @@ static bool readSqdData(const QString& sqdPath, const KitDatasetInfo& info, Matr
 
 int main(int argc, char* argv[])
 {
-    qInstallMessageHandler(MNELogger::customLogWriter);
+    UTILSLIB::Log::install_qt_message_handler();
     QCoreApplication app(argc, argv);
     QCoreApplication::setApplicationName("mne_kit2fiff");
     QCoreApplication::setApplicationVersion(PROGRAM_VERSION);

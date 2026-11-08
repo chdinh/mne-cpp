@@ -15,7 +15,7 @@
 //=============================================================================================================
 
 #include <math/sphere.h>
-#include <utils/generics/mne_logger.h>
+#include <utils/logger/log.h>
 
 //=============================================================================================================
 // QT INCLUDES
@@ -100,7 +100,7 @@ TestSphere::TestSphere()
 
 void TestSphere::initTestCase()
 {
-    qInstallMessageHandler(UTILSLIB::MNELogger::customLogWriter);
+    UTILSLIB::Log::install_qt_message_handler();
 }
 
 //=============================================================================================================

@@ -26,7 +26,7 @@
 #include <mna/mna_recording.h>
 #include <mna/mna_file_ref.h>
 #include <mna/mna_types.h>
-#include <utils/generics/mne_logger.h>
+#include <utils/logger/log.h>
 
 //=============================================================================================================
 // QT INCLUDES
@@ -453,7 +453,7 @@ static void printUsage(QTextStream& out)
 
 int main(int argc, char* argv[])
 {
-    qInstallMessageHandler(MNELogger::customLogWriter);
+    UTILSLIB::Log::install_qt_message_handler();
     QCoreApplication app(argc, argv);
     app.setApplicationName(QStringLiteral("mne_mna_bids_converter"));
     app.setApplicationVersion(QStringLiteral(MNE_CPP_VERSION));

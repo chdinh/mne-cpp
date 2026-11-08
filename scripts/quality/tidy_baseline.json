@@ -1541,7 +1541,7 @@
     "src/libraries/utils/generics/circularbuffer.h": {
       "clang-analyzer-core.uninitialized.Assign": 1
     },
-    "src/libraries/utils/generics/mne_logger.cpp": {
+    "src/libraries/utils/logger/mne_logger.cpp": {
       "clang-analyzer-deadcode.DeadStores": 1
     },
     "src/libraries/utils/layoutloader.cpp": {

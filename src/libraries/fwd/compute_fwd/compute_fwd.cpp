@@ -21,7 +21,7 @@
 
 #include <fiff/fiff_stream.h>
 #include <fiff/fiff_info.h>
-#include <utils/generics/log.h>
+#include <utils/logger/log.h>
 #include <utils/string_utils.h>
 
 //=============================================================================================================

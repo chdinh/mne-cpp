@@ -21,8 +21,7 @@
 #include <utils/byte_stream.h>
 #include <utils/generics/circularbuffer.h>
 #include <utils/generics/commandpattern.h>
-#include <utils/generics/log.h>
-#include <utils/generics/mne_logger.h>
+#include <utils/logger/log.h>
 #include <utils/generics/observerpattern.h>
 #include <utils/ioutils.h>
 #include <utils/layoutloader.h>
@@ -149,14 +148,14 @@ int main(int argc, char* argv[])
     QTemporaryDir dir;
     bool ok = true;
 
-    //! [mne_logger_usage]
-    qInstallMessageHandler(MNELogger::customLogWriter); // coloured console output
-    MNELogger::setLogFile(dir.filePath("example.log")); // and a plain-text copy
-    qInfo() << "logging to" << MNELogger::logFile();
-    //! [mne_logger_usage]
-    MNELogger::setLogFile(QString());
+    //! [log_file_usage]
+    UTILSLIB::Log::install_qt_message_handler();                                                // console output
+    UTILSLIB::Log::set_file(UTILSLIB::pathFromUtf8(dir.filePath("example.log").toStdString())); // and a plain-text copy
+    Log::info("logging to {}", UTILSLIB::utf8FromPath(Log::file()));
+    //! [log_file_usage]
+    Log::set_file({});
     QFile log(dir.filePath("example.log"));
-    ok &= expect(log.open(QIODevice::ReadOnly) && log.readAll().contains("logging to"), "MNELogger wrote the message to the log file");
+    ok &= expect(log.open(QIODevice::ReadOnly) && log.readAll().contains("logging to"), "Log wrote the message to the log file");
 
     //! [log_usage]
     Log::warning("channel {} is flat", "MEG 0113"); // formatted as by std::format, then passed to Qt's handler

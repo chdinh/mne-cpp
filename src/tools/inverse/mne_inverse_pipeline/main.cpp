@@ -24,7 +24,7 @@
 #include <mna/mna_graph_executor.h>
 #include <mna/mna_op_registry.h>
 
-#include <utils/generics/mne_logger.h>
+#include <utils/logger/log.h>
 
 //=============================================================================================================
 // QT INCLUDES
@@ -53,7 +53,7 @@ int main(int argc, char* argv[])
     QCoreApplication::setApplicationName(QStringLiteral("mne_inverse_pipeline"));
     QCoreApplication::setApplicationVersion(QStringLiteral(PROGRAM_VERSION));
 
-    qInstallMessageHandler(MNELogger::customLogWriter);
+    UTILSLIB::Log::install_qt_message_handler();
 
     //
     // Command-line parsing

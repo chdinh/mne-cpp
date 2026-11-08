@@ -24,7 +24,7 @@
 #include <fiff/fiff.h>
 
 #include <dsp/filterkernel.h>
-#include <utils/generics/mne_logger.h>
+#include <utils/logger/log.h>
 
 #include <dsp/rt/rt_filter.h>
 
@@ -60,7 +60,7 @@ using namespace Eigen;
  */
 int main(int argc, char* argv[])
 {
-    qInstallMessageHandler(MNELogger::customLogWriter);
+    UTILSLIB::Log::install_qt_message_handler();
     QCoreApplication a(argc, argv);
 
     // Command Line Parser

@@ -21,7 +21,7 @@
 #include <fiff/fiff_constants.h>
 #include <fiff/fiff_dir_node.h>
 
-#include <utils/generics/mne_logger.h>
+#include <utils/logger/log.h>
 
 //=============================================================================================================
 // QT INCLUDES
@@ -58,7 +58,7 @@ using namespace Eigen;
 
 int main(int argc, char* argv[])
 {
-    qInstallMessageHandler(MNELogger::customLogWriter);
+    UTILSLIB::Log::install_qt_message_handler();
     QCoreApplication app(argc, argv);
     QCoreApplication::setApplicationName("mne_sensor_locations");
     QCoreApplication::setApplicationVersion(PROGRAM_VERSION);

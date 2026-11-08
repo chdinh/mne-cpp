@@ -30,7 +30,7 @@
 #include <vector>
 #include <utility>
 
-#include <utils/generics/log.h>
+#include <utils/logger/log.h>
 #include <utils/string_utils.h>
 #include "fiff_stream.h"
 #include "fiff_raw_data.h"

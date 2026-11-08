@@ -16,7 +16,7 @@
 
 #include <fiff/fiff.h>
 #include <fiff/fiff_ctf_comp.h>
-#include <utils/generics/mne_logger.h>
+#include <utils/logger/log.h>
 
 //=============================================================================================================
 // QT INCLUDES
@@ -118,7 +118,7 @@ static bool readAsciiMatrix(const QString& filename,
 
 int main(int argc, char* argv[])
 {
-    qInstallMessageHandler(MNELogger::customLogWriter);
+    UTILSLIB::Log::install_qt_message_handler();
     QCoreApplication app(argc, argv);
     QCoreApplication::setApplicationName("mne_create_comp_data");
     QCoreApplication::setApplicationVersion(PROGRAM_VERSION);

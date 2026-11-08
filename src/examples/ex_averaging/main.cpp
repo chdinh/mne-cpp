@@ -26,7 +26,7 @@
 #include <mne/mne.h>
 #include <mne/mne_epoch_data_list.h>
 
-#include <utils/generics/mne_logger.h>
+#include <utils/logger/log.h>
 
 #include <disp/plots/helpers/figureexporter.h>
 #include <disp/plots/lineplot.h>
@@ -68,7 +68,7 @@ int main(int argc, char* argv[])
 
 #endif
 
-    qInstallMessageHandler(MNELogger::customLogWriter);
+    UTILSLIB::Log::install_qt_message_handler();
     QApplication a(argc, argv);
 
     // Command Line Parser

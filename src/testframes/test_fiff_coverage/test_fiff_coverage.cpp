@@ -27,7 +27,7 @@
 #include <fiff/fiff_named_matrix.h>
 #include <fiff/fiff_ctf_comp.h>
 #include <fiff/fiff_cov.h>
-#include <utils/generics/mne_logger.h>
+#include <utils/logger/log.h>
 
 //=============================================================================================================
 // QT INCLUDES
@@ -131,7 +131,7 @@ private:
 
 void TestFiffCoverage::initTestCase()
 {
-    qInstallMessageHandler(MNELogger::customLogWriter);
+    UTILSLIB::Log::install_qt_message_handler();
     m_sTestDataPath = QCoreApplication::applicationDirPath() + "/../resources/data/mne-cpp-test-data";
     QVERIFY2(QFile::exists(rawPath()),
              qPrintable(QString("Test data not found: %1").arg(rawPath())));

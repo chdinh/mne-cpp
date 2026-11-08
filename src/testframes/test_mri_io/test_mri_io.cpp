@@ -23,7 +23,7 @@
 // INCLUDES
 //=============================================================================================================
 
-#include <utils/generics/mne_logger.h>
+#include <utils/logger/log.h>
 
 #include <mri/mri_types.h>
 #include <mri/mri_vol_data.h>
@@ -252,7 +252,7 @@ QString TestMriIO::findSubjectsDir()
 
 void TestMriIO::initTestCase()
 {
-    qInstallMessageHandler(MNELogger::customLogWriter);
+    UTILSLIB::Log::install_qt_message_handler();
 
     QVERIFY(m_tempDir.isValid());
 

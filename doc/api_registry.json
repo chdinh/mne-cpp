@@ -1506,7 +1506,7 @@
       ],
       "status": "done",
       "skigen_candidate": false,
-      "notes": "CMNE (Dinh et al. 2021) \u2014 MNE-CPP original; deep-learning-enhanced inverse",
+      "notes": "CMNE (Dinh et al. 2021) — MNE-CPP original; deep-learning-enhanced inverse",
       "documented": true,
       "sidebar_position": 2,
       "guide": null,
@@ -2551,7 +2551,7 @@
       "example_mode": "run",
       "status": "done",
       "skigen_candidate": false,
-      "notes": "SPHARA \u2014 MNE-CPP original; surface harmonics for MEG",
+      "notes": "SPHARA — MNE-CPP original; surface harmonics for MEG",
       "documented": true,
       "sidebar_position": 26,
       "guide": null,
@@ -2822,7 +2822,7 @@
       "example_mode": "run",
       "status": "done",
       "skigen_candidate": false,
-      "notes": "ICA label classification \u2014 neuroscience-specific, stays in decoding",
+      "notes": "ICA label classification — neuroscience-specific, stays in decoding",
       "documented": true,
       "sidebar_position": 4,
       "guide": null,
@@ -2962,7 +2962,7 @@
       "status": "done",
       "skigen_candidate": true,
       "skigen_target": "Skigen::Covariance (new module needed)",
-      "notes": "Ledoit-Wolf, OAS shrinkage, PCA cov, Factor Analysis, auto-select via cross-validation \u2014 all reimplemented from sklearn; core algorithms should move to skigen",
+      "notes": "Ledoit-Wolf, OAS shrinkage, PCA cov, Factor Analysis, auto-select via cross-validation — all reimplemented from sklearn; core algorithms should move to skigen",
       "documented": true,
       "sidebar_position": 1,
       "guide": null,
@@ -2985,7 +2985,7 @@
       "example_mode": "run",
       "status": "done",
       "skigen_candidate": false,
-      "notes": "Cluster permutation testing \u2014 neuroscience-specific statistical method",
+      "notes": "Cluster permutation testing — neuroscience-specific statistical method",
       "documented": true,
       "sidebar_position": 2,
       "guide": null,
@@ -8182,31 +8182,9 @@
       "python_url": null
     },
     {
-      "name": "MNELogger",
-      "module": "utils",
-      "header": "utils/generics/mne_logger.h",
-      "origin": "mne-c + custom",
-      "mne_c_tool": null,
-      "mne_python": null,
-      "sklearn": null,
-      "test": null,
-      "example": "ex_utils",
-      "example_snippet": [
-        "ex_utils/main.cpp#mne_logger_usage"
-      ],
-      "example_mode": "run",
-      "status": "documented",
-      "skigen_candidate": false,
-      "documented": true,
-      "sidebar_position": 30,
-      "guide": null,
-      "python_equiv": null,
-      "python_url": null
-    },
-    {
       "name": "Log",
       "module": "utils",
-      "header": "utils/generics/log.h",
+      "header": "utils/logger/log.h",
       "origin": "mne-c + custom",
       "mne_c_tool": null,
       "mne_python": null,
@@ -8214,7 +8192,8 @@
       "test": "test_utils_logger",
       "example": "ex_utils",
       "example_snippet": [
-        "ex_utils/main.cpp#log_usage"
+        "ex_utils/main.cpp#log_usage",
+        "ex_utils/main.cpp#log_file_usage"
       ],
       "example_mode": "run",
       "status": "documented",
@@ -8228,7 +8207,7 @@
     {
       "name": "LogCapture",
       "module": "utils",
-      "header": "utils/generics/log.h",
+      "header": "utils/logger/log.h",
       "origin": "mne-c + custom",
       "mne_c_tool": null,
       "mne_python": null,
@@ -13288,7 +13267,7 @@
         "python": "mne.channels.DigMontage",
         "status": "partial",
         "mne_cpp": "FIFFLIB::FiffDigPointSet",
-        "note": "no channel-name\u2192position montage API",
+        "note": "no channel-name→position montage API",
         "test": "test_fiff_dig_point_python"
       },
       {
@@ -13373,7 +13352,7 @@
         "python": "mne.channels.make_dig_montage",
         "status": "partial",
         "mne_cpp": "FiffDigPointSet(std::vector<FiffDigPoint>)",
-        "note": "no name\u2192position mapping",
+        "note": "no name→position mapping",
         "test": "test_fiff_dig_point_python"
       },
       {
@@ -13674,7 +13653,7 @@
         "python": "mne.decoding.LinearModel",
         "status": "missing",
         "mne_cpp": "",
-        "note": "no coef\u2192patterns (Haufe) wrapper"
+        "note": "no coef→patterns (Haufe) wrapper"
       },
       {
         "python": "mne.decoding.PSDEstimator",
@@ -14041,7 +14020,7 @@
         "python": "mne.inverse_sparse.make_stc_from_dipoles",
         "status": "missing",
         "mne_cpp": "",
-        "note": "no dipole-list\u2192STC conversion"
+        "note": "no dipole-list→STC conversion"
       },
       {
         "python": "mne.inverse_sparse.mixed_norm",
@@ -14089,7 +14068,7 @@
         "python": "mne.io.get_channel_type_constants",
         "status": "partial",
         "mne_cpp": "FIFFV_MEG_CH",
-        "note": "macros only; no name\u2192constants map",
+        "note": "macros only; no name→constants map",
         "test": "test_fiff_core_python"
       },
       {
@@ -14500,7 +14479,7 @@
         "python": "mne.minimum_norm.compute_source_psd",
         "status": "partial",
         "mne_cpp": "INVLIB::computeSourcePsd",
-        "note": "takes an STC; no raw\u2192inverse\u2192PSD pipeline",
+        "note": "takes an STC; no raw→inverse→PSD pipeline",
         "test": "test_inv_convenience"
       },
       {
@@ -14651,7 +14630,7 @@
         "python": "mne.pick_types",
         "status": "partial",
         "mne_cpp": "FiffInfoBase::pick_types",
-        "note": "only meg/eeg/stim flags; no eog/ecg/seeg\u2026",
+        "note": "only meg/eeg/stim flags; no eog/ecg/seeg…",
         "test": "test_fiff_info"
       },
       {

@@ -42,7 +42,7 @@
 #include <inv/minimum_norm/inv_minimum_norm.h>
 
 #include <utils/ioutils.h>
-#include <utils/generics/mne_logger.h>
+#include <utils/logger/log.h>
 #include <fiff/fiff_events.h>
 
 #include <disp/viewers/connectivitysettingsview.h>
@@ -97,7 +97,7 @@ int main(int argc, char* argv[])
 #ifdef STATICBUILD
 // Q_INIT_RESOURCE(mne_disp3d);
 #endif
-    qInstallMessageHandler(MNELogger::customLogWriter);
+    UTILSLIB::Log::install_qt_message_handler();
     QApplication a(argc, argv);
     QApplication::addLibraryPath(QApplication::applicationDirPath() + "/../lib");
 

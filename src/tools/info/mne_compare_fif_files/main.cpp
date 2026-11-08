@@ -18,7 +18,7 @@
 #include <fiff/fiff_tag.h>
 #include <fiff/fiff_dir_node.h>
 #include <fiff/fiff_constants.h>
-#include <utils/generics/mne_logger.h>
+#include <utils/logger/log.h>
 
 //=============================================================================================================
 // QT INCLUDES
@@ -90,7 +90,7 @@ static QString tagName(int kind)
 
 int main(int argc, char* argv[])
 {
-    qInstallMessageHandler(MNELogger::customLogWriter);
+    UTILSLIB::Log::install_qt_message_handler();
     QCoreApplication app(argc, argv);
     QCoreApplication::setApplicationName("mne_compare_fif_files");
     QCoreApplication::setApplicationVersion(PROGRAM_VERSION);

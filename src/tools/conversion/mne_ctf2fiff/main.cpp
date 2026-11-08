@@ -21,7 +21,7 @@
 #include <fiff/fiff_info.h>
 #include <fiff/fiff_ch_info.h>
 #include <fiff/fiff_types.h>
-#include <utils/generics/mne_logger.h>
+#include <utils/logger/log.h>
 #include <utils/string_utils.h>
 
 //=============================================================================================================
@@ -371,7 +371,7 @@ static void mapCtfToFiff(const CtfSensorInfo& sen, FiffChInfo& ch)
 
 int main(int argc, char* argv[])
 {
-    qInstallMessageHandler(MNELogger::customLogWriter);
+    UTILSLIB::Log::install_qt_message_handler();
     QCoreApplication app(argc, argv);
     QCoreApplication::setApplicationName("mne_ctf2fiff");
     QCoreApplication::setApplicationVersion(PROGRAM_VERSION);

@@ -17,7 +17,7 @@
 // INCLUDES
 //=============================================================================================================
 
-#include <utils/generics/mne_logger.h>
+#include <utils/logger/log.h>
 
 #include "../../tools/preprocessing/mne_anonymize/fiffanonymizer.h"
 #include "../../tools/preprocessing/mne_anonymize/settingscontrollercl.h"
@@ -144,7 +144,7 @@ TestMneAnonymize::TestMneAnonymize()
 
 void TestMneAnonymize::initTestCase()
 {
-    qInstallMessageHandler(UTILSLIB::MNELogger::customLogWriter);
+    UTILSLIB::Log::install_qt_message_handler();
 }
 
 //=============================================================================================================

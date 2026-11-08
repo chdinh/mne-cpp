@@ -8,7 +8,7 @@
  * @since    2.0.0
  * @date     March, 2026
  * @brief    Tests for Observer/Subject pattern, CircularBuffer edge cases,
- *           and MNELogger — the generic utility design patterns in utils.
+ *           — the generic utility design patterns in utils.
  */
 
 //=============================================================================================================
@@ -17,7 +17,7 @@
 
 #include <utils/generics/observerpattern.h>
 #include <utils/generics/circularbuffer.h>
-#include <utils/generics/mne_logger.h>
+#include <utils/logger/log.h>
 
 //=============================================================================================================
 // QT INCLUDES
@@ -75,7 +75,7 @@ public:
 
 //=============================================================================================================
 /**
- * @brief Tests for Observer/Subject pattern, CircularBuffer, and MNELogger.
+ * @brief Tests for Observer/Subject pattern and CircularBuffer.
  */
 class TestUtilsObserverPattern : public QObject
 {
@@ -97,8 +97,6 @@ private slots:
     void testCircularBufferEigenMatrix();
     void testCircularBufferFillAndDrain();
 
-    // ── MNELogger ─────────────────────────────────────────────
-
     void cleanupTestCase();
 };
 
@@ -106,7 +104,7 @@ private slots:
 
 void TestUtilsObserverPattern::initTestCase()
 {
-    qInstallMessageHandler(UTILSLIB::MNELogger::customLogWriter);
+    UTILSLIB::Log::install_qt_message_handler();
 }
 
 //=============================================================================================================
@@ -304,10 +302,6 @@ void TestUtilsObserverPattern::testCircularBufferFillAndDrain()
     QVERIFY(buffer.pop(val));
     QCOMPARE(val, 999);
 }
-
-//=============================================================================================================
-// MNELogger
-//=============================================================================================================
 
 //=============================================================================================================
 

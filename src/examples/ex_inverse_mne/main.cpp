@@ -31,7 +31,7 @@
 #include <inv/inv_source_estimate.h>
 #include <inv/minimum_norm/inv_minimum_norm.h>
 
-#include <utils/generics/mne_logger.h>
+#include <utils/logger/log.h>
 
 #include <disp/plots/helpers/figureexporter.h>
 #include <disp/plots/lineplot.h>
@@ -70,7 +70,7 @@ using namespace UTILSLIB;
  */
 int main(int argc, char* argv[])
 {
-    qInstallMessageHandler(MNELogger::customLogWriter);
+    UTILSLIB::Log::install_qt_message_handler();
     QApplication app(argc, argv);
 
     // Command Line Parser

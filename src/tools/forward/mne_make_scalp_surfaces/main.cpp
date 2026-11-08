@@ -18,7 +18,7 @@
 #include <mne/mne_bem_surface.h>
 #include <fiff/fiff_stream.h>
 #include <fiff/fiff_types.h>
-#include <utils/generics/mne_logger.h>
+#include <utils/logger/log.h>
 
 //=============================================================================================================
 // QT INCLUDES
@@ -58,7 +58,7 @@ using namespace Eigen;
 
 int main(int argc, char* argv[])
 {
-    qInstallMessageHandler(MNELogger::customLogWriter);
+    UTILSLIB::Log::install_qt_message_handler();
     QCoreApplication app(argc, argv);
     QCoreApplication::setApplicationName("mne_make_scalp_surfaces");
     QCoreApplication::setApplicationVersion(PROGRAM_VERSION);

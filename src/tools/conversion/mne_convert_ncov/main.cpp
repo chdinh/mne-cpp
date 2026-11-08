@@ -18,7 +18,7 @@
 #include <fiff/fiff_cov.h>
 #include <fiff/fiff_info.h>
 #include <fiff/fiff_raw_data.h>
-#include <utils/generics/mne_logger.h>
+#include <utils/logger/log.h>
 #include <utils/string_utils.h>
 
 //=============================================================================================================
@@ -58,7 +58,7 @@ using namespace Eigen;
 
 int main(int argc, char* argv[])
 {
-    qInstallMessageHandler(MNELogger::customLogWriter);
+    UTILSLIB::Log::install_qt_message_handler();
     QCoreApplication app(argc, argv);
     QCoreApplication::setApplicationName("mne_convert_ncov");
     QCoreApplication::setApplicationVersion(PROGRAM_VERSION);
