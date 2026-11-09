@@ -119,7 +119,7 @@ TFplot tfplot(dataSpectrum, raw.info.sfreq, 0, 100, ColorMaps::Jet, times(0, 0))
 Sensor- or source-level functional connectivity of averaged MEG/EEG data with a selectable metric, shown as a 3D network.
 
 ````cpp title="src/examples/ex_connectivity/connectivitysettingsmanager.h, line 114"
-TFplot::SPtr m_pTfPlot;
+std::shared_ptr<TFplot> m_pTfPlot;
 Eigen::MatrixXd m_matEvoked;
 Eigen::MatrixXd m_matEvokedSource;
 MNELIB::MNEEpochDataList epochs;

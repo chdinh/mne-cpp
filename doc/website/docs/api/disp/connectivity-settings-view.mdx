@@ -174,18 +174,18 @@ Clears the view.
 
 Sensor- or source-level functional connectivity of averaged MEG/EEG data with a selectable metric, shown as a 3D network.
 
-````cpp title="src/examples/ex_connectivity/main.cpp, line 385"
+````cpp title="src/examples/ex_connectivity/main.cpp, line 386"
 // Create ConnectivitySettingsView as standalone widget
-QSharedPointer<ConnectivitySettingsView> pConnSettingsView = QSharedPointer<ConnectivitySettingsView>::create("EX_CONNECTIVITY");
+std::shared_ptr<ConnectivitySettingsView> pConnSettingsView = std::make_shared<ConnectivitySettingsView>("EX_CONNECTIVITY");
 ````
 
 ### [ex_connectivity_comparison](../../examples/connectivity/ex_connectivity_comparison.mdx)
 
 Compare connectivity metrics side by side on the same averaged sensor- or source-level data.
 
-````cpp title="src/examples/ex_connectivity_comparison/main.cpp, line 381"
+````cpp title="src/examples/ex_connectivity_comparison/main.cpp, line 382"
 // Create ConnectivitySettingsView as standalone widget
-QSharedPointer<ConnectivitySettingsView> pConnSettingsView = QSharedPointer<ConnectivitySettingsView>::create("EX_CONNECTIVITY_COMP");
+std::shared_ptr<ConnectivitySettingsView> pConnSettingsView = std::make_shared<ConnectivitySettingsView>("EX_CONNECTIVITY_COMP");
 pConnSettingsView->setNumberTrials(iNumTrials);
 pConnSettingsView->setFrequencyBand(dFreqMin, dFreqMax);
 ````

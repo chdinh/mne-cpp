@@ -43,7 +43,7 @@ Constructs a [`ChannelSelectionView`](/docs/api/disp/channel-selection-view) whi
 - **parent** : *QWidget **
   pointer to parent widget; If parent is 0, the new [`ChannelSelectionView`](/docs/api/disp/channel-selection-view) becomes a window. If parent is another widget, [`ChannelSelectionView`](/docs/api/disp/channel-selection-view) becomes a child window inside parent. [`ChannelSelectionView`](/docs/api/disp/channel-selection-view) is deleted when its parent is deleted.
 
-- **pChannelInfoModel** : *QSharedPointer&lt;[ChannelInfoModel](/docs/api/disp/channel-info-model)&gt;*
+- **pChannelInfoModel** : *std::shared_ptr&lt; [ChannelInfoModel](/docs/api/disp/channel-info-model) &gt;*
   pointer to the channel info model.
 
 - **f** : *Qt::WindowType*
@@ -78,7 +78,7 @@ Highlight channels This function highlights channels which were selected outside
 
 **Parameters:**
 
-- **channelIndexList** : *QModelIndexList*
+- **channelIndexList** : *const QModelIndexList &*
   channels which are be to set as selected.
 
 ---
@@ -89,7 +89,7 @@ Select channels This function selects channels which were selected outside this 
 
 **Parameters:**
 
-- **channelList** : *QStringList*
+- **channelList** : *const QStringList &*
   channels which are be to set as selected.
 
 ---
@@ -169,7 +169,7 @@ Sets the current layout file.
 
 **Parameters:**
 
-- **currentLayoutFile** : *QString*
+- **currentLayoutFile** : *const QString &*
   the current layout file.
 
 ---
