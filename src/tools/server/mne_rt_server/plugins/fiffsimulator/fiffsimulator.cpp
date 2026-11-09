@@ -231,7 +231,7 @@ void FiffSimulator::connectCommandManager()
 
 ConnectorID FiffSimulator::getConnectorID() const
 {
-    return _FIFFSIMULATOR;
+    return FIFF_SIMULATOR_CONNECTOR;
 }
 
 //=============================================================================================================

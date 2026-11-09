@@ -60,6 +60,10 @@ aliases; replace the old spelling as below.
   time in UTC.
 - `Subject::detach` of an observer that is not attached no longer crashes, and
   observers may detach themselves while they are notified.
+- `mne_rt_server` no longer aborts in debug builds when a client requests the
+  measurement info: the connector interface `RTSERVER::IConnector` lives in the
+  new `rtserver_connector` library, so the server and its plugins share one
+  type. Its ids are `FIFF_SIMULATOR_CONNECTOR` and `DEFAULT_CONNECTOR`.
 - `FiffTag::toInt`, `toJulian`, `toIntMatrix` and `toFloatMatrix` are no longer
   inline.
 - `fiff/fiff.h`, `connectivity/connectivity.h` and `mne/mne.h` are umbrella

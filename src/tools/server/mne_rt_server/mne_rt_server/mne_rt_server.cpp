@@ -18,7 +18,7 @@
 
 #include "mne_rt_server.h"
 
-#include "IConnector.h"
+#include <rtserver_connector/iconnector.h>
 
 #include <stdio.h>
 #include <stdlib.h>

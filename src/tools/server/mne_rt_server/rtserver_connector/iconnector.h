@@ -3,21 +3,26 @@
  * SPDX-License-Identifier: BSD-3-Clause
  * Copyright (c) 2012-2026 MNE-CPP Authors
  *
- * @file     IConnector.h
+ * @file     iconnector.h
  * @author   Christoph Dinh <christoph.dinh@mne-cpp.org>;
  *           Lorenz Esch <lorenz.esch@tu-ilmenau.de>;
  *           Matti Hamalainen <msh@nmr.mgh.harvard.edu>
  * @since    0.1.0
  * @date     July, 2012
- * @brief    The connector interface
+ * @brief    Interface of the mne_rt_server connector plugins.
+ *
+ * It lives in its own shared library, linked by the server and by every plugin, so all of them share one
+ * IConnector type and meta-object; the server connects to its signals and slots by member pointer.
  */
 
-#ifndef ICONNECTOR_H
-#define ICONNECTOR_H
+#ifndef RTSERVER_ICONNECTOR_H
+#define RTSERVER_ICONNECTOR_H
 
 //=============================================================================================================
 // INCLUDES
 //=============================================================================================================
+
+#include "rtserver_connector_global.h"
 
 #include <fiff/fiff_info.h>
 #include <com/rt_command/command_manager.h>
@@ -51,12 +56,12 @@ namespace RTSERVER
 
 //=========================================================================================================
 /**
- * Connector id enumeration. ToDo: add here IDs when creating a new connector
+ * Identifies a connector plugin; every new connector adds its id here.
  */
 enum ConnectorID
 {
-    _FIFFSIMULATOR = 1, /**< Connector id of the FIFF file simulator. */
-    _default = -1       /**< Default connector id. */
+    FIFF_SIMULATOR_CONNECTOR = 1, /**< The FIFF file simulator. */
+    DEFAULT_CONNECTOR = -1        /**< No specific connector. */
 };
 
 //=============================================================================================================
@@ -71,7 +76,7 @@ inline constexpr auto RAW_BUFFFER_SIZE = 10;
  *
  * @brief The IConnector class is the interface class of all plugins.
  */
-class IConnector : public QThread
+class RTSERVER_CONNECTOR_EXPORT IConnector : public QThread
 {
     Q_OBJECT
 
@@ -80,14 +85,13 @@ public:
     /**
      * Creates the IConnector.
      */
-    IConnector()
-    : m_bIsActive(false) {};
+    IConnector();
 
     //=========================================================================================================
     /**
      * Destroys the IConnector.
      */
-    virtual ~IConnector() {};
+    ~IConnector() override;
 
     //=========================================================================================================
     /**
@@ -183,14 +187,14 @@ protected:
      * Returning from this method will end the execution of the thread.
      * Pure virtual method inherited by QThread
      */
-    virtual void run() = 0;
+    void run() override = 0;
 
     QJsonObject m_qJsonObjectMetaData; /**< The meta data of the plugin defined in Q_PLUGIN_METADATA and the corresponding json file. */
 
     COMLIB::CommandManager m_commandManager; /**< The CommandManager of the connector. */
 
 private:
-    bool m_bIsActive; /**< Holds the activation status. */
+    bool m_bIsActive = false; /**< Holds the activation status. */
 };
 
 //=============================================================================================================
@@ -230,4 +234,4 @@ inline void IConnector::setStatus(bool status)
 #endif
 Q_DECLARE_INTERFACE(RTSERVER::IConnector, IConnector_iid)
 
-#endif //ICONNECTOR_H
+#endif // RTSERVER_ICONNECTOR_H

@@ -7,8 +7,8 @@ CI evidence: https://github.com/mne-tools/mne-cpp/actions/runs/39457390522 (comm
 ## Registration
 
 - Test directories: 280
-- Registered unconditionally: 271
-- Registered behind a CMake condition or early `return()`: 6
+- Registered unconditionally: 270
+- Registered behind a CMake condition or early `return()`: 7
 - Not registered: 3
 - Registered without `LABELS`: 0
 - Registered without explicit `TIMEOUT`: 0
@@ -47,6 +47,7 @@ CI evidence: https://github.com/mne-tools/mne-cpp/actions/runs/39457390522 (comm
 | `test_mne_browse_app` | conditional | BUILD_MNE_BROWSE |
 | `test_mne_flash_bem` | conditional | BUILD_MNE_FLASH_BEM |
 | `test_mne_watershed_bem` | conditional | BUILD_MNE_WATERSHED_BEM |
+| `test_rt_server_fiff_replay` | conditional | TARGET mne_rt_server |
 | `test_wasm_multi_draw` | unregistered | Standalone WebAssembly rendering demo, built only by scripts/wasm; not a CTest case. |
 | `test_wasm_multi_pass` | unregistered | Standalone WebAssembly rendering demo, built only by scripts/wasm; not a CTest case. |
 

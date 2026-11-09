@@ -20,7 +20,7 @@
 //=============================================================================================================
 
 #include "fiffsimulator_global.h"
-#include "../../mne_rt_server/IConnector.h"
+#include <rtserver_connector/iconnector.h>
 
 #include <acq/acq_device.h>
 #include <acq/acq_reader.h>

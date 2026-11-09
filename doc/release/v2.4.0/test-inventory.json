@@ -8,8 +8,8 @@
   "summary": {
     "directories": 280,
     "registration": {
-      "unconditional": 271,
-      "conditional": 6,
+      "unconditional": 270,
+      "conditional": 7,
       "unregistered": 3
     },
     "missing_directories": [],
@@ -8517,9 +8517,11 @@
       "name": "test_rt_server_fiff_replay",
       "cmake": "src/testframes/test_rt_server_fiff_replay/CMakeLists.txt",
       "registration": {
-        "state": "unconditional",
+        "state": "conditional",
         "via": "src/testframes/CMakeLists.txt",
-        "conditions": [],
+        "conditions": [
+          "TARGET mne_rt_server"
+        ],
         "early_return_guard": null,
         "unregistered_reason": null
       },
@@ -8534,7 +8536,7 @@
         "test-data"
       ],
       "gui": false,
-      "qskip_sites": 1,
+      "qskip_sites": 3,
       "spawns_processes": true,
       "ci_excluded_on": [],
       "ci": {

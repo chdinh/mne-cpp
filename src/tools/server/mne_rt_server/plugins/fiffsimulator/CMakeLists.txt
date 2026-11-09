@@ -18,26 +18,10 @@ set(SOURCES
     fiffsimulator.cpp
 )
 
-
-
-if(NOT BUILD_SHARED_LIBS)
-    set(HEADERS
-        fiffsimulator.h
-        fiffsimulator_global.h
-    )
-else()
-    set(HEADERS
-        fiffsimulator.h
-        fiffsimulator_global.h
-        ../../mne_rt_server/IConnector.h
-    )
-endif()
-
-set(FILE_TO_UPDATE channelselection_global.cpp)
-
-set(SOURCE_PATHS ${SOURCES})
-list(TRANSFORM SOURCE_PATHS PREPEND "${CMAKE_CURRENT_SOURCE_DIR}/")
-set_source_files_properties(${FILE_TO_UPDATE} PROPERTIES OBJECT_DEPENDS "${SOURCE_PATHS}")
+set(HEADERS
+    fiffsimulator.h
+    fiffsimulator_global.h
+)
 
 add_library(${PROJECT_NAME} ${SOURCES} ${HEADERS})
 
@@ -63,7 +47,7 @@ set(QT_REQUIRED_COMPONENT_LIBS ${QT_REQUIRED_COMPONENTS})
 list(TRANSFORM QT_REQUIRED_COMPONENT_LIBS PREPEND "Qt${QT_VERSION_MAJOR}::")
 
 set(MNE_LIBS_REQUIRED 
-    mne_utils
+    rtserver_connector
     mne_base
     mne_math
     mne_fiff

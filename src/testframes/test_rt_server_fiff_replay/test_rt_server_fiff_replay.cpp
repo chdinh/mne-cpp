@@ -23,13 +23,16 @@
 #include <fiff/fiff_constants.h>
 #include <fiff/fiff_file.h>
 #include <fiff/fiff_raw_data.h>
+#include <rtserver_connector/iconnector.h>
 
 //=============================================================================================================
 // QT INCLUDES
 //=============================================================================================================
 
 #include <QCoreApplication>
+#include <QDir>
 #include <QFile>
+#include <QPluginLoader>
 #include <QProcess>
 #include <QtTest>
 
@@ -55,12 +58,39 @@ class TestRtServerFiffReplay : public QObject
     Q_OBJECT
 
 private slots:
+    void pluginSharesTheConnectorType();
     void streamsTheFile();
     void cleanupTestCase();
 
 private:
     QProcess m_server;
 };
+
+//=============================================================================================================
+
+void TestRtServerFiffReplay::pluginSharesTheConnectorType()
+{
+    // The server connects to IConnector's slots and signals by member pointer. That only works if the plugin derives
+    // from the very IConnector the server knows; a second copy compiled into the plugin makes Qt's checks abort.
+#ifdef STATICBUILD
+    QSKIP("Connectors are linked into the server in static builds");
+#endif
+    const QDir plugins(QCoreApplication::applicationDirPath() + "/../bin/mne_rt_server_plugins");
+    const QStringList files = plugins.entryList(QDir::Files);
+    if (files.isEmpty()) {
+        QSKIP("mne_rt_server plugins not built");
+    }
+    for (const QString& name : files) {
+        QPluginLoader loader(plugins.absoluteFilePath(name));
+        QObject* instance = loader.instance();
+        if (instance == nullptr) {
+            QFAIL(qPrintable(name + ": " + loader.errorString()));
+            return;
+        }
+        QVERIFY2(instance->metaObject()->inherits(&RTSERVER::IConnector::staticMetaObject), qPrintable(name));
+        QVERIFY2(dynamic_cast<RTSERVER::IConnector*>(instance), qPrintable(name));
+    }
+}
 
 //=============================================================================================================
 

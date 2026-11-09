@@ -23,6 +23,7 @@ target_link_libraries(${PROJECT_NAME} PRIVATE
     Qt${QT_VERSION_MAJOR}::Test
     mne_com
     mne_fiff
+    rtserver_connector
     Eigen3::Eigen)
 
 if(NOT BUILD_SHARED_LIBS)
@@ -35,9 +36,7 @@ if(QT_VERSION_MAJOR EQUAL 6)
     qt_finalize_executable(${PROJECT_NAME})
 endif()
 
-if(TARGET mne_rt_server)
-    add_dependencies(${PROJECT_NAME} mne_rt_server rtserver_fiffsimulator)
-endif()
+add_dependencies(${PROJECT_NAME} mne_rt_server rtserver_fiffsimulator)
 
 # The server listens on the fixed ports 4217 and 4218.
 mne_add_test(${PROJECT_NAME}

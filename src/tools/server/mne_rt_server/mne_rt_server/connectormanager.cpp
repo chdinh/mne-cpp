@@ -22,7 +22,7 @@
 #include "commandserver.h"
 #include "fiffstreamserver.h"
 
-#include "IConnector.h"
+#include <rtserver_connector/iconnector.h>
 
 #include <com/rt_command/command_manager.h>
 
