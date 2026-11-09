@@ -52,7 +52,7 @@ Creates the real-time inverse operator estimation object.
 - **p_pFiffInfo** : *std::shared_ptr&lt; [FiffInfo](/docs/api/fiff/fiff-info) &gt; &*
   Fiff measurement info.
 
-- **p_pFwd** : *QSharedPointer&lt;[MNEForwardSolution](/docs/api/mne/mne-forward-solution)&gt; &*
+- **p_pFwd** : *std::shared_ptr&lt; [MNEForwardSolution](/docs/api/mne/mne-forward-solution) &gt; &*
   Forward solution.
 
 - **parent** : *QObject **
@@ -83,7 +83,7 @@ Slot to receive incoming forward solution.
 
 **Parameters:**
 
-- **pFwd** : *QSharedPointer&lt;[MNEForwardSolution](/docs/api/mne/mne-forward-solution)&gt;*
+- **pFwd** : *std::shared_ptr&lt; [MNEForwardSolution](/docs/api/mne/mne-forward-solution) &gt;*
   Forward solution.
 
 ---

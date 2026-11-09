@@ -33,7 +33,7 @@ mriPoints << innerSkull.rr.row(0), innerSkull.rr.row(20), innerSkull.rr.row(40);
 fitMatchedPoints(headShape.topRows(3), mriPoints, start);
 FiffCoordTrans headToMri(FIFFV_COORD_HEAD, FIFFV_COORD_MRI, start);
 // 2. Drop head shape points further than 10 mm from the surface, then refine with ICP
-auto surface = QSharedPointer<MNEProjectToSurface>::create(innerSkull);
+auto surface = std::make_shared<MNEProjectToSurface>(innerSkull);
 VectorXi take;
 MatrixXf kept;
 discard3DPointOutliers(surface, headShape, headToMri, take, kept, 0.01f);
@@ -48,14 +48,14 @@ performIcp(surface, kept, headToMri, rmse, false, 50, 1e-6f);
 ### performIcp(mneSurfacePoints, matPointCloud, transFromTo, fRMSE, bScale, iMaxIter, fTol, vecWeights)
 
 ```cpp
-bool performIcp(const QSharedPointer<[MNEProjectToSurface](/docs/api/mne/mne-project-to-surface)> mneSurfacePoints, const Eigen::MatrixXf & matPointCloud, [FiffCoordTrans](/docs/api/fiff/fiff-coord-trans) & transFromTo, float & fRMSE, bool bScale, int iMaxIter, float fTol, const Eigen::VectorXf & vecWeights);
+bool performIcp(const std::shared_ptr< [MNEProjectToSurface](/docs/api/mne/mne-project-to-surface) > & mneSurfacePoints, const Eigen::MatrixXf & matPointCloud, [FiffCoordTrans](/docs/api/fiff/fiff-coord-trans) & transFromTo, float & fRMSE, bool bScale, int iMaxIter, float fTol, const Eigen::VectorXf & vecWeights);
 ```
 
 The ICP algorithm to register a point cloud with a surface.
 
 **Parameters:**
 
-- **mneSurfacePoints** : *const QSharedPointer&lt;[MNEProjectToSurface](/docs/api/mne/mne-project-to-surface)&gt;*
+- **mneSurfacePoints** : *const std::shared_ptr&lt; [MNEProjectToSurface](/docs/api/mne/mne-project-to-surface) &gt; &*
   The [`MNEProjectToSurface`](/docs/api/mne/mne-project-to-surface) object that contains the surface triangles etc. (To).
 
 - **matPointCloud** : *const Eigen::MatrixXf &*
@@ -122,14 +122,14 @@ Corresponding point set registration using quaternions.
 ### discard3DPointOutliers(mneSurfacePoints, matPointCloud, transFromTo, vecTake, matTakePoint, fMaxDist)
 
 ```cpp
-bool discard3DPointOutliers(const QSharedPointer<[MNEProjectToSurface](/docs/api/mne/mne-project-to-surface)> mneSurfacePoints, const Eigen::MatrixXf & matPointCloud, const [FiffCoordTrans](/docs/api/fiff/fiff-coord-trans) & transFromTo, Eigen::VectorXi & vecTake, Eigen::MatrixXf & matTakePoint, float fMaxDist);
+bool discard3DPointOutliers(const std::shared_ptr< [MNEProjectToSurface](/docs/api/mne/mne-project-to-surface) > & mneSurfacePoints, const Eigen::MatrixXf & matPointCloud, const [FiffCoordTrans](/docs/api/fiff/fiff-coord-trans) & transFromTo, Eigen::VectorXi & vecTake, Eigen::MatrixXf & matTakePoint, float fMaxDist);
 ```
 
 Discard outliers compared to a given 3D surface.
 
 **Parameters:**
 
-- **mneSurfacePoints** : *const QSharedPointer&lt;[MNEProjectToSurface](/docs/api/mne/mne-project-to-surface)&gt;*
+- **mneSurfacePoints** : *const std::shared_ptr&lt; [MNEProjectToSurface](/docs/api/mne/mne-project-to-surface) &gt; &*
   The [`MNEProjectToSurface`](/docs/api/mne/mne-project-to-surface) object that contains the surface triangles etc. (To).
 
 - **matPointCloud** : *const Eigen::MatrixXf &*

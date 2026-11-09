@@ -595,7 +595,7 @@ mriPoints << innerSkull.rr.row(0), innerSkull.rr.row(20), innerSkull.rr.row(40);
 fitMatchedPoints(headShape.topRows(3), mriPoints, start);
 FiffCoordTrans headToMri(FIFFV_COORD_HEAD, FIFFV_COORD_MRI, start);
 // 2. Drop head shape points further than 10 mm from the surface, then refine with ICP
-auto surface = QSharedPointer<MNEProjectToSurface>::create(innerSkull);
+auto surface = std::make_shared<MNEProjectToSurface>(innerSkull);
 VectorXi take;
 MatrixXf kept;
 discard3DPointOutliers(surface, headShape, headToMri, take, kept, 0.01f);
