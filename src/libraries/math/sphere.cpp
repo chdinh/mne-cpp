@@ -107,7 +107,7 @@ Sphere Sphere::fit_sphere_simplex(const MatrixX3f& points, double simplex_size)
         return Sphere(center, R);
     }
 
-    return Sphere(Vector3f(), 0.0f);
+    return Sphere(Vector3f::Zero(), 0.0f);
 }
 
 //=============================================================================================================

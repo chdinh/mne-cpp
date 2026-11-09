@@ -217,6 +217,9 @@ void TestSphere::testFitSphereSimplex()
 
     // No points, no sphere
     QCOMPARE(Sphere::fit_sphere_simplex(MatrixX3f(0, 3), 0.005).radius(), 0.0f);
+    // A failed fit is a zero sphere, not an indeterminate centre
+    const Sphere failed = Sphere::fit_sphere_simplex(MatrixX3f(0, 3), 0.005);
+    QCOMPARE(failed.center(), Vector3f::Zero().eval());
 }
 
 //=============================================================================================================

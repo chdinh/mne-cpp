@@ -117,11 +117,33 @@ public:
 
     //=========================================================================================================
     /**
+     * The center of the sphere.
+     *
+     * @return the sphere's center.
+     */
+    const Eigen::Vector3f& center() const
+    {
+        return m_center;
+    }
+
+    //=========================================================================================================
+    /**
      * The radius of the sphere.
      *
      * @return reference to the sphere's radius.
      */
     float& radius()
+    {
+        return m_r;
+    }
+
+    //=========================================================================================================
+    /**
+     * The radius of the sphere.
+     *
+     * @return the sphere's radius.
+     */
+    float radius() const
     {
         return m_r;
     }
