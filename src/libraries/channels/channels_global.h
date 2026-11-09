@@ -42,7 +42,7 @@
 //=============================================================================================================
 /**
  * @namespace CHANNELSLIB
- * @brief     Shared utilities (I/O helpers, spectral analysis, layout management, warp algorithms).
+ * @brief     Sensor layouts, channel selections and standard EEG montages.
  */
 namespace CHANNELSLIB
 {

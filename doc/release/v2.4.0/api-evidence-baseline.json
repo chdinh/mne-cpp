@@ -4,13 +4,13 @@
   "policy": "scripts/quality/api_evidence_policy.json",
   "summary": {
     "exported_classes": 481,
-    "exported_free_functions": 168,
+    "exported_free_functions": 172,
     "registered_classes": 575,
     "exported_not_registered": 1,
     "registered_function_modules": 14,
     "registered_header_only": 81,
     "registered_stale": 0,
-    "registered_with_test": 225,
+    "registered_with_test": 229,
     "registered_test_unresolved": 0,
     "registered_with_example": 415,
     "registered_example_not_built": 0,
@@ -22,8 +22,8 @@
     "example_exempt": 162,
     "eligible_backed_by_registry_example": 413,
     "eligible_used_by_some_example": 354,
-    "examples_on_disk": 76,
-    "examples_built": 76
+    "examples_on_disk": 77,
+    "examples_built": 77
   },
   "by_library": {
     "acq": {
@@ -215,6 +215,15 @@
       "eligible_used_by_example": 8,
       "with_snippet": 8
     },
+    "pybridge": {
+      "public": 4,
+      "registered": 4,
+      "with_test": 4,
+      "eligible": 4,
+      "eligible_with_registry_example": 4,
+      "eligible_used_by_example": 4,
+      "with_snippet": 4
+    },
     "sts": {
       "public": 10,
       "registered": 10,
@@ -225,13 +234,13 @@
       "with_snippet": 10
     },
     "utils": {
-      "public": 9,
-      "registered": 9,
+      "public": 5,
+      "registered": 5,
       "with_test": 1,
-      "eligible": 8,
-      "eligible_with_registry_example": 8,
-      "eligible_used_by_example": 8,
-      "with_snippet": 9
+      "eligible": 4,
+      "eligible_with_registry_example": 4,
+      "eligible_used_by_example": 4,
+      "with_snippet": 5
     }
   },
   "exported_free_functions": [
@@ -1044,6 +1053,26 @@
       "name": "buildHashLong",
       "header": "mri/mri_global.h",
       "library": "mri"
+    },
+    {
+      "name": "buildDateTime",
+      "header": "pybridge/pybridge_global.h",
+      "library": "pybridge"
+    },
+    {
+      "name": "buildHash",
+      "header": "pybridge/pybridge_global.h",
+      "library": "pybridge"
+    },
+    {
+      "name": "buildHashLong",
+      "header": "pybridge/pybridge_global.h",
+      "library": "pybridge"
+    },
+    {
+      "name": "parse_progress_line",
+      "header": "pybridge/python_runner.h",
+      "library": "pybridge"
     },
     {
       "name": "buildDateTime",
@@ -14036,6 +14065,104 @@
       "exempt_reason": null
     },
     {
+      "name": "PythonRunner",
+      "header": "pybridge/python_runner.h",
+      "library": "pybridge",
+      "kind": "exported-class",
+      "exported": true,
+      "registered": true,
+      "registry_status": "documented",
+      "test": "test_pybridge_python_runner",
+      "test_resolves": true,
+      "example": "ex_pybridge",
+      "example_state": "built",
+      "including_examples": [
+        "ex_pybridge"
+      ],
+      "snippets": [
+        "ex_pybridge/main.cpp#python_runner_usage",
+        "ex_pybridge/main.cpp#python_runner_usage",
+        "ex_pybridge/main.cpp#python_runner_usage"
+      ],
+      "api_page": "doc/website/docs/api/pybridge/python-runner.mdx",
+      "python_equiv": null,
+      "example_eligible": true,
+      "exempt_reason": null
+    },
+    {
+      "name": "PythonRunnerConfig",
+      "header": "pybridge/python_runner.h",
+      "library": "pybridge",
+      "kind": "exported-class",
+      "exported": true,
+      "registered": true,
+      "registry_status": "documented",
+      "test": "test_pybridge_python_runner",
+      "test_resolves": true,
+      "example": "ex_pybridge",
+      "example_state": "built",
+      "including_examples": [
+        "ex_pybridge"
+      ],
+      "snippets": [
+        "ex_pybridge/main.cpp#python_runner_usage",
+        "ex_pybridge/main.cpp#python_runner_usage",
+        "ex_pybridge/main.cpp#python_runner_usage"
+      ],
+      "api_page": "doc/website/docs/api/pybridge/python-runner-config.mdx",
+      "python_equiv": null,
+      "example_eligible": true,
+      "exempt_reason": null
+    },
+    {
+      "name": "PythonRunnerResult",
+      "header": "pybridge/python_runner.h",
+      "library": "pybridge",
+      "kind": "exported-class",
+      "exported": true,
+      "registered": true,
+      "registry_status": "documented",
+      "test": "test_pybridge_python_runner",
+      "test_resolves": true,
+      "example": "ex_pybridge",
+      "example_state": "built",
+      "including_examples": [
+        "ex_pybridge"
+      ],
+      "snippets": [
+        "ex_pybridge/main.cpp#python_runner_usage",
+        "ex_pybridge/main.cpp#python_runner_usage",
+        "ex_pybridge/main.cpp#python_runner_usage"
+      ],
+      "api_page": "doc/website/docs/api/pybridge/python-runner-result.mdx",
+      "python_equiv": null,
+      "example_eligible": true,
+      "exempt_reason": null
+    },
+    {
+      "name": "PythonTestHelper",
+      "header": "pybridge/python_test_helper.h",
+      "library": "pybridge",
+      "kind": "exported-class",
+      "exported": true,
+      "registered": true,
+      "registry_status": "documented",
+      "test": "test_pybridge_python_runner",
+      "test_resolves": true,
+      "example": "ex_pybridge",
+      "example_state": "built",
+      "including_examples": [
+        "ex_pybridge"
+      ],
+      "snippets": [
+        "ex_pybridge/main.cpp#python_test_helper_usage"
+      ],
+      "api_page": "doc/website/docs/api/pybridge/python-test-helper.mdx",
+      "python_equiv": null,
+      "example_eligible": true,
+      "exempt_reason": null
+    },
+    {
       "name": "StatsAdjacency",
       "header": "sts/sts_adjacency.h",
       "library": "sts",
@@ -14338,104 +14465,6 @@
         "ex_utils/main.cpp#observer_pattern_usage"
       ],
       "api_page": "doc/website/docs/api/utils/subject.mdx",
-      "python_equiv": null,
-      "example_eligible": true,
-      "exempt_reason": null
-    },
-    {
-      "name": "PythonRunner",
-      "header": "utils/python_runner.h",
-      "library": "utils",
-      "kind": "exported-class",
-      "exported": true,
-      "registered": true,
-      "registry_status": "documented",
-      "test": null,
-      "test_resolves": false,
-      "example": "ex_utils",
-      "example_state": "built",
-      "including_examples": [
-        "ex_utils"
-      ],
-      "snippets": [
-        "ex_utils/main.cpp#python_runner_usage",
-        "ex_utils/main.cpp#python_runner_usage",
-        "ex_utils/main.cpp#python_runner_usage"
-      ],
-      "api_page": "doc/website/docs/api/utils/python-runner.mdx",
-      "python_equiv": null,
-      "example_eligible": true,
-      "exempt_reason": null
-    },
-    {
-      "name": "PythonRunnerConfig",
-      "header": "utils/python_runner.h",
-      "library": "utils",
-      "kind": "exported-class",
-      "exported": true,
-      "registered": true,
-      "registry_status": "documented",
-      "test": null,
-      "test_resolves": false,
-      "example": "ex_utils",
-      "example_state": "built",
-      "including_examples": [
-        "ex_utils"
-      ],
-      "snippets": [
-        "ex_utils/main.cpp#python_runner_usage",
-        "ex_utils/main.cpp#python_runner_usage",
-        "ex_utils/main.cpp#python_runner_usage"
-      ],
-      "api_page": "doc/website/docs/api/utils/python-runner-config.mdx",
-      "python_equiv": null,
-      "example_eligible": true,
-      "exempt_reason": null
-    },
-    {
-      "name": "PythonRunnerResult",
-      "header": "utils/python_runner.h",
-      "library": "utils",
-      "kind": "exported-class",
-      "exported": true,
-      "registered": true,
-      "registry_status": "documented",
-      "test": null,
-      "test_resolves": false,
-      "example": "ex_utils",
-      "example_state": "built",
-      "including_examples": [
-        "ex_utils"
-      ],
-      "snippets": [
-        "ex_utils/main.cpp#python_runner_usage",
-        "ex_utils/main.cpp#python_runner_usage",
-        "ex_utils/main.cpp#python_runner_usage"
-      ],
-      "api_page": "doc/website/docs/api/utils/python-runner-result.mdx",
-      "python_equiv": null,
-      "example_eligible": true,
-      "exempt_reason": null
-    },
-    {
-      "name": "PythonTestHelper",
-      "header": "utils/python_test_helper.h",
-      "library": "utils",
-      "kind": "exported-class",
-      "exported": true,
-      "registered": true,
-      "registry_status": "documented",
-      "test": null,
-      "test_resolves": false,
-      "example": "ex_utils",
-      "example_state": "built",
-      "including_examples": [
-        "ex_utils"
-      ],
-      "snippets": [
-        "ex_utils/main.cpp#python_test_helper_usage"
-      ],
-      "api_page": "doc/website/docs/api/utils/python-test-helper.mdx",
       "python_equiv": null,
       "example_eligible": true,
       "exempt_reason": null

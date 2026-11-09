@@ -33,7 +33,7 @@
 #include <inv/minimum_norm/inv_cmne_settings.h>
 
 #include <ml/ml_trainer.h>
-#include <utils/python_runner.h>
+#include <pybridge/python_runner.h>
 #include <base/log.h>
 #include <base/string_utils.h>
 
@@ -57,6 +57,14 @@
 #include <Eigen/Core>
 
 //=============================================================================================================
+// STL INCLUDES
+//=============================================================================================================
+
+#include <format>
+#include <string>
+#include <string_view>
+
+//=============================================================================================================
 // USED NAMESPACES
 //=============================================================================================================
 
@@ -64,7 +72,7 @@ using namespace Eigen;
 using namespace FIFFLIB;
 using namespace MNELIB;
 using namespace INVLIB;
-using namespace UTILSLIB;
+using namespace PYBRIDGELIB;
 using namespace BASELIB;
 using namespace MLLIB;
 
@@ -344,49 +352,50 @@ static int doTrain(const QCommandLineParser& parser, bool finetune)
     const QString pythonExe = parser.value(QStringLiteral("python"));
 
     // ── Build Python script arguments ──────────────────────────────────
-    QStringList args;
-    args << QStringLiteral("--fwd") << fwdPath
-         << QStringLiteral("--cov") << covPath
-         << QStringLiteral("--epochs") << epochsPath
-         << QStringLiteral("--out") << onnxOutPath
-         << QStringLiteral("--look-back") << QString::number(lookBack)
-         << QStringLiteral("--method") << methodStr
-         << QStringLiteral("--snr") << QString::number(snr, 'g', 6)
-         << QStringLiteral("--hidden") << QString::number(hiddenSize)
-         << QStringLiteral("--layers") << QString::number(numLayers)
-         << QStringLiteral("--train-epochs") << QString::number(trainEpochs)
-         << QStringLiteral("--lr") << QString::number(lr, 'g', 6)
-         << QStringLiteral("--batch") << QString::number(batchSize);
+    BASELIB::StringList args = {
+        "--fwd", fwdPath.toStdString(),
+        "--cov", covPath.toStdString(),
+        "--epochs", epochsPath.toStdString(),
+        "--out", onnxOutPath.toStdString(),
+        "--look-back", std::to_string(lookBack),
+        "--method", methodStr.toStdString(),
+        "--snr", std::format("{:.6g}", snr),
+        "--hidden", std::to_string(hiddenSize),
+        "--layers", std::to_string(numLayers),
+        "--train-epochs", std::to_string(trainEpochs),
+        "--lr", std::format("{:.6g}", lr),
+        "--batch", std::to_string(batchSize)};
 
     if (!gtStcPfx.isEmpty()) {
-        args << QStringLiteral("--gt-stc") << gtStcPfx;
+        args.insert(args.end(), {"--gt-stc", gtStcPfx.toStdString()});
     }
 
     if (finetune) {
-        args << QStringLiteral("--finetune") << finetuneOnnxPath;
+        args.insert(args.end(), {"--finetune", finetuneOnnxPath.toStdString()});
     }
 
     // ── Configure PythonRunner with venv ───────────────────────────────
     PythonRunnerConfig config;
-    config.pythonExe = pythonExe;
-    config.venvDir = QDir(cmneDir).absoluteFilePath(QStringLiteral(".venv"));
-    config.packageDir = cmneDir;
+    config.python_exe = pythonExe.toStdString();
+    config.venv_dir = QDir(cmneDir).absoluteFilePath(QStringLiteral(".venv")).toStdString();
+    config.package_dir = cmneDir.toStdString();
 
     MLTrainer trainer(config);
 
     // ── Set up live progress reporting ─────────────────────────────────
-    trainer.runner().setLineCallback([&out, &err](int channel, const QString& line) {
-        if (channel == 0) {
-            out << line << "\n";
+    trainer.runner().set_line_callback([&out, &err](PythonChannel channel, std::string_view line) {
+        const QString text = QString::fromUtf8(line.data(), static_cast<qsizetype>(line.size()));
+        if (channel == PythonChannel::StdOut) {
+            out << text << "\n";
             out.flush();
         } else {
-            err << line << "\n";
+            err << text << "\n";
             err.flush();
         }
     });
 
-    trainer.runner().setProgressCallback([&out](float pct, const QString& msg) {
-        out << "\r[" << QString::number(static_cast<double>(pct), 'f', 1) << "%] " << msg;
+    trainer.runner().set_progress_callback([&out](float pct, std::string_view msg) {
+        out << "\r[" << QString::number(static_cast<double>(pct), 'f', 1) << "%] " << QString::fromUtf8(msg.data(), static_cast<qsizetype>(msg.size()));
         out.flush();
     });
 
@@ -408,12 +417,12 @@ static int doTrain(const QCommandLineParser& parser, bool finetune)
         out << "  Ground truth: " << gtStcPfx << "\n";
     }
     out << "  Script    : " << scriptPath << "\n";
-    out << "  Venv      : " << config.venvDir << "\n";
+    out << "  Venv      : " << QString::fromStdString(config.venv_dir.string()) << "\n";
     out << "\n";
     out.flush();
 
     // ── Run training ───────────────────────────────────────────────────
-    PythonRunnerResult result = trainer.run(scriptPath, args);
+    PythonRunnerResult result = trainer.run(scriptPath.toStdString(), args);
 
     out << "\n";
 
@@ -426,14 +435,14 @@ static int doTrain(const QCommandLineParser& parser, bool finetune)
         }
     } else {
         err << "Training failed";
-        if (result.timedOut) {
+        if (result.timed_out) {
             err << " (timed out)";
         }
-        err << " with exit code " << result.exitCode << ".\n";
+        err << " with exit code " << result.exit_code << ".\n";
 
-        if (!result.stdErr.isEmpty()) {
+        if (!result.std_err.empty()) {
             err << "--- stderr ---\n"
-                << result.stdErr << "\n";
+                << QString::fromStdString(result.std_err) << "\n";
         }
     }
 

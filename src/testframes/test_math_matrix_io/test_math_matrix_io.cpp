@@ -38,6 +38,7 @@
 #include <filesystem>
 #include <fstream>
 #include <limits>
+#include <sstream>
 #include <string>
 
 //=============================================================================================================
@@ -160,6 +161,13 @@ void TestMatrixIo::commentsAndBlankLinesAreSkipped()
     QCOMPARE(c.rows(), Index(2));
     QCOMPARE(c.cols(), Index(3));
     QCOMPARE(c(1, 2), 6.0);
+
+    std::istringstream text("0.5 -1e3\n2 3\n");
+    Matrix2d fromStream;
+    QVERIFY(read_matrix(fromStream, text));
+    QCOMPARE(fromStream(0, 1), -1000.0);
+    std::istringstream ragged("1 2\n3\n");
+    QVERIFY(!read_matrix(c, ragged));
 }
 
 //=============================================================================================================

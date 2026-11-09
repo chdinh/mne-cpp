@@ -63,8 +63,11 @@ private:
 Here you execute and declare everything that is necessary for setting up your test. You generate and load all values in a variable that can be compared to later. If you want to load external calculated data in e.g. `.txt` files you can use:
 
 ```cpp
+#include <math/matrix_io.h>
+#include <pybridge/python_test_helper.h>
+
 Eigen::MatrixXd mDataFromFile;
-UTILSLIB::IOUtils::read_eigen_matrix(mDataFromFile, QCoreApplication::applicationDirPath() + "../resources/data/mne-cpp-test-data/Result/<yourFile>.txt");
+QVERIFY(MATHLIB::read_matrix(mDataFromFile, PYBRIDGELIB::PythonTestHelper::test_data_path() / "Result" / "<yourFile>.txt"));
 ```
 
 All files you use, have to be added to [mne-cpp-test-data](https://github.com/mne-tools/mne-cpp-test-data). In case you need to add new data open a Pull Request to this repository. The files you use should be as small as possible. If you need a .fif file, have a look at the already existing data first.

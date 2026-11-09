@@ -23,8 +23,6 @@
 #include <channels/layoutloader.h>
 #include <channels/layoutmaker.h>
 #include <channels/standard_montage.h>
-#include <utils/python_runner.h>
-#include <utils/python_test_helper.h>
 #include <utils/report.h>
 #include <channels/selectionio.h>
 
@@ -227,23 +225,6 @@ int main(int argc, char* argv[])
     //! [report_usage]
     ok &= expect(report.sectionCount() == 2 && html.contains("<table") && html.contains("Fp1") && QFile::exists(dir.filePath("report.html")),
                  "Report renders text and table sections to HTML");
-
-    //! [python_runner_usage]
-    PythonRunner python; // "python3" from PATH; a venv is configured via PythonRunnerConfig
-    QStringList progress;
-    python.setProgressCallback([&](float pct, const QString& msg) { progress << QString("%1 %2").arg(pct).arg(msg); });
-    const PythonRunnerResult run = python.runCode("import sys\nprint('[progress] 50% half')\nprint(sum(map(int, sys.argv[1:])))", {"2", "3"});
-    //! [python_runner_usage]
-    //! [python_test_helper_usage]
-    PythonTestHelper helper;                                                    // oracle access for tests
-    const MatrixXd fromNumpy = helper.evalMatrix("print('1 2'); print('3 4')"); // one line per row
-    //! [python_test_helper_usage]
-    if (python.isPythonAvailable()) {
-        ok &= expect(run.success && run.stdOut.trimmed().endsWith("5") && progress == QStringList({"50 half"}) && fromNumpy == (Matrix2d() << 1, 2, 3, 4).finished(),
-                     "PythonRunner passes arguments and parses [progress] lines; PythonTestHelper reads a matrix");
-    } else {
-        std::println("  skip  PythonRunner (python3 not found)");
-    }
 
     std::println("{}", ok ? "All utils checks passed." : "utils checks FAILED.");
     return ok ? EXIT_SUCCESS : EXIT_FAILURE;

@@ -50,6 +50,11 @@ target_link_libraries(${PROJECT_NAME} PRIVATE
     ${MNE_LIBS_REQUIRED}
     Eigen3::Eigen)
 
+# MLTrainer exposes PythonRunner; QProcess is not available in Qt for WebAssembly
+if(NOT WASM)
+    target_link_libraries(${PROJECT_NAME} PUBLIC mne_pybridge)
+endif()
+
 # ONNX Runtime (optional — enabled when USE_ONNXRUNTIME=ON and the package was found)
 if(TARGET onnxruntime::onnxruntime)
     target_link_libraries(${PROJECT_NAME} PRIVATE onnxruntime::onnxruntime)

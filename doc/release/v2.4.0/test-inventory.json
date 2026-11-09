@@ -51,6 +51,7 @@
           "test_channels_standard_montage",
           "test_math_matrix_io",
           "test_mne_acq_tool",
+          "test_pybridge_python_runner",
           "test_rt_server_fiff_replay"
         ],
         "executed_not_in_inventory": [
@@ -87,6 +88,7 @@
           "ex_read_raw",
           "ex_sts_statistics",
           "ex_utils",
+          "test_python_runner",
           "test_standard_montage",
           "test_utils_circularbuffer",
           "test_utils_ioutils",
@@ -118,6 +120,7 @@
           "test_channels_standard_montage",
           "test_math_matrix_io",
           "test_mne_acq_tool",
+          "test_pybridge_python_runner",
           "test_rt_server_fiff_replay"
         ],
         "executed_not_in_inventory": [
@@ -154,6 +157,7 @@
           "ex_read_raw",
           "ex_sts_statistics",
           "ex_utils",
+          "test_python_runner",
           "test_standard_montage",
           "test_utils_circularbuffer",
           "test_utils_ioutils",
@@ -185,6 +189,7 @@
           "test_channels_standard_montage",
           "test_math_matrix_io",
           "test_mne_acq_tool",
+          "test_pybridge_python_runner",
           "test_rt_server_fiff_replay"
         ],
         "executed_not_in_inventory": [
@@ -221,6 +226,7 @@
           "ex_read_raw",
           "ex_sts_statistics",
           "ex_utils",
+          "test_python_runner",
           "test_standard_montage",
           "test_utils_circularbuffer",
           "test_utils_ioutils",
@@ -252,6 +258,7 @@
           "test_channels_standard_montage",
           "test_math_matrix_io",
           "test_mne_acq_tool",
+          "test_pybridge_python_runner",
           "test_rt_server_fiff_replay"
         ],
         "executed_not_in_inventory": [
@@ -288,6 +295,7 @@
           "ex_read_raw",
           "ex_sts_statistics",
           "ex_utils",
+          "test_python_runner",
           "test_standard_montage",
           "test_utils_circularbuffer",
           "test_utils_ioutils",
@@ -319,6 +327,7 @@
           "test_channels_standard_montage",
           "test_math_matrix_io",
           "test_mne_acq_tool",
+          "test_pybridge_python_runner",
           "test_rt_server_fiff_replay"
         ],
         "executed_not_in_inventory": [
@@ -355,6 +364,7 @@
           "ex_read_raw",
           "ex_sts_statistics",
           "ex_utils",
+          "test_python_runner",
           "test_standard_montage",
           "test_utils_circularbuffer",
           "test_utils_ioutils",
@@ -386,6 +396,7 @@
           "test_channels_standard_montage",
           "test_math_matrix_io",
           "test_mne_acq_tool",
+          "test_pybridge_python_runner",
           "test_rt_server_fiff_replay"
         ],
         "executed_not_in_inventory": [
@@ -422,6 +433,7 @@
           "ex_read_raw",
           "ex_sts_statistics",
           "ex_utils",
+          "test_python_runner",
           "test_standard_montage",
           "test_utils_circularbuffer",
           "test_utils_ioutils",
@@ -8345,8 +8357,8 @@
       "registry_classes": []
     },
     {
-      "name": "test_python_runner",
-      "cmake": "src/testframes/test_python_runner/CMakeLists.txt",
+      "name": "test_pybridge_python_runner",
+      "cmake": "src/testframes/test_pybridge_python_runner/CMakeLists.txt",
       "registration": {
         "state": "unconditional",
         "via": "src/testframes/CMakeLists.txt",
@@ -8355,7 +8367,7 @@
         "unregistered_reason": null
       },
       "add_test_names": [
-        "test_python_runner"
+        "test_pybridge_python_runner"
       ],
       "labels": [
         "integration"
@@ -8370,14 +8382,19 @@
       "spawns_processes": false,
       "ci_excluded_on": [],
       "ci": {
-        "macos-26": "run",
-        "macos-26-qt-min": "run",
-        "ubuntu-24.04": "run",
-        "ubuntu-24.04-qt-min": "run",
-        "windows-2025-vs2026": "run",
-        "windows-2025-vs2026-qt-min": "run"
+        "macos-26": "absent",
+        "macos-26-qt-min": "absent",
+        "ubuntu-24.04": "absent",
+        "ubuntu-24.04-qt-min": "absent",
+        "windows-2025-vs2026": "absent",
+        "windows-2025-vs2026-qt-min": "absent"
       },
-      "registry_classes": []
+      "registry_classes": [
+        "PythonRunner",
+        "PythonRunnerConfig",
+        "PythonRunnerResult",
+        "PythonTestHelper"
+      ]
     },
     {
       "name": "test_report",

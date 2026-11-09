@@ -105,11 +105,11 @@ int main(int argc, char* argv[])
     QFile script(dir.filePath("train.py"));
     const bool written = script.open(QIODevice::WriteOnly) && script.write("import sys\nprint('trained on', sys.argv[1], 'epochs')\n") > 0;
     script.close();
-    MLTrainer trainer; // runs python3; a venv and pip install are configured via UTILSLIB::PythonRunnerConfig
-    const UTILSLIB::PythonRunnerResult result = trainer.run(script.fileName(), {"5"});
+    MLTrainer trainer; // runs python3; a venv and pip install are configured via PYBRIDGELIB::PythonRunnerConfig
+    const PYBRIDGELIB::PythonRunnerResult result = trainer.run(script.fileName().toStdString(), {"5"});
     //! [ml_trainer_usage]
-    if (trainer.runner().isPythonAvailable()) {
-        ok &= expect(written && result.success && result.stdOut.trimmed() == "trained on 5 epochs" && trainer.checkPrerequisites({"json", "no_such_package_xyz"}) == QStringList({"no_such_package_xyz"}),
+    if (trainer.runner().is_python_available()) {
+        ok &= expect(written && result.success && result.std_out == "trained on 5 epochs" && trainer.check_prerequisites({"json", "no_such_package_xyz"}) == BASELIB::StringList{"no_such_package_xyz"},
                      "MLTrainer runs the script with its arguments and reports the missing package");
     } else {
         std::println("  skip  MLTrainer (python3 not found)");

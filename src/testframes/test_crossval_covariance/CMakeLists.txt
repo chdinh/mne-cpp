@@ -34,7 +34,7 @@ target_link_libraries(${PROJECT_NAME}
     Eigen3::Eigen
     mne_sts
     mne_fiff
-    mne_utils
+    mne_pybridge
     mne_base
     mne_math
 )

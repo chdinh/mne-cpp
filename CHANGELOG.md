@@ -29,6 +29,12 @@ aliases; replace the old spelling as below.
 | `utils/error.h`, `byte_stream.h`, `endian.h`, `string_utils.h`, `thread_pool.h`, `buildinfo.h` and `UTILSLIB::Expected`, `Error`, `ByteStream`, `StringList`, `ThreadPool`, ... | `base/...` and `BASELIB::...`, in the new `mne_base` library |
 | `utils/layoutloader.h`, `layoutmaker.h`, `selectionio.h`, `montage/standard_montage.h` and `UTILSLIB::LayoutLoader`, `LayoutMaker`, `SelectionIO`, `StandardMontage` | `channels/...` and `CHANNELSLIB::...`, in the new `mne_channels` library |
 | `utils/ioutils.h`, `IOUtils::write_eigen_matrix(m, path, desc)`, `IOUtils::read_eigen_matrix(m, path)` | `math/matrix_io.h`, `MATHLIB::write_matrix(m, path, desc)`, `MATHLIB::read_matrix(m, path)` |
+| `utils/python_runner.h`, `python_test_helper.h`, `UTILSLIB::PythonRunner`, `PythonTestHelper` | `pybridge/...`, `PYBRIDGELIB::...`, in the new `mne_pybridge` library |
+| `PythonRunner::runCode`, `isPackageAvailable`, `ensureVenv`, ...; `result.stdOut`, `exitCode`, ...; `config.pythonExe`, `timeoutMsec`, `extraEnv` (`KEY=VALUE` list), ... | `run_code`, `is_package_available`, `ensure_venv`, ...; `std_out`, `exit_code`, ...; `python_exe`, `timeout` (`std::chrono`), `extra_env` (map), ... |
+| `PythonTestHelper::evalDouble(code, &ok)`, `evalVector`, `evalMatrix`, `evalMatrixViaFile` | `eval_double(code)` etc., returning `std::optional` |
+| `PythonTestHelper::writeMatrix`, `readMatrix` | `MATHLIB::write_matrix`, `MATHLIB::read_matrix` |
+| `PythonRunner` signals `lineReceived`, `progressUpdated`, `finished` | the line and progress callbacks; `PythonRunner` is no longer a `QObject` |
+| `MLTrainer::checkPrerequisites(QStringList)`, `InvCMNE::trainLstm(QString...)` | `check_prerequisites(StringList)`, `train_lstm(std::filesystem::path...)` |
 | `utils/generics/circularbuffer.h`, `CircularBuffer_Matrix_double` | `base/circular_buffer.h`, `BASELIB::CircularBuffer<Eigen::MatrixXd>` |
 | `CircularBuffer::push(ptr, n)`, `getFreeElementsRead()`, `pause()` | `push(std::span)`, `size()`; `pause` is removed |
 | `MNE_LOG_LEVEL=FATAL` | removed; `CRIT` is the highest level |
@@ -43,6 +49,9 @@ aliases; replace the old spelling as below.
   `read_matrix` is locale-independent, reads `nan`/`inf`, and fails instead of
   crashing on ragged rows, non-numeric values or a fixed-size target that does
   not fit.
+- `PythonTestHelper::eval` and `run_script` honour their timeout; it used to be
+  ignored. `PythonRunner` installs venv packages with `python -m pip`, and
+  `MATHLIB::read_matrix` also reads from a `std::istream`.
 - `FiffTag::toInt`, `toJulian`, `toIntMatrix` and `toFloatMatrix` are no longer
   inline.
 - `fiff/fiff.h`, `connectivity/connectivity.h` and `mne/mne.h` are umbrella

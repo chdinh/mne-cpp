@@ -11,7 +11,7 @@
  *
  * Implements the dSPM kernel assembly, the per-source z-score
  * rectification, the sliding-window LSTM inference via ONNX Runtime
- * and (outside WebAssembly builds) the @ref UTILSLIB::PythonRunner-based
+ * and (outside WebAssembly builds) the @ref PYBRIDGELIB::PythonRunner-based
  * training driver that invokes the upstream
  * @c train_cmne_lstm.py script. The training driver is a thin process
  * wrapper — the actual PyTorch model + ONNX export lives in Python and
@@ -23,7 +23,9 @@
 //=============================================================================================================
 
 #include "inv_cmne.h"
+
 #include <base/log.h>
+#include <base/string_utils.h>
 
 //=============================================================================================================
 // EIGEN INCLUDES
@@ -36,11 +38,12 @@
 //=============================================================================================================
 
 #include <QCoreApplication>
-#include <QDir>
 #include <QJsonDocument>
 #include <QJsonObject>
 
 #include <algorithm>
+#include <filesystem>
+#include <format>
 #include <limits>
 
 //=============================================================================================================
@@ -240,98 +243,89 @@ bool InvCMNE::applyCmne(const MatrixXd& matDspmData,
 
 #ifndef WASMBUILD
 
-UTILSLIB::PythonRunnerResult InvCMNE::trainLstm(
-    const QString& fwdPath,
-    const QString& covPath,
-    const QString& epochsPath,
-    const QString& outOnnxPath,
+PYBRIDGELIB::PythonRunnerResult InvCMNE::train_lstm(
+    const std::filesystem::path& fwdPath,
+    const std::filesystem::path& covPath,
+    const std::filesystem::path& epochsPath,
+    const std::filesystem::path& outOnnxPath,
     const InvCMNESettings& settings,
-    const QString& gtStcPrefix,
+    const std::string& gtStcPrefix,
     int hiddenSize,
     int numLayers,
     int trainEpochs,
     double learningRate,
     int batchSize,
-    const QString& finetuneOnnxPath,
-    const QString& pythonExe)
+    const std::filesystem::path& finetuneOnnxPath,
+    const std::string& pythonExe)
 {
-    // Resolve training package directory (contains pyproject.toml + script)
-    // Expected layout: <app_dir>/../scripts/ml/training/cmne/
-    QString appDir = QCoreApplication::applicationDirPath();
-    QString cmneDir = QDir(appDir).absoluteFilePath(
-        QStringLiteral("../scripts/ml/training/cmne"));
+    namespace fs = std::filesystem;
+    using BASELIB::utf8FromPath;
 
-    // Fallback: source tree relative to working directory
-    if (!QFile::exists(QDir(cmneDir).absoluteFilePath(QStringLiteral("pyproject.toml")))) {
-        cmneDir = QStringLiteral("scripts/ml/training/cmne");
+    // Training package directory (pyproject.toml + script): <app_dir>/../scripts/ml/training/cmne/, with the source
+    // tree relative to the working directory as fallback
+    fs::path cmneDir = BASELIB::pathFromUtf8(QCoreApplication::applicationDirPath().toStdString()) / ".." / "scripts" / "ml" / "training" / "cmne";
+    std::error_code ec;
+    if (!fs::exists(cmneDir / "pyproject.toml", ec)) {
+        cmneDir = fs::path("scripts") / "ml" / "training" / "cmne";
     }
+    cmneDir = fs::absolute(cmneDir, ec).lexically_normal();
+    const fs::path scriptPath = cmneDir / "train_cmne_lstm.py";
 
-    QString scriptPath = QDir(cmneDir).absoluteFilePath(QStringLiteral("train_cmne_lstm.py"));
-
-    if (!QFile::exists(scriptPath)) {
-        UTILSLIB::PythonRunnerResult result;
-        result.stdErr = QStringLiteral("Training script not found: ") + scriptPath;
-        BASELIB::Log::warning("[InvCMNE::trainLstm] {}", result.stdErr.toStdString());
+    if (!fs::exists(scriptPath, ec)) {
+        PYBRIDGELIB::PythonRunnerResult result;
+        result.std_err = "Training script not found: " + utf8FromPath(scriptPath);
+        BASELIB::Log::warning("[InvCMNE::train_lstm] {}", result.std_err);
         return result;
     }
 
-    BASELIB::Log::debug("[InvCMNE::trainLstm] Script: {}", scriptPath.toStdString());
-    BASELIB::Log::debug("[InvCMNE::trainLstm] Package dir: {}", cmneDir.toStdString());
+    BASELIB::Log::debug("[InvCMNE::train_lstm] Script: {}", utf8FromPath(scriptPath));
+    BASELIB::Log::debug("[InvCMNE::train_lstm] Package dir: {}", utf8FromPath(cmneDir));
 
-    // Map method integer to string
-    QString methodStr;
+    const char* method = "dSPM";
     switch (settings.method) {
         case 0:
-            methodStr = QStringLiteral("MNE");
-            break;
-        case 1:
-            methodStr = QStringLiteral("dSPM");
+            method = "MNE";
             break;
         case 2:
-            methodStr = QStringLiteral("sLORETA");
+            method = "sLORETA";
             break;
         case 3:
-            methodStr = QStringLiteral("eLORETA");
+            method = "eLORETA";
             break;
         default:
-            methodStr = QStringLiteral("dSPM");
             break;
     }
 
-    double snr = 1.0 / std::sqrt(settings.lambda2);
+    const double snr = 1.0 / std::sqrt(settings.lambda2);
 
-    // Build argument list matching train_cmne_lstm.py CLI
-    QStringList args;
-    args << QStringLiteral("--fwd") << fwdPath
-         << QStringLiteral("--cov") << covPath
-         << QStringLiteral("--epochs") << epochsPath
-         << QStringLiteral("--out") << outOnnxPath
-         << QStringLiteral("--look-back") << QString::number(settings.lookBack)
-         << QStringLiteral("--method") << methodStr
-         << QStringLiteral("--snr") << QString::number(snr, 'g', 6)
-         << QStringLiteral("--hidden") << QString::number(hiddenSize)
-         << QStringLiteral("--layers") << QString::number(numLayers)
-         << QStringLiteral("--train-epochs") << QString::number(trainEpochs)
-         << QStringLiteral("--lr") << QString::number(learningRate, 'g', 6)
-         << QStringLiteral("--batch") << QString::number(batchSize);
-
-    if (!gtStcPrefix.isEmpty()) {
-        args << QStringLiteral("--gt-stc") << gtStcPrefix;
+    // Argument list of the train_cmne_lstm.py command line
+    BASELIB::StringList args = {
+        "--fwd", utf8FromPath(fwdPath),
+        "--cov", utf8FromPath(covPath),
+        "--epochs", utf8FromPath(epochsPath),
+        "--out", utf8FromPath(outOnnxPath),
+        "--look-back", std::to_string(settings.lookBack),
+        "--method", method,
+        "--snr", std::format("{:.6g}", snr),
+        "--hidden", std::to_string(hiddenSize),
+        "--layers", std::to_string(numLayers),
+        "--train-epochs", std::to_string(trainEpochs),
+        "--lr", std::format("{:.6g}", learningRate),
+        "--batch", std::to_string(batchSize)};
+    if (!gtStcPrefix.empty()) {
+        args.insert(args.end(), {"--gt-stc", gtStcPrefix});
+    }
+    if (!finetuneOnnxPath.empty()) {
+        args.insert(args.end(), {"--finetune", utf8FromPath(finetuneOnnxPath)});
     }
 
-    if (!finetuneOnnxPath.isEmpty()) {
-        args << QStringLiteral("--finetune") << finetuneOnnxPath;
-    }
-
-    // Configure PythonRunner with venv + pyproject.toml
-    // Venv lives inside the cmne package directory as .venv/
-    UTILSLIB::PythonRunnerConfig config;
-    config.pythonExe = pythonExe;
-    config.venvDir = QDir(cmneDir).absoluteFilePath(QStringLiteral(".venv"));
-    config.packageDir = cmneDir;
+    // The venv lives inside the cmne package directory as .venv/
+    PYBRIDGELIB::PythonRunnerConfig config;
+    config.python_exe = pythonExe;
+    config.venv_dir = cmneDir / ".venv";
+    config.package_dir = cmneDir;
 
     MLLIB::MLTrainer trainer(config);
-
     return trainer.run(scriptPath, args);
 }
 

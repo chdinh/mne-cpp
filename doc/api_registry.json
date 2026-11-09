@@ -161,6 +161,15 @@
       "sidebar_position": 14,
       "namespace": "CHANNELSLIB"
     },
+    "pybridge": {
+      "dir": "src/libraries/pybridge",
+      "sidebar_label": "Python Bridge Library",
+      "origin": "custom",
+      "include": "pybridge",
+      "dir_slug": "pybridge",
+      "sidebar_position": 14,
+      "namespace": "PYBRIDGELIB"
+    },
     "com": {
       "dir": "src/libraries/com",
       "sidebar_label": "Communication Library",
@@ -8467,16 +8476,16 @@
     },
     {
       "name": "PythonRunner",
-      "module": "utils",
-      "header": "utils/python_runner.h",
-      "origin": "mne-c + custom",
+      "module": "pybridge",
+      "header": "pybridge/python_runner.h",
+      "origin": "custom",
       "mne_c_tool": null,
       "mne_python": null,
       "sklearn": null,
-      "test": null,
-      "example": "ex_utils",
+      "test": "test_pybridge_python_runner",
+      "example": "ex_pybridge",
       "example_snippet": [
-        "ex_utils/main.cpp#python_runner_usage"
+        "ex_pybridge/main.cpp#python_runner_usage"
       ],
       "example_mode": "run",
       "status": "documented",
@@ -8489,16 +8498,16 @@
     },
     {
       "name": "PythonTestHelper",
-      "module": "utils",
-      "header": "utils/python_test_helper.h",
-      "origin": "mne-c + custom",
+      "module": "pybridge",
+      "header": "pybridge/python_test_helper.h",
+      "origin": "custom",
       "mne_c_tool": null,
       "mne_python": null,
       "sklearn": null,
-      "test": null,
-      "example": "ex_utils",
+      "test": "test_pybridge_python_runner",
+      "example": "ex_pybridge",
       "example_snippet": [
-        "ex_utils/main.cpp#python_test_helper_usage"
+        "ex_pybridge/main.cpp#python_test_helper_usage"
       ],
       "example_mode": "run",
       "status": "documented",
@@ -11650,16 +11659,16 @@
     },
     {
       "name": "PythonRunnerConfig",
-      "module": "utils",
-      "header": "utils/python_runner.h",
-      "origin": "mne-c + custom",
+      "module": "pybridge",
+      "header": "pybridge/python_runner.h",
+      "origin": "custom",
       "mne_c_tool": null,
       "mne_python": null,
       "sklearn": null,
-      "test": null,
-      "example": "ex_utils",
+      "test": "test_pybridge_python_runner",
+      "example": "ex_pybridge",
       "example_snippet": [
-        "ex_utils/main.cpp#python_runner_usage"
+        "ex_pybridge/main.cpp#python_runner_usage"
       ],
       "example_mode": "run",
       "status": "documented",
@@ -11672,16 +11681,16 @@
     },
     {
       "name": "PythonRunnerResult",
-      "module": "utils",
-      "header": "utils/python_runner.h",
-      "origin": "mne-c + custom",
+      "module": "pybridge",
+      "header": "pybridge/python_runner.h",
+      "origin": "custom",
       "mne_c_tool": null,
       "mne_python": null,
       "sklearn": null,
-      "test": null,
-      "example": "ex_utils",
+      "test": "test_pybridge_python_runner",
+      "example": "ex_pybridge",
       "example_snippet": [
-        "ex_utils/main.cpp#python_runner_usage"
+        "ex_pybridge/main.cpp#python_runner_usage"
       ],
       "example_mode": "run",
       "status": "documented",
@@ -13345,7 +13354,7 @@
       {
         "python": "mne.channels.generate_2d_layout",
         "status": "partial",
-        "mne_cpp": "UTILSLIB::LayoutMaker::makeLayout",
+        "mne_cpp": "CHANNELSLIB::LayoutMaker::makeLayout",
         "note": "projects 3-D points; no direct 2-D input",
         "test": "test_channels_layout_selection"
       },
@@ -13390,7 +13399,7 @@
       {
         "python": "mne.channels.make_standard_montage",
         "status": "partial",
-        "mne_cpp": "UTILSLIB::StandardMontage::getMontage",
+        "mne_cpp": "CHANNELSLIB::StandardMontage::getMontage",
         "note": "standard_1005 (and its 10-20/10-10 subsets) from mne's bundled table; the other kinds (biosemi, easycap, GSN-HydroCel, ...) and fiducials are not bundled",
         "test": "test_channels_standard_montage"
       },
@@ -13403,7 +13412,7 @@
       {
         "python": "mne.channels.read_custom_montage",
         "status": "partial",
-        "mne_cpp": "UTILSLIB::LayoutLoader::readAsaElcFile",
+        "mne_cpp": "CHANNELSLIB::LayoutLoader::readAsaElcFile",
         "note": ".elc only; no .sfp/.loc/.bvef",
         "test": "test_channels_layout_selection"
       },
@@ -16491,6 +16500,17 @@
         "level": "start",
         "library": "base"
       },
+      "ex_pybridge": {
+        "title": "Run Python scripts and read what NumPy prints",
+        "tasks": [
+          "infrastructure"
+        ],
+        "modalities": [
+          "generic"
+        ],
+        "level": "start",
+        "library": "pybridge"
+      },
       "ex_bids": {
         "title": "Read and write BIDS datasets",
         "tasks": [
@@ -17229,7 +17249,7 @@
         "level": "start"
       },
       "ex_utils": {
-        "title": "Montages, layouts, selections, matrix files and reports",
+        "title": "Montages, layouts, selections and reports",
         "tasks": [
           "infrastructure"
         ],

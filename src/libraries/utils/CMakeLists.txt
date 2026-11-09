@@ -30,13 +30,6 @@ set(HEADERS
   generics/observerpattern.h
 )
 
-# QProcess is not available in Qt for WebAssembly, so exclude
-# PythonRunner / PythonTestHelper from WASM builds.
-if(NOT WASM)
-  list(APPEND SOURCES python_runner.cpp python_test_helper.cpp)
-  list(APPEND HEADERS python_runner.h python_test_helper.h)
-endif()
-
 set(FILE_TO_UPDATE utils_global.cpp)
 
 set(SOURCE_PATHS ${SOURCES})

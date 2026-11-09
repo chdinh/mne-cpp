@@ -7,7 +7,7 @@
  * @author   Christoph Dinh <christoph.dinh@mne-cpp.org>
  * @since    2.2.0
  * @date     April 2026
- * @brief    @ref MLLIB::MLTrainer convenience wrapper that drives Python training scripts via @ref UTILSLIB::PythonRunner.
+ * @brief    @ref MLLIB::MLTrainer convenience wrapper that drives Python training scripts via @ref PYBRIDGELIB::PythonRunner.
  *
  * Inference in mne-cpp goes through ONNX Runtime, but training itself
  * stays in Python where the ecosystem lives (PyTorch, scikit-learn,
@@ -17,9 +17,9 @@
  * or linking against @c libpython.
  *
  * The class adds three things on top of the generic
- * @ref UTILSLIB::PythonRunner "PythonRunner": prerequisite checking via
- * @c isPackageAvailable so callers can fail fast with a useful message,
- * automatic delegation to @c runInVenv when a @c venvDir is configured
+ * @ref PYBRIDGELIB::PythonRunner "PythonRunner": prerequisite checking via
+ * @c is_package_available so callers can fail fast with a useful message,
+ * automatic delegation to @c run_in_venv when a @c venv_dir is configured
  * (which creates and updates the venv before the script runs), and
  * convention-friendly defaults that match the @c scripts/ml/training/
  * layout shipped with the repository. The whole class is compiled
@@ -38,14 +38,15 @@
 
 #include "ml_global.h"
 
-#include <utils/python_runner.h>
+#include <pybridge/python_runner.h>
+
+#include <base/string_utils.h>
 
 //=============================================================================================================
-// QT INCLUDES
+// STL INCLUDES
 //=============================================================================================================
 
-#include <QString>
-#include <QStringList>
+#include <filesystem>
 
 //=============================================================================================================
 // DEFINE NAMESPACE MLLIB
@@ -56,13 +57,13 @@ namespace MLLIB
 
 //=============================================================================================================
 /**
- * @brief Launches Python training scripts via @ref UTILSLIB::PythonRunner with automatic venv handling and prerequisite checks.
+ * @brief Launches Python training scripts via @ref PYBRIDGELIB::PythonRunner with automatic venv handling and prerequisite checks.
  *
  * Training logic (PyTorch, scikit-learn, MNE-Python, …) lives entirely
  * in the @c .py scripts under @c scripts/ml/training/ and runs in a
  * child process; no Python embedding or @c libpython linkage is
- * required. If the configured @ref UTILSLIB::PythonRunnerConfig
- * carries a @c venvDir, the runner creates and updates the venv before
+ * required. If the configured @ref PYBRIDGELIB::PythonRunnerConfig
+ * carries a @c venv_dir, the runner creates and updates the venv before
  * each script invocation so dependencies are pinned per training job.
  *
  * @snippet ex_ml/main.cpp ml_trainer_usage
@@ -82,7 +83,7 @@ public:
      *
      * @param[in] config     PythonRunner configuration to use.
      */
-    explicit MLTrainer(const UTILSLIB::PythonRunnerConfig& config);
+    explicit MLTrainer(const PYBRIDGELIB::PythonRunnerConfig& config);
 
     //=========================================================================================================
     /**
@@ -90,13 +91,13 @@ public:
      *
      * @return Reference to the PythonRunner instance.
      */
-    UTILSLIB::PythonRunner& runner();
+    PYBRIDGELIB::PythonRunner& runner();
 
     //=========================================================================================================
     /**
      * Run a training script.
      *
-     * If the PythonRunner is configured with a venvDir and packageDir,
+     * If the PythonRunner is configured with a venv_dir and package_dir,
      * the venv is created/updated automatically before the script runs.
      *
      * @param[in] scriptPath     Path to the .py training script.
@@ -104,8 +105,7 @@ public:
      *
      * @return PythonRunnerResult with exit code, output, and progress.
      */
-    UTILSLIB::PythonRunnerResult run(const QString& scriptPath,
-                                     const QStringList& args = {});
+    PYBRIDGELIB::PythonRunnerResult run(const std::filesystem::path& scriptPath, const BASELIB::StringList& args = {});
 
     //=========================================================================================================
     /**
@@ -115,10 +115,10 @@ public:
      *
      * @return List of packages that could NOT be imported (empty = all OK).
      */
-    QStringList checkPrerequisites(const QStringList& packages) const;
+    BASELIB::StringList check_prerequisites(const BASELIB::StringList& packages) const;
 
 private:
-    UTILSLIB::PythonRunner m_runner; /**< Underlying Python process launcher. */
+    PYBRIDGELIB::PythonRunner m_runner; /**< Underlying Python process launcher. */
 };
 
 } // namespace MLLIB

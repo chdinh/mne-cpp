@@ -49,6 +49,7 @@
 #include <charconv>
 #include <filesystem>
 #include <fstream>
+#include <istream>
 #include <string>
 #include <string_view>
 #include <vector>
@@ -101,25 +102,13 @@ bool write_matrix(const Eigen::DenseBase<Derived>& matrix, const std::filesystem
 }
 
 //=============================================================================================================
-/**
- * Reads a matrix written by @ref write_matrix (or @c numpy.savetxt). Lines containing @c # and blank lines are
- * skipped. A row-vector target receives the first row of the file, a column-vector target the first column.
- *
- * @param[out] out  Resized and filled with the values read; left unchanged on failure.
- * @param[in]  path Whitespace-separated text file.
- *
- * @return True on success, false if the file cannot be opened, holds a non-numeric value or has rows of
- *         unequal length.
- */
-template<typename Scalar, int Rows, int Cols, int Options, int MaxRows, int MaxCols>
-bool read_matrix(Eigen::Matrix<Scalar, Rows, Cols, Options, MaxRows, MaxCols>& out, const std::filesystem::path& path)
-{
-    std::ifstream file(path);
-    if (!file) {
-        BASELIB::Log::warning("read_matrix: cannot open {}", path.string());
-        return false;
-    }
 
+namespace detail
+{
+
+template<typename Scalar, int Rows, int Cols, int Options, int MaxRows, int MaxCols>
+bool parse_matrix(Eigen::Matrix<Scalar, Rows, Cols, Options, MaxRows, MaxCols>& out, std::istream& file, std::string_view source)
+{
     std::vector<Scalar> values;
     Eigen::Index rows = 0;
     Eigen::Index cols = 0;
@@ -141,7 +130,7 @@ bool read_matrix(Eigen::Matrix<Scalar, Rows, Cols, Options, MaxRows, MaxCols>& o
             Scalar value{};
             const auto [next, ec] = std::from_chars(pos, end, value);
             if (ec != std::errc{} || (next != end && !std::isspace(static_cast<unsigned char>(*next)))) {
-                BASELIB::Log::warning("read_matrix: non-numeric value in row {} of {}", rows + 1, path.string());
+                BASELIB::Log::warning("read_matrix: non-numeric value in row {} of {}", rows + 1, source);
                 return false;
             }
             values.push_back(value);
@@ -152,7 +141,7 @@ bool read_matrix(Eigen::Matrix<Scalar, Rows, Cols, Options, MaxRows, MaxCols>& o
             continue;
         }
         if (rows > 0 && count != cols) {
-            BASELIB::Log::warning("read_matrix: row {} of {} has {} values, expected {}", rows + 1, path.string(), count, cols);
+            BASELIB::Log::warning("read_matrix: row {} of {} has {} values, expected {}", rows + 1, source, count, cols);
             return false;
         }
         cols = count;
@@ -169,7 +158,7 @@ bool read_matrix(Eigen::Matrix<Scalar, Rows, Cols, Options, MaxRows, MaxCols>& o
         outRows = cols > 0 ? rows : 0;
     }
     if ((Rows != Eigen::Dynamic && outRows != Rows) || (Cols != Eigen::Dynamic && outCols != Cols)) {
-        BASELIB::Log::warning("read_matrix: {} holds {} x {} values, which do not fit a {} x {} matrix", path.string(), rows, cols, Rows, Cols);
+        BASELIB::Log::warning("read_matrix: {} holds {} x {} values, which do not fit a {} x {} matrix", source, rows, cols, Rows, Cols);
         return false;
     }
 
@@ -180,6 +169,46 @@ bool read_matrix(Eigen::Matrix<Scalar, Rows, Cols, Options, MaxRows, MaxCols>& o
         out = parsed.topLeftCorner(outRows, outCols);
     }
     return true;
+}
+
+} // namespace detail
+
+//=============================================================================================================
+/**
+ * Reads a matrix written by @ref write_matrix (or @c numpy.savetxt). Lines containing @c # and blank lines are
+ * skipped. A row-vector target receives the first row of the file, a column-vector target the first column.
+ *
+ * @param[out] out  Resized and filled with the values read; left unchanged on failure.
+ * @param[in]  path Whitespace-separated text file.
+ *
+ * @return True on success, false if the file cannot be opened, holds a non-numeric value, has rows of
+ *         unequal length or does not fit a fixed-size @p out.
+ */
+template<typename Scalar, int Rows, int Cols, int Options, int MaxRows, int MaxCols>
+bool read_matrix(Eigen::Matrix<Scalar, Rows, Cols, Options, MaxRows, MaxCols>& out, const std::filesystem::path& path)
+{
+    std::ifstream file(path);
+    if (!file) {
+        BASELIB::Log::warning("read_matrix: cannot open {}", path.string());
+        return false;
+    }
+    return detail::parse_matrix(out, file, path.string());
+}
+
+//=============================================================================================================
+/**
+ * Reads a matrix in the same text layout from a stream, e.g. the captured output of a Python script.
+ *
+ * @param[out] out    Resized and filled with the values read; left unchanged on failure.
+ * @param[in]  stream Whitespace-separated text, one row per line.
+ *
+ * @return True on success, false if the text holds a non-numeric value, has rows of unequal length or does
+ *         not fit a fixed-size @p out.
+ */
+template<typename Scalar, int Rows, int Cols, int Options, int MaxRows, int MaxCols>
+bool read_matrix(Eigen::Matrix<Scalar, Rows, Cols, Options, MaxRows, MaxCols>& out, std::istream& stream)
+{
+    return detail::parse_matrix(out, stream, "stream");
 }
 
 } // namespace MATHLIB

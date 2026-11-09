@@ -18,9 +18,9 @@
  * t >= k an LSTM, run in ONNX Runtime, predicts the next estimate from the
  * previous k contextual estimates b; q_t is weighted by the max-normalised
  * |prediction|. Without a model the paper's control estimate is returned. The
- * @c trainLstm helper drives the Python training pipeline
+ * @c train_lstm helper drives the Python training pipeline
  * (@c scripts/ml/training/train_cmne_lstm.py) through
- * @ref UTILSLIB::PythonRunner so the full train-and-deploy cycle is
+ * @ref PYBRIDGELIB::PythonRunner so the full train-and-deploy cycle is
  * reachable from C++ without leaving the mne-cpp process.
  */
 
@@ -43,11 +43,18 @@
 #include <Eigen/Dense>
 
 //=============================================================================================================
+// STL INCLUDES
+//=============================================================================================================
+
+#include <filesystem>
+#include <string>
+
+//=============================================================================================================
 // FORWARD DECLARATIONS
 //=============================================================================================================
 
 #ifndef WASMBUILD
-namespace UTILSLIB
+namespace PYBRIDGELIB
 {
 struct PythonRunnerResult;
 }
@@ -160,7 +167,7 @@ public:
      * Train the CMNE LSTM model by invoking the Python training script.
      *
      * This is a convenience wrapper that calls
-     * ``scripts/ml/training/train_cmne_lstm.py`` via UTILSLIB::PythonRunner.
+     * ``scripts/ml/training/train_cmne_lstm.py`` via PYBRIDGELIB::PythonRunner.
      * The heavy lifting (PyTorch LSTM training + ONNX export) happens in
      * Python; C++ only launches the process and streams its output.
      *
@@ -180,20 +187,20 @@ public:
      *
      * @return PythonRunnerResult with exit code, captured output and progress.
      */
-    static UTILSLIB::PythonRunnerResult trainLstm(
-        const QString& fwdPath,
-        const QString& covPath,
-        const QString& epochsPath,
-        const QString& outOnnxPath,
+    static PYBRIDGELIB::PythonRunnerResult train_lstm(
+        const std::filesystem::path& fwdPath,
+        const std::filesystem::path& covPath,
+        const std::filesystem::path& epochsPath,
+        const std::filesystem::path& outOnnxPath,
         const InvCMNESettings& settings,
-        const QString& gtStcPrefix = {},
+        const std::string& gtStcPrefix = {},
         int hiddenSize = 256,
         int numLayers = 1,
         int trainEpochs = 50,
         double learningRate = 1e-3,
         int batchSize = 64,
-        const QString& finetuneOnnxPath = {},
-        const QString& pythonExe = QStringLiteral("python3"));
+        const std::filesystem::path& finetuneOnnxPath = {},
+        const std::string& pythonExe = "python3");
 #endif
 
 private:

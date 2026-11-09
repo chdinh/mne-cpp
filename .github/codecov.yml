@@ -149,6 +149,10 @@ component_management:
       name: libraries/channels
       paths:
         - src/libraries/channels/**
+    - component_id: libraries_pybridge
+      name: libraries/pybridge
+      paths:
+        - src/libraries/pybridge/**
     - component_id: libraries_utils
       name: libraries/utils
       paths:

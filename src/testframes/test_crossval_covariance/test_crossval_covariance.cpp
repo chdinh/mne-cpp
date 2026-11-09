@@ -19,7 +19,7 @@
  *    1. Both sides load the same raw FIFF file (sample data).
  *    2. C++  computes the result using the library under test.
  *    3. Python computes the reference via numpy.savetxt → temp file.
- *    4. C++  reads the file-based result with PythonTestHelper::readMatrix.
+ *    4. C++  reads the file-based result with MATHLIB::read_matrix.
  *    5. Element-wise comparison within a numeric tolerance.
  *  -----------------------------------------------------------------
  *
@@ -34,7 +34,9 @@
 #include <sts/sts_cov_estimators.h>
 #include <fiff/fiff.h>
 #include <fiff/fiff_raw_data.h>
-#include <utils/python_test_helper.h>
+#include <math/matrix_io.h>
+#include <pybridge/python_test_helper.h>
+#include <base/string_utils.h>
 
 //=============================================================================================================
 // QT INCLUDES
@@ -44,6 +46,14 @@
 #include <QObject>
 #include <QFile>
 #include <QTemporaryDir>
+
+//=============================================================================================================
+// STL INCLUDES
+//=============================================================================================================
+
+#include <chrono>
+#include <format>
+#include <optional>
 
 //=============================================================================================================
 // EIGEN INCLUDES
@@ -57,7 +67,7 @@
 
 using namespace STSLIB;
 using namespace FIFFLIB;
-using namespace UTILSLIB;
+using namespace PYBRIDGELIB;
 using namespace Eigen;
 
 //=============================================================================================================
@@ -120,7 +130,7 @@ private:
 void TestCrossvalCovariance::initTestCase()
 {
     // --- Paths ---
-    m_sDataPath = PythonTestHelper::testDataPath();
+    m_sDataPath = QString::fromStdString(BASELIB::utf8FromPath(PythonTestHelper::test_data_path())) + "/";
     m_sRawFile = m_sDataPath + "MEG/sample/sample_audvis_trunc_raw.fif";
 
     QVERIFY2(QFile::exists(m_sRawFile),
@@ -129,15 +139,15 @@ void TestCrossvalCovariance::initTestCase()
 
     // --- Python availability ---
     // Report status explicitly so test output always shows what was found.
-    bool hasPython = m_pyHelper.isPythonAvailable();
-    bool hasMne = hasPython && m_pyHelper.hasPackage("mne");
-    bool hasSklearn = hasPython && m_pyHelper.hasPackage("sklearn");
+    bool hasPython = m_pyHelper.is_python_available();
+    bool hasMne = hasPython && m_pyHelper.has_package("mne");
+    bool hasSklearn = hasPython && m_pyHelper.has_package("sklearn");
     m_bPythonAvailable = hasMne && hasSklearn;
 
     qDebug() << "Python detection: python3=" << hasPython
              << " mne=" << hasMne
              << " sklearn=" << hasSklearn
-             << " MNE_REQUIRE_PYTHON=" << PythonTestHelper::isPythonRequired();
+             << " MNE_REQUIRE_PYTHON=" << PythonTestHelper::is_python_required();
 
     // --- C++ covariance (always computed) ---
     computeCppCovariance();
@@ -235,22 +245,16 @@ void TestCrossvalCovariance::computePythonCovariance()
                          .arg(m_sRawFile, covFilePath);
 
     // Run Python and capture both the file and stdout
-    PythonRunnerResult result = m_pyHelper.eval(pyCode, 120000);
-    QVERIFY2(result.success,
-             qPrintable(QString("Python failed (exit %1): %2")
-                            .arg(result.exitCode)
-                            .arg(result.stdErr)));
+    const PythonRunnerResult result = m_pyHelper.eval(pyCode.toStdString(), std::chrono::minutes(2));
+    QVERIFY2(result.success, std::format("Python failed (exit {}): {}", result.exit_code, result.std_err).c_str());
 
     // Parse shrinkage from stdout
-    bool alphaOk = false;
-    m_pyAlpha = result.stdOut.trimmed().toDouble(&alphaOk);
-    QVERIFY2(alphaOk,
-             qPrintable(QString("Could not parse shrinkage: '%1'").arg(result.stdOut.trimmed())));
+    const std::optional<double> alpha = BASELIB::toDouble(BASELIB::trimmed(result.std_out));
+    QVERIFY2(alpha, std::format("Could not parse shrinkage: '{}'", result.std_out).c_str());
+    m_pyAlpha = *alpha;
 
     // Read covariance matrix from file
-    bool covOk = false;
-    m_pyCov = PythonTestHelper::readMatrix(covFilePath, &covOk);
-    QVERIFY2(covOk, "Failed to read Python covariance matrix from file");
+    QVERIFY2(MATHLIB::read_matrix(m_pyCov, covFilePath.toStdString()), "Failed to read Python covariance matrix from file");
 
     QCOMPARE(m_pyCov.rows(), m_nChannels);
     QCOMPARE(m_pyCov.cols(), m_nChannels);

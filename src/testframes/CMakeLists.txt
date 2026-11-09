@@ -262,7 +262,7 @@ add_subdirectory(test_fiff_coverage)
 add_subdirectory(test_mne_inv_coverage)
 
 # v2.2.0 new library tests
-add_subdirectory(test_python_runner)
+add_subdirectory(test_pybridge_python_runner)
 add_subdirectory(test_mna_io)
 add_subdirectory(test_fiff_annotations)
 add_subdirectory(test_dsp_multitaper)

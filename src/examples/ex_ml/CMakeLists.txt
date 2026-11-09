@@ -18,7 +18,7 @@ endif()
 target_link_libraries(${PROJECT_NAME} PRIVATE
   Qt${QT_VERSION_MAJOR}::Core
   mne_ml
-  mne_utils
+  mne_pybridge
   mne_base
   Eigen3::Eigen
 )

@@ -24,13 +24,13 @@
     }
   },
   "summary": {
-    "libraries": 26,
+    "libraries": 27,
     "qt_free": [
       "acq",
       "decoding",
       "math"
     ],
-    "tokens": 14923,
+    "tokens": 14686,
     "gui_outside_design": []
   },
   "libraries": {
@@ -326,15 +326,15 @@
       ]
     },
     "inv": {
-      "tokens": 353,
+      "tokens": 295,
       "by_category": {
         "containers": 86,
-        "files": 35,
+        "files": 29,
         "global": 37,
         "json": 2,
         "objects_signals": 7,
         "regex": 1,
-        "strings": 183,
+        "strings": 131,
         "threads": 2
       },
       "public_header_includes": 48,
@@ -372,11 +372,9 @@
       "modules": []
     },
     "ml": {
-      "tokens": 12,
-      "by_category": {
-        "strings": 12
-      },
-      "public_header_includes": 2,
+      "tokens": 0,
+      "by_category": {},
+      "public_header_includes": 0,
       "q_object": 0,
       "files": 10,
       "modules": [
@@ -437,6 +435,23 @@
         "Core"
       ]
     },
+    "pybridge": {
+      "tokens": 35,
+      "by_category": {
+        "files": 9,
+        "global": 2,
+        "objects_signals": 1,
+        "other": 2,
+        "strings": 20,
+        "time": 1
+      },
+      "public_header_includes": 0,
+      "q_object": 0,
+      "files": 6,
+      "modules": [
+        "Core"
+      ]
+    },
     "sts": {
       "tokens": 0,
       "by_category": {},
@@ -448,20 +463,17 @@
       ]
     },
     "utils": {
-      "tokens": 249,
+      "tokens": 47,
       "by_category": {
-        "containers": 15,
-        "files": 34,
-        "global": 10,
-        "objects_signals": 15,
-        "other": 2,
-        "regex": 7,
-        "strings": 164,
-        "time": 2
+        "containers": 8,
+        "files": 4,
+        "global": 1,
+        "strings": 33,
+        "time": 1
       },
-      "public_header_includes": 16,
-      "q_object": 1,
-      "files": 11,
+      "public_header_includes": 8,
+      "q_object": 0,
+      "files": 7,
       "modules": [
         "Core"
       ]

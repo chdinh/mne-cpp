@@ -7,20 +7,20 @@
  * @author   Christoph Dinh <christoph.dinh@mne-cpp.org>
  * @since    2.2.0
  * @date     April 2026
- * @brief    Implementation of @ref MLLIB::MLTrainer that dispatches training scripts through @ref UTILSLIB::PythonRunner.
+ * @brief    Implementation of @ref MLLIB::MLTrainer that dispatches training scripts through @ref PYBRIDGELIB::PythonRunner.
  *
  * The class is a few-line orchestrator on top of
- * @ref UTILSLIB::PythonRunner: @c run first checks that a Python
+ * @ref PYBRIDGELIB::PythonRunner: @c run first checks that a Python
  * interpreter is reachable (returning an error-populated
- * @ref UTILSLIB::PythonRunnerResult if not), then branches on whether
- * a @c venvDir is configured. With a venv it calls @c runInVenv which
+ * @ref PYBRIDGELIB::PythonRunnerResult if not), then branches on whether
+ * a @c venv_dir is configured. With a venv it calls @c run_in_venv which
  * creates / refreshes the virtual environment and installs the
  * required packages before launching the script; without a venv it
  * forwards directly to @c run and uses whatever interpreter the
  * caller's configuration points at.
  *
- * @ref MLLIB::MLTrainer::checkPrerequisites iterates the caller's
- * package list through @c isPackageAvailable and returns the missing
+ * @ref MLLIB::MLTrainer::check_prerequisites iterates the caller's
+ * package list through @c is_package_available and returns the missing
  * ones so the UI can surface a single "install these to enable
  * training" message instead of failing mid-script. The whole TU is
  * gated by @c WASMBUILD because @c QProcess is not part of Qt-for-WASM.
@@ -36,16 +36,11 @@
 #ifndef WASMBUILD // QProcess (used by PythonRunner) is not available in Qt WASM
 
 //=============================================================================================================
-// QT INCLUDES
-//=============================================================================================================
-
-
-//=============================================================================================================
 // USED NAMESPACES
 //=============================================================================================================
 
 using namespace MLLIB;
-using namespace UTILSLIB;
+using namespace PYBRIDGELIB;
 using namespace BASELIB;
 
 //=============================================================================================================
@@ -73,21 +68,20 @@ PythonRunner& MLTrainer::runner()
 
 //=============================================================================================================
 
-PythonRunnerResult MLTrainer::run(const QString& scriptPath,
-                                  const QStringList& args)
+PythonRunnerResult MLTrainer::run(const std::filesystem::path& scriptPath, const StringList& args)
 {
-    if (!m_runner.isPythonAvailable()) {
+    if (!m_runner.is_python_available()) {
         PythonRunnerResult result;
-        result.stdErr = QStringLiteral("Python interpreter not found: ") + m_runner.config().pythonExe;
-        Log::warning("[MLTrainer] {}", result.stdErr.toStdString());
+        result.std_err = "Python interpreter not found: " + m_runner.config().python_exe;
+        Log::warning("[MLTrainer] {}", result.std_err);
         return result;
     }
 
-    Log::debug("[MLTrainer] Running training script: {}", scriptPath.toStdString());
+    Log::debug("[MLTrainer] Running training script: {}", utf8FromPath(scriptPath));
 
-    // If a venv is configured, use runInVenv (creates venv + installs deps automatically)
-    if (!m_runner.config().venvDir.isEmpty()) {
-        return m_runner.runInVenv(scriptPath, args);
+    // If a venv is configured, use run_in_venv (creates venv + installs deps automatically)
+    if (!m_runner.config().venv_dir.empty()) {
+        return m_runner.run_in_venv(scriptPath, args);
     }
 
     return m_runner.run(scriptPath, args);
@@ -95,16 +89,16 @@ PythonRunnerResult MLTrainer::run(const QString& scriptPath,
 
 //=============================================================================================================
 
-QStringList MLTrainer::checkPrerequisites(const QStringList& packages) const
+StringList MLTrainer::check_prerequisites(const StringList& packages) const
 {
-    QStringList missing;
-    for (const QString& pkg : packages) {
-        if (!m_runner.isPackageAvailable(pkg)) {
-            missing << pkg;
+    StringList missing;
+    for (const std::string& package : packages) {
+        if (!m_runner.is_package_available(package)) {
+            missing.push_back(package);
         }
     }
-    if (!missing.isEmpty()) {
-        Log::warning("[MLTrainer] Missing Python packages: {}", (missing.join(QStringLiteral(", "))).toStdString());
+    if (!missing.empty()) {
+        Log::warning("[MLTrainer] Missing Python packages: {}", join(missing, ", "));
     }
     return missing;
 }

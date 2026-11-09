@@ -19,9 +19,10 @@
     },
     {
       "name": "support",
-      "description": "Cross-cutting helpers used by everything above.",
+      "description": "Cross-cutting helpers used by everything above, and the Python bridge.",
       "libraries": [
-        "mne_utils"
+        "mne_utils",
+        "mne_pybridge"
       ]
     },
     {

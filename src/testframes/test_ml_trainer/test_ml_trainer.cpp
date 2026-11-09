@@ -18,8 +18,8 @@
 
 #ifndef WASMBUILD
 #include <ml/ml_trainer.h>
-#include <utils/python_runner.h>
-#include <utils/python_test_helper.h>
+#include <pybridge/python_runner.h>
+#include <pybridge/python_test_helper.h>
 #endif
 
 //=============================================================================================================
@@ -33,12 +33,19 @@
 #include <QTextStream>
 
 //=============================================================================================================
+// STL INCLUDES
+//=============================================================================================================
+
+#include <format>
+#include <string>
+
+//=============================================================================================================
 // USED NAMESPACES
 //=============================================================================================================
 
 #ifndef WASMBUILD
 using namespace MLLIB;
-using namespace UTILSLIB;
+using namespace PYBRIDGELIB;
 #endif
 
 //=============================================================================================================
@@ -73,9 +80,9 @@ void TestMlTrainer::initTestCase()
 {
 #ifndef WASMBUILD
     MLTrainer trainer;
-    m_pythonAvailable = trainer.runner().isPythonAvailable();
+    m_pythonAvailable = trainer.runner().is_python_available();
     qDebug() << "Python detection: available=" << m_pythonAvailable
-             << " MNE_REQUIRE_PYTHON=" << UTILSLIB::PythonTestHelper::isPythonRequired();
+             << " MNE_REQUIRE_PYTHON=" << PythonTestHelper::is_python_required();
 #endif
     QVERIFY(m_tempDir.isValid());
 }
@@ -90,7 +97,7 @@ void TestMlTrainer::testConstruction()
 
     // Construction with config
     PythonRunnerConfig config;
-    config.pythonExe = "python3";
+    config.python_exe = "python3";
     MLTrainer trainerWithConfig(config);
 #endif
 }
@@ -105,9 +112,8 @@ void TestMlTrainer::testCheckPrerequisitesStdlib()
     MLTrainer trainer;
 
     // "os" is always available in Python standard library
-    QStringList missing = trainer.checkPrerequisites({"os"});
-    QVERIFY2(missing.isEmpty(),
-             qPrintable(QString("Expected 'os' to be importable, missing: %1").arg(missing.join(", "))));
+    const BASELIB::StringList missing = trainer.check_prerequisites({"os"});
+    QVERIFY2(missing.empty(), ("Expected 'os' to be importable, missing: " + BASELIB::join(missing, ", ")).c_str());
 #endif
 }
 
@@ -121,8 +127,8 @@ void TestMlTrainer::testCheckPrerequisitesNonexistent()
     MLTrainer trainer;
 
     // A nonexistent package should appear in the missing list
-    QStringList missing = trainer.checkPrerequisites({"nonexistent_xyz_package_12345"});
-    QVERIFY2(missing.contains("nonexistent_xyz_package_12345"),
+    const BASELIB::StringList missing = trainer.check_prerequisites({"os", "nonexistent_xyz_package_12345"});
+    QVERIFY2(missing == BASELIB::StringList{"nonexistent_xyz_package_12345"},
              "Nonexistent package should be reported as missing");
 #endif
 }
@@ -143,13 +149,10 @@ void TestMlTrainer::testRunTrivialScript()
     file.close();
 
     MLTrainer trainer;
-    PythonRunnerResult result = trainer.run(scriptPath, {});
+    const PythonRunnerResult result = trainer.run(scriptPath.toStdString(), {});
 
-    QVERIFY2(result.success,
-             qPrintable(QString("Script failed: exit=%1, stderr=%2")
-                            .arg(result.exitCode)
-                            .arg(result.stdErr)));
-    QVERIFY(result.stdOut.contains("hello from trainer"));
+    QVERIFY2(result.success, std::format("Script failed: exit={}, stderr={}", result.exit_code, result.std_err).c_str());
+    QCOMPARE(result.std_out, std::string("hello from trainer"));
 #endif
 }
 
@@ -162,8 +165,11 @@ void TestMlTrainer::testRunnerAccess()
 
     // The runner() accessor should return a valid reference
     PythonRunner& runner = trainer.runner();
-    // Calling isPythonAvailable on runner should not crash
-    runner.isPythonAvailable();
+    // The accessor returns the trainer's own runner, so configuration changes reach the next run
+    PythonRunnerConfig config = runner.config();
+    config.python_exe = "python-that-does-not-exist";
+    runner.set_config(config);
+    QVERIFY(!trainer.run("unused.py").success);
 #endif
 }
 

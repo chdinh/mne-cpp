@@ -124,7 +124,7 @@
         "test_ml_trainer",
         "test_mne_acq_tool",
         "test_mne_compute_raw_inverse",
-        "test_python_runner"
+        "test_pybridge_python_runner"
       ]
     }
   },
@@ -1332,7 +1332,7 @@
     },
     {
       "source": "parity",
-      "mne_cpp": "UTILSLIB::LayoutMaker::makeLayout",
+      "mne_cpp": "CHANNELSLIB::LayoutMaker::makeLayout",
       "python": "mne.channels.generate_2d_layout",
       "claimed": "partial",
       "equivalence": null,
@@ -1359,7 +1359,7 @@
     },
     {
       "source": "parity",
-      "mne_cpp": "UTILSLIB::StandardMontage::getMontage",
+      "mne_cpp": "CHANNELSLIB::StandardMontage::getMontage",
       "python": "mne.channels.make_standard_montage",
       "claimed": "partial",
       "equivalence": null,
@@ -1369,7 +1369,7 @@
     },
     {
       "source": "parity",
-      "mne_cpp": "UTILSLIB::LayoutLoader::readAsaElcFile",
+      "mne_cpp": "CHANNELSLIB::LayoutLoader::readAsaElcFile",
       "python": "mne.channels.read_custom_montage",
       "claimed": "partial",
       "equivalence": null,

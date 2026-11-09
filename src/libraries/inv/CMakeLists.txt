@@ -147,6 +147,11 @@ target_link_libraries(${PROJECT_NAME} PRIVATE
     Eigen3::Eigen
     ${FFTW_LIBS})
 
+# InvCMNE::train_lstm runs the training script; QProcess is not available in Qt for WebAssembly
+if(NOT WASM)
+    target_link_libraries(${PROJECT_NAME} PRIVATE mne_pybridge)
+endif()
+
 target_compile_definitions(${PROJECT_NAME} PRIVATE MNE_INV_LIBRARY MNE_GIT_HASH_SHORT="${MNE_GIT_HASH_SHORT}" MNE_GIT_HASH_LONG="${MNE_GIT_HASH_LONG}")
 
 if(NOT BUILD_SHARED_LIBS)
