@@ -1,0 +1,232 @@
+---
+id: python-test-helper
+title: "PYBRIDGELIB::PythonTestHelper"
+sidebar_label: PythonTestHelper
+sidebar_position: 41
+---
+
+# PythonTestHelper
+
+**Namespace:** `PYBRIDGELIB` &nbsp;·&nbsp; **Library:** Python Bridge Library &nbsp;·&nbsp; **Source:** [`pybridge/python_test_helper.h`](https://github.com/mne-tools/mne-cpp/blob/staging/src/libraries/pybridge/python_test_helper.h)
+
+`#include <pybridge/python_test_helper.h>`
+
+```cpp
+class PYBRIDGELIB::PythonTestHelper
+```
+
+Test-frame convenience class for cross-validating MNE-CPP outputs against MNE-Python reference implementations.
+
+```cpp
+PythonTestHelper py;
+GUARD_PYTHON(py.is_available(), "MNE-Python not available");
+
+// Run a Python snippet that prints a reference value
+const std::optional<double> norm = py.eval_double("import numpy as np; print(np.linalg.norm(np.ones(10)))");
+QVERIFY(norm && std::abs(*norm - cppNorm) < 1e-12);
+```
+
+Each `eval` call honours its timeout; a run that exceeds it is killed and reported as failed.
+
+Test helper for MNE-Python cross-validation.
+
+```cpp title="src/examples/ex_pybridge/main.cpp"
+PythonTestHelper helper;                                                                    // oracle access for tests
+const std::optional<MatrixXd> fromNumpy = helper.eval_matrix("print('1 2'); print('3 4')"); // one line per row
+```
+
+---
+
+## Public Methods
+
+### is_available()
+
+**Returns:**
+
+- *bool* — True if Python is available and MNE-Python can be imported.
+
+---
+
+### is_python_available()
+
+**Returns:**
+
+- *bool* — True if the Python interpreter can be started.
+
+---
+
+### has_package(package)
+
+**Parameters:**
+
+- **package** : *std::string_view*
+  Module name, e.g. "numpy", "scipy" or "mne".
+
+**Returns:**
+
+- *bool* — True if the package can be imported.
+
+---
+
+### eval(code, timeout)
+
+Runs Python code.
+
+**Parameters:**
+
+- **code** : *std::string_view*
+  Python source executed with `python` -c.
+
+- **timeout** : *std::chrono::milliseconds*
+  Wall-clock limit.
+
+**Returns:**
+
+- *[PythonRunnerResult](/docs/api/pybridge/python-runner-result)* — Exit code and captured output.
+
+---
+
+### eval_double(code, timeout)
+
+Runs Python code that prints a single number.
+
+**Parameters:**
+
+- **code** : *std::string_view*
+  Python source whose stdout is one number.
+
+- **timeout** : *std::chrono::milliseconds*
+  Wall-clock limit.
+
+**Returns:**
+
+- *std::optional&lt; double &gt;* — The number, or nothing if the run failed or printed something else.
+
+---
+
+### eval_vector(code, timeout)
+
+Runs Python code that prints numbers, one per line or whitespace-separated, all read into one vector.
+
+**Parameters:**
+
+- **code** : *std::string_view*
+  Python source whose stdout is numeric.
+
+- **timeout** : *std::chrono::milliseconds*
+  Wall-clock limit.
+
+**Returns:**
+
+- *std::optional&lt; Eigen::VectorXd &gt;* — The values, or nothing if the run failed, printed nothing or printed a non-numeric value.
+
+---
+
+### eval_matrix(code, timeout)
+
+Runs Python code that prints a matrix, one row per line with whitespace-separated values.
+
+**Parameters:**
+
+- **code** : *std::string_view*
+  Python source whose stdout is a matrix.
+
+- **timeout** : *std::chrono::milliseconds*
+  Wall-clock limit.
+
+**Returns:**
+
+- *std::optional&lt; Eigen::MatrixXd &gt;* — The matrix, or nothing if the run failed, printed nothing or printed ragged or non-numeric rows.
+
+---
+
+### eval_matrix_via_file(code, file, timeout)
+
+Runs Python code that writes a matrix to `file` (e.g.
+
+with `numpy.savetxt`) and reads it back. Preferred over `eval_matrix` for large matrices, since nothing is parsed from stdout.
+
+**Parameters:**
+
+- **code** : *std::string_view*
+  Python source that writes `file`.
+
+- **file** : *const std::filesystem::path &*
+  File the code writes; read with `MATHLIB::read_matrix`.
+
+- **timeout** : *std::chrono::milliseconds*
+  Wall-clock limit.
+
+**Returns:**
+
+- *std::optional&lt; Eigen::MatrixXd &gt;* — The matrix, or nothing if the run failed or the file is missing, empty or malformed.
+
+---
+
+### run_script(script, args, timeout)
+
+Runs a Python script.
+
+**Parameters:**
+
+- **script** : *const std::filesystem::path &*
+  Path of the .py file.
+
+- **args** : *const BASELIB::StringList &*
+  Arguments passed to the script.
+
+- **timeout** : *std::chrono::milliseconds*
+  Wall-clock limit.
+
+**Returns:**
+
+- *[PythonRunnerResult](/docs/api/pybridge/python-runner-result)* — Exit code and captured output.
+
+---
+
+## Static Methods
+
+### test_data_path()
+
+**Returns:**
+
+- *std::filesystem::path* — The mne-cpp-test-data directory relative to the running test binary.
+
+---
+
+### is_python_required()
+
+**Returns:**
+
+- *bool* — True if the environment variable `MNE_REQUIRE_PYTHON` is "true" or "1", i.e. missing Python must fail tests instead of skipping them.
+
+---
+
+## Example
+
+- Start here: [ex_pybridge](../../examples/pybridge/ex_pybridge.mdx) — Python bridge: run a script with arguments and progress reporting, and read a matrix NumPy prints.
+- Full source: [`src/examples/ex_pybridge/main.cpp`](https://github.com/mne-tools/mne-cpp/tree/staging/src/examples/ex_pybridge/main.cpp)
+- Build target: `ex_pybridge` (runs under CTest)
+
+## Used in examples
+
+### [ex_pybridge](../../examples/pybridge/ex_pybridge.mdx)
+
+Python bridge: run a script with arguments and progress reporting, and read a matrix NumPy prints.
+
+````cpp title="src/examples/ex_pybridge/main.cpp, line 79"
+const PythonRunnerResult run = python.run_code("import sys\nprint('[progress] 50% half')\nprint(sum(map(int, sys.argv[1:])))", {"2", "3"});
+PythonTestHelper helper;                                                                    // oracle access for tests
+const std::optional<MatrixXd> fromNumpy = helper.eval_matrix("print('1 2'); print('3 4')"); // one line per row
+if (python.is_python_available()) {
+    ok &= expect(run.success && run.std_out.ends_with("5") && progress == std::vector<std::string>{"50 half"},
+                 "PythonRunner passes arguments and parses [progress] lines");
+    ok &= expect(fromNumpy && *fromNumpy == (Matrix2d() << 1, 2, 3, 4).finished(), "PythonTestHelper reads a matrix");
+} else {
+    std::println("  skip  PythonRunner (python3 not found)");
+}
+````
+
+## Authors of this file
+
+- Christoph Dinh &lt;christoph.dinh@mne-cpp.org&gt;

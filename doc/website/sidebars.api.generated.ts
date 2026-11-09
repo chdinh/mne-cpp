@@ -489,8 +489,6 @@ const apiSidebar: SidebarsConfig['apiSidebar'] = [
         'api/utils/i-observer',
         'api/utils/numerics',
         'api/utils/parks-mc-clellan',
-        'api/utils/python-runner',
-        'api/utils/python-test-helper',
         'api/utils/spectral',
         'api/utils/spectrogram',
         'api/utils/subject',
@@ -501,8 +499,6 @@ const apiSidebar: SidebarsConfig['apiSidebar'] = [
         'api/utils/derivation-rule',
         'api/utils/dpss-result',
         'api/utils/epoch-extractor-params',
-        'api/utils/python-runner-config',
-        'api/utils/python-runner-result',
         'api/utils/report-section',
         'api/utils/spectogram-input-data',
         'api/utils/tapered-spectra-input-data',
@@ -521,6 +517,19 @@ const apiSidebar: SidebarsConfig['apiSidebar'] = [
         'api/channels/layout-maker',
         'api/channels/selection-io',
         'api/channels/electrode-position'
+      ],
+    },
+    {
+      type: 'category',
+      label: "Python Bridge Library",
+      collapsible: true,
+      collapsed: true,
+      link: {type: 'doc', id: 'api/pybridge/index'},
+      items: [
+        'api/pybridge/python-runner',
+        'api/pybridge/python-test-helper',
+        'api/pybridge/python-runner-config',
+        'api/pybridge/python-runner-result'
       ],
     },
     {

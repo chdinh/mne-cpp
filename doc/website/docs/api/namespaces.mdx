@@ -14,7 +14,7 @@ All public namespaces in the MNE-CPP library tree.
 | [`ACQLIB`](/docs/api/acq/) | 59 | Headless acquisition: sources, streams, zero-copy readers and native sample formats. |
 | [`BASELIB`](/docs/api/base/) | 9 | Shared utilities (I/O helpers, spectral analysis, layout management, warp algorithms). |
 | [`BIDSLIB`](/docs/api/bids/) | 14 | BIDS dataset reading, writing, path construction, and sidecar metadata handling for iEEG/EEG/MEG. |
-| [`CHANNELSLIB`](/docs/api/channels/) | 5 | Shared utilities (I/O helpers, spectral analysis, layout management, warp algorithms). |
+| [`CHANNELSLIB`](/docs/api/channels/) | 5 | Sensor layouts, channel selections and standard EEG montages. |
 | [`COMLIB`](/docs/api/com/) | 8 | Real-time client/server communication primitives for talking to `mne_rt_server`. |
 | [`CONNECTIVITYLIB`](/docs/api/connectivity/) | 20 | Functional connectivity metrics (coherence, PLV, cross-correlation, etc.). |
 | [`DECODINGLIB`](/docs/api/decoding/) | 5 | Supervised and unsupervised spatial-filter decompositions for M/EEG decoding. |
@@ -32,10 +32,11 @@ All public namespaces in the MNE-CPP library tree.
 | [`MNALIB`](/docs/api/mna/) | 22 | MNE Analysis Container Format (mna/mnx). |
 | [`MNELIB`](/docs/api/mne/) | 64 | Core MNE data structures (source spaces, source estimates, hemispheres). |
 | [`MRILIB`](/docs/api/mri/) | 8 | Volume I/O, voxel geometry and slice resampling for structural MRI data inside mne-cpp. |
+| [`PYBRIDGELIB`](/docs/api/pybridge/) | 4 | Python interoperability: script launcher and MNE-Python cross-validation helpers. |
 | [`RTPROCESSINGLIB`](/docs/api/dsp/) | 15 |  |
 | [`STSLIB`](/docs/api/sts/) | 10 | Statistical testing (t-tests, F-tests, cluster permutation, multiple comparison correction). |
 | `SURFACEKEYS` | 0 | Centralised string constants for surface map keys. |
-| [`UTILSLIB`](/docs/api/utils/) | 79 | Shared utilities (I/O helpers, spectral analysis, layout management, warp algorithms). |
+| [`UTILSLIB`](/docs/api/utils/) | 75 | Shared utilities (I/O helpers, spectral analysis, layout management, warp algorithms). |
 | `Ui` | 0 |  |
 
 ## Class inventory by namespace
@@ -557,6 +558,13 @@ All public namespaces in the MNE-CPP library tree.
 - [MriSlicer](/docs/api/mri/mri-slicer)
 - [MriVolData](/docs/api/mri/mri-vol-data)
 
+### PYBRIDGELIB
+
+- [PythonRunner](/docs/api/pybridge/python-runner)
+- [PythonRunnerConfig](/docs/api/pybridge/python-runner-config)
+- [PythonRunnerResult](/docs/api/pybridge/python-runner-result)
+- [PythonTestHelper](/docs/api/pybridge/python-test-helper)
+
 ### RTPROCESSINGLIB
 
 - [FilterObject](/docs/api/dsp/filter-object)
@@ -645,10 +653,6 @@ All public namespaces in the MNE-CPP library tree.
 - [ParksMcClellan](/docs/api/utils/parks-mc-clellan)
 - [PeakFinderParams](/docs/api/dsp/peak-finder-params)
 - [PicardIca](/docs/api/dsp/picard-ica)
-- [PythonRunner](/docs/api/utils/python-runner)
-- [PythonRunnerConfig](/docs/api/utils/python-runner-config)
-- [PythonRunnerResult](/docs/api/utils/python-runner-result)
-- [PythonTestHelper](/docs/api/utils/python-test-helper)
 - [Report](/docs/api/utils/report)
 - [ReportSection](/docs/api/utils/report-section)
 - [Resample](/docs/api/dsp/resample)

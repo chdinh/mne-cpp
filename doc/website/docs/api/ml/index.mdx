@@ -147,7 +147,7 @@ auto eigenMap = t2.matrix();  // RowMajorMatrixMap
 
 ## MLTrainer
 
-ML-specific convenience wrapper over `UTILSLIB::PythonRunner` for launching Python training scripts. Not available in WASM builds.
+ML-specific convenience wrapper over `PYBRIDGELIB::PythonRunner` for launching Python training scripts. Not available in WASM builds.
 
 ```cpp
 #include <ml/ml_trainer.h>
@@ -155,20 +155,19 @@ ML-specific convenience wrapper over `UTILSLIB::PythonRunner` for launching Pyth
 MLLIB::MLTrainer trainer;
 
 // Check prerequisites
-if (trainer.checkPackages({"torch", "mne", "numpy"})) {
+if (trainer.check_prerequisites({"torch", "mne", "numpy"}).empty()) {
     // Run training script
-    auto result = trainer.run("scripts/ml/training/train_cmne.py",
-                               {"--epochs", "100", "--lr", "0.001"});
-    if (result.exitCode == 0) {
-        qDebug() << "Training complete";
+    const auto result = trainer.run("scripts/ml/training/train_cmne.py", {"--epochs", "100", "--lr", "0.001"});
+    if (result.success) {
+        BASELIB::Log::info("Training complete");
     }
 }
 ```
 
 | Method | Description |
 |---|---|
-| `run(scriptPath, args)` | Run a Python training script |
-| `checkPackages(packages)` | Verify that required Python packages are importable |
+| `run(script, args)` | Run a Python training script, inside the configured venv if there is one |
+| `check_prerequisites(packages)` | Return the packages that cannot be imported |
 | `runner()` | Access the underlying `PythonRunner` for callback/config changes |
 
 ---

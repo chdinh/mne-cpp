@@ -49,6 +49,7 @@
     "fiff": "FIFF I/O",
     "math": "Math",
     "channels": "Channels",
+    "pybridge": "Python Bridge",
     "utils": "Utilities",
     "base": "Base"
   },
@@ -1493,6 +1494,25 @@
       "topics": []
     },
     {
+      "name": "ex_pybridge",
+      "title": "Run Python scripts and read what NumPy prints",
+      "brief": "Python bridge: run a script with arguments and progress reporting, and read a matrix NumPy prints",
+      "thumbnail": "",
+      "url": "/docs/examples/pybridge/ex_pybridge/",
+      "library": "pybridge",
+      "libraries": [
+        "pybridge"
+      ],
+      "tasks": [
+        "infrastructure"
+      ],
+      "modalities": [
+        "generic"
+      ],
+      "level": "start",
+      "topics": []
+    },
+    {
       "name": "ex_read_bem",
       "title": "Read and write a BEM model",
       "brief": "Read a BEM model from FIFF, write it back and verify the round trip",
@@ -1782,7 +1802,7 @@
     },
     {
       "name": "ex_utils",
-      "title": "Montages, layouts, selections, matrix files and reports",
+      "title": "Montages, layouts, selections and reports",
       "brief": "Utilities library: observers, commands, montages, layouts, selections and reports",
       "thumbnail": "",
       "url": "/docs/examples/channels/ex_utils/",

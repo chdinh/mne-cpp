@@ -7,7 +7,7 @@ sidebar_position: 6
 
 # Namespace Members
 
-Index of 443 namespace-level symbols (functions, typedefs, enums, variables) across all public namespaces.
+Index of 449 namespace-level symbols (functions, typedefs, enums, variables) across all public namespaces.
 
 - **Accuracy** `[enum]` in [INVLIB](/docs/api/inv/)
 - **acqApplyThreadPolicy** `[fn]` in [ACQLIB](/docs/api/acq/) — Applies `policy` to the calling thread: CPUs first, then priority.
@@ -83,6 +83,7 @@ Index of 443 namespace-level symbols (functions, typedefs, enums, variables) acr
 - **buildDateTime** `[fn]` in [MNALIB](/docs/api/mna/) — Returns build date and time.
 - **buildDateTime** `[fn]` in [MNELIB](/docs/api/mne/) — Returns build date and time.
 - **buildDateTime** `[fn]` in [MRILIB](/docs/api/mri/) — Returns the build date and time.
+- **buildDateTime** `[fn]` in [PYBRIDGELIB](/docs/api/pybridge/) — Returns build date and time.
 - **buildDateTime** `[fn]` in [STSLIB](/docs/api/sts/) — Returns build date and time.
 - **buildDateTime** `[fn]` in [UTILSLIB](/docs/api/utils/) — Returns build date and time.
 - **buildHash** `[fn]` in [ACQLIB](/docs/api/acq/) — Returns abbreviated build git hash.
@@ -106,6 +107,7 @@ Index of 443 namespace-level symbols (functions, typedefs, enums, variables) acr
 - **buildHash** `[fn]` in [MNALIB](/docs/api/mna/) — Returns abbreviated build git hash.
 - **buildHash** `[fn]` in [MNELIB](/docs/api/mne/) — Returns abbreviated build git hash.
 - **buildHash** `[fn]` in [MRILIB](/docs/api/mri/) — Returns the short git hash.
+- **buildHash** `[fn]` in [PYBRIDGELIB](/docs/api/pybridge/) — Returns abbreviated build git hash.
 - **buildHash** `[fn]` in [STSLIB](/docs/api/sts/) — Returns abbreviated build git hash.
 - **buildHash** `[fn]` in [UTILSLIB](/docs/api/utils/) — Returns abbreviated build git hash.
 - **buildHashLong** `[fn]` in [ACQLIB](/docs/api/acq/) — Returns full build git hash.
@@ -129,6 +131,7 @@ Index of 443 namespace-level symbols (functions, typedefs, enums, variables) acr
 - **buildHashLong** `[fn]` in [MNALIB](/docs/api/mna/) — Returns full build git hash.
 - **buildHashLong** `[fn]` in [MNELIB](/docs/api/mne/) — Returns full build git hash.
 - **buildHashLong** `[fn]` in [MRILIB](/docs/api/mri/) — Returns the long git hash.
+- **buildHashLong** `[fn]` in [PYBRIDGELIB](/docs/api/pybridge/) — Returns full build git hash.
 - **buildHashLong** `[fn]` in [STSLIB](/docs/api/sts/) — Returns full build git hash.
 - **buildHashLong** `[fn]` in [UTILSLIB](/docs/api/utils/) — Returns full build git hash.
 - **BVBinaryFormat** `[enum]` in [BIDSLIB](/docs/api/bids/) — Binary format enumeration for BrainVision data files.
@@ -376,6 +379,7 @@ Index of 443 namespace-level symbols (functions, typedefs, enums, variables) acr
 - **operator==** `[fn]` in [MNELIB](/docs/api/mne/)
 - **operator==** `[fn]` in [MNELIB](/docs/api/mne/)
 - **packABGR** `[fn]` in [DISP3DLIB](/docs/api/disp3-d/) — Pack RGBA colour components into a single ABGR uint32_t suitable for GPU vertex attributes declared as UNormByte4.
+- **parse_progress_line** `[fn]` in [PYBRIDGELIB](/docs/api/pybridge/) — Parses a progress line of the form `"[progress] 42.5%"` or `"[progress] 42.5% message"` (case-insensitive tag, surrounding whitespace ignored).
 - **pathFromUtf8** `[fn]` in [BASELIB](/docs/api/base/)
 - **peakFinder** `[fn]` in [UTILSLIB](/docs/api/utils/) — Find peaks in a 1D signal.
 - **peakFinderMne** `[fn]` in [UTILSLIB](/docs/api/utils/) — Noise-tolerant extrema search of `mne.preprocessing.peak_finder`.
@@ -384,11 +388,13 @@ Index of 443 namespace-level symbols (functions, typedefs, enums, variables) acr
 - **perspectivePresetRotation** `[fn]` in [DISP3DLIB](/docs/api/disp3-d/) — Default perspective rotation quaternion used for the "Perspective" camera.
 - **PickKind** `[enum]` in [DISP3DLIB](/docs/api/disp3-d/) — Kind of object that produced a 3-D pick.
 - **PointKind** `[enum]` in [ACQLIB](/docs/api/acq/) — Logical category of a captured point.
-- **PythonLineCallback** `[type]` in [UTILSLIB](/docs/api/utils/) — Line-level callback signature.
-- **PythonProgressCallback** `[type]` in [UTILSLIB](/docs/api/utils/) — Progress callback signature.
+- **PythonChannel** `[enum]` in [PYBRIDGELIB](/docs/api/pybridge/) — Output stream of the child process a line came from.
+- **PythonLineCallback** `[type]` in [PYBRIDGELIB](/docs/api/pybridge/) — Called for every output line (without the trailing newline).
+- **PythonProgressCallback** `[type]` in [PYBRIDGELIB](/docs/api/pybridge/) — Called for every `"[progress] &lt;pct&gt;% [message]"` line, with pct in 0 to 100.
 - **read** `[fn]` in [ACQLIB](/docs/api/acq/) — Reads samples into an Eigen matrix, resizing it only when its shape differs (so a reused matrix does not allocate).
 - **read_file_bytes** `[fn]` in [BASELIB](/docs/api/base/) — Reads a whole file, decompressing it if asked to.
 - **read_matrix** `[fn]` in [MATHLIB](/docs/api/math/) — Reads a matrix written by `write_matrix` (or `numpy.savetxt`).
+- **read_matrix** `[fn]` in [MATHLIB](/docs/api/math/) — Reads a matrix in the same text layout from a stream, e.g.
 - **ref** `[fn]` in [ACQLIB](/docs/api/acq/)
 - **ref** `[fn]` in [ACQLIB](/docs/api/acq/)
 - **registerFiffScheme** `[fn]` in [ACQLIB](/docs/api/acq/) — Registers the fiff:// scheme with `AcqDeviceRegistry::instance()`.

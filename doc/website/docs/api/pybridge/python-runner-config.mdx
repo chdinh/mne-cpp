@@ -1,0 +1,57 @@
+---
+id: python-runner-config
+title: "PYBRIDGELIB::PythonRunnerConfig"
+sidebar_label: PythonRunnerConfig
+sidebar_position: 61
+---
+
+# PythonRunnerConfig
+
+**Namespace:** `PYBRIDGELIB` &nbsp;·&nbsp; **Library:** Python Bridge Library &nbsp;·&nbsp; **Source:** [`pybridge/python_runner.h`](https://github.com/mne-tools/mne-cpp/blob/staging/src/libraries/pybridge/python_runner.h)
+
+`#include <pybridge/python_runner.h>`
+
+```cpp
+struct PYBRIDGELIB::PythonRunnerConfig
+```
+
+How and where a [`PythonRunner`](/docs/api/pybridge/python-runner) starts the interpreter.
+
+```cpp title="src/examples/ex_pybridge/main.cpp"
+PythonRunner python; // "python3" from PATH; a timeout or venv is set via PythonRunnerConfig
+std::vector<std::string> progress;
+python.set_progress_callback([&](float pct, std::string_view message) { progress.push_back(std::format("{} {}", pct, message)); });
+const PythonRunnerResult run = python.run_code("import sys\nprint('[progress] 50% half')\nprint(sum(map(int, sys.argv[1:])))", {"2", "3"});
+```
+
+---
+
+## Example
+
+- Start here: [ex_pybridge](../../examples/pybridge/ex_pybridge.mdx) — Python bridge: run a script with arguments and progress reporting, and read a matrix NumPy prints.
+- Full source: [`src/examples/ex_pybridge/main.cpp`](https://github.com/mne-tools/mne-cpp/tree/staging/src/examples/ex_pybridge/main.cpp)
+- Build target: `ex_pybridge` (runs under CTest)
+
+## Used in examples
+
+### [ex_pybridge](../../examples/pybridge/ex_pybridge.mdx)
+
+Python bridge: run a script with arguments and progress reporting, and read a matrix NumPy prints.
+
+````cpp title="src/examples/ex_pybridge/main.cpp, line 76"
+PythonRunner python; // "python3" from PATH; a timeout or venv is set via PythonRunnerConfig
+std::vector<std::string> progress;
+python.set_progress_callback([&](float pct, std::string_view message) { progress.push_back(std::format("{} {}", pct, message)); });
+const PythonRunnerResult run = python.run_code("import sys\nprint('[progress] 50% half')\nprint(sum(map(int, sys.argv[1:])))", {"2", "3"});
+PythonTestHelper helper;                                                                    // oracle access for tests
+const std::optional<MatrixXd> fromNumpy = helper.eval_matrix("print('1 2'); print('3 4')"); // one line per row
+if (python.is_python_available()) {
+    ok &= expect(run.success && run.std_out.ends_with("5") && progress == std::vector<std::string>{"50 half"},
+                 "PythonRunner passes arguments and parses [progress] lines");
+    ok &= expect(fromNumpy && *fromNumpy == (Matrix2d() << 1, 2, 3, 4).finished(), "PythonTestHelper reads a matrix");
+} else {
+````
+
+## Authors of this file
+
+- Christoph Dinh &lt;christoph.dinh@mne-cpp.org&gt;

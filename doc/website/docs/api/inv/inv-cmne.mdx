@@ -136,30 +136,30 @@ Rectify and z-score each source over time (Eq.
 
 ---
 
-### trainLstm(fwdPath, covPath, epochsPath, outOnnxPath, settings, gtStcPrefix, hiddenSize, numLayers, trainEpochs, learningRate, batchSize, finetuneOnnxPath, pythonExe)
+### train_lstm(fwdPath, covPath, epochsPath, outOnnxPath, settings, gtStcPrefix, hiddenSize, numLayers, trainEpochs, learningRate, batchSize, finetuneOnnxPath, pythonExe)
 
 Train the CMNE LSTM model by invoking the Python training script.
 
-This is a convenience wrapper that calls `scripts/ml/training/train_cmne_lstm.py` via [`PythonRunner`](/docs/api/utils/python-runner). The heavy lifting (PyTorch LSTM training + ONNX export) happens in Python; C++ only launches the process and streams its output.
+This is a convenience wrapper that calls `scripts/ml/training/train_cmne_lstm.py` via [`PythonRunner`](/docs/api/pybridge/python-runner). The heavy lifting (PyTorch LSTM training + ONNX export) happens in Python; C++ only launches the process and streams its output.
 
 **Parameters:**
 
-- **fwdPath** : *const QString &*
+- **fwdPath** : *const std::filesystem::path &*
   Path to forward solution FIFF file.
 
-- **covPath** : *const QString &*
+- **covPath** : *const std::filesystem::path &*
   Path to noise covariance FIFF file.
 
-- **epochsPath** : *const QString &*
+- **epochsPath** : *const std::filesystem::path &*
   Path to epochs FIFF file.
 
-- **outOnnxPath** : *const QString &*
+- **outOnnxPath** : *const std::filesystem::path &*
   Desired output path for the ONNX model.
 
 - **settings** : *const [InvCMNESettings](/docs/api/inv/inv-cmne-settings) &*
   CMNE settings (look-back, method, SNR are forwarded).
 
-- **gtStcPrefix** : *const QString &*
+- **gtStcPrefix** : *const std::string &*
   Ground-truth STC prefix (optional; empty = simulation mode).
 
 - **hiddenSize** : *int*
@@ -177,15 +177,15 @@ This is a convenience wrapper that calls `scripts/ml/training/train_cmne_lstm.py
 - **batchSize** : *int*
   Batch size (default 64).
 
-- **finetuneOnnxPath** : *const QString &*
+- **finetuneOnnxPath** : *const std::filesystem::path &*
   Existing ONNX model to fine-tune from (optional).
 
-- **pythonExe** : *const QString &*
+- **pythonExe** : *const std::string &*
   Python interpreter (default "python3").
 
 **Returns:**
 
-- *[PythonRunnerResult](/docs/api/utils/python-runner-result)* — PythonRunnerResult with exit code, captured output and progress.
+- *[PythonRunnerResult](/docs/api/pybridge/python-runner-result)* — PythonRunnerResult with exit code, captured output and progress.
 
 ---
 

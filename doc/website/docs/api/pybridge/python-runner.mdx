@@ -1,0 +1,226 @@
+---
+id: python-runner
+title: "PYBRIDGELIB::PythonRunner"
+sidebar_label: PythonRunner
+sidebar_position: 40
+---
+
+# PythonRunner
+
+**Namespace:** `PYBRIDGELIB` &nbsp;·&nbsp; **Library:** Python Bridge Library &nbsp;·&nbsp; **Source:** [`pybridge/python_runner.h`](https://github.com/mne-tools/mne-cpp/blob/staging/src/libraries/pybridge/python_runner.h)
+
+`#include <pybridge/python_runner.h>`
+
+```cpp
+class PYBRIDGELIB::PythonRunner
+```
+
+Runs Python scripts and one-liners in a child process.
+
+Output is streamed line by line to the optional callbacks and to [`Log`](/docs/api/base/log), and collected into the [`PythonRunnerResult`](/docs/api/pybridge/python-runner-result). Lines of the form `"[progress] 42.5%"` or `"[progress] 42.5% Training epoch 10/50"` are reported as progress. No Python embedding or linkage is required.
+
+Python script launcher with streaming output and progress reporting.
+
+```cpp title="src/examples/ex_pybridge/main.cpp"
+PythonRunner python; // "python3" from PATH; a timeout or venv is set via PythonRunnerConfig
+std::vector<std::string> progress;
+python.set_progress_callback([&](float pct, std::string_view message) { progress.push_back(std::format("{} {}", pct, message)); });
+const PythonRunnerResult run = python.run_code("import sys\nprint('[progress] 50% half')\nprint(sum(map(int, sys.argv[1:])))", {"2", "3"});
+```
+
+---
+
+## Public Methods
+
+### PythonRunner()
+
+Constructs a runner for `python3` from PATH.
+
+---
+
+### PythonRunner(config)
+
+Constructs a runner with an explicit configuration.
+
+**Parameters:**
+
+- **config** : *[PythonRunnerConfig](/docs/api/pybridge/python-runner-config)*
+  Interpreter, environment and limits.
+
+---
+
+### set_config(config)
+
+Replaces the configuration.
+
+**Parameters:**
+
+- **config** : *[PythonRunnerConfig](/docs/api/pybridge/python-runner-config)*
+  Interpreter, environment and limits.
+
+---
+
+### config()
+
+**Returns:**
+
+- *const [PythonRunnerConfig](/docs/api/pybridge/python-runner-config) &* — The current configuration; after a successful `ensure_venv` it names the venv interpreter.
+
+---
+
+### set_line_callback(callback)
+
+Sets the callback invoked for every stdout and stderr line.
+
+**Parameters:**
+
+- **callback** : *PythonLineCallback*
+  Line callback; an empty function disables it.
+
+---
+
+### set_progress_callback(callback)
+
+Sets the callback invoked for every progress line.
+
+**Parameters:**
+
+- **callback** : *PythonProgressCallback*
+  Progress callback; an empty function disables it.
+
+---
+
+### run(script, args)
+
+Runs a script and waits for it to finish.
+
+**Parameters:**
+
+- **script** : *const std::filesystem::path &*
+  Path of the .py file.
+
+- **args** : *const BASELIB::StringList &*
+  Arguments passed to the script.
+
+**Returns:**
+
+- *[PythonRunnerResult](/docs/api/pybridge/python-runner-result)* — Exit code, captured output and last progress.
+
+---
+
+### run_code(code, args)
+
+Runs Python code (`python` -c) and waits for it to finish.
+
+**Parameters:**
+
+- **code** : *std::string_view*
+  Python source.
+
+- **args** : *const BASELIB::StringList &*
+  Arguments available as `sys.argv`[1:].
+
+**Returns:**
+
+- *[PythonRunnerResult](/docs/api/pybridge/python-runner-result)* — Exit code, captured output and last progress.
+
+---
+
+### is_python_available()
+
+**Returns:**
+
+- *bool* — True if `"python &ndash;version"` succeeds.
+
+---
+
+### python_version()
+
+**Returns:**
+
+- *std::string* — The interpreter version, e.g. "3.12.4", or an empty string if Python is not available.
+
+---
+
+### is_package_available(package)
+
+Checks whether a package can be imported, without importing it.
+
+**Parameters:**
+
+- **package** : *std::string_view*
+  Module name, e.g. "mne" or "sklearn"; anything but a dotted Python identifier is rejected.
+
+**Returns:**
+
+- *bool* — True if `importlib.util.find_spec` finds the package.
+
+---
+
+### ensure_venv()
+
+Prepares the configured virtual environment: creates it if needed, installs `package_dir` (preferred) or `requirements_file` into it, and switches `python_exe` to the venv interpreter.
+
+Without a `venv_dir` it does nothing and succeeds.
+
+**Returns:**
+
+- *[PythonRunnerResult](/docs/api/pybridge/python-runner-result)* — The outcome of the venv setup.
+
+---
+
+### run_in_venv(script, args)
+
+Calls `ensure_venv`, then runs the script inside the venv.
+
+**Parameters:**
+
+- **script** : *const std::filesystem::path &*
+  Path of the .py file.
+
+- **args** : *const BASELIB::StringList &*
+  Arguments passed to the script.
+
+**Returns:**
+
+- *[PythonRunnerResult](/docs/api/pybridge/python-runner-result)* — The venv setup error, or the outcome of the run.
+
+---
+
+### venv_python_path()
+
+**Returns:**
+
+- *std::filesystem::path* — The interpreter inside `venv_dir`, or an empty path if no venv is configured.
+
+---
+
+## Example
+
+- Start here: [ex_pybridge](../../examples/pybridge/ex_pybridge.mdx) — Python bridge: run a script with arguments and progress reporting, and read a matrix NumPy prints.
+- Full source: [`src/examples/ex_pybridge/main.cpp`](https://github.com/mne-tools/mne-cpp/tree/staging/src/examples/ex_pybridge/main.cpp)
+- Build target: `ex_pybridge` (runs under CTest)
+
+## Used in examples
+
+### [ex_pybridge](../../examples/pybridge/ex_pybridge.mdx)
+
+Python bridge: run a script with arguments and progress reporting, and read a matrix NumPy prints.
+
+````cpp title="src/examples/ex_pybridge/main.cpp, line 76"
+PythonRunner python; // "python3" from PATH; a timeout or venv is set via PythonRunnerConfig
+std::vector<std::string> progress;
+python.set_progress_callback([&](float pct, std::string_view message) { progress.push_back(std::format("{} {}", pct, message)); });
+const PythonRunnerResult run = python.run_code("import sys\nprint('[progress] 50% half')\nprint(sum(map(int, sys.argv[1:])))", {"2", "3"});
+PythonTestHelper helper;                                                                    // oracle access for tests
+const std::optional<MatrixXd> fromNumpy = helper.eval_matrix("print('1 2'); print('3 4')"); // one line per row
+if (python.is_python_available()) {
+    ok &= expect(run.success && run.std_out.ends_with("5") && progress == std::vector<std::string>{"50 half"},
+                 "PythonRunner passes arguments and parses [progress] lines");
+    ok &= expect(fromNumpy && *fromNumpy == (Matrix2d() << 1, 2, 3, 4).finished(), "PythonTestHelper reads a matrix");
+} else {
+````
+
+## Authors of this file
+
+- Christoph Dinh &lt;christoph.dinh@mne-cpp.org&gt;

@@ -84,7 +84,39 @@ Lines containing `#` and blank lines are skipped. A row-vector target receives t
 
 **Returns:**
 
-- *bool* — True on success, false if the file cannot be opened, holds a non-numeric value or has rows of unequal length.
+- *bool* — True on success, false if the file cannot be opened, holds a non-numeric value, has rows of unequal length or does not fit a fixed-size `out`.
+
+---
+
+### read_matrix(out, stream)
+
+```cpp
+bool read_matrix(Eigen::Matrix< Scalar, Rows, Cols, Options, MaxRows, MaxCols > & out, std::istream & stream);
+```
+
+Reads a matrix in the same text layout from a stream, e.g.
+
+the captured output of a Python script.
+
+**Parameters:**
+
+- **out** : *Eigen::Matrix&lt; Scalar, Rows, Cols, Options, MaxRows, MaxCols &gt; &*
+  Resized and filled with the values read; left unchanged on failure.
+
+- **stream** : *std::istream &*
+  Whitespace-separated text, one row per line.
+
+**Returns:**
+
+- *bool* — True on success, false if the text holds a non-numeric value, has rows of unequal length or does not fit a fixed-size `out`.
+
+---
+
+### parse_matrix(out, file, source)
+
+```cpp
+bool parse_matrix(Eigen::Matrix< Scalar, Rows, Cols, Options, MaxRows, MaxCols > & out, std::istream & file, std::string_view source);
+```
 
 ---
 

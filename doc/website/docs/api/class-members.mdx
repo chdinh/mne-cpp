@@ -7,7 +7,7 @@ sidebar_position: 5
 
 # Class Members
 
-Index of 6294 public class members (functions, variables, typedefs, enums) across all documented classes.
+Index of 6288 public class members (functions, variables, typedefs, enums) across all documented classes.
 
 **Jump to:** [A](#a) · [B](#b) · [C](#c) · [D](#d) · [E](#e) · [F](#f) · [G](#g) · [H](#h) · [I](#i) · [J](#j) · [K](#k) · [L](#l) · [M](#m) · [N](#n) · [O](#o) · [P](#p) · [Q](#q) · [R](#r) · [S](#s) · [T](#t) · [U](#u) · [V](#v) · [W](#w) · [X](#x) · [Y](#y) · [Z](#z)
 
@@ -567,6 +567,7 @@ Index of 6294 public class members (functions, variables, typedefs, enums) acros
 - **chClass** `[var]` in [FiffCov](/docs/api/fiff/fiff-cov) — Channel classification vector.
 - **chdef** `[var]` in [MNEChSelection](/docs/api/mne/mne-ch-selection) — Channel definitions (may contain regular expressions).
 - **check_ch_names** `[fn]` in [MNEInverseOperator](/docs/api/mne/mne-inverse-operator) — Verify that inverse-operator channels are present in the measurement info.
+- **check_prerequisites** `[fn]` in [MLTrainer](/docs/api/ml/ml-trainer) — Check that the required Python packages are importable.
 - **checkArtifacts** `[fn]` in [FiffEvokedSet](/docs/api/fiff/fiff-evoked-set) — Check whether an epoch passes artifact rejection criteria.
 - **checkEegLocations** `[fn]` in [FiffChInfo](/docs/api/fiff/fiff-ch-info) — Check that all EEG channels in the list have reasonable (non-origin) locations.
 - **checkForArtifact** `[fn]` in [MNEEpochDataList](/docs/api/mne/mne-epoch-data-list) — Checks the givven matrix for artifacts beyond a threshold value.
@@ -575,7 +576,6 @@ Index of 6294 public class members (functions, variables, typedefs, enums) acros
 - **checkId** `[var]` in [MnaVerificationResult](/docs/api/mna/mna-verification-result) — References `MnaVerificationCheck::id`.
 - **checkIntegrity** `[fn]` in [ComputeFwdSettings](/docs/api/fwd/compute-fwd-settings) — Check whether Compute Forward Settings are correctly set.
 - **checkIntegrity** `[fn]` in [InvDipoleFitSettings](/docs/api/inv/inv-dipole-fit-settings) — Check whether Dipole Fit Settings are correctly set and report them.
-- **checkPrerequisites** `[fn]` in [MLTrainer](/docs/api/ml/ml-trainer) — Check that the required Python packages are importable.
 - **checks** `[var]` in [MnaVerification](/docs/api/mna/mna-verification) — Declarative checks (authored by user, evaluated by executor).
 - **chi2Isf** `[fn]` in [Numerics](/docs/api/utils/numerics) — Value a chi^2 variable exceeds with probability `p` (`scipy.stats.chi2.isf`).
 - **children** `[var]` in [FiffDirNode](/docs/api/fiff/fiff-dir-node) — Child nodes.
@@ -934,7 +934,7 @@ Index of 6294 public class members (functions, variables, typedefs, enums) acros
 - **Condition** `[type]` in [FiffEvoked](/docs/api/fiff/fiff-evoked) — Selects a data set by its index in the file or by its comment.
 - **condition** `[fn]` in [MNECovMatrix](/docs/api/mne/mne-cov-matrix) — Condition the covariance matrix by eigendecomposition with per-channel-type scaling, zeroing sub-threshold eigenvalues, and reconstructing.
 - **confidence** `[var]` in [IcaLabelResult](/docs/api/decoding/ica-label-result) — Confidence score in [0, 1].
-- **config** `[fn]` in [PythonRunner](/docs/api/utils/python-runner) — Get the current configuration.
+- **config** `[fn]` in [PythonRunner](/docs/api/pybridge/python-runner)
 - **confine** `[fn]` in [MNELayout](/docs/api/mne/mne-layout) — Zooms to the ports inside `area` (MNE-C `mne_lout_confine`).
 - **connect** `[fn]` in [MnaGraph](/docs/api/mna/mna-graph) — Connect output port of srcNode to input port of dstNode.
 - **connectedChanged** `[signal]` in [PolhemusConnection](/docs/api/acq/polhemus-connection) — Emitted whenever `ACQLIB::PolhemusConnection::isConnected` "isConnected" changes.
@@ -1467,8 +1467,8 @@ Index of 6294 public class members (functions, variables, typedefs, enums) acros
 - **endian** `[var]` in [FiffDataRef](/docs/api/fiff/fiff-data-ref) — Are the data in the little or big endian byte order.
 - **endPass** `[fn]` in [BrainRenderer](/docs/api/disp3-d/brain-renderer) — End any render pass (clearing or preserving).
 - **endSample** `[var]` in `AnnotationSpan` — Absolute last sample covered by the annotation.
+- **ensure_venv** `[fn]` in [PythonRunner](/docs/api/pybridge/python-runner) — Prepares the configured virtual environment: creates it if needed, installs `package_dir` (preferred) or `requirements_file` into it, and switches `python_exe` to the venv interpreter.
 - **ensureRenderTargets** `[fn]` in [BrainRenderer](/docs/api/disp3-d/brain-renderer) — Create the dual render-target pair for multi-pass rendering.
-- **ensureVenv** `[fn]` in [PythonRunner](/docs/api/utils/python-runner) — Ensure a virtual environment exists, is up-to-date, and has all required packages installed.
 - **ent** `[var]` in [FiffRawDir](/docs/api/fiff/fiff-raw-dir) — The data buffer; the default entry (kind -1) for a skip.
 - **ent** `[var]` in [MNERawBufDef](/docs/api/mne/mne-raw-buf-def) — Directory entry locating this buffer in the FIFF file (file buffers only).
 - **entries** `[fn]` in [FineCalibration](/docs/api/dsp/fine-calibration) — Get the calibration entries.
@@ -1500,14 +1500,14 @@ Index of 6294 public class members (functions, variables, typedefs, enums) acros
 - **errorOccurred** `[signal]` in [PolhemusConnection](/docs/api/acq/polhemus-connection) — Non-fatal protocol/IO error (already logged by the backend).
 - **ErrTest** `[fn]` in [ParksMcClellan](/docs/api/utils/parks-mc-clellan) — This was added by IowaHills and is used in Remez() in 6 places.
 - **estimateCovariance** `[fn]` in [RtCov](/docs/api/dsp/rt-cov) — Perform actual covariance estimation.
-- **eval** `[fn]` in [PythonTestHelper](/docs/api/utils/python-test-helper) — Run inline Python code and return the result.
-- **evalDouble** `[fn]` in [PythonTestHelper](/docs/api/utils/python-test-helper) — Run inline Python code that prints a single double value, and parse it.
-- **evalMatrix** `[fn]` in [PythonTestHelper](/docs/api/utils/python-test-helper) — Run inline Python code that prints a matrix (one row per line, space-separated values), and parse it into an Eigen MatrixXd.
-- **evalMatrixViaFile** `[fn]` in [PythonTestHelper](/docs/api/utils/python-test-helper) — Run Python code that writes a matrix to outputFilePath (e.g.
+- **eval** `[fn]` in [PythonTestHelper](/docs/api/pybridge/python-test-helper) — Runs Python code.
+- **eval_double** `[fn]` in [PythonTestHelper](/docs/api/pybridge/python-test-helper) — Runs Python code that prints a single number.
+- **eval_matrix** `[fn]` in [PythonTestHelper](/docs/api/pybridge/python-test-helper) — Runs Python code that prints a matrix, one row per line with whitespace-separated values.
+- **eval_matrix_via_file** `[fn]` in [PythonTestHelper](/docs/api/pybridge/python-test-helper) — Runs Python code that writes a matrix to `file` (e.g.
+- **eval_vector** `[fn]` in [PythonTestHelper](/docs/api/pybridge/python-test-helper) — Runs Python code that prints numbers, one per line or whitespace-separated, all read into one vector.
 - **evaluate** `[fn]` in [MnaParamTree](/docs/api/mna/mna-param-tree) — Evaluate all bindings whose trigger condition is met.
 - **evaluatedAt** `[var]` in [MnaVerificationResult](/docs/api/mna/mna-verification-result) — When this check was evaluated.
 - **evaluateExpression** `[fn]` in [MnaParamTree](/docs/api/mna/mna-param-tree) — Evaluate a single expression in the current context.
-- **evalVector** `[fn]` in [PythonTestHelper](/docs/api/utils/python-test-helper) — Run inline Python code that prints a flat array of doubles (one per line or space-separated), and parse it into an Eigen VectorXd.
 - **even_vertex_color** `[var]` in [MNEMshDisplaySurface](/docs/api/mne/mne-msh-display-surface) — Uniform RGBA color for non-data-driven coloring.
 - **event** `[var]` in [MNEEpochData](/docs/api/mne/mne-epoch-data) — The event code.
 - **event_list** `[var]` in [MNERawData](/docs/api/mne/mne-raw-data) — Trigger event list.
@@ -1559,7 +1559,7 @@ Index of 6294 public class members (functions, variables, typedefs, enums) acros
 - **executionOrder** `[var]` in `StreamContext` — Topological order used for startup/shutdown.
 - **exists** `[fn]` in [BIDSPath](/docs/api/bids/bids-path) — Checks whether the file at `filePath()` exists on disk.
 - **exists** `[fn]` in [CommandParser](/docs/api/com/command-parser) — Checks if a command exists.
-- **exitCode** `[var]` in [PythonRunnerResult](/docs/api/utils/python-runner-result) — Process exit code (-1 if never started).
+- **exit_code** `[var]` in [PythonRunnerResult](/docs/api/pybridge/python-runner-result) — Process exit code (-1 if it never started).
 - **Expected** `[fn]` in [Expected](/docs/api/base/expected)
 - **experimenter** `[var]` in [FiffInfo](/docs/api/fiff/fiff-info) — Experimenter name.
 - **explain_comp** `[fn]` in [MNECTFCompDataSet](/docs/api/mne/mnectf-comp-data-set) — Return a human-readable description string for a compensation kind constant.
@@ -1572,13 +1572,13 @@ Index of 6294 public class members (functions, variables, typedefs, enums) acros
 - **external** `[var]` in [AcqStreamOptions](/docs/api/acq/acq-stream-options) — Adopt this buffer instead of allocating one.
 - **externalToolVersion** `[var]` in [MnaProvenance](/docs/api/mna/mna-provenance) — e.g. "FreeSurfer 7.4.1", "Python 3.11.5"
 - **Extra** `[type]` in [FiffAnnotation](/docs/api/fiff/fiff-annotation) — A value of mne.Annotations.extras: None, bool, int, float or str.
+- **extra_env** `[var]` in [PythonRunnerConfig](/docs/api/pybridge/python-runner-config) — Variables added to the inherited environment.
 - **extract** `[fn]` in [EpochExtractor](/docs/api/utils/epoch-extractor) — Extract epochs from a continuous raw data matrix.
 - **extract** `[fn]` in [InvLabelTimeCourse](/docs/api/inv/inv-label-time-course) — Extract label time courses from a source estimate.
 - **extractOrthogonal** `[fn]` in [MriSlicer](/docs/api/mri/mri-slicer) — Extract all three orthogonal slices at a given RAS point.
 - **extractOrthogonal** `[fn]` in [MriSlicer](/docs/api/mri/mri-slicer) — Extract all three orthogonal slices at a given RAS point.
 - **extractSlice** `[fn]` in [MriSlicer](/docs/api/mri/mri-slicer) — Extract a 2D slice from a 3D volume stored as a flat array.
 - **extractSlice** `[fn]` in [MriSlicer](/docs/api/mri/mri-slicer) — Extract a 2D slice from an [`MriVolData`](/docs/api/mri/mri-vol-data) volume.
-- **extraEnv** `[var]` in [PythonRunnerConfig](/docs/api/utils/python-runner-config) — KEY=VALUE pairs appended to environment.
 - **extras** `[var]` in [FiffAnnotation](/docs/api/fiff/fiff-annotation) — Format-specific metadata, like mne.Annotations.extras.
 - **extras** `[var]` in [MnaFileRef](/docs/api/mna/mna-file-ref) — Unknown keys preserved for lossless round-trip.
 - **extras** `[var]` in [MnaNode](/docs/api/mna/mna-node) — Unknown keys preserved for lossless round-trip.
@@ -1784,7 +1784,6 @@ Index of 6294 public class members (functions, variables, typedefs, enums) acros
 - **FineCalibration** `[fn]` in [FineCalibration](/docs/api/dsp/fine-calibration)
 - **finish** `[fn]` in [AcqWriter](/docs/api/acq/acq-writer) — Marks the end of the stream; readers drain and then receive EndOfStream.
 - **finish_writing_raw** `[fn]` in [FiffStream](/docs/api/fiff/fiff-stream) — Finishes a raw file by writing all necessary end tags.
-- **finished** `[signal]` in [PythonRunner](/docs/api/utils/python-runner) — Emitted when the script finishes.
 - **finished** `[signal]` in [StcLoadingWorker](/docs/api/disp3-d/stc-loading-worker) — Emitted when loading is complete.
 - **finishedAt** `[var]` in [MnaProvenance](/docs/api/mna/mna-provenance)
 - **FirCoeff** `[var]` in [ParksMcClellan](/docs/api/utils/parks-mc-clellan) — containt the generated filter coefficients.
@@ -2343,6 +2342,7 @@ Index of 6294 public class members (functions, variables, typedefs, enums) acros
 - **has_grid_data** `[fn]` in [InvSourceEstimate](/docs/api/inv/inv-source-estimate)
 - **has_kind** `[fn]` in [FiffDirNode](/docs/api/fiff/fiff-dir-node) — Checks whether a [`FiffDirNode`](/docs/api/fiff/fiff-dir-node) has a specific kind.
 - **has_meg** `[var]` in [MNEProjItem](/docs/api/mne/mne-proj-item) — Whether the projection covers MEG channels.
+- **has_package** `[fn]` in [PythonTestHelper](/docs/api/pybridge/python-test-helper)
 - **has_positions** `[fn]` in [InvSourceEstimate](/docs/api/inv/inv-source-estimate)
 - **has_tag** `[fn]` in [FiffDirNode](/docs/api/fiff/fiff-dir-node) — Definition of the has_tag function in fiff_read_named_matrix.m.
 - **hasAllFiducials** `[fn]` in [AcquiredPoints](/docs/api/acq/acquired-points) — True iff all three cardinal fiducials have been captured.
@@ -2369,7 +2369,6 @@ Index of 6294 public class members (functions, variables, typedefs, enums) acros
 - **hasOp** `[fn]` in [MnaOpRegistry](/docs/api/mna/mna-op-registry) — Check if an operation type is registered.
 - **hasOrientation** `[var]` in [FastrakSample](/docs/api/acq/fastrak-sample)
 - **hasOrientation** `[fn]` in [SensorTreeItem](/docs/api/disp3-d/sensor-tree-item) — Returns true if an explicit orientation was set.
-- **hasPackage** `[fn]` in [PythonTestHelper](/docs/api/utils/python-test-helper) — Check if a specific Python package is importable.
 - **hasParam** `[fn]` in [MnaParamTree](/docs/api/mna/mna-param-tree)
 - **hasPenVertex** `[fn]` in [PolhemusCoregistration](/docs/api/acq/polhemus-coregistration)
 - **hasRh** `[fn]` in [StcLoadingWorker](/docs/api/disp3-d/stc-loading-worker) — Check if right hemisphere data was loaded.
@@ -2659,6 +2658,7 @@ Index of 6294 public class members (functions, variables, typedefs, enums) acros
 - **iRangeLow** `[var]` in [SpectogramInputData](/docs/api/utils/spectogram-input-data)
 - **iRefIdx** `[var]` in [MaxwellMoveCompParams](/docs/api/dsp/maxwell-move-comp-params) — Index of reference head position in headPos list.
 - **iRow** `[var]` in [FilterObject](/docs/api/dsp/filter-object)
+- **is_available** `[fn]` in [PythonTestHelper](/docs/api/pybridge/python-test-helper)
 - **is_axial_coil** `[fn]` in [FwdCoil](/docs/api/fwd/fwd-coil) — Checks if this is an axial coil.
 - **is_axial_coil_type** `[fn]` in [FwdCoilSet](/docs/api/fwd/fwd-coil-set) — Checks if a set of templates contains an axial coil of a specified type.
 - **is_diag** `[fn]` in [MNECovMatrix](/docs/api/mne/mne-cov-matrix) — Check whether this covariance matrix is stored in diagonal form.
@@ -2668,13 +2668,16 @@ Index of 6294 public class members (functions, variables, typedefs, enums) acros
 - **is_loaded** `[fn]` in [FsAtlasLookup](/docs/api/fs/fs-atlas-lookup) — Check whether a parcellation volume has been loaded.
 - **is_magnetometer_coil** `[fn]` in [FwdCoil](/docs/api/fwd/fwd-coil) — Checks if this is an magnetometer.
 - **is_magnetometer_coil_type** `[fn]` in [FwdCoilSet](/docs/api/fwd/fwd-coil-set) — Checks if a set of templates contains a magnetometer of a specified type.
+- **is_package_available** `[fn]` in [PythonRunner](/docs/api/pybridge/python-runner) — Checks whether a package can be imported, without importing it.
 - **is_planar_coil** `[fn]` in [FwdCoil](/docs/api/fwd/fwd-coil) — Checks if this is an planar coil.
 - **is_planar_coil_type** `[fn]` in [FwdCoilSet](/docs/api/fwd/fwd-coil-set) — Checks if a set of templates contains a planar coil of a specified type.
+- **is_python_available** `[fn]` in [PythonRunner](/docs/api/pybridge/python-runner)
+- **is_python_available** `[fn]` in [PythonTestHelper](/docs/api/pybridge/python-test-helper)
+- **is_python_required** `[fn]` in [PythonTestHelper](/docs/api/pybridge/python-test-helper)
 - **is_raw** `[var]` in [InvDipoleFitSettings](/docs/api/inv/inv-dipole-fit-settings) — Is this a raw data file.
 - **is_skip** `[var]` in [MNERawBufDef](/docs/api/mne/mne-raw-buf-def) — True if this buffer represents a data skip.
 - **isActive** `[fn]` in [CommandManager](/docs/api/com/command-manager) — Returns if [`CommandManager`](/docs/api/com/command-manager) is active.
 - **iSampleFreq** `[fn]` in [InvHpiModelParameters](/docs/api/inv/inv-hpi-model-parameters)
-- **isAvailable** `[fn]` in [PythonTestHelper](/docs/api/utils/python-test-helper) — Check if Python is available and MNE-Python is importable.
 - **isBad** `[fn]` in [FiffInfoBase](/docs/api/fiff/fiff-info-base)
 - **isBrainSurfaceKey** `[fn]` in [SubView](/docs/api/disp3-d/sub-view) — True when `key` identifies a brain-tissue surface (lh_/rh_) as opposed to BEM, sensor, digitizer, or source-space geometry.
 - **isCancelled** `[fn]` in [StcLoadingWorker](/docs/api/disp3-d/stc-loading-worker)
@@ -2713,11 +2716,7 @@ Index of 6294 public class members (functions, variables, typedefs, enums) acros
 - **isOpen** `[fn]` in [ByteStream](/docs/api/base/byte-stream)
 - **isOpen** `[fn]` in [FiffStream](/docs/api/fiff/fiff-stream)
 - **isOpen** `[fn]` in [FileByteStream](/docs/api/base/file-byte-stream)
-- **isPackageAvailable** `[fn]` in [PythonRunner](/docs/api/utils/python-runner) — Check whether a Python package is importable.
 - **isPlaying** `[var]` in [SubView](/docs/api/disp3-d/sub-view)
-- **isPythonAvailable** `[fn]` in [PythonRunner](/docs/api/utils/python-runner) — Check that the configured Python interpreter is reachable.
-- **isPythonAvailable** `[fn]` in [PythonTestHelper](/docs/api/utils/python-test-helper) — Check if Python is available (without checking for mne package).
-- **isPythonRequired** `[fn]` in [PythonTestHelper](/docs/api/utils/python-test-helper) — Check whether the environment demands Python availability.
 - **isRealtimeSensorStreaming** `[slot]` in [BrainView](/docs/api/disp3-d/brain-view) — Check whether real-time sensor streaming is active.
 - **isRealtimeStreaming** `[slot]` in [BrainView](/docs/api/disp3-d/brain-view) — Check whether real-time streaming is active.
 - **isRecording** `[fn]` in [AcqRecorder](/docs/api/acq/acq-recorder)
@@ -2889,7 +2888,6 @@ Index of 6294 public class members (functions, variables, typedefs, enums) acros
 - **LinePlot** `[fn]` in [LinePlot](/docs/api/disp/line-plot) — Constructs a line series plot.
 - **LinePlot** `[fn]` in [LinePlot](/docs/api/disp/line-plot) — Constructs a line series plot.
 - **LinePlot** `[fn]` in [LinePlot](/docs/api/disp/line-plot) — Constructs a line series plot.
-- **lineReceived** `[signal]` in [PythonRunner](/docs/api/utils/python-runner) — Emitted for every stdout/stderr line (mirrors the line callback).
 - **linFieldIntFunc** `[type]` in [FwdBemModel](/docs/api/fwd/fwd-bem-model) — Function pointer type for linear field coefficient integration methods.
 - **livePlugins** `[var]` in `StreamContext` — nodeId → owned live plugin (QObject avoids a scan dependency)
 - **load** `[fn]` in [DipoleObject](/docs/api/disp3-d/dipole-object)
@@ -3891,7 +3889,7 @@ Index of 6294 public class members (functions, variables, typedefs, enums) acros
 
 ## P {#p}
 
-- **packageDir** `[var]` in [PythonRunnerConfig](/docs/api/utils/python-runner-config) — Directory containing pyproject.toml for `pip install &lt;dir&gt;` (preferred).
+- **package_dir** `[var]` in [PythonRunnerConfig](/docs/api/pybridge/python-runner-config) — pyproject.toml directory to pip install into the venv.
 - **paint** `[fn]` in [AverageSceneItem](/docs/api/disp/average-scene-item)
 - **paint** `[fn]` in [FrequencySpectrumDelegate](/docs/api/disp/frequency-spectrum-delegate) — Use the painter and style option to render the item specified by the item index.
 - **paint** `[fn]` in [RtFiffRawViewDelegate](/docs/api/disp/rt-fiff-raw-view-delegate) — Use the painter and style option to render the item specified by the item index.
@@ -4121,9 +4119,8 @@ Index of 6294 public class members (functions, variables, typedefs, enums) acros
 - **ProcessingMode** `[enum]` in [AbstractView](/docs/api/disp/abstract-view)
 - **procrustes_align** `[fn]` in [FiffCoordTrans](/docs/api/fiff/fiff-coord-trans) — Performs a Procrustes alignment between two sets of corresponding 3D points.
 - **progress** `[signal]` in [StcLoadingWorker](/docs/api/disp3-d/stc-loading-worker) — Emitted to report progress.
+- **progress_pct** `[var]` in [PythonRunnerResult](/docs/api/pybridge/python-runner-result) — Last reported progress (0 to 100), or -1 if none was reported.
 - **ProgressCallback** `[type]` in [MnaGraphExecutor](/docs/api/mna/mna-graph-executor) — Progress callback type.
-- **progressPct** `[var]` in [PythonRunnerResult](/docs/api/utils/python-runner-result) — Last parsed progress percentage (0–100), or -1 if none.
-- **progressUpdated** `[signal]` in [PythonRunner](/docs/api/utils/python-runner) — Emitted when a progress line is parsed (mirrors the progress callback).
 - **ProgressView** `[fn]` in [ProgressView](/docs/api/disp/progress-view) — Creates an instance of a [`ProgressView`](/docs/api/disp/progress-view) object.
 - **proj** `[var]` in [FiffEvoked](/docs/api/fiff/fiff-evoked) — SSP projection.
 - **proj** `[var]` in [FiffRawData](/docs/api/fiff/fiff-raw-data) — SSP operator to apply to the data.
@@ -4186,11 +4183,10 @@ Index of 6294 public class members (functions, variables, typedefs, enums) acros
 - **pushVideoOverlayFrame** `[slot]` in [BrainView](/docs/api/disp3-d/brain-view) — Push a new video frame to the overlay (e.g.
 - **pValues** `[fn]` in [Command](/docs/api/com/command) — Returns parameter values.
 - **pValues** `[fn]` in [RawCommand](/docs/api/com/raw-command) — Returns parameter values.
-- **pythonExe** `[var]` in [PythonRunnerConfig](/docs/api/utils/python-runner-config) — Python interpreter path or command.
-- **PythonRunner** `[fn]` in [PythonRunner](/docs/api/utils/python-runner) — Construct a [`PythonRunner`](/docs/api/utils/python-runner) with default configuration.
-- **PythonRunner** `[fn]` in [PythonRunner](/docs/api/utils/python-runner) — Construct a [`PythonRunner`](/docs/api/utils/python-runner) with explicit configuration.
-- **PythonTestHelper** `[fn]` in [PythonTestHelper](/docs/api/utils/python-test-helper) — Constructs a [`PythonTestHelper`](/docs/api/utils/python-test-helper) with auto-detected Python.
-- **pythonVersion** `[fn]` in [PythonRunner](/docs/api/utils/python-runner) — Query the version string of the configured Python interpreter.
+- **python_exe** `[var]` in [PythonRunnerConfig](/docs/api/pybridge/python-runner-config) — Interpreter path, or a command found on PATH.
+- **python_version** `[fn]` in [PythonRunner](/docs/api/pybridge/python-runner)
+- **PythonRunner** `[fn]` in [PythonRunner](/docs/api/pybridge/python-runner) — Constructs a runner for `python3` from PATH.
+- **PythonRunner** `[fn]` in [PythonRunner](/docs/api/pybridge/python-runner) — Constructs a runner with an explicit configuration.
 
 ## Q {#q}
 
@@ -4362,7 +4358,6 @@ Index of 6294 public class members (functions, variables, typedefs, enums) acros
 - **readHeadPos** `[fn]` in [MaxwellMovementComp](/docs/api/dsp/maxwell-movement-comp) — Read head positions from a file.
 - **readInfo** `[fn]` in [RtDataClient](/docs/api/com/rt-data-client) — Reads fiff measurement information of a data the connection.
 - **readJson** `[fn]` in [BidsCoordinateSystem](/docs/api/bids/bids-coordinate-system) — Read a BIDS *_coordsystem.json file.
-- **readMatrix** `[fn]` in [PythonTestHelper](/docs/api/utils/python-test-helper) — Read an Eigen matrix from a text file (space-separated values, one row per line).
 - **readMegEegChannels** `[fn]` in [FiffInfo](/docs/api/fiff/fiff-info) — Read MEG and EEG channel information from a FIFF file, excluding bad channels.
 - **readMetadata** `[fn]` in [RtDataClient](/docs/api/com/rt-data-client) — Reads fiff metaata class from data connection.
 - **readMNESelFile** `[fn]` in [SelectionIO](/docs/api/channels/selection-io) — Reads the specified MNE sel file.
@@ -4463,7 +4458,7 @@ Index of 6294 public class members (functions, variables, typedefs, enums) acros
 - **requestParams** `[fn]` in [DipoleFitView](/docs/api/disp/dipole-fit-view) — Sends updated signals for parameters (excluding selected models).
 - **required** `[var]` in [MnaOpSchemaAttr](/docs/api/mna/mna-op-schema-attr) — Must be set?
 - **required** `[var]` in [MnaOpSchemaPort](/docs/api/mna/mna-op-schema-port) — Must be connected?
-- **requirementsFile** `[var]` in [PythonRunnerConfig](/docs/api/utils/python-runner-config) — Fallback: path to requirements.txt for `pip install -r`.
+- **requirements_file** `[var]` in [PythonRunnerConfig](/docs/api/pybridge/python-runner-config) — requirements.txt to install when there is no package_dir.
 - **res** `[var]` in [FwdThreadArg](/docs/api/fwd/fwd-thread-arg) — Destination for the solution (ncoil x nsources).
 - **res_grad** `[var]` in [FwdThreadArg](/docs/api/fwd/fwd-thread-arg) — Gradient result (ncoil x 3*nsources).
 - **resample** `[fn]` in [Resample](/docs/api/dsp/resample) — [`Resample`](/docs/api/dsp/resample) a single-channel row vector from `dOldSFreq` to `dNewSFreq`.
@@ -4585,12 +4580,12 @@ Index of 6294 public class members (functions, variables, typedefs, enums) acros
 - **run** `[fn]` in [ICA](/docs/api/dsp/ica) — Fit FastICA on the given data matrix.
 - **run** `[fn]` in [MLTrainer](/docs/api/ml/ml-trainer) — Run a training script.
 - **run** `[fn]` in [PicardIca](/docs/api/dsp/picard-ica) — Run the Picard [`ICA`](/docs/api/dsp/ica) algorithm.
-- **run** `[fn]` in [PythonRunner](/docs/api/utils/python-runner) — Run a Python script synchronously.
-- **runCode** `[fn]` in [PythonRunner](/docs/api/utils/python-runner) — Run a Python one-liner synchronously (`python -c "..."`).
-- **runInVenv** `[fn]` in [PythonRunner](/docs/api/utils/python-runner) — Convenience: ensure venv, then run a script inside it.
+- **run** `[fn]` in [PythonRunner](/docs/api/pybridge/python-runner) — Runs a script and waits for it to finish.
+- **run_code** `[fn]` in [PythonRunner](/docs/api/pybridge/python-runner) — Runs Python code (`python` -c) and waits for it to finish.
+- **run_in_venv** `[fn]` in [PythonRunner](/docs/api/pybridge/python-runner) — Calls `ensure_venv`, then runs the script inside the venv.
+- **run_script** `[fn]` in [PythonTestHelper](/docs/api/pybridge/python-test-helper) — Runs a Python script.
 - **runner** `[fn]` in [MLTrainer](/docs/api/ml/ml-trainer) — Access the underlying PythonRunner for callback/config changes.
 - **running** `[var]` in `StreamContext` — Whether the stream is active.
-- **runScript** `[fn]` in [PythonTestHelper](/docs/api/utils/python-test-helper) — Run a Python script file and return the result.
 - **runSection** `[fn]` in [IirFilter](/docs/api/dsp/iir-filter) — Runs one section in place, continuing from its transposed direct-form II state.
 
 ## S {#s}
@@ -4812,6 +4807,7 @@ Index of 6294 public class members (functions, variables, typedefs, enums) acros
 - **set_active** `[fn]` in [NetworkEdge](/docs/api/connectivity/network-edge) — Sets the active flag.
 - **set_comp** `[fn]` in [MNECTFCompDataSet](/docs/api/mne/mnectf-comp-data-set) — Write the compensation grade into the upper 16 bits of coil_type for all MEG channels in the list.
 - **set_compensation** `[fn]` in [MNECTFCompDataSet](/docs/api/mne/mnectf-comp-data-set) — Configure the full compensation pipeline: determine current compensation, build undo and target operators, and update channel coil types accordingly.
+- **set_config** `[fn]` in [PythonRunner](/docs/api/pybridge/python-runner) — Replaces the configuration.
 - **set_current_comp** `[fn]` in [FiffInfo](/docs/api/fiff/fiff-info) — Set the current compensation value in the channel info structures.
 - **set_current_comp** `[fn]` in [FiffInfo](/docs/api/fiff/fiff-info) — mne_set_current_comp
 - **set_fft_size** `[fn]` in [Network](/docs/api/connectivity/network)
@@ -4820,7 +4816,9 @@ Index of 6294 public class members (functions, variables, typedefs, enums) acros
 - **set_frequency_range** `[fn]` in [Network](/docs/api/connectivity/network) — Averages every edge weight over a new frequency range and updates the weight range.
 - **set_hub** `[fn]` in [NetworkNode](/docs/api/connectivity/network-node) — Marks the node as hub or not.
 - **set_level** `[fn]` in [Log](/docs/api/base/log) — Sets the lowest level that is written; messages below it are dropped before they are formatted.
+- **set_line_callback** `[fn]` in [PythonRunner](/docs/api/pybridge/python-runner) — Sets the callback invoked for every stdout and stderr line.
 - **set_method** `[fn]` in [Network](/docs/api/connectivity/network)
+- **set_progress_callback** `[fn]` in [PythonRunner](/docs/api/pybridge/python-runner) — Sets the callback invoked for every progress line.
 - **set_sampling_frequency** `[fn]` in [Network](/docs/api/connectivity/network)
 - **set_sink** `[fn]` in [Log](/docs/api/base/log) — Replaces the sink.
 - **set_threshold** `[fn]` in [Network](/docs/api/connectivity/network) — Sets the threshold and marks every edge with \|weight\| &gt;= threshold active.
@@ -4923,7 +4921,6 @@ Index of 6294 public class members (functions, variables, typedefs, enums) acros
 - **setColorPerAverage** `[fn]` in [AverageScene](/docs/api/disp/average-scene) — Set the color per average map information.
 - **setColorRange** `[fn]` in [ImageSc](/docs/api/disp/image-sc) — Maps `min` and `max` to the ends of the colour map instead of the data minimum and maximum; values outside are clipped.
 - **setCompensators** `[fn]` in [CompensatorView](/docs/api/disp/compensator-view) — Set the current compensators.
-- **setConfig** `[fn]` in [PythonRunner](/docs/api/utils/python-runner) — Set the configuration.
 - **setConnection** `[fn]` in [PolhemusCoregistration](/docs/api/acq/polhemus-coregistration)
 - **setConnectivityMethods** `[fn]` in [ConnectivitySettings](/docs/api/connectivity/connectivity-settings)
 - **setContactValues** `[fn]` in [ElectrodeObject](/docs/api/disp3-d/electrode-object) — Colour contacts by value through a colormap spanning [min(0, smallest), largest].
@@ -5050,7 +5047,6 @@ Index of 6294 public class members (functions, variables, typedefs, enums) acros
 - **setLayerVisible** `[fn]` in [MultimodalScene](/docs/api/disp3-d/multimodal-scene) — Toggle visibility of a layer.
 - **setLeadType** `[fn]` in [IeegImplantation](/docs/api/ieeg/ieeg-implantation) — Set a lead's type when it is declared rather than inferred.
 - **setLightingEnabled** `[slot]` in [BrainView](/docs/api/disp3-d/brain-view) — Enable or disable lighting for the scene.
-- **setLineCallback** `[fn]` in [PythonRunner](/docs/api/utils/python-runner) — Set a callback invoked for every stdout/stderr line.
 - **setLittleEndian** `[fn]` in [FiffStream](/docs/api/fiff/fiff-stream) — Sets the byte order of the stream; FIFF files are big-endian, some raw data files little-endian.
 - **setLiveMarkers** `[slot]` in [BrainView](/docs/api/disp3-d/brain-view) — Replace the set of live overlay markers.
 - **setLiveRay** `[slot]` in [BrainView](/docs/api/disp3-d/brain-view) — Set a semi-transparent ray cylinder between two world-space points.
@@ -5132,7 +5128,6 @@ Index of 6294 public class members (functions, variables, typedefs, enums) acros
 - **setProcessing** `[fn]` in [BIDSPath](/docs/api/bids/bids-path) — Set the processing label.
 - **setProcessingMode** `[fn]` in [AbstractView](/docs/api/disp/abstract-view) — Sets the GUI of this view to a specific mode.
 - **setProgressCallback** `[fn]` in [MnaGraphExecutor](/docs/api/mna/mna-graph-executor) — Set a progress callback invoked for each node execution.
-- **setProgressCallback** `[fn]` in [PythonRunner](/docs/api/utils/python-runner) — Set a callback invoked when a progress line is detected.
 - **setProjectionMatrix** `[fn]` in [RtHpi](/docs/api/dsp/rt-hpi) — Set the new projection matrix.
 - **setProjectors** `[fn]` in [ProjectorsView](/docs/api/disp/projectors-view) — Set the current projectors.
 - **setRadius** `[fn]` in [PolylineObject](/docs/api/disp3-d/polyline-object) — Sets the radius of the drawn segments.
@@ -5553,10 +5548,12 @@ Index of 6294 public class members (functions, variables, typedefs, enums) acros
 - **stcStepAccum** `[var]` in [SubView](/docs/api/disp3-d/sub-view)
 - **stcTmin** `[slot]` in [BrainView](/docs/api/disp3-d/brain-view) — Get the start time of the loaded source estimate.
 - **stcToLabel** `[fn]` in [FsLabelUtils](/docs/api/fs/fs-label-utils) — Convert a source estimate to labels by thresholding.
+- **std_err** `[var]` in [PythonRunnerResult](/docs/api/pybridge/python-runner-result) — Captured standard error, lines joined by '
+'.
+- **std_out** `[var]` in [PythonRunnerResult](/docs/api/pybridge/python-runner-result) — Captured standard output, lines joined by '
+'.
 - **stddev** `[fn]` in [DecodingCsp](/docs/api/decoding/decoding-csp)
 - **stddev** `[fn]` in [DecodingSpoc](/docs/api/decoding/decoding-spoc)
-- **stdErr** `[var]` in [PythonRunnerResult](/docs/api/utils/python-runner-result) — Complete captured standard error.
-- **stdOut** `[var]` in [PythonRunnerResult](/docs/api/utils/python-runner-result) — Complete captured standard output.
 - **stim14** `[var]` in [MNEMeasDataSet](/docs/api/mne/mne-meas-data-set) — Samples from the digital stimulus / trigger channel.
 - **stimIgnore** `[var]` in [RejectionParams](/docs/api/fiff/rejection-params) — Ignore this many seconds around the stimulus.
 - **stop** `[fn]` in [AcqBackend](/docs/api/acq/acq-backend) — Stops and joins every backend thread before returning.
@@ -5621,7 +5618,7 @@ Index of 6294 public class members (functions, variables, typedefs, enums) acros
 - **submit** `[fn]` in [ThreadPool](/docs/api/base/thread-pool) — Queues `task`.
 - **subTicks** `[var]` in [AcqSyncMarker](/docs/api/acq/acq-sync-marker) — Edge position inside the reference sample, in domain ticks.
 - **subtractBaseline** `[fn]` in [FiffEvokedSet](/docs/api/fiff/fiff-evoked-set) — Subtract baseline from each channel of an epoch.
-- **success** `[var]` in [PythonRunnerResult](/docs/api/utils/python-runner-result) — True when process exited with code 0.
+- **success** `[var]` in [PythonRunnerResult](/docs/api/pybridge/python-runner-result) — True when the process exited normally with code 0.
 - **suffix** `[fn]` in [BIDSPath](/docs/api/bids/bids-path) — Filename suffix.
 - **sum_solids** `[fn]` in [MNESurface](/docs/api/mne/mne-surface) — Sum the solid angles of all triangles as seen from a given point.
 - **sumd** `[var]` in [RegionDataOut](/docs/api/mne/region-data-out) — Sums of the distances to the centroid.
@@ -5683,7 +5680,7 @@ Index of 6294 public class members (functions, variables, typedefs, enums) acros
 - **tc_mult** `[var]` in [MNEMshColorScaleDef](/docs/api/mne/mne-msh-color-scale-def)
 - **tCdf** `[fn]` in [StatsTtest](/docs/api/sts/stats-ttest) — Compute the CDF of the t-distribution using the regularized incomplete beta function.
 - **TE** `[var]` in [MriVolData](/docs/api/mri/mri-vol-data) — Echo time (ms).
-- **testDataPath** `[fn]` in [PythonTestHelper](/docs/api/utils/python-test-helper) — Get the standard path to mne-cpp-test-data from the test binary location.
+- **test_data_path** `[fn]` in [PythonTestHelper](/docs/api/pybridge/python-test-helper)
 - **text** `[fn]` in [AcqError](/docs/api/acq/acq-error)
 - **text_color** `[var]` in [MNEMshDisplaySurfaceSet](/docs/api/mne/mne-msh-display-surface-set) — Text color (RGB).
 - **tfce** `[fn]` in [StatsCluster](/docs/api/sts/stats-cluster) — Threshold-Free Cluster Enhancement (TFCE).
@@ -5715,8 +5712,8 @@ Index of 6294 public class members (functions, variables, typedefs, enums) acros
 - **timeChanged** `[signal]` in [DipoleFitView](/docs/api/disp/dipole-fit-view) — Send new time values.
 - **timeCursor** `[fn]` in [MultimodalScene](/docs/api/disp3-d/multimodal-scene)
 - **timeCursorChanged** `[signal]` in [MultimodalScene](/docs/api/disp3-d/multimodal-scene) — Emitted when the shared time cursor (seconds) changes.
-- **timedOut** `[var]` in [PythonRunnerResult](/docs/api/utils/python-runner-result) — True if the timeout was reached.
-- **timeoutMsec** `[var]` in [PythonRunnerConfig](/docs/api/utils/python-runner-config) — Wall-clock timeout (-1 = no limit).
+- **timed_out** `[var]` in [PythonRunnerResult](/docs/api/pybridge/python-runner-result) — True if the timeout was reached and the process was killed.
+- **timeout** `[var]` in [PythonRunnerConfig](/docs/api/pybridge/python-runner-config) — Wall-clock limit; none by default.
 - **timePoint** `[fn]` in [SensorFieldMapper](/docs/api/disp3-d/sensor-field-mapper)
 - **timePointChanged** `[signal]` in [BrainView](/docs/api/disp3-d/brain-view) — Emitted when the time point changes.
 - **timePointChanged** `[signal]` in [MinimumNormSettingsView](/docs/api/disp/minimum-norm-settings-view) — Emit signal whenever the time point changed.
@@ -5855,7 +5852,7 @@ Index of 6294 public class members (functions, variables, typedefs, enums) acros
 - **trackerStation** `[fn]` in [PolhemusCoregistration](/docs/api/acq/polhemus-coregistration)
 - **trackerToDeviceRotation** `[fn]` in [PolhemusCoregistration](/docs/api/acq/polhemus-coregistration)
 - **trackerToDeviceTranslation** `[fn]` in [PolhemusCoregistration](/docs/api/acq/polhemus-coregistration)
-- **trainLstm** `[fn]` in [InvCMNE](/docs/api/inv/inv-cmne) — Train the CMNE LSTM model by invoking the Python training script.
+- **train_lstm** `[fn]` in [InvCMNE](/docs/api/inv/inv-cmne) — Train the CMNE LSTM model by invoking the Python training script.
 - **trans** `[var]` in [FiffCoordTrans](/docs/api/fiff/fiff-coord-trans) — The forward transform.
 - **trans** `[var]` in [MNEMshDisplaySurface](/docs/api/mne/mne-msh-display-surface) — Extra 4x4 transformation matrix for this surface.
 - **trans** `[var]` in [MNERawInfo](/docs/api/mne/mne-raw-info) — Coordinate transformation FIFF_COORD_HEAD &lt;-&gt; FIFF_COORD_DEVICE.
@@ -5941,7 +5938,7 @@ Index of 6294 public class members (functions, variables, typedefs, enums) acros
 ## U {#u}
 
 - **UnbiasedSquaredPhaseLagIndex** `[fn]` in [UnbiasedSquaredPhaseLagIndex](/docs/api/connectivity/unbiased-squared-phase-lag-index) — Constructs a [`UnbiasedSquaredPhaseLagIndex`](/docs/api/connectivity/unbiased-squared-phase-lag-index) object.
-- **unbuffered** `[var]` in [PythonRunnerConfig](/docs/api/utils/python-runner-config) — Pass -u to Python for unbuffered I/O.
+- **unbuffered** `[var]` in [PythonRunnerConfig](/docs/api/pybridge/python-runner-config) — Pass -u so output streams in real time.
 - **uncertaintyNs** `[var]` in [AcqClockModel](/docs/api/acq/acq-clock-model) — One-sigma uncertainty of `physicalNs()`.
 - **underrun** `[var]` in [AcqStreamStats](/docs/api/acq/acq-stream-stats) — Output: samples emitted as underrun fill.
 - **underrun** `[fn]` in [AcqWriteView](/docs/api/acq/acq-write-view)
@@ -6120,8 +6117,8 @@ Index of 6294 public class members (functions, variables, typedefs, enums) acros
 - **vecTimes** `[var]` in [MultitaperTfrResult](/docs/api/dsp/multitaper-tfr-result) — Time axis in seconds (window centres).
 - **Vector6T** `[type]` in [InvRapMusic](/docs/api/inv/inv-rap-music) — Defines Eigen::Matrix&lt;T, 6, 1&gt; as `Vector6T` type.
 - **VectorXT** `[type]` in [InvRapMusic](/docs/api/inv/inv-rap-music) — Defines Eigen::Matrix&lt;T, Eigen::Dynamic, 1&gt; as `VectorXT` type.
-- **venvDir** `[var]` in [PythonRunnerConfig](/docs/api/utils/python-runner-config) — Virtual-env directory (empty = no venv).
-- **venvPythonPath** `[fn]` in [PythonRunner](/docs/api/utils/python-runner) — Get the Python interpreter path inside the configured venv.
+- **venv_dir** `[var]` in [PythonRunnerConfig](/docs/api/pybridge/python-runner-config) — Virtual environment; empty uses `python_exe`.
+- **venv_python_path** `[fn]` in [PythonRunner](/docs/api/pybridge/python-runner)
 - **verbose** `[var]` in [InvDipoleFitSettings](/docs/api/inv/inv-dipole-fit-settings) — Verbose output.
 - **verification** `[var]` in [MnaNode](/docs/api/mna/mna-node) — Explanation, checks, results, and provenance snapshot.
 - **version** `[var]` in [AcqStreamInfo](/docs/api/acq/acq-stream-info) — Metadata version; incremented on every change.
@@ -6223,8 +6220,8 @@ Index of 6294 public class members (functions, variables, typedefs, enums) acros
 - **windowWidth** `[fn]` in [SliceObject](/docs/api/disp3-d/slice-object)
 - **withSuffix** `[fn]` in [BIDSPath](/docs/api/bids/bids-path) — Returns a copy of this [`BIDSPath`](/docs/api/bids/bids-path) with updated suffix and extension.
 - **work** `[var]` in [FwdCompData](/docs/api/fwd/fwd-comp-data) — The work area.
+- **working_dir** `[var]` in [PythonRunnerConfig](/docs/api/pybridge/python-runner-config) — Working directory; empty inherits the caller's.
 - **workingDir** `[var]` in [ProcessingSettings](/docs/api/mne/processing-settings)
-- **workingDir** `[var]` in [PythonRunnerConfig](/docs/api/utils/python-runner-config) — Working directory (empty = inherit).
 - **world** `[var]` in [PickResult](/docs/api/disp3-d/pick-result) — Hit position in world (MRI surface RAS) coordinates.
 - **worldBounds** `[fn]` in [MultimodalScene](/docs/api/disp3-d/multimodal-scene) — Scene-wide axis-aligned bounding box union of all visible layers, computed by the supplied per-kind extractor.
 - **worldToModel** `[fn]` in [PolhemusCoregistration](/docs/api/acq/polhemus-coregistration)
@@ -6309,7 +6306,6 @@ Index of 6294 public class members (functions, variables, typedefs, enums) acros
 - **writeHeadPos** `[fn]` in [MaxwellMovementComp](/docs/api/dsp/maxwell-movement-comp) — Write head positions to a file.
 - **writeJson** `[fn]` in [BidsCoordinateSystem](/docs/api/bids/bids-coordinate-system) — Write a BIDS *_coordsystem.json file.
 - **writeMatrix** `[fn]` in [InvSourceEstimateIO](/docs/api/inv/inv-source-estimate-io) — Export source estimate as a tab-separated matrix for easy import.
-- **writeMatrix** `[fn]` in [PythonTestHelper](/docs/api/utils/python-test-helper) — Write an Eigen matrix to a text file with full double precision.
 - **writeMNESelFile** `[fn]` in [SelectionIO](/docs/api/channels/selection-io) — Writes the specified selection groups to a single MNE .sel file.
 - **writeMNESelFile** `[fn]` in [SelectionIO](/docs/api/channels/selection-io) — Writes the specified selection groups to a single MNE .sel file.
 - **writePosition** `[fn]` in [AcqWriter](/docs/api/acq/acq-writer)
