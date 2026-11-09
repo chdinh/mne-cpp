@@ -7,11 +7,11 @@
  * @author   Christoph Dinh <christoph.dinh@mne-cpp.org>
  * @since    2.1.0
  * @date     March 2026
- * @brief    MNE-CPP BIDS library entry point: Qt symbol-visibility plumbing and the @ref BIDSLIB namespace documentation.
+ * @brief    MNE-CPP BIDS library entry point: symbol-visibility macro and the @ref BIDSLIB namespace documentation.
  *
  * Every public symbol in the BIDS library is annotated with
- * @c BIDSSHARED_EXPORT, which expands to @c Q_DECL_EXPORT when the
- * shared library itself is being built, @c Q_DECL_IMPORT for a
+ * @c BIDSSHARED_EXPORT, which exports the symbols when the
+ * shared library itself is being built, imports them for a
  * downstream consumer, and to nothing when the project is configured
  * with @c STATICBUILD. Including this header also pulls in
  * @c utils/buildinfo.h so the @ref BIDSLIB::buildDateTime, @ref
@@ -33,7 +33,6 @@
 // QT INCLUDES
 //=============================================================================================================
 
-#include <QtCore/qglobal.h>
 
 //=============================================================================================================
 // DEFINES
@@ -41,10 +40,20 @@
 
 #if defined(STATICBUILD)
 #define BIDSSHARED_EXPORT
-#elif defined(MNE_BIDS_LIBRARY)
-#define BIDSSHARED_EXPORT Q_DECL_EXPORT /**< Q_DECL_EXPORT must be added to the declarations of symbols used when compiling a shared library. */
+#elif defined(_WIN32)
+#if defined(MNE_BIDS_LIBRARY)
+#define BIDSSHARED_EXPORT __declspec(dllexport) /**< Exported when building the shared library. */
 #else
-#define BIDSSHARED_EXPORT Q_DECL_IMPORT /**< Q_DECL_IMPORT must be added to the declarations of symbols used when compiling a client that uses the shared library. */
+#define BIDSSHARED_EXPORT __declspec(dllimport) /**< Imported by clients of the shared library. */
+#endif
+#else
+#define BIDSSHARED_EXPORT __attribute__((visibility("default"))) /**< Default visibility on ELF/Mach-O. */
+#endif
+
+// Exported classes hold Eigen and standard-library members and share their ABI with clients built by the same
+// compiler, so MSVC's warnings about members and bases without dll-interface do not apply (Qt disables them alike).
+#if defined(_MSC_VER)
+#pragma warning(disable : 4251 4275)
 #endif
 
 //=============================================================================================================

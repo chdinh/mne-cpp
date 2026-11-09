@@ -61,8 +61,9 @@ list(TRANSFORM QT_REQUIRED_COMPONENT_LIBS PREPEND "Qt${QT_VERSION_MAJOR}::")
 
 # FiffInfo/FiffRawData appear in the public headers, so consumers need mne_fiff too
 target_link_libraries(${PROJECT_NAME} PUBLIC mne_fiff)
+# The public headers include Qt
+target_link_libraries(${PROJECT_NAME} PUBLIC ${QT_REQUIRED_COMPONENT_LIBS})
 target_link_libraries(${PROJECT_NAME} PRIVATE
-  ${QT_REQUIRED_COMPONENT_LIBS}
   mne_base
   Eigen3::Eigen)
 

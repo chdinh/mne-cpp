@@ -64,8 +64,8 @@
       ]
     },
     "bids": {
-      "tokens": 1029,
-      "public_header_includes": 33,
+      "tokens": 1027,
+      "public_header_includes": 32,
       "modules": [
         "Core"
       ]
@@ -76,16 +76,16 @@
       "modules": []
     },
     "com": {
-      "tokens": 369,
-      "public_header_includes": 30,
+      "tokens": 367,
+      "public_header_includes": 29,
       "modules": [
         "Core",
         "Network"
       ]
     },
     "connectivity": {
-      "tokens": 61,
-      "public_header_includes": 10,
+      "tokens": 59,
+      "public_header_includes": 9,
       "modules": [
         "Concurrent",
         "Core"
@@ -120,31 +120,31 @@
       ]
     },
     "dsp": {
-      "tokens": 456,
-      "public_header_includes": 29,
+      "tokens": 454,
+      "public_header_includes": 28,
       "modules": [
         "Concurrent",
         "Core"
       ]
     },
     "fiff": {
-      "tokens": 622,
-      "public_header_includes": 57,
+      "tokens": 620,
+      "public_header_includes": 56,
       "modules": [
         "Core",
         "Network"
       ]
     },
     "fs": {
-      "tokens": 112,
-      "public_header_includes": 7,
+      "tokens": 110,
+      "public_header_includes": 6,
       "modules": [
         "Core"
       ]
     },
     "fwd": {
-      "tokens": 38,
-      "public_header_includes": 7,
+      "tokens": 36,
+      "public_header_includes": 6,
       "modules": [
         "Concurrent",
         "Core"
@@ -158,16 +158,16 @@
       ]
     },
     "inv": {
-      "tokens": 295,
-      "public_header_includes": 48,
+      "tokens": 293,
+      "public_header_includes": 47,
       "modules": [
         "Concurrent",
         "Core"
       ]
     },
     "lsl": {
-      "tokens": 169,
-      "public_header_includes": 4,
+      "tokens": 167,
+      "public_header_includes": 3,
       "modules": [
         "Core",
         "Network"
@@ -184,15 +184,15 @@
       "modules": []
     },
     "mna": {
-      "tokens": 1639,
-      "public_header_includes": 85,
+      "tokens": 1637,
+      "public_header_includes": 84,
       "modules": [
         "Core"
       ]
     },
     "mne": {
-      "tokens": 451,
-      "public_header_includes": 75,
+      "tokens": 449,
+      "public_header_includes": 74,
       "modules": [
         "Concurrent",
         "Core"

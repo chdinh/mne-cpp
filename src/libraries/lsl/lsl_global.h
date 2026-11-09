@@ -11,11 +11,11 @@
  *
  * This header defines the @c LSLSHARED_EXPORT decoration that every
  * exported class and free function in LSLLIB must carry so that the
- * library can be linked both as a Qt shared library (the default
+ * library can be linked both as a shared library (the default
  * mne-cpp build) and as a statically linked archive (the WebAssembly
  * and @c STATICBUILD configurations). The macro expands to
- * @c Q_DECL_EXPORT when @c MNE_LSL_LIBRARY is defined during the
- * library's own translation units and to @c Q_DECL_IMPORT when the
+ * the export decoration when @c MNE_LSL_LIBRARY is defined during the
+ * library's own translation units and to the import one when the
  * header is consumed by a downstream module, mirroring the convention
  * used throughout the other mne-cpp libraries.
  *
@@ -41,7 +41,6 @@
 // QT INCLUDES
 //=============================================================================================================
 
-#include <QtCore/qglobal.h>
 
 //=============================================================================================================
 // DEFINES
@@ -49,10 +48,20 @@
 
 #if defined(STATICBUILD)
 #define LSLSHARED_EXPORT
-#elif defined(MNE_LSL_LIBRARY)
-#define LSLSHARED_EXPORT Q_DECL_EXPORT /**< Q_DECL_EXPORT must be added to the declarations of symbols used when compiling a shared library. */
+#elif defined(_WIN32)
+#if defined(MNE_LSL_LIBRARY)
+#define LSLSHARED_EXPORT __declspec(dllexport) /**< Exported when building the shared library. */
 #else
-#define LSLSHARED_EXPORT Q_DECL_IMPORT /**< Q_DECL_IMPORT must be added to the declarations of symbols used when compiling a client that uses the shared library. */
+#define LSLSHARED_EXPORT __declspec(dllimport) /**< Imported by clients of the shared library. */
+#endif
+#else
+#define LSLSHARED_EXPORT __attribute__((visibility("default"))) /**< Default visibility on ELF/Mach-O. */
+#endif
+
+// Exported classes hold Eigen and standard-library members and share their ABI with clients built by the same
+// compiler, so MSVC's warnings about members and bases without dll-interface do not apply (Qt disables them alike).
+#if defined(_MSC_VER)
+#pragma warning(disable : 4251 4275)
 #endif
 
 //=============================================================================================================

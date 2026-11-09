@@ -13,7 +13,7 @@
  * @brief    Export/import macros and build-info accessors for the FSLIB FreeSurfer I/O library.
  *
  * Defines the @c FSSHARED_EXPORT visibility macro used by every public
- * class in FSLIB so the library can be built either as a Qt shared
+ * class in FSLIB so the library can be built either as a shared
  * library (default) or as a static archive under @c STATICBUILD without
  * source changes. Also exposes the small set of build-info accessors
  * (date/time, abbreviated git hash, full git hash) that downstream
@@ -27,7 +27,6 @@
 // QT INCLUDES
 //=============================================================================================================
 
-#include <QtCore/qglobal.h>
 #include <base/buildinfo.h>
 
 //=============================================================================================================
@@ -36,10 +35,20 @@
 
 #if defined(STATICBUILD)
 #define FSSHARED_EXPORT
-#elif defined(MNE_FS_LIBRARY)
-#define FSSHARED_EXPORT Q_DECL_EXPORT /**< Q_DECL_EXPORT must be added to the declarations of symbols used when compiling a shared library. */
+#elif defined(_WIN32)
+#if defined(MNE_FS_LIBRARY)
+#define FSSHARED_EXPORT __declspec(dllexport) /**< Exported when building the shared library. */
 #else
-#define FSSHARED_EXPORT Q_DECL_IMPORT /**< Q_DECL_IMPORT must be added to the declarations of symbols used when compiling a client that uses the shared library. */
+#define FSSHARED_EXPORT __declspec(dllimport) /**< Imported by clients of the shared library. */
+#endif
+#else
+#define FSSHARED_EXPORT __attribute__((visibility("default"))) /**< Default visibility on ELF/Mach-O. */
+#endif
+
+// Exported classes hold Eigen and standard-library members and share their ABI with clients built by the same
+// compiler, so MSVC's warnings about members and bases without dll-interface do not apply (Qt disables them alike).
+#if defined(_MSC_VER)
+#pragma warning(disable : 4251 4275)
 #endif
 
 //=============================================================================================================

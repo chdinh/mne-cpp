@@ -33,7 +33,7 @@
       "ml",
       "report"
     ],
-    "tokens": 14496,
+    "tokens": 14474,
     "gui_outside_design": []
   },
   "libraries": {
@@ -103,17 +103,17 @@
       ]
     },
     "bids": {
-      "tokens": 1029,
+      "tokens": 1027,
       "by_category": {
         "containers": 82,
         "files": 102,
-        "global": 34,
+        "global": 32,
         "json": 32,
         "regex": 3,
         "strings": 769,
         "time": 7
       },
-      "public_header_includes": 33,
+      "public_header_includes": 32,
       "q_object": 0,
       "files": 24,
       "modules": [
@@ -129,11 +129,11 @@
       "modules": []
     },
     "com": {
-      "tokens": 369,
+      "tokens": 367,
       "by_category": {
         "containers": 20,
         "files": 5,
-        "global": 50,
+        "global": 48,
         "json": 45,
         "network": 10,
         "objects_signals": 90,
@@ -141,7 +141,7 @@
         "threads": 5,
         "time": 2
       },
-      "public_header_includes": 30,
+      "public_header_includes": 29,
       "q_object": 7,
       "files": 18,
       "modules": [
@@ -150,13 +150,13 @@
       ]
     },
     "connectivity": {
-      "tokens": 61,
+      "tokens": 59,
       "by_category": {
-        "global": 7,
+        "global": 5,
         "objects_signals": 4,
         "threads": 50
       },
-      "public_header_includes": 10,
+      "public_header_includes": 9,
       "q_object": 0,
       "files": 42,
       "modules": [
@@ -229,18 +229,18 @@
       ]
     },
     "dsp": {
-      "tokens": 456,
+      "tokens": 454,
       "by_category": {
         "containers": 79,
         "files": 29,
-        "global": 140,
+        "global": 138,
         "objects_signals": 84,
         "other": 3,
         "regex": 3,
         "strings": 97,
         "threads": 21
       },
-      "public_header_includes": 29,
+      "public_header_includes": 28,
       "q_object": 12,
       "files": 94,
       "modules": [
@@ -249,11 +249,11 @@
       ]
     },
     "fiff": {
-      "tokens": 622,
+      "tokens": 620,
       "by_category": {
         "containers": 3,
         "files": 81,
-        "global": 403,
+        "global": 401,
         "json": 37,
         "network": 6,
         "objects_signals": 14,
@@ -263,7 +263,7 @@
         "strings": 66,
         "time": 1
       },
-      "public_header_includes": 57,
+      "public_header_includes": 56,
       "q_object": 1,
       "files": 71,
       "modules": [
@@ -272,12 +272,12 @@
       ]
     },
     "fs": {
-      "tokens": 112,
+      "tokens": 110,
       "by_category": {
-        "global": 111,
+        "global": 109,
         "objects_signals": 1
       },
-      "public_header_includes": 7,
+      "public_header_includes": 6,
       "q_object": 0,
       "files": 18,
       "modules": [
@@ -285,16 +285,16 @@
       ]
     },
     "fwd": {
-      "tokens": 38,
+      "tokens": 36,
       "by_category": {
         "files": 9,
-        "global": 4,
+        "global": 2,
         "objects_signals": 6,
         "smart_pointers": 4,
         "strings": 11,
         "threads": 4
       },
-      "public_header_includes": 7,
+      "public_header_includes": 6,
       "q_object": 0,
       "files": 28,
       "modules": [
@@ -315,18 +315,18 @@
       ]
     },
     "inv": {
-      "tokens": 295,
+      "tokens": 293,
       "by_category": {
         "containers": 86,
         "files": 29,
-        "global": 37,
+        "global": 35,
         "json": 2,
         "objects_signals": 7,
         "regex": 1,
         "strings": 131,
         "threads": 2
       },
-      "public_header_includes": 48,
+      "public_header_includes": 47,
       "q_object": 0,
       "files": 81,
       "modules": [
@@ -335,16 +335,16 @@
       ]
     },
     "lsl": {
-      "tokens": 169,
+      "tokens": 167,
       "by_category": {
         "containers": 6,
-        "global": 32,
+        "global": 30,
         "network": 53,
         "other": 4,
         "strings": 71,
         "time": 3
       },
-      "public_header_includes": 4,
+      "public_header_includes": 3,
       "q_object": 0,
       "files": 13,
       "modules": [
@@ -369,11 +369,11 @@
       "modules": []
     },
     "mna": {
-      "tokens": 1639,
+      "tokens": 1637,
       "by_category": {
         "containers": 65,
         "files": 28,
-        "global": 33,
+        "global": 31,
         "json": 335,
         "objects_signals": 80,
         "other": 5,
@@ -381,7 +381,7 @@
         "strings": 1052,
         "time": 22
       },
-      "public_header_includes": 85,
+      "public_header_includes": 84,
       "q_object": 0,
       "files": 37,
       "modules": [
@@ -389,18 +389,18 @@
       ]
     },
     "mne": {
-      "tokens": 451,
+      "tokens": 449,
       "by_category": {
         "containers": 4,
         "files": 66,
-        "global": 294,
+        "global": 292,
         "objects_signals": 4,
         "other": 23,
         "regex": 1,
         "strings": 49,
         "threads": 10
       },
-      "public_header_includes": 75,
+      "public_header_includes": 74,
       "q_object": 0,
       "files": 113,
       "modules": [

@@ -27,7 +27,6 @@
 // INCLUDES
 //=============================================================================================================
 
-#include <QtCore/qglobal.h>
 #include <base/buildinfo.h>
 #include <base/string_utils.h>
 
@@ -37,10 +36,20 @@
 
 #if defined(STATICBUILD)
 #define INVSHARED_EXPORT
-#elif defined(MNE_INV_LIBRARY)
-#define INVSHARED_EXPORT Q_DECL_EXPORT /**< Q_DECL_EXPORT must be added to the declarations of symbols used when compiling a shared library. */
+#elif defined(_WIN32)
+#if defined(MNE_INV_LIBRARY)
+#define INVSHARED_EXPORT __declspec(dllexport) /**< Exported when building the shared library. */
 #else
-#define INVSHARED_EXPORT Q_DECL_IMPORT /**< Q_DECL_IMPORT must be added to the declarations of symbols used when compiling a client that uses the shared library. */
+#define INVSHARED_EXPORT __declspec(dllimport) /**< Imported by clients of the shared library. */
+#endif
+#else
+#define INVSHARED_EXPORT __attribute__((visibility("default"))) /**< Default visibility on ELF/Mach-O. */
+#endif
+
+// Exported classes hold Eigen and standard-library members and share their ABI with clients built by the same
+// compiler, so MSVC's warnings about members and bases without dll-interface do not apply (Qt disables them alike).
+#if defined(_MSC_VER)
+#pragma warning(disable : 4251 4275)
 #endif
 
 //=============================================================================================================

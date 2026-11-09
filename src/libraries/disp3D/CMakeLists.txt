@@ -188,8 +188,9 @@ if(USE_FFTW)
   endif()
 endif()
 
+# The public headers include Qt
+target_link_libraries(${PROJECT_NAME} PUBLIC ${QT_REQUIRED_COMPONENT_LIBS})
 target_link_libraries(${PROJECT_NAME} PRIVATE
-    ${QT_REQUIRED_COMPONENT_LIBS}
     ${MNE_LIBS_REQUIRED}
     Eigen3::Eigen
     ${FFTW_LIBS})

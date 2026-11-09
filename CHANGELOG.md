@@ -82,6 +82,11 @@ aliases; replace the old spelling as below.
   impedance widget no longer switches the plugin into impedance mode.
 - `Sphere::fit_sphere_simplex` returns a zero centre when the fit fails; it was
   uninitialised. `LayoutMaker` then projects around the origin, as MNE-C does.
+- The export macros of `mne_bids`, `mne_com`, `mne_connectivity`, `mne_dsp`,
+  `mne_fiff`, `mne_fs`, `mne_fwd`, `mne_inv`, `mne_lsl`, `mne_mna` and `mne_mne`
+  no longer come from Qt. Libraries whose public headers still include Qt
+  headers now link Qt publicly, so code using them no longer has to add Qt to
+  its own link line.
 - `Subject::detach` of an observer that is not attached no longer crashes, and
   observers may detach themselves while they are notified.
 - `mne_rt_server` no longer aborts in debug builds when a client requests the

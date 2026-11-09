@@ -20,8 +20,8 @@
  * and assorted real-time wrappers (averaging, covariance, noise PSD, inverse
  * operator update).
  *
- * @c DSPSHARED_EXPORT resolves to @c Q_DECL_EXPORT inside the DSP target
- * itself and to @c Q_DECL_IMPORT for every downstream consumer; it collapses
+ * @c DSPSHARED_EXPORT exports the symbols inside the DSP target
+ * itself and imports them for every downstream consumer; it collapses
  * to an empty token in static builds. This macro must annotate every symbol
  * that crosses the shared-library boundary on Windows so the import library
  * is generated correctly.
@@ -41,7 +41,6 @@
 // QT INCLUDES
 //=============================================================================================================
 
-#include <QtCore/qglobal.h>
 
 //=============================================================================================================
 // DEFINES
@@ -49,10 +48,20 @@
 
 #if defined(STATICBUILD)
 #define DSPSHARED_EXPORT
-#elif defined(MNE_DSP_LIBRARY)
-#define DSPSHARED_EXPORT Q_DECL_EXPORT /**< Q_DECL_EXPORT must be added to the declarations of symbols used when compiling a shared library. */
+#elif defined(_WIN32)
+#if defined(MNE_DSP_LIBRARY)
+#define DSPSHARED_EXPORT __declspec(dllexport) /**< Exported when building the shared library. */
 #else
-#define DSPSHARED_EXPORT Q_DECL_IMPORT /**< Q_DECL_IMPORT must be added to the declarations of symbols used when compiling a client that uses the shared library. */
+#define DSPSHARED_EXPORT __declspec(dllimport) /**< Imported by clients of the shared library. */
+#endif
+#else
+#define DSPSHARED_EXPORT __attribute__((visibility("default"))) /**< Default visibility on ELF/Mach-O. */
+#endif
+
+// Exported classes hold Eigen and standard-library members and share their ABI with clients built by the same
+// compiler, so MSVC's warnings about members and bases without dll-interface do not apply (Qt disables them alike).
+#if defined(_MSC_VER)
+#pragma warning(disable : 4251 4275)
 #endif
 
 //=============================================================================================================

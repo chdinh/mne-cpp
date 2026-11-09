@@ -28,7 +28,7 @@
  * @c disp / acquisition plugins that link against this library.
  *
  * This header defines @ref COMSHARED_EXPORT, expanding to
- * @c Q_DECL_EXPORT when building the shared library, @c Q_DECL_IMPORT
+ * the export decoration when building the shared library, the import one
  * when consuming it, and to nothing for the static build configuration
  * (@c STATICBUILD). It also declares the three @c buildDateTime /
  * @c buildHash / @c buildHashLong entry points used by tooling and the
@@ -42,7 +42,6 @@
 // INCLUDES
 //=============================================================================================================
 
-#include <QtCore/qglobal.h>
 #include <base/buildinfo.h>
 
 //=============================================================================================================
@@ -51,10 +50,20 @@
 
 #if defined(STATICBUILD)
 #define COMSHARED_EXPORT
-#elif defined(MNE_COM_LIBRARY)
-#define COMSHARED_EXPORT Q_DECL_EXPORT /**< Q_DECL_EXPORT must be added to the declarations of symbols used when compiling a shared library. */
+#elif defined(_WIN32)
+#if defined(MNE_COM_LIBRARY)
+#define COMSHARED_EXPORT __declspec(dllexport) /**< Exported when building the shared library. */
 #else
-#define COMSHARED_EXPORT Q_DECL_IMPORT /**< Q_DECL_IMPORT must be added to the declarations of symbols used when compiling a client that uses the shared library. */
+#define COMSHARED_EXPORT __declspec(dllimport) /**< Imported by clients of the shared library. */
+#endif
+#else
+#define COMSHARED_EXPORT __attribute__((visibility("default"))) /**< Default visibility on ELF/Mach-O. */
+#endif
+
+// Exported classes hold Eigen and standard-library members and share their ABI with clients built by the same
+// compiler, so MSVC's warnings about members and bases without dll-interface do not apply (Qt disables them alike).
+#if defined(_MSC_VER)
+#pragma warning(disable : 4251 4275)
 #endif
 
 //=============================================================================================================
