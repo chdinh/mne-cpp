@@ -1,0 +1,171 @@
+---
+id: report-class
+title: "REPORTLIB::Report"
+sidebar_label: Report
+sidebar_position: 2
+---
+
+# Report
+
+**Namespace:** `REPORTLIB` &nbsp;·&nbsp; **Library:** Report Library &nbsp;·&nbsp; **Source:** [`report/report.h`](https://github.com/mne-tools/mne-cpp/blob/staging/src/libraries/report/report.h)
+
+:::info[Python equivalent]
+`mne.Report` in MNE-Python.
+:::
+
+`#include <report/report.h>`
+
+```cpp
+class REPORTLIB::Report
+```
+
+Simple HTML report builder for MEG/EEG analysis results.
+
+```cpp title="src/examples/ex_report/main.cpp"
+Report report("Auditory evoked responses, sub-01");
+report.add_key_value("Data", {{"Raw file", "sample_audvis_raw.fif"}, {"Channels", "306 MEG, 60 EEG"}});
+report.add_table("Inverse", {"Parameter", "Value"}, {{"Method", "dSPM"}, {"SNR", "3"}, {"Depth", "0.8"}});
+report.add_text("Notes", "Bad channels MEG 2443 and EEG 053 were excluded.");
+report.add_code("Pipeline", "mne_process_raw --raw sample_audvis_raw.fif --lowpass 40");
+const std::string html = report.to_html();
+report.save(path); // open in any browser
+```
+
+---
+
+## Public Methods
+
+### Report(title)
+
+Constructs an empty report.
+
+**Parameters:**
+
+- **title** : *std::string*
+  [`Report`](/docs/api/report/report-class) title, used for the HTML page title and the main heading.
+
+---
+
+### add_text(title, text)
+
+Adds a paragraph of plain text.
+
+**Parameters:**
+
+- **title** : *std::string_view*
+  Section heading.
+
+- **text** : *std::string_view*
+  Text; it is HTML-escaped.
+
+---
+
+### add_table(title, headers, rows)
+
+Adds a table.
+
+**Parameters:**
+
+- **title** : *std::string_view*
+  Section heading.
+
+- **headers** : *const BASELIB::StringList &*
+  Column headers.
+
+- **rows** : *const std::vector&lt; BASELIB::StringList &gt; &*
+  Cells, one list per row.
+
+---
+
+### add_key_value(title, pairs)
+
+Adds a list of key-value pairs.
+
+**Parameters:**
+
+- **title** : *std::string_view*
+  Section heading.
+
+- **pairs** : *const std::vector&lt; std::pair&lt; std::string, std::string &gt; &gt; &*
+  (key, value) pairs, in display order.
+
+---
+
+### add_code(title, code)
+
+Adds a preformatted code block.
+
+**Parameters:**
+
+- **title** : *std::string_view*
+  Section heading.
+
+- **code** : *std::string_view*
+  Code text; it is HTML-escaped.
+
+---
+
+### section_count()
+
+**Returns:**
+
+- *std::size_t* — Number of sections added so far.
+
+---
+
+### to_html()
+
+**Returns:**
+
+- *std::string* — Self-contained HTML document with the title, all sections in the order they were added, and a footer with the generation time (UTC).
+
+---
+
+### save(path)
+
+Writes `to_html` to a file.
+
+**Parameters:**
+
+- **path** : *const std::filesystem::path &*
+  Output file; an existing file is overwritten.
+
+**Returns:**
+
+- *bool* — True on success, false if the file could not be written.
+
+---
+
+### title()
+
+**Returns:**
+
+- *const std::string &* — The title passed at construction.
+
+---
+
+## Example
+
+- Start here: [ex_report](../../examples/report/ex_report.mdx) — Report library: summarise an analysis run as a self-contained HTML page.
+- Full source: [`src/examples/ex_report/main.cpp`](https://github.com/mne-tools/mne-cpp/tree/staging/src/examples/ex_report/main.cpp)
+- Build target: `ex_report` (runs under CTest)
+
+## Used in examples
+
+### [ex_report](../../examples/report/ex_report.mdx)
+
+Report library: summarise an analysis run as a self-contained HTML page.
+
+````cpp title="src/examples/ex_report/main.cpp, line 71"
+Report report("Auditory evoked responses, sub-01");
+report.add_key_value("Data", {{"Raw file", "sample_audvis_raw.fif"}, {"Channels", "306 MEG, 60 EEG"}});
+report.add_table("Inverse", {"Parameter", "Value"}, {{"Method", "dSPM"}, {"SNR", "3"}, {"Depth", "0.8"}});
+report.add_text("Notes", "Bad channels MEG 2443 and EEG 053 were excluded.");
+report.add_code("Pipeline", "mne_process_raw --raw sample_audvis_raw.fif --lowpass 40");
+const std::string html = report.to_html();
+report.save(path); // open in any browser
+````
+
+## Authors of this file
+
+- Christoph Dinh &lt;christoph.dinh@mne-cpp.org&gt;

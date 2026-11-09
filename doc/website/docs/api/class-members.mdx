@@ -75,6 +75,7 @@ Index of 6288 public class members (functions, variables, typedefs, enums) acros
 - **actualValue** `[var]` in [MnaVerificationResult](/docs/api/mna/mna-verification-result) — The evaluated expression result.
 - **ad_hoc_noise** `[fn]` in [InvDipoleFitData](/docs/api/inv/inv-dipole-fit-data) — Create an ad-hoc diagonal noise-covariance matrix.
 - **add_bem_surface** `[fn]` in [MNEMshDisplaySurfaceSet](/docs/api/mne/mne-msh-display-surface-set) — Read a BEM surface from a FIFF file, optionally validate that it is topologically closed (via solid-angle check), and add it to this set.
+- **add_code** `[fn]` in [Report](/docs/api/report/report-class) — Adds a preformatted code block.
 - **add_edge** `[fn]` in [Network](/docs/api/connectivity/network) — Adds an edge between two existing nodes and registers it with both.
 - **add_filter_response** `[fn]` in [MNERawData](/docs/api/mne/mne-raw-data) — Create a frequency-domain filter response from the current filter definition and sampling frequency, replacing any existing response.
 - **add_geometry_info** `[fn]` in [MNEBemSurface](/docs/api/mne/mne-bem-surface) — Add vertex normals and neighbourhood information.
@@ -86,9 +87,12 @@ Index of 6288 public class members (functions, variables, typedefs, enums) acros
 - **add_inverse** `[fn]` in [FiffCoordTrans](/docs/api/fiff/fiff-coord-trans)
 - **add_item** `[fn]` in [MNEProjOp](/docs/api/mne/mne-proj-op) — Add a projection item that is active by default.
 - **add_item_active** `[fn]` in [MNEProjOp](/docs/api/mne/mne-proj-op) — Add a projection item with an explicit active/inactive state.
+- **add_key_value** `[fn]` in [Report](/docs/api/report/report-class) — Adds a list of key-value pairs.
 - **add_node** `[fn]` in [Network](/docs/api/connectivity/network) — Adds a node.
 - **add_patch_stats** `[fn]` in [MNESourceSpace](/docs/api/mne/mne-source-space) — Compute patch statistics (areas, normals, deviations).
 - **add_replace_surface** `[fn]` in [MNEMshDisplaySurfaceSet](/docs/api/mne/mne-msh-display-surface-set) — Add a new surface to the set, or replace an existing surface with the same ID if `replace` is true.
+- **add_table** `[fn]` in [Report](/docs/api/report/report-class) — Adds a table.
+- **add_text** `[fn]` in [Report](/docs/api/report/report-class) — Adds a paragraph of plain text.
 - **add_triangle_data** `[fn]` in [MNESurfaceOrVolume](/docs/api/mne/mne-surface-or-volume) — Populate the [`MNETriangle`](/docs/api/mne/mne-triangle) structures for both the full and in-use triangulations by computing edge vectors, normals, and areas.
 - **add_uniform_curv** `[fn]` in [MNESurfaceOrVolume](/docs/api/mne/mne-surface-or-volume) — Set all vertex curvature values to 1.0 (uniform curvature), if not already present.
 - **add_vertex_normals** `[fn]` in [MNESurfaceOrVolume](/docs/api/mne/mne-surface-or-volume) — Compute vertex normals by area-weighted accumulation of triangle normals, then normalize to unit length.
@@ -97,7 +101,6 @@ Index of 6288 public class members (functions, variables, typedefs, enums) acros
 - **addBem** `[fn]` in [DipoleFitView](/docs/api/disp/dipole-fit-view) — Updates GUI to show selected BEM file.
 - **addBemSurface** `[fn]` in [BrainTreeModel](/docs/api/disp3-d/brain-tree-model)
 - **addBinding** `[fn]` in [MnaParamTree](/docs/api/mna/mna-param-tree)
-- **addCode** `[fn]` in [Report](/docs/api/utils/report) — Add a preformatted code block.
 - **addData** `[slot]` in [BidsViewModel](/docs/api/disp/bids-view-model) — Adds data to the item model.
 - **addData** `[fn]` in [ChannelDataView](/docs/api/disp/channel-data-view) — Append new samples (real-time streaming use-case).
 - **addData** `[fn]` in [FrequencySpectrumModel](/docs/api/disp/frequency-spectrum-model) — Adds the frequency estimation.
@@ -116,7 +119,6 @@ Index of 6288 public class members (functions, variables, typedefs, enums) acros
 - **addEvent** `[fn]` in [RtFiffRawViewModel](/docs/api/disp/rt-fiff-raw-view-model) — Adds event based on input parameters.
 - **addGroupBox** `[fn]` in [QuickControlView](/docs/api/disp/quick-control-view) — Add a new group box to this Widget.
 - **addGroupBoxWithTabs** `[fn]` in [QuickControlView](/docs/api/disp/quick-control-view) — Add a new group box with tabs to this Widget.
-- **addKeyValue** `[fn]` in [Report](/docs/api/utils/report) — Add a key-value section.
 - **addLayer** `[fn]` in [MultimodalScene](/docs/api/disp3-d/multimodal-scene) — Add or replace a layer.
 - **addMeas** `[fn]` in [DipoleFitView](/docs/api/disp/dipole-fit-view) — Updates GUI to show selected measurement file.
 - **addMri** `[fn]` in [DipoleFitView](/docs/api/disp/dipole-fit-view) — Updates GUI to show selected MRI file.
@@ -133,9 +135,7 @@ Index of 6288 public class members (functions, variables, typedefs, enums) acros
 - **addSourceSpace** `[fn]` in [BrainTreeModel](/docs/api/disp3-d/brain-tree-model)
 - **addSubject** `[slot]` in [BidsViewModel](/docs/api/disp/bids-view-model) — Adds subject with given input name.
 - **addSurface** `[fn]` in [BrainTreeModel](/docs/api/disp3-d/brain-tree-model)
-- **addTable** `[fn]` in [Report](/docs/api/utils/report) — Add a table section.
 - **addTalairach** `[fn]` in [FiffCoordTransSet](/docs/api/fiff/fiff-coord-trans-set) — Sets the RAS -&gt; MNI transform from a .xfm file and the two MNI -&gt; FreeSurfer Talairach transforms (MNE-C mne_mri_add_talairach_transforms).
-- **addText** `[fn]` in [Report](/docs/api/utils/report) — Add a text section.
 - **addToData** `[slot]` in [BidsViewModel](/docs/api/disp/bids-view-model) — Adds a sub-item to a data item (ex.
 - **addTriangleData** `[fn]` in [MNEBemSurface](/docs/api/mne/mne-bem-surface) — Definition of the mne_add_triangle_data function in mne_add_geometry_info.c.
 - **addVertexNormals** `[fn]` in [MNEBemSurface](/docs/api/mne/mne-bem-surface) — Definition of the addVertexNormals function in mne_add_geometry_info.c.
@@ -2437,7 +2437,7 @@ Index of 6288 public class members (functions, variables, typedefs, enums) acros
 - **hpi_coil_freqs** `[var]` in [FiffInfo](/docs/api/fiff/fiff-info) — Excitation frequencies of the HPI coils in Hz, in coil order.
 - **hpiFreqs** `[var]` in [HpiFitResult](/docs/api/inv/hpi-fit-result)
 - **HpiSettingsView** `[fn]` in [HpiSettingsView](/docs/api/disp/hpi-settings-view) — Constructs a [`HpiSettingsView`](/docs/api/disp/hpi-settings-view) object.
-- **htmlContent** `[var]` in [ReportSection](/docs/api/utils/report-section)
+- **html** `[var]` in `Section` — Escaped HTML content.
 - **hub** `[fn]` in [NetworkNode](/docs/api/connectivity/network-node)
 - **hugePages** `[var]` in [AcqStreamOptions](/docs/api/acq/acq-stream-options) — 2 MiB pages (Linux transparent huge pages); best effort, reported in stats.
 - **hugePages** `[var]` in [AcqStreamStats](/docs/api/acq/acq-stream-stats) — Whether the ring is backed by huge pages.
@@ -4447,7 +4447,7 @@ Index of 6288 public class members (functions, variables, typedefs, enums) acros
 - **reply** `[fn]` in [Command](/docs/api/com/command) — Inherited command reply channel.
 - **report** `[var]` in [FitUser](/docs/api/math/fit-user)
 - **report** `[fn]` in [MNEProjOp](/docs/api/mne/mne-proj-op) — Write a one-line-per-item summary of all projection items to a text stream (no vector data).
-- **Report** `[fn]` in [Report](/docs/api/utils/report) — Construct a report with a title.
+- **Report** `[fn]` in [Report](/docs/api/report/report-class) — Constructs an empty report.
 - **report_data** `[fn]` in [MNEProjOp](/docs/api/mne/mne-proj-op) — Write a formatted summary of all projection items to a text stream, optionally including the full projection vector data while zeroing out excluded channels.
 - **report_dim** `[var]` in [FitDipUserRec](/docs/api/inv/fit-dip-user-rec)
 - **reportPick** `[fn]` in [MultimodalScene](/docs/api/disp3-d/multimodal-scene) — Report a pick result from a layer's renderer or hit-tester.
@@ -4632,7 +4632,7 @@ Index of 6288 public class members (functions, variables, typedefs, enums) acros
 - **save** `[fn]` in [FigureExporter](/docs/api/disp/figure-exporter) — Writes `image` as the next figure.
 - **save** `[fn]` in [MlModel](/docs/api/ml/ml-model) — Serialise the model to disk.
 - **save** `[fn]` in [MlOnnxModel](/docs/api/ml/ml-onnx-model) — Serialise the model to disk.
-- **save** `[fn]` in [Report](/docs/api/utils/report) — Save the report to an HTML file.
+- **save** `[fn]` in [Report](/docs/api/report/report-class) — Writes `to_html` to a file.
 - **save** `[fn]` in [SubView](/docs/api/disp3-d/sub-view) — Save this [`SubView`](/docs/api/disp3-d/sub-view)'s state to QSettings under the given prefix.
 - **save** `[fn]` in [ViewVisibilityProfile](/docs/api/disp3-d/view-visibility-profile) — Save this profile to QSettings under the given key prefix.
 - **save_calibrated** `[var]` in [FiffCtfComp](/docs/api/fiff/fiff-ctf-comp) — If data should be saved calibrated.
@@ -4741,7 +4741,7 @@ Index of 6288 public class members (functions, variables, typedefs, enums) acros
 - **SDPtr** `[type]` in [FiffNamedMatrix](/docs/api/fiff/fiff-named-matrix) — Shared data pointer type for [`FiffNamedMatrix`](/docs/api/fiff/fiff-named-matrix).
 - **second** `[var]` in [AcqSpanPair](/docs/api/acq/acq-span-pair) — Elements from the start of the ring; empty without wrap.
 - **secs** `[var]` in [FiffTime](/docs/api/fiff/fiff-time) — GMT time in seconds since epoch.
-- **sectionCount** `[fn]` in [Report](/docs/api/utils/report) — Get the number of sections.
+- **section_count** `[fn]` in [Report](/docs/api/report/report-class)
 - **seed** `[var]` in [SimulateStcParams](/docs/api/dsp/simulate-stc-params) — Random seed for reproducibility.
 - **seek** `[fn]` in [ByteStream](/docs/api/base/byte-stream)
 - **seek** `[fn]` in [FileByteStream](/docs/api/base/file-byte-stream)
@@ -5728,8 +5728,8 @@ Index of 6288 public class members (functions, variables, typedefs, enums) acros
 - **tipOffsetEnabled** `[fn]` in [PolhemusCoregistration](/docs/api/acq/polhemus-coregistration)
 - **TissueType** `[enum]` in [BrainSurface](/docs/api/disp3-d/brain-surface)
 - **tissueType** `[fn]` in [BrainSurface](/docs/api/disp3-d/brain-surface) — Get the tissue type.
-- **title** `[fn]` in [Report](/docs/api/utils/report) — Get the report title.
-- **title** `[var]` in [ReportSection](/docs/api/utils/report-section)
+- **title** `[fn]` in [Report](/docs/api/report/report-class)
+- **title** `[var]` in `Section` — Heading, not yet escaped.
 - **tmax** `[var]` in [AverageCategory](/docs/api/fiff/average-category) — Maximum time (s).
 - **tmax** `[var]` in [CovDefinition](/docs/api/mne/cov-definition) — Maximum time (s).
 - **tmax** `[var]` in [FiffEpochData](/docs/api/fiff/fiff-epoch-data) — End time of this epoch in seconds.
@@ -5754,6 +5754,7 @@ Index of 6288 public class members (functions, variables, typedefs, enums) acros
 - **to** `[var]` in [FiffCoordTrans](/docs/api/fiff/fiff-coord-trans) — Destination coordinate system.
 - **to** `[var]` in [MNEEvent](/docs/api/mne/mne-event) — Trigger value after the transition.
 - **to_fixed_ori** `[fn]` in [MNEForwardSolution](/docs/api/mne/mne-forward-solution) — Helper to convert the forward solution to fixed ori from free.
+- **to_html** `[fn]` in [Report](/docs/api/report/report-class)
 - **to_subj** `[var]` in [MNEMorphMap](/docs/api/mne/mne-morph-map) — Destination subject.
 - **toByte** `[fn]` in [FiffTag](/docs/api/fiff/fiff-tag) — to Byte Fast access; Data are deleted if tag gets deleted, and vice versa
 - **toCbor** `[fn]` in [MnaFileRef](/docs/api/mna/mna-file-ref) — Serialize to QCborMap.
@@ -5795,7 +5796,6 @@ Index of 6288 public class members (functions, variables, typedefs, enums) acros
 - **toggleSingleView** `[signal]` in [Control3DView](/docs/api/disp/control3-d-view) — Notifies the 'Single View' radio button has been checked.
 - **toggleTimeFormat** `[fn]` in [ChannelDataView](/docs/api/disp/channel-data-view) — Toggle time format between float seconds and HH:MM:SS clock time.
 - **toggleTimeFormat** `[fn]` in [TimeRulerWidget](/docs/api/disp/time-ruler-widget) — Toggle the time format between float seconds and HH:MM:SS clock time.
-- **toHtml** `[fn]` in [Report](/docs/api/utils/report) — Generate the full HTML string.
 - **toInt** `[fn]` in [FiffTag](/docs/api/fiff/fiff-tag) — to Int Fast access; Data are deleted if tag gets deleted, and vice versa
 - **toIntMatrix** `[fn]` in [FiffTag](/docs/api/fiff/fiff-tag) — to fiff FIFFT INT MATRIX
 - **toJson** `[fn]` in [MnaFileRef](/docs/api/mna/mna-file-ref) — Serialize to QJsonObject.

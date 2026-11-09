@@ -475,7 +475,6 @@ const apiSidebar: SidebarsConfig['apiSidebar'] = [
       collapsed: true,
       link: {type: 'doc', id: 'api/utils/index'},
       items: [
-        'api/utils/report',
         'api/utils/artifact-detect',
         'api/utils/bad-channel-detect',
         'api/utils/channel-derivation',
@@ -499,7 +498,6 @@ const apiSidebar: SidebarsConfig['apiSidebar'] = [
         'api/utils/derivation-rule',
         'api/utils/dpss-result',
         'api/utils/epoch-extractor-params',
-        'api/utils/report-section',
         'api/utils/spectogram-input-data',
         'api/utils/tapered-spectra-input-data',
         'api/utils/artifact-detect-proj-params'
@@ -530,6 +528,16 @@ const apiSidebar: SidebarsConfig['apiSidebar'] = [
         'api/pybridge/python-test-helper',
         'api/pybridge/python-runner-config',
         'api/pybridge/python-runner-result'
+      ],
+    },
+    {
+      type: 'category',
+      label: "Report Library",
+      collapsible: true,
+      collapsed: true,
+      link: {type: 'doc', id: 'api/report/index'},
+      items: [
+        'api/report/report-class'
       ],
     },
     {
