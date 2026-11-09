@@ -7,7 +7,7 @@ project(test_studio_raw_model LANGUAGES CXX)
 
 set(CMAKE_AUTOMOC ON)
 
-set(QT_REQUIRED_COMPONENTS Core Concurrent Network Test Widgets)
+set(QT_REQUIRED_COMPONENTS Core Test Widgets)
 find_package(QT NAMES Qt6 Qt5 REQUIRED COMPONENTS ${QT_REQUIRED_COMPONENTS})
 find_package(Qt${QT_VERSION_MAJOR} REQUIRED COMPONENTS ${QT_REQUIRED_COMPONENTS})
 

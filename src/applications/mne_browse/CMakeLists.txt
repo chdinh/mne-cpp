@@ -10,7 +10,7 @@ set(CMAKE_AUTOUIC ON)
 set(CMAKE_AUTOMOC ON)
 set(CMAKE_AUTORCC ON)
 
-set(QT_REQUIRED_COMPONENTS Core Widgets Concurrent Network Svg)
+set(QT_REQUIRED_COMPONENTS Core Widgets Concurrent Svg)
 
 if(NOT WASM)
   list(APPEND QT_REQUIRED_COMPONENTS PrintSupport)

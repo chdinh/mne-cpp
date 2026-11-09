@@ -5,7 +5,7 @@
 cmake_minimum_required(VERSION 3.14)
 project(ex_connectivity_metrics LANGUAGES CXX)
 
-set(QT_REQUIRED_COMPONENTS Core Widgets Concurrent Network)
+set(QT_REQUIRED_COMPONENTS Core Widgets)
 find_package(QT NAMES Qt6 Qt5 REQUIRED COMPONENTS ${QT_REQUIRED_COMPONENTS})
 find_package(Qt${QT_VERSION_MAJOR} REQUIRED COMPONENTS ${QT_REQUIRED_COMPONENTS})
 

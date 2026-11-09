@@ -16,7 +16,7 @@ if(WITH_CODE_COV)
   add_link_options("--coverage")
 endif()
 
-set(QT_REQUIRED_COMPONENTS Core Gui Test Widgets)
+set(QT_REQUIRED_COMPONENTS Core Gui Test)
 find_package(QT NAMES Qt6 Qt5 REQUIRED COMPONENTS ${QT_REQUIRED_COMPONENTS})
 find_package(Qt${QT_VERSION_MAJOR} REQUIRED COMPONENTS ${QT_REQUIRED_COMPONENTS})
 
