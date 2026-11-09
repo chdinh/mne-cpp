@@ -33,15 +33,22 @@
 #include <QDeadlineTimer>
 #include <QThread>
 
-#include <iostream>
-
-constexpr bool USENEW = true;
-
 //=============================================================================================================
 // USED NAMESPACES
 //=============================================================================================================
 
 using namespace COMLIB;
+
+//=============================================================================================================
+// DEFINE STATIC METHODS
+//=============================================================================================================
+
+namespace
+{
+
+constexpr int kReplyTimeoutMs = 30000; /**< Longest wait for the reply to a command, e.g. while the server loads a file. */
+
+} // namespace
 
 //=============================================================================================================
 // DEFINE MEMBER METHODS
@@ -87,56 +94,36 @@ void RtCmdClient::sendCommandJSON(const Command& p_command)
     QString t_sReply;
 
     if (this->state() == QAbstractSocket::ConnectedState) {
-        // Send request
-        if constexpr (USENEW) {
-            QByteArray block;
-            QDataStream out(&block, QIODevice::WriteOnly);
-            out.setVersion(QDataStream::Qt_5_1);
+        // Request and reply are QDataStream strings behind a quint16 byte count
+        QByteArray block;
+        QDataStream out(&block, QIODevice::WriteOnly);
+        out.setVersion(QDataStream::Qt_5_1);
+        out << static_cast<quint16>(0);
+        out << t_sCommand;
+        out.device()->seek(0);
+        out << static_cast<quint16>(static_cast<unsigned long>(block.size()) - sizeof(quint16));
+        this->write(block);
+        this->waitForBytesWritten();
 
-            out << static_cast<quint16>(0);
-            out << t_sCommand;
-            out.device()->seek(0);
-            out << static_cast<quint16>(static_cast<unsigned long>(block.size()) - sizeof(quint16));
-
-            this->write(block);
-            this->waitForBytesWritten();
-
-            // Receive response
-            QDataStream in(this);
-            in.setVersion(QDataStream::Qt_5_1);
-
-            quint16 blockSize = 0;
-
-            bool respComplete = false;
-
-            do {
-                this->waitForReadyRead(100);
-
-                if (blockSize == 0) {
-                    if (this->bytesAvailable() >= static_cast<int>(sizeof(quint16)))
-                        in >> blockSize;
-                } else if (this->bytesAvailable() >= blockSize) {
-                    in >> t_sReply;
-                    respComplete = true;
-                }
-            } while (!respComplete && blockSize < 65000); //Sanity Check -> allowed maximal blocksize is 65.000
-        } else {
-            this->write(t_sCommand.toUtf8().constData(), t_sCommand.size());
-            this->waitForBytesWritten();
-
-            // Receive response
-            bool respComplete = false;
-            QByteArray t_qByteArrayRaw;
-            do {
-                if (this->waitForReadyRead(100)) {
-                    t_qByteArrayRaw += this->readAll();
-                    // We need a break condition,
-                    // because we do not have a stop character and do not know how many bytes to receive.
-                    respComplete = t_qByteArrayRaw.count('{') == t_qByteArrayRaw.count('}');
-                }
-                BASELIB::Log::debug("Response: {} bytes", t_qByteArrayRaw.size());
-            } while (!respComplete);
-            t_sReply = QString(t_qByteArrayRaw);
+        QDataStream in(this);
+        in.setVersion(QDataStream::Qt_5_1);
+        quint16 blockSize = 0;
+        const QDeadlineTimer deadline(kReplyTimeoutMs);
+        while (true) {
+            if (blockSize == 0 && this->bytesAvailable() >= static_cast<qint64>(sizeof(quint16))) {
+                in >> blockSize;
+            }
+            if (blockSize > 0 && this->bytesAvailable() >= blockSize) {
+                in >> t_sReply;
+                break;
+            }
+            // Stop when the server is gone or does not answer; waitForReadyRead also returns on disconnection
+            if (this->state() != QAbstractSocket::ConnectedState || deadline.hasExpired() ||
+                !this->waitForReadyRead(static_cast<int>(deadline.remainingTime()))) {
+                BASELIB::Log::warning("No reply to {}: the server closed the connection or did not answer",
+                                      p_command.command().toStdString());
+                break;
+            }
         }
     } else {
         BASELIB::Log::warning("Request was not send, because client is not connected!");

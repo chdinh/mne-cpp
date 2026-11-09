@@ -31,7 +31,7 @@
       "math",
       "report"
     ],
-    "tokens": 14639,
+    "tokens": 14640,
     "gui_outside_design": []
   },
   "libraries": {
@@ -135,17 +135,17 @@
       ]
     },
     "com": {
-      "tokens": 368,
+      "tokens": 369,
       "by_category": {
         "containers": 20,
         "files": 5,
-        "global": 49,
+        "global": 50,
         "json": 45,
-        "network": 9,
+        "network": 10,
         "objects_signals": 90,
-        "strings": 144,
+        "strings": 142,
         "threads": 5,
-        "time": 1
+        "time": 2
       },
       "public_header_includes": 30,
       "q_object": 7,

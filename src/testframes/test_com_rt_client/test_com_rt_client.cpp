@@ -34,6 +34,7 @@
 #include <QJsonObject>
 #include <QAbstractSocket>
 #include <QDataStream>
+#include <QElapsedTimer>
 #include <QFile>
 #include <QTcpServer>
 #include <QTcpSocket>
@@ -69,6 +70,7 @@ private slots:
     void testRtCmdClientReadAvailableDataEmpty();
     void testRtCmdClientResponseSignal();
     void testRtCmdClientDisconnectedState();
+    void testRtCmdClientServerClosesWithoutReply();
 
     // ── RtDataClient (offline) ────────────────────────────────────────
     void testRtDataClientConstruction();
@@ -164,6 +166,31 @@ void TestComRtClient::testRtCmdClientDisconnectedState()
     QCOMPARE(client.state(), QAbstractSocket::UnconnectedState);
     QVERIFY(!client.isOpen());
     QCOMPARE(client.peerPort(), quint16(0));
+}
+
+//=============================================================================================================
+
+void TestComRtClient::testRtCmdClientServerClosesWithoutReply()
+{
+    // A server that goes away while a command waits for its reply must not keep the client spinning
+    QTcpServer server;
+    QVERIFY(server.listen(QHostAddress::LocalHost));
+    RtCmdClient client;
+    client.connectToHost(QHostAddress::LocalHost, server.serverPort());
+    QVERIFY(client.waitForConnected(5000));
+    QVERIFY(server.waitForNewConnection(5000));
+    std::unique_ptr<QTcpSocket> peer(server.nextPendingConnection());
+    QVERIFY(peer);
+    peer->close();
+
+    QSignalSpy replies(&client, &RtCmdClient::response);
+    QElapsedTimer elapsed;
+    elapsed.start();
+    client.sendCommandJSON(Command(QStringLiteral("help"), QStringLiteral("lists the commands")));
+    QVERIFY2(elapsed.elapsed() < 5000, qPrintable(QStringLiteral("returned after %1 ms").arg(elapsed.elapsed())));
+    QCOMPARE(replies.count(), 1);
+    QVERIFY(replies.first().first().toString().isEmpty());
+    QVERIFY(client.readAvailableData().isEmpty());
 }
 
 //=============================================================================================================

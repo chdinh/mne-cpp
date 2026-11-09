@@ -64,6 +64,8 @@ aliases; replace the old spelling as below.
   measurement info: the connector interface `RTSERVER::IConnector` lives in the
   new `rtserver_connector` library, so the server and its plugins share one
   type. Its ids are `FIFF_SIMULATOR_CONNECTOR` and `DEFAULT_CONNECTOR`.
+- `RtCmdClient` returns an empty reply when the server closes the connection or
+  does not answer within 30 s; it used to spin forever.
 - `FiffTag::toInt`, `toJulian`, `toIntMatrix` and `toFloatMatrix` are no longer
   inline.
 - `fiff/fiff.h`, `connectivity/connectivity.h` and `mne/mne.h` are umbrella
