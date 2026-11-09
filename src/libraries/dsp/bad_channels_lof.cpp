@@ -46,6 +46,7 @@
 //=============================================================================================================
 
 using namespace UTILSLIB;
+using namespace BASELIB;
 using namespace FIFFLIB;
 using namespace Eigen;
 
@@ -69,9 +70,9 @@ VectorXd UTILSLIB::computeLofScores(const MatrixXd& features, int k)
 
 //=============================================================================================================
 
-UTILSLIB::StringList UTILSLIB::findBadChannelsLof(const MatrixXd& data,
-                                                  const FiffInfo& info,
-                                                  const LofBadChannelParams& params)
+BASELIB::StringList UTILSLIB::findBadChannelsLof(const MatrixXd& data,
+                                                 const FiffInfo& info,
+                                                 const LofBadChannelParams& params)
 {
     // Select channel indices based on type filter
     std::vector<int> chIdx;

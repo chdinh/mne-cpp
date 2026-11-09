@@ -38,7 +38,7 @@
 
 #include <fs/fs_label.h>
 
-#include <utils/error.h>
+#include <base/error.h>
 
 #include <Eigen/Core>
 
@@ -89,7 +89,7 @@ public:
 
     //=========================================================================================================
     /**
-     * Reads an .stc file like read(); throws UTILSLIB::Error if it cannot.
+     * Reads an .stc file like read(); throws BASELIB::Error if it cannot.
      *
      * @param[in] path   The .stc file.
      */
@@ -104,7 +104,7 @@ public:
      * @return The source estimate, or why the file cannot be read: Io if it cannot be opened, Format if
      *         it ends before the data its header announces.
      */
-    [[nodiscard]] static UTILSLIB::Expected<InvSourceEstimate> read(const std::filesystem::path& path);
+    [[nodiscard]] static BASELIB::Expected<InvSourceEstimate> read(const std::filesystem::path& path);
 
     //=========================================================================================================
     /**
@@ -114,7 +114,7 @@ public:
      *
      * @return Nothing, or why the file cannot be written (Io).
      */
-    [[nodiscard]] UTILSLIB::Expected<void> write(const std::filesystem::path& path) const;
+    [[nodiscard]] BASELIB::Expected<void> write(const std::filesystem::path& path) const;
 
     //=========================================================================================================
     /**
@@ -127,7 +127,7 @@ public:
      * @return Nothing, or why the pair cannot be written: Format if the split point is unknown or the
      *         data do not match the vertices, Io if a file cannot be written.
      */
-    [[nodiscard]] UTILSLIB::Expected<void> write_hemisphere_pair(const std::filesystem::path& base) const;
+    [[nodiscard]] BASELIB::Expected<void> write_hemisphere_pair(const std::filesystem::path& base) const;
 
     //=========================================================================================================
     /**
@@ -137,7 +137,7 @@ public:
      *
      * @return A single-column source estimate, or why the file cannot be read (Io or Format).
      */
-    [[nodiscard]] static UTILSLIB::Expected<InvSourceEstimate> read_w(const std::filesystem::path& path);
+    [[nodiscard]] static BASELIB::Expected<InvSourceEstimate> read_w(const std::filesystem::path& path);
 
     //=========================================================================================================
     /**
@@ -147,7 +147,7 @@ public:
      *
      * @return Nothing, or why the file cannot be written: Format if the estimate is empty, Io otherwise.
      */
-    [[nodiscard]] UTILSLIB::Expected<void> write_w(const std::filesystem::path& path) const;
+    [[nodiscard]] BASELIB::Expected<void> write_w(const std::filesystem::path& path) const;
 
     //=========================================================================================================
     /**

@@ -18,8 +18,8 @@
 //=============================================================================================================
 
 #include "mne_meas_data.h"
-#include <utils/logger/log.h>
-#include <utils/string_utils.h>
+#include <base/log.h>
+#include <base/string_utils.h>
 #include "mne_meas_data_set.h"
 #include "mne_inverse_operator.h"
 
@@ -111,7 +111,7 @@ void MNEMeasData::adjust_baselines(float bmin, float bmax)
             for (int s = 0; s < current->np; s++)
                 bdata(s, c) -= ave;
         }
-        UTILSLIB::Log::info("\t{} : using baseline {:7.1f} ... {:7.1f} ms\n", current->comment.c_str() ? current->comment.c_str() : "unknown", 1000 * (tmin + b1 / sfreq), 1000 * (tmin + b2 / sfreq));
+        BASELIB::Log::info("\t{} : using baseline {:7.1f} ... {:7.1f} ms\n", current->comment.c_str() ? current->comment.c_str() : "unknown", 1000 * (tmin + b1 / sfreq), 1000 * (tmin + b2 / sfreq));
     }
 }
 
@@ -135,7 +135,7 @@ bool MNEMeasData::read_evoked_set(const std::filesystem::path& name,
        */
     auto read = FiffEvoked::read(name, set - 1, {}, false);
     if (!read) {
-        UTILSLIB::Log::critical("{}", read.error().what());
+        BASELIB::Log::critical("{}", read.error().what());
         return false;
     }
     const FiffEvoked& evoked = *read;
@@ -199,7 +199,7 @@ bool MNEMeasData::read_evoked_set(const std::filesystem::path& name,
     }
 
     if (!id.empty())
-        UTILSLIB::Log::info("\tMeasurement file id: {}\n", id.toString());
+        BASELIB::Log::info("\tMeasurement file id: {}\n", id.toString());
 
     /*
        * Pick out the necessary channels
@@ -219,7 +219,7 @@ bool MNEMeasData::read_evoked_set(const std::filesystem::path& name,
         }
         for (k = 0; k < nchan; k++)
             if (sel[k] == -1) {
-                UTILSLIB::Log::critical("All channels needed were not in the MEG/EEG data file (first missing: {}).", names[k]);
+                BASELIB::Log::critical("All channels needed were not in the MEG/EEG data file (first missing: {}).", names[k]);
                 return false;
             }
     } else { /* Load all channels */
@@ -243,7 +243,7 @@ bool MNEMeasData::read_evoked_set(const std::filesystem::path& name,
     np = n2 - n1;
     tmin = dtmin;
     tmax = dtmin + (np - 1) / sfreq;
-    UTILSLIB::Log::info("\tData time range: {:8.1f} ... {:8.1f} ms\n", 1000 * tmin, 1000 * tmax);
+    BASELIB::Log::info("\tData time range: {:8.1f} ... {:8.1f} ms\n", 1000 * tmin, 1000 * tmax);
     /*
        * Just put it together
        */
@@ -273,11 +273,11 @@ bool MNEMeasData::read_evoked_set(const std::filesystem::path& name,
 
         if (!devHeadT.empty()) {
             target.meg_head_t = std::make_unique<FiffCoordTrans>(devHeadT);
-            UTILSLIB::Log::info("\tUsing MEG <-> head transform from the present data set\n");
+            BASELIB::Log::info("\tUsing MEG <-> head transform from the present data set\n");
         }
         if (op != nullptr && !op->mri_head_t.empty()) { /* Copy if available */
             target.mri_head_t = std::make_unique<FiffCoordTrans>(op->mri_head_t);
-            UTILSLIB::Log::info("\tPicked MRI <-> head transform from the inverse operator\n");
+            BASELIB::Log::info("\tPicked MRI <-> head transform from the inverse operator\n");
         }
         /*
          * Channel list
@@ -292,14 +292,14 @@ bool MNEMeasData::read_evoked_set(const std::filesystem::path& name,
         if (op) {         /* Attach the projection operator and CTF compensation info to the data, too */
             target.proj = MNEProjOp::read(name);
             if (target.proj && target.proj->nitems > 0) {
-                UTILSLIB::Log::info("\tLoaded projection from {}:\n", UTILSLIB::utf8FromPath(name));
+                BASELIB::Log::info("\tLoaded projection from {}:\n", BASELIB::utf8FromPath(name));
                 QTextStream errStream(stderr);
                 target.proj->report(errStream, QStringLiteral("\t\t").toStdString());
             }
         } else {
             target.proj = MNEProjOp::read(name);
             if (target.proj && target.proj->nitems > 0) {
-                UTILSLIB::Log::info("\tLoaded projection from {}:\n", UTILSLIB::utf8FromPath(name));
+                BASELIB::Log::info("\tLoaded projection from {}:\n", BASELIB::utf8FromPath(name));
                 QTextStream errStream(stderr);
                 target.proj->report(errStream, QStringLiteral("\t\t").toStdString());
             }
@@ -308,7 +308,7 @@ bool MNEMeasData::read_evoked_set(const std::filesystem::path& name,
                 return false;
             }
             if (target.comp->ncomp > 0)
-                UTILSLIB::Log::info("\tRead {} compensation data sets from {}\n", target.comp->ncomp, UTILSLIB::utf8FromPath(name));
+                BASELIB::Log::info("\tRead {} compensation data sets from {}\n", target.comp->ncomp, BASELIB::utf8FromPath(name));
         }
         /*
          * Bad channels — already read by FiffEvoked via FiffStream::read_meas_info()
@@ -320,17 +320,17 @@ bool MNEMeasData::read_evoked_set(const std::filesystem::path& name,
 
             for (int b = 0; b < target.nbad; b++) {
                 for (k = 0; k < target.nchan; k++) {
-                    if (UTILSLIB::equalsIgnoreCase(target.chs[k].ch_name, target.badlist[b])) {
+                    if (BASELIB::equalsIgnoreCase(target.chs[k].ch_name, target.badlist[b])) {
                         target.bad[k] = 1;
                         break;
                     }
                 }
             }
-            UTILSLIB::Log::info("\t{} bad channels read from {}{}", target.nbad, UTILSLIB::utf8FromPath(name), target.nbad > 0 ? ":\n" : "\n");
+            BASELIB::Log::info("\t{} bad channels read from {}{}", target.nbad, BASELIB::utf8FromPath(name), target.nbad > 0 ? ":\n" : "\n");
             if (target.nbad > 0) {
-                UTILSLIB::Log::info("\t\t");
+                BASELIB::Log::info("\t\t");
                 for (k = 0; k < target.nbad; k++)
-                    UTILSLIB::Log::info("{}{:c}", target.badlist[k], k < target.nbad - 1 ? ' ' : '\n');
+                    BASELIB::Log::info("{}{:c}", target.badlist[k], k < target.nbad - 1 ? ' ' : '\n');
             }
         }
     }
@@ -370,7 +370,7 @@ bool MNEMeasData::read_evoked_set(const std::filesystem::path& name,
     target.nset++;
     if (fresh)
         target.current = target.sets.front().get();
-    UTILSLIB::Log::info("\t{} dataset {} from {}", fresh ? "Loaded" : "Added", comment, UTILSLIB::utf8FromPath(name));
+    BASELIB::Log::info("\t{} dataset {} from {}", fresh ? "Loaded" : "Added", comment, BASELIB::utf8FromPath(name));
     return true;
 }
 

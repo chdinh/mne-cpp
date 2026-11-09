@@ -153,7 +153,7 @@ DSPSHARED_EXPORT FIFFLIB::FiffAnnotations annotateAmplitude(
     const FIFFLIB::FiffInfo& info,
     double sfreq,
     const AnnotateAmplitudeParams& params,
-    StringList* bads = nullptr);
+    BASELIB::StringList* bads = nullptr);
 
 } // namespace UTILSLIB
 #endif // ANNOTATE_ARTIFACT_DSP_H

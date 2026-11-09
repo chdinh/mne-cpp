@@ -24,19 +24,19 @@
 
 const char* FWDLIB::buildDateTime()
 {
-    return UTILSLIB::dateTimeNow();
+    return BASELIB::dateTimeNow();
 }
 
 //=============================================================================================================
 
 const char* FWDLIB::buildHash()
 {
-    return UTILSLIB::gitHash();
+    return BASELIB::gitHash();
 }
 
 //=============================================================================================================
 
 const char* FWDLIB::buildHashLong()
 {
-    return UTILSLIB::gitHashLong();
+    return BASELIB::gitHashLong();
 }

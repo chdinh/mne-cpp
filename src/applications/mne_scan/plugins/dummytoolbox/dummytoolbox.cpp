@@ -33,7 +33,6 @@
 using namespace DUMMYTOOLBOXPLUGIN;
 using namespace SCSHAREDLIB;
 using namespace SCMEASLIB;
-using namespace UTILSLIB;
 using namespace Eigen;
 
 //=============================================================================================================
@@ -41,7 +40,7 @@ using namespace Eigen;
 //=============================================================================================================
 
 DummyToolbox::DummyToolbox()
-: m_pCircularBuffer(std::make_shared<CircularBuffer_Matrix_double>(40))
+: m_pCircularBuffer(std::make_shared<BASELIB::CircularBuffer<Eigen::MatrixXd>>(40))
 {
 }
 

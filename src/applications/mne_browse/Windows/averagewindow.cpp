@@ -17,7 +17,7 @@
 //=============================================================================================================
 
 #include "averagewindow.h"
-#include <utils/string_utils.h>
+#include <base/string_utils.h>
 
 #include <disp/viewers/helpers/averagesceneitem.h>
 
@@ -81,7 +81,7 @@ std::vector<std::string> selectedButterflyChannels(const FIFFLIB::FiffInfo& info
     std::vector<std::string> channelNames;
 
     for (const auto& channelInfo : info.chs) {
-        if (UTILSLIB::contains(info.bads, channelInfo.ch_name)) {
+        if (BASELIB::contains(info.bads, channelInfo.ch_name)) {
             continue;
         }
 
@@ -720,7 +720,7 @@ void AverageWindow::refreshPlots()
             const int last = displayEvoked.last;
 
             //Get the averageScenItem specific data row
-            int channelNumber = UTILSLIB::indexOf(fiffInfo->ch_names, averageSceneItemTemp->m_sChannelName.toStdString());
+            int channelNumber = BASELIB::indexOf(fiffInfo->ch_names, averageSceneItemTemp->m_sChannelName.toStdString());
 
             if (channelNumber != -1) {
                 averageSceneItemTemp->m_firstLastSample.first = first;
@@ -745,7 +745,7 @@ void AverageWindow::refreshPlots()
                 continue;
             const auto& info = evoked.info;
             for (int ch = 0; ch < std::ssize(info.chs) && ch < evoked.data.rows(); ++ch) {
-                if (UTILSLIB::contains(info.bads, info.chs[ch].ch_name))
+                if (BASELIB::contains(info.bads, info.chs[ch].ch_name))
                     continue;
                 double maxVal = evoked.data.row(ch).cwiseAbs().maxCoeff();
                 if (info.chs[ch].kind == FIFFV_MEG_CH) {
@@ -831,7 +831,7 @@ void AverageWindow::refreshPlots()
         if (!m_bButterflyAutoScaled) {
             const auto& info = displayEvoked.info;
             for (int ch = 0; ch < std::ssize(info.chs) && ch < displayEvoked.data.rows(); ++ch) {
-                if (UTILSLIB::contains(info.bads, info.chs[ch].ch_name))
+                if (BASELIB::contains(info.bads, info.chs[ch].ch_name))
                     continue;
                 double maxVal = displayEvoked.data.row(ch).cwiseAbs().maxCoeff();
                 if (info.chs[ch].kind == FIFFV_MEG_CH) {

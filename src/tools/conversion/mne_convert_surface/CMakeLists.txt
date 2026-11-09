@@ -31,6 +31,7 @@ set(MNE_LIBS_REQUIRED
     mne_fs
     mne_mne
     mne_utils
+    mne_base
     mne_math
 )
 

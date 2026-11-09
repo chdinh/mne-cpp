@@ -30,19 +30,19 @@
 
 const char* CONNECTIVITYLIB::buildDateTime()
 {
-    return UTILSLIB::dateTimeNow();
+    return BASELIB::dateTimeNow();
 }
 
 //=============================================================================================================
 
 const char* CONNECTIVITYLIB::buildHash()
 {
-    return UTILSLIB::gitHash();
+    return BASELIB::gitHash();
 }
 
 //=============================================================================================================
 
 const char* CONNECTIVITYLIB::buildHashLong()
 {
-    return UTILSLIB::gitHashLong();
+    return BASELIB::gitHashLong();
 }

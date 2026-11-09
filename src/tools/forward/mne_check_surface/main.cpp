@@ -18,7 +18,7 @@
 #include <mne/mne_bem_surface.h>
 #include <fiff/fiff_constants.h>
 #include <fs/fs_surface.h>
-#include <utils/logger/log.h>
+#include <base/log.h>
 
 //=============================================================================================================
 // QT INCLUDES
@@ -44,7 +44,6 @@
 using namespace MNELIB;
 using namespace FIFFLIB;
 using namespace FSLIB;
-using namespace UTILSLIB;
 using namespace Eigen;
 
 //=============================================================================================================
@@ -193,7 +192,7 @@ static float minSurfaceDist(const MNEBemSurface& s1, const MNEBemSurface& s2)
 
 int main(int argc, char* argv[])
 {
-    UTILSLIB::Log::install_qt_message_handler();
+    BASELIB::Log::install_qt_message_handler();
     QCoreApplication app(argc, argv);
     QCoreApplication::setApplicationName("mne_check_surface");
     QCoreApplication::setApplicationVersion(PROGRAM_VERSION);

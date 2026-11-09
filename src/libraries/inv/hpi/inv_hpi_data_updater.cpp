@@ -24,10 +24,10 @@
 
 #include "inv_hpi_data_updater.h"
 #include <memory>
-#include <utils/logger/log.h>
+#include <base/log.h>
 
 #include <vector>
-#include <utils/string_utils.h>
+#include <base/string_utils.h>
 #include <fiff/fiff_ch_info.h>
 #include <fiff/fiff_info.h>
 
@@ -86,7 +86,7 @@ void InvHpiDataUpdater::updateChannels(const std::shared_ptr<FiffInfo>& pFiffInf
             pFiffInfo->chs[i].chpos.coil_type == FIFFV_COIL_VV_PLANAR_T3) {
             // Check if the sensor is bad, if not append to innerind
 
-            if (!(UTILSLIB::contains(pFiffInfo->bads, pFiffInfo->ch_names.at(i)))) {
+            if (!(BASELIB::contains(pFiffInfo->bads, pFiffInfo->ch_names.at(i)))) {
                 m_vecInnerind.append(i);
                 m_lChannels.push_back(pFiffInfo->chs[i]);
             }
@@ -108,7 +108,7 @@ void InvHpiDataUpdater::updateHpiDigitizer(const FiffDigPointSet& dig)
 {
     const FiffDigPointSet coils = dig.pick_types({FIFFV_POINT_HPI});
     if (coils.empty()) {
-        UTILSLIB::Log::warning("InvHpiFit::updateHpiDigitizer - No HPI coils digitized. Returning.");
+        BASELIB::Log::warning("InvHpiFit::updateHpiDigitizer - No HPI coils digitized. Returning.");
         return;
     }
     m_matHpiDigitizer = MatrixXd(static_cast<Eigen::Index>(coils.size()), 3);
@@ -168,7 +168,7 @@ void InvHpiDataUpdater::prepareProjectors(const Eigen::MatrixXd& matProjectors)
 {
     // check if m_vecInnerInd is alreadz initialized
     if (m_vecInnerind.size() == 0) {
-        UTILSLIB::Log::warning("InvHpiFit::updateProjectors - No channels. Returning.");
+        BASELIB::Log::warning("InvHpiFit::updateProjectors - No channels. Returning.");
         return;
     }
 

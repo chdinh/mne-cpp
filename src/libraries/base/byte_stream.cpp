@@ -7,7 +7,7 @@
  * @author   Christoph Dinh <christoph.dinh@mne-cpp.org>
  * @since    2.5.0
  * @date     November 2026
- * @brief    Definition of @ref UTILSLIB::MemoryByteStream and @ref UTILSLIB::FileByteStream.
+ * @brief    Definition of @ref BASELIB::MemoryByteStream and @ref BASELIB::FileByteStream.
  */
 
 //=============================================================================================================
@@ -34,7 +34,7 @@
 // USED NAMESPACES
 //=============================================================================================================
 
-using namespace UTILSLIB;
+using namespace BASELIB;
 
 //=============================================================================================================
 // DEFINE STATICS AND LOCAL METHODS
@@ -264,7 +264,7 @@ bool FileByteStream::flush()
 
 //=============================================================================================================
 
-Expected<std::vector<std::byte>> UTILSLIB::read_file_bytes(const std::filesystem::path& path, Compression compression)
+Expected<std::vector<std::byte>> BASELIB::read_file_bytes(const std::filesystem::path& path, Compression compression)
 {
     std::ifstream file(path, std::ios::binary | std::ios::ate);
     if (!file) {

@@ -23,7 +23,7 @@
 //=============================================================================================================
 
 #include "inv_tf_mxne.h"
-#include <utils/logger/log.h>
+#include <base/log.h>
 
 #include <Eigen/SVD>
 
@@ -114,7 +114,7 @@ InvTfMxneResult InvTfMxne::compute(const MatrixXd& matGain,
     const int nAtoms = 2 * params.iNFreqs;
 
     if (matData.rows() != nChannels) {
-        UTILSLIB::Log::warning("[InvTfMxne::compute] Dimension mismatch: data rows {} != gain rows {}", matData.rows(), nChannels);
+        BASELIB::Log::warning("[InvTfMxne::compute] Dimension mismatch: data rows {} != gain rows {}", matData.rows(), nChannels);
         return result;
     }
 

@@ -19,7 +19,7 @@
 //=============================================================================================================
 
 #include "mne_named_vector.h"
-#include <utils/logger/log.h>
+#include <base/log.h>
 
 //=============================================================================================================
 // USED NAMESPACES
@@ -41,7 +41,7 @@ int MNENamedVector::pick(const StringList& pick_names, int nnames, bool require_
     int k, p;
 
     if (names.size() == 0) {
-        UTILSLIB::Log::critical("No names present in vector. Cannot pick.");
+        BASELIB::Log::critical("No names present in vector. Cannot pick.");
         return FAIL;
     }
 
@@ -58,7 +58,7 @@ int MNENamedVector::pick(const StringList& pick_names, int nnames, bool require_
             }
         }
         if (!found && require_all) {
-            UTILSLIB::Log::critical("All required elements not found in named vector.");
+            BASELIB::Log::critical("All required elements not found in named vector.");
             return FAIL;
         }
     }

@@ -32,7 +32,7 @@
 
 #include <mne/mne_forward_solution.h>
 
-#include <utils/string_utils.h>
+#include <base/string_utils.h>
 #include <scMeas/realtimehpiresult.h>
 #include <scMeas/realtimefwdsolution.h>
 #include <scMeas/realtimemultisamplearray.h>
@@ -58,7 +58,6 @@
 using namespace RTFWDPLUGIN;
 using namespace SCSHAREDLIB;
 using namespace SCMEASLIB;
-using namespace UTILSLIB;
 using namespace FWDLIB;
 using namespace FSLIB;
 using namespace FIFFLIB;
@@ -158,7 +157,7 @@ bool RtFwd::start()
         {&m_pFwdSettings->measname, "The meaurement file cannot be opend. Chosse another file."},
     };
     for (const auto& [path, message] : inputs) {
-        if (!FiffStream::open(UTILSLIB::pathFromUtf8(*path))) {
+        if (!FiffStream::open(BASELIB::pathFromUtf8(*path))) {
             QMessageBox msgBox;
             msgBox.setText(message);
             msgBox.setInformativeText(QString::fromStdString(*path));
@@ -406,7 +405,7 @@ void RtFwd::run()
             // compute and store
             pFwdSolution.reset(pFwdComputer->calculateFwd().release());
 
-            if (auto written = pFwdSolution->write(UTILSLIB::pathFromUtf8(m_pFwdSettings->solname)); !written) {
+            if (auto written = pFwdSolution->write(BASELIB::pathFromUtf8(m_pFwdSettings->solname)); !written) {
                 qWarning() << written.error().what();
             }
 

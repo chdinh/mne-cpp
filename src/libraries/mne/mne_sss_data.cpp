@@ -20,7 +20,7 @@
 
 #include "mne_sss_data.h"
 #include <memory>
-#include <utils/logger/log.h>
+#include <base/log.h>
 #include <fiff/fiff_file.h>
 #include <fiff/fiff_constants.h>
 #include <fiff/fiff_stream.h>
@@ -158,7 +158,7 @@ std::unique_ptr<MNESssData> MNESssData::read_from_node(FiffStream& stream, const
             s->comp_info = Eigen::VectorXi::Map(raw, ncomp);
 
             if (ncomp != (s->in_order * (2 + s->in_order) + s->out_order * (2 + s->out_order))) {
-                UTILSLIB::Log::critical("Number of SSS components does not match the expansion orders listed in the file");
+                BASELIB::Log::critical("Number of SSS components does not match the expansion orders listed in the file");
                 return nullptr;
             }
         }

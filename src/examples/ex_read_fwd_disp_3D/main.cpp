@@ -22,7 +22,7 @@
 #include <fs/fs_surfaceset.h>
 #include <fs/fs_annotationset.h>
 #include <mne/mne_forward_solution.h>
-#include <utils/logger/log.h>
+#include <base/log.h>
 
 //=============================================================================================================
 // QT INCLUDES
@@ -39,7 +39,6 @@
 
 using namespace MNELIB;
 using namespace MNELIB;
-using namespace UTILSLIB;
 using namespace FSLIB;
 using namespace DISP3DLIB;
 
@@ -62,7 +61,7 @@ int main(int argc, char* argv[])
 // Q_INIT_RESOURCE(mne_disp3d);
 #endif
 
-    UTILSLIB::Log::install_qt_message_handler();
+    BASELIB::Log::install_qt_message_handler();
     QApplication a(argc, argv);
 
     // Command Line Parser

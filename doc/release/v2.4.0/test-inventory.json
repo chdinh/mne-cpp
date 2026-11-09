@@ -42,11 +42,13 @@
           "test_acq_stream",
           "test_acq_thread",
           "test_acq_timebase",
+          "test_base_byte_stream",
+          "test_base_circular_buffer",
+          "test_base_logger",
+          "test_base_string_utils",
+          "test_base_thread_pool",
           "test_mne_acq_tool",
-          "test_rt_server_fiff_replay",
-          "test_utils_byte_stream",
-          "test_utils_string_utils",
-          "test_utils_thread_pool"
+          "test_rt_server_fiff_replay"
         ],
         "executed_not_in_inventory": [
           "ex_bids",
@@ -81,7 +83,9 @@
           "ex_read_fwd",
           "ex_read_raw",
           "ex_sts_statistics",
-          "ex_utils"
+          "ex_utils",
+          "test_utils_circularbuffer",
+          "test_utils_logger"
         ]
       },
       "macos-26-qt-min": {
@@ -99,11 +103,13 @@
           "test_acq_stream",
           "test_acq_thread",
           "test_acq_timebase",
+          "test_base_byte_stream",
+          "test_base_circular_buffer",
+          "test_base_logger",
+          "test_base_string_utils",
+          "test_base_thread_pool",
           "test_mne_acq_tool",
-          "test_rt_server_fiff_replay",
-          "test_utils_byte_stream",
-          "test_utils_string_utils",
-          "test_utils_thread_pool"
+          "test_rt_server_fiff_replay"
         ],
         "executed_not_in_inventory": [
           "ex_bids",
@@ -138,7 +144,9 @@
           "ex_read_fwd",
           "ex_read_raw",
           "ex_sts_statistics",
-          "ex_utils"
+          "ex_utils",
+          "test_utils_circularbuffer",
+          "test_utils_logger"
         ]
       },
       "ubuntu-24.04": {
@@ -156,11 +164,13 @@
           "test_acq_stream",
           "test_acq_thread",
           "test_acq_timebase",
+          "test_base_byte_stream",
+          "test_base_circular_buffer",
+          "test_base_logger",
+          "test_base_string_utils",
+          "test_base_thread_pool",
           "test_mne_acq_tool",
-          "test_rt_server_fiff_replay",
-          "test_utils_byte_stream",
-          "test_utils_string_utils",
-          "test_utils_thread_pool"
+          "test_rt_server_fiff_replay"
         ],
         "executed_not_in_inventory": [
           "ex_bids",
@@ -195,7 +205,9 @@
           "ex_read_fwd",
           "ex_read_raw",
           "ex_sts_statistics",
-          "ex_utils"
+          "ex_utils",
+          "test_utils_circularbuffer",
+          "test_utils_logger"
         ]
       },
       "ubuntu-24.04-qt-min": {
@@ -213,11 +225,13 @@
           "test_acq_stream",
           "test_acq_thread",
           "test_acq_timebase",
+          "test_base_byte_stream",
+          "test_base_circular_buffer",
+          "test_base_logger",
+          "test_base_string_utils",
+          "test_base_thread_pool",
           "test_mne_acq_tool",
-          "test_rt_server_fiff_replay",
-          "test_utils_byte_stream",
-          "test_utils_string_utils",
-          "test_utils_thread_pool"
+          "test_rt_server_fiff_replay"
         ],
         "executed_not_in_inventory": [
           "ex_bids",
@@ -252,7 +266,9 @@
           "ex_read_fwd",
           "ex_read_raw",
           "ex_sts_statistics",
-          "ex_utils"
+          "ex_utils",
+          "test_utils_circularbuffer",
+          "test_utils_logger"
         ]
       },
       "windows-2025-vs2026": {
@@ -270,11 +286,13 @@
           "test_acq_stream",
           "test_acq_thread",
           "test_acq_timebase",
+          "test_base_byte_stream",
+          "test_base_circular_buffer",
+          "test_base_logger",
+          "test_base_string_utils",
+          "test_base_thread_pool",
           "test_mne_acq_tool",
-          "test_rt_server_fiff_replay",
-          "test_utils_byte_stream",
-          "test_utils_string_utils",
-          "test_utils_thread_pool"
+          "test_rt_server_fiff_replay"
         ],
         "executed_not_in_inventory": [
           "ex_bids",
@@ -309,7 +327,9 @@
           "ex_read_fwd",
           "ex_read_raw",
           "ex_sts_statistics",
-          "ex_utils"
+          "ex_utils",
+          "test_utils_circularbuffer",
+          "test_utils_logger"
         ]
       },
       "windows-2025-vs2026-qt-min": {
@@ -327,11 +347,13 @@
           "test_acq_stream",
           "test_acq_thread",
           "test_acq_timebase",
+          "test_base_byte_stream",
+          "test_base_circular_buffer",
+          "test_base_logger",
+          "test_base_string_utils",
+          "test_base_thread_pool",
           "test_mne_acq_tool",
-          "test_rt_server_fiff_replay",
-          "test_utils_byte_stream",
-          "test_utils_string_utils",
-          "test_utils_thread_pool"
+          "test_rt_server_fiff_replay"
         ],
         "executed_not_in_inventory": [
           "ex_bids",
@@ -366,7 +388,9 @@
           "ex_read_fwd",
           "ex_read_raw",
           "ex_sts_statistics",
-          "ex_utils"
+          "ex_utils",
+          "test_utils_circularbuffer",
+          "test_utils_logger"
         ]
       }
     }
@@ -1150,6 +1174,177 @@
         "windows-2025-vs2026-qt-min": "run"
       },
       "registry_classes": []
+    },
+    {
+      "name": "test_base_byte_stream",
+      "cmake": "src/testframes/test_base_byte_stream/CMakeLists.txt",
+      "registration": {
+        "state": "unconditional",
+        "via": "src/testframes/CMakeLists.txt",
+        "conditions": [],
+        "early_return_guard": null,
+        "unregistered_reason": null
+      },
+      "add_test_names": [
+        "test_base_byte_stream"
+      ],
+      "labels": [
+        "unit"
+      ],
+      "timeout": 60,
+      "requirements": [],
+      "gui": false,
+      "qskip_sites": 0,
+      "spawns_processes": false,
+      "ci_excluded_on": [],
+      "ci": {
+        "macos-26": "absent",
+        "macos-26-qt-min": "absent",
+        "ubuntu-24.04": "absent",
+        "ubuntu-24.04-qt-min": "absent",
+        "windows-2025-vs2026": "absent",
+        "windows-2025-vs2026-qt-min": "absent"
+      },
+      "registry_classes": [
+        "ByteStream",
+        "FileByteStream",
+        "MemoryByteStream"
+      ]
+    },
+    {
+      "name": "test_base_circular_buffer",
+      "cmake": "src/testframes/test_base_circular_buffer/CMakeLists.txt",
+      "registration": {
+        "state": "unconditional",
+        "via": "src/testframes/CMakeLists.txt",
+        "conditions": [],
+        "early_return_guard": null,
+        "unregistered_reason": null
+      },
+      "add_test_names": [
+        "test_base_circular_buffer"
+      ],
+      "labels": [
+        "unit"
+      ],
+      "timeout": 60,
+      "requirements": [],
+      "gui": false,
+      "qskip_sites": 0,
+      "spawns_processes": false,
+      "ci_excluded_on": [],
+      "ci": {
+        "macos-26": "absent",
+        "macos-26-qt-min": "absent",
+        "ubuntu-24.04": "absent",
+        "ubuntu-24.04-qt-min": "absent",
+        "windows-2025-vs2026": "absent",
+        "windows-2025-vs2026-qt-min": "absent"
+      },
+      "registry_classes": [
+        "CircularBuffer"
+      ]
+    },
+    {
+      "name": "test_base_logger",
+      "cmake": "src/testframes/test_base_logger/CMakeLists.txt",
+      "registration": {
+        "state": "unconditional",
+        "via": "src/testframes/CMakeLists.txt",
+        "conditions": [],
+        "early_return_guard": null,
+        "unregistered_reason": null
+      },
+      "add_test_names": [
+        "test_base_logger"
+      ],
+      "labels": [
+        "unit"
+      ],
+      "timeout": 60,
+      "requirements": [],
+      "gui": false,
+      "qskip_sites": 0,
+      "spawns_processes": false,
+      "ci_excluded_on": [],
+      "ci": {
+        "macos-26": "absent",
+        "macos-26-qt-min": "absent",
+        "ubuntu-24.04": "absent",
+        "ubuntu-24.04-qt-min": "absent",
+        "windows-2025-vs2026": "absent",
+        "windows-2025-vs2026-qt-min": "absent"
+      },
+      "registry_classes": [
+        "Log",
+        "LogCapture"
+      ]
+    },
+    {
+      "name": "test_base_string_utils",
+      "cmake": "src/testframes/test_base_string_utils/CMakeLists.txt",
+      "registration": {
+        "state": "unconditional",
+        "via": "src/testframes/CMakeLists.txt",
+        "conditions": [],
+        "early_return_guard": null,
+        "unregistered_reason": null
+      },
+      "add_test_names": [
+        "test_base_string_utils"
+      ],
+      "labels": [
+        "unit"
+      ],
+      "timeout": 60,
+      "requirements": [],
+      "gui": false,
+      "qskip_sites": 1,
+      "spawns_processes": false,
+      "ci_excluded_on": [],
+      "ci": {
+        "macos-26": "absent",
+        "macos-26-qt-min": "absent",
+        "ubuntu-24.04": "absent",
+        "ubuntu-24.04-qt-min": "absent",
+        "windows-2025-vs2026": "absent",
+        "windows-2025-vs2026-qt-min": "absent"
+      },
+      "registry_classes": []
+    },
+    {
+      "name": "test_base_thread_pool",
+      "cmake": "src/testframes/test_base_thread_pool/CMakeLists.txt",
+      "registration": {
+        "state": "unconditional",
+        "via": "src/testframes/CMakeLists.txt",
+        "conditions": [],
+        "early_return_guard": null,
+        "unregistered_reason": null
+      },
+      "add_test_names": [
+        "test_base_thread_pool"
+      ],
+      "labels": [
+        "unit"
+      ],
+      "timeout": 60,
+      "requirements": [],
+      "gui": false,
+      "qskip_sites": 0,
+      "spawns_processes": false,
+      "ci_excluded_on": [],
+      "ci": {
+        "macos-26": "absent",
+        "macos-26-qt-min": "absent",
+        "ubuntu-24.04": "absent",
+        "ubuntu-24.04-qt-min": "absent",
+        "windows-2025-vs2026": "absent",
+        "windows-2025-vs2026-qt-min": "absent"
+      },
+      "registry_classes": [
+        "ThreadPool"
+      ]
     },
     {
       "name": "test_batch_processor",
@@ -9643,74 +9838,6 @@
       ]
     },
     {
-      "name": "test_utils_byte_stream",
-      "cmake": "src/testframes/test_utils_byte_stream/CMakeLists.txt",
-      "registration": {
-        "state": "unconditional",
-        "via": "src/testframes/CMakeLists.txt",
-        "conditions": [],
-        "early_return_guard": null,
-        "unregistered_reason": null
-      },
-      "add_test_names": [
-        "test_utils_byte_stream"
-      ],
-      "labels": [
-        "unit"
-      ],
-      "timeout": 60,
-      "requirements": [],
-      "gui": false,
-      "qskip_sites": 0,
-      "spawns_processes": false,
-      "ci_excluded_on": [],
-      "ci": {
-        "macos-26": "absent",
-        "macos-26-qt-min": "absent",
-        "ubuntu-24.04": "absent",
-        "ubuntu-24.04-qt-min": "absent",
-        "windows-2025-vs2026": "absent",
-        "windows-2025-vs2026-qt-min": "absent"
-      },
-      "registry_classes": [
-        "ByteStream",
-        "FileByteStream",
-        "MemoryByteStream"
-      ]
-    },
-    {
-      "name": "test_utils_circularbuffer",
-      "cmake": "src/testframes/test_utils_circularbuffer/CMakeLists.txt",
-      "registration": {
-        "state": "unconditional",
-        "via": "src/testframes/CMakeLists.txt",
-        "conditions": [],
-        "early_return_guard": null,
-        "unregistered_reason": null
-      },
-      "add_test_names": [
-        "test_utils_circularbuffer"
-      ],
-      "labels": [
-        "unit"
-      ],
-      "timeout": 60,
-      "requirements": [],
-      "gui": false,
-      "qskip_sites": 0,
-      "spawns_processes": false,
-      "ci_excluded_on": [],
-      "ci": {
-        "macos-26": "run",
-        "macos-26-qt-min": "run",
-        "ubuntu-24.04": "run",
-        "ubuntu-24.04-qt-min": "run",
-        "windows-2025-vs2026": "run",
-        "windows-2025-vs2026-qt-min": "run"
-      },
-      "registry_classes": []
-    },
-    {
       "name": "test_utils_ioutils",
       "cmake": "src/testframes/test_utils_ioutils/CMakeLists.txt",
       "registration": {
@@ -9807,41 +9934,6 @@
         "windows-2025-vs2026-qt-min": "run"
       },
       "registry_classes": []
-    },
-    {
-      "name": "test_utils_logger",
-      "cmake": "src/testframes/test_utils_logger/CMakeLists.txt",
-      "registration": {
-        "state": "unconditional",
-        "via": "src/testframes/CMakeLists.txt",
-        "conditions": [],
-        "early_return_guard": null,
-        "unregistered_reason": null
-      },
-      "add_test_names": [
-        "test_utils_logger"
-      ],
-      "labels": [
-        "unit"
-      ],
-      "timeout": 60,
-      "requirements": [],
-      "gui": false,
-      "qskip_sites": 0,
-      "spawns_processes": false,
-      "ci_excluded_on": [],
-      "ci": {
-        "macos-26": "run",
-        "macos-26-qt-min": "run",
-        "ubuntu-24.04": "run",
-        "ubuntu-24.04-qt-min": "run",
-        "windows-2025-vs2026": "run",
-        "windows-2025-vs2026-qt-min": "run"
-      },
-      "registry_classes": [
-        "Log",
-        "LogCapture"
-      ]
     },
     {
       "name": "test_utils_mnemath",
@@ -9977,72 +10069,6 @@
       },
       "registry_classes": [
         "Sphere"
-      ]
-    },
-    {
-      "name": "test_utils_string_utils",
-      "cmake": "src/testframes/test_utils_string_utils/CMakeLists.txt",
-      "registration": {
-        "state": "unconditional",
-        "via": "src/testframes/CMakeLists.txt",
-        "conditions": [],
-        "early_return_guard": null,
-        "unregistered_reason": null
-      },
-      "add_test_names": [
-        "test_utils_string_utils"
-      ],
-      "labels": [
-        "unit"
-      ],
-      "timeout": 60,
-      "requirements": [],
-      "gui": false,
-      "qskip_sites": 1,
-      "spawns_processes": false,
-      "ci_excluded_on": [],
-      "ci": {
-        "macos-26": "absent",
-        "macos-26-qt-min": "absent",
-        "ubuntu-24.04": "absent",
-        "ubuntu-24.04-qt-min": "absent",
-        "windows-2025-vs2026": "absent",
-        "windows-2025-vs2026-qt-min": "absent"
-      },
-      "registry_classes": []
-    },
-    {
-      "name": "test_utils_thread_pool",
-      "cmake": "src/testframes/test_utils_thread_pool/CMakeLists.txt",
-      "registration": {
-        "state": "unconditional",
-        "via": "src/testframes/CMakeLists.txt",
-        "conditions": [],
-        "early_return_guard": null,
-        "unregistered_reason": null
-      },
-      "add_test_names": [
-        "test_utils_thread_pool"
-      ],
-      "labels": [
-        "unit"
-      ],
-      "timeout": 60,
-      "requirements": [],
-      "gui": false,
-      "qskip_sites": 0,
-      "spawns_processes": false,
-      "ci_excluded_on": [],
-      "ci": {
-        "macos-26": "absent",
-        "macos-26-qt-min": "absent",
-        "ubuntu-24.04": "absent",
-        "ubuntu-24.04-qt-min": "absent",
-        "windows-2025-vs2026": "absent",
-        "windows-2025-vs2026-qt-min": "absent"
-      },
-      "registry_classes": [
-        "ThreadPool"
       ]
     },
     {

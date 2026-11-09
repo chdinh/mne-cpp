@@ -19,7 +19,7 @@
 #include <memory>
 
 #include <fiff/fiff_evoked_set.h>
-#include <utils/string_utils.h>
+#include <base/string_utils.h>
 
 //=============================================================================================================
 // QT INCLUDES

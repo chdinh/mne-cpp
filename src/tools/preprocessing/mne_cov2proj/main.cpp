@@ -22,8 +22,8 @@
 #include <fiff/fiff_stream.h>
 #include <fiff/fiff_constants.h>
 #include <fiff/fiff_raw_data.h>
-#include <utils/logger/log.h>
-#include <utils/string_utils.h>
+#include <base/log.h>
+#include <base/string_utils.h>
 
 //=============================================================================================================
 // QT INCLUDES
@@ -47,7 +47,7 @@
 //=============================================================================================================
 
 using namespace FIFFLIB;
-using namespace UTILSLIB;
+using namespace BASELIB;
 using namespace Eigen;
 
 //=============================================================================================================
@@ -60,7 +60,7 @@ using namespace Eigen;
 
 int main(int argc, char* argv[])
 {
-    UTILSLIB::Log::install_qt_message_handler();
+    BASELIB::Log::install_qt_message_handler();
     QCoreApplication app(argc, argv);
     QCoreApplication::setApplicationName("mne_cov2proj");
     QCoreApplication::setApplicationVersion(PROGRAM_VERSION);

@@ -25,12 +25,12 @@
 
 #include "fiff_evoked_set.h"
 #include <memory>
-#include <utils/logger/log.h>
+#include <base/log.h>
 
 #include <format>
 
-#include <utils/logger/log.h>
-#include <utils/string_utils.h>
+#include <base/log.h>
+#include <base/string_utils.h>
 #include "fiff_events.h"
 #include "fiff_raw_data.h"
 #include "fiff_tag.h"
@@ -62,7 +62,7 @@
 
 using namespace FIFFLIB;
 using namespace Eigen;
-using namespace UTILSLIB;
+using namespace BASELIB;
 
 //=============================================================================================================
 // DEFINE MEMBER METHODS
@@ -245,16 +245,16 @@ FiffEvokedSet FiffEvokedSet::computeGrandAverage(const std::vector<FiffEvokedSet
         StringList bads;
         for (const FiffEvokedSet& eset : evokedSets) {
             for (const std::string& bad : eset.evoked[j].info.bads) {
-                if (!UTILSLIB::contains(bads, bad)) {
+                if (!BASELIB::contains(bads, bad)) {
                     bads.push_back(bad);
                 }
             }
         }
         StringList common;
         for (const std::string& name : evokedSets.front().evoked[j].info.ch_names) {
-            bool inAll = !UTILSLIB::contains(bads, name);
+            bool inAll = !BASELIB::contains(bads, name);
             for (const FiffEvokedSet& eset : evokedSets) {
-                inAll = inAll && UTILSLIB::contains(eset.evoked[j].info.ch_names, name);
+                inAll = inAll && BASELIB::contains(eset.evoked[j].info.ch_names, name);
             }
             if (inAll) {
                 common.push_back(name);
@@ -424,7 +424,7 @@ bool FiffEvokedSet::checkArtifacts(const MatrixXd& epoch,
 {
     for (int c = 0; c < epoch.rows(); ++c) {
         // Skip bad channels
-        if (UTILSLIB::contains(bads, info.ch_names[c]))
+        if (BASELIB::contains(bads, info.ch_names[c]))
             continue;
 
         double minVal = epoch.row(c).minCoeff();

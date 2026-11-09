@@ -19,7 +19,7 @@
 // INCLUDES
 //=============================================================================================================
 
-#include <utils/logger/log.h>
+#include <base/log.h>
 
 //=============================================================================================================
 // QT INCLUDES
@@ -35,7 +35,6 @@
 // USED NAMESPACES
 //=============================================================================================================
 
-using namespace UTILSLIB;
 
 //=============================================================================================================
 /**
@@ -178,7 +177,7 @@ QString TestMneSetupMri::findSubjectsDir()
 
 void TestMneSetupMri::initTestCase()
 {
-    UTILSLIB::Log::install_qt_message_handler();
+    BASELIB::Log::install_qt_message_handler();
 
     QVERIFY(m_tempDir.isValid());
 

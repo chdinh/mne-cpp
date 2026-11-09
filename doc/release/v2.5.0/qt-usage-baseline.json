@@ -24,13 +24,13 @@
     }
   },
   "summary": {
-    "libraries": 24,
+    "libraries": 25,
     "qt_free": [
       "acq",
       "decoding",
       "math"
     ],
-    "tokens": 14968,
+    "tokens": 14956,
     "gui_outside_design": []
   },
   "libraries": {
@@ -83,6 +83,20 @@
       "modules": [
         "Core",
         "SerialPort"
+      ]
+    },
+    "base": {
+      "tokens": 8,
+      "by_category": {
+        "logging": 6,
+        "strings": 2
+      },
+      "public_header_includes": 0,
+      "q_object": 0,
+      "files": 14,
+      "modules": [
+        "Core",
+        "ZlibPrivate"
       ]
     },
     "bids": {
@@ -316,11 +330,10 @@
       ]
     },
     "lsl": {
-      "tokens": 170,
+      "tokens": 169,
       "by_category": {
         "containers": 6,
         "global": 32,
-        "logging": 1,
         "network": 53,
         "other": 4,
         "strings": 71,
@@ -419,25 +432,22 @@
       ]
     },
     "utils": {
-      "tokens": 445,
+      "tokens": 426,
       "by_category": {
-        "containers": 55,
+        "containers": 53,
         "files": 71,
         "global": 16,
-        "logging": 6,
         "objects_signals": 15,
         "other": 2,
         "regex": 10,
-        "strings": 259,
-        "threads": 9,
+        "strings": 257,
         "time": 2
       },
-      "public_header_includes": 37,
+      "public_header_includes": 34,
       "q_object": 1,
-      "files": 33,
+      "files": 21,
       "modules": [
-        "Core",
-        "ZlibPrivate"
+        "Core"
       ]
     }
   }

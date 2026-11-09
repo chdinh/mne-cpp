@@ -22,7 +22,7 @@
 #include <memory>
 
 #include <vector>
-#include <utils/string_utils.h>
+#include <base/string_utils.h>
 #include "mneoperator.h"
 
 #include <fiff/fiff_info.h>
@@ -576,7 +576,7 @@ const QStringList& ChannelInfoModel::getMappedChannelsList()
 
 int ChannelInfoModel::getIndexFromOrigChName(QString chName)
 {
-    return UTILSLIB::indexOf(m_pFiffInfo->ch_names, chName.toStdString());
+    return BASELIB::indexOf(m_pFiffInfo->ch_names, chName.toStdString());
 }
 
 //=============================================================================================================

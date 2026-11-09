@@ -27,7 +27,7 @@
 //=============================================================================================================
 
 #include <fiff/fiff_raw_data.h>
-#include <utils/string_utils.h>
+#include <base/string_utils.h>
 #include <fiff/fiff_info.h>
 
 //=============================================================================================================
@@ -93,7 +93,7 @@ RowVectorXi TestFiffRawSavePython::picks() const
     const QStringList names{"MEG0113", "MEG0112", "MEG0111", "EEG001", "STI014", "EOG061"};
     RowVectorXi sel(names.size());
     for (int k = 0; k < names.size(); ++k)
-        sel[k] = static_cast<int>(UTILSLIB::indexOf(m_raw.info.ch_names, names[k].toStdString()));
+        sel[k] = static_cast<int>(BASELIB::indexOf(m_raw.info.ch_names, names[k].toStdString()));
     return sel;
 }
 

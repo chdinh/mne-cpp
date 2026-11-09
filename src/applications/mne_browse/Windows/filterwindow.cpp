@@ -28,7 +28,6 @@
 //=============================================================================================================
 
 using namespace MNEBROWSE;
-using namespace UTILSLIB;
 using namespace FIFFLIB;
 using namespace MNELIB;
 using namespace DISPLIB;

@@ -32,7 +32,7 @@
 
 #include <mne/mne.h>
 
-#include <utils/string_utils.h>
+#include <base/string_utils.h>
 
 #include <QFile>
 
@@ -50,7 +50,7 @@ using namespace MNEPROCESSRAWAPP;
 using namespace FIFFLIB;
 using namespace MNELIB;
 using namespace Eigen;
-using namespace UTILSLIB;
+using namespace BASELIB;
 
 //=============================================================================================================
 // DEFINE MEMBER METHODS

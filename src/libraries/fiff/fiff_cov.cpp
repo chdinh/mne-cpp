@@ -24,7 +24,7 @@
 
 #include "fiff_cov.h"
 #include <memory>
-#include <utils/logger/log.h>
+#include <base/log.h>
 
 #include <algorithm>
 #include <iterator>
@@ -32,8 +32,8 @@
 #include <vector>
 #include <utility>
 
-#include <utils/logger/log.h>
-#include <utils/string_utils.h>
+#include <base/log.h>
+#include <base/string_utils.h>
 #include "fiff_stream.h"
 #include "fiff_raw_data.h"
 #include "fiff_evoked_set.h"
@@ -61,9 +61,10 @@
 //=============================================================================================================
 
 using namespace FIFFLIB;
-using UTILSLIB::ErrorCode;
-using UTILSLIB::fail;
+using BASELIB::ErrorCode;
+using BASELIB::fail;
 using namespace UTILSLIB;
+using namespace BASELIB;
 using namespace Eigen;
 
 //=============================================================================================================
@@ -89,7 +90,7 @@ FiffCov::FiffCov(const std::filesystem::path& path)
 
 //=============================================================================================================
 
-UTILSLIB::Expected<FiffCov> FiffCov::read(const std::filesystem::path& path)
+BASELIB::Expected<FiffCov> FiffCov::read(const std::filesystem::path& path)
 {
     auto stream = FiffStream::open(path);
     if (!stream) {
@@ -97,7 +98,7 @@ UTILSLIB::Expected<FiffCov> FiffCov::read(const std::filesystem::path& path)
     }
     FiffCov cov;
     if (!stream->read_cov(stream->dirtree(), FIFFV_MNE_NOISE_COV, cov)) {
-        return fail(ErrorCode::NotFound, "No noise covariance in {}", UTILSLIB::utf8FromPath(path));
+        return fail(ErrorCode::NotFound, "No noise covariance in {}", BASELIB::utf8FromPath(path));
     }
     return cov;
 }
@@ -164,7 +165,7 @@ FiffCov FiffCov::pick_channels(const StringList& p_include, const StringList& p_
     res.projs = this->projs;
 
     for (qint32 k = 0; k < static_cast<int>(this->bads.size()); ++k)
-        if (UTILSLIB::contains(res.names, this->bads[k]))
+        if (BASELIB::contains(res.names, this->bads[k]))
             res.bads.push_back(this->bads[k]);
     res.nfree = this->nfree;
 
@@ -180,7 +181,7 @@ FiffCov FiffCov::prepare_noise_cov(const FiffInfo& p_Info, const StringList& p_C
     VectorXi C_ch_idx = VectorXi::Zero(p_NoiseCov.names.size());
     qint32 count = 0;
     for (qint32 i = 0; i < static_cast<int>(p_ChNames.size()); ++i) {
-        qint32 idx = UTILSLIB::indexOf(p_NoiseCov.names, p_ChNames[i]);
+        qint32 idx = BASELIB::indexOf(p_NoiseCov.names, p_ChNames[i]);
         if (idx > -1) {
             C_ch_idx[count] = idx;
             ++count;
@@ -222,7 +223,7 @@ FiffCov FiffCov::prepare_noise_cov(const FiffInfo& p_Info, const StringList& p_C
     VectorXi C_meg_idx = VectorXi::Zero(p_NoiseCov.names.size());
     count = 0;
     for (qint32 k = 0; k < C.rows(); ++k) {
-        if (UTILSLIB::indexOf(meg_names, p_ChNames[k]) > -1) {
+        if (BASELIB::indexOf(meg_names, p_ChNames[k]) > -1) {
             C_meg_idx[count] = k;
             ++count;
         }
@@ -238,7 +239,7 @@ FiffCov FiffCov::prepare_noise_cov(const FiffInfo& p_Info, const StringList& p_C
     VectorXi C_eeg_idx = VectorXi::Zero(p_NoiseCov.names.size());
     count = 0;
     for (qint32 k = 0; k < C.rows(); ++k) {
-        if (UTILSLIB::indexOf(eeg_names, p_ChNames[k]) > -1) {
+        if (BASELIB::indexOf(eeg_names, p_ChNames[k]) > -1) {
             C_eeg_idx[count] = k;
             ++count;
         }
@@ -313,7 +314,7 @@ FiffCov FiffCov::regularize(const FiffInfo& p_info, double p_fRegMag, double p_f
     if (p_exclude.size() == 0) {
         p_exclude = p_info.bads;
         for (qint32 i = 0; i < static_cast<int>(cov.bads.size()); ++i)
-            if (!UTILSLIB::contains(p_exclude, cov.bads[i]))
+            if (!BASELIB::contains(p_exclude, cov.bads[i]))
                 p_exclude.push_back(cov.bads[i]);
     }
 
@@ -344,11 +345,11 @@ FiffCov FiffCov::regularize(const FiffInfo& p_info, double p_fRegMag, double p_f
 
     std::vector<qint32> idx_eeg, idx_mag, idx_grad;
     for (qint32 i = 0; i < static_cast<int>(ch_names.size()); ++i) {
-        if (UTILSLIB::contains(ch_names_eeg, ch_names[i]))
+        if (BASELIB::contains(ch_names_eeg, ch_names[i]))
             idx_eeg.push_back(i);
-        else if (UTILSLIB::contains(ch_names_mag, ch_names[i]))
+        else if (BASELIB::contains(ch_names_mag, ch_names[i]))
             idx_mag.push_back(i);
-        else if (UTILSLIB::contains(ch_names_grad, ch_names[i]))
+        else if (BASELIB::contains(ch_names_grad, ch_names[i]))
             idx_grad.push_back(i);
     }
 
@@ -594,11 +595,11 @@ FiffCov FiffCov::compute_from_epochs(const std::vector<std::vector<MatrixXd>>& e
 
 //=============================================================================================================
 
-UTILSLIB::Expected<void> FiffCov::save(const std::filesystem::path& path) const
+BASELIB::Expected<void> FiffCov::save(const std::filesystem::path& path) const
 {
     auto pStream = path.empty() ? nullptr : FiffStream::start_file(path);
     if (!pStream) {
-        return fail(ErrorCode::Io, "Cannot write the covariance to '{}'", UTILSLIB::utf8FromPath(path));
+        return fail(ErrorCode::Io, "Cannot write the covariance to '{}'", BASELIB::utf8FromPath(path));
     }
 
     pStream->start_block(FIFFB_MEAS);

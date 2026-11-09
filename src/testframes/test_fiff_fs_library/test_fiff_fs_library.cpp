@@ -17,7 +17,7 @@
 #include <QCoreApplication>
 #include <Eigen/Dense>
 
-#include <utils/logger/log.h>
+#include <base/log.h>
 
 // FIFF
 #include <fiff/fiff.h>
@@ -31,7 +31,7 @@
 #include <fiff/fiff_info.h>
 #include <fiff/fiff_info_base.h>
 #include <fiff/fiff_coord_trans.h>
-#include <utils/string_utils.h>
+#include <base/string_utils.h>
 #include <fiff/fiff_dig_point.h>
 #include <fiff/fiff_named_matrix.h>
 #include <fiff/fiff_ch_info.h>
@@ -259,7 +259,7 @@ private slots:
 
 void TestFiffFsLibrary::initTestCase()
 {
-    UTILSLIB::Log::install_qt_message_handler();
+    BASELIB::Log::install_qt_message_handler();
     QString base = QCoreApplication::applicationDirPath() + "/../resources/data/mne-cpp-test-data";
     if (QFile::exists(base + "/MEG/sample/sample_audvis_trunc_raw.fif"))
         m_sDataPath = base;

@@ -15,10 +15,10 @@
 //=============================================================================================================
 
 #include "eeg_reference.h"
-#include <utils/logger/log.h>
+#include <base/log.h>
 
 #include <vector>
-#include <utils/string_utils.h>
+#include <base/string_utils.h>
 
 #include <fiff/fiff_info.h>
 #include <fiff/fiff_constants.h>
@@ -35,6 +35,7 @@
 //=============================================================================================================
 
 using namespace UTILSLIB;
+using namespace BASELIB;
 using namespace FIFFLIB;
 using namespace Eigen;
 
@@ -80,7 +81,7 @@ void UTILSLIB::setEegReference(MatrixXd& data,
                                const StringList& refChannels,
                                bool projection)
 {
-    const bool useAverage = refChannels.empty() || (refChannels.size() == 1 && UTILSLIB::equalsIgnoreCase(refChannels.front(), "average"));
+    const bool useAverage = refChannels.empty() || (refChannels.size() == 1 && BASELIB::equalsIgnoreCase(refChannels.front(), "average"));
 
     if (projection) {
         if (!useAverage) {
@@ -138,7 +139,7 @@ void UTILSLIB::setEegReference(MatrixXd& data,
         // Specific channel(s): mean of named channels
         std::vector<int> refIdx;
         for (const std::string& name : refChannels) {
-            int idx = UTILSLIB::indexOf(info.ch_names, name);
+            int idx = BASELIB::indexOf(info.ch_names, name);
             if (idx < 0) {
                 Log::warning("setEegReference: reference channel '{}' not found.", name);
                 return;
@@ -234,12 +235,12 @@ void UTILSLIB::setBipolarReference(MatrixXd& data,
     // Resolve anode and cathode indices
     std::vector<int> anodeIdx(nPairs), cathodeIdx(nPairs);
     for (int i = 0; i < nPairs; ++i) {
-        anodeIdx[i] = UTILSLIB::indexOf(info.ch_names, anodes[i]);
+        anodeIdx[i] = BASELIB::indexOf(info.ch_names, anodes[i]);
         if (anodeIdx[i] < 0) {
             Log::warning("setBipolarReference: anode channel '{}' not found.", anodes[i]);
             return;
         }
-        cathodeIdx[i] = UTILSLIB::indexOf(info.ch_names, cathodes[i]);
+        cathodeIdx[i] = BASELIB::indexOf(info.ch_names, cathodes[i]);
         if (cathodeIdx[i] < 0) {
             Log::warning("setBipolarReference: cathode channel '{}' not found.", cathodes[i]);
             return;

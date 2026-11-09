@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: BSD-3-Clause
  * Copyright (c) 2026 MNE-CPP Authors
  *
- * @file     test_utils_thread_pool.cpp
+ * @file     test_base_thread_pool.cpp
  * @author   Christoph Dinh <christoph.dinh@mne-cpp.org>
  * @since    2.5.0
  * @date     November 2026
@@ -14,7 +14,7 @@
 // INCLUDES
 //=============================================================================================================
 
-#include <utils/thread_pool.h>
+#include <base/thread_pool.h>
 
 //=============================================================================================================
 // QT INCLUDES
@@ -40,7 +40,7 @@
 // USED NAMESPACES
 //=============================================================================================================
 
-using namespace UTILSLIB;
+using namespace BASELIB;
 
 //=============================================================================================================
 
@@ -261,4 +261,4 @@ void TestUtilsThreadPool::benchmarkMap()
 //=============================================================================================================
 
 QTEST_GUILESS_MAIN(TestUtilsThreadPool)
-#include "test_utils_thread_pool.moc"
+#include "test_base_thread_pool.moc"

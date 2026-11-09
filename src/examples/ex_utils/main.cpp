@@ -7,7 +7,7 @@
  * @author   Christoph Dinh <christoph.dinh@mne-cpp.org>
  * @since    2.4.0
  * @date     October 2026
- * @brief    Utilities library: buffers, observers, logging, file formats, montages, layouts and reports.
+ * @brief    Utilities library: observers, commands, matrix files, montages, layouts, selections and reports.
  *
  * Every step checks its result (round trips, known electrode positions) and the
  * example exits non-zero on a mismatch.
@@ -18,10 +18,7 @@
 // INCLUDES
 //=============================================================================================================
 
-#include <utils/byte_stream.h>
-#include <utils/generics/circularbuffer.h>
 #include <utils/generics/commandpattern.h>
-#include <utils/logger/log.h>
 #include <utils/generics/observerpattern.h>
 #include <utils/ioutils.h>
 #include <utils/layoutloader.h>
@@ -31,8 +28,6 @@
 #include <utils/python_test_helper.h>
 #include <utils/report.h>
 #include <utils/selectionio.h>
-#include <utils/string_utils.h>
-#include <utils/thread_pool.h>
 
 //=============================================================================================================
 // QT INCLUDES
@@ -147,71 +142,6 @@ int main(int argc, char* argv[])
     QCoreApplication app(argc, argv);
     QTemporaryDir dir;
     bool ok = true;
-
-    //! [log_file_usage]
-    UTILSLIB::Log::install_qt_message_handler();                                                // console output
-    UTILSLIB::Log::set_file(UTILSLIB::pathFromUtf8(dir.filePath("example.log").toStdString())); // and a plain-text copy
-    Log::info("logging to {}", UTILSLIB::utf8FromPath(Log::file()));
-    //! [log_file_usage]
-    Log::set_file({});
-    QFile log(dir.filePath("example.log"));
-    ok &= expect(log.open(QIODevice::ReadOnly) && log.readAll().contains("logging to"), "Log wrote the message to the log file");
-
-    //! [log_usage]
-    Log::warning("channel {} is flat", "MEG 0113"); // formatted as by std::format, then passed to Qt's handler
-    //! [log_usage]
-
-    //! [log_capture_usage]
-    LogCapture capture; // in a test: record instead of printing
-    Log::warning("channel MEG 0113 is flat");
-    const int flat = capture.count(Log::Level::Warning, "flat");
-    //! [log_capture_usage]
-    ok &= expect(flat == 1 && capture.entries().size() == 1, "LogCapture recorded the warning");
-
-    //! [byte_stream_usage]
-    const std::vector<float> samples = {1.5f, -0.25f};
-    {
-        auto out = FileByteStream::open(dir.filePath("data.bin").toStdString(), FileByteStream::Mode::Write);
-        out->writeBigEndian(std::int32_t(samples.size())); // FIFF byte order
-        out->writeBigEndian(samples.data(), samples.size());
-    }
-    auto in = FileByteStream::open(dir.filePath("data.bin").toStdString(), FileByteStream::Mode::Read);
-    std::int32_t count = 0;
-    in->readBigEndian(count);
-    std::vector<float> back(static_cast<std::size_t>(count));
-    in->readBigEndian(back.data(), back.size());
-    //! [byte_stream_usage]
-    ok &= expect(back == samples && in->atEnd(), "FileByteStream read back the big-endian samples");
-
-    //! [memory_byte_stream_usage]
-    MemoryByteStream memory;
-    memory.writeBigEndian(std::int16_t{0x0102});
-    const bool bigEndian = memory.data()[0] == std::byte{0x01}; // most significant byte first
-    //! [memory_byte_stream_usage]
-    ok &= expect(bigEndian && memory.size() == 2, "MemoryByteStream stores values most significant byte first");
-
-    //! [thread_pool_usage]
-    const std::vector<int> channels = {0, 1, 2, 3};
-    const std::vector<double> power = ThreadPool::global().parallelMap(channels, [](int ch) { return 0.5 * ch; }); // in order
-    auto background = ThreadPool::global().submit([] { return 42; });
-    //! [thread_pool_usage]
-    ok &= expect(power == std::vector<double>({0.0, 0.5, 1.0, 1.5}) && background.get() == 42, "ThreadPool mapped the channels in order");
-
-    const StringList fields = split(trimmed(" MEG 0113, 1.5e-13 \n"), ','); // a line of a text file
-    const std::optional<double> scale = toDouble(fields[1]);                // locale independent
-    const bool isGz = equalsIgnoreCase(utf8FromPath(pathFromUtf8("T1.NII.GZ").extension()), ".gz");
-    ok &= expect(fields[0] == "MEG 0113" && scale == 1.5e-13 && isGz, "string helpers parsed the line");
-
-    //! [circular_buffer_usage]
-    CircularBuffer<double> buffer(4); // single producer, single consumer
-    const double block[3] = {1.0, 2.0, 3.0};
-    buffer.push(block, 3);
-    double first = 0.0;
-    double second = 0.0;
-    buffer.pop(first);
-    buffer.pop(second);
-    //! [circular_buffer_usage]
-    ok &= expect(first == 1.0 && second == 2.0 && buffer.getFreeElementsRead() == 1, "CircularBuffer pops in FIFO order, one element left");
 
     Counter counter;
     LastSeen observer;

@@ -54,6 +54,7 @@
 using namespace DISPLIB;
 using namespace FIFFLIB;
 using namespace UTILSLIB;
+using namespace BASELIB;
 
 //=============================================================================================================
 // DEFINE MEMBER METHODS
@@ -334,7 +335,7 @@ void ChannelSelectionView::updateBadChannels()
             digIndex = m_pChannelInfoModel->index(i, 1);
             QString origChName = m_pChannelInfoModel->data(digIndex, ChannelInfoModelRoles::GetOrigChName).toString();
 
-            if (UTILSLIB::contains(badChannelList, origChName.toStdString())) {
+            if (BASELIB::contains(badChannelList, origChName.toStdString())) {
                 badChannelMappedNames << mappedChName;
             }
         }

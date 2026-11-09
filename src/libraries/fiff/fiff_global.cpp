@@ -29,19 +29,19 @@
 
 const char* FIFFLIB::buildDateTime()
 {
-    return UTILSLIB::dateTimeNow();
+    return BASELIB::dateTimeNow();
 }
 
 //=============================================================================================================
 
 const char* FIFFLIB::buildHash()
 {
-    return UTILSLIB::gitHash();
+    return BASELIB::gitHash();
 }
 
 //=============================================================================================================
 
 const char* FIFFLIB::buildHashLong()
 {
-    return UTILSLIB::gitHashLong();
+    return BASELIB::gitHashLong();
 }

@@ -22,7 +22,7 @@
 #include <memory>
 
 #include <vector>
-#include <utils/string_utils.h>
+#include <base/string_utils.h>
 #include "FormFiles/babymegsetupwidget.h"
 #include "FormFiles/babymegsquidcontroldgl.h"
 #include "babymegclient.h"
@@ -55,13 +55,14 @@ using namespace FIFFLIB;
 using namespace Eigen;
 using namespace RTPROCESSINGLIB;
 using namespace UTILSLIB;
+using namespace BASELIB;
 
 //=============================================================================================================
 // DEFINE MEMBER METHODS
 //=============================================================================================================
 
 BabyMEG::BabyMEG()
-: m_pCircularBuffer(std::make_shared<CircularBuffer_Matrix_float>(40))
+: m_pCircularBuffer(std::make_shared<BASELIB::CircularBuffer<Eigen::MatrixXf>>(40))
 , m_iBufferSize(-1)
 , m_sFiffProjections(QCoreApplication::applicationDirPath() + "/../resources/mne_scan/plugins/babymeg/header.fif")
 , m_sFiffCompensators(QCoreApplication::applicationDirPath() + "/../resources/mne_scan/plugins/babymeg/compensator.fif")
@@ -260,14 +261,14 @@ void BabyMEG::initConnector()
         m_pRTMSABabyMEG->measurementData()->setMultiArraySize(1);
 
         //Look for trigger channels and initialise detected trigger map
-        m_lTriggerChannelIndices.append(UTILSLIB::indexOf(m_pFiffInfo->ch_names, "TRG001"));
-        m_lTriggerChannelIndices.append(UTILSLIB::indexOf(m_pFiffInfo->ch_names, "TRG002"));
-        m_lTriggerChannelIndices.append(UTILSLIB::indexOf(m_pFiffInfo->ch_names, "TRG003"));
-        m_lTriggerChannelIndices.append(UTILSLIB::indexOf(m_pFiffInfo->ch_names, "TRG004"));
-        m_lTriggerChannelIndices.append(UTILSLIB::indexOf(m_pFiffInfo->ch_names, "TRG005"));
-        m_lTriggerChannelIndices.append(UTILSLIB::indexOf(m_pFiffInfo->ch_names, "TRG006"));
-        m_lTriggerChannelIndices.append(UTILSLIB::indexOf(m_pFiffInfo->ch_names, "TRG007"));
-        m_lTriggerChannelIndices.append(UTILSLIB::indexOf(m_pFiffInfo->ch_names, "TRG008"));
+        m_lTriggerChannelIndices.append(BASELIB::indexOf(m_pFiffInfo->ch_names, "TRG001"));
+        m_lTriggerChannelIndices.append(BASELIB::indexOf(m_pFiffInfo->ch_names, "TRG002"));
+        m_lTriggerChannelIndices.append(BASELIB::indexOf(m_pFiffInfo->ch_names, "TRG003"));
+        m_lTriggerChannelIndices.append(BASELIB::indexOf(m_pFiffInfo->ch_names, "TRG004"));
+        m_lTriggerChannelIndices.append(BASELIB::indexOf(m_pFiffInfo->ch_names, "TRG005"));
+        m_lTriggerChannelIndices.append(BASELIB::indexOf(m_pFiffInfo->ch_names, "TRG006"));
+        m_lTriggerChannelIndices.append(BASELIB::indexOf(m_pFiffInfo->ch_names, "TRG007"));
+        m_lTriggerChannelIndices.append(BASELIB::indexOf(m_pFiffInfo->ch_names, "TRG008"));
     }
 }
 
@@ -438,7 +439,7 @@ void BabyMEG::createDigTrig(MatrixXf& data)
     //Combine and write results into data block's digital trigger channel
     QMapIterator<int, QList<QPair<int, double>>> i(qMapDetectedTrigger);
     int counter = 0;
-    int idxDigTrig = UTILSLIB::indexOf(m_pFiffInfo->ch_names, "DTRG01");
+    int idxDigTrig = BASELIB::indexOf(m_pFiffInfo->ch_names, "DTRG01");
 
     while (i.hasNext()) {
         i.next();

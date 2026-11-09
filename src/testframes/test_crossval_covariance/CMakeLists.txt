@@ -35,6 +35,7 @@ target_link_libraries(${PROJECT_NAME}
     mne_sts
     mne_fiff
     mne_utils
+    mne_base
     mne_math
 )
 

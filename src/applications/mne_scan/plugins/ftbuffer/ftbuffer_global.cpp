@@ -24,19 +24,19 @@
 
 const char* FTBUFFERPLUGIN::buildDateTime()
 {
-    return UTILSLIB::dateTimeNow();
+    return BASELIB::dateTimeNow();
 }
 
 //=============================================================================================================
 
 const char* FTBUFFERPLUGIN::buildHash()
 {
-    return UTILSLIB::gitHash();
+    return BASELIB::gitHash();
 }
 
 //=============================================================================================================
 
 const char* FTBUFFERPLUGIN::buildHashLong()
 {
-    return UTILSLIB::gitHashLong();
+    return BASELIB::gitHashLong();
 }

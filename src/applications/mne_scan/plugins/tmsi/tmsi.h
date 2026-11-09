@@ -33,7 +33,9 @@
 #include <direct.h>
 
 #include <scShared/Plugins/abstractsensor.h>
-#include <utils/generics/circularbuffer.h>
+#include <base/circular_buffer.h>
+
+#include <Eigen/Core>
 #include <scMeas/realtimemultisamplearray.h>
 
 #include <utils/layoutloader.h>
@@ -225,7 +227,7 @@ private:
     QString m_sElcFilePath;                         /**< Holds the path for the .elc file (electrode positions). Defined by the user via the GUI.*/
     std::shared_ptr<FIFFLIB::FiffInfo> m_pFiffInfo; /**< Fiff measurement info.*/
 
-    std::shared_ptr<UTILSLIB::CircularBuffer_Matrix_float> m_pCircularBuffer; /**< Holds incoming raw data.*/
+    std::shared_ptr<BASELIB::CircularBuffer<Eigen::MatrixXf>> m_pCircularBuffer; /**< Holds incoming raw data.*/
 
     QSharedPointer<TMSIProducer> m_pTMSIProducer; /**< the TMSIProducer.*/
 

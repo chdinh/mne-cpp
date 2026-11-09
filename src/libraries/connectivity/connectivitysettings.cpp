@@ -23,7 +23,7 @@
 //=============================================================================================================
 
 #include "connectivitysettings.h"
-#include <utils/logger/log.h>
+#include <base/log.h>
 
 #include <vector>
 #include <utility>
@@ -179,12 +179,12 @@ bool ConnectivitySettings::empty() const
 void ConnectivitySettings::removeFirst(int iAmount)
 {
     if (m_trialData.empty()) {
-        UTILSLIB::Log::debug("ConnectivitySettings::removeFirst - No elements to delete. Returning.");
+        BASELIB::Log::debug("ConnectivitySettings::removeFirst - No elements to delete. Returning.");
         return;
     }
 
     if (std::ssize(m_trialData) < iAmount) {
-        UTILSLIB::Log::debug("ConnectivitySettings::removeFirst - Not enough elements stored in list in order to delete them. Returning.");
+        BASELIB::Log::debug("ConnectivitySettings::removeFirst - Not enough elements stored in list in order to delete them. Returning.");
         return;
     }
 
@@ -199,12 +199,12 @@ void ConnectivitySettings::removeFirst(int iAmount)
 void ConnectivitySettings::removeLast(int iAmount)
 {
     if (m_trialData.empty()) {
-        UTILSLIB::Log::debug("ConnectivitySettings::removeLast - No elements to delete. Returning.");
+        BASELIB::Log::debug("ConnectivitySettings::removeLast - No elements to delete. Returning.");
         return;
     }
 
     if (std::ssize(m_trialData) < iAmount) {
-        UTILSLIB::Log::debug("ConnectivitySettings::removeLast - Not enough elements stored in list in order to delete them. Returning.");
+        BASELIB::Log::debug("ConnectivitySettings::removeLast - Not enough elements stored in list in order to delete them. Returning.");
         return;
     }
 

@@ -33,6 +33,7 @@ set(MNE_LIBS_REQUIRED
     mne_dsp
     mne_fiff
     mne_utils
+    mne_base
     mne_math
     mne_mne
     mne_inv

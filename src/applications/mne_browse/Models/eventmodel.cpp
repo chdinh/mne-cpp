@@ -20,7 +20,7 @@
 #include <memory>
 
 #include <fiff/fiff_events.h>
-#include <utils/string_utils.h>
+#include <base/string_utils.h>
 #include <QFileInfo>
 
 

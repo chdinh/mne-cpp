@@ -55,7 +55,7 @@
 // STL INCLUDES
 //=============================================================================================================
 
-#include <utils/byte_stream.h>
+#include <base/byte_stream.h>
 
 #include <filesystem>
 #include <string>
@@ -230,7 +230,7 @@ public:
      *
      * @return The geometry; an Io error if the file cannot be read, a Format error if it is not a valid surface.
      */
-    static UTILSLIB::Expected<Geometry> read_geometry(const std::filesystem::path& file);
+    static BASELIB::Expected<Geometry> read_geometry(const std::filesystem::path& file);
 
     //=========================================================================================================
     /**
@@ -324,7 +324,7 @@ public:
      * @param[in] stream  Stream to read from.
      * @return the read 3-byte integer.
      */
-    static qint32 fread3(UTILSLIB::ByteStream& stream);
+    static qint32 fread3(BASELIB::ByteStream& stream);
 
     //=========================================================================================================
     /**
@@ -334,7 +334,7 @@ public:
      * @param[in] count   Number of elements to read.
      * @return the read 3-byte integers.
      */
-    static Eigen::VectorXi fread3_many(UTILSLIB::ByteStream& stream, qint32 count);
+    static Eigen::VectorXi fread3_many(BASELIB::ByteStream& stream, qint32 count);
 
 private:
     std::string m_sFilePath;    /**< Path to surf directory. */

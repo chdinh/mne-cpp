@@ -23,7 +23,7 @@
 //=============================================================================================================
 
 #include "inv_label_time_course.h"
-#include <utils/logger/log.h>
+#include <base/log.h>
 
 //=============================================================================================================
 // EIGEN INCLUDES
@@ -83,7 +83,7 @@ MatrixXd InvLabelTimeCourse::extract(const InvSourceEstimate& stc,
                                      bool bAllowEmpty)
 {
     if (stc.empty() || labels.empty()) {
-        UTILSLIB::Log::warning("[InvLabelTimeCourse::extract] Empty stc or labels.");
+        BASELIB::Log::warning("[InvLabelTimeCourse::extract] Empty stc or labels.");
         return MatrixXd();
     }
 
@@ -178,7 +178,7 @@ MatrixXd InvLabelTimeCourse::extract(const InvSourceEstimate& stc,
                 result(oi, t) = maxVal;
             }
         } else {
-            UTILSLIB::Log::warning("[InvLabelTimeCourse::extract] Unknown mode: {} — using mean.", mode.toStdString());
+            BASELIB::Log::warning("[InvLabelTimeCourse::extract] Unknown mode: {} — using mean.", mode.toStdString());
             result.row(oi) = labelData.colwise().mean();
         }
     }

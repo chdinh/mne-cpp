@@ -73,10 +73,10 @@ struct DSPSHARED_EXPORT BadChannelsMaxwellParams
  */
 struct DSPSHARED_EXPORT BadChannelsMaxwellResult
 {
-    StringList badChannels;      /**< Names of detected bad channels. */
-    std::vector<int> badIndices; /**< Indices in the MEG channel list. */
-    Eigen::VectorXd residuals;   /**< Per-channel reconstruction residuals. */
-    Eigen::VectorXd zScores;     /**< Per-channel z-scores of residuals. */
+    BASELIB::StringList badChannels; /**< Names of detected bad channels. */
+    std::vector<int> badIndices;     /**< Indices in the MEG channel list. */
+    Eigen::VectorXd residuals;       /**< Per-channel reconstruction residuals. */
+    Eigen::VectorXd zScores;         /**< Per-channel z-scores of residuals. */
 };
 
 //=============================================================================================================

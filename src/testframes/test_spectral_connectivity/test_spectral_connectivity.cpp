@@ -17,7 +17,7 @@
 // INCLUDES
 //=============================================================================================================
 
-#include <utils/logger/log.h>
+#include <base/log.h>
 
 #include <utils/ioutils.h>
 #include <connectivity/metrics/coherency.h>
@@ -98,7 +98,7 @@ TestSpectralConnectivity::TestSpectralConnectivity()
 
 void TestSpectralConnectivity::initTestCase()
 {
-    UTILSLIB::Log::install_qt_message_handler();
+    BASELIB::Log::install_qt_message_handler();
     //*********************************************************************************************************
     // Load and Setup Testing Data
     //*********************************************************************************************************

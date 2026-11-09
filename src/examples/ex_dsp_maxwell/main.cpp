@@ -20,7 +20,7 @@
 //=============================================================================================================
 
 #include <dsp/bad_channels_maxwell.h>
-#include <utils/string_utils.h>
+#include <base/string_utils.h>
 #include <dsp/filter_chpi.h>
 #include <dsp/fine_calibration.h>
 #include <dsp/maxwell_movement_comp.h>
@@ -151,8 +151,8 @@ int main(int argc, char* argv[])
     //! [bad_channels_maxwell_usage]
     int worst = 0;
     bads.zScores.maxCoeff(&worst);
-    ok &= expect(worst == 40 && std::ranges::contains(bads.badIndices, meg[40]) && UTILSLIB::contains(bads.badChannels, info.ch_names[meg[40]]),
-                 std::format("findBadChannelsMaxwell ranks {} worst (z = {:.0f}), flagged: {}", info.ch_names[meg[worst]], bads.zScores(worst), UTILSLIB::join(bads.badChannels, ", ")));
+    ok &= expect(worst == 40 && std::ranges::contains(bads.badIndices, meg[40]) && BASELIB::contains(bads.badChannels, info.ch_names[meg[40]]),
+                 std::format("findBadChannelsMaxwell ranks {} worst (z = {:.0f}), flagged: {}", info.ch_names[meg[worst]], bads.zScores(worst), BASELIB::join(bads.badChannels, ", ")));
 
     //! [maxwell_movement_comp_usage]
     std::vector<HeadPosEntry> headPos(1); // one position from t = 0: identity rotation, no translation

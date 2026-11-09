@@ -22,7 +22,7 @@
 //=============================================================================================================
 
 #include "inv_guess_data.h"
-#include <utils/logger/log.h>
+#include <base/log.h>
 #include "inv_dipole_fit_data.h"
 #include "inv_dipole_forward.h"
 #include <mne/mne_surface.h>
@@ -70,10 +70,10 @@ InvGuessData::InvGuessData(const QString& guessname, const QString& guess_surfna
         if (MNESourceSpace::read_source_spaces(guessname.toStdU16String(), sp) == FIFF_FAIL)
             return;
         if (static_cast<int>(sp.size()) != 1) {
-            UTILSLIB::Log::critical("Incorrect number of source spaces in guess file");
+            BASELIB::Log::critical("Incorrect number of source spaces in guess file");
             return;
         }
-        UTILSLIB::Log::info("Read guesses from {}\n", guessname.toStdString());
+        BASELIB::Log::info("Read guesses from {}\n", guessname.toStdString());
         guesses = std::move(sp[0]);
     } else {
         MNESurface* inner_skull = nullptr;
@@ -83,11 +83,11 @@ InvGuessData::InvGuessData(const QString& guessname, const QString& guess_surfna
         Q_ASSERT(f->mri_head_t);
         FiffCoordTrans::apply_inverse_trans(r0.data(), *f->mri_head_t, true);
         if (f->bem_model) {
-            UTILSLIB::Log::info("Using inner skull surface from the BEM ({})...\n", f->bemname.toStdString());
+            BASELIB::Log::info("Using inner skull surface from the BEM ({})...\n", f->bemname.toStdString());
             if ((inner_skull = f->bem_model->fwd_bem_find_surface(FIFFV_BEM_SURF_ID_BRAIN)) == nullptr)
                 return;
         } else if (!guess_surfname.isEmpty()) {
-            UTILSLIB::Log::info("Reading inner skull surface from {}...\n", guess_surfname.toStdString());
+            BASELIB::Log::info("Reading inner skull surface from {}...\n", guess_surfname.toStdString());
             inner_skull_owned = MNESurface::read_bem_surface(guess_surfname.toStdU16String(), FIFFV_BEM_SURF_ID_BRAIN, true);
             if (!inner_skull_owned)
                 return;
@@ -98,7 +98,7 @@ InvGuessData::InvGuessData(const QString& guessname, const QString& guess_surfna
             return;
     }
     if (guesses->nuse == 0) {
-        UTILSLIB::Log::critical("No active guess locations remaining.");
+        BASELIB::Log::critical("No active guess locations remaining.");
         return;
     }
     /*
@@ -111,7 +111,7 @@ InvGuessData::InvGuessData(const QString& guessname, const QString& guess_surfna
             return;
         guesses = std::move(guesses_vec[0]);
     }
-    UTILSLIB::Log::info("Guess locations are now in {} coordinates.\n", std::string(FiffCoordTrans::frame_name(f->coord_frame)));
+    BASELIB::Log::info("Guess locations are now in {} coordinates.\n", std::string(FiffCoordTrans::frame_name(f->coord_frame)));
 
     this->nguess = guesses->nuse;
     this->rr.resize(guesses->nuse, 3);
@@ -143,14 +143,14 @@ bool InvGuessData::compute_guess_fields(InvDipoleFitData* f)
     dipoleFitFuncs orig = nullptr;
 
     if (!f) {
-        UTILSLIB::Log::critical("Data missing in compute_guess_fields");
+        BASELIB::Log::critical("Data missing in compute_guess_fields");
         return false;
     }
     if (!f->noise) {
-        UTILSLIB::Log::critical("Noise covariance missing in compute_guess_fields");
+        BASELIB::Log::critical("Noise covariance missing in compute_guess_fields");
         return false;
     }
-    UTILSLIB::Log::info("Go through all guess source locations...");
+    BASELIB::Log::info("Go through all guess source locations...");
     orig = f->funcs;
     if (f->fit_mag_dipoles)
         f->funcs = f->mag_dipole_funcs.get();
@@ -165,11 +165,11 @@ bool InvGuessData::compute_guess_fields(InvDipoleFitData* f)
         }
 #ifdef DEBUG
         sing = this->guess_fwd[k]->sing;
-        UTILSLIB::Log::info("{:f} {:f} {:f}\n", sing[0], sing[1], sing[2]);
+        BASELIB::Log::info("{:f} {:f} {:f}\n", sing[0], sing[1], sing[2]);
 #endif
     }
     f->funcs = orig;
-    UTILSLIB::Log::info("[done {} sources]\n", this->nguess);
+    BASELIB::Log::info("[done {} sources]\n", this->nguess);
 
     return true;
 }

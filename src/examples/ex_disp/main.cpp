@@ -28,7 +28,7 @@
 #include <math.h>
 
 #include <dsp/spectrogram.h>
-#include <utils/logger/log.h>
+#include <base/log.h>
 
 //=============================================================================================================
 // Eigen
@@ -55,6 +55,7 @@ using namespace DISPLIB;
 using namespace FIFFLIB;
 using namespace MNELIB;
 using namespace UTILSLIB;
+using namespace BASELIB;
 
 //=============================================================================================================
 // MAIN
@@ -71,7 +72,7 @@ using namespace UTILSLIB;
  */
 int main(int argc, char* argv[])
 {
-    UTILSLIB::Log::install_qt_message_handler();
+    BASELIB::Log::install_qt_message_handler();
     QApplication a(argc, argv);
 
     // Command Line Parser

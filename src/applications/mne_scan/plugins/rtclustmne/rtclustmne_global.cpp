@@ -24,19 +24,19 @@
 
 const char* RTCLUSTMNEPLUGIN::buildDateTime()
 {
-    return UTILSLIB::dateTimeNow();
+    return BASELIB::dateTimeNow();
 }
 
 //=============================================================================================================
 
 const char* RTCLUSTMNEPLUGIN::buildHash()
 {
-    return UTILSLIB::gitHash();
+    return BASELIB::gitHash();
 }
 
 //=============================================================================================================
 
 const char* RTCLUSTMNEPLUGIN::buildHashLong()
 {
-    return UTILSLIB::gitHashLong();
+    return BASELIB::gitHashLong();
 }

@@ -21,7 +21,7 @@
 #include "fiff_annotations.h"
 #include "fiff_annotations_json.h"
 
-#include <utils/string_utils.h>
+#include <base/string_utils.h>
 
 #include <QByteArray>
 #include <QJsonDocument>
@@ -40,9 +40,9 @@
 //=============================================================================================================
 
 using namespace FIFFLIB;
-using UTILSLIB::ErrorCode;
-using UTILSLIB::Expected;
-using UTILSLIB::fail;
+using BASELIB::ErrorCode;
+using BASELIB::Expected;
+using BASELIB::fail;
 
 //=============================================================================================================
 // DEFINE GLOBAL METHODS
@@ -129,7 +129,7 @@ Expected<void> writeBytes(const std::filesystem::path& path, std::string_view by
 {
     std::ofstream file(path, std::ios::binary | std::ios::trunc);
     if (!file || !file.write(bytes.data(), static_cast<std::streamsize>(bytes.size()))) {
-        return fail(ErrorCode::Io, "cannot write {}", UTILSLIB::utf8FromPath(path));
+        return fail(ErrorCode::Io, "cannot write {}", BASELIB::utf8FromPath(path));
     }
     return {};
 }
@@ -138,14 +138,14 @@ Expected<std::string> readBytes(const std::filesystem::path& path)
 {
     std::ifstream file(path, std::ios::binary);
     if (!file) {
-        return fail(ErrorCode::Io, "cannot read {}", UTILSLIB::utf8FromPath(path));
+        return fail(ErrorCode::Io, "cannot read {}", BASELIB::utf8FromPath(path));
     }
     return std::string(std::istreambuf_iterator<char>(file), {});
 }
 
 std::string lowerExtension(const std::filesystem::path& path)
 {
-    return UTILSLIB::toLower(UTILSLIB::utf8FromPath(path.extension()));
+    return BASELIB::toLower(BASELIB::utf8FromPath(path.extension()));
 }
 
 } // namespace
@@ -227,7 +227,7 @@ Expected<FiffAnnotations> FiffAnnotations::read_json(const std::filesystem::path
     QJsonParseError parseError;
     const QJsonDocument doc = QJsonDocument::fromJson(QByteArray::fromStdString(*bytes), &parseError);
     if (parseError.error != QJsonParseError::NoError || !doc.isObject()) {
-        return fail(ErrorCode::Format, "{} is not an annotation JSON file: {}", UTILSLIB::utf8FromPath(path), parseError.errorString().toStdString());
+        return fail(ErrorCode::Format, "{} is not an annotation JSON file: {}", BASELIB::utf8FromPath(path), parseError.errorString().toStdString());
     }
 
     FiffAnnotations annot;
@@ -273,17 +273,17 @@ Expected<FiffAnnotations> FiffAnnotations::read_csv(const std::filesystem::path&
         return std::unexpected(bytes.error());
     }
     FiffAnnotations annot;
-    const UTILSLIB::StringList lines = UTILSLIB::split(*bytes, '\n');
+    const BASELIB::StringList lines = BASELIB::split(*bytes, '\n');
     for (std::size_t i = 1; i < lines.size(); ++i) {
-        const std::string_view line = UTILSLIB::trimmed(lines[i]);
+        const std::string_view line = BASELIB::trimmed(lines[i]);
         // The description may hold commas, so only the first two separate fields
         const std::size_t first = line.find(',');
         const std::size_t second = first == std::string_view::npos ? first : line.find(',', first + 1);
         if (second == std::string_view::npos) {
             continue;
         }
-        const std::optional<double> onset = UTILSLIB::toDouble(line.substr(0, first));
-        const std::optional<double> duration = UTILSLIB::toDouble(line.substr(first + 1, second - first - 1));
+        const std::optional<double> onset = BASELIB::toDouble(line.substr(0, first));
+        const std::optional<double> duration = BASELIB::toDouble(line.substr(first + 1, second - first - 1));
         if (onset && duration) {
             annot.append(*onset, *duration, std::string(line.substr(second + 1)));
         }

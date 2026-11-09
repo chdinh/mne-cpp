@@ -34,6 +34,7 @@ target_link_libraries(${PROJECT_NAME} PRIVATE
     ${QT_REQUIRED_COMPONENT_LIBS}
     mne_fiff
     mne_utils
+    mne_base
     Eigen3::Eigen
 )
 

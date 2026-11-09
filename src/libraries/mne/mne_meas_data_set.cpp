@@ -18,7 +18,7 @@
 //=============================================================================================================
 
 #include "mne_meas_data_set.h"
-#include <utils/logger/log.h>
+#include <base/log.h>
 
 #include <fiff/fiff_file.h>
 
@@ -66,7 +66,7 @@ int MNEMeasDataSet::getValuesAtTime(float time, float integ, int nch, bool use_a
             int n1 = static_cast<int>(std::floor(s1));
             float f1 = 1.0f + n1 - s1;
             if (n1 < 0 || n1 > np - 1) {
-                UTILSLIB::Log::warning("Sample value out of range {} (0..{})", n1, np - 1);
+                BASELIB::Log::warning("Sample value out of range {} (0..{})", n1, np - 1);
                 return -1;
             }
             if (n1 == np - 1) {
@@ -74,7 +74,7 @@ int MNEMeasDataSet::getValuesAtTime(float time, float integ, int nch, bool use_a
                     f1 = 1.0f;
             }
             if (f1 < 1.0f && n1 > np - 2) {
-                UTILSLIB::Log::warning("Sample value out of range {} (0..{}) {:.4f}", n1, np - 1, f1);
+                BASELIB::Log::warning("Sample value out of range {} (0..{}) {:.4f}", n1, np - 1, f1);
                 return -1;
             }
             if (f1 < 1.0f) {
@@ -106,11 +106,11 @@ int MNEMeasDataSet::getValuesAtTime(float time, float integ, int nch, bool use_a
                 float f1 = n1 - s1;
                 float f2 = s2 - n2;
                 if (n1 < 0 || n1 > np - 1) {
-                    UTILSLIB::Log::warning("Sample value out of range {} (0..{})", n1, np - 1);
+                    BASELIB::Log::warning("Sample value out of range {} (0..{})", n1, np - 1);
                     return -1;
                 }
                 if (n2 < 0 || n2 > np - 1) {
-                    UTILSLIB::Log::warning("Sample value out of range {} (0..{})", n2, np - 1);
+                    BASELIB::Log::warning("Sample value out of range {} (0..{})", n2, np - 1);
                     return -1;
                 }
                 if (f1 != 0.0f && n1 < 1)

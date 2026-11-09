@@ -90,11 +90,11 @@ public:
      *
      * @return The number of port/channel pairs found.
      */
-    int matchPorts(const UTILSLIB::StringList& channels);
+    int matchPorts(const BASELIB::StringList& channels);
 
     //=========================================================================================================
     /**
-     * Returns which port shows which channel after matchPorts(const UTILSLIB::StringList&).
+     * Returns which port shows which channel after matchPorts(const BASELIB::StringList&).
      *
      * @return Ports x channels, 1 where the port shows the channel.
      */
@@ -173,7 +173,7 @@ public:
 private:
     QRectF m_extent;           /**< Drawing area from the first line of the file. */
     QRectF m_visible;          /**< Currently shown area. */
-    Eigen::MatrixXi m_matches; /**< Ports x channels of the last matchPorts(const UTILSLIB::StringList&). */
+    Eigen::MatrixXi m_matches; /**< Ports x channels of the last matchPorts(const BASELIB::StringList&). */
 };
 
 } // namespace MNELIB

@@ -24,7 +24,7 @@
 #include <fiff/fiff_named_matrix.h>
 #include <fiff/fiff_types.h>
 
-#include <utils/logger/log.h>
+#include <base/log.h>
 
 //=============================================================================================================
 // EIGEN INCLUDES
@@ -47,7 +47,7 @@
 
 using namespace MNELIB;
 using namespace FIFFLIB;
-using namespace UTILSLIB;
+using namespace BASELIB;
 using namespace Eigen;
 
 //=============================================================================================================
@@ -62,7 +62,7 @@ using namespace Eigen;
 
 int main(int argc, char* argv[])
 {
-    UTILSLIB::Log::install_qt_message_handler();
+    BASELIB::Log::install_qt_message_handler();
     QCoreApplication app(argc, argv);
     QCoreApplication::setApplicationName("mne_label_ssp");
     QCoreApplication::setApplicationVersion(PROGRAM_VERSION);

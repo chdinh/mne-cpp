@@ -14,7 +14,7 @@
 // INCLUDES
 //=============================================================================================================
 
-#include <utils/logger/log.h>
+#include <base/log.h>
 
 //=============================================================================================================
 // QT INCLUDES
@@ -32,7 +32,6 @@
 // USED NAMESPACES
 //=============================================================================================================
 
-using namespace UTILSLIB;
 
 //=============================================================================================================
 // STATIC DEFINITIONS
@@ -161,7 +160,7 @@ static QList<CtfMarker> parseCtfMarkers(const QString& filename)
 
 int main(int argc, char* argv[])
 {
-    UTILSLIB::Log::install_qt_message_handler();
+    BASELIB::Log::install_qt_message_handler();
     QCoreApplication app(argc, argv);
     QCoreApplication::setApplicationName("mne_convert_ctf_markers");
     QCoreApplication::setApplicationVersion(PROGRAM_VERSION);

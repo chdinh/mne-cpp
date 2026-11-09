@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: BSD-3-Clause
  * Copyright (c) 2026 MNE-CPP Authors
  *
- * @file     test_utils_logger.cpp
+ * @file     test_base_logger.cpp
  * @author   Christoph Dinh <christoph.dinh@mne-cpp.org>
  * @since    0.1.0
  * @date     July, 2026
@@ -14,8 +14,8 @@
 // INCLUDES
 //=============================================================================================================
 
-#include <utils/logger/log.h>
-#include <utils/string_utils.h>
+#include <base/log.h>
+#include <base/string_utils.h>
 
 //=============================================================================================================
 // QT INCLUDES
@@ -41,7 +41,7 @@
 // USED NAMESPACES
 //=============================================================================================================
 
-using namespace UTILSLIB;
+using namespace BASELIB;
 
 //=============================================================================================================
 
@@ -356,4 +356,4 @@ void TestUtilsLogger::cleanupTestCase()
 //=============================================================================================================
 
 QTEST_APPLESS_MAIN(TestUtilsLogger)
-#include "test_utils_logger.moc"
+#include "test_base_logger.moc"

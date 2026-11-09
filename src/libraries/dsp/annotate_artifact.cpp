@@ -15,7 +15,7 @@
 //=============================================================================================================
 
 #include "annotate_artifact.h"
-#include <utils/logger/log.h>
+#include <base/log.h>
 
 #include <vector>
 #include <utility>
@@ -37,6 +37,7 @@
 //=============================================================================================================
 
 using namespace UTILSLIB;
+using namespace BASELIB;
 using namespace FIFFLIB;
 using namespace Eigen;
 

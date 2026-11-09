@@ -28,7 +28,7 @@
 #include <scShared/Management/plugininputdata.h>
 #include <scShared/Plugins/abstractplugin.h>
 
-#include <utils/logger/log.h>
+#include <base/log.h>
 
 //=============================================================================================================
 // EIGEN INCLUDES
@@ -129,7 +129,7 @@ int main(int argc, char* argv[])
 #endif
 #endif
 
-    UTILSLIB::Log::install_qt_message_handler();
+    BASELIB::Log::install_qt_message_handler();
 
     // Enable crisp fractional scaling on high-DPI monitors. Must be set before
     // the QApplication is constructed. (Qt6 enables high-DPI pixmaps by default.)
@@ -158,7 +158,7 @@ int main(int argc, char* argv[])
     const QString sLogDir = QStandardPaths::writableLocation(QStandardPaths::AppDataLocation);
     if (!sLogDir.isEmpty() && QDir().mkpath(sLogDir)) {
         const QString sLogFile = sLogDir + "/mne_scan.log";
-        if (UTILSLIB::Log::set_file(sLogFile.toStdU16String())) {
+        if (BASELIB::Log::set_file(sLogFile.toStdU16String())) {
             qInfo() << "Logging to" << sLogFile;
         } else {
             qWarning() << "Could not open log file" << sLogFile << "- logging to console only.";

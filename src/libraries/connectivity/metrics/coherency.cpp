@@ -18,7 +18,7 @@
 //=============================================================================================================
 
 #include "coherency.h"
-#include <utils/logger/log.h>
+#include <base/log.h>
 
 #include <vector>
 #include <utility>
@@ -48,6 +48,7 @@
 using namespace CONNECTIVITYLIB;
 using namespace Eigen;
 using namespace UTILSLIB;
+using namespace BASELIB;
 
 //=============================================================================================================
 // DEFINE GLOBAL METHODS

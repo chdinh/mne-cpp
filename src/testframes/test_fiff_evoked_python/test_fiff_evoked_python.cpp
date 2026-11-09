@@ -200,9 +200,9 @@ void TestFiffEvokedPython::readSelectors_matchPython()
                             FiffEvoked::read(path, 4),
                             FiffEvoked::read(path, -1)}) {
         QVERIFY(!bad);
-        QCOMPARE(bad.error().code, UTILSLIB::ErrorCode::NotFound);
+        QCOMPARE(bad.error().code, BASELIB::ErrorCode::NotFound);
     }
-    QVERIFY_THROWS_EXCEPTION(UTILSLIB::Error, FiffEvoked(path, "No such condition"));
+    QVERIFY_THROWS_EXCEPTION(BASELIB::Error, FiffEvoked(path, "No such condition"));
 }
 
 //=============================================================================================================
@@ -323,15 +323,15 @@ void TestFiffEvokedPython::readsAndSavesByPath()
     QCOMPARE(picked.evoked[0].comment, QString("Right visual"));
     QCOMPARE(picked.evoked[1].comment, m_set.evoked[0].comment);
     QVERIFY(picked.evoked[1].data.isApprox(back.evoked[0].data));
-    QCOMPARE(FiffEvokedSet::read(out, {0, 4}).error().code, UTILSLIB::ErrorCode::NotFound);
+    QCOMPARE(FiffEvokedSet::read(out, {0, 4}).error().code, BASELIB::ErrorCode::NotFound);
 
     const std::string missing = dir.filePath("missing-ave.fif").toStdString();
-    QCOMPARE(FiffEvokedSet::read(missing).error().code, UTILSLIB::ErrorCode::Io);
-    QCOMPARE(FiffEvoked::read(missing).error().code, UTILSLIB::ErrorCode::Io);
-    QVERIFY_THROWS_EXCEPTION(UTILSLIB::Error, FiffEvokedSet{missing});
+    QCOMPARE(FiffEvokedSet::read(missing).error().code, BASELIB::ErrorCode::Io);
+    QCOMPARE(FiffEvoked::read(missing).error().code, BASELIB::ErrorCode::Io);
+    QVERIFY_THROWS_EXCEPTION(BASELIB::Error, FiffEvokedSet{missing});
     const auto covariance = FiffEvokedSet::read(QString(avePath()).replace("-ave.fif", "-cov.fif").toStdU16String());
-    QCOMPARE(covariance.error().code, UTILSLIB::ErrorCode::NotFound);
-    QCOMPARE(m_set.save(dir.filePath("no/dir/set-ave.fif").toStdString()).error().code, UTILSLIB::ErrorCode::Io);
+    QCOMPARE(covariance.error().code, BASELIB::ErrorCode::NotFound);
+    QCOMPARE(m_set.save(dir.filePath("no/dir/set-ave.fif").toStdString()).error().code, BASELIB::ErrorCode::Io);
 }
 
 //=============================================================================================================

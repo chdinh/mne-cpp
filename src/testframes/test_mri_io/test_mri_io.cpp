@@ -23,7 +23,7 @@
 // INCLUDES
 //=============================================================================================================
 
-#include <utils/logger/log.h>
+#include <base/log.h>
 
 #include <mri/mri_types.h>
 #include <mri/mri_vol_data.h>
@@ -67,7 +67,6 @@
 
 using namespace MRILIB;
 using namespace FIFFLIB;
-using namespace UTILSLIB;
 using namespace Eigen;
 
 //=============================================================================================================
@@ -252,7 +251,7 @@ QString TestMriIO::findSubjectsDir()
 
 void TestMriIO::initTestCase()
 {
-    UTILSLIB::Log::install_qt_message_handler();
+    BASELIB::Log::install_qt_message_handler();
 
     QVERIFY(m_tempDir.isValid());
 

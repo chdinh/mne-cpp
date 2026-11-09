@@ -15,7 +15,7 @@
 //=============================================================================================================
 
 #include "fs_surface.h"
-#include <utils/logger/log.h>
+#include <base/log.h>
 #include <fiff/fiff_byte_swap.h>
 
 #include <iostream>
@@ -24,7 +24,7 @@
 // QT INCLUDES
 //=============================================================================================================
 
-#include <utils/string_utils.h>
+#include <base/string_utils.h>
 
 #include <format>
 
@@ -34,7 +34,7 @@
 
 using namespace FSLIB;
 using namespace Eigen;
-using namespace UTILSLIB;
+using namespace BASELIB;
 
 //=============================================================================================================
 // DEFINE MEMBER METHODS

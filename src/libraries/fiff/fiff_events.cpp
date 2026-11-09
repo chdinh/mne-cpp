@@ -33,7 +33,7 @@
 // QT INCLUDES
 //=============================================================================================================
 
-#include <utils/string_utils.h>
+#include <base/string_utils.h>
 
 
 #include <algorithm>
@@ -54,9 +54,9 @@
 using namespace FIFFLIB;
 using namespace Eigen;
 
-using UTILSLIB::ErrorCode;
-using UTILSLIB::Expected;
-using UTILSLIB::fail;
+using BASELIB::ErrorCode;
+using BASELIB::Expected;
+using BASELIB::fail;
 
 namespace
 {
@@ -73,7 +73,7 @@ std::string padded(const std::string& text, int width)
 
 bool isFif(const std::filesystem::path& path)
 {
-    return UTILSLIB::utf8FromPath(path.filename()).find(".fif") != std::string::npos;
+    return BASELIB::utf8FromPath(path.filename()).find(".fif") != std::string::npos;
 }
 
 } // namespace
@@ -104,7 +104,7 @@ Expected<FiffEvents> FiffEvents::read_fif(const std::filesystem::path& path)
     }
     const std::vector<std::shared_ptr<FiffDirNode>> blocks = stream->dirtree()->dir_tree_find(FIFFB_MNE_EVENTS);
     if (blocks.empty()) {
-        return fail(ErrorCode::NotFound, "{} holds no events", UTILSLIB::utf8FromPath(path));
+        return fail(ErrorCode::NotFound, "{} holds no events", BASELIB::utf8FromPath(path));
     }
     for (const FiffDirEntry& entry : blocks.front()->dir) {
         if (entry.kind != FIFF_MNE_EVENT_LIST) {
@@ -118,7 +118,7 @@ Expected<FiffEvents> FiffEvents::read_fif(const std::filesystem::path& path)
         const Eigen::Index rows = tag->size() / 12;
         return FiffEvents(Eigen::Map<const Eigen::Matrix<int, Eigen::Dynamic, 3, Eigen::RowMajor>>(reinterpret_cast<const int*>(tag->data()), rows, 3));
     }
-    return fail(ErrorCode::NotFound, "{} holds no event list", UTILSLIB::utf8FromPath(path));
+    return fail(ErrorCode::NotFound, "{} holds no event list", BASELIB::utf8FromPath(path));
 }
 
 //=============================================================================================================
@@ -127,7 +127,7 @@ Expected<FiffEvents> FiffEvents::read_ascii(const std::filesystem::path& path)
 {
     std::ifstream file(path);
     if (!file) {
-        return fail(ErrorCode::Io, "cannot read {}", UTILSLIB::utf8FromPath(path));
+        return fail(ErrorCode::Io, "cannot read {}", BASELIB::utf8FromPath(path));
     }
     std::vector<Eigen::RowVector3i> rows;
     std::string line;
@@ -141,11 +141,11 @@ Expected<FiffEvents> FiffEvents::read_ascii(const std::filesystem::path& path)
             continue;
         const std::size_t offset = fields.size() >= 4 ? 1 : 0;
         const auto field = [&fields](std::size_t i) {
-            return i < fields.size() ? UTILSLIB::toInt(fields[i]) : std::optional<int>(0);
+            return i < fields.size() ? BASELIB::toInt(fields[i]) : std::optional<int>(0);
         };
         const std::optional<int> sample = field(0), before = field(1 + offset), after = field(2 + offset);
         if (!sample || !before || !after) {
-            return fail(ErrorCode::Format, "{} line {} is not 'sample [time] before after': {}", UTILSLIB::utf8FromPath(path), number, line);
+            return fail(ErrorCode::Format, "{} line {} is not 'sample [time] before after': {}", BASELIB::utf8FromPath(path), number, line);
         }
         rows.emplace_back(*sample, *before, *after);
     }
@@ -169,11 +169,11 @@ Expected<void> FiffEvents::write(const std::filesystem::path& path, float sfreq)
 Expected<void> FiffEvents::write_fif(const std::filesystem::path& path) const
 {
     if (events.rows() == 0 || events.cols() < 3) {
-        return fail(ErrorCode::Format, "no events to write to {}", UTILSLIB::utf8FromPath(path));
+        return fail(ErrorCode::Format, "no events to write to {}", BASELIB::utf8FromPath(path));
     }
     auto stream = FiffStream::start_file(path);
     if (!stream) {
-        return fail(ErrorCode::Io, "cannot write {}", UTILSLIB::utf8FromPath(path));
+        return fail(ErrorCode::Io, "cannot write {}", BASELIB::utf8FromPath(path));
     }
     // FIFF stores the list row by row (sample, before, after).
     const Eigen::Matrix<int, Eigen::Dynamic, 3, Eigen::RowMajor> rows = events.leftCols(3);
@@ -191,7 +191,7 @@ Expected<void> FiffEvents::write_ascii(const std::filesystem::path& path, float 
 {
     std::ofstream out(path);
     if (!out) {
-        return fail(ErrorCode::Io, "cannot write {}", UTILSLIB::utf8FromPath(path));
+        return fail(ErrorCode::Io, "cannot write {}", BASELIB::utf8FromPath(path));
     }
     for (Eigen::Index k = 0; k < events.rows(); ++k) {
         const int sample = events(k, 0);
@@ -206,7 +206,7 @@ Expected<void> FiffEvents::write_ascii(const std::filesystem::path& path, float 
             << padded(std::to_string(after), 3) << '\n';
     }
     if (!out.flush()) {
-        return fail(ErrorCode::Io, "cannot write {}", UTILSLIB::utf8FromPath(path));
+        return fail(ErrorCode::Io, "cannot write {}", BASELIB::utf8FromPath(path));
     }
     return {};
 }

@@ -39,7 +39,7 @@ using namespace SCSHAREDLIB;
 using namespace SCMEASLIB;
 using namespace FIFFLIB;
 using namespace Eigen;
-using namespace UTILSLIB;
+using namespace BASELIB;
 
 //=============================================================================================================
 // DEFINE MEMBER METHODS
@@ -195,7 +195,7 @@ bool Natus::start()
 {
     // Init circular buffer to transmit data from the producer to this thread
     if (!m_pCircularBuffer) {
-        m_pCircularBuffer = std::make_shared<CircularBuffer_Matrix_double>(10);
+        m_pCircularBuffer = std::make_shared<BASELIB::CircularBuffer<Eigen::MatrixXd>>(10);
     }
 
     //Setup fiff info before setting up the RMTSA because we need it to init the RTMSA

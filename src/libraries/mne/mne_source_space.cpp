@@ -22,7 +22,7 @@
 //=============================================================================================================
 
 #include "mne_source_space.h"
-#include <utils/logger/log.h>
+#include <base/log.h>
 
 #include <vector>
 #include <utility>
@@ -104,7 +104,7 @@ int read_int3(QFile& in, int& ival)
     unsigned int s = 0;
 
     if (in.read(reinterpret_cast<char*>(&s), 3) != 3) {
-        UTILSLIB::Log::critical("read_int3 could not read data");
+        BASELIB::Log::critical("read_int3 could not read data");
         return FAIL;
     }
     s = static_cast<unsigned int>(FIFFLIB::swap_int(s));
@@ -119,7 +119,7 @@ int read_int(QFile& in, qint32& ival)
 {
     qint32 s;
     if (in.read(reinterpret_cast<char*>(&s), sizeof(qint32)) != static_cast<qint64>(sizeof(qint32))) {
-        UTILSLIB::Log::critical("read_int could not read data");
+        BASELIB::Log::critical("read_int could not read data");
         return FAIL;
     }
     ival = FIFFLIB::swap_int(s);
@@ -133,7 +133,7 @@ int read_int2(QFile& in, int& ival)
 {
     short s;
     if (in.read(reinterpret_cast<char*>(&s), sizeof(short)) != static_cast<qint64>(sizeof(short))) {
-        UTILSLIB::Log::critical("read_int2 could not read data");
+        BASELIB::Log::critical("read_int2 could not read data");
         return FAIL;
     }
     ival = FIFFLIB::swap_short(s);
@@ -147,7 +147,7 @@ int read_float(QFile& in, float& fval)
 {
     float f;
     if (in.read(reinterpret_cast<char*>(&f), sizeof(float)) != static_cast<qint64>(sizeof(float))) {
-        UTILSLIB::Log::critical("read_float could not read data");
+        BASELIB::Log::critical("read_float could not read data");
         return FAIL;
     }
     fval = FIFFLIB::swap_float(f);
@@ -161,7 +161,7 @@ int read_long(QFile& in, long long& lval)
 {
     long long s;
     if (in.read(reinterpret_cast<char*>(&s), sizeof(long long)) != static_cast<qint64>(sizeof(long long))) {
-        UTILSLIB::Log::critical("read_long could not read data");
+        BASELIB::Log::critical("read_long could not read data");
         return FAIL;
     }
     lval = FIFFLIB::swap_long(s);
@@ -175,7 +175,7 @@ int read_long(QFile& in, long long& lval)
 int check_vertex(int no, int maxno)
 {
     if (no < 0 || no > maxno - 1) {
-        UTILSLIB::Log::critical("Illegal vertex number {} (max {}).", no, maxno);
+        BASELIB::Log::critical("Illegal vertex number {} (max {}).", no, maxno);
         return FAIL;
     }
     return OK;
@@ -302,7 +302,7 @@ int read_tag_data(QFile& fp, int tag, long long nbytes, QByteArray& val, long lo
     if (nbytes > 0) {
         val = fp.read(nbytes);
         if (val.size() != nbytes) {
-            UTILSLIB::Log::critical("Failed to read {} bytes of tag data", static_cast<int>(nbytes));
+            BASELIB::Log::critical("Failed to read {} bytes of tag data", static_cast<int>(nbytes));
             return FAIL;
         }
         nbytesp = nbytes;
@@ -347,7 +347,7 @@ int read_tag_data(QFile& fp, int tag, long long nbytes, QByteArray& val, long lo
             val = QByteArray(reinterpret_cast<const char*>(&useRealRas), sizeof(int));
             nbytesp = sizeof(int);
         } else {
-            UTILSLIB::Log::warning("Encountered an unknown tag with no length specification : {}", tag);
+            BASELIB::Log::warning("Encountered an unknown tag with no length specification : {}", tag);
             nbytesp = 0;
         }
     }
@@ -454,12 +454,12 @@ int read_curvature_file(const std::filesystem::path& fname,
     float fval = 0.0f;
 
     if (!fp.open(QIODevice::ReadOnly)) {
-        UTILSLIB::Log::critical("{}", UTILSLIB::utf8FromPath(fname));
+        BASELIB::Log::critical("{}", BASELIB::utf8FromPath(fname));
         curv.resize(0);
         return FAIL;
     }
     if (read_int3(fp, magic) != 0) {
-        UTILSLIB::Log::critical("Bad magic in {}", UTILSLIB::utf8FromPath(fname));
+        BASELIB::Log::critical("Bad magic in {}", BASELIB::utf8FromPath(fname));
         curv.resize(0);
         return FAIL;
     }
@@ -476,14 +476,14 @@ int read_curvature_file(const std::filesystem::path& fname,
             return FAIL;
         }
 #ifdef DEBUG
-        UTILSLIB::Log::info("nvert = {} nface = {}\n", ncurv, nface);
+        BASELIB::Log::info("nvert = {} nface = {}\n", ncurv, nface);
 #endif
         if (read_int(fp, val_pervert) != 0) {
             curv.resize(0);
             return FAIL;
         }
         if (val_pervert != 1) {
-            UTILSLIB::Log::critical("Values per vertex not equal to one.");
+            BASELIB::Log::critical("Values per vertex not equal to one.");
             curv.resize(0);
             return FAIL;
         }
@@ -513,7 +513,7 @@ int read_curvature_file(const std::filesystem::path& fname,
             return FAIL;
         }
 #ifdef DEBUG
-        UTILSLIB::Log::info("nvert = {} nface = {}\n", ncurv, nface);
+        BASELIB::Log::info("nvert = {} nface = {}\n", ncurv, nface);
 #endif
         /*
  * Read the curvature values
@@ -533,7 +533,7 @@ int read_curvature_file(const std::filesystem::path& fname,
         }
     }
 #ifdef DEBUG
-    UTILSLIB::Log::info("Curvature range: {:f}...{:f}\n", curvmin, curvmax);
+    BASELIB::Log::info("Curvature range: {:f}...{:f}\n", curvmin, curvmax);
 #endif
     return OK;
 }
@@ -563,27 +563,27 @@ int read_triangle_file(const std::filesystem::path& fname,
     int which;
 
     if (!fp.open(QIODevice::ReadOnly)) {
-        UTILSLIB::Log::critical("{}", UTILSLIB::utf8FromPath(fname));
+        BASELIB::Log::critical("{}", BASELIB::utf8FromPath(fname));
         return FAIL;
     }
     if (read_int3(fp, magic) != 0) {
-        UTILSLIB::Log::critical("Bad magic in {}", UTILSLIB::utf8FromPath(fname));
+        BASELIB::Log::critical("Bad magic in {}", BASELIB::utf8FromPath(fname));
         return FAIL;
     }
     if (magic != TRIANGLE_FILE_MAGIC_NUMBER &&
         magic != QUAD_FILE_MAGIC_NUMBER &&
         magic != NEW_QUAD_FILE_MAGIC_NUMBER) {
-        UTILSLIB::Log::critical("Bad magic in {}", UTILSLIB::utf8FromPath(fname));
+        BASELIB::Log::critical("Bad magic in {}", BASELIB::utf8FromPath(fname));
         return FAIL;
     }
     if (magic == TRIANGLE_FILE_MAGIC_NUMBER) {
         /*
      * Get the comment
      */
-        UTILSLIB::Log::info("Triangle file : ");
+        BASELIB::Log::info("Triangle file : ");
         for (fp.getChar(&c); c != '\n'; fp.getChar(&c)) {
             if (fp.atEnd()) {
-                UTILSLIB::Log::critical("Bad triangle file.");
+                BASELIB::Log::critical("Bad triangle file.");
                 return FAIL;
             }
             putc(c, stderr);
@@ -596,7 +596,7 @@ int read_triangle_file(const std::filesystem::path& fname,
             return FAIL;
         if (read_int(fp, ntri) != 0)
             return FAIL;
-        UTILSLIB::Log::info(" nvert = {} ntri = {}\n", nvert, ntri);
+        BASELIB::Log::info(" nvert = {} ntri = {}\n", nvert, ntri);
         vert.resize(nvert, 3);
         tri.resize(ntri, 3);
         /*
@@ -633,7 +633,7 @@ int read_triangle_file(const std::filesystem::path& fname,
             return FAIL;
         if (read_int3(fp, nquad) != 0)
             return FAIL;
-        UTILSLIB::Log::info("{} file : nvert = {} nquad = {}\n", magic == QUAD_FILE_MAGIC_NUMBER ? "Quad" : "New quad", nvert, nquad);
+        BASELIB::Log::info("{} file : nvert = {} nquad = {}\n", magic == QUAD_FILE_MAGIC_NUMBER ? "Quad" : "New quad", nvert, nquad);
         vert.resize(nvert, 3);
         if (magic == QUAD_FILE_MAGIC_NUMBER) {
             for (k = 0; k < nvert; k++) {
@@ -934,7 +934,7 @@ int MNESourceSpace::transform_source_space(const FiffCoordTrans& t)
     if (coord_frame == t.to)
         return OK;
     if (coord_frame != t.from) {
-        UTILSLIB::Log::critical("Coordinate transformation does not match with the source space coordinate system.");
+        BASELIB::Log::critical("Coordinate transformation does not match with the source space coordinate system.");
         return FAIL;
     }
     for (k = 0; k < np; k++) {
@@ -958,13 +958,13 @@ int MNESourceSpace::add_patch_stats()
     std::vector<std::optional<MNEPatchInfo>> pinfo(nuse);
     int nave, p, q, k;
 
-    UTILSLIB::Log::info("Computing patch statistics...\n");
+    BASELIB::Log::info("Computing patch statistics...\n");
     if (neighbor_tri.empty())
         if (add_geometry_info(false) != OK)
             return FAIL;
 
     if (nearest.empty()) {
-        UTILSLIB::Log::critical("The patch information is not available.");
+        BASELIB::Log::critical("The patch information is not available.");
         return FAIL;
     }
     if (nuse == 0) {
@@ -974,7 +974,7 @@ int MNESourceSpace::add_patch_stats()
     /*
        * Calculate the average normals and the patch areas
        */
-    UTILSLIB::Log::info("\tareas, average normals, and mean deviations...");
+    BASELIB::Log::info("\tareas, average normals, and mean deviations...");
     std::sort(nearest.begin(), nearest.end(),
               [](const MNENearest& a, const MNENearest& b) { return a.nearest < b.nearest; });
     nearest_data = nearest.data(); // refresh after sort
@@ -982,7 +982,7 @@ int MNESourceSpace::add_patch_stats()
     for (p = 1, q = 0; p < np; p++) {
         if (nearest_data[p].nearest != nearest_data[p - 1].nearest) {
             if (nave == 0) {
-                UTILSLIB::Log::critical("No vertices belong to the patch of vertex {}", nearest_data[p - 1].nearest);
+                BASELIB::Log::critical("No vertices belong to the patch of vertex {}", nearest_data[p - 1].nearest);
                 return FAIL;
             }
             if (q < nuse && vertno[q] == nearest_data[p - 1].nearest) { /* Some source space points may have been omitted since
@@ -1004,7 +1004,7 @@ int MNESourceSpace::add_patch_stats()
         nave++;
     }
     if (nave == 0) {
-        UTILSLIB::Log::critical("No vertices belong to the patch of vertex {}", nearest_data[p - 1].nearest);
+        BASELIB::Log::critical("No vertices belong to the patch of vertex {}", nearest_data[p - 1].nearest);
         return FAIL;
     }
     if (q < nuse && vertno[q] == nearest_data[p - 1].nearest) {
@@ -1020,7 +1020,7 @@ int MNESourceSpace::add_patch_stats()
         pinfo[q]->calculate_normal_stats(this);
         q++;
     }
-    UTILSLIB::Log::info(" {}/{} [done]\n", q, nuse);
+    BASELIB::Log::info(" {}/{} [done]\n", q, nuse);
 
     patches = std::move(pinfo);
 
@@ -1131,7 +1131,7 @@ std::unique_ptr<MNESourceSpace> MNESourceSpace::load_surface_geom(const std::fil
         if (read_curvature_file(curv_file, curvs) == -1)
             return nullptr;
         if (curvs.size() != verts.rows()) {
-            UTILSLIB::Log::critical("Incorrect number of vertices in the curvature file.");
+            BASELIB::Log::critical("Incorrect number of vertices in the curvature file.");
             return nullptr;
         }
     }
@@ -1218,9 +1218,9 @@ std::unique_ptr<MNESourceSpace> MNESourceSpace::make_volume_source_space(const M
         if (dist > maxdist)
             maxdist = dist;
     }
-    UTILSLIB::Log::info("FsSurface CM = ({:6.1f} {:6.1f} {:6.1f}) mm\n", 1000 * cm[X], 1000 * cm[Y], 1000 * cm[Z]);
-    UTILSLIB::Log::info("FsSurface fits inside a sphere with radius {:6.1f} mm\n", 1000 * maxdist);
-    UTILSLIB::Log::info("FsSurface extent:\n\tx = {:6.1f} ... {:6.1f} mm\n\ty = {:6.1f} ... {:6.1f} mm\n\tz = {:6.1f} ... {:6.1f} mm\n", 1000 * minV[X], 1000 * maxV[X], 1000 * minV[Y], 1000 * maxV[Y], 1000 * minV[Z], 1000 * maxV[Z]);
+    BASELIB::Log::info("FsSurface CM = ({:6.1f} {:6.1f} {:6.1f}) mm\n", 1000 * cm[X], 1000 * cm[Y], 1000 * cm[Z]);
+    BASELIB::Log::info("FsSurface fits inside a sphere with radius {:6.1f} mm\n", 1000 * maxdist);
+    BASELIB::Log::info("FsSurface extent:\n\tx = {:6.1f} ... {:6.1f} mm\n\ty = {:6.1f} ... {:6.1f} mm\n\tz = {:6.1f} ... {:6.1f} mm\n", 1000 * minV[X], 1000 * maxV[X], 1000 * minV[Y], 1000 * maxV[Y], 1000 * minV[Z], 1000 * maxV[Z]);
     for (c = 0; c < 3; c++) {
         if (maxV[c] > 0)
             maxn[c] = floor(std::fabs(maxV[c]) / grid) + 1;
@@ -1231,7 +1231,7 @@ std::unique_ptr<MNESourceSpace> MNESourceSpace::make_volume_source_space(const M
         else
             minn[c] = -floor(std::fabs(minV[c]) / grid) - 1;
     }
-    UTILSLIB::Log::info("Grid extent:\n\tx = {:6.1f} ... {:6.1f} mm\n\ty = {:6.1f} ... {:6.1f} mm\n\tz = {:6.1f} ... {:6.1f} mm\n", 1000 * (minn[0] * grid), 1000 * (maxn[0] * grid), 1000 * (minn[1] * grid), 1000 * (maxn[1] * grid), 1000 * (minn[2] * grid), 1000 * (maxn[2] * grid));
+    BASELIB::Log::info("Grid extent:\n\tx = {:6.1f} ... {:6.1f} mm\n\ty = {:6.1f} ... {:6.1f} mm\n\tz = {:6.1f} ... {:6.1f} mm\n", 1000 * (minn[0] * grid), 1000 * (maxn[0] * grid), 1000 * (minn[1] * grid), 1000 * (maxn[1] * grid), 1000 * (minn[2] * grid), 1000 * (maxn[2] * grid));
     /*
        * Now make the initial grid
        */
@@ -1341,7 +1341,7 @@ std::unique_ptr<MNESourceSpace> MNESourceSpace::make_volume_source_space(const M
             }
         }
     }
-    UTILSLIB::Log::info("{} sources before omitting any.\n", sp->nuse);
+    BASELIB::Log::info("{} sources before omitting any.\n", sp->nuse);
     /*
        * Exclude infeasible points
        */
@@ -1352,7 +1352,7 @@ std::unique_ptr<MNESourceSpace> MNESourceSpace::make_volume_source_space(const M
             sp->nuse--;
         }
     }
-    UTILSLIB::Log::info("{} sources after omitting infeasible sources.\n", sp->nuse);
+    BASELIB::Log::info("{} sources after omitting infeasible sources.\n", sp->nuse);
     {
         std::vector<std::unique_ptr<MNESourceSpace>> sp_vec;
         sp_vec.push_back(std::move(sp));
@@ -1361,7 +1361,7 @@ std::unique_ptr<MNESourceSpace> MNESourceSpace::make_volume_source_space(const M
         }
         sp = std::move(sp_vec[0]);
     }
-    UTILSLIB::Log::info("{} sources remaining after excluding the sources outside the surface and less than {:6.1f} mm inside.\n", sp->nuse, 1000 * mindist);
+    BASELIB::Log::info("{} sources remaining after excluding the sources outside the surface and less than {:6.1f} mm inside.\n", sp->nuse, 1000 * mindist);
     // vertno must list only the used points (MNE-C leaves it covering the full grid).
     {
         Eigen::VectorXi used(sp->nuse);
@@ -1373,7 +1373,7 @@ std::unique_ptr<MNESourceSpace> MNESourceSpace::make_volume_source_space(const M
     /*
        * Omit unused vertices from the neighborhoods
        */
-    UTILSLIB::Log::info("Adjusting the neighborhood info...");
+    BASELIB::Log::info("Adjusting the neighborhood info...");
     for (k = 0; k < sp->np; k++) {
         Eigen::VectorXi& neigh = sp->neighbor_vert[k];
         nneigh = sp->nneighbor_vert[k];
@@ -1386,7 +1386,7 @@ std::unique_ptr<MNESourceSpace> MNESourceSpace::make_volume_source_space(const M
                 neigh[c] = -1;
         }
     }
-    UTILSLIB::Log::info("[done]\n");
+    BASELIB::Log::info("[done]\n");
     /*
      * Set up the volume data (needed for creating the interpolation matrix)
      */
@@ -1429,23 +1429,23 @@ int MNESourceSpace::filter_source_spaces(const MNESurface& surf, float limit, co
     int nspace = static_cast<int>(spaces.size());
 
     if (spaces[0]->coord_frame == FIFFV_COORD_HEAD && mri_head_t.empty()) {
-        UTILSLIB::Log::critical("Source spaces are in head coordinates and no coordinate transform was provided!");
+        BASELIB::Log::critical("Source spaces are in head coordinates and no coordinate transform was provided!");
         return FAIL;
     }
     /*
         * How close are the source points to the surface?
         */
-    UTILSLIB::Log::info("Source spaces are in ");
+    BASELIB::Log::info("Source spaces are in ");
     if (spaces[0]->coord_frame == FIFFV_COORD_HEAD)
-        UTILSLIB::Log::info("head coordinates.\n");
+        BASELIB::Log::info("head coordinates.\n");
     else if (spaces[0]->coord_frame == FIFFV_COORD_MRI)
-        UTILSLIB::Log::info("MRI coordinates.\n");
+        BASELIB::Log::info("MRI coordinates.\n");
     else
-        UTILSLIB::Log::warning("unknown ({}) coordinates.\n", spaces[0]->coord_frame);
-    UTILSLIB::Log::info("Checking that the sources are inside the bounding surface ");
+        BASELIB::Log::warning("unknown ({}) coordinates.\n", spaces[0]->coord_frame);
+    BASELIB::Log::info("Checking that the sources are inside the bounding surface ");
     if (limit > 0.0)
-        UTILSLIB::Log::info("and at least {:6.1f} mm away", 1000 * limit);
-    UTILSLIB::Log::info(" (will take a few...)\n");
+        BASELIB::Log::info("and at least {:6.1f} mm away", 1000 * limit);
+    BASELIB::Log::info(" (will take a few...)\n");
     omit = 0;
     omit_outside = 0;
     for (k = 0; k < nspace; k++) {
@@ -1490,10 +1490,10 @@ int MNESourceSpace::filter_source_spaces(const MNESurface& surf, float limit, co
             }
     }
     if (omit_outside > 0)
-        UTILSLIB::Log::info("{} source space points omitted because they are outside the inner skull surface.\n", omit_outside);
+        BASELIB::Log::info("{} source space points omitted because they are outside the inner skull surface.\n", omit_outside);
     if (omit > 0)
-        UTILSLIB::Log::info("{} source space points omitted because of the {:6.1f}-mm distance limit.\n", omit, 1000 * limit);
-    UTILSLIB::Log::info("Thank you for waiting.\n");
+        BASELIB::Log::info("{} source space points omitted because of the {:6.1f}-mm distance limit.\n", omit, 1000 * limit);
+    BASELIB::Log::info("Thank you for waiting.\n");
     return OK;
 }
 
@@ -1559,9 +1559,9 @@ void MNESourceSpace::filter_source_space(FilterThreadArg* arg)
         }
     }
     if (omit_outside > 0)
-        UTILSLIB::Log::info("{} source space points omitted because they are outside the inner skull surface.\n", omit_outside);
+        BASELIB::Log::info("{} source space points omitted because they are outside the inner skull surface.\n", omit_outside);
     if (omit > 0)
-        UTILSLIB::Log::info("{} source space points omitted because of the {:6.1f}-mm distance limit.\n", omit, 1000 * a->limit);
+        BASELIB::Log::info("{} source space points omitted because of the {:6.1f}-mm distance limit.\n", omit, 1000 * a->limit);
     a->stat = OK;
     return;
 }
@@ -1584,7 +1584,7 @@ int MNESourceSpace::filter_source_spaces(float limit, const std::filesystem::pat
     {
         auto rawSurf = MNESurface::read_bem_surface(bemfile, FIFFV_BEM_SURF_ID_BRAIN, false);
         if (!rawSurf) {
-            UTILSLIB::Log::critical("BEM model does not have the inner skull triangulation!");
+            BASELIB::Log::critical("BEM model does not have the inner skull triangulation!");
             return FAIL;
         }
         surf.reset(rawSurf.release());
@@ -1592,17 +1592,17 @@ int MNESourceSpace::filter_source_spaces(float limit, const std::filesystem::pat
     /*
      * How close are the source points to the surface?
      */
-    UTILSLIB::Log::info("Source spaces are in ");
+    BASELIB::Log::info("Source spaces are in ");
     if (spaces[0]->coord_frame == FIFFV_COORD_HEAD)
-        UTILSLIB::Log::info("head coordinates.\n");
+        BASELIB::Log::info("head coordinates.\n");
     else if (spaces[0]->coord_frame == FIFFV_COORD_MRI)
-        UTILSLIB::Log::info("MRI coordinates.\n");
+        BASELIB::Log::info("MRI coordinates.\n");
     else
-        UTILSLIB::Log::warning("unknown ({}) coordinates.\n", spaces[0]->coord_frame);
-    UTILSLIB::Log::info("Checking that the sources are inside the inner skull ");
+        BASELIB::Log::warning("unknown ({}) coordinates.\n", spaces[0]->coord_frame);
+    BASELIB::Log::info("Checking that the sources are inside the inner skull ");
     if (limit > 0.0)
-        UTILSLIB::Log::info("and at least {:6.1f} mm away", 1000 * limit);
-    UTILSLIB::Log::info(" (will take a few...)\n");
+        BASELIB::Log::info("and at least {:6.1f} mm away", 1000 * limit);
+    BASELIB::Log::info(" (will take a few...)\n");
     if (nproc < 2 || nspace == 1 || !use_threads) {
         /*
         * This is the conventional calculation
@@ -1643,7 +1643,7 @@ int MNESourceSpace::filter_source_spaces(float limit, const std::filesystem::pat
             spaces[k]->rearrange_source_space();
         }
     }
-    UTILSLIB::Log::info("Thank you for waiting.\n\n");
+    BASELIB::Log::info("Thank you for waiting.\n\n");
 
     return OK;
 }
@@ -1673,7 +1673,7 @@ int MNESourceSpace::read_source_spaces(const std::filesystem::path& name, std::v
 
     sources = stream.dirtree()->dir_tree_find(FIFFB_MNE_SOURCE_SPACE);
     if (sources.size() == 0) {
-        UTILSLIB::Log::critical("No source spaces available here");
+        BASELIB::Log::critical("No source spaces available here");
         stream.close();
         return FIFF_FAIL;
     }
@@ -1689,7 +1689,7 @@ int MNESourceSpace::read_source_spaces(const std::filesystem::path& name, std::v
         }
         new_space->np = *t_pTag->toInt();
         if (new_space->np == 0) {
-            UTILSLIB::Log::critical("No points in this source space");
+            BASELIB::Log::critical("No points in this source space");
             stream.close();
             return FIFF_FAIL;
         }
@@ -1855,14 +1855,14 @@ int MNESourceSpace::read_source_spaces(const std::filesystem::path& name, std::v
             }
             if (neighborsVec.size() > 0 && nneighborsVec.size() > 0) {
                 if (nvert != new_space->np) {
-                    UTILSLIB::Log::critical("Inconsistent neighborhood data in file.");
+                    BASELIB::Log::critical("Inconsistent neighborhood data in file.");
                     stream.close();
                     return FIFF_FAIL;
                 }
                 for (k = 0, ntot_count = 0; k < nvert; k++)
                     ntot_count += nneighborsVec[k];
                 if (ntot_count != ntot) {
-                    UTILSLIB::Log::critical("Inconsistent neighborhood data in file.");
+                    BASELIB::Log::critical("Inconsistent neighborhood data in file.");
                     stream.close();
                     return FIFF_FAIL;
                 }
@@ -1950,11 +1950,11 @@ int MNESourceSpace::transform_source_spaces_to(int coord_frame, const FiffCoordT
                         return FAIL;
                     }
                 } else {
-                    UTILSLIB::Log::critical("Could not transform a source space because of transformation incompatibility.");
+                    BASELIB::Log::critical("Could not transform a source space because of transformation incompatibility.");
                     return FAIL;
                 }
             } else {
-                UTILSLIB::Log::critical("Could not transform a source space because of missing coordinate transformation.");
+                BASELIB::Log::critical("Could not transform a source space because of missing coordinate transformation.");
                 return FAIL;
             }
         }
@@ -2001,7 +2001,7 @@ int MNESourceSpace::restrict_sources_to_labels(std::vector<std::unique_ptr<MNESo
         /*
          * Which hemi?
          */
-        const std::string labelName = UTILSLIB::utf8FromPath(labels[k]);
+        const std::string labelName = BASELIB::utf8FromPath(labels[k]);
         if (labelName.find(LH_LABEL_TAG) != std::string::npos) { //strstr(labels[k],LH_LABEL_TAG) != NULL) {
             sp = lh;
             inuse = &lh_inuse;
@@ -2009,7 +2009,7 @@ int MNESourceSpace::restrict_sources_to_labels(std::vector<std::unique_ptr<MNESo
             sp = rh;
             inuse = &rh_inuse;
         } else {
-            UTILSLIB::Log::warning("\tWarning: cannot assign label file {} to a hemisphere.\n", UTILSLIB::utf8FromPath(labels[k]));
+            BASELIB::Log::warning("\tWarning: cannot assign label file {} to a hemisphere.\n", BASELIB::utf8FromPath(labels[k]));
             continue;
         }
         if (sp) {
@@ -2019,9 +2019,9 @@ int MNESourceSpace::restrict_sources_to_labels(std::vector<std::unique_ptr<MNESo
                 if (sel[p] >= 0 && sel[p] < sp->np)
                     (*inuse)[sel[p]] = sp->inuse[sel[p]];
                 else
-                    UTILSLIB::Log::warning("vertex number out of range in {} ({} vs {})\n", UTILSLIB::utf8FromPath(labels[k]), sel[p], sp->np);
+                    BASELIB::Log::warning("vertex number out of range in {} ({} vs {})\n", BASELIB::utf8FromPath(labels[k]), sel[p], sp->np);
             }
-            UTILSLIB::Log::info("Processed label file {}\n", UTILSLIB::utf8FromPath(labels[k]));
+            BASELIB::Log::info("Processed label file {}\n", BASELIB::utf8FromPath(labels[k]));
         }
     }
     if (lh)
@@ -2046,13 +2046,13 @@ int MNESourceSpace::read_label(const std::filesystem::path& label, Eigen::Vector
        */
     QFile inFile(label);
     if (!inFile.open(QIODevice::ReadOnly | QIODevice::Text)) {
-        UTILSLIB::Log::critical("{}", UTILSLIB::utf8FromPath(label)); //err_set_sys_error(label);
+        BASELIB::Log::critical("{}", BASELIB::utf8FromPath(label)); //err_set_sys_error(label);
         sel.resize(0);
         return FAIL;
     }
     inFile.getChar(&c);
     if (c != '#') {
-        UTILSLIB::Log::critical("FsLabel file does not start correctly.");
+        BASELIB::Log::critical("FsLabel file does not start correctly.");
         sel.resize(0);
         return FAIL;
     }
@@ -2065,7 +2065,7 @@ int MNESourceSpace::read_label(const std::filesystem::path& label, Eigen::Vector
         QTextStream in(&inFile);
         in >> nlabel;
         if (in.status() != QTextStream::Ok) {
-            UTILSLIB::Log::critical("Could not read the number of labelled points.");
+            BASELIB::Log::critical("Could not read the number of labelled points.");
             sel.resize(0);
             return FAIL;
         }
@@ -2073,7 +2073,7 @@ int MNESourceSpace::read_label(const std::filesystem::path& label, Eigen::Vector
         for (k = 0; k < nlabel; k++) {
             in >> p >> fdum >> fdum >> fdum >> fdum;
             if (in.status() != QTextStream::Ok) {
-                UTILSLIB::Log::critical("Could not read label point # {}", k + 1);
+                BASELIB::Log::critical("Could not read label point # {}", k + 1);
                 sel.resize(0);
                 return FAIL;
             }
@@ -2161,7 +2161,7 @@ int MNESourceSpace::writeVolumeInfo(FiffStream& stream, bool selected_only) cons
     } else {
         if (interpolator && !MRI_volume.empty()) {
             stream.write_string(FIFF_MNE_SOURCE_SPACE_MRI_FILE, MRI_volume);
-            UTILSLIB::Log::critical("Cannot write the interpolator for selection yet");
+            BASELIB::Log::critical("Cannot write the interpolator for selection yet");
             return FAIL;
         }
     }
@@ -2175,7 +2175,7 @@ int MNESourceSpace::writeToStream(FiffStream& stream, bool selected_only) const
     int p, pp;
 
     if (np <= 0) {
-        UTILSLIB::Log::critical("No points in the source space being saved");
+        BASELIB::Log::critical("No points in the source space being saved");
         return FIFF_FAIL;
     }
 
@@ -2193,7 +2193,7 @@ int MNESourceSpace::writeToStream(FiffStream& stream, bool selected_only) const
 
     if (selected_only) {
         if (nuse == 0) {
-            UTILSLIB::Log::critical("No vertices in use. Cannot write active-only vertices from this source space");
+            BASELIB::Log::critical("No vertices in use. Cannot write active-only vertices from this source space");
             return FIFF_FAIL;
         }
 
@@ -2333,10 +2333,10 @@ std::vector<Eigen::VectorXi> MNESourceSpace::gradeToVertices(const std::filesyst
     std::vector<Eigen::VectorXi> vertices;
     const int nIco = 10 * (1 << (2 * grade)) + 2;
     for (const char* hemi : {"lh", "rh"}) {
-        const std::filesystem::path path = subjectsDir / UTILSLIB::pathFromUtf8(subject) / "surf" / (std::string(hemi) + ".sphere.reg");
+        const std::filesystem::path path = subjectsDir / BASELIB::pathFromUtf8(subject) / "surf" / (std::string(hemi) + ".sphere.reg");
         const std::unique_ptr<MNESourceSpace> sphere = load_surface_geom(path, {}, false, false);
         if (!sphere) {
-            UTILSLIB::Log::warning("[MNESourceSpace::gradeToVertices] Cannot read {}", UTILSLIB::utf8FromPath(path));
+            BASELIB::Log::warning("[MNESourceSpace::gradeToVertices] Cannot read {}", BASELIB::utf8FromPath(path));
             return {};
         }
         MNEHemisphere h;
@@ -2344,7 +2344,7 @@ std::vector<Eigen::VectorXi> MNESourceSpace::gradeToVertices(const std::filesyst
         h.rr = sphere->rr;
         const MNEHemisphere down = icoDownsample(h, grade);
         if (down.nuse != nIco) {
-            UTILSLIB::Log::warning("[MNESourceSpace::gradeToVertices] Cannot use icosahedral grade {} with subject {} (repeated vertices); use a lower grade.", grade, subject);
+            BASELIB::Log::warning("[MNESourceSpace::gradeToVertices] Cannot use icosahedral grade {} with subject {} (repeated vertices); use a lower grade.", grade, subject);
             return {};
         }
         vertices.push_back(down.vertno);
@@ -2359,7 +2359,7 @@ MNEHemisphere MNESourceSpace::icoDownsample(const MNEHemisphere& hemi, int icoGr
     MNEHemisphere result(hemi);
 
     if (hemi.np <= 0 || hemi.rr.rows() == 0) {
-        UTILSLIB::Log::warning("MNESourceSpace::icoDownsample - Hemisphere has no vertices.");
+        BASELIB::Log::warning("MNESourceSpace::icoDownsample - Hemisphere has no vertices.");
         return result;
     }
 

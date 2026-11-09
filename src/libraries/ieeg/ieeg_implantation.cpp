@@ -18,7 +18,7 @@
 
 #include <bids/bids_coordinate_system.h>
 #include <bids/bids_electrode.h>
-#include <utils/string_utils.h>
+#include <base/string_utils.h>
 
 //=============================================================================================================
 // QT INCLUDES
@@ -81,7 +81,7 @@ NameParts splitName(const std::string& name)
     std::size_t prefixEnd = digits;
     while (prefixEnd > 0 && (isSpace(name[prefixEnd - 1]) || name[prefixEnd - 1] == '_' || name[prefixEnd - 1] == '-'))
         --prefixEnd;
-    return {true, name.substr(0, prefixEnd), UTILSLIB::toInt(std::string_view(name).substr(digits)).value_or(0)};
+    return {true, name.substr(0, prefixEnd), BASELIB::toInt(std::string_view(name).substr(digits)).value_or(0)};
 }
 
 // "[4x8]", "4 x 8" -> (4, 8)
@@ -98,7 +98,7 @@ std::optional<std::pair<int, int>> parseDimension(std::string_view text)
             ++i;
         if (i == start)
             return std::nullopt;
-        return UTILSLIB::toInt(text.substr(start, i - start)).value_or(0);
+        return BASELIB::toInt(text.substr(start, i - start)).value_or(0);
     };
     if (i < text.size() && text[i] == '[')
         ++i;
@@ -120,7 +120,7 @@ std::optional<std::pair<int, int>> parseDimension(std::string_view text)
 
 std::optional<float> toCoordinate(const QString& text)
 {
-    const std::optional<double> value = UTILSLIB::toDouble(UTILSLIB::trimmed(text.toStdString()));
+    const std::optional<double> value = BASELIB::toDouble(BASELIB::trimmed(text.toStdString()));
     if (!value || !std::isfinite(static_cast<float>(*value)))
         return std::nullopt;
     return static_cast<float>(*value);
@@ -128,7 +128,7 @@ std::optional<float> toCoordinate(const QString& text)
 
 bool endsWithIgnoreCase(const std::string& text, std::string_view suffix)
 {
-    return text.size() >= suffix.size() && UTILSLIB::equalsIgnoreCase(std::string_view(text).substr(text.size() - suffix.size()), suffix);
+    return text.size() >= suffix.size() && BASELIB::equalsIgnoreCase(std::string_view(text).substr(text.size() - suffix.size()), suffix);
 }
 
 void setError(std::string* error, std::string message)
@@ -182,16 +182,16 @@ IeegImplantation::IeegImplantation(const std::vector<IeegContact>& contacts, con
 
 IeegImplantation IeegImplantation::readBids(const std::string& electrodesTsv, std::string* error)
 {
-    const std::filesystem::path tsvPath = UTILSLIB::pathFromUtf8(electrodesTsv);
-    const std::string tsvName = UTILSLIB::utf8FromPath(tsvPath.filename());
+    const std::filesystem::path tsvPath = BASELIB::pathFromUtf8(electrodesTsv);
+    const std::string tsvName = BASELIB::utf8FromPath(tsvPath.filename());
     // The coordsystem sidecar sharing the longest name prefix, so sessions are never mixed
     std::vector<std::pair<std::string, std::string>> candidates; // (lower-case name, name), sorted like QDir
     std::error_code ec;
     for (const auto& entry : std::filesystem::directory_iterator(tsvPath.parent_path().empty() ? "." : tsvPath.parent_path(), ec)) {
         std::error_code typeError;
-        const std::string name = UTILSLIB::utf8FromPath(entry.path().filename());
+        const std::string name = BASELIB::utf8FromPath(entry.path().filename());
         if (entry.is_regular_file(typeError) && endsWithIgnoreCase(name, "_coordsystem.json"))
-            candidates.emplace_back(UTILSLIB::toLower(name), name);
+            candidates.emplace_back(BASELIB::toLower(name), name);
     }
     std::sort(candidates.begin(), candidates.end());
     std::string coordPath;
@@ -200,7 +200,7 @@ IeegImplantation IeegImplantation::readBids(const std::string& electrodesTsv, st
         const auto prefix = std::mismatch(candidate.begin(), candidate.end(), tsvName.begin(), tsvName.end()).first - candidate.begin();
         if (prefix > bestPrefix) {
             bestPrefix = prefix;
-            coordPath = UTILSLIB::utf8FromPath(tsvPath.parent_path() / UTILSLIB::pathFromUtf8(candidate));
+            coordPath = BASELIB::utf8FromPath(tsvPath.parent_path() / BASELIB::pathFromUtf8(candidate));
         }
     }
     if (coordPath.empty()) {
@@ -234,7 +234,7 @@ IeegImplantation IeegImplantation::readBids(const std::string& electrodesTsv, st
         // Declarations are per lead; contacts without a group take their lead from the name later
         const std::string key = contact.lead.empty() ? contact.name : contact.lead;
         if (!e.type.isEmpty())
-            declaredTypes.insert_or_assign(key, UTILSLIB::toLower(e.type.toStdString()));
+            declaredTypes.insert_or_assign(key, BASELIB::toLower(e.type.toStdString()));
         if (!e.dimension.isEmpty())
             declaredDimensions.insert_or_assign(key, e.dimension.toStdString());
         contacts.push_back(std::move(contact));
@@ -304,7 +304,7 @@ int IeegImplantation::indexOf(const std::string& name) const
 
 bool IeegImplantation::isScannerRas() const
 {
-    return UTILSLIB::equalsIgnoreCase(m_coordinateSystem, "ACPC") || UTILSLIB::equalsIgnoreCase(m_coordinateSystem, "ScanRAS");
+    return BASELIB::equalsIgnoreCase(m_coordinateSystem, "ACPC") || BASELIB::equalsIgnoreCase(m_coordinateSystem, "ScanRAS");
 }
 
 //=============================================================================================================

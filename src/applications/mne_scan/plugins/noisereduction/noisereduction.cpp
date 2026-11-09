@@ -20,7 +20,7 @@
 #include <memory>
 
 #include <vector>
-#include <utils/string_utils.h>
+#include <base/string_utils.h>
 
 #include <disp/viewers/scalingview.h>
 #include <disp/viewers/projectorsview.h>
@@ -65,7 +65,7 @@ NoiseReduction::NoiseReduction()
 , m_iMaxFilterLength(1)
 , m_iMaxFilterTapSize(-1)
 , m_sCurrentSystem("VectorView")
-, m_pCircularBuffer(std::make_shared<UTILSLIB::CircularBuffer_Matrix_double>(40))
+, m_pCircularBuffer(std::make_shared<BASELIB::CircularBuffer<Eigen::MatrixXd>>(40))
 , m_pNoiseReductionInput(nullptr)
 , m_pNoiseReductionOutput(nullptr)
 {
@@ -353,7 +353,7 @@ void NoiseReduction::run()
             if (m_bSpharaActive) {
                 //Set bad channels to zero so they do not get smeared into
                 for (int i = 0; i < static_cast<int>(m_pFiffInfo->bads.size()); ++i) {
-                    matData.row(UTILSLIB::indexOf(m_pFiffInfo->ch_names, m_pFiffInfo->bads.at(i))).setZero();
+                    matData.row(BASELIB::indexOf(m_pFiffInfo->ch_names, m_pFiffInfo->bads.at(i))).setZero();
                 }
 
                 matData = m_matSparseSpharaMult * matData;
@@ -412,7 +412,7 @@ void NoiseReduction::updateProjection(const std::vector<FIFFLIB::FiffProj>& proj
 
         //set columns of matrix to zero depending on bad channels indexes
         for (qint32 j = 0; j < static_cast<int>(m_pFiffInfo->bads.size()); ++j) {
-            int index = UTILSLIB::indexOf(m_pFiffInfo->ch_names, m_pFiffInfo->bads.at(j));
+            int index = BASELIB::indexOf(m_pFiffInfo->ch_names, m_pFiffInfo->bads.at(j));
             if (index >= 0 && index < static_cast<int>(m_pFiffInfo->ch_names.size())) {
                 matProj.col(index).setZero();
             }

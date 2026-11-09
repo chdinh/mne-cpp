@@ -18,7 +18,7 @@
 //=============================================================================================================
 
 #include "coherency.h"
-#include <utils/logger/log.h>
+#include <base/log.h>
 #include "coherence.h"
 #include "../network/networknode.h"
 #include "../network/networkedge.h"
@@ -63,7 +63,7 @@ Network Coherence::calculate(ConnectivitySettings& connectivitySettings)
     Network finalNetwork("COH");
 
     if (connectivitySettings.empty()) {
-        UTILSLIB::Log::debug("Coherence::calculate - Input data is empty");
+        BASELIB::Log::debug("Coherence::calculate - Input data is empty");
         return finalNetwork;
     }
 
@@ -82,7 +82,7 @@ Network Coherence::calculate(ConnectivitySettings& connectivitySettings)
         m_iNumberBinStart > iNFreqs ||
         m_iNumberBinAmount > iNFreqs ||
         m_iNumberBinAmount + m_iNumberBinStart > iNFreqs) {
-        UTILSLIB::Log::debug("Coherence::calculate - Resetting to full spectrum");
+        BASELIB::Log::debug("Coherence::calculate - Resetting to full spectrum");
         AbstractMetric::m_iNumberBinStart = 0;
         AbstractMetric::m_iNumberBinAmount = iNFreqs;
     }

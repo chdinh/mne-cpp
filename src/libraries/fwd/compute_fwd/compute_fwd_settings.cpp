@@ -15,7 +15,7 @@
 //=============================================================================================================
 
 #include "compute_fwd_settings.h"
-#include <utils/logger/log.h>
+#include <base/log.h>
 
 //=============================================================================================================
 // USED NAMESPACES
@@ -66,25 +66,25 @@ ComputeFwdSettings::~ComputeFwdSettings()
 bool ComputeFwdSettings::checkIntegrity() const
 {
     if (srcname.empty()) {
-        UTILSLIB::Log::critical("Source space name is missing. Use the --src option to specify it.");
+        BASELIB::Log::critical("Source space name is missing. Use the --src option to specify it.");
         return false;
     }
     if (!mri_head_ident) {
         if (mriname.empty() && transname.empty()) {
-            UTILSLIB::Log::critical("MRI <-> head coordinate transformation is missing. Use the --mri or --trans option to specify it.");
+            BASELIB::Log::critical("MRI <-> head coordinate transformation is missing. Use the --mri or --trans option to specify it.");
             return false;
         }
     }
     if (measname.empty()) {
-        UTILSLIB::Log::critical("Source of coil and electrode locations is missing. Use the --meas option to specify it.");
+        BASELIB::Log::critical("Source of coil and electrode locations is missing. Use the --meas option to specify it.");
         return false;
     }
     if (solname.empty()) {
-        UTILSLIB::Log::critical("Solution name is missing. Use the --fwd option to specify it.");
+        BASELIB::Log::critical("Solution name is missing. Use the --fwd option to specify it.");
         return false;
     }
     if (!(include_meg || include_eeg)) {
-        UTILSLIB::Log::critical("Employ the --meg and --eeg options to select MEG and/or EEG");
+        BASELIB::Log::critical("Employ the --meg and --eeg options to select MEG and/or EEG");
         return false;
     }
     return true;

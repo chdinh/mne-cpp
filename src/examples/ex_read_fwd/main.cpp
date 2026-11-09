@@ -20,7 +20,7 @@
 #include <mne/mne_forward_solution.h>
 #include <fs/fs_annotationset.h>
 #include <utils/ioutils.h>
-#include <utils/logger/log.h>
+#include <base/log.h>
 
 //=============================================================================================================
 // QT INCLUDES
@@ -54,7 +54,7 @@ using namespace FSLIB;
  */
 int main(int argc, char* argv[])
 {
-    UTILSLIB::Log::install_qt_message_handler();
+    BASELIB::Log::install_qt_message_handler();
     QCoreApplication app(argc, argv);
 
     // Command Line Parser

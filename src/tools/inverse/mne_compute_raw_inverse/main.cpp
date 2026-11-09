@@ -37,8 +37,8 @@
 
 #include <fs/fs_label.h>
 
-#include <utils/logger/log.h>
-#include <utils/string_utils.h>
+#include <base/log.h>
+#include <base/string_utils.h>
 
 //=============================================================================================================
 // QT INCLUDES
@@ -70,7 +70,7 @@ using namespace FIFFLIB;
 using namespace MNELIB;
 using namespace INVLIB;
 using namespace FSLIB;
-using namespace UTILSLIB;
+using namespace BASELIB;
 
 //=============================================================================================================
 // DEFINES
@@ -342,7 +342,7 @@ static InvSourceEstimate processLabelDir(const QString& labelDir,
  */
 int main(int argc, char* argv[])
 {
-    UTILSLIB::Log::install_qt_message_handler();
+    BASELIB::Log::install_qt_message_handler();
     QCoreApplication app(argc, argv);
     QCoreApplication::setApplicationName("mne_compute_raw_inverse");
     QCoreApplication::setApplicationVersion(PROGRAM_VERSION);

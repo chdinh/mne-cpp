@@ -71,6 +71,7 @@ target_link_libraries(${PROJECT_NAME} PUBLIC
     mne_analyze_studio_sdk
     mne_fiff
     mne_utils
+    mne_base
     mne_bids
     mne_fs
     Eigen3::Eigen

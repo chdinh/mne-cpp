@@ -24,7 +24,7 @@
 
 #include "fiff_dig_point_set.h"
 #include <memory>
-#include <utils/logger/log.h>
+#include <base/log.h>
 
 //=============================================================================================================
 // INCLUDES
@@ -35,7 +35,7 @@
 #include "fiff_tag.h"
 #include "fiff_types.h"
 
-#include <utils/string_utils.h>
+#include <base/string_utils.h>
 
 #include <algorithm>
 #include <optional>
@@ -70,7 +70,7 @@ FiffDigPointSet::FiffDigPointSet(const std::filesystem::path& path)
 
 //=============================================================================================================
 
-UTILSLIB::Expected<FiffDigPointSet> FiffDigPointSet::read(const std::filesystem::path& path)
+BASELIB::Expected<FiffDigPointSet> FiffDigPointSet::read(const std::filesystem::path& path)
 {
     auto stream = FiffStream::open(path);
     if (!stream) {
@@ -81,11 +81,11 @@ UTILSLIB::Expected<FiffDigPointSet> FiffDigPointSet::read(const std::filesystem:
 
 //=============================================================================================================
 
-UTILSLIB::Expected<FiffDigPointSet> FiffDigPointSet::read(FiffStream& stream)
+BASELIB::Expected<FiffDigPointSet> FiffDigPointSet::read(FiffStream& stream)
 {
     const bool openHere = !stream.isOpen();
     if (openHere && !stream.open()) {
-        return UTILSLIB::fail(UTILSLIB::ErrorCode::Io, "cannot open {}", stream.streamName());
+        return BASELIB::fail(BASELIB::ErrorCode::Io, "cannot open {}", stream.streamName());
     }
 
     FiffDigPointSet dig;
@@ -98,7 +98,7 @@ UTILSLIB::Expected<FiffDigPointSet> FiffDigPointSet::read(FiffStream& stream)
             }
             const std::optional<FiffTag> tag = stream.read_tag(entry.pos);
             if (!tag) {
-                return UTILSLIB::fail(UTILSLIB::ErrorCode::Format, "cannot read the digitizer tag at {}", entry.pos);
+                return BASELIB::fail(BASELIB::ErrorCode::Format, "cannot read the digitizer tag at {}", entry.pos);
             }
             if (entry.kind == FIFF_DIG_POINT) {
                 dig.m_points.push_back(tag->toDigPoint());
@@ -120,19 +120,19 @@ UTILSLIB::Expected<FiffDigPointSet> FiffDigPointSet::read(FiffStream& stream)
 
 //=============================================================================================================
 
-UTILSLIB::Expected<void> FiffDigPointSet::write(const std::filesystem::path& path) const
+BASELIB::Expected<void> FiffDigPointSet::write(const std::filesystem::path& path) const
 {
     if (path.empty()) {
-        return UTILSLIB::fail(UTILSLIB::ErrorCode::Io, "the output path is empty");
+        return BASELIB::fail(BASELIB::ErrorCode::Io, "the output path is empty");
     }
     std::error_code ec;
     const std::filesystem::path dir = path.has_parent_path() ? path.parent_path() : std::filesystem::path(".");
     if (!std::filesystem::is_directory(dir, ec)) {
-        return UTILSLIB::fail(UTILSLIB::ErrorCode::NotFound, "the directory {} does not exist", UTILSLIB::utf8FromPath(dir));
+        return BASELIB::fail(BASELIB::ErrorCode::NotFound, "the directory {} does not exist", BASELIB::utf8FromPath(dir));
     }
     auto stream = FiffStream::start_file(path);
     if (!stream) {
-        return UTILSLIB::fail(UTILSLIB::ErrorCode::Io, "cannot open {} for writing", UTILSLIB::utf8FromPath(path));
+        return BASELIB::fail(BASELIB::ErrorCode::Io, "cannot open {} for writing", BASELIB::utf8FromPath(path));
     }
     write_to_stream(*stream);
     stream->end_file();
@@ -192,7 +192,7 @@ bool FiffDigPointSet::transform_to_head()
         }
     }
     if (!fid[0] || !fid[1] || !fid[2] || fid[0]->coord_frame != fid[1]->coord_frame || fid[0]->coord_frame != fid[2]->coord_frame) {
-        UTILSLIB::Log::warning("[FiffDigPointSet::transform_to_head] LPA, nasion and RPA in one frame are required.");
+        BASELIB::Log::warning("[FiffDigPointSet::transform_to_head] LPA, nasion and RPA in one frame are required.");
         return false;
     }
     const int frame = fid[0]->coord_frame;

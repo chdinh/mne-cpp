@@ -16,7 +16,7 @@
 
 #include "rt_cov.h"
 #include <memory>
-#include <utils/logger/log.h>
+#include <base/log.h>
 
 //=============================================================================================================
 // QT INCLUDES
@@ -56,7 +56,7 @@ FiffCov RtCov::estimateCovariance(const Eigen::MatrixXd& matData,
                                   int iNewMaxSamples)
 {
     if (m_fiffInfo.chs.empty()) {
-        UTILSLIB::Log::warning("[RtCov::estimateCovariance] FiffInfo was not set. Returning empty covariance estimation.");
+        BASELIB::Log::warning("[RtCov::estimateCovariance] FiffInfo was not set. Returning empty covariance estimation.");
         return FiffCov();
     }
 
@@ -143,7 +143,7 @@ FiffCov RtCov::estimateCovariance(const Eigen::MatrixXd& matData,
 
         return computedCov;
     } else {
-        UTILSLIB::Log::warning("[RtCov::estimateCovariance] Number of samples equals zero. Regularization not possible. Returning empty covariance estimation.");
+        BASELIB::Log::warning("[RtCov::estimateCovariance] Number of samples equals zero. Regularization not possible. Returning empty covariance estimation.");
         return FiffCov();
     }
 }

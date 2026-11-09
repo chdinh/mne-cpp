@@ -15,7 +15,7 @@
 //=============================================================================================================
 
 #include "directed_transfer_function.h"
-#include <utils/logger/log.h>
+#include <base/log.h>
 
 #include <vector>
 #include "mvar_model.h"
@@ -61,7 +61,7 @@ Network DirectedTransferFunction::calculate(ConnectivitySettings& connectivitySe
     Network finalNetwork("DTF");
 
     if (connectivitySettings.empty()) {
-        UTILSLIB::Log::debug("DirectedTransferFunction::calculate - Input data is empty");
+        BASELIB::Log::debug("DirectedTransferFunction::calculate - Input data is empty");
         return finalNetwork;
     }
 

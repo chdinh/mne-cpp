@@ -18,7 +18,7 @@
 //=============================================================================================================
 
 #include "mne_ctf_comp_data.h"
-#include <utils/logger/log.h>
+#include <base/log.h>
 
 #include <vector>
 #include "mne_types.h"
@@ -98,7 +98,7 @@ int MNECTFCompData::calibrate(const std::vector<FIFFLIB::FiffChInfo>& chs, int n
                 break;
             }
         if (!found) {
-            UTILSLIB::Log::critical("Channel {} not found. Cannot calibrate the compensation matrix.", name.toStdString());
+            BASELIB::Log::critical("Channel {} not found. Cannot calibrate the compensation matrix.", name.toStdString());
             return FAIL;
         }
     }
@@ -112,7 +112,7 @@ int MNECTFCompData::calibrate(const std::vector<FIFFLIB::FiffChInfo>& chs, int n
                 break;
             }
         if (!found) {
-            UTILSLIB::Log::critical("Channel {} not found. Cannot calibrate the compensation matrix.", name.toStdString());
+            BASELIB::Log::critical("Channel {} not found. Cannot calibrate the compensation matrix.", name.toStdString());
             return FAIL;
         }
     }

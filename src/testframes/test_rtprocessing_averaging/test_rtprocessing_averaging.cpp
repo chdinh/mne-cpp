@@ -4,13 +4,13 @@
 
 #include <QtTest/QtTest>
 #include <memory>
-#include <utils/string_utils.h>
+#include <base/string_utils.h>
 #include <Eigen/Dense>
 #include <format>
 #include <algorithm>
 #include <cmath>
 
-#include <utils/logger/log.h>
+#include <base/log.h>
 
 #include <dsp/rt/rt_averaging.h>
 #include <dsp/rt/rt_noise.h>
@@ -33,6 +33,7 @@
 
 using namespace RTPROCESSINGLIB;
 using namespace UTILSLIB;
+using namespace BASELIB;
 using namespace FIFFLIB;
 using namespace MNELIB;
 using namespace MNEBROWSE;
@@ -168,7 +169,7 @@ private:
 private slots:
     void initTestCase()
     {
-        UTILSLIB::Log::install_qt_message_handler();
+        BASELIB::Log::install_qt_message_handler();
         QString base = QCoreApplication::applicationDirPath() + "/../resources/data/mne-cpp-test-data";
         if (QFile::exists(base + "/MEG/sample/sample_audvis_trunc_raw.fif"))
             m_sDataPath = base;
@@ -261,7 +262,7 @@ private slots:
             QSKIP("No test data");
         FiffRawData raw((m_sDataPath + "/MEG/sample/sample_audvis_trunc_raw.fif").toStdString());
         std::shared_ptr<FiffInfo> info = std::make_shared<FiffInfo>(raw.info);
-        const int stiIdx = UTILSLIB::indexOf(info->ch_names, "STI014");
+        const int stiIdx = BASELIB::indexOf(info->ch_names, "STI014");
         QVERIFY(stiIdx >= 0);
         MatrixXd data, times;
         QVERIFY(raw.read_raw_segment(data, times));
@@ -719,7 +720,7 @@ private slots:
         const std::vector<int> codes = uniqueEventCodes(events, 4);
         QVERIFY(codes.size() >= 2);
 
-        UTILSLIB::StringList comments;
+        BASELIB::StringList comments;
         for (int code : codes) {
             comments.push_back(std::format("event_{}", code));
         }
@@ -791,7 +792,7 @@ private slots:
         FiffRawData raw((m_sDataPath + "/MEG/sample/sample_audvis_trunc_raw.fif").toStdString());
         MatrixXd data, times;
         QVERIFY(raw.read_raw_segment(data, times));
-        const int stiIdx = UTILSLIB::indexOf(raw.info.ch_names, "STI014");
+        const int stiIdx = BASELIB::indexOf(raw.info.ch_names, "STI014");
         QVERIFY(stiIdx >= 0);
 
         // Rising stim onsets with their codes, as read from the stim channel directly

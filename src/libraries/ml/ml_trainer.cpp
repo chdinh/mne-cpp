@@ -31,7 +31,7 @@
 //=============================================================================================================
 
 #include "ml_trainer.h"
-#include <utils/logger/log.h>
+#include <base/log.h>
 
 #ifndef WASMBUILD // QProcess (used by PythonRunner) is not available in Qt WASM
 
@@ -46,6 +46,7 @@
 
 using namespace MLLIB;
 using namespace UTILSLIB;
+using namespace BASELIB;
 
 //=============================================================================================================
 // DEFINE MEMBER METHODS

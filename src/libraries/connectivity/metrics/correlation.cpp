@@ -17,7 +17,7 @@
 //=============================================================================================================
 
 #include "correlation.h"
-#include <utils/logger/log.h>
+#include <base/log.h>
 #include "../network/networknode.h"
 #include "../network/networkedge.h"
 #include "../network/network.h"
@@ -66,7 +66,7 @@ Network Correlation::calculate(ConnectivitySettings& connectivitySettings)
     Network finalNetwork("COR");
 
     if (connectivitySettings.empty()) {
-        UTILSLIB::Log::debug("Correlation::calculate - Input data is empty");
+        BASELIB::Log::debug("Correlation::calculate - Input data is empty");
         return finalNetwork;
     }
 

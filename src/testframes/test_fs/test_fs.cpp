@@ -17,7 +17,7 @@
 // INCLUDES
 //=============================================================================================================
 
-#include <utils/logger/log.h>
+#include <base/log.h>
 #include <fs/fs_surface.h>
 #include <fs/fs_surfaceset.h>
 #include <fs/fs_annotation.h>
@@ -124,7 +124,7 @@ TestFS::TestFS()
 
 void TestFS::initTestCase()
 {
-    UTILSLIB::Log::install_qt_message_handler();
+    BASELIB::Log::install_qt_message_handler();
     qInfo() << "TestFS: Starting FreeSurfer library unit tests";
 }
 
@@ -572,7 +572,7 @@ void TestFS::testColortableAccessors()
     QCOMPARE(ids(1), 1002);
 
     // getNames
-    const UTILSLIB::StringList& names = ct.getNames();
+    const BASELIB::StringList& names = ct.getNames();
     QCOMPARE(names.size(), 2);
     QCOMPARE(names[0], QString("RegionA"));
     QCOMPARE(names[1], QString("RegionB"));

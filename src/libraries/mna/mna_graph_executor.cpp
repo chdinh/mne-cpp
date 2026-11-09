@@ -37,7 +37,7 @@
 //=============================================================================================================
 
 #include "mna_graph_executor.h"
-#include <utils/logger/log.h>
+#include <base/log.h>
 #include "mna_graph.h"
 #include "mna_op_registry.h"
 
@@ -423,7 +423,7 @@ MnaGraphExecutor::StreamContext MnaGraphExecutor::startStream(MnaGraph& graph,
     // 1. Validate the graph
     QStringList errors;
     if (!graph.validate(&errors)) {
-        UTILSLIB::Log::warning("MnaGraphExecutor::startStream - graph validation failed: {}", errors.join(", ").toStdString());
+        BASELIB::Log::warning("MnaGraphExecutor::startStream - graph validation failed: {}", errors.join(", ").toStdString());
         return ctx;
     }
 
@@ -438,7 +438,7 @@ MnaGraphExecutor::StreamContext MnaGraphExecutor::startStream(MnaGraph& graph,
         const MnaNode& n = graph.node(nodeId);
         std::unique_ptr<QObject> plugin = factory(n.opType);
         if (!plugin) {
-            UTILSLIB::Log::warning("MnaGraphExecutor::startStream - factory returned nullptr for opType: {}", n.opType.toStdString());
+            BASELIB::Log::warning("MnaGraphExecutor::startStream - factory returned nullptr for opType: {}", n.opType.toStdString());
             ctx.livePlugins.clear();
             return ctx;
         }

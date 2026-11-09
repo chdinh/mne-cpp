@@ -37,7 +37,7 @@
 #include "mri_nifti_io.h"
 
 #include <fiff/fiff_file.h>
-#include <utils/string_utils.h>
+#include <base/string_utils.h>
 
 #include <algorithm>
 
@@ -88,7 +88,7 @@ bool MriVolData::isValid() const
 bool MriVolData::read(const std::string& path)
 {
     // One loader for FreeSurfer MGH/MGZ and NIfTI-1 (.nii / .nii.gz), chosen by suffix
-    const std::string lower = UTILSLIB::toLower(path);
+    const std::string lower = BASELIB::toLower(path);
     if (lower.ends_with(".nii") || lower.ends_with(".nii.gz")) {
         return MriNiftiIO::read(path, *this);
     }

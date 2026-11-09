@@ -18,7 +18,7 @@
 
 #include "rtclustmne.h"
 #include <memory>
-#include <utils/string_utils.h>
+#include <base/string_utils.h>
 
 #include "FormFiles/rtclustmnesetupwidget.h"
 
@@ -67,6 +67,7 @@ using namespace INVLIB;
 using namespace RTPROCESSINGLIB;
 using namespace SCSHAREDLIB;
 using namespace UTILSLIB;
+using namespace BASELIB;
 using namespace MNELIB;
 using namespace FSLIB;
 using namespace Eigen;
@@ -76,7 +77,7 @@ using namespace Eigen;
 //=============================================================================================================
 
 RtClustMne::RtClustMne()
-: m_pCircularMatrixBuffer(std::make_shared<CircularBuffer_Matrix_double>(40))
+: m_pCircularMatrixBuffer(std::make_shared<BASELIB::CircularBuffer<Eigen::MatrixXd>>(40))
 , m_pCircularEvokedBuffer(std::make_shared<CircularBuffer<FIFFLIB::FiffEvoked>>(40))
 , m_bEvokedInput(false)
 , m_bRawInput(false)
@@ -272,7 +273,7 @@ bool RtClustMne::calcFiffInfo()
         //Pick only channels which are present in all data structures (covariance, evoked and forward)
         m_qListPickChannels.clear();
         for (const std::string& ch : m_pFiffInfoForward->ch_names) {
-            if (UTILSLIB::contains(m_pFiffInfoInput->ch_names, ch) && UTILSLIB::contains(m_qListCovChNames, ch))
+            if (BASELIB::contains(m_pFiffInfoInput->ch_names, ch) && BASELIB::contains(m_qListCovChNames, ch))
                 m_qListPickChannels.push_back(ch);
         }
         RowVectorXi sel = m_pFiffInfoInput->pick_channels(m_qListPickChannels);
@@ -633,7 +634,7 @@ void RtClustMne::run()
                     matDataResized.resize(iNumberChannels, matData.cols());
 
                     for (j = 0; j < iNumberChannels; ++j) {
-                        matDataResized.row(j) = matData.row(UTILSLIB::indexOf(lChNamesFiffInfo, lChNamesInvOp.at(j)));
+                        matDataResized.row(j) = matData.row(BASELIB::indexOf(lChNamesFiffInfo, lChNamesInvOp.at(j)));
                     }
 
                     //TODO: Add picking here. See evoked part as input.

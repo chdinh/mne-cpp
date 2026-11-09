@@ -22,7 +22,7 @@
 //=============================================================================================================
 
 #include "inv_minimum_norm.h"
-#include <utils/logger/log.h>
+#include <base/log.h>
 
 #include <inv/inv_source_estimate.h>
 #include <fiff/fiff_evoked.h>
@@ -49,6 +49,7 @@ using namespace Eigen;
 using namespace MNELIB;
 using namespace INVLIB;
 using namespace UTILSLIB;
+using namespace BASELIB;
 using namespace FIFFLIB;
 
 //=============================================================================================================

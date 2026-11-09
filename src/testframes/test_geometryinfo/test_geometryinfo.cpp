@@ -25,7 +25,7 @@
 // INCLUDES
 //=============================================================================================================
 
-#include <utils/logger/log.h>
+#include <base/log.h>
 
 #include <disp3D/helpers/geometryinfo.h>
 #include <mne/mne_bem.h>

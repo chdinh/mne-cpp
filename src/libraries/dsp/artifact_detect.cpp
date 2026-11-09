@@ -15,7 +15,7 @@
 //=============================================================================================================
 
 #include "artifact_detect.h"
-#include <utils/logger/log.h>
+#include <base/log.h>
 #include "firfilter.h"
 #include "peak_finder.h"
 
@@ -47,6 +47,7 @@
 //=============================================================================================================
 
 using namespace UTILSLIB;
+using namespace BASELIB;
 using namespace FIFFLIB;
 using namespace Eigen;
 

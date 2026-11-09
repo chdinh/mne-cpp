@@ -26,7 +26,6 @@
 //=============================================================================================================
 
 using namespace GUSBAMPPLUGIN;
-using namespace UTILSLIB;
 using namespace Eigen;
 using namespace std;
 

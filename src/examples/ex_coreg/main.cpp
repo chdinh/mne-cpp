@@ -32,8 +32,8 @@
 #include "mne/mne_bem_surface.h"
 #include "mne/mne_project_to_surface.h"
 
-#include <utils/logger/log.h>
-#include <utils/string_utils.h>
+#include <base/log.h>
+#include <base/string_utils.h>
 #include "mne/mne_icp.h"
 
 //=============================================================================================================
@@ -57,7 +57,6 @@
 //=============================================================================================================
 
 using namespace Eigen;
-using namespace UTILSLIB;
 using namespace FIFFLIB;
 using namespace MNELIB;
 using namespace DISP3DLIB;
@@ -81,7 +80,7 @@ int main(int argc, char* argv[])
 // Q_INIT_RESOURCE(mne_disp3d);
 #endif
 
-    UTILSLIB::Log::install_qt_message_handler();
+    BASELIB::Log::install_qt_message_handler();
     QApplication a(argc, argv);
 
     // Command Line Parser

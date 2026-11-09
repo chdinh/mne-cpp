@@ -17,7 +17,7 @@
 // INCLUDES
 //=============================================================================================================
 
-#include <utils/logger/log.h>
+#include <base/log.h>
 
 #include <fwd/compute_fwd/compute_fwd_settings.h>
 #include <fwd/compute_fwd/compute_fwd.h>
@@ -77,7 +77,7 @@ TestMneForwardSolution::TestMneForwardSolution()
 
 void TestMneForwardSolution::initTestCase()
 {
-    UTILSLIB::Log::install_qt_message_handler();
+    BASELIB::Log::install_qt_message_handler();
 }
 
 //=============================================================================================================
@@ -129,10 +129,10 @@ void TestMneForwardSolution::computeForward()
     // recalculate with same meg_head_t to check that we still get the same result
     pFwdComputer->updateHeadPos(pFiffInfo->dev_head_t, *pFwdSolution);
 
-    QVERIFY(pFwdSolution->write(UTILSLIB::pathFromUtf8(pSettingsMEGEEG->solname)));
+    QVERIFY(pFwdSolution->write(BASELIB::pathFromUtf8(pSettingsMEGEEG->solname)));
 
     // Read newly created fwd
-    m_pFwdMEGEEGRead = std::make_shared<MNEForwardSolution>(UTILSLIB::pathFromUtf8(pSettingsMEGEEG->solname));
+    m_pFwdMEGEEGRead = std::make_shared<MNEForwardSolution>(BASELIB::pathFromUtf8(pSettingsMEGEEG->solname));
 
     printf("<<<<<<<<<<<<<<<<<<<<<<<<< Compute/Write/Read MEG/EEG Forward Solution Finished <<<<<<<<<<<<<<<<<<<<<<<<<\n");
 

@@ -19,7 +19,7 @@
 
 #include <iostream>
 #include <memory>
-#include <utils/string_utils.h>
+#include <base/string_utils.h>
 #include <vector>
 #include <math.h>
 
@@ -144,7 +144,7 @@ void TestHpiFit::initTestCase()
 
     //set columns of matrix to zero depending on bad channels indexes
     for (qint32 j = 0; j < static_cast<int>(infoTemp.bads.size()); ++j) {
-        m_matProjectors.col(UTILSLIB::indexOf(infoTemp.ch_names, infoTemp.bads.at(j))).setZero();
+        m_matProjectors.col(BASELIB::indexOf(infoTemp.ch_names, infoTemp.bads.at(j))).setZero();
     }
 }
 

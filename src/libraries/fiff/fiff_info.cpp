@@ -25,10 +25,10 @@
 
 #include "fiff_info.h"
 #include <memory>
-#include <utils/logger/log.h>
+#include <base/log.h>
 
 #include <vector>
-#include <utils/string_utils.h>
+#include <base/string_utils.h>
 #include "fiff_stream.h"
 #include "fiff_file.h"
 
@@ -42,6 +42,7 @@
 
 using namespace FIFFLIB;
 using namespace UTILSLIB;
+using namespace BASELIB;
 using namespace Eigen;
 
 //=============================================================================================================
@@ -297,7 +298,7 @@ FiffInfo FiffInfo::pick_info(const RowVectorXi& sel) const
         res.ch_names.push_back(this->ch_names[idx]);
     }
     res.nchan = static_cast<int>(sel.size());
-    std::erase_if(res.bads, [&res](const std::string& bad) { return !UTILSLIB::contains(res.ch_names, bad); });
+    std::erase_if(res.bads, [&res](const std::string& bad) { return !BASELIB::contains(res.ch_names, bad); });
 
     return res;
 }
@@ -352,7 +353,7 @@ bool FiffInfo::readMegEegChannels(const std::string& name,
     std::vector<FiffChInfo> eeg;
 
     for (int k = 0; k < std::ssize(info.chs); k++) {
-        if (UTILSLIB::contains(bads, info.chs[k].ch_name))
+        if (BASELIB::contains(bads, info.chs[k].ch_name))
             continue;
         if (do_meg && info.chs[k].kind == FIFFV_MEG_CH)
             meg.push_back(info.chs[k]);

@@ -20,7 +20,7 @@
 
 #include <memory>
 
-#include <utils/logger/log.h>
+#include <base/log.h>
 
 //=============================================================================================================
 // QT INCLUDES
@@ -57,7 +57,7 @@ using namespace FWDLIB;
  */
 int main(int argc, char* argv[])
 {
-    UTILSLIB::Log::install_qt_message_handler();
+    BASELIB::Log::install_qt_message_handler();
     QApplication app(argc, argv);
     QCoreApplication::setApplicationName("mne_forward_solution");
     QCoreApplication::setApplicationVersion(PROGRAM_VERSION);
@@ -235,7 +235,7 @@ int main(int argc, char* argv[])
         return 1;
     }
 
-    if (!fwdSolution->write(UTILSLIB::pathFromUtf8(settings->solname))) {
+    if (!fwdSolution->write(BASELIB::pathFromUtf8(settings->solname))) {
         qCritical("The forward solution could not be written to %s.", settings->solname.c_str());
         return 1;
     }

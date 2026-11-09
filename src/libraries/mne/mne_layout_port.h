@@ -19,7 +19,7 @@
 
 #include "mne_global.h"
 
-#include <utils/string_utils.h>
+#include <base/string_utils.h>
 
 #include <QRectF>
 
@@ -77,15 +77,15 @@ public:
         return QRectF(xmin, ymin, xmax - xmin, ymax - ymin);
     }
 
-    int portno = 0;             /**< Running number of this viewport. */
-    bool invert = false;        /**< Draw the signal upside down (negative height in the file). */
-    float xmin = 0;             /**< Viewport left bound. */
-    float xmax = 0;             /**< Viewport right bound. */
-    float ymin = 0;             /**< Viewport bottom bound. */
-    float ymax = 0;             /**< Viewport top bound. */
-    std::string label;          /**< Channel names as written in the file (e.g. "MEG 0113"). */
-    UTILSLIB::StringList names; /**< Channel names in matching form (see cleanName()). */
-    bool matched = false;       /**< Set by the last MNELayout::matchPorts call. */
+    int portno = 0;            /**< Running number of this viewport. */
+    bool invert = false;       /**< Draw the signal upside down (negative height in the file). */
+    float xmin = 0;            /**< Viewport left bound. */
+    float xmax = 0;            /**< Viewport right bound. */
+    float ymin = 0;            /**< Viewport bottom bound. */
+    float ymax = 0;            /**< Viewport top bound. */
+    std::string label;         /**< Channel names as written in the file (e.g. "MEG 0113"). */
+    BASELIB::StringList names; /**< Channel names in matching form (see cleanName()). */
+    bool matched = false;      /**< Set by the last MNELayout::matchPorts call. */
 };
 
 } // namespace MNELIB

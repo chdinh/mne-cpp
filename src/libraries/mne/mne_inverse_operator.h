@@ -41,7 +41,7 @@
 #include "mne_forward_solution.h"
 
 #include <fiff/fiff_types.h>
-#include <utils/error.h>
+#include <base/error.h>
 #include <fiff/fiff_named_matrix.h>
 #include <fiff/fiff_proj.h>
 #include <fiff/fiff_cov.h>
@@ -143,7 +143,7 @@ public:
 
     //=========================================================================================================
     /**
-     * Reads an inverse operator file like read(); throws UTILSLIB::Error if it cannot.
+     * Reads an inverse operator file like read(); throws BASELIB::Error if it cannot.
      *
      * @param[in] path   The -inv.fif file.
      */
@@ -297,7 +297,7 @@ public:
      * @return The inverse operator, or why the file cannot be read: Io if it cannot be opened, NotFound if
      *         it holds no inverse solution, Format if a required part is missing or malformed.
      */
-    [[nodiscard]] static UTILSLIB::Expected<MNEInverseOperator> read(const std::filesystem::path& path);
+    [[nodiscard]] static BASELIB::Expected<MNEInverseOperator> read(const std::filesystem::path& path);
 
     //=========================================================================================================
     /**
@@ -307,7 +307,7 @@ public:
      *
      * @return Nothing, or why the file cannot be written (Io).
      */
-    [[nodiscard]] UTILSLIB::Expected<void> write(const std::filesystem::path& path) const;
+    [[nodiscard]] BASELIB::Expected<void> write(const std::filesystem::path& path) const;
 
     //=========================================================================================================
     /**

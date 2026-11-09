@@ -21,8 +21,8 @@
 //=============================================================================================================
 
 #include "inv_convenience.h"
-#include <utils/logger/log.h>
-#include <utils/string_utils.h>
+#include <base/log.h>
+#include <base/string_utils.h>
 #include "minimum_norm/inv_minimum_norm.h"
 
 #include <mne/mne_inverse_operator.h>
@@ -127,7 +127,7 @@ QList<InvSourceEstimate> INVLIB::applyInverseEpochs(
     QList<InvSourceEstimate> results;
 
     if (epochs.isEmpty()) {
-        UTILSLIB::Log::warning("[applyInverseEpochs] No epochs provided.");
+        BASELIB::Log::warning("[applyInverseEpochs] No epochs provided.");
         return results;
     }
 
@@ -140,7 +140,7 @@ QList<InvSourceEstimate> INVLIB::applyInverseEpochs(
     for (int i = 0; i < epochs.size(); ++i) {
         InvSourceEstimate stc = mn.calculateInverse(epochs[i], tmin, tstep, pickNormal);
         if (stc.empty()) {
-            UTILSLIB::Log::warning("[applyInverseEpochs] Epoch {} produced empty source estimate.", i);
+            BASELIB::Log::warning("[applyInverseEpochs] Epoch {} produced empty source estimate.", i);
         }
         results.append(stc);
     }
@@ -168,7 +168,7 @@ InvSourceEstimate INVLIB::applyInverseRaw(
     // Pick channels matching the inverse operator
     RowVectorXi picks = FiffInfo::pick_channels(raw.info.ch_names, inverse.noise_cov->names);
     if (picks.size() == 0) {
-        UTILSLIB::Log::warning("[applyInverseRaw] No channels match the inverse operator.");
+        BASELIB::Log::warning("[applyInverseRaw] No channels match the inverse operator.");
         return InvSourceEstimate();
     }
 
@@ -177,7 +177,7 @@ InvSourceEstimate INVLIB::applyInverseRaw(
     raw.read_raw_segment(data, times, from, to, picks);
 
     if (data.cols() == 0) {
-        UTILSLIB::Log::warning("[applyInverseRaw] No data read from raw file.");
+        BASELIB::Log::warning("[applyInverseRaw] No data read from raw file.");
         return InvSourceEstimate();
     }
 
@@ -197,7 +197,7 @@ FiffEvoked INVLIB::applyForward(const MNEForwardSolution& fwd, const InvSourceEs
 {
     // Adapted from mne.forward.forward.apply_forward / _apply_forward (MNE-Python, BSD-3-Clause).
     if (!fwd.sol || fwd.sol->data.size() == 0 || stc.empty()) {
-        UTILSLIB::Log::warning("[applyForward] Empty forward solution or source estimate.");
+        BASELIB::Log::warning("[applyForward] Empty forward solution or source estimate.");
         return FiffEvoked();
     }
     MNEForwardSolution fixed = fwd;
@@ -211,7 +211,7 @@ FiffEvoked INVLIB::applyForward(const MNEForwardSolution& fwd, const InvSourceEs
     QVector<int> columns(static_cast<int>(stc.data.rows()));
     if (nHemi == 0) {
         if (gain.cols() != stc.data.rows()) {
-            UTILSLIB::Log::warning("[applyForward] Forward columns {} != source estimate rows {}", gain.cols(), stc.data.rows());
+            BASELIB::Log::warning("[applyForward] Forward columns {} != source estimate rows {}", gain.cols(), stc.data.rows());
             return FiffEvoked();
         }
         std::iota(columns.begin(), columns.end(), 0);
@@ -225,7 +225,7 @@ FiffEvoked INVLIB::applyForward(const MNEForwardSolution& fwd, const InvSourceEs
                 offset += static_cast<int>(fixed.src.hemisphereAt(h)->vertno.size());
             const auto* hit = std::find(vertno.data(), vertno.data() + vertno.size(), stc.vertices(r));
             if (hit == vertno.data() + vertno.size()) {
-                UTILSLIB::Log::warning("[applyForward] Vertex {} is not in the forward solution.", stc.vertices(r));
+                BASELIB::Log::warning("[applyForward] Vertex {} is not in the forward solution.", stc.vertices(r));
                 return FiffEvoked();
             }
             columns[r] = offset + static_cast<int>(hit - vertno.data());
@@ -236,15 +236,15 @@ FiffEvoked INVLIB::applyForward(const MNEForwardSolution& fwd, const InvSourceEs
     RowVectorXi sel(fixed.sol->row_names.empty() ? gain.rows() : fixed.sol->row_names.size());
     if (fixed.sol->row_names.empty()) {
         if (info.nchan != gain.rows()) {
-            UTILSLIB::Log::warning("[applyForward] Unnamed forward rows {} != info channels {}", gain.rows(), info.nchan);
+            BASELIB::Log::warning("[applyForward] Unnamed forward rows {} != info channels {}", gain.rows(), info.nchan);
             return FiffEvoked();
         }
         std::iota(sel.begin(), sel.end(), 0);
     }
     for (int c = 0; c < static_cast<int>(fixed.sol->row_names.size()); ++c) {
-        sel(c) = static_cast<int>(UTILSLIB::indexOf(info.ch_names, fixed.sol->row_names[c]));
+        sel(c) = static_cast<int>(BASELIB::indexOf(info.ch_names, fixed.sol->row_names[c]));
         if (sel(c) < 0) {
-            UTILSLIB::Log::warning("[applyForward] Channel {} of the forward is not in the info.", fixed.sol->row_names[c]);
+            BASELIB::Log::warning("[applyForward] Channel {} of the forward is not in the info.", fixed.sol->row_names[c]);
             return FiffEvoked();
         }
     }
@@ -273,7 +273,7 @@ QPair<VectorXd, VectorXd> INVLIB::estimateSnr(
     // compute_regularization in MNE-C's mne_analyze/regularization.c.
     const MNEInverseOperator inv = inverse.prepare_inverse_operator(evoked.nave, 1.0f / 9.0f, false);
     if (!inv.eigen_fields) {
-        UTILSLIB::Log::warning("[estimateSnr] Could not prepare the inverse operator.");
+        BASELIB::Log::warning("[estimateSnr] Could not prepare the inverse operator.");
         return QPair<VectorXd, VectorXd>();
     }
     const MatrixXd white = inv.whitener * inv.proj * evoked.pick_channels(inv.noise_cov->names).data;
@@ -316,7 +316,7 @@ QPair<VectorXd, VectorXd> INVLIB::estimateSnr(
         }
     }
     if (!converged)
-        UTILSLIB::Log::warning("[estimateSnr] SNR estimation did not converge.");
+        BASELIB::Log::warning("[estimateSnr] SNR estimation did not converge.");
 
     return QPair<VectorXd, VectorXd>(snr.cwiseSqrt(), lambda2.cwiseSqrt().cwiseInverse());
 }
@@ -330,7 +330,7 @@ QPair<MatrixXd, int> INVLIB::computeWhitener(
     const int dim = noiseCov.dim;
 
     if (dim <= 0) {
-        UTILSLIB::Log::warning("[computeWhitener] Empty noise covariance.");
+        BASELIB::Log::warning("[computeWhitener] Empty noise covariance.");
         return QPair<MatrixXd, int>(MatrixXd(), 0);
     }
 
@@ -391,7 +391,7 @@ QPair<MatrixXd, VectorXd> INVLIB::computeSourcePsd(
     int nFft)
 {
     if (stc.empty()) {
-        UTILSLIB::Log::warning("[computeSourcePsd] Empty source estimate.");
+        BASELIB::Log::warning("[computeSourcePsd] Empty source estimate.");
         return QPair<MatrixXd, VectorXd>();
     }
 
@@ -428,7 +428,7 @@ QPair<MatrixXd, VectorXd> INVLIB::computeSourcePsd(
 
     int nBandFreqs = fmaxIdx - fminIdx + 1;
     if (nBandFreqs <= 0) {
-        UTILSLIB::Log::warning("[computeSourcePsd] No frequencies in range.");
+        BASELIB::Log::warning("[computeSourcePsd] No frequencies in range.");
         return QPair<MatrixXd, VectorXd>();
     }
 

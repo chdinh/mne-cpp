@@ -28,7 +28,7 @@
 //=============================================================================================================
 
 #include "mna_op_registry.h"
-#include <utils/logger/log.h>
+#include <base/log.h>
 #include "mna_registry_loader.h"
 
 //=============================================================================================================
@@ -124,7 +124,7 @@ int MnaOpRegistry::loadRegistryFiles()
     if (QDir(relPath).exists())
         return MnaRegistryLoader::loadDirectory(QDir::currentPath() + QStringLiteral("/") + relPath, *this);
 
-    UTILSLIB::Log::warning("MnaOpRegistry: Could not find resources/mna/ registry directory");
+    BASELIB::Log::warning("MnaOpRegistry: Could not find resources/mna/ registry directory");
     return 0;
 }
 

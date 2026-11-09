@@ -18,7 +18,7 @@
 //=============================================================================================================
 
 #include "fwd_comp_data.h"
-#include <utils/logger/log.h>
+#include <base/log.h>
 
 #include <vector>
 
@@ -63,7 +63,7 @@ int FwdCompData::fwd_comp_field(const Eigen::Vector3f& rd, const Eigen::Vector3f
     FwdCompData* comp = static_cast<FwdCompData*>(client);
 
     if (!comp->field) {
-        UTILSLIB::Log::warning("Field computation function is missing in fwd_comp_field");
+        BASELIB::Log::warning("Field computation function is missing in fwd_comp_field");
         return FAIL;
     }
     /*
@@ -107,7 +107,7 @@ int FwdCompData::fwd_make_ctf_comp_coils(MNECTFCompDataSet* set,
     if (!set)
         return OK;
     if (!coils || coils->ncoil() <= 0) {
-        UTILSLIB::Log::warning("Coil data missing in fwd_make_ctf_comp_coils");
+        BASELIB::Log::warning("Coil data missing in fwd_make_ctf_comp_coils");
         return FAIL;
     }
 
@@ -152,7 +152,7 @@ std::unique_ptr<FwdCompData> FwdCompData::fwd_make_comp_data(MNECTFCompDataSet* 
     if (comp_coils)
         comp->comp_coils = comp_coils->dup_coil_set();
     else
-        UTILSLIB::Log::warning("No coils to duplicate");
+        BASELIB::Log::warning("No coils to duplicate");
     comp->field = field;
     comp->vec_field = vec_field;
     comp->field_grad = field_grad;
@@ -170,7 +170,7 @@ int FwdCompData::fwd_comp_field_vec(const Eigen::Vector3f& rd, FwdCoilSet& coils
     FwdCompData* comp = static_cast<FwdCompData*>(client);
 
     if (!comp->vec_field) {
-        UTILSLIB::Log::warning("Field computation function is missing in fwd_comp_field_vec");
+        BASELIB::Log::warning("Field computation function is missing in fwd_comp_field_vec");
         return FAIL;
     }
     /*
@@ -213,7 +213,7 @@ int FwdCompData::fwd_comp_field_grad(const Eigen::Vector3f& rd, const Eigen::Vec
     FwdCompData* comp = static_cast<FwdCompData*>(client);
 
     if (!comp->field_grad) {
-        UTILSLIB::Log::critical("Field and gradient computation function is missing in fwd_comp_field_grad");
+        BASELIB::Log::critical("Field and gradient computation function is missing in fwd_comp_field_grad");
         return FAIL;
     }
     /*

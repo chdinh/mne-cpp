@@ -34,8 +34,8 @@
 //=============================================================================================================
 
 #include <QtCore/qglobal.h>
-#include <utils/buildinfo.h>
-#include <utils/string_utils.h>
+#include <base/buildinfo.h>
+#include <base/string_utils.h>
 
 //=============================================================================================================
 // DEFINES
@@ -65,7 +65,7 @@
 namespace FIFFLIB
 {
 
-using UTILSLIB::StringList;
+using BASELIB::StringList;
 
 //=============================================================================================================
 /**

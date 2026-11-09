@@ -164,8 +164,8 @@ QByteArray serialize(const FiffInfo& info)
     // The blocks of the source file are not copied: the payload must not depend on files elsewhere.
     FiffInfo copy = info;
     copy.filename.clear();
-    auto memory = std::make_unique<UTILSLIB::MemoryByteStream>();
-    const UTILSLIB::MemoryByteStream& written = *memory;
+    auto memory = std::make_unique<BASELIB::MemoryByteStream>();
+    const BASELIB::MemoryByteStream& written = *memory;
     Eigen::RowVectorXd cals;
     auto stream = FiffStream::start_writing_raw(std::move(memory), copy, cals, defaultMatrixXi, false);
     stream->finish_writing_raw();

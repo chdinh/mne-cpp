@@ -17,10 +17,10 @@
 
 #include <utils/ioutils.h>
 #include <utils/layoutloader.h>
-#include <utils/string_utils.h>
+#include <base/string_utils.h>
 #include <utils/layoutmaker.h>
 #include <utils/selectionio.h>
-#include <utils/logger/log.h>
+#include <base/log.h>
 
 //=============================================================================================================
 // QT INCLUDES
@@ -46,6 +46,7 @@
 //=============================================================================================================
 
 using namespace UTILSLIB;
+using namespace BASELIB;
 using namespace Eigen;
 
 //=============================================================================================================
@@ -103,7 +104,7 @@ TestUtilsLayoutSelection::TestUtilsLayoutSelection()
 
 void TestUtilsLayoutSelection::initTestCase()
 {
-    UTILSLIB::Log::install_qt_message_handler();
+    BASELIB::Log::install_qt_message_handler();
     QVERIFY(m_tempDir.isValid());
 }
 

@@ -15,10 +15,10 @@
 //=============================================================================================================
 
 #include "eog_regression.h"
-#include <utils/logger/log.h>
+#include <base/log.h>
 
 #include <vector>
-#include <utils/string_utils.h>
+#include <base/string_utils.h>
 
 #include <fiff/fiff_info.h>
 #include <fiff/fiff_ch_info.h>
@@ -35,6 +35,7 @@
 //=============================================================================================================
 
 using namespace UTILSLIB;
+using namespace BASELIB;
 using namespace FIFFLIB;
 using namespace Eigen;
 
@@ -69,12 +70,12 @@ void EogRegression::fit(const MatrixXd& data,
 
     if (eogChannels.empty()) {
         for (int i = 0; i < std::ssize(info.chs); ++i) {
-            if (info.chs[i].kind == FIFFV_EOG_CH && !UTILSLIB::contains(info.bads, info.ch_names[i]))
+            if (info.chs[i].kind == FIFFV_EOG_CH && !BASELIB::contains(info.bads, info.ch_names[i]))
                 m_vecEogIndices.push_back(i);
         }
     } else {
         for (const std::string& name : eogChannels) {
-            const int idx = static_cast<int>(UTILSLIB::indexOf(info.ch_names, name));
+            const int idx = static_cast<int>(BASELIB::indexOf(info.ch_names, name));
             if (idx >= 0)
                 m_vecEogIndices.push_back(idx);
             else

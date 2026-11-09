@@ -21,7 +21,7 @@
 #include <memory>
 
 #include <vector>
-#include <utils/string_utils.h>
+#include <base/string_utils.h>
 
 #include <fiff/fiff_types.h>
 #include <fiff/fiff_info.h>
@@ -53,6 +53,7 @@
 
 using namespace DISPLIB;
 using namespace UTILSLIB;
+using namespace BASELIB;
 using namespace FIFFLIB;
 using namespace Eigen;
 using namespace RTPROCESSINGLIB;
@@ -192,7 +193,7 @@ QVariant RtFiffRawViewModel::data(const QModelIndex& index, int role) const
 
         //******** third column (bad channel) ********
         if (index.column() == 2 && role == Qt::DisplayRole) {
-            return QVariant(UTILSLIB::contains(m_pFiffInfo->bads, m_pFiffInfo->ch_names[row]));
+            return QVariant(BASELIB::contains(m_pFiffInfo->bads, m_pFiffInfo->ch_names[row]));
         } // end column check
 
     } // end index.valid() check
@@ -799,11 +800,11 @@ void RtFiffRawViewModel::markChBad(QModelIndex ch, bool status)
     const std::vector<FiffChInfo>& chInfolist = m_pFiffInfo->chs;
 
     if (status) {
-        if (!UTILSLIB::contains(m_pFiffInfo->bads, chInfolist[ch.row()].ch_name))
+        if (!BASELIB::contains(m_pFiffInfo->bads, chInfolist[ch.row()].ch_name))
             m_pFiffInfo->bads.push_back(chInfolist[ch.row()].ch_name);
         qDebug() << "RawModel:" << chInfolist[ch.row()].ch_name << "marked as bad.";
-    } else if (UTILSLIB::contains(m_pFiffInfo->bads, chInfolist[ch.row()].ch_name)) {
-        int index = UTILSLIB::indexOf(m_pFiffInfo->bads, chInfolist[ch.row()].ch_name);
+    } else if (BASELIB::contains(m_pFiffInfo->bads, chInfolist[ch.row()].ch_name)) {
+        int index = BASELIB::indexOf(m_pFiffInfo->bads, chInfolist[ch.row()].ch_name);
         m_pFiffInfo->bads.erase(m_pFiffInfo->bads.begin() + index);
         qDebug() << "RawModel:" << chInfolist[ch.row()].ch_name << "marked as good.";
     }
@@ -868,11 +869,11 @@ void RtFiffRawViewModel::markChBad(QModelIndexList chlist, bool status)
 
     for (int i = 0; i < chlist.size(); ++i) {
         if (status) {
-            if (!UTILSLIB::contains(m_pFiffInfo->bads, chInfolist[chlist[i].row()].ch_name))
+            if (!BASELIB::contains(m_pFiffInfo->bads, chInfolist[chlist[i].row()].ch_name))
                 m_pFiffInfo->bads.push_back(chInfolist[chlist[i].row()].ch_name);
         } else {
-            if (UTILSLIB::contains(m_pFiffInfo->bads, chInfolist[chlist[i].row()].ch_name)) {
-                int index = UTILSLIB::indexOf(m_pFiffInfo->bads, chInfolist[chlist[i].row()].ch_name);
+            if (BASELIB::contains(m_pFiffInfo->bads, chInfolist[chlist[i].row()].ch_name)) {
+                int index = BASELIB::indexOf(m_pFiffInfo->bads, chInfolist[chlist[i].row()].ch_name);
                 m_pFiffInfo->bads.erase(m_pFiffInfo->bads.begin() + index);
             }
         }

@@ -23,12 +23,12 @@
 
 #include "mne_epoch_data_list.h"
 #include <memory>
-#include <utils/logger/log.h>
+#include <base/log.h>
 
 #include <vector>
 #include <utility>
 #include <format>
-#include <utils/string_utils.h>
+#include <base/string_utils.h>
 
 #include <fiff/fiff_evoked_set.h>
 
@@ -52,7 +52,7 @@
 
 using namespace FIFFLIB;
 using namespace MNELIB;
-using namespace UTILSLIB;
+using namespace BASELIB;
 using namespace Eigen;
 
 //=============================================================================================================
@@ -295,7 +295,7 @@ bool MNEEpochDataList::checkForArtifact(const MatrixXd& data,
         }
         // Like mne.Epochs(reject=...): only channel types with a limit are checked
         const auto limit = key ? mapReject.find(key) : mapReject.end();
-        if (limit == mapReject.end() || UTILSLIB::contains(lExcludeChs, ch.ch_name) || UTILSLIB::contains(pFiffInfo.bads, ch.ch_name) || ch.chpos.coil_type == FIFFV_COIL_BABY_REF_MAG || ch.chpos.coil_type == FIFFV_COIL_BABY_REF_MAG2) {
+        if (limit == mapReject.end() || BASELIB::contains(lExcludeChs, ch.ch_name) || BASELIB::contains(pFiffInfo.bads, ch.ch_name) || ch.chpos.coil_type == FIFFV_COIL_BABY_REF_MAG || ch.chpos.coil_type == FIFFV_COIL_BABY_REF_MAG2) {
             continue;
         }
         ArtifactRejectionData tempData;

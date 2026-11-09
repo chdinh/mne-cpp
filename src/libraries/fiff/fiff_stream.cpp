@@ -29,7 +29,7 @@
 
 #include "fiff_stream.h"
 #include <memory>
-#include <utils/logger/log.h>
+#include <base/log.h>
 
 #include <format>
 
@@ -55,7 +55,7 @@
 #include <math/linalg.h>
 #include <math/numerics.h>
 #include <utils/ioutils.h>
-#include <utils/string_utils.h>
+#include <base/string_utils.h>
 #include <algorithm>
 #include <cmath>
 #include <functional>
@@ -86,9 +86,10 @@
 //=============================================================================================================
 
 using namespace FIFFLIB;
-using UTILSLIB::ErrorCode;
-using UTILSLIB::fail;
+using BASELIB::ErrorCode;
+using BASELIB::fail;
 using namespace UTILSLIB;
+using namespace BASELIB;
 using namespace Eigen;
 
 //=============================================================================================================
@@ -99,7 +100,7 @@ namespace
 {
 
 // Byte stream over a Qt device, so sockets and Qt files keep working
-class QIODeviceByteStream : public UTILSLIB::ByteStream
+class QIODeviceByteStream : public BASELIB::ByteStream
 {
 public:
     explicit QIODeviceByteStream(QIODevice* device)
@@ -181,7 +182,7 @@ FiffStream::FiffStream(QByteArray* a,
 
 //=============================================================================================================
 
-FiffStream::FiffStream(std::unique_ptr<UTILSLIB::ByteStream> bytes, std::string name)
+FiffStream::FiffStream(std::unique_ptr<BASELIB::ByteStream> bytes, std::string name)
 : m_bytes(std::move(bytes))
 , m_name(std::move(name))
 {
@@ -189,10 +190,10 @@ FiffStream::FiffStream(std::unique_ptr<UTILSLIB::ByteStream> bytes, std::string 
 
 //=============================================================================================================
 
-UTILSLIB::Expected<FiffStream> FiffStream::open(const std::filesystem::path& path)
+BASELIB::Expected<FiffStream> FiffStream::open(const std::filesystem::path& path)
 {
-    const std::string name = UTILSLIB::utf8FromPath(path);
-    auto bytes = UTILSLIB::FileByteStream::open(path, UTILSLIB::FileByteStream::Mode::Read);
+    const std::string name = BASELIB::utf8FromPath(path);
+    auto bytes = BASELIB::FileByteStream::open(path, BASELIB::FileByteStream::Mode::Read);
     if (!bytes) {
         return fail(ErrorCode::Io, "Cannot open {}", name);
     }
@@ -207,12 +208,12 @@ UTILSLIB::Expected<FiffStream> FiffStream::open(const std::filesystem::path& pat
 
 std::unique_ptr<FiffStream> FiffStream::start_file(const std::filesystem::path& path)
 {
-    auto bytes = UTILSLIB::FileByteStream::open(path, UTILSLIB::FileByteStream::Mode::Write);
+    auto bytes = BASELIB::FileByteStream::open(path, BASELIB::FileByteStream::Mode::Write);
     if (!bytes) {
-        Log::warning("Cannot write to {}", UTILSLIB::utf8FromPath(path));
+        Log::warning("Cannot write to {}", BASELIB::utf8FromPath(path));
         return {};
     }
-    return start_file(std::make_unique<FiffStream>(std::move(bytes), UTILSLIB::utf8FromPath(path)));
+    return start_file(std::make_unique<FiffStream>(std::move(bytes), BASELIB::utf8FromPath(path)));
 }
 
 //=============================================================================================================
@@ -228,7 +229,7 @@ std::unique_ptr<FiffStream> FiffStream::start_file(std::unique_ptr<FiffStream> s
 
 //=============================================================================================================
 
-std::unique_ptr<UTILSLIB::ByteStream> FiffStream::byteStream(QIODevice& device, QIODevice::OpenMode mode)
+std::unique_ptr<BASELIB::ByteStream> FiffStream::byteStream(QIODevice& device, QIODevice::OpenMode mode)
 {
     if (device.isOpen() ? (device.openMode() & mode) != mode : !device.open(mode))
         return {};
@@ -655,7 +656,7 @@ bool FiffStream::read_annotations(const std::shared_ptr<FiffDirNode>& p_Node, Fi
             case FIFF_COMMENT:
                 // Unlike channel name lists, descriptions keep spaces; colons inside them are stored as {COLON}.
                 if (!tag->toString().empty()) {
-                    for (std::string& name : UTILSLIB::split(tag->toString(), ':')) {
+                    for (std::string& name : BASELIB::split(tag->toString(), ':')) {
                         for (std::size_t at = name.find("{COLON}"); at != std::string::npos; at = name.find("{COLON}", at + 1)) {
                             name.replace(at, 7, ":");
                         }
@@ -1117,7 +1118,7 @@ std::vector<FiffCtfComp> FiffStream::read_ctf_comp(const std::shared_ptr<FiffDir
 
 //=============================================================================================================
 
-UTILSLIB::Expected<FiffDigitizerData> FiffStream::read_digitizer_data(const std::shared_ptr<FiffDirNode>& node)
+BASELIB::Expected<FiffDigitizerData> FiffStream::read_digitizer_data(const std::shared_ptr<FiffDirNode>& node)
 {
     FiffDigitizerData dig;
     std::vector<std::shared_ptr<FiffDirNode>> blocks = node->dir_tree_find(FIFFB_ISOTRAK);
@@ -1133,7 +1134,7 @@ UTILSLIB::Expected<FiffDigitizerData> FiffStream::read_digitizer_data(const std:
             }
             const std::optional<FiffTag> tag = this->read_tag(entry.pos);
             if (!tag) {
-                return UTILSLIB::fail(UTILSLIB::ErrorCode::Format, "cannot read the digitizer tag at {} of {}", entry.pos, this->streamName());
+                return BASELIB::fail(BASELIB::ErrorCode::Format, "cannot read the digitizer tag at {} of {}", entry.pos, this->streamName());
             }
             if (entry.kind == FIFF_DIG_POINT) {
                 dig.points.push_back(tag->toDigPoint());
@@ -1143,12 +1144,12 @@ UTILSLIB::Expected<FiffDigitizerData> FiffStream::read_digitizer_data(const std:
         }
     }
     if (dig.points.empty()) {
-        return UTILSLIB::fail(UTILSLIB::ErrorCode::NotFound, "no digitizer points in {}", this->streamName());
+        return BASELIB::fail(BASELIB::ErrorCode::NotFound, "no digitizer points in {}", this->streamName());
     }
     for (FiffDigPoint& point : dig.points) {
         point.coord_frame = dig.coord_frame;
     }
-    dig.filename = UTILSLIB::pathFromUtf8(this->streamName());
+    dig.filename = BASELIB::pathFromUtf8(this->streamName());
     dig.active.assign(dig.points.size(), true);
     dig.discard.assign(dig.points.size(), false);
     return dig;
@@ -1912,7 +1913,7 @@ StringList FiffStream::split_name_list(std::string_view p_sNameList)
         if (c != ' ')
             compact.push_back(c);
     }
-    return UTILSLIB::split(compact, ':');
+    return BASELIB::split(compact, ':');
 }
 
 //=============================================================================================================
@@ -2040,7 +2041,7 @@ std::unique_ptr<FiffStream> FiffStream::start_writing_raw(const std::filesystem:
 
 //=============================================================================================================
 
-std::unique_ptr<FiffStream> FiffStream::start_writing_raw(std::unique_ptr<UTILSLIB::ByteStream> bytes,
+std::unique_ptr<FiffStream> FiffStream::start_writing_raw(std::unique_ptr<BASELIB::ByteStream> bytes,
                                                           const FiffInfo& info,
                                                           RowVectorXd& cals,
                                                           MatrixXi sel,
@@ -3031,7 +3032,7 @@ fiff_long_t FiffStream::write_int_matrix(fiff_int_t kind, const MatrixXi& mat)
 
 fiff_long_t FiffStream::write_name_list(fiff_int_t kind, const StringList& data)
 {
-    return this->write_string(kind, UTILSLIB::join(data, ":"));
+    return this->write_string(kind, BASELIB::join(data, ":"));
 }
 
 //=============================================================================================================

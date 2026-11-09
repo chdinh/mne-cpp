@@ -63,6 +63,7 @@ target_link_libraries(mne_analyze_studio_app_core PUBLIC
     mne_math
     mne_mne
     mne_utils
+    mne_base
     Eigen3::Eigen
 )
 set_target_properties(mne_analyze_studio_app_core PROPERTIES POSITION_INDEPENDENT_CODE ON)

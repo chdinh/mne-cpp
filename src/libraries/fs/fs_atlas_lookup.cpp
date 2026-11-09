@@ -15,15 +15,15 @@
 //=============================================================================================================
 
 #include "fs_atlas_lookup.h"
-#include <utils/logger/log.h>
+#include <base/log.h>
 
 //=============================================================================================================
 // INCLUDES
 //=============================================================================================================
 
-#include <utils/byte_stream.h>
-#include <utils/endian.h>
-#include <utils/string_utils.h>
+#include <base/byte_stream.h>
+#include <base/endian.h>
+#include <base/string_utils.h>
 
 #include <Eigen/LU>
 
@@ -177,12 +177,12 @@ const std::unordered_map<int, std::string>& lookupTable()
     return table;
 }
 
-template<UTILSLIB::Swappable T>
+template<BASELIB::Swappable T>
 T readBigEndian(const std::byte* data)
 {
     T value;
     std::memcpy(&value, data, sizeof(T));
-    return UTILSLIB::fromBigEndian(value);
+    return BASELIB::fromBigEndian(value);
 }
 
 } // namespace
@@ -195,10 +195,10 @@ bool FsAtlasLookup::load(const std::filesystem::path& parcellation)
 {
     m_loaded = false;
 
-    const bool gzip = UTILSLIB::toLower(UTILSLIB::utf8FromPath(parcellation.extension())) == ".mgz";
-    const auto bytes = UTILSLIB::read_file_bytes(parcellation, gzip ? UTILSLIB::Compression::Gzip : UTILSLIB::Compression::None);
+    const bool gzip = BASELIB::toLower(BASELIB::utf8FromPath(parcellation.extension())) == ".mgz";
+    const auto bytes = BASELIB::read_file_bytes(parcellation, gzip ? BASELIB::Compression::Gzip : BASELIB::Compression::None);
     if (!bytes) {
-        UTILSLIB::Log::warning("[FsAtlasLookup::load] {}", bytes.error().what());
+        BASELIB::Log::warning("[FsAtlasLookup::load] {}", bytes.error().what());
         return false;
     }
 
@@ -206,12 +206,12 @@ bool FsAtlasLookup::load(const std::filesystem::path& parcellation)
     // (int16), voxel sizes, x/y/z direction cosines and centre RAS (float32); the voxels start at byte 284.
     constexpr std::size_t kHeaderSize = 284;
     if (bytes->size() < kHeaderSize) {
-        UTILSLIB::Log::warning("[FsAtlasLookup::load] File too small: {}", UTILSLIB::utf8FromPath(parcellation));
+        BASELIB::Log::warning("[FsAtlasLookup::load] File too small: {}", BASELIB::utf8FromPath(parcellation));
         return false;
     }
     const std::byte* raw = bytes->data();
     if (readBigEndian<std::int32_t>(raw) != 1) {
-        UTILSLIB::Log::warning("[FsAtlasLookup::load] Unsupported MGH version: {}", readBigEndian<std::int32_t>(raw));
+        BASELIB::Log::warning("[FsAtlasLookup::load] Unsupported MGH version: {}", readBigEndian<std::int32_t>(raw));
         return false;
     }
     m_dimX = readBigEndian<std::int32_t>(raw + 4);
@@ -219,7 +219,7 @@ bool FsAtlasLookup::load(const std::filesystem::path& parcellation)
     m_dimZ = readBigEndian<std::int32_t>(raw + 12);
     const std::int32_t type = readBigEndian<std::int32_t>(raw + 20);
     if (m_dimX <= 0 || m_dimY <= 0 || m_dimZ <= 0 || readBigEndian<std::int32_t>(raw + 16) <= 0) {
-        UTILSLIB::Log::warning("[FsAtlasLookup::load] Invalid dimensions: {} {} {}", m_dimX, m_dimY, m_dimZ);
+        BASELIB::Log::warning("[FsAtlasLookup::load] Invalid dimensions: {} {} {}", m_dimX, m_dimY, m_dimZ);
         return false;
     }
 
@@ -247,11 +247,11 @@ bool FsAtlasLookup::load(const std::filesystem::path& parcellation)
         : (type == 1 || type == 3)                      ? 4
                                                         : 0;
     if (width == 0) {
-        UTILSLIB::Log::warning("[FsAtlasLookup::load] Unsupported MGH data type: {}", type);
+        BASELIB::Log::warning("[FsAtlasLookup::load] Unsupported MGH data type: {}", type);
         return false;
     }
     if ((bytes->size() - kHeaderSize) / width < nVoxels) {
-        UTILSLIB::Log::warning("[FsAtlasLookup::load] Truncated voxel data in {}", UTILSLIB::utf8FromPath(parcellation));
+        BASELIB::Log::warning("[FsAtlasLookup::load] Truncated voxel data in {}", BASELIB::utf8FromPath(parcellation));
         return false;
     }
     const std::byte* voxels = raw + kHeaderSize;

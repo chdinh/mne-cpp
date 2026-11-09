@@ -21,7 +21,7 @@
 //=============================================================================================================
 
 #include "mne_cluster_info.h"
-#include <utils/logger/log.h>
+#include <base/log.h>
 
 //=============================================================================================================
 // QT INCLUDES
@@ -65,7 +65,7 @@ void MNEClusterInfo::write(const std::filesystem::path& p_sFileName) const
 {
     QFile file(p_sFileName);
     if (!file.open(QIODevice::WriteOnly | QIODevice::Text)) {
-        UTILSLIB::Log::debug("Unable to open file.");
+        BASELIB::Log::debug("Unable to open file.");
         return;
     }
     QTextStream out(&file);

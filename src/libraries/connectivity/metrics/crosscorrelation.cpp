@@ -17,7 +17,7 @@
 //=============================================================================================================
 
 #include "crosscorrelation.h"
-#include <utils/logger/log.h>
+#include <base/log.h>
 
 #include <utility>
 #include "../network/networknode.h"
@@ -46,6 +46,7 @@
 using namespace CONNECTIVITYLIB;
 using namespace Eigen;
 using namespace UTILSLIB;
+using namespace BASELIB;
 
 //=============================================================================================================
 // DEFINE GLOBAL METHODS

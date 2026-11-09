@@ -41,7 +41,7 @@
 #include "fiff_types.h"
 #include "fiff_file.h"
 
-#include <utils/error.h>
+#include <base/error.h>
 
 //=============================================================================================================
 // EIGEN INCLUDES
@@ -98,7 +98,7 @@ public:
 
     //=========================================================================================================
     /**
-     * Reads one evoked data set, like read(); throws UTILSLIB::Error if it cannot.
+     * Reads one evoked data set, like read(); throws BASELIB::Error if it cannot.
      *
      * @param[in] path        The file.
      * @param[in] condition   Index of the data set, or its comment together with @p kind.
@@ -124,11 +124,11 @@ public:
      *
      * @return The evoked data, or why the file holds none matching @p condition.
      */
-    [[nodiscard]] static UTILSLIB::Expected<FiffEvoked> read(const std::filesystem::path& path,
-                                                             const Condition& condition = 0,
-                                                             const Baseline& baseline = {},
-                                                             bool proj = true,
-                                                             fiff_int_t kind = FIFFV_ASPECT_AVERAGE);
+    [[nodiscard]] static BASELIB::Expected<FiffEvoked> read(const std::filesystem::path& path,
+                                                            const Condition& condition = 0,
+                                                            const Baseline& baseline = {},
+                                                            bool proj = true,
+                                                            fiff_int_t kind = FIFFV_ASPECT_AVERAGE);
 
     //=========================================================================================================
     /**

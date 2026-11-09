@@ -18,7 +18,7 @@
 
 #include <iostream>
 #include <memory>
-#include <utils/string_utils.h>
+#include <base/string_utils.h>
 #include <vector>
 
 #include <fiff/fiff.h>
@@ -29,7 +29,7 @@
 #include <inv/hpi/inv_hpi_data_updater.h>
 
 #include <utils/ioutils.h>
-#include <utils/logger/log.h>
+#include <base/log.h>
 
 #include <fwd/fwd_coil_set.h>
 
@@ -72,7 +72,7 @@ using namespace Eigen;
 
 int main(int argc, char* argv[])
 {
-    UTILSLIB::Log::install_qt_message_handler();
+    BASELIB::Log::install_qt_message_handler();
     QElapsedTimer timer;
     QCoreApplication a(argc, argv);
 
@@ -174,7 +174,7 @@ int main(int argc, char* argv[])
 
     //set columns of matrix to zero depending on bad channels indexes
     for (qint32 j = 0; j < static_cast<int>(infoTemp.bads.size()); ++j) {
-        matProjectors.col(UTILSLIB::indexOf(infoTemp.ch_names, infoTemp.bads.at(j))).setZero();
+        matProjectors.col(BASELIB::indexOf(infoTemp.ch_names, infoTemp.bads.at(j))).setZero();
     }
 
     // if debugging files are necessary set bDoDebug = true;

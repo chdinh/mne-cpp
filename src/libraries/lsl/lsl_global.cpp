@@ -13,7 +13,7 @@
  * functions are intentionally implemented in a dedicated translation
  * unit rather than inlined in the header. This forces them to be
  * recompiled (and therefore re-stamped with the current value of
- * @c UTILSLIB::dateTimeNow and @c UTILSLIB::gitHash) every time the
+ * @c BASELIB::dateTimeNow and @c BASELIB::gitHash) every time the
  * LSL library is rebuilt, which is what allows the version dialogs
  * of downstream applications to report the exact commit and build
  * timestamp of the LSL stack they were linked against.
@@ -31,19 +31,19 @@
 
 const char* LSLLIB::buildDateTime()
 {
-    return UTILSLIB::dateTimeNow();
+    return BASELIB::dateTimeNow();
 }
 
 //=============================================================================================================
 
 const char* LSLLIB::buildHash()
 {
-    return UTILSLIB::gitHash();
+    return BASELIB::gitHash();
 }
 
 //=============================================================================================================
 
 const char* LSLLIB::buildHashLong()
 {
-    return UTILSLIB::gitHashLong();
+    return BASELIB::gitHashLong();
 }

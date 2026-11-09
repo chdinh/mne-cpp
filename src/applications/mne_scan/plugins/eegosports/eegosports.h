@@ -30,7 +30,7 @@
 #include "FormFiles/eegosportssetupprojectwidget.h"
 
 #include <scShared/Plugins/abstractsensor.h>
-#include <utils/generics/circularbuffer.h>
+#include <base/circular_buffer.h>
 #include <fstream>
 
 //=============================================================================================================
@@ -207,7 +207,7 @@ private:
     SCSHAREDLIB::PluginOutputData<SCMEASLIB::RealTimeMultiSampleArray>::SPtr m_pRMTSA_EEGoSports; /**< The RealTimeSampleArray to provide the EEG data.*/
     QSharedPointer<EEGoSportsImpedanceWidget> m_pEEGoSportsImpedanceWidget;                       /**< Widget for checking the impedances*/
     QSharedPointer<EEGoSportsSetupProjectWidget> m_pEEGoSportsSetupProjectWidget;                 /**< Widget for checking the impedances*/
-    std::shared_ptr<UTILSLIB::CircularBuffer_Matrix_double> m_pCircularBuffer;                    /**< Holds incoming raw data. */
+    std::shared_ptr<BASELIB::CircularBuffer<Eigen::MatrixXd>> m_pCircularBuffer;                  /**< Holds incoming raw data. */
 
     QString m_qStringResourcePath; /**< The path to the EEG resource directory.*/
 

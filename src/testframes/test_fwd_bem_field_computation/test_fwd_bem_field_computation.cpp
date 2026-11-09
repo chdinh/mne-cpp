@@ -27,7 +27,7 @@
 #include <fiff/fiff_info.h>
 #include <fiff/fiff_ch_info.h>
 #include <fiff/fiff_coord_trans.h>
-#include <utils/string_utils.h>
+#include <base/string_utils.h>
 #include <mne/mne_source_space.h>
 #include <mne/mne_surface.h>
 #include <mne/mne_forward_solution.h>

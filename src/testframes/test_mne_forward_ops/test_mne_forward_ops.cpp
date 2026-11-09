@@ -10,7 +10,7 @@
 //=============================================================================================================
 
 #include <QtTest/QtTest>
-#include <utils/string_utils.h>
+#include <base/string_utils.h>
 #include <QCoreApplication>
 #include <QDir>
 #include <QFile>
@@ -237,7 +237,7 @@ private slots:
             {"EEG001", {-3.50052778352e-07, 1.34513634827e-08, 4.92685045566e-07}},
             {"EEG060", {5.92750625114e-09, -2.18851835027e-07, -4.00659174832e-07}}};
         for (const auto& [name, values] : expected) {
-            const int row = static_cast<int>(UTILSLIB::indexOf(evoked.info.ch_names, name.toStdString()));
+            const int row = static_cast<int>(BASELIB::indexOf(evoked.info.ch_names, name.toStdString()));
             QVERIFY2(row >= 0, qPrintable(name));
             for (int k = 0; k < 3; ++k) {
                 const double got = evoked.data(row, 2 * k);
@@ -340,7 +340,7 @@ private slots:
         const FiffRawData raw(m_sRawFile.toStdString());
         Eigen::RowVectorXi sel(fwd.info.ch_names.size());
         for (int i = 0; i < sel.size(); ++i) {
-            sel(i) = static_cast<int>(UTILSLIB::indexOf(raw.info.ch_names, fwd.info.ch_names[i]));
+            sel(i) = static_cast<int>(BASELIB::indexOf(raw.info.ch_names, fwd.info.ch_names[i]));
             QVERIFY(sel(i) >= 0);
         }
         const FiffInfo info = raw.info.pick_info(sel);

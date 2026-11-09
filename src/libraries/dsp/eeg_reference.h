@@ -83,7 +83,7 @@ namespace UTILSLIB
  */
 DSPSHARED_EXPORT void setEegReference(Eigen::MatrixXd& data,
                                       FIFFLIB::FiffInfo& info,
-                                      const StringList& refChannels = {},
+                                      const BASELIB::StringList& refChannels = {},
                                       bool projection = false);
 
 //=============================================================================================================
@@ -100,7 +100,7 @@ DSPSHARED_EXPORT void setEegReference(Eigen::MatrixXd& data,
  */
 DSPSHARED_EXPORT void addReferenceChannels(Eigen::MatrixXd& data,
                                            FIFFLIB::FiffInfo& info,
-                                           const StringList& chNames);
+                                           const BASELIB::StringList& chNames);
 
 //=============================================================================================================
 /**
@@ -118,8 +118,8 @@ DSPSHARED_EXPORT void addReferenceChannels(Eigen::MatrixXd& data,
  */
 DSPSHARED_EXPORT void setBipolarReference(Eigen::MatrixXd& data,
                                           FIFFLIB::FiffInfo& info,
-                                          const StringList& anodes,
-                                          const StringList& cathodes,
+                                          const BASELIB::StringList& anodes,
+                                          const BASELIB::StringList& cathodes,
                                           bool dropOriginals = true);
 
 } // namespace UTILSLIB

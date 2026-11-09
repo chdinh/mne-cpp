@@ -42,7 +42,7 @@
 #include "fiff_stream.h"
 #include "fiff_dig_point.h"
 
-#include <utils/error.h>
+#include <base/error.h>
 
 #include <cstddef>
 #include <filesystem>
@@ -103,7 +103,7 @@ public:
 
     //=========================================================================================================
     /**
-     * Reads the digitizer points of a FIFF file, like read(); throws UTILSLIB::Error if it cannot.
+     * Reads the digitizer points of a FIFF file, like read(); throws BASELIB::Error if it cannot.
      *
      * @param[in] path   The file.
      */
@@ -117,7 +117,7 @@ public:
      *
      * @return The points, or why the file cannot be read.
      */
-    [[nodiscard]] static UTILSLIB::Expected<FiffDigPointSet> read(const std::filesystem::path& path);
+    [[nodiscard]] static BASELIB::Expected<FiffDigPointSet> read(const std::filesystem::path& path);
 
     //=========================================================================================================
     /**
@@ -127,7 +127,7 @@ public:
      *
      * @return The points, which are none if the stream holds no isotrak block, or why the stream cannot be read.
      */
-    [[nodiscard]] static UTILSLIB::Expected<FiffDigPointSet> read(FiffStream& stream);
+    [[nodiscard]] static BASELIB::Expected<FiffDigPointSet> read(FiffStream& stream);
 
     /** @return Whether the set holds no point. */
     bool empty() const noexcept
@@ -220,7 +220,7 @@ public:
      *
      * @return Nothing, or why the file cannot be written.
      */
-    [[nodiscard]] UTILSLIB::Expected<void> write(const std::filesystem::path& path) const;
+    [[nodiscard]] BASELIB::Expected<void> write(const std::filesystem::path& path) const;
 
     //=========================================================================================================
     /**

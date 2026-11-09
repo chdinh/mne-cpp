@@ -24,7 +24,7 @@
 //=============================================================================================================
 
 #include "rt_cmd_client.h"
-#include <utils/logger/log.h>
+#include <base/log.h>
 
 //=============================================================================================================
 // QT INCLUDES
@@ -134,12 +134,12 @@ void RtCmdClient::sendCommandJSON(const Command& p_command)
                     // because we do not have a stop character and do not know how many bytes to receive.
                     respComplete = t_qByteArrayRaw.count('{') == t_qByteArrayRaw.count('}');
                 }
-                UTILSLIB::Log::debug("Response: {} bytes", t_qByteArrayRaw.size());
+                BASELIB::Log::debug("Response: {} bytes", t_qByteArrayRaw.size());
             } while (!respComplete);
             t_sReply = QString(t_qByteArrayRaw);
         }
     } else {
-        UTILSLIB::Log::warning("Request was not send, because client is not connected!");
+        BASELIB::Log::warning("Request was not send, because client is not connected!");
     }
 
     m_qMutex.lock();
@@ -173,7 +173,7 @@ qint32 RtCmdClient::requestBufsize()
         }
     }
 
-    UTILSLIB::Log::critical("Unable to parse JSON response: {}", error.errorString().toStdString());
+    BASELIB::Log::critical("Unable to parse JSON response: {}", error.errorString().toStdString());
     return -1;
 }
 
@@ -203,7 +203,7 @@ void RtCmdClient::requestCommands()
     if (error.error == QJsonParseError::NoError)
         m_commandManager.insert(t_jsonDocumentOrigin);
     else
-        UTILSLIB::Log::critical("Unable to parse JSON response: {}", error.errorString().toStdString());
+        BASELIB::Log::critical("Unable to parse JSON response: {}", error.errorString().toStdString());
 }
 
 //=============================================================================================================
@@ -243,7 +243,7 @@ qint32 RtCmdClient::requestConnectors(QMap<qint32, QString>& p_qMapConnectors)
         if (!p_qMapConnectors.contains(id))
             p_qMapConnectors.insert(id, t_qConnectorName);
         else
-            UTILSLIB::Log::warning("Warning: CommandMap contains command {} already. Insertion skipped.\n", it.key().toStdString());
+            BASELIB::Log::warning("Warning: CommandMap contains command {} already. Insertion skipped.\n", it.key().toStdString());
 
         //if connector is active indicate it
         if (it.value().toObject().value(QString("active")).toBool())

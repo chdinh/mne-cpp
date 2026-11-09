@@ -82,7 +82,7 @@ public:
      */
     void fit(const Eigen::MatrixXd& data,
              const FIFFLIB::FiffInfo& info,
-             const StringList& eogChannels = {});
+             const BASELIB::StringList& eogChannels = {});
 
     //=========================================================================================================
     /**
@@ -107,7 +107,7 @@ public:
      */
     static void fitApply(Eigen::MatrixXd& data,
                          const FIFFLIB::FiffInfo& info,
-                         const StringList& eogChannels = {});
+                         const BASELIB::StringList& eogChannels = {});
 
     //=========================================================================================================
     /**

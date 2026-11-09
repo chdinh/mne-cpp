@@ -16,12 +16,12 @@
 // INCLUDES
 //=============================================================================================================
 
-#include <utils/logger/log.h>
+#include <base/log.h>
 
 #include <fiff/fiff.h>
 #include <fiff/fiff_dig_point_set.h>
 #include <mne/mne_forward_solution.h>
-#include <utils/byte_stream.h>
+#include <base/byte_stream.h>
 
 #include <iostream>
 #include <stdexcept>
@@ -148,7 +148,7 @@ TestFiffRWR::TestFiffRWR()
 
 void TestFiffRWR::initTestCase()
 {
-    UTILSLIB::Log::install_qt_message_handler();
+    BASELIB::Log::install_qt_message_handler();
     qDebug() << "dEpsilon" << dEpsilon;
 
     QVERIFY(m_tempDir.isValid());
@@ -399,7 +399,7 @@ void TestFiffRWR::readsRawByPathAndStream()
     std::vector<std::byte> fileBytes(static_cast<std::size_t>(qtFile.size()));
     QVERIFY(qtFile.read(reinterpret_cast<char*>(fileBytes.data()), qtFile.size()) == qtFile.size());
     qtFile.close();
-    const FiffRawData inMemory(std::make_unique<UTILSLIB::MemoryByteStream>(std::move(fileBytes)));
+    const FiffRawData inMemory(std::make_unique<BASELIB::MemoryByteStream>(std::move(fileBytes)));
     const fiff_int_t from = byPath.first_samp + 1000;
     const fiff_int_t to = from + 2 * static_cast<fiff_int_t>(byPath.info.sfreq);
     MatrixXd expected, times, data;
@@ -412,10 +412,10 @@ void TestFiffRWR::readsRawByPathAndStream()
     QVERIFY(data == expected);
     QCOMPARE(byPath.info.nchan, inMemory.info.nchan);
 
-    QVERIFY_THROWS_EXCEPTION(UTILSLIB::Error, FiffRawData(m_tempDir.filePath("missing_raw.fif").toStdString()));
-    QCOMPARE(FiffRawData::read(m_tempDir.filePath("missing_raw.fif").toStdString()).error().code, UTILSLIB::ErrorCode::Io);
+    QVERIFY_THROWS_EXCEPTION(BASELIB::Error, FiffRawData(m_tempDir.filePath("missing_raw.fif").toStdString()));
+    QCOMPARE(FiffRawData::read(m_tempDir.filePath("missing_raw.fif").toStdString()).error().code, BASELIB::ErrorCode::Io);
     QCOMPARE(FiffRawData::read(path.toStdString()).value().last_samp, byPath.last_samp);
-    QCOMPARE(FiffRawData::read(std::unique_ptr<UTILSLIB::ByteStream>()).error().code, UTILSLIB::ErrorCode::Io);
+    QCOMPARE(FiffRawData::read(std::unique_ptr<BASELIB::ByteStream>()).error().code, BASELIB::ErrorCode::Io);
 
     // Writing to a file and to bytes in memory gives the same bytes
     const std::string outPath = m_tempDir.filePath("written_raw.fif").toStdString();
@@ -424,8 +424,8 @@ void TestFiffRWR::readsRawByPathAndStream()
     QVERIFY(toFile);
     toFile->write_raw_buffer(expected, cals);
     toFile->finish_writing_raw();
-    auto memory = std::make_unique<UTILSLIB::MemoryByteStream>();
-    const UTILSLIB::MemoryByteStream& written = *memory;
+    auto memory = std::make_unique<BASELIB::MemoryByteStream>();
+    const BASELIB::MemoryByteStream& written = *memory;
     auto toMemory = FiffStream::start_writing_raw(std::move(memory), byPath.info, cals);
     QVERIFY(toMemory);
     toMemory->write_raw_buffer(expected, cals);
@@ -433,7 +433,7 @@ void TestFiffRWR::readsRawByPathAndStream()
     QFile fileOut(QString::fromStdString(outPath));
     QVERIFY(fileOut.open(QIODevice::ReadOnly));
     QCOMPARE(stableBytes(fileOut.readAll()), stableBytes(QByteArray(reinterpret_cast<const char*>(written.data().data()), static_cast<qsizetype>(written.size()))));
-    QVERIFY(!FiffStream::start_writing_raw(std::unique_ptr<UTILSLIB::ByteStream>(), byPath.info, cals));
+    QVERIFY(!FiffStream::start_writing_raw(std::unique_ptr<BASELIB::ByteStream>(), byPath.info, cals));
     QVERIFY(!FiffStream::start_writing_raw(m_tempDir.filePath("no/dir/raw.fif").toStdString(), byPath.info, cals));
 
     const std::string savedPath = m_tempDir.filePath("saved_raw.fif").toStdString();
@@ -455,7 +455,7 @@ void TestFiffRWR::readsWithoutQtDevice()
     QVERIFY(qtStream.open());
     QVERIFY(qtStream.isOpen());
 
-    auto bytes = UTILSLIB::FileByteStream::open(path.toStdString(), UTILSLIB::FileByteStream::Mode::Read);
+    auto bytes = BASELIB::FileByteStream::open(path.toStdString(), BASELIB::FileByteStream::Mode::Read);
     QVERIFY(bytes);
     FiffStream stream(std::move(bytes));
     QVERIFY(stream.device() == nullptr);
@@ -494,14 +494,14 @@ void TestFiffRWR::opensAndStartsFilesByPath()
     QVERIFY(in->nent() > 0);
     const auto missing = FiffStream::open(m_tempDir.filePath("missing.fif").toStdString());
     QVERIFY(!missing);
-    QCOMPARE(missing.error().code, UTILSLIB::ErrorCode::Io);
+    QCOMPARE(missing.error().code, BASELIB::ErrorCode::Io);
     QFile text(m_tempDir.filePath("text.fif"));
     QVERIFY(text.open(QIODevice::WriteOnly));
     text.write("not a FIFF file");
     text.close();
     const auto notFiff = FiffStream::open(text.fileName().toStdString());
     QVERIFY(!notFiff);
-    QCOMPARE(notFiff.error().code, UTILSLIB::ErrorCode::Format);
+    QCOMPARE(notFiff.error().code, BASELIB::ErrorCode::Format);
     QVERIFY(std::string_view(notFiff.error().what()).contains("text.fif"));
 
     // The stream is a value: it moves out of the result and keeps reading.

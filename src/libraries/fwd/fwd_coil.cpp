@@ -18,7 +18,7 @@
 
 #include "fwd_coil.h"
 #include <memory>
-#include <utils/logger/log.h>
+#include <base/log.h>
 #include <fiff/fiff_ch_info.h>
 #include <stdio.h>
 #include <algorithm>
@@ -98,11 +98,11 @@ FwdCoil::~FwdCoil()
 std::unique_ptr<FwdCoil> FwdCoil::create_eeg_el(const FiffChInfo& ch, const FiffCoordTrans& t)
 {
     if (ch.kind != FIFFV_EEG_CH) {
-        UTILSLIB::Log::warning("{} is not an EEG channel. Cannot create an electrode definition.", ch.ch_name);
+        BASELIB::Log::warning("{} is not an EEG channel. Cannot create an electrode definition.", ch.ch_name);
         return nullptr;
     }
     if (!t.empty() && t.from != FIFFV_COORD_HEAD) {
-        UTILSLIB::Log::warning("Inappropriate coordinate transformation in fwd_create_eeg_el");
+        BASELIB::Log::warning("Inappropriate coordinate transformation in fwd_create_eeg_el");
         return nullptr;
     }
 

@@ -15,13 +15,13 @@
 //=============================================================================================================
 
 #include "fs_surfaceset.h"
-#include <utils/logger/log.h>
+#include <base/log.h>
 
 //=============================================================================================================
 // QT INCLUDES
 //=============================================================================================================
 
-#include <utils/string_utils.h>
+#include <base/string_utils.h>
 
 //=============================================================================================================
 // USED NAMESPACES
@@ -81,12 +81,12 @@ FsSurfaceSet::FsSurfaceSet(const FsSurface& p_LHSurface, const FsSurface& p_RHSu
     if (p_LHSurface.hemi() == 0)
         m_surfs.insert_or_assign(0, p_LHSurface);
     else
-        UTILSLIB::Log::warning("Left hemisphere id is not 0. LH surface not assigned!");
+        BASELIB::Log::warning("Left hemisphere id is not 0. LH surface not assigned!");
 
     if (p_RHSurface.hemi() == 1)
         m_surfs.insert_or_assign(1, p_RHSurface);
     else
-        UTILSLIB::Log::warning("Right hemisphere id is not 1. RH surface not assigned!");
+        BASELIB::Log::warning("Right hemisphere id is not 1. RH surface not assigned!");
 
     calcOffset();
 }
@@ -151,7 +151,7 @@ namespace
 qint32 hemiIndex(qint32 idx)
 {
     if (idx != 0 && idx != 1) {
-        UTILSLIB::Log::warning("Warning: Index is not '0' or '1'! Returning '0'.");
+        BASELIB::Log::warning("Warning: Index is not '0' or '1'! Returning '0'.");
         return 0;
     }
     return idx;
@@ -162,7 +162,7 @@ qint32 hemiIndex(std::string_view idt)
     if (idt == "rh")
         return 1;
     if (idt != "lh")
-        UTILSLIB::Log::warning("Warning: Identifier is not 'lh' or 'rh'! Returning 'lh'.");
+        BASELIB::Log::warning("Warning: Identifier is not 'lh' or 'rh'! Returning 'lh'.");
     return 0;
 }
 

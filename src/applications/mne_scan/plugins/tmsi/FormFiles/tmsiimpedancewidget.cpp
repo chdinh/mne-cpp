@@ -35,7 +35,6 @@
 
 using namespace TMSIPLUGIN;
 using namespace Eigen;
-using namespace UTILSLIB;
 using namespace DISPLIB;
 using namespace std;
 

@@ -27,7 +27,9 @@
 #include "FormFiles/dummyyourwidget.h"
 
 #include <scShared/Plugins/abstractalgorithm.h>
-#include <utils/generics/circularbuffer.h>
+#include <base/circular_buffer.h>
+
+#include <Eigen/Core>
 #include <scMeas/realtimemultisamplearray.h>
 #include <fiff/fiff.h>
 
@@ -120,7 +122,7 @@ private:
 
     QSharedPointer<DummyYourWidget> m_pYourWidget; /**< The widget used to control this plugin by the user.*/
 
-    std::shared_ptr<UTILSLIB::CircularBuffer_Matrix_double> m_pCircularBuffer; /**< Holds incoming raw data. */
+    std::shared_ptr<BASELIB::CircularBuffer<Eigen::MatrixXd>> m_pCircularBuffer; /**< Holds incoming raw data. */
 
     SCSHAREDLIB::PluginInputData<SCMEASLIB::RealTimeMultiSampleArray>::SPtr m_pInput;   /**< The incoming data.*/
     SCSHAREDLIB::PluginOutputData<SCMEASLIB::RealTimeMultiSampleArray>::SPtr m_pOutput; /**< The outgoing data.*/

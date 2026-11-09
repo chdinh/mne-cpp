@@ -22,7 +22,7 @@
 //=============================================================================================================
 
 #include "inv_rap_music.h"
-#include <utils/logger/log.h>
+#include <base/log.h>
 
 #include <math/numerics.h>
 #include <fiff/fiff_evoked.h>
@@ -42,6 +42,7 @@ using namespace INVLIB;
 using namespace MNELIB;
 using namespace FIFFLIB;
 using namespace UTILSLIB;
+using namespace BASELIB;
 
 //=============================================================================================================
 // DEFINE MEMBER METHODS

@@ -19,7 +19,7 @@
 //=============================================================================================================
 
 #include <disp3D/view/brainview.h>
-#include <utils/string_utils.h>
+#include <base/string_utils.h>
 #include <disp3D/view/brainrenderer.h>
 #include <rhi/qrhi.h>
 #include <disp3D/renderable/polylineobject.h>
@@ -855,7 +855,7 @@ void TestDisp3dBrainView::rtSensorInterpolationMatWorker_basics()
     QVERIFY(!evoked.info.bads.empty());
     for (int k : pick) {
         QCOMPARE(evoked.info.chs[k].kind, FIFFV_EEG_CH);
-        QVERIFY(!UTILSLIB::contains(evoked.info.bads, evoked.info.chs[k].ch_name));
+        QVERIFY(!BASELIB::contains(evoked.info.bads, evoked.info.chs[k].ch_name));
     }
 
     // Same mapping as FwdFieldMap with the origin fitted to the head shape (MNE-Python's make_field_map origin="auto")

@@ -10,8 +10,8 @@
  * @brief    Seekable byte streams over memory and files, with big-endian value I/O, in standard C++.
  */
 
-#ifndef UTILS_BYTE_STREAM_H
-#define UTILS_BYTE_STREAM_H
+#ifndef BASE_BYTE_STREAM_H
+#define BASE_BYTE_STREAM_H
 
 //=============================================================================================================
 // INCLUDES
@@ -19,7 +19,7 @@
 
 #include "endian.h"
 #include "error.h"
-#include "utils_global.h"
+#include "base_global.h"
 
 //=============================================================================================================
 // STL INCLUDES
@@ -33,19 +33,19 @@
 #include <vector>
 
 //=============================================================================================================
-// DEFINE NAMESPACE UTILSLIB
+// DEFINE NAMESPACE BASELIB
 //=============================================================================================================
 
-namespace UTILSLIB
+namespace BASELIB
 {
 
 //=============================================================================================================
 /**
  * @brief A seekable sequence of bytes; positions are absolute byte offsets.
  *
- * @snippet ex_utils/main.cpp byte_stream_usage
+ * @snippet ex_base/main.cpp byte_stream_usage
  */
-class UTILSSHARED_EXPORT ByteStream
+class BASESHARED_EXPORT ByteStream
 {
 public:
     virtual ~ByteStream() = default;
@@ -188,9 +188,9 @@ public:
 /**
  * @brief A byte stream over a growable buffer in memory.
  *
- * @snippet ex_utils/main.cpp memory_byte_stream_usage
+ * @snippet ex_base/main.cpp memory_byte_stream_usage
  */
-class UTILSSHARED_EXPORT MemoryByteStream : public ByteStream
+class BASESHARED_EXPORT MemoryByteStream : public ByteStream
 {
 public:
     /** @param[in] data   Initial contents; the position starts at 0. */
@@ -217,9 +217,9 @@ private:
 /**
  * @brief A buffered byte stream over a file, with 64-bit positions.
  *
- * @snippet ex_utils/main.cpp byte_stream_usage
+ * @snippet ex_base/main.cpp byte_stream_usage
  */
-class UTILSSHARED_EXPORT FileByteStream : public ByteStream
+class BASESHARED_EXPORT FileByteStream : public ByteStream
 {
 public:
     /** How the file is opened. */
@@ -286,8 +286,8 @@ enum class Compression
  * @return The (decompressed) bytes; an Io error if the file cannot be read, a Format error if the gzip data is
  *         damaged or cut short.
  */
-UTILSSHARED_EXPORT Expected<std::vector<std::byte>> read_file_bytes(const std::filesystem::path& path, Compression compression = Compression::None);
+BASESHARED_EXPORT Expected<std::vector<std::byte>> read_file_bytes(const std::filesystem::path& path, Compression compression = Compression::None);
 
-} // namespace UTILSLIB
+} // namespace BASELIB
 
-#endif // UTILS_BYTE_STREAM_H
+#endif // BASE_BYTE_STREAM_H

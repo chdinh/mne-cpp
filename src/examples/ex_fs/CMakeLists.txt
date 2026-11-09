@@ -19,6 +19,7 @@ target_link_libraries(${PROJECT_NAME} PRIVATE
   Qt${QT_VERSION_MAJOR}::Core
   mne_fs
   mne_utils
+  mne_base
   Eigen3::Eigen
 )
 

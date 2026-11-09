@@ -15,7 +15,7 @@
 //=============================================================================================================
 
 #include <bids/bids_path.h>
-#include <utils/string_utils.h>
+#include <base/string_utils.h>
 #include <bids/bids_channel.h>
 #include <bids/bids_electrode.h>
 #include <bids/bids_event.h>
@@ -427,7 +427,7 @@ void TestBids::testReadBrainVision()
     QVERIFY(std::abs(data.raw.info.sfreq - 1000.0f) < 1.0f);
 
     // Bad channels: P4 marked bad in channels.tsv
-    QVERIFY(UTILSLIB::contains(data.raw.info.bads, "P4"));
+    QVERIFY(BASELIB::contains(data.raw.info.bads, "P4"));
     QCOMPARE(data.raw.info.bads.size(), 1);
 
     // Reference values produced by mne_bids.read_raw_bids(BIDSPath(...)) (mne-bids 0.17, mne 1.11): 32 channels,
@@ -483,7 +483,7 @@ void TestBids::testReadEdf()
     QVERIFY(std::abs(data.raw.info.sfreq - 128.0f) < 1.0f);
 
     // Bad channels: EEG O1 marked bad in channels.tsv (EDF uses full label)
-    QVERIFY(UTILSLIB::contains(data.raw.info.bads, "EEG O1"));
+    QVERIFY(BASELIB::contains(data.raw.info.bads, "EEG O1"));
 
     // As mne_bids.read_raw_bids: 25 channels, 128 Hz, bads ['EEG O1'], annotations start, stimulus, response
     QCOMPARE(data.events.size(), 3);
@@ -547,10 +547,10 @@ void TestBids::testReadEdf()
     EDFReader reduced;
     QVERIFY(reduced.open(dataPath() + QStringLiteral("EEG/test_reduced.edf")));
     const FIFFLIB::FiffInfo reducedInfo = reduced.getInfo();
-    const int a4 = UTILSLIB::indexOf(reducedInfo.ch_names, "A4");
-    const int status = UTILSLIB::indexOf(reducedInfo.ch_names, "Status");
+    const int a4 = BASELIB::indexOf(reducedInfo.ch_names, "A4");
+    const int status = BASELIB::indexOf(reducedInfo.ch_names, "Status");
     QVERIFY(a4 < 0 && status >= 0); // A4 is sampled below the highest rate
-    const int a10 = UTILSLIB::indexOf(reducedInfo.ch_names, "A10");
+    const int a10 = BASELIB::indexOf(reducedInfo.ch_names, "A10");
     QCOMPARE(reducedInfo.chs[a10].kind, FIFFV_EEG_CH);
     QCOMPARE(reducedInfo.chs[a10].unit, FIFF_UNIT_V);
     QCOMPARE(reducedInfo.chs[status].kind, FIFFV_STIM_CH);
@@ -667,7 +667,7 @@ void TestBids::testWriteRoundTrip()
     QCOMPARE(edfBack.events.size(), 3);
     QCOMPARE(edfBack.events[1].trialType, QStringLiteral("visual"));
     QCOMPARE(edfBack.events[2].trialType, QStringLiteral("response"));
-    QVERIFY(UTILSLIB::contains(edfBack.raw.info.bads, "EEG O1"));
+    QVERIFY(BASELIB::contains(edfBack.raw.info.bads, "EEG O1"));
 
     // channels.tsv units other than volts, as mne_bids.read_raw_bids: known ones set the unit, unknown ones keep it
     QFile channelsTsv(edfDst.channelsTsvPath().filePath());

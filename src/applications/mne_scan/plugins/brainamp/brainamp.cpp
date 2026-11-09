@@ -43,7 +43,6 @@
 using namespace BRAINAMPPLUGIN;
 using namespace SCSHAREDLIB;
 using namespace SCMEASLIB;
-using namespace UTILSLIB;
 using namespace FIFFLIB;
 using namespace Eigen;
 
@@ -63,7 +62,7 @@ BrainAMP::BrainAMP()
 , m_sLPA("2LD")
 , m_sRPA("2RD")
 , m_sNasion("0Z")
-, m_pCircularBuffer(std::make_shared<CircularBuffer_Matrix_double>(8))
+, m_pCircularBuffer(std::make_shared<BASELIB::CircularBuffer<Eigen::MatrixXd>>(8))
 {
     // Create record file option action bar item/button
     m_pActionSetupProject = new QAction(QIcon(":/images/database.png"), tr("Setup project"), this);

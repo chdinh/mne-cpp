@@ -33,7 +33,7 @@
 
 #include <disp/viewers/quickcontrolview.h>
 
-#include <utils/buildinfo.h>
+#include <base/buildinfo.h>
 
 #include "mainwindow.h"
 #include "startupwidget.h"
@@ -425,7 +425,7 @@ void MainWindow::about()
         m_textEdit_aboutText->setTextInteractionFlags(Qt::LinksAccessibleByKeyboard | Qt::LinksAccessibleByMouse | Qt::TextBrowserInteraction | Qt::TextSelectableByKeyboard | Qt::TextSelectableByMouse);
 
         QLabel* pLabel = new QLabel();
-        pLabel->setText(QString("Version: ") + CInfo::AppVersion() + " - " + QString(UTILSLIB::dateTimeNow()) + " - " + QString(UTILSLIB::gitHash()));
+        pLabel->setText(QString("Version: ") + CInfo::AppVersion() + " - " + QString(BASELIB::dateTimeNow()) + " - " + QString(BASELIB::gitHash()));
 
         gridLayout->addWidget(pLabel, 1, 0, 1, 1);
         gridLayout->addWidget(m_textEdit_aboutText, 2, 0, 1, 1);

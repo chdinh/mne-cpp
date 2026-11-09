@@ -39,7 +39,7 @@
 #include "fiff_types.h"
 #include "fiff_info.h"
 
-#include <utils/error.h>
+#include <base/error.h>
 
 //=============================================================================================================
 // QT INCLUDES
@@ -102,7 +102,7 @@ public:
 
     //=========================================================================================================
     /**
-     * Reads the noise covariance of a FIFF file, like read(); throws UTILSLIB::Error if it cannot.
+     * Reads the noise covariance of a FIFF file, like read(); throws BASELIB::Error if it cannot.
      *
      * @param[in] path   The file.
      */
@@ -116,7 +116,7 @@ public:
      *
      * @return The covariance, or why the file holds none.
      */
-    [[nodiscard]] static UTILSLIB::Expected<FiffCov> read(const std::filesystem::path& path);
+    [[nodiscard]] static BASELIB::Expected<FiffCov> read(const std::filesystem::path& path);
 
     //=========================================================================================================
     /**
@@ -243,7 +243,7 @@ public:
      *
      * @return Nothing, or why the file cannot be written.
      */
-    [[nodiscard]] UTILSLIB::Expected<void> save(const std::filesystem::path& path) const;
+    [[nodiscard]] BASELIB::Expected<void> save(const std::filesystem::path& path) const;
 
     //=========================================================================================================
     /**

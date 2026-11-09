@@ -24,7 +24,7 @@
 
 #include "inv_source_estimate.h"
 
-#include <utils/string_utils.h>
+#include <base/string_utils.h>
 
 #include <QtGlobal>
 
@@ -42,9 +42,9 @@
 using namespace INVLIB;
 using namespace FSLIB;
 using namespace Eigen;
-using UTILSLIB::ErrorCode;
-using UTILSLIB::Expected;
-using UTILSLIB::fail;
+using BASELIB::ErrorCode;
+using BASELIB::Expected;
+using BASELIB::fail;
 
 //=============================================================================================================
 // DEFINE GLOBAL METHODS
@@ -141,7 +141,7 @@ InvSourceEstimate InvSourceEstimate::reduce(int start, int n) const
 
 Expected<InvSourceEstimate> InvSourceEstimate::read(const std::filesystem::path& path)
 {
-    const std::string file = UTILSLIB::utf8FromPath(path);
+    const std::string file = BASELIB::utf8FromPath(path);
     std::ifstream in(path, std::ios::binary);
     if (!in) {
         return fail(ErrorCode::Io, "cannot read {}", file);
@@ -182,7 +182,7 @@ Expected<void> InvSourceEstimate::write(const std::filesystem::path& path) const
 {
     std::ofstream out(path, std::ios::binary | std::ios::trunc);
     if (!out) {
-        return fail(ErrorCode::Io, "cannot write {}", UTILSLIB::utf8FromPath(path));
+        return fail(ErrorCode::Io, "cannot write {}", BASELIB::utf8FromPath(path));
     }
     writeBig(out, 1000.0f * tmin);
     writeBig(out, 1000.0f * tstep);
@@ -195,7 +195,7 @@ Expected<void> InvSourceEstimate::write(const std::filesystem::path& path) const
         writeBig(out, static_cast<float>(data.data()[i]));
     }
     if (!out.flush()) {
-        return fail(ErrorCode::Io, "cannot write {}", UTILSLIB::utf8FromPath(path));
+        return fail(ErrorCode::Io, "cannot write {}", BASELIB::utf8FromPath(path));
     }
     return {};
 }
@@ -211,9 +211,9 @@ Expected<void> InvSourceEstimate::write_hemisphere_pair(const std::filesystem::p
         return fail(ErrorCode::Format, "the data have {} rows for {} vertices", data.rows(), vertices.size());
     }
     // A name from a file dialog may already carry one of the suffixes
-    std::string stem = UTILSLIB::utf8FromPath(base);
+    std::string stem = BASELIB::utf8FromPath(base);
     for (const std::string_view suffix : {"-lh.stc", "-rh.stc", ".stc"}) {
-        if (stem.size() > suffix.size() && UTILSLIB::equalsIgnoreCase(std::string_view(stem).substr(stem.size() - suffix.size()), suffix)) {
+        if (stem.size() > suffix.size() && BASELIB::equalsIgnoreCase(std::string_view(stem).substr(stem.size() - suffix.size()), suffix)) {
             stem.resize(stem.size() - suffix.size());
             break;
         }
@@ -227,7 +227,7 @@ Expected<void> InvSourceEstimate::write_hemisphere_pair(const std::filesystem::p
     } hemispheres[] = {{"-lh.stc", 0, nVerticesLh}, {"-rh.stc", nVerticesLh, nRh}};
     for (const auto& hemi : hemispheres) {
         InvSourceEstimate part(data.middleRows(hemi.offset, hemi.count), vertices.segment(hemi.offset, hemi.count), tmin, tstep);
-        if (Expected<void> written = part.write(UTILSLIB::pathFromUtf8(stem + hemi.suffix)); !written) {
+        if (Expected<void> written = part.write(BASELIB::pathFromUtf8(stem + hemi.suffix)); !written) {
             return written;
         }
     }
@@ -238,7 +238,7 @@ Expected<void> InvSourceEstimate::write_hemisphere_pair(const std::filesystem::p
 
 Expected<InvSourceEstimate> InvSourceEstimate::read_w(const std::filesystem::path& path)
 {
-    const std::string file = UTILSLIB::utf8FromPath(path);
+    const std::string file = BASELIB::utf8FromPath(path);
     std::ifstream in(path, std::ios::binary);
     if (!in) {
         return fail(ErrorCode::Io, "cannot read {}", file);
@@ -270,7 +270,7 @@ Expected<void> InvSourceEstimate::write_w(const std::filesystem::path& path) con
     }
     std::ofstream out(path, std::ios::binary | std::ios::trunc);
     if (!out) {
-        return fail(ErrorCode::Io, "cannot write {}", UTILSLIB::utf8FromPath(path));
+        return fail(ErrorCode::Io, "cannot write {}", BASELIB::utf8FromPath(path));
     }
     out.write("\0\0", 2);
     writeBig24(out, static_cast<std::int32_t>(vertices.size()));
@@ -279,7 +279,7 @@ Expected<void> InvSourceEstimate::write_w(const std::filesystem::path& path) con
         writeBig(out, static_cast<float>(data(i, 0)));
     }
     if (!out.flush()) {
-        return fail(ErrorCode::Io, "cannot write {}", UTILSLIB::utf8FromPath(path));
+        return fail(ErrorCode::Io, "cannot write {}", BASELIB::utf8FromPath(path));
     }
     return {};
 }

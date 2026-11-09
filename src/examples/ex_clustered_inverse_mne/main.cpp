@@ -30,7 +30,7 @@
 #include <disp3D/model/braintreemodel.h>
 
 #include <math/linalg.h>
-#include <utils/logger/log.h>
+#include <base/log.h>
 
 #include <iostream>
 
@@ -74,7 +74,7 @@ int main(int argc, char* argv[])
 #ifdef STATICBUILD
 // Q_INIT_RESOURCE(mne_disp3d);
 #endif
-    UTILSLIB::Log::install_qt_message_handler();
+    BASELIB::Log::install_qt_message_handler();
     QApplication app(argc, argv);
 
     // Command Line Parser

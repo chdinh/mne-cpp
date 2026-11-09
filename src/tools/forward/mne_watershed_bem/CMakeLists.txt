@@ -42,6 +42,7 @@ set(MNE_LIBS_REQUIRED
     mne_fs
     mne_mri
     mne_utils
+    mne_base
     mne_math
 )
 

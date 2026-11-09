@@ -21,7 +21,7 @@
 
 #include "hpisettingsview.h"
 
-#include <utils/string_utils.h>
+#include <base/string_utils.h>
 
 #include "ui_hpisettingsview.h"
 
@@ -425,7 +425,7 @@ void HpiSettingsView::onRemoveCoil()
 
 FiffDigPointSet HpiSettingsView::readDigitizersFromFile(const QString& fileName)
 {
-    auto dig = FiffDigPointSet::read(UTILSLIB::pathFromUtf8(fileName.toStdString()));
+    auto dig = FiffDigPointSet::read(BASELIB::pathFromUtf8(fileName.toStdString()));
     if (!dig || dig->empty()) {
         return {};
     }

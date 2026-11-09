@@ -56,8 +56,8 @@
 
 #include <inv/minimum_norm/inv_minimum_norm.h>
 #include <inv/inv_source_estimate.h>
-#include <utils/byte_stream.h>
-#include <utils/string_utils.h>
+#include <base/byte_stream.h>
+#include <base/string_utils.h>
 //*************************************************************************************************************
 //=============================================================================================================
 // USED NAMESPACES
@@ -68,10 +68,10 @@ using namespace MNEBROWSE;
 #ifdef WASMBUILD
 static QByteArray s_wasmByteArray;
 
-static std::unique_ptr<UTILSLIB::ByteStream> wasmRawBytes()
+static std::unique_ptr<BASELIB::ByteStream> wasmRawBytes()
 {
     const auto* begin = reinterpret_cast<const std::byte*>(s_wasmByteArray.constData());
-    return std::make_unique<UTILSLIB::MemoryByteStream>(std::vector<std::byte>(begin, begin + s_wasmByteArray.size()));
+    return std::make_unique<BASELIB::MemoryByteStream>(std::vector<std::byte>(begin, begin + s_wasmByteArray.size()));
 }
 #endif
 namespace

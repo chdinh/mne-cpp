@@ -20,7 +20,7 @@
 #include <vector>
 #include <math.h>
 
-#include <utils/logger/log.h>
+#include <base/log.h>
 
 #include <fiff/fiff.h>
 #include <mne/mne.h>
@@ -39,7 +39,6 @@
 
 using namespace FIFFLIB;
 using namespace MNELIB;
-using namespace UTILSLIB;
 
 //=============================================================================================================
 // MAIN
@@ -56,7 +55,7 @@ using namespace UTILSLIB;
  */
 int main(int argc, char* argv[])
 {
-    UTILSLIB::Log::install_qt_message_handler();
+    BASELIB::Log::install_qt_message_handler();
     QCoreApplication app(argc, argv);
 
     // Command Line Parser

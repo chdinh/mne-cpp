@@ -14,8 +14,8 @@
  * failure (if (auto cov = FiffCov::read(path)) ...). Both carry the same Error, whose message names the file.
  */
 
-#ifndef UTILS_ERROR_H
-#define UTILS_ERROR_H
+#ifndef BASE_ERROR_H
+#define BASE_ERROR_H
 
 //=============================================================================================================
 // STL INCLUDES
@@ -29,10 +29,10 @@
 #include <utility>
 
 //=============================================================================================================
-// DEFINE NAMESPACE UTILSLIB
+// DEFINE NAMESPACE BASELIB
 //=============================================================================================================
 
-namespace UTILSLIB
+namespace BASELIB
 {
 
 //=============================================================================================================
@@ -128,6 +128,6 @@ std::unexpected<Error> fail(ErrorCode code, std::format_string<Args...> format, 
     return std::unexpected(Error(code, std::format(format, std::forward<Args>(args)...)));
 }
 
-} // namespace UTILSLIB
+} // namespace BASELIB
 
-#endif // UTILS_ERROR_H
+#endif // BASE_ERROR_H

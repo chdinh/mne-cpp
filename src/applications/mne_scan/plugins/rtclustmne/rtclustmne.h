@@ -24,7 +24,9 @@
 
 #include <scShared/Plugins/abstractalgorithm.h>
 
-#include <utils/generics/circularbuffer.h>
+#include <base/circular_buffer.h>
+
+#include <Eigen/Core>
 
 #include <fiff/fiff_evoked.h>
 
@@ -243,8 +245,8 @@ protected:
     QSharedPointer<SCSHAREDLIB::PluginInputData<SCMEASLIB::RealTimeEvokedSet>> m_pRTESInput;         /**< The RealTimeEvoked input.*/
     QSharedPointer<SCSHAREDLIB::PluginInputData<SCMEASLIB::RealTimeCov>> m_pRTCInput;                /**< The RealTimeCov input.*/
     QSharedPointer<SCSHAREDLIB::PluginOutputData<SCMEASLIB::RealTimeSourceEstimate>> m_pRTSEOutput;  /**< The RealTimeSourceEstimate output.*/
-    std::shared_ptr<UTILSLIB::CircularBuffer_Matrix_double> m_pCircularMatrixBuffer;                 /**< Holds incoming RealTimeMultiSampleArray data.*/
-    std::shared_ptr<UTILSLIB::CircularBuffer<FIFFLIB::FiffEvoked>> m_pCircularEvokedBuffer;          /**< Holds incoming RealTimeMultiSampleArray data.*/
+    std::shared_ptr<BASELIB::CircularBuffer<Eigen::MatrixXd>> m_pCircularMatrixBuffer;               /**< Holds incoming RealTimeMultiSampleArray data.*/
+    std::shared_ptr<BASELIB::CircularBuffer<FIFFLIB::FiffEvoked>> m_pCircularEvokedBuffer;           /**< Holds incoming RealTimeMultiSampleArray data.*/
     std::shared_ptr<RTPROCESSINGLIB::RtInvOp> m_pRtInvOp;                                            /**< Real-time inverse operator. */
     std::shared_ptr<MNELIB::MNEForwardSolution> m_pFwd;                                              /**< Forward solution. */
     std::shared_ptr<FIFFLIB::FiffCov> m_pNoiseCov;                                                   /**< Noise Covariance Matrix. */

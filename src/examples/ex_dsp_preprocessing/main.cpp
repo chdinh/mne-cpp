@@ -52,6 +52,7 @@
 //=============================================================================================================
 
 using namespace UTILSLIB;
+using namespace BASELIB;
 using namespace MNELIB;
 using namespace Eigen;
 

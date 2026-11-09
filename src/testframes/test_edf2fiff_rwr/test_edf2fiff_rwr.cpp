@@ -17,12 +17,12 @@
 //=============================================================================================================
 
 #include <bids/readers/bids_edf_reader.h>
-#include <utils/string_utils.h>
+#include <base/string_utils.h>
 
 #include <fiff/fiff_constants.h>
 #include <fiff/fiff_raw_data.h>
 
-#include <utils/logger/log.h>
+#include <base/log.h>
 
 //=============================================================================================================
 // QT INCLUDES
@@ -65,7 +65,7 @@ private:
 
 void TestEDF2FIFFRWR::initTestCase()
 {
-    UTILSLIB::Log::install_qt_message_handler();
+    BASELIB::Log::install_qt_message_handler();
     const QString appDir = QCoreApplication::applicationDirPath();
     m_sEdf = appDir + "/../resources/data/mne-cpp-test-data/EEG/test_reduced.edf";
     QVERIFY(QFileInfo::exists(m_sEdf));
@@ -125,7 +125,7 @@ void TestEDF2FIFFRWR::convertMatchesPython()
         {QStringLiteral("Status"), FIFFV_STIM_CH, {4352.0, 0.0, 0.0, 57624.0}},
     };
     for (const auto& [name, kind, values] : expected) {
-        const int k = UTILSLIB::indexOf(raw.info.ch_names, name.toStdString());
+        const int k = BASELIB::indexOf(raw.info.ch_names, name.toStdString());
         QVERIFY2(k >= 0, qPrintable(name));
         QCOMPARE(raw.info.chs[k].kind, kind);
         const double tol = 1e-6 * std::abs(values[3]);

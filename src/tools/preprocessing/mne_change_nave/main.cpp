@@ -16,8 +16,8 @@
 
 #include <fiff/fiff_evoked_set.h>
 #include <fiff/fiff_evoked.h>
-#include <utils/string_utils.h>
-#include <utils/logger/log.h>
+#include <base/string_utils.h>
+#include <base/log.h>
 
 //=============================================================================================================
 // QT INCLUDES
@@ -40,7 +40,6 @@
 //=============================================================================================================
 
 using namespace FIFFLIB;
-using namespace UTILSLIB;
 
 //=============================================================================================================
 // STATIC DEFINITIONS
@@ -52,7 +51,7 @@ using namespace UTILSLIB;
 
 int main(int argc, char* argv[])
 {
-    UTILSLIB::Log::install_qt_message_handler();
+    BASELIB::Log::install_qt_message_handler();
     QCoreApplication app(argc, argv);
     QCoreApplication::setApplicationName("mne_change_nave");
     QCoreApplication::setApplicationVersion(PROGRAM_VERSION);

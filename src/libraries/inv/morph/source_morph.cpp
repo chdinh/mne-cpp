@@ -23,7 +23,7 @@
 //=============================================================================================================
 
 #include "source_morph.h"
-#include <utils/logger/log.h>
+#include <base/log.h>
 
 //=============================================================================================================
 // QT INCLUDES
@@ -46,12 +46,12 @@ void SourceMorph::compute(const VectorXi& verticesFrom,
                           const SparseMatrix<double>& morphMap)
 {
     if (verticesFrom.size() == 0 || verticesTo.size() == 0) {
-        UTILSLIB::Log::warning("[SourceMorph::compute] Empty vertex vectors.");
+        BASELIB::Log::warning("[SourceMorph::compute] Empty vertex vectors.");
         return;
     }
 
     if (morphMap.rows() != verticesTo.size() || morphMap.cols() != verticesFrom.size()) {
-        UTILSLIB::Log::warning("[SourceMorph::compute] Morph map dimensions mismatch: {} x {} but expected {} x {}", morphMap.rows(), morphMap.cols(), verticesTo.size(), verticesFrom.size());
+        BASELIB::Log::warning("[SourceMorph::compute] Morph map dimensions mismatch: {} x {} but expected {} x {}", morphMap.rows(), morphMap.cols(), verticesTo.size(), verticesFrom.size());
         return;
     }
 
@@ -66,17 +66,17 @@ void SourceMorph::compute(const VectorXi& verticesFrom,
 InvSourceEstimate SourceMorph::apply(const InvSourceEstimate& stcFrom) const
 {
     if (!m_bComputed) {
-        UTILSLIB::Log::warning("[SourceMorph::apply] Morph not computed. Call compute() first.");
+        BASELIB::Log::warning("[SourceMorph::apply] Morph not computed. Call compute() first.");
         return InvSourceEstimate();
     }
 
     if (stcFrom.empty()) {
-        UTILSLIB::Log::warning("[SourceMorph::apply] Source estimate is empty.");
+        BASELIB::Log::warning("[SourceMorph::apply] Source estimate is empty.");
         return InvSourceEstimate();
     }
 
     if (stcFrom.data.rows() != m_morphMatrix.cols()) {
-        UTILSLIB::Log::warning("[SourceMorph::apply] Source estimate rows {} != morph matrix cols {}", stcFrom.data.rows(), m_morphMatrix.cols());
+        BASELIB::Log::warning("[SourceMorph::apply] Source estimate rows {} != morph matrix cols {}", stcFrom.data.rows(), m_morphMatrix.cols());
         return InvSourceEstimate();
     }
 

@@ -24,7 +24,7 @@
 //=============================================================================================================
 
 #include "mne_bem_surface.h"
-#include <utils/logger/log.h>
+#include <base/log.h>
 
 #include <vector>
 
@@ -105,7 +105,7 @@ bool MNEBemSurface::addTriangleData()
     //
     //   Main triangulation
     //
-    UTILSLIB::Log::info("\tCompleting triangulation info...");
+    BASELIB::Log::info("\tCompleting triangulation info...");
     this->tri_cent = MatrixX3d::Zero(this->ntri, 3);
     this->tri_nn = MatrixX3d::Zero(this->ntri, 3);
     this->tri_area = VectorXd::Zero(this->ntri);
@@ -143,10 +143,10 @@ bool MNEBemSurface::addTriangleData()
         this->tri_nn.row(i) /= size;
     }
 
-    UTILSLIB::Log::info("Adding additional geometry info\n");
+    BASELIB::Log::info("Adding additional geometry info\n");
     add_geometry_info();
 
-    UTILSLIB::Log::info("[done]\n");
+    BASELIB::Log::info("[done]\n");
 
     return true;
 }
@@ -276,7 +276,7 @@ std::vector<MNEBemSurface> MNEBemSurface::makeScalpSurfaces(
     std::vector<MNEBemSurface> results;
 
     if (outerSkin.np <= 0 || outerSkin.ntri <= 0) {
-        UTILSLIB::Log::warning("MNEBemSurface::makeScalpSurfaces - Input surface is empty.");
+        BASELIB::Log::warning("MNEBemSurface::makeScalpSurfaces - Input surface is empty.");
         return results;
     }
 

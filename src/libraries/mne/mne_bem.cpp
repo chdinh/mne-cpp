@@ -26,16 +26,17 @@
 
 #include "mne_bem.h"
 #include <memory>
-#include <utils/logger/log.h>
+#include <base/log.h>
 
 #include <math/warp.h>
-#include <utils/string_utils.h>
+#include <base/string_utils.h>
 
 //=============================================================================================================
 // USED NAMESPACES
 //=============================================================================================================
 
 using namespace UTILSLIB;
+using namespace BASELIB;
 using namespace MNELIB;
 using namespace FIFFLIB;
 using namespace Eigen;
@@ -47,9 +48,9 @@ using namespace Eigen;
 namespace
 {
 
-using UTILSLIB::ErrorCode;
-using UTILSLIB::Expected;
-using UTILSLIB::fail;
+using BASELIB::ErrorCode;
+using BASELIB::Expected;
+using BASELIB::fail;
 
 //=============================================================================================================
 

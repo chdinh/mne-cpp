@@ -16,7 +16,7 @@
 // INCLUDES
 //=============================================================================================================
 
-#include <utils/logger/log.h>
+#include <base/log.h>
 
 #include <fiff/fiff_dig_point.h>
 #include <fiff/fiff_digitizer_data.h>
@@ -77,12 +77,12 @@ TestFiffDigitizer::TestFiffDigitizer()
 
 void TestFiffDigitizer::initTestCase()
 {
-    UTILSLIB::Log::install_qt_message_handler();
+    BASELIB::Log::install_qt_message_handler();
     //Read the results produced with MNE-CPP
     const QString dataDir = QCoreApplication::applicationDirPath() + "/../resources/data/mne-cpp-test-data/MEG/sample/";
     digDataLoaded = FiffDigitizerData((dataDir + "sample_audvis_trunc_raw.fif").toStdString());
-    QVERIFY_THROWS_EXCEPTION(UTILSLIB::Error, FiffDigitizerData((dataDir + "missing.fif").toStdString()));
-    QCOMPARE(FiffDigitizerData::read((dataDir + "sample_audvis-cov.fif").toStdString()).error().code, UTILSLIB::ErrorCode::NotFound);
+    QVERIFY_THROWS_EXCEPTION(BASELIB::Error, FiffDigitizerData((dataDir + "missing.fif").toStdString()));
+    QCOMPARE(FiffDigitizerData::read((dataDir + "sample_audvis-cov.fif").toStdString()).error().code, BASELIB::ErrorCode::NotFound);
     // Copies keep the source file and the transforms
     digDataLoaded.head_mri_t_adj = FiffCoordTrans((dataDir + "all-trans.fif").toStdU16String(), FIFFV_COORD_HEAD, FIFFV_COORD_MRI);
     const FiffDigitizerData copy = digDataLoaded;

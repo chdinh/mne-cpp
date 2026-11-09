@@ -19,7 +19,7 @@
 
 #include "covariancewindow.h"
 #include <memory>
-#include <utils/string_utils.h>
+#include <base/string_utils.h>
 
 #include <QAction>
 #include <QCheckBox>
@@ -53,7 +53,7 @@ QString summarizeChannelNames(const std::vector<std::string>& names, int limit =
 
     const int count = static_cast<int>(names.size());
     const std::vector<std::string> shown(names.begin(), names.begin() + std::min(count, limit));
-    QString joined = QString::fromStdString(UTILSLIB::join(shown, ", "));
+    QString joined = QString::fromStdString(BASELIB::join(shown, ", "));
     if (count <= limit) {
         return joined;
     }
@@ -76,7 +76,7 @@ QString covarianceSummary(const FIFFLIB::FiffCov& covariance,
 
     if (fiffInfo) {
         for (const std::string& channelName : covariance.names) {
-            const int channelIndex = UTILSLIB::indexOf(fiffInfo->ch_names, channelName);
+            const int channelIndex = BASELIB::indexOf(fiffInfo->ch_names, channelName);
             if (channelIndex < 0 || channelIndex >= std::ssize(fiffInfo->chs)) {
                 ++otherCount;
                 continue;
@@ -346,7 +346,7 @@ void CovarianceWindow::updateHeatmap()
         }
 
         if (m_pFiffInfo) {
-            const int chIdx = UTILSLIB::indexOf(m_pFiffInfo->ch_names, m_covariance.names[i]);
+            const int chIdx = BASELIB::indexOf(m_pFiffInfo->ch_names, m_covariance.names[i]);
             if (chIdx < 0 || chIdx >= std::ssize(m_pFiffInfo->chs))
                 continue;
 

@@ -55,6 +55,14 @@
         "SerialPort"
       ]
     },
+    "base": {
+      "tokens": 8,
+      "public_header_includes": 0,
+      "modules": [
+        "Core",
+        "ZlibPrivate"
+      ]
+    },
     "bids": {
       "tokens": 1029,
       "public_header_includes": 33,
@@ -159,7 +167,7 @@
       ]
     },
     "lsl": {
-      "tokens": 170,
+      "tokens": 169,
       "public_header_includes": 4,
       "modules": [
         "Core",
@@ -209,11 +217,10 @@
       ]
     },
     "utils": {
-      "tokens": 445,
-      "public_header_includes": 37,
+      "tokens": 426,
+      "public_header_includes": 34,
       "modules": [
-        "Core",
-        "ZlibPrivate"
+        "Core"
       ]
     }
   }

@@ -983,7 +983,7 @@ private slots:
 
         // Neuromag data has no CTF compensation: grade 0 is a no-op, another grade cannot be made
         QVERIFY(raw.apply_gradient_compensation(0));
-        QCOMPARE(raw.apply_gradient_compensation(1).error().code, UTILSLIB::ErrorCode::Format);
+        QCOMPARE(raw.apply_gradient_compensation(1).error().code, BASELIB::ErrorCode::Format);
     }
 
     void mne_combineXyz()
@@ -1202,7 +1202,7 @@ private slots:
         QCOMPARE(back.size(), fwd.src.size());
         QCOMPARE(back[0].nuse, fwd.src[0].nuse);
         QCOMPARE(back.get_vertno()[1], fwd.src.get_vertno()[1]);
-        QCOMPARE(MNESourceSpaces::read(path.parent_path() / "missing-src.fif").error().code, UTILSLIB::ErrorCode::Io);
+        QCOMPARE(MNESourceSpaces::read(path.parent_path() / "missing-src.fif").error().code, BASELIB::ErrorCode::Io);
     }
 
     void sourceSpaces_getVertno()

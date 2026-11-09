@@ -524,8 +524,8 @@ struct AcqRecorder::Impl
 
     std::unique_ptr<Block> header(std::size_t index, std::uint64_t firstTag) const
     {
-        auto memory = std::make_unique<UTILSLIB::MemoryByteStream>();
-        const UTILSLIB::MemoryByteStream& written = *memory;
+        auto memory = std::make_unique<BASELIB::MemoryByteStream>();
+        const BASELIB::MemoryByteStream& written = *memory;
         Eigen::RowVectorXd cals;
         auto tags = FiffStream::start_writing_raw(std::move(memory), fiffInfo, cals, defaultMatrixXi, false,
                                                   fiffType(pack));

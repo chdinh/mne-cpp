@@ -29,7 +29,7 @@
 #include "mne_setup_mri_settings.h"
 #include "setupmri.h"
 
-#include <utils/logger/log.h>
+#include <base/log.h>
 
 //=============================================================================================================
 // QT INCLUDES
@@ -42,7 +42,6 @@
 //=============================================================================================================
 
 using namespace MNESETUPMRI;
-using namespace UTILSLIB;
 
 //=============================================================================================================
 // STATIC DEFINITIONS
@@ -65,7 +64,7 @@ using namespace UTILSLIB;
  */
 int main(int argc, char* argv[])
 {
-    UTILSLIB::Log::install_qt_message_handler();
+    BASELIB::Log::install_qt_message_handler();
     QCoreApplication app(argc, argv);
     QCoreApplication::setApplicationName("mne_setup_mri");
     QCoreApplication::setApplicationVersion(PROGRAM_VERSION);

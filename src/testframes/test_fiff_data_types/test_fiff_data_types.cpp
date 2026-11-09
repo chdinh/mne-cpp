@@ -14,7 +14,7 @@
 #include <fiff/fiff_evoked_set.h>
 #include <fiff/fiff_evoked.h>
 #include <fiff/fiff_coord_trans.h>
-#include <utils/string_utils.h>
+#include <base/string_utils.h>
 #include <fiff/fiff_constants.h>
 #include <fiff/fiff_proj.h>
 #include <fiff/fiff_digitizer_data.h>
@@ -160,11 +160,11 @@ private slots:
         const std::filesystem::path missing = dir.filePath("missing.fif").toStdString();
         const auto read = FiffDigPointSet::read(missing);
         QVERIFY(!read.has_value());
-        QVERIFY_THROWS_EXCEPTION(UTILSLIB::Error, FiffDigPointSet{missing});
+        QVERIFY_THROWS_EXCEPTION(BASELIB::Error, FiffDigPointSet{missing});
 
         const auto write = fiducialsAndEeg().write(dir.filePath("no/such/dir/dig.fif").toStdString());
         QVERIFY(!write.has_value());
-        QCOMPARE(write.error().code, UTILSLIB::ErrorCode::NotFound);
+        QCOMPARE(write.error().code, BASELIB::ErrorCode::NotFound);
         QVERIFY(!fiducialsAndEeg().write({}).has_value());
     }
 

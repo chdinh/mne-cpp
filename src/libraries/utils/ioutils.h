@@ -40,7 +40,7 @@
 //=============================================================================================================
 
 #include "utils_global.h"
-#include <utils/logger/log.h>
+#include <base/log.h>
 #include <string>
 #include <sstream>
 #include <vector>
@@ -190,7 +190,7 @@ bool IOUtils::write_eigen_matrix(const Eigen::Matrix<T, Eigen::Dynamic, Eigen::D
             stream << "\n";
         }
     } else {
-        Log::warning("Could not write Eigen element to file! Path does not exist!");
+        BASELIB::Log::warning("Could not write Eigen element to file! Path does not exist!");
         return false;
     }
 
@@ -237,7 +237,7 @@ bool IOUtils::write_eigen_matrix(const Eigen::Matrix<T, Eigen::Dynamic, Eigen::D
             outputFile << "\n";
         }
     } else {
-        Log::warning("Could not write Eigen element to file! Path does not exist!");
+        BASELIB::Log::warning("Could not write Eigen element to file! Path does not exist!");
         return false;
     }
 
@@ -314,7 +314,7 @@ bool IOUtils::read_eigen_matrix(Eigen::Matrix<T, Eigen::Dynamic, Eigen::Dynamic>
             out.row(i) = help[i].transpose();
         }
     } else {
-        Log::warning("IOUtils::read_eigen_matrix - Could not read Eigen element from file! Path does not exist!");
+        BASELIB::Log::warning("IOUtils::read_eigen_matrix - Could not read Eigen element from file! Path does not exist!");
         return false;
     }
 
@@ -395,7 +395,7 @@ bool IOUtils::read_eigen_matrix(Eigen::Matrix<T, Eigen::Dynamic, Eigen::Dynamic>
             out.row(static_cast<Eigen::Index>(i)) = help[i].transpose();
         }
     } else {
-        Log::warning("IOUtils::read_eigen_matrix - Could not read Eigen element from file! Path does not exist!");
+        BASELIB::Log::warning("IOUtils::read_eigen_matrix - Could not read Eigen element from file! Path does not exist!");
         return false;
     }
 

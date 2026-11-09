@@ -21,7 +21,7 @@
 
 #include <dsp/rt/rt_averaging.h>
 #include <memory>
-#include <utils/string_utils.h>
+#include <base/string_utils.h>
 #include <dsp/rt/rt_connectivity.h>
 #include <dsp/rt/rt_cov.h>
 #include <dsp/rt/rt_hpis.h>
@@ -327,7 +327,7 @@ int main(int argc, char* argv[])
     //! [rt_inv_op_usage]
     const bool inverseArrived = waitFor(inverseDone, 60000);
     // 306 MEG channels in the forward solution, minus the bad MEG2443
-    ok &= expect(inverseArrived && inverse.nsource == fwd->nsource && inverse.nchan == 305 && UTILSLIB::contains(rawInfo->bads, "MEG2443"),
+    ok &= expect(inverseArrived && inverse.nsource == fwd->nsource && inverse.nchan == 305 && BASELIB::contains(rawInfo->bads, "MEG2443"),
                  std::format("RtInvOp builds a {}-channel operator for {} sources", inverse.nchan, inverse.nsource));
     rtInvOp.stop();
 

@@ -15,7 +15,7 @@
 //=============================================================================================================
 
 #include "filter_chpi.h"
-#include <utils/logger/log.h>
+#include <base/log.h>
 
 #include <vector>
 #include "iirfilter.h"
@@ -28,6 +28,7 @@
 //=============================================================================================================
 
 using namespace UTILSLIB;
+using namespace BASELIB;
 using namespace FIFFLIB;
 using namespace Eigen;
 

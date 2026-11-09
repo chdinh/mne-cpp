@@ -21,7 +21,7 @@
 #include <Eigen/Dense>
 #include <Eigen/Sparse>
 
-#include <utils/logger/log.h>
+#include <base/log.h>
 
 #include <fiff/fiff.h>
 #include <fiff/fiff_stream.h>
@@ -69,6 +69,7 @@ using namespace MNELIB;
 using namespace INVLIB;
 using namespace FWDLIB;
 using namespace UTILSLIB;
+using namespace BASELIB;
 using namespace Eigen;
 
 //=============================================================================================================
@@ -252,7 +253,7 @@ private slots:
 
 void TestMneLibrary::initTestCase()
 {
-    UTILSLIB::Log::install_qt_message_handler();
+    BASELIB::Log::install_qt_message_handler();
     QString base = QCoreApplication::applicationDirPath() + "/../resources/data/mne-cpp-test-data";
     if (QFile::exists(base + "/MEG/sample/sample_audvis_trunc_raw.fif"))
         m_sDataPath = base;
@@ -708,8 +709,8 @@ void TestMneLibrary::inverseOp_readFromFile()
     QVERIFY(!invOp.isFixedOrient());
 
     // A forward solution holds no inverse solution
-    QCOMPARE(MNEInverseOperator::read(fwdPath().toStdU16String()).error().code, UTILSLIB::ErrorCode::NotFound);
-    QCOMPARE(MNEInverseOperator::read("no-such-inv.fif").error().code, UTILSLIB::ErrorCode::Io);
+    QCOMPARE(MNEInverseOperator::read(fwdPath().toStdU16String()).error().code, BASELIB::ErrorCode::NotFound);
+    QCOMPARE(MNEInverseOperator::read("no-such-inv.fif").error().code, BASELIB::ErrorCode::Io);
 }
 
 void TestMneLibrary::inverseOp_basicGetters()
@@ -1496,7 +1497,7 @@ void TestMneLibrary::layout_matchAndConfine()
     QCOMPARE(static_cast<int>(layout->ports.size()), 3);
     QVERIFY(layout->ports[2].invert);
     QCOMPARE(layout->ports[2].rect(), QRectF(60, 30, 10, 5));
-    QCOMPARE(layout->ports[1].names, (UTILSLIB::StringList{"meg0112", "meg0111"}));
+    QCOMPARE(layout->ports[1].names, (BASELIB::StringList{"meg0112", "meg0111"}));
     QCOMPARE(layout->channelPositions().at("MEG 0111"), QPointF(30, 10));
 
     // Names match in any spelling; a CTF suffix after the dash is ignored.

@@ -17,7 +17,7 @@
 //=============================================================================================================
 
 #include <iostream>
-#include <utils/string_utils.h>
+#include <base/string_utils.h>
 #include <vector>
 #include <math.h>
 
@@ -26,7 +26,7 @@
 #include <mne/mne.h>
 #include <mne/mne_epoch_data_list.h>
 
-#include <utils/logger/log.h>
+#include <base/log.h>
 
 #include <disp/plots/helpers/figureexporter.h>
 #include <disp/plots/lineplot.h>
@@ -46,7 +46,7 @@
 using namespace DISPLIB;
 using namespace FIFFLIB;
 using namespace MNELIB;
-using namespace UTILSLIB;
+using namespace BASELIB;
 using namespace Eigen;
 
 //=============================================================================================================
@@ -68,7 +68,7 @@ int main(int argc, char* argv[])
 
 #endif
 
-    UTILSLIB::Log::install_qt_message_handler();
+    BASELIB::Log::install_qt_message_handler();
     QApplication a(argc, argv);
 
     // Command Line Parser
@@ -179,7 +179,7 @@ int main(int argc, char* argv[])
     butterfly.setXLabel("Time [ms]");
     butterfly.setYLabel("Gradiometers [fT/cm]");
     for (int c = 0; c < evoked.data.rows(); ++c) {
-        if (evoked.info.chs[c].unit == FIFF_UNIT_T_M && !UTILSLIB::contains(evoked.info.bads, evoked.info.ch_names[c])) {
+        if (evoked.info.chs[c].unit == FIFF_UNIT_T_M && !BASELIB::contains(evoked.info.bads, evoked.info.ch_names[c])) {
             QVector<double> values(times.size());
             for (int s = 0; s < times.size(); ++s) {
                 values[s] = 1e13 * evoked.data(c, s);

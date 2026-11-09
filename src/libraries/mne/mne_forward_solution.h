@@ -44,7 +44,7 @@
 #include <fiff/fiff_info_base.h>
 #include <fiff/fiff_cov.h>
 
-#include <utils/error.h>
+#include <base/error.h>
 
 #include <math.h>
 #include <filesystem>
@@ -177,7 +177,7 @@ public:
 
     //=========================================================================================================
     /**
-     * Reads a forward solution file like read(); throws UTILSLIB::Error if it cannot.
+     * Reads a forward solution file like read(); throws BASELIB::Error if it cannot.
      *
      * @param[in] path   The -fwd.fif file.
      */
@@ -185,7 +185,7 @@ public:
 
     //=========================================================================================================
     /**
-     * Reads a forward solution file like read(); throws UTILSLIB::Error if it cannot.
+     * Reads a forward solution file like read(); throws BASELIB::Error if it cannot.
      *
      * @param[in] path      The -fwd.fif file.
      * @param[in] options   How to prepare the solution.
@@ -364,7 +364,7 @@ public:
      * @return The forward solution, or why the file cannot be read: Io if it cannot be opened, NotFound if
      *         it holds no forward solution, Format if a required part is missing or inconsistent.
      */
-    [[nodiscard]] static UTILSLIB::Expected<MNEForwardSolution> read(const std::filesystem::path& path);
+    [[nodiscard]] static BASELIB::Expected<MNEForwardSolution> read(const std::filesystem::path& path);
 
     //=========================================================================================================
     /**
@@ -376,7 +376,7 @@ public:
      *
      * @return The forward solution, or why the file cannot be read (see read(path)).
      */
-    [[nodiscard]] static UTILSLIB::Expected<MNEForwardSolution> read(const std::filesystem::path& path, const ReadOptions& options);
+    [[nodiscard]] static BASELIB::Expected<MNEForwardSolution> read(const std::filesystem::path& path, const ReadOptions& options);
 
     //=========================================================================================================
     /**
@@ -392,7 +392,7 @@ public:
      *
      * @return Nothing, or why the file cannot be written (Io).
      */
-    [[nodiscard]] UTILSLIB::Expected<void> write(const std::filesystem::path& path) const;
+    [[nodiscard]] BASELIB::Expected<void> write(const std::filesystem::path& path) const;
 
     //=========================================================================================================
     /**

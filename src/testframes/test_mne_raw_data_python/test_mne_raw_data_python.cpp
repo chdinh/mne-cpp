@@ -27,7 +27,7 @@
 //=============================================================================================================
 
 #include <mne/mne_raw_data.h>
-#include <utils/string_utils.h>
+#include <base/string_utils.h>
 #include <mne/mne_raw_info.h>
 #include <mne/mne_ch_selection.h>
 #include <mne/mne_proj_op.h>
@@ -147,7 +147,7 @@ MNEChSelection TestMneRawDataPython::makeSelection() const
     // Channel names are stored without spaces ("MEG0113").
     for (int c = 0; c < sel.nchan; ++c) {
         std::erase(sel.chspick_nospace[c], ' ');
-        sel.pick[c] = static_cast<int>(UTILSLIB::indexOf(m_raw->ch_names, sel.chspick_nospace[c]));
+        sel.pick[c] = static_cast<int>(BASELIB::indexOf(m_raw->ch_names, sel.chspick_nospace[c]));
     }
     return sel;
 }
@@ -344,8 +344,8 @@ void TestMneRawDataPython::projectsSegment()
         const Eigen::MatrixXd u = op->proj_data.cast<double>();
         return Eigen::MatrixXd(Eigen::MatrixXd::Identity(u.cols(), u.cols()) - u.transpose() * u);
     };
-    const int eeg1 = UTILSLIB::indexOf(m_raw->ch_names, "EEG001");
-    const int meg2443 = UTILSLIB::indexOf(m_raw->ch_names, "MEG2443");
+    const int eeg1 = BASELIB::indexOf(m_raw->ch_names, "EEG001");
+    const int meg2443 = BASELIB::indexOf(m_raw->ch_names, "MEG2443");
     QVERIFY(eeg1 >= 0 && meg2443 >= 0);
     int nvec = 0;
     Eigen::MatrixXd p = projector({}, nvec);
@@ -484,8 +484,8 @@ void TestMneRawDataPython::picksDerivedChannel()
     filter.lowpass_width = filter.eog_lowpass_width = 5.0f;
     std::unique_ptr<MNERawData> raw(MNERawData::open_file(m_rawPath.toStdU16String(), false, false, filter));
     QVERIFY(raw);
-    const int a = static_cast<int>(UTILSLIB::indexOf(raw->ch_names, "MEG0111"));
-    const int b = static_cast<int>(UTILSLIB::indexOf(raw->ch_names, "MEG0121"));
+    const int a = static_cast<int>(BASELIB::indexOf(raw->ch_names, "MEG0111"));
+    const int b = static_cast<int>(BASELIB::indexOf(raw->ch_names, "MEG0121"));
     // A derivation set with one usable row and one whose input is not recorded.
     const MNEDerivSet set = MNEDerivSet::fromDefinitions({{"BIP", {{"MEG0111", 1.0}, {"MEG0121", -1.0}}}, {"MISSING", {{"MEG0111", 1.0}, {"EEG999", -1.0}}}});
     std::unique_ptr<MNEDeriv> deriv = set.match(raw->ch_names);

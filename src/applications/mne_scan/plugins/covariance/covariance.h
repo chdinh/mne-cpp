@@ -23,7 +23,9 @@
 #include <memory>
 
 #include <scShared/Plugins/abstractalgorithm.h>
-#include <utils/generics/circularbuffer.h>
+#include <base/circular_buffer.h>
+
+#include <Eigen/Core>
 
 //=============================================================================================================
 // QT INCLUDES
@@ -138,7 +140,7 @@ private:
     QMutex m_mutex;
     qint32 m_iEstimationSamples;
 
-    std::shared_ptr<UTILSLIB::CircularBuffer_Matrix_double> m_pCircularBuffer; /**< Matrix data circular buffer. */
+    std::shared_ptr<BASELIB::CircularBuffer<Eigen::MatrixXd>> m_pCircularBuffer; /**< Matrix data circular buffer. */
 
     std::shared_ptr<FIFFLIB::FiffInfo> m_pFiffInfo; /**< Fiff measurement info.*/
 

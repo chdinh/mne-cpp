@@ -15,7 +15,7 @@
 //=============================================================================================================
 
 #include <acq/acq.h>
-#include <utils/string_utils.h>
+#include <base/string_utils.h>
 
 #include <fiff/fiff_raw_data.h>
 
@@ -288,7 +288,7 @@ void TestMneAcqTool::recordWritesTheSource()
             continue;
         }
         // FIFFLIB drops the spaces of channel names on read.
-        const auto row = static_cast<Eigen::Index>(UTILSLIB::indexOf(raw.info.ch_names, ((QString::fromStdString(names[c]).remove(QLatin1Char(' '))).toStdString())));
+        const auto row = static_cast<Eigen::Index>(BASELIB::indexOf(raw.info.ch_names, ((QString::fromStdString(names[c]).remove(QLatin1Char(' '))).toStdString())));
         QVERIFY2(row >= 0, names[c].c_str());
         for (std::size_t s = 0; s < 2000; ++s) {
             const double want = expected[s * names.size() + c];

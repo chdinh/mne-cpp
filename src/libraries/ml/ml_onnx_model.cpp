@@ -43,8 +43,8 @@
 // INCLUDES
 //=============================================================================================================
 
-#include <utils/logger/log.h>
-#include <utils/string_utils.h>
+#include <base/log.h>
+#include <base/string_utils.h>
 
 #include <filesystem>
 
@@ -143,7 +143,7 @@ MlTensor MlOnnxModel::predict(const MlTensor& input) const
 
 bool MlOnnxModel::save(const std::string& /*path*/) const
 {
-    UTILSLIB::Log::warning("MlOnnxModel::save – ONNX models cannot be saved from this interface.");
+    BASELIB::Log::warning("MlOnnxModel::save – ONNX models cannot be saved from this interface.");
     return false;
 }
 
@@ -154,10 +154,10 @@ bool MlOnnxModel::load(const std::string& path)
 #ifdef MNE_USE_ONNXRUNTIME
     m_modelPath = path;
 
-    const std::filesystem::path file = UTILSLIB::pathFromUtf8(path);
+    const std::filesystem::path file = BASELIB::pathFromUtf8(path);
     std::error_code ec;
     if (!std::filesystem::exists(file, ec)) {
-        UTILSLIB::Log::warning("MlOnnxModel::load – File does not exist: {}", path);
+        BASELIB::Log::warning("MlOnnxModel::load – File does not exist: {}", path);
         return false;
     }
 
@@ -203,17 +203,17 @@ bool MlOnnxModel::load(const std::string& path)
             m_outputNames.emplace_back(namePtr.get());
         }
 
-        UTILSLIB::Log::debug("MlOnnxModel::load – Session created for {} ({} inputs, {} outputs)", path, numInputs, numOutputs);
+        BASELIB::Log::debug("MlOnnxModel::load – Session created for {} ({} inputs, {} outputs)", path, numInputs, numOutputs);
         return true;
 
     } catch (const Ort::Exception& e) {
-        UTILSLIB::Log::warning("MlOnnxModel::load – ORT error: {}", e.what());
+        BASELIB::Log::warning("MlOnnxModel::load – ORT error: {}", e.what());
         m_session.reset();
         return false;
     }
 #else
     m_modelPath = path;
-    UTILSLIB::Log::warning("MlOnnxModel::load – Path stored but no ONNX Runtime session created (build with -DUSE_ONNXRUNTIME=ON).");
+    BASELIB::Log::warning("MlOnnxModel::load – Path stored but no ONNX Runtime session created (build with -DUSE_ONNXRUNTIME=ON).");
     return false;
 #endif
 }

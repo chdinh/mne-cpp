@@ -8,7 +8,7 @@
 #include <Eigen/SparseCore>
 #include <cmath>
 
-#include <utils/logger/log.h>
+#include <base/log.h>
 
 #include <mne/mne_hemisphere.h>
 #include <mne/mne_forward_solution.h>
@@ -36,7 +36,7 @@
 using namespace MNELIB;
 using namespace INVLIB;
 using namespace FIFFLIB;
-using namespace UTILSLIB;
+using namespace BASELIB;
 using namespace Eigen;
 
 class TestMneHemisphereEpoch : public QObject
@@ -54,7 +54,7 @@ private:
 private slots:
     void initTestCase()
     {
-        UTILSLIB::Log::install_qt_message_handler();
+        BASELIB::Log::install_qt_message_handler();
         QString base = QCoreApplication::applicationDirPath() + "/../resources/data/mne-cpp-test-data";
         if (QFile::exists(base + "/MEG/sample/sample_audvis_trunc_raw.fif"))
             m_sDataPath = base;

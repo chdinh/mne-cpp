@@ -20,7 +20,7 @@
 //=============================================================================================================
 
 #include "mne_surface_or_volume.h"
-#include <utils/logger/log.h>
+#include <base/log.h>
 #include "mne_surface.h"
 #include "mne_source_space.h"
 #include "mne_patch_info.h"
@@ -222,11 +222,11 @@ void MNESurfaceOrVolume::add_triangle_data()
 #ifdef TRIANGLE_SIZE_WARNING
         for (k = 0, tri = tris.data(); k < ntri; k++, tri++)
             if (tri->area < 1e-5 * tot_area / ntri)
-                UTILSLIB::Log::warning("Warning: Triangle area is only {:g} um^2 ({:.5f} % of expected average)\n", 1e12 * tri->area, 100 * ntri * tri->area / tot_area);
+                BASELIB::Log::warning("Warning: Triangle area is only {:g} um^2 ({:.5f} % of expected average)\n", 1e12 * tri->area, 100 * ntri * tri->area / tot_area);
 #endif
     }
 #ifdef DEBUG
-    UTILSLIB::Log::info("\ttotal area = {:<.1f} cm^2\n", 1e4 * tot_area);
+    BASELIB::Log::info("\ttotal area = {:<.1f} cm^2\n", 1e4 * tot_area);
 #endif
     /*
        * Add information for the selected subset if applicable
@@ -289,7 +289,7 @@ void MNESurfaceOrVolume::calculate_vertex_distances()
 
     vert_dist.clear();
     vert_dist.resize(np);
-    UTILSLIB::Log::info("\tDistances between neighboring vertices...");
+    BASELIB::Log::info("\tDistances between neighboring vertices...");
     for (k = 0, ndist = 0; k < np; k++) {
         nneigh = nneighbor_vert[k];
         vert_dist[k] = Eigen::VectorXf(nneigh);
@@ -302,7 +302,7 @@ void MNESurfaceOrVolume::calculate_vertex_distances()
             ndist++;
         }
     }
-    UTILSLIB::Log::info("[{} distances done]\n", ndist);
+    BASELIB::Log::info("[{} distances done]\n", ndist);
     return;
 }
 
@@ -383,11 +383,11 @@ int MNESurfaceOrVolume::add_geometry_info(bool do_normals, bool check_too_many_n
     add_triangle_data();
     for (p = 0, tri = tris.data(); p < ntri; p++, tri++)
         if (tri->area == 0)
-            UTILSLIB::Log::warning("\tWarning : zero size triangle # {}\n", p);
-    UTILSLIB::Log::info("\tTriangle ");
+            BASELIB::Log::warning("\tWarning : zero size triangle # {}\n", p);
+    BASELIB::Log::info("\tTriangle ");
     if (do_normals)
-        UTILSLIB::Log::info("and vertex ");
-    UTILSLIB::Log::info("normals and neighboring triangles...");
+        BASELIB::Log::info("and vertex ");
+    BASELIB::Log::info("normals and neighboring triangles...");
     for (p = 0, tri = tris.data(); p < ntri; p++, tri++) {
         ii = tri->vert;
         w = 1.0; /* This should be related to the triangle size */
@@ -415,13 +415,13 @@ int MNESurfaceOrVolume::add_geometry_info(bool do_normals, bool check_too_many_n
             return FAIL;
 #else
 #ifdef REPORT_WARNINGS
-            UTILSLIB::Log::warning("Warning: Vertex {} does not have any neighboring triangles!\n", k);
+            BASELIB::Log::warning("Warning: Vertex {} does not have any neighboring triangles!\n", k);
 #endif
 #endif
             nfix_no_neighbors++;
         } else if (nneighbor_tri[k] < 3) {
 #ifdef REPORT_WARNINGS
-            UTILSLIB::Log::warning("\n\tTopological defect: Vertex {} has only {} neighboring triangle{} Vertex omitted.\n\t", k, nneighbor_tri[k], nneighbor_tri[k] > 1 ? "s." : ".");
+            BASELIB::Log::warning("\n\tTopological defect: Vertex {} has only {} neighboring triangle{} Vertex omitted.\n\t", k, nneighbor_tri[k], nneighbor_tri[k] > 1 ? "s." : ".");
 #endif
             nfix_defect++;
             nneighbor_tri[k] = 0;
@@ -437,11 +437,11 @@ int MNESurfaceOrVolume::add_geometry_info(bool do_normals, bool check_too_many_n
             if (size > 0.0)
                 nn.row(k) /= size;
         }
-    UTILSLIB::Log::info("[done]\n");
+    BASELIB::Log::info("[done]\n");
     /*
        * Determine the neighboring vertices
        */
-    UTILSLIB::Log::info("\tVertex neighbors...");
+    BASELIB::Log::info("\tVertex neighbors...");
     neighbor_vert.clear();
     neighbor_vert.resize(np);
     nneighbor_vert = VectorXi::Zero(np);
@@ -478,10 +478,10 @@ int MNESurfaceOrVolume::add_geometry_info(bool do_normals, bool check_too_many_n
                             neighbors[nneighbors++] = vert;
                         else {
                             if (check_too_many_neighbors) {
-                                UTILSLIB::Log::critical("Too many neighbors for vertex {}.", k);
+                                BASELIB::Log::critical("Too many neighbors for vertex {}.", k);
                                 return FAIL;
                             } else
-                                UTILSLIB::Log::warning("\tWarning: Too many neighbors for vertex {}\n", k);
+                                BASELIB::Log::warning("\tWarning: Too many neighbors for vertex {}\n", k);
                         }
                     }
                 }
@@ -489,13 +489,13 @@ int MNESurfaceOrVolume::add_geometry_info(bool do_normals, bool check_too_many_n
         }
         if (nneighbors != nneighbor_vert[k]) {
 #ifdef REPORT_WARNINGS
-            UTILSLIB::Log::warning("\n\tIncorrect number of distinct neighbors for vertex {} ({} instead of {}) [fixed].", k, nneighbors, nneighbor_vert[k]);
+            BASELIB::Log::warning("\n\tIncorrect number of distinct neighbors for vertex {} ({} instead of {}) [fixed].", k, nneighbors, nneighbor_vert[k]);
 #endif
             nfix_distinct++;
             nneighbor_vert[k] = nneighbors;
         }
     }
-    UTILSLIB::Log::info("[done]\n");
+    BASELIB::Log::info("[done]\n");
     /*
        * Distance calculation follows
        */
@@ -505,17 +505,17 @@ int MNESurfaceOrVolume::add_geometry_info(bool do_normals, bool check_too_many_n
        * Summarize the defects
        */
     if (nfix_defect > 0)
-        UTILSLIB::Log::warning("\tWarning: {} topological defects were fixed.\n", nfix_defect);
+        BASELIB::Log::warning("\tWarning: {} topological defects were fixed.\n", nfix_defect);
     if (nfix_distinct > 0)
-        UTILSLIB::Log::warning("\tWarning: {} vertices had incorrect number of distinct neighbors (fixed).\n", nfix_distinct);
+        BASELIB::Log::warning("\tWarning: {} vertices had incorrect number of distinct neighbors (fixed).\n", nfix_distinct);
     if (nfix_no_neighbors > 0)
-        UTILSLIB::Log::warning("\tWarning: {} vertices did not have any neighboring triangles (fixed)\n", nfix_no_neighbors);
+        BASELIB::Log::warning("\tWarning: {} vertices did not have any neighboring triangles (fixed)\n", nfix_no_neighbors);
 #ifdef DEBUG
     for (k = 0; k < np; k++) {
         if (nneighbor_vert[k] <= 0)
-            UTILSLIB::Log::critical("No neighbors for vertex {}\n", k);
+            BASELIB::Log::critical("No neighbors for vertex {}\n", k);
         if (nneighbor_tri[k] <= 0)
-            UTILSLIB::Log::critical("No neighbor tris for vertex {}\n", k);
+            BASELIB::Log::critical("No neighbor tris for vertex {}\n", k);
     }
 #endif
     return OK;

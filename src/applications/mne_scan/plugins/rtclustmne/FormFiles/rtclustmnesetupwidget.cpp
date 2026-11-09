@@ -26,7 +26,7 @@
 #include <fiff/fiff_coord_trans.h>
 
 #include <mne/mne_forward_solution.h>
-#include <utils/string_utils.h>
+#include <base/string_utils.h>
 
 #include <scMeas/realtimesourceestimate.h>
 

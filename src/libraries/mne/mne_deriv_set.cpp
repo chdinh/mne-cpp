@@ -16,11 +16,11 @@
 
 #include "mne_deriv_set.h"
 #include <memory>
-#include <utils/logger/log.h>
+#include <base/log.h>
 
 #include <vector>
 #include <utility>
-#include <utils/string_utils.h>
+#include <base/string_utils.h>
 
 #include <fiff/fiff_constants.h>
 #include <fiff/fiff_dir_node.h>
@@ -72,7 +72,7 @@ StringList tokenize(std::istream& in)
     };
     std::string line;
     while (std::getline(in, line)) {
-        if (UTILSLIB::trimmed(line).starts_with('#')) {
+        if (BASELIB::trimmed(line).starts_with('#')) {
             continue;
         }
         std::size_t k = 0;
@@ -111,13 +111,13 @@ std::unique_ptr<MNEDeriv> makeDeriv(const std::vector<MNEDerivSet::Definition>& 
             if (std::fabs(it->second) <= kZero) {
                 continue;
             }
-            if (!UTILSLIB::contains(inputs, it->first)) {
+            if (!BASELIB::contains(inputs, it->first)) {
                 inputs.push_back(it->first);
             }
-            row.push_back({static_cast<int>(UTILSLIB::indexOf(inputs, it->first)), it->second});
+            row.push_back({static_cast<int>(BASELIB::indexOf(inputs, it->first)), it->second});
         }
         if (row.empty()) {
-            UTILSLIB::Log::info("MNEDerivSet - Empty derivation \"{}\" omitted", definition.first);
+            BASELIB::Log::info("MNEDerivSet - Empty derivation \"{}\" omitted", definition.first);
             continue;
         }
         for (const auto& [column, weight] : row) {
@@ -157,7 +157,7 @@ std::optional<MNEDerivSet> MNEDerivSet::read(const std::filesystem::path& path)
         for (const std::shared_ptr<FiffDirNode>& matrix : block->dir_tree_find(FIFFB_MNE_NAMED_MATRIX)) {
             auto data = MNESparseNamedMatrix::read(stream, matrix, FIFF_MNE_DERIVATION_DATA);
             if (!data) {
-                UTILSLIB::Log::warning("MNEDerivSet::read - Bad derivation data in {}", UTILSLIB::utf8FromPath(path));
+                BASELIB::Log::warning("MNEDerivSet::read - Bad derivation data in {}", BASELIB::utf8FromPath(path));
                 return std::nullopt;
             }
             auto deriv = std::make_unique<MNEDeriv>();
@@ -175,7 +175,7 @@ std::optional<MNEDerivSet> MNEDerivSet::readText(const std::filesystem::path& pa
 {
     std::ifstream file(path);
     if (!file) {
-        UTILSLIB::Log::warning("MNEDerivSet::readText - Cannot open {}", UTILSLIB::utf8FromPath(path));
+        BASELIB::Log::warning("MNEDerivSet::readText - Cannot open {}", BASELIB::utf8FromPath(path));
         return std::nullopt;
     }
     const StringList tokens = tokenize(file);
@@ -196,7 +196,7 @@ std::optional<MNEDerivSet> MNEDerivSet::readText(const std::filesystem::path& pa
     bool havePrev = false;
     double number = 0.0;
     for (const std::string& token : tokens) {
-        const std::optional<double> parsed = UTILSLIB::toDouble(token);
+        const std::optional<double> parsed = BASELIB::toDouble(token);
         const bool isNumber = parsed.has_value();
         const double value = parsed.value_or(0.0);
         const Kind kind = token == "=" ? Kind::Equal : token == "+" ? Kind::Plus
@@ -211,14 +211,14 @@ std::optional<MNEDerivSet> MNEDerivSet::readText(const std::filesystem::path& pa
             definitions.push_back({token, {}});
         } else if (kind == Kind::Equal) {
             if (definitions.empty() || !definitions.back().second.empty()) {
-                UTILSLIB::Log::warning("MNEDerivSet::readText - Misplaced equal sign in {}", UTILSLIB::utf8FromPath(path));
+                BASELIB::Log::warning("MNEDerivSet::readText - Misplaced equal sign in {}", BASELIB::utf8FromPath(path));
                 return std::nullopt;
             }
         } else if (kind == Kind::Channel) {
             const double weight = prev == Kind::Minus ? -1.0 : prev == Kind::Number ? number
                                                                                     : 1.0;
             if (definitions.empty()) {
-                UTILSLIB::Log::warning("MNEDerivSet::readText - Misplaced channel name in {}", UTILSLIB::utf8FromPath(path));
+                BASELIB::Log::warning("MNEDerivSet::readText - Misplaced channel name in {}", BASELIB::utf8FromPath(path));
                 return std::nullopt;
             }
             definitions.back().second[token] += weight;
@@ -229,11 +229,11 @@ std::optional<MNEDerivSet> MNEDerivSet::readText(const std::filesystem::path& pa
         havePrev = true;
     }
     if (definitions.empty()) {
-        UTILSLIB::Log::warning("MNEDerivSet::readText - No derivations in {}", UTILSLIB::utf8FromPath(path));
+        BASELIB::Log::warning("MNEDerivSet::readText - No derivations in {}", BASELIB::utf8FromPath(path));
         return std::nullopt;
     }
     MNEDerivSet set;
-    set.derivs.push_back(makeDeriv(definitions, UTILSLIB::utf8FromPath(path), {}));
+    set.derivs.push_back(makeDeriv(definitions, BASELIB::utf8FromPath(path), {}));
     if (set.derivs.front()->deriv_data->nrow == 0) {
         return std::nullopt;
     }
@@ -254,7 +254,7 @@ MNEDerivSet MNEDerivSet::fromDefinitions(const std::vector<Definition>& definiti
 bool MNEDerivSet::write(const std::filesystem::path& path) const
 {
     if (derivs.empty()) {
-        UTILSLIB::Log::warning("MNEDerivSet::write - No derivations to write");
+        BASELIB::Log::warning("MNEDerivSet::write - No derivations to write");
         return false;
     }
     QFile file(path);
@@ -310,14 +310,14 @@ std::unique_ptr<MNEDeriv> MNEDerivSet::match(const StringList& chNames) const
         ++ntot;
         bool available = true;
         for (auto it = definition.second.cbegin(); it != definition.second.cend() && available; ++it) {
-            available = std::fabs(it->second) <= kZero || UTILSLIB::contains(chNames, it->first);
+            available = std::fabs(it->second) <= kZero || BASELIB::contains(chNames, it->first);
         }
         if (!available) {
             continue;
         }
         for (auto it = definition.second.cbegin(); it != definition.second.cend(); ++it) {
             if (std::fabs(it->second) > kZero) {
-                triplets.emplace_back(static_cast<int>(outputs.size()), static_cast<int>(UTILSLIB::indexOf(chNames, it->first)), static_cast<float>(it->second));
+                triplets.emplace_back(static_cast<int>(outputs.size()), static_cast<int>(BASELIB::indexOf(chNames, it->first)), static_cast<float>(it->second));
             }
         }
         outputs.push_back(definition.first);
@@ -325,7 +325,7 @@ std::unique_ptr<MNEDeriv> MNEDerivSet::match(const StringList& chNames) const
     if (outputs.empty()) {
         return nullptr;
     }
-    UTILSLIB::Log::info("MNEDerivSet::match - {} of {} derivations were matched.", outputs.size(), ntot);
+    BASELIB::Log::info("MNEDerivSet::match - {} of {} derivations were matched.", outputs.size(), ntot);
     Eigen::SparseMatrix<float> data(outputs.size(), chNames.size());
     data.setFromTriplets(triplets.begin(), triplets.end());
 

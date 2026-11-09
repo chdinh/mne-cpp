@@ -27,7 +27,7 @@
 
 #include "fiff_global.h"
 
-#include <utils/error.h>
+#include <base/error.h>
 
 #include <Eigen/Core>
 
@@ -78,7 +78,7 @@ public:
 
     //=========================================================================================================
     /**
-     * Reads an event file like read(); throws UTILSLIB::Error if it cannot.
+     * Reads an event file like read(); throws BASELIB::Error if it cannot.
      *
      * @param[in] path   The event file.
      */
@@ -92,7 +92,7 @@ public:
      *
      * @return The events, or why the file cannot be read.
      */
-    [[nodiscard]] static UTILSLIB::Expected<FiffEvents> read(const std::filesystem::path& path);
+    [[nodiscard]] static BASELIB::Expected<FiffEvents> read(const std::filesystem::path& path);
 
     //=========================================================================================================
     /**
@@ -103,7 +103,7 @@ public:
      * @return The events, or why the file cannot be read: Io if it cannot be opened, NotFound if it
      *         holds no event list.
      */
-    [[nodiscard]] static UTILSLIB::Expected<FiffEvents> read_fif(const std::filesystem::path& path);
+    [[nodiscard]] static BASELIB::Expected<FiffEvents> read_fif(const std::filesystem::path& path);
 
     //=========================================================================================================
     /**
@@ -115,7 +115,7 @@ public:
      * @return The events, or why the file cannot be read: Io if it cannot be opened, Format if a line
      *         does not start with a sample number.
      */
-    [[nodiscard]] static UTILSLIB::Expected<FiffEvents> read_ascii(const std::filesystem::path& path);
+    [[nodiscard]] static BASELIB::Expected<FiffEvents> read_ascii(const std::filesystem::path& path);
 
     //=========================================================================================================
     /**
@@ -126,7 +126,7 @@ public:
      *
      * @return Nothing, or why the file cannot be written.
      */
-    [[nodiscard]] UTILSLIB::Expected<void> write(const std::filesystem::path& path, float sfreq = 0.0f) const;
+    [[nodiscard]] BASELIB::Expected<void> write(const std::filesystem::path& path, float sfreq = 0.0f) const;
 
     //=========================================================================================================
     /**
@@ -136,7 +136,7 @@ public:
      *
      * @return Nothing, or why the file cannot be written: Format if there are no events, Io otherwise.
      */
-    [[nodiscard]] UTILSLIB::Expected<void> write_fif(const std::filesystem::path& path) const;
+    [[nodiscard]] BASELIB::Expected<void> write_fif(const std::filesystem::path& path) const;
 
     //=========================================================================================================
     /**
@@ -147,7 +147,7 @@ public:
      *
      * @return Nothing, or why the file cannot be written (Io).
      */
-    [[nodiscard]] UTILSLIB::Expected<void> write_ascii(const std::filesystem::path& path, float sfreq = 0.0f) const;
+    [[nodiscard]] BASELIB::Expected<void> write_ascii(const std::filesystem::path& path, float sfreq = 0.0f) const;
 
     //=========================================================================================================
     /**
@@ -161,10 +161,10 @@ public:
      * @return The events, which may be none, or why there are none: NotFound if the channel is
      *         missing, Io if its data cannot be read.
      */
-    [[nodiscard]] static UTILSLIB::Expected<FiffEvents> find_events(const FiffRawData& raw,
-                                                                    std::string_view stim_channel = "STI 014",
-                                                                    unsigned int mask = 0xFFFFFFFF,
-                                                                    bool leading_edge = true);
+    [[nodiscard]] static BASELIB::Expected<FiffEvents> find_events(const FiffRawData& raw,
+                                                                   std::string_view stim_channel = "STI 014",
+                                                                   unsigned int mask = 0xFFFFFFFF,
+                                                                   bool leading_edge = true);
 
     /** @return The number of events. */
     int num_events() const

@@ -24,7 +24,7 @@
 //=============================================================================================================
 
 #include <fiff/fiff.h>
-#include <utils/string_utils.h>
+#include <base/string_utils.h>
 #include <fiff/fiff_evoked.h>
 #include <fiff/fiff_evoked_set.h>
 #include <fiff/fiff_info.h>
@@ -40,7 +40,7 @@
 
 #include <fs/fs_label.h>
 
-#include <utils/logger/log.h>
+#include <base/log.h>
 
 //=============================================================================================================
 // QT INCLUDES
@@ -71,7 +71,7 @@ using namespace FIFFLIB;
 using namespace MNELIB;
 using namespace INVLIB;
 using namespace FSLIB;
-using namespace UTILSLIB;
+using namespace BASELIB;
 
 //=============================================================================================================
 // DEFINES
@@ -204,7 +204,7 @@ static bool readBaselines(const QString& fileName,
             continue;
         QStringList parts = line.split(QRegularExpression("\\s+"));
         if (parts.size() >= 2) {
-            const int idx = UTILSLIB::indexOf(ch_names, parts[0].toStdString());
+            const int idx = BASELIB::indexOf(ch_names, parts[0].toStdString());
             if (idx >= 0) {
                 baselines(idx) = parts[1].toDouble();
                 nFound++;
@@ -505,7 +505,7 @@ static bool writePredictedData(const QString& fileName,
  */
 int main(int argc, char* argv[])
 {
-    UTILSLIB::Log::install_qt_message_handler();
+    BASELIB::Log::install_qt_message_handler();
     QCoreApplication app(argc, argv);
     QCoreApplication::setApplicationName("mne_compute_mne");
     QCoreApplication::setApplicationVersion(PROGRAM_VERSION);
@@ -848,7 +848,7 @@ int main(int argc, char* argv[])
 
         MatrixXd pickedData(invOp.nchan, fwd.sol->data.cols());
         for (int channel = 0; channel < static_cast<int>(invOp.noise_cov->names.size()); ++channel) {
-            const int fwdChannel = UTILSLIB::indexOf(fwd.sol->row_names, invOp.noise_cov->names[channel]);
+            const int fwdChannel = BASELIB::indexOf(fwd.sol->row_names, invOp.noise_cov->names[channel]);
             if (fwdChannel < 0) {
                 qCritical("Error: Forward solution is missing inverse-operator channel %s.",
                           invOp.noise_cov->names[channel].c_str());

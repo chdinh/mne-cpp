@@ -10,8 +10,8 @@
  * @brief    Byte-order conversion of integers and floating-point values in standard C++.
  */
 
-#ifndef UTILS_ENDIAN_H
-#define UTILS_ENDIAN_H
+#ifndef BASE_ENDIAN_H
+#define BASE_ENDIAN_H
 
 //=============================================================================================================
 // STL INCLUDES
@@ -23,10 +23,10 @@
 #include <type_traits>
 
 //=============================================================================================================
-// DEFINE NAMESPACE UTILSLIB
+// DEFINE NAMESPACE BASELIB
 //=============================================================================================================
 
-namespace UTILSLIB
+namespace BASELIB
 {
 
 /** Integers and floating-point values of 1, 2, 4 or 8 bytes. */
@@ -99,6 +99,6 @@ void byteSwapInPlace(T* data, std::size_t count) noexcept
     }
 }
 
-} // namespace UTILSLIB
+} // namespace BASELIB
 
-#endif // UTILS_ENDIAN_H
+#endif // BASE_ENDIAN_H

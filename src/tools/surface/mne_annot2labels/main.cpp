@@ -17,7 +17,7 @@
 #include <fs/fs_annotation.h>
 #include <fs/fs_surface.h>
 #include <fs/fs_label.h>
-#include <utils/logger/log.h>
+#include <base/log.h>
 
 //=============================================================================================================
 // QT INCLUDES
@@ -42,7 +42,6 @@
 //=============================================================================================================
 
 using namespace FSLIB;
-using namespace UTILSLIB;
 using namespace Eigen;
 
 //=============================================================================================================
@@ -146,7 +145,7 @@ static bool processHemisphere(const QString& subjectsDir, const QString& subject
 
 int main(int argc, char* argv[])
 {
-    UTILSLIB::Log::install_qt_message_handler();
+    BASELIB::Log::install_qt_message_handler();
     QCoreApplication app(argc, argv);
     QCoreApplication::setApplicationName("mne_annot2labels");
     QCoreApplication::setApplicationVersion(PROGRAM_VERSION);

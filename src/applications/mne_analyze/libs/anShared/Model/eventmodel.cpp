@@ -27,7 +27,7 @@
 #include <iostream>
 
 #include <dsp/rt/rt_detect_trigger.h>
-#include <utils/string_utils.h>
+#include <base/string_utils.h>
 
 //=============================================================================================================
 // QT INCLUDES

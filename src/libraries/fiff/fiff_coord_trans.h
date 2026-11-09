@@ -45,7 +45,7 @@
 // QT INCLUDES
 //=============================================================================================================
 
-#include <utils/error.h>
+#include <base/error.h>
 
 #include <QMetaType>
 
@@ -99,7 +99,7 @@ public:
 
     //=========================================================================================================
     /**
-     * Reads the first coordinate transform of a FIFF file, like read(); throws UTILSLIB::Error if it cannot.
+     * Reads the first coordinate transform of a FIFF file, like read(); throws BASELIB::Error if it cannot.
      *
      * @param[in] path   The file.
      */
@@ -107,7 +107,7 @@ public:
 
     //=========================================================================================================
     /**
-     * Reads the transform between two frames, like read(path, from, to); throws UTILSLIB::Error if there is none.
+     * Reads the transform between two frames, like read(path, from, to); throws BASELIB::Error if there is none.
      *
      * @param[in] path   The file.
      * @param[in] from   Source coordinate frame.
@@ -284,7 +284,7 @@ public:
      *
      * @return The transform, or why the file holds none.
      */
-    [[nodiscard]] static UTILSLIB::Expected<FiffCoordTrans> read(const std::filesystem::path& path);
+    [[nodiscard]] static BASELIB::Expected<FiffCoordTrans> read(const std::filesystem::path& path);
 
     //=========================================================================================================
     /**
@@ -297,7 +297,7 @@ public:
      *
      * @return The transform, or why the file holds none between these frames.
      */
-    [[nodiscard]] static UTILSLIB::Expected<FiffCoordTrans> read(const std::filesystem::path& path, int from, int to);
+    [[nodiscard]] static BASELIB::Expected<FiffCoordTrans> read(const std::filesystem::path& path, int from, int to);
 
     //=========================================================================================================
     /**
@@ -309,7 +309,7 @@ public:
      *
      * @return The transform with its translation in m, or why the file cannot be read.
      */
-    [[nodiscard]] static UTILSLIB::Expected<FiffCoordTrans> read_ascii(const std::filesystem::path& path, int from, int to);
+    [[nodiscard]] static BASELIB::Expected<FiffCoordTrans> read_ascii(const std::filesystem::path& path, int from, int to);
 
     //=========================================================================================================
     /**
@@ -432,7 +432,7 @@ public:
      *
      * @return Nothing, or why the file cannot be written.
      */
-    [[nodiscard]] UTILSLIB::Expected<void> write(const std::filesystem::path& path) const;
+    [[nodiscard]] BASELIB::Expected<void> write(const std::filesystem::path& path) const;
 
     //=========================================================================================================
     /**
@@ -502,9 +502,9 @@ public:
      *
      * @return The coordinate transform, inverted if stored the other way round, or NotFound.
      */
-    [[nodiscard]] static UTILSLIB::Expected<FiffCoordTrans> read_from_node(FiffStream& stream,
-                                                                           const std::shared_ptr<FiffDirNode>& node,
-                                                                           int from, int to);
+    [[nodiscard]] static BASELIB::Expected<FiffCoordTrans> read_from_node(FiffStream& stream,
+                                                                          const std::shared_ptr<FiffDirNode>& node,
+                                                                          int from, int to);
 
     //========================================================================================================
     /**

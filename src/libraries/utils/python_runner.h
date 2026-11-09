@@ -118,7 +118,7 @@ using PythonProgressCallback = std::function<void(float pct, const QString& msg)
  * - Streams stdout/stderr line-by-line through optional callbacks.
  * - Parses a simple progress protocol: lines matching
  *   `[progress] <float>%` or `[progress] <float>% <message>`.
- * - Reports through UTILSLIB::Log.
+ * - Reports through BASELIB::Log.
  * - Supports timeout, environment injection, and working directory.
  *
  * No Python embedding or linkage is required.

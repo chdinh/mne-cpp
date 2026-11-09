@@ -47,4 +47,5 @@ target_link_libraries(mne_analyze_studio_mna_skills PUBLIC
     mne_analyze_studio_core
     mne_mna
     mne_utils
+    mne_base
 )

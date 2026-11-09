@@ -26,8 +26,8 @@
 
 #include <iostream>
 
-#include <utils/logger/log.h>
-#include <utils/string_utils.h>
+#include <base/log.h>
+#include <base/string_utils.h>
 
 #include <regex>
 
@@ -345,21 +345,21 @@ bool FiffInfoBase::readBadChannelsFromFile(const std::string& name, StringList& 
         listOut.clear();
         return true;
     }
-    std::ifstream file(UTILSLIB::pathFromUtf8(name));
+    std::ifstream file(BASELIB::pathFromUtf8(name));
     if (!file) {
-        UTILSLIB::Log::critical("Cannot open bad channel file: {}", name);
+        BASELIB::Log::critical("Cannot open bad channel file: {}", name);
         return false;
     }
     StringList list;
     std::string line;
     while (std::getline(file, line)) {
-        const std::string_view trimmed = UTILSLIB::trimmed(line);
+        const std::string_view trimmed = BASELIB::trimmed(line);
         if (trimmed.empty() || trimmed.front() == '#')
             continue;
         list.emplace_back(trimmed);
     }
     if (file.bad()) {
-        UTILSLIB::Log::critical("Error reading bad channel file: {}", name);
+        BASELIB::Log::critical("Error reading bad channel file: {}", name);
         return false;
     }
     listOut = std::move(list);

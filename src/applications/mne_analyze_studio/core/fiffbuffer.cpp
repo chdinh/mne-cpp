@@ -13,7 +13,7 @@
  */
 
 #include "fiffbuffer.h"
-#include <utils/string_utils.h>
+#include <base/string_utils.h>
 
 #include <QJsonArray>
 #include <QJsonObject>

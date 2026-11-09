@@ -32,7 +32,7 @@
 #include <string_view>
 #include <fiff/fiff_coord_trans.h>
 #include <fiff/fiff_stream.h>
-#include <utils/error.h>
+#include <base/error.h>
 
 #include <filesystem>
 #include <memory>
@@ -133,7 +133,7 @@ public:
 
     //=========================================================================================================
     /**
-     * Reads a source space file like read(); throws UTILSLIB::Error if it cannot.
+     * Reads a source space file like read(); throws BASELIB::Error if it cannot.
      *
      * @param[in] path   The -src.fif file (or any FIFF file holding source spaces).
      */
@@ -149,7 +149,7 @@ public:
      * @return The source spaces, or why the file cannot be read: Io if it cannot be opened, NotFound if it holds
      *         no source space, Format if a source space is incomplete or inconsistent.
      */
-    [[nodiscard]] static UTILSLIB::Expected<MNESourceSpaces> read(const std::filesystem::path& path, bool add_geom = true);
+    [[nodiscard]] static BASELIB::Expected<MNESourceSpaces> read(const std::filesystem::path& path, bool add_geom = true);
 
     //=========================================================================================================
     /**
@@ -160,7 +160,7 @@ public:
      *
      * @return The source spaces, or why the stream cannot be read (see read(path)).
      */
-    [[nodiscard]] static UTILSLIB::Expected<MNESourceSpaces> read(FIFFLIB::FiffStream& stream, bool add_geom = true);
+    [[nodiscard]] static BASELIB::Expected<MNESourceSpaces> read(FIFFLIB::FiffStream& stream, bool add_geom = true);
 
     //=========================================================================================================
     /**
@@ -170,7 +170,7 @@ public:
      *
      * @return Nothing, or why the file cannot be written (Io).
      */
-    [[nodiscard]] UTILSLIB::Expected<void> write(const std::filesystem::path& path) const;
+    [[nodiscard]] BASELIB::Expected<void> write(const std::filesystem::path& path) const;
 
     //=========================================================================================================
     /**

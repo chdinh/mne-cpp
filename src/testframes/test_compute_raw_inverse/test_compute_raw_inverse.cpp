@@ -16,7 +16,7 @@
 // INCLUDES
 //=============================================================================================================
 
-#include <utils/logger/log.h>
+#include <base/log.h>
 
 #include <fiff/fiff.h>
 #include <fiff/fiff_evoked.h>
@@ -56,7 +56,6 @@ using namespace FIFFLIB;
 using namespace MNELIB;
 using namespace INVLIB;
 using namespace FSLIB;
-using namespace UTILSLIB;
 
 //=============================================================================================================
 /**
@@ -161,7 +160,7 @@ QString TestComputeRawInverse::findDataPath()
 
 void TestComputeRawInverse::initTestCase()
 {
-    UTILSLIB::Log::install_qt_message_handler();
+    BASELIB::Log::install_qt_message_handler();
 
     printf(">>>>>>>>>>>>>>>>>>>>>>>>> Compute Raw Inverse Test Init >>>>>>>>>>>>>>>>>>>>>>>>>\n");
 

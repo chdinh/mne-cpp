@@ -19,6 +19,7 @@
 //=============================================================================================================
 
 #include "lsl_stream_inlet.h"
+#include <base/log.h>
 #include "lsl_protocol.h"
 
 //=============================================================================================================
@@ -168,7 +169,7 @@ public:
             }
         }
         if (result < 0) {
-            qWarning("[lsl::stream_inlet] Malformed sample from the outlet; closing the stream");
+            BASELIB::Log::warning("[lsl::stream_inlet] Malformed sample from the outlet; closing the stream");
             closeStream();
             return chunk;
         }

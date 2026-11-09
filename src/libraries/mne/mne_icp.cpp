@@ -20,7 +20,7 @@
 
 #include "mne_icp.h"
 #include <memory>
-#include <utils/logger/log.h>
+#include <base/log.h>
 #include <iostream>
 
 #include "fiff/fiff_coord_trans.h"
@@ -68,7 +68,7 @@ bool MNELIB::performIcp(const std::shared_ptr<MNEProjectToSurface>& mneSurfacePo
  */
 {
     if (matPointCloud.rows() == 0) {
-        UTILSLIB::Log::warning("[MNELIB::icp] Passed point cloud is empty.");
+        BASELIB::Log::warning("[MNELIB::icp] Passed point cloud is empty.");
         return false;
     }
 
@@ -94,13 +94,13 @@ bool MNELIB::performIcp(const std::shared_ptr<MNEProjectToSurface>& mneSurfacePo
     for (int iIter = 0; iIter < iMaxIter; ++iIter) {
         // Step a: compute the closest point on the surface; eq 29
         if (!mneSurfacePoints->find_closest_on_surface(matPk, iNP, matYk, vecNearest, vecDist)) {
-            UTILSLIB::Log::warning("[MNELIB::icp] find_closest_on_surface was not successful.");
+            BASELIB::Log::warning("[MNELIB::icp] find_closest_on_surface was not successful.");
             return false;
         }
 
         // Step b: compute the registration; eq 30
         if (!fitMatchedPoints(matP0, matYk, matTrans, fScale, bScale, vecWeights)) {
-            UTILSLIB::Log::warning("[MNELIB::icp] point cloud registration not successful");
+            BASELIB::Log::warning("[MNELIB::icp] point cloud registration not successful");
         }
 
         // Step c: apply registration
@@ -114,15 +114,15 @@ bool MNELIB::performIcp(const std::shared_ptr<MNEProjectToSurface>& mneSurfacePo
 
         if (std::sqrt(std::fabs(fMSE - fMSEPrev)) < fTol) {
             transFromTo = transICP;
-            UTILSLIB::Log::info("[MNELIB::icp] ICP was successful and converged after {} iterations with RMSE dist: {} mm.", iIter + 1, fRMSE * 1000);
+            BASELIB::Log::info("[MNELIB::icp] ICP was successful and converged after {} iterations with RMSE dist: {} mm.", iIter + 1, fRMSE * 1000);
             return true;
         }
         fMSEPrev = fMSE;
-        UTILSLIB::Log::info("[MNELIB::icp] ICP iteration {} with RMSE: {} mm.", iIter + 1, fRMSE * 1000);
+        BASELIB::Log::info("[MNELIB::icp] ICP iteration {} with RMSE: {} mm.", iIter + 1, fRMSE * 1000);
     }
     transFromTo = transICP;
 
-    UTILSLIB::Log::warning("[MNELIB::icp] Maximum number of {} iterations exceeded with RMSE: {} mm.", iMaxIter, fRMSE * 1000);
+    BASELIB::Log::warning("[MNELIB::icp] Maximum number of {} iterations exceeded with RMSE: {} mm.", iMaxIter, fRMSE * 1000);
     return true;
 }
 
@@ -161,7 +161,7 @@ bool MNELIB::fitMatchedPoints(const MatrixXf& matSrcPoint,
 
     // test size of point clouds
     if (matSrcPoint.size() != matDstPoint.size()) {
-        UTILSLIB::Log::warning("[MNELIB::fitMatchedPoints] Point clouds do not match.");
+        BASELIB::Log::warning("[MNELIB::fitMatchedPoints] Point clouds do not match.");
         return false;
     }
 
@@ -257,7 +257,7 @@ bool MNELIB::discard3DPointOutliers(const std::shared_ptr<MNELIB::MNEProjectToSu
     // discard outliers if necessary
     if (fMaxDist > 0.0) {
         if (!mneSurfacePoints->find_closest_on_surface(matP, iNP, matYk, vecNearest, vecDist)) {
-            UTILSLIB::Log::warning("[MNELIB::icp] find_closest_on_surface was not successful.");
+            BASELIB::Log::warning("[MNELIB::icp] find_closest_on_surface was not successful.");
             return false;
         }
 
@@ -272,7 +272,7 @@ bool MNELIB::discard3DPointOutliers(const std::shared_ptr<MNELIB::MNEProjectToSu
             }
         }
     }
-    UTILSLIB::Log::info("[MNELIB::discardOutliers] {} digitizers discarded.", iDiscarded);
+    BASELIB::Log::info("[MNELIB::discardOutliers] {} digitizers discarded.", iDiscarded);
     return true;
 }
 

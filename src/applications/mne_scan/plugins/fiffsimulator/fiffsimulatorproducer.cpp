@@ -42,7 +42,6 @@ using namespace FIFFSIMULATORPLUGIN;
 using namespace COMLIB;
 using namespace Eigen;
 using namespace FIFFLIB;
-using namespace UTILSLIB;
 
 //=============================================================================================================
 // DEFINE MEMBER METHODS

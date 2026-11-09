@@ -26,10 +26,10 @@
 
 #include "mne_inverse_operator.h"
 #include <memory>
-#include <utils/logger/log.h>
+#include <base/log.h>
 
 #include <vector>
-#include <utils/string_utils.h>
+#include <base/string_utils.h>
 #include <fs/fs_label.h>
 #include <math/linalg.h>
 
@@ -53,6 +53,7 @@
 //=============================================================================================================
 
 using namespace UTILSLIB;
+using namespace BASELIB;
 using namespace MNELIB;
 using namespace FIFFLIB;
 using namespace FSLIB;
@@ -232,7 +233,7 @@ bool MNEInverseOperator::check_ch_names(const FiffInfo& measInfo) const
 
     StringList missing_ch_names;
     for (qint32 i = 0; i < static_cast<int>(inv_ch_names.size()); ++i)
-        if (!UTILSLIB::contains(data_ch_names, inv_ch_names[i]))
+        if (!BASELIB::contains(data_ch_names, inv_ch_names[i]))
             missing_ch_names.push_back(inv_ch_names[i]);
 
     qint32 n_missing = static_cast<int>(missing_ch_names.size());
@@ -659,7 +660,7 @@ MNEInverseOperator MNEInverseOperator::make_inverse_operator(const FiffInfo& inf
     RowVectorXd ch_idx(info.chs.size());
     qint32 count = 0;
     for (qint32 i = 0; i < std::ssize(info.chs); ++i) {
-        if (UTILSLIB::contains(gain_info.ch_names, info.chs[i].ch_name)) {
+        if (BASELIB::contains(gain_info.ch_names, info.chs[i].ch_name)) {
             ch_idx[count] = i;
             ++count;
         }

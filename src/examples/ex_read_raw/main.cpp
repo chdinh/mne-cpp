@@ -23,7 +23,7 @@
 
 #include <fiff/fiff.h>
 #include <mne/mne.h>
-#include <utils/logger/log.h>
+#include <base/log.h>
 
 #include <disp/plots/helpers/figureexporter.h>
 #include <disp/plots/lineplot.h>
@@ -43,7 +43,7 @@
 using namespace DISPLIB;
 using namespace FIFFLIB;
 using namespace MNELIB;
-using namespace UTILSLIB;
+using namespace BASELIB;
 using namespace Eigen;
 
 //=============================================================================================================
@@ -62,7 +62,7 @@ using namespace Eigen;
  */
 int main(int argc, char* argv[])
 {
-    UTILSLIB::Log::install_qt_message_handler();
+    BASELIB::Log::install_qt_message_handler();
     QApplication app(argc, argv);
 
     // Command Line Parser

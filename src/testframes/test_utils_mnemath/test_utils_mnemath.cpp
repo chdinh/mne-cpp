@@ -16,7 +16,7 @@
 
 #include <math/linalg.h>
 #include <math/numerics.h>
-#include <utils/logger/log.h>
+#include <base/log.h>
 
 //=============================================================================================================
 // QT INCLUDES
@@ -130,7 +130,7 @@ TestMNEMath::TestMNEMath()
 
 void TestMNEMath::initTestCase()
 {
-    UTILSLIB::Log::install_qt_message_handler();
+    BASELIB::Log::install_qt_message_handler();
     qInfo() << "TestMNEMath: Starting MNEMath unit tests";
 }
 

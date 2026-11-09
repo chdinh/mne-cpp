@@ -36,10 +36,8 @@
 using namespace TMSIPLUGIN;
 using namespace SCSHAREDLIB;
 using namespace SCMEASLIB;
-using namespace UTILSLIB;
 using namespace FIFFLIB;
 using namespace std;
-using namespace UTILSLIB;
 using namespace Eigen;
 
 //=============================================================================================================
@@ -50,7 +48,7 @@ TMSI::TMSI()
 : m_pRMTSA_TMSI(0)
 , m_qStringResourcePath(qApp->applicationDirPath() + "/../resources/mne_scan/plugins/tmsi/")
 , m_pTMSIProducer(new TMSIProducer(this))
-, m_pCircularBuffer(std::make_shared<CircularBuffer_Matrix_float>(8))
+, m_pCircularBuffer(std::make_shared<BASELIB::CircularBuffer<Eigen::MatrixXf>>(8))
 {
     // Create record file option action bar item/button
     m_pActionSetupProject = new QAction(QIcon(":/images/database.png"), tr("Setup project"), this);

@@ -21,7 +21,7 @@
 //=============================================================================================================
 
 #include <inv/beamformer/inv_beamformer.h>
-#include <utils/string_utils.h>
+#include <base/string_utils.h>
 #include <inv/beamformer/inv_dics.h>
 #include <inv/beamformer/inv_lcmv.h>
 #include <inv/inv_source_estimate.h>
@@ -107,7 +107,7 @@ int main(int argc, char* argv[])
     const FiffEvoked sample((data + "/MEG/sample/sample_audvis-ave.fif").toStdU16String(), 0);
     StringList good;
     for (const std::string& name : sample.info.ch_names) {
-        if (name.starts_with("MEG") && !UTILSLIB::contains(sample.info.bads, name))
+        if (name.starts_with("MEG") && !BASELIB::contains(sample.info.bads, name))
             good.push_back(name);
     }
     FsLabel v1;

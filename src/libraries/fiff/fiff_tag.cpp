@@ -24,7 +24,7 @@
 
 #include "fiff_tag.h"
 #include <memory>
-#include <utils/logger/log.h>
+#include <base/log.h>
 
 #include <vector>
 #include "fiff_byte_swap.h"
@@ -94,7 +94,7 @@ bool FiffTag::getMatrixDimensions(qint32& p_ndim, std::vector<qint32>& p_Dims) c
     const int coding = fiff_type_matrix_coding(this->type);
     const bool sparse = coding == FIFFTS_MC_CCS || coding == FIFFTS_MC_RCS;
     if (coding != FIFFTS_MC_DENSE && !sparse) {
-        UTILSLIB::Log::warning("Cannot handle other than dense or sparse matrices yet.");
+        BASELIB::Log::warning("Cannot handle other than dense or sparse matrices yet.");
         return false;
     }
     const qint32 nTrailer = ndim + (sparse ? 2 : 1);
@@ -721,7 +721,7 @@ fiff_int_t FiffTag::fiff_type_matrix_coding(fiff_int_t type)
 const qint32* FiffTag::toInt() const
 {
     if (this->isMatrix() || this->getType() != FIFFT_INT) {
-        UTILSLIB::Log::warning("Expected an integer tag : {} (found data type {} instead)\n", this->kind, this->getType());
+        BASELIB::Log::warning("Expected an integer tag : {} (found data type {} instead)\n", this->kind, this->getType());
         return nullptr;
     } else
         return reinterpret_cast<const qint32*>(this->data());
@@ -732,7 +732,7 @@ const qint32* FiffTag::toInt() const
 const qint32* FiffTag::toJulian() const
 {
     if (this->isMatrix() || this->getType() != FIFFT_JULIAN) {
-        UTILSLIB::Log::warning("Expected a julian tag : {} (found data type {} instead)\n", this->kind, this->getType());
+        BASELIB::Log::warning("Expected a julian tag : {} (found data type {} instead)\n", this->kind, this->getType());
         return nullptr;
     } else
         return reinterpret_cast<const qint32*>(this->data());
@@ -750,7 +750,7 @@ Eigen::MatrixXi FiffTag::toIntMatrix() const
     this->getMatrixDimensions(ndim, dims);
 
     if (ndim != 2) {
-        UTILSLIB::Log::warning("Only two-dimensional matrices are supported at this time");
+        BASELIB::Log::warning("Only two-dimensional matrices are supported at this time");
         return Eigen::MatrixXi();
     }
 
@@ -768,7 +768,7 @@ Eigen::MatrixXf FiffTag::toFloatMatrix() const
         return Eigen::MatrixXf(); //NULL;
 
     if (fiff_type_matrix_coding(this->type) != FIFFTS_MC_DENSE) {
-        UTILSLIB::Log::warning("Error in FiffTag::toFloatMatrix(): Matrix is not dense!");
+        BASELIB::Log::warning("Error in FiffTag::toFloatMatrix(): Matrix is not dense!");
         return Eigen::MatrixXf();
     }
 
@@ -777,7 +777,7 @@ Eigen::MatrixXf FiffTag::toFloatMatrix() const
     this->getMatrixDimensions(ndim, dims);
 
     if (ndim != 2) {
-        UTILSLIB::Log::warning("Only two-dimensional matrices are supported at this time");
+        BASELIB::Log::warning("Only two-dimensional matrices are supported at this time");
         return Eigen::MatrixXf();
     }
 

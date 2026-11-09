@@ -22,7 +22,7 @@
 
 #include "brainamp_global.h"
 
-#include <utils/generics/circularbuffer.h>
+#include <base/circular_buffer.h>
 
 //=============================================================================================================
 // INCLUDES

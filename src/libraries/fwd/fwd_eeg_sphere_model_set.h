@@ -135,7 +135,7 @@ public:
 
     //=========================================================================================================
     /**
-     * List the properties of available models via UTILSLIB::Log.
+     * List the properties of available models via BASELIB::Log.
      */
     void fwd_list_eeg_sphere_models();
 

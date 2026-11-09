@@ -19,7 +19,7 @@
 #include <Eigen/Dense>
 #include <Eigen/Sparse>
 
-#include <utils/logger/log.h>
+#include <base/log.h>
 
 #include <fiff/fiff.h>
 #include <fiff/fiff_stream.h>
@@ -57,7 +57,6 @@
 using namespace FIFFLIB;
 using namespace MNELIB;
 using namespace INVLIB;
-using namespace UTILSLIB;
 using namespace Eigen;
 
 //=============================================================================================================
@@ -177,7 +176,7 @@ private slots:
 
 void TestInvDipoleRapMne::initTestCase()
 {
-    UTILSLIB::Log::install_qt_message_handler();
+    BASELIB::Log::install_qt_message_handler();
 
     m_sTestDataPath = QCoreApplication::applicationDirPath() + "/../resources/data/mne-cpp-test-data";
     QVERIFY2(QFile::exists(rawPath()),

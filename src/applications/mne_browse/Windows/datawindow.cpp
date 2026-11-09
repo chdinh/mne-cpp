@@ -18,7 +18,7 @@
 
 #include "datawindow.h"
 #include <memory>
-#include <utils/string_utils.h>
+#include <base/string_utils.h>
 #include "../Models/virtualchannelmodel.h"
 #include <disp/viewers/helpers/channeldatamodel.h>
 #include <fiff/fiff_constants.h>
@@ -225,7 +225,7 @@ void DataWindow::computeAutoScale()
     QMap<qint32, TypeStats> typeStats;
 
     for (int ch = 0; ch < fiffInfo->nchan && ch < block.rows(); ++ch) {
-        if (UTILSLIB::contains(fiffInfo->bads, fiffInfo->ch_names[ch]))
+        if (BASELIB::contains(fiffInfo->bads, fiffInfo->ch_names[ch]))
             continue;
 
         const auto& chInfo = fiffInfo->chs[ch];

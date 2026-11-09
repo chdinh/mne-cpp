@@ -16,7 +16,7 @@
 // INCLUDES
 //=============================================================================================================
 
-#include <utils/logger/log.h>
+#include <base/log.h>
 #include <fiff/fiff_constants.h>
 #include <fiff/fiff_coord_trans.h>
 #include <fiff/fiff_dig_point.h>
@@ -82,7 +82,7 @@ TestFiffCoordTrans::TestFiffCoordTrans()
 
 void TestFiffCoordTrans::initTestCase()
 {
-    UTILSLIB::Log::install_qt_message_handler();
+    BASELIB::Log::install_qt_message_handler();
 
     QVERIFY(m_tempDir.isValid());
     const std::string testPath = m_tempDir.filePath("test-trans.fif").toStdString();
@@ -193,7 +193,7 @@ void TestFiffCoordTrans::transformToHeadMatchesMnePython()
 
 void TestFiffCoordTrans::readersReportWhyTheyFail()
 {
-    using UTILSLIB::ErrorCode;
+    using BASELIB::ErrorCode;
     const std::string missing = m_tempDir.filePath("missing-trans.fif").toStdString();
     const auto noFile = FiffCoordTrans::read(missing);
     QVERIFY(!noFile);
@@ -203,12 +203,12 @@ void TestFiffCoordTrans::readersReportWhyTheyFail()
     try {
         const FiffCoordTrans trans(missing);
         QFAIL("no exception");
-    } catch (const UTILSLIB::Error& error) {
+    } catch (const BASELIB::Error& error) {
         QCOMPARE(error.code, ErrorCode::Io);
         QVERIFY(std::string_view(error.what()).contains("missing-trans.fif"));
     }
-    QVERIFY_THROWS_EXCEPTION(UTILSLIB::Error, std::ignore = FiffCoordTrans::read(missing).value());
-    QVERIFY_THROWS_EXCEPTION(UTILSLIB::Error, FiffCoordTrans(transPath().toStdU16String(), FIFFV_COORD_MRI, FIFFV_COORD_DEVICE));
+    QVERIFY_THROWS_EXCEPTION(BASELIB::Error, std::ignore = FiffCoordTrans::read(missing).value());
+    QVERIFY_THROWS_EXCEPTION(BASELIB::Error, FiffCoordTrans(transPath().toStdU16String(), FIFFV_COORD_MRI, FIFFV_COORD_DEVICE));
     const FiffCoordTrans mriHead(transPath().toStdU16String(), FIFFV_COORD_MRI, FIFFV_COORD_HEAD);
     QCOMPARE(mriHead.to, FIFFV_COORD_HEAD);
 
@@ -233,7 +233,7 @@ void TestFiffCoordTrans::readersReportWhyTheyFail()
 
 void TestFiffCoordTrans::readsAsciiTransforms()
 {
-    using UTILSLIB::ErrorCode;
+    using BASELIB::ErrorCode;
     QFile file(m_tempDir.filePath("head-mri.txt"));
     QVERIFY(file.open(QIODevice::WriteOnly));
     file.write("# head -> MRI, translation in mm\n0 -1 0 10\n1 0 0 -20\n0 0 1 30\n0 0 0 1\n");

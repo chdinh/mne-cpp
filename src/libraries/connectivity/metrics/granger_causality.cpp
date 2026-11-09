@@ -15,7 +15,7 @@
 //=============================================================================================================
 
 #include "granger_causality.h"
-#include <utils/logger/log.h>
+#include <base/log.h>
 
 #include <vector>
 #include "mvar_model.h"
@@ -61,7 +61,7 @@ Network GrangerCausality::calculate(ConnectivitySettings& connectivitySettings)
     Network finalNetwork("GC");
 
     if (connectivitySettings.empty()) {
-        UTILSLIB::Log::debug("GrangerCausality::calculate - Input data is empty");
+        BASELIB::Log::debug("GrangerCausality::calculate - Input data is empty");
         return finalNetwork;
     }
 

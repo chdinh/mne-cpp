@@ -31,6 +31,7 @@ target_link_libraries(${PROJECT_NAME} PRIVATE
     mne_fiff
     mne_mne
     mne_utils
+    mne_base
     mne_math
     Eigen3::Eigen
 )

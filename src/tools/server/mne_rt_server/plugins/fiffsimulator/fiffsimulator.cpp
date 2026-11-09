@@ -23,7 +23,7 @@
 #include <acq/fiff/acq_fiff_replay.h>
 #include <fiff/fiff.h>
 #include <fiff/fiff_types.h>
-#include <utils/string_utils.h>
+#include <base/string_utils.h>
 
 #include <com/rt_command/command.h>
 
@@ -53,7 +53,6 @@ using namespace FIFFSIMULATORRTSERVERPLUGIN;
 using namespace ACQLIB;
 using namespace FIFFLIB;
 using namespace RTSERVER;
-using namespace UTILSLIB;
 using namespace COMLIB;
 
 //=============================================================================================================

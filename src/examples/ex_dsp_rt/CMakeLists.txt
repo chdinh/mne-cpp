@@ -20,6 +20,7 @@ target_link_libraries(${PROJECT_NAME} PRIVATE
   mne_dsp
   mne_fiff
   mne_utils
+  mne_base
   mne_connectivity
   mne_inv
   mne_mne

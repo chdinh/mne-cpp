@@ -29,16 +29,16 @@
 
 #include "mri_mgh_io.h"
 
-#include <utils/byte_stream.h>
+#include <base/byte_stream.h>
 
 #include <fiff/fiff_coord_trans.h>
 #include <fiff/fiff_coord_trans_set.h>
 #include <fiff/fiff_constants.h>
 #include <fiff/fiff_file.h>
 
-#include <utils/byte_stream.h>
-#include <utils/logger/log.h>
-#include <utils/string_utils.h>
+#include <base/byte_stream.h>
+#include <base/log.h>
+#include <base/string_utils.h>
 
 //=============================================================================================================
 // QT INCLUDES
@@ -67,7 +67,7 @@
 using namespace MRILIB;
 using namespace FIFFLIB;
 using namespace Eigen;
-using UTILSLIB::Log;
+using BASELIB::Log;
 
 //=============================================================================================================
 // DEFINE LOCAL FUNCTIONS
@@ -78,7 +78,7 @@ namespace
 
 // Reads @p count big-endian values of type T and converts each one with @p convert into @p out
 template<typename T, typename Out, typename Convert>
-bool readBigEndianInto(UTILSLIB::ByteStream& stream, std::vector<Out>& out, std::size_t count, Convert convert)
+bool readBigEndianInto(BASELIB::ByteStream& stream, std::vector<Out>& out, std::size_t count, Convert convert)
 {
     std::vector<T> values(count);
     if (!stream.readBigEndian(values.data(), count))
@@ -103,8 +103,8 @@ bool MriMghIO::read(const std::string& mgzFile,
     volData.fileName = mgzFile;
 
     // Step 1: Get raw (decompressed) bytes
-    const bool isCompressed = UTILSLIB::toLower(mgzFile).ends_with(".mgz");
-    const auto fileData = UTILSLIB::read_file_bytes(UTILSLIB::pathFromUtf8(mgzFile), isCompressed ? UTILSLIB::Compression::Gzip : UTILSLIB::Compression::None);
+    const bool isCompressed = BASELIB::toLower(mgzFile).ends_with(".mgz");
+    const auto fileData = BASELIB::read_file_bytes(BASELIB::pathFromUtf8(mgzFile), isCompressed ? BASELIB::Compression::Gzip : BASELIB::Compression::None);
     if (!fileData) {
         Log::critical("MriMghIO::read - {}", fileData.error().what());
         return false;
@@ -170,7 +170,7 @@ bool MriMghIO::parseHeader(const std::vector<std::byte>& data, MriVolData& volDa
     //   Bytes 90-283: unused (padding)
     //
 
-    UTILSLIB::MemoryByteStream stream({data.begin(), data.begin() + MRI_MGH_DATA_OFFSET});
+    BASELIB::MemoryByteStream stream({data.begin(), data.begin() + MRI_MGH_DATA_OFFSET});
 
     std::int32_t header[7] = {};
     stream.readBigEndian(header, 7);
@@ -244,7 +244,7 @@ bool MriMghIO::readVoxelData(const std::vector<std::byte>& data, MriVolData& vol
         return false;
     }
 
-    UTILSLIB::MemoryByteStream stream({data.begin() + MRI_MGH_DATA_OFFSET, data.begin() + std::ptrdiff_t(MRI_MGH_DATA_OFFSET + frameSize)});
+    BASELIB::MemoryByteStream stream({data.begin() + MRI_MGH_DATA_OFFSET, data.begin() + std::ptrdiff_t(MRI_MGH_DATA_OFFSET + frameSize)});
     volData.slices.resize(nslice);
 
     // Build the vox2ras transform for per-slice transforms
@@ -330,7 +330,7 @@ bool MriMghIO::parseFooter(const std::vector<std::byte>& data,
         return true;
     }
 
-    UTILSLIB::MemoryByteStream stream({data.begin() + std::ptrdiff_t(footerPos), data.end()});
+    BASELIB::MemoryByteStream stream({data.begin() + std::ptrdiff_t(footerPos), data.end()});
     float scan[5] = {};
     stream.readBigEndian(scan, 5);
     volData.TR = scan[0];
@@ -365,7 +365,7 @@ bool MriMghIO::parseFooter(const std::vector<std::byte>& data,
 
         if (tagType == MGH_TAG_MGH_XFORM) {
             // TAG_MGH_XFORM: path to talairach.xfm; FreeSurfer includes the terminating NUL in the length
-            std::string xfmPath(UTILSLIB::trimmed(std::string_view(tagData).substr(0, tagData.find('\0'))));
+            std::string xfmPath(BASELIB::trimmed(std::string_view(tagData).substr(0, tagData.find('\0'))));
             volData.talairachXfmPath = xfmPath;
 
             if (verbose) {
@@ -373,12 +373,12 @@ bool MriMghIO::parseFooter(const std::vector<std::byte>& data,
             }
 
             // Resolve relative paths using subject MRI directory
-            if (!UTILSLIB::pathFromUtf8(xfmPath).is_absolute() && !subjectMriDir.empty()) {
-                xfmPath = UTILSLIB::utf8FromPath(UTILSLIB::pathFromUtf8(subjectMriDir) / "transforms" / UTILSLIB::pathFromUtf8(xfmPath));
+            if (!BASELIB::pathFromUtf8(xfmPath).is_absolute() && !subjectMriDir.empty()) {
+                xfmPath = BASELIB::utf8FromPath(BASELIB::pathFromUtf8(subjectMriDir) / "transforms" / BASELIB::pathFromUtf8(xfmPath));
             }
 
             FiffCoordTransSet talairach;
-            if (talairach.addTalairach(UTILSLIB::pathFromUtf8(xfmPath))) {
+            if (talairach.addTalairach(BASELIB::pathFromUtf8(xfmPath))) {
                 additionalTrans.push_back(talairach.RAS_MNI_tal_t);
                 additionalTrans.push_back(talairach.MNI_tal_tal_gtz_t);
                 additionalTrans.push_back(talairach.MNI_tal_tal_ltz_t);

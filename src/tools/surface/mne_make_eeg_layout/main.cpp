@@ -18,8 +18,8 @@
 #include <fiff/fiff_info.h>
 #include <fiff/fiff_raw_data.h>
 
-#include <utils/logger/log.h>
-#include <utils/string_utils.h>
+#include <base/log.h>
+#include <base/string_utils.h>
 
 //=============================================================================================================
 // QT INCLUDES
@@ -43,7 +43,6 @@
 //=============================================================================================================
 
 using namespace FIFFLIB;
-using namespace UTILSLIB;
 using namespace Eigen;
 
 //=============================================================================================================
@@ -78,7 +77,7 @@ static void azimuthalProjection(const Vector3f& pos, const Vector3f& center,
 
 int main(int argc, char* argv[])
 {
-    UTILSLIB::Log::install_qt_message_handler();
+    BASELIB::Log::install_qt_message_handler();
     QCoreApplication app(argc, argv);
     QCoreApplication::setApplicationName("mne_make_eeg_layout");
     QCoreApplication::setApplicationVersion(PROGRAM_VERSION);

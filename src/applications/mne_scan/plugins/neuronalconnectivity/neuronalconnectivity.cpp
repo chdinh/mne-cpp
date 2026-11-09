@@ -18,7 +18,7 @@
 
 #include "neuronalconnectivity.h"
 #include <memory>
-#include <utils/string_utils.h>
+#include <base/string_utils.h>
 #include "FormFiles/neuronalconnectivitysetupwidget.h"
 
 #include <connectivity/connectivity.h>
@@ -49,6 +49,7 @@ using namespace MNELIB;
 using namespace CONNECTIVITYLIB;
 using namespace DISPLIB;
 using namespace UTILSLIB;
+using namespace BASELIB;
 using namespace RTPROCESSINGLIB;
 using namespace Eigen;
 using namespace FSLIB;
@@ -455,7 +456,7 @@ void NeuronalConnectivity::generateNodeVertices()
         m_vecPicks.resize(0);
 
         for (int i = 0; i < picksTmp.cols() - 1; i += 2) {
-            if (!UTILSLIB::contains(m_pFiffInfo->bads, m_pFiffInfo->ch_names.at(picksTmp(i)))) {
+            if (!BASELIB::contains(m_pFiffInfo->bads, m_pFiffInfo->ch_names.at(picksTmp(i)))) {
                 m_vecPicks.conservativeResize(m_vecPicks.cols() + 1);
                 m_vecPicks(m_vecPicks.cols() - 1) = picksTmp(i);
             }

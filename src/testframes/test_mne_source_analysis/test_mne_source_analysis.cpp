@@ -14,7 +14,7 @@
  */
 
 #include <QtTest/QtTest>
-#include <utils/string_utils.h>
+#include <base/string_utils.h>
 
 #include <fiff/fiff.h>
 #include <fiff/fiff_cov.h>
@@ -306,7 +306,7 @@ private slots:
         StringList chNames;
         for (int i = 0; i < sel.size(); ++i) {
             const std::string& name = raw.info.ch_names[sel(i)];
-            if (UTILSLIB::contains(cov.names, name))
+            if (BASELIB::contains(cov.names, name))
                 chNames.push_back(name);
         }
         QVERIFY2(!chNames.empty(), "No intersecting channels between cov and info");

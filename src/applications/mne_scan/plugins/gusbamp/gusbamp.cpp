@@ -36,7 +36,6 @@
 using namespace SCSHAREDLIB;
 using namespace SCMEASLIB;
 using namespace GUSBAMPPLUGIN;
-using namespace UTILSLIB;
 using namespace Eigen;
 using namespace FIFFLIB;
 
@@ -51,7 +50,7 @@ GUSBAmp::GUSBAmp()
 , m_iNumberOfChannels(0)
 , m_iSamplesPerBlock(0)
 , m_iSampleRate(128)
-, m_pCircularBuffer(std::make_shared<CircularBuffer_Matrix_float>(8))
+, m_pCircularBuffer(std::make_shared<BASELIB::CircularBuffer<Eigen::MatrixXf>>(8))
 {
     m_viChannelsToAcquire = {1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16};
 

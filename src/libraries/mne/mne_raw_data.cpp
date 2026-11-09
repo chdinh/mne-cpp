@@ -21,10 +21,10 @@
 
 #include "mne_raw_data.h"
 #include <memory>
-#include <utils/logger/log.h>
+#include <base/log.h>
 
 #include <vector>
-#include <utils/string_utils.h>
+#include <base/string_utils.h>
 
 #include <QFile>
 #include <QTextStream>
@@ -203,7 +203,7 @@ int mne_apply_filter(const MNEFilterDef& filter, FilterData* d, float* data, int
     float* freq_resp;
 
     if (ns != filter.size + 2 * filter.taper_size) {
-        UTILSLIB::Log::critical("Incorrect data length in apply_filter");
+        BASELIB::Log::critical("Incorrect data length in apply_filter");
         return FAIL;
     }
     /*
@@ -310,7 +310,7 @@ std::unique_ptr<FilterData> mne_create_filter_response(const MNEFilterDef& filte
             highpass_widths = 3; /* Minimal */
 
         if (filter.filter_on) {
-            UTILSLIB::Log::info("filter : {:7.3f} ... {:6.1f} Hz   bins : {} ... {} of {} hpw : {} lpw : {}\n", highpass, lowpass, highpasss, lowpasss, resp_size, highpass_widths, lowpass_widths);
+            BASELIB::Log::info("filter : {:7.3f} ... {:6.1f} Hz   bins : {} ... {} of {} hpw : {} lpw : {}\n", highpass, lowpass, highpasss, lowpasss, resp_size, highpass_widths, lowpass_widths);
         }
         if (highpasss > highpass_widths + 1) {
             w = highpass_widths;
@@ -346,11 +346,11 @@ std::unique_ptr<FilterData> mne_create_filter_response(const MNEFilterDef& filte
         }
         if (filter.filter_on) {
             if (*highpass_effective)
-                UTILSLIB::Log::info("Highpass filter will work as specified.\n");
+                BASELIB::Log::info("Highpass filter will work as specified.\n");
             else
-                UTILSLIB::Log::warning("NOTE: Highpass filter omitted due to a too low corner frequency.\n");
+                BASELIB::Log::warning("NOTE: Highpass filter omitted due to a too low corner frequency.\n");
         } else
-            UTILSLIB::Log::warning("NOTE: Filter is presently switched off.\n");
+            BASELIB::Log::warning("NOTE: Filter is presently switched off.\n");
     }
     return filter_data;
 }
@@ -396,7 +396,7 @@ int mne_read_raw_buffer_t( //fiffFile     in,        /* Input file */
 
     if (ent.type == FIFFT_FLOAT) {
         if (static_cast<int>(t_pTag->size() / (sizeof(fiff_float_t) * nchan)) != nsamp) {
-            UTILSLIB::Log::critical("Incorrect number of samples in buffer.");
+            BASELIB::Log::critical("Incorrect number of samples in buffer.");
             return FAIL;
         }
         this_samplef = t_pTag->toFloat();
@@ -406,7 +406,7 @@ int mne_read_raw_buffer_t( //fiffFile     in,        /* Input file */
         }
     } else if (ent.type == FIFFT_SHORT || ent.type == FIFFT_DAU_PACK16) {
         if (static_cast<int>(t_pTag->size() / (sizeof(fiff_short_t) * nchan)) != nsamp) {
-            UTILSLIB::Log::critical("Incorrect number of samples in buffer.");
+            BASELIB::Log::critical("Incorrect number of samples in buffer.");
             return FAIL;
         }
         this_samples = reinterpret_cast<fiff_short_t*>(t_pTag->data());
@@ -416,7 +416,7 @@ int mne_read_raw_buffer_t( //fiffFile     in,        /* Input file */
         }
     } else if (ent.type == FIFFT_INT) {
         if (static_cast<int>(t_pTag->size() / (sizeof(fiff_int_t) * nchan)) != nsamp) {
-            UTILSLIB::Log::critical("Incorrect number of samples in buffer.");
+            BASELIB::Log::critical("Incorrect number of samples in buffer.");
             return FAIL;
         }
         this_sample = t_pTag->toInt();
@@ -426,7 +426,7 @@ int mne_read_raw_buffer_t( //fiffFile     in,        /* Input file */
         }
     } else if (ent.type == FIFFT_DOUBLE) {
         if (static_cast<int>(t_pTag->size() / (sizeof(double) * nchan)) != nsamp) {
-            UTILSLIB::Log::critical("Incorrect number of samples in buffer.");
+            BASELIB::Log::critical("Incorrect number of samples in buffer.");
             return FAIL;
         }
         const double* this_sampled = t_pTag->toDouble();
@@ -435,7 +435,7 @@ int mne_read_raw_buffer_t( //fiffFile     in,        /* Input file */
                 data(c, s) = static_cast<float>(mult[c] * this_sampled[pickno[c]]);
         }
     } else {
-        UTILSLIB::Log::critical("We are not prepared to handle raw data type: {}", ent.type);
+        BASELIB::Log::critical("We are not prepared to handle raw data type: {}", ent.type);
         return FAIL;
     }
     return OK;
@@ -612,7 +612,7 @@ void MNERawData::setup_filter_bufs()
          firstsamp = firstsamp + filter->size)
         nfilt_buf++;
 #ifdef DEBUG
-    UTILSLIB::Log::info("{} filter buffers needed\n", nfilt_buf);
+    BASELIB::Log::info("{} filter buffers needed\n", nfilt_buf);
 #endif
     this->filt_bufs.resize(nfilt_buf);
     for (k = 0, firstsamp = this->first_samp - filter->taper_size; k < nfilt_buf; k++,
@@ -661,7 +661,7 @@ int MNERawData::load_one_buffer(MNERawBufDef* buf)
      */
 {
     if (buf->ent.kind == FIFF_DATA_SKIP) {
-        UTILSLIB::Log::critical("Cannot load a skip");
+        BASELIB::Log::critical("Cannot load a skip");
         return FAIL;
     }
     if (buf->vals.size() == 0) { /* The data space may have been reused */
@@ -672,7 +672,7 @@ int MNERawData::load_one_buffer(MNERawBufDef* buf)
         return OK;
 
 #ifdef DEBUG
-    UTILSLIB::Log::debug("Read buffer {} .. {}\n", buf->firsts, buf->lasts);
+    BASELIB::Log::debug("Read buffer {} .. {}\n", buf->firsts, buf->lasts);
 #endif
 
     if (mne_read_raw_buffer_t(*stream,
@@ -947,7 +947,7 @@ int MNERawData::pick_data_proj(MNEChSelection* sel, int firsts, int ns, float** 
                     for (c = 0; c < info->nchan; c++)
                         pvalues[c] = (*values)(c, p);
                     if (proj->project_vector(pvalues, true) != OK)
-                        UTILSLIB::Log::warning("Error");
+                        BASELIB::Log::warning("Error");
                     if (sel) {
                         if (sel->nderiv > 0 && deriv_matched) {
                             if (mne_sparse_vec_mult2(deriv_matched->deriv_data->data.get(), pvalues.data(), deriv_pvalues_vec.data()) == FAIL)
@@ -1031,7 +1031,7 @@ int MNERawData::load_one_filt_buf(MNERawBufDef* buf)
 
 #ifdef DEBUG
     if (res == OK)
-        UTILSLIB::Log::debug("Loaded filtered buffer {}...{} {} {} last = {}\n", buf->firsts, buf->lasts, buf->lasts - buf->firsts + 1, buf->ns, first_samp + nsamp);
+        BASELIB::Log::debug("Loaded filtered buffer {}...{} {} {} last = {}\n", buf->firsts, buf->lasts, buf->lasts - buf->firsts + 1, buf->ns, first_samp + nsamp);
 #endif
     buf->valid = res == OK;
     return res;
@@ -1094,7 +1094,7 @@ int MNERawData::pick_data_filt(MNEChSelection* sel, int firsts, int ns, float** 
     }
     for (; k < static_cast<int>(filt_bufs.size()) && this_buf->firsts <= lasts; k++, this_buf++) {
 #ifdef DEBUG
-        UTILSLIB::Log::debug("this_buf ({}): {}..{}\n", k, this_buf->firsts, this_buf->lasts);
+        BASELIB::Log::debug("this_buf ({}): {}..{}\n", k, this_buf->firsts, this_buf->lasts);
 #endif
         /*
          * Load the buffer first and apply projection
@@ -1194,8 +1194,8 @@ int MNERawData::pick_data_filt(MNEChSelection* sel, int firsts, int ns, float** 
             s2 = ns;
         }
 #ifdef DEBUG
-        UTILSLIB::Log::debug("buf  : {}..{} {}\n", bs1, bs2, bs2 - bs1);
-        UTILSLIB::Log::debug("dest : {}..{} {}\n", s1, s2, s2 - s1);
+        BASELIB::Log::debug("buf  : {}..{} {}\n", bs1, bs2, bs2 - bs1);
+        BASELIB::Log::debug("dest : {}..{} {}\n", s1, s2, s2 - s1);
 #endif
         /*
          * Then pick data from all relevant channels
@@ -1279,7 +1279,7 @@ MNERawData* MNERawData::open_file_comp(const std::filesystem::path& name,
         if (withoutSpaces(ch.ch_name) == trigger) {
             if (std::fabs(1.0 - ch.range) > 1e-5) {
                 ch.range = 1.0;
-                UTILSLIB::Log::info("{} range set to {:f}\n", MNE_DEFAULT_TRIGGER_CH, ch.range);
+                BASELIB::Log::info("{} range set to {:f}\n", MNE_DEFAULT_TRIGGER_CH, ch.range);
             }
         }
         /*
@@ -1287,7 +1287,7 @@ MNERawData* MNERawData::open_file_comp(const std::filesystem::path& name,
          */
         if (ch.unit_mul != 0) {
             ch.cal = pow(10.0, static_cast<double>(ch.unit_mul)) * ch.cal;
-            UTILSLIB::Log::info("Ch {} unit multiplier {} -> 0\n", ch.ch_name, ch.unit_mul);
+            BASELIB::Log::info("Ch {} unit multiplier {} -> 0\n", ch.ch_name, ch.unit_mul);
             ch.unit_mul = 0;
         }
     }
@@ -1308,7 +1308,7 @@ MNERawData* MNERawData::open_file_comp(const std::filesystem::path& name,
     for (int i = 0; i < data->info->nchan; i++)
         data->ch_names.push_back(data->info->chInfo[i].ch_name);
     if (static_cast<int>(data->ch_names.size()) != data->info->nchan) {
-        UTILSLIB::Log::critical("Channel names were not translated correctly into a name list");
+        BASELIB::Log::critical("Channel names were not translated correctly into a name list");
         return nullptr;
     }
     /*
@@ -1317,14 +1317,14 @@ MNERawData* MNERawData::open_file_comp(const std::filesystem::path& name,
     data->comp = MNECTFCompDataSet::read(data->filename);
     if (data->comp) {
         if (data->comp->ncomp > 0)
-            UTILSLIB::Log::info("Read {} compensation data sets from {}\n", data->comp->ncomp, data->filename);
+            BASELIB::Log::info("Read {} compensation data sets from {}\n", data->comp->ncomp, data->filename);
         else
-            UTILSLIB::Log::info("No compensation data in {}\n", data->filename);
+            BASELIB::Log::info("No compensation data in {}\n", data->filename);
     } else
-        UTILSLIB::Log::warning("err_print_error()");
+        BASELIB::Log::warning("err_print_error()");
     if ((data->comp_file = MNECTFCompDataSet::get_comp(data->info->chInfo, data->info->nchan)) == FAIL)
         return nullptr;
-    UTILSLIB::Log::info("Compensation in file : {}\n", MNECTFCompDataSet::explain_comp(MNECTFCompDataSet::map_comp_kind(data->comp_file)));
+    BASELIB::Log::info("Compensation in file : {}\n", MNECTFCompDataSet::explain_comp(MNECTFCompDataSet::map_comp_kind(data->comp_file)));
     if (comp_set < 0)
         data->comp_now = data->comp_file;
     else
@@ -1332,7 +1332,7 @@ MNERawData* MNERawData::open_file_comp(const std::filesystem::path& name,
 
     if (!data->comp) {
         if (data->comp_now != MNE_CTFV_NOGRAD) {
-            UTILSLIB::Log::critical("Cannot do compensation because compensation data are missing");
+            BASELIB::Log::critical("Cannot do compensation because compensation data are missing");
             return nullptr;
         }
     } else if (data->comp->set_compensation(data->comp_now,
@@ -1346,11 +1346,11 @@ MNERawData* MNERawData::open_file_comp(const std::filesystem::path& name,
        */
     data->sss = MNESssData::read(name);
     if (data->sss && data->sss->job != FIFFV_SSS_JOB_NOTHING && data->sss->comp_info.size() > 0) {
-        UTILSLIB::Log::info("SSS data read from {} :\n", data->filename);
+        BASELIB::Log::info("SSS data read from {} :\n", data->filename);
         QTextStream errStream(stderr);
         data->sss->print(errStream);
     } else {
-        UTILSLIB::Log::info("No SSS data in {}\n", data->filename);
+        BASELIB::Log::info("No SSS data in {}\n", data->filename);
         data->sss.reset();
     }
     /*
@@ -1377,7 +1377,7 @@ MNERawData* MNERawData::open_file_comp(const std::filesystem::path& name,
         if (t_pTag = data->stream->read_tag(dir0[current_dir0].pos); !t_pTag)
             return nullptr;
         nsamp_skip = data->info->buf_size * (*t_pTag->toInt());
-        UTILSLIB::Log::info("Data skip of {} samples in the beginning\n", nsamp_skip);
+        BASELIB::Log::info("Data skip of {} samples in the beginning\n", nsamp_skip);
         current_dir0++;
         ndir--;
         if (dir0[current_dir0].kind == FIFF_FIRST_SAMPLE) {
@@ -1401,7 +1401,7 @@ MNERawData* MNERawData::open_file_comp(const std::filesystem::path& name,
         data->first_samp = 0;
     }
 #ifdef DEBUG
-    UTILSLIB::Log::info("data->first_samp = {}\n", data->first_samp);
+    BASELIB::Log::info("data->first_samp = {}\n", data->first_samp);
 #endif
     /*
        * Figure out the buffers
@@ -1437,7 +1437,7 @@ MNERawData* MNERawData::open_file_comp(const std::filesystem::path& name,
             else if (dir.type == FIFFT_DOUBLE)
                 data->bufs[k].ns = dir.size / (data->info->nchan * sizeof(double));
             else {
-                UTILSLIB::Log::critical("We are not prepared to handle raw data type: {}", dir.type);
+                BASELIB::Log::critical("We are not prepared to handle raw data type: {}", dir.type);
                 return nullptr;
             }
         } else if (dir.kind == FIFF_DATA_SKIP) {
@@ -1464,17 +1464,17 @@ MNERawData* MNERawData::open_file_comp(const std::filesystem::path& name,
         if (mne_read_bad_channel_list(name, data->badlist, data->nbad) == OK) {
             for (b = 0; b < data->nbad; b++) {
                 for (k = 0; k < data->info->nchan; k++) {
-                    if (UTILSLIB::equalsIgnoreCase(data->info->chInfo[k].ch_name, data->badlist[b])) {
+                    if (BASELIB::equalsIgnoreCase(data->info->chInfo[k].ch_name, data->badlist[b])) {
                         data->bad[k] = 1;
                         break;
                     }
                 }
             }
-            UTILSLIB::Log::info("{} bad channels read from {}{}", data->nbad, UTILSLIB::utf8FromPath(name), data->nbad > 0 ? ":\n" : "\n");
+            BASELIB::Log::info("{} bad channels read from {}{}", data->nbad, BASELIB::utf8FromPath(name), data->nbad > 0 ? ":\n" : "\n");
             if (data->nbad > 0) {
-                UTILSLIB::Log::info("\t");
+                BASELIB::Log::info("\t");
                 for (k = 0; k < data->nbad; k++)
-                    UTILSLIB::Log::info("{}{:c}", data->badlist[k], k < data->nbad - 1 ? ' ' : '\n');
+                    BASELIB::Log::info("{}{:c}", data->badlist[k], k < data->nbad - 1 ? ' ' : '\n');
             }
         }
     }
@@ -1501,13 +1501,13 @@ MNERawData* MNERawData::open_file_comp(const std::filesystem::path& name,
         data->first_sample_val.resize(data->info->nchan);
         for (k = 0; k < data->info->nchan; k++)
             data->first_sample_val[k] = vals[k][0];
-        UTILSLIB::Log::info("Initial dc offsets determined\n");
+        BASELIB::Log::info("Initial dc offsets determined\n");
     }
-    UTILSLIB::Log::info("Raw data file {}:\n", UTILSLIB::utf8FromPath(name));
-    UTILSLIB::Log::info("\tnchan  = {}\n", data->info->nchan);
-    UTILSLIB::Log::info("\tnsamp  = {}\n", data->nsamp);
-    UTILSLIB::Log::info("\tsfreq  = {:<8.3f} Hz\n", data->info->sfreq);
-    UTILSLIB::Log::info("\tlength = {:<8.3f} sec\n", data->nsamp / data->info->sfreq);
+    BASELIB::Log::info("Raw data file {}:\n", BASELIB::utf8FromPath(name));
+    BASELIB::Log::info("\tnchan  = {}\n", data->info->nchan);
+    BASELIB::Log::info("\tnsamp  = {}\n", data->nsamp);
+    BASELIB::Log::info("\tsfreq  = {:<8.3f} Hz\n", data->info->sfreq);
+    BASELIB::Log::info("\tlength = {:<8.3f} sec\n", data->nsamp / data->info->sfreq);
 
     return data.release();
 }
@@ -1532,10 +1532,10 @@ int MNERawData::attachDerivations(const MNEDerivSet& derivations, bool keepPrevi
     deriv->append(derivations);
     deriv_matched = deriv->match(ch_names);
     if (!deriv_matched) {
-        UTILSLIB::Log::info("No derivations are valid for these raw data.");
+        BASELIB::Log::info("No derivations are valid for these raw data.");
         return 0;
     }
     const int nvalid = deriv_matched->validate(info->chInfo);
-    UTILSLIB::Log::info("{} of {} of the matched derivations are valid for these raw data.", nvalid, deriv_matched->deriv_data->nrow);
+    BASELIB::Log::info("{} of {} of the matched derivations are valid for these raw data.", nvalid, deriv_matched->deriv_data->nrow);
     return nvalid;
 }

@@ -44,7 +44,7 @@
 //=============================================================================================================
 
 #include <inv/inv_convenience.h>
-#include <utils/string_utils.h>
+#include <base/string_utils.h>
 #include <inv/minimum_norm/inv_minimum_norm.h>
 #include <mne/mne_forward_solution.h>
 #include <mne/mne_inverse_operator.h>
@@ -302,7 +302,7 @@ void TestInvEloretaPython::estimateSnr_matchesPython()
         const RowVectorXd ramp = RowVectorXd::LinSpaced(evoked.data.cols(), 1.0, static_cast<double>(evoked.data.cols())) * amplitude;
         evoked.data.setZero();
         for (int i = 0; i < g.size(); ++i)
-            evoked.data.row(UTILSLIB::indexOf(evoked.info.ch_names, m_freeFwd.sol->row_names[i])) = g(i) * ramp;
+            evoked.data.row(BASELIB::indexOf(evoked.info.ch_names, m_freeFwd.sol->row_names[i])) = g(i) * ramp;
     } else {
         QTest::ignoreMessage(QtWarningMsg, "[estimateSnr] SNR estimation did not converge.");
     }
@@ -362,7 +362,7 @@ void TestInvEloretaPython::mneData_matchesPython()
         const RowVectorXd ramp = RowVectorXd::LinSpaced(evoked.data.cols(), 1.0, static_cast<double>(evoked.data.cols())) * amplitude;
         evoked.data.setZero();
         for (int i = 0; i < g.size(); ++i)
-            evoked.data.row(UTILSLIB::indexOf(evoked.info.ch_names, m_freeFwd.sol->row_names[i])) = g(i) * ramp;
+            evoked.data.row(BASELIB::indexOf(evoked.info.ch_names, m_freeFwd.sol->row_names[i])) = g(i) * ramp;
     }
 
     InvMinimumNorm mn(m_loose, 1.0f / 9.0f, "MNE");

@@ -22,11 +22,11 @@
 
 #include "mne_forward_solution.h"
 #include <memory>
-#include <utils/logger/log.h>
+#include <base/log.h>
 
 #include <vector>
 
-#include <utils/string_utils.h>
+#include <base/string_utils.h>
 
 #include <fiff/fiff_coord_trans.h>
 
@@ -59,6 +59,7 @@
 using namespace MNELIB;
 using namespace FSLIB;
 using namespace UTILSLIB;
+using namespace BASELIB;
 using namespace Eigen;
 using namespace FIFFLIB;
 
@@ -79,14 +80,14 @@ bool check_matching_chnames_conventions(const StringList& chNamesA, const String
     }
 
     for (const std::string& name : chNamesA) {
-        if (UTILSLIB::contains(chNamesB, name)) {
+        if (BASELIB::contains(chNamesB, name)) {
             bMatching = true;
         } else if (bCheckForNewNamingConvention) {
             // New convention drops the space ("MEG0113"), the old one has it before the number ("MEG 0113")
             std::string newConv = name;
             std::erase(newConv, ' ');
 
-            if (UTILSLIB::contains(chNamesB, newConv)) {
+            if (BASELIB::contains(chNamesB, newConv)) {
                 bMatching = true;
             } else {
                 const auto digit = [](char c) {
@@ -104,7 +105,7 @@ bool check_matching_chnames_conventions(const StringList& chNamesA, const String
                         oldConv += " " + number;
                         pos = hit + number.size();
                     }
-                    bMatching = UTILSLIB::contains(chNamesB, newConv) || UTILSLIB::contains(chNamesB, oldConv);
+                    bMatching = BASELIB::contains(chNamesB, newConv) || BASELIB::contains(chNamesB, oldConv);
                 }
             }
         }
@@ -918,7 +919,7 @@ MNEForwardSolution MNEForwardSolution::pick_channels(const StringList& include,
 
     StringList bads;
     for (const std::string& bad : fwd.info.bads)
-        if (UTILSLIB::contains(ch_names, bad))
+        if (BASELIB::contains(ch_names, bad))
             bads.push_back(bad);
     fwd.info.bads = std::move(bads);
     fwd.sol->row_names = std::move(ch_names);
@@ -1014,7 +1015,7 @@ void MNEForwardSolution::prepare_forward(const FiffInfo& p_info,
 
     ch_names.clear();
     for (qint32 i = 0; i < std::ssize(p_info.chs); ++i)
-        if (!UTILSLIB::contains(p_info.bads, p_info.chs[i].ch_name) && !UTILSLIB::contains(p_noise_cov.bads, p_info.chs[i].ch_name) && UTILSLIB::contains(p_noise_cov.names, p_info.chs[i].ch_name) && UTILSLIB::contains(fwd_ch_names, p_info.chs[i].ch_name))
+        if (!BASELIB::contains(p_info.bads, p_info.chs[i].ch_name) && !BASELIB::contains(p_noise_cov.bads, p_info.chs[i].ch_name) && BASELIB::contains(p_noise_cov.names, p_info.chs[i].ch_name) && BASELIB::contains(fwd_ch_names, p_info.chs[i].ch_name))
             ch_names.push_back(p_info.chs[i].ch_name);
 
     qint32 n_chan = static_cast<int>(ch_names.size());
@@ -1060,12 +1061,12 @@ void MNEForwardSolution::prepare_forward(const FiffInfo& p_info,
     qint32 count_fwd_idx = 0;
     qint32 count_info_idx = 0;
     for (qint32 i = 0; i < static_cast<int>(ch_names.size()); ++i) {
-        idx = UTILSLIB::indexOf(fwd_ch_names, ch_names[i]);
+        idx = BASELIB::indexOf(fwd_ch_names, ch_names[i]);
         if (idx > -1) {
             fwd_idx[count_fwd_idx] = idx;
             ++count_fwd_idx;
         }
-        idx = UTILSLIB::indexOf(p_info.ch_names, ch_names[i]);
+        idx = BASELIB::indexOf(p_info.ch_names, ch_names[i]);
         if (idx > -1) {
             info_idx[count_info_idx] = idx;
             ++count_info_idx;
@@ -1331,7 +1332,7 @@ Expected<MNEForwardSolution> MNEForwardSolution::read(const std::filesystem::pat
     StringList exclude_bads = options.exclude;
     if (bads.size() > 0) {
         for (qint32 k = 0; k < static_cast<int>(bads.size()); ++k)
-            if (std::none_of(exclude_bads.begin(), exclude_bads.end(), [&](const std::string& e) { return UTILSLIB::equalsIgnoreCase(e, bads[k]); }))
+            if (std::none_of(exclude_bads.begin(), exclude_bads.end(), [&](const std::string& e) { return BASELIB::equalsIgnoreCase(e, bads[k]); }))
                 exclude_bads.push_back(bads[k]);
     }
 

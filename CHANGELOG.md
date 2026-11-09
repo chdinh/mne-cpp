@@ -16,18 +16,24 @@ aliases; replace the old spelling as below.
 |---|---|
 | `QString` names, comments and descriptions | `std::string` (UTF-8) |
 | `QString` file names, `QFile&` / `QIODevice&` readers | `std::filesystem::path` |
-| `QList`, `QVector`, `QStringList`, `QMap`, `QHash` in signatures | `std::vector`, `UTILSLIB::StringList`, `std::map` |
-| `bool read(..., T& out)` and filled `std::unique_ptr` out-parameters | `UTILSLIB::Expected<T>` / `std::optional<T>` return values |
+| `QList`, `QVector`, `QStringList`, `QMap`, `QHash` in signatures | `std::vector`, `BASELIB::StringList`, `std::map` |
+| `bool read(..., T& out)` and filled `std::unique_ptr` out-parameters | `BASELIB::Expected<T>` / `std::optional<T>` return values |
 | `T::SPtr`, `T::ConstSPtr` (`QSharedPointer`) | `std::shared_ptr<T>`, `std::shared_ptr<const T>`, `std::make_shared<T>()` |
 | `T::UPtr` | `std::unique_ptr<T>` |
 | `ptr.data()`, `ptr.isNull()`, `ptr.clear()` | `ptr.get()`, `!ptr`, `ptr.reset()` |
-| `qInstallMessageHandler(MNELogger::customLogWriter)` | `UTILSLIB::Log::install_qt_message_handler()` |
-| `MNELogger::setLogFile(QString)`, `logFile()` | `UTILSLIB::Log::set_file(path)`, `Log::file()` |
-| `utils/generics/mne_logger.h`, `utils/generics/log.h` | `utils/logger/log.h` |
-| `qWarning() << ...` in library code | `UTILSLIB::Log::warning("... {}", value)` (std::format syntax) |
-| `QTest::ignoreMessage` for library messages | `UTILSLIB::LogCapture` |
+| `qInstallMessageHandler(MNELogger::customLogWriter)` | `BASELIB::Log::install_qt_message_handler()` |
+| `MNELogger::setLogFile(QString)`, `logFile()` | `BASELIB::Log::set_file(path)`, `Log::file()` |
+| `utils/generics/mne_logger.h`, `utils/generics/log.h` | `base/log.h` |
+| `qWarning() << ...` in library code | `BASELIB::Log::warning("... {}", value)` (std::format syntax) |
+| `QTest::ignoreMessage` for library messages | `BASELIB::LogCapture` |
+| `utils/error.h`, `byte_stream.h`, `endian.h`, `string_utils.h`, `thread_pool.h`, `buildinfo.h` and `UTILSLIB::Expected`, `Error`, `ByteStream`, `StringList`, `ThreadPool`, ... | `base/...` and `BASELIB::...`, in the new `mne_base` library |
+| `utils/generics/circularbuffer.h`, `CircularBuffer_Matrix_double` | `base/circular_buffer.h`, `BASELIB::CircularBuffer<Eigen::MatrixXd>` |
+| `CircularBuffer::push(ptr, n)`, `getFreeElementsRead()`, `pause()` | `push(std::span)`, `size()`; `pause` is removed |
 | `MNE_LOG_LEVEL=FATAL` | removed; `CRIT` is the highest level |
 
+- `mne_base` is the new lowest library: logging, error results, byte streams,
+  string and path helpers, the thread pool and the circular buffer. It depends
+  on the standard library, zlib and Qt Core only, so `mne_lsl` logs through it.
 - `MNE_LOG_LEVEL` now sets the initial `Log::level()`; it can be changed at
   run time with `Log::set_level`, and messages below it are not formatted.
 - `FiffTag::toInt`, `toJulian`, `toIntMatrix` and `toFloatMatrix` are no longer

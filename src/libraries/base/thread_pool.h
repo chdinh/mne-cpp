@@ -10,14 +10,14 @@
  * @brief    Fixed-size worker pool with futures and blocking parallel loops, in standard C++.
  */
 
-#ifndef UTILS_THREAD_POOL_H
-#define UTILS_THREAD_POOL_H
+#ifndef BASE_THREAD_POOL_H
+#define BASE_THREAD_POOL_H
 
 //=============================================================================================================
 // INCLUDES
 //=============================================================================================================
 
-#include "utils_global.h"
+#include "base_global.h"
 
 //=============================================================================================================
 // STL INCLUDES
@@ -36,10 +36,10 @@
 #include <vector>
 
 //=============================================================================================================
-// DEFINE NAMESPACE UTILSLIB
+// DEFINE NAMESPACE BASELIB
 //=============================================================================================================
 
-namespace UTILSLIB
+namespace BASELIB
 {
 
 //=============================================================================================================
@@ -49,9 +49,9 @@ namespace UTILSLIB
  * parallelFor() and parallelMap() block until done, and the calling thread works through the range too, so they
  * may be nested or called from a task of the same pool without deadlocking.
  *
- * @snippet ex_utils/main.cpp thread_pool_usage
+ * @snippet ex_base/main.cpp thread_pool_usage
  */
-class UTILSSHARED_EXPORT ThreadPool
+class BASESHARED_EXPORT ThreadPool
 {
 public:
     //=========================================================================================================
@@ -133,6 +133,6 @@ private:
     bool m_stopping = false;
 };
 
-} // namespace UTILSLIB
+} // namespace BASELIB
 
-#endif // UTILS_THREAD_POOL_H
+#endif // BASE_THREAD_POOL_H

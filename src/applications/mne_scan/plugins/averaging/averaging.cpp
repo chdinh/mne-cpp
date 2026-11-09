@@ -41,7 +41,6 @@
 using namespace AVERAGINGPLUGIN;
 using namespace SCSHAREDLIB;
 using namespace SCMEASLIB;
-using namespace UTILSLIB;
 using namespace FIFFLIB;
 using namespace DISPLIB;
 using namespace RTPROCESSINGLIB;
@@ -69,7 +68,7 @@ std::map<std::string, double> toStdThresholds(const QMap<QString, double>& thres
 //=============================================================================================================
 
 Averaging::Averaging()
-: m_pCircularBuffer(std::make_shared<CircularBuffer<FIFFLIB::FiffEvokedSet>>(40))
+: m_pCircularBuffer(std::make_shared<BASELIB::CircularBuffer<FIFFLIB::FiffEvokedSet>>(40))
 {
 }
 

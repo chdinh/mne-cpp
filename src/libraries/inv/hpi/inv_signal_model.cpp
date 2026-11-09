@@ -21,7 +21,7 @@
 //=============================================================================================================
 
 #include "inv_hpi_model_parameters.h"
-#include <utils/logger/log.h>
+#include <base/log.h>
 #include "inv_signal_model.h"
 #include <math/linalg.h>
 
@@ -75,10 +75,10 @@ MatrixXd InvSignalModel::fitData(const InvHpiModelParameters& hpiModelParameters
 bool InvSignalModel::checkEmpty(const InvHpiModelParameters& hpiModelParameters)
 {
     if (hpiModelParameters.vecHpiFreqs().empty()) {
-        UTILSLIB::Log::warning("InvSignalModel::checkEmpty - no Hpi frequencies set");
+        BASELIB::Log::warning("InvSignalModel::checkEmpty - no Hpi frequencies set");
         return true;
     } else if (hpiModelParameters.iSampleFreq() == 0) {
-        UTILSLIB::Log::warning("InvSignalModel::checkEmpty - no sampling frequencies set");
+        BASELIB::Log::warning("InvSignalModel::checkEmpty - no sampling frequencies set");
         return true;
     }
     return false;

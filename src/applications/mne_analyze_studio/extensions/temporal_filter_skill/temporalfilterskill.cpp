@@ -19,7 +19,7 @@
 #include <fiff/fiff_raw_data.h>
 #include <fiff/fiff_stream.h>
 #include <dsp/firfilter.h>
-#include <utils/string_utils.h>
+#include <base/string_utils.h>
 
 #include <Eigen/Core>
 

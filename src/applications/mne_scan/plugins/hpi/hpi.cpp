@@ -20,7 +20,7 @@
 
 #include "hpi.h"
 #include <memory>
-#include <utils/string_utils.h>
+#include <base/string_utils.h>
 
 #include "FormFiles/hpisetupwidget.h"
 
@@ -47,7 +47,6 @@
 
 using namespace HPIPLUGIN;
 using namespace SCMEASLIB;
-using namespace UTILSLIB;
 using namespace DISPLIB;
 using namespace FIFFLIB;
 using namespace SCSHAREDLIB;
@@ -75,7 +74,7 @@ Hpi::Hpi()
 , m_bDoContinousHpi(false)
 , m_bUseSSP(false)
 , m_bUseComp(false)
-, m_pCircularBuffer(std::make_shared<CircularBuffer_Matrix_double>(40))
+, m_pCircularBuffer(std::make_shared<BASELIB::CircularBuffer<Eigen::MatrixXd>>(40))
 {
     connect(this, &Hpi::devHeadTransAvailable,
             this, &Hpi::onDevHeadTransAvailable, Qt::BlockingQueuedConnection);
@@ -383,7 +382,7 @@ void Hpi::updateProjections()
             infoTemp.make_projector(matProjectors);
             //set columns of matrix to zero depending on bad channels indexes
             for (qint32 j = 0; j < static_cast<int>(infoTemp.bads.size()); ++j) {
-                matProjectors.col(UTILSLIB::indexOf(infoTemp.ch_names, infoTemp.bads.at(j))).setZero();
+                matProjectors.col(BASELIB::indexOf(infoTemp.ch_names, infoTemp.bads.at(j))).setZero();
             }
         }
 

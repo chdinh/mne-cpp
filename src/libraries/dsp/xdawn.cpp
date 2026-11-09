@@ -15,7 +15,7 @@
 //=============================================================================================================
 
 #include "xdawn.h"
-#include <utils/logger/log.h>
+#include <base/log.h>
 
 #include <vector>
 
@@ -42,6 +42,7 @@
 //=============================================================================================================
 
 using namespace UTILSLIB;
+using namespace BASELIB;
 using namespace MNELIB;
 using namespace Eigen;
 

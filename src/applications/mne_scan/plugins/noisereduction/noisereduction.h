@@ -24,7 +24,9 @@
 
 #include <vector>
 
-#include <utils/generics/circularbuffer.h>
+#include <base/circular_buffer.h>
+
+#include <Eigen/Core>
 
 #include <fiff/fiff_proj.h>
 
@@ -239,7 +241,7 @@ private:
 
     std::shared_ptr<FIFFLIB::FiffInfo> m_pFiffInfo; /**< Fiff measurement info.*/
 
-    std::shared_ptr<UTILSLIB::CircularBuffer_Matrix_double> m_pCircularBuffer; /**< Holds incoming raw data. */
+    std::shared_ptr<BASELIB::CircularBuffer<Eigen::MatrixXd>> m_pCircularBuffer; /**< Holds incoming raw data. */
 
     SCSHAREDLIB::PluginInputData<SCMEASLIB::RealTimeMultiSampleArray>::SPtr m_pNoiseReductionInput;   /**< The RealTimeMultiSampleArray of the NoiseReduction input.*/
     SCSHAREDLIB::PluginOutputData<SCMEASLIB::RealTimeMultiSampleArray>::SPtr m_pNoiseReductionOutput; /**< The RealTimeMultiSampleArray of the NoiseReduction output.*/

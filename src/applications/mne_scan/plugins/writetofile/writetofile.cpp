@@ -39,7 +39,6 @@ using namespace DISPLIB;
 using namespace FIFFLIB;
 using namespace SCSHAREDLIB;
 using namespace Eigen;
-using namespace UTILSLIB;
 
 //=============================================================================================================
 // DEFINE MEMBER METHODS
@@ -52,7 +51,7 @@ WriteToFile::WriteToFile()
 , m_iBlinkStatus(0)
 , m_iSplitCount(0)
 , m_iRecordingMSeconds(5 * 60 * 1000)
-, m_pCircularBuffer(std::make_shared<CircularBuffer_Matrix_double>(40))
+, m_pCircularBuffer(std::make_shared<BASELIB::CircularBuffer<Eigen::MatrixXd>>(40))
 {
     m_pActionRecordFile = new QAction(QIcon(":/images/record.png"), tr("Start Recording"), this);
     m_pActionRecordFile->setStatusTip(tr("Start Recording"));

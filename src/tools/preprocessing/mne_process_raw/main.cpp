@@ -30,7 +30,7 @@
 #include "batchprocessor.h"
 
 #include <mne/mne_process_description.h>
-#include <utils/logger/log.h>
+#include <base/log.h>
 
 #include <QCoreApplication>
 #include <QCommandLineParser>
@@ -43,7 +43,7 @@
 
 using namespace MNEPROCESSRAWAPP;
 using namespace MNELIB;
-using namespace UTILSLIB;
+using namespace BASELIB;
 
 //=============================================================================================================
 // VERSION
@@ -185,7 +185,7 @@ static void printHelp()
  */
 int main(int argc, char* argv[])
 {
-    UTILSLIB::Log::install_qt_message_handler();
+    BASELIB::Log::install_qt_message_handler();
     QCoreApplication app(argc, argv);
     QCoreApplication::setApplicationName("mne_process_raw");
     QCoreApplication::setApplicationVersion(PROGRAM_VERSION);

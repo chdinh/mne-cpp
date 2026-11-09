@@ -31,7 +31,7 @@
 
 #include "fiff_global.h"
 
-#include <utils/error.h>
+#include <base/error.h>
 
 #include <QSharedPointer>
 
@@ -253,7 +253,7 @@ public:
      *
      * @return The annotations, or why the file cannot be read (Io or Format).
      */
-    [[nodiscard]] static UTILSLIB::Expected<FiffAnnotations> read_json(const std::filesystem::path& path);
+    [[nodiscard]] static BASELIB::Expected<FiffAnnotations> read_json(const std::filesystem::path& path);
 
     //=========================================================================================================
     /**
@@ -264,7 +264,7 @@ public:
      *
      * @return The annotations, or why the file cannot be read (Io).
      */
-    [[nodiscard]] static UTILSLIB::Expected<FiffAnnotations> read_csv(const std::filesystem::path& path);
+    [[nodiscard]] static BASELIB::Expected<FiffAnnotations> read_csv(const std::filesystem::path& path);
 
     //=========================================================================================================
     /**
@@ -274,7 +274,7 @@ public:
      *
      * @return The annotations, or why the file cannot be read.
      */
-    [[nodiscard]] static UTILSLIB::Expected<FiffAnnotations> read(const std::filesystem::path& path);
+    [[nodiscard]] static BASELIB::Expected<FiffAnnotations> read(const std::filesystem::path& path);
 
     //=========================================================================================================
     /**
@@ -284,7 +284,7 @@ public:
      *
      * @return Nothing, or why the file cannot be written (Io).
      */
-    [[nodiscard]] UTILSLIB::Expected<void> write_json(const std::filesystem::path& path) const;
+    [[nodiscard]] BASELIB::Expected<void> write_json(const std::filesystem::path& path) const;
 
     //=========================================================================================================
     /**
@@ -294,7 +294,7 @@ public:
      *
      * @return Nothing, or why the file cannot be written (Io).
      */
-    [[nodiscard]] UTILSLIB::Expected<void> write_csv(const std::filesystem::path& path) const;
+    [[nodiscard]] BASELIB::Expected<void> write_csv(const std::filesystem::path& path) const;
 
     //=========================================================================================================
     /**
@@ -304,7 +304,7 @@ public:
      *
      * @return Nothing, or why the file cannot be written (Io).
      */
-    [[nodiscard]] UTILSLIB::Expected<void> write(const std::filesystem::path& path) const;
+    [[nodiscard]] BASELIB::Expected<void> write(const std::filesystem::path& path) const;
 
 private:
     std::vector<FiffAnnotation> m_annotations; /**< Annotation storage. */

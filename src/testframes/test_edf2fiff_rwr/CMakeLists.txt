@@ -33,6 +33,7 @@ set(MNE_LIBS_REQUIRED
   mne_bids
   mne_fiff
   mne_utils
+  mne_base
 )
 
 target_link_libraries(${PROJECT_NAME} PRIVATE

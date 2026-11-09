@@ -2,8 +2,15 @@
   "$comment": "Dependency architecture policy for scripts/quality/audit_dependencies.py. Gate G5. The rule is simple and deliberately strict: a library may depend only on libraries in a strictly lower layer. Same-layer edges are refused too, because they are how cycles start.",
   "layers": [
     {
+      "name": "base",
+      "description": "Logging, error results, byte streams, string and path helpers, threads; depends on the standard library, zlib and Qt Core only.",
+      "libraries": [
+        "mne_base"
+      ]
+    },
+    {
       "name": "core",
-      "description": "Numerics and transport primitives with no MNE-CPP dependencies of their own.",
+      "description": "Numerics and transport primitives built only on the base library.",
       "libraries": [
         "mne_math",
         "mne_lsl",

@@ -17,11 +17,10 @@
 #include <QApplication>
 #include <QCommandLineParser>
 
-#include <utils/logger/log.h>
+#include <base/log.h>
 
 #include "app/mainwindow.h"
 
-using namespace UTILSLIB;
 
 //=============================================================================================================
 // STATIC DEFINITIONS
@@ -35,7 +34,7 @@ using namespace UTILSLIB;
 
 int main(int argc, char* argv[])
 {
-    UTILSLIB::Log::install_qt_message_handler();
+    BASELIB::Log::install_qt_message_handler();
     QApplication app(argc, argv);
     QCoreApplication::setApplicationName("MNE Inspect");
     QCoreApplication::setApplicationVersion(PROGRAM_VERSION);

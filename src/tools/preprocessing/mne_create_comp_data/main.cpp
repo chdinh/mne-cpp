@@ -16,7 +16,7 @@
 
 #include <fiff/fiff.h>
 #include <fiff/fiff_ctf_comp.h>
-#include <utils/logger/log.h>
+#include <base/log.h>
 
 //=============================================================================================================
 // QT INCLUDES
@@ -41,7 +41,7 @@
 //=============================================================================================================
 
 using namespace FIFFLIB;
-using namespace UTILSLIB;
+using namespace BASELIB;
 using namespace Eigen;
 
 //=============================================================================================================
@@ -118,7 +118,7 @@ static bool readAsciiMatrix(const QString& filename,
 
 int main(int argc, char* argv[])
 {
-    UTILSLIB::Log::install_qt_message_handler();
+    BASELIB::Log::install_qt_message_handler();
     QCoreApplication app(argc, argv);
     QCoreApplication::setApplicationName("mne_create_comp_data");
     QCoreApplication::setApplicationVersion(PROGRAM_VERSION);

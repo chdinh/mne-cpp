@@ -30,7 +30,6 @@ using namespace SCSHAREDLIB;
 using namespace SCMEASLIB;
 using namespace FIFFLIB;
 using namespace Eigen;
-using namespace UTILSLIB;
 
 //=============================================================================================================
 // DEFINE MEMBER METHODS
@@ -40,7 +39,7 @@ FtBuffer::FtBuffer()
 : m_bIsConfigured(false)
 , m_pFtBuffProducer(QSharedPointer<FtBuffProducer>::create(this))
 , m_pFiffInfo(std::make_shared<FiffInfo>())
-, m_pCircularBuffer(std::make_shared<CircularBuffer_Matrix_double>(10))
+, m_pCircularBuffer(std::make_shared<BASELIB::CircularBuffer<Eigen::MatrixXd>>(10))
 , m_sBufferAddress("127.0.0.1")
 , m_iBufferPort(1972)
 {

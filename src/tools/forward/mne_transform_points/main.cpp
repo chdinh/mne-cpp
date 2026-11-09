@@ -17,8 +17,8 @@
 #include <fiff/fiff_coord_trans.h>
 #include <fiff/fiff_constants.h>
 
-#include <utils/logger/log.h>
-#include <utils/string_utils.h>
+#include <base/log.h>
+#include <base/string_utils.h>
 
 //=============================================================================================================
 // QT INCLUDES
@@ -43,7 +43,6 @@
 //=============================================================================================================
 
 using namespace FIFFLIB;
-using namespace UTILSLIB;
 using namespace Eigen;
 
 //=============================================================================================================
@@ -74,7 +73,7 @@ static int frameFromName(const QString& name)
 
 int main(int argc, char* argv[])
 {
-    UTILSLIB::Log::install_qt_message_handler();
+    BASELIB::Log::install_qt_message_handler();
     QCoreApplication app(argc, argv);
     QCoreApplication::setApplicationName("mne_transform_points");
     QCoreApplication::setApplicationVersion(PROGRAM_VERSION);

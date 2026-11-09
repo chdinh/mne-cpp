@@ -141,6 +141,10 @@ component_management:
       name: libraries/sts
       paths:
         - src/libraries/sts/**
+    - component_id: libraries_base
+      name: libraries/base
+      paths:
+        - src/libraries/base/**
     - component_id: libraries_utils
       name: libraries/utils
       paths:

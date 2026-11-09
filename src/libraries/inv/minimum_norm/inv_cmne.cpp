@@ -23,7 +23,7 @@
 //=============================================================================================================
 
 #include "inv_cmne.h"
-#include <utils/logger/log.h>
+#include <base/log.h>
 
 //=============================================================================================================
 // EIGEN INCLUDES
@@ -80,12 +80,12 @@ InvCMNEResult InvCMNE::compute(
 
     MatrixXd sensing, prediction, cmne;
     if (settings.onnxModelPath.isEmpty()) {
-        UTILSLIB::Log::info("[InvCMNE] No model: control estimate with look-back {}", settings.lookBack);
+        BASELIB::Log::info("[InvCMNE] No model: control estimate with look-back {}", settings.lookBack);
         cmne = controlEstimate(matDspm, settings.lookBack);
         sensing = zScoreRectify(matDspm);
         prediction = sensing;
     } else if (!applyCmne(matDspm, settings.onnxModelPath, sensing, prediction, cmne)) {
-        UTILSLIB::Log::warning("[InvCMNE] CMNE could not be applied; returning the dSPM estimate only.");
+        BASELIB::Log::warning("[InvCMNE] CMNE could not be applied; returning the dSPM estimate only.");
         return result;
     }
     result.stcSensing = InvSourceEstimate(sensing, vertices, 0.0f, 1.0f);
@@ -107,7 +107,7 @@ MatrixXd InvCMNE::computeDspmKernel(
 
     // Step 1: Whiten noise covariance via eigendecomposition
     // C_n = V * D * V^T  ->  C_n^{-1/2} = V * D^{-1/2} * V^T
-    UTILSLIB::Log::info("  [dSPM kernel] Eigendecomposition of noise covariance ( {} x {} ) …", nChannels, nChannels);
+    BASELIB::Log::info("  [dSPM kernel] Eigendecomposition of noise covariance ( {} x {} ) …", nChannels, nChannels);
     // Decompose the correlation matrix D^-1/2 C D^-1/2: MEG (T^2) and EEG (V^2) variances differ by 1e13,
     // so a cutoff relative to the largest eigenvalue of C would drop every MEG component.
     const VectorXd scale = matNoiseCov.diagonal().cwiseMax(std::numeric_limits<double>::min()).cwiseSqrt();
@@ -128,11 +128,11 @@ MatrixXd InvCMNE::computeDspmKernel(
     MatrixXd matWhitener = eigVecs * eigValsInvSqrt.asDiagonal() * eigVecs.transpose() * scale.cwiseInverse().asDiagonal();
 
     // Step 2: Whiten gain matrix
-    UTILSLIB::Log::info("  [dSPM kernel] Whitening gain matrix …");
+    BASELIB::Log::info("  [dSPM kernel] Whitening gain matrix …");
     MatrixXd matGainWhitened = matWhitener * matGain; // n_channels x n_sources
 
     // Step 3: MNE kernel
-    UTILSLIB::Log::info("  [dSPM kernel] Computing MNE kernel (LDLT solve, {} x {} ) …", nChannels, nChannels);
+    BASELIB::Log::info("  [dSPM kernel] Computing MNE kernel (LDLT solve, {} x {} ) …", nChannels, nChannels);
     // K = C_R * G_tilde^T * (G_tilde * C_R * G_tilde^T + lambda2 * I)^{-1}
     MatrixXd matGCR = matGainWhitened * matSrcCov;        // n_channels x n_sources
     MatrixXd matA = matGCR * matGainWhitened.transpose(); // n_channels x n_channels
@@ -145,7 +145,7 @@ MatrixXd InvCMNE::computeDspmKernel(
     // Step 4: dSPM normalization
     // noise_norm_i = sqrt((K * C_n * K^T)(i,i))
     // K_dSPM(i,:) = K(i,:) / noise_norm_i
-    UTILSLIB::Log::info("  [dSPM kernel] Normalizing {} source rows …", nSources);
+    BASELIB::Log::info("  [dSPM kernel] Normalizing {} source rows …", nSources);
     MatrixXd matKCn = matK * matNoiseCov; // n_sources x n_channels
     for (int i = 0; i < nSources; ++i) {
         double noiseNorm = std::sqrt(matKCn.row(i).dot(matK.row(i)));
@@ -201,18 +201,18 @@ bool InvCMNE::applyCmne(const MatrixXd& matDspmData,
 {
     MLLIB::MlOnnxModel model;
     if (!model.load(onnxModelPath.toStdString())) {
-        UTILSLIB::Log::warning("[InvCMNE] Cannot load CMNE model {}", onnxModelPath.toStdString());
+        BASELIB::Log::warning("[InvCMNE] Cannot load CMNE model {}", onnxModelPath.toStdString());
         return false;
     }
     const QJsonObject config = QJsonDocument::fromJson(QByteArray::fromStdString(model.metadata("cmne_config"))).object();
     const int k = config.value(QStringLiteral("look_back")).toInt();
     const int nSources = config.value(QStringLiteral("n_sources")).toInt();
     if (k <= 0 || nSources != matDspmData.rows()) {
-        UTILSLIB::Log::warning("[InvCMNE] Model {} has no cmne_config for {} sources (look_back {} , n_sources {} ).", onnxModelPath.toStdString(), matDspmData.rows(), k, nSources);
+        BASELIB::Log::warning("[InvCMNE] Model {} has no cmne_config for {} sources (look_back {} , n_sources {} ).", onnxModelPath.toStdString(), matDspmData.rows(), k, nSources);
         return false;
     }
     if (matDspmData.cols() <= k) {
-        UTILSLIB::Log::warning("[InvCMNE] Need more than look_back = {} samples, got {}", k, matDspmData.cols());
+        BASELIB::Log::warning("[InvCMNE] Need more than look_back = {} samples, got {}", k, matDspmData.cols());
         return false;
     }
     sensing = config.value(QStringLiteral("rectify")).toBool(true) ? zScoreRectify(matDspmData) : standardize(matDspmData);
@@ -271,12 +271,12 @@ UTILSLIB::PythonRunnerResult InvCMNE::trainLstm(
     if (!QFile::exists(scriptPath)) {
         UTILSLIB::PythonRunnerResult result;
         result.stdErr = QStringLiteral("Training script not found: ") + scriptPath;
-        UTILSLIB::Log::warning("[InvCMNE::trainLstm] {}", result.stdErr.toStdString());
+        BASELIB::Log::warning("[InvCMNE::trainLstm] {}", result.stdErr.toStdString());
         return result;
     }
 
-    UTILSLIB::Log::debug("[InvCMNE::trainLstm] Script: {}", scriptPath.toStdString());
-    UTILSLIB::Log::debug("[InvCMNE::trainLstm] Package dir: {}", cmneDir.toStdString());
+    BASELIB::Log::debug("[InvCMNE::trainLstm] Script: {}", scriptPath.toStdString());
+    BASELIB::Log::debug("[InvCMNE::trainLstm] Package dir: {}", cmneDir.toStdString());
 
     // Map method integer to string
     QString methodStr;

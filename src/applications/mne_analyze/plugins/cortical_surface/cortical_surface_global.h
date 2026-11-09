@@ -17,7 +17,7 @@
 #ifndef MNEANALYZE_CORTICAL_SURFACE_GLOBAL_H
 #define MNEANALYZE_CORTICAL_SURFACE_GLOBAL_H
 
-#include <utils/buildinfo.h>
+#include <base/buildinfo.h>
 
 #include <QtCore/qglobal.h>
 

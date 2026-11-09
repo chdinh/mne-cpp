@@ -31,7 +31,7 @@
 #include "fiff_coord_trans.h"
 #include "fiff_dig_point_set.h"
 
-#include <utils/error.h>
+#include <base/error.h>
 
 #include <Eigen/Core>
 
@@ -68,7 +68,7 @@ public:
 
     //=========================================================================================================
     /**
-     * Reads the digitizer data of a FIFF file like read(); throws UTILSLIB::Error if it cannot.
+     * Reads the digitizer data of a FIFF file like read(); throws BASELIB::Error if it cannot.
      *
      * @param[in] path   The FIFF file.
      */
@@ -84,7 +84,7 @@ public:
      * @return The data, or why the file cannot be read: Io if it cannot be opened, NotFound if it
      *         holds no digitizer points.
      */
-    [[nodiscard]] static UTILSLIB::Expected<FiffDigitizerData> read(const std::filesystem::path& path);
+    [[nodiscard]] static BASELIB::Expected<FiffDigitizerData> read(const std::filesystem::path& path);
 
     //=========================================================================================================
     /**

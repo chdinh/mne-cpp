@@ -23,7 +23,7 @@
 //=============================================================================================================
 
 #include "fiff_ch_info.h"
-#include <utils/logger/log.h>
+#include <base/log.h>
 
 #include <vector>
 #include "fiff_constants.h"
@@ -87,7 +87,7 @@ bool FiffChInfo::checkEegLocations(const std::vector<FiffChInfo>& chs, int nch)
     for (int k = 0; k < nch; k++) {
         if (chs.at(k).kind == FIFFV_EEG_CH) {
             if (chs.at(k).chpos.r0.norm() < close) {
-                UTILSLIB::Log::critical("Some EEG channels do not have locations assigned.");
+                BASELIB::Log::critical("Some EEG channels do not have locations assigned.");
                 return false;
             }
         }

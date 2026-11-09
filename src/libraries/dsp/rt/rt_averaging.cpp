@@ -16,7 +16,7 @@
 
 #include "rt_averaging.h"
 #include <memory>
-#include <utils/logger/log.h>
+#include <base/log.h>
 
 #include <format>
 
@@ -40,6 +40,7 @@
 using namespace RTPROCESSINGLIB;
 using namespace FIFFLIB;
 using namespace UTILSLIB;
+using namespace BASELIB;
 using namespace Eigen;
 using namespace MNELIB;
 

@@ -15,7 +15,7 @@
 //=============================================================================================================
 
 #include "partial_directed_coherence.h"
-#include <utils/logger/log.h>
+#include <base/log.h>
 
 #include <vector>
 #include "mvar_model.h"
@@ -61,7 +61,7 @@ Network PartialDirectedCoherence::calculate(ConnectivitySettings& connectivitySe
     Network finalNetwork("PDC");
 
     if (connectivitySettings.empty()) {
-        UTILSLIB::Log::debug("PartialDirectedCoherence::calculate - Input data is empty");
+        BASELIB::Log::debug("PartialDirectedCoherence::calculate - Input data is empty");
         return finalNetwork;
     }
 

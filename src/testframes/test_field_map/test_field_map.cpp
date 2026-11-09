@@ -27,7 +27,7 @@
 //=============================================================================================================
 
 #include <fwd/fwd_field_map.h>
-#include <utils/string_utils.h>
+#include <base/string_utils.h>
 
 #include <fiff/fiff.h>
 #include <fiff/fiff_evoked.h>
@@ -388,7 +388,7 @@ void TestFieldMap::initTestCase()
     StringList megChNames, eegChNames;
     for (int k = 0; k < std::ssize(m_evoked.info.chs); ++k) {
         const auto& ch = m_evoked.info.chs[k];
-        if (UTILSLIB::contains(m_evoked.info.bads, ch.ch_name))
+        if (BASELIB::contains(m_evoked.info.bads, ch.ch_name))
             continue;
         if (ch.kind == FIFFV_MEG_CH) {
             megChs.push_back(ch);
@@ -561,7 +561,7 @@ void TestFieldMap::testMappingProjectorVariants()
 
     StringList eegNames;
     for (const FiffChInfo& ch : m_evoked.info.chs) {
-        if (ch.kind == FIFFV_EEG_CH && !UTILSLIB::contains(m_evoked.info.bads, ch.ch_name))
+        if (ch.kind == FIFFV_EEG_CH && !BASELIB::contains(m_evoked.info.bads, ch.ch_name))
             eegNames.push_back(ch.ch_name);
     }
 
@@ -1061,7 +1061,7 @@ void TestFieldMap::testHelmetFieldMap()
     StringList cppMegChNames;
     for (int k = 0; k < std::ssize(m_evoked.info.chs); ++k) {
         const auto& ch = m_evoked.info.chs[k];
-        if (UTILSLIB::contains(m_evoked.info.bads, ch.ch_name))
+        if (BASELIB::contains(m_evoked.info.bads, ch.ch_name))
             continue;
         if (ch.kind == FIFFV_MEG_CH) {
             megChs.push_back(ch);

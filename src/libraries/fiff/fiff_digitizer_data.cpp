@@ -18,7 +18,7 @@
 //=============================================================================================================
 
 #include "fiff_digitizer_data.h"
-#include <utils/logger/log.h>
+#include <base/log.h>
 #include "fiff_coord_trans.h"
 #include "fiff_stream.h"
 #include "fiff_dig_point.h"
@@ -40,7 +40,7 @@ FiffDigitizerData::FiffDigitizerData(const std::filesystem::path& path)
 
 //=============================================================================================================
 
-UTILSLIB::Expected<FiffDigitizerData> FiffDigitizerData::read(const std::filesystem::path& path)
+BASELIB::Expected<FiffDigitizerData> FiffDigitizerData::read(const std::filesystem::path& path)
 {
     auto stream = FiffStream::open(path);
     if (!stream) {
@@ -53,24 +53,24 @@ UTILSLIB::Expected<FiffDigitizerData> FiffDigitizerData::read(const std::filesys
 
 void FiffDigitizerData::print() const
 {
-    UTILSLIB::Log::info("Number of digitizer points: {}", points.size());
+    BASELIB::Log::info("Number of digitizer points: {}", points.size());
 
     switch (coord_frame) {
         case FIFFV_COORD_MRI:
-            UTILSLIB::Log::info("Coord. Frame: FIFFV_COORD_MRI");
+            BASELIB::Log::info("Coord. Frame: FIFFV_COORD_MRI");
             break;
         case FIFFV_COORD_HEAD:
-            UTILSLIB::Log::info("Coord. Frame: FIFFV_COORD_HEAD");
+            BASELIB::Log::info("Coord. Frame: FIFFV_COORD_HEAD");
             break;
     }
 
     for (auto& point : points) {
         if (point.kind == FIFFV_POINT_HPI) {
-            UTILSLIB::Log::info("HPI Point {} - {}, {}, {}", point.ident, point.r[0], point.r[1], point.r[2]);
+            BASELIB::Log::info("HPI Point {} - {}, {}, {}", point.ident, point.r[0], point.r[1], point.r[2]);
         }
     }
 
-    UTILSLIB::Log::info("Number of MRI fiducials: {}", nfids());
+    BASELIB::Log::info("Number of MRI fiducials: {}", nfids());
 }
 
 //=============================================================================================================

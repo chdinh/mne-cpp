@@ -18,7 +18,7 @@
 #include <fiff/fiff_dig_point_set.h>
 
 #include <utils/montage/standard_montage.h>
-#include <utils/string_utils.h>
+#include <base/string_utils.h>
 
 #include <QComboBox>
 #include <QFile>

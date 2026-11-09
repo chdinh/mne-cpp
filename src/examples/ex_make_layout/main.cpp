@@ -21,7 +21,7 @@
 
 #include <utils/layoutmaker.h>
 #include <utils/layoutloader.h>
-#include <utils/logger/log.h>
+#include <base/log.h>
 
 #include <fiff/fiff.h>
 
@@ -59,7 +59,7 @@ int main(int argc, char* argv[])
     // Please notice that this example only works in release mode.
     // Debug mode somehow corrupts the simplex coder. ToDo: Fix this!
     //
-    UTILSLIB::Log::install_qt_message_handler();
+    BASELIB::Log::install_qt_message_handler();
     QCoreApplication a(argc, argv);
 
     // Command Line Parser

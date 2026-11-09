@@ -16,7 +16,7 @@
 
 #include <fs/fs_surface.h>
 #include <fs/fs_label.h>
-#include <utils/logger/log.h>
+#include <base/log.h>
 
 //=============================================================================================================
 // QT INCLUDES
@@ -41,7 +41,6 @@
 //=============================================================================================================
 
 using namespace FSLIB;
-using namespace UTILSLIB;
 using namespace Eigen;
 
 //=============================================================================================================
@@ -80,7 +79,7 @@ static VectorXi buildNearestMap(const MatrixX3f& srcSphere, const MatrixX3f& dst
 
 int main(int argc, char* argv[])
 {
-    UTILSLIB::Log::install_qt_message_handler();
+    BASELIB::Log::install_qt_message_handler();
     QCoreApplication app(argc, argv);
     QCoreApplication::setApplicationName("mne_morph_labels");
     QCoreApplication::setApplicationVersion(PROGRAM_VERSION);

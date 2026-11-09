@@ -35,7 +35,7 @@
 //=============================================================================================================
 
 #include <fiff/fiff_cov.h>
-#include <utils/string_utils.h>
+#include <base/string_utils.h>
 #include <fiff/fiff_info.h>
 #include <fiff/fiff_raw_data.h>
 #include <fiff/fiff_stream.h>
@@ -157,7 +157,7 @@ void TestFiffCovPython::scalars_matchPython()
     else if (field == "n_bads")
         actual = static_cast<int>(m_cov.bads.size());
     else if (field == "n_projs")
-        actual = m_cov.projs.size();
+        actual = static_cast<int>(m_cov.projs.size());
     else if (field == "rows")
         actual = static_cast<int>(m_cov.data.rows());
     else if (field == "cols")
@@ -199,8 +199,8 @@ void TestFiffCovPython::channelNames_matchPython()
 
     // Bad channels are carried on the covariance too, and are stripped the same way.
     QCOMPARE(m_cov.bads.size(), 2);
-    QVERIFY(UTILSLIB::contains(m_cov.bads, "MEG2443"));
-    QVERIFY(UTILSLIB::contains(m_cov.bads, "EEG053"));
+    QVERIFY(BASELIB::contains(m_cov.bads, "MEG2443"));
+    QVERIFY(BASELIB::contains(m_cov.bads, "EEG053"));
 
     // The name list has to line up with the matrix it describes.
     QCOMPARE(m_cov.names.size(), static_cast<int>(m_cov.data.rows()));
@@ -267,7 +267,7 @@ void TestFiffCovPython::data_isSymmetric()
     QCOMPARE(FiffCov::compute_grand_average({}).dim, -1);
     FiffCov smaller = m_cov.pick_channels(StringList(m_cov.names.begin() + 0, m_cov.names.begin() + 0 + 3));
     QCOMPARE(FiffCov::compute_grand_average({m_cov, smaller}).dim, -1);
-    QCOMPARE(m_cov.save({}).error().code, UTILSLIB::ErrorCode::Io);
+    QCOMPARE(m_cov.save({}).error().code, BASELIB::ErrorCode::Io);
 }
 
 //=============================================================================================================
@@ -323,7 +323,7 @@ void TestFiffCovPython::regularize_matchesPython()
 
     const FiffCov reg = cov.regularize(info, 0.1, 0.05, 0.2, proj);
     auto at = [&](const char* a, const char* b) {
-        return reg.data(UTILSLIB::indexOf(reg.names, a), UTILSLIB::indexOf(reg.names, b));
+        return reg.data(BASELIB::indexOf(reg.names, a), BASELIB::indexOf(reg.names, b));
     };
     auto close = [](double got, double want) {
         return std::abs(got - want) <= 1e-9 * std::abs(want);
@@ -336,14 +336,14 @@ void TestFiffCovPython::regularize_matchesPython()
 
     // A zero amount leaves that channel type alone; excluding every EEG channel leaves EEG untouched too
     const FiffCov noEeg = cov.regularize(info, 0.1, 0.05, 0.0, proj);
-    QCOMPARE(noEeg.data(UTILSLIB::indexOf(noEeg.names, "EEG001"), UTILSLIB::indexOf(noEeg.names, "EEG001")), cov.data(UTILSLIB::indexOf(cov.names, "EEG001"), UTILSLIB::indexOf(cov.names, "EEG001")));
+    QCOMPARE(noEeg.data(BASELIB::indexOf(noEeg.names, "EEG001"), BASELIB::indexOf(noEeg.names, "EEG001")), cov.data(BASELIB::indexOf(cov.names, "EEG001"), BASELIB::indexOf(cov.names, "EEG001")));
     StringList eegNames;
     for (const FiffChInfo& ch : info.chs) {
         if (ch.kind == FIFFV_EEG_CH)
             eegNames.push_back(ch.ch_name);
     }
     const FiffCov excluded = cov.regularize(info, 0.1, 0.05, 0.2, proj, eegNames);
-    QCOMPARE(excluded.data(UTILSLIB::indexOf(excluded.names, "EEG001"), UTILSLIB::indexOf(excluded.names, "EEG001")), cov.data(UTILSLIB::indexOf(cov.names, "EEG001"), UTILSLIB::indexOf(cov.names, "EEG001")));
+    QCOMPARE(excluded.data(BASELIB::indexOf(excluded.names, "EEG001"), BASELIB::indexOf(excluded.names, "EEG001")), cov.data(BASELIB::indexOf(cov.names, "EEG001"), BASELIB::indexOf(cov.names, "EEG001")));
 }
 
 //=============================================================================================================

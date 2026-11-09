@@ -20,7 +20,7 @@
 #include "mne_show_fiff_settings.h"
 #include "mne_fiff_contents.h"
 
-#include <utils/logger/log.h>
+#include <base/log.h>
 
 //*************************************************************************************************************
 //=============================================================================================================
@@ -37,7 +37,6 @@
 //=============================================================================================================
 
 using namespace SHOWFIFF;
-using namespace UTILSLIB;
 
 //*************************************************************************************************************
 //=============================================================================================================
@@ -63,7 +62,7 @@ using namespace UTILSLIB;
  */
 int main(int argc, char* argv[])
 {
-    UTILSLIB::Log::install_qt_message_handler();
+    BASELIB::Log::install_qt_message_handler();
     QCoreApplication app(argc, argv);
     QCoreApplication::setApplicationName("mne_show_fiff");
     QCoreApplication::setApplicationVersion(PROGRAM_VERSION);

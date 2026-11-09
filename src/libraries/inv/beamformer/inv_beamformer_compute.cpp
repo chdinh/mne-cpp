@@ -24,7 +24,7 @@
 //=============================================================================================================
 
 #include "inv_beamformer_compute.h"
-#include <utils/logger/log.h>
+#include <base/log.h>
 
 
 //=============================================================================================================
@@ -98,7 +98,7 @@ void InvBeamformerCompute::regPinv(const MatrixXd& C,
     }
 
     if (rankOut == 0) {
-        UTILSLIB::Log::warning("InvBeamformerCompute::regPinv - Covariance matrix has zero rank!");
+        BASELIB::Log::warning("InvBeamformerCompute::regPinv - Covariance matrix has zero rank!");
         CInv = MatrixXd::Zero(n, n);
         loadingFactor = 0.0;
         return;
@@ -183,11 +183,11 @@ bool InvBeamformerCompute::computeBeamformer(const MatrixXd& G,
     const int nSources = nDipoles / nOrient;
 
     if (nSources * nOrient != nDipoles) {
-        UTILSLIB::Log::warning("InvBeamformerCompute::computeBeamformer - G.cols() not divisible by nOrient!");
+        BASELIB::Log::warning("InvBeamformerCompute::computeBeamformer - G.cols() not divisible by nOrient!");
         return false;
     }
     if (Cm.rows() != nChannels || Cm.cols() != nChannels) {
-        UTILSLIB::Log::warning("InvBeamformerCompute::computeBeamformer - Cm dimension mismatch with leadfield!");
+        BASELIB::Log::warning("InvBeamformerCompute::computeBeamformer - Cm dimension mismatch with leadfield!");
         return false;
     }
 

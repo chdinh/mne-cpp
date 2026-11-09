@@ -21,7 +21,7 @@
 //=============================================================================================================
 
 #include <gusbamp_global.h>
-#include <utils/generics/circularbuffer.h>
+#include <base/circular_buffer.h>
 #include <vector>
 #include <Windows.h>
 

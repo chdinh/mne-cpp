@@ -21,7 +21,7 @@
 
 #include "math/simplex_algorithm.h"
 #include <memory>
-#include <utils/logger/log.h>
+#include <base/log.h>
 
 #include "fwd_eeg_sphere_model.h"
 #include "fwd_eeg_sphere_model_set.h"
@@ -40,6 +40,7 @@
 
 using namespace Eigen;
 using namespace UTILSLIB;
+using namespace BASELIB;
 using namespace FWDLIB;
 
 //=============================================================================================================

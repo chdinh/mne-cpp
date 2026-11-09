@@ -20,7 +20,7 @@
 //=============================================================================================================
 
 #include "mne_epoch_data.h"
-#include <utils/logger/log.h>
+#include <base/log.h>
 
 #include <utility>
 
@@ -35,6 +35,7 @@
 using namespace MNELIB;
 using namespace Eigen;
 using namespace UTILSLIB;
+using namespace BASELIB;
 
 //=============================================================================================================
 // DEFINE MEMBER METHODS

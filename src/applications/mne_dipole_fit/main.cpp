@@ -19,7 +19,7 @@
 #include <inv/dipole_fit/inv_dipole_fit_settings.h>
 #include <inv/dipole_fit/inv_dipole_fit.h>
 
-#include <utils/logger/log.h>
+#include <base/log.h>
 
 #include <mne/mne_bem.h>
 
@@ -50,7 +50,6 @@
 using namespace INVLIB;
 using namespace FSLIB;
 using namespace MNELIB;
-using namespace UTILSLIB;
 using namespace DISP3DLIB;
 
 //=============================================================================================================
@@ -85,7 +84,7 @@ int main(int argc, char* argv[])
             break;
         }
     }
-    UTILSLIB::Log::install_qt_message_handler();
+    BASELIB::Log::install_qt_message_handler();
     std::unique_ptr<QCoreApplication> app;
     if (guiRequested) {
         app = std::make_unique<QApplication>(argc, argv);

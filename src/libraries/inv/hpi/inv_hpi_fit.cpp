@@ -23,7 +23,7 @@
 //=============================================================================================================
 
 #include "inv_hpi_fit.h"
-#include <utils/logger/log.h>
+#include <base/log.h>
 #include "inv_hpi_fit_data.h"
 #include "inv_sensor_set.h"
 #include "inv_hpi_data_updater.h"
@@ -115,16 +115,16 @@ void InvHpiFit::fit(const MatrixXd& matProjectedData,
                     HpiFitResult& hpiFitResult)
 {
     if (matProjectedData.rows() != matProjectors.rows()) {
-        UTILSLIB::Log::warning("InvHpiFit::fit - Projector and data dimensions do not match. Returning.");
+        BASELIB::Log::warning("InvHpiFit::fit - Projector and data dimensions do not match. Returning.");
         return;
     } else if (hpiModelParameters.iNHpiCoils() != matCoilsHead.rows()) {
-        UTILSLIB::Log::warning("InvHpiFit::fit - Number of coils and hpi digitizers do not match. Returning.");
+        BASELIB::Log::warning("InvHpiFit::fit - Number of coils and hpi digitizers do not match. Returning.");
         return;
     } else if (matProjectedData.rows() == 0 || matProjectors.rows() == 0) {
-        UTILSLIB::Log::warning("InvHpiFit::fit - No data or Projectors passed. Returning.");
+        BASELIB::Log::warning("InvHpiFit::fit - No data or Projectors passed. Returning.");
         return;
     } else if (m_sensors.ncoils() != matProjectedData.rows()) {
-        UTILSLIB::Log::warning("InvHpiFit::fit - Number of channels in sensors and data do not match. Returning.");
+        BASELIB::Log::warning("InvHpiFit::fit - Number of channels in sensors and data do not match. Returning.");
         return;
     }
 
@@ -559,10 +559,10 @@ bool InvHpiFit::compareTransformation(const MatrixX4f& mDevHeadT,
 
     // compare to thresholds and update
     if (fMove > fThreshTrans) {
-        UTILSLIB::Log::info("Large movement: {} mm", fMove * 1000);
+        BASELIB::Log::info("Large movement: {} mm", fMove * 1000);
         bState = true;
     } else if (fAngle > fThreshRot) {
-        UTILSLIB::Log::info("Large rotation: {} degree", fAngle);
+        BASELIB::Log::info("Large rotation: {} degree", fAngle);
         bState = true;
     } else {
         bState = false;

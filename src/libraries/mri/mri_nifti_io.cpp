@@ -36,11 +36,11 @@
 
 #include <fiff/fiff_file.h>
 
-#include <utils/byte_stream.h>
+#include <base/byte_stream.h>
 
-#include <utils/endian.h>
-#include <utils/logger/log.h>
-#include <utils/string_utils.h>
+#include <base/endian.h>
+#include <base/log.h>
+#include <base/string_utils.h>
 
 //=============================================================================================================
 // EIGEN INCLUDES
@@ -65,7 +65,7 @@
 using namespace MRILIB;
 using namespace FIFFLIB;
 using namespace Eigen;
-using UTILSLIB::Log;
+using BASELIB::Log;
 
 namespace
 {
@@ -81,16 +81,16 @@ constexpr std::int16_t DT_UINT16 = 512;
 constexpr std::size_t NIFTI_HDR_SIZE = 348;
 
 // Value of type T at @p p, stored with the file's byte order
-template<UTILSLIB::Swappable T>
+template<BASELIB::Swappable T>
 T readValue(const std::byte* p, bool bigEndian)
 {
     T v;
     std::memcpy(&v, p, sizeof(T));
-    return bigEndian != (std::endian::native == std::endian::big) ? UTILSLIB::byteSwap(v) : v;
+    return bigEndian != (std::endian::native == std::endian::big) ? BASELIB::byteSwap(v) : v;
 }
 
 // Decodes @p count values of type T from @p p and converts each one with @p convert into @p out
-template<UTILSLIB::Swappable T, typename Out, typename Convert>
+template<BASELIB::Swappable T, typename Out, typename Convert>
 void readValues(const std::byte*& p, bool bigEndian, std::vector<Out>& out, std::size_t count, Convert convert)
 {
     out.resize(count);
@@ -104,7 +104,7 @@ void readValues(const std::byte*& p, bool bigEndian, std::vector<Out>& out, std:
 
 bool MriNiftiIO::decompress(const std::string& gzFile, std::vector<std::byte>& rawData)
 {
-    auto bytes = UTILSLIB::read_file_bytes(UTILSLIB::pathFromUtf8(gzFile), UTILSLIB::Compression::Gzip);
+    auto bytes = BASELIB::read_file_bytes(BASELIB::pathFromUtf8(gzFile), BASELIB::Compression::Gzip);
     if (!bytes) {
         Log::critical("MriNiftiIO::decompress - {}", bytes.error().what());
         return false;
@@ -119,8 +119,8 @@ bool MriNiftiIO::read(const std::string& niiFile, MriVolData& volData, bool verb
 {
     volData.fileName = niiFile;
 
-    const bool compressed = UTILSLIB::toLower(niiFile).ends_with(".gz");
-    const auto content = UTILSLIB::read_file_bytes(UTILSLIB::pathFromUtf8(niiFile), compressed ? UTILSLIB::Compression::Gzip : UTILSLIB::Compression::None);
+    const bool compressed = BASELIB::toLower(niiFile).ends_with(".gz");
+    const auto content = BASELIB::read_file_bytes(BASELIB::pathFromUtf8(niiFile), compressed ? BASELIB::Compression::Gzip : BASELIB::Compression::None);
     if (!content) {
         Log::critical("MriNiftiIO::read - {}", content.error().what());
         return false;

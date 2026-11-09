@@ -110,7 +110,7 @@ public:
                                        float tmax,
                                        qint32 event,
                                        const std::map<std::string, double>& mapReject,
-                                       const UTILSLIB::StringList& lExcludeChs = {},
+                                       const BASELIB::StringList& lExcludeChs = {},
                                        const Eigen::RowVectorXi& picks = Eigen::RowVectorXi());
 
     //=========================================================================================================
@@ -167,7 +167,7 @@ public:
     static bool checkForArtifact(const Eigen::MatrixXd& data,
                                  const FIFFLIB::FiffInfo& pFiffInfo,
                                  const std::map<std::string, double>& mapReject,
-                                 const UTILSLIB::StringList& lExcludeChs = {});
+                                 const BASELIB::StringList& lExcludeChs = {});
 
     //=========================================================================================================
     /**
@@ -192,7 +192,7 @@ public:
     static FIFFLIB::FiffEvokedSet averageCategories(const FIFFLIB::FiffRawData& raw,
                                                     const Eigen::MatrixXi& events,
                                                     const std::vector<int>& eventCodes,
-                                                    const UTILSLIB::StringList& comments,
+                                                    const BASELIB::StringList& comments,
                                                     float tmin,
                                                     float tmax,
                                                     const std::map<std::string, double>& mapReject = {},
@@ -227,7 +227,7 @@ public:
                                               float fTBaselineFromS,
                                               float fTBaselineToS,
                                               const std::map<std::string, double>& mapReject,
-                                              const UTILSLIB::StringList& lExcludeChs = {},
+                                              const BASELIB::StringList& lExcludeChs = {},
                                               const Eigen::RowVectorXi& vecPicks = Eigen::RowVectorXi());
 
 private:

@@ -21,7 +21,7 @@
 //=============================================================================================================
 
 #include "inv_resolution_matrix.h"
-#include <utils/logger/log.h>
+#include <base/log.h>
 
 //=============================================================================================================
 // QT INCLUDES
@@ -43,7 +43,7 @@ MatrixXd InvResolutionMatrix::compute(const MatrixXd& matInverseKernel,
                                       const MatrixXd& matLeadField)
 {
     if (matInverseKernel.cols() != matLeadField.rows()) {
-        UTILSLIB::Log::warning("[InvResolutionMatrix::compute] Dimension mismatch: inverse kernel cols {} != lead field rows {}", matInverseKernel.cols(), matLeadField.rows());
+        BASELIB::Log::warning("[InvResolutionMatrix::compute] Dimension mismatch: inverse kernel cols {} != lead field rows {}", matInverseKernel.cols(), matLeadField.rows());
         return MatrixXd();
     }
 
@@ -55,7 +55,7 @@ MatrixXd InvResolutionMatrix::compute(const MatrixXd& matInverseKernel,
 VectorXd InvResolutionMatrix::getPsf(const MatrixXd& matResolution, int iSourceIdx)
 {
     if (iSourceIdx < 0 || iSourceIdx >= matResolution.cols()) {
-        UTILSLIB::Log::warning("[InvResolutionMatrix::getPsf] Index out of range: {}", iSourceIdx);
+        BASELIB::Log::warning("[InvResolutionMatrix::getPsf] Index out of range: {}", iSourceIdx);
         return VectorXd();
     }
 
@@ -67,7 +67,7 @@ VectorXd InvResolutionMatrix::getPsf(const MatrixXd& matResolution, int iSourceI
 VectorXd InvResolutionMatrix::getCtf(const MatrixXd& matResolution, int iSourceIdx)
 {
     if (iSourceIdx < 0 || iSourceIdx >= matResolution.rows()) {
-        UTILSLIB::Log::warning("[InvResolutionMatrix::getCtf] Index out of range: {}", iSourceIdx);
+        BASELIB::Log::warning("[InvResolutionMatrix::getCtf] Index out of range: {}", iSourceIdx);
         return VectorXd();
     }
 

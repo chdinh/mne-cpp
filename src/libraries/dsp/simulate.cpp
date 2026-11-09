@@ -15,7 +15,7 @@
 //=============================================================================================================
 
 #include "simulate.h"
-#include <utils/logger/log.h>
+#include <base/log.h>
 
 #include <vector>
 
@@ -44,6 +44,7 @@
 //=============================================================================================================
 
 using namespace UTILSLIB;
+using namespace BASELIB;
 using namespace INVLIB;
 using namespace FIFFLIB;
 using namespace MNELIB;

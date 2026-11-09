@@ -44,11 +44,13 @@
           "test_acq_stream",
           "test_acq_thread",
           "test_acq_timebase",
+          "test_base_byte_stream",
+          "test_base_circular_buffer",
+          "test_base_logger",
+          "test_base_string_utils",
+          "test_base_thread_pool",
           "test_mne_acq_tool",
-          "test_rt_server_fiff_replay",
-          "test_utils_byte_stream",
-          "test_utils_string_utils",
-          "test_utils_thread_pool"
+          "test_rt_server_fiff_replay"
         ],
         "macos-26-qt-min": [
           "test_acq_convert",
@@ -61,11 +63,13 @@
           "test_acq_stream",
           "test_acq_thread",
           "test_acq_timebase",
+          "test_base_byte_stream",
+          "test_base_circular_buffer",
+          "test_base_logger",
+          "test_base_string_utils",
+          "test_base_thread_pool",
           "test_mne_acq_tool",
-          "test_rt_server_fiff_replay",
-          "test_utils_byte_stream",
-          "test_utils_string_utils",
-          "test_utils_thread_pool"
+          "test_rt_server_fiff_replay"
         ],
         "ubuntu-24.04": [
           "test_acq_convert",
@@ -78,11 +82,13 @@
           "test_acq_stream",
           "test_acq_thread",
           "test_acq_timebase",
+          "test_base_byte_stream",
+          "test_base_circular_buffer",
+          "test_base_logger",
+          "test_base_string_utils",
+          "test_base_thread_pool",
           "test_mne_acq_tool",
-          "test_rt_server_fiff_replay",
-          "test_utils_byte_stream",
-          "test_utils_string_utils",
-          "test_utils_thread_pool"
+          "test_rt_server_fiff_replay"
         ],
         "ubuntu-24.04-qt-min": [
           "test_acq_convert",
@@ -95,11 +101,13 @@
           "test_acq_stream",
           "test_acq_thread",
           "test_acq_timebase",
+          "test_base_byte_stream",
+          "test_base_circular_buffer",
+          "test_base_logger",
+          "test_base_string_utils",
+          "test_base_thread_pool",
           "test_mne_acq_tool",
-          "test_rt_server_fiff_replay",
-          "test_utils_byte_stream",
-          "test_utils_string_utils",
-          "test_utils_thread_pool"
+          "test_rt_server_fiff_replay"
         ],
         "windows-2025-vs2026": [
           "test_acq_convert",
@@ -112,11 +120,13 @@
           "test_acq_stream",
           "test_acq_thread",
           "test_acq_timebase",
+          "test_base_byte_stream",
+          "test_base_circular_buffer",
+          "test_base_logger",
+          "test_base_string_utils",
+          "test_base_thread_pool",
           "test_mne_acq_tool",
-          "test_rt_server_fiff_replay",
-          "test_utils_byte_stream",
-          "test_utils_string_utils",
-          "test_utils_thread_pool"
+          "test_rt_server_fiff_replay"
         ],
         "windows-2025-vs2026-qt-min": [
           "test_acq_convert",
@@ -129,11 +139,13 @@
           "test_acq_stream",
           "test_acq_thread",
           "test_acq_timebase",
+          "test_base_byte_stream",
+          "test_base_circular_buffer",
+          "test_base_logger",
+          "test_base_string_utils",
+          "test_base_thread_pool",
           "test_mne_acq_tool",
-          "test_rt_server_fiff_replay",
-          "test_utils_byte_stream",
-          "test_utils_string_utils",
-          "test_utils_thread_pool"
+          "test_rt_server_fiff_replay"
         ]
       },
       "ci_failures": 0,
@@ -162,7 +174,7 @@
       "example_eligible": 414,
       "eligible_backed_percent": 99.76,
       "snippets": 450,
-      "registered_test_percent": 38.78
+      "registered_test_percent": 38.96
     },
     "G4_screenshots": {
       "referenced_images": 19,

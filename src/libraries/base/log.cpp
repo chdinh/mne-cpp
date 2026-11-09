@@ -12,7 +12,7 @@
  *           Christoph Dinh <christoph.dinh@mne-cpp.org>
  * @since    0.1.0
  * @date     July 2019
- * @brief    Definition of @ref UTILSLIB::Log and @ref UTILSLIB::LogCapture.
+ * @brief    Definition of @ref BASELIB::Log and @ref BASELIB::LogCapture.
  *
  * The console writer serialises its writes through one mutex, so lines from different threads never
  * interleave inside one record.
@@ -24,7 +24,7 @@
 
 #include "log.h"
 
-#include "../string_utils.h"
+#include "string_utils.h"
 
 //=============================================================================================================
 // QT INCLUDES
@@ -52,7 +52,7 @@
 // USED NAMESPACES
 //=============================================================================================================
 
-using namespace UTILSLIB;
+using namespace BASELIB;
 
 //=============================================================================================================
 // DEFINE STATICS AND LOCAL METHODS

@@ -17,7 +17,7 @@
 #include "mne_deriv.h"
 
 #include <vector>
-#include <utils/string_utils.h>
+#include <base/string_utils.h>
 
 //=============================================================================================================
 // USED NAMESPACES
@@ -81,7 +81,7 @@ int MNEDeriv::validate(const std::vector<FiffChInfo>& chInfo)
         const FiffChInfo* first = nullptr;
         bool ok = true;
         for (Eigen::SparseMatrix<float, Eigen::RowMajor>::InnerIterator it(rows, j); it && ok; ++it) {
-            const int pick = static_cast<int>(UTILSLIB::indexOf(names, ((deriv_data->collist[static_cast<int>(it.col())]))));
+            const int pick = static_cast<int>(BASELIB::indexOf(names, ((deriv_data->collist[static_cast<int>(it.col())]))));
             if (pick < 0) {
                 ok = false;
             } else if (!first) {

@@ -15,7 +15,7 @@
 //=============================================================================================================
 
 #include "bids_dataset_description.h"
-#include <utils/logger/log.h>
+#include <base/log.h>
 
 //=============================================================================================================
 // QT INCLUDES
@@ -41,7 +41,7 @@ BidsDatasetDescription BidsDatasetDescription::read(const QString& sFilePath)
 
     QFile file(sFilePath);
     if (!file.open(QIODevice::ReadOnly | QIODevice::Text)) {
-        UTILSLIB::Log::warning("[BidsDatasetDescription::read] Cannot open {}", sFilePath.toStdString());
+        BASELIB::Log::warning("[BidsDatasetDescription::read] Cannot open {}", sFilePath.toStdString());
         return desc;
     }
 
@@ -50,7 +50,7 @@ BidsDatasetDescription BidsDatasetDescription::read(const QString& sFilePath)
     file.close();
 
     if (error.error != QJsonParseError::NoError) {
-        UTILSLIB::Log::warning("[BidsDatasetDescription::read] Parse error in {} : {}", sFilePath.toStdString(), error.errorString().toStdString());
+        BASELIB::Log::warning("[BidsDatasetDescription::read] Parse error in {} : {}", sFilePath.toStdString(), error.errorString().toStdString());
         return desc;
     }
 
@@ -80,7 +80,7 @@ bool BidsDatasetDescription::write(const QString& sFilePath,
 
     QFile file(sFilePath);
     if (!file.open(QIODevice::WriteOnly | QIODevice::Text)) {
-        UTILSLIB::Log::warning("[BidsDatasetDescription::write] Cannot open {} for writing", sFilePath.toStdString());
+        BASELIB::Log::warning("[BidsDatasetDescription::write] Cannot open {} for writing", sFilePath.toStdString());
         return false;
     }
 

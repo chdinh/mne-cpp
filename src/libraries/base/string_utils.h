@@ -13,14 +13,14 @@
  * names need.
  */
 
-#ifndef UTILS_STRING_UTILS_H
-#define UTILS_STRING_UTILS_H
+#ifndef BASE_STRING_UTILS_H
+#define BASE_STRING_UTILS_H
 
 //=============================================================================================================
 // INCLUDES
 //=============================================================================================================
 
-#include "utils_global.h"
+#include "base_global.h"
 
 //=============================================================================================================
 // STL INCLUDES
@@ -33,10 +33,10 @@
 #include <vector>
 
 //=============================================================================================================
-// DEFINE NAMESPACE UTILSLIB
+// DEFINE NAMESPACE BASELIB
 //=============================================================================================================
 
-namespace UTILSLIB
+namespace BASELIB
 {
 
 /** Ordered list of names, e.g. channel names; the standard-library counterpart of QStringList. */
@@ -47,7 +47,7 @@ using StringList = std::vector<std::string>;
  *
  * @return @p text without leading and trailing ASCII whitespace, like QString::trimmed().
  */
-UTILSSHARED_EXPORT std::string_view trimmed(std::string_view text);
+BASESHARED_EXPORT std::string_view trimmed(std::string_view text);
 
 /**
  * @param[in] text        Any text.
@@ -56,7 +56,7 @@ UTILSSHARED_EXPORT std::string_view trimmed(std::string_view text);
  *
  * @return The fields of @p text, like QString::split(); empty text gives one empty field unless skipped.
  */
-UTILSSHARED_EXPORT StringList split(std::string_view text, char separator, bool skipEmpty = false);
+BASESHARED_EXPORT StringList split(std::string_view text, char separator, bool skipEmpty = false);
 
 //=============================================================================================================
 /**
@@ -65,7 +65,7 @@ UTILSSHARED_EXPORT StringList split(std::string_view text, char separator, bool 
  *
  * @return Index of the first occurrence of @p name, or -1, like QStringList::indexOf().
  */
-UTILSSHARED_EXPORT int indexOf(const StringList& list, std::string_view name);
+BASESHARED_EXPORT int indexOf(const StringList& list, std::string_view name);
 
 //=============================================================================================================
 /**
@@ -74,7 +74,7 @@ UTILSSHARED_EXPORT int indexOf(const StringList& list, std::string_view name);
  *
  * @return Whether @p list holds @p name.
  */
-UTILSSHARED_EXPORT bool contains(const StringList& list, std::string_view name);
+BASESHARED_EXPORT bool contains(const StringList& list, std::string_view name);
 
 //=============================================================================================================
 /**
@@ -83,14 +83,14 @@ UTILSSHARED_EXPORT bool contains(const StringList& list, std::string_view name);
  *
  * @return The names joined by @p separator, like QStringList::join().
  */
-UTILSSHARED_EXPORT std::string join(const StringList& list, std::string_view separator);
+BASESHARED_EXPORT std::string join(const StringList& list, std::string_view separator);
 
 /**
  * @param[in] text   UTF-8 text.
  *
  * @return @p text with ASCII letters in lower case; other bytes unchanged.
  */
-UTILSSHARED_EXPORT std::string toLower(std::string_view text);
+BASESHARED_EXPORT std::string toLower(std::string_view text);
 
 /**
  * @param[in] a   UTF-8 text.
@@ -98,36 +98,36 @@ UTILSSHARED_EXPORT std::string toLower(std::string_view text);
  *
  * @return Whether @p a and @p b are equal when ASCII letters are compared without case.
  */
-UTILSSHARED_EXPORT bool equalsIgnoreCase(std::string_view a, std::string_view b);
+BASESHARED_EXPORT bool equalsIgnoreCase(std::string_view a, std::string_view b);
 
 /**
  * @param[in] text   A decimal number with optional surrounding whitespace, independent of the locale.
  *
  * @return The value, or nothing if @p text is not entirely a finite or infinite number, like QString::toDouble().
  */
-UTILSSHARED_EXPORT std::optional<double> toDouble(std::string_view text);
+BASESHARED_EXPORT std::optional<double> toDouble(std::string_view text);
 
 /**
  * @param[in] text   A decimal integer with optional surrounding whitespace.
  *
  * @return The value, or nothing if @p text is not entirely an int in range, like QString::toInt().
  */
-UTILSSHARED_EXPORT std::optional<int> toInt(std::string_view text);
+BASESHARED_EXPORT std::optional<int> toInt(std::string_view text);
 
 /**
  * @param[in] utf8   A path in UTF-8.
  *
  * @return The path; unlike std::filesystem::path(std::string), correct for non-ASCII names on Windows too.
  */
-UTILSSHARED_EXPORT std::filesystem::path pathFromUtf8(std::string_view utf8);
+BASESHARED_EXPORT std::filesystem::path pathFromUtf8(std::string_view utf8);
 
 /**
  * @param[in] path   Any path.
  *
  * @return @p path in UTF-8 on every platform.
  */
-UTILSSHARED_EXPORT std::string utf8FromPath(const std::filesystem::path& path);
+BASESHARED_EXPORT std::string utf8FromPath(const std::filesystem::path& path);
 
-} // namespace UTILSLIB
+} // namespace BASELIB
 
-#endif // UTILS_STRING_UTILS_H
+#endif // BASE_STRING_UTILS_H

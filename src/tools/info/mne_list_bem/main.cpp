@@ -19,7 +19,7 @@
 #include <mne/mne_bem.h>
 #include <mne/mne_bem_surface.h>
 
-#include <utils/logger/log.h>
+#include <base/log.h>
 
 //=============================================================================================================
 // QT INCLUDES
@@ -44,7 +44,6 @@
 
 using namespace FIFFLIB;
 using namespace MNELIB;
-using namespace UTILSLIB;
 using namespace Eigen;
 
 //=============================================================================================================
@@ -57,7 +56,7 @@ using namespace Eigen;
 
 int main(int argc, char* argv[])
 {
-    UTILSLIB::Log::install_qt_message_handler();
+    BASELIB::Log::install_qt_message_handler();
     QCoreApplication app(argc, argv);
     QCoreApplication::setApplicationName("mne_list_bem");
     QCoreApplication::setApplicationVersion(PROGRAM_VERSION);

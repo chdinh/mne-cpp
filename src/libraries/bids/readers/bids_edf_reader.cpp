@@ -15,7 +15,7 @@
 //=============================================================================================================
 
 #include "bids_edf_reader.h"
-#include <utils/logger/log.h>
+#include <base/log.h>
 
 #include <fiff/fiff_constants.h>
 
@@ -133,7 +133,7 @@ bool EDFReader::open(const QString& sFilePath)
     m_file.setFileName(sFilePath);
 
     if (!m_file.open(QIODevice::ReadOnly)) {
-        UTILSLIB::Log::warning("[EDFReader::open] Could not open file: {}", sFilePath.toStdString());
+        BASELIB::Log::warning("[EDFReader::open] Could not open file: {}", sFilePath.toStdString());
         return false;
     }
 
@@ -215,7 +215,7 @@ void EDFReader::parseHeader(QIODevice* pDev)
 
     // Verify header size consistency
     if (pDev->pos() != m_iNumBytesInHeader) {
-        UTILSLIB::Log::warning("[EDFReader::parseHeader] Header byte count mismatch: read {} expected {}", pDev->pos(), m_iNumBytesInHeader);
+        BASELIB::Log::warning("[EDFReader::parseHeader] Header byte count mismatch: read {} expected {}", pDev->pos(), m_iNumBytesInHeader);
     }
 
     // Calculate bytes per data record
@@ -263,14 +263,14 @@ FiffInfo EDFReader::getInfo() const
 MatrixXf EDFReader::readRawSegment(int iStartSampleIdx, int iEndSampleIdx) const
 {
     if (!m_bIsOpen) {
-        UTILSLIB::Log::warning("[EDFReader::readRawSegment] File not open");
+        BASELIB::Log::warning("[EDFReader::readRawSegment] File not open");
         return MatrixXf();
     }
 
     long totalSamples = getSampleCount();
     if (iStartSampleIdx < 0 || iStartSampleIdx >= totalSamples ||
         iEndSampleIdx < 0 || iEndSampleIdx > totalSamples) {
-        UTILSLIB::Log::warning("[EDFReader::readRawSegment] Index out of bounds: {} - {}", iStartSampleIdx, iEndSampleIdx);
+        BASELIB::Log::warning("[EDFReader::readRawSegment] Index out of bounds: {} - {}", iStartSampleIdx, iEndSampleIdx);
         return MatrixXf();
     }
 

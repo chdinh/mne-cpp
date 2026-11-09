@@ -107,22 +107,22 @@ struct MNESHARED_EXPORT ProcessingSettings
     std::string workingDir;
 
     // Input
-    UTILSLIB::StringList rawFiles;   /**< Raw data file(s). */
-    UTILSLIB::StringList eventFiles; /**< Event file(s) to read. */
-    int compensateTo = -1;           /**< Desired software gradient compensation (-1 = from file). */
-    bool allowMaxShield = false;     /**< Allow unprocessed MaxShield data. */
+    BASELIB::StringList rawFiles;   /**< Raw data file(s). */
+    BASELIB::StringList eventFiles; /**< Event file(s) to read. */
+    int compensateTo = -1;          /**< Desired software gradient compensation (-1 = from file). */
+    bool allowMaxShield = false;    /**< Allow unprocessed MaxShield data. */
 
     // Filter
     FilterSettings filter;
 
     // Events output
-    UTILSLIB::StringList eventsOutFiles; /**< Save events to these files. */
-    bool saveAllEvents = false;          /**< Save all transitions (not just leading edge). */
-    std::string digTrigger;              /**< Digital trigger channel name. */
-    unsigned int digTriggerMask = 0;     /**< Mask for digital trigger channel. */
+    BASELIB::StringList eventsOutFiles; /**< Save events to these files. */
+    bool saveAllEvents = false;         /**< Save all transitions (not just leading edge). */
+    std::string digTrigger;             /**< Digital trigger channel name. */
+    unsigned int digTriggerMask = 0;    /**< Mask for digital trigger channel. */
 
     // Projection
-    UTILSLIB::StringList projFiles;   /**< SSP data files. */
+    BASELIB::StringList projFiles;    /**< SSP data files. */
     int projOn = -1;                  /**< -1=unspecified, 0=off, 1=on. */
     bool makeProj = false;            /**< Create a new projection operator. */
     int projEvent = -1;               /**< Which event for projector creation. */
@@ -138,20 +138,20 @@ struct MNESHARED_EXPORT ProcessingSettings
     bool saveProjAugmented = false;   /**< Output in augmented format for graph. */
 
     // Save
-    UTILSLIB::StringList saveFiles; /**< Destination(s) for saving filtered raw data. */
-    bool omitSubjectInfo = false;   /**< Omit subject info from output. */
-    int decimation = 1;             /**< Decimation factor. */
-    long splitSize = -1;            /**< Split output into chunks of this many bytes (-1=no split). */
+    BASELIB::StringList saveFiles; /**< Destination(s) for saving filtered raw data. */
+    bool omitSubjectInfo = false;  /**< Omit subject info from output. */
+    int decimation = 1;            /**< Decimation factor. */
+    long splitSize = -1;           /**< Split output into chunks of this many bytes (-1=no split). */
 
     // Averaging
-    UTILSLIB::StringList aveFiles; /**< Averaging description file(s). */
-    std::string saveAveTag;        /**< Tag for average output files. */
-    std::string grandAveFile;      /**< Grand average output file. */
+    BASELIB::StringList aveFiles; /**< Averaging description file(s). */
+    std::string saveAveTag;       /**< Tag for average output files. */
+    std::string grandAveFile;     /**< Grand average output file. */
 
     // Covariance
-    UTILSLIB::StringList covFiles; /**< Covariance description file(s). */
-    std::string saveCovTag;        /**< Tag for covariance output files. */
-    std::string grandCovFile;      /**< Grand covariance output file. */
+    BASELIB::StringList covFiles; /**< Covariance description file(s). */
+    std::string saveCovTag;       /**< Tag for covariance output files. */
+    std::string grandCovFile;     /**< Grand covariance output file. */
 
     // Misc
     bool saveHere = false; /**< Save auto-generated files in CWD instead of raw data dir. */

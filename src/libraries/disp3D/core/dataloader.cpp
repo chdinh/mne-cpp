@@ -31,8 +31,8 @@
 #include <fiff/fiff_stream.h>
 #include <fiff/fiff_dig_point_set.h>
 #include <mne/mne_bem.h>
-#include <utils/logger/log.h>
-#include <utils/string_utils.h>
+#include <base/log.h>
+#include <base/string_utils.h>
 #include <fs/fs_surface.h>
 
 using namespace FIFFLIB;
@@ -335,7 +335,7 @@ bool DataLoader::loadHeadToMriTransform(const QString& transPath,
     // A file may hold several transforms (e.g. all-trans.fif: device -> head and MRI -> head)
     const auto read = FiffCoordTrans::read(transPath.toStdU16String(), FIFFV_COORD_HEAD, FIFFV_COORD_MRI);
     if (!read) {
-        UTILSLIB::Log::warning("DataLoader: {}", read.error().what());
+        BASELIB::Log::warning("DataLoader: {}", read.error().what());
         return false;
     }
     trans = *read;

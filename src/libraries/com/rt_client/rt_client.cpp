@@ -23,7 +23,7 @@
 //=============================================================================================================
 
 #include "rt_client.h"
-#include <utils/logger/log.h>
+#include <base/log.h>
 #include "rt_cmd_client.h"
 #include "rt_data_client.h"
 
@@ -153,14 +153,14 @@ void RtClient::run()
 
         if (kind == FIFF_DATA_BUFFER) {
             to += matData.cols();
-            UTILSLIB::Log::info("Reading {} ... {}  =  {:9.3f} ... {:9.3f} secs...", from, to, static_cast<float>(from) / m_pFiffInfo->sfreq, static_cast<float>(to) / m_pFiffInfo->sfreq);
+            BASELIB::Log::info("Reading {} ... {}  =  {:9.3f} ... {:9.3f} secs...", from, to, static_cast<float>(from) / m_pFiffInfo->sfreq, static_cast<float>(to) / m_pFiffInfo->sfreq);
             from += matData.cols();
 
             emit rawBufferReceived(matData);
         } else if (FIFF_DATA_BUFFER == FIFF_BLOCK_END)
             m_bIsRunning = false;
 
-        UTILSLIB::Log::info("[done]");
+        BASELIB::Log::info("[done]");
     }
 
     //

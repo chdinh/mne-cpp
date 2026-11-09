@@ -26,7 +26,7 @@
 #include <mna/mna_recording.h>
 #include <mna/mna_file_ref.h>
 #include <mna/mna_types.h>
-#include <utils/logger/log.h>
+#include <base/log.h>
 
 //=============================================================================================================
 // QT INCLUDES
@@ -47,7 +47,6 @@
 //=============================================================================================================
 
 using namespace MNALIB;
-using namespace UTILSLIB;
 
 //=============================================================================================================
 // BIDS HELPERS
@@ -453,7 +452,7 @@ static void printUsage(QTextStream& out)
 
 int main(int argc, char* argv[])
 {
-    UTILSLIB::Log::install_qt_message_handler();
+    BASELIB::Log::install_qt_message_handler();
     QCoreApplication app(argc, argv);
     app.setApplicationName(QStringLiteral("mne_mna_bids_converter"));
     app.setApplicationVersion(QStringLiteral(MNE_CPP_VERSION));

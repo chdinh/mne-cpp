@@ -7,7 +7,7 @@
  * @author   Christoph Dinh <christoph.dinh@mne-cpp.org>
  * @since    2.5.0
  * @date     November 2026
- * @brief    Definition of the text and path helpers in utils/string_utils.h.
+ * @brief    Definition of the text and path helpers in base/string_utils.h.
  */
 
 //=============================================================================================================
@@ -105,7 +105,7 @@ std::string_view stripPlus(std::string_view text)
 // DEFINE GLOBAL METHODS
 //=============================================================================================================
 
-std::string_view UTILSLIB::trimmed(std::string_view text)
+std::string_view BASELIB::trimmed(std::string_view text)
 {
     while (!text.empty() && isSpace(text.front())) {
         text.remove_prefix(1);
@@ -118,7 +118,7 @@ std::string_view UTILSLIB::trimmed(std::string_view text)
 
 //=============================================================================================================
 
-UTILSLIB::StringList UTILSLIB::split(std::string_view text, char separator, bool skipEmpty)
+BASELIB::StringList BASELIB::split(std::string_view text, char separator, bool skipEmpty)
 {
     StringList fields;
     for (std::size_t start = 0;;) {
@@ -136,7 +136,7 @@ UTILSLIB::StringList UTILSLIB::split(std::string_view text, char separator, bool
 
 //=============================================================================================================
 
-int UTILSLIB::indexOf(const StringList& list, std::string_view name)
+int BASELIB::indexOf(const StringList& list, std::string_view name)
 {
     const auto it = std::find(list.begin(), list.end(), name);
     return it == list.end() ? -1 : static_cast<int>(it - list.begin());
@@ -144,14 +144,14 @@ int UTILSLIB::indexOf(const StringList& list, std::string_view name)
 
 //=============================================================================================================
 
-bool UTILSLIB::contains(const StringList& list, std::string_view name)
+bool BASELIB::contains(const StringList& list, std::string_view name)
 {
     return std::find(list.begin(), list.end(), name) != list.end();
 }
 
 //=============================================================================================================
 
-std::string UTILSLIB::join(const StringList& list, std::string_view separator)
+std::string BASELIB::join(const StringList& list, std::string_view separator)
 {
     std::string out;
     for (std::size_t i = 0; i < list.size(); ++i) {
@@ -164,7 +164,7 @@ std::string UTILSLIB::join(const StringList& list, std::string_view separator)
 
 //=============================================================================================================
 
-std::string UTILSLIB::toLower(std::string_view text)
+std::string BASELIB::toLower(std::string_view text)
 {
     std::string out(text);
     std::transform(out.begin(), out.end(), out.begin(), lower);
@@ -173,14 +173,14 @@ std::string UTILSLIB::toLower(std::string_view text)
 
 //=============================================================================================================
 
-bool UTILSLIB::equalsIgnoreCase(std::string_view a, std::string_view b)
+bool BASELIB::equalsIgnoreCase(std::string_view a, std::string_view b)
 {
     return a.size() == b.size() && std::equal(a.begin(), a.end(), b.begin(), [](char x, char y) { return lower(x) == lower(y); });
 }
 
 //=============================================================================================================
 
-std::optional<double> UTILSLIB::toDouble(std::string_view text)
+std::optional<double> BASELIB::toDouble(std::string_view text)
 {
     text = stripPlus(trimmed(text));
     const std::string lowered = toLower(text);
@@ -209,7 +209,7 @@ std::optional<double> UTILSLIB::toDouble(std::string_view text)
 
 //=============================================================================================================
 
-std::optional<int> UTILSLIB::toInt(std::string_view text)
+std::optional<int> BASELIB::toInt(std::string_view text)
 {
     text = stripPlus(trimmed(text));
     int value = 0;
@@ -222,14 +222,14 @@ std::optional<int> UTILSLIB::toInt(std::string_view text)
 
 //=============================================================================================================
 
-std::filesystem::path UTILSLIB::pathFromUtf8(std::string_view utf8)
+std::filesystem::path BASELIB::pathFromUtf8(std::string_view utf8)
 {
     return std::filesystem::path(std::u8string(utf8.begin(), utf8.end()));
 }
 
 //=============================================================================================================
 
-std::string UTILSLIB::utf8FromPath(const std::filesystem::path& path)
+std::string BASELIB::utf8FromPath(const std::filesystem::path& path)
 {
     const std::u8string utf8 = path.u8string();
     return std::string(utf8.begin(), utf8.end());

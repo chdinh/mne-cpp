@@ -31,7 +31,7 @@
 
 #include "dsp_global.h"
 
-#include <utils/string_utils.h>
+#include <base/string_utils.h>
 
 #include <filesystem>
 #include <map>
@@ -88,7 +88,7 @@ public:
      *
      * @return Vector of DerivationRule, e.g. LH1-LH2 (+1·LH1, −1·LH2), LH2-LH3, RA1-RA2.
      */
-    static std::vector<DerivationRule> buildBipolar(const StringList& channelNames);
+    static std::vector<DerivationRule> buildBipolar(const BASELIB::StringList& channelNames);
 
     /**
      * @brief Build common-average reference derivation rules.
@@ -100,7 +100,7 @@ public:
      *
      * @return Vector of DerivationRule, one per input channel.
      */
-    static std::vector<DerivationRule> buildCommonAverage(const StringList& channelNames);
+    static std::vector<DerivationRule> buildCommonAverage(const BASELIB::StringList& channelNames);
 
     /**
      * @brief Apply derivation rules to a data matrix.
@@ -112,9 +112,9 @@ public:
      * @return A pair of (derived data matrix, derived channel names).
      *         The output matrix has n_rules rows × n_times columns.
      */
-    static std::pair<Eigen::MatrixXd, StringList> apply(
+    static std::pair<Eigen::MatrixXd, BASELIB::StringList> apply(
         const Eigen::MatrixXd& matData,
-        const StringList& channelNames,
+        const BASELIB::StringList& channelNames,
         const std::vector<DerivationRule>& rules);
 
     /**

@@ -33,7 +33,7 @@
 #ifndef UTILS_GLOBAL_H
 #define UTILS_GLOBAL_H
 
-#include "buildinfo.h"
+#include <base/buildinfo.h>
 
 //=============================================================================================================
 // DEFINES

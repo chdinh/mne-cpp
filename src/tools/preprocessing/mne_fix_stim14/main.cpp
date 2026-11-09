@@ -15,12 +15,12 @@
 //=============================================================================================================
 
 #include <fiff/fiff_raw_data.h>
-#include <utils/string_utils.h>
+#include <base/string_utils.h>
 #include <fiff/fiff_stream.h>
 #include <fiff/fiff_info.h>
 #include <fiff/fiff_ch_info.h>
 #include <fiff/fiff_file.h>
-#include <utils/logger/log.h>
+#include <base/log.h>
 
 //=============================================================================================================
 // QT INCLUDES
@@ -43,7 +43,6 @@
 //=============================================================================================================
 
 using namespace FIFFLIB;
-using namespace UTILSLIB;
 using namespace Eigen;
 
 //=============================================================================================================
@@ -57,7 +56,7 @@ using namespace Eigen;
 static int findChannelByName(const FiffInfo& info, const QString& name)
 {
     for (int i = 0; i < std::ssize(info.chs); ++i) {
-        if (std::string(UTILSLIB::trimmed(info.chs[i].ch_name)) == name)
+        if (std::string(BASELIB::trimmed(info.chs[i].ch_name)) == name)
             return i;
     }
     return -1;
@@ -67,7 +66,7 @@ static int findChannelByName(const FiffInfo& info, const QString& name)
 
 int main(int argc, char* argv[])
 {
-    UTILSLIB::Log::install_qt_message_handler();
+    BASELIB::Log::install_qt_message_handler();
     QCoreApplication app(argc, argv);
     QCoreApplication::setApplicationName("mne_fix_stim14");
     QCoreApplication::setApplicationVersion(PROGRAM_VERSION);

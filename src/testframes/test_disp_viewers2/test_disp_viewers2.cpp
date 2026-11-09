@@ -20,7 +20,7 @@
 //=============================================================================================================
 
 #include <disp/viewers/abstractview.h>
-#include <utils/string_utils.h>
+#include <base/string_utils.h>
 #include <disp/viewers/hpisettingsview.h>
 #include <disp/viewers/coregsettingsview.h>
 #include <disp/viewers/artifactsettingsview.h>
@@ -2005,12 +2005,12 @@ void TestDispViewers2::rtFiffRawViewModel_dataFlow()
     QCOMPARE(model.getIdxSelMap().size(), 4);
 
     model.markChBad(model.index(0, 0), true);
-    QVERIFY(UTILSLIB::contains(info->bads, "MEG0111"));
+    QVERIFY(BASELIB::contains(info->bads, "MEG0111"));
     model.markChBad(model.index(0, 0), false);
-    QVERIFY(!UTILSLIB::contains(info->bads, "MEG0111"));
+    QVERIFY(!BASELIB::contains(info->bads, "MEG0111"));
     model.markChBad({model.index(0, 0), model.index(2, 0)}, true);
-    QVERIFY(UTILSLIB::contains(info->bads, "MEG0111"));
-    QVERIFY(UTILSLIB::contains(info->bads, "MEG0113"));
+    QVERIFY(BASELIB::contains(info->bads, "MEG0111"));
+    QVERIFY(BASELIB::contains(info->bads, "MEG0113"));
 
     QMap<double, QColor> triggerColors;
     triggerColors.insert(3.0, Qt::red);
@@ -2417,7 +2417,7 @@ void TestDispViewers2::evokedSetModel_projectionRolesAndAverageMaps()
     QCOMPARE(matrices.at(0).second.first[5 * 4 + 3], 5.0);
     QVERIFY(!model.data(0, 1, Qt::BackgroundRole).isValid());
     QVERIFY(!model.data(0, 1, Qt::ToolTipRole).isValid());
-    QCOMPARE(model.data(0, 0).toStringList().join(QLatin1Char(',')).toStdString(), UTILSLIB::join(set->info.ch_names, ","));
+    QCOMPARE(model.data(0, 0).toStringList().join(QLatin1Char(',')).toStdString(), BASELIB::join(set->info.ch_names, ","));
     QCOMPARE(model.headerData(1, Qt::Horizontal).toString(), QStringLiteral("data plot"));
     QCOMPARE(model.headerData(1, Qt::Horizontal, Qt::TextAlignmentRole).toInt(), static_cast<int>(Qt::AlignLeft));
     QVERIFY(!model.headerData(0, Qt::Horizontal).isValid());
@@ -3709,9 +3709,9 @@ void TestDispViewers2::rtFiffRawView_paintsHidesRowsAndAddsEvents()
     QSignalSpy markSpy(&view, &RtFiffRawView::channelMarkingChanged);
     table->selectRow(2);
     contextAction(table->visualRect(model->index(2, 1)).center(), QStringLiteral("Mark as bad"));
-    QVERIFY(UTILSLIB::contains(info->bads, "MEG0113"));
+    QVERIFY(BASELIB::contains(info->bads, "MEG0113"));
     contextAction(table->visualRect(model->index(2, 1)).center(), QStringLiteral("Mark as good"));
-    QVERIFY(!UTILSLIB::contains(info->bads, "MEG0113"));
+    QVERIFY(!BASELIB::contains(info->bads, "MEG0113"));
     QCOMPARE(markSpy.size(), 2);
 
     // Only show / hide / reset the selected rows

@@ -18,7 +18,7 @@
 
 #include <vector>
 #include <fiff/fiff_file.h>
-#include <utils/logger/log.h>
+#include <base/log.h>
 
 //=============================================================================================================
 // QT INCLUDES
@@ -46,7 +46,6 @@
 //=============================================================================================================
 
 using namespace FIFFLIB;
-using namespace UTILSLIB;
 using namespace Eigen;
 
 //=============================================================================================================
@@ -167,7 +166,7 @@ static bool readCalibration(const QString& filename, VectorXf& cals)
 
 int main(int argc, char* argv[])
 {
-    UTILSLIB::Log::install_qt_message_handler();
+    BASELIB::Log::install_qt_message_handler();
     QCoreApplication app(argc, argv);
     QCoreApplication::setApplicationName("mne_tufts2fiff");
     QCoreApplication::setApplicationVersion(PROGRAM_VERSION);

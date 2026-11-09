@@ -16,9 +16,9 @@
 // INCLUDES
 //=============================================================================================================
 
-#include <utils/logger/log.h>
+#include <base/log.h>
 #include <memory>
-#include <utils/string_utils.h>
+#include <base/string_utils.h>
 #include <iostream>
 #include <inv/hpi/inv_hpi_data_updater.h>
 #include <inv/hpi/inv_sensor_set.h>
@@ -43,7 +43,6 @@
 //=============================================================================================================
 
 using namespace FIFFLIB;
-using namespace UTILSLIB;
 using namespace INVLIB;
 using namespace Eigen;
 
@@ -98,7 +97,7 @@ TestHpiDataUpdater::TestHpiDataUpdater()
 
 void TestHpiDataUpdater::initTestCase()
 {
-    UTILSLIB::Log::install_qt_message_handler();
+    BASELIB::Log::install_qt_message_handler();
 
     QFile t_fileIn(QCoreApplication::applicationDirPath() + "/../resources/data/mne-cpp-test-data/MEG/sample/test_hpiFit_raw.fif");
 
@@ -125,7 +124,7 @@ void TestHpiDataUpdater::initTestCase()
             m_pFiffInfo->chs[i].chpos.coil_type == FIFFV_COIL_VV_PLANAR_T2 ||
             m_pFiffInfo->chs[i].chpos.coil_type == FIFFV_COIL_VV_PLANAR_T3) {
             // Check if the sensor is bad, if not append to innerind
-            if (!(UTILSLIB::contains(m_pFiffInfo->bads, m_pFiffInfo->ch_names.at(i)))) {
+            if (!(BASELIB::contains(m_pFiffInfo->bads, m_pFiffInfo->ch_names.at(i)))) {
                 m_lChannelsWithoutBads.push_back(m_pFiffInfo->chs[i]);
                 m_vecInnerindWithoutBads.append(i);
             }
@@ -141,7 +140,7 @@ void TestHpiDataUpdater::initTestCase()
             m_pFiffInfo->chs[i].chpos.coil_type == FIFFV_COIL_VV_PLANAR_T2 ||
             m_pFiffInfo->chs[i].chpos.coil_type == FIFFV_COIL_VV_PLANAR_T3) {
             // Check if the sensor is bad, if not append to innerind
-            if (!(UTILSLIB::contains(m_pFiffInfo->bads, m_pFiffInfo->ch_names.at(i)))) {
+            if (!(BASELIB::contains(m_pFiffInfo->bads, m_pFiffInfo->ch_names.at(i)))) {
                 m_lChannelsWithBads.push_back(m_pFiffInfo->chs[i]);
                 m_vecInnerindWithBads.append(i);
             }

@@ -38,7 +38,7 @@
 
 #include <fiff/fiff_info.h>
 #include <fiff/fiff_evoked.h>
-#include <utils/string_utils.h>
+#include <base/string_utils.h>
 
 #include <map>
 #include <string>
@@ -238,7 +238,7 @@ DSPSHARED_EXPORT FIFFLIB::FiffEvoked computeFilteredAverage(const FIFFLIB::FiffR
                                                             float fTBaselineToS,
                                                             const std::map<std::string, double>& mapReject,
                                                             const UTILSLIB::FilterKernel& filterKernel,
-                                                            const UTILSLIB::StringList& lExcludeChs = {},
+                                                            const BASELIB::StringList& lExcludeChs = {},
                                                             const Eigen::RowVectorXi& vecPicks = Eigen::RowVectorXi());
 
 //=============================================================================================================

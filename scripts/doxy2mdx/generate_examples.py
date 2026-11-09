@@ -78,7 +78,7 @@ LIBRARIES = {
     "sts": "Statistics", "inv": "Inverse", "fwd": "Forward", "disp3D": "3D Visualization",
     "disp": "Visualization", "dsp": "Signal Processing", "ieeg": "iEEG", "bids": "BIDS",
     "lsl": "Lab Streaming Layer", "mna": "MNA Pipelines", "mri": "MRI", "fs": "FreeSurfer",
-    "mne": "MNE Core", "fiff": "FIFF I/O", "math": "Math", "utils": "Utilities",
+    "mne": "MNE Core", "fiff": "FIFF I/O", "math": "Math", "utils": "Utilities", "base": "Base",
 }
 DATASETS = {
     "MNE-sample-data": "the [MNE sample dataset](../../manual/sample-dataset.mdx) in "

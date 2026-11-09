@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: BSD-3-Clause
  * Copyright (c) 2026 MNE-CPP Authors
  *
- * @file     test_utils_string_utils.cpp
+ * @file     test_base_string_utils.cpp
  * @author   Christoph Dinh <christoph.dinh@mne-cpp.org>
  * @since    2.5.0
  * @date     November 2026
@@ -14,7 +14,7 @@
 // INCLUDES
 //=============================================================================================================
 
-#include <utils/string_utils.h>
+#include <base/string_utils.h>
 
 //=============================================================================================================
 // QT INCLUDES
@@ -39,7 +39,7 @@
 // USED NAMESPACES
 //=============================================================================================================
 
-using namespace UTILSLIB;
+using namespace BASELIB;
 
 //=============================================================================================================
 /**
@@ -246,4 +246,4 @@ void TestUtilsStringUtils::utf8PathsRoundTrip()
 //=============================================================================================================
 
 QTEST_GUILESS_MAIN(TestUtilsStringUtils)
-#include "test_utils_string_utils.moc"
+#include "test_base_string_utils.moc"

@@ -134,6 +134,15 @@
       "sidebar_position": 13,
       "namespace": "BIDSLIB"
     },
+    "base": {
+      "dir": "src/libraries/base",
+      "sidebar_label": "Base Library",
+      "origin": "custom",
+      "include": "base",
+      "dir_slug": "base",
+      "sidebar_position": 14,
+      "namespace": "BASELIB"
+    },
     "utils": {
       "dir": "src/libraries/utils",
       "sidebar_label": "Utilities Library",
@@ -7897,16 +7906,16 @@
     },
     {
       "name": "CircularBuffer",
-      "module": "utils",
-      "header": "utils/generics/circularbuffer.h",
+      "module": "base",
+      "header": "base/circular_buffer.h",
       "origin": "mne-c + custom",
       "mne_c_tool": null,
       "mne_python": null,
       "sklearn": null,
-      "test": null,
-      "example": "ex_utils",
+      "test": "test_base_circular_buffer",
+      "example": "ex_base",
       "example_snippet": [
-        "ex_utils/main.cpp#circular_buffer_usage"
+        "ex_base/main.cpp#circular_buffer_usage"
       ],
       "example_mode": "run",
       "status": "documented",
@@ -8183,17 +8192,17 @@
     },
     {
       "name": "Log",
-      "module": "utils",
-      "header": "utils/logger/log.h",
+      "module": "base",
+      "header": "base/log.h",
       "origin": "mne-c + custom",
       "mne_c_tool": null,
       "mne_python": null,
       "sklearn": null,
-      "test": "test_utils_logger",
-      "example": "ex_utils",
+      "test": "test_base_logger",
+      "example": "ex_base",
       "example_snippet": [
-        "ex_utils/main.cpp#log_usage",
-        "ex_utils/main.cpp#log_file_usage"
+        "ex_base/main.cpp#log_usage",
+        "ex_base/main.cpp#log_file_usage"
       ],
       "example_mode": "run",
       "status": "documented",
@@ -8206,16 +8215,16 @@
     },
     {
       "name": "LogCapture",
-      "module": "utils",
-      "header": "utils/logger/log.h",
+      "module": "base",
+      "header": "base/log.h",
       "origin": "mne-c + custom",
       "mne_c_tool": null,
       "mne_python": null,
       "sklearn": null,
-      "test": "test_utils_logger",
-      "example": "ex_utils",
+      "test": "test_base_logger",
+      "example": "ex_base",
       "example_snippet": [
-        "ex_utils/main.cpp#log_capture_usage"
+        "ex_base/main.cpp#log_capture_usage"
       ],
       "example_mode": "run",
       "status": "documented",
@@ -8228,8 +8237,8 @@
     },
     {
       "name": "Error",
-      "module": "utils",
-      "header": "utils/error.h",
+      "module": "base",
+      "header": "base/error.h",
       "origin": "custom",
       "mne_c_tool": null,
       "mne_python": null,
@@ -8250,8 +8259,8 @@
     },
     {
       "name": "Expected",
-      "module": "utils",
-      "header": "utils/error.h",
+      "module": "base",
+      "header": "base/error.h",
       "origin": "custom",
       "mne_c_tool": null,
       "mne_python": null,
@@ -8272,16 +8281,16 @@
     },
     {
       "name": "ByteStream",
-      "module": "utils",
-      "header": "utils/byte_stream.h",
+      "module": "base",
+      "header": "base/byte_stream.h",
       "origin": "mne-c + custom",
       "mne_c_tool": null,
       "mne_python": null,
       "sklearn": null,
-      "test": "test_utils_byte_stream",
-      "example": "ex_utils",
+      "test": "test_base_byte_stream",
+      "example": "ex_base",
       "example_snippet": [
-        "ex_utils/main.cpp#byte_stream_usage"
+        "ex_base/main.cpp#byte_stream_usage"
       ],
       "example_mode": "run",
       "status": "documented",
@@ -8294,16 +8303,16 @@
     },
     {
       "name": "MemoryByteStream",
-      "module": "utils",
-      "header": "utils/byte_stream.h",
+      "module": "base",
+      "header": "base/byte_stream.h",
       "origin": "mne-c + custom",
       "mne_c_tool": null,
       "mne_python": null,
       "sklearn": null,
-      "test": "test_utils_byte_stream",
-      "example": "ex_utils",
+      "test": "test_base_byte_stream",
+      "example": "ex_base",
       "example_snippet": [
-        "ex_utils/main.cpp#memory_byte_stream_usage"
+        "ex_base/main.cpp#memory_byte_stream_usage"
       ],
       "example_mode": "run",
       "status": "documented",
@@ -8316,16 +8325,16 @@
     },
     {
       "name": "FileByteStream",
-      "module": "utils",
-      "header": "utils/byte_stream.h",
+      "module": "base",
+      "header": "base/byte_stream.h",
       "origin": "mne-c + custom",
       "mne_c_tool": null,
       "mne_python": null,
       "sklearn": null,
-      "test": "test_utils_byte_stream",
-      "example": "ex_utils",
+      "test": "test_base_byte_stream",
+      "example": "ex_base",
       "example_snippet": [
-        "ex_utils/main.cpp#byte_stream_usage"
+        "ex_base/main.cpp#byte_stream_usage"
       ],
       "example_mode": "run",
       "status": "documented",
@@ -8338,16 +8347,16 @@
     },
     {
       "name": "ThreadPool",
-      "module": "utils",
-      "header": "utils/thread_pool.h",
+      "module": "base",
+      "header": "base/thread_pool.h",
       "origin": "mne-c + custom",
       "mne_c_tool": null,
       "mne_python": null,
       "sklearn": null,
-      "test": "test_utils_thread_pool",
-      "example": "ex_utils",
+      "test": "test_base_thread_pool",
+      "example": "ex_base",
       "example_snippet": [
-        "ex_utils/main.cpp#thread_pool_usage"
+        "ex_base/main.cpp#thread_pool_usage"
       ],
       "example_mode": "run",
       "status": "documented",
@@ -16437,6 +16446,17 @@
         "level": "start",
         "library": "acq"
       },
+      "ex_acq_scope": {
+        "title": "Watch a multi-channel stream live with a closed-loop stimulator",
+        "tasks": [
+          "real-time"
+        ],
+        "modalities": [
+          "eeg"
+        ],
+        "level": "start",
+        "library": "acq"
+      },
       "ex_averaging": {
         "title": "Average epochs into an evoked response",
         "tasks": [
@@ -16449,6 +16469,17 @@
         ],
         "level": "start",
         "library": "mne"
+      },
+      "ex_base": {
+        "title": "Log, read binary files and run work on a thread pool",
+        "tasks": [
+          "infrastructure"
+        ],
+        "modalities": [
+          "generic"
+        ],
+        "level": "start",
+        "library": "base"
       },
       "ex_bids": {
         "title": "Read and write BIDS datasets",
@@ -17188,7 +17219,7 @@
         "level": "start"
       },
       "ex_utils": {
-        "title": "Buffers, logging, montages and reports",
+        "title": "Montages, layouts, selections, matrix files and reports",
         "tasks": [
           "infrastructure"
         ],
@@ -17206,17 +17237,6 @@
           "generic"
         ],
         "level": "start"
-      },
-      "ex_acq_scope": {
-        "title": "Watch a multi-channel stream live with a closed-loop stimulator",
-        "tasks": [
-          "real-time"
-        ],
-        "modalities": [
-          "eeg"
-        ],
-        "level": "start",
-        "library": "acq"
       }
     }
   }

@@ -48,7 +48,7 @@
 // QT INCLUDES
 //=============================================================================================================
 
-#include <utils/error.h>
+#include <base/error.h>
 
 #include <QSharedPointer>
 
@@ -97,7 +97,7 @@ public:
 
     //=========================================================================================================
     /**
-     * Opens a raw FIFF file like read(); throws UTILSLIB::Error if it cannot.
+     * Opens a raw FIFF file like read(); throws BASELIB::Error if it cannot.
      *
      * @param[in] path   The raw data file.
      */
@@ -106,11 +106,11 @@ public:
     //=========================================================================================================
     /**
      * Opens raw FIFF data held in bytes that are not a file, e.g. in memory, like read(); throws
-     * UTILSLIB::Error if it cannot.
+     * BASELIB::Error if it cannot.
      *
      * @param[in] bytes   The raw data; kept for reading segments.
      */
-    explicit FiffRawData(std::unique_ptr<UTILSLIB::ByteStream> bytes);
+    explicit FiffRawData(std::unique_ptr<BASELIB::ByteStream> bytes);
 
     //=========================================================================================================
     /**
@@ -123,7 +123,7 @@ public:
      * @return The raw data, or why the file cannot be read: Io if it cannot be opened, NotFound if it
      *         holds no raw data, Format if it is damaged or holds MaxShield data that is not allowed.
      */
-    [[nodiscard]] static UTILSLIB::Expected<FiffRawData> read(const std::filesystem::path& path, bool allow_maxshield = false);
+    [[nodiscard]] static BASELIB::Expected<FiffRawData> read(const std::filesystem::path& path, bool allow_maxshield = false);
 
     //=========================================================================================================
     /**
@@ -134,7 +134,7 @@ public:
      *
      * @return The raw data, or why it cannot be read.
      */
-    [[nodiscard]] static UTILSLIB::Expected<FiffRawData> read(std::unique_ptr<UTILSLIB::ByteStream> bytes, bool allow_maxshield = false);
+    [[nodiscard]] static BASELIB::Expected<FiffRawData> read(std::unique_ptr<BASELIB::ByteStream> bytes, bool allow_maxshield = false);
 
     //=========================================================================================================
     /**
@@ -245,7 +245,7 @@ public:
      *
      * @return Nothing, or why the compensator cannot be made (Format).
      */
-    [[nodiscard]] UTILSLIB::Expected<void> apply_gradient_compensation(int grade);
+    [[nodiscard]] BASELIB::Expected<void> apply_gradient_compensation(int grade);
 
 public:
     std::unique_ptr<FiffStream> file; /**< replaces fid. */
@@ -258,7 +258,7 @@ public:
     FiffCtfComp comp;                 /**< Compensator. */
 
 private:
-    static UTILSLIB::Expected<FiffRawData> read(std::unique_ptr<FiffStream> stream, bool allow_maxshield);
+    static BASELIB::Expected<FiffRawData> read(std::unique_ptr<FiffStream> stream, bool allow_maxshield);
 };
 } // NAMESPACE
 

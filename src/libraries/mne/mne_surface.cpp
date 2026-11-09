@@ -23,7 +23,7 @@
 
 #include "mne_surface.h"
 #include <memory>
-#include <utils/logger/log.h>
+#include <base/log.h>
 #include "mne_source_space.h"
 #include "mne_triangle.h"
 #include "mne_proj_data.h"
@@ -273,7 +273,7 @@ void MNESurface::find_closest_on_surface_approx(const PointsT& r, int np_points,
     auto p = std::make_unique<MNEProjData>(this);
     int k;
 
-    UTILSLIB::Log::info("{} for {} points {} steps...", nearest_tri[0] < 0 ? "Closest" : "Approx closest", np_points, nstep);
+    BASELIB::Log::info("{} for {} points {} steps...", nearest_tri[0] < 0 ? "Closest" : "Approx closest", np_points, nstep);
 
     for (k = 0; k < np_points; k++) {
         Eigen::Vector3f pt = Eigen::Map<const Eigen::Vector3f>(r.row(k).data());
@@ -285,7 +285,7 @@ void MNESurface::find_closest_on_surface_approx(const PointsT& r, int np_points,
         }
     }
 
-    UTILSLIB::Log::info("[done]\n");
+    BASELIB::Log::info("[done]\n");
 }
 
 //=============================================================================================================
@@ -416,7 +416,7 @@ std::unique_ptr<MNESurface> MNESurface::read_bem_surface(const std::filesystem::
     }
     surfs = stream.dirtree()->dir_tree_find(FIFFB_BEM_SURF);
     if (surfs.size() == 0) {
-        UTILSLIB::Log::critical("No BEM surfaces found in {}", UTILSLIB::utf8FromPath(name));
+        BASELIB::Log::critical("No BEM surfaces found in {}", BASELIB::utf8FromPath(name));
         stream.close();
         return nullptr;
     }
@@ -430,7 +430,7 @@ std::unique_ptr<MNESurface> MNESurface::read_bem_surface(const std::filesystem::
             }
         }
         if (id != which) {
-            UTILSLIB::Log::critical("Desired surface not found in {}", UTILSLIB::utf8FromPath(name));
+            BASELIB::Log::critical("Desired surface not found in {}", BASELIB::utf8FromPath(name));
             stream.close();
             return nullptr;
         }

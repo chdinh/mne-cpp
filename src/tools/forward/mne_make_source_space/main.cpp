@@ -30,7 +30,7 @@
 #include <fs/fs_surface.h>
 #include <fs/fs_surfaceset.h>
 
-#include <utils/logger/log.h>
+#include <base/log.h>
 
 //=============================================================================================================
 // QT INCLUDES
@@ -58,7 +58,6 @@ using namespace Eigen;
 using namespace FIFFLIB;
 using namespace MNELIB;
 using namespace FSLIB;
-using namespace UTILSLIB;
 
 //=============================================================================================================
 // DEFINES
@@ -331,7 +330,7 @@ static MNEHemisphere buildHemisphere(const FsSurface& surf,
  */
 int main(int argc, char* argv[])
 {
-    UTILSLIB::Log::install_qt_message_handler();
+    BASELIB::Log::install_qt_message_handler();
     QCoreApplication app(argc, argv);
     QCoreApplication::setApplicationName("mne_make_source_space");
     QCoreApplication::setApplicationVersion(PROGRAM_VERSION);

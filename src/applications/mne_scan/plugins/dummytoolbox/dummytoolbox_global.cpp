@@ -17,7 +17,7 @@
 //=============================================================================================================
 
 #include "dummytoolbox_global.h"
-#include <utils/buildinfo.h>
+#include <base/buildinfo.h>
 
 //=============================================================================================================
 // DEFINE METHODS
@@ -25,19 +25,19 @@
 
 const char* DUMMYTOOLBOXPLUGIN::buildDateTime()
 {
-    return UTILSLIB::dateTimeNow();
+    return BASELIB::dateTimeNow();
 };
 
 //=============================================================================================================
 
 const char* DUMMYTOOLBOXPLUGIN::buildHash()
 {
-    return UTILSLIB::gitHash();
+    return BASELIB::gitHash();
 };
 
 //=============================================================================================================
 
 const char* DUMMYTOOLBOXPLUGIN::buildHashLong()
 {
-    return UTILSLIB::gitHashLong();
+    return BASELIB::gitHashLong();
 };

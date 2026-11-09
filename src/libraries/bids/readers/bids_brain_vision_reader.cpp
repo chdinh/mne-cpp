@@ -15,7 +15,7 @@
 //=============================================================================================================
 
 #include "bids_brain_vision_reader.h"
-#include <utils/logger/log.h>
+#include <base/log.h>
 
 #include <fiff/fiff_constants.h>
 
@@ -120,7 +120,7 @@ bool BrainVisionReader::open(const QString& sFilePath)
     // Open the binary data file
     m_dataFile.setFileName(m_sDataPath);
     if (!m_dataFile.open(QIODevice::ReadOnly)) {
-        UTILSLIB::Log::warning("[BrainVisionReader::open] Could not open data file: {}", m_sDataPath.toStdString());
+        BASELIB::Log::warning("[BrainVisionReader::open] Could not open data file: {}", m_sDataPath.toStdString());
         return false;
     }
 
@@ -141,7 +141,7 @@ bool BrainVisionReader::parseHeader(const QString& sVhdrPath)
 {
     QFile hdrFile(sVhdrPath);
     if (!hdrFile.open(QIODevice::ReadOnly | QIODevice::Text)) {
-        UTILSLIB::Log::warning("[BrainVisionReader::parseHeader] Could not open header: {}", sVhdrPath.toStdString());
+        BASELIB::Log::warning("[BrainVisionReader::parseHeader] Could not open header: {}", sVhdrPath.toStdString());
         return false;
     }
 
@@ -156,7 +156,7 @@ bool BrainVisionReader::parseHeader(const QString& sVhdrPath)
         QStringLiteral("Brain ?Vision( Core| V-Amp)? Data( Exchange)? Header File,? Version [12]\\.0"),
         QRegularExpression::CaseInsensitiveOption);
     if (!versionRe.match(firstLine).hasMatch()) {
-        UTILSLIB::Log::warning("[BrainVisionReader::parseHeader] Unrecognized header version: {}", firstLine.toStdString());
+        BASELIB::Log::warning("[BrainVisionReader::parseHeader] Unrecognized header version: {}", firstLine.toStdString());
         return false;
     }
 
@@ -195,14 +195,14 @@ bool BrainVisionReader::parseHeader(const QString& sVhdrPath)
         commonInfos = sections["Common infos"];
 
     if (commonInfos.isEmpty()) {
-        UTILSLIB::Log::warning("[BrainVisionReader::parseHeader] Missing [Common Infos] section");
+        BASELIB::Log::warning("[BrainVisionReader::parseHeader] Missing [Common Infos] section");
         return false;
     }
 
     // Data file path (relative to .vhdr location)
     QString dataFileName = commonInfos.value("DataFile");
     if (dataFileName.isEmpty()) {
-        UTILSLIB::Log::warning("[BrainVisionReader::parseHeader] No DataFile specified");
+        BASELIB::Log::warning("[BrainVisionReader::parseHeader] No DataFile specified");
         return false;
     }
     m_sDataPath = QDir(sDir).absoluteFilePath(dataFileName);
@@ -214,7 +214,7 @@ bool BrainVisionReader::parseHeader(const QString& sVhdrPath)
     }
 
     if (commonInfos.value("DataFormat", "BINARY").toUpper() != QLatin1String("BINARY")) {
-        UTILSLIB::Log::warning("[BrainVisionReader::parseHeader] Only BINARY data is supported, not {}", (commonInfos.value("DataFormat")).toStdString());
+        BASELIB::Log::warning("[BrainVisionReader::parseHeader] Only BINARY data is supported, not {}", (commonInfos.value("DataFormat")).toStdString());
         return false;
     }
 
@@ -225,7 +225,7 @@ bool BrainVisionReader::parseHeader(const QString& sVhdrPath)
     // Number of channels
     m_iNumChannels = commonInfos.value("NumberOfChannels", "0").toInt();
     if (m_iNumChannels <= 0) {
-        UTILSLIB::Log::warning("[BrainVisionReader::parseHeader] Invalid channel count: {}", m_iNumChannels);
+        BASELIB::Log::warning("[BrainVisionReader::parseHeader] Invalid channel count: {}", m_iNumChannels);
         return false;
     }
 
@@ -294,7 +294,7 @@ bool BrainVisionReader::parseMarkers(const QString& sVmrkPath)
 {
     QFile mrkFile(sVmrkPath);
     if (!mrkFile.open(QIODevice::ReadOnly | QIODevice::Text)) {
-        UTILSLIB::Log::warning("[BrainVisionReader::parseMarkers] Could not open marker file: {}", sVmrkPath.toStdString());
+        BASELIB::Log::warning("[BrainVisionReader::parseMarkers] Could not open marker file: {}", sVmrkPath.toStdString());
         return false;
     }
 
@@ -421,14 +421,14 @@ FIFFLIB::FiffInfo BrainVisionReader::getInfo() const
 Eigen::MatrixXf BrainVisionReader::readRawSegment(int iStartSampleIdx, int iEndSampleIdx) const
 {
     if (!m_bIsOpen) {
-        UTILSLIB::Log::warning("[BrainVisionReader::readRawSegment] File not open");
+        BASELIB::Log::warning("[BrainVisionReader::readRawSegment] File not open");
         return MatrixXf();
     }
 
     if (iStartSampleIdx < 0 || iStartSampleIdx >= m_lSampleCount ||
         iEndSampleIdx < 0 || iEndSampleIdx > m_lSampleCount ||
         iEndSampleIdx <= iStartSampleIdx) {
-        UTILSLIB::Log::warning("[BrainVisionReader::readRawSegment] Invalid range: {} - {}", iStartSampleIdx, iEndSampleIdx);
+        BASELIB::Log::warning("[BrainVisionReader::readRawSegment] Invalid range: {} - {}", iStartSampleIdx, iEndSampleIdx);
         return MatrixXf();
     }
 

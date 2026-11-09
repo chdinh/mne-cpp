@@ -23,7 +23,7 @@
 #include <capabilityutils.h>
 
 #include <dsp/welch_psd.h>
-#include <utils/string_utils.h>
+#include <base/string_utils.h>
 
 #include <QJsonArray>
 #include <QFile>

@@ -21,7 +21,7 @@
 #include <disp/plots/helpers/figureexporter.h>
 #include <disp/plots/lineplot.h>
 #include <math/spectral.h>
-#include <utils/logger/log.h>
+#include <base/log.h>
 #include <mne/mne.h>
 
 //=============================================================================================================
@@ -60,7 +60,7 @@ using namespace UTILSLIB;
  */
 int main(int argc, char* argv[])
 {
-    UTILSLIB::Log::install_qt_message_handler();
+    BASELIB::Log::install_qt_message_handler();
     QApplication a(argc, argv);
 
     // Generate input data

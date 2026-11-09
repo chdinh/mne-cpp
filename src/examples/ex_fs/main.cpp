@@ -27,7 +27,7 @@
 #include <fs/fs_label_utils.h>
 #include <fs/fs_surface.h>
 #include <fs/fs_surfaceset.h>
-#include <utils/string_utils.h>
+#include <base/string_utils.h>
 
 //=============================================================================================================
 // QT INCLUDES
@@ -182,7 +182,7 @@ int main(int argc, char* argv[])
     //! [fs_atlas_lookup_usage]
     // nibabel: inv(affine) maps (-4,-4,-4) to voxel (0,0,0) and (2,0,-2) to voxel (3,2,1)
     ok &= expect(atlas.is_loaded() && regionsAt == std::vector<std::string>{"Left-Hippocampus", "Right-Hippocampus", "Unknown"},
-                 std::format("atlas lookup: {}", UTILSLIB::join(regionsAt, ", ")));
+                 std::format("atlas lookup: {}", BASELIB::join(regionsAt, ", ")));
 
     std::println("{}", ok ? "All fs checks passed." : "fs checks FAILED.");
     return ok ? EXIT_SUCCESS : EXIT_FAILURE;

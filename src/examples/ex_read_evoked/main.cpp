@@ -17,13 +17,13 @@
 //=============================================================================================================
 
 #include <iostream>
-#include <utils/string_utils.h>
+#include <base/string_utils.h>
 #include <vector>
 #include <math.h>
 
 #include <fiff/fiff.h>
 #include <mne/mne.h>
-#include <utils/logger/log.h>
+#include <base/log.h>
 
 #include <disp/plots/helpers/figureexporter.h>
 #include <disp/plots/lineplot.h>
@@ -43,7 +43,6 @@
 using namespace DISPLIB;
 using namespace FIFFLIB;
 using namespace MNELIB;
-using namespace UTILSLIB;
 
 //=============================================================================================================
 // DEFINE GLOBAL METHODS
@@ -64,7 +63,7 @@ void saveButterfly(const FiffEvoked& evoked, int kind, int unit, double scale, c
     plot.setXLabel("Time [ms]");
     plot.setYLabel(yLabel);
     for (int c = 0; c < evoked.data.rows(); ++c) {
-        if (evoked.info.chs[c].kind != kind || evoked.info.chs[c].unit != unit || UTILSLIB::contains(evoked.info.bads, evoked.info.ch_names[c])) {
+        if (evoked.info.chs[c].kind != kind || evoked.info.chs[c].unit != unit || BASELIB::contains(evoked.info.bads, evoked.info.ch_names[c])) {
             continue;
         }
         QVector<double> values(times.size());
@@ -93,7 +92,7 @@ void saveButterfly(const FiffEvoked& evoked, int kind, int unit, double scale, c
  */
 int main(int argc, char* argv[])
 {
-    UTILSLIB::Log::install_qt_message_handler();
+    BASELIB::Log::install_qt_message_handler();
     QApplication a(argc, argv);
 
     // Command Line Parser

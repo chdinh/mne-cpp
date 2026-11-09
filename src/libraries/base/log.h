@@ -15,20 +15,20 @@
  * @date     July 2019
  * @brief    Logging: a std::format facade with a replaceable sink, the console and file writer, and a capture sink for tests.
  *
- * Libraries report through @ref UTILSLIB::Log, whose interface is standard C++ only. By default every
+ * Libraries report through @ref BASELIB::Log, whose interface is standard C++ only. By default every
  * message is forwarded to Qt's message handler, so Qt widgets and QtTest see it too; applications install
- * @ref UTILSLIB::Log::install_qt_message_handler to print it, results to stdout and diagnostics to stderr,
- * optionally mirrored to a log file. @ref UTILSLIB::LogCapture records messages for the lifetime of a scope.
+ * @ref BASELIB::Log::install_qt_message_handler to print it, results to stdout and diagnostics to stderr,
+ * optionally mirrored to a log file. @ref BASELIB::LogCapture records messages for the lifetime of a scope.
  */
 
-#ifndef UTILS_LOG_H
-#define UTILS_LOG_H
+#ifndef BASE_LOG_H
+#define BASE_LOG_H
 
 //=============================================================================================================
 // INCLUDES
 //=============================================================================================================
 
-#include "../utils_global.h"
+#include "base_global.h"
 
 //=============================================================================================================
 // STL INCLUDES
@@ -44,21 +44,21 @@
 #include <vector>
 
 //=============================================================================================================
-// DEFINE NAMESPACE UTILSLIB
+// DEFINE NAMESPACE BASELIB
 //=============================================================================================================
 
-namespace UTILSLIB
+namespace BASELIB
 {
 
 //=============================================================================================================
 /**
  * @brief Writes library messages to the current sink; thread-safe.
  *
- * @snippet ex_utils/main.cpp log_usage
+ * @snippet ex_base/main.cpp log_usage
  *
- * @snippet ex_utils/main.cpp log_file_usage
+ * @snippet ex_base/main.cpp log_file_usage
  */
-class UTILSSHARED_EXPORT Log
+class BASESHARED_EXPORT Log
 {
 public:
     /** Severity, matching Qt's debug, info, warning and critical messages. */
@@ -198,9 +198,9 @@ public:
  * Records every level; the sink and level before are restored on destruction, so captures nest when
  * destroyed in reverse order.
  *
- * @snippet ex_utils/main.cpp log_capture_usage
+ * @snippet ex_base/main.cpp log_capture_usage
  */
-class UTILSSHARED_EXPORT LogCapture
+class BASESHARED_EXPORT LogCapture
 {
 public:
     /** One recorded message. */
@@ -238,6 +238,6 @@ private:
     Log::Level m_previousLevel;
 };
 
-} // namespace UTILSLIB
+} // namespace BASELIB
 
-#endif // UTILS_LOG_H
+#endif // BASE_LOG_H

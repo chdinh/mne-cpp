@@ -30,7 +30,7 @@
 #include <fiff/fiff_info.h>
 #include <inv/inv_source_estimate.h>
 #include <inv/minimum_norm/inv_minimum_norm.h>
-#include <utils/logger/log.h>
+#include <base/log.h>
 
 //=============================================================================================================
 // QT INCLUDES
@@ -55,7 +55,6 @@
 using namespace MNELIB;
 using namespace FIFFLIB;
 using namespace INVLIB;
-using namespace UTILSLIB;
 using namespace Eigen;
 
 //=============================================================================================================
@@ -137,7 +136,7 @@ private:
 
 void TestMneInvCoverage::initTestCase()
 {
-    UTILSLIB::Log::install_qt_message_handler();
+    BASELIB::Log::install_qt_message_handler();
     m_sTestDataPath = QCoreApplication::applicationDirPath() + "/../resources/data/mne-cpp-test-data";
     QVERIFY2(QFile::exists(rawPath()),
              qPrintable(QString("Test data not found: %1").arg(rawPath())));
@@ -302,15 +301,15 @@ void TestMneInvCoverage::testReadBemRejectsDamagedSurfaces()
         QTemporaryDir dir;
         const std::filesystem::path path = dir.filePath("bem.fif").toStdU16String();
         if (!source.write(path))
-            return std::optional<UTILSLIB::ErrorCode>(UTILSLIB::ErrorCode::Io);
+            return std::optional<BASELIB::ErrorCode>(BASELIB::ErrorCode::Io);
         auto bem = MNEBem::read(path);
-        return bem ? (bem->size() == 2 ? std::optional<UTILSLIB::ErrorCode>() : std::optional(UTILSLIB::ErrorCode::NotFound)) : std::optional(bem.error().code);
+        return bem ? (bem->size() == 2 ? std::optional<BASELIB::ErrorCode>() : std::optional(BASELIB::ErrorCode::NotFound)) : std::optional(bem.error().code);
     };
     QCOMPARE(damaged([](MNEBemSurface&) {}), std::nullopt);
-    QCOMPARE(damaged([](MNEBemSurface& s) { s.np = 4; }), UTILSLIB::ErrorCode::Format);
-    QCOMPARE(damaged([](MNEBemSurface& s) { s.ntri = 2; }), UTILSLIB::ErrorCode::Format);
-    QCOMPARE(damaged([](MNEBemSurface& s) { s.nn = Eigen::MatrixX3f::Zero(2, 3); }), UTILSLIB::ErrorCode::Format);
-    QCOMPARE(MNEBem::read(std::filesystem::path("no-such-bem.fif")).error().code, UTILSLIB::ErrorCode::Io);
+    QCOMPARE(damaged([](MNEBemSurface& s) { s.np = 4; }), BASELIB::ErrorCode::Format);
+    QCOMPARE(damaged([](MNEBemSurface& s) { s.ntri = 2; }), BASELIB::ErrorCode::Format);
+    QCOMPARE(damaged([](MNEBemSurface& s) { s.nn = Eigen::MatrixX3f::Zero(2, 3); }), BASELIB::ErrorCode::Format);
+    QCOMPARE(MNEBem::read(std::filesystem::path("no-such-bem.fif")).error().code, BASELIB::ErrorCode::Io);
 }
 
 //=============================================================================================================

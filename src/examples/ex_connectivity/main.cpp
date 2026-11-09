@@ -43,7 +43,7 @@
 #include <inv/minimum_norm/inv_minimum_norm.h>
 
 #include <utils/ioutils.h>
-#include <utils/logger/log.h>
+#include <base/log.h>
 #include <fiff/fiff_events.h>
 
 #include <disp/viewers/connectivitysettingsview.h>
@@ -76,6 +76,7 @@ using namespace FIFFLIB;
 using namespace CONNECTIVITYLIB;
 using namespace Eigen;
 using namespace UTILSLIB;
+using namespace BASELIB;
 using namespace MNELIB;
 using namespace FSLIB;
 using namespace DISP3DLIB;
@@ -98,7 +99,7 @@ int main(int argc, char* argv[])
 #ifdef STATICBUILD
 // Q_INIT_RESOURCE(mne_disp3d);
 #endif
-    UTILSLIB::Log::install_qt_message_handler();
+    BASELIB::Log::install_qt_message_handler();
     QApplication a(argc, argv);
     QApplication::addLibraryPath(QApplication::applicationDirPath() + "/../lib");
 
@@ -213,7 +214,7 @@ int main(int argc, char* argv[])
     events = FiffEvents::read(sEve.toStdU16String()).value().events;
 
     // Read the epochs and reject bad epochs. Note, that SSPs are automatically applied to the data if activate_projections() was called beforehand.
-    UTILSLIB::StringList exludeChs;
+    BASELIB::StringList exludeChs;
     //exludeChs << "EOG061" << "EOG063";
 
     std::map<std::string, double> mapReject;

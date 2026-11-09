@@ -35,6 +35,7 @@ target_link_libraries(test_mne_library PRIVATE
     mne_fiff
     mne_fs
     mne_utils
+    mne_base
     mne_math
     mne_events
     Eigen3::Eigen

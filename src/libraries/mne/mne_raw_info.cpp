@@ -20,7 +20,7 @@
 
 #include "mne_raw_info.h"
 #include <memory>
-#include <utils/logger/log.h>
+#include <base/log.h>
 
 #include <vector>
 
@@ -162,12 +162,12 @@ int MNERawInfo::get_meas_info(FiffStream& stream,
         * Find desired parents
         */
     if (meas = find_meas(node); !meas) {
-        UTILSLIB::Log::critical("Meas. block not found!");
+        BASELIB::Log::critical("Meas. block not found!");
         return (-1);
     }
 
     if (meas_info = find_meas_info(node); !meas_info) {
-        UTILSLIB::Log::critical("Meas. info not found!");
+        BASELIB::Log::critical("Meas. info not found!");
         return (-1);
     }
     /*
@@ -228,7 +228,7 @@ int MNERawInfo::get_meas_info(FiffStream& stream,
 
                 this_ch = t_pTag->toChInfo();
                 if (this_ch.scanNo <= 0 || this_ch.scanNo > *nchan) {
-                    UTILSLIB::Log::critical("FIFF_CH_INFO : scan # out of range!");
+                    BASELIB::Log::critical("FIFF_CH_INFO : scan # out of range!");
                     return (-1);
                 } else
                     ch[this_ch.scanNo - 1] = this_ch;
@@ -286,7 +286,7 @@ int MNERawInfo::get_meas_info(FiffStream& stream,
         }
     }
     if (to_find != 0) {
-        UTILSLIB::Log::critical("Not all essential tags were found!");
+        BASELIB::Log::critical("Not all essential tags were found!");
         return (-1);
     }
     chp = ch;
@@ -335,13 +335,13 @@ int MNERawInfo::load(const std::filesystem::path& name, int allow_maxshield, std
         if (allow_maxshield) {
             raw = find_maxshield(stream.dirtree());
             if (raw->empty()) {
-                UTILSLIB::Log::critical("No raw data in this file.");
+                BASELIB::Log::critical("No raw data in this file.");
                 stream.close();
                 return FIFF_FAIL;
             }
             maxshield_data = true;
         } else {
-            UTILSLIB::Log::critical("No raw data in this file.");
+            BASELIB::Log::critical("No raw data in this file.");
             stream.close();
             return FIFF_FAIL;
         }
@@ -398,7 +398,7 @@ int MNERawInfo::load(const std::filesystem::path& name, int allow_maxshield, std
             else if (raw->dir[k].type == FIFFT_DOUBLE)
                 info->buf_size = raw->dir[k].size / (nchan * sizeof(double));
             else {
-                UTILSLIB::Log::critical("We are not prepared to handle raw data type: {}", raw->dir[k].type);
+                BASELIB::Log::critical("We are not prepared to handle raw data type: {}", raw->dir[k].type);
                 stream.close();
                 return FIFF_FAIL;
             }
@@ -406,7 +406,7 @@ int MNERawInfo::load(const std::filesystem::path& name, int allow_maxshield, std
         }
     }
     if (info->buf_size <= 0) {
-        UTILSLIB::Log::critical("No raw data buffers available.");
+        BASELIB::Log::critical("No raw data buffers available.");
         stream.close();
         return FIFF_FAIL;
     }

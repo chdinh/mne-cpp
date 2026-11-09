@@ -16,7 +16,7 @@
 // INCLUDES
 //=============================================================================================================
 
-#include <utils/logger/log.h>
+#include <base/log.h>
 #include <memory>
 #include <mne/mne_project_to_surface.h>
 #include <mne/mne_bem.h>

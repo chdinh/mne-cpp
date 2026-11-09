@@ -46,7 +46,7 @@
 // QT INCLUDES
 //=============================================================================================================
 
-#include <utils/string_utils.h>
+#include <base/string_utils.h>
 
 #include <QSharedPointer>
 
@@ -255,7 +255,7 @@ public:
     bool toLabels(const FsSurface& p_surf,
                   std::vector<FsLabel>& p_qListLabels,
                   std::vector<Eigen::RowVector4i>& p_qListLabelRGBAs,
-                  const UTILSLIB::StringList& lLabelPicks = {}) const;
+                  const BASELIB::StringList& lLabelPicks = {}) const;
 
     //=========================================================================================================
     /**

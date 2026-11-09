@@ -47,6 +47,7 @@
 //=============================================================================================================
 
 using namespace UTILSLIB;
+using namespace BASELIB;
 using namespace INVLIB;
 using namespace FIFFLIB;
 using namespace MNELIB;

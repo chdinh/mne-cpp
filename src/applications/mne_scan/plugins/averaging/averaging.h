@@ -25,7 +25,7 @@
 #include <vector>
 
 #include <scShared/Plugins/abstractalgorithm.h>
-#include <utils/generics/circularbuffer.h>
+#include <base/circular_buffer.h>
 
 #include <fiff/fiff_evoked_set.h>
 
@@ -205,7 +205,7 @@ private:
     SCSHAREDLIB::PluginInputData<SCMEASLIB::RealTimeMultiSampleArray>::SPtr m_pAveragingInput; /**< The RealTimeSampleArray of the Averaging input.*/
     SCSHAREDLIB::PluginOutputData<SCMEASLIB::RealTimeEvokedSet>::SPtr m_pAveragingOutput;      /**< The RealTimeEvoked of the Averaging output.*/
 
-    std::shared_ptr<UTILSLIB::CircularBuffer<FIFFLIB::FiffEvokedSet>> m_pCircularBuffer; /**< Holds incoming fiff evoked sets. */
+    std::shared_ptr<BASELIB::CircularBuffer<FIFFLIB::FiffEvokedSet>> m_pCircularBuffer; /**< Holds incoming fiff evoked sets. */
 
     QMutex m_qMutex; /**< Provides access serialization between threads. */
 

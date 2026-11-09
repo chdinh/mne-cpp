@@ -33,7 +33,9 @@
 
 #include <fiff/fiff_raw_data.h>
 
-#include <utils/generics/circularbuffer.h>
+#include <base/circular_buffer.h>
+
+#include <Eigen/Core>
 
 //=============================================================================================================
 // QT INCLUDES
@@ -226,7 +228,7 @@ private:
     std::shared_ptr<FIFFLIB::FiffInfo> m_pFiffInfo;                                                           /**< Fiff measurement info.*/
     std::shared_ptr<FIFFLIB::FiffRawData> m_pNeuromagHeadChunkData;                                           /**< Fiff into parser for header data collected from Neuromag extended header. */
     QSharedPointer<SCSHAREDLIB::PluginOutputData<SCMEASLIB::RealTimeMultiSampleArray>> m_pRTMSA_BufferOutput; /**< The RealTimeSampleArray to provide the plugin output data.*/
-    std::shared_ptr<UTILSLIB::CircularBuffer_Matrix_double> m_pCircularBuffer;                                /**< Holds incoming raw data. */
+    std::shared_ptr<BASELIB::CircularBuffer<Eigen::MatrixXd>> m_pCircularBuffer;                              /**< Holds incoming raw data. */
 
     QString m_sBufferAddress; /**< The address used to connect to the buffer if starting without being connected */
     int m_iBufferPort;        /**< The port used to connect to the buffer if starting without being connected */

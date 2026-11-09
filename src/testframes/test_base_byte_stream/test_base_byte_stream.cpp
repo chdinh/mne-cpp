@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: BSD-3-Clause
  * Copyright (c) 2026 MNE-CPP Authors
  *
- * @file     test_utils_byte_stream.cpp
+ * @file     test_base_byte_stream.cpp
  * @author   Christoph Dinh <christoph.dinh@mne-cpp.org>
  * @since    2.5.0
  * @date     November 2026
@@ -14,8 +14,8 @@
 // INCLUDES
 //=============================================================================================================
 
-#include <utils/byte_stream.h>
-#include <utils/endian.h>
+#include <base/byte_stream.h>
+#include <base/endian.h>
 
 //=============================================================================================================
 // QT INCLUDES
@@ -41,7 +41,7 @@
 // USED NAMESPACES
 //=============================================================================================================
 
-using namespace UTILSLIB;
+using namespace BASELIB;
 
 //=============================================================================================================
 
@@ -412,4 +412,4 @@ void TestUtilsByteStream::benchmarkReadBigEndianFloats()
 //=============================================================================================================
 
 QTEST_GUILESS_MAIN(TestUtilsByteStream)
-#include "test_utils_byte_stream.moc"
+#include "test_base_byte_stream.moc"

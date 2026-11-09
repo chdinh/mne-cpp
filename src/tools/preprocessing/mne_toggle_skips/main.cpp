@@ -18,7 +18,7 @@
 #include <fiff/fiff_tag.h>
 #include <fiff/fiff_dir_entry.h>
 #include <fiff/fiff_types.h>
-#include <utils/logger/log.h>
+#include <base/log.h>
 
 //=============================================================================================================
 // QT INCLUDES
@@ -35,7 +35,6 @@
 //=============================================================================================================
 
 using namespace FIFFLIB;
-using namespace UTILSLIB;
 
 //=============================================================================================================
 // STATIC DEFINITIONS
@@ -47,7 +46,7 @@ using namespace UTILSLIB;
 
 int main(int argc, char* argv[])
 {
-    UTILSLIB::Log::install_qt_message_handler();
+    BASELIB::Log::install_qt_message_handler();
     QCoreApplication app(argc, argv);
     QCoreApplication::setApplicationName("mne_toggle_skips");
     QCoreApplication::setApplicationVersion(PROGRAM_VERSION);

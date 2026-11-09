@@ -15,7 +15,7 @@
 //=============================================================================================================
 
 #include "rt_connectivity.h"
-#include <utils/logger/log.h>
+#include <base/log.h>
 
 #include <connectivity/connectivitysettings.h>
 #include <connectivity/compute_connectivity.h>
@@ -38,7 +38,7 @@ void RtConnectivityWorker::doWork(const std::shared_ptr<ConnectivitySettings>& c
     }
 
     if (connectivitySettings->getConnectivityMethods().empty()) {
-        UTILSLIB::Log::debug("RtConnectivityWorker::doWork() - Network methods are empty");
+        BASELIB::Log::debug("RtConnectivityWorker::doWork() - Network methods are empty");
         return;
     }
 

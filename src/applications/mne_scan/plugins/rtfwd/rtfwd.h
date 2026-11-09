@@ -25,7 +25,7 @@
 
 #include <scShared/Plugins/abstractalgorithm.h>
 
-#include <utils/generics/circularbuffer.h>
+#include <base/circular_buffer.h>
 
 #include <fiff/fiff_coord_trans.h>
 

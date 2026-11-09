@@ -17,11 +17,11 @@
 //=============================================================================================================
 
 #include <iostream>
-#include <utils/string_utils.h>
+#include <base/string_utils.h>
 #include <vector>
 #include <math.h>
 
-#include <utils/logger/log.h>
+#include <base/log.h>
 
 #include <fiff/fiff.h>
 #include <mne/mne.h>
@@ -42,7 +42,7 @@
 
 using namespace FIFFLIB;
 using namespace MNELIB;
-using namespace UTILSLIB;
+using namespace BASELIB;
 using namespace Eigen;
 
 //=============================================================================================================
@@ -60,7 +60,7 @@ using namespace Eigen;
  */
 int main(int argc, char* argv[])
 {
-    UTILSLIB::Log::install_qt_message_handler();
+    BASELIB::Log::install_qt_message_handler();
     QCoreApplication a(argc, argv);
 
     // Command Line Parser
@@ -190,9 +190,9 @@ int main(int argc, char* argv[])
             secondOfPair = QString::fromStdString(p_FiffEvokedSet.info.ch_names.at(pairs(i, 1)));
 
             //If one channel of the planar gradiometer is marked bad, add the other to the bad channel list
-            if (!UTILSLIB::contains(p_FiffEvokedSet.info.bads, firstOfPair.toStdString()) && UTILSLIB::contains(p_FiffEvokedSet.info.bads, secondOfPair.toStdString()))
+            if (!BASELIB::contains(p_FiffEvokedSet.info.bads, firstOfPair.toStdString()) && BASELIB::contains(p_FiffEvokedSet.info.bads, secondOfPair.toStdString()))
                 p_FiffEvokedSet.info.bads.push_back(secondOfPair.toStdString());
-            if (UTILSLIB::contains(p_FiffEvokedSet.info.bads, firstOfPair.toStdString()) && !UTILSLIB::contains(p_FiffEvokedSet.info.bads, secondOfPair.toStdString()))
+            if (BASELIB::contains(p_FiffEvokedSet.info.bads, firstOfPair.toStdString()) && !BASELIB::contains(p_FiffEvokedSet.info.bads, secondOfPair.toStdString()))
                 p_FiffEvokedSet.info.bads.push_back(firstOfPair.toStdString());
         }
     }

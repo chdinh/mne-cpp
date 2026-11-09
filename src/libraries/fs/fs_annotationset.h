@@ -190,7 +190,7 @@ public:
     bool toLabels(const FsSurfaceSet& p_surfSet,
                   std::vector<FsLabel>& p_qListLabels,
                   std::vector<Eigen::RowVector4i>& p_qListLabelRGBAs,
-                  const UTILSLIB::StringList& lLabelPicks = {}) const;
+                  const BASELIB::StringList& lLabelPicks = {}) const;
 
     //=========================================================================================================
     /**

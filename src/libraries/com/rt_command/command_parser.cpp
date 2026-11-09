@@ -25,7 +25,7 @@
 //=============================================================================================================
 
 #include "command_parser.h"
-#include <utils/logger/log.h>
+#include <base/log.h>
 #include "command_manager.h"
 
 //=============================================================================================================
@@ -81,7 +81,7 @@ bool CommandParser::parse(const QString& p_sInput, QStringList& p_qListCommandsP
         isJson = true;
 
     if (isJson) {
-        UTILSLIB::Log::debug("JSON command recognized");
+        BASELIB::Log::debug("JSON command recognized");
 
         QJsonObject t_jsonObjectCommand;
         QJsonObject t_jsonObjectParameters;
@@ -98,7 +98,7 @@ bool CommandParser::parse(const QString& p_sInput, QStringList& p_qListCommandsP
         QJsonObject::Iterator itParam;
         for (it = t_jsonObjectCommand.begin(); it != t_jsonObjectCommand.end(); ++it) {
             //Print Command
-            UTILSLIB::Log::info("{}\r\n", it.key().toStdString());
+            BASELIB::Log::info("{}\r\n", it.key().toStdString());
 
             if (exists(it.key())) {
                 RawCommand t_rawCommand(it.key(), true);
@@ -110,7 +110,7 @@ bool CommandParser::parse(const QString& p_sInput, QStringList& p_qListCommandsP
 
                 //append the parameters
                 for (itParam = t_jsonObjectParameters.begin(); itParam != t_jsonObjectParameters.end(); ++itParam) {
-                    UTILSLIB::Log::info(" {}", itParam.value().toString().toStdString());
+                    BASELIB::Log::info(" {}", itParam.value().toString().toStdString());
                     //ToDo do a cross check with the param naming and key
                     m_rawCommand.pValues().append(itParam.value().toString());
                 }
@@ -118,16 +118,16 @@ bool CommandParser::parse(const QString& p_sInput, QStringList& p_qListCommandsP
                 //Notify attached command manager
                 notify();
             }
-            UTILSLIB::Log::info("\r\n");
+            BASELIB::Log::info("\r\n");
         }
     } else {
         QStringList t_qCommandList = p_sInput.split(" ");
 
         //Print command
-        UTILSLIB::Log::info("{}\r\n", t_qCommandList[0].toStdString());
+        BASELIB::Log::info("{}\r\n", t_qCommandList[0].toStdString());
 
         if (!exists(t_qCommandList[0])) {
-            UTILSLIB::Log::info("\r\n");
+            BASELIB::Log::info("\r\n");
             return false;
         }
 
@@ -141,11 +141,11 @@ bool CommandParser::parse(const QString& p_sInput, QStringList& p_qListCommandsP
         {
             //Parse Parameters
             for (qint32 i = 1; i < t_qCommandList.size(); ++i) {
-                UTILSLIB::Log::info(" {}", t_qCommandList[i].toStdString());
+                BASELIB::Log::info(" {}", t_qCommandList[i].toStdString());
                 m_rawCommand.pValues().append(t_qCommandList[i]);
             }
         }
-        UTILSLIB::Log::info("\r\n");
+        BASELIB::Log::info("\r\n");
         notify();
     }
 

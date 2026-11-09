@@ -33,6 +33,7 @@ target_link_libraries(${PROJECT_NAME}
     ${QT_REQUIRED_COMPONENT_LIBS}
     mne_mna
     mne_utils
+    mne_base
 )
 
 set_target_properties(${PROJECT_NAME} PROPERTIES

@@ -7,8 +7,7 @@
  * @author   Christoph Dinh <christoph.dinh@mne-cpp.org>
  * @since    2.0.0
  * @date     March, 2026
- * @brief    Tests for Observer/Subject pattern, CircularBuffer edge cases,
- *           — the generic utility design patterns in utils.
+ * @brief    Tests for the Observer/Subject pattern.
  */
 
 //=============================================================================================================
@@ -16,8 +15,7 @@
 //=============================================================================================================
 
 #include <utils/generics/observerpattern.h>
-#include <utils/generics/circularbuffer.h>
-#include <utils/logger/log.h>
+#include <base/log.h>
 
 //=============================================================================================================
 // QT INCLUDES
@@ -75,7 +73,7 @@ public:
 
 //=============================================================================================================
 /**
- * @brief Tests for Observer/Subject pattern and CircularBuffer.
+ * @brief Tests for the Observer/Subject pattern.
  */
 class TestUtilsObserverPattern : public QObject
 {
@@ -91,11 +89,6 @@ private slots:
     void testMultipleObservers();
     void testDetachAndReattach();
 
-    // ── CircularBuffer edge cases ─────────────────────────────────────
-    void testCircularBufferPauseResume();
-    void testCircularBufferFreeElements();
-    void testCircularBufferEigenMatrix();
-    void testCircularBufferFillAndDrain();
 
     void cleanupTestCase();
 };
@@ -104,7 +97,7 @@ private slots:
 
 void TestUtilsObserverPattern::initTestCase()
 {
-    UTILSLIB::Log::install_qt_message_handler();
+    BASELIB::Log::install_qt_message_handler();
 }
 
 //=============================================================================================================
@@ -207,100 +200,6 @@ void TestUtilsObserverPattern::testDetachAndReattach()
 
     subject.notify();
     QCOMPARE(obs1.updateCount, 1);
-}
-
-//=============================================================================================================
-// CircularBuffer edge cases
-//=============================================================================================================
-
-void TestUtilsObserverPattern::testCircularBufferPauseResume()
-{
-    CircularBuffer<int> buffer(10);
-
-    buffer.push(42);
-    buffer.pause(true);
-
-    // While paused, push should fail
-    bool pushOk = buffer.push(99);
-    QVERIFY(!pushOk);
-
-    // Pop should also fail while paused
-    int val = 0;
-    bool popOk = buffer.pop(val);
-    QVERIFY(!popOk);
-
-    // Resume
-    buffer.pause(false);
-    // The 42 we pushed before pause should still be there
-    popOk = buffer.pop(val);
-    QVERIFY(popOk);
-    QCOMPARE(val, 42);
-}
-
-//=============================================================================================================
-
-void TestUtilsObserverPattern::testCircularBufferFreeElements()
-{
-    CircularBuffer<int> buffer(5);
-
-    QCOMPARE(buffer.getFreeElementsWrite(), 5);
-    QCOMPARE(buffer.getFreeElementsRead(), 0);
-
-    buffer.push(1);
-    buffer.push(2);
-
-    QCOMPARE(buffer.getFreeElementsWrite(), 3);
-    QCOMPARE(buffer.getFreeElementsRead(), 2);
-
-    int val;
-    buffer.pop(val);
-    QCOMPARE(buffer.getFreeElementsWrite(), 4);
-    QCOMPARE(buffer.getFreeElementsRead(), 1);
-}
-
-//=============================================================================================================
-
-void TestUtilsObserverPattern::testCircularBufferEigenMatrix()
-{
-    CircularBuffer<MatrixXd> buffer(3);
-
-    MatrixXd A(2, 2);
-    A << 1, 2, 3, 4;
-
-    QVERIFY(buffer.push(A));
-
-    MatrixXd B;
-    QVERIFY(buffer.pop(B));
-    QVERIFY(B.isApprox(A));
-}
-
-//=============================================================================================================
-
-void TestUtilsObserverPattern::testCircularBufferFillAndDrain()
-{
-    CircularBuffer<int> buffer(4);
-
-    // Fill to capacity
-    for (int i = 0; i < 4; ++i) {
-        QVERIFY(buffer.push(i * 10));
-    }
-    QCOMPARE(buffer.getFreeElementsWrite(), 0);
-    QCOMPARE(buffer.getFreeElementsRead(), 4);
-
-    // Drain all
-    for (int i = 0; i < 4; ++i) {
-        int val;
-        QVERIFY(buffer.pop(val));
-        QCOMPARE(val, i * 10);
-    }
-    QCOMPARE(buffer.getFreeElementsWrite(), 4);
-    QCOMPARE(buffer.getFreeElementsRead(), 0);
-
-    // Buffer should be reusable after drain
-    QVERIFY(buffer.push(999));
-    int val;
-    QVERIFY(buffer.pop(val));
-    QCOMPARE(val, 999);
 }
 
 //=============================================================================================================

@@ -17,7 +17,7 @@
 #include "sensorfieldmapper.h"
 
 #include <vector>
-#include <utils/string_utils.h>
+#include <base/string_utils.h>
 #include "renderable/brainsurface.h"
 #include "core/rendertypes.h"
 
@@ -240,7 +240,7 @@ bool SensorFieldMapper::buildMapping(
     std::vector<std::string> megChNames, eegChNames;
 
     auto isBad = [this](const std::string& name) {
-        return UTILSLIB::contains(m_evoked.info.bads, name);
+        return BASELIB::contains(m_evoked.info.bads, name);
     };
 
     const int nChs = static_cast<int>(m_evoked.info.chs.size());

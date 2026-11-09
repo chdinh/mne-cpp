@@ -18,7 +18,7 @@
 //=============================================================================================================
 
 #include "fiff_annotation_event_utils.h"
-#include <utils/logger/log.h>
+#include <base/log.h>
 
 //=============================================================================================================
 // QT INCLUDES
@@ -30,7 +30,7 @@
 // STL INCLUDES
 //=============================================================================================================
 
-#include <utils/string_utils.h>
+#include <base/string_utils.h>
 
 #include <cmath>
 
@@ -55,7 +55,7 @@ FiffAnnotations FIFFLIB::annotations_from_events(const MatrixXi& events,
         return annotations;
     }
     if (sfreq <= 0.0) {
-        UTILSLIB::Log::warning("annotations_from_events: sfreq must be positive, got {:f}", sfreq);
+        BASELIB::Log::warning("annotations_from_events: sfreq must be positive, got {:f}", sfreq);
         return annotations;
     }
     for (Index i = 0; i < events.rows(); ++i) {
@@ -77,7 +77,7 @@ MatrixXi FIFFLIB::events_from_annotations(const FiffAnnotations& annotations,
         return MatrixXi(0, 3);
     }
     if (sfreq <= 0.0) {
-        UTILSLIB::Log::warning("events_from_annotations: sfreq must be positive, got {:f}", sfreq);
+        BASELIB::Log::warning("events_from_annotations: sfreq must be positive, got {:f}", sfreq);
         return MatrixXi(0, 3);
     }
     MatrixXi result(static_cast<Index>(annotations.size()), 3);
@@ -86,7 +86,7 @@ MatrixXi FIFFLIB::events_from_annotations(const FiffAnnotations& annotations,
         const auto id = event_id.find(a.description);
         result(row, 0) = static_cast<int>(std::round(a.onset * sfreq)) + first_sample;
         result(row, 1) = 0;
-        result(row, 2) = id != event_id.end() ? id->second : UTILSLIB::toInt(a.description).value_or(0);
+        result(row, 2) = id != event_id.end() ? id->second : BASELIB::toInt(a.description).value_or(0);
         ++row;
     }
     return result;

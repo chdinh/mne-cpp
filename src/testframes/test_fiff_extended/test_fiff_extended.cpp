@@ -3,7 +3,7 @@
 //   Christoph Dinh <christoph.dinh@mne-cpp.org>
 
 #include <QtTest/QtTest>
-#include <utils/string_utils.h>
+#include <base/string_utils.h>
 #include <QBuffer>
 #include <QFile>
 #include <QTemporaryDir>
@@ -216,7 +216,7 @@ private slots:
         RowVectorXi picks = raw.info.pick_types(true, true, false, {}, raw.info.bads);
         StringList chNames;
         for (int i = 0; i < picks.size(); ++i) {
-            if (UTILSLIB::contains(cov.names, raw.info.ch_names[picks(i)]))
+            if (BASELIB::contains(cov.names, raw.info.ch_names[picks(i)]))
                 chNames.push_back(raw.info.ch_names[picks(i)]);
         }
         FiffCov prepared = cov.prepare_noise_cov(raw.info, chNames);
@@ -340,7 +340,7 @@ private slots:
     {
         FiffInfo info = createSyntheticInfo(5);
         RowVectorXd cals;
-        auto pStream = FiffStream::start_writing_raw(std::make_unique<UTILSLIB::MemoryByteStream>(), info, cals);
+        auto pStream = FiffStream::start_writing_raw(std::make_unique<BASELIB::MemoryByteStream>(), info, cals);
         QVERIFY(pStream);
         pStream->finish_writing_raw();
     }

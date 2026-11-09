@@ -19,7 +19,7 @@
 
 #include "rawmodel.h"
 #include <memory>
-#include <utils/string_utils.h>
+#include <base/string_utils.h>
 
 #include <math/numerics.h>
 
@@ -207,7 +207,7 @@ QVariant RawModel::data(const QModelIndex& index, int role) const
                 }
 
                 case Qt::BackgroundRole: { //plot channel red if marked as red
-                    if (UTILSLIB::contains(m_pFiffInfo->bads, m_chInfolist[index.row()].ch_name)) {
+                    if (BASELIB::contains(m_pFiffInfo->bads, m_chInfolist[index.row()].ch_name)) {
                         QBrush brush;
                         brush.setStyle(Qt::SolidPattern);
                         brush.setColor(Qt::darkRed);
@@ -668,12 +668,12 @@ void RawModel::markChBad(QModelIndexList chlist, bool status)
     for (int i = 0; i < chlist.size(); ++i) {
         if (chlist[i].column() == 1) { //only process indexes corresponding to column 1 (data)
             if (status) {
-                if (!UTILSLIB::contains(m_pFiffInfo->bads, m_chInfolist[chlist[i].row()].ch_name))
+                if (!BASELIB::contains(m_pFiffInfo->bads, m_chInfolist[chlist[i].row()].ch_name))
                     m_pFiffInfo->bads.push_back(m_chInfolist[chlist[i].row()].ch_name);
                 qInfo() << "RawModel:" << m_chInfolist[chlist[i].row()].ch_name << "marked as bad.";
             } else {
-                if (UTILSLIB::contains(m_pFiffInfo->bads, m_chInfolist[chlist[i].row()].ch_name)) {
-                    int index = UTILSLIB::indexOf(m_pFiffInfo->bads, m_chInfolist[chlist[i].row()].ch_name);
+                if (BASELIB::contains(m_pFiffInfo->bads, m_chInfolist[chlist[i].row()].ch_name)) {
+                    int index = BASELIB::indexOf(m_pFiffInfo->bads, m_chInfolist[chlist[i].row()].ch_name);
                     m_pFiffInfo->bads.erase(m_pFiffInfo->bads.begin() + index);
                     qInfo() << "RawModel:" << m_chInfolist[chlist[i].row()].ch_name << "marked as good.";
                 }

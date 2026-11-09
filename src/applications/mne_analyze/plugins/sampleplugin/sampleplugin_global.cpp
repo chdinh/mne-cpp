@@ -17,7 +17,7 @@
 //=============================================================================================================
 
 #include "sampleplugin_global.h"
-#include "utils/buildinfo.h"
+#include <base/buildinfo.h>
 
 //=============================================================================================================
 // DEFINE METHODS
@@ -25,19 +25,19 @@
 
 const char* SAMPLEPLUGINPLUGIN::buildDateTime()
 {
-    return UTILSLIB::dateTimeNow();
+    return BASELIB::dateTimeNow();
 };
 
 //=============================================================================================================
 
 const char* SAMPLEPLUGINPLUGIN::buildHash()
 {
-    return UTILSLIB::gitHash();
+    return BASELIB::gitHash();
 };
 
 //=============================================================================================================
 
 const char* SAMPLEPLUGINPLUGIN::buildHashLong()
 {
-    return UTILSLIB::gitHashLong();
+    return BASELIB::gitHashLong();
 };

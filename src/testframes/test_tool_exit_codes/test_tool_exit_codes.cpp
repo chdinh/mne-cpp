@@ -25,7 +25,7 @@
 // INCLUDES
 //=============================================================================================================
 
-#include <utils/logger/log.h>
+#include <base/log.h>
 
 //=============================================================================================================
 // QT INCLUDES
@@ -44,7 +44,6 @@
 // USED NAMESPACES
 //=============================================================================================================
 
-using namespace UTILSLIB;
 
 //=============================================================================================================
 /**
@@ -102,7 +101,7 @@ TestToolExitCodes::TestToolExitCodes()
 
 void TestToolExitCodes::initTestCase()
 {
-    UTILSLIB::Log::install_qt_message_handler();
+    BASELIB::Log::install_qt_message_handler();
 
     // Scoped to a directory that is created and removed per run. Some tools open
     // their input read-write and so leave an empty file behind on failure, which

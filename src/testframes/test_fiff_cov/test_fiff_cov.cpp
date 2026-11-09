@@ -17,8 +17,8 @@
 // INCLUDES
 //=============================================================================================================
 
-#include <utils/logger/log.h>
-#include <utils/string_utils.h>
+#include <base/log.h>
+#include <base/string_utils.h>
 
 #include <fiff/fiff_cov.h>
 #include <fiff/fiff_raw_data.h>
@@ -162,7 +162,7 @@ TestFiffCov::TestFiffCov()
 
 void TestFiffCov::initTestCase()
 {
-    UTILSLIB::Log::install_qt_message_handler();
+    BASELIB::Log::install_qt_message_handler();
     qDebug() << "Epsilon" << dEpsilon;
     //Read the results produced with MNE-CPP
     covLoaded = FiffCov((QCoreApplication::applicationDirPath() + "/../resources/data/mne-cpp-test-data/MEG/sample/sample_audvis-cov.fif").toStdU16String());
@@ -307,8 +307,8 @@ void TestFiffCov::computeFromEpochs_matchesPython()
     rej.eegReject = static_cast<float>(eegReject);
     const FiffCov cov = FiffCov::compute_from_epochs(raw, events, codes, tmin, tmax, tmin, bmax, baseline, removeMean, 0, delay, eegReject > 0.0 ? &rej : nullptr);
     QCOMPARE(cov.nfree, nfree);
-    const int i = UTILSLIB::indexOf(cov.names, "MEG0113");
-    const int e = UTILSLIB::indexOf(cov.names, "EEG001");
+    const int i = BASELIB::indexOf(cov.names, "MEG0113");
+    const int e = BASELIB::indexOf(cov.names, "EEG001");
     const Vector3d got(cov.data(i, i), cov.data(e, e), cov.data(i, e));
     for (int k = 0; k < 3; ++k)
         QVERIFY2(std::abs(got[k] - ref[k]) <= 1e-6 * std::abs(ref[k]), qPrintable(QString("entry %1: %2 vs %3").arg(k).arg(got[k], 0, 'g', 17).arg(ref[k], 0, 'g', 17)));
@@ -357,15 +357,15 @@ void TestFiffCov::saveRoundTrip_computedCovariance()
     // A raw file is FIFF but holds no covariance.
     const auto noCov = FiffCov::read(rawFile.fileName().toStdString());
     QVERIFY(!noCov);
-    QCOMPARE(noCov.error().code, UTILSLIB::ErrorCode::NotFound);
+    QCOMPARE(noCov.error().code, BASELIB::ErrorCode::NotFound);
     QVERIFY(std::string_view(noCov.error().what()).contains(rawFile.fileName().toStdString()));
-    QVERIFY_THROWS_EXCEPTION(UTILSLIB::Error, FiffCov(rawFile.fileName().toStdU16String()));
+    QVERIFY_THROWS_EXCEPTION(BASELIB::Error, FiffCov(rawFile.fileName().toStdU16String()));
     const auto missing = FiffCov::read(tempDir.filePath("missing-cov.fif").toStdString());
     QVERIFY(!missing);
-    QCOMPARE(missing.error().code, UTILSLIB::ErrorCode::Io);
+    QCOMPARE(missing.error().code, BASELIB::ErrorCode::Io);
     const auto unwritable = cov.save(tempDir.filePath("no/dir/cov.fif").toStdString());
     QVERIFY(!unwritable);
-    QCOMPARE(unwritable.error().code, UTILSLIB::ErrorCode::Io);
+    QCOMPARE(unwritable.error().code, BASELIB::ErrorCode::Io);
 }
 
 //=============================================================================================================

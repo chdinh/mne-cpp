@@ -23,7 +23,7 @@
 //=============================================================================================================
 
 #include "fiff_proj.h"
-#include <utils/logger/log.h>
+#include <base/log.h>
 
 #include <format>
 #include <map>
@@ -35,7 +35,7 @@
 #include <vector>
 
 #include <set>
-#include <utils/string_utils.h>
+#include <base/string_utils.h>
 #include "fiff_raw_data.h"
 #include "fiff_evoked.h"
 #include "fiff_constants.h"
@@ -57,6 +57,7 @@
 //=============================================================================================================
 
 using namespace UTILSLIB;
+using namespace BASELIB;
 using namespace FIFFLIB;
 using namespace Eigen;
 
@@ -72,7 +73,7 @@ std::array<std::vector<int>, 3> pcaChannelGroups(const FiffInfo& info)
 {
     std::array<std::vector<int>, 3> groups;
     for (int k = 0; k < std::ssize(info.chs); ++k) {
-        if (UTILSLIB::contains(info.bads, info.ch_names[k])) {
+        if (BASELIB::contains(info.bads, info.ch_names[k])) {
             continue;
         }
         if (info.chs[k].kind == FIFFV_MEG_CH) {
@@ -367,7 +368,7 @@ std::vector<FiffProj> FiffProj::compute_from_raw(const FiffRawData& raw,
         // Simple peak-to-peak rejection
         bool ok = true;
         for (int c = 0; c < nchan && ok; ++c) {
-            if (UTILSLIB::contains(raw.info.bads, raw.info.ch_names[c]))
+            if (BASELIB::contains(raw.info.bads, raw.info.ch_names[c]))
                 continue;
             double pp = epochData.row(c).maxCoeff() - epochData.row(c).minCoeff();
             if (raw.info.chs[c].kind == FIFFV_MEG_CH) {

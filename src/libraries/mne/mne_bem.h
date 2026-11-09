@@ -36,7 +36,7 @@
 #include <fiff/fiff_coord_trans.h>
 #include <fiff/fiff_stream.h>
 
-#include <utils/error.h>
+#include <base/error.h>
 
 #include <filesystem>
 #include <span>
@@ -75,7 +75,7 @@ public:
 
     //=========================================================================================================
     /**
-     * Reads a -bem.fif file like read(); throws UTILSLIB::Error if it cannot.
+     * Reads a -bem.fif file like read(); throws BASELIB::Error if it cannot.
      *
      * @param[in] path   The -bem.fif file.
      */
@@ -91,7 +91,7 @@ public:
      * @return The model, or why the file cannot be read: Io if it cannot be opened, NotFound if it holds no
      *         BEM surfaces, Format if a surface is incomplete or inconsistent.
      */
-    [[nodiscard]] static UTILSLIB::Expected<MNEBem> read(const std::filesystem::path& path, bool patch_stats = true);
+    [[nodiscard]] static BASELIB::Expected<MNEBem> read(const std::filesystem::path& path, bool patch_stats = true);
 
     //=========================================================================================================
     /**
@@ -102,7 +102,7 @@ public:
      *
      * @return The model, or why the stream cannot be read (see read(path)).
      */
-    [[nodiscard]] static UTILSLIB::Expected<MNEBem> read(FIFFLIB::FiffStream& stream, bool patch_stats = true);
+    [[nodiscard]] static BASELIB::Expected<MNEBem> read(FIFFLIB::FiffStream& stream, bool patch_stats = true);
 
     //=========================================================================================================
     /**
@@ -112,7 +112,7 @@ public:
      *
      * @return Nothing, or why the file cannot be written (Io).
      */
-    [[nodiscard]] UTILSLIB::Expected<void> write(const std::filesystem::path& path) const;
+    [[nodiscard]] BASELIB::Expected<void> write(const std::filesystem::path& path) const;
 
     //=========================================================================================================
     /**

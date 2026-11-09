@@ -30,7 +30,7 @@
 #include <mne/mne_inverse_operator.h>
 #include <inv/minimum_norm/inv_minimum_norm.h>
 #include <inv/inv_source_estimate.h>
-#include <utils/string_utils.h>
+#include <base/string_utils.h>
 
 #include <Eigen/Core>
 

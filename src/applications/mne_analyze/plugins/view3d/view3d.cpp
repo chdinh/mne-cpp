@@ -365,5 +365,5 @@ void View3D::onModelRemoved(QSharedPointer<ANSHAREDLIB::AbstractModel> pRemovedM
 
 QString View3D::getBuildInfo()
 {
-    return QString(UTILSLIB::dateTimeNow());
+    return QString(BASELIB::dateTimeNow());
 }

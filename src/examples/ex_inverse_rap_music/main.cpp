@@ -33,7 +33,7 @@
 #include <disp3D/view/brainview.h>
 #include <disp3D/model/braintreemodel.h>
 
-#include <utils/logger/log.h>
+#include <base/log.h>
 
 #include <iostream>
 
@@ -54,7 +54,7 @@ using namespace MNELIB;
 using namespace FSLIB;
 using namespace FIFFLIB;
 using namespace INVLIB;
-using namespace UTILSLIB;
+using namespace BASELIB;
 using namespace DISP3DLIB;
 
 //=============================================================================================================
@@ -76,7 +76,7 @@ int main(int argc, char* argv[])
 // Q_INIT_RESOURCE(mne_disp3d);
 #endif
 
-    UTILSLIB::Log::install_qt_message_handler();
+    BASELIB::Log::install_qt_message_handler();
     QApplication a(argc, argv);
 
     // Command Line Parser

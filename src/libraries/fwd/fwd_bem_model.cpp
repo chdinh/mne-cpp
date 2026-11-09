@@ -20,7 +20,7 @@
 //=============================================================================================================
 
 #include "fwd_bem_model.h"
-#include <utils/logger/log.h>
+#include <base/log.h>
 #include "fwd_bem_solution.h"
 #include "fwd_eeg_sphere_model.h"
 #include <mne/mne_surface.h>
@@ -198,8 +198,8 @@ std::filesystem::path FwdBemModel::fwd_bem_make_bem_sol_name(const std::filesyst
      * Make a standard BEM solution file name
      */
 {
-    const std::string file = UTILSLIB::utf8FromPath(name);
-    return UTILSLIB::pathFromUtf8(std::string(strip_from(strip_from(strip_from(file, ".fif"), "-sol"), "-bem")) + BEM_SOL_SUFFIX);
+    const std::string file = BASELIB::utf8FromPath(name);
+    return BASELIB::pathFromUtf8(std::string(strip_from(strip_from(strip_from(file, ".fif"), "-sol"), "-bem")) + BEM_SOL_SUFFIX);
 }
 
 //=============================================================================================================
@@ -239,7 +239,7 @@ int FwdBemModel::get_int(FiffStream& stream, const std::shared_ptr<FiffDirNode>&
     std::optional<FiffTag> t_pTag;
     if (t_pTag = node->find_tag(stream, what); t_pTag) {
         if (t_pTag->getType() != FIFFT_INT) {
-            UTILSLIB::Log::warning("Expected an integer tag : {} (found data type {} instead)", what, t_pTag->getType());
+            BASELIB::Log::warning("Expected an integer tag : {} (found data type {} instead)", what, t_pTag->getType());
             return FAIL;
         }
         *res = *t_pTag->toInt();
@@ -255,7 +255,7 @@ MNESurface* FwdBemModel::fwd_bem_find_surface(int kind)
     for (int k = 0; k < this->nsurf; k++)
         if (this->surfs[k]->id == kind)
             return this->surfs[k].get();
-    UTILSLIB::Log::warning("Desired surface ({} = {}) not found.", kind, fwd_bem_explain_surface(kind));
+    BASELIB::Log::warning("Desired surface ({} = {}) not found.", kind, fwd_bem_explain_surface(kind));
     return nullptr;
 }
 
@@ -272,7 +272,7 @@ std::unique_ptr<FwdBemModel> FwdBemModel::fwd_bem_load_surfaces(const std::files
     int j, k;
 
     if (nkind <= 0) {
-        UTILSLIB::Log::critical("No surfaces specified to fwd_bem_load_surfaces");
+        BASELIB::Log::critical("No surfaces specified to fwd_bem_load_surfaces");
         return nullptr;
     }
 
@@ -282,11 +282,11 @@ std::unique_ptr<FwdBemModel> FwdBemModel::fwd_bem_load_surfaces(const std::files
         if (!s)
             return nullptr;
         if (cond < 0.0) {
-            UTILSLIB::Log::critical("No conductivity available for surface {}", fwd_bem_explain_surface(kinds[k]));
+            BASELIB::Log::critical("No conductivity available for surface {}", fwd_bem_explain_surface(kinds[k]));
             return nullptr;
         }
         if (s->coord_frame != FIFFV_COORD_MRI) {
-            UTILSLIB::Log::critical("FsSurface {} not specified in MRI coordinates.", fwd_bem_explain_surface(kinds[k]));
+            BASELIB::Log::critical("FsSurface {} not specified in MRI coordinates.", fwd_bem_explain_surface(kinds[k]));
             return nullptr;
         }
         sigma_tmp[k] = cond;
@@ -372,7 +372,7 @@ int FwdBemModel::fwd_bem_load_solution(const std::filesystem::path& name, int be
         std::vector<std::shared_ptr<FiffDirNode>> nodes = stream.dirtree()->dir_tree_find(FIFFB_BEM);
 
         if (nodes.size() == 0) {
-            UTILSLIB::Log::warning("No BEM data in {}", UTILSLIB::utf8FromPath(name));
+            BASELIB::Log::warning("No BEM data in {}", BASELIB::utf8FromPath(name));
             stream.close();
             return NOT_FOUND;
         }
@@ -390,12 +390,12 @@ int FwdBemModel::fwd_bem_load_solution(const std::filesystem::path& name, int be
     else if (method == FIFFV_BEM_APPROX_LINEAR)
         method = FWD_BEM_LINEAR_COLL;
     else {
-        UTILSLIB::Log::warning("Cannot handle BEM approximation method : {}", method);
+        BASELIB::Log::warning("Cannot handle BEM approximation method : {}", method);
         stream.close();
         return FAIL;
     }
     if (bemMethod != FWD_BEM_UNKNOWN && method != bemMethod) {
-        UTILSLIB::Log::warning("Approximation method in file : {} desired : {}", method, bemMethod);
+        BASELIB::Log::warning("Approximation method in file : {} desired : {}", method, bemMethod);
         stream.close();
         return NOT_FOUND;
     }
@@ -411,14 +411,14 @@ int FwdBemModel::fwd_bem_load_solution(const std::filesystem::path& name, int be
         t_pTag->getMatrixDimensions(ndim, dims);
 
         if (ndim != 2) {
-            UTILSLIB::Log::warning("Expected a two-dimensional solution matrix instead of a {} dimensional one", ndim);
+            BASELIB::Log::warning("Expected a two-dimensional solution matrix instead of a {} dimensional one", ndim);
             stream.close();
             return FAIL;
         }
         for (k = 0, dim = 0; k < nsurf; k++)
             dim = dim + ((method == FWD_BEM_LINEAR_COLL) ? surfs[k]->np : surfs[k]->ntri);
         if (dims[0] != dim || dims[1] != dim) {
-            UTILSLIB::Log::warning("Expected a {} x {} solution matrix instead of a {} x {}  one", dim, dim, dims[0], dims[1]);
+            BASELIB::Log::warning("Expected a {} x {} solution matrix instead of a {} x {}  one", dim, dim, dims[0], dims[1]);
             stream.close();
             return NOT_FOUND;
         }
@@ -450,7 +450,7 @@ int FwdBemModel::fwd_bem_set_head_mri_t(const FiffCoordTrans& t)
         head_mri_t = t.inverted();
         return OK;
     } else {
-        UTILSLIB::Log::warning("Improper coordinate transform delivered to fwd_bem_set_head_mri_t");
+        BASELIB::Log::warning("Improper coordinate transform delivered to fwd_bem_set_head_mri_t");
         return FAIL;
     }
 }
@@ -466,7 +466,7 @@ std::unique_ptr<MNESourceSpace> FwdBemModel::make_guesses(MNESurface* guess_surf
     float dist;
 
     if (!guess_surf) {
-        UTILSLIB::Log::info("Making a spherical guess space with radius {:7.1f} mm...", 1000 * guessrad);
+        BASELIB::Log::info("Making a spherical guess space with radius {:7.1f} mm...", 1000 * guessrad);
 
         QFile bemFile(QString(QCoreApplication::applicationDirPath() + "/../resources/general/surf2bem/icos.fif"));
         if (!QCoreApplication::startingUp())
@@ -475,7 +475,7 @@ std::unique_ptr<MNESourceSpace> FwdBemModel::make_guesses(MNESurface* guess_surf
             bemFile.setFileName("../resources/general/surf2bem/icos.fif");
 
         if (!bemFile.exists()) {
-            UTILSLIB::Log::debug("{} does not exists.", bemFile.fileName().toStdString());
+            BASELIB::Log::debug("{} does not exists.", bemFile.fileName().toStdString());
             return res;
         }
 
@@ -493,9 +493,9 @@ std::unique_ptr<MNESourceSpace> FwdBemModel::make_guesses(MNESurface* guess_surf
             return res;
         guess_surf = sphere_owner.get();
     } else {
-        UTILSLIB::Log::info("Guess surface ({} = {}) is in {} coordinates", guess_surf->id, FwdBemModel::fwd_bem_explain_surface(guess_surf->id), mne_coord_frame_name_40(guess_surf->coord_frame).toStdString());
+        BASELIB::Log::info("Guess surface ({} = {}) is in {} coordinates", guess_surf->id, FwdBemModel::fwd_bem_explain_surface(guess_surf->id), mne_coord_frame_name_40(guess_surf->coord_frame).toStdString());
     }
-    UTILSLIB::Log::info("Filtering (grid = {:6.0f} mm)...", 1000 * grid);
+    BASELIB::Log::info("Filtering (grid = {:6.0f} mm)...", 1000 * grid);
     res = MNESourceSpace::make_volume_source_space(*guess_surf, grid, exclude, mindist);
 
     return res;
@@ -597,10 +597,10 @@ void FwdBemModel::lin_pot_coeff(const Eigen::Vector3f& from, MNETriangle& to, Ei
         check += omega[k] * z;
     }
     check *= -area2 / triple;
-    UTILSLIB::Log::info("({:g},{:g},{:g}) =? ({:g},{:g},{:g})", check[0], check[1], check[2], vec_omega[0], vec_omega[1], vec_omega[2]);
+    BASELIB::Log::info("({:g},{:g},{:g}) =? ({:g},{:g},{:g})", check[0], check[1], check[2], vec_omega[0], vec_omega[1], vec_omega[2]);
     check -= vec_omega;
     double rel2 = sqrt(check.dot(check) / vec_omega.dot(vec_omega));
-    UTILSLIB::Log::info("err1 = {:g}, err2 = {:g}", 100 * rel1, 100 * rel2);
+    BASELIB::Log::info("err1 = {:g}, err2 = {:g}", 100 * rel1, 100 * rel2);
 #endif
     return;
 }
@@ -625,7 +625,7 @@ void FwdBemModel::correct_auto_elements(MNESurface& surf, Eigen::MatrixXf& mat)
         sum = 0.0;
         for (k = 0; k < nnode; k++)
             sum = sum + mat(j, k);
-        UTILSLIB::Log::info("row {} sum = {:g} missing = {:g}", j + 1, sum / pi2, 1.0 - sum / pi2);
+        BASELIB::Log::info("row {} sum = {:g} missing = {:g}", j + 1, sum / pi2, 1.0 - sum / pi2);
         mat(j, j) = pi2 - sum;
     }
 #else
@@ -694,7 +694,7 @@ Eigen::MatrixXf FwdBemModel::fwd_bem_lin_pot_coeff(const std::vector<MNESurface*
             np2 = surf2->np;
             ntri = surf2->ntri;
 
-            UTILSLIB::Log::info("\t\t{} ({}) -> {} ({}) ... ", fwd_bem_explain_surface(surf1->id), np1, fwd_bem_explain_surface(surf2->id), np2);
+            BASELIB::Log::info("\t\t{} ({}) -> {} ({}) ... ", fwd_bem_explain_surface(surf1->id), np1, fwd_bem_explain_surface(surf2->id), np2);
 
             for (j = 0; j < np1; j++) {
                 for (k = 0; k < np2; k++)
@@ -721,7 +721,7 @@ Eigen::MatrixXf FwdBemModel::fwd_bem_lin_pot_coeff(const std::vector<MNESurface*
                 correct_auto_elements(*surf1, sub_mat);
                 mat.block(joff, koff, np1, np1) = sub_mat;
             }
-            UTILSLIB::Log::info("[done]");
+            BASELIB::Log::info("[done]");
         }
     }
     return mat;
@@ -746,8 +746,8 @@ int FwdBemModel::fwd_bem_linear_collocation_solution()
     for (auto& s : surfs)
         rawSurfs.push_back(s.get());
 
-    UTILSLIB::Log::info("\nComputing the linear collocation solution...");
-    UTILSLIB::Log::info("\tMatrix coefficients...");
+    BASELIB::Log::info("\nComputing the linear collocation solution...");
+    BASELIB::Log::info("\tMatrix coefficients...");
     coeff = fwd_bem_lin_pot_coeff(rawSurfs);
     if (coeff.size() == 0) {
         fwd_bem_free_solution();
@@ -757,7 +757,7 @@ int FwdBemModel::fwd_bem_linear_collocation_solution()
     for (k = 0, nsol = 0; k < nsurf; k++)
         nsol += surfs[k]->np;
 
-    UTILSLIB::Log::info("\tInverting the coefficient matrix...");
+    BASELIB::Log::info("\tInverting the coefficient matrix...");
     solution = fwd_bem_multi_solution(coeff, &gamma, nsurf, np);
     if (solution.size() == 0) {
         fwd_bem_free_solution();
@@ -771,9 +771,9 @@ int FwdBemModel::fwd_bem_linear_collocation_solution()
         (ip_mult = sigma[nsurf - 2] / sigma[nsurf - 1]) <= ip_approach_limit) {
         Eigen::MatrixXf ip_solution;
 
-        UTILSLIB::Log::info("IP approach required...");
+        BASELIB::Log::info("IP approach required...");
 
-        UTILSLIB::Log::info("\tMatrix coefficients (homog)...");
+        BASELIB::Log::info("\tMatrix coefficients (homog)...");
         std::vector<MNESurface*> last_surfs = {surfs.back().get()};
         coeff = fwd_bem_lin_pot_coeff(last_surfs);
         if (coeff.size() == 0) {
@@ -781,19 +781,19 @@ int FwdBemModel::fwd_bem_linear_collocation_solution()
             return FAIL;
         }
 
-        UTILSLIB::Log::info("\tInverting the coefficient matrix (homog)...");
+        BASELIB::Log::info("\tInverting the coefficient matrix (homog)...");
         ip_solution = fwd_bem_homog_solution(coeff, surfs[nsurf - 1]->np);
         if (ip_solution.size() == 0) {
             fwd_bem_free_solution();
             return FAIL;
         }
 
-        UTILSLIB::Log::info("\tModify the original solution to incorporate IP approach...");
+        BASELIB::Log::info("\tModify the original solution to incorporate IP approach...");
 
         fwd_bem_ip_modify_solution(solution, ip_solution, ip_mult, nsurf, this->np);
     }
     bem_method = FWD_BEM_LINEAR_COLL;
-    UTILSLIB::Log::info("Solution ready.");
+    BASELIB::Log::info("Solution ready.");
     return OK;
 }
 
@@ -869,12 +869,12 @@ void FwdBemModel::fwd_bem_ip_modify_solution(Eigen::MatrixXf& solution, Eigen::M
     Eigen::VectorXf row(nlast);
     mult = (1.0 + ip_mult) / ip_mult;
 
-    UTILSLIB::Log::info("\t\tCombining...");
-    UTILSLIB::Log::info("t ");
+    BASELIB::Log::info("\t\tCombining...");
+    BASELIB::Log::info("t ");
     ip_solution.transposeInPlace();
 
     for (s = 0, joff = 0; s < nsurf; s++) {
-        UTILSLIB::Log::info("{}3 ", s + 1);
+        BASELIB::Log::info("{}3 ", s + 1);
         /*
          * For each row in this surface block, compute dot products
          * with the transposed ip_solution and subtract 2x the result
@@ -888,10 +888,10 @@ void FwdBemModel::fwd_bem_ip_modify_solution(Eigen::MatrixXf& solution, Eigen::M
         joff = joff + ntri[s];
     }
 
-    UTILSLIB::Log::info("t ");
+    BASELIB::Log::info("t ");
     ip_solution.transposeInPlace();
 
-    UTILSLIB::Log::info("33 ");
+    BASELIB::Log::info("33 ");
     /*
      * The lower right corner is a special case
      */
@@ -901,9 +901,9 @@ void FwdBemModel::fwd_bem_ip_modify_solution(Eigen::MatrixXf& solution, Eigen::M
     /*
      * Final scaling
      */
-    UTILSLIB::Log::info("done.\n\t\tScaling...");
+    BASELIB::Log::info("done.\n\t\tScaling...");
     solution *= ip_mult;
-    UTILSLIB::Log::info("done.");
+    BASELIB::Log::info("done.");
     return;
 }
 
@@ -933,7 +933,7 @@ int FwdBemModel::fwd_bem_check_solids(const Eigen::MatrixXf& angles, int ntri1, 
         * to inner:     sum = 0*pi;
         */
         if (std::fabs(sums[j] - desired) > 1e-4) {
-            UTILSLIB::Log::warning("solid angle matrix: rowsum[{}] = 2PI*{:g}", j + 1, sums[j]);
+            BASELIB::Log::warning("solid angle matrix: rowsum[{}] = 2PI*{:g}", j + 1, sums[j]);
             res = -1;
             break;
         }
@@ -966,7 +966,7 @@ Eigen::MatrixXf FwdBemModel::fwd_bem_solid_angles(const std::vector<MNESurface*>
         for (q = 0, koff = 0; q < static_cast<int>(surfs.size()); q++, koff = koff + ntri2) {
             surf2 = surfs[q];
             ntri2 = surf2->ntri;
-            UTILSLIB::Log::info("\t\t{} ({}) -> {} ({}) ... ", fwd_bem_explain_surface(surf1->id), ntri1, fwd_bem_explain_surface(surf2->id), ntri2);
+            BASELIB::Log::info("\t\t{} ({}) -> {} ({}) ... ", fwd_bem_explain_surface(surf1->id), ntri1, fwd_bem_explain_surface(surf2->id), ntri2);
             for (j = 0; j < ntri1; j++)
                 for (k = 0, tri = surf2->tris.data(); k < ntri2; k++, tri++) {
                     if (p == q && j == k)
@@ -975,7 +975,7 @@ Eigen::MatrixXf FwdBemModel::fwd_bem_solid_angles(const std::vector<MNESurface*>
                         result = MNESurfaceOrVolume::solid_angle(surf1->tris[j].cent, *tri);
                     solids(j + joff, k + koff) = result;
                 }
-            UTILSLIB::Log::info("[done]");
+            BASELIB::Log::info("[done]");
             if (p == q)
                 desired = 1;
             else if (p < q)
@@ -1010,8 +1010,8 @@ int FwdBemModel::fwd_bem_constant_collocation_solution()
     for (auto& s : surfs)
         rawSurfs.push_back(s.get());
 
-    UTILSLIB::Log::info("\nComputing the constant collocation solution...");
-    UTILSLIB::Log::info("\tSolid angles...");
+    BASELIB::Log::info("\nComputing the constant collocation solution...");
+    BASELIB::Log::info("\tSolid angles...");
     solids = fwd_bem_solid_angles(rawSurfs);
     if (solids.size() == 0) {
         fwd_bem_free_solution();
@@ -1021,7 +1021,7 @@ int FwdBemModel::fwd_bem_constant_collocation_solution()
     for (k = 0, nsol = 0; k < nsurf; k++)
         nsol += surfs[k]->ntri;
 
-    UTILSLIB::Log::info("\tInverting the coefficient matrix...");
+    BASELIB::Log::info("\tInverting the coefficient matrix...");
     solution = fwd_bem_multi_solution(solids, &gamma, nsurf, ntri);
     if (solution.size() == 0) {
         fwd_bem_free_solution();
@@ -1034,9 +1034,9 @@ int FwdBemModel::fwd_bem_constant_collocation_solution()
         (ip_mult = sigma[nsurf - 2] / sigma[nsurf - 1]) <= ip_approach_limit) {
         Eigen::MatrixXf ip_solution;
 
-        UTILSLIB::Log::info("IP approach required...");
+        BASELIB::Log::info("IP approach required...");
 
-        UTILSLIB::Log::info("\tSolid angles (homog)...");
+        BASELIB::Log::info("\tSolid angles (homog)...");
         std::vector<MNESurface*> last_surfs = {surfs.back().get()};
         solids = fwd_bem_solid_angles(last_surfs);
         if (solids.size() == 0) {
@@ -1044,18 +1044,18 @@ int FwdBemModel::fwd_bem_constant_collocation_solution()
             return FAIL;
         }
 
-        UTILSLIB::Log::info("\tInverting the coefficient matrix (homog)...");
+        BASELIB::Log::info("\tInverting the coefficient matrix (homog)...");
         ip_solution = fwd_bem_homog_solution(solids, surfs[nsurf - 1]->ntri);
         if (ip_solution.size() == 0) {
             fwd_bem_free_solution();
             return FAIL;
         }
 
-        UTILSLIB::Log::info("\tModify the original solution to incorporate IP approach...");
+        BASELIB::Log::info("\tModify the original solution to incorporate IP approach...");
         fwd_bem_ip_modify_solution(solution, ip_solution, ip_mult, nsurf, this->ntri);
     }
     bem_method = FWD_BEM_CONSTANT_COLL;
-    UTILSLIB::Log::info("Solution ready.");
+    BASELIB::Log::info("Solution ready.");
 
     return OK;
 }
@@ -1076,7 +1076,7 @@ int FwdBemModel::fwd_bem_compute_solution(int bemMethod)
         return fwd_bem_constant_collocation_solution();
 
     fwd_bem_free_solution();
-    UTILSLIB::Log::warning("Unknown BEM method: {}", bemMethod);
+    BASELIB::Log::warning("Unknown BEM method: {}", bemMethod);
     return FAIL;
 }
 
@@ -1093,13 +1093,13 @@ int FwdBemModel::fwd_bem_load_recompute_solution(const std::filesystem::path& na
         fwd_bem_free_solution();
         solres = fwd_bem_load_solution(name, bemMethod);
         if (solres == LOADED) {
-            UTILSLIB::Log::info("\nLoaded {} BEM solution from {}", fwd_bem_explain_method(this->bem_method), UTILSLIB::utf8FromPath(name));
+            BASELIB::Log::info("\nLoaded {} BEM solution from {}", fwd_bem_explain_method(this->bem_method), BASELIB::utf8FromPath(name));
             return OK;
         } else if (solres == FAIL)
             return FAIL;
 #ifdef DEBUG
         else
-            UTILSLIB::Log::warning("Desired BEM  solution not available in {} ({})", name, err_get_error());
+            BASELIB::Log::warning("Desired BEM  solution not available in {} ({})", name, err_get_error());
 #endif
     }
     if (bemMethod == FWD_BEM_UNKNOWN)
@@ -1112,11 +1112,11 @@ int FwdBemModel::fwd_bem_load_recompute_solution(const std::filesystem::path& na
 int FwdBemModel::fwd_bem_save_model(const std::filesystem::path& name) const
 {
     if (nsurf == 0) {
-        UTILSLIB::Log::warning("[FwdBemModel::fwd_bem_save_model] No model to save");
+        BASELIB::Log::warning("[FwdBemModel::fwd_bem_save_model] No model to save");
         return FAIL;
     }
     if (solution.size() > 0 && bem_method != FWD_BEM_CONSTANT_COLL && bem_method != FWD_BEM_LINEAR_COLL) {
-        UTILSLIB::Log::warning("[FwdBemModel::fwd_bem_save_model] Unknown BEM method : {}", bem_method);
+        BASELIB::Log::warning("[FwdBemModel::fwd_bem_save_model] Unknown BEM method : {}", bem_method);
         return FAIL;
     }
     QFile file(name);
@@ -1187,7 +1187,7 @@ int FwdBemModel::fwd_bem_specify_els(FwdCoilSet* els)
     FwdBemSolution* sol = nullptr;
 
     if (solution.size() == 0) {
-        UTILSLIB::Log::warning("Solution not computed in fwd_bem_specify_els");
+        BASELIB::Log::warning("Solution not computed in fwd_bem_specify_els");
         return FAIL;
     }
     if (!els || els->ncoil() == 0)
@@ -1219,7 +1219,7 @@ int FwdBemModel::fwd_bem_specify_els(FwdCoilSet* els)
                 FiffCoordTrans::apply_trans(r, head_mri_t, FIFFV_MOVE);
             best = scalp->project_to_surface(nullptr, Eigen::Map<const Eigen::Vector3f>(r), dist);
             if (best < 0) {
-                UTILSLIB::Log::warning("One of the electrodes could not be projected onto the scalp surface. How come?");
+                BASELIB::Log::warning("One of the electrodes could not be projected onto the scalp surface. How come?");
                 els->user_data.reset();
                 return FAIL;
             }
@@ -1244,7 +1244,7 @@ int FwdBemModel::fwd_bem_specify_els(FwdCoilSet* els)
                         sol->solution(k, q) += w[v] * solution(tri->vert[v], q);
                 }
             } else {
-                UTILSLIB::Log::warning("Unknown BEM approximation method : {}", bem_method);
+                BASELIB::Log::warning("Unknown BEM approximation method : {}", bem_method);
                 els->user_data.reset();
                 return FAIL;
             }
@@ -1452,15 +1452,15 @@ int FwdBemModel::fwd_bem_pot_els(const Eigen::Vector3f& rd, const Eigen::Vector3
     FwdBemSolution* sol = els.user_data.get();
 
     if (!m) {
-        UTILSLIB::Log::warning("No BEM model specified to fwd_bem_pot_els");
+        BASELIB::Log::warning("No BEM model specified to fwd_bem_pot_els");
         return FAIL;
     }
     if (m->solution.size() == 0) {
-        UTILSLIB::Log::warning("No solution available for fwd_bem_pot_els");
+        BASELIB::Log::warning("No solution available for fwd_bem_pot_els");
         return FAIL;
     }
     if (!sol || sol->ncoil != els.ncoil()) {
-        UTILSLIB::Log::warning("No appropriate electrode-specific data available in fwd_bem_pot_coils");
+        BASELIB::Log::warning("No appropriate electrode-specific data available in fwd_bem_pot_coils");
         return FAIL;
     }
     if (m->bem_method == FWD_BEM_CONSTANT_COLL) {
@@ -1468,7 +1468,7 @@ int FwdBemModel::fwd_bem_pot_els(const Eigen::Vector3f& rd, const Eigen::Vector3
     } else if (m->bem_method == FWD_BEM_LINEAR_COLL) {
         m->fwd_bem_lin_pot_calc(rd, Q, &els, false, pot);
     } else {
-        UTILSLIB::Log::warning("Unknown BEM method : {}", m->bem_method);
+        BASELIB::Log::warning("Unknown BEM method : {}", m->bem_method);
         return FAIL;
     }
     return OK;
@@ -1485,15 +1485,15 @@ int FwdBemModel::fwd_bem_pot_grad_els(const Eigen::Vector3f& rd, const Eigen::Ve
     FwdBemSolution* sol = els.user_data.get();
 
     if (!m) {
-        UTILSLIB::Log::critical("No BEM model specified to fwd_bem_pot_els");
+        BASELIB::Log::critical("No BEM model specified to fwd_bem_pot_els");
         return FAIL;
     }
     if (m->solution.size() == 0) {
-        UTILSLIB::Log::critical("No solution available for fwd_bem_pot_els");
+        BASELIB::Log::critical("No solution available for fwd_bem_pot_els");
         return FAIL;
     }
     if (!sol || sol->ncoil != els.ncoil()) {
-        UTILSLIB::Log::critical("No appropriate electrode-specific data available in fwd_bem_pot_coils");
+        BASELIB::Log::critical("No appropriate electrode-specific data available in fwd_bem_pot_coils");
         return FAIL;
     }
     if (m->bem_method == FWD_BEM_CONSTANT_COLL) {
@@ -1503,7 +1503,7 @@ int FwdBemModel::fwd_bem_pot_grad_els(const Eigen::Vector3f& rd, const Eigen::Ve
         m->fwd_bem_lin_pot_calc(rd, Q, &els, false, pot);
         m->fwd_bem_lin_pot_grad_calc(rd, Q, &els, false, xgrad, ygrad, zgrad);
     } else {
-        UTILSLIB::Log::critical("Unknown BEM method : {}", m->bem_method);
+        BASELIB::Log::critical("Unknown BEM method : {}", m->bem_method);
         return FAIL;
     }
     return OK;
@@ -1705,17 +1705,17 @@ Eigen::MatrixXf FwdBemModel::fwd_bem_field_coeff(FwdCoilSet* coils) /* Gradiomet
     double mult;
 
     if (solution.size() == 0) {
-        UTILSLIB::Log::warning("Solution matrix missing in fwd_bem_field_coeff");
+        BASELIB::Log::warning("Solution matrix missing in fwd_bem_field_coeff");
         return Eigen::MatrixXf();
     }
     if (bem_method != FWD_BEM_CONSTANT_COLL) {
-        UTILSLIB::Log::warning("BEM method should be constant collocation for fwd_bem_field_coeff");
+        BASELIB::Log::warning("BEM method should be constant collocation for fwd_bem_field_coeff");
         return Eigen::MatrixXf();
     }
     if (coils->coord_frame != FIFFV_COORD_MRI) {
         if (coils->coord_frame == FIFFV_COORD_HEAD) {
             if (head_mri_t.empty()) {
-                UTILSLIB::Log::warning("head -> mri coordinate transform missing in fwd_bem_field_coeff");
+                BASELIB::Log::warning("head -> mri coordinate transform missing in fwd_bem_field_coeff");
                 return Eigen::MatrixXf();
             } else {
                 /*
@@ -1726,7 +1726,7 @@ Eigen::MatrixXf FwdBemModel::fwd_bem_field_coeff(FwdCoilSet* coils) /* Gradiomet
                 coils = tcoils.get();
             }
         } else {
-            UTILSLIB::Log::warning("Incompatible coil coordinate frame {} for fwd_bem_field_coeff", coils->coord_frame);
+            BASELIB::Log::warning("Incompatible coil coordinate frame {} for fwd_bem_field_coeff", coils->coord_frame);
             return Eigen::MatrixXf();
         }
     }
@@ -1886,17 +1886,17 @@ Eigen::MatrixXf FwdBemModel::fwd_bem_lin_field_coeff(FwdCoilSet* coils, int meth
     linFieldIntFunc func;
 
     if (solution.size() == 0) {
-        UTILSLIB::Log::warning("Solution matrix missing in fwd_bem_lin_field_coeff");
+        BASELIB::Log::warning("Solution matrix missing in fwd_bem_lin_field_coeff");
         return Eigen::MatrixXf();
     }
     if (bem_method != FWD_BEM_LINEAR_COLL) {
-        UTILSLIB::Log::warning("BEM method should be linear collocation for fwd_bem_lin_field_coeff");
+        BASELIB::Log::warning("BEM method should be linear collocation for fwd_bem_lin_field_coeff");
         return Eigen::MatrixXf();
     }
     if (coils->coord_frame != FIFFV_COORD_MRI) {
         if (coils->coord_frame == FIFFV_COORD_HEAD) {
             if (head_mri_t.empty()) {
-                UTILSLIB::Log::warning("head -> mri coordinate transform missing in fwd_bem_lin_field_coeff");
+                BASELIB::Log::warning("head -> mri coordinate transform missing in fwd_bem_lin_field_coeff");
                 return Eigen::MatrixXf();
             } else {
                 /*
@@ -1907,7 +1907,7 @@ Eigen::MatrixXf FwdBemModel::fwd_bem_lin_field_coeff(FwdCoilSet* coils, int meth
                 coils = tcoils.get();
             }
         } else {
-            UTILSLIB::Log::warning("Incompatible coil coordinate frame {} for fwd_bem_field_coeff", coils->coord_frame);
+            BASELIB::Log::warning("Incompatible coil coordinate frame {} for fwd_bem_field_coeff", coils->coord_frame);
             return Eigen::MatrixXf();
         }
     }
@@ -1966,7 +1966,7 @@ int FwdBemModel::fwd_bem_specify_coils(FwdCoilSet* coils)
     FwdBemSolution* csol = nullptr;
 
     if (solution.size() == 0) {
-        UTILSLIB::Log::warning("Solution not computed in fwd_bem_specify_coils");
+        BASELIB::Log::warning("Solution not computed in fwd_bem_specify_coils");
         return FAIL;
     }
     if (coils)
@@ -1978,7 +1978,7 @@ int FwdBemModel::fwd_bem_specify_coils(FwdCoilSet* coils)
     else if (bem_method == FWD_BEM_LINEAR_COLL)
         sol = fwd_bem_lin_field_coeff(coils, FWD_BEM_LIN_FIELD_SIMPLE);
     else {
-        UTILSLIB::Log::warning("Unknown BEM method in fwd_bem_specify_coils : {}", bem_method);
+        BASELIB::Log::warning("Unknown BEM method in fwd_bem_specify_coils : {}", bem_method);
         return FAIL;
     }
     if (sol.size() == 0)
@@ -2304,11 +2304,11 @@ int FwdBemModel::fwd_bem_field(const Eigen::Vector3f& rd, const Eigen::Vector3f&
     FwdBemSolution* sol = coils.user_data.get();
 
     if (!m) {
-        UTILSLIB::Log::warning("No BEM model specified to fwd_bem_field");
+        BASELIB::Log::warning("No BEM model specified to fwd_bem_field");
         return FAIL;
     }
     if (!sol || sol->solution.size() == 0 || sol->ncoil != coils.ncoil()) {
-        UTILSLIB::Log::warning("No appropriate coil-specific data available in fwd_bem_field");
+        BASELIB::Log::warning("No appropriate coil-specific data available in fwd_bem_field");
         return FAIL;
     }
     if (m->bem_method == FWD_BEM_CONSTANT_COLL) {
@@ -2316,7 +2316,7 @@ int FwdBemModel::fwd_bem_field(const Eigen::Vector3f& rd, const Eigen::Vector3f&
     } else if (m->bem_method == FWD_BEM_LINEAR_COLL) {
         m->fwd_bem_lin_field_calc(rd, Q, coils, B);
     } else {
-        UTILSLIB::Log::warning("Unknown BEM method : {}", m->bem_method);
+        BASELIB::Log::warning("Unknown BEM method : {}", m->bem_method);
         return FAIL;
     }
     return OK;
@@ -2337,12 +2337,12 @@ int FwdBemModel::fwd_bem_field_grad(const Eigen::Vector3f& rd,
     FwdBemSolution* sol = coils.user_data.get();
 
     if (!m) {
-        UTILSLIB::Log::critical("No BEM model specified to fwd_bem_field");
+        BASELIB::Log::critical("No BEM model specified to fwd_bem_field");
         return FAIL;
     }
 
     if (!sol || sol->solution.size() == 0 || sol->ncoil != coils.ncoil()) {
-        UTILSLIB::Log::critical("No appropriate coil-specific data available in fwd_bem_field");
+        BASELIB::Log::critical("No appropriate coil-specific data available in fwd_bem_field");
         return FAIL;
     }
 
@@ -2355,7 +2355,7 @@ int FwdBemModel::fwd_bem_field_grad(const Eigen::Vector3f& rd,
 
         m->fwd_bem_lin_field_grad_calc(rd, Q, coils, xgrad, ygrad, zgrad);
     } else {
-        UTILSLIB::Log::critical("Unknown BEM method : {}", m->bem_method);
+        BASELIB::Log::critical("Unknown BEM method : {}", m->bem_method);
         return FAIL;
     }
 
@@ -2606,7 +2606,7 @@ int FwdBemModel::compute_forward_meg(std::vector<std::unique_ptr<MNESourceSpace>
         vec_field = FwdCompData::fwd_comp_field_vec;
     } else {
 #ifdef TEST
-        UTILSLIB::Log::info("Using differences.");
+        BASELIB::Log::info("Using differences.");
         comp = FwdCompData::fwd_make_comp_data(comp_data,
                                                coils, comp_coils,
                                                FwdBemModel::fwd_bem_field,
@@ -2627,16 +2627,16 @@ int FwdBemModel::compute_forward_meg(std::vector<std::unique_ptr<MNESourceSpace>
         /*
         * Field computation matrices...
         */
-        UTILSLIB::Log::info("Composing the field computation matrix...");
+        BASELIB::Log::info("Composing the field computation matrix...");
         if (fwd_bem_specify_coils(coils) == FAIL)
             return cleanup_fail();
-        UTILSLIB::Log::info("[done]");
+        BASELIB::Log::info("[done]");
 
         if (comp->set && comp->set->current) { /* Test just to specify confusing output */
-            UTILSLIB::Log::info("Composing the field computation matrix (compensation coils)...");
+            BASELIB::Log::info("Composing the field computation matrix (compensation coils)...");
             if (fwd_bem_specify_coils(comp->comp_coils.get()) == FAIL)
                 return cleanup_fail();
-            UTILSLIB::Log::info("[done]");
+            BASELIB::Log::info("[done]");
         }
         vec_field = nullptr;
     }
@@ -2692,7 +2692,7 @@ int FwdBemModel::compute_forward_meg(std::vector<std::unique_ptr<MNESourceSpace>
                 off = fixed_ori ? off + spaces[k]->nuse : off + 3 * spaces[k]->nuse;
                 args.push_back(std::move(t_arg));
             }
-            UTILSLIB::Log::info("{} processors. I will use one thread for each of the {} source spaces.", nproc, nspace);
+            BASELIB::Log::info("{} processors. I will use one thread for each of the {} source spaces.", nproc, nspace);
         } else {
             for (k = 0, off = 0, q = 0; k < nspace; k++) {
                 for (p = 0; p < 3; p++, q++) {
@@ -2704,9 +2704,9 @@ int FwdBemModel::compute_forward_meg(std::vector<std::unique_ptr<MNESourceSpace>
                 }
                 off = fixed_ori ? off + spaces[k]->nuse : off + 3 * spaces[k]->nuse;
             }
-            UTILSLIB::Log::info("{} processors. I will use {} threads : {} source spaces x 3 source components.", nproc, nthread, nspace);
+            BASELIB::Log::info("{} processors. I will use {} threads : {} source spaces x 3 source components.", nproc, nthread, nspace);
         }
-        UTILSLIB::Log::info("Computing MEG at {} source locations ({} orientations)...", nsource, fixed_ori ? "fixed" : "free");
+        BASELIB::Log::info("Computing MEG at {} source locations ({} orientations)...", nsource, fixed_ori ? "fixed" : "free");
         /*
         * Ready to start the threads & Wait for them to complete
         */
@@ -2724,7 +2724,7 @@ int FwdBemModel::compute_forward_meg(std::vector<std::unique_ptr<MNESourceSpace>
         if (stat != OK)
             return cleanup_fail();
     } else {
-        UTILSLIB::Log::info("Computing MEG at {} source locations ({} orientations, no threads)...", nsource, fixed_ori ? "fixed" : "free");
+        BASELIB::Log::info("Computing MEG at {} source locations ({} orientations, no threads)...", nsource, fixed_ori ? "fixed" : "free");
         for (k = 0, off = 0; k < nspace; k++) {
             one_arg->s = spaces[k].get();
             one_arg->off = off;
@@ -2734,7 +2734,7 @@ int FwdBemModel::compute_forward_meg(std::vector<std::unique_ptr<MNESourceSpace>
             off = fixed_ori ? off + one_arg->s->nuse : off + 3 * one_arg->s->nuse;
         }
     }
-    UTILSLIB::Log::info("done.");
+    BASELIB::Log::info("done.");
     {
         StringList orig_names;
         for (k = 0; k < nmeg; k++)
@@ -2808,16 +2808,16 @@ int FwdBemModel::compute_forward_eeg(std::vector<std::unique_ptr<MNESourceSpace>
 
     if (sphere) {
         if (!eeg_model) {
-            UTILSLIB::Log::critical("EEG sphere model not defined.");
+            BASELIB::Log::critical("EEG sphere model not defined.");
             return FAIL;
         }
         if (eeg_model->nfit == 0) {
-            UTILSLIB::Log::info("Using the standard series expansion for a multilayer sphere model for EEG");
+            BASELIB::Log::info("Using the standard series expansion for a multilayer sphere model for EEG");
             pot = FwdEegSphereModel::fwd_eeg_multi_spherepot_coil1;
             vec_pot = nullptr;
             pot_grad = nullptr;
         } else {
-            UTILSLIB::Log::info("Using the equivalent source approach in the homogeneous sphere for EEG");
+            BASELIB::Log::info("Using the equivalent source approach in the homogeneous sphere for EEG");
             pot = FwdEegSphereModel::fwd_eeg_spherepot_coil;
             vec_pot = FwdEegSphereModel::fwd_eeg_spherepot_coil_vec;
             pot_grad = FwdEegSphereModel::fwd_eeg_spherepot_grad_coil;
@@ -2830,7 +2830,7 @@ int FwdBemModel::compute_forward_eeg(std::vector<std::unique_ptr<MNESourceSpace>
         pot = fwd_bem_pot_els;
         vec_pot = nullptr;
 #ifdef TEST
-        UTILSLIB::Log::info("Using differences.");
+        BASELIB::Log::info("Using differences.");
         pot_grad = my_bem_pot_grad;
 #else
         pot_grad = fwd_bem_pot_grad_els;
@@ -2845,7 +2845,7 @@ int FwdBemModel::compute_forward_eeg(std::vector<std::unique_ptr<MNESourceSpace>
     }
     if (bDoGrad) {
         if (!pot_grad) {
-            UTILSLIB::Log::critical("EEG gradient calculation function not available");
+            BASELIB::Log::critical("EEG gradient calculation function not available");
             return FAIL;
         }
         int ncols = fixed_ori ? 3 * nsource : 3 * 3 * nsource;
@@ -2884,7 +2884,7 @@ int FwdBemModel::compute_forward_eeg(std::vector<std::unique_ptr<MNESourceSpace>
                 off = fixed_ori ? off + spaces[k]->nuse : off + 3 * spaces[k]->nuse;
                 args.push_back(std::move(t_arg));
             }
-            UTILSLIB::Log::info("{} processors. I will use one thread for each of the {} source spaces.", nproc, nspace);
+            BASELIB::Log::info("{} processors. I will use one thread for each of the {} source spaces.", nproc, nspace);
         } else {
             for (k = 0, off = 0, q = 0; k < nspace; k++) {
                 for (p = 0; p < 3; p++, q++) {
@@ -2896,9 +2896,9 @@ int FwdBemModel::compute_forward_eeg(std::vector<std::unique_ptr<MNESourceSpace>
                 }
                 off = fixed_ori ? off + spaces[k]->nuse : off + 3 * spaces[k]->nuse;
             }
-            UTILSLIB::Log::info("{} processors. I will use {} threads : {} source spaces x 3 source components.", nproc, nthread, nspace);
+            BASELIB::Log::info("{} processors. I will use {} threads : {} source spaces x 3 source components.", nproc, nthread, nspace);
         }
-        UTILSLIB::Log::info("Computing EEG at {} source locations ({} orientations)...", nsource, fixed_ori ? "fixed" : "free");
+        BASELIB::Log::info("Computing EEG at {} source locations ({} orientations)...", nsource, fixed_ori ? "fixed" : "free");
         /*
         * Ready to start the threads & Wait for them to complete
         */
@@ -2916,7 +2916,7 @@ int FwdBemModel::compute_forward_eeg(std::vector<std::unique_ptr<MNESourceSpace>
         if (stat != OK)
             return FAIL;
     } else {
-        UTILSLIB::Log::info("Computing EEG at {} source locations ({} orientations, no threads)...", nsource, fixed_ori ? "fixed" : "free");
+        BASELIB::Log::info("Computing EEG at {} source locations ({} orientations, no threads)...", nsource, fixed_ori ? "fixed" : "free");
         for (k = 0, off = 0; k < nspace; k++) {
             one_arg->s = spaces[k].get();
             one_arg->off = off;
@@ -2926,7 +2926,7 @@ int FwdBemModel::compute_forward_eeg(std::vector<std::unique_ptr<MNESourceSpace>
             off = fixed_ori ? off + one_arg->s->nuse : off + 3 * one_arg->s->nuse;
         }
     }
-    UTILSLIB::Log::info("done.");
+    BASELIB::Log::info("done.");
     {
         StringList orig_names;
         for (k = 0; k < neeg; k++)

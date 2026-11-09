@@ -21,7 +21,7 @@
 
 #include "mne_named_matrix.h"
 #include <memory>
-#include <utils/logger/log.h>
+#include <base/log.h>
 #include <fiff/fiff_constants.h>
 #include <fiff/fiff_stream.h>
 #include <fiff/fiff_tag.h>
@@ -95,11 +95,11 @@ std::unique_ptr<MNENamedMatrix> MNENamedMatrix::pick(const StringList& pickrowli
      * Validate: picking by name requires names in the original matrix.
      */
     if (!pickrowlist.empty() && this->rowlist.empty()) {
-        UTILSLIB::Log::critical("MNENamedMatrix::pick - Cannot pick rows: no row names in original matrix.");
+        BASELIB::Log::critical("MNENamedMatrix::pick - Cannot pick rows: no row names in original matrix.");
         return nullptr;
     }
     if (!pickcollist.empty() && this->collist.empty()) {
-        UTILSLIB::Log::critical("MNENamedMatrix::pick - Cannot pick columns: no column names in original matrix.");
+        BASELIB::Log::critical("MNENamedMatrix::pick - Cannot pick columns: no column names in original matrix.");
         return nullptr;
     }
 
@@ -128,7 +128,7 @@ std::unique_ptr<MNENamedMatrix> MNENamedMatrix::pick(const StringList& pickrowli
                 }
             }
             if (pick_row[j] == -1) {
-                UTILSLIB::Log::critical("MNENamedMatrix::pick - Row '{}' not found in original matrix.", name);
+                BASELIB::Log::critical("MNENamedMatrix::pick - Row '{}' not found in original matrix.", name);
                 return nullptr;
             }
         }
@@ -156,7 +156,7 @@ std::unique_ptr<MNENamedMatrix> MNENamedMatrix::pick(const StringList& pickrowli
                 }
             }
             if (pick_col[j] == -1) {
-                UTILSLIB::Log::critical("MNENamedMatrix::pick - Column '{}' not found in original matrix.", name);
+                BASELIB::Log::critical("MNENamedMatrix::pick - Column '{}' not found in original matrix.", name);
                 return nullptr;
             }
         }
@@ -208,7 +208,7 @@ std::unique_ptr<MNENamedMatrix> MNENamedMatrix::read(FiffStream& stream,
 
         t_pTag->getMatrixDimensions(ndim, dims);
         if (ndim != 2) {
-            UTILSLIB::Log::critical("MNENamedMatrix::read - Only two-dimensional matrices are supported.");
+            BASELIB::Log::critical("MNENamedMatrix::read - Only two-dimensional matrices are supported.");
             return nullptr;
         }
 
@@ -220,7 +220,7 @@ std::unique_ptr<MNENamedMatrix> MNENamedMatrix::read(FiffStream& stream,
                 if (t_pTag = tmp_node->children[k]->find_tag(stream, kind); t_pTag) {
                     t_pTag->getMatrixDimensions(ndim, dims);
                     if (ndim != 2) {
-                        UTILSLIB::Log::critical("MNENamedMatrix::read - Only two-dimensional matrices are supported.");
+                        BASELIB::Log::critical("MNENamedMatrix::read - Only two-dimensional matrices are supported.");
                         return nullptr;
                     }
 
@@ -244,7 +244,7 @@ std::unique_ptr<MNENamedMatrix> MNENamedMatrix::read(FiffStream& stream,
     } else {
         nrow = *t_pTag->toInt();
         if (nrow != data.rows()) {
-            UTILSLIB::Log::critical("MNENamedMatrix::read - FIFF_MNE_NROW tag ({}) conflicts with matrix data ({}).", nrow, data.rows());
+            BASELIB::Log::critical("MNENamedMatrix::read - FIFF_MNE_NROW tag ({}) conflicts with matrix data ({}).", nrow, data.rows());
             return nullptr;
         }
     }
@@ -254,7 +254,7 @@ std::unique_ptr<MNENamedMatrix> MNENamedMatrix::read(FiffStream& stream,
     } else {
         ncol = *t_pTag->toInt();
         if (ncol != data.cols()) {
-            UTILSLIB::Log::critical("MNENamedMatrix::read - FIFF_MNE_NCOL tag ({}) conflicts with matrix data ({}).", ncol, data.cols());
+            BASELIB::Log::critical("MNENamedMatrix::read - FIFF_MNE_NCOL tag ({}) conflicts with matrix data ({}).", ncol, data.cols());
             return nullptr;
         }
     }
@@ -266,7 +266,7 @@ std::unique_ptr<MNENamedMatrix> MNENamedMatrix::read(FiffStream& stream,
         const std::string s = t_pTag->toString();
         rownames = FiffStream::split_name_list(s);
         if (static_cast<int>(rownames.size()) != nrow) {
-            UTILSLIB::Log::critical("MNENamedMatrix::read - Row name count ({}) does not match nrow ({}).", rownames.size(), nrow);
+            BASELIB::Log::critical("MNENamedMatrix::read - Row name count ({}) does not match nrow ({}).", rownames.size(), nrow);
             return nullptr;
         }
     }
@@ -275,7 +275,7 @@ std::unique_ptr<MNENamedMatrix> MNENamedMatrix::read(FiffStream& stream,
         const std::string s = t_pTag->toString();
         colnames = FiffStream::split_name_list(s);
         if (static_cast<int>(colnames.size()) != ncol) {
-            UTILSLIB::Log::critical("MNENamedMatrix::read - Column name count ({}) does not match ncol ({}).", colnames.size(), ncol);
+            BASELIB::Log::critical("MNENamedMatrix::read - Column name count ({}) does not match ncol ({}).", colnames.size(), ncol);
             return nullptr;
         }
     }

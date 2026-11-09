@@ -15,7 +15,7 @@
  * @c __DATE__ / @c __TIME__ macros and the @c MNE_GIT_HASH_*
  * defines (injected by CMake at configure time) are evaluated
  * in the translation unit that invokes them. The values are
- * picked up by @c utils_global.cpp exactly once so every
+ * picked up by each library's *_global.cpp exactly once so every
  * mne-cpp binary reports a single, stable build identifier in
  * its About dialog, CLI @c --version banner, and crash logs.
  *
@@ -24,8 +24,8 @@
  * sentinel string instead of failing the build.
  */
 
-#ifndef BUILD_INFO_LIB
-#define BUILD_INFO_LIB
+#ifndef BASE_BUILDINFO_H
+#define BASE_BUILDINFO_H
 
 //=============================================================================================================
 // INCLUDES
@@ -33,7 +33,7 @@
 
 #include <cstring>
 
-namespace UTILSLIB
+namespace BASELIB
 {
 
 //=============================================================================================================

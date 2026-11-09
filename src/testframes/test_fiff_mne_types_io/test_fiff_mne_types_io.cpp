@@ -16,7 +16,7 @@
 // INCLUDES
 //=============================================================================================================
 
-#include <utils/logger/log.h>
+#include <base/log.h>
 
 #include <fiff/fiff.h>
 #include "fiff_types_ref.h"
@@ -73,7 +73,7 @@ TestFiffMneTypesIO::TestFiffMneTypesIO()
 
 void TestFiffMneTypesIO::initTestCase()
 {
-    UTILSLIB::Log::install_qt_message_handler();
+    BASELIB::Log::install_qt_message_handler();
     qDebug() << "Epsilon" << dEpsilon;
     qDebug() << "Raw File Name" << sRawName;
     qDebug() << "Evoked File Name" << sEvokedName;

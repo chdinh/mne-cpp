@@ -36,7 +36,7 @@
 #include <fwd/compute_fwd/compute_fwd_settings.h>
 #include <fiff/fiff_raw_data.h>
 #include <fiff/fiff_coord_trans.h>
-#include <utils/string_utils.h>
+#include <base/string_utils.h>
 #include <mne/mne_forward_solution.h>
 #include <fs/fs_label.h>
 

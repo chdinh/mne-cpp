@@ -31,10 +31,10 @@
 #include <fiff/fiff_constants.h>
 #include <fiff/fiff_file.h>
 
-#include <utils/byte_stream.h>
-#include <utils/string_utils.h>
+#include <base/byte_stream.h>
+#include <base/string_utils.h>
 
-#include <utils/logger/log.h>
+#include <base/log.h>
 
 //=============================================================================================================
 // STL INCLUDES
@@ -84,14 +84,14 @@ bool MriCorIO::read(const std::string& dir,
         char name[16];
         std::snprintf(name, sizeof(name), "/COR-%03d", k + 1);
         const std::string fileName = dir + name;
-        const auto data = UTILSLIB::read_file_bytes(UTILSLIB::pathFromUtf8(fileName));
+        const auto data = BASELIB::read_file_bytes(BASELIB::pathFromUtf8(fileName));
         if (!data) {
-            UTILSLIB::Log::critical("MriCorIO::read - Could not open COR file {}", fileName);
+            BASELIB::Log::critical("MriCorIO::read - Could not open COR file {}", fileName);
             return false;
         }
 
         if (data->size() < nPixels) {
-            UTILSLIB::Log::critical("MriCorIO::read - COR file {} is too small: {} bytes (expected {})", fileName, data->size(), nPixels);
+            BASELIB::Log::critical("MriCorIO::read - COR file {} is too small: {} bytes (expected {})", fileName, data->size(), nPixels);
             return false;
         }
 
@@ -124,7 +124,7 @@ bool MriCorIO::read(const std::string& dir,
     }
 
     if (verbose) {
-        UTILSLIB::Log::info("Read {} COR slices from {}", COR_NSLICE, dir);
+        BASELIB::Log::info("Read {} COR slices from {}", COR_NSLICE, dir);
     }
 
     return true;

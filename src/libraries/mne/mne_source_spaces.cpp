@@ -22,20 +22,21 @@
 
 #include "mne_source_spaces.h"
 #include <memory>
-#include <utils/logger/log.h>
+#include <base/log.h>
 
 #include <vector>
 #include "mne_nearest.h"
 
 #include <math/linalg.h>
 #include <fs/fs_label.h>
-#include <utils/string_utils.h>
+#include <base/string_utils.h>
 
 //=============================================================================================================
 // USED NAMESPACES
 //=============================================================================================================
 
 using namespace UTILSLIB;
+using namespace BASELIB;
 using namespace FSLIB;
 using namespace MNELIB;
 using namespace Eigen;
@@ -48,9 +49,9 @@ using namespace FIFFLIB;
 namespace
 {
 
-using UTILSLIB::ErrorCode;
-using UTILSLIB::Expected;
-using UTILSLIB::fail;
+using BASELIB::ErrorCode;
+using BASELIB::Expected;
+using BASELIB::fail;
 
 Expected<MNEHemisphere> read_source_space(FiffStream& stream, const std::shared_ptr<FiffDirNode>& p_Tree, const std::string& name)
 {

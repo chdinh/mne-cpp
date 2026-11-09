@@ -3,13 +3,13 @@
 //   Christoph Dinh <christoph.dinh@mne-cpp.org>
 
 #include <QtTest/QtTest>
-#include <utils/string_utils.h>
+#include <base/string_utils.h>
 #include <Eigen/Dense>
 
 #include <cstring>
 #include <new>
 
-#include <utils/logger/log.h>
+#include <base/log.h>
 
 #include <fiff/fiff_info_base.h>
 #include <fiff/fiff_info.h>
@@ -24,7 +24,7 @@
 #include <fiff/fiff_dig_point_set.h>
 
 using namespace FIFFLIB;
-using namespace UTILSLIB;
+using namespace BASELIB;
 using namespace Eigen;
 
 class TestFiffInfo : public QObject
@@ -67,7 +67,7 @@ private:
 private slots:
     void initTestCase()
     {
-        UTILSLIB::Log::install_qt_message_handler();
+        BASELIB::Log::install_qt_message_handler();
         QString base = QCoreApplication::applicationDirPath() + "/../resources/data/mne-cpp-test-data";
         if (QFile::exists(base + "/MEG/sample/sample_audvis_trunc_raw.fif"))
             m_sDataPath = base;
@@ -164,7 +164,7 @@ private slots:
         FiffInfoBase info = makeSyntheticInfoBase(3);
         StringList types = info.get_channel_types();
         QVERIFY(types.size() > 0);
-        QVERIFY(UTILSLIB::contains(types, "mag"));
+        QVERIFY(BASELIB::contains(types, "mag"));
     }
 
     void infoBase_equality()
@@ -335,7 +335,7 @@ private slots:
 
         StringList chTypes = raw.info.get_channel_types();
         QVERIFY(chTypes.size() > 0);
-        QVERIFY(UTILSLIB::contains(chTypes, "mag") || UTILSLIB::contains(chTypes, "grad") || UTILSLIB::contains(chTypes, "eeg"));
+        QVERIFY(BASELIB::contains(chTypes, "mag") || BASELIB::contains(chTypes, "grad") || BASELIB::contains(chTypes, "eeg"));
     }
 
     //=========================================================================

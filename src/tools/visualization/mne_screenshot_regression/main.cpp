@@ -23,13 +23,12 @@
 #include <fs/fs_annotation.h>
 #include <disp3D/view/brainview.h>
 #include <disp3D/model/braintreemodel.h>
-#include <utils/logger/log.h>
+#include <base/log.h>
 
 #include <cmath>
 
 using namespace FSLIB;
 using namespace DISP3DLIB;
-using namespace UTILSLIB;
 
 //=============================================================================================================
 
@@ -58,7 +57,7 @@ static double imageRmse(const QImage& a, const QImage& b)
 
 int main(int argc, char* argv[])
 {
-    UTILSLIB::Log::install_qt_message_handler();
+    BASELIB::Log::install_qt_message_handler();
     QApplication app(argc, argv);
     app.setApplicationName("mne_screenshot_regression");
 

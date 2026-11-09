@@ -14,7 +14,7 @@
 // INCLUDES
 //=============================================================================================================
 
-#include <utils/logger/log.h>
+#include <base/log.h>
 
 #include <connectivity/network/network.h>
 
@@ -36,7 +36,6 @@
 
 using namespace Eigen;
 using namespace CONNECTIVITYLIB;
-using namespace UTILSLIB;
 
 //=============================================================================================================
 // HELPERS
@@ -148,7 +147,7 @@ TestNetworkVisualization::TestNetworkVisualization()
 
 void TestNetworkVisualization::initTestCase()
 {
-    UTILSLIB::Log::install_qt_message_handler();
+    BASELIB::Log::install_qt_message_handler();
 
     m_fullNet4 = buildTestNetwork(4);
     m_fullNet10 = buildTestNetwork(10);

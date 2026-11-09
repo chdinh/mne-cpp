@@ -85,7 +85,7 @@ EEGoSports::EEGoSports()
 , m_sLPA("2LD")
 , m_sRPA("2RD")
 , m_sNasion("0Z")
-, m_pCircularBuffer(std::make_shared<CircularBuffer_Matrix_double>(10))
+, m_pCircularBuffer(std::make_shared<BASELIB::CircularBuffer<Eigen::MatrixXd>>(10))
 {
 }
 

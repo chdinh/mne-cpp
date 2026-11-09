@@ -20,8 +20,8 @@
 #include <fiff/fiff_dig_point_set.h>
 #include <fiff/fiff_info.h>
 #include <fiff/fiff_stream.h>
-#include <utils/logger/log.h>
-#include <utils/string_utils.h>
+#include <base/log.h>
+#include <base/string_utils.h>
 
 //=============================================================================================================
 // QT INCLUDES
@@ -53,7 +53,6 @@
 //=============================================================================================================
 
 using namespace FIFFLIB;
-using namespace UTILSLIB;
 
 namespace
 {
@@ -156,7 +155,7 @@ bool readDigitizer(const QString& path, FiffDigPointSet& points)
 
 int main(int argc, char* argv[])
 {
-    UTILSLIB::Log::install_qt_message_handler();
+    BASELIB::Log::install_qt_message_handler();
     QCoreApplication app(argc, argv);
     QCoreApplication::setApplicationName("mne_eximia2fiff");
     QCoreApplication::setApplicationVersion(PROGRAM_VERSION);

@@ -15,7 +15,7 @@
 //=============================================================================================================
 
 #include "mne_layout.h"
-#include <utils/logger/log.h>
+#include <base/log.h>
 
 //=============================================================================================================
 // STL INCLUDES
@@ -33,7 +33,7 @@
 //=============================================================================================================
 
 using namespace MNELIB;
-using namespace UTILSLIB;
+using namespace BASELIB;
 
 //=============================================================================================================
 // DEFINE STATIC METHODS
@@ -69,7 +69,7 @@ std::string MNELayoutPort::cleanName(std::string_view name)
 
 bool MNELayoutPort::contains(std::string_view channel) const
 {
-    return UTILSLIB::contains(names, cleanName(channel));
+    return BASELIB::contains(names, cleanName(channel));
 }
 
 //=============================================================================================================

@@ -42,7 +42,7 @@
 #include <mne/mne_msh_display_surface_set.h>
 #include <mne/mne_msh_display_surface.h>
 #include <mne/mne_surface_or_volume.h>
-#include <utils/string_utils.h>
+#include <base/string_utils.h>
 
 #include <memory>
 

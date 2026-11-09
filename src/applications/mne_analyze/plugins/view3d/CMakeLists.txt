@@ -59,6 +59,7 @@ set(MNE_LIBS_REQUIRED
     mne_disp
     mne_disp3D
     mne_utils
+    mne_base
     mne_math
     mne_fiff
     mne_fs

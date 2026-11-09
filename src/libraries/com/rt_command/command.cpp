@@ -24,7 +24,7 @@
 //=============================================================================================================
 
 #include "command.h"
-#include <utils/logger/log.h>
+#include <base/log.h>
 #include "command_manager.h"
 
 //=============================================================================================================
@@ -118,7 +118,7 @@ Command::Command(const QString& p_sCommand, const QString& p_sDescription,
             m_qListParamDescriptions = p_vecParameterDescriptions;
         }
     } else {
-        UTILSLIB::Log::critical("error: description vector hasn't the same size like parameter map.\n");
+        BASELIB::Log::critical("error: description vector hasn't the same size like parameter map.\n");
         return;
     }
 }

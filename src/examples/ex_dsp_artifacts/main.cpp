@@ -21,7 +21,7 @@
 //=============================================================================================================
 
 #include <dsp/annotate_artifact.h>
-#include <utils/string_utils.h>
+#include <base/string_utils.h>
 #include <dsp/artifact_detect.h>
 #include <dsp/bad_channel_detect.h>
 #include <dsp/bad_channels_lof.h>
@@ -58,6 +58,7 @@
 //=============================================================================================================
 
 using namespace UTILSLIB;
+using namespace BASELIB;
 using namespace FIFFLIB;
 using namespace Eigen;
 
@@ -228,7 +229,7 @@ int main(int argc, char* argv[])
     const FiffAnnotations flatSpans = annotateAmplitude(loose, info, kSFreq, amplitude, &flatChannels);
     //! [annotate_amplitude_usage]
     ok &= expect(flatSpans.size() == 1 && flatSpans[0].description == "BAD_flat" && std::abs(flatSpans[0].onset - 1.0) < 1e-12 && flatChannels == StringList{"EEG2"},
-                 std::format("annotateAmplitude: {} flat span(s), bad {}", flatSpans.size(), UTILSLIB::join(flatChannels, ", ")));
+                 std::format("annotateAmplitude: {} flat span(s), bad {}", flatSpans.size(), BASELIB::join(flatChannels, ", ")));
 
     // 4 s of 8 EEG channels at 1 kHz: alpha, a few tones and a 125 Hz EMG burst from 1.5 to 2.5 s
     const double emgSFreq = 1000.0;

@@ -20,7 +20,7 @@
 
 #include <fs/fs_surface.h>
 #include <mne/mne_morph_map.h>
-#include <utils/logger/log.h>
+#include <base/log.h>
 
 //=============================================================================================================
 // QT INCLUDES
@@ -43,7 +43,6 @@
 
 using namespace FSLIB;
 using namespace MNELIB;
-using namespace UTILSLIB;
 
 //=============================================================================================================
 // STATIC DEFINITIONS
@@ -55,7 +54,7 @@ using namespace UTILSLIB;
 
 int main(int argc, char* argv[])
 {
-    UTILSLIB::Log::install_qt_message_handler();
+    BASELIB::Log::install_qt_message_handler();
     QCoreApplication app(argc, argv);
     QCoreApplication::setApplicationName("mne_make_morph_maps");
     QCoreApplication::setApplicationVersion(PROGRAM_VERSION);

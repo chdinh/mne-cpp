@@ -28,9 +28,9 @@
  * @ref FIFFLIB::FiffStream::write_coord_trans "write_coord_trans", ...) emit a fully spec-compliant FIFF file
  * that round-trips through MNE-Python and MNE-C unchanged.
  *
- * All bytes go through a @ref UTILSLIB::ByteStream "byte stream", either one
+ * All bytes go through a @ref BASELIB::ByteStream "byte stream", either one
  * wrapping the given @c QIODevice, which keeps sockets and Qt files working,
- * or one the caller passes in, such as a @ref UTILSLIB::FileByteStream.
+ * or one the caller passes in, such as a @ref BASELIB::FileByteStream.
  */
 
 #ifndef FIFF_STREAM_H
@@ -48,8 +48,8 @@
 #include "fiff_dir_node.h"
 #include "fiff_dir_entry.h"
 
-#include <utils/byte_stream.h>
-#include <utils/error.h>
+#include <base/byte_stream.h>
+#include <base/error.h>
 
 //=============================================================================================================
 // EIGEN INCLUDES
@@ -145,7 +145,7 @@ public:
      * @param[in] bytes  The byte stream, already open; the fiff stream owns it.
      * @param[in] name   Name reported by streamName(), e.g. the file path.
      */
-    explicit FiffStream(std::unique_ptr<UTILSLIB::ByteStream> bytes, std::string name = {});
+    explicit FiffStream(std::unique_ptr<BASELIB::ByteStream> bytes, std::string name = {});
 
     //=========================================================================================================
     /**
@@ -155,7 +155,7 @@ public:
      *
      * @return The open stream, or why the file cannot be opened or is not a FIFF file.
      */
-    [[nodiscard]] static UTILSLIB::Expected<FiffStream> open(const std::filesystem::path& path);
+    [[nodiscard]] static BASELIB::Expected<FiffStream> open(const std::filesystem::path& path);
 
     ~FiffStream();
 
@@ -433,7 +433,7 @@ public:
      *
      * @return The data, all points active, or NotFound if the node holds no digitizer points.
      */
-    [[nodiscard]] UTILSLIB::Expected<FiffDigitizerData> read_digitizer_data(const std::shared_ptr<FiffDirNode>& node);
+    [[nodiscard]] BASELIB::Expected<FiffDigitizerData> read_digitizer_data(const std::shared_ptr<FiffDirNode>& node);
 
     //=========================================================================================================
     /**
@@ -535,7 +535,7 @@ public:
      *
      * @return The byte stream, or nullptr if the device cannot be opened.
      */
-    static std::unique_ptr<UTILSLIB::ByteStream> byteStream(QIODevice& device, QIODevice::OpenMode mode);
+    static std::unique_ptr<BASELIB::ByteStream> byteStream(QIODevice& device, QIODevice::OpenMode mode);
 
     //=========================================================================================================
     /**
@@ -625,7 +625,7 @@ public:
      *
      * @return the started stream, or null if @p bytes is null.
      */
-    static std::unique_ptr<FiffStream> start_writing_raw(std::unique_ptr<UTILSLIB::ByteStream> bytes,
+    static std::unique_ptr<FiffStream> start_writing_raw(std::unique_ptr<BASELIB::ByteStream> bytes,
                                                          const FiffInfo& info,
                                                          Eigen::RowVectorXd& cals,
                                                          Eigen::MatrixXi sel = defaultMatrixXi,
@@ -1009,7 +1009,7 @@ private:
     void skipRaw(fiff_long_t bytes);
 
     // Reads one value in the stream's byte order; a short read yields 0 and marks the stream failed
-    template<UTILSLIB::Swappable T>
+    template<BASELIB::Swappable T>
     void read(T& value)
     {
         if (m_bytes->read(&value, sizeof(T)) != sizeof(T)) {
@@ -1018,21 +1018,21 @@ private:
             return;
         }
         if (m_littleEndian != (std::endian::native == std::endian::little))
-            value = UTILSLIB::byteSwap(value);
+            value = BASELIB::byteSwap(value);
     }
 
-    template<UTILSLIB::Swappable T>
+    template<BASELIB::Swappable T>
     void write(T value)
     {
         if (m_littleEndian != (std::endian::native == std::endian::little))
-            value = UTILSLIB::byteSwap(value);
+            value = BASELIB::byteSwap(value);
         m_bytes->write(&value, sizeof(T));
     }
 
 private:
     std::unique_ptr<QIODevice> m_ownedDevice; /**< Buffer created for the byte-array constructor. */
     QIODevice* m_device = nullptr;            /**< Qt device, or nullptr for a stream on a byte stream. */
-    std::unique_ptr<UTILSLIB::ByteStream> m_bytes;
+    std::unique_ptr<BASELIB::ByteStream> m_bytes;
     std::string m_name; /**< File path of a stream on a byte stream. */
     bool m_littleEndian = false;
     bool m_readFailed = false;

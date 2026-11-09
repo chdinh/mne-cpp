@@ -58,7 +58,7 @@ using namespace Eigen;
 FiffSimulator::FiffSimulator()
 : m_pFiffSimulatorProducer(new FiffSimulatorProducer(this))
 , m_pRtCmdClient(std::make_shared<RtCmdClient>())
-, m_pCircularBuffer(std::make_shared<CircularBuffer_Matrix_float>(40))
+, m_pCircularBuffer(std::make_shared<BASELIB::CircularBuffer<Eigen::MatrixXf>>(40))
 , m_bCmdClientIsConnected(false)
 , m_sFiffSimulatorIP("127.0.0.1")
 , m_sFiffSimulatorClientAlias("mne_scan")

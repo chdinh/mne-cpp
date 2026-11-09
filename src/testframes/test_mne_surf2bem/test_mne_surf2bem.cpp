@@ -23,7 +23,7 @@
 // INCLUDES
 //=============================================================================================================
 
-#include <utils/logger/log.h>
+#include <base/log.h>
 #include <mne/mne_bem.h>
 #include <mne/mne_bem_surface.h>
 
@@ -42,7 +42,6 @@
 // USED NAMESPACES
 //=============================================================================================================
 
-using namespace UTILSLIB;
 using namespace MNELIB;
 
 //=============================================================================================================
@@ -188,7 +187,7 @@ void TestMneSurf2Bem::setupProcess(QProcess& proc)
 
 void TestMneSurf2Bem::initTestCase()
 {
-    UTILSLIB::Log::install_qt_message_handler();
+    BASELIB::Log::install_qt_message_handler();
 
     QVERIFY(m_tempDir.isValid());
 

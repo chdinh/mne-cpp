@@ -22,8 +22,8 @@
 //=============================================================================================================
 
 #include "inv_lcmv.h"
-#include <utils/logger/log.h>
-#include <utils/string_utils.h>
+#include <base/log.h>
+#include <base/string_utils.h>
 #include "inv_beamformer_compute.h"
 
 #include <mne/mne_forward_solution.h>
@@ -48,6 +48,7 @@ using namespace INVLIB;
 using namespace MNELIB;
 using namespace FIFFLIB;
 using namespace UTILSLIB;
+using namespace BASELIB;
 
 //=============================================================================================================
 // DEFINE MEMBER METHODS
@@ -230,7 +231,7 @@ InvSourceEstimate InvLCMV::applyLCMV(const FiffEvoked& evoked, const InvBeamform
         const int nTimes = static_cast<int>(evoked.data.cols());
         data.resize(nFilterCh, nTimes);
         for (int i = 0; i < nFilterCh; ++i) {
-            int idx = UTILSLIB::indexOf(evoked.info.ch_names, filters.chNames[i]);
+            int idx = BASELIB::indexOf(evoked.info.ch_names, filters.chNames[i]);
             if (idx < 0) {
                 Log::warning("InvLCMV::applyLCMV - Channel {} not found in evoked!", filters.chNames[i]);
                 return InvSourceEstimate();

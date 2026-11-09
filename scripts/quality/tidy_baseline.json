@@ -1538,7 +1538,7 @@
     "src/libraries/sts/sts_cov_estimators.cpp": {
       "bugprone-random-generator-seed": 1
     },
-    "src/libraries/utils/generics/circularbuffer.h": {
+    "src/libraries/base/circular_buffer.h": {
       "clang-analyzer-core.uninitialized.Assign": 1
     },
     "src/libraries/utils/logger/mne_logger.cpp": {

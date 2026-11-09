@@ -46,7 +46,6 @@ using namespace COVARIANCEPLUGIN;
 using namespace DISPLIB;
 using namespace SCSHAREDLIB;
 using namespace SCMEASLIB;
-using namespace UTILSLIB;
 using namespace RTPROCESSINGLIB;
 using namespace FIFFLIB;
 using namespace Eigen;
@@ -57,7 +56,7 @@ using namespace Eigen;
 
 Covariance::Covariance()
 : m_iEstimationSamples(2000)
-, m_pCircularBuffer(std::make_shared<CircularBuffer_Matrix_double>(40))
+, m_pCircularBuffer(std::make_shared<BASELIB::CircularBuffer<Eigen::MatrixXd>>(40))
 {
 }
 

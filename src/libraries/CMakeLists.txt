@@ -58,6 +58,7 @@ if(WITH_CODE_COV)
   add_link_options("--coverage")
 endif()
 
+add_subdirectory(base)
 add_subdirectory(math)
 add_subdirectory(utils)
 add_subdirectory(lsl)

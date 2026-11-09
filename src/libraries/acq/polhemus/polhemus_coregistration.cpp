@@ -19,7 +19,7 @@
  */
 
 #include "polhemus_coregistration.h"
-#include <utils/logger/log.h>
+#include <base/log.h>
 
 #include <format>
 #include "acquired_points.h"
@@ -128,13 +128,13 @@ bool PolhemusCoregistration::captureCurrentPenPositionAsFiducial(FiducialId id)
     m_penFid[ident] = m_penPosition;
     m_hasPenFid[ident] = true;
 
-    UTILSLIB::Log::info("Fiducial captured: {}  ({}, {}, {}) mm", labels[ident], m_penPosition.x() * 1000.f, m_penPosition.y() * 1000.f, m_penPosition.z() * 1000.f);
+    BASELIB::Log::info("Fiducial captured: {}  ({}, {}, {}) mm", labels[ident], m_penPosition.x() * 1000.f, m_penPosition.y() * 1000.f, m_penPosition.z() * 1000.f);
 
     // Log distances to previously captured fiducials
     for (int j = 1; j <= 3; ++j) {
         if (j != ident && m_hasPenFid[j]) {
             float dist = (m_penFid[ident] - m_penFid[j]).norm() * 1000.0f;
-            UTILSLIB::Log::info("  {} ↔ {}: {} mm{}", labels[ident], labels[j], dist, (dist > 200.0f ? "  *** WARNING: > 200 mm!" : ""));
+            BASELIB::Log::info("  {} ↔ {}: {} mm{}", labels[ident], labels[j], dist, (dist > 200.0f ? "  *** WARNING: > 200 mm!" : ""));
         }
     }
 
@@ -217,7 +217,7 @@ bool PolhemusCoregistration::captureCurrentPenPositionAsVertex()
         return false;
     m_penVertex = m_penPosition;
     m_hasPenVertex = true;
-    UTILSLIB::Log::info("Captured pen vertex (CZ) at {} {} {} mm", m_penVertex.x() * 1000.0f, m_penVertex.y() * 1000.0f, m_penVertex.z() * 1000.0f);
+    BASELIB::Log::info("Captured pen vertex (CZ) at {} {} {} mm", m_penVertex.x() * 1000.0f, m_penVertex.y() * 1000.0f, m_penVertex.z() * 1000.0f);
     // Notify observers so auto-registration can trigger
     if (m_pPoints)
         emit m_pPoints->pointsChanged();
@@ -243,7 +243,7 @@ bool PolhemusCoregistration::computeRegistration()
     const float dLR = (pLpa - pRpa).norm() * 1000.0f;
     const float minSpread = std::min({dNL, dNR, dLR});
     if (minSpread < 20.0f) {
-        UTILSLIB::Log::warning("Registration failed: pen fiducials too close (min spread {} mm, need > 20 mm)", minSpread);
+        BASELIB::Log::warning("Registration failed: pen fiducials too close (min spread {} mm, need > 20 mm)", minSpread);
         m_registrationValid = false;
         emit registrationChanged();
         return false;
@@ -273,7 +273,7 @@ bool PolhemusCoregistration::computeRegistration()
         const float maxRatio = std::max({dNL / mNL, dNR / mNR, dLR / mLR});
         const float minRatio = std::min({dNL / mNL, dNR / mNR, dLR / mLR});
         if (maxRatio / minRatio > 2.0f) {
-            UTILSLIB::Log::warning("Registration: shape mismatch — pen fiducial triangle has very different proportions from model. Check fiducial placement!");
+            BASELIB::Log::warning("Registration: shape mismatch — pen fiducial triangle has very different proportions from model. Check fiducial placement!");
         }
 
         // --- Kabsch algorithm (SVD least-squares rigid alignment) ---
@@ -349,7 +349,7 @@ bool PolhemusCoregistration::computeRegistration()
         m_headToWorld.setIdentity();
         m_headToDevice = m_deviceToWorld.inverse() * m_headToWorld;
         m_registrationValid = true;
-        UTILSLIB::Log::info("Registration succeeded (analytical paired).");
+        BASELIB::Log::info("Registration succeeded (analytical paired).");
         emit registrationChanged();
         return true;
     }
@@ -364,7 +364,7 @@ bool PolhemusCoregistration::computeRegistration()
     m_headToDevice = m_deviceToWorld.inverse() * m_headToWorld;
     m_worldToModel.setIdentity();
     m_registrationValid = true;
-    UTILSLIB::Log::info("Registration succeeded (head-frame fallback).");
+    BASELIB::Log::info("Registration succeeded (head-frame fallback).");
     emit registrationChanged();
     return true;
 }
@@ -474,7 +474,7 @@ void PolhemusCoregistration::onPenButtonPressedFromConn(int station,
             m_pivotState = PivotState::Collecting;
             m_pivotPositions.clear();
             m_pivotOrientations.clear();
-            UTILSLIB::Log::info("Pivot calibration: collecting — pivot the pen around its tip");
+            BASELIB::Log::info("Pivot calibration: collecting — pivot the pen around its tip");
             emit pivotStateChanged(m_pivotState);
             return;
         }
@@ -526,7 +526,7 @@ void PolhemusCoregistration::startPivotCalibration()
     m_pivotOrientations.clear();
     m_pivotResidualMm = 0.0f;
     m_pivotState = PivotState::WaitingForStart;
-    UTILSLIB::Log::info("Pivot calibration: press stylus button to begin collecting");
+    BASELIB::Log::info("Pivot calibration: press stylus button to begin collecting");
     emit pivotStateChanged(m_pivotState);
 }
 
@@ -542,7 +542,7 @@ bool PolhemusCoregistration::solvePivotCalibration()
 {
     const int N = static_cast<int>(m_pivotPositions.size());
     if (N < 10) {
-        UTILSLIB::Log::warning("Pivot calibration: only {} samples, need at least 10", N);
+        BASELIB::Log::warning("Pivot calibration: only {} samples, need at least 10", N);
         m_pivotState = PivotState::Idle;
         emit pivotStateChanged(m_pivotState);
         return false;
@@ -579,7 +579,7 @@ bool PolhemusCoregistration::solvePivotCalibration()
     const auto& sv = svd.singularValues();
     double cond = sv(0) / sv(sv.size() - 1);
     if (cond > 1e6) {
-        UTILSLIB::Log::warning("Pivot calibration: ill-conditioned (cond = {} ). Pivot the pen through a wider range of angles.", cond);
+        BASELIB::Log::warning("Pivot calibration: ill-conditioned (cond = {} ). Pivot the pen through a wider range of angles.", cond);
         m_pivotState = PivotState::Idle;
         emit pivotStateChanged(m_pivotState);
         return false;
@@ -602,7 +602,7 @@ bool PolhemusCoregistration::solvePivotCalibration()
     float rms = static_cast<float>(std::sqrt(sumSq / static_cast<double>(N))) * 1000.0f;
     m_pivotResidualMm = rms;
 
-    UTILSLIB::Log::info("Pivot calibration: {} samples, cond = {} , offset = {} {} {} mm, RMS residual = {} mm", N, cond, offset.x() * 1000.0f, offset.y() * 1000.0f, offset.z() * 1000.0f, rms);
+    BASELIB::Log::info("Pivot calibration: {} samples, cond = {} , offset = {} {} {} mm, RMS residual = {} mm", N, cond, offset.x() * 1000.0f, offset.y() * 1000.0f, offset.z() * 1000.0f, rms);
 
     m_penTipOffset = offset;
     m_pivotState = PivotState::Done;
@@ -618,13 +618,13 @@ bool PolhemusCoregistration::solvePivotCalibration()
 bool PolhemusCoregistration::captureOpticalCalibSample()
 {
     if (!m_havePenPos) {
-        UTILSLIB::Log::warning("Optical calibration: no pen position available");
+        BASELIB::Log::warning("Optical calibration: no pen position available");
         return false;
     }
 
     const Eigen::Matrix4f& dev = m_deviceToWorld;
     if (isIdentity(dev)) {
-        UTILSLIB::Log::warning("Optical calibration: no tracker data available");
+        BASELIB::Log::warning("Optical calibration: no tracker data available");
         return false;
     }
 
@@ -646,7 +646,7 @@ bool PolhemusCoregistration::captureOpticalCalibSample()
     const Eigen::Vector3f localFocus = trackerOri.inverse() * (m_penPosition - trackerPos);
     const float distToTracker = localFocus.norm() * 1000.0f;
 
-    UTILSLIB::Log::info("Optical calibration sample {}:\n    tracker pos: ({}, {}, {}) mm\n    focus point: ({}, {}, {}) mm\n    focus (local): ({}, {}, {}) mm\n    distance tracker\u2194focus: {} mm", n, trackerPos.x() * 1000.f, trackerPos.y() * 1000.f, trackerPos.z() * 1000.f, m_penPosition.x() * 1000.f, m_penPosition.y() * 1000.f, m_penPosition.z() * 1000.f, localFocus.x() * 1000.f, localFocus.y() * 1000.f, localFocus.z() * 1000.f, distToTracker);
+    BASELIB::Log::info("Optical calibration sample {}:\n    tracker pos: ({}, {}, {}) mm\n    focus point: ({}, {}, {}) mm\n    focus (local): ({}, {}, {}) mm\n    distance tracker\u2194focus: {} mm", n, trackerPos.x() * 1000.f, trackerPos.y() * 1000.f, trackerPos.z() * 1000.f, m_penPosition.x() * 1000.f, m_penPosition.y() * 1000.f, m_penPosition.z() * 1000.f, localFocus.x() * 1000.f, localFocus.y() * 1000.f, localFocus.z() * 1000.f, distToTracker);
 
     // Log convergence angle between tracker→focus directions for successive samples.
     // As the OPMI moves farther away, this angle shrinks (lines become parallel);
@@ -659,7 +659,7 @@ bool PolhemusCoregistration::captureOpticalCalibSample()
         const float dot = std::clamp(curDir.dot(prevDir), -1.0f, 1.0f);
         const float angleDeg = std::acos(dot) * (180.0f / 3.14159265f);
         const float prevDist = prevLocal.norm() * 1000.0f;
-        UTILSLIB::Log::info("    convergence angle (sample {}\u2194{}): {}\u00b0  (distances: {} / {} mm)", n - 1, n, angleDeg, prevDist, distToTracker);
+        BASELIB::Log::info("    convergence angle (sample {}\u2194{}): {}\u00b0  (distances: {} / {} mm)", n - 1, n, angleDeg, prevDist, distToTracker);
     }
 
     return true;
@@ -679,13 +679,13 @@ void PolhemusCoregistration::clearOpticalCalibSamples()
 bool PolhemusCoregistration::captureObjectiveCenter()
 {
     if (!m_havePenPos) {
-        UTILSLIB::Log::warning("Objective center capture: no pen position available");
+        BASELIB::Log::warning("Objective center capture: no pen position available");
         return false;
     }
 
     const Eigen::Matrix4f& dev = m_deviceToWorld;
     if (isIdentity(dev)) {
-        UTILSLIB::Log::warning("Objective center capture: no tracker data available");
+        BASELIB::Log::warning("Objective center capture: no tracker data available");
         return false;
     }
 
@@ -699,7 +699,7 @@ bool PolhemusCoregistration::captureObjectiveCenter()
     m_hasObjectiveCenter = true;
 
     const float distMm = m_objectiveCenterLocal.norm() * 1000.0f;
-    UTILSLIB::Log::info("Objective center captured (tracker-local): ({}, {}, {}) mm, distance from tracker: {} mm", m_objectiveCenterLocal.x() * 1000.f, m_objectiveCenterLocal.y() * 1000.f, m_objectiveCenterLocal.z() * 1000.f, distMm);
+    BASELIB::Log::info("Objective center captured (tracker-local): ({}, {}, {}) mm, distance from tracker: {} mm", m_objectiveCenterLocal.x() * 1000.f, m_objectiveCenterLocal.y() * 1000.f, m_objectiveCenterLocal.z() * 1000.f, distMm);
 
     return true;
 }
@@ -714,7 +714,7 @@ bool PolhemusCoregistration::solveOpticalCalibration()
 {
     const int N = static_cast<int>(m_opticalCalibSamples.size());
     if (N < 2) {
-        UTILSLIB::Log::warning("Optical calibration: need at least 2 samples, have {}", N);
+        BASELIB::Log::warning("Optical calibration: need at least 2 samples, have {}", N);
         return false;
     }
 
@@ -773,7 +773,7 @@ bool PolhemusCoregistration::solveOpticalCalibration()
         if (meanRay.dot(axisDir) < 0.0)
             axisDir = -axisDir;
 
-        UTILSLIB::Log::info("Optical calibration: using directly captured objective center, |O|={} mm", opticalCenter.norm() * 1000.0);
+        BASELIB::Log::info("Optical calibration: using directly captured objective center, |O|={} mm", opticalCenter.norm() * 1000.0);
     } else if (knownDist > 0.0 && N >= 2) {
         // Start where the PCA axis meets the sphere |O| = R on the side the axis points away from the
         // tracker; the descent below only takes small steps, so it cannot travel from a distant start.
@@ -862,7 +862,7 @@ bool PolhemusCoregistration::solveOpticalCalibration()
         if (opticalCenter.dot(axisDir) < 0.0)
             axisDir = -axisDir;
 
-        UTILSLIB::Log::info("Optical calibration: constrained refinement (R={} mm) converged, |O|={} mm", knownDist * 1000.0, opticalCenter.norm() * 1000.0);
+        BASELIB::Log::info("Optical calibration: constrained refinement (R={} mm) converged, |O|={} mm", knownDist * 1000.0, opticalCenter.norm() * 1000.0);
     }
 
     // Step 4: Compute RMS residual (perpendicular distance from each point to the ray from O)
@@ -893,22 +893,22 @@ bool PolhemusCoregistration::solveOpticalCalibration()
     const float distMm = m_opticalCenterLocal.norm() * 1000.0f;
 
     const std::string constraint = knownDist > 0.0 ? std::format(", constrained R={:.1f} mm", knownDist * 1000.0) : std::string();
-    UTILSLIB::Log::info("Optical calibration solved ({} samples{}):\n"
-                        "    axis (local):   ({:.4f}, {:.4f}, {:.4f})\n"
-                        "    center (local): ({:.1f}, {:.1f}, {:.1f}) mm\n"
-                        "    tracker\u2194center: {:.1f} mm\n"
-                        "    RMS residual:   {:.2f} mm\n"
-                        "    depth spread:   {:.1f} mm (range {:.0f} .. {:.0f} mm)",
-                        N, constraint,
-                        m_opticalAxisLocal.x(), m_opticalAxisLocal.y(), m_opticalAxisLocal.z(),
-                        m_opticalCenterLocal.x() * 1000.f, m_opticalCenterLocal.y() * 1000.f, m_opticalCenterLocal.z() * 1000.f,
-                        distMm, rms, depthSpreadMm, minDepth * 1000.0, maxDepth * 1000.0);
+    BASELIB::Log::info("Optical calibration solved ({} samples{}):\n"
+                       "    axis (local):   ({:.4f}, {:.4f}, {:.4f})\n"
+                       "    center (local): ({:.1f}, {:.1f}, {:.1f}) mm\n"
+                       "    tracker\u2194center: {:.1f} mm\n"
+                       "    RMS residual:   {:.2f} mm\n"
+                       "    depth spread:   {:.1f} mm (range {:.0f} .. {:.0f} mm)",
+                       N, constraint,
+                       m_opticalAxisLocal.x(), m_opticalAxisLocal.y(), m_opticalAxisLocal.z(),
+                       m_opticalCenterLocal.x() * 1000.f, m_opticalCenterLocal.y() * 1000.f, m_opticalCenterLocal.z() * 1000.f,
+                       distMm, rms, depthSpreadMm, minDepth * 1000.0, maxDepth * 1000.0);
 
     // Per-sample: report convergence angle between tracker→focus direction
     // and fitted optical axis.  This angle shrinks as the OPMI moves farther
     // from the head (lines become parallel) and grows at close range where
     // the tracker offset dominates.
-    UTILSLIB::Log::info("    Per-sample convergence angles (tracker\u2192focus vs optical axis):");
+    BASELIB::Log::info("    Per-sample convergence angles (tracker\u2192focus vs optical axis):");
     for (int i = 0; i < N; ++i) {
         const Eigen::Vector3d& p = localPoints[static_cast<size_t>(i)];
         const Eigen::Vector3d trkToFocus = p.normalized();
@@ -917,15 +917,15 @@ bool PolhemusCoregistration::solveOpticalCalibration()
         const double depth = (p - opticalCenter).dot(axisDir);
         const Eigen::Vector3d diff = p - opticalCenter;
         const double perpDist = (diff - diff.dot(axisDir) * axisDir).norm() * 1000.0;
-        UTILSLIB::Log::info("      sample {}: depth={} mm, convergence angle={}\u00b0, perp err={} mm", (i + 1), depth * 1000.0, angleDeg, perpDist);
+        BASELIB::Log::info("      sample {}: depth={} mm, convergence angle={}\u00b0, perp err={} mm", (i + 1), depth * 1000.0, angleDeg, perpDist);
     }
 
     if (depthSpreadMm < 50.0) {
-        UTILSLIB::Log::warning("Optical calibration: depth spread is only {} mm. For a reliable axis direction, move the OPMI to vary the focal distance by at least 50 mm between samples.", depthSpreadMm);
+        BASELIB::Log::warning("Optical calibration: depth spread is only {} mm. For a reliable axis direction, move the OPMI to vary the focal distance by at least 50 mm between samples.", depthSpreadMm);
     }
 
     if (rms > 10.0) {
-        UTILSLIB::Log::warning("Optical calibration: RMS residual {} mm is large. Check that the stylus accurately marks the microscope focus point.", rms);
+        BASELIB::Log::warning("Optical calibration: RMS residual {} mm is large. Check that the stylus accurately marks the microscope focus point.", rms);
     }
 
     // Plausibility check: when not using constrained mode, verify the
@@ -934,7 +934,7 @@ bool PolhemusCoregistration::solveOpticalCalibration()
         constexpr float kMinPlausibleMm = 100.0f;
         constexpr float kMaxPlausibleMm = 500.0f;
         if (distMm < kMinPlausibleMm || distMm > kMaxPlausibleMm) {
-            UTILSLIB::Log::warning("Optical calibration: tracker\u2194axis distance {} mm is outside the plausible range [{}, {}] mm.  Calibration data may be unreliable.", distMm, kMinPlausibleMm, kMaxPlausibleMm);
+            BASELIB::Log::warning("Optical calibration: tracker\u2194axis distance {} mm is outside the plausible range [{}, {}] mm.  Calibration data may be unreliable.", distMm, kMinPlausibleMm, kMaxPlausibleMm);
         }
     }
 
@@ -1021,7 +1021,7 @@ bool PolhemusCoregistration::applyOpticalAxisFineAdjust(const Eigen::Vector3f& t
 
     // Sanity: reject corrections > 10° — likely a user error
     if (correctionDeg > 10.0f) {
-        UTILSLIB::Log::warning("Optical fine adjust: correction {}° exceeds 10° limit — rejected.", correctionDeg);
+        BASELIB::Log::warning("Optical fine adjust: correction {}° exceeds 10° limit — rejected.", correctionDeg);
         return false;
     }
 
@@ -1042,7 +1042,7 @@ bool PolhemusCoregistration::applyOpticalAxisFineAdjust(const Eigen::Vector3f& t
     m_opticalFineAdjustDeg = correctionDeg;
     m_opticalFineAdjustApplied = true;
 
-    UTILSLIB::Log::info("Optical fine adjust applied: {}°\n    axis (local):   ({}, {}, {})", correctionDeg, m_opticalAxisLocal.x(), m_opticalAxisLocal.y(), m_opticalAxisLocal.z());
+    BASELIB::Log::info("Optical fine adjust applied: {}°\n    axis (local):   ({}, {}, {})", correctionDeg, m_opticalAxisLocal.x(), m_opticalAxisLocal.y(), m_opticalAxisLocal.z());
 
     emit opticalCalibrationChanged();
     return true;
@@ -1059,7 +1059,7 @@ void PolhemusCoregistration::clearOpticalFineAdjust()
     m_opticalFineAdjustApplied = false;
     m_opticalFineAdjustDeg = 0.0f;
 
-    UTILSLIB::Log::info("Optical fine adjust cleared — axis restored to original calibration.");
+    BASELIB::Log::info("Optical fine adjust cleared — axis restored to original calibration.");
     emit opticalCalibrationChanged();
 }
 

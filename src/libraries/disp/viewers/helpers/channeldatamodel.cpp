@@ -17,7 +17,7 @@
 
 #include "channeldatamodel.h"
 #include <memory>
-#include <utils/string_utils.h>
+#include <base/string_utils.h>
 #include <fiff/fiff_info.h>
 #include <fiff/fiff_constants.h>
 
@@ -264,7 +264,7 @@ void ChannelDataModel::setChannelBad(int channelIdx, bool bad)
 
     if (m_pFiffInfo && channelIdx >= 0 && channelIdx < m_pFiffInfo->nchan) {
         const std::string& channelName = m_pFiffInfo->ch_names[channelIdx];
-        const int badIndex = UTILSLIB::indexOf(m_pFiffInfo->bads, channelName);
+        const int badIndex = BASELIB::indexOf(m_pFiffInfo->bads, channelName);
 
         if (bad) {
             if (badIndex < 0)
@@ -509,7 +509,7 @@ void ChannelDataModel::rebuildDisplayInfo()
             m_displayInfo[ch].name = QString("CH %1").arg(ch + 1);
         m_displayInfo[ch].typeLabel = typeLabelForChannel(ch);
         m_displayInfo[ch].bad = (m_pFiffInfo && ch < realChannelCount)
-            ? UTILSLIB::contains(m_pFiffInfo->bads, m_displayInfo[ch].name.toStdString())
+            ? BASELIB::contains(m_pFiffInfo->bads, m_displayInfo[ch].name.toStdString())
             : false;
         m_displayInfo[ch].isVirtualChannel = false;
     }

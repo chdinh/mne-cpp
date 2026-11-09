@@ -15,7 +15,7 @@
 //=============================================================================================================
 
 #include "sessionfilter.h"
-#include <utils/string_utils.h>
+#include <base/string_utils.h>
 
 #include <dsp/firfilter.h>
 

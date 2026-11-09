@@ -19,7 +19,7 @@
 #include <mne/mne.h>
 #include <mne/mne_source_space.h>
 #include <memory>
-#include <utils/logger/log.h>
+#include <base/log.h>
 
 //=============================================================================================================
 // QT INCLUDES
@@ -47,7 +47,6 @@
 using namespace FIFFLIB;
 using namespace INVLIB;
 using namespace MNELIB;
-using namespace UTILSLIB;
 using namespace Eigen;
 
 //=============================================================================================================
@@ -116,7 +115,7 @@ static bool readStcFile(const QString& filename, MatrixXd& data, VectorXi& verti
 
 int main(int argc, char* argv[])
 {
-    UTILSLIB::Log::install_qt_message_handler();
+    BASELIB::Log::install_qt_message_handler();
     QCoreApplication app(argc, argv);
     QCoreApplication::setApplicationName("mne_volume_data2mri");
     QCoreApplication::setApplicationVersion(PROGRAM_VERSION);

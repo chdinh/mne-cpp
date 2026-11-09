@@ -173,7 +173,7 @@ public:
 
     //=========================================================================================================
     /**
-     * Reads evoked data sets of a FIFF file, like read(); throws UTILSLIB::Error if it cannot.
+     * Reads evoked data sets of a FIFF file, like read(); throws BASELIB::Error if it cannot.
      *
      * @param[in] path         The file.
      * @param[in] conditions   Indices or comments of the averages to read, in this order; empty reads all.
@@ -267,10 +267,10 @@ public:
      *
      * @return The evoked data sets, or why the file does not hold them.
      */
-    [[nodiscard]] static UTILSLIB::Expected<FiffEvokedSet> read(const std::filesystem::path& path,
-                                                                const std::vector<FiffEvoked::Condition>& conditions = {},
-                                                                const FiffEvoked::Baseline& baseline = {},
-                                                                bool proj = true);
+    [[nodiscard]] static BASELIB::Expected<FiffEvokedSet> read(const std::filesystem::path& path,
+                                                               const std::vector<FiffEvoked::Condition>& conditions = {},
+                                                               const FiffEvoked::Baseline& baseline = {},
+                                                               bool proj = true);
 
     //=========================================================================================================
     /**
@@ -280,7 +280,7 @@ public:
      *
      * @return Nothing, or why the file cannot be written.
      */
-    [[nodiscard]] UTILSLIB::Expected<void> save(const std::filesystem::path& path) const;
+    [[nodiscard]] BASELIB::Expected<void> save(const std::filesystem::path& path) const;
 
     //=========================================================================================================
     /**

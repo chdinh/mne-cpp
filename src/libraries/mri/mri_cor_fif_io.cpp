@@ -35,7 +35,7 @@
 #include <fiff/fiff_file.h>
 #include <fiff/fiff_constants.h>
 
-#include <utils/logger/log.h>
+#include <base/log.h>
 
 //=============================================================================================================
 // QT INCLUDES
@@ -91,7 +91,7 @@ bool MriCorFifIO::write(const std::string& fileName,
     auto stream = FiffStream::start_file(file);
 
     if (!stream) {
-        UTILSLIB::Log::critical("MriCorFifIO::write - Could not open file for writing: {}", fileName);
+        BASELIB::Log::critical("MriCorFifIO::write - Could not open file for writing: {}", fileName);
         return false;
     }
 

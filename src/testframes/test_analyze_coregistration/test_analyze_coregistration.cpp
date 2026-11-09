@@ -24,7 +24,7 @@
 
 #include <fiff/fiff_constants.h>
 #include <fiff/fiff_coord_trans.h>
-#include <utils/string_utils.h>
+#include <base/string_utils.h>
 #include <fiff/fiff_dig_point_set.h>
 
 #include <QtTest>

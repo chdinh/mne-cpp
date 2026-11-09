@@ -21,7 +21,7 @@
 //=============================================================================================================
 
 #include "inv_source_estimate_io.h"
-#include <utils/logger/log.h>
+#include <base/log.h>
 
 //=============================================================================================================
 // QT INCLUDES
@@ -47,13 +47,13 @@ bool InvSourceEstimateIO::writeCsv(const InvSourceEstimate& stc,
                                    char cDelim)
 {
     if (stc.empty()) {
-        UTILSLIB::Log::warning("[InvSourceEstimateIO::writeCsv] Source estimate is empty.");
+        BASELIB::Log::warning("[InvSourceEstimateIO::writeCsv] Source estimate is empty.");
         return false;
     }
 
     QFile file(sPath);
     if (!file.open(QIODevice::WriteOnly | QIODevice::Text)) {
-        UTILSLIB::Log::warning("[InvSourceEstimateIO::writeCsv] Cannot open: {}", sPath.toStdString());
+        BASELIB::Log::warning("[InvSourceEstimateIO::writeCsv] Cannot open: {}", sPath.toStdString());
         return false;
     }
 
@@ -88,7 +88,7 @@ InvSourceEstimate InvSourceEstimateIO::readCsv(const QString& sPath,
 {
     QFile file(sPath);
     if (!file.open(QIODevice::ReadOnly | QIODevice::Text)) {
-        UTILSLIB::Log::warning("[InvSourceEstimateIO::readCsv] Cannot open: {}", sPath.toStdString());
+        BASELIB::Log::warning("[InvSourceEstimateIO::readCsv] Cannot open: {}", sPath.toStdString());
         return InvSourceEstimate();
     }
 
@@ -99,7 +99,7 @@ InvSourceEstimate InvSourceEstimateIO::readCsv(const QString& sPath,
     QString header = in.readLine();
     QStringList headerParts = header.split(delim, Qt::SkipEmptyParts);
     if (headerParts.size() < 2) {
-        UTILSLIB::Log::warning("[InvSourceEstimateIO::readCsv] Invalid header.");
+        BASELIB::Log::warning("[InvSourceEstimateIO::readCsv] Invalid header.");
         return InvSourceEstimate();
     }
 
@@ -157,13 +157,13 @@ bool InvSourceEstimateIO::writeMatrix(const InvSourceEstimate& stc,
                                       const QString& sPath)
 {
     if (stc.empty()) {
-        UTILSLIB::Log::warning("[InvSourceEstimateIO::writeMatrix] Source estimate is empty.");
+        BASELIB::Log::warning("[InvSourceEstimateIO::writeMatrix] Source estimate is empty.");
         return false;
     }
 
     QFile file(sPath);
     if (!file.open(QIODevice::WriteOnly | QIODevice::Text)) {
-        UTILSLIB::Log::warning("[InvSourceEstimateIO::writeMatrix] Cannot open: {}", sPath.toStdString());
+        BASELIB::Log::warning("[InvSourceEstimateIO::writeMatrix] Cannot open: {}", sPath.toStdString());
         return false;
     }
 

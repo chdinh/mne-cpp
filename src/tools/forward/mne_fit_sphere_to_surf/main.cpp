@@ -21,7 +21,7 @@
 #include <fs/fs_surface.h>
 #include <math/sphere.h>
 
-#include <utils/logger/log.h>
+#include <base/log.h>
 
 //=============================================================================================================
 // QT INCLUDES
@@ -61,7 +61,7 @@ using namespace Eigen;
 
 int main(int argc, char* argv[])
 {
-    UTILSLIB::Log::install_qt_message_handler();
+    BASELIB::Log::install_qt_message_handler();
     QCoreApplication app(argc, argv);
     QCoreApplication::setApplicationName("mne_fit_sphere_to_surf");
     QCoreApplication::setApplicationVersion(PROGRAM_VERSION);

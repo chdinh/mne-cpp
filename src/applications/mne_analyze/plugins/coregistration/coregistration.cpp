@@ -30,7 +30,7 @@
 #include <mne/mne_bem.h>
 #include <mne/mne_project_to_surface.h>
 #include <mne/mne_icp.h>
-#include <utils/string_utils.h>
+#include <base/string_utils.h>
 
 //=============================================================================================================
 // EIGEN INCLUDES

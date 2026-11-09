@@ -19,7 +19,7 @@
  * of its t- or F-values.
  *
  * The null distribution of the maximum absolute cluster-mass is then
- * built by @c UTILSLIB::ThreadPool::parallelMap over @c nPermutations
+ * built by @c BASELIB::ThreadPool::parallelMap over @c nPermutations
  * randomisations - exchangeable label shuffles for the two-sample test,
  * Rademacher sign flips for the one-sample test, and group-label
  * reassignments for the ANOVA test - with thread-local
@@ -43,7 +43,7 @@
 #include "sts_ttest.h"
 #include "sts_ftest.h"
 
-#include <utils/thread_pool.h>
+#include <base/thread_pool.h>
 
 #include <cmath>
 #include <algorithm>
@@ -103,7 +103,7 @@ StatsClusterResult StatsCluster::permutationTest(
         return permuteOnce(allData, nA, adjacency, threshold, tail);
     };
 
-    std::vector<double> nullDist = UTILSLIB::ThreadPool::global().parallelMap(permIndices, permuteFunc);
+    std::vector<double> nullDist = BASELIB::ThreadPool::global().parallelMap(permIndices, permuteFunc);
 
     // Sort null distribution for percentile computation
     std::sort(nullDist.begin(), nullDist.end());
@@ -597,7 +597,7 @@ StatsClusterResult StatsCluster::oneSamplePermutationTest(
         return permuteOnceOneSample(data, adjacency, threshold, tail);
     };
 
-    std::vector<double> nullDist = UTILSLIB::ThreadPool::global().parallelMap(permIndices, permuteFunc);
+    std::vector<double> nullDist = BASELIB::ThreadPool::global().parallelMap(permIndices, permuteFunc);
 
     std::sort(nullDist.begin(), nullDist.end());
 
@@ -655,7 +655,7 @@ StatsClusterResult StatsCluster::fTestPermutationTest(
         return permuteOnceFTest(allData, groupSizes, adjacency, threshold);
     };
 
-    std::vector<double> nullDist = UTILSLIB::ThreadPool::global().parallelMap(permIndices, permuteFunc);
+    std::vector<double> nullDist = BASELIB::ThreadPool::global().parallelMap(permIndices, permuteFunc);
 
     std::sort(nullDist.begin(), nullDist.end());
 

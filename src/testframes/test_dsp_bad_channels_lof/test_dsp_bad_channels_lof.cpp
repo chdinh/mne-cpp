@@ -15,7 +15,7 @@
 //=============================================================================================================
 
 #include <dsp/bad_channels_lof.h>
-#include <utils/string_utils.h>
+#include <base/string_utils.h>
 #include <fiff/fiff_info.h>
 #include <fiff/fiff_ch_info.h>
 #include <fiff/fiff_constants.h>
@@ -44,6 +44,7 @@
 //=============================================================================================================
 
 using namespace UTILSLIB;
+using namespace BASELIB;
 using namespace FIFFLIB;
 using namespace Eigen;
 
@@ -161,8 +162,8 @@ private slots:
         params.dThreshold = 2.0;
 
         StringList bads = findBadChannelsLof(data, info, params);
-        QVERIFY2(UTILSLIB::contains(bads, "EEG6"),
-                 qPrintable(QString("Expected EEG6 in bads, got: %1").arg(QString::fromStdString(UTILSLIB::join(bads, ", ")))));
+        QVERIFY2(BASELIB::contains(bads, "EEG6"),
+                 qPrintable(QString("Expected EEG6 in bads, got: %1").arg(QString::fromStdString(BASELIB::join(bads, ", ")))));
     }
 
     void testCleanDataNoBads()
@@ -264,8 +265,8 @@ private slots:
         params.dThreshold = 2.0;
 
         StringList bads = findBadChannelsLof(data, info, params);
-        QVERIFY2(UTILSLIB::contains(bads, "EEG4"),
-                 qPrintable(QString("Expected flat EEG4 in bads, got: %1").arg(QString::fromStdString(UTILSLIB::join(bads, ", ")))));
+        QVERIFY2(BASELIB::contains(bads, "EEG4"),
+                 qPrintable(QString("Expected flat EEG4 in bads, got: %1").arg(QString::fromStdString(BASELIB::join(bads, ", ")))));
     }
 
     void cleanupTestCase()

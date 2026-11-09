@@ -23,7 +23,7 @@
 
 #include "mne_hemisphere.h"
 #include <memory>
-#include <utils/logger/log.h>
+#include <base/log.h>
 #include "mne_nearest.h"
 
 #include <math/linalg.h>
@@ -36,6 +36,7 @@
 
 using namespace MNELIB;
 using namespace UTILSLIB;
+using namespace BASELIB;
 using namespace Eigen;
 using namespace FIFFLIB;
 

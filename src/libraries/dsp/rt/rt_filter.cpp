@@ -16,7 +16,7 @@
 
 #include "rt_filter.h"
 #include <memory>
-#include <utils/logger/log.h>
+#include <base/log.h>
 
 #include <fiff/fiff_raw_data.h>
 #include <fiff/fiff_file.h>
@@ -41,6 +41,7 @@ using namespace RTPROCESSINGLIB;
 using namespace Eigen;
 using namespace FIFFLIB;
 using namespace UTILSLIB;
+using namespace BASELIB;
 using namespace MNELIB;
 
 //=============================================================================================================

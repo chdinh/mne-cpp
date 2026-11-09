@@ -23,7 +23,7 @@
 #include "hpi_global.h"
 #include <memory>
 
-#include <utils/generics/circularbuffer.h>
+#include <base/circular_buffer.h>
 #include <scShared/Plugins/abstractalgorithm.h>
 
 #include <fiff/fiff_dig_point_set.h>
@@ -295,7 +295,7 @@ private:
 
     std::shared_ptr<FIFFLIB::FiffInfo> m_pFiffInfo; /**< Fiff measurement info.*/
     std::shared_ptr<FIFFLIB::FiffDigitizerData> m_pFiffDigitizerData;
-    std::shared_ptr<UTILSLIB::CircularBuffer_Matrix_double> m_pCircularBuffer; /**< Holds incoming raw data. */
+    std::shared_ptr<BASELIB::CircularBuffer<Eigen::MatrixXd>> m_pCircularBuffer; /**< Holds incoming raw data. */
 
     SCSHAREDLIB::PluginInputData<SCMEASLIB::RealTimeMultiSampleArray>::SPtr m_pHpiInput; /**< The RealTimeMultiSampleArray of the Hpi input.*/
     SCSHAREDLIB::PluginOutputData<SCMEASLIB::RealTimeHpiResult>::SPtr m_pHpiOutput;      /**< The RealTimeHpiResult of the Hpi output.*/

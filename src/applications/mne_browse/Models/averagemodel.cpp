@@ -19,7 +19,7 @@
 #include "averagemodel.h"
 #include <memory>
 #include <fiff/fiff_io.h>
-#include <utils/string_utils.h>
+#include <base/string_utils.h>
 
 
 //*************************************************************************************************************

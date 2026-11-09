@@ -19,7 +19,7 @@
 //=============================================================================================================
 
 #include "inv_ecd.h"
-#include <utils/logger/log.h>
+#include <base/log.h>
 
 //=============================================================================================================
 // USED NAMESPACES
@@ -72,14 +72,14 @@ void InvEcd::print() const
         return;
 
     // Time, location, moment magnitude and components, reduced khi^2, goodness of fit, function evaluations
-    UTILSLIB::Log::info("{:6.1f} {:7.2f} {:7.2f} {:7.2f} {:6.2f} {:6.2f} {:6.2f} {:6.2f} {:6.2f} {:6.2f} {}",
-                        1000 * this->time,
-                        1000 * this->rd[0],
-                        1000 * this->rd[1],
-                        1000 * this->rd[2],
-                        1e9 * this->Q.norm(),
-                        1e9 * this->Q[0], 1e9 * this->Q[1], 1e9 * this->Q[2],
-                        this->khi2 / this->nfree,
-                        100 * this->good,
-                        this->neval);
+    BASELIB::Log::info("{:6.1f} {:7.2f} {:7.2f} {:7.2f} {:6.2f} {:6.2f} {:6.2f} {:6.2f} {:6.2f} {:6.2f} {}",
+                       1000 * this->time,
+                       1000 * this->rd[0],
+                       1000 * this->rd[1],
+                       1000 * this->rd[2],
+                       1e9 * this->Q.norm(),
+                       1e9 * this->Q[0], 1e9 * this->Q[1], 1e9 * this->Q[2],
+                       this->khi2 / this->nfree,
+                       100 * this->good,
+                       this->neval);
 }

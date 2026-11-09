@@ -15,14 +15,14 @@
 //=============================================================================================================
 
 #include "fs_label.h"
-#include <utils/logger/log.h>
+#include <base/log.h>
 #include "fs_surface.h"
 
 //=============================================================================================================
 // QT INCLUDES
 //=============================================================================================================
 
-#include <utils/string_utils.h>
+#include <base/string_utils.h>
 
 
 #include <fstream>
@@ -125,16 +125,16 @@ bool FsLabel::read(const std::filesystem::path& p_sFileName, FsLabel& p_Label)
 {
     p_Label.clear();
 
-    const std::string fileName = UTILSLIB::utf8FromPath(p_sFileName.filename());
+    const std::string fileName = BASELIB::utf8FromPath(p_sFileName.filename());
     if (!fileName.ends_with(".label")) {
-        UTILSLIB::Log::warning("Given file ({}) is not a .label file!\n", UTILSLIB::utf8FromPath(p_sFileName));
+        BASELIB::Log::warning("Given file ({}) is not a .label file!\n", BASELIB::utf8FromPath(p_sFileName));
         return false;
     }
 
-    UTILSLIB::Log::info("Reading label...");
+    BASELIB::Log::info("Reading label...");
     std::ifstream file(p_sFileName);
     if (!file) {
-        UTILSLIB::Log::warning("\tError: Couldn't open the label file\n");
+        BASELIB::Log::warning("\tError: Couldn't open the label file\n");
         return false;
     }
 
@@ -142,7 +142,7 @@ bool FsLabel::read(const std::filesystem::path& p_sFileName, FsLabel& p_Label)
     std::string line;
     std::getline(file, comment);
     std::getline(file, line);
-    const int nv = UTILSLIB::toInt(line).value_or(0);
+    const int nv = BASELIB::toInt(line).value_or(0);
 
     // One row per vertex: vertex number, x, y, z (mm) and value
     MatrixXd data = MatrixXd::Zero(nv, 5);
@@ -167,7 +167,7 @@ bool FsLabel::read(const std::filesystem::path& p_sFileName, FsLabel& p_Label)
     else if (fileName.size() > 3 + 6 && (fileName.starts_with("lh.") || fileName.starts_with("rh.")))
         p_Label.name = fileName.substr(3, fileName.size() - 3 - 6);
 
-    UTILSLIB::Log::info("[done]\n");
+    BASELIB::Log::info("[done]\n");
 
     return true;
 }

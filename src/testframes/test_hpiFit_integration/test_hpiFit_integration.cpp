@@ -16,7 +16,7 @@
 // INCLUDES
 //=============================================================================================================
 
-#include <utils/logger/log.h>
+#include <base/log.h>
 #include <memory>
 
 #include <iostream>
@@ -108,7 +108,7 @@ TestHpiFitIntegration::TestHpiFitIntegration()
 
 void TestHpiFitIntegration::initTestCase()
 {
-    UTILSLIB::Log::install_qt_message_handler();
+    BASELIB::Log::install_qt_message_handler();
     qInfo() << "Error Translation" << dErrorTrans;
     qInfo() << "Error Quaternion" << dErrorQuat;
     QFile t_fileIn(QCoreApplication::applicationDirPath() + "/../resources/data/mne-cpp-test-data/MEG/sample/test_hpiFit_raw.fif");

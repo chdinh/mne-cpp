@@ -15,7 +15,7 @@
 //=============================================================================================================
 
 #include "mvar_model.h"
-#include <utils/logger/log.h>
+#include <base/log.h>
 
 #include <vector>
 
@@ -133,7 +133,7 @@ void MvarModel::fitLevinsonDurbin(const MatrixXd& data, int p)
     const int nObs = nSamples - p;
 
     if (nObs <= 0) {
-        UTILSLIB::Log::warning("MvarModel::fitLevinsonDurbin - Not enough samples for model order {}", p);
+        BASELIB::Log::warning("MvarModel::fitLevinsonDurbin - Not enough samples for model order {}", p);
         m_order = 0;
         m_coeffs.clear();
         m_noiseCov = MatrixXd::Identity(nCh, nCh);

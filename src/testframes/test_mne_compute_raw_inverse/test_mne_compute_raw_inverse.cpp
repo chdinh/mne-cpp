@@ -23,7 +23,7 @@
 //=============================================================================================================
 
 #include <inv/inv_source_estimate.h>
-#include <utils/logger/log.h>
+#include <base/log.h>
 
 //=============================================================================================================
 // QT INCLUDES
@@ -48,7 +48,6 @@
 
 using namespace Eigen;
 using namespace INVLIB;
-using namespace UTILSLIB;
 
 //=============================================================================================================
 /**
@@ -286,7 +285,7 @@ bool TestMneComputeRawInverse::readStc(const QString& path, InvSourceEstimate& s
 
 void TestMneComputeRawInverse::initTestCase()
 {
-    UTILSLIB::Log::install_qt_message_handler();
+    BASELIB::Log::install_qt_message_handler();
 
     printf(">>>>>>>>>>>>>>>>>>>>>>>>> mne_compute_raw_inverse Integration Test Init >>>>>>>>>>>>>>>>>>>>>>>>>\n");
 

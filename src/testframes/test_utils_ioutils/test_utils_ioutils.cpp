@@ -15,7 +15,7 @@
 //=============================================================================================================
 
 #include <utils/ioutils.h>
-#include <utils/logger/log.h>
+#include <base/log.h>
 
 //=============================================================================================================
 // QT INCLUDES
@@ -74,7 +74,7 @@ TestIOUtils::TestIOUtils()
 
 void TestIOUtils::initTestCase()
 {
-    UTILSLIB::Log::install_qt_message_handler();
+    BASELIB::Log::install_qt_message_handler();
     QVERIFY(m_tempDir.isValid());
 }
 

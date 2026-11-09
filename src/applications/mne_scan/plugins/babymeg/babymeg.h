@@ -27,7 +27,7 @@
 #include <fiff/fiff_stream.h>
 
 #include <scShared/Plugins/abstractsensor.h>
-#include <utils/generics/circularbuffer.h>
+#include <base/circular_buffer.h>
 
 //=============================================================================================================
 // QT INCLUDES
@@ -275,7 +275,7 @@ protected:
 
     SCSHAREDLIB::PluginOutputData<SCMEASLIB::RealTimeMultiSampleArray>::SPtr m_pRTMSABabyMEG; /**< The RealTimeMultiSampleArray to provide the rt_server Channels.*/
 
-    std::shared_ptr<UTILSLIB::CircularBuffer_Matrix_float> m_pCircularBuffer; /**< Holds incoming raw data. */
+    std::shared_ptr<BASELIB::CircularBuffer<Eigen::MatrixXf>> m_pCircularBuffer; /**< Holds incoming raw data. */
 
     QSharedPointer<BabyMEGClient> m_pMyClient;              /**< TCP/IP communication between Qt and Labview. */
     QSharedPointer<BabyMEGClient> m_pMyClientComm;          /**< TCP/IP communication between Qt and Labview - communication. */

@@ -16,7 +16,7 @@
 
 #include "rt_hpis.h"
 #include <memory>
-#include <utils/logger/log.h>
+#include <base/log.h>
 
 #include <inv/hpi/inv_hpi_fit.h>
 #include <inv/hpi/inv_sensor_set.h>
@@ -114,7 +114,7 @@ void RtHpi::append(const MatrixXd& data)
                      m_modelParameters,
                      m_matCoilsHead);
     } else {
-        UTILSLIB::Log::warning("[RtHpi::append] Not enough coil frequencies set. At least three frequencies are needed.");
+        BASELIB::Log::warning("[RtHpi::append] Not enough coil frequencies set. At least three frequencies are needed.");
     }
 }
 

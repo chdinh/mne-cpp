@@ -15,7 +15,7 @@
 //=============================================================================================================
 
 #include "fs_annotation.h"
-#include <utils/logger/log.h>
+#include <base/log.h>
 #include "fs_label.h"
 #include "fs_surface.h"
 
@@ -29,7 +29,7 @@
 #include <algorithm>
 #include <numeric>
 
-#include <utils/byte_stream.h>
+#include <base/byte_stream.h>
 
 #include <format>
 
@@ -98,7 +98,7 @@ bool FsAnnotation::read(const std::string& subject_id, qint32 hemi, const std::s
     if (hemi != 0 && hemi != 1)
         return false;
 
-    return read(subjects_dir / UTILSLIB::pathFromUtf8(subject_id) / "label", hemi, atlas, p_Annotation);
+    return read(subjects_dir / BASELIB::pathFromUtf8(subject_id) / "label", hemi, atlas, p_Annotation);
 }
 
 //=============================================================================================================
@@ -108,7 +108,7 @@ bool FsAnnotation::read(const std::filesystem::path& path, qint32 hemi, const st
     if (hemi != 0 && hemi != 1)
         return false;
 
-    return read(path / UTILSLIB::pathFromUtf8(std::format("{}.{}.annot", hemi == 0 ? "lh" : "rh", atlas)), p_Annotation);
+    return read(path / BASELIB::pathFromUtf8(std::format("{}.{}.annot", hemi == 0 ? "lh" : "rh", atlas)), p_Annotation);
 }
 
 //=============================================================================================================
@@ -117,13 +117,13 @@ bool FsAnnotation::read(const std::filesystem::path& p_sFileName, FsAnnotation& 
 {
     p_Annotation.clear();
 
-    UTILSLIB::Log::info("Reading annotation...\n");
-    auto bytes = UTILSLIB::read_file_bytes(p_sFileName);
+    BASELIB::Log::info("Reading annotation...\n");
+    auto bytes = BASELIB::read_file_bytes(p_sFileName);
     if (!bytes) {
-        UTILSLIB::Log::warning("\tError: Couldn't open the file");
+        BASELIB::Log::warning("\tError: Couldn't open the file");
         return false;
     }
-    UTILSLIB::MemoryByteStream stream(std::move(*bytes));
+    BASELIB::MemoryByteStream stream(std::move(*bytes));
     const auto readInt = [&stream]() {
         qint32 value = 0;
         stream.readBigEndian(value);
@@ -148,7 +148,7 @@ bool FsAnnotation::read(const std::filesystem::path& p_sFileName, FsAnnotation& 
 
     const qint32 numEl = readInt();
     if (numEl < 0 || static_cast<std::uint64_t>(numEl) * 8 > stream.size() - stream.pos()) {
-        UTILSLIB::Log::warning("\tError: Truncated annotation file");
+        BASELIB::Log::warning("\tError: Truncated annotation file");
         return false;
     }
     // Vertex number and label id interleaved
@@ -166,7 +166,7 @@ bool FsAnnotation::read(const std::filesystem::path& p_sFileName, FsAnnotation& 
         ct.clear();
         qint32 numEntries = readInt();
         if (numEntries > 0) {
-            UTILSLIB::Log::info("\tReading from Original Version\n");
+            BASELIB::Log::info("\tReading from Original Version\n");
             ct.numEntries = numEntries;
             ct.orig_tab = readString();
             ct.struct_names.assign(static_cast<std::size_t>(numEntries), std::string());
@@ -178,13 +178,13 @@ bool FsAnnotation::read(const std::filesystem::path& p_sFileName, FsAnnotation& 
         } else {
             const qint32 version = -numEntries;
             if (version != 2)
-                UTILSLIB::Log::warning("\tError! Does not handle version {}", version);
+                BASELIB::Log::warning("\tError! Does not handle version {}", version);
             else
-                UTILSLIB::Log::info("\tReading from version {}\n", version);
+                BASELIB::Log::info("\tReading from version {}\n", version);
 
             numEntries = readInt();
             if (numEntries < 0) {
-                UTILSLIB::Log::warning("\tError: Invalid colortable size {}", numEntries);
+                BASELIB::Log::warning("\tError: Invalid colortable size {}", numEntries);
                 return false;
             }
             ct.numEntries = numEntries;
@@ -196,26 +196,26 @@ bool FsAnnotation::read(const std::filesystem::path& p_sFileName, FsAnnotation& 
             for (qint32 i = 0; i < numEntriesToRead; ++i) {
                 const qint32 structure = readInt();
                 if (structure < 0 || structure >= numEntries) {
-                    UTILSLIB::Log::warning("\tError! Read entry, index {}", structure);
+                    BASELIB::Log::warning("\tError! Read entry, index {}", structure);
                     return false;
                 }
                 std::string& name = ct.struct_names[static_cast<std::size_t>(structure)];
                 if (!name.empty())
-                    UTILSLIB::Log::warning("Error! Duplicate Structure {}", structure);
+                    BASELIB::Log::warning("Error! Duplicate Structure {}", structure);
                 name = readString();
                 readColor(ct, structure);
             }
         }
-        UTILSLIB::Log::info("\tcolortable with {} entries read\n\t(originally {})\n", ct.numEntries, ct.orig_tab);
+        BASELIB::Log::info("\tcolortable with {} entries read\n\t(originally {})\n", ct.numEntries, ct.orig_tab);
     } else {
-        UTILSLIB::Log::warning("\tError! No colortable stored");
+        BASELIB::Log::warning("\tError! No colortable stored");
     }
 
-    p_Annotation.m_sFileName = UTILSLIB::utf8FromPath(p_sFileName.filename());
-    p_Annotation.m_sFilePath = UTILSLIB::utf8FromPath(p_sFileName);
+    p_Annotation.m_sFileName = BASELIB::utf8FromPath(p_sFileName.filename());
+    p_Annotation.m_sFilePath = BASELIB::utf8FromPath(p_sFileName);
     p_Annotation.m_iHemi = p_Annotation.m_sFileName.starts_with("lh.") ? 0 : 1;
 
-    UTILSLIB::Log::info("[done]\n");
+    BASELIB::Log::info("[done]\n");
 
     return true;
 }
@@ -225,26 +225,26 @@ bool FsAnnotation::read(const std::filesystem::path& p_sFileName, FsAnnotation& 
 bool FsAnnotation::toLabels(const FsSurface& p_surf,
                             std::vector<FsLabel>& p_qListLabels,
                             std::vector<RowVector4i>& p_qListLabelRGBAs,
-                            const UTILSLIB::StringList& lLabelPicks) const
+                            const BASELIB::StringList& lLabelPicks) const
 {
     if (this->m_iHemi != p_surf.hemi()) {
-        UTILSLIB::Log::warning("FsAnnotation and surface hemisphere (annot = {}; surf = {}) do not match!\n", this->m_iHemi, p_surf.hemi());
+        BASELIB::Log::warning("FsAnnotation and surface hemisphere (annot = {}; surf = {}) do not match!\n", this->m_iHemi, p_surf.hemi());
         return false;
     }
 
     if (m_LabelIds.size() == 0) {
-        UTILSLIB::Log::warning("FsAnnotation doesn't' contain data!\n");
+        BASELIB::Log::warning("FsAnnotation doesn't' contain data!\n");
         return false;
     }
 
-    UTILSLIB::Log::info("Converting labels from annotation...");
+    BASELIB::Log::info("Converting labels from annotation...");
 
     //n_read = 0
     //labels = list()
     //label_colors = list()
 
     VectorXi label_ids = m_Colortable.getLabelIds();
-    const UTILSLIB::StringList& label_names = m_Colortable.getNames();
+    const BASELIB::StringList& label_names = m_Colortable.getNames();
     MatrixX4i label_rgbas = m_Colortable.getRGBAs();
 
     // load the vertex positions from surface
@@ -290,7 +290,7 @@ bool FsAnnotation::toLabels(const FsSurface& p_surf,
             p_qListLabels.emplace_back(vertices, pos, values, this->m_iHemi, name, label_id);
             // store the color
             p_qListLabelRGBAs.push_back(label_rgba);
-        } else if (UTILSLIB::contains(lLabelPicks, name)) {
+        } else if (BASELIB::contains(lLabelPicks, name)) {
             //t_tris
             p_qListLabels.emplace_back(vertices, pos, values, this->m_iHemi, name, label_id);
             // store the color
@@ -340,7 +340,7 @@ bool FsAnnotation::toLabels(const FsSurface& p_surf,
     std::ranges::move(labels, p_qListLabels.begin() + static_cast<std::ptrdiff_t>(firstNew));
     std::ranges::copy(rgbas, p_qListLabelRGBAs.begin() + static_cast<std::ptrdiff_t>(firstNew));
 
-    UTILSLIB::Log::info("[done]\n");
+    BASELIB::Log::info("[done]\n");
 
     return true;
 }

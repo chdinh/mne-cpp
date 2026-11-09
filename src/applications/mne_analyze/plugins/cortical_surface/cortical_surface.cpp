@@ -41,7 +41,7 @@
 #include <inv/sparse/inv_gamma_map.h>
 #include <inv/sparse/inv_mxne.h>
 
-#include <utils/string_utils.h>
+#include <base/string_utils.h>
 
 //=============================================================================================================
 // QT INCLUDES
