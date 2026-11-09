@@ -10,22 +10,21 @@
  *           Gabriel Motta <gabrielbenmotta@gmail.com>
  * @since    0.1.0
  * @date     November 2014
- * @brief    Generator that projects 3-D electrode positions onto a 2-D @c .lout topographic layout via least-squares sphere fitting.
+ * @brief    Generator that projects 3-D electrode positions onto a 2-D @c .lout topographic layout.
  *
  * @ref CHANNELSLIB::LayoutMaker is the counterpart of
  * @ref CHANNELSLIB::LayoutLoader "LayoutLoader": given the 3-D coordinates of an
  * EEG cap (typically captured with the Polhemus digitizer or
  * loaded from a vendor @c .elc file) it produces the 2-D
- * channel layout file used by every topographic widget in
+ * channel layout used by every topographic widget in
  * mne-cpp — butterfly plots, sensor maps, time-frequency
  * heatmaps in DISPLIB and DISP3DLIB.
  *
- * The projection is done by first fitting a sphere to the
- * supplied head-frame points (@ref MATHLIB::Sphere::fit_sphere_simplex), then
- * applying an azimuthal projection of every electrode onto
- * the tangent plane at the sphere apex. Optional mirroring
- * flags exist for caps whose left/right convention differs
- * from MNE's defaults.
+ * As in MNE-C @c mne_make_eeg_layout, a sphere is fitted to the
+ * points (@ref MATHLIB::Sphere::fit_sphere_simplex) and every
+ * electrode is mapped by an azimuthal equidistant projection
+ * around the sphere apex. Optional mirroring flags exist for
+ * caps whose left/right convention differs from MNE's defaults.
  */
 
 #ifndef CHANNELS_LAYOUTMAKER_H
@@ -37,18 +36,12 @@
 
 #include "channels_global.h"
 
+#include <base/string_utils.h>
+
+#include <filesystem>
+#include <optional>
+#include <span>
 #include <vector>
-#include <string>
-#include <fstream>
-
-//=============================================================================================================
-// QT INCLUDES
-//=============================================================================================================
-
-#include <QVector>
-#include <QList>
-#include <QStringList>
-#include <QFile>
 
 //=============================================================================================================
 // EIGEN INCLUDES
@@ -57,7 +50,7 @@
 #include <Eigen/Core>
 
 //=============================================================================================================
-// DEFINE NAMESPACE MNELIB
+// DEFINE NAMESPACE CHANNELSLIB
 //=============================================================================================================
 
 namespace CHANNELSLIB
@@ -65,9 +58,25 @@ namespace CHANNELSLIB
 
 //=============================================================================================================
 /**
- * Make layout files from given 3D points
+ * @brief How @ref LayoutMaker::make_layout projects and sizes the channel boxes.
  *
- * @brief Make layout files from given 3D points.
+ * @snippet ex_channels/main.cpp layout_maker_usage
+ */
+struct CHANNELSSHARED_EXPORT LayoutOptions
+{
+    bool fit_sphere = true;  /**< Project around the best-fitting sphere, else around the origin. */
+    double radius = 20.0;    /**< Radius of the projection disk, in layout units. */
+    double box_width = 5.0;  /**< Width of each channel box, in layout units. */
+    double box_height = 4.0; /**< Height of each channel box, in layout units. */
+    bool mirror_x = false;   /**< Negate the x coordinates. */
+    bool mirror_y = false;   /**< Negate the y coordinates. */
+};
+
+//=============================================================================================================
+/**
+ * Makes 2-D channel layouts from 3-D sensor positions.
+ *
+ * @brief Makes 2-D channel layouts from 3-D sensor positions.
  *
  * @snippet ex_channels/main.cpp layout_maker_usage
  */
@@ -76,70 +85,33 @@ class CHANNELSSHARED_EXPORT LayoutMaker
 public:
     //=========================================================================================================
     /**
-     * Reads the specified ANT elc-layout file.
-     * @param[in] inputPoints       The input points in 3D space.
-     * @param[in, out] outputPoints     The output layout points in 2D space.
-     * @param[in] names             The channel names.
-     * @param[in] outFile           The outout file.
-     * @param[in] do_fit            The flag whether to do a sphere fitting.
-     * @param[in] prad Radius of the projection disk in layout units.
-     * @param[in] w Width of each channel box in layout units.
-     * @param[in] h Height of each channel box in layout units.
-     * @param[in] writeFile         The flag whether to write to file.
-     * @param[in] mirrorXAxis       Mirror points at x axis.
-     * @param[in] mirrorYAxis       Mirror points at y axis.
+     * Projects 3-D positions onto the plane.
      *
-     * @return true if making layout was successful, false otherwise.
+     * @param[in] positions  The sensor positions.
+     * @param[in] options    Projection and box size.
+     *
+     * @return The lower-left corner of each channel box, or no value if there are no positions or all coincide.
      */
-    static bool makeLayout(const QList<QVector<float>>& inputPoints,
-                           QList<QVector<float>>& outputPoints,
-                           const QStringList& names,
-                           QFile& outFile,
-                           bool do_fit,
-                           float prad,
-                           float w,
-                           float h,
-                           bool writeFile = false,
-                           bool mirrorXAxis = false,
-                           bool mirrorYAxis = false);
+    static std::optional<std::vector<Eigen::Vector2d>> make_layout(std::span<const Eigen::Vector3d> positions,
+                                                                   const LayoutOptions& options = {});
 
     //=========================================================================================================
     /**
-     * Reads the specified ANT elc-layout file.
-     * @param[in] inputPoints       The input points in 3D space.
-     * @param[in, out] outputPoints     The output layout points in 2D space.
-     * @param[in] names             The channel names.
-     * @param[in] outFilePath           The outout file.
-     * @param[in] do_fit            The flag whether to do a sphere fitting.
-     * @param[in] prad Radius of the projection disk in layout units.
-     * @param[in] w Width of each channel box in layout units.
-     * @param[in] h Height of each channel box in layout units.
-     * @param[in] writeFile         The flag whether to write to file.
-     * @param[in] mirrorXAxis       Mirror points at x axis.
-     * @param[in] mirrorYAxis       Mirror points at y axis.
+     * Writes channel boxes as an MNE-C @c .lout file.
      *
-     * @return true if making layout was successful, false otherwise.
+     * @param[in] path     The output file.
+     * @param[in] corners  The lower-left corner of each box, as returned by make_layout().
+     * @param[in] names    The channel names; boxes without a name are written unnamed.
+     * @param[in] options  The box size.
+     *
+     * @return Whether the file was written.
      */
-    static bool makeLayout(const std::vector<std::vector<float>>& inputPoints,
-                           std::vector<std::vector<float>>& outputPoints,
-                           const std::vector<std::string>& names,
-                           const std::string& outFilePath,
-                           bool do_fit,
-                           float prad,
-                           float w,
-                           float h,
-                           bool writeFile = false,
-                           bool mirrorXAxis = false,
-                           bool mirrorYAxis = false);
-
-private:
-    static void sphere_coord(float x,
-                             float y,
-                             float z,
-                             float* r,
-                             float* theta,
-                             float* phi);
+    static bool write_lout(const std::filesystem::path& path,
+                           std::span<const Eigen::Vector2d> corners,
+                           const BASELIB::StringList& names,
+                           const LayoutOptions& options = {});
 };
-} //NAMESPACE
+
+} // namespace CHANNELSLIB
 
 #endif // CHANNELS_LAYOUTMAKER_H

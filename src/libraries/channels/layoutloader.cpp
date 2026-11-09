@@ -6,18 +6,10 @@
  * @file     layoutloader.cpp
  * @author   Lorenz Esch <lorenz.esch@tu-ilmenau.de>;
  *           Christoph Dinh <christoph.dinh@mne-cpp.org>;
- *           Gabriel Motta <gabrielbenmotta@gmail.com>;
- *           Andreas Griesshammer <ag@fieldlineinc.com>
+ *           Gabriel Motta <gabrielbenmotta@gmail.com>
  * @since    0.1.0
  * @date     September 2014
- * @brief    Implementation of the ANT @c .elc parser declared in @ref layoutloader.h.
- *
- * The parsers are deliberately tolerant of trailing whitespace
- * and missing comment lines because exported layouts from
- * different vendors and from hand-edited test fixtures vary
- * widely. Unit conversion to metres happens at read time so
- * downstream consumers (DISP3DLIB, MNELIB) never need to keep
- * track of which file flavour produced a coordinate.
+ * @brief    Implementation of the @c .elc reader declared in @ref layoutloader.h.
  */
 
 //=============================================================================================================
@@ -25,18 +17,12 @@
 //=============================================================================================================
 
 #include "layoutloader.h"
+
 #include <base/log.h>
+
 #include <algorithm>
 #include <fstream>
-
-//=============================================================================================================
-// QT INCLUDES
-//=============================================================================================================
-
-#include <QIODevice>
-#include <QTextStream>
-#include <QFile>
-#include <QRegularExpression>
+#include <sstream>
 
 //=============================================================================================================
 // USED NAMESPACES
@@ -46,183 +32,106 @@ using namespace CHANNELSLIB;
 using namespace BASELIB;
 
 //=============================================================================================================
-// DEFINE MEMBER METHODS
-//=============================================================================================================s
+// STATIC HELPERS
+//=============================================================================================================
 
-bool LayoutLoader::readAsaElcFile(const QString& path,
-                                  QStringList& channelNames,
-                                  QList<QVector<float>>& location3D,
-                                  QList<QVector<float>>& location2D,
-                                  QString& unit)
+namespace
 {
-    //Open .elc file
-    if (!path.contains(".elc"))
-        return false;
 
-    QFile file(path);
-    if (!file.open(QIODevice::ReadOnly | QIODevice::Text)) {
-        Log::debug("Error opening elc file");
-        return false;
+enum class Block
+{
+    Header,
+    Positions3d,
+    Positions2d,
+    Labels
+};
+
+// The trailing numbers of a position line, after an optional "name :" prefix.
+std::optional<std::vector<double>> coordinates(std::string_view line, std::string* name)
+{
+    if (const auto colon = line.find(':'); colon != std::string_view::npos) {
+        if (name)
+            *name = std::string(trimmed(line.substr(0, colon)));
+        line.remove_prefix(colon + 1);
     }
-
-    //Start reading from file
-    double numberElectrodes;
-    QTextStream in(&file);
-    bool read2D = false;
-
-    while (!in.atEnd()) {
-        QString line = in.readLine();
-
-        QStringList fields = line.split(QRegularExpression("\\s+"));
-
-        //Delete last element if it is a blank character
-        if (fields.at(fields.size() - 1) == "")
-            fields.removeLast();
-
-        if (!line.contains("#")) //Skip commented areas in file
-        {
-            //Read number of electrodes
-            if (line.contains("NumberPositions"))
-                numberElectrodes = fields.at(1).toDouble();
-
-            //Read the unit of the position values
-            if (line.contains("UnitPosition"))
-                unit = fields.at(1);
-
-            //Read actual electrode positions
-            if (line.contains("Positions2D"))
-                read2D = true;
-
-            if (line.contains(":") && !read2D) //Read 3D positions
-            {
-                channelNames.push_back(fields.at(0));
-                QVector<float> posTemp;
-
-                posTemp.push_back(fields.at(fields.size() - 3).toDouble()); //x
-                posTemp.push_back(fields.at(fields.size() - 2).toDouble()); //y
-                posTemp.push_back(fields.at(fields.size() - 1).toDouble()); //z
-
-                location3D.append(posTemp);
-            }
-
-            if (line.contains(":") && read2D) //Read 2D positions
-            {
-                QVector<float> posTemp;
-                posTemp.push_back(fields.at(fields.size() - 2).toDouble()); //x
-                posTemp.push_back(fields.at(fields.size() - 1).toDouble()); //y
-                location2D.append(posTemp);
-            }
-
-            //Read channel names
-            if (line.contains("Labels")) {
-                line = in.readLine();
-                fields = line.split(QRegularExpression("\\s+"));
-
-                //Delete last element if it is a blank character
-                if (fields.at(fields.size() - 1) == "")
-                    fields.removeLast();
-
-                channelNames = fields;
-            }
-        }
+    std::vector<double> values;
+    for (const std::string& field : split(line, ' ', true)) {
+        const auto value = toDouble(field);
+        if (!value)
+            return std::nullopt;
+        values.push_back(*value);
     }
+    return values;
+}
 
-    static_cast<void>(numberElectrodes);
+} // anonymous namespace
 
-    file.close();
+//=============================================================================================================
+// DEFINE MEMBER METHODS
+//=============================================================================================================
 
-    return true;
+std::optional<ElectrodeLayout> LayoutLoader::read_elc(const std::filesystem::path& path)
+{
+    if (toLower(path.extension().string()) != ".elc")
+        return std::nullopt;
+
+    std::ifstream file(path);
+    if (!file) {
+        Log::debug("Cannot open the electrode file {}", path.string());
+        return std::nullopt;
+    }
+    std::stringstream text;
+    text << file.rdbuf();
+    return parse_elc(text.str());
 }
 
 //=============================================================================================================
 
-bool LayoutLoader::readAsaElcFile(const std::string& path,
-                                  std::vector<std::string>& channelNames,
-                                  std::vector<std::vector<float>>& location3D,
-                                  std::vector<std::vector<float>>& location2D,
-                                  std::string& unit)
+std::optional<ElectrodeLayout> LayoutLoader::parse_elc(std::string_view text)
 {
-    if (path.find(".elc") == std::string::npos) {
-        return false;
-    }
+    ElectrodeLayout layout;
+    StringList prefixNames;
+    StringList labels;
+    Block block = Block::Header;
 
-    std::ifstream inFile(path);
+    for (std::string line : split(text, '\n')) {
+        std::replace(line.begin(), line.end(), '\t', ' ');
+        const std::string_view content = trimmed(line);
+        if (content.empty() || content.front() == '#')
+            continue;
 
-    if (!inFile.is_open()) {
-        Log::debug("Error opening elc file");
-        return false;
-    }
-
-    //Start reading from file
-    double numberElectrodes;
-    bool read2D = false;
-
-    std::string line;
-
-    while (std::getline(inFile, line)) {
-        if (line.find('#') == std::string::npos) {
-            std::vector<std::string> elements;
-            std::stringstream stream{line};
-            std::string element;
-
-            stream >> std::ws;
-            while (stream >> element) {
-                elements.push_back(std::move(element));
-                stream >> std::ws;
-            }
-
-            //Read number of electrodes
-            if (line.find("NumberPositions") != std::string::npos)
-                numberElectrodes = std::stod(elements.at(1));
-
-            //Read the unit of the position values
-            if (line.find("UnitPosition") != std::string::npos)
-                unit = elements.at(1);
-
-            //Read actual electrode positions
-            if (line.find("Positions2D") != std::string::npos)
-                read2D = true;
-
-            if (line.find(':') != std::string::npos && !read2D) //Read 3D positions
-            {
-                channelNames.push_back(elements.at(0));
-                std::vector<float> posTemp;
-
-                posTemp.push_back(std::stod(elements.at(elements.size() - 3))); //x
-                posTemp.push_back(std::stod(elements.at(elements.size() - 2))); //y
-                posTemp.push_back(std::stod(elements.at(elements.size() - 1))); //z
-
-                location3D.push_back(std::move(posTemp));
-            }
-
-            if (line.find(":") != std::string::npos && read2D) //Read 2D positions
-            {
-                std::vector<float> posTemp;
-                posTemp.push_back(std::stod(elements.at(elements.size() - 2))); //x
-                posTemp.push_back(std::stod(elements.at(elements.size() - 1))); //y
-                location2D.push_back(std::move(posTemp));
-            }
-
-            //Read channel names
-            if (line.find("Labels") != std::string::npos) {
-                std::getline(inFile, line);
-                std::stringstream channels{line};
-                std::vector<std::string> listOfNames;
-
-                std::string channelName;
-
-                channels >> std::ws;
-                while (channels >> channelName) {
-                    listOfNames.push_back(std::move(channelName));
-                    channels >> std::ws;
-                }
-
-                channelNames = std::move(listOfNames);
-            }
+        const StringList fields = split(content, ' ', true);
+        const std::string_view keyword = fields.front();
+        if (keyword == "Positions") {
+            block = Block::Positions3d;
+        } else if (keyword == "Positions2D") {
+            block = Block::Positions2d;
+        } else if (keyword == "Labels") {
+            block = Block::Labels;
+        } else if (keyword == "UnitPosition") {
+            if (fields.size() > 1)
+                layout.unit = fields[1];
+        } else if (keyword.starts_with("NumberPositions") || keyword == "ReferenceLabel") {
+            continue;
+        } else if (block == Block::Labels) {
+            labels.insert(labels.end(), fields.begin(), fields.end());
+        } else if (block == Block::Positions3d) {
+            std::string name;
+            const auto values = coordinates(content, &name);
+            if (!values || values->size() != 3)
+                return std::nullopt;
+            layout.positions_3d.emplace_back((*values)[0], (*values)[1], (*values)[2]);
+            prefixNames.push_back(std::move(name));
+        } else if (block == Block::Positions2d) {
+            const auto values = coordinates(content, nullptr);
+            if (!values || values->size() != 2)
+                return std::nullopt;
+            layout.positions_2d.emplace_back((*values)[0], (*values)[1]);
         }
     }
 
-    static_cast<void>(numberElectrodes);
-
-    return true;
+    layout.names = labels.empty() ? std::move(prefixNames) : std::move(labels);
+    if (layout.positions_3d.empty() || layout.names.size() != layout.positions_3d.size())
+        return std::nullopt;
+    return layout;
 }

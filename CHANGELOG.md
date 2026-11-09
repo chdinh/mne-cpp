@@ -28,6 +28,10 @@ aliases; replace the old spelling as below.
 | `QTest::ignoreMessage` for library messages | `BASELIB::LogCapture` |
 | `utils/error.h`, `byte_stream.h`, `endian.h`, `string_utils.h`, `thread_pool.h`, `buildinfo.h` and `UTILSLIB::Expected`, `Error`, `ByteStream`, `StringList`, `ThreadPool`, ... | `base/...` and `BASELIB::...`, in the new `mne_base` library |
 | `utils/layoutloader.h`, `layoutmaker.h`, `selectionio.h`, `montage/standard_montage.h` and `UTILSLIB::LayoutLoader`, `LayoutMaker`, `SelectionIO`, `StandardMontage` | `channels/...` and `CHANNELSLIB::...`, in the new `mne_channels` library |
+| `LayoutLoader::readAsaElcFile(path, names, loc3D, loc2D, unit)` | `LayoutLoader::read_elc(path)` → `std::optional<ElectrodeLayout>` (`names`, `positions_3d`, `positions_2d`, `unit`); `parse_elc(text)` |
+| `LayoutMaker::makeLayout(in, out, names, file, do_fit, prad, w, h, writeFile, mirrorX, mirrorY)` | `LayoutMaker::make_layout(positions, LayoutOptions)` → box corners; `write_lout(path, corners, names, options)` |
+| `SelectionIO::readMNESelFile`, `readBrainstormMonFile`, `writeMNESelFile`, `writeBrainstormMonFiles` (`QMultiMap` / `std::multimap`) | `SelectionIO::read_sel`, `read_mon`, `write_sel`, `write_mon` with `std::vector<ChannelSelection>` in file order |
+| `StandardMontage::getMontage`, `getElectrodeNames`, `findElectrode(name, pos)`, `electrodeCount` | `montage`, `electrode_names`, `find_electrode(name)` → `std::optional<Eigen::Vector3d>`, `electrode_count` |
 | `utils/ioutils.h`, `IOUtils::write_eigen_matrix(m, path, desc)`, `IOUtils::read_eigen_matrix(m, path)` | `math/matrix_io.h`, `MATHLIB::write_matrix(m, path, desc)`, `MATHLIB::read_matrix(m, path)` |
 | `utils/python_runner.h`, `python_test_helper.h`, `UTILSLIB::PythonRunner`, `PythonTestHelper` | `pybridge/...`, `PYBRIDGELIB::...`, in the new `mne_pybridge` library |
 | `PythonRunner::runCode`, `isPackageAvailable`, `ensureVenv`, ...; `result.stdOut`, `exitCode`, ...; `config.pythonExe`, `timeoutMsec`, `extraEnv` (`KEY=VALUE` list), ... | `run_code`, `is_package_available`, `ensure_venv`, ...; `std_out`, `exit_code`, ...; `python_exe`, `timeout` (`std::chrono`), `extra_env` (map), ... |
@@ -66,6 +70,14 @@ aliases; replace the old spelling as below.
   as base64 data, so the page stays one self-contained file, and links its
   sections from a table of contents. It escapes single quotes too, and its
   footer shows the generation time in UTC.
+- `mne_channels` no longer depends on Qt; the standard_1005 table is compiled
+  in. `LayoutLoader` also reads MNE-Python's `.elc` layout (plain coordinates,
+  one label per line) and Windows line ends, and fails on malformed numbers
+  instead of reading them as zero. `SelectionIO::write_mon` refuses group names
+  that would leave the target directory.
+- `ex_make_layout` honours `--mirrorY`; it used to mirror x twice.
+- `Sphere::fit_sphere_simplex` returns a zero centre when the fit fails; it was
+  uninitialised. `LayoutMaker` then projects around the origin, as MNE-C does.
 - `Subject::detach` of an observer that is not attached no longer crashes, and
   observers may detach themselves while they are notified.
 - `mne_rt_server` no longer aborts in debug builds when a client requests the

@@ -1332,7 +1332,7 @@
     },
     {
       "source": "parity",
-      "mne_cpp": "CHANNELSLIB::LayoutMaker::makeLayout",
+      "mne_cpp": "CHANNELSLIB::LayoutMaker::make_layout",
       "python": "mne.channels.generate_2d_layout",
       "claimed": "partial",
       "equivalence": null,
@@ -1350,7 +1350,7 @@
     },
     {
       "source": "parity",
-      "mne_cpp": "LayoutMaker::makeLayout (CLI)",
+      "mne_cpp": "LayoutMaker::make_layout (CLI)",
       "python": "mne.channels.make_eeg_layout",
       "claimed": "implemented",
       "equivalence": null,
@@ -1359,7 +1359,7 @@
     },
     {
       "source": "parity",
-      "mne_cpp": "CHANNELSLIB::StandardMontage::getMontage",
+      "mne_cpp": "CHANNELSLIB::StandardMontage::montage",
       "python": "mne.channels.make_standard_montage",
       "claimed": "partial",
       "equivalence": null,
@@ -1369,7 +1369,7 @@
     },
     {
       "source": "parity",
-      "mne_cpp": "CHANNELSLIB::LayoutLoader::readAsaElcFile",
+      "mne_cpp": "CHANNELSLIB::LayoutLoader::read_elc",
       "python": "mne.channels.read_custom_montage",
       "claimed": "partial",
       "equivalence": null,
@@ -1466,7 +1466,7 @@
     },
     {
       "source": "parity",
-      "mne_cpp": "CHANNELSLIB::SelectionIO::readMNESelFile",
+      "mne_cpp": "CHANNELSLIB::SelectionIO::read_sel",
       "python": "mne.channels.read_vectorview_selection",
       "claimed": "partial",
       "equivalence": null,
@@ -2869,7 +2869,7 @@
     },
     {
       "source": "parity",
-      "mne_cpp": "SelectionIO::readMNESelFile",
+      "mne_cpp": "SelectionIO::read_sel",
       "python": "mne.read_vectorview_selection",
       "claimed": "partial",
       "equivalence": null,

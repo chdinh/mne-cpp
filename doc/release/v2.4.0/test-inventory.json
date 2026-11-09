@@ -1650,7 +1650,7 @@
       "timeout": 60,
       "requirements": [],
       "gui": false,
-      "qskip_sites": 2,
+      "qskip_sites": 1,
       "spawns_processes": false,
       "ci_excluded_on": [],
       "ci": {
@@ -1661,7 +1661,14 @@
         "windows-2025-vs2026": "absent",
         "windows-2025-vs2026-qt-min": "absent"
       },
-      "registry_classes": []
+      "registry_classes": [
+        "ChannelSelection",
+        "ElectrodeLayout",
+        "LayoutLoader",
+        "LayoutMaker",
+        "LayoutOptions",
+        "SelectionIO"
+      ]
     },
     {
       "name": "test_channels_standard_montage",
@@ -1695,6 +1702,7 @@
         "windows-2025-vs2026-qt-min": "absent"
       },
       "registry_classes": [
+        "ElectrodePosition",
         "StandardMontage"
       ]
     },

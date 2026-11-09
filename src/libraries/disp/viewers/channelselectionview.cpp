@@ -45,7 +45,10 @@
 #include <QKeyEvent>
 #include <QSignalBlocker>
 #include <QDebug>
+#include <filesystem>
+#include <optional>
 #include <utility>
+#include <vector>
 
 //=============================================================================================================
 // USED NAMESPACES
@@ -473,10 +476,8 @@ bool ChannelSelectionView::loadLayout(const QString& path)
     }
 
     //if no layout for EEG is specified generate from digitizer points
-    QList<QVector<float>> inputPoints;
-    QList<QVector<float>> outputPoints;
+    std::vector<Eigen::Vector3d> positions;
     QStringList names;
-    QFile out("manualLayout.lout");
 
     for (int i = 0; i < m_pChannelInfoModel->rowCount(); i++) {
         QModelIndex digIndex = m_pChannelInfoModel->index(i, 1);
@@ -488,46 +489,21 @@ bool ChannelSelectionView::loadLayout(const QString& path)
         digIndex = m_pChannelInfoModel->index(i, 4);
         int kind = m_pChannelInfoModel->data(digIndex, ChannelInfoModelRoles::GetChKind).toInt();
 
-        if (kind == FIFFV_EEG_CH) { //FIFFV_MEG_CH
-            QVector<float> temp;
-            temp.append(channelDig.x());
-            temp.append(channelDig.y());
-            temp.append(channelDig.z());
-            inputPoints.append(temp);
-
+        if (kind == FIFFV_EEG_CH) {
+            positions.emplace_back(channelDig.x(), channelDig.y(), channelDig.z());
             names << chName;
         }
     }
 
-    float prad = 60.0;
-    float width = 5.0;
-    float height = 4.0;
-    int numberTries = 0;
-
-    if (inputPoints.size() > 0) {
-        while (numberTries < 10) {
-            if (!LayoutMaker::makeLayout(inputPoints,
-                                         outputPoints,
-                                         names,
-                                         out,
-                                         true,
-                                         prad,
-                                         width,
-                                         height,
-                                         false,
-                                         false,
-                                         true)) {
-                numberTries++;
-            } else {
-                numberTries = 11;
-            }
-        }
-    }
-
     //Add new EEG points to Layout Map
-    for (int i = 0; i < outputPoints.size(); i++) {
-        if (!m_layoutMap.contains(names.at(i))) {
-            m_layoutMap[names.at(i)] = QPointF(outputPoints.at(i)[0], outputPoints.at(i)[1]);
+    if (!positions.empty()) {
+        const auto corners = CHANNELSLIB::LayoutMaker::make_layout(positions, {.radius = 60.0, .box_width = 5.0, .box_height = 4.0, .mirror_y = true});
+        if (corners) {
+            for (std::size_t i = 0; i < corners->size(); ++i) {
+                const QString& name = names.at(static_cast<qsizetype>(i));
+                if (!m_layoutMap.contains(name))
+                    m_layoutMap[name] = QPointF((*corners)[i].x(), (*corners)[i].y());
+            }
         }
     }
 
@@ -581,12 +557,24 @@ bool ChannelSelectionView::loadSelectionGroups(const QString& path)
 
     // An empty path, or one with neither recognised extension, reads nothing
     // and must report failure rather than an indeterminate value.
-    bool state = false;
+    std::optional<std::vector<ChannelSelection>> groups;
     if (!path.isEmpty()) {
+        const std::filesystem::path file = BASELIB::pathFromUtf8(newPath.toStdString());
         if (path.contains(".sel"))
-            state = SelectionIO::readMNESelFile(newPath, m_selectionGroupsMap);
-        if (path.contains(".mon"))
-            state = SelectionIO::readBrainstormMonFile(newPath, m_selectionGroupsMap);
+            groups = SelectionIO::read_sel(file);
+        if (path.contains(".mon")) {
+            if (auto group = SelectionIO::read_mon(file))
+                groups = std::vector<ChannelSelection>{std::move(*group)};
+        }
+    }
+    const bool state = groups.has_value();
+    if (groups) {
+        for (const ChannelSelection& group : *groups) {
+            QStringList channels;
+            for (const std::string& channel : group.channels)
+                channels << QString::fromStdString(channel);
+            m_selectionGroupsMap.insert(QString::fromStdString(group.name), channels);
+        }
     }
 
     //Create group 'All' and 'All EEG' manually (bcause this group depends on the loaded channels from the Info data file, not on the loaded selection file)
@@ -747,10 +735,18 @@ void ChannelSelectionView::onBtnSaveUserSelection()
     tempMap.remove("All EEG");
 
     if (!path.isEmpty()) {
+        std::vector<ChannelSelection> groups;
+        for (auto it = tempMap.constBegin(); it != tempMap.constEnd(); ++it) {
+            ChannelSelection group{it.key().toStdString(), {}};
+            for (const QString& channel : it.value())
+                group.channels.push_back(channel.toStdString());
+            groups.push_back(std::move(group));
+        }
+        const std::filesystem::path file = BASELIB::pathFromUtf8(path.toStdString());
         if (path.contains(".sel"))
-            SelectionIO::writeMNESelFile(path, tempMap);
+            SelectionIO::write_sel(file, groups);
         if (path.contains(".mon"))
-            SelectionIO::writeBrainstormMonFiles(path, tempMap);
+            SelectionIO::write_mon(file.parent_path(), groups);
     }
 }
 

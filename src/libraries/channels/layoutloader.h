@@ -10,7 +10,7 @@
  *           Gabriel Motta <gabrielbenmotta@gmail.com>
  * @since    0.1.0
  * @date     September 2014
- * @brief    Reader for ANT @c .elc electrode files used by the topographic plotting widgets.
+ * @brief    Reader for ANT/ASA @c .elc electrode files used by the topographic plotting widgets.
  *
  * ANT @c .elc is the ASCII electrode list of ANT/eemagine systems with 3-D head-frame
  * and 2-D projected positions and a unit declaration (mm / cm / m). MNE-C @c .lout
@@ -26,18 +26,13 @@
 
 #include "channels_global.h"
 
+#include <base/string_utils.h>
+
+#include <filesystem>
+#include <optional>
 #include <string>
+#include <string_view>
 #include <vector>
-
-//=============================================================================================================
-// QT INCLUDES
-//=============================================================================================================
-
-#include <QSharedPointer>
-#include <QVector>
-#include <QStringList>
-#include <QString>
-#include <QPoint>
 
 //=============================================================================================================
 // EIGEN INCLUDES
@@ -46,21 +41,31 @@
 #include <Eigen/Core>
 
 //=============================================================================================================
-// DEFINE NAMESPACE MNELIB
+// DEFINE NAMESPACE CHANNELSLIB
 //=============================================================================================================
 
 namespace CHANNELSLIB
 {
 
 //=============================================================================================================
-// DEFINES
-//=============================================================================================================
+/**
+ * @brief The electrodes of an @c .elc file, in file order.
+ *
+ * @snippet ex_channels/main.cpp layout_loader_usage
+ */
+struct CHANNELSSHARED_EXPORT ElectrodeLayout
+{
+    BASELIB::StringList names;                 /**< Electrode names, from the Labels block if present. */
+    std::vector<Eigen::Vector3d> positions_3d; /**< 3-D positions, in @c unit. */
+    std::vector<Eigen::Vector2d> positions_2d; /**< 2-D positions of the Positions2D block, if present. */
+    std::string unit;                          /**< Unit of the positions, e.g. "mm". */
+};
 
 //=============================================================================================================
 /**
- * Reads ANT .elc files, which contain the electrode positions of an EEG cap.
+ * Reads ANT/ASA .elc files, which hold the electrode positions of an EEG cap.
  *
- * @brief Reads ANT .elc electrode files into Qt/STL containers.
+ * @brief Reads ANT/ASA .elc electrode files.
  *
  * @snippet ex_channels/main.cpp layout_loader_usage
  */
@@ -69,38 +74,28 @@ class CHANNELSSHARED_EXPORT LayoutLoader
 public:
     //=========================================================================================================
     /**
-     * Reads the specified ANT elc-layout file.
-     * @param[in] path holds the file path of the elc file which is to be read.
-     * @param[in, out] channelNames Receives the channel names.
-     * @param[in] location3D holds the vector to which the read 3D positions are stored.
-     * @param[in] location2D holds the vector to which the read 2D positions are stored.
-     * @param[in, out] unit Receives the unit of the positions.
-     * @return true if reading was successful, false otherwise.
+     * Reads an .elc file.
+     *
+     * @param[in] path  The .elc file.
+     *
+     * @return The electrodes, or no value if the file has no .elc extension, cannot be opened or is malformed.
      */
-    static bool readAsaElcFile(const QString& path,
-                               QStringList& channelNames,
-                               QList<QVector<float>>& location3D,
-                               QList<QVector<float>>& location2D,
-                               QString& unit);
+    static std::optional<ElectrodeLayout> read_elc(const std::filesystem::path& path);
 
     //=========================================================================================================
     /**
-     * Reads the specified ANT elc-layout file.
-     * @param[in] path holds the file path of the elc file which is to be read.
-     * @param[in, out] channelNames Receives the channel names.
-     * @param[in] location3D holds the vector to which the read 3D positions are stored.
-     * @param[in] location2D holds the vector to which the read 2D positions are stored.
-     * @param[in, out] unit Receives the unit of the positions.
-     * @return true if reading was successful, false otherwise.
+     * Parses the text of an .elc file.
+     *
+     * Position lines are @c "name : x y z" or plain @c "x y z"; the names of a Labels block take precedence.
+     * Lines starting with @c # are comments.
+     *
+     * @param[in] text  The file contents.
+     *
+     * @return The electrodes, or no value if there are none or names and positions do not pair up.
      */
-    static bool readAsaElcFile(const std::string& path,
-                               std::vector<std::string>& channelNames,
-                               std::vector<std::vector<float>>& location3D,
-                               std::vector<std::vector<float>>& location2D,
-                               std::string& unit);
-
-private:
+    static std::optional<ElectrodeLayout> parse_elc(std::string_view text);
 };
-} // NAMESPACE
+
+} // namespace CHANNELSLIB
 
 #endif // CHANNELS_LAYOUTLOADER_H

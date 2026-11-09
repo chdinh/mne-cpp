@@ -15,9 +15,12 @@
 #include <QtTest>
 #include <QObject>
 #include <Eigen/Core>
+#include <algorithm>
 #include <cmath>
+#include <set>
 
 using namespace CHANNELSLIB;
+using namespace BASELIB;
 using namespace Eigen;
 
 class TestStandardMontage : public QObject
@@ -27,126 +30,115 @@ class TestStandardMontage : public QObject
 private slots:
     void testMontage1020Count()
     {
-        auto montage = StandardMontage::getMontage(StandardMontage::System::Standard_1020);
-        QCOMPARE(montage.size(), 21);
+        QCOMPARE(StandardMontage::montage(StandardMontage::System::Standard_1020).size(), std::size_t(21));
     }
 
     void testMontage1010Count()
     {
-        auto montage = StandardMontage::getMontage(StandardMontage::System::Standard_1010);
-        QVERIFY(montage.size() > 21);
-        QVERIFY(montage.size() >= 60);
+        QCOMPARE(StandardMontage::montage(StandardMontage::System::Standard_1010).size(), std::size_t(73));
     }
 
     void testElectrodeNames1020()
     {
-        QStringList names = StandardMontage::getElectrodeNames(StandardMontage::System::Standard_1020);
-        QCOMPARE(names.size(), 21);
-        QVERIFY(names.contains("Cz"));
-        QVERIFY(names.contains("Fp1"));
-        QVERIFY(names.contains("O2"));
-        QVERIFY(names.contains("A1"));
+        const StringList names = StandardMontage::electrode_names(StandardMontage::System::Standard_1020);
+        QCOMPARE(names.size(), std::size_t(21));
+        for (const char* name : {"Cz", "Fp1", "O2", "A1"})
+            QVERIFY(contains(names, name));
     }
 
     void testElectrodeNames1010()
     {
-        QStringList names = StandardMontage::getElectrodeNames(StandardMontage::System::Standard_1010);
-        QVERIFY(names.contains("FCz"));
-        QVERIFY(names.contains("CPz"));
-        QVERIFY(names.contains("AF7"));
-        QVERIFY(names.contains("PO8"));
+        const StringList names = StandardMontage::electrode_names(StandardMontage::System::Standard_1010);
+        for (const char* name : {"FCz", "CPz", "AF7", "PO8"})
+            QVERIFY(contains(names, name));
     }
 
     void testFindElectrode()
     {
-        Vector3d pos;
-        QVERIFY(StandardMontage::findElectrode("Cz", pos));
-        // Cz should be at midline, superior position
-        QVERIFY(std::abs(pos.x()) < 0.001); // midline
-        QVERIFY(pos.z() > 0.05);            // superior
+        const auto cz = StandardMontage::find_electrode("Cz");
+        QVERIFY(cz);
+        QVERIFY(std::abs(cz->x()) < 0.001); // midline
+        QVERIFY(cz->z() > 0.05);            // superior
     }
 
     void testFindElectrodeCaseInsensitive()
     {
-        Vector3d pos1, pos2;
-        QVERIFY(StandardMontage::findElectrode("cz", pos1));
-        QVERIFY(StandardMontage::findElectrode("CZ", pos2));
-        QVERIFY((pos1 - pos2).norm() < 1e-10);
+        const auto lower = StandardMontage::find_electrode("cz");
+        const auto upper = StandardMontage::find_electrode("CZ");
+        QVERIFY(lower && upper);
+        QCOMPARE(*lower, *upper);
+        // The fiducials are in the table, though not in the montage
+        QVERIFY(StandardMontage::find_electrode("lpa"));
     }
 
     void testFindElectrodeNotFound()
     {
-        Vector3d pos;
-        QVERIFY(!StandardMontage::findElectrode("NONEXISTENT", pos));
+        QVERIFY(!StandardMontage::find_electrode("NONEXISTENT"));
+        QVERIFY(!StandardMontage::find_electrode(""));
     }
 
     void testPositionsReasonableRange()
     {
         // All electrodes should be within ~12 cm of origin
-        auto montage = StandardMontage::getMontage(StandardMontage::System::Standard_1020);
-        for (const auto& ep : montage) {
-            double r = ep.pos.norm();
-            QVERIFY2(r > 0.01 && r < 0.15,
-                     qPrintable(QString("%1: r=%2 out of range").arg(ep.name).arg(r)));
+        for (const ElectrodePosition& electrode : StandardMontage::montage(StandardMontage::System::Standard_1020)) {
+            const double r = electrode.pos.norm();
+            QVERIFY2(r > 0.01 && r < 0.15, electrode.name.c_str());
         }
     }
 
     void testSymmetry()
     {
         // Fp1 and Fp2 should be symmetric about midline
-        Vector3d fp1, fp2;
-        QVERIFY(StandardMontage::findElectrode("Fp1", fp1));
-        QVERIFY(StandardMontage::findElectrode("Fp2", fp2));
-
-        QVERIFY(std::abs(fp1.x() + fp2.x()) < 0.005); // x symmetric
-        QVERIFY(std::abs(fp1.y() - fp2.y()) < 0.005); // y same
-        QVERIFY(std::abs(fp1.z() - fp2.z()) < 0.005); // z same
+        const auto fp1 = StandardMontage::find_electrode("Fp1");
+        const auto fp2 = StandardMontage::find_electrode("Fp2");
+        QVERIFY(fp1 && fp2);
+        QVERIFY(std::abs(fp1->x() + fp2->x()) < 0.005);
+        QVERIFY(std::abs(fp1->y() - fp2->y()) < 0.005);
+        QVERIFY(std::abs(fp1->z() - fp2->z()) < 0.005);
     }
 
     void testElectrodeCountMethod()
     {
-        QCOMPARE(StandardMontage::electrodeCount(StandardMontage::System::Standard_1020), 21);
-        QVERIFY(StandardMontage::electrodeCount(StandardMontage::System::Standard_1010) >= 60);
+        for (const auto system : {StandardMontage::System::Standard_1020, StandardMontage::System::Standard_1010, StandardMontage::System::Standard_1005})
+            QCOMPARE(StandardMontage::electrode_count(system), StandardMontage::montage(system).size());
     }
 
     void testPositionsMatchPython()
     {
         // Reference values produced by mne.channels.make_standard_montage("standard_1005")
         // (mne 1.11.0): 343 electrodes from Fp1 to A2, without the fiducials.
-        const QList<ElectrodePosition> montage = StandardMontage::getMontage(StandardMontage::System::Standard_1005);
-        QCOMPARE(montage.size(), 343);
-        QCOMPARE(montage.first().name, QStringLiteral("Fp1"));
-        QCOMPARE(montage.last().name, QStringLiteral("A2"));
+        const std::vector<ElectrodePosition> montage = StandardMontage::montage(StandardMontage::System::Standard_1005);
+        QCOMPARE(montage.size(), std::size_t(343));
+        QCOMPARE(montage.front().name, std::string("Fp1"));
+        QCOMPARE(montage.back().name, std::string("A2"));
         Vector3d sum = Vector3d::Zero();
         for (const ElectrodePosition& electrode : montage)
             sum += electrode.pos;
         QVERIFY((sum - Vector3d(0.23258589999999968, -5.762538499999998, 7.280988999999997)).norm() < 1e-12);
 
-        const QList<QPair<QString, Vector3d>> expected{{"Cz", {0.0004009, -0.009167, 0.100244}},
-                                                       {"A1", {-0.0860761, -0.0249897, -0.067986}},
-                                                       {"Fp1", {-0.0294367, 0.0839171, -0.00699}},
-                                                       {"O2", {0.0298426, -0.112156, 0.0088}}};
+        const std::vector<ElectrodePosition> expected{{"Cz", {0.0004009, -0.009167, 0.100244}},
+                                                      {"A1", {-0.0860761, -0.0249897, -0.067986}},
+                                                      {"Fp1", {-0.0294367, 0.0839171, -0.00699}},
+                                                      {"O2", {0.0298426, -0.112156, 0.0088}}};
         for (const auto& [name, position] : expected) {
-            Vector3d pos;
-            QVERIFY(StandardMontage::findElectrode(name, pos));
-            QVERIFY2((pos - position).norm() < 1e-12, qPrintable(name));
+            const auto pos = StandardMontage::find_electrode(name);
+            QVERIFY(pos);
+            QVERIFY2((*pos - position).norm() < 1e-12, name.c_str());
         }
         // The smaller systems are subsets of the same table
         for (const auto system : {StandardMontage::System::Standard_1020, StandardMontage::System::Standard_1010}) {
-            for (const ElectrodePosition& electrode : StandardMontage::getMontage(system)) {
-                Vector3d pos;
-                QVERIFY(StandardMontage::findElectrode(electrode.name, pos));
-                QCOMPARE(electrode.pos, pos);
+            for (const ElectrodePosition& electrode : StandardMontage::montage(system)) {
+                const auto pos = StandardMontage::find_electrode(electrode.name);
+                QVERIFY(pos);
+                QCOMPARE(electrode.pos, *pos);
             }
         }
-        QCOMPARE(StandardMontage::electrodeCount(StandardMontage::System::Standard_1010), 73);
     }
 
     void testUniqueNames()
     {
-        QStringList names = StandardMontage::getElectrodeNames(StandardMontage::System::Standard_1010);
-        QSet<QString> unique(names.begin(), names.end());
-        QCOMPARE(unique.size(), names.size());
+        const StringList names = StandardMontage::electrode_names(StandardMontage::System::Standard_1010);
+        QCOMPARE(std::set<std::string>(names.begin(), names.end()).size(), names.size());
     }
 };
 

@@ -11,14 +11,6 @@
  * @since    0.1.0
  * @date     May 2015
  * @brief    Implementation of the MNE @c .sel and Brainstorm @c .mon parsers declared in @ref selectionio.h.
- *
- * Parsing is line-oriented and intentionally lenient: comment
- * lines (@c #) and blank lines are skipped, trailing whitespace
- * is stripped, and channel names are matched case-sensitively
- * because FIFF names are case-sensitive themselves. The writer
- * preserves the original group ordering so a round-trip
- * load/save through mne-cpp does not reshuffle a user's
- * selections.
  */
 
 //=============================================================================================================
@@ -26,19 +18,10 @@
 //=============================================================================================================
 
 #include "selectionio.h"
+
 #include <base/log.h>
 
-#include <iostream>
 #include <fstream>
-#include <sstream>
-
-//=============================================================================================================
-// QT INCLUDES
-//=============================================================================================================
-
-#include <QFileInfo>
-#include <QTextStream>
-#include <QFile>
 
 //=============================================================================================================
 // USED NAMESPACES
@@ -48,289 +31,114 @@ using namespace CHANNELSLIB;
 using namespace BASELIB;
 
 //=============================================================================================================
+// STATIC HELPERS
+//=============================================================================================================
+
+namespace
+{
+
+bool has_extension(const std::filesystem::path& path, std::string_view extension)
+{
+    return toLower(path.extension().string()) == extension;
+}
+
+// A line without its Windows line end.
+std::string_view without_cr(std::string_view line)
+{
+    return !line.empty() && line.back() == '\r' ? line.substr(0, line.size() - 1) : line;
+}
+
+} // anonymous namespace
+
+//=============================================================================================================
 // DEFINE MEMBER METHODS
 //=============================================================================================================
 
-SelectionIO::SelectionIO()
+std::optional<std::vector<ChannelSelection>> SelectionIO::read_sel(const std::filesystem::path& path)
 {
+    if (!has_extension(path, ".sel"))
+        return std::nullopt;
+    std::ifstream file(path);
+    if (!file) {
+        Log::debug("Cannot open the selection file {}", path.string());
+        return std::nullopt;
+    }
+
+    std::vector<ChannelSelection> groups;
+    for (std::string line; std::getline(file, line);) {
+        const std::string_view content = without_cr(line);
+        const auto colon = content.find(':');
+        if (content.find('%') != std::string_view::npos || colon == std::string_view::npos)
+            continue;
+        groups.push_back({std::string(content.substr(0, colon)), split(content.substr(colon + 1), '|', true)});
+    }
+    return groups;
 }
 
 //=============================================================================================================
 
-bool SelectionIO::readMNESelFile(QString path, QMultiMap<QString, QStringList>& selectionMap)
+std::optional<ChannelSelection> SelectionIO::read_mon(const std::filesystem::path& path)
 {
-    //Open .sel file
-    if (!path.contains(".sel"))
-        return false;
-
-    //clear the map first
-    selectionMap.clear();
-
-    QFile file(path);
-    if (!file.open(QIODevice::ReadOnly | QIODevice::Text)) {
-        Log::debug("Error opening selection file");
-        return false;
+    if (!has_extension(path, ".mon"))
+        return std::nullopt;
+    std::ifstream file(path);
+    if (!file) {
+        Log::debug("Cannot open the montage file {}", path.string());
+        return std::nullopt;
     }
 
-    //Start reading from file
-    QTextStream in(&file);
-
-    while (!in.atEnd()) {
-        QString line = in.readLine();
-
-        if (line.contains("%") == false && line.contains(":") == true) //Skip commented areas in file
-        {
-            QStringList firstSplit = line.split(":");
-
-            //Create new key
-            QString key = firstSplit.at(0);
-
-            QStringList secondSplit = firstSplit.at(1).split("|");
-
-            //Delete last element if it is a blank character
-            if (secondSplit.at(secondSplit.size() - 1) == "")
-                secondSplit.removeLast();
-
-            //Add to map
-            selectionMap.insert(key, secondSplit);
-        }
-    }
-
-    file.close();
-
-    return true;
-}
-
-//=============================================================================================================
-
-bool SelectionIO::readMNESelFile(const std::string& path, std::multimap<std::string, std::vector<std::string>>& selectionMap)
-{
-    //Open .sel file
-    if (path.find(".sel") == std::string::npos)
-        return false;
-
-    //clear the map first
-    selectionMap.clear();
-
-    std::ifstream inFile(path);
-    if (!inFile.is_open()) {
-        Log::debug("Error opening selection file");
-        return false;
-    }
-
+    ChannelSelection group;
     std::string line;
-
-    while (std::getline(inFile, line)) {
-        if (line.find('%') == std::string::npos && line.find(':') != std::string::npos) {
-            // Split on ':' → key : channels
-            auto colonPos = line.find(':');
-            std::string key = line.substr(0, colonPos);
-            std::string channelsPart = line.substr(colonPos + 1);
-
-            // Split channels on '|'
-            std::vector<std::string> channels;
-            std::stringstream stream{channelsPart};
-            std::string token;
-            while (std::getline(stream, token, '|')) {
-                channels.push_back(token);
-            }
-
-            // Remove trailing empty element
-            if (!channels.empty() && channels.back().empty()) {
-                channels.pop_back();
-            }
-
-            selectionMap.insert({key, channels});
-        }
+    std::getline(file, line);
+    group.name = without_cr(line);
+    while (std::getline(file, line)) {
+        if (const auto colon = line.find(':'); colon != std::string::npos)
+            group.channels.emplace_back(trimmed(std::string_view(line).substr(0, colon)));
     }
-
-    return true;
+    return group;
 }
 
 //=============================================================================================================
 
-bool SelectionIO::readBrainstormMonFile(QString path, QMultiMap<QString, QStringList>& selectionMap)
+bool SelectionIO::write_sel(const std::filesystem::path& path, std::span<const ChannelSelection> groups)
 {
-    //Open .sel file
-    if (!path.contains(".mon"))
+    if (!has_extension(path, ".sel"))
         return false;
-
-    //clear the map first
-    selectionMap.clear();
-
-    QFile file(path);
-    if (!file.open(QIODevice::ReadOnly | QIODevice::Text)) {
-        Log::debug("Error opening montage file");
+    std::ofstream file(path);
+    if (!file) {
+        Log::debug("Cannot write the selection file {}", path.string());
         return false;
     }
-
-    //Start reading from file
-    QTextStream in(&file);
-    QString groupName = in.readLine();
-    QStringList channels;
-
-    while (!in.atEnd()) {
-        QString line = in.readLine();
-
-        if (line.contains(":") == true) {
-            QStringList secondSplit = line.split(":");
-            QString key = secondSplit.at(0);
-            channels.append(key);
-        }
+    for (const ChannelSelection& group : groups) {
+        file << group.name << ':';
+        for (const std::string& channel : group.channels)
+            file << channel << '|';
+        file << "\n\n";
     }
-
-    //Add to map
-    selectionMap.insert(groupName, channels);
-
-    file.close();
-
-    return true;
+    return static_cast<bool>(file);
 }
 
 //=============================================================================================================
 
-bool SelectionIO::readBrainstormMonFile(const std::string& path, std::multimap<std::string, std::vector<std::string>>& selectionMap)
+bool SelectionIO::write_mon(const std::filesystem::path& directory, std::span<const ChannelSelection> groups)
 {
-    //Open file
-    if (path.find(".mon") == std::string::npos)
-        return false;
-
-    //clear the map first
-    selectionMap.clear();
-
-    std::ifstream inFile(path);
-    if (!inFile.is_open()) {
-        Log::debug("Error opening montage file");
-        return false;
-    }
-    std::vector<std::string> channels;
-
-    std::string groupName;
-    std::getline(inFile, groupName);
-
-    std::string line;
-    while (std::getline(inFile, line)) {
-        if (line.find(':') != std::string::npos) {
-            auto colonPos = line.find(':');
-            std::string channelName = line.substr(0, colonPos);
-            channels.push_back(channelName);
-        }
-    }
-
-    selectionMap.insert({groupName, channels});
-
-    return true;
-}
-
-//=============================================================================================================
-
-bool SelectionIO::writeMNESelFile(QString path, const QMultiMap<QString, QStringList>& selectionMap)
-{
-    //Open .sel file
-    if (!path.contains(".sel"))
-        return false;
-
-    QFile file(path);
-    if (!file.open(QIODevice::WriteOnly | QIODevice::Text)) {
-        Log::debug("Error opening sel file for writing");
-        return false;
-    }
-
-    //Write selections to file
-    QTextStream out(&file);
-
-    QMultiMap<QString, QStringList>::const_iterator i = selectionMap.constBegin();
-    while (i != selectionMap.constEnd()) {
-        out << i.key() << ":";
-
-        for (int u = 0; u < i.value().size(); u++)
-            out << i.value().at(u) << "|";
-
-        out << "\n"
-            << "\n";
-
-        ++i;
-    }
-
-    file.close();
-
-    return true;
-}
-
-//=============================================================================================================
-
-bool SelectionIO::writeMNESelFile(const std::string& path, const std::map<std::string, std::vector<std::string>>& selectionMap)
-{
-    //Open .sel file
-    if (path.find(".sel") == std::string::npos)
-        return false;
-
-    std::ofstream outFile(path);
-    if (!outFile.is_open()) {
-        Log::debug("Error opening sel file for writing");
-        return false;
-    }
-
-    for (auto& mapElement : selectionMap) {
-        outFile << mapElement.first << ":";
-        for (auto& vectorElement : mapElement.second) {
-            outFile << vectorElement << "|";
-        }
-        outFile << "\n"
-                << "\n";
-    }
-
-    return true;
-}
-
-//=============================================================================================================
-
-bool SelectionIO::writeBrainstormMonFiles(QString path, const QMultiMap<QString, QStringList>& selectionMap)
-{
-    for (auto i = selectionMap.constBegin(); i != selectionMap.constEnd(); i++) {
-        QFileInfo fileInfo(path);
-
-        QString newPath = QString("%1/%2.mon").arg(fileInfo.absolutePath()).arg(i.key());
-
-        //std::cout<<newPath.toStdString()<<std::endl;
-
-        QFile file(newPath);
-        if (!file.open(QIODevice::WriteOnly | QIODevice::Text)) {
-            Log::debug("Error opening mon file for writing");
+    for (const ChannelSelection& group : groups) {
+        // The group name becomes a file name, so it must not reach outside the directory
+        if (group.name.empty() || group.name.find_first_of("/\\:") != std::string::npos) {
+            Log::debug("Cannot use the group name '{}' as a file name", group.name);
             return false;
         }
-
-        //Write selections to file
-        QTextStream out(&file);
-
-        out << i.key() << "\n";
-
-        for (int u = 0; u < i.value().size(); u++)
-            out << i.value().at(u) << " : " << i.value().at(u) << "\n";
-
-        file.close();
-    }
-
-    return true;
-}
-
-//=============================================================================================================
-
-bool SelectionIO::writeBrainstormMonFiles(const std::string& path, const std::map<std::string, std::vector<std::string>>& selectionMap)
-{
-    for (auto& mapElement : selectionMap) {
-        std::string newPath{path.substr(0, path.find_last_of("/") + 1) + mapElement.first + ".mon"};
-        std::ofstream outFile(newPath);
-        if (!outFile.is_open()) {
-            Log::debug("Error opening mon file for writing");
+        const std::filesystem::path fileName = pathFromUtf8(group.name + ".mon");
+        std::ofstream file(directory / fileName);
+        if (!file) {
+            Log::debug("Cannot write the montage file {}", (directory / fileName).string());
             return false;
         }
-
-        outFile << mapElement.first << "\n";
-        for (auto& vectorElement : mapElement.second) {
-            outFile << vectorElement << " : " << vectorElement << "\n";
-        }
+        file << group.name << '\n';
+        for (const std::string& channel : group.channels)
+            file << channel << " : " << channel << '\n';
+        if (!file)
+            return false;
     }
-
     return true;
 }

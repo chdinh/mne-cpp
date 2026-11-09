@@ -133,31 +133,12 @@ void TMSIImpedanceWidget::initGraphicScene()
     // Clear all items from scene
     m_qGScene->clear();
 
-    // Load standard layout file
-    LayoutLoader* asaObject = new LayoutLoader();
-    QList<QVector<float>> elcLocation3D;
-    QList<QVector<float>> elcLocation2D;
-    QString unit;
-    QStringList elcChannelNames;
-    QString sElcFilePath = QString("../resources/mne_scan/plugins/tmsi/loc_files/standard_waveguard128.elc");
-
-    if (!asaObject->readAsaElcFile(sElcFilePath,
-                                   elcChannelNames,
-                                   elcLocation3D,
-                                   elcLocation2D, unit)) {
+    const auto layout = CHANNELSLIB::LayoutLoader::read_elc("../resources/mne_scan/plugins/tmsi/loc_files/standard_waveguard128.elc");
+    if (!layout) {
         qDebug() << "Error: Reading elc file.";
         return;
     }
-
-    // Generate lookup table for channel names to corresponding matrix/vector index
-    for (int i = 0; i < elcLocation2D.size(); i++)
-        m_qmElectrodeNameIndex.insert(elcChannelNames.at(i), i);
-
-    // Add electrodes to scene
-    for (int i = 0; i < elcLocation2D.size(); i++) {
-        QVector2D position(elcLocation2D[i][1] * -4.5, elcLocation2D[i][0] * -4.5); // swap x y to rotate 90°, multiply to mirror by x and y axis, multiply by to scale
-        addElectrodeItem(elcChannelNames.at(i), position);
-    }
+    addElectrodeItems(*layout);
 
     ui->m_graphicsView_impedanceView->fitInView(m_qGScene->itemsBoundingRect(), Qt::KeepAspectRatio);
 }
@@ -169,6 +150,20 @@ void TMSIImpedanceWidget::addElectrodeItem(QString electrodeName, QVector2D posi
     TMSIElectrodeItem* item = new TMSIElectrodeItem(electrodeName, QPointF(position.x(), position.y()), QColor(m_cbColorMap->valueToJet(1)), m_qmElectrodeNameIndex[electrodeName]);
     item->setPos(QPointF(position.x(), position.y()));
     m_qGScene->addItem(item);
+}
+
+//=============================================================================================================
+
+void TMSIImpedanceWidget::addElectrodeItems(const CHANNELSLIB::ElectrodeLayout& layout)
+{
+    for (std::size_t i = 0; i < layout.positions_2d.size(); ++i)
+        m_qmElectrodeNameIndex.insert(QString::fromStdString(layout.names[i]), static_cast<int>(i));
+
+    // swap x y to rotate 90°, multiply to mirror by x and y axis, multiply by to scale
+    for (std::size_t i = 0; i < layout.positions_2d.size(); ++i) {
+        const Eigen::Vector2d& position = layout.positions_2d[i];
+        addElectrodeItem(QString::fromStdString(layout.names[i]), QVector2D(static_cast<float>(position.y() * -4.5), static_cast<float>(position.x() * -4.5)));
+    }
 }
 
 //=============================================================================================================
@@ -243,34 +238,14 @@ void TMSIImpedanceWidget::loadLayout()
                                                         "../resources/mne_scan/plugins/tmsi/loc_files/",
                                                         tr("ELC layout file (*.elc)"));
 
-    // Load standard layout file
-    LayoutLoader* asaObject = new LayoutLoader();
-    QList<QVector<float>> elcLocation3D;
-    QList<QVector<float>> elcLocation2D;
-    QString unit;
-    QStringList elcChannelNames;
-
-    if (!asaObject->readAsaElcFile(sElcFilePath,
-                                   elcChannelNames,
-                                   elcLocation3D,
-                                   elcLocation2D,
-                                   unit))
+    const auto layout = CHANNELSLIB::LayoutLoader::read_elc(BASELIB::pathFromUtf8(sElcFilePath.toStdString()));
+    if (!layout) {
         qDebug() << "Error: Reading elc file.";
-    else
-        m_qGScene->clear();
-
-    // Clean old map -> Generate lookup table for channel names and corresponding index
-    m_qmElectrodeNameIndex.clear();
-
-    for (int i = 0; i < elcLocation2D.size(); i++)
-        m_qmElectrodeNameIndex.insert(elcChannelNames.at(i), i);
-
-    // Add electrodes to scene
-    for (int i = 0; i < elcLocation2D.size(); i++) {
-        QVector2D position(elcLocation2D[i][1] * -4.5, elcLocation2D[i][0] * -4.5); // swap x y to rotate 90°, multiply to mirror by x and y axis, multiply by to scale
-
-        addElectrodeItem(elcChannelNames.at(i), position);
+        return;
     }
+    m_qGScene->clear();
+    m_qmElectrodeNameIndex.clear();
+    addElectrodeItems(*layout);
 
     ui->m_graphicsView_impedanceView->fitInView(m_qGScene->itemsBoundingRect(), Qt::KeepAspectRatio);
 }

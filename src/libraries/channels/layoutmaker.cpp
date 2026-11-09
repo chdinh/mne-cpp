@@ -21,23 +21,14 @@
 //=============================================================================================================
 
 #include "layoutmaker.h"
+
 #include <base/log.h>
-#include <math/simplex_algorithm.h>
 #include <math/sphere.h>
 
-// MSVC builds already define _USE_MATH_DEFINES globally (see src/CMakeLists.txt),
-// so define it here only for the toolchains that do not.
-#ifndef _USE_MATH_DEFINES
-#define _USE_MATH_DEFINES
-#endif
-#include <math.h>
-#include <iostream>
-
-//=============================================================================================================
-// QT INCLUDES
-//=============================================================================================================
-
-#include <QTextStream>
+#include <cmath>
+#include <format>
+#include <fstream>
+#include <numbers>
 
 //=============================================================================================================
 // USED NAMESPACES
@@ -49,324 +40,96 @@ using namespace BASELIB;
 using namespace Eigen;
 
 //=============================================================================================================
-// DEFINES
+// STATIC HELPERS
 //=============================================================================================================
 
-constexpr double EPS = 1e-6;
+namespace
+{
+
+// Polar angle and azimuth of a direction, as MNE-C's sphere_coord: on the z axis both are zero.
+Vector2d polar_azimuth(const Vector3d& r)
+{
+    const double rxy = std::hypot(r.x(), r.y());
+    if (rxy < 1e-6)
+        return Vector2d::Zero();
+    const double phi = std::atan2(r.y(), r.x());
+    return {std::acos(r.z() / r.norm()), phi < 0.0 ? phi + 2.0 * std::numbers::pi : phi};
+}
+
+} // anonymous namespace
 
 //=============================================================================================================
 // DEFINE MEMBER METHODS
 //=============================================================================================================
 
-bool LayoutMaker::makeLayout(const QList<QVector<float>>& inputPoints,
-                             QList<QVector<float>>& outputPoints,
-                             const QStringList& names,
-                             QFile& outFile,
-                             bool do_fit,
-                             float prad,
-                             float w,
-                             float h,
-                             bool writeFile,
-                             bool mirrorXAxis,
-                             bool mirrorYAxis)
+std::optional<std::vector<Vector2d>> LayoutMaker::make_layout(std::span<const Vector3d> positions,
+                                                              const LayoutOptions& options)
 {
-    /*
-     * Automatically make a layout according to the
-     * channel locations in inputPoints
-     */
-    VectorXf r0 = VectorXf::Zero(3);
-    VectorXf rr(3);
-    float rad, th, phi;
-
-    float xmin, xmax, ymin, ymax;
-    int k;
-    int nchan = inputPoints.size();
-
-    MatrixXf rrs(nchan, 3);
-    VectorXf xx(nchan);
-    VectorXf yy(nchan);
-
-    if (nchan <= 0) {
-        Log::warning("No input points to lay out.");
-        return false;
+    if (positions.empty()) {
+        Log::warning("No positions to lay out.");
+        return std::nullopt;
     }
 
-    //Fill matrix with 3D points
-    for (k = 0; k < nchan; k++) {
-        rrs(k, 0) = inputPoints.at(k)[0]; //x
-        rrs(k, 1) = inputPoints.at(k)[1]; //y
-        rrs(k, 2) = inputPoints.at(k)[2]; //z
+    Vector3d origin = Vector3d::Zero();
+    if (options.fit_sphere) {
+        MatrixX3f points(static_cast<Index>(positions.size()), 3);
+        for (Index k = 0; k < points.rows(); ++k)
+            points.row(k) = positions[static_cast<std::size_t>(k)].cast<float>().transpose();
+        const Sphere sphere = Sphere::fit_sphere_simplex(points, 0.05);
+        if (sphere.radius() > 0.0f) {
+            origin = sphere.center().cast<double>();
+            Log::info("Best-fitting sphere: origin ({}, {}, {}), radius {}", origin.x(), origin.y(), origin.z(), sphere.radius());
+        } else {
+            // As MNE-C mne_make_eeg_layout: a failed fit falls back to the origin
+            Log::warning("Sphere fitting failed, using the origin");
+        }
     }
 
-    Log::info("Channels found for layout: {}", nchan);
-
-    //Fit to sphere if wanted by the user
-    if (!do_fit) {
-        Log::info("Using default origin:{}, {}, {}", r0[0], r0[1], r0[2]);
-    } else {
-        Sphere sphere = Sphere::fit_sphere_simplex(rrs, 0.05);
-
-        r0 = sphere.center();
-        rad = sphere.radius();
-
-        Log::info("best fitting sphere:");
-        Log::info("torigin: {}, {}, {}; tradius: {}", r0[0], r0[1], r0[2], rad);
+    // Azimuthal equidistant projection: the polar angle becomes the distance from the centre
+    std::vector<Vector2d> centres;
+    centres.reserve(positions.size());
+    for (const Vector3d& position : positions) {
+        const Vector2d angles = polar_azimuth(position - origin);
+        const double distance = options.radius * 2.0 * angles.x() / std::numbers::pi;
+        centres.emplace_back(distance * std::cos(angles.y()), distance * std::sin(angles.y()));
     }
 
-    /*
-     * Do the azimuthal equidistant projection
-     */
-    for (k = 0; k < nchan; k++) {
-        rr = static_cast<VectorXf>(rrs.row(k)) - r0; // MNE-C VEC_DIFF(r0, rrs[k], rr): rrs[k] - r0
-        sphere_coord(rr[0], rr[1], rr[2], &rad, &th, &phi);
-        xx[k] = prad * (2.0 * th / M_PI) * cos(phi);
-        yy[k] = prad * (2.0 * th / M_PI) * sin(phi);
+    Vector2d minimum = centres.front();
+    Vector2d maximum = minimum;
+    for (const Vector2d& centre : centres) {
+        minimum = minimum.cwiseMin(centre);
+        maximum = maximum.cwiseMax(centre);
     }
-
-    /*
-     * Find suitable range of viewports
-     */
-    xmin = xmax = xx[0];
-    ymin = ymax = yy[0];
-
-    for (k = 1; k < nchan; k++) {
-        if (xx[k] > xmax)
-            xmax = xx[k];
-        else if (xx[k] < xmin)
-            xmin = xx[k];
-        if (yy[k] > ymax)
-            ymax = yy[k];
-        else if (yy[k] < ymin)
-            ymin = yy[k];
-    }
-
-    if (xmin == xmax || ymin == ymax) {
+    if (minimum.x() == maximum.x() || minimum.y() == maximum.y()) {
         Log::critical("Cannot make a layout. All positions are identical");
-        return false;
+        return std::nullopt;
     }
 
-    xmax = xmax + 0.6 * w;
-    xmin = xmin - 0.6 * w;
-
-    ymax = ymax + 0.6 * h;
-    ymin = ymin - 0.6 * h;
-
-    /*
-     * Compose the viewports
-     */
-    QVector<float> point;
-    QTextStream out;
-
-    if (writeFile) {
-        if (!outFile.open(QIODevice::WriteOnly)) {
-            Log::critical("Could not open output file!");
-            return false;
-        }
-
-        out.setDevice(&outFile);
-    }
-
-#if QT_VERSION > QT_VERSION_CHECK(6, 0, 0)
-    using Qt::endl;
-#endif
-
-    out << "0.000000 0.000000 0.000000 0.000000" << endl;
-
-    for (k = 0; k < nchan; k++) {
-        point.clear();
-
-        if (mirrorXAxis)
-            point.append(-(xx[k] - 0.5 * w));
-        else
-            point.append(xx[k] - 0.5 * w);
-
-        if (mirrorYAxis)
-            point.append(-(yy[k] - 0.5 * h));
-        else
-            point.append(yy[k] - 0.5 * h);
-
-        outputPoints.append(point);
-
-        if (writeFile) {
-            if (k < names.size()) {
-                out << k + 1 << " " << point[0] << " " << point[1] << " " << w << " " << h << " " << names.at(k) << endl;
-            } else {
-                out << k + 1 << " " << point[0] << " " << point[1] << " " << w << " " << h << endl;
-            }
-        }
-    }
-
-    if (writeFile) {
-        Log::info("Successfully wrote the layout file.");
-
-        outFile.close();
-    }
-
-    return true;
+    const Vector2d halfBox(0.5 * options.box_width, 0.5 * options.box_height);
+    const Vector2d mirror(options.mirror_x ? -1.0 : 1.0, options.mirror_y ? -1.0 : 1.0);
+    for (Vector2d& centre : centres)
+        centre = (centre - halfBox).cwiseProduct(mirror);
+    return centres;
 }
 
 //=============================================================================================================
 
-bool LayoutMaker::makeLayout(const std::vector<std::vector<float>>& inputPoints,
-                             std::vector<std::vector<float>>& outputPoints,
-                             const std::vector<std::string>& names,
-                             const std::string& outFilePath,
-                             bool do_fit,
-                             float prad,
-                             float w,
-                             float h,
-                             bool writeFile,
-                             bool mirrorXAxis,
-                             bool mirrorYAxis)
+bool LayoutMaker::write_lout(const std::filesystem::path& path,
+                             std::span<const Vector2d> corners,
+                             const StringList& names,
+                             const LayoutOptions& options)
 {
-    /*
-     * Automatically make a layout according to the
-     * channel locations in inputPoints
-     */
-    VectorXf r0 = VectorXf::Zero(3);
-    VectorXf rr(3);
-    float rad, th, phi;
-
-    float xmin, xmax, ymin, ymax;
-    // std::vector::size() is size_t; the channel count is used as an Eigen
-    // index and compared against int loop counters throughout.
-    int nchan = static_cast<int>(inputPoints.size());
-
-    MatrixXf rrs(nchan, 3);
-    VectorXf xx(nchan);
-    VectorXf yy(nchan);
-
-    if (nchan <= 0) {
-        Log::warning("No input points to lay out.");
+    std::ofstream file(path);
+    if (!file) {
+        Log::critical("Cannot open the layout file {}", path.string());
         return false;
     }
-
-    //Fill matrix with 3D points
-    for (int k = 0; k < nchan; k++) {
-        rrs(k, 0) = inputPoints.at(k)[0]; //x
-        rrs(k, 1) = inputPoints.at(k)[1]; //y
-        rrs(k, 2) = inputPoints.at(k)[2]; //z
+    file << "0.000000 0.000000 0.000000 0.000000\n";
+    for (std::size_t k = 0; k < corners.size(); ++k) {
+        file << std::format("{} {:.6f} {:.6f} {:.6f} {:.6f}", k + 1, corners[k].x(), corners[k].y(), options.box_width, options.box_height);
+        if (k < names.size())
+            file << ' ' << names[k];
+        file << '\n';
     }
-
-    Log::info("Channels found for layout: {}", nchan);
-
-    //Fit to sphere if wanted by the user
-    if (!do_fit) {
-        Log::info("Using default origin:{}, {}, {}", r0[0], r0[1], r0[2]);
-    } else {
-        Sphere sphere = Sphere::fit_sphere_simplex(rrs, 0.05);
-
-        r0 = sphere.center();
-        rad = sphere.radius();
-
-        Log::info("best fitting sphere:");
-        Log::info("torigin: {}, {}, {}; tradius: {}", r0[0], r0[1], r0[2], rad);
-    }
-
-    /*
-     * Do the azimuthal equidistant projection
-     */
-    for (int k = 0; k < nchan; k++) {
-        rr = static_cast<VectorXf>(rrs.row(k)) - r0; // MNE-C VEC_DIFF(r0, rrs[k], rr): rrs[k] - r0
-        sphere_coord(rr[0], rr[1], rr[2], &rad, &th, &phi);
-        xx[k] = prad * (2.0 * th / M_PI) * cos(phi);
-        yy[k] = prad * (2.0 * th / M_PI) * sin(phi);
-    }
-
-    /*
-     * Find suitable range of viewports
-     */
-    xmin = xmax = xx[0];
-    ymin = ymax = yy[0];
-
-    for (int k = 1; k < nchan; k++) {
-        if (xx[k] > xmax)
-            xmax = xx[k];
-        else if (xx[k] < xmin)
-            xmin = xx[k];
-        if (yy[k] > ymax)
-            ymax = yy[k];
-        else if (yy[k] < ymin)
-            ymin = yy[k];
-    }
-
-    if (xmin == xmax || ymin == ymax) {
-        Log::critical("Cannot make a layout. All positions are identical");
-        return false;
-    }
-
-    xmax = xmax + 0.6 * w;
-    xmin = xmin - 0.6 * w;
-
-    ymax = ymax + 0.6 * h;
-    ymin = ymin - 0.6 * h;
-
-    /*
-     * Compose the viewports
-     */
-    std::vector<float> point;
-    std::ofstream outFile;
-
-    if (writeFile) {
-        outFile.open(outFilePath);
-        if (!outFile.is_open()) {
-            Log::critical("Could not open output file!");
-            return false;
-        }
-        outFile << "0.000000 0.000000 0.000000 0.000000" << std::endl;
-    }
-
-    for (int k = 0; k < nchan; k++) {
-        point.clear();
-
-        if (mirrorXAxis)
-            point.push_back(-(xx[k] - 0.5 * w));
-        else
-            point.push_back(xx[k] - 0.5 * w);
-
-        if (mirrorYAxis)
-            point.push_back(-(yy[k] - 0.5 * h));
-        else
-            point.push_back(yy[k] - 0.5 * h);
-
-        outputPoints.push_back(point);
-
-        if (writeFile) {
-            if ((k) < static_cast<int>(names.size())) {
-                outFile << k + 1 << " " << point[0] << " " << point[1] << " " << w << " " << h << " " << names.at(k) << std::endl;
-            } else {
-                outFile << k + 1 << " " << point[0] << " " << point[1] << " " << w << " " << h << std::endl;
-            }
-        }
-    }
-
-    if (writeFile) {
-        Log::info("Successfully wrote the layout file.");
-    }
-
-    return true;
-}
-
-//=============================================================================================================
-
-void LayoutMaker::sphere_coord(float x,
-                               float y,
-                               float z,
-                               float* r,
-                               float* theta,
-                               float* phi)
-{
-    /* Rectangular to spherical coordinates */
-    float rxy = sqrt(x * x + y * y);
-    if (rxy < EPS) { /* Let's hope this is reasonable */
-        *r = z;
-        *theta = 0.0;
-        *phi = 0.0;
-    } else {
-        *r = sqrt(x * x + y * y + z * z);
-        *theta = acos(z / (*r));
-        *phi = atan2(y, x);
-        if (*phi < 0.0)
-            *phi = *phi + 2.0 * M_PI;
-    }
+    return static_cast<bool>(file);
 }

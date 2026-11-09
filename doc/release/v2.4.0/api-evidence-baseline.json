@@ -3,25 +3,25 @@
   "generated_by": "scripts/quality/audit_api_evidence.py",
   "policy": "scripts/quality/api_evidence_policy.json",
   "summary": {
-    "exported_classes": 478,
+    "exported_classes": 481,
     "exported_free_functions": 174,
-    "registered_classes": 574,
+    "registered_classes": 577,
     "exported_not_registered": 1,
     "registered_function_modules": 14,
     "registered_header_only": 83,
     "registered_stale": 0,
-    "registered_with_test": 232,
+    "registered_with_test": 239,
     "registered_test_unresolved": 0,
-    "registered_with_example": 415,
+    "registered_with_example": 418,
     "registered_example_not_built": 0,
     "registered_with_python_equiv": 97,
     "registered_without_api_page": 0,
-    "with_snippet": 449,
-    "public_api_units": 575,
-    "example_eligible": 411,
+    "with_snippet": 452,
+    "public_api_units": 578,
+    "example_eligible": 414,
     "example_exempt": 164,
-    "eligible_backed_by_registry_example": 410,
-    "eligible_used_by_some_example": 351,
+    "eligible_backed_by_registry_example": 413,
+    "eligible_used_by_some_example": 354,
     "examples_on_disk": 79,
     "examples_built": 79
   },
@@ -54,13 +54,13 @@
       "with_snippet": 14
     },
     "channels": {
-      "public": 5,
-      "registered": 5,
-      "with_test": 1,
-      "eligible": 5,
-      "eligible_with_registry_example": 5,
-      "eligible_used_by_example": 5,
-      "with_snippet": 5
+      "public": 8,
+      "registered": 8,
+      "with_test": 8,
+      "eligible": 8,
+      "eligible_with_registry_example": 8,
+      "eligible_used_by_example": 8,
+      "with_snippet": 8
     },
     "com": {
       "public": 11,
@@ -2650,7 +2650,6 @@
         "ex_inverse_pwl_rap_music",
         "ex_inverse_rap_music",
         "ex_make_inverse_operator",
-        "ex_make_layout",
         "ex_read_bem",
         "ex_read_epochs",
         "ex_read_evoked",
@@ -2711,7 +2710,6 @@
         "ex_inverse_pwl_rap_music",
         "ex_inverse_rap_music",
         "ex_make_inverse_operator",
-        "ex_make_layout",
         "ex_read_bem",
         "ex_read_epochs",
         "ex_read_evoked",
@@ -3089,15 +3087,15 @@
       "exempt_reason": null
     },
     {
-      "name": "LayoutLoader",
+      "name": "ElectrodeLayout",
       "header": "channels/layoutloader.h",
       "library": "channels",
       "kind": "exported-class",
       "exported": true,
       "registered": true,
       "registry_status": "documented",
-      "test": null,
-      "test_resolves": false,
+      "test": "test_channels_layout_selection",
+      "test_resolves": true,
       "example": "ex_channels",
       "example_state": "built",
       "including_examples": [
@@ -3105,6 +3103,32 @@
         "ex_make_layout"
       ],
       "snippets": [
+        "ex_channels/main.cpp#layout_loader_usage",
+        "ex_channels/main.cpp#layout_loader_usage"
+      ],
+      "api_page": "doc/website/docs/api/channels/electrode-layout.mdx",
+      "python_equiv": null,
+      "example_eligible": true,
+      "exempt_reason": null
+    },
+    {
+      "name": "LayoutLoader",
+      "header": "channels/layoutloader.h",
+      "library": "channels",
+      "kind": "exported-class",
+      "exported": true,
+      "registered": true,
+      "registry_status": "documented",
+      "test": "test_channels_layout_selection",
+      "test_resolves": true,
+      "example": "ex_channels",
+      "example_state": "built",
+      "including_examples": [
+        "ex_channels",
+        "ex_make_layout"
+      ],
+      "snippets": [
+        "ex_channels/main.cpp#layout_loader_usage",
         "ex_channels/main.cpp#layout_loader_usage"
       ],
       "api_page": "doc/website/docs/api/channels/layout-loader.mdx",
@@ -3120,8 +3144,8 @@
       "exported": true,
       "registered": true,
       "registry_status": "documented",
-      "test": null,
-      "test_resolves": false,
+      "test": "test_channels_layout_selection",
+      "test_resolves": true,
       "example": "ex_channels",
       "example_state": "built",
       "including_examples": [
@@ -3129,9 +3153,59 @@
         "ex_make_layout"
       ],
       "snippets": [
+        "ex_channels/main.cpp#layout_maker_usage",
         "ex_channels/main.cpp#layout_maker_usage"
       ],
       "api_page": "doc/website/docs/api/channels/layout-maker.mdx",
+      "python_equiv": null,
+      "example_eligible": true,
+      "exempt_reason": null
+    },
+    {
+      "name": "LayoutOptions",
+      "header": "channels/layoutmaker.h",
+      "library": "channels",
+      "kind": "exported-class",
+      "exported": true,
+      "registered": true,
+      "registry_status": "documented",
+      "test": "test_channels_layout_selection",
+      "test_resolves": true,
+      "example": "ex_channels",
+      "example_state": "built",
+      "including_examples": [
+        "ex_channels",
+        "ex_make_layout"
+      ],
+      "snippets": [
+        "ex_channels/main.cpp#layout_maker_usage",
+        "ex_channels/main.cpp#layout_maker_usage"
+      ],
+      "api_page": "doc/website/docs/api/channels/layout-options.mdx",
+      "python_equiv": null,
+      "example_eligible": true,
+      "exempt_reason": null
+    },
+    {
+      "name": "ChannelSelection",
+      "header": "channels/selectionio.h",
+      "library": "channels",
+      "kind": "exported-class",
+      "exported": true,
+      "registered": true,
+      "registry_status": "documented",
+      "test": "test_channels_layout_selection",
+      "test_resolves": true,
+      "example": "ex_channels",
+      "example_state": "built",
+      "including_examples": [
+        "ex_channels"
+      ],
+      "snippets": [
+        "ex_channels/main.cpp#selection_io_usage",
+        "ex_channels/main.cpp#selection_io_usage"
+      ],
+      "api_page": "doc/website/docs/api/channels/channel-selection.mdx",
       "python_equiv": null,
       "example_eligible": true,
       "exempt_reason": null
@@ -3144,14 +3218,15 @@
       "exported": true,
       "registered": true,
       "registry_status": "documented",
-      "test": null,
-      "test_resolves": false,
+      "test": "test_channels_layout_selection",
+      "test_resolves": true,
       "example": "ex_channels",
       "example_state": "built",
       "including_examples": [
         "ex_channels"
       ],
       "snippets": [
+        "ex_channels/main.cpp#selection_io_usage",
         "ex_channels/main.cpp#selection_io_usage"
       ],
       "api_page": "doc/website/docs/api/channels/selection-io.mdx",
@@ -3167,8 +3242,8 @@
       "exported": true,
       "registered": true,
       "registry_status": "documented",
-      "test": null,
-      "test_resolves": false,
+      "test": "test_channels_standard_montage",
+      "test_resolves": true,
       "example": "ex_channels",
       "example_state": "built",
       "including_examples": [

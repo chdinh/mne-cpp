@@ -177,15 +177,14 @@ void EEGoSportsSetupProjectWidget::onCardinalComboBoxChanged()
 
 void EEGoSportsSetupProjectWidget::updateCardinalComboBoxes(const QString& sPath)
 {
-    QList<QVector<float>> elcLocation3D;
-    QList<QVector<float>> elcLocation2D;
-    QString unit;
-    QStringList elcChannelNames;
-
-    if (!LayoutLoader::readAsaElcFile(sPath, elcChannelNames, elcLocation3D, elcLocation2D, unit)) {
+    const auto layout = LayoutLoader::read_elc(BASELIB::pathFromUtf8(sPath.toStdString()));
+    if (!layout) {
         qCritical() << "Unable to read elc file.";
         return;
     }
+    QStringList elcChannelNames;
+    for (const std::string& name : layout->names)
+        elcChannelNames << QString::fromStdString(name);
 
     m_pUi->m_comboBox_LPA->clear();
     m_pUi->m_comboBox_RPA->clear();

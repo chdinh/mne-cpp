@@ -41,6 +41,30 @@ using namespace std;
 using namespace Eigen;
 
 //=============================================================================================================
+// STATIC HELPERS
+//=============================================================================================================
+
+namespace
+{
+
+// The electrodes of an .elc file, in the containers the channel set-up works on
+bool readElc(const QString& path, QStringList& names, QList<QVector<float>>& positions3d, QList<QVector<float>>& positions2d)
+{
+    const auto layout = CHANNELSLIB::LayoutLoader::read_elc(BASELIB::pathFromUtf8(path.toStdString()));
+    if (!layout)
+        return false;
+    for (const std::string& name : layout->names)
+        names << QString::fromStdString(name);
+    for (const Eigen::Vector3d& r : layout->positions_3d)
+        positions3d.append({static_cast<float>(r.x()), static_cast<float>(r.y()), static_cast<float>(r.z())});
+    for (const Eigen::Vector2d& r : layout->positions_2d)
+        positions2d.append({static_cast<float>(r.x()), static_cast<float>(r.y())});
+    return true;
+}
+
+} // anonymous namespace
+
+//=============================================================================================================
 // DEFINE MEMBER METHODS
 //=============================================================================================================
 
@@ -137,14 +161,9 @@ void TMSI::setUpFiffInfo()
     //Read electrode positions from .elc file
     QList<QVector<float>> elcLocation3D;
     QList<QVector<float>> elcLocation2D;
-    QString unit;
     QStringList elcChannelNames;
 
-    if (!LayoutLoader::readAsaElcFile(m_sElcFilePath,
-                                      elcChannelNames,
-                                      elcLocation3D,
-                                      elcLocation2D,
-                                      unit))
+    if (!readElc(m_sElcFilePath, elcChannelNames, elcLocation3D, elcLocation2D))
         qDebug() << "Error: Reading elc file.";
 
     //qDebug() << elcLocation3D;

@@ -7,62 +7,22 @@
 cmake_minimum_required(VERSION 3.14)
 project(ex_make_layout LANGUAGES CXX)
 
-#Handle qt uic, moc, rrc automatically
-set(CMAKE_AUTOUIC ON)
-set(CMAKE_AUTOMOC ON)
-set(CMAKE_AUTORCC ON)
+# fiff_global.h still takes its export macros from Qt
+find_package(QT NAMES Qt6 Qt5 REQUIRED COMPONENTS Core)
+find_package(Qt${QT_VERSION_MAJOR} REQUIRED COMPONENTS Core)
 
-set(QT_REQUIRED_COMPONENTS Core Concurrent Network)
-find_package(QT NAMES Qt6 Qt5 REQUIRED COMPONENTS ${QT_REQUIRED_COMPONENTS})
-find_package(Qt${QT_VERSION_MAJOR} REQUIRED COMPONENTS ${QT_REQUIRED_COMPONENTS})
-
-set(SOURCES
-    main.cpp
-)
-
-if(${QT_VERSION_MAJOR} GREATER_EQUAL 6)
-    qt_add_executable(${PROJECT_NAME} MANUAL_FINALIZATION ${SOURCES})
-else()
-    add_executable(${PROJECT_NAME} ${SOURCES})
-endif()
-
-set(QT_REQUIRED_COMPONENT_LIBS ${QT_REQUIRED_COMPONENTS})
-list(TRANSFORM QT_REQUIRED_COMPONENT_LIBS PREPEND "Qt${QT_VERSION_MAJOR}::")
-
-set(MNE_LIBS_REQUIRED 
-  mne_dsp
-  mne_connectivity
-  mne_inv
-  mne_fwd
-  mne_mne
-  mne_fiff
-  mne_fs
-  mne_channels
-  mne_base
-    mne_math
-  mne_events
-  mne_disp
-  mne_disp3D
-)
+add_executable(${PROJECT_NAME} main.cpp)
 
 target_link_libraries(${PROJECT_NAME} PRIVATE
-  ${QT_REQUIRED_COMPONENT_LIBS}
-  ${MNE_LIBS_REQUIRED}
+  mne_channels
+  mne_fiff
+  mne_base
   Eigen3::Eigen
-)
-
-set_target_properties(${PROJECT_NAME} PROPERTIES
-    MACOSX_BUNDLE FALSE
-    WIN32_EXECUTABLE FALSE
+  Qt${QT_VERSION_MAJOR}::Core
 )
 
 install(TARGETS ${PROJECT_NAME}
-    BUNDLE DESTINATION .
-    LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR})
-
-if(QT_VERSION_MAJOR EQUAL 6)
-    qt_finalize_executable(${PROJECT_NAME})
-endif()
+    RUNTIME DESTINATION bin)
 
 if(NOT BUILD_SHARED_LIBS)
     target_compile_definitions(${PROJECT_NAME} PRIVATE STATICBUILD)

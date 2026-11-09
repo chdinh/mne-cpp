@@ -24,18 +24,19 @@
 
 #include "channels_global.h"
 
+#include <base/string_utils.h>
+
+#include <cstddef>
+#include <optional>
+#include <string>
+#include <string_view>
+#include <vector>
+
 //=============================================================================================================
 // EIGEN INCLUDES
 //=============================================================================================================
 
 #include <Eigen/Core>
-
-//=============================================================================================================
-// QT INCLUDES
-//=============================================================================================================
-
-#include <QStringList>
-#include <QMap>
 
 //=============================================================================================================
 // DEFINE NAMESPACE CHANNELSLIB
@@ -52,7 +53,7 @@ namespace CHANNELSLIB
  */
 struct CHANNELSSHARED_EXPORT ElectrodePosition
 {
-    QString name;        /**< Electrode name (e.g. "Cz", "Fp1"). */
+    std::string name;    /**< Electrode name (e.g. "Cz", "Fp1"). */
     Eigen::Vector3d pos; /**< Position in metres, MNI (fsaverage MRI) coordinates. */
 };
 
@@ -78,46 +79,43 @@ public:
 
     //=========================================================================================================
     /**
-     * @brief Get a standard montage by system name.
+     * @brief The electrodes of a montage system.
      *
      * @param[in] system  The montage system.
      *
-     * @return List of electrode positions.
+     * @return The electrode positions.
      */
-    static QList<ElectrodePosition> getMontage(System system);
+    static std::vector<ElectrodePosition> montage(System system);
 
     //=========================================================================================================
     /**
-     * @brief Get electrode names for a standard montage.
+     * @brief The electrode names of a montage system.
      *
      * @param[in] system  The montage system.
      *
-     * @return List of electrode names.
+     * @return The electrode names, in montage order.
      */
-    static QStringList getElectrodeNames(System system);
+    static BASELIB::StringList electrode_names(System system);
 
     //=========================================================================================================
     /**
-     * @brief Look up a single electrode position by name.
+     * @brief Looks up an electrode of the standard_1005 table, fiducials included.
      *
-     * Searches every position of the standard_1005 table, including the fiducials Nz, LPA and RPA.
+     * @param[in] name  Electrode name, case-insensitive.
      *
-     * @param[in] name  Electrode name (case-insensitive).
-     * @param[out] pos  Position if found.
-     *
-     * @return true if found.
+     * @return The position, or no value if the name is unknown.
      */
-    static bool findElectrode(const QString& name, Eigen::Vector3d& pos);
+    static std::optional<Eigen::Vector3d> find_electrode(std::string_view name);
 
     //=========================================================================================================
     /**
-     * @brief Get the number of electrodes in a montage.
+     * @brief The number of electrodes of a montage system.
      *
      * @param[in] system  The montage system.
      *
-     * @return Number of electrode positions defined for the montage.
+     * @return The electrode count.
      */
-    static int electrodeCount(System system);
+    static std::size_t electrode_count(System system);
 };
 
 } // namespace CHANNELSLIB

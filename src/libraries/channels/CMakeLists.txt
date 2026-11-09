@@ -7,12 +7,6 @@ project(mne_channels
   LANGUAGES CXX
 )
 
-set(CMAKE_AUTORCC ON)
-
-set(QT_REQUIRED_COMPONENTS Core)
-find_package(QT NAMES Qt6 Qt5 REQUIRED COMPONENTS ${QT_REQUIRED_COMPONENTS})
-find_package(Qt${QT_VERSION_MAJOR} REQUIRED COMPONENTS ${QT_REQUIRED_COMPONENTS})
-
 set(SOURCES
   channels_global.cpp
   layoutloader.cpp
@@ -37,22 +31,18 @@ set_source_files_properties(${FILE_TO_UPDATE} PROPERTIES OBJECT_DEPENDS "${SOURC
 
 add_library(${PROJECT_NAME} ${SOURCES} ${HEADERS})
 
-# MNE-Python's standard_1005 electrode table, behind StandardMontage
-qt_add_resources(${PROJECT_NAME} "standard_montage"
-  PREFIX "/channels/montages"
-  BASE data
-  FILES data/standard_1005.elc
-)
+# MNE-Python's standard_1005 electrode table, behind StandardMontage, embedded as a string literal
+set(_elc "${CMAKE_CURRENT_SOURCE_DIR}/data/standard_1005.elc")
+file(READ "${_elc}" STANDARD_1005_ELC)
+file(CONFIGURE OUTPUT "${CMAKE_CURRENT_BINARY_DIR}/standard_1005_elc.inc" CONTENT "R\"elc(@STANDARD_1005_ELC@)elc\"\n" @ONLY)
+set_property(DIRECTORY APPEND PROPERTY CMAKE_CONFIGURE_DEPENDS "${_elc}")
 
 target_include_directories(${PROJECT_NAME} PUBLIC $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/..> $<INSTALL_INTERFACE:include>)
-
-set(QT_REQUIRED_COMPONENT_LIBS ${QT_REQUIRED_COMPONENTS})
-list(TRANSFORM QT_REQUIRED_COMPONENT_LIBS PREPEND "Qt${QT_VERSION_MAJOR}::")
+target_include_directories(${PROJECT_NAME} PRIVATE "${CMAKE_CURRENT_BINARY_DIR}")
 
 target_link_libraries(${PROJECT_NAME}
   PUBLIC
     mne_base
-    ${QT_REQUIRED_COMPONENT_LIBS}
     Eigen3::Eigen
   PRIVATE
     mne_math)

@@ -64,6 +64,15 @@ QString fiducialName(FiducialId id)
     return {};
 }
 
+// The electrode names of a cap, for the list widget
+QStringList electrodeNames(StandardMontage::System system)
+{
+    QStringList names;
+    for (const std::string& name : StandardMontage::electrode_names(system))
+        names << QString::fromStdString(name);
+    return names;
+}
+
 QString systemLabel(StandardMontage::System sys)
 {
     switch (sys) {
@@ -588,7 +597,7 @@ QWidget* AlignWizard::buildEegCapPage()
 
 QString AlignWizard::nextEegLabel(int* outIdent) const
 {
-    const QStringList names = StandardMontage::getElectrodeNames(m_capSystem);
+    const QStringList names = electrodeNames(m_capSystem);
     const int captured = m_pPoints->countOf(PointKind::Eeg);
     if (captured >= names.size()) {
         if (outIdent)
@@ -605,7 +614,7 @@ void AlignWizard::refreshEegUi()
     if (!m_pEegList)
         return;
 
-    const QStringList names = StandardMontage::getElectrodeNames(m_capSystem);
+    const QStringList names = electrodeNames(m_capSystem);
     const int captured = m_pPoints->countOf(PointKind::Eeg);
 
     if (m_pEegList->count() != names.size()) {

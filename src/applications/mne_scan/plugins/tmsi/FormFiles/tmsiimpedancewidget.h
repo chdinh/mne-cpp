@@ -107,6 +107,13 @@ private:
 
     //=========================================================================================================
     /**
+    * Adds every electrode with a 2-D position of a cap to the QGraphicScene and to the name lookup table.
+    * @param[in] layout The cap.
+    */
+    void addElectrodeItems(const CHANNELSLIB::ElectrodeLayout& layout);
+
+    //=========================================================================================================
+    /**
      * Start the measurement process.
      */
     void startImpedanceMeasurement();

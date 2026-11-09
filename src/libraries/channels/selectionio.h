@@ -24,10 +24,7 @@
  * - Brainstorm @c .mon — one montage definition per file,
  *   used by the Brainstorm GUI for the same purpose.
  *
- * Both directions are supported (single-file @c .sel, fanned-
- * out @c .mon set) and both @c QString and @c std::string
- * overloads exist so the parser can be used from the Qt GUI
- * layer and from headless tests without a string conversion.
+ * Groups keep their file order through a read/write round trip.
  */
 
 #ifndef CHANNELS_SELECTIONIO_H
@@ -39,31 +36,38 @@
 
 #include "channels_global.h"
 
-#include <vector>
+#include <base/string_utils.h>
+
+#include <filesystem>
+#include <optional>
+#include <span>
 #include <string>
-#include <map>
+#include <vector>
 
 //=============================================================================================================
-// QT INCLUDES
-//=============================================================================================================
-
-#include <QMap>
-#include <QStringList>
-
-//=============================================================================================================
-// DEFINE NAMESPACE MNELIB
+// DEFINE NAMESPACE CHANNELSLIB
 //=============================================================================================================
 
 namespace CHANNELSLIB
 {
 
 //=============================================================================================================
-// DEFINES
-//=============================================================================================================
+/**
+ * @brief A named group of channels.
+ *
+ * @snippet ex_channels/main.cpp selection_io_usage
+ */
+struct CHANNELSSHARED_EXPORT ChannelSelection
+{
+    std::string name;             /**< Group name, e.g. "Left-temporal". */
+    BASELIB::StringList channels; /**< Channel names, in file order. */
+
+    bool operator==(const ChannelSelection&) const = default;
+};
 
 //=============================================================================================================
 /**
- * Processes selection files (mne .sel) files which contain the channels for each selection group.
+ * Reads and writes channel selection groups.
  *
  * @brief Reader/writer for MNE .sel channel-selection files and Brainstorm .mon montage files.
  *
@@ -74,90 +78,47 @@ class CHANNELSSHARED_EXPORT SelectionIO
 public:
     //=========================================================================================================
     /**
-     * Constructs a Filter object.
+     * Reads an MNE .sel file: one @c "name:ch1|ch2|..." group per line, @c % lines are comments.
+     *
+     * @param[in] path  The .sel file.
+     *
+     * @return The groups in file order, or no value if the path has no .sel extension or cannot be opened.
      */
-    SelectionIO();
+    static std::optional<std::vector<ChannelSelection>> read_sel(const std::filesystem::path& path);
 
     //=========================================================================================================
     /**
-     * Reads the specified MNE sel file.
-     * @param[in] path holds the file path of the .sel file which is to be read.
-     * @param[in] selectionMap holds the map to which the read selection groups are stored.
+     * Reads a Brainstorm .mon file: the group name, then one @c "channel : expression" line per channel.
      *
-     * @return True on success, false if the path lacks a .sel extension or the file cannot be opened.
+     * @param[in] path  The .mon file.
+     *
+     * @return The group, or no value if the path has no .mon extension or cannot be opened.
      */
-    static bool readMNESelFile(QString path, QMultiMap<QString, QStringList>& selectionMap);
+    static std::optional<ChannelSelection> read_mon(const std::filesystem::path& path);
 
     //=========================================================================================================
     /**
-     * Reads the specified MNE sel file.
-     * @param[in] path holds the file path of the .sel file which is to be read.
-     * @param[in] selectionMap holds the map to which the read selection groups are stored.
+     * Writes groups to an MNE .sel file.
      *
-     * @return True on success, false if the path lacks a .sel extension or the file cannot be opened.
+     * @param[in] path    The .sel file.
+     * @param[in] groups  The groups.
+     *
+     * @return Whether the file was written; false if the path has no .sel extension.
      */
-    static bool readMNESelFile(const std::string& path, std::multimap<std::string, std::vector<std::string>>& selectionMap);
+    static bool write_sel(const std::filesystem::path& path, std::span<const ChannelSelection> groups);
 
     //=========================================================================================================
     /**
-     * Reads the specified Brainstorm montage file.
-     * @param[in] path holds the file path of the .mon file which is to be read.
-     * @param[in] selectionMap holds the map to which the read selection groups are stored.
+     * Writes each group to its own Brainstorm .mon file, named after the group.
      *
-     * @return True on success, false if the path lacks a .mon extension or the file cannot be opened.
-     */
-    static bool readBrainstormMonFile(QString path, QMultiMap<QString, QStringList>& selectionMap);
-
-    //=========================================================================================================
-    /**
-     * Reads the specified Brainstorm montage file.
-     * @param[in] path holds the file path of the .mon file which is to be read.
-     * @param[in] selectionMap holds the map to which the read selection groups are stored.
+     * @param[in] directory  The directory to write to.
+     * @param[in] groups     The groups.
      *
-     * @return True on success, false if the path lacks a .mon extension or the file cannot be opened.
+     * @return Whether every file was written.
      */
-    static bool readBrainstormMonFile(const std::string& path, std::multimap<std::string, std::vector<std::string>>& selectionMap);
-
-    //=========================================================================================================
-    /**
-     * Writes the specified selection groups to a single MNE .sel file.
-     * @param[in] path holds the file path of the .sel file which is to be read.
-     * @param[in] selectionMap holds the map to which the read selection groups are stored.
-     *
-     * @return True on success, false if the path lacks a .sel extension or the file cannot be opened for writing.
-     */
-    static bool writeMNESelFile(QString path, const QMultiMap<QString, QStringList>& selectionMap);
-
-    //=========================================================================================================
-    /**
-     * Writes the specified selection groups to a single MNE .sel file.
-     * @param[in] path holds the file path of the .sel file which is to be read.
-     * @param[in] selectionMap holds the map to which the read selection groups are stored.
-     *
-     * @return True on success, false if the path lacks a .sel extension or the file cannot be opened for writing.
-     */
-    static bool writeMNESelFile(const std::string& path, const std::map<std::string, std::vector<std::string>>& selectionMap);
-
-    //=========================================================================================================
-    /**
-     * Writes the specified selection groups to different Brainstorm .mon files. The amount of written files depend on the number of selection groups in selectionMap
-     * @param[in] path holds the file path of the .mon file which is to be read.
-     * @param[in] selectionMap holds the map to which the read selection groups are stored.
-     *
-     * @return True if all .mon files were written, false if any file could not be opened for writing.
-     */
-    static bool writeBrainstormMonFiles(QString path, const QMultiMap<QString, QStringList>& selectionMap);
-
-    //=========================================================================================================
-    /**
-     * Writes the specified selection groups to different Brainstorm .mon files. The amount of written files depend on the number of selection groups in selectionMap
-     * @param[in] path holds the file path of the .mon file which is to be read.
-     * @param[in] selectionMap holds the map to which the read selection groups are stored.
-     *
-     * @return True if all .mon files were written, false if any file could not be opened for writing.
-     */
-    static bool writeBrainstormMonFiles(const std::string& path, const std::map<std::string, std::vector<std::string>>& selectionMap);
+    static bool write_mon(const std::filesystem::path& directory, std::span<const ChannelSelection> groups);
 };
-} // NAMESPACE
+
+} // namespace CHANNELSLIB
 
 #endif // CHANNELS_SELECTIONIO_H

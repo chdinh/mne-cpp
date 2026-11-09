@@ -16,10 +16,13 @@
 //=============================================================================================================
 
 #include <channels/layoutloader.h>
-#include <base/string_utils.h>
 #include <channels/layoutmaker.h>
 #include <channels/selectionio.h>
 #include <base/log.h>
+
+#include <filesystem>
+#include <fstream>
+#include <sstream>
 
 //=============================================================================================================
 // QT INCLUDES
@@ -28,11 +31,7 @@
 #include <QCoreApplication>
 #include <QObject>
 #include <QTemporaryDir>
-#include <QTemporaryFile>
-#include <QDebug>
 #include <QtTest>
-#include <QFile>
-#include <QTextStream>
 
 //=============================================================================================================
 // EIGEN INCLUDES
@@ -48,60 +47,76 @@ using namespace CHANNELSLIB;
 using namespace BASELIB;
 using namespace Eigen;
 
+namespace fs = std::filesystem;
+
+//=============================================================================================================
+// STATIC HELPERS
+//=============================================================================================================
+
+namespace
+{
+
+std::string read_text(const fs::path& path)
+{
+    std::ifstream file(path);
+    std::stringstream text;
+    text << file.rdbuf();
+    return text.str();
+}
+
+void write_text(const fs::path& path, std::string_view text)
+{
+    std::ofstream(path) << text;
+}
+
+// Four points on the equator of the unit sphere, scaled to 0.1
+std::vector<Vector3d> equator()
+{
+    return {{0.1, 0.0, 0.0}, {0.0, 0.1, 0.0}, {-0.1, 0.0, 0.0}, {0.0, -0.1, 0.0}};
+}
+
+} // anonymous namespace
+
 //=============================================================================================================
 /**
  * @brief Tests for LayoutLoader, LayoutMaker, and SelectionIO.
  */
-class TestUtilsLayoutSelection : public QObject
+class TestChannelsLayoutSelection : public QObject
 {
     Q_OBJECT
-
-public:
-    TestUtilsLayoutSelection();
 
 private slots:
     void initTestCase();
 
-    // ── LayoutLoader ──────────────────────────────────────────────────
-    void testReadAsaElcFileQString();
-    void testReadAsaElcFileStdString();
-    void testReadAsaElcFileNonExistent();
-    void testReadAsaElcFileWrongExtension();
+    // LayoutLoader
+    void testReadElcNamedPositions();
+    void testReadElcLabelsAndPlainPositions();
+    void testReadElcResourceFile();
+    void testReadElcRejects();
 
-    // ── LayoutMaker ───────────────────────────────────────────────────
+    // LayoutMaker
     void testMakeLayoutNoFit();
     void testMakeLayoutWithFit();
-    void testMakeLayoutMirrorX();
-    void testMakeLayoutMirrorY();
-    // std::vector overload
-    void testMakeLayoutStdVectorNoFit();
-    void testMakeLayoutStdVectorWithFit();
-    void testMakeLayoutStdVectorMirrorX();
-    void testMakeLayoutStdVectorWriteFile();
+    void testMakeLayoutMirror();
+    void testMakeLayoutRejects();
+    void testWriteLout();
 
-    // ── SelectionIO ───────────────────────────────────────────────────
-    void testWriteReadMNESelFileQString();
-    void testWriteReadMNESelFileStdString();
-    void testReadMNESelFileNonExistent();
-    void testWriteReadBrainstormMonQString();
-    void testWriteReadBrainstormMonStdString();
-
-    void cleanupTestCase();
+    // SelectionIO
+    void testSelRoundTrip();
+    void testReadSelSkipsComments();
+    void testReadSelRejects();
+    void testMonRoundTrip();
+    void testWriteMonRejectsPathNames();
 
 private:
+    fs::path tempPath(std::string_view name) const;
+
     QTemporaryDir m_tempDir;
-    QString resourcePath() const;
 };
 
 //=============================================================================================================
 
-TestUtilsLayoutSelection::TestUtilsLayoutSelection()
-{
-}
-
-//=============================================================================================================
-
-void TestUtilsLayoutSelection::initTestCase()
+void TestChannelsLayoutSelection::initTestCase()
 {
     BASELIB::Log::install_qt_message_handler();
     QVERIFY(m_tempDir.isValid());
@@ -109,390 +124,240 @@ void TestUtilsLayoutSelection::initTestCase()
 
 //=============================================================================================================
 
-QString TestUtilsLayoutSelection::resourcePath() const
+fs::path TestChannelsLayoutSelection::tempPath(std::string_view name) const
 {
-    return QCoreApplication::applicationDirPath() + "/../resources/";
+    return fs::path(m_tempDir.path().toStdString()) / name;
 }
 
 //=============================================================================================================
 // LayoutLoader
 //=============================================================================================================
 
-void TestUtilsLayoutSelection::testReadAsaElcFileQString()
+void TestChannelsLayoutSelection::testReadElcNamedPositions()
 {
-    QString elcPath = resourcePath() + "general/3DLayouts/standard_waveguard64.elc";
-    if (!QFile::exists(elcPath)) {
+    // ANT layout: "name : x y z" lines, the Labels block (upper case) wins over the prefixes
+    const auto layout = LayoutLoader::parse_elc("# comment\n"
+                                                "NumberPositions=\t2\n"
+                                                "UnitPosition\tmm\n"
+                                                "Positions\n"
+                                                "Fp1:\t94.9\t30.7\t14.0\n"
+                                                "Cz :\t0.0\t0.0\t87.0\n"
+                                                "Labels\n"
+                                                "FP1\tCZ\n"
+                                                "Positions2D\n"
+                                                "Fp1: 82.7\t29.37\n"
+                                                "Cz : 0\t0\n");
+    QVERIFY(layout);
+    QCOMPARE(layout->names, StringList({"FP1", "CZ"}));
+    QCOMPARE(layout->unit, std::string("mm"));
+    QCOMPARE(layout->positions_3d.size(), std::size_t(2));
+    QVERIFY((layout->positions_3d[0] - Vector3d(94.9, 30.7, 14.0)).norm() < 1e-12);
+    QVERIFY((layout->positions_3d[1] - Vector3d(0.0, 0.0, 87.0)).norm() < 1e-12);
+    QCOMPARE(layout->positions_2d.size(), std::size_t(2));
+    QVERIFY((layout->positions_2d[0] - Vector2d(82.7, 29.37)).norm() < 1e-12);
+
+    // Without a Labels block the names come from the position lines
+    const auto unlabelled = LayoutLoader::parse_elc("Positions\nFp1 : 1 2 3\nCz : 4 5 6\n");
+    QVERIFY(unlabelled);
+    QCOMPARE(unlabelled->names, StringList({"Fp1", "Cz"}));
+}
+
+//=============================================================================================================
+
+void TestChannelsLayoutSelection::testReadElcLabelsAndPlainPositions()
+{
+    // MNE-Python layout: plain "x y z" lines, then one label per line, Windows line ends
+    const fs::path path = tempPath("plain.ELC");
+    write_text(path, "ReferenceLabel\tavg\r\nUnitPosition\tm\r\nPositions\r\n1 2 3\r\n4 5 6\r\nLabels\r\nA1\r\nA2\r\n");
+    const auto layout = LayoutLoader::read_elc(path);
+    QVERIFY(layout);
+    QCOMPARE(layout->names, StringList({"A1", "A2"}));
+    QCOMPARE(layout->unit, std::string("m"));
+    QVERIFY((layout->positions_3d[1] - Vector3d(4.0, 5.0, 6.0)).norm() < 1e-12);
+    QVERIFY(layout->positions_2d.empty());
+}
+
+//=============================================================================================================
+
+void TestChannelsLayoutSelection::testReadElcResourceFile()
+{
+    const fs::path path = fs::path(QCoreApplication::applicationDirPath().toStdString()) / "../resources/general/3DLayouts/standard_waveguard64.elc";
+    if (!fs::exists(path))
         QSKIP("ELC file not available");
+
+    const auto layout = LayoutLoader::read_elc(path);
+    QVERIFY(layout);
+    QCOMPARE(layout->names.size(), std::size_t(64));
+    QCOMPARE(layout->positions_3d.size(), std::size_t(64));
+    QCOMPARE(layout->positions_2d.size(), std::size_t(64));
+    QCOMPARE(layout->names.front(), std::string("FP1"));
+    QCOMPARE(layout->unit, std::string("mm"));
+
+    // Every cap shipped with mne-cpp reads, with a name and a 2-D position for each electrode where given
+    int files = 0;
+    for (const auto& entry : fs::recursive_directory_iterator(path.parent_path().parent_path().parent_path())) {
+        if (entry.path().extension() != ".elc")
+            continue;
+        ++files;
+        const auto cap = LayoutLoader::read_elc(entry.path());
+        QVERIFY2(cap, entry.path().string().c_str());
+        QVERIFY2(cap->positions_2d.empty() || cap->positions_2d.size() == cap->positions_3d.size(), entry.path().string().c_str());
     }
-
-    QStringList channelNames;
-    QList<QVector<float>> location3D, location2D;
-    QString unit;
-
-    bool ok = LayoutLoader::readAsaElcFile(elcPath, channelNames, location3D, location2D, unit);
-    QVERIFY(ok);
-    QVERIFY(!channelNames.isEmpty());
-    QVERIFY(!location3D.isEmpty());
-    // Each 3D location has 3 coordinates
-    QCOMPARE(location3D.first().size(), 3);
+    QVERIFY(files >= 9);
 }
 
 //=============================================================================================================
 
-void TestUtilsLayoutSelection::testReadAsaElcFileStdString()
+void TestChannelsLayoutSelection::testReadElcRejects()
 {
-    QString elcPath = resourcePath() + "general/3DLayouts/standard_waveguard64.elc";
-    if (!QFile::exists(elcPath)) {
-        QSKIP("ELC file not available");
-    }
+    QVERIFY(!LayoutLoader::read_elc("/nonexistent.elc"));
+    const fs::path wrongExtension = tempPath("cap.txt");
+    write_text(wrongExtension, "Positions\nCz : 0 0 1\n");
+    QVERIFY(!LayoutLoader::read_elc(wrongExtension));
 
-    StringList channelNames;
-    std::vector<std::vector<float>> location3D, location2D;
-    std::string unit;
-
-    bool ok = LayoutLoader::readAsaElcFile(elcPath.toStdString(), channelNames, location3D, location2D, unit);
-    QVERIFY(ok);
-    QVERIFY(!channelNames.empty());
-    QVERIFY(!location3D.empty());
-    QCOMPARE((int)location3D.front().size(), 3);
-}
-
-//=============================================================================================================
-
-void TestUtilsLayoutSelection::testReadAsaElcFileNonExistent()
-{
-    QStringList channelNames;
-    QList<QVector<float>> location3D, location2D;
-    QString unit;
-
-    bool ok = LayoutLoader::readAsaElcFile(QString("/nonexistent.elc"), channelNames, location3D, location2D, unit);
-    QVERIFY(!ok);
-}
-
-//=============================================================================================================
-
-void TestUtilsLayoutSelection::testReadAsaElcFileWrongExtension()
-{
-    QStringList channelNames;
-    QList<QVector<float>> location3D, location2D;
-    QString unit;
-
-    bool ok = LayoutLoader::readAsaElcFile(QString("/some/file.txt"), channelNames, location3D, location2D, unit);
-    QVERIFY(!ok);
+    QVERIFY(!LayoutLoader::parse_elc(""));
+    QVERIFY(!LayoutLoader::parse_elc("Positions\nCz : 0 zero 1\n"));
+    QVERIFY(!LayoutLoader::parse_elc("Positions\n0 0 1\n1 0 0\nLabels\nCz\n"));
 }
 
 //=============================================================================================================
 // LayoutMaker
 //=============================================================================================================
 
-void TestUtilsLayoutSelection::testMakeLayoutNoFit()
+void TestChannelsLayoutSelection::testMakeLayoutNoFit()
 {
-    QList<QVector<float>> inputPoints;
-    inputPoints.append({0.1f, 0.0f, 0.0f});
-    inputPoints.append({0.0f, 0.1f, 0.0f});
-    inputPoints.append({-0.1f, 0.0f, 0.0f});
-    inputPoints.append({0.0f, -0.1f, 0.0f});
-
-    QList<QVector<float>> outputPoints;
-    QStringList names = {"Ch1", "Ch2", "Ch3", "Ch4"};
-
-    QString outPath = m_tempDir.path() + "/layout_nofit.lout";
-    QFile outFile(outPath);
-
-    bool ok = LayoutMaker::makeLayout(inputPoints, outputPoints, names, outFile,
-                                      false, 0.2f, 0.5f, 0.5f, false);
-    QVERIFY(ok);
-    QCOMPARE(outputPoints.size(), 4);
-
-    // Each output point should have at least 2 coordinates (x, y)
-    for (const auto& pt : outputPoints) {
-        QVERIFY(pt.size() >= 2);
-    }
+    const LayoutOptions options{.fit_sphere = false, .radius = 0.2, .box_width = 0.5, .box_height = 0.5};
+    const auto corners = LayoutMaker::make_layout(equator(), options);
+    QVERIFY(corners);
+    QCOMPARE(corners->size(), std::size_t(4));
 
     // Equatorial points lie at 90 degrees from the pole, i.e. at radius prad, in their own direction
     // (box corner = centre - (w/2, h/2)), as in MNE-C mne_make_eeg_layout
-    const float expected[4][2] = {{0.2f, 0.0f}, {0.0f, 0.2f}, {-0.2f, 0.0f}, {0.0f, -0.2f}};
-    for (int i = 0; i < 4; ++i) {
-        QVERIFY(qAbs(outputPoints[i][0] + 0.25f - expected[i][0]) < 1e-5f);
-        QVERIFY(qAbs(outputPoints[i][1] + 0.25f - expected[i][1]) < 1e-5f);
-    }
+    const Vector2d expected[4] = {{0.2, 0.0}, {0.0, 0.2}, {-0.2, 0.0}, {0.0, -0.2}};
+    for (std::size_t i = 0; i < 4; ++i)
+        QVERIFY(((*corners)[i] + Vector2d(0.25, 0.25) - expected[i]).norm() < 1e-12);
 }
 
 //=============================================================================================================
 
-void TestUtilsLayoutSelection::testMakeLayoutWithFit()
+void TestChannelsLayoutSelection::testMakeLayoutWithFit()
 {
-    QList<QVector<float>> inputPoints;
-    inputPoints.append({0.1f, 0.0f, 0.05f});
-    inputPoints.append({0.0f, 0.1f, 0.05f});
-    inputPoints.append({-0.1f, 0.0f, 0.05f});
-    inputPoints.append({0.0f, -0.1f, 0.05f});
-    inputPoints.append({0.05f, 0.05f, 0.07f});
-
-    QList<QVector<float>> outputPoints;
-    QStringList names = {"Ch1", "Ch2", "Ch3", "Ch4", "Ch5"};
-
-    QString outPath = m_tempDir.path() + "/layout_fit.lout";
-    QFile outFile(outPath);
-
-    bool ok = LayoutMaker::makeLayout(inputPoints, outputPoints, names, outFile,
-                                      true, 0.3f, 0.5f, 0.5f, false);
-    QVERIFY(ok);
-    QCOMPARE(outputPoints.size(), 5);
+    const std::vector<Vector3d> cap{{0.1, 0.0, 0.05}, {0.0, 0.1, 0.05}, {-0.1, 0.0, 0.05}, {0.0, -0.1, 0.05}, {0.05, 0.05, 0.07}};
+    const auto corners = LayoutMaker::make_layout(cap, {.radius = 0.3, .box_width = 0.5, .box_height = 0.5});
+    QVERIFY(corners);
+    QCOMPARE(corners->size(), std::size_t(5));
 }
 
 //=============================================================================================================
 
-void TestUtilsLayoutSelection::testMakeLayoutMirrorX()
+void TestChannelsLayoutSelection::testMakeLayoutMirror()
 {
-    QList<QVector<float>> inputPoints;
-    inputPoints.append({0.1f, 0.0f, 0.0f});
-    inputPoints.append({0.0f, 0.1f, 0.0f});
-    inputPoints.append({-0.1f, 0.0f, 0.0f});
+    const LayoutOptions plain{.fit_sphere = false, .radius = 0.2, .box_width = 0.5, .box_height = 0.4};
+    LayoutOptions mirrored = plain;
+    mirrored.mirror_x = true;
+    mirrored.mirror_y = true;
 
-    QList<QVector<float>> outputNormal, outputMirrored;
-    QStringList names = {"Ch1", "Ch2", "Ch3"};
-
-    QFile out1(m_tempDir.path() + "/layout_normal.lout");
-    QFile out2(m_tempDir.path() + "/layout_mirrorx.lout");
-
-    LayoutMaker::makeLayout(inputPoints, outputNormal, names, out1,
-                            false, 0.2f, 0.5f, 0.5f, false, false, false);
-    LayoutMaker::makeLayout(inputPoints, outputMirrored, names, out2,
-                            false, 0.2f, 0.5f, 0.5f, false, true, false);
-
-    QCOMPARE(outputMirrored.size(), outputNormal.size());
-    // X coordinates should be negated
-    for (int i = 0; i < outputNormal.size(); ++i) {
-        QVERIFY(qAbs(outputMirrored[i][0] + outputNormal[i][0]) < 1e-5f);
-    }
+    const auto normal = LayoutMaker::make_layout(equator(), plain);
+    const auto flipped = LayoutMaker::make_layout(equator(), mirrored);
+    QVERIFY(normal && flipped);
+    for (std::size_t i = 0; i < normal->size(); ++i)
+        QVERIFY(((*flipped)[i] + (*normal)[i]).norm() < 1e-12);
 }
 
 //=============================================================================================================
 
-void TestUtilsLayoutSelection::testMakeLayoutMirrorY()
+void TestChannelsLayoutSelection::testMakeLayoutRejects()
 {
-    QList<QVector<float>> inputPoints;
-    inputPoints.append({0.1f, 0.0f, 0.0f});
-    inputPoints.append({0.0f, 0.1f, 0.0f});
-    inputPoints.append({-0.1f, 0.0f, 0.0f});
-
-    QList<QVector<float>> outputNormal, outputMirrored;
-    QStringList names = {"Ch1", "Ch2", "Ch3"};
-
-    QFile out1(m_tempDir.path() + "/layout_normal2.lout");
-    QFile out2(m_tempDir.path() + "/layout_mirrory.lout");
-
-    LayoutMaker::makeLayout(inputPoints, outputNormal, names, out1,
-                            false, 0.2f, 0.5f, 0.5f, false, false, false);
-    LayoutMaker::makeLayout(inputPoints, outputMirrored, names, out2,
-                            false, 0.2f, 0.5f, 0.5f, false, false, true);
-
-    QCOMPARE(outputMirrored.size(), outputNormal.size());
-    // Y coordinates should be negated
-    for (int i = 0; i < outputNormal.size(); ++i) {
-        QVERIFY(qAbs(outputMirrored[i][1] + outputNormal[i][1]) < 1e-5f);
-    }
-}
-
-//=============================================================================================================
-// LayoutMaker — std::vector overload
-//=============================================================================================================
-
-void TestUtilsLayoutSelection::testMakeLayoutStdVectorNoFit()
-{
-    std::vector<std::vector<float>> inputPoints = {
-        {0.1f, 0.0f, 0.0f},
-        {0.0f, 0.1f, 0.0f},
-        {-0.1f, 0.0f, 0.0f},
-        {0.0f, -0.1f, 0.0f}};
-
-    std::vector<std::vector<float>> outputPoints;
-    StringList names = {"Ch1", "Ch2", "Ch3", "Ch4"};
-
-    std::string outPath = (m_tempDir.path() + "/layout_stdvec_nofit.lout").toStdString();
-
-    bool ok = LayoutMaker::makeLayout(inputPoints, outputPoints, names, outPath,
-                                      false, 0.2f, 0.5f, 0.5f, false);
-    QVERIFY(ok);
-    QCOMPARE(static_cast<int>(outputPoints.size()), 4);
-    for (const auto& pt : outputPoints) {
-        QVERIFY(pt.size() >= 2);
-    }
+    QVERIFY(!LayoutMaker::make_layout(std::vector<Vector3d>{}));
+    const std::vector<Vector3d> coincident(3, Vector3d(0.0, 0.0, 0.1));
+    QVERIFY(!LayoutMaker::make_layout(coincident, {.fit_sphere = false}));
 }
 
 //=============================================================================================================
 
-void TestUtilsLayoutSelection::testMakeLayoutStdVectorWithFit()
+void TestChannelsLayoutSelection::testWriteLout()
 {
-    std::vector<std::vector<float>> inputPoints = {
-        {0.1f, 0.0f, 0.05f},
-        {0.0f, 0.1f, 0.05f},
-        {-0.1f, 0.0f, 0.05f},
-        {0.0f, -0.1f, 0.05f},
-        {0.05f, 0.05f, 0.07f}};
+    const std::vector<Vector2d> corners{{-0.25, 1.5}, {2.0, -3.125}};
+    const fs::path path = tempPath("layout.lout");
+    QVERIFY(LayoutMaker::write_lout(path, corners, {"EEG 001"}, {.box_width = 0.5, .box_height = 0.4}));
+    QCOMPARE(read_text(path), std::string("0.000000 0.000000 0.000000 0.000000\n"
+                                          "1 -0.250000 1.500000 0.500000 0.400000 EEG 001\n"
+                                          "2 2.000000 -3.125000 0.500000 0.400000\n"));
 
-    std::vector<std::vector<float>> outputPoints;
-    StringList names = {"Ch1", "Ch2", "Ch3", "Ch4", "Ch5"};
-
-    std::string outPath = (m_tempDir.path() + "/layout_stdvec_fit.lout").toStdString();
-
-    bool ok = LayoutMaker::makeLayout(inputPoints, outputPoints, names, outPath,
-                                      true, 0.3f, 0.5f, 0.5f, false);
-    QVERIFY(ok);
-    QCOMPARE(static_cast<int>(outputPoints.size()), 5);
-}
-
-//=============================================================================================================
-
-void TestUtilsLayoutSelection::testMakeLayoutStdVectorMirrorX()
-{
-    std::vector<std::vector<float>> inputPoints = {
-        {0.1f, 0.0f, 0.0f},
-        {0.0f, 0.1f, 0.0f},
-        {-0.1f, 0.0f, 0.0f}};
-
-    std::vector<std::vector<float>> outputNormal, outputMirrored;
-    StringList names = {"Ch1", "Ch2", "Ch3"};
-
-    std::string out1 = (m_tempDir.path() + "/layout_stdvec_normal.lout").toStdString();
-    std::string out2 = (m_tempDir.path() + "/layout_stdvec_mirrorx.lout").toStdString();
-
-    LayoutMaker::makeLayout(inputPoints, outputNormal, names, out1,
-                            false, 0.2f, 0.5f, 0.5f, false, false, false);
-    LayoutMaker::makeLayout(inputPoints, outputMirrored, names, out2,
-                            false, 0.2f, 0.5f, 0.5f, false, true, false);
-
-    QCOMPARE(outputMirrored.size(), outputNormal.size());
-    for (size_t i = 0; i < outputNormal.size(); ++i) {
-        QVERIFY(std::abs(outputMirrored[i][0] + outputNormal[i][0]) < 1e-5f);
-    }
-}
-
-//=============================================================================================================
-
-void TestUtilsLayoutSelection::testMakeLayoutStdVectorWriteFile()
-{
-    std::vector<std::vector<float>> inputPoints = {
-        {0.1f, 0.0f, 0.0f},
-        {0.0f, 0.1f, 0.0f},
-        {-0.1f, 0.0f, 0.0f}};
-
-    std::vector<std::vector<float>> outputPoints;
-    StringList names = {"Ch1", "Ch2", "Ch3"};
-
-    std::string outPath = (m_tempDir.path() + "/layout_stdvec_written.lout").toStdString();
-
-    bool ok = LayoutMaker::makeLayout(inputPoints, outputPoints, names, outPath,
-                                      false, 0.2f, 0.5f, 0.5f, true);
-    QVERIFY(ok);
-    QCOMPARE(static_cast<int>(outputPoints.size()), 3);
-
-    // Verify file was written
-    QFile written(QString::fromStdString(outPath));
-    QVERIFY(written.exists());
-    QVERIFY(written.size() > 0);
+    QVERIFY(!LayoutMaker::write_lout(tempPath("missing/dir/layout.lout"), corners, {}));
 }
 
 //=============================================================================================================
 // SelectionIO
 //=============================================================================================================
 
-void TestUtilsLayoutSelection::testWriteReadMNESelFileQString()
+void TestChannelsLayoutSelection::testSelRoundTrip()
 {
-    QString path = m_tempDir.path() + "/test_write.sel";
-
-    QMultiMap<QString, QStringList> selMap;
-    selMap.insert("GroupA", QStringList({"MEG 0111", "MEG 0121", "MEG 0131"}));
-    selMap.insert("GroupB", QStringList({"MEG 0211", "MEG 0221"}));
-
-    QVERIFY(SelectionIO::writeMNESelFile(path, selMap));
-
-    QMultiMap<QString, QStringList> readMap;
-    QVERIFY(SelectionIO::readMNESelFile(path, readMap));
-    QVERIFY(!readMap.isEmpty());
-    QVERIFY(readMap.contains("GroupA"));
-    QVERIFY(readMap.contains("GroupB"));
+    // File order survives, also when it is not alphabetical
+    const std::vector<ChannelSelection> groups{{"Vertex", {"MEG 0711"}},
+                                               {"Left-temporal", {"MEG 0111", "MEG 0121", "MEG 0131"}},
+                                               {"Empty", {}}};
+    const fs::path path = tempPath("groups.sel");
+    QVERIFY(SelectionIO::write_sel(path, groups));
+    const auto read = SelectionIO::read_sel(path);
+    QVERIFY(read);
+    QVERIFY(*read == groups);
 }
 
 //=============================================================================================================
 
-void TestUtilsLayoutSelection::testWriteReadMNESelFileStdString()
+void TestChannelsLayoutSelection::testReadSelSkipsComments()
 {
-    std::string path = m_tempDir.path().toStdString() + "/test_write_std.sel";
-
-    std::map<std::string, StringList> selMap;
-    selMap["GroupA"] = {"MEG 0111", "MEG 0121"};
-    selMap["GroupB"] = {"MEG 0211"};
-
-    QVERIFY(SelectionIO::writeMNESelFile(path, selMap));
-
-    std::multimap<std::string, StringList> readMap;
-    QVERIFY(SelectionIO::readMNESelFile(path, readMap));
-    QVERIFY(!readMap.empty());
-    QVERIFY(readMap.count("GroupA") > 0);
+    const fs::path path = tempPath("mne_browse_raw.sel");
+    write_text(path, "%\r\n% Vectorview: comment with a colon\r\n\r\nVertex:MEG 0711|MEG 0712|\r\n");
+    const auto read = SelectionIO::read_sel(path);
+    QVERIFY(read);
+    QCOMPARE(read->size(), std::size_t(1));
+    QVERIFY(read->front() == ChannelSelection({"Vertex", {"MEG 0711", "MEG 0712"}}));
 }
 
 //=============================================================================================================
 
-void TestUtilsLayoutSelection::testReadMNESelFileNonExistent()
+void TestChannelsLayoutSelection::testReadSelRejects()
 {
-    QMultiMap<QString, QStringList> readMap;
-    bool ok = SelectionIO::readMNESelFile(QString("/nonexistent.sel"), readMap);
-    QVERIFY(!ok);
+    QVERIFY(!SelectionIO::read_sel("/nonexistent.sel"));
+    const fs::path wrongExtension = tempPath("groups.txt");
+    write_text(wrongExtension, "Vertex:MEG 0711|\n");
+    QVERIFY(!SelectionIO::read_sel(wrongExtension));
+    QVERIFY(!SelectionIO::write_sel(wrongExtension, {}));
 }
 
 //=============================================================================================================
 
-void TestUtilsLayoutSelection::testWriteReadBrainstormMonQString()
+void TestChannelsLayoutSelection::testMonRoundTrip()
 {
-    // Write a group to its own .mon file, then read it back
-    QString basePath = m_tempDir.path() + "/brainstorm";
+    const std::vector<ChannelSelection> groups{{"Frontal", {"Fp1", "Fp2"}}, {"Occipital", {"O1"}}};
+    const fs::path directory = tempPath("");
+    QVERIFY(SelectionIO::write_mon(directory, groups));
+    QCOMPARE(read_text(directory / "Frontal.mon"), std::string("Frontal\nFp1 : Fp1\nFp2 : Fp2\n"));
 
-    QMultiMap<QString, QStringList> selMap;
-    selMap.insert("TestGroup", QStringList({"Chan1", "Chan2", "Chan3"}));
-
-    QVERIFY(SelectionIO::writeBrainstormMonFiles(basePath, selMap));
-
-    // writeBrainstormMonFiles uses QFileInfo(path).absolutePath() + "/" + key + ".mon"
-    QFileInfo fi(basePath);
-    QString monPath = fi.absolutePath() + "/TestGroup.mon";
-    QVERIFY2(QFile::exists(monPath), qPrintable("Mon file not found at: " + monPath));
-
-    QMultiMap<QString, QStringList> readMap;
-    QVERIFY(SelectionIO::readBrainstormMonFile(monPath, readMap));
-    QVERIFY(!readMap.isEmpty());
+    const auto occipital = SelectionIO::read_mon(directory / "Occipital.mon");
+    QVERIFY(occipital);
+    QVERIFY(*occipital == groups[1]);
+    QVERIFY(!SelectionIO::read_mon(directory / "Missing.mon"));
+    QVERIFY(!SelectionIO::read_mon(directory / "groups.sel"));
 }
 
 //=============================================================================================================
 
-void TestUtilsLayoutSelection::testWriteReadBrainstormMonStdString()
+void TestChannelsLayoutSelection::testWriteMonRejectsPathNames()
 {
-    std::string basePath = m_tempDir.path().toStdString() + "/brainstorm_std";
-
-    std::map<std::string, StringList> selMap;
-    selMap["StdTestGroup"] = {"Chan1", "Chan2"};
-
-    QVERIFY(SelectionIO::writeBrainstormMonFiles(basePath, selMap));
-
-    // Read back using std::string overload
-    std::string monPath = basePath.substr(0, basePath.find_last_of("/") + 1) + "StdTestGroup.mon";
-    std::multimap<std::string, StringList> readMap;
-    QVERIFY(SelectionIO::readBrainstormMonFile(monPath, readMap));
-    QVERIFY(!readMap.empty());
-}
-
-
-//=============================================================================================================
-
-void TestUtilsLayoutSelection::cleanupTestCase()
-{
-    qInfo() << "TestUtilsLayoutSelection: All tests completed";
+    // A group name is a file name; it must not escape the target directory
+    const fs::path directory = tempPath("mon");
+    fs::create_directories(directory);
+    QVERIFY(!SelectionIO::write_mon(directory, std::vector<ChannelSelection>{{"../escape", {"Cz"}}}));
+    QVERIFY(!fs::exists(tempPath("escape.mon")));
+    QVERIFY(!SelectionIO::write_mon(directory, std::vector<ChannelSelection>{{"", {"Cz"}}}));
 }
 
 //=============================================================================================================
 // MAIN
 //=============================================================================================================
 
-QTEST_GUILESS_MAIN(TestUtilsLayoutSelection)
+QTEST_GUILESS_MAIN(TestChannelsLayoutSelection)
 #include "test_channels_layout_selection.moc"

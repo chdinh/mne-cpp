@@ -27,11 +27,12 @@
     "libraries": 27,
     "qt_free": [
       "acq",
+      "channels",
       "decoding",
       "math",
       "report"
     ],
-    "tokens": 14640,
+    "tokens": 14496,
     "gui_outside_design": []
   },
   "libraries": {
@@ -119,20 +120,12 @@
       ]
     },
     "channels": {
-      "tokens": 144,
-      "by_category": {
-        "containers": 37,
-        "files": 29,
-        "global": 6,
-        "regex": 2,
-        "strings": 70
-      },
-      "public_header_includes": 13,
+      "tokens": 0,
+      "by_category": {},
+      "public_header_includes": 0,
       "q_object": 0,
       "files": 10,
-      "modules": [
-        "Core"
-      ]
+      "modules": []
     },
     "com": {
       "tokens": 369,
@@ -183,9 +176,9 @@
     "disp": {
       "tokens": 6099,
       "by_category": {
-        "containers": 482,
-        "files": 109,
-        "global": 1256,
+        "containers": 477,
+        "files": 108,
+        "global": 1257,
         "gui": 924,
         "json": 5,
         "logging": 49,
@@ -193,7 +186,7 @@
         "other": 1503,
         "regex": 4,
         "smart_pointers": 60,
-        "strings": 1122,
+        "strings": 1127,
         "threads": 23,
         "time": 11
       },

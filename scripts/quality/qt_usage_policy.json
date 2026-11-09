@@ -71,11 +71,9 @@
       ]
     },
     "channels": {
-      "tokens": 144,
-      "public_header_includes": 13,
-      "modules": [
-        "Core"
-      ]
+      "tokens": 0,
+      "public_header_includes": 0,
+      "modules": []
     },
     "com": {
       "tokens": 369,

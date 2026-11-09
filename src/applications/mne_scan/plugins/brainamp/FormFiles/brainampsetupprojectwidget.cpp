@@ -170,15 +170,14 @@ void BrainAMPSetupProjectWidget::onCardinalComboBoxChanged()
 
 void BrainAMPSetupProjectWidget::updateCardinalComboBoxes(const QString& sPath)
 {
-    QList<QVector<float>> elcLocation3D;
-    QList<QVector<float>> elcLocation2D;
-    QString unit;
-    QStringList elcChannelNames;
-
-    if (!LayoutLoader::readAsaElcFile(sPath, elcChannelNames, elcLocation3D, elcLocation2D, unit)) {
+    const auto layout = LayoutLoader::read_elc(BASELIB::pathFromUtf8(sPath.toStdString()));
+    if (!layout) {
         qDebug() << "Error: Reading elc file.";
         return;
     }
+    QStringList elcChannelNames;
+    for (const std::string& name : layout->names)
+        elcChannelNames << QString::fromStdString(name);
 
     ui->m_comboBox_LPA->clear();
     ui->m_comboBox_RPA->clear();
