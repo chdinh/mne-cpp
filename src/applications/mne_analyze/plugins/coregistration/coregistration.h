@@ -20,6 +20,7 @@
 //=============================================================================================================
 
 #include "coregistration_global.h"
+#include <memory>
 #include <anShared/Plugins/abstractplugin.h>
 
 #include <fiff/fiff_coord_trans.h>
@@ -300,7 +301,7 @@ private:
     void onModelRemoved(QSharedPointer<ANSHAREDLIB::AbstractModel> pRemovedModel);
 
     QVector<QSharedPointer<ANSHAREDLIB::AbstractModel>> m_vecBemDataModels; /**< Vector with all available Bem Models. */
-    QSharedPointer<MNELIB::MNEBem> m_pBem;                                  /**< The currently selected Bem model. */
+    std::shared_ptr<MNELIB::MNEBem> m_pBem;                                 /**< The currently selected Bem model. */
     QString m_sCurrentSelectedBem;                                          /**< The name of the currently selected Bem. */
     FIFFLIB::FiffDigPointSet m_digSetHead;                                  /**< The currently selected digitizer set. */
     FIFFLIB::FiffDigPointSet m_digFidMri;                                   /**< The currently selected mri fiducials. */

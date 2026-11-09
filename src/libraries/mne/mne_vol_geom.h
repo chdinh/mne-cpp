@@ -59,9 +59,6 @@ namespace MNELIB
 class MNESHARED_EXPORT MNEVolGeom
 {
 public:
-    typedef QSharedPointer<MNEVolGeom> SPtr;            /**< Shared pointer type for MNEVolGeom. */
-    typedef QSharedPointer<const MNEVolGeom> ConstSPtr; /**< Const shared pointer type for MNEVolGeom. */
-
     //=========================================================================================================
     /**
      * Constructs the MNE Volume Geometry

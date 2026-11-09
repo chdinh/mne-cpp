@@ -33,6 +33,7 @@
 //=============================================================================================================
 
 #include <Eigen/Core>
+#include <utility>
 
 //=============================================================================================================
 // USED NAMESPACES
@@ -70,7 +71,7 @@ void RtInvOpWorker::doWork(const RtInvOpInput& inputData)
 //=============================================================================================================
 
 RtInvOp::RtInvOp(std::shared_ptr<FiffInfo>& p_pFiffInfo,
-                 MNEForwardSolution::SPtr& p_pFwd,
+                 std::shared_ptr<MNEForwardSolution>& p_pFwd,
                  QObject* parent)
 : QObject(parent)
 , m_pFiffInfo(p_pFiffInfo)
@@ -116,9 +117,9 @@ void RtInvOp::append(const FIFFLIB::FiffCov& noiseCov)
 
 //=============================================================================================================
 
-void RtInvOp::setFwdSolution(QSharedPointer<MNELIB::MNEForwardSolution> pFwd)
+void RtInvOp::setFwdSolution(std::shared_ptr<MNELIB::MNEForwardSolution> pFwd)
 {
-    m_pFwd = pFwd;
+    m_pFwd = std::move(pFwd);
 }
 
 //=============================================================================================================

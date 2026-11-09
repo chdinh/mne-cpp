@@ -199,10 +199,10 @@ void View3D::updateCoregBem(QSharedPointer<ANSHAREDLIB::BemDataModel> pNewModel)
         qWarning().noquote().nospace() << "[View3D::updateCoregBem] Null BrainTreeModel";
         return;
     } else if (pNewModel->getType() == ANSHAREDLIB_BEMDATA_MODEL) {
-        if (!pNewModel->getBem().data()->empty()) {
+        if (!pNewModel->getBem().get()->empty()) {
             m_pBemTreeCoreg = m_p3DModel->addBemSurface("Co-Registration",
                                                         QFileInfo(pNewModel->getModelPath()).fileName(),
-                                                        (*pNewModel->getBem().data())[0]);
+                                                        (*pNewModel->getBem().get())[0]);
         }
     }
     return;

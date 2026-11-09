@@ -57,9 +57,6 @@ class MNEInverseOperator;
 class MNESHARED_EXPORT MNEMneData
 {
 public:
-    typedef QSharedPointer<MNEMneData> SPtr;            /**< Shared pointer type for MNEMneData. */
-    typedef QSharedPointer<const MNEMneData> ConstSPtr; /**< Const shared pointer type for MNEMneData. */
-
     //=========================================================================================================
     /**
      * Constructs the MNEMneData.

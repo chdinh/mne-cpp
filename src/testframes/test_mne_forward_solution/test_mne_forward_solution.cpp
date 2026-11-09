@@ -63,8 +63,8 @@ private slots:
     void cleanupTestCase();
 
 private:
-    QSharedPointer<MNEForwardSolution> m_pFwdMEGEEGRead;
-    QSharedPointer<MNEForwardSolution> m_pFwdMEGEEGRef;
+    std::shared_ptr<MNEForwardSolution> m_pFwdMEGEEGRead;
+    std::shared_ptr<MNEForwardSolution> m_pFwdMEGEEGRef;
 };
 
 //=============================================================================================================
@@ -89,7 +89,7 @@ void TestMneForwardSolution::computeForward()
 
     // Read reference forward solution
     QString fwdMEGEEGFileRef(QCoreApplication::applicationDirPath() + "/../resources/data/mne-cpp-test-data/Result/ref-sample_audvis-meg-eeg-oct-6-fwd.fif");
-    m_pFwdMEGEEGRef = QSharedPointer<MNEForwardSolution>::create(fwdMEGEEGFileRef.toStdU16String());
+    m_pFwdMEGEEGRef = std::make_shared<MNEForwardSolution>(fwdMEGEEGFileRef.toStdU16String());
 
     //Following is equivalent to:
     //mne_forward_solution
@@ -132,7 +132,7 @@ void TestMneForwardSolution::computeForward()
     QVERIFY(pFwdSolution->write(UTILSLIB::pathFromUtf8(pSettingsMEGEEG->solname)));
 
     // Read newly created fwd
-    m_pFwdMEGEEGRead = QSharedPointer<MNEForwardSolution>::create(UTILSLIB::pathFromUtf8(pSettingsMEGEEG->solname));
+    m_pFwdMEGEEGRead = std::make_shared<MNEForwardSolution>(UTILSLIB::pathFromUtf8(pSettingsMEGEEG->solname));
 
     printf("<<<<<<<<<<<<<<<<<<<<<<<<< Compute/Write/Read MEG/EEG Forward Solution Finished <<<<<<<<<<<<<<<<<<<<<<<<<\n");
 

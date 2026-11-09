@@ -27,6 +27,7 @@
 //=============================================================================================================
 
 #include "../inv_global.h"
+#include <memory>
 #include "inv_dipole_forward.h"
 
 //=============================================================================================================
@@ -67,9 +68,6 @@ class InvDipoleFitData;
 class INVSHARED_EXPORT InvGuessData
 {
 public:
-    typedef QSharedPointer<InvGuessData> SPtr;            /**< Shared pointer type for InvGuessData. */
-    typedef QSharedPointer<const InvGuessData> ConstSPtr; /**< Const shared pointer type for InvGuessData. */
-
     //=========================================================================================================
     /**
      * Constructs the Guess Data
@@ -117,7 +115,7 @@ public:
 
 public:
     Eigen::Matrix<float, Eigen::Dynamic, 3, Eigen::RowMajor> rr; /**< Guess dipole locations (nguess x 3, row-major). */
-    std::vector<InvDipoleForward::UPtr> guess_fwd;               /**< Forward solutions for the guesses. */
+    std::vector<std::unique_ptr<InvDipoleForward>> guess_fwd;    /**< Forward solutions for the guesses. */
     int nguess = 0;                                              /**< How many sources. */
 };
 

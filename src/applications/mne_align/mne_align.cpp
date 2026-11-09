@@ -11,6 +11,7 @@
  */
 
 #include "mne_align.h"
+#include <memory>
 
 #include "qt_conversions.h"
 #include "align_3d_view.h"
@@ -538,8 +539,8 @@ void MneAlign::onIcpFit()
             matInit(r, c) = initQt(r, c);
 
     // Build MNEProjectToSurface from the head BEM
-    MNEProjectToSurface::SPtr projSurface =
-        MNEProjectToSurface::SPtr::create((*bem)[0]);
+    std::shared_ptr<MNEProjectToSurface> projSurface =
+        std::make_shared<MNEProjectToSurface>((*bem)[0]);
 
     // Build point cloud from all captured points (raw tracker space)
     const auto& pts = m_pPoints->points();

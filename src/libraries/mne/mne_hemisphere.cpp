@@ -22,6 +22,7 @@
 //=============================================================================================================
 
 #include "mne_hemisphere.h"
+#include <memory>
 #include <utils/logger/log.h>
 #include "mne_nearest.h"
 
@@ -149,7 +150,7 @@ MNEHemisphere::~MNEHemisphere()
 
 //=============================================================================================================
 
-MNESourceSpace::SPtr MNEHemisphere::clone() const
+std::shared_ptr<MNESourceSpace> MNEHemisphere::clone() const
 {
     return std::make_shared<MNEHemisphere>(*this);
 }

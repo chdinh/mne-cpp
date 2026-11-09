@@ -670,7 +670,7 @@ private slots:
         QVERIFY(filter.isValid());
 
         for (const auto& epoch : filteredEpochs) {
-            QVERIFY(!epoch.isNull());
+            QVERIFY(!!epoch);
             epoch->epoch = filter.applyToMatrix(epoch->epoch, raw.info);
         }
 

@@ -75,9 +75,6 @@ namespace MNELIB
 class MNESHARED_EXPORT MNESssData
 {
 public:
-    typedef QSharedPointer<MNESssData> SPtr;            /**< Shared pointer type for MNESssData. */
-    typedef QSharedPointer<const MNESssData> ConstSPtr; /**< Const shared pointer type for MNESssData. */
-
     //=========================================================================================================
     /**
      * Constructs the MNE SSS Data

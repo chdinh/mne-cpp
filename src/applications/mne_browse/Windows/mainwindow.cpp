@@ -189,7 +189,7 @@ void applySessionFilterToEpochList(MNELIB::MNEEpochDataList& epochList,
                                    const std::map<std::string, double>& rejectMap)
 {
     for (const auto& epoch : epochList) {
-        if (epoch.isNull()) {
+        if (!epoch) {
             continue;
         }
 
@@ -212,7 +212,7 @@ FIFFLIB::FiffCov computeCovarianceFromEpochLists(const QList<MNELIB::MNEEpochDat
         std::vector<Eigen::MatrixXd>& codeEpochs = epochs.emplace_back();
         codeEpochs.reserve(static_cast<std::size_t>(epochList.size()));
         for (const auto& epoch : epochList) {
-            if (!epoch.isNull() && epoch->epoch.size() > 0)
+            if (!!epoch && epoch->epoch.size() > 0)
                 codeEpochs.push_back(epoch->epoch);
         }
     }

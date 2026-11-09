@@ -220,7 +220,7 @@ public:
 public:
     std::vector<std::shared_ptr<FiffRawData>> m_qlistRaw;   /**< List of raw data sets. */
     std::vector<std::shared_ptr<FiffEvoked>> m_qlistEvoked; /**< List of evoked data sets. */
-    //    std::vector<QSharedPointer<MNEForwardSolution> > m_qlistFwd;
+    //    std::vector<std::shared_ptr<MNEForwardSolution> > m_qlistFwd;
     //FiffCov, MNEInverseOperator, FsAnnotationSet,
 };
 

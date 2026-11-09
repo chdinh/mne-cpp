@@ -67,10 +67,6 @@ class MNEProjData;
 class MNESHARED_EXPORT MNESurface : public MNESurfaceOrVolume
 {
 public:
-    typedef std::shared_ptr<MNESurface> SPtr;            /**< Shared pointer type for MNESurface. */
-    typedef std::shared_ptr<const MNESurface> ConstSPtr; /**< Const shared pointer type for MNESurface. */
-    typedef std::unique_ptr<MNESurface> UPtr;            /**< Unique pointer type for MNESurface. */
-
     //=========================================================================================================
     /**
      * Constructs the MNE FsSurface

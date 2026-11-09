@@ -17,6 +17,7 @@
 //=============================================================================================================
 
 #include <iostream>
+#include <memory>
 
 #include <disp3D/view/brainview.h>
 #include <disp3D/model/braintreemodel.h>
@@ -125,8 +126,8 @@ int main(int argc, char* argv[])
 
     // read Bem
     MNEBem bemHead(parser.value(bemOption).toStdU16String());
-    MNEBemSurface::SPtr bemSurface = MNEBemSurface::SPtr::create(bemHead[0]);
-    MNEProjectToSurface::SPtr mneSurfacePoints = MNEProjectToSurface::SPtr::create(*bemSurface);
+    std::shared_ptr<MNEBemSurface> bemSurface = std::make_shared<MNEBemSurface>(bemHead[0]);
+    std::shared_ptr<MNEProjectToSurface> mneSurfacePoints = std::make_shared<MNEProjectToSurface>(*bemSurface);
 
     // read digitizer data
     const FiffDigPointSet dig(parser.value(digOption).toStdString());

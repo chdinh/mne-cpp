@@ -17,6 +17,7 @@
 //=============================================================================================================
 
 #include "bemdatamodel.h"
+#include <memory>
 
 #include <fiff/fiff_stream.h>
 
@@ -47,7 +48,7 @@ BemDataModel::BemDataModel(const QString& sFilePath,
                            const QByteArray& byteLoadedData,
                            QObject* pParent)
 : AbstractModel(sFilePath, pParent)
-, m_pBem(MNEBem::SPtr::create())
+, m_pBem(std::make_shared<MNEBem>())
 {
     if (byteLoadedData.isEmpty()) {
         m_file.setFileName(sFilePath);

@@ -28,6 +28,7 @@
 //=============================================================================================================
 
 #include "mne_global.h"
+#include <memory>
 
 //=============================================================================================================
 // QT INCLUDES
@@ -81,7 +82,7 @@ const Eigen::VectorXf vecDefaultWeights;
  * @return Whether the registration was successful.
  */
 
-MNESHARED_EXPORT bool performIcp(const QSharedPointer<MNELIB::MNEProjectToSurface> mneSurfacePoints,
+MNESHARED_EXPORT bool performIcp(const std::shared_ptr<MNELIB::MNEProjectToSurface>& mneSurfacePoints,
                                  const Eigen::MatrixXf& matPointCloud,
                                  FIFFLIB::FiffCoordTrans& transFromTo,
                                  float& fRMSE,
@@ -127,7 +128,7 @@ MNESHARED_EXPORT bool fitMatchedPoints(const Eigen::MatrixXf& matSrcPoint,
  * @return Whether the discarding was successful.
  */
 
-MNESHARED_EXPORT bool discard3DPointOutliers(const QSharedPointer<MNELIB::MNEProjectToSurface> mneSurfacePoints,
+MNESHARED_EXPORT bool discard3DPointOutliers(const std::shared_ptr<MNELIB::MNEProjectToSurface>& mneSurfacePoints,
                                              const Eigen::MatrixXf& matPointCloud,
                                              const FIFFLIB::FiffCoordTrans& transFromTo,
                                              Eigen::VectorXi& vecTake,

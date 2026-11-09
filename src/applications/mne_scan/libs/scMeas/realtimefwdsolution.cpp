@@ -38,7 +38,7 @@ RealTimeFwdSolution::RealTimeFwdSolution(QObject* parent)
 : Measurement(QMetaType::fromName("RealTimeFwdSolution::SPtr").id(), parent)
 , m_bInitialized(false)
 , m_bClustered(false)
-, m_pFwdSolution(QSharedPointer<MNEForwardSolution>(new MNEForwardSolution))
+, m_pFwdSolution(std::make_shared<MNEForwardSolution>())
 {
 }
 
@@ -64,7 +64,7 @@ std::shared_ptr<FiffInfo> RealTimeFwdSolution::getFiffInfo()
 
 //=============================================================================================================
 
-QSharedPointer<MNEForwardSolution> RealTimeFwdSolution::getValue()
+std::shared_ptr<MNEForwardSolution> RealTimeFwdSolution::getValue()
 {
     QMutexLocker locker(&m_qMutex);
     return m_pFwdSolution;
@@ -72,7 +72,7 @@ QSharedPointer<MNEForwardSolution> RealTimeFwdSolution::getValue()
 
 //=============================================================================================================
 
-void RealTimeFwdSolution::setValue(const MNEForwardSolution::SPtr pFwdSolution)
+void RealTimeFwdSolution::setValue(const std::shared_ptr<MNEForwardSolution>& pFwdSolution)
 {
     m_qMutex.lock();
     m_pFwdSolution = pFwdSolution;

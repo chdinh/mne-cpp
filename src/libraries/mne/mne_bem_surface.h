@@ -74,9 +74,6 @@ namespace MNELIB
 class MNESHARED_EXPORT MNEBemSurface : public MNESurface
 {
 public:
-    typedef QSharedPointer<MNEBemSurface> SPtr;            /**< Shared pointer type for MNEBemSurface. */
-    typedef QSharedPointer<const MNEBemSurface> ConstSPtr; /**< Const shared pointer type for MNEBemSurface. */
-
     //=========================================================================================================
     /**
      * Constructors the bem surface.

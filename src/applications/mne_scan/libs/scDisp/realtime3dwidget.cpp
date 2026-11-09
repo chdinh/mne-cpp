@@ -159,7 +159,7 @@ void RealTime3DWidget::update(SCMEASLIB::Measurement::SPtr pMeasurement)
             }
         }
     } else if (RealTimeSourceEstimate::SPtr pRTSE = qSharedPointerDynamicCast<RealTimeSourceEstimate>(pMeasurement)) {
-        QList<InvSourceEstimate::SPtr> lMNEData = pRTSE->getValue();
+        QList<std::shared_ptr<InvSourceEstimate>> lMNEData = pRTSE->getValue();
 
         // Add source estimate data via BrainView's realtime streaming
         if (!lMNEData.isEmpty()) {

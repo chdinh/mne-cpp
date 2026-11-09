@@ -73,7 +73,7 @@ namespace RTPROCESSINGLIB
 struct RtInvOpInput
 {
     std::shared_ptr<FIFFLIB::FiffInfo> pFiffInfo;
-    QSharedPointer<MNELIB::MNEForwardSolution> pFwd;
+    std::shared_ptr<MNELIB::MNEForwardSolution> pFwd;
     FIFFLIB::FiffCov noiseCov;
 };
 
@@ -130,7 +130,7 @@ public:
      * @param[in] parent         Parent QObject (optional).
      */
     explicit RtInvOp(std::shared_ptr<FIFFLIB::FiffInfo>& p_pFiffInfo,
-                     QSharedPointer<MNELIB::MNEForwardSolution>& p_pFwd,
+                     std::shared_ptr<MNELIB::MNEForwardSolution>& p_pFwd,
                      QObject* parent = 0);
 
     //=========================================================================================================
@@ -153,7 +153,7 @@ public:
      *
      * @param[in] pFwd     Forward solution.
      */
-    void setFwdSolution(QSharedPointer<MNELIB::MNEForwardSolution> pFwd);
+    void setFwdSolution(std::shared_ptr<MNELIB::MNEForwardSolution> pFwd);
 
     //=========================================================================================================
     /**
@@ -176,8 +176,8 @@ protected:
      */
     void handleResults(const MNELIB::MNEInverseOperator& invOp);
 
-    std::shared_ptr<FIFFLIB::FiffInfo> m_pFiffInfo;    /**< The fiff measurement information. */
-    QSharedPointer<MNELIB::MNEForwardSolution> m_pFwd; /**< The forward solution. */
+    std::shared_ptr<FIFFLIB::FiffInfo> m_pFiffInfo;     /**< The fiff measurement information. */
+    std::shared_ptr<MNELIB::MNEForwardSolution> m_pFwd; /**< The forward solution. */
 
     QThread m_workerThread; /**< The worker thread. */
 

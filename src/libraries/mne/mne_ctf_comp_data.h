@@ -66,9 +66,6 @@ namespace MNELIB
 class MNESHARED_EXPORT MNECTFCompData
 {
 public:
-    typedef QSharedPointer<MNECTFCompData> SPtr;            /**< Shared pointer type for MNECTFCompData. */
-    typedef QSharedPointer<const MNECTFCompData> ConstSPtr; /**< Const shared pointer type for MNECTFCompData. */
-
     //=========================================================================================================
     /**
      * Constructs an empty MNE CTF Compensation Data object.

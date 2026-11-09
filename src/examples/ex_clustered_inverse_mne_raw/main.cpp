@@ -18,6 +18,7 @@
 //=============================================================================================================
 
 #include <fs/fs_label.h>
+#include <memory>
 #include <fs/fs_surface.h>
 #include <fs/fs_surfaceset.h>
 #include <fs/fs_annotationset.h>
@@ -318,7 +319,7 @@ int main(int argc, char* argv[])
             epoch->tmin = ((float)(from) - (float)(raw.first_samp)) / raw.info.sfreq;
             epoch->tmax = ((float)(to) - (float)(raw.first_samp)) / raw.info.sfreq;
 
-            data.append(MNEEpochData::SPtr(epoch)); //List takes ownwership of the pointer - no delete need
+            data.append(std::shared_ptr<MNEEpochData>(epoch)); //List takes ownwership of the pointer - no delete need
         } else {
             printf("Can't read the event data segments");
             return 0;

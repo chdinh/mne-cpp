@@ -159,10 +159,6 @@ static Eigen::MatrixXd defaultD;
 class MNESHARED_EXPORT MNEForwardSolution
 {
 public:
-    typedef QSharedPointer<MNEForwardSolution> SPtr;            /**< Shared pointer type for MNEForwardSolution. */
-    typedef QSharedPointer<const MNEForwardSolution> ConstSPtr; /**< Const shared pointer type for MNEForwardSolution. */
-    typedef std::unique_ptr<MNEForwardSolution> UPtr;           /**< Unique pointer type for MNEForwardSolution. */
-
     /** How read() prepares the solution it reads. */
     struct ReadOptions
     {

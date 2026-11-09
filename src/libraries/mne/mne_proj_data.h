@@ -59,9 +59,6 @@ class MNESurface;
 class MNESHARED_EXPORT MNEProjData
 {
 public:
-    typedef QSharedPointer<MNEProjData> SPtr;            /**< Shared pointer type for MNEProjData. */
-    typedef QSharedPointer<const MNEProjData> ConstSPtr; /**< Const shared pointer type for MNEProjData. */
-
     //=========================================================================================================
     /**
      * Constructs the MNEProjData.

@@ -88,9 +88,6 @@ namespace MNELIB
 class MNESHARED_EXPORT MNENamedMatrix
 {
 public:
-    typedef QSharedPointer<MNENamedMatrix> SPtr;            /**< Shared pointer type for MNENamedMatrix. */
-    typedef QSharedPointer<const MNENamedMatrix> ConstSPtr; /**< Const shared pointer type for MNENamedMatrix. */
-
     //=========================================================================================================
     /**
      * @brief Default constructor.

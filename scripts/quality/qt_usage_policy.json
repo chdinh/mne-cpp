@@ -110,7 +110,7 @@
       ]
     },
     "dsp": {
-      "tokens": 463,
+      "tokens": 456,
       "public_header_includes": 29,
       "modules": [
         "Concurrent",
@@ -151,7 +151,7 @@
       ]
     },
     "inv": {
-      "tokens": 393,
+      "tokens": 353,
       "public_header_includes": 48,
       "modules": [
         "Concurrent",
@@ -186,8 +186,8 @@
       ]
     },
     "mne": {
-      "tokens": 538,
-      "public_header_includes": 76,
+      "tokens": 451,
+      "public_header_includes": 75,
       "modules": [
         "Concurrent",
         "Core",

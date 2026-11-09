@@ -30,6 +30,7 @@
 //=============================================================================================================
 
 #include "mne_global.h"
+#include <memory>
 #include "mne_source_space.h"
 #include "mne_cluster_info.h"
 
@@ -70,8 +71,6 @@ namespace MNELIB
 class MNESHARED_EXPORT MNEHemisphere : public MNESourceSpace
 {
 public:
-    using SPtr = std::shared_ptr<MNEHemisphere>; /**< Shared pointer type for MNEHemisphere. */
-
     //=========================================================================================================
     /**
      * Constructors the hemisphere source space.
@@ -98,7 +97,7 @@ public:
      *
      * @return a shared_ptr<MNESourceSpace> pointing to a cloned MNEHemisphere.
      */
-    MNESourceSpace::SPtr clone() const override;
+    std::shared_ptr<MNESourceSpace> clone() const override;
 
     //=========================================================================================================
     /**

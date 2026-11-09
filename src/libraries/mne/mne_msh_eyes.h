@@ -47,9 +47,6 @@ namespace MNELIB
 class MNESHARED_EXPORT MNEMshEyes
 {
 public:
-    typedef QSharedPointer<MNEMshEyes> SPtr;            /**< Shared pointer type for MNEMshEyes. */
-    typedef QSharedPointer<const MNEMshEyes> ConstSPtr; /**< Const shared pointer type for MNEMshEyes. */
-
     //=========================================================================================================
     /**
      * Constructs an empty MNEMshEyes.

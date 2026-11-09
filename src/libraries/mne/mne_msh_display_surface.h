@@ -84,9 +84,6 @@ namespace MNELIB
 class MNESHARED_EXPORT MNEMshDisplaySurface : public MNESurface
 {
 public:
-    typedef QSharedPointer<MNEMshDisplaySurface> SPtr;            /**< Shared pointer type for MNEMshDisplaySurface. */
-    typedef QSharedPointer<const MNEMshDisplaySurface> ConstSPtr; /**< Const shared pointer type for MNEMshDisplaySurface. */
-
     //=========================================================================================================
     /**
      * Constructs the MNEMshDisplaySurface.

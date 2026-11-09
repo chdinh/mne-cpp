@@ -53,9 +53,6 @@ namespace MNELIB
 class MNESHARED_EXPORT MNEMshLightSet
 {
 public:
-    typedef QSharedPointer<MNEMshLightSet> SPtr;            /**< Shared pointer type for MNEMshLightSet. */
-    typedef QSharedPointer<const MNEMshLightSet> ConstSPtr; /**< Const shared pointer type for MNEMshLightSet. */
-
     //=========================================================================================================
     /**
      * Constructs an empty MNEMshLightSet.

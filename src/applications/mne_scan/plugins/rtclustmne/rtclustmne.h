@@ -246,7 +246,7 @@ protected:
     std::shared_ptr<UTILSLIB::CircularBuffer_Matrix_double> m_pCircularMatrixBuffer;                 /**< Holds incoming RealTimeMultiSampleArray data.*/
     std::shared_ptr<UTILSLIB::CircularBuffer<FIFFLIB::FiffEvoked>> m_pCircularEvokedBuffer;          /**< Holds incoming RealTimeMultiSampleArray data.*/
     std::shared_ptr<RTPROCESSINGLIB::RtInvOp> m_pRtInvOp;                                            /**< Real-time inverse operator. */
-    QSharedPointer<MNELIB::MNEForwardSolution> m_pFwd;                                               /**< Forward solution. */
+    std::shared_ptr<MNELIB::MNEForwardSolution> m_pFwd;                                              /**< Forward solution. */
     std::shared_ptr<FIFFLIB::FiffCov> m_pNoiseCov;                                                   /**< Noise Covariance Matrix. */
     std::shared_ptr<FSLIB::FsAnnotationSet> m_pAnnotationSet;                                        /**< FsAnnotation set. */
     std::shared_ptr<FSLIB::FsSurfaceSet> m_pSurfaceSet;                                              /**< FsSurface set. */

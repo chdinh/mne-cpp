@@ -84,9 +84,6 @@ enum class Accuracy : int
 class INVSHARED_EXPORT InvSensorSet
 {
 public:
-    typedef QSharedPointer<InvSensorSet> SPtr;            /**< Shared pointer type for InvSensorSet. */
-    typedef QSharedPointer<const InvSensorSet> ConstSPtr; /**< Const shared pointer type for InvSensorSet. */
-
     //=========================================================================================================
     /**
      * Default Constructor.
@@ -254,9 +251,6 @@ inline bool InvSensorSet::operator!=(const InvSensorSet& b) const
 class INVSHARED_EXPORT InvSensorSetCreator
 {
 public:
-    typedef QSharedPointer<InvSensorSetCreator> SPtr;            /**< Shared pointer type for InvSensorSet. */
-    typedef QSharedPointer<const InvSensorSetCreator> ConstSPtr; /**< Const shared pointer type for InvSensorSet. */
-
     //=========================================================================================================
     /**
     * Constructs a MEG InvSensorSet object.

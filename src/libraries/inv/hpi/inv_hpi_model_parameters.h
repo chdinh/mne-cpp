@@ -62,9 +62,6 @@ namespace INVLIB
 class INVSHARED_EXPORT InvHpiModelParameters
 {
 public:
-    typedef QSharedPointer<InvHpiModelParameters> SPtr;            /**< Shared pointer type for InvHpiModelParameters. */
-    typedef QSharedPointer<const InvHpiModelParameters> ConstSPtr; /**< Const shared pointer type for InvHpiModelParameters. */
-
     //=========================================================================================================
     /**
     * Defaul Constructor.

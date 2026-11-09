@@ -62,9 +62,6 @@ namespace INVLIB
 class INVSHARED_EXPORT InvSignalModel
 {
 public:
-    typedef QSharedPointer<InvSignalModel> SPtr;            /**< Shared pointer type for InvSignalModel. */
-    typedef QSharedPointer<const InvSignalModel> ConstSPtr; /**< Const shared pointer type for InvSignalModel. */
-
     //=========================================================================================================
     /**
      * Constructs a InvSignalModel object.

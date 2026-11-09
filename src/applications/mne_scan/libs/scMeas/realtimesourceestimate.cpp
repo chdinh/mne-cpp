@@ -36,7 +36,7 @@ RealTimeSourceEstimate::RealTimeSourceEstimate(QObject* parent)
 : Measurement(QMetaType::fromName("RealTimeSourceEstimate::SPtr").id(), parent)
 , m_pAnnotSet(std::make_shared<FsAnnotationSet>())
 , m_pSurfSet(std::make_shared<FsSurfaceSet>())
-, m_pFwdSolution(MNEForwardSolution::SPtr(new MNEForwardSolution))
+, m_pFwdSolution(std::make_shared<MNEForwardSolution>())
 , m_iSourceEstimateSize(1)
 , m_bInitialized(false)
 {
@@ -50,7 +50,7 @@ RealTimeSourceEstimate::~RealTimeSourceEstimate()
 
 //=============================================================================================================
 
-QList<InvSourceEstimate::SPtr>& RealTimeSourceEstimate::getValue()
+QList<std::shared_ptr<InvSourceEstimate>>& RealTimeSourceEstimate::getValue()
 {
     QMutexLocker locker(&m_qMutex);
     return m_pMNEStc;
@@ -63,7 +63,7 @@ void RealTimeSourceEstimate::setValue(InvSourceEstimate& v)
     m_qMutex.lock();
 
     //Store
-    InvSourceEstimate::SPtr pMNESourceEstimate = InvSourceEstimate::SPtr::create(v);
+    std::shared_ptr<InvSourceEstimate> pMNESourceEstimate = std::make_shared<InvSourceEstimate>(v);
     m_pMNEStc.append(pMNESourceEstimate);
 
     m_bInitialized = true;

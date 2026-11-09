@@ -3,6 +3,7 @@
 //   Christoph Dinh <christoph.dinh@mne-cpp.org>
 
 #include <QtTest/QtTest>
+#include <memory>
 #include <Eigen/Dense>
 #include <Eigen/SparseCore>
 #include <cmath>
@@ -370,7 +371,7 @@ private slots:
     {
         MNEEpochDataList list;
         for (int i = 0; i < 5; ++i) {
-            MNEEpochData::SPtr e = MNEEpochData::SPtr::create();
+            std::shared_ptr<MNEEpochData> e = std::make_shared<MNEEpochData>();
             e->epoch = MatrixXd::Random(2, 10);
             e->bReject = (i == 1 || i == 3); // reject epochs 1 and 3
             list.append(e);
@@ -384,7 +385,7 @@ private slots:
     {
         MNEEpochDataList list;
         for (int i = 0; i < 3; ++i) {
-            MNEEpochData::SPtr e = MNEEpochData::SPtr::create();
+            std::shared_ptr<MNEEpochData> e = std::make_shared<MNEEpochData>();
             e->epoch = MatrixXd::Random(5, 10); // 5 channels, 10 samples
             list.append(e);
         }
@@ -792,7 +793,7 @@ private slots:
         while (from + epochSamples <= raw.last_samp && nEpochs < 5) {
             MatrixXd data, times;
             if (raw.read_raw_segment(data, times, from, from + epochSamples - 1)) {
-                MNEEpochData::SPtr epoch = MNEEpochData::SPtr::create();
+                std::shared_ptr<MNEEpochData> epoch = std::make_shared<MNEEpochData>();
                 epoch->epoch = data;
                 epoch->tmin = (float)(from - raw.first_samp) / raw.info.sfreq;
                 epoch->tmax = epoch->tmin + 0.5f;
@@ -825,7 +826,7 @@ private slots:
         for (int i = 0; i < 5 && from + epochSamples <= raw.last_samp; ++i) {
             MatrixXd data, times;
             if (raw.read_raw_segment(data, times, from, from + epochSamples - 1)) {
-                MNEEpochData::SPtr epoch = MNEEpochData::SPtr::create();
+                std::shared_ptr<MNEEpochData> epoch = std::make_shared<MNEEpochData>();
                 epoch->epoch = data;
                 epoch->bReject = (i == 2);
                 epochList.append(epoch);
@@ -853,7 +854,7 @@ private slots:
         for (int i = 0; i < 3 && from + epochSamples <= raw.last_samp; ++i) {
             MatrixXd data, times;
             if (raw.read_raw_segment(data, times, from, from + epochSamples - 1)) {
-                MNEEpochData::SPtr epoch = MNEEpochData::SPtr::create();
+                std::shared_ptr<MNEEpochData> epoch = std::make_shared<MNEEpochData>();
                 epoch->epoch = data;
                 epochList.append(epoch);
             }

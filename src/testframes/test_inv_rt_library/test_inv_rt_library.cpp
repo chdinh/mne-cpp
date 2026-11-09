@@ -378,11 +378,11 @@ void TestInvRtLibrary::rtInvOp_lifecycle()
     pInfo->sfreq = 1000.0;
     pInfo->nchan = 10;
 
-    auto pFwd = QSharedPointer<MNEForwardSolution>::create();
+    auto pFwd = std::make_shared<MNEForwardSolution>();
 
     RtInvOp rtInv(pInfo, pFwd);
 
-    auto pFwd2 = QSharedPointer<MNEForwardSolution>::create();
+    auto pFwd2 = std::make_shared<MNEForwardSolution>();
     rtInv.setFwdSolution(pFwd2);
 
     rtInv.stop();

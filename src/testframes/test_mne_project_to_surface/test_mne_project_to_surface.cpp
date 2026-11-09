@@ -17,6 +17,7 @@
 //=============================================================================================================
 
 #include <utils/logger/log.h>
+#include <memory>
 #include <mne/mne_project_to_surface.h>
 #include <mne/mne_bem.h>
 #include <mne/mne_bem_surface.h>
@@ -82,8 +83,8 @@ void TestMNEProjectToSurface::initTestCase()
     QString sRef(QCoreApplication::applicationDirPath() + "/../resources/data/mne-cpp-test-data/Result/mne_project_to_surface.txt");
 
     MNEBem bemHead((QCoreApplication::applicationDirPath() + "/../resources/data/mne-cpp-test-data/subjects/sample/bem/sample-1280-1280-1280-bem.fif").toStdU16String());
-    MNEBemSurface::SPtr bemSurface = MNEBemSurface::SPtr::create(bemHead[0]);
-    MNEProjectToSurface::SPtr mneSurfacePoints = MNEProjectToSurface::SPtr::create(*bemSurface);
+    std::shared_ptr<MNEBemSurface> bemSurface = std::make_shared<MNEBemSurface>(bemHead[0]);
+    std::shared_ptr<MNEProjectToSurface> mneSurfacePoints = std::make_shared<MNEProjectToSurface>(*bemSurface);
 
     VectorXi vecNearest; // Triangle of the new point
     VectorXf vecDist;    // The Distance between matX and matP

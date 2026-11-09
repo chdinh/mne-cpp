@@ -48,9 +48,6 @@ namespace MNELIB
 class MNESHARED_EXPORT MNEMghTag
 {
 public:
-    typedef QSharedPointer<MNEMghTag> SPtr;            /**< Shared pointer type for MNEMghTag. */
-    typedef QSharedPointer<const MNEMghTag> ConstSPtr; /**< Const shared pointer type for MNEMghTag. */
-
     //=========================================================================================================
     /**
      * Constructs an empty MNEMghTag.

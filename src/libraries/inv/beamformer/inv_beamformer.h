@@ -73,9 +73,6 @@ namespace INVLIB
 class INVSHARED_EXPORT InvBeamformer
 {
 public:
-    typedef QSharedPointer<InvBeamformer> SPtr;
-    typedef QSharedPointer<const InvBeamformer> ConstSPtr;
-
     //=========================================================================================================
     /**
      * Default constructor — produces an empty (invalid) beamformer.

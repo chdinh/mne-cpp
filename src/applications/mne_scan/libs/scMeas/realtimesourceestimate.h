@@ -132,7 +132,7 @@ public:
      *
      * @param[in] fwdSolution   the forward solution to set.
      */
-    inline void setFwdSolution(MNELIB::MNEForwardSolution::SPtr& fwdSolution);
+    inline void setFwdSolution(std::shared_ptr<MNELIB::MNEForwardSolution>& fwdSolution);
 
     //=========================================================================================================
     /**
@@ -140,7 +140,7 @@ public:
      *
      * @return the forward solution.
      */
-    inline MNELIB::MNEForwardSolution::SPtr& getFwdSolution();
+    inline std::shared_ptr<MNELIB::MNEForwardSolution>& getFwdSolution();
 
     //=========================================================================================================
     /**
@@ -158,7 +158,7 @@ public:
      *
      * @return the last attached value.
      */
-    virtual QList<INVLIB::InvSourceEstimate::SPtr>& getValue();
+    virtual QList<std::shared_ptr<INVLIB::InvSourceEstimate>>& getValue();
 
     //=========================================================================================================
     /**
@@ -206,14 +206,14 @@ private:
     std::shared_ptr<FIFFLIB::FiffInfo> m_pFiffInfo; /**< The Fiff info. */
     FIFFLIB::FiffCoordTrans m_mriHeadTrans;         /**< Mri to head transformation. */
 
-    std::shared_ptr<FSLIB::FsAnnotationSet> m_pAnnotSet; /**< FsAnnotation set. */
-    std::shared_ptr<FSLIB::FsSurfaceSet> m_pSurfSet;     /**< FsSurface set. */
-    MNELIB::MNEForwardSolution::SPtr m_pFwdSolution;     /**< Forward solution. */
+    std::shared_ptr<FSLIB::FsAnnotationSet> m_pAnnotSet;        /**< FsAnnotation set. */
+    std::shared_ptr<FSLIB::FsSurfaceSet> m_pSurfSet;            /**< FsSurface set. */
+    std::shared_ptr<MNELIB::MNEForwardSolution> m_pFwdSolution; /**< Forward solution. */
 
     qint32 m_iSourceEstimateSize; /**< Sample size of the multi sample array.*/
 
-    QList<INVLIB::InvSourceEstimate::SPtr> m_pMNEStc; /**< The source estimates. */
-    bool m_bInitialized;                              /**< Is initialized. */
+    QList<std::shared_ptr<INVLIB::InvSourceEstimate>> m_pMNEStc; /**< The source estimates. */
+    bool m_bInitialized;                                         /**< Is initialized. */
 };
 
 //=============================================================================================================
@@ -267,7 +267,7 @@ inline FIFFLIB::FiffCoordTrans& RealTimeSourceEstimate::getMriHeadTrans()
 }
 //=============================================================================================================
 
-inline void RealTimeSourceEstimate::setFwdSolution(MNELIB::MNEForwardSolution::SPtr& fwdSolution)
+inline void RealTimeSourceEstimate::setFwdSolution(std::shared_ptr<MNELIB::MNEForwardSolution>& fwdSolution)
 {
     QMutexLocker locker(&m_qMutex);
     m_pFwdSolution = fwdSolution;
@@ -275,7 +275,7 @@ inline void RealTimeSourceEstimate::setFwdSolution(MNELIB::MNEForwardSolution::S
 
 //=============================================================================================================
 
-inline MNELIB::MNEForwardSolution::SPtr& RealTimeSourceEstimate::getFwdSolution()
+inline std::shared_ptr<MNELIB::MNEForwardSolution>& RealTimeSourceEstimate::getFwdSolution()
 {
     QMutexLocker locker(&m_qMutex);
     return m_pFwdSolution;

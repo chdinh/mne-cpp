@@ -19,6 +19,7 @@
 //=============================================================================================================
 
 #include "mne_icp.h"
+#include <memory>
 #include <utils/logger/log.h>
 #include <iostream>
 
@@ -52,7 +53,7 @@ using namespace FIFFLIB;
 // DEFINE GLOBAL METHODS
 //=============================================================================================================
 
-bool MNELIB::performIcp(const MNEProjectToSurface::SPtr mneSurfacePoints,
+bool MNELIB::performIcp(const std::shared_ptr<MNEProjectToSurface>& mneSurfacePoints,
                         const Eigen::MatrixXf& matPointCloud,
                         FiffCoordTrans& transFromTo,
                         float& fRMSE,
@@ -234,7 +235,7 @@ bool MNELIB::fitMatchedPoints(const MatrixXf& matSrcPoint,
 
 //=========================================================================================================
 
-bool MNELIB::discard3DPointOutliers(const QSharedPointer<MNELIB::MNEProjectToSurface> mneSurfacePoints,
+bool MNELIB::discard3DPointOutliers(const std::shared_ptr<MNELIB::MNEProjectToSurface>& mneSurfacePoints,
                                     const MatrixXf& matPointCloud,
                                     const FiffCoordTrans& transFromTo,
                                     VectorXi& vecTake,

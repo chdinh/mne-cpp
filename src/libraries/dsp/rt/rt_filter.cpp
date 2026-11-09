@@ -600,10 +600,10 @@ FiffEvoked RTPROCESSINGLIB::computeFilteredAverage(const FiffRawData& raw,
             //Check if data block has the same size as the previous one
             if (!lstEpochDataList.isEmpty()) {
                 if (epoch->epoch.size() == lstEpochDataList.last()->epoch.size()) {
-                    lstEpochDataList.append(MNEEpochData::SPtr(epoch.release()));
+                    lstEpochDataList.append(std::shared_ptr<MNEEpochData>(epoch.release()));
                 }
             } else {
-                lstEpochDataList.append(MNEEpochData::SPtr(epoch.release()));
+                lstEpochDataList.append(std::shared_ptr<MNEEpochData>(epoch.release()));
             }
         } else {
             Log::warning("[MNEEpochDataList::readEpochs] Can't read the event data segments.");

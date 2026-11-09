@@ -308,7 +308,7 @@ int main(int argc, char* argv[])
     // Inverse operator from the sample forward solution and the covariance of the sample raw data
     FiffRawData raw((dataDir + "/MEG/sample/sample_audvis_trunc_raw.fif").toStdString());
     std::shared_ptr<FiffInfo> rawInfo = std::make_shared<FiffInfo>(raw.info);
-    QSharedPointer<MNEForwardSolution> fwd = QSharedPointer<MNEForwardSolution>::create((dataDir + "/Result/ref-sample_audvis-meg-eeg-oct-6-fwd.fif").toStdU16String());
+    std::shared_ptr<MNEForwardSolution> fwd = std::make_shared<MNEForwardSolution>((dataDir + "/Result/ref-sample_audvis-meg-eeg-oct-6-fwd.fif").toStdU16String());
     MatrixXd rawData;
     MatrixXd rawTimes;
     ok &= raw.read_raw_segment(rawData, rawTimes, raw.first_samp, raw.first_samp + 5999);

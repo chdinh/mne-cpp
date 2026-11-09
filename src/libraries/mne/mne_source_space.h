@@ -72,9 +72,6 @@ class MNEHemisphere;
 class MNESHARED_EXPORT MNESourceSpace : public MNESurfaceOrVolume
 {
 public:
-    using SPtr = std::shared_ptr<MNESourceSpace>; /**< Shared pointer type for MNESourceSpace. */
-    using UPtr = std::unique_ptr<MNESourceSpace>; /**< Unique pointer type for MNESourceSpace. */
-
     //=========================================================================================================
     /**
      * Constructs the MNE Source Space
@@ -95,7 +92,7 @@ public:
      *
      * @return a shared_ptr to the cloned source space.
      */
-    virtual MNESourceSpace::SPtr clone() const;
+    virtual std::shared_ptr<MNESourceSpace> clone() const;
 
     //=========================================================================================================
     /**

@@ -85,9 +85,6 @@ struct FilterData;
 class MNESHARED_EXPORT MNERawData
 {
 public:
-    typedef QSharedPointer<MNERawData> SPtr;            /**< Shared pointer type for MNERawData. */
-    typedef QSharedPointer<const MNERawData> ConstSPtr; /**< Const shared pointer type for MNERawData. */
-
     //=========================================================================================================
     /**
      * Constructs the MNE Raw Data

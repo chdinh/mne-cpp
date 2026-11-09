@@ -830,7 +830,7 @@ MNESourceSpace::~MNESourceSpace()
 
 //=============================================================================================================
 
-MNESourceSpace::SPtr MNESourceSpace::clone() const
+std::shared_ptr<MNESourceSpace> MNESourceSpace::clone() const
 {
     // Base class clone — creates a MNESourceSpace with the same fields.
     // Derived classes (e.g., MNEHemisphere) override this to preserve their type.
@@ -1508,7 +1508,7 @@ void MNESourceSpace::filter_source_space(FilterThreadArg* arg)
     Eigen::Vector3f r1;
     float mindist, dist;
 
-    QSharedPointer<MNESurface> surf = a->surf.toStrongRef();
+    std::shared_ptr<MNESurface> surf = a->surf.lock();
     if (!surf) {
         a->stat = FAIL;
         return;
@@ -1573,7 +1573,7 @@ int MNESourceSpace::filter_source_spaces(float limit, const std::filesystem::pat
           * Remove all source space points closer to the surface than a given limit
           */
 {
-    QSharedPointer<MNESurface> surf;
+    std::shared_ptr<MNESurface> surf;
     int k;
     int nproc = QThread::idealThreadCount();
     int nspace = static_cast<int>(spaces.size());

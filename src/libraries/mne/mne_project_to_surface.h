@@ -70,9 +70,6 @@ class MNEBemSurface;
 class MNESHARED_EXPORT MNEProjectToSurface
 {
 public:
-    typedef QSharedPointer<MNEProjectToSurface> SPtr;            /**< Shared pointer type for MNEProjectToSurface. */
-    typedef QSharedPointer<const MNEProjectToSurface> ConstSPtr; /**< Const shared pointer type for MNEProjectToSurface. */
-
     //=========================================================================================================
     /**
      * Constructs a MNEProjectToSurface object.

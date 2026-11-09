@@ -74,9 +74,6 @@ namespace MNELIB
 class MNESHARED_EXPORT MNERawInfo
 {
 public:
-    typedef QSharedPointer<MNERawInfo> SPtr;            /**< Shared pointer type for MNERawInfo. */
-    typedef QSharedPointer<const MNERawInfo> ConstSPtr; /**< Const shared pointer type for MNERawInfo. */
-
     //=========================================================================================================
     /**
      * @brief Constructs a default MNERawInfo.

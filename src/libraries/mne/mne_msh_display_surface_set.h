@@ -74,9 +74,6 @@ class MNESurfacePatch;
 class MNESHARED_EXPORT MNEMshDisplaySurfaceSet
 {
 public:
-    typedef QSharedPointer<MNEMshDisplaySurfaceSet> SPtr;            /**< Shared pointer type for MNEMshDisplaySurfaceSet. */
-    typedef QSharedPointer<const MNEMshDisplaySurfaceSet> ConstSPtr; /**< Const shared pointer type for MNEMshDisplaySurfaceSet. */
-
     //=========================================================================================================
     /**
      * Constructs the MNEMshDisplaySurfaceSet.

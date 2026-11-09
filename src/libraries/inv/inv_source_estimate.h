@@ -73,9 +73,6 @@ namespace INVLIB
 class INVSHARED_EXPORT InvSourceEstimate
 {
 public:
-    using SPtr = QSharedPointer<InvSourceEstimate>;            /**< Shared pointer type for InvSourceEstimate. */
-    using ConstSPtr = QSharedPointer<const InvSourceEstimate>; /**< Const shared pointer type for InvSourceEstimate. */
-
     /** Constructs an empty source estimate. */
     InvSourceEstimate() = default;
 

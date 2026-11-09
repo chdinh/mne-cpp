@@ -65,9 +65,6 @@ namespace MNELIB
 class MNESHARED_EXPORT MNEDeriv
 {
 public:
-    typedef QSharedPointer<MNEDeriv> SPtr;            /**< Shared pointer type for MNEDeriv. */
-    typedef QSharedPointer<const MNEDeriv> ConstSPtr; /**< Const shared pointer type for MNEDeriv. */
-
     //=========================================================================================================
     /**
      * Constructs an empty MNE Derivation.

@@ -17,6 +17,7 @@
 //=============================================================================================================
 
 #include <utils/logger/log.h>
+#include <memory>
 
 #include <mne/mne_msh_display_surface_set.h>
 #include <mne/mne_msh_display_surface.h>
@@ -60,7 +61,7 @@ private slots:
 private:
     double dEpsilon;
 
-    MNEMshDisplaySurfaceSet::SPtr m_pSurfSetBemLoaded;
+    std::shared_ptr<MNEMshDisplaySurfaceSet> m_pSurfSetBemLoaded;
 };
 
 //=============================================================================================================
@@ -79,7 +80,7 @@ void TestMneMshDisplaySurfaceSet::initTestCase()
 
     //Read the results produced with MNE-CPP
     //Calculate the alignment of the fiducials
-    m_pSurfSetBemLoaded = MNEMshDisplaySurfaceSet::SPtr(new MNEMshDisplaySurfaceSet());
+    m_pSurfSetBemLoaded = std::make_shared<MNEMshDisplaySurfaceSet>();
     m_pSurfSetBemLoaded->add_bem_surface((QCoreApplication::applicationDirPath() + "/../resources/data/mne-cpp-test-data/subjects/sample/bem/sample-5120-bem.fif").toStdU16String(),
                                          FIFFV_BEM_SURF_ID_BRAIN,
                                          "5120",

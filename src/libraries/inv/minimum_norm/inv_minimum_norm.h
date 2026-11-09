@@ -72,9 +72,6 @@ namespace INVLIB
 class INVSHARED_EXPORT InvMinimumNorm
 {
 public:
-    typedef QSharedPointer<InvMinimumNorm> SPtr;            /**< Shared pointer type for InvMinimumNorm. */
-    typedef QSharedPointer<const InvMinimumNorm> ConstSPtr; /**< Const shared pointer type for InvMinimumNorm. */
-
     //=========================================================================================================
     /**
      * Constructs minimum norm inverse algorithm

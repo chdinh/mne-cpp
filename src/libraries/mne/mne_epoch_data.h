@@ -64,9 +64,6 @@ namespace MNELIB
 class MNESHARED_EXPORT MNEEpochData
 {
 public:
-    typedef QSharedPointer<MNEEpochData> SPtr;            /**< Shared pointer type for MNEEpochData. */
-    typedef QSharedPointer<const MNEEpochData> ConstSPtr; /**< Const shared pointer type for MNEEpochData. */
-
     //=========================================================================================================
     /**
      * Default constructor.

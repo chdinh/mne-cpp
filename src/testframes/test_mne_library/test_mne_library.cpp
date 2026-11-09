@@ -1342,7 +1342,7 @@ void TestMneLibrary::epochData_baselineCorrectionAndDrop()
 {
     MNEEpochDataList list;
     for (int i = 0; i < 5; i++) {
-        MNEEpochData::SPtr epoch = MNEEpochData::SPtr::create();
+        std::shared_ptr<MNEEpochData> epoch = std::make_shared<MNEEpochData>();
         epoch->epoch = MatrixXd::Random(3, 100) + MatrixXd::Constant(3, 100, 10.0);
         epoch->tmin = -0.1f;
         epoch->tmax = 0.3f;
@@ -1360,7 +1360,7 @@ void TestMneLibrary::epochData_pickChannels()
 {
     MNEEpochDataList list;
     for (int i = 0; i < 3; i++) {
-        MNEEpochData::SPtr epoch = MNEEpochData::SPtr::create();
+        std::shared_ptr<MNEEpochData> epoch = std::make_shared<MNEEpochData>();
         epoch->epoch = MatrixXd::Random(5, 50);
         list.append(epoch);
     }
@@ -1386,7 +1386,7 @@ void TestMneLibrary::epochData_average()
 
     MNEEpochDataList list;
     for (int i = 0; i < 10; i++) {
-        MNEEpochData::SPtr epoch = MNEEpochData::SPtr::create();
+        std::shared_ptr<MNEEpochData> epoch = std::make_shared<MNEEpochData>();
         epoch->epoch = MatrixXd::Ones(3, 100) * (i + 1);
         epoch->tmin = 0.0f;
         epoch->tmax = 0.099f;
@@ -1630,7 +1630,7 @@ void TestMneLibrary::misc_epochDataList()
     MNEEpochDataList list;
     QVERIFY(list.isEmpty());
 
-    MNEEpochData::SPtr epoch = MNEEpochData::SPtr::create();
+    std::shared_ptr<MNEEpochData> epoch = std::make_shared<MNEEpochData>();
     epoch->epoch = MatrixXd::Random(5, 100);
     epoch->tmin = 0.0f;
     epoch->tmax = 0.1f;

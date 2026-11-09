@@ -76,9 +76,6 @@ namespace MNELIB
 class MNESHARED_EXPORT MNEMorphMap
 {
 public:
-    typedef QSharedPointer<MNEMorphMap> SPtr;            /**< Shared pointer type for MNEMorphMap. */
-    typedef QSharedPointer<const MNEMorphMap> ConstSPtr; /**< Const shared pointer type for MNEMorphMap. */
-
     MNEMorphMap() = default;
     MNEMorphMap(MNEMorphMap&&) = default;
     MNEMorphMap& operator=(MNEMorphMap&&) = default;

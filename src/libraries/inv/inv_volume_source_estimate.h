@@ -53,9 +53,6 @@ namespace INVLIB
 class INVSHARED_EXPORT InvVolumeSourceEstimate : public InvSourceEstimate
 {
 public:
-    typedef QSharedPointer<InvVolumeSourceEstimate> SPtr;
-    typedef QSharedPointer<const InvVolumeSourceEstimate> ConstSPtr;
-
     //=========================================================================================================
     InvVolumeSourceEstimate();
 

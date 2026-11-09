@@ -77,9 +77,6 @@ namespace INVLIB
 class INVSHARED_EXPORT InvHpiDataUpdater
 {
 public:
-    typedef QSharedPointer<InvHpiDataUpdater> SPtr;            /**< Shared pointer type for InvHpiDataUpdater. */
-    typedef QSharedPointer<const InvHpiDataUpdater> ConstSPtr; /**< Const shared pointer type for InvHpiDataUpdater. */
-
     //=========================================================================================================
     /**
     * Constructs a InvHpiDataUpdater object.

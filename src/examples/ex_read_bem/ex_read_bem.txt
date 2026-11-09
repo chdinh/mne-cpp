@@ -1,5 +1,6 @@
 
 #include <iostream>
+#include <memory>
 #include <mne/mne_surface.h> 
 
  
@@ -30,7 +31,7 @@ int main(int argc, char *argv[])
     QCoreApplication a(argc, argv); 
 
     QFile t_readBemFile("D:/myBemFile.fif"); 
- QList<MNESurface::SPtr> bemSurfaces;
+ QList<std::shared_ptr<MNESurface>> bemSurfaces;
  
  MNESurface::read(t_readBemFile, bemSurfaces);
  

@@ -460,7 +460,7 @@ int FwdBemModel::fwd_bem_set_head_mri_t(const FiffCoordTrans& t)
 std::unique_ptr<MNESourceSpace> FwdBemModel::make_guesses(MNESurface* guess_surf, float guessrad, const Eigen::Vector3f& guess_r0, float grid, float exclude, float mindist)
 {
     QString bemname;
-    MNESurface::UPtr sphere_owner;
+    std::unique_ptr<MNESurface> sphere_owner;
     std::unique_ptr<MNESourceSpace> res;
     int k;
     float dist;

@@ -67,9 +67,6 @@ class MNESourceSpace;
 class MNESHARED_EXPORT MNESurfacePatch
 {
 public:
-    typedef QSharedPointer<MNESurfacePatch> SPtr;            /**< Shared pointer type for MNESurfacePatch. */
-    typedef QSharedPointer<const MNESurfacePatch> ConstSPtr; /**< Const shared pointer type for MNESurfacePatch. */
-
     //=========================================================================================================
     /**
      * Constructs a patch with @p np vertices.

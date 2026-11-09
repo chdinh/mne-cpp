@@ -22,6 +22,7 @@
 //=============================================================================================================
 
 #include "mne_epoch_data_list.h"
+#include <memory>
 #include <utils/logger/log.h>
 
 #include <vector>
@@ -153,10 +154,10 @@ MNEEpochDataList MNEEpochDataList::readEpochs(const FiffRawData& raw,
             //Check if data block has the same size as the previous one
             if (!data.isEmpty()) {
                 if (epoch->epoch.size() == data.last()->epoch.size()) {
-                    data.append(MNEEpochData::SPtr(epoch.release())); //List takes ownwership of the pointer - no delete need
+                    data.append(std::shared_ptr<MNEEpochData>(epoch.release())); //List takes ownwership of the pointer - no delete need
                 }
             } else {
-                data.append(MNEEpochData::SPtr(epoch.release())); //List takes ownwership of the pointer - no delete need
+                data.append(std::shared_ptr<MNEEpochData>(epoch.release())); //List takes ownwership of the pointer - no delete need
             }
         } else {
             Log::warning("[MNEEpochDataList::readEpochs] Can't read the event data segments.");
@@ -237,7 +238,7 @@ FiffEvoked MNEEpochDataList::average(const FiffInfo& info,
 void MNEEpochDataList::applyBaselineCorrection(const std::pair<float, float>& baseline)
 {
     // Run baseline correction
-    QMutableListIterator<MNEEpochData::SPtr> i(*this);
+    QMutableListIterator<std::shared_ptr<MNEEpochData>> i(*this);
     while (i.hasNext()) {
         i.next()->applyBaselineCorrection(baseline);
     }
@@ -247,7 +248,7 @@ void MNEEpochDataList::applyBaselineCorrection(const std::pair<float, float>& ba
 
 void MNEEpochDataList::dropRejected()
 {
-    QMutableListIterator<MNEEpochData::SPtr> i(*this);
+    QMutableListIterator<std::shared_ptr<MNEEpochData>> i(*this);
     while (i.hasNext()) {
         if (i.next()->isRejected()) {
             i.remove();
@@ -259,7 +260,7 @@ void MNEEpochDataList::dropRejected()
 
 void MNEEpochDataList::pick_channels(const RowVectorXi& sel)
 {
-    QMutableListIterator<MNEEpochData::SPtr> i(*this);
+    QMutableListIterator<std::shared_ptr<MNEEpochData>> i(*this);
     while (i.hasNext()) {
         i.next()->pick_channels(sel);
     }

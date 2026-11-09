@@ -45,7 +45,7 @@ RealTimeConnectivityEstimate::RealTimeConnectivityEstimate(QObject* parent)
 : Measurement(QMetaType::fromName("RealTimeConnectivityEstimate::SPtr").id(), parent)
 , m_pAnnotSet(std::make_shared<FsAnnotationSet>())
 , m_pSurfSet(std::make_shared<FsSurfaceSet>())
-, m_pFwdSolution(MNEForwardSolution::SPtr(new MNEForwardSolution))
+, m_pFwdSolution(std::make_shared<MNEForwardSolution>())
 , m_pNetwork(QSharedPointer<Network>::create())
 , m_bInitialized(false)
 {

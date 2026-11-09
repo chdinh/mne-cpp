@@ -20,6 +20,7 @@
 //=============================================================================================================
 
 #include "../anshared_global.h"
+#include <memory>
 #include "../Utils/types.h"
 #include "abstractmodel.h"
 
@@ -105,7 +106,7 @@ public:
      *
      * @return The MNEBem object.
      */
-    inline MNELIB::MNEBem::SPtr getBem();
+    inline std::shared_ptr<MNELIB::MNEBem> getBem();
 
     //=========================================================================================================
     /**
@@ -136,7 +137,7 @@ private:
     QByteArray m_byteLoadedData;
     QBuffer m_buffer;
 
-    MNELIB::MNEBem::SPtr m_pBem; /**< Data. */
+    std::shared_ptr<MNELIB::MNEBem> m_pBem; /**< Data. */
 
 signals:
     //=========================================================================================================
@@ -145,7 +146,7 @@ signals:
      *
      * @param[in] pBem    The new Bem model.
      */
-    void newBemAvailable(const MNELIB::MNEBem::SPtr pBem);
+    void newBemAvailable(const std::shared_ptr<MNELIB::MNEBem> pBem);
 };
 
 //=============================================================================================================
@@ -159,10 +160,10 @@ inline MODEL_TYPE BemDataModel::getType() const
 
 inline bool BemDataModel::isEmpty() const
 {
-    return m_pBem.isNull();
+    return !m_pBem;
 }
 
-inline MNELIB::MNEBem::SPtr BemDataModel::getBem()
+inline std::shared_ptr<MNELIB::MNEBem> BemDataModel::getBem()
 {
     return m_pBem;
 }

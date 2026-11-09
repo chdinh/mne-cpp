@@ -69,9 +69,6 @@ namespace MNELIB
 class MNESHARED_EXPORT MNEProjItem
 {
 public:
-    typedef QSharedPointer<MNEProjItem> SPtr;            /**< Shared pointer type for MNEProjItem. */
-    typedef QSharedPointer<const MNEProjItem> ConstSPtr; /**< Const shared pointer type for MNEProjItem. */
-
     //=========================================================================================================
     /**
      * @brief Default constructor.

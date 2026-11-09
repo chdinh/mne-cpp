@@ -9,6 +9,7 @@
  *        MNEEpochDataList, MNEClusterInfo, MNESourceSpaces, MNEForwardSolution.
  */
 #include <QTest>
+#include <memory>
 #include <QCoreApplication>
 #include <QFile>
 #include <QTemporaryFile>
@@ -241,7 +242,7 @@ private slots:
     {
         MNEEpochDataList list;
         for (int i = 0; i < 3; ++i) {
-            auto ep = MNEEpochData::SPtr::create();
+            auto ep = std::make_shared<MNEEpochData>();
             ep->epoch = MatrixXd::Ones(2, 10) * (i + 1.0);
             ep->tmin = 0.0f;
             ep->tmax = 0.9f;
@@ -267,7 +268,7 @@ private slots:
     {
         MNEEpochDataList list;
         for (int i = 0; i < 5; ++i) {
-            auto ep = MNEEpochData::SPtr::create();
+            auto ep = std::make_shared<MNEEpochData>();
             ep->epoch = MatrixXd::Random(2, 10);
             ep->event = 1;
             ep->tmin = 0.0f;
@@ -285,7 +286,7 @@ private slots:
     {
         MNEEpochDataList list;
         for (int i = 0; i < 3; ++i) {
-            auto ep = MNEEpochData::SPtr::create();
+            auto ep = std::make_shared<MNEEpochData>();
             ep->epoch = MatrixXd::Random(5, 10);
             ep->event = 1;
             ep->tmin = 0.0f;
@@ -352,7 +353,7 @@ private slots:
 
         MNEEpochDataList list;
         for (int i = 0; i < 4; ++i) {
-            auto ep = MNEEpochData::SPtr::create();
+            auto ep = std::make_shared<MNEEpochData>();
             ep->epoch = MatrixXd::Ones(1, 50) * (i + 1.0);
             ep->event = 1;
             ep->tmin = 0.0f;

@@ -60,9 +60,6 @@ class MNEPatchInfo;
 class MNESHARED_EXPORT MNENearest
 {
 public:
-    typedef QSharedPointer<MNENearest> SPtr;            /**< Shared pointer type for MNENearest. */
-    typedef QSharedPointer<const MNENearest> ConstSPtr; /**< Const shared pointer type for MNENearest. */
-
     //=========================================================================================================
     /**
      * Constructs the MNE Nearest

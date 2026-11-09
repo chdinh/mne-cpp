@@ -62,9 +62,6 @@ namespace INVLIB
 class INVSHARED_EXPORT InvEcdSet
 {
 public:
-    typedef QSharedPointer<InvEcdSet> SPtr;            /**< Shared pointer type for InvEcdSet. */
-    typedef QSharedPointer<const InvEcdSet> ConstSPtr; /**< Const shared pointer type for InvEcdSet. */
-
     //=========================================================================================================
     /**
      * Constructs a Electric Current Dipole Set object.

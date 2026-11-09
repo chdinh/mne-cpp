@@ -94,9 +94,6 @@ class MNESssData;
 class MNESHARED_EXPORT MNECovMatrix
 {
 public:
-    typedef QSharedPointer<MNECovMatrix> SPtr;            /**< Shared pointer type for MNECovMatrix. */
-    typedef QSharedPointer<const MNECovMatrix> ConstSPtr; /**< Const shared pointer type for MNECovMatrix. */
-
     //=========================================================================================================
     /**
      * Construct a covariance matrix.

@@ -64,9 +64,6 @@ namespace MNELIB
 class MNESHARED_EXPORT MNERawBufDef
 {
 public:
-    typedef QSharedPointer<MNERawBufDef> SPtr;            /**< Shared pointer type for MNERawBufDef. */
-    typedef QSharedPointer<const MNERawBufDef> ConstSPtr; /**< Const shared pointer type for MNERawBufDef. */
-
     //=========================================================================================================
     /**
      * @brief Default constructor.

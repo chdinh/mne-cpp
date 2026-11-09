@@ -19,6 +19,7 @@
 //=============================================================================================================
 
 #include <mne/mne_epoch_data_list.h>
+#include <memory>
 
 #include <QAbstractTableModel>
 
@@ -188,11 +189,11 @@ private:
      */
     struct EpochEntry
     {
-        MNELIB::MNEEpochData::SPtr epoch; /**< Backing epoch object with reject/exclude state. */
-        int eventCode = 0;                /**< Event code that created this epoch. */
-        int absoluteSample = 0;           /**< Absolute trigger sample in the raw file. */
-        int sample = 0;                   /**< Display sample relative to the loaded raw file. */
-        double timeSeconds = 0.0;         /**< Trigger time in seconds relative to file start. */
+        std::shared_ptr<MNELIB::MNEEpochData> epoch; /**< Backing epoch object with reject/exclude state. */
+        int eventCode = 0;                           /**< Event code that created this epoch. */
+        int absoluteSample = 0;                      /**< Absolute trigger sample in the raw file. */
+        int sample = 0;                              /**< Display sample relative to the loaded raw file. */
+        double timeSeconds = 0.0;                    /**< Trigger time in seconds relative to file start. */
     };
 
     //=========================================================================================================

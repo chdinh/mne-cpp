@@ -61,9 +61,6 @@ namespace MNELIB
 class MNESHARED_EXPORT MNETriangle
 {
 public:
-    typedef QSharedPointer<MNETriangle> SPtr;            /**< Shared pointer type for MNETriangle. */
-    typedef QSharedPointer<const MNETriangle> ConstSPtr; /**< Const shared pointer type for MNETriangle. */
-
     //=========================================================================================================
     /**
      * Constructs an empty MNETriangle with zeroed geometry.

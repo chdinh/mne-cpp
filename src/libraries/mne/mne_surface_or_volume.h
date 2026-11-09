@@ -104,9 +104,6 @@ class FilterThreadArg;
 class MNESHARED_EXPORT MNESurfaceOrVolume
 {
 public:
-    typedef QSharedPointer<MNESurfaceOrVolume> SPtr;            /**< Shared pointer type for MNESurfaceOrVolume. */
-    typedef QSharedPointer<const MNESurfaceOrVolume> ConstSPtr; /**< Const shared pointer type for MNESurfaceOrVolume. */
-
     /*
      * Eigen convenience types – row-major so that row(i).data() gives
      * a contiguous 3-element pointer, matching the old float** / int** layout.

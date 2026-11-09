@@ -89,9 +89,6 @@ class MNENamedMatrix;
 class MNESHARED_EXPORT MNEMeasData
 {
 public:
-    typedef QSharedPointer<MNEMeasData> SPtr;            /**< Shared pointer type for MNEMeasData. */
-    typedef QSharedPointer<const MNEMeasData> ConstSPtr; /**< Const shared pointer type for MNEMeasData. */
-
     //=========================================================================================================
     /**
      * @brief Constructs an empty measurement data container.

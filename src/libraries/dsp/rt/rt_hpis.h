@@ -32,6 +32,7 @@
 //=============================================================================================================
 
 #include "../dsp_global.h"
+#include <memory>
 #include <inv/hpi/inv_sensor_set.h>
 #include <inv/hpi/inv_signal_model.h>
 
@@ -111,7 +112,7 @@ public:
 
 protected:
     //=========================================================================================================
-    QSharedPointer<INVLIB::InvHpiFit> m_pHpiFit; /**< Holds the HpiFit object. */
+    std::shared_ptr<INVLIB::InvHpiFit> m_pHpiFit; /**< Holds the HpiFit object. */
 
 signals:
     void resultReady(const INVLIB::HpiFitResult& fitResult);

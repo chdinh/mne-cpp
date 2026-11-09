@@ -57,9 +57,6 @@ namespace INVLIB
 class INVSHARED_EXPORT InvEcd
 {
 public:
-    typedef QSharedPointer<InvEcd> SPtr;            /**< Shared pointer type for InvEcd. */
-    typedef QSharedPointer<const InvEcd> ConstSPtr; /**< Const shared pointer type for InvEcd. */
-
     //=========================================================================================================
     /**
      * Constructs the Electric Current Dipole

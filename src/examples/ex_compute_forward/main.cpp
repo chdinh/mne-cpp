@@ -128,7 +128,7 @@ int main(int argc, char* argv[])
 
     // read back to verify round-trip
     timer3.start();
-    auto pFwdRead = MNEForwardSolution::SPtr::create(UTILSLIB::pathFromUtf8(pSettings->solname));
+    auto pFwdRead = std::make_shared<MNEForwardSolution>(UTILSLIB::pathFromUtf8(pSettings->solname));
     fTime3 = timer3.elapsed();
 
     // update head position and recompute

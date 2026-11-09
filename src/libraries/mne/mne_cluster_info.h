@@ -64,9 +64,6 @@ namespace MNELIB
 class MNESHARED_EXPORT MNEClusterInfo
 {
 public:
-    typedef QSharedPointer<MNEClusterInfo> SPtr;            /**< Shared pointer type for MNEClusterInfo. */
-    typedef QSharedPointer<const MNEClusterInfo> ConstSPtr; /**< Const shared pointer type for MNEClusterInfo. */
-
     //=========================================================================================================
     /**
      * Default constructor.

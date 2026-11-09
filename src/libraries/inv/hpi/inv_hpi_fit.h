@@ -139,9 +139,6 @@ struct HpiFitResult
 class INVSHARED_EXPORT InvHpiFit
 {
 public:
-    typedef QSharedPointer<InvHpiFit> SPtr;            /**< Shared pointer type for InvHpiFit. */
-    typedef QSharedPointer<const InvHpiFit> ConstSPtr; /**< Const shared pointer type for InvHpiFit. */
-
     //=========================================================================================================
     /**
      * Default constructor.

@@ -17,6 +17,7 @@
 //=============================================================================================================
 
 #include <iostream>
+#include <memory>
 #include <vector>
 #include <math.h>
 
@@ -160,8 +161,8 @@ int main(int argc, char* argv[])
                                                          picks);
 
     // Epochs image of the gradiometer with the largest average response, as mne.Epochs.plot_image draws it
-    QList<MNEEpochData::SPtr> kept;
-    for (const MNEEpochData::SPtr& epoch : data) {
+    QList<std::shared_ptr<MNEEpochData>> kept;
+    for (const std::shared_ptr<MNEEpochData>& epoch : data) {
         if (!epoch->isRejected()) {
             kept.append(epoch);
         }
@@ -179,7 +180,7 @@ int main(int argc, char* argv[])
             continue;
         }
         RowVectorXd mean = RowVectorXd::Zero(nSamples);
-        for (const MNEEpochData::SPtr& epoch : kept) {
+        for (const std::shared_ptr<MNEEpochData>& epoch : kept) {
             mean += epoch->epoch.row(c) / kept.size();
         }
         if (mean.cwiseAbs().maxCoeff() > strongest) {

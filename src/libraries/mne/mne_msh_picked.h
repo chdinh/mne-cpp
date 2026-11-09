@@ -50,9 +50,6 @@ namespace MNELIB
 class MNESHARED_EXPORT MNEMshPicked
 {
 public:
-    typedef QSharedPointer<MNEMshPicked> SPtr;            /**< Shared pointer type for MNEMshPicked. */
-    typedef QSharedPointer<const MNEMshPicked> ConstSPtr; /**< Const shared pointer type for MNEMshPicked. */
-
     //=========================================================================================================
     /**
      * Constructs the MNEMshPicked.

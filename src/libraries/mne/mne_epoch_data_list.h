@@ -27,6 +27,7 @@
 //=============================================================================================================
 
 #include <map>
+#include <memory>
 #include <string>
 #include <fiff/fiff_types.h>
 #include <fiff/fiff_evoked.h>
@@ -73,12 +74,9 @@ struct ArtifactRejectionData
  *
  * @snippet ex_mne_api/main.cpp mne_epoch_rejection_usage
  */
-class MNESHARED_EXPORT MNEEpochDataList : public QList<MNEEpochData::SPtr>
+class MNESHARED_EXPORT MNEEpochDataList : public QList<std::shared_ptr<MNEEpochData>>
 {
 public:
-    typedef QSharedPointer<MNEEpochDataList> SPtr;            /**< Shared pointer type for MNEEpochDataList. */
-    typedef QSharedPointer<const MNEEpochDataList> ConstSPtr; /**< Const shared pointer type for MNEEpochDataList. */
-
     //=========================================================================================================
     /**
      * Default constructor.

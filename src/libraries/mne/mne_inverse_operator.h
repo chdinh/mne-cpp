@@ -33,6 +33,7 @@
 //=============================================================================================================
 
 #include "mne_global.h"
+#include <memory>
 
 #include <string>
 #include <vector>
@@ -134,9 +135,6 @@ struct RegionMT
 class MNESHARED_EXPORT MNEInverseOperator
 {
 public:
-    typedef QSharedPointer<MNEInverseOperator> SPtr;            /**< Shared pointer type for MNEInverseOperator. */
-    typedef QSharedPointer<const MNEInverseOperator> ConstSPtr; /**< Const shared pointer type for MNEInverseOperator. */
-
     //=========================================================================================================
     /**
      * @brief Constructs an empty inverse operator with invalid sentinel values.
@@ -402,7 +400,7 @@ inline std::ostream& operator<<(std::ostream& out, const MNEInverseOperator& inv
 
 #ifndef metatype_mneinverseoperatorsptr
 #define metatype_mneinverseoperatorsptr
-Q_DECLARE_METATYPE(QSharedPointer<MNELIB::MNEInverseOperator>); /**< Provides QT META type declaration of the QSharedPointer<MNELIB::MNEInverseOperator> type. For signal/slot usage.*/
+Q_DECLARE_METATYPE(std::shared_ptr<MNELIB::MNEInverseOperator>); /**< Provides QT META type declaration of the std::shared_ptr<MNELIB::MNEInverseOperator> type. For signal/slot usage.*/
 #endif
 
 #ifndef metatype_mneinverseoperators

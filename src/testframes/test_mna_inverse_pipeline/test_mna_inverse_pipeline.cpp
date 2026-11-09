@@ -78,7 +78,7 @@ using namespace Eigen;
 // QVariant metatype declarations for types not already registered in library headers
 //=============================================================================================================
 
-// Note: std::shared_ptr<FiffCov> and QSharedPointer<MNEInverseOperator> are already
+// Note: std::shared_ptr<FiffCov> and std::shared_ptr<MNEInverseOperator> are already
 // declared in fiff_cov.h and mne_inverse_operator.h respectively.
 // Only declare types that are missing from upstream headers.
 #ifndef Q_MOC_RUN
@@ -216,7 +216,7 @@ void TestMnaInversePipeline::registerRealOps()
                            QString fwdPath = attrs.value(QStringLiteral("fwd_path")).toString();
                            fwdPath.replace(QLatin1String("${TEST_DATA}"), dataPath);
 
-                           auto fwd = QSharedPointer<MNEForwardSolution>::create(fwdPath.toStdU16String());
+                           auto fwd = std::make_shared<MNEForwardSolution>(fwdPath.toStdU16String());
 
                            return {{QStringLiteral("forward"), QVariant::fromValue(fwd)}};
                        });
@@ -227,7 +227,7 @@ void TestMnaInversePipeline::registerRealOps()
     reg.registerOpFunc(QStringLiteral("make_inverse_operator"),
                        [](const QVariantMap& inputs, const QVariantMap& attrs) -> QVariantMap {
                            auto info = inputs.value(QStringLiteral("info")).value<std::shared_ptr<FiffInfo>>();
-                           auto fwd = inputs.value(QStringLiteral("forward")).value<QSharedPointer<MNEForwardSolution>>();
+                           auto fwd = inputs.value(QStringLiteral("forward")).value<std::shared_ptr<MNEForwardSolution>>();
                            auto cov = inputs.value(QStringLiteral("noise_cov")).value<std::shared_ptr<FiffCov>>();
 
                            float loose = attrs.value(QStringLiteral("loose"), 0.2).toFloat();
@@ -236,7 +236,7 @@ void TestMnaInversePipeline::registerRealOps()
                            MNEInverseOperator invOpLocal = MNEInverseOperator::make_inverse_operator(
                                *info, *fwd, *cov, loose, depth, false, true);
 
-                           auto invOp = QSharedPointer<MNEInverseOperator>::create(invOpLocal);
+                           auto invOp = std::make_shared<MNEInverseOperator>(invOpLocal);
 
                            return {{QStringLiteral("inverse_operator"), QVariant::fromValue(invOp)}};
                        });
@@ -246,7 +246,7 @@ void TestMnaInversePipeline::registerRealOps()
     //
     reg.registerOpFunc(QStringLiteral("apply_inverse"),
                        [](const QVariantMap& inputs, const QVariantMap& attrs) -> QVariantMap {
-                           auto invOp = inputs.value(QStringLiteral("inverse_operator")).value<QSharedPointer<MNEInverseOperator>>();
+                           auto invOp = inputs.value(QStringLiteral("inverse_operator")).value<std::shared_ptr<MNEInverseOperator>>();
                            auto evoked = inputs.value(QStringLiteral("evoked")).value<std::shared_ptr<FiffEvoked>>();
 
                            QString method = attrs.value(QStringLiteral("method"), QStringLiteral("dSPM")).toString();
@@ -264,7 +264,7 @@ void TestMnaInversePipeline::registerRealOps()
                            mn.doInverseSetup(evoked->nave, pickNormal);
 
                            InvSourceEstimate stcLocal = mn.calculateInverse(picked.data, tmin, tstep, pickNormal);
-                           auto stc = QSharedPointer<InvSourceEstimate>::create(stcLocal);
+                           auto stc = std::make_shared<InvSourceEstimate>(stcLocal);
 
                            return {{QStringLiteral("source_estimate"), QVariant::fromValue(stc)}};
                        });
@@ -408,7 +408,7 @@ void TestMnaInversePipeline::testExecuteRealPipeline()
     {
         QVariant v = ctx.results.value(QStringLiteral("load_fwd::forward"));
         QVERIFY2(v.isValid(), "load_fwd::forward not in results");
-        auto fwd = v.value<QSharedPointer<MNEForwardSolution>>();
+        auto fwd = v.value<std::shared_ptr<MNEForwardSolution>>();
         QVERIFY2(fwd != nullptr, "MNEForwardSolution is null");
         QVERIFY2(!fwd->empty(), "Forward solution is empty");
         QVERIFY2(fwd->nsource > 0,
@@ -426,7 +426,7 @@ void TestMnaInversePipeline::testExecuteRealPipeline()
     {
         QVariant v = ctx.results.value(QStringLiteral("make_inv::inverse_operator"));
         QVERIFY2(v.isValid(), "make_inv::inverse_operator not in results");
-        auto invOp = v.value<QSharedPointer<MNEInverseOperator>>();
+        auto invOp = v.value<std::shared_ptr<MNEInverseOperator>>();
         QVERIFY2(invOp != nullptr, "MNEInverseOperator is null");
         QVERIFY2(invOp->nchan > 0,
                  qPrintable(QString("nchan = %1, expected > 0").arg(invOp->nchan)));
@@ -444,7 +444,7 @@ void TestMnaInversePipeline::testExecuteRealPipeline()
     {
         QVariant v = ctx.results.value(QStringLiteral("apply_dspm::source_estimate"));
         QVERIFY2(v.isValid(), "apply_dspm::source_estimate not in results");
-        auto stc = v.value<QSharedPointer<InvSourceEstimate>>();
+        auto stc = v.value<std::shared_ptr<InvSourceEstimate>>();
         QVERIFY2(stc != nullptr, "InvSourceEstimate is null");
         QVERIFY2(!stc->empty(), "Source estimate is empty");
 

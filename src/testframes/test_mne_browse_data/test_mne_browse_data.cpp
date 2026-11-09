@@ -943,7 +943,7 @@ void TestMneBrowseData::testEpochModelReviewsEpochs()
 {
     // Two event codes; epochs listed out of time order; the code-3 epoch at sample 1300 is auto-rejected
     const auto makeEpoch = [](int sample, double ptp, bool reject) {
-        auto epoch = MNEEpochData::SPtr::create();
+        auto epoch = std::make_shared<MNEEpochData>();
         epoch->eventSample = sample;
         epoch->epoch = MatrixXd::Zero(2, 10);
         epoch->epoch(1, 4) = ptp;

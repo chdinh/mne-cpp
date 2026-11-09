@@ -17,6 +17,7 @@
 //=============================================================================================================
 
 #include <iostream>
+#include <memory>
 
 #include "fiff/fiff_dig_point_set.h"
 #include "fiff/fiff_dig_point.h"
@@ -108,8 +109,8 @@ void TestCoregistration::initTestCase()
 
     // read Bem
     MNEBem bemHead((QCoreApplication::applicationDirPath() + "/../resources/data/mne-cpp-test-data/subjects/sample/bem/sample-1280-1280-1280-bem.fif").toStdU16String());
-    MNEBemSurface::SPtr bemSurface = MNEBemSurface::SPtr::create(bemHead[0]);
-    MNEProjectToSurface::SPtr mneSurfacePoints = MNEProjectToSurface::SPtr::create(*bemSurface);
+    std::shared_ptr<MNEBemSurface> bemSurface = std::make_shared<MNEBemSurface>(bemHead[0]);
+    std::shared_ptr<MNEProjectToSurface> mneSurfacePoints = std::make_shared<MNEProjectToSurface>(*bemSurface);
 
     // read digitizer data
     const FiffDigPointSet dig((QCoreApplication::applicationDirPath() + "/../resources/data/mne-cpp-test-data/MEG/sample/sample_audvis-ave.fif").toStdString());
@@ -150,7 +151,7 @@ void TestCoregistration::initTestCase()
     }
 
     fiff_int_t iFrom = digSetSrc[0].coord_frame;
-    fiff_int_t iTo = bemSurface.data()->coord_frame;
+    fiff_int_t iTo = bemSurface.get()->coord_frame;
     transFitMatched = FiffCoordTrans(iFrom, iTo, matTrans);
     transPerformICP = FiffCoordTrans(transFitMatched);
 

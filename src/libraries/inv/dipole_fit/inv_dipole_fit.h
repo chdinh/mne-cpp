@@ -68,9 +68,6 @@ namespace INVLIB
 class INVSHARED_EXPORT InvDipoleFit
 {
 public:
-    typedef QSharedPointer<InvDipoleFit> SPtr;            /**< Shared pointer type for InvDipoleFit. */
-    typedef QSharedPointer<const InvDipoleFit> ConstSPtr; /**< Const shared pointer type for InvDipoleFit. */
-
     //=========================================================================================================
     /**
      * Constructs Dipole Fit algorithm.

@@ -587,7 +587,7 @@ void RtClustMne::run()
     bool bUpdateMinimumNorm = false;
     bool bCmne = false;
     QString sModelCheckpoint;
-    QSharedPointer<INVLIB::InvMinimumNorm> pMinimumNorm;
+    std::shared_ptr<INVLIB::InvMinimumNorm> pMinimumNorm;
     StringList lChNamesFiffInfo;
     StringList lChNamesInvOp;
 
@@ -610,7 +610,7 @@ void RtClustMne::run()
         if (bUpdateMinimumNorm) {
             m_qMutex.lock();
             if (!bCmne) {
-                pMinimumNorm = InvMinimumNorm::SPtr(new InvMinimumNorm(m_invOp, lambda2, m_sMethod));
+                pMinimumNorm = std::make_shared<InvMinimumNorm>(m_invOp, lambda2, m_sMethod);
             } else {
                 pMinimumNorm.reset();
             }
@@ -709,7 +709,7 @@ InvSourceEstimate RtClustMne::computeCmneInverse(const FiffEvoked& evoked,
         return stcEmpty;
     }
 
-    QSharedPointer<MNEForwardSolution> pFwd;
+    std::shared_ptr<MNEForwardSolution> pFwd;
     FIFFLIB::FiffCov::SDPtr pNoiseCov;
     FIFFLIB::FiffCov::SDPtr pSrcCov;
 

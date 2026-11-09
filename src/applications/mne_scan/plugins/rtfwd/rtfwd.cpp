@@ -376,8 +376,8 @@ void RtFwd::run()
     emit statusInformationChanged(0); // initializing
     std::shared_ptr<ComputeFwd> pFwdComputer = std::make_shared<ComputeFwd>(m_pFwdSettings);
 
-    MNEForwardSolution::SPtr pFwdSolution;
-    MNEForwardSolution::SPtr pClusteredFwd;
+    std::shared_ptr<MNEForwardSolution> pFwdSolution;
+    std::shared_ptr<MNEForwardSolution> pClusteredFwd;
 
     emit statusInformationChanged(4); // not computed
 
@@ -474,7 +474,7 @@ void RtFwd::run()
 
         if (bDoClustering && bFwdReady && bNClusterChanged) {
             emit statusInformationChanged(3); // clustering
-            pClusteredFwd = MNEForwardSolution::SPtr(new MNEForwardSolution(pFwdSolution->cluster_forward_solution(*m_pAnnotationSet, m_pFwdSettings->ncluster)));
+            pClusteredFwd = std::make_shared<MNEForwardSolution>(pFwdSolution->cluster_forward_solution(*m_pAnnotationSet, m_pFwdSettings->ncluster));
             emit clusteringAvailable(pClusteredFwd->nsource);
 
             m_pRTFSOutput->measurementData()->setValue(pClusteredFwd);

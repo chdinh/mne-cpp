@@ -52,9 +52,6 @@ namespace MNELIB
 class MNESHARED_EXPORT MNEMshColorScaleDef
 {
 public:
-    typedef QSharedPointer<MNEMshColorScaleDef> SPtr;            /**< Shared pointer type for MNEMshColorScaleDef. */
-    typedef QSharedPointer<const MNEMshColorScaleDef> ConstSPtr; /**< Const shared pointer type for MNEMshColorScaleDef. */
-
     //=========================================================================================================
     /**
      * Constructs the MNEMshColorScaleDef.

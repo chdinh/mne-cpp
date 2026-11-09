@@ -3,6 +3,7 @@
 //   Christoph Dinh <christoph.dinh@mne-cpp.org>
 
 #include <QtTest/QtTest>
+#include <memory>
 #include <QBuffer>
 #include <QTemporaryDir>
 #include <QDir>
@@ -345,7 +346,7 @@ private slots:
         }
 
         FiffEvoked ev = es.evoked[0];
-        MNEEpochData::SPtr epoch(new MNEEpochData());
+        std::shared_ptr<MNEEpochData> epoch(new MNEEpochData());
         epoch->epoch = ev.data;
         epoch->tmin = ev.times(0);
         epoch->tmax = ev.times(ev.times.size() - 1);
@@ -526,7 +527,7 @@ private slots:
         MNEEpochDataList list;
         QVERIFY(list.isEmpty());
 
-        MNEEpochData::SPtr epoch(new MNEEpochData());
+        std::shared_ptr<MNEEpochData> epoch(new MNEEpochData());
         epoch->epoch = MatrixXd::Random(5, 10);
         epoch->tmin = 0.0;
         epoch->tmax = 0.01f;

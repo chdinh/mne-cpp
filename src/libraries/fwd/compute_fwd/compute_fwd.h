@@ -157,17 +157,17 @@ private:
     // Computation state
     //=========================================================================================================
 
-    std::vector<MNELIB::MNESourceSpace::UPtr> m_spaces; /**< Source spaces. */
-    int m_iNSource = 0;                                 /**< Number of active source points. */
-    std::unique_ptr<FwdCoilSet> m_templates;            /**< Template coil set. */
-    std::unique_ptr<FwdCoilSet> m_megcoils;             /**< MEG coil set. */
-    std::unique_ptr<FwdCoilSet> m_compcoils;            /**< Compensator coil set. */
-    std::unique_ptr<FwdCoilSet> m_eegels;               /**< EEG electrode set. */
-    MNELIB::MNECTFCompDataSet::UPtr m_compData;         /**< CTF compensation data. */
-    std::unique_ptr<FwdEegSphereModelSet> m_eegModels;  /**< EEG sphere model set. */
-    std::unique_ptr<FwdEegSphereModel> m_eegModel;      /**< Active EEG sphere model. */
-    std::unique_ptr<FwdBemModel> m_bemModel;            /**< BEM model. */
-    bool m_bInitialized = false;                        /**< Whether initFwd completed. */
+    std::vector<std::unique_ptr<MNELIB::MNESourceSpace>> m_spaces; /**< Source spaces. */
+    int m_iNSource = 0;                                            /**< Number of active source points. */
+    std::unique_ptr<FwdCoilSet> m_templates;                       /**< Template coil set. */
+    std::unique_ptr<FwdCoilSet> m_megcoils;                        /**< MEG coil set. */
+    std::unique_ptr<FwdCoilSet> m_compcoils;                       /**< Compensator coil set. */
+    std::unique_ptr<FwdCoilSet> m_eegels;                          /**< EEG electrode set. */
+    std::unique_ptr<MNELIB::MNECTFCompDataSet> m_compData;         /**< CTF compensation data. */
+    std::unique_ptr<FwdEegSphereModelSet> m_eegModels;             /**< EEG sphere model set. */
+    std::unique_ptr<FwdEegSphereModel> m_eegModel;                 /**< Active EEG sphere model. */
+    std::unique_ptr<FwdBemModel> m_bemModel;                       /**< BEM model. */
+    bool m_bInitialized = false;                                   /**< Whether initFwd completed. */
 
     std::vector<FIFFLIB::FiffChInfo> m_listMegChs;  /**< MEG channel information. */
     std::vector<FIFFLIB::FiffChInfo> m_listEegChs;  /**< EEG channel information. */

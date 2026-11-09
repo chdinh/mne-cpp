@@ -47,9 +47,6 @@ namespace INVLIB
 class INVSHARED_EXPORT InvVectorSourceEstimate : public InvSourceEstimate
 {
 public:
-    typedef QSharedPointer<InvVectorSourceEstimate> SPtr;
-    typedef QSharedPointer<const InvVectorSourceEstimate> ConstSPtr;
-
     //=========================================================================================================
     InvVectorSourceEstimate();
 

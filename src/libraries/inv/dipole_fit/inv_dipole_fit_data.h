@@ -134,9 +134,6 @@ class InvEcd;
 class INVSHARED_EXPORT InvDipoleFitData
 {
 public:
-    typedef QSharedPointer<InvDipoleFitData> SPtr;            /**< Shared pointer type for InvDipoleFitData. */
-    typedef QSharedPointer<const InvDipoleFitData> ConstSPtr; /**< Const shared pointer type for InvDipoleFitData. */
-
     //=========================================================================================================
     /**
      * Default Constructor

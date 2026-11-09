@@ -59,9 +59,6 @@ class MNESourceSpace;
 class MNESHARED_EXPORT MNEPatchInfo
 {
 public:
-    typedef QSharedPointer<MNEPatchInfo> SPtr;            /**< Shared pointer type for MNEPatchInfo. */
-    typedef QSharedPointer<const MNEPatchInfo> ConstSPtr; /**< Const shared pointer type for MNEPatchInfo. */
-
     //=========================================================================================================
     /**
      * Constructs the MNE Patch Information

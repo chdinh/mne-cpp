@@ -74,9 +74,6 @@ class MNECovMatrix;
 class MNESHARED_EXPORT MNEProjOp
 {
 public:
-    typedef QSharedPointer<MNEProjOp> SPtr;            /**< Shared pointer type for MNEProjOp. */
-    typedef QSharedPointer<const MNEProjOp> ConstSPtr; /**< Const shared pointer type for MNEProjOp. */
-
     //=========================================================================================================
     /**
      * @brief Default constructor.

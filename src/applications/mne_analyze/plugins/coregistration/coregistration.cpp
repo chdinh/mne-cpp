@@ -18,6 +18,7 @@
 //=============================================================================================================
 
 #include "coregistration.h"
+#include <memory>
 
 #include <anShared/Management/analyzedata.h>
 #include <anShared/Management/communicator.h>
@@ -239,7 +240,7 @@ void CoRegistration::onChangeSelectedBem(const QString& sText)
         if (bemDataModel->getModelName() == sText && sText != m_sCurrentSelectedBem) {
             // update current selected Bem
             pBemDataModel = qSharedPointerCast<BemDataModel>(bemDataModel);
-            m_pBem = QSharedPointer<MNEBem>(pBemDataModel->getBem());
+            m_pBem = std::shared_ptr<MNEBem>(pBemDataModel->getBem());
             m_sCurrentSelectedBem = sText;
 
             // send event to 3DView etc.
@@ -571,8 +572,8 @@ FiffCoordTrans CoRegistration::computeICP(FiffCoordTrans transInit,
     float fRMSE = 0.0;
 
     // init surface points
-    MNEBemSurface::SPtr bemSurface = MNEBemSurface::SPtr::create(bemHead[0]);
-    MNEProjectToSurface::SPtr mneSurfacePoints = MNEProjectToSurface::SPtr::create(*bemSurface);
+    std::shared_ptr<MNEBemSurface> bemSurface = std::make_shared<MNEBemSurface>(bemHead[0]);
+    std::shared_ptr<MNEProjectToSurface> mneSurfacePoints = std::make_shared<MNEProjectToSurface>(*bemSurface);
 
     // get selected digitizers
     FiffDigPointSet digSetHSP = digSetHead.pick_types(lPickHSP);

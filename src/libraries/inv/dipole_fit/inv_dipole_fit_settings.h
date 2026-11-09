@@ -75,9 +75,6 @@ inline constexpr double BIG_TIME = 1e6;
 class INVSHARED_EXPORT InvDipoleFitSettings
 {
 public:
-    typedef QSharedPointer<InvDipoleFitSettings> SPtr;            /**< Shared pointer type for InvDipoleFitSettings. */
-    typedef QSharedPointer<const InvDipoleFitSettings> ConstSPtr; /**< Const shared pointer type for InvDipoleFitSettings. */
-
     //=========================================================================================================
     /**
      * Default Constructor

@@ -43,7 +43,7 @@ using namespace INVLIB;
 
 RtHpiWorker::RtHpiWorker(const InvSensorSet sensorSet)
 {
-    m_pHpiFit = QSharedPointer<INVLIB::InvHpiFit>(new InvHpiFit(sensorSet));
+    m_pHpiFit = std::make_shared<InvHpiFit>(sensorSet);
 }
 
 void RtHpiWorker::doWork(const Eigen::MatrixXd& matData,

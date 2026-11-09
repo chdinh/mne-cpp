@@ -91,9 +91,6 @@ struct Pair
 class INVSHARED_EXPORT InvRapMusic
 {
 public:
-    typedef QSharedPointer<InvRapMusic> SPtr;            /**< Shared pointer type for InvRapMusic. */
-    typedef QSharedPointer<const InvRapMusic> ConstSPtr; /**< Const shared pointer type for InvRapMusic. */
-
     //*********************************************************************************************************
     //=========================================================================================================
     // TYPEDEFS

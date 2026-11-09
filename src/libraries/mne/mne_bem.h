@@ -30,6 +30,7 @@
 //=============================================================================================================
 
 #include "mne_global.h"
+#include <memory>
 #include "mne_bem_surface.h"
 
 #include <fiff/fiff_coord_trans.h>
@@ -66,8 +67,6 @@ namespace MNELIB
 class MNESHARED_EXPORT MNEBem
 {
 public:
-    using SPtr = QSharedPointer<MNEBem>;                               /**< Shared pointer type for MNEBem. */
-    using ConstSPtr = QSharedPointer<const MNEBem>;                    /**< Const shared pointer type for MNEBem. */
     using iterator = std::vector<MNEBemSurface>::iterator;             /**< Surface iterator. */
     using const_iterator = std::vector<MNEBemSurface>::const_iterator; /**< Const surface iterator. */
 
@@ -237,7 +236,7 @@ Q_DECLARE_METATYPE(MNELIB::MNEBem); /**< Provides QT META type declaration of th
 
 #ifndef metatype_bem_sptr
 #define metatype_bem_sptr
-Q_DECLARE_METATYPE(MNELIB::MNEBem::SPtr); /**< Provides QT META type declaration of the MNELIB::MNEBem::SPtr type. For signal/slot usage.*/
+Q_DECLARE_METATYPE(std::shared_ptr<MNELIB::MNEBem>); /**< Provides QT META type declaration of the std::shared_ptr<MNELIB::MNEBem> type. For signal/slot usage.*/
 #endif
 
 #endif // MNE_BEM_H

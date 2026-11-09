@@ -57,9 +57,6 @@ namespace MNELIB
 class MNESHARED_EXPORT MNEMeasDataSet
 {
 public:
-    typedef QSharedPointer<MNEMeasDataSet> SPtr;            /**< Shared pointer type for MNEMeasDataSet. */
-    typedef QSharedPointer<const MNEMeasDataSet> ConstSPtr; /**< Const shared pointer type for MNEMeasDataSet. */
-
     //=========================================================================================================
     /**
      * @brief Constructs an empty measurement data set.

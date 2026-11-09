@@ -105,7 +105,7 @@ public:
      *
      * @param[in] fwdSolution     The forward solution which should be distributed.
      */
-    virtual void setValue(const MNELIB::MNEForwardSolution::SPtr pFwdSolution);
+    virtual void setValue(const std::shared_ptr<MNELIB::MNEForwardSolution>& pFwdSolution);
 
     //=========================================================================================================
     /**
@@ -114,7 +114,7 @@ public:
      *
      * @return The last attached value.
      */
-    virtual QSharedPointer<MNELIB::MNEForwardSolution> getValue();
+    virtual std::shared_ptr<MNELIB::MNEForwardSolution> getValue();
 
     //=========================================================================================================
     /**
@@ -169,8 +169,8 @@ private:
     bool m_bInitialized;     /**< If values are stored.*/
     bool m_bClustered;       /**< If fwd is clustered.*/
 
-    QSharedPointer<MNELIB::MNEForwardSolution> m_pFwdSolution; /**< The Mne Forward Solution. */
-    std::shared_ptr<FIFFLIB::FiffInfo> m_pFiffInfo;            /**< The Fiff Info. */
+    std::shared_ptr<MNELIB::MNEForwardSolution> m_pFwdSolution; /**< The Mne Forward Solution. */
+    std::shared_ptr<FIFFLIB::FiffInfo> m_pFiffInfo;             /**< The Fiff Info. */
 
     QSharedDataPointer<FIFFLIB::FiffNamedMatrix> m_pNamedMatSol;     /**< The solution matrix (LF). */
     QSharedDataPointer<FIFFLIB::FiffNamedMatrix> m_pNamedMatSolGrad; /**< The gradient solution matrix (LF). */
