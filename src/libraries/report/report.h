@@ -9,10 +9,11 @@
  * @date     May 2026
  * @brief    HTML report builder, mne-cpp's counterpart of @c mne.Report for summarising analysis pipelines.
  *
- * @ref REPORTLIB::Report collects titled sections (free text, tables, key-value pairs, preformatted code) and emits a
- * self-contained HTML document that opens directly in a browser or can be attached to an email. The output has no
- * dependencies (inline CSS, no JavaScript), so it stays readable in restricted environments where MEG/EEG processing
- * reports are typically reviewed. All text is HTML-escaped; strings are UTF-8.
+ * @ref REPORTLIB::Report collects titled sections (free text, tables, key-value pairs, preformatted code and figures)
+ * and emits a single self-contained HTML document that opens directly in a browser or can be attached to an email.
+ * Figures are embedded as base64 data, so the page needs no files next to it; CSS is inline and there is no
+ * JavaScript, so it stays readable in restricted environments where MEG/EEG processing reports are typically
+ * reviewed. A table of contents links the sections. All text is HTML-escaped; strings are UTF-8.
  */
 
 #ifndef REPORTLIB_REPORT_H
@@ -43,6 +44,17 @@
 
 namespace REPORTLIB
 {
+
+//=============================================================================================================
+/**
+ * Encoding of an embedded figure.
+ */
+enum class ImageFormat
+{
+    Png,  /**< image/png, e.g. a rendered plot or screenshot. */
+    Jpeg, /**< image/jpeg, e.g. a photograph of the electrode cap. */
+    Svg   /**< image/svg+xml; embedded as an image, so scripts in it never run. */
+};
 
 //=============================================================================================================
 /**
@@ -100,14 +112,37 @@ public:
 
     //=========================================================================================================
     /**
+     * Adds a figure, embedded in the page.
+     *
+     * @param[in] title    Section heading, also the image's alternative text.
+     * @param[in] data     Encoded image, e.g. the bytes of a PNG file or the text of an SVG document.
+     * @param[in] format   Encoding of @p data.
+     * @param[in] caption  Text shown below the figure; none if empty.
+     */
+    void add_image(std::string_view title, std::string_view data, ImageFormat format, std::string_view caption = {});
+
+    //=========================================================================================================
+    /**
+     * Adds a figure from a .png, .jpg, .jpeg or .svg file (case-insensitive extension), embedded in the page.
+     *
+     * @param[in] title    Section heading, also the image's alternative text.
+     * @param[in] path     Image file.
+     * @param[in] caption  Text shown below the figure; none if empty.
+     *
+     * @return True on success, false if the file cannot be read or its format is not supported.
+     */
+    bool add_image_file(std::string_view title, const std::filesystem::path& path, std::string_view caption = {});
+
+    //=========================================================================================================
+    /**
      * @return Number of sections added so far.
      */
     std::size_t section_count() const;
 
     //=========================================================================================================
     /**
-     * @return Self-contained HTML document with the title, all sections in the order they were added, and a
-     *         footer with the generation time (UTC).
+     * @return Self-contained HTML document with the title, a table of contents (from two sections on), all
+     *         sections in the order they were added, and a footer with the generation time (UTC).
      */
     std::string to_html() const;
 
@@ -150,6 +185,16 @@ private:
  * @return The escaped text.
  */
 REPORTSHARED_EXPORT std::string html_escape(std::string_view text);
+
+//=============================================================================================================
+/**
+ * Encodes bytes as base64 (RFC 4648, with padding), as used in data URIs.
+ *
+ * @param[in] data   Bytes to encode.
+ *
+ * @return The encoded text.
+ */
+REPORTSHARED_EXPORT std::string base64_encode(std::string_view data);
 
 } // namespace REPORTLIB
 

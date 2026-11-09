@@ -7,7 +7,7 @@
  * @author   Christoph Dinh <christoph.dinh@mne-cpp.org>
  * @since    2.5.0
  * @date     November 2026
- * @brief    Report library: summarise an analysis run as a self-contained HTML page.
+ * @brief    Report library: summarise an analysis run, figures included, as a self-contained HTML page.
  *
  * Every step checks its result and the example exits non-zero on a mismatch. The report is written to the
  * temporary directory and removed afterwards.
@@ -29,8 +29,10 @@
 // STL INCLUDES
 //=============================================================================================================
 
+#include <cmath>
 #include <cstdlib>
 #include <filesystem>
+#include <format>
 #include <print>
 #include <system_error>
 #include <string>
@@ -55,6 +57,23 @@ bool expect(bool condition, std::string_view what)
     return condition;
 }
 
+//=============================================================================================================
+
+/** A damped 10 Hz oscillation as an SVG line plot, standing in for a rendered evoked response. */
+std::string evokedSvg()
+{
+    std::string points;
+    for (int i = 0; i <= 400; ++i) {
+        const double t = i / 1000.0;
+        const double v = std::exp(-t / 0.08) * std::sin(2.0 * 3.141592653589793 * 10.0 * t);
+        points += std::format("{:.1f},{:.1f} ", 20.0 + i * 1.5, 110.0 - v * 90.0);
+    }
+    return std::format("<svg xmlns=\"http://www.w3.org/2000/svg\" width=\"640\" height=\"220\">"
+                       "<line x1=\"20\" y1=\"110\" x2=\"620\" y2=\"110\" stroke=\"#999\"/>"
+                       "<polyline fill=\"none\" stroke=\"#2980b9\" stroke-width=\"2\" points=\"{}\"/></svg>",
+                       points);
+}
+
 } // namespace
 
 //=============================================================================================================
@@ -72,13 +91,16 @@ int main(int argc, char* argv[])
     report.add_key_value("Data", {{"Raw file", "sample_audvis_raw.fif"}, {"Channels", "306 MEG, 60 EEG"}});
     report.add_table("Inverse", {"Parameter", "Value"}, {{"Method", "dSPM"}, {"SNR", "3"}, {"Depth", "0.8"}});
     report.add_text("Notes", "Bad channels MEG 2443 and EEG 053 were excluded.");
+    report.add_image("Evoked response", evokedSvg(), ImageFormat::Svg, "MEG 1332, 0 to 400 ms"); // or add_image_file("...", "plot.png")
     report.add_code("Pipeline", "mne_process_raw --raw sample_audvis_raw.fif --lowpass 40");
     const std::string html = report.to_html();
-    report.save(path); // open in any browser
+    report.save(path); // one self-contained page: open it in any browser
     //! [report_usage]
 
-    ok &= expect(report.section_count() == 4 && html.find("<td>dSPM</td>") != std::string::npos,
-                 "Report renders key-value, table, text and code sections to HTML");
+    ok &= expect(report.section_count() == 5 && html.find("<td>dSPM</td>") != std::string::npos,
+                 "Report renders key-value, table, text, figure and code sections to HTML");
+    ok &= expect(html.find("data:image/svg+xml;base64,") != std::string::npos && html.find("<nav class=\"toc\">") != std::string::npos,
+                 "the figure is embedded and a table of contents links the sections");
     std::error_code ec;
     ok &= expect(std::filesystem::file_size(path, ec) == html.size(), "Report saves the page"); // fixed-width timestamp
     std::filesystem::remove(path);

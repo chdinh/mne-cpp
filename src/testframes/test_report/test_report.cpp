@@ -74,7 +74,7 @@ private slots:
         QCOMPARE(report.section_count(), std::size_t(1));
 
         const std::string html = report.to_html();
-        QVERIFY(contains(html, "<h2>Info</h2>"));
+        QVERIFY(contains(html, "<h2 id=\"section-1\">Info</h2>"));
         QVERIFY(contains(html, "<p>Some text content</p>"));
     }
 
@@ -171,6 +171,72 @@ private slots:
         QVERIFY(contains(saved, "<p>Content</p>"));
 
         QVERIFY(!report.save(path.parent_path() / "missing_dir" / "report.html"));
+    }
+
+    void testBase64()
+    {
+        QCOMPARE(base64_encode(""), std::string(""));
+        QCOMPARE(base64_encode("f"), std::string("Zg=="));
+        QCOMPARE(base64_encode("fo"), std::string("Zm8="));
+        QCOMPARE(base64_encode("foo"), std::string("Zm9v"));
+        QCOMPARE(base64_encode("foobar"), std::string("Zm9vYmFy"));
+        QCOMPARE(base64_encode(std::string_view("\x89PNG\r\n\x1a\n", 8)), std::string("iVBORw0KGgo="));
+    }
+
+    void testAddImage()
+    {
+        Report report("Figures");
+        report.add_image("Butterfly <MEG>", std::string_view("\x89PNG\r\n\x1a\n", 8), ImageFormat::Png, "Evoked & averaged");
+        report.add_image("Topomap", "<svg xmlns=\"http://www.w3.org/2000/svg\"/>", ImageFormat::Svg);
+        QCOMPARE(report.section_count(), std::size_t(2));
+
+        const std::string html = report.to_html();
+        QVERIFY(contains(html, "<h2 id=\"section-1\">Butterfly &lt;MEG&gt;</h2>"));
+        QVERIFY(contains(html, "<img src=\"data:image/png;base64,iVBORw0KGgo=\" alt=\"Butterfly &lt;MEG&gt;\">"));
+        QVERIFY(contains(html, "<figcaption>Evoked &amp; averaged</figcaption>"));
+        QVERIFY(contains(html, "src=\"data:image/svg+xml;base64,"));
+        QVERIFY(!contains(html, "<svg")); // embedded as an image, never as live markup
+    }
+
+    void testAddImageFile()
+    {
+        QTemporaryDir dir;
+        QVERIFY(dir.isValid());
+        const std::filesystem::path base(dir.path().toStdString());
+        std::ofstream(base / "plot.PNG", std::ios::binary) << std::string_view("\x89PNG\r\n\x1a\n", 8);
+        std::ofstream(base / "plot.jpeg", std::ios::binary) << "jpeg";
+        std::ofstream(base / "plot.svg", std::ios::binary) << "<svg/>";
+        std::ofstream(base / "plot.bmp", std::ios::binary) << "bmp";
+
+        Report report;
+        QVERIFY(report.add_image_file("PNG", base / "plot.PNG"));
+        QVERIFY(report.add_image_file("JPEG", base / "plot.jpeg", "caption"));
+        QVERIFY(report.add_image_file("SVG", base / "plot.svg"));
+        QVERIFY(!report.add_image_file("BMP", base / "plot.bmp")); // unsupported format
+        QVERIFY(!report.add_image_file("Missing", base / "missing.png"));
+        QCOMPARE(report.section_count(), std::size_t(3));
+
+        const std::string html = report.to_html();
+        QVERIFY(contains(html, "data:image/png;base64,iVBORw0KGgo="));
+        QVERIFY(contains(html, "data:image/jpeg;base64,anBlZw=="));
+        QVERIFY(contains(html, "data:image/svg+xml;base64,PHN2Zy8+"));
+    }
+
+    void testTableOfContents()
+    {
+        Report single("One");
+        single.add_text("Only", "text");
+        QVERIFY(!contains(single.to_html(), "<nav"));
+
+        Report report("Many");
+        report.add_text("Data & info", "a");
+        report.add_code("Pipeline", "b");
+        const std::string html = report.to_html();
+        QVERIFY(contains(html, "<nav class=\"toc\">"));
+        QVERIFY(contains(html, "<li><a href=\"#section-1\">Data &amp; info</a></li>"));
+        QVERIFY(contains(html, "<li><a href=\"#section-2\">Pipeline</a></li>"));
+        QVERIFY(contains(html, "<h2 id=\"section-2\">Pipeline</h2>"));
+        QVERIFY(html.find("<nav") < html.find("<h2"));
     }
 };
 

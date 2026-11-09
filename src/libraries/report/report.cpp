@@ -23,9 +23,11 @@
 //=============================================================================================================
 
 #include <chrono>
+#include <cstdint>
 #include <format>
 #include <fstream>
 #include <iterator>
+#include <optional>
 #include <utility>
 
 //=============================================================================================================
@@ -56,7 +58,40 @@ constexpr std::string_view kStyle =
     "dd { margin-left: 20px; color: #555; }\n"
     "pre { background-color: #f8f8f8; border: 1px solid #ddd; padding: 12px; border-radius: 4px; overflow-x: auto; }\n"
     "code { font-family: 'SF Mono', Menlo, Monaco, monospace; font-size: 0.9em; }\n"
+    "figure { margin: 10px 0; }\n"
+    "figure img { max-width: 100%; height: auto; border: 1px solid #ddd; }\n"
+    "figcaption { color: #555; font-size: 0.9em; margin-top: 4px; }\n"
+    ".toc { background-color: #f8f8f8; border: 1px solid #ddd; padding: 8px 16px; }\n"
+    ".toc ul { margin: 0; padding-left: 20px; }\n"
     ".footer { margin-top: 40px; padding-top: 10px; border-top: 1px solid #ddd; color: #999; font-size: 0.85em; }\n";
+
+std::string_view mimeType(ImageFormat format)
+{
+    switch (format) {
+        case ImageFormat::Png:
+            return "image/png";
+        case ImageFormat::Jpeg:
+            return "image/jpeg";
+        case ImageFormat::Svg:
+            return "image/svg+xml";
+    }
+    return "application/octet-stream";
+}
+
+std::optional<ImageFormat> formatOfExtension(const std::filesystem::path& path)
+{
+    const std::string extension = toLower(utf8FromPath(path.extension()));
+    if (extension == ".png") {
+        return ImageFormat::Png;
+    }
+    if (extension == ".jpg" || extension == ".jpeg") {
+        return ImageFormat::Jpeg;
+    }
+    if (extension == ".svg") {
+        return ImageFormat::Svg;
+    }
+    return std::nullopt;
+}
 
 /** Appends an element whose text content is escaped, e.g. <td>text</td>. */
 void appendElement(std::string& html, std::string_view tag, std::string_view text, std::string_view indent = "")
@@ -96,6 +131,36 @@ std::string REPORTLIB::html_escape(std::string_view text)
         }
     }
     return escaped;
+}
+
+//=============================================================================================================
+
+std::string REPORTLIB::base64_encode(std::string_view data)
+{
+    constexpr std::string_view alphabet = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/";
+    std::string encoded;
+    encoded.reserve((data.size() + 2) / 3 * 4);
+    std::size_t i = 0;
+    for (; i + 2 < data.size(); i += 3) {
+        const auto chunk = static_cast<std::uint32_t>(static_cast<unsigned char>(data[i]) << 16U |
+                                                      static_cast<unsigned char>(data[i + 1]) << 8U |
+                                                      static_cast<unsigned char>(data[i + 2]));
+        encoded += alphabet[chunk >> 18U & 0x3FU];
+        encoded += alphabet[chunk >> 12U & 0x3FU];
+        encoded += alphabet[chunk >> 6U & 0x3FU];
+        encoded += alphabet[chunk & 0x3FU];
+    }
+    if (const std::size_t rest = data.size() - i; rest > 0) {
+        std::uint32_t chunk = static_cast<std::uint32_t>(static_cast<unsigned char>(data[i])) << 16U;
+        if (rest == 2) {
+            chunk |= static_cast<std::uint32_t>(static_cast<unsigned char>(data[i + 1])) << 8U;
+        }
+        encoded += alphabet[chunk >> 18U & 0x3FU];
+        encoded += alphabet[chunk >> 12U & 0x3FU];
+        encoded += rest == 2 ? alphabet[chunk >> 6U & 0x3FU] : '=';
+        encoded += '=';
+    }
+    return encoded;
 }
 
 //=============================================================================================================
@@ -163,6 +228,38 @@ void Report::add_code(std::string_view title, std::string_view code)
 
 //=============================================================================================================
 
+void Report::add_image(std::string_view title, std::string_view data, ImageFormat format, std::string_view caption)
+{
+    std::string html = std::format("<figure>\n<img src=\"data:{};base64,{}\" alt=\"{}\">\n", mimeType(format),
+                                   base64_encode(data), html_escape(title));
+    if (!caption.empty()) {
+        appendElement(html, "figcaption", caption);
+    }
+    html += "</figure>";
+    add_section(title, std::move(html));
+}
+
+//=============================================================================================================
+
+bool Report::add_image_file(std::string_view title, const std::filesystem::path& path, std::string_view caption)
+{
+    const std::optional<ImageFormat> format = formatOfExtension(path);
+    if (!format) {
+        Log::warning("[Report::add_image_file] Unsupported image format: {}", utf8FromPath(path));
+        return false;
+    }
+    std::ifstream file(path, std::ios::binary);
+    if (!file) {
+        Log::warning("[Report::add_image_file] Cannot open: {}", utf8FromPath(path));
+        return false;
+    }
+    const std::string data((std::istreambuf_iterator<char>(file)), std::istreambuf_iterator<char>());
+    add_image(title, data, *format, caption);
+    return true;
+}
+
+//=============================================================================================================
+
 std::size_t Report::section_count() const
 {
     return m_sections.size();
@@ -187,9 +284,17 @@ std::string Report::to_html() const
     html += kStyle;
     html += "</style>\n</head>\n<body>\n";
     appendElement(html, "h1", m_title);
-    for (const Section& section : m_sections) {
-        appendElement(html, "h2", section.title);
-        html += section.html;
+    if (m_sections.size() > 1) {
+        html += "<nav class=\"toc\">\n<ul>\n";
+        for (std::size_t i = 0; i < m_sections.size(); ++i) {
+            std::format_to(std::back_inserter(html), "<li><a href=\"#section-{}\">{}</a></li>\n", i + 1,
+                           html_escape(m_sections[i].title));
+        }
+        html += "</ul>\n</nav>\n";
+    }
+    for (std::size_t i = 0; i < m_sections.size(); ++i) {
+        std::format_to(std::back_inserter(html), "<h2 id=\"section-{}\">{}</h2>\n", i + 1, html_escape(m_sections[i].title));
+        html += m_sections[i].html;
         html += '\n';
     }
     const auto now = std::chrono::floor<std::chrono::seconds>(std::chrono::system_clock::now());

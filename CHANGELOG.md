@@ -62,8 +62,10 @@ aliases; replace the old spelling as below.
 - `PythonTestHelper::eval` and `run_script` honour their timeout; it used to be
   ignored. `PythonRunner` installs venv packages with `python -m pip`, and
   `MATHLIB::read_matrix` also reads from a `std::istream`.
-- `Report` escapes single quotes too, and its footer shows the generation
-  time in UTC.
+- `Report` embeds figures (`add_image`, `add_image_file` for PNG, JPEG and SVG)
+  as base64 data, so the page stays one self-contained file, and links its
+  sections from a table of contents. It escapes single quotes too, and its
+  footer shows the generation time in UTC.
 - `Subject::detach` of an observer that is not attached no longer crashes, and
   observers may detach themselves while they are notified.
 - `mne_rt_server` no longer aborts in debug builds when a client requests the

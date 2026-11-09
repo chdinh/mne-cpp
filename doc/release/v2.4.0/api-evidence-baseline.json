@@ -4,7 +4,7 @@
   "policy": "scripts/quality/api_evidence_policy.json",
   "summary": {
     "exported_classes": 478,
-    "exported_free_functions": 173,
+    "exported_free_functions": 174,
     "registered_classes": 574,
     "exported_not_registered": 1,
     "registered_function_modules": 14,
@@ -1076,6 +1076,11 @@
     },
     {
       "name": "html_escape",
+      "header": "report/report.h",
+      "library": "report"
+    },
+    {
+      "name": "base64_encode",
       "header": "report/report.h",
       "library": "report"
     },
