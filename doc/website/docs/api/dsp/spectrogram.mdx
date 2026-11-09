@@ -1,0 +1,86 @@
+---
+id: spectrogram
+title: "DSPLIB::Spectrogram"
+sidebar_label: Spectrogram
+sidebar_position: 77
+---
+
+# Spectrogram
+
+**Namespace:** `DSPLIB` &nbsp;·&nbsp; **Library:** DSP Library &nbsp;·&nbsp; **Source:** [`dsp/spectrogram.h`](https://github.com/mne-tools/mne-cpp/blob/staging/src/libraries/dsp/spectrogram.h)
+
+`#include <dsp/spectrogram.h>`
+
+```cpp
+class DSPLIB::Spectrogram
+```
+
+Computes time-frequency spectrograms via short-time Fourier transform with configurable window and overlap.
+
+```cpp title="src/examples/ex_dsp_spectral/main.cpp"
+const MatrixXd spectrogram = Spectrogram::makeSpectrogram(signal.transpose(), 64); // frequency bins x samples
+```
+
+---
+
+## Static Methods
+
+### makeSpectrogram(signal, windowSize)
+
+Calculates the spectrogram (tf-representation) of a given signal.
+
+**Parameters:**
+
+- **signal** : *Eigen::VectorXd*
+  input-signal to calculate spectrogram of.
+
+- **windowSize** : *qint32*
+  width of the Gaussian window in samples (trades time against frequency resolution).
+
+**Returns:**
+
+- *Eigen::MatrixXd* — Power |STFT|^2, N/2 x N for a signal of N samples: row k is the FFT bin at k * sfreq / N Hz, column j the window centred on sample j.
+
+---
+
+## Example
+
+- Start here: [ex_dsp_spectral](../../examples/dsp/ex_dsp_spectral.mdx) — Spectral and filtering tools of the dsp library on signals with known content.
+- Full source: [`src/examples/ex_dsp_spectral/main.cpp`](https://github.com/mne-tools/mne-cpp/tree/staging/src/examples/ex_dsp_spectral/main.cpp)
+- Build target: `ex_dsp_spectral` (runs under CTest)
+
+## Used in examples
+
+### [ex_disp](../../examples/disp/ex_disp.mdx)
+
+Disp library widgets: image map, line plot and time-frequency plot of raw data.
+
+````cpp title="src/examples/ex_disp/main.cpp, line 189"
+//tf plot example: spectrogram of the same channel
+MatrixXd dataSpectrum = Spectrogram::makeSpectrogram(dataCol, raw.info.sfreq * 0.2);
+TFplot tfplot(dataSpectrum, raw.info.sfreq, 0, 100, ColorMaps::Jet, times(0, 0));
+````
+
+### [ex_dsp_spectral](../../examples/dsp/ex_dsp_spectral.mdx)
+
+Spectral and filtering tools of the dsp library on signals with known content.
+
+````cpp title="src/examples/ex_dsp_spectral/main.cpp, line 169"
+const MatrixXd spectrogram = Spectrogram::makeSpectrogram(signal.transpose(), 64); // frequency bins x samples
+ok &= expect(spectrogram.cols() == n && spectrogram.rows() > 0 && spectrogram.allFinite(),
+             std::format("spectrogram is {} x {} and finite", spectrogram.rows(), spectrogram.cols()));
+````
+
+### [ex_tf_plot](../../examples/disp/ex_tf_plot.mdx)
+
+Spectrogram of one evoked channel shown as a time-frequency plot.
+
+````cpp title="src/examples/ex_tf_plot/main.cpp, line 78"
+//tf plot
+VectorXd dataCol = p_FiffEvoked.data.row(83).transpose();
+MatrixXd dataSpectrum = Spectrogram::makeSpectrogram(dataCol, p_FiffEvoked.info.sfreq * 0.1);
+````
+
+## Authors of this file
+
+- Christoph Dinh &lt;christoph.dinh@mne-cpp.org&gt;

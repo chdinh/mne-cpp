@@ -1,0 +1,49 @@
+---
+id: dpss-result
+title: "DSPLIB::DpssResult"
+sidebar_label: DpssResult
+sidebar_position: 84
+---
+
+# DpssResult
+
+**Namespace:** `DSPLIB` &nbsp;·&nbsp; **Library:** DSP Library &nbsp;·&nbsp; **Source:** [`dsp/dpss.h`](https://github.com/mne-tools/mne-cpp/blob/staging/src/libraries/dsp/dpss.h)
+
+`#include <dsp/dpss.h>`
+
+```cpp
+struct DSPLIB::DpssResult
+```
+
+Result of a DPSS taper computation.
+
+```cpp title="src/examples/ex_dsp_spectral/main.cpp"
+const DpssResult dpss = Dpss::compute(64, 2.5, 4); // N = 64 samples, NW = 2.5, 4 tapers
+```
+
+---
+
+## Example
+
+- Start here: [ex_dsp_spectral](../../examples/dsp/ex_dsp_spectral.mdx) — Spectral and filtering tools of the dsp library on signals with known content.
+- Full source: [`src/examples/ex_dsp_spectral/main.cpp`](https://github.com/mne-tools/mne-cpp/tree/staging/src/examples/ex_dsp_spectral/main.cpp)
+- Build target: `ex_dsp_spectral` (runs under CTest)
+
+## Used in examples
+
+### [ex_dsp_spectral](../../examples/dsp/ex_dsp_spectral.mdx)
+
+Spectral and filtering tools of the dsp library on signals with known content.
+
+````cpp title="src/examples/ex_dsp_spectral/main.cpp, line 132"
+const DpssResult dpss = Dpss::compute(64, 2.5, 4); // N = 64 samples, NW = 2.5, 4 tapers
+// scipy.signal.windows.dpss(64, 2.5, 4, return_ratios=True)
+const double dpssErr = maxError(dpss.vecEigenvalues, {0.9999972774351693, 0.9998465484588153, 0.9962668597877571, 0.9524259615013084});
+ok &= expect(dpss.matTapers.rows() == 4 && dpssErr < 1e-8, std::format("DPSS concentration ratios = scipy (max error {:g})", dpssErr));
+ok &= expect((dpss.matTapers * dpss.matTapers.transpose() - MatrixXd::Identity(4, 4)).cwiseAbs().maxCoeff() < 1e-10,
+             "DPSS tapers are orthonormal");
+````
+
+## Authors of this file
+
+- Christoph Dinh &lt;christoph.dinh@mne-cpp.org&gt;

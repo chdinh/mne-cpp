@@ -7,9 +7,9 @@ sidebar_position: 46
 
 # Spectral
 
-**Namespace:** `UTILSLIB` &nbsp;·&nbsp; **Library:** Utilities Library &nbsp;·&nbsp; **Source:** [`math/spectral.h`](https://github.com/mne-tools/mne-cpp/blob/staging/src/libraries/math/spectral.h)
+**Namespace:** `MATHLIB` &nbsp;·&nbsp; **Library:** Math Library &nbsp;·&nbsp; **Source:** [`math/spectral.h`](https://github.com/mne-tools/mne-cpp/blob/staging/src/libraries/math/spectral.h)
 
-`#include <utils/spectral.h>`
+`#include <math/spectral.h>`
 
 ```cpp
 class MATHLIB::Spectral
@@ -101,7 +101,7 @@ This function gets called in parallel.
 
 **Parameters:**
 
-- **inputData** : *const [TaperedSpectraInputData](/docs/api/utils/tapered-spectra-input-data) &*
+- **inputData** : *const [TaperedSpectraInputData](/docs/api/math/tapered-spectra-input-data) &*
   The input data.
 
 **Returns:**
@@ -205,6 +205,37 @@ Calculates a hanning window of given length.
 - Start here: [ex_math](../../examples/math/ex_math.mdx) — Math library on inputs with known answers.
 - Full source: [`src/examples/ex_math/main.cpp`](https://github.com/mne-tools/mne-cpp/tree/staging/src/examples/ex_math/main.cpp)
 - Build target: `ex_math` (runs under CTest)
+
+## Used in examples
+
+### [ex_spectral](../../examples/disp/ex_spectral.mdx)
+
+Multitaper spectra, power spectral density and cross-spectral density of random test signals.
+
+````cpp title="src/examples/ex_spectral/main.cpp, line 80"
+//Generate hanning window
+QPair<MatrixXd, VectorXd> tapers = Spectral::generateTapers(iNSamples, "hanning");
+MatrixXd matTaps = tapers.first;
+VectorXd vecTapWeights = tapers.second;
+int iNfft = iNSamples;
+````
+
+### [ex_math](../../examples/math/ex_math.mdx)
+
+Math library on inputs with known answers.
+
+````cpp title="src/examples/ex_math/main.cpp, line 125"
+const auto [tapers, weights] = Spectral::generateTapers(nSamples, std::string("hanning"));
+const MatrixXcd spectra = Spectral::computeTaperedSpectraRow(signal, tapers, nSamples);
+const RowVectorXd psd = Spectral::psdFromTaperedSpectra(spectra, weights, nSamples, sFreq);
+const VectorXd freqs = Spectral::calculateFFTFreqs(nSamples, sFreq);
+Index peak = 0;
+psd.maxCoeff(&peak);
+const double power = psd.sum() * (freqs(1) - freqs(0)); // integrated one-sided PSD = signal variance
+ok &= expect(freqs.size() == nSamples / 2 + 1 && std::fabs(freqs(peak) - 10.0) < 1e-12,
+             std::format("PSD peaks at {:g} Hz; {} bins match numpy.fft.rfftfreq", freqs(peak), freqs.size()));
+ok &= expect(std::fabs(power - 2.0) < 0.05, std::format("Parseval: integrated PSD {:g} = variance 2", power));
+````
 
 ## Authors of this file
 

@@ -2,14 +2,14 @@
 id: cosine-filter
 title: "DSPLIB::CosineFilter"
 sidebar_label: CosineFilter
-sidebar_position: 9
+sidebar_position: 70
 ---
 
 # CosineFilter
 
-**Namespace:** `UTILSLIB` &nbsp;·&nbsp; **Library:** Utilities Library &nbsp;·&nbsp; **Source:** [`dsp/cosinefilter.h`](https://github.com/mne-tools/mne-cpp/blob/staging/src/libraries/dsp/cosinefilter.h)
+**Namespace:** `DSPLIB` &nbsp;·&nbsp; **Library:** DSP Library &nbsp;·&nbsp; **Source:** [`dsp/cosinefilter.h`](https://github.com/mne-tools/mne-cpp/blob/staging/src/libraries/dsp/cosinefilter.h)
 
-`#include <utils/cosinefilter.h>`
+`#include <dsp/cosinefilter.h>`
 
 ```cpp
 class DSPLIB::CosineFilter
@@ -31,13 +31,13 @@ const RowVectorXcd& response = cosineLp.m_vecFftCoeff; // one-sided response, bi
 
 ### CosineFilter()
 
-Constructs a [`CosineFilter`](/docs/api/utils/cosine-filter) object.
+Constructs a [`CosineFilter`](/docs/api/dsp/cosine-filter) object.
 
 ---
 
 ### CosineFilter(fftLength, lowpass, lowpass_width, highpass, highpass_width, sFreq, type)
 
-Constructs a [`CosineFilter`](/docs/api/utils/cosine-filter) object.
+Constructs a [`CosineFilter`](/docs/api/dsp/cosine-filter) object.
 
 **Parameters:**
 
@@ -69,6 +69,24 @@ Constructs a [`CosineFilter`](/docs/api/utils/cosine-filter) object.
 - Start here: [ex_dsp_filter](../../examples/dsp/ex_dsp_filter.mdx) — FIR filter design, application and storage with the dsp library.
 - Full source: [`src/examples/ex_dsp_filter/main.cpp`](https://github.com/mne-tools/mne-cpp/tree/staging/src/examples/ex_dsp_filter/main.cpp)
 - Build target: `ex_dsp_filter` (runs under CTest)
+
+## Used in examples
+
+### [ex_dsp_filter](../../examples/dsp/ex_dsp_filter.mdx)
+
+FIR filter design, application and storage with the dsp library.
+
+````cpp title="src/examples/ex_dsp_filter/main.cpp, line 126"
+// CosineFilter works in absolute Hz: low-pass edge 40 Hz with a 10 Hz slope, FFT length 1024
+CosineFilter cosineLp(1024, 40.0f, 10.0f, 0.0f, 0.0f, kSFreq, CosineFilter::LPF);
+const RowVectorXcd& response = cosineLp.m_vecFftCoeff; // one-sided response, bin k at k * 1000 / 1024 Hz
+// Cosine-squared slope from 35 to 45 Hz: unity well below, zero well above
+const double c10 = std::abs(response(10));
+const double c40 = std::abs(response(41));
+const double c100 = std::abs(response(102));
+ok &= expect(response.size() == 513 && c10 == 1.0 && c40 > 0.3 && c40 < 0.7 && c100 == 0.0,
+             std::format("CosineFilter response at 10/40/100 Hz: {:g} / {:g} / {:g}", c10, c40, c100));
+````
 
 ## Authors of this file
 
