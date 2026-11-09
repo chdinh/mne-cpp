@@ -48,7 +48,7 @@ namespace CHANNELSLIB
 /**
  * @brief Represents an electrode position in a montage.
  *
- * @snippet ex_utils/main.cpp standard_montage_usage
+ * @snippet ex_channels/main.cpp standard_montage_usage
  */
 struct CHANNELSSHARED_EXPORT ElectrodePosition
 {
@@ -60,7 +60,7 @@ struct CHANNELSSHARED_EXPORT ElectrodePosition
 /**
  * @brief Standard EEG montage with named electrode positions.
  *
- * @snippet ex_utils/main.cpp standard_montage_usage
+ * @snippet ex_channels/main.cpp standard_montage_usage
  */
 class CHANNELSSHARED_EXPORT StandardMontage
 {

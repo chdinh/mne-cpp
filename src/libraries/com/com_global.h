@@ -82,7 +82,7 @@ namespace COMLIB
  * @brief Compile-time date/time stamp baked into the @c COMLIB binary.
  *
  * Resolved from the @c __DATE__ / @c __TIME__ macros at build time and
- * surfaced through @c utils/buildinfo.h. Used by About dialogs and bug
+ * surfaced through @c base/buildinfo.h. Used by About dialogs and bug
  * reports to disambiguate identically-versioned builds.
  *
  * @return Null-terminated build date/time string with static storage duration.

@@ -31,8 +31,10 @@ set(HEADERS
     rt_client/rt_cmd_client.h
     rt_client/rt_data_client.h
     rt_command/command.h
+    rt_command/command_pattern.h
     rt_command/command_manager.h
     rt_command/command_parser.h
+    rt_command/observer_pattern.h
     rt_command/raw_command.h
 )
 
@@ -66,7 +68,6 @@ set(QT_REQUIRED_COMPONENT_LIBS ${QT_REQUIRED_COMPONENTS})
 list(TRANSFORM QT_REQUIRED_COMPONENT_LIBS PREPEND "Qt${QT_VERSION_MAJOR}::")
 
 set(MNE_LIBS_REQUIRED 
-    mne_utils
     mne_base
     mne_math
     mne_fiff

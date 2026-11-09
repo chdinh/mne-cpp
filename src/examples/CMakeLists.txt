@@ -78,8 +78,9 @@ if(NOT WASM)
   add_subdirectory(ex_lsl)
   add_subdirectory(ex_mna)
   add_subdirectory(ex_base)
+  add_subdirectory(ex_com)
   add_subdirectory(ex_pybridge)
-  add_subdirectory(ex_utils)
+  add_subdirectory(ex_channels)
 endif()
 
 ## Examples using disp3D

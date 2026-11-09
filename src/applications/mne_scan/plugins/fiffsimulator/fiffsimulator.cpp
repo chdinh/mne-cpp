@@ -43,9 +43,7 @@
 //=============================================================================================================
 
 using namespace FIFFSIMULATORPLUGIN;
-using namespace UTILSLIB;
 using namespace SCSHAREDLIB;
-using namespace UTILSLIB;
 using namespace SCMEASLIB;
 using namespace COMLIB;
 using namespace Eigen;

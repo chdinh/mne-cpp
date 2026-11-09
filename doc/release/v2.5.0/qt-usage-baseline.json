@@ -31,7 +31,7 @@
       "math",
       "report"
     ],
-    "tokens": 14640,
+    "tokens": 14639,
     "gui_outside_design": []
   },
   "libraries": {
@@ -149,7 +149,7 @@
       },
       "public_header_includes": 30,
       "q_object": 7,
-      "files": 16,
+      "files": 18,
       "modules": [
         "Concurrent",
         "Core",
@@ -472,13 +472,11 @@
       ]
     },
     "utils": {
-      "tokens": 1,
-      "by_category": {
-        "containers": 1
-      },
-      "public_header_includes": 4,
+      "tokens": 0,
+      "by_category": {},
+      "public_header_includes": 0,
       "q_object": 0,
-      "files": 5,
+      "files": 2,
       "modules": [
         "Core"
       ]

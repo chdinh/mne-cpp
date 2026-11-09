@@ -9,8 +9,8 @@
  * @date     March 2026
  * @brief    Front-end tokeniser that turns incoming JSON or CLI payloads into @ref COMLIB::RawCommand objects and notifies attached managers.
  *
- * @ref COMLIB::CommandParser owns the @c Subject side of the observer
- * pattern in @c utils/generics: every @ref COMLIB::CommandManager that
+ * @ref COMLIB::CommandParser is the @ref COMLIB::Subject side of the observer
+ * pattern; every @ref COMLIB::CommandManager that
  * wants to react to a slice of the command vocabulary attaches itself,
  * and the parser then fans every accepted request out to all of them.
  * That decoupling lets multiple subsystems (data acquisition, source
@@ -44,7 +44,7 @@
 #include "raw_command.h"
 #include "command.h"
 
-#include <utils/generics/observerpattern.h>
+#include "observer_pattern.h"
 
 //=============================================================================================================
 // QT INCLUDES
@@ -71,7 +71,7 @@ namespace COMLIB
  * whichever manager handled the request so the caller (typically a
  * @ref RtCmdClient) can forward them to the originating socket.
  */
-class COMSHARED_EXPORT CommandParser : public QObject, public UTILSLIB::Subject
+class COMSHARED_EXPORT CommandParser : public QObject, public Subject
 {
     Q_OBJECT
 

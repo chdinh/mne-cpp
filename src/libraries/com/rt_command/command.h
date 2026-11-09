@@ -29,7 +29,7 @@
  * @c toJsonObject() / @c toStringList() format the same object for the
  * different transports.
  *
- * @c Command implements @ref UTILSLIB::ICommand from the generic command
+ * @c Command implements @ref COMLIB::ICommand from the generic command
  * pattern so it can be dispatched through @ref COMLIB::CommandManager without
  * the manager needing to know whether the receiver is local or remote;
  * the @c triggered / @c received signals are how the manager routes
@@ -45,7 +45,7 @@
 
 #include "../com_global.h"
 
-#include <utils/generics/commandpattern.h>
+#include "command_pattern.h"
 
 //=============================================================================================================
 // QT INCLUDES
@@ -78,12 +78,12 @@ static QVariant defaultVariant;
  * names / values / descriptions, and a JSON-vs-CLI flag. Constructible
  * either from a parsed @c QJsonObject (when echoing the server’s
  * advertised command list) or from explicit string/value lists (when
- * authoring a request). Implements @ref UTILSLIB::ICommand so it can be
+ * authoring a request). Implements @ref COMLIB::ICommand so it can be
  * dispatched through @ref CommandManager and surfaces parameter access
  * by both name (@c operator[](QString)) and index
  * (@c operator[](qint32)).
  */
-class COMSHARED_EXPORT Command : public QObject, public UTILSLIB::ICommand
+class COMSHARED_EXPORT Command : public QObject, public ICommand
 {
     Q_OBJECT
 

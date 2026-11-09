@@ -67,7 +67,7 @@ namespace CHANNELSLIB
  *
  * @brief Reader/writer for MNE .sel channel-selection files and Brainstorm .mon montage files.
  *
- * @snippet ex_utils/main.cpp selection_io_usage
+ * @snippet ex_channels/main.cpp selection_io_usage
  */
 class CHANNELSSHARED_EXPORT SelectionIO
 {

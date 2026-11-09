@@ -11,7 +11,7 @@
  *
  * Provides the three out-of-line definitions of @ref COMLIB::buildDateTime,
  * @ref COMLIB::buildHash and @ref COMLIB::buildHashLong. Each delegates
- * to the equivalent function in @c UTILSLIB so the actual @c __DATE__ /
+ * to the equivalent function in @c BASELIB so the actual @c __DATE__ /
  * @c __TIME__ / @c MNE_GIT_HASH_* compile-time strings are owned by a
  * single utility translation unit and the values reported across all
  * mne-cpp libraries stay consistent.

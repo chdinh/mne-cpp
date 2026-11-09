@@ -7,7 +7,7 @@
  * @author   Christoph Dinh <christoph.dinh@mne-cpp.org>
  * @since    2.4.0
  * @date     October 2026
- * @brief    Utilities library: observers, commands, montages, layouts and selections.
+ * @brief    Utilities library: montages, layouts and selections.
  *
  * Every step checks its result (round trips, known electrode positions) and the
  * example exits non-zero on a mismatch.
@@ -18,8 +18,6 @@
 // INCLUDES
 //=============================================================================================================
 
-#include <utils/generics/commandpattern.h>
-#include <utils/generics/observerpattern.h>
 #include <channels/layoutloader.h>
 #include <channels/layoutmaker.h>
 #include <channels/standard_montage.h>
@@ -52,7 +50,6 @@
 // USED NAMESPACES
 //=============================================================================================================
 
-using namespace UTILSLIB;
 using namespace CHANNELSLIB;
 using namespace Eigen;
 
@@ -69,65 +66,6 @@ bool expect(bool condition, std::string_view what)
     return condition;
 }
 
-//=============================================================================================================
-
-//! [observer_pattern_usage]
-// A subject notifies every attached observer; observers pull the state they need
-class Counter : public Subject
-{
-public:
-    void increment()
-    {
-        ++m_value;
-        notify();
-    }
-    int value() const
-    {
-        return m_value;
-    }
-
-private:
-    int m_value = 0;
-};
-
-class LastSeen : public IObserver
-{
-public:
-    void update(Subject* pSubject) override
-    {
-        m_seen = static_cast<Counter*>(pSubject)->value();
-    }
-    int seen() const
-    {
-        return m_seen;
-    }
-
-private:
-    int m_seen = -1;
-};
-//! [observer_pattern_usage]
-
-//! [command_pattern_usage]
-// A command wraps an action so it can be queued or replayed later
-class AppendCommand : public ICommand
-{
-public:
-    AppendCommand(QStringList& target, QString text)
-    : m_target(target)
-    , m_text(std::move(text))
-    {
-    }
-    void execute() override
-    {
-        m_target.append(m_text);
-    }
-
-private:
-    QStringList& m_target;
-    QString m_text;
-};
-//! [command_pattern_usage]
-
 } // namespace
 
 //=============================================================================================================
@@ -139,23 +77,6 @@ int main(int argc, char* argv[])
     QCoreApplication app(argc, argv);
     QTemporaryDir dir;
     bool ok = true;
-
-    Counter counter;
-    LastSeen observer;
-    counter.attach(&observer);
-    counter.increment();
-    counter.increment();
-    counter.detach(&observer);
-    counter.increment();
-    ok &= expect(observer.seen() == 2, std::format("observer saw {} before detaching (2)", observer.seen()));
-
-    QStringList journal;
-    QList<AppendCommand*> queue = {new AppendCommand(journal, "a"), new AppendCommand(journal, "b")};
-    for (ICommand* command : queue) {
-        command->execute();
-    }
-    qDeleteAll(queue);
-    ok &= expect(journal == QStringList({"a", "b"}), "commands executed in order");
 
     //! [selection_io_usage]
     QMultiMap<QString, QStringList> selections;

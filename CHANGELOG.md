@@ -36,6 +36,9 @@ aliases; replace the old spelling as below.
 | `PythonRunner` signals `lineReceived`, `progressUpdated`, `finished` | the line and progress callbacks; `PythonRunner` is no longer a `QObject` |
 | `MLTrainer::checkPrerequisites(QStringList)`, `InvCMNE::trainLstm(QString...)` | `check_prerequisites(StringList)`, `train_lstm(std::filesystem::path...)` |
 | `utils/report.h`, `UTILSLIB::Report` (`QString`, `QList<QPair>`); `addText`, `addTable`, `addKeyValue`, `addCode`, `sectionCount`, `toHtml`; `ReportSection` | `report/report.h`, `REPORTLIB::Report` (`std::string`, `std::vector<std::pair>`), in the new Qt-free `mne_report` library; `add_text`, ..., `to_html`; the section type is private |
+| `utils/generics/observerpattern.h`, `commandpattern.h`, `UTILSLIB::Subject`, `IObserver`, `ICommand` | `com/rt_command/observer_pattern.h`, `command_pattern.h`, `COMLIB::...` |
+| `Subject::t_Observers` (`QSet`), `observerNumDebug()`, the global `Subject::notifyEnabled` | `observers()` (`std::vector`, attach order), `observers().size()`, per-subject `set_notify_enabled()` |
+| `ex_utils` | `ex_channels`; the other sections moved to `ex_base`, `ex_math`, `ex_pybridge`, `ex_report` and `ex_com` |
 | `utils/generics/circularbuffer.h`, `CircularBuffer_Matrix_double` | `base/circular_buffer.h`, `BASELIB::CircularBuffer<Eigen::MatrixXd>` |
 | `CircularBuffer::push(ptr, n)`, `getFreeElementsRead()`, `pause()` | `push(std::span)`, `size()`; `pause` is removed |
 | `MNE_LOG_LEVEL=FATAL` | removed; `CRIT` is the highest level |
@@ -55,6 +58,8 @@ aliases; replace the old spelling as below.
   `MATHLIB::read_matrix` also reads from a `std::istream`.
 - `Report` escapes single quotes too, and its footer shows the generation
   time in UTC.
+- `Subject::detach` of an observer that is not attached no longer crashes, and
+  observers may detach themselves while they are notified.
 - `FiffTag::toInt`, `toJulian`, `toIntMatrix` and `toFloatMatrix` are no longer
   inline.
 - `fiff/fiff.h`, `connectivity/connectivity.h` and `mne/mne.h` are umbrella

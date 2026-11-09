@@ -50,7 +50,7 @@
 #include "command.h"
 #include "command_parser.h"
 
-#include <utils/generics/observerpattern.h>
+#include "observer_pattern.h"
 
 //=============================================================================================================
 // Qt Includes
@@ -82,7 +82,7 @@ namespace COMLIB
  * one at a time or bulk-loaded from a @c QJsonDocument matching the
  * server’s self-described command list.
  */
-class COMSHARED_EXPORT CommandManager : public QObject, public UTILSLIB::IObserver
+class COMSHARED_EXPORT CommandManager : public QObject, public IObserver
 {
     Q_OBJECT
 
@@ -170,7 +170,7 @@ public:
      *
      * @param[in] p_pSubject  pointer to the subject (CommandParser) to which observer (CommandManager) is attached to.
      */
-    virtual void update(UTILSLIB::Subject* p_pSubject);
+    virtual void update(Subject* p_pSubject);
 
     //=========================================================================================================
     /**

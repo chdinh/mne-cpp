@@ -15,7 +15,7 @@
  * command object or an array of them, supporting batched requests in a
  * single payload. In either case the result is a populated
  * @ref RawCommand handed to every attached @ref CommandManager via the
- * @c Subject::notify mechanism inherited from @c utils/generics; the
+ * @c Subject::notify mechanism inherited from @ref COMLIB::Subject; the
  * @c response signal carries replies produced by handlers back to the
  * originating @ref RtCmdClient.
  */
@@ -57,9 +57,8 @@ CommandParser::CommandParser(QObject* parent)
 
 bool CommandParser::exists(const QString& p_sCommand)
 {
-    Subject::t_Observers::Iterator itObservers;
-    for (itObservers = this->observers().begin(); itObservers != this->observers().end(); ++itObservers) {
-        CommandManager* t_pCommandManager = static_cast<CommandManager*>(*itObservers);
+    for (IObserver* observer : observers()) {
+        CommandManager* t_pCommandManager = static_cast<CommandManager*>(observer);
         if (t_pCommandManager->hasCommand(p_sCommand))
             return true;
     }

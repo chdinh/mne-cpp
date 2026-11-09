@@ -49,6 +49,7 @@
           "test_base_thread_pool",
           "test_channels_layout_selection",
           "test_channels_standard_montage",
+          "test_com_observer_pattern",
           "test_math_matrix_io",
           "test_mne_acq_tool",
           "test_pybridge_python_runner",
@@ -93,7 +94,8 @@
           "test_utils_circularbuffer",
           "test_utils_ioutils",
           "test_utils_layout_selection",
-          "test_utils_logger"
+          "test_utils_logger",
+          "test_utils_observer_pattern"
         ]
       },
       "macos-26-qt-min": {
@@ -118,6 +120,7 @@
           "test_base_thread_pool",
           "test_channels_layout_selection",
           "test_channels_standard_montage",
+          "test_com_observer_pattern",
           "test_math_matrix_io",
           "test_mne_acq_tool",
           "test_pybridge_python_runner",
@@ -162,7 +165,8 @@
           "test_utils_circularbuffer",
           "test_utils_ioutils",
           "test_utils_layout_selection",
-          "test_utils_logger"
+          "test_utils_logger",
+          "test_utils_observer_pattern"
         ]
       },
       "ubuntu-24.04": {
@@ -187,6 +191,7 @@
           "test_base_thread_pool",
           "test_channels_layout_selection",
           "test_channels_standard_montage",
+          "test_com_observer_pattern",
           "test_math_matrix_io",
           "test_mne_acq_tool",
           "test_pybridge_python_runner",
@@ -231,7 +236,8 @@
           "test_utils_circularbuffer",
           "test_utils_ioutils",
           "test_utils_layout_selection",
-          "test_utils_logger"
+          "test_utils_logger",
+          "test_utils_observer_pattern"
         ]
       },
       "ubuntu-24.04-qt-min": {
@@ -256,6 +262,7 @@
           "test_base_thread_pool",
           "test_channels_layout_selection",
           "test_channels_standard_montage",
+          "test_com_observer_pattern",
           "test_math_matrix_io",
           "test_mne_acq_tool",
           "test_pybridge_python_runner",
@@ -300,7 +307,8 @@
           "test_utils_circularbuffer",
           "test_utils_ioutils",
           "test_utils_layout_selection",
-          "test_utils_logger"
+          "test_utils_logger",
+          "test_utils_observer_pattern"
         ]
       },
       "windows-2025-vs2026": {
@@ -325,6 +333,7 @@
           "test_base_thread_pool",
           "test_channels_layout_selection",
           "test_channels_standard_montage",
+          "test_com_observer_pattern",
           "test_math_matrix_io",
           "test_mne_acq_tool",
           "test_pybridge_python_runner",
@@ -369,7 +378,8 @@
           "test_utils_circularbuffer",
           "test_utils_ioutils",
           "test_utils_layout_selection",
-          "test_utils_logger"
+          "test_utils_logger",
+          "test_utils_observer_pattern"
         ]
       },
       "windows-2025-vs2026-qt-min": {
@@ -394,6 +404,7 @@
           "test_base_thread_pool",
           "test_channels_layout_selection",
           "test_channels_standard_montage",
+          "test_com_observer_pattern",
           "test_math_matrix_io",
           "test_mne_acq_tool",
           "test_pybridge_python_runner",
@@ -438,7 +449,8 @@
           "test_utils_circularbuffer",
           "test_utils_ioutils",
           "test_utils_layout_selection",
-          "test_utils_logger"
+          "test_utils_logger",
+          "test_utils_observer_pattern"
         ]
       }
     }
@@ -1637,6 +1649,42 @@
         "CommandManager",
         "CommandParser",
         "RawCommand"
+      ]
+    },
+    {
+      "name": "test_com_observer_pattern",
+      "cmake": "src/testframes/test_com_observer_pattern/CMakeLists.txt",
+      "registration": {
+        "state": "unconditional",
+        "via": "src/testframes/CMakeLists.txt",
+        "conditions": [],
+        "early_return_guard": null,
+        "unregistered_reason": null
+      },
+      "add_test_names": [
+        "test_com_observer_pattern"
+      ],
+      "labels": [
+        "unit"
+      ],
+      "timeout": 60,
+      "requirements": [],
+      "gui": false,
+      "qskip_sites": 0,
+      "spawns_processes": false,
+      "ci_excluded_on": [],
+      "ci": {
+        "macos-26": "absent",
+        "macos-26-qt-min": "absent",
+        "ubuntu-24.04": "absent",
+        "ubuntu-24.04-qt-min": "absent",
+        "windows-2025-vs2026": "absent",
+        "windows-2025-vs2026-qt-min": "absent"
+      },
+      "registry_classes": [
+        "ICommand",
+        "IObserver",
+        "Subject"
       ]
     },
     {
@@ -10024,38 +10072,6 @@
         "Linalg",
         "Numerics"
       ]
-    },
-    {
-      "name": "test_utils_observer_pattern",
-      "cmake": "src/testframes/test_utils_observer_pattern/CMakeLists.txt",
-      "registration": {
-        "state": "unconditional",
-        "via": "src/testframes/CMakeLists.txt",
-        "conditions": [],
-        "early_return_guard": null,
-        "unregistered_reason": null
-      },
-      "add_test_names": [
-        "test_utils_observer_pattern"
-      ],
-      "labels": [
-        "unit"
-      ],
-      "timeout": 60,
-      "requirements": [],
-      "gui": false,
-      "qskip_sites": 0,
-      "spawns_processes": false,
-      "ci_excluded_on": [],
-      "ci": {
-        "macos-26": "run",
-        "macos-26-qt-min": "run",
-        "ubuntu-24.04": "run",
-        "ubuntu-24.04-qt-min": "run",
-        "windows-2025-vs2026": "run",
-        "windows-2025-vs2026-qt-min": "run"
-      },
-      "registry_classes": []
     },
     {
       "name": "test_utils_spectral",

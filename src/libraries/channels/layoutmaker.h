@@ -69,7 +69,7 @@ namespace CHANNELSLIB
  *
  * @brief Make layout files from given 3D points.
  *
- * @snippet ex_utils/main.cpp layout_maker_usage
+ * @snippet ex_channels/main.cpp layout_maker_usage
  */
 class CHANNELSSHARED_EXPORT LayoutMaker
 {

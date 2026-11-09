@@ -143,15 +143,13 @@ void MNERTServer::comHelp(Command p_command)
     //
     // Generate help
     //
-    UTILSLIB::Subject::t_Observers::Iterator itObservers;
-
     //Map to store all commands & merging multi occurence
     QMap<QString, Command> t_qMapCommands;
 
     QMap<QString, Command>::ConstIterator itCommands;
 
-    for (itObservers = m_commandServer.getCommandParser().observers().begin(); itObservers != m_commandServer.getCommandParser().observers().end(); ++itObservers) {
-        CommandManager* t_pCommandManager = static_cast<CommandManager*>(*itObservers);
+    for (COMLIB::IObserver* observer : m_commandServer.getCommandParser().observers()) {
+        CommandManager* t_pCommandManager = static_cast<CommandManager*>(observer);
 
         for (itCommands = t_pCommandManager->commandMap().begin(); itCommands != t_pCommandManager->commandMap().end(); ++itCommands) {
             if (t_qMapCommands.keys().contains(itCommands.key())) {

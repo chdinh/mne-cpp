@@ -3,7 +3,7 @@
 #   Christoph Dinh <christoph.dinh@mne-cpp.org>
 
 cmake_minimum_required(VERSION 3.14)
-project(ex_utils LANGUAGES CXX)
+project(ex_channels LANGUAGES CXX)
 
 find_package(QT NAMES Qt6 Qt5 REQUIRED COMPONENTS Core)
 find_package(Qt${QT_VERSION_MAJOR} REQUIRED COMPONENTS Core)
@@ -17,7 +17,6 @@ endif()
 
 target_link_libraries(${PROJECT_NAME} PRIVATE
   Qt${QT_VERSION_MAJOR}::Core
-  mne_utils
   mne_channels
   mne_base
   Eigen3::Eigen

@@ -62,7 +62,7 @@ namespace CHANNELSLIB
  *
  * @brief Reads ANT .elc electrode files into Qt/STL containers.
  *
- * @snippet ex_utils/main.cpp layout_loader_usage
+ * @snippet ex_channels/main.cpp layout_loader_usage
  */
 class CHANNELSSHARED_EXPORT LayoutLoader
 {

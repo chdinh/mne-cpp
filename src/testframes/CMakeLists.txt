@@ -204,7 +204,7 @@ add_subdirectory(test_com_rt_client)
 
 # Utils, disp, and disp3D coverage tests
 add_subdirectory(test_channels_layout_selection)
-add_subdirectory(test_utils_observer_pattern)
+add_subdirectory(test_com_observer_pattern)
 add_subdirectory(test_disp_plots)
 add_subdirectory(test_disp3d_viewstate)
 add_subdirectory(test_disp3d_brainsurface)

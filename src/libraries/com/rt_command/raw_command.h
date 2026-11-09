@@ -19,7 +19,7 @@
  * class avoids forcing every observer to deal with half-populated
  * @c Command objects.
  *
- * The class also implements @ref UTILSLIB::ICommand so it can be
+ * The class also implements @ref COMLIB::ICommand so it can be
  * notified through the same dispatch path as a fully-typed @c Command;
  * the @c executed(QList<QString>) signal hands the raw parameter list
  * to whichever @ref COMLIB::CommandManager recognises the keyword, which is
@@ -40,7 +40,7 @@
 
 #include "../com_global.h"
 
-#include <utils/generics/commandpattern.h>
+#include "command_pattern.h"
 
 //=============================================================================================================
 // QT INCLUDES
@@ -67,7 +67,7 @@ namespace COMLIB
  * located. Retains the JSON-vs-CLI dialect flag so replies travel back
  * in the same encoding the caller used.
  */
-class COMSHARED_EXPORT RawCommand : public QObject, public UTILSLIB::ICommand
+class COMSHARED_EXPORT RawCommand : public QObject, public ICommand
 {
     Q_OBJECT
 

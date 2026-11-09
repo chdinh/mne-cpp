@@ -3,14 +3,14 @@
   "generated_by": "scripts/quality/audit_api_evidence.py",
   "policy": "scripts/quality/api_evidence_policy.json",
   "summary": {
-    "exported_classes": 480,
+    "exported_classes": 478,
     "exported_free_functions": 176,
     "registered_classes": 574,
     "exported_not_registered": 1,
     "registered_function_modules": 14,
-    "registered_header_only": 81,
+    "registered_header_only": 83,
     "registered_stale": 0,
-    "registered_with_test": 229,
+    "registered_with_test": 232,
     "registered_test_unresolved": 0,
     "registered_with_example": 415,
     "registered_example_not_built": 0,
@@ -18,12 +18,12 @@
     "registered_without_api_page": 0,
     "with_snippet": 449,
     "public_api_units": 575,
-    "example_eligible": 414,
-    "example_exempt": 161,
-    "eligible_backed_by_registry_example": 413,
-    "eligible_used_by_some_example": 354,
-    "examples_on_disk": 78,
-    "examples_built": 78
+    "example_eligible": 411,
+    "example_exempt": 164,
+    "eligible_backed_by_registry_example": 410,
+    "eligible_used_by_some_example": 351,
+    "examples_on_disk": 79,
+    "examples_built": 79
   },
   "by_library": {
     "acq": {
@@ -63,13 +63,13 @@
       "with_snippet": 5
     },
     "com": {
-      "public": 8,
-      "registered": 8,
-      "with_test": 8,
+      "public": 11,
+      "registered": 11,
+      "with_test": 11,
       "eligible": 0,
       "eligible_with_registry_example": 0,
       "eligible_used_by_example": 0,
-      "with_snippet": 0
+      "with_snippet": 3
     },
     "connectivity": {
       "public": 20,
@@ -241,15 +241,6 @@
       "eligible_with_registry_example": 10,
       "eligible_used_by_example": 10,
       "with_snippet": 10
-    },
-    "utils": {
-      "public": 3,
-      "registered": 3,
-      "with_test": 0,
-      "eligible": 3,
-      "eligible_with_registry_example": 3,
-      "eligible_used_by_example": 3,
-      "with_snippet": 3
     }
   },
   "exported_free_functions": [
@@ -3117,14 +3108,14 @@
       "registry_status": "documented",
       "test": null,
       "test_resolves": false,
-      "example": "ex_utils",
+      "example": "ex_channels",
       "example_state": "built",
       "including_examples": [
-        "ex_make_layout",
-        "ex_utils"
+        "ex_channels",
+        "ex_make_layout"
       ],
       "snippets": [
-        "ex_utils/main.cpp#layout_loader_usage"
+        "ex_channels/main.cpp#layout_loader_usage"
       ],
       "api_page": "doc/website/docs/api/channels/layout-loader.mdx",
       "python_equiv": null,
@@ -3141,14 +3132,14 @@
       "registry_status": "documented",
       "test": null,
       "test_resolves": false,
-      "example": "ex_utils",
+      "example": "ex_channels",
       "example_state": "built",
       "including_examples": [
-        "ex_make_layout",
-        "ex_utils"
+        "ex_channels",
+        "ex_make_layout"
       ],
       "snippets": [
-        "ex_utils/main.cpp#layout_maker_usage"
+        "ex_channels/main.cpp#layout_maker_usage"
       ],
       "api_page": "doc/website/docs/api/channels/layout-maker.mdx",
       "python_equiv": null,
@@ -3165,13 +3156,13 @@
       "registry_status": "documented",
       "test": null,
       "test_resolves": false,
-      "example": "ex_utils",
+      "example": "ex_channels",
       "example_state": "built",
       "including_examples": [
-        "ex_utils"
+        "ex_channels"
       ],
       "snippets": [
-        "ex_utils/main.cpp#selection_io_usage"
+        "ex_channels/main.cpp#selection_io_usage"
       ],
       "api_page": "doc/website/docs/api/channels/selection-io.mdx",
       "python_equiv": null,
@@ -3188,14 +3179,14 @@
       "registry_status": "documented",
       "test": null,
       "test_resolves": false,
-      "example": "ex_utils",
+      "example": "ex_channels",
       "example_state": "built",
       "including_examples": [
-        "ex_utils"
+        "ex_channels"
       ],
       "snippets": [
-        "ex_utils/main.cpp#standard_montage_usage",
-        "ex_utils/main.cpp#standard_montage_usage"
+        "ex_channels/main.cpp#standard_montage_usage",
+        "ex_channels/main.cpp#standard_montage_usage"
       ],
       "api_page": "doc/website/docs/api/channels/electrode-position.mdx",
       "python_equiv": null,
@@ -3212,14 +3203,14 @@
       "registry_status": "done",
       "test": "test_channels_standard_montage",
       "test_resolves": true,
-      "example": "ex_utils",
+      "example": "ex_channels",
       "example_state": "built",
       "including_examples": [
-        "ex_utils"
+        "ex_channels"
       ],
       "snippets": [
-        "ex_utils/main.cpp#standard_montage_usage",
-        "ex_utils/main.cpp#standard_montage_usage"
+        "ex_channels/main.cpp#standard_montage_usage",
+        "ex_channels/main.cpp#standard_montage_usage"
       ],
       "api_page": "doc/website/docs/api/channels/standard-montage.mdx",
       "python_equiv": "mne.channels.make_standard_montage",
@@ -3355,6 +3346,77 @@
       "including_examples": [],
       "snippets": [],
       "api_page": "doc/website/docs/api/com/command-parser.mdx",
+      "python_equiv": null,
+      "example_eligible": false,
+      "exempt_reason": "header prefix 'com/rt_command/': Requires a running mne_rt_server; evidenced by integration tests rather than a runnable example."
+    },
+    {
+      "name": "ICommand",
+      "header": "com/rt_command/command_pattern.h",
+      "library": "com",
+      "kind": "header-only",
+      "exported": false,
+      "registered": true,
+      "registry_status": "documented",
+      "test": "test_com_observer_pattern",
+      "test_resolves": true,
+      "example": "ex_com",
+      "example_state": "built",
+      "including_examples": [
+        "ex_com"
+      ],
+      "snippets": [
+        "ex_com/main.cpp#command_pattern_usage"
+      ],
+      "api_page": "doc/website/docs/api/com/i-command.mdx",
+      "python_equiv": null,
+      "example_eligible": false,
+      "exempt_reason": "header prefix 'com/rt_command/': Requires a running mne_rt_server; evidenced by integration tests rather than a runnable example."
+    },
+    {
+      "name": "IObserver",
+      "header": "com/rt_command/observer_pattern.h",
+      "library": "com",
+      "kind": "header-only",
+      "exported": false,
+      "registered": true,
+      "registry_status": "documented",
+      "test": "test_com_observer_pattern",
+      "test_resolves": true,
+      "example": "ex_com",
+      "example_state": "built",
+      "including_examples": [
+        "ex_com"
+      ],
+      "snippets": [
+        "ex_com/main.cpp#observer_pattern_usage",
+        "ex_com/main.cpp#observer_pattern_usage"
+      ],
+      "api_page": "doc/website/docs/api/com/i-observer.mdx",
+      "python_equiv": null,
+      "example_eligible": false,
+      "exempt_reason": "header prefix 'com/rt_command/': Requires a running mne_rt_server; evidenced by integration tests rather than a runnable example."
+    },
+    {
+      "name": "Subject",
+      "header": "com/rt_command/observer_pattern.h",
+      "library": "com",
+      "kind": "header-only",
+      "exported": false,
+      "registered": true,
+      "registry_status": "documented",
+      "test": "test_com_observer_pattern",
+      "test_resolves": true,
+      "example": "ex_com",
+      "example_state": "built",
+      "including_examples": [
+        "ex_com"
+      ],
+      "snippets": [
+        "ex_com/main.cpp#observer_pattern_usage",
+        "ex_com/main.cpp#observer_pattern_usage"
+      ],
+      "api_page": "doc/website/docs/api/com/subject.mdx",
       "python_equiv": null,
       "example_eligible": false,
       "exempt_reason": "header prefix 'com/rt_command/': Requires a running mne_rt_server; evidenced by integration tests rather than a runnable example."
@@ -14446,77 +14508,6 @@
         "ex_sts_statistics/main.cpp#stats_ttest_usage"
       ],
       "api_page": "doc/website/docs/api/sts/stats-ttest-result.mdx",
-      "python_equiv": null,
-      "example_eligible": true,
-      "exempt_reason": null
-    },
-    {
-      "name": "ICommand",
-      "header": "utils/generics/commandpattern.h",
-      "library": "utils",
-      "kind": "header-only",
-      "exported": false,
-      "registered": true,
-      "registry_status": "documented",
-      "test": null,
-      "test_resolves": false,
-      "example": "ex_utils",
-      "example_state": "built",
-      "including_examples": [
-        "ex_utils"
-      ],
-      "snippets": [
-        "ex_utils/main.cpp#command_pattern_usage"
-      ],
-      "api_page": "doc/website/docs/api/utils/i-command.mdx",
-      "python_equiv": null,
-      "example_eligible": true,
-      "exempt_reason": null
-    },
-    {
-      "name": "IObserver",
-      "header": "utils/generics/observerpattern.h",
-      "library": "utils",
-      "kind": "exported-class",
-      "exported": true,
-      "registered": true,
-      "registry_status": "documented",
-      "test": null,
-      "test_resolves": false,
-      "example": "ex_utils",
-      "example_state": "built",
-      "including_examples": [
-        "ex_utils"
-      ],
-      "snippets": [
-        "ex_utils/main.cpp#observer_pattern_usage",
-        "ex_utils/main.cpp#observer_pattern_usage"
-      ],
-      "api_page": "doc/website/docs/api/utils/i-observer.mdx",
-      "python_equiv": null,
-      "example_eligible": true,
-      "exempt_reason": null
-    },
-    {
-      "name": "Subject",
-      "header": "utils/generics/observerpattern.h",
-      "library": "utils",
-      "kind": "exported-class",
-      "exported": true,
-      "registered": true,
-      "registry_status": "documented",
-      "test": null,
-      "test_resolves": false,
-      "example": "ex_utils",
-      "example_state": "built",
-      "including_examples": [
-        "ex_utils"
-      ],
-      "snippets": [
-        "ex_utils/main.cpp#observer_pattern_usage",
-        "ex_utils/main.cpp#observer_pattern_usage"
-      ],
-      "api_page": "doc/website/docs/api/utils/subject.mdx",
       "python_equiv": null,
       "example_eligible": true,
       "exempt_reason": null
