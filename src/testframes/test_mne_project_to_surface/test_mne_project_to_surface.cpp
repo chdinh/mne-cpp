@@ -21,7 +21,7 @@
 #include <mne/mne_project_to_surface.h>
 #include <mne/mne_bem.h>
 #include <mne/mne_bem_surface.h>
-#include <utils/ioutils.h>
+#include <math/matrix_io.h>
 
 //=============================================================================================================
 // QT INCLUDES
@@ -95,7 +95,7 @@ void TestMNEProjectToSurface::initTestCase()
     mneSurfacePoints->find_closest_on_surface(matPointsShifted, iNP, matResult, vecNearest, vecDist);
 
     // read reference
-    UTILSLIB::IOUtils::read_eigen_matrix(matRef, sRef);
+    MATHLIB::read_matrix(matRef, sRef.toStdString());
 }
 
 //=============================================================================================================

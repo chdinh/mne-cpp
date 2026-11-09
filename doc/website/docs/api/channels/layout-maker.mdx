@@ -128,7 +128,7 @@ Reads the specified ANT elc-layout file.
 
 ## Example
 
-- Start here: [ex_utils](../../examples/channels/ex_utils.mdx) — Utilities library: observers, commands, matrix files, montages, layouts, selections and reports.
+- Start here: [ex_utils](../../examples/channels/ex_utils.mdx) — Utilities library: observers, commands, montages, layouts, selections and reports.
 - Full source: [`src/examples/ex_utils/main.cpp`](https://github.com/mne-tools/mne-cpp/tree/staging/src/examples/ex_utils/main.cpp)
 - Build target: `ex_utils` (runs under CTest)
 
@@ -136,9 +136,9 @@ Reads the specified ANT elc-layout file.
 
 ### [ex_utils](../../examples/channels/ex_utils.mdx)
 
-Utilities library: observers, commands, matrix files, montages, layouts, selections and reports.
+Utilities library: observers, commands, montages, layouts, selections and reports.
 
-````cpp title="src/examples/ex_utils/main.cpp, line 203"
+````cpp title="src/examples/ex_utils/main.cpp, line 191"
 QList<QVector<float>> layout2d;
 QFile layoutFile(dir.filePath("1020.lout"));
 LayoutMaker::makeLayout(points3d, layout2d, names, layoutFile, true, 20.0f, 5.0f, 4.0f, true);

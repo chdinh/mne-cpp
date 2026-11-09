@@ -19,7 +19,7 @@
 #include <iostream>
 #include <mne/mne_forward_solution.h>
 #include <fs/fs_annotationset.h>
-#include <utils/ioutils.h>
+#include <math/matrix_io.h>
 #include <base/log.h>
 
 //=============================================================================================================
@@ -111,7 +111,7 @@ int main(int argc, char* argv[])
     qDebug() << "col_names:";
     qDebug() << t_clusteredFwd.sol->col_names;
     qDebug() << "write fwd data to ./test_fwd.txt ...";
-    IOUtils::write_eigen_matrix(t_clusteredFwd.sol->data, QDir::temp().filePath("ex_read_fwd-clustered.txt"));
+    MATHLIB::write_matrix(t_clusteredFwd.sol->data, QDir::temp().filePath("ex_read_fwd-clustered.txt").toStdString());
     qDebug() << "[done]";
 
     return t_clusteredFwd.sol->ncol > 0 && t_clusteredFwd.sol->ncol < t_Fwd.sol->ncol ? 0 : 1;

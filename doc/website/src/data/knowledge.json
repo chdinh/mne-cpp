@@ -390,7 +390,6 @@
         "fs",
         "mne",
         "fiff",
-        "utils",
         "base"
       ],
       "tasks": [
@@ -421,7 +420,6 @@
         "fs",
         "mne",
         "fiff",
-        "utils",
         "base"
       ],
       "tasks": [
@@ -468,8 +466,7 @@
       "libraries": [
         "connectivity",
         "mne",
-        "fiff",
-        "utils"
+        "fiff"
       ],
       "tasks": [
         "connectivity"
@@ -1037,7 +1034,7 @@
         "inv",
         "fwd",
         "fiff",
-        "utils",
+        "math",
         "base"
       ],
       "tasks": [
@@ -1180,7 +1177,7 @@
       "libraries": [
         "inv",
         "fiff",
-        "utils"
+        "math"
       ],
       "tasks": [
         "preprocessing"
@@ -1504,7 +1501,6 @@
       "library": "mne",
       "libraries": [
         "mne",
-        "utils",
         "base"
       ],
       "tasks": [
@@ -1580,7 +1576,7 @@
       "libraries": [
         "fs",
         "mne",
-        "utils",
+        "math",
         "base"
       ],
       "tasks": [
@@ -1787,7 +1783,7 @@
     {
       "name": "ex_utils",
       "title": "Montages, layouts, selections, matrix files and reports",
-      "brief": "Utilities library: observers, commands, matrix files, montages, layouts, selections and reports",
+      "brief": "Utilities library: observers, commands, montages, layouts, selections and reports",
       "thumbnail": "",
       "url": "/docs/examples/channels/ex_utils/",
       "library": "channels",

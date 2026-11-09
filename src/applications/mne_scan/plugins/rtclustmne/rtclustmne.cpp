@@ -45,7 +45,6 @@
 #include <scMeas/realtimeevokedset.h>
 #include <scMeas/realtimefwdsolution.h>
 
-#include <utils/ioutils.h>
 
 //=============================================================================================================
 // QT INCLUDES

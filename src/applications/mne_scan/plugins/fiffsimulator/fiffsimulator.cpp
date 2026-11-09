@@ -22,7 +22,6 @@
 
 #include "FormFiles/fiffsimulatorsetupwidget.h"
 
-#include <utils/ioutils.h>
 #include <fiff/fiff_info.h>
 #include <fiff/fiff_digitizer_data.h>
 #include <scMeas/realtimemultisamplearray.h>

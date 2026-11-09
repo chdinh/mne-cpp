@@ -27,7 +27,7 @@ const bool found = StandardMontage::findElectrode("Cz", cz); // mne's standard_1
 
 ## Example
 
-- Start here: [ex_utils](../../examples/channels/ex_utils.mdx) — Utilities library: observers, commands, matrix files, montages, layouts, selections and reports.
+- Start here: [ex_utils](../../examples/channels/ex_utils.mdx) — Utilities library: observers, commands, montages, layouts, selections and reports.
 - Full source: [`src/examples/ex_utils/main.cpp`](https://github.com/mne-tools/mne-cpp/tree/staging/src/examples/ex_utils/main.cpp)
 - Build target: `ex_utils` (runs under CTest)
 
@@ -35,9 +35,9 @@ const bool found = StandardMontage::findElectrode("Cz", cz); // mne's standard_1
 
 ### [ex_utils](../../examples/channels/ex_utils.mdx)
 
-Utilities library: observers, commands, matrix files, montages, layouts, selections and reports.
+Utilities library: observers, commands, montages, layouts, selections and reports.
 
-````cpp title="src/examples/ex_utils/main.cpp, line 188"
+````cpp title="src/examples/ex_utils/main.cpp, line 176"
 const QList<ElectrodePosition> montage1020 = StandardMontage::getMontage(StandardMontage::System::Standard_1020);
 Vector3d cz;
 const bool found = StandardMontage::findElectrode("Cz", cz); // mne's standard_1005 positions, metres, MNI frame

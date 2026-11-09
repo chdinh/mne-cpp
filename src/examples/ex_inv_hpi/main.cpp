@@ -30,7 +30,7 @@
 #include <inv/hpi/inv_signal_model.h>
 #include <fiff/fiff_info.h>
 #include <fiff/fiff_raw_data.h>
-#include <utils/ioutils.h>
+#include <math/matrix_io.h>
 
 //=============================================================================================================
 // QT INCLUDES
@@ -56,7 +56,6 @@
 
 using namespace INVLIB;
 using namespace FIFFLIB;
-using namespace UTILSLIB;
 using namespace Eigen;
 
 //=============================================================================================================
@@ -118,7 +117,7 @@ int main(int argc, char* argv[])
     // MaxFilter head position at t = 0: translation (-0.814, -11.046, 53.572) mm. One 200 ms window, so allow 1 mm
     // (test_hpiFit_integration holds the mean over the whole recording to 0.3 mm).
     MatrixXd maxfilter;
-    IOUtils::read_eigen_matrix(maxfilter, data + "/Result/ref_hpiFit_pos.txt");
+    MATHLIB::read_matrix(maxfilter, (data + "/Result/ref_hpiFit_pos.txt").toStdString());
     const Vector3d translation = fit.devHeadTrans.trans.block<3, 1>(0, 3).cast<double>();
     const Vector3d reference = maxfilter.block<1, 3>(0, 4).transpose();
     ok &= expect(fit.hpiFreqs == QVector<int>({166, 154, 161, 158}) && fit.GoF.minCoeff() > 0.98 && (translation - reference).norm() < 0.001,

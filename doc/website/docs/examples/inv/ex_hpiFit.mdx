@@ -12,7 +12,7 @@ Fit continuous HPI coils on raw data with SSP and write the head positions for c
 
 <ExampleFacts name="ex_hpiFit" />
 
-**Libraries:** [Inverse](../../api/inv/index.mdx), [Forward](../../api/fwd/index.mdx), [FIFF I/O](../../api/fiff/index.mdx), [Utilities](../../api/utils/index.mdx), [Base](../../api/base/index.mdx)
+**Libraries:** [Inverse](../../api/inv/index.mdx), [Forward](../../api/fwd/index.mdx), [FIFF I/O](../../api/fiff/index.mdx), [Math](../../api/math/index.mdx), [Base](../../api/base/index.mdx)
 
 ## Results
 
@@ -129,7 +129,6 @@ The documented classes this example uses most:
 - [InvHpiDataUpdater](../../api/inv/inv-hpi-data-updater.mdx)
 - [InvHpiFit](../../api/inv/inv-hpi-fit.mdx)
 - [InvHpiModelParameters](../../api/inv/inv-hpi-model-parameters.mdx)
-- [IOUtils](../../api/utils/io-utils.mdx)
 
 ## Source
 
@@ -166,7 +165,7 @@ The documented classes this example uses most:
 #include <inv/hpi/inv_hpi_fit.h>
 #include <inv/hpi/inv_hpi_data_updater.h>
 
-#include <utils/ioutils.h>
+#include <math/matrix_io.h>
 #include <base/log.h>
 
 #include <fwd/fwd_coil_set.h>
@@ -188,7 +187,6 @@ The documented classes this example uses most:
 
 using namespace INVLIB;
 using namespace FIFFLIB;
-using namespace UTILSLIB;
 using namespace Eigen;
 
 //=============================================================================================================
@@ -397,7 +395,7 @@ int main(int argc, char* argv[])
             << "Average Duration:" << matPosition.col(9).mean() << "ms";
 
     if (bSave) {
-        IOUtils::write_eigen_matrix(matPosition, QString(QCoreApplication::applicationDirPath() + "/MNE-sample-data/" + sNameOut));
+        MATHLIB::write_matrix(matPosition, QString(QCoreApplication::applicationDirPath() + "/MNE-sample-data/" + sNameOut).toStdString());
     }
 }
 ````

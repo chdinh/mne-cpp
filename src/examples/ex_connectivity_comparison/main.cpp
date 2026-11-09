@@ -44,7 +44,6 @@
 
 #include <inv/minimum_norm/inv_minimum_norm.h>
 
-#include <utils/ioutils.h>
 #include <base/log.h>
 #include <fiff/fiff_events.h>
 

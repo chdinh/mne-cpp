@@ -26,7 +26,7 @@
 #include <fiff/fiff_types.h>
 #include <fiff/fiff_info.h>
 
-#include <utils/ioutils.h>
+#include <math/matrix_io.h>
 
 #include <dsp/sphara.h>
 #include <dsp/rt/rt_detect_trigger.h>
@@ -237,13 +237,13 @@ QVariant RtFiffRawViewModel::headerData(int section, Qt::Orientation orientation
 void RtFiffRawViewModel::initSphara()
 {
     //Load SPHARA matrices for babymeg and vectorview
-    IOUtils::read_eigen_matrix(m_matSpharaVVGradLoaded, QCoreApplication::applicationDirPath() + QString("/../resources/mne_scan/plugins/noisereduction/SPHARA/Vectorview_SPHARA_InvEuclidean_Grad.txt"));
-    IOUtils::read_eigen_matrix(m_matSpharaVVMagLoaded, QCoreApplication::applicationDirPath() + QString("/../resources/mne_scan/plugins/noisereduction/SPHARA/Vectorview_SPHARA_InvEuclidean_Mag.txt"));
+    MATHLIB::read_matrix(m_matSpharaVVGradLoaded, (QCoreApplication::applicationDirPath() + QString("/../resources/mne_scan/plugins/noisereduction/SPHARA/Vectorview_SPHARA_InvEuclidean_Grad.txt")).toStdString());
+    MATHLIB::read_matrix(m_matSpharaVVMagLoaded, (QCoreApplication::applicationDirPath() + QString("/../resources/mne_scan/plugins/noisereduction/SPHARA/Vectorview_SPHARA_InvEuclidean_Mag.txt")).toStdString());
 
-    IOUtils::read_eigen_matrix(m_matSpharaBabyMEGInnerLoaded, QCoreApplication::applicationDirPath() + QString("/../resources/mne_scan/plugins/noisereduction/SPHARA/BabyMEG_SPHARA_InvEuclidean_Inner.txt"));
-    IOUtils::read_eigen_matrix(m_matSpharaBabyMEGOuterLoaded, QCoreApplication::applicationDirPath() + QString("/../resources/mne_scan/plugins/noisereduction/SPHARA/BabyMEG_SPHARA_InvEuclidean_Outer.txt"));
+    MATHLIB::read_matrix(m_matSpharaBabyMEGInnerLoaded, (QCoreApplication::applicationDirPath() + QString("/../resources/mne_scan/plugins/noisereduction/SPHARA/BabyMEG_SPHARA_InvEuclidean_Inner.txt")).toStdString());
+    MATHLIB::read_matrix(m_matSpharaBabyMEGOuterLoaded, (QCoreApplication::applicationDirPath() + QString("/../resources/mne_scan/plugins/noisereduction/SPHARA/BabyMEG_SPHARA_InvEuclidean_Outer.txt")).toStdString());
 
-    IOUtils::read_eigen_matrix(m_matSpharaEEGLoaded, QCoreApplication::applicationDirPath() + QString("/../resources/mne_scan/plugins/noisereduction/SPHARA/Current_SPHARA_EEG.txt"));
+    MATHLIB::read_matrix(m_matSpharaEEGLoaded, (QCoreApplication::applicationDirPath() + QString("/../resources/mne_scan/plugins/noisereduction/SPHARA/Current_SPHARA_EEG.txt")).toStdString());
 
     //Generate indices used to create the SPHARA operators for VectorView
     m_vecIndicesFirstVV.resize(0);

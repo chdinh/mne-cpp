@@ -24,6 +24,7 @@ set(HEADERS
   sphere.h
   warp.h
   simplex_algorithm.h
+  matrix_io.h
   kmeans.h
   spectral.h
 )
@@ -40,7 +41,9 @@ mne_warn_on_narrowing(${PROJECT_NAME})
 
 target_include_directories(${PROJECT_NAME} PUBLIC $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/..> $<INSTALL_INTERFACE:include>)
 
-target_link_libraries(${PROJECT_NAME} PRIVATE
+target_link_libraries(${PROJECT_NAME} PUBLIC
+  mne_base
+  PRIVATE
   Eigen3::Eigen)
 
 target_compile_definitions(${PROJECT_NAME} PRIVATE MNE_MATH_LIBRARY MNE_GIT_HASH_SHORT="${MNE_GIT_HASH_SHORT}" MNE_GIT_HASH_LONG="${MNE_GIT_HASH_LONG}")

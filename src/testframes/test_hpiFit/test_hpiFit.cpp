@@ -31,7 +31,6 @@
 #include <inv/hpi/inv_hpi_data_updater.h>
 #include <inv/hpi/inv_sensor_set.h>
 
-#include <utils/ioutils.h>
 
 #include <fwd/fwd_coil_set.h>
 
@@ -52,7 +51,6 @@
 //=============================================================================================================
 
 using namespace FIFFLIB;
-using namespace UTILSLIB;
 using namespace INVLIB;
 using namespace Eigen;
 

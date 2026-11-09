@@ -25,7 +25,7 @@
 #include <fiff/fiff_evoked_set.h>
 
 #include <iostream>
-#include <utils/ioutils.h>
+#include <math/matrix_io.h>
 
 //=============================================================================================================
 // QT INCLUDES
@@ -39,7 +39,6 @@
 //=============================================================================================================
 
 using namespace FIFFLIB;
-using namespace UTILSLIB;
 using namespace Eigen;
 
 namespace
@@ -169,7 +168,7 @@ void TestFiffCov::initTestCase()
 
     //Read the result data produced with mne_matlab
     MatrixXd data;
-    IOUtils::read_eigen_matrix(data, QCoreApplication::applicationDirPath() + "/../resources/data/mne-cpp-test-data/Result/ref_data_sample_audvis-cov.dat");
+    MATHLIB::read_matrix(data, (QCoreApplication::applicationDirPath() + "/../resources/data/mne-cpp-test-data/Result/ref_data_sample_audvis-cov.dat").toStdString());
     covResult.data = data;
 
     covResult.kind = 1;

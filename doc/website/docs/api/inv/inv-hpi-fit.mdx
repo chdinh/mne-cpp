@@ -160,7 +160,7 @@ Compares two 4x4 transformation matrices by evaluating their rotation and transl
 
 Fit continuous HPI coils on raw data with SSP and write the head positions for comparison with MaxFilter.
 
-````cpp title="src/examples/ex_hpiFit/main.cpp, line 183"
+````cpp title="src/examples/ex_hpiFit/main.cpp, line 182"
 InvHpiDataUpdater hpiDataUpdater = InvHpiDataUpdater(pFiffInfo);
 InvHpiFit HPI = InvHpiFit(hpiDataUpdater.getSensors());
 ````
@@ -181,7 +181,7 @@ ok &= expect(workerFit.GoF.size() == 4 && workerFit.GoF.minCoeff() > 0.98 && wor
 
 Inverse library: continuous head position (HPI) fitting.
 
-````cpp title="src/examples/ex_inv_hpi/main.cpp, line 111"
+````cpp title="src/examples/ex_inv_hpi/main.cpp, line 110"
 updater.prepareDataAndProjectors(segment, MatrixXd::Identity(info->nchan, info->nchan));
 // The coil frequencies are known but not their order; the first fit with bOrderFrequencies finds it.
 const InvHpiModelParameters model(QVector<int>({154, 158, 161, 166}), info->sfreq, info->linefreq, true);
@@ -191,7 +191,7 @@ hpi.fit(updater.getProjectedData(), updater.getProjectors(), model, updater.getH
 // MaxFilter head position at t = 0: translation (-0.814, -11.046, 53.572) mm. One 200 ms window, so allow 1 mm
 // (test_hpiFit_integration holds the mean over the whole recording to 0.3 mm).
 MatrixXd maxfilter;
-IOUtils::read_eigen_matrix(maxfilter, data + "/Result/ref_hpiFit_pos.txt");
+MATHLIB::read_matrix(maxfilter, (data + "/Result/ref_hpiFit_pos.txt").toStdString());
 const Vector3d translation = fit.devHeadTrans.trans.block<3, 1>(0, 3).cast<double>();
 const Vector3d reference = maxfilter.block<1, 3>(0, 4).transpose();
 ok &= expect(fit.hpiFreqs == QVector<int>({166, 154, 161, 158}) && fit.GoF.minCoeff() > 0.98 && (translation - reference).norm() < 0.001,

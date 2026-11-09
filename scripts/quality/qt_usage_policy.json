@@ -224,8 +224,8 @@
       ]
     },
     "utils": {
-      "tokens": 282,
-      "public_header_includes": 21,
+      "tokens": 249,
+      "public_header_includes": 16,
       "modules": [
         "Core"
       ]

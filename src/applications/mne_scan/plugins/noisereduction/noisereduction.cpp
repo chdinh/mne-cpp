@@ -32,7 +32,7 @@
 #include <dsp/rt/rt_filter.h>
 #include <dsp/sphara.h>
 
-#include <utils/ioutils.h>
+#include <math/matrix_io.h>
 
 #include <scMeas/realtimemultisamplearray.h>
 
@@ -379,7 +379,7 @@ void NoiseReduction::run()
             //            }
             //        }
 
-            //        UTILSLIB::IOUtils::write_eigen_matrix(commonAvr, "commonAvr.txt", "common vaergae matrix");
+            //        MATHLIB::write_matrix(commonAvr, "commonAvr.txt", "common vaergae matrix");
 
             m_mutex.unlock();
 
@@ -555,13 +555,13 @@ void NoiseReduction::setFilterActive(bool state)
 void NoiseReduction::initSphara()
 {
     //Load SPHARA matrix
-    IOUtils::read_eigen_matrix(m_matSpharaVVGradLoaded, QString(QCoreApplication::applicationDirPath() + "/../resources/mne_scan/plugins/noisereduction/SPHARA/Vectorview_SPHARA_InvEuclidean_Grad.txt"));
-    IOUtils::read_eigen_matrix(m_matSpharaVVMagLoaded, QString(QCoreApplication::applicationDirPath() + "/../resources/mne_scan/plugins/noisereduction/SPHARA/Vectorview_SPHARA_InvEuclidean_Mag.txt"));
+    MATHLIB::read_matrix(m_matSpharaVVGradLoaded, QString(QCoreApplication::applicationDirPath() + "/../resources/mne_scan/plugins/noisereduction/SPHARA/Vectorview_SPHARA_InvEuclidean_Grad.txt").toStdString());
+    MATHLIB::read_matrix(m_matSpharaVVMagLoaded, QString(QCoreApplication::applicationDirPath() + "/../resources/mne_scan/plugins/noisereduction/SPHARA/Vectorview_SPHARA_InvEuclidean_Mag.txt").toStdString());
 
-    IOUtils::read_eigen_matrix(m_matSpharaBabyMEGInnerLoaded, QString(QCoreApplication::applicationDirPath() + "/../resources/mne_scan/plugins/noisereduction/SPHARA/BabyMEG_SPHARA_InvEuclidean_Inner.txt"));
-    IOUtils::read_eigen_matrix(m_matSpharaBabyMEGOuterLoaded, QString(QCoreApplication::applicationDirPath() + "/../resources/mne_scan/plugins/noisereduction/SPHARA/BabyMEG_SPHARA_InvEuclidean_Outer.txt"));
+    MATHLIB::read_matrix(m_matSpharaBabyMEGInnerLoaded, QString(QCoreApplication::applicationDirPath() + "/../resources/mne_scan/plugins/noisereduction/SPHARA/BabyMEG_SPHARA_InvEuclidean_Inner.txt").toStdString());
+    MATHLIB::read_matrix(m_matSpharaBabyMEGOuterLoaded, QString(QCoreApplication::applicationDirPath() + "/../resources/mne_scan/plugins/noisereduction/SPHARA/BabyMEG_SPHARA_InvEuclidean_Outer.txt").toStdString());
 
-    IOUtils::read_eigen_matrix(m_matSpharaEEGLoaded, QString(QCoreApplication::applicationDirPath() + "/../resources/mne_scan/plugins/noisereduction/SPHARA/Current_SPHARA_EEG.txt"));
+    MATHLIB::read_matrix(m_matSpharaEEGLoaded, QString(QCoreApplication::applicationDirPath() + "/../resources/mne_scan/plugins/noisereduction/SPHARA/Current_SPHARA_EEG.txt").toStdString());
 
     //Generate indices used to create the SPHARA operators for VectorView
     m_vecIndicesFirstVV.resize(0);
@@ -636,8 +636,8 @@ void NoiseReduction::createSpharaOperator()
     }
 
     //Write final operator matrices to file
-    //    IOUtils::write_eigen_matrix(matSpharaMultFirst, QString(QCoreApplication::applicationDirPath() + "../resources/mne_scan/plugins/noisereduction/SPHARA/matSpharaMultFirst.txt"));
-    //    IOUtils::write_eigen_matrix(matSpharaMultSecond, QString(QCoreApplication::applicationDirPath() + "../resources/mne_scan/plugins/noisereduction/SPHARA/matSpharaMultSecond.txt"));
+    //    MATHLIB::write_matrix(matSpharaMultFirst, QString(QCoreApplication::applicationDirPath() + "../resources/mne_scan/plugins/noisereduction/SPHARA/matSpharaMultFirst.txt"));
+    //    MATHLIB::write_matrix(matSpharaMultSecond, QString(QCoreApplication::applicationDirPath() + "../resources/mne_scan/plugins/noisereduction/SPHARA/matSpharaMultSecond.txt"));
 
     //
     // Make operators sparse

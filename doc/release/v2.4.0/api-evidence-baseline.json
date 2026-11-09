@@ -3,18 +3,18 @@
   "generated_by": "scripts/quality/audit_api_evidence.py",
   "policy": "scripts/quality/api_evidence_policy.json",
   "summary": {
-    "exported_classes": 482,
+    "exported_classes": 481,
     "exported_free_functions": 168,
     "registered_classes": 575,
     "exported_not_registered": 1,
-    "registered_function_modules": 13,
+    "registered_function_modules": 14,
     "registered_header_only": 81,
     "registered_stale": 0,
-    "registered_with_test": 224,
+    "registered_with_test": 225,
     "registered_test_unresolved": 0,
     "registered_with_example": 415,
     "registered_example_not_built": 0,
-    "registered_with_python_equiv": 96,
+    "registered_with_python_equiv": 97,
     "registered_without_api_page": 0,
     "with_snippet": 450,
     "public_api_units": 576,
@@ -171,13 +171,13 @@
       "with_snippet": 3
     },
     "math": {
-      "public": 9,
-      "registered": 9,
-      "with_test": 7,
-      "eligible": 7,
-      "eligible_with_registry_example": 7,
-      "eligible_used_by_example": 7,
-      "with_snippet": 9
+      "public": 10,
+      "registered": 10,
+      "with_test": 8,
+      "eligible": 8,
+      "eligible_with_registry_example": 8,
+      "eligible_used_by_example": 8,
+      "with_snippet": 10
     },
     "ml": {
       "public": 4,
@@ -225,13 +225,13 @@
       "with_snippet": 10
     },
     "utils": {
-      "public": 10,
-      "registered": 10,
+      "public": 9,
+      "registered": 9,
       "with_test": 1,
-      "eligible": 9,
-      "eligible_with_registry_example": 9,
-      "eligible_used_by_example": 9,
-      "with_snippet": 10
+      "eligible": 8,
+      "eligible_with_registry_example": 8,
+      "eligible_used_by_example": 8,
+      "with_snippet": 9
     }
   },
   "exported_free_functions": [
@@ -11573,6 +11573,32 @@
       "exempt_reason": null
     },
     {
+      "name": "MatrixIo",
+      "header": "math/matrix_io.h",
+      "library": "math",
+      "kind": "function-module",
+      "exported": false,
+      "registered": true,
+      "registry_status": "documented",
+      "test": "test_math_matrix_io",
+      "test_resolves": true,
+      "example": "ex_math",
+      "example_state": "built",
+      "including_examples": [
+        "ex_hpiFit",
+        "ex_inv_hpi",
+        "ex_math",
+        "ex_read_fwd"
+      ],
+      "snippets": [
+        "ex_math/main.cpp#matrix_io_usage"
+      ],
+      "api_page": "doc/website/docs/api/math/matrix-io.mdx",
+      "python_equiv": "numpy.savetxt / numpy.loadtxt",
+      "example_eligible": true,
+      "exempt_reason": null
+    },
+    {
       "name": "Numerics",
       "header": "math/numerics.h",
       "library": "math",
@@ -14312,36 +14338,6 @@
         "ex_utils/main.cpp#observer_pattern_usage"
       ],
       "api_page": "doc/website/docs/api/utils/subject.mdx",
-      "python_equiv": null,
-      "example_eligible": true,
-      "exempt_reason": null
-    },
-    {
-      "name": "IOUtils",
-      "header": "utils/ioutils.h",
-      "library": "utils",
-      "kind": "exported-class",
-      "exported": true,
-      "registered": true,
-      "registry_status": "documented",
-      "test": null,
-      "test_resolves": false,
-      "example": "ex_utils",
-      "example_state": "built",
-      "including_examples": [
-        "ex_connectivity",
-        "ex_connectivity_comparison",
-        "ex_connectivity_performance",
-        "ex_hpiFit",
-        "ex_inv_hpi",
-        "ex_read_bem",
-        "ex_read_fwd",
-        "ex_utils"
-      ],
-      "snippets": [
-        "ex_utils/main.cpp#ioutils_usage"
-      ],
-      "api_page": "doc/website/docs/api/utils/io-utils.mdx",
       "python_equiv": null,
       "example_eligible": true,
       "exempt_reason": null

@@ -22,7 +22,6 @@
 
 #include <fiff/fiff_raw_data.h>
 
-#include <utils/ioutils.h>
 
 #include <mne/mne_epoch_data_list.h>
 #include <mne/mne.h>

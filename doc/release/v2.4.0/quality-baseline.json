@@ -51,6 +51,7 @@
           "test_base_thread_pool",
           "test_channels_layout_selection",
           "test_channels_standard_montage",
+          "test_math_matrix_io",
           "test_mne_acq_tool",
           "test_rt_server_fiff_replay"
         ],
@@ -72,6 +73,7 @@
           "test_base_thread_pool",
           "test_channels_layout_selection",
           "test_channels_standard_montage",
+          "test_math_matrix_io",
           "test_mne_acq_tool",
           "test_rt_server_fiff_replay"
         ],
@@ -93,6 +95,7 @@
           "test_base_thread_pool",
           "test_channels_layout_selection",
           "test_channels_standard_montage",
+          "test_math_matrix_io",
           "test_mne_acq_tool",
           "test_rt_server_fiff_replay"
         ],
@@ -114,6 +117,7 @@
           "test_base_thread_pool",
           "test_channels_layout_selection",
           "test_channels_standard_montage",
+          "test_math_matrix_io",
           "test_mne_acq_tool",
           "test_rt_server_fiff_replay"
         ],
@@ -135,6 +139,7 @@
           "test_base_thread_pool",
           "test_channels_layout_selection",
           "test_channels_standard_montage",
+          "test_math_matrix_io",
           "test_mne_acq_tool",
           "test_rt_server_fiff_replay"
         ],
@@ -156,6 +161,7 @@
           "test_base_thread_pool",
           "test_channels_layout_selection",
           "test_channels_standard_montage",
+          "test_math_matrix_io",
           "test_mne_acq_tool",
           "test_rt_server_fiff_replay"
         ]
@@ -186,7 +192,7 @@
       "example_eligible": 414,
       "eligible_backed_percent": 99.76,
       "snippets": 450,
-      "registered_test_percent": 38.96
+      "registered_test_percent": 39.13
     },
     "G4_screenshots": {
       "referenced_images": 19,
@@ -218,17 +224,17 @@
         "missing": 145,
         "not-applicable": 8
       },
-      "claims": 359,
+      "claims": 360,
       "claims_by_evidence": {
         "cross-validated-static": 174,
         "cross-validated-live": 0,
-        "tested": 184,
+        "tested": 185,
         "unverified": 1
       },
       "claims_by_status": {
         "equivalent": 139,
         "exceeds": 0,
-        "implemented": 125,
+        "implemented": 126,
         "partial": 95
       },
       "equivalence_without_static_evidence": []

@@ -30,7 +30,6 @@
 #include "inv_signal_model.h"
 #include "inv_hpi_model_parameters.h"
 
-#include <utils/ioutils.h>
 
 // MSVC builds already define _USE_MATH_DEFINES globally (see src/CMakeLists.txt),
 // so define it here only for the toolchains that do not.

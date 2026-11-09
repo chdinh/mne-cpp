@@ -12,7 +12,7 @@ Read a forward solution, print its gain matrix and source geometry, and cluster 
 
 <ExampleFacts name="ex_read_fwd" />
 
-**Libraries:** [FreeSurfer](../../api/fs/index.mdx), [MNE Core](../../api/mne/index.mdx), [Utilities](../../api/utils/index.mdx), [Base](../../api/base/index.mdx)
+**Libraries:** [FreeSurfer](../../api/fs/index.mdx), [MNE Core](../../api/mne/index.mdx), [Math](../../api/math/index.mdx), [Base](../../api/base/index.mdx)
 
 ## Results
 
@@ -114,7 +114,6 @@ The documented classes this example uses most:
 | [`FsAnnotation`](../../api/fs/fs-annotation.mdx) | FreeSurfer |
 | [`FsAnnotationSet`](../../api/fs/fs-annotation-set.mdx) | FreeSurfer |
 | [`FsSurface`](../../api/fs/fs-surface.mdx) | FreeSurfer |
-| [`IOUtils`](../../api/utils/io-utils.mdx) | Utilities |
 | [`Log`](../../api/base/log.mdx) | Base |
 
 ## Source
@@ -143,7 +142,7 @@ The documented classes this example uses most:
 #include <iostream>
 #include <mne/mne_forward_solution.h>
 #include <fs/fs_annotationset.h>
-#include <utils/ioutils.h>
+#include <math/matrix_io.h>
 #include <base/log.h>
 
 //=============================================================================================================
@@ -235,7 +234,7 @@ int main(int argc, char* argv[])
     qDebug() << "col_names:";
     qDebug() << t_clusteredFwd.sol->col_names;
     qDebug() << "write fwd data to ./test_fwd.txt ...";
-    IOUtils::write_eigen_matrix(t_clusteredFwd.sol->data, QDir::temp().filePath("ex_read_fwd-clustered.txt"));
+    MATHLIB::write_matrix(t_clusteredFwd.sol->data, QDir::temp().filePath("ex_read_fwd-clustered.txt").toStdString());
     qDebug() << "[done]";
 
     return t_clusteredFwd.sol->ncol > 0 && t_clusteredFwd.sol->ncol < t_Fwd.sol->ncol ? 0 : 1;

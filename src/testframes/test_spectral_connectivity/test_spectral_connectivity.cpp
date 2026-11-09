@@ -19,7 +19,7 @@
 
 #include <base/log.h>
 
-#include <utils/ioutils.h>
+#include <math/matrix_io.h>
 #include <connectivity/metrics/coherency.h>
 #include <connectivity/metrics/coherence.h>
 #include <connectivity/metrics/imagcoherence.h>
@@ -50,7 +50,6 @@
 
 using namespace Eigen;
 using namespace CONNECTIVITYLIB;
-using namespace UTILSLIB;
 
 //=============================================================================================================
 /**
@@ -126,7 +125,7 @@ void TestSpectralConnectivity::spectralConnectivityCoherence()
 
     MatrixXd refConnectivity;
     QString refFileName(QCoreApplication::applicationDirPath() + "/../resources/data/mne-cpp-test-data/Result/Connectivity/ref_spectral_connectivity_coh.txt");
-    IOUtils::read_eigen_matrix(refConnectivity, refFileName);
+    MATHLIB::read_matrix(refConnectivity, refFileName.toStdString());
     m_dRefConnectivityOutput = refConnectivity.col(0).mean();
 
     //*********************************************************************************************************
@@ -152,7 +151,7 @@ void TestSpectralConnectivity::spectralConnectivityImagCoherence()
 
     MatrixXd refConnectivity;
     QString refFileName(QCoreApplication::applicationDirPath() + "/../resources/data/mne-cpp-test-data/Result/Connectivity/ref_spectral_connectivity_imagcoh.txt");
-    IOUtils::read_eigen_matrix(refConnectivity, refFileName);
+    MATHLIB::read_matrix(refConnectivity, refFileName.toStdString());
     m_dRefConnectivityOutput = refConnectivity.col(0).mean();
 
     //*********************************************************************************************************
@@ -179,7 +178,7 @@ void TestSpectralConnectivity::spectralConnectivityPLV()
 
     MatrixXd refConnectivity;
     QString refFileName(QCoreApplication::applicationDirPath() + "/../resources/data/mne-cpp-test-data/Result/Connectivity/ref_spectral_connectivity_plv.txt");
-    IOUtils::read_eigen_matrix(refConnectivity, refFileName);
+    MATHLIB::read_matrix(refConnectivity, refFileName.toStdString());
     m_dRefConnectivityOutput = refConnectivity.col(0).mean();
 
     //*********************************************************************************************************
@@ -206,7 +205,7 @@ void TestSpectralConnectivity::spectralConnectivityPLI()
 
     MatrixXd refConnectivity;
     QString refFileName(QCoreApplication::applicationDirPath() + "/../resources/data/mne-cpp-test-data/Result/Connectivity/ref_spectral_connectivity_pli.txt");
-    IOUtils::read_eigen_matrix(refConnectivity, refFileName);
+    MATHLIB::read_matrix(refConnectivity, refFileName.toStdString());
     m_dRefConnectivityOutput = refConnectivity.col(0).mean();
 
     //*********************************************************************************************************
@@ -233,7 +232,7 @@ void TestSpectralConnectivity::spectralConnectivityPLI2()
 
     MatrixXd refConnectivity;
     QString refFileName(QCoreApplication::applicationDirPath() + "/../resources/data/mne-cpp-test-data/Result/Connectivity/ref_spectral_connectivity_pli2.txt");
-    IOUtils::read_eigen_matrix(refConnectivity, refFileName);
+    MATHLIB::read_matrix(refConnectivity, refFileName.toStdString());
     m_dRefConnectivityOutput = refConnectivity.col(0).mean();
 
     //*********************************************************************************************************
@@ -260,7 +259,7 @@ void TestSpectralConnectivity::spectralConnectivityWPLI()
 
     MatrixXd refConnectivity;
     QString refFileName(QCoreApplication::applicationDirPath() + "/../resources/data/mne-cpp-test-data/Result/Connectivity/ref_spectral_connectivity_wpli.txt");
-    IOUtils::read_eigen_matrix(refConnectivity, refFileName);
+    MATHLIB::read_matrix(refConnectivity, refFileName.toStdString());
     m_dRefConnectivityOutput = refConnectivity.col(0).mean();
 
     //*********************************************************************************************************
@@ -287,7 +286,7 @@ void TestSpectralConnectivity::spectralConnectivityWPLI2()
 
     MatrixXd refConnectivity;
     QString refFileName(QCoreApplication::applicationDirPath() + "/../resources/data/mne-cpp-test-data/Result/Connectivity/ref_spectral_connectivity_wpli2.txt");
-    IOUtils::read_eigen_matrix(refConnectivity, refFileName);
+    MATHLIB::read_matrix(refConnectivity, refFileName.toStdString());
     m_dRefConnectivityOutput = refConnectivity.col(0).mean();
 
     //*********************************************************************************************************
@@ -308,7 +307,7 @@ void TestSpectralConnectivity::spectralConnectivityXCOR()
     QString outputResultFile("ref_spectral_connectivity_xcorr.txt");
     Network network = CrossCorrelation::calculate(m_connectivitySettings);
     m_dConnectivityOutput = network.connectivity_matrix()(0, 1);
-    IOUtils::write_eigen_matrix(network.connectivity_matrix(), outputResultFile);
+    MATHLIB::write_matrix(network.connectivity_matrix(), outputResultFile.toStdString());
 
     //*********************************************************************************************************
     // Load Results As Reference
@@ -316,7 +315,7 @@ void TestSpectralConnectivity::spectralConnectivityXCOR()
 
     MatrixXd refConnectivity;
     QString refFileName(QCoreApplication::applicationDirPath() + "/../resources/data/mne-cpp-test-data/Result/Connectivity/ref_spectral_connectivity_xcor.txt");
-    IOUtils::read_eigen_matrix(refConnectivity, refFileName);
+    MATHLIB::read_matrix(refConnectivity, refFileName.toStdString());
     m_dRefConnectivityOutput = refConnectivity(0, 1);
 
     //*********************************************************************************************************
@@ -340,7 +339,7 @@ std::vector<MatrixXd> TestSpectralConnectivity::readConnectivityData()
 {
     MatrixXd inputTrials;
     QString dataFileName(QCoreApplication::applicationDirPath() + "/../resources/data/mne-cpp-test-data/MEG/sample/data_spectral_connectivity.txt");
-    IOUtils::read_eigen_matrix(inputTrials, dataFileName);
+    MATHLIB::read_matrix(inputTrials, dataFileName.toStdString());
     int iNTrials = inputTrials.rows() / 2;
 
     std::vector<MatrixXd> matDataList;

@@ -21,6 +21,7 @@
 
 #include <math/kmeans.h>
 #include <math/linalg.h>
+#include <math/matrix_io.h>
 #include <math/numerics.h>
 #include <math/simplex_algorithm.h>
 #include <math/spectral.h>
@@ -39,6 +40,7 @@
 
 #include <cmath>
 #include <cstdlib>
+#include <filesystem>
 #include <format>
 #include <initializer_list>
 #include <print>
@@ -186,6 +188,18 @@ int main(int argc, char* argv[])
     //! [warp_calculate]
     const float warpErr = (warped - (vertices.rowwise() + RowVector3f(0.5f, -0.2f, 0.1f))).cwiseAbs().maxCoeff();
     ok &= expect(warpErr < 1e-4f, std::format("TPS warp reproduces the translation (max error {:g})", warpErr));
+
+    //! [matrix_io_usage]
+    // Plain text, one row per line: numpy.loadtxt reads it, and values read back bit-identical
+    const std::filesystem::path matrixPath = std::filesystem::temp_directory_path() / "ex_math_matrix.txt";
+    MatrixXd matrix(2, 3);
+    matrix << 0.1, -2.0 / 3.0, 3.25, 0.0, 1e-6, 42.0;
+    MATHLIB::write_matrix(matrix, matrixPath, "example matrix");
+    MatrixXd readBack;
+    MATHLIB::read_matrix(readBack, matrixPath);
+    //! [matrix_io_usage]
+    std::filesystem::remove(matrixPath);
+    ok &= expect(readBack == matrix, "text matrix round trip is bit-identical");
 
     std::println("{}", ok ? "All math checks passed." : "Math checks FAILED.");
     return ok ? EXIT_SUCCESS : EXIT_FAILURE;

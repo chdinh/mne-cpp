@@ -15,8 +15,9 @@
  * multi-taper spectral estimation (@ref UTILSLIB::Spectral),
  * Nelder–Mead simplex optimisation
  * (@ref UTILSLIB::SimplexAlgorithm), sphere fitting (@ref UTILSLIB::Sphere)
- * and thin-plate-spline warping (@ref UTILSLIB::Warp). It depends only on
- * Eigen, Qt core and UTILSLIB and is therefore safe to pull into any
+ * thin-plate-spline warping (@ref UTILSLIB::Warp) and plain-text matrix files
+ * (@ref MATHLIB::write_matrix, @ref MATHLIB::read_matrix). It depends only on
+ * Eigen and BASELIB and is therefore safe to pull into any
  * higher-level library (FIFFLIB, FWDLIB, INVERSELIB, CONNECTIVITYLIB).
  *
  * This header defines the @c MATHSHARED_EXPORT visibility macro that

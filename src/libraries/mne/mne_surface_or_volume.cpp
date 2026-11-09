@@ -40,7 +40,6 @@
 #include <fiff/fiff_dig_point.h>
 
 #include <math/sphere.h>
-#include <utils/ioutils.h>
 
 #include <QFile>
 #include <QTextStream>

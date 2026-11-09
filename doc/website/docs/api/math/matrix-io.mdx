@@ -1,0 +1,104 @@
+---
+id: matrix-io
+title: "MatrixIo"
+sidebar_label: MatrixIo
+sidebar_position: 23
+---
+
+# MatrixIo
+
+**Namespace:** `MATHLIB` &nbsp;·&nbsp; **Library:** Math Library
+
+:::info[Module]
+This page documents a **header-level module** — a collection of free
+functions that share an algorithmic topic. There is no enclosing C++
+class; the functions live directly in the library namespace.
+:::
+
+:::info[Python equivalent]
+`numpy.savetxt / numpy.loadtxt` in MNE-Python.
+:::
+
+`#include <math/matrix_io.h>`
+
+SPDX-License-Identifier: BSD-3-Clause Copyright (c) 2013-2026 MNE-CPP Authors.
+
+`MATHLIB::write_matrix` and `MATHLIB::read_matrix` round-trip any dense Eigen expression through plain text, one row per line, so intermediate results can be compared with NumPy (`numpy.loadtxt` and `numpy.savetxt` read and write the same layout) and reference data can be checked into a test-data repository. Values are written with enough digits to read back bit-identical; lines containing `#` are comments.
+
+---
+
+## Functions
+
+### write_matrix(matrix, path, description)
+
+```cpp
+bool write_matrix(const Eigen::DenseBase< Derived > & matrix, const std::filesystem::path & path, std::string_view description);
+```
+
+Writes a dense matrix as whitespace-separated text, one row per line.
+
+```cpp title="src/examples/ex_math/main.cpp"
+// Plain text, one row per line: numpy.loadtxt reads it, and values read back bit-identical
+const std::filesystem::path matrixPath = std::filesystem::temp_directory_path() / "ex_math_matrix.txt";
+MatrixXd matrix(2, 3);
+matrix << 0.1, -2.0 / 3.0, 3.25, 0.0, 1e-6, 42.0;
+MATHLIB::write_matrix(matrix, matrixPath, "example matrix");
+MatrixXd readBack;
+MATHLIB::read_matrix(readBack, matrixPath);
+```
+
+**Parameters:**
+
+- **matrix** : *const Eigen::DenseBase&lt; Derived &gt; &*
+  Matrix, vector or any dense Eigen expression to write.
+
+- **path** : *const std::filesystem::path &*
+  Output file; an existing file is overwritten.
+
+- **description** : *std::string_view*
+  If not empty, a comment header with the dimensions and this description is written first.
+
+**Returns:**
+
+- *bool* — True on success, false if the file could not be written.
+
+---
+
+### read_matrix(out, path)
+
+```cpp
+bool read_matrix(Eigen::Matrix< Scalar, Rows, Cols, Options, MaxRows, MaxCols > & out, const std::filesystem::path & path);
+```
+
+Reads a matrix written by `write_matrix` (or `numpy.savetxt`).
+
+Lines containing `#` and blank lines are skipped. A row-vector target receives the first row of the file, a column-vector target the first column.
+
+**Parameters:**
+
+- **out** : *Eigen::Matrix&lt; Scalar, Rows, Cols, Options, MaxRows, MaxCols &gt; &*
+  Resized and filled with the values read; left unchanged on failure.
+
+- **path** : *const std::filesystem::path &*
+  Whitespace-separated text file.
+
+**Returns:**
+
+- *bool* — True on success, false if the file cannot be opened, holds a non-numeric value or has rows of unequal length.
+
+---
+
+## Example
+
+- Start here: [ex_math](../../examples/math/ex_math.mdx) — Math library on inputs with known answers.
+- Full source: [`src/examples/ex_math/main.cpp`](https://github.com/mne-tools/mne-cpp/tree/staging/src/examples/ex_math/main.cpp)
+- Build target: `ex_math` (runs under CTest)
+
+## Authors of this file
+
+- Christoph Dinh &lt;christoph.dinh@mne-cpp.org&gt;
+- Lorenz Esch &lt;lorenz.esch@tu-ilmenau.de&gt;
+- Ricky &lt;rickytjen@yahoo.com&gt;
+- Juan GPC &lt;jgarciaprieto@mgh.harvard.edu&gt;
+- Gabriel Motta &lt;gabrielbenmotta@gmail.com&gt;
+- Andreas Griesshammer &lt;ag@fieldlineinc.com&gt;

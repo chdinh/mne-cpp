@@ -28,7 +28,7 @@
 #include <inv/hpi/inv_hpi_fit.h>
 #include <inv/hpi/inv_hpi_data_updater.h>
 
-#include <utils/ioutils.h>
+#include <math/matrix_io.h>
 #include <base/log.h>
 
 #include <fwd/fwd_coil_set.h>
@@ -50,7 +50,6 @@
 
 using namespace INVLIB;
 using namespace FIFFLIB;
-using namespace UTILSLIB;
 using namespace Eigen;
 
 //=============================================================================================================
@@ -259,6 +258,6 @@ int main(int argc, char* argv[])
             << "Average Duration:" << matPosition.col(9).mean() << "ms";
 
     if (bSave) {
-        IOUtils::write_eigen_matrix(matPosition, QString(QCoreApplication::applicationDirPath() + "/MNE-sample-data/" + sNameOut));
+        MATHLIB::write_matrix(matPosition, QString(QCoreApplication::applicationDirPath() + "/MNE-sample-data/" + sNameOut).toStdString());
     }
 }

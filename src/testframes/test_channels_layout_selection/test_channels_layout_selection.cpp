@@ -15,7 +15,6 @@
 // INCLUDES
 //=============================================================================================================
 
-#include <utils/ioutils.h>
 #include <channels/layoutloader.h>
 #include <base/string_utils.h>
 #include <channels/layoutmaker.h>
@@ -45,7 +44,6 @@
 // USED NAMESPACES
 //=============================================================================================================
 
-using namespace UTILSLIB;
 using namespace CHANNELSLIB;
 using namespace BASELIB;
 using namespace Eigen;

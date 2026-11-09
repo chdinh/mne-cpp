@@ -7,7 +7,7 @@
  * @author   Christoph Dinh <christoph.dinh@mne-cpp.org>
  * @since    2.4.0
  * @date     October 2026
- * @brief    Utilities library: observers, commands, matrix files, montages, layouts, selections and reports.
+ * @brief    Utilities library: observers, commands, montages, layouts, selections and reports.
  *
  * Every step checks its result (round trips, known electrode positions) and the
  * example exits non-zero on a mismatch.
@@ -20,7 +20,6 @@
 
 #include <utils/generics/commandpattern.h>
 #include <utils/generics/observerpattern.h>
-#include <utils/ioutils.h>
 #include <channels/layoutloader.h>
 #include <channels/layoutmaker.h>
 #include <channels/standard_montage.h>
@@ -160,17 +159,6 @@ int main(int argc, char* argv[])
     }
     qDeleteAll(queue);
     ok &= expect(journal == QStringList({"a", "b"}), "commands executed in order");
-
-    //! [ioutils_usage]
-    MatrixXd matrix(2, 3);
-    matrix << 1.5, -2.0, 3.25, 0.0, 1e-6, 42.0;
-    const QString matrixPath = dir.filePath("matrix.txt");
-    IOUtils::write_eigen_matrix(matrix, matrixPath, "example matrix");
-    MatrixXd readBack;
-    IOUtils::read_eigen_matrix(readBack, matrixPath);
-    //! [ioutils_usage]
-    ok &= expect(readBack.rows() == 2 && readBack.cols() == 3 && (readBack - matrix).cwiseAbs().maxCoeff() < 1e-12,
-                 "IOUtils text matrix round trip");
 
     //! [selection_io_usage]
     QMultiMap<QString, QStringList> selections;

@@ -19,7 +19,6 @@
 #include <base/log.h>
 #include <inv/hpi/inv_signal_model.h>
 #include <iostream>
-#include <utils/ioutils.h>
 
 //=============================================================================================================
 // QT INCLUDES
@@ -40,7 +39,6 @@
 
 using namespace INVLIB;
 using namespace Eigen;
-using namespace UTILSLIB;
 
 //=============================================================================================================
 /**

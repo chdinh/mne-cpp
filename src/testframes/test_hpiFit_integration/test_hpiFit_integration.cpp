@@ -30,7 +30,7 @@
 #include <inv/hpi/inv_hpi_fit.h>
 #include <inv/hpi/inv_hpi_data_updater.h>
 
-#include <utils/ioutils.h>
+#include <math/matrix_io.h>
 
 #include <fwd/fwd_coil_set.h>
 
@@ -51,7 +51,6 @@
 //=============================================================================================================
 
 using namespace FIFFLIB;
-using namespace UTILSLIB;
 using namespace INVLIB;
 using namespace Eigen;
 
@@ -141,8 +140,8 @@ void TestHpiFitIntegration::initTestCase()
     fiff_int_t quantum = ceil(quantum_sec * pFiffInfo->sfreq);
 
     // Read Quaternion File from maxfilter and calculated movements/rotations with python
-    IOUtils::read_eigen_matrix(mRefPos, QCoreApplication::applicationDirPath() + "/../resources/data/mne-cpp-test-data/Result/ref_hpiFit_pos.txt");
-    IOUtils::read_eigen_matrix(mRefResult, QCoreApplication::applicationDirPath() + "/../resources/data/mne-cpp-test-data/Result/ref_angle_move.txt");
+    MATHLIB::read_matrix(mRefPos, (QCoreApplication::applicationDirPath() + "/../resources/data/mne-cpp-test-data/Result/ref_hpiFit_pos.txt").toStdString());
+    MATHLIB::read_matrix(mRefResult, (QCoreApplication::applicationDirPath() + "/../resources/data/mne-cpp-test-data/Result/ref_angle_move.txt").toStdString());
 
     mHpiResult = mRefResult;
 
@@ -215,7 +214,7 @@ void TestHpiFitIntegration::initTestCase()
         mHpiResult(i, 1) = devHeadT.angle_to(hpiFitResult.devHeadTrans.trans);
     }
     // For debug: position file for InvHpiFit
-    //    UTILSLIB::IOUtils::write_eigen_matrix(mHpiPos, QCoreApplication::applicationDirPath() + "/../resources/data/MNE-sample-data/mHpiPos.txt");
+    //    MATHLIB::write_matrix(mHpiPos, QCoreApplication::applicationDirPath() + "/../resources/data/MNE-sample-data/mHpiPos.txt");
 }
 
 //=============================================================================================================

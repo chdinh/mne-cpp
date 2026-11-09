@@ -30,7 +30,7 @@
       "decoding",
       "math"
     ],
-    "tokens": 14956,
+    "tokens": 14923,
     "gui_outside_design": []
   },
   "libraries": {
@@ -368,7 +368,7 @@
       "by_category": {},
       "public_header_includes": 0,
       "q_object": 0,
-      "files": 15,
+      "files": 16,
       "modules": []
     },
     "ml": {
@@ -448,20 +448,20 @@
       ]
     },
     "utils": {
-      "tokens": 282,
+      "tokens": 249,
       "by_category": {
-        "containers": 16,
-        "files": 42,
+        "containers": 15,
+        "files": 34,
         "global": 10,
         "objects_signals": 15,
         "other": 2,
-        "regex": 8,
-        "strings": 187,
+        "regex": 7,
+        "strings": 164,
         "time": 2
       },
-      "public_header_includes": 21,
+      "public_header_includes": 16,
       "q_object": 1,
-      "files": 13,
+      "files": 11,
       "modules": [
         "Core"
       ]

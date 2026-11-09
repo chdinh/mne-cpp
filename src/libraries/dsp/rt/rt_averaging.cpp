@@ -22,7 +22,6 @@
 
 #include <mne/mne_epoch_data_list.h>
 
-#include <utils/ioutils.h>
 #include "rt_detect_trigger.h"
 #include <math/numerics.h>
 

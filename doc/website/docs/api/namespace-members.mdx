@@ -7,7 +7,7 @@ sidebar_position: 6
 
 # Namespace Members
 
-Index of 441 namespace-level symbols (functions, typedefs, enums, variables) across all public namespaces.
+Index of 443 namespace-level symbols (functions, typedefs, enums, variables) across all public namespaces.
 
 - **Accuracy** `[enum]` in [INVLIB](/docs/api/inv/)
 - **acqApplyThreadPolicy** `[fn]` in [ACQLIB](/docs/api/acq/) — Applies `policy` to the calling thread: CPUs first, then priority.
@@ -388,6 +388,7 @@ Index of 441 namespace-level symbols (functions, typedefs, enums, variables) acr
 - **PythonProgressCallback** `[type]` in [UTILSLIB](/docs/api/utils/) — Progress callback signature.
 - **read** `[fn]` in [ACQLIB](/docs/api/acq/) — Reads samples into an Eigen matrix, resizing it only when its shape differs (so a reused matrix does not allocate).
 - **read_file_bytes** `[fn]` in [BASELIB](/docs/api/base/) — Reads a whole file, decompressing it if asked to.
+- **read_matrix** `[fn]` in [MATHLIB](/docs/api/math/) — Reads a matrix written by `write_matrix` (or `numpy.savetxt`).
 - **ref** `[fn]` in [ACQLIB](/docs/api/acq/)
 - **ref** `[fn]` in [ACQLIB](/docs/api/acq/)
 - **registerFiffScheme** `[fn]` in [ACQLIB](/docs/api/acq/) — Registers the fiff:// scheme with `AcqDeviceRegistry::instance()`.
@@ -450,3 +451,4 @@ Index of 441 namespace-level symbols (functions, typedefs, enums, variables) acr
 - **visualizationModeFromName** `[fn]` in [DISP3DLIB](/docs/api/disp3-d/) — Convert a visualization mode name to enum.
 - **visualizationModeName** `[fn]` in [DISP3DLIB](/docs/api/disp3-d/) — Convert a `VisualizationMode` enum to display string.
 - **write** `[fn]` in [ACQLIB](/docs/api/acq/) — Writes all columns of an Eigen matrix to an output stream: reserves, encodes, commits.
+- **write_matrix** `[fn]` in [MATHLIB](/docs/api/math/) — Writes a dense matrix as whitespace-separated text, one row per line.

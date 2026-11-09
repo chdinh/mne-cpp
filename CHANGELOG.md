@@ -28,6 +28,7 @@ aliases; replace the old spelling as below.
 | `QTest::ignoreMessage` for library messages | `BASELIB::LogCapture` |
 | `utils/error.h`, `byte_stream.h`, `endian.h`, `string_utils.h`, `thread_pool.h`, `buildinfo.h` and `UTILSLIB::Expected`, `Error`, `ByteStream`, `StringList`, `ThreadPool`, ... | `base/...` and `BASELIB::...`, in the new `mne_base` library |
 | `utils/layoutloader.h`, `layoutmaker.h`, `selectionio.h`, `montage/standard_montage.h` and `UTILSLIB::LayoutLoader`, `LayoutMaker`, `SelectionIO`, `StandardMontage` | `channels/...` and `CHANNELSLIB::...`, in the new `mne_channels` library |
+| `utils/ioutils.h`, `IOUtils::write_eigen_matrix(m, path, desc)`, `IOUtils::read_eigen_matrix(m, path)` | `math/matrix_io.h`, `MATHLIB::write_matrix(m, path, desc)`, `MATHLIB::read_matrix(m, path)` |
 | `utils/generics/circularbuffer.h`, `CircularBuffer_Matrix_double` | `base/circular_buffer.h`, `BASELIB::CircularBuffer<Eigen::MatrixXd>` |
 | `CircularBuffer::push(ptr, n)`, `getFreeElementsRead()`, `pause()` | `push(std::span)`, `size()`; `pause` is removed |
 | `MNE_LOG_LEVEL=FATAL` | removed; `CRIT` is the highest level |
@@ -37,6 +38,11 @@ aliases; replace the old spelling as below.
   on the standard library, zlib and Qt Core only, so `mne_lsl` logs through it.
 - `MNE_LOG_LEVEL` now sets the initial `Log::level()`; it can be changed at
   run time with `Log::set_level`, and messages below it are not formatted.
+- `MATHLIB::write_matrix` accepts any dense Eigen expression and writes the
+  shortest text that reads back bit-identical (it used to round to 6 digits).
+  `read_matrix` is locale-independent, reads `nan`/`inf`, and fails instead of
+  crashing on ragged rows, non-numeric values or a fixed-size target that does
+  not fit.
 - `FiffTag::toInt`, `toJulian`, `toIntMatrix` and `toFloatMatrix` are no longer
   inline.
 - `fiff/fiff.h`, `connectivity/connectivity.h` and `mne/mne.h` are umbrella

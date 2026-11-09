@@ -406,7 +406,8 @@ const apiSidebar: SidebarsConfig['apiSidebar'] = [
         'api/math/simplex-algorithm',
         'api/math/warp',
         'api/math/sphere',
-        'api/math/fit-user'
+        'api/math/fit-user',
+        'api/math/matrix-io'
       ],
     },
     {
@@ -485,7 +486,6 @@ const apiSidebar: SidebarsConfig['apiSidebar'] = [
         'api/utils/filter-io',
         'api/utils/filter-parameter',
         'api/utils/i-command',
-        'api/utils/io-utils',
         'api/utils/i-observer',
         'api/utils/numerics',
         'api/utils/parks-mc-clellan',

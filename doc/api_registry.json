@@ -8112,17 +8112,17 @@
       "python_url": null
     },
     {
-      "name": "IOUtils",
-      "module": "utils",
-      "header": "utils/ioutils.h",
+      "name": "MatrixIo",
+      "module": "math",
+      "header": "math/matrix_io.h",
       "origin": "mne-c + custom",
       "mne_c_tool": null,
       "mne_python": null,
       "sklearn": null,
-      "test": null,
-      "example": "ex_utils",
+      "test": "test_math_matrix_io",
+      "example": "ex_math",
       "example_snippet": [
-        "ex_utils/main.cpp#ioutils_usage"
+        "ex_math/main.cpp#matrix_io_usage"
       ],
       "example_mode": "run",
       "status": "documented",
@@ -8130,8 +8130,9 @@
       "documented": true,
       "sidebar_position": 23,
       "guide": null,
-      "python_equiv": null,
-      "python_url": null
+      "python_equiv": "numpy.savetxt / numpy.loadtxt",
+      "python_url": null,
+      "kind": "module"
     },
     {
       "name": "IObserver",
