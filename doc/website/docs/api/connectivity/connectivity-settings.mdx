@@ -164,7 +164,7 @@ Constructs a [`ConnectivitySettings`](/docs/api/connectivity/connectivity-settin
 
 Sensor- or source-level functional connectivity of averaged MEG/EEG data with a selectable metric, shown as a 3D network.
 
-````cpp title="src/examples/ex_connectivity/connectivitysettingsmanager.h, line 94"
+````cpp title="src/examples/ex_connectivity/connectivitysettingsmanager.h, line 93"
 ConnectivitySettings m_settings;
 std::shared_ptr<RtConnectivity> m_pRtConnectivity;
 std::vector<Network> m_rawNetworkData; /**< Results as computed. */
@@ -197,7 +197,7 @@ settings.setFFTSize(256);
 
 Compare connectivity metrics side by side on the same averaged sensor- or source-level data.
 
-````cpp title="src/examples/ex_connectivity_comparison/main.cpp, line 200"
+````cpp title="src/examples/ex_connectivity_comparison/main.cpp, line 199"
 ConnectivitySettings conSettings;
 ````
 

@@ -143,7 +143,7 @@ data = proj * data;
 // Read one condition of evoked data, baseline-corrected over -200 to 0 ms
 const FiffEvoked evoked("sample_audvis-ave.fif", "Left Auditory", {{-0.2f, 0.0f}});
 
-// Read noise covariance; throws UTILSLIB::Error if the file holds none
+// Read noise covariance; throws BASELIB::Error if the file holds none
 const FiffCov cov("sample_audvis-cov.fif");
 ```
 

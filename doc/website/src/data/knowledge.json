@@ -1862,7 +1862,7 @@
     {
       "name": "ex_warp",
       "title": "Thin-plate-spline warping",
-      "brief": "Example demonstrating thin-plate-spline (TPS) warping with UTILSLIB::Warp",
+      "brief": "Example demonstrating thin-plate-spline (TPS) warping with MATHLIB::Warp",
       "thumbnail": "",
       "url": "/docs/examples/math/ex_warp/",
       "library": "math",

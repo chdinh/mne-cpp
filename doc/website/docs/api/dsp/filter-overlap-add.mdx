@@ -1,18 +1,18 @@
 ---
 id: filter-overlap-add
-title: "RTPROCESSINGLIB::FilterOverlapAdd"
+title: "DSPLIB::FilterOverlapAdd"
 sidebar_label: FilterOverlapAdd
 sidebar_position: 29
 ---
 
 # FilterOverlapAdd
 
-**Namespace:** `RTPROCESSINGLIB` &nbsp;·&nbsp; **Library:** DSP Library &nbsp;·&nbsp; **Source:** [`dsp/rt/rt_filter.h`](https://github.com/mne-tools/mne-cpp/blob/staging/src/libraries/dsp/rt/rt_filter.h)
+**Namespace:** `DSPLIB` &nbsp;·&nbsp; **Library:** DSP Library &nbsp;·&nbsp; **Source:** [`dsp/rt/rt_filter.h`](https://github.com/mne-tools/mne-cpp/blob/staging/src/libraries/dsp/rt/rt_filter.h)
 
 `#include <dsp/rt_filter.h>`
 
 ```cpp
-class RTPROCESSINGLIB::FilterOverlapAdd
+class DSPLIB::FilterOverlapAdd
 ```
 
 Filtering with FFT convolution and the overlap add method for continuous data streams.
@@ -130,7 +130,7 @@ Reset the stored overlap matrices.
 
 FIR filter design, application and storage with the dsp library.
 
-````cpp title="src/examples/ex_dsp_filter/main.cpp, line 160"
+````cpp title="src/examples/ex_dsp_filter/main.cpp, line 159"
 FilterOverlapAdd overlapAdd; // keeps the filter tail between calls
 const int block = 1000;
 MatrixXd streamed(2, n);

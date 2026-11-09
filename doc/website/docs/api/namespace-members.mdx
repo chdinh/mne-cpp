@@ -35,11 +35,11 @@ Index of 453 namespace-level symbols (functions, typedefs, enums, variables) acr
 - **AcqUnit** `[enum]` in [ACQLIB](/docs/api/acq/) — SI unit of the physical value of a channel (value = raw * scale + offset, times 10^unitExponent).
 - **AcqWait** `[enum]` in [ACQLIB](/docs/api/acq/) — How a waiting reader or writer is woken.
 - **AcqWritePart** `[type]` in [ACQLIB](/docs/api/acq/) — Writable run.
-- **addReferenceChannels** `[fn]` in [UTILSLIB](/docs/api/utils/) — Add reference channel(s) back as zero-filled rows.
+- **addReferenceChannels** `[fn]` in [DSPLIB](/docs/api/dsp/) — Add reference channel(s) back as zero-filled rows.
 - **allowedDatatypes** `[fn]` in [BIDSLIB](/docs/api/bids/) — All allowed BIDS datatypes.
 - **allowedElectrophysiologyDatatypes** `[fn]` in [BIDSLIB](/docs/api/bids/) — All allowed BIDS electrophysiology datatypes.
-- **annotateAmplitude** `[fn]` in [UTILSLIB](/docs/api/utils/) — Annotate spans where consecutive samples jump or stay flat, as mne.preprocessing.annotate_amplitude.
-- **annotateMusclZscore** `[fn]` in [UTILSLIB](/docs/api/utils/) — Detect muscle artifacts via high-frequency z-score and annotate bad segments.
+- **annotateAmplitude** `[fn]` in [DSPLIB](/docs/api/dsp/) — Annotate spans where consecutive samples jump or stay flat, as mne.preprocessing.annotate_amplitude.
+- **annotateMusclZscore** `[fn]` in [DSPLIB](/docs/api/dsp/) — Detect muscle artifacts via high-frequency z-score and annotate bad segments.
 - **annotations_from_events** `[fn]` in [FIFFLIB](/docs/api/fiff/) — Converts events to annotations, like mne.annotations_from_events.
 - **applyForward** `[fn]` in [INVLIB](/docs/api/inv/) — Project a source estimate to the sensors, as mne.apply_forward.
 - **applyInverseEpochs** `[fn]` in [INVLIB](/docs/api/inv/) — Apply inverse operator to each epoch in a list.
@@ -71,7 +71,7 @@ Index of 453 namespace-level symbols (functions, typedefs, enums, variables) acr
 - **buildDateTime** `[fn]` in [DECODINGLIB](/docs/api/decoding/) — Returns build date and time.
 - **buildDateTime** `[fn]` in [DISP3DLIB](/docs/api/disp3-d/) — Returns build date and time.
 - **buildDateTime** `[fn]` in [DISPLIB](/docs/api/disp/) — Returns build date and time.
-- **buildDateTime** `[fn]` in `DSPLIB` — Returns build date and time.
+- **buildDateTime** `[fn]` in [DSPLIB](/docs/api/dsp/) — Returns build date and time.
 - **buildDateTime** `[fn]` in [FIFFLIB](/docs/api/fiff/) — Returns build date and time.
 - **buildDateTime** `[fn]` in [FSLIB](/docs/api/fs/) — Returns build date and time.
 - **buildDateTime** `[fn]` in [FWDLIB](/docs/api/fwd/) — Returns build date and time.
@@ -96,7 +96,7 @@ Index of 453 namespace-level symbols (functions, typedefs, enums, variables) acr
 - **buildHash** `[fn]` in [DECODINGLIB](/docs/api/decoding/) — Returns abbreviated build git hash.
 - **buildHash** `[fn]` in [DISP3DLIB](/docs/api/disp3-d/) — Returns abbreviated build git hash.
 - **buildHash** `[fn]` in [DISPLIB](/docs/api/disp/) — Returns abbreviated build git hash.
-- **buildHash** `[fn]` in `DSPLIB` — Returns abbreviated build git hash.
+- **buildHash** `[fn]` in [DSPLIB](/docs/api/dsp/) — Returns abbreviated build git hash.
 - **buildHash** `[fn]` in [FIFFLIB](/docs/api/fiff/) — Returns abbreviated build git hash.
 - **buildHash** `[fn]` in [FSLIB](/docs/api/fs/) — Returns abbreviated build git hash.
 - **buildHash** `[fn]` in [FWDLIB](/docs/api/fwd/) — Returns abbreviated build git hash.
@@ -121,7 +121,7 @@ Index of 453 namespace-level symbols (functions, typedefs, enums, variables) acr
 - **buildHashLong** `[fn]` in [DECODINGLIB](/docs/api/decoding/) — Returns full build git hash.
 - **buildHashLong** `[fn]` in [DISP3DLIB](/docs/api/disp3-d/) — Returns full build git hash.
 - **buildHashLong** `[fn]` in [DISPLIB](/docs/api/disp/) — Returns full build git hash.
-- **buildHashLong** `[fn]` in `DSPLIB` — Returns full build git hash.
+- **buildHashLong** `[fn]` in [DSPLIB](/docs/api/dsp/) — Returns full build git hash.
 - **buildHashLong** `[fn]` in [FIFFLIB](/docs/api/fiff/) — Returns full build git hash.
 - **buildHashLong** `[fn]` in [FSLIB](/docs/api/fs/) — Returns full build git hash.
 - **buildHashLong** `[fn]` in [FWDLIB](/docs/api/fwd/) — Returns full build git hash.
@@ -146,10 +146,10 @@ Index of 453 namespace-level symbols (functions, typedefs, enums, variables) acr
 - **ColorMaps** `[enum]` in [DISPLIB](/docs/api/disp/)
 - **Compression** `[enum]` in [BASELIB](/docs/api/base/) — How the bytes of a file are stored.
 - **compute_connectivity** `[fn]` in [CONNECTIVITYLIB](/docs/api/connectivity/) — Computes every connectivity method the settings ask for, as mne_connectivity.spectral_connectivity_epochs does for its spectral methods.
-- **computeBridgedElectrodes** `[fn]` in [UTILSLIB](/docs/api/utils/) — Detect bridged EEG electrodes.
-- **computeElectricalDistance** `[fn]` in [UTILSLIB](/docs/api/utils/) — Compute electrical distance matrix between EEG channels.
-- **computeFilteredAverage** `[fn]` in [RTPROCESSINGLIB](/docs/api/dsp/) — Computes the filtered average for given fiff raw data.
-- **computeLofScores** `[fn]` in [UTILSLIB](/docs/api/utils/) — Compute LOF scores for a feature matrix.
+- **computeBridgedElectrodes** `[fn]` in [DSPLIB](/docs/api/dsp/) — Detect bridged EEG electrodes.
+- **computeElectricalDistance** `[fn]` in [DSPLIB](/docs/api/dsp/) — Compute electrical distance matrix between EEG channels.
+- **computeFilteredAverage** `[fn]` in [DSPLIB](/docs/api/dsp/) — Computes the filtered average for given fiff raw data.
+- **computeLofScores** `[fn]` in [DSPLIB](/docs/api/dsp/) — Compute LOF scores for a feature matrix.
 - **computeSourceBandPower** `[fn]` in [INVLIB](/docs/api/inv/) — Compute band power for source estimate.
 - **computeSourcePsd** `[fn]` in [INVLIB](/docs/api/inv/) — Compute PSD for a source estimate using Welch's method.
 - **computeWhitener** `[fn]` in [INVLIB](/docs/api/inv/) — Compute whitening matrix from a noise covariance.
@@ -177,10 +177,10 @@ Index of 453 namespace-level symbols (functions, typedefs, enums, variables) acr
 - **defaultTris** `[fn]` in [FSLIB](/docs/api/fs/)
 - **defaultVariant** `[var]` in [COMLIB](/docs/api/com/)
 - **defaultVectorXi** `[var]` in [FIFFLIB](/docs/api/fiff/)
-- **detectTriggerFlanksGrad** `[fn]` in [RTPROCESSINGLIB](/docs/api/dsp/) — detectTriggerFlanksGrad detects flanks from a given data matrix in row wise order.
-- **detectTriggerFlanksGrad** `[fn]` in [RTPROCESSINGLIB](/docs/api/dsp/) — detectTriggerFlanksGrad detects flanks from a given data matrix in row wise order.
-- **detectTriggerFlanksMax** `[fn]` in [RTPROCESSINGLIB](/docs/api/dsp/) — detectTriggerFlanks detects flanks from a given data matrix in row wise order.
-- **detectTriggerFlanksMax** `[fn]` in [RTPROCESSINGLIB](/docs/api/dsp/) — detectTriggerFlanks detects flanks from a given data matrix in row wise order.
+- **detectTriggerFlanksGrad** `[fn]` in [DSPLIB](/docs/api/dsp/) — detectTriggerFlanksGrad detects flanks from a given data matrix in row wise order.
+- **detectTriggerFlanksGrad** `[fn]` in [DSPLIB](/docs/api/dsp/) — detectTriggerFlanksGrad detects flanks from a given data matrix in row wise order.
+- **detectTriggerFlanksMax** `[fn]` in [DSPLIB](/docs/api/dsp/) — detectTriggerFlanks detects flanks from a given data matrix in row wise order.
+- **detectTriggerFlanksMax** `[fn]` in [DSPLIB](/docs/api/dsp/) — detectTriggerFlanks detects flanks from a given data matrix in row wise order.
 - **DetrendMode** `[enum]` in [DISPLIB](/docs/api/disp/) — Channel display metadata (read-only from the renderer's perspective).
 - **dipoleFitFuncs** `[type]` in [INVLIB](/docs/api/inv/) — Pointer alias for [`dipoleFitFuncsRec`](/docs/api/inv/dipole-fit-funcs-rec), used throughout the dipole fitting module.
 - **Direction** `[enum]` in [CONNECTIVITYLIB](/docs/api/connectivity/) — Selects which incident edges of a node count.
@@ -216,19 +216,19 @@ Index of 453 namespace-level symbols (functions, typedefs, enums, variables) acr
 - **fiff_ushort_t** `[type]` in [FIFFLIB](/docs/api/fiff/)
 - **fiffFrameToBidsCoord** `[fn]` in [BIDSLIB](/docs/api/bids/) — Maps FIFF coordinate frame constants to BIDS coordinate system names.
 - **fiffKindToBidsType** `[fn]` in [BIDSLIB](/docs/api/bids/) — Maps FIFF channel kind constants to BIDS channel type strings.
-- **filterChannel** `[fn]` in [RTPROCESSINGLIB](/docs/api/dsp/) — This function is used to filter row-wise in parallel threads.
-- **filterChpi** `[fn]` in [UTILSLIB](/docs/api/utils/) — Remove cHPI excitation signals from MEG data by notch filtering.
-- **filterChpi** `[fn]` in [UTILSLIB](/docs/api/utils/) — Overload that attempts to extract cHPI frequencies from FiffInfo.
-- **filterData** `[fn]` in [RTPROCESSINGLIB](/docs/api/dsp/) — Creates a user designed filter kernel and filters the raw input data.
-- **filterData** `[fn]` in [RTPROCESSINGLIB](/docs/api/dsp/) — Calculates the filtered version of the raw input data based on a given list filters.
-- **filterDataBlock** `[fn]` in [RTPROCESSINGLIB](/docs/api/dsp/) — Calculates the filtered version of the raw input data block.
-- **filterFile** `[fn]` in [RTPROCESSINGLIB](/docs/api/dsp/) — Creates a user designed filter kernel, filters data from an input file and writes the filtered data to a pIODevice.
-- **filterFile** `[fn]` in [RTPROCESSINGLIB](/docs/api/dsp/) — Filters data from an input file based on an existing filter kernel and writes the filtered data to a pIODevice.
-- **findBadChannelsLof** `[fn]` in [UTILSLIB](/docs/api/utils/) — Detect bad channels using Local Outlier Factor (LOF).
-- **findBadChannelsMaxwell** `[fn]` in [UTILSLIB](/docs/api/utils/) — Detect bad MEG channels using [`SSS`](/docs/api/dsp/sss) reconstruction residuals.
+- **filterChannel** `[fn]` in [DSPLIB](/docs/api/dsp/) — This function is used to filter row-wise in parallel threads.
+- **filterChpi** `[fn]` in [DSPLIB](/docs/api/dsp/) — Remove cHPI excitation signals from MEG data by notch filtering.
+- **filterChpi** `[fn]` in [DSPLIB](/docs/api/dsp/) — Overload that attempts to extract cHPI frequencies from FiffInfo.
+- **filterData** `[fn]` in [DSPLIB](/docs/api/dsp/) — Creates a user designed filter kernel and filters the raw input data.
+- **filterData** `[fn]` in [DSPLIB](/docs/api/dsp/) — Calculates the filtered version of the raw input data based on a given list filters.
+- **filterDataBlock** `[fn]` in [DSPLIB](/docs/api/dsp/) — Calculates the filtered version of the raw input data block.
+- **filterFile** `[fn]` in [DSPLIB](/docs/api/dsp/) — Creates a user designed filter kernel, filters data from an input file and writes the filtered data to a pIODevice.
+- **filterFile** `[fn]` in [DSPLIB](/docs/api/dsp/) — Filters data from an input file based on an existing filter kernel and writes the filtered data to a pIODevice.
+- **findBadChannelsLof** `[fn]` in [DSPLIB](/docs/api/dsp/) — Detect bad channels using Local Outlier Factor (LOF).
+- **findBadChannelsMaxwell** `[fn]` in [DSPLIB](/docs/api/dsp/) — Detect bad MEG channels using [`SSS`](/docs/api/dsp/sss) reconstruction residuals.
 - **fitMatchedPoints** `[fn]` in [MNELIB](/docs/api/mne/) — Corresponding point set registration using quaternions.
 - **fitUser** `[type]` in [FWDLIB](/docs/api/fwd/)
-- **fixStimArtifact** `[fn]` in [UTILSLIB](/docs/api/utils/) — Repair stimulus artifacts by interpolating or zeroing data around events.
+- **fixStimArtifact** `[fn]` in [DSPLIB](/docs/api/dsp/) — Repair stimulus artifacts by interpolating or zeroing data around events.
 - **fromBigEndian** `[fn]` in [BASELIB](/docs/api/base/)
 - **fromFiffInfo** `[fn]` in [ACQLIB](/docs/api/acq/) — Describes a FIFF measurement as a stream.
 - **fromTokens** `[fn]` in [INVLIB](/docs/api/inv/) — Reconstruct an [`InvSourceEstimate`](/docs/api/inv/inv-source-estimate) from a token sequence.
@@ -283,9 +283,9 @@ Index of 453 namespace-level symbols (functions, typedefs, enums, variables) acr
 - **kHelmet** `[var]` in `SURFACEKEYS`
 - **kLhInflated** `[var]` in `SURFACEKEYS`
 - **kLhPrefix** `[var]` in `SURFACEKEYS`
-- **KMeansDistance** `[enum]` in [UTILSLIB](/docs/api/utils/) — Distance metric for K-Means clustering.
-- **KMeansEmptyAction** `[enum]` in [UTILSLIB](/docs/api/utils/) — Action to take when a K-Means cluster becomes empty.
-- **KMeansStart** `[enum]` in [UTILSLIB](/docs/api/utils/) — Initialization strategy for K-Means clustering.
+- **KMeansDistance** `[enum]` in [MATHLIB](/docs/api/math/) — Distance metric for K-Means clustering.
+- **KMeansEmptyAction** `[enum]` in [MATHLIB](/docs/api/math/) — Action to take when a K-Means cluster becomes empty.
+- **KMeansStart** `[enum]` in [MATHLIB](/docs/api/math/) — Initialization strategy for K-Means clustering.
 - **kRhInflated** `[var]` in `SURFACEKEYS`
 - **kRhPrefix** `[var]` in `SURFACEKEYS`
 - **kSensDig** `[var]` in `SURFACEKEYS`
@@ -298,7 +298,7 @@ Index of 453 namespace-level symbols (functions, typedefs, enums, variables) acr
 - **local_clock** `[fn]` in [LSLLIB](/docs/api/lsl/) — Seconds of the monotonic clock LSL timestamps refer to, as liblsl's lsl_local_clock().
 - **lslRuntime** `[fn]` in [ACQLIB](/docs/api/acq/)
 - **m_matViridrisData** `[var]` in [DISPLIB](/docs/api/disp/)
-- **makeSpharaProjector** `[fn]` in [UTILSLIB](/docs/api/utils/) — Constructs a SPHARA operator.
+- **makeSpharaProjector** `[fn]` in [DSPLIB](/docs/api/dsp/) — Constructs a SPHARA operator.
 - **map** `[fn]` in [ACQLIB](/docs/api/acq/) — Maps part `i` of `view` as a channels x samples matrix of the native type, without copy.
 - **mapRangeExact** `[fn]` in [ACQLIB](/docs/api/acq/) — The samples of `to` whose instants lie in the time span of samples [`first`, `end`) of `from`, e.g.
 - **mapSample** `[fn]` in [ACQLIB](/docs/api/acq/) — Maps a sample of one stream to the sample of another stream at the same physical time through host time, so the result carries both clocks' uncertainty.
@@ -385,9 +385,9 @@ Index of 453 namespace-level symbols (functions, typedefs, enums, variables) acr
 - **packABGR** `[fn]` in [DISP3DLIB](/docs/api/disp3-d/) — Pack RGBA colour components into a single ABGR uint32_t suitable for GPU vertex attributes declared as UNormByte4.
 - **parse_progress_line** `[fn]` in [PYBRIDGELIB](/docs/api/pybridge/) — Parses a progress line of the form `"[progress] 42.5%"` or `"[progress] 42.5% message"` (case-insensitive tag, surrounding whitespace ignored).
 - **pathFromUtf8** `[fn]` in [BASELIB](/docs/api/base/)
-- **peakFinder** `[fn]` in [UTILSLIB](/docs/api/utils/) — Find peaks in a 1D signal.
-- **peakFinderMne** `[fn]` in [UTILSLIB](/docs/api/utils/) — Noise-tolerant extrema search of `mne.preprocessing.peak_finder`.
-- **peakProminences** `[fn]` in [UTILSLIB](/docs/api/utils/) — Compute prominence of each peak.
+- **peakFinder** `[fn]` in [DSPLIB](/docs/api/dsp/) — Find peaks in a 1D signal.
+- **peakFinderMne** `[fn]` in [DSPLIB](/docs/api/dsp/) — Noise-tolerant extrema search of `mne.preprocessing.peak_finder`.
+- **peakProminences** `[fn]` in [DSPLIB](/docs/api/dsp/) — Compute prominence of each peak.
 - **performIcp** `[fn]` in [MNELIB](/docs/api/mne/) — The ICP algorithm to register a point cloud with a surface.
 - **perspectivePresetRotation** `[fn]` in [DISP3DLIB](/docs/api/disp3-d/) — Default perspective rotation quaternion used for the "Perspective" camera.
 - **PickKind** `[enum]` in [DISP3DLIB](/docs/api/disp3-d/) — Kind of object that produced a 3-D pick.
@@ -410,25 +410,25 @@ Index of 453 namespace-level symbols (functions, typedefs, enums, variables) acr
 - **SceneLayerKind** `[enum]` in [DISP3DLIB](/docs/api/disp3-d/) — Modality of a layer in the multimodal scene.
 - **sensorParentToKeyPrefix** `[fn]` in `SURFACEKEYS` — Map a parent-item display text (e.g.
 - **sensorTypeToObjectKey** `[fn]` in `SURFACEKEYS` — Map from user-facing sensor type name (e.g.
-- **setBipolarReference** `[fn]` in [UTILSLIB](/docs/api/utils/) — Create bipolar derivations from EEG channels.
-- **setEegReference** `[fn]` in [UTILSLIB](/docs/api/utils/) — Re-reference EEG channels to average, specific channel(s), or REST.
+- **setBipolarReference** `[fn]` in [DSPLIB](/docs/api/dsp/) — Create bipolar derivations from EEG channels.
+- **setEegReference** `[fn]` in [DSPLIB](/docs/api/dsp/) — Re-reference EEG channels to average, specific channel(s), or REST.
 - **ShaderMode** `[enum]` in [DISP3DLIB](/docs/api/disp3-d/) — Shader pipeline modes supported by the renderer.
 - **shaderModeFromName** `[fn]` in [DISP3DLIB](/docs/api/disp3-d/) — Convert a shader name ("Standard", "Holographic", "Anatomical") to enum.
 - **shaderModeName** `[fn]` in [DISP3DLIB](/docs/api/disp3-d/) — Convert a `ShaderMode` enum to display string.
-- **simulateEvoked** `[fn]` in [UTILSLIB](/docs/api/utils/) — Simulate evoked data from a source estimate and forward model.
-- **simulateEvokedNoiseless** `[fn]` in [UTILSLIB](/docs/api/utils/) — Simulate evoked data without noise.
-- **simulateStc** `[fn]` in [UTILSLIB](/docs/api/utils/) — Create a synthetic source time course.
-- **simulateStcFromWaveforms** `[fn]` in [UTILSLIB](/docs/api/utils/) — Create a synthetic source time course from custom waveforms.
+- **simulateEvoked** `[fn]` in [DSPLIB](/docs/api/dsp/) — Simulate evoked data from a source estimate and forward model.
+- **simulateEvokedNoiseless** `[fn]` in [DSPLIB](/docs/api/dsp/) — Simulate evoked data without noise.
+- **simulateStc** `[fn]` in [DSPLIB](/docs/api/dsp/) — Create a synthetic source time course.
+- **simulateStcFromWaveforms** `[fn]` in [DSPLIB](/docs/api/dsp/) — Create a synthetic source time course from custom waveforms.
 - **SliceOrientation** `[enum]` in [DISP3DLIB](/docs/api/disp3-d/) — Orientation for an orthogonal MRI slice.
 - **SliceOrientation** `[enum]` in [MRILIB](/docs/api/mri/) — Slice orientation for orthogonal MRI volume slicing.
 - **split** `[fn]` in [BASELIB](/docs/api/base/)
 - **SplitterHit** `[enum]` in [DISP3DLIB](/docs/api/disp3-d/) — Identifies which splitter(s) are hit by a cursor position.
 - **StatsCorrection** `[enum]` in [STSLIB](/docs/api/sts/) — Multiple comparison correction method.
 - **StatsTailType** `[enum]` in [STSLIB](/docs/api/sts/) — Tail type for statistical tests.
-- **StimArtifactMode** `[enum]` in [UTILSLIB](/docs/api/utils/) — Mode for stimulus artifact repair.
+- **StimArtifactMode** `[enum]` in [DSPLIB](/docs/api/dsp/) — Mode for stimulus artifact repair.
 - **StringList** `[type]` in [BASELIB](/docs/api/base/) — Ordered list of names, e.g.
 - **StringList** `[type]` in [DISPLIB](/docs/api/disp/) — Ordered list of names, e.g.
-- **StringList** `[type]` in `DSPLIB` — Ordered list of names, e.g.
+- **StringList** `[type]` in [DSPLIB](/docs/api/dsp/) — Ordered list of names, e.g.
 - **StringList** `[type]` in [FIFFLIB](/docs/api/fiff/) — Ordered list of names, e.g.
 - **StringList** `[type]` in [FWDLIB](/docs/api/fwd/) — Ordered list of names, e.g.
 - **StringList** `[type]` in [INVLIB](/docs/api/inv/) — Ordered list of names, e.g.
@@ -445,7 +445,7 @@ Index of 453 namespace-level symbols (functions, typedefs, enums, variables) acr
 - **toBigEndian** `[fn]` in [BASELIB](/docs/api/base/)
 - **toDLPack** `[fn]` in [ACQLIB](/docs/api/acq/) — Exports one part of `view` as a read-only DLPack tensor of shape channels x samples, without a copy.
 - **toDouble** `[fn]` in [BASELIB](/docs/api/base/)
-- **toEventMatrix** `[fn]` in [RTPROCESSINGLIB](/docs/api/dsp/) — Transforms QMap with stored information about events per stim channel to a list of event matrices.
+- **toEventMatrix** `[fn]` in [DSPLIB](/docs/api/dsp/) — Transforms QMap with stored information about events per stim channel to a list of event matrices.
 - **toFiffInfo** `[fn]` in [ACQLIB](/docs/api/acq/) — Builds FIFF measurement info for a stream, e.g.
 - **toInt** `[fn]` in [BASELIB](/docs/api/base/)
 - **tokenIds** `[fn]` in [INVLIB](/docs/api/inv/) — Extract just the integer token IDs from a token sequence (discarding continuous values).

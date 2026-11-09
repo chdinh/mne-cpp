@@ -20,24 +20,23 @@ All public namespaces in the MNE-CPP library tree.
 | [`DECODINGLIB`](/docs/api/decoding/) | 5 | Supervised and unsupervised spatial-filter decompositions for M/EEG decoding. |
 | [`DISP3DLIB`](/docs/api/disp3-d/) | 49 | 3-D brain visualisation using the Qt RHI rendering backend. |
 | [`DISPLIB`](/docs/api/disp/) | 70 | 2-D display widgets and visualisation helpers (charts, topography, colour maps). |
-| `DSPLIB` | 0 | Digital signal processing (filtering, spectrograms, real-time averaging, HPI, noise reduction). |
+| [`DSPLIB`](/docs/api/dsp/) | 76 | Digital signal processing (filtering, spectrograms, real-time averaging, HPI, noise reduction). |
 | [`FIFFLIB`](/docs/api/fiff/) | 39 | FIFF file I/O, in-memory data structures and high-level readers/writers. |
 | [`FSLIB`](/docs/api/fs/) | 8 | FreeSurfer surface, annotation and parcellation I/O for mne-cpp. |
 | [`FWDLIB`](/docs/api/fwd/) | 13 | Forward modelling — BEM solver, spherical models, sensor/coil definitions and the lead-field assembly that links current dipoles to MEG/EEG sensor readings. |
 | [`IEEGLIB`](/docs/api/ieeg/) | 6 | Intracranial EEG (sEEG, ECoG): implantation, bipolar referencing, cortical mapping. |
 | [`INVLIB`](/docs/api/inv/) | 54 | Inverse source estimation (MNE, dSPM, sLORETA, dipole fitting). |
 | [`LSLLIB`](/docs/api/lsl/) | 3 | Lab Streaming Layer (LSL) integration for real-time data exchange. |
-| [`MATHLIB`](/docs/api/math/) | 0 | Mathematical algorithms and geometry (linear algebra, optimization, spectral estimation). |
+| [`MATHLIB`](/docs/api/math/) | 9 | Mathematical algorithms and geometry (linear algebra, optimization, spectral estimation). |
 | [`MLLIB`](/docs/api/ml/) | 4 | Tensors, model abstraction, ONNX Runtime inference and Python training drivers used across mne-cpp. |
 | [`MNALIB`](/docs/api/mna/) | 22 | MNE Analysis Container Format (mna/mnx). |
 | [`MNELIB`](/docs/api/mne/) | 64 | Core MNE data structures (source spaces, source estimates, hemispheres). |
 | [`MRILIB`](/docs/api/mri/) | 8 | Volume I/O, voxel geometry and slice resampling for structural MRI data inside mne-cpp. |
 | [`PYBRIDGELIB`](/docs/api/pybridge/) | 4 | Python interoperability: script launcher and MNE-Python cross-validation helpers. |
 | [`REPORTLIB`](/docs/api/report/) | 1 | HTML reports of analysis results. |
-| [`RTPROCESSINGLIB`](/docs/api/dsp/) | 15 |  |
 | [`STSLIB`](/docs/api/sts/) | 10 | Statistical testing (t-tests, F-tests, cluster permutation, multiple comparison correction). |
 | `SURFACEKEYS` | 0 | Centralised string constants for surface map keys. |
-| [`UTILSLIB`](/docs/api/utils/) | 70 | Shared utilities (I/O helpers, spectral analysis, layout management, warp algorithms). |
+| [`UTILSLIB`](/docs/api/utils/) | 0 | Shared utilities (I/O helpers, spectral analysis, layout management, warp algorithms). |
 | `Ui` | 0 |  |
 
 ## Class inventory by namespace
@@ -311,6 +310,85 @@ All public namespaces in the MNE-CPP library tree.
 - [TimeRulerWidget](/docs/api/disp/time-ruler-widget)
 - [TriggerDetectionView](/docs/api/disp/trigger-detection-view)
 
+### DSPLIB
+
+- [AnnotateAmplitudeParams](/docs/api/dsp/annotate-amplitude-params)
+- [AnnotateMusclParams](/docs/api/dsp/annotate-muscl-params)
+- [ArtifactDetect](/docs/api/utils/artifact-detect)
+- [ArtifactDetectEcgParams](/docs/api/utils/artifact-detect-ecg-params)
+- [ArtifactDetectEogParams](/docs/api/utils/artifact-detect-eog-params)
+- [ArtifactDetectProjParams](/docs/api/utils/artifact-detect-proj-params)
+- [BadChannelDetect](/docs/api/utils/bad-channel-detect)
+- [BadChannelDetectParams](/docs/api/utils/bad-channel-detect-params)
+- [BadChannelsMaxwellParams](/docs/api/dsp/bad-channels-maxwell-params)
+- [BadChannelsMaxwellResult](/docs/api/dsp/bad-channels-maxwell-result)
+- [BridgedElectrodeParams](/docs/api/dsp/bridged-electrode-params)
+- [ChannelDerivation](/docs/api/utils/channel-derivation)
+- [ConnectivityAec](/docs/api/dsp/connectivity-aec)
+- [CosineFilter](/docs/api/utils/cosine-filter)
+- [Csd](/docs/api/utils/csd)
+- [CsdResult](/docs/api/utils/csd-result)
+- [DerivationRule](/docs/api/utils/derivation-rule)
+- [Dpss](/docs/api/utils/dpss)
+- [DpssResult](/docs/api/utils/dpss-result)
+- [EogRegression](/docs/api/dsp/eog-regression)
+- [EpochExtractor](/docs/api/utils/epoch-extractor)
+- [EpochExtractorParams](/docs/api/utils/epoch-extractor-params)
+- [ExtendedInfomax](/docs/api/dsp/extended-infomax)
+- [FilterChpiParams](/docs/api/dsp/filter-chpi-params)
+- [FilterIO](/docs/api/utils/filter-io)
+- [FilterKernel](/docs/api/dsp/filter-kernel)
+- [FilterObject](/docs/api/dsp/filter-object)
+- [FilterOverlapAdd](/docs/api/dsp/filter-overlap-add)
+- [FilterParameter](/docs/api/utils/filter-parameter)
+- [FineCalEntry](/docs/api/dsp/fine-cal-entry)
+- [FineCalibration](/docs/api/dsp/fine-calibration)
+- [FirFilter](/docs/api/dsp/fir-filter)
+- [HeadPosEntry](/docs/api/dsp/head-pos-entry)
+- [ICA](/docs/api/dsp/ica)
+- [IcaResult](/docs/api/dsp/ica-result)
+- [IirBiquad](/docs/api/dsp/iir-biquad)
+- [IirFilter](/docs/api/dsp/iir-filter)
+- [IirStreamFilter](/docs/api/dsp/iir-stream-filter)
+- [InfomaxResult](/docs/api/dsp/infomax-result)
+- [LofBadChannelParams](/docs/api/dsp/lof-bad-channel-params)
+- [MaxwellMoveCompParams](/docs/api/dsp/maxwell-move-comp-params)
+- [MaxwellMovementComp](/docs/api/dsp/maxwell-movement-comp)
+- [MorletTfr](/docs/api/dsp/morlet-tfr)
+- [MorletTfrResult](/docs/api/dsp/morlet-tfr-result)
+- [MultitaperPsd](/docs/api/dsp/multitaper-psd)
+- [MultitaperPsdResult](/docs/api/dsp/multitaper-psd-result)
+- [MultitaperTfr](/docs/api/dsp/multitaper-tfr)
+- [MultitaperTfrResult](/docs/api/dsp/multitaper-tfr-result)
+- [ParksMcClellan](/docs/api/utils/parks-mc-clellan)
+- [PeakFinderParams](/docs/api/dsp/peak-finder-params)
+- [PicardIca](/docs/api/dsp/picard-ica)
+- [Resample](/docs/api/dsp/resample)
+- [RtAveraging](/docs/api/dsp/rt-averaging)
+- [RtAveragingWorker](/docs/api/dsp/rt-averaging-worker)
+- [RtConnectivity](/docs/api/dsp/rt-connectivity)
+- [RtConnectivityWorker](/docs/api/dsp/rt-connectivity-worker)
+- [RtCov](/docs/api/dsp/rt-cov)
+- [RtCovComputeResult](/docs/api/dsp/rt-cov-compute-result)
+- [RtHpi](/docs/api/dsp/rt-hpi)
+- [RtHpiWorker](/docs/api/dsp/rt-hpi-worker)
+- [RtInvOp](/docs/api/dsp/rt-inv-op)
+- [RtInvOpInput](/docs/api/dsp/rt-inv-op-input)
+- [RtInvOpWorker](/docs/api/dsp/rt-inv-op-worker)
+- [RtNoise](/docs/api/dsp/rt-noise)
+- [RtNoiseWorker](/docs/api/dsp/rt-noise-worker)
+- [SSS](/docs/api/dsp/sss)
+- [SSSParams](/docs/api/dsp/sss-params)
+- [SimulateStcParams](/docs/api/dsp/simulate-stc-params)
+- [SpectogramInputData](/docs/api/utils/spectogram-input-data)
+- [Spectrogram](/docs/api/utils/spectrogram)
+- [SurfaceLaplacian](/docs/api/dsp/surface-laplacian)
+- [SurfaceLaplacianResult](/docs/api/dsp/surface-laplacian-result)
+- [WelchPsd](/docs/api/dsp/welch-psd)
+- [WelchPsdResult](/docs/api/dsp/welch-psd-result)
+- [Xdawn](/docs/api/dsp/xdawn)
+- [XdawnResult](/docs/api/dsp/xdawn-result)
+
 ### FIFFLIB
 
 - [AverageCategory](/docs/api/fiff/average-category)
@@ -452,6 +530,18 @@ All public namespaces in the MNE-CPP library tree.
 - [stream_inlet](/docs/api/lsl/stream_inlet)
 - [stream_outlet](/docs/api/lsl/stream_outlet)
 
+### MATHLIB
+
+- [FitUser](/docs/api/math/fit-user)
+- [KMeans](/docs/api/math/k-means)
+- [Linalg](/docs/api/math/linalg)
+- [Numerics](/docs/api/utils/numerics)
+- [SimplexAlgorithm](/docs/api/math/simplex-algorithm)
+- [Spectral](/docs/api/utils/spectral)
+- [Sphere](/docs/api/math/sphere)
+- [TaperedSpectraInputData](/docs/api/utils/tapered-spectra-input-data)
+- [Warp](/docs/api/math/warp)
+
 ### MLLIB
 
 - [MLTrainer](/docs/api/ml/ml-trainer)
@@ -573,24 +663,6 @@ All public namespaces in the MNE-CPP library tree.
 
 - [Report](/docs/api/report/report-class)
 
-### RTPROCESSINGLIB
-
-- [FilterObject](/docs/api/dsp/filter-object)
-- [FilterOverlapAdd](/docs/api/dsp/filter-overlap-add)
-- [RtAveraging](/docs/api/dsp/rt-averaging)
-- [RtAveragingWorker](/docs/api/dsp/rt-averaging-worker)
-- [RtConnectivity](/docs/api/dsp/rt-connectivity)
-- [RtConnectivityWorker](/docs/api/dsp/rt-connectivity-worker)
-- [RtCov](/docs/api/dsp/rt-cov)
-- [RtCovComputeResult](/docs/api/dsp/rt-cov-compute-result)
-- [RtHpi](/docs/api/dsp/rt-hpi)
-- [RtHpiWorker](/docs/api/dsp/rt-hpi-worker)
-- [RtInvOp](/docs/api/dsp/rt-inv-op)
-- [RtInvOpInput](/docs/api/dsp/rt-inv-op-input)
-- [RtInvOpWorker](/docs/api/dsp/rt-inv-op-worker)
-- [RtNoise](/docs/api/dsp/rt-noise)
-- [RtNoiseWorker](/docs/api/dsp/rt-noise-worker)
-
 ### STSLIB
 
 - [StatsAdjacency](/docs/api/sts/stats-adjacency)
@@ -603,76 +675,3 @@ All public namespaces in the MNE-CPP library tree.
 - [StatsTtest](/docs/api/sts/stats-ttest)
 - [StatsTtestResult](/docs/api/sts/stats-ttest-result)
 - [StsCovEstimators](/docs/api/sts/sts-cov-estimators)
-
-### UTILSLIB
-
-- [AnnotateAmplitudeParams](/docs/api/dsp/annotate-amplitude-params)
-- [AnnotateMusclParams](/docs/api/dsp/annotate-muscl-params)
-- [ArtifactDetect](/docs/api/utils/artifact-detect)
-- [ArtifactDetectEcgParams](/docs/api/utils/artifact-detect-ecg-params)
-- [ArtifactDetectEogParams](/docs/api/utils/artifact-detect-eog-params)
-- [ArtifactDetectProjParams](/docs/api/utils/artifact-detect-proj-params)
-- [BadChannelDetect](/docs/api/utils/bad-channel-detect)
-- [BadChannelDetectParams](/docs/api/utils/bad-channel-detect-params)
-- [BadChannelsMaxwellParams](/docs/api/dsp/bad-channels-maxwell-params)
-- [BadChannelsMaxwellResult](/docs/api/dsp/bad-channels-maxwell-result)
-- [BridgedElectrodeParams](/docs/api/dsp/bridged-electrode-params)
-- [ChannelDerivation](/docs/api/utils/channel-derivation)
-- [ConnectivityAec](/docs/api/dsp/connectivity-aec)
-- [CosineFilter](/docs/api/utils/cosine-filter)
-- [Csd](/docs/api/utils/csd)
-- [CsdResult](/docs/api/utils/csd-result)
-- [DerivationRule](/docs/api/utils/derivation-rule)
-- [Dpss](/docs/api/utils/dpss)
-- [DpssResult](/docs/api/utils/dpss-result)
-- [EogRegression](/docs/api/dsp/eog-regression)
-- [EpochExtractor](/docs/api/utils/epoch-extractor)
-- [EpochExtractorParams](/docs/api/utils/epoch-extractor-params)
-- [ExtendedInfomax](/docs/api/dsp/extended-infomax)
-- [FilterChpiParams](/docs/api/dsp/filter-chpi-params)
-- [FilterIO](/docs/api/utils/filter-io)
-- [FilterKernel](/docs/api/dsp/filter-kernel)
-- [FilterParameter](/docs/api/utils/filter-parameter)
-- [FineCalEntry](/docs/api/dsp/fine-cal-entry)
-- [FineCalibration](/docs/api/dsp/fine-calibration)
-- [FirFilter](/docs/api/dsp/fir-filter)
-- [FitUser](/docs/api/math/fit-user)
-- [HeadPosEntry](/docs/api/dsp/head-pos-entry)
-- [ICA](/docs/api/dsp/ica)
-- [IcaResult](/docs/api/dsp/ica-result)
-- [IirBiquad](/docs/api/dsp/iir-biquad)
-- [IirFilter](/docs/api/dsp/iir-filter)
-- [IirStreamFilter](/docs/api/dsp/iir-stream-filter)
-- [InfomaxResult](/docs/api/dsp/infomax-result)
-- [KMeans](/docs/api/math/k-means)
-- [Linalg](/docs/api/math/linalg)
-- [LofBadChannelParams](/docs/api/dsp/lof-bad-channel-params)
-- [MaxwellMoveCompParams](/docs/api/dsp/maxwell-move-comp-params)
-- [MaxwellMovementComp](/docs/api/dsp/maxwell-movement-comp)
-- [MorletTfr](/docs/api/dsp/morlet-tfr)
-- [MorletTfrResult](/docs/api/dsp/morlet-tfr-result)
-- [MultitaperPsd](/docs/api/dsp/multitaper-psd)
-- [MultitaperPsdResult](/docs/api/dsp/multitaper-psd-result)
-- [MultitaperTfr](/docs/api/dsp/multitaper-tfr)
-- [MultitaperTfrResult](/docs/api/dsp/multitaper-tfr-result)
-- [Numerics](/docs/api/utils/numerics)
-- [ParksMcClellan](/docs/api/utils/parks-mc-clellan)
-- [PeakFinderParams](/docs/api/dsp/peak-finder-params)
-- [PicardIca](/docs/api/dsp/picard-ica)
-- [Resample](/docs/api/dsp/resample)
-- [SSS](/docs/api/dsp/sss)
-- [SSSParams](/docs/api/dsp/sss-params)
-- [SimplexAlgorithm](/docs/api/math/simplex-algorithm)
-- [SimulateStcParams](/docs/api/dsp/simulate-stc-params)
-- [SpectogramInputData](/docs/api/utils/spectogram-input-data)
-- [Spectral](/docs/api/utils/spectral)
-- [Spectrogram](/docs/api/utils/spectrogram)
-- [Sphere](/docs/api/math/sphere)
-- [SurfaceLaplacian](/docs/api/dsp/surface-laplacian)
-- [SurfaceLaplacianResult](/docs/api/dsp/surface-laplacian-result)
-- [TaperedSpectraInputData](/docs/api/utils/tapered-spectra-input-data)
-- [Warp](/docs/api/math/warp)
-- [WelchPsd](/docs/api/dsp/welch-psd)
-- [WelchPsdResult](/docs/api/dsp/welch-psd-result)
-- [Xdawn](/docs/api/dsp/xdawn)
-- [XdawnResult](/docs/api/dsp/xdawn-result)
