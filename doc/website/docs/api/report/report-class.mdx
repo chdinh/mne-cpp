@@ -26,9 +26,10 @@ Report report("Auditory evoked responses, sub-01");
 report.add_key_value("Data", {{"Raw file", "sample_audvis_raw.fif"}, {"Channels", "306 MEG, 60 EEG"}});
 report.add_table("Inverse", {"Parameter", "Value"}, {{"Method", "dSPM"}, {"SNR", "3"}, {"Depth", "0.8"}});
 report.add_text("Notes", "Bad channels MEG 2443 and EEG 053 were excluded.");
+report.add_image("Evoked response", evokedSvg(), ImageFormat::Svg, "MEG 1332, 0 to 400 ms"); // or add_image_file("...", "plot.png")
 report.add_code("Pipeline", "mne_process_raw --raw sample_audvis_raw.fif --lowpass 40");
 const std::string html = report.to_html();
-report.save(path); // open in any browser
+report.save(path); // one self-contained page: open it in any browser
 ```
 
 ---
@@ -105,6 +106,47 @@ Adds a preformatted code block.
 
 ---
 
+### add_image(title, data, format, caption)
+
+Adds a figure, embedded in the page.
+
+**Parameters:**
+
+- **title** : *std::string_view*
+  Section heading, also the image's alternative text.
+
+- **data** : *std::string_view*
+  Encoded image, e.g. the bytes of a PNG file or the text of an SVG document.
+
+- **format** : *ImageFormat*
+  Encoding of `data`.
+
+- **caption** : *std::string_view*
+  Text shown below the figure; none if empty.
+
+---
+
+### add_image_file(title, path, caption)
+
+Adds a figure from a .png, .jpg, .jpeg or .svg file (case-insensitive extension), embedded in the page.
+
+**Parameters:**
+
+- **title** : *std::string_view*
+  Section heading, also the image's alternative text.
+
+- **path** : *const std::filesystem::path &*
+  Image file.
+
+- **caption** : *std::string_view*
+  Text shown below the figure; none if empty.
+
+**Returns:**
+
+- *bool* — True on success, false if the file cannot be read or its format is not supported.
+
+---
+
 ### section_count()
 
 **Returns:**
@@ -117,7 +159,7 @@ Adds a preformatted code block.
 
 **Returns:**
 
-- *std::string* — Self-contained HTML document with the title, all sections in the order they were added, and a footer with the generation time (UTC).
+- *std::string* — Self-contained HTML document with the title, a table of contents (from two sections on), all sections in the order they were added, and a footer with the generation time (UTC).
 
 ---
 
@@ -146,7 +188,7 @@ Writes `to_html` to a file.
 
 ## Example
 
-- Start here: [ex_report](../../examples/report/ex_report.mdx) — Report library: summarise an analysis run as a self-contained HTML page.
+- Start here: [ex_report](../../examples/report/ex_report.mdx) — Report library: summarise an analysis run, figures included, as a self-contained HTML page.
 - Full source: [`src/examples/ex_report/main.cpp`](https://github.com/mne-tools/mne-cpp/tree/staging/src/examples/ex_report/main.cpp)
 - Build target: `ex_report` (runs under CTest)
 
@@ -154,16 +196,17 @@ Writes `to_html` to a file.
 
 ### [ex_report](../../examples/report/ex_report.mdx)
 
-Report library: summarise an analysis run as a self-contained HTML page.
+Report library: summarise an analysis run, figures included, as a self-contained HTML page.
 
-````cpp title="src/examples/ex_report/main.cpp, line 71"
+````cpp title="src/examples/ex_report/main.cpp, line 90"
 Report report("Auditory evoked responses, sub-01");
 report.add_key_value("Data", {{"Raw file", "sample_audvis_raw.fif"}, {"Channels", "306 MEG, 60 EEG"}});
 report.add_table("Inverse", {"Parameter", "Value"}, {{"Method", "dSPM"}, {"SNR", "3"}, {"Depth", "0.8"}});
 report.add_text("Notes", "Bad channels MEG 2443 and EEG 053 were excluded.");
+report.add_image("Evoked response", evokedSvg(), ImageFormat::Svg, "MEG 1332, 0 to 400 ms"); // or add_image_file("...", "plot.png")
 report.add_code("Pipeline", "mne_process_raw --raw sample_audvis_raw.fif --lowpass 40");
 const std::string html = report.to_html();
-report.save(path); // open in any browser
+report.save(path); // one self-contained page: open it in any browser
 ````
 
 ## Authors of this file

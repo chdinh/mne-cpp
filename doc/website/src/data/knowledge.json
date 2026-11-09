@@ -1727,7 +1727,7 @@
     {
       "name": "ex_report",
       "title": "Summarise an analysis run as an HTML report",
-      "brief": "Report library: summarise an analysis run as a self-contained HTML page",
+      "brief": "Report library: summarise an analysis run, figures included, as a self-contained HTML page",
       "thumbnail": "",
       "url": "/docs/examples/report/ex_report/",
       "library": "report",
