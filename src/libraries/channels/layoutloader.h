@@ -17,14 +17,14 @@
  * layouts are read by @ref MNELIB::MNELayout.
  */
 
-#ifndef LAYOUTLOADER_H
-#define LAYOUTLOADER_H
+#ifndef CHANNELS_LAYOUTLOADER_H
+#define CHANNELS_LAYOUTLOADER_H
 
 //=============================================================================================================
 // INCLUDES
 //=============================================================================================================
 
-#include "utils_global.h"
+#include "channels_global.h"
 
 #include <string>
 #include <vector>
@@ -49,7 +49,7 @@
 // DEFINE NAMESPACE MNELIB
 //=============================================================================================================
 
-namespace UTILSLIB
+namespace CHANNELSLIB
 {
 
 //=============================================================================================================
@@ -64,7 +64,7 @@ namespace UTILSLIB
  *
  * @snippet ex_utils/main.cpp layout_loader_usage
  */
-class UTILSSHARED_EXPORT LayoutLoader
+class CHANNELSSHARED_EXPORT LayoutLoader
 {
 public:
     //=========================================================================================================
@@ -103,4 +103,4 @@ private:
 };
 } // NAMESPACE
 
-#endif // LAYOUTLOADER_H
+#endif // CHANNELS_LAYOUTLOADER_H

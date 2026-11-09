@@ -23,8 +23,8 @@
 
 #include "ui_brainampsetupprojectwidget.h"
 
-#include <utils/layoutloader.h>
-#include <utils/layoutmaker.h>
+#include <channels/layoutloader.h>
+#include <channels/layoutmaker.h>
 
 //=============================================================================================================
 // QT INCLUDES
@@ -39,6 +39,7 @@
 
 using namespace BRAINAMPPLUGIN;
 using namespace UTILSLIB;
+using namespace CHANNELSLIB;
 
 //=============================================================================================================
 // DEFINE MEMBER METHODS

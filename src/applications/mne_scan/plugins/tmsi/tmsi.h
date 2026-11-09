@@ -38,7 +38,7 @@
 #include <Eigen/Core>
 #include <scMeas/realtimemultisamplearray.h>
 
-#include <utils/layoutloader.h>
+#include <channels/layoutloader.h>
 
 #include <fiff/fiff.h>
 

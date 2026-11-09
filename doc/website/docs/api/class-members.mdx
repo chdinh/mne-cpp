@@ -1415,7 +1415,7 @@ Index of 6306 public class members (functions, variables, typedefs, enums) acros
 - **eigenvalues** `[fn]` in [DecodingSsd](/docs/api/decoding/decoding-ssd)
 - **eigvec** `[var]` in [FiffCov](/docs/api/fiff/fiff-cov) — Matrix of eigenvectors (each row represents an eigenvector).
 - **electrodeContactClicked** `[signal]` in [BrainView](/docs/api/disp3-d/brain-view) — Emitted when a click lands on an electrode contact.
-- **electrodeCount** `[fn]` in [StandardMontage](/docs/api/utils/standard-montage) — Get the number of electrodes in a montage.
+- **electrodeCount** `[fn]` in [StandardMontage](/docs/api/channels/standard-montage) — Get the number of electrodes in a montage.
 - **ElectrodeObject** `[fn]` in [ElectrodeObject](/docs/api/disp3-d/electrode-object)
 - **electrodes** `[var]` in [BidsRawData](/docs/api/bids/bids-raw-data) — Electrode positions from *_electrodes.tsv.
 - **electrodesTsvPath** `[fn]` in [BIDSPath](/docs/api/bids/bids-path) — Returns the path for the electrodes.tsv sidecar.
@@ -1773,7 +1773,7 @@ Index of 6306 public class members (functions, variables, typedefs, enums) acros
 - **find_stim_steps** `[fn]` in [FiffEvents](/docs/api/fiff/fiff-events) — Find the samples where all stimulus channels change at once, like mne.find_stim_steps.
 - **find_tag** `[fn]` in [FiffDirNode](/docs/api/fiff/fiff-dir-node) — Reads the first tag of a kind among the tags of this block.
 - **findArtifactComponents** `[fn]` in [MlIcaLabel](/docs/api/decoding/ml-ica-label) — Extract indices of artifact components (EOG, ECG, muscle).
-- **findElectrode** `[fn]` in [StandardMontage](/docs/api/utils/standard-montage) — Look up a single electrode position by name.
+- **findElectrode** `[fn]` in [StandardMontage](/docs/api/channels/standard-montage) — Look up a single electrode position by name.
 - **findEntry** `[fn]` in [FineCalibration](/docs/api/dsp/fine-calibration) — Find entry by channel number.
 - **findHeadSurfaceKey** `[fn]` in [SensorFieldMapper](/docs/api/disp3-d/sensor-field-mapper) — Find a BEM head surface key in the given surface map.
 - **findHelmetSurfaceKey** `[fn]` in [SensorFieldMapper](/docs/api/disp3-d/sensor-field-mapper) — Find the MEG helmet surface key ("sens_surface_meg") if present.
@@ -2147,7 +2147,7 @@ Index of 6306 public class members (functions, variables, typedefs, enums) acros
 - **getDistanceTimeSpacer** `[fn]` in [RtFiffRawView](/docs/api/disp/rt-fiff-raw-view) — Returns teh current distance between time spacers.
 - **getDoArtifactThresholdRejection** `[fn]` in [ArtifactSettingsView](/docs/api/disp/artifact-settings-view)
 - **getDoBaselineCorrection** `[fn]` in [AveragingSettingsView](/docs/api/disp/averaging-settings-view)
-- **getElectrodeNames** `[fn]` in [StandardMontage](/docs/api/utils/standard-montage) — Get electrode names for a standard montage.
+- **getElectrodeNames** `[fn]` in [StandardMontage](/docs/api/channels/standard-montage) — Get electrode names for a standard montage.
 - **getEventsToDisplay** `[fn]` in [RtFiffRawViewModel](/docs/api/disp/rt-fiff-raw-view-model) — Returns event sample positions between two samples.
 - **getEvokedSet** `[fn]` in [EvokedSetModel](/docs/api/disp/evoked-set-model)
 - **getEvokedSetModel** `[fn]` in [AverageLayoutView](/docs/api/disp/average-layout-view) — Returns the currently set [`EvokedSetModel`](/docs/api/disp/evoked-set-model).
@@ -2211,7 +2211,7 @@ Index of 6306 public class members (functions, variables, typedefs, enums) acros
 - **getModalityMap** `[fn]` in [ButterflyView](/docs/api/disp/butterfly-view) — Get the activation of the already created modality check boxes.
 - **getModalityMap** `[fn]` in [ModalitySelectionView](/docs/api/disp/modality-selection-view) — Get the activation of the already created modality check boxes.
 - **getModelCheckpoint** `[fn]` in [MinimumNormSettingsView](/docs/api/disp/minimum-norm-settings-view) — Returns the current model checkpoint path.
-- **getMontage** `[fn]` in [StandardMontage](/docs/api/utils/standard-montage) — Get a standard montage by system name.
+- **getMontage** `[fn]` in [StandardMontage](/docs/api/channels/standard-montage) — Get a standard montage by system name.
 - **getName** `[fn]` in [FilterKernel](/docs/api/dsp/filter-kernel)
 - **getName** `[fn]` in [FilterParameter](/docs/api/utils/filter-parameter) — Returns parameter name.
 - **getName** `[fn]` in [InvMinimumNorm](/docs/api/inv/inv-minimum-norm) — Get the name of the inverse operator.
@@ -3087,8 +3087,8 @@ Index of 6306 public class members (functions, variables, typedefs, enums) acros
 - **makeCorticalMap** `[fn]` in [MNECorticalMap](/docs/api/mne/mne-cortical-map) — Create the resolution matrix M = K G that maps source activity to its estimate.
 - **makeDICS** `[fn]` in [InvDICS](/docs/api/inv/inv-dics) — Compute DICS beamformer spatial filters for one or more frequencies.
 - **makeFixedLengthEpochs** `[fn]` in [FiffEpochs](/docs/api/fiff/fiff-epochs) — Create fixed-length epochs from continuous data.
-- **makeLayout** `[fn]` in [LayoutMaker](/docs/api/utils/layout-maker) — Reads the specified ANT elc-layout file.
-- **makeLayout** `[fn]` in [LayoutMaker](/docs/api/utils/layout-maker) — Reads the specified ANT elc-layout file.
+- **makeLayout** `[fn]` in [LayoutMaker](/docs/api/channels/layout-maker) — Reads the specified ANT elc-layout file.
+- **makeLayout** `[fn]` in [LayoutMaker](/docs/api/channels/layout-maker) — Reads the specified ANT elc-layout file.
 - **makeLCMV** `[fn]` in [InvLCMV](/docs/api/inv/inv-lcmv) — Compute LCMV beamformer spatial filters.
 - **makeLCMVResolutionMatrix** `[fn]` in [InvLCMV](/docs/api/inv/inv-lcmv) — Compute the LCMV resolution matrix: R = W @ G.
 - **makeProj** `[var]` in [ProcessingSettings](/docs/api/mne/processing-settings) — Create a new projection operator.
@@ -3426,7 +3426,7 @@ Index of 6306 public class members (functions, variables, typedefs, enums) acros
 - **name** `[var]` in [BidsElectrode](/docs/api/bids/bids-electrode) — Electrode name (REQUIRED).
 - **name** `[var]` in [BrainVisionChannelInfo](/docs/api/bids/brain-vision-channel-info)
 - **name** `[var]` in [ChannelDisplayInfo](/docs/api/disp/channel-display-info) — Channel name for the label.
-- **name** `[var]` in [ElectrodePosition](/docs/api/utils/electrode-position) — Electrode name (e.g.
+- **name** `[var]` in [ElectrodePosition](/docs/api/channels/electrode-position) — Electrode name (e.g.
 - **name** `[var]` in [FsLabel](/docs/api/fs/fs-label) — Name of the label.
 - **name** `[var]` in [FwdEegSphereModel](/docs/api/fwd/fwd-eeg-sphere-model) — Textual identifier.
 - **name** `[var]` in [IeegBipolarPair](/docs/api/ieeg/ieeg-bipolar-pair) — Derivation name, "anode-cathode" as in MNE-Python.
@@ -4044,7 +4044,7 @@ Index of 6306 public class members (functions, variables, typedefs, enums) acros
 - **ports** `[var]` in [MNELayout](/docs/api/mne/mne-layout) — Viewports in file order.
 - **pos** `[fn]` in [ByteStream](/docs/api/base/byte-stream)
 - **pos** `[var]` in [CoilParam](/docs/api/inv/coil-param)
-- **pos** `[var]` in [ElectrodePosition](/docs/api/utils/electrode-position) — Position in metres, MNI (fsaverage MRI) coordinates.
+- **pos** `[var]` in [ElectrodePosition](/docs/api/channels/electrode-position) — Position in metres, MNI (fsaverage MRI) coordinates.
 - **pos** `[var]` in [FiffDirEntry](/docs/api/fiff/fiff-dir-entry) — Location in file; the data is located at pos + FIFFC_DATA_OFFSET.
 - **pos** `[fn]` in [FileByteStream](/docs/api/base/file-byte-stream)
 - **pos** `[var]` in [FsLabel](/docs/api/fs/fs-label) — Locations in meters.
@@ -4349,15 +4349,15 @@ Index of 6306 public class members (functions, variables, typedefs, enums) acros
 - **read_tag_data** `[fn]` in [FiffStream](/docs/api/fiff/fiff-stream) — Reads the payload of a tag whose header `read_tag_info()` has read.
 - **read_tag_info** `[fn]` in [FiffStream](/docs/api/fiff/fiff-stream) — Reads the header of the tag at the current position.
 - **read_w** `[fn]` in [InvSourceEstimate](/docs/api/inv/inv-source-estimate) — Reads a .w file (one value per vertex), as mne.read_w does.
-- **readAsaElcFile** `[fn]` in [LayoutLoader](/docs/api/utils/layout-loader) — Reads the specified ANT elc-layout file.
-- **readAsaElcFile** `[fn]` in [LayoutLoader](/docs/api/utils/layout-loader) — Reads the specified ANT elc-layout file.
+- **readAsaElcFile** `[fn]` in [LayoutLoader](/docs/api/channels/layout-loader) — Reads the specified ANT elc-layout file.
+- **readAsaElcFile** `[fn]` in [LayoutLoader](/docs/api/channels/layout-loader) — Reads the specified ANT elc-layout file.
 - **readAvailableData** `[fn]` in [RtCmdClient](/docs/api/com/rt-cmd-client) — Returns the available data.
 - **readBadChannelsFromFile** `[fn]` in [FiffInfoBase](/docs/api/fiff/fiff-info-base) — Read bad channel names from a plain text file (one name per line, '#' comments skipped).
 - **readBids** `[fn]` in [IeegImplantation](/docs/api/ieeg/ieeg-implantation) — Read a BIDS iEEG `*_electrodes.tsv`.
 - **readBigEndian** `[fn]` in [ByteStream](/docs/api/base/byte-stream) — Reads `count` big-endian values and converts them to host byte order.
 - **readBigEndian** `[fn]` in [ByteStream](/docs/api/base/byte-stream)
-- **readBrainstormMonFile** `[fn]` in [SelectionIO](/docs/api/utils/selection-io) — Reads the specified Brainstorm montage file.
-- **readBrainstormMonFile** `[fn]` in [SelectionIO](/docs/api/utils/selection-io) — Reads the specified Brainstorm montage file.
+- **readBrainstormMonFile** `[fn]` in [SelectionIO](/docs/api/channels/selection-io) — Reads the specified Brainstorm montage file.
+- **readBrainstormMonFile** `[fn]` in [SelectionIO](/docs/api/channels/selection-io) — Reads the specified Brainstorm montage file.
 - **readCsv** `[fn]` in [InvSourceEstimateIO](/docs/api/inv/inv-source-estimate-io) — Read source estimate from CSV format.
 - **readDefinitionFile** `[fn]` in [ChannelDerivation](/docs/api/utils/channel-derivation) — Read derivation rules from an MNE-C derivation text file (`MNELIB::MNEDerivSet::readText`).
 - **readEpochs** `[fn]` in [MNEEpochDataList](/docs/api/mne/mne-epoch-data-list) — Read the epochs from a raw file based on provided events.
@@ -4371,8 +4371,8 @@ Index of 6306 public class members (functions, variables, typedefs, enums) acros
 - **readMatrix** `[fn]` in [PythonTestHelper](/docs/api/utils/python-test-helper) — Read an Eigen matrix from a text file (space-separated values, one row per line).
 - **readMegEegChannels** `[fn]` in [FiffInfo](/docs/api/fiff/fiff-info) — Read MEG and EEG channel information from a FIFF file, excluding bad channels.
 - **readMetadata** `[fn]` in [RtDataClient](/docs/api/com/rt-data-client) — Reads fiff metaata class from data connection.
-- **readMNESelFile** `[fn]` in [SelectionIO](/docs/api/utils/selection-io) — Reads the specified MNE sel file.
-- **readMNESelFile** `[fn]` in [SelectionIO](/docs/api/utils/selection-io) — Reads the specified MNE sel file.
+- **readMNESelFile** `[fn]` in [SelectionIO](/docs/api/channels/selection-io) — Reads the specified MNE sel file.
+- **readMNESelFile** `[fn]` in [SelectionIO](/docs/api/channels/selection-io) — Reads the specified MNE sel file.
 - **readMniTransform** `[fn]` in [FiffCoordTransSet](/docs/api/fiff/fiff-coord-trans-set) — Reads the scanner RAS -&gt; MNI Talairach transform of a FreeSurfer/MNI .xfm file (MNE-C read_mni_coord_transform_file).
 - **ReadMode** `[enum]` in [AcqReader](/docs/api/acq/acq-reader) — Consumption mode.
 - **readRawBuffer** `[fn]` in [RtDataClient](/docs/api/com/rt-data-client) — Reads fiff measurement information of a data the connection.
@@ -4781,7 +4781,7 @@ Index of 6306 public class members (functions, variables, typedefs, enums) acros
 - **selectedRegionId** `[fn]` in [BrainSurface](/docs/api/disp3-d/brain-surface)
 - **selectedVertexStart** `[fn]` in [BrainSurface](/docs/api/disp3-d/brain-surface)
 - **selectionChanged** `[signal]` in [ChannelSelectionView](/docs/api/disp/channel-selection-view) — emit this signal whenever the selection in the scene has changed
-- **SelectionIO** `[fn]` in [SelectionIO](/docs/api/utils/selection-io) — Constructs a Filter object.
+- **SelectionIO** `[fn]` in [SelectionIO](/docs/api/channels/selection-io) — Constructs a Filter object.
 - **SelectionItem** `[fn]` in [SelectionItem](/docs/api/disp/selection-item)
 - **SelectionItem** `[fn]` in [SelectionItem](/docs/api/disp/selection-item)
 - **SelectionScene** `[fn]` in [SelectionScene](/docs/api/disp/selection-scene) — Constructs a [`SelectionScene`](/docs/api/disp/selection-scene).
@@ -5658,7 +5658,7 @@ Index of 6306 public class members (functions, variables, typedefs, enums) acros
 - **surfs** `[var]` in [MNEMshDisplaySurfaceSet](/docs/api/mne/mne-msh-display-surface-set) — Array of display surfaces (owned).
 - **symMatPow** `[fn]` in [InvBeamformerCompute](/docs/api/inv/inv-beamformer-compute) — Symmetric matrix power: X^p via eigendecomposition.
 - **syncBemShadersToBrainShaders** `[slot]` in [BrainView](/docs/api/disp3-d/brain-view) — Synchronize all BEM shader targets to their respective brain shader targets.
-- **System** `[enum]` in [StandardMontage](/docs/api/utils/standard-montage) — Supported standard montage systems.
+- **System** `[enum]` in [StandardMontage](/docs/api/channels/standard-montage) — Supported standard montage systems.
 - **system** `[var]` in [BidsCoordinateSystem](/docs/api/bids/bids-coordinate-system) — e.g.
 
 ## T {#t}
@@ -6312,8 +6312,8 @@ Index of 6306 public class members (functions, variables, typedefs, enums) acros
 - **write_w** `[fn]` in [InvSourceEstimate](/docs/api/inv/inv-source-estimate) — Writes the first time point as a .w file, as mne.write_w does.
 - **writeBigEndian** `[fn]` in [ByteStream](/docs/api/base/byte-stream) — Writes `count` values in big-endian byte order.
 - **writeBigEndian** `[fn]` in [ByteStream](/docs/api/base/byte-stream)
-- **writeBrainstormMonFiles** `[fn]` in [SelectionIO](/docs/api/utils/selection-io) — Writes the specified selection groups to different Brainstorm .mon files.
-- **writeBrainstormMonFiles** `[fn]` in [SelectionIO](/docs/api/utils/selection-io) — Writes the specified selection groups to different Brainstorm .mon files.
+- **writeBrainstormMonFiles** `[fn]` in [SelectionIO](/docs/api/channels/selection-io) — Writes the specified selection groups to different Brainstorm .mon files.
+- **writeBrainstormMonFiles** `[fn]` in [SelectionIO](/docs/api/channels/selection-io) — Writes the specified selection groups to different Brainstorm .mon files.
 - **writeCsv** `[fn]` in [InvSourceEstimateIO](/docs/api/inv/inv-source-estimate-io) — Export source estimate to CSV format.
 - **writeDefinitionFile** `[fn]` in [ChannelDerivation](/docs/api/utils/channel-derivation) — Write derivation rules in MNE-C derivation text syntax, readable by readDefinitionFile and mne_make_derivations.
 - **writeFif** `[fn]` in [MNEEventList](/docs/api/mne/mne-event-list) — Writes the list as an event block with comments, readable by `mne.read_events`.
@@ -6322,8 +6322,8 @@ Index of 6306 public class members (functions, variables, typedefs, enums) acros
 - **writeJson** `[fn]` in [BidsCoordinateSystem](/docs/api/bids/bids-coordinate-system) — Write a BIDS *_coordsystem.json file.
 - **writeMatrix** `[fn]` in [InvSourceEstimateIO](/docs/api/inv/inv-source-estimate-io) — Export source estimate as a tab-separated matrix for easy import.
 - **writeMatrix** `[fn]` in [PythonTestHelper](/docs/api/utils/python-test-helper) — Write an Eigen matrix to a text file with full double precision.
-- **writeMNESelFile** `[fn]` in [SelectionIO](/docs/api/utils/selection-io) — Writes the specified selection groups to a single MNE .sel file.
-- **writeMNESelFile** `[fn]` in [SelectionIO](/docs/api/utils/selection-io) — Writes the specified selection groups to a single MNE .sel file.
+- **writeMNESelFile** `[fn]` in [SelectionIO](/docs/api/channels/selection-io) — Writes the specified selection groups to a single MNE .sel file.
+- **writeMNESelFile** `[fn]` in [SelectionIO](/docs/api/channels/selection-io) — Writes the specified selection groups to a single MNE .sel file.
 - **writePosition** `[fn]` in [AcqWriter](/docs/api/acq/acq-writer)
 - **writer** `[fn]` in [AcqStream](/docs/api/acq/acq-stream) — Takes the writer of an output stream (control path).
 - **writerWaits** `[var]` in [AcqStreamStats](/docs/api/acq/acq-stream-stats) — Output: beginWrite() calls that had to wait for space.

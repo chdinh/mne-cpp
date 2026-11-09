@@ -61,6 +61,7 @@ endif()
 add_subdirectory(base)
 add_subdirectory(math)
 add_subdirectory(utils)
+add_subdirectory(channels)
 add_subdirectory(lsl)
 
 add_subdirectory(fiff)

@@ -12,7 +12,7 @@ Utilities library: observers, commands, matrix files, montages, layouts, selecti
 
 <ExampleFacts name="ex_utils" />
 
-**Libraries:** [Utilities](../../api/utils/index.mdx)
+**Libraries:** [Channels](../../api/channels/index.mdx), [Utilities](../../api/utils/index.mdx)
 
 ## What it demonstrates
 
@@ -61,29 +61,29 @@ The documented classes this example uses most:
 |---|---|
 | [`IOUtils`](../../api/utils/io-utils.mdx) | Utilities |
 | [`PythonRunner`](../../api/utils/python-runner.mdx) | Utilities |
-| [`SelectionIO`](../../api/utils/selection-io.mdx) | Utilities |
-| [`StandardMontage`](../../api/utils/standard-montage.mdx) | Utilities |
-| [`ElectrodePosition`](../../api/utils/electrode-position.mdx) | Utilities |
+| [`SelectionIO`](../../api/channels/selection-io.mdx) | Channels |
+| [`StandardMontage`](../../api/channels/standard-montage.mdx) | Channels |
+| [`ElectrodePosition`](../../api/channels/electrode-position.mdx) | Channels |
 | [`ICommand`](../../api/utils/i-command.mdx) | Utilities |
-| [`LayoutLoader`](../../api/utils/layout-loader.mdx) | Utilities |
-| [`LayoutMaker`](../../api/utils/layout-maker.mdx) | Utilities |
+| [`LayoutLoader`](../../api/channels/layout-loader.mdx) | Channels |
+| [`LayoutMaker`](../../api/channels/layout-maker.mdx) | Channels |
 
 ## Used in the API reference
 
-- [ElectrodePosition](../../api/utils/electrode-position.mdx)
+- [ElectrodePosition](../../api/channels/electrode-position.mdx)
+- [LayoutLoader](../../api/channels/layout-loader.mdx)
+- [LayoutMaker](../../api/channels/layout-maker.mdx)
+- [SelectionIO](../../api/channels/selection-io.mdx)
+- [StandardMontage](../../api/channels/standard-montage.mdx)
 - [ICommand](../../api/utils/i-command.mdx)
 - [IObserver](../../api/utils/i-observer.mdx)
 - [IOUtils](../../api/utils/io-utils.mdx)
-- [LayoutLoader](../../api/utils/layout-loader.mdx)
-- [LayoutMaker](../../api/utils/layout-maker.mdx)
 - [PythonRunnerConfig](../../api/utils/python-runner-config.mdx)
 - [PythonRunnerResult](../../api/utils/python-runner-result.mdx)
 - [PythonRunner](../../api/utils/python-runner.mdx)
 - [PythonTestHelper](../../api/utils/python-test-helper.mdx)
 - [ReportSection](../../api/utils/report-section.mdx)
 - [Report](../../api/utils/report.mdx)
-- [SelectionIO](../../api/utils/selection-io.mdx)
-- [StandardMontage](../../api/utils/standard-montage.mdx)
 - [Subject](../../api/utils/subject.mdx)
 
 ## Source
@@ -114,13 +114,13 @@ The documented classes this example uses most:
 #include <utils/generics/commandpattern.h>
 #include <utils/generics/observerpattern.h>
 #include <utils/ioutils.h>
-#include <utils/layoutloader.h>
-#include <utils/layoutmaker.h>
-#include <utils/montage/standard_montage.h>
+#include <channels/layoutloader.h>
+#include <channels/layoutmaker.h>
+#include <channels/standard_montage.h>
 #include <utils/python_runner.h>
 #include <utils/python_test_helper.h>
 #include <utils/report.h>
-#include <utils/selectionio.h>
+#include <channels/selectionio.h>
 
 //=============================================================================================================
 // QT INCLUDES
@@ -150,6 +150,7 @@ The documented classes this example uses most:
 //=============================================================================================================
 
 using namespace UTILSLIB;
+using namespace CHANNELSLIB;
 using namespace Eigen;
 
 //=============================================================================================================

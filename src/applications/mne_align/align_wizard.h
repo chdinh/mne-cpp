@@ -27,7 +27,7 @@
 #include <acq/polhemus/acquired_points.h>
 #include <acq/polhemus/polhemus_connection.h>
 
-#include <utils/montage/standard_montage.h>
+#include <channels/standard_montage.h>
 
 #include <QPair>
 #include <QPointer>
@@ -140,7 +140,7 @@ public:
     }
 
     /** @return The selected EEG cap montage system. */
-    UTILSLIB::StandardMontage::System cap() const
+    CHANNELSLIB::StandardMontage::System cap() const
     {
         return m_capSystem;
     }
@@ -159,7 +159,7 @@ signals:
     void bemPathChanged(const QString& path);
 
     /** @brief Emitted when the EEG cap selection changes. */
-    void capChanged(UTILSLIB::StandardMontage::System system);
+    void capChanged(CHANNELSLIB::StandardMontage::System system);
 
     /** @brief Emitted when the user clicks Save in the Save step. */
     void requestSaveTrans(const QString& outPath);
@@ -251,7 +251,7 @@ private:
     ACQLIB::PolhemusConnection* m_pDigitizer = nullptr;
 
     QString m_bemPath;
-    UTILSLIB::StandardMontage::System m_capSystem = UTILSLIB::StandardMontage::System::Standard_1020;
+    CHANNELSLIB::StandardMontage::System m_capSystem = CHANNELSLIB::StandardMontage::System::Standard_1020;
 
     QVector3D m_lastLivePos;
     bool m_haveLive = false;

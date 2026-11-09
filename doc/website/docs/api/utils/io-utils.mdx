@@ -150,17 +150,17 @@ Read Eigen Matrix from file (std::string path).
 
 ## Example
 
-- Start here: [ex_utils](../../examples/utils/ex_utils.mdx) — Utilities library: observers, commands, matrix files, montages, layouts, selections and reports.
+- Start here: [ex_utils](../../examples/channels/ex_utils.mdx) — Utilities library: observers, commands, matrix files, montages, layouts, selections and reports.
 - Full source: [`src/examples/ex_utils/main.cpp`](https://github.com/mne-tools/mne-cpp/tree/staging/src/examples/ex_utils/main.cpp)
 - Build target: `ex_utils` (runs under CTest)
 
 ## Used in examples
 
-### [ex_utils](../../examples/utils/ex_utils.mdx)
+### [ex_utils](../../examples/channels/ex_utils.mdx)
 
 Utilities library: observers, commands, matrix files, montages, layouts, selections and reports.
 
-````cpp title="src/examples/ex_utils/main.cpp, line 164"
+````cpp title="src/examples/ex_utils/main.cpp, line 165"
 MatrixXd matrix(2, 3);
 matrix << 1.5, -2.0, 3.25, 0.0, 1e-6, 42.0;
 const QString matrixPath = dir.filePath("matrix.txt");

@@ -145,6 +145,10 @@ component_management:
       name: libraries/base
       paths:
         - src/libraries/base/**
+    - component_id: libraries_channels
+      name: libraries/channels
+      paths:
+        - src/libraries/channels/**
     - component_id: libraries_utils
       name: libraries/utils
       paths:

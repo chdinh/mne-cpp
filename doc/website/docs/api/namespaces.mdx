@@ -14,6 +14,7 @@ All public namespaces in the MNE-CPP library tree.
 | [`ACQLIB`](/docs/api/acq/) | 59 | Headless acquisition: sources, streams, zero-copy readers and native sample formats. |
 | [`BASELIB`](/docs/api/base/) | 9 | Shared utilities (I/O helpers, spectral analysis, layout management, warp algorithms). |
 | [`BIDSLIB`](/docs/api/bids/) | 14 | BIDS dataset reading, writing, path construction, and sidecar metadata handling for iEEG/EEG/MEG. |
+| [`CHANNELSLIB`](/docs/api/channels/) | 5 | Shared utilities (I/O helpers, spectral analysis, layout management, warp algorithms). |
 | [`COMLIB`](/docs/api/com/) | 8 | Real-time client/server communication primitives for talking to `mne_rt_server`. |
 | [`CONNECTIVITYLIB`](/docs/api/connectivity/) | 20 | Functional connectivity metrics (coherence, PLV, cross-correlation, etc.). |
 | [`DECODINGLIB`](/docs/api/decoding/) | 5 | Supervised and unsupervised spatial-filter decompositions for M/EEG decoding. |
@@ -34,7 +35,7 @@ All public namespaces in the MNE-CPP library tree.
 | [`RTPROCESSINGLIB`](/docs/api/dsp/) | 15 |  |
 | [`STSLIB`](/docs/api/sts/) | 10 | Statistical testing (t-tests, F-tests, cluster permutation, multiple comparison correction). |
 | `SURFACEKEYS` | 0 | Centralised string constants for surface map keys. |
-| [`UTILSLIB`](/docs/api/utils/) | 85 | Shared utilities (I/O helpers, spectral analysis, layout management, warp algorithms). |
+| [`UTILSLIB`](/docs/api/utils/) | 80 | Shared utilities (I/O helpers, spectral analysis, layout management, warp algorithms). |
 | `Ui` | 0 |  |
 
 ## Class inventory by namespace
@@ -129,6 +130,14 @@ All public namespaces in the MNE-CPP library tree.
 - [BrainVisionReader](/docs/api/bids/brain-vision-reader)
 - [EDFChannelInfo](/docs/api/bids/edf-channel-info)
 - [EDFReader](/docs/api/bids/edf-reader)
+
+### CHANNELSLIB
+
+- [ElectrodePosition](/docs/api/channels/electrode-position)
+- [LayoutLoader](/docs/api/channels/layout-loader)
+- [LayoutMaker](/docs/api/channels/layout-maker)
+- [SelectionIO](/docs/api/channels/selection-io)
+- [StandardMontage](/docs/api/channels/standard-montage)
 
 ### COMLIB
 
@@ -600,7 +609,6 @@ All public namespaces in the MNE-CPP library tree.
 - [DerivationRule](/docs/api/utils/derivation-rule)
 - [Dpss](/docs/api/utils/dpss)
 - [DpssResult](/docs/api/utils/dpss-result)
-- [ElectrodePosition](/docs/api/utils/electrode-position)
 - [EogRegression](/docs/api/dsp/eog-regression)
 - [EpochExtractor](/docs/api/utils/epoch-extractor)
 - [EpochExtractorParams](/docs/api/utils/epoch-extractor-params)
@@ -624,8 +632,6 @@ All public namespaces in the MNE-CPP library tree.
 - [IirStreamFilter](/docs/api/dsp/iir-stream-filter)
 - [InfomaxResult](/docs/api/dsp/infomax-result)
 - [KMeans](/docs/api/math/k-means)
-- [LayoutLoader](/docs/api/utils/layout-loader)
-- [LayoutMaker](/docs/api/utils/layout-maker)
 - [Linalg](/docs/api/math/linalg)
 - [LofBadChannelParams](/docs/api/dsp/lof-bad-channel-params)
 - [MaxwellMoveCompParams](/docs/api/dsp/maxwell-move-comp-params)
@@ -649,14 +655,12 @@ All public namespaces in the MNE-CPP library tree.
 - [Resample](/docs/api/dsp/resample)
 - [SSS](/docs/api/dsp/sss)
 - [SSSParams](/docs/api/dsp/sss-params)
-- [SelectionIO](/docs/api/utils/selection-io)
 - [SimplexAlgorithm](/docs/api/math/simplex-algorithm)
 - [SimulateStcParams](/docs/api/dsp/simulate-stc-params)
 - [SpectogramInputData](/docs/api/utils/spectogram-input-data)
 - [Spectral](/docs/api/utils/spectral)
 - [Spectrogram](/docs/api/utils/spectrogram)
 - [Sphere](/docs/api/math/sphere)
-- [StandardMontage](/docs/api/utils/standard-montage)
 - [Subject](/docs/api/utils/subject)
 - [SurfaceLaplacian](/docs/api/dsp/surface-laplacian)
 - [SurfaceLaplacianResult](/docs/api/dsp/surface-laplacian-result)

@@ -474,7 +474,6 @@ const apiSidebar: SidebarsConfig['apiSidebar'] = [
       collapsed: true,
       link: {type: 'doc', id: 'api/utils/index'},
       items: [
-        'api/utils/standard-montage',
         'api/utils/report',
         'api/utils/artifact-detect',
         'api/utils/bad-channel-detect',
@@ -488,13 +487,10 @@ const apiSidebar: SidebarsConfig['apiSidebar'] = [
         'api/utils/i-command',
         'api/utils/io-utils',
         'api/utils/i-observer',
-        'api/utils/layout-loader',
-        'api/utils/layout-maker',
         'api/utils/numerics',
         'api/utils/parks-mc-clellan',
         'api/utils/python-runner',
         'api/utils/python-test-helper',
-        'api/utils/selection-io',
         'api/utils/spectral',
         'api/utils/spectrogram',
         'api/utils/subject',
@@ -504,7 +500,6 @@ const apiSidebar: SidebarsConfig['apiSidebar'] = [
         'api/utils/csd-result',
         'api/utils/derivation-rule',
         'api/utils/dpss-result',
-        'api/utils/electrode-position',
         'api/utils/epoch-extractor-params',
         'api/utils/python-runner-config',
         'api/utils/python-runner-result',
@@ -512,6 +507,20 @@ const apiSidebar: SidebarsConfig['apiSidebar'] = [
         'api/utils/spectogram-input-data',
         'api/utils/tapered-spectra-input-data',
         'api/utils/artifact-detect-proj-params'
+      ],
+    },
+    {
+      type: 'category',
+      label: "Channels Library",
+      collapsible: true,
+      collapsed: true,
+      link: {type: 'doc', id: 'api/channels/index'},
+      items: [
+        'api/channels/standard-montage',
+        'api/channels/layout-loader',
+        'api/channels/layout-maker',
+        'api/channels/selection-io',
+        'api/channels/electrode-position'
       ],
     },
     {

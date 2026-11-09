@@ -203,7 +203,7 @@ add_subdirectory(test_com)
 add_subdirectory(test_com_rt_client)
 
 # Utils, disp, and disp3D coverage tests
-add_subdirectory(test_utils_layout_selection)
+add_subdirectory(test_channels_layout_selection)
 add_subdirectory(test_utils_observer_pattern)
 add_subdirectory(test_disp_plots)
 add_subdirectory(test_disp3d_viewstate)
@@ -321,7 +321,7 @@ add_subdirectory(test_dsp_bad_channels_maxwell)
 add_subdirectory(test_dsp_simulate)
 
 # v2.3.0 Standard montages + source morph tests
-add_subdirectory(test_standard_montage)
+add_subdirectory(test_channels_standard_montage)
 add_subdirectory(test_source_morph)
 
 # v2.3.0 Fine calibration + Maxwell movement compensation tests

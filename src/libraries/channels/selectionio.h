@@ -13,7 +13,7 @@
  * @date     May 2015
  * @brief    Reader / writer for MNE @c .sel channel-selection files and Brainstorm @c .mon montage files.
  *
- * @ref UTILSLIB::SelectionIO converts between two text-based
+ * @ref CHANNELSLIB::SelectionIO converts between two text-based
  * grouping formats that mne-cpp's GUI tools and command-line
  * pipelines hand back and forth with sibling toolchains:
  *
@@ -30,14 +30,14 @@
  * layer and from headless tests without a string conversion.
  */
 
-#ifndef SELECTIONIO_H
-#define SELECTIONIO_H
+#ifndef CHANNELS_SELECTIONIO_H
+#define CHANNELS_SELECTIONIO_H
 
 //=============================================================================================================
 // INCLUDES
 //=============================================================================================================
 
-#include "utils_global.h"
+#include "channels_global.h"
 
 #include <vector>
 #include <string>
@@ -54,7 +54,7 @@
 // DEFINE NAMESPACE MNELIB
 //=============================================================================================================
 
-namespace UTILSLIB
+namespace CHANNELSLIB
 {
 
 //=============================================================================================================
@@ -69,7 +69,7 @@ namespace UTILSLIB
  *
  * @snippet ex_utils/main.cpp selection_io_usage
  */
-class UTILSSHARED_EXPORT SelectionIO
+class CHANNELSSHARED_EXPORT SelectionIO
 {
 public:
     //=========================================================================================================
@@ -160,4 +160,4 @@ public:
 };
 } // NAMESPACE
 
-#endif // SELECTIONIO_H
+#endif // CHANNELS_SELECTIONIO_H

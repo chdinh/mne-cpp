@@ -12,7 +12,7 @@ Project the 3D sensor positions of a FIFF file onto a 2D channel layout.
 
 <ExampleFacts name="ex_make_layout" />
 
-**Libraries:** [FIFF I/O](../../api/fiff/index.mdx), [Utilities](../../api/utils/index.mdx), [Base](../../api/base/index.mdx)
+**Libraries:** [FIFF I/O](../../api/fiff/index.mdx), [Channels](../../api/channels/index.mdx), [Base](../../api/base/index.mdx)
 
 ## Results
 
@@ -60,14 +60,14 @@ The documented classes this example uses most:
 |---|---|
 | [`FiffInfo`](../../api/fiff/fiff-info.mdx) | FIFF I/O |
 | [`FiffRawData`](../../api/fiff/fiff-raw-data.mdx) | FIFF I/O |
-| [`LayoutLoader`](../../api/utils/layout-loader.mdx) | Utilities |
-| [`LayoutMaker`](../../api/utils/layout-maker.mdx) | Utilities |
+| [`LayoutLoader`](../../api/channels/layout-loader.mdx) | Channels |
+| [`LayoutMaker`](../../api/channels/layout-maker.mdx) | Channels |
 | [`Log`](../../api/base/log.mdx) | Base |
 
 ## Used in the API reference
 
-- [LayoutLoader](../../api/utils/layout-loader.mdx)
-- [LayoutMaker](../../api/utils/layout-maker.mdx)
+- [LayoutLoader](../../api/channels/layout-loader.mdx)
+- [LayoutMaker](../../api/channels/layout-maker.mdx)
 
 ## Source
 
@@ -95,8 +95,8 @@ The documented classes this example uses most:
 #include <vector>
 #include <math.h>
 
-#include <utils/layoutmaker.h>
-#include <utils/layoutloader.h>
+#include <channels/layoutmaker.h>
+#include <channels/layoutloader.h>
 #include <base/log.h>
 
 #include <fiff/fiff.h>
@@ -114,7 +114,7 @@ The documented classes this example uses most:
 //=============================================================================================================
 
 using namespace FIFFLIB;
-using namespace UTILSLIB;
+using namespace CHANNELSLIB;
 
 //=============================================================================================================
 // MAIN

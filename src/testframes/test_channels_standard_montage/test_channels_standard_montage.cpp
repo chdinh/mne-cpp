@@ -3,21 +3,21 @@
  * SPDX-License-Identifier: BSD-3-Clause
  * Copyright (c) 2026 MNE-CPP Authors
  *
- * @file     test_standard_montage.cpp
+ * @file     test_channels_standard_montage.cpp
  * @author   Christoph Dinh <christoph.dinh@mne-cpp.org>
  * @since    2.3.0
  * @date     May, 2026
  * @brief    Tests for standard montage definitions.
  */
 
-#include <utils/montage/standard_montage.h>
+#include <channels/standard_montage.h>
 
 #include <QtTest>
 #include <QObject>
 #include <Eigen/Core>
 #include <cmath>
 
-using namespace UTILSLIB;
+using namespace CHANNELSLIB;
 using namespace Eigen;
 
 class TestStandardMontage : public QObject
@@ -151,4 +151,4 @@ private slots:
 };
 
 QTEST_GUILESS_MAIN(TestStandardMontage)
-#include "test_standard_montage.moc"
+#include "test_channels_standard_montage.moc"

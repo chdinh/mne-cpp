@@ -4,7 +4,7 @@
   "policy": "scripts/quality/api_evidence_policy.json",
   "summary": {
     "exported_classes": 482,
-    "exported_free_functions": 165,
+    "exported_free_functions": 168,
     "registered_classes": 575,
     "exported_not_registered": 1,
     "registered_function_modules": 13,
@@ -52,6 +52,15 @@
       "eligible_with_registry_example": 14,
       "eligible_used_by_example": 14,
       "with_snippet": 14
+    },
+    "channels": {
+      "public": 5,
+      "registered": 5,
+      "with_test": 1,
+      "eligible": 5,
+      "eligible_with_registry_example": 5,
+      "eligible_used_by_example": 5,
+      "with_snippet": 5
     },
     "com": {
       "public": 8,
@@ -216,13 +225,13 @@
       "with_snippet": 10
     },
     "utils": {
-      "public": 15,
-      "registered": 15,
-      "with_test": 2,
-      "eligible": 14,
-      "eligible_with_registry_example": 14,
-      "eligible_used_by_example": 14,
-      "with_snippet": 15
+      "public": 10,
+      "registered": 10,
+      "with_test": 1,
+      "eligible": 9,
+      "eligible_with_registry_example": 9,
+      "eligible_used_by_example": 9,
+      "with_snippet": 10
     }
   },
   "exported_free_functions": [
@@ -445,6 +454,21 @@
       "name": "buildHashLong",
       "header": "bids/bids_global.h",
       "library": "bids"
+    },
+    {
+      "name": "buildDateTime",
+      "header": "channels/channels_global.h",
+      "library": "channels"
+    },
+    {
+      "name": "buildHash",
+      "header": "channels/channels_global.h",
+      "library": "channels"
+    },
+    {
+      "name": "buildHashLong",
+      "header": "channels/channels_global.h",
+      "library": "channels"
     },
     {
       "name": "buildDateTime",
@@ -3022,6 +3046,125 @@
       ],
       "api_page": "doc/website/docs/api/bids/edf-reader.mdx",
       "python_equiv": null,
+      "example_eligible": true,
+      "exempt_reason": null
+    },
+    {
+      "name": "LayoutLoader",
+      "header": "channels/layoutloader.h",
+      "library": "channels",
+      "kind": "exported-class",
+      "exported": true,
+      "registered": true,
+      "registry_status": "documented",
+      "test": null,
+      "test_resolves": false,
+      "example": "ex_utils",
+      "example_state": "built",
+      "including_examples": [
+        "ex_make_layout",
+        "ex_utils"
+      ],
+      "snippets": [
+        "ex_utils/main.cpp#layout_loader_usage"
+      ],
+      "api_page": "doc/website/docs/api/channels/layout-loader.mdx",
+      "python_equiv": null,
+      "example_eligible": true,
+      "exempt_reason": null
+    },
+    {
+      "name": "LayoutMaker",
+      "header": "channels/layoutmaker.h",
+      "library": "channels",
+      "kind": "exported-class",
+      "exported": true,
+      "registered": true,
+      "registry_status": "documented",
+      "test": null,
+      "test_resolves": false,
+      "example": "ex_utils",
+      "example_state": "built",
+      "including_examples": [
+        "ex_make_layout",
+        "ex_utils"
+      ],
+      "snippets": [
+        "ex_utils/main.cpp#layout_maker_usage"
+      ],
+      "api_page": "doc/website/docs/api/channels/layout-maker.mdx",
+      "python_equiv": null,
+      "example_eligible": true,
+      "exempt_reason": null
+    },
+    {
+      "name": "SelectionIO",
+      "header": "channels/selectionio.h",
+      "library": "channels",
+      "kind": "exported-class",
+      "exported": true,
+      "registered": true,
+      "registry_status": "documented",
+      "test": null,
+      "test_resolves": false,
+      "example": "ex_utils",
+      "example_state": "built",
+      "including_examples": [
+        "ex_utils"
+      ],
+      "snippets": [
+        "ex_utils/main.cpp#selection_io_usage"
+      ],
+      "api_page": "doc/website/docs/api/channels/selection-io.mdx",
+      "python_equiv": null,
+      "example_eligible": true,
+      "exempt_reason": null
+    },
+    {
+      "name": "ElectrodePosition",
+      "header": "channels/standard_montage.h",
+      "library": "channels",
+      "kind": "exported-class",
+      "exported": true,
+      "registered": true,
+      "registry_status": "documented",
+      "test": null,
+      "test_resolves": false,
+      "example": "ex_utils",
+      "example_state": "built",
+      "including_examples": [
+        "ex_utils"
+      ],
+      "snippets": [
+        "ex_utils/main.cpp#standard_montage_usage",
+        "ex_utils/main.cpp#standard_montage_usage"
+      ],
+      "api_page": "doc/website/docs/api/channels/electrode-position.mdx",
+      "python_equiv": null,
+      "example_eligible": true,
+      "exempt_reason": null
+    },
+    {
+      "name": "StandardMontage",
+      "header": "channels/standard_montage.h",
+      "library": "channels",
+      "kind": "exported-class",
+      "exported": true,
+      "registered": true,
+      "registry_status": "done",
+      "test": "test_channels_standard_montage",
+      "test_resolves": true,
+      "example": "ex_utils",
+      "example_state": "built",
+      "including_examples": [
+        "ex_utils"
+      ],
+      "snippets": [
+        "ex_utils/main.cpp#standard_montage_usage",
+        "ex_utils/main.cpp#standard_montage_usage"
+      ],
+      "api_page": "doc/website/docs/api/channels/standard-montage.mdx",
+      "python_equiv": "mne.channels.make_standard_montage",
       "example_eligible": true,
       "exempt_reason": null
     },
@@ -14204,102 +14347,6 @@
       "exempt_reason": null
     },
     {
-      "name": "LayoutLoader",
-      "header": "utils/layoutloader.h",
-      "library": "utils",
-      "kind": "exported-class",
-      "exported": true,
-      "registered": true,
-      "registry_status": "documented",
-      "test": null,
-      "test_resolves": false,
-      "example": "ex_utils",
-      "example_state": "built",
-      "including_examples": [
-        "ex_make_layout",
-        "ex_utils"
-      ],
-      "snippets": [
-        "ex_utils/main.cpp#layout_loader_usage"
-      ],
-      "api_page": "doc/website/docs/api/utils/layout-loader.mdx",
-      "python_equiv": null,
-      "example_eligible": true,
-      "exempt_reason": null
-    },
-    {
-      "name": "LayoutMaker",
-      "header": "utils/layoutmaker.h",
-      "library": "utils",
-      "kind": "exported-class",
-      "exported": true,
-      "registered": true,
-      "registry_status": "documented",
-      "test": null,
-      "test_resolves": false,
-      "example": "ex_utils",
-      "example_state": "built",
-      "including_examples": [
-        "ex_make_layout",
-        "ex_utils"
-      ],
-      "snippets": [
-        "ex_utils/main.cpp#layout_maker_usage"
-      ],
-      "api_page": "doc/website/docs/api/utils/layout-maker.mdx",
-      "python_equiv": null,
-      "example_eligible": true,
-      "exempt_reason": null
-    },
-    {
-      "name": "ElectrodePosition",
-      "header": "utils/montage/standard_montage.h",
-      "library": "utils",
-      "kind": "exported-class",
-      "exported": true,
-      "registered": true,
-      "registry_status": "documented",
-      "test": null,
-      "test_resolves": false,
-      "example": "ex_utils",
-      "example_state": "built",
-      "including_examples": [
-        "ex_utils"
-      ],
-      "snippets": [
-        "ex_utils/main.cpp#standard_montage_usage",
-        "ex_utils/main.cpp#standard_montage_usage"
-      ],
-      "api_page": "doc/website/docs/api/utils/electrode-position.mdx",
-      "python_equiv": null,
-      "example_eligible": true,
-      "exempt_reason": null
-    },
-    {
-      "name": "StandardMontage",
-      "header": "utils/montage/standard_montage.h",
-      "library": "utils",
-      "kind": "exported-class",
-      "exported": true,
-      "registered": true,
-      "registry_status": "done",
-      "test": "test_standard_montage",
-      "test_resolves": true,
-      "example": "ex_utils",
-      "example_state": "built",
-      "including_examples": [
-        "ex_utils"
-      ],
-      "snippets": [
-        "ex_utils/main.cpp#standard_montage_usage",
-        "ex_utils/main.cpp#standard_montage_usage"
-      ],
-      "api_page": "doc/website/docs/api/utils/standard-montage.mdx",
-      "python_equiv": "mne.channels.make_standard_montage",
-      "example_eligible": true,
-      "exempt_reason": null
-    },
-    {
       "name": "PythonRunner",
       "header": "utils/python_runner.h",
       "library": "utils",
@@ -14442,29 +14489,6 @@
       "python_equiv": null,
       "example_eligible": false,
       "exempt_reason": "registry: Private storage record of Report; sections are created through the Report::add* methods."
-    },
-    {
-      "name": "SelectionIO",
-      "header": "utils/selectionio.h",
-      "library": "utils",
-      "kind": "exported-class",
-      "exported": true,
-      "registered": true,
-      "registry_status": "documented",
-      "test": null,
-      "test_resolves": false,
-      "example": "ex_utils",
-      "example_state": "built",
-      "including_examples": [
-        "ex_utils"
-      ],
-      "snippets": [
-        "ex_utils/main.cpp#selection_io_usage"
-      ],
-      "api_page": "doc/website/docs/api/utils/selection-io.mdx",
-      "python_equiv": null,
-      "example_eligible": true,
-      "exempt_reason": null
     }
   ]
 }

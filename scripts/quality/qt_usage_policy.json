@@ -70,6 +70,13 @@
         "Core"
       ]
     },
+    "channels": {
+      "tokens": 144,
+      "public_header_includes": 13,
+      "modules": [
+        "Core"
+      ]
+    },
     "com": {
       "tokens": 368,
       "public_header_includes": 30,
@@ -217,8 +224,8 @@
       ]
     },
     "utils": {
-      "tokens": 426,
-      "public_header_includes": 34,
+      "tokens": 282,
+      "public_header_includes": 21,
       "modules": [
         "Core"
       ]

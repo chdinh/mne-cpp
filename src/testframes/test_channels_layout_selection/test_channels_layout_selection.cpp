@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: BSD-3-Clause
  * Copyright (c) 2026 MNE-CPP Authors
  *
- * @file     test_utils_layout_selection.cpp
+ * @file     test_channels_layout_selection.cpp
  * @author   Christoph Dinh <christoph.dinh@mne-cpp.org>
  * @since    2.0.0
  * @date     March, 2026
@@ -16,10 +16,10 @@
 //=============================================================================================================
 
 #include <utils/ioutils.h>
-#include <utils/layoutloader.h>
+#include <channels/layoutloader.h>
 #include <base/string_utils.h>
-#include <utils/layoutmaker.h>
-#include <utils/selectionio.h>
+#include <channels/layoutmaker.h>
+#include <channels/selectionio.h>
 #include <base/log.h>
 
 //=============================================================================================================
@@ -46,6 +46,7 @@
 //=============================================================================================================
 
 using namespace UTILSLIB;
+using namespace CHANNELSLIB;
 using namespace BASELIB;
 using namespace Eigen;
 
@@ -496,4 +497,4 @@ void TestUtilsLayoutSelection::cleanupTestCase()
 //=============================================================================================================
 
 QTEST_GUILESS_MAIN(TestUtilsLayoutSelection)
-#include "test_utils_layout_selection.moc"
+#include "test_channels_layout_selection.moc"

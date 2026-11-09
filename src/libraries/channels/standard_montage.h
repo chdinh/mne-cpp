@@ -9,20 +9,20 @@
  * @date     May 2026
  * @brief    Standard 10-20 / 10-10 / 10-05 EEG electrode positions of MNE-Python's standard_1005 montage.
  *
- * @ref UTILSLIB::StandardMontage gives every consumer in mne-cpp (the coregistration wizard,
+ * @ref CHANNELSLIB::StandardMontage gives every consumer in mne-cpp (the coregistration wizard,
  * the layout maker, forward modelling) a default cap when no digitised positions exist. The
  * positions are those of mne.channels.make_standard_montage("standard_1005"), in metres in
  * the MNI (fsaverage MRI) frame; the 10-20 and 10-10 systems are its electrodes of those names.
  */
 
-#ifndef STANDARD_MONTAGE_H
-#define STANDARD_MONTAGE_H
+#ifndef CHANNELS_STANDARD_MONTAGE_H
+#define CHANNELS_STANDARD_MONTAGE_H
 
 //=============================================================================================================
 // INCLUDES
 //=============================================================================================================
 
-#include "../utils_global.h"
+#include "channels_global.h"
 
 //=============================================================================================================
 // EIGEN INCLUDES
@@ -38,10 +38,10 @@
 #include <QMap>
 
 //=============================================================================================================
-// DEFINE NAMESPACE UTILSLIB
+// DEFINE NAMESPACE CHANNELSLIB
 //=============================================================================================================
 
-namespace UTILSLIB
+namespace CHANNELSLIB
 {
 
 //=============================================================================================================
@@ -50,7 +50,7 @@ namespace UTILSLIB
  *
  * @snippet ex_utils/main.cpp standard_montage_usage
  */
-struct UTILSSHARED_EXPORT ElectrodePosition
+struct CHANNELSSHARED_EXPORT ElectrodePosition
 {
     QString name;        /**< Electrode name (e.g. "Cz", "Fp1"). */
     Eigen::Vector3d pos; /**< Position in metres, MNI (fsaverage MRI) coordinates. */
@@ -62,7 +62,7 @@ struct UTILSSHARED_EXPORT ElectrodePosition
  *
  * @snippet ex_utils/main.cpp standard_montage_usage
  */
-class UTILSSHARED_EXPORT StandardMontage
+class CHANNELSSHARED_EXPORT StandardMontage
 {
 public:
     //=========================================================================================================
@@ -120,6 +120,6 @@ public:
     static int electrodeCount(System system);
 };
 
-} // namespace UTILSLIB
+} // namespace CHANNELSLIB
 
-#endif // STANDARD_MONTAGE_H
+#endif // CHANNELS_STANDARD_MONTAGE_H

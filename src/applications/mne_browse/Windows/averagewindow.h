@@ -27,7 +27,7 @@
 #include "../Models/averagemodel.h"
 #include "../Delegates/averagedelegate.h"
 
-#include <utils/layoutloader.h>
+#include <channels/layoutloader.h>
 #include <disp/viewers/helpers/averagescene.h>
 #include <disp/viewers/helpers/selectionsceneitem.h>
 

@@ -32,7 +32,8 @@
         "mne_fs",
         "mne_ml",
         "mne_mna",
-        "mne_decoding"
+        "mne_decoding",
+        "mne_channels"
       ]
     },
     {

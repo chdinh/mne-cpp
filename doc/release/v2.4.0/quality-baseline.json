@@ -49,6 +49,8 @@
           "test_base_logger",
           "test_base_string_utils",
           "test_base_thread_pool",
+          "test_channels_layout_selection",
+          "test_channels_standard_montage",
           "test_mne_acq_tool",
           "test_rt_server_fiff_replay"
         ],
@@ -68,6 +70,8 @@
           "test_base_logger",
           "test_base_string_utils",
           "test_base_thread_pool",
+          "test_channels_layout_selection",
+          "test_channels_standard_montage",
           "test_mne_acq_tool",
           "test_rt_server_fiff_replay"
         ],
@@ -87,6 +91,8 @@
           "test_base_logger",
           "test_base_string_utils",
           "test_base_thread_pool",
+          "test_channels_layout_selection",
+          "test_channels_standard_montage",
           "test_mne_acq_tool",
           "test_rt_server_fiff_replay"
         ],
@@ -106,6 +112,8 @@
           "test_base_logger",
           "test_base_string_utils",
           "test_base_thread_pool",
+          "test_channels_layout_selection",
+          "test_channels_standard_montage",
           "test_mne_acq_tool",
           "test_rt_server_fiff_replay"
         ],
@@ -125,6 +133,8 @@
           "test_base_logger",
           "test_base_string_utils",
           "test_base_thread_pool",
+          "test_channels_layout_selection",
+          "test_channels_standard_montage",
           "test_mne_acq_tool",
           "test_rt_server_fiff_replay"
         ],
@@ -144,6 +154,8 @@
           "test_base_logger",
           "test_base_string_utils",
           "test_base_thread_pool",
+          "test_channels_layout_selection",
+          "test_channels_standard_montage",
           "test_mne_acq_tool",
           "test_rt_server_fiff_replay"
         ]

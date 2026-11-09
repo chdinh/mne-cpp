@@ -21,7 +21,7 @@
 #include "ui_eegosportssetupprojectwidget.h"
 #include "../eegosports.h"
 
-#include <utils/layoutloader.h>
+#include <channels/layoutloader.h>
 
 //=============================================================================================================
 // QT INCLUDES
@@ -36,6 +36,7 @@
 
 using namespace EEGOSPORTSPLUGIN;
 using namespace UTILSLIB;
+using namespace CHANNELSLIB;
 
 //=============================================================================================================
 // DEFINE MEMBER METHODS

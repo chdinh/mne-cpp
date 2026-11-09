@@ -1544,14 +1544,14 @@
     "src/libraries/utils/logger/mne_logger.cpp": {
       "clang-analyzer-deadcode.DeadStores": 1
     },
-    "src/libraries/utils/layoutloader.cpp": {
+    "src/libraries/channels/layoutloader.cpp": {
       "performance-faster-string-find": 1
     },
-    "src/libraries/utils/layoutmaker.cpp": {
+    "src/libraries/channels/layoutmaker.cpp": {
       "bugprone-reserved-identifier": 1,
       "clang-analyzer-deadcode.DeadStores": 8
     },
-    "src/libraries/utils/selectionio.cpp": {
+    "src/libraries/channels/selectionio.cpp": {
       "performance-faster-string-find": 1,
       "performance-unnecessary-copy-initialization": 2,
       "performance-unnecessary-value-param": 4
@@ -1735,7 +1735,7 @@
     "src/testframes/test_utils_kmeans/test_utils_kmeans.cpp": {
       "bugprone-random-generator-seed": 1
     },
-    "src/testframes/test_utils_layout_selection/test_utils_layout_selection.cpp": {
+    "src/testframes/test_channels_layout_selection/test_channels_layout_selection.cpp": {
       "performance-faster-string-find": 1
     },
     "src/testframes/test_utils_sphere/test_utils_sphere.cpp": {

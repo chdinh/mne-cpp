@@ -25,8 +25,8 @@
 #include "FormFiles/eegosportssetupwidget.h"
 #include "FormFiles/eegosportssetupprojectwidget.h"
 
-#include <utils/layoutloader.h>
-#include <utils/layoutmaker.h>
+#include <channels/layoutloader.h>
+#include <channels/layoutmaker.h>
 
 #include <scMeas/realtimemultisamplearray.h>
 
@@ -65,6 +65,7 @@ using namespace EEGOSPORTSPLUGIN;
 using namespace SCSHAREDLIB;
 using namespace SCMEASLIB;
 using namespace UTILSLIB;
+using namespace CHANNELSLIB;
 using namespace FIFFLIB;
 using namespace UTILSLIB;
 using namespace Eigen;

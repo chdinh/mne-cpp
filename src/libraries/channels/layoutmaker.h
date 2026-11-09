@@ -12,8 +12,8 @@
  * @date     November 2014
  * @brief    Generator that projects 3-D electrode positions onto a 2-D @c .lout topographic layout via least-squares sphere fitting.
  *
- * @ref UTILSLIB::LayoutMaker is the counterpart of
- * @ref UTILSLIB::LayoutLoader "LayoutLoader": given the 3-D coordinates of an
+ * @ref CHANNELSLIB::LayoutMaker is the counterpart of
+ * @ref CHANNELSLIB::LayoutLoader "LayoutLoader": given the 3-D coordinates of an
  * EEG cap (typically captured with the Polhemus digitizer or
  * loaded from a vendor @c .elc file) it produces the 2-D
  * channel layout file used by every topographic widget in
@@ -28,14 +28,14 @@
  * from MNE's defaults.
  */
 
-#ifndef LAYOUTMAKER_H
-#define LAYOUTMAKER_H
+#ifndef CHANNELS_LAYOUTMAKER_H
+#define CHANNELS_LAYOUTMAKER_H
 
 //=============================================================================================================
 // INCLUDES
 //=============================================================================================================
 
-#include "utils_global.h"
+#include "channels_global.h"
 
 #include <vector>
 #include <string>
@@ -60,7 +60,7 @@
 // DEFINE NAMESPACE MNELIB
 //=============================================================================================================
 
-namespace UTILSLIB
+namespace CHANNELSLIB
 {
 
 //=============================================================================================================
@@ -71,7 +71,7 @@ namespace UTILSLIB
  *
  * @snippet ex_utils/main.cpp layout_maker_usage
  */
-class UTILSSHARED_EXPORT LayoutMaker
+class CHANNELSSHARED_EXPORT LayoutMaker
 {
 public:
     //=========================================================================================================
@@ -142,4 +142,4 @@ private:
 };
 } //NAMESPACE
 
-#endif // LAYOUTMAKER_H
+#endif // CHANNELS_LAYOUTMAKER_H

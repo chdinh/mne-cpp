@@ -21,7 +21,7 @@
 // INCLUDES
 //=============================================================================================================
 
-#include <utils/layoutloader.h>
+#include <channels/layoutloader.h>
 #include "../eegosportselectrodeitem.h"
 #include "../eegosportsimpedancescene.h"
 #include "disp/plots/helpers/colormap.h"

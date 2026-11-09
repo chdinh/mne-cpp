@@ -27,8 +27,8 @@
 
 #include <fiff/fiff_constants.h>
 #include <mne/mne_layout.h>
-#include <utils/selectionio.h>
-#include <utils/layoutmaker.h>
+#include <channels/selectionio.h>
+#include <channels/layoutmaker.h>
 
 
 //=============================================================================================================
@@ -53,7 +53,7 @@
 
 using namespace DISPLIB;
 using namespace FIFFLIB;
-using namespace UTILSLIB;
+using namespace CHANNELSLIB;
 using namespace BASELIB;
 
 //=============================================================================================================

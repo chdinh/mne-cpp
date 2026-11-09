@@ -1,18 +1,18 @@
 ---
 id: layout-maker
-title: "UTILSLIB::LayoutMaker"
+title: "CHANNELSLIB::LayoutMaker"
 sidebar_label: LayoutMaker
 sidebar_position: 28
 ---
 
 # LayoutMaker
 
-**Namespace:** `UTILSLIB` &nbsp;·&nbsp; **Library:** Utilities Library &nbsp;·&nbsp; **Source:** [`utils/layoutmaker.h`](https://github.com/mne-tools/mne-cpp/blob/staging/src/libraries/utils/layoutmaker.h)
+**Namespace:** `CHANNELSLIB` &nbsp;·&nbsp; **Library:** Channels Library &nbsp;·&nbsp; **Source:** [`channels/layoutmaker.h`](https://github.com/mne-tools/mne-cpp/blob/staging/src/libraries/channels/layoutmaker.h)
 
-`#include <utils/layoutmaker.h>`
+`#include <channels/layoutmaker.h>`
 
 ```cpp
-class UTILSLIB::LayoutMaker
+class CHANNELSLIB::LayoutMaker
 ```
 
 Make layout files from given 3D points.
@@ -128,17 +128,17 @@ Reads the specified ANT elc-layout file.
 
 ## Example
 
-- Start here: [ex_utils](../../examples/utils/ex_utils.mdx) — Utilities library: observers, commands, matrix files, montages, layouts, selections and reports.
+- Start here: [ex_utils](../../examples/channels/ex_utils.mdx) — Utilities library: observers, commands, matrix files, montages, layouts, selections and reports.
 - Full source: [`src/examples/ex_utils/main.cpp`](https://github.com/mne-tools/mne-cpp/tree/staging/src/examples/ex_utils/main.cpp)
 - Build target: `ex_utils` (runs under CTest)
 
 ## Used in examples
 
-### [ex_utils](../../examples/utils/ex_utils.mdx)
+### [ex_utils](../../examples/channels/ex_utils.mdx)
 
 Utilities library: observers, commands, matrix files, montages, layouts, selections and reports.
 
-````cpp title="src/examples/ex_utils/main.cpp, line 202"
+````cpp title="src/examples/ex_utils/main.cpp, line 203"
 QList<QVector<float>> layout2d;
 QFile layoutFile(dir.filePath("1020.lout"));
 LayoutMaker::makeLayout(points3d, layout2d, names, layoutFile, true, 20.0f, 5.0f, 4.0f, true);

@@ -24,7 +24,7 @@
     }
   },
   "summary": {
-    "libraries": 25,
+    "libraries": 26,
     "qt_free": [
       "acq",
       "decoding",
@@ -113,6 +113,22 @@
       "public_header_includes": 33,
       "q_object": 0,
       "files": 24,
+      "modules": [
+        "Core"
+      ]
+    },
+    "channels": {
+      "tokens": 144,
+      "by_category": {
+        "containers": 37,
+        "files": 29,
+        "global": 6,
+        "regex": 2,
+        "strings": 70
+      },
+      "public_header_includes": 13,
+      "q_object": 0,
+      "files": 10,
       "modules": [
         "Core"
       ]
@@ -432,20 +448,20 @@
       ]
     },
     "utils": {
-      "tokens": 426,
+      "tokens": 282,
       "by_category": {
-        "containers": 53,
-        "files": 71,
-        "global": 16,
+        "containers": 16,
+        "files": 42,
+        "global": 10,
         "objects_signals": 15,
         "other": 2,
-        "regex": 10,
-        "strings": 257,
+        "regex": 8,
+        "strings": 187,
         "time": 2
       },
-      "public_header_includes": 34,
+      "public_header_includes": 21,
       "q_object": 1,
-      "files": 21,
+      "files": 13,
       "modules": [
         "Core"
       ]

@@ -21,13 +21,13 @@
 #include <utils/generics/commandpattern.h>
 #include <utils/generics/observerpattern.h>
 #include <utils/ioutils.h>
-#include <utils/layoutloader.h>
-#include <utils/layoutmaker.h>
-#include <utils/montage/standard_montage.h>
+#include <channels/layoutloader.h>
+#include <channels/layoutmaker.h>
+#include <channels/standard_montage.h>
 #include <utils/python_runner.h>
 #include <utils/python_test_helper.h>
 #include <utils/report.h>
-#include <utils/selectionio.h>
+#include <channels/selectionio.h>
 
 //=============================================================================================================
 // QT INCLUDES
@@ -57,6 +57,7 @@
 //=============================================================================================================
 
 using namespace UTILSLIB;
+using namespace CHANNELSLIB;
 using namespace Eigen;
 
 //=============================================================================================================

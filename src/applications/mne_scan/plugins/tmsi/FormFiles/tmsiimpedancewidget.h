@@ -19,7 +19,7 @@
 // INCLUDES
 //=============================================================================================================
 
-#include <utils/layoutloader.h>
+#include <channels/layoutloader.h>
 #include "../tmsielectrodeitem.h"
 #include "../tmsiimpedancescene.h"
 #include "disp/plots/helpers/colormap.h"

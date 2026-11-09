@@ -19,8 +19,8 @@
 #include <vector>
 #include <math.h>
 
-#include <utils/layoutmaker.h>
-#include <utils/layoutloader.h>
+#include <channels/layoutmaker.h>
+#include <channels/layoutloader.h>
 #include <base/log.h>
 
 #include <fiff/fiff.h>
@@ -38,7 +38,7 @@
 //=============================================================================================================
 
 using namespace FIFFLIB;
-using namespace UTILSLIB;
+using namespace CHANNELSLIB;
 
 //=============================================================================================================
 // MAIN

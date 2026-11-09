@@ -29,7 +29,7 @@
 // USED NAMESPACES
 //=============================================================================================================
 
-using namespace UTILSLIB;
+using namespace CHANNELSLIB;
 using namespace BASELIB;
 using namespace Eigen;
 
@@ -52,7 +52,7 @@ const QList<ElectrodePosition>& standard1005Table()
     static const QList<ElectrodePosition> table = [] {
         initStandardMontageResource();
         QList<ElectrodePosition> positions;
-        QFile file(QStringLiteral(":/utils/montages/standard_1005.elc"));
+        QFile file(QStringLiteral(":/channels/montages/standard_1005.elc"));
         if (!file.open(QIODevice::ReadOnly | QIODevice::Text)) {
             Log::warning("[StandardMontage] the built-in standard_1005 table is missing");
             return positions;

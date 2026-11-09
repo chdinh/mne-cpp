@@ -1,22 +1,22 @@
 ---
 id: standard-montage
-title: "UTILSLIB::StandardMontage"
+title: "CHANNELSLIB::StandardMontage"
 sidebar_label: StandardMontage
 sidebar_position: 1
 ---
 
 # StandardMontage
 
-**Namespace:** `UTILSLIB` &nbsp;·&nbsp; **Library:** Utilities Library &nbsp;·&nbsp; **Source:** [`utils/montage/standard_montage.h`](https://github.com/mne-tools/mne-cpp/blob/staging/src/libraries/utils/montage/standard_montage.h)
+**Namespace:** `CHANNELSLIB` &nbsp;·&nbsp; **Library:** Channels Library &nbsp;·&nbsp; **Source:** [`channels/standard_montage.h`](https://github.com/mne-tools/mne-cpp/blob/staging/src/libraries/channels/standard_montage.h)
 
 :::info[Python equivalent]
 `mne.channels.make_standard_montage` in MNE-Python.
 :::
 
-`#include <utils/standard_montage.h>`
+`#include <channels/standard_montage.h>`
 
 ```cpp
-class UTILSLIB::StandardMontage
+class CHANNELSLIB::StandardMontage
 ```
 
 Standard EEG montage with named electrode positions.
@@ -42,7 +42,7 @@ Get a standard montage by system name.
 
 **Returns:**
 
-- *QList&lt; [ElectrodePosition](/docs/api/utils/electrode-position) &gt;* — List of electrode positions.
+- *QList&lt; [ElectrodePosition](/docs/api/channels/electrode-position) &gt;* — List of electrode positions.
 
 ---
 
@@ -98,17 +98,17 @@ Get the number of electrodes in a montage.
 
 ## Example
 
-- Start here: [ex_utils](../../examples/utils/ex_utils.mdx) — Utilities library: observers, commands, matrix files, montages, layouts, selections and reports.
+- Start here: [ex_utils](../../examples/channels/ex_utils.mdx) — Utilities library: observers, commands, matrix files, montages, layouts, selections and reports.
 - Full source: [`src/examples/ex_utils/main.cpp`](https://github.com/mne-tools/mne-cpp/tree/staging/src/examples/ex_utils/main.cpp)
 - Build target: `ex_utils` (runs under CTest)
 
 ## Used in examples
 
-### [ex_utils](../../examples/utils/ex_utils.mdx)
+### [ex_utils](../../examples/channels/ex_utils.mdx)
 
 Utilities library: observers, commands, matrix files, montages, layouts, selections and reports.
 
-````cpp title="src/examples/ex_utils/main.cpp, line 187"
+````cpp title="src/examples/ex_utils/main.cpp, line 188"
 const QList<ElectrodePosition> montage1020 = StandardMontage::getMontage(StandardMontage::System::Standard_1020);
 Vector3d cz;
 const bool found = StandardMontage::findElectrode("Cz", cz); // mne's standard_1005 positions, metres, MNI frame

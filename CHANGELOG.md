@@ -27,6 +27,7 @@ aliases; replace the old spelling as below.
 | `qWarning() << ...` in library code | `BASELIB::Log::warning("... {}", value)` (std::format syntax) |
 | `QTest::ignoreMessage` for library messages | `BASELIB::LogCapture` |
 | `utils/error.h`, `byte_stream.h`, `endian.h`, `string_utils.h`, `thread_pool.h`, `buildinfo.h` and `UTILSLIB::Expected`, `Error`, `ByteStream`, `StringList`, `ThreadPool`, ... | `base/...` and `BASELIB::...`, in the new `mne_base` library |
+| `utils/layoutloader.h`, `layoutmaker.h`, `selectionio.h`, `montage/standard_montage.h` and `UTILSLIB::LayoutLoader`, `LayoutMaker`, `SelectionIO`, `StandardMontage` | `channels/...` and `CHANNELSLIB::...`, in the new `mne_channels` library |
 | `utils/generics/circularbuffer.h`, `CircularBuffer_Matrix_double` | `base/circular_buffer.h`, `BASELIB::CircularBuffer<Eigen::MatrixXd>` |
 | `CircularBuffer::push(ptr, n)`, `getFreeElementsRead()`, `pause()` | `push(std::span)`, `size()`; `pause` is removed |
 | `MNE_LOG_LEVEL=FATAL` | removed; `CRIT` is the highest level |

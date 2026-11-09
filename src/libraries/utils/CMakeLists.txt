@@ -19,10 +19,6 @@ find_package(Qt${QT_VERSION_MAJOR} REQUIRED COMPONENTS ${QT_REQUIRED_COMPONENTS}
 
 set(SOURCES
   ioutils.cpp
-  layoutloader.cpp
-  layoutmaker.cpp
-  selectionio.cpp
-  montage/standard_montage.cpp
   report.cpp
   generics/observerpattern.cpp
   utils_global.cpp
@@ -31,10 +27,6 @@ set(SOURCES
 set(HEADERS
   utils_global.h
   ioutils.h
-  layoutloader.h
-  layoutmaker.h
-  selectionio.h
-  montage/standard_montage.h
   report.h
   generics/commandpattern.h
   generics/observerpattern.h
@@ -54,13 +46,6 @@ list(TRANSFORM SOURCE_PATHS PREPEND "${CMAKE_CURRENT_SOURCE_DIR}/")
 set_source_files_properties(${FILE_TO_UPDATE} PROPERTIES OBJECT_DEPENDS "${SOURCE_PATHS}")
 
 add_library(${PROJECT_NAME} ${SOURCES} ${HEADERS})
-
-# MNE-Python's standard_1005 electrode table, behind StandardMontage
-qt_add_resources(${PROJECT_NAME} "standard_montage"
-  PREFIX "/utils/montages"
-  BASE montage/data
-  FILES montage/data/standard_1005.elc
-)
 
 target_include_directories(${PROJECT_NAME} PUBLIC $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/..> $<INSTALL_INTERFACE:include>)
 

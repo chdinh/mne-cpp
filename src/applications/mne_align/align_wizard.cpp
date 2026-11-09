@@ -17,7 +17,7 @@
 #include <fiff/fiff_dig_point.h>
 #include <fiff/fiff_dig_point_set.h>
 
-#include <utils/montage/standard_montage.h>
+#include <channels/standard_montage.h>
 #include <base/string_utils.h>
 
 #include <QComboBox>
@@ -35,7 +35,7 @@
 
 using namespace ACQLIB;
 using namespace MNEALIGN;
-using UTILSLIB::StandardMontage;
+using CHANNELSLIB::StandardMontage;
 
 namespace
 {

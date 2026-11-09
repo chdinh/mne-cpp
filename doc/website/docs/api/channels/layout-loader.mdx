@@ -1,18 +1,18 @@
 ---
 id: layout-loader
-title: "UTILSLIB::LayoutLoader"
+title: "CHANNELSLIB::LayoutLoader"
 sidebar_label: LayoutLoader
 sidebar_position: 27
 ---
 
 # LayoutLoader
 
-**Namespace:** `UTILSLIB` &nbsp;·&nbsp; **Library:** Utilities Library &nbsp;·&nbsp; **Source:** [`utils/layoutloader.h`](https://github.com/mne-tools/mne-cpp/blob/staging/src/libraries/utils/layoutloader.h)
+**Namespace:** `CHANNELSLIB` &nbsp;·&nbsp; **Library:** Channels Library &nbsp;·&nbsp; **Source:** [`channels/layoutloader.h`](https://github.com/mne-tools/mne-cpp/blob/staging/src/libraries/channels/layoutloader.h)
 
-`#include <utils/layoutloader.h>`
+`#include <channels/layoutloader.h>`
 
 ```cpp
-class UTILSLIB::LayoutLoader
+class CHANNELSLIB::LayoutLoader
 ```
 
 Reads ANT .elc files, which contain the electrode positions of an EEG cap.
@@ -88,17 +88,17 @@ Reads the specified ANT elc-layout file.
 
 ## Example
 
-- Start here: [ex_utils](../../examples/utils/ex_utils.mdx) — Utilities library: observers, commands, matrix files, montages, layouts, selections and reports.
+- Start here: [ex_utils](../../examples/channels/ex_utils.mdx) — Utilities library: observers, commands, matrix files, montages, layouts, selections and reports.
 - Full source: [`src/examples/ex_utils/main.cpp`](https://github.com/mne-tools/mne-cpp/tree/staging/src/examples/ex_utils/main.cpp)
 - Build target: `ex_utils` (runs under CTest)
 
 ## Used in examples
 
-### [ex_utils](../../examples/utils/ex_utils.mdx)
+### [ex_utils](../../examples/channels/ex_utils.mdx)
 
 Utilities library: observers, commands, matrix files, montages, layouts, selections and reports.
 
-````cpp title="src/examples/ex_utils/main.cpp, line 224"
+````cpp title="src/examples/ex_utils/main.cpp, line 225"
 QList<QVector<float>> cap3D;
 QList<QVector<float>> cap2D;
 QString capUnit;
