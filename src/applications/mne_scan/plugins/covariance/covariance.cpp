@@ -17,6 +17,7 @@
 //=============================================================================================================
 
 #include "covariance.h"
+#include <memory>
 
 #include "FormFiles/covariancesetupwidget.h"
 
@@ -56,7 +57,7 @@ using namespace Eigen;
 
 Covariance::Covariance()
 : m_iEstimationSamples(2000)
-, m_pCircularBuffer(CircularBuffer_Matrix_double::SPtr::create(40))
+, m_pCircularBuffer(std::make_shared<CircularBuffer_Matrix_double>(40))
 {
 }
 

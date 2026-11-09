@@ -72,9 +72,6 @@ template<typename T>
 class CircularBuffer
 {
 public:
-    typedef QSharedPointer<CircularBuffer> SPtr;            /**< Shared pointer type for CircularBuffer. */
-    typedef QSharedPointer<const CircularBuffer> ConstSPtr; /**< Const shared pointer type for CircularBuffer. */
-
     //=========================================================================================================
     /**
      * Constructs a CircularBuffer.

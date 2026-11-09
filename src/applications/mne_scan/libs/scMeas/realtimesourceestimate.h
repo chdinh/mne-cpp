@@ -20,6 +20,7 @@
 //=============================================================================================================
 
 #include "scmeas_global.h"
+#include <memory>
 #include "measurement.h"
 
 #include <fs/fs_label.h>
@@ -82,7 +83,7 @@ public:
      *
      * @param[in] annotSet   the annotation set to set.
      */
-    inline void setAnnotSet(FSLIB::FsAnnotationSet::SPtr& annotSet);
+    inline void setAnnotSet(std::shared_ptr<FSLIB::FsAnnotationSet>& annotSet);
 
     //=========================================================================================================
     /**
@@ -90,7 +91,7 @@ public:
      *
      * @return the annotation set.
      */
-    inline FSLIB::FsAnnotationSet::SPtr& getAnnotSet();
+    inline std::shared_ptr<FSLIB::FsAnnotationSet>& getAnnotSet();
 
     //=========================================================================================================
     /**
@@ -98,7 +99,7 @@ public:
      *
      * @param[in] surfSet   the surface set to set.
      */
-    inline void setSurfSet(FSLIB::FsSurfaceSet::SPtr& surfSet);
+    inline void setSurfSet(std::shared_ptr<FSLIB::FsSurfaceSet>& surfSet);
 
     //=========================================================================================================
     /**
@@ -106,7 +107,7 @@ public:
      *
      * @return the surface set.
      */
-    inline FSLIB::FsSurfaceSet::SPtr& getSurfSet();
+    inline std::shared_ptr<FSLIB::FsSurfaceSet>& getSurfSet();
 
     //=========================================================================================================
     /**
@@ -204,9 +205,9 @@ private:
     FIFFLIB::FiffInfo::SPtr m_pFiffInfo;    /**< The Fiff info. */
     FIFFLIB::FiffCoordTrans m_mriHeadTrans; /**< Mri to head transformation. */
 
-    FSLIB::FsAnnotationSet::SPtr m_pAnnotSet;        /**< FsAnnotation set. */
-    FSLIB::FsSurfaceSet::SPtr m_pSurfSet;            /**< FsSurface set. */
-    MNELIB::MNEForwardSolution::SPtr m_pFwdSolution; /**< Forward solution. */
+    std::shared_ptr<FSLIB::FsAnnotationSet> m_pAnnotSet; /**< FsAnnotation set. */
+    std::shared_ptr<FSLIB::FsSurfaceSet> m_pSurfSet;     /**< FsSurface set. */
+    MNELIB::MNEForwardSolution::SPtr m_pFwdSolution;     /**< Forward solution. */
 
     qint32 m_iSourceEstimateSize; /**< Sample size of the multi sample array.*/
 
@@ -218,7 +219,7 @@ private:
 // INLINE DEFINITIONS
 //=============================================================================================================
 
-inline void RealTimeSourceEstimate::setAnnotSet(FSLIB::FsAnnotationSet::SPtr& annotSet)
+inline void RealTimeSourceEstimate::setAnnotSet(std::shared_ptr<FSLIB::FsAnnotationSet>& annotSet)
 {
     QMutexLocker locker(&m_qMutex);
     m_pAnnotSet = annotSet;
@@ -226,7 +227,7 @@ inline void RealTimeSourceEstimate::setAnnotSet(FSLIB::FsAnnotationSet::SPtr& an
 
 //=============================================================================================================
 
-inline FSLIB::FsAnnotationSet::SPtr& RealTimeSourceEstimate::getAnnotSet()
+inline std::shared_ptr<FSLIB::FsAnnotationSet>& RealTimeSourceEstimate::getAnnotSet()
 {
     QMutexLocker locker(&m_qMutex);
     return m_pAnnotSet;
@@ -234,7 +235,7 @@ inline FSLIB::FsAnnotationSet::SPtr& RealTimeSourceEstimate::getAnnotSet()
 
 //=============================================================================================================
 
-inline void RealTimeSourceEstimate::setSurfSet(FSLIB::FsSurfaceSet::SPtr& surfSet)
+inline void RealTimeSourceEstimate::setSurfSet(std::shared_ptr<FSLIB::FsSurfaceSet>& surfSet)
 {
     QMutexLocker locker(&m_qMutex);
     m_pSurfSet = surfSet;
@@ -242,7 +243,7 @@ inline void RealTimeSourceEstimate::setSurfSet(FSLIB::FsSurfaceSet::SPtr& surfSe
 
 //=============================================================================================================
 
-inline FSLIB::FsSurfaceSet::SPtr& RealTimeSourceEstimate::getSurfSet()
+inline std::shared_ptr<FSLIB::FsSurfaceSet>& RealTimeSourceEstimate::getSurfSet()
 {
     QMutexLocker locker(&m_qMutex);
     return m_pSurfSet;

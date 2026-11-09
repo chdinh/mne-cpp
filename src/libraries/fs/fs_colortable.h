@@ -75,9 +75,6 @@ namespace FSLIB
 class FSSHARED_EXPORT FsColortable
 {
 public:
-    typedef QSharedPointer<FsColortable> SPtr;            /**< Shared pointer type for FsColortable. */
-    typedef QSharedPointer<const FsColortable> ConstSPtr; /**< Const shared pointer type for FsColortable. */
-
     //=========================================================================================================
     /**
      * Default constructor.

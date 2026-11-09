@@ -20,6 +20,7 @@
 //=============================================================================================================
 
 #include "noisereduction_global.h"
+#include <memory>
 
 #include <vector>
 
@@ -238,7 +239,7 @@ private:
 
     QSharedPointer<FIFFLIB::FiffInfo> m_pFiffInfo; /**< Fiff measurement info.*/
 
-    QSharedPointer<UTILSLIB::CircularBuffer_Matrix_double> m_pCircularBuffer; /**< Holds incoming raw data. */
+    std::shared_ptr<UTILSLIB::CircularBuffer_Matrix_double> m_pCircularBuffer; /**< Holds incoming raw data. */
 
     SCSHAREDLIB::PluginInputData<SCMEASLIB::RealTimeMultiSampleArray>::SPtr m_pNoiseReductionInput;   /**< The RealTimeMultiSampleArray of the NoiseReduction input.*/
     SCSHAREDLIB::PluginOutputData<SCMEASLIB::RealTimeMultiSampleArray>::SPtr m_pNoiseReductionOutput; /**< The RealTimeMultiSampleArray of the NoiseReduction output.*/

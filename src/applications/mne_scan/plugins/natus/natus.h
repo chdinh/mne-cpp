@@ -20,6 +20,7 @@
 //=============================================================================================================
 
 #include "natus_global.h"
+#include <memory>
 
 #include <scShared/Plugins/abstractsensor.h>
 #include <utils/generics/circularbuffer.h>
@@ -157,9 +158,9 @@ protected:
 
     QString m_qStringResourcePath; /**< The path to the EEG resource directory.*/
 
-    QThread m_pProducerThread;                                                /**< The thread used to host the producer.*/
-    QSharedPointer<NATUSPLUGIN::NatusProducer> m_pNatusProducer;              /**< The producer object.*/
-    QSharedPointer<UTILSLIB::CircularBuffer_Matrix_double> m_pCircularBuffer; /**< Holds incoming raw data. */
+    QThread m_pProducerThread;                                                 /**< The thread used to host the producer.*/
+    QSharedPointer<NATUSPLUGIN::NatusProducer> m_pNatusProducer;               /**< The producer object.*/
+    std::shared_ptr<UTILSLIB::CircularBuffer_Matrix_double> m_pCircularBuffer; /**< Holds incoming raw data. */
 
     QSharedPointer<SCSHAREDLIB::PluginOutputData<SCMEASLIB::RealTimeMultiSampleArray>> m_pRMTSA_Natus; /**< The RealTimeSampleArray to provide the EEG data.*/
     QSharedPointer<FIFFLIB::FiffInfo> m_pFiffInfo;                                                     /**< Fiff measurement info.*/

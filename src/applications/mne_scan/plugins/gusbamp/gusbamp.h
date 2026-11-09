@@ -21,6 +21,7 @@
 //=============================================================================================================
 
 #include "gusbamp_global.h"
+#include <memory>
 #include <scShared/Plugins/abstractsensor.h>
 #include <utils/generics/circularbuffer.h>
 #include <scMeas/realtimemultisamplearray.h>
@@ -177,7 +178,7 @@ private:
     SCSHAREDLIB::PluginOutputData<SCMEASLIB::RealTimeMultiSampleArray>::SPtr m_pRTMSA_GUSBAmp; /**< The RealTimeSampleArray to provide the EEG data.*/
     QSharedPointer<GUSBAmpSetupProjectWidget> m_pGUSBampSetupProjectWidget;                    /**< Widget for setup the project file*/
 
-    QSharedPointer<UTILSLIB::CircularBuffer_Matrix_float> m_pCircularBuffer; /**< Holds incoming raw data.*/
+    std::shared_ptr<UTILSLIB::CircularBuffer_Matrix_float> m_pCircularBuffer; /**< Holds incoming raw data.*/
 
     QString m_qStringResourcePath;                      /**< The path to the EEG resource directory.*/
     QSharedPointer<GUSBAmpProducer> m_pGUSBAmpProducer; /**< the GUSBAmpProducer.*/

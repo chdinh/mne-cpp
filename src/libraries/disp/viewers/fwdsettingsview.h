@@ -230,7 +230,7 @@ signals:
      * @param[in] pAnnotationSet        The FsAnnotation set.
      */
     void atlasDirChanged(const QString& sDirPath,
-                         const FSLIB::FsAnnotationSet::SPtr pAnnotationSet);
+                         const std::shared_ptr<FSLIB::FsAnnotationSet>& pAnnotationSet);
 
     //=========================================================================================================
     /**

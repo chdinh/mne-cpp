@@ -17,6 +17,7 @@
 //=============================================================================================================
 
 #include "averaging.h"
+#include <memory>
 #include "FormFiles/averagingsetupwidget.h"
 
 #include <disp/viewers/averagingsettingsview.h>
@@ -68,7 +69,7 @@ std::map<std::string, double> toStdThresholds(const QMap<QString, double>& thres
 //=============================================================================================================
 
 Averaging::Averaging()
-: m_pCircularBuffer(CircularBuffer<FIFFLIB::FiffEvokedSet>::SPtr::create(40))
+: m_pCircularBuffer(std::make_shared<CircularBuffer<FIFFLIB::FiffEvokedSet>>(40))
 {
 }
 

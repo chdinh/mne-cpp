@@ -79,9 +79,6 @@ class FsSurfaceSet;
 class FSSHARED_EXPORT FsAnnotationSet
 {
 public:
-    typedef QSharedPointer<FsAnnotationSet> SPtr;            /**< Shared pointer type for FsAnnotationSet. */
-    typedef QSharedPointer<const FsAnnotationSet> ConstSPtr; /**< Const shared pointer type for FsAnnotationSet. */
-
     //=========================================================================================================
     /**
      * Default constructor

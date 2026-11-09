@@ -88,9 +88,6 @@ class COMSHARED_EXPORT Command : public QObject, public UTILSLIB::ICommand
     Q_OBJECT
 
 public:
-    typedef QSharedPointer<Command> SPtr;
-    typedef QSharedPointer<const Command> ConstSPtr;
-
     //=========================================================================================================
     /**
      * Constructs a Command

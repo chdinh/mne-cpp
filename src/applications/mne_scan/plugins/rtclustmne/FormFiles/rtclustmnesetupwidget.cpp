@@ -17,6 +17,7 @@
 //=============================================================================================================
 
 #include "rtclustmnesetupwidget.h"
+#include <memory>
 
 #include "../rtclustmne.h"
 
@@ -92,7 +93,7 @@ void RtClustMneSetupWidget::showAtlasDirDialog()
 
     ui.m_qLineEdit_AtlasDirName->setText(m_pMNE->m_sAtlasDir);
 
-    FsAnnotationSet::SPtr t_pAnnotationSet = FsAnnotationSet::SPtr(new FsAnnotationSet((t_sAtlasDir + "/lh.aparc.a2009s.annot").toStdU16String(), (t_sAtlasDir + "/rh.aparc.a2009s.annot").toStdU16String()));
+    std::shared_ptr<FsAnnotationSet> t_pAnnotationSet = std::make_shared<FsAnnotationSet>((t_sAtlasDir + "/lh.aparc.a2009s.annot").toStdU16String(), (t_sAtlasDir + "/rh.aparc.a2009s.annot").toStdU16String());
 
     if (!t_pAnnotationSet->empty() && t_pAnnotationSet->size() == 2) {
         m_pMNE->m_pAnnotationSet = t_pAnnotationSet;
@@ -103,7 +104,7 @@ void RtClustMneSetupWidget::showAtlasDirDialog()
 
         ui.m_qLabel_atlasStat->setText("loaded");
     } else {
-        m_pMNE->m_pAnnotationSet = FsAnnotationSet::SPtr(new FsAnnotationSet());
+        m_pMNE->m_pAnnotationSet = std::make_shared<FsAnnotationSet>();
         ui.m_qLabel_atlasStat->setText("not loaded");
     }
 }
@@ -116,7 +117,7 @@ void RtClustMneSetupWidget::showSurfaceDirDialog()
                                                               QString(),
                                                               QFileDialog::ShowDirsOnly | QFileDialog::DontResolveSymlinks);
 
-    FsSurfaceSet::SPtr t_pSurfaceSet = FsSurfaceSet::SPtr(new FsSurfaceSet((t_sSurfaceDir + "/lh.orig").toStdU16String(), (t_sSurfaceDir + "/rh.orig").toStdU16String()));
+    std::shared_ptr<FsSurfaceSet> t_pSurfaceSet = std::make_shared<FsSurfaceSet>((t_sSurfaceDir + "/lh.orig").toStdU16String(), (t_sSurfaceDir + "/rh.orig").toStdU16String());
 
     ui.m_qLineEdit_SurfaceDirName->setText(t_sSurfaceDir);
 
@@ -129,7 +130,7 @@ void RtClustMneSetupWidget::showSurfaceDirDialog()
 
         ui.m_qLabel_surfaceStat->setText("loaded");
     } else {
-        m_pMNE->m_pSurfaceSet = FsSurfaceSet::SPtr(new FsSurfaceSet());
+        m_pMNE->m_pSurfaceSet = std::make_shared<FsSurfaceSet>();
         ui.m_qLabel_surfaceStat->setText("not loaded");
     }
 }

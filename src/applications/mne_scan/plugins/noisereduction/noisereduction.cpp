@@ -17,6 +17,7 @@
 //=============================================================================================================
 
 #include "noisereduction.h"
+#include <memory>
 
 #include <vector>
 #include <utils/string_utils.h>
@@ -64,7 +65,7 @@ NoiseReduction::NoiseReduction()
 , m_iMaxFilterLength(1)
 , m_iMaxFilterTapSize(-1)
 , m_sCurrentSystem("VectorView")
-, m_pCircularBuffer(QSharedPointer<UTILSLIB::CircularBuffer_Matrix_double>::create(40))
+, m_pCircularBuffer(std::make_shared<UTILSLIB::CircularBuffer_Matrix_double>(40))
 , m_pNoiseReductionInput(nullptr)
 , m_pNoiseReductionOutput(nullptr)
 {

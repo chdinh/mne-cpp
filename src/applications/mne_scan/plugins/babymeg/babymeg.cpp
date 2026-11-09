@@ -19,6 +19,7 @@
 //=============================================================================================================
 
 #include "babymeg.h"
+#include <memory>
 
 #include <vector>
 #include <utils/string_utils.h>
@@ -60,7 +61,7 @@ using namespace UTILSLIB;
 //=============================================================================================================
 
 BabyMEG::BabyMEG()
-: m_pCircularBuffer(CircularBuffer_Matrix_float::SPtr(new CircularBuffer_Matrix_float(40)))
+: m_pCircularBuffer(std::make_shared<CircularBuffer_Matrix_float>(40))
 , m_iBufferSize(-1)
 , m_sFiffProjections(QCoreApplication::applicationDirPath() + "/../resources/mne_scan/plugins/babymeg/header.fif")
 , m_sFiffCompensators(QCoreApplication::applicationDirPath() + "/../resources/mne_scan/plugins/babymeg/compensator.fif")

@@ -17,6 +17,7 @@
 //=============================================================================================================
 
 #include "ftbuffer.h"
+#include <memory>
 #include "ftbuffproducer.h"
 #include <QDebug>
 
@@ -39,7 +40,7 @@ FtBuffer::FtBuffer()
 : m_bIsConfigured(false)
 , m_pFtBuffProducer(QSharedPointer<FtBuffProducer>::create(this))
 , m_pFiffInfo(QSharedPointer<FiffInfo>::create())
-, m_pCircularBuffer(QSharedPointer<CircularBuffer_Matrix_double>(new CircularBuffer_Matrix_double(10)))
+, m_pCircularBuffer(std::make_shared<CircularBuffer_Matrix_double>(10))
 , m_sBufferAddress("127.0.0.1")
 , m_iBufferPort(1972)
 {

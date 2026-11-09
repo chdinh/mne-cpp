@@ -17,6 +17,7 @@
 //=============================================================================================================
 
 #include "realtimeconnectivityestimate.h"
+#include <memory>
 
 #include <connectivity/network/network.h>
 
@@ -42,8 +43,8 @@ using namespace FSLIB;
 
 RealTimeConnectivityEstimate::RealTimeConnectivityEstimate(QObject* parent)
 : Measurement(QMetaType::fromName("RealTimeConnectivityEstimate::SPtr").id(), parent)
-, m_pAnnotSet(FsAnnotationSet::SPtr(new FsAnnotationSet))
-, m_pSurfSet(FsSurfaceSet::SPtr(new FsSurfaceSet))
+, m_pAnnotSet(std::make_shared<FsAnnotationSet>())
+, m_pSurfSet(std::make_shared<FsSurfaceSet>())
 , m_pFwdSolution(MNEForwardSolution::SPtr(new MNEForwardSolution))
 , m_pNetwork(QSharedPointer<Network>::create())
 , m_bInitialized(false)

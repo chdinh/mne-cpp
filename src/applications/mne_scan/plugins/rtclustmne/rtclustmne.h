@@ -20,6 +20,7 @@
 //=============================================================================================================
 
 #include "rtclustmne_global.h"
+#include <memory>
 
 #include <scShared/Plugins/abstractalgorithm.h>
 
@@ -242,13 +243,13 @@ protected:
     QSharedPointer<SCSHAREDLIB::PluginInputData<SCMEASLIB::RealTimeEvokedSet>> m_pRTESInput;         /**< The RealTimeEvoked input.*/
     QSharedPointer<SCSHAREDLIB::PluginInputData<SCMEASLIB::RealTimeCov>> m_pRTCInput;                /**< The RealTimeCov input.*/
     QSharedPointer<SCSHAREDLIB::PluginOutputData<SCMEASLIB::RealTimeSourceEstimate>> m_pRTSEOutput;  /**< The RealTimeSourceEstimate output.*/
-    QSharedPointer<UTILSLIB::CircularBuffer_Matrix_double> m_pCircularMatrixBuffer;                  /**< Holds incoming RealTimeMultiSampleArray data.*/
-    QSharedPointer<UTILSLIB::CircularBuffer<FIFFLIB::FiffEvoked>> m_pCircularEvokedBuffer;           /**< Holds incoming RealTimeMultiSampleArray data.*/
+    std::shared_ptr<UTILSLIB::CircularBuffer_Matrix_double> m_pCircularMatrixBuffer;                 /**< Holds incoming RealTimeMultiSampleArray data.*/
+    std::shared_ptr<UTILSLIB::CircularBuffer<FIFFLIB::FiffEvoked>> m_pCircularEvokedBuffer;          /**< Holds incoming RealTimeMultiSampleArray data.*/
     QSharedPointer<RTPROCESSINGLIB::RtInvOp> m_pRtInvOp;                                             /**< Real-time inverse operator. */
     QSharedPointer<MNELIB::MNEForwardSolution> m_pFwd;                                               /**< Forward solution. */
     QSharedPointer<FIFFLIB::FiffCov> m_pNoiseCov;                                                    /**< Noise Covariance Matrix. */
-    QSharedPointer<FSLIB::FsAnnotationSet> m_pAnnotationSet;                                         /**< FsAnnotation set. */
-    QSharedPointer<FSLIB::FsSurfaceSet> m_pSurfaceSet;                                               /**< FsSurface set. */
+    std::shared_ptr<FSLIB::FsAnnotationSet> m_pAnnotationSet;                                        /**< FsAnnotation set. */
+    std::shared_ptr<FSLIB::FsSurfaceSet> m_pSurfaceSet;                                              /**< FsSurface set. */
     QSharedPointer<FIFFLIB::FiffInfoBase> m_pFiffInfoForward;                                        /**< Fiff information of the forward solution. */
     QSharedPointer<FIFFLIB::FiffInfo> m_pFiffInfo;                                                   /**< Fiff information. */
     QSharedPointer<FIFFLIB::FiffInfo> m_pFiffInfoInput;                                              /**< Fiff information of the evoked. */

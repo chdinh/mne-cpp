@@ -21,6 +21,7 @@
 //=============================================================================================================
 
 #include "tmsi_global.h"
+#include <memory>
 
 #include "FormFiles/tmsisetupwidget.h"
 #include "FormFiles/tmsimanualannotationwidget.h"
@@ -224,7 +225,7 @@ private:
     QString m_sElcFilePath;                        /**< Holds the path for the .elc file (electrode positions). Defined by the user via the GUI.*/
     QSharedPointer<FIFFLIB::FiffInfo> m_pFiffInfo; /**< Fiff measurement info.*/
 
-    QSharedPointer<UTILSLIB::CircularBuffer_Matrix_float> m_pCircularBuffer; /**< Holds incoming raw data.*/
+    std::shared_ptr<UTILSLIB::CircularBuffer_Matrix_float> m_pCircularBuffer; /**< Holds incoming raw data.*/
 
     QSharedPointer<TMSIProducer> m_pTMSIProducer; /**< the TMSIProducer.*/
 

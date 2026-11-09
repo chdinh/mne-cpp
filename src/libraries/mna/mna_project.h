@@ -65,9 +65,6 @@ namespace MNALIB
 class MNASHARED_EXPORT MnaProject
 {
 public:
-    typedef QSharedPointer<MnaProject> SPtr;            /**< Shared pointer type. */
-    typedef QSharedPointer<const MnaProject> ConstSPtr; /**< Const shared pointer type. */
-
     //=========================================================================================================
     /**
      * Default constructor.

@@ -17,6 +17,7 @@
 //=============================================================================================================
 
 #include "fiffsimulator.h"
+#include <memory>
 #include "fiffsimulatorproducer.h"
 
 #include "FormFiles/fiffsimulatorsetupwidget.h"
@@ -56,8 +57,8 @@ using namespace Eigen;
 
 FiffSimulator::FiffSimulator()
 : m_pFiffSimulatorProducer(new FiffSimulatorProducer(this))
-, m_pRtCmdClient(QSharedPointer<RtCmdClient>::create())
-, m_pCircularBuffer(QSharedPointer<CircularBuffer_Matrix_float>(new CircularBuffer_Matrix_float(40)))
+, m_pRtCmdClient(std::make_shared<RtCmdClient>())
+, m_pCircularBuffer(std::make_shared<CircularBuffer_Matrix_float>(40))
 , m_bCmdClientIsConnected(false)
 , m_sFiffSimulatorIP("127.0.0.1")
 , m_sFiffSimulatorClientAlias("mne_scan")

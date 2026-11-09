@@ -21,6 +21,7 @@
 //=============================================================================================================
 
 #include "brainamp_global.h"
+#include <memory>
 
 #include <fstream>
 
@@ -183,7 +184,7 @@ private:
     QSharedPointer<SCSHAREDLIB::PluginOutputData<SCMEASLIB::RealTimeMultiSampleArray>> m_pRMTSA_BrainAMP; /**< The RealTimeSampleArray to provide the EEG data.*/
     QSharedPointer<BrainAMPSetupProjectWidget> m_pBrainAMPSetupProjectWidget;                             /**< Widget for checking the impedances*/
 
-    QSharedPointer<UTILSLIB::CircularBuffer_Matrix_double> m_pCircularBuffer; /**< Holds incoming raw data.*/
+    std::shared_ptr<UTILSLIB::CircularBuffer_Matrix_double> m_pCircularBuffer; /**< Holds incoming raw data.*/
 
     QString m_qStringResourcePath; /**< The path to the EEG resource directory.*/
 

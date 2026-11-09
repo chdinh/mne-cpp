@@ -70,9 +70,6 @@ namespace FSLIB
 class FSSHARED_EXPORT FsSurfaceSet
 {
 public:
-    typedef QSharedPointer<FsSurfaceSet> SPtr;            /**< Shared pointer type for FsSurfaceSet class. */
-    typedef QSharedPointer<const FsSurfaceSet> ConstSPtr; /**< Const shared pointer type for FsSurfaceSet class. */
-
     //=========================================================================================================
     /**
      * Default constructor

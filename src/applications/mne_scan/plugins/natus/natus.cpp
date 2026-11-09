@@ -17,6 +17,7 @@
 //=============================================================================================================
 
 #include "natus.h"
+#include <memory>
 #include "natusproducer.h"
 #include "FormFiles/natussetup.h"
 
@@ -194,7 +195,7 @@ bool Natus::start()
 {
     // Init circular buffer to transmit data from the producer to this thread
     if (!m_pCircularBuffer) {
-        m_pCircularBuffer = QSharedPointer<CircularBuffer_Matrix_double>(new CircularBuffer_Matrix_double(10));
+        m_pCircularBuffer = std::make_shared<CircularBuffer_Matrix_double>(10);
     }
 
     //Setup fiff info before setting up the RMTSA because we need it to init the RTMSA

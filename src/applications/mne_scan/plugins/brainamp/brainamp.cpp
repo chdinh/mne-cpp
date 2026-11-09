@@ -18,6 +18,7 @@
 //=============================================================================================================
 
 #include "brainamp.h"
+#include <memory>
 #include "brainampproducer.h"
 
 #include "FormFiles/brainampsetupwidget.h"
@@ -62,7 +63,7 @@ BrainAMP::BrainAMP()
 , m_sLPA("2LD")
 , m_sRPA("2RD")
 , m_sNasion("0Z")
-, m_pCircularBuffer(QSharedPointer<CircularBuffer_Matrix_double>(new CircularBuffer_Matrix_double(8)))
+, m_pCircularBuffer(std::make_shared<CircularBuffer_Matrix_double>(8))
 {
     // Create record file option action bar item/button
     m_pActionSetupProject = new QAction(QIcon(":/images/database.png"), tr("Setup project"), this);

@@ -19,6 +19,7 @@
 
 
 #include "hpi.h"
+#include <memory>
 #include <utils/string_utils.h>
 
 #include "FormFiles/hpisetupwidget.h"
@@ -73,7 +74,7 @@ Hpi::Hpi()
 , m_bDoContinousHpi(false)
 , m_bUseSSP(false)
 , m_bUseComp(false)
-, m_pCircularBuffer(CircularBuffer_Matrix_double::SPtr::create(40))
+, m_pCircularBuffer(std::make_shared<CircularBuffer_Matrix_double>(40))
 {
     connect(this, &Hpi::devHeadTransAvailable,
             this, &Hpi::onDevHeadTransAvailable, Qt::BlockingQueuedConnection);

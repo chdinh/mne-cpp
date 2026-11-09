@@ -20,6 +20,7 @@
 //=============================================================================================================
 
 #include "averaging_global.h"
+#include <memory>
 
 #include <vector>
 
@@ -204,7 +205,7 @@ private:
     SCSHAREDLIB::PluginInputData<SCMEASLIB::RealTimeMultiSampleArray>::SPtr m_pAveragingInput; /**< The RealTimeSampleArray of the Averaging input.*/
     SCSHAREDLIB::PluginOutputData<SCMEASLIB::RealTimeEvokedSet>::SPtr m_pAveragingOutput;      /**< The RealTimeEvoked of the Averaging output.*/
 
-    UTILSLIB::CircularBuffer<FIFFLIB::FiffEvokedSet>::SPtr m_pCircularBuffer; /**< Holds incoming fiff evoked sets. */
+    std::shared_ptr<UTILSLIB::CircularBuffer<FIFFLIB::FiffEvokedSet>> m_pCircularBuffer; /**< Holds incoming fiff evoked sets. */
 
     QMutex m_qMutex; /**< Provides access serialization between threads. */
 

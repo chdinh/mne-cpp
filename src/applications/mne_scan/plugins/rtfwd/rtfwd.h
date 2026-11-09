@@ -192,7 +192,7 @@ private:
      * @param[in] pAnnotationSet        The FsAnnotation set.
      */
     void onAtlasDirChanged(const QString& sDirPath,
-                           const QSharedPointer<FSLIB::FsAnnotationSet> pAnnotationSet);
+                           const std::shared_ptr<FSLIB::FsAnnotationSet>& pAnnotationSet);
 
     QMutex m_mutex;         /**< The threads mutex.*/
     QFuture<void> m_future; /**< The future monitoring the clustering and forward calculation. */
@@ -213,7 +213,7 @@ private:
     QSharedPointer<FIFFLIB::FiffInfo> m_pFiffInfo; /**< Fiff measurement info.*/
     FIFFLIB::FiffCoordTrans m_transDevHead;        /**< Updated meg->head transformation. */
 
-    QSharedPointer<FSLIB::FsAnnotationSet> m_pAnnotationSet; /**< FsAnnotation set. */
+    std::shared_ptr<FSLIB::FsAnnotationSet> m_pAnnotationSet; /**< FsAnnotation set. */
 
     SCSHAREDLIB::PluginInputData<SCMEASLIB::RealTimeHpiResult>::SPtr m_pHpiInput;          /**< The incoming Hpi data.*/
     SCSHAREDLIB::PluginInputData<SCMEASLIB::RealTimeMultiSampleArray>::SPtr m_pRTMSAInput; /**< The incoming data.*/

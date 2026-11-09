@@ -15,6 +15,7 @@
 //=============================================================================================================
 
 #include "bids_raw_data.h"
+#include <memory>
 #include <utils/logger/log.h>
 #include "bids_channel.h"
 #include "bids_dataset_description.h"
@@ -680,7 +681,7 @@ void BidsRawData::clear()
 
 //=============================================================================================================
 
-AbstractFormatReader::UPtr BidsRawData::createReader(const QString& sExtension)
+std::unique_ptr<AbstractFormatReader> BidsRawData::createReader(const QString& sExtension)
 {
     QString ext = sExtension.toLower();
     if (ext == ".vhdr" || ext == ".ahdr")

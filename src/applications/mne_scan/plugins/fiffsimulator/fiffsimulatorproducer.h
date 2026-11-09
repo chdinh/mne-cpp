@@ -20,6 +20,7 @@
 //=============================================================================================================
 
 #include <com/rt_client/rt_data_client.h>
+#include <memory>
 
 //=============================================================================================================
 // QT INCLUDES
@@ -113,7 +114,7 @@ protected:
 private:
     QMutex m_producerMutex; /**< The mutex to ensure thread safety.*/
 
-    QSharedPointer<COMLIB::RtDataClient> m_pRtDataClient; /**< The data client.*/
+    std::shared_ptr<COMLIB::RtDataClient> m_pRtDataClient; /**< The data client.*/
 
     FiffSimulator* m_pFiffSimulator; /**< Holds a pointer to corresponding MNERtClient.*/
 

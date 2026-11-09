@@ -20,6 +20,7 @@
 //=============================================================================================================
 
 #include "ftbuffer_global.h"
+#include <memory>
 
 #include "FormFiles/ftbuffersetupwidget.h"
 
@@ -225,7 +226,7 @@ private:
     QSharedPointer<FIFFLIB::FiffInfo> m_pFiffInfo;                                                            /**< Fiff measurement info.*/
     QSharedPointer<FIFFLIB::FiffRawData> m_pNeuromagHeadChunkData;                                            /**< Fiff into parser for header data collected from Neuromag extended header. */
     QSharedPointer<SCSHAREDLIB::PluginOutputData<SCMEASLIB::RealTimeMultiSampleArray>> m_pRTMSA_BufferOutput; /**< The RealTimeSampleArray to provide the plugin output data.*/
-    QSharedPointer<UTILSLIB::CircularBuffer_Matrix_double> m_pCircularBuffer;                                 /**< Holds incoming raw data. */
+    std::shared_ptr<UTILSLIB::CircularBuffer_Matrix_double> m_pCircularBuffer;                                /**< Holds incoming raw data. */
 
     QString m_sBufferAddress; /**< The address used to connect to the buffer if starting without being connected */
     int m_iBufferPort;        /**< The port used to connect to the buffer if starting without being connected */

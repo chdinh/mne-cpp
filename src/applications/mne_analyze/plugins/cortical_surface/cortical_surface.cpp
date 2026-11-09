@@ -521,14 +521,14 @@ bool CorticalSurface::loadSurfaces(const QString& subjectsDir,
 
     bool anyLoaded = false;
 
-    auto loadOne = [&](int hemiCode, QSharedPointer<FsSurface>& slot) {
+    auto loadOne = [&](int hemiCode, std::shared_ptr<FsSurface>& slot) {
         const QString path = surfaceFilePath(subjectsDir, subjectId, hemiCode, type);
         if (!QFileInfo::exists(path)) {
             slot.reset();
             qWarning() << "[CorticalSurface] Surface file not found:" << path;
             return;
         }
-        auto pSurf = QSharedPointer<FsSurface>::create();
+        auto pSurf = std::make_shared<FsSurface>();
         if (!FsSurface::read(path.toStdU16String(), *pSurf, /*loadCurvature*/ true)) {
             slot.reset();
             qWarning() << "[CorticalSurface] FsSurface::read failed for" << path;
@@ -618,7 +618,7 @@ void CorticalSurface::refreshSceneLayers()
     m_pScene->removeLayer(QStringLiteral("cortex_rh"));
 
     auto registerHemi = [&](const QString& id, const QString& display,
-                            const QSharedPointer<FsSurface>& surf) {
+                            const std::shared_ptr<FsSurface>& surf) {
         if (!surf) {
             return;
         }
@@ -629,15 +629,7 @@ void CorticalSurface::refreshSceneLayers()
         layer.opacity = 1.0f;
         layer.visible = true;
         // The renderer downcasts payload back to FsSurface via the kind.
-        // We hand the scene a std::shared_ptr<void> whose deleter captures
-        // the QSharedPointer; this keeps the FsSurface alive for as long
-        // as the layer is registered, without depending on QSharedPointer
-        // <-> std::shared_ptr interop helpers (Qt 6.5+).
-        QSharedPointer<FsSurface> keepAlive = surf;
-        layer.payload = std::shared_ptr<void>(static_cast<void*>(surf.data()),
-                                              [keepAlive](void*) mutable {
-                                                  keepAlive.reset();
-                                              });
+        layer.payload = surf;
         m_pScene->addLayer(std::move(layer));
     };
 
@@ -1102,7 +1094,7 @@ bool CorticalSurface::pickVertex(const QVector3D& worldPoint)
     int bestVertex = -1;
     double bestDistSq = std::numeric_limits<double>::infinity();
 
-    auto scan = [&](const QSharedPointer<FsSurface>& surf, int hemiCode) {
+    auto scan = [&](const std::shared_ptr<FsSurface>& surf, int hemiCode) {
         if (!surf) {
             return;
         }
@@ -1712,7 +1704,7 @@ int CorticalSurface::loadAnnot(const QString& path)
         return 0;
     }
     int hemi = path.contains(QStringLiteral("/rh.")) ? 1 : 0;
-    QSharedPointer<FsSurface> surf = (hemi == 0) ? m_pSurfaceLh : m_pSurfaceRh;
+    std::shared_ptr<FsSurface> surf = (hemi == 0) ? m_pSurfaceLh : m_pSurfaceRh;
     if (!surf) {
         qWarning() << "[CorticalSurface] loadAnnot: matching hemisphere surface not loaded";
         return 0;
@@ -1872,7 +1864,7 @@ void CorticalSurface::onCreateLabelFromMarkedTriggered()
         return;
 
     auto buildSeed = [&](const QVector<int>& verts, int hemi,
-                         const QSharedPointer<FsSurface>& surf) -> FsLabel {
+                         const std::shared_ptr<FsSurface>& surf) -> FsLabel {
         FsLabel seed;
         if (verts.isEmpty() || !surf)
             return seed;

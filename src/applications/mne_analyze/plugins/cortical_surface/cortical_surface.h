@@ -25,6 +25,7 @@
 //=============================================================================================================
 
 #include "cortical_surface_global.h"
+#include <memory>
 
 #include <anShared/Plugins/abstractplugin.h>
 
@@ -524,8 +525,8 @@ private:
     CorticalSurfaceType m_surfaceType = CorticalSurfaceType::Inflated;
 
     /** Loaded surfaces keyed by hemisphere index (0 = lh, 1 = rh). */
-    QSharedPointer<FSLIB::FsSurface> m_pSurfaceLh;
-    QSharedPointer<FSLIB::FsSurface> m_pSurfaceRh;
+    std::shared_ptr<FSLIB::FsSurface> m_pSurfaceLh;
+    std::shared_ptr<FSLIB::FsSurface> m_pSurfaceRh;
 
     /** Per-plugin scene; a future slice will share this with the
      *  MNE Inspect application via the AnalyzeData store. */

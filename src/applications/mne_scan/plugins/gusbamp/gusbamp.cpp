@@ -18,6 +18,7 @@
 //=============================================================================================================
 
 #include "gusbamp.h"
+#include <memory>
 #include "gusbampproducer.h"
 #include <fiff/fiff_ch_info.h>
 
@@ -50,7 +51,7 @@ GUSBAmp::GUSBAmp()
 , m_iNumberOfChannels(0)
 , m_iSamplesPerBlock(0)
 , m_iSampleRate(128)
-, m_pCircularBuffer(QSharedPointer<CircularBuffer_Matrix_float>(new CircularBuffer_Matrix_float(8)))
+, m_pCircularBuffer(std::make_shared<CircularBuffer_Matrix_float>(8))
 {
     m_viChannelsToAcquire = {1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16};
 

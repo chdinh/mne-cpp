@@ -81,9 +81,6 @@ class FsSurface;
 class FSSHARED_EXPORT FsLabel
 {
 public:
-    typedef QSharedPointer<FsLabel> SPtr;            /**< Shared pointer type for FsLabel class. */
-    typedef QSharedPointer<const FsLabel> ConstSPtr; /**< Const shared pointer type for FsLabel class. */
-
     //=========================================================================================================
     /**
      * Default constructor

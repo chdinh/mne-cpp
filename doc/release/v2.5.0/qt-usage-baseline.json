@@ -30,7 +30,7 @@
       "decoding",
       "math"
     ],
-    "tokens": 15353,
+    "tokens": 15319,
     "gui_outside_design": []
   },
   "libraries": {
@@ -104,7 +104,7 @@
       ]
     },
     "com": {
-      "tokens": 376,
+      "tokens": 368,
       "by_category": {
         "containers": 20,
         "files": 5,
@@ -112,7 +112,6 @@
         "json": 45,
         "network": 9,
         "objects_signals": 90,
-        "smart_pointers": 8,
         "strings": 144,
         "threads": 5,
         "time": 1
@@ -253,11 +252,10 @@
       ]
     },
     "fs": {
-      "tokens": 124,
+      "tokens": 112,
       "by_category": {
         "global": 111,
-        "objects_signals": 1,
-        "smart_pointers": 12
+        "objects_signals": 1
       },
       "public_header_includes": 7,
       "q_object": 0,
@@ -359,7 +357,7 @@
       ]
     },
     "mna": {
-      "tokens": 1641,
+      "tokens": 1639,
       "by_category": {
         "containers": 65,
         "files": 28,
@@ -368,7 +366,6 @@
         "objects_signals": 80,
         "other": 5,
         "regex": 19,
-        "smart_pointers": 2,
         "strings": 1052,
         "time": 22
       },
@@ -425,7 +422,7 @@
       ]
     },
     "utils": {
-      "tokens": 457,
+      "tokens": 445,
       "by_category": {
         "containers": 55,
         "files": 71,
@@ -434,7 +431,6 @@
         "objects_signals": 15,
         "other": 2,
         "regex": 10,
-        "smart_pointers": 12,
         "strings": 259,
         "threads": 9,
         "time": 2

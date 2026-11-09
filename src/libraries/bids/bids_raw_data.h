@@ -40,6 +40,7 @@
 //=============================================================================================================
 
 #include "bids_global.h"
+#include <memory>
 #include "bids_event.h"
 #include "bids_electrode.h"
 #include "bids_coordinate_system.h"
@@ -220,18 +221,18 @@ public:
      *
      * @return Shared pointer to the reader, or nullptr if unsupported.
      */
-    static AbstractFormatReader::UPtr createReader(const QString& sExtension);
+    static std::unique_ptr<AbstractFormatReader> createReader(const QString& sExtension);
 
     //=========================================================================================================
     // Core data members (public, following mne-cpp convention)
     //=========================================================================================================
 
-    FIFFLIB::FiffRawData raw;              /**< Raw data with fully populated FiffInfo. */
-    QList<BidsEvent> events;               /**< Events from *_events.tsv. */
-    QMap<QString, int> eventIdMap;         /**< trial_type string → numeric value mapping. */
-    QList<BidsElectrode> electrodes;       /**< Electrode positions from *_electrodes.tsv. */
-    BidsCoordinateSystem coordinateSystem; /**< Coordinate system from *_coordsystem.json. */
-    AbstractFormatReader::UPtr reader;     /**< The underlying format reader (keeps file open). */
+    FIFFLIB::FiffRawData raw;                     /**< Raw data with fully populated FiffInfo. */
+    QList<BidsEvent> events;                      /**< Events from *_events.tsv. */
+    QMap<QString, int> eventIdMap;                /**< trial_type string → numeric value mapping. */
+    QList<BidsElectrode> electrodes;              /**< Electrode positions from *_electrodes.tsv. */
+    BidsCoordinateSystem coordinateSystem;        /**< Coordinate system from *_coordsystem.json. */
+    std::unique_ptr<AbstractFormatReader> reader; /**< The underlying format reader (keeps file open). */
 
     //=========================================================================================================
     // iEEG sidecar metadata (integrated from *_{datatype}.json)

@@ -77,9 +77,6 @@ class COMSHARED_EXPORT RtCmdClient : public QTcpSocket
     Q_OBJECT
 
 public:
-    typedef QSharedPointer<RtCmdClient> SPtr;            /**< Shared pointer type for RtCmdClient. */
-    typedef QSharedPointer<const RtCmdClient> ConstSPtr; /**< Const shared pointer type for RtCmdClient. */
-
     //=========================================================================================================
     /**
      * Creates the real-time command client.

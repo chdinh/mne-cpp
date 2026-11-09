@@ -18,6 +18,7 @@
 //=============================================================================================================
 
 #include "dummytoolbox.h"
+#include <memory>
 
 //=============================================================================================================
 // EIGEN INCLUDES
@@ -40,7 +41,7 @@ using namespace Eigen;
 //=============================================================================================================
 
 DummyToolbox::DummyToolbox()
-: m_pCircularBuffer(QSharedPointer<CircularBuffer_Matrix_double>(new CircularBuffer_Matrix_double(40)))
+: m_pCircularBuffer(std::make_shared<CircularBuffer_Matrix_double>(40))
 {
 }
 

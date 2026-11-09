@@ -18,6 +18,7 @@
 //=============================================================================================================
 
 #include "rtfwd.h"
+#include <memory>
 #include "FormFiles/rtfwdsetupwidget.h"
 
 #include <disp/viewers/fwdsettingsview.h>
@@ -119,7 +120,7 @@ QSharedPointer<AbstractPlugin> RtFwd::clone() const
 void RtFwd::init()
 {
     // Inits
-    m_pAnnotationSet = FsAnnotationSet::SPtr(new FsAnnotationSet((m_sAtlasDir + "/lh.aparc.a2009s.annot").toStdU16String(), (m_sAtlasDir + "/rh.aparc.a2009s.annot").toStdU16String()));
+    m_pAnnotationSet = std::make_shared<FsAnnotationSet>((m_sAtlasDir + "/lh.aparc.a2009s.annot").toStdU16String(), (m_sAtlasDir + "/rh.aparc.a2009s.annot").toStdU16String());
 
     // Input
     m_pHpiInput = PluginInputData<RealTimeHpiResult>::create(this, "rtFwd RTHR In", "rtFwd real time HPI result input data");
@@ -329,7 +330,7 @@ void RtFwd::onClusteringStatusChanged(bool bDoClustering)
 
 //=============================================================================================================
 
-void RtFwd::onAtlasDirChanged(const QString& sDirPath, const FsAnnotationSet::SPtr pAnnotationSet)
+void RtFwd::onAtlasDirChanged(const QString& sDirPath, const std::shared_ptr<FsAnnotationSet>& pAnnotationSet)
 {
     m_mutex.lock();
     m_sAtlasDir = sDirPath;
@@ -473,7 +474,7 @@ void RtFwd::run()
 
         if (bDoClustering && bFwdReady && bNClusterChanged) {
             emit statusInformationChanged(3); // clustering
-            pClusteredFwd = MNEForwardSolution::SPtr(new MNEForwardSolution(pFwdSolution->cluster_forward_solution(*m_pAnnotationSet.data(), m_pFwdSettings->ncluster)));
+            pClusteredFwd = MNEForwardSolution::SPtr(new MNEForwardSolution(pFwdSolution->cluster_forward_solution(*m_pAnnotationSet, m_pFwdSettings->ncluster)));
             emit clusteringAvailable(pClusteredFwd->nsource);
 
             m_pRTFSOutput->measurementData()->setValue(pClusteredFwd);

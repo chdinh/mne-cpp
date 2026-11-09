@@ -21,6 +21,7 @@
 //=============================================================================================================
 
 #include "hpi_global.h"
+#include <memory>
 
 #include <utils/generics/circularbuffer.h>
 #include <scShared/Plugins/abstractalgorithm.h>
@@ -294,7 +295,7 @@ private:
 
     QSharedPointer<FIFFLIB::FiffInfo> m_pFiffInfo; /**< Fiff measurement info.*/
     QSharedPointer<FIFFLIB::FiffDigitizerData> m_pFiffDigitizerData;
-    QSharedPointer<UTILSLIB::CircularBuffer_Matrix_double> m_pCircularBuffer; /**< Holds incoming raw data. */
+    std::shared_ptr<UTILSLIB::CircularBuffer_Matrix_double> m_pCircularBuffer; /**< Holds incoming raw data. */
 
     SCSHAREDLIB::PluginInputData<SCMEASLIB::RealTimeMultiSampleArray>::SPtr m_pHpiInput; /**< The RealTimeMultiSampleArray of the Hpi input.*/
     SCSHAREDLIB::PluginOutputData<SCMEASLIB::RealTimeHpiResult>::SPtr m_pHpiOutput;      /**< The RealTimeHpiResult of the Hpi output.*/

@@ -17,6 +17,7 @@
 //=============================================================================================================
 
 #include "rtclustmne.h"
+#include <memory>
 #include <utils/string_utils.h>
 
 #include "FormFiles/rtclustmnesetupwidget.h"
@@ -75,8 +76,8 @@ using namespace Eigen;
 //=============================================================================================================
 
 RtClustMne::RtClustMne()
-: m_pCircularMatrixBuffer(CircularBuffer_Matrix_double::SPtr(new CircularBuffer_Matrix_double(40)))
-, m_pCircularEvokedBuffer(CircularBuffer<FIFFLIB::FiffEvoked>::SPtr::create(40))
+: m_pCircularMatrixBuffer(std::make_shared<CircularBuffer_Matrix_double>(40))
+, m_pCircularEvokedBuffer(std::make_shared<CircularBuffer<FIFFLIB::FiffEvoked>>(40))
 , m_bEvokedInput(false)
 , m_bRawInput(false)
 , m_bUpdateMinimumNorm(false)
@@ -115,8 +116,8 @@ QSharedPointer<AbstractPlugin> RtClustMne::clone() const
 void RtClustMne::init()
 {
     // Inits
-    m_pAnnotationSet = FsAnnotationSet::SPtr(new FsAnnotationSet((m_sAtlasDir + "/lh.aparc.a2009s.annot").toStdU16String(), (m_sAtlasDir + "/rh.aparc.a2009s.annot").toStdU16String()));
-    m_pSurfaceSet = FsSurfaceSet::SPtr(new FsSurfaceSet((m_sSurfaceDir + "/lh.orig").toStdU16String(), (m_sSurfaceDir + "/rh.orig").toStdU16String()));
+    m_pAnnotationSet = std::make_shared<FsAnnotationSet>((m_sAtlasDir + "/lh.aparc.a2009s.annot").toStdU16String(), (m_sAtlasDir + "/rh.aparc.a2009s.annot").toStdU16String());
+    m_pSurfaceSet = std::make_shared<FsSurfaceSet>((m_sSurfaceDir + "/lh.orig").toStdU16String(), (m_sSurfaceDir + "/rh.orig").toStdU16String());
     // The sample-data transform is optional; a missing file leaves no transform
     m_mriHeadTrans = FIFFLIB::FiffCoordTrans::read(m_fMriHeadTrans.fileName().toStdU16String()).value_or(FIFFLIB::FiffCoordTrans());
 

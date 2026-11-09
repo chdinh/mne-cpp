@@ -91,7 +91,7 @@ public:
      *
      * @param[in] annotSet   the annotation set to set.
      */
-    inline void setAnnotSet(const QSharedPointer<FSLIB::FsAnnotationSet>& annotSet);
+    inline void setAnnotSet(const std::shared_ptr<FSLIB::FsAnnotationSet>& annotSet);
 
     //=========================================================================================================
     /**
@@ -99,7 +99,7 @@ public:
      *
      * @return the annotation set.
      */
-    inline QSharedPointer<FSLIB::FsAnnotationSet>& getAnnotSet();
+    inline std::shared_ptr<FSLIB::FsAnnotationSet>& getAnnotSet();
 
     //=========================================================================================================
     /**
@@ -123,7 +123,7 @@ public:
      *
      * @param[in] surfSet   the surface set to set.
      */
-    inline void setSurfSet(const QSharedPointer<FSLIB::FsSurfaceSet>& surfSet);
+    inline void setSurfSet(const std::shared_ptr<FSLIB::FsSurfaceSet>& surfSet);
 
     //=========================================================================================================
     /**
@@ -131,7 +131,7 @@ public:
      *
      * @return the surface set.
      */
-    inline QSharedPointer<FSLIB::FsSurfaceSet>& getSurfSet();
+    inline std::shared_ptr<FSLIB::FsSurfaceSet>& getSurfSet();
 
     //=========================================================================================================
     /**
@@ -196,8 +196,8 @@ private:
 
     QSharedPointer<FIFFLIB::FiffInfo> m_pFiffInfo; /**< The Fiff info. */
 
-    QSharedPointer<FSLIB::FsAnnotationSet> m_pAnnotSet;        /**< FsAnnotation set. Needed for visualization. */
-    QSharedPointer<FSLIB::FsSurfaceSet> m_pSurfSet;            /**< FsSurface set. Needed for visualization. */
+    std::shared_ptr<FSLIB::FsAnnotationSet> m_pAnnotSet;       /**< FsAnnotation set. Needed for visualization. */
+    std::shared_ptr<FSLIB::FsSurfaceSet> m_pSurfSet;           /**< FsSurface set. Needed for visualization. */
     QSharedPointer<MNELIB::MNEForwardSolution> m_pFwdSolution; /**< Forward solution. Needed for visualization. */
     QSharedPointer<MNELIB::MNEBem> m_pSensorSurface;           /**< The sensor surface. Needed for visualization. */
 
@@ -209,7 +209,7 @@ private:
 // INLINE DEFINITIONS
 //=============================================================================================================
 
-inline void RealTimeConnectivityEstimate::setAnnotSet(const QSharedPointer<FSLIB::FsAnnotationSet>& annotSet)
+inline void RealTimeConnectivityEstimate::setAnnotSet(const std::shared_ptr<FSLIB::FsAnnotationSet>& annotSet)
 {
     QMutexLocker locker(&m_qMutex);
     m_pAnnotSet = annotSet;
@@ -217,7 +217,7 @@ inline void RealTimeConnectivityEstimate::setAnnotSet(const QSharedPointer<FSLIB
 
 //=============================================================================================================
 
-inline QSharedPointer<FSLIB::FsAnnotationSet>& RealTimeConnectivityEstimate::getAnnotSet()
+inline std::shared_ptr<FSLIB::FsAnnotationSet>& RealTimeConnectivityEstimate::getAnnotSet()
 {
     QMutexLocker locker(&m_qMutex);
     return m_pAnnotSet;
@@ -241,7 +241,7 @@ inline QSharedPointer<MNELIB::MNEBem>& RealTimeConnectivityEstimate::getSensorSu
 
 //=============================================================================================================
 
-inline void RealTimeConnectivityEstimate::setSurfSet(const QSharedPointer<FSLIB::FsSurfaceSet>& surfSet)
+inline void RealTimeConnectivityEstimate::setSurfSet(const std::shared_ptr<FSLIB::FsSurfaceSet>& surfSet)
 {
     QMutexLocker locker(&m_qMutex);
     m_pSurfSet = surfSet;
@@ -249,7 +249,7 @@ inline void RealTimeConnectivityEstimate::setSurfSet(const QSharedPointer<FSLIB:
 
 //=============================================================================================================
 
-inline QSharedPointer<FSLIB::FsSurfaceSet>& RealTimeConnectivityEstimate::getSurfSet()
+inline std::shared_ptr<FSLIB::FsSurfaceSet>& RealTimeConnectivityEstimate::getSurfSet()
 {
     QMutexLocker locker(&m_qMutex);
     return m_pSurfSet;

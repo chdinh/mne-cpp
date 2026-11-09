@@ -21,6 +21,7 @@
 //=============================================================================================================
 
 #include "babymeg_global.h"
+#include <memory>
 
 #include <fiff/fiff_info.h>
 #include <fiff/fiff_stream.h>
@@ -274,7 +275,7 @@ protected:
 
     SCSHAREDLIB::PluginOutputData<SCMEASLIB::RealTimeMultiSampleArray>::SPtr m_pRTMSABabyMEG; /**< The RealTimeMultiSampleArray to provide the rt_server Channels.*/
 
-    QSharedPointer<UTILSLIB::CircularBuffer_Matrix_float> m_pCircularBuffer; /**< Holds incoming raw data. */
+    std::shared_ptr<UTILSLIB::CircularBuffer_Matrix_float> m_pCircularBuffer; /**< Holds incoming raw data. */
 
     QSharedPointer<BabyMEGClient> m_pMyClient;              /**< TCP/IP communication between Qt and Labview. */
     QSharedPointer<BabyMEGClient> m_pMyClientComm;          /**< TCP/IP communication between Qt and Labview - communication. */

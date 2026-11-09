@@ -68,9 +68,6 @@ class Subject;
 class UTILSSHARED_EXPORT IObserver
 {
 public:
-    typedef QSharedPointer<IObserver> SPtr;            /**< Shared pointer type for IObserver. */
-    typedef QSharedPointer<const IObserver> ConstSPtr; /**< Const shared pointer type for IObserver. */
-
     //=========================================================================================================
     /**
      * Destroys the IObserver.
@@ -97,9 +94,6 @@ public:
 class UTILSSHARED_EXPORT Subject
 {
 public:
-    typedef QSharedPointer<Subject> SPtr;            /**< Shared pointer type for Subject. */
-    typedef QSharedPointer<const Subject> ConstSPtr; /**< Const shared pointer type for Subject. */
-
     typedef QSet<IObserver*> t_Observers; /**< Defines a new IObserver set type. */
 
     //=========================================================================================================

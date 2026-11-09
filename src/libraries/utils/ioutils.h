@@ -80,9 +80,6 @@ namespace UTILSLIB
 class UTILSSHARED_EXPORT IOUtils
 {
 public:
-    typedef QSharedPointer<IOUtils> SPtr;            /**< Shared pointer type for IOUtils class. */
-    typedef QSharedPointer<const IOUtils> ConstSPtr; /**< Const shared pointer type for IOUtils class. */
-
     ~IOUtils() {};
 
     //=========================================================================================================

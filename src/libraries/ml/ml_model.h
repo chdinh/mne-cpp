@@ -21,7 +21,7 @@
  * N-dimensional float32 carrier, which gives ONNX Runtime a zero-copy
  * path into its own tensor representation while keeping Eigen-based
  * pre/post-processing in mne-cpp idiomatic. Implementations are
- * expected to be cheap to copy-by-shared-pointer (see @ref MLLIB::MlModel::SPtr "SPtr") so
+ * shared through @c std::shared_ptr, so
  * models can be parked on UI threads and invoked from worker threads
  * without ownership questions.
  */
@@ -60,8 +60,6 @@ namespace MLLIB
 class MLSHARED_EXPORT MlModel
 {
 public:
-    using SPtr = std::shared_ptr<MlModel>; /**< Shared pointer type for MlModel. */
-
     //=========================================================================================================
     /**
      * Virtual destructor.

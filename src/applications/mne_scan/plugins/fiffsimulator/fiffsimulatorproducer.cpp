@@ -17,6 +17,7 @@
 //=============================================================================================================
 
 #include "fiffsimulatorproducer.h"
+#include <memory>
 #include "fiffsimulator.h"
 
 #include <fiff/fiff_digitizer_data.h>
@@ -69,8 +70,8 @@ FiffSimulatorProducer::~FiffSimulatorProducer()
 
 void FiffSimulatorProducer::connectDataClient(QString p_sRtSeverIP)
 {
-    if (m_pRtDataClient.isNull()) {
-        m_pRtDataClient = QSharedPointer<RtDataClient>(new RtDataClient);
+    if (!m_pRtDataClient) {
+        m_pRtDataClient = std::make_shared<RtDataClient>();
     } else if (m_bDataClientIsConnected) {
         return;
     }

@@ -21,6 +21,7 @@
 //=============================================================================================================
 
 #include "writetofile_global.h"
+#include <memory>
 
 #include <utils/generics/circularbuffer.h>
 #include <scShared/Plugins/abstractalgorithm.h>
@@ -333,7 +334,7 @@ private:
     QPointer<QAction> m_pActionRecordFile; /**< start recording action. */
     QPointer<QAction> m_pActionClipRecording;
 
-    QSharedPointer<UTILSLIB::CircularBuffer_Matrix_double> m_pCircularBuffer; /**< Holds incoming raw data. */
+    std::shared_ptr<UTILSLIB::CircularBuffer_Matrix_double> m_pCircularBuffer; /**< Holds incoming raw data. */
 
     SCSHAREDLIB::PluginInputData<SCMEASLIB::RealTimeMultiSampleArray>::SPtr m_pWriteToFileInput; /**< The RealTimeMultiSampleArray of the WriteToFile input.*/
 

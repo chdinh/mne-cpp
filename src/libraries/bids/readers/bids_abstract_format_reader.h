@@ -23,7 +23,7 @@
  * @ref BIDSLIB::AbstractFormatReader::supportsExtension "supportsExtension" power the dispatch implemented by @ref
  * BIDSLIB::BidsRawData::createReader.
  *
- * Ownership is via @c BIDSLIB::AbstractFormatReader::UPtr "UPtr" (@c std::unique_ptr) because the concrete
+ * Readers are owned through @c std::unique_ptr because the concrete
  * readers keep the underlying file open for lazy segment reads.
  */
 
@@ -71,8 +71,6 @@ namespace BIDSLIB
 class BIDSSHARED_EXPORT AbstractFormatReader
 {
 public:
-    using UPtr = std::unique_ptr<AbstractFormatReader>;
-
     //=========================================================================================================
     /**
      * @brief Virtual destructor.

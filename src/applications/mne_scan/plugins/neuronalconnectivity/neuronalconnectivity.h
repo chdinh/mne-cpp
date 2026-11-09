@@ -20,6 +20,7 @@
 //=============================================================================================================
 
 #include "neuronalconnectivity_global.h"
+#include <memory>
 
 #include <scShared/Plugins/abstractalgorithm.h>
 
@@ -237,11 +238,11 @@ private:
 
     CONNECTIVITYLIB::ConnectivitySettings m_connectivitySettings; /**< The connectivity settings.*/
 
-    QSharedPointer<UTILSLIB::CircularBuffer<CONNECTIVITYLIB::Network>> m_pCircularBuffer; /**< The circular buffer holding the connectivity estimates.*/
-    QSharedPointer<RTPROCESSINGLIB::RtConnectivity> m_pRtConnectivity;                    /**< The real-time connectivity estimation object.*/
-    QSharedPointer<FIFFLIB::FiffInfo> m_pFiffInfo;                                        /**< Fiff measurement info.*/
-    QSharedPointer<DISPLIB::ConnectivitySettingsView> m_pConnectivitySettingsView;        /**< The connectivity settings widget which will be added to the Quick Control view. The QuickControlView will not take ownership. Ownership will be managed by the QSharedPointer.*/
-    QAction* m_pActionShowYourWidget;                                                     /**< flag whether thread is running.*/
+    std::shared_ptr<UTILSLIB::CircularBuffer<CONNECTIVITYLIB::Network>> m_pCircularBuffer; /**< The circular buffer holding the connectivity estimates.*/
+    QSharedPointer<RTPROCESSINGLIB::RtConnectivity> m_pRtConnectivity;                     /**< The real-time connectivity estimation object.*/
+    QSharedPointer<FIFFLIB::FiffInfo> m_pFiffInfo;                                         /**< Fiff measurement info.*/
+    QSharedPointer<DISPLIB::ConnectivitySettingsView> m_pConnectivitySettingsView;         /**< The connectivity settings widget which will be added to the Quick Control view. The QuickControlView will not take ownership. Ownership will be managed by the QSharedPointer.*/
+    QAction* m_pActionShowYourWidget;                                                      /**< flag whether thread is running.*/
 
     SCSHAREDLIB::PluginInputData<SCMEASLIB::RealTimeSourceEstimate>::SPtr m_pRTSEInput;    /**< The RealTimeSourceEstimate input.*/
     SCSHAREDLIB::PluginInputData<SCMEASLIB::RealTimeMultiSampleArray>::SPtr m_pRTMSAInput; /**< The RealTimeMultiSampleArray input.*/

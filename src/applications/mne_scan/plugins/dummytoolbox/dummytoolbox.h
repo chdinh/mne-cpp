@@ -21,6 +21,7 @@
 //=============================================================================================================
 
 #include "dummytoolbox_global.h"
+#include <memory>
 
 #include "FormFiles/dummysetupwidget.h"
 #include "FormFiles/dummyyourwidget.h"
@@ -119,7 +120,7 @@ private:
 
     QSharedPointer<DummyYourWidget> m_pYourWidget; /**< The widget used to control this plugin by the user.*/
 
-    QSharedPointer<UTILSLIB::CircularBuffer_Matrix_double> m_pCircularBuffer; /**< Holds incoming raw data. */
+    std::shared_ptr<UTILSLIB::CircularBuffer_Matrix_double> m_pCircularBuffer; /**< Holds incoming raw data. */
 
     SCSHAREDLIB::PluginInputData<SCMEASLIB::RealTimeMultiSampleArray>::SPtr m_pInput;   /**< The incoming data.*/
     SCSHAREDLIB::PluginOutputData<SCMEASLIB::RealTimeMultiSampleArray>::SPtr m_pOutput; /**< The outgoing data.*/

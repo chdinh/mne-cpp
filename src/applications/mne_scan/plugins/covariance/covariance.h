@@ -20,6 +20,7 @@
 //=============================================================================================================
 
 #include "covariance_global.h"
+#include <memory>
 
 #include <scShared/Plugins/abstractalgorithm.h>
 #include <utils/generics/circularbuffer.h>
@@ -137,7 +138,7 @@ private:
     QMutex m_mutex;
     qint32 m_iEstimationSamples;
 
-    UTILSLIB::CircularBuffer_Matrix_double::SPtr m_pCircularBuffer; /**< Matrix data circular buffer. */
+    std::shared_ptr<UTILSLIB::CircularBuffer_Matrix_double> m_pCircularBuffer; /**< Matrix data circular buffer. */
 
     QSharedPointer<FIFFLIB::FiffInfo> m_pFiffInfo; /**< Fiff measurement info.*/
 

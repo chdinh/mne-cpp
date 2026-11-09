@@ -67,9 +67,6 @@ namespace UTILSLIB
 class UTILSSHARED_EXPORT LayoutLoader
 {
 public:
-    typedef QSharedPointer<LayoutLoader> SPtr;            /**< Shared pointer type for LayoutLoader. */
-    typedef QSharedPointer<const LayoutLoader> ConstSPtr; /**< Const shared pointer type for LayoutLoader. */
-
     //=========================================================================================================
     /**
      * Reads the specified ANT elc-layout file.

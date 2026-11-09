@@ -17,6 +17,7 @@
 //=============================================================================================================
 
 #include "neuronalconnectivity.h"
+#include <memory>
 #include <utils/string_utils.h>
 #include "FormFiles/neuronalconnectivitysetupwidget.h"
 
@@ -65,7 +66,7 @@ NeuronalConnectivity::NeuronalConnectivity()
 , m_fFreqBandHigh(13.0f)
 , m_iBlockSize(1)
 , m_sAvrType("1")
-, m_pCircularBuffer(CircularBuffer<CONNECTIVITYLIB::Network>::SPtr::create(40))
+, m_pCircularBuffer(std::make_shared<CircularBuffer<CONNECTIVITYLIB::Network>>(40))
 , m_pRtConnectivity(RtConnectivity::SPtr::create())
 , m_pActionShowYourWidget(nullptr)
 {

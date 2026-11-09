@@ -20,6 +20,7 @@
 //=============================================================================================================
 
 #include "fiffsimulator_global.h"
+#include <memory>
 
 #include <scShared/Plugins/abstractsensor.h>
 #include <com/rt_client/rt_cmd_client.h>
@@ -172,11 +173,11 @@ protected:
 
     SCSHAREDLIB::PluginOutputData<SCMEASLIB::RealTimeMultiSampleArray>::SPtr m_pRTMSA_FiffSimulator; /**< The RealTimeMultiSampleArray to provide the rt_server Channels.*/
 
-    QSharedPointer<FiffSimulatorProducer> m_pFiffSimulatorProducer;          /**< Holds the FiffSimulatorProducer.*/
-    QSharedPointer<FIFFLIB::FiffInfo> m_pFiffInfo;                           /**< Fiff measurement info.*/
-    QSharedPointer<FIFFLIB::FiffDigitizerData> m_pFiffDigData;               /**< Fiff Digitizer Data. */
-    QSharedPointer<COMLIB::RtCmdClient> m_pRtCmdClient;                      /**< The command client.*/
-    QSharedPointer<UTILSLIB::CircularBuffer_Matrix_float> m_pCircularBuffer; /**< Holds incoming raw data. */
+    QSharedPointer<FiffSimulatorProducer> m_pFiffSimulatorProducer;           /**< Holds the FiffSimulatorProducer.*/
+    QSharedPointer<FIFFLIB::FiffInfo> m_pFiffInfo;                            /**< Fiff measurement info.*/
+    QSharedPointer<FIFFLIB::FiffDigitizerData> m_pFiffDigData;                /**< Fiff Digitizer Data. */
+    std::shared_ptr<COMLIB::RtCmdClient> m_pRtCmdClient;                      /**< The command client.*/
+    std::shared_ptr<UTILSLIB::CircularBuffer_Matrix_float> m_pCircularBuffer; /**< Holds incoming raw data. */
 
     bool m_bCmdClientIsConnected;        /**< If the command client is connected.*/
     QString m_sFiffSimulatorIP;          /**< The IP Adress of mne_rt_server.*/
