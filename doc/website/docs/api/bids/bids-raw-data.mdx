@@ -206,7 +206,7 @@ Create the appropriate format reader for a given file extension.
 
 **Returns:**
 
-- *[AbstractFormatReader](/docs/api/bids/abstract-format-reader)::UPtr* — Shared pointer to the reader, or nullptr if unsupported.
+- *std::unique_ptr&lt; [AbstractFormatReader](/docs/api/bids/abstract-format-reader) &gt;* — Shared pointer to the reader, or nullptr if unsupported.
 
 ---
 
