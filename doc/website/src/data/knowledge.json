@@ -42,6 +42,7 @@
     "ieeg": "iEEG",
     "bids": "BIDS",
     "lsl": "Lab Streaming Layer",
+    "com": "Communication",
     "mna": "MNA Pipelines",
     "mri": "MRI",
     "fs": "FreeSurfer",
@@ -244,6 +245,25 @@
       "topics": []
     },
     {
+      "name": "ex_channels",
+      "title": "Montages, layouts and selections",
+      "brief": "Utilities library: montages, layouts and selections",
+      "thumbnail": "",
+      "url": "/docs/examples/channels/ex_channels/",
+      "library": "channels",
+      "libraries": [
+        "channels"
+      ],
+      "tasks": [
+        "infrastructure"
+      ],
+      "modalities": [
+        "generic"
+      ],
+      "level": "start",
+      "topics": []
+    },
+    {
       "name": "ex_clustered_inverse_mne",
       "title": "MNE, dSPM and sLORETA with a clustered forward model",
       "brief": "Cluster the forward solution by cortical parcellation and compute an MNE, dSPM or sLORETA estimate of an evoked response",
@@ -349,6 +369,25 @@
       "topics": [
         "rap-music"
       ]
+    },
+    {
+      "name": "ex_com",
+      "title": "Observer and command patterns behind real-time commands",
+      "brief": "Communication library: the observer and command patterns behind the real-time command dispatch",
+      "thumbnail": "",
+      "url": "/docs/examples/com/ex_com/",
+      "library": "com",
+      "libraries": [
+        "com"
+      ],
+      "tasks": [
+        "infrastructure"
+      ],
+      "modalities": [
+        "generic"
+      ],
+      "level": "start",
+      "topics": []
     },
     {
       "name": "ex_compute_forward",
@@ -1819,26 +1858,6 @@
       "topics": [
         "spectral-analysis"
       ]
-    },
-    {
-      "name": "ex_utils",
-      "title": "Montages, layouts and selections",
-      "brief": "Utilities library: observers, commands, montages, layouts and selections",
-      "thumbnail": "",
-      "url": "/docs/examples/channels/ex_utils/",
-      "library": "channels",
-      "libraries": [
-        "channels",
-        "utils"
-      ],
-      "tasks": [
-        "infrastructure"
-      ],
-      "modalities": [
-        "generic"
-      ],
-      "level": "start",
-      "topics": []
     },
     {
       "name": "ex_warp",

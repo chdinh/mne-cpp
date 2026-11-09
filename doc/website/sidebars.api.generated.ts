@@ -484,13 +484,10 @@ const apiSidebar: SidebarsConfig['apiSidebar'] = [
         'api/utils/epoch-extractor',
         'api/utils/filter-io',
         'api/utils/filter-parameter',
-        'api/utils/i-command',
-        'api/utils/i-observer',
         'api/utils/numerics',
         'api/utils/parks-mc-clellan',
         'api/utils/spectral',
         'api/utils/spectrogram',
-        'api/utils/subject',
         'api/utils/artifact-detect-ecg-params',
         'api/utils/artifact-detect-eog-params',
         'api/utils/bad-channel-detect-params',
@@ -554,7 +551,10 @@ const apiSidebar: SidebarsConfig['apiSidebar'] = [
         'api/com/raw-command',
         'api/com/rt-client',
         'api/com/rt-cmd-client',
-        'api/com/rt-data-client'
+        'api/com/rt-data-client',
+        'api/com/i-command',
+        'api/com/i-observer',
+        'api/com/subject'
       ],
     },
     {

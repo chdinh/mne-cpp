@@ -25,7 +25,7 @@ Holds a `QMap<QString,Command>` indexed by command keyword; when [`CommandParser
 classDiagram
     QObject <|-- CommandManager
     IObserver <|-- CommandManager
-    click IObserver href "../../utils/i-observer/"
+    click IObserver href "../../com/i-observer/"
 ```
 
 ---
@@ -147,11 +147,11 @@ Sets the activation status of the [`CommandManager`](/docs/api/com/command-manag
 
 ### update(p_pSubject)
 
-Updates the [IObserver](/docs/api/utils/i-observer) ([`CommandManager`](/docs/api/com/command-manager)) when a new command was received.
+Updates the [`IObserver`](/docs/api/com/i-observer) ([`CommandManager`](/docs/api/com/command-manager)) when a new command was received.
 
 **Parameters:**
 
-- **p_pSubject** : *[Subject](/docs/api/utils/subject) **
+- **p_pSubject** : *[Subject](/docs/api/com/subject) **
   pointer to the subject ([`CommandParser`](/docs/api/com/command-parser)) to which observer ([`CommandManager`](/docs/api/com/command-manager)) is attached to.
 
 ---

@@ -19,7 +19,7 @@ Processes selection files (mne .sel) files which contain the channels for each s
 
 Reader/writer for MNE .sel channel-selection files and Brainstorm .mon montage files.
 
-```cpp title="src/examples/ex_utils/main.cpp"
+```cpp title="src/examples/ex_channels/main.cpp"
 QMultiMap<QString, QStringList> selections;
 selections.insert("Left-temporal", {"MEG0111", "MEG0112", "MEG0113"});
 selections.insert("Vertex", {"MEG0711"});
@@ -191,17 +191,17 @@ The amount of written files depend on the number of selection groups in selectio
 
 ## Example
 
-- Start here: [ex_utils](../../examples/channels/ex_utils.mdx) — Utilities library: observers, commands, montages, layouts and selections.
-- Full source: [`src/examples/ex_utils/main.cpp`](https://github.com/mne-tools/mne-cpp/tree/staging/src/examples/ex_utils/main.cpp)
-- Build target: `ex_utils` (runs under CTest)
+- Start here: [ex_channels](../../examples/channels/ex_channels.mdx) — Utilities library: montages, layouts and selections.
+- Full source: [`src/examples/ex_channels/main.cpp`](https://github.com/mne-tools/mne-cpp/tree/staging/src/examples/ex_channels/main.cpp)
+- Build target: `ex_channels` (runs under CTest)
 
 ## Used in examples
 
-### [ex_utils](../../examples/channels/ex_utils.mdx)
+### [ex_channels](../../examples/channels/ex_channels.mdx)
 
-Utilities library: observers, commands, montages, layouts and selections.
+Utilities library: montages, layouts and selections.
 
-````cpp title="src/examples/ex_utils/main.cpp, line 162"
+````cpp title="src/examples/ex_channels/main.cpp, line 83"
 selections.insert("Left-temporal", {"MEG0111", "MEG0112", "MEG0113"});
 selections.insert("Vertex", {"MEG0711"});
 const QString selPath = dir.filePath("groups.sel");

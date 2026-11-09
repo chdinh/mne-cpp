@@ -17,7 +17,7 @@ class COMLIB::Command
 
 Named, parameterised command exchanged with `mne_rt_server`; supports both JSON and CLI serialisation.
 
-Holds the command keyword, description, parallel lists of parameter names / values / descriptions, and a JSON-vs-CLI flag. Constructible either from a parsed `QJsonObject` (when echoing the server’s advertised command list) or from explicit string/value lists (when authoring a request). Implements [`ICommand`](/docs/api/utils/i-command) so it can be dispatched through [`CommandManager`](/docs/api/com/command-manager) and surfaces parameter access by both name (`operator[](QString)`) and index (``operator[](qint32)``).
+Holds the command keyword, description, parallel lists of parameter names / values / descriptions, and a JSON-vs-CLI flag. Constructible either from a parsed `QJsonObject` (when echoing the server’s advertised command list) or from explicit string/value lists (when authoring a request). Implements [`ICommand`](/docs/api/com/i-command) so it can be dispatched through [`CommandManager`](/docs/api/com/command-manager) and surfaces parameter access by both name (`operator[](QString)`) and index (``operator[](qint32)``).
 
 ### Inheritance
 
@@ -25,7 +25,7 @@ Holds the command keyword, description, parallel lists of parameter names / valu
 classDiagram
     QObject <|-- Command
     ICommand <|-- Command
-    click ICommand href "../../utils/i-command/"
+    click ICommand href "../../com/i-command/"
 ```
 
 ---
@@ -190,7 +190,7 @@ Gets the help text or description of this command.
 
 ### execute()
 
-Inherited by [ICommand](/docs/api/utils/i-command).
+Inherited by [`ICommand`](/docs/api/com/i-command).
 
 Emits received().
 
