@@ -21,10 +21,10 @@
 #include "parksmcclellan.h"
 
 //=============================================================================================================
-// QT INCLUDES
+// STL INCLUDES
 //=============================================================================================================
 
-#include <qmath.h>
+#include <numbers>
 
 //=============================================================================================================
 // USED NAMESPACES
@@ -254,7 +254,7 @@ void ParksMcClellan::CalcParkCoeff2(int NumBands, int TapCount)
 
     if (!OddNumTaps) {
         for (j = 1; j <= GridIndex; j++) {
-            Change = cos(M_PI * Grid[j]);
+            Change = cos(std::numbers::pi * Grid[j]);
             DesiredMag[j] = DesiredMag[j] / Change;
             Weight[j] = Weight[j] * Change;
         }

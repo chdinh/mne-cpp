@@ -26,10 +26,10 @@
 #include <math/linalg.h>
 
 //=============================================================================================================
-// QT INCLUDES
+// STL INCLUDES
 //=============================================================================================================
 
-#include <qmath.h>
+#include <numbers>
 
 //=============================================================================================================
 // EIGEN INCLUDES
@@ -107,8 +107,8 @@ void InvSignalModel::computeInverseBasicModel()
     matSimsig.conservativeResize(m_iCurrentModelCols, iNumCoils * 2);
 
     for (int i = 0; i < iNumCoils; ++i) {
-        matSimsig.col(i) = sin(2 * M_PI * m_modelParameters.vecHpiFreqs()[i] * vecTime.array());
-        matSimsig.col(i + iNumCoils) = cos(2 * M_PI * m_modelParameters.vecHpiFreqs()[i] * vecTime.array());
+        matSimsig.col(i) = sin(2 * std::numbers::pi * m_modelParameters.vecHpiFreqs()[i] * vecTime.array());
+        matSimsig.col(i + iNumCoils) = cos(2 * std::numbers::pi * m_modelParameters.vecHpiFreqs()[i] * vecTime.array());
     }
     m_matInverseSignalModel = MATHLIB::Linalg::pinv(matSimsig);
 }
@@ -127,10 +127,10 @@ void InvSignalModel::computeInverseAdvancedModel()
     // add linefreq + harmonics + DC part to model
     matSimsig.conservativeResize(m_iCurrentModelCols, iNumCoils * 4 + 2);
     for (int i = 0; i < iNumCoils; ++i) {
-        matSimsig.col(i) = sin(2 * M_PI * m_modelParameters.vecHpiFreqs()[i] * vecTime.array());
-        matSimsig.col(i + iNumCoils) = cos(2 * M_PI * m_modelParameters.vecHpiFreqs()[i] * vecTime.array());
-        matSimsig.col(i + 2 * iNumCoils) = sin(2 * M_PI * m_modelParameters.iLineFreq() * (i + 1) * vecTime.array());
-        matSimsig.col(i + 3 * iNumCoils) = cos(2 * M_PI * m_modelParameters.iLineFreq() * (i + 1) * vecTime.array());
+        matSimsig.col(i) = sin(2 * std::numbers::pi * m_modelParameters.vecHpiFreqs()[i] * vecTime.array());
+        matSimsig.col(i + iNumCoils) = cos(2 * std::numbers::pi * m_modelParameters.vecHpiFreqs()[i] * vecTime.array());
+        matSimsig.col(i + 2 * iNumCoils) = sin(2 * std::numbers::pi * m_modelParameters.iLineFreq() * (i + 1) * vecTime.array());
+        matSimsig.col(i + 3 * iNumCoils) = cos(2 * std::numbers::pi * m_modelParameters.iLineFreq() * (i + 1) * vecTime.array());
     }
     matSimsig.col(iNumCoils * 4) = RowVectorXd::LinSpaced(m_iCurrentModelCols, -0.5, 0.5);
     matSimsig.col(iNumCoils * 4 + 1).fill(1);

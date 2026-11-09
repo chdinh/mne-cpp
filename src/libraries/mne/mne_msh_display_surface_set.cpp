@@ -36,10 +36,10 @@
 #include <Eigen/Core>
 
 //=============================================================================================================
-// QT INCLUDES
+// STL INCLUDES
 //=============================================================================================================
 
-#include <qmath.h>
+#include <numbers>
 
 //=============================================================================================================
 // CONSTANTS
@@ -201,7 +201,7 @@ int MNEMshDisplaySurfaceSet::add_bem_surface(const std::filesystem::path& filepa
 
     if (check) {
         surf->compute_surface_cm();
-        double sum = surf->sum_solids(Eigen::Map<const Eigen::Vector3f>(surf->cm)) / (4 * M_PI);
+        double sum = surf->sum_solids(Eigen::Map<const Eigen::Vector3f>(surf->cm)) / (4 * std::numbers::pi);
         if (std::fabs(sum - 1.0) > 1e-4) {
             BASELIB::Log::critical("{} surface is not closed (sum of solid angles = {:g} * 4*PI).", bemname, sum);
             return -1;

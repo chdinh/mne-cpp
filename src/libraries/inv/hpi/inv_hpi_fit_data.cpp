@@ -30,10 +30,10 @@
 #include <algorithm>
 
 //=============================================================================================================
-// QT INCLUDES
+// STL INCLUDES
 //=============================================================================================================
 
-#include <qmath.h>
+#include <numbers>
 
 //=============================================================================================================
 // USED NAMESPACES
@@ -132,7 +132,7 @@ Eigen::MatrixXd InvHpiFitData::magnetic_dipole(Eigen::MatrixXd matPos,
 
     for (int i = 0; i < iNchan; i++) {
         for (int j = 0; j < 3; j++) {
-            lf(i, j) = u0 * lf(i, j) / (4 * M_PI * r5(i, j));
+            lf(i, j) = u0 * lf(i, j) / (4 * std::numbers::pi * r5(i, j));
         }
     }
 

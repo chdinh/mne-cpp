@@ -26,7 +26,7 @@
 #include "fwd_eeg_sphere_model.h"
 #include "fwd_eeg_sphere_model_set.h"
 
-#include <qmath.h>
+#include <numbers>
 
 #include <Eigen/Core>
 
@@ -351,7 +351,7 @@ int FwdEegSphereModel::fwd_eeg_multi_spherepot(const Eigen::Vector3f& rd_in, con
     Eigen::Vector3f vec1, vec2;
     float v1, v2;
     float cos_beta, Qr, Qt, Q2, c;
-    float pi4_inv = static_cast<float>(0.25 / M_PI);
+    float pi4_inv = static_cast<float>(0.25 / std::numbers::pi);
     float sigmaM_inv;
     /*
        * Precompute the coefficients
@@ -482,7 +482,7 @@ int FwdEegSphereModel::fwd_eeg_multi_spherepot_coil1(const Eigen::Vector3f& rd, 
 bool FwdEegSphereModel::fwd_eeg_spherepot_vec(const Eigen::Vector3f& rd_in, const Eigen::Matrix<float, Eigen::Dynamic, 3, Eigen::RowMajor>& el, int neeg, Eigen::MatrixXf& Vval_vec, void* client)
 {
     auto* m = static_cast<FwdEegSphereModel*>(client);
-    float fact = 0.25f / static_cast<float>(M_PI);
+    float fact = 0.25f / static_cast<float>(std::numbers::pi);
     Eigen::Vector3f a_vec;
     float a, a2, a3;
     float rrd, rd2, rd2_inv, r, r2, ra, rda;
@@ -661,7 +661,7 @@ int FwdEegSphereModel::fwd_eeg_spherepot(const Eigen::Vector3f& rd_in,
       */
 {
     auto* m = static_cast<FwdEegSphereModel*>(client);
-    float fact = static_cast<float>(0.25 / M_PI);
+    float fact = static_cast<float>(0.25 / std::numbers::pi);
     Eigen::Vector3f a_vec;
     float a, a2, a3;
     float rrd, rd2, rd2_inv, r, r2, ra, rda;
