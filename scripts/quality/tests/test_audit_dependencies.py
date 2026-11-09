@@ -117,10 +117,10 @@ class AuditTestCase(unittest.TestCase):
 class TestGraphExtraction(AuditTestCase):
     def test_dependencies_are_read_through_the_variable(self) -> None:
         self.add_library("math")
-        self.add_library("utils", ["mne_math"])
-        self.add_library("fiff", ["mne_utils", "mne_math"])
+        self.add_library("channels", ["mne_math"])
+        self.add_library("fiff", ["mne_channels", "mne_math"])
         graph = self.graph()
-        self.assertEqual(["mne_math", "mne_utils"], graph["mne_fiff"].depends_on)
+        self.assertEqual(["mne_channels", "mne_math"], graph["mne_fiff"].depends_on)
         self.assertEqual([], graph["mne_math"].depends_on)
 
     def test_nested_library_is_part_of_the_graph(self) -> None:
@@ -177,8 +177,8 @@ class TestGraphExtraction(AuditTestCase):
 
     def test_graph_output_is_deterministic(self) -> None:
         self.add_library("math")
-        self.add_library("utils", ["mne_math"])
-        policy = self.policy([("core", ["mne_math"]), ("support", ["mne_utils"])])
+        self.add_library("channels", ["mne_math"])
+        policy = self.policy([("core", ["mne_math"]), ("support", ["mne_channels"])])
         index, names, _ = audit.layer_index(policy)
         first = json.dumps(audit.graph_as_dict(self.graph(), index, names), sort_keys=True)
         second = json.dumps(audit.graph_as_dict(self.graph(), index, names), sort_keys=True)
@@ -193,10 +193,10 @@ class TestGraphExtraction(AuditTestCase):
 class TestLayerViolations(AuditTestCase):
     def test_clean_stack_passes(self) -> None:
         self.add_library("math")
-        self.add_library("utils", ["mne_math"])
-        self.add_library("fiff", ["mne_utils"])
+        self.add_library("channels", ["mne_math"])
+        self.add_library("fiff", ["mne_channels"])
         policy = self.policy(
-            [("core", ["mne_math"]), ("support", ["mne_utils"]), ("io", ["mne_fiff"])]
+            [("core", ["mne_math"]), ("support", ["mne_channels"]), ("io", ["mne_fiff"])]
         )
         self.assertEqual([], self.evaluate(policy))
 
@@ -208,8 +208,8 @@ class TestLayerViolations(AuditTestCase):
 
     def test_edge_within_the_same_layer_fails(self) -> None:
         self.add_library("math")
-        self.add_library("utils", ["mne_math"])
-        policy = self.policy([("core", ["mne_math", "mne_utils"])])
+        self.add_library("channels", ["mne_math"])
+        policy = self.policy([("core", ["mne_math", "mne_channels"])])
         self.assertIn("DEP010", self.evaluate(policy))
 
     def test_unassigned_library_fails(self) -> None:
@@ -254,8 +254,8 @@ class TestCycles(AuditTestCase):
 
     def test_a_directed_acyclic_graph_has_no_cycles(self) -> None:
         self.add_library("math")
-        self.add_library("utils", ["mne_math"])
-        self.add_library("fiff", ["mne_utils", "mne_math"])
+        self.add_library("channels", ["mne_math"])
+        self.add_library("fiff", ["mne_channels", "mne_math"])
         self.assertEqual([], audit.find_cycles(self.graph()))
 
     def test_a_diamond_is_not_a_cycle(self) -> None:
@@ -269,20 +269,20 @@ class TestCycles(AuditTestCase):
 class TestForbiddenEdges(AuditTestCase):
     def test_forbidden_edge_fails(self) -> None:
         self.add_library("math")
-        self.add_library("utils", ["mne_math"])
+        self.add_library("channels", ["mne_math"])
         policy = self.policy(
-            [("core", ["mne_math"]), ("support", ["mne_utils"])],
-            forbidden_edges=[{"from": "mne_utils", "to": "mne_math", "reason": "kept deliberately apart"}],
+            [("core", ["mne_math"]), ("support", ["mne_channels"])],
+            forbidden_edges=[{"from": "mne_channels", "to": "mne_math", "reason": "kept deliberately apart"}],
         )
         codes = self.evaluate(policy)
         self.assertIn("DEP012", codes)
 
     def test_forbidden_edge_that_is_absent_passes(self) -> None:
         self.add_library("math")
-        self.add_library("utils", ["mne_math"])
+        self.add_library("channels", ["mne_math"])
         policy = self.policy(
-            [("core", ["mne_math"]), ("support", ["mne_utils"])],
-            forbidden_edges=[{"from": "mne_math", "to": "mne_utils", "reason": "would invert the stack"}],
+            [("core", ["mne_math"]), ("support", ["mne_channels"])],
+            forbidden_edges=[{"from": "mne_math", "to": "mne_channels", "reason": "would invert the stack"}],
         )
         self.assertEqual([], self.evaluate(policy))
 
